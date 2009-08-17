@@ -1,41 +1,55 @@
-From: "H Hartley Sweeten" <hartleys@visionengravers.com>
-Subject: RE: legal status of code derived from sdcard.org specs?
-Date: Mon, 17 Aug 2009 12:12:11 -0400
-Message-ID: <BD79186B4FD85F4B8E60E381CAEE190901BEA05D@mi8nycmail19.Mi8.com>
-References: <4A860486.1030001@gmail.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [Bugme-new] [Bug 13920] New: MMC/SD card reader wont work on
+ kernels higher than 2.6.24.x
+Date: Mon, 17 Aug 2009 14:05:10 -0700
+Message-ID: <20090817140510.8efc368d.akpm@linux-foundation.org>
+References: <bug-13920-10286@http.bugzilla.kernel.org/>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod6og101.obsmtp.com ([64.18.1.181]:55456 "HELO
-	exprod6og101.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1755677AbZHQQTU convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2009 12:19:20 -0400
-Content-class: urn:content-classes:message
-In-Reply-To: <4A860486.1030001@gmail.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:57666 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758106AbZHQVFY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2009 17:05:24 -0400
+In-Reply-To: <bug-13920-10286@http.bugzilla.kernel.org/>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Don Mullis <don.mullis@gmail.com>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, jusko@tlen.pl
 
-On Friday, August 14, 2009 5:43 PM, Don Mullis wrote:
-> sdcard.org specs appear to not be (any longer) public.  When downloading 
-> some today I had to give an employer's name, and received in return PDFs 
-> watermarked with that name.
+
+(switched to email.  Please respond via emailed reply-to-all, not via the
+bugzilla web interface).
+
+On Wed, 5 Aug 2009 17:32:52 GMT
+bugzilla-daemon@bugzilla.kernel.org wrote:
+
+> http://bugzilla.kernel.org/show_bug.cgi?id=13920
 > 
-> This is a practical issue for a couple of patches that I'd like to post 
-> for review.  They extend the existing code that extracts the CSD and SCR 
-> registers to extract as well an SD-specific register containing some 
-> performance-related parameters.
+>            Summary: MMC/SD card reader wont work on kernels higher than
+>                     2.6.24.x
+>            Product: Drivers
+>            Version: 2.5
+>     Kernel Version: higher than 2.6.24.x
+>           Platform: All
+>         OS/Version: Linux
+>               Tree: Mainline
+>             Status: NEW
+>           Severity: normal
+>           Priority: P1
+>          Component: MMC/SD
+>         AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
+>         ReportedBy: jusko@tlen.pl
+>         Regression: Yes
 > 
-> Any ideas on how we might seek clarification?
+> 
+> My card reader stop reading cards on kernels higher than 2.6.24.x.
+> 
+> Log from lsusb about card reader:
+> 
+> "Bus 006 Device 002: ID 05e3:070e Genesys Logic, Inc. X-PRO CR20xA USB 2.0
+> Internal Card Reader"
+> 
 
-On 7-29-09 Segher Boessenkool posted a message on linux-embedded that said
-the following:
 
-The MMC Association has merged with JEDEC, so now everyone can download
-the specs, e.g. http://www.jedec.org/download/search/JESD84-A44.pdf .
-
-Does that help?
-
-Regards,
-Hartley
