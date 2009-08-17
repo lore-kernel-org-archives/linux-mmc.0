@@ -1,36 +1,103 @@
-From: Don Mullis <don.mullis@gmail.com>
-Subject: Re: legal status of code derived from sdcard.org specs?
-Date: Mon, 17 Aug 2009 14:49:09 -0700
-Message-ID: <6657d10e0908171449l6961e65ek76e33a94154de7c4@mail.gmail.com>
-References: <4A860486.1030001@gmail.com> <4A8840AC.5050204@mnementh.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: akpm@linux-foundation.org
+Subject: + sdio-fix-read-buffer-overflow.patch added to -mm tree
+Date: Mon, 17 Aug 2009 15:32:56 -0700
+Message-ID: <200908172232.n7HMWuEO016403@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f196.google.com ([209.85.216.196]:54482 "EHLO
-	mail-px0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758099AbZHQVtH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2009 17:49:07 -0400
-Received: by pxi34 with SMTP id 34so1405160pxi.4
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Aug 2009 14:49:09 -0700 (PDT)
-In-Reply-To: <4A8840AC.5050204@mnementh.co.uk>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:48754 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750991AbZHQWdE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2009 18:33:04 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>
-Cc: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: roel.kluin@gmail.com, david.vrabel@csr.com, linux-mmc@vger.kernel.org
 
-On 8/16/09, Ian Molton <ian@mnementh.co.uk> wrote:
-> Don Mullis wrote:
->> sdcard.org specs appear to not be (any longer) public.  When downloading
->> some today I had to give an employer's name, and received in return PDFs
->> watermarked with that name.
->
-> If you can put in any name, and they dont verify it, I cant imagine they
-> can claim the specs are private.
 
-A bit more Googling has turned up the "SD Simplified Specification",
-publicly available from:
+The patch titled
+     sdio: fix read buffer overflow
+has been added to the -mm tree.  Its filename is
+     sdio-fix-read-buffer-overflow.patch
 
-    http://www.sdcard.org/developers/tech/sdcard/pls/
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-This doc does describe the SD_STATUS register -- so I will post my patches.
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: sdio: fix read buffer overflow
+From: Roel Kluin <roel.kluin@gmail.com>
+
+Avoid buffer underrun when parsing an invalid CISTPL_VERS_1.
+
+Signed-off-by: Roel Kluin <roel.kluin@gmail.com>
+Cc: David Vrabel <david.vrabel@csr.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/core/sdio_cis.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff -puN drivers/mmc/core/sdio_cis.c~sdio-fix-read-buffer-overflow drivers/mmc/core/sdio_cis.c
+--- a/drivers/mmc/core/sdio_cis.c~sdio-fix-read-buffer-overflow
++++ a/drivers/mmc/core/sdio_cis.c
+@@ -40,7 +40,7 @@ static int cistpl_vers_1(struct mmc_card
+ 			nr_strings++;
+ 	}
+ 
+-	if (buf[i-1] != '\0') {
++	if (nr_strings < 4) {
+ 		printk(KERN_WARNING "SDIO: ignoring broken CISTPL_VERS_1\n");
+ 		return 0;
+ 	}
+_
+
+Patches currently in -mm which might be from roel.kluin@gmail.com are
+
+origin.patch
+linux-next.patch
+s3c-fix-check-of-index-into-s3c_gpios.patch
+stmp3xxx-deallocation-with-negative-index-of-descriptors.patch
+dm-strncpy-does-not-null-terminate-string.patch
+powerpc-sky-cpu-redundant-or-incorrect-tests-on-unsigned.patch
+powerpc-avoid-calculating-possibly-invalid-address.patch
+drm-i915-intel_sdvo_multifunc_encoder-sdvo_output_svid0-tested-twice.patch
+mips-decrease-size-of-au1xxx_dbdma_pm_regs.patch
+slram-read-buffer-overflow.patch
+mtd-fix-read-buffer-overflow.patch
+hfc_usb-fix-read-buffer-overflow.patch
+zorro8390-fix-read-buffer-overflow-in-zorro8390_init_one-checkpatch-fixes.patch
+cyclades-read-buffer-overflow.patch
+serial167-fix-read-buffer-overflow.patch
+drivers-scsi-fnic-fnic_scsic-clean-up.patch
+ibmmca-buffer-overflow.patch
+scsi-eata-fix-buffer-overflow.patch
+drivers-scsi-gdthc-fix-buffer-overflow.patch
+drivers-scsi-u14-34fc-fix-uffer-overflow.patch
+drivers-scsi-lpfc-lpfc_vportc-fix-read-buffer-overflow.patch
+osst-fix-read-buffer-overflow.patch
+frv-duplicate-output_buffer-of-e03.patch
+frv-duplicate-output_buffer-of-e03-checkpatch-fixes.patch
+blackfin-fix-read-buffer-overflow.patch
+arch-alpha-boot-tools-objstripc-wrong-variable-tested-after-open.patch
+m32r-remove-redundant-tests-on-unsigned.patch
+m68k-count-can-reach-51-not-50.patch
+m68k-cnt-reaches-1-not-0.patch
+dme1737-keep-index-within-pwm_config.patch
+sdio-fix-read-buffer-overflow.patch
+ncpfs-read-buffer-overflow.patch
+smbfs-read-buffer-overflow.patch
+platinumfb-misplaced-parenthesis.patch
+sisfb-read-buffer-overflow.patch
+drivers-video-console-newport_conc-fix-read-outside-array-bounds.patch
+mwave-fix-read-buffer-overflow.patch
+adfs-remove-redundant-test-on-unsigned.patch
+
