@@ -1,203 +1,75 @@
 From: Ben Dooks <ben@simtec.co.uk>
-Subject: [patch 6/9] s3cmci: Add debugfs support for examining driver and hardware state.
-Date: Tue, 18 Aug 2009 12:56:10 +0100
-Message-ID: <20090818115659.576214060@fluff.org>
+Subject: [patch 1/9] s3cmci: Use resource_size() instead of local macro
+Date: Tue, 18 Aug 2009 12:56:05 +0100
+Message-ID: <20090818115658.717272622@fluff.org>
 References: <20090818115604.056816271@fluff.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aeryn.fluff.org.uk ([87.194.8.8]:55701 "EHLO
+Received: from aeryn.fluff.org.uk ([87.194.8.8]:55695 "EHLO
 	kira.home.fluff.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1758730AbZHRL5A (ORCPT
+	with ESMTP id S1758739AbZHRL5A (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Aug 2009 07:57:00 -0400
-Content-Disposition: inline; filename=s3cmci-add-debugfs.patch
+Content-Disposition: inline; filename=s3cmci-fix-resource-size.patch
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 
-Export driver state and hardware register state via debugfs entries
-created under a directory formed from dev_name() on the probed device
-when CONFIG_DEBUG_FS is set.
+Replace the local definition RESSIZE() with the standard resource_size()
+call for getting the size of a struct resource.
 
 Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 
 ---
- drivers/mmc/host/s3cmci.c |  126 ++++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/s3cmci.h |    6 ++
- 2 files changed, 132 insertions(+)
+ drivers/mmc/host/s3cmci.c |   10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
 
 Index: b/drivers/mmc/host/s3cmci.c
 ===================================================================
---- a/drivers/mmc/host/s3cmci.c	2009-08-04 12:24:02.000000000 +0100
-+++ b/drivers/mmc/host/s3cmci.c	2009-08-04 12:24:04.000000000 +0100
-@@ -17,6 +17,8 @@
- #include <linux/mmc/host.h>
- #include <linux/platform_device.h>
- #include <linux/cpufreq.h>
-+#include <linux/debugfs.h>
-+#include <linux/seq_file.h>
- #include <linux/gpio.h>
- #include <linux/irq.h>
- #include <linux/io.h>
-@@ -1244,6 +1246,127 @@ static inline void s3cmci_cpufreq_deregi
- #endif
+--- a/drivers/mmc/host/s3cmci.c	2009-07-20 14:35:52.000000000 +0100
++++ b/drivers/mmc/host/s3cmci.c	2009-07-22 14:34:10.000000000 +0100
+@@ -58,8 +58,6 @@ static const int dbgmap_debug = dbg_err 
+ 		dev_dbg(&host->pdev->dev, args);  \
+ 	} while (0)
  
- 
-+#ifdef CONFIG_DEBUG_FS
-+
-+static int s3cmci_state_show(struct seq_file *seq, void *v)
-+{
-+	struct s3cmci_host *host = seq->private;
-+
-+	seq_printf(seq, "Register base = 0x%08x\n", (u32)host->base);
-+	seq_printf(seq, "Clock rate = %ld\n", host->clk_rate);
-+	seq_printf(seq, "Prescale = %d\n", host->prescaler);
-+	seq_printf(seq, "is2440 = %d\n", host->is2440);
-+	seq_printf(seq, "IRQ = %d\n", host->irq);
-+	seq_printf(seq, "CD IRQ = %d\n", host->irq_cd);
-+	seq_printf(seq, "Do DMA = %d\n", host->dodma);
-+	seq_printf(seq, "SDIIMSK at %d\n", host->sdiimsk);
-+	seq_printf(seq, "SDIDATA at %d\n", host->sdidata);
-+
-+	return 0;
-+}
-+
-+static int s3cmci_state_open(struct inode *inode, struct file *file)
-+{
-+	return single_open(file, s3cmci_state_show, inode->i_private);
-+}
-+
-+static const struct file_operations s3cmci_fops_state = {
-+	.owner		= THIS_MODULE,
-+	.open		= s3cmci_state_open,
-+	.read		= seq_read,
-+	.llseek		= seq_lseek,
-+	.release	= single_release,
-+};
-+
-+#define DBG_REG(_r) { .addr = S3C2410_SDI##_r, .name = #_r }
-+
-+struct s3cmci_reg {
-+	unsigned short	addr;
-+	unsigned char	*name;
-+} debug_regs[] = {
-+	DBG_REG(CON),
-+	DBG_REG(PRE),
-+	DBG_REG(CMDARG),
-+	DBG_REG(CMDCON),
-+	DBG_REG(CMDSTAT),
-+	DBG_REG(RSP0),
-+	DBG_REG(RSP1),
-+	DBG_REG(RSP2),
-+	DBG_REG(RSP3),
-+	DBG_REG(TIMER),
-+	DBG_REG(BSIZE),
-+	DBG_REG(DCON),
-+	DBG_REG(DCNT),
-+	DBG_REG(DSTA),
-+	DBG_REG(FSTA),
-+	{}
-+};
-+
-+static int s3cmci_regs_show(struct seq_file *seq, void *v)
-+{
-+	struct s3cmci_host *host = seq->private;
-+	struct s3cmci_reg *rptr = debug_regs;
-+
-+	for (; rptr->name; rptr++)
-+		seq_printf(seq, "SDI%s\t=0x%08x\n", rptr->name,
-+			   readl(host->base + rptr->addr));
-+
-+	seq_printf(seq, "SDIIMSK\t=0x%08x\n", readl(host->base + host->sdiimsk));
-+
-+	return 0;
-+}
-+
-+static int s3cmci_regs_open(struct inode *inode, struct file *file)
-+{
-+	return single_open(file, s3cmci_regs_show, inode->i_private);
-+}
-+
-+static const struct file_operations s3cmci_fops_regs = {
-+	.owner		= THIS_MODULE,
-+	.open		= s3cmci_regs_open,
-+	.read		= seq_read,
-+	.llseek		= seq_lseek,
-+	.release	= single_release,
-+};
-+
-+static void s3cmci_debugfs_attach(struct s3cmci_host *host)
-+{
-+	struct device *dev = &host->pdev->dev;
-+
-+	host->debug_root = debugfs_create_dir(dev_name(dev), NULL);
-+	if (IS_ERR(host->debug_root)) {
-+		dev_err(dev, "failed to create debugfs root\n");
-+		return;
-+	}
-+
-+	host->debug_state = debugfs_create_file("state", 0444,
-+						host->debug_root, host,
-+						&s3cmci_fops_state);
-+
-+	if (IS_ERR(host->debug_state))
-+		dev_err(dev, "failed to create debug state file\n");
-+
-+	host->debug_regs = debugfs_create_file("regs", 0444,
-+					       host->debug_root, host,
-+					       &s3cmci_fops_regs);
-+
-+	if (IS_ERR(host->debug_regs))
-+		dev_err(dev, "failed to create debug regs file\n");
-+}
-+
-+static void s3cmci_debugfs_remove(struct s3cmci_host *host)
-+{
-+	debugfs_remove(host->debug_regs);
-+	debugfs_remove(host->debug_state);
-+	debugfs_remove(host->debug_root);
-+}
-+
-+#else
-+static inline void s3cmci_debugfs_attach(struct s3cmci_host *host) { }
-+static inline void s3cmci_debugfs_remove(struct s3cmci_host *host) { }
-+
-+#endif /* CONFIG_DEBUG_FS */
-+
- static int __devinit s3cmci_probe(struct platform_device *pdev)
- {
- 	struct s3cmci_host *host;
-@@ -1435,6 +1558,8 @@ static int __devinit s3cmci_probe(struct
- 		goto free_cpufreq;
+-#define RESSIZE(ressource) (((ressource)->end - (ressource)->start)+1)
+-
+ static struct s3c2410_dma_client s3cmci_dma_client = {
+ 	.name		= "s3c-mci",
+ };
+@@ -1298,7 +1296,7 @@ static int __devinit s3cmci_probe(struct
  	}
  
-+	s3cmci_debugfs_attach(host);
-+
- 	platform_set_drvdata(pdev, mmc);
- 	dev_info(&pdev->dev, "initialisation done.\n");
+ 	host->mem = request_mem_region(host->mem->start,
+-				       RESSIZE(host->mem), pdev->name);
++				       resource_size(host->mem), pdev->name);
  
-@@ -1489,6 +1614,7 @@ static void s3cmci_shutdown(struct platf
- 	if (host->irq_cd >= 0)
- 		free_irq(host->irq_cd, host);
+ 	if (!host->mem) {
+ 		dev_err(&pdev->dev, "failed to request io memory region.\n");
+@@ -1306,7 +1304,7 @@ static int __devinit s3cmci_probe(struct
+ 		goto probe_free_host;
+ 	}
  
-+	s3cmci_debugfs_remove(host);
- 	s3cmci_cpufreq_deregister(host);
- 	mmc_remove_host(mmc);
- 	clk_disable(host->clk);
-Index: b/drivers/mmc/host/s3cmci.h
-===================================================================
---- a/drivers/mmc/host/s3cmci.h	2009-08-04 12:06:01.000000000 +0100
-+++ b/drivers/mmc/host/s3cmci.h	2009-08-04 12:24:04.000000000 +0100
-@@ -68,6 +68,12 @@ struct s3cmci_host {
- 	unsigned int		ccnt, dcnt;
- 	struct tasklet_struct	pio_tasklet;
+-	host->base = ioremap(host->mem->start, RESSIZE(host->mem));
++	host->base = ioremap(host->mem->start, resource_size(host->mem));
+ 	if (!host->base) {
+ 		dev_err(&pdev->dev, "failed to ioremap() io memory region.\n");
+ 		ret = -EINVAL;
+@@ -1433,7 +1431,7 @@ static int __devinit s3cmci_probe(struct
+ 	iounmap(host->base);
  
-+#ifdef CONFIG_DEBUG_FS
-+	struct dentry		*debug_root;
-+	struct dentry		*debug_state;
-+	struct dentry		*debug_regs;
-+#endif
-+
- #ifdef CONFIG_CPU_FREQ
- 	struct notifier_block	freq_transition;
- #endif
+  probe_free_mem_region:
+-	release_mem_region(host->mem->start, RESSIZE(host->mem));
++	release_mem_region(host->mem->start, resource_size(host->mem));
+ 
+  probe_free_host:
+ 	mmc_free_host(mmc);
+@@ -1469,7 +1467,7 @@ static int __devexit s3cmci_remove(struc
+ 	free_irq(host->irq, host);
+ 
+ 	iounmap(host->base);
+-	release_mem_region(host->mem->start, RESSIZE(host->mem));
++	release_mem_region(host->mem->start, resource_size(host->mem));
+ 
+ 	mmc_free_host(mmc);
+ 	return 0;
 
 -- 
