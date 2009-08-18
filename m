@@ -1,121 +1,149 @@
-From: akpm@linux-foundation.org
-Subject: + sdhci-of-cleanup-esdhcs-set_clock-a-little-bit.patch added to -mm tree
-Date: Mon, 17 Aug 2009 16:09:14 -0700
-Message-ID: <200908172309.n7HN9FbQ015024@imap1.linux-foundation.org>
+From: Ben Dooks <ben@simtec.co.uk>
+Subject: [patch 2/9] s3cmci: update probe to use new platform id list.
+Date: Tue, 18 Aug 2009 12:56:06 +0100
+Message-ID: <20090818115658.869044208@fluff.org>
+References: <20090818115604.056816271@fluff.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:36231 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751182AbZHQXOX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2009 19:14:23 -0400
+Received: from aeryn.fluff.org.uk ([87.194.8.8]:55691 "EHLO
+	kira.home.fluff.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751370AbZHRL45 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Aug 2009 07:56:57 -0400
+Content-Disposition: inline; filename=s3cmci-update-probe.patch
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: avorontsov@ru.mvista.com, ben@fluff.org, david.vrabel@csr.com, galak@kernel.crashing.org, linux-mmc@vger.kernel.org, pierre@ossman.eu, s.hauer@pengutronix.de
+To: linux-mmc@vger.kernel.org
 
+Use the platform id list to match the three different versions of the
+hardware block that this driver supports.
 
-The patch titled
-     sdhci-of: cleanup eSDHC's set_clock() a little bit
-has been added to the -mm tree.  Its filename is
-     sdhci-of-cleanup-esdhcs-set_clock-a-little-bit.patch
+This will change the prefix of the console messages produced by this
+driver to be prefixed by s3c-mci instead of the hardware block name,
+such as s3c2440-mci.
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: sdhci-of: cleanup eSDHC's set_clock() a little bit
-From: Anton Vorontsov <avorontsov@ru.mvista.com>
-
-- Get rid of incomprehensible "if { for { if } }" construction for the
-  exponential divisor calculation. The first if statement isn't correct
-  at all, since it should check for "host->max_clk / pre_div / 16 >
-  clock". The error doesn't cause any bugs because the check in the for
-  loop does the right thing, and so the outer check becomes useless;
-
-- For the linear divisor do the same: a single while statement is more
-  readable than for + if construction;
-
-- Add dev_dbg() that prints desired and actual clock frequency.
-
-Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Kumar Gala <galak@kernel.crashing.org>
-Cc: David Vrabel <david.vrabel@csr.com>
-Cc: Ben Dooks <ben@fluff.org>
-Cc: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
+ drivers/mmc/host/s3cmci.c |   71 +++++++++++++++-------------------------------
+ 1 file changed, 24 insertions(+), 47 deletions(-)
 
- drivers/mmc/host/sdhci-of.c |   19 ++++++++-----------
- 1 file changed, 8 insertions(+), 11 deletions(-)
-
-diff -puN drivers/mmc/host/sdhci-of.c~sdhci-of-cleanup-esdhcs-set_clock-a-little-bit drivers/mmc/host/sdhci-of.c
---- a/drivers/mmc/host/sdhci-of.c~sdhci-of-cleanup-esdhcs-set_clock-a-little-bit
-+++ a/drivers/mmc/host/sdhci-of.c
-@@ -121,8 +121,8 @@ static void esdhc_writeb(struct sdhci_ho
+Index: b/drivers/mmc/host/s3cmci.c
+===================================================================
+--- a/drivers/mmc/host/s3cmci.c	2009-07-20 14:47:21.000000000 +0100
++++ b/drivers/mmc/host/s3cmci.c	2009-07-22 14:33:54.000000000 +0100
+@@ -1244,11 +1244,14 @@ static inline void s3cmci_cpufreq_deregi
+ }
+ #endif
  
- static void esdhc_set_clock(struct sdhci_host *host, unsigned int clock)
+-static int __devinit s3cmci_probe(struct platform_device *pdev, int is2440)
++static int __devinit s3cmci_probe(struct platform_device *pdev)
  {
--	int div;
- 	int pre_div = 2;
-+	int div = 1;
- 
- 	clrbits32(host->ioaddr + ESDHC_SYSTEM_CONTROL, ESDHC_CLOCK_IPGEN |
- 		  ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
-@@ -130,17 +130,14 @@ static void esdhc_set_clock(struct sdhci
- 	if (clock == 0)
- 		goto out;
- 
--	if (host->max_clk / 16 > clock) {
--		for (; pre_div < 256; pre_div *= 2) {
--			if (host->max_clk / pre_div < clock * 16)
--				break;
--		}
--	}
-+	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
-+		pre_div *= 2;
- 
--	for (div = 1; div <= 16; div++) {
--		if (host->max_clk / (div * pre_div) <= clock)
--			break;
--	}
-+	while (host->max_clk / pre_div / div > clock && div < 16)
-+		div++;
+ 	struct s3cmci_host *host;
+ 	struct mmc_host	*mmc;
+ 	int ret;
++	int is2440;
 +
-+	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
-+		clock, host->max_clk / pre_div / div);
++	is2440 = platform_get_device_id(pdev)->driver_data;
  
- 	pre_div >>= 1;
- 	div--;
-_
+ 	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
+ 	if (!mmc) {
+@@ -1473,20 +1476,22 @@ static int __devexit s3cmci_remove(struc
+ 	return 0;
+ }
+ 
+-static int __devinit s3cmci_2410_probe(struct platform_device *dev)
+-{
+-	return s3cmci_probe(dev, 0);
+-}
++static struct platform_device_id s3cmci_driver_ids[] = {
++	{
++		.name	= "s3c2410-sdi",
++		.driver_data	= 0,
++	}, {
++		.name	= "s3c2412-sdi",
++		.driver_data	= 1,
++	}, {
++		.name	= "s3c2440-sdi",
++		.driver_data	= 1,
++	},
++	{ }
++};
+ 
+-static int __devinit s3cmci_2412_probe(struct platform_device *dev)
+-{
+-	return s3cmci_probe(dev, 1);
+-}
++MODULE_DEVICE_TABLE(platform, s3cmci_driver_ids);
+ 
+-static int __devinit s3cmci_2440_probe(struct platform_device *dev)
+-{
+-	return s3cmci_probe(dev, 1);
+-}
+ 
+ #ifdef CONFIG_PM
+ 
+@@ -1510,50 +1515,25 @@ static int s3cmci_resume(struct platform
+ #endif /* CONFIG_PM */
+ 
+ 
+-static struct platform_driver s3cmci_2410_driver = {
+-	.driver.name	= "s3c2410-sdi",
+-	.driver.owner	= THIS_MODULE,
+-	.probe		= s3cmci_2410_probe,
+-	.remove		= __devexit_p(s3cmci_remove),
+-	.shutdown	= s3cmci_shutdown,
+-	.suspend	= s3cmci_suspend,
+-	.resume		= s3cmci_resume,
+-};
+-
+-static struct platform_driver s3cmci_2412_driver = {
+-	.driver.name	= "s3c2412-sdi",
+-	.driver.owner	= THIS_MODULE,
+-	.probe		= s3cmci_2412_probe,
+-	.remove		= __devexit_p(s3cmci_remove),
+-	.shutdown	= s3cmci_shutdown,
+-	.suspend	= s3cmci_suspend,
+-	.resume		= s3cmci_resume,
+-};
+-
+-static struct platform_driver s3cmci_2440_driver = {
+-	.driver.name	= "s3c2440-sdi",
++static struct platform_driver s3cmci_driver = {
++	.driver.name	= "s3c-sdi",
+ 	.driver.owner	= THIS_MODULE,
+-	.probe		= s3cmci_2440_probe,
++	.id_table	= s3cmci_driver_ids,
++	.probe		= s3cmci_probe,
+ 	.remove		= __devexit_p(s3cmci_remove),
+ 	.shutdown	= s3cmci_shutdown,
+ 	.suspend	= s3cmci_suspend,
+ 	.resume		= s3cmci_resume,
+ };
+ 
+-
+ static int __init s3cmci_init(void)
+ {
+-	platform_driver_register(&s3cmci_2410_driver);
+-	platform_driver_register(&s3cmci_2412_driver);
+-	platform_driver_register(&s3cmci_2440_driver);
+-	return 0;
++	return platform_driver_register(&s3cmci_driver);
+ }
+ 
+ static void __exit s3cmci_exit(void)
+ {
+-	platform_driver_unregister(&s3cmci_2410_driver);
+-	platform_driver_unregister(&s3cmci_2412_driver);
+-	platform_driver_unregister(&s3cmci_2440_driver);
++	platform_driver_unregister(&s3cmci_driver);
+ }
+ 
+ module_init(s3cmci_init);
+@@ -1562,6 +1542,3 @@ module_exit(s3cmci_exit);
+ MODULE_DESCRIPTION("Samsung S3C MMC/SD Card Interface driver");
+ MODULE_LICENSE("GPL v2");
+ MODULE_AUTHOR("Thomas Kleffel <tk@maintech.de>, Ben Dooks <ben-linux@fluff.org>");
+-MODULE_ALIAS("platform:s3c2410-sdi");
+-MODULE_ALIAS("platform:s3c2412-sdi");
+-MODULE_ALIAS("platform:s3c2440-sdi");
 
-Patches currently in -mm which might be from avorontsov@ru.mvista.com are
-
-linux-next.patch
-mtd-sst25l-non-jedec-spi-flash-driver.patch
-mtd-m25p80-fix-null-pointer-dereference-bug.patch
-sdhci-be-more-strict-with-get_min_clock-usage.patch
-sdhci-of-fix-sd-clock-calculation.patch
-sdhci-of-avoid-writing-reserved-bits-into-host-control-register.patch
-sdhci-of-fix-high-speed-cards-recognition.patch
-powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc.patch
-sdhci-of-dont-hard-code-inverted-write-protect-quirk.patch
-sdhci-of-cleanup-esdhcs-set_clock-a-little-bit.patch
-powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards.patch
-spi-add-support-for-device-table-matching.patch
-mtd-m25p80-convert-to-device-table-matching.patch
-of-remove-stmm25p40-alias.patch
-hwmon-adxx-convert-to-device-table-matching.patch
-hwmon-lm70-convert-to-device-table-matching.patch
-spi-prefix-modalias-with-spi.patch
-
+-- 
