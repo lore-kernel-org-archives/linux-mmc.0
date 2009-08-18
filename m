@@ -1,307 +1,209 @@
 From: Ben Dooks <ben@simtec.co.uk>
-Subject: [patch 7/9] s3cmci: Add SDIO IRQ support
-Date: Tue, 18 Aug 2009 12:56:11 +0100
-Message-ID: <20090818115659.760564580@fluff.org>
+Subject: [patch 3/9] s3cmci: Change GPIO to gpiolib from S3C24XX specific calls
+Date: Tue, 18 Aug 2009 12:56:07 +0100
+Message-ID: <20090818115659.026966661@fluff.org>
 References: <20090818115604.056816271@fluff.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aeryn.fluff.org.uk ([87.194.8.8]:55703 "EHLO
+Received: from aeryn.fluff.org.uk ([87.194.8.8]:55693 "EHLO
 	kira.home.fluff.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1758694AbZHRL45 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Aug 2009 07:56:57 -0400
-Content-Disposition: inline; filename=s3cmci-add-sdio-irq.patch
+	with ESMTP id S1758723AbZHRL5A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Aug 2009 07:57:00 -0400
+Content-Disposition: inline; filename=s3cmci-gpiolib-conversion.patch
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 
-The controller supports SDIO IRQ detection so add support for hardware
-assisted SDIO interrupt detection for the SDIO core. This improves the
-response time for SDIO interrupts and thus the transfer rate from devices
-such as the Marvel 8686.
+Move to using gpiolib to access the card detect and write protect GPIO
+lines instead of using the platform speicifc s3c2410_gpio calls.
 
-As a note, it does seem that the controller will miss an IRQ than is held
-asserted, so there are some manual checks to see if the SDIO interrupt is
-active after a transfer.
-
-Major testing on the S3C2440.
+Also ensure that the card lines are claimed the same way to avoid overlap
+with any other drivers.
 
 Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 
 ---
- drivers/mmc/host/s3cmci.c |  161 +++++++++++++++++++++++++++++++++++++++++++---
- drivers/mmc/host/s3cmci.h |    5 +
- 2 files changed, 156 insertions(+), 10 deletions(-)
+ drivers/mmc/host/s3cmci.c |   75 ++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 63 insertions(+), 12 deletions(-)
 
 Index: b/drivers/mmc/host/s3cmci.c
 ===================================================================
---- a/drivers/mmc/host/s3cmci.c	2009-08-12 13:48:31.000000000 +0100
-+++ b/drivers/mmc/host/s3cmci.c	2009-08-12 13:55:36.000000000 +0100
-@@ -190,7 +190,33 @@ static inline u32 disable_imask(struct s
+--- a/drivers/mmc/host/s3cmci.c	2009-08-04 11:54:17.000000000 +0100
++++ b/drivers/mmc/host/s3cmci.c	2009-08-04 12:23:56.000000000 +0100
+@@ -1047,7 +1047,7 @@ static int s3cmci_card_present(struct mm
+ 	if (pdata->gpio_detect == 0)
+ 		return -ENOSYS;
  
- static inline void clear_imask(struct s3cmci_host *host)
+-	ret = s3c2410_gpio_getpin(pdata->gpio_detect) ? 0 : 1;
++	ret = gpio_get_value(pdata->gpio_detect) ? 0 : 1;
+ 	return ret ^ pdata->detect_invert;
+ }
+ 
+@@ -1119,8 +1119,7 @@ static void s3cmci_set_ios(struct mmc_ho
+ 
+ 	case MMC_POWER_OFF:
+ 	default:
+-		s3c2410_gpio_setpin(S3C2410_GPE5, 0);
+-		s3c2410_gpio_cfgpin(S3C2410_GPE5, S3C2410_GPIO_OUTPUT);
++		gpio_direction_output(S3C2410_GPE5, 0);
+ 
+ 		if (host->is2440)
+ 			mci_con |= S3C2440_SDICON_SDRESET;
+@@ -1244,12 +1243,14 @@ static inline void s3cmci_cpufreq_deregi
+ }
+ #endif
+ 
++
+ static int __devinit s3cmci_probe(struct platform_device *pdev)
  {
--	writel(0, host->base + host->sdiimsk);
-+	u32 mask = readl(host->base + host->sdiimsk);
-+
-+	/* preserve the SDIO IRQ mask state */
-+	mask &= S3C2410_SDIIMSK_SDIOIRQ;
-+	writel(mask, host->base + host->sdiimsk);
-+}
-+
-+/**
-+ * s3cmci_check_sdio_irq - test whether the SDIO IRQ is being signalled
-+ * @host: The host to check.
-+ *
-+ * Test to see if the SDIO interrupt is being signalled in case the
-+ * controller has failed to re-detect a card interrupt. Read GPE8 and
-+ * see if it is low and if so, signal a SDIO interrupt.
-+ *
-+ * This is currently called if a request is finished (we assume that the
-+ * bus is now idle) and when the SDIO IRQ is enabled in case the IRQ is
-+ * already being indicated.
-+*/
-+static void s3cmci_check_sdio_irq(struct s3cmci_host *host)
-+{
-+	if (host->sdio_irqen) {
-+		if (gpio_get_value(S3C2410_GPE(8)) == 0) {
-+			printk(KERN_DEBUG "%s: signalling irq\n", __func__);
-+			mmc_signal_sdio_irq(host->mmc);
-+		}
-+	}
- }
+ 	struct s3cmci_host *host;
+ 	struct mmc_host	*mmc;
+ 	int ret;
+ 	int is2440;
++	int i;
  
- static inline int get_data_buffer(struct s3cmci_host *host,
-@@ -238,6 +264,64 @@ static inline u32 fifo_free(struct s3cmc
- 	return 63 - fifostat;
- }
+ 	is2440 = platform_get_device_id(pdev)->driver_data;
  
-+/**
-+ * s3cmci_enable_irq - enable IRQ, after having disabled it.
-+ * @host: The device state.
-+ * @more: True if more IRQs are expected from transfer.
-+ *
-+ * Enable the main IRQ if needed after it has been disabled.
-+ *
-+ * The IRQ can be one of the following states:
-+ *	- disabled during IDLE
-+ *	- disabled whilst processing data
-+ *	- enabled during transfer
-+ *	- enabled whilst awaiting SDIO interrupt detection
-+ */
-+static void s3cmci_enable_irq(struct s3cmci_host *host, bool more)
-+{
-+	unsigned long flags;
-+	bool enable = false;
-+
-+	local_irq_save(flags);
-+
-+	host->irq_enabled = more;
-+	host->irq_disabled = false;
-+
-+	enable = more | host->sdio_irqen;
-+
-+	if (host->irq_state != enable) {
-+		host->irq_state = enable;
-+
-+		if (enable)
-+			enable_irq(host->irq);
-+		else
-+			disable_irq(host->irq);
-+	}
-+
-+	local_irq_restore(flags);
-+}
-+
-+/**
-+ *
-+ */
-+static void s3cmci_disable_irq(struct s3cmci_host *host, bool transfer)
-+{
-+	unsigned long flags;
-+
-+	local_irq_save(flags);
-+
-+	//printk(KERN_DEBUG "%s: transfer %d\n", __func__, transfer);
-+
-+	host->irq_disabled = transfer;
-+
-+	if (transfer && host->irq_state) {
-+		host->irq_state = false;
-+		disable_irq(host->irq);
-+	}
-+
-+	local_irq_restore(flags);
-+}
-+
- static void do_pio_read(struct s3cmci_host *host)
- {
- 	int res;
-@@ -374,8 +458,7 @@ static void pio_tasklet(unsigned long da
- {
- 	struct s3cmci_host *host = (struct s3cmci_host *) data;
+@@ -1259,6 +1260,18 @@ static int __devinit s3cmci_probe(struct
+ 		goto probe_out;
+ 	}
  
--
--	disable_irq(host->irq);
-+	s3cmci_disable_irq(host, true);
- 
- 	if (host->pio_active == XFER_WRITE)
- 		do_pio_write(host);
-@@ -395,9 +478,10 @@ static void pio_tasklet(unsigned long da
- 				host->mrq->data->error = -EINVAL;
- 		}
- 
-+		s3cmci_enable_irq(host, false);
- 		finalize_request(host);
- 	} else
--		enable_irq(host->irq);
-+		s3cmci_enable_irq(host, true);
- }
- 
- /*
-@@ -432,17 +516,27 @@ static irqreturn_t s3cmci_irq(int irq, v
- 	struct s3cmci_host *host = dev_id;
- 	struct mmc_command *cmd;
- 	u32 mci_csta, mci_dsta, mci_fsta, mci_dcnt, mci_imsk;
--	u32 mci_cclear, mci_dclear;
-+	u32 mci_cclear = 0, mci_dclear;
- 	unsigned long iflags;
- 
-+	mci_dsta = readl(host->base + S3C2410_SDIDSTA);
-+	mci_imsk = readl(host->base + host->sdiimsk);
++	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++) {
++		ret = gpio_request(i, dev_name(&pdev->dev));
++		if (ret) {
++			dev_err(&pdev->dev, "failed to get gpio %d\n", i);
 +
-+	if (mci_dsta & S3C2410_SDIDSTA_SDIOIRQDETECT) {
-+		if (mci_imsk & S3C2410_SDIIMSK_SDIOIRQ) {
-+			mci_dclear = S3C2410_SDIDSTA_SDIOIRQDETECT;
-+			writel(mci_dclear, host->base + S3C2410_SDIDSTA);
++			for (i--; i >= S3C2410_GPE(5); i--)
++				gpio_free(i);
 +
-+			mmc_signal_sdio_irq(host->mmc);
-+			return IRQ_HANDLED;
++			goto probe_free_host;
 +		}
 +	}
 +
- 	spin_lock_irqsave(&host->complete_lock, iflags);
+ 	host = mmc_priv(mmc);
+ 	host->mmc 	= mmc;
+ 	host->pdev	= pdev;
+@@ -1295,7 +1308,7 @@ static int __devinit s3cmci_probe(struct
+ 			"failed to get io memory region resouce.\n");
  
- 	mci_csta = readl(host->base + S3C2410_SDICMDSTAT);
--	mci_dsta = readl(host->base + S3C2410_SDIDSTA);
- 	mci_dcnt = readl(host->base + S3C2410_SDIDCNT);
- 	mci_fsta = readl(host->base + S3C2410_SDIFSTA);
--	mci_imsk = readl(host->base + host->sdiimsk);
--	mci_cclear = 0;
- 	mci_dclear = 0;
+ 		ret = -ENOENT;
+-		goto probe_free_host;
++		goto probe_free_gpio;
+ 	}
  
- 	if ((host->complete_what == COMPLETION_NONE) ||
-@@ -776,6 +870,8 @@ static void finalize_request(struct s3cm
- request_done:
- 	host->complete_what = COMPLETION_NONE;
- 	host->mrq = NULL;
-+
-+	s3cmci_check_sdio_irq(host);
- 	mmc_request_done(host->mmc, mrq);
- }
+ 	host->mem = request_mem_region(host->mem->start,
+@@ -1304,7 +1317,7 @@ static int __devinit s3cmci_probe(struct
+ 	if (!host->mem) {
+ 		dev_err(&pdev->dev, "failed to request io memory region.\n");
+ 		ret = -ENOENT;
+-		goto probe_free_host;
++		goto probe_free_gpio;
+ 	}
  
-@@ -1037,7 +1133,7 @@ static void s3cmci_send_request(struct m
- 	s3cmci_send_command(host, cmd);
- 
- 	/* Enable Interrupt */
--	enable_irq(host->irq);
-+	s3cmci_enable_irq(host, true);
- }
- 
- static int s3cmci_card_present(struct mmc_host *mmc)
-@@ -1178,11 +1274,52 @@ static int s3cmci_get_ro(struct mmc_host
- 	return ret;
- }
- 
-+static void s3cmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
-+{
-+	struct s3cmci_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+	u32 con;
-+
-+	local_irq_save(flags);
-+
-+	con = readl(host->base + S3C2410_SDICON);
-+	host->sdio_irqen = enable;
-+
-+	if (enable == host->sdio_irqen)
-+		goto same_state;
-+
-+	if (enable) {
-+		con |= S3C2410_SDICON_SDIOIRQ;
-+		enable_imask(host, S3C2410_SDIIMSK_SDIOIRQ);
-+
-+		if (!host->irq_state && !host->irq_disabled) {
-+			host->irq_state = true;
-+			enable_irq(host->irq);
-+		}
-+	} else {
-+		disable_imask(host, S3C2410_SDIIMSK_SDIOIRQ);
-+		con &= ~S3C2410_SDICON_SDIOIRQ;
-+
-+		if (!host->irq_enabled && host->irq_state) {
-+			disable_irq_nosync(host->irq);
-+			host->irq_state = false;
-+		}
-+	}
-+
-+	writel(con, host->base + S3C2410_SDICON);
-+
-+ same_state:
-+	local_irq_restore(flags);
-+
-+	s3cmci_check_sdio_irq(host);
-+}
-+
- static struct mmc_host_ops s3cmci_ops = {
- 	.request	= s3cmci_request,
- 	.set_ios	= s3cmci_set_ios,
- 	.get_ro		= s3cmci_get_ro,
- 	.get_cd		= s3cmci_card_present,
-+	.enable_sdio_irq = s3cmci_enable_sdio_irq,
- };
- 
- static struct s3c24xx_mci_pdata s3cmci_def_pdata = {
-@@ -1257,6 +1394,9 @@ static int s3cmci_state_show(struct seq_
- 	seq_printf(seq, "Prescale = %d\n", host->prescaler);
- 	seq_printf(seq, "is2440 = %d\n", host->is2440);
- 	seq_printf(seq, "IRQ = %d\n", host->irq);
-+	seq_printf(seq, "IRQ enabled = %d\n", host->irq_enabled);
-+	seq_printf(seq, "IRQ disabled = %d\n", host->irq_disabled);
-+	seq_printf(seq, "IRQ state = %d\n", host->irq_state);
- 	seq_printf(seq, "CD IRQ = %d\n", host->irq_cd);
- 	seq_printf(seq, "Do DMA = %d\n", host->dodma);
- 	seq_printf(seq, "SDIIMSK at %d\n", host->sdiimsk);
-@@ -1468,6 +1608,7 @@ static int __devinit s3cmci_probe(struct
- 	 * ensure we don't lock the system with un-serviceable requests. */
+ 	host->base = ioremap(host->mem->start, resource_size(host->mem));
+@@ -1333,6 +1346,14 @@ static int __devinit s3cmci_probe(struct
  
  	disable_irq(host->irq);
-+	host->irq_state = false;
  
- 	if (host->pdata->gpio_detect) {
- 		ret = gpio_request(host->pdata->gpio_detect, "s3cmci detect");
-@@ -1526,7 +1667,7 @@ static int __devinit s3cmci_probe(struct
- 
- 	mmc->ops 	= &s3cmci_ops;
- 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
--	mmc->caps	= MMC_CAP_4_BIT_DATA;
-+	mmc->caps	= MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
- 	mmc->f_min 	= host->clk_rate / (host->clk_div * 256);
- 	mmc->f_max 	= host->clk_rate / host->clk_div;
- 
-Index: b/drivers/mmc/host/s3cmci.h
-===================================================================
---- a/drivers/mmc/host/s3cmci.h	2009-08-12 13:48:31.000000000 +0100
-+++ b/drivers/mmc/host/s3cmci.h	2009-08-12 13:54:49.000000000 +0100
-@@ -42,6 +42,11 @@ struct s3cmci_host {
- 	int			dodma;
- 	int			dmatogo;
- 
-+	bool			irq_disabled;
-+	bool			irq_enabled;
-+	bool			irq_state;
-+	int			sdio_irqen;
++	if (host->pdata->gpio_detect) {
++		ret = gpio_request(host->pdata->gpio_detect, "s3cmci detect");
++		if (ret) {
++			dev_err(&pdev->dev, "failed to get detect gpio\n");
++			goto probe_free_irq;
++		}
++	}
 +
- 	struct mmc_request	*mrq;
- 	int			cmd_is_stop;
+ 	host->irq_cd = s3c2410_gpio_getirq(host->pdata->gpio_detect);
+ 
+ 	if (host->irq_cd >= 0) {
+@@ -1341,22 +1362,27 @@ static int __devinit s3cmci_probe(struct
+ 				DRIVER_NAME, host)) {
+ 			dev_err(&pdev->dev, "can't get card detect irq.\n");
+ 			ret = -ENOENT;
+-			goto probe_free_irq;
++			goto probe_free_gpio_cd;
+ 		}
+ 	} else {
+ 		dev_warn(&pdev->dev, "host detect has no irq available\n");
+-		s3c2410_gpio_cfgpin(host->pdata->gpio_detect,
+-				    S3C2410_GPIO_INPUT);
++		gpio_direction_input(host->pdata->gpio_detect);
+ 	}
+ 
+-	if (host->pdata->gpio_wprotect)
+-		s3c2410_gpio_cfgpin(host->pdata->gpio_wprotect,
+-				    S3C2410_GPIO_INPUT);
++	if (host->pdata->gpio_wprotect) {
++		ret = gpio_request(host->pdata->gpio_wprotect, "s3cmci wp");
++		if (ret) {
++			dev_err(&pdev->dev, "failed to get writeprotect\n");
++			goto probe_free_irq_cd;
++		}
++
++		gpio_direction_input(host->pdata->gpio_wprotect);
++	}
+ 
+ 	if (s3c2410_dma_request(S3CMCI_DMA, &s3cmci_dma_client, NULL) < 0) {
+ 		dev_err(&pdev->dev, "unable to get DMA channel.\n");
+ 		ret = -EBUSY;
+-		goto probe_free_irq_cd;
++		goto probe_free_gpio_wp;
+ 	}
+ 
+ 	host->clk = clk_get(&pdev->dev, "sdi");
+@@ -1423,6 +1449,14 @@ static int __devinit s3cmci_probe(struct
+  clk_free:
+ 	clk_put(host->clk);
+ 
++ probe_free_gpio_wp:
++	if (host->pdata->gpio_wprotect)
++		gpio_free(host->pdata->gpio_wprotect);
++
++ probe_free_gpio_cd:
++	if (host->pdata->gpio_detect)
++		gpio_free(host->pdata->gpio_detect);
++
+  probe_free_irq_cd:
+ 	if (host->irq_cd >= 0)
+ 		free_irq(host->irq_cd, host);
+@@ -1436,8 +1470,13 @@ static int __devinit s3cmci_probe(struct
+  probe_free_mem_region:
+ 	release_mem_region(host->mem->start, resource_size(host->mem));
+ 
++ probe_free_gpio:
++	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
++		gpio_free(i);
++
+  probe_free_host:
+ 	mmc_free_host(mmc);
++
+  probe_out:
+ 	return ret;
+ }
+@@ -1459,6 +1498,8 @@ static int __devexit s3cmci_remove(struc
+ {
+ 	struct mmc_host		*mmc  = platform_get_drvdata(pdev);
+ 	struct s3cmci_host	*host = mmc_priv(mmc);
++	struct s3c24xx_mci_pdata *pd = host->pdata;
++	int i;
+ 
+ 	s3cmci_shutdown(pdev);
+ 
+@@ -1469,6 +1510,16 @@ static int __devexit s3cmci_remove(struc
+ 
+ 	free_irq(host->irq, host);
+ 
++	if (pd->gpio_wprotect)
++		gpio_free(pd->gpio_wprotect);
++
++	if (pd->gpio_detect)
++		gpio_free(pd->gpio_detect);
++
++	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
++		gpio_free(i);
++
++
+ 	iounmap(host->base);
+ 	release_mem_region(host->mem->start, resource_size(host->mem));
  
 
 -- 
