@@ -1,56 +1,135 @@
-From: "Madhusudhan Chikkature" <madhu.cr@ti.com>
-Subject: [PATCH] Maintainers update for TI OMAP hsmmc driver
-Date: Thu, 20 Aug 2009 04:16:57 +0530 (IST)
-Message-ID: <43836.192.168.10.88.1250722017.squirrel@dbdmail.itg.ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: akpm@linux-foundation.org
+Subject: [merged] mmc-add-the-new-linux-mmc-mailing-list-to-maintainers.patch removed from -mm tree
+Date: Thu, 20 Aug 2009 13:12:48 -0700
+Message-ID: <200908202012.n7KKCmdT015561__18652.9177510694$1250799273$gmane$org@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:35272 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753289AbZHSWrl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Aug 2009 18:47:41 -0400
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42999 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755305AbZHTUOO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Aug 2009 16:14:14 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
-Cc: jarkko.lavinen@nokia.com, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
+To: akpm@linux-foundation.org, HaraldWelte@viatech.com, JosephChan@via.com.tw, ben-linux@fluff.org, drzeus@drzeus.cx, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.o
 
-Hi,
 
-I have posted this patch to linux-mmc@vger.kernel.org list earlier. I am
-reposting it to Andrew as I am not clear on the upstream path from
-linux-mmc@vger.kernel.org list currently.
+The patch titled
+     mmc: add the new linux-mmc mailing list to MAINTAINERS
+has been removed from the -mm tree.  Its filename was
+     mmc-add-the-new-linux-mmc-mailing-list-to-maintainers.patch
 
-Regards,
-Madhu
+This patch was dropped because it was merged into mainline or a subsystem tree
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc: add the new linux-mmc mailing list to MAINTAINERS
+From: Andrew Morton <akpm@linux-foundation.org>
+
+There are a number of individual MMC drivers listed in MAINTAINERS.  I
+didn't modify those records.  Perhaps I should have.
+
+Cc: <linux-mmc@vger.kernel.org>
+Cc: Manuel Lauss <manuel.lauss@gmail.com>
+Cc: Nicolas Pitre <nico@cam.org>
+Cc: Pierre Ossman <drzeus@drzeus.cx>
+Cc: Pavel Pisa <ppisa@pikron.com>
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Cc: Ben Dooks <ben-linux@fluff.org>
+Cc: Sascha Sommer <saschasommer@freenet.de>
+Cc: Ian Molton <ian@mnementh.co.uk>
+Cc: Joseph Chan <JosephChan@via.com.tw>
+Cc: Harald Welte <HaraldWelte@viatech.com>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
-Update maintainers entry for TI OMAP HS MMC support.
+ MAINTAINERS |    1 +
+ 1 file changed, 1 insertion(+)
 
-Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-Acked-by: Kevin Hilman <khilman@deeprootsystems.com>
----
- MAINTAINERS |    8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+diff -puN MAINTAINERS~mmc-add-the-new-linux-mmc-mailing-list-to-maintainers MAINTAINERS
+--- a/MAINTAINERS~mmc-add-the-new-linux-mmc-mailing-list-to-maintainers
++++ a/MAINTAINERS
+@@ -3429,6 +3429,7 @@ F:	drivers/mfd/
+ 
+ MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
+ S:	Orphan
++L:	linux-mmc@vger.kernel.org
+ F:	drivers/mmc/
+ F:	include/linux/mmc/
+ 
+_
 
-Index: linux-2.6/MAINTAINERS
-===================================================================
---- linux-2.6.orig/MAINTAINERS
-+++ linux-2.6/MAINTAINERS
-@@ -3712,7 +3712,13 @@ OMAP MMC SUPPORT
- M:	Jarkko Lavinen <jarkko.lavinen@nokia.com>
- L:	linux-omap@vger.kernel.org
- S:	Maintained
--F:	drivers/mmc/host/*omap*
-+F:	drivers/mmc/host/omap.c
-+
-+OMAP HS MMC SUPPORT
-+M:	Madhusudhan Chikkature <madhu.cr@ti.com>
-+L:	linux-omap@vger.kernel.org
-+S:	Maintained
-+F:	drivers/mmc/host/omap_hsmmc.c
+Patches currently in -mm which might be from akpm@linux-foundation.org are
 
- OMAP RANDOM NUMBER GENERATOR SUPPORT
- M:	Deepak Saxena <dsaxena@plexity.net>
-
+origin.patch
+linux-next.patch
+next-remove-localversion.patch
+i-need-old-gcc.patch
+arch-x86-kernel-cpu-amdc-fix-x86_64-allnoconfig-build.patch
+arch-x86-kernel-cpu-cpufreq-acpi-cpufreqc-avoid-cross-cpu-interrupts-by-using-smp_call_function_any.patch
+video-initial-support-for-adv7180-update-fix.patch
+timer-stats-fix-del_timer_sync-and-try_to_del_timer_sync.patch
+input-drivers-input-xpadc-improve-xbox-360-wireless-support-and-add-sysfs-interface.patch
+input-documentation-input-xpadtxt-update-for-new-driver-functionality.patch
+checkincludespl-add-option-to-remove-duplicates-in-place.patch
+leds-gpio-leds-fix-typographics-fault.patch
+leds-fix-coding-style-in-worker-thread-code-for-ledtrig-gpio.patch
+slram-read-buffer-overflow.patch
+zorro8390-fix-read-buffer-overflow-in-zorro8390_init_one-checkpatch-fixes.patch
+3x59x-fix-pci-resource-management.patch
+bluetooth-fix-for-acer-bluetooth-optical-rechargeable-mouse.patch
+serial167-fix-read-buffer-overflow.patch
+waitqueues-give-waitqueue-spinlocks-their-own-lockdep-classes-checkpatch-fixes.patch
+raw-fix-rawctl-compat-ioctls-breakage-on-amd64-and-itanic.patch
+libfs-make-simple_read_from_buffer-conventional.patch
+fs-fix-overflow-in-sys_mount-for-in-kernel-calls.patch
+vfs-optimize-touch_time-too.patch
+revert-mm-prevent-balance_dirty_pages-from-doing-too-much-work.patch
+mm-make-swap-token-dummies-static-inlines-fix.patch
+readahead-add-blk_run_backing_dev-fix.patch
+readahead-add-blk_run_backing_dev-fix-fix-2.patch
+memory-hotplug-update-zone-pcp-at-memory-online-fix.patch
+vmscan-dont-attempt-to-reclaim-anon-page-in-lumpy-reclaim-when-no-swap-space-is-avilable.patch
+ummunotify-userspace-support-for-mmu-notifications-v3-fix.patch
+arches-drop-superfluous-casts-in-nr_free_pages-callers-checkpatch-fixes.patch
+tracing-page-allocator-add-trace-event-for-page-traffic-related-to-the-buddy-lists-fix.patch
+frv-duplicate-output_buffer-of-e03-checkpatch-fixes.patch
+m68k-count-can-reach-51-not-50.patch
+arch-m68k-include-asm-motorola_pgalloch-fix-kunmap-arg.patch
+printk-boot_delay-rename-printk_delay_msec-to-loops_per_msec-fix.patch
+printk-add-printk_delay-to-make-messages-readable-for-some-scenarios-fix.patch
+printk-add-printk_delay-to-make-messages-readable-for-some-scenarios-cleanup.patch
+generic-ipi-make-struct-call_function_data-lockless-cleanup.patch
+proc-connector-add-event-for-process-becoming-session-leader.patch
+kernel-smpc-relocate-some-code.patch
+mmc-register-mmci-omap-hs-using-platform_driver_probe.patch
+sdio-add-cd-disable-support-cleanup.patch
+procfs-provide-stack-information-for-threads-v011-fix.patch
+kcore-use-registerd-physmem-information-checkpatch-fixes.patch
+rtc-add-driver-for-mxcs-internal-rtc-module-fix.patch
+rtc-add-driver-for-mxcs-internal-rtc-module-fix-fix.patch
+rtc-philips-nxp-pcf2123-driver-v03-fix.patch
+gpiolib-add-names-file-in-gpio-chip-sysfs-checkpatch-fixes.patch
+gpiolib-add-names-file-in-gpio-chip-sysfs-checkpatch-fixes-fix.patch
+davinci-fb-frame-buffer-driver-for-ti-da8xx-omap-l1xx.patch
+davinci-fb-frame-buffer-driver-for-ti-da8xx-omap-l1xx-v4-cleanup.patch
+drivers-video-add-kmalloc-null-tests-fix.patch
+v3-minixfs-add-missing-directory-type-checking-checkpatch-fixes.patch
+memcg-remove-the-overhead-associated-with-the-root-cgroup-fix.patch
+memcg-add-comments-explaining-memory-barriers-checkpatch-fixes.patch
+memory-controller-soft-limit-reclaim-on-contention-v9-fix.patch
+memcg-improve-resource-counter-scalability-checkpatch-fixes.patch
+exec-make-do_coredump-more-resilient-to-recursive-crashes-v9-checkpatch-fixes.patch
+exec-let-do_coredump-limit-the-number-of-concurrent-dumps-to-pipes-v9-checkpatch-fixes.patch
+elf-clean-up-fill_note_info-fix.patch
+net-netfilter-ipvs-ip_vs_wrrc-use-lib-gcdc-fix.patch
+reiser4-export-remove_from_page_cache-fix.patch
+reiser4.patch
+reiser4-remove-simple_prepare_write-usage-checkpatch-fixes.patch
+fs-reiser4-contextc-current_is_pdflush-got-removed.patch
+slab-leaks3-default-y.patch
+put_bh-debug.patch
+getblk-handle-2tb-devices.patch
+getblk-handle-2tb-devices-fix.patch
+undeprecate-pci_find_device.patch
+notify_change-callers-must-hold-i_mutex.patch
 
