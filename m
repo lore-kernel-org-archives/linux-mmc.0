@@ -1,107 +1,59 @@
-From: akpm@linux-foundation.org
-Subject: + maintainers-update-for-ti-omap-hsmmc-driver.patch added to -mm tree
-Date: Thu, 20 Aug 2009 14:48:09 -0700
-Message-ID: <200908202148.n7KLm9IF021228@imap1.linux-foundation.org>
+From: "Normann Cunz" <nc@wcos.de>
+Subject: (unknown)
+Date: Fri, 21 Aug 2009 16:56:41 +0200
+Message-ID: <004201ca226f$9825d190$c87174b0$@de>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:57315 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751467AbZHTVsk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Aug 2009 17:48:40 -0400
+Received: from mo-p00-ob.rzone.de ([81.169.146.160]:55027 "EHLO
+	mo-p00-ob.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932303AbZHUO4u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Aug 2009 10:56:50 -0400
+Received: from ncmobile (pd956a62f.dip0.t-ipconnect.de [217.86.166.47])
+	by post.strato.de (mrclete mo23) (RZmta 21.0)
+	with ESMTP id I0073dl7LEH0as for <linux-mmc@vger.kernel.org>;
+	Fri, 21 Aug 2009 16:56:49 +0200 (MEST)
+Subject: 
+Content-Language: de
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: madhu.cr@ti.com, khilman@deeprootsystems.com, linux-mmc@vger.kernel.org
+To: "Linux-Mailing-List (mmc)" <linux-mmc@vger.kernel.org>
 
+Hello,
 
-The patch titled
-     MAINTAINERS: update for TI OMAP hsmmc driver
-has been added to the -mm tree.  Its filename is
-     maintainers-update-for-ti-omap-hsmmc-driver.patch
+after having a first glance on the MMC/SD driver source, I'm unsure how to
+handle the following requirement (System: Kernel 2.6.30 on i386).
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: MAINTAINERS: update for TI OMAP hsmmc driver
-From: "Madhusudhan Chikkature" <madhu.cr@ti.com>
-
-Update maintainers entry for TI OMAP HS MMC support.
-
-Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-Acked-by: Kevin Hilman <khilman@deeprootsystems.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- MAINTAINERS |    8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
-
-diff -puN MAINTAINERS~maintainers-update-for-ti-omap-hsmmc-driver MAINTAINERS
---- a/MAINTAINERS~maintainers-update-for-ti-omap-hsmmc-driver
-+++ a/MAINTAINERS
-@@ -3791,7 +3791,13 @@ OMAP MMC SUPPORT
- M:	Jarkko Lavinen <jarkko.lavinen@nokia.com>
- L:	linux-omap@vger.kernel.org
- S:	Maintained
--F:	drivers/mmc/host/*omap*
-+F:	drivers/mmc/host/omap.c
-+
-+OMAP HS MMC SUPPORT
-+M:	Madhusudhan Chikkature <madhu.cr@ti.com>
-+L:	linux-omap@vger.kernel.org
-+S:	Maintained
-+F:	drivers/mmc/host/omap_hsmmc.c
+I'm trying to integrate a SD card with a 'command system expansion' via
+switch-command (see 'sd card association', 'physical layer simplified spec
+2.00', chapter 4.3.12). The additional commands are used to communicate with
+a specialized controller within the SD card (1), as well as access hidden
+memory in a secure way (2). Because of the multi functionality (ordinary SD
++ 2 additional features) and not SDIO, I'd like to get a clue where to
+start?
  
- OMAP RANDOM NUMBER GENERATOR SUPPORT
- M:	Deepak Saxena <dsaxena@plexity.net>
-_
+The first extension might be handled via ioctrl(), so that a user space
+applications could use it. 
+The second one should be accessible as a device, which can be mounted to
+apply a file system.
 
-Patches currently in -mm which might be from madhu.cr@ti.com are
+So there are some questions:
 
-linux-next.patch
-mmc-register-mmci-omap-hs-using-platform_driver_probe.patch
-mmc-add-enable-and-disable-methods-to-mmc-host.patch
-mmc-allow-host-claim-release-nesting.patch
-mmc-add-mmc_cap_nonremovable-host-capability.patch
-mmc-add-ability-to-save-power-by-powering-off-cards.patch
-mmc-add-mmc-card-sleep-and-awake-support.patch
-mmc-power-off-once-at-removal.patch
-mmc-add-host-capabilities-for-sd-only-and-mmc-only.patch
-mmc-check-status-after-mmc-switch-command.patch
-omap_hsmmc-add-debugfs-entry-host-registers.patch
-omap_hsmmc-make-use-of-new-enable-disable-interface.patch
-arm-omap-mmc-twl4030-add-context-loss-counter-support.patch
-omap_hsmmc-keep-track-of-power-mode.patch
-omap_hsmmc-context-save-restore-support.patch
-omap_hsmmc-set-open-drain-bit-correctly.patch
-omap_hsmmc-ensure-workqueues-are-empty-before-suspend.patch
-omap_hsmmc-fix-scatter-gather-list-sanity-checking.patch
-omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability.patch
-omap_hsmmc-support-for-deeper-power-saving-states.patch
-arm-omap-mmc-twl4030-add-regulator-sleep-wake-function.patch
-omap_hsmmc-put-mmc-regulator-to-sleep.patch
-omap_hsmmc-add-mmc-card-sleep-and-awake-support.patch
-omap_hsmmc-fix-null-pointer-dereference.patch
-omap_hsmmc-cleanup-macro-usage.patch
-omap_hsmmc-clear-interrupt-status-after-init-sequence.patch
-omap_hsmmc-cater-for-weird-cmd6-behaviour.patch
-omap_hsmmc-prevent-races-with-irq-handler.patch
-omap_hsmmc-pass-host-capabilities-for-sd-only-and-mmc-only.patch
-omap_hsmmc-code-refactoring.patch
-omap_hsmmc-protect-the-card-when-the-cover-is-open.patch
-omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired.patch
-omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired-fix-for-the-db-clock-failure-message.patch
-omap_hsmmc-set-a-large-data-timeout-for-commands-with-busy-signal.patch
-arm-omap-rx51-set-mmc-capabilities-and-power-saving-flag.patch
-maintainers-update-for-ti-omap-hsmmc-driver.patch
+- Do I have to write a complete new driver?
+- Can I rely on the existing driver?
+- Is there already something implemented?
+- Where to place it?
+- Do I need a new major device id (in case of a new driver) or just a minor
+one for mounting?
+
+Another problem might be, that a flash access (read/write) could intercept
+the extended communication and vice versa?
+
+In the hope to get a little bit of light in the dark,
+
+TIA
+Norman
+
 
