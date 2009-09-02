@@ -1,31 +1,68 @@
-From: "Dasgupta, Romit" <romit@ti.com>
-Subject: RE: mmcqd cpu utilization
-Date: Thu, 3 Sep 2009 01:30:41 +0530
-Message-ID: <B85A65D85D7EB246BE421B3FB0FBB59301DD57A8B3@dbde02.ent.ti.com>
-References: <007301ca2bf2$2888e2a0$544ff780@am.dhcp.ti.com>
- <20090902194036.07c1f72c@mjolnir.ossman.eu>
- <00ae01ca2c07$98d416f0$544ff780@am.dhcp.ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: akpm@linux-foundation.org
+Subject: + sdhci-add-no-card-no-reset-quirk-for-ricoh-r5c822-sony-z11.patch added to -mm tree
+Date: Wed, 02 Sep 2009 16:42:53 -0700
+Message-ID: <200909022342.n82NgrVW025860@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:47736 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753430AbZIBUA6 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2009 16:00:58 -0400
-In-Reply-To: <00ae01ca2c07$98d416f0$544ff780@am.dhcp.ti.com>
-Content-Language: en-US
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:50689 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753817AbZIBXnE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2009 19:43:04 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, 'Pierre Ossman' <pierre@ossman.eu>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "hch@lst.de" <hch@lst.de>
+To: mm-commits@vger.kernel.org
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, preining@logic.at
 
-Madhu,
->
->> My guess would be that the omap driver doesn't (cannot?) use the
->> hardware to wait for busy to end, so the system must poll.
->>
->So your guess hints probably at "wait_for_completion(&complete)".
->Am I correct?
->
-Madhu wait_for_completion is blocking call. Please check 'omap_mmc_request'
+
+The patch titled
+     sdhci: add no-card-no-reset quirk for Ricoh R5C822/Sony Z11
+has been added to the -mm tree.  Its filename is
+     sdhci-add-no-card-no-reset-quirk-for-ricoh-r5c822-sony-z11.patch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: sdhci: add no-card-no-reset quirk for Ricoh R5C822/Sony Z11
+From: Chris Ball <cjb@laptop.org>
+
+Card insertion detection is broken without this quirk on a Sony Vaio
+Z11, as discussed on linux-mmc here: http://marc.info/?t=125017355000008
+
+Signed-off-by: Chris Ball <cjb@laptop.org>
+Tested-by: Norbert Preining <preining@logic.at>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/sdhci-pci.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff -puN drivers/mmc/host/sdhci-pci.c~sdhci-add-no-card-no-reset-quirk-for-ricoh-r5c822-sony-z11 drivers/mmc/host/sdhci-pci.c
+--- a/drivers/mmc/host/sdhci-pci.c~sdhci-add-no-card-no-reset-quirk-for-ricoh-r5c822-sony-z11
++++ a/drivers/mmc/host/sdhci-pci.c
+@@ -83,7 +83,8 @@ static int ricoh_probe(struct sdhci_pci_
+ 	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_IBM)
+ 		chip->quirks |= SDHCI_QUIRK_CLOCK_BEFORE_RESET;
+ 
+-	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG)
++	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG ||
++	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
+ 		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
+ 
+ 	return 0;
+_
+
+Patches currently in -mm which might be from cjb@laptop.org are
+
+sdhci-add-no-card-no-reset-quirk-for-ricoh-r5c822-sony-z11.patch
+
