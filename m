@@ -1,358 +1,240 @@
-From: Zdenek Kabelac <zdenek.kabelac@gmail.com>
-Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
-Date: Fri, 4 Sep 2009 11:13:02 +0200
-Message-ID: <c4e36d110909040213t4d4258b4w3e2d4725e0b2a161@mail.gmail.com>
-References: <c4e36d110908310451t7c238e09u5af112fa3321cc23@mail.gmail.com>
-	 <200908312119.12121.rjw@sisk.pl>
-	 <c4e36d110909010234i5f1b9357l805132137725a4f8@mail.gmail.com>
-	 <c4e36d110909031529q77b53122kdb85785ba293c478@mail.gmail.com>
-	 <20090903232317.GA6760@lst.de> <87ljkvmt71.fsf@devron.myhome.or.jp>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: akpm@linux-foundation.org
+Subject: + omap4-mmc-driver-support-on-omap4.patch added to -mm tree
+Date: Fri, 04 Sep 2009 12:19:17 -0700
+Message-ID: <200909041919.n84JJHoC027148@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f217.google.com ([209.85.220.217]:41469 "EHLO
-	mail-fx0-f217.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933031AbZIDJNB convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Sep 2009 05:13:01 -0400
-In-Reply-To: <87ljkvmt71.fsf@devron.myhome.or.jp>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42261 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933651AbZIDTTi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Sep 2009 15:19:38 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
-Cc: Christoph Hellwig <hch@lst.de>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
+To: mm-commits@vger.kernel.org
+Cc: kishore.kadiyala@ti.com, Hiroshi.DOYU@nokia.com, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk, madhu.cr@ti.com, sakari.ailus@maxwell.research.nokia.com, tony@atomide.com
 
-2009/9/4 OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>:
-> Christoph Hellwig <hch@lst.de> writes:
->
->> On Fri, Sep 04, 2009 at 12:29:04AM +0200, Zdenek Kabelac wrote:
->>> Ok - another bisect game played - and unexpected winner is:
->>>
->>> (fat: add ->sync_fs)
->>>
->>> f83d6d46e7adf241a064a4a425e5cd8a8fd8925f
->>>
->>> Reverting this commit with current -rc8 kernel makes the system hap=
-py
->>> during the suspend/resume cycle. Obviously it has it price :) so ju=
-st
->>> plain revert is probably not a good solution so the problem looks
->>> 'more serious' =A0(fat is not the only fs with this patch) thus add=
-ing
->>> original author to this thread.
->
-> From it, I suspect the possible reason seems to read mmc after remove
-> event. I.e. the following sequence or something
->
-> =A0 =A0sync fs process
-> =A0 =A0[...]
-> =A0 =A0removed mmc event
-> =A0 =A0[...]
-> =A0 =A0fat_sync_fs() =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 <- sync agai=
-n?
-> =A0 =A0 =A0 =A0fat_clusters_flush()
-> =A0 =A0 =A0 =A0 =A0 =A0sb_bread() =A0 =A0 =A0 =A0 =A0 =A0 =A0<- read =
-block on removed mmc
->
-> Can you add dump_stack() to the top of fat_sync_fs()? I hope it tells
-> why fat_sync_fs() is called (it is called from device unplug event?).
->
-> Well, that commit seems a bit strange. It calls fat_clusters_flush()
-> unconditionally without checking sb->s_dirt. However, if my guess is
-> right, "sync after removed event" itself sounds like the issue in
-> suspend process.
->
-> Thanks.
->
->> Note that when you rever this patch on a current kernel you do actua=
-lly
->> get different behvaviour than when going back to before this commit.
->>
->> In 2.6.30 we called ->write_super in the various sync functions and
->> then ->sync_fs, in 2.6.31-rc8 you would not call any syncing at all
->> anymore. =A0I think this patch might just be a symptom for a situati=
-on
->> where the suspend code causes a sync and the mmc driver can't handle
->> it anymore.
 
-So - here is the console trace from suspend when I've added
-dump_stack() to the fat_sync_fs()   (and also added debug prints
-around each call in this function -so its obvious the function is
-actually left - but then it freezes later somewhere.)
+The patch titled
+     omap4: mmc driver support on OMAP4
+has been added to the -mm tree.  Its filename is
+     omap4-mmc-driver-support-on-omap4.patch
 
-It's interesting that 3 calls to sync happens.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-Zdenek
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-usb 3-1: USB disconnect, address 2
-btusb_intr_complete: hci0 urb ffff880137fdd630 failed to resubmit (19)
-btusb_bulk_complete: hci0 urb ffff880137fdd738 failed to resubmit (19)
-btusb_bulk_complete: hci0 urb ffff880137fdd840 failed to resubmit (19)
-PM: Removing info for No Bus:ep_81
-PM: Removing info for No Bus:ep_82
-PM: Removing info for No Bus:ep_02
-PM: Removing info for usb:3-1:1.0
-btusb_send_frame: hci0 urb ffff88013356b528 submission failed
-PM: Removing info for No Bus:rfkill0
-PM: Removing info for No Bus:hci0
-PM: Removing info for No Bus:ep_83
-PM: Removing info for No Bus:ep_03
-PM: Removing info for usb:3-1:1.1
-PM: Removing info for No Bus:ep_84
-PM: Removing info for No Bus:ep_04
-PM: Removing info for usb:3-1:1.2
-PM: Removing info for usb:3-1:1.3
-PM: Removing info for No Bus:ep_00
-PM: Removing info for usb:3-1
-PM: Removing info for No Bus:usbdev3.2
-PM: Adding info for No Bus:vcs63
-PM: Adding info for No Bus:vcsa63
-=46AT: dump before lock
-Pid: 2271, comm: sync Not tainted 2.6.31-rc8-00043-g54a3792 #32
-Call Trace:
- [<ffffffffa0537d94>] fat_sync_fs+0x24/0x80 [fat]
- [<ffffffff81132206>] __sync_filesystem+0x36/0x50
- [<ffffffff81132318>] sync_filesystems+0xf8/0x130
- [<ffffffff811323a7>] sys_sync+0x17/0x40
- [<ffffffff8100c15b>] system_call_fastpath+0x16/0x1b
-=46AT: fat_cluster_flush
-=46AT: before unlock
-=46AT: leaving fat_sync_fs
-=46AT: dump before lock
-Pid: 2271, comm: sync Not tainted 2.6.31-rc8-00043-g54a3792 #32
-Call Trace:
- [<ffffffffa0537d94>] fat_sync_fs+0x24/0x80 [fat]
- [<ffffffff81132206>] __sync_filesystem+0x36/0x50
- [<ffffffff81132318>] sync_filesystems+0xf8/0x130
- [<ffffffff811323b1>] sys_sync+0x21/0x40
- [<ffffffff8100c15b>] system_call_fastpath+0x16/0x1b
-=46AT: fat_cluster_flush
-=46AT: before unlock
-=46AT: leaving fat_sync_fs
-PM: Removing info for No Bus:iwl-phy0::assoc
-PM: Syncing filesystems ...
-=46AT: dump before lock
-Pid: 2143, comm: pm-suspend Not tainted 2.6.31-rc8-00043-g54a3792 #32
-Call Trace:
- [<ffffffffa0537d94>] fat_sync_fs+0x24/0x80 [fat]
- [<ffffffff81132206>] __sync_filesystem+0x36/0x50
- [<ffffffff81132318>] sync_filesystems+0xf8/0x130
- [<ffffffff811323a7>] sys_sync+0x17/0x40
- [<ffffffff8108d22b>] enter_state+0x6b/0x150
- [<ffffffff8108c7f9>] state_store+0x99/0x100
- [<ffffffff81226807>] kobj_attr_store+0x17/0x20
- [<ffffffff8116e8f9>] sysfs_write_file+0xd9/0x160
- [<ffffffff8110cc78>] vfs_write+0xb8/0x1a0
- [<ffffffff8109eb8b>] ? audit_syscall_entry+0x28b/0x2b0
- [<ffffffff8110d781>] sys_write+0x51/0x90
- [<ffffffff8100c15b>] system_call_fastpath+0x16/0x1b
-=46AT: fat_cluster_flush
-=46AT: before unlock
-=46AT: leaving fat_sync_fs
-PM: Removing info for No Bus:iwl-phy0::RX
-PM: Removing info for No Bus:iwl-phy0::TX
-PM: Removing info for No Bus:iwl-phy0::radio
-=46AT: dump before lock
-Pid: 2143, comm: pm-suspend Not tainted 2.6.31-rc8-00043-g54a3792 #32
-Call Trace:
- [<ffffffffa0537d94>] fat_sync_fs+0x24/0x80 [fat]
- [<ffffffff81132206>] __sync_filesystem+0x36/0x50
- [<ffffffff81132318>] sync_filesystems+0xf8/0x130
- [<ffffffff811323b1>] sys_sync+0x21/0x40
- [<ffffffff8108d22b>] enter_state+0x6b/0x150
- [<ffffffff8108c7f9>] state_store+0x99/0x100
- [<ffffffff81226807>] kobj_attr_store+0x17/0x20
- [<ffffffff8116e8f9>] sysfs_write_file+0xd9/0x160
- [<ffffffff8110cc78>] vfs_write+0xb8/0x1a0
- [<ffffffff8109eb8b>] ? audit_syscall_entry+0x28b/0x2b0
- [<ffffffff8110d781>] sys_write+0x51/0x90
- [<ffffffff8100c15b>] system_call_fastpath+0x16/0x1b
-=46AT: fat_cluster_flush
-=46AT: before unlock
-=46AT: leaving fat_sync_fs
-done.
-PM: Preparing system for mem sleep
-=46reezing user space processes ... (elapsed 0.00 seconds) done.
-=46reezing remaining freezable tasks ... (elapsed 0.00 seconds) done.
-PM: Entering mem sleep
-platform dock.0: preparing suspend
-platform dock.1: preparing suspend
-platform dock.2: preparing suspend
-agpgart-intel 0000:00:00.0: preparing suspend
-pci 0000:00:02.0: preparing suspend
-pci 0000:00:02.1: preparing suspend
-e1000e 0000:00:19.0: preparing suspend, may wakeup
-uhci_hcd 0000:00:1a.0: preparing suspend
-uhci_hcd 0000:00:1a.1: preparing suspend
-ehci_hcd 0000:00:1a.7: preparing suspend
-HDA Intel 0000:00:1b.0: preparing suspend
-pcieport-driver 0000:00:1c.0: preparing suspend
-pcieport-driver 0000:00:1c.1: preparing suspend
-pcieport-driver 0000:00:1c.2: preparing suspend
-pcieport-driver 0000:00:1c.3: preparing suspend
-pcieport-driver 0000:00:1c.4: preparing suspend
-uhci_hcd 0000:00:1d.0: preparing suspend
-uhci_hcd 0000:00:1d.1: preparing suspend
-uhci_hcd 0000:00:1d.2: preparing suspend
-ehci_hcd 0000:00:1d.7: preparing suspend
-pci 0000:00:1e.0: preparing suspend
-pci 0000:00:1f.0: preparing suspend
-ata_piix 0000:00:1f.1: preparing suspend
-ahci 0000:00:1f.2: preparing suspend
-i801_smbus 0000:00:1f.3: preparing suspend
-iwl3945 0000:03:00.0: preparing suspend
-pci 0000:15:00.0: preparing suspend
-sdhci-pci 0000:15:00.2: preparing suspend
-pci 0000:15:00.3: preparing suspend
-pci 0000:15:00.4: preparing suspend
-pci 0000:15:00.5: preparing suspend
-platform vesafb.0: preparing suspend
-serial8250 serial8250: preparing suspend
-i8042 i8042: preparing suspend
-platform hdaps: preparing suspend
-usb usb1: preparing type suspend, may wakeup
-usb usb2: preparing type suspend, may wakeup
-usb usb3: preparing type suspend, may wakeup
-usb usb4: preparing type suspend, may wakeup
-usb usb5: preparing type suspend, may wakeup
-usb usb6: preparing type suspend, may wakeup
-usb usb7: preparing type suspend, may wakeup
-usb 1-4: preparing type suspend, may wakeup
-usb 3-2: preparing type suspend, may wakeup
-usb 1-4.4: preparing type suspend, may wakeup
-iTCO_wdt iTCO_wdt: preparing suspend
-platform regulatory.0: preparing suspend
-thinkpad_acpi thinkpad_acpi: preparing suspend
-thinkpad_hwmon thinkpad_hwmon: preparing suspend
-backlight acpi_video0: legacy class suspend
-drm card0: legacy class suspend
-pci 0000:00:02.0: power state changed by ACPI to D3
-mmcblk mmc0:b368: legacy suspend
-leds mmc0::: legacy class suspend
-rfkill rfkill2: legacy class suspend
-ieee80211 phy0: legacy class suspend
-leds tpacpi::thinkvantage: legacy class suspend
-leds tpacpi::standby: legacy class suspend
-leds tpacpi::power: legacy class suspend
-leds tpacpi::thinklight: legacy class suspend
-rfkill rfkill1: legacy class suspend
-thinkpad_hwmon thinkpad_hwmon: suspend
-thinkpad_acpi thinkpad_acpi: suspend
-psmouse serio2: legacy suspend
-platform regulatory.0: suspend
-iTCO_wdt iTCO_wdt: suspend
-usb 1-4.4: type suspend, may wakeup
-usb 3-2: type suspend, may wakeup
-usb 1-4: type suspend, may wakeup
-usb usb7: type suspend, may wakeup
-usb usb6: type suspend, may wakeup
-usb usb5: type suspend, may wakeup
-usb usb4: type suspend, may wakeup
-usb usb3: type suspend, may wakeup
-usb usb2: type suspend, may wakeup
-usb usb1: type suspend, may wakeup
-sr 3:0:0:0: legacy suspend
-scsi target3:0:0: legacy suspend
-sd 0:0:0:0: legacy suspend
-sd 0:0:0:0: [sda] Synchronizing SCSI cache
-sd 0:0:0:0: [sda] Stopping disk
-scsi target0:0:0: legacy suspend
-platform hdaps: suspend
-psmouse serio1: legacy suspend
-atkbd serio0: legacy suspend
-i8042 i8042: suspend
-scsi host4: legacy suspend
-scsi host3: legacy suspend
-scsi host2: legacy suspend
-scsi host1: legacy suspend
-scsi host0: legacy suspend
-serial8250 serial8250: suspend
-platform vesafb.0: suspend
-pnp 00:0a: legacy suspend
-i8042 aux 00:09: legacy suspend
-i8042 kbd 00:08: legacy suspend
-rtc_cmos 00:07: legacy suspend, may wakeup
-pnp 00:06: legacy suspend
-pnp 00:05: legacy suspend
-pnp 00:04: legacy suspend
-pnp 00:03: legacy suspend
-system 00:02: legacy suspend
-pnp 00:01: legacy suspend
-system 00:00: legacy suspend
-pci 0000:15:00.5: suspend
-pci 0000:15:00.4: suspend
-pci 0000:15:00.3: suspend
-sdhci-pci 0000:15:00.2: suspend
-mmc0: card b368 removed
-PM: Removing info for mmc:mmc0:b368
-=46AT: dump before lock
-Pid: 2143, comm: pm-suspend Not tainted 2.6.31-rc8-00043-g54a3792 #32
-Call Trace:
- [<ffffffffa0537d94>] fat_sync_fs+0x24/0x80 [fat]
- [<ffffffff81132206>] __sync_filesystem+0x36/0x50
- [<ffffffff8113240a>] sync_filesystem+0x3a/0x70
- [<ffffffff8113b8ce>] fsync_bdev+0x2e/0x70
- [<ffffffff8121b3ce>] invalidate_partition+0x2e/0x50
- [<ffffffff81169d2f>] del_gendisk+0x3f/0x140
- [<ffffffffa02791ee>] mmc_blk_remove+0x2e/0x60 [mmc_block]
- [<ffffffffa022b2f7>] mmc_bus_remove+0x17/0x20 [mmc_core]
- [<ffffffff812d2036>] __device_release_driver+0x66/0xc0
- [<ffffffff812d219d>] device_release_driver+0x2d/0x40
- [<ffffffff812d112c>] bus_remove_device+0xac/0xe0
- [<ffffffff812cf2af>] device_del+0x12f/0x1a0
- [<ffffffffa022b3db>] mmc_remove_card+0x5b/0x90 [mmc_core]
- [<ffffffffa022d097>] mmc_sd_remove+0x27/0x50 [mmc_core]
- [<ffffffffa022ae9d>] mmc_suspend_host+0xed/0x120 [mmc_core]
- [<ffffffffa023bda8>] sdhci_suspend_host+0x38/0x60 [sdhci]
- [<ffffffffa025d270>] sdhci_pci_suspend+0x50/0x130 [sdhci_pci]
- [<ffffffff81242c3d>] pci_legacy_suspend+0x4d/0xf0
- [<ffffffff8124369d>] pci_pm_suspend+0xdd/0x130
- [<ffffffff812d660b>] pm_op+0x15b/0x1b0
- [<ffffffff812d7763>] dpm_suspend_start+0x423/0x580
- [<ffffffff8108d04f>] suspend_devices_and_enter+0x5f/0x1d0
- [<ffffffff8108d2e8>] enter_state+0x128/0x150
- [<ffffffff8108c7f9>] state_store+0x99/0x100
- [<ffffffff81226807>] kobj_attr_store+0x17/0x20
- [<ffffffff8116e8f9>] sysfs_write_file+0xd9/0x160
- [<ffffffff8110cc78>] vfs_write+0xb8/0x1a0
- [<ffffffff8109eb8b>] ? audit_syscall_entry+0x28b/0x2b0
- [<ffffffff8110d781>] sys_write+0x51/0x90
- [<ffffffff8100c15b>] system_call_fastpath+0x16/0x1b
-=46AT: fat_cluster_flush
-=46AT: before unlock
-=46AT: leaving fat_sync_fs
-=46AT: dump before lock
-Pid: 2143, comm: pm-suspend Not tainted 2.6.31-rc8-00043-g54a3792 #32
-Call Trace:
- [<ffffffffa0537d94>] fat_sync_fs+0x24/0x80 [fat]
- [<ffffffff81132206>] __sync_filesystem+0x36/0x50
- [<ffffffff8113241b>] sync_filesystem+0x4b/0x70
- [<ffffffff8113b8ce>] fsync_bdev+0x2e/0x70
- [<ffffffff8121b3ce>] invalidate_partition+0x2e/0x50
- [<ffffffff81169d2f>] del_gendisk+0x3f/0x140
- [<ffffffffa02791ee>] mmc_blk_remove+0x2e/0x60 [mmc_block]
- [<ffffffffa022b2f7>] mmc_bus_remove+0x17/0x20 [mmc_core]
- [<ffffffff812d2036>] __device_release_driver+0x66/0xc0
- [<ffffffff812d219d>] device_release_driver+0x2d/0x40
- [<ffffffff812d112c>] bus_remove_device+0xac/0xe0
- [<ffffffff812cf2af>] device_del+0x12f/0x1a0
- [<ffffffffa022b3db>] mmc_remove_card+0x5b/0x90 [mmc_core]
- [<ffffffffa022d097>] mmc_sd_remove+0x27/0x50 [mmc_core]
- [<ffffffffa022ae9d>] mmc_suspend_host+0xed/0x120 [mmc_core]
- [<ffffffffa023bda8>] sdhci_suspend_host+0x38/0x60 [sdhci]
- [<ffffffffa025d270>] sdhci_pci_suspend+0x50/0x130 [sdhci_pci]
- [<ffffffff81242c3d>] pci_legacy_suspend+0x4d/0xf0
- [<ffffffff8124369d>] pci_pm_suspend+0xdd/0x130
- [<ffffffff812d660b>] pm_op+0x15b/0x1b0
- [<ffffffff812d7763>] dpm_suspend_start+0x423/0x580
- [<ffffffff8108d04f>] suspend_devices_and_enter+0x5f/0x1d0
- [<ffffffff8108d2e8>] enter_state+0x128/0x150
- [<ffffffff8108c7f9>] state_store+0x99/0x100
- [<ffffffff81226807>] kobj_attr_store+0x17/0x20
- [<ffffffff8116e8f9>] sysfs_write_file+0xd9/0x160
- [<ffffffff8110cc78>] vfs_write+0xb8/0x1a0
- [<ffffffff8109eb8b>] ? audit_syscall_entry+0x28b/0x2b0
- [<ffffffff8110d781>] sys_write+0x51/0x90
- [<ffffffff8100c15b>] system_call_fastpath+0x16/0x1b
-=46AT: fat_cluster_flush
-=46AT: before unlock
-=46AT: leaving fat_sync_fs
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: omap4: mmc driver support on OMAP4
+From: "kishore kadiyala" <kishore.kadiyala@ti.com>
+
+Add basic support for all 5 MMC controllers on OMAP4.
+
+This patch doesn't include mmc-regulator support
+
+Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Cc: <madhu.cr@ti.com>
+Cc: Russell King <linux@arm.linux.org.uk>
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: Hiroshi DOYU <Hiroshi.DOYU@nokia.com>
+Cc: Sakari Ailus <sakari.ailus@maxwell.research.nokia.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ arch/arm/mach-omap2/devices.c          |   42 ++++++++++++++++++++---
+ arch/arm/plat-omap/include/mach/irqs.h |    2 +
+ arch/arm/plat-omap/include/mach/mmc.h  |    9 ++++
+ drivers/mmc/host/Kconfig               |    6 +--
+ drivers/mmc/host/omap_hsmmc.c          |   10 +++++
+ 5 files changed, 60 insertions(+), 9 deletions(-)
+
+diff -puN arch/arm/mach-omap2/devices.c~omap4-mmc-driver-support-on-omap4 arch/arm/mach-omap2/devices.c
+--- a/arch/arm/mach-omap2/devices.c~omap4-mmc-driver-support-on-omap4
++++ a/arch/arm/mach-omap2/devices.c
+@@ -397,7 +397,7 @@ static inline void omap_init_sha1_md5(vo
+ 
+ /*-------------------------------------------------------------------------*/
+ 
+-#ifdef CONFIG_ARCH_OMAP3
++#if defined(CONFIG_ARCH_OMAP3) || defined(CONFIG_ARCH_OMAP4)
+ 
+ #define MMCHS_SYSCONFIG			0x0010
+ #define MMCHS_SYSCONFIG_SWRESET		(1 << 1)
+@@ -424,8 +424,8 @@ static struct platform_device dummy_pdev
+  **/
+ static void __init omap_hsmmc_reset(void)
+ {
+-	u32 i, nr_controllers = cpu_is_omap34xx() ? OMAP34XX_NR_MMC :
+-		OMAP24XX_NR_MMC;
++	u32 i, nr_controllers = cpu_is_omap44xx() ? OMAP44XX_NR_MMC :
++		(cpu_is_omap34xx() ? OMAP34XX_NR_MMC : OMAP24XX_NR_MMC);
+ 
+ 	for (i = 0; i < nr_controllers; i++) {
+ 		u32 v, base = 0;
+@@ -442,8 +442,21 @@ static void __init omap_hsmmc_reset(void
+ 		case 2:
+ 			base = OMAP3_MMC3_BASE;
+ 			break;
++		case 3:
++			if (!cpu_is_omap44xx())
++				return;
++			base = OMAP4_MMC4_BASE;
++			break;
++		case 4:
++			if (!cpu_is_omap44xx())
++				return;
++			base = OMAP4_MMC5_BASE;
++			break;
+ 		}
+ 
++		if (cpu_is_omap44xx())
++			base += OMAP4_MMC_REG_OFFSET;
++
+ 		dummy_pdev.id = i;
+ 		dev_set_name(&dummy_pdev.dev, "mmci-omap-hs.%d", i);
+ 		iclk = clk_get(dev, "ick");
+@@ -581,11 +594,23 @@ void __init omap2_init_mmc(struct omap_m
+ 			irq = INT_24XX_MMC2_IRQ;
+ 			break;
+ 		case 2:
+-			if (!cpu_is_omap34xx())
++			if (!cpu_is_omap44xx() && !cpu_is_omap34xx())
+ 				return;
+ 			base = OMAP3_MMC3_BASE;
+ 			irq = INT_34XX_MMC3_IRQ;
+ 			break;
++		case 3:
++			if (!cpu_is_omap44xx())
++				return;
++			base = OMAP4_MMC4_BASE + OMAP4_MMC_REG_OFFSET;
++			irq = INT_44XX_MMC4_IRQ;
++			break;
++		case 4:
++			if (!cpu_is_omap44xx())
++				return;
++			base = OMAP4_MMC5_BASE + OMAP4_MMC_REG_OFFSET;
++			irq = INT_44XX_MMC5_IRQ;
++			break;
+ 		default:
+ 			continue;
+ 		}
+@@ -593,8 +618,15 @@ void __init omap2_init_mmc(struct omap_m
+ 		if (cpu_is_omap2420()) {
+ 			size = OMAP2420_MMC_SIZE;
+ 			name = "mmci-omap";
++		} else if (cpu_is_omap44xx()) {
++			if (i < 3) {
++				base += OMAP4_MMC_REG_OFFSET;
++				irq += IRQ_GIC_START;
++			}
++			size = OMAP4_HSMMC_SIZE;
++			name = "mmci-omap-hs";
+ 		} else {
+-			size = HSMMC_SIZE;
++			size = OMAP3_HSMMC_SIZE;
+ 			name = "mmci-omap-hs";
+ 		}
+ 		omap_mmc_add(name, i, base, size, irq, mmc_data[i]);
+diff -puN arch/arm/plat-omap/include/mach/irqs.h~omap4-mmc-driver-support-on-omap4 arch/arm/plat-omap/include/mach/irqs.h
+--- a/arch/arm/plat-omap/include/mach/irqs.h~omap4-mmc-driver-support-on-omap4
++++ a/arch/arm/plat-omap/include/mach/irqs.h
+@@ -503,6 +503,7 @@
+ #define INT_44XX_FPKA_READY_IRQ	(50 + IRQ_GIC_START)
+ #define INT_44XX_SHA1MD51_IRQ	(51 + IRQ_GIC_START)
+ #define INT_44XX_RNG_IRQ	(52 + IRQ_GIC_START)
++#define INT_44XX_MMC5_IRQ	(59 + IRQ_GIC_START)
+ #define INT_44XX_I2C3_IRQ	(61 + IRQ_GIC_START)
+ #define INT_44XX_FPKA_ERROR_IRQ	(64 + IRQ_GIC_START)
+ #define INT_44XX_PBIAS_IRQ	(75 + IRQ_GIC_START)
+@@ -511,6 +512,7 @@
+ #define INT_44XX_TLL_IRQ	(78 + IRQ_GIC_START)
+ #define INT_44XX_PARTHASH_IRQ	(79 + IRQ_GIC_START)
+ #define INT_44XX_MMC3_IRQ	(94 + IRQ_GIC_START)
++#define INT_44XX_MMC4_IRQ	(96 + IRQ_GIC_START)
+ 
+ 
+ /* Max. 128 level 2 IRQs (OMAP1610), 192 GPIOs (OMAP730/850) and
+diff -puN arch/arm/plat-omap/include/mach/mmc.h~omap4-mmc-driver-support-on-omap4 arch/arm/plat-omap/include/mach/mmc.h
+--- a/arch/arm/plat-omap/include/mach/mmc.h~omap4-mmc-driver-support-on-omap4
++++ a/arch/arm/plat-omap/include/mach/mmc.h
+@@ -25,11 +25,18 @@
+ 
+ #define OMAP24XX_NR_MMC		2
+ #define OMAP34XX_NR_MMC		3
++#define OMAP44XX_NR_MMC		5
+ #define OMAP2420_MMC_SIZE	OMAP1_MMC_SIZE
+-#define HSMMC_SIZE		0x200
++#define OMAP3_HSMMC_SIZE	0x200
++#define OMAP4_HSMMC_SIZE	0x1000
+ #define OMAP2_MMC1_BASE		0x4809c000
+ #define OMAP2_MMC2_BASE		0x480b4000
+ #define OMAP3_MMC3_BASE		0x480ad000
++#define OMAP4_MMC4_BASE		0x480d1000
++#define OMAP4_MMC5_BASE		0x480d5000
++#define OMAP4_MMC_REG_OFFSET	0x100
++#define HSMMC5			(1 << 4)
++#define HSMMC4			(1 << 3)
+ #define HSMMC3			(1 << 2)
+ #define HSMMC2			(1 << 1)
+ #define HSMMC1			(1 << 0)
+diff -puN drivers/mmc/host/Kconfig~omap4-mmc-driver-support-on-omap4 drivers/mmc/host/Kconfig
+--- a/drivers/mmc/host/Kconfig~omap4-mmc-driver-support-on-omap4
++++ a/drivers/mmc/host/Kconfig
+@@ -132,11 +132,11 @@ config MMC_OMAP
+ 
+ config MMC_OMAP_HS
+ 	tristate "TI OMAP High Speed Multimedia Card Interface support"
+-	depends on ARCH_OMAP2430 || ARCH_OMAP3
++	depends on ARCH_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
+ 	help
+ 	  This selects the TI OMAP High Speed Multimedia card Interface.
+-	  If you have an OMAP2430 or OMAP3 board with a Multimedia Card slot,
+-	  say Y or M here.
++	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
++	  Multimedia Card slot, say Y or M here.
+ 
+ 	  If unsure, say N.
+ 
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap4-mmc-driver-support-on-omap4 drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap4-mmc-driver-support-on-omap4
++++ a/drivers/mmc/host/omap_hsmmc.c
+@@ -109,6 +109,8 @@
+ #define OMAP_MMC1_DEVID		0
+ #define OMAP_MMC2_DEVID		1
+ #define OMAP_MMC3_DEVID		2
++#define OMAP_MMC4_DEVID		3
++#define OMAP_MMC5_DEVID		4
+ 
+ #define MMC_TIMEOUT_MS		20
+ #define OMAP_MMC_MASTER_CLOCK	96000000
+@@ -1761,6 +1763,14 @@ static int __init omap_hsmmc_probe(struc
+ 		host->dma_line_tx = OMAP34XX_DMA_MMC3_TX;
+ 		host->dma_line_rx = OMAP34XX_DMA_MMC3_RX;
+ 		break;
++	case OMAP_MMC4_DEVID:
++		host->dma_line_tx = OMAP44XX_DMA_MMC4_TX;
++		host->dma_line_rx = OMAP44XX_DMA_MMC4_RX;
++		break;
++	case OMAP_MMC5_DEVID:
++		host->dma_line_tx = OMAP44XX_DMA_MMC5_TX;
++		host->dma_line_rx = OMAP44XX_DMA_MMC5_RX;
++		break;
+ 	default:
+ 		dev_err(mmc_dev(host->mmc), "Invalid MMC id\n");
+ 		goto err_irq;
+_
+
+Patches currently in -mm which might be from kishore.kadiyala@ti.com are
+
+omap-hsmmc-do-not-enable-buffer-ready-interrupt-if-using-dma.patch
+omap4-mmc-driver-support-on-omap4.patch
+
