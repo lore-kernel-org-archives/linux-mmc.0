@@ -1,240 +1,36 @@
-From: akpm@linux-foundation.org
-Subject: + omap4-mmc-driver-support-on-omap4.patch added to -mm tree
-Date: Fri, 04 Sep 2009 12:19:17 -0700
-Message-ID: <200909041919.n84JJHoC027148@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:42261 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933651AbZIDTTi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Sep 2009 15:19:38 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] OMAP4: MMC driver support on OMAP4
+Date: Fri, 4 Sep 2009 12:19:12 -0700
+Message-ID: <20090904121912.4b4e2b5a.akpm@linux-foundation.org>
+References: <34590.192.168.10.89.1251897876.squirrel@dbdmail.itg.ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S933882AbZIDTTp@vger.kernel.org>
+In-Reply-To: <34590.192.168.10.89.1251897876.squirrel@dbdmail.itg.ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: kishore kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, jarkko.lavinen@nokia.com, madhu.cr@ti.com, linux-arm-kernel@lists.arm.linux.org.uk, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: kishore.kadiyala@ti.com, Hiroshi.DOYU@nokia.com, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk, madhu.cr@ti.com, sakari.ailus@maxwell.research.nokia.com, tony@atomide.com
 
+On Wed, 2 Sep 2009 18:54:36 +0530 (IST)
+"kishore kadiyala" <kishore.kadiyala@ti.com> wrote:
 
-The patch titled
-     omap4: mmc driver support on OMAP4
-has been added to the -mm tree.  Its filename is
-     omap4-mmc-driver-support-on-omap4.patch
+> This Patch adds basic support for all 5 MMC controllers on OMAP4.
+> 
+> -Kishore
+> 
+> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+> ---
+> This patch doesn't include mmc-regulator support
+> 
+>  arch/arm/mach-omap2/devices.c          |   42 +++++++++++++++++++++++++++++----
+>  arch/arm/plat-omap/include/mach/irqs.h |    2 +
+>  arch/arm/plat-omap/include/mach/mmc.h  |    9 ++++++-
+>  drivers/mmc/host/Kconfig               |    6 ++--
+>  drivers/mmc/host/omap_hsmmc.c          |   10 +++++++
+>  5 files changed, 60 insertions(+), 9 deletions(-)
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: omap4: mmc driver support on OMAP4
-From: "kishore kadiyala" <kishore.kadiyala@ti.com>
-
-Add basic support for all 5 MMC controllers on OMAP4.
-
-This patch doesn't include mmc-regulator support
-
-Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
-Cc: <madhu.cr@ti.com>
-Cc: Russell King <linux@arm.linux.org.uk>
-Cc: Tony Lindgren <tony@atomide.com>
-Cc: Hiroshi DOYU <Hiroshi.DOYU@nokia.com>
-Cc: Sakari Ailus <sakari.ailus@maxwell.research.nokia.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- arch/arm/mach-omap2/devices.c          |   42 ++++++++++++++++++++---
- arch/arm/plat-omap/include/mach/irqs.h |    2 +
- arch/arm/plat-omap/include/mach/mmc.h  |    9 ++++
- drivers/mmc/host/Kconfig               |    6 +--
- drivers/mmc/host/omap_hsmmc.c          |   10 +++++
- 5 files changed, 60 insertions(+), 9 deletions(-)
-
-diff -puN arch/arm/mach-omap2/devices.c~omap4-mmc-driver-support-on-omap4 arch/arm/mach-omap2/devices.c
---- a/arch/arm/mach-omap2/devices.c~omap4-mmc-driver-support-on-omap4
-+++ a/arch/arm/mach-omap2/devices.c
-@@ -397,7 +397,7 @@ static inline void omap_init_sha1_md5(vo
- 
- /*-------------------------------------------------------------------------*/
- 
--#ifdef CONFIG_ARCH_OMAP3
-+#if defined(CONFIG_ARCH_OMAP3) || defined(CONFIG_ARCH_OMAP4)
- 
- #define MMCHS_SYSCONFIG			0x0010
- #define MMCHS_SYSCONFIG_SWRESET		(1 << 1)
-@@ -424,8 +424,8 @@ static struct platform_device dummy_pdev
-  **/
- static void __init omap_hsmmc_reset(void)
- {
--	u32 i, nr_controllers = cpu_is_omap34xx() ? OMAP34XX_NR_MMC :
--		OMAP24XX_NR_MMC;
-+	u32 i, nr_controllers = cpu_is_omap44xx() ? OMAP44XX_NR_MMC :
-+		(cpu_is_omap34xx() ? OMAP34XX_NR_MMC : OMAP24XX_NR_MMC);
- 
- 	for (i = 0; i < nr_controllers; i++) {
- 		u32 v, base = 0;
-@@ -442,8 +442,21 @@ static void __init omap_hsmmc_reset(void
- 		case 2:
- 			base = OMAP3_MMC3_BASE;
- 			break;
-+		case 3:
-+			if (!cpu_is_omap44xx())
-+				return;
-+			base = OMAP4_MMC4_BASE;
-+			break;
-+		case 4:
-+			if (!cpu_is_omap44xx())
-+				return;
-+			base = OMAP4_MMC5_BASE;
-+			break;
- 		}
- 
-+		if (cpu_is_omap44xx())
-+			base += OMAP4_MMC_REG_OFFSET;
-+
- 		dummy_pdev.id = i;
- 		dev_set_name(&dummy_pdev.dev, "mmci-omap-hs.%d", i);
- 		iclk = clk_get(dev, "ick");
-@@ -581,11 +594,23 @@ void __init omap2_init_mmc(struct omap_m
- 			irq = INT_24XX_MMC2_IRQ;
- 			break;
- 		case 2:
--			if (!cpu_is_omap34xx())
-+			if (!cpu_is_omap44xx() && !cpu_is_omap34xx())
- 				return;
- 			base = OMAP3_MMC3_BASE;
- 			irq = INT_34XX_MMC3_IRQ;
- 			break;
-+		case 3:
-+			if (!cpu_is_omap44xx())
-+				return;
-+			base = OMAP4_MMC4_BASE + OMAP4_MMC_REG_OFFSET;
-+			irq = INT_44XX_MMC4_IRQ;
-+			break;
-+		case 4:
-+			if (!cpu_is_omap44xx())
-+				return;
-+			base = OMAP4_MMC5_BASE + OMAP4_MMC_REG_OFFSET;
-+			irq = INT_44XX_MMC5_IRQ;
-+			break;
- 		default:
- 			continue;
- 		}
-@@ -593,8 +618,15 @@ void __init omap2_init_mmc(struct omap_m
- 		if (cpu_is_omap2420()) {
- 			size = OMAP2420_MMC_SIZE;
- 			name = "mmci-omap";
-+		} else if (cpu_is_omap44xx()) {
-+			if (i < 3) {
-+				base += OMAP4_MMC_REG_OFFSET;
-+				irq += IRQ_GIC_START;
-+			}
-+			size = OMAP4_HSMMC_SIZE;
-+			name = "mmci-omap-hs";
- 		} else {
--			size = HSMMC_SIZE;
-+			size = OMAP3_HSMMC_SIZE;
- 			name = "mmci-omap-hs";
- 		}
- 		omap_mmc_add(name, i, base, size, irq, mmc_data[i]);
-diff -puN arch/arm/plat-omap/include/mach/irqs.h~omap4-mmc-driver-support-on-omap4 arch/arm/plat-omap/include/mach/irqs.h
---- a/arch/arm/plat-omap/include/mach/irqs.h~omap4-mmc-driver-support-on-omap4
-+++ a/arch/arm/plat-omap/include/mach/irqs.h
-@@ -503,6 +503,7 @@
- #define INT_44XX_FPKA_READY_IRQ	(50 + IRQ_GIC_START)
- #define INT_44XX_SHA1MD51_IRQ	(51 + IRQ_GIC_START)
- #define INT_44XX_RNG_IRQ	(52 + IRQ_GIC_START)
-+#define INT_44XX_MMC5_IRQ	(59 + IRQ_GIC_START)
- #define INT_44XX_I2C3_IRQ	(61 + IRQ_GIC_START)
- #define INT_44XX_FPKA_ERROR_IRQ	(64 + IRQ_GIC_START)
- #define INT_44XX_PBIAS_IRQ	(75 + IRQ_GIC_START)
-@@ -511,6 +512,7 @@
- #define INT_44XX_TLL_IRQ	(78 + IRQ_GIC_START)
- #define INT_44XX_PARTHASH_IRQ	(79 + IRQ_GIC_START)
- #define INT_44XX_MMC3_IRQ	(94 + IRQ_GIC_START)
-+#define INT_44XX_MMC4_IRQ	(96 + IRQ_GIC_START)
- 
- 
- /* Max. 128 level 2 IRQs (OMAP1610), 192 GPIOs (OMAP730/850) and
-diff -puN arch/arm/plat-omap/include/mach/mmc.h~omap4-mmc-driver-support-on-omap4 arch/arm/plat-omap/include/mach/mmc.h
---- a/arch/arm/plat-omap/include/mach/mmc.h~omap4-mmc-driver-support-on-omap4
-+++ a/arch/arm/plat-omap/include/mach/mmc.h
-@@ -25,11 +25,18 @@
- 
- #define OMAP24XX_NR_MMC		2
- #define OMAP34XX_NR_MMC		3
-+#define OMAP44XX_NR_MMC		5
- #define OMAP2420_MMC_SIZE	OMAP1_MMC_SIZE
--#define HSMMC_SIZE		0x200
-+#define OMAP3_HSMMC_SIZE	0x200
-+#define OMAP4_HSMMC_SIZE	0x1000
- #define OMAP2_MMC1_BASE		0x4809c000
- #define OMAP2_MMC2_BASE		0x480b4000
- #define OMAP3_MMC3_BASE		0x480ad000
-+#define OMAP4_MMC4_BASE		0x480d1000
-+#define OMAP4_MMC5_BASE		0x480d5000
-+#define OMAP4_MMC_REG_OFFSET	0x100
-+#define HSMMC5			(1 << 4)
-+#define HSMMC4			(1 << 3)
- #define HSMMC3			(1 << 2)
- #define HSMMC2			(1 << 1)
- #define HSMMC1			(1 << 0)
-diff -puN drivers/mmc/host/Kconfig~omap4-mmc-driver-support-on-omap4 drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~omap4-mmc-driver-support-on-omap4
-+++ a/drivers/mmc/host/Kconfig
-@@ -132,11 +132,11 @@ config MMC_OMAP
- 
- config MMC_OMAP_HS
- 	tristate "TI OMAP High Speed Multimedia Card Interface support"
--	depends on ARCH_OMAP2430 || ARCH_OMAP3
-+	depends on ARCH_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
- 	help
- 	  This selects the TI OMAP High Speed Multimedia card Interface.
--	  If you have an OMAP2430 or OMAP3 board with a Multimedia Card slot,
--	  say Y or M here.
-+	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
-+	  Multimedia Card slot, say Y or M here.
- 
- 	  If unsure, say N.
- 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap4-mmc-driver-support-on-omap4 drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap4-mmc-driver-support-on-omap4
-+++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -109,6 +109,8 @@
- #define OMAP_MMC1_DEVID		0
- #define OMAP_MMC2_DEVID		1
- #define OMAP_MMC3_DEVID		2
-+#define OMAP_MMC4_DEVID		3
-+#define OMAP_MMC5_DEVID		4
- 
- #define MMC_TIMEOUT_MS		20
- #define OMAP_MMC_MASTER_CLOCK	96000000
-@@ -1761,6 +1763,14 @@ static int __init omap_hsmmc_probe(struc
- 		host->dma_line_tx = OMAP34XX_DMA_MMC3_TX;
- 		host->dma_line_rx = OMAP34XX_DMA_MMC3_RX;
- 		break;
-+	case OMAP_MMC4_DEVID:
-+		host->dma_line_tx = OMAP44XX_DMA_MMC4_TX;
-+		host->dma_line_rx = OMAP44XX_DMA_MMC4_RX;
-+		break;
-+	case OMAP_MMC5_DEVID:
-+		host->dma_line_tx = OMAP44XX_DMA_MMC5_TX;
-+		host->dma_line_rx = OMAP44XX_DMA_MMC5_RX;
-+		break;
- 	default:
- 		dev_err(mmc_dev(host->mmc), "Invalid MMC id\n");
- 		goto err_irq;
-_
-
-Patches currently in -mm which might be from kishore.kadiyala@ti.com are
-
-omap-hsmmc-do-not-enable-buffer-ready-interrupt-if-using-dma.patch
-omap4-mmc-driver-support-on-omap4.patch
-
+This looks like an ARM patch more than an MMC patch.  I grabbed it as
+an MMC thing but hopefully someone else will grab it for a more
+appropriate tree.
