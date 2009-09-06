@@ -1,73 +1,50 @@
 From: Pierre Ossman <pierre@ossman.eu>
-Subject: [PATCH] Orphaning sdhci driver and list
-Date: Sun, 6 Sep 2009 15:56:32 +0200
-Message-ID: <20090906155632.3ef835e3@mjolnir.ossman.eu>
+Subject: Re: [PATCH 1/4] [MMC] core SDIO suspend/resume support
+Date: Sun, 6 Sep 2009 16:17:41 +0200
+Message-ID: <20090906161741.33a56583@mjolnir.ossman.eu>
+References: <1251916646-3537-1-git-send-email-nico@cam.org>
+	<1251916646-3537-2-git-send-email-nico@cam.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-24961-1252245396-0001-2"
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-25038-1252246664-0001-2"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 82-117-125-11.tcdsl.calypso.net ([82.117.125.11]:37925 "EHLO
+Received: from 82-117-125-11.tcdsl.calypso.net ([82.117.125.11]:35475 "EHLO
 	smtp.ossman.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752772AbZIFN4d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 6 Sep 2009 09:56:33 -0400
+	id S1754827AbZIFORm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 6 Sep 2009 10:17:42 -0400
+In-Reply-To: <1251916646-3537-2-git-send-email-nico@cam.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: sdhci-devel@lists.ossman.eu, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
-Cc: Ben Dooks <ben@fluff.org>, Anton Vorontsov <avorontsov@ru.mvista.com>
+To: Nicolas Pitre <nico@cam.org>
+Cc: linux-mmc@vger.kernel.org
 
 This is a MIME-formatted message.  If you see this text it means that your
 E-mail software does not support MIME-formatted messages.
 
---=_freyr.ossman.eu-24961-1252245396-0001-2
+--=_freyr.ossman.eu-25038-1252246664-0001-2
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: quoted-printable
 
-Remove myself as maintainer from the sdhci driver and steer people
-towards the new MMC list for discussing it.
+On Wed, 02 Sep 2009 14:37:23 -0400
+Nicolas Pitre <nico@cam.org> wrote:
 
-Signed-off-by: Pierre Ossman <pierre@ossman.eu>
----
+>=20
+> When resuming, we make sure the same card is still inserted by comparing
+> the vendor and product IDs.  If there is a mismatch, or if there is simply
+> no card anymore in the slot, then the previous card is "removed" and the
+> new card is detected.
+>=20
 
-I've noticed that people have already begun sending their sdhci patches
-to Andrew, so this is more or less a formality at this point.
+I know this is an area with a lot of differing views, but I see this as
+totally insufficient. Like storage cards, this card might have a
+non-volatile state that drivers and upper layers rely on being the same
+before and after suspend.
 
-I won't be turning off the sdhci-devel list anytime soon, but please
-try to move your conversations to the linux-mmc list.
+(Then there's also the issue of e.g. having two "identical" wifi cards
+but with different MAC addresses).
 
-And as with the core MMC stuff, I'm not falling of the face of the
-planet, just prioritising different things in my life for a while.
-
-
-diff --git a/MAINTAINERS b/MAINTAINERS
-index d6befb2..ad5daf0 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -4449,20 +4449,20 @@ S:      Maintained
- F:     drivers/mmc/host/sdricoh_cs.c
-=20
- SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
--M:     Pierre Ossman <pierre@ossman.eu>
--L:     sdhci-devel@lists.ossman.eu
--S:     Maintained
-+S:     Orphan
-+L:     linux-mmc@vger.kernel.org
-+F:     drivers/mmc/host/sdhci.*
-=20
- SECURE DIGITAL HOST CONTROLLER INTERFACE, OPEN FIRMWARE BINDINGS (SDHCI-OF)
- M:     Anton Vorontsov <avorontsov@ru.mvista.com>
- L:     linuxppc-dev@ozlabs.org
--L:     sdhci-devel@lists.ossman.eu
-+L:     linux-mmc@vger.kernel.org
- S:     Maintained
--F:     drivers/mmc/host/sdhci.*
-+F:     drivers/mmc/host/sdhci-of.*
-=20
- SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
- M:     Ben Dooks <ben-linux@fluff.org>
--L:     sdhci-devel@lists.ossman.eu
-+L:     linux-mmc@vger.kernel.org
- S:     Maintained
- F:     drivers/mmc/host/sdhci-s3c.c
-=20
+I think the right way to go is to retain enough power to the card for
+it to stay initialised and then poke it at resume to see if it is still
+running in the same state we left it.
 
 Rgds
 --=20
@@ -78,7 +55,7 @@ Rgds
   for SMTP traffic and consider using PGP for end-to-end
   encryption.
 
---=_freyr.ossman.eu-24961-1252245396-0001-2
+--=_freyr.ossman.eu-25038-1252246664-0001-2
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment; filename=signature.asc
@@ -86,9 +63,9 @@ Content-Disposition: attachment; filename=signature.asc
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.12 (GNU/Linux)
 
-iEYEARECAAYFAkqjv5IACgkQ7b8eESbyJLi2oACeNCdkvNoUThFg7+KnUm/zZO4G
-72cAoO2e2nEkRKzn8iAIHEZ6eispONnF
-=A/St
+iEYEARECAAYFAkqjxIcACgkQ7b8eESbyJLj/XwCgu7ipf5MlySpqZUzMPz7wRb4A
+SvoAoOqo6uKXLhDzGjYzjRbzlFj+kcUT
+=Atd/
 -----END PGP SIGNATURE-----
 
---=_freyr.ossman.eu-24961-1252245396-0001-2--
+--=_freyr.ossman.eu-25038-1252246664-0001-2--
