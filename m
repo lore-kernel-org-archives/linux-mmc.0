@@ -1,65 +1,45 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: MMC retry mechanism
-Date: Mon, 07 Sep 2009 10:17:32 +0300
-Message-ID: <4AA4B38C.6060202@nokia.com>
-References: <011c01ca2dac$2de779d0$544ff780@am.dhcp.ti.com>
+From: =?UTF-8?B?7ZmN7IugIHNoaW4gaG9uZw==?= <hongshin@gmail.com>
+Subject: BUG? a suspected race bug at sdio_irq_thread()
+Date: Mon, 7 Sep 2009 19:15:37 +0900
+Message-ID: <2014bcab0909070315j67c5db31gff6bc70f0b6369a5@mail.gmail.com>
+References: <2014bcab0909022048n2c937af4l5bd38c501469b1c7@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:25943 "EHLO
-	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751312AbZIGHRi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Sep 2009 03:17:38 -0400
-In-Reply-To: <011c01ca2dac$2de779d0$544ff780@am.dhcp.ti.com>
+Received: from mail-yw0-f175.google.com ([209.85.211.175]:42019 "EHLO
+	mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752736AbZIGKPe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Sep 2009 06:15:34 -0400
+Received: by ywh5 with SMTP id 5so3438423ywh.4
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Sep 2009 03:15:37 -0700 (PDT)
+In-Reply-To: <2014bcab0909022048n2c937af4l5bd38c501469b1c7@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
 
-Madhusudhan wrote:
-> Hi Adrian,
-> 
-> With respect to the below commit, It looks like currently the retry
-> mechanism only handles the READ path.
-> 
-> I wonder could a similar retry logic feasible for the WRITE path?
-> 
-> Regards,
-> Madhu
+Hello. I am reporting a suspected race bug at sdio_irq_thread()
+in drivers/mmc/core/sdio_irq.c of Linux 2.6.30.5.
 
->From my point of view, writes should never fail.  In theory, the MMC
-should have enough reserved blocks to cover bad blocks for the
-expected lifetime of the device.  It should then be just copying
-and remapping to avoid having to return write errors.
+I hope this report is helpful. I am not certain whether this reports
+real bug or not since I do not have much background.
+So, please examine the report and let me know your opinion.
 
-Of course, a lot of cards probably don't do that right.  However,
-I think maybe the block layer already retries failed writes.
+sdio_irq_therad() is spawned as a sdio_card_irq_get().
+This thread is stopped by sdio_card_irq_put().
 
-> 
->  
-> 
-> commit 6a79e391df295bd7c2aa1309ea5031f361c197fd
-> Author: Adrian Hunter <ext-adrian.hunter@nokia.com>
-> Date:   Wed Dec 31 18:21:17 2008 +0100
-> 
->  
-> 
->     mmc_block: ensure all sectors that do not have errors are read
-> 
->     If a card encounters an ECC error while reading a sector it will
-> 
->     timeout.  Instead of reporting the entire I/O request as having
-> 
->     an error, redo the I/O one sector at a time so that all readable
-> 
->     sectors are provided to the upper layers.
-> 
->  
-> 
->     Signed-off-by: Adrian Hunter <ext-adrian.hunter@nokia.com>
-> 
->     Signed-off-by: Pierre Ossman <drzeus@drzeus.cx>
-> 
-> 
+sdio_irq_thread() finishes its do-while iteration
+when kthread_should_stop() returns true
+or a condition is satisfied (break statements at line 106)
 
+For the later case, if sdio_irq_thread() is finished
+before kthread_should_stop() returns false.
+
+In that situation, if other thread invokes kthread_stop(),
+the caller of kthread_stop() might have a problem (waiting indefinitely).
+
+Could you examine the possibility of this type of errors please?
+
+Thank you
+
+Sincerely
+Shin Hong
