@@ -1,45 +1,53 @@
-From: =?UTF-8?B?7ZmN7IugIHNoaW4gaG9uZw==?= <hongshin@gmail.com>
-Subject: BUG? a suspected race bug at sdio_irq_thread()
-Date: Mon, 7 Sep 2009 19:15:37 +0900
-Message-ID: <2014bcab0909070315j67c5db31gff6bc70f0b6369a5@mail.gmail.com>
-References: <2014bcab0909022048n2c937af4l5bd38c501469b1c7@mail.gmail.com>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
+Date: Mon, 7 Sep 2009 14:51:30 +0200
+Message-ID: <20090907125130.GA1595@ucw.cz>
+References: <c4e36d110908310451t7c238e09u5af112fa3321cc23@mail.gmail.com> <200908312119.12121.rjw@sisk.pl> <c4e36d110909010234i5f1b9357l805132137725a4f8@mail.gmail.com> <c4e36d110909031529q77b53122kdb85785ba293c478@mail.gmail.com> <20090903232317.GA6760@lst.de> <87ljkvmt71.fsf@devron.myhome.or.jp> <c4e36d110909040213t4d4258b4w3e2d4725e0b2a161@mail.gmail.com> <87iqfx5mss.fsf@devron.myhome.or.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f175.google.com ([209.85.211.175]:42019 "EHLO
-	mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752736AbZIGKPe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Sep 2009 06:15:34 -0400
-Received: by ywh5 with SMTP id 5so3438423ywh.4
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Sep 2009 03:15:37 -0700 (PDT)
-In-Reply-To: <2014bcab0909022048n2c937af4l5bd38c501469b1c7@mail.gmail.com>
+Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:47795 "EHLO
+	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750844AbZIGMwq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Sep 2009 08:52:46 -0400
+Content-Disposition: inline
+In-Reply-To: <87iqfx5mss.fsf@devron.myhome.or.jp>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
+Cc: Zdenek Kabelac <zdenek.kabelac@gmail.com>, Christoph Hellwig <hch@lst.de>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
 
-Hello. I am reporting a suspected race bug at sdio_irq_thread()
-in drivers/mmc/core/sdio_irq.c of Linux 2.6.30.5.
+Hi!
 
-I hope this report is helpful. I am not certain whether this reports
-real bug or not since I do not have much background.
-So, please examine the report and let me know your opinion.
+> >>> Note that when you rever this patch on a current kernel you do actually
+> >>> get different behvaviour than when going back to before this commit.
+> >>>
+> >>> In 2.6.30 we called ->write_super in the various sync functions and
+> >>> then ->sync_fs, in 2.6.31-rc8 you would not call any syncing at all
+> >>> anymore. ?I think this patch might just be a symptom for a situation
+> >>> where the suspend code causes a sync and the mmc driver can't handle
+> >>> it anymore.
+> >
+> > So - here is the console trace from suspend when I've added
+> > dump_stack() to the fat_sync_fs()   (and also added debug prints
+> > around each call in this function -so its obvious the function is
+> > actually left - but then it freezes later somewhere.)
+> >
+> > It's interesting that 3 calls to sync happens.
+> 
+> It seems
+> 
+>     1) sync() (probabry "sync" command)
+>     2) sync as part of suspend sequence
+>     3) sync_filesystem() by mmc remove event
+> 
+> I guess the root-cause of the problem would be 3). However, it would not
+> be easy to fix, at least, we would need to think about what we want to
+> do for it. So, to workaround it for now, I've made this patch.
 
-sdio_irq_therad() is spawned as a sdio_card_irq_get().
-This thread is stopped by sdio_card_irq_put().
+MMC driver trying to synchronize filesystems looks like ugly layering
+violation to me. Why are we doing that?
 
-sdio_irq_thread() finishes its do-while iteration
-when kthread_should_stop() returns true
-or a condition is satisfied (break statements at line 106)
-
-For the later case, if sdio_irq_thread() is finished
-before kthread_should_stop() returns false.
-
-In that situation, if other thread invokes kthread_stop(),
-the caller of kthread_stop() might have a problem (waiting indefinitely).
-
-Could you examine the possibility of this type of errors please?
-
-Thank you
-
-Sincerely
-Shin Hong
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
