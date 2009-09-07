@@ -1,40 +1,116 @@
-From: Ben Dooks <ben-linux@fluff.org>
-Subject: Re: [PATCH 0/4] s3c6410: Samsung 6410 clock configuration fixes.
-Date: Mon, 7 Sep 2009 14:24:37 +0100
-Message-ID: <20090907132437.GF2367@trinity.fluff.org>
-References: <1252326311-5647-1-git-send-email-thomas.ab@samsung.com>
+From: Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
+Subject: [PATCH RFC 1/3] sdio: recognize io card without powercycle
+Date: Mon, 7 Sep 2009 18:46:58 +0000 (GMT)
+Message-ID: <369914.76148.qm@web28315.mail.ukl.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from trinity.fluff.org ([89.16.178.74]:55185 "EHLO trinity.fluff.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751863AbZIGNYk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 7 Sep 2009 09:24:40 -0400
-Content-Disposition: inline
-In-Reply-To: <1252326311-5647-1-git-send-email-thomas.ab@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/mixed; boundary="0-1437562912-1252349218=:76148"
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: bcm43xx-dev-0fE9KPoRgkgATYTw5x5z8w@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Abraham <thomas.ab@samsung.com>
-Cc: ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On Mon, Sep 07, 2009 at 09:25:11PM +0900, Thomas Abraham wrote:
-> This patch series fixes issues in the Samsung's 6410 clock configuration
-> code. These patches are required for the correct functioning of the 
-> s3c6410 SDHCI driver. The following patches are included in this 
-> patch series.
-> 
-> [PATCH 1/4] s3c6410: use correct divider_shift in setrate_clksrc()
-> [PATCH 2/4] s3c6410: update clk->parent when setting clock source
-> [PATCH 3/4] s3c6410: Fix divider value calculation in s3c64xx_roundrate_clksrc
-> [PATCH 4/4] s3c6410: Remove redundant mpll parent assignment.
+--0-1437562912-1252349218=:76148
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-A brief review seems to indicate they are ok, it is just whether this
-late in the release cycle it is worth trying to push them as fixes or
-adding them to the -next tree for 2.6.31 inclusion.
+=0A=0A=0A      
+--0-1437562912-1252349218=:76148
+Content-Type: text/x-patch; name="0116-sdio-recognize-io-card-without-powercycle.patch"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="0116-sdio-recognize-io-card-without-powercycle.patch"
 
--- 
-Ben
+RnJvbSA1Yzk3NDYyYWU5MTg4NTI0ZmFhMGM1N2ZhOGI1YmY4ZTllMGMxMjVj
+IE1vbiBTZXAgMTcgMDA6MDA6MDAgMjAwMQpGcm9tOiBBbGJlcnQgSGVycmFu
+eiA8YWxiZXJ0X2hlcnJhbnpAeWFob28uZXM+CkRhdGU6IFR1ZSwgMTggQXVn
+IDIwMDkgMjE6MDY6MzIgKzAyMDAKU3ViamVjdDogW1BBVENIXSBzZGlvOiBy
+ZWNvZ25pemUgaW8gY2FyZCB3aXRob3V0IHBvd2VyY3ljbGUKClNESU8gU2lt
+cGxpZmllZCBTcGVjaWZpY2F0aW9uIChhdCBsZWFzdCBWMi4wMCkgc3RhdGVz
+IHRoYXQgaXQgaXMgc3Ryb25nbHkKcmVjb21tZW5kZWQgdGhhdCB0aGUgaG9z
+dCBleGVjdXRlcyBlaXRoZXIgYSBwb3dlciByZXNldCBvciBpc3N1ZXMgYSBD
+TUQ1MgooSS9PIFJlc2V0KSB0byByZS1pbml0aWFsaXplIGFuIEkvTyBjYXJk
+LgpBZGRpdGlvbmFsbHksIHRoZSBDTUQ1MiBtdXN0IGJlIGlzc3VlZCBmaXJz
+dCBiZWNhdXNlIGl0IGNhbm5vdCBiZSBpc3N1ZWQKYWZ0ZXIgYSBDTUQwLgoK
+V2l0aCB0aGlzIHBhdGNoIHRoZSBOaW50ZW5kbyBXaWkgU0RJTy1iYXNlZCBX
+TEFOIGNhcmQgaXMgZGV0ZWN0ZWQgYWZ0ZXIgYQpzeXN0ZW0gcmVzZXQsIHdp
+dGhvdXQgcmVxdWlyaW5nIGEgY29tcGxldGUgc3lzdGVtIHBvd2VyY3ljbGUu
+CgpTaWduZWQtb2ZmLWJ5OiBBbGJlcnQgSGVycmFueiA8YWxiZXJ0X2hlcnJh
+bnpAeWFob28uZXM+Ci0tLQogZHJpdmVycy9tbWMvY29yZS9jb3JlLmMgICAg
+IHwgICAgMSArCiBkcml2ZXJzL21tYy9jb3JlL3NkaW9fb3BzLmMgfCAgIDM2
+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKy0tLS0tLQogZHJpdmVy
+cy9tbWMvY29yZS9zZGlvX29wcy5oIHwgICAgMSArCiAzIGZpbGVzIGNoYW5n
+ZWQsIDMyIGluc2VydGlvbnMoKyksIDYgZGVsZXRpb25zKC0pCgpkaWZmIC0t
+Z2l0IGEvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMgYi9kcml2ZXJzL21tYy9j
+b3JlL2NvcmUuYwppbmRleCBkODRjODgwLi5jNzY4ZjcwIDEwMDY0NAotLS0g
+YS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYworKysgYi9kcml2ZXJzL21tYy9j
+b3JlL2NvcmUuYwpAQCAtODkwLDYgKzg5MCw3IEBAIHZvaWQgbW1jX3Jlc2Nh
+bihzdHJ1Y3Qgd29ya19zdHJ1Y3QgKndvcmspCiAJbW1jX2NsYWltX2hvc3Qo
+aG9zdCk7CiAKIAltbWNfcG93ZXJfdXAoaG9zdCk7CisJc2Rpb19nb19pZGxl
+KGhvc3QpOwogCW1tY19nb19pZGxlKGhvc3QpOwogCiAJbW1jX3NlbmRfaWZf
+Y29uZChob3N0LCBob3N0LT5vY3JfYXZhaWwpOwpkaWZmIC0tZ2l0IGEvZHJp
+dmVycy9tbWMvY29yZS9zZGlvX29wcy5jIGIvZHJpdmVycy9tbWMvY29yZS9z
+ZGlvX29wcy5jCmluZGV4IDRlYjc4MjUuLjE0ZDMyMDQgMTAwNjQ0Ci0tLSBh
+L2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19vcHMuYworKysgYi9kcml2ZXJzL21t
+Yy9jb3JlL3NkaW9fb3BzLmMKQEAgLTY3LDEzICs2NywxMyBAQCBpbnQgbW1j
+X3NlbmRfaW9fb3BfY29uZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIHUzMiBv
+Y3IsIHUzMiAqcm9jcikKIAlyZXR1cm4gZXJyOwogfQogCi1pbnQgbW1jX2lv
+X3J3X2RpcmVjdChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsIGludCB3cml0ZSwg
+dW5zaWduZWQgZm4sCi0JdW5zaWduZWQgYWRkciwgdTggaW4sIHU4KiBvdXQp
+CitzdGF0aWMgaW50IG1tY19pb19yd19kaXJlY3RfaG9zdChzdHJ1Y3QgbW1j
+X2hvc3QgKmhvc3QsIGludCB3cml0ZSwgdW5zaWduZWQgZm4sCisJdW5zaWdu
+ZWQgYWRkciwgdTggaW4sIHU4ICpvdXQpCiB7CiAJc3RydWN0IG1tY19jb21t
+YW5kIGNtZDsKIAlpbnQgZXJyOwogCi0JQlVHX09OKCFjYXJkKTsKKwlCVUdf
+T04oIWhvc3QpOwogCUJVR19PTihmbiA+IDcpOwogCiAJLyogc2FuaXR5IGNo
+ZWNrICovCkBAIC05MCwxMSArOTAsMTEgQEAgaW50IG1tY19pb19yd19kaXJl
+Y3Qoc3RydWN0IG1tY19jYXJkICpjYXJkLCBpbnQgd3JpdGUsIHVuc2lnbmVk
+IGZuLAogCWNtZC5hcmcgfD0gaW47CiAJY21kLmZsYWdzID0gTU1DX1JTUF9T
+UElfUjUgfCBNTUNfUlNQX1I1IHwgTU1DX0NNRF9BQzsKIAotCWVyciA9IG1t
+Y193YWl0X2Zvcl9jbWQoY2FyZC0+aG9zdCwgJmNtZCwgMCk7CisJZXJyID0g
+bW1jX3dhaXRfZm9yX2NtZChob3N0LCAmY21kLCAwKTsKIAlpZiAoZXJyKQog
+CQlyZXR1cm4gZXJyOwogCi0JaWYgKG1tY19ob3N0X2lzX3NwaShjYXJkLT5o
+b3N0KSkgeworCWlmIChtbWNfaG9zdF9pc19zcGkoaG9zdCkpIHsKIAkJLyog
+aG9zdCBkcml2ZXIgYWxyZWFkeSByZXBvcnRlZCBlcnJvcnMgKi8KIAl9IGVs
+c2UgewogCQlpZiAoY21kLnJlc3BbMF0gJiBSNV9FUlJPUikKQEAgLTEwNiw3
+ICsxMDYsNyBAQCBpbnQgbW1jX2lvX3J3X2RpcmVjdChzdHJ1Y3QgbW1jX2Nh
+cmQgKmNhcmQsIGludCB3cml0ZSwgdW5zaWduZWQgZm4sCiAJfQogCiAJaWYg
+KG91dCkgewotCQlpZiAobW1jX2hvc3RfaXNfc3BpKGNhcmQtPmhvc3QpKQor
+CQlpZiAobW1jX2hvc3RfaXNfc3BpKGhvc3QpKQogCQkJKm91dCA9IChjbWQu
+cmVzcFswXSA+PiA4KSAmIDB4RkY7CiAJCWVsc2UKIAkJCSpvdXQgPSBjbWQu
+cmVzcFswXSAmIDB4RkY7CkBAIC0xMTUsNiArMTE1LDEzIEBAIGludCBtbWNf
+aW9fcndfZGlyZWN0KHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgaW50IHdyaXRl
+LCB1bnNpZ25lZCBmbiwKIAlyZXR1cm4gMDsKIH0KIAoraW50IG1tY19pb19y
+d19kaXJlY3Qoc3RydWN0IG1tY19jYXJkICpjYXJkLCBpbnQgd3JpdGUsIHVu
+c2lnbmVkIGZuLAorCXVuc2lnbmVkIGFkZHIsIHU4IGluLCB1OCAqb3V0KQor
+eworCUJVR19PTighY2FyZCk7CisJcmV0dXJuIG1tY19pb19yd19kaXJlY3Rf
+aG9zdChjYXJkLT5ob3N0LCB3cml0ZSwgZm4sIGFkZHIsIGluLCBvdXQpOwor
+fQorCiBpbnQgbW1jX2lvX3J3X2V4dGVuZGVkKHN0cnVjdCBtbWNfY2FyZCAq
+Y2FyZCwgaW50IHdyaXRlLCB1bnNpZ25lZCBmbiwKIAl1bnNpZ25lZCBhZGRy
+LCBpbnQgaW5jcl9hZGRyLCB1OCAqYnVmLCB1bnNpZ25lZCBibG9ja3MsIHVu
+c2lnbmVkIGJsa3N6KQogewpAQCAtMTgyLDMgKzE4OSwyMCBAQCBpbnQgbW1j
+X2lvX3J3X2V4dGVuZGVkKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgaW50IHdy
+aXRlLCB1bnNpZ25lZCBmbiwKIAlyZXR1cm4gMDsKIH0KIAoraW50IHNkaW9f
+Z29faWRsZShzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpCit7CisJaW50IHJldDsK
+Kwl1OCBhYm9ydDsKKworCS8qIFNESU8gU2ltcGxpZmllZCBTcGVjaWZpY2F0
+aW9uIFYyLjAsIDQuNCBSZXNldCBmb3IgU0RJTyAqLworCisJcmV0ID0gbW1j
+X2lvX3J3X2RpcmVjdF9ob3N0KGhvc3QsIDAsIDAsIFNESU9fQ0NDUl9BQk9S
+VCwgMCwgJmFib3J0KTsKKwlpZiAocmV0KQorCQlhYm9ydCA9IDB4MDg7CisJ
+ZWxzZQorCQlhYm9ydCB8PSAweDA4OworCisJcmV0ID0gbW1jX2lvX3J3X2Rp
+cmVjdF9ob3N0KGhvc3QsIDEsIDAsIFNESU9fQ0NDUl9BQk9SVCwgYWJvcnQs
+IE5VTEwpOworCXJldHVybiByZXQ7Cit9CisKZGlmZiAtLWdpdCBhL2RyaXZl
+cnMvbW1jL2NvcmUvc2Rpb19vcHMuaCBiL2RyaXZlcnMvbW1jL2NvcmUvc2Rp
+b19vcHMuaAppbmRleCBlMmU3NGIwLi45YjU0NmM3IDEwMDY0NAotLS0gYS9k
+cml2ZXJzL21tYy9jb3JlL3NkaW9fb3BzLmgKKysrIGIvZHJpdmVycy9tbWMv
+Y29yZS9zZGlvX29wcy5oCkBAIC0xNyw2ICsxNyw3IEBAIGludCBtbWNfaW9f
+cndfZGlyZWN0KHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgaW50IHdyaXRlLCB1
+bnNpZ25lZCBmbiwKIAl1bnNpZ25lZCBhZGRyLCB1OCBpbiwgdTgqIG91dCk7
+CiBpbnQgbW1jX2lvX3J3X2V4dGVuZGVkKHN0cnVjdCBtbWNfY2FyZCAqY2Fy
+ZCwgaW50IHdyaXRlLCB1bnNpZ25lZCBmbiwKIAl1bnNpZ25lZCBhZGRyLCBp
+bnQgaW5jcl9hZGRyLCB1OCAqYnVmLCB1bnNpZ25lZCBibG9ja3MsIHVuc2ln
+bmVkIGJsa3N6KTsKK2ludCBzZGlvX2dvX2lkbGUoc3RydWN0IG1tY19ob3N0
+ICpob3N0KTsKIAogI2VuZGlmCiAKLS0gCjEuNi4wLjQKCg==
 
-Q:      What's a light-year?
-A:      One-third less calories than a regular year.
-
+--0-1437562912-1252349218=:76148--
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
