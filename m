@@ -1,11 +1,11 @@
 From: thomas.ab@samsung.com
-Subject: [PATCH 3/8] s3c6410: sdhci: Set parent clock, source clock and sdhci module speed.
-Date: Tue,  8 Sep 2009 15:51:26 +0900
-Message-ID: <1252392686-31135-1-git-send-email-thomas.ab@samsung.com>
+Subject: [PATCH 4/8] s3c6410: sdhci: Enable ADMA feature in 6410 sdhci controller.
+Date: Tue,  8 Sep 2009 15:52:49 +0900
+Message-ID: <1252392769-31159-1-git-send-email-thomas.ab@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ganesha.gnumonks.org ([213.95.27.120]:46833 "EHLO
+Received: from ganesha.gnumonks.org ([213.95.27.120]:46837 "EHLO
 	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753858AbZIHHCO (ORCPT
+	with ESMTP id S1753861AbZIHHCO (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Sep 2009 03:02:14 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -14,52 +14,30 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Thomas Abra
 
 From: Thomas Abraham <thomas.ab@samsung.com>
 
-This patch sets the parent clock, source clock and sdhci module
-clock speed for 6410 sdhci controller.
-
-Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
+This patch enables ADMA feature in 6410 SDHCI controller
+driver.
 ---
- drivers/mmc/host/sdhci-s3c.c |   13 +++++++++++++
- 1 files changed, 13 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c |    7 +------
+ 1 files changed, 1 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 50997d2..db1bb93 100644
+index db1bb93..7f5b64e 100644
 --- a/drivers/mmc/host/sdhci-s3c.c
 +++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -22,6 +22,8 @@
+@@ -329,12 +329,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	host->irq = irq;
  
- #include <plat/sdhci.h>
- #include <plat/regs-sdhci.h>
-+#include <plat/clock.h>
-+#include <plat/cpu.h>
+ 	/* Setup quirks for the controller */
+-
+-	/* Currently with ADMA enabled we are getting some length
+-	 * interrupts that are not being dealt with, do disable
+-	 * ADMA until this is sorted out. */
+-	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+-	host->quirks |= SDHCI_QUIRK_32BIT_ADMA_SIZE;
++	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
  
- #include "sdhci.h"
+ #ifndef CONFIG_MMC_SDHCI_S3C_DMA
  
-@@ -221,6 +223,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	struct sdhci_host *host;
- 	struct sdhci_s3c *sc;
- 	struct resource *res;
-+	struct clk *clk_mmc, *clk_parent;
- 	int ret, irq, ptr, clks;
- 
- 	if (!pdata) {
-@@ -240,6 +243,16 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		return -ENOENT;
- 	}
- 
-+	/* Set the SDHCI controller clock rate */
-+	clk_mmc = clk_get(dev, pdata->clk_source_name);
-+	clk_parent = clk_get(dev, pdata->clk_parent_name);
-+        if (!clk_mmc || !clk_parent) {
-+                dev_err(dev, "could not obtain clock information");
-+                return -ENXIO;
-+        }
-+	clk_set_parent(clk_mmc, clk_parent);
-+	clk_set_rate(clk_mmc, pdata->clk_speed);
-+
- 	host = sdhci_alloc_host(dev, sizeof(struct sdhci_s3c));
- 	if (IS_ERR(host)) {
- 		dev_err(dev, "sdhci_alloc_host() failed\n");
 -- 
 1.5.3.4
 
