@@ -1,60 +1,62 @@
 From: Nicolas Pitre <nico@cam.org>
-Subject: Re: [PATCH 1/4] [MMC] core SDIO suspend/resume support
-Date: Mon, 07 Sep 2009 21:53:20 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.0909072145220.6044@xanadu.home>
-References: <1251916646-3537-1-git-send-email-nico@cam.org>
- <1251916646-3537-2-git-send-email-nico@cam.org>
- <20090906161741.33a56583@mjolnir.ossman.eu>
+Subject: Re: BUG? a suspected race bug at sdio_irq_thread()
+Date: Mon, 07 Sep 2009 22:30:38 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.0909072217160.6044@xanadu.home>
+References: <2014bcab0909022048n2c937af4l5bd38c501469b1c7@mail.gmail.com>
+ <2014bcab0909070315j67c5db31gff6bc70f0b6369a5@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: multipart/mixed; boundary="Boundary_(ID_d7N3xyKGBqBDVaaMS36Pew)"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:17913 "EHLO
+Received: from relais.videotron.ca ([24.201.245.36]:23201 "EHLO
 	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752458AbZIHBxX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Sep 2009 21:53:23 -0400
-Received: from xanadu.home ([66.130.28.92]) by VL-MH-MR002.ip.videotron.ca
+	with ESMTP id S1753289AbZIHCbD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Sep 2009 22:31:03 -0400
+Received: from xanadu.home ([66.130.28.92]) by VL-MH-MR001.ip.videotron.ca
  (Sun Java(tm) System Messaging Server 6.3-4.01 (built Aug  3 2007; 32bit))
- with ESMTP id <0KPM00DNDQKWBV80@VL-MH-MR002.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Mon, 07 Sep 2009 21:53:20 -0400 (EDT)
-In-reply-to: <20090906161741.33a56583@mjolnir.ossman.eu>
+ with ESMTP id <0KPM00BLYSB2GH81@VL-MH-MR001.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Mon, 07 Sep 2009 22:30:38 -0400 (EDT)
+In-reply-to: <2014bcab0909070315j67c5db31gff6bc70f0b6369a5@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Ossman <pierre@ossman.eu>
+To: =?EUC-KR?Q?=C8=AB=BD=C5_shin_hong?= <hongshin@gmail.com>
 Cc: linux-mmc@vger.kernel.org
 
-On Sun, 6 Sep 2009, Pierre Ossman wrote:
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-> On Wed, 02 Sep 2009 14:37:23 -0400
-> Nicolas Pitre <nico@cam.org> wrote:
-> 
-> > 
-> > When resuming, we make sure the same card is still inserted by comparing
-> > the vendor and product IDs.  If there is a mismatch, or if there is simply
-> > no card anymore in the slot, then the previous card is "removed" and the
-> > new card is detected.
-> > 
-> 
-> I know this is an area with a lot of differing views, but I see this as
-> totally insufficient. Like storage cards, this card might have a
-> non-volatile state that drivers and upper layers rely on being the same
-> before and after suspend.
-> 
-> (Then there's also the issue of e.g. having two "identical" wifi cards
-> but with different MAC addresses).
-> 
-> I think the right way to go is to retain enough power to the card for
-> it to stay initialised and then poke it at resume to see if it is still
-> running in the same state we left it.
+--Boundary_(ID_d7N3xyKGBqBDVaaMS36Pew)
+Content-type: TEXT/PLAIN; charset=EUC-KR
+Content-transfer-encoding: 8BIT
 
-IMHO the right way to go is instead to consider patch2/4 that goes along 
-with this series and defer such additional intelligence to each function 
-driver's resume method.  After all that's where knowledge of MAC 
-addresses and so on should be, not in the core code.
+On Mon, 7 Sep 2009, È«½Å shin hong wrote:
 
-And in the context of power management, always having to keep power to 
-the card is somehow against the point, isn't it?  Especially considering 
-that this simply is not always possible.
+> sdio_irq_therad() is spawned as a sdio_card_irq_get().
+> This thread is stopped by sdio_card_irq_put().
+> 
+> sdio_irq_thread() finishes its do-while iteration
+> when kthread_should_stop() returns true
+> or a condition is satisfied (break statements at line 106)
+> 
+> For the later case, if sdio_irq_thread() is finished
+> before kthread_should_stop() returns false.
+> 
+> In that situation, if other thread invokes kthread_stop(),
+> the caller of kthread_stop() might have a problem (waiting indefinitely).
+
+No.
+
+First of all, you get one instance of sdio_irq_thread() for each card.  
+And if a card has multiple functions, then multiple sdio_card_irq_get() 
+and sdio_card_irq_put() are expected, and they should be balanced as 
+well.
+
+So, when the last user of SDIO card interrupt calls sdio_card_irq_put(), 
+then kthread_stop() is called on the IRQ thread, meaning that the 
+kthread_should_stop condition is made true and the thread awakened, and 
+then its termination is waited for.  If the thread terminated itself 
+then there is simply no waiting to do.
 
 
 Nicolas
+
+--Boundary_(ID_d7N3xyKGBqBDVaaMS36Pew)--
