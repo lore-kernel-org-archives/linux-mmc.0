@@ -1,124 +1,65 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH V3 14/30] omap_hsmmc: ensure workqueues are empty before suspend
-Date: Wed, 09 Sep 2009 14:58:18 +0300
-Message-ID: <20090909115818.12833.42435.sendpatchset@ahunter-laptop>
+Subject: [PATCH V3 15/30] omap_hsmmc: fix scatter-gather list sanity checking
+Date: Wed, 09 Sep 2009 14:58:25 +0300
+Message-ID: <20090909115825.12833.2425.sendpatchset@ahunter-laptop>
 References: <20090909115633.12833.39619.sendpatchset@ahunter-laptop>
 Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <20090909115633.12833.39619.sendpatchset@ahunter-laptop>
 Sender: linux-omap-owner@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-omap Mailing List <linux-omap@vger.kernel.org>, Pierre Ossman <pierre@ossman.eu>, Matt Fleming <matt@console-pimps.org>
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Pierre Ossman <pierre@ossman.eu>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Matt Fleming <matt@console-pimps.org>
 List-Id: linux-mmc@vger.kernel.org
 
->From f97476c2395ae2a5003957caaf4897f43327e1dd Mon Sep 17 00:00:00 2001
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Date: Fri, 24 Apr 2009 13:13:20 +0300
-Subject: [PATCH] omap_hsmmc: ensure workqueues are empty before suspend
+>From fff912de41b3c8b5036aaa4d8ac6762efac533f0 Mon Sep 17 00:00:00 2001
+From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Date: Fri, 24 Apr 2009 14:20:43 +0300
+Subject: [PATCH] omap_hsmmc: fix scatter-gather list sanity checking
 
+Do not use host->dma_len when it is uninitialzed.
+Finish the request with an error if the mmc_omap_prepare_data()
+fails.
+
+Signed-off-by: Jarkko Lavinen <jarkko.lavinen@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   50 +++++++++++++++++++++++++++-------------
- 1 files changed, 34 insertions(+), 16 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   14 ++++++++++++--
+ 1 files changed, 12 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index e0b9c49..041af02 100644
+index 041af02..df13a54 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -149,7 +149,6 @@ struct mmc_omap_host {
- 	u32			bytesleft;
- 	int			suspended;
- 	int			irq;
--	int			carddetect;
- 	int			use_dma, dma_ch;
- 	int			dma_line_tx, dma_line_rx;
- 	int			slot_id;
-@@ -754,14 +753,19 @@ static void mmc_omap_detect(struct work_struct *work)
- 	struct mmc_omap_host *host = container_of(work, struct mmc_omap_host,
- 						mmc_carddetect_work);
- 	struct omap_mmc_slot_data *slot = &mmc_slot(host);
-+	int carddetect;
-+
-+	if (host->suspended)
-+		return;
-+
-+	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
+@@ -871,7 +871,7 @@ mmc_omap_start_dma_transfer(struct mmc_omap_host *host, struct mmc_request *req)
+ 	struct mmc_data *data = req->data;
  
- 	if (mmc_slot(host).card_detect)
--		host->carddetect = slot->card_detect(slot->card_detect_irq);
-+		carddetect = slot->card_detect(slot->card_detect_irq);
- 	else
--		host->carddetect = -ENOSYS;
-+		carddetect = -ENOSYS;
+ 	/* Sanity check: all the SG entries must be aligned by block size. */
+-	for (i = 0; i < host->dma_len; i++) {
++	for (i = 0; i < data->sg_len; i++) {
+ 		struct scatterlist *sgl;
  
--	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
--	if (host->carddetect) {
-+	if (carddetect) {
- 		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
- 	} else {
- 		mmc_host_enable(host->mmc);
-@@ -778,6 +782,8 @@ static irqreturn_t omap_mmc_cd_handler(int irq, void *dev_id)
+ 		sgl = data->sg + i;
+@@ -1014,10 +1014,20 @@ static int omap_mmc_disable(struct mmc_host *mmc, int lazy)
+ static void omap_mmc_request(struct mmc_host *mmc, struct mmc_request *req)
  {
- 	struct mmc_omap_host *host = (struct mmc_omap_host *)dev_id;
+ 	struct mmc_omap_host *host = mmc_priv(mmc);
++	int err;
  
-+	if (host->suspended)
-+		return IRQ_HANDLED;
- 	schedule_work(&host->mmc_carddetect_work);
+ 	WARN_ON(host->mrq != NULL);
+ 	host->mrq = req;
+-	mmc_omap_prepare_data(host, req);
++	err = mmc_omap_prepare_data(host, req);
++	if (err) {
++		req->cmd->error = err;
++		if (req->data)
++			req->data->error = err;
++		host->mrq = NULL;
++		mmc_request_done(mmc, req);
++		return;
++	}
++
+ 	mmc_omap_start_command(host, req->cmd, req->data);
+ }
  
- 	return IRQ_HANDLED;
-@@ -1517,30 +1523,42 @@ static int omap_mmc_suspend(struct platform_device *pdev, pm_message_t state)
- 		return 0;
- 
- 	if (host) {
-+		host->suspended = 1;
-+		if (host->pdata->suspend) {
-+			ret = host->pdata->suspend(&pdev->dev,
-+							host->slot_id);
-+			if (ret) {
-+				dev_dbg(mmc_dev(host->mmc),
-+					"Unable to handle MMC board"
-+					" level suspend\n");
-+				host->suspended = 0;
-+				return ret;
-+			}
-+		}
-+		cancel_work_sync(&host->mmc_carddetect_work);
- 		mmc_host_enable(host->mmc);
- 		ret = mmc_suspend_host(host->mmc, state);
- 		if (ret == 0) {
--			host->suspended = 1;
--
- 			OMAP_HSMMC_WRITE(host->base, ISE, 0);
- 			OMAP_HSMMC_WRITE(host->base, IE, 0);
- 
--			if (host->pdata->suspend) {
--				ret = host->pdata->suspend(&pdev->dev,
--								host->slot_id);
--				if (ret)
--					dev_dbg(mmc_dev(host->mmc),
--						"Unable to handle MMC board"
--						" level suspend\n");
--			}
- 
- 			OMAP_HSMMC_WRITE(host->base, HCTL,
- 					 OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
- 			mmc_host_disable(host->mmc);
- 			clk_disable(host->iclk);
- 			clk_disable(host->dbclk);
--		} else
-+		} else {
-+			host->suspended = 0;
-+			if (host->pdata->resume) {
-+				ret = host->pdata->resume(&pdev->dev,
-+							  host->slot_id);
-+				if (ret)
-+					dev_dbg(mmc_dev(host->mmc),
-+						"Unmask interrupt failed\n");
-+			}
- 			mmc_host_disable(host->mmc);
-+		}
- 
- 	}
- 	return ret;
 -- 
 1.5.6.3
 
