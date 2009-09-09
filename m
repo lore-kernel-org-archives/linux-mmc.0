@@ -1,53 +1,109 @@
-From: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
-Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
-Date: Wed, 09 Sep 2009 22:52:26 +0900
-Message-ID: <87hbvc5ip1.fsf@devron.myhome.or.jp>
-References: <c4e36d110908310451t7c238e09u5af112fa3321cc23@mail.gmail.com>
-	<200908312119.12121.rjw@sisk.pl>
-	<c4e36d110909010234i5f1b9357l805132137725a4f8@mail.gmail.com>
-	<c4e36d110909031529q77b53122kdb85785ba293c478@mail.gmail.com>
-	<20090903232317.GA6760@lst.de> <87ljkvmt71.fsf@devron.myhome.or.jp>
-	<20090908190614.GA18545@lst.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH 1/3] MMCI Break out clock divider setup
+Date: Wed,  9 Sep 2009 22:55:00 +0200
+Message-ID: <1252529700-7429-1-git-send-email-linus.walleij@stericsson.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.parknet.ad.jp ([210.171.162.6]:40129 "EHLO
-	mail.officemail.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752484AbZIINw0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2009 09:52:26 -0400
-In-Reply-To: <20090908190614.GA18545@lst.de> (Christoph Hellwig's message of
-	"Tue, 8 Sep 2009 21:06:14 +0200")
+Received: from mail.df.lth.se ([194.47.250.12]:56689 "EHLO df.lth.se"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752924AbZIIUzX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 9 Sep 2009 16:55:23 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Zdenek Kabelac <zdenek.kabelac@gmail.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@stericsson.com>
 
-Christoph Hellwig <hch@lst.de> writes:
+This breaks out the clock divider set-up code from the
+mmci_set_ios() code and surrounds the two register
+writes with a host lock so we don't get collisions if
+(in future code) two code paths want to change the
+clock divider at the same time as can be the case if
+we get something like pre/post- clock frequency change
+notifications soonish.
 
-> On Fri, Sep 04, 2009 at 09:47:46AM +0900, OGAWA Hirofumi wrote:
->> Well, that commit seems a bit strange. It calls fat_clusters_flush()
->> unconditionally without checking sb->s_dirt. However, if my guess is
->> right, "sync after removed event" itself sounds like the issue in
->> suspend process.
->
-> The idea of ->sync_fs is that we always perform the sync activity,
-> and not just the usual background superblock writeback trigerred by
-> s_dirt.  If FAT doesn't need that and never has races around s_dirt
-> you can add the check back, but I would recommend against it.
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+---
+ drivers/mmc/host/mmci.c |   49 +++++++++++++++++++++++++++++++---------------
+ 1 files changed, 33 insertions(+), 16 deletions(-)
 
-I'm not sure the detail of your idea of ->sync_fs. "always perform" is
-not the goal of it, right?  Anyway, we should consider about unnecessary
-write reduces the lifetime of flash base device.
-
-And what races of s_dirt?  ("always perform" fixed those? and why we
-gave up to fix the real problems or root-casue?)  Maybe, I already
-noticed one of those, but I may not be noticing all of those.  If you
-can explain the detail of those known problems, I appreciate and would
-be useful.
-
-And write_super() of FAT doesn't affect to fs consistency, it's one of
-reasons why I moved it to write_super().
-
-Thanks.
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index a923ee2..083f9b8 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -38,6 +38,33 @@
+ 
+ static unsigned int fmax = 515633;
+ 
++/*
++ * This must be called with host->lock held
++ */
++static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
++{
++	u32 clk = 0;
++
++	if (desired) {
++		if (desired >= host->mclk) {
++			clk = MCI_CLK_BYPASS;
++			host->cclk = host->mclk;
++		} else {
++			clk = host->mclk / (2 * desired) - 1;
++			if (clk >= 256)
++				clk = 255;
++			host->cclk = host->mclk / (2 * (clk + 1));
++		}
++		if (host->hw_designer == 0x80)
++			clk |= MCI_FCEN; /* Bug fix in ST IP block */
++		clk |= MCI_CLK_ENABLE;
++		/* This hasn't proven to be worthwhile */
++		/* clk |= MCI_CLK_PWRSAVE; */
++	}
++
++	writel(clk, host->base + MMCICLOCK);
++}
++
+ static void
+ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ {
+@@ -420,21 +447,7 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct mmci_host *host = mmc_priv(mmc);
+ 	u32 clk = 0, pwr = 0;
+-
+-	if (ios->clock) {
+-		if (ios->clock >= host->mclk) {
+-			clk = MCI_CLK_BYPASS;
+-			host->cclk = host->mclk;
+-		} else {
+-			clk = host->mclk / (2 * ios->clock) - 1;
+-			if (clk >= 256)
+-				clk = 255;
+-			host->cclk = host->mclk / (2 * (clk + 1));
+-		}
+-		if (host->hw_designer == 0x80)
+-			clk |= MCI_FCEN; /* Bug fix in ST IP block */
+-		clk |= MCI_CLK_ENABLE;
+-	}
++	unsigned long flags;
+ 
+ 	if (host->plat->translate_vdd)
+ 		pwr |= host->plat->translate_vdd(mmc_dev(mmc), ios->vdd);
+@@ -465,12 +478,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		}
+ 	}
+ 
+-	writel(clk, host->base + MMCICLOCK);
++	spin_lock_irqsave(&host->lock, flags);
++
++	mmci_set_clkreg(host, ios->clock);
+ 
+ 	if (host->pwr != pwr) {
+ 		host->pwr = pwr;
+ 		writel(pwr, host->base + MMCIPOWER);
+ 	}
++
++	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
+ static int mmci_get_ro(struct mmc_host *mmc)
 -- 
-OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
+1.6.2.1
+
