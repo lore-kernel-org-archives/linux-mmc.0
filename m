@@ -1,134 +1,116 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH V3 7/30] mmc: check status after MMC SWITCH command
-Date: Wed, 09 Sep 2009 14:57:26 +0300
-Message-ID: <20090909115726.12833.59084.sendpatchset@ahunter-laptop>
+Subject: [PATCH V3 8/30] omap_hsmmc: add debugfs entry (host registers)
+Date: Wed, 09 Sep 2009 14:57:34 +0300
+Message-ID: <20090909115734.12833.4891.sendpatchset@ahunter-laptop>
 References: <20090909115633.12833.39619.sendpatchset@ahunter-laptop>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:42782 "EHLO
+Received: from smtp.nokia.com ([192.100.122.233]:42792 "EHLO
 	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753134AbZIIL5R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2009 07:57:17 -0400
+	with ESMTP id S1753068AbZIIL5W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2009 07:57:22 -0400
 In-Reply-To: <20090909115633.12833.39619.sendpatchset@ahunter-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Pierre Ossman <pierre@ossman.eu>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Matt Fleming <matt@console-pimps.org>
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-omap Mailing List <linux-omap@vger.kernel.org>, Pierre Ossman <pierre@ossman.eu>, Matt Fleming <matt@console-pimps.org>
 
->From b1b7bb5d722ff81b28b006fa43eca3eb86769add Mon Sep 17 00:00:00 2001
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Date: Wed, 3 Jun 2009 12:22:29 +0300
-Subject: [PATCH] mmc: check status after MMC SWITCH command
+>From 9ef69fd17bbd1d598a7f262d5940f88dbfff526c Mon Sep 17 00:00:00 2001
+From: Denis Karpov <ext-denis.2.karpov@nokia.com>
+Date: Wed, 22 Apr 2009 14:21:34 +0200
+Subject: [PATCH] omap_hsmmc: add debugfs entry (host registers)
 
-According to the standard, the SWITCH command should
-be followed by a SEND_STATUS command to check for
-errors.
+Adds <debugfs_root>/kernel/debug/mmc<N>/regs entry,
+contents show registers' state and some driver internal
+state variables.
 
+Signed-off-by: Denis Karpov <ext-denis.2.karpov@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 ---
- drivers/mmc/core/mmc.c     |   24 ++++++++++++++++++------
- drivers/mmc/core/mmc_ops.c |   23 +++++++++++++++++++++++
- include/linux/mmc/mmc.h    |    1 +
- 3 files changed, 42 insertions(+), 6 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   57 +++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 57 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 8e2e3d2..f87cc0b 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -416,12 +416,17 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		(host->caps & MMC_CAP_MMC_HIGHSPEED)) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 			EXT_CSD_HS_TIMING, 1);
--		if (err)
-+		if (err && err != -EBADMSG)
- 			goto free_card;
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 1cf9cfb..cbd8376 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -17,6 +17,8 @@
  
--		mmc_card_set_highspeed(card);
--
--		mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-+		if (err) {
-+			printk(KERN_WARNING "%s: switch to highspeed failed\n",
-+			       mmc_hostname(card->host));
-+			err = 0;
-+		} else {
-+			mmc_card_set_highspeed(card);
-+			mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-+		}
- 	}
+ #include <linux/module.h>
+ #include <linux/init.h>
++#include <linux/debugfs.h>
++#include <linux/seq_file.h>
+ #include <linux/interrupt.h>
+ #include <linux/delay.h>
+ #include <linux/dma-mapping.h>
+@@ -967,6 +969,59 @@ static struct mmc_host_ops mmc_omap_ops = {
+ 	/* NYET -- enable_sdio_irq */
+ };
  
- 	/*
-@@ -456,10 +461,17 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 				 EXT_CSD_BUS_WIDTH, ext_csd_bit);
- 
--		if (err)
-+		if (err && err != -EBADMSG)
- 			goto free_card;
- 
--		mmc_set_bus_width(card->host, bus_width);
-+		if (err) {
-+			printk(KERN_WARNING "%s: switch to bus width %d "
-+			       "failed\n", mmc_hostname(card->host),
-+			       1 << bus_width);
-+			err = 0;
-+		} else {
-+			mmc_set_bus_width(card->host, bus_width);
-+		}
- 	}
- 
- 	if (!oldcard)
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 355c604..d2cb5c6 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -390,6 +390,7 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value)
- {
- 	int err;
- 	struct mmc_command cmd;
-+	u32 status;
- 
- 	BUG_ON(!card);
- 	BUG_ON(!card->host);
-@@ -407,6 +408,28 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value)
- 	if (err)
- 		return err;
- 
-+	/* Must check status to be sure of no errors */
-+	do {
-+		err = mmc_send_status(card, &status);
-+		if (err)
-+			return err;
-+		if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
-+			break;
-+		if (mmc_host_is_spi(card->host))
-+			break;
-+	} while (R1_CURRENT_STATE(status) == 7);
++#ifdef CONFIG_DEBUG_FS
 +
-+	if (mmc_host_is_spi(card->host)) {
-+		if (status & R1_SPI_ILLEGAL_COMMAND)
-+			return -EBADMSG;
-+	} else {
-+		if (status & 0xFDFFA000)
-+			printk(KERN_WARNING "%s: unexpected status %#x after "
-+			       "switch", mmc_hostname(card->host), status);
-+		if (status & R1_SWITCH_ERROR)
-+			return -EBADMSG;
-+	}
++static int mmc_regs_show(struct seq_file *s, void *data)
++{
++	struct mmc_host *mmc = s->private;
++	struct mmc_omap_host *host = mmc_priv(mmc);
++
++	seq_printf(s, "mmc%d regs:\n", mmc->index);
++
++	seq_printf(s, "SYSCONFIG:\t0x%08x\n",
++			OMAP_HSMMC_READ(host->base, SYSCONFIG));
++	seq_printf(s, "CON:\t\t0x%08x\n",
++			OMAP_HSMMC_READ(host->base, CON));
++	seq_printf(s, "HCTL:\t\t0x%08x\n",
++			OMAP_HSMMC_READ(host->base, HCTL));
++	seq_printf(s, "SYSCTL:\t\t0x%08x\n",
++			OMAP_HSMMC_READ(host->base, SYSCTL));
++	seq_printf(s, "IE:\t\t0x%08x\n",
++			OMAP_HSMMC_READ(host->base, IE));
++	seq_printf(s, "ISE:\t\t0x%08x\n",
++			OMAP_HSMMC_READ(host->base, ISE));
++	seq_printf(s, "CAPA:\t\t0x%08x\n",
++			OMAP_HSMMC_READ(host->base, CAPA));
++	return 0;
++}
++
++static int mmc_regs_open(struct inode *inode, struct file *file)
++{
++	return single_open(file, mmc_regs_show, inode->i_private);
++}
++
++static const struct file_operations mmc_regs_fops = {
++	.open           = mmc_regs_open,
++	.read           = seq_read,
++	.llseek         = seq_lseek,
++	.release        = single_release,
++};
++
++static void omap_mmc_debugfs(struct mmc_host *mmc)
++{
++	if (mmc->debugfs_root)
++		debugfs_create_file("regs", S_IRUSR, mmc->debugfs_root,
++			mmc, &mmc_regs_fops);
++}
++
++#else
++
++static void omap_mmc_debugfs(struct mmc_host *mmc)
++{
++}
++
++#endif
++
+ static int __init omap_mmc_probe(struct platform_device *pdev)
+ {
+ 	struct omap_mmc_platform_data *pdata = pdev->dev.platform_data;
+@@ -1150,6 +1205,8 @@ static int __init omap_mmc_probe(struct platform_device *pdev)
+ 			goto err_cover_switch;
+ 	}
+ 
++	omap_mmc_debugfs(mmc);
 +
  	return 0;
- }
  
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index b2b4095..c02c8db 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -128,6 +128,7 @@
- #define R1_STATUS(x)            (x & 0xFFFFE000)
- #define R1_CURRENT_STATE(x)	((x & 0x00001E00) >> 9)	/* sx, b (4 bits) */
- #define R1_READY_FOR_DATA	(1 << 8)	/* sx, a */
-+#define R1_SWITCH_ERROR		(1 << 7)	/* sx, c */
- #define R1_APP_CMD		(1 << 5)	/* sr, c */
- 
- /*
+ err_cover_switch:
 -- 
 1.5.6.3
 
