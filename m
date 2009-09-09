@@ -1,38 +1,131 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
-Date: Tue, 8 Sep 2009 21:48:33 +0200
-Message-ID: <200909082148.33872.rjw@sisk.pl>
-References: <c4e36d110908310451t7c238e09u5af112fa3321cc23@mail.gmail.com> <87ljkvmt71.fsf@devron.myhome.or.jp> <20090908190614.GA18545@lst.de>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+From: akpm@linux-foundation.org
+Subject: + sdhci-orphan-driver-and-list.patch added to -mm tree
+Date: Tue, 08 Sep 2009 23:08:24 -0700
+Message-ID: <200909090608.n8968OkN011294@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:58585 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751517AbZIHTri (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 8 Sep 2009 15:47:38 -0400
-In-Reply-To: <20090908190614.GA18545@lst.de>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42445 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751481AbZIIGI6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2009 02:08:58 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>, Zdenek Kabelac <zdenek.kabelac@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
+To: mm-commits@vger.kernel.org
+Cc: pierre@ossman.eu, linux-mmc@vger.kernel.org
 
-On Tuesday 08 September 2009, Christoph Hellwig wrote:
-> On Fri, Sep 04, 2009 at 09:47:46AM +0900, OGAWA Hirofumi wrote:
-> > Well, that commit seems a bit strange. It calls fat_clusters_flush()
-> > unconditionally without checking sb->s_dirt. However, if my guess is
-> > right, "sync after removed event" itself sounds like the issue in
-> > suspend process.
-> 
-> The idea of ->sync_fs is that we always perform the sync activity,
-> and not just the usual background superblock writeback trigerred by
-> s_dirt.  If FAT doesn't need that and never has races around s_dirt
-> you can add the check back, but I would recommend against it.
-> 
-> Also when you hack around this in FAt MMC will still fail with every
-> other filesystem.
 
-So, what should be done in your opinion?
+The patch titled
+     sdhci: orphan driver and list
+has been added to the -mm tree.  Its filename is
+     sdhci-orphan-driver-and-list.patch
 
-Rafael
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: sdhci: orphan driver and list
+From: Pierre Ossman <pierre@ossman.eu>
+
+Remove myself as maintainer from the sdhci driver and steer people
+towards the new MMC list for discussing it.
+
+Signed-off-by: Pierre Ossman <pierre@ossman.eu>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ MAINTAINERS |   12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff -puN MAINTAINERS~sdhci-orphan-driver-and-list MAINTAINERS
+--- a/MAINTAINERS~sdhci-orphan-driver-and-list
++++ a/MAINTAINERS
+@@ -4462,20 +4462,20 @@ S:	Maintained
+ F:	drivers/mmc/host/sdricoh_cs.c
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
+-M:	Pierre Ossman <pierre@ossman.eu>
+-L:	sdhci-devel@lists.ossman.eu
+-S:	Maintained
++S:     Orphan
++L:     linux-mmc@vger.kernel.org
++F:     drivers/mmc/host/sdhci.*
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE, OPEN FIRMWARE BINDINGS (SDHCI-OF)
+ M:	Anton Vorontsov <avorontsov@ru.mvista.com>
+ L:	linuxppc-dev@ozlabs.org
+-L:	sdhci-devel@lists.ossman.eu
++L:     linux-mmc@vger.kernel.org
+ S:	Maintained
+-F:	drivers/mmc/host/sdhci.*
++F:     drivers/mmc/host/sdhci-of.*
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
+ M:	Ben Dooks <ben-linux@fluff.org>
+-L:	sdhci-devel@lists.ossman.eu
++L:     linux-mmc@vger.kernel.org
+ S:	Maintained
+ F:	drivers/mmc/host/sdhci-s3c.c
+ 
+_
+
+Patches currently in -mm which might be from pierre@ossman.eu are
+
+sdhci-orphan-driver-and-list.patch
+linux-next.patch
+sdio-do-not-ignore-mmc_vdd_165_195.patch
+tmio_mmc-optionally-support-using-platform-clock.patch
+sh-switch-migo-r-to-use-the-tmio-mmc-driver-instead-of-spi.patch
+mmc-add-enable-and-disable-methods-to-mmc-host.patch
+mmc-allow-host-claim-release-nesting.patch
+mmc-add-mmc_cap_nonremovable-host-capability.patch
+mmc-add-ability-to-save-power-by-powering-off-cards.patch
+mmc-add-mmc-card-sleep-and-awake-support.patch
+mmc-power-off-once-at-removal.patch
+mmc-add-host-capabilities-for-sd-only-and-mmc-only.patch
+mmc-check-status-after-mmc-switch-command.patch
+omap_hsmmc-add-debugfs-entry-host-registers.patch
+omap_hsmmc-make-use-of-new-enable-disable-interface.patch
+arm-omap-mmc-twl4030-add-context-loss-counter-support.patch
+omap_hsmmc-keep-track-of-power-mode.patch
+omap_hsmmc-context-save-restore-support.patch
+omap_hsmmc-set-open-drain-bit-correctly.patch
+omap_hsmmc-ensure-workqueues-are-empty-before-suspend.patch
+omap_hsmmc-fix-scatter-gather-list-sanity-checking.patch
+omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability.patch
+omap_hsmmc-support-for-deeper-power-saving-states.patch
+arm-omap-mmc-twl4030-add-regulator-sleep-wake-function.patch
+omap_hsmmc-put-mmc-regulator-to-sleep.patch
+omap_hsmmc-add-mmc-card-sleep-and-awake-support.patch
+omap_hsmmc-fix-null-pointer-dereference.patch
+omap_hsmmc-cleanup-macro-usage.patch
+omap_hsmmc-clear-interrupt-status-after-init-sequence.patch
+omap_hsmmc-cater-for-weird-cmd6-behaviour.patch
+omap_hsmmc-prevent-races-with-irq-handler.patch
+omap_hsmmc-pass-host-capabilities-for-sd-only-and-mmc-only.patch
+omap_hsmmc-code-refactoring.patch
+omap_hsmmc-protect-the-card-when-the-cover-is-open.patch
+omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired.patch
+omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired-fix-for-the-db-clock-failure-message.patch
+omap_hsmmc-set-a-large-data-timeout-for-commands-with-busy-signal.patch
+arm-omap-rx51-set-mmc-capabilities-and-power-saving-flag.patch
+sdio-add-cd-disable-support.patch
+sdio-add-cd-disable-support-cleanup.patch
+sdhci-be-more-strict-with-get_min_clock-usage.patch
+sdhci-of-fix-sd-clock-calculation.patch
+sdhci-of-avoid-writing-reserved-bits-into-host-control-register.patch
+sdhci-of-fix-high-speed-cards-recognition.patch
+powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc.patch
+sdhci-of-dont-hard-code-inverted-write-protect-quirk.patch
+sdhci-of-cleanup-esdhcs-set_clock-a-little-bit.patch
+powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards.patch
+
