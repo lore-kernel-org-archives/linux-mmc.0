@@ -1,101 +1,86 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH V3 11/30] omap_hsmmc: keep track of power mode
-Date: Wed, 09 Sep 2009 14:57:55 +0300
-Message-ID: <20090909115755.12833.10726.sendpatchset@ahunter-laptop>
+Subject: [PATCH V3 10/30] ARM: OMAP: mmc-twl4030: add context loss counter support
+Date: Wed, 09 Sep 2009 14:57:47 +0300
+Message-ID: <20090909115747.12833.12983.sendpatchset@ahunter-laptop>
 References: <20090909115633.12833.39619.sendpatchset@ahunter-laptop>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:42834 "EHLO
+Received: from smtp.nokia.com ([192.100.122.233]:42843 "EHLO
 	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753161AbZIIL5j (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2009 07:57:39 -0400
+	with ESMTP id S1752249AbZIIL5o (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2009 07:57:44 -0400
 In-Reply-To: <20090909115633.12833.39619.sendpatchset@ahunter-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Pierre Ossman <pierre@ossman.eu>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Matt Fleming <matt@console-pimps.org>
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-omap Mailing List <linux-omap@vger.kernel.org>, Pierre Ossman <pierre@ossman.eu>, Matt Fleming <matt@console-pimps.org>
 
->From c6da86a98f20740cf1c0944d92934322be6ab699 Mon Sep 17 00:00:00 2001
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Date: Tue, 7 Jul 2009 16:44:11 +0300
-Subject: [PATCH] omap_hsmmc: keep track of power mode
+>From 027d57463031f291c704f3048c49765c02e661b1 Mon Sep 17 00:00:00 2001
+From: Denis Karpov <ext-denis.2.karpov@nokia.com>
+Date: Tue, 7 Jul 2009 15:54:44 +0300
+Subject: [PATCH] ARM: OMAP: mmc-twl4030: add context loss counter support
 
-This patch is preparation for adding context save
-and restore support.
+PM dynamic OFF state results in context loss.  That is, the host
+controller has been powered off at some point, which means the
+registers have been reset.  The driver must detect when this
+happens, and restore the context.  This patch adds the means
+to detect context loss.
 
-Keep track of the current power mode so that the
-context restore function can avoid restoring the
-context for a card if the power has been switched
-off.  If the power is off, the card must be
-reinitialized anyway which will re-establish the
-context.
+Note, the PM side is not yet implemented.
 
+Signed-off-by: Denis Karpov <ext-denis.2.karpov@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   27 +++++++++++++++++++--------
- 1 files changed, 19 insertions(+), 8 deletions(-)
+ arch/arm/mach-omap2/mmc-twl4030.c     |   15 +++++++++++++++
+ arch/arm/plat-omap/include/mach/mmc.h |    3 +++
+ 2 files changed, 18 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index b1bee52..8a41629 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -141,6 +141,7 @@ struct mmc_omap_host {
- 	unsigned int		dma_len;
- 	unsigned int		dma_sg_idx;
- 	unsigned char		bus_mode;
-+	unsigned char		power_mode;
- 	u32			*buffer;
- 	u32			bytesleft;
- 	int			suspended;
-@@ -856,16 +857,25 @@ static void omap_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	unsigned long regval;
- 	unsigned long timeout;
- 	u32 con;
-+	int do_send_init_stream = 0;
+diff --git a/arch/arm/mach-omap2/mmc-twl4030.c b/arch/arm/mach-omap2/mmc-twl4030.c
+index 3c04c2f..30d0286 100644
+--- a/arch/arm/mach-omap2/mmc-twl4030.c
++++ b/arch/arm/mach-omap2/mmc-twl4030.c
+@@ -198,6 +198,18 @@ static int twl_mmc_resume(struct device *dev, int slot)
+ #define twl_mmc_resume	NULL
+ #endif
  
- 	mmc_host_enable(host->mmc);
++#if defined(CONFIG_ARCH_OMAP3) && defined(CONFIG_PM)
++
++static int twl4030_mmc_get_context_loss(struct device *dev)
++{
++	/* FIXME: PM DPS not implemented yet */
++	return 0;
++}
++
++#else
++#define twl4030_mmc_get_context_loss NULL
++#endif
++
+ static int twl_mmc1_set_power(struct device *dev, int slot, int power_on,
+ 				int vdd)
+ {
+@@ -390,6 +402,9 @@ void __init twl4030_mmc_init(struct twl4030_hsmmc_info *controllers)
+ 		} else
+ 			mmc->slots[0].switch_pin = -EINVAL;
  
--	switch (ios->power_mode) {
--	case MMC_POWER_OFF:
--		mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
--		break;
--	case MMC_POWER_UP:
--		mmc_slot(host).set_power(host->dev, host->slot_id, 1, ios->vdd);
--		break;
-+	if (ios->power_mode != host->power_mode) {
-+		switch (ios->power_mode) {
-+		case MMC_POWER_OFF:
-+			mmc_slot(host).set_power(host->dev, host->slot_id,
-+						 0, 0);
-+			break;
-+		case MMC_POWER_UP:
-+			mmc_slot(host).set_power(host->dev, host->slot_id,
-+						 1, ios->vdd);
-+			break;
-+		case MMC_POWER_ON:
-+			do_send_init_stream = 1;
-+			break;
-+		}
-+		host->power_mode = ios->power_mode;
- 	}
++		mmc->get_context_loss_count =
++				twl4030_mmc_get_context_loss;
++
+ 		/* write protect normally uses an OMAP gpio */
+ 		if (gpio_is_valid(c->gpio_wp)) {
+ 			gpio_request(c->gpio_wp, "mmc_wp");
+diff --git a/arch/arm/plat-omap/include/mach/mmc.h b/arch/arm/plat-omap/include/mach/mmc.h
+index 81d5b36..2f7cf31 100644
+--- a/arch/arm/plat-omap/include/mach/mmc.h
++++ b/arch/arm/plat-omap/include/mach/mmc.h
+@@ -59,6 +59,9 @@ struct omap_mmc_platform_data {
+ 	int (*suspend)(struct device *dev, int slot);
+ 	int (*resume)(struct device *dev, int slot);
  
- 	con = OMAP_HSMMC_READ(host->base, CON);
-@@ -931,7 +941,7 @@ static void omap_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) | CEN);
++	/* Return context loss count due to PM states changing */
++	int (*get_context_loss_count)(struct device *dev);
++
+ 	u64 dma_mask;
  
--	if (ios->power_mode == MMC_POWER_ON)
-+	if (do_send_init_stream)
- 		send_init_stream(host);
- 
- 	if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
-@@ -1109,6 +1119,7 @@ static int __init omap_mmc_probe(struct platform_device *pdev)
- 	host->slot_id	= 0;
- 	host->mapbase	= res->start;
- 	host->base	= ioremap(host->mapbase, SZ_4K);
-+	host->power_mode = -1;
- 
- 	platform_set_drvdata(pdev, host);
- 	INIT_WORK(&host->mmc_carddetect_work, mmc_omap_detect);
+ 	struct omap_mmc_slot_data {
 -- 
 1.5.6.3
 
