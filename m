@@ -1,46 +1,52 @@
 From: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
 Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
-Date: Wed, 09 Sep 2009 22:21:56 +0900
-Message-ID: <87ljko5k3v.fsf@devron.myhome.or.jp>
+Date: Wed, 09 Sep 2009 22:52:26 +0900
+Message-ID: <87hbvc5ip1.fsf@devron.myhome.or.jp>
 References: <c4e36d110908310451t7c238e09u5af112fa3321cc23@mail.gmail.com>
 	<200908312119.12121.rjw@sisk.pl>
 	<c4e36d110909010234i5f1b9357l805132137725a4f8@mail.gmail.com>
 	<c4e36d110909031529q77b53122kdb85785ba293c478@mail.gmail.com>
 	<20090903232317.GA6760@lst.de> <87ljkvmt71.fsf@devron.myhome.or.jp>
-	<c4e36d110909040213t4d4258b4w3e2d4725e0b2a161@mail.gmail.com>
-	<87iqfx5mss.fsf@devron.myhome.or.jp> <20090907125130.GA1595@ucw.cz>
+	<20090908190614.GA18545@lst.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.parknet.ad.jp ([210.171.162.6]:51426 "EHLO
+Received: from mail.parknet.ad.jp ([210.171.162.6]:40129 "EHLO
 	mail.officemail.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751003AbZIINVz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2009 09:21:55 -0400
-In-Reply-To: <20090907125130.GA1595@ucw.cz> (Pavel Machek's message of "Mon, 7
-	Sep 2009 14:51:30 +0200")
+	with ESMTP id S1752484AbZIINw0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2009 09:52:26 -0400
+In-Reply-To: <20090908190614.GA18545@lst.de> (Christoph Hellwig's message of
+	"Tue, 8 Sep 2009 21:06:14 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Zdenek Kabelac <zdenek.kabelac@gmail.com>, Christoph Hellwig <hch@lst.de>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zdenek Kabelac <zdenek.kabelac@gmail.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
 
-Pavel Machek <pavel@ucw.cz> writes:
+Christoph Hellwig <hch@lst.de> writes:
 
->> It seems
->> 
->>     1) sync() (probabry "sync" command)
->>     2) sync as part of suspend sequence
->>     3) sync_filesystem() by mmc remove event
->> 
->> I guess the root-cause of the problem would be 3). However, it would not
->> be easy to fix, at least, we would need to think about what we want to
->> do for it. So, to workaround it for now, I've made this patch.
+> On Fri, Sep 04, 2009 at 09:47:46AM +0900, OGAWA Hirofumi wrote:
+>> Well, that commit seems a bit strange. It calls fat_clusters_flush()
+>> unconditionally without checking sb->s_dirt. However, if my guess is
+>> right, "sync after removed event" itself sounds like the issue in
+>> suspend process.
 >
-> MMC driver trying to synchronize filesystems looks like ugly layering
-> violation to me. Why are we doing that?
+> The idea of ->sync_fs is that we always perform the sync activity,
+> and not just the usual background superblock writeback trigerred by
+> s_dirt.  If FAT doesn't need that and never has races around s_dirt
+> you can add the check back, but I would recommend against it.
 
-There is no _layering violation_ here. IIRC, mmc just tells card removed
-event to another layer (on some points of view, to tell event can be
-wrong though). The partition (block) layer does it by event.
+I'm not sure the detail of your idea of ->sync_fs. "always perform" is
+not the goal of it, right?  Anyway, we should consider about unnecessary
+write reduces the lifetime of flash base device.
+
+And what races of s_dirt?  ("always perform" fixed those? and why we
+gave up to fix the real problems or root-casue?)  Maybe, I already
+noticed one of those, but I may not be noticing all of those.  If you
+can explain the detail of those known problems, I appreciate and would
+be useful.
+
+And write_super() of FAT doesn't affect to fs consistency, it's one of
+reasons why I moved it to write_super().
 
 Thanks.
 -- 
