@@ -1,45 +1,84 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
-Date: Thu, 10 Sep 2009 21:23:54 +0200
-Message-ID: <20090910192354.GD23356@elf.ucw.cz>
-References: <c4e36d110908310451t7c238e09u5af112fa3321cc23@mail.gmail.com> <200908312119.12121.rjw@sisk.pl> <c4e36d110909010234i5f1b9357l805132137725a4f8@mail.gmail.com> <c4e36d110909031529q77b53122kdb85785ba293c478@mail.gmail.com> <20090903232317.GA6760@lst.de> <87ljkvmt71.fsf@devron.myhome.or.jp> <c4e36d110909040213t4d4258b4w3e2d4725e0b2a161@mail.gmail.com> <87iqfx5mss.fsf@devron.myhome.or.jp> <20090907125130.GA1595@ucw.cz> <87ljko5k3v.fsf@devron.myhome.or.jp>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: MMC retry mechanism
+Date: Thu, 10 Sep 2009 16:20:26 -0500
+Message-ID: <009a01ca325c$843e83f0$544ff780@am.dhcp.ti.com>
+References: <011c01ca2dac$2de779d0$544ff780@am.dhcp.ti.com> <4AA4B38C.6060202@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:46884 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753092AbZIJTX5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Sep 2009 15:23:57 -0400
-Content-Disposition: inline
-In-Reply-To: <87ljko5k3v.fsf@devron.myhome.or.jp>
+Received: from bear.ext.ti.com ([192.94.94.41]:50115 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753884AbZIJVUa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Sep 2009 17:20:30 -0400
+In-Reply-To: <4AA4B38C.6060202@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
-Cc: Zdenek Kabelac <zdenek.kabelac@gmail.com>, Christoph Hellwig <hch@lst.de>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
+To: 'Adrian Hunter' <adrian.hunter@nokia.com>
+Cc: linux-mmc@vger.kernel.org
 
-On Wed 2009-09-09 22:21:56, OGAWA Hirofumi wrote:
-> Pavel Machek <pavel@ucw.cz> writes:
+
+
+> -----Original Message-----
+> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
+> Sent: Monday, September 07, 2009 2:18 AM
+> To: Madhusudhan
+> Cc: linux-mmc@vger.kernel.org
+> Subject: Re: MMC retry mechanism
 > 
-> >> It seems
-> >> 
-> >>     1) sync() (probabry "sync" command)
-> >>     2) sync as part of suspend sequence
-> >>     3) sync_filesystem() by mmc remove event
-> >> 
-> >> I guess the root-cause of the problem would be 3). However, it would not
-> >> be easy to fix, at least, we would need to think about what we want to
-> >> do for it. So, to workaround it for now, I've made this patch.
+> Madhusudhan wrote:
+> > Hi Adrian,
 > >
-> > MMC driver trying to synchronize filesystems looks like ugly layering
-> > violation to me. Why are we doing that?
+> > With respect to the below commit, It looks like currently the retry
+> > mechanism only handles the READ path.
+> >
+> > I wonder could a similar retry logic feasible for the WRITE path?
+> >
+> > Regards,
+> > Madhu
 > 
-> There is no _layering violation_ here. IIRC, mmc just tells card removed
-> event to another layer (on some points of view, to tell event can be
-> wrong though). The partition (block) layer does it by event.
+> From my point of view, writes should never fail.  In theory, the MMC
+> should have enough reserved blocks to cover bad blocks for the
+> expected lifetime of the device.  It should then be just copying
+> and remapping to avoid having to return write errors.
+> 
+> Of course, a lot of cards probably don't do that right.  However,
+> I think maybe the block layer already retries failed writes.
+> 
+What if there is a DATA CRC error during a write and the low level driver
+reports the data.error as -EILSEQ. Will the block layer retry? I thought it
+is supported only for the read through your patch.
 
-So what is the problem? Emulating sync when card is already removed
-seems little ... interesting?
+Regards,
+Madhu
 
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+> >
+> >
+> >
+> > commit 6a79e391df295bd7c2aa1309ea5031f361c197fd
+> > Author: Adrian Hunter <ext-adrian.hunter@nokia.com>
+> > Date:   Wed Dec 31 18:21:17 2008 +0100
+> >
+> >
+> >
+> >     mmc_block: ensure all sectors that do not have errors are read
+> >
+> >     If a card encounters an ECC error while reading a sector it will
+> >
+> >     timeout.  Instead of reporting the entire I/O request as having
+> >
+> >     an error, redo the I/O one sector at a time so that all readable
+> >
+> >     sectors are provided to the upper layers.
+> >
+> >
+> >
+> >     Signed-off-by: Adrian Hunter <ext-adrian.hunter@nokia.com>
+> >
+> >     Signed-off-by: Pierre Ossman <drzeus@drzeus.cx>
+> >
+> >
+> 
+
+
