@@ -1,74 +1,45 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
-Date: Sat, 12 Sep 2009 00:32:13 +0200
-Message-ID: <200909120032.13164.rjw@sisk.pl>
-References: <c4e36d110908310451t7c238e09u5af112fa3321cc23@mail.gmail.com> <200909120004.02146.rjw@sisk.pl> <20090911222154.GB11441@elf.ucw.cz>
+Date: Fri, 11 Sep 2009 18:29:17 -0400
+Message-ID: <m3eiqdqfnm.fsf@pullcord.laptop.org>
+References: <20090903232317.GA6760@lst.de>
+	<c4e36d110909040213t4d4258b4w3e2d4725e0b2a161@mail.gmail.com>
+	<87iqfx5mss.fsf@devron.myhome.or.jp> <20090907125130.GA1595@ucw.cz>
+	<87ljko5k3v.fsf@devron.myhome.or.jp>
+	<20090910192354.GD23356@elf.ucw.cz>
+	<87bplim1ce.fsf@devron.myhome.or.jp>
+	<20090911200922.GF8137@elf.ucw.cz>
+	<c4e36d110909111414n716a06b1mdd0cd741230595b5@mail.gmail.com>
+	<20090911213204.GC25544@elf.ucw.cz>
+	<c4e36d110909111445nb6592cfue01543f5d04c2cda@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:46286 "EHLO ogre.sisk.pl"
+Received: from void.printf.net ([89.145.121.20]:45914 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751137AbZIKWbO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 11 Sep 2009 18:31:14 -0400
-In-Reply-To: <20090911222154.GB11441@elf.ucw.cz>
+	id S1750857AbZIKWbo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 11 Sep 2009 18:31:44 -0400
+In-Reply-To: <c4e36d110909111445nb6592cfue01543f5d04c2cda@mail.gmail.com>
+	(Zdenek Kabelac's message of "Fri, 11 Sep 2009 23:45:01 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>, Zdenek Kabelac <zdenek.kabelac@gmail.com>, Christoph Hellwig <hch@lst.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
+To: Zdenek Kabelac <zdenek.kabelac@gmail.com>
+Cc: Pavel Machek <pavel@ucw.cz>, OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>, Christoph Hellwig <hch@lst.de>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
 
-On Saturday 12 September 2009, Pavel Machek wrote:
-> On Sat 2009-09-12 00:04:02, Rafael J. Wysocki wrote:
-> > On Friday 11 September 2009, OGAWA Hirofumi wrote:
-> > > Pavel Machek <pavel@ucw.cz> writes:
-> > > 
-> > > > On Wed 2009-09-09 22:21:56, OGAWA Hirofumi wrote:
-> > > >> Pavel Machek <pavel@ucw.cz> writes:
-> > > >> 
-> > > >> >> It seems
-> > > >> >> 
-> > > >> >>     1) sync() (probabry "sync" command)
-> > > >> >>     2) sync as part of suspend sequence
-> > > >> >>     3) sync_filesystem() by mmc remove event
-> > > >> >> 
-> > > >> >> I guess the root-cause of the problem would be 3). However, it would not
-> > > >> >> be easy to fix, at least, we would need to think about what we want to
-> > > >> >> do for it. So, to workaround it for now, I've made this patch.
-> > > >> >
-> > > >> > MMC driver trying to synchronize filesystems looks like ugly layering
-> > > >> > violation to me. Why are we doing that?
-> > > >> 
-> > > >> There is no _layering violation_ here. IIRC, mmc just tells card removed
-> > > >> event to another layer (on some points of view, to tell event can be
-> > > >> wrong though). The partition (block) layer does it by event.
-> > > >
-> > > > So what is the problem?  Emulating sync when card is already removed
-> > > > seems little ... interesting?
-> > > 
-> > > Um..., sorry, I'm not sure what are you talking about. Of course, the
-> > > problem of this is that system freeze on suspend.
-> > > 
-> > > Or are you asking my guess of the cause, or something?  If so, although
-> > > I'm not reading all emails on this thread, from Zdenek's backtrace, the
-> > > sequence would be
-> > > 
-> > >     1) suspend mmc
-> > >     2) mmc generates card removed event
-> > 
-> > Which shouldn't happen.
-> 
-> Are you sure? IIRC it depends on  CONFIG_MMC_UNSAFE_RESUME.
+Hi,
 
-Generating the event at this point is too late, because there's no way to
-handle it cleanly with the current suspend/resume design.
+   > Well system could check basic card ids if they match after resume
 
-It probably will work if the event is generated before we freeze the user
-space, for example with the help of a suspend notifier, but generating it
-from a driver's suspend routine is not valid.
+No.  That (arguably) guarantees that it's the same card, but not that
+it wasn't modified in another machine during the suspend.
 
-Again, that's a consequence of the lack of a general solution for handling
-"removable" file systems over suspend/resume.
+   > if some users wants to crash his card by randomly swapping it
+   > during suspend/resume - I'd have no problem with that....
 
-Thanks,
-Rafael
+You should have a problem with it.  Taking a card from a suspended
+machine and working on it with a different machine is not a bizarre
+thing to want to do.
+
+-- 
+Chris Ball   <cjb@laptop.org>
+One Laptop Per Child
