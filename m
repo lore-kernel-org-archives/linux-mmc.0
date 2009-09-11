@@ -1,12 +1,13 @@
 From: Pierre Ossman <pierre-vCPtPcF4ZGuHXe+LvDLADg@public.gmane.org>
-Subject: Re: [PATCH] sdio: recognize io card without powercycle
-Date: Fri, 11 Sep 2009 07:58:19 +0200
-Message-ID: <20090911075819.1989d75b@mjolnir.ossman.eu>
+Subject: Re: [PATCH] sdio: pass unknown cis tuples to sdio drivers
+Date: Fri, 11 Sep 2009 08:06:59 +0200
+Message-ID: <20090911080659.2ac822fc@mjolnir.ossman.eu>
 References: <1252587402-7382-1-git-send-email-albert_herranz@yahoo.es>
+	<1252587402-7382-2-git-send-email-albert_herranz@yahoo.es>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-14418-1252648703-0001-2"
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-14467-1252649223-0001-2"
 Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1252587402-7382-1-git-send-email-albert_herranz-mRCrAkd8dF0@public.gmane.org>
+In-Reply-To: <1252587402-7382-2-git-send-email-albert_herranz-mRCrAkd8dF0@public.gmane.org>
 Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcm43xx-dev-0fE9KPoRgkgATYTw5x5z8w@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
@@ -14,39 +15,81 @@ List-Id: linux-mmc@vger.kernel.org
 This is a MIME-formatted message.  If you see this text it means that your
 E-mail software does not support MIME-formatted messages.
 
---=_freyr.ossman.eu-14418-1252648703-0001-2
+--=_freyr.ossman.eu-14467-1252649223-0001-2
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, 10 Sep 2009 14:56:41 +0200
+On Thu, 10 Sep 2009 14:56:42 +0200
 Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org> wrote:
 
-> SDIO Simplified Specification V2.00 states that it is strongly recommended
-> that the host executes either a power reset or issues a CMD52 (I/O Reset)=
- to
-> re-initialize an I/O only card or the I/O portion of a combo card.
-> Additionally, the CMD52 must be issued first because it cannot be issued
-> after a CMD0.
+> Some manufacturers provide vendor information in non-vendor specific CIS
+> tuples. For example, Broadcom uses an Extended Function tuple to provide
+> the MAC address on some of their network cards, as in the case of the
+> Nintendo Wii WLAN daughter card.
 >=20
-> With this patch the Nintendo Wii SDIO-based WLAN card is detected after a
-> system reset, without requiring a complete system powercycle.
+> This patch allows passing correct tuples unknown to the SDIO core to
+> a matching SDIO driver instead of rejecting them and failing.
 >=20
 > Signed-off-by: Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
 > ---
 
-I had problems with cards already in the idle state crashing when I
-sent them a reset. I suggest a big round of testing before merging this.
+The description for this patch should be made clearer. The title
+suggests it adds functionality that's already in place. It should be
+something along the lines of "Also pass malformed tuples to card
+drivers".
 
-> @@ -182,3 +189,20 @@ int mmc_io_rw_extended(struct mmc_card *card, int wr=
-ite, unsigned fn,
->  	return 0;
+In the sake of sanity, you might want to add this behaviour to all
+parsers, not just the FUNCE one.
+
+I'm also unclear on how this is supposed to work. What does the
+broadcom tuple look like? This patch looks like it will silence a lot
+of legitimate warnings, and possibly pollute the card structures with
+bogus data.
+
+> diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+> index 963f293..87934ac 100644
+> --- a/drivers/mmc/core/sdio_cis.c
+> +++ b/drivers/mmc/core/sdio_cis.c
+> @@ -123,8 +123,9 @@ static int cistpl_funce_func(struct sdio_func *func,
+>  	vsn =3D func->card->cccr.sdio_vsn;
+>  	min_size =3D (vsn =3D=3D SDIO_SDIO_REV_1_00) ? 28 : 42;
+> =20
+> +	/* let the SDIO driver take care of unknown tuples */
+>  	if (size < min_size || buf[0] !=3D 1)
+
+Misleading comment, the tuple is not unknown.
+
+> -		return -EINVAL;
+> +		return -EILSEQ;
+> =20
+
+What does this change improve?
+
+>  	/* TPLFE_MAX_BLK_SIZE */
+>  	func->max_blksize =3D buf[12] | (buf[13] << 8);
+> @@ -154,13 +155,7 @@ static int cistpl_funce(struct mmc_card *card, struc=
+t sdio_func *func,
+>  	else
+>  		ret =3D cistpl_funce_common(card, buf, size);
+> =20
+> -	if (ret) {
+> -		printk(KERN_ERR "%s: bad CISTPL_FUNCE size %u "
+> -		       "type %u\n", mmc_hostname(card->host), size, buf[0]);
+> -		return ret;
+> -	}
+> -
+> -	return 0;
+> +	return ret;
 >  }
 > =20
-> +int sdio_go_idle(struct mmc_host *host)
-> +{
+>  typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
 
-It might be clearer if you use the terminology from the spec, so either
-sdio_abort() or sdio_reset().
+Silencing a legitimate error.
+
+> +		if (ret =3D=3D -EILSEQ) {
+> +			/* this tuple is unknown to the core */
+
+Misleading comment, the tuple might be known but malformed.
 
 Rgds
 --=20
@@ -57,7 +100,7 @@ Rgds
   for SMTP traffic and consider using PGP for end-to-end
   encryption.
 
---=_freyr.ossman.eu-14418-1252648703-0001-2
+--=_freyr.ossman.eu-14467-1252649223-0001-2
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment; filename=signature.asc
@@ -65,12 +108,12 @@ Content-Disposition: attachment; filename=signature.asc
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.12 (GNU/Linux)
 
-iEYEARECAAYFAkqp5v4ACgkQ7b8eESbyJLjFQwCfSwwLYHjebMD8t/U2TEacJRIM
-lV4An3v+gqIfRxLMtded3piLxrqXOQ5y
-=pmXm
+iEYEARECAAYFAkqp6QUACgkQ7b8eESbyJLhuFQCeNbHWxpp9q5Uhe+vrorQXlCHd
++bMAoLadCNvhVOWHqAYZi0yXMKqcW4Ef
+=yAX+
 -----END PGP SIGNATURE-----
 
---=_freyr.ossman.eu-14418-1252648703-0001-2--
+--=_freyr.ossman.eu-14467-1252649223-0001-2--
 --
 To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
