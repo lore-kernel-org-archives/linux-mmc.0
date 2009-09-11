@@ -1,113 +1,84 @@
-From: akpm@linux-foundation.org
-Subject: + mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command.patch added to -mm tree
-Date: Thu, 10 Sep 2009 15:34:38 -0700
-Message-ID: <200909102234.n8AMYcRP024081@imap1.linux-foundation.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] sdio: pass unknown cis tuples to sdio drivers
+Date: Thu, 10 Sep 2009 20:39:51 -0700
+Message-ID: <20090910203951.041d5c17.akpm@linux-foundation.org>
+References: <1252587402-7382-1-git-send-email-albert_herranz@yahoo.es>
+	<1252587402-7382-2-git-send-email-albert_herranz@yahoo.es>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:35198 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:34649 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751304AbZIJWft (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Sep 2009 18:35:49 -0400
+	by vger.kernel.org with ESMTP id S1752608AbZIKDjy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Sep 2009 23:39:54 -0400
+In-Reply-To: <1252587402-7382-2-git-send-email-albert_herranz@yahoo.es>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: wolfgang.mues@auerswald.de, linux-mmc@vger.kernel.org, stable@kernel.org
+To: Albert Herranz <albert_herranz@yahoo.es>
+Cc: linux-mmc@vger.kernel.org, bcm43xx-dev@lists.berlios.de, linux-wireless@vger.kernel.org
+
+On Thu, 10 Sep 2009 14:56:42 +0200 Albert Herranz <albert_herranz@yahoo.es> wrote:
+
+> Some manufacturers provide vendor information in non-vendor specific CIS
+> tuples. For example, Broadcom uses an Extended Function tuple to provide
+> the MAC address on some of their network cards, as in the case of the
+> Nintendo Wii WLAN daughter card.
+> 
+> This patch allows passing correct tuples unknown to the SDIO core to
+> a matching SDIO driver instead of rejecting them and failing.
+> 
+
+This looks leaky to me.
 
 
-The patch titled
-     mmc_spi: fail gracefully if host or card do not support the switch command
-has been added to the -mm tree.  Its filename is
-     mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command.patch
+: 		if (i < ARRAY_SIZE(cis_tpl_list)) {
+: 			const struct cis_tpl *tpl = cis_tpl_list + i;
+: 			if (tpl_link < tpl->min_size) {
+: 				printk(KERN_ERR
+: 				       "%s: bad CIS tuple 0x%02x"
+: 				       " (length = %u, expected >= %u)\n",
+: 				       mmc_hostname(card->host),
+: 				       tpl_code, tpl_link, tpl->min_size);
+: 				ret = -EINVAL;
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+ret == -EINVAL
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+: 			} else if (tpl->parse) {
+: 				ret = tpl->parse(card, func,
+: 						 this->data, tpl_link);
+: 			}
+: 			/* already successfully parsed, not needed anymore */
+: 			if (!ret)
+: 				kfree(this);
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+`this' doesn't get freed
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+: 		} else {
+: 			/* unknown tuple */
+: 			ret = -EILSEQ;
+: 		}
+: 
+: 		if (ret == -EILSEQ) {
 
-------------------------------------------------------
-Subject: mmc_spi: fail gracefully if host or card do not support the switch command
-From: Wolfgang Muees <wolfgang.mues@auerswald.de>
+`this' doesn't get remembered.
 
-Some time ago, I have send a patch to the mmc_spi subsystem changing the
-error codes.  This was after a discussion with Pierre about using EINVAL
-only for non-recoverable errors.  This patch was accepted as
+: 			/* this tuple is unknown to the core */
+: 			this->next = NULL;
+: 			this->code = tpl_code;
+: 			this->size = tpl_link;
+: 			*prev = this;
+: 			prev = &this->next;
+: 			pr_debug("%s: queuing CIS tuple 0x%02x length %u\n",
+: 				 mmc_hostname(card->host), tpl_code, tpl_link);
+: 			/* keep on analyzing tuples */
+: 			ret = 0;
+: 		}
+: 
+: 		ptr += tpl_link;
 
-http://git.kernel.org/linus/fdd858db7113ca64132de390188d7ca00701013d
+`this' leaks.
 
-Unfortunately, several weeks later, I realized that this patch has opened
-a little can of worms because there are SD cards on the market which
+: 	} while (!ret);
 
-a) claim that they support the switch command
-AND
-b) refuse to execute this command if operating in SPI mode.
-
-So, such a card would get unusuable in an embedded linux system in SPI
-mode, because the init sequence terminates with an error.
-
-This patch adds the missing error codes to the caller of the switch
-command and restores the old behaviour to fail gracefully if these
-commands can not execute.
-
-Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
-Cc: <linux-mmc@vger.kernel.org>
-Cc: <stable@kernel.org>		[2.6.31.x]
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/core/mmc.c |   10 +++++-----
- drivers/mmc/core/sd.c  |   10 +++++-----
- 2 files changed, 10 insertions(+), 10 deletions(-)
-
-diff -puN drivers/mmc/core/mmc.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command drivers/mmc/core/mmc.c
---- a/drivers/mmc/core/mmc.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command
-+++ a/drivers/mmc/core/mmc.c
-@@ -179,11 +179,11 @@ static int mmc_read_ext_csd(struct mmc_c
- 
- 	err = mmc_send_ext_csd(card, ext_csd);
- 	if (err) {
--		/*
--		 * We all hosts that cannot perform the command
--		 * to fail more gracefully
--		 */
--		if (err != -EINVAL)
-+		/* If the host or the card can't do the switch,
-+		 * fail more gracefully. */
-+		if ((err != -EINVAL)
-+		 && (err != -ENOSYS)
-+		 && (err != -EFAULT))
- 			goto out;
- 
- 		/*
-diff -puN drivers/mmc/core/sd.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command drivers/mmc/core/sd.c
---- a/drivers/mmc/core/sd.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command
-+++ a/drivers/mmc/core/sd.c
-@@ -210,11 +210,11 @@ static int mmc_read_switch(struct mmc_ca
- 
- 	err = mmc_sd_switch(card, 0, 0, 1, status);
- 	if (err) {
--		/*
--		 * We all hosts that cannot perform the command
--		 * to fail more gracefully
--		 */
--		if (err != -EINVAL)
-+		/* If the host or the card can't do the switch,
-+		 * fail more gracefully. */
-+		if ((err != -EINVAL)
-+		 && (err != -ENOSYS)
-+		 && (err != -EFAULT))
- 			goto out;
- 
- 		printk(KERN_WARNING "%s: problem reading switch "
-_
-
-Patches currently in -mm which might be from wolfgang.mues@auerswald.de are
-
-mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command.patch
-
+Please check?
