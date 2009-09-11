@@ -1,120 +1,79 @@
-From: Pierre Ossman <pierre-vCPtPcF4ZGuHXe+LvDLADg@public.gmane.org>
-Subject: Re: [PATCH] sdio: pass unknown cis tuples to sdio drivers
-Date: Fri, 11 Sep 2009 08:06:59 +0200
-Message-ID: <20090911080659.2ac822fc@mjolnir.ossman.eu>
-References: <1252587402-7382-1-git-send-email-albert_herranz@yahoo.es>
-	<1252587402-7382-2-git-send-email-albert_herranz@yahoo.es>
+From: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
+Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
+Date: Fri, 11 Sep 2009 15:39:45 +0900
+Message-ID: <87bplim1ce.fsf@devron.myhome.or.jp>
+References: <c4e36d110908310451t7c238e09u5af112fa3321cc23@mail.gmail.com>
+	<200908312119.12121.rjw@sisk.pl>
+	<c4e36d110909010234i5f1b9357l805132137725a4f8@mail.gmail.com>
+	<c4e36d110909031529q77b53122kdb85785ba293c478@mail.gmail.com>
+	<20090903232317.GA6760@lst.de> <87ljkvmt71.fsf@devron.myhome.or.jp>
+	<c4e36d110909040213t4d4258b4w3e2d4725e0b2a161@mail.gmail.com>
+	<87iqfx5mss.fsf@devron.myhome.or.jp> <20090907125130.GA1595@ucw.cz>
+	<87ljko5k3v.fsf@devron.myhome.or.jp>
+	<20090910192354.GD23356@elf.ucw.cz>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-14467-1252649223-0001-2"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1252587402-7382-2-git-send-email-albert_herranz-mRCrAkd8dF0@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcm43xx-dev-0fE9KPoRgkgATYTw5x5z8w@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.parknet.ad.jp ([210.171.162.6]:49721 "EHLO
+	mail.officemail.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752656AbZIKGju (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Sep 2009 02:39:50 -0400
+In-Reply-To: <20090910192354.GD23356@elf.ucw.cz> (Pavel Machek's message of
+	"Thu, 10 Sep 2009 21:23:54 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Zdenek Kabelac <zdenek.kabelac@gmail.com>, Christoph Hellwig <hch@lst.de>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
 
-This is a MIME-formatted message.  If you see this text it means that your
-E-mail software does not support MIME-formatted messages.
+Pavel Machek <pavel@ucw.cz> writes:
 
---=_freyr.ossman.eu-14467-1252649223-0001-2
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+> On Wed 2009-09-09 22:21:56, OGAWA Hirofumi wrote:
+>> Pavel Machek <pavel@ucw.cz> writes:
+>> 
+>> >> It seems
+>> >> 
+>> >>     1) sync() (probabry "sync" command)
+>> >>     2) sync as part of suspend sequence
+>> >>     3) sync_filesystem() by mmc remove event
+>> >> 
+>> >> I guess the root-cause of the problem would be 3). However, it would not
+>> >> be easy to fix, at least, we would need to think about what we want to
+>> >> do for it. So, to workaround it for now, I've made this patch.
+>> >
+>> > MMC driver trying to synchronize filesystems looks like ugly layering
+>> > violation to me. Why are we doing that?
+>> 
+>> There is no _layering violation_ here. IIRC, mmc just tells card removed
+>> event to another layer (on some points of view, to tell event can be
+>> wrong though). The partition (block) layer does it by event.
+>
+> So what is the problem?  Emulating sync when card is already removed
+> seems little ... interesting?
 
-On Thu, 10 Sep 2009 14:56:42 +0200
-Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org> wrote:
+Um..., sorry, I'm not sure what are you talking about. Of course, the
+problem of this is that system freeze on suspend.
 
-> Some manufacturers provide vendor information in non-vendor specific CIS
-> tuples. For example, Broadcom uses an Extended Function tuple to provide
-> the MAC address on some of their network cards, as in the case of the
-> Nintendo Wii WLAN daughter card.
->=20
-> This patch allows passing correct tuples unknown to the SDIO core to
-> a matching SDIO driver instead of rejecting them and failing.
->=20
-> Signed-off-by: Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
-> ---
+Or are you asking my guess of the cause, or something?  If so, although
+I'm not reading all emails on this thread, from Zdenek's backtrace, the
+sequence would be
 
-The description for this patch should be made clearer. The title
-suggests it adds functionality that's already in place. It should be
-something along the lines of "Also pass malformed tuples to card
-drivers".
+    1) suspend mmc
+    2) mmc generates card removed event
+    3) prepare to invalidate blockdev
+    4) sync fs on invalidating blockdev
+    5) flush buffers on invalidating blockdev (partitions)
+    6) delete blockdev (partitions)
 
-In the sake of sanity, you might want to add this behaviour to all
-parsers, not just the FUNCE one.
+or like the above. And I can guess some possible issues/root-cause we
+have to handle from it.
 
-I'm also unclear on how this is supposed to work. What does the
-broadcom tuple look like? This patch looks like it will silence a lot
-of legitimate warnings, and possibly pollute the card structures with
-bogus data.
+    a) card removed event from mmc for suspend is right design?
+    b) the card can be changed/removed before system was resumed, mmc
+       can be detect/handle it properly?
+    c) flushing buffers on _deleted_ device is right design?
 
-> diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-> index 963f293..87934ac 100644
-> --- a/drivers/mmc/core/sdio_cis.c
-> +++ b/drivers/mmc/core/sdio_cis.c
-> @@ -123,8 +123,9 @@ static int cistpl_funce_func(struct sdio_func *func,
->  	vsn =3D func->card->cccr.sdio_vsn;
->  	min_size =3D (vsn =3D=3D SDIO_SDIO_REV_1_00) ? 28 : 42;
-> =20
-> +	/* let the SDIO driver take care of unknown tuples */
->  	if (size < min_size || buf[0] !=3D 1)
+and I suspect there are more issues in detail and resume process though.
 
-Misleading comment, the tuple is not unknown.
-
-> -		return -EINVAL;
-> +		return -EILSEQ;
-> =20
-
-What does this change improve?
-
->  	/* TPLFE_MAX_BLK_SIZE */
->  	func->max_blksize =3D buf[12] | (buf[13] << 8);
-> @@ -154,13 +155,7 @@ static int cistpl_funce(struct mmc_card *card, struc=
-t sdio_func *func,
->  	else
->  		ret =3D cistpl_funce_common(card, buf, size);
-> =20
-> -	if (ret) {
-> -		printk(KERN_ERR "%s: bad CISTPL_FUNCE size %u "
-> -		       "type %u\n", mmc_hostname(card->host), size, buf[0]);
-> -		return ret;
-> -	}
-> -
-> -	return 0;
-> +	return ret;
->  }
-> =20
->  typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
-
-Silencing a legitimate error.
-
-> +		if (ret =3D=3D -EILSEQ) {
-> +			/* this tuple is unknown to the core */
-
-Misleading comment, the tuple might be known but malformed.
-
-Rgds
---=20
-     -- Pierre Ossman
-
-  WARNING: This correspondence is being monitored by the
-  Swedish government. Make sure your server uses encryption
-  for SMTP traffic and consider using PGP for end-to-end
-  encryption.
-
---=_freyr.ossman.eu-14467-1252649223-0001-2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename=signature.asc
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.12 (GNU/Linux)
-
-iEYEARECAAYFAkqp6QUACgkQ7b8eESbyJLhuFQCeNbHWxpp9q5Uhe+vrorQXlCHd
-+bMAoLadCNvhVOWHqAYZi0yXMKqcW4Ef
-=yAX+
------END PGP SIGNATURE-----
-
---=_freyr.ossman.eu-14467-1252649223-0001-2--
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks.
+-- 
+OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
