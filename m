@@ -1,142 +1,77 @@
-From: akpm@linux-foundation.org
-Subject: + sdio-pass-unknown-cis-tuples-to-sdio-drivers.patch added to -mm tree
-Date: Thu, 10 Sep 2009 20:40:15 -0700
-Message-ID: <200909110340.n8B3eFJK003082@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:54670 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753703AbZIKDkO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Sep 2009 23:40:14 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Pierre Ossman <pierre-vCPtPcF4ZGuHXe+LvDLADg@public.gmane.org>
+Subject: Re: [PATCH] sdio: recognize io card without powercycle
+Date: Fri, 11 Sep 2009 07:58:19 +0200
+Message-ID: <20090911075819.1989d75b@mjolnir.ossman.eu>
+References: <1252587402-7382-1-git-send-email-albert_herranz@yahoo.es>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-14418-1252648703-0001-2"
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1252587402-7382-1-git-send-email-albert_herranz-mRCrAkd8dF0@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcm43xx-dev-0fE9KPoRgkgATYTw5x5z8w@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: albert_herranz@yahoo.es, linux-mmc@vger.kernel.org
 
+This is a MIME-formatted message.  If you see this text it means that your
+E-mail software does not support MIME-formatted messages.
 
-The patch titled
-     sdio: pass unknown cis tuples to sdio drivers
-has been added to the -mm tree.  Its filename is
-     sdio-pass-unknown-cis-tuples-to-sdio-drivers.patch
+--=_freyr.ossman.eu-14418-1252648703-0001-2
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+On Thu, 10 Sep 2009 14:56:41 +0200
+Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org> wrote:
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+> SDIO Simplified Specification V2.00 states that it is strongly recommended
+> that the host executes either a power reset or issues a CMD52 (I/O Reset)=
+ to
+> re-initialize an I/O only card or the I/O portion of a combo card.
+> Additionally, the CMD52 must be issued first because it cannot be issued
+> after a CMD0.
+>=20
+> With this patch the Nintendo Wii SDIO-based WLAN card is detected after a
+> system reset, without requiring a complete system powercycle.
+>=20
+> Signed-off-by: Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
+> ---
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+I had problems with cards already in the idle state crashing when I
+sent them a reset. I suggest a big round of testing before merging this.
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+> @@ -182,3 +189,20 @@ int mmc_io_rw_extended(struct mmc_card *card, int wr=
+ite, unsigned fn,
+>  	return 0;
+>  }
+> =20
+> +int sdio_go_idle(struct mmc_host *host)
+> +{
 
-------------------------------------------------------
-Subject: sdio: pass unknown cis tuples to sdio drivers
-From: Albert Herranz <albert_herranz@yahoo.es>
+It might be clearer if you use the terminology from the spec, so either
+sdio_abort() or sdio_reset().
 
-Some manufacturers provide vendor information in non-vendor specific CIS
-tuples.  For example, Broadcom uses an Extended Function tuple to provide
-the MAC address on some of their network cards, as in the case of the
-Nintendo Wii WLAN daughter card.
+Rgds
+--=20
+     -- Pierre Ossman
 
-This patch allows passing correct tuples unknown to the SDIO core to a
-matching SDIO driver instead of rejecting them and failing.
+  WARNING: This correspondence is being monitored by the
+  Swedish government. Make sure your server uses encryption
+  for SMTP traffic and consider using PGP for end-to-end
+  encryption.
 
-Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
+--=_freyr.ossman.eu-14418-1252648703-0001-2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename=signature.asc
 
- drivers/mmc/core/sdio_cis.c |   46 ++++++++++++++++++----------------
- 1 file changed, 25 insertions(+), 21 deletions(-)
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.12 (GNU/Linux)
 
-diff -puN drivers/mmc/core/sdio_cis.c~sdio-pass-unknown-cis-tuples-to-sdio-drivers drivers/mmc/core/sdio_cis.c
---- a/drivers/mmc/core/sdio_cis.c~sdio-pass-unknown-cis-tuples-to-sdio-drivers
-+++ a/drivers/mmc/core/sdio_cis.c
-@@ -123,8 +123,9 @@ static int cistpl_funce_func(struct sdio
- 	vsn = func->card->cccr.sdio_vsn;
- 	min_size = (vsn == SDIO_SDIO_REV_1_00) ? 28 : 42;
- 
-+	/* let the SDIO driver take care of unknown tuples */
- 	if (size < min_size || buf[0] != 1)
--		return -EINVAL;
-+		return -EILSEQ;
- 
- 	/* TPLFE_MAX_BLK_SIZE */
- 	func->max_blksize = buf[12] | (buf[13] << 8);
-@@ -154,13 +155,7 @@ static int cistpl_funce(struct mmc_card 
- 	else
- 		ret = cistpl_funce_common(card, buf, size);
- 
--	if (ret) {
--		printk(KERN_ERR "%s: bad CISTPL_FUNCE size %u "
--		       "type %u\n", mmc_hostname(card->host), size, buf[0]);
--		return ret;
--	}
--
--	return 0;
-+	return ret;
- }
- 
- typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
-@@ -253,21 +248,12 @@ static int sdio_read_cis(struct mmc_card
- 		for (i = 0; i < ARRAY_SIZE(cis_tpl_list); i++)
- 			if (cis_tpl_list[i].code == tpl_code)
- 				break;
--		if (i >= ARRAY_SIZE(cis_tpl_list)) {
--			/* this tuple is unknown to the core */
--			this->next = NULL;
--			this->code = tpl_code;
--			this->size = tpl_link;
--			*prev = this;
--			prev = &this->next;
--			printk(KERN_DEBUG
--			       "%s: queuing CIS tuple 0x%02x length %u\n",
--			       mmc_hostname(card->host), tpl_code, tpl_link);
--		} else {
-+		if (i < ARRAY_SIZE(cis_tpl_list)) {
- 			const struct cis_tpl *tpl = cis_tpl_list + i;
- 			if (tpl_link < tpl->min_size) {
- 				printk(KERN_ERR
--				       "%s: bad CIS tuple 0x%02x (length = %u, expected >= %u)\n",
-+				       "%s: bad CIS tuple 0x%02x"
-+				       " (length = %u, expected >= %u)\n",
- 				       mmc_hostname(card->host),
- 				       tpl_code, tpl_link, tpl->min_size);
- 				ret = -EINVAL;
-@@ -275,7 +261,25 @@ static int sdio_read_cis(struct mmc_card
- 				ret = tpl->parse(card, func,
- 						 this->data, tpl_link);
- 			}
--			kfree(this);
-+			/* already successfully parsed, not needed anymore */
-+			if (!ret)
-+				kfree(this);
-+		} else {
-+			/* unknown tuple */
-+			ret = -EILSEQ;
-+		}
-+
-+		if (ret == -EILSEQ) {
-+			/* this tuple is unknown to the core */
-+			this->next = NULL;
-+			this->code = tpl_code;
-+			this->size = tpl_link;
-+			*prev = this;
-+			prev = &this->next;
-+			pr_debug("%s: queuing CIS tuple 0x%02x length %u\n",
-+				 mmc_hostname(card->host), tpl_code, tpl_link);
-+			/* keep on analyzing tuples */
-+			ret = 0;
- 		}
- 
- 		ptr += tpl_link;
-_
+iEYEARECAAYFAkqp5v4ACgkQ7b8eESbyJLjFQwCfSwwLYHjebMD8t/U2TEacJRIM
+lV4An3v+gqIfRxLMtded3piLxrqXOQ5y
+=pmXm
+-----END PGP SIGNATURE-----
 
-Patches currently in -mm which might be from albert_herranz@yahoo.es are
-
-linux-next.patch
-sdio-recognize-io-card-without-powercycle.patch
-sdio-pass-unknown-cis-tuples-to-sdio-drivers.patch
-
+--=_freyr.ossman.eu-14418-1252648703-0001-2--
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
