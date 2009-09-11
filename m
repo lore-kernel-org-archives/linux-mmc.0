@@ -1,79 +1,38 @@
-From: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
-Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
-Date: Fri, 11 Sep 2009 15:39:45 +0900
-Message-ID: <87bplim1ce.fsf@devron.myhome.or.jp>
-References: <c4e36d110908310451t7c238e09u5af112fa3321cc23@mail.gmail.com>
-	<200908312119.12121.rjw@sisk.pl>
-	<c4e36d110909010234i5f1b9357l805132137725a4f8@mail.gmail.com>
-	<c4e36d110909031529q77b53122kdb85785ba293c478@mail.gmail.com>
-	<20090903232317.GA6760@lst.de> <87ljkvmt71.fsf@devron.myhome.or.jp>
-	<c4e36d110909040213t4d4258b4w3e2d4725e0b2a161@mail.gmail.com>
-	<87iqfx5mss.fsf@devron.myhome.or.jp> <20090907125130.GA1595@ucw.cz>
-	<87ljko5k3v.fsf@devron.myhome.or.jp>
-	<20090910192354.GD23356@elf.ucw.cz>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: V3 - mmc and omap_hsmmc patches
+Date: Fri, 11 Sep 2009 10:20:45 +0300
+Message-ID: <4AA9FA4D.7060701@nokia.com>
+References: <004e01ca3239$14eb9ab0$544ff780@am.dhcp.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.parknet.ad.jp ([210.171.162.6]:49721 "EHLO
-	mail.officemail.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752656AbZIKGju (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Sep 2009 02:39:50 -0400
-In-Reply-To: <20090910192354.GD23356@elf.ucw.cz> (Pavel Machek's message of
-	"Thu, 10 Sep 2009 21:23:54 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <004e01ca3239$14eb9ab0$544ff780@am.dhcp.ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Madhusudhan <madhu.cr@ti.com>
+Cc: 'Andrew Morton' <akpm@linux-foundation.org>, "Lavinen Jarkko (Nokia-D/Helsinki)" <jarkko.lavinen@nokia.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 'Matt Fleming' <matt@console-pimps.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Zdenek Kabelac <zdenek.kabelac@gmail.com>, Christoph Hellwig <hch@lst.de>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
 
-Pavel Machek <pavel@ucw.cz> writes:
+Madhusudhan wrote:
+> Hi Adrian,
+> 
+>> [PATCH V3 0/30] mmc and omap_hsmmc patches
+> 
+> What is the reason for V3? What is the difference between V2 and V3 series?
 
-> On Wed 2009-09-09 22:21:56, OGAWA Hirofumi wrote:
->> Pavel Machek <pavel@ucw.cz> writes:
->> 
->> >> It seems
->> >> 
->> >>     1) sync() (probabry "sync" command)
->> >>     2) sync as part of suspend sequence
->> >>     3) sync_filesystem() by mmc remove event
->> >> 
->> >> I guess the root-cause of the problem would be 3). However, it would not
->> >> be easy to fix, at least, we would need to think about what we want to
->> >> do for it. So, to workaround it for now, I've made this patch.
->> >
->> > MMC driver trying to synchronize filesystems looks like ugly layering
->> > violation to me. Why are we doing that?
->> 
->> There is no _layering violation_ here. IIRC, mmc just tells card removed
->> event to another layer (on some points of view, to tell event can be
->> wrong though). The partition (block) layer does it by event.
->
-> So what is the problem?  Emulating sync when card is already removed
-> seems little ... interesting?
+The reason for V3 is that the SD-only and MMC-only host capability patches were
+not wanted.
 
-Um..., sorry, I'm not sure what are you talking about. Of course, the
-problem of this is that system freeze on suspend.
+The difference is that patches originally numbered 0007 and 0027 were dropped
+and the rest re-rolled.
+i.e.
 
-Or are you asking my guess of the cause, or something?  If so, although
-I'm not reading all emails on this thread, from Zdenek's backtrace, the
-sequence would be
+	Subject: [PATCH V2 7/32] mmc: add host capabilities for SD only and MMC only
+	File: 0007-mmc-add-host-capabilities-for-SD-only-and-MMC-only.patch
 
-    1) suspend mmc
-    2) mmc generates card removed event
-    3) prepare to invalidate blockdev
-    4) sync fs on invalidating blockdev
-    5) flush buffers on invalidating blockdev (partitions)
-    6) delete blockdev (partitions)
+	Subject: [PATCH V2 27/32] omap_hsmmc: pass host capabilities for SD only and MMC only
+	File: 0027-omap_hsmmc-pass-host-capabilities-for-SD-only-and-M.patch
 
-or like the above. And I can guess some possible issues/root-cause we
-have to handle from it.
+were removed.
 
-    a) card removed event from mmc for suspend is right design?
-    b) the card can be changed/removed before system was resumed, mmc
-       can be detect/handle it properly?
-    c) flushing buffers on _deleted_ device is right design?
 
-and I suspect there are more issues in detail and resume process though.
-
-Thanks.
--- 
-OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
