@@ -1,149 +1,139 @@
 From: Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
-Subject: [PATCH v2] sdio: pass whitelisted cis funce tuples to sdio drivers
-Date: Fri, 11 Sep 2009 11:54:12 +0200
-Message-ID: <1252662852-20548-2-git-send-email-albert_herranz@yahoo.es>
-References: <1252662852-20548-1-git-send-email-albert_herranz@yahoo.es>
+Subject: [PATCH v2] sdio: recognize io card without powercycle
+Date: Fri, 11 Sep 2009 11:54:11 +0200
+Message-ID: <1252662852-20548-1-git-send-email-albert_herranz@yahoo.es>
 Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1252662852-20548-1-git-send-email-albert_herranz-mRCrAkd8dF0@public.gmane.org>
 Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, pierre-vCPtPcF4ZGuHXe+LvDLADg@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: bcm43xx-dev-0fE9KPoRgkgATYTw5x5z8w@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Some manufacturers provide vendor information in non-vendor specific CIS
-tuples. For example, Broadcom uses an Extended Function tuple to provide
-the MAC address on some of their network cards, as in the case of the
-Nintendo Wii WLAN daughter card.
+SDIO Simplified Specification V2.00 states that it is strongly recommended
+that the host executes either a power reset or issues a CMD52 (I/O Reset) to
+re-initialize an I/O only card or the I/O portion of a combo card.
+Additionally, the CMD52 must be issued first because it cannot be issued
+after a CMD0.
 
-This patch allows passing whitelisted FUNCE tuples unknown to the SDIO core to
-a matching SDIO driver instead of rejecting them and failing.
+With this patch the Nintendo Wii SDIO-based WLAN card is detected after a
+system reset, without requiring a complete system powercycle.
 
 Signed-off-by: Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>
 ---
 v1
-- fixed typo in commit message
+- reworded commit message
 - CC'd akpm as suggested by mb
-- required by commit 4ea602e183ca20a7577ebe253323d0e5d0f9847 in net-next-2.6
 
 v2
-- renamed from "sdio: pass unknown cis tuples to sdio drivers"
-- added funce tuple whitelist concept
-- fixed leak reported by akpm
+- renamed sdio_go_idle to sdio_reset as suggested by Pierre Ossman
 
- drivers/mmc/core/sdio_cis.c |   65 ++++++++++++++++++++++++++++++++----------
- 1 files changed, 49 insertions(+), 16 deletions(-)
+ drivers/mmc/core/core.c     |    1 +
+ drivers/mmc/core/sdio_ops.c |   36 ++++++++++++++++++++++++++++++------
+ drivers/mmc/core/sdio_ops.h |    1 +
+ 3 files changed, 32 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-index 963f293..4e4fac1 100644
---- a/drivers/mmc/core/sdio_cis.c
-+++ b/drivers/mmc/core/sdio_cis.c
-@@ -98,6 +98,22 @@ static const unsigned char speed_val[16] =
- static const unsigned int speed_unit[8] =
- 	{ 10000, 100000, 1000000, 10000000, 0, 0, 0, 0 };
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 2649117..dd746d9 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -868,6 +868,7 @@ void mmc_rescan(struct work_struct *work)
+ 		mmc_claim_host(host);
  
-+/* FUNCE tuples with these types get passed to SDIO drivers */
-+static const unsigned char funce_type_whitelist[] = {
-+	4 /* CISTPL_FUNCE_LAN_NODE_ID used in Broadcom cards */
-+};
-+
-+static int cistpl_funce_whitelisted(unsigned char type)
-+{
-+	int i;
-+
-+	for (i = 0; i < ARRAY_SIZE(funce_type_whitelist); i++) {
-+		if (funce_type_whitelist[i] == type)
-+			return 1;
-+	}
-+	return 0;
-+}
-+
- static int cistpl_funce_common(struct mmc_card *card,
- 			       const unsigned char *buf, unsigned size)
- {
-@@ -120,6 +136,10 @@ static int cistpl_funce_func(struct sdio_func *func,
- 	unsigned vsn;
- 	unsigned min_size;
+ 		mmc_power_up(host);
++		sdio_reset(host);
+ 		mmc_go_idle(host);
  
-+	/* let SDIO drivers take care of whitelisted FUNCE tuples */
-+	if (cistpl_funce_whitelisted(buf[0]))
-+		return -EILSEQ;
-+
- 	vsn = func->card->cccr.sdio_vsn;
- 	min_size = (vsn == SDIO_SDIO_REV_1_00) ? 28 : 42;
- 
-@@ -154,13 +174,12 @@ static int cistpl_funce(struct mmc_card *card, struct sdio_func *func,
- 	else
- 		ret = cistpl_funce_common(card, buf, size);
- 
--	if (ret) {
-+	if (ret && ret != -EILSEQ) {
- 		printk(KERN_ERR "%s: bad CISTPL_FUNCE size %u "
- 		       "type %u\n", mmc_hostname(card->host), size, buf[0]);
--		return ret;
- 	}
- 
--	return 0;
-+	return ret;
+ 		mmc_send_if_cond(host, host->ocr_avail);
+diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+index 4eb7825..dea36d9 100644
+--- a/drivers/mmc/core/sdio_ops.c
++++ b/drivers/mmc/core/sdio_ops.c
+@@ -67,13 +67,13 @@ int mmc_send_io_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 	return err;
  }
  
- typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
-@@ -253,21 +272,12 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
- 		for (i = 0; i < ARRAY_SIZE(cis_tpl_list); i++)
- 			if (cis_tpl_list[i].code == tpl_code)
- 				break;
--		if (i >= ARRAY_SIZE(cis_tpl_list)) {
--			/* this tuple is unknown to the core */
--			this->next = NULL;
--			this->code = tpl_code;
--			this->size = tpl_link;
--			*prev = this;
--			prev = &this->next;
--			printk(KERN_DEBUG
--			       "%s: queuing CIS tuple 0x%02x length %u\n",
--			       mmc_hostname(card->host), tpl_code, tpl_link);
--		} else {
-+		if (i < ARRAY_SIZE(cis_tpl_list)) {
- 			const struct cis_tpl *tpl = cis_tpl_list + i;
- 			if (tpl_link < tpl->min_size) {
- 				printk(KERN_ERR
--				       "%s: bad CIS tuple 0x%02x (length = %u, expected >= %u)\n",
-+				       "%s: bad CIS tuple 0x%02x"
-+				       " (length = %u, expected >= %u)\n",
- 				       mmc_hostname(card->host),
- 				       tpl_code, tpl_link, tpl->min_size);
- 				ret = -EINVAL;
-@@ -275,7 +285,30 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
- 				ret = tpl->parse(card, func,
- 						 this->data, tpl_link);
- 			}
--			kfree(this);
-+			/*
-+			 * We don't need the tuple anymore if it was
-+			 * successfully parsed by the SDIO core or if it is
-+			 * not going to be parsed by SDIO drivers.
-+			 */
-+			if (!ret || ret != -EILSEQ)
-+				kfree(this);
-+		} else {
-+			/* unknown tuple */
-+			ret = -EILSEQ;
-+		}
-+
-+		if (ret == -EILSEQ) {
-+			/* this tuple is unknown to the core or whitelisted */
-+			this->next = NULL;
-+			this->code = tpl_code;
-+			this->size = tpl_link;
-+			*prev = this;
-+			prev = &this->next;
-+			printk(KERN_DEBUG
-+			       "%s: queuing CIS tuple 0x%02x length %u\n",
-+			       mmc_hostname(card->host), tpl_code, tpl_link);
-+			/* keep on analyzing tuples */
-+			ret = 0;
- 		}
+-int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+-	unsigned addr, u8 in, u8* out)
++static int mmc_io_rw_direct_host(struct mmc_host *host, int write, unsigned fn,
++	unsigned addr, u8 in, u8 *out)
+ {
+ 	struct mmc_command cmd;
+ 	int err;
  
- 		ptr += tpl_link;
+-	BUG_ON(!card);
++	BUG_ON(!host);
+ 	BUG_ON(fn > 7);
+ 
+ 	/* sanity check */
+@@ -90,11 +90,11 @@ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+ 	cmd.arg |= in;
+ 	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_AC;
+ 
+-	err = mmc_wait_for_cmd(card->host, &cmd, 0);
++	err = mmc_wait_for_cmd(host, &cmd, 0);
+ 	if (err)
+ 		return err;
+ 
+-	if (mmc_host_is_spi(card->host)) {
++	if (mmc_host_is_spi(host)) {
+ 		/* host driver already reported errors */
+ 	} else {
+ 		if (cmd.resp[0] & R5_ERROR)
+@@ -106,7 +106,7 @@ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+ 	}
+ 
+ 	if (out) {
+-		if (mmc_host_is_spi(card->host))
++		if (mmc_host_is_spi(host))
+ 			*out = (cmd.resp[0] >> 8) & 0xFF;
+ 		else
+ 			*out = cmd.resp[0] & 0xFF;
+@@ -115,6 +115,13 @@ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+ 	return 0;
+ }
+ 
++int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
++	unsigned addr, u8 in, u8 *out)
++{
++	BUG_ON(!card);
++	return mmc_io_rw_direct_host(card->host, write, fn, addr, in, out);
++}
++
+ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz)
+ {
+@@ -182,3 +189,20 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	return 0;
+ }
+ 
++int sdio_reset(struct mmc_host *host)
++{
++	int ret;
++	u8 abort;
++
++	/* SDIO Simplified Specification V2.0, 4.4 Reset for SDIO */
++
++	ret = mmc_io_rw_direct_host(host, 0, 0, SDIO_CCCR_ABORT, 0, &abort);
++	if (ret)
++		abort = 0x08;
++	else
++		abort |= 0x08;
++
++	ret = mmc_io_rw_direct_host(host, 1, 0, SDIO_CCCR_ABORT, abort, NULL);
++	return ret;
++}
++
+diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
+index e2e74b0..12a4d3a 100644
+--- a/drivers/mmc/core/sdio_ops.h
++++ b/drivers/mmc/core/sdio_ops.h
+@@ -17,6 +17,7 @@ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned addr, u8 in, u8* out);
+ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz);
++int sdio_reset(struct mmc_host *host);
+ 
+ #endif
+ 
 -- 
 1.6.0.4
 
