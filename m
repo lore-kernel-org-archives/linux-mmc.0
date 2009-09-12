@@ -1,41 +1,44 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
-Date: Sat, 12 Sep 2009 00:36:41 +0200
-Message-ID: <200909120036.41725.rjw@sisk.pl>
-References: <20090903232317.GA6760@lst.de> <c4e36d110909111445nb6592cfue01543f5d04c2cda@mail.gmail.com> <m3eiqdqfnm.fsf@pullcord.laptop.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: V3 - mmc and omap_hsmmc patches
+Date: Sat, 12 Sep 2009 10:49:37 +0100
+Message-ID: <20090912094936.GB21695@console-pimps.org>
+References: <004e01ca3239$14eb9ab0$544ff780@am.dhcp.ti.com>
+ <4AA9FA4D.7060701@nokia.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:46304 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757131AbZIKWfd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 11 Sep 2009 18:35:33 -0400
-In-Reply-To: <m3eiqdqfnm.fsf@pullcord.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <4AA9FA4D.7060701@nokia.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Madhusudhan <madhu.cr@ti.com>, 'Andrew Morton' <akpm@linux-foundation.org>, "Lavinen Jarkko (Nokia-D/Helsinki)" <jarkko.lavinen@nokia.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Zdenek Kabelac <zdenek.kabelac@gmail.com>, Pavel Machek <pavel@ucw.cz>, OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>, Christoph Hellwig <hch@lst.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
 
-On Saturday 12 September 2009, Chris Ball wrote:
-> Hi,
+On Fri, Sep 11, 2009 at 10:20:45AM +0300, Adrian Hunter wrote:
+> Madhusudhan wrote:
+> > Hi Adrian,
+> > 
+> >> [PATCH V3 0/30] mmc and omap_hsmmc patches
+> > 
+> > What is the reason for V3? What is the difference between V2 and V3 series?
 > 
->    > Well system could check basic card ids if they match after resume
+> The reason for V3 is that the SD-only and MMC-only host capability patches were
+> not wanted.
 > 
-> No.  That (arguably) guarantees that it's the same card, but not that
-> it wasn't modified in another machine during the suspend.
-
-Generally speaking, we'd also need to check superblocks for this to work.
- 
->    > if some users wants to crash his card by randomly swapping it
->    > during suspend/resume - I'd have no problem with that....
+> The difference is that patches originally numbered 0007 and 0027 were dropped
+> and the rest re-rolled.
+> i.e.
 > 
-> You should have a problem with it.  Taking a card from a suspended
-> machine and working on it with a different machine is not a bizarre
-> thing to want to do.
+> 	Subject: [PATCH V2 7/32] mmc: add host capabilities for SD only and MMC only
+> 	File: 0007-mmc-add-host-capabilities-for-SD-only-and-MMC-only.patch
+> 
+> 	Subject: [PATCH V2 27/32] omap_hsmmc: pass host capabilities for SD only and MMC only
+> 	File: 0027-omap_hsmmc-pass-host-capabilities-for-SD-only-and-M.patch
+> 
+> were removed.
+> 
+> 
 
-Agreed.
-
-Thanks,
-Rafael
+I think my Reviewed-by can just be carried forward if this is a simple
+re-rolling. Though if for some reason they need reviewing again just
+nudge me.
