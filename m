@@ -1,46 +1,77 @@
 From: Pavel Machek <pavel@ucw.cz>
 Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
-Date: Mon, 14 Sep 2009 22:25:59 +0200
-Message-ID: <20090914202558.GA10398@elf.ucw.cz>
-References: <20090907125130.GA1595@ucw.cz> <87ljko5k3v.fsf@devron.myhome.or.jp> <20090910192354.GD23356@elf.ucw.cz> <87bplim1ce.fsf@devron.myhome.or.jp> <20090911200922.GF8137@elf.ucw.cz> <c4e36d110909111414n716a06b1mdd0cd741230595b5@mail.gmail.com> <20090911213204.GC25544@elf.ucw.cz> <c4e36d110909111445nb6592cfue01543f5d04c2cda@mail.gmail.com> <20090911215117.GA11441@elf.ucw.cz> <20090914220510.5558d215@mjolnir.ossman.eu>
+Date: Mon, 14 Sep 2009 22:27:29 +0200
+Message-ID: <20090914202729.GB10398@elf.ucw.cz>
+References: <20090903232317.GA6760@lst.de> <c4e36d110909111445nb6592cfue01543f5d04c2cda@mail.gmail.com> <m3eiqdqfnm.fsf@pullcord.laptop.org> <200909120036.41725.rjw@sisk.pl> <c4e36d110909140139u786f2165oc5a35dce5b2c0527@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:33987 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932733AbZINU0D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Sep 2009 16:26:03 -0400
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S933913AbZINU1k@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20090914220510.5558d215@mjolnir.ossman.eu>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <c4e36d110909140139u786f2165oc5a35dce5b2c0527@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Zdenek Kabelac <zdenek.kabelac@gmail.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Chris Ball <cjb@laptop.org>, OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>, Christoph Hellwig <hch@lst.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Ossman <pierre-list@ossman.eu>
-Cc: Zdenek Kabelac <zdenek.kabelac@gmail.com>, OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>, Christoph Hellwig <hch@lst.de>, "Rafael J. Wysocki" <rjw@sisk.pl>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
 
-On Mon 2009-09-14 22:05:10, Pierre Ossman wrote:
-> On Fri, 11 Sep 2009 23:51:17 +0200
-> Pavel Machek <pavel@ucw.cz> wrote:
-> 
-> > On Fri 2009-09-11 23:45:01, Zdenek Kabelac wrote:
-> > > 
-> > > Well system could check basic card ids if they match after resume - if
-> > > some users wants to crash his card by randomly swapping it during
-> > > suspend/resume - I'd have no problem with that....
-> > 
-> > Well, I do have small problem with that :-).
-> > 
-> > Anyway, patch for rechecking IDs would probably be accepted, but
-> > that's not how it works now.
-> 
-> It _does_ check the card id when you have UNSAFE_RESUME selected. It
-> doesn't just hook up whatever card you happen to have in the slot with
-> your old block device. I may have a lot of opponents when it comes
-> to my suspend design choices, but I'm not completely crazy. ;)
+On Mon 2009-09-14 10:39:44, Zdenek Kabelac wrote:
+> 2009/9/12 Rafael J. Wysocki <rjw@sisk.pl>:
+> > On Saturday 12 September 2009, Chris Ball wrote:
+> >> Hi,
+> >>
+> >> =A0 =A0> Well system could check basic card ids if they match afte=
+r resume
+> >>
+> >> No. =A0That (arguably) guarantees that it's the same card, but not=
+ that
+> >> it wasn't modified in another machine during the suspend.
+> >
+> > Generally speaking, we'd also need to check superblocks for this to=
+ work.
+> >
+> >> =A0 =A0> if some users wants to crash his card by randomly swappin=
+g it
+> >> =A0 =A0> during suspend/resume - I'd have no problem with that....
+> >>
+> >> You should have a problem with it. =A0Taking a card from a suspend=
+ed
+> >> machine and working on it with a different machine is not a bizarr=
+e
+> >> thing to want to do.
+> >
+> > Agreed.
+>=20
+>=20
+> Well - ok - so let me ask this question - if I'll replace local hard
+> drive during suspend - what will happen - is this prohibited by hw
+> (e.i. to switch SATA cables) ?
 
-:-) Ok, ok. Patch checking filesystem timestamps would be welcome in
-that case ;-).
+During _suspend_: yes. You are not expected to open your machine while
+powered up.
+
+> IMHO filesystem should be able to detect corruption of its data
+> structures - (assuming fs is notified about suspend/resume
+> operation)
+
+Patch welcome.
+
+> Also there could be one simple quick solution/hack - to require to
+> have at least all remote drives unmounted - so suspend would be
+> refused if it runs mounted card/usb drive -  this would be 100% bette=
+r
+> than current solution which effectively kills my laptop if I forget t=
+o
+> unmount card in mmc reader - especially if dmesg contains message wit=
+h
+> the reason why my suspend fails.
+
+It should not _kill_ your laptop -- that's a bug we want to
+fix. Instead it is designed to behave as if you hot-unplugged your
+card while mounted.
+
 									Pavel
 
--- 
+--=20
 (english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses=
+/blog.html
