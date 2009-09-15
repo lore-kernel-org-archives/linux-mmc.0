@@ -1,57 +1,54 @@
-From: Randy Dunlap <randy.dunlap@oracle.com>
-Subject: [PATCH -next] ssb/sdio: fix printk format warnings
-Date: Tue, 15 Sep 2009 14:52:40 -0700
-Message-ID: <20090915145240.d847dea8.randy.dunlap@oracle.com>
+From: Ben Dooks <ben-linux@fluff.org>
+Subject: Re: [PATCH 4/4] s3c6410: Remove redundant mpll parent assignment.
+Date: Wed, 16 Sep 2009 00:41:27 +0100
+Message-ID: <20090915234127.GA24720@trinity.fluff.org>
+References: <1252388401-31529-1-git-send-email-thomas.ab@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from acsinet12.oracle.com ([141.146.126.234]:58003 "EHLO
-	acsinet12.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751117AbZIOVw6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Sep 2009 17:52:58 -0400
+Received: from trinity.fluff.org ([89.16.178.74]:40980 "EHLO trinity.fluff.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753224AbZIOXl3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 Sep 2009 19:41:29 -0400
+Content-Disposition: inline
+In-Reply-To: <1252388401-31529-1-git-send-email-thomas.ab@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Michael Buesch <mb@bu3sch.de>
-Cc: netdev <netdev@vger.kernel.org>, akpm <akpm@linux-foundation.org>
+To: thomas.ab@samsung.com
+Cc: ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-From: Randy Dunlap <randy.dunlap@oracle.com>
+On Tue, Sep 08, 2009 at 02:40:01PM +0900, thomas.ab@samsung.com wrote:
+> From: Thomas Abraham <thomas.ab@samsung.com>
+> 
+> This patch removes the redundant MPLL parent assignment
+> in the function s3c6400_register_clocks.
 
-Fix printk format warnings:
-
-drivers/ssb/sdio.c:336: warning: format '%u' expects type 'unsigned int', but argument 7 has type 'size_t'
-drivers/ssb/sdio.c:443: warning: format '%u' expects type 'unsigned int', but argument 7 has type 'size_t'
-
-Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
----
- drivers/ssb/sdio.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
---- linux-next-20090914.orig/drivers/ssb/sdio.c
-+++ linux-next-20090914/drivers/ssb/sdio.c
-@@ -333,7 +333,7 @@ static void ssb_sdio_block_read(struct s
- 		goto out;
+Where is the other assignment being done from?
  
- err_out:
--	dev_dbg(ssb_sdio_dev(bus), "%04X:%04X (width=%u, len=%u), error %d\n",
-+	dev_dbg(ssb_sdio_dev(bus), "%04X:%04X (width=%u, len=%zu), error %d\n",
- 		bus->sdio_sbaddr >> 16, offset, reg_width, saved_count, error);
- out:
- 	sdio_release_host(bus->host_sdio);
-@@ -440,7 +440,7 @@ static void ssb_sdio_block_write(struct 
- 		goto out;
- 
- err_out:
--	dev_dbg(ssb_sdio_dev(bus), "%04X:%04X (width=%u, len=%u), error %d\n",
-+	dev_dbg(ssb_sdio_dev(bus), "%04X:%04X (width=%u, len=%zu), error %d\n",
- 		bus->sdio_sbaddr >> 16, offset, reg_width, saved_count, error);
- out:
- 	sdio_release_host(bus->host_sdio);
+> Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
+> ---
+>  arch/arm/plat-s3c64xx/s3c6400-clock.c |    1 -
+>  1 files changed, 0 insertions(+), 1 deletions(-)
+> 
+> diff --git a/arch/arm/plat-s3c64xx/s3c6400-clock.c b/arch/arm/plat-s3c64xx/s3c6400-clock.c
+> index 9745852..72c03ab 100644
+> --- a/arch/arm/plat-s3c64xx/s3c6400-clock.c
+> +++ b/arch/arm/plat-s3c64xx/s3c6400-clock.c
+> @@ -758,6 +758,5 @@ void __init s3c6400_register_clocks(unsigned armclk_divlimit)
+>  		}
+>  	}
+>  
+> -	clk_mpll.parent = &clk_mout_mpll.clk;
+>  	clk_epll.parent = &clk_mout_epll.clk;
+>  }
+> -- 
+> 1.5.3.4
+> 
 
+-- 
+-- 
+Ben
 
+Q:      What's a light-year?
+A:      One-third less calories than a regular year.
 
-
----
-~Randy
-LPC 2009, Sept. 23-25, Portland, Oregon
-http://linuxplumbersconf.org/2009/
