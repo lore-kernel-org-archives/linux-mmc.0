@@ -1,145 +1,128 @@
-From: Mahadev Cholachagudda <mgudda@gmail.com>
-Subject: [PATCH 1/1] CMD12 error recovery support for SD cards
-Date: Wed, 16 Sep 2009 16:09:11 +0530
-Message-ID: <bd31ea570909160339l5f996e9eh1f87abdbe527a404@mail.gmail.com>
-References: <bd31ea570909160334u1b17a068hd8be89c7035232f9@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH] MMCI enable the use of a regulator
+Date: Thu, 17 Sep 2009 00:17:21 +0200
+Message-ID: <1253139441-10596-1-git-send-email-linus.walleij@stericsson.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f180.google.com ([209.85.222.180]:48302 "EHLO
-	mail-pz0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752251AbZIPLFu convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2009 07:05:50 -0400
-Received: by pzk10 with SMTP id 10so17625pzk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2009 04:05:53 -0700 (PDT)
-In-Reply-To: <bd31ea570909160334u1b17a068hd8be89c7035232f9@mail.gmail.com>
+Received: from mail.df.lth.se ([194.47.250.12]:41013 "EHLO df.lth.se"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754836AbZIPWRf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Sep 2009 18:17:35 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: Linus Walleij <linus.walleij@stericsson.com>
 
-Dear All,
+This enables the use of a regulator to power the MMCI/PL180
+PrimeCell. The OCR mask is calculated and voltage is set using
+the new MMC core functions for discovering voltage ranges
+in regulators. The platform translate_vdd function which basically
+controls the 4 lines out of the PL180 is disabled if you use a
+regulator instead.
 
-I've a kernel code base of 2.6.28.9, where in I find that CMD12 error
-recovery is not been implemented. It is a wise idea to implement CMD12
-error recovery, that involves sending CMD13 to get the status of the
-card. If the card is in "trans" state, it means CMD12 error shall be
-treated as successfull. If card state is not in "trans", then we have
-to send CMD12 again to stop the data transfer and then checking of the
-card status through CMD13. This sequence is detailed in the
-"Simplified Host Controller specification" on SDCard website. I
-believe this is the case for any controller, though I may be wrong.
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+---
+ drivers/mmc/host/mmci.c |   50 +++++++++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/host/mmci.h |    1 +
+ 2 files changed, 47 insertions(+), 4 deletions(-)
 
-With the modification done to the code which is attached as patch to
-the latest mmc git, it is working at our site. And we do see some
-errors with the SDIO controller (proprietary but meets Standard SD
-host controller specification) that we are using.
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 79205e5..3d1e532 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -23,6 +23,7 @@
+ #include <linux/scatterlist.h>
+ #include <linux/gpio.h>
+ #include <linux/amba/mmci.h>
++#include <linux/regulator/consumer.h>
+ 
+ #include <asm/cacheflush.h>
+ #include <asm/div64.h>
+@@ -452,13 +453,28 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	u32 pwr = 0;
+ 	unsigned long flags;
+ 
+-	if (host->plat->translate_vdd)
+-		pwr |= host->plat->translate_vdd(mmc_dev(mmc), ios->vdd);
+-
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_OFF:
++		if(host->vcc &&
++		   regulator_is_enabled(host->vcc))
++			regulator_disable(host->vcc);
+ 		break;
+ 	case MMC_POWER_UP:
++#ifdef CONFIG_REGULATOR
++		if (host->vcc)
++			/* This implicitly enables the regulator */
++			mmc_regulator_set_ocr(host->vcc, ios->vdd);
++#endif
++		/*
++		 * The translate_vdd function is not used if you have
++		 * an external regulator, or your design is really weird.
++		 * Using it would mean sending in power control BOTH using
++		 * a regulator AND the 4 MMCIPWR bits. If we don't have
++		 * a regulator, we might have some other platform specific
++		 * power control behind this translate function.
++		 */
++		if (!host->vcc && host->plat->translate_vdd)
++			pwr |= host->plat->translate_vdd(mmc_dev(mmc), ios->vdd);
+ 		/* The ST version does not have this, fall through to POWER_ON */
+ 		if (host->hw_designer != AMBA_VENDOR_ST) {
+ 			pwr |= MCI_PWR_UP;
+@@ -603,7 +619,29 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
+ 	mmc->ops = &mmci_ops;
+ 	mmc->f_min = (host->mclk + 511) / 512;
+ 	mmc->f_max = min(host->mclk, fmax);
+-	mmc->ocr_avail = plat->ocr_mask;
++#ifdef CONFIG_REGULATOR
++	/* If we're using the regulator framework, try to fetch a regulator */
++	host->vcc = regulator_get(&dev->dev, "vmmc");
++	if (IS_ERR(host->vcc))
++		host->vcc = NULL;
++	else {
++		int mask = mmc_regulator_get_ocrmask(host->vcc);
++
++		if (mask < 0)
++			dev_err(&dev->dev, "error getting OCR mask (%d)\n",
++				mask);
++		else {
++			host->mmc->ocr_avail = (u32) mask;
++			if (plat->ocr_mask)
++				dev_warn(&dev->dev,
++				 "Provided ocr_mask/setpower will not be used "
++				 "(using regulator instead)\n");
++		}
++	}
++#endif
++	/* Fall back to platform data if no regulator is found */
++	if (host->vcc == NULL)
++		mmc->ocr_avail = plat->ocr_mask;
+ 	mmc->caps = plat->capabilities;
+ 
+ 	/*
+@@ -741,6 +779,10 @@ static int __devexit mmci_remove(struct amba_device *dev)
+ 		clk_disable(host->clk);
+ 		clk_put(host->clk);
+ 
++		if (regulator_is_enabled(host->vcc))
++			regulator_disable(host->vcc);
++		regulator_put(host->vcc);
++
+ 		mmc_free_host(mmc);
+ 
+ 		amba_release_regions(dev);
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index a7f9a51..1ceb9a9 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -175,6 +175,7 @@ struct mmci_host {
+ 	struct scatterlist	*sg_ptr;
+ 	unsigned int		sg_off;
+ 	unsigned int		size;
++	struct regulator	*vcc;
+ };
+ 
+ static inline void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
+-- 
+1.6.2.1
 
-Request you to comment on the patch.
-
-diff -urNd linux-orig/drivers/mmc/card/block.c
-linux-current/drivers/mmc/card/block.c
---- linux-orig/drivers/mmc/card/block.c=A0=A0=A0 2009-09-16 15:43:03.66=
-7274139 +0530
-+++ linux-current/drivers/mmc/card/block.c=A0=A0=A0 2009-09-16
-15:36:24.722272962 +0530
-@@ -335,6 +335,76 @@
-=A0=A0=A0=A0 =A0=A0=A0 =A0* until later as we need to wait for the card=
- to leave
-=A0=A0=A0=A0 =A0=A0=A0 =A0* programming mode even when things go wrong.
-=A0=A0=A0=A0 =A0=A0=A0 =A0*/
-+
-+=A0=A0=A0 /* cmd12 error recovery fix */
-+=A0=A0=A0 if( (brq.stop.error) && (brq.data.blocks > 1) &&
-!mmc_host_is_spi(card->host) &&
-+=A0=A0=A0=A0=A0=A0=A0 mmc_card_sd(card) ) {
-+
-+=A0=A0=A0=A0=A0 struct mmc_request my_mrq;
-+=A0=A0=A0=A0=A0 struct mmc_command my_cmd;
-+
-+=A0=A0=A0=A0=A0 /*
-+=A0=A0=A0=A0=A0=A0 * if there is an error for CMD12, get the state of =
-the card by
-+=A0=A0=A0=A0=A0=A0 * sending cmd13 and then check the state of the car=
-d.
-+=A0=A0=A0=A0=A0=A0 * If the card state is "tran", consider the cmd12 i=
-s successfull
-+=A0=A0=A0=A0=A0=A0 * If not, then send again CMD12 to stop the data tr=
-ansfer. This time,
-+=A0=A0=A0=A0=A0=A0 * any failure to get response, will result in to th=
-e card being
-+=A0=A0=A0=A0=A0=A0 * non-recoverable.
-+=A0=A0=A0=A0=A0=A0 */
-+
-+=A0=A0=A0=A0=A0 memset(&my_mrq, 0, sizeof(struct mmc_request));
-+=A0=A0=A0=A0=A0 memset(&my_cmd, 0, sizeof(struct mmc_command));
-+=A0=A0=A0=A0=A0 my_cmd.opcode =3D MMC_SEND_STATUS;
-+=A0=A0=A0=A0=A0 my_cmd.arg =3D card->rca << 16;
-+=A0=A0=A0=A0=A0 my_cmd.flags =3D MMC_RSP_R1 | MMC_CMD_AC;
-+=A0=A0=A0=A0=A0 my_mrq.cmd =3D &my_cmd;
-+=A0=A0=A0=A0=A0 mmc_wait_for_req(card->host, &my_mrq);
-+
-+=A0=A0=A0=A0=A0 if(!my_mrq.cmd->error) {
-+=A0=A0=A0=A0=A0=A0=A0 if(R1_CURRENT_STATE(my_cmd.resp[0]) =3D=3D 4) {
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 /* card is in "trans" state, so treat the =
-CMD12 as succesfull */
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 brq.stop.error =3D 0;
-+=A0=A0=A0=A0=A0=A0=A0 }
-+=A0=A0=A0=A0=A0=A0=A0 else {
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 /*
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 * card is not still in trans state. Now=
- send CMD12 again and repeat
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 * the process of checking the card stat=
-us using CMD13
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 */
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 memset(&my_cmd, 0, sizeof(struct mmc_comma=
-nd));
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 my_cmd.opcode =3D MMC_STOP_TRANSMISSION;
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 my_cmd.arg =3D 0;
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 my_cmd.flags =3D MMC_RSP_SPI_R1B | MMC_RSP=
-_R1B | MMC_CMD_AC;
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 my_mrq.cmd =3D &my_cmd;
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 mmc_wait_for_req(card->host, &my_mrq);
-+
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 /* get the card status */
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 memset(&my_cmd, 0, sizeof(struct mmc_comma=
-nd));
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 my_cmd.opcode =3D MMC_SEND_STATUS;
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 my_cmd.arg =3D card->rca << 16;
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 my_cmd.flags =3D MMC_RSP_R1 | MMC_CMD_AC;
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 my_mrq.cmd =3D &my_cmd;
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 mmc_wait_for_req(card->host, &my_mrq);
-+
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 if(!my_mrq.cmd->error) {
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 if(R1_CURRENT_STATE(my_cmd.resp[0]) =
-=3D=3D 4) {
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 /* card is in "trans" state, s=
-o treat the CMD12 as succesfull */
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 brq.stop.error =3D 0;
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 }
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 else {
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 /*
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 * card is not in "trans" st=
-ate yet. Just post an error and
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 * error is not recoverable
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 */
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 }
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 }
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 else {
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 /* error for cmd13!!, then something=
- is wrong with the card */
-+=A0=A0=A0=A0=A0=A0=A0=A0=A0 }
-+=A0=A0=A0=A0=A0=A0=A0 }
-+=A0=A0=A0=A0=A0 }
-+=A0=A0=A0 }
-+=A0=A0=A0 /* cmd12 error recovery fix */
-+
-=A0=A0=A0=A0 =A0=A0=A0 if (brq.cmd.error || brq.data.error || brq.stop.=
-error) {
-=A0=A0=A0=A0 =A0=A0=A0 =A0=A0=A0 if (brq.data.blocks > 1 && rq_data_dir=
-(req) =3D=3D READ) {
-=A0=A0=A0=A0 =A0=A0=A0 =A0=A0=A0 =A0=A0=A0 /* Redo read one sector at a=
- time */
-
-Regards,
-Mahadev Cholachagudda
