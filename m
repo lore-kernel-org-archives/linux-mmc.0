@@ -1,52 +1,80 @@
 From: Ben Dooks <ben-linux@fluff.org>
-Subject: Re: [PATCH 5/8] s3c6410: sdhci: Removing unused host_caps entry from sdhci0 platform data
-Date: Wed, 16 Sep 2009 01:50:41 +0100
-Message-ID: <20090916005041.GS13508@trinity.fluff.org>
-References: <1252392910-31200-1-git-send-email-thomas.ab@samsung.com>
+Subject: Re: [PATCH 8/8] s3c6410: sdhci: Updating sdhci_s3c_remove module exit function
+Date: Wed, 16 Sep 2009 01:52:01 +0100
+Message-ID: <20090916005201.GT13508@trinity.fluff.org>
+References: <1252393355-31920-1-git-send-email-thomas.ab@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from trinity.fluff.org ([89.16.178.74]:47305 "EHLO trinity.fluff.org"
+Received: from trinity.fluff.org ([89.16.178.74]:47355 "EHLO trinity.fluff.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751665AbZIPAui (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 15 Sep 2009 20:50:38 -0400
+	id S1751116AbZIPAv6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 Sep 2009 20:51:58 -0400
 Content-Disposition: inline
-In-Reply-To: <1252392910-31200-1-git-send-email-thomas.ab@samsung.com>
+In-Reply-To: <1252393355-31920-1-git-send-email-thomas.ab@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: thomas.ab@samsung.com
 Cc: ben-linux@fluff.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Tue, Sep 08, 2009 at 03:55:10PM +0900, thomas.ab@samsung.com wrote:
+On Tue, Sep 08, 2009 at 04:02:35PM +0900, thomas.ab@samsung.com wrote:
 > From: Thomas Abraham <thomas.ab@samsung.com>
 > 
-> This patch removes the unused 'host_caps' entry from the sdhci0
-> platform data.
-
-Hmm, I guess we can sort out the capabilities from the information
-supplied elsewhere in the platfor data.
-
-Please merge the changes into one patch with the remvoal of the field
-from the platform data.
- 
+> This patch populates the sdhci_s3c_remove function in the
+> s3c sdhci driver. This will allow s3c sdhci driver to be
+> used as a module.
+> 
 > Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
 > ---
->  arch/arm/plat-s3c/dev-hsmmc.c |    2 --
->  1 files changed, 0 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci-s3c.c |   26 ++++++++++++++++++++++++++
+>  1 files changed, 26 insertions(+), 0 deletions(-)
 > 
-> diff --git a/arch/arm/plat-s3c/dev-hsmmc.c b/arch/arm/plat-s3c/dev-hsmmc.c
-> index 357ec60..647ca09 100644
-> --- a/arch/arm/plat-s3c/dev-hsmmc.c
-> +++ b/arch/arm/plat-s3c/dev-hsmmc.c
-> @@ -39,8 +39,6 @@ static u64 s3c_device_hsmmc_dmamask = 0xffffffffUL;
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 7f5b64e..80e8c38 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -380,9 +380,35 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
 >  
->  struct s3c_sdhci_platdata s3c_hsmmc0_def_platdata = {
->  	.max_width		= 4,
-> -	.host_caps		= (MMC_CAP_4_BIT_DATA |
-> -				  MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED),
->  	.clk_parent_name	= "dout_mpll",
->  	.clk_source_name 	= "mmc_bus",
->  	.clk_speed		= 50*MHZ,
+>  static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+>  {
+> +	struct sdhci_host *host =  platform_get_drvdata(pdev);
+> +	struct sdhci_s3c *sc = sdhci_priv(host);
+> +	int ptr, dead = 0;
+> +	u32 scratch;
+> +
+> +	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
+> +	if (scratch == (u32)-1)
+> +		dead = 1;
+> +
+> +	sdhci_remove_host(host, dead);
+> +
+> +	for (ptr = 0; ptr < 3; ptr++) {
+
+ptr < ARRRAY_SIZE(sc->clk_bus)
+
+you probably also need to check for the validity of the clock
+and skip it if it is not in used.
+
+> +		clk_disable(sc->clk_bus[ptr]);
+> +		clk_put(sc->clk_bus[ptr]);
+> +	}
+> +	clk_disable(sc->clk_io);
+> +	clk_put(sc->clk_io);
+> +
+> +	iounmap(host->ioaddr);
+> +	release_resource(sc->ioarea);
+> +	kfree(sc->ioarea);
+> +
+> +	sdhci_free_host(host);
+> +	platform_set_drvdata(pdev, NULL);
+> +
+>  	return 0;
+>  }
+>  
+> +
+>  #ifdef CONFIG_PM
+>  
+>  static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t pm)
 > -- 
 > 1.5.3.4
 > 
