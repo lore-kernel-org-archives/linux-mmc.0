@@ -1,54 +1,52 @@
 From: Ben Dooks <ben-linux@fluff.org>
-Subject: Re: [PATCH 4/8] s3c6410: sdhci: Enable ADMA feature in 6410 sdhci controller.
-Date: Wed, 16 Sep 2009 01:47:38 +0100
-Message-ID: <20090916004737.GR13508@trinity.fluff.org>
-References: <1252392769-31159-1-git-send-email-thomas.ab@samsung.com>
+Subject: Re: [PATCH 5/8] s3c6410: sdhci: Removing unused host_caps entry from sdhci0 platform data
+Date: Wed, 16 Sep 2009 01:50:41 +0100
+Message-ID: <20090916005041.GS13508@trinity.fluff.org>
+References: <1252392910-31200-1-git-send-email-thomas.ab@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from trinity.fluff.org ([89.16.178.74]:42463 "EHLO trinity.fluff.org"
+Received: from trinity.fluff.org ([89.16.178.74]:47305 "EHLO trinity.fluff.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751838AbZIPAre (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 15 Sep 2009 20:47:34 -0400
+	id S1751665AbZIPAui (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 Sep 2009 20:50:38 -0400
 Content-Disposition: inline
-In-Reply-To: <1252392769-31159-1-git-send-email-thomas.ab@samsung.com>
+In-Reply-To: <1252392910-31200-1-git-send-email-thomas.ab@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: thomas.ab@samsung.com
 Cc: ben-linux@fluff.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Tue, Sep 08, 2009 at 03:52:49PM +0900, thomas.ab@samsung.com wrote:
+On Tue, Sep 08, 2009 at 03:55:10PM +0900, thomas.ab@samsung.com wrote:
 > From: Thomas Abraham <thomas.ab@samsung.com>
 > 
-> This patch enables ADMA feature in 6410 SDHCI controller
-> driver.
+> This patch removes the unused 'host_caps' entry from the sdhci0
+> platform data.
 
-Hmm, surely this wouldn't have wrapped and could have goine onto one line?
+Hmm, I guess we can sort out the capabilities from the information
+supplied elsewhere in the platfor data.
 
-Also no signoff.
-
+Please merge the changes into one patch with the remvoal of the field
+from the platform data.
+ 
+> Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
 > ---
->  drivers/mmc/host/sdhci-s3c.c |    7 +------
->  1 files changed, 1 insertions(+), 6 deletions(-)
+>  arch/arm/plat-s3c/dev-hsmmc.c |    2 --
+>  1 files changed, 0 insertions(+), 2 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index db1bb93..7f5b64e 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -329,12 +329,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  	host->irq = irq;
+> diff --git a/arch/arm/plat-s3c/dev-hsmmc.c b/arch/arm/plat-s3c/dev-hsmmc.c
+> index 357ec60..647ca09 100644
+> --- a/arch/arm/plat-s3c/dev-hsmmc.c
+> +++ b/arch/arm/plat-s3c/dev-hsmmc.c
+> @@ -39,8 +39,6 @@ static u64 s3c_device_hsmmc_dmamask = 0xffffffffUL;
 >  
->  	/* Setup quirks for the controller */
-> -
-> -	/* Currently with ADMA enabled we are getting some length
-> -	 * interrupts that are not being dealt with, do disable
-> -	 * ADMA until this is sorted out. */
-> -	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-> -	host->quirks |= SDHCI_QUIRK_32BIT_ADMA_SIZE;
-> +	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
->  
->  #ifndef CONFIG_MMC_SDHCI_S3C_DMA
->  
+>  struct s3c_sdhci_platdata s3c_hsmmc0_def_platdata = {
+>  	.max_width		= 4,
+> -	.host_caps		= (MMC_CAP_4_BIT_DATA |
+> -				  MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED),
+>  	.clk_parent_name	= "dout_mpll",
+>  	.clk_source_name 	= "mmc_bus",
+>  	.clk_speed		= 50*MHZ,
 > -- 
 > 1.5.3.4
 > 
