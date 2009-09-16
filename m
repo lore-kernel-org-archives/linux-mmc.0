@@ -1,19 +1,22 @@
 From: akpm@linux-foundation.org
-Subject: + mmc-core-sdio-suspend-resume-support.patch added to -mm tree
-Date: Wed, 16 Sep 2009 16:44:01 -0700
-Message-ID: <200909162344.n8GNi2qH021176@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: nico@fluxnic.net, linux-mmc@vger.kernel.org, nico@marvell.com
+Subject: + mmc-core-sdio-suspend-resume-support-fix.patch added to -mm tree
+Date: Wed, 16 Sep 2009 16:44:04 -0700
+Message-ID: <200909162344.n8GNi5Dq021198@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:48826 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1760615AbZIPXob (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2009 19:44:31 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org, nico@marvell.com
 
 
 The patch titled
-     mmc: core SDIO suspend/resume support
+     mmc-core-sdio-suspend-resume-support-fix
 has been added to the -mm tree.  Its filename is
-     mmc-core-sdio-suspend-resume-support.patch
+     mmc-core-sdio-suspend-resume-support-fix.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -29,338 +32,138 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: core SDIO suspend/resume support
-From: Nicolas Pitre <nico@fluxnic.net>
+Subject: mmc-core-sdio-suspend-resume-support-fix
+From: Andrew Morton <akpm@linux-foundation.org>
 
-Currently, all SDIO cards are virtually removed upon a suspend, and
-completely reprobed upon a resume.  This adds the suspend and resume
-methods to the SDIO bus driver so to be able to dispatch those events to
-the actual SDIO function drivers for real suspend/resume instead.
+drivers/mmc/core/sdio.c: In function 'mmc_sdio_suspend':
+drivers/mmc/core/sdio.c:410: warning: initialization discards qualifiers from pointer target type
+drivers/mmc/core/sdio.c:426: warning: initialization discards qualifiers from pointer target type
+drivers/mmc/core/sdio.c: In function 'mmc_sdio_resume':
+drivers/mmc/core/sdio.c:454: warning: initialization discards qualifiers from pointer target type
 
-All active functions on a card must have a driver with both a suspend and
-a resume method though.  Failing that, we fall back to the current
-behavior of simply "removing" the card when suspending.
-
-When resuming, we make sure the same card is still inserted by comparing
-the vendor and product IDs.  If there is a mismatch, or if there is simply
-no card anymore in the slot, then the previous card is "removed" and the
-new card is detected.  This is further enhanced with the next patch.
-
-Signed-off-by: Nicolas Pitre <nico@marvell.com>
 Cc: <linux-mmc@vger.kernel.org>
+Cc: Nicolas Pitre <nico@marvell.com>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/sdio.c |  285 ++++++++++++++++++++++++++------------
- 1 file changed, 196 insertions(+), 89 deletions(-)
+ drivers/mmc/core/sdio.c |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff -puN drivers/mmc/core/sdio.c~mmc-core-sdio-suspend-resume-support drivers/mmc/core/sdio.c
---- a/drivers/mmc/core/sdio.c~mmc-core-sdio-suspend-resume-support
+diff -puN drivers/mmc/core/sdio.c~mmc-core-sdio-suspend-resume-support-fix drivers/mmc/core/sdio.c
+--- a/drivers/mmc/core/sdio.c~mmc-core-sdio-suspend-resume-support-fix
 +++ a/drivers/mmc/core/sdio.c
-@@ -218,6 +218,134 @@ static int sdio_enable_hs(struct mmc_car
- }
- 
- /*
-+ * Handle the detection and initialisation of a card.
-+ *
-+ * In the case of a resume, "oldcard" will contain the card
-+ * we're trying to reinitialise.
-+ */
-+static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
-+			      struct mmc_card *oldcard)
-+{
-+	struct mmc_card *card;
-+	int err;
-+
-+	BUG_ON(!host);
-+	WARN_ON(!host->claimed);
-+
-+	/*
-+	 * Inform the card of the voltage
-+	 */
-+	err = mmc_send_io_op_cond(host, host->ocr, &ocr);
-+	if (err)
-+		goto err;
-+
-+	/*
-+	 * For SPI, enable CRC as appropriate.
-+	 */
-+	if (mmc_host_is_spi(host)) {
-+		err = mmc_spi_set_crc(host, use_spi_crc);
-+		if (err)
-+			goto err;
-+	}
-+
-+	/*
-+	 * Allocate card structure.
-+	 */
-+	card = mmc_alloc_card(host, NULL);
-+	if (IS_ERR(card)) {
-+		err = PTR_ERR(card);
-+		goto err;
-+	}
-+
-+	card->type = MMC_TYPE_SDIO;
-+
-+	/*
-+	 * For native busses:  set card RCA and quit open drain mode.
-+	 */
-+	if (!mmc_host_is_spi(host)) {
-+		err = mmc_send_relative_addr(host, &card->rca);
-+		if (err)
-+			goto remove;
-+
-+		mmc_set_bus_mode(host, MMC_BUSMODE_PUSHPULL);
-+	}
-+
-+	/*
-+	 * Select card, as all following commands rely on that.
-+	 */
-+	if (!mmc_host_is_spi(host)) {
-+		err = mmc_select_card(card);
-+		if (err)
-+			goto remove;
-+	}
-+
-+	/*
-+	 * Read the common registers.
-+	 */
-+	err = sdio_read_cccr(card);
-+	if (err)
-+		goto remove;
-+
-+	/*
-+	 * Read the common CIS tuples.
-+	 */
-+	err = sdio_read_common_cis(card);
-+	if (err)
-+		goto remove;
-+
-+	if (oldcard) {
-+		int same = (card->cis.vendor == oldcard->cis.vendor &&
-+			    card->cis.device == oldcard->cis.device);
-+		mmc_remove_card(card);
-+		if (!same) {
-+			err = -ENOENT;
-+			goto err;
-+		}
-+		card = oldcard;
-+	}
-+
-+	/*
-+	 * Switch to high-speed (if supported).
-+	 */
-+	err = sdio_enable_hs(card);
-+	if (err)
-+		goto remove;
-+
-+	/*
-+	 * Change to the card's maximum speed.
-+	 */
-+	if (mmc_card_highspeed(card)) {
-+		/*
-+		 * The SDIO specification doesn't mention how
-+		 * the CIS transfer speed register relates to
-+		 * high-speed, but it seems that 50 MHz is
-+		 * mandatory.
-+		 */
-+		mmc_set_clock(host, 50000000);
-+	} else {
-+		mmc_set_clock(host, card->cis.max_dtr);
-+	}
-+
-+	/*
-+	 * Switch to wider bus (if supported).
-+	 */
-+	err = sdio_enable_wide(card);
-+	if (err)
-+		goto remove;
-+
-+	if (!oldcard)
-+		host->card = card;
-+	return 0;
-+
-+remove:
-+	if (!oldcard)
-+		mmc_remove_card(card);
-+
-+err:
-+	return err;
-+}
-+
-+/*
-  * Host is being removed. Free up the current card.
-  */
- static void mmc_sdio_remove(struct mmc_host *host)
-@@ -266,10 +394,74 @@ static void mmc_sdio_detect(struct mmc_h
+@@ -407,7 +407,7 @@ static void mmc_sdio_suspend(struct mmc_
+ 	for (i = 0; i < host->card->sdio_funcs; i++) {
+ 		struct sdio_func *func = host->card->sdio_func[i];
+ 		if (func && sdio_func_present(func) && func->dev.driver) {
+-			struct dev_pm_ops *pmops = func->dev.driver->pm;
++			const struct dev_pm_ops *pmops = func->dev.driver->pm;
+ 			if (!pmops || !pmops->suspend || !pmops->resume) {
+ 				/* just remove the entire card in that case */
+ 				mmc_sdio_remove(host);
+@@ -423,7 +423,7 @@ static void mmc_sdio_suspend(struct mmc_
+ 	for (i = 0; i < host->card->sdio_funcs; i++) {
+ 		struct sdio_func *func = host->card->sdio_func[i];
+ 		if (func && sdio_func_present(func) && func->dev.driver) {
+-			struct dev_pm_ops *pmops = func->dev.driver->pm;
++			const struct dev_pm_ops *pmops = func->dev.driver->pm;
+ 			pmops->suspend(&func->dev);
+ 		}
  	}
- }
- 
-+/*
-+ * SDIO suspend.  We need to suspend all functions separately.
-+ * Therefore all registered functions must have drivers with suspend
-+ * and resume methods.  Failing that we simply remove the whole card.
-+ */
-+static void mmc_sdio_suspend(struct mmc_host *host)
-+{
-+	int i;
-+
-+	/* make sure all registered functions can suspend/resume */
-+	for (i = 0; i < host->card->sdio_funcs; i++) {
-+		struct sdio_func *func = host->card->sdio_func[i];
-+		if (func && sdio_func_present(func) && func->dev.driver) {
-+			struct dev_pm_ops *pmops = func->dev.driver->pm;
-+			if (!pmops || !pmops->suspend || !pmops->resume) {
-+				/* just remove the entire card in that case */
-+				mmc_sdio_remove(host);
-+				mmc_claim_host(host);
-+				mmc_detach_bus(host);
-+				mmc_release_host(host);
-+				return;
-+			}
-+		}
-+	}
-+
-+	/* now suspend them */
-+	for (i = 0; i < host->card->sdio_funcs; i++) {
-+		struct sdio_func *func = host->card->sdio_func[i];
-+		if (func && sdio_func_present(func) && func->dev.driver) {
-+			struct dev_pm_ops *pmops = func->dev.driver->pm;
-+			pmops->suspend(&func->dev);
-+		}
-+	}
-+}
-+
-+static void mmc_sdio_resume(struct mmc_host *host)
-+{
-+	int i, err;
-+
-+	BUG_ON(!host);
-+	BUG_ON(!host->card);
-+
-+	mmc_claim_host(host);
-+	err = mmc_sdio_init_card(host, host->ocr, host->card);
-+	mmc_release_host(host);
-+	if (err) {
-+		mmc_sdio_remove(host);
-+		mmc_claim_host(host);
-+		mmc_detach_bus(host);
-+		mmc_release_host(host);
-+		return;
-+	}
-+
-+	/* resume all functions */
-+	for (i = 0; i < host->card->sdio_funcs; i++) {
-+		struct sdio_func *func = host->card->sdio_func[i];
-+		if (func && sdio_func_present(func) && func->dev.driver) {
-+			struct dev_pm_ops *pmops = func->dev.driver->pm;
-+			pmops->resume(&func->dev);
-+		}
-+	}
-+}
- 
- static const struct mmc_bus_ops mmc_sdio_ops = {
- 	.remove = mmc_sdio_remove,
- 	.detect = mmc_sdio_detect,
-+	.suspend = mmc_sdio_suspend,
-+	.resume = mmc_sdio_resume,
- };
- 
- 
-@@ -309,103 +501,18 @@ int mmc_attach_sdio(struct mmc_host *hos
+@@ -451,7 +451,7 @@ static void mmc_sdio_resume(struct mmc_h
+ 	for (i = 0; i < host->card->sdio_funcs; i++) {
+ 		struct sdio_func *func = host->card->sdio_func[i];
+ 		if (func && sdio_func_present(func) && func->dev.driver) {
+-			struct dev_pm_ops *pmops = func->dev.driver->pm;
++			const struct dev_pm_ops *pmops = func->dev.driver->pm;
+ 			pmops->resume(&func->dev);
+ 		}
  	}
- 
- 	/*
--	 * Inform the card of the voltage
-+	 * Detect and init the card.
- 	 */
--	err = mmc_send_io_op_cond(host, host->ocr, &ocr);
-+	err = mmc_sdio_init_card(host, host->ocr, NULL);
- 	if (err)
- 		goto err;
--
--	/*
--	 * For SPI, enable CRC as appropriate.
--	 */
--	if (mmc_host_is_spi(host)) {
--		err = mmc_spi_set_crc(host, use_spi_crc);
--		if (err)
--			goto err;
--	}
-+	card = host->card;
- 
- 	/*
- 	 * The number of functions on the card is encoded inside
- 	 * the ocr.
- 	 */
--	funcs = (ocr & 0x70000000) >> 28;
--
--	/*
--	 * Allocate card structure.
--	 */
--	card = mmc_alloc_card(host, NULL);
--	if (IS_ERR(card)) {
--		err = PTR_ERR(card);
--		goto err;
--	}
--
--	card->type = MMC_TYPE_SDIO;
--	card->sdio_funcs = funcs;
--
--	host->card = card;
--
--	/*
--	 * For native busses:  set card RCA and quit open drain mode.
--	 */
--	if (!mmc_host_is_spi(host)) {
--		err = mmc_send_relative_addr(host, &card->rca);
--		if (err)
--			goto remove;
--
--		mmc_set_bus_mode(host, MMC_BUSMODE_PUSHPULL);
--	}
--
--	/*
--	 * Select card, as all following commands rely on that.
--	 */
--	if (!mmc_host_is_spi(host)) {
--		err = mmc_select_card(card);
--		if (err)
--			goto remove;
--	}
--
--	/*
--	 * Read the common registers.
--	 */
--	err = sdio_read_cccr(card);
--	if (err)
--		goto remove;
--
--	/*
--	 * Read the common CIS tuples.
--	 */
--	err = sdio_read_common_cis(card);
--	if (err)
--		goto remove;
--
--	/*
--	 * Switch to high-speed (if supported).
--	 */
--	err = sdio_enable_hs(card);
--	if (err)
--		goto remove;
--
--	/*
--	 * Change to the card's maximum speed.
--	 */
--	if (mmc_card_highspeed(card)) {
--		/*
--		 * The SDIO specification doesn't mention how
--		 * the CIS transfer speed register relates to
--		 * high-speed, but it seems that 50 MHz is
--		 * mandatory.
--		 */
--		mmc_set_clock(host, 50000000);
--	} else {
--		mmc_set_clock(host, card->cis.max_dtr);
--	}
+_
+
+Patches currently in -mm which might be from akpm@linux-foundation.org are
+
+origin.patch
+fs-make-sure-data-stored-into-inode-is-properly-seen-before-unlocking-new-inode-fix.patch
+linux-next.patch
+linux-next-git-rejects.patch
+next-remove-localversion.patch
+i-need-old-gcc.patch
+arch-x86-kernel-cpu-cpufreq-acpi-cpufreqc-avoid-cross-cpu-interrupts-by-using-smp_call_function_any.patch
+hwmon-driver-for-acpi-40-power-meters-fix.patch
+hwmon-driver-for-acpi-40-power-meters-fix-2.patch
+cpuidle-fix-the-menu-governor-to-boost-io-performance.patch
+video-initial-support-for-adv7180-update-fix.patch
+timer-stats-fix-del_timer_sync-and-try_to_del_timer_sync.patch
+input-drivers-input-xpadc-improve-xbox-360-wireless-support-and-add-sysfs-interface.patch
+input-documentation-input-xpadtxt-update-for-new-driver-functionality.patch
+checkincludespl-add-option-to-remove-duplicates-in-place.patch
+zorro8390-fix-read-buffer-overflow-in-zorro8390_init_one-checkpatch-fixes.patch
+3x59x-fix-pci-resource-management.patch
+bluetooth-fix-for-acer-bluetooth-optical-rechargeable-mouse.patch
+serial167-fix-read-buffer-overflow.patch
+waitqueues-give-waitqueue-spinlocks-their-own-lockdep-classes-checkpatch-fixes.patch
+st-fix-test-of-value-range-in-st_set_options-fix.patch
+raw-fix-rawctl-compat-ioctls-breakage-on-amd64-and-itanic.patch
+libfs-make-simple_read_from_buffer-conventional.patch
+fs-fix-overflow-in-sys_mount-for-in-kernel-calls.patch
+vfs-optimize-touch_time-too.patch
+fs-improve-remountro-vs-buffercache-coherency-fix.patch
+percpu-avoid-calling-__pcpu_ptr_to_addrnull.patch
+mm-make-swap-token-dummies-static-inlines-fix.patch
+readahead-add-blk_run_backing_dev-fix.patch
+readahead-add-blk_run_backing_dev-fix-fix-2.patch
+memory-hotplug-update-zone-pcp-at-memory-online-fix.patch
+revert-hugetlb-restore-interleaving-of-bootmem-huge-pages-2631.patch
+vmscan-dont-attempt-to-reclaim-anon-page-in-lumpy-reclaim-when-no-swap-space-is-avilable.patch
+revert-proc-kcore-work-around-a-bug.patch
+arches-drop-superfluous-casts-in-nr_free_pages-callers-checkpatch-fixes.patch
+tracing-page-allocator-add-trace-event-for-page-traffic-related-to-the-buddy-lists-fix.patch
+page-allocator-maintain-rolling-count-of-pages-to-free-from-the-pcp-checkpatch-fixes.patch
+dev-mem-cleanup-unxlate_dev_mem_ptr-calls-fix.patch
+dev-mem-cleanup-unxlate_dev_mem_ptr-calls-fix-fix.patch
+frv-duplicate-output_buffer-of-e03-checkpatch-fixes.patch
+printk-boot_delay-rename-printk_delay_msec-to-loops_per_msec-fix.patch
+printk-add-printk_delay-to-make-messages-readable-for-some-scenarios-fix.patch
+printk-add-printk_delay-to-make-messages-readable-for-some-scenarios-cleanup.patch
+generic-ipi-make-struct-call_function_data-lockless-cleanup.patch
+proc-connector-add-event-for-process-becoming-session-leader.patch
+kernel-smpc-relocate-some-code.patch
+mmc-register-mmci-omap-hs-using-platform_driver_probe.patch
+sdio-add-cd-disable-support-cleanup.patch
+sdio-add-mmc_quirk_lenient_fn0-fix.patch
+at91-atmel-mci-platform-configuration-to-the-the-atmel-mci-driver-checkpatch-fixes.patch
+mmc-core-sdio-suspend-resume-support-fix.patch
+procfs-provide-stack-information-for-threads-v011-fix.patch
+kcore-register-vmemmap-range-fix.patch
+rtc-add-driver-for-mxcs-internal-rtc-module-fix.patch
+rtc-add-driver-for-mxcs-internal-rtc-module-fix-fix.patch
+gpiolib-add-names-file-in-gpio-chip-sysfs-checkpatch-fixes.patch
+gpiolib-add-names-file-in-gpio-chip-sysfs-checkpatch-fixes-fix.patch
+davinci-fb-frame-buffer-driver-for-ti-da8xx-omap-l1xx.patch
+davinci-fb-frame-buffer-driver-for-ti-da8xx-omap-l1xx-v4-cleanup.patch
+drivers-video-add-kmalloc-null-tests-fix.patch
+v3-minixfs-add-missing-directory-type-checking-checkpatch-fixes.patch
+page-types-add-feature-for-walking-process-address-space-checkpatch-fixes.patch
+cgroups-add-functionality-to-read-write-lock-clone_thread-forking-per-threadgroup-fix.patch
+memcg-remove-the-overhead-associated-with-the-root-cgroup-fix.patch
+memcg-add-comments-explaining-memory-barriers-checkpatch-fixes.patch
+memory-controller-soft-limit-reclaim-on-contention-v9-fix.patch
+memcg-improve-resource-counter-scalability-checkpatch-fixes.patch
+exec-make-do_coredump-more-resilient-to-recursive-crashes-v9-checkpatch-fixes.patch
+exec-let-do_coredump-limit-the-number-of-concurrent-dumps-to-pipes-v9-checkpatch-fixes.patch
+elf-clean-up-fill_note_info-fix.patch
+net-netfilter-ipvs-ip_vs_wrrc-use-lib-gcdc-fix.patch
+reiser4-export-remove_from_page_cache-fix.patch
+reiser4.patch
+reiser4-remove-simple_prepare_write-usage-checkpatch-fixes.patch
+fs-reiser4-contextc-current_is_pdflush-got-removed.patch
+reiser4-fix.patch
+reiser4-disable.patch
+slab-leaks3-default-y.patch
+put_bh-debug.patch
+getblk-handle-2tb-devices.patch
+getblk-handle-2tb-devices-fix.patch
+undeprecate-pci_find_device.patch
+notify_change-callers-must-hold-i_mutex.patch
+
