@@ -1,26 +1,28 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [PATCH 0/2] mmc: atmel-mci: introduce MCI2 support on at91
-Date: Thu, 17 Sep 2009 18:29:25 +0200
-Message-ID: <1253204967-30010-1-git-send-email-nicolas.ferre@atmel.com>
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756956AbZIQPZu@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, haavard.skinnemoen@atmel.com, kernel@avr32linux.org
+From: "Eric Millbrandt" <emillbrandt@coldhaus.com>
+Subject: mmc_spi: do propper retry managment in the block layer
+Date: Thu, 17 Sep 2009 13:53:34 -0500
+Message-ID: <20090917185335.M87521@coldhaus.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset=iso-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from workbench.coldhaus.com ([74.0.48.218]:54634 "EHLO
+	workbench.coldhaus.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759148AbZIQTBM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Sep 2009 15:01:12 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: wolfgang.mues@auerswald.de
+Cc: linux-mmc@vger.kernel.org
 
-This patchset introduces the support of a new revision of the MCI IP on AT91
-SOCs. The use of an alternate DMA engine on those platforms introduces the need
-of a generic way of handling dma slave interface.
+Hello Wolfgang,
 
-Note: those patches goes on top of the following patch that is already in
-mmotm:
-        atmel-mci: Unified Atmel MCI drivers (AVR32 & AT91)
+What ever happened to your patch "mmc_spi: do propper retry managment in the
+block layer - 4th try"? (http://patchwork.kernel.org/patch/29551/)  I have
+been using this patch with success on my hardware.  I have not seen this patch
+picked up in either Pierre Ossman's or the -stable tree.  The patch does not
+apply cleanly to the 2.6.31 kernel, but I was able to iron out the
+differences.  It would be a shame to see you work go to waste.
 
-Nicolas Ferre (2):
-      atmel-mci: change use of dma slave interface
-      mmc: atmel-mci: New MCI2 module support in atmel-mci driver
+Eric
 
- arch/avr32/mach-at32ap/at32ap700x.c |    6 +-
- drivers/mmc/host/atmel-mci.c        |  167 ++++++++++++++++++++++++++++-------
- include/linux/atmel-mci.h           |    3 +-
- 3 files changed, 143 insertions(+), 33 deletions(-)
