@@ -1,88 +1,254 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-make-sdio-device-driver-struct-accessors-public.patch added to -mm tree
-Date: Wed, 16 Sep 2009 16:44:09 -0700
-Message-ID: <200909162344.n8GNi9x5021398@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: nico@fluxnic.net, linux-mmc@vger.kernel.org, nico@marvell.com
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: [PATCH 2/2] mmc: atmel-mci: New MCI2 module support in atmel-mci driver
+Date: Thu, 17 Sep 2009 18:29:27 +0200
+Message-ID: <1253204967-30010-3-git-send-email-nicolas.ferre@atmel.com>
+References: <1253204967-30010-1-git-send-email-nicolas.ferre@atmel.com>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755982AbZIQPZc@vger.kernel.org>
+In-Reply-To: <1253204967-30010-1-git-send-email-nicolas.ferre@atmel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, haavard.skinnemoen@atmel.com, kernel@avr32linux.org, Nicolas Ferre <nicolas.ferre@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
 
+This new revision of the IP adds some improvements to the MCI already present
+in several Atmel SOC.
+Some new registers are added and a particular way of handling DMA interaction
+lead to a new sequence in function call which is backward compatible: On MCI2,
+we must set the DMAEN bit to enable the DMA handshaking interface. This must
+happen before the data transfer command is sent.
 
-The patch titled
-     mmc: make SDIO device/driver struct accessors public
-has been added to the -mm tree.  Its filename is
-     mmc-make-sdio-device-driver-struct-accessors-public.patch
+A new function is able to differentiate MCI2 code and is based on knowledge of
+processor id (cpu_is_xxx()).
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: make SDIO device/driver struct accessors public
-From: Nicolas Pitre <nico@fluxnic.net>
-
-Especially with the PM framework, those are quite handy to have in driver
-code too.
-
-Signed-off-by: Nicolas Pitre <nico@marvell.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Signed-off-by: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
 ---
+ drivers/mmc/host/atmel-mci.c |   85 +++++++++++++++++++++++++++++++++++++-----
+ 1 files changed, 75 insertions(+), 10 deletions(-)
 
- drivers/mmc/core/sdio_bus.c   |    3 ---
- include/linux/mmc/sdio_func.h |    3 +++
- 2 files changed, 3 insertions(+), 3 deletions(-)
-
-diff -puN drivers/mmc/core/sdio_bus.c~mmc-make-sdio-device-driver-struct-accessors-public drivers/mmc/core/sdio_bus.c
---- a/drivers/mmc/core/sdio_bus.c~mmc-make-sdio-device-driver-struct-accessors-public
-+++ a/drivers/mmc/core/sdio_bus.c
-@@ -20,9 +20,6 @@
- #include "sdio_cis.h"
- #include "sdio_bus.h"
- 
--#define dev_to_sdio_func(d)	container_of(d, struct sdio_func, dev)
--#define to_sdio_driver(d)      container_of(d, struct sdio_driver, drv)
--
- /* show configuration fields */
- #define sdio_config_attr(field, format_string)				\
- static ssize_t								\
-diff -puN include/linux/mmc/sdio_func.h~mmc-make-sdio-device-driver-struct-accessors-public include/linux/mmc/sdio_func.h
---- a/include/linux/mmc/sdio_func.h~mmc-make-sdio-device-driver-struct-accessors-public
-+++ a/include/linux/mmc/sdio_func.h
-@@ -67,6 +67,7 @@ struct sdio_func {
- 
- #define sdio_get_drvdata(f)	dev_get_drvdata(&(f)->dev)
- #define sdio_set_drvdata(f,d)	dev_set_drvdata(&(f)->dev, d)
-+#define dev_to_sdio_func(d)	container_of(d, struct sdio_func, dev)
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 1689396..d9a1a8e 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -92,6 +92,7 @@ struct atmel_mci_dma {
+  * @need_clock_update: Update the clock rate before the next request.
+  * @need_reset: Reset controller before next request.
+  * @mode_reg: Value of the MR register.
++ * @cfg_reg: Value of the CFG register.
+  * @bus_hz: The rate of @mck in Hz. This forms the basis for MMC bus
+  *	rate and timeout calculations.
+  * @mapbase: Physical address of the MMIO registers.
+@@ -155,6 +156,7 @@ struct atmel_mci {
+ 	bool			need_clock_update;
+ 	bool			need_reset;
+ 	u32			mode_reg;
++	u32			cfg_reg;
+ 	unsigned long		bus_hz;
+ 	unsigned long		mapbase;
+ 	struct clk		*mck;
+@@ -223,6 +225,19 @@ static bool mci_has_rwproof(void)
+ }
  
  /*
-  * SDIO function device driver
-@@ -81,6 +82,8 @@ struct sdio_driver {
- 	struct device_driver drv;
- };
- 
-+#define to_sdio_driver(d)	container_of(d, struct sdio_driver, drv)
++ * The new MCI2 module isn't 100% compatible with the old MCI module,
++ * and it has a few nice features which we want to use...
++ */
++static inline bool atmci_is_mci2(void)
++{
++	if (cpu_is_at91sam9g45())
++		return true;
 +
- /**
-  * SDIO_DEVICE - macro used to describe a specific SDIO device
-  * @vend: the 16 bit manufacturer code
-_
-
-Patches currently in -mm which might be from nico@fluxnic.net are
-
-origin.patch
-mmc-core-sdio-suspend-resume-support.patch
-mmc-propagate-error-codes-back-from-bus-drivers-suspend-resume-methods.patch
-mmc-make-sdio-device-driver-struct-accessors-public.patch
-
++	return false;
++}
++
++
++/*
+  * The debugfs stuff below is mostly optimized away when
+  * CONFIG_DEBUG_FS is not set.
+  */
+@@ -357,12 +372,33 @@ static int atmci_regs_show(struct seq_file *s, void *v)
+ 			buf[MCI_BLKR / 4],
+ 			buf[MCI_BLKR / 4] & 0xffff,
+ 			(buf[MCI_BLKR / 4] >> 16) & 0xffff);
++	if (atmci_is_mci2())
++		seq_printf(s, "CSTOR:\t0x%08x\n", buf[MCI_CSTOR / 4]);
+ 
+ 	/* Don't read RSPR and RDR; it will consume the data there */
+ 
+ 	atmci_show_status_reg(s, "SR", buf[MCI_SR / 4]);
+ 	atmci_show_status_reg(s, "IMR", buf[MCI_IMR / 4]);
+ 
++	if (atmci_is_mci2()) {
++		u32 val;
++
++		val = buf[MCI_DMA / 4];
++		seq_printf(s, "DMA:\t0x%08x OFFSET=%u CHKSIZE=%u%s\n",
++				val, val & 3,
++				((val >> 4) & 3) ?
++					1 << (((val >> 4) & 3) + 1) : 1,
++				val & MCI_DMAEN ? " DMAEN" : "");
++
++		val = buf[MCI_CFG / 4];
++		seq_printf(s, "CFG:\t0x%08x%s%s%s%s\n",
++				val,
++				val & MCI_CFG_FIFOMODE_1DATA ? " FIFOMODE_ONE_DATA" : "",
++				val & MCI_CFG_FERRCTRL_COR ? " FERRCTRL_CLEAR_ON_READ" : "",
++				val & MCI_CFG_HSMODE ? " HSMODE" : "",
++				val & MCI_CFG_LSYNC ? " LSYNC" : "");
++	}
++
+ 	kfree(buf);
+ 
+ 	return 0;
+@@ -557,6 +593,10 @@ static void atmci_dma_complete(void *arg)
+ 
+ 	dev_vdbg(&host->pdev->dev, "DMA complete\n");
+ 
++	if (atmci_is_mci2())
++		/* Disable DMA hardware handshaking on MCI */
++		mci_writel(host, DMA, mci_readl(host, DMA) & ~MCI_DMAEN);
++
+ 	atmci_dma_cleanup(host);
+ 
+ 	/*
+@@ -592,7 +632,7 @@ static void atmci_dma_complete(void *arg)
+ }
+ 
+ static int
+-atmci_submit_data_dma(struct atmel_mci *host, struct mmc_data *data)
++atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ {
+ 	struct dma_chan			*chan;
+ 	struct dma_async_tx_descriptor	*desc;
+@@ -623,6 +663,9 @@ atmci_submit_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 	if (!chan)
+ 		return -ENODEV;
+ 
++	if (atmci_is_mci2())
++		mci_writel(host, DMA, MCI_DMA_CHKSIZE(3) | MCI_DMAEN);
++
+ 	if (data->flags & MMC_DATA_READ)
+ 		direction = DMA_FROM_DEVICE;
+ 	else
+@@ -637,21 +680,30 @@ atmci_submit_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 	host->dma.data_desc = desc;
+ 	desc->callback = atmci_dma_complete;
+ 	desc->callback_param = host;
+-	desc->tx_submit(desc);
+-
+-	/* Go! */
+-	chan->device->device_issue_pending(chan);
+ 
+ 	return 0;
+ }
+ 
++static void atmci_submit_data(struct atmel_mci *host)
++{
++	struct dma_chan			*chan = host->data_chan;
++	struct dma_async_tx_descriptor	*desc = host->dma.data_desc;
++
++	if (chan) {
++		desc->tx_submit(desc);
++		chan->device->device_issue_pending(chan);
++	}
++}
++
+ #else /* CONFIG_MMC_ATMELMCI_DMA */
+ 
+-static int atmci_submit_data_dma(struct atmel_mci *host, struct mmc_data *data)
++static int atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ {
+ 	return -ENOSYS;
+ }
+ 
++static void atmci_submit_data(struct atmel_mci *host) {}
++
+ static void atmci_stop_dma(struct atmel_mci *host)
+ {
+ 	/* Data transfer was stopped by the interrupt handler */
+@@ -665,7 +717,7 @@ static void atmci_stop_dma(struct atmel_mci *host)
+  * Returns a mask of interrupt flags to be enabled after the whole
+  * request has been prepared.
+  */
+-static u32 atmci_submit_data(struct atmel_mci *host, struct mmc_data *data)
++static u32 atmci_prepare_data(struct atmel_mci *host, struct mmc_data *data)
+ {
+ 	u32 iflags;
+ 
+@@ -676,7 +728,7 @@ static u32 atmci_submit_data(struct atmel_mci *host, struct mmc_data *data)
+ 	host->data = data;
+ 
+ 	iflags = ATMCI_DATA_ERROR_FLAGS;
+-	if (atmci_submit_data_dma(host, data)) {
++	if (atmci_prepare_data_dma(host, data)) {
+ 		host->data_chan = NULL;
+ 
+ 		/*
+@@ -722,6 +774,8 @@ static void atmci_start_request(struct atmel_mci *host,
+ 		mci_writel(host, CR, MCI_CR_SWRST);
+ 		mci_writel(host, CR, MCI_CR_MCIEN);
+ 		mci_writel(host, MR, host->mode_reg);
++		if (atmci_is_mci2())
++			mci_writel(host, CFG, host->cfg_reg);
+ 		host->need_reset = false;
+ 	}
+ 	mci_writel(host, SDCR, slot->sdc_reg);
+@@ -737,6 +791,7 @@ static void atmci_start_request(struct atmel_mci *host,
+ 		while (!(mci_readl(host, SR) & MCI_CMDRDY))
+ 			cpu_relax();
+ 	}
++	iflags = 0;
+ 	data = mrq->data;
+ 	if (data) {
+ 		atmci_set_timeout(host, slot, data);
+@@ -746,15 +801,17 @@ static void atmci_start_request(struct atmel_mci *host,
+ 				| MCI_BLKLEN(data->blksz));
+ 		dev_vdbg(&slot->mmc->class_dev, "BLKR=0x%08x\n",
+ 			MCI_BCNT(data->blocks) | MCI_BLKLEN(data->blksz));
++
++		iflags |= atmci_prepare_data(host, data);
+ 	}
+ 
+-	iflags = MCI_CMDRDY;
++	iflags |= MCI_CMDRDY;
+ 	cmd = mrq->cmd;
+ 	cmdflags = atmci_prepare_command(slot->mmc, cmd);
+ 	atmci_start_command(host, cmd, cmdflags);
+ 
+ 	if (data)
+-		iflags |= atmci_submit_data(host, data);
++		atmci_submit_data(host);
+ 
+ 	if (mrq->stop) {
+ 		host->stop_cmdr = atmci_prepare_command(slot->mmc, mrq->stop);
+@@ -850,6 +907,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			clk_enable(host->mck);
+ 			mci_writel(host, CR, MCI_CR_SWRST);
+ 			mci_writel(host, CR, MCI_CR_MCIEN);
++			if (atmci_is_mci2())
++				mci_writel(host, CFG, host->cfg_reg);
+ 		}
+ 
+ 		/*
+@@ -1088,6 +1147,8 @@ static void atmci_detect_change(unsigned long data)
+ 				mci_writel(host, CR, MCI_CR_SWRST);
+ 				mci_writel(host, CR, MCI_CR_MCIEN);
+ 				mci_writel(host, MR, host->mode_reg);
++				if (atmci_is_mci2())
++					mci_writel(host, CFG, host->cfg_reg);
+ 
+ 				host->data = NULL;
+ 				host->cmd = NULL;
+@@ -1637,6 +1698,10 @@ static void atmci_configure_dma(struct atmel_mci *host)
+ 	}
+ 	if (!host->dma.chan)
+ 		dev_notice(&host->pdev->dev, "DMA not available, using PIO\n");
++	else
++		dev_info(&host->pdev->dev,
++					"Using %s for DMA transfers\n",
++					dma_chan_name(host->dma.chan));
+ }
+ #else
+ static void atmci_configure_dma(struct atmel_mci *host) {}
+-- 
+1.5.6.5
