@@ -1,18 +1,39 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH] sdhci: Increase timeout for internal clock stabilization.
-Date: Fri, 18 Sep 2009 18:15:56 -0400
-Message-ID: <m3ocp7c31f.fsf@pullcord.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: akpm@linux-foundation.org
+Subject: + sdhci-increase-timeout-for-internal-clock-stabilization.patch added to -mm tree
+Date: Fri, 18 Sep 2009 15:30:57 -0700
+Message-ID: <200909182230.n8IMUv2f014367@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57052 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757334AbZIRWSr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 18 Sep 2009 18:18:47 -0400
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:46286 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751432AbZIRWb3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Sep 2009 18:31:29 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, HaraldWelte@viatech.com, Pierre Ossman <pierre@ossman.eu>, Deepak Saxena <dsaxena@laptop.org>
+To: mm-commits@vger.kernel.org
+Cc: cjb@laptop.org, HaraldWelte@viatech.com, linux-mmc@vger.kernel.org
+
+
+The patch titled
+     sdhci: increase timeout for internal clock stabilization.
+has been added to the -mm tree.  Its filename is
+     sdhci-increase-timeout-for-internal-clock-stabilization.patch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: sdhci: increase timeout for internal clock stabilization.
+From: Chris Ball <cjb@laptop.org>
 
 On an OLPC XO-1.5 development board with Via VX855 chipset, the sdhci
 controller can take up to 12ms to stabilize its clock, but the current
@@ -26,15 +47,17 @@ a little longer for in general.
 
 Signed-off-by: Chris Ball <cjb@laptop.org>
 Cc: Harald Welte <HaraldWelte@viatech.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
- drivers/mmc/host/sdhci.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index fc96f8c..00ab7b3 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -991,8 +991,8 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ drivers/mmc/host/sdhci.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff -puN drivers/mmc/host/sdhci.c~sdhci-increase-timeout-for-internal-clock-stabilization drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~sdhci-increase-timeout-for-internal-clock-stabilization
++++ a/drivers/mmc/host/sdhci.c
+@@ -994,8 +994,8 @@ static void sdhci_set_clock(struct sdhci
  	clk |= SDHCI_CLOCK_INT_EN;
  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
  
@@ -45,9 +68,10 @@ index fc96f8c..00ab7b3 100644
  	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
  		& SDHCI_CLOCK_INT_STABLE)) {
  		if (timeout == 0) {
--- 
-1.6.4
+_
 
--- 
-Chris Ball   <cjb@laptop.org>
-One Laptop Per Child
+Patches currently in -mm which might be from cjb@laptop.org are
+
+sdhci-add-no-card-no-reset-quirk-for-ricoh-r5c822-sony-z11.patch
+sdhci-increase-timeout-for-internal-clock-stabilization.patch
+
