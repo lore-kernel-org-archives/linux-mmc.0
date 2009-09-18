@@ -1,95 +1,62 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: EXT_CSD  Register : CSD_STRUCTURE vs CSD_CSD_REV
-Date: Fri, 18 Sep 2009 08:11:34 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B02F64D7C63@dbde02.ent.ti.com>
-References: <2A3DCF3DA181AD40BDE86A3150B27B6B02F6454333@dbde02.ent.ti.com>
- <20090914215140.7efe4671@mjolnir.ossman.eu>
+From: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
+Subject: Re: Regression in suspend to ram in 2.6.31-rc kernels
+Date: Fri, 18 Sep 2009 20:15:17 +0900
+Message-ID: <87fxaksdve.fsf@devron.myhome.or.jp>
+References: <20090903232317.GA6760@lst.de>
+	<c4e36d110909111445nb6592cfue01543f5d04c2cda@mail.gmail.com>
+	<m3eiqdqfnm.fsf@pullcord.laptop.org> <200909120036.41725.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:41959 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751165AbZIRClw convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Sep 2009 22:41:52 -0400
-Content-Language: en-US
+Received: from mail.parknet.ad.jp ([210.171.162.6]:36011 "EHLO
+	mail.officemail.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756055AbZIRLPV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Sep 2009 07:15:21 -0400
+In-Reply-To: <200909120036.41725.rjw@sisk.pl> (Rafael J. Wysocki's message of
+	"Sat, 12 Sep 2009 00:36:41 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Ossman <pierre@ossman.eu>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "Benjamin.Telya@sandisk.com" <Benjamin.Telya@sandisk.com>, "drzeus-list@drzeus.cx" <drzeus-list@drzeus.cx>, "Pandita, Vikram" <vikram.pandita@ti.com>, "Joshi, Rhishi" <rhishi@ti.com>, "Sawant, Anand" <sawant@ti.com>, "Raju, Veeramanikandan" <veera@ti.com>
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Chris Ball <cjb@laptop.org>, Zdenek Kabelac <zdenek.kabelac@gmail.com>, Pavel Machek <pavel@ucw.cz>, Christoph Hellwig <hch@lst.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, viro@zeniv.linux.org.uk
 
+"Rafael J. Wysocki" <rjw@sisk.pl> writes:
 
-HI,
+> On Saturday 12 September 2009, Chris Ball wrote:
+>> Hi,
+>> 
+>>    > Well system could check basic card ids if they match after resume
+>> 
+>> No.  That (arguably) guarantees that it's the same card, but not that
+>> it wasn't modified in another machine during the suspend.
+>
+> Generally speaking, we'd also need to check superblocks for this to work.
+>  
+>>    > if some users wants to crash his card by randomly swapping it
+>>    > during suspend/resume - I'd have no problem with that....
+>> 
+>> You should have a problem with it.  Taking a card from a suspended
+>> machine and working on it with a different machine is not a bizarre
+>> thing to want to do.
+>
+> Agreed.
 
-Thanks for the information.
+Um...
 
-And what I understood from MMCA specification is that - 
-EXT_CSD_REV: Defines the fixed parameters. related to the EXT_CSD, according to its revision. Nothing to do with MMCA specification version or > 4GB card.
+What happen if we moved remove event to resume sequence?  I.e. The
+resume generates remove and insert event (or such revalidate).  With
+this, I hope the suspend is not bothered by complex one, and the resume
+just ignores (if needed) previous state and notify it to userland by
+remove/insert event.
 
-SO, I need just one more help from you to browse the MMCA specification where it's mentioned that if Card is >4GB then EXT_CSD_REV Revision should be > 2 (Rev 1.2)?
+And, userland process should unmount for removal devices before suspend
+process (as part of userland preparation)?
 
-And again the fact I mentioned in my previous email that below fact is from Symbian OS too.
+If we assumed the removable device can be changed before resume, fs
+would need to recover process, to make sure in-core and on-disk state
+has consistent.
 
-So please reply and help me to understand better.
+Um..., for now, I feel the umount before suspend is only safe way.
 
-Thanks & regards,
-Ghorai 
-
------Original Message-----
-From: Pierre Ossman [mailto:pierre@ossman.eu] 
-Sent: 2009-09-15 01:22
-To: Ghorai, Sukumar
-Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org; Chikkature Rajashekar, Madhusudhan; Benjamin.Telya@sandisk.com; drzeus-list@drzeus.cx; Pandita, Vikram; Joshi, Rhishi; Sawant, Anand; Raju, Veeramanikandan
-Subject: Re: EXT_CSD Register : CSD_STRUCTURE vs CSD_CSD_REV
-
-On Mon, 14 Sep 2009 20:34:35 +0530
-"Ghorai, Sukumar" <s-ghorai@ti.com> wrote:
-
-> Hello,
-> 
-> I am working in Linux MMC driver.
-> Recently I came across one 16GB MMC card where EXT_CSD Register having EXT_CSD_REV[192] field as ZERO, which is valid according to Specification. But card is not working due to following reason -
-> 
->  1.  As we know there are two fields in Extended CSD Register -  CSD_STRUCTURE Version[194] & EXT_CSD_REV Revision [192].
-> 
-> 
->  1.  In mmc.c/ mmc_read_ext_csd ()
->     *   Implementation expecting EXT_CSD_REV non zero (e.g. >3 in current code)
->     *   I think it could be checking for CSD_STRUCTURE version.
->     *   Because EXT_CSD_REV having Zero is the valid Field.
->     *   This is the way it's done in other OS too.
-
-The opposite, it expects the version to be below 3 as those are the
-only ones it knows about. Checking the CSD version for the EXT_CSD
-would just be silly.
-
-> 
-> 
->  1.  To check the high capacity card.
->     *   We could check in access mode from OCR.  This is not in Linux exactly and steps to check the EXT_CSD_REV.
->     *   This is done in some other OS too.
-> 
-
-Checking the OCR is insufficient if I remember the spec correctly, so
-we ignore it completely. The EXT_CSD needs to be correct for high
-capacity to work anyway.
-
-> So do you think we can update the code to check the CSD_STRUCTURE Version? Please let us know your opinion.
-
-No, as that would violate the spec and possibly misinterpret some cards
-as high-capacity.
-
-To handle your card you would have to build some kind of quirks system
-so that the kernel can identify that this card is buggy and compensate
-for it.
-
-[Ghorai] Would you please help me to browse the MMCA specification where it's mentioned that if Card is >4GB then EXT_CSD_REV Revision should be > 2 (Rev 1.2)?
-
-Rgds
+Thanks.
 -- 
--- Pierre Ossman
-
-  WARNING: This correspondence is being monitored by the
-  Swedish government. Make sure your server uses encryption
-  for SMTP traffic and consider using PGP for end-to-end
-  encryption.
+OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
