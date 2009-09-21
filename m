@@ -1,75 +1,49 @@
-From: Ben Dooks <ben@simtec.co.uk>
-Subject: [patch 10/11] s3cmci: Make SDIO IRQ hardware IRQ support build-time configurable.
-Date: Mon, 21 Sep 2009 14:36:05 +0100
-Message-ID: <20090921133724.521019781@smtp.local.simtec.co.uk>
-References: <20090921133555.015075699@smtp.local.simtec.co.uk>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 3/3] Move MMCI header to amba include dir
+Date: Mon, 21 Sep 2009 16:01:03 +0100
+Message-ID: <20090921150103.GB30821@n2100.arm.linux.org.uk>
+References: <1252529727-7957-1-git-send-email-linus.walleij@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hull.simtec.co.uk ([78.105.113.97]:39681 "EHLO
-	preston.local.simtec.co.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1756274AbZIUOWE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2009 10:22:04 -0400
-Content-Disposition: inline; filename=simtec/ready/s3cmci-build-configurable-sdio-hwirq.patch
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:48063 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751929AbZIUPBK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2009 11:01:10 -0400
+Content-Disposition: inline
+In-Reply-To: <1252529727-7957-1-git-send-email-linus.walleij@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
-Cc: ben-linux@fluff.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Catalin Marinas <catalin.marinas@arm.com>
 
-We have found a couple of boards where the SDIO IRQ hardware support
-has failed to work properly, and thus we should make it configurable
-whether or not to be included in the driver.
+On Wed, Sep 09, 2009 at 10:55:27PM +0200, Linus Walleij wrote:
+> This moves the mmci platform data definition struct away from
+> arch/arm/include/asm/mach/mmc.h into the more proper place among
+> the other primecells in include/linux/amba/mmci.h and at the same
+> time renames it to "mmci.h", and also the struct in this file
+> confusingly named mmc_platform_data has been renamed
+> mmci_platform_data for clarity.
 
-Signed-off-by: Ben Dooks <ben@simtec.co.uk>
+Not sure what's happened, but this patch appears to conflict with
+another, resulting in:
 
----
- drivers/mmc/host/Kconfig  |    7 +++++++
- drivers/mmc/host/s3cmci.c |    9 +++++++--
- 2 files changed, 14 insertions(+), 2 deletions(-)
+arch/arm/mach-versatile/core.c:372: error: variable 'mmc0_plat_data' has initializer but incomplete type
+arch/arm/mach-versatile/core.c:373: error: unknown field 'ocr_mask' specified in initializer
+arch/arm/mach-versatile/core.c:373: warning: excess elements in struct initializer
+arch/arm/mach-versatile/core.c:373: warning: (near initialization for 'mmc0_plat_data')
+arch/arm/mach-versatile/core.c:374: error: unknown field 'status' specified in initializer
+arch/arm/mach-versatile/core.c:374: warning: excess elements in struct initializer
+arch/arm/mach-versatile/core.c:374: warning: (near initialization for 'mmc0_plat_data')
+arch/arm/mach-versatile/core.c:375: error: unknown field 'gpio_wp' specified in initializer
+arch/arm/mach-versatile/core.c:375: warning: excess elements in struct initializer
+arch/arm/mach-versatile/core.c:375: warning: (near initialization for 'mmc0_plat_data')
+arch/arm/mach-versatile/core.c:376: error: unknown field 'gpio_cd' specified in initializer
+arch/arm/mach-versatile/core.c:376: warning: excess elements in struct initializer
+arch/arm/mach-versatile/core.c:376: warning: (near initialization for 'mmc0_plat_data')
 
-Index: b/drivers/mmc/host/s3cmci.c
-===================================================================
---- a/drivers/mmc/host/s3cmci.c	2009-09-10 12:27:38.000000000 +0100
-+++ b/drivers/mmc/host/s3cmci.c	2009-09-10 15:48:15.000000000 +0100
-@@ -1715,7 +1715,11 @@ static int __devinit s3cmci_probe(struct
- 
- 	mmc->ops 	= &s3cmci_ops;
- 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
-+#ifdef CONFIG_MMC_S3C_HW_SDIO_IRQ
- 	mmc->caps	= MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
-+#else
-+	mmc->caps	= MMC_CAP_4_BIT_DATA;
-+#endif
- 	mmc->f_min 	= host->clk_rate / (host->clk_div * 256);
- 	mmc->f_max 	= host->clk_rate / host->clk_div;
- 
-@@ -1750,8 +1754,9 @@ static int __devinit s3cmci_probe(struct
- 	s3cmci_debugfs_attach(host);
- 
- 	platform_set_drvdata(pdev, mmc);
--	dev_info(&pdev->dev, "%s - using %s\n", mmc_hostname(mmc),
--		 s3cmci_host_usedma(host) ? "dma" : "pio");
-+	dev_info(&pdev->dev, "%s - using %s, %s SDIO IRQ\n", mmc_hostname(mmc),
-+		 s3cmci_host_usedma(host) ? "dma" : "pio",
-+		 mmc->caps & MMC_CAP_SDIO_IRQ ? "hw" : "sw");
- 
- 	return 0;
- 
-Index: b/drivers/mmc/host/Kconfig
-===================================================================
---- a/drivers/mmc/host/Kconfig	2009-09-10 15:43:29.000000000 +0100
-+++ b/drivers/mmc/host/Kconfig	2009-09-10 15:45:10.000000000 +0100
-@@ -261,6 +261,13 @@ config MMC_S3C
- 
- 	  If unsure, say N.
- 
-+config MMC_S3C_HW_SDIO_IRQ
-+       bool "Hardware support for SDIO IRQ"
-+       depends on MMC_S3C
-+       help
-+         Enable the hardware support for SDIO interrupts instead of using
-+	 the generic polling code.
-+
- choice
- 	prompt "Samsung S3C SD/MMC transfer code"
- 	depends on MMC_S3C
+arch/arm/mach-realview/realview_eb.c:40:26: error: asm/mach/mmc.h: No such file or directory
+arch/arm/mach-realview/realview_pb1176.c:40:26: error: asm/mach/mmc.h: No such file or directory
+arch/arm/mach-realview/realview_pb11mp.c:41:26: error: asm/mach/mmc.h: No such file or directory
 
---
+so I'm going to drop it for the time being.
