@@ -1,204 +1,84 @@
 From: Ben Dooks <ben@simtec.co.uk>
-Subject: [patch 06/11] s3cmci: Add debugfs support for examining driver and hardware state.
-Date: Mon, 21 Sep 2009 14:36:01 +0100
-Message-ID: <20090921133722.896939067@smtp.local.simtec.co.uk>
+Subject: [patch 04/11] s3cmci: Change to use dev_pm_ops
+Date: Mon, 21 Sep 2009 14:35:59 +0100
+Message-ID: <20090921133722.084907394@smtp.local.simtec.co.uk>
 References: <20090921133555.015075699@smtp.local.simtec.co.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hull.simtec.co.uk ([78.105.113.97]:39679 "EHLO
+Received: from hull.simtec.co.uk ([78.105.113.97]:39678 "EHLO
 	preston.local.simtec.co.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1756267AbZIUOWB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2009 10:22:01 -0400
-Content-Disposition: inline; filename=simtec/pushed/s3cmci-add-debugfs.patch
+	by vger.kernel.org with ESMTP id S1756240AbZIUOWA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2009 10:22:00 -0400
+Content-Disposition: inline; filename=simtec/pushed/s3cmci-use-pmops.patch
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
 Cc: ben-linux@fluff.org
 
-Export driver state and hardware register state via debugfs entries
-created under a directory formed from dev_name() on the probed device
-when CONFIG_DEBUG_FS is set.
+Move to using dev_pm_ops for suspend and resume.
 
 Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 
 ---
- drivers/mmc/host/s3cmci.c |  126 ++++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/s3cmci.h |    6 ++
- 2 files changed, 132 insertions(+)
+ drivers/mmc/host/s3cmci.c |   29 ++++++++++++++++++-----------
+ 1 file changed, 18 insertions(+), 11 deletions(-)
 
 Index: b/drivers/mmc/host/s3cmci.c
 ===================================================================
---- a/drivers/mmc/host/s3cmci.c	2009-08-04 12:24:02.000000000 +0100
-+++ b/drivers/mmc/host/s3cmci.c	2009-08-04 12:24:04.000000000 +0100
-@@ -17,6 +17,8 @@
- #include <linux/mmc/host.h>
- #include <linux/platform_device.h>
- #include <linux/cpufreq.h>
-+#include <linux/debugfs.h>
-+#include <linux/seq_file.h>
- #include <linux/gpio.h>
- #include <linux/irq.h>
- #include <linux/io.h>
-@@ -1244,6 +1246,127 @@ static inline void s3cmci_cpufreq_deregi
- #endif
+--- a/drivers/mmc/host/s3cmci.c	2009-08-04 12:14:05.000000000 +0100
++++ b/drivers/mmc/host/s3cmci.c	2009-08-04 12:23:03.000000000 +0100
+@@ -1546,35 +1546,42 @@ MODULE_DEVICE_TABLE(platform, s3cmci_dri
  
+ #ifdef CONFIG_PM
  
-+#ifdef CONFIG_DEBUG_FS
-+
-+static int s3cmci_state_show(struct seq_file *seq, void *v)
-+{
-+	struct s3cmci_host *host = seq->private;
-+
-+	seq_printf(seq, "Register base = 0x%08x\n", (u32)host->base);
-+	seq_printf(seq, "Clock rate = %ld\n", host->clk_rate);
-+	seq_printf(seq, "Prescale = %d\n", host->prescaler);
-+	seq_printf(seq, "is2440 = %d\n", host->is2440);
-+	seq_printf(seq, "IRQ = %d\n", host->irq);
-+	seq_printf(seq, "CD IRQ = %d\n", host->irq_cd);
-+	seq_printf(seq, "Do DMA = %d\n", host->dodma);
-+	seq_printf(seq, "SDIIMSK at %d\n", host->sdiimsk);
-+	seq_printf(seq, "SDIDATA at %d\n", host->sdidata);
-+
-+	return 0;
-+}
-+
-+static int s3cmci_state_open(struct inode *inode, struct file *file)
-+{
-+	return single_open(file, s3cmci_state_show, inode->i_private);
-+}
-+
-+static const struct file_operations s3cmci_fops_state = {
-+	.owner		= THIS_MODULE,
-+	.open		= s3cmci_state_open,
-+	.read		= seq_read,
-+	.llseek		= seq_lseek,
-+	.release	= single_release,
-+};
-+
-+#define DBG_REG(_r) { .addr = S3C2410_SDI##_r, .name = #_r }
-+
-+struct s3cmci_reg {
-+	unsigned short	addr;
-+	unsigned char	*name;
-+} debug_regs[] = {
-+	DBG_REG(CON),
-+	DBG_REG(PRE),
-+	DBG_REG(CMDARG),
-+	DBG_REG(CMDCON),
-+	DBG_REG(CMDSTAT),
-+	DBG_REG(RSP0),
-+	DBG_REG(RSP1),
-+	DBG_REG(RSP2),
-+	DBG_REG(RSP3),
-+	DBG_REG(TIMER),
-+	DBG_REG(BSIZE),
-+	DBG_REG(DCON),
-+	DBG_REG(DCNT),
-+	DBG_REG(DSTA),
-+	DBG_REG(FSTA),
-+	{}
-+};
-+
-+static int s3cmci_regs_show(struct seq_file *seq, void *v)
-+{
-+	struct s3cmci_host *host = seq->private;
-+	struct s3cmci_reg *rptr = debug_regs;
-+
-+	for (; rptr->name; rptr++)
-+		seq_printf(seq, "SDI%s\t=0x%08x\n", rptr->name,
-+			   readl(host->base + rptr->addr));
-+
-+	seq_printf(seq, "SDIIMSK\t=0x%08x\n", readl(host->base + host->sdiimsk));
-+
-+	return 0;
-+}
-+
-+static int s3cmci_regs_open(struct inode *inode, struct file *file)
-+{
-+	return single_open(file, s3cmci_regs_show, inode->i_private);
-+}
-+
-+static const struct file_operations s3cmci_fops_regs = {
-+	.owner		= THIS_MODULE,
-+	.open		= s3cmci_regs_open,
-+	.read		= seq_read,
-+	.llseek		= seq_lseek,
-+	.release	= single_release,
-+};
-+
-+static void s3cmci_debugfs_attach(struct s3cmci_host *host)
-+{
-+	struct device *dev = &host->pdev->dev;
-+
-+	host->debug_root = debugfs_create_dir(dev_name(dev), NULL);
-+	if (IS_ERR(host->debug_root)) {
-+		dev_err(dev, "failed to create debugfs root\n");
-+		return;
-+	}
-+
-+	host->debug_state = debugfs_create_file("state", 0444,
-+						host->debug_root, host,
-+						&s3cmci_fops_state);
-+
-+	if (IS_ERR(host->debug_state))
-+		dev_err(dev, "failed to create debug state file\n");
-+
-+	host->debug_regs = debugfs_create_file("regs", 0444,
-+					       host->debug_root, host,
-+					       &s3cmci_fops_regs);
-+
-+	if (IS_ERR(host->debug_regs))
-+		dev_err(dev, "failed to create debug regs file\n");
-+}
-+
-+static void s3cmci_debugfs_remove(struct s3cmci_host *host)
-+{
-+	debugfs_remove(host->debug_regs);
-+	debugfs_remove(host->debug_state);
-+	debugfs_remove(host->debug_root);
-+}
-+
-+#else
-+static inline void s3cmci_debugfs_attach(struct s3cmci_host *host) { }
-+static inline void s3cmci_debugfs_remove(struct s3cmci_host *host) { }
-+
-+#endif /* CONFIG_DEBUG_FS */
-+
- static int __devinit s3cmci_probe(struct platform_device *pdev)
+-static int s3cmci_suspend(struct platform_device *dev, pm_message_t state)
++static int s3cmci_suspend(struct device *dev)
  {
- 	struct s3cmci_host *host;
-@@ -1435,6 +1558,8 @@ static int __devinit s3cmci_probe(struct
- 		goto free_cpufreq;
- 	}
+-	struct mmc_host *mmc = platform_get_drvdata(dev);
++	struct mmc_host *mmc = platform_get_drvdata(to_platform_device(dev));
++	struct pm_message event = { PM_EVENT_SUSPEND };
  
-+	s3cmci_debugfs_attach(host);
+-	return  mmc_suspend_host(mmc, state);
++	return mmc_suspend_host(mmc, event);
+ }
+ 
+-static int s3cmci_resume(struct platform_device *dev)
++static int s3cmci_resume(struct device *dev)
+ {
+-	struct mmc_host *mmc = platform_get_drvdata(dev);
++	struct mmc_host *mmc = platform_get_drvdata(to_platform_device(dev));
+ 
+ 	return mmc_resume_host(mmc);
+ }
+ 
++static struct dev_pm_ops s3cmci_pm = {
++	.suspend	= s3cmci_suspend,
++	.resume		= s3cmci_resume,
++};
 +
- 	platform_set_drvdata(pdev, mmc);
- 	dev_info(&pdev->dev, "initialisation done.\n");
++#define s3cmci_pm_ops &s3cmci_pm
+ #else /* CONFIG_PM */
+-#define s3cmci_suspend NULL
+-#define s3cmci_resume NULL
++#define s3cmci_pm_ops NULL
+ #endif /* CONFIG_PM */
  
-@@ -1489,6 +1614,7 @@ static void s3cmci_shutdown(struct platf
- 	if (host->irq_cd >= 0)
- 		free_irq(host->irq_cd, host);
  
-+	s3cmci_debugfs_remove(host);
- 	s3cmci_cpufreq_deregister(host);
- 	mmc_remove_host(mmc);
- 	clk_disable(host->clk);
-Index: b/drivers/mmc/host/s3cmci.h
-===================================================================
---- a/drivers/mmc/host/s3cmci.h	2009-08-04 12:06:01.000000000 +0100
-+++ b/drivers/mmc/host/s3cmci.h	2009-08-04 12:24:04.000000000 +0100
-@@ -68,6 +68,12 @@ struct s3cmci_host {
- 	unsigned int		ccnt, dcnt;
- 	struct tasklet_struct	pio_tasklet;
+ static struct platform_driver s3cmci_driver = {
+-	.driver.name	= "s3c-sdi",
+-	.driver.owner	= THIS_MODULE,
++	.driver	= {
++		.name	= "s3c-sdi",
++		.owner	= THIS_MODULE,
++		.pm	= s3cmci_pm_ops,
++	},
+ 	.id_table	= s3cmci_driver_ids,
+ 	.probe		= s3cmci_probe,
+ 	.remove		= __devexit_p(s3cmci_remove),
+ 	.shutdown	= s3cmci_shutdown,
+-	.suspend	= s3cmci_suspend,
+-	.resume		= s3cmci_resume,
+ };
  
-+#ifdef CONFIG_DEBUG_FS
-+	struct dentry		*debug_root;
-+	struct dentry		*debug_state;
-+	struct dentry		*debug_regs;
-+#endif
-+
- #ifdef CONFIG_CPU_FREQ
- 	struct notifier_block	freq_transition;
- #endif
+ static int __init s3cmci_init(void)
 
 --
