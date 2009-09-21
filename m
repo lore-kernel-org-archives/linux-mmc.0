@@ -1,76 +1,205 @@
 From: Ben Dooks <ben@simtec.co.uk>
-Subject: [patch 01/11] s3cmci: Use resource_size() instead of local macro
-Date: Mon, 21 Sep 2009 14:35:56 +0100
-Message-ID: <20090921133720.857521897@smtp.local.simtec.co.uk>
+Subject: [patch 09/11] s3cmci: DMA fixes
+Date: Mon, 21 Sep 2009 14:36:04 +0100
+Message-ID: <20090921133724.116954815@smtp.local.simtec.co.uk>
 References: <20090921133555.015075699@smtp.local.simtec.co.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hull.simtec.co.uk ([78.105.113.97]:39669 "EHLO
+Received: from hull.simtec.co.uk ([78.105.113.97]:39668 "EHLO
 	preston.local.simtec.co.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1756001AbZIUOVv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2009 10:21:51 -0400
-Content-Disposition: inline; filename=simtec/pushed/s3cmci-fix-resource-size.patch
+	by vger.kernel.org with ESMTP id S1755796AbZIUOVt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2009 10:21:49 -0400
+Content-Disposition: inline; filename=simtec/pushed/s3cmci-dma-fixes.patch
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
 Cc: ben-linux@fluff.org
 
-Replace the local definition RESSIZE() with the standard resource_size()
-call for getting the size of a struct resource.
+Fixes for the DMA transfer mode of the driver to try and improve the
+state of the code:
+
+- Ensure that dma_complete is set during the end of the command phase
+  so that transfers do not stall awaiting the completion
+
+- Update the DMA debugging to provide a bit more useful information
+  such as how many DMA descriptors where not processed and print the
+  DMA addresses in hexadecimal.
+
+- Fix the DMA channel request code to actually request DMA for the
+  S3CMCI block instead of whatever '0' signified.
+
+- Add fallback to PIO if we cannot get the DMA channel, as many of the
+  devices with this block only have a limited number of DMA channels.
+
+- Only try and claim and free the DMA channel if we are trying to use it.
+
+This improves the driver DMA code to the point where it can now identify
+a card and read the partition table. However the DMA can still stall when
+trying to move data between the host and memory.
 
 Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 
 ---
- drivers/mmc/host/s3cmci.c |   10 ++++------
- 1 file changed, 4 insertions(+), 6 deletions(-)
+ drivers/mmc/host/s3cmci.c |   62 ++++++++++++++++++++++++++++++++++------------
+ drivers/mmc/host/s3cmci.h |    3 --
+ 2 files changed, 47 insertions(+), 18 deletions(-)
 
 Index: b/drivers/mmc/host/s3cmci.c
 ===================================================================
---- a/drivers/mmc/host/s3cmci.c	2009-07-20 14:35:52.000000000 +0100
-+++ b/drivers/mmc/host/s3cmci.c	2009-07-22 14:34:10.000000000 +0100
-@@ -58,8 +58,6 @@ static const int dbgmap_debug = dbg_err 
- 		dev_dbg(&host->pdev->dev, args);  \
- 	} while (0)
+--- a/drivers/mmc/host/s3cmci.c	2009-08-12 13:55:53.000000000 +0100
++++ b/drivers/mmc/host/s3cmci.c	2009-08-12 13:59:28.000000000 +0100
+@@ -183,6 +183,21 @@ static inline bool s3cmci_host_usedma(st
+ #endif
+ }
  
--#define RESSIZE(ressource) (((ressource)->end - (ressource)->start)+1)
++/**
++ * s3cmci_host_canpio - return true if host has pio code available
++ *
++ * Return true if the driver has been compiled with the PIO support code
++ * available.
++ */
++static inline bool s3cmci_host_canpio(void)
++{
++#ifdef CONFIG_MMC_S3C_PIO
++	return true;
++#else
++	return false;
++#endif
++}
++
+ static inline u32 enable_imask(struct s3cmci_host *host, u32 imask)
+ {
+ 	u32 newmask;
+@@ -786,6 +801,7 @@ static void s3cmci_dma_done_callback(str
+ 	dbg(host, dbg_dma, "DMA FINISHED Size:%i DSTA:%08x DCNT:%08x\n",
+ 		size, mci_dsta, mci_dcnt);
+ 
++	host->dma_complete = 1;
+ 	host->complete_what = COMPLETION_FINALIZE;
+ 
+ out:
+@@ -816,7 +832,8 @@ static void finalize_request(struct s3cm
+ 	if (cmd->data && (cmd->error == 0) &&
+ 	    (cmd->data->error == 0)) {
+ 		if (s3cmci_host_usedma(host) && (!host->dma_complete)) {
+-			dbg(host, dbg_dma, "DMA Missing!\n");
++			dbg(host, dbg_dma, "DMA Missing (%d)!\n",
++			    host->dma_complete);
+ 			return;
+ 		}
+ 	}
+@@ -1065,7 +1082,7 @@ static int s3cmci_prepare_pio(struct s3c
+ static int s3cmci_prepare_dma(struct s3cmci_host *host, struct mmc_data *data)
+ {
+ 	int dma_len, i;
+-	int rw = (data->flags & MMC_DATA_WRITE) ? 1 : 0;
++	int rw = data->flags & MMC_DATA_WRITE;
+ 
+ 	BUG_ON((data->flags & BOTH_DIR) == BOTH_DIR);
+ 
+@@ -1073,7 +1090,7 @@ static int s3cmci_prepare_dma(struct s3c
+ 	s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_FLUSH);
+ 
+ 	dma_len = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+-			     (rw) ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
++			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
+ 
+ 	if (dma_len == 0)
+ 		return -ENOMEM;
+@@ -1084,11 +1101,11 @@ static int s3cmci_prepare_dma(struct s3c
+ 	for (i = 0; i < dma_len; i++) {
+ 		int res;
+ 
+-		dbg(host, dbg_dma, "enqueue %i:%u@%u\n", i,
+-			sg_dma_address(&data->sg[i]),
+-			sg_dma_len(&data->sg[i]));
++		dbg(host, dbg_dma, "enqueue %i: %08x@%u\n", i,
++		    sg_dma_address(&data->sg[i]),
++		    sg_dma_len(&data->sg[i]));
+ 
+-		res = s3c2410_dma_enqueue(host->dma, (void *) host,
++		res = s3c2410_dma_enqueue(host->dma, host,
+ 					  sg_dma_address(&data->sg[i]),
+ 					  sg_dma_len(&data->sg[i]));
+ 
+@@ -1581,8 +1598,6 @@ static int __devinit s3cmci_probe(struct
+ 	host->complete_what 	= COMPLETION_NONE;
+ 	host->pio_active 	= XFER_NONE;
+ 
+-	host->dma		= S3CMCI_DMA;
 -
- static struct s3c2410_dma_client s3cmci_dma_client = {
- 	.name		= "s3c-mci",
- };
-@@ -1298,7 +1296,7 @@ static int __devinit s3cmci_probe(struct
+ #ifdef CONFIG_MMC_S3C_PIODMA
+ 	host->dodma		= host->pdata->dma;
+ #endif
+@@ -1665,10 +1680,21 @@ static int __devinit s3cmci_probe(struct
+ 		gpio_direction_input(host->pdata->gpio_wprotect);
  	}
  
- 	host->mem = request_mem_region(host->mem->start,
--				       RESSIZE(host->mem), pdev->name);
-+				       resource_size(host->mem), pdev->name);
- 
- 	if (!host->mem) {
- 		dev_err(&pdev->dev, "failed to request io memory region.\n");
-@@ -1306,7 +1304,7 @@ static int __devinit s3cmci_probe(struct
- 		goto probe_free_host;
+-	if (s3c2410_dma_request(S3CMCI_DMA, &s3cmci_dma_client, NULL) < 0) {
+-		dev_err(&pdev->dev, "unable to get DMA channel.\n");
+-		ret = -EBUSY;
+-		goto probe_free_gpio_wp;
++	/* depending on the dma state, get a dma channel to use. */
++
++	if (s3cmci_host_usedma(host)) {
++		host->dma = s3c2410_dma_request(DMACH_SDI, &s3cmci_dma_client,
++						host);
++		if (host->dma < 0) {
++			dev_err(&pdev->dev, "cannot get DMA channel.\n");
++			if (!s3cmci_host_canpio()) {
++				ret = -EBUSY;
++				goto probe_free_gpio_wp;
++			} else {
++				dev_warn(&pdev->dev, "falling back to PIO.\n");
++				host->dodma = 0;
++			}
++		}
  	}
  
--	host->base = ioremap(host->mem->start, RESSIZE(host->mem));
-+	host->base = ioremap(host->mem->start, resource_size(host->mem));
- 	if (!host->base) {
- 		dev_err(&pdev->dev, "failed to ioremap() io memory region.\n");
- 		ret = -EINVAL;
-@@ -1433,7 +1431,7 @@ static int __devinit s3cmci_probe(struct
- 	iounmap(host->base);
+ 	host->clk = clk_get(&pdev->dev, "sdi");
+@@ -1676,7 +1702,7 @@ static int __devinit s3cmci_probe(struct
+ 		dev_err(&pdev->dev, "failed to find clock source.\n");
+ 		ret = PTR_ERR(host->clk);
+ 		host->clk = NULL;
+-		goto probe_free_host;
++		goto probe_free_dma;
+ 	}
  
-  probe_free_mem_region:
--	release_mem_region(host->mem->start, RESSIZE(host->mem));
-+	release_mem_region(host->mem->start, resource_size(host->mem));
+ 	ret = clk_enable(host->clk);
+@@ -1738,6 +1764,10 @@ static int __devinit s3cmci_probe(struct
+  clk_free:
+ 	clk_put(host->clk);
  
-  probe_free_host:
- 	mmc_free_host(mmc);
-@@ -1469,7 +1467,7 @@ static int __devexit s3cmci_remove(struc
++ probe_free_dma:
++	if (s3cmci_host_usedma(host))
++		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
++
+  probe_free_gpio_wp:
+ 	if (host->pdata->gpio_wprotect)
+ 		gpio_free(host->pdata->gpio_wprotect);
+@@ -1796,7 +1826,9 @@ static int __devexit s3cmci_remove(struc
+ 	clk_put(host->clk);
+ 
+ 	tasklet_disable(&host->pio_tasklet);
+-	s3c2410_dma_free(S3CMCI_DMA, &s3cmci_dma_client);
++
++	if (s3cmci_host_usedma(host))
++		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
+ 
  	free_irq(host->irq, host);
  
- 	iounmap(host->base);
--	release_mem_region(host->mem->start, RESSIZE(host->mem));
-+	release_mem_region(host->mem->start, resource_size(host->mem));
+Index: b/drivers/mmc/host/s3cmci.h
+===================================================================
+--- a/drivers/mmc/host/s3cmci.h	2009-08-12 13:54:49.000000000 +0100
++++ b/drivers/mmc/host/s3cmci.h	2009-08-12 13:59:28.000000000 +0100
+@@ -8,9 +8,6 @@
+  * published by the Free Software Foundation.
+  */
  
- 	mmc_free_host(mmc);
- 	return 0;
+-/* FIXME: DMA Resource management ?! */
+-#define S3CMCI_DMA 0
+-
+ enum s3cmci_waitfor {
+ 	COMPLETION_NONE,
+ 	COMPLETION_FINALIZE,
 
 --
