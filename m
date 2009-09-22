@@ -1,80 +1,165 @@
 From: akpm@linux-foundation.org
-Subject: [merged] sdhci-orphan-driver-and-list.patch removed from -mm tree
-Date: Tue, 22 Sep 2009 13:36:40 -0700
-Message-ID: <200909222036.n8MKaeRJ030266@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:50369 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751782AbZIVUhO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 16:37:14 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [folded] omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired-fix-for-the-db-clock-failure-message.patch removed from -mm tree
+Date: Tue, 22 Sep 2009 14:39:35 -0700
+Message-ID: <200909222139.n8MLda9r025394@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: madhu.cr@ti.com, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, matt@console-pimps.org, philipl@overt.
 List-Id: linux-mmc@vger.kernel.org
-To: pierre@ossman.eu, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     sdhci: orphan driver and list
+     omap_hsmmc: fix for the db clock failure message
 has been removed from the -mm tree.  Its filename was
-     sdhci-orphan-driver-and-list.patch
+     omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired-fix-for-the-db-clock-failure-message.patch
 
-This patch was dropped because it was merged into mainline or a subsystem tree
+This patch was dropped because it was folded into omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired.patch
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sdhci: orphan driver and list
-From: Pierre Ossman <pierre@ossman.eu>
+Subject: omap_hsmmc: fix for the db clock failure message
+From: "Madhusudhan Chikkature" <madhu.cr@ti.com>
 
-Remove myself as maintainer from the sdhci driver and steer people
-towards the new MMC list for discussing it.
+Remove the error message "Failed to get debounce clock.." printed out by
+the MMC driver on OMAP3430.  The debounce clock needs to be handled only
+for OMAP2430.
 
-Signed-off-by: Pierre Ossman <pierre@ossman.eu>
+Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Matt Fleming <matt@console-pimps.org>
+Cc: Ian Molton <ian@mnementh.co.uk>
+Cc: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Cc: Denis Karpov <ext-denis.2.karpov@nokia.com>
+Cc: Pierre Ossman <pierre@ossman.eu>
+Cc: Philip Langdale <philipl@overt.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- MAINTAINERS |   12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   46 +++++++++++++++++---------------
+ 1 file changed, 25 insertions(+), 21 deletions(-)
 
-diff -puN MAINTAINERS~sdhci-orphan-driver-and-list MAINTAINERS
---- a/MAINTAINERS~sdhci-orphan-driver-and-list
-+++ a/MAINTAINERS
-@@ -4533,20 +4533,20 @@ S:	Maintained
- F:	drivers/mmc/host/sdricoh_cs.c
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired-fix-for-the-db-clock-failure-message drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired-fix-for-the-db-clock-failure-message
++++ a/drivers/mmc/host/omap_hsmmc.c
+@@ -162,7 +162,7 @@ struct omap_hsmmc_host {
+ 	int			use_dma, dma_ch;
+ 	int			dma_line_tx, dma_line_rx;
+ 	int			slot_id;
+-	int			dbclk_enabled;
++	int			got_dbclk;
+ 	int			response_busy;
+ 	int			context_loss;
+ 	int			dpm_state;
+@@ -742,7 +742,7 @@ static int omap_hsmmc_switch_opcond(stru
+ 	/* Disable the clocks */
+ 	clk_disable(host->fclk);
+ 	clk_disable(host->iclk);
+-	if (host->dbclk_enabled)
++	if (host->got_dbclk)
+ 		clk_disable(host->dbclk);
  
- SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
--M:	Pierre Ossman <pierre@ossman.eu>
--L:	sdhci-devel@lists.ossman.eu
--S:	Maintained
-+S:     Orphan
-+L:     linux-mmc@vger.kernel.org
-+F:     drivers/mmc/host/sdhci.*
+ 	/* Turn the power off */
+@@ -753,9 +753,9 @@ static int omap_hsmmc_switch_opcond(stru
+ 		ret = mmc_slot(host).set_power(host->dev, host->slot_id, 1,
+ 					       vdd);
+ 	clk_enable(host->iclk);
+-	if (host->dbclk_enabled)
+-		clk_enable(host->dbclk);
+ 	clk_enable(host->fclk);
++	if (host->got_dbclk)
++		clk_enable(host->dbclk);
  
- SECURE DIGITAL HOST CONTROLLER INTERFACE, OPEN FIRMWARE BINDINGS (SDHCI-OF)
- M:	Anton Vorontsov <avorontsov@ru.mvista.com>
- L:	linuxppc-dev@ozlabs.org
--L:	sdhci-devel@lists.ossman.eu
-+L:     linux-mmc@vger.kernel.org
- S:	Maintained
--F:	drivers/mmc/host/sdhci.*
-+F:     drivers/mmc/host/sdhci-of.*
+ 	if (ret != 0)
+ 		goto err;
+@@ -1697,18 +1697,22 @@ static int __init omap_hsmmc_probe(struc
+ 		goto err1;
+ 	}
  
- SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
- M:	Ben Dooks <ben-linux@fluff.org>
--L:	sdhci-devel@lists.ossman.eu
-+L:     linux-mmc@vger.kernel.org
- S:	Maintained
- F:	drivers/mmc/host/sdhci-s3c.c
+-	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
+-	/*
+-	 * MMC can still work without debounce clock.
+-	 */
+-	if (IS_ERR(host->dbclk))
+-		dev_warn(mmc_dev(host->mmc), "Failed to get debounce clock\n");
+-	else
+-		if (clk_enable(host->dbclk) != 0)
+-			dev_dbg(mmc_dev(host->mmc), "Enabling debounce"
+-							" clk failed\n");
++	if (cpu_is_omap2430()) {
++		host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
++		/*
++		 * MMC can still work without debounce clock.
++		 */
++		if (IS_ERR(host->dbclk))
++			dev_warn(mmc_dev(host->mmc),
++				"Failed to get debounce clock\n");
+ 		else
+-			host->dbclk_enabled = 1;
++			host->got_dbclk = 1;
++
++		if (host->got_dbclk)
++			if (clk_enable(host->dbclk) != 0)
++				dev_dbg(mmc_dev(host->mmc), "Enabling debounce"
++							" clk failed\n");
++	}
  
+ 	/* Since we do only SG emulation, we can have as many segs
+ 	 * as we want. */
+@@ -1825,7 +1829,7 @@ err_irq:
+ 	clk_disable(host->iclk);
+ 	clk_put(host->fclk);
+ 	clk_put(host->iclk);
+-	if (host->dbclk_enabled) {
++	if (host->got_dbclk) {
+ 		clk_disable(host->dbclk);
+ 		clk_put(host->dbclk);
+ 	}
+@@ -1859,7 +1863,7 @@ static int omap_hsmmc_remove(struct plat
+ 		clk_disable(host->iclk);
+ 		clk_put(host->fclk);
+ 		clk_put(host->iclk);
+-		if (host->dbclk_enabled) {
++		if (host->got_dbclk) {
+ 			clk_disable(host->dbclk);
+ 			clk_put(host->dbclk);
+ 		}
+@@ -1910,7 +1914,7 @@ static int omap_hsmmc_suspend(struct pla
+ 				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
+ 			mmc_host_disable(host->mmc);
+ 			clk_disable(host->iclk);
+-			if (host->dbclk_enabled)
++			if (host->got_dbclk)
+ 				clk_disable(host->dbclk);
+ 		} else {
+ 			host->suspended = 0;
+@@ -1942,14 +1946,14 @@ static int omap_hsmmc_resume(struct plat
+ 		if (ret)
+ 			goto clk_en_err;
+ 
+-		if (host->dbclk_enabled)
+-			clk_enable(host->dbclk);
+-
+ 		if (mmc_host_enable(host->mmc) != 0) {
+ 			clk_disable(host->iclk);
+ 			goto clk_en_err;
+ 		}
+ 
++		if (host->got_dbclk)
++			clk_enable(host->dbclk);
++
+ 		omap_hsmmc_conf_bus_power(host);
+ 
+ 		if (host->pdata->resume) {
 _
 
-Patches currently in -mm which might be from pierre@ossman.eu are
+Patches currently in -mm which might be from madhu.cr@ti.com are
 
 origin.patch
-linux-next.patch
-sdio-do-not-ignore-mmc_vdd_165_195.patch
-tmio_mmc-optionally-support-using-platform-clock.patch
-sh-switch-migo-r-to-use-the-tmio-mmc-driver-instead-of-spi.patch
+mmc-register-mmci-omap-hs-using-platform_driver_probe.patch
 mmc-add-enable-and-disable-methods-to-mmc-host.patch
 mmc-allow-host-claim-release-nesting.patch
 mmc-add-mmc_cap_nonremovable-host-capability.patch
@@ -107,15 +192,6 @@ omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired-fix-for-the-db-clock
 omap_hsmmc-set-a-large-data-timeout-for-commands-with-busy-signal.patch
 arm-omap-rx51-set-mmc-capabilities-and-power-saving-flag.patch
 arm-omap-rx51-set-mmc-capabilities-and-power-saving-flag-update.patch
-sdio-add-cd-disable-support.patch
-sdio-add-cd-disable-support-cleanup.patch
-sdhci-be-more-strict-with-get_min_clock-usage.patch
-sdhci-of-fix-sd-clock-calculation.patch
-sdhci-of-avoid-writing-reserved-bits-into-host-control-register.patch
-sdhci-of-fix-high-speed-cards-recognition.patch
-powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc.patch
-sdhci-of-dont-hard-code-inverted-write-protect-quirk.patch
-sdhci-of-cleanup-esdhcs-set_clock-a-little-bit.patch
-powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards.patch
-sdhci-increase-timeout-for-internal-clock-stabilization.patch
+maintainers-update-for-ti-omap-hsmmc-driver.patch
+omap4-mmc-driver-support-on-omap4.patch
 
