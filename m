@@ -1,82 +1,76 @@
 From: akpm@linux-foundation.org
-Subject: [patch 083/232] sdhci-of: cleanup eSDHC's set_clock() a little bit
-Date: Tue, 22 Sep 2009 16:45:16 -0700
-Message-ID: <200909222345.n8MNjGTI013969@imap1.linux-foundation.org>
+Subject: [patch 085/232] sdio: add MMC_QUIRK_LENIENT_FN0
+Date: Tue, 22 Sep 2009 16:45:18 -0700
+Message-ID: <200909222345.n8MNjIlM014061@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:54447 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:58900 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753408AbZIVXr4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:47:56 -0400
+	by vger.kernel.org with ESMTP id S1752984AbZIWABW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 20:01:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, avorontsov@ru.mvista.com, ben@fluff.org, david.vrabel@csr.com, galak@kernel.crashing.org, linux-mmc@vger.kernel.org, pierre@ossman.eu, s.hauer@pengutronix.de
+Cc: akpm@linux-foundation.org, ohad@wizery.com, linux-mmc@vger.kernel.org
 
-From: Anton Vorontsov <avorontsov@ru.mvista.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
 
-- Get rid of incomprehensible "if { for { if } }" construction for the
-  exponential divisor calculation. The first if statement isn't correct
-  at all, since it should check for "host->max_clk / pre_div / 16 >
-  clock". The error doesn't cause any bugs because the check in the for
-  loop does the right thing, and so the outer check becomes useless;
+Normally writes to SDIO function 0 outside the vendor specific CCCR
+registers are prohibited.
 
-- For the linear divisor do the same: a single while statement is more
-  readable than for + if construction;
+To support embedded devices that require writes to SDIO function 0 outside
+this range (e.g.  TI WL127x embedded sdio wifi device),
+MMC_QUIRK_LENIENT_FN0 is introduced.
 
-- Add dev_dbg() that prints desired and actual clock frequency.
+A card quirks field is added to `struct mmc_card' to support non-standard
+devices (e.g.  embedded sdio devices).
 
-Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Kumar Gala <galak@kernel.crashing.org>
-Cc: David Vrabel <david.vrabel@csr.com>
-Cc: Ben Dooks <ben@fluff.org>
-Cc: Sascha Hauer <s.hauer@pengutronix.de>
+[akpm@linux-foundation.org: code in C, not cpp!]
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci-of.c |   19 ++++++++-----------
- 1 file changed, 8 insertions(+), 11 deletions(-)
+ drivers/mmc/core/sdio_io.c |    2 +-
+ include/linux/mmc/card.h   |    7 +++++++
+ 2 files changed, 8 insertions(+), 1 deletion(-)
 
-diff -puN drivers/mmc/host/sdhci-of.c~sdhci-of-cleanup-esdhcs-set_clock-a-little-bit drivers/mmc/host/sdhci-of.c
---- a/drivers/mmc/host/sdhci-of.c~sdhci-of-cleanup-esdhcs-set_clock-a-little-bit
-+++ a/drivers/mmc/host/sdhci-of.c
-@@ -121,8 +121,8 @@ static void esdhc_writeb(struct sdhci_ho
+diff -puN drivers/mmc/core/sdio_io.c~sdio-add-mmc_quirk_lenient_fn0 drivers/mmc/core/sdio_io.c
+--- a/drivers/mmc/core/sdio_io.c~sdio-add-mmc_quirk_lenient_fn0
++++ a/drivers/mmc/core/sdio_io.c
+@@ -624,7 +624,7 @@ void sdio_f0_writeb(struct sdio_func *fu
  
- static void esdhc_set_clock(struct sdhci_host *host, unsigned int clock)
- {
--	int div;
- 	int pre_div = 2;
-+	int div = 1;
+ 	BUG_ON(!func);
  
- 	clrbits32(host->ioaddr + ESDHC_SYSTEM_CONTROL, ESDHC_CLOCK_IPGEN |
- 		  ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
-@@ -130,17 +130,14 @@ static void esdhc_set_clock(struct sdhci
- 	if (clock == 0)
- 		goto out;
+-	if (addr < 0xF0 || addr > 0xFF) {
++	if ((addr < 0xF0 || addr > 0xFF) && (!mmc_card_lenient_fn0(func->card))) {
+ 		if (err_ret)
+ 			*err_ret = -EINVAL;
+ 		return;
+diff -puN include/linux/mmc/card.h~sdio-add-mmc_quirk_lenient_fn0 include/linux/mmc/card.h
+--- a/include/linux/mmc/card.h~sdio-add-mmc_quirk_lenient_fn0
++++ a/include/linux/mmc/card.h
+@@ -97,6 +97,8 @@ struct mmc_card {
+ #define MMC_STATE_READONLY	(1<<1)		/* card is read-only */
+ #define MMC_STATE_HIGHSPEED	(1<<2)		/* card is in high speed mode */
+ #define MMC_STATE_BLOCKADDR	(1<<3)		/* card uses block-addressing */
++	unsigned int		quirks; 	/* card quirks */
++#define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
  
--	if (host->max_clk / 16 > clock) {
--		for (; pre_div < 256; pre_div *= 2) {
--			if (host->max_clk / pre_div < clock * 16)
--				break;
--		}
--	}
-+	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
-+		pre_div *= 2;
+ 	u32			raw_cid[4];	/* raw card CID */
+ 	u32			raw_csd[4];	/* raw card CSD */
+@@ -132,6 +134,11 @@ struct mmc_card {
+ #define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
+ #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
  
--	for (div = 1; div <= 16; div++) {
--		if (host->max_clk / (div * pre_div) <= clock)
--			break;
--	}
-+	while (host->max_clk / pre_div / div > clock && div < 16)
-+		div++;
++static inline int mmc_card_lenient_fn0(const struct mmc_card *c)
++{
++	return c->quirks & MMC_QUIRK_LENIENT_FN0;
++}
 +
-+	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
-+		clock, host->max_clk / pre_div / div);
+ #define mmc_card_name(c)	((c)->cid.prod_name)
+ #define mmc_card_id(c)		(dev_name(&(c)->dev))
  
- 	pre_div >>= 1;
- 	div--;
 _
