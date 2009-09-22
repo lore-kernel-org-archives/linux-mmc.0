@@ -1,15 +1,15 @@
 From: akpm@linux-foundation.org
-Subject: [patch 062/232] omap_hsmmc: put MMC regulator to sleep
-Date: Tue, 22 Sep 2009 16:44:51 -0700
-Message-ID: <200909222344.n8MNiqOJ013065@imap1.linux-foundation.org>
+Subject: [patch 061/232] ARM: OMAP: mmc-twl4030: add regulator sleep / wake function
+Date: Tue, 22 Sep 2009 16:44:50 -0700
+Message-ID: <200909222344.n8MNioZD012995@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:34105 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:59022 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753380AbZIWASw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 20:18:52 -0400
+	by vger.kernel.org with ESMTP id S1753386AbZIWASy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 20:18:54 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
@@ -17,15 +17,8 @@ Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia
 
 From: Adrian Hunter <adrian.hunter@nokia.com>
 
-When a card is not in use, the voltage regulator can be put to sleep. 
-This is an alternative to powering the card off, when powering off is not
-safe because the card might be replaced without the driver being aware of
-it.
-
-That situation happens if:
-	- the card is removable i.e. not eMMC
-	- and there is no card detect
-	- and there is a cover switch but the cover is open
+Add the ability for the driver to put the card power regulators to sleep
+and wake them up again.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
@@ -40,133 +33,101 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/omap_hsmmc.c |   59 +++++++++++++++++++++++++++++---
- 1 file changed, 54 insertions(+), 5 deletions(-)
+ arch/arm/mach-omap2/mmc-twl4030.c     |   57 ++++++++++++++++++++++++
+ arch/arm/plat-omap/include/mach/mmc.h |    2 
+ 2 files changed, 59 insertions(+)
 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-put-mmc-regulator-to-sleep drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-put-mmc-regulator-to-sleep
-+++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -162,6 +162,7 @@ struct mmc_omap_host {
- 	int			response_busy;
- 	int			context_loss;
- 	int			dpm_state;
-+	int			vdd;
- 
- 	struct	omap_mmc_platform_data	*pdata;
- };
-@@ -1038,10 +1039,12 @@ static void omap_mmc_set_ios(struct mmc_
- 		case MMC_POWER_OFF:
- 			mmc_slot(host).set_power(host->dev, host->slot_id,
- 						 0, 0);
-+			host->vdd = 0;
- 			break;
- 		case MMC_POWER_UP:
- 			mmc_slot(host).set_power(host->dev, host->slot_id,
- 						 1, ios->vdd);
-+			host->vdd = ios->vdd;
- 			break;
- 		case MMC_POWER_ON:
- 			do_send_init_stream = 1;
-@@ -1179,19 +1182,20 @@ static void omap_hsmmc_init(struct mmc_o
- 
- /*
-  * Dynamic power saving handling, FSM:
-- *   ENABLED -> DISABLED -> OFF
-+ *   ENABLED -> DISABLED -> OFF / REGSLEEP
-  *     ^___________|          |
-  *     |______________________|
-  *
-  * ENABLED:   mmc host is fully functional
-  * DISABLED:  fclk is off
-  * OFF:       fclk is off,voltage regulator is off
-+ * REGSLEEP:  fclk is off,voltage regulator is asleep
-  *
-  * Transition handlers return the timeout for the next state transition
-  * or negative error.
-  */
- 
--enum {ENABLED = 0, DISABLED, OFF};
-+enum {ENABLED = 0, DISABLED, REGSLEEP, OFF};
- 
- /* Handler for [ENABLED -> DISABLED] transition */
- static int omap_mmc_enabled_to_disabled(struct mmc_omap_host *host)
-@@ -1228,8 +1232,12 @@ static int omap_mmc_disabled_to_off(stru
- 	     mmc_slot(host).get_cover_state(host->dev, host->slot_id))) {
- 		mmc_power_save_host(host->mmc);
- 		new_state = OFF;
--	} else
--		new_state = DISABLED;
-+	} else {
-+		if (mmc_slot(host).set_sleep)
-+			mmc_slot(host).set_sleep(host->dev, host->slot_id,
-+						 1, 0, 0);
-+		new_state = REGSLEEP;
-+	}
- 
- 	OMAP_HSMMC_WRITE(host->base, ISE, 0);
- 	OMAP_HSMMC_WRITE(host->base, IE, 0);
-@@ -1286,6 +1294,44 @@ static int omap_mmc_off_to_enabled(struc
- 	return 0;
+diff -puN arch/arm/mach-omap2/mmc-twl4030.c~arm-omap-mmc-twl4030-add-regulator-sleep-wake-function arch/arm/mach-omap2/mmc-twl4030.c
+--- a/arch/arm/mach-omap2/mmc-twl4030.c~arm-omap-mmc-twl4030-add-regulator-sleep-wake-function
++++ a/arch/arm/mach-omap2/mmc-twl4030.c
+@@ -340,6 +340,61 @@ static int twl_mmc23_set_power(struct de
+ 	return ret;
  }
  
-+/* Handler for [REGSLEEP -> ENABLED] transition */
-+static int omap_mmc_regsleep_to_enabled(struct mmc_omap_host *host)
++static int twl_mmc1_set_sleep(struct device *dev, int slot, int sleep, int vdd,
++			      int cardsleep)
 +{
-+	unsigned long timeout;
++	struct twl_mmc_controller *c = &hsmmc[0];
++	int mode = sleep ? REGULATOR_MODE_STANDBY : REGULATOR_MODE_NORMAL;
 +
-+	dev_dbg(mmc_dev(host->mmc), "REGSLEEP -> ENABLED\n");
-+
-+	clk_enable(host->fclk);
-+	clk_enable(host->iclk);
-+
-+	if (clk_enable(host->dbclk))
-+		dev_dbg(mmc_dev(host->mmc),
-+			"Enabling debounce clk failed\n");
-+
-+	omap_mmc_restore_ctx(host);
-+
-+	/*
-+	 * We turned off interrupts and bus power.  Interrupts
-+	 * are turned on by 'mmc_omap_start_command()' so we
-+	 * just need to turn on the bus power here.
-+	 */
-+	OMAP_HSMMC_WRITE(host->base, HCTL,
-+			 OMAP_HSMMC_READ(host->base, HCTL) | SDBP);
-+
-+	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
-+	while ((OMAP_HSMMC_READ(host->base, HCTL) & SDBP) != SDBP &&
-+	       time_before(jiffies, timeout))
-+		;
-+
-+	if (mmc_slot(host).set_sleep)
-+		mmc_slot(host).set_sleep(host->dev, host->slot_id,
-+					 0, host->vdd, 0);
-+
-+	host->dpm_state = ENABLED;
-+
-+	return 0;
++	return regulator_set_mode(c->vcc, mode);
 +}
 +
- /*
-  * Bring MMC host to ENABLED from any other PM state.
-  */
-@@ -1296,6 +1342,8 @@ static int omap_mmc_enable(struct mmc_ho
- 	switch (host->dpm_state) {
- 	case DISABLED:
- 		return omap_mmc_disabled_to_enabled(host);
-+	case REGSLEEP:
-+		return omap_mmc_regsleep_to_enabled(host);
- 	case OFF:
- 		return omap_mmc_off_to_enabled(host);
- 	default:
-@@ -1393,7 +1441,8 @@ static int mmc_regs_show(struct seq_file
- 			host->dpm_state, mmc->nesting_cnt,
- 			host->context_loss, context_loss);
++static int twl_mmc23_set_sleep(struct device *dev, int slot, int sleep, int vdd,
++			       int cardsleep)
++{
++	struct twl_mmc_controller *c = NULL;
++	struct omap_mmc_platform_data *mmc = dev->platform_data;
++	int i, err, mode;
++
++	for (i = 1; i < ARRAY_SIZE(hsmmc); i++) {
++		if (mmc == hsmmc[i].mmc) {
++			c = &hsmmc[i];
++			break;
++		}
++	}
++
++	if (c == NULL)
++		return -ENODEV;
++
++	/*
++	 * If we don't see a Vcc regulator, assume it's a fixed
++	 * voltage always-on regulator.
++	 */
++	if (!c->vcc)
++		return 0;
++
++	mode = sleep ? REGULATOR_MODE_STANDBY : REGULATOR_MODE_NORMAL;
++
++	if (!c->vcc_aux)
++		return regulator_set_mode(c->vcc, mode);
++
++	if (cardsleep) {
++		/* VCC can be turned off if card is asleep */
++		struct regulator *vcc_aux = c->vcc_aux;
++
++		c->vcc_aux = NULL;
++		if (sleep)
++			err = twl_mmc23_set_power(dev, slot, 0, 0);
++		else
++			err = twl_mmc23_set_power(dev, slot, 1, vdd);
++		c->vcc_aux = vcc_aux;
++	} else
++		err = regulator_set_mode(c->vcc, mode);
++	if (err)
++		return err;
++	return regulator_set_mode(c->vcc_aux, mode);
++}
++
+ static struct omap_mmc_platform_data *hsmmc_data[OMAP34XX_NR_MMC] __initdata;
  
--	if (host->suspended || host->dpm_state == OFF) {
-+	if (host->suspended || host->dpm_state == OFF ||
-+	    host->dpm_state == REGSLEEP) {
- 		seq_printf(s, "host suspended, can't read registers\n");
- 		return 0;
- 	}
+ void __init twl4030_mmc_init(struct twl4030_hsmmc_info *controllers)
+@@ -433,6 +488,7 @@ void __init twl4030_mmc_init(struct twl4
+ 		case 1:
+ 			/* on-chip level shifting via PBIAS0/PBIAS1 */
+ 			mmc->slots[0].set_power = twl_mmc1_set_power;
++			mmc->slots[0].set_sleep = twl_mmc1_set_sleep;
+ 			break;
+ 		case 2:
+ 			if (c->ext_clock)
+@@ -443,6 +499,7 @@ void __init twl4030_mmc_init(struct twl4
+ 		case 3:
+ 			/* off-chip level shifting, or none */
+ 			mmc->slots[0].set_power = twl_mmc23_set_power;
++			mmc->slots[0].set_sleep = twl_mmc23_set_sleep;
+ 			break;
+ 		default:
+ 			pr_err("MMC%d configuration not supported!\n", c->mmc);
+diff -puN arch/arm/plat-omap/include/mach/mmc.h~arm-omap-mmc-twl4030-add-regulator-sleep-wake-function arch/arm/plat-omap/include/mach/mmc.h
+--- a/arch/arm/plat-omap/include/mach/mmc.h~arm-omap-mmc-twl4030-add-regulator-sleep-wake-function
++++ a/arch/arm/plat-omap/include/mach/mmc.h
+@@ -95,6 +95,8 @@ struct omap_mmc_platform_data {
+ 		int (* set_bus_mode)(struct device *dev, int slot, int bus_mode);
+ 		int (* set_power)(struct device *dev, int slot, int power_on, int vdd);
+ 		int (* get_ro)(struct device *dev, int slot);
++		int (*set_sleep)(struct device *dev, int slot, int sleep,
++				 int vdd, int cardsleep);
+ 
+ 		/* return MMC cover switch state, can be NULL if not supported.
+ 		 *
 _
