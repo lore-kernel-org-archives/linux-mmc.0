@@ -1,14 +1,14 @@
 From: akpm@linux-foundation.org
-Subject: [patch 054/232] omap_hsmmc: keep track of power mode
-Date: Tue, 22 Sep 2009 16:44:42 -0700
-Message-ID: <200909222344.n8MNigfJ012713@imap1.linux-foundation.org>
+Subject: [patch 059/232] omap_hsmmc: make use of new MMC_CAP_NONREMOVABLE host capability
+Date: Tue, 22 Sep 2009 16:44:48 -0700
+Message-ID: <200909222344.n8MNimwa012892@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:43193 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:37265 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753370AbZIWASW (ORCPT
+	by vger.kernel.org with ESMTP id S1753320AbZIWASW (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 20:18:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -17,12 +17,7 @@ Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia
 
 From: Adrian Hunter <adrian.hunter@nokia.com>
 
-This patch is preparation for adding context save and restore support.
-
-Keep track of the current power mode so that the context restore function
-can avoid restoring the context for a card if the power has been switched
-off.  If the power is off, the card must be reinitialized anyway which
-will re-establish the context.
+Let the board specify that a card is nonremovable e.g. eMMC
 
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
@@ -37,68 +32,60 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/omap_hsmmc.c |   27 +++++++++++++++++++--------
- 1 file changed, 19 insertions(+), 8 deletions(-)
+ arch/arm/mach-omap2/mmc-twl4030.c     |    3 +++
+ arch/arm/mach-omap2/mmc-twl4030.h     |    1 +
+ arch/arm/plat-omap/include/mach/mmc.h |    3 +++
+ drivers/mmc/host/omap_hsmmc.c         |    3 +++
+ 4 files changed, 10 insertions(+)
 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-keep-track-of-power-mode drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-keep-track-of-power-mode
+diff -puN arch/arm/mach-omap2/mmc-twl4030.c~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability arch/arm/mach-omap2/mmc-twl4030.c
+--- a/arch/arm/mach-omap2/mmc-twl4030.c~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability
++++ a/arch/arm/mach-omap2/mmc-twl4030.c
+@@ -415,6 +415,9 @@ void __init twl4030_mmc_init(struct twl4
+ 		} else
+ 			mmc->slots[0].gpio_wp = -EINVAL;
+ 
++		if (c->nonremovable)
++			mmc->slots[0].nonremovable = 1;
++
+ 		/* NOTE:  MMC slots should have a Vcc regulator set up.
+ 		 * This may be from a TWL4030-family chip, another
+ 		 * controllable regulator, or a fixed supply.
+diff -puN arch/arm/mach-omap2/mmc-twl4030.h~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability arch/arm/mach-omap2/mmc-twl4030.h
+--- a/arch/arm/mach-omap2/mmc-twl4030.h~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability
++++ a/arch/arm/mach-omap2/mmc-twl4030.h
+@@ -12,6 +12,7 @@ struct twl4030_hsmmc_info {
+ 	bool	transceiver;	/* MMC-2 option */
+ 	bool	ext_clock;	/* use external pin for input clock */
+ 	bool	cover_only;	/* No card detect - just cover switch */
++	bool	nonremovable;	/* Nonremovable e.g. eMMC */
+ 	int	gpio_cd;	/* or -EINVAL */
+ 	int	gpio_wp;	/* or -EINVAL */
+ 	char	*name;		/* or NULL for default */
+diff -puN arch/arm/plat-omap/include/mach/mmc.h~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability arch/arm/plat-omap/include/mach/mmc.h
+--- a/arch/arm/plat-omap/include/mach/mmc.h~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability
++++ a/arch/arm/plat-omap/include/mach/mmc.h
+@@ -83,6 +83,9 @@ struct omap_mmc_platform_data {
+ 		/* use the internal clock */
+ 		unsigned internal_clock:1;
+ 
++		/* nonremovable e.g. eMMC */
++		unsigned nonremovable:1;
++
+ 		int switch_pin;			/* gpio (card detect) */
+ 		int gpio_wp;			/* gpio (write protect) */
+ 
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability
 +++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -143,6 +143,7 @@ struct mmc_omap_host {
- 	unsigned int		dma_len;
- 	unsigned int		dma_sg_idx;
- 	unsigned char		bus_mode;
-+	unsigned char		power_mode;
- 	u32			*buffer;
- 	u32			bytesleft;
- 	int			suspended;
-@@ -863,16 +864,25 @@ static void omap_mmc_set_ios(struct mmc_
- 	unsigned long regval;
- 	unsigned long timeout;
- 	u32 con;
-+	int do_send_init_stream = 0;
+@@ -1390,6 +1390,9 @@ static int __init omap_mmc_probe(struct 
+ 	else if (pdata->slots[host->slot_id].wires >= 4)
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
  
- 	mmc_host_enable(host->mmc);
++	if (pdata->slots[host->slot_id].nonremovable)
++		mmc->caps |= MMC_CAP_NONREMOVABLE;
++
+ 	omap_hsmmc_init(host);
  
--	switch (ios->power_mode) {
--	case MMC_POWER_OFF:
--		mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
--		break;
--	case MMC_POWER_UP:
--		mmc_slot(host).set_power(host->dev, host->slot_id, 1, ios->vdd);
--		break;
-+	if (ios->power_mode != host->power_mode) {
-+		switch (ios->power_mode) {
-+		case MMC_POWER_OFF:
-+			mmc_slot(host).set_power(host->dev, host->slot_id,
-+						 0, 0);
-+			break;
-+		case MMC_POWER_UP:
-+			mmc_slot(host).set_power(host->dev, host->slot_id,
-+						 1, ios->vdd);
-+			break;
-+		case MMC_POWER_ON:
-+			do_send_init_stream = 1;
-+			break;
-+		}
-+		host->power_mode = ios->power_mode;
- 	}
- 
- 	con = OMAP_HSMMC_READ(host->base, CON);
-@@ -938,7 +948,7 @@ static void omap_mmc_set_ios(struct mmc_
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) | CEN);
- 
--	if (ios->power_mode == MMC_POWER_ON)
-+	if (do_send_init_stream)
- 		send_init_stream(host);
- 
- 	if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
-@@ -1116,6 +1126,7 @@ static int __init omap_mmc_probe(struct 
- 	host->slot_id	= 0;
- 	host->mapbase	= res->start;
- 	host->base	= ioremap(host->mapbase, SZ_4K);
-+	host->power_mode = -1;
- 
- 	platform_set_drvdata(pdev, host);
- 	INIT_WORK(&host->mmc_carddetect_work, mmc_omap_detect);
+ 	/* Select DMA lines */
 _
