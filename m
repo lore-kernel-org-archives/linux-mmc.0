@@ -1,90 +1,85 @@
 From: akpm@linux-foundation.org
-Subject: [patch 090/232] mmc_spi: fail gracefully if host or card do not support the switch command
-Date: Tue, 22 Sep 2009 16:45:26 -0700
-Message-ID: <200909222345.n8MNjQuA014339@imap1.linux-foundation.org>
+Subject: [patch 082/232] sdhci-of: don't hard-code inverted write-protect quirk
+Date: Tue, 22 Sep 2009 16:45:15 -0700
+Message-ID: <200909222345.n8MNjFCh013955@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:54226 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42661 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753381AbZIVXrL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:47:11 -0400
+	by vger.kernel.org with ESMTP id S1753395AbZIVXrW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:47:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, wolfgang.mues@auerswald.de, linux-mmc@vger.kernel.org, stable@kernel.org
+Cc: akpm@linux-foundation.org, avorontsov@ru.mvista.com, ben@fluff.org, david.vrabel@csr.com, galak@kernel.crashing.org, linux-mmc@vger.kernel.org, pierre@ossman.eu, s.hauer@pengutronix.de
 
-From: Wolfgang Muees <wolfgang.mues@auerswald.de>
+From: Anton Vorontsov <avorontsov@ru.mvista.com>
 
-Some time ago, I have send a patch to the mmc_spi subsystem changing the
-error codes.  This was after a discussion with Pierre about using EINVAL
-only for non-recoverable errors.  This patch was accepted as
+MPC85xx SOCs have normal write-protect state reporting, so we shouldn't
+hard-code the quirk.
 
-http://git.kernel.org/linus/fdd858db7113ca64132de390188d7ca00701013d
+Instead, look for "sdhci,wp-inverted" property, plus check for
+mpc837x_{rdb,mds} machines since older device trees don't specify the new
+property.
 
-Unfortunately, several weeks later, I realized that this patch has opened
-a little can of worms because there are SD cards on the market which
-
-a) claim that they support the switch command
-AND
-b) refuse to execute this command if operating in SPI mode.
-
-So, such a card would get unusuable in an embedded linux system in SPI
-mode, because the init sequence terminates with an error.
-
-This patch adds the missing error codes to the caller of the switch
-command and restores the old behaviour to fail gracefully if these
-commands can not execute.
-
-Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
+Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
+Cc: Pierre Ossman <pierre@ossman.eu>
+Cc: Kumar Gala <galak@kernel.crashing.org>
+Cc: David Vrabel <david.vrabel@csr.com>
+Cc: Ben Dooks <ben@fluff.org>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>
 Cc: <linux-mmc@vger.kernel.org>
-Cc: <stable@kernel.org>		[2.6.31.x]
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/mmc.c |   10 +++++-----
- drivers/mmc/core/sd.c  |   10 +++++-----
- 2 files changed, 10 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci-of.c |   14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
 
-diff -puN drivers/mmc/core/mmc.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command drivers/mmc/core/mmc.c
---- a/drivers/mmc/core/mmc.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command
-+++ a/drivers/mmc/core/mmc.c
-@@ -179,11 +179,11 @@ static int mmc_read_ext_csd(struct mmc_c
+diff -puN drivers/mmc/host/sdhci-of.c~sdhci-of-dont-hard-code-inverted-write-protect-quirk drivers/mmc/host/sdhci-of.c
+--- a/drivers/mmc/host/sdhci-of.c~sdhci-of-dont-hard-code-inverted-write-protect-quirk
++++ a/drivers/mmc/host/sdhci-of.c
+@@ -21,6 +21,7 @@
+ #include <linux/of.h>
+ #include <linux/of_platform.h>
+ #include <linux/mmc/host.h>
++#include <asm/machdep.h>
+ #include "sdhci.h"
  
- 	err = mmc_send_ext_csd(card, ext_csd);
- 	if (err) {
--		/*
--		 * We all hosts that cannot perform the command
--		 * to fail more gracefully
--		 */
--		if (err != -EINVAL)
-+		/* If the host or the card can't do the switch,
-+		 * fail more gracefully. */
-+		if ((err != -EINVAL)
-+		 && (err != -ENOSYS)
-+		 && (err != -EFAULT))
- 			goto out;
+ struct sdhci_of_data {
+@@ -175,7 +176,6 @@ static unsigned int esdhc_get_min_clock(
+ static struct sdhci_of_data sdhci_esdhc = {
+ 	.quirks = SDHCI_QUIRK_FORCE_BLK_SZ_2048 |
+ 		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+-		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
+ 		  SDHCI_QUIRK_NO_BUSY_IRQ |
+ 		  SDHCI_QUIRK_NONSTANDARD_CLOCK |
+ 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+@@ -219,6 +219,15 @@ static int sdhci_of_resume(struct of_dev
  
- 		/*
-diff -puN drivers/mmc/core/sd.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command drivers/mmc/core/sd.c
---- a/drivers/mmc/core/sd.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command
-+++ a/drivers/mmc/core/sd.c
-@@ -210,11 +210,11 @@ static int mmc_read_switch(struct mmc_ca
+ #endif
  
- 	err = mmc_sd_switch(card, 0, 0, 1, status);
- 	if (err) {
--		/*
--		 * We all hosts that cannot perform the command
--		 * to fail more gracefully
--		 */
--		if (err != -EINVAL)
-+		/* If the host or the card can't do the switch,
-+		 * fail more gracefully. */
-+		if ((err != -EINVAL)
-+		 && (err != -ENOSYS)
-+		 && (err != -EFAULT))
- 			goto out;
++static bool __devinit sdhci_of_wp_inverted(struct device_node *np)
++{
++	if (of_get_property(np, "sdhci,wp-inverted", NULL))
++		return true;
++
++	/* Old device trees don't have the wp-inverted property. */
++	return machine_is(mpc837x_rdb) || machine_is(mpc837x_mds);
++}
++
+ static int __devinit sdhci_of_probe(struct of_device *ofdev,
+ 				 const struct of_device_id *match)
+ {
+@@ -261,6 +270,9 @@ static int __devinit sdhci_of_probe(stru
+ 	if (of_get_property(np, "sdhci,1-bit-only", NULL))
+ 		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
  
- 		printk(KERN_WARNING "%s: problem reading switch "
++	if (sdhci_of_wp_inverted(np))
++		host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
++
+ 	clk = of_get_property(np, "clock-frequency", &size);
+ 	if (clk && size == sizeof(*clk) && *clk)
+ 		of_host->clock = *clk;
 _
