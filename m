@@ -1,15 +1,15 @@
 From: akpm@linux-foundation.org
-Subject: [patch 073/232] ARM: OMAP: RX51: set MMC capabilities and power-saving flag
-Date: Tue, 22 Sep 2009 16:45:05 -0700
-Message-ID: <200909222345.n8MNj5dr013593@imap1.linux-foundation.org>
+Subject: [patch 070/232] omap_hsmmc: protect the card when the cover is open
+Date: Tue, 22 Sep 2009 16:45:01 -0700
+Message-ID: <200909222345.n8MNj1CA013464@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:58001 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:58121 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753493AbZIVXpn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:45:43 -0400
+	by vger.kernel.org with ESMTP id S1753493AbZIVXpo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:45:44 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
@@ -17,7 +17,10 @@ Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia
 
 From: Adrian Hunter <adrian.hunter@nokia.com>
 
-Specify MMC capabilities and set the power-saving flag for RX51.
+Depending on the manufacturer, there is a small possibility that removing
+a card while it is being written to, can render the card permanently
+unusable.  To prevent that, the card is made inaccessible when the cover
+is open.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
@@ -32,35 +35,124 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- arch/arm/mach-omap2/board-rx51-peripherals.c |    4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c |   63 ++++++++++++++++++++++++++++++--
+ 1 file changed, 61 insertions(+), 2 deletions(-)
 
-diff -puN arch/arm/mach-omap2/board-rx51-peripherals.c~arm-omap-rx51-set-mmc-capabilities-and-power-saving-flag arch/arm/mach-omap2/board-rx51-peripherals.c
---- a/arch/arm/mach-omap2/board-rx51-peripherals.c~arm-omap-rx51-set-mmc-capabilities-and-power-saving-flag
-+++ a/arch/arm/mach-omap2/board-rx51-peripherals.c
-@@ -19,6 +19,7 @@
- #include <linux/delay.h>
- #include <linux/regulator/machine.h>
- #include <linux/gpio.h>
-+#include <linux/mmc/host.h>
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-protect-the-card-when-the-cover-is-open drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-protect-the-card-when-the-cover-is-open
++++ a/drivers/mmc/host/omap_hsmmc.c
+@@ -167,6 +167,8 @@ struct omap_hsmmc_host {
+ 	int			context_loss;
+ 	int			dpm_state;
+ 	int			vdd;
++	int			protect_card;
++	int			reqs_blocked;
  
- #include <mach/mcspi.h>
- #include <mach/mux.h>
-@@ -102,6 +103,7 @@ static struct twl4030_hsmmc_info mmc[] =
- 		.cover_only	= true,
- 		.gpio_cd	= 160,
- 		.gpio_wp	= -EINVAL,
-+		.power_saving	= true,
- 	},
- 	{
- 		.name		= "internal",
-@@ -109,6 +111,8 @@ static struct twl4030_hsmmc_info mmc[] =
- 		.wires		= 8,
- 		.gpio_cd	= -EINVAL,
- 		.gpio_wp	= -EINVAL,
-+		.nonremovable	= true,
-+		.power_saving	= true,
- 	},
- 	{}	/* Terminator */
+ 	struct	omap_mmc_platform_data	*pdata;
  };
+@@ -351,6 +353,9 @@ static void send_init_stream(struct omap
+ 	int reg = 0;
+ 	unsigned long timeout;
+ 
++	if (host->protect_card)
++		return;
++
+ 	disable_irq(host->irq);
+ 	OMAP_HSMMC_WRITE(host->base, CON,
+ 		OMAP_HSMMC_READ(host->base, CON) | INIT_STREAM);
+@@ -786,6 +791,30 @@ err:
+ 	return ret;
+ }
+ 
++/* Protect the card while the cover is open */
++static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
++{
++	if (!mmc_slot(host).get_cover_state)
++		return;
++
++	host->reqs_blocked = 0;
++	if (mmc_slot(host).get_cover_state(host->dev, host->slot_id)) {
++		if (host->protect_card) {
++			printk(KERN_INFO "%s: cover is closed, "
++					 "card is now accessible\n",
++					 mmc_hostname(host->mmc));
++			host->protect_card = 0;
++		}
++	} else {
++		if (!host->protect_card) {
++			printk(KERN_INFO "%s: cover is open, "
++					 "card is now inaccessible\n",
++					 mmc_hostname(host->mmc));
++			host->protect_card = 1;
++		}
++	}
++}
++
+ /*
+  * Work Item to notify the core about card insertion/removal
+  */
+@@ -803,8 +832,10 @@ static void omap_hsmmc_detect(struct wor
+ 
+ 	if (slot->card_detect)
+ 		carddetect = slot->card_detect(slot->card_detect_irq);
+-	else
++	else {
++		omap_hsmmc_protect_card(host);
+ 		carddetect = -ENOSYS;
++	}
+ 
+ 	if (carddetect) {
+ 		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+@@ -1040,8 +1071,32 @@ static void omap_hsmmc_request(struct mm
+ 	 * interrupts, but not if we are already in interrupt context i.e.
+ 	 * retries.
+ 	 */
+-	if (!in_interrupt())
++	if (!in_interrupt()) {
+ 		spin_lock_irqsave(&host->irq_lock, host->flags);
++		/*
++		 * Protect the card from I/O if there is a possibility
++		 * it can be removed.
++		 */
++		if (host->protect_card) {
++			if (host->reqs_blocked < 3) {
++				/*
++				 * Ensure the controller is left in a consistent
++				 * state by resetting the command and data state
++				 * machines.
++				 */
++				omap_hsmmc_reset_controller_fsm(host, SRD);
++				omap_hsmmc_reset_controller_fsm(host, SRC);
++				host->reqs_blocked += 1;
++			}
++			req->cmd->error = -EBADF;
++			if (req->data)
++				req->data->error = -EBADF;
++			spin_unlock_irqrestore(&host->irq_lock, host->flags);
++			mmc_request_done(mmc, req);
++			return;
++		} else if (host->reqs_blocked)
++			host->reqs_blocked = 0;
++	}
+ 	WARN_ON(host->mrq != NULL);
+ 	host->mrq = req;
+ 	err = omap_hsmmc_prepare_data(host, req);
+@@ -1732,6 +1787,8 @@ static int __init omap_hsmmc_probe(struc
+ 
+ 	mmc_host_lazy_disable(host->mmc);
+ 
++	omap_hsmmc_protect_card(host);
++
+ 	mmc_add_host(mmc);
+ 
+ 	if (mmc_slot(host).name != NULL) {
+@@ -1897,6 +1954,8 @@ static int omap_hsmmc_resume(struct plat
+ 					"Unmask interrupt failed\n");
+ 		}
+ 
++		omap_hsmmc_protect_card(host);
++
+ 		/* Notify the core to resume the host */
+ 		ret = mmc_resume_host(host->mmc);
+ 		if (ret == 0)
 _
