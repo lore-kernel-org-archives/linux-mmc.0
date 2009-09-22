@@ -1,25 +1,24 @@
 From: akpm@linux-foundation.org
-Subject: [patch 065/232] omap_hsmmc: cleanup macro usage
-Date: Tue, 22 Sep 2009 16:44:55 -0700
-Message-ID: <200909222344.n8MNitlO013168@imap1.linux-foundation.org>
+Subject: [patch 052/232] omap_hsmmc: make use of new enable/disable interface
+Date: Tue, 22 Sep 2009 16:44:39 -0700
+Message-ID: <200909222344.n8MNid3I012581@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:39131 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:55655 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752067AbZIWATR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 20:19:17 -0400
+	by vger.kernel.org with ESMTP id S1752067AbZIWATY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 20:19:24 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, ext-denis.2.karpov@nokia.com, adrian.hunter@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.org, pierre@ossman.eu, roberto.foglietta@gmail.com
+Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.org, pierre@ossman.eu, roberto.foglietta@gmail.com
 
-From: Denis Karpov <ext-denis.2.karpov@nokia.com>
+From: Adrian Hunter <adrian.hunter@nokia.com>
 
-Use macro mmc_slot() in omap_hsmmc.
+For the moment enable / disable just turns the fclk on and off.
 
-Signed-off-by: Denis Karpov <ext-denis.2.karpov@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
 Cc: Ian Molton <ian@mnementh.co.uk>
@@ -33,146 +32,203 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/omap_hsmmc.c |   42 ++++++++++++++------------------
- 1 file changed, 19 insertions(+), 23 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   68 +++++++++++++++++++++++++++-----
+ 1 file changed, 58 insertions(+), 10 deletions(-)
 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-cleanup-macro-usage drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-cleanup-macro-usage
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-make-use-of-new-enable-disable-interface drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-make-use-of-new-enable-disable-interface
 +++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -368,9 +368,8 @@ int mmc_omap_cover_is_closed(struct mmc_
- {
- 	int r = 1;
- 
--	if (host->pdata->slots[host->slot_id].get_cover_state)
--		r = host->pdata->slots[host->slot_id].get_cover_state(host->dev,
--			host->slot_id);
-+	if (mmc_slot(host).get_cover_state)
-+		r = mmc_slot(host).get_cover_state(host->dev, host->slot_id);
- 	return r;
- }
- 
-@@ -393,9 +392,8 @@ mmc_omap_show_slot_name(struct device *d
- {
- 	struct mmc_host *mmc = container_of(dev, struct mmc_host, class_dev);
- 	struct mmc_omap_host *host = mmc_priv(mmc);
--	struct omap_mmc_slot_data slot = host->pdata->slots[host->slot_id];
- 
--	return sprintf(buf, "%s\n", slot.name);
-+	return sprintf(buf, "%s\n", mmc_slot(host).name);
- }
- 
- static DEVICE_ATTR(slot_name, S_IRUGO, mmc_omap_show_slot_name, NULL);
-@@ -632,7 +630,8 @@ static irqreturn_t mmc_omap_irq(int irq,
- 			(status & CMD_CRC)) {
- 			if (host->cmd) {
- 				if (status & CMD_TIMEOUT) {
--					mmc_omap_reset_controller_fsm(host, SRC);
-+					mmc_omap_reset_controller_fsm(host,
-+								      SRC);
- 					host->cmd->error = -ETIMEDOUT;
- 				} else {
- 					host->cmd->error = -EILSEQ;
-@@ -775,7 +774,7 @@ static void mmc_omap_detect(struct work_
- 
- 	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
- 
--	if (mmc_slot(host).card_detect)
-+	if (slot->card_detect)
- 		carddetect = slot->card_detect(slot->card_detect_irq);
- 	else
- 		carddetect = -ENOSYS;
-@@ -830,7 +829,7 @@ static void mmc_omap_config_dma_params(s
- 			sg_dma_address(sgl), 0, 0);
+@@ -605,7 +605,9 @@ static void mmc_omap_detect(struct work_
+ 	if (host->carddetect) {
+ 		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
  	} else {
- 		omap_set_dma_src_params(dma_ch, 0, OMAP_DMA_AMODE_CONSTANT,
--					(host->mapbase + OMAP_HSMMC_DATA), 0, 0);
-+			(host->mapbase + OMAP_HSMMC_DATA), 0, 0);
- 		omap_set_dma_dest_params(dma_ch, 0, OMAP_DMA_AMODE_POST_INC,
- 			sg_dma_address(sgl), 0, 0);
++		mmc_host_enable(host->mmc);
+ 		mmc_omap_reset_controller_fsm(host, SRD);
++		mmc_host_lazy_disable(host->mmc);
+ 		mmc_detect_change(host->mmc, (HZ * 50) / 1000);
  	}
-@@ -918,7 +917,7 @@ mmc_omap_start_dma_transfer(struct mmc_o
- 	}
+ }
+@@ -818,6 +820,27 @@ mmc_omap_prepare_data(struct mmc_omap_ho
+ 	return 0;
+ }
  
- 	ret = omap_request_dma(mmc_omap_get_dma_sync_dev(host, data), "MMC/SD",
--			       mmc_omap_dma_cb,host, &dma_ch);
-+			       mmc_omap_dma_cb, host, &dma_ch);
- 	if (ret != 0) {
- 		dev_err(mmc_dev(host->mmc),
- 			"%s: omap_request_dma() failed with %d\n",
-@@ -1138,21 +1137,19 @@ static void omap_mmc_set_ios(struct mmc_
++static int omap_mmc_enable(struct mmc_host *mmc)
++{
++	struct mmc_omap_host *host = mmc_priv(mmc);
++	int err;
++
++	err = clk_enable(host->fclk);
++	if (err)
++		return err;
++	dev_dbg(mmc_dev(host->mmc), "mmc_fclk: enabled\n");
++	return 0;
++}
++
++static int omap_mmc_disable(struct mmc_host *mmc, int lazy)
++{
++	struct mmc_omap_host *host = mmc_priv(mmc);
++
++	clk_disable(host->fclk);
++	dev_dbg(mmc_dev(host->mmc), "mmc_fclk: disabled\n");
++	return 0;
++}
++
+ /*
+  * Request function. for read/write operation
+  */
+@@ -841,6 +864,8 @@ static void omap_mmc_set_ios(struct mmc_
+ 	unsigned long timeout;
+ 	u32 con;
+ 
++	mmc_host_enable(host->mmc);
++
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_OFF:
+ 		mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
+@@ -919,6 +944,8 @@ static void omap_mmc_set_ios(struct mmc_
+ 	if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
+ 		OMAP_HSMMC_WRITE(host->base, CON,
+ 				OMAP_HSMMC_READ(host->base, CON) | OD);
++
++	mmc_host_lazy_disable(host->mmc);
+ }
+ 
  static int omap_hsmmc_get_cd(struct mmc_host *mmc)
- {
- 	struct mmc_omap_host *host = mmc_priv(mmc);
--	struct omap_mmc_platform_data *pdata = host->pdata;
- 
--	if (!pdata->slots[0].card_detect)
-+	if (!mmc_slot(host).card_detect)
- 		return -ENOSYS;
--	return pdata->slots[0].card_detect(pdata->slots[0].card_detect_irq);
-+	return mmc_slot(host).card_detect(mmc_slot(host).card_detect_irq);
+@@ -969,6 +996,8 @@ static void omap_hsmmc_init(struct mmc_o
  }
  
- static int omap_hsmmc_get_ro(struct mmc_host *mmc)
- {
+ static struct mmc_host_ops mmc_omap_ops = {
++	.enable = omap_mmc_enable,
++	.disable = omap_mmc_disable,
+ 	.request = omap_mmc_request,
+ 	.set_ios = omap_mmc_set_ios,
+ 	.get_cd = omap_hsmmc_get_cd,
+@@ -983,7 +1012,16 @@ static int mmc_regs_show(struct seq_file
+ 	struct mmc_host *mmc = s->private;
  	struct mmc_omap_host *host = mmc_priv(mmc);
--	struct omap_mmc_platform_data *pdata = host->pdata;
  
--	if (!pdata->slots[0].get_ro)
-+	if (!mmc_slot(host).get_ro)
- 		return -ENOSYS;
--	return pdata->slots[0].get_ro(host->dev, 0);
-+	return mmc_slot(host).get_ro(host->dev, 0);
+-	seq_printf(s, "mmc%d regs:\n", mmc->index);
++	seq_printf(s, "mmc%d:\n"
++			" enabled:\t%d\n"
++			" nesting_cnt:\t%d\n"
++			"\nregs:\n",
++			mmc->index, mmc->enabled ? 1 : 0, mmc->nesting_cnt);
++
++	if (clk_enable(host->fclk) != 0) {
++		seq_printf(s, "can't read the regs\n");
++		goto err;
++	}
+ 
+ 	seq_printf(s, "SYSCONFIG:\t0x%08x\n",
+ 			OMAP_HSMMC_READ(host->base, SYSCONFIG));
+@@ -999,6 +1037,9 @@ static int mmc_regs_show(struct seq_file
+ 			OMAP_HSMMC_READ(host->base, ISE));
+ 	seq_printf(s, "CAPA:\t\t0x%08x\n",
+ 			OMAP_HSMMC_READ(host->base, CAPA));
++
++	clk_disable(host->fclk);
++err:
+ 	return 0;
  }
  
- static void omap_hsmmc_init(struct mmc_omap_host *host)
-@@ -1563,7 +1560,7 @@ static int __init omap_mmc_probe(struct 
- 	platform_set_drvdata(pdev, host);
- 	INIT_WORK(&host->mmc_carddetect_work, mmc_omap_detect);
+@@ -1099,14 +1140,16 @@ static int __init omap_mmc_probe(struct 
+ 		goto err1;
+ 	}
  
--	if (pdata->slots[host->slot_id].power_saving)
-+	if (mmc_slot(host).power_saving)
- 		mmc->ops	= &mmc_omap_ps_ops;
- 	else
- 		mmc->ops	= &mmc_omap_ops;
-@@ -1633,12 +1630,12 @@ static int __init omap_mmc_probe(struct 
- 	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
- 		     MMC_CAP_WAIT_WHILE_BUSY;
+-	if (clk_enable(host->fclk) != 0) {
++	mmc->caps |= MMC_CAP_DISABLE;
++	mmc_set_disable_delay(mmc, 100);
++	if (mmc_host_enable(host->mmc) != 0) {
+ 		clk_put(host->iclk);
+ 		clk_put(host->fclk);
+ 		goto err1;
+ 	}
  
--	if (pdata->slots[host->slot_id].wires >= 8)
-+	if (mmc_slot(host).wires >= 8)
- 		mmc->caps |= MMC_CAP_8_BIT_DATA;
--	else if (pdata->slots[host->slot_id].wires >= 4)
-+	else if (mmc_slot(host).wires >= 4)
- 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 	if (clk_enable(host->iclk) != 0) {
+-		clk_disable(host->fclk);
++		mmc_host_disable(host->mmc);
+ 		clk_put(host->iclk);
+ 		clk_put(host->fclk);
+ 		goto err1;
+@@ -1197,6 +1240,8 @@ static int __init omap_mmc_probe(struct 
+ 	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
+ 	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
  
--	if (pdata->slots[host->slot_id].nonremovable)
-+	if (mmc_slot(host).nonremovable)
- 		mmc->caps |= MMC_CAP_NONREMOVABLE;
- 
- 	omap_hsmmc_init(host);
-@@ -1700,13 +1697,12 @@ static int __init omap_mmc_probe(struct 
- 
++	mmc_host_lazy_disable(host->mmc);
++
  	mmc_add_host(mmc);
  
--	if (host->pdata->slots[host->slot_id].name != NULL) {
-+	if (mmc_slot(host).name != NULL) {
- 		ret = device_create_file(&mmc->class_dev, &dev_attr_slot_name);
- 		if (ret < 0)
- 			goto err_slot_name;
- 	}
--	if (mmc_slot(host).card_detect_irq &&
--	    host->pdata->slots[host->slot_id].get_cover_state) {
-+	if (mmc_slot(host).card_detect_irq && mmc_slot(host).get_cover_state) {
- 		ret = device_create_file(&mmc->class_dev,
- 					&dev_attr_cover_switch);
- 		if (ret < 0)
-@@ -1812,7 +1808,7 @@ static int omap_mmc_suspend(struct platf
+ 	if (host->pdata->slots[host->slot_id].name != NULL) {
+@@ -1225,7 +1270,7 @@ err_irq_cd:
+ err_irq_cd_init:
+ 	free_irq(host->irq, host);
+ err_irq:
+-	clk_disable(host->fclk);
++	mmc_host_disable(host->mmc);
+ 	clk_disable(host->iclk);
+ 	clk_put(host->fclk);
+ 	clk_put(host->iclk);
+@@ -1250,6 +1295,7 @@ static int omap_mmc_remove(struct platfo
+ 	struct resource *res;
  
+ 	if (host) {
++		mmc_host_enable(host->mmc);
+ 		mmc_remove_host(host->mmc);
+ 		if (host->pdata->cleanup)
+ 			host->pdata->cleanup(&pdev->dev);
+@@ -1258,7 +1304,7 @@ static int omap_mmc_remove(struct platfo
+ 			free_irq(mmc_slot(host).card_detect_irq, host);
+ 		flush_scheduled_work();
+ 
+-		clk_disable(host->fclk);
++		mmc_host_disable(host->mmc);
+ 		clk_disable(host->iclk);
+ 		clk_put(host->fclk);
+ 		clk_put(host->iclk);
+@@ -1289,6 +1335,7 @@ static int omap_mmc_suspend(struct platf
+ 		return 0;
+ 
+ 	if (host) {
++		mmc_host_enable(host->mmc);
+ 		ret = mmc_suspend_host(host->mmc, state);
+ 		if (ret == 0) {
+ 			host->suspended = 1;
+@@ -1307,10 +1354,11 @@ static int omap_mmc_suspend(struct platf
  
  			OMAP_HSMMC_WRITE(host->base, HCTL,
--					 OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
-+				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
- 			mmc_host_disable(host->mmc);
+ 					 OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
+-			clk_disable(host->fclk);
++			mmc_host_disable(host->mmc);
  			clk_disable(host->iclk);
  			clk_disable(host->dbclk);
+-		}
++		} else
++			mmc_host_disable(host->mmc);
+ 
+ 	}
+ 	return ret;
+@@ -1327,13 +1375,12 @@ static int omap_mmc_resume(struct platfo
+ 
+ 	if (host) {
+ 
+-		ret = clk_enable(host->fclk);
+-		if (ret)
++		if (mmc_host_enable(host->mmc) != 0)
+ 			goto clk_en_err;
+ 
+ 		ret = clk_enable(host->iclk);
+ 		if (ret) {
+-			clk_disable(host->fclk);
++			mmc_host_disable(host->mmc);
+ 			clk_put(host->fclk);
+ 			goto clk_en_err;
+ 		}
+@@ -1355,6 +1402,7 @@ static int omap_mmc_resume(struct platfo
+ 		ret = mmc_resume_host(host->mmc);
+ 		if (ret == 0)
+ 			host->suspended = 0;
++		mmc_host_lazy_disable(host->mmc);
+ 	}
+ 
+ 	return ret;
 _
