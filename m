@@ -1,29 +1,30 @@
 From: akpm@linux-foundation.org
-Subject: [patch 047/232] mmc: add ability to save power by powering off cards
-Date: Tue, 22 Sep 2009 16:44:33 -0700
-Message-ID: <200909222344.n8MNiXHg012403@imap1.linux-foundation.org>
+Subject: [patch 053/232] ARM: OMAP: mmc-twl4030: add context loss counter support
+Date: Tue, 22 Sep 2009 16:44:40 -0700
+Message-ID: <200909222344.n8MNifUE012663@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:52057 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:56493 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753459AbZIVXpT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:45:19 -0400
+	by vger.kernel.org with ESMTP id S1753476AbZIVXpZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:45:25 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.org, pierre@ossman.eu, roberto.foglietta@gmail.com
+Cc: akpm@linux-foundation.org, ext-denis.2.karpov@nokia.com, adrian.hunter@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.org, pierre@ossman.eu, roberto.foglietta@gmail.com
 
-From: Adrian Hunter <adrian.hunter@nokia.com>
+From: Denis Karpov <ext-denis.2.karpov@nokia.com>
 
-Power can be saved by powering off cards that are not in use.  This is
-similar to suspend / resume except it is under the control of the driver,
-and does not require any power management support.  It can only be used
-when the driver can monitor whether the card is removed, otherwise it is
-unsafe.  This is possible because, unlike suspend, the driver still
-receives card detect and / or cover switch interrupts.
+PM dynamic OFF state results in context loss.  That is, the host
+controller has been powered off at some point, which means the registers
+have been reset.  The driver must detect when this happens, and restore
+the context.  This patch adds the means to detect context loss.
 
+Note, the PM side is not yet implemented.
+
+Signed-off-by: Denis Karpov <ext-denis.2.karpov@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
 Cc: Ian Molton <ian@mnementh.co.uk>
@@ -37,164 +38,53 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/core.c  |   34 ++++++++++++++++++++++++++++++++++
- drivers/mmc/core/core.h  |    2 ++
- drivers/mmc/core/mmc.c   |   11 +++++++++++
- drivers/mmc/core/sd.c    |   11 +++++++++++
- include/linux/mmc/host.h |    3 +++
- 5 files changed, 61 insertions(+)
+ arch/arm/mach-omap2/mmc-twl4030.c     |   15 +++++++++++++++
+ arch/arm/plat-omap/include/mach/mmc.h |    3 +++
+ 2 files changed, 18 insertions(+)
 
-diff -puN drivers/mmc/core/core.c~mmc-add-ability-to-save-power-by-powering-off-cards drivers/mmc/core/core.c
---- a/drivers/mmc/core/core.c~mmc-add-ability-to-save-power-by-powering-off-cards
-+++ a/drivers/mmc/core/core.c
-@@ -1151,6 +1151,40 @@ void mmc_stop_host(struct mmc_host *host
- 	mmc_power_off(host);
- }
+diff -puN arch/arm/mach-omap2/mmc-twl4030.c~arm-omap-mmc-twl4030-add-context-loss-counter-support arch/arm/mach-omap2/mmc-twl4030.c
+--- a/arch/arm/mach-omap2/mmc-twl4030.c~arm-omap-mmc-twl4030-add-context-loss-counter-support
++++ a/arch/arm/mach-omap2/mmc-twl4030.c
+@@ -198,6 +198,18 @@ static int twl_mmc_resume(struct device 
+ #define twl_mmc_resume	NULL
+ #endif
  
-+void mmc_power_save_host(struct mmc_host *host)
++#if defined(CONFIG_ARCH_OMAP3) && defined(CONFIG_PM)
++
++static int twl4030_mmc_get_context_loss(struct device *dev)
 +{
-+	mmc_bus_get(host);
-+
-+	if (!host->bus_ops || host->bus_dead || !host->bus_ops->power_restore) {
-+		mmc_bus_put(host);
-+		return;
-+	}
-+
-+	if (host->bus_ops->power_save)
-+		host->bus_ops->power_save(host);
-+
-+	mmc_bus_put(host);
-+
-+	mmc_power_off(host);
-+}
-+EXPORT_SYMBOL(mmc_power_save_host);
-+
-+void mmc_power_restore_host(struct mmc_host *host)
-+{
-+	mmc_bus_get(host);
-+
-+	if (!host->bus_ops || host->bus_dead || !host->bus_ops->power_restore) {
-+		mmc_bus_put(host);
-+		return;
-+	}
-+
-+	mmc_power_up(host);
-+	host->bus_ops->power_restore(host);
-+
-+	mmc_bus_put(host);
-+}
-+EXPORT_SYMBOL(mmc_power_restore_host);
-+
- #ifdef CONFIG_PM
- 
- /**
-diff -puN drivers/mmc/core/core.h~mmc-add-ability-to-save-power-by-powering-off-cards drivers/mmc/core/core.h
---- a/drivers/mmc/core/core.h~mmc-add-ability-to-save-power-by-powering-off-cards
-+++ a/drivers/mmc/core/core.h
-@@ -20,6 +20,8 @@ struct mmc_bus_ops {
- 	void (*detect)(struct mmc_host *);
- 	void (*suspend)(struct mmc_host *);
- 	void (*resume)(struct mmc_host *);
-+	void (*power_save)(struct mmc_host *);
-+	void (*power_restore)(struct mmc_host *);
- };
- 
- void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
-diff -puN drivers/mmc/core/mmc.c~mmc-add-ability-to-save-power-by-powering-off-cards drivers/mmc/core/mmc.c
---- a/drivers/mmc/core/mmc.c~mmc-add-ability-to-save-power-by-powering-off-cards
-+++ a/drivers/mmc/core/mmc.c
-@@ -549,6 +549,14 @@ static void mmc_resume(struct mmc_host *
- 
- }
- 
-+static void mmc_power_restore(struct mmc_host *host)
-+{
-+	host->card->state &= ~MMC_STATE_HIGHSPEED;
-+	mmc_claim_host(host);
-+	mmc_init_card(host, host->ocr, host->card);
-+	mmc_release_host(host);
++	/* FIXME: PM DPS not implemented yet */
++	return 0;
 +}
 +
- #ifdef CONFIG_MMC_UNSAFE_RESUME
- 
- static const struct mmc_bus_ops mmc_ops = {
-@@ -556,6 +564,7 @@ static const struct mmc_bus_ops mmc_ops 
- 	.detect = mmc_detect,
- 	.suspend = mmc_suspend,
- 	.resume = mmc_resume,
-+	.power_restore = mmc_power_restore,
- };
- 
- static void mmc_attach_bus_ops(struct mmc_host *host)
-@@ -570,6 +579,7 @@ static const struct mmc_bus_ops mmc_ops 
- 	.detect = mmc_detect,
- 	.suspend = NULL,
- 	.resume = NULL,
-+	.power_restore = mmc_power_restore,
- };
- 
- static const struct mmc_bus_ops mmc_ops_unsafe = {
-@@ -577,6 +587,7 @@ static const struct mmc_bus_ops mmc_ops_
- 	.detect = mmc_detect,
- 	.suspend = mmc_suspend,
- 	.resume = mmc_resume,
-+	.power_restore = mmc_power_restore,
- };
- 
- static void mmc_attach_bus_ops(struct mmc_host *host)
-diff -puN drivers/mmc/core/sd.c~mmc-add-ability-to-save-power-by-powering-off-cards drivers/mmc/core/sd.c
---- a/drivers/mmc/core/sd.c~mmc-add-ability-to-save-power-by-powering-off-cards
-+++ a/drivers/mmc/core/sd.c
-@@ -603,6 +603,14 @@ static void mmc_sd_resume(struct mmc_hos
- 
- }
- 
-+static void mmc_sd_power_restore(struct mmc_host *host)
-+{
-+	host->card->state &= ~MMC_STATE_HIGHSPEED;
-+	mmc_claim_host(host);
-+	mmc_sd_init_card(host, host->ocr, host->card);
-+	mmc_release_host(host);
-+}
++#else
++#define twl4030_mmc_get_context_loss NULL
++#endif
 +
- #ifdef CONFIG_MMC_UNSAFE_RESUME
+ static int twl_mmc1_set_power(struct device *dev, int slot, int power_on,
+ 				int vdd)
+ {
+@@ -390,6 +402,9 @@ void __init twl4030_mmc_init(struct twl4
+ 		} else
+ 			mmc->slots[0].switch_pin = -EINVAL;
  
- static const struct mmc_bus_ops mmc_sd_ops = {
-@@ -610,6 +618,7 @@ static const struct mmc_bus_ops mmc_sd_o
- 	.detect = mmc_sd_detect,
- 	.suspend = mmc_sd_suspend,
- 	.resume = mmc_sd_resume,
-+	.power_restore = mmc_sd_power_restore,
- };
- 
- static void mmc_sd_attach_bus_ops(struct mmc_host *host)
-@@ -624,6 +633,7 @@ static const struct mmc_bus_ops mmc_sd_o
- 	.detect = mmc_sd_detect,
- 	.suspend = NULL,
- 	.resume = NULL,
-+	.power_restore = mmc_sd_power_restore,
- };
- 
- static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
-@@ -631,6 +641,7 @@ static const struct mmc_bus_ops mmc_sd_o
- 	.detect = mmc_sd_detect,
- 	.suspend = mmc_sd_suspend,
- 	.resume = mmc_sd_resume,
-+	.power_restore = mmc_sd_power_restore,
- };
- 
- static void mmc_sd_attach_bus_ops(struct mmc_host *host)
-diff -puN include/linux/mmc/host.h~mmc-add-ability-to-save-power-by-powering-off-cards include/linux/mmc/host.h
---- a/include/linux/mmc/host.h~mmc-add-ability-to-save-power-by-powering-off-cards
-+++ a/include/linux/mmc/host.h
-@@ -223,6 +223,9 @@ static inline void *mmc_priv(struct mmc_
- extern int mmc_suspend_host(struct mmc_host *, pm_message_t);
- extern int mmc_resume_host(struct mmc_host *);
- 
-+extern void mmc_power_save_host(struct mmc_host *host);
-+extern void mmc_power_restore_host(struct mmc_host *host);
++		mmc->get_context_loss_count =
++				twl4030_mmc_get_context_loss;
 +
- extern void mmc_detect_change(struct mmc_host *, unsigned long delay);
- extern void mmc_request_done(struct mmc_host *, struct mmc_request *);
+ 		/* write protect normally uses an OMAP gpio */
+ 		if (gpio_is_valid(c->gpio_wp)) {
+ 			gpio_request(c->gpio_wp, "mmc_wp");
+diff -puN arch/arm/plat-omap/include/mach/mmc.h~arm-omap-mmc-twl4030-add-context-loss-counter-support arch/arm/plat-omap/include/mach/mmc.h
+--- a/arch/arm/plat-omap/include/mach/mmc.h~arm-omap-mmc-twl4030-add-context-loss-counter-support
++++ a/arch/arm/plat-omap/include/mach/mmc.h
+@@ -59,6 +59,9 @@ struct omap_mmc_platform_data {
+ 	int (*suspend)(struct device *dev, int slot);
+ 	int (*resume)(struct device *dev, int slot);
  
++	/* Return context loss count due to PM states changing */
++	int (*get_context_loss_count)(struct device *dev);
++
+ 	u64 dma_mask;
+ 
+ 	struct omap_mmc_slot_data {
 _
