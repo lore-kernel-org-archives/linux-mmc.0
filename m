@@ -1,15 +1,15 @@
 From: akpm@linux-foundation.org
-Subject: [patch 046/232] mmc: add MMC_CAP_NONREMOVABLE host capability
-Date: Tue, 22 Sep 2009 16:44:32 -0700
-Message-ID: <200909222344.n8MNiWtx012359@imap1.linux-foundation.org>
+Subject: [patch 047/232] mmc: add ability to save power by powering off cards
+Date: Tue, 22 Sep 2009 16:44:33 -0700
+Message-ID: <200909222344.n8MNiXHg012403@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:38499 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:52057 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753448AbZIVXpR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:45:17 -0400
+	by vger.kernel.org with ESMTP id S1753459AbZIVXpT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:45:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
@@ -17,10 +17,12 @@ Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia
 
 From: Adrian Hunter <adrian.hunter@nokia.com>
 
-eMMC's are not removable, so unsafe resume is OK always.
-
-To permit this a new host capability MMC_CAP_NONREMOVABLE has been added
-and suspend / resume updated accordingly.
+Power can be saved by powering off cards that are not in use.  This is
+similar to suspend / resume except it is under the control of the driver,
+and does not require any power management support.  It can only be used
+when the driver can monitor whether the card is removed, otherwise it is
+unsafe.  This is possible because, unlike suspend, the driver still
+receives card detect and / or cover switch interrupts.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
@@ -35,170 +37,164 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/mmc.c   |   41 ++++++++++++++++++++++++++++++-------
- drivers/mmc/core/sd.c    |   41 ++++++++++++++++++++++++++++++-------
- include/linux/mmc/host.h |    1 
- 3 files changed, 69 insertions(+), 14 deletions(-)
+ drivers/mmc/core/core.c  |   34 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/core.h  |    2 ++
+ drivers/mmc/core/mmc.c   |   11 +++++++++++
+ drivers/mmc/core/sd.c    |   11 +++++++++++
+ include/linux/mmc/host.h |    3 +++
+ 5 files changed, 61 insertions(+)
 
-diff -puN drivers/mmc/core/mmc.c~mmc-add-mmc_cap_nonremovable-host-capability drivers/mmc/core/mmc.c
---- a/drivers/mmc/core/mmc.c~mmc-add-mmc_cap_nonremovable-host-capability
-+++ a/drivers/mmc/core/mmc.c
-@@ -507,8 +507,6 @@ static void mmc_detect(struct mmc_host *
- 	}
+diff -puN drivers/mmc/core/core.c~mmc-add-ability-to-save-power-by-powering-off-cards drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~mmc-add-ability-to-save-power-by-powering-off-cards
++++ a/drivers/mmc/core/core.c
+@@ -1151,6 +1151,40 @@ void mmc_stop_host(struct mmc_host *host
+ 	mmc_power_off(host);
  }
  
--#ifdef CONFIG_MMC_UNSAFE_RESUME
--
- /*
-  * Suspend callback from host.
-  */
-@@ -551,20 +549,49 @@ static void mmc_resume(struct mmc_host *
- 
- }
- 
--#else
-+#ifdef CONFIG_MMC_UNSAFE_RESUME
- 
--#define mmc_suspend NULL
--#define mmc_resume NULL
-+static const struct mmc_bus_ops mmc_ops = {
-+	.remove = mmc_remove,
-+	.detect = mmc_detect,
-+	.suspend = mmc_suspend,
-+	.resume = mmc_resume,
-+};
- 
--#endif
-+static void mmc_attach_bus_ops(struct mmc_host *host)
++void mmc_power_save_host(struct mmc_host *host)
 +{
-+	mmc_attach_bus(host, &mmc_ops);
++	mmc_bus_get(host);
++
++	if (!host->bus_ops || host->bus_dead || !host->bus_ops->power_restore) {
++		mmc_bus_put(host);
++		return;
++	}
++
++	if (host->bus_ops->power_save)
++		host->bus_ops->power_save(host);
++
++	mmc_bus_put(host);
++
++	mmc_power_off(host);
++}
++EXPORT_SYMBOL(mmc_power_save_host);
++
++void mmc_power_restore_host(struct mmc_host *host)
++{
++	mmc_bus_get(host);
++
++	if (!host->bus_ops || host->bus_dead || !host->bus_ops->power_restore) {
++		mmc_bus_put(host);
++		return;
++	}
++
++	mmc_power_up(host);
++	host->bus_ops->power_restore(host);
++
++	mmc_bus_put(host);
++}
++EXPORT_SYMBOL(mmc_power_restore_host);
++
+ #ifdef CONFIG_PM
+ 
+ /**
+diff -puN drivers/mmc/core/core.h~mmc-add-ability-to-save-power-by-powering-off-cards drivers/mmc/core/core.h
+--- a/drivers/mmc/core/core.h~mmc-add-ability-to-save-power-by-powering-off-cards
++++ a/drivers/mmc/core/core.h
+@@ -20,6 +20,8 @@ struct mmc_bus_ops {
+ 	void (*detect)(struct mmc_host *);
+ 	void (*suspend)(struct mmc_host *);
+ 	void (*resume)(struct mmc_host *);
++	void (*power_save)(struct mmc_host *);
++	void (*power_restore)(struct mmc_host *);
+ };
+ 
+ void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+diff -puN drivers/mmc/core/mmc.c~mmc-add-ability-to-save-power-by-powering-off-cards drivers/mmc/core/mmc.c
+--- a/drivers/mmc/core/mmc.c~mmc-add-ability-to-save-power-by-powering-off-cards
++++ a/drivers/mmc/core/mmc.c
+@@ -549,6 +549,14 @@ static void mmc_resume(struct mmc_host *
+ 
+ }
+ 
++static void mmc_power_restore(struct mmc_host *host)
++{
++	host->card->state &= ~MMC_STATE_HIGHSPEED;
++	mmc_claim_host(host);
++	mmc_init_card(host, host->ocr, host->card);
++	mmc_release_host(host);
 +}
 +
-+#else
+ #ifdef CONFIG_MMC_UNSAFE_RESUME
  
  static const struct mmc_bus_ops mmc_ops = {
- 	.remove = mmc_remove,
+@@ -556,6 +564,7 @@ static const struct mmc_bus_ops mmc_ops 
  	.detect = mmc_detect,
-+	.suspend = NULL,
-+	.resume = NULL,
-+};
-+
-+static const struct mmc_bus_ops mmc_ops_unsafe = {
-+	.remove = mmc_remove,
-+	.detect = mmc_detect,
  	.suspend = mmc_suspend,
  	.resume = mmc_resume,
++	.power_restore = mmc_power_restore,
  };
  
-+static void mmc_attach_bus_ops(struct mmc_host *host)
-+{
-+	const struct mmc_bus_ops *bus_ops;
-+
-+	if (host->caps & MMC_CAP_NONREMOVABLE)
-+		bus_ops = &mmc_ops_unsafe;
-+	else
-+		bus_ops = &mmc_ops;
-+	mmc_attach_bus(host, bus_ops);
-+}
-+
-+#endif
-+
- /*
-  * Starting point for MMC card init.
-  */
-@@ -575,7 +602,7 @@ int mmc_attach_mmc(struct mmc_host *host
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
+ static void mmc_attach_bus_ops(struct mmc_host *host)
+@@ -570,6 +579,7 @@ static const struct mmc_bus_ops mmc_ops 
+ 	.detect = mmc_detect,
+ 	.suspend = NULL,
+ 	.resume = NULL,
++	.power_restore = mmc_power_restore,
+ };
  
--	mmc_attach_bus(host, &mmc_ops);
-+	mmc_attach_bus_ops(host);
+ static const struct mmc_bus_ops mmc_ops_unsafe = {
+@@ -577,6 +587,7 @@ static const struct mmc_bus_ops mmc_ops_
+ 	.detect = mmc_detect,
+ 	.suspend = mmc_suspend,
+ 	.resume = mmc_resume,
++	.power_restore = mmc_power_restore,
+ };
  
- 	/*
- 	 * We need to get OCR a different way for SPI.
-diff -puN drivers/mmc/core/sd.c~mmc-add-mmc_cap_nonremovable-host-capability drivers/mmc/core/sd.c
---- a/drivers/mmc/core/sd.c~mmc-add-mmc_cap_nonremovable-host-capability
+ static void mmc_attach_bus_ops(struct mmc_host *host)
+diff -puN drivers/mmc/core/sd.c~mmc-add-ability-to-save-power-by-powering-off-cards drivers/mmc/core/sd.c
+--- a/drivers/mmc/core/sd.c~mmc-add-ability-to-save-power-by-powering-off-cards
 +++ a/drivers/mmc/core/sd.c
-@@ -561,8 +561,6 @@ static void mmc_sd_detect(struct mmc_hos
- 	}
- }
- 
--#ifdef CONFIG_MMC_UNSAFE_RESUME
--
- /*
-  * Suspend callback from host.
-  */
-@@ -605,20 +603,49 @@ static void mmc_sd_resume(struct mmc_hos
+@@ -603,6 +603,14 @@ static void mmc_sd_resume(struct mmc_hos
  
  }
  
--#else
-+#ifdef CONFIG_MMC_UNSAFE_RESUME
- 
--#define mmc_sd_suspend NULL
--#define mmc_sd_resume NULL
-+static const struct mmc_bus_ops mmc_sd_ops = {
-+	.remove = mmc_sd_remove,
-+	.detect = mmc_sd_detect,
-+	.suspend = mmc_sd_suspend,
-+	.resume = mmc_sd_resume,
-+};
- 
--#endif
-+static void mmc_sd_attach_bus_ops(struct mmc_host *host)
++static void mmc_sd_power_restore(struct mmc_host *host)
 +{
-+	mmc_attach_bus(host, &mmc_sd_ops);
++	host->card->state &= ~MMC_STATE_HIGHSPEED;
++	mmc_claim_host(host);
++	mmc_sd_init_card(host, host->ocr, host->card);
++	mmc_release_host(host);
 +}
 +
-+#else
+ #ifdef CONFIG_MMC_UNSAFE_RESUME
  
  static const struct mmc_bus_ops mmc_sd_ops = {
- 	.remove = mmc_sd_remove,
+@@ -610,6 +618,7 @@ static const struct mmc_bus_ops mmc_sd_o
  	.detect = mmc_sd_detect,
-+	.suspend = NULL,
-+	.resume = NULL,
-+};
-+
-+static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
-+	.remove = mmc_sd_remove,
-+	.detect = mmc_sd_detect,
  	.suspend = mmc_sd_suspend,
  	.resume = mmc_sd_resume,
++	.power_restore = mmc_sd_power_restore,
  };
  
-+static void mmc_sd_attach_bus_ops(struct mmc_host *host)
-+{
-+	const struct mmc_bus_ops *bus_ops;
-+
-+	if (host->caps & MMC_CAP_NONREMOVABLE)
-+		bus_ops = &mmc_sd_ops_unsafe;
-+	else
-+		bus_ops = &mmc_sd_ops;
-+	mmc_attach_bus(host, bus_ops);
-+}
-+
-+#endif
-+
- /*
-  * Starting point for SD card init.
-  */
-@@ -629,7 +656,7 @@ int mmc_attach_sd(struct mmc_host *host,
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
+ static void mmc_sd_attach_bus_ops(struct mmc_host *host)
+@@ -624,6 +633,7 @@ static const struct mmc_bus_ops mmc_sd_o
+ 	.detect = mmc_sd_detect,
+ 	.suspend = NULL,
+ 	.resume = NULL,
++	.power_restore = mmc_sd_power_restore,
+ };
  
--	mmc_attach_bus(host, &mmc_sd_ops);
-+	mmc_sd_attach_bus_ops(host);
+ static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
+@@ -631,6 +641,7 @@ static const struct mmc_bus_ops mmc_sd_o
+ 	.detect = mmc_sd_detect,
+ 	.suspend = mmc_sd_suspend,
+ 	.resume = mmc_sd_resume,
++	.power_restore = mmc_sd_power_restore,
+ };
  
- 	/*
- 	 * We need to get OCR a different way for SPI.
-diff -puN include/linux/mmc/host.h~mmc-add-mmc_cap_nonremovable-host-capability include/linux/mmc/host.h
---- a/include/linux/mmc/host.h~mmc-add-mmc_cap_nonremovable-host-capability
+ static void mmc_sd_attach_bus_ops(struct mmc_host *host)
+diff -puN include/linux/mmc/host.h~mmc-add-ability-to-save-power-by-powering-off-cards include/linux/mmc/host.h
+--- a/include/linux/mmc/host.h~mmc-add-ability-to-save-power-by-powering-off-cards
 +++ a/include/linux/mmc/host.h
-@@ -148,6 +148,7 @@ struct mmc_host {
- #define MMC_CAP_NEEDS_POLL	(1 << 5)	/* Needs polling for card-detection */
- #define MMC_CAP_8_BIT_DATA	(1 << 6)	/* Can the host do 8 bit transfers */
- #define MMC_CAP_DISABLE		(1 << 7)	/* Can the host be disabled */
-+#define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
+@@ -223,6 +223,9 @@ static inline void *mmc_priv(struct mmc_
+ extern int mmc_suspend_host(struct mmc_host *, pm_message_t);
+ extern int mmc_resume_host(struct mmc_host *);
  
- 	/* host specific block data */
- 	unsigned int		max_seg_size;	/* see blk_queue_max_segment_size */
++extern void mmc_power_save_host(struct mmc_host *host);
++extern void mmc_power_restore_host(struct mmc_host *host);
++
+ extern void mmc_detect_change(struct mmc_host *, unsigned long delay);
+ extern void mmc_request_done(struct mmc_host *, struct mmc_request *);
+ 
 _
