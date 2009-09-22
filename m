@@ -1,34 +1,61 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 3/3] Move MMCI header to amba include dir
-Date: Mon, 21 Sep 2009 16:11:07 +0100
-Message-ID: <20090921151107.GC30821@n2100.arm.linux.org.uk>
-References: <1252529727-7957-1-git-send-email-linus.walleij@stericsson.com> <20090921150103.GB30821@n2100.arm.linux.org.uk>
+From: akpm@linux-foundation.org
+Subject: [patch 002/200] sdhci: orphan driver and list
+Date: Mon, 21 Sep 2009 17:00:59 -0700
+Message-ID: <200909220000.n8M00xNn026275@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:38828 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756442AbZIUPLf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2009 11:11:35 -0400
-Content-Disposition: inline
-In-Reply-To: <20090921150103.GB30821@n2100.arm.linux.org.uk>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:53685 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754656AbZIVABe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2009 20:01:34 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@stericsson.com>
-Cc: Catalin Marinas <catalin.marinas@arm.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: torvalds@linux-foundation.org
+Cc: akpm@linux-foundation.org, pierre@ossman.eu, linux-mmc@vger.kernel.org
 
-On Mon, Sep 21, 2009 at 04:01:03PM +0100, Russell King - ARM Linux wrote:
-> On Wed, Sep 09, 2009 at 10:55:27PM +0200, Linus Walleij wrote:
-> > This moves the mmci platform data definition struct away from
-> > arch/arm/include/asm/mach/mmc.h into the more proper place among
-> > the other primecells in include/linux/amba/mmci.h and at the same
-> > time renames it to "mmci.h", and also the struct in this file
-> > confusingly named mmc_platform_data has been renamed
-> > mmci_platform_data for clarity.
-> 
-> Not sure what's happened, but this patch appears to conflict with
-> another, resulting in:
+From: Pierre Ossman <pierre@ossman.eu>
 
-It's also meant that 5702/1 has been dropped in addition to 5699/1.
-In future, please ensure that you run a build check on the machines
-which you've modified.  Thanks.
+Remove myself as maintainer from the sdhci driver and steer people
+towards the new MMC list for discussing it.
+
+Signed-off-by: Pierre Ossman <pierre@ossman.eu>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ MAINTAINERS |   12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff -puN MAINTAINERS~sdhci-orphan-driver-and-list MAINTAINERS
+--- a/MAINTAINERS~sdhci-orphan-driver-and-list
++++ a/MAINTAINERS
+@@ -4533,20 +4533,20 @@ S:	Maintained
+ F:	drivers/mmc/host/sdricoh_cs.c
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
+-M:	Pierre Ossman <pierre@ossman.eu>
+-L:	sdhci-devel@lists.ossman.eu
+-S:	Maintained
++S:     Orphan
++L:     linux-mmc@vger.kernel.org
++F:     drivers/mmc/host/sdhci.*
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE, OPEN FIRMWARE BINDINGS (SDHCI-OF)
+ M:	Anton Vorontsov <avorontsov@ru.mvista.com>
+ L:	linuxppc-dev@ozlabs.org
+-L:	sdhci-devel@lists.ossman.eu
++L:     linux-mmc@vger.kernel.org
+ S:	Maintained
+-F:	drivers/mmc/host/sdhci.*
++F:     drivers/mmc/host/sdhci-of.*
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
+ M:	Ben Dooks <ben-linux@fluff.org>
+-L:	sdhci-devel@lists.ossman.eu
++L:     linux-mmc@vger.kernel.org
+ S:	Maintained
+ F:	drivers/mmc/host/sdhci-s3c.c
+ 
+_
