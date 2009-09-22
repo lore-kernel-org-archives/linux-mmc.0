@@ -1,87 +1,124 @@
 From: akpm@linux-foundation.org
-Subject: [patch 072/232] omap_hsmmc: set a large data timeout for commands with busy signal
-Date: Tue, 22 Sep 2009 16:45:03 -0700
-Message-ID: <200909222345.n8MNj4E8013543@imap1.linux-foundation.org>
+Subject: [patch 080/232] sdhci-of: fix high-speed cards recognition
+Date: Tue, 22 Sep 2009 16:45:13 -0700
+Message-ID: <200909222345.n8MNjDlx013885@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:48359 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:38353 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753359AbZIWARx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 20:17:53 -0400
+	by vger.kernel.org with ESMTP id S1753359AbZIWAR6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 20:17:58 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.org, pierre@ossman.eu, roberto.foglietta@gmail.com
+Cc: akpm@linux-foundation.org, avorontsov@ru.mvista.com, ben@fluff.org, david.vrabel@csr.com, galak@kernel.crashing.org, linux-mmc@vger.kernel.org, pierre@ossman.eu, s.hauer@pengutronix.de
 
-From: Adrian Hunter <adrian.hunter@nokia.com>
+From: Anton Vorontsov <avorontsov@ru.mvista.com>
 
-Commands like SWITCH (CMD6) send a response and then signal busy while the
-operation is completed.  These commands are expected to always succeed
-(otherwise the response would have indicated an error).
+eSDHC fails to recognize some SDHS cards, throwing timeout errors:
 
-Set an arbitrarily large data timeout value (100ms) for these commands to
-ensure that premature timeouts do not occur.
+  mmc0: error -110 whilst initialising SD card
 
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
-Acked-by: Matt Fleming <matt@console-pimps.org>
-Cc: Ian Molton <ian@mnementh.co.uk>
-Cc: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
-Cc: Denis Karpov <ext-denis.2.karpov@nokia.com>
+That's because we calculate timeout value in a wrong way: on eSDHC hosts
+the timeout clock is derivied from the SD clock, which is set dynamically.
+
+As David Vrabel suggested, deriving timeout clock from SD clock is a
+common scheme, so let's implement DATA_TIMEOUT_USES_SDCLK quirk and use it
+for eSDHC hosts.
+
+Also, from now on we don't need esdhc_get_timeout_clock() callback, so
+remove it.
+
+Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
 Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Philip Langdale <philipl@overt.org>
-Cc: "Madhusudhan" <madhu.cr@ti.com>
+Cc: Kumar Gala <galak@kernel.crashing.org>
+Cc: David Vrabel <david.vrabel@csr.com>
+Cc: Ben Dooks <ben@fluff.org>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/omap_hsmmc.c |   15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-of.c |    9 +--------
+ drivers/mmc/host/sdhci.c    |    9 +++++++--
+ drivers/mmc/host/sdhci.h    |    2 ++
+ 3 files changed, 10 insertions(+), 10 deletions(-)
 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-set-a-large-data-timeout-for-commands-with-busy-signal drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-set-a-large-data-timeout-for-commands-with-busy-signal
-+++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -997,7 +997,8 @@ static int omap_hsmmc_start_dma_transfer
+diff -puN drivers/mmc/host/sdhci-of.c~sdhci-of-fix-high-speed-cards-recognition drivers/mmc/host/sdhci-of.c
+--- a/drivers/mmc/host/sdhci-of.c~sdhci-of-fix-high-speed-cards-recognition
++++ a/drivers/mmc/host/sdhci-of.c
+@@ -172,19 +172,13 @@ static unsigned int esdhc_get_min_clock(
+ 	return of_host->clock / 256 / 16;
  }
  
- static void set_data_timeout(struct omap_hsmmc_host *host,
--			     struct mmc_request *req)
-+			     unsigned int timeout_ns,
-+			     unsigned int timeout_clks)
- {
- 	unsigned int timeout, cycle_ns;
- 	uint32_t reg, clkd, dto = 0;
-@@ -1008,8 +1009,8 @@ static void set_data_timeout(struct omap
- 		clkd = 1;
+-static unsigned int esdhc_get_timeout_clock(struct sdhci_host *host)
+-{
+-	struct sdhci_of_host *of_host = sdhci_priv(host);
+-
+-	return of_host->clock / 1000;
+-}
+-
+ static struct sdhci_of_data sdhci_esdhc = {
+ 	.quirks = SDHCI_QUIRK_FORCE_BLK_SZ_2048 |
+ 		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+ 		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
+ 		  SDHCI_QUIRK_NO_BUSY_IRQ |
+ 		  SDHCI_QUIRK_NONSTANDARD_CLOCK |
++		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+ 		  SDHCI_QUIRK_PIO_NEEDS_DELAY |
+ 		  SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET |
+ 		  SDHCI_QUIRK_NO_CARD_NO_RESET,
+@@ -199,7 +193,6 @@ static struct sdhci_of_data sdhci_esdhc 
+ 		.enable_dma = esdhc_enable_dma,
+ 		.get_max_clock = esdhc_get_max_clock,
+ 		.get_min_clock = esdhc_get_min_clock,
+-		.get_timeout_clock = esdhc_get_timeout_clock,
+ 	},
+ };
  
- 	cycle_ns = 1000000000 / (clk_get_rate(host->fclk) / clkd);
--	timeout = req->data->timeout_ns / cycle_ns;
--	timeout += req->data->timeout_clks;
-+	timeout = timeout_ns / cycle_ns;
-+	timeout += timeout_clks;
- 	if (timeout) {
- 		while ((timeout & 0x80000000) == 0) {
- 			dto += 1;
-@@ -1043,12 +1044,18 @@ omap_hsmmc_prepare_data(struct omap_hsmm
+diff -puN drivers/mmc/host/sdhci.c~sdhci-of-fix-high-speed-cards-recognition drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~sdhci-of-fix-high-speed-cards-recognition
++++ a/drivers/mmc/host/sdhci.c
+@@ -591,6 +591,9 @@ static u8 sdhci_calc_timeout(struct sdhc
+ 	target_timeout = data->timeout_ns / 1000 +
+ 		data->timeout_clks / host->clock;
  
- 	if (req->data == NULL) {
- 		OMAP_HSMMC_WRITE(host->base, BLK, 0);
-+		/*
-+		 * Set an arbitrary 100ms data timeout for commands with
-+		 * busy signal.
-+		 */
-+		if (req->cmd->flags & MMC_RSP_BUSY)
-+			set_data_timeout(host, 100000000U, 0);
- 		return 0;
++	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
++		host->timeout_clk = host->clock / 1000;
++
+ 	/*
+ 	 * Figure out needed cycles.
+ 	 * We do this in steps in order to fit inside a 32 bit int.
+@@ -1757,13 +1760,15 @@ int sdhci_add_host(struct sdhci_host *ho
+ 	host->timeout_clk =
+ 		(caps & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
+ 	if (host->timeout_clk == 0) {
+-		if (!host->ops->get_timeout_clock) {
++		if (host->ops->get_timeout_clock) {
++			host->timeout_clk = host->ops->get_timeout_clock(host);
++		} else if (!(host->quirks &
++				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
+ 			printk(KERN_ERR
+ 			       "%s: Hardware doesn't specify timeout clock "
+ 			       "frequency.\n", mmc_hostname(mmc));
+ 			return -ENODEV;
+ 		}
+-		host->timeout_clk = host->ops->get_timeout_clock(host);
  	}
+ 	if (caps & SDHCI_TIMEOUT_CLK_UNIT)
+ 		host->timeout_clk *= 1000;
+diff -puN drivers/mmc/host/sdhci.h~sdhci-of-fix-high-speed-cards-recognition drivers/mmc/host/sdhci.h
+--- a/drivers/mmc/host/sdhci.h~sdhci-of-fix-high-speed-cards-recognition
++++ a/drivers/mmc/host/sdhci.h
+@@ -232,6 +232,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_FORCE_1_BIT_DATA			(1<<22)
+ /* Controller needs 10ms delay between applying power and clock */
+ #define SDHCI_QUIRK_DELAY_AFTER_POWER			(1<<23)
++/* Controller uses SDCLK instead of TMCLK for data timeouts */
++#define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
  
- 	OMAP_HSMMC_WRITE(host->base, BLK, (req->data->blksz)
- 					| (req->data->blocks << 16));
--	set_data_timeout(host, req);
-+	set_data_timeout(host, req->data->timeout_ns, req->data->timeout_clks);
- 
- 	if (host->use_dma) {
- 		ret = omap_hsmmc_start_dma_transfer(host, req);
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
 _
