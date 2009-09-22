@@ -1,15 +1,15 @@
 From: akpm@linux-foundation.org
-Subject: [patch 071/232] omap_hsmmc: ensure all clock enables and disables are paired
-Date: Tue, 22 Sep 2009 16:45:02 -0700
-Message-ID: <200909222345.n8MNj2c8013499@imap1.linux-foundation.org>
+Subject: [patch 068/232] omap_hsmmc: prevent races with irq handler
+Date: Tue, 22 Sep 2009 16:44:58 -0700
+Message-ID: <200909222344.n8MNixVT013272@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:54514 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:35682 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753494AbZIVXpp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:45:45 -0400
+	by vger.kernel.org with ESMTP id S1753483AbZIVXpm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 19:45:42 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
@@ -17,7 +17,15 @@ Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia
 
 From: Adrian Hunter <adrian.hunter@nokia.com>
 
-[madhu.cr@ti.com: fix for the db clock failure message]
+If an unexpected interrupt occurs while preparing the next request, an
+oops can occur.
+
+For example, a new request is setting up DMA for data transfer so
+host->data is not NULL.  An unexpected transfer complete (TC) interrupt
+comes along and the interrupt handler sets host->data to NULL.  Oops!
+
+Prevent that by adding a spinlock.
+
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
 Cc: Ian Molton <ian@mnementh.co.uk>
@@ -28,137 +36,92 @@ Cc: Pierre Ossman <pierre@ossman.eu>
 Cc: Philip Langdale <philipl@overt.org>
 Cc: "Madhusudhan" <madhu.cr@ti.com>
 Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/omap_hsmmc.c |   60 +++++++++++++++++---------------
- 1 file changed, 33 insertions(+), 27 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-prevent-races-with-irq-handler drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-prevent-races-with-irq-handler
 +++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -162,7 +162,7 @@ struct omap_hsmmc_host {
- 	int			use_dma, dma_ch;
- 	int			dma_line_tx, dma_line_rx;
- 	int			slot_id;
--	int			dbclk_enabled;
-+	int			got_dbclk;
- 	int			response_busy;
- 	int			context_loss;
- 	int			dpm_state;
-@@ -742,22 +742,24 @@ static int omap_hsmmc_switch_opcond(stru
- 	/* Disable the clocks */
- 	clk_disable(host->fclk);
- 	clk_disable(host->iclk);
--	clk_disable(host->dbclk);
-+	if (host->got_dbclk)
-+		clk_disable(host->dbclk);
+@@ -148,6 +148,8 @@ struct mmc_omap_host {
+ 	struct	work_struct	mmc_carddetect_work;
+ 	void	__iomem		*base;
+ 	resource_size_t		mapbase;
++	spinlock_t		irq_lock; /* Prevent races with irq handler */
++	unsigned long		flags;
+ 	unsigned int		id;
+ 	unsigned int		dma_len;
+ 	unsigned int		dma_sg_idx;
+@@ -459,6 +461,14 @@ mmc_omap_start_command(struct mmc_omap_h
+ 	if (host->use_dma)
+ 		cmdreg |= DMA_EN;
  
- 	/* Turn the power off */
- 	ret = mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
--	if (ret != 0)
--		goto err;
- 
- 	/* Turn the power ON with given VDD 1.8 or 3.0v */
--	ret = mmc_slot(host).set_power(host->dev, host->slot_id, 1, vdd);
-+	if (!ret)
-+		ret = mmc_slot(host).set_power(host->dev, host->slot_id, 1,
-+					       vdd);
-+	clk_enable(host->iclk);
-+	clk_enable(host->fclk);
-+	if (host->got_dbclk)
-+		clk_enable(host->dbclk);
++	/*
++	 * In an interrupt context (i.e. STOP command), the spinlock is unlocked
++	 * by the interrupt handler, otherwise (i.e. for a new request) it is
++	 * unlocked here.
++	 */
++	if (!in_interrupt())
++		spin_unlock_irqrestore(&host->irq_lock, host->flags);
 +
- 	if (ret != 0)
- 		goto err;
+ 	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
+ 	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
+ }
+@@ -621,11 +631,14 @@ static irqreturn_t mmc_omap_irq(int irq,
+ 	struct mmc_data *data;
+ 	int end_cmd = 0, end_trans = 0, status;
  
--	clk_enable(host->fclk);
--	clk_enable(host->iclk);
--	clk_enable(host->dbclk);
--
- 	OMAP_HSMMC_WRITE(host->base, HCTL,
- 		OMAP_HSMMC_READ(host->base, HCTL) & SDVSCLR);
- 	reg_val = OMAP_HSMMC_READ(host->base, HCTL);
-@@ -1695,18 +1697,22 @@ static int __init omap_hsmmc_probe(struc
- 		goto err1;
++	spin_lock(&host->irq_lock);
++
+ 	if (host->mrq == NULL) {
+ 		OMAP_HSMMC_WRITE(host->base, STAT,
+ 			OMAP_HSMMC_READ(host->base, STAT));
+ 		/* Flush posted write */
+ 		OMAP_HSMMC_READ(host->base, STAT);
++		spin_unlock(&host->irq_lock);
+ 		return IRQ_HANDLED;
  	}
  
--	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
--	/*
--	 * MMC can still work without debounce clock.
--	 */
--	if (IS_ERR(host->dbclk))
--		dev_warn(mmc_dev(host->mmc), "Failed to get debounce clock\n");
--	else
--		if (clk_enable(host->dbclk) != 0)
--			dev_dbg(mmc_dev(host->mmc), "Enabling debounce"
--							" clk failed\n");
-+	if (cpu_is_omap2430()) {
-+		host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
-+		/*
-+		 * MMC can still work without debounce clock.
-+		 */
-+		if (IS_ERR(host->dbclk))
-+			dev_warn(mmc_dev(host->mmc),
-+				"Failed to get debounce clock\n");
- 		else
--			host->dbclk_enabled = 1;
-+			host->got_dbclk = 1;
-+
-+		if (host->got_dbclk)
-+			if (clk_enable(host->dbclk) != 0)
-+				dev_dbg(mmc_dev(host->mmc), "Enabling debounce"
-+							" clk failed\n");
-+	}
+@@ -690,6 +703,8 @@ static irqreturn_t mmc_omap_irq(int irq,
+ 	if ((end_trans || (status & TC)) && host->mrq)
+ 		mmc_omap_xfer_done(host, data);
  
- 	/* Since we do only SG emulation, we can have as many segs
- 	 * as we want. */
-@@ -1820,7 +1826,7 @@ err_irq:
- 	clk_disable(host->iclk);
- 	clk_put(host->fclk);
- 	clk_put(host->iclk);
--	if (host->dbclk_enabled) {
-+	if (host->got_dbclk) {
- 		clk_disable(host->dbclk);
- 		clk_put(host->dbclk);
++	spin_unlock(&host->irq_lock);
++
+ 	return IRQ_HANDLED;
+ }
+ 
+@@ -1018,6 +1033,13 @@ static void omap_mmc_request(struct mmc_
+ 	struct mmc_omap_host *host = mmc_priv(mmc);
+ 	int err;
+ 
++	/*
++	 * Prevent races with the interrupt handler because of unexpected
++	 * interrupts, but not if we are already in interrupt context i.e.
++	 * retries.
++	 */
++	if (!in_interrupt())
++		spin_lock_irqsave(&host->irq_lock, host->flags);
+ 	WARN_ON(host->mrq != NULL);
+ 	host->mrq = req;
+ 	err = mmc_omap_prepare_data(host, req);
+@@ -1026,6 +1048,8 @@ static void omap_mmc_request(struct mmc_
+ 		if (req->data)
+ 			req->data->error = err;
+ 		host->mrq = NULL;
++		if (!in_interrupt())
++			spin_unlock_irqrestore(&host->irq_lock, host->flags);
+ 		mmc_request_done(mmc, req);
+ 		return;
  	}
-@@ -1854,7 +1860,7 @@ static int omap_hsmmc_remove(struct plat
- 		clk_disable(host->iclk);
- 		clk_put(host->fclk);
- 		clk_put(host->iclk);
--		if (host->dbclk_enabled) {
-+		if (host->got_dbclk) {
- 			clk_disable(host->dbclk);
- 			clk_put(host->dbclk);
- 		}
-@@ -1905,7 +1911,8 @@ static int omap_hsmmc_suspend(struct pla
- 				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
- 			mmc_host_disable(host->mmc);
- 			clk_disable(host->iclk);
--			clk_disable(host->dbclk);
-+			if (host->got_dbclk)
-+				clk_disable(host->dbclk);
- 		} else {
- 			host->suspended = 0;
- 			if (host->pdata->resume) {
-@@ -1936,15 +1943,14 @@ static int omap_hsmmc_resume(struct plat
- 		if (ret)
- 			goto clk_en_err;
+@@ -1580,6 +1604,7 @@ static int __init omap_mmc_probe(struct 
+ 	mmc->f_max	= 52000000;
  
--		if (clk_enable(host->dbclk) != 0)
--			dev_dbg(mmc_dev(host->mmc),
--					"Enabling debounce clk failed\n");
--
- 		if (mmc_host_enable(host->mmc) != 0) {
- 			clk_disable(host->iclk);
- 			goto clk_en_err;
- 		}
+ 	sema_init(&host->sem, 1);
++	spin_lock_init(&host->irq_lock);
  
-+		if (host->got_dbclk)
-+			clk_enable(host->dbclk);
-+
- 		omap_hsmmc_conf_bus_power(host);
- 
- 		if (host->pdata->resume) {
+ 	host->iclk = clk_get(&pdev->dev, "ick");
+ 	if (IS_ERR(host->iclk)) {
 _
