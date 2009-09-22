@@ -1,39 +1,121 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH 3/3] Move MMCI header to amba include dir
-Date: Tue, 22 Sep 2009 15:45:47 +0200
-Message-ID: <63386a3d0909220645t2f995c4ftf9893e23ac5caf0e@mail.gmail.com>
-References: <1252529727-7957-1-git-send-email-linus.walleij@stericsson.com>
-	 <20090921150103.GB30821@n2100.arm.linux.org.uk>
-	 <20090921151107.GC30821@n2100.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: akpm@linux-foundation.org
+Subject: [merged] sdhci-orphan-driver-and-list.patch removed from -mm tree
+Date: Tue, 22 Sep 2009 13:36:40 -0700
+Message-ID: <200909222036.n8MKaeRJ030266@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f218.google.com ([209.85.220.218]:47378 "EHLO
-	mail-fx0-f218.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753559AbZIVNpo convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 09:45:44 -0400
-Received: by fxm18 with SMTP id 18so810428fxm.17
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Sep 2009 06:45:48 -0700 (PDT)
-In-Reply-To: <20090921151107.GC30821@n2100.arm.linux.org.uk>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:50369 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751782AbZIVUhO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 16:37:14 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Linus Walleij <linus.walleij@stericsson.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: pierre@ossman.eu, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
-2009/9/21 Russell King - ARM Linux <linux@arm.linux.org.uk>:
 
->> Not sure what's happened, but this patch appears to conflict with
->> another, resulting in:
->
-> It's also meant that 5702/1 has been dropped in addition to 5699/1.
-> In future, please ensure that you run a build check on the machines
-> which you've modified. =A0Thanks.
+The patch titled
+     sdhci: orphan driver and list
+has been removed from the -mm tree.  Its filename was
+     sdhci-orphan-driver-and-list.patch
 
-My fault for not regression-compiling enough. Learnt a lesson,
-hotted my integration scripts with defaultcompiles for Realview,
-Integrator and versatile and submitted new versions to the patch
-tracker, sorry for the inconvenience.
+This patch was dropped because it was merged into mainline or a subsystem tree
 
-Yours.
-Linus Walleij
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: sdhci: orphan driver and list
+From: Pierre Ossman <pierre@ossman.eu>
+
+Remove myself as maintainer from the sdhci driver and steer people
+towards the new MMC list for discussing it.
+
+Signed-off-by: Pierre Ossman <pierre@ossman.eu>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ MAINTAINERS |   12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff -puN MAINTAINERS~sdhci-orphan-driver-and-list MAINTAINERS
+--- a/MAINTAINERS~sdhci-orphan-driver-and-list
++++ a/MAINTAINERS
+@@ -4533,20 +4533,20 @@ S:	Maintained
+ F:	drivers/mmc/host/sdricoh_cs.c
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
+-M:	Pierre Ossman <pierre@ossman.eu>
+-L:	sdhci-devel@lists.ossman.eu
+-S:	Maintained
++S:     Orphan
++L:     linux-mmc@vger.kernel.org
++F:     drivers/mmc/host/sdhci.*
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE, OPEN FIRMWARE BINDINGS (SDHCI-OF)
+ M:	Anton Vorontsov <avorontsov@ru.mvista.com>
+ L:	linuxppc-dev@ozlabs.org
+-L:	sdhci-devel@lists.ossman.eu
++L:     linux-mmc@vger.kernel.org
+ S:	Maintained
+-F:	drivers/mmc/host/sdhci.*
++F:     drivers/mmc/host/sdhci-of.*
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
+ M:	Ben Dooks <ben-linux@fluff.org>
+-L:	sdhci-devel@lists.ossman.eu
++L:     linux-mmc@vger.kernel.org
+ S:	Maintained
+ F:	drivers/mmc/host/sdhci-s3c.c
+ 
+_
+
+Patches currently in -mm which might be from pierre@ossman.eu are
+
+origin.patch
+linux-next.patch
+sdio-do-not-ignore-mmc_vdd_165_195.patch
+tmio_mmc-optionally-support-using-platform-clock.patch
+sh-switch-migo-r-to-use-the-tmio-mmc-driver-instead-of-spi.patch
+mmc-add-enable-and-disable-methods-to-mmc-host.patch
+mmc-allow-host-claim-release-nesting.patch
+mmc-add-mmc_cap_nonremovable-host-capability.patch
+mmc-add-ability-to-save-power-by-powering-off-cards.patch
+mmc-add-mmc-card-sleep-and-awake-support.patch
+mmc-power-off-once-at-removal.patch
+mmc-check-status-after-mmc-switch-command.patch
+omap_hsmmc-add-debugfs-entry-host-registers.patch
+omap_hsmmc-make-use-of-new-enable-disable-interface.patch
+arm-omap-mmc-twl4030-add-context-loss-counter-support.patch
+omap_hsmmc-keep-track-of-power-mode.patch
+omap_hsmmc-context-save-restore-support.patch
+omap_hsmmc-set-open-drain-bit-correctly.patch
+omap_hsmmc-ensure-workqueues-are-empty-before-suspend.patch
+omap_hsmmc-fix-scatter-gather-list-sanity-checking.patch
+omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability.patch
+omap_hsmmc-support-for-deeper-power-saving-states.patch
+arm-omap-mmc-twl4030-add-regulator-sleep-wake-function.patch
+omap_hsmmc-put-mmc-regulator-to-sleep.patch
+omap_hsmmc-add-mmc-card-sleep-and-awake-support.patch
+omap_hsmmc-fix-null-pointer-dereference.patch
+omap_hsmmc-cleanup-macro-usage.patch
+omap_hsmmc-clear-interrupt-status-after-init-sequence.patch
+omap_hsmmc-cater-for-weird-cmd6-behaviour.patch
+omap_hsmmc-prevent-races-with-irq-handler.patch
+omap_hsmmc-code-refactoring.patch
+omap_hsmmc-protect-the-card-when-the-cover-is-open.patch
+omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired.patch
+omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired-fix-for-the-db-clock-failure-message.patch
+omap_hsmmc-set-a-large-data-timeout-for-commands-with-busy-signal.patch
+arm-omap-rx51-set-mmc-capabilities-and-power-saving-flag.patch
+arm-omap-rx51-set-mmc-capabilities-and-power-saving-flag-update.patch
+sdio-add-cd-disable-support.patch
+sdio-add-cd-disable-support-cleanup.patch
+sdhci-be-more-strict-with-get_min_clock-usage.patch
+sdhci-of-fix-sd-clock-calculation.patch
+sdhci-of-avoid-writing-reserved-bits-into-host-control-register.patch
+sdhci-of-fix-high-speed-cards-recognition.patch
+powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc.patch
+sdhci-of-dont-hard-code-inverted-write-protect-quirk.patch
+sdhci-of-cleanup-esdhcs-set_clock-a-little-bit.patch
+powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards.patch
+sdhci-increase-timeout-for-internal-clock-stabilization.patch
+
