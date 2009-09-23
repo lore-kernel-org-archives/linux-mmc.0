@@ -1,7 +1,7 @@
 From: akpm@linux-foundation.org
-Subject: [merged] powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:55:47 -0700
-Message-ID: <200909231955.n8NJtlLT003555@imap1.linux-foundation.org>
+Subject: [merged] powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:55:59 -0700
+Message-ID: <200909231955.n8NJtxLa003933@imap1.linux-foundation.org>
 Reply-To: linux-kernel@vger.kernel.org
 Return-path: <mm-commits-owner@vger.kernel.org>
 Sender: mm-commits-owner@vger.kernel.org
@@ -10,23 +10,24 @@ List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     powerpc: introduce and document sdhci,wp-inverted property for eSDHC
+     powerpc/85xx: add eSDHC support for MPC8536DS boards
 has been removed from the -mm tree.  Its filename was
-     powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc.patch
+     powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: powerpc: introduce and document sdhci,wp-inverted property for eSDHC
+Subject: powerpc/85xx: add eSDHC support for MPC8536DS boards
 From: Anton Vorontsov <avorontsov@ru.mvista.com>
 
-eSDHC block in MPC837x SOCs reports inverted write-protect state, soon
-sdhci-of driver will look for sdhci,wp-inverted properties to decide
-whether apply a specific quirk.
+This patch simply adds sdhci node to the device tree.
 
-So, document the property and add it to device tree source files.
+We specify clock-frequency manually, so that eSDHC will work without
+upgrading U-Boot.  Though, that'll only work for default setup (1500 MHz)
+on new board revisions.  For non-default setups, it's recommended to
+upgrade U-Boot, since it will fixup clock-frequency automatically.
 
 Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
 Cc: Pierre Ossman <pierre@ossman.eu>
@@ -39,105 +40,27 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- Documentation/powerpc/dts-bindings/fsl/esdhc.txt |    2 ++
- arch/powerpc/boot/dts/mpc8377_mds.dts            |    1 +
- arch/powerpc/boot/dts/mpc8377_rdb.dts            |    1 +
- arch/powerpc/boot/dts/mpc8377_wlan.dts           |    1 +
- arch/powerpc/boot/dts/mpc8378_mds.dts            |    1 +
- arch/powerpc/boot/dts/mpc8378_rdb.dts            |    1 +
- arch/powerpc/boot/dts/mpc8379_mds.dts            |    1 +
- arch/powerpc/boot/dts/mpc8379_rdb.dts            |    1 +
- 8 files changed, 9 insertions(+)
+ arch/powerpc/boot/dts/mpc8536ds.dts |    8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff -puN Documentation/powerpc/dts-bindings/fsl/esdhc.txt~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc Documentation/powerpc/dts-bindings/fsl/esdhc.txt
---- a/Documentation/powerpc/dts-bindings/fsl/esdhc.txt~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc
-+++ a/Documentation/powerpc/dts-bindings/fsl/esdhc.txt
-@@ -10,6 +10,8 @@ Required properties:
-   - interrupts : should contain eSDHC interrupt.
-   - interrupt-parent : interrupt source phandle.
-   - clock-frequency : specifies eSDHC base clock frequency.
-+  - sdhci,wp-inverted : (optional) specifies that eSDHC controller
-+    reports inverted write-protect state;
-   - sdhci,1-bit-only : (optional) specifies that a controller can
-     only handle 1-bit data transfers.
- 
-diff -puN arch/powerpc/boot/dts/mpc8377_mds.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc arch/powerpc/boot/dts/mpc8377_mds.dts
---- a/arch/powerpc/boot/dts/mpc8377_mds.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc
-+++ a/arch/powerpc/boot/dts/mpc8377_mds.dts
-@@ -159,6 +159,7 @@
- 				reg = <0x2e000 0x1000>;
- 				interrupts = <42 0x8>;
- 				interrupt-parent = <&ipic>;
-+				sdhci,wp-inverted;
- 				/* Filled in by U-Boot */
- 				clock-frequency = <0>;
- 			};
-diff -puN arch/powerpc/boot/dts/mpc8377_rdb.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc arch/powerpc/boot/dts/mpc8377_rdb.dts
---- a/arch/powerpc/boot/dts/mpc8377_rdb.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc
-+++ a/arch/powerpc/boot/dts/mpc8377_rdb.dts
-@@ -173,6 +173,7 @@
- 				reg = <0x2e000 0x1000>;
- 				interrupts = <42 0x8>;
- 				interrupt-parent = <&ipic>;
-+				sdhci,wp-inverted;
- 				/* Filled in by U-Boot */
- 				clock-frequency = <111111111>;
- 			};
-diff -puN arch/powerpc/boot/dts/mpc8377_wlan.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc arch/powerpc/boot/dts/mpc8377_wlan.dts
---- a/arch/powerpc/boot/dts/mpc8377_wlan.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc
-+++ a/arch/powerpc/boot/dts/mpc8377_wlan.dts
-@@ -150,6 +150,7 @@
- 				reg = <0x2e000 0x1000>;
- 				interrupts = <42 0x8>;
- 				interrupt-parent = <&ipic>;
-+				sdhci,wp-inverted;
- 				clock-frequency = <133333333>;
- 			};
+diff -puN arch/powerpc/boot/dts/mpc8536ds.dts~powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards arch/powerpc/boot/dts/mpc8536ds.dts
+--- a/arch/powerpc/boot/dts/mpc8536ds.dts~powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards
++++ a/arch/powerpc/boot/dts/mpc8536ds.dts
+@@ -258,6 +258,14 @@
+ 			clock-frequency = <250000000>;
  		};
-diff -puN arch/powerpc/boot/dts/mpc8378_mds.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc arch/powerpc/boot/dts/mpc8378_mds.dts
---- a/arch/powerpc/boot/dts/mpc8378_mds.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc
-+++ a/arch/powerpc/boot/dts/mpc8378_mds.dts
-@@ -159,6 +159,7 @@
- 				reg = <0x2e000 0x1000>;
- 				interrupts = <42 0x8>;
- 				interrupt-parent = <&ipic>;
-+				sdhci,wp-inverted;
- 				/* Filled in by U-Boot */
- 				clock-frequency = <0>;
- 			};
-diff -puN arch/powerpc/boot/dts/mpc8378_rdb.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc arch/powerpc/boot/dts/mpc8378_rdb.dts
---- a/arch/powerpc/boot/dts/mpc8378_rdb.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc
-+++ a/arch/powerpc/boot/dts/mpc8378_rdb.dts
-@@ -173,6 +173,7 @@
- 				reg = <0x2e000 0x1000>;
- 				interrupts = <42 0x8>;
- 				interrupt-parent = <&ipic>;
-+				sdhci,wp-inverted;
- 				/* Filled in by U-Boot */
- 				clock-frequency = <111111111>;
- 			};
-diff -puN arch/powerpc/boot/dts/mpc8379_mds.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc arch/powerpc/boot/dts/mpc8379_mds.dts
---- a/arch/powerpc/boot/dts/mpc8379_mds.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc
-+++ a/arch/powerpc/boot/dts/mpc8379_mds.dts
-@@ -157,6 +157,7 @@
- 				reg = <0x2e000 0x1000>;
- 				interrupts = <42 0x8>;
- 				interrupt-parent = <&ipic>;
-+				sdhci,wp-inverted;
- 				/* Filled in by U-Boot */
- 				clock-frequency = <0>;
- 			};
-diff -puN arch/powerpc/boot/dts/mpc8379_rdb.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc arch/powerpc/boot/dts/mpc8379_rdb.dts
---- a/arch/powerpc/boot/dts/mpc8379_rdb.dts~powerpc-introduce-and-document-sdhciwp-inverted-property-for-esdhc
-+++ a/arch/powerpc/boot/dts/mpc8379_rdb.dts
-@@ -171,6 +171,7 @@
- 				reg = <0x2e000 0x1000>;
- 				interrupts = <42 0x8>;
- 				interrupt-parent = <&ipic>;
-+				sdhci,wp-inverted;
- 				/* Filled in by U-Boot */
- 				clock-frequency = <111111111>;
- 			};
+ 
++		sdhci@2e000 {
++			compatible = "fsl,mpc8536-esdhc", "fsl,esdhc";
++			reg = <0x2e000 0x1000>;
++			interrupts = <72 0x2>;
++			interrupt-parent = <&mpic>;
++			clock-frequency = <250000000>;
++		};
++
+ 		serial0: serial@4500 {
+ 			cell-index = <0>;
+ 			device_type = "serial";
 _
 
 Patches currently in -mm which might be from avorontsov@ru.mvista.com are
