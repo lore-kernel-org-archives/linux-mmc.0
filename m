@@ -1,34 +1,30 @@
 From: akpm@linux-foundation.org
-Subject: [merged] omap_hsmmc-fix-scatter-gather-list-sanity-checking.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:54:51 -0700
-Message-ID: <200909231954.n8NJspAq001525@imap1.linux-foundation.org>
+Subject: [merged] omap_hsmmc-ensure-workqueues-are-empty-before-suspend.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:54:49 -0700
+Message-ID: <200909231954.n8NJsn5p001470@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:41117 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:56413 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750911AbZIWUIa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 16:08:30 -0400
+	by vger.kernel.org with ESMTP id S1752214AbZIWUJA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 16:09:00 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jarkko.lavinen@nokia.com, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
+To: adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
 
 
 The patch titled
-     omap_hsmmc: fix scatter-gather list sanity checking
+     omap_hsmmc: ensure workqueues are empty before suspend
 has been removed from the -mm tree.  Its filename was
-     omap_hsmmc-fix-scatter-gather-list-sanity-checking.patch
+     omap_hsmmc-ensure-workqueues-are-empty-before-suspend.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: omap_hsmmc: fix scatter-gather list sanity checking
-From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Subject: omap_hsmmc: ensure workqueues are empty before suspend
+From: Adrian Hunter <adrian.hunter@nokia.com>
 
-Do not use host->dma_len when it is uninitialzed.  Finish the request with
-an error if the mmc_omap_prepare_data() fails.
-
-Signed-off-by: Jarkko Lavinen <jarkko.lavinen@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
 Cc: Ian Molton <ian@mnementh.co.uk>
@@ -42,46 +38,110 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/omap_hsmmc.c |   14 ++++++++++++--
- 1 file changed, 12 insertions(+), 2 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   50 +++++++++++++++++++++-----------
+ 1 file changed, 34 insertions(+), 16 deletions(-)
 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-fix-scatter-gather-list-sanity-checking drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-fix-scatter-gather-list-sanity-checking
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-ensure-workqueues-are-empty-before-suspend drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-ensure-workqueues-are-empty-before-suspend
 +++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -878,7 +878,7 @@ mmc_omap_start_dma_transfer(struct mmc_o
- 	struct mmc_data *data = req->data;
- 
- 	/* Sanity check: all the SG entries must be aligned by block size. */
--	for (i = 0; i < host->dma_len; i++) {
-+	for (i = 0; i < data->sg_len; i++) {
- 		struct scatterlist *sgl;
- 
- 		sgl = data->sg + i;
-@@ -1021,10 +1021,20 @@ static int omap_mmc_disable(struct mmc_h
- static void omap_mmc_request(struct mmc_host *mmc, struct mmc_request *req)
- {
- 	struct mmc_omap_host *host = mmc_priv(mmc);
-+	int err;
- 
- 	WARN_ON(host->mrq != NULL);
- 	host->mrq = req;
--	mmc_omap_prepare_data(host, req);
-+	err = mmc_omap_prepare_data(host, req);
-+	if (err) {
-+		req->cmd->error = err;
-+		if (req->data)
-+			req->data->error = err;
-+		host->mrq = NULL;
-+		mmc_request_done(mmc, req);
-+		return;
-+	}
+@@ -151,7 +151,6 @@ struct mmc_omap_host {
+ 	u32			bytesleft;
+ 	int			suspended;
+ 	int			irq;
+-	int			carddetect;
+ 	int			use_dma, dma_ch;
+ 	int			dma_line_tx, dma_line_rx;
+ 	int			slot_id;
+@@ -761,14 +760,19 @@ static void mmc_omap_detect(struct work_
+ 	struct mmc_omap_host *host = container_of(work, struct mmc_omap_host,
+ 						mmc_carddetect_work);
+ 	struct omap_mmc_slot_data *slot = &mmc_slot(host);
++	int carddetect;
 +
- 	mmc_omap_start_command(host, req->cmd, req->data);
- }
++	if (host->suspended)
++		return;
++
++	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
  
+ 	if (mmc_slot(host).card_detect)
+-		host->carddetect = slot->card_detect(slot->card_detect_irq);
++		carddetect = slot->card_detect(slot->card_detect_irq);
+ 	else
+-		host->carddetect = -ENOSYS;
++		carddetect = -ENOSYS;
+ 
+-	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
+-	if (host->carddetect) {
++	if (carddetect) {
+ 		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+ 	} else {
+ 		mmc_host_enable(host->mmc);
+@@ -785,6 +789,8 @@ static irqreturn_t omap_mmc_cd_handler(i
+ {
+ 	struct mmc_omap_host *host = (struct mmc_omap_host *)dev_id;
+ 
++	if (host->suspended)
++		return IRQ_HANDLED;
+ 	schedule_work(&host->mmc_carddetect_work);
+ 
+ 	return IRQ_HANDLED;
+@@ -1524,30 +1530,42 @@ static int omap_mmc_suspend(struct platf
+ 		return 0;
+ 
+ 	if (host) {
++		host->suspended = 1;
++		if (host->pdata->suspend) {
++			ret = host->pdata->suspend(&pdev->dev,
++							host->slot_id);
++			if (ret) {
++				dev_dbg(mmc_dev(host->mmc),
++					"Unable to handle MMC board"
++					" level suspend\n");
++				host->suspended = 0;
++				return ret;
++			}
++		}
++		cancel_work_sync(&host->mmc_carddetect_work);
+ 		mmc_host_enable(host->mmc);
+ 		ret = mmc_suspend_host(host->mmc, state);
+ 		if (ret == 0) {
+-			host->suspended = 1;
+-
+ 			OMAP_HSMMC_WRITE(host->base, ISE, 0);
+ 			OMAP_HSMMC_WRITE(host->base, IE, 0);
+ 
+-			if (host->pdata->suspend) {
+-				ret = host->pdata->suspend(&pdev->dev,
+-								host->slot_id);
+-				if (ret)
+-					dev_dbg(mmc_dev(host->mmc),
+-						"Unable to handle MMC board"
+-						" level suspend\n");
+-			}
+ 
+ 			OMAP_HSMMC_WRITE(host->base, HCTL,
+ 					 OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
+ 			mmc_host_disable(host->mmc);
+ 			clk_disable(host->iclk);
+ 			clk_disable(host->dbclk);
+-		} else
++		} else {
++			host->suspended = 0;
++			if (host->pdata->resume) {
++				ret = host->pdata->resume(&pdev->dev,
++							  host->slot_id);
++				if (ret)
++					dev_dbg(mmc_dev(host->mmc),
++						"Unmask interrupt failed\n");
++			}
+ 			mmc_host_disable(host->mmc);
++		}
+ 
+ 	}
+ 	return ret;
 _
 
-Patches currently in -mm which might be from jarkko.lavinen@nokia.com are
+Patches currently in -mm which might be from adrian.hunter@nokia.com are
 
 origin.patch
 
