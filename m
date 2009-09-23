@@ -1,71 +1,86 @@
 From: akpm@linux-foundation.org
-Subject: [merged] powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:55:59 -0700
-Message-ID: <200909231955.n8NJtxLa003933@imap1.linux-foundation.org>
+Subject: [merged] sdio-add-mmc_quirk_lenient_fn0.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:55:56 -0700
+Message-ID: <200909231955.n8NJtuBm003861@imap1.linux-foundation.org>
 Reply-To: linux-kernel@vger.kernel.org
 Return-path: <mm-commits-owner@vger.kernel.org>
 Sender: mm-commits-owner@vger.kernel.org
-To: avorontsov@ru.mvista.com, ben@fluff.org, benh@kernel.crashing.org, david.vrabel@csr.com, galak@kernel.crashing.org, linux-mmc@vger.kernel.org, pierre@ossman.eu, s.hauer@pengutronix.de
+To: ohad@wizery.com, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     powerpc/85xx: add eSDHC support for MPC8536DS boards
+     sdio: add MMC_QUIRK_LENIENT_FN0
 has been removed from the -mm tree.  Its filename was
-     powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards.patch
+     sdio-add-mmc_quirk_lenient_fn0.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: powerpc/85xx: add eSDHC support for MPC8536DS boards
-From: Anton Vorontsov <avorontsov@ru.mvista.com>
+Subject: sdio: add MMC_QUIRK_LENIENT_FN0
+From: Ohad Ben-Cohen <ohad@wizery.com>
 
-This patch simply adds sdhci node to the device tree.
+Normally writes to SDIO function 0 outside the vendor specific CCCR
+registers are prohibited.
 
-We specify clock-frequency manually, so that eSDHC will work without
-upgrading U-Boot.  Though, that'll only work for default setup (1500 MHz)
-on new board revisions.  For non-default setups, it's recommended to
-upgrade U-Boot, since it will fixup clock-frequency automatically.
+To support embedded devices that require writes to SDIO function 0 outside
+this range (e.g.  TI WL127x embedded sdio wifi device),
+MMC_QUIRK_LENIENT_FN0 is introduced.
 
-Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Kumar Gala <galak@kernel.crashing.org>
-Cc: David Vrabel <david.vrabel@csr.com>
-Cc: Ben Dooks <ben@fluff.org>
-Cc: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+A card quirks field is added to `struct mmc_card' to support non-standard
+devices (e.g.  embedded sdio devices).
+
+[akpm@linux-foundation.org: code in C, not cpp!]
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- arch/powerpc/boot/dts/mpc8536ds.dts |    8 ++++++++
- 1 file changed, 8 insertions(+)
+ drivers/mmc/core/sdio_io.c |    2 +-
+ include/linux/mmc/card.h   |    7 +++++++
+ 2 files changed, 8 insertions(+), 1 deletion(-)
 
-diff -puN arch/powerpc/boot/dts/mpc8536ds.dts~powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards arch/powerpc/boot/dts/mpc8536ds.dts
---- a/arch/powerpc/boot/dts/mpc8536ds.dts~powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards
-+++ a/arch/powerpc/boot/dts/mpc8536ds.dts
-@@ -258,6 +258,14 @@
- 			clock-frequency = <250000000>;
- 		};
+diff -puN drivers/mmc/core/sdio_io.c~sdio-add-mmc_quirk_lenient_fn0 drivers/mmc/core/sdio_io.c
+--- a/drivers/mmc/core/sdio_io.c~sdio-add-mmc_quirk_lenient_fn0
++++ a/drivers/mmc/core/sdio_io.c
+@@ -624,7 +624,7 @@ void sdio_f0_writeb(struct sdio_func *fu
  
-+		sdhci@2e000 {
-+			compatible = "fsl,mpc8536-esdhc", "fsl,esdhc";
-+			reg = <0x2e000 0x1000>;
-+			interrupts = <72 0x2>;
-+			interrupt-parent = <&mpic>;
-+			clock-frequency = <250000000>;
-+		};
+ 	BUG_ON(!func);
+ 
+-	if (addr < 0xF0 || addr > 0xFF) {
++	if ((addr < 0xF0 || addr > 0xFF) && (!mmc_card_lenient_fn0(func->card))) {
+ 		if (err_ret)
+ 			*err_ret = -EINVAL;
+ 		return;
+diff -puN include/linux/mmc/card.h~sdio-add-mmc_quirk_lenient_fn0 include/linux/mmc/card.h
+--- a/include/linux/mmc/card.h~sdio-add-mmc_quirk_lenient_fn0
++++ a/include/linux/mmc/card.h
+@@ -97,6 +97,8 @@ struct mmc_card {
+ #define MMC_STATE_READONLY	(1<<1)		/* card is read-only */
+ #define MMC_STATE_HIGHSPEED	(1<<2)		/* card is in high speed mode */
+ #define MMC_STATE_BLOCKADDR	(1<<3)		/* card uses block-addressing */
++	unsigned int		quirks; 	/* card quirks */
++#define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+ 
+ 	u32			raw_cid[4];	/* raw card CID */
+ 	u32			raw_csd[4];	/* raw card CSD */
+@@ -132,6 +134,11 @@ struct mmc_card {
+ #define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
+ #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
+ 
++static inline int mmc_card_lenient_fn0(const struct mmc_card *c)
++{
++	return c->quirks & MMC_QUIRK_LENIENT_FN0;
++}
 +
- 		serial0: serial@4500 {
- 			cell-index = <0>;
- 			device_type = "serial";
+ #define mmc_card_name(c)	((c)->cid.prod_name)
+ #define mmc_card_id(c)		(dev_name(&(c)->dev))
+ 
 _
 
-Patches currently in -mm which might be from avorontsov@ru.mvista.com are
+Patches currently in -mm which might be from ohad@wizery.com are
 
 origin.patch
-linux-next.patch
-rtc-set-wakeup-capability-for-i2c-and-spi-rtc-drivers.patch
 
