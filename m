@@ -1,86 +1,100 @@
 From: akpm@linux-foundation.org
-Subject: [merged] sdio-add-mmc_quirk_lenient_fn0.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:55:56 -0700
-Message-ID: <200909231955.n8NJtuBm003861@imap1.linux-foundation.org>
+Subject: [merged] mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:56:15 -0700
+Message-ID: <200909231956.n8NJuFcf004517@imap1.linux-foundation.org>
 Reply-To: linux-kernel@vger.kernel.org
 Return-path: <mm-commits-owner@vger.kernel.org>
 Sender: mm-commits-owner@vger.kernel.org
-To: ohad@wizery.com, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
+To: wolfgang.mues@auerswald.de, linux-mmc@vger.kernel.org, stable@kernel.org, mm-commits@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     sdio: add MMC_QUIRK_LENIENT_FN0
+     mmc_spi: fail gracefully if host or card do not support the switch command
 has been removed from the -mm tree.  Its filename was
-     sdio-add-mmc_quirk_lenient_fn0.patch
+     mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sdio: add MMC_QUIRK_LENIENT_FN0
-From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: mmc_spi: fail gracefully if host or card do not support the switch command
+From: Wolfgang Muees <wolfgang.mues@auerswald.de>
 
-Normally writes to SDIO function 0 outside the vendor specific CCCR
-registers are prohibited.
+Some time ago, I have send a patch to the mmc_spi subsystem changing the
+error codes.  This was after a discussion with Pierre about using EINVAL
+only for non-recoverable errors.  This patch was accepted as
 
-To support embedded devices that require writes to SDIO function 0 outside
-this range (e.g.  TI WL127x embedded sdio wifi device),
-MMC_QUIRK_LENIENT_FN0 is introduced.
+http://git.kernel.org/linus/fdd858db7113ca64132de390188d7ca00701013d
 
-A card quirks field is added to `struct mmc_card' to support non-standard
-devices (e.g.  embedded sdio devices).
+Unfortunately, several weeks later, I realized that this patch has opened
+a little can of worms because there are SD cards on the market which
 
-[akpm@linux-foundation.org: code in C, not cpp!]
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+a) claim that they support the switch command
+AND
+b) refuse to execute this command if operating in SPI mode.
+
+So, such a card would get unusuable in an embedded linux system in SPI
+mode, because the init sequence terminates with an error.
+
+This patch adds the missing error codes to the caller of the switch
+command and restores the old behaviour to fail gracefully if these
+commands can not execute.
+
+Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
 Cc: <linux-mmc@vger.kernel.org>
+Cc: <stable@kernel.org>		[2.6.31.x]
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/sdio_io.c |    2 +-
- include/linux/mmc/card.h   |    7 +++++++
- 2 files changed, 8 insertions(+), 1 deletion(-)
+ drivers/mmc/core/mmc.c |   10 +++++-----
+ drivers/mmc/core/sd.c  |   10 +++++-----
+ 2 files changed, 10 insertions(+), 10 deletions(-)
 
-diff -puN drivers/mmc/core/sdio_io.c~sdio-add-mmc_quirk_lenient_fn0 drivers/mmc/core/sdio_io.c
---- a/drivers/mmc/core/sdio_io.c~sdio-add-mmc_quirk_lenient_fn0
-+++ a/drivers/mmc/core/sdio_io.c
-@@ -624,7 +624,7 @@ void sdio_f0_writeb(struct sdio_func *fu
+diff -puN drivers/mmc/core/mmc.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command drivers/mmc/core/mmc.c
+--- a/drivers/mmc/core/mmc.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command
++++ a/drivers/mmc/core/mmc.c
+@@ -179,11 +179,11 @@ static int mmc_read_ext_csd(struct mmc_c
  
- 	BUG_ON(!func);
+ 	err = mmc_send_ext_csd(card, ext_csd);
+ 	if (err) {
+-		/*
+-		 * We all hosts that cannot perform the command
+-		 * to fail more gracefully
+-		 */
+-		if (err != -EINVAL)
++		/* If the host or the card can't do the switch,
++		 * fail more gracefully. */
++		if ((err != -EINVAL)
++		 && (err != -ENOSYS)
++		 && (err != -EFAULT))
+ 			goto out;
  
--	if (addr < 0xF0 || addr > 0xFF) {
-+	if ((addr < 0xF0 || addr > 0xFF) && (!mmc_card_lenient_fn0(func->card))) {
- 		if (err_ret)
- 			*err_ret = -EINVAL;
- 		return;
-diff -puN include/linux/mmc/card.h~sdio-add-mmc_quirk_lenient_fn0 include/linux/mmc/card.h
---- a/include/linux/mmc/card.h~sdio-add-mmc_quirk_lenient_fn0
-+++ a/include/linux/mmc/card.h
-@@ -97,6 +97,8 @@ struct mmc_card {
- #define MMC_STATE_READONLY	(1<<1)		/* card is read-only */
- #define MMC_STATE_HIGHSPEED	(1<<2)		/* card is in high speed mode */
- #define MMC_STATE_BLOCKADDR	(1<<3)		/* card uses block-addressing */
-+	unsigned int		quirks; 	/* card quirks */
-+#define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+ 		/*
+diff -puN drivers/mmc/core/sd.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command drivers/mmc/core/sd.c
+--- a/drivers/mmc/core/sd.c~mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command
++++ a/drivers/mmc/core/sd.c
+@@ -210,11 +210,11 @@ static int mmc_read_switch(struct mmc_ca
  
- 	u32			raw_cid[4];	/* raw card CID */
- 	u32			raw_csd[4];	/* raw card CSD */
-@@ -132,6 +134,11 @@ struct mmc_card {
- #define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
- #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
+ 	err = mmc_sd_switch(card, 0, 0, 1, status);
+ 	if (err) {
+-		/*
+-		 * We all hosts that cannot perform the command
+-		 * to fail more gracefully
+-		 */
+-		if (err != -EINVAL)
++		/* If the host or the card can't do the switch,
++		 * fail more gracefully. */
++		if ((err != -EINVAL)
++		 && (err != -ENOSYS)
++		 && (err != -EFAULT))
+ 			goto out;
  
-+static inline int mmc_card_lenient_fn0(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_LENIENT_FN0;
-+}
-+
- #define mmc_card_name(c)	((c)->cid.prod_name)
- #define mmc_card_id(c)		(dev_name(&(c)->dev))
- 
+ 		printk(KERN_WARNING "%s: problem reading switch "
 _
 
-Patches currently in -mm which might be from ohad@wizery.com are
+Patches currently in -mm which might be from wolfgang.mues@auerswald.de are
 
 origin.patch
 
