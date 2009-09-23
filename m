@@ -1,29 +1,33 @@
 From: akpm@linux-foundation.org
-Subject: [merged] omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:54:53 -0700
-Message-ID: <200909231954.n8NJsrYE001639@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
+Subject: [merged] omap_hsmmc-fix-null-pointer-dereference.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:55:03 -0700
+Message-ID: <200909231955.n8NJt3f6002051@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42918 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753622AbZIWTzu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 15:55:50 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: jarkko.lavinen@nokia.com, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
 
 
 The patch titled
-     omap_hsmmc: make use of new MMC_CAP_NONREMOVABLE host capability
+     omap_hsmmc: fix NULL pointer dereference
 has been removed from the -mm tree.  Its filename was
-     omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability.patch
+     omap_hsmmc-fix-null-pointer-dereference.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: omap_hsmmc: make use of new MMC_CAP_NONREMOVABLE host capability
-From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: omap_hsmmc: fix NULL pointer dereference
+From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
 
-Let the board specify that a card is nonremovable e.g. eMMC
+Do not call 'mmc_omap_xfer_done()' if the request is already done.
 
+Signed-off-by: Jarkko Lavinen <jarkko.lavinen@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
 Cc: Ian Molton <ian@mnementh.co.uk>
@@ -37,65 +41,24 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- arch/arm/mach-omap2/mmc-twl4030.c     |    3 +++
- arch/arm/mach-omap2/mmc-twl4030.h     |    1 +
- arch/arm/plat-omap/include/mach/mmc.h |    3 +++
- drivers/mmc/host/omap_hsmmc.c         |    3 +++
- 4 files changed, 10 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff -puN arch/arm/mach-omap2/mmc-twl4030.c~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability arch/arm/mach-omap2/mmc-twl4030.c
---- a/arch/arm/mach-omap2/mmc-twl4030.c~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability
-+++ a/arch/arm/mach-omap2/mmc-twl4030.c
-@@ -415,6 +415,9 @@ void __init twl4030_mmc_init(struct twl4
- 		} else
- 			mmc->slots[0].gpio_wp = -EINVAL;
- 
-+		if (c->nonremovable)
-+			mmc->slots[0].nonremovable = 1;
-+
- 		/* NOTE:  MMC slots should have a Vcc regulator set up.
- 		 * This may be from a TWL4030-family chip, another
- 		 * controllable regulator, or a fixed supply.
-diff -puN arch/arm/mach-omap2/mmc-twl4030.h~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability arch/arm/mach-omap2/mmc-twl4030.h
---- a/arch/arm/mach-omap2/mmc-twl4030.h~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability
-+++ a/arch/arm/mach-omap2/mmc-twl4030.h
-@@ -12,6 +12,7 @@ struct twl4030_hsmmc_info {
- 	bool	transceiver;	/* MMC-2 option */
- 	bool	ext_clock;	/* use external pin for input clock */
- 	bool	cover_only;	/* No card detect - just cover switch */
-+	bool	nonremovable;	/* Nonremovable e.g. eMMC */
- 	int	gpio_cd;	/* or -EINVAL */
- 	int	gpio_wp;	/* or -EINVAL */
- 	char	*name;		/* or NULL for default */
-diff -puN arch/arm/plat-omap/include/mach/mmc.h~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability arch/arm/plat-omap/include/mach/mmc.h
---- a/arch/arm/plat-omap/include/mach/mmc.h~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability
-+++ a/arch/arm/plat-omap/include/mach/mmc.h
-@@ -83,6 +83,9 @@ struct omap_mmc_platform_data {
- 		/* use the internal clock */
- 		unsigned internal_clock:1;
- 
-+		/* nonremovable e.g. eMMC */
-+		unsigned nonremovable:1;
-+
- 		int switch_pin;			/* gpio (card detect) */
- 		int gpio_wp;			/* gpio (write protect) */
- 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-make-use-of-new-mmc_cap_nonremovable-host-capability
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-fix-null-pointer-dereference drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-fix-null-pointer-dereference
 +++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -1390,6 +1390,9 @@ static int __init omap_mmc_probe(struct 
- 	else if (pdata->slots[host->slot_id].wires >= 4)
- 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+@@ -677,7 +677,7 @@ static irqreturn_t mmc_omap_irq(int irq,
  
-+	if (pdata->slots[host->slot_id].nonremovable)
-+		mmc->caps |= MMC_CAP_NONREMOVABLE;
-+
- 	omap_hsmmc_init(host);
+ 	if (end_cmd || ((status & CC) && host->cmd))
+ 		mmc_omap_cmd_done(host, host->cmd);
+-	if (end_trans || (status & TC))
++	if ((end_trans || (status & TC)) && host->mrq)
+ 		mmc_omap_xfer_done(host, data);
  
- 	/* Select DMA lines */
+ 	return IRQ_HANDLED;
 _
 
-Patches currently in -mm which might be from adrian.hunter@nokia.com are
+Patches currently in -mm which might be from jarkko.lavinen@nokia.com are
 
 origin.patch
 
