@@ -1,109 +1,71 @@
-From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH] U300 switch MMCI to use regulator
-Date: Wed, 23 Sep 2009 16:59:16 +0200
-Message-ID: <1253717956-11688-1-git-send-email-linus.walleij@stericsson.com>
+From: Inaky Perez-Gonzalez <inaky@linux.intel.com>
+Subject: Re: [PATCH 1/3] iwmc3200top: Add Intel Wireless MultiCom 3200 top
+ driver.
+Date: Wed, 23 Sep 2009 10:48:14 -0700
+Message-ID: <1253728094.3033.240.camel@localhost.localdomain>
+References: <1253662724-16497-1-git-send-email-tomas.winkler@intel.com>
+	 <1253662724-16497-2-git-send-email-tomas.winkler@intel.com>
+	 <1253689036.4458.22.camel@johannes.local>
+	 <1ba2fa240909230023v17fe2b49v4981d464dba469ed@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:45149 "EHLO df.lth.se"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750752AbZIWO73 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 23 Sep 2009 10:59:29 -0400
+Received: from mga06.intel.com ([134.134.136.21]:8900 "EHLO
+	orsmga101.jf.intel.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751377AbZIWRtR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 13:49:17 -0400
+In-Reply-To: <1ba2fa240909230023v17fe2b49v4981d464dba469ed@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: Linus Walleij <linus.walleij@stericsson.com>
+To: Tomas Winkler <tomasw@gmail.com>
+Cc: Johannes Berg <johannes@sipsolutions.net>, "davem@davemloft.net" <davem@davemloft.net>, "linville@tuxdriver.com" <linville@tuxdriver.com>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Zhu, Yi" <yi.zhu@intel.com>, "Kao, Cindy H" <cindy.h.kao@intel.com>, "Cohen, Guy" <guy.cohen@intel.com>, "Rindjunsky, Ron" <ron.rindjunsky@intel.com>
 
-This switches the U300 over from using a custom translate_vdd
-function (which was just flipping blind bits in the hardware)
-to using the regulator that actually controls the MMC voltage.
+On Wed, 2009-09-23 at 01:23 -0600, Tomas Winkler wrote:
+> On Wed, Sep 23, 2009 at 9:57 AM, Johannes Berg
+> <johannes@sipsolutions.net> wrote:
+> > On Wed, 2009-09-23 at 02:38 +0300, Tomas Winkler wrote:
+> >
+> >> +config IWMC3200TOP
+> >> +        tristate "Intel Wireless MultiCom Top Driver"
+> >> +        depends on MMC && EXPERIMENTAL
+> >> +        select FW_LOADER
+> >> +     ---help---
+> >> +       Intel Wireless MultiCom 3200 Top driver is responsible for
+> >> +       for firmware load and enabled coms enumeration
+> >
+> > This seems like the wrong approach to me.
+> >
+> > To me, it seems like you have a device that contains an internal bus and
+> > allows bus enumeration. Typically, we would surface that bus in the
+> > driver/device model and allow sub-drivers to bind to that by way of
+> > exposing the internal bus, like e.g. drivers/ssb/.
+> 
+> From HW perspective your assumption is not exactly correct. All the
+> devices are visible on the SDIO bus but they are not operational
+> (probe won't succeed) until TOP download the firmware and kicks the
+> devices. From SW perspective to create another bus layer is an option.
+> I'm not sure if it's not more complicated one.
 
-Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
----
- arch/arm/mach-u300/mmc.c |   64 +++-------------------------------------------
- 1 files changed, 4 insertions(+), 60 deletions(-)
+It is definitely more complicated; we thought about it and it wasn't
+worth. The current solution works and it is simple enough.
 
-diff --git a/arch/arm/mach-u300/mmc.c b/arch/arm/mach-u300/mmc.c
-index 70f0ca5..cedc74c 100644
---- a/arch/arm/mach-u300/mmc.c
-+++ b/arch/arm/mach-u300/mmc.c
-@@ -40,64 +40,6 @@ static unsigned int mmc_status(struct device *dev)
- 	return mmci_card->mmc_inserted;
- }
- 
--/*
-- * Here follows a large chunk of code which will only be enabled if you
-- * have both the AB3100 chip mounted and the MMC subsystem activated.
-- */
--
--static u32 mmc_translate_vdd(struct device *dev, unsigned int voltage)
--{
--	int v;
--
--	/*
--	 * MMC Spec:
--	 * bit 7:	1.70 - 1.95V
--	 * bit 8 - 14:	2.0 - 2.6V
--	 * bit 15 - 23:	2.7 - 3.6V
--	 *
--	 * ab3100 voltages:
--	 * 000 - 2.85V
--	 * 001 - 2.75V
--	 * 010 - 1.8V
--	 * 011 - 1.5V
--	 */
--	switch (voltage) {
--	case 8:
--		v = 3;
--		break;
--	case 9:
--	case 10:
--	case 11:
--	case 12:
--	case 13:
--	case 14:
--	case 15:
--		v = 1;
--		break;
--	case 16:
--		v = 1;
--		break;
--	case 17:
--	case 18:
--	case 19:
--	case 20:
--	case 21:
--	case 22:
--	case 23:
--	case 24:
--		v = 0;
--		break;
--	default:
--		v = 0;
--		break;
--	}
--
--	/* PL180 voltage register bits */
--	return v << 2;
--}
--
--
--
- static int mmci_callback(void *data)
- {
- 	struct mmci_card_event *mmci_card = data;
-@@ -154,9 +96,11 @@ int __devinit mmc_init(struct amba_device *adev)
- 	if (!mmci_card)
- 		return -ENOMEM;
- 
-+	/*
-+	 * Do not set ocr_mask or voltage translation function,
-+	 * we have a regulator we can control instead.
-+	 */
- 	/* Nominally 2.85V on our platform */
--	mmci_card->mmc0_plat_data.ocr_mask = MMC_VDD_28_29;
--	mmci_card->mmc0_plat_data.translate_vdd = mmc_translate_vdd;
- 	mmci_card->mmc0_plat_data.status = mmc_status;
- 	mmci_card->mmc0_plat_data.gpio_wp = -1;
- 	mmci_card->mmc0_plat_data.gpio_cd = -1;
--- 
-1.6.2.1
+To extend Tomas' explanation:
+
+1 device powers up
+2 enabling any sdio function that is not the top one fails; drivers
+  return -ENODEV
+3 top function is enabled, firmware loaded, it initializes
+  the rest of the functions. Top driver kicks a SDIO bus rescan
+  on a workqueue
+4 other sdio functions can be enabled and probe succesfully (uploading
+  firmware, yadah yadah).
+
+A subbus would add a lot of complexity to all this, having to replicate
+most of the device probing, suspend/resume, pre/post reset (that's is 
+being added to SDIO).
+
+Thanks,
+
+
 
