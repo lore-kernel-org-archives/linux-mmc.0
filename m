@@ -1,31 +1,30 @@
 From: akpm@linux-foundation.org
-Subject: [merged] mmc-add-enable-and-disable-methods-to-mmc-host.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:54:22 -0700
-Message-ID: <200909231954.n8NJsMwB000536@imap1.linux-foundation.org>
+Subject: [merged] omap_hsmmc-context-save-restore-support.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:54:45 -0700
+Message-ID: <200909231954.n8NJsj9X001376@imap1.linux-foundation.org>
 Reply-To: linux-kernel@vger.kernel.org
 Return-path: <mm-commits-owner@vger.kernel.org>
 Sender: mm-commits-owner@vger.kernel.org
-To: adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
+To: ext-denis.2.karpov@nokia.com, adrian.hunter@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
 List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     mmc: add 'enable' and 'disable' methods to mmc host
+     omap_hsmmc: context save/restore support
 has been removed from the -mm tree.  Its filename was
-     mmc-add-enable-and-disable-methods-to-mmc-host.patch
+     omap_hsmmc-context-save-restore-support.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: add 'enable' and 'disable' methods to mmc host
-From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: omap_hsmmc: context save/restore support
+From: Denis Karpov <ext-denis.2.karpov@nokia.com>
 
-MMC hosts that support power saving can use the 'enable' and 'disable'
-methods to exit and enter power saving states.  An explanation of their
-use is provided in the comments added to include/linux/mmc/host.h.
+Keep the context over PM dynamic OFF states.
 
+Signed-off-by: Denis Karpov <ext-denis.2.karpov@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
 Cc: Ian Molton <ian@mnementh.co.uk>
@@ -39,337 +38,291 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/core.c  |  177 +++++++++++++++++++++++++++++++++++--
- drivers/mmc/core/host.c  |    1 
- drivers/mmc/core/host.h  |    2 
- include/linux/mmc/host.h |   47 +++++++++
- 4 files changed, 221 insertions(+), 6 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |  194 ++++++++++++++++++++++++++++++--
+ 1 file changed, 184 insertions(+), 10 deletions(-)
 
-diff -puN drivers/mmc/core/core.c~mmc-add-enable-and-disable-methods-to-mmc-host drivers/mmc/core/core.c
---- a/drivers/mmc/core/core.c~mmc-add-enable-and-disable-methods-to-mmc-host
-+++ a/drivers/mmc/core/core.c
-@@ -344,6 +344,101 @@ unsigned int mmc_align_data_size(struct 
- EXPORT_SYMBOL(mmc_align_data_size);
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-context-save-restore-support drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-context-save-restore-support
++++ a/drivers/mmc/host/omap_hsmmc.c
+@@ -37,6 +37,7 @@
  
- /**
-+ *	mmc_host_enable - enable a host.
-+ *	@host: mmc host to enable
-+ *
-+ *	Hosts that support power saving can use the 'enable' and 'disable'
-+ *	methods to exit and enter power saving states. For more information
-+ *	see comments for struct mmc_host_ops.
-+ */
-+int mmc_host_enable(struct mmc_host *host)
-+{
-+	if (!(host->caps & MMC_CAP_DISABLE))
-+		return 0;
-+
-+	if (host->en_dis_recurs)
-+		return 0;
-+
-+	if (host->nesting_cnt++)
-+		return 0;
-+
-+	cancel_delayed_work_sync(&host->disable);
-+
-+	if (host->enabled)
-+		return 0;
-+
-+	if (host->ops->enable) {
-+		int err;
-+
-+		host->en_dis_recurs = 1;
-+		err = host->ops->enable(host);
-+		host->en_dis_recurs = 0;
-+
-+		if (err) {
-+			pr_debug("%s: enable error %d\n",
-+				 mmc_hostname(host), err);
-+			return err;
-+		}
-+	}
-+	host->enabled = 1;
-+	return 0;
-+}
-+EXPORT_SYMBOL(mmc_host_enable);
-+
-+static int mmc_host_do_disable(struct mmc_host *host, int lazy)
-+{
-+	if (host->ops->disable) {
-+		int err;
-+
-+		host->en_dis_recurs = 1;
-+		err = host->ops->disable(host, lazy);
-+		host->en_dis_recurs = 0;
-+
-+		if (err < 0) {
-+			pr_debug("%s: disable error %d\n",
-+				 mmc_hostname(host), err);
-+			return err;
-+		}
-+		if (err > 0) {
-+			unsigned long delay = msecs_to_jiffies(err);
-+
-+			mmc_schedule_delayed_work(&host->disable, delay);
-+		}
-+	}
-+	host->enabled = 0;
-+	return 0;
-+}
-+
-+/**
-+ *	mmc_host_disable - disable a host.
-+ *	@host: mmc host to disable
-+ *
-+ *	Hosts that support power saving can use the 'enable' and 'disable'
-+ *	methods to exit and enter power saving states. For more information
-+ *	see comments for struct mmc_host_ops.
-+ */
-+int mmc_host_disable(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!(host->caps & MMC_CAP_DISABLE))
-+		return 0;
-+
-+	if (host->en_dis_recurs)
-+		return 0;
-+
-+	if (--host->nesting_cnt)
-+		return 0;
-+
-+	if (!host->enabled)
-+		return 0;
-+
-+	err = mmc_host_do_disable(host, 0);
-+	return err;
-+}
-+EXPORT_SYMBOL(mmc_host_disable);
-+
-+/**
-  *	__mmc_claim_host - exclusively claim a host
-  *	@host: mmc host to claim
-  *	@abort: whether or not the operation should be aborted
-@@ -379,11 +474,81 @@ int __mmc_claim_host(struct mmc_host *ho
- 		wake_up(&host->wq);
- 	spin_unlock_irqrestore(&host->lock, flags);
- 	remove_wait_queue(&host->wq, &wait);
-+	if (!stop)
-+		mmc_host_enable(host);
- 	return stop;
- }
+ /* OMAP HSMMC Host Controller Registers */
+ #define OMAP_HSMMC_SYSCONFIG	0x0010
++#define OMAP_HSMMC_SYSSTATUS	0x0014
+ #define OMAP_HSMMC_CON		0x002C
+ #define OMAP_HSMMC_BLK		0x0104
+ #define OMAP_HSMMC_ARG		0x0108
+@@ -96,6 +97,8 @@
+ #define DUAL_VOLT_OCR_BIT	7
+ #define SRC			(1 << 25)
+ #define SRD			(1 << 26)
++#define SOFTRESET		(1 << 1)
++#define RESETDONE		(1 << 0)
  
- EXPORT_SYMBOL(__mmc_claim_host);
- 
-+static int mmc_try_claim_host(struct mmc_host *host)
-+{
-+	int claimed_host = 0;
-+	unsigned long flags;
+ /*
+  * FIXME: Most likely all the data using these _DEVID defines should come
+@@ -154,6 +157,8 @@ struct mmc_omap_host {
+ 	int			slot_id;
+ 	int			dbclk_enabled;
+ 	int			response_busy;
++	int			context_loss;
 +
-+	spin_lock_irqsave(&host->lock, flags);
-+	if (!host->claimed) {
-+		host->claimed = 1;
-+		claimed_host = 1;
-+	}
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	return claimed_host;
-+}
-+
-+static void mmc_do_release_host(struct mmc_host *host)
-+{
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	host->claimed = 0;
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	wake_up(&host->wq);
-+}
-+
-+void mmc_host_deeper_disable(struct work_struct *work)
-+{
-+	struct mmc_host *host =
-+		container_of(work, struct mmc_host, disable.work);
-+
-+	/* If the host is claimed then we do not want to disable it anymore */
-+	if (!mmc_try_claim_host(host))
-+		return;
-+	mmc_host_do_disable(host, 1);
-+	mmc_do_release_host(host);
-+}
-+
-+/**
-+ *	mmc_host_lazy_disable - lazily disable a host.
-+ *	@host: mmc host to disable
-+ *
-+ *	Hosts that support power saving can use the 'enable' and 'disable'
-+ *	methods to exit and enter power saving states. For more information
-+ *	see comments for struct mmc_host_ops.
-+ */
-+int mmc_host_lazy_disable(struct mmc_host *host)
-+{
-+	if (!(host->caps & MMC_CAP_DISABLE))
-+		return 0;
-+
-+	if (host->en_dis_recurs)
-+		return 0;
-+
-+	if (--host->nesting_cnt)
-+		return 0;
-+
-+	if (!host->enabled)
-+		return 0;
-+
-+	if (host->disable_delay) {
-+		mmc_schedule_delayed_work(&host->disable,
-+				msecs_to_jiffies(host->disable_delay));
-+		return 0;
-+	} else
-+		return mmc_host_do_disable(host, 1);
-+}
-+EXPORT_SYMBOL(mmc_host_lazy_disable);
-+
- /**
-  *	mmc_release_host - release a host
-  *	@host: mmc host to release
-@@ -393,15 +558,11 @@ EXPORT_SYMBOL(__mmc_claim_host);
-  */
- void mmc_release_host(struct mmc_host *host)
- {
--	unsigned long flags;
--
- 	WARN_ON(!host->claimed);
- 
--	spin_lock_irqsave(&host->lock, flags);
--	host->claimed = 0;
--	spin_unlock_irqrestore(&host->lock, flags);
-+	mmc_host_lazy_disable(host);
- 
--	wake_up(&host->wq);
-+	mmc_do_release_host(host);
- }
- 
- EXPORT_SYMBOL(mmc_release_host);
-@@ -953,6 +1114,8 @@ void mmc_stop_host(struct mmc_host *host
- 	spin_unlock_irqrestore(&host->lock, flags);
- #endif
- 
-+	if (host->caps & MMC_CAP_DISABLE)
-+		cancel_delayed_work(&host->disable);
- 	cancel_delayed_work(&host->detect);
- 	mmc_flush_scheduled_work();
- 
-@@ -981,6 +1144,8 @@ void mmc_stop_host(struct mmc_host *host
-  */
- int mmc_suspend_host(struct mmc_host *host, pm_message_t state)
- {
-+	if (host->caps & MMC_CAP_DISABLE)
-+		cancel_delayed_work(&host->disable);
- 	cancel_delayed_work(&host->detect);
- 	mmc_flush_scheduled_work();
- 
-diff -puN drivers/mmc/core/host.c~mmc-add-enable-and-disable-methods-to-mmc-host drivers/mmc/core/host.c
---- a/drivers/mmc/core/host.c~mmc-add-enable-and-disable-methods-to-mmc-host
-+++ a/drivers/mmc/core/host.c
-@@ -83,6 +83,7 @@ struct mmc_host *mmc_alloc_host(int extr
- 	spin_lock_init(&host->lock);
- 	init_waitqueue_head(&host->wq);
- 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
-+	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
- 
- 	/*
- 	 * By default, hosts do not support SGIO or large requests.
-diff -puN drivers/mmc/core/host.h~mmc-add-enable-and-disable-methods-to-mmc-host drivers/mmc/core/host.h
---- a/drivers/mmc/core/host.h~mmc-add-enable-and-disable-methods-to-mmc-host
-+++ a/drivers/mmc/core/host.h
-@@ -14,5 +14,7 @@
- int mmc_register_host_class(void);
- void mmc_unregister_host_class(void);
- 
-+void mmc_host_deeper_disable(struct work_struct *work);
-+
- #endif
- 
-diff -puN include/linux/mmc/host.h~mmc-add-enable-and-disable-methods-to-mmc-host include/linux/mmc/host.h
---- a/include/linux/mmc/host.h~mmc-add-enable-and-disable-methods-to-mmc-host
-+++ a/include/linux/mmc/host.h
-@@ -51,6 +51,35 @@ struct mmc_ios {
+ 	struct	omap_mmc_platform_data	*pdata;
  };
  
- struct mmc_host_ops {
-+	/*
-+	 * Hosts that support power saving can use the 'enable' and 'disable'
-+	 * methods to exit and enter power saving states. 'enable' is called
-+	 * when the host is claimed and 'disable' is called (or scheduled with
-+	 * a delay) when the host is released. The 'disable' is scheduled if
-+	 * the disable delay set by 'mmc_set_disable_delay()' is non-zero,
-+	 * otherwise 'disable' is called immediately. 'disable' may be
-+	 * scheduled repeatedly, to permit ever greater power saving at the
-+	 * expense of ever greater latency to re-enable. Rescheduling is
-+	 * determined by the return value of the 'disable' method. A positive
-+	 * value gives the delay in milliseconds.
-+	 *
-+	 * In the case where a host function (like set_ios) may be called
-+	 * with or without the host claimed, enabling and disabling can be
-+	 * done directly and will nest correctly. Call 'mmc_host_enable()' and
-+	 * 'mmc_host_lazy_disable()' for this purpose, but note that these
-+	 * functions must be paired.
-+	 *
-+	 * Alternatively, 'mmc_host_enable()' may be paired with
-+	 * 'mmc_host_disable()' which calls 'disable' immediately.  In this
-+	 * case the 'disable' method will be called with 'lazy' set to 0.
-+	 * This is mainly useful for error paths.
-+	 *
-+	 * Because lazy disable may be called from a work queue, the 'disable'
-+	 * method must claim the host when 'lazy' != 0, which will work
-+	 * correctly because recursion is detected and handled.
-+	 */
-+	int (*enable)(struct mmc_host *host);
-+	int (*disable)(struct mmc_host *host, int lazy);
- 	void	(*request)(struct mmc_host *host, struct mmc_request *req);
- 	/*
- 	 * Avoid calling these three functions too often or in a "fast path",
-@@ -118,6 +147,7 @@ struct mmc_host {
- #define MMC_CAP_SPI		(1 << 4)	/* Talks only SPI protocols */
- #define MMC_CAP_NEEDS_POLL	(1 << 5)	/* Needs polling for card-detection */
- #define MMC_CAP_8_BIT_DATA	(1 << 6)	/* Can the host do 8 bit transfers */
-+#define MMC_CAP_DISABLE		(1 << 7)	/* Can the host be disabled */
+@@ -168,6 +173,166 @@ static void omap_mmc_stop_clock(struct m
+ 		dev_dbg(mmc_dev(host->mmc), "MMC Clock is not stoped\n");
+ }
  
- 	/* host specific block data */
- 	unsigned int		max_seg_size;	/* see blk_queue_max_segment_size */
-@@ -142,6 +172,13 @@ struct mmc_host {
- 	unsigned int		removed:1;	/* host is being removed */
- #endif
- 
-+	/* Only used with MMC_CAP_DISABLE */
-+	int			enabled;	/* host is enabled */
-+	int			nesting_cnt;	/* "enable" nesting count */
-+	int			en_dis_recurs;	/* detect recursion */
-+	unsigned int		disable_delay;	/* disable delay in msecs */
-+	struct delayed_work	disable;	/* disabling work */
++#ifdef CONFIG_PM
 +
- 	struct mmc_card		*card;		/* device attached to this host */
- 
- 	wait_queue_head_t	wq;
-@@ -197,5 +234,15 @@ struct regulator;
- int mmc_regulator_get_ocrmask(struct regulator *supply);
- int mmc_regulator_set_ocr(struct regulator *supply, unsigned short vdd_bit);
- 
-+int mmc_host_enable(struct mmc_host *host);
-+int mmc_host_disable(struct mmc_host *host);
-+int mmc_host_lazy_disable(struct mmc_host *host);
-+
-+static inline void mmc_set_disable_delay(struct mmc_host *host,
-+					 unsigned int disable_delay)
++/*
++ * Restore the MMC host context, if it was lost as result of a
++ * power state change.
++ */
++static int omap_mmc_restore_ctx(struct mmc_omap_host *host)
 +{
-+	host->disable_delay = disable_delay;
++	struct mmc_ios *ios = &host->mmc->ios;
++	struct omap_mmc_platform_data *pdata = host->pdata;
++	int context_loss = 0;
++	u32 hctl, capa, con;
++	u16 dsor = 0;
++	unsigned long timeout;
++
++	if (pdata->get_context_loss_count) {
++		context_loss = pdata->get_context_loss_count(host->dev);
++		if (context_loss < 0)
++			return 1;
++	}
++
++	dev_dbg(mmc_dev(host->mmc), "context was %slost\n",
++		context_loss == host->context_loss ? "not " : "");
++	if (host->context_loss == context_loss)
++		return 1;
++
++	/* Wait for hardware reset */
++	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
++	while ((OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE) != RESETDONE
++		&& time_before(jiffies, timeout))
++		;
++
++	/* Do software reset */
++	OMAP_HSMMC_WRITE(host->base, SYSCONFIG, SOFTRESET);
++	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
++	while ((OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE) != RESETDONE
++		&& time_before(jiffies, timeout))
++		;
++
++	OMAP_HSMMC_WRITE(host->base, SYSCONFIG,
++			OMAP_HSMMC_READ(host->base, SYSCONFIG) | AUTOIDLE);
++
++	if (host->id == OMAP_MMC1_DEVID) {
++		if (host->power_mode != MMC_POWER_OFF &&
++		    (1 << ios->vdd) <= MMC_VDD_23_24)
++			hctl = SDVS18;
++		else
++			hctl = SDVS30;
++		capa = VS30 | VS18;
++	} else {
++		hctl = SDVS18;
++		capa = VS18;
++	}
++
++	OMAP_HSMMC_WRITE(host->base, HCTL,
++			OMAP_HSMMC_READ(host->base, HCTL) | hctl);
++
++	OMAP_HSMMC_WRITE(host->base, CAPA,
++			OMAP_HSMMC_READ(host->base, CAPA) | capa);
++
++	OMAP_HSMMC_WRITE(host->base, HCTL,
++			OMAP_HSMMC_READ(host->base, HCTL) | SDBP);
++
++	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
++	while ((OMAP_HSMMC_READ(host->base, HCTL) & SDBP) != SDBP
++		&& time_before(jiffies, timeout))
++		;
++
++	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
++	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
++	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
++
++	/* Do not initialize card-specific things if the power is off */
++	if (host->power_mode == MMC_POWER_OFF)
++		goto out;
++
++	con = OMAP_HSMMC_READ(host->base, CON);
++	switch (ios->bus_width) {
++	case MMC_BUS_WIDTH_8:
++		OMAP_HSMMC_WRITE(host->base, CON, con | DW8);
++		break;
++	case MMC_BUS_WIDTH_4:
++		OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
++		OMAP_HSMMC_WRITE(host->base, HCTL,
++			OMAP_HSMMC_READ(host->base, HCTL) | FOUR_BIT);
++		break;
++	case MMC_BUS_WIDTH_1:
++		OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
++		OMAP_HSMMC_WRITE(host->base, HCTL,
++			OMAP_HSMMC_READ(host->base, HCTL) & ~FOUR_BIT);
++		break;
++	}
++
++	if (ios->clock) {
++		dsor = OMAP_MMC_MASTER_CLOCK / ios->clock;
++		if (dsor < 1)
++			dsor = 1;
++
++		if (OMAP_MMC_MASTER_CLOCK / dsor > ios->clock)
++			dsor++;
++
++		if (dsor > 250)
++			dsor = 250;
++	}
++
++	OMAP_HSMMC_WRITE(host->base, SYSCTL,
++		OMAP_HSMMC_READ(host->base, SYSCTL) & ~CEN);
++	OMAP_HSMMC_WRITE(host->base, SYSCTL, (dsor << 6) | (DTO << 16));
++	OMAP_HSMMC_WRITE(host->base, SYSCTL,
++		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
++
++	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
++	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & ICS) != ICS
++		&& time_before(jiffies, timeout))
++		;
++
++	OMAP_HSMMC_WRITE(host->base, SYSCTL,
++		OMAP_HSMMC_READ(host->base, SYSCTL) | CEN);
++
++	con = OMAP_HSMMC_READ(host->base, CON);
++	if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
++		OMAP_HSMMC_WRITE(host->base, CON, con | OD);
++	else
++		OMAP_HSMMC_WRITE(host->base, CON, con & ~OD);
++out:
++	host->context_loss = context_loss;
++
++	dev_dbg(mmc_dev(host->mmc), "context is restored\n");
++	return 0;
 +}
 +
- #endif
++/*
++ * Save the MMC host context (store the number of power state changes so far).
++ */
++static void omap_mmc_save_ctx(struct mmc_omap_host *host)
++{
++	struct omap_mmc_platform_data *pdata = host->pdata;
++	int context_loss;
++
++	if (pdata->get_context_loss_count) {
++		context_loss = pdata->get_context_loss_count(host->dev);
++		if (context_loss < 0)
++			return;
++		host->context_loss = context_loss;
++	}
++}
++
++#else
++
++static int omap_mmc_restore_ctx(struct mmc_omap_host *host)
++{
++	return 0;
++}
++
++static void omap_mmc_save_ctx(struct mmc_omap_host *host)
++{
++}
++
++#endif
++
+ /*
+  * Send init stream sequence to card
+  * before sending IDLE command
+@@ -830,6 +995,7 @@ static int omap_mmc_enable(struct mmc_ho
+ 	if (err)
+ 		return err;
+ 	dev_dbg(mmc_dev(host->mmc), "mmc_fclk: enabled\n");
++	omap_mmc_restore_ctx(host);
+ 	return 0;
+ }
  
+@@ -837,6 +1003,7 @@ static int omap_mmc_disable(struct mmc_h
+ {
+ 	struct mmc_omap_host *host = mmc_priv(mmc);
+ 
++	omap_mmc_save_ctx(host);
+ 	clk_disable(host->fclk);
+ 	dev_dbg(mmc_dev(host->mmc), "mmc_fclk: disabled\n");
+ 	return 0;
+@@ -941,7 +1108,7 @@ static void omap_mmc_set_ios(struct mmc_
+ 
+ 	/* Wait till the ICS bit is set */
+ 	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+-	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & ICS) != 0x2
++	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & ICS) != ICS
+ 		&& time_before(jiffies, timeout))
+ 		msleep(1);
+ 
+@@ -1021,12 +1188,19 @@ static int mmc_regs_show(struct seq_file
+ {
+ 	struct mmc_host *mmc = s->private;
+ 	struct mmc_omap_host *host = mmc_priv(mmc);
++	struct omap_mmc_platform_data *pdata = host->pdata;
++	int context_loss = 0;
++
++	if (pdata->get_context_loss_count)
++		context_loss = pdata->get_context_loss_count(host->dev);
+ 
+ 	seq_printf(s, "mmc%d:\n"
+ 			" enabled:\t%d\n"
+ 			" nesting_cnt:\t%d\n"
++			" ctx_loss:\t%d:%d\n"
+ 			"\nregs:\n",
+-			mmc->index, mmc->enabled ? 1 : 0, mmc->nesting_cnt);
++			mmc->index, mmc->enabled ? 1 : 0, mmc->nesting_cnt,
++			host->context_loss, context_loss);
+ 
+ 	if (clk_enable(host->fclk) != 0) {
+ 		seq_printf(s, "can't read the regs\n");
+@@ -1151,6 +1325,8 @@ static int __init omap_mmc_probe(struct 
+ 		goto err1;
+ 	}
+ 
++	omap_mmc_save_ctx(host);
++
+ 	mmc->caps |= MMC_CAP_DISABLE;
+ 	mmc_set_disable_delay(mmc, 100);
+ 	if (mmc_host_enable(host->mmc) != 0) {
+@@ -1385,21 +1561,19 @@ static int omap_mmc_resume(struct platfo
+ 		return 0;
+ 
+ 	if (host) {
+-
+-		if (mmc_host_enable(host->mmc) != 0)
+-			goto clk_en_err;
+-
+ 		ret = clk_enable(host->iclk);
+-		if (ret) {
+-			mmc_host_disable(host->mmc);
+-			clk_put(host->fclk);
++		if (ret)
+ 			goto clk_en_err;
+-		}
+ 
+ 		if (clk_enable(host->dbclk) != 0)
+ 			dev_dbg(mmc_dev(host->mmc),
+ 					"Enabling debounce clk failed\n");
+ 
++		if (mmc_host_enable(host->mmc) != 0) {
++			clk_disable(host->iclk);
++			goto clk_en_err;
++		}
++
+ 		omap_hsmmc_init(host);
+ 
+ 		if (host->pdata->resume) {
 _
 
-Patches currently in -mm which might be from adrian.hunter@nokia.com are
+Patches currently in -mm which might be from ext-denis.2.karpov@nokia.com are
 
 origin.patch
 
