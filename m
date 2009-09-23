@@ -1,32 +1,32 @@
 From: akpm@linux-foundation.org
-Subject: [merged] mmc-check-status-after-mmc-switch-command.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:54:35 -0700
-Message-ID: <200909231954.n8NJsZfr001040@imap1.linux-foundation.org>
+Subject: [merged] arm-omap-mmc-twl4030-add-regulator-sleep-wake-function.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:54:57 -0700
+Message-ID: <200909231954.n8NJsvQm001788@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:32926 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:56371 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751533AbZIWUJ3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 16:09:29 -0400
+	by vger.kernel.org with ESMTP id S1752346AbZIWUKD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 16:10:03 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
 
 
 The patch titled
-     mmc: check status after MMC SWITCH command
+     ARM: OMAP: mmc-twl4030: add regulator sleep / wake function
 has been removed from the -mm tree.  Its filename was
-     mmc-check-status-after-mmc-switch-command.patch
+     arm-omap-mmc-twl4030-add-regulator-sleep-wake-function.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: check status after MMC SWITCH command
+Subject: ARM: OMAP: mmc-twl4030: add regulator sleep / wake function
 From: Adrian Hunter <adrian.hunter@nokia.com>
 
-According to the standard, the SWITCH command should be followed by a
-SEND_STATUS command to check for errors.
+Add the ability for the driver to put the card power regulators to sleep
+and wake them up again.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
@@ -41,107 +41,103 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/mmc.c     |   24 ++++++++++++++++++------
- drivers/mmc/core/mmc_ops.c |   23 +++++++++++++++++++++++
- include/linux/mmc/mmc.h    |    1 +
- 3 files changed, 42 insertions(+), 6 deletions(-)
+ arch/arm/mach-omap2/mmc-twl4030.c     |   57 ++++++++++++++++++++++++
+ arch/arm/plat-omap/include/mach/mmc.h |    2 
+ 2 files changed, 59 insertions(+)
 
-diff -puN drivers/mmc/core/mmc.c~mmc-check-status-after-mmc-switch-command drivers/mmc/core/mmc.c
---- a/drivers/mmc/core/mmc.c~mmc-check-status-after-mmc-switch-command
-+++ a/drivers/mmc/core/mmc.c
-@@ -416,12 +416,17 @@ static int mmc_init_card(struct mmc_host
- 		(host->caps & MMC_CAP_MMC_HIGHSPEED)) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 			EXT_CSD_HS_TIMING, 1);
--		if (err)
-+		if (err && err != -EBADMSG)
- 			goto free_card;
- 
--		mmc_card_set_highspeed(card);
--
--		mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-+		if (err) {
-+			printk(KERN_WARNING "%s: switch to highspeed failed\n",
-+			       mmc_hostname(card->host));
-+			err = 0;
-+		} else {
-+			mmc_card_set_highspeed(card);
-+			mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-+		}
- 	}
- 
- 	/*
-@@ -456,10 +461,17 @@ static int mmc_init_card(struct mmc_host
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 				 EXT_CSD_BUS_WIDTH, ext_csd_bit);
- 
--		if (err)
-+		if (err && err != -EBADMSG)
- 			goto free_card;
- 
--		mmc_set_bus_width(card->host, bus_width);
-+		if (err) {
-+			printk(KERN_WARNING "%s: switch to bus width %d "
-+			       "failed\n", mmc_hostname(card->host),
-+			       1 << bus_width);
-+			err = 0;
-+		} else {
-+			mmc_set_bus_width(card->host, bus_width);
-+		}
- 	}
- 
- 	if (!oldcard)
-diff -puN drivers/mmc/core/mmc_ops.c~mmc-check-status-after-mmc-switch-command drivers/mmc/core/mmc_ops.c
---- a/drivers/mmc/core/mmc_ops.c~mmc-check-status-after-mmc-switch-command
-+++ a/drivers/mmc/core/mmc_ops.c
-@@ -390,6 +390,7 @@ int mmc_switch(struct mmc_card *card, u8
- {
- 	int err;
- 	struct mmc_command cmd;
-+	u32 status;
- 
- 	BUG_ON(!card);
- 	BUG_ON(!card->host);
-@@ -407,6 +408,28 @@ int mmc_switch(struct mmc_card *card, u8
- 	if (err)
- 		return err;
- 
-+	/* Must check status to be sure of no errors */
-+	do {
-+		err = mmc_send_status(card, &status);
-+		if (err)
-+			return err;
-+		if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
-+			break;
-+		if (mmc_host_is_spi(card->host))
-+			break;
-+	} while (R1_CURRENT_STATE(status) == 7);
-+
-+	if (mmc_host_is_spi(card->host)) {
-+		if (status & R1_SPI_ILLEGAL_COMMAND)
-+			return -EBADMSG;
-+	} else {
-+		if (status & 0xFDFFA000)
-+			printk(KERN_WARNING "%s: unexpected status %#x after "
-+			       "switch", mmc_hostname(card->host), status);
-+		if (status & R1_SWITCH_ERROR)
-+			return -EBADMSG;
-+	}
-+
- 	return 0;
+diff -puN arch/arm/mach-omap2/mmc-twl4030.c~arm-omap-mmc-twl4030-add-regulator-sleep-wake-function arch/arm/mach-omap2/mmc-twl4030.c
+--- a/arch/arm/mach-omap2/mmc-twl4030.c~arm-omap-mmc-twl4030-add-regulator-sleep-wake-function
++++ a/arch/arm/mach-omap2/mmc-twl4030.c
+@@ -340,6 +340,61 @@ static int twl_mmc23_set_power(struct de
+ 	return ret;
  }
  
-diff -puN include/linux/mmc/mmc.h~mmc-check-status-after-mmc-switch-command include/linux/mmc/mmc.h
---- a/include/linux/mmc/mmc.h~mmc-check-status-after-mmc-switch-command
-+++ a/include/linux/mmc/mmc.h
-@@ -128,6 +128,7 @@
- #define R1_STATUS(x)            (x & 0xFFFFE000)
- #define R1_CURRENT_STATE(x)	((x & 0x00001E00) >> 9)	/* sx, b (4 bits) */
- #define R1_READY_FOR_DATA	(1 << 8)	/* sx, a */
-+#define R1_SWITCH_ERROR		(1 << 7)	/* sx, c */
- #define R1_APP_CMD		(1 << 5)	/* sr, c */
++static int twl_mmc1_set_sleep(struct device *dev, int slot, int sleep, int vdd,
++			      int cardsleep)
++{
++	struct twl_mmc_controller *c = &hsmmc[0];
++	int mode = sleep ? REGULATOR_MODE_STANDBY : REGULATOR_MODE_NORMAL;
++
++	return regulator_set_mode(c->vcc, mode);
++}
++
++static int twl_mmc23_set_sleep(struct device *dev, int slot, int sleep, int vdd,
++			       int cardsleep)
++{
++	struct twl_mmc_controller *c = NULL;
++	struct omap_mmc_platform_data *mmc = dev->platform_data;
++	int i, err, mode;
++
++	for (i = 1; i < ARRAY_SIZE(hsmmc); i++) {
++		if (mmc == hsmmc[i].mmc) {
++			c = &hsmmc[i];
++			break;
++		}
++	}
++
++	if (c == NULL)
++		return -ENODEV;
++
++	/*
++	 * If we don't see a Vcc regulator, assume it's a fixed
++	 * voltage always-on regulator.
++	 */
++	if (!c->vcc)
++		return 0;
++
++	mode = sleep ? REGULATOR_MODE_STANDBY : REGULATOR_MODE_NORMAL;
++
++	if (!c->vcc_aux)
++		return regulator_set_mode(c->vcc, mode);
++
++	if (cardsleep) {
++		/* VCC can be turned off if card is asleep */
++		struct regulator *vcc_aux = c->vcc_aux;
++
++		c->vcc_aux = NULL;
++		if (sleep)
++			err = twl_mmc23_set_power(dev, slot, 0, 0);
++		else
++			err = twl_mmc23_set_power(dev, slot, 1, vdd);
++		c->vcc_aux = vcc_aux;
++	} else
++		err = regulator_set_mode(c->vcc, mode);
++	if (err)
++		return err;
++	return regulator_set_mode(c->vcc_aux, mode);
++}
++
+ static struct omap_mmc_platform_data *hsmmc_data[OMAP34XX_NR_MMC] __initdata;
  
- /*
+ void __init twl4030_mmc_init(struct twl4030_hsmmc_info *controllers)
+@@ -433,6 +488,7 @@ void __init twl4030_mmc_init(struct twl4
+ 		case 1:
+ 			/* on-chip level shifting via PBIAS0/PBIAS1 */
+ 			mmc->slots[0].set_power = twl_mmc1_set_power;
++			mmc->slots[0].set_sleep = twl_mmc1_set_sleep;
+ 			break;
+ 		case 2:
+ 			if (c->ext_clock)
+@@ -443,6 +499,7 @@ void __init twl4030_mmc_init(struct twl4
+ 		case 3:
+ 			/* off-chip level shifting, or none */
+ 			mmc->slots[0].set_power = twl_mmc23_set_power;
++			mmc->slots[0].set_sleep = twl_mmc23_set_sleep;
+ 			break;
+ 		default:
+ 			pr_err("MMC%d configuration not supported!\n", c->mmc);
+diff -puN arch/arm/plat-omap/include/mach/mmc.h~arm-omap-mmc-twl4030-add-regulator-sleep-wake-function arch/arm/plat-omap/include/mach/mmc.h
+--- a/arch/arm/plat-omap/include/mach/mmc.h~arm-omap-mmc-twl4030-add-regulator-sleep-wake-function
++++ a/arch/arm/plat-omap/include/mach/mmc.h
+@@ -95,6 +95,8 @@ struct omap_mmc_platform_data {
+ 		int (* set_bus_mode)(struct device *dev, int slot, int bus_mode);
+ 		int (* set_power)(struct device *dev, int slot, int power_on, int vdd);
+ 		int (* get_ro)(struct device *dev, int slot);
++		int (*set_sleep)(struct device *dev, int slot, int sleep,
++				 int vdd, int cardsleep);
+ 
+ 		/* return MMC cover switch state, can be NULL if not supported.
+ 		 *
 _
 
 Patches currently in -mm which might be from adrian.hunter@nokia.com are
