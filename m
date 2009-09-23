@@ -1,31 +1,40 @@
 From: akpm@linux-foundation.org
-Subject: [merged] omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:55:18 -0700
-Message-ID: <200909231955.n8NJtI3H002567@imap1.linux-foundation.org>
+Subject: [merged] omap_hsmmc-put-mmc-regulator-to-sleep.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:54:59 -0700
+Message-ID: <200909231954.n8NJsxWD001810@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:43711 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:47855 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753221AbZIWUKc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 16:10:32 -0400
+	by vger.kernel.org with ESMTP id S1753514AbZIWUKd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 16:10:33 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
 
 
 The patch titled
-     omap_hsmmc: ensure all clock enables and disables are paired
+     omap_hsmmc: put MMC regulator to sleep
 has been removed from the -mm tree.  Its filename was
-     omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired.patch
+     omap_hsmmc-put-mmc-regulator-to-sleep.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: omap_hsmmc: ensure all clock enables and disables are paired
+Subject: omap_hsmmc: put MMC regulator to sleep
 From: Adrian Hunter <adrian.hunter@nokia.com>
 
-[madhu.cr@ti.com: fix for the db clock failure message]
+When a card is not in use, the voltage regulator can be put to sleep. 
+This is an alternative to powering the card off, when powering off is not
+safe because the card might be replaced without the driver being aware of
+it.
+
+That situation happens if:
+	- the card is removable i.e. not eMMC
+	- and there is no card detect
+	- and there is a cover switch but the cover is open
+
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
 Cc: Ian Molton <ian@mnementh.co.uk>
@@ -36,139 +45,138 @@ Cc: Pierre Ossman <pierre@ossman.eu>
 Cc: Philip Langdale <philipl@overt.org>
 Cc: "Madhusudhan" <madhu.cr@ti.com>
 Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/omap_hsmmc.c |   60 +++++++++++++++++---------------
- 1 file changed, 33 insertions(+), 27 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   59 +++++++++++++++++++++++++++++---
+ 1 file changed, 54 insertions(+), 5 deletions(-)
 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-ensure-all-clock-enables-and-disables-are-paired
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-put-mmc-regulator-to-sleep drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-put-mmc-regulator-to-sleep
 +++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -162,7 +162,7 @@ struct omap_hsmmc_host {
- 	int			use_dma, dma_ch;
- 	int			dma_line_tx, dma_line_rx;
- 	int			slot_id;
--	int			dbclk_enabled;
-+	int			got_dbclk;
+@@ -162,6 +162,7 @@ struct mmc_omap_host {
  	int			response_busy;
  	int			context_loss;
  	int			dpm_state;
-@@ -742,22 +742,24 @@ static int omap_hsmmc_switch_opcond(stru
- 	/* Disable the clocks */
- 	clk_disable(host->fclk);
- 	clk_disable(host->iclk);
--	clk_disable(host->dbclk);
-+	if (host->got_dbclk)
-+		clk_disable(host->dbclk);
++	int			vdd;
  
- 	/* Turn the power off */
- 	ret = mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
--	if (ret != 0)
--		goto err;
+ 	struct	omap_mmc_platform_data	*pdata;
+ };
+@@ -1038,10 +1039,12 @@ static void omap_mmc_set_ios(struct mmc_
+ 		case MMC_POWER_OFF:
+ 			mmc_slot(host).set_power(host->dev, host->slot_id,
+ 						 0, 0);
++			host->vdd = 0;
+ 			break;
+ 		case MMC_POWER_UP:
+ 			mmc_slot(host).set_power(host->dev, host->slot_id,
+ 						 1, ios->vdd);
++			host->vdd = ios->vdd;
+ 			break;
+ 		case MMC_POWER_ON:
+ 			do_send_init_stream = 1;
+@@ -1179,19 +1182,20 @@ static void omap_hsmmc_init(struct mmc_o
  
- 	/* Turn the power ON with given VDD 1.8 or 3.0v */
--	ret = mmc_slot(host).set_power(host->dev, host->slot_id, 1, vdd);
-+	if (!ret)
-+		ret = mmc_slot(host).set_power(host->dev, host->slot_id, 1,
-+					       vdd);
-+	clk_enable(host->iclk);
-+	clk_enable(host->fclk);
-+	if (host->got_dbclk)
-+		clk_enable(host->dbclk);
-+
- 	if (ret != 0)
- 		goto err;
+ /*
+  * Dynamic power saving handling, FSM:
+- *   ENABLED -> DISABLED -> OFF
++ *   ENABLED -> DISABLED -> OFF / REGSLEEP
+  *     ^___________|          |
+  *     |______________________|
+  *
+  * ENABLED:   mmc host is fully functional
+  * DISABLED:  fclk is off
+  * OFF:       fclk is off,voltage regulator is off
++ * REGSLEEP:  fclk is off,voltage regulator is asleep
+  *
+  * Transition handlers return the timeout for the next state transition
+  * or negative error.
+  */
  
--	clk_enable(host->fclk);
--	clk_enable(host->iclk);
--	clk_enable(host->dbclk);
--
- 	OMAP_HSMMC_WRITE(host->base, HCTL,
- 		OMAP_HSMMC_READ(host->base, HCTL) & SDVSCLR);
- 	reg_val = OMAP_HSMMC_READ(host->base, HCTL);
-@@ -1695,18 +1697,22 @@ static int __init omap_hsmmc_probe(struc
- 		goto err1;
- 	}
+-enum {ENABLED = 0, DISABLED, OFF};
++enum {ENABLED = 0, DISABLED, REGSLEEP, OFF};
  
--	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
--	/*
--	 * MMC can still work without debounce clock.
--	 */
--	if (IS_ERR(host->dbclk))
--		dev_warn(mmc_dev(host->mmc), "Failed to get debounce clock\n");
--	else
--		if (clk_enable(host->dbclk) != 0)
--			dev_dbg(mmc_dev(host->mmc), "Enabling debounce"
--							" clk failed\n");
-+	if (cpu_is_omap2430()) {
-+		host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
-+		/*
-+		 * MMC can still work without debounce clock.
-+		 */
-+		if (IS_ERR(host->dbclk))
-+			dev_warn(mmc_dev(host->mmc),
-+				"Failed to get debounce clock\n");
- 		else
--			host->dbclk_enabled = 1;
-+			host->got_dbclk = 1;
-+
-+		if (host->got_dbclk)
-+			if (clk_enable(host->dbclk) != 0)
-+				dev_dbg(mmc_dev(host->mmc), "Enabling debounce"
-+							" clk failed\n");
+ /* Handler for [ENABLED -> DISABLED] transition */
+ static int omap_mmc_enabled_to_disabled(struct mmc_omap_host *host)
+@@ -1228,8 +1232,12 @@ static int omap_mmc_disabled_to_off(stru
+ 	     mmc_slot(host).get_cover_state(host->dev, host->slot_id))) {
+ 		mmc_power_save_host(host->mmc);
+ 		new_state = OFF;
+-	} else
+-		new_state = DISABLED;
++	} else {
++		if (mmc_slot(host).set_sleep)
++			mmc_slot(host).set_sleep(host->dev, host->slot_id,
++						 1, 0, 0);
++		new_state = REGSLEEP;
 +	}
  
- 	/* Since we do only SG emulation, we can have as many segs
- 	 * as we want. */
-@@ -1820,7 +1826,7 @@ err_irq:
- 	clk_disable(host->iclk);
- 	clk_put(host->fclk);
- 	clk_put(host->iclk);
--	if (host->dbclk_enabled) {
-+	if (host->got_dbclk) {
- 		clk_disable(host->dbclk);
- 		clk_put(host->dbclk);
- 	}
-@@ -1854,7 +1860,7 @@ static int omap_hsmmc_remove(struct plat
- 		clk_disable(host->iclk);
- 		clk_put(host->fclk);
- 		clk_put(host->iclk);
--		if (host->dbclk_enabled) {
-+		if (host->got_dbclk) {
- 			clk_disable(host->dbclk);
- 			clk_put(host->dbclk);
- 		}
-@@ -1905,7 +1911,8 @@ static int omap_hsmmc_suspend(struct pla
- 				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
- 			mmc_host_disable(host->mmc);
- 			clk_disable(host->iclk);
--			clk_disable(host->dbclk);
-+			if (host->got_dbclk)
-+				clk_disable(host->dbclk);
- 		} else {
- 			host->suspended = 0;
- 			if (host->pdata->resume) {
-@@ -1936,15 +1943,14 @@ static int omap_hsmmc_resume(struct plat
- 		if (ret)
- 			goto clk_en_err;
+ 	OMAP_HSMMC_WRITE(host->base, ISE, 0);
+ 	OMAP_HSMMC_WRITE(host->base, IE, 0);
+@@ -1286,6 +1294,44 @@ static int omap_mmc_off_to_enabled(struc
+ 	return 0;
+ }
  
--		if (clk_enable(host->dbclk) != 0)
--			dev_dbg(mmc_dev(host->mmc),
--					"Enabling debounce clk failed\n");
--
- 		if (mmc_host_enable(host->mmc) != 0) {
- 			clk_disable(host->iclk);
- 			goto clk_en_err;
- 		}
- 
-+		if (host->got_dbclk)
-+			clk_enable(host->dbclk);
++/* Handler for [REGSLEEP -> ENABLED] transition */
++static int omap_mmc_regsleep_to_enabled(struct mmc_omap_host *host)
++{
++	unsigned long timeout;
 +
- 		omap_hsmmc_conf_bus_power(host);
++	dev_dbg(mmc_dev(host->mmc), "REGSLEEP -> ENABLED\n");
++
++	clk_enable(host->fclk);
++	clk_enable(host->iclk);
++
++	if (clk_enable(host->dbclk))
++		dev_dbg(mmc_dev(host->mmc),
++			"Enabling debounce clk failed\n");
++
++	omap_mmc_restore_ctx(host);
++
++	/*
++	 * We turned off interrupts and bus power.  Interrupts
++	 * are turned on by 'mmc_omap_start_command()' so we
++	 * just need to turn on the bus power here.
++	 */
++	OMAP_HSMMC_WRITE(host->base, HCTL,
++			 OMAP_HSMMC_READ(host->base, HCTL) | SDBP);
++
++	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
++	while ((OMAP_HSMMC_READ(host->base, HCTL) & SDBP) != SDBP &&
++	       time_before(jiffies, timeout))
++		;
++
++	if (mmc_slot(host).set_sleep)
++		mmc_slot(host).set_sleep(host->dev, host->slot_id,
++					 0, host->vdd, 0);
++
++	host->dpm_state = ENABLED;
++
++	return 0;
++}
++
+ /*
+  * Bring MMC host to ENABLED from any other PM state.
+  */
+@@ -1296,6 +1342,8 @@ static int omap_mmc_enable(struct mmc_ho
+ 	switch (host->dpm_state) {
+ 	case DISABLED:
+ 		return omap_mmc_disabled_to_enabled(host);
++	case REGSLEEP:
++		return omap_mmc_regsleep_to_enabled(host);
+ 	case OFF:
+ 		return omap_mmc_off_to_enabled(host);
+ 	default:
+@@ -1393,7 +1441,8 @@ static int mmc_regs_show(struct seq_file
+ 			host->dpm_state, mmc->nesting_cnt,
+ 			host->context_loss, context_loss);
  
- 		if (host->pdata->resume) {
+-	if (host->suspended || host->dpm_state == OFF) {
++	if (host->suspended || host->dpm_state == OFF ||
++	    host->dpm_state == REGSLEEP) {
+ 		seq_printf(s, "host suspended, can't read registers\n");
+ 		return 0;
+ 	}
 _
 
 Patches currently in -mm which might be from adrian.hunter@nokia.com are
