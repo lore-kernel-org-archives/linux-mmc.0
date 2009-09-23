@@ -1,81 +1,52 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [patch 084/232] powerpc/85xx: add eSDHC support for MPC8536DS
- boards
-Date: Wed, 23 Sep 2009 04:32:00 +0400
-Message-ID: <20090923003200.GA21228@oksana.dev.rtsoft.ru>
-References: <200909222345.n8MNjHtJ013999@imap1.linux-foundation.org>
-Reply-To: avorontsov@ru.mvista.com
+From: Marcel Holtmann <marcel-kz+m5ild9QBg9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH 3/3] i2400m-sdio: select IWMC3200TOP in Kconfig
+Date: Tue, 22 Sep 2009 17:44:04 -0700
+Message-ID: <1253666644.2931.7.camel@localhost.localdomain>
+References: <1253662724-16497-1-git-send-email-tomas.winkler@intel.com>
+	 <1253662724-16497-2-git-send-email-tomas.winkler@intel.com>
+	 <1253662724-16497-3-git-send-email-tomas.winkler@intel.com>
+	 <1253662724-16497-4-git-send-email-tomas.winkler@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f211.google.com ([209.85.219.211]:51782 "EHLO
-	mail-ew0-f211.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752896AbZIWAcA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2009 20:32:00 -0400
-Received: by ewy7 with SMTP id 7so259882ewy.17
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Sep 2009 17:32:02 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <200909222345.n8MNjHtJ013999@imap1.linux-foundation.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1253662724-16497-4-git-send-email-tomas.winkler-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tomas Winkler <tomas.winkler-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org, linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yi.zhu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, inaky.perez-gonzalez-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, cindy.h.kao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, guy.cohen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, ron.rindjunsky-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org
-Cc: torvalds@linux-foundation.org, avorontsov@ru.mvista.com, ben@fluff.org, benh@kernel.crashing.org, david.vrabel@csr.com, galak@kernel.crashing.org, linux-mmc@vger.kernel.org, pierre@ossman.eu, s.hauer@pengutronix.de
 
-On Tue, Sep 22, 2009 at 04:45:17PM -0700, akpm@linux-foundation.org wrote:
-> From: Anton Vorontsov <avorontsov@ru.mvista.com>
+Hi Tomas,
+
+> i2400m-sdio requires iwmc3200top for its operation
 > 
-> This patch simply adds sdhci node to the device tree.
-> 
-> We specify clock-frequency manually, so that eSDHC will work without
-> upgrading U-Boot.  Though, that'll only work for default setup (1500 MHz)
-> on new board revisions.  For non-default setups, it's recommended to
-> upgrade U-Boot, since it will fixup clock-frequency automatically.
-> 
-> Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
-> Cc: Pierre Ossman <pierre@ossman.eu>
-> Cc: Kumar Gala <galak@kernel.crashing.org>
-> Cc: David Vrabel <david.vrabel@csr.com>
-> Cc: Ben Dooks <ben@fluff.org>
-> Cc: Sascha Hauer <s.hauer@pengutronix.de>
-> Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
-> Cc: <linux-mmc@vger.kernel.org>
-> Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+> Signed-off-by: Tomas Winkler <tomas.winkler-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > ---
+>  drivers/net/wimax/i2400m/Kconfig |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
 > 
->  arch/powerpc/boot/dts/mpc8536ds.dts |    8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff -puN arch/powerpc/boot/dts/mpc8536ds.dts~powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards arch/powerpc/boot/dts/mpc8536ds.dts
-> --- a/arch/powerpc/boot/dts/mpc8536ds.dts~powerpc-85xx-add-esdhc-support-for-mpc8536ds-boards
-> +++ a/arch/powerpc/boot/dts/mpc8536ds.dts
-> @@ -258,6 +258,14 @@
->  			clock-frequency = <250000000>;
->  		};
+> diff --git a/drivers/net/wimax/i2400m/Kconfig b/drivers/net/wimax/i2400m/Kconfig
+> index d623b3d..7368ad5 100644
+> --- a/drivers/net/wimax/i2400m/Kconfig
+> +++ b/drivers/net/wimax/i2400m/Kconfig
+> @@ -25,6 +25,7 @@ config WIMAX_I2400M_SDIO
+>  	tristate "Intel Wireless WiMAX Connection 2400 over SDIO"
+>  	depends on WIMAX && MMC
+>  	select WIMAX_I2400M
+> +	select IWMC3200TOP
+>  	help
+>  	  Select if you have a device based on the Intel WiMAX
+>  	  Connection 2400 over SDIO.
 
-By "clock-frequency = <250000000>;" above and the one down below*
-I can see that this patch is already applied (via powerpc tree).
+this is not true actually. Since the WiMAX hardware in my laptop doesn't
+require the top driver.
 
-Please don't merge this particular patch, it's already there.
+Regards
 
-> +		sdhci@2e000 {
-> +			compatible = "fsl,mpc8536-esdhc", "fsl,esdhc";
-> +			reg = <0x2e000 0x1000>;
-> +			interrupts = <72 0x2>;
-> +			interrupt-parent = <&mpic>;
-> +			clock-frequency = <250000000>;
+Marcel
 
-*
 
-> +		};
-> +
->  		serial0: serial@4500 {
->  			cell-index = <0>;
->  			device_type = "serial";
-> _
-
-Thanks,
-
--- 
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
