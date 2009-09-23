@@ -1,47 +1,41 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH 1/1] CMD12 error recovery support for SD cards
-Date: Wed, 23 Sep 2009 11:27:15 +0100
-Message-ID: <20090923102715.GA4307@console-pimps.org>
-References: <bd31ea570909160334u1b17a068hd8be89c7035232f9@mail.gmail.com> <bd31ea570909160339l5f996e9eh1f87abdbe527a404@mail.gmail.com>
+From: Tomas Winkler <tomasw-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 1/3] iwmc3200top: Add Intel Wireless MultiCom 3200 top
+	driver.
+Date: Wed, 23 Sep 2009 15:29:59 +0300
+Message-ID: <1ba2fa240909230529t13f202f5k9c8742025ca63aa8@mail.gmail.com>
+References: <1253662724-16497-1-git-send-email-tomas.winkler@intel.com>
+	 <1253662724-16497-2-git-send-email-tomas.winkler@intel.com>
+	 <1253689036.4458.22.camel@johannes.local>
+	 <1ba2fa240909230023v17fe2b49v4981d464dba469ed@mail.gmail.com>
+	 <1253691283.4458.38.camel@johannes.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:34979 "EHLO
-	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751252AbZIWK0y (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 06:26:54 -0400
-Content-Disposition: inline
-In-Reply-To: <bd31ea570909160339l5f996e9eh1f87abdbe527a404@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1253691283.4458.38.camel-YfaajirXv2244ywRPIzf9A@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
+Cc: davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org, linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, yi.zhu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, inaky.perez-gonzalez-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, cindy.h.kao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, guy.cohen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, ron.rindjunsky-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mahadev Cholachagudda <mgudda@gmail.com>
-Cc: linux-mmc@vger.kernel.org
 
-On Wed, Sep 16, 2009 at 04:09:11PM +0530, Mahadev Cholachagudda wrote:
-> Dear All,
-> 
-> I've a kernel code base of 2.6.28.9, where in I find that CMD12 error
-> recovery is not been implemented. It is a wise idea to implement CMD12
-> error recovery, that involves sending CMD13 to get the status of the
-> card. If the card is in "trans" state, it means CMD12 error shall be
-> treated as successfull. If card state is not in "trans", then we have
-> to send CMD12 again to stop the data transfer and then checking of the
-> card status through CMD13. This sequence is detailed in the
-> "Simplified Host Controller specification" on SDCard website. I
-> believe this is the case for any controller, though I may be wrong.
-> 
-> With the modification done to the code which is attached as patch to
-> the latest mmc git, it is working at our site. And we do see some
-> errors with the SDIO controller (proprietary but meets Standard SD
-> host controller specification) that we are using.
-> 
-> Request you to comment on the patch.
-> 
+On Wed, Sep 23, 2009 at 10:34 AM, Johannes Berg
+<johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org> wrote:
+> On Wed, 2009-09-23 at 10:23 +0300, Tomas Winkler wrote:
+>
+>> From HW perspective your assumption is not exactly correct. All the
+>> devices are visible on the SDIO bus but they are not operational
+>> (probe won't succeed) until TOP download the firmware and kicks the
+>> devices. From SW perspective to create another bus layer is an option.
+>> I'm not sure if it's not more complicated one.
+>
+> Ah, ok, so it is quite different. Not sure how sdio probing works, so I
+> guess I can't say much here.
 
-In principal this patch seems OK. However, I recommend reading
-Documentation/CodingStyle and sending this patch again once you've fixed
-up the coding style and whitespace errors.
+This is not about SDIO probing this is rather unusual HW design.
+Anyhow all comments and ideas are welcome.
 
-Is there a specific reason that you have used mmc_wait_for_req() instead
-of mmc_wait_for_cmd() and reusing the "cmd" local variable? The empty
-"else" clauses can also probably be deleted.
+Thanks
+Tomas
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
