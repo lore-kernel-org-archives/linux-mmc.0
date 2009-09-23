@@ -1,34 +1,30 @@
 From: akpm@linux-foundation.org
-Subject: [merged] omap_hsmmc-protect-the-card-when-the-cover-is-open.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:55:16 -0700
-Message-ID: <200909231955.n8NJtGR8002515@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:42618 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753332AbZIWUKf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 16:10:35 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [merged] mmc-add-enable-and-disable-methods-to-mmc-host.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:54:22 -0700
+Message-ID: <200909231954.n8NJsMwB000536@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
 To: adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
+List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     omap_hsmmc: protect the card when the cover is open
+     mmc: add 'enable' and 'disable' methods to mmc host
 has been removed from the -mm tree.  Its filename was
-     omap_hsmmc-protect-the-card-when-the-cover-is-open.patch
+     mmc-add-enable-and-disable-methods-to-mmc-host.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: omap_hsmmc: protect the card when the cover is open
+Subject: mmc: add 'enable' and 'disable' methods to mmc host
 From: Adrian Hunter <adrian.hunter@nokia.com>
 
-Depending on the manufacturer, there is a small possibility that removing
-a card while it is being written to, can render the card permanently
-unusable.  To prevent that, the card is made inaccessible when the cover
-is open.
+MMC hosts that support power saving can use the 'enable' and 'disable'
+methods to exit and enter power saving states.  An explanation of their
+use is provided in the comments added to include/linux/mmc/host.h.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Acked-by: Matt Fleming <matt@console-pimps.org>
@@ -43,126 +39,334 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/omap_hsmmc.c |   63 ++++++++++++++++++++++++++++++--
- 1 file changed, 61 insertions(+), 2 deletions(-)
+ drivers/mmc/core/core.c  |  177 +++++++++++++++++++++++++++++++++++--
+ drivers/mmc/core/host.c  |    1 
+ drivers/mmc/core/host.h  |    2 
+ include/linux/mmc/host.h |   47 +++++++++
+ 4 files changed, 221 insertions(+), 6 deletions(-)
 
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-protect-the-card-when-the-cover-is-open drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-protect-the-card-when-the-cover-is-open
-+++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -167,6 +167,8 @@ struct omap_hsmmc_host {
- 	int			context_loss;
- 	int			dpm_state;
- 	int			vdd;
-+	int			protect_card;
-+	int			reqs_blocked;
+diff -puN drivers/mmc/core/core.c~mmc-add-enable-and-disable-methods-to-mmc-host drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~mmc-add-enable-and-disable-methods-to-mmc-host
++++ a/drivers/mmc/core/core.c
+@@ -344,6 +344,101 @@ unsigned int mmc_align_data_size(struct 
+ EXPORT_SYMBOL(mmc_align_data_size);
  
- 	struct	omap_mmc_platform_data	*pdata;
- };
-@@ -351,6 +353,9 @@ static void send_init_stream(struct omap
- 	int reg = 0;
- 	unsigned long timeout;
- 
-+	if (host->protect_card)
-+		return;
-+
- 	disable_irq(host->irq);
- 	OMAP_HSMMC_WRITE(host->base, CON,
- 		OMAP_HSMMC_READ(host->base, CON) | INIT_STREAM);
-@@ -786,6 +791,30 @@ err:
- 	return ret;
- }
- 
-+/* Protect the card while the cover is open */
-+static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
+ /**
++ *	mmc_host_enable - enable a host.
++ *	@host: mmc host to enable
++ *
++ *	Hosts that support power saving can use the 'enable' and 'disable'
++ *	methods to exit and enter power saving states. For more information
++ *	see comments for struct mmc_host_ops.
++ */
++int mmc_host_enable(struct mmc_host *host)
 +{
-+	if (!mmc_slot(host).get_cover_state)
-+		return;
++	if (!(host->caps & MMC_CAP_DISABLE))
++		return 0;
 +
-+	host->reqs_blocked = 0;
-+	if (mmc_slot(host).get_cover_state(host->dev, host->slot_id)) {
-+		if (host->protect_card) {
-+			printk(KERN_INFO "%s: cover is closed, "
-+					 "card is now accessible\n",
-+					 mmc_hostname(host->mmc));
-+			host->protect_card = 0;
-+		}
-+	} else {
-+		if (!host->protect_card) {
-+			printk(KERN_INFO "%s: cover is open, "
-+					 "card is now inaccessible\n",
-+					 mmc_hostname(host->mmc));
-+			host->protect_card = 1;
++	if (host->en_dis_recurs)
++		return 0;
++
++	if (host->nesting_cnt++)
++		return 0;
++
++	cancel_delayed_work_sync(&host->disable);
++
++	if (host->enabled)
++		return 0;
++
++	if (host->ops->enable) {
++		int err;
++
++		host->en_dis_recurs = 1;
++		err = host->ops->enable(host);
++		host->en_dis_recurs = 0;
++
++		if (err) {
++			pr_debug("%s: enable error %d\n",
++				 mmc_hostname(host), err);
++			return err;
 +		}
 +	}
++	host->enabled = 1;
++	return 0;
++}
++EXPORT_SYMBOL(mmc_host_enable);
++
++static int mmc_host_do_disable(struct mmc_host *host, int lazy)
++{
++	if (host->ops->disable) {
++		int err;
++
++		host->en_dis_recurs = 1;
++		err = host->ops->disable(host, lazy);
++		host->en_dis_recurs = 0;
++
++		if (err < 0) {
++			pr_debug("%s: disable error %d\n",
++				 mmc_hostname(host), err);
++			return err;
++		}
++		if (err > 0) {
++			unsigned long delay = msecs_to_jiffies(err);
++
++			mmc_schedule_delayed_work(&host->disable, delay);
++		}
++	}
++	host->enabled = 0;
++	return 0;
 +}
 +
- /*
-  * Work Item to notify the core about card insertion/removal
++/**
++ *	mmc_host_disable - disable a host.
++ *	@host: mmc host to disable
++ *
++ *	Hosts that support power saving can use the 'enable' and 'disable'
++ *	methods to exit and enter power saving states. For more information
++ *	see comments for struct mmc_host_ops.
++ */
++int mmc_host_disable(struct mmc_host *host)
++{
++	int err;
++
++	if (!(host->caps & MMC_CAP_DISABLE))
++		return 0;
++
++	if (host->en_dis_recurs)
++		return 0;
++
++	if (--host->nesting_cnt)
++		return 0;
++
++	if (!host->enabled)
++		return 0;
++
++	err = mmc_host_do_disable(host, 0);
++	return err;
++}
++EXPORT_SYMBOL(mmc_host_disable);
++
++/**
+  *	__mmc_claim_host - exclusively claim a host
+  *	@host: mmc host to claim
+  *	@abort: whether or not the operation should be aborted
+@@ -379,11 +474,81 @@ int __mmc_claim_host(struct mmc_host *ho
+ 		wake_up(&host->wq);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 	remove_wait_queue(&host->wq, &wait);
++	if (!stop)
++		mmc_host_enable(host);
+ 	return stop;
+ }
+ 
+ EXPORT_SYMBOL(__mmc_claim_host);
+ 
++static int mmc_try_claim_host(struct mmc_host *host)
++{
++	int claimed_host = 0;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++	if (!host->claimed) {
++		host->claimed = 1;
++		claimed_host = 1;
++	}
++	spin_unlock_irqrestore(&host->lock, flags);
++	return claimed_host;
++}
++
++static void mmc_do_release_host(struct mmc_host *host)
++{
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++	host->claimed = 0;
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	wake_up(&host->wq);
++}
++
++void mmc_host_deeper_disable(struct work_struct *work)
++{
++	struct mmc_host *host =
++		container_of(work, struct mmc_host, disable.work);
++
++	/* If the host is claimed then we do not want to disable it anymore */
++	if (!mmc_try_claim_host(host))
++		return;
++	mmc_host_do_disable(host, 1);
++	mmc_do_release_host(host);
++}
++
++/**
++ *	mmc_host_lazy_disable - lazily disable a host.
++ *	@host: mmc host to disable
++ *
++ *	Hosts that support power saving can use the 'enable' and 'disable'
++ *	methods to exit and enter power saving states. For more information
++ *	see comments for struct mmc_host_ops.
++ */
++int mmc_host_lazy_disable(struct mmc_host *host)
++{
++	if (!(host->caps & MMC_CAP_DISABLE))
++		return 0;
++
++	if (host->en_dis_recurs)
++		return 0;
++
++	if (--host->nesting_cnt)
++		return 0;
++
++	if (!host->enabled)
++		return 0;
++
++	if (host->disable_delay) {
++		mmc_schedule_delayed_work(&host->disable,
++				msecs_to_jiffies(host->disable_delay));
++		return 0;
++	} else
++		return mmc_host_do_disable(host, 1);
++}
++EXPORT_SYMBOL(mmc_host_lazy_disable);
++
+ /**
+  *	mmc_release_host - release a host
+  *	@host: mmc host to release
+@@ -393,15 +558,11 @@ EXPORT_SYMBOL(__mmc_claim_host);
   */
-@@ -803,8 +832,10 @@ static void omap_hsmmc_detect(struct wor
+ void mmc_release_host(struct mmc_host *host)
+ {
+-	unsigned long flags;
+-
+ 	WARN_ON(!host->claimed);
  
- 	if (slot->card_detect)
- 		carddetect = slot->card_detect(slot->card_detect_irq);
--	else
-+	else {
-+		omap_hsmmc_protect_card(host);
- 		carddetect = -ENOSYS;
-+	}
+-	spin_lock_irqsave(&host->lock, flags);
+-	host->claimed = 0;
+-	spin_unlock_irqrestore(&host->lock, flags);
++	mmc_host_lazy_disable(host);
  
- 	if (carddetect) {
- 		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
-@@ -1040,8 +1071,32 @@ static void omap_hsmmc_request(struct mm
- 	 * interrupts, but not if we are already in interrupt context i.e.
- 	 * retries.
- 	 */
--	if (!in_interrupt())
-+	if (!in_interrupt()) {
- 		spin_lock_irqsave(&host->irq_lock, host->flags);
-+		/*
-+		 * Protect the card from I/O if there is a possibility
-+		 * it can be removed.
-+		 */
-+		if (host->protect_card) {
-+			if (host->reqs_blocked < 3) {
-+				/*
-+				 * Ensure the controller is left in a consistent
-+				 * state by resetting the command and data state
-+				 * machines.
-+				 */
-+				omap_hsmmc_reset_controller_fsm(host, SRD);
-+				omap_hsmmc_reset_controller_fsm(host, SRC);
-+				host->reqs_blocked += 1;
-+			}
-+			req->cmd->error = -EBADF;
-+			if (req->data)
-+				req->data->error = -EBADF;
-+			spin_unlock_irqrestore(&host->irq_lock, host->flags);
-+			mmc_request_done(mmc, req);
-+			return;
-+		} else if (host->reqs_blocked)
-+			host->reqs_blocked = 0;
-+	}
- 	WARN_ON(host->mrq != NULL);
- 	host->mrq = req;
- 	err = omap_hsmmc_prepare_data(host, req);
-@@ -1732,6 +1787,8 @@ static int __init omap_hsmmc_probe(struc
+-	wake_up(&host->wq);
++	mmc_do_release_host(host);
+ }
  
- 	mmc_host_lazy_disable(host->mmc);
+ EXPORT_SYMBOL(mmc_release_host);
+@@ -953,6 +1114,8 @@ void mmc_stop_host(struct mmc_host *host
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ #endif
  
-+	omap_hsmmc_protect_card(host);
++	if (host->caps & MMC_CAP_DISABLE)
++		cancel_delayed_work(&host->disable);
+ 	cancel_delayed_work(&host->detect);
+ 	mmc_flush_scheduled_work();
+ 
+@@ -981,6 +1144,8 @@ void mmc_stop_host(struct mmc_host *host
+  */
+ int mmc_suspend_host(struct mmc_host *host, pm_message_t state)
+ {
++	if (host->caps & MMC_CAP_DISABLE)
++		cancel_delayed_work(&host->disable);
+ 	cancel_delayed_work(&host->detect);
+ 	mmc_flush_scheduled_work();
+ 
+diff -puN drivers/mmc/core/host.c~mmc-add-enable-and-disable-methods-to-mmc-host drivers/mmc/core/host.c
+--- a/drivers/mmc/core/host.c~mmc-add-enable-and-disable-methods-to-mmc-host
++++ a/drivers/mmc/core/host.c
+@@ -83,6 +83,7 @@ struct mmc_host *mmc_alloc_host(int extr
+ 	spin_lock_init(&host->lock);
+ 	init_waitqueue_head(&host->wq);
+ 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
++	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
+ 
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+diff -puN drivers/mmc/core/host.h~mmc-add-enable-and-disable-methods-to-mmc-host drivers/mmc/core/host.h
+--- a/drivers/mmc/core/host.h~mmc-add-enable-and-disable-methods-to-mmc-host
++++ a/drivers/mmc/core/host.h
+@@ -14,5 +14,7 @@
+ int mmc_register_host_class(void);
+ void mmc_unregister_host_class(void);
+ 
++void mmc_host_deeper_disable(struct work_struct *work);
 +
- 	mmc_add_host(mmc);
+ #endif
  
- 	if (mmc_slot(host).name != NULL) {
-@@ -1897,6 +1954,8 @@ static int omap_hsmmc_resume(struct plat
- 					"Unmask interrupt failed\n");
- 		}
+diff -puN include/linux/mmc/host.h~mmc-add-enable-and-disable-methods-to-mmc-host include/linux/mmc/host.h
+--- a/include/linux/mmc/host.h~mmc-add-enable-and-disable-methods-to-mmc-host
++++ a/include/linux/mmc/host.h
+@@ -51,6 +51,35 @@ struct mmc_ios {
+ };
  
-+		omap_hsmmc_protect_card(host);
+ struct mmc_host_ops {
++	/*
++	 * Hosts that support power saving can use the 'enable' and 'disable'
++	 * methods to exit and enter power saving states. 'enable' is called
++	 * when the host is claimed and 'disable' is called (or scheduled with
++	 * a delay) when the host is released. The 'disable' is scheduled if
++	 * the disable delay set by 'mmc_set_disable_delay()' is non-zero,
++	 * otherwise 'disable' is called immediately. 'disable' may be
++	 * scheduled repeatedly, to permit ever greater power saving at the
++	 * expense of ever greater latency to re-enable. Rescheduling is
++	 * determined by the return value of the 'disable' method. A positive
++	 * value gives the delay in milliseconds.
++	 *
++	 * In the case where a host function (like set_ios) may be called
++	 * with or without the host claimed, enabling and disabling can be
++	 * done directly and will nest correctly. Call 'mmc_host_enable()' and
++	 * 'mmc_host_lazy_disable()' for this purpose, but note that these
++	 * functions must be paired.
++	 *
++	 * Alternatively, 'mmc_host_enable()' may be paired with
++	 * 'mmc_host_disable()' which calls 'disable' immediately.  In this
++	 * case the 'disable' method will be called with 'lazy' set to 0.
++	 * This is mainly useful for error paths.
++	 *
++	 * Because lazy disable may be called from a work queue, the 'disable'
++	 * method must claim the host when 'lazy' != 0, which will work
++	 * correctly because recursion is detected and handled.
++	 */
++	int (*enable)(struct mmc_host *host);
++	int (*disable)(struct mmc_host *host, int lazy);
+ 	void	(*request)(struct mmc_host *host, struct mmc_request *req);
+ 	/*
+ 	 * Avoid calling these three functions too often or in a "fast path",
+@@ -118,6 +147,7 @@ struct mmc_host {
+ #define MMC_CAP_SPI		(1 << 4)	/* Talks only SPI protocols */
+ #define MMC_CAP_NEEDS_POLL	(1 << 5)	/* Needs polling for card-detection */
+ #define MMC_CAP_8_BIT_DATA	(1 << 6)	/* Can the host do 8 bit transfers */
++#define MMC_CAP_DISABLE		(1 << 7)	/* Can the host be disabled */
+ 
+ 	/* host specific block data */
+ 	unsigned int		max_seg_size;	/* see blk_queue_max_segment_size */
+@@ -142,6 +172,13 @@ struct mmc_host {
+ 	unsigned int		removed:1;	/* host is being removed */
+ #endif
+ 
++	/* Only used with MMC_CAP_DISABLE */
++	int			enabled;	/* host is enabled */
++	int			nesting_cnt;	/* "enable" nesting count */
++	int			en_dis_recurs;	/* detect recursion */
++	unsigned int		disable_delay;	/* disable delay in msecs */
++	struct delayed_work	disable;	/* disabling work */
 +
- 		/* Notify the core to resume the host */
- 		ret = mmc_resume_host(host->mmc);
- 		if (ret == 0)
+ 	struct mmc_card		*card;		/* device attached to this host */
+ 
+ 	wait_queue_head_t	wq;
+@@ -197,5 +234,15 @@ struct regulator;
+ int mmc_regulator_get_ocrmask(struct regulator *supply);
+ int mmc_regulator_set_ocr(struct regulator *supply, unsigned short vdd_bit);
+ 
++int mmc_host_enable(struct mmc_host *host);
++int mmc_host_disable(struct mmc_host *host);
++int mmc_host_lazy_disable(struct mmc_host *host);
++
++static inline void mmc_set_disable_delay(struct mmc_host *host,
++					 unsigned int disable_delay)
++{
++	host->disable_delay = disable_delay;
++}
++
+ #endif
+ 
 _
 
 Patches currently in -mm which might be from adrian.hunter@nokia.com are
