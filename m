@@ -1,62 +1,63 @@
 From: akpm@linux-foundation.org
-Subject: [merged] maintainers-update-for-ti-omap-hsmmc-driver.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:55:25 -0700
-Message-ID: <200909231955.n8NJtPR4002813@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:49605 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753652AbZIWTz5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 15:55:57 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [merged] omap_hsmmc-clear-interrupt-status-after-init-sequence.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:55:07 -0700
+Message-ID: <200909231955.n8NJt7i5002201@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, ian@mnementh.co.uk, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, philipl@overt.
 List-Id: linux-mmc@vger.kernel.org
-To: madhu.cr@ti.com, khilman@deeprootsystems.com, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     MAINTAINERS: update for TI OMAP hsmmc driver
+     omap_hsmmc: clear interrupt status after init sequence
 has been removed from the -mm tree.  Its filename was
-     maintainers-update-for-ti-omap-hsmmc-driver.patch
+     omap_hsmmc-clear-interrupt-status-after-init-sequence.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: MAINTAINERS: update for TI OMAP hsmmc driver
-From: "Madhusudhan Chikkature" <madhu.cr@ti.com>
+Subject: omap_hsmmc: clear interrupt status after init sequence
+From: Adrian Hunter <adrian.hunter@nokia.com>
 
-Update maintainers entry for TI OMAP HS MMC support.
+Clear the interrupt status after sending the initialization sequence, as
+specified in the TRM.
 
-Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-Acked-by: Kevin Hilman <khilman@deeprootsystems.com>
+Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+Acked-by: Matt Fleming <matt@console-pimps.org>
+Cc: Ian Molton <ian@mnementh.co.uk>
+Cc: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Cc: Denis Karpov <ext-denis.2.karpov@nokia.com>
+Cc: Pierre Ossman <pierre@ossman.eu>
+Cc: Philip Langdale <philipl@overt.org>
+Cc: "Madhusudhan" <madhu.cr@ti.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- MAINTAINERS |    8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ drivers/mmc/host/omap_hsmmc.c |    4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff -puN MAINTAINERS~maintainers-update-for-ti-omap-hsmmc-driver MAINTAINERS
---- a/MAINTAINERS~maintainers-update-for-ti-omap-hsmmc-driver
-+++ a/MAINTAINERS
-@@ -3768,7 +3768,13 @@ OMAP MMC SUPPORT
- M:	Jarkko Lavinen <jarkko.lavinen@nokia.com>
- L:	linux-omap@vger.kernel.org
- S:	Maintained
--F:	drivers/mmc/host/*omap*
-+F:	drivers/mmc/host/omap.c
-+
-+OMAP HS MMC SUPPORT
-+M:	Madhusudhan Chikkature <madhu.cr@ti.com>
-+L:	linux-omap@vger.kernel.org
-+S:	Maintained
-+F:	drivers/mmc/host/omap_hsmmc.c
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-clear-interrupt-status-after-init-sequence drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-clear-interrupt-status-after-init-sequence
++++ a/drivers/mmc/host/omap_hsmmc.c
+@@ -360,6 +360,10 @@ static void send_init_stream(struct mmc_
  
- OMAP RANDOM NUMBER GENERATOR SUPPORT
- M:	Deepak Saxena <dsaxena@plexity.net>
+ 	OMAP_HSMMC_WRITE(host->base, CON,
+ 		OMAP_HSMMC_READ(host->base, CON) & ~INIT_STREAM);
++
++	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
++	OMAP_HSMMC_READ(host->base, STAT);
++
+ 	enable_irq(host->irq);
+ }
+ 
 _
 
-Patches currently in -mm which might be from madhu.cr@ti.com are
+Patches currently in -mm which might be from adrian.hunter@nokia.com are
 
 origin.patch
 
