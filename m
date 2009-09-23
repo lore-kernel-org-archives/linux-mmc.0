@@ -1,180 +1,100 @@
 From: akpm@linux-foundation.org
-Subject: [merged] atmel-mci-unified-atmel-mci-drivers-avr32-at91.patch removed from -mm tree
-Date: Wed, 23 Sep 2009 12:56:02 -0700
-Message-ID: <200909231956.n8NJu2k2004035@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: rob@emanuele.us, hskinnemoen@atmel.com, linux-mmc@vger.kernel.org, linux@maxim.org.za, nicolas.ferre@atmel.com, rmk@arm.linux.org.uk, mm-commits@vger.kernel.org
+Subject: [merged] sdhci-of-dont-hard-code-inverted-write-protect-quirk.patch removed from -mm tree
+Date: Wed, 23 Sep 2009 12:55:50 -0700
+Message-ID: <200909231955.n8NJtoCZ003615@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:51848 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753734AbZIWUHT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2009 16:07:19 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: avorontsov@ru.mvista.com, ben@fluff.org, david.vrabel@csr.com, galak@kernel.crashing.org, linux-mmc@vger.kernel.org, pierre@ossman.eu, s.hauer@pengutronix.de, mm-commits@vger.kernel.org
 
 
 The patch titled
-     atmel-mci: unified Atmel MCI drivers (AVR32 & AT91)
+     sdhci-of: don't hard-code inverted write-protect quirk
 has been removed from the -mm tree.  Its filename was
-     atmel-mci-unified-atmel-mci-drivers-avr32-at91.patch
+     sdhci-of-dont-hard-code-inverted-write-protect-quirk.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: atmel-mci: unified Atmel MCI drivers (AVR32 & AT91)
-From: Rob Emanuele <rob@emanuele.us>
+Subject: sdhci-of: don't hard-code inverted write-protect quirk
+From: Anton Vorontsov <avorontsov@ru.mvista.com>
 
-Unification of the atmel-mci driver to support the AT91 processors MCI
-interface.  The atmel-mci driver currently supports the AVR32 and this
-patch adds AT91 support.
+MPC85xx SOCs have normal write-protect state reporting, so we shouldn't
+hard-code the quirk.
 
-Add read/write proof selection switch dependent on chip availability of
-this feature.
+Instead, look for "sdhci,wp-inverted" property, plus check for
+mpc837x_{rdb,mds} machines since older device trees don't specify the new
+property.
 
-To use this new driver on a at91 the platform driver for your board needs
-to be updated.
-
-[nicolas.ferre@atmel.com indent, Kconfig comment and one printk modification]
-Signed-off-by: Rob Emanuele <rob@emanuele.us>
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Haavard Skinnemoen <hskinnemoen@atmel.com>
-Cc: Andrew Victor <linux@maxim.org.za>
-Cc: Russell King <rmk@arm.linux.org.uk>
+Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
+Cc: Pierre Ossman <pierre@ossman.eu>
+Cc: Kumar Gala <galak@kernel.crashing.org>
+Cc: David Vrabel <david.vrabel@csr.com>
+Cc: Ben Dooks <ben@fluff.org>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/Kconfig     |   16 ++++++++++++----
- drivers/mmc/host/atmel-mci.c |   33 ++++++++++++++++++++++++++++++---
- 2 files changed, 42 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sdhci-of.c |   14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
 
-diff -puN drivers/mmc/host/Kconfig~atmel-mci-unified-atmel-mci-drivers-avr32-at91 drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~atmel-mci-unified-atmel-mci-drivers-avr32-at91
-+++ a/drivers/mmc/host/Kconfig
-@@ -160,6 +160,12 @@ config MMC_AU1X
+diff -puN drivers/mmc/host/sdhci-of.c~sdhci-of-dont-hard-code-inverted-write-protect-quirk drivers/mmc/host/sdhci-of.c
+--- a/drivers/mmc/host/sdhci-of.c~sdhci-of-dont-hard-code-inverted-write-protect-quirk
++++ a/drivers/mmc/host/sdhci-of.c
+@@ -21,6 +21,7 @@
+ #include <linux/of.h>
+ #include <linux/of_platform.h>
+ #include <linux/mmc/host.h>
++#include <asm/machdep.h>
+ #include "sdhci.h"
  
- 	  If unsure, say N.
+ struct sdhci_of_data {
+@@ -175,7 +176,6 @@ static unsigned int esdhc_get_min_clock(
+ static struct sdhci_of_data sdhci_esdhc = {
+ 	.quirks = SDHCI_QUIRK_FORCE_BLK_SZ_2048 |
+ 		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+-		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
+ 		  SDHCI_QUIRK_NO_BUSY_IRQ |
+ 		  SDHCI_QUIRK_NONSTANDARD_CLOCK |
+ 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+@@ -219,6 +219,15 @@ static int sdhci_of_resume(struct of_dev
  
-+choice
-+	prompt "Atmel SD/MMC Driver"
-+	default MMC_ATMELMCI if AVR32
-+	help
-+	  Choose which driver to use for the Atmel MCI Silicon
-+
- config MMC_AT91
- 	tristate "AT91 SD/MMC Card Interface support"
- 	depends on ARCH_AT91
-@@ -170,17 +176,19 @@ config MMC_AT91
+ #endif
  
- config MMC_ATMELMCI
- 	tristate "Atmel Multimedia Card Interface support"
--	depends on AVR32
-+	depends on AVR32 || ARCH_AT91
- 	help
- 	  This selects the Atmel Multimedia Card Interface driver. If
--	  you have an AT32 (AVR32) platform with a Multimedia Card
--	  slot, say Y or M here.
-+	  you have an AT32 (AVR32) or AT91 platform with a Multimedia
-+	  Card slot, say Y or M here.
- 
- 	  If unsure, say N.
- 
-+endchoice
-+
- config MMC_ATMELMCI_DMA
- 	bool "Atmel MCI DMA support (EXPERIMENTAL)"
--	depends on MMC_ATMELMCI && DMA_ENGINE && EXPERIMENTAL
-+	depends on MMC_ATMELMCI && AVR32 && DMA_ENGINE && EXPERIMENTAL
- 	help
- 	  Say Y here to have the Atmel MCI driver use a DMA engine to
- 	  do data transfers and thus increase the throughput and
-diff -puN drivers/mmc/host/atmel-mci.c~atmel-mci-unified-atmel-mci-drivers-avr32-at91 drivers/mmc/host/atmel-mci.c
---- a/drivers/mmc/host/atmel-mci.c~atmel-mci-unified-atmel-mci-drivers-avr32-at91
-+++ a/drivers/mmc/host/atmel-mci.c
-@@ -30,6 +30,7 @@
- #include <asm/io.h>
- #include <asm/unaligned.h>
- 
-+#include <mach/cpu.h>
- #include <mach/board.h>
- 
- #include "atmel-mci-regs.h"
-@@ -210,6 +211,18 @@ struct atmel_mci_slot {
- 	set_bit(event, &host->pending_events)
- 
- /*
-+ * Enable or disable features/registers based on
-+ * whether the processor supports them
-+ */
-+static bool mci_has_rwproof(void)
++static bool __devinit sdhci_of_wp_inverted(struct device_node *np)
 +{
-+	if (cpu_is_at91sam9261() || cpu_is_at91rm9200())
-+		return false;
-+	else
++	if (of_get_property(np, "sdhci,wp-inverted", NULL))
 +		return true;
++
++	/* Old device trees don't have the wp-inverted property. */
++	return machine_is(mpc837x_rdb) || machine_is(mpc837x_mds);
 +}
 +
-+/*
-  * The debugfs stuff below is mostly optimized away when
-  * CONFIG_DEBUG_FS is not set.
-  */
-@@ -276,8 +289,13 @@ static void atmci_show_status_reg(struct
- 		[3]	= "BLKE",
- 		[4]	= "DTIP",
- 		[5]	= "NOTBUSY",
-+		[6]	= "ENDRX",
-+		[7]	= "ENDTX",
- 		[8]	= "SDIOIRQA",
- 		[9]	= "SDIOIRQB",
-+		[12]	= "SDIOWAIT",
-+		[14]	= "RXBUFF",
-+		[15]	= "TXBUFE",
- 		[16]	= "RINDE",
- 		[17]	= "RDIRE",
- 		[18]	= "RCRCE",
-@@ -285,6 +303,11 @@ static void atmci_show_status_reg(struct
- 		[20]	= "RTOE",
- 		[21]	= "DCRCE",
- 		[22]	= "DTOE",
-+		[23]	= "CSTOE",
-+		[24]	= "BLKOVRE",
-+		[25]	= "DMADONE",
-+		[26]	= "FIFOEMPTY",
-+		[27]	= "XFRDONE",
- 		[30]	= "OVRE",
- 		[31]	= "UNRE",
- 	};
-@@ -849,13 +872,15 @@ static void atmci_set_ios(struct mmc_hos
- 			clkdiv = 255;
- 		}
+ static int __devinit sdhci_of_probe(struct of_device *ofdev,
+ 				 const struct of_device_id *match)
+ {
+@@ -261,6 +270,9 @@ static int __devinit sdhci_of_probe(stru
+ 	if (of_get_property(np, "sdhci,1-bit-only", NULL))
+ 		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
  
-+		host->mode_reg = MCI_MR_CLKDIV(clkdiv);
++	if (sdhci_of_wp_inverted(np))
++		host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
 +
- 		/*
- 		 * WRPROOF and RDPROOF prevent overruns/underruns by
- 		 * stopping the clock when the FIFO is full/empty.
- 		 * This state is not expected to last for long.
- 		 */
--		host->mode_reg = MCI_MR_CLKDIV(clkdiv) | MCI_MR_WRPROOF
--					| MCI_MR_RDPROOF;
-+		if (mci_has_rwproof())
-+			host->mode_reg |= (MCI_MR_WRPROOF | MCI_MR_RDPROOF);
- 
- 		if (list_empty(&host->queue))
- 			mci_writel(host, MR, host->mode_reg);
-@@ -1648,8 +1673,10 @@ static int __init atmci_probe(struct pla
- 			nr_slots++;
- 	}
- 
--	if (!nr_slots)
-+	if (!nr_slots) {
-+		dev_err(&pdev->dev, "init failed: no slot defined\n");
- 		goto err_init_slot;
-+	}
- 
- 	dev_info(&pdev->dev,
- 			"Atmel MCI controller at 0x%08lx irq %d, %u slots\n",
+ 	clk = of_get_property(np, "clock-frequency", &size);
+ 	if (clk && size == sizeof(*clk) && *clk)
+ 		of_host->clock = *clk;
 _
 
-Patches currently in -mm which might be from rob@emanuele.us are
+Patches currently in -mm which might be from avorontsov@ru.mvista.com are
 
 origin.patch
+linux-next.patch
+rtc-set-wakeup-capability-for-i2c-and-spi-rtc-drivers.patch
 
