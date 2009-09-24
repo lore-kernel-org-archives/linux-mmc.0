@@ -1,87 +1,35 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH] mxcmmc: fix error path in mxcmci_probe
-Date: Thu, 24 Sep 2009 11:51:42 +0200
-Message-ID: <20090924095142.GL27039@pengutronix.de>
-References: <1253778254-6881-1-git-send-email-u.kleine-koenig@pengutronix.de>
+From: Inaky Perez-Gonzalez <inaky.perez-gonzalez@intel.com>
+Subject: Re: [PATCH 3/3 V2] i2400m-sdio: select IWMC3200TOP in Kconfig
+Date: Thu, 24 Sep 2009 10:25:20 -0700
+Message-ID: <1253813120.4219.0.camel@localhost.localdomain>
+References: <1253779256-17058-1-git-send-email-tomas.winkler@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:42958 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751206AbZIXJvo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Sep 2009 05:51:44 -0400
-Content-Disposition: inline
-In-Reply-To: <1253778254-6881-1-git-send-email-u.kleine-koenig@pengutronix.de>
+Received: from mga02.intel.com ([134.134.136.20]:52138 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752370AbZIXR0S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 24 Sep 2009 13:26:18 -0400
+In-Reply-To: <1253779256-17058-1-git-send-email-tomas.winkler@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Uwe =?iso-8859-15?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>, Martin Fuzzey <mfuzzey@gmail.com>, Pierre Ossman <drzeus@drzeus.cx>
+To: "Winkler, Tomas" <tomas.winkler@intel.com>
+Cc: "davem@davemloft.net" <davem@davemloft.net>, "linville@tuxdriver.com" <linville@tuxdriver.com>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Zhu, Yi" <yi.zhu@intel.com>, "Kao, Cindy H" <cindy.h.kao@intel.com>, "Cohen, Guy" <guy.cohen@intel.com>, "Rindjunsky, Ron" <ron.rindjunsky@intel.com>
 
-On Thu, Sep 24, 2009 at 09:44:14AM +0200, Uwe Kleine-K=F6nig wrote:
-> After a failing allocation of mmc or a failed ioremap in mxcmci_probe=
- host was
-> used uninitialized.
+On Thu, 2009-09-24 at 02:00 -0600, Winkler, Tomas wrote:
+> i2400m-sdio requires iwmc3200top for its operation
+> 
+> create separate config option to separate 3200 specifics
+> from eventual further wimax sdio HW.
+> 
+> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
 
-Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
+Acked-by: Inaky Perez-Gonzalez <inaky@linux.intel.com>
 
->=20
-> Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-> Cc: Sascha Hauer <s.hauer@pengutronix.de>
-> Cc: Pierre Ossman <pierre@ossman.eu>
-> Cc: Martin Fuzzey <mfuzzey@gmail.com>
-> Cc: Pierre Ossman <drzeus@drzeus.cx>
-> ---
->  drivers/mmc/host/mxcmmc.c |   10 +++++-----
->  1 files changed, 5 insertions(+), 5 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index bc14bb1..bec4605 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -679,17 +679,17 @@ static int mxcmci_probe(struct platform_device =
-*pdev)
->  {
->  	struct mmc_host *mmc;
->  	struct mxcmci_host *host =3D NULL;
-> -	struct resource *r;
-> +	struct resource *iores, *r;
->  	int ret =3D 0, irq;
-> =20
->  	printk(KERN_INFO "i.MX SDHC driver\n");
-> =20
-> -	r =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +	iores =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
->  	irq =3D platform_get_irq(pdev, 0);
-> -	if (!r || irq < 0)
-> +	if (!iores || irq < 0)
->  		return -EINVAL;
-> =20
-> -	r =3D request_mem_region(r->start, resource_size(r), pdev->name);
-> +	r =3D request_mem_region(iores->start, resource_size(iores), pdev->=
-name);
->  	if (!r)
->  		return -EBUSY;
-> =20
-> @@ -809,7 +809,7 @@ out_iounmap:
->  out_free:
->  	mmc_free_host(mmc);
->  out_release_mem:
-> -	release_mem_region(host->res->start, resource_size(host->res));
-> +	release_mem_region(iores->start, resource_size(iores));
->  	return ret;
->  }
-> =20
-> --=20
-> 1.6.4.3
->=20
+I'll merge this into the WiMAX tree.
 
---=20
-Pengutronix e.K.                           |                           =
-  |
-Industrial Linux Solutions                 | http://www.pengutronix.de/=
-  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0  =
-  |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-555=
-5 |
+-- 
+-- Inaky
+
+
