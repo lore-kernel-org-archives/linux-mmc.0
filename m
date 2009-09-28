@@ -1,67 +1,65 @@
-From: David Vrabel <david.vrabel@csr.com>
+From: Matt Fleming <matt@console-pimps.org>
 Subject: Re: [PATCH] sdio: add MMC_CAP_VDD_165_195 host capability
-Date: Mon, 28 Sep 2009 19:09:52 +0100
-Message-ID: <4AC0FBF0.6090007@csr.com>
-References: <1254160269.10634.15.camel@localhost>
+Date: Mon, 28 Sep 2009 19:10:48 +0100
+Message-ID: <20090928181046.GA4791@console-pimps.org>
+References: <1254160714.31101.3.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-d.mailcontrol.com ([85.115.60.190]:54124 "EHLO
-	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752255AbZI1SKw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2009 14:10:52 -0400
-Received: from rly23d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
-	by rly23d.srv.mailcontrol.com (MailControl) with ESMTP id n8SIAVqK022396
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2009 19:10:47 +0100
-Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
-	by rly23d.srv.mailcontrol.com (MailControl) id n8SI9uZY018577
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2009 19:09:56 +0100
-In-Reply-To: <1254160269.10634.15.camel@localhost>
+Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:47748 "EHLO
+	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752319AbZI1SLb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2009 14:11:31 -0400
+Content-Disposition: inline
+In-Reply-To: <1254160714.31101.3.camel@localhost>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ohad Ben-Cohen <ohad@bencohen.org>
-Cc: akpm@linux-foundation.org, "p hilipl"@overt.org, ian@mnementh.co.uk, matt@console-pimps.org, pierre@ossman.eu, roberto.foglietta@gmail.com, linux-mmc@vger.kernel.org
+Cc: akpm@linux-foundation.org, philipl@overt.org, ian@mnementh.co.uk, pierre@ossman.eu, roberto.foglietta@gmail.com, david.vrabel@csr.com, linux-mmc@vger.kernel.org
 
-Ohad Ben-Cohen wrote:
+On Mon, Sep 28, 2009 at 07:58:34PM +0200, Ohad Ben-Cohen wrote:
+> [I should really ditch my mailer, I know. hope it's the last attempt. Sorry x 2]
+> ---
 > From: Ohad Ben-Cohen <ohad@wizery.com>
 > 
 > To allow the usage of MMC_VDD_165_195, host capability
 > MMC_CAP_VDD_165_195 is introduced. This is necessary
 > because MMC_VDD_165_195 is currently reserved/undefined.
+> 
 
-The host already reports what voltages it supports (in
-mmc_host::ocr_avail) so a seperate MMC_CAP_* isn't needed.
+Have you got patches that add this capability to the TI 127x and ZOOM2
+board setup files?
 
-This interpretation of the reserved bits in the OCR should only done for
-certain cards where the bits actually do mean 1.8 V operation (with v2.0
-signalling) is possible.
-
-That's a fair amount of work so perhaps in the interim something like this:
-
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -494,6 +494,9 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
- 		ocr &= ~0x7F;
- 	}
-
-+	if (ocr & MMC_VDD_165_195)
-+		printk(KERN_WARNING "%s: warning: card claims non-standard 1.65-1.95
-V support"
-+
- 	host->ocr = mmc_select_voltage(host, ocr);
-
- 	/*
-
-And revisit this if these bits either: a) gain a (different) standard
-meaning; or b) some other card uses these bits in a different
-non-standard way.  Neither seems likely.
-
-David
--- 
-David Vrabel, Senior Software Engineer, Drivers
-CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
-Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
+> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+> ---
+>  drivers/mmc/core/sdio.c  |    7 +++++++
+>  include/linux/mmc/host.h |    1 +
+>  2 files changed, 8 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index cdb845b..a9f3ed6 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -494,6 +494,13 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
+>  		ocr &= ~0x7F;
+>  	}
+>  
+> +	if ((ocr & MMC_VDD_165_195) && !(host->caps & MMC_CAP_VDD_165_195)) {
+> +		printk(KERN_WARNING "%s: SDIO card claims to support the "
+> +			"incompletely defined 'low voltage range'. This "
+> +			"will be ignored.\n", mmc_hostname(host));
+> +		ocr &= ~MMC_VDD_165_195;
+> +	}
+> +
+>  	host->ocr = mmc_select_voltage(host, ocr);
+>  
+>  	/*
 
 
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+I know you copied this warning from the old code but does anyone think
+it's worth making this warning a bit clearer? e.g,
+
+> +		printk(KERN_WARNING "%s: SDIO card claims to support the "
+> +			"incompletely defined 'low voltage range', but the "
+> +			"host controller does not. This voltage range"
+> +			"will be ignored.\n", mmc_hostname(host));
