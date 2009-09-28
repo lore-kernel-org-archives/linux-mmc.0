@@ -1,336 +1,446 @@
-From: Yegor Yefremov <yegor_sub1@visionsystems.de>
-Subject: Re: [at91sam9g45] DMA driver for AC97 and MCI
-Date: Mon, 28 Sep 2009 12:34:46 +0200
-Message-ID: <4AC09146.4000608@visionsystems.de>
-References: <4ABCBD32.7080408@visionsystems.de> <4ABCE36F.1000205@atmel.com>
-Reply-To: yegor_sub1@visionsystems.de
+From: "Scott Branden" <sbranden@broadcom.com>
+Subject: RE: [PATCH] Move MMCI header to amba include dir
+Date: Mon, 28 Sep 2009 10:11:29 -0700
+Message-ID: <9383297B60843144AC17878B479520F110AEE53835@SJEXCHCCR01.corp.ad.broadcom.com>
+References: <1253625972-19407-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <4ABCE36F.1000205@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain;
+ charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mms2.broadcom.com ([216.31.210.18]:1432 "EHLO mms2.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751811AbZI1RLj convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2009 13:11:39 -0400
+In-Reply-To: <1253625972-19407-1-git-send-email-linus.walleij@stericsson.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@stericsson.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: Catalin Marinas <catalin.marinas@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
->> I try to get sound and SD card working on at91sam9g45-ekes development
->> board using linux-next tree. As far as I understand AT_HDMAC is the
->> appropriate DMA driver for ARCH_AT91SAM9G45.
+Hi Linus,
+
+You changes cause the bcmring platform to fail to compile.
+
+Can you go through all the ARM platforms and make the
+necessary adjustments with the change in header files
+for mmc?
+
+Thanks,
+ Scott
+
+> -----Original Message-----
+> From: linux-arm-kernel-bounces@lists.infradead.org 
+> [mailto:linux-arm-kernel-bounces@lists.infradead.org] On 
+> Behalf Of Linus Walleij
+> Sent: September 22, 2009 6:26 AM
+> To: linux-arm-kernel@lists.infradead.org
+> Cc: Catalin Marinas; linux-mmc@vger.kernel.org; Linus Walleij
+> Subject: [PATCH] Move MMCI header to amba include dir
 > 
-> Correct.
+> This moves the mmci platform data definition struct away from 
+> arch/arm/include/asm/mach/mmc.h into the more proper place 
+> among the other primecells in include/linux/amba/mmci.h and 
+> at the same time renames it to "mmci.h", and also the struct 
+> in this file confusingly named mmc_platform_data has been 
+> renamed mmci_platform_data for clarity.
 > 
->> I resolved dependencies with this patch, so I could activate it for
->> my platform.
->>
->> --- a/drivers/dma/Kconfig
->> +++ b/drivers/dma/Kconfig
->> @@ -48,7 +48,7 @@ config DW_DMAC
->>
->>  config AT_HDMAC
->>         tristate "Atmel AHB DMA support"
->> -       depends on ARCH_AT91SAM9RL
->> +       depends on ARCH_AT91SAM9RL || ARCH_AT91SAM9G45
->>         select DMA_ENGINE
->>         help
->>           Support the Atmel AHB DMA controller.  This can be integrated in
+> Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+> Cc: Catalin Marinas <catalin.marinas@arm.com>
+> ---
+> This patch is against the devel branch in Russells git, and 
+> was compiled with no errors against realview_defconfig, 
+> versatile_defconfig, integrator_defconfig and u300_defconfig.
+> Some minor tweaks were needed to compile, since devel is not 
+> yet rebased to master (vic.c #include <linux/device.h> patch 
+> and the new clocksource code are the culprits).
+> ---
+>  arch/arm/include/asm/mach/mmc.h          |   18 ------------------
+>  arch/arm/mach-integrator/integrator_cp.c |    4 ++--
+>  arch/arm/mach-realview/core.c            |    6 +++---
+>  arch/arm/mach-realview/core.h            |    4 ++--
+>  arch/arm/mach-realview/realview_eb.c     |    2 +-
+>  arch/arm/mach-realview/realview_pb1176.c |    2 +-
+>  arch/arm/mach-realview/realview_pb11mp.c |    2 +-
+>  arch/arm/mach-realview/realview_pba8.c   |    2 +-
+>  arch/arm/mach-realview/realview_pbx.c    |    2 +-
+>  arch/arm/mach-u300/mmc.c                 |    4 ++--
+>  arch/arm/mach-versatile/core.c           |    4 ++--
+>  arch/arm/mach-versatile/versatile_pb.c   |    4 ++--
+>  drivers/mmc/host/mmci.c                  |    4 ++--
+>  drivers/mmc/host/mmci.h                  |    2 +-
+>  include/linux/amba/mmci.h                |   18 ++++++++++++++++++
+>  15 files changed, 39 insertions(+), 39 deletions(-)  delete 
+> mode 100644 arch/arm/include/asm/mach/mmc.h  create mode 
+> 100644 include/linux/amba/mmci.h
 > 
-> Well, this patch was waiting for this other to reach mainline:
-> http://www.arm.linux.org.uk/developer/patches/viewpatch.php?id=5621/1
+> diff --git a/arch/arm/include/asm/mach/mmc.h 
+> b/arch/arm/include/asm/mach/mmc.h deleted file mode 100644 
+> index 27bec55..0000000
+> --- a/arch/arm/include/asm/mach/mmc.h
+> +++ /dev/null
+> @@ -1,18 +0,0 @@
+> -/*
+> - *  arch/arm/include/asm/mach/mmc.h
+> - */
+> -#ifndef ASMARM_MACH_MMC_H
+> -#define ASMARM_MACH_MMC_H
+> -
+> -#include <linux/mmc/host.h>
+> -
+> -struct mmc_platform_data {
+> -	unsigned int ocr_mask;			/* available voltages */
+> -	u32 (*translate_vdd)(struct device *, unsigned int);
+> -	unsigned int (*status)(struct device *);
+> -	int	gpio_wp;
+> -	int	gpio_cd;
+> -	unsigned long capabilities;
+> -};
+> -
+> -#endif
+> diff --git a/arch/arm/mach-integrator/integrator_cp.c 
+> b/arch/arm/mach-integrator/integrator_cp.c
+> index 2a318eb..3f35293 100644
+> --- a/arch/arm/mach-integrator/integrator_cp.c
+> +++ b/arch/arm/mach-integrator/integrator_cp.c
+> @@ -19,6 +19,7 @@
+>  #include <linux/amba/bus.h>
+>  #include <linux/amba/kmi.h>
+>  #include <linux/amba/clcd.h>
+> +#include <linux/amba/mmci.h>
+>  #include <linux/io.h>
+>  
+>  #include <asm/clkdev.h>
+> @@ -35,7 +36,6 @@
+>  #include <asm/mach/arch.h>
+>  #include <asm/mach/flash.h>
+>  #include <asm/mach/irq.h>
+> -#include <asm/mach/mmc.h>
+>  #include <asm/mach/map.h>
+>  #include <asm/mach/time.h>
+>  
+> @@ -400,7 +400,7 @@ static unsigned int mmc_status(struct device *dev)
+>  	return status & 8;
+>  }
+>  
+> -static struct mmc_platform_data mmc_data = {
+> +static struct mmci_platform_data mmc_data = {
+>  	.ocr_mask	= MMC_VDD_32_33|MMC_VDD_33_34,
+>  	.status		= mmc_status,
+>  	.gpio_wp	= -1,
+> diff --git a/arch/arm/mach-realview/core.c 
+> b/arch/arm/mach-realview/core.c index 5a5e1f7..a2083b6 100644
+> --- a/arch/arm/mach-realview/core.c
+> +++ b/arch/arm/mach-realview/core.c
+> @@ -30,6 +30,7 @@
+>  #include <linux/io.h>
+>  #include <linux/smsc911x.h>
+>  #include <linux/ata_platform.h>
+> +#include <linux/amba/mmci.h>
+>  
+>  #include <asm/clkdev.h>
+>  #include <asm/system.h>
+> @@ -44,7 +45,6 @@
+>  #include <asm/mach/flash.h>
+>  #include <asm/mach/irq.h>
+>  #include <asm/mach/map.h>
+> -#include <asm/mach/mmc.h>
+>  
+>  #include <asm/hardware/gic.h>
+>  
+> @@ -237,14 +237,14 @@ static unsigned int 
+> realview_mmc_status(struct device *dev)
+>  	return readl(REALVIEW_SYSMCI) & mask;
+>  }
+>  
+> -struct mmc_platform_data realview_mmc0_plat_data = {
+> +struct mmci_platform_data realview_mmc0_plat_data = {
+>  	.ocr_mask	= MMC_VDD_32_33|MMC_VDD_33_34,
+>  	.status		= realview_mmc_status,
+>  	.gpio_wp	= 17,
+>  	.gpio_cd	= 16,
+>  };
+>  
+> -struct mmc_platform_data realview_mmc1_plat_data = {
+> +struct mmci_platform_data realview_mmc1_plat_data = {
+>  	.ocr_mask	= MMC_VDD_32_33|MMC_VDD_33_34,
+>  	.status		= realview_mmc_status,
+>  	.gpio_wp	= 19,
+> diff --git a/arch/arm/mach-realview/core.h 
+> b/arch/arm/mach-realview/core.h index 59a337b..46cd6ac 100644
+> --- a/arch/arm/mach-realview/core.h
+> +++ b/arch/arm/mach-realview/core.h
+> @@ -47,8 +47,8 @@ static struct amba_device name##_device = {	
+> 		\
+>  extern struct platform_device realview_flash_device;  extern 
+> struct platform_device realview_cf_device;  extern struct 
+> platform_device realview_i2c_device; -extern struct 
+> mmc_platform_data realview_mmc0_plat_data; -extern struct 
+> mmc_platform_data realview_mmc1_plat_data;
+> +extern struct mmci_platform_data realview_mmc0_plat_data; 
+> extern struct 
+> +mmci_platform_data realview_mmc1_plat_data;
+>  extern struct clcd_board clcd_plat_data;  extern void 
+> __iomem *gic_cpu_base_addr;  extern void __iomem 
+> *timer0_va_base; diff --git 
+> a/arch/arm/mach-realview/realview_eb.c 
+> b/arch/arm/mach-realview/realview_eb.c
+> index c0795ea..1d65e64 100644
+> --- a/arch/arm/mach-realview/realview_eb.c
+> +++ b/arch/arm/mach-realview/realview_eb.c
+> @@ -24,6 +24,7 @@
+>  #include <linux/sysdev.h>
+>  #include <linux/amba/bus.h>
+>  #include <linux/amba/pl061.h>
+> +#include <linux/amba/mmci.h>
+>  #include <linux/io.h>
+>  
+>  #include <mach/hardware.h>
+> @@ -37,7 +38,6 @@
+>  
+>  #include <asm/mach/arch.h>
+>  #include <asm/mach/map.h>
+> -#include <asm/mach/mmc.h>
+>  #include <asm/mach/time.h>
+>  
+>  #include <mach/board-eb.h>
+> diff --git a/arch/arm/mach-realview/realview_pb1176.c 
+> b/arch/arm/mach-realview/realview_pb1176.c
+> index 395dc18..2817fe0 100644
+> --- a/arch/arm/mach-realview/realview_pb1176.c
+> +++ b/arch/arm/mach-realview/realview_pb1176.c
+> @@ -24,6 +24,7 @@
+>  #include <linux/sysdev.h>
+>  #include <linux/amba/bus.h>
+>  #include <linux/amba/pl061.h>
+> +#include <linux/amba/mmci.h>
+>  #include <linux/io.h>
+>  
+>  #include <mach/hardware.h>
+> @@ -37,7 +38,6 @@
+>  #include <asm/mach/arch.h>
+>  #include <asm/mach/flash.h>
+>  #include <asm/mach/map.h>
+> -#include <asm/mach/mmc.h>
+>  #include <asm/mach/time.h>
+>  
+>  #include <mach/board-pb1176.h>
+> diff --git a/arch/arm/mach-realview/realview_pb11mp.c 
+> b/arch/arm/mach-realview/realview_pb11mp.c
+> index c0c9e35..94680fc 100644
+> --- a/arch/arm/mach-realview/realview_pb11mp.c
+> +++ b/arch/arm/mach-realview/realview_pb11mp.c
+> @@ -24,6 +24,7 @@
+>  #include <linux/sysdev.h>
+>  #include <linux/amba/bus.h>
+>  #include <linux/amba/pl061.h>
+> +#include <linux/amba/mmci.h>
+>  #include <linux/io.h>
+>  
+>  #include <mach/hardware.h>
+> @@ -38,7 +39,6 @@
+>  #include <asm/mach/arch.h>
+>  #include <asm/mach/flash.h>
+>  #include <asm/mach/map.h>
+> -#include <asm/mach/mmc.h>
+>  #include <asm/mach/time.h>
+>  
+>  #include <mach/board-pb11mp.h>
+> diff --git a/arch/arm/mach-realview/realview_pba8.c 
+> b/arch/arm/mach-realview/realview_pba8.c
+> index 4fc64e1..941beb2 100644
+> --- a/arch/arm/mach-realview/realview_pba8.c
+> +++ b/arch/arm/mach-realview/realview_pba8.c
+> @@ -24,6 +24,7 @@
+>  #include <linux/sysdev.h>
+>  #include <linux/amba/bus.h>
+>  #include <linux/amba/pl061.h>
+> +#include <linux/amba/mmci.h>
+>  #include <linux/io.h>
+>  
+>  #include <asm/irq.h>
+> @@ -34,7 +35,6 @@
+>  
+>  #include <asm/mach/arch.h>
+>  #include <asm/mach/map.h>
+> -#include <asm/mach/mmc.h>
+>  #include <asm/mach/time.h>
+>  
+>  #include <mach/hardware.h>
+> diff --git a/arch/arm/mach-realview/realview_pbx.c 
+> b/arch/arm/mach-realview/realview_pbx.c
+> index cf68b54..7e4bc6c 100644
+> --- a/arch/arm/mach-realview/realview_pbx.c
+> +++ b/arch/arm/mach-realview/realview_pbx.c
+> @@ -23,6 +23,7 @@
+>  #include <linux/sysdev.h>
+>  #include <linux/amba/bus.h>
+>  #include <linux/amba/pl061.h>
+> +#include <linux/amba/mmci.h>
+>  #include <linux/io.h>
+>  
+>  #include <asm/irq.h>
+> @@ -34,7 +35,6 @@
+>  
+>  #include <asm/mach/arch.h>
+>  #include <asm/mach/map.h>
+> -#include <asm/mach/mmc.h>
+>  #include <asm/mach/time.h>
+>  
+>  #include <mach/hardware.h>
+> diff --git a/arch/arm/mach-u300/mmc.c 
+> b/arch/arm/mach-u300/mmc.c index 82af247..7b6b016 100644
+> --- a/arch/arm/mach-u300/mmc.c
+> +++ b/arch/arm/mach-u300/mmc.c
+> @@ -19,8 +19,8 @@
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/regulator/machine.h>
+>  #include <linux/gpio.h>
+> +#include <linux/amba/mmci.h>
+>  
+> -#include <asm/mach/mmc.h>
+>  #include "mmc.h"
+>  #include "padmux.h"
+>  
+> @@ -28,7 +28,7 @@ struct mmci_card_event {
+>  	struct input_dev *mmc_input;
+>  	int mmc_inserted;
+>  	struct work_struct workq;
+> -	struct mmc_platform_data mmc0_plat_data;
+> +	struct mmci_platform_data mmc0_plat_data;
+>  };
+>  
+>  static unsigned int mmc_status(struct device *dev) diff 
+> --git a/arch/arm/mach-versatile/core.c 
+> b/arch/arm/mach-versatile/core.c index 975eae4..e13be7c 100644
+> --- a/arch/arm/mach-versatile/core.c
+> +++ b/arch/arm/mach-versatile/core.c
+> @@ -27,6 +27,7 @@
+>  #include <linux/amba/bus.h>
+>  #include <linux/amba/clcd.h>
+>  #include <linux/amba/pl061.h>
+> +#include <linux/amba/mmci.h>
+>  #include <linux/clocksource.h>
+>  #include <linux/clockchips.h>
+>  #include <linux/cnt32_to_63.h>
+> @@ -47,7 +48,6 @@
+>  #include <asm/mach/irq.h>
+>  #include <asm/mach/time.h>
+>  #include <asm/mach/map.h>
+> -#include <asm/mach/mmc.h>
+>  
+>  #include "core.h"
+>  #include "clock.h"
+> @@ -369,7 +369,7 @@ unsigned int mmc_status(struct device *dev)
+>  	return readl(VERSATILE_SYSMCI) & mask;  }
+>  
+> -static struct mmc_platform_data mmc0_plat_data = {
+> +static struct mmci_platform_data mmc0_plat_data = {
+>  	.ocr_mask	= MMC_VDD_32_33|MMC_VDD_33_34,
+>  	.status		= mmc_status,
+>  	.gpio_wp	= -1,
+> diff --git a/arch/arm/mach-versatile/versatile_pb.c 
+> b/arch/arm/mach-versatile/versatile_pb.c
+> index 9af8d81..239cd30 100644
+> --- a/arch/arm/mach-versatile/versatile_pb.c
+> +++ b/arch/arm/mach-versatile/versatile_pb.c
+> @@ -24,6 +24,7 @@
+>  #include <linux/sysdev.h>
+>  #include <linux/amba/bus.h>
+>  #include <linux/amba/pl061.h>
+> +#include <linux/amba/mmci.h>
+>  #include <linux/io.h>
+>  
+>  #include <mach/hardware.h>
+> @@ -31,7 +32,6 @@
+>  #include <asm/mach-types.h>
+>  
+>  #include <asm/mach/arch.h>
+> -#include <asm/mach/mmc.h>
+>  
+>  #include "core.h"
+>  
+> @@ -41,7 +41,7 @@
+>  #define IRQ_MMCI1A	IRQ_SIC_MMCI1A
+>  #endif
+>  
+> -static struct mmc_platform_data mmc1_plat_data = {
+> +static struct mmci_platform_data mmc1_plat_data = {
+>  	.ocr_mask	= MMC_VDD_32_33|MMC_VDD_33_34,
+>  	.status		= mmc_status,
+>  	.gpio_wp	= -1,
+> diff --git a/drivers/mmc/host/mmci.c 
+> b/drivers/mmc/host/mmci.c index bf7c05b..79205e5 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -22,12 +22,12 @@
+>  #include <linux/clk.h>
+>  #include <linux/scatterlist.h>
+>  #include <linux/gpio.h>
+> +#include <linux/amba/mmci.h>
+>  
+>  #include <asm/cacheflush.h>
+>  #include <asm/div64.h>
+>  #include <asm/io.h>
+>  #include <asm/sizes.h>
+> -#include <asm/mach/mmc.h>
+>  
+>  #include "mmci.h"
+>  
+> @@ -537,7 +537,7 @@ static void mmci_check_status(unsigned long data)
+>  
+>  static int __devinit mmci_probe(struct amba_device *dev, 
+> struct amba_id *id)  {
+> -	struct mmc_platform_data *plat = dev->dev.platform_data;
+> +	struct mmci_platform_data *plat = dev->dev.platform_data;
+>  	struct mmci_host *host;
+>  	struct mmc_host *mmc;
+>  	int ret;
+> diff --git a/drivers/mmc/host/mmci.h 
+> b/drivers/mmc/host/mmci.h index 839f264..a7f9a51 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -161,7 +161,7 @@ struct mmci_host {
+>  	unsigned int		mclk;
+>  	unsigned int		cclk;
+>  	u32			pwr;
+> -	struct mmc_platform_data *plat;
+> +	struct mmci_platform_data *plat;
+>  
+>  	u8			hw_designer;
+>  	u8			hw_revision:4;
+> diff --git a/include/linux/amba/mmci.h 
+> b/include/linux/amba/mmci.h new file mode 100644 index 
+> 0000000..6b42417
+> --- /dev/null
+> +++ b/include/linux/amba/mmci.h
+> @@ -0,0 +1,18 @@
+> +/*
+> + *  include/linux/amba/mmci.h
+> + */
+> +#ifndef AMBA_MMCI_H
+> +#define AMBA_MMCI_H
+> +
+> +#include <linux/mmc/host.h>
+> +
+> +struct mmci_platform_data {
+> +	unsigned int ocr_mask;			/* available voltages */
+> +	u32 (*translate_vdd)(struct device *, unsigned int);
+> +	unsigned int (*status)(struct device *);
+> +	int	gpio_wp;
+> +	int	gpio_cd;
+> +	unsigned long capabilities;
+> +};
+> +
+> +#endif
+> --
+> 1.6.2.1
 > 
-> It is true that you will need it.
 > 
->> Should this driver be also used for sound driver and MCI?
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 > 
-> Sure. For sound, maybe we will have to conform to the dma cyclic API
-> introduced by dw_dmac driver.
 > 
-> For MCI, here is a patch series that goes before the patch that will do
-> the link between atmel_mci, at_hdmac and at91sam9g45.
-> 
-> http://lkml.org/lkml/2009/9/17/224
-> 
-> This last patch is not posted to the mailing list yet, I am waiting for
-> the others to reach mainline.
-> 
-> I you are interested in it, you can have a preview here:
-> ftp://ftp.linux4sam.org/devel/linux/2630_lnx4sam_patchset-tmp_20090828.tgz
-> patch named :
-> "at91/atmel-mci: inclusion of sd/mmc driver in at91sam9g45 chip and
-> board" aka:
-> 2630_lnx4sam_patchset-tmp/2.6.30-at91-exp-0033-at91-atmel-mci-inclusion-of-sd-mmc-driver-in-at91sa.patch
-
-Thanks for the patches. I could get the stuff working. I applied 
-
-2.6.30-at91-exp-0031-atmel-mci-change-use-of-dma-slave-interface.patch
-2.6.30-at91-exp-0032-mmc-atmel-mci-New-MCI2-module-support-in-atmel-mci.patch
-2.6.30-at91-exp-0033-at91-atmel-mci-inclusion-of-sd-mmc-driver-in-at91sa.patch
-
-to Linus tree (2.6.32-rc2)
-
-As to 2.6.30-at91-exp-0033-at91-atmel-mci-inclusion-of-sd-mmc-driver-in-at91sa.patch I've only changed
-DW_DMA_SLAVE_WIDTH_32BIT to AT_DMA_SLAVE_WIDTH_32BIT
-
-I couldn't apply 2.6.30-at91-exp-0032-mmc-atmel-mci-New-MCI2-module-support-in-atmel-mci.patch with quilt at once, so I had to make it manually. Here is applicable version:
-
->From db778d85fe91649735f0fb23fa1088fee745f0ec Mon Sep 17 00:00:00 2001
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Date: Fri, 21 Aug 2009 18:23:30 +0200
-Subject: [PATCH 32/47] mmc: atmel-mci: New MCI2 module support in atmel-mci driver
-
-This new revision of the IP adds some improvements to the MCI already present
-in several Atmel SOC.
-Some new registers are added and a particular way of handling DMA interaction
-lead to a new sequence in function call which is backward compatible: On MCI2,
-we must set the DMAEN bit to enable the DMA handshaking interface. This must
-happen before the data transfer command is sent.
-
-A new function is able to differentiate MCI2 code and is based on knowledge of
-processor id (cpu_is_xxx()).
-
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Signed-off-by: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
----
- drivers/mmc/host/atmel-mci.c |   85 +++++++++++++++++++++++++++++++++++++-----
- 1 files changed, 75 insertions(+), 10 deletions(-)
-
-Index: linus2/drivers/mmc/host/atmel-mci.c
-===================================================================
---- linus2.orig/drivers/mmc/host/atmel-mci.c
-+++ linus2/drivers/mmc/host/atmel-mci.c
-@@ -92,6 +92,7 @@ struct atmel_mci_dma {
-  * @need_clock_update: Update the clock rate before the next request.
-  * @need_reset: Reset controller before next request.
-  * @mode_reg: Value of the MR register.
-+ * @cfg_reg: Value of the CFG register.
-  * @bus_hz: The rate of @mck in Hz. This forms the basis for MMC bus
-  *	rate and timeout calculations.
-  * @mapbase: Physical address of the MMIO registers.
-@@ -155,6 +156,7 @@ struct atmel_mci {
- 	bool			need_clock_update;
- 	bool			need_reset;
- 	u32			mode_reg;
-+	u32			cfg_reg;
- 	unsigned long		bus_hz;
- 	unsigned long		mapbase;
- 	struct clk		*mck;
-@@ -223,6 +225,19 @@ static bool mci_has_rwproof(void)
- }
- 
- /*
-+ * The new MCI2 module isn't 100% compatible with the old MCI module,
-+ * and it has a few nice features which we want to use...
-+ */
-+static inline bool atmci_is_mci2(void)
-+{
-+	if (cpu_is_at91sam9g45())
-+		return true;
-+
-+	return false;
-+}
-+
-+
-+/*
-  * The debugfs stuff below is mostly optimized away when
-  * CONFIG_DEBUG_FS is not set.
-  */
-@@ -357,12 +372,33 @@ static int atmci_regs_show(struct seq_fi
- 			buf[MCI_BLKR / 4],
- 			buf[MCI_BLKR / 4] & 0xffff,
- 			(buf[MCI_BLKR / 4] >> 16) & 0xffff);
-+	if (atmci_is_mci2())
-+		seq_printf(s, "CSTOR:\t0x%08x\n", buf[MCI_CSTOR / 4]);
- 
- 	/* Don't read RSPR and RDR; it will consume the data there */
- 
- 	atmci_show_status_reg(s, "SR", buf[MCI_SR / 4]);
- 	atmci_show_status_reg(s, "IMR", buf[MCI_IMR / 4]);
- 
-+	if (atmci_is_mci2()) {
-+		u32 val;
-+
-+		val = buf[MCI_DMA / 4];
-+		seq_printf(s, "DMA:\t0x%08x OFFSET=%u CHKSIZE=%u%s\n",
-+				val, val & 3,
-+				((val >> 4) & 3) ?
-+					1 << (((val >> 4) & 3) + 1) : 1,
-+				val & MCI_DMAEN ? " DMAEN" : "");
-+
-+		val = buf[MCI_CFG / 4];
-+		seq_printf(s, "CFG:\t0x%08x%s%s%s%s\n",
-+				val,
-+				val & MCI_CFG_FIFOMODE_1DATA ? " FIFOMODE_ONE_DATA" : "",
-+				val & MCI_CFG_FERRCTRL_COR ? " FERRCTRL_CLEAR_ON_READ" : "",
-+				val & MCI_CFG_HSMODE ? " HSMODE" : "",
-+				val & MCI_CFG_LSYNC ? " LSYNC" : "");
-+	}
-+
- 	kfree(buf);
- 
- 	return 0;
-@@ -557,6 +593,10 @@ static void atmci_dma_complete(void *arg
- 
- 	dev_vdbg(&host->pdev->dev, "DMA complete\n");
- 
-+	if (atmci_is_mci2())
-+		/* Disable DMA hardware handshaking on MCI */
-+		mci_writel(host, DMA, mci_readl(host, DMA) & ~MCI_DMAEN);
-+
- 	atmci_dma_cleanup(host);
- 
- 	/*
-@@ -592,7 +632,7 @@ static void atmci_dma_complete(void *arg
- }
- 
- static int
--atmci_submit_data_dma(struct atmel_mci *host, struct mmc_data *data)
-+atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
- {
- 	struct dma_chan			*chan;
- 	struct dma_async_tx_descriptor	*desc;
-@@ -624,6 +664,9 @@ atmci_submit_data_dma(struct atmel_mci *
- 	if (!chan)
- 		return -ENODEV;
- 
-+	if (atmci_is_mci2())
-+		mci_writel(host, DMA, MCI_DMA_CHKSIZE(3) | MCI_DMAEN);
-+
- 	if (data->flags & MMC_DATA_READ)
- 		direction = DMA_FROM_DEVICE;
- 	else
-@@ -641,10 +684,6 @@ atmci_submit_data_dma(struct atmel_mci *
- 	host->dma.data_desc = desc;
- 	desc->callback = atmci_dma_complete;
- 	desc->callback_param = host;
--	desc->tx_submit(desc);
--
--	/* Go! */
--	chan->device->device_issue_pending(chan);
- 
- 	return 0;
- unmap_exit:
-@@ -652,13 +691,27 @@ unmap_exit:
- 	return -ENOMEM;
- }
- 
-+static void atmci_submit_data(struct atmel_mci *host)
-+{
-+	struct dma_chan			*chan = host->data_chan;
-+	struct dma_async_tx_descriptor	*desc = host->dma.data_desc;
-+
-+	if (chan) {
-+		desc->tx_submit(desc);
-+		chan->device->device_issue_pending(chan);
-+	}
-+}
-+
- #else /* CONFIG_MMC_ATMELMCI_DMA */
- 
--static int atmci_submit_data_dma(struct atmel_mci *host, struct mmc_data *data)
-+static int atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
- {
- 	return -ENOSYS;
- }
- 
-+static void atmci_submit_data(struct atmel_mci *host) {}
-+
-+
- static void atmci_stop_dma(struct atmel_mci *host)
- {
- 	/* Data transfer was stopped by the interrupt handler */
-@@ -672,7 +725,7 @@ static void atmci_stop_dma(struct atmel_
-  * Returns a mask of interrupt flags to be enabled after the whole
-  * request has been prepared.
-  */
--static u32 atmci_submit_data(struct atmel_mci *host, struct mmc_data *data)
-+static u32 atmci_prepare_data(struct atmel_mci *host, struct mmc_data *data)
- {
- 	u32 iflags;
- 
-@@ -683,7 +736,7 @@ static u32 atmci_submit_data(struct atme
- 	host->data = data;
- 
- 	iflags = ATMCI_DATA_ERROR_FLAGS;
--	if (atmci_submit_data_dma(host, data)) {
-+	if (atmci_prepare_data_dma(host, data)) {
- 		host->data_chan = NULL;
- 
- 		/*
-@@ -729,6 +782,8 @@ static void atmci_start_request(struct a
- 		mci_writel(host, CR, MCI_CR_SWRST);
- 		mci_writel(host, CR, MCI_CR_MCIEN);
- 		mci_writel(host, MR, host->mode_reg);
-+		if (atmci_is_mci2())
-+			mci_writel(host, CFG, host->cfg_reg);
- 		host->need_reset = false;
- 	}
- 	mci_writel(host, SDCR, slot->sdc_reg);
-@@ -744,6 +799,7 @@ static void atmci_start_request(struct a
- 		while (!(mci_readl(host, SR) & MCI_CMDRDY))
- 			cpu_relax();
- 	}
-+	iflags = 0;
- 	data = mrq->data;
- 	if (data) {
- 		atmci_set_timeout(host, slot, data);
-@@ -753,15 +809,17 @@ static void atmci_start_request(struct a
- 				| MCI_BLKLEN(data->blksz));
- 		dev_vdbg(&slot->mmc->class_dev, "BLKR=0x%08x\n",
- 			MCI_BCNT(data->blocks) | MCI_BLKLEN(data->blksz));
-+
-+		iflags |= atmci_prepare_data(host, data);
- 	}
- 
--	iflags = MCI_CMDRDY;
-+	iflags |= MCI_CMDRDY;
- 	cmd = mrq->cmd;
- 	cmdflags = atmci_prepare_command(slot->mmc, cmd);
- 	atmci_start_command(host, cmd, cmdflags);
- 
- 	if (data)
--		iflags |= atmci_submit_data(host, data);
-+		atmci_submit_data(host);
- 
- 	if (mrq->stop) {
- 		host->stop_cmdr = atmci_prepare_command(slot->mmc, mrq->stop);
-@@ -857,6 +915,8 @@ static void atmci_set_ios(struct mmc_hos
- 			clk_enable(host->mck);
- 			mci_writel(host, CR, MCI_CR_SWRST);
- 			mci_writel(host, CR, MCI_CR_MCIEN);
-+			if (atmci_is_mci2())
-+				mci_writel(host, CFG, host->cfg_reg);
- 		}
- 
- 		/*
-@@ -1095,6 +1155,8 @@ static void atmci_detect_change(unsigned
- 				mci_writel(host, CR, MCI_CR_SWRST);
- 				mci_writel(host, CR, MCI_CR_MCIEN);
- 				mci_writel(host, MR, host->mode_reg);
-+				if (atmci_is_mci2())
-+					mci_writel(host, CFG, host->cfg_reg);
- 
- 				host->data = NULL;
- 				host->cmd = NULL;
-@@ -1644,6 +1706,10 @@ static void atmci_configure_dma(struct a
- 	}
- 	if (!host->dma.chan)
- 		dev_notice(&host->pdev->dev, "DMA not available, using PIO\n");
-+	else
-+		dev_info(&host->pdev->dev,
-+					"Using %s for DMA transfers\n",
-+					dma_chan_name(host->dma.chan));
- }
- #else
- static void atmci_configure_dma(struct atmel_mci *host) {}
-
-
-Best regards,
-Yegor Yefremov
