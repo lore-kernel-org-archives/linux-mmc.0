@@ -1,23 +1,23 @@
 From: Ohad Ben-Cohen <ohad@bencohen.org>
 Subject: [PATCH] sdio: add MMC_CAP_VDD_165_195 host capability
-Date: Mon, 28 Sep 2009 19:55:34 +0200
-Message-ID: <1254160534.31101.1.camel@localhost>
+Date: Mon, 28 Sep 2009 19:58:34 +0200
+Message-ID: <1254160714.31101.3.camel@localhost>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f210.google.com ([209.85.218.210]:55994 "EHLO
+Received: from mail-bw0-f210.google.com ([209.85.218.210]:44561 "EHLO
 	mail-bw0-f210.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751992AbZI1RrX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2009 13:47:23 -0400
-Received: by bwz6 with SMTP id 6so1443959bwz.37
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2009 10:47:26 -0700 (PDT)
+	with ESMTP id S1751992AbZI1RuT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2009 13:50:19 -0400
+Received: by bwz6 with SMTP id 6so1445996bwz.37
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2009 10:50:22 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: akpm@linux-foundation.org
-Cc: ian@mnementh.co.uk, matt@console-pimps.org, pierre@ossman.eu, roberto.foglietta@gmail.com, david.vrabel@csr.com, linux-mmc@vger.kernel.org
+Cc: philipl@overt.org, ian@mnementh.co.uk, matt@console-pimps.org, pierre@ossman.eu, roberto.foglietta@gmail.com, david.vrabel@csr.com, linux-mmc@vger.kernel.org
 
-[resending due to mailer issues - sorry]
+[I should really ditch my mailer, I know. hope it's the last attempt. Sorry x 2]
 ---
 From: Ohad Ben-Cohen <ohad@wizery.com>
 
