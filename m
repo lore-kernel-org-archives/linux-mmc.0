@@ -1,44 +1,57 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH] Move MMCI header to amba include dir
-Date: Mon, 28 Sep 2009 20:45:38 +0200
-Message-ID: <63386a3d0909281145t509f9105x396f5d32b79e9c47@mail.gmail.com>
-References: <1253625972-19407-1-git-send-email-linus.walleij@stericsson.com>
-	 <9383297B60843144AC17878B479520F110AEE53835@SJEXCHCCR01.corp.ad.broadcom.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH] sdio: add MMC_CAP_VDD_165_195 host capability
+Date: Mon, 28 Sep 2009 22:02:27 +0200
+Message-ID: <da15981b0909281302y59011a63h9d999c7ba94bf63f@mail.gmail.com>
+References: <1254160269.10634.15.camel@localhost> <4AC0FBF0.6090007@csr.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f210.google.com ([209.85.218.210]:57762 "EHLO
+Received: from mail-bw0-f210.google.com ([209.85.218.210]:65273 "EHLO
 	mail-bw0-f210.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752797AbZI1Spg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2009 14:45:36 -0400
-Received: by bwz6 with SMTP id 6so1484385bwz.37
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2009 11:45:38 -0700 (PDT)
-In-Reply-To: <9383297B60843144AC17878B479520F110AEE53835@SJEXCHCCR01.corp.ad.broadcom.com>
+	with ESMTP id S1752919AbZI1UCo convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2009 16:02:44 -0400
+Received: by bwz6 with SMTP id 6so1538131bwz.37
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2009 13:02:47 -0700 (PDT)
+In-Reply-To: <4AC0FBF0.6090007@csr.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Branden <sbranden@broadcom.com>
-Cc: Linus Walleij <linus.walleij@stericsson.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Catalin Marinas <catalin.marinas@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: David Vrabel <david.vrabel@csr.com>, akpm@linux-foundation.org
+Cc: philipl@overt.org, ian@mnementh.co.uk, matt@console-pimps.org, pierre@ossman.eu, roberto.foglietta@gmail.com, linux-mmc@vger.kernel.org
 
-2009/9/28 Scott Branden <sbranden@broadcom.com>:
+Hi David,
 
-> You changes cause the bcmring platform to fail to compile.
+On Mon, Sep 28, 2009 at 8:09 PM, David Vrabel <david.vrabel@csr.com> wr=
+ote:
 
-The noes! Patch mailed.
+=2E..
 
-> Can you go through all the ARM platforms and make the
-> necessary adjustments with the change in header files
-> for mmc?
+> That's a fair amount of work so perhaps in the interim something like=
+ this:
+>
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -494,6 +494,9 @@ int mmc_attach_sdio(struct mmc_host *host, u32 oc=
+r)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ocr &=3D ~0x7F;
+> =A0 =A0 =A0 =A0}
+>
+> + =A0 =A0 =A0 if (ocr & MMC_VDD_165_195)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_WARNING "%s: warning: card =
+claims non-standard 1.65-1.95
+> V support"
+> +
+> =A0 =A0 =A0 =A0host->ocr =3D mmc_select_voltage(host, ocr);
+>
+> =A0 =A0 =A0 =A0/*
 
-I think bcmring was the only one, I missed it because this
-patch was boiling when bcmring got merged... Look:
 
-linux-next-work/arch/arm$ grep -r 'asm/mmc.h' . | wc -l
-0
+Thanks, that would work for us just fine.
 
-Whereas:
-linux-next-work/arch/arm$ grep -r 'linux/amba/mmci.h' . | wc -l
-10
+=46WIW,
 
-So I think I've fixed them now.
+Ack-by: Ohad Ben-Cohen <ohad@wizery.com>
 
-Linus Walleij
+
+Regards,
+Ohad.
