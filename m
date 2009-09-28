@@ -1,65 +1,35 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH] sdio: add MMC_CAP_VDD_165_195 host capability
-Date: Mon, 28 Sep 2009 19:10:48 +0100
-Message-ID: <20090928181046.GA4791@console-pimps.org>
-References: <1254160714.31101.3.camel@localhost>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH] Move MMCI header to amba include dir
+Date: Mon, 28 Sep 2009 19:17:42 +0100
+Message-ID: <20090928181742.GH10671@n2100.arm.linux.org.uk>
+References: <1253625972-19407-1-git-send-email-linus.walleij@stericsson.com> <9383297B60843144AC17878B479520F110AEE53835@SJEXCHCCR01.corp.ad.broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:47748 "EHLO
-	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752319AbZI1SLb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2009 14:11:31 -0400
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:48037 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752245AbZI1SSV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2009 14:18:21 -0400
 Content-Disposition: inline
-In-Reply-To: <1254160714.31101.3.camel@localhost>
+In-Reply-To: <9383297B60843144AC17878B479520F110AEE53835@SJEXCHCCR01.corp.ad.broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@bencohen.org>
-Cc: akpm@linux-foundation.org, philipl@overt.org, ian@mnementh.co.uk, pierre@ossman.eu, roberto.foglietta@gmail.com, david.vrabel@csr.com, linux-mmc@vger.kernel.org
+To: Scott Branden <sbranden@broadcom.com>
+Cc: Linus Walleij <linus.walleij@stericsson.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Catalin Marinas <catalin.marinas@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Mon, Sep 28, 2009 at 07:58:34PM +0200, Ohad Ben-Cohen wrote:
-> [I should really ditch my mailer, I know. hope it's the last attempt. Sorry x 2]
-> ---
-> From: Ohad Ben-Cohen <ohad@wizery.com>
+On Mon, Sep 28, 2009 at 10:11:29AM -0700, Scott Branden wrote:
+> Hi Linus,
 > 
-> To allow the usage of MMC_VDD_165_195, host capability
-> MMC_CAP_VDD_165_195 is introduced. This is necessary
-> because MMC_VDD_165_195 is currently reserved/undefined.
+> You changes cause the bcmring platform to fail to compile.
 > 
+> Can you go through all the ARM platforms and make the
+> necessary adjustments with the change in header files
+> for mmc?
 
-Have you got patches that add this capability to the TI 127x and ZOOM2
-board setup files?
+Since Linus's change has been merged, and it's a conflict caused by
+simultaneous development, you _both_ need to work towards sorting it
+out.
 
-> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
-> ---
->  drivers/mmc/core/sdio.c  |    7 +++++++
->  include/linux/mmc/host.h |    1 +
->  2 files changed, 8 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index cdb845b..a9f3ed6 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -494,6 +494,13 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
->  		ocr &= ~0x7F;
->  	}
->  
-> +	if ((ocr & MMC_VDD_165_195) && !(host->caps & MMC_CAP_VDD_165_195)) {
-> +		printk(KERN_WARNING "%s: SDIO card claims to support the "
-> +			"incompletely defined 'low voltage range'. This "
-> +			"will be ignored.\n", mmc_hostname(host));
-> +		ocr &= ~MMC_VDD_165_195;
-> +	}
-> +
->  	host->ocr = mmc_select_voltage(host, ocr);
->  
->  	/*
-
-
-I know you copied this warning from the old code but does anyone think
-it's worth making this warning a bit clearer? e.g,
-
-> +		printk(KERN_WARNING "%s: SDIO card claims to support the "
-> +			"incompletely defined 'low voltage range', but the "
-> +			"host controller does not. This voltage range"
-> +			"will be ignored.\n", mmc_hostname(host));
+Please put some time into looking at the changes and doing whatever's
+necessary to sort bcmring out.  It's quite a simple change at the
+end of the day - a move of a header file and a rename of a structure.
