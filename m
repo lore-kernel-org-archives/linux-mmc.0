@@ -1,53 +1,50 @@
 From: Pierre Ossman <pierre@ossman.eu>
-Subject: Re: [PATCH] sdio: add MMC_CAP_VDD_165_195 host capability
-Date: Tue, 29 Sep 2009 20:28:33 +0200
-Message-ID: <20090929202833.179fb521@mjolnir.ossman.eu>
-References: <1254160269.10634.15.camel@localhost>
-	<4AC0FBF0.6090007@csr.com>
-	<20090928192548.11da5c3c@fido2.homeip.net>
+Subject: Re: TMIO MMC: full patchset.
+Date: Tue, 29 Sep 2009 20:32:35 +0200
+Message-ID: <20090929203235.7426cb1f@mjolnir.ossman.eu>
+References: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
+	<20090929132058.GC6934@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-31751-1254248919-0001-2"
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-31791-1254249159-0001-2"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 82-117-125-11.tcdsl.calypso.net ([82.117.125.11]:46732 "EHLO
+Received: from 82-117-125-11.tcdsl.calypso.net ([82.117.125.11]:39816 "EHLO
 	smtp.ossman.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753047AbZI2S2f (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 29 Sep 2009 14:28:35 -0400
-In-Reply-To: <20090928192548.11da5c3c@fido2.homeip.net>
+	id S1752302AbZI2Scf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 29 Sep 2009 14:32:35 -0400
+In-Reply-To: <20090929132058.GC6934@console-pimps.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Langdale <philipl@overt.org>
-Cc: David Vrabel <david.vrabel@csr.com>, Ohad Ben-Cohen <ohad@bencohen.org>, akpm@linux-foundation.org, "p hilipl"@overt.org, ian@mnementh.co.uk, matt@console-pimps.org, roberto.foglietta@gmail.com, linux-mmc@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, magnus.damm@gmail.com, sameo@openedhand.com, pb@handhelds.org, philipp.zabel@gmail.com, Sascha Hauer <s.hauer@pengutronix.de>
 
 This is a MIME-formatted message.  If you see this text it means that your
 E-mail software does not support MIME-formatted messages.
 
---=_freyr.ossman.eu-31751-1254248919-0001-2
+--=_freyr.ossman.eu-31791-1254249159-0001-2
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, 28 Sep 2009 19:25:48 -0700
-Philip Langdale <philipl@overt.org> wrote:
+On Tue, 29 Sep 2009 14:20:58 +0100
+Matt Fleming <matt@console-pimps.org> wrote:
 
 >=20
-> Hi David,
+> I'm not sure that propagating this magical 400kHz constant around the
+> MMC code is the best way to go. It could do with a #define.
 >=20
-> Ok, that sounds reasonable, but my concern is a controller that
-> publishes support for MMC_VDD_165_195 for mmc cards but doesn't
-> claim support for SDIO cards - particularly considering the
-> signalling implications you mentioned. Now, maybe you don't see
-> this happening in the wild, but it seems to me that it has to
-> be possible. It seems that to guard against this, you'd need a
-> host cap that says "165_195 for SD" and if it's not present,
-> mask it out of the OCR when dealing with SD/IO cards.
->=20
-> Am I being too paranoid?
->=20
+> You're the second person to run into issues with the lower limit
+> initialisation patch. Does anybody know where that value came from? Is
+> it definitely the best value to use or has it just been picked out of
+> the air?
 
-There is no way the vendor of the SD controller can know what this bit
-means to the vendor of the SD/SDIO card as it is undefined. I'm afraid
-I see no safe way of supporting this bit. The only thing we can do is
-interpret it as being the same as the MMC bit, but then only with an
-opt-in configuration as we might be killing hardware with this.
+The MMC and SD specs state that init must be done at < 400 kHz. We
+originally used the lowest possible freq. the controller could handle,
+but there was one controller who went so ridiculously low that it caused
+other problems.
+
+Re this patch, I'd think it would be more sensible to lower the init
+frequency a bit than some retry logic. It is possible to init a card
+and for it to end up in a weird state, so we should have margins
+already at the first attempt.
 
 Rgds
 --=20
@@ -58,7 +55,7 @@ Rgds
   for SMTP traffic and consider using PGP for end-to-end
   encryption.
 
---=_freyr.ossman.eu-31751-1254248919-0001-2
+--=_freyr.ossman.eu-31791-1254249159-0001-2
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment; filename=signature.asc
@@ -66,9 +63,9 @@ Content-Disposition: attachment; filename=signature.asc
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.12 (GNU/Linux)
 
-iEYEARECAAYFAkrCUdUACgkQ7b8eESbyJLhNcQCg4FPtIc5KeXrUU9+ysoeuoZ3O
-PhsAoMEMaztVVOBdakO4aRod7YAT/JXE
-=Os2c
+iEYEARECAAYFAkrCUsUACgkQ7b8eESbyJLj0SgCgw2sbdOkzJM7NjTWB5DqaFQKJ
+ArgAoNSfCMPJ7ogeNWjoZifs9Ab82PLL
+=SA1b
 -----END PGP SIGNATURE-----
 
---=_freyr.ossman.eu-31751-1254248919-0001-2--
+--=_freyr.ossman.eu-31791-1254249159-0001-2--
