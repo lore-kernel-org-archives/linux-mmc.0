@@ -1,71 +1,74 @@
-From: Pierre Ossman <pierre@ossman.eu>
-Subject: Re: TMIO MMC: full patchset.
-Date: Tue, 29 Sep 2009 20:32:35 +0200
-Message-ID: <20090929203235.7426cb1f@mjolnir.ossman.eu>
-References: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
-	<20090929132058.GC6934@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-31791-1254249159-0001-2"
+From: akpm@linux-foundation.org
+Subject: [nacked] sdio-add-mmc_cap_vdd_165_195-host-capability.patch removed from -mm tree
+Date: Tue, 29 Sep 2009 12:03:58 -0700
+Message-ID: <200909291903.n8TJ3woW011062@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 82-117-125-11.tcdsl.calypso.net ([82.117.125.11]:39816 "EHLO
-	smtp.ossman.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752302AbZI2Scf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 29 Sep 2009 14:32:35 -0400
-In-Reply-To: <20090929132058.GC6934@console-pimps.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:34809 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753462AbZI2TD4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Sep 2009 15:03:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, magnus.damm@gmail.com, sameo@openedhand.com, pb@handhelds.org, philipp.zabel@gmail.com, Sascha Hauer <s.hauer@pengutronix.de>
+To: ohad@wizery.com, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
-This is a MIME-formatted message.  If you see this text it means that your
-E-mail software does not support MIME-formatted messages.
 
---=_freyr.ossman.eu-31791-1254249159-0001-2
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+The patch titled
+     sdio: add MMC_CAP_VDD_165_195 host capability
+has been removed from the -mm tree.  Its filename was
+     sdio-add-mmc_cap_vdd_165_195-host-capability.patch
 
-On Tue, 29 Sep 2009 14:20:58 +0100
-Matt Fleming <matt@console-pimps.org> wrote:
+This patch was dropped because it was nacked
 
->=20
-> I'm not sure that propagating this magical 400kHz constant around the
-> MMC code is the best way to go. It could do with a #define.
->=20
-> You're the second person to run into issues with the lower limit
-> initialisation patch. Does anybody know where that value came from? Is
-> it definitely the best value to use or has it just been picked out of
-> the air?
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-The MMC and SD specs state that init must be done at < 400 kHz. We
-originally used the lowest possible freq. the controller could handle,
-but there was one controller who went so ridiculously low that it caused
-other problems.
+------------------------------------------------------
+Subject: sdio: add MMC_CAP_VDD_165_195 host capability
+From: Ohad Ben-Cohen <ohad@wizery.com>
 
-Re this patch, I'd think it would be more sensible to lower the init
-frequency a bit than some retry logic. It is possible to init a card
-and for it to end up in a weird state, so we should have margins
-already at the first attempt.
+To allow the usage of MMC_VDD_165_195, host capability MMC_CAP_VDD_165_195
+is introduced.  This is necessary because MMC_VDD_165_195 is currently
+reserved/undefined.
 
-Rgds
---=20
-     -- Pierre Ossman
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
-  WARNING: This correspondence is being monitored by the
-  Swedish government. Make sure your server uses encryption
-  for SMTP traffic and consider using PGP for end-to-end
-  encryption.
+ drivers/mmc/core/sdio.c  |    7 +++++++
+ include/linux/mmc/host.h |    1 +
+ 2 files changed, 8 insertions(+)
 
---=_freyr.ossman.eu-31791-1254249159-0001-2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename=signature.asc
+diff -puN drivers/mmc/core/sdio.c~sdio-add-mmc_cap_vdd_165_195-host-capability drivers/mmc/core/sdio.c
+--- a/drivers/mmc/core/sdio.c~sdio-add-mmc_cap_vdd_165_195-host-capability
++++ a/drivers/mmc/core/sdio.c
+@@ -494,6 +494,13 @@ int mmc_attach_sdio(struct mmc_host *hos
+ 		ocr &= ~0x7F;
+ 	}
+ 
++	if ((ocr & MMC_VDD_165_195) && !(host->caps & MMC_CAP_VDD_165_195)) {
++		printk(KERN_WARNING "%s: SDIO card claims to support the "
++			"incompletely defined 'low voltage range'. This "
++			"will be ignored.\n", mmc_hostname(host));
++		ocr &= ~MMC_VDD_165_195;
++	}
++
+ 	host->ocr = mmc_select_voltage(host, ocr);
+ 
+ 	/*
+diff -puN include/linux/mmc/host.h~sdio-add-mmc_cap_vdd_165_195-host-capability include/linux/mmc/host.h
+--- a/include/linux/mmc/host.h~sdio-add-mmc_cap_vdd_165_195-host-capability
++++ a/include/linux/mmc/host.h
+@@ -150,6 +150,7 @@ struct mmc_host {
+ #define MMC_CAP_DISABLE		(1 << 7)	/* Can the host be disabled */
+ #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
+ #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
++#define MMC_CAP_VDD_165_195	(1 << 10)	/* Accepts MMC_VDD_165_195 */
+ 
+ 	/* host specific block data */
+ 	unsigned int		max_seg_size;	/* see blk_queue_max_segment_size */
+_
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.12 (GNU/Linux)
+Patches currently in -mm which might be from ohad@wizery.com are
 
-iEYEARECAAYFAkrCUsUACgkQ7b8eESbyJLj0SgCgw2sbdOkzJM7NjTWB5DqaFQKJ
-ArgAoNSfCMPJ7ogeNWjoZifs9Ab82PLL
-=SA1b
------END PGP SIGNATURE-----
+sdio-add-mmc_cap_vdd_165_195-host-capability.patch
 
---=_freyr.ossman.eu-31791-1254249159-0001-2--
