@@ -1,356 +1,232 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: TMIO MMC: full patchset.
-Date: Wed, 30 Sep 2009 20:41:07 +0900
-Message-ID: <aec7e5c30909300441w6ca07dd9o889590c6100b846b@mail.gmail.com>
-References: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
+From: Mahadev Cholachagudda <mgudda@gmail.com>
+Subject: [PATCH 1/1] Implementation for knowing speed_class of inserted SD
+	card from user space
+Date: Wed, 30 Sep 2009 17:22:14 +0530
+Message-ID: <bd31ea570909300452u49ec17b3h4399da986dd2f78@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=0016e645ad96b2163b0474ca01ab
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f199.google.com ([209.85.211.199]:39896 "EHLO
-	mail-yw0-f199.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754205AbZI3LlD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Sep 2009 07:41:03 -0400
-Received: by ywh37 with SMTP id 37so6094038ywh.4
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2009 04:41:07 -0700 (PDT)
-In-Reply-To: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
+Received: from mail-px0-f194.google.com ([209.85.216.194]:34043 "EHLO
+	mail-px0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754173AbZI3LwK convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Sep 2009 07:52:10 -0400
+Received: by pxi32 with SMTP id 32so5384513pxi.4
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2009 04:52:14 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>
-Cc: linux-mmc@vger.kernel.org, sameo@openedhand.com, pb@handhelds.org, philipp.zabel@gmail.com, akpm@linux-foundation.org
+To: linux-mmc@vger.kernel.org
+Cc: Pierre Ossman <pierre@ossman.eu>, Pierre Ossman <drzeus-list@drzeus.cx>, Matt Fleming <matt@console-pimps.org>
 
---0016e645ad96b2163b0474ca01ab
-Content-Type: text/plain; charset=ISO-8859-1
+Dear All,
 
-Hey Ian,
+The below patch allows an application to know the speed_class of the
+inserted SD card. Since the MMC cards do not specify speed_class, I'm
+making the speed_class to indicate as 0xFF. The coding of the
+speed_class is same as present in the SD Simplified specification.
 
-[CC akpm]
+simplified SD spec:
+http://www.sdcard.org/developers/tech/sdcard/pls/Simplified_Physical_La=
+yer_Spec.pdf
 
-On Tue, Sep 29, 2009 at 9:52 PM, Ian Molton <ian@mnementh.co.uk> wrote:
-> Hi guys,
->
-> This is the full TMIO MMC patchset, compiled, tested, checkpatch passed.
->
-> Please base all tmio based code on top of this patchset.
+See page 65 and 66
 
-I just took patch 0001->0005 for a spin on SuperH and they seem fine.
-Feel free to add an acked-by from me for the first patch. I know too
-little about the other parts to say anything useful.
+SPEED_CLASS
+This 8-bit field indicates the Speed Class and the value can be
+calculated by Pw/2.
+SPEED_CLASS Value Definition
+00h Class 0
+01h Class 2
+02h Class 4
+03h Class 6
+04h =96 FFh Reserved
+Table 4-38: Speed Class Code Field
 
-To get SuperH working I also need to update the kconfig. And to detect
-the clock rate dynamically I needed another minor patch. If you
-dislike the clock patch then I can also work around it in the board
-code for now.
+The changes were tested in our platform, which displayed the proper
+speed_class for inserted SD cards (6 of them were tested) and one
+MMCMobile card.
 
-I plan on submitting the platform data patches to the SuperH mailing
-list in the near future, but I may need to rework them somehow if you
-dislike the clock patch approach.
+The speed_class can be known by looking at sysfs entries at :
+/sys/devices/platform/nx_sdiomc.0/mmc_host/mmc0/mmc0:XXXX/speed_class
 
-Cheers,
+	This file contains the speed class of the SD/MMC card that is
+inserted. Please note that, speed_class is not applicable for MMC
+cards. This file contains a hexadecimal number. Interpretation shall
+be like as below:
+0x00 =E0 Class 0
+0x01 =E0 Class 2
+0x02 =E0 Class 4
+0x03 =E0 Class 6
+0x04 to 0xFF =E0 Reserved (currently, for MMC based cards, it is 0xFF)
 
-/ magnus
+(where in nx_sdiomc.0 is our platform driver for sdhci)
 
---0016e645ad96b2163b0474ca01ab
-Content-Type: application/octet-stream;
-	name="linux-2.6.32-rc-tmio_mmc-kconfig-superh-20090930b.patch"
-Content-Disposition: attachment;
-	filename="linux-2.6.32-rc-tmio_mmc-kconfig-superh-20090930b.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_g07zqqvo5
+Let me know if you have any comments/suggestions?
 
-RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkFkZCBTVVBFUkggdG8gdGhl
-IEtjb25maWcgZGVwZW5kZW5jaWVzIGZvciB0bWlvX21tYy4KClRoaXMgY2hhbmdlIGFsbG93cyB1
-cyB0byBkcml2ZSB0aGUgU0RISSBoYXJkd2FyZSBibG9ja3MKZm91bmQgaW4gU3VwZXJIIE1vYmls
-ZSB3aXRoIHRtaW9fbW1jLgoKU2lnbmVkLW9mZi1ieTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNv
-dXJjZS5zZT4KLS0tCgogZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnIHwgICAgMiArLQogMSBmaWxl
-IGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pCgotLS0gMDAwMS9kcml2ZXJz
-L21tYy9ob3N0L0tjb25maWcKKysrIHdvcmsvZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnCTIwMDkt
-MDktMzAgMTc6MjY6MDIuMDAwMDAwMDAwICswOTAwCkBAIC0yODgsNyArMjg4LDcgQEAgY29uZmln
-IE1NQ19TRFJJQ09IX0NTCiAKIGNvbmZpZyBNTUNfVE1JTwogCXRyaXN0YXRlICJUb3NoaWJhIE1v
-YmlsZSBJTyBDb250cm9sbGVyIChUTUlPKSBNTUMvU0QgZnVuY3Rpb24gc3VwcG9ydCIKLQlkZXBl
-bmRzIG9uIE1GRF9UTUlPIHx8IE1GRF9BU0lDMworCWRlcGVuZHMgb24gTUZEX1RNSU8gfHwgTUZE
-X0FTSUMzIHx8IFNVUEVSSAogCWhlbHAKIAkgIFRoaXMgcHJvdmlkZXMgc3VwcG9ydCBmb3IgdGhl
-IFNEL01NQyBjZWxsIGZvdW5kIGluIFRDNjM5M1hCLAogCSAgVDdMNjZYQiBhbmQgYWxzbyBIVEMg
-QVNJQzMK
---0016e645ad96b2163b0474ca01ab
-Content-Type: application/octet-stream;
-	name="linux-2.6.32-rc-tmio_mmc-clk-20090930b.patch"
-Content-Disposition: attachment;
-	filename="linux-2.6.32-rc-tmio_mmc-clk-20090930b.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_g07zv8p56
+Regards,
+Mahadev K Cholachagudda
 
-RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkV4dGVuZCB0aGUgdG1pb19t
-bWMgcGxhdGZvcm0gZGF0YSB3aXRoIGEgc3RydWN0IGNsay4KCldpdGggdGhpcyBpbiBwbGFjZSB3
-ZSBjYW4gYXNzaWduIGVhY2ggdG1pb19tbWMgZHJpdmVyCmluc3RhbmNlIHRoZWlyIG93biBTREhJ
-IGNsb2NrIGZyb20gdGhlIGJvYXJkIGNvZGUuCgpTaWduZWQtb2ZmLWJ5OiBNYWdudXMgRGFtbSA8
-ZGFtbUBvcGVuc291cmNlLnNlPgotLS0KCiBkcml2ZXJzL21tYy9ob3N0L3RtaW9fbW1jLmMgfCAg
-IDE3ICsrKysrKysrKysrKysrKy0tCiBpbmNsdWRlL2xpbnV4L21mZC90bWlvLmggICAgfCAgICAx
-ICsKIDIgZmlsZXMgY2hhbmdlZCwgMTYgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkKCi0t
-LSAwMDA2L2RyaXZlcnMvbW1jL2hvc3QvdG1pb19tbWMuYworKysgd29yay9kcml2ZXJzL21tYy9o
-b3N0L3RtaW9fbW1jLmMJMjAwOS0wOS0zMCAxNzo0MzoyOC4wMDAwMDAwMDAgKzA5MDAKQEAgLTMy
-LDYgKzMyLDcgQEAKICNpbmNsdWRlIDxsaW51eC9tbWMvaG9zdC5oPgogI2luY2x1ZGUgPGxpbnV4
-L21mZC9jb3JlLmg+CiAjaW5jbHVkZSA8bGludXgvbWZkL3RtaW8uaD4KKyNpbmNsdWRlIDxsaW51
-eC9jbGsuaD4KIAogI2luY2x1ZGUgInRtaW9fbW1jLmgiCiAKQEAgLTUzMyw3ICs1MzQsNyBAQCBz
-dGF0aWMgaW50IF9fZGV2aW5pdCB0bWlvX21tY19wcm9iZShzdHJ1CiAJCWdvdG8gb3V0OwogCiAJ
-cGRhdGEgPSBjZWxsLT5kcml2ZXJfZGF0YTsKLQlpZiAoIXBkYXRhIHx8ICFwZGF0YS0+aGNsaykK
-KwlpZiAoIXBkYXRhIHx8ICEocGRhdGEtPmhjbGsgfHwgcGRhdGEtPmNsaykpCiAJCWdvdG8gb3V0
-OwogCiAJcmV0ID0gLUVOT01FTTsKQEAgLTU1Nyw5ICs1NTgsMTUgQEAgc3RhdGljIGludCBfX2Rl
-dmluaXQgdG1pb19tbWNfcHJvYmUoc3RydQogCWlmICghaG9zdC0+Y3RsKQogCQlnb3RvIGhvc3Rf
-ZnJlZTsKIAorCWlmIChwZGF0YS0+Y2xrKSB7CisJCWNsa19lbmFibGUocGRhdGEtPmNsayk7CisJ
-CW1tYy0+Zl9tYXggPSBjbGtfZ2V0X3JhdGUocGRhdGEtPmNsayk7CisJfSBlbHNlIHsKKwkJbW1j
-LT5mX21heCA9IHBkYXRhLT5oY2xrOworCX0KKwogCW1tYy0+b3BzID0gJnRtaW9fbW1jX29wczsK
-IAltbWMtPmNhcHMgPSBNTUNfQ0FQXzRfQklUX0RBVEE7Ci0JbW1jLT5mX21heCA9IHBkYXRhLT5o
-Y2xrOwogCW1tYy0+Zl9taW4gPSBtbWMtPmZfbWF4IC8gNTEyOwogCW1tYy0+b2NyX2F2YWlsID0g
-TU1DX1ZERF8zMl8zMyB8IE1NQ19WRERfMzNfMzQ7CiAKQEAgLTU5Nyw2ICs2MDQsOCBAQCBzdGF0
-aWMgaW50IF9fZGV2aW5pdCB0bWlvX21tY19wcm9iZShzdHJ1CiAJcmV0dXJuIDA7CiAKIHVubWFw
-X2N0bDoKKwlpZiAocGRhdGEtPmNsaykKKwkJY2xrX2Rpc2FibGUocGRhdGEtPmNsayk7CiAJaW91
-bm1hcChob3N0LT5jdGwpOwogaG9zdF9mcmVlOgogCW1tY19mcmVlX2hvc3QobW1jKTsKQEAgLTYw
-NywxMiArNjE2LDE2IEBAIG91dDoKIHN0YXRpYyBpbnQgX19kZXZleGl0IHRtaW9fbW1jX3JlbW92
-ZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpkZXYpCiB7CiAJc3RydWN0IG1tY19ob3N0ICptbWMg
-PSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShkZXYpOworCXN0cnVjdCBtZmRfY2VsbAkqY2VsbCA9IChz
-dHJ1Y3QgbWZkX2NlbGwgKilkZXYtPmRldi5wbGF0Zm9ybV9kYXRhOworCXN0cnVjdCB0bWlvX21t
-Y19kYXRhICpwZGF0YSA9IGNlbGwtPmRyaXZlcl9kYXRhOwogCiAJcGxhdGZvcm1fc2V0X2RydmRh
-dGEoZGV2LCBOVUxMKTsKIAogCWlmIChtbWMpIHsKIAkJc3RydWN0IHRtaW9fbW1jX2hvc3QgKmhv
-c3QgPSBtbWNfcHJpdihtbWMpOwogCQltbWNfcmVtb3ZlX2hvc3QobW1jKTsKKwkJaWYgKHBkYXRh
-LT5jbGspCisJCQljbGtfZGlzYWJsZShwZGF0YS0+Y2xrKTsKIAkJZnJlZV9pcnEoaG9zdC0+aXJx
-LCBob3N0KTsKIAkJaW91bm1hcChob3N0LT5jdGwpOwogCQltbWNfZnJlZV9ob3N0KG1tYyk7Ci0t
-LSAwMDAzL2luY2x1ZGUvbGludXgvbWZkL3RtaW8uaAorKysgd29yay9pbmNsdWRlL2xpbnV4L21m
-ZC90bWlvLmgJMjAwOS0wOS0zMCAxNzo0MzoyOC4wMDAwMDAwMDAgKzA5MDAKQEAgLTU0LDYgKzU0
-LDcgQEAgdm9pZCB0bWlvX2NvcmVfbW1jX2Nsa19kaXYodm9pZCBfX2lvbWVtIAogICovCiBzdHJ1
-Y3QgdG1pb19tbWNfZGF0YSB7CiAJY29uc3QgdW5zaWduZWQgaW50CQloY2xrOworCXN0cnVjdCBj
-bGsJCSpjbGs7CiAJdm9pZCAoKnNldF9wd3IpKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKmhvc3Qs
-IGludCBzdGF0ZSk7CiAJdm9pZCAoKnNldF9ub19jbGtfZGl2KShzdHJ1Y3QgcGxhdGZvcm1fZGV2
-aWNlICpob3N0LCBpbnQgc3RhdGUpOwogfTsK
---0016e645ad96b2163b0474ca01ab
-Content-Type: application/octet-stream;
-	name="linux-2.6.32-rc-sh-migor-tmio_mmc-pdata-20090930c.patch"
-Content-Disposition: attachment;
-	filename="linux-2.6.32-rc-sh-migor-tmio_mmc-pdata-20090930c.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_g07zw2wy7
+diff -urNd linux-orig/drivers/mmc/core/mmc.c
+linux-current/drivers/mmc/core/mmc.c
+--- linux-orig/drivers/mmc/core/mmc.c	2009-09-30 16:52:16.973273403 +05=
+30
++++ linux-current/drivers/mmc/core/mmc.c	2009-09-30 17:06:48.321273501 =
++0530
+@@ -258,6 +258,7 @@
+ MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+ MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+ MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
++MMC_DEV_ATTR(speed_class, "0x%02x\n", card->speed_class);
 
-RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkNvbnZlcnQgdGhlIE1pZ28t
-UiBib2FyZCB0byB1c2UgdG1pb19tbWMgZm9yIHRoZQpTRCBDYXJkIGNvbm5lY3RlZCB0byBDTjkg
-aW5zdGVhZCBvZiBtbWNfc3BpLgoKU2lnbmVkLW9mZi1ieTogTWFnbnVzIERhbW0gPGRhbW1Ab3Bl
-bnNvdXJjZS5zZT4KLS0tCgogYXJjaC9zaC9ib2FyZHMvbWFjaC1taWdvci9zZXR1cC5jIHwgICA2
-MyArKysrKysrKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tCiAxIGZpbGUgY2hhbmdlZCwg
-NDAgaW5zZXJ0aW9ucygrKSwgMjMgZGVsZXRpb25zKC0pCgotLS0gMDAwMS9hcmNoL3NoL2JvYXJk
-cy9tYWNoLW1pZ29yL3NldHVwLmMKKysrIHdvcmsvYXJjaC9zaC9ib2FyZHMvbWFjaC1taWdvci9z
-ZXR1cC5jCTIwMDktMDktMzAgMTk6NTg6NDEuMDAwMDAwMDAwICswOTAwCkBAIC0xOCw4ICsxOCw2
-IEBACiAjaW5jbHVkZSA8bGludXgvZGVsYXkuaD4KICNpbmNsdWRlIDxsaW51eC9jbGsuaD4KICNp
-bmNsdWRlIDxsaW51eC9ncGlvLmg+Ci0jaW5jbHVkZSA8bGludXgvc3BpL3NwaS5oPgotI2luY2x1
-ZGUgPGxpbnV4L3NwaS9zcGlfZ3Bpby5oPgogI2luY2x1ZGUgPHZpZGVvL3NoX21vYmlsZV9sY2Rj
-Lmg+CiAjaW5jbHVkZSA8bWVkaWEvc2hfbW9iaWxlX2NldS5oPgogI2luY2x1ZGUgPG1lZGlhL292
-NzcyeC5oPgpAQCAtMzAsNiArMjgsOCBAQAogI2luY2x1ZGUgPGFzbS9zaF9rZXlzYy5oPgogI2lu
-Y2x1ZGUgPG1hY2gvbWlnb3IuaD4KICNpbmNsdWRlIDxjcHUvc2g3NzIyLmg+CisjaW5jbHVkZSA8
-bGludXgvbWZkL2NvcmUuaD4KKyNpbmNsdWRlIDxsaW51eC9tZmQvdG1pby5oPgogCiAvKiBBZGRy
-ZXNzICAgICBJUlEgIFNpemUgIEJ1cyAgRGVzY3JpcHRpb24KICAqIDB4MDAwMDAwMDAgICAgICAg
-NjRNQiAgMTYgICBOT1IgRmxhc2ggKFNQMjlQTDI1Nk4pCkBAIC0zOTAsMTcgKzM5MCwzNSBAQCBz
-dGF0aWMgc3RydWN0IHBsYXRmb3JtX2RldmljZSBtaWdvcl9jZXVfCiAJfSwKIH07CiAKLXN0cnVj
-dCBzcGlfZ3Bpb19wbGF0Zm9ybV9kYXRhIHNkY2FyZF9jbjlfcGxhdGZvcm1fZGF0YSA9IHsKLQku
-c2NrID0gR1BJT19QVEQwLAotCS5tb3NpID0gR1BJT19QVEQxLAotCS5taXNvID0gR1BJT19QVEQy
-LAotCS5udW1fY2hpcHNlbGVjdCA9IDEsCitzdGF0aWMgc3RydWN0IHRtaW9fbW1jX2RhdGEgc2Ro
-aV9jbjlfZHJpdmVyX2RhdGEgPSB7CiB9OwogCi1zdGF0aWMgc3RydWN0IHBsYXRmb3JtX2Rldmlj
-ZSBzZGNhcmRfY245X2RldmljZSA9IHsKLQkubmFtZQkJPSAic3BpX2dwaW8iLAorc3RhdGljIHN0
-cnVjdCBtZmRfY2VsbCBzZGhpX2NuOV9wbGF0Zm9ybV9kYXRhID0geworCS5kcml2ZXJfZGF0YSA9
-ICZzZGhpX2NuOV9kcml2ZXJfZGF0YSwKK307CisKK3N0YXRpYyBzdHJ1Y3QgcmVzb3VyY2Ugc2Ro
-aV9jbjlfcmVzb3VyY2VzW10gPSB7CisJWzBdID0geworCQkubmFtZQk9ICJTREhJIiwKKwkJLnN0
-YXJ0CT0gMHgwNGNlMDAwMCwKKwkJLmVuZAk9IDB4MDRjZTAxZmYsCisJCS5mbGFncwk9IElPUkVT
-T1VSQ0VfTUVNLAorCX0sCisJWzFdID0geworCQkuc3RhcnQJPSAxMDEsCisJCS5mbGFncyAgPSBJ
-T1JFU09VUkNFX0lSUSwKKwl9LAorfTsKKworc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ug
-c2RoaV9jbjlfZGV2aWNlID0geworCS5uYW1lCQk9ICJ0bWlvLW1tYyIsCisJLm51bV9yZXNvdXJj
-ZXMJPSBBUlJBWV9TSVpFKHNkaGlfY245X3Jlc291cmNlcyksCisJLnJlc291cmNlCT0gc2RoaV9j
-bjlfcmVzb3VyY2VzLAogCS5kZXYJPSB7Ci0JCS5wbGF0Zm9ybV9kYXRhCT0gJnNkY2FyZF9jbjlf
-cGxhdGZvcm1fZGF0YSwKKwkJLnBsYXRmb3JtX2RhdGEJPSAmc2RoaV9jbjlfcGxhdGZvcm1fZGF0
-YSwKKwl9LAorCS5hcmNoZGF0YSA9IHsKKwkJLmh3YmxrX2lkID0gSFdCTEtfU0RISSwKIAl9LAog
-fTsKIApAQCAtNDY3LDIwICs0ODUsMTEgQEAgc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ug
-Km1pZ29yX2RldgogCSZtaWdvcl9jZXVfZGV2aWNlLAogCSZtaWdvcl9ub3JfZmxhc2hfZGV2aWNl
-LAogCSZtaWdvcl9uYW5kX2ZsYXNoX2RldmljZSwKLQkmc2RjYXJkX2NuOV9kZXZpY2UsCisJJnNk
-aGlfY245X2RldmljZSwKIAkmbWlnb3JfY2FtZXJhWzBdLAogCSZtaWdvcl9jYW1lcmFbMV0sCiB9
-OwogCi1zdGF0aWMgc3RydWN0IHNwaV9ib2FyZF9pbmZvIG1pZ29yX3NwaV9kZXZpY2VzW10gPSB7
-Ci0JewotCQkubW9kYWxpYXMgPSAibW1jX3NwaSIsCi0JCS5tYXhfc3BlZWRfaHogPSA1MDAwMDAw
-LAotCQkuY2hpcF9zZWxlY3QgPSAwLAotCQkuY29udHJvbGxlcl9kYXRhID0gKHZvaWQgKikgR1BJ
-T19QVEQ1LAotCX0sCi19OwotCiBzdGF0aWMgaW50IF9faW5pdCBtaWdvcl9kZXZpY2VzX3NldHVw
-KHZvaWQpCiB7CiAKQEAgLTUyNSw2ICs1MzQsMTcgQEAgc3RhdGljIGludCBfX2luaXQgbWlnb3Jf
-ZGV2aWNlc19zZXR1cCh2bwogCWdwaW9fcmVxdWVzdChHUElPX1BUQTEsIE5VTEwpOwogCWdwaW9f
-ZGlyZWN0aW9uX2lucHV0KEdQSU9fUFRBMSk7CiAKKwkvKiBTREhJICovCisJZ3Bpb19yZXF1ZXN0
-KEdQSU9fRk5fU0RISUNELCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJV1AsIE5V
-TEwpOworCWdwaW9fcmVxdWVzdChHUElPX0ZOX1NESElEMywgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0
-KEdQSU9fRk5fU0RISUQyLCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJRDEsIE5V
-TEwpOworCWdwaW9fcmVxdWVzdChHUElPX0ZOX1NESElEMCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0
-KEdQSU9fRk5fU0RISUNNRCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISUNMSywg
-TlVMTCk7CisJc2RoaV9jbjlfZHJpdmVyX2RhdGEuY2xrID0gY2xrX2dldChOVUxMLCAic2RoaTAi
-KTsKKwogCS8qIFRvdWNoIFBhbmVsICovCiAJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fSVJRNiwgTlVM
-TCk7CiAKQEAgLTYxMiw5ICs2MzIsNiBAQCBzdGF0aWMgaW50IF9faW5pdCBtaWdvcl9kZXZpY2Vz
-X3NldHVwKHZvCiAJaTJjX3JlZ2lzdGVyX2JvYXJkX2luZm8oMCwgbWlnb3JfaTJjX2RldmljZXMs
-CiAJCQkJQVJSQVlfU0laRShtaWdvcl9pMmNfZGV2aWNlcykpOwogCi0Jc3BpX3JlZ2lzdGVyX2Jv
-YXJkX2luZm8obWlnb3Jfc3BpX2RldmljZXMsCi0JCQkJQVJSQVlfU0laRShtaWdvcl9zcGlfZGV2
-aWNlcykpOwotCiAJcmV0dXJuIHBsYXRmb3JtX2FkZF9kZXZpY2VzKG1pZ29yX2RldmljZXMsIEFS
-UkFZX1NJWkUobWlnb3JfZGV2aWNlcykpOwogfQogYXJjaF9pbml0Y2FsbChtaWdvcl9kZXZpY2Vz
-X3NldHVwKTsK
---0016e645ad96b2163b0474ca01ab
-Content-Type: application/octet-stream;
-	name="linux-2.6.32-rc-sh-ap325rxa-tmio_mmc-pdata-20090930c.patch"
-Content-Disposition: attachment;
-	filename="linux-2.6.32-rc-sh-ap325rxa-tmio_mmc-pdata-20090930c.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_g07zwtz38
+ static struct attribute *mmc_std_attrs[] =3D {
+ 	&dev_attr_cid.attr,
+@@ -269,6 +270,7 @@
+ 	&dev_attr_name.attr,
+ 	&dev_attr_oemid.attr,
+ 	&dev_attr_serial.attr,
++	&dev_attr_speed_class.attr,
+ 	NULL,
+ };
 
-RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkNvbnZlcnQgdGhlIEFQMzI1
-IGJvYXJkIHRvIHVzZSB0bWlvX21tYyBmb3IgdGhlClNEIENhcmQgY29ubmVjdGVkIHRvIENOMyBp
-bnN0ZWFkIG9mIG1tY19zcGkuCgpTaWduZWQtb2ZmLWJ5OiBNYWdudXMgRGFtbSA8ZGFtbUBvcGVu
-c291cmNlLnNlPgotLS0KCiBhcmNoL3NoL2JvYXJkcy9ib2FyZC1hcDMyNXJ4YS5jIHwgICA2MyAr
-KysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0KIDEgZmlsZSBjaGFuZ2VkLCA0
-MCBpbnNlcnRpb25zKCspLCAyMyBkZWxldGlvbnMoLSkKCi0tLSAwMDAxL2FyY2gvc2gvYm9hcmRz
-L2JvYXJkLWFwMzI1cnhhLmMKKysrIHdvcmsvYXJjaC9zaC9ib2FyZHMvYm9hcmQtYXAzMjVyeGEu
-YwkyMDA5LTA5LTMwIDIwOjA2OjU5LjAwMDAwMDAwMCArMDkwMApAQCAtMjAsOCArMjAsNiBAQAog
-I2luY2x1ZGUgPGxpbnV4L2kyYy5oPgogI2luY2x1ZGUgPGxpbnV4L3Ntc2M5MTF4Lmg+CiAjaW5j
-bHVkZSA8bGludXgvZ3Bpby5oPgotI2luY2x1ZGUgPGxpbnV4L3NwaS9zcGkuaD4KLSNpbmNsdWRl
-IDxsaW51eC9zcGkvc3BpX2dwaW8uaD4KICNpbmNsdWRlIDxtZWRpYS9vdjc3MnguaD4KICNpbmNs
-dWRlIDxtZWRpYS9zb2NfY2FtZXJhLmg+CiAjaW5jbHVkZSA8bWVkaWEvc29jX2NhbWVyYV9wbGF0
-Zm9ybS5oPgpAQCAtMzAsNiArMjgsOCBAQAogI2luY2x1ZGUgPGFzbS9pby5oPgogI2luY2x1ZGUg
-PGFzbS9jbG9jay5oPgogI2luY2x1ZGUgPGNwdS9zaDc3MjMuaD4KKyNpbmNsdWRlIDxsaW51eC9t
-ZmQvY29yZS5oPgorI2luY2x1ZGUgPGxpbnV4L21mZC90bWlvLmg+CiAKIHN0YXRpYyBzdHJ1Y3Qg
-c21zYzkxMXhfcGxhdGZvcm1fY29uZmlnIHNtc2M5MTF4X2NvbmZpZyA9IHsKIAkucGh5X2ludGVy
-ZmFjZQk9IFBIWV9JTlRFUkZBQ0VfTU9ERV9NSUksCkBAIC00MDksMTcgKzQwOSwzNSBAQCBzdGF0
-aWMgc3RydWN0IHBsYXRmb3JtX2RldmljZSBjZXVfZGV2aWNlCiAJfSwKIH07CiAKLXN0cnVjdCBz
-cGlfZ3Bpb19wbGF0Zm9ybV9kYXRhIHNkY2FyZF9jbjNfcGxhdGZvcm1fZGF0YSA9IHsKLQkuc2Nr
-ID0gR1BJT19QVEQwLAotCS5tb3NpID0gR1BJT19QVEQxLAotCS5taXNvID0gR1BJT19QVEQyLAot
-CS5udW1fY2hpcHNlbGVjdCA9IDEsCitzdGF0aWMgc3RydWN0IHJlc291cmNlIHNkaGkwX2NuM19y
-ZXNvdXJjZXNbXSA9IHsKKwlbMF0gPSB7CisJCS5uYW1lCT0gIlNESEkwIiwKKwkJLnN0YXJ0CT0g
-MHgwNGNlMDAwMCwKKwkJLmVuZAk9IDB4MDRjZTAxZmYsCisJCS5mbGFncwk9IElPUkVTT1VSQ0Vf
-TUVNLAorCX0sCisJWzFdID0geworCQkuc3RhcnQJPSAxMDEsCisJCS5mbGFncyAgPSBJT1JFU09V
-UkNFX0lSUSwKKwl9LAorfTsKKworc3RhdGljIHN0cnVjdCB0bWlvX21tY19kYXRhIHNkaGkwX2Nu
-M19kcml2ZXJfZGF0YSA9IHsKK307CisKK3N0cnVjdCBtZmRfY2VsbCBzZGhpMF9jbjNfcGxhdGZv
-cm1fZGF0YSA9IHsKKwkuZHJpdmVyX2RhdGEgPSAmc2RoaTBfY24zX2RyaXZlcl9kYXRhLAogfTsK
-IAotc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ugc2RjYXJkX2NuM19kZXZpY2UgPSB7Ci0J
-Lm5hbWUJCT0gInNwaV9ncGlvIiwKK3N0YXRpYyBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlIHNkaGkw
-X2NuM19kZXZpY2UgPSB7CisJLm5hbWUJCT0gInRtaW8tbW1jIiwKKwkubnVtX3Jlc291cmNlcwk9
-IEFSUkFZX1NJWkUoc2RoaTBfY24zX3Jlc291cmNlcyksCisJLnJlc291cmNlCT0gc2RoaTBfY24z
-X3Jlc291cmNlcywKIAkuZGV2CT0gewotCQkucGxhdGZvcm1fZGF0YQk9ICZzZGNhcmRfY24zX3Bs
-YXRmb3JtX2RhdGEsCisJCS5wbGF0Zm9ybV9kYXRhCT0gJnNkaGkwX2NuM19wbGF0Zm9ybV9kYXRh
-LAorCX0sCisJLmFyY2hkYXRhID0geworCQkuaHdibGtfaWQgPSBIV0JMS19TREhJMCwKIAl9LAog
-fTsKIApAQCAtNDcwLDIwICs0ODgsMTEgQEAgc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ug
-KmFwMzI1cnhhXwogCSZsY2RjX2RldmljZSwKIAkmY2V1X2RldmljZSwKIAkmbmFuZF9mbGFzaF9k
-ZXZpY2UsCi0JJnNkY2FyZF9jbjNfZGV2aWNlLAorCSZzZGhpMF9jbjNfZGV2aWNlLAogCSZhcDMy
-NXJ4YV9jYW1lcmFbMF0sCiAJJmFwMzI1cnhhX2NhbWVyYVsxXSwKIH07CiAKLXN0YXRpYyBzdHJ1
-Y3Qgc3BpX2JvYXJkX2luZm8gYXAzMjVyeGFfc3BpX2RldmljZXNbXSA9IHsKLQl7Ci0JCS5tb2Rh
-bGlhcyA9ICJtbWNfc3BpIiwKLQkJLm1heF9zcGVlZF9oeiA9IDUwMDAwMDAsCi0JCS5jaGlwX3Nl
-bGVjdCA9IDAsCi0JCS5jb250cm9sbGVyX2RhdGEgPSAodm9pZCAqKSBHUElPX1BURDUsCi0JfSwK
-LX07Ci0KIHN0YXRpYyBpbnQgX19pbml0IGFwMzI1cnhhX2RldmljZXNfc2V0dXAodm9pZCkKIHsK
-IAkvKiBMRDMgYW5kIExENCBMRURzICovCkBAIC01NzgsMTIgKzU4NywyMCBAQCBzdGF0aWMgaW50
-IF9faW5pdCBhcDMyNXJ4YV9kZXZpY2VzX3NldHVwCiAKIAlwbGF0Zm9ybV9yZXNvdXJjZV9zZXR1
-cF9tZW1vcnkoJmNldV9kZXZpY2UsICJjZXUiLCA0IDw8IDIwKTsKIAorCS8qIFNESEkwICovCisJ
-Z3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBDRF9QVEQsIE5VTEwpOworCWdwaW9fcmVxdWVzdChH
-UElPX0ZOX1NESEkwV1BfUFRELCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMEQz
-X1BURCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBEMl9QVEQsIE5VTEwpOwor
-CWdwaW9fcmVxdWVzdChHUElPX0ZOX1NESEkwRDFfUFRELCBOVUxMKTsKKwlncGlvX3JlcXVlc3Qo
-R1BJT19GTl9TREhJMEQwX1BURCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBD
-TURfUFRELCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMENMS19QVEQsIE5VTEwp
-OworCXNkaGkwX2NuM19kcml2ZXJfZGF0YS5jbGsgPSBjbGtfZ2V0KE5VTEwsICJzZGhpMCIpOwor
-CiAJaTJjX3JlZ2lzdGVyX2JvYXJkX2luZm8oMCwgYXAzMjVyeGFfaTJjX2RldmljZXMsCiAJCQkJ
-QVJSQVlfU0laRShhcDMyNXJ4YV9pMmNfZGV2aWNlcykpOwogCi0Jc3BpX3JlZ2lzdGVyX2JvYXJk
-X2luZm8oYXAzMjVyeGFfc3BpX2RldmljZXMsCi0JCQkJQVJSQVlfU0laRShhcDMyNXJ4YV9zcGlf
-ZGV2aWNlcykpOwotCiAJcmV0dXJuIHBsYXRmb3JtX2FkZF9kZXZpY2VzKGFwMzI1cnhhX2Rldmlj
-ZXMsCiAJCQkJQVJSQVlfU0laRShhcDMyNXJ4YV9kZXZpY2VzKSk7CiB9Cg==
---0016e645ad96b2163b0474ca01ab
-Content-Type: application/octet-stream;
-	name="linux-2.6.32-rc-sh-se7724-tmio_mmc-pdata-20090930c.patch"
-Content-Disposition: attachment;
-	filename="linux-2.6.32-rc-sh-se7724-tmio_mmc-pdata-20090930c.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_g07zxk2p9
+@@ -454,6 +456,12 @@
+ 		mmc_set_bus_width(card->host, bus_width);
+ 	}
 
-RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkFkZCBTRCBDYXJkIHN1cHBv
-cnQgdG8gdGhlIHNlNzcyNCBib2FyZCB1c2luZyB0aGUKdG1pb19tbWMgZHJpdmVyIGhvb2tlZCB1
-cCB0byBTREhJMCBhbmQgQ043LgoKU2lnbmVkLW9mZi1ieTogTWFnbnVzIERhbW0gPGRhbW1Ab3Bl
-bnNvdXJjZS5zZT4KLS0tCgogYXJjaC9zaC9ib2FyZHMvbWFjaC1zZS83NzI0L3NldHVwLmMgfCAg
-IDQ2ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCiAxIGZpbGUgY2hhbmdlZCwg
-NDYgaW5zZXJ0aW9ucygrKQoKLS0tIDAwMDEvYXJjaC9zaC9ib2FyZHMvbWFjaC1zZS83NzI0L3Nl
-dHVwLmMKKysrIHdvcmsvYXJjaC9zaC9ib2FyZHMvbWFjaC1zZS83NzI0L3NldHVwLmMJMjAwOS0w
-OS0zMCAyMDoxMDoyOC4wMDAwMDAwMDAgKzA5MDAKQEAgLTIwLDYgKzIwLDggQEAKICNpbmNsdWRl
-IDxsaW51eC9ncGlvLmg+CiAjaW5jbHVkZSA8bGludXgvaW5wdXQuaD4KICNpbmNsdWRlIDxsaW51
-eC91c2IvcjhhNjY1OTcuaD4KKyNpbmNsdWRlIDxsaW51eC9tZmQvY29yZS5oPgorI2luY2x1ZGUg
-PGxpbnV4L21mZC90bWlvLmg+CiAjaW5jbHVkZSA8dmlkZW8vc2hfbW9iaWxlX2xjZGMuaD4KICNp
-bmNsdWRlIDxtZWRpYS9zaF9tb2JpbGVfY2V1Lmg+CiAjaW5jbHVkZSA8c291bmQvc2hfZnNpLmg+
-CkBAIC00NDgsNiArNDUwLDM4IEBAIHN0YXRpYyBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlIHNoNzcy
-NF91c2IKIAkucmVzb3VyY2UJPSBzaDc3MjRfdXNiMV9nYWRnZXRfcmVzb3VyY2VzLAogfTsKIAor
-c3RhdGljIHN0cnVjdCByZXNvdXJjZSBzZGhpMF9jbjdfcmVzb3VyY2VzW10gPSB7CisJWzBdID0g
-eworCQkubmFtZQk9ICJTREhJMCIsCisJCS5zdGFydCAgPSAweDA0Y2UwMDAwLAorCQkuZW5kICAg
-ID0gMHgwNGNlMDFmZiwKKwkJLmZsYWdzICA9IElPUkVTT1VSQ0VfTUVNLAorCX0sCisJWzFdID0g
-eworCQkuc3RhcnQgID0gMTAxLAorCQkuZmxhZ3MgID0gSU9SRVNPVVJDRV9JUlEsCisJfSwKK307
-CisKK3N0cnVjdCB0bWlvX21tY19kYXRhIHNkaGkwX2NuN19kcml2ZXJfZGF0YSA9IHsKK307CisK
-K3N0cnVjdCBtZmRfY2VsbCBzZGhpMF9jbjdfcGxhdGZvcm1fZGF0YSA9IHsKKwkuZHJpdmVyX2Rh
-dGEgPSAmc2RoaTBfY243X2RyaXZlcl9kYXRhLAorfTsKKworc3RhdGljIHN0cnVjdCBwbGF0Zm9y
-bV9kZXZpY2Ugc2RoaTBfY243X2RldmljZSA9IHsKKwkubmFtZSAgICAgICAgICAgPSAidG1pby1t
-bWMiLAorCS5udW1fcmVzb3VyY2VzICA9IEFSUkFZX1NJWkUoc2RoaTBfY243X3Jlc291cmNlcyks
-CisJLnJlc291cmNlICAgICAgID0gc2RoaTBfY243X3Jlc291cmNlcywKKwkuZGV2ICAgID0gewor
-CQkucGxhdGZvcm1fZGF0YSAgPSAmc2RoaTBfY243X3BsYXRmb3JtX2RhdGEsCisJfSwKKwkuYXJj
-aGRhdGEgPSB7CisJCS5od2Jsa19pZCA9IEhXQkxLX1NESEkwLAorCX0sCit9OworCiBzdGF0aWMg
-c3RydWN0IHBsYXRmb3JtX2RldmljZSAqbXM3NzI0c2VfZGV2aWNlc1tdIF9faW5pdGRhdGEgPSB7
-CiAJJmhlYXJ0YmVhdF9kZXZpY2UsCiAJJnNtYzkxeF9ldGhfZGV2aWNlLApAQCAtNDYwLDYgKzQ5
-NCw3IEBAIHN0YXRpYyBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICptczc3MjRzZV8KIAkmc2g3NzI0
-X3VzYjBfaG9zdF9kZXZpY2UsCiAJJnNoNzcyNF91c2IxX2dhZGdldF9kZXZpY2UsCiAJJmZzaV9k
-ZXZpY2UsCisJJnNkaGkwX2NuN19kZXZpY2UsCiB9OwogCiAjZGVmaW5lIEVFUFJPTV9PUCAgIDB4
-QkEyMDYwMDAKQEAgLTY5OCw2ICs3MzMsMTcgQEAgc3RhdGljIGludCBfX2luaXQgZGV2aWNlc19z
-ZXR1cCh2b2lkKQogCWNsa19zZXRfcmF0ZSgmZnNpbWNrYV9jbGssIDExMDAwKTsKIAljbGtfcHV0
-KGZzaWFfY2xrKTsKIAorCS8qIFNESEkwIGNvbm5lY3RlZCB0byBjbjcgKi8KKwlncGlvX3JlcXVl
-c3QoR1BJT19GTl9TREhJMENELCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMFdQ
-LCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMEQzLCBOVUxMKTsKKwlncGlvX3Jl
-cXVlc3QoR1BJT19GTl9TREhJMEQyLCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJ
-MEQxLCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMEQwLCBOVUxMKTsKKwlncGlv
-X3JlcXVlc3QoR1BJT19GTl9TREhJMENNRCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5f
-U0RISTBDTEssIE5VTEwpOworCXNkaGkwX2NuN19kcml2ZXJfZGF0YS5jbGsgPSBjbGtfZ2V0KE5V
-TEwsICJzZGhpMCIpOworCiAJLyoKIAkgKiBlbmFibGUgU0gtRXRoCiAJICoK
---0016e645ad96b2163b0474ca01ab
-Content-Type: application/octet-stream;
-	name="linux-2.6.32-rc-sh-kfr2r09-tmio_mmc-pdata-20090930c.patch"
-Content-Disposition: attachment;
-	filename="linux-2.6.32-rc-sh-kfr2r09-tmio_mmc-pdata-20090930c.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_g07zxzjs10
++	/*
++	 * to indicate speed_class reserved, as MMC card do not indicate
++	 * any speed_class
++	 * */
++	card->speed_class =3D 0xFF;
++
+ 	if (!oldcard)
+ 		host->card =3D card;
 
-RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkFkZCBTRCBDYXJkIHN1cHBv
-cnQgdG8gdGhlIGtmcjJyMDkgYm9hcmQgdXNpbmcgdGhlCnRtaW9fbW1jIGRyaXZlciBob29rZWQg
-dXAgdG8gU0RISTAgYW5kIHljMzA0LgoKU2lnbmVkLW9mZi1ieTogTWFnbnVzIERhbW0gPGRhbW1A
-b3BlbnNvdXJjZS5zZT4KLS0tCgogYXJjaC9zaC9ib2FyZHMvbWFjaC1rZnIycjA5L3NldHVwLmMg
-fCAgIDQ2ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCiAxIGZpbGUgY2hhbmdl
-ZCwgNDYgaW5zZXJ0aW9ucygrKQoKLS0tIDAwMDEvYXJjaC9zaC9ib2FyZHMvbWFjaC1rZnIycjA5
-L3NldHVwLmMKKysrIHdvcmsvYXJjaC9zaC9ib2FyZHMvbWFjaC1rZnIycjA5L3NldHVwLmMJMjAw
-OS0wOS0zMCAyMDoxNTozMy4wMDAwMDAwMDAgKzA5MDAKQEAgLTE5LDYgKzE5LDggQEAKICNpbmNs
-dWRlIDxsaW51eC9pMmMuaD4KICNpbmNsdWRlIDxsaW51eC91c2IvcjhhNjY1OTcuaD4KICNpbmNs
-dWRlIDx2aWRlby9zaF9tb2JpbGVfbGNkYy5oPgorI2luY2x1ZGUgPGxpbnV4L21mZC9jb3JlLmg+
-CisjaW5jbHVkZSA8bGludXgvbWZkL3RtaW8uaD4KICNpbmNsdWRlIDxhc20vY2xvY2suaD4KICNp
-bmNsdWRlIDxhc20vbWFjaHZlYy5oPgogI2luY2x1ZGUgPGFzbS9pby5oPgpAQCAtMjEyLDExICsy
-MTQsNDQgQEAgc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Uga2ZyMnIwOV91cwogCS5yZXNv
-dXJjZQk9IGtmcjJyMDlfdXNiMF9nYWRnZXRfcmVzb3VyY2VzLAogfTsKIAorc3RhdGljIHN0cnVj
-dCByZXNvdXJjZSBrZnIycjA5X3NoX3NkaGkwX3Jlc291cmNlc1tdID0geworCVswXSA9IHsKKwkJ
-Lm5hbWUJPSAiU0RISTAiLAorCQkuc3RhcnQgID0gMHgwNGNlMDAwMCwKKwkJLmVuZCAgICA9IDB4
-MDRjZTAxZmYsCisJCS5mbGFncyAgPSBJT1JFU09VUkNFX01FTSwKKwl9LAorCVsxXSA9IHsKKwkJ
-LnN0YXJ0ICA9IDEwMSwKKwkJLmZsYWdzICA9IElPUkVTT1VSQ0VfSVJRLAorCX0sCit9OworCitz
-dHJ1Y3QgdG1pb19tbWNfZGF0YSBrZnIycjA5X3NoX3NkaGkwX2RyaXZlcl9kYXRhID0geworfTsK
-Kworc3RydWN0IG1mZF9jZWxsIGtmcjJyMDlfc2hfc2RoaTBfcGxhdGZvcm1fZGF0YSA9IHsKKwku
-ZHJpdmVyX2RhdGEgPSAma2ZyMnIwOV9zaF9zZGhpMF9kcml2ZXJfZGF0YSwKK307CisKK3N0YXRp
-YyBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlIGtmcjJyMDlfc2hfc2RoaTBfZGV2aWNlID0geworCS5u
-YW1lICAgICAgICAgICA9ICJ0bWlvLW1tYyIsCisJLm51bV9yZXNvdXJjZXMgID0gQVJSQVlfU0la
-RShrZnIycjA5X3NoX3NkaGkwX3Jlc291cmNlcyksCisJLnJlc291cmNlICAgICAgID0ga2ZyMnIw
-OV9zaF9zZGhpMF9yZXNvdXJjZXMsCisJLmRldiAgICA9IHsKKwkJLnBsYXRmb3JtX2RhdGEgID0g
-JmtmcjJyMDlfc2hfc2RoaTBfcGxhdGZvcm1fZGF0YSwKKwl9LAorCS5hcmNoZGF0YSA9IHsKKwkJ
-Lmh3YmxrX2lkID0gSFdCTEtfU0RISTAsCisJfSwKK307CisKIHN0YXRpYyBzdHJ1Y3QgcGxhdGZv
-cm1fZGV2aWNlICprZnIycjA5X2RldmljZXNbXSBfX2luaXRkYXRhID0gewogCSZrZnIycjA5X25v
-cl9mbGFzaF9kZXZpY2UsCiAJJmtmcjJyMDlfbmFuZF9mbGFzaF9kZXZpY2UsCiAJJmtmcjJyMDlf
-c2hfa2V5c2NfZGV2aWNlLAogCSZrZnIycjA5X3NoX2xjZGNfZGV2aWNlLAorCSZrZnIycjA5X3No
-X3NkaGkwX2RldmljZSwKIH07CiAKICNkZWZpbmUgQlNDX0NTMEJDUiAweGZlYzEwMDA0CkBAIC0z
-NjEsNiArMzk2LDE3IEBAIHN0YXRpYyBpbnQgX19pbml0IGtmcjJyMDlfZGV2aWNlc19zZXR1cCgK
-IAlpZiAoa2ZyMnIwOV91c2IwX2dhZGdldF9zZXR1cCgpID09IDApCiAJCXBsYXRmb3JtX2Rldmlj
-ZV9yZWdpc3Rlcigma2ZyMnIwOV91c2IwX2dhZGdldF9kZXZpY2UpOwogCisJLyogU0RISTAgY29u
-bmVjdGVkIHRvIHljMzA0ICovCisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBDRCwgTlVMTCk7
-CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBXUCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQ
-SU9fRk5fU0RISTBEMywgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBEMiwgTlVM
-TCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBEMSwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0
-KEdQSU9fRk5fU0RISTBEMCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBDTUQs
-IE5VTEwpOworCWdwaW9fcmVxdWVzdChHUElPX0ZOX1NESEkwQ0xLLCBOVUxMKTsKKwlrZnIycjA5
-X3NoX3NkaGkwX2RyaXZlcl9kYXRhLmNsayA9IGNsa19nZXQoTlVMTCwgInNkaGkwIik7CisKIAly
-ZXR1cm4gcGxhdGZvcm1fYWRkX2RldmljZXMoa2ZyMnIwOV9kZXZpY2VzLAogCQkJCSAgICBBUlJB
-WV9TSVpFKGtmcjJyMDlfZGV2aWNlcykpOwogfQo=
---0016e645ad96b2163b0474ca01ab--
+diff -urNd linux-orig/drivers/mmc/core/sd.c linux-current/drivers/mmc/c=
+ore/sd.c
+--- linux-orig/drivers/mmc/core/sd.c	2009-09-30 16:52:10.588335882 +053=
+0
++++ linux-current/drivers/mmc/core/sd.c	2009-09-30 17:03:59.458273462 +=
+0530
+@@ -294,6 +294,7 @@
+ MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+ MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+ MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
++MMC_DEV_ATTR(speed_class, "0x%02x\n", card->speed_class);
+
+
+ static struct attribute *sd_std_attrs[] =3D {
+@@ -307,6 +308,7 @@
+ 	&dev_attr_name.attr,
+ 	&dev_attr_oemid.attr,
+ 	&dev_attr_serial.attr,
++	&dev_attr_speed_class.attr,
+ 	NULL,
+ };
+
+@@ -508,6 +510,20 @@
+ 		}
+ 	}
+
++	if (!oldcard) {
++		/* get the speed class */
++		u8 *sd_status;
++		sd_status =3D kmalloc(64, GFP_KERNEL);
++		if(!sd_status)
++			goto free_card;
++
++		err =3D mmc_app_sd_status(card, sd_status);
++		card->speed_class =3D sd_status[8];
++		kfree(sd_status);
++		if(err)
++			goto free_card;
++	}
++
+ 	if (!oldcard)
+ 		host->card =3D card;
+
+diff -urNd linux-orig/drivers/mmc/core/sd_ops.c
+linux-current/drivers/mmc/core/sd_ops.c
+--- linux-orig/drivers/mmc/core/sd_ops.c	2009-09-30 16:52:22.195336136 =
++0530
++++ linux-current/drivers/mmc/core/sd_ops.c	2009-09-30 17:01:11.9012742=
+05 +0530
+@@ -348,3 +348,50 @@
+ 	return 0;
+ }
+
++int mmc_app_sd_status(struct mmc_card *card, u8 *sd_status)
++{
++	int err;
++	struct mmc_request mrq;
++	struct mmc_command cmd;
++	struct mmc_data data;
++	struct scatterlist sg;
++
++	BUG_ON(!card);
++	BUG_ON(!card->host);
++	BUG_ON(!sd_status);
++
++	/* NOTE: caller guarantees sd_status is heap-allocated */
++	err =3D mmc_app_cmd(card->host, card);
++	if (err)
++		return err;
++
++	memset(&mrq, 0, sizeof(struct mmc_request));
++	memset(&cmd, 0, sizeof(struct mmc_command));
++	memset(&data, 0, sizeof(struct mmc_data));
++
++	mrq.cmd =3D &cmd;
++	mrq.data =3D &data;
++
++	cmd.opcode =3D 13;
++	cmd.arg =3D 0;
++	cmd.flags =3D MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
++
++	data.blksz =3D 64;
++	data.blocks =3D 1;
++	data.flags =3D MMC_DATA_READ;
++	data.sg =3D &sg;
++	data.sg_len =3D 1;
++
++	sg_init_one(&sg, sd_status, 64);
++
++	mmc_set_data_timeout(&data, card);
++
++	mmc_wait_for_req(card->host, &mrq);
++
++	if (cmd.error)
++		return cmd.error;
++	if (data.error)
++		return data.error;
++	return 0;
++}
++
+diff -urNd linux-orig/drivers/mmc/core/sd_ops.h
+linux-current/drivers/mmc/core/sd_ops.h
+--- linux-orig/drivers/mmc/core/sd_ops.h	2009-09-30 16:52:25.708273492 =
++0530
++++ linux-current/drivers/mmc/core/sd_ops.h	2009-09-30 16:59:04.7672738=
+89 +0530
+@@ -19,6 +19,7 @@
+ int mmc_app_send_scr(struct mmc_card *card, u32 *scr);
+ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+ 	u8 value, u8 *resp);
++int mmc_app_sd_status(struct mmc_card *card, u8 *sd_status);
+
+ #endif
+
+diff -urNd linux-orig/include/linux/mmc/card.h
+linux-current/include/linux/mmc/card.h
+--- linux-orig/include/linux/mmc/card.h	2009-09-30 16:51:59.230273430 +=
+0530
++++ linux-current/include/linux/mmc/card.h	2009-09-30 16:53:54.16227301=
+3 +0530
+@@ -111,6 +111,7 @@
+ 	unsigned		num_info;	/* number of info strings */
+ 	const char		**info;		/* info strings */
+ 	struct sdio_func_tuple	*tuples;	/* unknown common tuples */
++	u32 speed_class; /* speed_class for SD cards, for MMC, it is always
+reserved */
+
+ 	struct dentry		*debugfs_root;
+ };
