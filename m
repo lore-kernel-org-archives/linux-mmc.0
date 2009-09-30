@@ -1,142 +1,356 @@
-From: Mahadev Cholachagudda <mgudda@gmail.com>
-Subject: Re: [PATCH 1/1] CMD12 error recovery support for SD cards
-Date: Wed, 30 Sep 2009 16:48:26 +0530
-Message-ID: <bd31ea570909300418y4f12bf3bu2d145b94a93319e@mail.gmail.com>
-References: <bd31ea570909160334u1b17a068hd8be89c7035232f9@mail.gmail.com>
-	 <bd31ea570909160339l5f996e9eh1f87abdbe527a404@mail.gmail.com>
-	 <20090923102715.GA4307@console-pimps.org>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: TMIO MMC: full patchset.
+Date: Wed, 30 Sep 2009 20:41:07 +0900
+Message-ID: <aec7e5c30909300441w6ca07dd9o889590c6100b846b@mail.gmail.com>
+References: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/mixed; boundary=0016e645ad96b2163b0474ca01ab
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f194.google.com ([209.85.216.194]:55352 "EHLO
-	mail-px0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751136AbZI3LSW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Sep 2009 07:18:22 -0400
-Received: by pxi32 with SMTP id 32so5365808pxi.4
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2009 04:18:26 -0700 (PDT)
-In-Reply-To: <20090923102715.GA4307@console-pimps.org>
+Received: from mail-yw0-f199.google.com ([209.85.211.199]:39896 "EHLO
+	mail-yw0-f199.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754205AbZI3LlD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Sep 2009 07:41:03 -0400
+Received: by ywh37 with SMTP id 37so6094038ywh.4
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2009 04:41:07 -0700 (PDT)
+In-Reply-To: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org
-Cc: Pierre Ossman <pierre@ossman.eu>, Pierre Ossman <drzeus-list@drzeus.cx>
+To: Ian Molton <ian@mnementh.co.uk>
+Cc: linux-mmc@vger.kernel.org, sameo@openedhand.com, pb@handhelds.org, philipp.zabel@gmail.com, akpm@linux-foundation.org
 
-Dear Matt,
-Thank you very much. Attached is the re-written patch with comments
-included. This has been tested in our platform, where it recovers from
-CMD12 cmd_conflict errors.
+--0016e645ad96b2163b0474ca01ab
+Content-Type: text/plain; charset=ISO-8859-1
 
-Regards,
-Mahadev
+Hey Ian,
 
+[CC akpm]
 
-diff -urNd linux-orig/drivers/mmc/card/block.c
-linux-current/drivers/mmc/card/block.c
---- linux-orig/drivers/mmc/card/block.c	2009-09-16 15:43:03.667274139 +0530
-+++ linux-current/drivers/mmc/card/block.c	2009-09-30 16:41:50.605273759 +0530
-@@ -330,6 +330,67 @@
-
- 		mmc_queue_bounce_post(mq);
-
-+		/* cmd12 error recovery fix */
-+		if( (brq.stop.error) && (brq.data.blocks > 1) &&
-+				!mmc_host_is_spi(card->host) && mmc_card_sd(card) ) {
-+
-+			/*
-+			 * if there is an error for CMD12, get the state of the card by
-+			 * sending cmd13 and then check the state of the card.
-+			 * If the card state is "tran", consider the cmd12 is successfull
-+			 * If not, then send again CMD12 to stop the data transfer. This
-+			 * time, any failure to get response, will result in to the card
-+			 * being non-recoverable.
-+			 */
-+			memset(&cmd, 0, sizeof(struct mmc_command));
-+			cmd.opcode = MMC_SEND_STATUS;
-+			cmd.arg = card->rca << 16;
-+			cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+			mmc_wait_for_cmd(card->host, &cmd, 0);
-+
-+			if(!cmd.error && R1_CURRENT_STATE(cmd.resp[0]) == 4) {
-+				/* card is in "trans" state, so treat the CMD12 as succesfull */
-+				brq.stop.error = 0;
-+			} else {
-+				/*
-+				 * card is not still in trans state. Now send CMD12 again and
-+				 * repeat the process of checking the card status using CMD13
-+				 */
-+				memset(&cmd, 0, sizeof(struct mmc_command));
-+				cmd.opcode = MMC_STOP_TRANSMISSION;
-+				cmd.arg = 0;
-+				cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+				mmc_wait_for_cmd(card->host, &cmd, 0);
-+
-+				/* get the card status */
-+				memset(&cmd, 0, sizeof(struct mmc_command));
-+				cmd.opcode = MMC_SEND_STATUS;
-+				cmd.arg = card->rca << 16;
-+				cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+				mmc_wait_for_cmd(card->host, &cmd, 0);
-+
-+				if(!cmd.error) {
-+					if(R1_CURRENT_STATE(cmd.resp[0]) == 4) {
-+						/* card is in "trans" state, so treat the CMD12 as succesfull */
-+						brq.stop.error = 0;
-+					} else {
-+						printk(KERN_ERR "%s: CMD12 error not recoverable\n",
-+								req->rq_disk->disk_name );
-+						/*
-+						 * card is not in "trans" state yet. Just post an error and
-+						 * error is not recoverable
-+						 */
-+					}
-+				} else {
-+					printk(KERN_ERR "%s: CMD13 returns an error!!\n",
-+							req->rq_disk->disk_name );
-+					/* error for cmd13!!, then something is wrong with the card */
-+				}
-+			}
-+		}
-+		/* cmd12 error recovery fix */
-+
-+
- 		/*
- 		 * Check for errors here, but don't jump to cmd_err
- 		 * until later as we need to wait for the card to leave
-
-
-
-2009/9/23 Matt Fleming <matt@console-pimps.org>:
-> On Wed, Sep 16, 2009 at 04:09:11PM +0530, Mahadev Cholachagudda wrote:
->> Dear All,
->>
->> I've a kernel code base of 2.6.28.9, where in I find that CMD12 error
->> recovery is not been implemented. It is a wise idea to implement CMD12
->> error recovery, that involves sending CMD13 to get the status of the
->> card. If the card is in "trans" state, it means CMD12 error shall be
->> treated as successfull. If card state is not in "trans", then we have
->> to send CMD12 again to stop the data transfer and then checking of the
->> card status through CMD13. This sequence is detailed in the
->> "Simplified Host Controller specification" on SDCard website. I
->> believe this is the case for any controller, though I may be wrong.
->>
->> With the modification done to the code which is attached as patch to
->> the latest mmc git, it is working at our site. And we do see some
->> errors with the SDIO controller (proprietary but meets Standard SD
->> host controller specification) that we are using.
->>
->> Request you to comment on the patch.
->>
+On Tue, Sep 29, 2009 at 9:52 PM, Ian Molton <ian@mnementh.co.uk> wrote:
+> Hi guys,
 >
-> In principal this patch seems OK. However, I recommend reading
-> Documentation/CodingStyle and sending this patch again once you've fixed
-> up the coding style and whitespace errors.
+> This is the full TMIO MMC patchset, compiled, tested, checkpatch passed.
 >
-> Is there a specific reason that you have used mmc_wait_for_req() instead
-> of mmc_wait_for_cmd() and reusing the "cmd" local variable? The empty
-> "else" clauses can also probably be deleted.
->
+> Please base all tmio based code on top of this patchset.
 
+I just took patch 0001->0005 for a spin on SuperH and they seem fine.
+Feel free to add an acked-by from me for the first patch. I know too
+little about the other parts to say anything useful.
 
+To get SuperH working I also need to update the kconfig. And to detect
+the clock rate dynamically I needed another minor patch. If you
+dislike the clock patch then I can also work around it in the board
+code for now.
 
--- 
+I plan on submitting the platform data patches to the SuperH mailing
+list in the near future, but I may need to rework them somehow if you
+dislike the clock patch approach.
+
 Cheers,
-Mahadev
+
+/ magnus
+
+--0016e645ad96b2163b0474ca01ab
+Content-Type: application/octet-stream;
+	name="linux-2.6.32-rc-tmio_mmc-kconfig-superh-20090930b.patch"
+Content-Disposition: attachment;
+	filename="linux-2.6.32-rc-tmio_mmc-kconfig-superh-20090930b.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_g07zqqvo5
+
+RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkFkZCBTVVBFUkggdG8gdGhl
+IEtjb25maWcgZGVwZW5kZW5jaWVzIGZvciB0bWlvX21tYy4KClRoaXMgY2hhbmdlIGFsbG93cyB1
+cyB0byBkcml2ZSB0aGUgU0RISSBoYXJkd2FyZSBibG9ja3MKZm91bmQgaW4gU3VwZXJIIE1vYmls
+ZSB3aXRoIHRtaW9fbW1jLgoKU2lnbmVkLW9mZi1ieTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNv
+dXJjZS5zZT4KLS0tCgogZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnIHwgICAgMiArLQogMSBmaWxl
+IGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pCgotLS0gMDAwMS9kcml2ZXJz
+L21tYy9ob3N0L0tjb25maWcKKysrIHdvcmsvZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnCTIwMDkt
+MDktMzAgMTc6MjY6MDIuMDAwMDAwMDAwICswOTAwCkBAIC0yODgsNyArMjg4LDcgQEAgY29uZmln
+IE1NQ19TRFJJQ09IX0NTCiAKIGNvbmZpZyBNTUNfVE1JTwogCXRyaXN0YXRlICJUb3NoaWJhIE1v
+YmlsZSBJTyBDb250cm9sbGVyIChUTUlPKSBNTUMvU0QgZnVuY3Rpb24gc3VwcG9ydCIKLQlkZXBl
+bmRzIG9uIE1GRF9UTUlPIHx8IE1GRF9BU0lDMworCWRlcGVuZHMgb24gTUZEX1RNSU8gfHwgTUZE
+X0FTSUMzIHx8IFNVUEVSSAogCWhlbHAKIAkgIFRoaXMgcHJvdmlkZXMgc3VwcG9ydCBmb3IgdGhl
+IFNEL01NQyBjZWxsIGZvdW5kIGluIFRDNjM5M1hCLAogCSAgVDdMNjZYQiBhbmQgYWxzbyBIVEMg
+QVNJQzMK
+--0016e645ad96b2163b0474ca01ab
+Content-Type: application/octet-stream;
+	name="linux-2.6.32-rc-tmio_mmc-clk-20090930b.patch"
+Content-Disposition: attachment;
+	filename="linux-2.6.32-rc-tmio_mmc-clk-20090930b.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_g07zv8p56
+
+RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkV4dGVuZCB0aGUgdG1pb19t
+bWMgcGxhdGZvcm0gZGF0YSB3aXRoIGEgc3RydWN0IGNsay4KCldpdGggdGhpcyBpbiBwbGFjZSB3
+ZSBjYW4gYXNzaWduIGVhY2ggdG1pb19tbWMgZHJpdmVyCmluc3RhbmNlIHRoZWlyIG93biBTREhJ
+IGNsb2NrIGZyb20gdGhlIGJvYXJkIGNvZGUuCgpTaWduZWQtb2ZmLWJ5OiBNYWdudXMgRGFtbSA8
+ZGFtbUBvcGVuc291cmNlLnNlPgotLS0KCiBkcml2ZXJzL21tYy9ob3N0L3RtaW9fbW1jLmMgfCAg
+IDE3ICsrKysrKysrKysrKysrKy0tCiBpbmNsdWRlL2xpbnV4L21mZC90bWlvLmggICAgfCAgICAx
+ICsKIDIgZmlsZXMgY2hhbmdlZCwgMTYgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkKCi0t
+LSAwMDA2L2RyaXZlcnMvbW1jL2hvc3QvdG1pb19tbWMuYworKysgd29yay9kcml2ZXJzL21tYy9o
+b3N0L3RtaW9fbW1jLmMJMjAwOS0wOS0zMCAxNzo0MzoyOC4wMDAwMDAwMDAgKzA5MDAKQEAgLTMy
+LDYgKzMyLDcgQEAKICNpbmNsdWRlIDxsaW51eC9tbWMvaG9zdC5oPgogI2luY2x1ZGUgPGxpbnV4
+L21mZC9jb3JlLmg+CiAjaW5jbHVkZSA8bGludXgvbWZkL3RtaW8uaD4KKyNpbmNsdWRlIDxsaW51
+eC9jbGsuaD4KIAogI2luY2x1ZGUgInRtaW9fbW1jLmgiCiAKQEAgLTUzMyw3ICs1MzQsNyBAQCBz
+dGF0aWMgaW50IF9fZGV2aW5pdCB0bWlvX21tY19wcm9iZShzdHJ1CiAJCWdvdG8gb3V0OwogCiAJ
+cGRhdGEgPSBjZWxsLT5kcml2ZXJfZGF0YTsKLQlpZiAoIXBkYXRhIHx8ICFwZGF0YS0+aGNsaykK
+KwlpZiAoIXBkYXRhIHx8ICEocGRhdGEtPmhjbGsgfHwgcGRhdGEtPmNsaykpCiAJCWdvdG8gb3V0
+OwogCiAJcmV0ID0gLUVOT01FTTsKQEAgLTU1Nyw5ICs1NTgsMTUgQEAgc3RhdGljIGludCBfX2Rl
+dmluaXQgdG1pb19tbWNfcHJvYmUoc3RydQogCWlmICghaG9zdC0+Y3RsKQogCQlnb3RvIGhvc3Rf
+ZnJlZTsKIAorCWlmIChwZGF0YS0+Y2xrKSB7CisJCWNsa19lbmFibGUocGRhdGEtPmNsayk7CisJ
+CW1tYy0+Zl9tYXggPSBjbGtfZ2V0X3JhdGUocGRhdGEtPmNsayk7CisJfSBlbHNlIHsKKwkJbW1j
+LT5mX21heCA9IHBkYXRhLT5oY2xrOworCX0KKwogCW1tYy0+b3BzID0gJnRtaW9fbW1jX29wczsK
+IAltbWMtPmNhcHMgPSBNTUNfQ0FQXzRfQklUX0RBVEE7Ci0JbW1jLT5mX21heCA9IHBkYXRhLT5o
+Y2xrOwogCW1tYy0+Zl9taW4gPSBtbWMtPmZfbWF4IC8gNTEyOwogCW1tYy0+b2NyX2F2YWlsID0g
+TU1DX1ZERF8zMl8zMyB8IE1NQ19WRERfMzNfMzQ7CiAKQEAgLTU5Nyw2ICs2MDQsOCBAQCBzdGF0
+aWMgaW50IF9fZGV2aW5pdCB0bWlvX21tY19wcm9iZShzdHJ1CiAJcmV0dXJuIDA7CiAKIHVubWFw
+X2N0bDoKKwlpZiAocGRhdGEtPmNsaykKKwkJY2xrX2Rpc2FibGUocGRhdGEtPmNsayk7CiAJaW91
+bm1hcChob3N0LT5jdGwpOwogaG9zdF9mcmVlOgogCW1tY19mcmVlX2hvc3QobW1jKTsKQEAgLTYw
+NywxMiArNjE2LDE2IEBAIG91dDoKIHN0YXRpYyBpbnQgX19kZXZleGl0IHRtaW9fbW1jX3JlbW92
+ZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpkZXYpCiB7CiAJc3RydWN0IG1tY19ob3N0ICptbWMg
+PSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShkZXYpOworCXN0cnVjdCBtZmRfY2VsbAkqY2VsbCA9IChz
+dHJ1Y3QgbWZkX2NlbGwgKilkZXYtPmRldi5wbGF0Zm9ybV9kYXRhOworCXN0cnVjdCB0bWlvX21t
+Y19kYXRhICpwZGF0YSA9IGNlbGwtPmRyaXZlcl9kYXRhOwogCiAJcGxhdGZvcm1fc2V0X2RydmRh
+dGEoZGV2LCBOVUxMKTsKIAogCWlmIChtbWMpIHsKIAkJc3RydWN0IHRtaW9fbW1jX2hvc3QgKmhv
+c3QgPSBtbWNfcHJpdihtbWMpOwogCQltbWNfcmVtb3ZlX2hvc3QobW1jKTsKKwkJaWYgKHBkYXRh
+LT5jbGspCisJCQljbGtfZGlzYWJsZShwZGF0YS0+Y2xrKTsKIAkJZnJlZV9pcnEoaG9zdC0+aXJx
+LCBob3N0KTsKIAkJaW91bm1hcChob3N0LT5jdGwpOwogCQltbWNfZnJlZV9ob3N0KG1tYyk7Ci0t
+LSAwMDAzL2luY2x1ZGUvbGludXgvbWZkL3RtaW8uaAorKysgd29yay9pbmNsdWRlL2xpbnV4L21m
+ZC90bWlvLmgJMjAwOS0wOS0zMCAxNzo0MzoyOC4wMDAwMDAwMDAgKzA5MDAKQEAgLTU0LDYgKzU0
+LDcgQEAgdm9pZCB0bWlvX2NvcmVfbW1jX2Nsa19kaXYodm9pZCBfX2lvbWVtIAogICovCiBzdHJ1
+Y3QgdG1pb19tbWNfZGF0YSB7CiAJY29uc3QgdW5zaWduZWQgaW50CQloY2xrOworCXN0cnVjdCBj
+bGsJCSpjbGs7CiAJdm9pZCAoKnNldF9wd3IpKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKmhvc3Qs
+IGludCBzdGF0ZSk7CiAJdm9pZCAoKnNldF9ub19jbGtfZGl2KShzdHJ1Y3QgcGxhdGZvcm1fZGV2
+aWNlICpob3N0LCBpbnQgc3RhdGUpOwogfTsK
+--0016e645ad96b2163b0474ca01ab
+Content-Type: application/octet-stream;
+	name="linux-2.6.32-rc-sh-migor-tmio_mmc-pdata-20090930c.patch"
+Content-Disposition: attachment;
+	filename="linux-2.6.32-rc-sh-migor-tmio_mmc-pdata-20090930c.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_g07zw2wy7
+
+RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkNvbnZlcnQgdGhlIE1pZ28t
+UiBib2FyZCB0byB1c2UgdG1pb19tbWMgZm9yIHRoZQpTRCBDYXJkIGNvbm5lY3RlZCB0byBDTjkg
+aW5zdGVhZCBvZiBtbWNfc3BpLgoKU2lnbmVkLW9mZi1ieTogTWFnbnVzIERhbW0gPGRhbW1Ab3Bl
+bnNvdXJjZS5zZT4KLS0tCgogYXJjaC9zaC9ib2FyZHMvbWFjaC1taWdvci9zZXR1cC5jIHwgICA2
+MyArKysrKysrKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tCiAxIGZpbGUgY2hhbmdlZCwg
+NDAgaW5zZXJ0aW9ucygrKSwgMjMgZGVsZXRpb25zKC0pCgotLS0gMDAwMS9hcmNoL3NoL2JvYXJk
+cy9tYWNoLW1pZ29yL3NldHVwLmMKKysrIHdvcmsvYXJjaC9zaC9ib2FyZHMvbWFjaC1taWdvci9z
+ZXR1cC5jCTIwMDktMDktMzAgMTk6NTg6NDEuMDAwMDAwMDAwICswOTAwCkBAIC0xOCw4ICsxOCw2
+IEBACiAjaW5jbHVkZSA8bGludXgvZGVsYXkuaD4KICNpbmNsdWRlIDxsaW51eC9jbGsuaD4KICNp
+bmNsdWRlIDxsaW51eC9ncGlvLmg+Ci0jaW5jbHVkZSA8bGludXgvc3BpL3NwaS5oPgotI2luY2x1
+ZGUgPGxpbnV4L3NwaS9zcGlfZ3Bpby5oPgogI2luY2x1ZGUgPHZpZGVvL3NoX21vYmlsZV9sY2Rj
+Lmg+CiAjaW5jbHVkZSA8bWVkaWEvc2hfbW9iaWxlX2NldS5oPgogI2luY2x1ZGUgPG1lZGlhL292
+NzcyeC5oPgpAQCAtMzAsNiArMjgsOCBAQAogI2luY2x1ZGUgPGFzbS9zaF9rZXlzYy5oPgogI2lu
+Y2x1ZGUgPG1hY2gvbWlnb3IuaD4KICNpbmNsdWRlIDxjcHUvc2g3NzIyLmg+CisjaW5jbHVkZSA8
+bGludXgvbWZkL2NvcmUuaD4KKyNpbmNsdWRlIDxsaW51eC9tZmQvdG1pby5oPgogCiAvKiBBZGRy
+ZXNzICAgICBJUlEgIFNpemUgIEJ1cyAgRGVzY3JpcHRpb24KICAqIDB4MDAwMDAwMDAgICAgICAg
+NjRNQiAgMTYgICBOT1IgRmxhc2ggKFNQMjlQTDI1Nk4pCkBAIC0zOTAsMTcgKzM5MCwzNSBAQCBz
+dGF0aWMgc3RydWN0IHBsYXRmb3JtX2RldmljZSBtaWdvcl9jZXVfCiAJfSwKIH07CiAKLXN0cnVj
+dCBzcGlfZ3Bpb19wbGF0Zm9ybV9kYXRhIHNkY2FyZF9jbjlfcGxhdGZvcm1fZGF0YSA9IHsKLQku
+c2NrID0gR1BJT19QVEQwLAotCS5tb3NpID0gR1BJT19QVEQxLAotCS5taXNvID0gR1BJT19QVEQy
+LAotCS5udW1fY2hpcHNlbGVjdCA9IDEsCitzdGF0aWMgc3RydWN0IHRtaW9fbW1jX2RhdGEgc2Ro
+aV9jbjlfZHJpdmVyX2RhdGEgPSB7CiB9OwogCi1zdGF0aWMgc3RydWN0IHBsYXRmb3JtX2Rldmlj
+ZSBzZGNhcmRfY245X2RldmljZSA9IHsKLQkubmFtZQkJPSAic3BpX2dwaW8iLAorc3RhdGljIHN0
+cnVjdCBtZmRfY2VsbCBzZGhpX2NuOV9wbGF0Zm9ybV9kYXRhID0geworCS5kcml2ZXJfZGF0YSA9
+ICZzZGhpX2NuOV9kcml2ZXJfZGF0YSwKK307CisKK3N0YXRpYyBzdHJ1Y3QgcmVzb3VyY2Ugc2Ro
+aV9jbjlfcmVzb3VyY2VzW10gPSB7CisJWzBdID0geworCQkubmFtZQk9ICJTREhJIiwKKwkJLnN0
+YXJ0CT0gMHgwNGNlMDAwMCwKKwkJLmVuZAk9IDB4MDRjZTAxZmYsCisJCS5mbGFncwk9IElPUkVT
+T1VSQ0VfTUVNLAorCX0sCisJWzFdID0geworCQkuc3RhcnQJPSAxMDEsCisJCS5mbGFncyAgPSBJ
+T1JFU09VUkNFX0lSUSwKKwl9LAorfTsKKworc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ug
+c2RoaV9jbjlfZGV2aWNlID0geworCS5uYW1lCQk9ICJ0bWlvLW1tYyIsCisJLm51bV9yZXNvdXJj
+ZXMJPSBBUlJBWV9TSVpFKHNkaGlfY245X3Jlc291cmNlcyksCisJLnJlc291cmNlCT0gc2RoaV9j
+bjlfcmVzb3VyY2VzLAogCS5kZXYJPSB7Ci0JCS5wbGF0Zm9ybV9kYXRhCT0gJnNkY2FyZF9jbjlf
+cGxhdGZvcm1fZGF0YSwKKwkJLnBsYXRmb3JtX2RhdGEJPSAmc2RoaV9jbjlfcGxhdGZvcm1fZGF0
+YSwKKwl9LAorCS5hcmNoZGF0YSA9IHsKKwkJLmh3YmxrX2lkID0gSFdCTEtfU0RISSwKIAl9LAog
+fTsKIApAQCAtNDY3LDIwICs0ODUsMTEgQEAgc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ug
+Km1pZ29yX2RldgogCSZtaWdvcl9jZXVfZGV2aWNlLAogCSZtaWdvcl9ub3JfZmxhc2hfZGV2aWNl
+LAogCSZtaWdvcl9uYW5kX2ZsYXNoX2RldmljZSwKLQkmc2RjYXJkX2NuOV9kZXZpY2UsCisJJnNk
+aGlfY245X2RldmljZSwKIAkmbWlnb3JfY2FtZXJhWzBdLAogCSZtaWdvcl9jYW1lcmFbMV0sCiB9
+OwogCi1zdGF0aWMgc3RydWN0IHNwaV9ib2FyZF9pbmZvIG1pZ29yX3NwaV9kZXZpY2VzW10gPSB7
+Ci0JewotCQkubW9kYWxpYXMgPSAibW1jX3NwaSIsCi0JCS5tYXhfc3BlZWRfaHogPSA1MDAwMDAw
+LAotCQkuY2hpcF9zZWxlY3QgPSAwLAotCQkuY29udHJvbGxlcl9kYXRhID0gKHZvaWQgKikgR1BJ
+T19QVEQ1LAotCX0sCi19OwotCiBzdGF0aWMgaW50IF9faW5pdCBtaWdvcl9kZXZpY2VzX3NldHVw
+KHZvaWQpCiB7CiAKQEAgLTUyNSw2ICs1MzQsMTcgQEAgc3RhdGljIGludCBfX2luaXQgbWlnb3Jf
+ZGV2aWNlc19zZXR1cCh2bwogCWdwaW9fcmVxdWVzdChHUElPX1BUQTEsIE5VTEwpOwogCWdwaW9f
+ZGlyZWN0aW9uX2lucHV0KEdQSU9fUFRBMSk7CiAKKwkvKiBTREhJICovCisJZ3Bpb19yZXF1ZXN0
+KEdQSU9fRk5fU0RISUNELCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJV1AsIE5V
+TEwpOworCWdwaW9fcmVxdWVzdChHUElPX0ZOX1NESElEMywgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0
+KEdQSU9fRk5fU0RISUQyLCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJRDEsIE5V
+TEwpOworCWdwaW9fcmVxdWVzdChHUElPX0ZOX1NESElEMCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0
+KEdQSU9fRk5fU0RISUNNRCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISUNMSywg
+TlVMTCk7CisJc2RoaV9jbjlfZHJpdmVyX2RhdGEuY2xrID0gY2xrX2dldChOVUxMLCAic2RoaTAi
+KTsKKwogCS8qIFRvdWNoIFBhbmVsICovCiAJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fSVJRNiwgTlVM
+TCk7CiAKQEAgLTYxMiw5ICs2MzIsNiBAQCBzdGF0aWMgaW50IF9faW5pdCBtaWdvcl9kZXZpY2Vz
+X3NldHVwKHZvCiAJaTJjX3JlZ2lzdGVyX2JvYXJkX2luZm8oMCwgbWlnb3JfaTJjX2RldmljZXMs
+CiAJCQkJQVJSQVlfU0laRShtaWdvcl9pMmNfZGV2aWNlcykpOwogCi0Jc3BpX3JlZ2lzdGVyX2Jv
+YXJkX2luZm8obWlnb3Jfc3BpX2RldmljZXMsCi0JCQkJQVJSQVlfU0laRShtaWdvcl9zcGlfZGV2
+aWNlcykpOwotCiAJcmV0dXJuIHBsYXRmb3JtX2FkZF9kZXZpY2VzKG1pZ29yX2RldmljZXMsIEFS
+UkFZX1NJWkUobWlnb3JfZGV2aWNlcykpOwogfQogYXJjaF9pbml0Y2FsbChtaWdvcl9kZXZpY2Vz
+X3NldHVwKTsK
+--0016e645ad96b2163b0474ca01ab
+Content-Type: application/octet-stream;
+	name="linux-2.6.32-rc-sh-ap325rxa-tmio_mmc-pdata-20090930c.patch"
+Content-Disposition: attachment;
+	filename="linux-2.6.32-rc-sh-ap325rxa-tmio_mmc-pdata-20090930c.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_g07zwtz38
+
+RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkNvbnZlcnQgdGhlIEFQMzI1
+IGJvYXJkIHRvIHVzZSB0bWlvX21tYyBmb3IgdGhlClNEIENhcmQgY29ubmVjdGVkIHRvIENOMyBp
+bnN0ZWFkIG9mIG1tY19zcGkuCgpTaWduZWQtb2ZmLWJ5OiBNYWdudXMgRGFtbSA8ZGFtbUBvcGVu
+c291cmNlLnNlPgotLS0KCiBhcmNoL3NoL2JvYXJkcy9ib2FyZC1hcDMyNXJ4YS5jIHwgICA2MyAr
+KysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0KIDEgZmlsZSBjaGFuZ2VkLCA0
+MCBpbnNlcnRpb25zKCspLCAyMyBkZWxldGlvbnMoLSkKCi0tLSAwMDAxL2FyY2gvc2gvYm9hcmRz
+L2JvYXJkLWFwMzI1cnhhLmMKKysrIHdvcmsvYXJjaC9zaC9ib2FyZHMvYm9hcmQtYXAzMjVyeGEu
+YwkyMDA5LTA5LTMwIDIwOjA2OjU5LjAwMDAwMDAwMCArMDkwMApAQCAtMjAsOCArMjAsNiBAQAog
+I2luY2x1ZGUgPGxpbnV4L2kyYy5oPgogI2luY2x1ZGUgPGxpbnV4L3Ntc2M5MTF4Lmg+CiAjaW5j
+bHVkZSA8bGludXgvZ3Bpby5oPgotI2luY2x1ZGUgPGxpbnV4L3NwaS9zcGkuaD4KLSNpbmNsdWRl
+IDxsaW51eC9zcGkvc3BpX2dwaW8uaD4KICNpbmNsdWRlIDxtZWRpYS9vdjc3MnguaD4KICNpbmNs
+dWRlIDxtZWRpYS9zb2NfY2FtZXJhLmg+CiAjaW5jbHVkZSA8bWVkaWEvc29jX2NhbWVyYV9wbGF0
+Zm9ybS5oPgpAQCAtMzAsNiArMjgsOCBAQAogI2luY2x1ZGUgPGFzbS9pby5oPgogI2luY2x1ZGUg
+PGFzbS9jbG9jay5oPgogI2luY2x1ZGUgPGNwdS9zaDc3MjMuaD4KKyNpbmNsdWRlIDxsaW51eC9t
+ZmQvY29yZS5oPgorI2luY2x1ZGUgPGxpbnV4L21mZC90bWlvLmg+CiAKIHN0YXRpYyBzdHJ1Y3Qg
+c21zYzkxMXhfcGxhdGZvcm1fY29uZmlnIHNtc2M5MTF4X2NvbmZpZyA9IHsKIAkucGh5X2ludGVy
+ZmFjZQk9IFBIWV9JTlRFUkZBQ0VfTU9ERV9NSUksCkBAIC00MDksMTcgKzQwOSwzNSBAQCBzdGF0
+aWMgc3RydWN0IHBsYXRmb3JtX2RldmljZSBjZXVfZGV2aWNlCiAJfSwKIH07CiAKLXN0cnVjdCBz
+cGlfZ3Bpb19wbGF0Zm9ybV9kYXRhIHNkY2FyZF9jbjNfcGxhdGZvcm1fZGF0YSA9IHsKLQkuc2Nr
+ID0gR1BJT19QVEQwLAotCS5tb3NpID0gR1BJT19QVEQxLAotCS5taXNvID0gR1BJT19QVEQyLAot
+CS5udW1fY2hpcHNlbGVjdCA9IDEsCitzdGF0aWMgc3RydWN0IHJlc291cmNlIHNkaGkwX2NuM19y
+ZXNvdXJjZXNbXSA9IHsKKwlbMF0gPSB7CisJCS5uYW1lCT0gIlNESEkwIiwKKwkJLnN0YXJ0CT0g
+MHgwNGNlMDAwMCwKKwkJLmVuZAk9IDB4MDRjZTAxZmYsCisJCS5mbGFncwk9IElPUkVTT1VSQ0Vf
+TUVNLAorCX0sCisJWzFdID0geworCQkuc3RhcnQJPSAxMDEsCisJCS5mbGFncyAgPSBJT1JFU09V
+UkNFX0lSUSwKKwl9LAorfTsKKworc3RhdGljIHN0cnVjdCB0bWlvX21tY19kYXRhIHNkaGkwX2Nu
+M19kcml2ZXJfZGF0YSA9IHsKK307CisKK3N0cnVjdCBtZmRfY2VsbCBzZGhpMF9jbjNfcGxhdGZv
+cm1fZGF0YSA9IHsKKwkuZHJpdmVyX2RhdGEgPSAmc2RoaTBfY24zX2RyaXZlcl9kYXRhLAogfTsK
+IAotc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ugc2RjYXJkX2NuM19kZXZpY2UgPSB7Ci0J
+Lm5hbWUJCT0gInNwaV9ncGlvIiwKK3N0YXRpYyBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlIHNkaGkw
+X2NuM19kZXZpY2UgPSB7CisJLm5hbWUJCT0gInRtaW8tbW1jIiwKKwkubnVtX3Jlc291cmNlcwk9
+IEFSUkFZX1NJWkUoc2RoaTBfY24zX3Jlc291cmNlcyksCisJLnJlc291cmNlCT0gc2RoaTBfY24z
+X3Jlc291cmNlcywKIAkuZGV2CT0gewotCQkucGxhdGZvcm1fZGF0YQk9ICZzZGNhcmRfY24zX3Bs
+YXRmb3JtX2RhdGEsCisJCS5wbGF0Zm9ybV9kYXRhCT0gJnNkaGkwX2NuM19wbGF0Zm9ybV9kYXRh
+LAorCX0sCisJLmFyY2hkYXRhID0geworCQkuaHdibGtfaWQgPSBIV0JMS19TREhJMCwKIAl9LAog
+fTsKIApAQCAtNDcwLDIwICs0ODgsMTEgQEAgc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ug
+KmFwMzI1cnhhXwogCSZsY2RjX2RldmljZSwKIAkmY2V1X2RldmljZSwKIAkmbmFuZF9mbGFzaF9k
+ZXZpY2UsCi0JJnNkY2FyZF9jbjNfZGV2aWNlLAorCSZzZGhpMF9jbjNfZGV2aWNlLAogCSZhcDMy
+NXJ4YV9jYW1lcmFbMF0sCiAJJmFwMzI1cnhhX2NhbWVyYVsxXSwKIH07CiAKLXN0YXRpYyBzdHJ1
+Y3Qgc3BpX2JvYXJkX2luZm8gYXAzMjVyeGFfc3BpX2RldmljZXNbXSA9IHsKLQl7Ci0JCS5tb2Rh
+bGlhcyA9ICJtbWNfc3BpIiwKLQkJLm1heF9zcGVlZF9oeiA9IDUwMDAwMDAsCi0JCS5jaGlwX3Nl
+bGVjdCA9IDAsCi0JCS5jb250cm9sbGVyX2RhdGEgPSAodm9pZCAqKSBHUElPX1BURDUsCi0JfSwK
+LX07Ci0KIHN0YXRpYyBpbnQgX19pbml0IGFwMzI1cnhhX2RldmljZXNfc2V0dXAodm9pZCkKIHsK
+IAkvKiBMRDMgYW5kIExENCBMRURzICovCkBAIC01NzgsMTIgKzU4NywyMCBAQCBzdGF0aWMgaW50
+IF9faW5pdCBhcDMyNXJ4YV9kZXZpY2VzX3NldHVwCiAKIAlwbGF0Zm9ybV9yZXNvdXJjZV9zZXR1
+cF9tZW1vcnkoJmNldV9kZXZpY2UsICJjZXUiLCA0IDw8IDIwKTsKIAorCS8qIFNESEkwICovCisJ
+Z3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBDRF9QVEQsIE5VTEwpOworCWdwaW9fcmVxdWVzdChH
+UElPX0ZOX1NESEkwV1BfUFRELCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMEQz
+X1BURCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBEMl9QVEQsIE5VTEwpOwor
+CWdwaW9fcmVxdWVzdChHUElPX0ZOX1NESEkwRDFfUFRELCBOVUxMKTsKKwlncGlvX3JlcXVlc3Qo
+R1BJT19GTl9TREhJMEQwX1BURCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBD
+TURfUFRELCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMENMS19QVEQsIE5VTEwp
+OworCXNkaGkwX2NuM19kcml2ZXJfZGF0YS5jbGsgPSBjbGtfZ2V0KE5VTEwsICJzZGhpMCIpOwor
+CiAJaTJjX3JlZ2lzdGVyX2JvYXJkX2luZm8oMCwgYXAzMjVyeGFfaTJjX2RldmljZXMsCiAJCQkJ
+QVJSQVlfU0laRShhcDMyNXJ4YV9pMmNfZGV2aWNlcykpOwogCi0Jc3BpX3JlZ2lzdGVyX2JvYXJk
+X2luZm8oYXAzMjVyeGFfc3BpX2RldmljZXMsCi0JCQkJQVJSQVlfU0laRShhcDMyNXJ4YV9zcGlf
+ZGV2aWNlcykpOwotCiAJcmV0dXJuIHBsYXRmb3JtX2FkZF9kZXZpY2VzKGFwMzI1cnhhX2Rldmlj
+ZXMsCiAJCQkJQVJSQVlfU0laRShhcDMyNXJ4YV9kZXZpY2VzKSk7CiB9Cg==
+--0016e645ad96b2163b0474ca01ab
+Content-Type: application/octet-stream;
+	name="linux-2.6.32-rc-sh-se7724-tmio_mmc-pdata-20090930c.patch"
+Content-Disposition: attachment;
+	filename="linux-2.6.32-rc-sh-se7724-tmio_mmc-pdata-20090930c.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_g07zxk2p9
+
+RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkFkZCBTRCBDYXJkIHN1cHBv
+cnQgdG8gdGhlIHNlNzcyNCBib2FyZCB1c2luZyB0aGUKdG1pb19tbWMgZHJpdmVyIGhvb2tlZCB1
+cCB0byBTREhJMCBhbmQgQ043LgoKU2lnbmVkLW9mZi1ieTogTWFnbnVzIERhbW0gPGRhbW1Ab3Bl
+bnNvdXJjZS5zZT4KLS0tCgogYXJjaC9zaC9ib2FyZHMvbWFjaC1zZS83NzI0L3NldHVwLmMgfCAg
+IDQ2ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCiAxIGZpbGUgY2hhbmdlZCwg
+NDYgaW5zZXJ0aW9ucygrKQoKLS0tIDAwMDEvYXJjaC9zaC9ib2FyZHMvbWFjaC1zZS83NzI0L3Nl
+dHVwLmMKKysrIHdvcmsvYXJjaC9zaC9ib2FyZHMvbWFjaC1zZS83NzI0L3NldHVwLmMJMjAwOS0w
+OS0zMCAyMDoxMDoyOC4wMDAwMDAwMDAgKzA5MDAKQEAgLTIwLDYgKzIwLDggQEAKICNpbmNsdWRl
+IDxsaW51eC9ncGlvLmg+CiAjaW5jbHVkZSA8bGludXgvaW5wdXQuaD4KICNpbmNsdWRlIDxsaW51
+eC91c2IvcjhhNjY1OTcuaD4KKyNpbmNsdWRlIDxsaW51eC9tZmQvY29yZS5oPgorI2luY2x1ZGUg
+PGxpbnV4L21mZC90bWlvLmg+CiAjaW5jbHVkZSA8dmlkZW8vc2hfbW9iaWxlX2xjZGMuaD4KICNp
+bmNsdWRlIDxtZWRpYS9zaF9tb2JpbGVfY2V1Lmg+CiAjaW5jbHVkZSA8c291bmQvc2hfZnNpLmg+
+CkBAIC00NDgsNiArNDUwLDM4IEBAIHN0YXRpYyBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlIHNoNzcy
+NF91c2IKIAkucmVzb3VyY2UJPSBzaDc3MjRfdXNiMV9nYWRnZXRfcmVzb3VyY2VzLAogfTsKIAor
+c3RhdGljIHN0cnVjdCByZXNvdXJjZSBzZGhpMF9jbjdfcmVzb3VyY2VzW10gPSB7CisJWzBdID0g
+eworCQkubmFtZQk9ICJTREhJMCIsCisJCS5zdGFydCAgPSAweDA0Y2UwMDAwLAorCQkuZW5kICAg
+ID0gMHgwNGNlMDFmZiwKKwkJLmZsYWdzICA9IElPUkVTT1VSQ0VfTUVNLAorCX0sCisJWzFdID0g
+eworCQkuc3RhcnQgID0gMTAxLAorCQkuZmxhZ3MgID0gSU9SRVNPVVJDRV9JUlEsCisJfSwKK307
+CisKK3N0cnVjdCB0bWlvX21tY19kYXRhIHNkaGkwX2NuN19kcml2ZXJfZGF0YSA9IHsKK307CisK
+K3N0cnVjdCBtZmRfY2VsbCBzZGhpMF9jbjdfcGxhdGZvcm1fZGF0YSA9IHsKKwkuZHJpdmVyX2Rh
+dGEgPSAmc2RoaTBfY243X2RyaXZlcl9kYXRhLAorfTsKKworc3RhdGljIHN0cnVjdCBwbGF0Zm9y
+bV9kZXZpY2Ugc2RoaTBfY243X2RldmljZSA9IHsKKwkubmFtZSAgICAgICAgICAgPSAidG1pby1t
+bWMiLAorCS5udW1fcmVzb3VyY2VzICA9IEFSUkFZX1NJWkUoc2RoaTBfY243X3Jlc291cmNlcyks
+CisJLnJlc291cmNlICAgICAgID0gc2RoaTBfY243X3Jlc291cmNlcywKKwkuZGV2ICAgID0gewor
+CQkucGxhdGZvcm1fZGF0YSAgPSAmc2RoaTBfY243X3BsYXRmb3JtX2RhdGEsCisJfSwKKwkuYXJj
+aGRhdGEgPSB7CisJCS5od2Jsa19pZCA9IEhXQkxLX1NESEkwLAorCX0sCit9OworCiBzdGF0aWMg
+c3RydWN0IHBsYXRmb3JtX2RldmljZSAqbXM3NzI0c2VfZGV2aWNlc1tdIF9faW5pdGRhdGEgPSB7
+CiAJJmhlYXJ0YmVhdF9kZXZpY2UsCiAJJnNtYzkxeF9ldGhfZGV2aWNlLApAQCAtNDYwLDYgKzQ5
+NCw3IEBAIHN0YXRpYyBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICptczc3MjRzZV8KIAkmc2g3NzI0
+X3VzYjBfaG9zdF9kZXZpY2UsCiAJJnNoNzcyNF91c2IxX2dhZGdldF9kZXZpY2UsCiAJJmZzaV9k
+ZXZpY2UsCisJJnNkaGkwX2NuN19kZXZpY2UsCiB9OwogCiAjZGVmaW5lIEVFUFJPTV9PUCAgIDB4
+QkEyMDYwMDAKQEAgLTY5OCw2ICs3MzMsMTcgQEAgc3RhdGljIGludCBfX2luaXQgZGV2aWNlc19z
+ZXR1cCh2b2lkKQogCWNsa19zZXRfcmF0ZSgmZnNpbWNrYV9jbGssIDExMDAwKTsKIAljbGtfcHV0
+KGZzaWFfY2xrKTsKIAorCS8qIFNESEkwIGNvbm5lY3RlZCB0byBjbjcgKi8KKwlncGlvX3JlcXVl
+c3QoR1BJT19GTl9TREhJMENELCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMFdQ
+LCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMEQzLCBOVUxMKTsKKwlncGlvX3Jl
+cXVlc3QoR1BJT19GTl9TREhJMEQyLCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJ
+MEQxLCBOVUxMKTsKKwlncGlvX3JlcXVlc3QoR1BJT19GTl9TREhJMEQwLCBOVUxMKTsKKwlncGlv
+X3JlcXVlc3QoR1BJT19GTl9TREhJMENNRCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5f
+U0RISTBDTEssIE5VTEwpOworCXNkaGkwX2NuN19kcml2ZXJfZGF0YS5jbGsgPSBjbGtfZ2V0KE5V
+TEwsICJzZGhpMCIpOworCiAJLyoKIAkgKiBlbmFibGUgU0gtRXRoCiAJICoK
+--0016e645ad96b2163b0474ca01ab
+Content-Type: application/octet-stream;
+	name="linux-2.6.32-rc-sh-kfr2r09-tmio_mmc-pdata-20090930c.patch"
+Content-Disposition: attachment;
+	filename="linux-2.6.32-rc-sh-kfr2r09-tmio_mmc-pdata-20090930c.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_g07zxzjs10
+
+RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KCkFkZCBTRCBDYXJkIHN1cHBv
+cnQgdG8gdGhlIGtmcjJyMDkgYm9hcmQgdXNpbmcgdGhlCnRtaW9fbW1jIGRyaXZlciBob29rZWQg
+dXAgdG8gU0RISTAgYW5kIHljMzA0LgoKU2lnbmVkLW9mZi1ieTogTWFnbnVzIERhbW0gPGRhbW1A
+b3BlbnNvdXJjZS5zZT4KLS0tCgogYXJjaC9zaC9ib2FyZHMvbWFjaC1rZnIycjA5L3NldHVwLmMg
+fCAgIDQ2ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCiAxIGZpbGUgY2hhbmdl
+ZCwgNDYgaW5zZXJ0aW9ucygrKQoKLS0tIDAwMDEvYXJjaC9zaC9ib2FyZHMvbWFjaC1rZnIycjA5
+L3NldHVwLmMKKysrIHdvcmsvYXJjaC9zaC9ib2FyZHMvbWFjaC1rZnIycjA5L3NldHVwLmMJMjAw
+OS0wOS0zMCAyMDoxNTozMy4wMDAwMDAwMDAgKzA5MDAKQEAgLTE5LDYgKzE5LDggQEAKICNpbmNs
+dWRlIDxsaW51eC9pMmMuaD4KICNpbmNsdWRlIDxsaW51eC91c2IvcjhhNjY1OTcuaD4KICNpbmNs
+dWRlIDx2aWRlby9zaF9tb2JpbGVfbGNkYy5oPgorI2luY2x1ZGUgPGxpbnV4L21mZC9jb3JlLmg+
+CisjaW5jbHVkZSA8bGludXgvbWZkL3RtaW8uaD4KICNpbmNsdWRlIDxhc20vY2xvY2suaD4KICNp
+bmNsdWRlIDxhc20vbWFjaHZlYy5oPgogI2luY2x1ZGUgPGFzbS9pby5oPgpAQCAtMjEyLDExICsy
+MTQsNDQgQEAgc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Uga2ZyMnIwOV91cwogCS5yZXNv
+dXJjZQk9IGtmcjJyMDlfdXNiMF9nYWRnZXRfcmVzb3VyY2VzLAogfTsKIAorc3RhdGljIHN0cnVj
+dCByZXNvdXJjZSBrZnIycjA5X3NoX3NkaGkwX3Jlc291cmNlc1tdID0geworCVswXSA9IHsKKwkJ
+Lm5hbWUJPSAiU0RISTAiLAorCQkuc3RhcnQgID0gMHgwNGNlMDAwMCwKKwkJLmVuZCAgICA9IDB4
+MDRjZTAxZmYsCisJCS5mbGFncyAgPSBJT1JFU09VUkNFX01FTSwKKwl9LAorCVsxXSA9IHsKKwkJ
+LnN0YXJ0ICA9IDEwMSwKKwkJLmZsYWdzICA9IElPUkVTT1VSQ0VfSVJRLAorCX0sCit9OworCitz
+dHJ1Y3QgdG1pb19tbWNfZGF0YSBrZnIycjA5X3NoX3NkaGkwX2RyaXZlcl9kYXRhID0geworfTsK
+Kworc3RydWN0IG1mZF9jZWxsIGtmcjJyMDlfc2hfc2RoaTBfcGxhdGZvcm1fZGF0YSA9IHsKKwku
+ZHJpdmVyX2RhdGEgPSAma2ZyMnIwOV9zaF9zZGhpMF9kcml2ZXJfZGF0YSwKK307CisKK3N0YXRp
+YyBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlIGtmcjJyMDlfc2hfc2RoaTBfZGV2aWNlID0geworCS5u
+YW1lICAgICAgICAgICA9ICJ0bWlvLW1tYyIsCisJLm51bV9yZXNvdXJjZXMgID0gQVJSQVlfU0la
+RShrZnIycjA5X3NoX3NkaGkwX3Jlc291cmNlcyksCisJLnJlc291cmNlICAgICAgID0ga2ZyMnIw
+OV9zaF9zZGhpMF9yZXNvdXJjZXMsCisJLmRldiAgICA9IHsKKwkJLnBsYXRmb3JtX2RhdGEgID0g
+JmtmcjJyMDlfc2hfc2RoaTBfcGxhdGZvcm1fZGF0YSwKKwl9LAorCS5hcmNoZGF0YSA9IHsKKwkJ
+Lmh3YmxrX2lkID0gSFdCTEtfU0RISTAsCisJfSwKK307CisKIHN0YXRpYyBzdHJ1Y3QgcGxhdGZv
+cm1fZGV2aWNlICprZnIycjA5X2RldmljZXNbXSBfX2luaXRkYXRhID0gewogCSZrZnIycjA5X25v
+cl9mbGFzaF9kZXZpY2UsCiAJJmtmcjJyMDlfbmFuZF9mbGFzaF9kZXZpY2UsCiAJJmtmcjJyMDlf
+c2hfa2V5c2NfZGV2aWNlLAogCSZrZnIycjA5X3NoX2xjZGNfZGV2aWNlLAorCSZrZnIycjA5X3No
+X3NkaGkwX2RldmljZSwKIH07CiAKICNkZWZpbmUgQlNDX0NTMEJDUiAweGZlYzEwMDA0CkBAIC0z
+NjEsNiArMzk2LDE3IEBAIHN0YXRpYyBpbnQgX19pbml0IGtmcjJyMDlfZGV2aWNlc19zZXR1cCgK
+IAlpZiAoa2ZyMnIwOV91c2IwX2dhZGdldF9zZXR1cCgpID09IDApCiAJCXBsYXRmb3JtX2Rldmlj
+ZV9yZWdpc3Rlcigma2ZyMnIwOV91c2IwX2dhZGdldF9kZXZpY2UpOwogCisJLyogU0RISTAgY29u
+bmVjdGVkIHRvIHljMzA0ICovCisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBDRCwgTlVMTCk7
+CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBXUCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQ
+SU9fRk5fU0RISTBEMywgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBEMiwgTlVM
+TCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBEMSwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0
+KEdQSU9fRk5fU0RISTBEMCwgTlVMTCk7CisJZ3Bpb19yZXF1ZXN0KEdQSU9fRk5fU0RISTBDTUQs
+IE5VTEwpOworCWdwaW9fcmVxdWVzdChHUElPX0ZOX1NESEkwQ0xLLCBOVUxMKTsKKwlrZnIycjA5
+X3NoX3NkaGkwX2RyaXZlcl9kYXRhLmNsayA9IGNsa19nZXQoTlVMTCwgInNkaGkwIik7CisKIAly
+ZXR1cm4gcGxhdGZvcm1fYWRkX2RldmljZXMoa2ZyMnIwOV9kZXZpY2VzLAogCQkJCSAgICBBUlJB
+WV9TSVpFKGtmcjJyMDlfZGV2aWNlcykpOwogfQo=
+--0016e645ad96b2163b0474ca01ab--
