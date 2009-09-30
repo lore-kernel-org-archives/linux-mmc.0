@@ -1,68 +1,127 @@
-From: Pierre Ossman <pierre@ossman.eu>
-Subject: Re: [PATCH 1/1] Implementation for knowing speed_class of inserted
- SD  card from user space
-Date: Wed, 30 Sep 2009 14:17:57 +0200
-Message-ID: <20090930141757.293dd589@mjolnir.ossman.eu>
-References: <bd31ea570909300452u49ec17b3h4399da986dd2f78@mail.gmail.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: Re: [PATCH 1/2] atmel-mci: change use of dma slave interface
+Date: Wed, 30 Sep 2009 15:33:17 +0200
+Message-ID: <4AC35E1D.7040802@atmel.com>
+References: <1253204967-30010-1-git-send-email-nicolas.ferre@atmel.com>	<1253204967-30010-2-git-send-email-nicolas.ferre@atmel.com> <20090929122928.f5fea29b.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-8381-1254313084-0001-2"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 82-117-125-11.tcdsl.calypso.net ([82.117.125.11]:47520 "EHLO
-	smtp.ossman.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752320AbZI3MSA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 30 Sep 2009 08:18:00 -0400
-In-Reply-To: <bd31ea570909300452u49ec17b3h4399da986dd2f78@mail.gmail.com>
+Received: from mail.atmel.fr ([81.80.104.162]:52870 "EHLO atmel-es2.atmel.fr"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754016AbZI3NdW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 30 Sep 2009 09:33:22 -0400
+In-Reply-To: <20090929122928.f5fea29b.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mahadev Cholachagudda <mgudda@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
+To: Andrew Morton <akpm@linux-foundation.org>, haavard.skinnemoen@atmel.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel@avr32linux.org, Hans-Christian Egtvedt <hcegtvedt@atmel.com>
 
-This is a MIME-formatted message.  If you see this text it means that your
-E-mail software does not support MIME-formatted messages.
+Andrew Morton :
+> On Thu, 17 Sep 2009 18:29:26 +0200
+> Nicolas Ferre <nicolas.ferre@atmel.com> wrote:
+> 
+>> Allow the use of another DMA controller driver in atmel-mci sd/mmc driver. This
+>> adds a generic dma_slave pointer to the mci platform structure where we can
+>> store DMA controller information. In atmel-mci we use information provided by
+>> this structure to initialize the driver (with new helper functions that are
+>> architecture dependant).
+>> This also adds at32/avr32 chip modifications to cope with this new access
+>> method.
+>>
+>> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+>> ---
+>>  arch/avr32/mach-at32ap/at32ap700x.c |    6 ++-
+>>  drivers/mmc/host/atmel-mci.c        |   82 ++++++++++++++++++++++++++---------
+>>  include/linux/atmel-mci.h           |    3 +-
+>>  3 files changed, 68 insertions(+), 23 deletions(-)
+>>
+>> diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
+>> index eb9d4dc..d1fe145 100644
+>> --- a/arch/avr32/mach-at32ap/at32ap700x.c
+>> +++ b/arch/avr32/mach-at32ap/at32ap700x.c
+>> @@ -1320,7 +1320,7 @@ struct platform_device *__init
+>>  at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+>>  {
+>>  	struct platform_device		*pdev;
+>> -	struct dw_dma_slave		*dws = &data->dma_slave;
+>> +	struct dw_dma_slave		*dws;
+>>  	u32				pioa_mask;
+>>  	u32				piob_mask;
+>>  
+>> @@ -1339,6 +1339,8 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+>>  				ARRAY_SIZE(atmel_mci0_resource)))
+>>  		goto fail;
+>>  
+>> +	dws = kzalloc(sizeof(struct dw_dma_slave), GFP_KERNEL);
+> 
+> I don't see anywhere where this gets freed again?
 
---=_freyr.ossman.eu-8381-1254313084-0001-2
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+Well, in fact those are platform initialization functions that have no
+"exit" equivalent. Is this the proper way of managing this ?
 
-On Wed, 30 Sep 2009 17:22:14 +0530
-Mahadev Cholachagudda <mgudda@gmail.com> wrote:
+Anyway, I have forgotten to free memory in case of a "fail" error case
+that is present in this function. I will correct this in my v2 patch.
 
->=20
-> Let me know if you have any comments/suggestions?
->=20
+> 
+>>  	dws->dma_dev = &dw_dmac0_device.dev;
+>>  	dws->reg_width = DW_DMA_SLAVE_WIDTH_32BIT;
+>>  	dws->cfg_hi = (DWC_CFGH_SRC_PER(0)
+>> @@ -1346,6 +1348,8 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+>>  	dws->cfg_lo &= ~(DWC_CFGL_HS_DST_POL
+>>  				| DWC_CFGL_HS_SRC_POL);
+>>  
+>> +	data->dma_slave = dws;
+>> +
+>>  	if (platform_device_add_data(pdev, data,
+>>  				sizeof(struct mci_platform_data)))
+>>  		goto fail;
+>> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+>> index 065fa81..1689396 100644
+>> --- a/drivers/mmc/host/atmel-mci.c
+>> +++ b/drivers/mmc/host/atmel-mci.c
+>> @@ -1575,16 +1575,71 @@ static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
+>>  }
+>>  
+>>  #ifdef CONFIG_MMC_ATMELMCI_DMA
+>> -static bool filter(struct dma_chan *chan, void *slave)
+>> +static struct device *find_slave_dev(void *slave)
+>> +{
+>> +	if (!slave)
+>> +		return NULL;
+>> +
+>> +	if (cpu_is_at32ap7000())
+>> +		return ((struct dw_dma_slave *)slave)->dma_dev;
+>> +	else
+>> +		return ((struct at_dma_slave *)slave)->dma_dev;
+>> +}
+> 
+> Quite a few unsafeish typecasts here.
 
-I have a few:
+I am afraid, yes.
 
-1. The obvious one; why? When does user space need to know the speed
-rating, and is the speed rating still meaningful after all the layers
-in the kernel? Userspace ABI stuff should be added with great care.
+>>  struct mci_platform_data {
+>> -	struct dw_dma_slave	dma_slave;
+>> +	void			*dma_slave;
+>>  	struct mci_slot_pdata	slot[ATMEL_MCI_MAX_NR_SLOTS];
+>>  };
+> 
+> I think the code would come out better if this has type dw_dma_slave*.
 
-2. I think it's better to not show the attribute when it isn't relevant
-rather than return 0xFF.
+Do you mean that I would leave dw_dma_slave* in mci_platform_data and
+use this field for struct at_dma_slave content where I need it ? I
+thought it was more confusing...
 
-3. Isn't this a SD 2.0 feature? So you should check the version of the
-card before populating/showing this field.
+> You'll still need typecasts to support the dma_request_channel()
+> callback, but the code will be safer and cleaner, I expect.
 
-Rgds
---=20
-     -- Pierre Ossman
+My concern are:
+1/ allow the use of either dmaengine driver
+2/ avoid too much modification to dw_dma_slave as it
+is also used for audio stuff on avr32 platforms...
+3/ not introduce heavy weigh solution like the use of an union
 
-  WARNING: This correspondence is being monitored by the
-  Swedish government. Make sure your server uses encryption
-  for SMTP traffic and consider using PGP for end-to-end
-  encryption.
+Best regards,
+-- 
+Nicolas Ferre
 
---=_freyr.ossman.eu-8381-1254313084-0001-2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename=signature.asc
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.12 (GNU/Linux)
-
-iEYEARECAAYFAkrDTHcACgkQ7b8eESbyJLgH1gCgi39/F2KESaPQdVrBlYrjev+f
-yYYAmwTzSG5y/bIAko30mbTsh5Vwv37X
-=2vaI
------END PGP SIGNATURE-----
-
---=_freyr.ossman.eu-8381-1254313084-0001-2--
