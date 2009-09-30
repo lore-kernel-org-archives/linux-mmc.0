@@ -1,214 +1,115 @@
-From: Philipp Zabel <philipp.zabel@gmail.com>
+From: Ian Molton <ian@mnementh.co.uk>
 Subject: Re: TMIO MMC: full patchset.
-Date: Wed, 30 Sep 2009 18:59:15 +0200
-Message-ID: <1254329955.32349.1.camel@flow>
+Date: Wed, 30 Sep 2009 21:15:22 +0100
+Message-ID: <c09aa50a0909301315o683322e4k4b85e21ab473341e@mail.gmail.com>
 References: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
+	<aec7e5c30909300441w6ca07dd9o889590c6100b846b@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f218.google.com ([209.85.220.218]:41776 "EHLO
-	mail-fx0-f218.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751740AbZI3Q7D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Sep 2009 12:59:03 -0400
-Received: by fxm18 with SMTP id 18so5488765fxm.17
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2009 09:59:05 -0700 (PDT)
-In-Reply-To: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
+Received: from mail-bw0-f210.google.com ([209.85.218.210]:57967 "EHLO
+	mail-bw0-f210.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751222AbZI3UPj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Sep 2009 16:15:39 -0400
+Received: by bwz6 with SMTP id 6so3111946bwz.37
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2009 13:15:42 -0700 (PDT)
+In-Reply-To: <aec7e5c30909300441w6ca07dd9o889590c6100b846b@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>
-Cc: linux-mmc@vger.kernel.org, magnus.damm@gmail.com, sameo@openedhand.com, pb@handhelds.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc@vger.kernel.org, sameo@openedhand.com, pb@handhelds.org, philipp.zabel@gmail.com, akpm@linux-foundation.org
 
-Am Dienstag, den 29.09.2009, 13:52 +0100 schrieb Ian Molton: 
-> Hi guys,
-> 
-> This is the full TMIO MMC patchset, compiled, tested, checkpatch passed.
+No, sorry, this is not the way to do it. Please actually use the
+platform hooks I provided, thats *why* I spent all this time rewriting
+the driver for you. All you've done is add the same hook I added but
+in a broken way.
 
-With bus shift support dropped from the SD_CONFIG register accessors, I
-can't use this as-is on ASIC3. What do you think about the following
-(sketch of a) patch to add it back?
+Passing struct clk pointers about is _not the right way_ its not the
+way the clk api was designed to be used. clocks are _got and _put by
+name and device references, and the pointers should not be getting
+passed from platform code to modular drivers.
 
-regards
-Philipp 
+Doing it from the platform code via the hooks I provided is not a
+workaround - its the proper way to do it until such time as the clk
+API is merged into the core kernel and divorced from its CPU
+dependency (so that MFD drivers can use it to provide clocks and the
+tmio_mmc driver can lose the platform hooks for clocking).
 
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index a206a8d..89042d6 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -40,14 +40,38 @@
- 
- #define   SDCREN 0x2   /* Enable access to MMC CTL regs. (flag in COMMAND_REG)*/
- 
--#define sd_config_write8(a, b)  tmio_iowrite8((b), (a))
--#define sd_config_write16(a, b) tmio_iowrite16((b), (a))
--#define sd_config_write32(a, b) tmio_iowrite32((b), (a))
--
--int tmio_core_mmc_enable(void __iomem *cnf, unsigned long base);
--int tmio_core_mmc_resume(void __iomem *cnf, unsigned long base);
--void tmio_core_mmc_pwr(void __iomem *cnf, int state);
--void tmio_core_mmc_clk_div(void __iomem *cnf, int state);
-+/*
-+ * data for the tmio_core_mmc functions (CONFIG regs)
-+ */
-+struct tmio_core_mmc {
-+	void __iomem *cnf;
-+	int           bus_shift;
-+	unsigned long base;
-+};
-+
-+static inline void sd_config_write8(struct tmio_core_mmc *sd_config, int addr,
-+		u8 val)
-+{
-+	writeb(val, sd_config->cnf + (addr << sd_config->bus_shift));
-+}
-+
-+static inline void sd_config_write16(struct tmio_core_mmc *sd_config, int addr,
-+		u16 val)
-+{
-+	writew(val, sd_config->cnf + (addr << sd_config->bus_shift));
-+}
-+
-+static inline void sd_config_write32(struct tmio_core_mmc *sd_config, int addr,
-+		u32 val)
-+{
-+	writew(val, sd_config->cnf + (addr << sd_config->bus_shift));
-+	writew(val >> 16, sd_config->cnf + ((addr + 2) << sd_config->bus_shift));
-+}
-+
-+int tmio_core_mmc_enable(struct tmio_core_mmc *sd_config);
-+int tmio_core_mmc_resume(struct tmio_core_mmc *sd_config);
-+void tmio_core_mmc_pwr(struct tmio_core_mmc *sd_config, int state);
-+void tmio_core_mmc_clk_div(struct tmio_core_mmc *sd_config, int state);
- 
- /*
-  * data for the MMC controller
-diff --git a/drivers/mfd/tmio_core.c b/drivers/mfd/tmio_core.c
-index 483fbbb..7abb997 100644
---- a/drivers/mfd/tmio_core.c
-+++ b/drivers/mfd/tmio_core.c
-@@ -10,45 +10,45 @@
- 
- #include <linux/mfd/tmio.h>
- 
--int tmio_core_mmc_enable(void __iomem *cnf, unsigned long base)
-+int tmio_core_mmc_enable(struct tmio_core_mmc *sd_config, unsigned long base)
- {
- 	/* Enable the MMC/SD Control registers */
--	sd_config_write16(cnf + CNF_CMD, SDCREN);
--	sd_config_write32(cnf + CNF_CTL_BASE, base & 0xfffe);
-+	sd_config_write16(sd_config, CNF_CMD, SDCREN);
-+	sd_config_write32(sd_config, CNF_CTL_BASE, base & 0xfffe);
- 
- 	/* Disable SD power during suspend */
--	sd_config_write8(cnf + CNF_PWR_CTL_3, 0x01);
-+	sd_config_write8(sd_config, CNF_PWR_CTL_3, 0x01);
- 
- 	/* The below is required but why? FIXME */
--	sd_config_write8(cnf + CNF_STOP_CLK_CTL, 0x1f);
-+	sd_config_write8(sd_config, CNF_STOP_CLK_CTL, 0x1f);
- 
- 	/* Power down SD bus*/
--	sd_config_write8(cnf + CNF_PWR_CTL_2, 0x00);
-+	sd_config_write8(sd_config, CNF_PWR_CTL_2, 0x00);
- 
- 	return 0;
- }
- EXPORT_SYMBOL(tmio_core_mmc_enable);
- 
--int tmio_core_mmc_resume(void __iomem *cnf, unsigned long base)
-+int tmio_core_mmc_resume(struct tmio_core_mmc *sd_config, unsigned long base)
- {
- 
- 	/* Enable the MMC/SD Control registers */
--	sd_config_write16(cnf + CNF_CMD, SDCREN);
--	sd_config_write32(cnf + CNF_CTL_BASE, base & 0xfffe);
-+	sd_config_write16(sd_config, CNF_CMD, SDCREN);
-+	sd_config_write32(sd_config, CNF_CTL_BASE, base & 0xfffe);
- 
- 	return 0;
- }
- EXPORT_SYMBOL(tmio_core_mmc_resume);
- 
--void tmio_core_mmc_pwr(void __iomem *cnf, int state)
-+void tmio_core_mmc_pwr(struct tmio_core_mmc *sd_config, int state)
- {
--	sd_config_write8(cnf + CNF_PWR_CTL_2, state ? 0x02 : 0x00);
-+	sd_config_write8(sd_config, CNF_PWR_CTL_2, state ? 0x02 : 0x00);
- }
- EXPORT_SYMBOL(tmio_core_mmc_pwr);
- 
--void tmio_core_mmc_clk_div(void __iomem *cnf, int state)
-+void tmio_core_mmc_clk_div(struct tmio_core_mmc *sd_config, int state)
- {
--	sd_config_write8(cnf + CNF_SD_CLK_MODE, state ? 1 : 0);
-+	sd_config_write8(sd_config, CNF_SD_CLK_MODE, state ? 1 : 0);
- }
- EXPORT_SYMBOL(tmio_core_mmc_clk_div);
- 
-diff --git a/drivers/mfd/tc6387xb.c b/drivers/mfd/tc6387xb.c
-index fa8da02..520effe 100644
---- a/drivers/mfd/tc6387xb.c
-+++ b/drivers/mfd/tc6387xb.c
-@@ -26,10 +26,9 @@ struct tc6387xb {
- 	void __iomem *scr;
- 	struct clk *clk32k;
- 	struct resource rscr;
-+	struct tmio_core_mmc sd_config;
- };
- 
--static struct resource tc6387xb_mmc_resources[];
--
- /*--------------------------------------------------------------------------*/
- 
- #ifdef CONFIG_PM
-@@ -54,8 +53,7 @@ static int tc6387xb_resume(struct platform_device *dev)
- 	if (pdata && pdata->resume)
- 		pdata->resume(dev);
- 
--	tmio_core_mmc_resume(tc6387xb->scr + 0x200,
--		tc6387xb_mmc_resources[0].start & 0xfffe);
-+	tmio_core_mmc_resume(&tc6387xb->sd_config);
- 
- 	return 0;
- }
-@@ -71,7 +69,7 @@ static void tc6387xb_mmc_pwr(struct platform_device *mmc, int state)
- 	struct platform_device *dev = to_platform_device(mmc->dev.parent);
- 	struct tc6387xb *tc6387xb = platform_get_drvdata(dev);
- 
--	tmio_core_mmc_pwr(tc6387xb->scr + 0x200, state);
-+	tmio_core_mmc_pwr(&tc6387xb->sd_config, state);
- }
- 
- static void tc6387xb_mmc_clk_div(struct platform_device *mmc, int state)
-@@ -79,7 +77,7 @@ static void tc6387xb_mmc_clk_div(struct platform_device *mmc, int state)
- 	struct platform_device *dev = to_platform_device(mmc->dev.parent);
- 	struct tc6387xb *tc6387xb = platform_get_drvdata(dev);
- 
--	tmio_core_mmc_clk_div(tc6387xb->scr + 0x200, state);
-+	tmio_core_mmc_clk_div(&tc6387xb->sd_config, state);
- }
- 
+Some constructive advice follows:
 
-@@ -90,8 +88,7 @@ static int tc6387xb_mmc_enable(struct platform_device *mmc)
- 
- 	clk_enable(tc6387xb->clk32k);
- 
--	tmio_core_mmc_enable(tc6387xb->scr + 0x200,
--		tc6387xb_mmc_resources[0].start & 0xfffe);
-+	tmio_core_mmc_enable(&tc6387xb->sd_config);
- 
- 	return 0;
- }
-@@ -196,6 +193,9 @@ static int tc6387xb_probe(struct platform_device *dev)
- 	tc6387xb_cells[TC6387XB_CELL_MMC].data_size =
- 		sizeof(tc6387xb_cells[TC6387XB_CELL_MMC]);
- 
-+	tc6387xb->sd_config.cnf = tc6387xb->scr + 0x200;
-+	tc6387xb->sd_config.base = tc6387xb_mmc_resources[0].start & 0xfffe;
-+
- 	ret = mfd_add_devices(&dev->dev, dev->id, tc6387xb_cells,
- 			      ARRAY_SIZE(tc6387xb_cells), iomem, irq);
- 
+Does your clock rate vary dynamically, or is it on a per platform
+basis? If the latter then thats fine. If the former, you will need to
+do a lot more work as tmio-mmc was not written to support the clock
+rate getting changed under its feet, and you could fry peoples
+hardware.
+
+Also I would recommend that you merge all the platform data patches
+along with the kconfig patch as a single changeset in git or a single
+patch if you arent using git (you should use git). There is no reason
+to seperate them, and the platform data patches are useless without
+the kconfig patch (and vice-versa).
+
+Since you will be then submitting the platform patches all at once,
+then I suggest you factor out all the identical MMC related structs
+into a seperate file (pxa has devices.c - superh may have something
+similar?) and then you can simply add the devices to a list of devices
+or have a single function call in each of the platform files, rather
+than duplicating the code all over the place. My guess is these wont
+be the only superH boards to use this driver. If the name of the MMC
+clock differs on each board, you can solve this by using a clock alias
+on each board (you may need to copy the clock alias support I wrote
+for SA1100/PXA - not sure if it went in to the generic code or just
+ARM stuff)
+
+Also you should consider adding updated defconfigs for each of the
+affected platforms to that patchset when you submit it - if you dont
+you will break them because they will lose their spi MMC access. That
+might be a bit serious if thats where their root fs is...
+
+As a bonus of using the tmio-mmc platform hooks properly, you also get
+to submit everything via the superH tree. You may consider the Kconfig
+patch acked-by me but I think it should be merged as part of a
+patchset containing all the platform patches too.
+
+I'd like to see the updated version when you're done.
+
+HTH!
+
+-Ian
+
+2009/9/30 Magnus Damm <magnus.damm@gmail.com>:
+> Hey Ian,
+>
+> [CC akpm]
+>
+> On Tue, Sep 29, 2009 at 9:52 PM, Ian Molton <ian@mnementh.co.uk> wrote:
+>> Hi guys,
+>>
+>> This is the full TMIO MMC patchset, compiled, tested, checkpatch passed.
+>>
+>> Please base all tmio based code on top of this patchset.
+>
+> I just took patch 0001->0005 for a spin on SuperH and they seem fine.
+> Feel free to add an acked-by from me for the first patch. I know too
+> little about the other parts to say anything useful.
+>
+> To get SuperH working I also need to update the kconfig. And to detect
+> the clock rate dynamically I needed another minor patch. If you
+> dislike the clock patch then I can also work around it in the board
+> code for now.
+>
+> I plan on submitting the platform data patches to the SuperH mailing
+> list in the near future, but I may need to rework them somehow if you
+> dislike the clock patch approach.
+>
+> Cheers,
+>
+> / magnus
+>
 
 
 
+-- 
+Ian Molton
+Linux, Automotive, and other hacking:
+http://www.mnementh.co.uk/
