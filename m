@@ -1,35 +1,71 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: TMIO MMC: full patchset.
-Date: Wed, 30 Sep 2009 18:39:32 -0700
-Message-ID: <20090930183932.7b90456f.akpm@linux-foundation.org>
-References: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
-	<aec7e5c30909300441w6ca07dd9o889590c6100b846b@mail.gmail.com>
-	<c09aa50a0909301315o683322e4k4b85e21ab473341e@mail.gmail.com>
-	<aec7e5c30909301830s2d3ba9r39cce5cd57e87025@mail.gmail.com>
+From: Jonathan Cameron <jic23@cam.ac.uk>
+Subject: Re: [patch 077/232] sdio: fix read buffer overflow
+Date: Thu, 01 Oct 2009 11:08:04 +0100
+Message-ID: <4AC47F84.20806@cam.ac.uk>
+References: <200909222345.n8MNj9kq013725@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:38145 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755344AbZJABkP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Sep 2009 21:40:15 -0400
-In-Reply-To: <aec7e5c30909301830s2d3ba9r39cce5cd57e87025@mail.gmail.com>
+Received: from ppsw-5.csi.cam.ac.uk ([131.111.8.135]:57546 "EHLO
+	ppsw-5.csi.cam.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755601AbZJAKHh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2009 06:07:37 -0400
+In-Reply-To: <200909222345.n8MNj9kq013725@imap1.linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, sameo@openedhand.com, pb@handhelds.org, philipp.zabel@gmail.com
+To: akpm@linux-foundation.org
+Cc: roel.kluin@gmail.com, david.vrabel@csr.com, linux-mmc@vger.kernel.org, "libertas-dev@lists.infradead.org" <libertas-dev@lists.infradead.org>
 
-On Thu, 1 Oct 2009 10:30:42 +0900 Magnus Damm <magnus.damm@gmail.com> wrote:
+Hi All,
 
-> Any chance we can get at least the ian-0001 patch and the kconfig bit
-> merged in 2.6.32-rc?
+This patch is causing a regression with libertas 8686.
+It's only finding 3 strings which I'm guessing means
+it is an invalid CISTPL_VERS_1. Unfortunately the libertas_sdio
+code relies on a string in one of them to tell it what model of
+card we have.
 
-<wakes up>
+Can someone confirm what the CIS_VERS_1 spec actually is?
+I've found one vague reference to entries 3 and 4 being optional
+but the simplified sdio spec refers to the pcmcia 3.2.10 spec
+which I don't have easy access to.
 
-Please flag the proposed merge plans clearly in the description when
-you send out the patch series and lets take a look at it then.
+Any suggestions on a work around?
 
-I don't need much reason to shove stuff into -rc2, but it's nice to
-have _some_ reason ;)
+Thanks,
+
+Jonathan
+
+
+> From: Roel Kluin <roel.kluin@gmail.com>
+> 
+> Avoid buffer underrun when parsing an invalid CISTPL_VERS_1.
+> 
+> Signed-off-by: Roel Kluin <roel.kluin@gmail.com>
+> Cc: David Vrabel <david.vrabel@csr.com>
+> Cc: <linux-mmc@vger.kernel.org>
+> Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+> ---
+> 
+>  drivers/mmc/core/sdio_cis.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff -puN drivers/mmc/core/sdio_cis.c~sdio-fix-read-buffer-overflow drivers/mmc/core/sdio_cis.c
+> --- a/drivers/mmc/core/sdio_cis.c~sdio-fix-read-buffer-overflow
+> +++ a/drivers/mmc/core/sdio_cis.c
+> @@ -40,7 +40,7 @@ static int cistpl_vers_1(struct mmc_card
+>  			nr_strings++;
+>  	}
+>  
+> -	if (buf[i-1] != '\0') {
+> +	if (nr_strings < 4) {
+>  		printk(KERN_WARNING "SDIO: ignoring broken CISTPL_VERS_1\n");
+>  		return 0;
+>  	}
+> _
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
