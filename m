@@ -1,15 +1,15 @@
 From: akpm@linux-foundation.org
-Subject: [patch 28/42] s3cmci: add better support for no card detect or write protect available
-Date: Thu, 01 Oct 2009 15:44:21 -0700
-Message-ID: <200910012244.n91MiLRx009083@imap1.linux-foundation.org>
+Subject: [patch 27/42] s3cmci: make SDIO IRQ hardware IRQ support build-time configurable
+Date: Thu, 01 Oct 2009 15:44:20 -0700
+Message-ID: <200910012244.n91MiKN3009049@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:53667 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42829 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753868AbZJAWoW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2009 18:44:22 -0400
+	by vger.kernel.org with ESMTP id S1753858AbZJAWoV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2009 18:44:21 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
@@ -17,122 +17,61 @@ Cc: akpm@linux-foundation.org, ben@simtec.co.uk, linux-mmc@vger.kernel.org
 
 From: Ben Dooks <ben@simtec.co.uk>
 
-Add better support for omitting either the card detect or the write
-protect GPIOs if the board does not support it.  Add the fields
-no_wprotect and no_detect to the platform data which when set indicate the
-absence of the respective GPIOs.
-
-Note, this also fixes a minor bug where it tries to free IRQ0 if there is
-no detect gpio available.
+We have found a couple of boards where the SDIO IRQ hardware support has
+failed to work properly, and thus we should make it configurable whether
+or not to be included in the driver.
 
 Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- arch/arm/plat-s3c24xx/include/plat/mci.h |    2 
- drivers/mmc/host/s3cmci.c                |   44 +++++++++++----------
- 2 files changed, 26 insertions(+), 20 deletions(-)
+ drivers/mmc/host/Kconfig  |    7 +++++++
+ drivers/mmc/host/s3cmci.c |    9 +++++++--
+ 2 files changed, 14 insertions(+), 2 deletions(-)
 
-diff -puN arch/arm/plat-s3c24xx/include/plat/mci.h~s3cmci-add-better-support-for-no-card-detect-or-write-protect-available arch/arm/plat-s3c24xx/include/plat/mci.h
---- a/arch/arm/plat-s3c24xx/include/plat/mci.h~s3cmci-add-better-support-for-no-card-detect-or-write-protect-available
-+++ a/arch/arm/plat-s3c24xx/include/plat/mci.h
-@@ -2,6 +2,8 @@
- #define _ARCH_MCI_H
+diff -puN drivers/mmc/host/Kconfig~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable drivers/mmc/host/Kconfig
+--- a/drivers/mmc/host/Kconfig~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable
++++ a/drivers/mmc/host/Kconfig
+@@ -276,6 +276,13 @@ config MMC_S3C
  
- struct s3c24xx_mci_pdata {
-+	unsigned int	no_wprotect : 1;
-+	unsigned int	no_detect : 1;
- 	unsigned int	wprotect_invert : 1;
- 	unsigned int	detect_invert : 1;   /* set => detect active high. */
- 	unsigned int	use_dma : 1;
-diff -puN drivers/mmc/host/s3cmci.c~s3cmci-add-better-support-for-no-card-detect-or-write-protect-available drivers/mmc/host/s3cmci.c
---- a/drivers/mmc/host/s3cmci.c~s3cmci-add-better-support-for-no-card-detect-or-write-protect-available
+ 	  If unsure, say N.
+ 
++config MMC_S3C_HW_SDIO_IRQ
++       bool "Hardware support for SDIO IRQ"
++       depends on MMC_S3C
++       help
++         Enable the hardware support for SDIO interrupts instead of using
++	 the generic polling code.
++
+ choice
+ 	prompt "Samsung S3C SD/MMC transfer code"
+ 	depends on MMC_S3C
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable
 +++ a/drivers/mmc/host/s3cmci.c
-@@ -1299,7 +1299,7 @@ static int s3cmci_get_ro(struct mmc_host
- 	struct s3c24xx_mci_pdata *pdata = host->pdata;
- 	int ret;
+@@ -1715,7 +1715,11 @@ static int __devinit s3cmci_probe(struct
  
--	if (pdata->gpio_wprotect == 0)
-+	if (pdata->no_wprotect)
- 		return 0;
+ 	mmc->ops 	= &s3cmci_ops;
+ 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
++#ifdef CONFIG_MMC_S3C_HW_SDIO_IRQ
+ 	mmc->caps	= MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
++#else
++	mmc->caps	= MMC_CAP_4_BIT_DATA;
++#endif
+ 	mmc->f_min 	= host->clk_rate / (host->clk_div * 256);
+ 	mmc->f_max 	= host->clk_rate / host->clk_div;
  
- 	ret = s3c2410_gpio_getpin(pdata->gpio_wprotect);
-@@ -1647,30 +1647,34 @@ static int __devinit s3cmci_probe(struct
- 	disable_irq(host->irq);
- 	host->irq_state = false;
+@@ -1750,8 +1754,9 @@ static int __devinit s3cmci_probe(struct
+ 	s3cmci_debugfs_attach(host);
  
--	if (host->pdata->gpio_detect) {
-+	if (!host->pdata->no_detect) {
- 		ret = gpio_request(host->pdata->gpio_detect, "s3cmci detect");
- 		if (ret) {
- 			dev_err(&pdev->dev, "failed to get detect gpio\n");
- 			goto probe_free_irq;
- 		}
--	}
+ 	platform_set_drvdata(pdev, mmc);
+-	dev_info(&pdev->dev, "%s - using %s\n", mmc_hostname(mmc),
+-		 s3cmci_host_usedma(host) ? "dma" : "pio");
++	dev_info(&pdev->dev, "%s - using %s, %s SDIO IRQ\n", mmc_hostname(mmc),
++		 s3cmci_host_usedma(host) ? "dma" : "pio",
++		 mmc->caps & MMC_CAP_SDIO_IRQ ? "hw" : "sw");
  
--	host->irq_cd = s3c2410_gpio_getirq(host->pdata->gpio_detect);
-+		host->irq_cd = s3c2410_gpio_getirq(host->pdata->gpio_detect);
+ 	return 0;
  
--	if (host->irq_cd >= 0) {
--		if (request_irq(host->irq_cd, s3cmci_irq_cd,
--				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
--				DRIVER_NAME, host)) {
--			dev_err(&pdev->dev, "can't get card detect irq.\n");
--			ret = -ENOENT;
--			goto probe_free_gpio_cd;
-+		if (host->irq_cd >= 0) {
-+			if (request_irq(host->irq_cd, s3cmci_irq_cd,
-+					IRQF_TRIGGER_RISING |
-+					IRQF_TRIGGER_FALLING,
-+					DRIVER_NAME, host)) {
-+				dev_err(&pdev->dev,
-+					"can't get card detect irq.\n");
-+				ret = -ENOENT;
-+				goto probe_free_gpio_cd;
-+			}
-+		} else {
-+			dev_warn(&pdev->dev,
-+				 "host detect has no irq available\n");
-+			gpio_direction_input(host->pdata->gpio_detect);
- 		}
--	} else {
--		dev_warn(&pdev->dev, "host detect has no irq available\n");
--		gpio_direction_input(host->pdata->gpio_detect);
--	}
-+	} else
-+		host->irq_cd = -1;
- 
--	if (host->pdata->gpio_wprotect) {
-+	if (!host->pdata->no_wprotect) {
- 		ret = gpio_request(host->pdata->gpio_wprotect, "s3cmci wp");
- 		if (ret) {
- 			dev_err(&pdev->dev, "failed to get writeprotect\n");
-@@ -1774,11 +1778,11 @@ static int __devinit s3cmci_probe(struct
- 		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
- 
-  probe_free_gpio_wp:
--	if (host->pdata->gpio_wprotect)
-+	if (!host->pdata->no_wprotect)
- 		gpio_free(host->pdata->gpio_wprotect);
- 
-  probe_free_gpio_cd:
--	if (host->pdata->gpio_detect)
-+	if (!host->pdata->no_detect)
- 		gpio_free(host->pdata->gpio_detect);
- 
-  probe_free_irq_cd:
-@@ -1837,10 +1841,10 @@ static int __devexit s3cmci_remove(struc
- 
- 	free_irq(host->irq, host);
- 
--	if (pd->gpio_wprotect)
-+	if (!pd->no_wprotect)
- 		gpio_free(pd->gpio_wprotect);
- 
--	if (pd->gpio_detect)
-+	if (!pd->no_detect)
- 		gpio_free(pd->gpio_detect);
- 
- 	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
 _
