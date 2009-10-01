@@ -1,146 +1,153 @@
 From: akpm@linux-foundation.org
-Subject: [patch 11/42] sdio: pass whitelisted cis funce tuples to sdio drivers
-Date: Thu, 01 Oct 2009 15:44:05 -0700
-Message-ID: <200910012244.n91Mi5G5008447@imap1.linux-foundation.org>
+Subject: [patch 19/42] s3cmci: update probe to use new platform id list
+Date: Thu, 01 Oct 2009 15:44:14 -0700
+Message-ID: <200910012244.n91MiEUj008732@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:45142 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:39057 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752639AbZJAWoD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2009 18:44:03 -0400
+	by vger.kernel.org with ESMTP id S1753481AbZJAWoR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2009 18:44:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, albert_herranz@yahoo.es, linux-mmc@vger.kernel.org
+Cc: akpm@linux-foundation.org, ben@simtec.co.uk, linux-mmc@vger.kernel.org
 
-From: Albert Herranz <albert_herranz@yahoo.es>
+From: Ben Dooks <ben@simtec.co.uk>
 
-Some manufacturers provide vendor information in non-vendor specific CIS
-tuples.  For example, Broadcom uses an Extended Function tuple to provide
-the MAC address on some of their network cards, as in the case of the
-Nintendo Wii WLAN daughter card.
+Use the platform id list to match the three different versions of the
+hardware block that this driver supports.
 
-This patch allows passing whitelisted FUNCE tuples unknown to the SDIO
-core to a matching SDIO driver instead of rejecting them and failing.
+This will change the prefix of the console messages produced by this
+driver to be prefixed by s3c-mci instead of the hardware block name, such
+as s3c2440-mci.
 
-Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
+Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/sdio_cis.c |   65 +++++++++++++++++++++++++---------
- 1 file changed, 49 insertions(+), 16 deletions(-)
+ drivers/mmc/host/s3cmci.c |   71 ++++++++++++------------------------
+ 1 file changed, 24 insertions(+), 47 deletions(-)
 
-diff -puN drivers/mmc/core/sdio_cis.c~sdio-pass-whitelisted-cis-funce-tuples-to-sdio-drivers drivers/mmc/core/sdio_cis.c
---- a/drivers/mmc/core/sdio_cis.c~sdio-pass-whitelisted-cis-funce-tuples-to-sdio-drivers
-+++ a/drivers/mmc/core/sdio_cis.c
-@@ -98,6 +98,22 @@ static const unsigned char speed_val[16]
- static const unsigned int speed_unit[8] =
- 	{ 10000, 100000, 1000000, 10000000, 0, 0, 0, 0 };
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-update-probe-to-use-new-platform-id-list drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-update-probe-to-use-new-platform-id-list
++++ a/drivers/mmc/host/s3cmci.c
+@@ -1244,11 +1244,14 @@ static inline void s3cmci_cpufreq_deregi
+ }
+ #endif
  
-+/* FUNCE tuples with these types get passed to SDIO drivers */
-+static const unsigned char funce_type_whitelist[] = {
-+	4 /* CISTPL_FUNCE_LAN_NODE_ID used in Broadcom cards */
-+};
-+
-+static int cistpl_funce_whitelisted(unsigned char type)
-+{
-+	int i;
-+
-+	for (i = 0; i < ARRAY_SIZE(funce_type_whitelist); i++) {
-+		if (funce_type_whitelist[i] == type)
-+			return 1;
-+	}
-+	return 0;
-+}
-+
- static int cistpl_funce_common(struct mmc_card *card,
- 			       const unsigned char *buf, unsigned size)
+-static int __devinit s3cmci_probe(struct platform_device *pdev, int is2440)
++static int __devinit s3cmci_probe(struct platform_device *pdev)
  {
-@@ -120,6 +136,10 @@ static int cistpl_funce_func(struct sdio
- 	unsigned vsn;
- 	unsigned min_size;
- 
-+	/* let SDIO drivers take care of whitelisted FUNCE tuples */
-+	if (cistpl_funce_whitelisted(buf[0]))
-+		return -EILSEQ;
+ 	struct s3cmci_host *host;
+ 	struct mmc_host	*mmc;
+ 	int ret;
++	int is2440;
 +
- 	vsn = func->card->cccr.sdio_vsn;
- 	min_size = (vsn == SDIO_SDIO_REV_1_00) ? 28 : 42;
++	is2440 = platform_get_device_id(pdev)->driver_data;
  
-@@ -154,13 +174,12 @@ static int cistpl_funce(struct mmc_card 
- 	else
- 		ret = cistpl_funce_common(card, buf, size);
- 
--	if (ret) {
-+	if (ret && ret != -EILSEQ) {
- 		printk(KERN_ERR "%s: bad CISTPL_FUNCE size %u "
- 		       "type %u\n", mmc_hostname(card->host), size, buf[0]);
--		return ret;
- 	}
- 
--	return 0;
-+	return ret;
+ 	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
+ 	if (!mmc) {
+@@ -1473,20 +1476,22 @@ static int __devexit s3cmci_remove(struc
+ 	return 0;
  }
  
- typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
-@@ -253,21 +272,12 @@ static int sdio_read_cis(struct mmc_card
- 		for (i = 0; i < ARRAY_SIZE(cis_tpl_list); i++)
- 			if (cis_tpl_list[i].code == tpl_code)
- 				break;
--		if (i >= ARRAY_SIZE(cis_tpl_list)) {
--			/* this tuple is unknown to the core */
--			this->next = NULL;
--			this->code = tpl_code;
--			this->size = tpl_link;
--			*prev = this;
--			prev = &this->next;
--			printk(KERN_DEBUG
--			       "%s: queuing CIS tuple 0x%02x length %u\n",
--			       mmc_hostname(card->host), tpl_code, tpl_link);
--		} else {
-+		if (i < ARRAY_SIZE(cis_tpl_list)) {
- 			const struct cis_tpl *tpl = cis_tpl_list + i;
- 			if (tpl_link < tpl->min_size) {
- 				printk(KERN_ERR
--				       "%s: bad CIS tuple 0x%02x (length = %u, expected >= %u)\n",
-+				       "%s: bad CIS tuple 0x%02x"
-+				       " (length = %u, expected >= %u)\n",
- 				       mmc_hostname(card->host),
- 				       tpl_code, tpl_link, tpl->min_size);
- 				ret = -EINVAL;
-@@ -275,7 +285,30 @@ static int sdio_read_cis(struct mmc_card
- 				ret = tpl->parse(card, func,
- 						 this->data, tpl_link);
- 			}
--			kfree(this);
-+			/*
-+			 * We don't need the tuple anymore if it was
-+			 * successfully parsed by the SDIO core or if it is
-+			 * not going to be parsed by SDIO drivers.
-+			 */
-+			if (!ret || ret != -EILSEQ)
-+				kfree(this);
-+		} else {
-+			/* unknown tuple */
-+			ret = -EILSEQ;
-+		}
-+
-+		if (ret == -EILSEQ) {
-+			/* this tuple is unknown to the core or whitelisted */
-+			this->next = NULL;
-+			this->code = tpl_code;
-+			this->size = tpl_link;
-+			*prev = this;
-+			prev = &this->next;
-+			printk(KERN_DEBUG
-+			       "%s: queuing CIS tuple 0x%02x length %u\n",
-+			       mmc_hostname(card->host), tpl_code, tpl_link);
-+			/* keep on analyzing tuples */
-+			ret = 0;
- 		}
+-static int __devinit s3cmci_2410_probe(struct platform_device *dev)
+-{
+-	return s3cmci_probe(dev, 0);
+-}
++static struct platform_device_id s3cmci_driver_ids[] = {
++	{
++		.name	= "s3c2410-sdi",
++		.driver_data	= 0,
++	}, {
++		.name	= "s3c2412-sdi",
++		.driver_data	= 1,
++	}, {
++		.name	= "s3c2440-sdi",
++		.driver_data	= 1,
++	},
++	{ }
++};
  
- 		ptr += tpl_link;
+-static int __devinit s3cmci_2412_probe(struct platform_device *dev)
+-{
+-	return s3cmci_probe(dev, 1);
+-}
++MODULE_DEVICE_TABLE(platform, s3cmci_driver_ids);
+ 
+-static int __devinit s3cmci_2440_probe(struct platform_device *dev)
+-{
+-	return s3cmci_probe(dev, 1);
+-}
+ 
+ #ifdef CONFIG_PM
+ 
+@@ -1510,50 +1515,25 @@ static int s3cmci_resume(struct platform
+ #endif /* CONFIG_PM */
+ 
+ 
+-static struct platform_driver s3cmci_2410_driver = {
+-	.driver.name	= "s3c2410-sdi",
+-	.driver.owner	= THIS_MODULE,
+-	.probe		= s3cmci_2410_probe,
+-	.remove		= __devexit_p(s3cmci_remove),
+-	.shutdown	= s3cmci_shutdown,
+-	.suspend	= s3cmci_suspend,
+-	.resume		= s3cmci_resume,
+-};
+-
+-static struct platform_driver s3cmci_2412_driver = {
+-	.driver.name	= "s3c2412-sdi",
+-	.driver.owner	= THIS_MODULE,
+-	.probe		= s3cmci_2412_probe,
+-	.remove		= __devexit_p(s3cmci_remove),
+-	.shutdown	= s3cmci_shutdown,
+-	.suspend	= s3cmci_suspend,
+-	.resume		= s3cmci_resume,
+-};
+-
+-static struct platform_driver s3cmci_2440_driver = {
+-	.driver.name	= "s3c2440-sdi",
++static struct platform_driver s3cmci_driver = {
++	.driver.name	= "s3c-sdi",
+ 	.driver.owner	= THIS_MODULE,
+-	.probe		= s3cmci_2440_probe,
++	.id_table	= s3cmci_driver_ids,
++	.probe		= s3cmci_probe,
+ 	.remove		= __devexit_p(s3cmci_remove),
+ 	.shutdown	= s3cmci_shutdown,
+ 	.suspend	= s3cmci_suspend,
+ 	.resume		= s3cmci_resume,
+ };
+ 
+-
+ static int __init s3cmci_init(void)
+ {
+-	platform_driver_register(&s3cmci_2410_driver);
+-	platform_driver_register(&s3cmci_2412_driver);
+-	platform_driver_register(&s3cmci_2440_driver);
+-	return 0;
++	return platform_driver_register(&s3cmci_driver);
+ }
+ 
+ static void __exit s3cmci_exit(void)
+ {
+-	platform_driver_unregister(&s3cmci_2410_driver);
+-	platform_driver_unregister(&s3cmci_2412_driver);
+-	platform_driver_unregister(&s3cmci_2440_driver);
++	platform_driver_unregister(&s3cmci_driver);
+ }
+ 
+ module_init(s3cmci_init);
+@@ -1562,6 +1542,3 @@ module_exit(s3cmci_exit);
+ MODULE_DESCRIPTION("Samsung S3C MMC/SD Card Interface driver");
+ MODULE_LICENSE("GPL v2");
+ MODULE_AUTHOR("Thomas Kleffel <tk@maintech.de>, Ben Dooks <ben-linux@fluff.org>");
+-MODULE_ALIAS("platform:s3c2410-sdi");
+-MODULE_ALIAS("platform:s3c2412-sdi");
+-MODULE_ALIAS("platform:s3c2440-sdi");
 _
