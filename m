@@ -1,36 +1,55 @@
 From: Magnus Damm <magnus.damm@gmail.com>
-Subject: [PATCH 02/07] mmc: Add SuperH to the tmio-mmc Kconfig
-Date: Fri, 02 Oct 2009 11:22:21 +0900
-Message-ID: <20091002022221.8215.50121.sendpatchset@rxone.opensource.se>
+Subject: [PATCH 03/07] mmc: Remove const from tmio-mmc platform data
+Date: Fri, 02 Oct 2009 11:22:32 +0900
+Message-ID: <20091002022232.8215.10549.sendpatchset@rxone.opensource.se>
 References: <20091002022158.8215.58317.sendpatchset@rxone.opensource.se>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ew0-f211.google.com ([209.85.219.211]:61326 "EHLO
+	mail-ew0-f211.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754689AbZJBC1G (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2009 22:27:06 -0400
 In-Reply-To: <20091002022158.8215.58317.sendpatchset@rxone.opensource.se>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, g.liakhovetski@gmx.de, ian@mnementh.co.uk, lethal@linux-sh.org, Magnus Damm <magnus.damm@gmail.com>, akpm@linux-foundation.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org, ian@mnementh.co.uk, lethal@linux-sh.org, Magnus Damm <magnus.damm@gmail.com>, g.liakhovetski@gmx.de
 
 From: Magnus Damm <damm@opensource.se>
 
-Add SUPERH to the Kconfig dependencies for tmio_mmc.
-
-This change allows us to drive the SDHI hardware blocks
-found in SuperH Mobile with tmio_mmc.
+Remove const from the hclk member of the tmio-mmc platform
+data. This to allow assigning a value dynamically to the
+platform data in the SuperH Mobile SDHI driver.
 
 Signed-off-by: Magnus Damm <damm@opensource.se>
 ---
 
- drivers/mmc/host/Kconfig |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ Depends on the SuperH Mobile SDHI driver.
 
---- 0001/drivers/mmc/host/Kconfig
-+++ work/drivers/mmc/host/Kconfig	2009-09-30 17:26:02.000000000 +0900
-@@ -288,7 +288,7 @@ config MMC_SDRICOH_CS
+ drivers/mfd/sh_mobile_sdhi.c |    4 +---
+ include/linux/mfd/tmio.h     |    2 +-
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+--- 0008/drivers/mfd/sh_mobile_sdhi.c
++++ work/drivers/mfd/sh_mobile_sdhi.c	2009-10-02 09:58:40.000000000 +0900
+@@ -84,9 +84,7 @@ static int __init sh_mobile_sdhi_probe(s
+ 	}
  
- config MMC_TMIO
- 	tristate "Toshiba Mobile IO Controller (TMIO) MMC/SD function support"
--	depends on MFD_TMIO || MFD_ASIC3
-+	depends on MFD_TMIO || MFD_ASIC3 || SUPERH
- 	help
- 	  This provides support for the SD/MMC cell found in TC6393XB,
- 	  T7L66XB and also HTC ASIC3
+ 	clk_enable(priv->clk);
+-
+-	/* FIXME: silly const unsigned int hclk */
+-	*(unsigned int *)&priv->mmc_data.hclk = clk_get_rate(priv->clk);
++	priv->mmc_data.hclk = clk_get_rate(priv->clk);
+ 
+ 	memcpy(&priv->cell_mmc, &sh_mobile_sdhi_cell, sizeof(priv->cell_mmc));
+ 	priv->cell_mmc.driver_data = &priv->mmc_data;
+--- 0002/include/linux/mfd/tmio.h
++++ work/include/linux/mfd/tmio.h	2009-10-02 09:55:50.000000000 +0900
+@@ -53,7 +53,7 @@ void tmio_core_mmc_clk_div(void __iomem 
+  * data for the MMC controller
+  */
+ struct tmio_mmc_data {
+-	const unsigned int		hclk;
++	unsigned int		hclk;
+ 	void (*set_pwr)(struct platform_device *host, int state);
+ 	void (*set_no_clk_div)(struct platform_device *host, int state);
+ };
