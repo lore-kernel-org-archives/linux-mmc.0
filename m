@@ -1,53 +1,46 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: TMIO MMC: full patchset.
-Date: Fri, 2 Oct 2009 15:17:40 +0900
-Message-ID: <aec7e5c30910012317w52c639f0lc87a60c9fc1b51e2@mail.gmail.com>
-References: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
-	 <aec7e5c30909300441w6ca07dd9o889590c6100b846b@mail.gmail.com>
-	 <c09aa50a0909301315o683322e4k4b85e21ab473341e@mail.gmail.com>
-	 <aec7e5c30909301830s2d3ba9r39cce5cd57e87025@mail.gmail.com>
-	 <20090930183932.7b90456f.akpm@linux-foundation.org>
+From: Ben Dooks <ben@simtec.co.uk>
+Subject: Re: [patch 00/11] s3cmci fixes and updates for current merge window
+Date: Fri, 02 Oct 2009 07:50:45 +0100
+Message-ID: <4AC5A2C5.7070800@simtec.co.uk>
+References: <20090921133555.015075699@smtp.local.simtec.co.uk> <20090929155656.28142423.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f212.google.com ([209.85.217.212]:55323 "EHLO
-	mail-gx0-f212.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756720AbZJBGRg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Oct 2009 02:17:36 -0400
-Received: by gxk4 with SMTP id 4so1092183gxk.8
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Oct 2009 23:17:40 -0700 (PDT)
-In-Reply-To: <20090930183932.7b90456f.akpm@linux-foundation.org>
+Received: from aeryn.fluff.org.uk ([87.194.8.8]:43544 "EHLO
+	kira.home.fluff.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756977AbZJBGun (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Oct 2009 02:50:43 -0400
+In-Reply-To: <20090929155656.28142423.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, sameo@openedhand.com, pb@handhelds.org, philipp.zabel@gmail.com
+Cc: linux-mmc@vger.kernel.org, ben-linux@fluff.org
 
-On Thu, Oct 1, 2009 at 10:39 AM, Andrew Morton
-<akpm@linux-foundation.org> wrote:
-> On Thu, 1 Oct 2009 10:30:42 +0900 Magnus Damm <magnus.damm@gmail.com> wrote:
->
->> Any chance we can get at least the ian-0001 patch and the kconfig bit
->> merged in 2.6.32-rc?
->
-> <wakes up>
->
-> Please flag the proposed merge plans clearly in the description when
-> you send out the patch series and lets take a look at it then.
+Andrew Morton wrote:
+> On Mon, 21 Sep 2009 14:35:55 +0100
+> Ben Dooks <ben@simtec.co.uk> wrote:
+> 
+>> This is a set of the s3cmci updates and fixes for the current merge
+>> window. It is a resend of an updated version of a series posted a
+>> few weeks ago, which I could not find queued anywhere.
+>>
+> 
+> Sending a pile of stuff in the middle of the merge window is rather
+> late for "the current merge window"!
 
-I propose the following merge order:
+Sorry, but pretty much all of this was posted on the 18th of August
+and no-one bothered to comment.
 
-1) The following MMC specific patch from Ian gets merged first:
-[PATCH 1/5] MMC: hardware abstraction for CNF area
-(maybe we need a new version of that one?)
+> And this patch series is a mishmash of features and bugfixes.
 
-2) My series is then merged through the SuperH tree:
-[PATCH 00/07] sh: SuperH Mobile SDHI changes
-(I may need to rework some patches after feedback)
+Since none of this was regression fixes I thought it wasn't
+stuff that should have been submitted earlier.
 
-I'd like to see this in 2.6.32 since it's a fairly insular change and
-we've been struggling with this issue for more than half a year now.
-It would be nice to not delay it any further.
+For example, the DMA fixes are in code that hasn't been used in the driver
+for ages, the rest are more cleanup than fix.
 
-Cheers,
+-- 
+Ben Dooks, Software Engineer, Simtec Electronics
 
-/ magnus
+http://www.simtec.co.uk/
