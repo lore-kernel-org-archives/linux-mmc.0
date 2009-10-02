@@ -1,206 +1,95 @@
-From: akpm@linux-foundation.org
-Subject: [patch 23/42] s3cmci: add debugfs support for examining driver and hardware state
-Date: Thu, 01 Oct 2009 15:44:17 -0700
-Message-ID: <200910012244.n91MiHco008826@imap1.linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
+From: Greg KH <gregkh@suse.de>
+Subject: [016/136] mmc_spi: fail gracefully if host or card do not support the switch command
+Date: Thu, 01 Oct 2009 18:16:04 -0700
+Message-ID: <20091002012408.133960162@mini.kroah.org>
+References: <20091002011548.335611824@mini.kroah.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:46530 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753850AbZJAWoU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2009 18:44:20 -0400
+Received: from kroah.org ([198.145.64.141]:32925 "EHLO coco.kroah.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754698AbZJBBcg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 1 Oct 2009 21:32:36 -0400
+Content-Disposition: inline; filename=mmc_spi-fail-gracefully-if-host-or-card-do-not-support-the-switch-command.patch
+In-Reply-To: <20091002012911.GA18542@kroah.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, ben@simtec.co.uk, linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@kernel.org
+Cc: stable-review@kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, alan@lxorguk.ukuu.org.uk, Wolfgang Muees <wolfgang.mues@auerswald.de>, linux-mmc@vger.kernel.org
 
-From: Ben Dooks <ben@simtec.co.uk>
+2.6.31-stable review patch.  If anyone has any objections, please let us know.
 
-Export driver state and hardware register state via debugfs entries
-created under a directory formed from dev_name() on the probed device when
-CONFIG_DEBUG_FS is set.
+------------------
+From: Wolfgang Muees <wolfgang.mues@auerswald.de>
 
-Signed-off-by: Ben Dooks <ben@simtec.co.uk>
+commit d08ebeddfb3293fa4bdfca9c610daf1e8ec8b233 upstream.
+
+Some time ago, I have send a patch to the mmc_spi subsystem changing the
+error codes.  This was after a discussion with Pierre about using EINVAL
+only for non-recoverable errors.  This patch was accepted as
+
+http://git.kernel.org/linus/fdd858db7113ca64132de390188d7ca00701013d
+
+Unfortunately, several weeks later, I realized that this patch has opened
+a little can of worms because there are SD cards on the market which
+
+a) claim that they support the switch command
+AND
+b) refuse to execute this command if operating in SPI mode.
+
+So, such a card would get unusuable in an embedded linux system in SPI
+mode, because the init sequence terminates with an error.
+
+This patch adds the missing error codes to the caller of the switch
+command and restores the old behaviour to fail gracefully if these
+commands can not execute.
+
+Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
 ---
+ drivers/mmc/core/mmc.c |   10 +++++-----
+ drivers/mmc/core/sd.c  |   10 +++++-----
+ 2 files changed, 10 insertions(+), 10 deletions(-)
 
- drivers/mmc/host/s3cmci.c |  126 ++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/s3cmci.h |    6 +
- 2 files changed, 132 insertions(+)
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -180,11 +180,11 @@ static int mmc_read_ext_csd(struct mmc_c
+ 
+ 	err = mmc_send_ext_csd(card, ext_csd);
+ 	if (err) {
+-		/*
+-		 * We all hosts that cannot perform the command
+-		 * to fail more gracefully
+-		 */
+-		if (err != -EINVAL)
++		/* If the host or the card can't do the switch,
++		 * fail more gracefully. */
++		if ((err != -EINVAL)
++		 && (err != -ENOSYS)
++		 && (err != -EFAULT))
+ 			goto out;
+ 
+ 		/*
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -210,11 +210,11 @@ static int mmc_read_switch(struct mmc_ca
+ 
+ 	err = mmc_sd_switch(card, 0, 0, 1, status);
+ 	if (err) {
+-		/*
+-		 * We all hosts that cannot perform the command
+-		 * to fail more gracefully
+-		 */
+-		if (err != -EINVAL)
++		/* If the host or the card can't do the switch,
++		 * fail more gracefully. */
++		if ((err != -EINVAL)
++		 && (err != -ENOSYS)
++		 && (err != -EFAULT))
+ 			goto out;
+ 
+ 		printk(KERN_WARNING "%s: problem reading switch "
 
-diff -puN drivers/mmc/host/s3cmci.c~s3cmci-add-debugfs-support-for-examining-driver-and-hardware-state drivers/mmc/host/s3cmci.c
---- a/drivers/mmc/host/s3cmci.c~s3cmci-add-debugfs-support-for-examining-driver-and-hardware-state
-+++ a/drivers/mmc/host/s3cmci.c
-@@ -17,6 +17,8 @@
- #include <linux/mmc/host.h>
- #include <linux/platform_device.h>
- #include <linux/cpufreq.h>
-+#include <linux/debugfs.h>
-+#include <linux/seq_file.h>
- #include <linux/gpio.h>
- #include <linux/irq.h>
- #include <linux/io.h>
-@@ -1244,6 +1246,127 @@ static inline void s3cmci_cpufreq_deregi
- #endif
- 
- 
-+#ifdef CONFIG_DEBUG_FS
-+
-+static int s3cmci_state_show(struct seq_file *seq, void *v)
-+{
-+	struct s3cmci_host *host = seq->private;
-+
-+	seq_printf(seq, "Register base = 0x%08x\n", (u32)host->base);
-+	seq_printf(seq, "Clock rate = %ld\n", host->clk_rate);
-+	seq_printf(seq, "Prescale = %d\n", host->prescaler);
-+	seq_printf(seq, "is2440 = %d\n", host->is2440);
-+	seq_printf(seq, "IRQ = %d\n", host->irq);
-+	seq_printf(seq, "CD IRQ = %d\n", host->irq_cd);
-+	seq_printf(seq, "Do DMA = %d\n", host->dodma);
-+	seq_printf(seq, "SDIIMSK at %d\n", host->sdiimsk);
-+	seq_printf(seq, "SDIDATA at %d\n", host->sdidata);
-+
-+	return 0;
-+}
-+
-+static int s3cmci_state_open(struct inode *inode, struct file *file)
-+{
-+	return single_open(file, s3cmci_state_show, inode->i_private);
-+}
-+
-+static const struct file_operations s3cmci_fops_state = {
-+	.owner		= THIS_MODULE,
-+	.open		= s3cmci_state_open,
-+	.read		= seq_read,
-+	.llseek		= seq_lseek,
-+	.release	= single_release,
-+};
-+
-+#define DBG_REG(_r) { .addr = S3C2410_SDI##_r, .name = #_r }
-+
-+struct s3cmci_reg {
-+	unsigned short	addr;
-+	unsigned char	*name;
-+} debug_regs[] = {
-+	DBG_REG(CON),
-+	DBG_REG(PRE),
-+	DBG_REG(CMDARG),
-+	DBG_REG(CMDCON),
-+	DBG_REG(CMDSTAT),
-+	DBG_REG(RSP0),
-+	DBG_REG(RSP1),
-+	DBG_REG(RSP2),
-+	DBG_REG(RSP3),
-+	DBG_REG(TIMER),
-+	DBG_REG(BSIZE),
-+	DBG_REG(DCON),
-+	DBG_REG(DCNT),
-+	DBG_REG(DSTA),
-+	DBG_REG(FSTA),
-+	{}
-+};
-+
-+static int s3cmci_regs_show(struct seq_file *seq, void *v)
-+{
-+	struct s3cmci_host *host = seq->private;
-+	struct s3cmci_reg *rptr = debug_regs;
-+
-+	for (; rptr->name; rptr++)
-+		seq_printf(seq, "SDI%s\t=0x%08x\n", rptr->name,
-+			   readl(host->base + rptr->addr));
-+
-+	seq_printf(seq, "SDIIMSK\t=0x%08x\n", readl(host->base + host->sdiimsk));
-+
-+	return 0;
-+}
-+
-+static int s3cmci_regs_open(struct inode *inode, struct file *file)
-+{
-+	return single_open(file, s3cmci_regs_show, inode->i_private);
-+}
-+
-+static const struct file_operations s3cmci_fops_regs = {
-+	.owner		= THIS_MODULE,
-+	.open		= s3cmci_regs_open,
-+	.read		= seq_read,
-+	.llseek		= seq_lseek,
-+	.release	= single_release,
-+};
-+
-+static void s3cmci_debugfs_attach(struct s3cmci_host *host)
-+{
-+	struct device *dev = &host->pdev->dev;
-+
-+	host->debug_root = debugfs_create_dir(dev_name(dev), NULL);
-+	if (IS_ERR(host->debug_root)) {
-+		dev_err(dev, "failed to create debugfs root\n");
-+		return;
-+	}
-+
-+	host->debug_state = debugfs_create_file("state", 0444,
-+						host->debug_root, host,
-+						&s3cmci_fops_state);
-+
-+	if (IS_ERR(host->debug_state))
-+		dev_err(dev, "failed to create debug state file\n");
-+
-+	host->debug_regs = debugfs_create_file("regs", 0444,
-+					       host->debug_root, host,
-+					       &s3cmci_fops_regs);
-+
-+	if (IS_ERR(host->debug_regs))
-+		dev_err(dev, "failed to create debug regs file\n");
-+}
-+
-+static void s3cmci_debugfs_remove(struct s3cmci_host *host)
-+{
-+	debugfs_remove(host->debug_regs);
-+	debugfs_remove(host->debug_state);
-+	debugfs_remove(host->debug_root);
-+}
-+
-+#else
-+static inline void s3cmci_debugfs_attach(struct s3cmci_host *host) { }
-+static inline void s3cmci_debugfs_remove(struct s3cmci_host *host) { }
-+
-+#endif /* CONFIG_DEBUG_FS */
-+
- static int __devinit s3cmci_probe(struct platform_device *pdev)
- {
- 	struct s3cmci_host *host;
-@@ -1435,6 +1558,8 @@ static int __devinit s3cmci_probe(struct
- 		goto free_cpufreq;
- 	}
- 
-+	s3cmci_debugfs_attach(host);
-+
- 	platform_set_drvdata(pdev, mmc);
- 	dev_info(&pdev->dev, "initialisation done.\n");
- 
-@@ -1489,6 +1614,7 @@ static void s3cmci_shutdown(struct platf
- 	if (host->irq_cd >= 0)
- 		free_irq(host->irq_cd, host);
- 
-+	s3cmci_debugfs_remove(host);
- 	s3cmci_cpufreq_deregister(host);
- 	mmc_remove_host(mmc);
- 	clk_disable(host->clk);
-diff -puN drivers/mmc/host/s3cmci.h~s3cmci-add-debugfs-support-for-examining-driver-and-hardware-state drivers/mmc/host/s3cmci.h
---- a/drivers/mmc/host/s3cmci.h~s3cmci-add-debugfs-support-for-examining-driver-and-hardware-state
-+++ a/drivers/mmc/host/s3cmci.h
-@@ -68,6 +68,12 @@ struct s3cmci_host {
- 	unsigned int		ccnt, dcnt;
- 	struct tasklet_struct	pio_tasklet;
- 
-+#ifdef CONFIG_DEBUG_FS
-+	struct dentry		*debug_root;
-+	struct dentry		*debug_state;
-+	struct dentry		*debug_regs;
-+#endif
-+
- #ifdef CONFIG_CPU_FREQ
- 	struct notifier_block	freq_transition;
- #endif
-_
+
