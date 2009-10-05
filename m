@@ -1,65 +1,109 @@
-From: Pierre Ossman <pierre@ossman.eu>
-Subject: Re: MMC support for password protection of SD cards
-Date: Mon, 5 Oct 2009 12:43:09 +0200
-Message-ID: <20091005124309.01c19792@mjolnir.ossman.eu>
-References: <bd31ea570910042328w6f59b18avf738fd564f7f19b2@mail.gmail.com>
+From: Antonio Ospite <ospite@studenti.unina.it>
+Subject: Re: [PATCH] pxamci: fix printing gpio numbers in pxamci_probe
+Date: Mon, 5 Oct 2009 12:45:58 +0200
+Message-ID: <20091005124558.04dd13cd.ospite@studenti.unina.it>
+References: <1254493442-32312-1-git-send-email-ospite@studenti.unina.it>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-15581-1254739396-0001-2"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 82-117-125-11.tcdsl.calypso.net ([82.117.125.11]:33962 "EHLO
-	smtp.ossman.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932530AbZJEKnx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 5 Oct 2009 06:43:53 -0400
-In-Reply-To: <bd31ea570910042328w6f59b18avf738fd564f7f19b2@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============0419523824=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1254493442-32312-1-git-send-email-ospite@studenti.unina.it>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org, eric.y.miao@gmail.com, Antonio Ospite <ospite@studenti.unina.it>
 List-Id: linux-mmc@vger.kernel.org
-To: Mahadev Cholachagudda <mgudda@gmail.com>
-Cc: linux-mmc@vger.kernel.org
 
-This is a MIME-formatted message.  If you see this text it means that your
-E-mail software does not support MIME-formatted messages.
+--===============0419523824==
+Content-Type: multipart/signed; protocol="application/pgp-signature";
+ micalg="PGP-SHA1";
+ boundary="Signature=_Mon__5_Oct_2009_12_45_58_+0200_=hTMuFWr1ZPsWSq."
 
---=_freyr.ossman.eu-15581-1254739396-0001-2
+--Signature=_Mon__5_Oct_2009_12_45_58_+0200_=hTMuFWr1ZPsWSq.
 Content-Type: text/plain; charset=US-ASCII
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, 5 Oct 2009 11:58:30 +0530
-Mahadev Cholachagudda <mgudda@gmail.com> wrote:
+On Fri,  2 Oct 2009 16:24:02 +0200
+Antonio Ospite <ospite@studenti.unina.it> wrote:
 
-> Dear All,
+> Signed-off-by: Antonio Ospite <ospite@studenti.unina.it>
+> ---
+>  drivers/mmc/host/pxamci.c |    4 ++--
+>  1 files changed, 2 insertions(+), 2 deletions(-)
 >=20
-> Can you please point me to any source that contain the support for
-> password protection of SD cards?
-> I could see one reference towards this at
->=20
-> http://thread.gmane.org/gmane.linux.kernel/373855
->=20
-> But no discussions being done on that thread since 2006. Is it because
-> of the propitiatory nature or legal issues with the SD Organization?
+> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+> index 5e0b152..b00d673 100644
+> --- a/drivers/mmc/host/pxamci.c
+> +++ b/drivers/mmc/host/pxamci.c
+> @@ -693,7 +693,7 @@ static int pxamci_probe(struct platform_device *pdev)
+>  	if (gpio_is_valid(gpio_ro)) {
+>  		ret =3D gpio_request(gpio_ro, "mmc card read only");
+>  		if (ret) {
+> -			dev_err(&pdev->dev, "Failed requesting gpio_ro %d\n", gpio_power);
+> +			dev_err(&pdev->dev, "Failed requesting gpio_ro %d\n", gpio_ro);
+>  			goto err_gpio_ro;
+>  		}
+>  		gpio_direction_input(gpio_ro);
+> @@ -701,7 +701,7 @@ static int pxamci_probe(struct platform_device *pdev)
+>  	if (gpio_is_valid(gpio_cd)) {
+>  		ret =3D gpio_request(gpio_cd, "mmc card detect");
+>  		if (ret) {
+> -			dev_err(&pdev->dev, "Failed requesting gpio_cd %d\n", gpio_power);
+> +			dev_err(&pdev->dev, "Failed requesting gpio_cd %d\n", gpio_cd);
+>  			goto err_gpio_cd;
+>  		}
+>  		gpio_direction_input(gpio_cd);
+> --=20
+> 1.6.4.3
 >=20
 
-Neither. It simply never got finished with regard to handling SD cards.
+Ping.
 
-Rgds
+Thanks,
+   Antonio
+
 --=20
-     -- Pierre Ossman
+Antonio Ospite
+http://ao2.it
 
-  WARNING: This correspondence is being monitored by the
-  Swedish government. Make sure your server uses encryption
-  for SMTP traffic and consider using PGP for end-to-end
-  encryption.
+PGP public key ID: 0x4553B001
 
---=_freyr.ossman.eu-15581-1254739396-0001-2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename=signature.asc
+A: Because it messes up the order in which people normally read text.
+   See http://en.wikipedia.org/wiki/Posting_style
+Q: Why is top-posting such a bad thing?
+A: Top-posting.
+Q: What is the most annoying thing in e-mail?
+
+--Signature=_Mon__5_Oct_2009_12_45_58_+0200_=hTMuFWr1ZPsWSq.
+Content-Type: application/pgp-signature
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.12 (GNU/Linux)
+Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAkrJzcAACgkQ7b8eESbyJLg5EwCgtz9uiL/L/wly4N3qnixd2Itg
-UJsAn191eKKgF0GIUFLJeyhLTjsYdMnR
-=A0zG
+iEYEARECAAYFAkrJzmYACgkQ5xr2akVTsAFmpACgmLSB0nK/cOYZKX4t3IwS8LOp
+zQAAn0XmliFy33uRjbdNxLNSRixJAome
+=nRAu
 -----END PGP SIGNATURE-----
 
---=_freyr.ossman.eu-15581-1254739396-0001-2--
+--Signature=_Mon__5_Oct_2009_12_45_58_+0200_=hTMuFWr1ZPsWSq.--
+
+
+--===============0419523824==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============0419523824==--
