@@ -1,49 +1,45 @@
-From: Ian Molton <ian@mnementh.co.uk>
-Subject: Re: TMIO MMC: full patchset.
-Date: Sun, 4 Oct 2009 18:19:46 +0100
-Message-ID: <c09aa50a0910041019h7510339el6409aa17af4851ed@mail.gmail.com>
-References: <c09aa50a0909290552j1c371ddfpc7444d5d87e66f76@mail.gmail.com>
-	<aec7e5c30910012246r1c452606w149f18d9fe825737@mail.gmail.com>
-	<c09aa50a0910020031x1c6f1fceo4740a3edc9592cbe@mail.gmail.com>
-	<aec7e5c30910020057w38e72894p9ffed291f3fc1d1@mail.gmail.com>
-	<c09aa50a0910021114h1a84703dt4f168b9fee1b723a@mail.gmail.com>
-	<aec7e5c30910030611k1f468271x51654aab7d9197ac@mail.gmail.com>
-	<c09aa50a0910031700l390b6185o3a6b6376aead4e1e@mail.gmail.com>
-	<aec7e5c30910032205j1f9cefa6r7639164904b3ae8c@mail.gmail.com>
-	<c09aa50a0910040851g51640678r5d1f79a50b01164a@mail.gmail.com>
-	<1254672749.9214.79.camel@lenovo.internal.reciva.com>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH 00/07] sh: SuperH Mobile SDHI changes
+Date: Mon, 5 Oct 2009 11:23:06 +0900
+Message-ID: <20091005022306.GC3185@linux-sh.org>
+References: <20091002022158.8215.58317.sendpatchset@rxone.opensource.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f227.google.com ([209.85.220.227]:53162 "EHLO
-	mail-fx0-f227.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751919AbZJDRUo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Oct 2009 13:20:44 -0400
-Received: by fxm27 with SMTP id 27so2368634fxm.17
-        for <linux-mmc@vger.kernel.org>; Sun, 04 Oct 2009 10:20:06 -0700 (PDT)
-In-Reply-To: <1254672749.9214.79.camel@lenovo.internal.reciva.com>
+Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:43181 "EHLO
+	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758209AbZJECYc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Oct 2009 22:24:32 -0400
+Content-Disposition: inline
+In-Reply-To: <20091002022158.8215.58317.sendpatchset@rxone.opensource.se>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Phil Blundell <pb@handhelds.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, sameo@openedhand.com, philipp.zabel@gmail.com, akpm@linux-foundation.org, Paul Mundt <lethal@linux-sh.org>
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, g.liakhovetski@gmx.de, ian@mnementh.co.uk, akpm@linux-foundation.org
 
-1mA IIRC. Its never been calibrated though, its just a mid-priced multimeter.
+On Fri, Oct 02, 2009 at 11:21:58AM +0900, Magnus Damm wrote:
+> sh: SuperH Mobile SDHI changes
+> 
+> [PATCH 01/07] mfd: Add SuperH Mobile SDHI platform driver 
+> [PATCH 02/07] mmc: Add SuperH to the tmio-mmc Kconfig
+> [PATCH 03/07] mmc: Remove const from tmio-mmc platform data
+> [PATCH 04/07] sh: SDHI platform data to the Migo-R board
+> [PATCH 05/07] sh: SDHI platform data to the AP325RXA board
+> [PATCH 06/07] sh: SDHI platform data to the SE7724 board
+> [PATCH 07/07] sh: SDHI platform data to the kfr2r09 board
+> 
+> These patches contain the SuperH specific changes needed for
+> the tmio-mmc driver to work with SuperH Mobile SDHI hardware.
+> 
+> The tmio-mmc patch 0001-MMC-hardware-abstraction-for-CNF-area.patch
+> by Ian Molton is needed for correct run time behaviour. Without
+> this patch the tmio-mmc probe() fails gracefully.
+> 
+> I suggest merging the series in the SuperH tree. Not sure about
+> the best way to merge the patch by Ian.
+> 
+> Signed-off-by: Magnus Damm <damm@opensource.se>
 
-2009/10/4 Phil Blundell <pb@handhelds.org>:
-> On Sun, 2009-10-04 at 16:51 +0100, Ian Molton wrote:
->> Seriously, on e750 the power draw of the tc6393 in standby is so low
->> my meter cant measure it.
->
-> What's the resolution of your meter?
->
-> p.
->
->
->
-
-
-
--- 
-Ian Molton
-Linux, Automotive, and other hacking:
-http://www.mnementh.co.uk/
+At least patch 3/7 depends on Ian's patch being merged first, so there's
+little point in merging this series until that hits upstream. So I'll
+hold off on this for now.
