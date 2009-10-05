@@ -1,42 +1,166 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH] pxamci: fix printing gpio numbers in pxamci_probe
-Date: Mon, 05 Oct 2009 19:56:10 +0200
-Message-ID: <87tyydafnp.fsf@free.fr>
-References: <1254493442-32312-1-git-send-email-ospite@studenti.unina.it>
-	<20091005124558.04dd13cd.ospite@studenti.unina.it>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20091005124558.04dd13cd.ospite@studenti.unina.it> (Antonio
-	Ospite's message of "Mon\, 5 Oct 2009 12\:45\:58 +0200")
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Antonio Ospite <ospite@studenti.unina.it>
-Cc: eric.y.miao@gmail.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+From: akpm@linux-foundation.org
+Subject: [merged] s3cmci-update-probe-to-use-new-platform-id-list.patch removed from -mm tree
+Date: Mon, 05 Oct 2009 11:38:47 -0700
+Message-ID: <200910051838.n95IclOw017669@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:47967 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754588AbZJESj3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 14:39:29 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ben@simtec.co.uk, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
-Antonio Ospite <ospite@studenti.unina.it> writes:
 
-> On Fri,  2 Oct 2009 16:24:02 +0200
-> Antonio Ospite <ospite@studenti.unina.it> wrote:
->
->> Signed-off-by: Antonio Ospite <ospite@studenti.unina.it>
+The patch titled
+     s3cmci: update probe to use new platform id list
+has been removed from the -mm tree.  Its filename was
+     s3cmci-update-probe-to-use-new-platform-id-list.patch
 
-As this fixes code I wrote poorly, feel free to have my :
-Reviewed-by: Robert Jarzmik <robert.jarzmik@free.fr>
+This patch was dropped because it was merged into mainline or a subsystem tree
 
-Eric, I think this can be scheduled without any problem into your linux-next
-branch.
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-Cheers
+------------------------------------------------------
+Subject: s3cmci: update probe to use new platform id list
+From: Ben Dooks <ben@simtec.co.uk>
 
---
-Robert
+Use the platform id list to match the three different versions of the
+hardware block that this driver supports.
+
+This will change the prefix of the console messages produced by this
+driver to be prefixed by s3c-mci instead of the hardware block name, such
+as s3c2440-mci.
+
+Signed-off-by: Ben Dooks <ben@simtec.co.uk>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/s3cmci.c |   71 ++++++++++++------------------------
+ 1 file changed, 24 insertions(+), 47 deletions(-)
+
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-update-probe-to-use-new-platform-id-list drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-update-probe-to-use-new-platform-id-list
++++ a/drivers/mmc/host/s3cmci.c
+@@ -1244,11 +1244,14 @@ static inline void s3cmci_cpufreq_deregi
+ }
+ #endif
+ 
+-static int __devinit s3cmci_probe(struct platform_device *pdev, int is2440)
++static int __devinit s3cmci_probe(struct platform_device *pdev)
+ {
+ 	struct s3cmci_host *host;
+ 	struct mmc_host	*mmc;
+ 	int ret;
++	int is2440;
++
++	is2440 = platform_get_device_id(pdev)->driver_data;
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
+ 	if (!mmc) {
+@@ -1473,20 +1476,22 @@ static int __devexit s3cmci_remove(struc
+ 	return 0;
+ }
+ 
+-static int __devinit s3cmci_2410_probe(struct platform_device *dev)
+-{
+-	return s3cmci_probe(dev, 0);
+-}
++static struct platform_device_id s3cmci_driver_ids[] = {
++	{
++		.name	= "s3c2410-sdi",
++		.driver_data	= 0,
++	}, {
++		.name	= "s3c2412-sdi",
++		.driver_data	= 1,
++	}, {
++		.name	= "s3c2440-sdi",
++		.driver_data	= 1,
++	},
++	{ }
++};
+ 
+-static int __devinit s3cmci_2412_probe(struct platform_device *dev)
+-{
+-	return s3cmci_probe(dev, 1);
+-}
++MODULE_DEVICE_TABLE(platform, s3cmci_driver_ids);
+ 
+-static int __devinit s3cmci_2440_probe(struct platform_device *dev)
+-{
+-	return s3cmci_probe(dev, 1);
+-}
+ 
+ #ifdef CONFIG_PM
+ 
+@@ -1510,50 +1515,25 @@ static int s3cmci_resume(struct platform
+ #endif /* CONFIG_PM */
+ 
+ 
+-static struct platform_driver s3cmci_2410_driver = {
+-	.driver.name	= "s3c2410-sdi",
+-	.driver.owner	= THIS_MODULE,
+-	.probe		= s3cmci_2410_probe,
+-	.remove		= __devexit_p(s3cmci_remove),
+-	.shutdown	= s3cmci_shutdown,
+-	.suspend	= s3cmci_suspend,
+-	.resume		= s3cmci_resume,
+-};
+-
+-static struct platform_driver s3cmci_2412_driver = {
+-	.driver.name	= "s3c2412-sdi",
+-	.driver.owner	= THIS_MODULE,
+-	.probe		= s3cmci_2412_probe,
+-	.remove		= __devexit_p(s3cmci_remove),
+-	.shutdown	= s3cmci_shutdown,
+-	.suspend	= s3cmci_suspend,
+-	.resume		= s3cmci_resume,
+-};
+-
+-static struct platform_driver s3cmci_2440_driver = {
+-	.driver.name	= "s3c2440-sdi",
++static struct platform_driver s3cmci_driver = {
++	.driver.name	= "s3c-sdi",
+ 	.driver.owner	= THIS_MODULE,
+-	.probe		= s3cmci_2440_probe,
++	.id_table	= s3cmci_driver_ids,
++	.probe		= s3cmci_probe,
+ 	.remove		= __devexit_p(s3cmci_remove),
+ 	.shutdown	= s3cmci_shutdown,
+ 	.suspend	= s3cmci_suspend,
+ 	.resume		= s3cmci_resume,
+ };
+ 
+-
+ static int __init s3cmci_init(void)
+ {
+-	platform_driver_register(&s3cmci_2410_driver);
+-	platform_driver_register(&s3cmci_2412_driver);
+-	platform_driver_register(&s3cmci_2440_driver);
+-	return 0;
++	return platform_driver_register(&s3cmci_driver);
+ }
+ 
+ static void __exit s3cmci_exit(void)
+ {
+-	platform_driver_unregister(&s3cmci_2410_driver);
+-	platform_driver_unregister(&s3cmci_2412_driver);
+-	platform_driver_unregister(&s3cmci_2440_driver);
++	platform_driver_unregister(&s3cmci_driver);
+ }
+ 
+ module_init(s3cmci_init);
+@@ -1562,6 +1542,3 @@ module_exit(s3cmci_exit);
+ MODULE_DESCRIPTION("Samsung S3C MMC/SD Card Interface driver");
+ MODULE_LICENSE("GPL v2");
+ MODULE_AUTHOR("Thomas Kleffel <tk@maintech.de>, Ben Dooks <ben-linux@fluff.org>");
+-MODULE_ALIAS("platform:s3c2410-sdi");
+-MODULE_ALIAS("platform:s3c2412-sdi");
+-MODULE_ALIAS("platform:s3c2440-sdi");
+_
+
+Patches currently in -mm which might be from ben@simtec.co.uk are
+
+gpiolib-add-names-file-in-gpio-chip-sysfs.patch
+
