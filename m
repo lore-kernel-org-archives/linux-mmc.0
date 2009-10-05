@@ -1,69 +1,148 @@
 From: akpm@linux-foundation.org
-Subject: [merged] s3cmci-fix-direct-write-to-interrupt-mask.patch removed from -mm tree
-Date: Mon, 05 Oct 2009 11:38:55 -0700
-Message-ID: <200910051838.n95Ict76018016@imap1.linux-foundation.org>
+Subject: [merged] s3cmci-add-better-support-for-no-card-detect-or-write-protect-available.patch removed from -mm tree
+Date: Mon, 05 Oct 2009 11:39:11 -0700
+Message-ID: <200910051839.n95IdBrj018602@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:52942 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:58173 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754621AbZJESjf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 14:39:35 -0400
+	by vger.kernel.org with ESMTP id S1754679AbZJESju (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 14:39:50 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ben@simtec.co.uk, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     s3cmci: fix direct write to interrupt mask
+     s3cmci: add better support for no card detect or write protect available
 has been removed from the -mm tree.  Its filename was
-     s3cmci-fix-direct-write-to-interrupt-mask.patch
+     s3cmci-add-better-support-for-no-card-detect-or-write-protect-available.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: s3cmci: fix direct write to interrupt mask
+Subject: s3cmci: add better support for no card detect or write protect available
 From: Ben Dooks <ben@simtec.co.uk>
 
-The clear_imask() call should be used to clear the interrupt mask
-register, as it may end up clearing the SDIO interrupt bit if this is
-enabled.
+Add better support for omitting either the card detect or the write
+protect GPIOs if the board does not support it.  Add the fields
+no_wprotect and no_detect to the platform data which when set indicate the
+absence of the respective GPIOs.
 
-Change all writes of zero to SDIIMSK register to use clear_imask() ready
-for the SDIO updates.
+Note, this also fixes a minor bug where it tries to free IRQ0 if there is
+no detect gpio available.
 
 Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/s3cmci.c |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ arch/arm/plat-s3c24xx/include/plat/mci.h |    2 
+ drivers/mmc/host/s3cmci.c                |   44 +++++++++++----------
+ 2 files changed, 26 insertions(+), 20 deletions(-)
 
-diff -puN drivers/mmc/host/s3cmci.c~s3cmci-fix-direct-write-to-interrupt-mask drivers/mmc/host/s3cmci.c
---- a/drivers/mmc/host/s3cmci.c~s3cmci-fix-direct-write-to-interrupt-mask
+diff -puN arch/arm/plat-s3c24xx/include/plat/mci.h~s3cmci-add-better-support-for-no-card-detect-or-write-protect-available arch/arm/plat-s3c24xx/include/plat/mci.h
+--- a/arch/arm/plat-s3c24xx/include/plat/mci.h~s3cmci-add-better-support-for-no-card-detect-or-write-protect-available
++++ a/arch/arm/plat-s3c24xx/include/plat/mci.h
+@@ -2,6 +2,8 @@
+ #define _ARCH_MCI_H
+ 
+ struct s3c24xx_mci_pdata {
++	unsigned int	no_wprotect : 1;
++	unsigned int	no_detect : 1;
+ 	unsigned int	wprotect_invert : 1;
+ 	unsigned int	detect_invert : 1;   /* set => detect active high. */
+ 	unsigned int	use_dma : 1;
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-add-better-support-for-no-card-detect-or-write-protect-available drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-add-better-support-for-no-card-detect-or-write-protect-available
 +++ a/drivers/mmc/host/s3cmci.c
-@@ -681,9 +681,9 @@ out:
- fail_request:
- 	host->mrq->data->error = -EINVAL;
- 	host->complete_what = COMPLETION_FINALIZE;
--	writel(0, host->base + host->sdiimsk);
--	goto out;
-+	clear_imask(host);
+@@ -1299,7 +1299,7 @@ static int s3cmci_get_ro(struct mmc_host
+ 	struct s3c24xx_mci_pdata *pdata = host->pdata;
+ 	int ret;
  
-+	goto out;
- }
+-	if (pdata->gpio_wprotect == 0)
++	if (pdata->no_wprotect)
+ 		return 0;
  
- static void finalize_request(struct s3cmci_host *host)
-@@ -726,7 +726,7 @@ static void finalize_request(struct s3cm
- 	writel(0, host->base + S3C2410_SDICMDARG);
- 	writel(S3C2410_SDIDCON_STOP, host->base + S3C2410_SDIDCON);
- 	writel(0, host->base + S3C2410_SDICMDCON);
--	writel(0, host->base + host->sdiimsk);
-+	clear_imask(host);
+ 	ret = s3c2410_gpio_getpin(pdata->gpio_wprotect);
+@@ -1647,30 +1647,34 @@ static int __devinit s3cmci_probe(struct
+ 	disable_irq(host->irq);
+ 	host->irq_state = false;
  
- 	if (cmd->data && cmd->error)
- 		cmd->data->error = cmd->error;
+-	if (host->pdata->gpio_detect) {
++	if (!host->pdata->no_detect) {
+ 		ret = gpio_request(host->pdata->gpio_detect, "s3cmci detect");
+ 		if (ret) {
+ 			dev_err(&pdev->dev, "failed to get detect gpio\n");
+ 			goto probe_free_irq;
+ 		}
+-	}
+ 
+-	host->irq_cd = s3c2410_gpio_getirq(host->pdata->gpio_detect);
++		host->irq_cd = s3c2410_gpio_getirq(host->pdata->gpio_detect);
+ 
+-	if (host->irq_cd >= 0) {
+-		if (request_irq(host->irq_cd, s3cmci_irq_cd,
+-				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+-				DRIVER_NAME, host)) {
+-			dev_err(&pdev->dev, "can't get card detect irq.\n");
+-			ret = -ENOENT;
+-			goto probe_free_gpio_cd;
++		if (host->irq_cd >= 0) {
++			if (request_irq(host->irq_cd, s3cmci_irq_cd,
++					IRQF_TRIGGER_RISING |
++					IRQF_TRIGGER_FALLING,
++					DRIVER_NAME, host)) {
++				dev_err(&pdev->dev,
++					"can't get card detect irq.\n");
++				ret = -ENOENT;
++				goto probe_free_gpio_cd;
++			}
++		} else {
++			dev_warn(&pdev->dev,
++				 "host detect has no irq available\n");
++			gpio_direction_input(host->pdata->gpio_detect);
+ 		}
+-	} else {
+-		dev_warn(&pdev->dev, "host detect has no irq available\n");
+-		gpio_direction_input(host->pdata->gpio_detect);
+-	}
++	} else
++		host->irq_cd = -1;
+ 
+-	if (host->pdata->gpio_wprotect) {
++	if (!host->pdata->no_wprotect) {
+ 		ret = gpio_request(host->pdata->gpio_wprotect, "s3cmci wp");
+ 		if (ret) {
+ 			dev_err(&pdev->dev, "failed to get writeprotect\n");
+@@ -1774,11 +1778,11 @@ static int __devinit s3cmci_probe(struct
+ 		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
+ 
+  probe_free_gpio_wp:
+-	if (host->pdata->gpio_wprotect)
++	if (!host->pdata->no_wprotect)
+ 		gpio_free(host->pdata->gpio_wprotect);
+ 
+  probe_free_gpio_cd:
+-	if (host->pdata->gpio_detect)
++	if (!host->pdata->no_detect)
+ 		gpio_free(host->pdata->gpio_detect);
+ 
+  probe_free_irq_cd:
+@@ -1837,10 +1841,10 @@ static int __devexit s3cmci_remove(struc
+ 
+ 	free_irq(host->irq, host);
+ 
+-	if (pd->gpio_wprotect)
++	if (!pd->no_wprotect)
+ 		gpio_free(pd->gpio_wprotect);
+ 
+-	if (pd->gpio_detect)
++	if (!pd->no_detect)
+ 		gpio_free(pd->gpio_detect);
+ 
+ 	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
 _
 
 Patches currently in -mm which might be from ben@simtec.co.uk are
