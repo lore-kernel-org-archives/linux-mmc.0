@@ -1,90 +1,159 @@
 From: akpm@linux-foundation.org
-Subject: [merged] s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable.patch removed from -mm tree
-Date: Mon, 05 Oct 2009 11:39:09 -0700
-Message-ID: <200910051839.n95Id9gN018475@imap1.linux-foundation.org>
+Subject: [merged] sdio-pass-whitelisted-cis-funce-tuples-to-sdio-drivers.patch removed from -mm tree
+Date: Mon, 05 Oct 2009 11:38:23 -0700
+Message-ID: <200910051838.n95IcNbB016898@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:51038 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:49199 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754660AbZJESjt (ORCPT
+	by vger.kernel.org with ESMTP id S1754663AbZJESjt (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 14:39:49 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ben@simtec.co.uk, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
+To: albert_herranz@yahoo.es, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     s3cmci: make SDIO IRQ hardware IRQ support build-time configurable
+     sdio: pass whitelisted cis funce tuples to sdio drivers
 has been removed from the -mm tree.  Its filename was
-     s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable.patch
+     sdio-pass-whitelisted-cis-funce-tuples-to-sdio-drivers.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: s3cmci: make SDIO IRQ hardware IRQ support build-time configurable
-From: Ben Dooks <ben@simtec.co.uk>
+Subject: sdio: pass whitelisted cis funce tuples to sdio drivers
+From: Albert Herranz <albert_herranz@yahoo.es>
 
-We have found a couple of boards where the SDIO IRQ hardware support has
-failed to work properly, and thus we should make it configurable whether
-or not to be included in the driver.
+Some manufacturers provide vendor information in non-vendor specific CIS
+tuples.  For example, Broadcom uses an Extended Function tuple to provide
+the MAC address on some of their network cards, as in the case of the
+Nintendo Wii WLAN daughter card.
 
-Signed-off-by: Ben Dooks <ben@simtec.co.uk>
+This patch allows passing whitelisted FUNCE tuples unknown to the SDIO
+core to a matching SDIO driver instead of rejecting them and failing.
+
+Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/Kconfig  |    7 +++++++
- drivers/mmc/host/s3cmci.c |    9 +++++++--
- 2 files changed, 14 insertions(+), 2 deletions(-)
+ drivers/mmc/core/sdio_cis.c |   65 +++++++++++++++++++++++++---------
+ 1 file changed, 49 insertions(+), 16 deletions(-)
 
-diff -puN drivers/mmc/host/Kconfig~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable
-+++ a/drivers/mmc/host/Kconfig
-@@ -276,6 +276,13 @@ config MMC_S3C
+diff -puN drivers/mmc/core/sdio_cis.c~sdio-pass-whitelisted-cis-funce-tuples-to-sdio-drivers drivers/mmc/core/sdio_cis.c
+--- a/drivers/mmc/core/sdio_cis.c~sdio-pass-whitelisted-cis-funce-tuples-to-sdio-drivers
++++ a/drivers/mmc/core/sdio_cis.c
+@@ -98,6 +98,22 @@ static const unsigned char speed_val[16]
+ static const unsigned int speed_unit[8] =
+ 	{ 10000, 100000, 1000000, 10000000, 0, 0, 0, 0 };
  
- 	  If unsure, say N.
- 
-+config MMC_S3C_HW_SDIO_IRQ
-+       bool "Hardware support for SDIO IRQ"
-+       depends on MMC_S3C
-+       help
-+         Enable the hardware support for SDIO interrupts instead of using
-+	 the generic polling code.
++/* FUNCE tuples with these types get passed to SDIO drivers */
++static const unsigned char funce_type_whitelist[] = {
++	4 /* CISTPL_FUNCE_LAN_NODE_ID used in Broadcom cards */
++};
 +
- choice
- 	prompt "Samsung S3C SD/MMC transfer code"
- 	depends on MMC_S3C
-diff -puN drivers/mmc/host/s3cmci.c~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable drivers/mmc/host/s3cmci.c
---- a/drivers/mmc/host/s3cmci.c~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable
-+++ a/drivers/mmc/host/s3cmci.c
-@@ -1715,7 +1715,11 @@ static int __devinit s3cmci_probe(struct
++static int cistpl_funce_whitelisted(unsigned char type)
++{
++	int i;
++
++	for (i = 0; i < ARRAY_SIZE(funce_type_whitelist); i++) {
++		if (funce_type_whitelist[i] == type)
++			return 1;
++	}
++	return 0;
++}
++
+ static int cistpl_funce_common(struct mmc_card *card,
+ 			       const unsigned char *buf, unsigned size)
+ {
+@@ -120,6 +136,10 @@ static int cistpl_funce_func(struct sdio
+ 	unsigned vsn;
+ 	unsigned min_size;
  
- 	mmc->ops 	= &s3cmci_ops;
- 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
-+#ifdef CONFIG_MMC_S3C_HW_SDIO_IRQ
- 	mmc->caps	= MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
-+#else
-+	mmc->caps	= MMC_CAP_4_BIT_DATA;
-+#endif
- 	mmc->f_min 	= host->clk_rate / (host->clk_div * 256);
- 	mmc->f_max 	= host->clk_rate / host->clk_div;
++	/* let SDIO drivers take care of whitelisted FUNCE tuples */
++	if (cistpl_funce_whitelisted(buf[0]))
++		return -EILSEQ;
++
+ 	vsn = func->card->cccr.sdio_vsn;
+ 	min_size = (vsn == SDIO_SDIO_REV_1_00) ? 28 : 42;
  
-@@ -1750,8 +1754,9 @@ static int __devinit s3cmci_probe(struct
- 	s3cmci_debugfs_attach(host);
+@@ -154,13 +174,12 @@ static int cistpl_funce(struct mmc_card 
+ 	else
+ 		ret = cistpl_funce_common(card, buf, size);
  
- 	platform_set_drvdata(pdev, mmc);
--	dev_info(&pdev->dev, "%s - using %s\n", mmc_hostname(mmc),
--		 s3cmci_host_usedma(host) ? "dma" : "pio");
-+	dev_info(&pdev->dev, "%s - using %s, %s SDIO IRQ\n", mmc_hostname(mmc),
-+		 s3cmci_host_usedma(host) ? "dma" : "pio",
-+		 mmc->caps & MMC_CAP_SDIO_IRQ ? "hw" : "sw");
+-	if (ret) {
++	if (ret && ret != -EILSEQ) {
+ 		printk(KERN_ERR "%s: bad CISTPL_FUNCE size %u "
+ 		       "type %u\n", mmc_hostname(card->host), size, buf[0]);
+-		return ret;
+ 	}
  
- 	return 0;
+-	return 0;
++	return ret;
+ }
  
+ typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
+@@ -253,21 +272,12 @@ static int sdio_read_cis(struct mmc_card
+ 		for (i = 0; i < ARRAY_SIZE(cis_tpl_list); i++)
+ 			if (cis_tpl_list[i].code == tpl_code)
+ 				break;
+-		if (i >= ARRAY_SIZE(cis_tpl_list)) {
+-			/* this tuple is unknown to the core */
+-			this->next = NULL;
+-			this->code = tpl_code;
+-			this->size = tpl_link;
+-			*prev = this;
+-			prev = &this->next;
+-			printk(KERN_DEBUG
+-			       "%s: queuing CIS tuple 0x%02x length %u\n",
+-			       mmc_hostname(card->host), tpl_code, tpl_link);
+-		} else {
++		if (i < ARRAY_SIZE(cis_tpl_list)) {
+ 			const struct cis_tpl *tpl = cis_tpl_list + i;
+ 			if (tpl_link < tpl->min_size) {
+ 				printk(KERN_ERR
+-				       "%s: bad CIS tuple 0x%02x (length = %u, expected >= %u)\n",
++				       "%s: bad CIS tuple 0x%02x"
++				       " (length = %u, expected >= %u)\n",
+ 				       mmc_hostname(card->host),
+ 				       tpl_code, tpl_link, tpl->min_size);
+ 				ret = -EINVAL;
+@@ -275,7 +285,30 @@ static int sdio_read_cis(struct mmc_card
+ 				ret = tpl->parse(card, func,
+ 						 this->data, tpl_link);
+ 			}
+-			kfree(this);
++			/*
++			 * We don't need the tuple anymore if it was
++			 * successfully parsed by the SDIO core or if it is
++			 * not going to be parsed by SDIO drivers.
++			 */
++			if (!ret || ret != -EILSEQ)
++				kfree(this);
++		} else {
++			/* unknown tuple */
++			ret = -EILSEQ;
++		}
++
++		if (ret == -EILSEQ) {
++			/* this tuple is unknown to the core or whitelisted */
++			this->next = NULL;
++			this->code = tpl_code;
++			this->size = tpl_link;
++			*prev = this;
++			prev = &this->next;
++			printk(KERN_DEBUG
++			       "%s: queuing CIS tuple 0x%02x length %u\n",
++			       mmc_hostname(card->host), tpl_code, tpl_link);
++			/* keep on analyzing tuples */
++			ret = 0;
+ 		}
+ 
+ 		ptr += tpl_link;
 _
 
-Patches currently in -mm which might be from ben@simtec.co.uk are
+Patches currently in -mm which might be from albert_herranz@yahoo.es are
 
-gpiolib-add-names-file-in-gpio-chip-sysfs.patch
+sdio-recognize-io-card-without-powercycle.patch
 
