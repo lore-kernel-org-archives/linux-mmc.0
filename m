@@ -1,43 +1,65 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PULL REQUEST] MMC and TMIO updates
-Date: Mon, 5 Oct 2009 13:18:31 +0900
-Message-ID: <aec7e5c30910042118o49f0f42bpbebfd9abd84b45b@mail.gmail.com>
-References: <c09aa50a0910041024s2e48ce92kfc55b6692b02a7af@mail.gmail.com>
+From: Mahadev Cholachagudda <mgudda@gmail.com>
+Subject: Re: [PATCH 1/1] CMD12 error recovery support for SD cards
+Date: Mon, 5 Oct 2009 09:53:42 +0530
+Message-ID: <bd31ea570910042123l20d97843i57d66cdd5c9eb5a5@mail.gmail.com>
+References: <bd31ea570909160334u1b17a068hd8be89c7035232f9@mail.gmail.com>
+	 <bd31ea570909160339l5f996e9eh1f87abdbe527a404@mail.gmail.com>
+	 <20090923102715.GA4307@console-pimps.org>
+	 <bd31ea570909300418y4f12bf3bu2d145b94a93319e@mail.gmail.com>
+	 <20091002102002.GA6687@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f212.google.com ([209.85.217.212]:57631 "EHLO
-	mail-gx0-f212.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750799AbZJEETJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 00:19:09 -0400
-Received: by gxk4 with SMTP id 4so3486236gxk.8
-        for <linux-mmc@vger.kernel.org>; Sun, 04 Oct 2009 21:18:32 -0700 (PDT)
-In-Reply-To: <c09aa50a0910041024s2e48ce92kfc55b6692b02a7af@mail.gmail.com>
+Received: from mail-px0-f179.google.com ([209.85.216.179]:50628 "EHLO
+	mail-px0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751212AbZJEEYT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 00:24:19 -0400
+Received: by pxi9 with SMTP id 9so2658796pxi.4
+        for <linux-mmc@vger.kernel.org>; Sun, 04 Oct 2009 21:23:43 -0700 (PDT)
+In-Reply-To: <20091002102002.GA6687@console-pimps.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>
-Cc: Phil Blundell <pb@handhelds.org>, linux-mmc@vger.kernel.org, sameo@openedhand.com, philipp.zabel@gmail.com, akpm@linux-foundation.org, Paul Mundt <lethal@linux-sh.org>
+To: Matt Fleming <matt@console-pimps.org>
+Cc: linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>
 
-Hi Ian,
-
-On Mon, Oct 5, 2009 at 2:24 AM, Ian Molton <ian@mnementh.co.uk> wrote:
-> Hi folks,
+2009/10/2 Matt Fleming <matt@console-pimps.org>:
 >
-> Andrew, can you please pull
+> I may be looking at an out of date SD Host Controller Spec, but can you
+> point me at the place where it says that it's ok to retry the CMD12 if
+> it failed? I can find the part explaining that you can issue CMD13 to
+> see if CMD12 really failed or not, but not the place where it says you
+> can reissue CMD12.
 >
-> git//git.mnementh.co.uk/linux-2.6-im tmio_clockpower
+> In your testcase, do you always end up issuing the second CMD12?
 >
-> Thanks!
 
-So I did a second round of testing on my kfr2r09 board, and the
-updated version of the patch is still working fine.
+In SD HostController Simplified Spec, page 106, tells about CMD12
+failure and CMD13 to check the status.
+Page 110, section 3.10.2, tells about AutoCMD12 error recovery, but we
+can safely include this for checking with normal CMD12 error recovery.
 
-To fulfill the dependencies for my SuperH Mobile SDHI driver I simply
-cherry picked the single patch "MMC: hardware abstraction for CNF
-area" that can be found here:
+Yep, In our target board, some-times, we end up issuing the second CMD12.
 
-http://git.mnementh.co.uk/cgi-bin/gitweb.cgi?p=linux-2.6-im.git;a=commitdiff_plain;h=4cd83bd05e6c817a4a72ababd82bf5ae700c021d
+>
+> Are you sure that this recovery procedure is not valid over SPI when
+> doing a multiblock read?
+>
 
-Thanks for your help!
+I'm not able to get the details of recovery procedure for SPI.
+Moreover the host controller spec 2.0 does not support SPI mode.
 
-/ magnus
+> "successfull" should be "successful"
+
+Shall be updated.
+
+>
+> I'm not entirely sure any of these errors are needed. The code below
+> this in drivers/mmc/card/block.c will print an error message if
+> brq.stop.error is non-zero (and we will have left it non-zero if we
+> haven't recovered).
+>
+
+OK. I shall update this too.
+
+Regards,
+Mahadev
