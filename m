@@ -1,242 +1,217 @@
 From: akpm@linux-foundation.org
-Subject: [merged] s3cmci-change-gpio-to-gpiolib-from-s3c24xx-specific-calls.patch removed from -mm tree
-Date: Mon, 05 Oct 2009 11:38:50 -0700
-Message-ID: <200910051838.n95Icocs017811@imap1.linux-foundation.org>
+Subject: [merged] s3cmci-dma-fixes.patch removed from -mm tree
+Date: Mon, 05 Oct 2009 11:39:06 -0700
+Message-ID: <200910051839.n95Id6es018377@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:46734 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:54294 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754590AbZJESja (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 14:39:30 -0400
+	by vger.kernel.org with ESMTP id S1754659AbZJESjt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 14:39:49 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ben@simtec.co.uk, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     s3cmci: change GPIO to gpiolib from S3C24XX specific calls
+     s3cmci: DMA fixes
 has been removed from the -mm tree.  Its filename was
-     s3cmci-change-gpio-to-gpiolib-from-s3c24xx-specific-calls.patch
+     s3cmci-dma-fixes.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: s3cmci: change GPIO to gpiolib from S3C24XX specific calls
+Subject: s3cmci: DMA fixes
 From: Ben Dooks <ben@simtec.co.uk>
 
-Move to using gpiolib to access the card detect and write protect GPIO
-lines instead of using the platform speicifc s3c2410_gpio calls.
+Fixes for the DMA transfer mode of the driver to try and improve the state
+of the code:
 
-Also ensure that the card lines are claimed the same way to avoid overlap
-with any other drivers.
+- Ensure that dma_complete is set during the end of the command phase
+  so that transfers do not stall awaiting the completion
+
+- Update the DMA debugging to provide a bit more useful information
+  such as how many DMA descriptors where not processed and print the
+  DMA addresses in hexadecimal.
+
+- Fix the DMA channel request code to actually request DMA for the
+  S3CMCI block instead of whatever '0' signified.
+
+- Add fallback to PIO if we cannot get the DMA channel, as many of the
+  devices with this block only have a limited number of DMA channels.
+
+- Only try and claim and free the DMA channel if we are trying to use it.
+
+This improves the driver DMA code to the point where it can now identify a
+card and read the partition table.  However the DMA can still stall when
+trying to move data between the host and memory.
 
 Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/s3cmci.c |   87 ++++++++++++++++++++++++++++--------
- 1 file changed, 69 insertions(+), 18 deletions(-)
+ drivers/mmc/host/s3cmci.c |   62 +++++++++++++++++++++++++++---------
+ drivers/mmc/host/s3cmci.h |    3 -
+ 2 files changed, 47 insertions(+), 18 deletions(-)
 
-diff -puN drivers/mmc/host/s3cmci.c~s3cmci-change-gpio-to-gpiolib-from-s3c24xx-specific-calls drivers/mmc/host/s3cmci.c
---- a/drivers/mmc/host/s3cmci.c~s3cmci-change-gpio-to-gpiolib-from-s3c24xx-specific-calls
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-dma-fixes drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-dma-fixes
 +++ a/drivers/mmc/host/s3cmci.c
-@@ -1047,7 +1047,7 @@ static int s3cmci_card_present(struct mm
- 	if (pdata->gpio_detect == 0)
- 		return -ENOSYS;
- 
--	ret = s3c2410_gpio_getpin(pdata->gpio_detect) ? 0 : 1;
-+	ret = gpio_get_value(pdata->gpio_detect) ? 0 : 1;
- 	return ret ^ pdata->detect_invert;
- }
- 
-@@ -1102,12 +1102,12 @@ static void s3cmci_set_ios(struct mmc_ho
- 	switch (ios->power_mode) {
- 	case MMC_POWER_ON:
- 	case MMC_POWER_UP:
--		s3c2410_gpio_cfgpin(S3C2410_GPE5, S3C2410_GPE5_SDCLK);
--		s3c2410_gpio_cfgpin(S3C2410_GPE6, S3C2410_GPE6_SDCMD);
--		s3c2410_gpio_cfgpin(S3C2410_GPE7, S3C2410_GPE7_SDDAT0);
--		s3c2410_gpio_cfgpin(S3C2410_GPE8, S3C2410_GPE8_SDDAT1);
--		s3c2410_gpio_cfgpin(S3C2410_GPE9, S3C2410_GPE9_SDDAT2);
--		s3c2410_gpio_cfgpin(S3C2410_GPE10, S3C2410_GPE10_SDDAT3);
-+		s3c2410_gpio_cfgpin(S3C2410_GPE(5), S3C2410_GPE5_SDCLK);
-+		s3c2410_gpio_cfgpin(S3C2410_GPE(6), S3C2410_GPE6_SDCMD);
-+		s3c2410_gpio_cfgpin(S3C2410_GPE(7), S3C2410_GPE7_SDDAT0);
-+		s3c2410_gpio_cfgpin(S3C2410_GPE(8), S3C2410_GPE8_SDDAT1);
-+		s3c2410_gpio_cfgpin(S3C2410_GPE(9), S3C2410_GPE9_SDDAT2);
-+		s3c2410_gpio_cfgpin(S3C2410_GPE(10), S3C2410_GPE10_SDDAT3);
- 
- 		if (host->pdata->set_power)
- 			host->pdata->set_power(ios->power_mode, ios->vdd);
-@@ -1119,8 +1119,7 @@ static void s3cmci_set_ios(struct mmc_ho
- 
- 	case MMC_POWER_OFF:
- 	default:
--		s3c2410_gpio_setpin(S3C2410_GPE5, 0);
--		s3c2410_gpio_cfgpin(S3C2410_GPE5, S3C2410_GPIO_OUTPUT);
-+		gpio_direction_output(S3C2410_GPE(5), 0);
- 
- 		if (host->is2440)
- 			mci_con |= S3C2440_SDICON_SDRESET;
-@@ -1244,12 +1243,14 @@ static inline void s3cmci_cpufreq_deregi
- }
+@@ -183,6 +183,21 @@ static inline bool s3cmci_host_usedma(st
  #endif
+ }
  
++/**
++ * s3cmci_host_canpio - return true if host has pio code available
++ *
++ * Return true if the driver has been compiled with the PIO support code
++ * available.
++ */
++static inline bool s3cmci_host_canpio(void)
++{
++#ifdef CONFIG_MMC_S3C_PIO
++	return true;
++#else
++	return false;
++#endif
++}
 +
- static int __devinit s3cmci_probe(struct platform_device *pdev)
+ static inline u32 enable_imask(struct s3cmci_host *host, u32 imask)
  {
- 	struct s3cmci_host *host;
- 	struct mmc_host	*mmc;
- 	int ret;
- 	int is2440;
-+	int i;
+ 	u32 newmask;
+@@ -786,6 +801,7 @@ static void s3cmci_dma_done_callback(str
+ 	dbg(host, dbg_dma, "DMA FINISHED Size:%i DSTA:%08x DCNT:%08x\n",
+ 		size, mci_dsta, mci_dcnt);
  
- 	is2440 = platform_get_device_id(pdev)->driver_data;
++	host->dma_complete = 1;
+ 	host->complete_what = COMPLETION_FINALIZE;
  
-@@ -1259,6 +1260,18 @@ static int __devinit s3cmci_probe(struct
- 		goto probe_out;
- 	}
- 
-+	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++) {
-+		ret = gpio_request(i, dev_name(&pdev->dev));
-+		if (ret) {
-+			dev_err(&pdev->dev, "failed to get gpio %d\n", i);
-+
-+			for (i--; i >= S3C2410_GPE(5); i--)
-+				gpio_free(i);
-+
-+			goto probe_free_host;
-+		}
-+	}
-+
- 	host = mmc_priv(mmc);
- 	host->mmc 	= mmc;
- 	host->pdev	= pdev;
-@@ -1295,7 +1308,7 @@ static int __devinit s3cmci_probe(struct
- 			"failed to get io memory region resouce.\n");
- 
- 		ret = -ENOENT;
--		goto probe_free_host;
-+		goto probe_free_gpio;
- 	}
- 
- 	host->mem = request_mem_region(host->mem->start,
-@@ -1304,7 +1317,7 @@ static int __devinit s3cmci_probe(struct
- 	if (!host->mem) {
- 		dev_err(&pdev->dev, "failed to request io memory region.\n");
- 		ret = -ENOENT;
--		goto probe_free_host;
-+		goto probe_free_gpio;
- 	}
- 
- 	host->base = ioremap(host->mem->start, resource_size(host->mem));
-@@ -1333,6 +1346,14 @@ static int __devinit s3cmci_probe(struct
- 
- 	disable_irq(host->irq);
- 
-+	if (host->pdata->gpio_detect) {
-+		ret = gpio_request(host->pdata->gpio_detect, "s3cmci detect");
-+		if (ret) {
-+			dev_err(&pdev->dev, "failed to get detect gpio\n");
-+			goto probe_free_irq;
-+		}
-+	}
-+
- 	host->irq_cd = s3c2410_gpio_getirq(host->pdata->gpio_detect);
- 
- 	if (host->irq_cd >= 0) {
-@@ -1341,22 +1362,27 @@ static int __devinit s3cmci_probe(struct
- 				DRIVER_NAME, host)) {
- 			dev_err(&pdev->dev, "can't get card detect irq.\n");
- 			ret = -ENOENT;
--			goto probe_free_irq;
-+			goto probe_free_gpio_cd;
+ out:
+@@ -816,7 +832,8 @@ static void finalize_request(struct s3cm
+ 	if (cmd->data && (cmd->error == 0) &&
+ 	    (cmd->data->error == 0)) {
+ 		if (s3cmci_host_usedma(host) && (!host->dma_complete)) {
+-			dbg(host, dbg_dma, "DMA Missing!\n");
++			dbg(host, dbg_dma, "DMA Missing (%d)!\n",
++			    host->dma_complete);
+ 			return;
  		}
- 	} else {
- 		dev_warn(&pdev->dev, "host detect has no irq available\n");
--		s3c2410_gpio_cfgpin(host->pdata->gpio_detect,
--				    S3C2410_GPIO_INPUT);
-+		gpio_direction_input(host->pdata->gpio_detect);
+ 	}
+@@ -1065,7 +1082,7 @@ static int s3cmci_prepare_pio(struct s3c
+ static int s3cmci_prepare_dma(struct s3cmci_host *host, struct mmc_data *data)
+ {
+ 	int dma_len, i;
+-	int rw = (data->flags & MMC_DATA_WRITE) ? 1 : 0;
++	int rw = data->flags & MMC_DATA_WRITE;
+ 
+ 	BUG_ON((data->flags & BOTH_DIR) == BOTH_DIR);
+ 
+@@ -1073,7 +1090,7 @@ static int s3cmci_prepare_dma(struct s3c
+ 	s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_FLUSH);
+ 
+ 	dma_len = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+-			     (rw) ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
++			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
+ 
+ 	if (dma_len == 0)
+ 		return -ENOMEM;
+@@ -1084,11 +1101,11 @@ static int s3cmci_prepare_dma(struct s3c
+ 	for (i = 0; i < dma_len; i++) {
+ 		int res;
+ 
+-		dbg(host, dbg_dma, "enqueue %i:%u@%u\n", i,
+-			sg_dma_address(&data->sg[i]),
+-			sg_dma_len(&data->sg[i]));
++		dbg(host, dbg_dma, "enqueue %i: %08x@%u\n", i,
++		    sg_dma_address(&data->sg[i]),
++		    sg_dma_len(&data->sg[i]));
+ 
+-		res = s3c2410_dma_enqueue(host->dma, (void *) host,
++		res = s3c2410_dma_enqueue(host->dma, host,
+ 					  sg_dma_address(&data->sg[i]),
+ 					  sg_dma_len(&data->sg[i]));
+ 
+@@ -1581,8 +1598,6 @@ static int __devinit s3cmci_probe(struct
+ 	host->complete_what 	= COMPLETION_NONE;
+ 	host->pio_active 	= XFER_NONE;
+ 
+-	host->dma		= S3CMCI_DMA;
+-
+ #ifdef CONFIG_MMC_S3C_PIODMA
+ 	host->dodma		= host->pdata->dma;
+ #endif
+@@ -1665,10 +1680,21 @@ static int __devinit s3cmci_probe(struct
+ 		gpio_direction_input(host->pdata->gpio_wprotect);
  	}
  
--	if (host->pdata->gpio_wprotect)
--		s3c2410_gpio_cfgpin(host->pdata->gpio_wprotect,
--				    S3C2410_GPIO_INPUT);
-+	if (host->pdata->gpio_wprotect) {
-+		ret = gpio_request(host->pdata->gpio_wprotect, "s3cmci wp");
-+		if (ret) {
-+			dev_err(&pdev->dev, "failed to get writeprotect\n");
-+			goto probe_free_irq_cd;
-+		}
+-	if (s3c2410_dma_request(S3CMCI_DMA, &s3cmci_dma_client, NULL) < 0) {
+-		dev_err(&pdev->dev, "unable to get DMA channel.\n");
+-		ret = -EBUSY;
+-		goto probe_free_gpio_wp;
++	/* depending on the dma state, get a dma channel to use. */
 +
-+		gpio_direction_input(host->pdata->gpio_wprotect);
-+	}
- 
- 	if (s3c2410_dma_request(S3CMCI_DMA, &s3cmci_dma_client, NULL) < 0) {
- 		dev_err(&pdev->dev, "unable to get DMA channel.\n");
- 		ret = -EBUSY;
--		goto probe_free_irq_cd;
-+		goto probe_free_gpio_wp;
++	if (s3cmci_host_usedma(host)) {
++		host->dma = s3c2410_dma_request(DMACH_SDI, &s3cmci_dma_client,
++						host);
++		if (host->dma < 0) {
++			dev_err(&pdev->dev, "cannot get DMA channel.\n");
++			if (!s3cmci_host_canpio()) {
++				ret = -EBUSY;
++				goto probe_free_gpio_wp;
++			} else {
++				dev_warn(&pdev->dev, "falling back to PIO.\n");
++				host->dodma = 0;
++			}
++		}
  	}
  
  	host->clk = clk_get(&pdev->dev, "sdi");
-@@ -1423,6 +1449,14 @@ static int __devinit s3cmci_probe(struct
+@@ -1676,7 +1702,7 @@ static int __devinit s3cmci_probe(struct
+ 		dev_err(&pdev->dev, "failed to find clock source.\n");
+ 		ret = PTR_ERR(host->clk);
+ 		host->clk = NULL;
+-		goto probe_free_host;
++		goto probe_free_dma;
+ 	}
+ 
+ 	ret = clk_enable(host->clk);
+@@ -1738,6 +1764,10 @@ static int __devinit s3cmci_probe(struct
   clk_free:
  	clk_put(host->clk);
  
-+ probe_free_gpio_wp:
-+	if (host->pdata->gpio_wprotect)
-+		gpio_free(host->pdata->gpio_wprotect);
++ probe_free_dma:
++	if (s3cmci_host_usedma(host))
++		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
 +
-+ probe_free_gpio_cd:
-+	if (host->pdata->gpio_detect)
-+		gpio_free(host->pdata->gpio_detect);
-+
-  probe_free_irq_cd:
- 	if (host->irq_cd >= 0)
- 		free_irq(host->irq_cd, host);
-@@ -1436,8 +1470,13 @@ static int __devinit s3cmci_probe(struct
-  probe_free_mem_region:
- 	release_mem_region(host->mem->start, resource_size(host->mem));
+  probe_free_gpio_wp:
+ 	if (host->pdata->gpio_wprotect)
+ 		gpio_free(host->pdata->gpio_wprotect);
+@@ -1796,7 +1826,9 @@ static int __devexit s3cmci_remove(struc
+ 	clk_put(host->clk);
  
-+ probe_free_gpio:
-+	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
-+		gpio_free(i);
+ 	tasklet_disable(&host->pio_tasklet);
+-	s3c2410_dma_free(S3CMCI_DMA, &s3cmci_dma_client);
 +
-  probe_free_host:
- 	mmc_free_host(mmc);
-+
-  probe_out:
- 	return ret;
- }
-@@ -1459,6 +1498,8 @@ static int __devexit s3cmci_remove(struc
- {
- 	struct mmc_host		*mmc  = platform_get_drvdata(pdev);
- 	struct s3cmci_host	*host = mmc_priv(mmc);
-+	struct s3c24xx_mci_pdata *pd = host->pdata;
-+	int i;
- 
- 	s3cmci_shutdown(pdev);
- 
-@@ -1469,6 +1510,16 @@ static int __devexit s3cmci_remove(struc
++	if (s3cmci_host_usedma(host))
++		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
  
  	free_irq(host->irq, host);
  
-+	if (pd->gpio_wprotect)
-+		gpio_free(pd->gpio_wprotect);
-+
-+	if (pd->gpio_detect)
-+		gpio_free(pd->gpio_detect);
-+
-+	for (i = S3C2410_GPE(5); i <= S3C2410_GPE(10); i++)
-+		gpio_free(i);
-+
-+
- 	iounmap(host->base);
- 	release_mem_region(host->mem->start, resource_size(host->mem));
+diff -puN drivers/mmc/host/s3cmci.h~s3cmci-dma-fixes drivers/mmc/host/s3cmci.h
+--- a/drivers/mmc/host/s3cmci.h~s3cmci-dma-fixes
++++ a/drivers/mmc/host/s3cmci.h
+@@ -8,9 +8,6 @@
+  * published by the Free Software Foundation.
+  */
  
+-/* FIXME: DMA Resource management ?! */
+-#define S3CMCI_DMA 0
+-
+ enum s3cmci_waitfor {
+ 	COMPLETION_NONE,
+ 	COMPLETION_FINALIZE,
 _
 
 Patches currently in -mm which might be from ben@simtec.co.uk are
