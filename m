@@ -1,94 +1,87 @@
 From: akpm@linux-foundation.org
-Subject: [merged] s3cmci-change-to-use-dev_pm_ops.patch removed from -mm tree
-Date: Mon, 05 Oct 2009 11:38:53 -0700
-Message-ID: <200910051838.n95IcrrK017948@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: ben@simtec.co.uk, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
+Subject: [merged] s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable.patch removed from -mm tree
+Date: Mon, 05 Oct 2009 11:39:09 -0700
+Message-ID: <200910051839.n95Id9gN018475@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:51038 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754660AbZJESjt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 14:39:49 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ben@simtec.co.uk, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     s3cmci: change to use dev_pm_ops
+     s3cmci: make SDIO IRQ hardware IRQ support build-time configurable
 has been removed from the -mm tree.  Its filename was
-     s3cmci-change-to-use-dev_pm_ops.patch
+     s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: s3cmci: change to use dev_pm_ops
+Subject: s3cmci: make SDIO IRQ hardware IRQ support build-time configurable
 From: Ben Dooks <ben@simtec.co.uk>
 
-Move to using dev_pm_ops for suspend and resume.
+We have found a couple of boards where the SDIO IRQ hardware support has
+failed to work properly, and thus we should make it configurable whether
+or not to be included in the driver.
 
 Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/s3cmci.c |   29 ++++++++++++++++++-----------
- 1 file changed, 18 insertions(+), 11 deletions(-)
+ drivers/mmc/host/Kconfig  |    7 +++++++
+ drivers/mmc/host/s3cmci.c |    9 +++++++--
+ 2 files changed, 14 insertions(+), 2 deletions(-)
 
-diff -puN drivers/mmc/host/s3cmci.c~s3cmci-change-to-use-dev_pm_ops drivers/mmc/host/s3cmci.c
---- a/drivers/mmc/host/s3cmci.c~s3cmci-change-to-use-dev_pm_ops
-+++ a/drivers/mmc/host/s3cmci.c
-@@ -1546,35 +1546,42 @@ MODULE_DEVICE_TABLE(platform, s3cmci_dri
+diff -puN drivers/mmc/host/Kconfig~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable drivers/mmc/host/Kconfig
+--- a/drivers/mmc/host/Kconfig~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable
++++ a/drivers/mmc/host/Kconfig
+@@ -276,6 +276,13 @@ config MMC_S3C
  
- #ifdef CONFIG_PM
+ 	  If unsure, say N.
  
--static int s3cmci_suspend(struct platform_device *dev, pm_message_t state)
-+static int s3cmci_suspend(struct device *dev)
- {
--	struct mmc_host *mmc = platform_get_drvdata(dev);
-+	struct mmc_host *mmc = platform_get_drvdata(to_platform_device(dev));
-+	struct pm_message event = { PM_EVENT_SUSPEND };
- 
--	return  mmc_suspend_host(mmc, state);
-+	return mmc_suspend_host(mmc, event);
- }
- 
--static int s3cmci_resume(struct platform_device *dev)
-+static int s3cmci_resume(struct device *dev)
- {
--	struct mmc_host *mmc = platform_get_drvdata(dev);
-+	struct mmc_host *mmc = platform_get_drvdata(to_platform_device(dev));
- 
- 	return mmc_resume_host(mmc);
- }
- 
-+static struct dev_pm_ops s3cmci_pm = {
-+	.suspend	= s3cmci_suspend,
-+	.resume		= s3cmci_resume,
-+};
++config MMC_S3C_HW_SDIO_IRQ
++       bool "Hardware support for SDIO IRQ"
++       depends on MMC_S3C
++       help
++         Enable the hardware support for SDIO interrupts instead of using
++	 the generic polling code.
 +
-+#define s3cmci_pm_ops &s3cmci_pm
- #else /* CONFIG_PM */
--#define s3cmci_suspend NULL
--#define s3cmci_resume NULL
-+#define s3cmci_pm_ops NULL
- #endif /* CONFIG_PM */
+ choice
+ 	prompt "Samsung S3C SD/MMC transfer code"
+ 	depends on MMC_S3C
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-make-sdio-irq-hardware-irq-support-build-time-configurable
++++ a/drivers/mmc/host/s3cmci.c
+@@ -1715,7 +1715,11 @@ static int __devinit s3cmci_probe(struct
  
+ 	mmc->ops 	= &s3cmci_ops;
+ 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
++#ifdef CONFIG_MMC_S3C_HW_SDIO_IRQ
+ 	mmc->caps	= MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
++#else
++	mmc->caps	= MMC_CAP_4_BIT_DATA;
++#endif
+ 	mmc->f_min 	= host->clk_rate / (host->clk_div * 256);
+ 	mmc->f_max 	= host->clk_rate / host->clk_div;
  
- static struct platform_driver s3cmci_driver = {
--	.driver.name	= "s3c-sdi",
--	.driver.owner	= THIS_MODULE,
-+	.driver	= {
-+		.name	= "s3c-sdi",
-+		.owner	= THIS_MODULE,
-+		.pm	= s3cmci_pm_ops,
-+	},
- 	.id_table	= s3cmci_driver_ids,
- 	.probe		= s3cmci_probe,
- 	.remove		= __devexit_p(s3cmci_remove),
- 	.shutdown	= s3cmci_shutdown,
--	.suspend	= s3cmci_suspend,
--	.resume		= s3cmci_resume,
- };
+@@ -1750,8 +1754,9 @@ static int __devinit s3cmci_probe(struct
+ 	s3cmci_debugfs_attach(host);
  
- static int __init s3cmci_init(void)
+ 	platform_set_drvdata(pdev, mmc);
+-	dev_info(&pdev->dev, "%s - using %s\n", mmc_hostname(mmc),
+-		 s3cmci_host_usedma(host) ? "dma" : "pio");
++	dev_info(&pdev->dev, "%s - using %s, %s SDIO IRQ\n", mmc_hostname(mmc),
++		 s3cmci_host_usedma(host) ? "dma" : "pio",
++		 mmc->caps & MMC_CAP_SDIO_IRQ ? "hw" : "sw");
+ 
+ 	return 0;
+ 
 _
 
 Patches currently in -mm which might be from ben@simtec.co.uk are
