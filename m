@@ -1,163 +1,86 @@
 From: akpm@linux-foundation.org
-Subject: [merged] s3cmci-update-probe-to-use-new-platform-id-list.patch removed from -mm tree
-Date: Mon, 05 Oct 2009 11:38:47 -0700
-Message-ID: <200910051838.n95IclOw017669@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:47967 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754588AbZJESj3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 14:39:29 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [merged] s3cmci-use-resource_size-instead-of-local-macro.patch removed from -mm tree
+Date: Mon, 05 Oct 2009 11:38:44 -0700
+Message-ID: <200910051838.n95Icift017602@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
 To: ben@simtec.co.uk, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     s3cmci: update probe to use new platform id list
+     s3cmci: use resource_size() instead of local macro
 has been removed from the -mm tree.  Its filename was
-     s3cmci-update-probe-to-use-new-platform-id-list.patch
+     s3cmci-use-resource_size-instead-of-local-macro.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: s3cmci: update probe to use new platform id list
+Subject: s3cmci: use resource_size() instead of local macro
 From: Ben Dooks <ben@simtec.co.uk>
 
-Use the platform id list to match the three different versions of the
-hardware block that this driver supports.
-
-This will change the prefix of the console messages produced by this
-driver to be prefixed by s3c-mci instead of the hardware block name, such
-as s3c2440-mci.
+Replace the local definition RESSIZE() with the standard resource_size()
+call for getting the size of a struct resource.
 
 Signed-off-by: Ben Dooks <ben@simtec.co.uk>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/s3cmci.c |   71 ++++++++++++------------------------
- 1 file changed, 24 insertions(+), 47 deletions(-)
+ drivers/mmc/host/s3cmci.c |   10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
 
-diff -puN drivers/mmc/host/s3cmci.c~s3cmci-update-probe-to-use-new-platform-id-list drivers/mmc/host/s3cmci.c
---- a/drivers/mmc/host/s3cmci.c~s3cmci-update-probe-to-use-new-platform-id-list
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-use-resource_size-instead-of-local-macro drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-use-resource_size-instead-of-local-macro
 +++ a/drivers/mmc/host/s3cmci.c
-@@ -1244,11 +1244,14 @@ static inline void s3cmci_cpufreq_deregi
- }
- #endif
+@@ -58,8 +58,6 @@ static const int dbgmap_debug = dbg_err 
+ 		dev_dbg(&host->pdev->dev, args);  \
+ 	} while (0)
  
--static int __devinit s3cmci_probe(struct platform_device *pdev, int is2440)
-+static int __devinit s3cmci_probe(struct platform_device *pdev)
- {
- 	struct s3cmci_host *host;
- 	struct mmc_host	*mmc;
- 	int ret;
-+	int is2440;
-+
-+	is2440 = platform_get_device_id(pdev)->driver_data;
- 
- 	mmc = mmc_alloc_host(sizeof(struct s3cmci_host), &pdev->dev);
- 	if (!mmc) {
-@@ -1473,20 +1476,22 @@ static int __devexit s3cmci_remove(struc
- 	return 0;
- }
- 
--static int __devinit s3cmci_2410_probe(struct platform_device *dev)
--{
--	return s3cmci_probe(dev, 0);
--}
-+static struct platform_device_id s3cmci_driver_ids[] = {
-+	{
-+		.name	= "s3c2410-sdi",
-+		.driver_data	= 0,
-+	}, {
-+		.name	= "s3c2412-sdi",
-+		.driver_data	= 1,
-+	}, {
-+		.name	= "s3c2440-sdi",
-+		.driver_data	= 1,
-+	},
-+	{ }
-+};
- 
--static int __devinit s3cmci_2412_probe(struct platform_device *dev)
--{
--	return s3cmci_probe(dev, 1);
--}
-+MODULE_DEVICE_TABLE(platform, s3cmci_driver_ids);
- 
--static int __devinit s3cmci_2440_probe(struct platform_device *dev)
--{
--	return s3cmci_probe(dev, 1);
--}
- 
- #ifdef CONFIG_PM
- 
-@@ -1510,50 +1515,25 @@ static int s3cmci_resume(struct platform
- #endif /* CONFIG_PM */
- 
- 
--static struct platform_driver s3cmci_2410_driver = {
--	.driver.name	= "s3c2410-sdi",
--	.driver.owner	= THIS_MODULE,
--	.probe		= s3cmci_2410_probe,
--	.remove		= __devexit_p(s3cmci_remove),
--	.shutdown	= s3cmci_shutdown,
--	.suspend	= s3cmci_suspend,
--	.resume		= s3cmci_resume,
--};
+-#define RESSIZE(ressource) (((ressource)->end - (ressource)->start)+1)
 -
--static struct platform_driver s3cmci_2412_driver = {
--	.driver.name	= "s3c2412-sdi",
--	.driver.owner	= THIS_MODULE,
--	.probe		= s3cmci_2412_probe,
--	.remove		= __devexit_p(s3cmci_remove),
--	.shutdown	= s3cmci_shutdown,
--	.suspend	= s3cmci_suspend,
--	.resume		= s3cmci_resume,
--};
--
--static struct platform_driver s3cmci_2440_driver = {
--	.driver.name	= "s3c2440-sdi",
-+static struct platform_driver s3cmci_driver = {
-+	.driver.name	= "s3c-sdi",
- 	.driver.owner	= THIS_MODULE,
--	.probe		= s3cmci_2440_probe,
-+	.id_table	= s3cmci_driver_ids,
-+	.probe		= s3cmci_probe,
- 	.remove		= __devexit_p(s3cmci_remove),
- 	.shutdown	= s3cmci_shutdown,
- 	.suspend	= s3cmci_suspend,
- 	.resume		= s3cmci_resume,
+ static struct s3c2410_dma_client s3cmci_dma_client = {
+ 	.name		= "s3c-mci",
  };
+@@ -1298,7 +1296,7 @@ static int __devinit s3cmci_probe(struct
+ 	}
  
--
- static int __init s3cmci_init(void)
- {
--	platform_driver_register(&s3cmci_2410_driver);
--	platform_driver_register(&s3cmci_2412_driver);
--	platform_driver_register(&s3cmci_2440_driver);
--	return 0;
-+	return platform_driver_register(&s3cmci_driver);
- }
+ 	host->mem = request_mem_region(host->mem->start,
+-				       RESSIZE(host->mem), pdev->name);
++				       resource_size(host->mem), pdev->name);
  
- static void __exit s3cmci_exit(void)
- {
--	platform_driver_unregister(&s3cmci_2410_driver);
--	platform_driver_unregister(&s3cmci_2412_driver);
--	platform_driver_unregister(&s3cmci_2440_driver);
-+	platform_driver_unregister(&s3cmci_driver);
- }
+ 	if (!host->mem) {
+ 		dev_err(&pdev->dev, "failed to request io memory region.\n");
+@@ -1306,7 +1304,7 @@ static int __devinit s3cmci_probe(struct
+ 		goto probe_free_host;
+ 	}
  
- module_init(s3cmci_init);
-@@ -1562,6 +1542,3 @@ module_exit(s3cmci_exit);
- MODULE_DESCRIPTION("Samsung S3C MMC/SD Card Interface driver");
- MODULE_LICENSE("GPL v2");
- MODULE_AUTHOR("Thomas Kleffel <tk@maintech.de>, Ben Dooks <ben-linux@fluff.org>");
--MODULE_ALIAS("platform:s3c2410-sdi");
--MODULE_ALIAS("platform:s3c2412-sdi");
--MODULE_ALIAS("platform:s3c2440-sdi");
+-	host->base = ioremap(host->mem->start, RESSIZE(host->mem));
++	host->base = ioremap(host->mem->start, resource_size(host->mem));
+ 	if (!host->base) {
+ 		dev_err(&pdev->dev, "failed to ioremap() io memory region.\n");
+ 		ret = -EINVAL;
+@@ -1433,7 +1431,7 @@ static int __devinit s3cmci_probe(struct
+ 	iounmap(host->base);
+ 
+  probe_free_mem_region:
+-	release_mem_region(host->mem->start, RESSIZE(host->mem));
++	release_mem_region(host->mem->start, resource_size(host->mem));
+ 
+  probe_free_host:
+ 	mmc_free_host(mmc);
+@@ -1469,7 +1467,7 @@ static int __devexit s3cmci_remove(struc
+ 	free_irq(host->irq, host);
+ 
+ 	iounmap(host->base);
+-	release_mem_region(host->mem->start, RESSIZE(host->mem));
++	release_mem_region(host->mem->start, resource_size(host->mem));
+ 
+ 	mmc_free_host(mmc);
+ 	return 0;
 _
 
 Patches currently in -mm which might be from ben@simtec.co.uk are
