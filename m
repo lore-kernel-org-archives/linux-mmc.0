@@ -1,55 +1,274 @@
-From: Ian Molton <ian@mnementh.co.uk>
-Subject: Re: [PATCH 00/07] sh: SuperH Mobile SDHI changes
-Date: Mon, 5 Oct 2009 21:02:30 +0100
-Message-ID: <c09aa50a0910051302r768de5av29fde7f1518ee958@mail.gmail.com>
-References: <20091002022158.8215.58317.sendpatchset@rxone.opensource.se>
-	<20091005022306.GC3185@linux-sh.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Albert Herranz <albert_herranz@yahoo.es>
+Subject: [PATCH] sdio: rework cis tuple parsing
+Date: Tue,  6 Oct 2009 20:47:08 +0200
+Message-ID: <1254854829-23346-1-git-send-email-albert_herranz@yahoo.es>
+References: <20091004154433.37b19c5f@mjolnir.ossman.eu>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f227.google.com ([209.85.220.227]:46777 "EHLO
-	mail-fx0-f227.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753306AbZJEUD1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2009 16:03:27 -0400
-In-Reply-To: <20091005022306.GC3185@linux-sh.org>
+Received: from smtp142.mail.ukl.yahoo.com ([77.238.184.73]:23480 "HELO
+	smtp142.mail.ukl.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1757649AbZJFSsF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2009 14:48:05 -0400
+In-Reply-To: <20091004154433.37b19c5f@mjolnir.ossman.eu>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, g.liakhovetski@gmx.de, ian@mnementh.co.uk, akpm@linux-foundation.org
+To: pierre@ossman.eu, akpm@linux-foundation.org, linux-mmc@vger.kernel.org
+Cc: Albert Herranz <albert_herranz@yahoo.es>
 
-Im awaiting a reply from the linux-next folk
+This patch reworks the current CIS tuple parsing code, reusing the
+existing infrastructure and providing an easy way to add new CISTPL_FUNCE
+parsers by TPLFE_TYPE.
 
-2009/10/5 Paul Mundt <lethal@linux-sh.org>:
-> On Fri, Oct 02, 2009 at 11:21:58AM +0900, Magnus Damm wrote:
->> sh: SuperH Mobile SDHI changes
->>
->> [PATCH 01/07] mfd: Add SuperH Mobile SDHI platform driver
->> [PATCH 02/07] mmc: Add SuperH to the tmio-mmc Kconfig
->> [PATCH 03/07] mmc: Remove const from tmio-mmc platform data
->> [PATCH 04/07] sh: SDHI platform data to the Migo-R board
->> [PATCH 05/07] sh: SDHI platform data to the AP325RXA board
->> [PATCH 06/07] sh: SDHI platform data to the SE7724 board
->> [PATCH 07/07] sh: SDHI platform data to the kfr2r09 board
->>
->> These patches contain the SuperH specific changes needed for
->> the tmio-mmc driver to work with SuperH Mobile SDHI hardware.
->>
->> The tmio-mmc patch 0001-MMC-hardware-abstraction-for-CNF-area.patch
->> by Ian Molton is needed for correct run time behaviour. Without
->> this patch the tmio-mmc probe() fails gracefully.
->>
->> I suggest merging the series in the SuperH tree. Not sure about
->> the best way to merge the patch by Ian.
->>
->> Signed-off-by: Magnus Damm <damm@opensource.se>
->
-> At least patch 3/7 depends on Ian's patch being merged first, so there's
-> little point in merging this series until that hits upstream. So I'll
-> hold off on this for now.
->
+Valid known CIS tuples are now silently queued for the SDIO function driver
+when not parsed/processed (-EILSEQ) by the SDIO core.
+Unknown CIS tuples (-ENOENT) are queued too for the SDIO function driver
+without aborting the initialization, but emit a warning in the
+kernel log.
 
+CISTPL_FUNCE tuples can be "whitelisted" now by adding a matching entry
+to the cis_tpl_funce_list table.
 
+Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
+Acked-by: Pierre Ossman <pierre@ossman.eu>
+---
+v1
+- renamed tplc to tpl_count
+- reworded some comments
 
+ drivers/mmc/core/sdio_cis.c |  167 ++++++++++++++++++++++++-------------------
+ 1 files changed, 93 insertions(+), 74 deletions(-)
+
+diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+index e1035c8..cafd9c1 100644
+--- a/drivers/mmc/core/sdio_cis.c
++++ b/drivers/mmc/core/sdio_cis.c
+@@ -98,26 +98,56 @@ static const unsigned char speed_val[16] =
+ static const unsigned int speed_unit[8] =
+ 	{ 10000, 100000, 1000000, 10000000, 0, 0, 0, 0 };
+ 
+-/* FUNCE tuples with these types get passed to SDIO drivers */
+-static const unsigned char funce_type_whitelist[] = {
+-	4 /* CISTPL_FUNCE_LAN_NODE_ID used in Broadcom cards */
++
++typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
++			   const unsigned char *, unsigned);
++
++struct cis_tpl {
++	unsigned char code;
++	unsigned char min_size;
++	tpl_parse_t *parse;
+ };
+ 
+-static int cistpl_funce_whitelisted(unsigned char type)
++static int cis_tpl_parse(struct mmc_card *card, struct sdio_func *func,
++			 const char *tpl_descr,
++			 const struct cis_tpl *tpl, int tpl_count,
++			 unsigned char code,
++			 const unsigned char *buf, unsigned size)
+ {
+-	int i;
++	int i, ret;
+ 
+-	for (i = 0; i < ARRAY_SIZE(funce_type_whitelist); i++) {
+-		if (funce_type_whitelist[i] == type)
+-			return 1;
++	/* look for a matching code in the table */
++	for (i = 0; i < tpl_count; i++, tpl++) {
++		if (tpl->code == code)
++			break;
+ 	}
+-	return 0;
++	if (i < tpl_count) {
++		if (size >= tpl->min_size) {
++			if (tpl->parse)
++				ret = tpl->parse(card, func, buf, size);
++			else
++				ret = -EILSEQ;	/* known tuple, not parsed */
++		} else {
++			/* invalid tuple */
++			ret = -EINVAL;
++		}
++		if (ret && ret != -EILSEQ && ret != -ENOENT) {
++			printk(KERN_ERR "%s: bad %s tuple 0x%02x (%u bytes)\n",
++			       mmc_hostname(card->host), tpl_descr, code, size);
++		}
++	} else {
++		/* unknown tuple */
++		ret = -ENOENT;
++	}
++
++	return ret;
+ }
+ 
+-static int cistpl_funce_common(struct mmc_card *card,
++static int cistpl_funce_common(struct mmc_card *card, struct sdio_func *func,
+ 			       const unsigned char *buf, unsigned size)
+ {
+-	if (size < 0x04 || buf[0] != 0)
++	/* Only valid for the common CIS (function 0) */
++	if (func)
+ 		return -EINVAL;
+ 
+ 	/* TPLFE_FN0_BLK_SIZE */
+@@ -130,20 +160,24 @@ static int cistpl_funce_common(struct mmc_card *card,
+ 	return 0;
+ }
+ 
+-static int cistpl_funce_func(struct sdio_func *func,
++static int cistpl_funce_func(struct mmc_card *card, struct sdio_func *func,
+ 			     const unsigned char *buf, unsigned size)
+ {
+ 	unsigned vsn;
+ 	unsigned min_size;
+ 
+-	/* let SDIO drivers take care of whitelisted FUNCE tuples */
+-	if (cistpl_funce_whitelisted(buf[0]))
+-		return -EILSEQ;
++	/* Only valid for the individual function's CIS (1-7) */
++	if (!func)
++		return -EINVAL;
+ 
++	/*
++	 * This tuple has a different length depending on the SDIO spec
++	 * version.
++	 */
+ 	vsn = func->card->cccr.sdio_vsn;
+ 	min_size = (vsn == SDIO_SDIO_REV_1_00) ? 28 : 42;
+ 
+-	if (size < min_size || buf[0] != 1)
++	if (size < min_size)
+ 		return -EINVAL;
+ 
+ 	/* TPLFE_MAX_BLK_SIZE */
+@@ -158,39 +192,32 @@ static int cistpl_funce_func(struct sdio_func *func,
+ 	return 0;
+ }
+ 
++/*
++ * Known TPLFE_TYPEs table for CISTPL_FUNCE tuples.
++ *
++ * Note that, unlike PCMCIA, CISTPL_FUNCE tuples are not parsed depending
++ * on the TPLFID_FUNCTION value of the previous CISTPL_FUNCID as on SDIO
++ * TPLFID_FUNCTION is always hardcoded to 0x0C.
++ */
++static const struct cis_tpl cis_tpl_funce_list[] = {
++	{	0x00,	4,	cistpl_funce_common		},
++	{	0x01,	0,	cistpl_funce_func		},
++	{	0x04,	1+1+6,	/* CISTPL_FUNCE_LAN_NODE_ID */	},
++};
++
+ static int cistpl_funce(struct mmc_card *card, struct sdio_func *func,
+ 			const unsigned char *buf, unsigned size)
+ {
+-	int ret;
+-
+-	/*
+-	 * There should be two versions of the CISTPL_FUNCE tuple,
+-	 * one for the common CIS (function 0) and a version used by
+-	 * the individual function's CIS (1-7). Yet, the later has a
+-	 * different length depending on the SDIO spec version.
+-	 */
+-	if (func)
+-		ret = cistpl_funce_func(func, buf, size);
+-	else
+-		ret = cistpl_funce_common(card, buf, size);
+-
+-	if (ret && ret != -EILSEQ) {
+-		printk(KERN_ERR "%s: bad CISTPL_FUNCE size %u "
+-		       "type %u\n", mmc_hostname(card->host), size, buf[0]);
+-	}
++	if (size < 1)
++		return -EINVAL;
+ 
+-	return ret;
++	return cis_tpl_parse(card, func, "CISTPL_FUNCE",
++			     cis_tpl_funce_list,
++			     ARRAY_SIZE(cis_tpl_funce_list),
++			     buf[0], buf, size);
+ }
+ 
+-typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
+-			   const unsigned char *, unsigned);
+-
+-struct cis_tpl {
+-	unsigned char code;
+-	unsigned char min_size;
+-	tpl_parse_t *parse;
+-};
+-
++/* Known TPL_CODEs table for CIS tuples */
+ static const struct cis_tpl cis_tpl_list[] = {
+ 	{	0x15,	3,	cistpl_vers_1		},
+ 	{	0x20,	4,	cistpl_manfid		},
+@@ -269,46 +296,38 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
+ 			break;
+ 		}
+ 
+-		for (i = 0; i < ARRAY_SIZE(cis_tpl_list); i++)
+-			if (cis_tpl_list[i].code == tpl_code)
+-				break;
+-		if (i < ARRAY_SIZE(cis_tpl_list)) {
+-			const struct cis_tpl *tpl = cis_tpl_list + i;
+-			if (tpl_link < tpl->min_size) {
+-				printk(KERN_ERR
+-				       "%s: bad CIS tuple 0x%02x"
+-				       " (length = %u, expected >= %u)\n",
+-				       mmc_hostname(card->host),
+-				       tpl_code, tpl_link, tpl->min_size);
+-				ret = -EINVAL;
+-			} else if (tpl->parse) {
+-				ret = tpl->parse(card, func,
+-						 this->data, tpl_link);
+-			}
++		/* Try to parse the CIS tuple */
++		ret = cis_tpl_parse(card, func, "CIS",
++				    cis_tpl_list, ARRAY_SIZE(cis_tpl_list),
++				    tpl_code, this->data, tpl_link);
++		if (ret == -EILSEQ || ret == -ENOENT) {
+ 			/*
+-			 * We don't need the tuple anymore if it was
+-			 * successfully parsed by the SDIO core or if it is
+-			 * not going to be parsed by SDIO drivers.
++			 * The tuple is unknown or known but not parsed.
++			 * Queue the tuple for the function driver.
+ 			 */
+-			if (!ret || ret != -EILSEQ)
+-				kfree(this);
+-		} else {
+-			/* unknown tuple */
+-			ret = -EILSEQ;
+-		}
+-
+-		if (ret == -EILSEQ) {
+-			/* this tuple is unknown to the core or whitelisted */
+ 			this->next = NULL;
+ 			this->code = tpl_code;
+ 			this->size = tpl_link;
+ 			*prev = this;
+ 			prev = &this->next;
+-			printk(KERN_DEBUG
+-			       "%s: queuing CIS tuple 0x%02x length %u\n",
+-			       mmc_hostname(card->host), tpl_code, tpl_link);
++
++			if (ret == -ENOENT) {
++				/* warn about unknown tuples */
++				printk(KERN_WARNING "%s: queuing unknown"
++				       " CIS tuple 0x%02x (%u bytes)\n",
++				       mmc_hostname(card->host),
++				       tpl_code, tpl_link);
++			}
++
+ 			/* keep on analyzing tuples */
+ 			ret = 0;
++		} else {
++			/*
++			 * We don't need the tuple anymore if it was
++			 * successfully parsed by the SDIO core or if it is
++			 * not going to be queued for a driver.
++			 */
++			kfree(this);
+ 		}
+ 
+ 		ptr += tpl_link;
 -- 
-Ian Molton
-Linux, Automotive, and other hacking:
-http://www.mnementh.co.uk/
+1.6.0.4
+
