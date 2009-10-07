@@ -1,62 +1,59 @@
-From: Bing Zhao <bzhao@marvell.com>
-Subject: RE: [patch 077/232] sdio: fix read buffer overflow
-Date: Tue, 6 Oct 2009 14:49:12 -0700
-Message-ID: <477F20668A386D41ADCC57781B1F704306DDD5C274@SC-VEXCH1.marvell.com>
-References: <200909222345.n8MNj9kq013725@imap1.linux-foundation.org>
-	<4AC47F84.20806@cam.ac.uk> <4AC48E8E.6030808@csr.com>	<4AC48FA1.409@csr.com>
- <4AC4B899.9000701@cam.ac.uk>
+From: akpm@linux-foundation.org
+Subject: [patch 15/16] mmc: sdio: don't require CISTPL_VERS_1 to contain 4 strings
+Date: Wed, 07 Oct 2009 16:32:33 -0700
+Message-ID: <200910072332.n97NWYT7029982@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from galiil.marvell.com ([199.203.130.254]:59712 "EHLO
-	galiil.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757292AbZJFVzS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2009 17:55:18 -0400
-In-Reply-To: <4AC4B899.9000701@cam.ac.uk>
-Content-Language: en-US
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:46659 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755433AbZJGXnA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Oct 2009 19:43:00 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jonathan Cameron <jic23@cam.ac.uk>, David Vrabel <david.vrabel@csr.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "roel.kluin@gmail.com" <roel.kluin@gmail.com>, "libertas-dev@lists.infradead.org" <libertas-dev@lists.infradead.org>
+To: torvalds@linux-foundation.org
+Cc: akpm@linux-foundation.org, david.vrabel@csr.com, bzhao@marvell.com, jic23@cam.ac.uk, linux-mmc@vger.kernel.org, roel.kluin@gmail.com
 
-Hi,
+From: David Vrabel <david.vrabel@csr.com>
 
-> -----Original Message-----
-> From: libertas-dev-bounces@lists.infradead.org [mailto:libertas-dev-bounces@lists.infradead.org] On
-> Behalf Of Jonathan Cameron
-> Sent: Thursday, October 01, 2009 7:12 AM
-> To: David Vrabel
-> Cc: linux-mmc@vger.kernel.org; akpm@linux-foundation.org; roel.kluin@gmail.com; libertas-
-> dev@lists.infradead.org
-> Subject: Re: [patch 077/232] sdio: fix read buffer overflow
-> 
-> David Vrabel wrote:
-> > David Vrabel wrote:
-> >> It's harmless if the tuple contains fewer so I think we should just try
-> >> and parse as many strings as possible.  Does this patch fix your regression?
-> >
-> > I spelt the field name wrong in the comment.  Use this patch instead,
-> > please.
-> Works for me, so Tested-by: Jonathan Cameron <jic23@cam.ac.uk>
-> 
-> I guess it's just a question of posting it as a normal patch and seeing if
-> anyone screams.
+The PC Card 8.0 specification (vol.  4, section 3.2.10) says the
+TPLLV1_INFO field of the CISTPL_VERS_1 tuple must contain 4 strings.  Some
+cards don't have all 4 so just parse as many as we can.
 
-This patch works for me too.
-
+[akpm@linux-foundation.org: coding-style fixes]
+Signed-off-by: David Vrabel <david.vrabel@csr.com>
+Tested-by: Jonathan Cameron <jic23@cam.ac.uk>
 Tested-by: Bing Zhao <bzhao@marvell.com>
+Cc: Roel Kluin <roel.kluin@gmail.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
-Thanks,
 
-Bing
-
-> 
-> Thanks,
-> 
-> Jonathan
-> 
-> _______________________________________________
-> libertas-dev mailing list
-> libertas-dev@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/libertas-dev
+diff -puN drivers/mmc/core/sdio_cis.c~mmc-sdio-dont-require-cistpl_vers_1-to-contain-4-strings drivers/mmc/core/sdio_cis.c
+--- a/drivers/mmc/core/sdio_cis.c~mmc-sdio-dont-require-cistpl_vers_1-to-contain-4-strings
++++ a/drivers/mmc/core/sdio_cis.c
+@@ -29,6 +29,8 @@ static int cistpl_vers_1(struct mmc_card
+ 	unsigned i, nr_strings;
+ 	char **buffer, *string;
+ 
++	/* Find all null-terminated (including zero length) strings in
++	   the TPLLV1_INFO field. Trailing garbage is ignored. */
+ 	buf += 2;
+ 	size -= 2;
+ 
+@@ -39,11 +41,8 @@ static int cistpl_vers_1(struct mmc_card
+ 		if (buf[i] == 0)
+ 			nr_strings++;
+ 	}
+-
+-	if (nr_strings < 4) {
+-		printk(KERN_WARNING "SDIO: ignoring broken CISTPL_VERS_1\n");
++	if (nr_strings == 0)
+ 		return 0;
+-	}
+ 
+ 	size = i;
+ 
+_
