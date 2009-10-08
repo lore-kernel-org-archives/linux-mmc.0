@@ -1,42 +1,46 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
 Subject: Re: [PATCH] mmc: at91_mci: Don't include asm/mach/mmc.h
-Date: Thu, 8 Oct 2009 13:26:45 +0200
-Message-ID: <63386a3d0910080426j2a48e5d7wd2d2cb633a5f7a15@mail.gmail.com>
+Date: Thu, 08 Oct 2009 14:14:27 +0200
+Message-ID: <4ACDD7A3.1040908@atmel.com>
 References: <1254996762-19115-1-git-send-email-u.kleine-koenig@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f210.google.com ([209.85.218.210]:61260 "EHLO
-	mail-bw0-f210.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757317AbZJHL1X convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Oct 2009 07:27:23 -0400
-Received: by bwz6 with SMTP id 6so681354bwz.37
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Oct 2009 04:26:46 -0700 (PDT)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1254996762-19115-1-git-send-email-u.kleine-koenig@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: =?UTF-8?B?VXdlIEtsZWluZS1Lw7ZuaWc=?= <u.kleine-koenig@pengutronix.de>
+Cc: Linus Walleij <linus.walleij@stericsson.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-mmc@vger.kernel.org, Pierre Ossman <drzeus@drzeus.cx>, Russell King <rmk+kernel@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Uwe_Kleine=2DK=F6nig?= <u.kleine-koenig@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@stericsson.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Pierre Ossman <drzeus@drzeus.cx>, linux-arm-kernel@lists.infradead.org
 
-2009/10/8 Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>:
-> This fixes a compile bug introduced in
->
-> =A0 =A0 =A0 =A06ef297f (ARM: 5720/1: Move MMCI header to amba include=
- dir)
->
-> That commit moved arch/arm/include/asm/mach/mmc.h to
-> include/linux/amba/mmci.h. =A0Just removing the include was enough.
->
-> Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-> Cc: Catalin Marinas <catalin.marinas@arm.com>
-> Cc: Linus Walleij <linus.walleij@stericsson.com>
-
-Acked-by: Linus Walleij <linus.walleij@stericsson.com>
-
-The include paths in the kernel lead me astray... Weird that this
-driver included that file at all though, but I guess the driver was der=
-ived
-from MMCI at some early staget and it got left in?
-
-Linus Walleij
+VXdlIEtsZWluZS1Lw7ZuaWcgOgo+IFRoaXMgZml4ZXMgYSBjb21waWxlIGJ1ZyBpbnRyb2R1Y2Vk
+IGluCj4gCj4gCTZlZjI5N2YgKEFSTTogNTcyMC8xOiBNb3ZlIE1NQ0kgaGVhZGVyIHRvIGFtYmEg
+aW5jbHVkZSBkaXIpCj4gCj4gVGhhdCBjb21taXQgbW92ZWQgYXJjaC9hcm0vaW5jbHVkZS9hc20v
+bWFjaC9tbWMuaCB0bwo+IGluY2x1ZGUvbGludXgvYW1iYS9tbWNpLmguICBKdXN0IHJlbW92aW5n
+IHRoZSBpbmNsdWRlIHdhcyBlbm91Z2guCj4gCj4gU2lnbmVkLW9mZi1ieTogVXdlIEtsZWluZS1L
+w7ZuaWcgPHUua2xlaW5lLWtvZW5pZ0BwZW5ndXRyb25peC5kZT4KPiBDYzogQ2F0YWxpbiBNYXJp
+bmFzIDxjYXRhbGluLm1hcmluYXNAYXJtLmNvbT4KPiBDYzogTGludXMgV2FsbGVpaiA8bGludXMu
+d2FsbGVpakBzdGVyaWNzc29uLmNvbT4KPiBDYzogUnVzc2VsbCBLaW5nIDxybWsra2VybmVsQGFy
+bS5saW51eC5vcmcudWs+Cj4gQ2M6IFBpZXJyZSBPc3NtYW4gPGRyemV1c0BkcnpldXMuY3g+Cj4g
+Q2M6IGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwoKQWNrZWQtYnk6IE5pY29s
+YXMgRmVycmUgPG5pY29sYXMuZmVycmVAYXRtZWwuY29tPgoKPiAtLS0KPiAgZHJpdmVycy9tbWMv
+aG9zdC9hdDkxX21jaS5jIHwgICAgMSAtCj4gIDEgZmlsZXMgY2hhbmdlZCwgMCBpbnNlcnRpb25z
+KCspLCAxIGRlbGV0aW9ucygtKQo+IAo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2F0
+OTFfbWNpLmMgYi9kcml2ZXJzL21tYy9ob3N0L2F0OTFfbWNpLmMKPiBpbmRleCBlNTU2ZDQyLi42
+MzkyNGUwIDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvYXQ5MV9tY2kuYwo+ICsrKyBi
+L2RyaXZlcnMvbW1jL2hvc3QvYXQ5MV9tY2kuYwo+IEBAIC03Miw3ICs3Miw2IEBACj4gICNpbmNs
+dWRlIDxhc20vaXJxLmg+Cj4gICNpbmNsdWRlIDxhc20vZ3Bpby5oPgo+ICAKPiAtI2luY2x1ZGUg
+PGFzbS9tYWNoL21tYy5oPgo+ICAjaW5jbHVkZSA8bWFjaC9ib2FyZC5oPgo+ICAjaW5jbHVkZSA8
+bWFjaC9jcHUuaD4KPiAgI2luY2x1ZGUgPG1hY2gvYXQ5MV9tY2kuaD4KCgotLSAKTmljb2xhcyBG
+ZXJyZQoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxp
+bnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFk
+ZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4
+LWFybS1rZXJuZWwK
