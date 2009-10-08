@@ -1,41 +1,42 @@
-From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-Subject: [PATCH] mmc: at91_mci: Don't include asm/mach/mmc.h
-Date: Thu,  8 Oct 2009 12:12:42 +0200
-Message-ID: <1254996762-19115-1-git-send-email-u.kleine-koenig@pengutronix.de>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH] mmc: at91_mci: Don't include asm/mach/mmc.h
+Date: Thu, 8 Oct 2009 13:26:45 +0200
+Message-ID: <63386a3d0910080426j2a48e5d7wd2d2cb633a5f7a15@mail.gmail.com>
+References: <1254996762-19115-1-git-send-email-u.kleine-koenig@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org
-Cc: Catalin Marinas <catalin.marinas@arm.com>, Pierre Ossman <drzeus@drzeus.cx>, Linus Walleij <linus.walleij@stericsson.com>, linux-arm-kernel@lists.infradead.org, Russell King <rmk+kernel@arm.linux.org.uk>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bw0-f210.google.com ([209.85.218.210]:61260 "EHLO
+	mail-bw0-f210.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757317AbZJHL1X convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Oct 2009 07:27:23 -0400
+Received: by bwz6 with SMTP id 6so681354bwz.37
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Oct 2009 04:26:46 -0700 (PDT)
+In-Reply-To: <1254996762-19115-1-git-send-email-u.kleine-koenig@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?ISO-8859-1?Q?Uwe_Kleine=2DK=F6nig?= <u.kleine-koenig@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@stericsson.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Pierre Ossman <drzeus@drzeus.cx>, linux-arm-kernel@lists.infradead.org
 
-VGhpcyBmaXhlcyBhIGNvbXBpbGUgYnVnIGludHJvZHVjZWQgaW4KCgk2ZWYyOTdmIChBUk06IDU3
-MjAvMTogTW92ZSBNTUNJIGhlYWRlciB0byBhbWJhIGluY2x1ZGUgZGlyKQoKVGhhdCBjb21taXQg
-bW92ZWQgYXJjaC9hcm0vaW5jbHVkZS9hc20vbWFjaC9tbWMuaCB0bwppbmNsdWRlL2xpbnV4L2Ft
-YmEvbW1jaS5oLiAgSnVzdCByZW1vdmluZyB0aGUgaW5jbHVkZSB3YXMgZW5vdWdoLgoKU2lnbmVk
-LW9mZi1ieTogVXdlIEtsZWluZS1Lw7ZuaWcgPHUua2xlaW5lLWtvZW5pZ0BwZW5ndXRyb25peC5k
-ZT4KQ2M6IENhdGFsaW4gTWFyaW5hcyA8Y2F0YWxpbi5tYXJpbmFzQGFybS5jb20+CkNjOiBMaW51
-cyBXYWxsZWlqIDxsaW51cy53YWxsZWlqQHN0ZXJpY3Nzb24uY29tPgpDYzogUnVzc2VsbCBLaW5n
-IDxybWsra2VybmVsQGFybS5saW51eC5vcmcudWs+CkNjOiBQaWVycmUgT3NzbWFuIDxkcnpldXNA
-ZHJ6ZXVzLmN4PgpDYzogbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCi0tLQog
-ZHJpdmVycy9tbWMvaG9zdC9hdDkxX21jaS5jIHwgICAgMSAtCiAxIGZpbGVzIGNoYW5nZWQsIDAg
-aW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9o
-b3N0L2F0OTFfbWNpLmMgYi9kcml2ZXJzL21tYy9ob3N0L2F0OTFfbWNpLmMKaW5kZXggZTU1NmQ0
-Mi4uNjM5MjRlMCAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9hdDkxX21jaS5jCisrKyBi
-L2RyaXZlcnMvbW1jL2hvc3QvYXQ5MV9tY2kuYwpAQCAtNzIsNyArNzIsNiBAQAogI2luY2x1ZGUg
-PGFzbS9pcnEuaD4KICNpbmNsdWRlIDxhc20vZ3Bpby5oPgogCi0jaW5jbHVkZSA8YXNtL21hY2gv
-bW1jLmg+CiAjaW5jbHVkZSA8bWFjaC9ib2FyZC5oPgogI2luY2x1ZGUgPG1hY2gvY3B1Lmg+CiAj
-aW5jbHVkZSA8bWFjaC9hdDkxX21jaS5oPgotLSAKMS42LjQuMwoKCl9fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBs
-aXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5m
-cmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
+2009/10/8 Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>:
+> This fixes a compile bug introduced in
+>
+> =A0 =A0 =A0 =A06ef297f (ARM: 5720/1: Move MMCI header to amba include=
+ dir)
+>
+> That commit moved arch/arm/include/asm/mach/mmc.h to
+> include/linux/amba/mmci.h. =A0Just removing the include was enough.
+>
+> Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
+> Cc: Catalin Marinas <catalin.marinas@arm.com>
+> Cc: Linus Walleij <linus.walleij@stericsson.com>
+
+Acked-by: Linus Walleij <linus.walleij@stericsson.com>
+
+The include paths in the kernel lead me astray... Weird that this
+driver included that file at all though, but I guess the driver was der=
+ived
+from MMCI at some early staget and it got left in?
+
+Linus Walleij
