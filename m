@@ -1,59 +1,37 @@
-From: akpm@linux-foundation.org
-Subject: [patch 15/16] mmc: sdio: don't require CISTPL_VERS_1 to contain 4 strings
-Date: Wed, 07 Oct 2009 16:32:33 -0700
-Message-ID: <200910072332.n97NWYT7029982@imap1.linux-foundation.org>
+From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
+	<u.kleine-koenig@pengutronix.de>
+Subject: 70a3341a71 broke omap_hsmmc?
+Date: Thu, 8 Oct 2009 11:24:30 +0200
+Message-ID: <20091008092430.GA22561@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:46659 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755433AbZJGXnA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Oct 2009 19:43:00 -0400
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:49156 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756725AbZJHJZX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Oct 2009 05:25:23 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, david.vrabel@csr.com, bzhao@marvell.com, jic23@cam.ac.uk, linux-mmc@vger.kernel.org, roel.kluin@gmail.com
+Cc: Adrian Hunter <adrian.hunter@nokia.com>, Matt Fleming <matt@console-pimps.org>, Ian Molton <ian@mnementh.co.uk>, "Roberto A. Foglietta" <roberto.foglietta@gmail.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Denis Karpov <ext-denis.2.karpov@nokia.com>, Pierre Ossman <pierre@ossman.eu>, Philip Langdale <philipl@overt.org>, Madhusudhan <madhu.cr@ti.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-From: David Vrabel <david.vrabel@csr.com>
+Hello,
 
-The PC Card 8.0 specification (vol.  4, section 3.2.10) says the
-TPLLV1_INFO field of the CISTPL_VERS_1 tuple must contain 4 strings.  Some
-cards don't have all 4 so just parse as many as we can.
+commit 70a3341a711f27ae77714ae7dd360a4e7e2d5e7c changed registering of
+omap_hsmmc_host from using platform_driver_probe to using
+platform_driver_register.  But omap_hsmmc_driver doesn't have a probe
+entry.  So I expect that the driver doesn't bind correctly.
 
-[akpm@linux-foundation.org: coding-style fixes]
-Signed-off-by: David Vrabel <david.vrabel@csr.com>
-Tested-by: Jonathan Cameron <jic23@cam.ac.uk>
-Tested-by: Bing Zhao <bzhao@marvell.com>
-Cc: Roel Kluin <roel.kluin@gmail.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
+The fix is either convert back to platform_driver_probe or (add
+platform_driver_probe to omap_hsmmc_driver and move it to section
+=2Edevinit.text).
 
+Best regards
+Uwe
 
-diff -puN drivers/mmc/core/sdio_cis.c~mmc-sdio-dont-require-cistpl_vers_1-to-contain-4-strings drivers/mmc/core/sdio_cis.c
---- a/drivers/mmc/core/sdio_cis.c~mmc-sdio-dont-require-cistpl_vers_1-to-contain-4-strings
-+++ a/drivers/mmc/core/sdio_cis.c
-@@ -29,6 +29,8 @@ static int cistpl_vers_1(struct mmc_card
- 	unsigned i, nr_strings;
- 	char **buffer, *string;
- 
-+	/* Find all null-terminated (including zero length) strings in
-+	   the TPLLV1_INFO field. Trailing garbage is ignored. */
- 	buf += 2;
- 	size -= 2;
- 
-@@ -39,11 +41,8 @@ static int cistpl_vers_1(struct mmc_card
- 		if (buf[i] == 0)
- 			nr_strings++;
- 	}
--
--	if (nr_strings < 4) {
--		printk(KERN_WARNING "SDIO: ignoring broken CISTPL_VERS_1\n");
-+	if (nr_strings == 0)
- 		return 0;
--	}
- 
- 	size = i;
- 
-_
+--=20
+Pengutronix e.K.                              | Uwe Kleine-K=F6nig     =
+       |
+Industrial Linux Solutions                    | http://www.pengutronix.=
+de/  |
