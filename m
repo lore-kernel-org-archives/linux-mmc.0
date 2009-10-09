@@ -1,78 +1,72 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH] omap_hsmmc: Add missing probe handler hook
-Date: Thu, 8 Oct 2009 15:54:28 -0700
-Message-ID: <20091008225428.GA25892@atomide.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="5I6of5zJg18YgZEa"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-omap-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Madhusudhan Chikkature <madhu.cr@ti.com>, Felipe Contreras <felipe.contreras@gmail.com>, Adrian Hunter <adrian.hunter@nokia.com>, Roger Quadros <ext-roger.quadros@nokia.com>, Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>, Denis Karpov <ext-denis.2.karpov@nokia.com>
+From: akpm@linux-foundation.org
+Subject: [merged] mmc-sdio-dont-require-cistpl_vers_1-to-contain-4-strings.patch removed from -mm tree
+Date: Fri, 09 Oct 2009 15:05:18 -0700
+Message-ID: <200910092205.n99M5Ivx021129@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:54208 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934674AbZJIWGG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Oct 2009 18:06:06 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: david.vrabel@csr.com, bzhao@marvell.com, jic23@cam.ac.uk, linux-mmc@vger.kernel.org, roel.kluin@gmail.com, mm-commits@vger.kernel.org
 
 
---5I6of5zJg18YgZEa
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
+The patch titled
+     mmc: sdio: don't require CISTPL_VERS_1 to contain 4 strings
+has been removed from the -mm tree.  Its filename was
+     mmc-sdio-dont-require-cistpl_vers_1-to-contain-4-strings.patch
 
-Andrew,
+This patch was dropped because it was merged into mainline or a subsystem tree
 
-Here's a fix from Roger Quadros that was accidentally not posted
-to linux-mmc as pointed out by Felipe Contreras on LKML.
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-Can you please pick it up?
+------------------------------------------------------
+Subject: mmc: sdio: don't require CISTPL_VERS_1 to contain 4 strings
+From: David Vrabel <david.vrabel@csr.com>
 
-For reference, this is the issue Uwe Kleine-König mentioned at:
-http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg00528.html
+The PC Card 8.0 specification (vol.  4, section 3.2.10) says the
+TPLLV1_INFO field of the CISTPL_VERS_1 tuple must contain 4 strings.  Some
+cards don't have all 4 so just parse as many as we can.
 
-Felipe Contreras summarized how things broke at:
-http://lkml.org/lkml/2009/10/8/334
-
-Regards,
-
-Tony
-
---5I6of5zJg18YgZEa
-Content-Type: text/x-diff; charset=us-ascii
-Content-Disposition: inline; filename="v2-omap_hsmmc-Add-missing-probe-handler-hook.patch"
-
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Subject: [v2] omap_hsmmc: Add missing probe handler hook
-Date: Fri, 02 Oct 2009 12:22:40 -0000
-From: Roger Quadros <ext-roger.quadros@nokia.com>
-X-Patchwork-Id: 51344
-
-The missing probe handler hook will never probe the driver. Add it back.
-Fixes broken MMC on OMAP.
-
-We use platform_driver_probe() API since omap_hsmmc is not a hot-pluggable
-device.
-
-Signed-off-by: Roger Quadros <ext-roger.quadros@nokia.com>
-Tested-by: Felipe Contreras <felipe.contreras@gmail.com>
-Tested-by: Tony Lindgren <tony@atomide.com>
-
+[akpm@linux-foundation.org: coding-style fixes]
+Signed-off-by: David Vrabel <david.vrabel@csr.com>
+Tested-by: Jonathan Cameron <jic23@cam.ac.uk>
+Tested-by: Bing Zhao <bzhao@marvell.com>
+Cc: Roel Kluin <roel.kluin@gmail.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
-drivers/mmc/host/omap_hsmmc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 4487cc0..0aecaae 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2013,7 +2013,7 @@ static struct platform_driver omap_hsmmc_driver = {
- static int __init omap_hsmmc_init(void)
- {
- 	/* Register the MMC driver */
--	return platform_driver_register(&omap_hsmmc_driver);
-+	return platform_driver_probe(&omap_hsmmc_driver, omap_hsmmc_probe);
- }
+
+diff -puN drivers/mmc/core/sdio_cis.c~mmc-sdio-dont-require-cistpl_vers_1-to-contain-4-strings drivers/mmc/core/sdio_cis.c
+--- a/drivers/mmc/core/sdio_cis.c~mmc-sdio-dont-require-cistpl_vers_1-to-contain-4-strings
++++ a/drivers/mmc/core/sdio_cis.c
+@@ -29,6 +29,8 @@ static int cistpl_vers_1(struct mmc_card
+ 	unsigned i, nr_strings;
+ 	char **buffer, *string;
  
- static void __exit omap_hsmmc_cleanup(void)
++	/* Find all null-terminated (including zero length) strings in
++	   the TPLLV1_INFO field. Trailing garbage is ignored. */
+ 	buf += 2;
+ 	size -= 2;
+ 
+@@ -39,11 +41,8 @@ static int cistpl_vers_1(struct mmc_card
+ 		if (buf[i] == 0)
+ 			nr_strings++;
+ 	}
+-
+-	if (nr_strings < 4) {
+-		printk(KERN_WARNING "SDIO: ignoring broken CISTPL_VERS_1\n");
++	if (nr_strings == 0)
+ 		return 0;
+-	}
+ 
+ 	size = i;
+ 
+_
 
---5I6of5zJg18YgZEa--
+Patches currently in -mm which might be from david.vrabel@csr.com are
+
+origin.patch
+
