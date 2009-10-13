@@ -1,54 +1,47 @@
-From: Philip Langdale <philipl@overt.org>
-Subject: Re: [PATCH] sdio: add MMC_CAP_VDD_165_195 host capability
-Date: Mon, 12 Oct 2009 19:39:52 -0700
-Message-ID: <20091012193952.1482e322@fido2.homeip.net>
-References: <1254160269.10634.15.camel@localhost>
-	<4AC0FBF0.6090007@csr.com>
-	<20090928192548.11da5c3c@fido2.homeip.net>
-	<20090929202833.179fb521@mjolnir.ossman.eu>
-	<f6ee8ef9d3da123c11433b52ec8d6a60@localhost>
-	<20090929233732.62f470e0@mjolnir.ossman.eu>
-	<20090929231013.5d67b36a@fido2.homeip.net>
-	<20091008203826.5e027347@mjolnir.ossman.eu>
-	<20091010114215.5f9d8c94@fido2.homeip.net>
-	<4AD32B01.5000600@csr.com>
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Subject: [PATCH] mmc: at91_mci: Don't include asm/mach/mmc.h
+Date: Tue, 13 Oct 2009 09:19:48 +0200
+Message-ID: <1255418388-27866-1-git-send-email-u.kleine-koenig@pengutronix.de>
+References: <1254996762-19115-1-git-send-email-u.kleine-koenig@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from usul.overt.org ([204.11.33.43]:35857 "EHLO usul.overt.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755358AbZJMClD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 12 Oct 2009 22:41:03 -0400
-In-Reply-To: <4AD32B01.5000600@csr.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1254996762-19115-1-git-send-email-u.kleine-koenig@pengutronix.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: Catalin Marinas <catalin.marinas@arm.com>, Andrew Morton <akpm@linux-foundation.org>, Pierre Ossman <drzeus@drzeus.cx>, linux-arm-kernel@lists.infradead.org, Russell King <rmk+kernel@arm.linux.org.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: David Vrabel <david.vrabel@csr.com>
-Cc: Pierre Ossman <pierre@ossman.eu>, Ohad Ben-Cohen <ohad@bencohen.org>, akpm@linux-foundation.org, ian@mnementh.co.uk, matt@console-pimps.org, roberto.foglietta@gmail.com, linux-mmc@vger.kernel.org
 
-On Mon, 12 Oct 2009 14:11:29 +0100
-David Vrabel <david.vrabel@csr.com> wrote:
-
-> 
-> In the 3.00 spec, OCR bit 24 is S18R (Signalling 1.8V request).  This
-> is outside of the VDD region (bits 0:23).  So I think we can support
-> non standard DS/HS (Default Speed/High Speed) cards that report 1.8V
-> operation (in the VDD region) and new UHS-I (Ultra High Speed phase I)
-> cards without any confusion.
-> 
-> On a UHS-I capable controller, the software would send ACMD41 with
-> S18R set and see if the card responses with it set.  If so, it tells
-> the card to switch to 1.8V signalling (CMD11) and tells the
-> controller to switch to 1.8V signalling and SDR12 mode.  The
-> controller still supplies 3.3V to the card even after the switch.
-> Later on the host software will query the card to find out what UHS-I
-> modes are supported and switch card and controller to a faster mode
-> (if possible).
-
-Interesting. But that means that Ohad's patch doesn't make much sense;
-his uses the MMC low voltage OCR bit in an SDIO context. So either, the
-patch is wrong, or he's dealing with out-of-spec hardware.
-
-Ohad?
-
---phil
+VGhpcyBmaXhlcyBhIGNvbXBpbGUgZXJyb3IgaW50cm9kdWNlZCBpbgoKCTZlZjI5N2YgKEFSTTog
+NTcyMC8xOiBNb3ZlIE1NQ0kgaGVhZGVyIHRvIGFtYmEgaW5jbHVkZSBkaXIpCgpUaGF0IGNvbW1p
+dCBtb3ZlZCBhcmNoL2FybS9pbmNsdWRlL2FzbS9tYWNoL21tYy5oIHRvCmluY2x1ZGUvbGludXgv
+YW1iYS9tbWNpLmguICBKdXN0IHJlbW92aW5nIHRoZSBpbmNsdWRlIHdhcyBlbm91Z2guCgpTaWdu
+ZWQtb2ZmLWJ5OiBVd2UgS2xlaW5lLUvDtm5pZyA8dS5rbGVpbmUta29lbmlnQHBlbmd1dHJvbml4
+LmRlPgpBY2tlZC1ieTogTGludXMgV2FsbGVpaiA8bGludXMud2FsbGVpakBzdGVyaWNzc29uLmNv
+bT4KQWNrZWQtYnk6IE5pY29sYXMgRmVycmUgPG5pY29sYXMuZmVycmVAYXRtZWwuY29tPgpBY2tl
+ZC1ieTogQmlsbCBHYXRsaWZmIDxiZ2F0QGJpbGxnYXRsaWZmLmNvbT4KQ2M6IENhdGFsaW4gTWFy
+aW5hcyA8Y2F0YWxpbi5tYXJpbmFzQGFybS5jb20+CkNjOiBSdXNzZWxsIEtpbmcgPHJtaytrZXJu
+ZWxAYXJtLmxpbnV4Lm9yZy51az4KQ2M6IFBpZXJyZSBPc3NtYW4gPGRyemV1c0BkcnpldXMuY3g+
+CkNjOiBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKQ2M6IEFuZHJldyBNb3J0
+b24gPGFrcG1AbGludXgtZm91bmRhdGlvbi5vcmc+Ci0tLQpIZWxsbywKCndoYXQgaXMgdGhlIHJp
+Z2h0IHBhdGggdG8gTGludXMgZm9yIHRoaXMgcGF0Y2g/CgpCZXN0IHJlZ2FyZHMKVXdlCgogZHJp
+dmVycy9tbWMvaG9zdC9hdDkxX21jaS5jIHwgICAgMSAtCiAxIGZpbGVzIGNoYW5nZWQsIDAgaW5z
+ZXJ0aW9ucygrKSwgMSBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0
+L2F0OTFfbWNpLmMgYi9kcml2ZXJzL21tYy9ob3N0L2F0OTFfbWNpLmMKaW5kZXggZTU1NmQ0Mi4u
+NjM5MjRlMCAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9hdDkxX21jaS5jCisrKyBiL2Ry
+aXZlcnMvbW1jL2hvc3QvYXQ5MV9tY2kuYwpAQCAtNzIsNyArNzIsNiBAQAogI2luY2x1ZGUgPGFz
+bS9pcnEuaD4KICNpbmNsdWRlIDxhc20vZ3Bpby5oPgogCi0jaW5jbHVkZSA8YXNtL21hY2gvbW1j
+Lmg+CiAjaW5jbHVkZSA8bWFjaC9ib2FyZC5oPgogI2luY2x1ZGUgPG1hY2gvY3B1Lmg+CiAjaW5j
+bHVkZSA8bWFjaC9hdDkxX21jaS5oPgotLSAKMS42LjQuMwoKCl9fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0
+CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFk
+ZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
