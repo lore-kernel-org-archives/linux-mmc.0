@@ -1,70 +1,28 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [PATCH] mmc: at91_mci: Don't include asm/mach/mmc.h
-Date: Tue, 13 Oct 2009 09:36:48 +0200
-Message-ID: <4AD42E10.7010801@atmel.com>
-References: <1254996762-19115-1-git-send-email-u.kleine-koenig@pengutronix.de> <1255418388-27866-1-git-send-email-u.kleine-koenig@pengutronix.de>
+From: "Johnson, Charles F" <charles.f.johnson@intel.com>
+Subject: RFC: Shared eMMC Controller
+Date: Tue, 13 Oct 2009 08:38:06 -0700
+Message-ID: <0D4616E6925F9541919B60692F61509E43AAA2A7@orsmsx502.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.atmel.fr ([81.80.104.162]:47423 "EHLO atmel-es2.atmel.fr"
+Received: from mga02.intel.com ([134.134.136.20]:9608 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933460AbZJMHmY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Oct 2009 03:42:24 -0400
-In-Reply-To: <1255418388-27866-1-git-send-email-u.kleine-koenig@pengutronix.de>
+	id S1753070AbZJMPin convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Oct 2009 11:38:43 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?VXdlIEtsZWluZS1Lw7ZuaWc=?= <u.kleine-koenig@pengutronix.de>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
-Cc: Catalin Marinas <catalin.marinas@arm.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Pierre Ossman <drzeus@drzeus.cx>, linux-arm-kernel@lists.infradead.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Uwe Kleine-K=C3=B6nig :
-> This fixes a compile error introduced in
->=20
-> 	6ef297f (ARM: 5720/1: Move MMCI header to amba include dir)
->=20
-> That commit moved arch/arm/include/asm/mach/mmc.h to
-> include/linux/amba/mmci.h.  Just removing the include was enough.
->=20
-> Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
-> Acked-by: Linus Walleij <linus.walleij@stericsson.com>
-> Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-> Acked-by: Bill Gatliff <bgat@billgatliff.com>
-> Cc: Catalin Marinas <catalin.marinas@arm.com>
-> Cc: Russell King <rmk+kernel@arm.linux.org.uk>
-> Cc: Pierre Ossman <drzeus@drzeus.cx>
-> Cc: linux-arm-kernel@lists.infradead.org
-> Cc: Andrew Morton <akpm@linux-foundation.org>
-> ---
-> Hello,
->=20
-> what is the right path to Linus for this patch?
+I'm working on a system where we have a need to share the eMMC host controller with both the main CPU and a micro-controller.  So to coodinate access we need to define a mutex mechanism between the two.  This is possible since there is some shared non-cachable static ram that both have access to.  My question for this email list is, if we limit the mmc driver changes to use the chipset specific quirk mechanism, would that be acceptable ?? 
 
-Uwe,
+As soon as we have the code, we'll post it, but I am interested in any comments. 
 
-I gess that Andrew Morton will have to handle it.
+Thanks.
 
-Let's help him not forget it ;-)
+Charles Johnson
+Intel Corp.
+charles.f.johnson@intel.com
 
-Bye,
-
->  drivers/mmc/host/at91_mci.c |    1 -
->  1 files changed, 0 insertions(+), 1 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.=
-c
-> index e556d42..63924e0 100644
-> --- a/drivers/mmc/host/at91_mci.c
-> +++ b/drivers/mmc/host/at91_mci.c
-> @@ -72,7 +72,6 @@
->  #include <asm/irq.h>
->  #include <asm/gpio.h>
-> =20
-> -#include <asm/mach/mmc.h>
->  #include <mach/board.h>
->  #include <mach/cpu.h>
->  #include <mach/at91_mci.h>
-
-
---=20
-Nicolas Ferre
-
+ 
