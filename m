@@ -1,104 +1,56 @@
-From: akpm@linux-foundation.org
-Subject: + mxcmmc-fix-error-path-in-mxcmci_probe.patch added to -mm tree
-Date: Tue, 13 Oct 2009 19:45:03 -0700
-Message-ID: <200910140245.n9E2j3jX028722@imap1.linux-foundation.org>
+From: Manuel Lauss <manuel.lauss@googlemail.com>
+Subject: [PATCH] mmc: au1xmmc: allow platforms to disable host capabilities
+Date: Wed, 14 Oct 2009 09:38:06 +0200
+Message-ID: <4AD57FDE.1040206@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:35933 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754041AbZJNCqF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Oct 2009 22:46:05 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mips-bounce@linux-mips.org>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+To: linux-mmc@vger.kernel.org
+Cc: Manuel Lauss <manuel.lauss@gmail.com>, Linux-MIPS <linux-mips@linux-mips.org>
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: u.kleine-koenig@pengutronix.de, drzeus@drzeus.cx, linux-mmc@vger.kernel.org, mfuzzey@gmail.com, pierre@ossman.eu, s.hauer@pengutronix.de
 
 
-The patch titled
-     mxcmmc: fix error path in mxcmci_probe
-has been added to the -mm tree.  Its filename is
-     mxcmmc-fix-error-path-in-mxcmci_probe.patch
+Although the hardware supports a 4/8bit SD interface and the driver
+unconditionally advertises all hardware caps to the MMC core, not all
+datalines may actually be wired up.  This patch introduces another
+field to au1xmmc platform data allowing platforms to disable certain
+advanced host controller features.
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your cod=
-e ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mm=
-otm/
-
-------------------------------------------------------
-Subject: mxcmmc: fix error path in mxcmci_probe
-=46rom: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-
-After a failing allocation of mmc or a failed ioremap in mxcmci_probe h=
-ost was
-used uninitialized.
-
-Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Martin Fuzzey <mfuzzey@gmail.com>
-Cc: Pierre Ossman <drzeus@drzeus.cx>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Manuel Lauss <manuel.lauss@gmail.com>
 ---
+ arch/mips/include/asm/mach-au1x00/au1100_mmc.h |    1 +
+ drivers/mmc/host/au1xmmc.c                     |    4 ++++
+ 2 files changed, 5 insertions(+), 0 deletions(-)
 
- drivers/mmc/host/mxcmmc.c |   10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+diff --git a/arch/mips/include/asm/mach-au1x00/au1100_mmc.h b/arch/mips/include/asm/mach-au1x00/au1100_mmc.h
+index c35e209..a674643 100644
+--- a/arch/mips/include/asm/mach-au1x00/au1100_mmc.h
++++ b/arch/mips/include/asm/mach-au1x00/au1100_mmc.h
+@@ -46,6 +46,7 @@ struct au1xmmc_platform_data {
+ 	int(*card_readonly)(void *mmc_host);
+ 	void(*set_power)(void *mmc_host, int state);
+ 	struct led_classdev *led;
++	unsigned long mask_host_caps;
+ };
 
-diff -puN drivers/mmc/host/mxcmmc.c~mxcmmc-fix-error-path-in-mxcmci_pro=
-be drivers/mmc/host/mxcmmc.c
---- a/drivers/mmc/host/mxcmmc.c~mxcmmc-fix-error-path-in-mxcmci_probe
-+++ a/drivers/mmc/host/mxcmmc.c
-@@ -679,17 +679,17 @@ static int mxcmci_probe(struct platform_
- {
- 	struct mmc_host *mmc;
- 	struct mxcmci_host *host =3D NULL;
--	struct resource *r;
-+	struct resource *iores, *r;
- 	int ret =3D 0, irq;
-=20
- 	printk(KERN_INFO "i.MX SDHC driver\n");
-=20
--	r =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	iores =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq =3D platform_get_irq(pdev, 0);
--	if (!r || irq < 0)
-+	if (!iores || irq < 0)
- 		return -EINVAL;
-=20
--	r =3D request_mem_region(r->start, resource_size(r), pdev->name);
-+	r =3D request_mem_region(iores->start, resource_size(iores), pdev->na=
-me);
- 	if (!r)
- 		return -EBUSY;
-=20
-@@ -809,7 +809,7 @@ out_iounmap:
- out_free:
- 	mmc_free_host(mmc);
- out_release_mem:
--	release_mem_region(host->res->start, resource_size(host->res));
-+	release_mem_region(iores->start, resource_size(iores));
- 	return ret;
- }
-=20
-_
+ #define SD0_BASE	0xB0600000
+diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
+index 7534726..e2caf5a 100644
+--- a/drivers/mmc/host/au1xmmc.c
++++ b/drivers/mmc/host/au1xmmc.c
+@@ -1025,6 +1025,10 @@ static int __devinit au1xmmc_probe(struct platform_device *pdev)
+ 	} else
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
 
-Patches currently in -mm which might be from u.kleine-koenig@pengutroni=
-x.de are
++	/* platform may not be able to use all advertised caps */
++	if (host->platdata)
++		mmc->caps &= ~(host->platdata->mask_host_caps);
++
+ 	tasklet_init(&host->data_task, au1xmmc_tasklet_data,
+ 			(unsigned long)host);
 
-linux-next.patch
-mmc-at91_mci-dont-include-asm-mach-mmch.patch
-atmel_serial-fix-bad-build_bug_on-usage.patch
-mxcmmc-fix-error-path-in-mxcmci_probe.patch
-
+-- 
+1.6.5
