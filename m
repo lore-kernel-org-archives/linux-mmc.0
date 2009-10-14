@@ -1,56 +1,41 @@
-From: Manuel Lauss <manuel.lauss@googlemail.com>
-Subject: [PATCH] mmc: au1xmmc: allow platforms to disable host capabilities
-Date: Wed, 14 Oct 2009 09:38:06 +0200
-Message-ID: <4AD57FDE.1040206@gmail.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH] sdio: add MMC_CAP_VDD_165_195 host capability
+Date: Wed, 14 Oct 2009 09:56:28 +0200
+Message-ID: <da15981b0910140056j9a62fccvdb256b851455c686@mail.gmail.com>
+References: <1254160269.10634.15.camel@localhost> <20090928192548.11da5c3c@fido2.homeip.net>
+	<20090929202833.179fb521@mjolnir.ossman.eu> <f6ee8ef9d3da123c11433b52ec8d6a60@localhost>
+	<20090929233732.62f470e0@mjolnir.ossman.eu> <20090929231013.5d67b36a@fido2.homeip.net>
+	<20091008203826.5e027347@mjolnir.ossman.eu> <20091010114215.5f9d8c94@fido2.homeip.net>
+	<4AD32B01.5000600@csr.com> <20091012193952.1482e322@fido2.homeip.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mips-bounce@linux-mips.org>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-To: linux-mmc@vger.kernel.org
-Cc: Manuel Lauss <manuel.lauss@gmail.com>, Linux-MIPS <linux-mips@linux-mips.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-fx0-f227.google.com ([209.85.220.227]:64396 "EHLO
+	mail-fx0-f227.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755402AbZJNH5Z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Oct 2009 03:57:25 -0400
+Received: by fxm27 with SMTP id 27so11214224fxm.17
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Oct 2009 00:56:48 -0700 (PDT)
+In-Reply-To: <20091012193952.1482e322@fido2.homeip.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Langdale <philipl@overt.org>, David Vrabel <david.vrabel@csr.com>, Pierre Ossman <pierre@ossman.eu>
+Cc: akpm@linux-foundation.org, ian@mnementh.co.uk, matt@console-pimps.org, roberto.foglietta@gmail.com, linux-mmc@vger.kernel.org
 
+On Tue, Oct 13, 2009 at 4:39 AM, Philip Langdale <philipl@overt.org> wrote:
+> Interesting. But that means that Ohad's patch doesn't make much sense;
+> his uses the MMC low voltage OCR bit in an SDIO context. So either, the
+> patch is wrong, or he's dealing with out-of-spec hardware.
 
-Although the hardware supports a 4/8bit SD interface and the driver
-unconditionally advertises all hardware caps to the MMC core, not all
-datalines may actually be wired up.  This patch introduces another
-field to au1xmmc platform data allowing platforms to disable certain
-advanced host controller features.
+Yes, the hardware is out-of-spec. It uses the undefined low voltage
+OCR bit to achieve 1.8V SDIO voltage. By removing the MMC_VDD_165_195
+restriction, commit 27cce39f555def6f5ebe7f03d69ccc44ab25f0b2 makes it
+possible for the hardware to work with unpatched kernels.
 
-Signed-off-by: Manuel Lauss <manuel.lauss@gmail.com>
----
- arch/mips/include/asm/mach-au1x00/au1100_mmc.h |    1 +
- drivers/mmc/host/au1xmmc.c                     |    4 ++++
- 2 files changed, 5 insertions(+), 0 deletions(-)
+Philip, David, Pierre - would you like to remove the MMC_VDD_165_195
+restriction differently ? maybe to revive the MMC_CAP_VDD_165_195 host
+capability patch in some way (see
+http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg00386.html) ?
 
-diff --git a/arch/mips/include/asm/mach-au1x00/au1100_mmc.h b/arch/mips/include/asm/mach-au1x00/au1100_mmc.h
-index c35e209..a674643 100644
---- a/arch/mips/include/asm/mach-au1x00/au1100_mmc.h
-+++ b/arch/mips/include/asm/mach-au1x00/au1100_mmc.h
-@@ -46,6 +46,7 @@ struct au1xmmc_platform_data {
- 	int(*card_readonly)(void *mmc_host);
- 	void(*set_power)(void *mmc_host, int state);
- 	struct led_classdev *led;
-+	unsigned long mask_host_caps;
- };
-
- #define SD0_BASE	0xB0600000
-diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
-index 7534726..e2caf5a 100644
---- a/drivers/mmc/host/au1xmmc.c
-+++ b/drivers/mmc/host/au1xmmc.c
-@@ -1025,6 +1025,10 @@ static int __devinit au1xmmc_probe(struct platform_device *pdev)
- 	} else
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
-
-+	/* platform may not be able to use all advertised caps */
-+	if (host->platdata)
-+		mmc->caps &= ~(host->platdata->mask_host_caps);
-+
- 	tasklet_init(&host->data_task, au1xmmc_tasklet_data,
- 			(unsigned long)host);
-
--- 
-1.6.5
+Thank you for the comments and help,
+Ohad.
