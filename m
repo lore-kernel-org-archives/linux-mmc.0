@@ -1,80 +1,148 @@
-From: akpm@linux-foundation.org
-Subject: + davinci-mmc-modify-data-types-of-edma-related-variables.patch added to -mm tree
-Date: Thu, 15 Oct 2009 12:27:24 -0700
-Message-ID: <200910151927.n9FJROeO018787@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: sudhakar.raj@ti.com, dbrownell@users.sourceforge.net, linux-mmc@vger.kernel.org, purushotam@ti.com, vipin.bhandari@ti.com
+From: Thadeu Lima de Souza Cascardo <cascardo@holoscopio.com>
+Subject: [PATCH 1/8] trivial: coding style fixes
+Date: Thu, 15 Oct 2009 16:44:00 -0300
+Message-ID: <1255635840-5691-1-git-send-email-cascardo@holoscopio.com>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1762994AbZJOToy@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: trivial@kernel.org
+Cc: akpm@linux-foundation.org, adobriyan@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Thadeu Lima de Souza Cascardo <cascardo@holoscopio.com>
 List-Id: linux-mmc@vger.kernel.org
 
-
-The patch titled
-     mmc: davinci: modify data types of EDMA related variables
-has been added to the -mm tree.  Its filename is
-     davinci-mmc-modify-data-types-of-edma-related-variables.patch
-
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: davinci: modify data types of EDMA related variables
-From: Sudhakar Rajashekhara <sudhakar.raj@ti.com>
-
-
-Currently DaVinci EDMA driver supports multiple EDMA channel
-controller instances. edma_alloc_channel() api returns a 32
-bit value which has the channel controller number in MSB and
-the EDMA channel number in LSB. The variables which store the
-value returned by edma_alloc_channel() have to be 32 bit wide
-now.
-
-Signed-off-by: Sudhakar Rajashekhara <sudhakar.raj@ti.com>
-Acked-by: Vipin Bhandari <vipin.bhandari@ti.com>
-Cc: Purshotam Kumar <purushotam@ti.com>
-Acked-by: David Brownell <dbrownell@users.sourceforge.net>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Thadeu Lima de Souza Cascardo <cascardo@holoscopio.com>
 ---
+ drivers/mmc/card/sdio_uart.c |   40 +++++++++++++++++++++-------------------
+ 1 files changed, 21 insertions(+), 19 deletions(-)
 
-
-diff -puN drivers/mmc/host/davinci_mmc.c~davinci-mmc-modify-data-types-of-edma-related-variables drivers/mmc/host/davinci_mmc.c
---- a/drivers/mmc/host/davinci_mmc.c~davinci-mmc-modify-data-types-of-edma-related-variables
-+++ a/drivers/mmc/host/davinci_mmc.c
-@@ -178,7 +178,7 @@ struct mmc_davinci_host {
- 	u32 buffer_bytes_left;
- 	u32 bytes_left;
+diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.c
+index 36a8d53..b8e7c5a 100644
+--- a/drivers/mmc/card/sdio_uart.c
++++ b/drivers/mmc/card/sdio_uart.c
+@@ -231,7 +231,8 @@ static unsigned int sdio_uart_get_mctrl(struct sdio_uart_port *port)
+ 	return ret;
+ }
  
--	u8 rxdma, txdma;
-+	u32 rxdma, txdma;
- 	bool use_dma;
- 	bool do_dma;
+-static void sdio_uart_write_mctrl(struct sdio_uart_port *port, unsigned int mctrl)
++static void sdio_uart_write_mctrl(struct sdio_uart_port *port,
++				  unsigned int mctrl)
+ {
+ 	unsigned char mcr = 0;
  
-@@ -190,7 +190,7 @@ struct mmc_davinci_host {
- 	struct edmacc_param	tx_template;
- 	struct edmacc_param	rx_template;
- 	unsigned		n_link;
--	u8			links[NR_SG - 1];
-+	u32			links[NR_SG - 1];
+@@ -387,7 +388,8 @@ static void sdio_uart_stop_rx(struct sdio_uart_port *port)
+ 	sdio_out(port, UART_IER, port->ier);
+ }
  
- 	/* For PIO we walk scatterlists one segment at a time. */
- 	unsigned int		sg_len;
-_
-
-Patches currently in -mm which might be from sudhakar.raj@ti.com are
-
-linux-next.patch
-mtdpart-memory-accessor-interface-for-mtd-layer.patch
-davinci-mmc-modify-data-types-of-edma-related-variables.patch
-
+-static void sdio_uart_receive_chars(struct sdio_uart_port *port, unsigned int *status)
++static void sdio_uart_receive_chars(struct sdio_uart_port *port,
++				    unsigned int *status)
+ {
+ 	struct tty_struct *tty = port->tty;
+ 	unsigned int ch, flag;
+@@ -399,7 +401,7 @@ static void sdio_uart_receive_chars(struct sdio_uart_port *port, unsigned int *s
+ 		port->icount.rx++;
+ 
+ 		if (unlikely(*status & (UART_LSR_BI | UART_LSR_PE |
+-				        UART_LSR_FE | UART_LSR_OE))) {
++					UART_LSR_FE | UART_LSR_OE))) {
+ 			/*
+ 			 * For statistics only
+ 			 */
+@@ -417,9 +419,9 @@ static void sdio_uart_receive_chars(struct sdio_uart_port *port, unsigned int *s
+ 			 * Mask off conditions which should be ignored.
+ 			 */
+ 			*status &= port->read_status_mask;
+-			if (*status & UART_LSR_BI) {
++			if (*status & UART_LSR_BI)
+ 				flag = TTY_BREAK;
+-			} else if (*status & UART_LSR_PE)
++			else if (*status & UART_LSR_PE)
+ 				flag = TTY_PARITY;
+ 			else if (*status & UART_LSR_FE)
+ 				flag = TTY_FRAME;
+@@ -574,7 +576,7 @@ static int sdio_uart_startup(struct sdio_uart_port *port)
+ 	 */
+ 	sdio_out(port, UART_FCR, UART_FCR_ENABLE_FIFO);
+ 	sdio_out(port, UART_FCR, UART_FCR_ENABLE_FIFO |
+-			UART_FCR_CLEAR_RCVR | UART_FCR_CLEAR_XMIT);
++		       UART_FCR_CLEAR_RCVR | UART_FCR_CLEAR_XMIT);
+ 	sdio_out(port, UART_FCR, 0);
+ 
+ 	/*
+@@ -635,7 +637,7 @@ static void sdio_uart_shutdown(struct sdio_uart_port *port)
+ 	if (port->tty->termios->c_cflag & HUPCL)
+ 		sdio_uart_clear_mctrl(port, TIOCM_DTR | TIOCM_RTS);
+ 
+-	 /* Disable interrupts from this port */
++	/* Disable interrupts from this port */
+ 	sdio_release_irq(port->func);
+ 	port->ier = 0;
+ 	sdio_out(port, UART_IER, 0);
+@@ -659,7 +661,7 @@ skip:
+ 	free_page((unsigned long)port->xmit.buf);
+ }
+ 
+-static int sdio_uart_open (struct tty_struct *tty, struct file * filp)
++static int sdio_uart_open(struct tty_struct *tty, struct file *filp)
+ {
+ 	struct sdio_uart_port *port;
+ 	int ret;
+@@ -846,7 +848,7 @@ static void sdio_uart_set_termios(struct tty_struct *tty, struct ktermios *old_t
+ 	struct sdio_uart_port *port = tty->driver_data;
+ 	unsigned int cflag = tty->termios->c_cflag;
+ 
+-#define RELEVANT_IFLAG(iflag)   ((iflag) & (IGNBRK|BRKINT|IGNPAR|PARMRK|INPCK))
++#define RELEVANT_IFLAG(iflag)	((iflag) & (IGNBRK|BRKINT|IGNPAR|PARMRK|INPCK))
+ 
+ 	if ((cflag ^ old_termios->c_cflag) == 0 &&
+ 	    RELEVANT_IFLAG(tty->termios->c_iflag ^ old_termios->c_iflag) == 0)
+@@ -925,7 +927,7 @@ static int sdio_uart_tiocmset(struct tty_struct *tty, struct file *file,
+ 	struct sdio_uart_port *port = tty->driver_data;
+ 	int result;
+ 
+-	result =sdio_uart_claim_func(port);
++	result = sdio_uart_claim_func(port);
+ 	if(!result) {
+ 		sdio_uart_update_mctrl(port, set, clear);
+ 		sdio_uart_release_func(port);
+@@ -946,31 +948,31 @@ static int sdio_uart_proc_show(struct seq_file *m, void *v)
+ 			seq_printf(m, "%d: uart:SDIO", i);
+ 			if(capable(CAP_SYS_ADMIN)) {
+ 				seq_printf(m, " tx:%d rx:%d",
+-					       port->icount.tx, port->icount.rx);
++					      port->icount.tx, port->icount.rx);
+ 				if (port->icount.frame)
+ 					seq_printf(m, " fe:%d",
+-						       port->icount.frame);
++						      port->icount.frame);
+ 				if (port->icount.parity)
+ 					seq_printf(m, " pe:%d",
+-						       port->icount.parity);
++						      port->icount.parity);
+ 				if (port->icount.brk)
+ 					seq_printf(m, " brk:%d",
+-						       port->icount.brk);
++						      port->icount.brk);
+ 				if (port->icount.overrun)
+ 					seq_printf(m, " oe:%d",
+-						       port->icount.overrun);
++						      port->icount.overrun);
+ 				if (port->icount.cts)
+ 					seq_printf(m, " cts:%d",
+-						       port->icount.cts);
++						      port->icount.cts);
+ 				if (port->icount.dsr)
+ 					seq_printf(m, " dsr:%d",
+-						       port->icount.dsr);
++						      port->icount.dsr);
+ 				if (port->icount.rng)
+ 					seq_printf(m, " rng:%d",
+-						       port->icount.rng);
++						      port->icount.rng);
+ 				if (port->icount.dcd)
+ 					seq_printf(m, " dcd:%d",
+-						       port->icount.dcd);
++						      port->icount.dcd);
+ 			}
+ 			sdio_uart_port_put(port);
+ 			seq_putc(m, '\n');
+-- 
+1.6.3.3
