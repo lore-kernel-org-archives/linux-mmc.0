@@ -1,284 +1,294 @@
-From: John Rigby <jcrigby@gmail.com>
-Subject: Re: MMC_CAP_SDIO_IRQ for omap 3430
-Date: Fri, 16 Oct 2009 15:26:37 -0600
-Message-ID: <4b73d43f0910161426l7600f424w5b8345d16790dd21@mail.gmail.com>
-References: <4b73d43f0910151330q6c5cae7sa2a5948b586cc215@mail.gmail.com>
-	 <4AD81DC2.4080607@googlemail.com>
-	 <42153.192.168.10.89.1255715021.squirrel@dbdmail.itg.ti.com>
-	 <4AD8C959.1000004@googlemail.com>
-	 <004701ca4ea5$aeacefe0$544ff780@am.dhcp.ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <004701ca4ea5$aeacefe0$544ff780@am.dhcp.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: Dirk Behme <dirk.behme@googlemail.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Steve Sakoman <sakoman@gmail.com>
+From: akpm@linux-foundation.org
+Subject: + sdio-rework-cis-tuple-parsing.patch added to -mm tree
+Date: Fri, 16 Oct 2009 15:21:23 -0700
+Message-ID: <200910162221.n9GMLN4M002761@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:50514 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750923AbZJPWV2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Oct 2009 18:21:28 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: albert_herranz@yahoo.es, linux-mmc@vger.kernel.org, pierre@ossman.eu
 
-It appears to never get cleared in the status register.
 
-I added some printks to sdio_irq.c to print the pending interrupts in
-the SDIO_CCCR_INTx register for the card and there are no pending
-interrupts so I don't think it is a card driver or card issue.
+The patch titled
+     sdio: rework cis tuple parsing
+has been added to the -mm tree.  Its filename is
+     sdio-rework-cis-tuple-parsing.patch
 
-It would be funny if the TRM was wrong and the CIRQ bit is really
-cleared by writing 1 to it.  I'll try that.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-John
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-On Fri, Oct 16, 2009 at 3:14 PM, Madhusudhan <madhu.cr@ti.com> wrote:
->
->
->> -----Original Message-----
->> From: Dirk Behme [mailto:dirk.behme@googlemail.com]
->> Sent: Friday, October 16, 2009 2:28 PM
->> To: Madhusudhan Chikkature
->> Cc: linux-mmc@vger.kernel.org; John Rigby; linux-omap@vger.kernel.or=
-g;
->> Steve Sakoman
->> Subject: Re: MMC_CAP_SDIO_IRQ for omap 3430
->>
->> Madhusudhan Chikkature wrote:
->> > Hi Dirk,
->> >
->> > I am inlining the patch so that it helps review.
->> ...
->> > @@ -1165,8 +1178,15 @@ static void omap_hsmmc_set_ios(struct mm
->> > =A0 =A0 =A0 =A0 =A0 =A0 break;
->> > =A0 =A0 case MMC_BUS_WIDTH_4:
->> > =A0 =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base, CON, con & ~D=
-W8);
->> > - =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base, HCTL,
->> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_READ(host->base, =
-HCTL) | FOUR_BIT);
->> > + =A0 =A0 =A0 =A0 =A0 if (mmc_card_sdio(host->mmc->card)) {
->> >
->> > I wish it could be moved to "enable_sdio_irq" so that we can avoid
->> inclusion of
->> > card.h and checking the type of card in the host controller driver=
-=2E
->>
->> Yes, this would be the real clean way. But ...
->>
->> > But the
->> > dependancy on 4-bit seems to be a problem here.
->>
->> ... most probably we have to find a workaround until (if ever?) abov=
-e
->> clean implementation is available.
->>
->> What we need is after SDIO mode and bus width is known, and before t=
-he
->> first interrupt comes, to set IBG.
->>
->> > On the problems being discussed on testing is the interrupt source
->> geting
->> > cleared at the SDIO card level upon genaration of the CIRQ? If not=
- it
->> remains
->> > asserted.
->>
->> Yes, this seems to be exactly the problem John reports in his follow
->> up mail.
->>
->> Any hint how to clear SDIO interrupt?
->>
-> On the controller side I guess it is cleared when you pass "disable" =
-in the
-> enable_sdio_irq" fn. This happens when you call mmc_signal_sdio_irq.
->
-> I am not too sure about how it gets disabled from the card side. I se=
-e that
-> SDIO core has a function "sdio_release_irq" which is used by the sdio=
- uart
-> driver. The usage of this could give a clue.
->
-> Regards,
-> Madhu
->
->> Many thanks
->>
->> Dirk
->>
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base,=
- HCTL,
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0OMAP_HSMMC_READ(host->base, HCTL)
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0| IBG | FOUR_BIT);
->> > + =A0 =A0 =A0 =A0 =A0 } else {
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base,=
- HCTL,
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0OMAP_HSMMC_READ(host->base, HCTL)
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0| FOUR_BIT);
->> > + =A0 =A0 =A0 =A0 =A0 }
->> > =A0 =A0 =A0 =A0 =A0 =A0 break;
->> > =A0 =A0 case MMC_BUS_WIDTH_1:
->> > =A0 =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base, CON, con & ~D=
-W8);
->> > @@ -1512,6 +1532,24 @@ static int omap_hsmmc_disable_fclk(struc
->> > =A0 =A0 return 0;
->> > =A0}
->> >
->> > +static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int
->> enable)
->> > +{
->> > + =A0 struct omap_hsmmc_host *host =3D mmc_priv(mmc);
->> > + =A0 u32 ie, ise;
->> > +
->> > + =A0 ise =3D OMAP_HSMMC_READ(host->base, ISE);
->> > + =A0 ie =A0=3D OMAP_HSMMC_READ(host->base, IE);
->> > +
->> > + =A0 if (enable) {
->> > + =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base, ISE, ise | CIRQ=
-_ENABLE);
->> > + =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base, IE, =A0ie =A0| =
-CIRQ_ENABLE);
->> > + =A0 } else {
->> > + =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base, ISE, ise & ~CIR=
-Q_ENABLE);
->> > + =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base, IE, =A0ie =A0& =
-~CIRQ_ENABLE);
->> > + =A0 }
->> > +
->> > +}
->> > +
->> > =A0static const struct mmc_host_ops omap_hsmmc_ops =3D {
->> > =A0 =A0 .enable =3D omap_hsmmc_enable_fclk,
->> > =A0 =A0 .disable =3D omap_hsmmc_disable_fclk,
->> > @@ -1519,7 +1557,7 @@ static const struct mmc_host_ops omap_hs
->> > =A0 =A0 .set_ios =3D omap_hsmmc_set_ios,
->> > =A0 =A0 .get_cd =3D omap_hsmmc_get_cd,
->> > =A0 =A0 .get_ro =3D omap_hsmmc_get_ro,
->> > - =A0 /* NYET -- enable_sdio_irq */
->> > + =A0 .enable_sdio_irq =3D omap_hsmmc_enable_sdio_irq,
->> > =A0};
->> >
->> > =A0static const struct mmc_host_ops omap_hsmmc_ps_ops =3D {
->> > @@ -1529,7 +1567,7 @@ static const struct mmc_host_ops omap_hs
->> > =A0 =A0 .set_ios =3D omap_hsmmc_set_ios,
->> > =A0 =A0 .get_cd =3D omap_hsmmc_get_cd,
->> > =A0 =A0 .get_ro =3D omap_hsmmc_get_ro,
->> > - =A0 /* NYET -- enable_sdio_irq */
->> > + =A0 .enable_sdio_irq =3D omap_hsmmc_enable_sdio_irq,
->> > =A0};
->> >
->> > =A0#ifdef CONFIG_DEBUG_FS
->> > @@ -1734,7 +1772,7 @@ static int __init omap_hsmmc_probe(struc
->> > =A0 =A0 mmc->max_seg_size =3D mmc->max_req_size;
->> >
->> > =A0 =A0 mmc->caps |=3D MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEE=
-D |
->> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0MMC_CAP_WAIT_WHILE_BUSY;
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP=
-_SDIO_IRQ;
->> >
->> > =A0 =A0 if (mmc_slot(host).wires >=3D 8)
->> > =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_8_BIT_DATA;
->> >
->> >
->> >
->> >
->> >
->> >> John Rigby wrote:
->> >>> I have seen several discussions about lack of sdio irq support i=
-n the
->> >>> hsmmc driver but no patches. =A0Has anyone on this list implemen=
-ted this
->> >>> and/or can anyone point me to patches?
->> >> What a coincidence ;)
->> >>
->> >> I'm currently working on this. See attachment what I currently ha=
-ve.
->> >> It is compile tested only against recent omap linux head. I don't=
- have
->> >> a board using SDIO at the moment, so no real testing possible :(
->> >>
->> >> Some background, maybe it helps people to step in:
->> >>
->> >> Gumstix OMAP3 based Overo air board connects Marvell 88W8686 wifi=
- by
->> >> MMC port 2 in 4 bit configuration [1]. The wifi performance is qu=
-ite
->> >> bad (~100kB/s). There is some rumor that this might be SDIO irq
->> >> related [2]. There was an attempt to fix this [3] already, but th=
-is
->> >> doesn't work [4]. Having this, I started to look into it.
->> >>
->> >> I used [3], the TI Davinci driver [5] (supporting SDIO irq), the =
-SDIO
->> >> Simplified Specification [6] and the OMAP35x TRM [7] as starting
->> points.
->> >>
->> >> Unfortunately, the Davinci MMC registers and irqs are different
->> >> (Davinci has a dedicated SDIO irq). But combining [3] and [5] hel=
-ps to
->> >> get an idea what has to be done.
->> >>
->> >> I think the main issues of [3] were that it doesn't enable IBG fo=
-r 4
->> >> bit mode ([6] chapter 8.1.2) and that mmc_omap_irq() doesn't rese=
-t the
->> >> irq bits.
->> >>
->> >> Topics I still open:
->> >>
->> >> - Is it always necessary to deal with IE _and_ ISE register? I'm =
-not
->> >> totally clear what the difference between these two registers are=
- ;)
->> >> And in which order they have to be set.
->> >>
->> >> - Davinci driver [5] in line 1115 checks for data line to call
->> >> mmc_signal_sdio_irq() for irq enable.
->> >>
->> >> - Davinci driver deals with SDIO in xfer_done() (line 873)
->> >>
->> >> - Davinci driver sets block size to 64 if SDIO in line 701
->> >>
->> >> It would be quite nice if anybody likes to comment on attachment =
-and
->> >> help testing.
->> >>
->> >> Many thanks and best regards
->> >>
->> >> Dirk
->> >>
->> >> [1] http://gumstix.net/wiki/index.php?title=3DOvero_Wifi
->> >>
->> >> [2] http://groups.google.com/group/beagleboard/msg/14e822778c5eeb=
-56
->> >>
->> >> [3] http://groups.google.com/group/beagleboard/msg/d0eb69f4c20673=
-be
->> >>
->> >> [4] http://groups.google.com/group/beagleboard/msg/5cdfe2a3195319=
-37
->> >>
->> >> [5]
->> >> http://arago-project.org/git/projects/?p=3Dlinux-
->> davinci.git;a=3Dblob;f=3Ddrivers/mmc/host/davinci_mmc.c;h=3D1bf05872=
-50614c6d8abf
->> e02028b96e0e47148ac8;hb=3DHEAD
->> >>
->> >> [6] http://www.sdcard.org/developers/tech/sdio/sd_bluetooth_spec/
->> >>
->> >> [7] http://focus.ti.com/lit/ug/spruf98c/spruf98c.pdf
->> >>
->> >>
->> >
->> >
->> >
->>
->
->
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: sdio: rework cis tuple parsing
+From: Albert Herranz <albert_herranz@yahoo.es>
+
+Rework the current CIS tuple parsing code, reusing the existing
+infrastructure and providing an easy way to add new CISTPL_FUNCE parsers
+by TPLFE_TYPE.
+
+Valid known CIS tuples are now silently queued for the SDIO function
+driver when not parsed/processed (-EILSEQ) by the SDIO core.  Unknown CIS
+tuples (-ENOENT) are queued too for the SDIO function driver without
+aborting the initialization, but emit a warning in the kernel log.
+
+CISTPL_FUNCE tuples can be "whitelisted" now by adding a matching entry to
+the cis_tpl_funce_list table.
+
+Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
+Acked-by: Pierre Ossman <pierre@ossman.eu>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+
+diff -puN drivers/mmc/core/sdio_cis.c~sdio-rework-cis-tuple-parsing drivers/mmc/core/sdio_cis.c
+--- a/drivers/mmc/core/sdio_cis.c~sdio-rework-cis-tuple-parsing
++++ a/drivers/mmc/core/sdio_cis.c
+@@ -97,26 +97,56 @@ static const unsigned char speed_val[16]
+ static const unsigned int speed_unit[8] =
+ 	{ 10000, 100000, 1000000, 10000000, 0, 0, 0, 0 };
+ 
+-/* FUNCE tuples with these types get passed to SDIO drivers */
+-static const unsigned char funce_type_whitelist[] = {
+-	4 /* CISTPL_FUNCE_LAN_NODE_ID used in Broadcom cards */
++
++typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
++			   const unsigned char *, unsigned);
++
++struct cis_tpl {
++	unsigned char code;
++	unsigned char min_size;
++	tpl_parse_t *parse;
+ };
+ 
+-static int cistpl_funce_whitelisted(unsigned char type)
++static int cis_tpl_parse(struct mmc_card *card, struct sdio_func *func,
++			 const char *tpl_descr,
++			 const struct cis_tpl *tpl, int tpl_count,
++			 unsigned char code,
++			 const unsigned char *buf, unsigned size)
+ {
+-	int i;
++	int i, ret;
+ 
+-	for (i = 0; i < ARRAY_SIZE(funce_type_whitelist); i++) {
+-		if (funce_type_whitelist[i] == type)
+-			return 1;
++	/* look for a matching code in the table */
++	for (i = 0; i < tpl_count; i++, tpl++) {
++		if (tpl->code == code)
++			break;
+ 	}
+-	return 0;
++	if (i < tpl_count) {
++		if (size >= tpl->min_size) {
++			if (tpl->parse)
++				ret = tpl->parse(card, func, buf, size);
++			else
++				ret = -EILSEQ;	/* known tuple, not parsed */
++		} else {
++			/* invalid tuple */
++			ret = -EINVAL;
++		}
++		if (ret && ret != -EILSEQ && ret != -ENOENT) {
++			printk(KERN_ERR "%s: bad %s tuple 0x%02x (%u bytes)\n",
++			       mmc_hostname(card->host), tpl_descr, code, size);
++		}
++	} else {
++		/* unknown tuple */
++		ret = -ENOENT;
++	}
++
++	return ret;
+ }
+ 
+-static int cistpl_funce_common(struct mmc_card *card,
++static int cistpl_funce_common(struct mmc_card *card, struct sdio_func *func,
+ 			       const unsigned char *buf, unsigned size)
+ {
+-	if (size < 0x04 || buf[0] != 0)
++	/* Only valid for the common CIS (function 0) */
++	if (func)
+ 		return -EINVAL;
+ 
+ 	/* TPLFE_FN0_BLK_SIZE */
+@@ -129,20 +159,24 @@ static int cistpl_funce_common(struct mm
+ 	return 0;
+ }
+ 
+-static int cistpl_funce_func(struct sdio_func *func,
++static int cistpl_funce_func(struct mmc_card *card, struct sdio_func *func,
+ 			     const unsigned char *buf, unsigned size)
+ {
+ 	unsigned vsn;
+ 	unsigned min_size;
+ 
+-	/* let SDIO drivers take care of whitelisted FUNCE tuples */
+-	if (cistpl_funce_whitelisted(buf[0]))
+-		return -EILSEQ;
++	/* Only valid for the individual function's CIS (1-7) */
++	if (!func)
++		return -EINVAL;
+ 
++	/*
++	 * This tuple has a different length depending on the SDIO spec
++	 * version.
++	 */
+ 	vsn = func->card->cccr.sdio_vsn;
+ 	min_size = (vsn == SDIO_SDIO_REV_1_00) ? 28 : 42;
+ 
+-	if (size < min_size || buf[0] != 1)
++	if (size < min_size)
+ 		return -EINVAL;
+ 
+ 	/* TPLFE_MAX_BLK_SIZE */
+@@ -157,39 +191,32 @@ static int cistpl_funce_func(struct sdio
+ 	return 0;
+ }
+ 
++/*
++ * Known TPLFE_TYPEs table for CISTPL_FUNCE tuples.
++ *
++ * Note that, unlike PCMCIA, CISTPL_FUNCE tuples are not parsed depending
++ * on the TPLFID_FUNCTION value of the previous CISTPL_FUNCID as on SDIO
++ * TPLFID_FUNCTION is always hardcoded to 0x0C.
++ */
++static const struct cis_tpl cis_tpl_funce_list[] = {
++	{	0x00,	4,	cistpl_funce_common		},
++	{	0x01,	0,	cistpl_funce_func		},
++	{	0x04,	1+1+6,	/* CISTPL_FUNCE_LAN_NODE_ID */	},
++};
++
+ static int cistpl_funce(struct mmc_card *card, struct sdio_func *func,
+ 			const unsigned char *buf, unsigned size)
+ {
+-	int ret;
+-
+-	/*
+-	 * There should be two versions of the CISTPL_FUNCE tuple,
+-	 * one for the common CIS (function 0) and a version used by
+-	 * the individual function's CIS (1-7). Yet, the later has a
+-	 * different length depending on the SDIO spec version.
+-	 */
+-	if (func)
+-		ret = cistpl_funce_func(func, buf, size);
+-	else
+-		ret = cistpl_funce_common(card, buf, size);
+-
+-	if (ret && ret != -EILSEQ) {
+-		printk(KERN_ERR "%s: bad CISTPL_FUNCE size %u "
+-		       "type %u\n", mmc_hostname(card->host), size, buf[0]);
+-	}
++	if (size < 1)
++		return -EINVAL;
+ 
+-	return ret;
++	return cis_tpl_parse(card, func, "CISTPL_FUNCE",
++			     cis_tpl_funce_list,
++			     ARRAY_SIZE(cis_tpl_funce_list),
++			     buf[0], buf, size);
+ }
+ 
+-typedef int (tpl_parse_t)(struct mmc_card *, struct sdio_func *,
+-			   const unsigned char *, unsigned);
+-
+-struct cis_tpl {
+-	unsigned char code;
+-	unsigned char min_size;
+-	tpl_parse_t *parse;
+-};
+-
++/* Known TPL_CODEs table for CIS tuples */
+ static const struct cis_tpl cis_tpl_list[] = {
+ 	{	0x15,	3,	cistpl_vers_1		},
+ 	{	0x20,	4,	cistpl_manfid		},
+@@ -268,46 +295,38 @@ static int sdio_read_cis(struct mmc_card
+ 			break;
+ 		}
+ 
+-		for (i = 0; i < ARRAY_SIZE(cis_tpl_list); i++)
+-			if (cis_tpl_list[i].code == tpl_code)
+-				break;
+-		if (i < ARRAY_SIZE(cis_tpl_list)) {
+-			const struct cis_tpl *tpl = cis_tpl_list + i;
+-			if (tpl_link < tpl->min_size) {
+-				printk(KERN_ERR
+-				       "%s: bad CIS tuple 0x%02x"
+-				       " (length = %u, expected >= %u)\n",
+-				       mmc_hostname(card->host),
+-				       tpl_code, tpl_link, tpl->min_size);
+-				ret = -EINVAL;
+-			} else if (tpl->parse) {
+-				ret = tpl->parse(card, func,
+-						 this->data, tpl_link);
+-			}
++		/* Try to parse the CIS tuple */
++		ret = cis_tpl_parse(card, func, "CIS",
++				    cis_tpl_list, ARRAY_SIZE(cis_tpl_list),
++				    tpl_code, this->data, tpl_link);
++		if (ret == -EILSEQ || ret == -ENOENT) {
+ 			/*
+-			 * We don't need the tuple anymore if it was
+-			 * successfully parsed by the SDIO core or if it is
+-			 * not going to be parsed by SDIO drivers.
++			 * The tuple is unknown or known but not parsed.
++			 * Queue the tuple for the function driver.
+ 			 */
+-			if (!ret || ret != -EILSEQ)
+-				kfree(this);
+-		} else {
+-			/* unknown tuple */
+-			ret = -EILSEQ;
+-		}
+-
+-		if (ret == -EILSEQ) {
+-			/* this tuple is unknown to the core or whitelisted */
+ 			this->next = NULL;
+ 			this->code = tpl_code;
+ 			this->size = tpl_link;
+ 			*prev = this;
+ 			prev = &this->next;
+-			printk(KERN_DEBUG
+-			       "%s: queuing CIS tuple 0x%02x length %u\n",
+-			       mmc_hostname(card->host), tpl_code, tpl_link);
++
++			if (ret == -ENOENT) {
++				/* warn about unknown tuples */
++				printk(KERN_WARNING "%s: queuing unknown"
++				       " CIS tuple 0x%02x (%u bytes)\n",
++				       mmc_hostname(card->host),
++				       tpl_code, tpl_link);
++			}
++
+ 			/* keep on analyzing tuples */
+ 			ret = 0;
++		} else {
++			/*
++			 * We don't need the tuple anymore if it was
++			 * successfully parsed by the SDIO core or if it is
++			 * not going to be queued for a driver.
++			 */
++			kfree(this);
+ 		}
+ 
+ 		ptr += tpl_link;
+_
+
+Patches currently in -mm which might be from albert_herranz@yahoo.es are
+
+sdio-rework-cis-tuple-parsing.patch
+sdio-recognize-io-card-without-powercycle.patch
+
