@@ -1,2270 +1,3476 @@
-From: Tomas Winkler <tomas.winkler-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH net-next V2 1/3] iwmc3200top: Add Intel Wireless MultiCom 3200 top driver.
-Date: Sat, 17 Oct 2009 21:09:34 +0200
-Message-ID: <1255806576-26869-1-git-send-email-tomas.winkler@intel.com>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org, linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: yi.zhu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, inaky.perez-gonzalez-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, cindy.h.kao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, guy.cohen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, ron.rindjunsky-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Tomas Winkler <tomas.winkler-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Dirk Behme <dirk.behme@googlemail.com>
+Subject: Re: MMC_CAP_SDIO_IRQ for omap 3430
+Date: Sun, 18 Oct 2009 18:44:52 +0200
+Message-ID: <4ADB4604.2090704@googlemail.com>
+References: <4b73d43f0910151330q6c5cae7sa2a5948b586cc215@mail.gmail.com>	 <4AD81DC2.4080607@googlemail.com>	 <42153.192.168.10.89.1255715021.squirrel@dbdmail.itg.ti.com>	 <4AD8C959.1000004@googlemail.com>	 <004701ca4ea5$aeacefe0$544ff780@am.dhcp.ti.com> <4b73d43f0910161426l7600f424w5b8345d16790dd21@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="------------060304000104020501030605"
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <4b73d43f0910161426l7600f424w5b8345d16790dd21@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: John Rigby <jcrigby@gmail.com>
+Cc: Madhusudhan <madhu.cr@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Steve Sakoman <sakoman@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds Intel Wireless MultiCom 3200 top driver.
-IWMC3200 is 4Wireless Com CHIP (GPS/BT/WiFi/WiMAX).
-Top driver is responsible for device initialization and firmware download.
-Firmware handled by top is responsible for top itself and
-as well as bluetooth and GPS coms. (Wifi and WiMax provide their own firmware)
-In addition top driver is used to retrieve firmware logs
-and supports other debugging features
+This is a multi-part message in MIME format.
+--------------060304000104020501030605
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 
-Signed-off-by: Tomas Winkler <tomas.winkler-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
-V2:
-1. fixing barker management
-2. use dev_get_drvdata instead of d->driver_data
-3. cleanup debugfs
+John Rigby wrote:
+> It appears to never get cleared in the status register.
+> 
+> I added some printks to sdio_irq.c to print the pending interrupts in
+> the SDIO_CCCR_INTx register for the card and there are no pending
+> interrupts so I don't think it is a card driver or card issue.
+> 
+> It would be funny if the TRM was wrong and the CIRQ bit is really
+> cleared by writing 1 to it.  I'll try that.
 
- drivers/misc/Kconfig                   |    1 +
- drivers/misc/Makefile                  |    1 +
- drivers/misc/iwmc3200top/Kconfig       |   20 +
- drivers/misc/iwmc3200top/Makefile      |   29 ++
- drivers/misc/iwmc3200top/debugfs.c     |  133 ++++++
- drivers/misc/iwmc3200top/debugfs.h     |   58 +++
- drivers/misc/iwmc3200top/fw-download.c |  359 ++++++++++++++++
- drivers/misc/iwmc3200top/fw-msg.h      |  113 +++++
- drivers/misc/iwmc3200top/iwmc3200top.h |  206 ++++++++++
- drivers/misc/iwmc3200top/log.c         |  347 ++++++++++++++++
- drivers/misc/iwmc3200top/log.h         |  158 +++++++
- drivers/misc/iwmc3200top/main.c        |  699 ++++++++++++++++++++++++++++++++
- 12 files changed, 2124 insertions(+), 0 deletions(-)
- create mode 100644 drivers/misc/iwmc3200top/Kconfig
- create mode 100644 drivers/misc/iwmc3200top/Makefile
- create mode 100644 drivers/misc/iwmc3200top/debugfs.c
- create mode 100644 drivers/misc/iwmc3200top/debugfs.h
- create mode 100644 drivers/misc/iwmc3200top/fw-download.c
- create mode 100644 drivers/misc/iwmc3200top/fw-msg.h
- create mode 100644 drivers/misc/iwmc3200top/iwmc3200top.h
- create mode 100644 drivers/misc/iwmc3200top/log.c
- create mode 100644 drivers/misc/iwmc3200top/log.h
- create mode 100644 drivers/misc/iwmc3200top/main.c
+2.6.22.18 TI kernel for Beagle from
 
-diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
-index df1f86b..a2ea383 100644
---- a/drivers/misc/Kconfig
-+++ b/drivers/misc/Kconfig
-@@ -249,5 +249,6 @@ config EP93XX_PWM
- source "drivers/misc/c2port/Kconfig"
- source "drivers/misc/eeprom/Kconfig"
- source "drivers/misc/cb710/Kconfig"
-+source "drivers/misc/iwmc3200top/Kconfig"
- 
- endif # MISC_DEVICES
-diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
-index f982d2e..e311267 100644
---- a/drivers/misc/Makefile
-+++ b/drivers/misc/Makefile
-@@ -21,5 +21,6 @@ obj-$(CONFIG_HP_ILO)		+= hpilo.o
- obj-$(CONFIG_ISL29003)		+= isl29003.o
- obj-$(CONFIG_EP93XX_PWM)	+= ep93xx_pwm.o
- obj-$(CONFIG_C2PORT)		+= c2port/
-+obj-$(CONFIG_IWMC3200TOP)      += iwmc3200top/
- obj-y				+= eeprom/
- obj-y				+= cb710/
-diff --git a/drivers/misc/iwmc3200top/Kconfig b/drivers/misc/iwmc3200top/Kconfig
-new file mode 100644
-index 0000000..9e4b88f
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/Kconfig
-@@ -0,0 +1,20 @@
-+config IWMC3200TOP
-+        tristate "Intel Wireless MultiCom Top Driver"
-+        depends on MMC && EXPERIMENTAL
-+        select FW_LOADER
-+	---help---
-+	  Intel Wireless MultiCom 3200 Top driver is responsible for
-+	  for firmware load and enabled coms enumeration
-+
-+config IWMC3200TOP_DEBUG
-+	bool "Enable full debug output of iwmc3200top Driver"
-+	depends on IWMC3200TOP
-+	---help---
-+	  Enable full debug output of iwmc3200top Driver
-+
-+config IWMC3200TOP_DEBUGFS
-+	bool "Enable Debugfs debugging interface for iwmc3200top"
-+	depends on IWMC3200TOP
-+	---help---
-+	  Enable creation of debugfs files for iwmc3200top
-+
-diff --git a/drivers/misc/iwmc3200top/Makefile b/drivers/misc/iwmc3200top/Makefile
-new file mode 100644
-index 0000000..fbf53fb
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/Makefile
-@@ -0,0 +1,29 @@
-+# iwmc3200top - Intel Wireless MultiCom 3200 Top Driver
-+# drivers/misc/iwmc3200top/Makefile
-+#
-+# Copyright (C) 2009 Intel Corporation. All rights reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License version
-+# 2 as published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it will be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write to the Free Software
-+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-+# 02110-1301, USA.
-+#
-+#
-+# Author Name: Maxim Grabarnik <maxim.grabarnink-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+#  -
-+#
-+#
-+
-+obj-$(CONFIG_IWMC3200TOP)	+= iwmc3200top.o
-+iwmc3200top-objs	:= main.o fw-download.o
-+iwmc3200top-$(CONFIG_IWMC3200TOP_DEBUG) += log.o
-+iwmc3200top-$(CONFIG_IWMC3200TOP_DEBUGFS) += debugfs.o
-diff --git a/drivers/misc/iwmc3200top/debugfs.c b/drivers/misc/iwmc3200top/debugfs.c
-new file mode 100644
-index 0000000..0c8ea0a
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/debugfs.c
-@@ -0,0 +1,133 @@
-+/*
-+ * iwmc3200top - Intel Wireless MultiCom 3200 Top Driver
-+ * drivers/misc/iwmc3200top/debufs.c
-+ *
-+ * Copyright (C) 2009 Intel Corporation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License version
-+ * 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-+ * 02110-1301, USA.
-+ *
-+ *
-+ * Author Name: Maxim Grabarnik <maxim.grabarnink-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ *  -
-+ *
-+ */
-+
-+#include <linux/kernel.h>
-+#include <linux/string.h>
-+#include <linux/ctype.h>
-+#include <linux/mmc/sdio_func.h>
-+#include <linux/mmc/sdio.h>
-+#include <linux/debugfs.h>
-+
-+#include "iwmc3200top.h"
-+#include "fw-msg.h"
-+#include "log.h"
-+#include "debugfs.h"
-+
-+
-+
-+/*      Constants definition        */
-+#define HEXADECIMAL_RADIX	16
-+
-+/*      Functions definition        */
-+
-+
-+#define DEBUGFS_ADD(name, parent) do {					\
-+	dbgfs->dbgfs_##parent##_files.file_##name =			\
-+	debugfs_create_file(#name, 0644, dbgfs->dir_##parent, priv,	\
-+				&iwmct_dbgfs_##name##_ops);		\
-+} while (0)
-+
-+#define DEBUGFS_RM(name)  do {		\
-+	debugfs_remove(name);		\
-+	name = NULL;			\
-+} while (0)
-+
-+#define DEBUGFS_READ_FUNC(name)						\
-+ssize_t iwmct_dbgfs_##name##_read(struct file *file,			\
-+				  char __user *user_buf,		\
-+				  size_t count, loff_t *ppos);
-+
-+#define DEBUGFS_WRITE_FUNC(name)					\
-+ssize_t iwmct_dbgfs_##name##_write(struct file *file,			\
-+				   const char __user *user_buf,		\
-+				   size_t count, loff_t *ppos);
-+
-+#define DEBUGFS_READ_FILE_OPS(name)					\
-+	DEBUGFS_READ_FUNC(name)						\
-+	static const struct file_operations iwmct_dbgfs_##name##_ops = {  \
-+		.read = iwmct_dbgfs_##name##_read,			\
-+		.open = iwmct_dbgfs_open_file_generic,			\
-+	};
-+
-+#define DEBUGFS_WRITE_FILE_OPS(name)					\
-+	DEBUGFS_WRITE_FUNC(name)					\
-+	static const struct file_operations iwmct_dbgfs_##name##_ops = {  \
-+		.write = iwmct_dbgfs_##name##_write,			\
-+		.open = iwmct_dbgfs_open_file_generic,			\
-+	};
-+
-+#define DEBUGFS_READ_WRITE_FILE_OPS(name)				\
-+	DEBUGFS_READ_FUNC(name)						\
-+	DEBUGFS_WRITE_FUNC(name)					\
-+	static const struct file_operations iwmct_dbgfs_##name##_ops = {\
-+		.write = iwmct_dbgfs_##name##_write,			\
-+		.read = iwmct_dbgfs_##name##_read,			\
-+		.open = iwmct_dbgfs_open_file_generic,			\
-+	};
-+
-+
-+/*      Debugfs file ops definitions        */
-+
-+/*
-+ * Create the debugfs files and directories
-+ *
-+ */
-+void iwmct_dbgfs_register(struct iwmct_priv *priv, const char *name)
-+{
-+	struct iwmct_debugfs *dbgfs;
-+
-+	dbgfs = kzalloc(sizeof(struct iwmct_debugfs), GFP_KERNEL);
-+	if (!dbgfs) {
-+		LOG_ERROR(priv, DEBUGFS, "failed to allocate %zd bytes\n",
-+					sizeof(struct iwmct_debugfs));
-+		return;
-+	}
-+
-+	priv->dbgfs = dbgfs;
-+	dbgfs->name = name;
-+	dbgfs->dir_drv = debugfs_create_dir(name, NULL);
-+	if (!dbgfs->dir_drv) {
-+		LOG_ERROR(priv, DEBUGFS, "failed to create debugfs dir\n");
-+		return;
-+	}
-+
-+	return;
-+}
-+
-+/**
-+ * Remove the debugfs files and directories
-+ *
-+ */
-+void iwmct_dbgfs_unregister(struct iwmct_debugfs *dbgfs)
-+{
-+	if (!dbgfs)
-+		return;
-+
-+	DEBUGFS_RM(dbgfs->dir_drv);
-+	kfree(dbgfs);
-+	dbgfs = NULL;
-+}
-+
-diff --git a/drivers/misc/iwmc3200top/debugfs.h b/drivers/misc/iwmc3200top/debugfs.h
-new file mode 100644
-index 0000000..71d4575
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/debugfs.h
-@@ -0,0 +1,58 @@
-+/*
-+ * iwmc3200top - Intel Wireless MultiCom 3200 Top Driver
-+ * drivers/misc/iwmc3200top/debufs.h
-+ *
-+ * Copyright (C) 2009 Intel Corporation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License version
-+ * 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-+ * 02110-1301, USA.
-+ *
-+ *
-+ * Author Name: Maxim Grabarnik <maxim.grabarnink-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ *  -
-+ *
-+ */
-+
-+#ifndef __DEBUGFS_H__
-+#define __DEBUGFS_H__
-+
-+
-+#ifdef CONFIG_IWMC3200TOP_DEBUGFS
-+
-+struct iwmct_debugfs {
-+	const char *name;
-+	struct dentry *dir_drv;
-+	struct dir_drv_files {
-+	} dbgfs_drv_files;
-+};
-+
-+void iwmct_dbgfs_register(struct iwmct_priv *priv, const char *name);
-+void iwmct_dbgfs_unregister(struct iwmct_debugfs *dbgfs);
-+
-+#else /* CONFIG_IWMC3200TOP_DEBUGFS */
-+
-+struct iwmct_debugfs;
-+
-+static inline void
-+iwmct_dbgfs_register(struct iwmct_priv *priv, const char *name)
-+{}
-+
-+static inline void
-+iwmct_dbgfs_unregister(struct iwmct_debugfs *dbgfs)
-+{}
-+
-+#endif /* CONFIG_IWMC3200TOP_DEBUGFS */
-+
-+#endif /* __DEBUGFS_H__ */
-+
-diff --git a/drivers/misc/iwmc3200top/fw-download.c b/drivers/misc/iwmc3200top/fw-download.c
-new file mode 100644
-index 0000000..33cb693
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/fw-download.c
-@@ -0,0 +1,359 @@
-+/*
-+ * iwmc3200top - Intel Wireless MultiCom 3200 Top Driver
-+ * drivers/misc/iwmc3200top/fw-download.c
-+ *
-+ * Copyright (C) 2009 Intel Corporation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License version
-+ * 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-+ * 02110-1301, USA.
-+ *
-+ *
-+ * Author Name: Maxim Grabarnik <maxim.grabarnink-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ *  -
-+ *
-+ */
-+
-+#include <linux/firmware.h>
-+#include <linux/mmc/sdio_func.h>
-+#include <asm/unaligned.h>
-+
-+#include "iwmc3200top.h"
-+#include "log.h"
-+#include "fw-msg.h"
-+
-+#define CHECKSUM_BYTES_NUM sizeof(u32)
-+
-+/**
-+  init parser struct with file
-+ */
-+static int iwmct_fw_parser_init(struct iwmct_priv *priv, const u8 *file,
-+			      size_t file_size, size_t block_size)
-+{
-+	struct iwmct_parser *parser = &priv->parser;
-+	struct iwmct_fw_hdr *fw_hdr = &parser->versions;
-+
-+	LOG_INFOEX(priv, INIT, "-->\n");
-+
-+	LOG_INFO(priv, FW_DOWNLOAD, "file_size=%zd\n", file_size);
-+
-+	parser->file = file;
-+	parser->file_size = file_size;
-+	parser->cur_pos = 0;
-+	parser->buf = NULL;
-+
-+	parser->buf = kzalloc(block_size, GFP_KERNEL);
-+	if (!parser->buf) {
-+		LOG_ERROR(priv, FW_DOWNLOAD, "kzalloc error\n");
-+		return -ENOMEM;
-+	}
-+	parser->buf_size = block_size;
-+
-+	/* extract fw versions */
-+	memcpy(fw_hdr, parser->file, sizeof(struct iwmct_fw_hdr));
-+	LOG_INFO(priv, FW_DOWNLOAD, "fw versions are:\n"
-+		"top %u.%u.%u gps %u.%u.%u bt %u.%u.%u tic %s\n",
-+		fw_hdr->top_major, fw_hdr->top_minor, fw_hdr->top_revision,
-+		fw_hdr->gps_major, fw_hdr->gps_minor, fw_hdr->gps_revision,
-+		fw_hdr->bt_major, fw_hdr->bt_minor, fw_hdr->bt_revision,
-+		fw_hdr->tic_name);
-+
-+	parser->cur_pos += sizeof(struct iwmct_fw_hdr);
-+
-+	LOG_INFOEX(priv, INIT, "<--\n");
-+	return 0;
-+}
-+
-+static bool iwmct_checksum(struct iwmct_priv *priv)
-+{
-+	struct iwmct_parser *parser = &priv->parser;
-+	__le32 *file = (__le32 *)parser->file;
-+	int i, pad, steps;
-+	u32 accum = 0;
-+	u32 checksum;
-+	u32 mask = 0xffffffff;
-+
-+	pad = (parser->file_size - CHECKSUM_BYTES_NUM) % 4;
-+	steps =  (parser->file_size - CHECKSUM_BYTES_NUM) / 4;
-+
-+	LOG_INFO(priv, FW_DOWNLOAD, "pad=%d steps=%d\n", pad, steps);
-+
-+	for (i = 0; i < steps; i++)
-+		accum += le32_to_cpu(file[i]);
-+
-+	if (pad) {
-+		mask <<= 8 * (4 - pad);
-+		accum += le32_to_cpu(file[steps]) & mask;
-+	}
-+
-+	checksum = get_unaligned_le32((__le32 *)(parser->file +
-+			parser->file_size - CHECKSUM_BYTES_NUM));
-+
-+	LOG_INFO(priv, FW_DOWNLOAD,
-+		"compare checksum accum=0x%x to checksum=0x%x\n",
-+		accum, checksum);
-+
-+	return checksum == accum;
-+}
-+
-+static int iwmct_parse_next_section(struct iwmct_priv *priv, const u8 **p_sec,
-+				  size_t *sec_size, __le32 *sec_addr)
-+{
-+	struct iwmct_parser *parser = &priv->parser;
-+	struct iwmct_dbg *dbg = &priv->dbg;
-+	struct iwmct_fw_sec_hdr *sec_hdr;
-+
-+	LOG_INFOEX(priv, INIT, "-->\n");
-+
-+	while (parser->cur_pos + sizeof(struct iwmct_fw_sec_hdr)
-+		<= parser->file_size) {
-+
-+		sec_hdr = (struct iwmct_fw_sec_hdr *)
-+				(parser->file + parser->cur_pos);
-+		parser->cur_pos += sizeof(struct iwmct_fw_sec_hdr);
-+
-+		LOG_INFO(priv, FW_DOWNLOAD,
-+			"sec hdr: type=%s addr=0x%x size=%d\n",
-+			sec_hdr->type, sec_hdr->target_addr,
-+			sec_hdr->data_size);
-+
-+		if (strcmp(sec_hdr->type, "ENT") == 0)
-+			parser->entry_point = le32_to_cpu(sec_hdr->target_addr);
-+		else if (strcmp(sec_hdr->type, "LBL") == 0)
-+			strcpy(dbg->label_fw, parser->file + parser->cur_pos);
-+		else if (((strcmp(sec_hdr->type, "TOP") == 0) &&
-+			  (priv->barker & BARKER_DNLOAD_TOP_MSK)) ||
-+			 ((strcmp(sec_hdr->type, "GPS") == 0) &&
-+			  (priv->barker & BARKER_DNLOAD_GPS_MSK)) ||
-+			 ((strcmp(sec_hdr->type, "BTH") == 0) &&
-+			  (priv->barker & BARKER_DNLOAD_BT_MSK))) {
-+			*sec_addr = sec_hdr->target_addr;
-+			*sec_size = le32_to_cpu(sec_hdr->data_size);
-+			*p_sec = parser->file + parser->cur_pos;
-+			parser->cur_pos += le32_to_cpu(sec_hdr->data_size);
-+			return 1;
-+		} else if (strcmp(sec_hdr->type, "LOG") != 0)
-+			LOG_WARNING(priv, FW_DOWNLOAD,
-+				    "skipping section type %s\n",
-+				    sec_hdr->type);
-+
-+		parser->cur_pos += le32_to_cpu(sec_hdr->data_size);
-+		LOG_INFO(priv, FW_DOWNLOAD,
-+			"finished with section cur_pos=%zd\n", parser->cur_pos);
-+	}
-+
-+	LOG_INFOEX(priv, INIT, "<--\n");
-+	return 0;
-+}
-+
-+static int iwmct_download_section(struct iwmct_priv *priv, const u8 *p_sec,
-+				size_t sec_size, __le32 addr)
-+{
-+	struct iwmct_parser *parser = &priv->parser;
-+	struct iwmct_fw_load_hdr *hdr = (struct iwmct_fw_load_hdr *)parser->buf;
-+	const u8 *cur_block = p_sec;
-+	size_t sent = 0;
-+	int cnt = 0;
-+	int ret = 0;
-+	u32 cmd = 0;
-+
-+	LOG_INFOEX(priv, INIT, "-->\n");
-+	LOG_INFO(priv, FW_DOWNLOAD, "Download address 0x%x size 0x%zx\n",
-+				addr, sec_size);
-+
-+	while (sent < sec_size) {
-+		int i;
-+		u32 chksm = 0;
-+		u32 reset = atomic_read(&priv->reset);
-+		/* actual FW data */
-+		u32 data_size = min(parser->buf_size - sizeof(*hdr),
-+				    sec_size - sent);
-+		/* Pad to block size */
-+		u32 trans_size = (data_size + sizeof(*hdr) +
-+				  IWMC_SDIO_BLK_SIZE - 1) &
-+				  ~(IWMC_SDIO_BLK_SIZE - 1);
-+		++cnt;
-+
-+		/* in case of reset, interrupt FW DOWNLAOD */
-+		if (reset) {
-+			LOG_INFO(priv, FW_DOWNLOAD,
-+				 "Reset detected. Abort FW download!!!");
-+			ret = -ECANCELED;
-+			goto exit;
-+		}
-+
-+		memset(parser->buf, 0, parser->buf_size);
-+		cmd |= IWMC_OPCODE_WRITE << CMD_HDR_OPCODE_POS;
-+		cmd |= IWMC_CMD_SIGNATURE << CMD_HDR_SIGNATURE_POS;
-+		cmd |= (priv->dbg.direct ? 1 : 0) << CMD_HDR_DIRECT_ACCESS_POS;
-+		cmd |= (priv->dbg.checksum ? 1 : 0) << CMD_HDR_USE_CHECKSUM_POS;
-+		hdr->data_size = cpu_to_le32(data_size);
-+		hdr->target_addr = addr;
-+
-+		/* checksum is allowed for sizes divisible by 4 */
-+		if (data_size & 0x3)
-+			cmd &= ~CMD_HDR_USE_CHECKSUM_MSK;
-+
-+		memcpy(hdr->data, cur_block, data_size);
-+
-+
-+		if (cmd & CMD_HDR_USE_CHECKSUM_MSK) {
-+
-+			chksm = data_size + le32_to_cpu(addr) + cmd;
-+			for (i = 0; i < data_size >> 2; i++)
-+				chksm += ((u32 *)cur_block)[i];
-+
-+			hdr->block_chksm = cpu_to_le32(chksm);
-+			LOG_INFO(priv, FW_DOWNLOAD, "Checksum = 0x%X\n",
-+				 hdr->block_chksm);
-+		}
-+
-+		LOG_INFO(priv, FW_DOWNLOAD, "trans#%d, len=%d, sent=%zd, "
-+				"sec_size=%zd, startAddress 0x%X\n",
-+				cnt, trans_size, sent, sec_size, addr);
-+
-+		if (priv->dbg.dump)
-+			LOG_HEXDUMP(FW_DOWNLOAD, parser->buf, trans_size);
-+
-+
-+		hdr->cmd = cpu_to_le32(cmd);
-+		/* send it down */
-+		/* TODO: add more proper sending and error checking */
-+		ret = iwmct_tx(priv, 0, parser->buf, trans_size);
-+		if (ret != 0) {
-+			LOG_INFO(priv, FW_DOWNLOAD,
-+				"iwmct_tx returned %d\n", ret);
-+			goto exit;
-+		}
-+
-+		addr = cpu_to_le32(le32_to_cpu(addr) + data_size);
-+		sent += data_size;
-+		cur_block = p_sec + sent;
-+
-+		if (priv->dbg.blocks && (cnt + 1) >= priv->dbg.blocks) {
-+			LOG_INFO(priv, FW_DOWNLOAD,
-+				"Block number limit is reached [%d]\n",
-+				priv->dbg.blocks);
-+			break;
-+		}
-+	}
-+
-+	if (sent < sec_size)
-+		ret = -EINVAL;
-+exit:
-+	LOG_INFOEX(priv, INIT, "<--\n");
-+	return ret;
-+}
-+
-+static int iwmct_kick_fw(struct iwmct_priv *priv, bool jump)
-+{
-+	struct iwmct_parser *parser = &priv->parser;
-+	struct iwmct_fw_load_hdr *hdr = (struct iwmct_fw_load_hdr *)parser->buf;
-+	int ret;
-+	u32 cmd;
-+
-+	LOG_INFOEX(priv, INIT, "-->\n");
-+
-+	memset(parser->buf, 0, parser->buf_size);
-+	cmd = IWMC_CMD_SIGNATURE << CMD_HDR_SIGNATURE_POS;
-+	if (jump) {
-+		cmd |= IWMC_OPCODE_JUMP << CMD_HDR_OPCODE_POS;
-+		hdr->target_addr = cpu_to_le32(parser->entry_point);
-+		LOG_INFO(priv, FW_DOWNLOAD, "jump address 0x%x\n",
-+				parser->entry_point);
-+	} else {
-+		cmd |= IWMC_OPCODE_LAST_COMMAND << CMD_HDR_OPCODE_POS;
-+		LOG_INFO(priv, FW_DOWNLOAD, "last command\n");
-+	}
-+
-+	hdr->cmd = cpu_to_le32(cmd);
-+
-+	LOG_HEXDUMP(FW_DOWNLOAD, parser->buf, sizeof(*hdr));
-+	/* send it down */
-+	/* TODO: add more proper sending and error checking */
-+	ret = iwmct_tx(priv, 0, parser->buf, IWMC_SDIO_BLK_SIZE);
-+	if (ret)
-+		LOG_INFO(priv, FW_DOWNLOAD, "iwmct_tx returned %d", ret);
-+
-+	LOG_INFOEX(priv, INIT, "<--\n");
-+	return 0;
-+}
-+
-+int iwmct_fw_load(struct iwmct_priv *priv)
-+{
-+	const struct firmware *raw = NULL;
-+	__le32 addr;
-+	size_t len;
-+	const u8 *pdata;
-+	const u8 *name = "iwmc3200top.1.fw";
-+	int ret = 0;
-+
-+	/* clear parser struct */
-+	memset(&priv->parser, 0, sizeof(struct iwmct_parser));
-+	if (!name) {
-+		ret = -EINVAL;
-+		goto exit;
-+	}
-+
-+	/* get the firmware */
-+	ret = request_firmware(&raw, name, &priv->func->dev);
-+	if (ret < 0) {
-+		LOG_ERROR(priv, FW_DOWNLOAD, "%s request_firmware failed %d\n",
-+			  name, ret);
-+		goto exit;
-+	}
-+
-+	if (raw->size < sizeof(struct iwmct_fw_sec_hdr)) {
-+		LOG_ERROR(priv, FW_DOWNLOAD, "%s smaller then (%zd) (%zd)\n",
-+			  name, sizeof(struct iwmct_fw_sec_hdr), raw->size);
-+		goto exit;
-+	}
-+
-+	LOG_INFO(priv, FW_DOWNLOAD, "Read firmware '%s'\n", name);
-+
-+	ret = iwmct_fw_parser_init(priv, raw->data, raw->size, priv->trans_len);
-+	if (ret < 0) {
-+		LOG_ERROR(priv, FW_DOWNLOAD,
-+			  "iwmct_parser_init failed: Reason %d\n", ret);
-+		goto exit;
-+	}
-+
-+	/* checksum  */
-+	if (!iwmct_checksum(priv)) {
-+		LOG_ERROR(priv, FW_DOWNLOAD, "checksum error\n");
-+		ret = -EINVAL;
-+		goto exit;
-+	}
-+
-+	/* download firmware to device */
-+	while (iwmct_parse_next_section(priv, &pdata, &len, &addr)) {
-+		if (iwmct_download_section(priv, pdata, len, addr)) {
-+			LOG_ERROR(priv, FW_DOWNLOAD,
-+				  "%s download section failed\n", name);
-+			ret = -EIO;
-+			goto exit;
-+		}
-+	}
-+
-+	iwmct_kick_fw(priv, !!(priv->barker & BARKER_DNLOAD_JUMP_MSK));
-+
-+exit:
-+	kfree(priv->parser.buf);
-+
-+	if (raw)
-+		release_firmware(raw);
-+
-+	raw = NULL;
-+
-+	return ret;
-+}
-diff --git a/drivers/misc/iwmc3200top/fw-msg.h b/drivers/misc/iwmc3200top/fw-msg.h
-new file mode 100644
-index 0000000..9e26b75
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/fw-msg.h
-@@ -0,0 +1,113 @@
-+/*
-+ * iwmc3200top - Intel Wireless MultiCom 3200 Top Driver
-+ * drivers/misc/iwmc3200top/fw-msg.h
-+ *
-+ * Copyright (C) 2009 Intel Corporation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License version
-+ * 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-+ * 02110-1301, USA.
-+ *
-+ *
-+ * Author Name: Maxim Grabarnik <maxim.grabarnink-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ *  -
-+ *
-+ */
-+
-+#ifndef __FWMSG_H__
-+#define __FWMSG_H__
-+
-+#define COMM_TYPE_D2H           	0xFF
-+#define COMM_TYPE_H2D           	0xEE
-+
-+#define COMM_CATEGORY_OPERATIONAL      	0x00
-+#define COMM_CATEGORY_DEBUG            	0x01
-+#define COMM_CATEGORY_TESTABILITY      	0x02
-+#define COMM_CATEGORY_DIAGNOSTICS      	0x03
-+
-+#define OP_DBG_ZSTR_MSG			cpu_to_le16(0x1A)
-+
-+#define FW_LOG_SRC_MAX			32
-+#define FW_LOG_SRC_ALL			255
-+
-+#define FW_STRING_TABLE_ADDR		cpu_to_le32(0x0C000000)
-+
-+#define CMD_DBG_LOG_LEVEL		cpu_to_le16(0x0001)
-+#define CMD_TST_DEV_RESET		cpu_to_le16(0x0060)
-+#define CMD_TST_FUNC_RESET		cpu_to_le16(0x0062)
-+#define CMD_TST_IFACE_RESET		cpu_to_le16(0x0064)
-+#define CMD_TST_CPU_UTILIZATION		cpu_to_le16(0x0065)
-+#define CMD_TST_TOP_DEEP_SLEEP		cpu_to_le16(0x0080)
-+#define CMD_TST_WAKEUP			cpu_to_le16(0x0081)
-+#define CMD_TST_FUNC_WAKEUP		cpu_to_le16(0x0082)
-+#define CMD_TST_FUNC_DEEP_SLEEP_REQUEST	cpu_to_le16(0x0083)
-+#define CMD_TST_GET_MEM_DUMP		cpu_to_le16(0x0096)
-+
-+#define OP_OPR_ALIVE			cpu_to_le16(0x0010)
-+#define OP_OPR_CMD_ACK			cpu_to_le16(0x001F)
-+#define OP_OPR_CMD_NACK			cpu_to_le16(0x0020)
-+#define OP_TST_MEM_DUMP			cpu_to_le16(0x0043)
-+
-+#define CMD_FLAG_PADDING_256		0x80
-+
-+#define FW_HCMD_BLOCK_SIZE      	256
-+
-+struct msg_hdr {
-+	u8 type;
-+	u8 category;
-+	__le16 opcode;
-+	u8 seqnum;
-+	u8 flags;
-+	__le16 length;
-+} __attribute__((__packed__));
-+
-+struct log_hdr {
-+	__le32 timestamp;
-+	u8 severity;
-+	u8 logsource;
-+	__le16 reserved;
-+} __attribute__((__packed__));
-+
-+struct mdump_hdr {
-+	u8 dmpid;
-+	u8 frag;
-+	__le16 size;
-+	__le32 addr;
-+} __attribute__((__packed__));
-+
-+struct top_msg {
-+	struct msg_hdr hdr;
-+	union {
-+		/* D2H messages */
-+		struct {
-+			struct log_hdr log_hdr;
-+			u8 data[1];
-+		} __attribute__((__packed__)) log;
-+
-+		struct {
-+			struct log_hdr log_hdr;
-+			struct mdump_hdr md_hdr;
-+			u8 data[1];
-+		} __attribute__((__packed__)) mdump;
-+
-+		/* H2D messages */
-+		struct {
-+			u8 logsource;
-+			u8 sevmask;
-+		} __attribute__((__packed__)) logdefs[FW_LOG_SRC_MAX];
-+		struct mdump_hdr mdump_req;
-+	} u;
-+} __attribute__((__packed__));
-+
-+
-+#endif /* __FWMSG_H__ */
-diff --git a/drivers/misc/iwmc3200top/iwmc3200top.h b/drivers/misc/iwmc3200top/iwmc3200top.h
-new file mode 100644
-index 0000000..f572fcf
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/iwmc3200top.h
-@@ -0,0 +1,206 @@
-+/*
-+ * iwmc3200top - Intel Wireless MultiCom 3200 Top Driver
-+ * drivers/misc/iwmc3200top/iwmc3200top.h
-+ *
-+ * Copyright (C) 2009 Intel Corporation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License version
-+ * 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-+ * 02110-1301, USA.
-+ *
-+ *
-+ * Author Name: Maxim Grabarnik <maxim.grabarnink-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ *  -
-+ *
-+ */
-+
-+#ifndef __IWMC3200TOP_H__
-+#define __IWMC3200TOP_H__
-+
-+#include <linux/workqueue.h>
-+
-+#define DRV_NAME "iwmc3200top"
-+
-+#define IWMC_SDIO_BLK_SIZE			256
-+#define IWMC_DEFAULT_TR_BLK			64
-+#define IWMC_SDIO_DATA_ADDR			0x0
-+#define IWMC_SDIO_INTR_ENABLE_ADDR		0x14
-+#define IWMC_SDIO_INTR_STATUS_ADDR		0x13
-+#define IWMC_SDIO_INTR_CLEAR_ADDR		0x13
-+#define IWMC_SDIO_INTR_GET_SIZE_ADDR		0x2C
-+
-+#define COMM_HUB_HEADER_LENGTH 16
-+#define LOGGER_HEADER_LENGTH   10
-+
-+
-+#define BARKER_DNLOAD_BT_POS		0
-+#define BARKER_DNLOAD_BT_MSK		BIT(BARKER_DNLOAD_BT_POS)
-+#define BARKER_DNLOAD_GPS_POS		1
-+#define BARKER_DNLOAD_GPS_MSK		BIT(BARKER_DNLOAD_GPS_POS)
-+#define BARKER_DNLOAD_TOP_POS		2
-+#define BARKER_DNLOAD_TOP_MSK		BIT(BARKER_DNLOAD_TOP_POS)
-+#define BARKER_DNLOAD_RESERVED1_POS	3
-+#define BARKER_DNLOAD_RESERVED1_MSK	BIT(BARKER_DNLOAD_RESERVED1_POS)
-+#define BARKER_DNLOAD_JUMP_POS		4
-+#define BARKER_DNLOAD_JUMP_MSK		BIT(BARKER_DNLOAD_JUMP_POS)
-+#define BARKER_DNLOAD_SYNC_POS		5
-+#define BARKER_DNLOAD_SYNC_MSK		BIT(BARKER_DNLOAD_SYNC_POS)
-+#define BARKER_DNLOAD_RESERVED2_POS	6
-+#define BARKER_DNLOAD_RESERVED2_MSK	(0x3 << BARKER_DNLOAD_RESERVED2_POS)
-+#define BARKER_DNLOAD_BARKER_POS	8
-+#define BARKER_DNLOAD_BARKER_MSK	(0xffffff << BARKER_DNLOAD_BARKER_POS)
-+
-+#define IWMC_BARKER_REBOOT 	(0xdeadbe << BARKER_DNLOAD_BARKER_POS)
-+/* whole field barker */
-+#define IWMC_BARKER_ACK 	0xfeedbabe
-+
-+#define IWMC_CMD_SIGNATURE 	0xcbbc
-+
-+#define CMD_HDR_OPCODE_POS		0
-+#define CMD_HDR_OPCODE_MSK_MSK		(0xf << CMD_HDR_OPCODE_MSK_POS)
-+#define CMD_HDR_RESPONSE_CODE_POS	4
-+#define CMD_HDR_RESPONSE_CODE_MSK	(0xf << CMD_HDR_RESPONSE_CODE_POS)
-+#define CMD_HDR_USE_CHECKSUM_POS	8
-+#define CMD_HDR_USE_CHECKSUM_MSK	BIT(CMD_HDR_USE_CHECKSUM_POS)
-+#define CMD_HDR_RESPONSE_REQUIRED_POS	9
-+#define CMD_HDR_RESPONSE_REQUIRED_MSK	BIT(CMD_HDR_RESPONSE_REQUIRED_POS)
-+#define CMD_HDR_DIRECT_ACCESS_POS	10
-+#define CMD_HDR_DIRECT_ACCESS_MSK	BIT(CMD_HDR_DIRECT_ACCESS_POS)
-+#define CMD_HDR_RESERVED_POS		11
-+#define CMD_HDR_RESERVED_MSK		BIT(0x1f << CMD_HDR_RESERVED_POS)
-+#define CMD_HDR_SIGNATURE_POS		16
-+#define CMD_HDR_SIGNATURE_MSK		BIT(0xffff << CMD_HDR_SIGNATURE_POS)
-+
-+enum {
-+	IWMC_OPCODE_PING = 0,
-+	IWMC_OPCODE_READ = 1,
-+	IWMC_OPCODE_WRITE = 2,
-+	IWMC_OPCODE_JUMP = 3,
-+	IWMC_OPCODE_REBOOT = 4,
-+	IWMC_OPCODE_PERSISTENT_WRITE = 5,
-+	IWMC_OPCODE_PERSISTENT_READ = 6,
-+	IWMC_OPCODE_READ_MODIFY_WRITE = 7,
-+	IWMC_OPCODE_LAST_COMMAND = 15
-+};
-+
-+struct iwmct_fw_load_hdr {
-+	__le32 cmd;
-+	__le32 target_addr;
-+	__le32 data_size;
-+	__le32 block_chksm;
-+	u8 data[0];
-+};
-+
-+/**
-+ * struct iwmct_fw_hdr
-+ * holds all sw components versions
-+ */
-+struct iwmct_fw_hdr {
-+	u8 top_major;
-+	u8 top_minor;
-+	u8 top_revision;
-+	u8 gps_major;
-+	u8 gps_minor;
-+	u8 gps_revision;
-+	u8 bt_major;
-+	u8 bt_minor;
-+	u8 bt_revision;
-+	u8 tic_name[31];
-+};
-+
-+/**
-+ * struct iwmct_fw_sec_hdr
-+ * @type: function type
-+ * @data_size: section's data size
-+ * @target_addr: download address
-+ */
-+struct iwmct_fw_sec_hdr {
-+	u8 type[4];
-+	__le32 data_size;
-+	__le32 target_addr;
-+};
-+
-+/**
-+ * struct iwmct_parser
-+ * @file: fw image
-+ * @file_size: fw size
-+ * @cur_pos: position in file
-+ * @buf: temp buf for download
-+ * @buf_size: size of buf
-+ * @entry_point: address to jump in fw kick-off
-+ */
-+struct iwmct_parser {
-+	const u8 *file;
-+	size_t file_size;
-+	size_t cur_pos;
-+	u8 *buf;
-+	size_t buf_size;
-+	u32 entry_point;
-+	struct iwmct_fw_hdr versions;
-+};
-+
-+
-+struct iwmct_work_struct {
-+	struct list_head list;
-+	ssize_t iosize;
-+};
-+
-+struct iwmct_dbg {
-+	int blocks;
-+	bool dump;
-+	bool jump;
-+	bool direct;
-+	bool checksum;
-+	bool fw_download;
-+	int block_size;
-+	int download_trans_blks;
-+
-+	char label_fw[256];
-+};
-+
-+struct iwmct_debugfs;
-+
-+struct iwmct_priv {
-+	struct sdio_func *func;
-+	struct iwmct_debugfs *dbgfs;
-+	struct iwmct_parser parser;
-+	atomic_t reset;
-+	atomic_t dev_sync;
-+	u32 trans_len;
-+	u32 barker;
-+	struct iwmct_dbg dbg;
-+
-+	/* drivers work queue */
-+	struct workqueue_struct *wq;
-+	struct workqueue_struct *bus_rescan_wq;
-+	struct work_struct bus_rescan_worker;
-+	struct work_struct isr_worker;
-+
-+	/* drivers wait queue */
-+	wait_queue_head_t wait_q;
-+
-+	/* rx request list */
-+	struct list_head read_req_list;
-+};
-+
-+extern int iwmct_tx(struct iwmct_priv *priv, unsigned int addr,
-+		void *src, int count);
-+
-+extern int iwmct_fw_load(struct iwmct_priv *priv);
-+
-+extern void iwmct_dbg_init_params(struct iwmct_priv *drv);
-+extern void iwmct_dbg_init_drv_attrs(struct device_driver *drv);
-+extern void iwmct_dbg_remove_drv_attrs(struct device_driver *drv);
-+extern int iwmct_send_hcmd(struct iwmct_priv *priv, u8 *cmd, u16 len);
-+
-+#endif  /*  __IWMC3200TOP_H__  */
-diff --git a/drivers/misc/iwmc3200top/log.c b/drivers/misc/iwmc3200top/log.c
-new file mode 100644
-index 0000000..d569279
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/log.c
-@@ -0,0 +1,347 @@
-+/*
-+ * iwmc3200top - Intel Wireless MultiCom 3200 Top Driver
-+ * drivers/misc/iwmc3200top/log.c
-+ *
-+ * Copyright (C) 2009 Intel Corporation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License version
-+ * 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-+ * 02110-1301, USA.
-+ *
-+ *
-+ * Author Name: Maxim Grabarnik <maxim.grabarnink-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ *  -
-+ *
-+ */
-+
-+#include <linux/kernel.h>
-+#include <linux/mmc/sdio_func.h>
-+#include <linux/ctype.h>
-+#include "fw-msg.h"
-+#include "iwmc3200top.h"
-+#include "log.h"
-+
-+/* Maximal hexadecimal string size of the FW memdump message */
-+#define LOG_MSG_SIZE_MAX		12400
-+
-+/* iwmct_logdefs is a global used by log macros */
-+u8 iwmct_logdefs[LOG_SRC_MAX];
-+static u8 iwmct_fw_logdefs[FW_LOG_SRC_MAX];
-+
-+
-+static int _log_set_log_filter(u8 *logdefs, int size, u8 src, u8 logmask)
-+{
-+	int i;
-+
-+	if (src < size)
-+		logdefs[src] = logmask;
-+	else if (src == LOG_SRC_ALL)
-+		for (i = 0; i < size; i++)
-+			logdefs[i] = logmask;
-+	else
-+		return -1;
-+
-+	return 0;
-+}
-+
-+
-+int iwmct_log_set_filter(u8 src, u8 logmask)
-+{
-+	return _log_set_log_filter(iwmct_logdefs, LOG_SRC_MAX, src, logmask);
-+}
-+
-+
-+int iwmct_log_set_fw_filter(u8 src, u8 logmask)
-+{
-+	return _log_set_log_filter(iwmct_fw_logdefs,
-+				   FW_LOG_SRC_MAX, src, logmask);
-+}
-+
-+
-+static int log_msg_format_hex(char *str, int slen, u8 *ibuf,
-+			      int ilen, char *pref)
-+{
-+	int pos = 0;
-+	int i;
-+	int len;
-+
-+	for (pos = 0, i = 0; pos < slen - 2 && pref[i] != '\0'; i++, pos++)
-+		str[pos] = pref[i];
-+
-+	for (i = 0; pos < slen - 2 && i < ilen; pos += len, i++)
-+		len = snprintf(&str[pos], slen - pos - 1, " %2.2X", ibuf[i]);
-+
-+	if (i < ilen)
-+		return -1;
-+
-+	return 0;
-+}
-+
-+/*	NOTE: This function is not thread safe.
-+	Currently it's called only from sdio rx worker - no race there
-+*/
-+void iwmct_log_top_message(struct iwmct_priv *priv, u8 *buf, int len)
-+{
-+	struct top_msg *msg;
-+	static char logbuf[LOG_MSG_SIZE_MAX];
-+
-+	msg = (struct top_msg *)buf;
-+
-+	if (len < sizeof(msg->hdr) + sizeof(msg->u.log.log_hdr)) {
-+		LOG_ERROR(priv, FW_MSG, "Log message from TOP "
-+			  "is too short %d (expected %zd)\n",
-+			  len, sizeof(msg->hdr) + sizeof(msg->u.log.log_hdr));
-+		return;
-+	}
-+
-+	if (!(iwmct_fw_logdefs[msg->u.log.log_hdr.logsource] &
-+		BIT(msg->u.log.log_hdr.severity)) ||
-+	    !(iwmct_logdefs[LOG_SRC_FW_MSG] & BIT(msg->u.log.log_hdr.severity)))
-+		return;
-+
-+	switch (msg->hdr.category) {
-+	case COMM_CATEGORY_TESTABILITY:
-+		if (!(iwmct_logdefs[LOG_SRC_TST] &
-+		      BIT(msg->u.log.log_hdr.severity)))
-+			return;
-+		if (log_msg_format_hex(logbuf, LOG_MSG_SIZE_MAX, buf,
-+				       le16_to_cpu(msg->hdr.length) +
-+				       sizeof(msg->hdr), "<TST>"))
-+			LOG_WARNING(priv, TST,
-+				  "TOP TST message is too long, truncating...");
-+		LOG_WARNING(priv, TST, "%s\n", logbuf);
-+		break;
-+	case COMM_CATEGORY_DEBUG:
-+		if (msg->hdr.opcode == OP_DBG_ZSTR_MSG)
-+			LOG_INFO(priv, FW_MSG, "%s %s", "<DBG>",
-+				       ((u8 *)msg) + sizeof(msg->hdr)
-+					+ sizeof(msg->u.log.log_hdr));
-+		else {
-+			if (log_msg_format_hex(logbuf, LOG_MSG_SIZE_MAX, buf,
-+					le16_to_cpu(msg->hdr.length)
-+						+ sizeof(msg->hdr),
-+					"<DBG>"))
-+				LOG_WARNING(priv, FW_MSG,
-+					"TOP DBG message is too long,"
-+					"truncating...");
-+			LOG_WARNING(priv, FW_MSG, "%s\n", logbuf);
-+		}
-+		break;
-+	default:
-+		break;
-+	}
-+}
-+
-+static int _log_get_filter_str(u8 *logdefs, int logdefsz, char *buf, int size)
-+{
-+	int i, pos, len;
-+	for (i = 0, pos = 0; (pos < size-1) && (i < logdefsz); i++) {
-+		len = snprintf(&buf[pos], size - pos - 1, "0x%02X%02X,",
-+				i, logdefs[i]);
-+		pos += len;
-+	}
-+	buf[pos-1] = '\n';
-+	buf[pos] = '\0';
-+
-+	if (i < logdefsz)
-+		return -1;
-+	return 0;
-+}
-+
-+int log_get_filter_str(char *buf, int size)
-+{
-+	return _log_get_filter_str(iwmct_logdefs, LOG_SRC_MAX, buf, size);
-+}
-+
-+int log_get_fw_filter_str(char *buf, int size)
-+{
-+	return _log_get_filter_str(iwmct_fw_logdefs, FW_LOG_SRC_MAX, buf, size);
-+}
-+
-+#define HEXADECIMAL_RADIX	16
-+#define LOG_SRC_FORMAT		7 /* log level is in format of "0xXXXX," */
-+
-+ssize_t show_iwmct_log_level(struct device *d,
-+				struct device_attribute *attr, char *buf)
-+{
-+	struct iwmct_priv *priv = dev_get_drvdata(d);
-+	char *str_buf;
-+	int buf_size;
-+	ssize_t ret;
-+
-+	buf_size = (LOG_SRC_FORMAT * LOG_SRC_MAX) + 1;
-+	str_buf = kzalloc(buf_size, GFP_KERNEL);
-+	if (!str_buf) {
-+		LOG_ERROR(priv, DEBUGFS,
-+			"failed to allocate %d bytes\n", buf_size);
-+		ret = -ENOMEM;
-+		goto exit;
-+	}
-+
-+	if (log_get_filter_str(str_buf, buf_size) < 0) {
-+		ret = -EINVAL;
-+		goto exit;
-+	}
-+
-+	ret = sprintf(buf, "%s", str_buf);
-+
-+exit:
-+	kfree(str_buf);
-+	return ret;
-+}
-+
-+ssize_t store_iwmct_log_level(struct device *d,
-+			struct device_attribute *attr,
-+			const char *buf, size_t count)
-+{
-+	struct iwmct_priv *priv = dev_get_drvdata(d);
-+	char *token, *str_buf = NULL;
-+	long val;
-+	ssize_t ret = count;
-+	u8 src, mask;
-+
-+	if (!count)
-+		goto exit;
-+
-+	str_buf = kzalloc(count, GFP_KERNEL);
-+	if (!str_buf) {
-+		LOG_ERROR(priv, DEBUGFS,
-+			"failed to allocate %zd bytes\n", count);
-+		ret = -ENOMEM;
-+		goto exit;
-+	}
-+
-+	memcpy(str_buf, buf, count);
-+
-+	while ((token = strsep(&str_buf, ",")) != NULL) {
-+		while (isspace(*token))
-+			++token;
-+		if (strict_strtol(token, HEXADECIMAL_RADIX, &val)) {
-+			LOG_ERROR(priv, DEBUGFS,
-+				  "failed to convert string to long %s\n",
-+				  token);
-+			ret = -EINVAL;
-+			goto exit;
-+		}
-+
-+		mask  = val & 0xFF;
-+		src = (val & 0XFF00) >> 8;
-+		iwmct_log_set_filter(src, mask);
-+	}
-+
-+exit:
-+	kfree(str_buf);
-+	return ret;
-+}
-+
-+ssize_t show_iwmct_log_level_fw(struct device *d,
-+			struct device_attribute *attr, char *buf)
-+{
-+	struct iwmct_priv *priv = dev_get_drvdata(d);
-+	char *str_buf;
-+	int buf_size;
-+	ssize_t ret;
-+
-+	buf_size = (LOG_SRC_FORMAT * FW_LOG_SRC_MAX) + 2;
-+
-+	str_buf = kzalloc(buf_size, GFP_KERNEL);
-+	if (!str_buf) {
-+		LOG_ERROR(priv, DEBUGFS,
-+			"failed to allocate %d bytes\n", buf_size);
-+		ret = -ENOMEM;
-+		goto exit;
-+	}
-+
-+	if (log_get_fw_filter_str(str_buf, buf_size) < 0) {
-+		ret = -EINVAL;
-+		goto exit;
-+	}
-+
-+	ret = sprintf(buf, "%s", str_buf);
-+
-+exit:
-+	kfree(str_buf);
-+	return ret;
-+}
-+
-+ssize_t store_iwmct_log_level_fw(struct device *d,
-+			struct device_attribute *attr,
-+			const char *buf, size_t count)
-+{
-+	struct iwmct_priv *priv = dev_get_drvdata(d);
-+	struct top_msg cmd;
-+	char *token, *str_buf = NULL;
-+	ssize_t ret = count;
-+	u16 cmdlen = 0;
-+	int i;
-+	long val;
-+	u8 src, mask;
-+
-+	if (!count)
-+		goto exit;
-+
-+	str_buf = kzalloc(count, GFP_KERNEL);
-+	if (!str_buf) {
-+		LOG_ERROR(priv, DEBUGFS,
-+			"failed to allocate %zd bytes\n", count);
-+		ret = -ENOMEM;
-+		goto exit;
-+	}
-+
-+	memcpy(str_buf, buf, count);
-+
-+	cmd.hdr.type = COMM_TYPE_H2D;
-+	cmd.hdr.category = COMM_CATEGORY_DEBUG;
-+	cmd.hdr.opcode = CMD_DBG_LOG_LEVEL;
-+
-+	for (i = 0; ((token = strsep(&str_buf, ",")) != NULL) &&
-+		     (i < FW_LOG_SRC_MAX); i++) {
-+
-+		while (isspace(*token))
-+			++token;
-+
-+		if (strict_strtol(token, HEXADECIMAL_RADIX, &val)) {
-+			LOG_ERROR(priv, DEBUGFS,
-+				  "failed to convert string to long %s\n",
-+				  token);
-+			ret = -EINVAL;
-+			goto exit;
-+		}
-+
-+		mask  = val & 0xFF; /* LSB */
-+		src = (val & 0XFF00) >> 8; /* 2nd least significant byte. */
-+		iwmct_log_set_fw_filter(src, mask);
-+
-+		cmd.u.logdefs[i].logsource = src;
-+		cmd.u.logdefs[i].sevmask = mask;
-+	}
-+
-+	cmd.hdr.length = cpu_to_le16(i * sizeof(cmd.u.logdefs[0]));
-+	cmdlen = (i * sizeof(cmd.u.logdefs[0]) + sizeof(cmd.hdr));
-+
-+	ret = iwmct_send_hcmd(priv, (u8 *)&cmd, cmdlen);
-+	if (ret) {
-+		LOG_ERROR(priv, DEBUGFS,
-+			  "Failed to send %d bytes of fwcmd, ret=%zd\n",
-+			  cmdlen, ret);
-+		goto exit;
-+	} else
-+		LOG_INFO(priv, DEBUGFS, "fwcmd sent (%d bytes)\n", cmdlen);
-+
-+	ret = count;
-+
-+exit:
-+	kfree(str_buf);
-+	return ret;
-+}
-+
-diff --git a/drivers/misc/iwmc3200top/log.h b/drivers/misc/iwmc3200top/log.h
-new file mode 100644
-index 0000000..aba8121
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/log.h
-@@ -0,0 +1,158 @@
-+/*
-+ * iwmc3200top - Intel Wireless MultiCom 3200 Top Driver
-+ * drivers/misc/iwmc3200top/log.h
-+ *
-+ * Copyright (C) 2009 Intel Corporation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License version
-+ * 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-+ * 02110-1301, USA.
-+ *
-+ *
-+ * Author Name: Maxim Grabarnik <maxim.grabarnink-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ *  -
-+ *
-+ */
-+
-+#ifndef __LOG_H__
-+#define __LOG_H__
-+
-+
-+/* log severity:
-+ * The log levels here match FW log levels
-+ * so values need to stay as is */
-+#define LOG_SEV_CRITICAL		0
-+#define LOG_SEV_ERROR			1
-+#define LOG_SEV_WARNING			2
-+#define LOG_SEV_INFO			3
-+#define LOG_SEV_INFOEX			4
-+
-+#define LOG_SEV_FILTER_ALL		\
-+	(BIT(LOG_SEV_CRITICAL) |	\
-+	 BIT(LOG_SEV_ERROR)    |	\
-+	 BIT(LOG_SEV_WARNING)  | 	\
-+	 BIT(LOG_SEV_INFO)     |	\
-+	 BIT(LOG_SEV_INFOEX))
-+
-+/* log source */
-+#define LOG_SRC_INIT			0
-+#define LOG_SRC_DEBUGFS			1
-+#define LOG_SRC_FW_DOWNLOAD		2
-+#define LOG_SRC_FW_MSG			3
-+#define LOG_SRC_TST			4
-+#define LOG_SRC_IRQ			5
-+
-+#define	LOG_SRC_MAX			6
-+#define	LOG_SRC_ALL			0xFF
-+
-+/**
-+ * Default intitialization runtime log level
-+ */
-+#ifndef LOG_SEV_FILTER_RUNTIME
-+#define LOG_SEV_FILTER_RUNTIME			\
-+	(BIT(LOG_SEV_CRITICAL)	|		\
-+	 BIT(LOG_SEV_ERROR)	|		\
-+	 BIT(LOG_SEV_WARNING))
-+#endif
-+
-+#ifndef FW_LOG_SEV_FILTER_RUNTIME
-+#define FW_LOG_SEV_FILTER_RUNTIME	LOG_SEV_FILTER_ALL
-+#endif
-+
-+#ifdef CONFIG_IWMC3200TOP_DEBUG
-+/**
-+ * Log macros
-+ */
-+
-+#define priv2dev(priv) (&(priv->func)->dev)
-+
-+#define LOG_CRITICAL(priv, src, fmt, args...)				\
-+do {									\
-+	if (iwmct_logdefs[LOG_SRC_ ## src] & BIT(LOG_SEV_CRITICAL))	\
-+		dev_crit(priv2dev(priv), "%s %d: " fmt,			\
-+			__func__, __LINE__, ##args);			\
-+} while (0)
-+
-+#define LOG_ERROR(priv, src, fmt, args...)				\
-+do {									\
-+	if (iwmct_logdefs[LOG_SRC_ ## src] & BIT(LOG_SEV_ERROR))	\
-+		dev_err(priv2dev(priv), "%s %d: " fmt,			\
-+			__func__, __LINE__, ##args);			\
-+} while (0)
-+
-+#define LOG_WARNING(priv, src, fmt, args...)				\
-+do {									\
-+	if (iwmct_logdefs[LOG_SRC_ ## src] & BIT(LOG_SEV_WARNING))	\
-+		dev_warn(priv2dev(priv), "%s %d: " fmt,			\
-+			 __func__, __LINE__, ##args);			\
-+} while (0)
-+
-+#define LOG_INFO(priv, src, fmt, args...)				\
-+do {									\
-+	if (iwmct_logdefs[LOG_SRC_ ## src] & BIT(LOG_SEV_INFO))		\
-+		dev_info(priv2dev(priv), "%s %d: " fmt,			\
-+			 __func__, __LINE__, ##args);			\
-+} while (0)
-+
-+#define LOG_INFOEX(priv, src, fmt, args...)				\
-+do {									\
-+	if (iwmct_logdefs[LOG_SRC_ ## src] & BIT(LOG_SEV_INFOEX))	\
-+		dev_dbg(priv2dev(priv), "%s %d: " fmt,			\
-+			 __func__, __LINE__, ##args);			\
-+} while (0)
-+
-+#define LOG_HEXDUMP(src, ptr, len)					\
-+do {									\
-+	if (iwmct_logdefs[LOG_SRC_ ## src] & BIT(LOG_SEV_INFOEX))	\
-+		print_hex_dump(KERN_DEBUG, "", DUMP_PREFIX_NONE,	\
-+				16, 1, ptr, len, false);		\
-+} while (0)
-+
-+void iwmct_log_top_message(struct iwmct_priv *priv, u8 *buf, int len);
-+
-+extern u8 iwmct_logdefs[];
-+
-+int iwmct_log_set_filter(u8 src, u8 logmask);
-+int iwmct_log_set_fw_filter(u8 src, u8 logmask);
-+
-+ssize_t show_iwmct_log_level(struct device *d,
-+			struct device_attribute *attr, char *buf);
-+ssize_t store_iwmct_log_level(struct device *d,
-+			struct device_attribute *attr,
-+			const char *buf, size_t count);
-+ssize_t show_iwmct_log_level_fw(struct device *d,
-+			struct device_attribute *attr, char *buf);
-+ssize_t store_iwmct_log_level_fw(struct device *d,
-+			struct device_attribute *attr,
-+			const char *buf, size_t count);
-+
-+#else
-+
-+#define LOG_CRITICAL(priv, src, fmt, args...)
-+#define LOG_ERROR(priv, src, fmt, args...)
-+#define LOG_WARNING(priv, src, fmt, args...)
-+#define LOG_INFO(priv, src, fmt, args...)
-+#define LOG_INFOEX(priv, src, fmt, args...)
-+#define LOG_HEXDUMP(src, ptr, len)
-+
-+static inline void iwmct_log_top_message(struct iwmct_priv *priv,
-+					 u8 *buf, int len) {}
-+static inline int iwmct_log_set_filter(u8 src, u8 logmask) { return 0; }
-+static inline int iwmct_log_set_fw_filter(u8 src, u8 logmask) { return 0; }
-+
-+#endif /* CONFIG_IWMC3200TOP_DEBUG */
-+
-+int log_get_filter_str(char *buf, int size);
-+int log_get_fw_filter_str(char *buf, int size);
-+
-+#endif /* __LOG_H__ */
-diff --git a/drivers/misc/iwmc3200top/main.c b/drivers/misc/iwmc3200top/main.c
-new file mode 100644
-index 0000000..6e4e491
---- /dev/null
-+++ b/drivers/misc/iwmc3200top/main.c
-@@ -0,0 +1,699 @@
-+/*
-+ * iwmc3200top - Intel Wireless MultiCom 3200 Top Driver
-+ * drivers/misc/iwmc3200top/main.c
-+ *
-+ * Copyright (C) 2009 Intel Corporation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License version
-+ * 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-+ * 02110-1301, USA.
-+ *
-+ *
-+ * Author Name: Maxim Grabarnik <maxim.grabarnink-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ *  -
-+ *
-+ */
-+
-+#include <linux/module.h>
-+#include <linux/init.h>
-+#include <linux/kernel.h>
-+#include <linux/debugfs.h>
-+#include <linux/mmc/sdio_ids.h>
-+#include <linux/mmc/sdio_func.h>
-+#include <linux/mmc/sdio.h>
-+
-+#include "iwmc3200top.h"
-+#include "log.h"
-+#include "fw-msg.h"
-+#include "debugfs.h"
-+
-+
-+#define DRIVER_DESCRIPTION "Intel(R) IWMC 3200 Top Driver"
-+#define DRIVER_COPYRIGHT "Copyright (c) 2008 Intel Corporation."
-+
-+#define IWMCT_VERSION "0.1.62"
-+
-+#ifdef REPOSITORY_LABEL
-+#define RL REPOSITORY_LABEL
-+#else
-+#define RL local
-+#endif
-+
-+#ifdef CONFIG_IWMC3200TOP_DEBUG
-+#define VD "-d"
-+#else
-+#define VD
-+#endif
-+
-+#define DRIVER_VERSION IWMCT_VERSION "-"  __stringify(RL) VD
-+
-+MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
-+MODULE_VERSION(DRIVER_VERSION);
-+MODULE_LICENSE("GPL");
-+MODULE_AUTHOR(DRIVER_COPYRIGHT);
-+
-+
-+/* FIXME: These can be found in sdio_ids.h in newer kernels */
-+#ifndef SDIO_INTEL_VENDOR_ID
-+#define SDIO_INTEL_VENDOR_ID			0x0089
-+#endif
-+#ifndef SDIO_DEVICE_ID_INTEL_IWMC3200TOP
-+#define SDIO_DEVICE_ID_INTEL_IWMC3200TOP	0x1404
-+#endif
-+
-+/*
-+ * This workers main task is to wait for OP_OPR_ALIVE
-+ * from TOP FW until ALIVE_MSG_TIMOUT timeout is elapsed.
-+ * When OP_OPR_ALIVE received it will issue
-+ * a call to "bus_rescan_devices".
-+ */
-+static void iwmct_rescan_worker(struct work_struct *ws)
-+{
-+	struct iwmct_priv *priv;
-+	int ret;
-+
-+	priv = container_of(ws, struct iwmct_priv, bus_rescan_worker);
-+
-+	LOG_INFO(priv, FW_MSG, "Calling bus_rescan\n");
-+
-+	ret = bus_rescan_devices(priv->func->dev.bus);
-+	if (ret < 0)
-+		LOG_INFO(priv, FW_DOWNLOAD, "bus_rescan_devices FAILED!!!\n");
-+}
-+
-+static void op_top_message(struct iwmct_priv *priv, struct top_msg *msg)
-+{
-+	switch (msg->hdr.opcode) {
-+	case OP_OPR_ALIVE:
-+		LOG_INFO(priv, FW_MSG, "Got ALIVE from device, wake rescan\n");
-+		queue_work(priv->bus_rescan_wq, &priv->bus_rescan_worker);
-+		break;
-+	default:
-+		LOG_INFO(priv, FW_MSG, "Received msg opcode 0x%X\n",
-+			msg->hdr.opcode);
-+		break;
-+	}
-+}
-+
-+
-+static void handle_top_message(struct iwmct_priv *priv, u8 *buf, int len)
-+{
-+	struct top_msg *msg;
-+
-+	msg = (struct top_msg *)buf;
-+
-+	if (msg->hdr.type != COMM_TYPE_D2H) {
-+		LOG_ERROR(priv, FW_MSG,
-+			"Message from TOP with invalid message type 0x%X\n",
-+			msg->hdr.type);
-+		return;
-+	}
-+
-+	if (len < sizeof(msg->hdr)) {
-+		LOG_ERROR(priv, FW_MSG,
-+			"Message from TOP is too short for message header "
-+			"received %d bytes, expected at least %zd bytes\n",
-+			len, sizeof(msg->hdr));
-+		return;
-+	}
-+
-+	if (len < le16_to_cpu(msg->hdr.length) + sizeof(msg->hdr)) {
-+		LOG_ERROR(priv, FW_MSG,
-+			"Message length (%d bytes) is shorter than "
-+			"in header (%d bytes)\n",
-+			len, le16_to_cpu(msg->hdr.length));
-+		return;
-+	}
-+
-+	switch (msg->hdr.category) {
-+	case COMM_CATEGORY_OPERATIONAL:
-+		op_top_message(priv, (struct top_msg *)buf);
-+		break;
-+
-+	case COMM_CATEGORY_DEBUG:
-+	case COMM_CATEGORY_TESTABILITY:
-+	case COMM_CATEGORY_DIAGNOSTICS:
-+		iwmct_log_top_message(priv, buf, len);
-+		break;
-+
-+	default:
-+		LOG_ERROR(priv, FW_MSG,
-+			"Message from TOP with unknown category 0x%X\n",
-+			msg->hdr.category);
-+		break;
-+	}
-+}
-+
-+int iwmct_send_hcmd(struct iwmct_priv *priv, u8 *cmd, u16 len)
-+{
-+	int ret;
-+	u8 *buf;
-+
-+	LOG_INFOEX(priv, FW_MSG, "Sending hcmd:\n");
-+
-+	/* add padding to 256 for IWMC */
-+	((struct top_msg *)cmd)->hdr.flags |= CMD_FLAG_PADDING_256;
-+
-+	LOG_HEXDUMP(FW_MSG, cmd, len);
-+
-+	if (len > FW_HCMD_BLOCK_SIZE) {
-+		LOG_ERROR(priv, FW_MSG, "size %d exceeded hcmd max size %d\n",
-+			  len, FW_HCMD_BLOCK_SIZE);
-+		return -1;
-+	}
-+
-+	buf = kzalloc(FW_HCMD_BLOCK_SIZE, GFP_KERNEL);
-+	if (!buf) {
-+		LOG_ERROR(priv, FW_MSG, "kzalloc error, buf size %d\n",
-+			  FW_HCMD_BLOCK_SIZE);
-+		return -1;
-+	}
-+
-+	memcpy(buf, cmd, len);
-+
-+	sdio_claim_host(priv->func);
-+	ret = sdio_memcpy_toio(priv->func, IWMC_SDIO_DATA_ADDR, buf,
-+			       FW_HCMD_BLOCK_SIZE);
-+	sdio_release_host(priv->func);
-+
-+	kfree(buf);
-+	return ret;
-+}
-+
-+int iwmct_tx(struct iwmct_priv *priv, unsigned int addr,
-+	void *src, int count)
-+{
-+	int ret;
-+
-+	sdio_claim_host(priv->func);
-+	ret = sdio_memcpy_toio(priv->func, addr, src, count);
-+	sdio_release_host(priv->func);
-+
-+	return ret;
-+}
-+
-+static void iwmct_irq_read_worker(struct work_struct *ws)
-+{
-+	struct iwmct_priv *priv;
-+	struct iwmct_work_struct *read_req;
-+	__le32 *buf = NULL;
-+	int ret;
-+	int iosize;
-+	u32 barker;
-+	bool is_barker;
-+
-+	priv = container_of(ws, struct iwmct_priv, isr_worker);
-+
-+	LOG_INFO(priv, IRQ, "enter iwmct_irq_read_worker %p\n", ws);
-+
-+	/* --------------------- Handshake with device -------------------- */
-+	sdio_claim_host(priv->func);
-+
-+	/* all list manipulations have to be protected by
-+	 * sdio_claim_host/sdio_release_host */
-+	if (list_empty(&priv->read_req_list)) {
-+		LOG_ERROR(priv, IRQ, "read_req_list empty in read worker\n");
-+		goto exit_release;
-+	}
-+
-+	read_req = list_entry(priv->read_req_list.next,
-+			      struct iwmct_work_struct, list);
-+
-+	list_del(&read_req->list);
-+	iosize = read_req->iosize;
-+	kfree(read_req);
-+
-+	buf = kzalloc(iosize, GFP_KERNEL);
-+	if (!buf) {
-+		LOG_ERROR(priv, IRQ, "kzalloc error, buf size %d\n", iosize);
-+		goto exit_release;
-+	}
-+
-+	LOG_INFO(priv, IRQ, "iosize=%d, buf=%p, func=%d\n",
-+				iosize, buf, priv->func->num);
-+
-+	/* read from device */
-+	ret = sdio_memcpy_fromio(priv->func, buf, IWMC_SDIO_DATA_ADDR, iosize);
-+	if (ret) {
-+		LOG_ERROR(priv, IRQ, "error %d reading buffer\n", ret);
-+		goto exit_release;
-+	}
-+
-+	LOG_HEXDUMP(IRQ, (u8 *)buf, iosize);
-+
-+	barker = le32_to_cpu(buf[0]);
-+
-+	/* Verify whether it's a barker and if not - treat as regular Rx */
-+	if (barker == IWMC_BARKER_ACK ||
-+	    (barker & BARKER_DNLOAD_BARKER_MSK) == IWMC_BARKER_REBOOT) {
-+
-+		/* Valid Barker is equal on first 4 dwords */
-+		is_barker = (buf[1] == buf[0]) &&
-+			    (buf[2] == buf[0]) &&
-+			    (buf[3] == buf[0]);
-+
-+		if (!is_barker) {
-+			LOG_WARNING(priv, IRQ,
-+				"Potentially inconsistent barker "
-+				"%08X_%08X_%08X_%08X\n",
-+				le32_to_cpu(buf[0]), le32_to_cpu(buf[1]),
-+				le32_to_cpu(buf[2]), le32_to_cpu(buf[3]));
-+		}
-+	} else {
-+		is_barker = false;
-+	}
-+
-+	/* Handle Top CommHub message */
-+	if (!is_barker) {
-+		sdio_release_host(priv->func);
-+		handle_top_message(priv, (u8 *)buf, iosize);
-+		goto exit;
-+	} else if (barker == IWMC_BARKER_ACK) { /* Handle barkers */
-+		if (atomic_read(&priv->dev_sync) == 0) {
-+			LOG_ERROR(priv, IRQ,
-+				  "ACK barker arrived out-of-sync\n");
-+			goto exit_release;
-+		}
-+
-+		/* Continuing to FW download (after Sync is completed)*/
-+		atomic_set(&priv->dev_sync, 0);
-+		LOG_INFO(priv, IRQ, "ACK barker arrived "
-+				"- starting FW download\n");
-+	} else { /* REBOOT barker */
-+		LOG_INFO(priv, IRQ, "Recieved reboot barker: %x\n", barker);
-+		priv->barker = barker;
-+
-+		if (barker & BARKER_DNLOAD_SYNC_MSK) {
-+			/* Send the same barker back */
-+			ret = sdio_memcpy_toio(priv->func, IWMC_SDIO_DATA_ADDR,
-+					       buf, iosize);
-+			if (ret) {
-+				LOG_ERROR(priv, IRQ,
-+					 "error %d echoing barker\n", ret);
-+				goto exit_release;
-+			}
-+			LOG_INFO(priv, IRQ, "Echoing barker to device\n");
-+			atomic_set(&priv->dev_sync, 1);
-+			goto exit_release;
-+		}
-+
-+		/* Continuing to FW download (without Sync) */
-+		LOG_INFO(priv, IRQ, "No sync requested "
-+				    "- starting FW download\n");
-+	}
-+
-+	sdio_release_host(priv->func);
-+
-+
-+	LOG_INFO(priv, IRQ, "barker download request 0x%x is:\n", priv->barker);
-+	LOG_INFO(priv, IRQ, "*******  Top FW %s requested ********\n",
-+			(priv->barker & BARKER_DNLOAD_TOP_MSK) ? "was" : "not");
-+	LOG_INFO(priv, IRQ, "*******  GPS FW %s requested ********\n",
-+			(priv->barker & BARKER_DNLOAD_GPS_MSK) ? "was" : "not");
-+	LOG_INFO(priv, IRQ, "*******  BT FW %s requested ********\n",
-+			(priv->barker & BARKER_DNLOAD_BT_MSK) ? "was" : "not");
-+
-+	if (priv->dbg.fw_download)
-+		iwmct_fw_load(priv);
-+	else
-+		LOG_ERROR(priv, IRQ, "FW download not allowed\n");
-+
-+	goto exit;
-+
-+exit_release:
-+	sdio_release_host(priv->func);
-+exit:
-+	kfree(buf);
-+	LOG_INFO(priv, IRQ, "exit iwmct_irq_read_worker\n");
-+}
-+
-+static void iwmct_irq(struct sdio_func *func)
-+{
-+	struct iwmct_priv *priv;
-+	int val, ret;
-+	int iosize;
-+	int addr = IWMC_SDIO_INTR_GET_SIZE_ADDR;
-+	struct iwmct_work_struct *read_req;
-+
-+	priv = sdio_get_drvdata(func);
-+
-+	LOG_INFO(priv, IRQ, "enter iwmct_irq\n");
-+
-+	/* read the function's status register */
-+	val = sdio_readb(func, IWMC_SDIO_INTR_STATUS_ADDR, &ret);
-+
-+	LOG_INFO(priv, IRQ, "iir value = %d, ret=%d\n", val, ret);
-+
-+	if (!val) {
-+		LOG_ERROR(priv, IRQ, "iir = 0, exiting ISR\n");
-+		goto exit_clear_intr;
-+	}
-+
-+
-+	/*
-+	 * read 2 bytes of the transaction size
-+	 * IMPORTANT: sdio transaction size has to be read before clearing
-+	 * sdio interrupt!!!
-+	 */
-+	val = sdio_readb(priv->func, addr++, &ret);
-+	iosize = val;
-+	val = sdio_readb(priv->func, addr++, &ret);
-+	iosize += val << 8;
-+
-+	LOG_INFO(priv, IRQ, "READ size %d\n", iosize);
-+
-+	if (iosize == 0) {
-+		LOG_ERROR(priv, IRQ, "READ size %d, exiting ISR\n", iosize);
-+		goto exit_clear_intr;
-+	}
-+
-+	/* allocate a work structure to pass iosize to the worker */
-+	read_req = kzalloc(sizeof(struct iwmct_work_struct), GFP_KERNEL);
-+	if (!read_req) {
-+		LOG_ERROR(priv, IRQ, "failed to allocate read_req, exit ISR\n");
-+		goto exit_clear_intr;
-+	}
-+
-+	INIT_LIST_HEAD(&read_req->list);
-+	read_req->iosize = iosize;
-+
-+	list_add_tail(&priv->read_req_list, &read_req->list);
-+
-+	/* clear the function's interrupt request bit (write 1 to clear) */
-+	sdio_writeb(func, 1, IWMC_SDIO_INTR_CLEAR_ADDR, &ret);
-+
-+	queue_work(priv->wq, &priv->isr_worker);
-+
-+	LOG_INFO(priv, IRQ, "exit iwmct_irq\n");
-+
-+	return;
-+
-+exit_clear_intr:
-+	/* clear the function's interrupt request bit (write 1 to clear) */
-+	sdio_writeb(func, 1, IWMC_SDIO_INTR_CLEAR_ADDR, &ret);
-+}
-+
-+
-+static int blocks;
-+module_param(blocks, int, 0604);
-+MODULE_PARM_DESC(blocks, "max_blocks_to_send");
-+
-+static int dump;
-+module_param(dump, bool, 0604);
-+MODULE_PARM_DESC(dump, "dump_hex_content");
-+
-+static int jump = 1;
-+module_param(jump, bool, 0604);
-+
-+static int direct = 1;
-+module_param(direct, bool, 0604);
-+
-+static int checksum = 1;
-+module_param(checksum, bool, 0604);
-+
-+static int fw_download = 1;
-+module_param(fw_download, bool, 0604);
-+
-+static int block_size = IWMC_SDIO_BLK_SIZE;
-+module_param(block_size, int, 0404);
-+
-+static int download_trans_blks = IWMC_DEFAULT_TR_BLK;
-+module_param(download_trans_blks, int, 0604);
-+
-+static int rubbish_barker;
-+module_param(rubbish_barker, bool, 0604);
-+
-+#ifdef CONFIG_IWMC3200TOP_DEBUG
-+static int log_level[LOG_SRC_MAX];
-+static unsigned int log_level_argc;
-+module_param_array(log_level, int, &log_level_argc, 0604);
-+MODULE_PARM_DESC(log_level, "log_level");
-+
-+static int log_level_fw[FW_LOG_SRC_MAX];
-+static unsigned int log_level_fw_argc;
-+module_param_array(log_level_fw, int, &log_level_fw_argc, 0604);
-+MODULE_PARM_DESC(log_level_fw, "log_level_fw");
-+#endif
-+
-+void iwmct_dbg_init_params(struct iwmct_priv *priv)
-+{
-+#ifdef CONFIG_IWMC3200TOP_DEBUG
-+	int i;
-+
-+	for (i = 0; i < log_level_argc; i++) {
-+		dev_notice(&priv->func->dev, "log_level[%d]=0x%X\n",
-+						i, log_level[i]);
-+		iwmct_log_set_filter((log_level[i] >> 8) & 0xFF,
-+			       log_level[i] & 0xFF);
-+	}
-+	for (i = 0; i < log_level_fw_argc; i++) {
-+		dev_notice(&priv->func->dev, "log_level_fw[%d]=0x%X\n",
-+						i, log_level_fw[i]);
-+		iwmct_log_set_fw_filter((log_level_fw[i] >> 8) & 0xFF,
-+				  log_level_fw[i] & 0xFF);
-+	}
-+#endif
-+
-+	priv->dbg.blocks = blocks;
-+	LOG_INFO(priv, INIT, "blocks=%d\n", blocks);
-+	priv->dbg.dump = (bool)dump;
-+	LOG_INFO(priv, INIT, "dump=%d\n", dump);
-+	priv->dbg.jump = (bool)jump;
-+	LOG_INFO(priv, INIT, "jump=%d\n", jump);
-+	priv->dbg.direct = (bool)direct;
-+	LOG_INFO(priv, INIT, "direct=%d\n", direct);
-+	priv->dbg.checksum = (bool)checksum;
-+	LOG_INFO(priv, INIT, "checksum=%d\n", checksum);
-+	priv->dbg.fw_download = (bool)fw_download;
-+	LOG_INFO(priv, INIT, "fw_download=%d\n", fw_download);
-+	priv->dbg.block_size = block_size;
-+	LOG_INFO(priv, INIT, "block_size=%d\n", block_size);
-+	priv->dbg.download_trans_blks = download_trans_blks;
-+	LOG_INFO(priv, INIT, "download_trans_blks=%d\n", download_trans_blks);
-+}
-+
-+/*****************************************************************************
-+ *
-+ * sysfs attributes
-+ *
-+ *****************************************************************************/
-+static ssize_t show_iwmct_fw_version(struct device *d,
-+				  struct device_attribute *attr, char *buf)
-+{
-+	struct iwmct_priv *priv = dev_get_drvdata(d);
-+	return sprintf(buf, "%s\n", priv->dbg.label_fw);
-+}
-+static DEVICE_ATTR(cc_label_fw, S_IRUGO, show_iwmct_fw_version, NULL);
-+
-+#ifdef CONFIG_IWMC3200TOP_DEBUG
-+static DEVICE_ATTR(log_level, S_IWUSR | S_IRUGO,
-+		   show_iwmct_log_level, store_iwmct_log_level);
-+static DEVICE_ATTR(log_level_fw, S_IWUSR | S_IRUGO,
-+		   show_iwmct_log_level_fw, store_iwmct_log_level_fw);
-+#endif
-+
-+static struct attribute *iwmct_sysfs_entries[] = {
-+	&dev_attr_cc_label_fw.attr,
-+#ifdef CONFIG_IWMC3200TOP_DEBUG
-+	&dev_attr_log_level.attr,
-+	&dev_attr_log_level_fw.attr,
-+#endif
-+	NULL
-+};
-+
-+static struct attribute_group iwmct_attribute_group = {
-+	.name = NULL,		/* put in device directory */
-+	.attrs = iwmct_sysfs_entries,
-+};
-+
-+
-+static int iwmct_probe(struct sdio_func *func,
-+			   const struct sdio_device_id *id)
-+{
-+	struct iwmct_priv *priv;
-+	int ret;
-+	int val = 1;
-+	int addr = IWMC_SDIO_INTR_ENABLE_ADDR;
-+
-+	dev_dbg(&func->dev, "enter iwmct_probe\n");
-+
-+	dev_dbg(&func->dev, "IRQ polling period id %u msecs, HZ is %d\n",
-+		jiffies_to_msecs(2147483647), HZ);
-+
-+	priv = kzalloc(sizeof(struct iwmct_priv), GFP_KERNEL);
-+	if (!priv) {
-+		dev_err(&func->dev, "kzalloc error\n");
-+		return -ENOMEM;
-+	}
-+	priv->func = func;
-+	sdio_set_drvdata(func, priv);
-+
-+
-+	/* create drivers work queue */
-+	priv->wq = create_workqueue(DRV_NAME "_wq");
-+	priv->bus_rescan_wq = create_workqueue(DRV_NAME "_rescan_wq");
-+	INIT_WORK(&priv->bus_rescan_worker, iwmct_rescan_worker);
-+	INIT_WORK(&priv->isr_worker, iwmct_irq_read_worker);
-+
-+	init_waitqueue_head(&priv->wait_q);
-+
-+	sdio_claim_host(func);
-+	/* FIXME: Remove after it is fixed in the Boot ROM upgrade */
-+	func->enable_timeout = 10;
-+
-+	/* In our HW, setting the block size also wakes up the boot rom. */
-+	ret = sdio_set_block_size(func, priv->dbg.block_size);
-+	if (ret) {
-+		LOG_ERROR(priv, INIT,
-+			"sdio_set_block_size() failure: %d\n", ret);
-+		goto error_sdio_enable;
-+	}
-+
-+	ret = sdio_enable_func(func);
-+	if (ret) {
-+		LOG_ERROR(priv, INIT, "sdio_enable_func() failure: %d\n", ret);
-+		goto error_sdio_enable;
-+	}
-+
-+	/* init reset and dev_sync states */
-+	atomic_set(&priv->reset, 0);
-+	atomic_set(&priv->dev_sync, 0);
-+
-+	/* init read req queue */
-+	INIT_LIST_HEAD(&priv->read_req_list);
-+
-+	/* process configurable parameters */
-+	iwmct_dbg_init_params(priv);
-+	ret = sysfs_create_group(&func->dev.kobj, &iwmct_attribute_group);
-+	if (ret) {
-+		LOG_ERROR(priv, INIT, "Failed to register attributes and "
-+			 "initialize module_params\n");
-+		goto error_dev_attrs;
-+	}
-+
-+	iwmct_dbgfs_register(priv, DRV_NAME);
-+
-+	if (!priv->dbg.direct && priv->dbg.download_trans_blks > 8) {
-+		LOG_INFO(priv, INIT,
-+			 "Reducing transaction to 8 blocks = 2K (from %d)\n",
-+			 priv->dbg.download_trans_blks);
-+		priv->dbg.download_trans_blks = 8;
-+	}
-+	priv->trans_len = priv->dbg.download_trans_blks * priv->dbg.block_size;
-+	LOG_INFO(priv, INIT, "Transaction length = %d\n", priv->trans_len);
-+
-+	ret = sdio_claim_irq(func, iwmct_irq);
-+	if (ret) {
-+		LOG_ERROR(priv, INIT, "sdio_claim_irq() failure: %d\n", ret);
-+		goto error_claim_irq;
-+	}
-+
-+
-+	/* Enable function's interrupt */
-+	sdio_writeb(priv->func, val, addr, &ret);
-+	if (ret) {
-+		LOG_ERROR(priv, INIT, "Failure writing to "
-+			  "Interrupt Enable Register (%d): %d\n", addr, ret);
-+		goto error_enable_int;
-+	}
-+
-+	sdio_release_host(func);
-+
-+	LOG_INFO(priv, INIT, "exit iwmct_probe\n");
-+
-+	return ret;
-+
-+error_enable_int:
-+	sdio_release_irq(func);
-+error_claim_irq:
-+	sdio_disable_func(func);
-+error_dev_attrs:
-+	iwmct_dbgfs_unregister(priv->dbgfs);
-+	sysfs_remove_group(&func->dev.kobj, &iwmct_attribute_group);
-+error_sdio_enable:
-+	sdio_release_host(func);
-+	return ret;
-+}
-+
-+static void iwmct_remove(struct sdio_func *func)
-+{
-+	struct iwmct_work_struct *read_req;
-+	struct iwmct_priv *priv = sdio_get_drvdata(func);
-+
-+	priv = sdio_get_drvdata(func);
-+
-+	LOG_INFO(priv, INIT, "enter\n");
-+
-+	sdio_claim_host(func);
-+	sdio_release_irq(func);
-+	sdio_release_host(func);
-+
-+	/* Safely destroy osc workqueue */
-+	destroy_workqueue(priv->bus_rescan_wq);
-+	destroy_workqueue(priv->wq);
-+
-+	sdio_claim_host(func);
-+	sdio_disable_func(func);
-+	sysfs_remove_group(&func->dev.kobj, &iwmct_attribute_group);
-+	iwmct_dbgfs_unregister(priv->dbgfs);
-+	sdio_release_host(func);
-+
-+	/* free read requests */
-+	while (!list_empty(&priv->read_req_list)) {
-+		read_req = list_entry(priv->read_req_list.next,
-+			struct iwmct_work_struct, list);
-+
-+		list_del(&read_req->list);
-+		kfree(read_req);
-+	}
-+
-+	kfree(priv);
-+}
-+
-+
-+static const struct sdio_device_id iwmct_ids[] = {
-+	{ SDIO_DEVICE(SDIO_INTEL_VENDOR_ID, SDIO_DEVICE_ID_INTEL_IWMC3200TOP)},
-+	{ /* end: all zeroes */	},
-+};
-+
-+MODULE_DEVICE_TABLE(sdio, iwmct_ids);
-+
-+static struct sdio_driver iwmct_driver = {
-+	.probe		= iwmct_probe,
-+	.remove		= iwmct_remove,
-+	.name		= DRV_NAME,
-+	.id_table	= iwmct_ids,
-+};
-+
-+static int __init iwmct_init(void)
-+{
-+	int rc;
-+
-+	/* Default log filter settings */
-+	iwmct_log_set_filter(LOG_SRC_ALL, LOG_SEV_FILTER_RUNTIME);
-+	iwmct_log_set_filter(LOG_SRC_FW_MSG, LOG_SEV_FILTER_ALL);
-+	iwmct_log_set_fw_filter(LOG_SRC_ALL, FW_LOG_SEV_FILTER_RUNTIME);
-+
-+	rc = sdio_register_driver(&iwmct_driver);
-+
-+	return rc;
-+}
-+
-+static void __exit iwmct_exit(void)
-+{
-+	sdio_unregister_driver(&iwmct_driver);
-+}
-+
-+module_init(iwmct_init);
-+module_exit(iwmct_exit);
-+
--- 
-1.6.0.6
+http://www.beagleboard.org/uploads/2.6_kernel_revb-v2.tar.gz
 
----------------------------------------------------------------------
-Intel Israel (74) Limited
+seems to have SDIO support in omap_hsmmc.c/h. Both in attachment.
 
-This e-mail and any attachments may contain confidential material for
-the sole use of the intended recipient(s). Any review or distribution
-by others is strictly prohibited. If you are not the intended
-recipient, please contact the sender and delete all copies.
+Having a short look to it:
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+- enable_sdio_irq()/int_enable() seems to be done the same way
+
+- interrupt acknowledge in irq handler seems to be done the same way 
+as we do it, too
+
+but
+
+- IBG bit doesn't seem to be used (?)
+
+- SDIO interrupt is additionally enabled in mmc_omap_start_command()
+
+Anything more?
+
+Cheers
+
+Dirk
+
+> On Fri, Oct 16, 2009 at 3:14 PM, Madhusudhan <madhu.cr@ti.com> wrote:
+>>
+>>> -----Original Message-----
+>>> From: Dirk Behme [mailto:dirk.behme@googlemail.com]
+>>> Sent: Friday, October 16, 2009 2:28 PM
+>>> To: Madhusudhan Chikkature
+>>> Cc: linux-mmc@vger.kernel.org; John Rigby; linux-omap@vger.kernel.org;
+>>> Steve Sakoman
+>>> Subject: Re: MMC_CAP_SDIO_IRQ for omap 3430
+>>>
+>>> Madhusudhan Chikkature wrote:
+>>>> Hi Dirk,
+>>>>
+>>>> I am inlining the patch so that it helps review.
+>>> ...
+>>>> @@ -1165,8 +1178,15 @@ static void omap_hsmmc_set_ios(struct mm
+>>>>             break;
+>>>>     case MMC_BUS_WIDTH_4:
+>>>>             OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
+>>>> -           OMAP_HSMMC_WRITE(host->base, HCTL,
+>>>> -                   OMAP_HSMMC_READ(host->base, HCTL) | FOUR_BIT);
+>>>> +           if (mmc_card_sdio(host->mmc->card)) {
+>>>>
+>>>> I wish it could be moved to "enable_sdio_irq" so that we can avoid
+>>> inclusion of
+>>>> card.h and checking the type of card in the host controller driver.
+>>> Yes, this would be the real clean way. But ...
+>>>
+>>>> But the
+>>>> dependancy on 4-bit seems to be a problem here.
+>>> ... most probably we have to find a workaround until (if ever?) above
+>>> clean implementation is available.
+>>>
+>>> What we need is after SDIO mode and bus width is known, and before the
+>>> first interrupt comes, to set IBG.
+>>>
+>>>> On the problems being discussed on testing is the interrupt source
+>>> geting
+>>>> cleared at the SDIO card level upon genaration of the CIRQ? If not it
+>>> remains
+>>>> asserted.
+>>> Yes, this seems to be exactly the problem John reports in his follow
+>>> up mail.
+>>>
+>>> Any hint how to clear SDIO interrupt?
+>>>
+>> On the controller side I guess it is cleared when you pass "disable" in the
+>> enable_sdio_irq" fn. This happens when you call mmc_signal_sdio_irq.
+>>
+>> I am not too sure about how it gets disabled from the card side. I see that
+>> SDIO core has a function "sdio_release_irq" which is used by the sdio uart
+>> driver. The usage of this could give a clue.
+>>
+>> Regards,
+>> Madhu
+>>
+>>> Many thanks
+>>>
+>>> Dirk
+>>>
+>>>> +                   OMAP_HSMMC_WRITE(host->base, HCTL,
+>>>> +                                    OMAP_HSMMC_READ(host->base, HCTL)
+>>>> +                                    | IBG | FOUR_BIT);
+>>>> +           } else {
+>>>> +                   OMAP_HSMMC_WRITE(host->base, HCTL,
+>>>> +                                    OMAP_HSMMC_READ(host->base, HCTL)
+>>>> +                                    | FOUR_BIT);
+>>>> +           }
+>>>>             break;
+>>>>     case MMC_BUS_WIDTH_1:
+>>>>             OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
+>>>> @@ -1512,6 +1532,24 @@ static int omap_hsmmc_disable_fclk(struc
+>>>>     return 0;
+>>>>  }
+>>>>
+>>>> +static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int
+>>> enable)
+>>>> +{
+>>>> +   struct omap_hsmmc_host *host = mmc_priv(mmc);
+>>>> +   u32 ie, ise;
+>>>> +
+>>>> +   ise = OMAP_HSMMC_READ(host->base, ISE);
+>>>> +   ie  = OMAP_HSMMC_READ(host->base, IE);
+>>>> +
+>>>> +   if (enable) {
+>>>> +           OMAP_HSMMC_WRITE(host->base, ISE, ise | CIRQ_ENABLE);
+>>>> +           OMAP_HSMMC_WRITE(host->base, IE,  ie  | CIRQ_ENABLE);
+>>>> +   } else {
+>>>> +           OMAP_HSMMC_WRITE(host->base, ISE, ise & ~CIRQ_ENABLE);
+>>>> +           OMAP_HSMMC_WRITE(host->base, IE,  ie  & ~CIRQ_ENABLE);
+>>>> +   }
+>>>> +
+>>>> +}
+>>>> +
+>>>>  static const struct mmc_host_ops omap_hsmmc_ops = {
+>>>>     .enable = omap_hsmmc_enable_fclk,
+>>>>     .disable = omap_hsmmc_disable_fclk,
+>>>> @@ -1519,7 +1557,7 @@ static const struct mmc_host_ops omap_hs
+>>>>     .set_ios = omap_hsmmc_set_ios,
+>>>>     .get_cd = omap_hsmmc_get_cd,
+>>>>     .get_ro = omap_hsmmc_get_ro,
+>>>> -   /* NYET -- enable_sdio_irq */
+>>>> +   .enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+>>>>  };
+>>>>
+>>>>  static const struct mmc_host_ops omap_hsmmc_ps_ops = {
+>>>> @@ -1529,7 +1567,7 @@ static const struct mmc_host_ops omap_hs
+>>>>     .set_ios = omap_hsmmc_set_ios,
+>>>>     .get_cd = omap_hsmmc_get_cd,
+>>>>     .get_ro = omap_hsmmc_get_ro,
+>>>> -   /* NYET -- enable_sdio_irq */
+>>>> +   .enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+>>>>  };
+>>>>
+>>>>  #ifdef CONFIG_DEBUG_FS
+>>>> @@ -1734,7 +1772,7 @@ static int __init omap_hsmmc_probe(struc
+>>>>     mmc->max_seg_size = mmc->max_req_size;
+>>>>
+>>>>     mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+>>>> -                MMC_CAP_WAIT_WHILE_BUSY;
+>>>> +                MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_SDIO_IRQ;
+>>>>
+>>>>     if (mmc_slot(host).wires >= 8)
+>>>>             mmc->caps |= MMC_CAP_8_BIT_DATA;
+>>>>
+>>>>
+>>>>
+>>>>
+>>>>
+>>>>> John Rigby wrote:
+>>>>>> I have seen several discussions about lack of sdio irq support in the
+>>>>>> hsmmc driver but no patches.  Has anyone on this list implemented this
+>>>>>> and/or can anyone point me to patches?
+>>>>> What a coincidence ;)
+>>>>>
+>>>>> I'm currently working on this. See attachment what I currently have.
+>>>>> It is compile tested only against recent omap linux head. I don't have
+>>>>> a board using SDIO at the moment, so no real testing possible :(
+>>>>>
+>>>>> Some background, maybe it helps people to step in:
+>>>>>
+>>>>> Gumstix OMAP3 based Overo air board connects Marvell 88W8686 wifi by
+>>>>> MMC port 2 in 4 bit configuration [1]. The wifi performance is quite
+>>>>> bad (~100kB/s). There is some rumor that this might be SDIO irq
+>>>>> related [2]. There was an attempt to fix this [3] already, but this
+>>>>> doesn't work [4]. Having this, I started to look into it.
+>>>>>
+>>>>> I used [3], the TI Davinci driver [5] (supporting SDIO irq), the SDIO
+>>>>> Simplified Specification [6] and the OMAP35x TRM [7] as starting
+>>> points.
+>>>>> Unfortunately, the Davinci MMC registers and irqs are different
+>>>>> (Davinci has a dedicated SDIO irq). But combining [3] and [5] helps to
+>>>>> get an idea what has to be done.
+>>>>>
+>>>>> I think the main issues of [3] were that it doesn't enable IBG for 4
+>>>>> bit mode ([6] chapter 8.1.2) and that mmc_omap_irq() doesn't reset the
+>>>>> irq bits.
+>>>>>
+>>>>> Topics I still open:
+>>>>>
+>>>>> - Is it always necessary to deal with IE _and_ ISE register? I'm not
+>>>>> totally clear what the difference between these two registers are ;)
+>>>>> And in which order they have to be set.
+>>>>>
+>>>>> - Davinci driver [5] in line 1115 checks for data line to call
+>>>>> mmc_signal_sdio_irq() for irq enable.
+>>>>>
+>>>>> - Davinci driver deals with SDIO in xfer_done() (line 873)
+>>>>>
+>>>>> - Davinci driver sets block size to 64 if SDIO in line 701
+>>>>>
+>>>>> It would be quite nice if anybody likes to comment on attachment and
+>>>>> help testing.
+>>>>>
+>>>>> Many thanks and best regards
+>>>>>
+>>>>> Dirk
+>>>>>
+>>>>> [1] http://gumstix.net/wiki/index.php?title=Overo_Wifi
+>>>>>
+>>>>> [2] http://groups.google.com/group/beagleboard/msg/14e822778c5eeb56
+>>>>>
+>>>>> [3] http://groups.google.com/group/beagleboard/msg/d0eb69f4c20673be
+>>>>>
+>>>>> [4] http://groups.google.com/group/beagleboard/msg/5cdfe2a319531937
+>>>>>
+>>>>> [5]
+>>>>> http://arago-project.org/git/projects/?p=linux-
+>>> davinci.git;a=blob;f=drivers/mmc/host/davinci_mmc.c;h=1bf0587250614c6d8abf
+>>> e02028b96e0e47148ac8;hb=HEAD
+>>>>> [6] http://www.sdcard.org/developers/tech/sdio/sd_bluetooth_spec/
+>>>>>
+>>>>> [7] http://focus.ti.com/lit/ug/spruf98c/spruf98c.pdf
+>>>>>
+>>>>>
+>>>>
+>>>>
+>>
+>>
+> 
+
+
+--------------060304000104020501030605
+Content-Type: text/x-csrc;
+ name="omap_hsmmc.c"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline;
+ filename="omap_hsmmc.c"
+
+/*
+ * drivers/mmc/omap_hsmmc.c
+ *
+ * Driver for OMAP2430/3430 MMC controller.
+ *
+ * Copyright (C) 2006-2007 Texas Instruments, Inc
+ * Author: Texas Instruments
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
+#include <linux/module.h>
+#include <linux/init.h>
+#include <linux/interrupt.h>
+#include <linux/delay.h>
+#include <linux/dma-mapping.h>
+#include <linux/platform_device.h>
+#include <linux/timer.h>
+#include <linux/i2c.h>
+
+#include <linux/mmc/mmc.h>
+#include <linux/mmc/sd.h>
+#include <linux/mmc/sdio.h>
+#include <linux/mmc/host.h>
+#include <linux/mmc/core.h>
+#include <linux/mmc/card.h>
+
+#include <asm/io.h>
+#include <asm/irq.h>
+#include <asm/dma.h>
+#include <asm/mach-types.h>
+#include <asm/arch/twl4030.h>
+#include <asm/hardware.h>
+#include <asm/arch/board.h>
+#include <asm/arch/cpu.h>
+#include <asm/arch/clock.h>
+#include <asm/semaphore.h>
+#include "omap_hsmmc.h"
+#include <asm/scatterlist.h>
+
+#ifdef CONFIG_PM
+#include <linux/notifier.h>
+#include <linux/pm.h>
+#endif
+#ifdef CONFIG_DPM
+#include <linux/dpm.h>
+#endif
+
+/* TAG for Aggressive Power changes in MMC */
+//#define AGGR_PM_CAP 1
+#undef AGGR_PM_CAP
+
+#ifdef AGGR_PM_CAP
+#define mmc_clk_enable_aggressive(host)		mmc_clk_enable(host)
+#define mmc_clk_disable_aggressive(host)	mmc_clk_disable(host)
+#else
+#define mmc_clk_enable_aggressive(host)		/* NULL */
+#define mmc_clk_disable_aggressive(host)	/* NULL */
+#endif
+
+
+#ifdef AGGR_PM_CAP
+/* SYSCONFIG bit values */
+#define OMAP_MMC_SYSCONFIG_CLKACT_IOFF_FOFF	0x0
+#define OMAP_MMC_SYSCONFIG_CLKACT_ION_FOFF	0x1
+#define OMAP_MMC_SYSCONFIG_CLKACT_IOFF_FON	0x2
+#define OMAP_MMC_SYSCONFIG_CLKACT_ION_FON	0x3
+
+#define OMAP_MMC_SYSCONFIG_SIDLE_FORCEIDLE	0x0
+#define OMAP_MMC_SYSCONFIG_SIDLE_NOIDLE		0x1
+#define OMAP_MMC_SYSCONFIG_SIDLE_SMARTIDLE	0x2
+
+#define OMAP_MMC_SYSCONFIG_ENAWAKEUP	0x1
+
+#define OMAP_MMC_SYSCONFIG_AUTOIDLE	0x1
+
+/* SYSCONFIG bit Masks */
+#define OMAP_MMC_SYSCONFIG_CLKACT_SHIFT		0x8
+#define OMAP_MMC_SYSCONFIG_SIDLE_SHIFT		0x3
+#define OMAP_MMC_SYSCONFIG_ENAWAKEUP_SHIFT	0x2
+
+#define OMAP_MMC_SYSCONFIG_LVL1	0x1
+#define OMAP_MMC_SYSCONFIG_LVL2	0x2
+#endif /* #ifdef AGGR_PM_CAP */
+
+#if defined(CONFIG_MACH_OMAP_2430SDP) || \
+	defined(CONFIG_MACH_OMAP_3430SDP) || \
+	defined(CONFIG_MACH_OMAP_3430LABRADOR) || \
+	defined(CONFIG_MACH_OMAP3EVM) || defined(CONFIG_MACH_OMAP3_BEAGLE)
+extern int enable_mmc_power(int slot);
+extern int disable_mmc_power(int slot);
+extern int mask_carddetect_int(int slot);
+extern int unmask_carddetect_int(int slot);
+extern int setup_mmc_carddetect_irq(int irq);
+extern int switch_power_mode(int power_mode);
+
+extern ssize_t mmc_omap_show_cover_switch(struct device *dev, struct
+					device_attribute *attr, char *buf);
+extern ssize_t set_mmc_carddetect(struct device *dev, struct device_attribute
+				*attr, const char *buf, size_t count);
+DEVICE_ATTR(mmc_cover_switch, S_IRUGO, mmc_omap_show_cover_switch, NULL);
+DEVICE_ATTR(mmc_card_detect, S_IWUSR, NULL, set_mmc_carddetect);
+#endif
+
+#define MMC_CARD_NONE 4
+#define MAX_CRC_RETRY 1
+
+struct mmc_omap_host *saved_host1, *saved_host2;
+
+struct mmc_omap_host {
+	int		suspended;
+	struct		mmc_host *mmc;
+	struct		mmc_request *mrq;
+	struct		mmc_command *cmd;
+	struct		mmc_data *data;
+#ifdef CONFIG_OMAP_SDIO
+	struct		mmc_data *sdiodata;
+	int		sdio_card_intr;
+#endif
+	struct		timer_list detect_timer;
+	struct		resource *mem_res;
+	void		__iomem *base;
+	void		*mapbase;
+	struct		clk *fclk, *iclk, *dbclk;
+	/* Required for a 3430 ES1.0 Sil errata fix */
+	struct		clk *gptfck;
+	unsigned int	id;
+	int		irq;
+	int		card_detect_irq;
+	unsigned char	bus_mode;
+	struct		semaphore sem;
+	unsigned char	datadir;
+	u32		*buffer;
+	u32		bytesleft;
+	int		use_dma, dma_ch;
+	unsigned int	dma_len;
+	unsigned int	sg_dma_len;
+	unsigned int	dma_dir;
+	int chain_id;
+	struct omap_dma_channel_params params;
+	u32 chains_requested;/* Number of chains to be requested */
+	u32 extra_chain_reqd;/* if there is a need of last chaining*/
+	u32 no_of_chain_reqd;/*No of times callback called*/
+	u32 current_cb_cnt;
+	int brs_received;
+	int dma_done;
+	int dma_is_read;
+	spinlock_t dma_lock;
+	unsigned int sg_len;
+	int sg_idx;
+	u32 buffer_bytes_left;
+	u32 total_bytes_left;
+	struct		work_struct mmc_carddetect_work;
+	int		initstream;
+	/*Added for CRC retry*/
+	bool card_detected;
+	u32 rca, mod_addr, org_addr;
+	int is_high_capacity;
+	int flag_err, cmd_12,cmd_13, crc_retry;
+};
+
+#ifdef CONFIG_OMAP34XX_OFFMODE
+struct omap_hsmmc_regs {
+	u32 hctl;
+	u32 capa;
+	u32 sysconfig;
+	u32 ise;
+	u32 ie;
+	u32 con;
+	u32 sysctl;
+};
+static struct omap_hsmmc_regs hsmmc_ctx[2];
+#endif /* #ifdef CONFIG_OMAP34XX_OFFMODE */
+
+#ifdef CONFIG_OMAP_SDIO
+static int blkmode_bytecount[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+static int polling_mode = 0;
+static void mmc_omap_polling_command(struct mmc_omap_host *host,
+				struct mmc_command *cmd, u32 cmdreg);
+#endif /* ifdef CONFIG_OMAP_SDIO */
+
+#ifdef CONFIG_MMC_OMAP3430
+static spinlock_t mmc_gpt_lock;
+static int gptfclk_counter;
+#endif /* #ifdef CONFIG_MMC_OMAP3430 */
+
+static int mmc_clk_counter [NO_OF_MMC_HOSTS];
+#define OMAP_MMC_STAT_BRR						  1 << 5
+#define OMAP_MMC_STAT_BWR						  1 << 4
+#define NO_OF_DMA_CHAINS_USED 2//This will work  with 2 chains currently
+
+static void mmc_chain_dma(struct mmc_omap_host *host, struct mmc_data *data);
+static int mmc_omap_get_dma_channel(struct mmc_omap_host *host, struct mmc_data *data);
+
+#ifdef AGGR_PM_CAP
+static int omap_mmc_sysconfig (struct mmc_omap_host *host, int level)
+{
+	u32 sysconfig_val;
+
+	switch (level) {
+	case OMAP_MMC_SYSCONFIG_LVL1:
+		/*
+		 * All features of SYSCONFIG enabled
+		 * Note: MMC has Wakeup capability enabled at reset.
+		 * If this capability is required then care needs to be taken
+		 * for other wakeup related register such as HCTL(IWE bit) and
+		 * interrupts in IE and ISE registers
+		 *
+		 * Clock activity has only FCLK ON
+		 *
+		 * Enabling SmartIdle in ES1.0, pervents CORE from going to
+		 * retention. Hence even Wakeup capability is disabled.
+		 */
+		sysconfig_val = (
+					(OMAP_MMC_SYSCONFIG_CLKACT_IOFF_FON <<
+					OMAP_MMC_SYSCONFIG_CLKACT_SHIFT) |
+					(OMAP_MMC_SYSCONFIG_SIDLE_SMARTIDLE <<
+					OMAP_MMC_SYSCONFIG_SIDLE_SHIFT) |
+					OMAP_MMC_SYSCONFIG_AUTOIDLE
+				);
+
+		OMAP_HSMMC_WRITE(host->base, SYSCONFIG, sysconfig_val);
+		break;
+
+	case OMAP_MMC_SYSCONFIG_LVL2:
+		/*
+		 * Clock activity has ICLK and FCLK OFF
+		 */
+		sysconfig_val = (
+					(OMAP_MMC_SYSCONFIG_CLKACT_IOFF_FOFF <<
+					OMAP_MMC_SYSCONFIG_CLKACT_SHIFT) |
+					OMAP_MMC_SYSCONFIG_AUTOIDLE
+				);
+
+		OMAP_HSMMC_WRITE(host->base, SYSCONFIG, sysconfig_val);
+		break;
+	}
+	return 0;
+}
+#endif /* #ifdef AGGR_PM_CAP */
+
+#ifdef CONFIG_OMAP34XX_OFFMODE
+static void omap2_hsmmc_save_ctx(struct mmc_omap_host *host)
+{
+	/* MMC : context save */
+	hsmmc_ctx[host->id - 1].hctl = OMAP_HSMMC_READ(host->base, HCTL);
+	hsmmc_ctx[host->id - 1].capa = OMAP_HSMMC_READ(host->base, CAPA);
+	hsmmc_ctx[host->id - 1].sysconfig = OMAP_HSMMC_READ(host->base,
+								SYSCONFIG);
+	hsmmc_ctx[host->id - 1].ise = OMAP_HSMMC_READ(host->base, ISE);
+	hsmmc_ctx[host->id - 1].ie = OMAP_HSMMC_READ(host->base, IE);
+	hsmmc_ctx[host->id - 1].con = OMAP_HSMMC_READ(host->base, CON);
+	hsmmc_ctx[host->id - 1].sysctl = OMAP_HSMMC_READ(host->base, SYSCTL);
+}
+
+static void omap2_hsmmc_restore_ctx(struct mmc_omap_host *host)
+{
+	/* MMC : context restore */
+	OMAP_HSMMC_WRITE(host->base, HCTL, hsmmc_ctx[host->id - 1].hctl);
+	OMAP_HSMMC_WRITE(host->base, CAPA, hsmmc_ctx[host->id - 1].capa);
+	OMAP_HSMMC_WRITE(host->base, CON, hsmmc_ctx[host->id - 1].con);
+	OMAP_HSMMC_WRITE(host->base, SYSCONFIG,
+					hsmmc_ctx[host->id - 1].sysconfig);
+	OMAP_HSMMC_WRITE(host->base, ISE, hsmmc_ctx[host->id - 1].ise);
+	OMAP_HSMMC_WRITE(host->base, IE, hsmmc_ctx[host->id - 1].ie);
+	OMAP_HSMMC_WRITE(host->base, SYSCTL, hsmmc_ctx[host->id - 1].sysctl);
+	OMAP_HSMMC_WRITE(host->base, HCTL, OMAP_HSMMC_READ(host->base,
+								HCTL) | SDBP);
+}
+#endif /* #ifdef CONFIG_OMAP34XX_OFFMODE */
+
+static int mmc_clk_enable (struct mmc_omap_host *host)
+{
+	int hostid = host->id - 1;
+
+#ifdef CONFIG_MMC_OMAP3430
+	/* 3430-ES1.0  Sil errata fix */
+	if (is_sil_rev_less_than(OMAP3430_REV_ES2_0)) {
+		spin_lock(&mmc_gpt_lock);
+		if (!gptfclk_counter) {
+			if (clk_enable(host->gptfck) != 0) {
+				dev_dbg(mmc_dev(host->mmc),
+					"Unable to enable gptfck clock \n");
+				goto clk_en_err;
+			}
+		}
+		gptfclk_counter ++;
+		spin_unlock(&mmc_gpt_lock);
+	}
+#endif /* #ifdef CONFIG_MMC_OMAP3430 */
+
+	if (!mmc_clk_counter[hostid]) {
+		if (clk_enable(host->iclk) != 0)
+			goto clk_en_err1;
+
+		if (clk_enable(host->fclk) != 0)
+			goto clk_en_err2;
+
+#ifdef AGGR_PM_CAP
+		omap_mmc_sysconfig (host, OMAP_MMC_SYSCONFIG_LVL1);
+#endif /* #ifdef AGGR_PM_CAP */
+#ifdef CONFIG_OMAP34XX_OFFMODE
+		if (context_restore_required(host->fclk))
+			omap2_hsmmc_restore_ctx(host);
+#endif /* #ifdef CONFIG_OMAP34XX_OFFMODE */
+	}
+	mmc_clk_counter[hostid] ++;
+	return 0;
+
+clk_en_err2:
+	/* On fclk failure */
+	clk_disable(host->iclk);
+
+clk_en_err1:
+	/* On iclk failure */
+#ifdef CONFIG_MMC_OMAP3430
+	if (is_sil_rev_less_than(OMAP3430_REV_ES2_0)) {
+		spin_lock(&mmc_gpt_lock);
+		gptfclk_counter --;
+		if (!gptfclk_counter)
+			clk_disable(host->gptfck);
+		spin_unlock(&mmc_gpt_lock);
+	}
+#endif /* #ifdef CONFIG_MMC_OMAP3430 */
+
+clk_en_err:
+	dev_dbg(mmc_dev(host->mmc),
+		"Unable to enable MMC clocks \n");
+#ifdef CONFIG_MMC_OMAP3430
+	spin_unlock(&mmc_gpt_lock);
+#endif /* #ifdef CONFIG_MMC_OMAP3430 */
+	return -1;
+}
+
+static int mmc_clk_disable (struct mmc_omap_host *host)
+{
+	int hostid = host->id - 1;
+
+	mmc_clk_counter[hostid] --;
+	if (!mmc_clk_counter[hostid]) {
+#ifdef CONFIG_OMAP34XX_OFFMODE
+		omap2_hsmmc_save_ctx(host);
+#endif /* #ifdef CONFIG_OMAP34XX_OFFMODE */
+#ifdef AGGR_PM_CAP
+		omap_mmc_sysconfig (host, OMAP_MMC_SYSCONFIG_LVL2);
+#endif /* #ifdef AGGR_PM_CAP */
+		clk_disable(host->fclk);
+		clk_disable(host->iclk);
+	}
+
+#ifdef CONFIG_MMC_OMAP3430
+	/* 3430-ES1.0  Sil errata fix */
+	if (is_sil_rev_less_than(OMAP3430_REV_ES2_0)) {
+		spin_lock(&mmc_gpt_lock);
+		gptfclk_counter --;
+		if (!gptfclk_counter)
+			clk_disable(host->gptfck);
+		spin_unlock(&mmc_gpt_lock);
+	}
+#endif /* #ifdef CONFIG_MMC_OMAP3430 */
+	return 0;
+}
+
+/*
+ * Stop clock to the card
+ */
+static void omap_mmc_stop_clock(struct mmc_omap_host *host)
+{
+	/* Stop clock to the card */
+	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+			OMAP_HSMMC_READ(host->base, SYSCTL) & ~CEN);
+	if ((OMAP_HSMMC_READ(host->base, SYSCTL) & CEN) != 0x0)
+		dev_dbg(mmc_dev(host->mmc), "MMC clock not stoped,"
+					"clock freq can not be altered\n");
+}
+
+/*
+ * Send init stream sequence to the card before sending IDLE command
+ */
+static void send_init_stream(struct mmc_omap_host *host)
+{
+	int reg = 0, status;
+	typeof(jiffies) timeout;
+
+	disable_irq(host->irq);
+	OMAP_HSMMC_WRITE(host->base, ISE, INT_CLEAR);
+	OMAP_HSMMC_WRITE(host->base, IE, INT_CLEAR);
+
+	OMAP_HSMMC_WRITE(host->base, CON,
+			OMAP_HSMMC_READ(host->base, CON) | INIT_STREAM);
+	OMAP_HSMMC_WRITE(host->base, CMD, INIT_STREAM_CMD);
+
+	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+	while ((reg != CC) && time_before(jiffies, timeout)) {
+		reg = OMAP_HSMMC_READ(host->base, STAT) & CC;
+	}
+
+	OMAP_HSMMC_WRITE(host->base, CON,
+			OMAP_HSMMC_READ(host->base, CON) & ~INIT_STREAM);
+
+	status = OMAP_HSMMC_READ(host->base, STAT);
+	OMAP_HSMMC_WRITE(host->base, STAT, status);
+
+	enable_irq(host->irq);
+}
+
+
+/*
+ * Configure the resptype, cmdtype and send the given command to the card
+ */
+static void
+mmc_omap_start_command18(struct mmc_omap_host *host, struct mmc_command *cmd)
+{
+	int  cmdreg = 0, resptype = 0, cmdtype = 0;
+
+	mmc_clk_enable_aggressive(host);
+	/* Clear status bits and enable interrupts */
+	OMAP_HSMMC_WRITE(host->base, STAT, OMAP_HSMMC_STAT_CLEAR);
+
+	resptype = 2;
+	cmdreg = (MMC_READ_MULTIPLE_BLOCK << 24) | (resptype << 16) | (cmdtype << 22);
+	cmdreg |= DP_SELECT | DDIR | MSBS | BCE | DMA_EN;
+	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
+	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
+	OMAP_HSMMC_WRITE(host->base, ARG, host->mod_addr);
+	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
+}
+
+/*
+ * Configure the resptype, cmdtype and send the given command to the card
+ */
+static void
+mmc_omap_start_command(struct mmc_omap_host *host, struct mmc_command *cmd)
+{
+	int  cmdreg = 0, resptype = 0, cmdtype = 0;
+#ifdef CONFIG_OMAP_SDIO
+	int func = 0, new_size = 0;
+#endif	/* ifdef CONFIG_OMAP_SDIO */
+
+	dev_dbg(mmc_dev(host->mmc), "%s: CMD%d, argument 0x%08x\n",
+			mmc_hostname(host->mmc), cmd->opcode, cmd->arg);
+
+	host->cmd = cmd;
+
+#ifdef CONFIG_OMAP_SDIO
+	if (cmd->opcode == IO_RW_DIRECT) {
+		if ((cmd->arg & IO_RW_DIRECT_MASK) == IO_RW_DIRECT_ARG_MASK)
+			cmdtype = 0x2;
+	}
+#endif	/* ifdef CONFIG_OMAP_SDIO */
+
+	mmc_clk_enable_aggressive(host);
+
+	/* Clear status bits and enable interrupts */
+	OMAP_HSMMC_WRITE(host->base, STAT, OMAP_HSMMC_STAT_CLEAR);
+
+	switch (RSP_TYPE(mmc_resp_type(cmd))) {
+	case RSP_TYPE(MMC_RSP_R1):
+	case RSP_TYPE(MMC_RSP_R3):
+		/* resp 1, resp 1b */
+		resptype = 2;
+		break;
+	case RSP_TYPE(MMC_RSP_R2):
+		resptype = 1;
+		break;
+	default:
+		break;
+	}
+
+	cmdreg = (cmd->opcode << 24) | (resptype << 16) | (cmdtype << 22);
+	if (cmd->opcode == MMC_SEND_CSD)
+		host->rca = cmd->arg;
+	if (cmd->opcode == MMC_READ_MULTIPLE_BLOCK)
+		host->org_addr = cmd->arg;
+
+
+	if (cmd->opcode == MMC_READ_SINGLE_BLOCK
+		|| cmd->opcode == MMC_READ_MULTIPLE_BLOCK
+		|| cmd->opcode == SD_APP_SEND_SCR
+		|| (cmd->opcode == SD_SWITCH && cmd->arg == 0xfffff1)
+		|| (cmd->opcode == SD_SWITCH && cmd->arg == 0x80fffff1)
+		|| (cmd->opcode == MMC_SEND_EXT_CSD && cmd->arg == 0)) {
+
+		if (host->use_dma)
+			cmdreg |= DP_SELECT | DDIR | MSBS | BCE | DMA_EN;
+		else
+			cmdreg |= DP_SELECT | DDIR | MSBS | BCE;
+
+	} else if (cmd->opcode == MMC_WRITE_BLOCK
+		|| cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK) {
+
+		if (host->use_dma)
+			cmdreg |= DP_SELECT | MSBS | BCE | DMA_EN;
+		else
+			cmdreg |= DP_SELECT | MSBS | BCE;
+
+		cmdreg &= ~(DDIR);
+	}
+
+#ifdef CONFIG_OMAP_SDIO
+	/* Handle I/O related command settings */
+	if (cmd->opcode == IO_RW_EXTENDED) {
+
+		if (polling_mode == 1) {
+			return mmc_omap_polling_command(host, cmd, cmdreg);
+		}
+
+		if (cmd->arg & OMAP_SDIO_READ) {
+#ifdef	CONFIG_OMAP_SDIO_NON_DMA_MODE
+			cmdreg |= DP_SELECT;
+#else
+			cmdreg |= DP_SELECT | DMA_EN | BCE | MSBS;
+#endif
+			cmdreg &= ~(DDIR);
+		} else {
+#ifdef	CONFIG_OMAP_SDIO_NON_DMA_MODE
+			cmdreg |= DP_SELECT | DDIR;
+#else
+			cmdreg |= DP_SELECT | DDIR | DMA_EN | BCE | MSBS;
+#endif
+		}
+	}
+
+	if (cmd->opcode == IO_RW_DIRECT) {
+		if (cmd->arg & OMAP_SDIO_READ) {
+			cmdreg &= ~(DDIR);
+			if ((cmd->arg & sdio_blkmode_mask) ==
+					sdio_blkmode_regaddr1) {
+				func = ((cmd->arg & sdio_rw_function_mask)
+					>> 17);
+				new_size = (cmd->arg & 0xFF);
+				blkmode_bytecount[func] =
+					blkmode_bytecount[func] & 0xFF00;
+				blkmode_bytecount[func] =
+					blkmode_bytecount[func] | new_size;
+			} else if ((cmd->arg & sdio_blkmode_mask) ==
+					sdio_blkmode_regaddr2) {
+				func = ((cmd->arg & sdio_rw_function_mask)
+					>> 17);
+				new_size = ((cmd->arg & 0xFF) << 8);
+				blkmode_bytecount[func] =
+					blkmode_bytecount[func] & 0x00FF;
+				blkmode_bytecount[func] =
+					blkmode_bytecount[func] | new_size;
+			} else
+				cmdreg |= DDIR;
+		}
+	}
+
+#endif	/* ifdef CONFIG_OMAP_SDIO */
+	if (cmd->opcode == MMC_GO_IDLE_STATE || cmd->opcode == MMC_SEND_OP_COND
+		|| cmd->opcode == MMC_ALL_SEND_CID)
+		OMAP_HSMMC_WRITE(host->base, CON,
+				OMAP_HSMMC_READ(host->base, CON) | OD);
+
+	if (cmd->opcode == MMC_GO_IDLE_STATE) {
+		if (host->initstream == 0) {
+			send_init_stream(host);
+			host->initstream = 1;
+		}
+	}
+
+#ifdef CONFIG_OMAP_SDIO
+	if (host->sdio_card_intr) {
+		OMAP_HSMMC_WRITE(host->base, ISE, SDIO_CARD_INT_EN_MASK);
+		OMAP_HSMMC_WRITE(host->base, IE, SDIO_CARD_INT_EN_MASK);
+	} else {
+#endif
+	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
+	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
+#ifdef CONFIG_OMAP_SDIO
+	}
+#endif
+
+	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
+	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
+}
+
+#ifdef CONFIG_OMAP_SDIO
+/*
+ * Notify the xfer done on SDIO card to the core
+ */
+static void
+sdio_omap_xfer_done(struct mmc_omap_host *host, struct mmc_data *sdiodata)
+{
+	if (!sdiodata)
+		return;
+#ifndef  CONFIG_OMAP_SDIO_NON_DMA_MODE
+	if (polling_mode == 0)
+		dma_unmap_sg(mmc_dev(host->mmc), host->mrq->data->sg,
+			host->dma_len, host->dma_dir);
+#endif
+	host->data = NULL;
+	host->sdiodata = NULL;
+	host->datadir = OMAP_MMC_DATADIR_NONE;
+
+	mmc_clk_disable_aggressive(host);
+
+	if (!host->cmd) {
+		host->mrq = NULL;
+		mmc_request_done(host->mmc, sdiodata->mrq);
+	}
+	return;
+}
+#endif	/* ifdef CONFIG_OMAP_SDIO */
+
+/*
+ * Notify the xfer done on MMC/SD cards to the core
+ */
+static void
+mmc_omap_xfer_done(struct mmc_omap_host *host, struct mmc_data *data)
+{
+	if(host->use_dma)
+	{
+		/* Un-map the memory required for DMA */
+		dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->sg_len,
+			host->dma_dir);
+	}
+
+	/* Reset the variables as transfer is complete */
+	host->data = NULL;
+	host->sg_len = 0;
+	host->sg_dma_len = 0;
+
+	host->datadir = OMAP_MMC_DATADIR_NONE;
+
+	if (data->error == MMC_ERR_NONE)
+		data->bytes_xfered += data->blocks * (data->blksz);
+	else
+		data->bytes_xfered = 0;
+
+	mmc_clk_disable_aggressive(host);
+
+	if (!data->stop) {
+		host->mrq = NULL;
+		mmc_request_done(host->mmc, data->mrq);
+		return;
+	}
+	/* Send the stop command. Remember FCLK is not stopped before this call */
+	mmc_omap_start_command(host, data->stop);
+}
+
+
+static void
+mmc_omap_end_of_data(struct mmc_omap_host *host, struct mmc_data *data)
+{
+	unsigned long flags;
+	int done;
+
+	if (!host->use_dma) {
+		mmc_omap_xfer_done(host, data);
+		return;
+	}
+	done = 0;
+	spin_lock_irqsave(&host->dma_lock, flags);
+	if (host->dma_done)
+		done = 1;
+	else
+		host->brs_received = 1;
+	spin_unlock_irqrestore(&host->dma_lock, flags);
+
+	if (done)
+		mmc_omap_xfer_done(host, data);
+}
+
+
+static void
+mmc_omap_dma_done(struct mmc_omap_host *host, struct mmc_data *data)
+{
+	unsigned long flags;
+	int done;
+
+	done = 0;
+	spin_lock_irqsave(&host->dma_lock, flags);
+	if (host->brs_received)
+		done = 1;
+	else
+		host->dma_done = 1;
+	spin_unlock_irqrestore(&host->dma_lock, flags);
+	if (done)
+		mmc_omap_xfer_done(host, data);
+}
+
+/*
+ * Notify the core about command completion
+ */
+static void
+mmc_omap_cmd_done(struct mmc_omap_host *host, struct mmc_command *cmd)
+{
+	host->cmd = NULL;
+	if (cmd->flags & MMC_RSP_PRESENT) {
+		if (cmd->flags & MMC_RSP_136) {
+			/* response type 2 */
+			cmd->resp[3] = OMAP_HSMMC_READ(host->base, RSP10);
+			cmd->resp[2] = OMAP_HSMMC_READ(host->base, RSP32);
+			cmd->resp[1] = OMAP_HSMMC_READ(host->base, RSP54);
+			cmd->resp[0] = OMAP_HSMMC_READ(host->base, RSP76);
+		} else {
+			/* response types 1, 1b, 3, 4, 5, 6 */
+			cmd->resp[0] = OMAP_HSMMC_READ(host->base, RSP10);
+		}
+	}
+	if(cmd->opcode == SD_APP_OP_COND)
+	{
+		if(cmd->resp[0] & 0x40000000)
+		{
+			host->is_high_capacity = 1;
+		}
+		else
+		{
+			host->is_high_capacity = 0;
+		}
+	}
+	if(cmd->opcode == MMC_SEND_OP_COND)
+	{
+		if(cmd->resp[0] & 0x40000000)
+		{
+			host->is_high_capacity = 1;
+		}
+		else
+		{
+			host->is_high_capacity = 0;
+		}
+	}
+
+#ifdef CONFIG_OMAP_SDIO
+	if (host->mmc->mode == MMC_MODE_SDIO) {
+		if (host->sdiodata == NULL || cmd->error != MMC_ERR_NONE) {
+			dev_dbg(mmc_dev(host->mmc), "%s: End request, err %x\n",
+					mmc_hostname(host->mmc), cmd->error);
+			host->mrq = NULL;
+
+			mmc_clk_disable_aggressive(host);
+
+			mmc_request_done(host->mmc, cmd->mrq);
+		}
+	} else {
+#endif
+		if (host->data == NULL || cmd->error != MMC_ERR_NONE) {
+			dev_dbg(mmc_dev(host->mmc), "%s: End request, err %x\n",
+					mmc_hostname(host->mmc), cmd->error);
+			host->mrq = NULL;
+
+			mmc_clk_disable_aggressive(host);
+
+			mmc_request_done(host->mmc, cmd->mrq);
+		}
+
+#ifdef CONFIG_OMAP_SDIO
+	}
+#endif
+}
+
+/*
+ * Dma cleaning in case of command errors
+ */
+static void mmc_dma_cleanup(struct mmc_omap_host *host)
+{
+	int dma_ch;
+
+	host->data->error |= MMC_ERR_TIMEOUT;
+
+	if(host->mmc->mode == MMC_MODE_SDIO)
+	{
+		if (host->use_dma && host->dma_ch != -1) {
+			dma_unmap_sg(mmc_dev(host->mmc), host->data->sg, host->dma_len,
+				host->dma_dir);
+			dma_ch = host->dma_ch;
+			host->dma_ch = -1;
+			omap_free_dma(dma_ch);
+
+		}
+	}
+	else
+	{
+		if (host->use_dma) {
+			omap_stop_dma_chain_transfers(host->chain_id);
+			dma_unmap_sg(mmc_dev(host->mmc), host->data->sg, host->sg_len,
+				host->dma_dir);
+			omap_free_dma_chain(host->chain_id);
+			mmc_omap_dma_done(host, host->data);
+			host->chain_id = -1;
+		}
+	}
+	host->data = NULL;
+#ifdef CONFIG_OMAP_SDIO
+	host->sdiodata = NULL;
+#endif
+	host->datadir = OMAP_MMC_DATADIR_NONE;
+}
+
+#if defined(CONFIG_OMAP_SDIO) && defined(CONFIG_OMAP_SDIO_NON_DMA_MODE)
+/*
+ * Sdio non dma mode data transfer function
+ */
+static void sdio_non_dma_xfer(struct mmc_omap_host *host)
+{
+	int i, readCnt, bytec;
+	typeof(jiffies) timeout;
+
+	if (host->cmd) {
+		timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+
+		if (host->cmd->opcode == IO_RW_EXTENDED) {
+			bytec = (host->cmd->arg & 0x1FF);
+
+			if (bytec == 0)
+				bytec = 0x200;
+
+			readCnt = (bytec / 4);
+
+			if (bytec % 4)
+				readCnt++;
+
+			if (host->cmd->arg & OMAP_SDIO_READ) {
+				while (((OMAP_HSMMC_READ(host->base, PSTATE)
+					& BWE) != BRW)
+					&& time_before(jiffies, timeout));
+
+				for (i = 0; i < readCnt; i++)
+					OMAP_HSMMC_WRITE(host->base, DATA,
+							*host->buffer++);
+			} else {
+				while (((OMAP_HSMMC_READ(host->base, PSTATE)
+					& BRE) != BRR)
+					&& time_before(jiffies, timeout));
+
+				for (i = 0; i < readCnt; i++)
+					*host->buffer++ =
+					OMAP_HSMMC_READ(host->base, DATA);
+			}
+		}
+	}
+}
+#endif
+
+/* PIO only */
+static void
+mmc_omap_sg_to_buf(struct mmc_omap_host *host)
+{
+	struct scatterlist *sg;
+
+	sg = host->data->sg + host->sg_idx;
+	host->buffer_bytes_left = sg->length;
+	host->buffer = page_address(sg->page) + sg->offset;
+	if (host->buffer_bytes_left > host->total_bytes_left)
+		host->buffer_bytes_left = host->total_bytes_left;
+}
+
+
+/* PIO only */
+static void
+mmc_omap_xfer_data(struct mmc_omap_host *host, int write)
+{
+	int n;
+
+	if (host->buffer_bytes_left == 0) {
+		host->sg_idx++;
+		BUG_ON(host->sg_idx == host->sg_len);
+		mmc_omap_sg_to_buf(host);
+	}
+	n = 64;
+	if (n > host->buffer_bytes_left)
+		n = host->buffer_bytes_left;
+	host->buffer_bytes_left -= n;
+	host->total_bytes_left -= n;
+	host->data->bytes_xfered += n;
+
+	if (write) {
+		__raw_writesw(host->base + OMAP_HSMMC_DATA, host->buffer, n);
+	} else {
+		__raw_readsw(host->base + OMAP_HSMMC_DATA, host->buffer, n);
+	}
+}
+
+
+/*
+ * Configure the resptype, cmdtype and send the given command to the card
+ */
+static void
+mmc_omap_start_command13(struct mmc_omap_host *host, struct mmc_command *cmd)
+{
+	int  cmdreg = 0, resptype = 0, cmdtype = 0;
+	unsigned long flags;
+
+	mmc_clk_enable_aggressive(host);
+	/* Clear status bits and enable interrupts */
+	OMAP_HSMMC_WRITE(host->base, STAT, OMAP_HSMMC_STAT_CLEAR);
+	resptype = 2;
+	cmdreg = (MMC_SEND_STATUS << 24) | (resptype << 16) | (cmdtype << 22);
+
+	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
+	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
+	OMAP_HSMMC_WRITE(host->base, ARG, host->rca);
+	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
+	spin_lock_irqsave(&host->dma_lock, flags);
+	host->cmd_13 = 1;
+	spin_unlock_irqrestore(&host->dma_lock, flags);
+}
+
+/*
+ * Notify the core about command completion
+ */
+static void
+mmc_omap_err_cmd_done(struct mmc_omap_host *host, struct mmc_command *cmd)
+{
+	cmd->resp[0] = OMAP_HSMMC_READ(host->base, RSP10);
+	mmc_clk_disable_aggressive(host);
+	if(host->cmd_13 == 1)
+	{
+		if(cmd->resp[0] != 0x900)
+			dev_dbg(mmc_dev(host->mmc),
+				"%s:CMD response error cmd->resp[0]%x\n",
+				mmc_hostname(host->mmc),cmd->resp[0]);
+	}
+}
+
+
+
+static int
+mmc_omap_err_calc(struct mmc_omap_host *host)
+{
+	unsigned sg_len_remain;
+	struct mmc_data *data = host->data;
+	unsigned long flags;
+
+	if(unlikely(host == NULL))
+	{
+		return -1;
+	}
+	/* Enable DMA */
+	host->use_dma = 1;
+	spin_lock_irqsave(&host->dma_lock, flags);
+
+	if(host->extra_chain_reqd == 0)
+	{
+		if(host->data->sg_len <= NO_OF_DMA_CHAINS_USED)
+			host->sg_idx = 0;
+		else
+			host->sg_idx = host->sg_idx-NO_OF_DMA_CHAINS_USED;
+	}
+	else
+	{
+		if(host->sg_idx == host->data->sg_len)
+			host->sg_idx = host->data->sg_len;
+		else
+			host->sg_idx = host->sg_idx-NO_OF_DMA_CHAINS_USED;
+	}
+	if(host->sg_idx == host->data->sg_len)
+		sg_len_remain =1;
+	else
+		sg_len_remain = data->sg_len - host->sg_idx;
+	if(sg_len_remain >= NO_OF_DMA_CHAINS_USED)
+	{
+		host->chains_requested = NO_OF_DMA_CHAINS_USED;
+	}
+	else
+	{
+		host->chains_requested = 1;
+	}
+	if(host->data->sg_len <= NO_OF_DMA_CHAINS_USED)
+	{
+		host->extra_chain_reqd = 0;
+		host->no_of_chain_reqd = 0;
+		host->current_cb_cnt = 0;
+	}
+	else
+	{
+		host->no_of_chain_reqd = sg_len_remain/NO_OF_DMA_CHAINS_USED;
+		host->extra_chain_reqd= sg_len_remain%NO_OF_DMA_CHAINS_USED;
+		host->current_cb_cnt = 1;
+	}
+	spin_unlock_irqrestore(&host->dma_lock, flags);
+
+	return 0;
+
+}
+
+
+
+/*
+ * Routine to configure block leangth for MMC/SD/SDIO cards
+ * and intiate the transfer.
+ */
+static int
+mmc_omap_err_prepare_data(struct mmc_omap_host *host)
+{
+	int i;
+	unsigned count=0, count1=0;
+	struct mmc_data *data = host->data;
+
+	if(unlikely(host == NULL))
+	{
+		return -1;
+	}
+	mmc_clk_enable_aggressive(host);	
+	if (host->use_dma && host->chain_id != -1) {
+		omap_stop_dma_chain_transfers(host->chain_id);
+/*		  dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->sg_len,
+			host->dma_dir);*/
+		omap_free_dma_chain(host->chain_id);
+		host->chain_id = -1;
+	}
+
+	for(i = 0 ;i < host->sg_idx; i++)
+	{
+		count1 += (sg_dma_len(&data->sg[i])/data->blksz);
+	}
+
+	for(i = host->sg_idx ;i < (host->chains_requested+host->sg_idx); i++)
+	{
+		count += (sg_dma_len(&data->sg[i])/data->blksz);
+	}
+
+	OMAP_HSMMC_WRITE(host->base, BLK, (host->data->blksz));
+	OMAP_HSMMC_WRITE(host->base, BLK,
+					OMAP_HSMMC_READ(host->base,
+					BLK) | (count << 16));
+	host->mod_addr = host->org_addr;
+	if(host->is_high_capacity ==1)
+		host->mod_addr += count1;//as card is high capacity
+	else
+		host->mod_addr += (count1*512);//as card is not high capacity
+	host->datadir = (host->data->flags & MMC_DATA_WRITE) ?
+			OMAP_MMC_DATADIR_WRITE : OMAP_MMC_DATADIR_READ;
+	if (mmc_omap_get_dma_channel(host, data) == 0)
+	{
+		enum dma_data_direction dma_data_dir;
+
+		if (data->flags & MMC_DATA_WRITE)
+			dma_data_dir = DMA_TO_DEVICE;
+		else
+			dma_data_dir = DMA_FROM_DEVICE;
+		host->total_bytes_left = 0;
+		mmc_chain_dma(host, host->data);
+		host->brs_received = 0;
+		host->dma_done = 0;
+		/* Enable DMA */
+		host->use_dma = 1;
+	}
+	mmc_clk_disable_aggressive(host);	
+	return 0;
+}
+
+/*
+ * Notify the xfer done on MMC/SD cards to the core
+ */
+static void
+mmc_omap_read_err_done(struct mmc_omap_host *host, struct mmc_data *data)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&host->dma_lock, flags);
+	host->flag_err = 1;
+	host->cmd_12 = 1;
+	spin_unlock_irqrestore(&host->dma_lock, flags);
+	mmc_clk_disable_aggressive(host);
+	mmc_omap_start_command(host, data->stop);
+}
+
+
+/*
+ * Notify the xfer done on MMC/SD cards to the core
+ */
+static void
+mmc_omap_err_done(struct mmc_omap_host *host, struct mmc_data *data)
+{
+	host->data = NULL;
+	if (host->use_dma && host->chain_id != -1) {
+		omap_stop_dma_chain_transfers(host->chain_id);
+		dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->sg_len,
+			host->dma_dir);
+		omap_free_dma_chain(host->chain_id);
+		host->chain_id = -1;
+	}
+
+	host->datadir = OMAP_MMC_DATADIR_NONE;
+	host->sg_dma_len = 0;
+
+	mmc_clk_disable_aggressive(host);
+
+	if (!data->stop) {
+		host->mrq = NULL;
+		mmc_request_done(host->mmc, data->mrq);
+		return;
+	}
+	mmc_omap_start_command(host, data->stop);
+}
+
+
+
+/*
+ * The MMC controller IRQ handler
+ */
+static irqreturn_t mmc_omap_irq(int irq, void *dev_id)
+{
+	struct mmc_omap_host *host = (struct mmc_omap_host *)dev_id;
+	int end_command, end_transfer, status, read_crc =0;
+	unsigned long flags;
+	typeof(jiffies) timeout;
+
+	if (unlikely(host == NULL))
+	{
+		return IRQ_HANDLED;
+	}
+
+	if(unlikely(host->cmd == NULL && host->data == NULL)) {
+		status = OMAP_HSMMC_READ(host->base, STAT);
+		if (status != 0) {
+			OMAP_HSMMC_WRITE(host->base, STAT, status);
+		}
+
+		mmc_clk_disable_aggressive(host);
+
+		return IRQ_HANDLED;
+	}
+
+	end_command = 0;
+	end_transfer = 0;
+	if (host->cmd) {
+		if (host->cmd->opcode == MMC_SELECT_CARD
+			|| host->cmd->opcode == MMC_SWITCH) {
+			timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+			while (time_before(jiffies, timeout)) {
+				if ((OMAP_HSMMC_READ(host->base, STAT)
+					& CC) == CC)
+					break;
+			}
+		}
+	}
+	status = OMAP_HSMMC_READ(host->base, STAT);
+	dev_dbg(mmc_dev(host->mmc), "Status in IRQ %x\n", status);
+
+	if(unlikely(host->use_dma == 0))
+	{
+		if (host->total_bytes_left != 0) {
+			if ((status & OMAP_MMC_STAT_BRR) ||
+				(status & TC))
+				mmc_omap_xfer_data(host, 0);
+			if (status & OMAP_MMC_STAT_BWR)
+				mmc_omap_xfer_data(host, 1);
+		}
+	}
+
+	if (status & (OMAP_HSMMC_ERR)) {
+		if (status & (OMAP_HSMMC_CMD_TIMEOUT) ||
+			status & (OMAP_HSMMC_CMD_CRC)) {
+			if (host->cmd) {
+				if (status & (OMAP_HSMMC_CMD_TIMEOUT)) {
+					/*
+					 * Timeouts are normal in case of
+					 * MMC_SEND_STATUS
+					 */
+
+					if (host->cmd->opcode !=
+						MMC_ALL_SEND_CID)
+						dev_dbg(mmc_dev(host->mmc),
+							"CMD Timeout CMD%d\n",
+							host->cmd->opcode);
+					host->cmd->error |= MMC_ERR_TIMEOUT;
+				} else {
+					dev_dbg(mmc_dev(host->mmc),
+						"%s: Command CRC error CMD%d\n",
+						mmc_hostname(host->mmc),
+						host->cmd->opcode);
+					host->cmd->error |= MMC_ERR_BADCRC;
+				}
+				end_command = 1;
+			}
+
+			if (host->data)
+				mmc_dma_cleanup(host);
+		}
+
+		if (status & (OMAP_HSMMC_DATA_TIMEOUT) ||
+			status & (OMAP_HSMMC_DATA_CRC)) {
+			if (host->data) {
+				if (status & (OMAP_HSMMC_DATA_TIMEOUT)) {
+					dev_dbg(mmc_dev(host->mmc),
+						"%s:Data timeout\n",
+						mmc_hostname(host->mmc));
+					mmc_dma_cleanup(host);
+				} else {
+					if(host->data->flags & MMC_DATA_READ)
+					{
+						read_crc = 1;
+						if(host->flag_err == 1)
+						{
+							dev_dbg(mmc_dev(host->mmc),
+								"%s:Data CRC for the second time\n",
+								mmc_hostname(host->mmc));
+							spin_lock_irqsave(&host->dma_lock, flags);
+							host->crc_retry++;
+							host->flag_err = 0;
+							spin_unlock_irqrestore(&host->dma_lock, flags);
+							if(host->crc_retry == MAX_CRC_RETRY)
+							{
+								spin_lock_irqsave(&host->dma_lock, flags);
+								host->mod_addr = host->org_addr = 0;
+								host->flag_err = host->cmd_12 = host->cmd_13 = 0;
+								spin_unlock_irqrestore(&host->dma_lock, flags);
+								host->data->error |= MMC_ERR_BADCRC;
+								mmc_omap_err_done(host, host->data);
+							}
+						}
+				   }
+					else
+						host->data->error |= MMC_ERR_BADCRC;
+					dev_dbg(mmc_dev(host->mmc),
+							"%s: Data CRC error,"
+							" bytes left %d\n",
+							mmc_hostname(host->mmc),
+							host->bytesleft);
+				}
+				end_transfer = 1;
+			}
+		}
+
+		if (status & OMAP_HSMMC_CARD_ERR) {
+			dev_dbg(mmc_dev(host->mmc),
+				"MMC%d: Card status error (CMD%d)\n",
+				host->id, host->cmd->opcode);
+			if (host->cmd) {
+				host->cmd->error |= MMC_ERR_FAILED;
+				end_command = 1;
+			}
+			if (host->data) {
+				host->data->error |= MMC_ERR_FAILED;
+				end_transfer = 1;
+			}
+		}
+	}
+
+#ifdef CONFIG_OMAP_SDIO
+	if (host->mmc->mode == MMC_MODE_SDIO && host->sdio_card_intr) {
+		if (status & OMAP_HSMMC_CARD_INT) {
+			dev_dbg(mmc_dev(host->mmc),
+				"MMC%d: SDIO CARD interrupt status %x\n",
+				host->id, status);
+			OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK &
+				(~OMAP_HSMMC_CARD_INT));
+			host->sdio_card_intr = 0;
+			/*
+			 * SDIO Card interrupt notifier code should go here,
+			 * it should clear the source of interrupt and then
+			 * call again the interrupt enable API.
+			 */
+			return IRQ_HANDLED;
+		}
+	}
+#endif
+
+#if defined(CONFIG_OMAP_SDIO) && defined(CONFIG_OMAP_SDIO_NON_DMA_MODE)
+	sdio_non_dma_xfer(host);
+#endif /* ifdef CONFIG_OMAP_SDIO */
+
+	OMAP_HSMMC_WRITE(host->base, STAT, status);
+	if(host->flag_err == 1)
+	{
+		if(host->cmd_12 == 1)
+		{
+			if (status & CC) {
+				mmc_omap_err_cmd_done(host, host->cmd);
+				spin_lock_irqsave(&host->dma_lock, flags);
+				host->cmd_12 =0;
+				spin_unlock_irqrestore(&host->dma_lock, flags);
+				mmc_omap_start_command13(host, host->cmd);
+				return IRQ_HANDLED;
+			}
+		}
+		if(host->cmd_13 == 1)
+		{
+			if (status & CC) {
+				mmc_omap_err_cmd_done(host, host->cmd);
+				spin_lock_irqsave(&host->dma_lock, flags);
+				host->cmd_13 =0;
+				spin_unlock_irqrestore(&host->dma_lock, flags);
+				mmc_omap_err_prepare_data(host);
+				omap_start_dma_chain_transfers(host->chain_id);
+				mmc_omap_start_command18(host, host->cmd);
+				return IRQ_HANDLED;
+			}
+		}
+		return IRQ_HANDLED;
+	}
+
+	if (end_command || (status & CC)) {
+		mmc_omap_cmd_done(host, host->cmd);
+	}
+
+	if (host->mmc->mode == MMC_MODE_MMC
+		|| host->mmc->mode == MMC_MODE_SD){
+		if (end_transfer){
+			if(read_crc)
+			{
+				mmc_omap_err_calc(host);
+				mmc_omap_read_err_done(host, host->data);
+			}
+			else
+				mmc_omap_err_done(host, host->data);
+			}
+		else if (status & TC)
+			mmc_omap_end_of_data(host, host->data);
+	}
+#ifdef CONFIG_OMAP_SDIO
+	if(host->mmc->mode == MMC_MODE_SDIO){
+		if (end_transfer || (status & TC))
+			sdio_omap_xfer_done(host, host->sdiodata);
+	}
+#endif	/* ifdef CONFIG_OMAP_SDIO */
+
+	return IRQ_HANDLED;
+}
+
+#ifdef CONFIG_OMAP_SDIO
+/*
+ * Function for polling mode read write for SDIO cards
+ */
+static void mmc_omap_polling_command(struct mmc_omap_host *host,
+					 struct mmc_command *cmd, u32 cmdreg)
+{
+	int i, readCnt, bytec, status = 0;
+	typeof(jiffies) timeout;
+
+	if (cmd->arg & OMAP_SDIO_READ) {
+		cmdreg |= DP_SELECT;
+		cmdreg &= ~(DDIR);
+	} else {
+		cmdreg |= DP_SELECT | DDIR;
+	}
+
+	OMAP_HSMMC_WRITE(host->base, STAT, OMAP_HSMMC_STAT_CLEAR);
+	OMAP_HSMMC_WRITE(host->base, ISE, INT_CLEAR);
+	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
+
+	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
+	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
+
+	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+	while (time_before(jiffies, timeout)) {
+		status = OMAP_HSMMC_READ(host->base, STAT);
+		if ((status & CC))
+			break;
+	}
+	if (!(status & CC)) {
+		dev_dbg(mmc_dev(host->mmc),
+		"SDIO Command error CMD IO_RW_extd\n");
+		host->cmd->error |= MMC_ERR_TIMEOUT;
+		mmc_omap_cmd_done(host, host->cmd);
+		return;
+	}
+
+	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+	bytec = (host->cmd->arg & 0x1FF);
+	readCnt = (bytec / 4);
+
+	if (bytec % 4)
+		readCnt++;
+
+	if (host->cmd->arg & OMAP_SDIO_READ) {
+		while (((OMAP_HSMMC_READ(host->base, PSTATE)
+			& BWE) != BRW)
+			&& time_before(jiffies, timeout)) ;
+
+		for (i = 0; i < readCnt; i++)
+			OMAP_HSMMC_WRITE(host->base, DATA, *host->buffer++);
+	} else {
+		while (((OMAP_HSMMC_READ(host->base, PSTATE) & BRE) != BRR)
+			&& time_before(jiffies, timeout)) ;
+
+		for (i = 0; i < readCnt; i++)
+			*host->buffer++ = OMAP_HSMMC_READ(host->base, DATA);
+	}
+
+	status = 0;
+	mmc_omap_cmd_done(host, host->cmd);
+	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+
+	while (time_before(jiffies, timeout)) {
+		status = OMAP_HSMMC_READ(host->base, STAT);
+		if (status & TC)
+			break;
+	}
+
+	if (!(status & TC)) {
+		dev_dbg(mmc_dev(host->mmc), "SDIO data sending error \n");
+		host->data->error = MMC_ERR_TIMEOUT;
+		return;
+	}
+
+	sdio_omap_xfer_done(host, host->sdiodata);
+	return;
+}
+#endif
+
+/*
+ * Turn the socket power ON/OFF
+ */
+static int mmc_omap_power(struct mmc_omap_host *host, int on)
+{
+	int ret = 0;
+
+	if (on){
+		if (machine_is_omap_2430sdp() ||
+					machine_is_omap_3430sdp() ||
+					machine_is_omap_3430labrador() ||
+					machine_is_omap3evm() || machine_is_omap3_beagle() )
+
+			ret = enable_mmc_power(host->id);
+	} else {
+		if (machine_is_omap_2430sdp() ||
+					machine_is_omap_3430sdp() ||
+					machine_is_omap_3430labrador() ||
+					machine_is_omap3evm() || machine_is_omap3_beagle() )
+
+			ret = disable_mmc_power(host->id);
+	}
+
+	return ret;
+}
+/*
+ * power switching module for mmc slot 1
+ * power_mode=0 switches to 1.8V
+ * power_mode=1 switches to 3V
+ * Caller makes sure that it calls on  slot 1 with correct cpu revision
+ */
+static int omap_mmc_switch_opcond(struct mmc_omap_host *host, int power_mode)
+{
+	int ret = 0;
+
+	mmc_clk_disable(host);
+
+	if (cpu_is_omap2430())
+		clk_disable(host->dbclk);
+
+	ret = mmc_omap_power(host,0);
+	if (ret != 0)
+		dev_dbg(mmc_dev(host->mmc),"Unable to disable power to MMC1\n");
+
+		if (machine_is_omap_2430sdp() ||
+					machine_is_omap_3430sdp() ||
+					machine_is_omap_3430labrador() ||
+					machine_is_omap3evm() || machine_is_omap3_beagle() ) {
+
+		if (switch_power_mode(power_mode))
+			dev_dbg(mmc_dev(host->mmc), "Unable to switch operating"
+				"voltage to the card\n");
+	}
+
+	mmc_clk_enable(host);
+
+	if (cpu_is_omap2430()) {
+		if (clk_enable(host->dbclk) != 0)
+			dev_dbg(mmc_dev(host->mmc),
+				"Unable to enable MMC1 debounce clock"
+				"while switching power\n");
+	}
+
+	OMAP_HSMMC_WRITE(host->base, HCTL,
+			OMAP_HSMMC_READ(host->base, HCTL) & SDVSCLR);
+	if (power_mode == 0) {
+		OMAP_HSMMC_WRITE(host->base, HCTL,
+			OMAP_HSMMC_READ(host->base, HCTL) | SDVS18);
+	} else {
+		OMAP_HSMMC_WRITE(host->base, HCTL,
+			OMAP_HSMMC_READ(host->base, HCTL) | SDVS30);
+		host->initstream = 0;
+	}
+	OMAP_HSMMC_WRITE(host->base, HCTL,
+			OMAP_HSMMC_READ(host->base, HCTL) | SDBP);
+
+	return 0;
+}
+
+/*
+ * Work Item to notify the core about card insertion/removal
+ */
+static void mmc_omap_detect(struct work_struct *work)
+{
+	struct mmc_omap_host *host = container_of(work, struct mmc_omap_host,
+		mmc_carddetect_work);
+
+	mmc_clk_enable_aggressive(host);
+
+	if (cpu_is_omap34xx() || (cpu_is_omap2430()
+		&& omap2_cpu_rev() == 2)) {
+		if (host->id == OMAP_MMC1_DEVID) {
+			if (!(OMAP_HSMMC_READ(host->base, HCTL)
+				& SDVSDET)) {
+				if (omap_mmc_switch_opcond(host, 1) != 0)
+					dev_dbg(mmc_dev(host->mmc),
+					"mmc_omap_detect:switch"
+					"command operation failed\n");
+				host->mmc->ios.vdd =
+					fls(host->mmc->ocr_avail) - 1;
+			}
+		}
+	}
+	mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+
+	mmc_clk_disable_aggressive(host);
+}
+
+/*
+ * Interrupt service routine for handling card insertion and removal
+ */
+static irqreturn_t mmc_omap_irq_cd(int irq, void *dev_id)
+{
+	struct mmc_omap_host *host = (struct mmc_omap_host *)dev_id;
+	unsigned long flags;
+
+	if (machine_is_omap_2430sdp() ||
+			machine_is_omap_3430sdp() ||
+			machine_is_omap_3430labrador() ||
+			machine_is_omap3evm() || machine_is_omap3_beagle() )
+	{
+		spin_lock_irqsave(&host->dma_lock, flags);
+		host->card_detected = 1;
+		host->mmc->mode = MMC_CARD_NONE;
+		host->rca = host->mod_addr = host->org_addr = 0;
+		host->is_high_capacity = 0;
+		host->flag_err = host->cmd_12 = host->cmd_13 = 0;
+		spin_unlock_irqrestore(&host->dma_lock, flags);
+		schedule_work(&host->mmc_carddetect_work);
+	}
+	else
+		dev_dbg(mmc_dev(host->mmc), "Place to implement MMC hotplug"
+			"implementation based on what the other"
+			"board can support\n");
+
+	return IRQ_HANDLED;
+}
+
+/*
+ * DMA call back function
+ lch is chain id in case of chaining
+ */
+static void mmc_omap_dma_cb(int lch, u16 ch_status, void *data)
+{
+	struct mmc_omap_host *host = (struct mmc_omap_host *)data;
+	int chainid = host->chain_id;
+	int dma_ch;
+	unsigned long flags;
+
+	if(host->flag_err)
+	{
+		spin_lock_irqsave(&host->dma_lock, flags);
+		host->crc_retry =0;
+		spin_unlock_irqrestore(&host->dma_lock, flags);
+		if(host->no_of_chain_reqd > host->current_cb_cnt)
+		{
+			spin_lock_irqsave(&host->dma_lock, flags);
+			host->current_cb_cnt++;
+			spin_unlock_irqrestore(&host->dma_lock, flags);
+			mmc_omap_read_err_done(host, host->data);
+		}
+		else if(host->no_of_chain_reqd == host->current_cb_cnt)
+		{
+			if(host->extra_chain_reqd == 0)
+			{
+				/*cleanup and go away*/
+				spin_lock_irqsave(&host->dma_lock, flags);
+				host->flag_err = 0;
+				spin_unlock_irqrestore(&host->dma_lock, flags);
+				omap_stop_dma_chain_transfers(chainid);
+				omap_free_dma_chain(chainid);
+				mmc_omap_dma_done(host, host->data);
+				host->chain_id = -1;
+
+			}
+			else
+			{
+				/*do the last transfer*/
+				spin_lock_irqsave(&host->dma_lock, flags);
+				host->chains_requested = host->extra_chain_reqd;
+				host->extra_chain_reqd = 0;
+				spin_unlock_irqrestore(&host->dma_lock, flags);
+				mmc_omap_read_err_done(host, host->data);
+			}
+		}
+		return;
+	}
+	if(host->mmc->mode == MMC_MODE_SDIO)
+	{
+		/*
+		 * Only report the error for the time being, until the error handling
+		 * for these type of errors is supported from the core
+		 */
+		if (ch_status & (1 << 11))
+			dev_dbg(mmc_dev(host->mmc), " %s :MISALIGNED_ADRS_ERR\n",
+				mmc_hostname(host->mmc));
+
+		if (host->dma_ch < 0) {
+			dev_dbg(mmc_dev(host->mmc), "%s:"
+				"DMA callback while DMA not enabled?\n",
+				mmc_hostname(host->mmc));
+			return;
+		}
+
+		dma_ch = host->dma_ch;
+		host->dma_ch = -1;
+		omap_free_dma(dma_ch);
+	}
+	else
+	{
+		/* If we are at the last transfer, Shut down the reciever */
+		if (omap_dma_chain_status(chainid) == OMAP_DMA_CHAIN_INACTIVE) {
+			if(host->no_of_chain_reqd > host->current_cb_cnt)
+			{
+				mmc_chain_dma(host, host->data);
+				omap_dma_set_interrupt_ch(host->chain_id, OMAP_DMA_DROP_IRQ |
+								 OMAP2_DMA_MISALIGNED_ERR_IRQ |
+								 OMAP2_DMA_TRANS_ERR_IRQ,
+								 OMAP_DMA_DROP_IRQ |
+								 OMAP_DMA_BLOCK_IRQ |
+								 OMAP2_DMA_MISALIGNED_ERR_IRQ |
+								 OMAP2_DMA_TRANS_ERR_IRQ);
+				omap_start_dma_chain_transfers(host->chain_id);
+				spin_lock_irqsave(&host->dma_lock, flags);
+				host->current_cb_cnt++;
+				spin_unlock_irqrestore(&host->dma_lock, flags);
+			}
+			else if(host->no_of_chain_reqd == host->current_cb_cnt)
+			{
+				if(host->extra_chain_reqd == 0)
+				{
+					omap_stop_dma_chain_transfers(chainid);
+					omap_free_dma_chain(chainid);
+					mmc_omap_dma_done(host, host->data);
+					host->chain_id = -1;
+				}
+				else
+				{
+					omap_stop_dma_chain_transfers(chainid);
+					omap_free_dma_chain(chainid);
+					host->chain_id = -1;
+					spin_lock_irqsave(&host->dma_lock, flags);
+					host->chains_requested = host->extra_chain_reqd;
+					spin_unlock_irqrestore(&host->dma_lock, flags);
+					mmc_omap_get_dma_channel(host, host->data);
+					mmc_chain_dma(host, host->data);
+					omap_start_dma_chain_transfers(host->chain_id);
+					spin_lock_irqsave(&host->dma_lock, flags);
+					host->extra_chain_reqd = 0;
+					spin_unlock_irqrestore(&host->dma_lock, flags);
+				}
+			}
+			else
+			{
+				dev_dbg(mmc_dev(host->mmc), "%s:"
+					"DMA callback ERROR\n",
+					mmc_hostname(host->mmc));
+			}
+		}
+		else
+		{
+			dev_dbg(mmc_dev(host->mmc), "%s:"
+				"DMA callback Channel active?\n",
+				mmc_hostname(host->mmc));
+		}
+	}
+}
+
+
+#ifdef CONFIG_OMAP_SDIO
+#ifndef CONFIG_OMAP_SDIO_NON_DMA_MODE
+
+/*
+ * Configure dma src and destination parameters
+ */
+static int mmc_omap_config_dma_param(int sync_dir, struct mmc_omap_host *host,
+					 struct mmc_data *data)
+{
+	if (sync_dir == OMAP_DMA_DST_SYNC) {
+		omap_set_dma_dest_params(host->dma_ch,
+					0,	// dest_port required only for OMAP1
+						OMAP_DMA_AMODE_CONSTANT,
+				  (dma_addr_t) (host-> mapbase + OMAP_HSMMC_DATA),0, 0);
+		omap_set_dma_src_params(host->dma_ch,
+					0,	// src_port required only for OMAP1
+					OMAP_DMA_AMODE_POST_INC,
+				sg_dma_address(&data-> sg[0]), 0, 0);
+	} else {
+		omap_set_dma_src_params(host->dma_ch,
+					0,	// src_port required only for OMAP1
+				OMAP_DMA_AMODE_CONSTANT,
+				(dma_addr_t) (host->mapbase +OMAP_HSMMC_DATA),0, 0);
+		omap_set_dma_dest_params(host->dma_ch,
+					0,	// dest_port required only for OMAP1
+				OMAP_DMA_AMODE_POST_INC,
+			sg_dma_address(&data->sg[0]), 0,0);
+	}
+	return 0;
+}
+
+/*
+ * Routine to configure and start dma for SDIO card
+ */
+static int
+sdio_omap_start_dma_transfer(struct mmc_omap_host *host,
+				 struct mmc_request *req)
+{
+	int sync_dev, sync_dir, dma_ch, ret, readCnt, bytecount;
+	int nob = 1, func = 0;
+	struct mmc_data *data = req->data;
+	/*
+	 * If for some reason the DMA transfer is still active,
+	 * we wait for timeout period and free the dma
+	 */
+	if (host->dma_ch != -1) {
+		set_current_state(TASK_INTERRUPTIBLE);
+		schedule_timeout(100);
+		if (down_trylock(&host->sem)) {
+			dma_ch = host->dma_ch;
+			host->dma_ch = -1;
+			omap_free_dma(dma_ch);
+			up(&host->sem);
+			return 1;
+		}
+	} else {
+		if (down_trylock(&host->sem)) {
+			dev_dbg(mmc_dev(host->mmc),
+				"Semaphore was not initialized \n");
+			BUG();
+		}
+	}
+
+	if (req->cmd->opcode == IO_RW_EXTENDED) {
+		if (req->cmd->arg & OMAP_SDIO_READ) {
+			if (host->id == OMAP_MMC1_DEVID)
+				sync_dev = OMAP24XX_DMA_MMC1_TX;
+			else
+				sync_dev = OMAP24XX_DMA_MMC2_TX;
+		} else {
+			if (host->id == OMAP_MMC1_DEVID)
+				sync_dev = OMAP24XX_DMA_MMC1_RX;
+			else
+				sync_dev = OMAP24XX_DMA_MMC2_RX;
+		}
+
+		ret = omap_request_dma(sync_dev, "SDIO", mmc_omap_dma_cb,
+						host,&dma_ch);
+		if (ret != 0) {
+			dev_dbg(mmc_dev(host->mmc),
+				"%s: omap_request_dma() failed with %d\n",
+				mmc_hostname(host->mmc), ret);
+			return ret;
+		}
+
+		host->dma_len =  dma_map_sg(mmc_dev(host->mmc), data->sg,
+						data->sg_len, host->dma_dir);
+		host->dma_ch = dma_ch;
+
+		if (req->cmd->arg & OMAP_SDIO_READ) {
+			sync_dir = OMAP_DMA_DST_SYNC;
+			mmc_omap_config_dma_param(sync_dir, host, data);
+		} else {
+			sync_dir = OMAP_DMA_SRC_SYNC;
+			mmc_omap_config_dma_param(sync_dir, host, data);
+		}
+
+		if (req->cmd->arg & SDIO_BLKMODE) {
+			nob = req->cmd->arg & 0x1FF;
+
+			if (nob == 0)
+				nob = 0x200;
+
+			func = ((req->cmd->arg & sdio_function_mask) >> 28);
+			bytecount = blkmode_bytecount[func];
+			readCnt = (bytecount / 4);
+
+			if (bytecount % 4)
+				readCnt++;
+
+		} else {
+			bytecount = req->cmd->arg & 0x1FF;
+
+			if (bytecount == 0)
+				bytecount = 0x200;
+
+			readCnt = (bytecount / 4);
+
+			if (bytecount % 4)
+				readCnt++;
+		}
+
+		omap_set_dma_transfer_params(dma_ch,
+				OMAP_DMA_DATA_TYPE_S32, readCnt,
+				nob,OMAP_DMA_SYNC_FRAME, sync_dev,sync_dir);
+
+		omap_start_dma(dma_ch);
+	}
+	return 0;
+}
+#endif
+#endif	/* ifdef CONFIG_OMAP_SDIO */
+
+static int mmc_omap_get_dma_channel(struct mmc_omap_host *host, struct mmc_data *data)
+{
+	int ret = 0;
+	int dma_chid;
+	u16 frame;
+	u32 count;
+	struct scatterlist *sg = &data->sg[host->sg_idx];
+	int sync_dev = 0;
+
+	frame = data->blksz;/*blk size*/
+	count = sg_dma_len(sg)/frame;/*No of blocks*/
+
+	/*
+	 * If for some reason the DMA transfer is still active,
+	 * we wait for timeout period and free the dma
+	 */
+	 if(host->chain_id != -1)
+		 dev_dbg(mmc_dev(host->mmc),
+			 "%s: chain is not free\n",
+			 mmc_hostname(host->mmc));
+
+	/*Common params*/
+	//host->params.burst_mode =
+	host->params.data_type = OMAP_DMA_DATA_TYPE_S32;
+	host->params.dst_ei = 0;
+	host->params.dst_fi = 0;
+	host->params.dst_port = 0;
+	host->params.elem_count = (data->blksz / 4);
+	//host->params.ie =
+	host->params.read_prio = DMA_CH_PRIO_HIGH;
+	host->params.src_ei = 0;
+	host->params.src_fi = 0;
+	host->params.src_port = 0;
+	host->params.sync_mode = OMAP_DMA_SYNC_FRAME;
+	host->params.write_prio = DMA_CH_PRIO_HIGH;
+
+
+	if (!(data->flags & MMC_DATA_WRITE)) {
+		host->dma_dir = DMA_FROM_DEVICE;
+		if (host->id == OMAP_MMC1_DEVID)
+			sync_dev = OMAP24XX_DMA_MMC1_RX;
+		else
+			sync_dev = OMAP24XX_DMA_MMC2_RX;
+
+		host->params.dst_amode = OMAP_DMA_AMODE_POST_INC;
+		host->params.dst_start = sg_dma_address(&data->sg[host->sg_idx]);
+
+		host->params.frame_count = count;
+
+		host->params.src_amode = OMAP_DMA_AMODE_CONSTANT;
+		host->params.src_or_dst_synch = OMAP_DMA_SRC_SYNC;
+		host->params.src_start = (dma_addr_t) (host->mapbase +OMAP_HSMMC_DATA);
+
+		host->params.trigger = sync_dev;
+	} else {
+		host->dma_dir = DMA_TO_DEVICE;
+		if (host->id == OMAP_MMC1_DEVID)
+			sync_dev = OMAP24XX_DMA_MMC1_TX;
+		else
+			sync_dev = OMAP24XX_DMA_MMC2_TX;
+
+		host->params.dst_amode = OMAP_DMA_AMODE_CONSTANT;
+		host->params.dst_start = (dma_addr_t) (host->mapbase + OMAP_HSMMC_DATA);
+
+		host->params.frame_count = count;
+
+		host->params.src_amode = OMAP_DMA_AMODE_POST_INC;
+		host->params.src_or_dst_synch = OMAP_DMA_DST_SYNC;
+		host->params.src_start = sg_dma_address(&data->sg[host->sg_idx]);
+
+		host->params.trigger = sync_dev;
+	}
+
+	/* Request a DMA chain for transfer
+	 * A chain is requested before each transfer to avoid
+	 * locking of DMA resources
+	 */
+	ret = omap_request_dma_chain(sync_dev, "MMC/SD", mmc_omap_dma_cb,
+							&dma_chid, host->chains_requested,
+							OMAP_DMA_DYNAMIC_CHAIN, host->params);
+	if (ret != 0) {
+		dev_dbg(mmc_dev(host->mmc),
+			"%s: omap_request_dma_chain() failed with %d\n",
+			mmc_hostname(host->mmc), ret);
+		return ret;
+	}
+	else
+	{
+		if(host->chains_requested > 1)
+		omap_dma_set_interrupt_ch(dma_chid, OMAP_DMA_DROP_IRQ |
+						 OMAP2_DMA_MISALIGNED_ERR_IRQ |
+						 OMAP2_DMA_TRANS_ERR_IRQ,
+						 OMAP_DMA_DROP_IRQ |
+						 OMAP_DMA_BLOCK_IRQ |
+						 OMAP2_DMA_MISALIGNED_ERR_IRQ |
+						 OMAP2_DMA_TRANS_ERR_IRQ);
+	}
+	host->chain_id = dma_chid;
+	return 0;
+}
+
+
+static void mmc_chain_dma(struct mmc_omap_host *host, struct mmc_data *data)
+{
+	u16 frame;
+	u32 count,i,dma_chain_status, sg_idx = host->sg_idx;
+	struct scatterlist *sg;
+
+	frame = data->blksz;
+	for(i = host->sg_idx ;i < (host->chains_requested + sg_idx); i++)
+	{
+		sg = &data->sg[i];
+		count = sg_dma_len(sg)/frame;
+		host->sg_dma_len += (frame * count);
+		if(!(data->flags & MMC_DATA_WRITE))
+		{
+			dma_chain_status = omap_dma_chain_a_transfer(host->chain_id,
+			(dma_addr_t) (host->mapbase +OMAP_HSMMC_DATA),
+			sg_dma_address(&data->sg[i]), (data->blksz / 4),
+			count, host);
+			if(dma_chain_status != 0)
+				dev_dbg(mmc_dev(host->mmc),
+					"%s: omap_dma_chain_a_transfer() failed during read with %d\n",
+					mmc_hostname(host->mmc), dma_chain_status);
+		}
+		else
+		{
+			dma_chain_status = omap_dma_chain_a_transfer(host->chain_id,
+			sg_dma_address(&data->sg[i]),
+			(dma_addr_t) (host->mapbase + OMAP_HSMMC_DATA),
+			(data->blksz / 4) ,count ,host);
+			if(dma_chain_status != 0)
+				dev_dbg(mmc_dev(host->mmc),
+					"%s: omap_dma_chain_a_transfer() failed during write with %d\n",
+					mmc_hostname(host->mmc), dma_chain_status);
+		}
+		host->sg_idx++;
+	}
+
+}
+
+/*
+ * Routine to configure block leangth for MMC/SD/SDIO cards
+ * and intiate the transfer.
+ */
+static int
+mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
+{
+	int use_dma;
+	int i, block_size;
+	unsigned sg_len;
+	struct mmc_data *data = req->data;
+	unsigned long flags;
+
+#ifdef CONFIG_OMAP_SDIO
+	int byte_count = 0, func = 0;
+	int ret = 0;
+#endif
+
+	if(unlikely(host == NULL))
+	{
+		return -1;
+	}
+
+	/* Store the pointer for request */
+	host->data = req->data;
+
+#ifdef CONFIG_OMAP_SDIO
+	host->sdiodata = req->data;
+	if (req->cmd->opcode == IO_RW_EXTENDED) {
+		if (req->cmd->arg & OMAP_SDIO_READ)
+			host->datadir = OMAP_MMC_DATADIR_WRITE;
+		else
+			host->datadir = OMAP_MMC_DATADIR_READ;
+
+		if ((req->cmd->arg & 0x1FF) == 0)
+			byte_count = 0x200;
+		else
+			byte_count = req->cmd->arg & 0x1FF;
+
+		func = ((req->cmd->arg & sdio_function_mask) >> 28);
+
+		if (req->cmd->arg & SDIO_BLKMODE) {
+			OMAP_HSMMC_WRITE(host->base, BLK,
+					blkmode_bytecount[func]);
+			OMAP_HSMMC_WRITE(host->base, BLK,
+					OMAP_HSMMC_READ(host->base,
+					BLK) | (byte_count << 16));
+		} else {
+			OMAP_HSMMC_WRITE(host->base, BLK, byte_count);
+			OMAP_HSMMC_WRITE(host->base, BLK,
+					OMAP_HSMMC_READ(host->base,BLK)
+					| (1 << 16));
+		}
+
+#ifdef	CONFIG_OMAP_SDIO_NON_DMA_MODE
+		host->buffer = (u32 *) req->data->sdio_buffer_virt;
+#else
+		if (polling_mode == 0) {
+			ret = sdio_omap_start_dma_transfer(host, req);
+			if (ret != 0) {
+				dev_dbg(mmc_dev(host->mmc),
+					"Sdio start dma failure\n");
+				return ret;
+			} else {
+				host->buffer = NULL;
+				host->bytesleft = 0;
+			}
+		} else {
+			host->buffer = (u32 *) req->data->sdio_buffer_virt;
+		}
+#endif
+		return 0;
+	}
+#endif	/* ifdef CONFIG_OMAP_SDIO */
+	/* Enable DMA */
+	host->use_dma = 1;
+	if (req->data == NULL) {
+		host->datadir = OMAP_MMC_DATADIR_NONE;
+		OMAP_HSMMC_WRITE(host->base, BLK, BLK_CLEAR);
+		/* Since there is nothing to DMA, clear the flag */
+		host->use_dma = 0;
+		return 0;
+	}
+
+	OMAP_HSMMC_WRITE(host->base, BLK, (req->data->blksz));
+	OMAP_HSMMC_WRITE(host->base, BLK,
+					OMAP_HSMMC_READ(host->base,
+					BLK) | (req->data->blocks << 16));
+
+
+	/* Copy the Block Size information */
+	block_size = data->blksz;
+
+	/* Cope with calling layer confusion; it issues "single
+	 * block" writes using multi-block scatterlists.
+	 */
+	sg_len = (data->blocks == 1) ? 1 : data->sg_len;
+
+	spin_lock_irqsave(&host->dma_lock, flags);
+	if(sg_len > NO_OF_DMA_CHAINS_USED)
+	{
+		host->extra_chain_reqd = sg_len % NO_OF_DMA_CHAINS_USED;
+		host->no_of_chain_reqd = sg_len / NO_OF_DMA_CHAINS_USED;
+		host->chains_requested = NO_OF_DMA_CHAINS_USED;
+		host->current_cb_cnt = 1;
+	}
+	else
+	{
+		host->extra_chain_reqd = 0;
+		host->no_of_chain_reqd = 0;
+		host->chains_requested = data->sg_len;
+		host->current_cb_cnt = 0;
+	}
+	spin_unlock_irqrestore(&host->dma_lock, flags);
+
+	/* Only do DMA for entire blocks */
+	use_dma = host->use_dma;
+	if (use_dma) {
+		for (i = 0; i < sg_len; i++) {
+			if ((data->sg[i].length % block_size) != 0) {
+				use_dma = 0;
+				break;
+			}
+		}
+	}
+	host->datadir = (req->data-> flags & MMC_DATA_WRITE) ?
+			OMAP_MMC_DATADIR_WRITE : OMAP_MMC_DATADIR_READ;
+	/* Initialize the internal scatter list count */
+	host->sg_idx = 0;
+	if (use_dma) {
+		if (mmc_omap_get_dma_channel(host, data) == 0) {
+			enum dma_data_direction dma_data_dir;
+
+			if (data->flags & MMC_DATA_WRITE)
+				dma_data_dir = DMA_TO_DEVICE;
+			else
+				dma_data_dir = DMA_FROM_DEVICE;
+
+			host->sg_len = dma_map_sg(mmc_dev(host->mmc), data->sg,
+						sg_len, dma_data_dir);
+			host->total_bytes_left = 0;
+			mmc_chain_dma(host, req->data);
+			host->brs_received = 0;
+			host->dma_done = 0;
+
+			/* Enable DMA */
+			host->use_dma = 1;
+		}
+		else
+		{
+			host->use_dma = 0;
+		}
+	} else {
+		/* Revert to CPU copy */
+		host->buffer =
+			(u32 *) (page_address(req->data->sg->page) +
+				req->data->sg->offset);
+		host->bytesleft = req->data->blocks * (req->data->blksz);
+		host->dma_ch = -1;
+		host->use_dma = 0;
+	}
+
+	return 0;
+}
+
+/*
+ * Request function. Exposed API to core for read/write operation
+ */
+static void omap_mmc_request(struct mmc_host *mmc, struct mmc_request *req)
+{
+	struct mmc_omap_host *host = mmc_priv(mmc);
+
+	WARN_ON(host->mrq != NULL);
+	host->mrq = req;
+
+	mmc_clk_enable_aggressive(host);
+
+	/* Reset MMC Controller's Data FSM */
+	if (req->cmd->opcode == MMC_GO_IDLE_STATE) {
+		OMAP_HSMMC_WRITE(host->base, SYSCTL,
+				OMAP_HSMMC_READ(host->base, SYSCTL) | 1 << 26);
+		while (OMAP_HSMMC_READ(host->base, SYSCTL) & (1 << 26)) ;
+	}
+
+	if (req->cmd->opcode == SD_APP_SEND_SCR
+		|| req->cmd->opcode == MMC_SEND_EXT_CSD)
+		mmc->ios.bus_width = MMC_BUS_WIDTH_1;
+
+	if (mmc_omap_prepare_data(host, req))
+		dev_dbg(mmc_dev(host->mmc),
+			"MMC host %s failed to initiate data transfer\n",
+			mmc_hostname(host->mmc));
+
+	/* Start the DMA if DMA is needed */
+	if (host->use_dma && (host->mmc->mode == MMC_MODE_MMC
+			|| host->mmc->mode == MMC_MODE_SD))
+	{
+		omap_start_dma_chain_transfers(host->chain_id);
+	}
+	if(host->card_detected == 1)
+	{
+		if (host->mmc->mode == MMC_MODE_MMC ||
+			host->mmc->mode == MMC_MODE_SD)
+		{
+			host->mmc->max_hw_segs = 128;
+			host->mmc->max_phys_segs = 128;
+			host->mmc->max_blk_size = 512;
+			host->mmc->max_blk_count = 0xFFFF;
+			host->mmc->max_req_size = host->mmc->max_blk_size * host->mmc->max_blk_count;
+			host->mmc->max_seg_size = host->mmc->max_req_size;
+			host->card_detected = 0;
+		}
+		else if(host->mmc->mode == MMC_MODE_SDIO)
+		{
+			host->mmc->max_hw_segs = 1;
+			host->mmc->max_phys_segs = 1;
+			host->mmc->max_seg_size = 1<<12;
+			host->mmc->max_req_size = 1<<12;
+			host->mmc->max_blk_size = 512;
+			host->mmc->max_blk_count = 1<<12 / 512;
+			host->card_detected = 0;
+		}
+	}
+	mmc_clk_disable_aggressive(host);
+
+	mmc_omap_start_command(host, req->cmd);
+}
+
+
+/*
+ * Routine to configure clock values. Exposed API to core
+ */
+static void omap_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+{
+	struct mmc_omap_host *host = mmc_priv(mmc);
+	u16 dsor = 0;
+	unsigned long regVal;
+	typeof(jiffies) timeout;
+	int *addr;
+
+	dev_dbg(mmc_dev(host->mmc), "%s: set_ios: clock %dHz busmode %d"
+			"powermode %d Vdd %x Bus Width %d\n",
+			mmc_hostname(host->mmc), ios->clock, ios->bus_mode,
+			ios->power_mode, ios->vdd, ios->bus_width);
+
+	switch (ios->power_mode) {
+	case MMC_POWER_OFF:
+		host->initstream = 0;
+#ifdef CONFIG_MMC_OMAP3430
+		if (host->id == OMAP_MMC1_DEVID) {
+			addr = (int *)&OMAP2_CONTROL_PBIAS_1;
+			*addr &= ~(1 << 1);
+			if (is_sil_rev_greater_than(OMAP3430_REV_ES1_0))
+				*addr &= ~(1 << 9);
+		}
+#endif
+		if (mmc_omap_power(host, 0))
+			dev_dbg(mmc_dev(host->mmc),
+				"Could not disable power to MMC%d\n",host->id);
+		break;
+	case MMC_POWER_UP:
+		if (mmc_omap_power(host, 1))
+			dev_dbg(mmc_dev(host->mmc),
+				"Could not enable power to MMC%d\n",host->id);
+#ifdef CONFIG_MMC_OMAP3430
+		if (host->id == OMAP_MMC1_DEVID) {
+			addr = (int *)&OMAP2_CONTROL_PBIAS_1;
+			*addr |= (1 << 1);
+			if (is_sil_rev_greater_than(OMAP3430_REV_ES1_0))
+				*addr |= (1 << 9);
+		}
+#endif
+		break;
+	}
+
+	mmc_clk_enable_aggressive(host);
+
+	switch (mmc->ios.bus_width) {
+	case MMC_BUS_WIDTH_8:
+				OMAP_HSMMC_WRITE(host->base, CON,
+			OMAP_HSMMC_READ(host->base,CON)
+			| EIGHT_BIT);
+		break;
+	case MMC_BUS_WIDTH_4:
+		OMAP_HSMMC_WRITE(host->base, HCTL,
+			OMAP_HSMMC_READ(host->base,HCTL)
+			| FOUR_BIT);
+		break;
+	case MMC_BUS_WIDTH_1:
+		OMAP_HSMMC_WRITE(host->base, CON,
+			OMAP_HSMMC_READ(host->base,CON) & ~EIGHT_BIT);
+		OMAP_HSMMC_WRITE(host->base, HCTL,
+			OMAP_HSMMC_READ(host->base,HCTL) & ~FOUR_BIT);
+		break;
+	}
+
+	if (host->id == OMAP_MMC1_DEVID) {
+		if ((cpu_is_omap34xx() && is_sil_rev_less_than(OMAP3430_REV_ES2_0))
+			|| (cpu_is_omap2430() && omap2_cpu_rev() == 2)) {
+			if ((OMAP_HSMMC_READ(host->base, HCTL) & SDVSDET) &&
+					((ios->vdd == 7) || (ios->vdd == 8))) {
+				if (omap_mmc_switch_opcond(host, 0) != 0)
+					dev_dbg(mmc_dev(host->mmc),
+							"omap_mmc_set_ios:"
+						"switch operation failed\n");
+				host->initstream = 0;
+			}
+		}
+	}
+
+	if (ios->clock) {
+		/* Enable MMC_SD_CLK */
+		dsor = OMAP_MMC_MASTER_CLOCK / ios->clock;
+		if (dsor < 1)
+			dsor = 1;
+
+		if (OMAP_MMC_MASTER_CLOCK / dsor > ios->clock)
+			dsor++;
+
+		if (dsor > 250)
+			dsor = 250;
+	}
+
+	omap_mmc_stop_clock(host);
+	regVal = OMAP_HSMMC_READ(host->base, SYSCTL);
+	regVal = regVal & ~(CLKD_MASK);
+	regVal = regVal | (dsor << 6);
+	regVal = regVal | (DTO << 16);
+	OMAP_HSMMC_WRITE(host->base, SYSCTL, regVal);
+	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+			OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
+
+	/* wait till the ICS bit is set */
+	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & ICS) != 0x2
+		&& time_before(jiffies, timeout)) ;
+	/* Enable clock to the card */
+	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+			OMAP_HSMMC_READ(host->base, SYSCTL) | CEN);
+
+	mmc_clk_disable_aggressive(host);
+}
+
+static struct mmc_host_ops mmc_omap_ops = {
+	.request = omap_mmc_request,
+	.set_ios = omap_mmc_set_ios,
+};
+
+#ifdef CONFIG_OMAP_SDIO
+/*
+ * Routine implementing SDIO polling mode sysfs entry
+ */
+static ssize_t sdio_polling_switch(struct device *dev,
+				struct device_attribute *attr,
+				const char *buf, size_t count)
+{
+	char cmd[25];
+	int i = 0;
+
+	if (count < 6) {
+		dev_dbg(dev, "Invalid string\n");
+		return count;
+	}
+
+	while (buf[i] != ' ' && buf[i] != '\n' && i < count) {
+		cmd[i] = buf[i];
+		i++;
+	}
+
+	cmd[i] = '\0';
+	i++;
+
+	if (!strcmp(cmd, "Enable")) {
+		polling_mode = 1;
+	} else if (!strcmp(cmd, "Disable")) {
+		polling_mode = 0;
+	} else {
+		dev_dbg(dev, "Unrecognized string\n");
+		dev_dbg(dev, "Usage:\n");
+		dev_dbg(dev, "echo Enable >"
+			"/sys/devices/platform/hsmmc-omap/sdio_polling_switch\n");
+		dev_dbg(dev, "echo Disable >"
+			"/sys/devices/platform/hsmmc-omap/sdio_polling_switch\n");
+	}
+	return count;
+}
+
+static DEVICE_ATTR(sdio_polling_switch, S_IWUSR, NULL, sdio_polling_switch);
+#endif
+
+/*
+ * Routine implementing the driver probe method
+ */
+static int __init omap_mmc_probe(struct platform_device *pdev)
+{
+	struct omap_mmc_conf *minfo = pdev->dev.platform_data;
+	struct mmc_host *mmc;
+	struct mmc_omap_host *host = NULL;
+	struct resource *res;
+	int ret = 0, irq, *addr;
+	if (minfo == NULL) {
+		dev_err(&pdev->dev, "platform data missing\n");
+		return -ENXIO;
+	}
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	irq = platform_get_irq(pdev, 0);
+	if (res == NULL || irq < 0)
+		return -ENXIO;
+
+	res = request_mem_region(res->start, res->end - res->start + 1,
+							pdev->name);
+	if (res == NULL)
+		return -EBUSY;
+
+	mmc = mmc_alloc_host(sizeof(struct mmc_omap_host), &pdev->dev);
+	if (!mmc) {
+		ret = -ENOMEM;
+		goto mmc_alloc_err;
+	}
+
+	host = mmc_priv(mmc);
+	host->mmc = mmc;
+
+	sema_init(&host->sem, 1);
+
+	host->use_dma = OMAP_USE_DMA;
+	host->dma_ch = -1;
+	host->initstream = 0;
+	host->mem_res = res;
+	host->irq = irq;
+	host->id = pdev->id;
+	host->mapbase = (void *)host->mem_res->start;
+	host->base = (void __iomem *)IO_ADDRESS(host->mapbase);
+	mmc->ops = &mmc_omap_ops;
+	mmc->f_min = 400000;
+	mmc->f_max = 52000000;
+	mmc->mode = MMC_CARD_NONE;
+	host->card_detected = 1;
+	host->is_high_capacity = 0;
+	host->flag_err = 0;
+	host->cmd_12 = 0;
+	host->cmd_13 = 0;
+	host->crc_retry = 0;
+
+#ifdef CONFIG_OMAP_SDIO
+	host->sdio_card_intr = 0;
+#endif
+	spin_lock_init(&host->dma_lock);
+	host->chain_id = -1;
+	host->sg_dma_len = 0;
+
+	if (cpu_is_omap2430()) {
+		if (host->id == OMAP_MMC1_DEVID) {
+			host->fclk = clk_get(&pdev->dev, "mmchs1_fck");
+			if (IS_ERR(host->fclk)) {
+				ret = PTR_ERR(host->fclk);
+				host->fclk = NULL;
+				goto clk_get_err;
+			}
+			host->iclk = clk_get(&pdev->dev, "mmchs1_ick");
+			if (IS_ERR(host->iclk)) {
+				ret = PTR_ERR(host->iclk);
+				host->iclk = NULL;
+				clk_put(host->fclk);
+				goto clk_get_err;
+			}
+			host->dbclk = clk_get(&pdev->dev, "mmchsdb1_fck");
+			/*
+			 * Only through a error message, MMC can still work
+			 * without debounce clock.
+			 */
+			if (IS_ERR(host->dbclk))
+				dev_dbg(mmc_dev(host->mmc),
+					"Failed to get debounce"
+					"clock for MMC1\n");
+		} else {
+			host->fclk = clk_get(&pdev->dev, "mmchs2_fck");
+			if (IS_ERR(host->fclk)) {
+				ret = PTR_ERR(host->fclk);
+				host->fclk = NULL;
+				goto clk_get_err;
+			}
+			host->iclk = clk_get(&pdev->dev, "mmchs2_ick");
+			if (IS_ERR(host->iclk)) {
+				ret = PTR_ERR(host->iclk);
+				host->iclk = NULL;
+				clk_put(host->fclk);
+				goto clk_get_err;
+			}
+			host->dbclk = clk_get(&pdev->dev, "mmchsdb2_fck");
+			/*
+			 * Only through a error message, MMC can still work
+			 * without debounce clock.
+			 */
+			if (IS_ERR(host->dbclk))
+				dev_dbg(mmc_dev(host->mmc),
+						"Failed to get"
+					"debounce clock for MMC2\n");
+		}
+	}
+
+	if (cpu_is_omap34xx()) {
+		/* 3430-ES1.0  Sil errata fix */
+		if (is_sil_rev_less_than(OMAP3430_REV_ES2_0)) {
+			host->gptfck = clk_get(&pdev->dev, "gpt10_fck");
+			if (IS_ERR(host->gptfck)) {
+				ret = PTR_ERR(host->gptfck);
+				host->gptfck = NULL;
+				goto clk_get_err;
+			}
+		}
+
+		host->fclk = clk_get(&pdev->dev, "mmc_fck");
+		if (IS_ERR(host->fclk)) {
+			ret = PTR_ERR(host->fclk);
+			host->fclk = NULL;
+			goto clk_get_err;
+		}
+
+		host->iclk = clk_get(&pdev->dev, "mmc_ick");
+		if (IS_ERR(host->iclk)) {
+			ret = PTR_ERR(host->iclk);
+			clk_put(host->fclk);
+			host->iclk = NULL;
+			goto clk_get_err;
+		}
+	}
+
+#ifdef CONFIG_OMAP34XX_OFFMODE
+	modify_timeout_value(host->fclk, 500);
+#endif /* #ifdef CONFIG_OMAP34XX_OFFMODE */
+
+	mmc_clk_enable(host);
+
+	if (cpu_is_omap2430()) {
+		if (clk_enable(host->dbclk) != 0)
+			dev_dbg(mmc_dev(host->mmc),
+				"Failed to enable debounce clock for MMC%d\n",
+				host->id);
+		omap_writel(omap_readl(OMAP2_CONTROL_DEVCONF1) | MMC1_ACTIVE_OVERWRITE,
+							OMAP2_CONTROL_DEVCONF1);
+		if (minfo->wire4)
+			/* OMAP2430 ES2.0 and onwards can support 4-bit */
+			if (omap2_cpu_rev() >= 1)
+				mmc->caps = MMC_CAP_4_BIT_DATA;
+	}
+
+	if (host->id == OMAP_MMC1_DEVID) {
+		if (cpu_is_omap34xx()) {
+#ifdef CONFIG_MMC_OMAP3430
+			addr = (int *)&OMAP2_CONTROL_PBIAS_1;
+			*addr |= (1 << 2);
+
+			addr = (int *)&OMAP2_CONTROL_DEVCONF0;
+			*addr |= (1 << 24);
+#endif
+			/* There is no 8-bit field in the structure yet */
+			if (minfo->wire4) {
+				if (cpu_is_omap3410()) {
+					mmc->caps = MMC_CAP_4_BIT_DATA;
+				}
+				else
+					mmc->caps = MMC_CAP_8_BIT_DATA;
+			}
+
+			OMAP_HSMMC_WRITE(host->base, HCTL,
+					OMAP_HSMMC_READ(host->base,
+					HCTL) | SDVS30);
+		} else if (cpu_is_omap2430()) {
+			/* OMAP2430 MMC1 on ES1.0 and ES2.1 can support 3V */
+			if (omap2_cpu_rev() == 0 || omap2_cpu_rev() > 1) {
+				OMAP_HSMMC_WRITE(host->base, HCTL,
+						OMAP_HSMMC_READ(host->base,
+								HCTL) | SDVS30);
+			} else {
+				/* OMAP2430 MMC1 ES2.0 - 1.8V only */
+				OMAP_HSMMC_WRITE(host->base, HCTL,
+						OMAP_HSMMC_READ(host->base,
+								HCTL) | SDVS18);
+			}
+		}
+	} else if (host->id == OMAP_MMC2_DEVID) {
+		if (cpu_is_omap34xx()) {
+#ifdef CONFIG_MMC_OMAP3430
+			addr = (int *)&OMAP2_CONTROL_DEVCONF1;
+			*addr |= (1 << 6);
+#endif
+
+			if (minfo->wire4)
+				mmc->caps = MMC_CAP_4_BIT_DATA;
+		}
+		OMAP_HSMMC_WRITE(host->base, HCTL,
+				OMAP_HSMMC_READ(host->base,
+						HCTL) | SDVS18);
+	}
+
+	/* Use scatterlist DMA to reduce per-transfer costs.
+	 * NOTE max_seg_size assumption that small blocks aren't
+	 * normally used (except e.g. for reading SD registers).
+	 */
+	mmc->max_phys_segs = 128;		 /* Largest sized scatter list
+									 * the driver could handle. Since this is
+									 * managed by us in software, we can tune
+									 * this value */
+	mmc->max_hw_segs = 128; 		 /* Largest number of address/length
+									 * pairs the host adapter can actually
+									 * give at once to the device. This value
+									 * should be kept same as scatter list	*/
+	mmc->max_blk_size = 512;	   /* Block Length at max can be 1024 */
+	mmc->max_blk_count = 0xFFFF;	/* No. of Blocks is 16 bits 			*/
+	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+	mmc->max_seg_size = mmc->max_req_size;
+
+	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34 | MMC_VDD_165_195;
+
+	OMAP_HSMMC_WRITE(host->base, CAPA,OMAP_HSMMC_READ(host->base,
+							CAPA) | VS30 | VS18);
+
+	mmc->caps |= MMC_CAP_MULTIWRITE | MMC_CAP_BYTEBLOCK | MMC_CAP_MMC_HIGHSPEED |
+			MMC_CAP_SD_HIGHSPEED;
+
+	/* Set the controller to AUTO IDLE mode */
+	OMAP_HSMMC_WRITE(host->base, SYSCONFIG,
+			OMAP_HSMMC_READ(host->base, SYSCONFIG) | AUTOIDLE);
+	/* Set SD bus power bit */
+	OMAP_HSMMC_WRITE(host->base, HCTL,
+			OMAP_HSMMC_READ(host->base, HCTL) | SDBP);
+
+	if (machine_is_omap_2430sdp() ||
+			machine_is_omap_3430sdp() ||
+			machine_is_omap_3430labrador() ||
+			machine_is_omap3evm() || machine_is_omap3_beagle() ) {
+		/*
+		 * Create sysfs entries for enabling/disabling hotplug
+		 * support for MMC cards
+		 */
+		if (device_create_file(&pdev->dev,
+				&dev_attr_mmc_cover_switch) < 0) {
+			dev_dbg(mmc_dev(host->mmc),
+					"Unable to create sysfs"
+				"attribute for MMC1 cover switch\n");
+		}
+		if (device_create_file(&pdev->dev,
+			&dev_attr_mmc_card_detect) < 0) {
+			dev_dbg(mmc_dev(host->mmc),
+				"Unable to create sysfs"
+				"attribute for MMC1 card detect\n");
+		}
+	}
+
+#ifdef CONFIG_OMAP_SDIO
+	if (device_create_file(&pdev->dev, &dev_attr_sdio_polling_switch) < 0) {
+		dev_dbg(mmc_dev(host->mmc),
+			"Unable to create sysfs"
+			"attribute for SDIO 1 polling switch\n");
+	}
+#endif
+
+	/* Request IRQ for MMC operations */
+	ret = request_irq(host->irq, mmc_omap_irq, 0, pdev->name,
+				host);
+	if (ret) {
+		dev_dbg(mmc_dev(host->mmc), "Unable to grab HSMMC IRQ");
+		goto irq_err;
+	}
+
+	host->card_detect_irq = minfo->switch_pin;
+	if (minfo->switch_pin >= 0) {
+		if (machine_is_omap_2430sdp() ||
+					machine_is_omap_3430sdp() ||
+					machine_is_omap_3430labrador() ||
+					machine_is_omap3evm() || machine_is_omap3_beagle() ) {
+			host->card_detect_irq =
+				TWL4030_GPIO_IRQ_NO(minfo->switch_pin);
+			INIT_WORK(&host->mmc_carddetect_work, mmc_omap_detect);
+
+
+			if (setup_mmc_carddetect_irq(minfo->switch_pin)) {
+				free_irq(host->irq, host);
+				goto irq_err;
+			}
+
+		}
+	}
+
+	if (minfo->switch_pin >= 0) {
+		ret = request_irq(host->card_detect_irq,
+			mmc_omap_irq_cd, IRQF_DISABLED, pdev->name,host);
+		if (ret < 0) {
+			dev_dbg(mmc_dev(host->mmc),
+				"Unable to grab T2 GPIO IRQ");
+			free_irq(host->irq, host);
+			goto irq_err;
+		}
+	}
+
+	if (host->id == OMAP_MMC1_DEVID)
+		saved_host1 = host;
+	else
+		saved_host2 = host;
+
+	platform_set_drvdata(pdev, host);
+
+	mmc_clk_disable_aggressive(host);
+
+	mmc_add_host(mmc);
+	return 0;
+
+clk_get_err:
+	dev_dbg(mmc_dev(host->mmc),
+		"Error getting clock for MMC\n");
+	if (host) {
+		mmc_free_host(mmc);
+	}
+	return ret;
+
+mmc_alloc_err:
+	if (host)
+		mmc_free_host(mmc);
+	return ret;
+
+irq_err:
+	mmc_clk_disable(host);
+
+	if (cpu_is_omap2430())
+		clk_disable(host->dbclk);
+
+	clk_put(host->fclk);
+	clk_put(host->iclk);
+
+	if (cpu_is_omap2430())
+		clk_put(host->dbclk);
+
+	if (host)
+		mmc_free_host(mmc);
+	return ret;
+}
+
+/*
+ * Routine implementing the driver remove method
+ */
+static int omap_mmc_remove(struct platform_device *pdev)
+{
+	struct mmc_omap_host *host = platform_get_drvdata(pdev);
+
+	platform_set_drvdata(pdev, NULL);
+
+	if (host) {
+		free_irq(host->irq, host);
+		free_irq(host->card_detect_irq, host);
+		flush_scheduled_work();
+
+		/* Free the clks */
+#ifndef AGGR_PM_CAP
+		mmc_clk_disable(host);
+#endif /* #ifndef AGGR_PM_CAP */
+
+		if (cpu_is_omap2430())
+			clk_disable(host->dbclk);
+		clk_put(host->fclk);
+		clk_put(host->iclk);
+		if (cpu_is_omap2430())
+			clk_put(host->dbclk);
+
+#ifdef CONFIG_OMAP_SDIO
+		device_remove_file(&pdev->dev,
+					&dev_attr_sdio_polling_switch);
+#endif
+		mmc_free_host(host->mmc);
+	}
+	return 0;
+}
+
+#ifdef CONFIG_PM
+/*
+ * Routine to suspend the MMC device
+ */
+static int omap_mmc_suspend(struct platform_device *pdev, pm_message_t state)
+{
+	int ret = 0;
+	int status;
+	struct mmc_omap_host *host = platform_get_drvdata(pdev);
+
+	if (host && host->suspended)
+		return 0;
+
+	if (host) {
+		/* Notify the core to suspend the host */
+		ret = mmc_suspend_host(host->mmc, state);
+		if (ret == 0) {
+			host->suspended = 1;
+
+		/* Temporarily enabling the clocks for configuration */
+		mmc_clk_enable_aggressive(host);
+
+		if (machine_is_omap_2430sdp() ||
+					machine_is_omap_3430sdp() ||
+					machine_is_omap_3430labrador() ||
+					machine_is_omap3evm() || machine_is_omap3_beagle() ) {
+			disable_irq(host->card_detect_irq);
+			ret = mask_carddetect_int(host->id);
+			if (ret)
+				dev_dbg(mmc_dev(host->mmc),
+					"Unable to mask the card detect"
+					"interrupt in suspend\n");
+		}
+
+		if (cpu_is_omap34xx() || (cpu_is_omap2430()
+				&& omap2_cpu_rev() == 2)) {
+			if (!(OMAP_HSMMC_READ(host->base, HCTL) & SDVSDET)) {
+				OMAP_HSMMC_WRITE(host->base,HCTL,
+						OMAP_HSMMC_READ(host->base,HCTL)
+						& SDVSCLR);
+				OMAP_HSMMC_WRITE(host->base,HCTL,
+						OMAP_HSMMC_READ(host->base,HCTL)
+						|SDVS30);
+				OMAP_HSMMC_WRITE(host->base,HCTL,
+						OMAP_HSMMC_READ(host->base,HCTL)
+						| SDBP);
+			}
+		}
+
+		/* Disable Interrupts */
+		OMAP_HSMMC_WRITE(host->base, ISE, INT_CLEAR);
+		OMAP_HSMMC_WRITE(host->base, IE, INT_CLEAR);
+
+		/* Clearing the STAT register*/
+		status = OMAP_HSMMC_READ(host->base, STAT);
+			OMAP_HSMMC_WRITE(host->base, STAT, status);
+		/* disable clks for MMC1 */
+		mmc_clk_disable(host);
+
+		if (cpu_is_omap2430())
+			clk_disable(host->dbclk);
+
+		if (cpu_is_omap2430()) {
+			if (host->id == OMAP_MMC1_DEVID) {
+				if (omap2_cpu_rev() == 2) {
+					omap_writel(omap_readl(OMAP2_CONTROL_DEVCONF1)
+						& ~MMC1_ACTIVE_OVERWRITE,
+						OMAP2_CONTROL_DEVCONF1);
+				}
+			}
+		}
+
+		ret = mmc_omap_power(host,0);
+		if (ret != 0)
+			dev_dbg(mmc_dev(host->mmc),
+				"Unable to disable power to MMC1\n");
+		host->initstream = 0;
+		}
+	}
+	return ret;
+}
+
+/*
+ * Routine to resume the MMC device
+ */
+static int omap_mmc_resume(struct platform_device *pdev)
+{
+	int ret = 0;
+	struct mmc_omap_host *host = platform_get_drvdata(pdev);
+
+	if (host && !host->suspended)
+		return 0;
+
+	if (host) {
+		if (cpu_is_omap2430()) {
+			if (host->id == OMAP_MMC1_DEVID) {
+				if (omap2_cpu_rev() == 2)
+					omap_writel(omap_readl(OMAP2_CONTROL_DEVCONF1)
+						| MMC1_ACTIVE_OVERWRITE,
+						OMAP2_CONTROL_DEVCONF1);
+			}
+		}
+		ret = mmc_omap_power(host,1);
+		if (ret != 0) {
+			dev_dbg(mmc_dev(host->mmc),
+				   "Unable to enable power to MMC1\n");
+			return ret;
+		}
+
+#ifndef AGGR_PM_CAP
+		mmc_clk_enable(host);
+#endif /* #ifndef AGGR_PM_CAP */
+
+		if (cpu_is_omap2430()) {
+			if (clk_enable(host->dbclk) != 0)
+				dev_dbg(mmc_dev(host->mmc),
+						"Unable to enable debounce"
+					"clock for MMC1\n");
+		}
+
+		if (machine_is_omap_2430sdp() ||
+					machine_is_omap_3430sdp() ||
+					machine_is_omap_3430labrador() ||
+					machine_is_omap3evm() || machine_is_omap3_beagle() ) {
+			enable_irq(host->card_detect_irq);
+			ret = unmask_carddetect_int(host->id);
+			if (ret)
+				dev_dbg(mmc_dev(host->mmc),
+					"Unable to unmask the card"
+					"detect interrupt\n");
+		}
+
+		/* Notify the core to resume the host */
+		ret = mmc_resume_host(host->mmc);
+		if (ret == 0)
+			host->suspended = 0;
+	}
+	return ret;
+
+#ifndef AGGR_PM_CAP
+clk_en_err:
+	dev_dbg(mmc_dev(host->mmc),
+		"Unable to enable MMC clocks during resume\n");
+	return -1;
+#endif
+}
+
+#else
+#define omap_mmc_suspend	NULL
+#define omap_mmc_resume		NULL
+#endif
+
+#ifdef CONFIG_DPM
+static int
+omap_mmc_pre_scale(int slot, struct notifier_block *op, unsigned long level,
+		   void *ptr)
+{
+	int i = 0, timeout = 20;
+	struct mmc_omap_host *host = (slot == MMC1) ? saved_host1 : saved_host2;
+
+	switch (level) {
+	case SCALE_PRECHANGE:
+		/* If DMA is active then enable the stop at block gap event */
+		if (host->dma_ch) {
+			OMAP_HSMMC_WRITE(host->base, HCTL,
+					OMAP_HSMMC_READ(host->base,HCTL) | SBGR);
+			while (((OMAP_HSMMC_READ(host->base, STAT) & TC) != 0x2)
+				|| (i < timeout)) {
+				i++;
+				/*
+				 * Wait for 5 Micro seconds before reading the
+				 * Block gap status
+				 */
+				udelay(5);
+			}
+			host->dma_ch = -1;
+		}
+		break;
+	}
+	return 0;
+}
+
+static int
+omap_mmc_post_scale(int slot, struct notifier_block *op, unsigned long level,
+			void *ptr)
+{
+	struct mmc_omap_host *host = (slot == MMC1) ? saved_host1 : saved_host2;
+
+	switch (level) {
+	case SCALE_POSTCHANGE:
+		if (host->dma_ch == -1) {
+		/*
+		 * Reset the stop at block gap event before re-starting the
+		 * transmission
+		 */
+		OMAP_HSMMC_WRITE(host->base, HCTL,
+				OMAP_HSMMC_READ(host->base,HCTL) & ~(SBGR));
+		/* Restart the transmision from the previously left block */
+		OMAP_HSMMC_WRITE(host->base, HCTL,
+				OMAP_HSMMC_READ(host->base,HCTL) | CT);
+		/* 1ms delay reuired after re-starting transfer */
+		mdelay(1);
+		}
+		break;
+	}
+	return 0;
+}
+
+#if defined(CONFIG_OMAP2430_MMC1) || defined(CONFIG_OMAP3430_MMC1)
+/*
+ * Prescale function for MMC1 controller
+ */
+static int
+omap_mmc1_scale_prechange(struct notifier_block *op, unsigned long level,
+			  void *ptr)
+{
+	return omap_mmc_pre_scale(MMC1, op, level, ptr);
+}
+
+/*
+ * Post scale  function for MMC1 controller
+ */
+static int
+omap_mmc1_scale_postchange(struct notifier_block *op, unsigned long level,
+			   void *ptr)
+{
+	return omap_mmc_post_scale(MMC1, op, level, ptr);
+}
+
+static struct notifier_block omap_mmc1_pre_scale = {
+	.notifier_call = omap_mmc1_scale_prechange,
+};
+
+static struct notifier_block omap_mmc1_post_scale = {
+	.notifier_call = omap_mmc1_scale_postchange,
+};
+#endif
+#if defined(CONFIG_OMAP2430_MMC2) || defined(CONFIG_OMAP3430_MMC2)
+/*
+ * Prescale function for MMC2 controller
+ */
+static int
+omap_mmc2_scale_prechange(struct notifier_block *op, unsigned long level,
+			  void *ptr)
+{
+	return omap_mmc_pre_scale(MMC2, op, level, ptr);
+}
+
+/*
+ * Post scale  function for MMC2 controller
+ */
+static int
+omap_mmc2_scale_postchange(struct notifier_block *op, unsigned long level,
+			   void *ptr)
+{
+	return omap_mmc_post_scale(MMC2, op, level, ptr);
+}
+
+static struct notifier_block omap_mmc2_pre_scale = {
+	.notifier_call = omap_mmc2_scale_prechange,
+};
+
+static struct notifier_block omap_mmc2_post_scale = {
+	.notifier_call = omap_mmc2_scale_postchange,
+};
+#endif
+#endif
+
+static struct platform_driver omap_mmc_driver = {
+	.probe = omap_mmc_probe,
+	.remove = omap_mmc_remove,
+	.suspend = omap_mmc_suspend,
+	.resume = omap_mmc_resume,
+	.driver = {
+		   .name = "hsmmc-omap",
+		   },
+};
+
+#ifdef CONFIG_OMAP_SDIO
+/* API for Enable/Disable SDIO card interrupt */
+int sdio_card_int_enable(int enable, int slot)
+{
+	int intr_mask, intr_ena;
+	struct mmc_omap_host *host = (slot == MMC1) ? saved_host1 : saved_host2;
+
+	intr_ena = OMAP_HSMMC_READ(host->base, ISE);
+	intr_mask = OMAP_HSMMC_READ(host->base, IE);
+	host->sdio_card_intr = enable;
+
+	if (enable == SDIO_CARD_INT_DISABLE) {
+		intr_ena = intr_ena & ~(OMAP_HSMMC_CARD_INT);
+		intr_mask = intr_mask & ~(OMAP_HSMMC_CARD_INT);
+	} else {
+		intr_ena = intr_ena | OMAP_HSMMC_CARD_INT;
+		intr_mask = intr_mask | OMAP_HSMMC_CARD_INT;
+	}
+	OMAP_HSMMC_WRITE(host->base, ISE, intr_ena);
+	OMAP_HSMMC_WRITE(host->base, IE, intr_mask);
+	return 0;
+}
+EXPORT_SYMBOL(sdio_card_int_enable);
+#endif
+
+/*
+ * Driver init method
+ */
+static int __init omap_mmc_init(void)
+{
+	/* Register the MMC driver */
+	if (platform_driver_register(&omap_mmc_driver)) {
+		printk(KERN_ERR ":failed to register MMC driver\n");
+		return -ENODEV;
+	}
+#ifdef CONFIG_DPM
+#if defined(CONFIG_OMAP2430_MMC1) || defined(CONFIG_OMAP3430_MMC1)
+	/* DPM scale registration for MMC1 controller */
+	dpm_register_scale(&omap_mmc1_pre_scale, SCALE_PRECHANGE);
+	dpm_register_scale(&omap_mmc1_post_scale, SCALE_POSTCHANGE);
+#endif
+#if defined(CONFIG_OMAP2430_MMC2) || defined(CONFIG_OMAP3430_MMC2)
+	/* DPM scale registration for MMC2 controller */
+	dpm_register_scale(&omap_mmc2_pre_scale, SCALE_PRECHANGE);
+	dpm_register_scale(&omap_mmc2_post_scale, SCALE_POSTCHANGE);
+#endif
+#endif
+	return 0;
+}
+
+/*
+ * Driver exit method
+ */
+static void __exit omap_mmc_cleanup(void)
+{
+	/* Unregister MMC driver */
+	platform_driver_unregister(&omap_mmc_driver);
+
+#ifdef CONFIG_DPM
+#if defined(CONFIG_OMAP2430_MMC1) || defined(CONFIG_OMAP3430_MMC1)
+	/* Unregister DPM scale functions for MMC1 controller */
+	dpm_unregister_scale(&omap_mmc1_pre_scale, SCALE_PRECHANGE);
+	dpm_unregister_scale(&omap_mmc1_post_scale, SCALE_POSTCHANGE);
+#endif
+#if defined(CONFIG_OMAP2430_MMC2) || defined(CONFIG_OMAP3430_MMC2)
+	/* Unregister DPM scale functions for MMC2 controller */
+	dpm_unregister_scale(&omap_mmc2_pre_scale, SCALE_PRECHANGE);
+	dpm_unregister_scale(&omap_mmc2_post_scale, SCALE_POSTCHANGE);
+#endif
+#endif
+}
+
+module_init(omap_mmc_init);
+module_exit(omap_mmc_cleanup);
+
+MODULE_DESCRIPTION("OMAP 2430/3430 Multimedia Card driver");
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Texas Instruments");
+
+--------------060304000104020501030605
+Content-Type: text/x-chdr;
+ name="omap_hsmmc.h"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline;
+ filename="omap_hsmmc.h"
+
+/*
+* drivers/mmc/omap_hsmmc.h
+*
+* Header file for OMAP2430/3430 HSMMC controller.
+*
+* Copyright (C) 2007 Texas Instruments.
+* Author: Texas Instruments
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License version 2 as
+* published by the Free Software Foundation.
+*
+* THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+* IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+* WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+#ifndef	DRIVERS_MEDIA_MMC_OMAP_H
+#define	DRIVERS_MEDIA_MMC_OMAP_H
+
+#define RSP_TYPE(x)	((x) & ~(MMC_RSP_BUSY|MMC_RSP_OPCODE))
+#define OMAP_MMC1_DEVID	1
+#define OMAP_MMC2_DEVID 2
+
+#define OMAP_MMC_DATADIR_NONE	0
+#define OMAP_MMC_DATADIR_READ	1
+#define OMAP_MMC_DATADIR_WRITE	2
+#define MMC1_ACTIVE_OVERWRITE (1<<31)
+
+#define OMAP_MMC_MASTER_CLOCK	96000000
+#define OMAP_USE_DMA		1
+#define MMC1			1
+#define MMC2			2
+
+/* HSMMC Host Controller Registers */
+#define OMAP_HSMMC_SYSCONFIG	0x0010
+#define OMAP_HSMMC_SYSSTATUS	0x0014
+#define OMAP_HSMMC_CSRE		0x0024
+#define OMAP_HSMMC_SYSTEST	0x0028
+#define OMAP_HSMMC_CON		0x002C
+#define OMAP_HSMMC_BLK		0x0104
+#define OMAP_HSMMC_ARG		0x0108
+#define OMAP_HSMMC_CMD		0x010C
+#define OMAP_HSMMC_RSP10	0x0110
+#define OMAP_HSMMC_RSP32	0x0114
+#define OMAP_HSMMC_RSP54	0x0118
+#define OMAP_HSMMC_RSP76	0x011C
+#define OMAP_HSMMC_DATA		0x0120
+#define OMAP_HSMMC_PSTATE	0x0124
+#define OMAP_HSMMC_HCTL		0x0128
+#define OMAP_HSMMC_SYSCTL	0x012C
+#define OMAP_HSMMC_STAT		0x0130
+#define OMAP_HSMMC_IE		0x0134
+#define OMAP_HSMMC_ISE		0x0138
+#define OMAP_HSMMC_AC12		0x013C
+#define OMAP_HSMMC_CAPA		0x0140
+#define OMAP_HSMMC_CUR_CAPA	0x0148
+#define OMAP_HSMMC_REV		0x01FC
+
+/* HSMMC controller bit definitions */
+#define VS18		(1<<26)
+#define VS30		(1<<25)
+#define SDVS18		(0x5<<9)
+#define SDVS30		(0x6<<9)
+#define SDVSCLR		0xFFFFF1FF
+#define SDVSDET		0x00000400
+#define SIDLE_MODE	(0x2<<3)
+#define AUTOIDLE	0x1
+#define SDBP		(1<<8)
+#define DTO		0xe
+#define ICE		0x1
+#define ICS		0x2
+#define CEN		(1<<2)
+#define CLKD_MASK	0x0000FFC0
+#define INT_EN_MASK	0x307F0033
+#define SDIO_CARD_INT_EN_MASK	0x307F0133
+#define INIT_STREAM	(1<<1)
+#define DP_SELECT	(1<<21)
+#define DDIR		(1<<4)
+#define DMA_EN		0x1
+#define MSBS		1<<5
+#define BCE		1<<1
+#define EIGHT_BIT	1 << 5
+#define FOUR_BIT	1 << 1
+#define CC		0x1
+#define TC		0x02
+#define OD		0x1
+#define BRW		0x400
+#define BRR		0x800
+#define BRE		(1<<11)
+#define BWE		(1<<10)
+#define SBGR		(1<<16)
+#define CT		(1<<17)
+#define OMAP_SDIO_READ	(1<<31)
+#define SDIO_BLKMODE	(1<<27)
+#define OMAP_HSMMC_ERR	(1 << 15)	   /* Any error */
+#define OMAP_HSMMC_CMD_TIMEOUT	(1 << 16)   /* Command response time-out */
+#define OMAP_HSMMC_DATA_TIMEOUT	(1 << 20)   /* Data response time-out */
+#define OMAP_HSMMC_CMD_CRC	(1 << 17)   /* Command CRC error */
+#define OMAP_HSMMC_DATA_CRC	(1 << 21)   /* Date CRC error */
+#define OMAP_HSMMC_CARD_ERR	(1 << 28)   /* Card ERR */
+#define OMAP_HSMMC_CARD_INT	(1 << 8)   /* SDIO Card INT */
+#define OMAP_HSMMC_STAT_CLEAR	0xFFFFFFFF
+#define INIT_STREAM_CMD		0x00000000
+#define INT_CLEAR		0x00000000
+#define BLK_CLEAR		0x00000000
+
+#define sdio_blkmode_regaddr1	0x2000
+#define sdio_blkmode_regaddr2	0x2200
+#define sdio_blkmode_mask	0x03F1FE00
+#define sdio_function_mask	0x70000000
+#define sdio_rw_function_mask	0x000E0000
+#define IO_RW_DIRECT_MASK	0xF000FF00
+#define IO_RW_DIRECT_ARG_MASK	0x80001A00
+#define SDIO_CARD_INT_ENABLE	1
+#define SDIO_CARD_INT_DISABLE	0
+
+#define MMC_TIMEOUT_MS	20
+#define NO_OF_MMC_HOSTS 2
+
+/* MMC Host controller read/write API's */
+#define OMAP_HSMMC_READ(base, reg)	__raw_readl((base) + OMAP_HSMMC_##reg)
+#define OMAP_HSMMC_WRITE(base, reg, val)	__raw_writel((val), (base) + OMAP_HSMMC_##reg)
+
+#ifdef CONFIG_OMAP34XX_OFFMODE
+extern int context_restore_required(struct clk *clk);
+extern void modify_timeout_value(struct clk *clk, u32 value);
+#endif /* #ifdef CONFIG_OMAP34XX_OFFMODE */
+#endif
+
+--------------060304000104020501030605--
