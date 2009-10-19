@@ -1,11 +1,11 @@
 From: Dirk Behme <dirk.behme@googlemail.com>
 Subject: Re: MMC_CAP_SDIO_IRQ for omap 3430
-Date: Mon, 19 Oct 2009 20:10:56 +0200
-Message-ID: <4ADCABB0.2070908@googlemail.com>
+Date: Mon, 19 Oct 2009 20:16:47 +0200
+Message-ID: <4ADCAD0F.9010107@googlemail.com>
 References: <4b73d43f0910151330q6c5cae7sa2a5948b586cc215@mail.gmail.com> <4AD81DC2.4080607@googlemail.com> <42153.192.168.10.89.1255715021.squirrel@dbdmail.itg.ti.com> <4AD8C959.1000004@googlemail.com> <004701ca4ea5$aeacefe0$544ff780@am.dhcp.ti.com> <4b73d43f0910161426l7600f424w5b8345d16790dd21@mail.gmail.com> <4ADB4604.2090704@googlemail.com> <13B9B4C6EF24D648824FF11BE8967162039B3184F0@dlee02.ent.ti.com> <4b73d43f0910181717i9623184mc2b8c7d6ca0fb435@mail.gmail.com> <4b73d43f0910181724q11d40851wb2aed801d7ae85f6@mail.gmail.com> <005101ca50e1$11ef2770$544ff780@am.dhcp.ti.com>
 Mime-Version: 1.0
 Content-Type: multipart/mixed;
- boundary="------------020608050301010909080008"
+ boundary="------------080806070404090402010602"
 Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <005101ca50e1$11ef2770$544ff780@am.dhcp.ti.com>
 Sender: linux-omap-owner@vger.kernel.org
@@ -14,7 +14,7 @@ Cc: Madhusudhan <madhu.cr@ti.com>, 'John Rigby' <jcrigby@gmail.com>, "'Woodruff,
 List-Id: linux-mmc@vger.kernel.org
 
 This is a multi-part message in MIME format.
---------------020608050301010909080008
+--------------080806070404090402010602
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 
@@ -22,6 +22,8 @@ Madhusudhan wrote:
 > Hi John,
 > 
 > So does the SDIO card interrupt mode work fine now?
+
+(wrong attachment in previous mail :( sorry)
 
 If somebody likes to test, my updated patch v2 in attachment. Compile 
 tested only, testing and comments are welcome.
@@ -94,7 +96,8 @@ Dirk
 > 
 
 
---------------020608050301010909080008
+
+--------------080806070404090402010602
 Content-Type: text/plain;
  name="omap_hsmmc_sdio_irq_patch.txt"
 Content-Transfer-Encoding: 7bit
@@ -158,21 +161,6 @@ Index: linux-beagle/drivers/mmc/host/omap_hsmmc.c
  #define ERR			(1 << 15)
  #define CMD_TIMEOUT		(1 << 16)
  #define DATA_TIMEOUT		(1 << 20)
-@@ -268,12 +272,12 @@ static int omap_hsmmc_context_restore(st
- 		OMAP_HSMMC_WRITE(host->base, CON, con | DW8);
- 		break;
- 	case MMC_BUS_WIDTH_4:
--		OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
-+		OMAP_HSMMC_WRITE(host->base, CON, (con | CTPL) & ~DW8);
- 		OMAP_HSMMC_WRITE(host->base, HCTL,
- 			OMAP_HSMMC_READ(host->base, HCTL) | FOUR_BIT);
- 		break;
- 	case MMC_BUS_WIDTH_1:
--		OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
-+		OMAP_HSMMC_WRITE(host->base, CON, (con | CTPL) & ~DW8);
- 		OMAP_HSMMC_WRITE(host->base, HCTL,
- 			OMAP_HSMMC_READ(host->base, HCTL) & ~FOUR_BIT);
- 		break;
 @@ -653,6 +657,15 @@ static irqreturn_t omap_hsmmc_irq(int ir
  	status = OMAP_HSMMC_READ(host->base, STAT);
  	dev_dbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
@@ -189,16 +177,23 @@ Index: linux-beagle/drivers/mmc/host/omap_hsmmc.c
  	if (status & ERR) {
  #ifdef CONFIG_MMC_DEBUG
  		omap_hsmmc_report_irq(host, status);
-@@ -1166,7 +1179,8 @@ static void omap_hsmmc_set_ios(struct mm
+@@ -1164,12 +1177,13 @@ static void omap_hsmmc_set_ios(struct mm
+ 		OMAP_HSMMC_WRITE(host->base, CON, con | DW8);
+ 		break;
  	case MMC_BUS_WIDTH_4:
- 		OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
+-		OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
++		OMAP_HSMMC_WRITE(host->base, CON, (con | CTPL) & ~DW8);
  		OMAP_HSMMC_WRITE(host->base, HCTL,
 -			OMAP_HSMMC_READ(host->base, HCTL) | FOUR_BIT);
 +				 OMAP_HSMMC_READ(host->base, HCTL)
 +				 | IBG | FOUR_BIT);
  		break;
  	case MMC_BUS_WIDTH_1:
- 		OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
+-		OMAP_HSMMC_WRITE(host->base, CON, con & ~DW8);
++		OMAP_HSMMC_WRITE(host->base, CON, (con | CTPL) & ~DW8);
+ 		OMAP_HSMMC_WRITE(host->base, HCTL,
+ 			OMAP_HSMMC_READ(host->base, HCTL) & ~FOUR_BIT);
+ 		break;
 @@ -1512,6 +1526,24 @@ static int omap_hsmmc_disable_fclk(struc
  	return 0;
  }
@@ -252,4 +247,4 @@ Index: linux-beagle/drivers/mmc/host/omap_hsmmc.c
  	if (mmc_slot(host).wires >= 8)
  		mmc->caps |= MMC_CAP_8_BIT_DATA;
 
---------------020608050301010909080008--
+--------------080806070404090402010602--
