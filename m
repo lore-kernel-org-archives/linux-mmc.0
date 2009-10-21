@@ -1,64 +1,87 @@
-From: Daniel Mack <daniel@caiaq.de>
-Subject: Re: MXC MMC driver and SDIO peripherals
-Date: Wed, 21 Oct 2009 22:51:56 +0200
-Message-ID: <20091021205156.GO14091@buzzloop.caiaq.de>
-References: <20091021192038.GK14091@buzzloop.caiaq.de>
- <1256156119.8469.40.camel@localhost.localdomain>
+From: Stefan Richter <stefanr@s5r6.in-berlin.de>
+Subject: Re: [PATCH 1/2] Disk hot removal causing oopses and fixes
+Date: Wed, 21 Oct 2009 22:55:09 +0200
+Message-ID: <4ADF752D.7010206@s5r6.in-berlin.de>
+References: <20091021161201.GA16968@angel.research.nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from buzzloop.caiaq.de ([212.112.241.133]:54759 "EHLO
-	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754147AbZJUUvz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2009 16:51:55 -0400
-Content-Disposition: inline
-In-Reply-To: <1256156119.8469.40.camel@localhost.localdomain>
+Received: from einhorn.in-berlin.de ([192.109.42.8]:34577 "EHLO
+	einhorn.in-berlin.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753739AbZJUUzM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2009 16:55:12 -0400
+In-Reply-To: <20091021161201.GA16968@angel.research.nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Williams <dcbw@redhat.com>
-Cc: linux-arm-kernel@lists.infradead.org, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, libertas-dev@lists.infradead.org
+To: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Cc: Jens Axboe <axboe@kernel.dk>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Dan,
-
-On Wed, Oct 21, 2009 at 01:15:19PM -0700, Dan Williams wrote:
-> On Wed, 2009-10-21 at 21:20 +0200, Daniel Mack wrote:
-> > Hi,
-> > 
-> > we're having trouble getting SDIO connected harware to fly on MX31 based
-> > designs. In particular, a SD8686 chip supported by the libertas_sdio
-> > driver will hang forever when built without CONFIG_MMC_DEBUG=y. With
-> > that option selected, however, the behaviour is a little different, and
-> > I can at least see the following messages on a recent 2.6.32-rc5 based
-> > MX31 tree.
-> > 
-> > Is there any common pitfall for such setups? I did more or less the same
-> > thing on PXAs (same WLAN chip, same kind of interface, same firmware),
-> > and haven't seen any such effects, so I suspect the MXC specific parts
-> > to be the reason for that. Any ideas?
+Jarkko Lavinen wrote:
+> When MMC driver notices a card has been removed, it removes the
+> card and the block device.  The call proceeds to
+> blk_cleanup_queue() which marks the request queue dead, calls
+> elevator exit to release the elevator and puts request queue.
+> This releases elevator always and may also release the request
+> queue.
 > 
-> Any idea what quirks your SDHC is using if any?  Does it require PIO or
-> can it do DMA? 
+> If file system is still mounted and using the disk after
+> blk_cleanup_queue() has been called, io requests will access
+> already free'ed structures and oopses and BUG_ON()s jump in.
+[...]
+>  fs/block_dev.c |   24 ++++++++++++++++++++----
+>  1 files changed, 20 insertions(+), 4 deletions(-)
+[...]
 
-In mainline kernels, DMA is limited to the MX2 SoC family. The MX3 that
-I'm using is excluded from that feature, but I'mm not aware of the
-reason for that.
+And in patch 2/2:
+>  block/blk-core.c |    9 +++++++++
+>  1 files changed, 9 insertions(+), 0 deletions(-)
 
-> Does it have any transfer restrictions on block size or
-> bit-width? 
+This doesn't look right.  I suspect you need to fix the MMC subsystem.
+It has to reference-count its objects so that they are not freed as long
+as they are used by upper layers, notably by the block subsystem.
 
-I didn't really debug it yet, but from what I see in the sources, the
-maximum block size is 2048. The hardware is connected via the 4-wire
-interface (+clk, +cmd). The system I tried that on has a MMC slot where
-I can plug in either the WLAN eval kit or a memory card, and the latter
-works just fine, which tells me that at least the pin config and the
-hardware can't be entirely wrong.
+OK, actually I am not 100% sure whether the issue is in the lower layers
+alone --- I'm only (reasonably) familiar with drivers below the SCSI
+subsystem, not with those directly below the block subsystem.
 
-> What is the debug output of the MMC stack when loading the
-> module for your SDHC?
+In case of SCSI, low level requests the removal of scsi_device or
+Scsi_Host instances when appropriate, and the respective removal
+functions in SCSI core make sure that upper layers will not use a
+scsi_device after scsi_remove_device (or other flavors of it) anymore;
+likewise it guarantees that a Scsi_Host will not be used by upper layers
+anymore when scsi_remove_host returns to the low level driver.
 
-Exactly one line ;)
+So, while I don't know what the block subsystem offers in this regard,
+the fix cannot be that the block layer somehow notices that lower layers
+went away and goes quiet then; instead the way to go is that lower
+layers make sure that the block request queue is destroyed before MMC
+device objects are destroyed (or in other words:  that the MMC device
+objects stay around at least as long as the block request queue exists).
 
-[    1.340000] i.MX SDHC driver
+[Quoting in different order than posted:]
+> I've been testing mmc driver robustness against rapid card removal
+> reinsert cycles and it has been rather easy to get a kernel oopses 
+> (on 2.6.28) because of insufficient locking. 
 
+I dare say without knowing the MMC and block system:  It is not a
+locking issue, it is a reference counting issue.
 
-Daniel
+Make sure to always "get" an object before you hand a pointer to it over
+to some store or to another context (and of course "put" it when that
+reference is removed from that store or, respectively, not longer used
+by that other context).  And make sure that an object is destroyed only
+when the reference count goes to zero.  The kref API does this, and so
+do the APIs which are wrapped around it (like get_device, put_device).
+
+So, make sure that the reference to the MMC device which the block layer
+needs is counted for as long as there is the request queue.
+
+PS:  The kref API is based on an atomic counter so that there is
+fundamentally never a need to use locking (mutual exclusion) for proper
+reference counting and proper deferral of object destruction.  The whole
+secret is not to forget to count _all_ references.
+-- 
+Stefan Richter
+-=====-==--= =-=- =-=-=
+http://arcgraph.de/sr/
