@@ -1,51 +1,57 @@
-From: Marcel Holtmann <marcel@holtmann.org>
-Subject: Re: [PATCH net-next V2 1/3] iwmc3200top: Add Intel Wireless
- MultiCom  3200 top driver.
-Date: Wed, 21 Oct 2009 21:52:47 +0900
-Message-ID: <1256129568.7737.1.camel@localhost.localdomain>
-References: <1255806576-26869-1-git-send-email-tomas.winkler@intel.com>
-	 <20091019.215457.43252934.davem@davemloft.net>
-	 <1ba2fa240910200453k4638dc6cm8c8911353ea85b60@mail.gmail.com>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: [PATCH] at91: at91sam9g20ek modify dual slot evaluation kit
+Date: Wed, 21 Oct 2009 17:26:53 +0200
+Message-ID: <20091021152653.GF19714@game.jcrosoft.org>
+References: <1256049173-17373-1-git-send-email-nicolas.ferre@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from senator.holtmann.net ([87.106.208.187]:35097 "EHLO
-	mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751949AbZJUMxJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2009 08:53:09 -0400
-In-Reply-To: <1ba2fa240910200453k4638dc6cm8c8911353ea85b60@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1256049173-17373-1-git-send-email-nicolas.ferre@atmel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: avictor.za@gmail.com, linux-mmc@vger.kernel.org, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomas Winkler <tomasw@gmail.com>
-Cc: David Miller <davem@davemloft.net>, linville@tuxdriver.com, netdev@vger.kernel.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, yi.zhu@intel.com, inaky.perez-gonzalez@intel.com, cindy.h.kao@intel.com, guy.cohen@intel.com, ron.rindjunsky@intel.com
 
-Hi Tomas,
+> +	  that embeds only one SD/MMC slot.
+> +
+> +config MACH_AT91SAM9G20EK_2MMC
+> +	bool "Atmel AT91SAM9G20-EK Evaluation Kit with 2 SD/MMC Slots"
+> +	depends on ARCH_AT91SAM9G20
+> +	help
+> +	  Select this if you are using an Atmel AT91SAM9G20-EK Evaluation Kit
+> +	  with 2 SD/MMC Slots. This is the case for AT91SAM9G20-EK rev. C and
+> +	  onwards.
+>  
+>  config MACH_CPU9G20
+>  	bool "Eukrea CPU9G20 board"
+> @@ -392,7 +394,7 @@ config MTD_AT91_DATAFLASH_CARD
+>  
+>  config MTD_NAND_ATMEL_BUSWIDTH_16
+>  	bool "Enable 16-bit data bus interface to NAND flash"
+> -	depends on (MACH_AT91SAM9260EK || MACH_AT91SAM9261EK || MACH_AT91SAM9G10EK || MACH_AT91SAM9263EK || MACH_AT91SAM9G20EK || MACH_AT91SAM9G45EKES || MACH_AT91CAP9ADK)
+> +	depends on (MACH_AT91SAM9260EK || MACH_AT91SAM9261EK || MACH_AT91SAM9G10EK || MACH_AT91SAM9263EK || MACH_AT91SAM9G20EK || MACH_AT91SAM9G20EK_2MMC || MACH_AT91SAM9G45EKES || MACH_AT91CAP9ADK)
+it's time to replace this by select it at machine config state
 
-> >> This patch adds Intel Wireless MultiCom 3200 top driver.
-> >> IWMC3200 is 4Wireless Com CHIP (GPS/BT/WiFi/WiMAX).
-> >> Top driver is responsible for device initialization and firmware download.
-> >> Firmware handled by top is responsible for top itself and
-> >> as well as bluetooth and GPS coms. (Wifi and WiMax provide their own firmware)
-> >> In addition top driver is used to retrieve firmware logs
-> >> and supports other debugging features
-> >>
-> >> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> >
-> > Applied to net-next-2.6
-> 
-> Thanks Dave
-> 
-> Marcel
-> I want to send out now the BT driver, would like the patch against
-> bluetooth-next-2.6.git, then I wait till you sync or can you also pick
-> it from net-next if Dave is OK with that?
+> @@ -254,7 +257,11 @@ static void __init ek_board_init(void)
+>  	/* Ethernet */
+>  	at91_add_device_eth(&ek_macb_data);
+>  	/* MMC */
+> +#if defined(CONFIG_MMC_ATMELMCI) || defined(CONFIG_MMC_ATMELMCI_MODULE)
+>  	at91_add_device_mci(0, &ek_mmc_data);
+> +#else
+> +	at91_add_device_mmc(0, &ek_mmc_data);
+> +#endif
+do we really need to do this choice at board level?
 
-send it against net-next since you are working in drivers/bluetooth/, we
-will have not conflicts.
-
-Regards
-
-Marcel
-
-
+Best Regards,
+J.
