@@ -1,57 +1,125 @@
-From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Subject: Re: [PATCH] at91: at91sam9g20ek modify dual slot evaluation kit
-Date: Wed, 21 Oct 2009 17:26:53 +0200
-Message-ID: <20091021152653.GF19714@game.jcrosoft.org>
-References: <1256049173-17373-1-git-send-email-nicolas.ferre@atmel.com>
+From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Subject: [PATCH 1/2] Disk hot removal causing oopses and fixes
+Date: Wed, 21 Oct 2009 19:12:01 +0300
+Message-ID: <20091021161201.GA16968@angel.research.nokia.com>
+Reply-To: Jarkko Lavinen <jarkko.lavinen@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.nokia.com ([192.100.122.230]:19421 "EHLO
+	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754005AbZJUQTF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2009 12:19:05 -0400
 Content-Disposition: inline
-In-Reply-To: <1256049173-17373-1-git-send-email-nicolas.ferre@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: avictor.za@gmail.com, linux-mmc@vger.kernel.org, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jens Axboe <axboe@kernel.dk>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-> +	  that embeds only one SD/MMC slot.
-> +
-> +config MACH_AT91SAM9G20EK_2MMC
-> +	bool "Atmel AT91SAM9G20-EK Evaluation Kit with 2 SD/MMC Slots"
-> +	depends on ARCH_AT91SAM9G20
-> +	help
-> +	  Select this if you are using an Atmel AT91SAM9G20-EK Evaluation Kit
-> +	  with 2 SD/MMC Slots. This is the case for AT91SAM9G20-EK rev. C and
-> +	  onwards.
->  
->  config MACH_CPU9G20
->  	bool "Eukrea CPU9G20 board"
-> @@ -392,7 +394,7 @@ config MTD_AT91_DATAFLASH_CARD
->  
->  config MTD_NAND_ATMEL_BUSWIDTH_16
->  	bool "Enable 16-bit data bus interface to NAND flash"
-> -	depends on (MACH_AT91SAM9260EK || MACH_AT91SAM9261EK || MACH_AT91SAM9G10EK || MACH_AT91SAM9263EK || MACH_AT91SAM9G20EK || MACH_AT91SAM9G45EKES || MACH_AT91CAP9ADK)
-> +	depends on (MACH_AT91SAM9260EK || MACH_AT91SAM9261EK || MACH_AT91SAM9G10EK || MACH_AT91SAM9263EK || MACH_AT91SAM9G20EK || MACH_AT91SAM9G20EK_2MMC || MACH_AT91SAM9G45EKES || MACH_AT91CAP9ADK)
-it's time to replace this by select it at machine config state
+I am proposing two patches to protect the request queue and io
+elevator from inadvertent releasing.
 
-> @@ -254,7 +257,11 @@ static void __init ek_board_init(void)
->  	/* Ethernet */
->  	at91_add_device_eth(&ek_macb_data);
->  	/* MMC */
-> +#if defined(CONFIG_MMC_ATMELMCI) || defined(CONFIG_MMC_ATMELMCI_MODULE)
->  	at91_add_device_mci(0, &ek_mmc_data);
-> +#else
-> +	at91_add_device_mmc(0, &ek_mmc_data);
-> +#endif
-do we really need to do this choice at board level?
+I've been testing mmc driver robustness against rapid card removal
+reinsert cycles and it has been rather easy to get a kernel oopses 
+(on 2.6.28) because of insufficient locking. 
 
-Best Regards,
-J.
+When MMC driver notices a card has been removed, it removes the
+card and the block device.  The call proceeds to
+blk_cleanup_queue() which marks the request queue dead, calls
+elevator exit to release the elevator and puts request queue.
+This releases elevator always and may also release the request
+queue.
+
+If file system is still mounted and using the disk after
+blk_cleanup_queue() has been called, io requests will access
+already free'ed structures and oopses and BUG_ON()s jump in.
+
+When the proposed patches are applied, I am not able reproduce 
+the oopses in io scheduler or elevator anymore. There is still
+another oops is sysfs truing to add duplicate file, but i think
+that is not related.
+
+Cheers
+Jarkko Lavinen
+
+>From 9559377f3166345649c3406427f410cd51472944 Mon Sep 17 00:00:00 2001
+From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Date: Wed, 21 Oct 2009 18:48:18 +0300
+Subject: [PATCH 1/2] block: Avoid dead request queue too early removal
+
+If disk is removed while file system is still mounted, the disk
+removal can release the dead request queue too early while
+file system is still trying to sumit requests.
+
+Signed-off-by: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+---
+ fs/block_dev.c |   24 ++++++++++++++++++++----
+ 1 files changed, 20 insertions(+), 4 deletions(-)
+
+diff --git a/fs/block_dev.c b/fs/block_dev.c
+index 9cf4b92..91f2fc3 100644
+--- a/fs/block_dev.c
++++ b/fs/block_dev.c
+@@ -1165,6 +1165,8 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
+ 	int ret;
+ 	int partno;
+ 	int perm = 0;
++	int q_ref = 0;
++	struct module *owner;
+ 
+ 	if (mode & FMODE_READ)
+ 		perm |= MAY_READ;
+@@ -1187,6 +1189,11 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
+ 	if (!disk)
+ 		goto out_unlock_kernel;
+ 
++	if (blk_get_queue(disk->queue))
++		goto out_unlock_kernel;
++	else
++		q_ref = 1;
++
+ 	mutex_lock_nested(&bdev->bd_mutex, for_part);
+ 	if (!bdev->bd_openers) {
+ 		bdev->bd_disk = disk;
+@@ -1248,8 +1255,10 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
+ 			bd_set_size(bdev, (loff_t)bdev->bd_part->nr_sects << 9);
+ 		}
+ 	} else {
++		owner = disk->fops->owner;
++		blk_put_queue(disk->queue);
+ 		put_disk(disk);
+-		module_put(disk->fops->owner);
++		module_put(owner);
+ 		disk = NULL;
+ 		if (bdev->bd_contains == bdev) {
+ 			if (bdev->bd_disk->fops->open) {
+@@ -1281,9 +1290,15 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
+  out_unlock_kernel:
+ 	unlock_kernel();
+ 
+-	if (disk)
+-		module_put(disk->fops->owner);
+-	put_disk(disk);
++	if (disk) {
++		owner = disk->fops->owner;
++		if (q_ref)
++			blk_put_queue(disk->queue);
++
++		put_disk(disk);
++		module_put(owner);
++	}
++
+ 	bdput(bdev);
+ 
+ 	return ret;
+@@ -1360,6 +1375,7 @@ static int __blkdev_put(struct block_device *bdev, fmode_t mode, int for_part)
+ 	if (!bdev->bd_openers) {
+ 		struct module *owner = disk->fops->owner;
+ 
++		blk_put_queue(disk->queue);
+ 		put_disk(disk);
+ 		module_put(owner);
+ 		disk_put_part(bdev->bd_part);
+-- 
+1.6.3.3
+
