@@ -1,74 +1,39 @@
-From: akpm@linux-foundation.org
-Subject: [merged] mmc-at91_mci-dont-include-asm-mach-mmch.patch removed from -mm tree
-Date: Mon, 26 Oct 2009 15:23:21 -0700
-Message-ID: <200910262223.n9QMNM0i010686@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
+From: Andrew Victor <avictor.za@gmail.com>
+Subject: Re: [PATCH 3/3 v2] at91/atmel-mci: inclusion of sd/mmc driver in
+	at91sam9g45 chip and board
+Date: Tue, 27 Oct 2009 21:43:26 +0200
+Message-ID: <cd73a99e0910271243x744c956bl598fef9fd4144840@mail.gmail.com>
+References: <acfa557032a93e2d3186981b16f7048a5a31028a.1256314995.git.nicolas.ferre@atmel.com>
+	 <20090930155557.7dae503b@hskinnemoen-d830>
+	 <a3b1332815576dc4d496937b8a5ab69d36818d00.1256314995.git.nicolas.ferre@atmel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: u.kleine-koenig@pengutronix.de, bgat@billgatliff.com, linus.walleij@stericsson.com, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com, rmk+kernel@arm.linux.org.uk, mm-commits@vger.kernel.org
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S932106AbZJ0TnZ@vger.kernel.org>
+In-Reply-To: <a3b1332815576dc4d496937b8a5ab69d36818d00.1256314995.git.nicolas.ferre@atmel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: linux-mmc@vger.kernel.org, haavard.skinnemoen@atmel.com, akpm@linux-foundation.org, kernel@avr32linux.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
+hi Nicolas,
 
-The patch titled
-     mmc: at91_mci: don't include asm/mach/mmc.h
-has been removed from the -mm tree.  Its filename was
-     mmc-at91_mci-dont-include-asm-mach-mmch.patch
+> + =A0 =A0 =A0 if (data->slot[0].wp_pin)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 at91_set_gpio_input(data->slot[0].wp_pi=
+n, 1);
 
-This patch was dropped because it was merged into mainline or a subsyst=
-em tree
+> +static struct mci_platform_data __initdata mci0_data =3D {
+> + =A0 =A0 =A0 .slot[0] =3D {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .bus_width =A0 =A0 =A0=3D 4,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .detect_pin =A0 =A0 =3D AT91_PIN_PD10,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .wp_pin =A0 =A0 =A0 =A0 =3D -1,
+> + =A0 =A0 =A0 },
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mm=
-otm/
-
-------------------------------------------------------
-Subject: mmc: at91_mci: don't include asm/mach/mmc.h
-=46rom: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-
-This fixes a compile error introduced in
-
-	6ef297f (ARM: 5720/1: Move MMCI header to amba include dir)
-
-That commit moved arch/arm/include/asm/mach/mmc.h to
-include/linux/amba/mmci.h.  Just removing the include was enough.
-
-Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-Acked-by: Linus Walleij <linus.walleij@stericsson.com>
-Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Acked-by: Bill Gatliff <bgat@billgatliff.com>
-Cc: Russell King <rmk+kernel@arm.linux.org.uk>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
+Causes at91_set_gpio_input() to be called for pin -1.  Which shouldn't =
+be valid.
+AT91 platforms use 0 to indicate an un-connected GPIO pin, so the
+assignment of "wp_pin" should probably just be removed.
 
 
-diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-dont-include-asm-mac=
-h-mmch drivers/mmc/host/at91_mci.c
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-dont-include-asm-mach-mm=
-ch
-+++ a/drivers/mmc/host/at91_mci.c
-@@ -72,7 +72,6 @@
- #include <asm/irq.h>
- #include <asm/gpio.h>
-=20
--#include <asm/mach/mmc.h>
- #include <mach/board.h>
- #include <mach/cpu.h>
- #include <mach/at91_mci.h>
-_
-
-Patches currently in -mm which might be from u.kleine-koenig@pengutroni=
-x.de are
-
-origin.patch
-atmel_serial-fix-bad-build_bug_on-usage.patch
-linux-next.patch
-mxcmmc-fix-error-path-in-mxcmci_probe.patch
-
---
-To unsubscribe from this list: send the line "unsubscribe mm-commits" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards,
+  Andrew Victor
