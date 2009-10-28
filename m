@@ -1,7 +1,7 @@
 From: Dan Williams <dcbw@redhat.com>
 Subject: Re: MXC MMC driver and SDIO peripherals
-Date: Wed, 28 Oct 2009 10:06:02 -0700
-Message-ID: <1256749562.3850.41.camel@localhost.localdomain>
+Date: Wed, 28 Oct 2009 10:11:04 -0700
+Message-ID: <1256749864.3850.44.camel@localhost.localdomain>
 References: <20091021192038.GK14091@buzzloop.caiaq.de>
 	 <1256156119.8469.40.camel@localhost.localdomain>
 	 <20091028164752.GN29442@buzzloop.caiaq.de>
@@ -9,10 +9,10 @@ Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57676 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:54695 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752683AbZJ1RGq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Oct 2009 13:06:46 -0400
+	id S1752744AbZJ1RL1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 28 Oct 2009 13:11:27 -0400
 In-Reply-To: <20091028164752.GN29442@buzzloop.caiaq.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -66,31 +66,15 @@ On Wed, 2009-10-28 at 17:47 +0100, Daniel Mack wrote:
 > 
 > Any idea how to get that working with only single block small transfers?
 
-All the Marvell documentation (v5 at least) refers to 512-byte transfers
-of the second-stage firmware in 32-byte blocks:
+Just a note; single-block transfers will probably kill your wifi
+performance, especially if the errata are true.  When the libertas
+driver sends network data packets it sends them with
 
-Section 2.2.1.1 of the v5 spec states:
+		ret = sdio_writesb(card->func, card->ioport,
+				packet->buffer, packet->nb);
 
-"
-2) If the length requested by helper is larger than 512 bytes, it is cut
-into multiple pieces for CMD53 write. The current download length is set
-to 512 bytes (16 blocks x 32 bytes per block) in each iteration of CMD53
-write.
-3) Host starts the download of 16 blocks of firmware (512 bytes)
-4) Host copies the payload to the buffer.
-5) Host writes 16 blocks of the firmware image data using CMD 53.
-6) Repeat Steps 3 through 5 until the firmware image data specified by
-the helper (Step 2) for this iteration is downloaded completely.
-"
-
-The helper firmware may well expect all 16 blocks.  But try adjusting
-"chunk_size" in if_sdio.c::if_sdio_prog_real() down to one block (ie, 32
-not 512) and see if the helper pukes.  The code looks like it can handle
-chunk_size changes just fine.
-
-If it does, and we after we further test that with other v8 and v9
-firmware, then maybe we can print out a big fat warning about SDHC
-suckage before trying a single-block fallback.
+so if your packet is normal ethernet 1500 bytes, breaking that up in to
+47 single block transfers of 32-bytes each is going to be slow...
 
 Dan
 
