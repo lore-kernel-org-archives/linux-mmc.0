@@ -1,61 +1,32 @@
-From: Ben Nizette <bn@niasdigital.com>
-Subject: Re: [PATCH 3/3 v2] at91/atmel-mci: inclusion of sd/mmc driver in
- at91sam9g45 chip and board
-Date: Tue, 03 Nov 2009 09:14:57 +1100
-Message-ID: <1257200097.4358.54.camel@ben-desktop>
-References: <acfa557032a93e2d3186981b16f7048a5a31028a.1256314995.git.nicolas.ferre@atmel.com>
-	 <20090930155557.7dae503b@hskinnemoen-d830>
-	 <a3b1332815576dc4d496937b8a5ab69d36818d00.1256314995.git.nicolas.ferre@atmel.com>
-	 <cd73a99e0910271243x744c956bl598fef9fd4144840@mail.gmail.com>
-	 <20091028083548.38f1d80c@hskinnemoen-d830>
-	 <d6cda7730910271753o54acfa04t1225de460083325f@mail.gmail.com>
-	 <cd73a99e0910281253x1bb72b74p47cb5110efb0871f@mail.gmail.com>
-	 <1256763057.4362.36.camel@ben-desktop>  <4AEF12B7.3040704@atmel.com>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Subject: Re: [PATCH 0/6] Clean up the sdio_uart driver and fix the tty code
+Date: Mon, 2 Nov 2009 22:35:35 +0000
+Message-ID: <20091102223535.0d57ac09@lxorguk.ukuu.org.uk>
+References: <20091102164039.11877.88825.stgit@localhost.localdomain>
+	<alpine.LFD.2.00.0911021243040.13333@xanadu.home>
+	<20091102191604.010acbc9@lxorguk.ukuu.org.uk>
+	<alpine.LFD.2.00.0911021542520.13333@xanadu.home>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from outbound.icp-qv1-irony-out6.iinet.net.au ([203.59.1.109]:49888
-	"EHLO outbound.icp-qv1-irony-out6.iinet.net.au" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756899AbZKBWOo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2009 17:14:44 -0500
-In-Reply-To: <4AEF12B7.3040704@atmel.com>
+Received: from earthlight.etchedpixels.co.uk ([81.2.110.250]:43662 "EHLO
+	www.etchedpixels.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1757174AbZKBWeD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2009 17:34:03 -0500
+In-Reply-To: <alpine.LFD.2.00.0911021542520.13333@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Andrew Victor <avictor.za@gmail.com>, linux-arm-kernel@lists.infradead.org, "\"\\\"Thiago A.\\\" =?ISO-8859-1?Q?Corr=EAa=22?=" <thiago.correa@gmail.com>, kernel@avr32linux.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: Alan Cox <alan@linux.intel.com>, linux-mmc@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, dhowells@redhat.com
 
+> However the kernel is now crashing when the card is pulled out while 
+> some process is reading from the device.  This used to behave well 
+> before. I don't have time to investigate that one right now though.
 
-[apologies for the MTA fart causing that weird, rouge blank email :-) ]
+That usually means I've goofed on the ref counting. I'll add your patch
+and review the code closely.
 
-On Mon, 2009-11-02 at 18:11 +0100, Nicolas Ferre wrote:
-> Ben Nizette :
-> > 
-> > static inline int gpio_is_valid(int number)
-> > {
-> > 	/* only some non-negative numbers are valid */
-> > 	return ((unsigned)number) < ARCH_NR_GPIOS;
-> > }
-> 
-> I understand that the better way to solve this issue is to:
-> - keep the AT91 way of specifying not connected pins (= 0)
-> - code the gpio_is_valid() function for at91 that tests this way of
-> handling not connected gpio
-> 
-
-I'm not sure I'd break cross-arch compat here, but whatever.  I guess it
-depends how deeply the =0 stuff is ingrained in the at91 codebase
-
-> I see that in arch/arm/mach-at91/include/mach/gpio.h
-> we include the asm-generic/gpio.h file... must I implement the full set
-> of gpiolib ?
-
-I'd suggest creating an ARCH_HAVE_GPIO_VALID (darn, long name) or
-something; define it before #include <asm-generic/gpio.h> and #ifdef
-protect the offending declaration in that header.
-
-	--Ben.
-
-> 
-> Best regards,
+Thanks
+Alan
 
