@@ -1,79 +1,53 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH 0/6] Clean up the sdio_uart driver and fix the tty code
-Date: Mon, 02 Nov 2009 16:57:34 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.0911021542520.13333@xanadu.home>
-References: <20091102164039.11877.88825.stgit@localhost.localdomain>
- <alpine.LFD.2.00.0911021243040.13333@xanadu.home>
- <20091102191604.010acbc9@lxorguk.ukuu.org.uk>
+From: Ben Nizette <bn@niasdigital.com>
+Subject: Re: [PATCH 3/3 v2] at91/atmel-mci: inclusion of sd/mmc driver in
+ at91sam9g45 chip and board
+Date: Tue, 03 Nov 2009 09:10:30 +1100
+Message-ID: <1257199830.4358.50.camel@ben-desktop>
+References: <acfa557032a93e2d3186981b16f7048a5a31028a.1256314995.git.nicolas.ferre@atmel.com>
+	 <20090930155557.7dae503b@hskinnemoen-d830>
+	 <a3b1332815576dc4d496937b8a5ab69d36818d00.1256314995.git.nicolas.ferre@atmel.com>
+	 <cd73a99e0910271243x744c956bl598fef9fd4144840@mail.gmail.com>
+	 <20091028083548.38f1d80c@hskinnemoen-d830>
+	 <d6cda7730910271753o54acfa04t1225de460083325f@mail.gmail.com>
+	 <cd73a99e0910281253x1bb72b74p47cb5110efb0871f@mail.gmail.com>
+	 <1256763057.4362.36.camel@ben-desktop>  <4AEF12B7.3040704@atmel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:10689 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756425AbZKBV53 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2009 16:57:29 -0500
-In-reply-to: <20091102191604.010acbc9@lxorguk.ukuu.org.uk>
+Received: from outbound.icp-qv1-irony-out4.iinet.net.au ([203.59.1.104]:22840
+	"EHLO outbound.icp-qv1-irony-out4.iinet.net.au"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755784AbZKBWKR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 2 Nov 2009 17:10:17 -0500
+In-Reply-To: <4AEF12B7.3040704@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: Alan Cox <alan@linux.intel.com>, linux-mmc@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, dhowells@redhat.com
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Andrew Victor <avictor.za@gmail.com>, linux-arm-kernel@lists.infradead.org, "\"\\\"Thiago A.\\\" =?ISO-8859-1?Q?Corr=EAa=22?=" <thiago.correa@gmail.com>, kernel@avr32linux.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
 
-On Mon, 2 Nov 2009, Alan Cox wrote:
-
-> > However I have problems applying your patches.  Most of them require 
-> > fuzzy patching to apply, and one of them even doesn't apply that way.  
-> > What is your base tree?
+On Mon, 2009-11-02 at 18:11 +0100, Nicolas Ferre wrote:
+> Ben Nizette :
+> > 
+> > static inline int gpio_is_valid(int number)
+> > {
+> > 	/* only some non-negative numbers are valid */
+> > 	return ((unsigned)number) < ARCH_NR_GPIOS;
+> > }
 > 
-> Linux-next, but there is a patch I posted afterwards that goes before the
-> sdio_uart patches.
-
-Yep, picked it as well.
-
-> Want me to send you a set with all the patches
-> including the other one ?
-
-It all applied fine now on top of linux-next, with these warnings:
-
-Applying: sdio_uart: Switch to the open/close helpers
-/home/nico/kernels/linux-2.6/.git/rebase-apply/patch:90: trailing whitespace.
-/home/nico/kernels/linux-2.6/.git/rebase-apply/patch:156: trailing whitespace.
-/home/nico/kernels/linux-2.6/.git/rebase-apply/patch:260: trailing whitespace.
-warning: 3 lines add whitespace errors.
-
-Now... testing reveals that the very first patch "sdio_uart: use 
-tty_port" causes a segmentation fault in sdio_uart_open():
-
-Unable to handle kernel NULL pointer dereference at virtual address 00000084
-pgd = dfb44000 [00000084] *pgd=1fb99031, *pte=00000000, *ppte=00000000
-Internal error: Oops: 17 [#1] PREEMPT
-last sysfs file: 
-/sys/devices/platform/mvsdio/mmc_host/mmc0/mmc0:f111/uevent
-Modules linked in:
-CPU: 0    Not tainted  (2.6.32-rc5-next-20091102-00001-gb36eae9 #10)
-PC is at sdio_uart_open+0x204/0x2cc
-[...]
-
-This is fixed by this patch:
-
-diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.c
-index c2759db..671fe5e 100644
---- a/drivers/mmc/card/sdio_uart.c
-+++ b/drivers/mmc/card/sdio_uart.c
-@@ -608,7 +608,7 @@ static int sdio_uart_startup(struct sdio_uart_port *port)
- 		if (!(sdio_uart_get_mctrl(port) & TIOCM_CTS))
- 			tty->hw_stopped = 1;
- 
--	clear_bit(TTY_IO_ERROR, &port->tty->flags);
-+	clear_bit(TTY_IO_ERROR, &tty->flags);
- 
- 	/* Kick the IRQ handler once while we're still holding the host lock */
- 	sdio_uart_irq(port->func);
-
-With this folded in, the card does work with the full series applied.  
-However the kernel is now crashing when the card is pulled out while 
-some process is reading from the device.  This used to behave well 
-before. I don't have time to investigate that one right now though.
+> I understand that the better way to solve this issue is to:
+> - keep the AT91 way of specifying not connected pins (= 0)
+> - code the gpio_is_valid() function for at91 that tests this way of
+> handling not connected gpio
+> 
 
 
-Nicolas
+> I see that in arch/arm/mach-at91/include/mach/gpio.h
+> we include the asm-generic/gpio.h file... must I implement the full set
+> of gpiolib ?
+
+
+
+> 
+> Best regards,
+
