@@ -1,159 +1,307 @@
 From: Alan Cox <alan@linux.intel.com>
-Subject: [PATCH 6/6] sdio_uart: Style fixes
-Date: Mon, 02 Nov 2009 16:46:24 +0000
-Message-ID: <20091102164621.11877.25315.stgit@localhost.localdomain>
+Subject: [PATCH 3/6] sdio_uart: Switch to the open/close helpers
+Date: Mon, 02 Nov 2009 16:45:57 +0000
+Message-ID: <20091102164552.11877.19074.stgit@localhost.localdomain>
 References: <20091102164039.11877.88825.stgit@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756376AbZKBRAH@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from earthlight.etchedpixels.co.uk ([81.2.110.250]:40008 "EHLO
+	bob.linux.org.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756123AbZKBQ7U (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2009 11:59:20 -0500
 In-Reply-To: <20091102164039.11877.88825.stgit@localhost.localdomain>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, nico@cam.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, nico@cam.org
 
-Running the current code through checkpatch shows a few bits of noise
-mostly but not entirely from before the changes.
+Gets us proper tty semantics, removes some code and fixes up a few corner
+case races (hangup during open etc)
 
 Signed-off-by: Alan Cox <alan@linux.intel.com>
 ---
 
- drivers/mmc/card/sdio_uart.c |   33 +++++++++++++++------------------
- 1 files changed, 15 insertions(+), 18 deletions(-)
+ drivers/mmc/card/sdio_uart.c |  190 +++++++++++++++++++++++++-----------------
+ 1 files changed, 114 insertions(+), 76 deletions(-)
 
 
 diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.c
-index c4fc27d..ff93f47 100644
+index 97432c0..fd00453 100644
 --- a/drivers/mmc/card/sdio_uart.c
 +++ b/drivers/mmc/card/sdio_uart.c
-@@ -462,7 +462,8 @@ static void sdio_uart_transmit_chars(struct sdio_uart_port *port)
+@@ -559,13 +559,46 @@ static void sdio_uart_irq(struct sdio_func *func)
+ 	port->in_sdio_uart_irq = NULL;
+ }
  
- 	tty = tty_port_tty_get(&port->port);
- 
--	if (tty == NULL || !kfifo_len(xmit) || tty->stopped || tty->hw_stopped) {
-+	if (tty == NULL || !kfifo_len(xmit)
-+				|| tty->stopped || tty->hw_stopped) {
- 		sdio_uart_stop_tx(port);
- 		return;
- 	}
-@@ -590,7 +591,6 @@ static int sdio_uart_activate(struct tty_port *tport, struct tty_struct *tty)
+-static int sdio_uart_startup(struct sdio_uart_port *port)
++/**
++ *	uart_dtr_rts		-	 port helper to set uart signals
++ *	@tport: tty port to be updated
++ *	@onoff: set to turn on DTR/RTS
++ *
++ *	Called by the tty port helpers when the modem signals need to be
++ *	adjusted during an open, close and hangup.
++ */
++
++static void uart_dtr_rts(struct tty_port *tport, int onoff)
  {
- 	struct sdio_uart_port *port =
- 			container_of(tport, struct sdio_uart_port, port);
 -	unsigned long page;
- 	int ret;
+-	int ret = -ENOMEM;
+-	struct tty_struct *tty = tty_port_tty_get(&port->port);
++	struct sdio_uart_port *port =
++			container_of(tport, struct sdio_uart_port, port);
++	if (onoff == 0)
++		sdio_uart_clear_mctrl(port, TIOCM_DTR | TIOCM_RTS);
++	else
++		sdio_uart_set_mctrl(port, TIOCM_DTR | TIOCM_RTS);
++}
+ 
+-	/* FIXME: What if it is NULL ?? */
++/**
++ *	sdio_uart_activate	-	start up hardware
++ *	@tport: tty port to activate
++ *	@tty: tty bound to this port
++ *
++ *	Activate a tty port. The port locking guarantees us this will be
++ *	run exactly once per set of opens, and if successful will see the
++ *	shutdown method run exactly once to match. Start up and shutdown are
++ *	protected from each other by the internal locking and will not run
++ *	at the same time even during a hangup event.
++ *
++ *	If we successfully start up the port we take an extra kref as we
++ *	will keep it around until shutdown when the kref is dropped.
++ */
++
++static int sdio_uart_activate(struct tty_port *tport, struct tty_struct *tty)
++{
++	struct sdio_uart_port *port =
++			container_of(tport, struct sdio_uart_port, port);
++	unsigned long page;
++	int ret;
  
  	/*
-@@ -633,7 +633,7 @@ static int sdio_uart_activate(struct tty_port *tport, struct tty_struct *tty)
- 	 */
- 	sdio_out(port, UART_LCR, UART_LCR_WLEN8);
+ 	 * Set the TTY IO error marker - we will only clear this
+@@ -576,7 +609,7 @@ static int sdio_uart_startup(struct sdio_uart_port *port)
+ 	/* Initialise and allocate the transmit buffer. */
+ 	page = __get_free_page(GFP_KERNEL);
+ 	if (!page)
+-		goto err0;
++		return -ENOMEM;
+ 	port->xmit.buf = (unsigned char *)page;
+ 	circ_clear(&port->xmit);
  
--	port->ier = UART_IER_RLSI | UART_IER_RDI | UART_IER_RTOIE | UART_IER_UUE;
-+	port->ier = UART_IER_RLSI|UART_IER_RDI|UART_IER_RTOIE|UART_IER_UUE;
- 	port->mctrl = TIOCM_OUT2;
+@@ -630,7 +663,6 @@ static int sdio_uart_startup(struct sdio_uart_port *port)
+ 	sdio_uart_irq(port->func);
  
- 	sdio_uart_change_speed(port, tty->termios, NULL);
-@@ -660,7 +660,6 @@ err1:
+ 	sdio_uart_release_func(port);
+-	tty_kref_put(tty);
+ 	return 0;
+ 
+ err3:
+@@ -639,15 +671,25 @@ err2:
+ 	sdio_uart_release_func(port);
+ err1:
+ 	free_page((unsigned long)port->xmit.buf);
+-err0:
+-	tty_kref_put(tty);
  	return ret;
  }
  
--	
- /**
-  *	sdio_uart_shutdown	-	stop hardware
-  *	@tport: tty port to shut down
-@@ -675,11 +674,8 @@ static void sdio_uart_shutdown(struct tty_port *tport)
+-static void sdio_uart_shutdown(struct sdio_uart_port *port)
++	
++/**
++ *	sdio_uart_shutdown	-	stop hardware
++ *	@tport: tty port to shut down
++ *
++ *	Deactivate a tty port. The port locking guarantees us this will be
++ *	run only if a successful matching activate already ran. The two are
++ *	protected from each other by the internal locking and will not run
++ *	at the same time even during a hangup event.
++ */
++
++static void sdio_uart_shutdown(struct tty_port *tport)
  {
- 	struct sdio_uart_port *port =
- 			container_of(tport, struct sdio_uart_port, port);
--	int ret;
--
--	ret = sdio_uart_claim_func(port);
--	if (ret)
--		return ret;
-+	if (sdio_uart_claim_func(port))
-+		return;
++	struct sdio_uart_port *port =
++			container_of(tport, struct sdio_uart_port, port);
+ 	int ret;
+-	struct tty_struct *tty;
+ 
+ 	ret = sdio_uart_claim_func(port);
+ 	if (ret)
+@@ -655,14 +697,6 @@ static void sdio_uart_shutdown(struct sdio_uart_port *port)
  
  	sdio_uart_stop_rx(port);
  
-@@ -727,7 +723,6 @@ static int sdio_uart_install(struct tty_driver *driver, struct tty_struct *tty)
- 	} else
- 		sdio_uart_port_put(port);
- 	return ret;
--		
+-	/* TODO: wait here for TX FIFO to drain */
+-
+-	tty = tty_port_tty_get(&port->port);
+-	/* Turn off DTR and RTS early. */
+-	if (tty && (tty->termios->c_cflag & HUPCL))
+-		sdio_uart_clear_mctrl(port, TIOCM_DTR | TIOCM_RTS);
+-	tty_kref_put(tty);
+-
+ 	/* Disable interrupts from this port */
+ 	sdio_release_irq(port->func);
+ 	port->ier = 0;
+@@ -687,74 +721,68 @@ skip:
+ 	free_page((unsigned long)port->xmit.buf);
  }
  
- /**
-@@ -767,7 +762,7 @@ static void sdio_uart_hangup(struct tty_struct *tty)
- 	tty_port_hangup(&port->port);
- }
- 
--static int sdio_uart_write(struct tty_struct * tty, const unsigned char *buf,
-+static int sdio_uart_write(struct tty_struct *tty, const unsigned char *buf,
- 			   int count)
- {
- 	struct sdio_uart_port *port = tty->driver_data;
-@@ -778,7 +773,7 @@ static int sdio_uart_write(struct tty_struct * tty, const unsigned char *buf,
- 
- 	ret = kfifo_put(port->xmit_fifo, buf, count);
- 
--	if ( !(port->ier & UART_IER_THRI)) {
-+	if (!(port->ier & UART_IER_THRI)) {
- 		int err = sdio_uart_claim_func(port);
- 		if (!err) {
- 			sdio_uart_start_tx(port);
-@@ -865,7 +860,8 @@ static void sdio_uart_unthrottle(struct tty_struct *tty)
- 	sdio_uart_release_func(port);
- }
- 
--static void sdio_uart_set_termios(struct tty_struct *tty, struct ktermios *old_termios)
-+static void sdio_uart_set_termios(struct tty_struct *tty,
-+						struct ktermios *old_termios)
- {
- 	struct sdio_uart_port *port = tty->driver_data;
- 	unsigned int cflag = tty->termios->c_cflag;
-@@ -944,7 +940,7 @@ static int sdio_uart_tiocmset(struct tty_struct *tty, struct file *file,
- 	int result;
- 
- 	result = sdio_uart_claim_func(port);
--	if(!result) {
-+	if (!result) {
- 		sdio_uart_update_mctrl(port, set, clear);
- 		sdio_uart_release_func(port);
- 	}
-@@ -962,7 +958,7 @@ static int sdio_uart_proc_show(struct seq_file *m, void *v)
- 		struct sdio_uart_port *port = sdio_uart_port_get(i);
- 		if (port) {
- 			seq_printf(m, "%d: uart:SDIO", i);
--			if(capable(CAP_SYS_ADMIN)) {
-+			if (capable(CAP_SYS_ADMIN)) {
- 				seq_printf(m, " tx:%d rx:%d",
- 					      port->icount.tx, port->icount.rx);
- 				if (port->icount.frame)
-@@ -1015,7 +1011,7 @@ static const struct tty_port_operations sdio_uart_port_ops = {
- 	.shutdown = sdio_uart_shutdown,
- 	.activate = sdio_uart_activate,
- };
--	
+-static int sdio_uart_open(struct tty_struct *tty, struct file *filp)
++/**
++ *	sdio_uart_install	-	install method
++ *	@driver: the driver in use (sdio_uart in our case)
++ *	@tty: the tty being bound
++ *
++ *	Look up and bind the tty and the driver together. Initialize
++ *	any needed private data (in our case the termios)
++ */
 +
++static int sdio_uart_install(struct tty_driver *driver, struct tty_struct *tty)
+ {
+-	struct sdio_uart_port *port;
+-	int ret;
++	int idx = tty->index;
++	struct sdio_uart_port *port = sdio_uart_port_get(idx);
++	int ret = tty_init_termios(tty);
++
++	if (ret == 0) {
++		tty_driver_kref_get(driver);
++		tty->count++;
++		/* This is the ref sdio_uart_port get provided */
++		tty->driver_data = port;
++		driver->ttys[idx] = tty;
++	} else
++		sdio_uart_port_put(port);
++	return ret;
++		
++}
+ 
+-	port = sdio_uart_port_get(tty->index);
+-	if (!port)
+-		return -ENODEV;
++/**
++ *	sdio_uart_cleanup	-	called on the last tty kref drop
++ *	@tty: the tty being destroyed
++ *
++ *	Called asynchronously when the last reference to the tty is dropped.
++ *	We cannot destroy the tty->driver_data port kref until this point
++ */
+ 
+-	mutex_lock(&port->port.mutex);
++static void sdio_uart_cleanup(struct tty_struct *tty)
++{
++	struct sdio_uart_port *port = tty->driver_data;
++	tty->driver_data = NULL;	/* Bug trap */
++	sdio_uart_port_put(port);
++}
+ 
+-	/*
+-	 * Make sure not to mess up with a dead port
+-	 * which has not been closed yet.
+-	 */
+-	if (tty->driver_data && tty->driver_data != port) {
+-		mutex_unlock(&port->port.mutex);
+-		sdio_uart_port_put(port);
+-		return -EBUSY;
+-	}
++/*
++ *	Open/close/hangup is now entirely boilerplate
++ */
+ 
+-	if (!port->opened) {
+-		tty->driver_data = port;
+-		tty_port_tty_set(&port->port, tty);
+-		ret = sdio_uart_startup(port);
+-		if (ret) {
+-			tty->driver_data = NULL;
+-			tty_port_tty_set(&port->port, NULL);
+-			mutex_unlock(&port->port.mutex);
+-			sdio_uart_port_put(port);
+-			return ret;
+-		}
+-	}
+-	port->opened++;
+-	mutex_unlock(&port->port.mutex);
+-	return 0;
++static int sdio_uart_open(struct tty_struct *tty, struct file *filp)
++{
++	struct sdio_uart_port *port = tty->driver_data;
++	return tty_port_open(&port->port, tty, filp);
+ }
+ 
+ static void sdio_uart_close(struct tty_struct *tty, struct file * filp)
+ {
+ 	struct sdio_uart_port *port = tty->driver_data;
++	tty_port_close(&port->port, tty, filp);
++}
+ 
+-	if (!port)
+-		return;
+-
+-	mutex_lock(&port->port.mutex);
+-	BUG_ON(!port->opened);
+-
+-	/*
+-	 * This is messy.  The tty layer calls us even when open()
+-	 * returned an error.  Ignore this close request if tty->count
+-	 * is larger than port->count.
+-	 */
+-	if (tty->count > port->opened) {
+-		mutex_unlock(&port->port.mutex);
+-		return;
+-	}
+-
+-	if (--port->opened == 0) {
+-		tty->closing = 1;
+-		sdio_uart_shutdown(port);
+-		tty_ldisc_flush(tty);
+-		tty_port_tty_set(&port->port, NULL);
+-		tty->driver_data = NULL;
+-		tty->closing = 0;
+-	}
+-	mutex_unlock(&port->port.mutex);
+-	sdio_uart_port_put(port);
++static void sdio_uart_hangup(struct tty_struct *tty)
++{
++	struct sdio_uart_port *port = tty->driver_data;
++	tty_port_hangup(&port->port);
+ }
+ 
+ static int sdio_uart_write(struct tty_struct * tty, const unsigned char *buf,
+@@ -1020,6 +1048,12 @@ static const struct file_operations sdio_uart_proc_fops = {
+ 	.release	= single_release,
+ };
+ 
++static const struct tty_port_operations sdio_uart_port_ops = {
++	.dtr_rts = uart_dtr_rts,
++	.shutdown = sdio_uart_shutdown,
++	.activate = sdio_uart_activate,
++};
++	
  static const struct tty_operations sdio_uart_ops = {
  	.open			= sdio_uart_open,
  	.close			= sdio_uart_close,
-@@ -1068,7 +1064,7 @@ static int sdio_uart_probe(struct sdio_func *func,
- 		}
- 		if (!tpl) {
- 			printk(KERN_WARNING
--			       "%s: can't find tuple 0x91 subtuple 0 (SUBTPL_SIOREG) for GPS class\n",
-+       "%s: can't find tuple 0x91 subtuple 0 (SUBTPL_SIOREG) for GPS class\n",
- 			       sdio_func_id(func));
- 			kfree(port);
- 			return -EINVAL;
-@@ -1101,7 +1097,8 @@ static int sdio_uart_probe(struct sdio_func *func,
- 		kfree(port);
- 	} else {
- 		struct device *dev;
--		dev = tty_register_device(sdio_uart_tty_driver, port->index, &func->dev);
-+		dev = tty_register_device(sdio_uart_tty_driver,
-+						port->index, &func->dev);
- 		if (IS_ERR(dev)) {
- 			sdio_uart_port_remove(port);
- 			ret = PTR_ERR(dev);
+@@ -1030,9 +1064,12 @@ static const struct tty_operations sdio_uart_ops = {
+ 	.throttle		= sdio_uart_throttle,
+ 	.unthrottle		= sdio_uart_unthrottle,
+ 	.set_termios		= sdio_uart_set_termios,
++	.hangup			= sdio_uart_hangup,
+ 	.break_ctl		= sdio_uart_break_ctl,
+ 	.tiocmget		= sdio_uart_tiocmget,
+ 	.tiocmset		= sdio_uart_tiocmset,
++	.install		= sdio_uart_install,
++	.cleanup		= sdio_uart_cleanup,
+ 	.proc_fops		= &sdio_uart_proc_fops,
+ };
+ 
+@@ -1095,6 +1132,7 @@ static int sdio_uart_probe(struct sdio_func *func,
+ 	port->func = func;
+ 	sdio_set_drvdata(func, port);
+ 	tty_port_init(&port->port);
++	port->port.ops = &sdio_uart_port_ops;
+ 
+ 	ret = sdio_uart_add_port(port);
+ 	if (ret) {
+
