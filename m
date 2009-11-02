@@ -1,108 +1,42 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: msm_sdcc.c: add missing include, fix compilation
-Date: Mon, 2 Nov 2009 12:12:39 +0100
-Message-ID: <20091102111239.GB26989@elf.ucw.cz>
-References: <20091022072119.GA3285@elf.ucw.cz>
- <20091022185126.GA4401@n2100.arm.linux.org.uk>
+From: Alan Cox <alan@linux.intel.com>
+Subject: [PATCH 0/6] Clean up the sdio_uart driver and fix the tty code
+Date: Mon, 02 Nov 2009 16:44:18 +0000
+Message-ID: <20091102164039.11877.88825.stgit@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:37489 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754309AbZKBLMl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2009 06:12:41 -0500
-Content-Disposition: inline
-In-Reply-To: <20091022185126.GA4401@n2100.arm.linux.org.uk>
+Received: from earthlight.etchedpixels.co.uk ([81.2.110.250]:39986 "EHLO
+	bob.linux.org.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755961AbZKBQ5r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2009 11:57:47 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, kernel list <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@osdl.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, nico@cam.org
 
-Hi!
+This sorts out the sdio uart handling of the tty layer. The existing code
+has lots of races and other fun bugs. Beat it into the current tty format for
+hotpluggable devices. The updates are intentionally modelled on Alan Stern's
+USB serial approach which is defintiely "best practice" right now. Also clean
+it up as we go and sort the circ stuff out.
 
-> > Add missing include for	msm_sdcc compilation.
-> > 
-> > Signed-off-by: Pavel Machek <pavel@ucw.cz>
-> 
-> I don't think this is the right solution - why should MSM have a
-> platform specific include in the ARM generic include files?
-> 
-> (If anything, we should be getting rid of any non-shared platform
-> specific includes in the arch/arm/include/asm/mach directory.)
-
-Ok.
-
+I don't have hardware to test this so hopefully someone out there does,
+otherwise given the nature of the bugs involved the driver will be progressed
+to BROKEN and removal.
 ---
 
-Add missing include for msm_sdcc compilation, and remove pwrsink
-support that is not mainline, yet.
+Alan Cox (6):
+      sdio_uart: Style fixes
+      sdio_uart: Use kfifo instead of the messy circ stuff
+      sdio_uart: Fix termios handling
+      sdio_uart: Switch to the open/close helpers
+      sdio_uart: Move the open lock
+      sdio_uart: refcount the tty objects
 
-Signed-off-by: Pavel Machek <pavel@ucw.cz>
 
-diff --git a/arch/arm/mach-msm/include/mach/mmc.h b/arch/arm/mach-msm/include/mach/mmc.h
-new file mode 100644
-index 0000000..8948dec
---- /dev/null
-+++ b/arch/arm/mach-msm/include/mach/mmc.h
-@@ -0,0 +1,26 @@
-+/*
-+ *  arch/arm/include/asm/mach/mmc.h
-+ */
-+#ifndef ASMARM_MACH_MMC_H
-+#define ASMARM_MACH_MMC_H
-+
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/card.h>
-+#include <linux/mmc/sdio_func.h>
-+
-+struct embedded_sdio_data {
-+        struct sdio_cis cis;
-+        struct sdio_cccr cccr;
-+        struct sdio_embedded_func *funcs;
-+        int num_funcs;
-+};
-+
-+struct mmc_platform_data {
-+	unsigned int ocr_mask;			/* available voltages */
-+	u32 (*translate_vdd)(struct device *, unsigned int);
-+	unsigned int (*status)(struct device *);
-+	struct embedded_sdio_data *embedded_sdio;
-+	int (*register_status_notify)(void (*callback)(int card_present, void *dev_id), void *dev_id);
-+};
-+
-+#endif
-diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
-index dba4600..b31946e 100644
---- a/drivers/mmc/host/msm_sdcc.c
-+++ b/drivers/mmc/host/msm_sdcc.c
-@@ -38,10 +38,9 @@
- #include <asm/div64.h>
- #include <asm/sizes.h>
- 
--#include <asm/mach/mmc.h>
-+#include <mach/mmc.h>
- #include <mach/msm_iomap.h>
- #include <mach/dma.h>
--#include <mach/htc_pwrsink.h>
- 
- #include "msm_sdcc.h"
- 
-@@ -775,13 +774,11 @@ msmsdcc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	switch (ios->power_mode) {
- 	case MMC_POWER_OFF:
--		htc_pwrsink_set(PWRSINK_SDCARD, 0);
- 		break;
- 	case MMC_POWER_UP:
- 		pwr |= MCI_PWR_UP;
- 		break;
- 	case MMC_POWER_ON:
--		htc_pwrsink_set(PWRSINK_SDCARD, 100);
- 		pwr |= MCI_PWR_ON;
- 		break;
- 	}
-
+ drivers/mmc/card/sdio_uart.c |  333 ++++++++++++++++++++++--------------------
+ 1 files changed, 176 insertions(+), 157 deletions(-)
 
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+"and on the seventh day she exited append mode"
+
