@@ -1,8 +1,8 @@
 From: Ben Nizette <bn@niasdigital.com>
 Subject: Re: [PATCH 3/3 v2] at91/atmel-mci: inclusion of sd/mmc driver in
  at91sam9g45 chip and board
-Date: Tue, 03 Nov 2009 09:10:30 +1100
-Message-ID: <1257199830.4358.50.camel@ben-desktop>
+Date: Tue, 03 Nov 2009 09:14:57 +1100
+Message-ID: <1257200097.4358.54.camel@ben-desktop>
 References: <acfa557032a93e2d3186981b16f7048a5a31028a.1256314995.git.nicolas.ferre@atmel.com>
 	 <20090930155557.7dae503b@hskinnemoen-d830>
 	 <a3b1332815576dc4d496937b8a5ab69d36818d00.1256314995.git.nicolas.ferre@atmel.com>
@@ -15,16 +15,18 @@ Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from outbound.icp-qv1-irony-out4.iinet.net.au ([203.59.1.104]:22840
-	"EHLO outbound.icp-qv1-irony-out4.iinet.net.au"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755784AbZKBWKR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 2 Nov 2009 17:10:17 -0500
+Received: from outbound.icp-qv1-irony-out6.iinet.net.au ([203.59.1.109]:49888
+	"EHLO outbound.icp-qv1-irony-out6.iinet.net.au" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756899AbZKBWOo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2009 17:14:44 -0500
 In-Reply-To: <4AEF12B7.3040704@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Nicolas Ferre <nicolas.ferre@atmel.com>
 Cc: Andrew Victor <avictor.za@gmail.com>, linux-arm-kernel@lists.infradead.org, "\"\\\"Thiago A.\\\" =?ISO-8859-1?Q?Corr=EAa=22?=" <thiago.correa@gmail.com>, kernel@avr32linux.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
+
+
+[apologies for the MTA fart causing that weird, rouge blank email :-) ]
 
 On Mon, 2009-11-02 at 18:11 +0100, Nicolas Ferre wrote:
 > Ben Nizette :
@@ -41,12 +43,18 @@ On Mon, 2009-11-02 at 18:11 +0100, Nicolas Ferre wrote:
 > handling not connected gpio
 > 
 
+I'm not sure I'd break cross-arch compat here, but whatever.  I guess it
+depends how deeply the =0 stuff is ingrained in the at91 codebase
 
 > I see that in arch/arm/mach-at91/include/mach/gpio.h
 > we include the asm-generic/gpio.h file... must I implement the full set
 > of gpiolib ?
 
+I'd suggest creating an ARCH_HAVE_GPIO_VALID (darn, long name) or
+something; define it before #include <asm-generic/gpio.h> and #ifdef
+protect the offending declaration in that header.
 
+	--Ben.
 
 > 
 > Best regards,
