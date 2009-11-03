@@ -1,228 +1,231 @@
 From: Alan Cox <alan@linux.intel.com>
-Subject: [PATCH 08/11] sdio_uart: Use kfifo instead of the messy circ stuff
-Date: Tue, 03 Nov 2009 14:18:32 +0000
-Message-ID: <20091103141827.31032.40688.stgit@localhost.localdomain>
+Subject: [PATCH 04/11] sdio_uart: refcount the tty objects
+Date: Tue, 03 Nov 2009 14:17:53 +0000
+Message-ID: <20091103141747.31032.70659.stgit@localhost.localdomain>
 References: <20091103141525.31032.45206.stgit@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753650AbZKCOb6@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1752719AbZKCObY@vger.kernel.org>
 In-Reply-To: <20091103141525.31032.45206.stgit@localhost.localdomain>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nico@cam.org
 List-Id: linux-mmc@vger.kernel.org
 
-Probably all the tty code should switch to this, especially when the new
-lockless kfifo is merged.
+The tty can go away underneath us, so we must refcount it. Do the na=C3=
+=AFve
+implementation initially. We will worry about startup shortly.
 
 Signed-off-by: Alan Cox <alan@linux.intel.com>
 ---
 
- drivers/mmc/card/sdio_uart.c |   86 +++++++++++++-----------------------------
- 1 files changed, 27 insertions(+), 59 deletions(-)
+ drivers/mmc/card/sdio_uart.c |   58 ++++++++++++++++++++++++++++++----=
+--------
+ 1 files changed, 41 insertions(+), 17 deletions(-)
 
 
-diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.c
-index d41aa35..674f3bf 100644
+diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.=
+c
+index 671fe5e..51aeaf6 100644
 --- a/drivers/mmc/card/sdio_uart.c
 +++ b/drivers/mmc/card/sdio_uart.c
-@@ -32,7 +32,7 @@
- #include <linux/mutex.h>
- #include <linux/seq_file.h>
- #include <linux/serial_reg.h>
--#include <linux/circ_buf.h>
-+#include <linux/kfifo.h>
- #include <linux/gfp.h>
- #include <linux/tty.h>
- #include <linux/tty_flip.h>
-@@ -46,18 +46,9 @@
- #define UART_NR		8	/* Number of UARTs this driver can handle */
- 
- 
--#define UART_XMIT_SIZE	PAGE_SIZE
-+#define FIFO_SIZE	PAGE_SIZE
- #define WAKEUP_CHARS	256
- 
--#define circ_empty(circ)	((circ)->head == (circ)->tail)
--#define circ_clear(circ)	((circ)->head = (circ)->tail = 0)
--
--#define circ_chars_pending(circ) \
--		(CIRC_CNT((circ)->head, (circ)->tail, UART_XMIT_SIZE))
--
--#define circ_chars_free(circ) \
--		(CIRC_SPACE((circ)->head, (circ)->tail, UART_XMIT_SIZE))
--
- 
- struct uart_icount {
- 	__u32	cts;
-@@ -81,7 +72,7 @@ struct sdio_uart_port {
- 	struct mutex		func_lock;
- 	struct task_struct	*in_sdio_uart_irq;
- 	unsigned int		regs_offset;
--	struct circ_buf		xmit;
-+	struct kfifo		*xmit_fifo;
- 	spinlock_t		write_lock;
- 	struct uart_icount	icount;
- 	unsigned int		uartclk;
-@@ -103,6 +94,9 @@ static int sdio_uart_add_port(struct sdio_uart_port *port)
- 	kref_init(&port->kref);
- 	mutex_init(&port->func_lock);
- 	spin_lock_init(&port->write_lock);
-+	port->xmit_fifo = kfifo_alloc(FIFO_SIZE, GFP_KERNEL, &port->write_lock);
-+	if (port->xmit_fifo == NULL)
-+		return -ENOMEM;
- 
- 	spin_lock(&sdio_uart_table_lock);
- 	for (index = 0; index < UART_NR; index++) {
-@@ -452,9 +446,11 @@ static void sdio_uart_receive_chars(struct sdio_uart_port *port,
- 
+@@ -172,8 +172,13 @@ static void sdio_uart_port_remove(struct sdio_uart=
+_port *port)
+ 	sdio_claim_host(func);
+ 	port->func =3D NULL;
+ 	mutex_unlock(&port->func_lock);
+-	if (port->opened)
+-		tty_hangup(port->port.tty);
++	if (port->opened) {
++		struct tty_struct *tty =3D tty_port_tty_get(&port->port);
++		/* tty_hangup is async so is this safe as is ?? */
++		if (tty)
++			tty_hangup(tty);
++		tty_kref_put(tty);
++	}
+ 	mutex_unlock(&port->open_lock);
+ 	sdio_release_irq(func);
+ 	sdio_disable_func(func);
+@@ -392,7 +397,7 @@ static void sdio_uart_stop_rx(struct sdio_uart_port=
+ *port)
+ static void sdio_uart_receive_chars(struct sdio_uart_port *port,
+ 				    unsigned int *status)
+ {
+-	struct tty_struct *tty =3D port->port.tty;
++	struct tty_struct *tty =3D tty_port_tty_get(&port->port);
+ 	unsigned int ch, flag;
+ 	int max_count =3D 256;
+=20
+@@ -429,25 +434,30 @@ static void sdio_uart_receive_chars(struct sdio_u=
+art_port *port,
+ 		}
+=20
+ 		if ((*status & port->ignore_status_mask & ~UART_LSR_OE) =3D=3D 0)
+-			tty_insert_flip_char(tty, ch, flag);
++			if (tty)
++				tty_insert_flip_char(tty, ch, flag);
+=20
+ 		/*
+ 		 * Overrun is special.  Since it's reported immediately,
+ 		 * it doesn't affect the current character.
+ 		 */
+ 		if (*status & ~port->ignore_status_mask & UART_LSR_OE)
+-			tty_insert_flip_char(tty, 0, TTY_OVERRUN);
++			if (tty)
++				tty_insert_flip_char(tty, 0, TTY_OVERRUN);
+=20
+ 		*status =3D sdio_in(port, UART_LSR);
+ 	} while ((*status & UART_LSR_DR) && (max_count-- > 0));
+-	tty_flip_buffer_push(tty);
++	if (tty) {
++		tty_flip_buffer_push(tty);
++		tty_kref_put(tty);
++	}
+ }
+=20
  static void sdio_uart_transmit_chars(struct sdio_uart_port *port)
  {
--	struct circ_buf *xmit = &port->xmit;
-+	struct kfifo *xmit = port->xmit_fifo;
+ 	struct circ_buf *xmit =3D &port->xmit;
  	int count;
- 	struct tty_struct *tty;
-+	u8 iobuf[16];
-+	int len;
- 
+-	struct tty_struct *tty =3D port->port.tty;
++	struct tty_struct *tty;
+=20
  	if (port->x_char) {
  		sdio_out(port, UART_TX, port->x_char);
-@@ -465,24 +461,21 @@ static void sdio_uart_transmit_chars(struct sdio_uart_port *port)
- 
- 	tty = tty_port_tty_get(&port->port);
- 
--	if (tty == NULL || circ_empty(xmit) || tty->stopped || tty->hw_stopped) {
-+	if (tty == NULL || !kfifo_len(xmit) || tty->stopped || tty->hw_stopped) {
+@@ -455,7 +465,10 @@ static void sdio_uart_transmit_chars(struct sdio_u=
+art_port *port)
+ 		port->x_char =3D 0;
+ 		return;
+ 	}
+-	if (circ_empty(xmit) || tty->stopped || tty->hw_stopped) {
++
++	tty =3D tty_port_tty_get(&port->port);
++
++	if (tty =3D=3D NULL || circ_empty(xmit) || tty->stopped || tty->hw_st=
+opped) {
  		sdio_uart_stop_tx(port);
  		return;
  	}
- 
--	count = 16;
--	do {
--		sdio_out(port, UART_TX, xmit->buf[xmit->tail]);
--		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
-+	len = kfifo_get(xmit, iobuf, 16);
-+	for (count = 0; count < len; count++) {
-+		sdio_out(port, UART_TX, iobuf[count]);
- 		port->icount.tx++;
--		if (circ_empty(xmit))
--			break;
--	} while (--count > 0);
-+	}
- 
--	if (circ_chars_pending(xmit) < WAKEUP_CHARS)
-+	if (len < WAKEUP_CHARS)
- 		tty_wakeup(tty);
- 
--	if (circ_empty(xmit))
-+	if (len == 0)
+@@ -474,12 +487,13 @@ static void sdio_uart_transmit_chars(struct sdio_=
+uart_port *port)
+=20
+ 	if (circ_empty(xmit))
  		sdio_uart_stop_tx(port);
- 	tty_kref_put(tty);
++	tty_kref_put(tty);
  }
-@@ -605,22 +598,17 @@ static int sdio_uart_activate(struct tty_port *tport, struct tty_struct *tty)
- 	 */
- 	set_bit(TTY_IO_ERROR, &tty->flags);
- 
--	/* Initialise and allocate the transmit buffer. */
--	page = __get_free_page(GFP_KERNEL);
--	if (!page)
--		return -ENOMEM;
--	port->xmit.buf = (unsigned char *)page;
--	circ_clear(&port->xmit);
-+	kfifo_reset(port->xmit_fifo);
- 
- 	ret = sdio_uart_claim_func(port);
- 	if (ret)
--		goto err1;
-+		return ret;
- 	ret = sdio_enable_func(port->func);
- 	if (ret)
--		goto err2;
-+		goto err1;
- 	ret = sdio_claim_irq(port->func, sdio_uart_irq);
- 	if (ret)
--		goto err3;
-+		goto err2;
- 
+=20
+ static void sdio_uart_check_modem_status(struct sdio_uart_port *port)
+ {
+ 	int status;
+-	struct tty_struct *tty =3D port->port.tty;
++	struct tty_struct *tty;
+=20
+ 	status =3D sdio_in(port, UART_MSR);
+=20
+@@ -494,7 +508,8 @@ static void sdio_uart_check_modem_status(struct sdi=
+o_uart_port *port)
+ 		port->icount.dcd++;
+ 	if (status & UART_MSR_DCTS) {
+ 		port->icount.cts++;
+-		if (tty->termios->c_cflag & CRTSCTS) {
++		tty =3D tty_port_tty_get(&port->port);
++		if (tty && (tty->termios->c_cflag & CRTSCTS)) {
+ 			int cts =3D (status & UART_MSR_CTS);
+ 			if (tty->hw_stopped) {
+ 				if (cts) {
+@@ -509,6 +524,7 @@ static void sdio_uart_check_modem_status(struct sdi=
+o_uart_port *port)
+ 				}
+ 			}
+ 		}
++		tty_kref_put(tty);
+ 	}
+ }
+=20
+@@ -548,8 +564,10 @@ static void sdio_uart_irq(struct sdio_func *func)
+ static int sdio_uart_startup(struct sdio_uart_port *port)
+ {
+ 	unsigned long page;
+-	int ret;
+-	struct tty_struct *tty =3D port->port.tty;
++	int ret =3D -ENOMEM;
++	struct tty_struct *tty =3D tty_port_tty_get(&port->port);
++
++	/* FIXME: What if it is NULL ?? */
+=20
  	/*
- 	 * Clear the FIFO buffers and disable them.
-@@ -664,12 +652,10 @@ static int sdio_uart_activate(struct tty_port *tport, struct tty_struct *tty)
+ 	 * Set the TTY IO error marker - we will only clear this
+@@ -560,7 +578,7 @@ static int sdio_uart_startup(struct sdio_uart_port =
+*port)
+ 	/* Initialise and allocate the transmit buffer. */
+ 	page =3D __get_free_page(GFP_KERNEL);
+ 	if (!page)
+-		return -ENOMEM;
++		goto err0;
+ 	port->xmit.buf =3D (unsigned char *)page;
+ 	circ_clear(&port->xmit);
+=20
+@@ -614,6 +632,7 @@ static int sdio_uart_startup(struct sdio_uart_port =
+*port)
+ 	sdio_uart_irq(port->func);
+=20
  	sdio_uart_release_func(port);
++	tty_kref_put(tty);
  	return 0;
- 
--err3:
--	sdio_disable_func(port->func);
- err2:
--	sdio_uart_release_func(port);
-+	sdio_disable_func(port->func);
+=20
+ err3:
+@@ -622,12 +641,15 @@ err2:
+ 	sdio_uart_release_func(port);
  err1:
--	free_page((unsigned long)port->xmit.buf);
-+	sdio_uart_release_func(port);
+ 	free_page((unsigned long)port->xmit.buf);
++err0:
++	tty_kref_put(tty);
  	return ret;
  }
- 
-@@ -692,7 +678,7 @@ static void sdio_uart_shutdown(struct tty_port *tport)
- 
- 	ret = sdio_uart_claim_func(port);
+=20
+ static void sdio_uart_shutdown(struct sdio_uart_port *port)
+ {
+ 	int ret;
++	struct tty_struct *tty;
+=20
+ 	ret =3D sdio_uart_claim_func(port);
  	if (ret)
--		goto skip;
-+		return ret;
- 
- 	sdio_uart_stop_rx(port);
- 
-@@ -714,10 +700,6 @@ static void sdio_uart_shutdown(struct tty_port *tport)
- 	sdio_disable_func(port->func);
- 
- 	sdio_uart_release_func(port);
--
--skip:
--	/* Free the transmit buffer page. */
--	free_page((unsigned long)port->xmit.buf);
- }
- 
- /**
-@@ -788,26 +770,12 @@ static int sdio_uart_write(struct tty_struct * tty, const unsigned char *buf,
- 			   int count)
- {
- 	struct sdio_uart_port *port = tty->driver_data;
--	struct circ_buf *circ = &port->xmit;
--	int c, ret = 0;
-+	int ret;
- 
- 	if (!port->func)
- 		return -ENODEV;
- 
--	spin_lock(&port->write_lock);
--	while (1) {
--		c = CIRC_SPACE_TO_END(circ->head, circ->tail, UART_XMIT_SIZE);
--		if (count < c)
--			c = count;
--		if (c <= 0)
--			break;
--		memcpy(circ->buf + circ->head, buf, c);
--		circ->head = (circ->head + c) & (UART_XMIT_SIZE - 1);
--		buf += c;
--		count -= c;
--		ret += c;
--	}
--	spin_unlock(&port->write_lock);
-+	ret = kfifo_put(port->xmit_fifo, buf, count);
- 
- 	if ( !(port->ier & UART_IER_THRI)) {
- 		int err = sdio_uart_claim_func(port);
-@@ -825,13 +793,13 @@ static int sdio_uart_write(struct tty_struct * tty, const unsigned char *buf,
- static int sdio_uart_write_room(struct tty_struct *tty)
- {
- 	struct sdio_uart_port *port = tty->driver_data;
--	return port ? circ_chars_free(&port->xmit) : 0;
-+	return FIFO_SIZE - kfifo_len(port->xmit_fifo);
- }
- 
- static int sdio_uart_chars_in_buffer(struct tty_struct *tty)
- {
- 	struct sdio_uart_port *port = tty->driver_data;
--	return port ? circ_chars_pending(&port->xmit) : 0;
-+	return kfifo_len(port->xmit_fifo);
- }
- 
- static void sdio_uart_send_xchar(struct tty_struct *tty, char ch)
+@@ -637,9 +659,11 @@ static void sdio_uart_shutdown(struct sdio_uart_po=
+rt *port)
+=20
+ 	/* TODO: wait here for TX FIFO to drain */
+=20
++	tty =3D tty_port_tty_get(&port->port);
+ 	/* Turn off DTR and RTS early. */
+-	if (port->port.tty->termios->c_cflag & HUPCL)
++	if (tty && (tty->termios->c_cflag & HUPCL))
+ 		sdio_uart_clear_mctrl(port, TIOCM_DTR | TIOCM_RTS);
++	tty_kref_put(tty);
+=20
+ 	/* Disable interrupts from this port */
+ 	sdio_release_irq(port->func);
+@@ -688,11 +712,11 @@ static int sdio_uart_open(struct tty_struct *tty,=
+ struct file *filp)
+=20
+ 	if (!port->opened) {
+ 		tty->driver_data =3D port;
+-		port->port.tty =3D tty;
++		tty_port_tty_set(&port->port, tty);
+ 		ret =3D sdio_uart_startup(port);
+ 		if (ret) {
+ 			tty->driver_data =3D NULL;
+-			port->port.tty =3D NULL;
++			tty_port_tty_set(&port->port, NULL);
+ 			mutex_unlock(&port->open_lock);
+ 			sdio_uart_port_put(port);
+ 			return ret;
+@@ -727,7 +751,7 @@ static void sdio_uart_close(struct tty_struct *tty,=
+ struct file * filp)
+ 		tty->closing =3D 1;
+ 		sdio_uart_shutdown(port);
+ 		tty_ldisc_flush(tty);
+-		port->port.tty =3D NULL;
++		tty_port_tty_set(&port->port, NULL);
+ 		tty->driver_data =3D NULL;
+ 		tty->closing =3D 0;
+ 	}
