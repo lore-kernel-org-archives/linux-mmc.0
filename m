@@ -1,82 +1,36 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH 0/6] Clean up the sdio_uart driver and fix the tty code
-Date: Mon, 02 Nov 2009 19:30:33 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.0911021731260.13333@xanadu.home>
-References: <20091102164039.11877.88825.stgit@localhost.localdomain>
- <alpine.LFD.2.00.0911021243040.13333@xanadu.home>
- <20091102191604.010acbc9@lxorguk.ukuu.org.uk>
- <alpine.LFD.2.00.0911021542520.13333@xanadu.home>
+From: Marcel Holtmann <marcel@holtmann.org>
+Subject: Re: [PATCH net-next] iwmc3200bt: Add iwmc3200 bluetooth driver
+Date: Tue, 03 Nov 2009 10:40:25 +0900
+Message-ID: <1257212425.3420.2.camel@localhost.localdomain>
+References: <1257204990-18669-1-git-send-email-tomas.winkler@intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:14861 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757373AbZKCAa3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2009 19:30:29 -0500
-In-reply-to: <alpine.LFD.2.00.0911021542520.13333@xanadu.home>
+Received: from senator.holtmann.net ([87.106.208.187]:34531 "EHLO
+	mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754282AbZKCBk3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2009 20:40:29 -0500
+In-Reply-To: <1257204990-18669-1-git-send-email-tomas.winkler@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: Alan Cox <alan@linux.intel.com>, linux-mmc@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, dhowells@redhat.com
+To: Tomas Winkler <tomas.winkler@intel.com>
+Cc: davem@davemloft.net, netdev@vger.kernel.org, linux-bluetooth@vger.kernel.org, linux-mmc@vger.kernel.org, guy.cohen@intel.com, ron.rindjunsky@intel.com
 
-On Mon, 2 Nov 2009, Nicolas Pitre wrote:
+Hi Dave,
 
-> With this folded in, the card does work with the full series applied.  
-> However the kernel is now crashing when the card is pulled out while 
-> some process is reading from the device.  This used to behave well 
-> before. I don't have time to investigate that one right now though.
+> Add Intel Wireless MultiCom 3200 SDIO BT driver
+> IWMC3200 is 4Wireless Com CHIP (GPS/BT/WiFi/WiMAX).
+> wmc3200bt is derived from btsdio driver
 
-OK, here more data points:
+just a heads up, this is not a net-next patch. This clearly goes via
+proper review on linux-bluetooth and bluetooth-next tree first. So
+please don't pull until I ack it.
 
-My test is to insert GPS card and do a 'cat /dev/ttySDIO0' and watch 
-NMEA data scrolling by.
+Tomas, please try not to jump the gun here.
 
-With "sdio_uart: Move the open lock" applied, I can pull the card out 
-and the cat process terminates.  However inserting the card back and 
-repeating the test again always gives me:
+Regards
 
-	cat: /dev/ttySDIO0: Input/output error
-
-until I reboot.  Same thing happens if I terminates cat with ^C and 
-start it again.
-
-With "sdio_uart: Switch to the open/close helpers" applied, things got 
-even worse.  Interrupting cat with ^C still gives the same result as 
-above.  But yanking the card out when cat is still running doesn't 
-terminate cat unless I ^C it at which point the kernel crashes with a 
-BUG().  The backtrace is:
-
-[<c0029c88>] (__bug+0x18/0x24) from [<c02665d0>] (sdio_writeb+0x1c/0x4c)
-[<c02665d0>] (sdio_writeb+0x1c/0x4c) from [<c01b4098>] (tty_port_lower_dtr_rts+0x1c/0x20)
-[<c01b4098>] (tty_port_lower_dtr_rts+0x1c/0x20) from [<c01b412c>] (tty_port_close_end+0x2c/0x130)
-[<c01b412c>] (tty_port_close_end+0x2c/0x130) from [<c01b49a8>] (tty_port_close+0x2c/0x3c)
-[<c01b49a8>] (tty_port_close+0x2c/0x3c) from [<c01ae0c4>] (tty_release_dev+0x17c/0x478)
-[<c01ae0c4>] (tty_release_dev+0x17c/0x478) from [<c01ae3e8>] (tty_release+0x28/0x4c)
-[<c01ae3e8>] (tty_release+0x28/0x4c) from [<c00b5bf0>] (__fput+0x118/0x210)
-[<c00b5bf0>] (__fput+0x118/0x210) from [<c00b28b4>] (filp_close+0x70/0x7c)
-[<c00b28b4>] (filp_close+0x70/0x7c) from [<c003d0e0>] (put_files_struct+0x80/0xd4)
-[<c003d0e0>] (put_files_struct+0x80/0xd4) from [<c003eac0>] (do_exit+0x220/0x714)
-[<c003eac0>] (do_exit+0x220/0x714) from [<c003f074>] (do_group_exit+0xc0/0xf4)
-[<c003f074>] (do_group_exit+0xc0/0xf4) from [<c004d8d0>] (get_signal_to_deliver+0x3c8/0x428)
-[...] (impressive nesting culled)
-
-Only after backing out those 2 patches as wellas "sdio_uart: refcount 
-the tty objects" is the correct behavior restored.
+Marcel
 
 
-Nicolas
-
-
-
-[<c004d8d0>] (get_signal_to_deliver+0x3c8/0x428) from [<c0028b34>] (do_notify_resume+0x5c/0x5d0)
-[<c0028b34>] (do_notify_resume+0x5c/0x5d0) from [<c0026a88>] (work_pending+0x1c/0x20)
-
-
-
-
-
-> 
-> 
-> Nicolas
-> 
