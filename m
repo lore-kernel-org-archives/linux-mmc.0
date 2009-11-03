@@ -1,190 +1,60 @@
-From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
-Subject: Re: [PATCH 1/2] Disk hot removal causing oopses and fixes
-Date: Tue, 3 Nov 2009 13:54:44 +0200
-Message-ID: <20091103115444.GA8507@angel.research.nokia.com>
-References: <20091021161201.GA16968@angel.research.nokia.com>
- <4ADF752D.7010206@s5r6.in-berlin.de>
-Reply-To: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: Re: [PATCH] at91: at91sam9g20ek modify dual slot evaluation kit
+Date: Tue, 03 Nov 2009 13:04:35 +0100
+Message-ID: <4AF01C53.3070301@atmel.com>
+References: <1256049173-17373-1-git-send-email-nicolas.ferre@atmel.com> <20091021152653.GF19714@game.jcrosoft.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="azLHFNyN32YCQGCU"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.230]:52633 "EHLO
-	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751500AbZKCLzJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Nov 2009 06:55:09 -0500
-Content-Disposition: inline
-In-Reply-To: <4ADF752D.7010206@s5r6.in-berlin.de>
+Received: from mail.atmel.fr ([81.80.104.162]:43511 "EHLO atmel-es2.atmel.fr"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752196AbZKCMEj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Nov 2009 07:04:39 -0500
+In-Reply-To: <20091021152653.GF19714@game.jcrosoft.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ext Stefan Richter <stefanr@s5r6.in-berlin.de>
-Cc: Jens Axboe <axboe@kernel.dk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Cc: linux-arm-kernel@lists.infradead.org, avictor.za@gmail.com, akpm@linux-foundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
+Jean-Christophe PLAGNIOL-VILLARD :
+>> +	  that embeds only one SD/MMC slot.
+>> +
+>> +config MACH_AT91SAM9G20EK_2MMC
+>> +	bool "Atmel AT91SAM9G20-EK Evaluation Kit with 2 SD/MMC Slots"
+>> +	depends on ARCH_AT91SAM9G20
+>> +	help
+>> +	  Select this if you are using an Atmel AT91SAM9G20-EK Evaluation Kit
+>> +	  with 2 SD/MMC Slots. This is the case for AT91SAM9G20-EK rev. C and
+>> +	  onwards.
+>>  
+>>  config MACH_CPU9G20
+>>  	bool "Eukrea CPU9G20 board"
+>> @@ -392,7 +394,7 @@ config MTD_AT91_DATAFLASH_CARD
+>>  
+>>  config MTD_NAND_ATMEL_BUSWIDTH_16
+>>  	bool "Enable 16-bit data bus interface to NAND flash"
+>> -	depends on (MACH_AT91SAM9260EK || MACH_AT91SAM9261EK || MACH_AT91SAM9G10EK || MACH_AT91SAM9263EK || MACH_AT91SAM9G20EK || MACH_AT91SAM9G45EKES || MACH_AT91CAP9ADK)
+>> +	depends on (MACH_AT91SAM9260EK || MACH_AT91SAM9261EK || MACH_AT91SAM9G10EK || MACH_AT91SAM9263EK || MACH_AT91SAM9G20EK || MACH_AT91SAM9G20EK_2MMC || MACH_AT91SAM9G45EKES || MACH_AT91CAP9ADK)
+> it's time to replace this by select it at machine config state
 
---azLHFNyN32YCQGCU
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Ok patches are comming now on top of this one.
 
-Hi Steven
+>> @@ -254,7 +257,11 @@ static void __init ek_board_init(void)
+>>  	/* Ethernet */
+>>  	at91_add_device_eth(&ek_macb_data);
+>>  	/* MMC */
+>> +#if defined(CONFIG_MMC_ATMELMCI) || defined(CONFIG_MMC_ATMELMCI_MODULE)
+>>  	at91_add_device_mci(0, &ek_mmc_data);
+>> +#else
+>> +	at91_add_device_mmc(0, &ek_mmc_data);
+>> +#endif
+> do we really need to do this choice at board level?
 
-Sorry for late reply.
+Yes, you will choose on your board which driver will drive your sd/mmc
+interface. The device file will give access to both of them.
 
-> It has to reference-count its objects so that they are not freed as long
-> as they are used by upper layers,
-
-The block layer and device removal seems to be designed from
-top-down approach.  Althouh disc is referenced from
-__blkdev_get(), disc's request queue is not.  Also
-blk_cleanup_queue() calls elevator_exit() without caring if
-anyone still uses the elevator.
-
-A remedy would be to take reference of the request queue in
-__blkdev_get() and move elevator_exit() from blk_cleanup_queue()
-to blk_release_queue().
-
-I've tried this and it works fine. I am unable to cause oops within
-the elevator or anywhere else with hot card removal.  This is how
-it should be, since first the queue is marked dead and no new
-requests are added into queue and old requests are flushed with
-elevator_exit before releasing it and the dead status takes care
-they don't even reach to requst issue function.
-
-The caveat is ihat when request queue is initialzed with
-blk_init_queue(), caller provides a pointer to spinlock.  When
-blk_cleanup_queue() is called, drivers release the lock before
-elevator_exit() is finished.  In mmc driver the struct containing
-queue_lock is released immediately after returning blk_cleanup_queue().
-Then later when request queue is released, elevator_exit() tries to
-use the released spinlock.
-
-Kind of hack workaround is to reset the queue_lock pointer to
-request queue's internal lock in blk_cleanup_queue().
-
-Jarkko Lavvinen
----
->From 8ccee6132f376d78bb6e355016ecc06c9ca47b9f Mon Sep 17 00:00:00 2001
-From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
-Date: Tue, 3 Nov 2009 09:48:00 +0200
-Subject: [PATCH] block: Move elevator exit from blk_cleanup_queue() to blk_release_queue()
-
-If block_cleanup_queue() should not remove elevator if it is still
-in use. Better call the elevator exit in blk_release_queue() when
-all the reference to queue are gone.  Since drivers could use queue
-locks which are freed after returning from blk_cleanup_queue(),
-switch the queue lock to internal one.
-
-Signed-off-by: Jarkko Lavinen <jarkko.lavinen@nokia.com>
----
- block/blk-core.c  |    8 ++++++--
- block/blk-sysfs.c |    3 +++
- 2 files changed, 9 insertions(+), 2 deletions(-)
-
-diff --git a/block/blk-core.c b/block/blk-core.c
-index 9daf621..8d7d5aa 100644
---- a/block/blk-core.c
-+++ b/block/blk-core.c
-@@ -449,6 +449,8 @@ void blk_put_queue(struct request_queue *q)
- 
- void blk_cleanup_queue(struct request_queue *q)
- {
-+	spinlock_t *oldlock;
-+
- 	/*
- 	 * We know we have process context here, so we can be a little
- 	 * cautious and ensure that pending block actions on this device
-@@ -461,8 +463,10 @@ void blk_cleanup_queue(struct request_queue *q)
- 	queue_flag_set_unlocked(QUEUE_FLAG_DEAD, q);
- 	mutex_unlock(&q->sysfs_lock);
- 
--	if (q->elevator)
--		elevator_exit(q->elevator);
-+	oldlock = q->queue_lock;
-+	spin_lock_irq(oldlock);
-+	q->queue_lock = &q->__queue_lock;
-+	spin_unlock_irq(oldlock);
- 
- 	blk_put_queue(q);
- }
-diff --git a/block/blk-sysfs.c b/block/blk-sysfs.c
-index 21e275d..8ac3e5b 100644
---- a/block/blk-sysfs.c
-+++ b/block/blk-sysfs.c
-@@ -304,6 +304,9 @@ static void blk_release_queue(struct kobject *kobj)
- 		container_of(kobj, struct request_queue, kobj);
- 	struct request_list *rl = &q->rq;
- 
-+	if (q->elevator)
-+		elevator_exit(q->elevator);
-+
- 	blk_sync_queue(q);
- 
- 	if (rl->rq_pool)
+Best regards,
 -- 
-1.6.5
+Nicolas Ferre
 
-
---azLHFNyN32YCQGCU
-Content-Type: text/x-diff; charset=us-ascii
-Content-Disposition: attachment; filename="0002-block-Move-elevator-exit-from-blk_cleanup_queue-to-b.patch"
-
->From 8ccee6132f376d78bb6e355016ecc06c9ca47b9f Mon Sep 17 00:00:00 2001
-From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
-Date: Tue, 3 Nov 2009 09:48:00 +0200
-Subject: [PATCH] block: Move elevator exit from blk_cleanup_queue() to blk_release_queue()
-
-If block_cleanup_queue() should not remove elevator if it is still
-in use. Better call the elevator exit in blk_release_queue() when
-all the reference to queue are gone.  Since drivers could use queue
-locks which are freed after returning from blk_cleanup_queue(),
-switch the queue lock to internal one.
-
-Signed-off-by: Jarkko Lavinen <jarkko.lavinen@nokia.com>
----
- block/blk-core.c  |    8 ++++++--
- block/blk-sysfs.c |    3 +++
- 2 files changed, 9 insertions(+), 2 deletions(-)
-
-diff --git a/block/blk-core.c b/block/blk-core.c
-index 9daf621..8d7d5aa 100644
---- a/block/blk-core.c
-+++ b/block/blk-core.c
-@@ -449,6 +449,8 @@ void blk_put_queue(struct request_queue *q)
- 
- void blk_cleanup_queue(struct request_queue *q)
- {
-+	spinlock_t *oldlock;
-+
- 	/*
- 	 * We know we have process context here, so we can be a little
- 	 * cautious and ensure that pending block actions on this device
-@@ -461,8 +463,10 @@ void blk_cleanup_queue(struct request_queue *q)
- 	queue_flag_set_unlocked(QUEUE_FLAG_DEAD, q);
- 	mutex_unlock(&q->sysfs_lock);
- 
--	if (q->elevator)
--		elevator_exit(q->elevator);
-+	oldlock = q->queue_lock;
-+	spin_lock_irq(oldlock);
-+	q->queue_lock = &q->__queue_lock;
-+	spin_unlock_irq(oldlock);
- 
- 	blk_put_queue(q);
- }
-diff --git a/block/blk-sysfs.c b/block/blk-sysfs.c
-index 21e275d..8ac3e5b 100644
---- a/block/blk-sysfs.c
-+++ b/block/blk-sysfs.c
-@@ -304,6 +304,9 @@ static void blk_release_queue(struct kobject *kobj)
- 		container_of(kobj, struct request_queue, kobj);
- 	struct request_list *rl = &q->rq;
- 
-+	if (q->elevator)
-+		elevator_exit(q->elevator);
-+
- 	blk_sync_queue(q);
- 
- 	if (rl->rq_pool)
--- 
-1.6.5
-
-
---azLHFNyN32YCQGCU--
