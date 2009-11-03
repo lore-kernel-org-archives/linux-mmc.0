@@ -1,102 +1,190 @@
-From: akpm@linux-foundation.org
-Subject: + drivers-mmc-move-dereference-after-null-test.patch added to -mm tree
-Date: Mon, 02 Nov 2009 22:24:11 -0800
-Message-ID: <200911030624.nA36OC3n029396@imap1.linux-foundation.org>
+From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Subject: Re: [PATCH 1/2] Disk hot removal causing oopses and fixes
+Date: Tue, 3 Nov 2009 13:54:44 +0200
+Message-ID: <20091103115444.GA8507@angel.research.nokia.com>
+References: <20091021161201.GA16968@angel.research.nokia.com>
+ <4ADF752D.7010206@s5r6.in-berlin.de>
+Reply-To: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="azLHFNyN32YCQGCU"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:49897 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750998AbZKCGYM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Nov 2009 01:24:12 -0500
+Received: from smtp.nokia.com ([192.100.122.230]:52633 "EHLO
+	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751500AbZKCLzJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Nov 2009 06:55:09 -0500
+Content-Disposition: inline
+In-Reply-To: <4ADF752D.7010206@s5r6.in-berlin.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: julia@diku.dk, linux-mmc@vger.kernel.org
+To: ext Stefan Richter <stefanr@s5r6.in-berlin.de>
+Cc: Jens Axboe <axboe@kernel.dk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
-The patch titled
-     drivers/mmc: Move dereference after NULL test
-has been added to the -mm tree.  Its filename is
-     drivers-mmc-move-dereference-after-null-test.patch
+--azLHFNyN32YCQGCU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+Hi Steven
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+Sorry for late reply.
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+> It has to reference-count its objects so that they are not freed as long
+> as they are used by upper layers,
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+The block layer and device removal seems to be designed from
+top-down approach.  Althouh disc is referenced from
+__blkdev_get(), disc's request queue is not.  Also
+blk_cleanup_queue() calls elevator_exit() without caring if
+anyone still uses the elevator.
 
-------------------------------------------------------
-Subject: drivers/mmc: Move dereference after NULL test
-From: Julia Lawall <julia@diku.dk>
+A remedy would be to take reference of the request queue in
+__blkdev_get() and move elevator_exit() from blk_cleanup_queue()
+to blk_release_queue().
 
-If the NULL test on mrq is needed, then the derefernce should be after the
-NULL test.
+I've tried this and it works fine. I am unable to cause oops within
+the elevator or anywhere else with hot card removal.  This is how
+it should be, since first the queue is marked dead and no new
+requests are added into queue and old requests are flushed with
+elevator_exit before releasing it and the dead status takes care
+they don't even reach to requst issue function.
 
-A simplified version of the semantic match that detects this problem is as
-follows (http://coccinelle.lip6.fr/):
+The caveat is ihat when request queue is initialzed with
+blk_init_queue(), caller provides a pointer to spinlock.  When
+blk_cleanup_queue() is called, drivers release the lock before
+elevator_exit() is finished.  In mmc driver the struct containing
+queue_lock is released immediately after returning blk_cleanup_queue().
+Then later when request queue is released, elevator_exit() tries to
+use the released spinlock.
 
-// <smpl>
-@match exists@
-expression x, E;
-identifier fld;
-@@
+Kind of hack workaround is to reset the queue_lock pointer to
+request queue's internal lock in blk_cleanup_queue().
 
-* x->fld
-  ... when != \(x = E\|&x\)
-* x == NULL
-// </smpl>
-
-Signed-off-by: Julia Lawall <julia@diku.dk>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Jarkko Lavvinen
 ---
+>From 8ccee6132f376d78bb6e355016ecc06c9ca47b9f Mon Sep 17 00:00:00 2001
+From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Date: Tue, 3 Nov 2009 09:48:00 +0200
+Subject: [PATCH] block: Move elevator exit from blk_cleanup_queue() to blk_release_queue()
 
- drivers/mmc/host/s3cmci.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+If block_cleanup_queue() should not remove elevator if it is still
+in use. Better call the elevator exit in blk_release_queue() when
+all the reference to queue are gone.  Since drivers could use queue
+locks which are freed after returning from blk_cleanup_queue(),
+switch the queue lock to internal one.
 
-diff -puN drivers/mmc/host/s3cmci.c~drivers-mmc-move-dereference-after-null-test drivers/mmc/host/s3cmci.c
---- a/drivers/mmc/host/s3cmci.c~drivers-mmc-move-dereference-after-null-test
-+++ a/drivers/mmc/host/s3cmci.c
-@@ -820,7 +820,7 @@ fail_request:
- static void finalize_request(struct s3cmci_host *host)
+Signed-off-by: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+---
+ block/blk-core.c  |    8 ++++++--
+ block/blk-sysfs.c |    3 +++
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/block/blk-core.c b/block/blk-core.c
+index 9daf621..8d7d5aa 100644
+--- a/block/blk-core.c
++++ b/block/blk-core.c
+@@ -449,6 +449,8 @@ void blk_put_queue(struct request_queue *q)
+ 
+ void blk_cleanup_queue(struct request_queue *q)
  {
- 	struct mmc_request *mrq = host->mrq;
--	struct mmc_command *cmd = host->cmd_is_stop ? mrq->stop : mrq->cmd;
-+	struct mmc_command *cmd;
- 	int debug_as_failure = 0;
++	spinlock_t *oldlock;
++
+ 	/*
+ 	 * We know we have process context here, so we can be a little
+ 	 * cautious and ensure that pending block actions on this device
+@@ -461,8 +463,10 @@ void blk_cleanup_queue(struct request_queue *q)
+ 	queue_flag_set_unlocked(QUEUE_FLAG_DEAD, q);
+ 	mutex_unlock(&q->sysfs_lock);
  
- 	if (host->complete_what != COMPLETION_FINALIZE)
-@@ -828,6 +828,7 @@ static void finalize_request(struct s3cm
+-	if (q->elevator)
+-		elevator_exit(q->elevator);
++	oldlock = q->queue_lock;
++	spin_lock_irq(oldlock);
++	q->queue_lock = &q->__queue_lock;
++	spin_unlock_irq(oldlock);
  
- 	if (!mrq)
- 		return;
-+	cmd = host->cmd_is_stop ? mrq->stop : mrq->cmd;
+ 	blk_put_queue(q);
+ }
+diff --git a/block/blk-sysfs.c b/block/blk-sysfs.c
+index 21e275d..8ac3e5b 100644
+--- a/block/blk-sysfs.c
++++ b/block/blk-sysfs.c
+@@ -304,6 +304,9 @@ static void blk_release_queue(struct kobject *kobj)
+ 		container_of(kobj, struct request_queue, kobj);
+ 	struct request_list *rl = &q->rq;
  
- 	if (cmd->data && (cmd->error == 0) &&
- 	    (cmd->data->error == 0)) {
-_
++	if (q->elevator)
++		elevator_exit(q->elevator);
++
+ 	blk_sync_queue(q);
+ 
+ 	if (rl->rq_pool)
+-- 
+1.6.5
 
-Patches currently in -mm which might be from julia@diku.dk are
 
-origin.patch
-linux-next.patch
-drivers-scsi-libsas-use-sam_good.patch
-drivers-block-dac960c-use-dac960_v2_controller.patch
-drivers-char-ipmi-use-kcs_idle_state.patch
-drivers-message-move-dereference-after-null-test.patch
-drivers-acpi-move-dereference-after-null-test.patch
-drivers-media-video-move-dereference-after-null-test.patch
-drivers-mmc-move-dereference-after-null-test.patch
-drivers-cpuidle-move-dereference-after-null-test.patch
-drivers-video-move-dereference-after-null-test.patch
-drivers-ata-libata-move-dereference-after-null-test.patch
-drivers-scsi-remove-unnecessary-null-test.patch
-arch-arm-plat-omap-drop-an-unnecessary-null-test.patch
-arch-arm-plat-s3c24xx-move-dereference-after-null-test.patch
+--azLHFNyN32YCQGCU
+Content-Type: text/x-diff; charset=us-ascii
+Content-Disposition: attachment; filename="0002-block-Move-elevator-exit-from-blk_cleanup_queue-to-b.patch"
 
+>From 8ccee6132f376d78bb6e355016ecc06c9ca47b9f Mon Sep 17 00:00:00 2001
+From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Date: Tue, 3 Nov 2009 09:48:00 +0200
+Subject: [PATCH] block: Move elevator exit from blk_cleanup_queue() to blk_release_queue()
+
+If block_cleanup_queue() should not remove elevator if it is still
+in use. Better call the elevator exit in blk_release_queue() when
+all the reference to queue are gone.  Since drivers could use queue
+locks which are freed after returning from blk_cleanup_queue(),
+switch the queue lock to internal one.
+
+Signed-off-by: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+---
+ block/blk-core.c  |    8 ++++++--
+ block/blk-sysfs.c |    3 +++
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/block/blk-core.c b/block/blk-core.c
+index 9daf621..8d7d5aa 100644
+--- a/block/blk-core.c
++++ b/block/blk-core.c
+@@ -449,6 +449,8 @@ void blk_put_queue(struct request_queue *q)
+ 
+ void blk_cleanup_queue(struct request_queue *q)
+ {
++	spinlock_t *oldlock;
++
+ 	/*
+ 	 * We know we have process context here, so we can be a little
+ 	 * cautious and ensure that pending block actions on this device
+@@ -461,8 +463,10 @@ void blk_cleanup_queue(struct request_queue *q)
+ 	queue_flag_set_unlocked(QUEUE_FLAG_DEAD, q);
+ 	mutex_unlock(&q->sysfs_lock);
+ 
+-	if (q->elevator)
+-		elevator_exit(q->elevator);
++	oldlock = q->queue_lock;
++	spin_lock_irq(oldlock);
++	q->queue_lock = &q->__queue_lock;
++	spin_unlock_irq(oldlock);
+ 
+ 	blk_put_queue(q);
+ }
+diff --git a/block/blk-sysfs.c b/block/blk-sysfs.c
+index 21e275d..8ac3e5b 100644
+--- a/block/blk-sysfs.c
++++ b/block/blk-sysfs.c
+@@ -304,6 +304,9 @@ static void blk_release_queue(struct kobject *kobj)
+ 		container_of(kobj, struct request_queue, kobj);
+ 	struct request_list *rl = &q->rq;
+ 
++	if (q->elevator)
++		elevator_exit(q->elevator);
++
+ 	blk_sync_queue(q);
+ 
+ 	if (rl->rq_pool)
+-- 
+1.6.5
+
+
+--azLHFNyN32YCQGCU--
