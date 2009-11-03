@@ -1,44 +1,102 @@
 From: Alan Cox <alan@linux.intel.com>
-Subject: [PATCH 10/11] sdio_uart: Fix the locking on "func" for new code
-Date: Tue, 03 Nov 2009 14:18:58 +0000
-Message-ID: <20091103141846.31032.81142.stgit@localhost.localdomain>
+Subject: [PATCH 11/11] sdio_uart: add modem functionality
+Date: Tue, 03 Nov 2009 14:19:40 +0000
+Message-ID: <20091103141903.31032.28460.stgit@localhost.localdomain>
 References: <20091103141525.31032.45206.stgit@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753786AbZKCOcZ@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from earthlight.etchedpixels.co.uk ([81.2.110.250]:55434 "EHLO
+	bob.linux.org.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752614AbZKCOdE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Nov 2009 09:33:04 -0500
 In-Reply-To: <20091103141525.31032.45206.stgit@localhost.localdomain>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nico@cam.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nico@cam.org
 
-The new dtr_rts function didn't take the port->func lock as it should
-so add use of the lock there.
+Add the POSIX block for carrier
 
+Linux TIOCMIWAIT functionality is still lacking from the driver.
 
 Signed-off-by: Alan Cox <alan@linux.intel.com>
 ---
 
- drivers/mmc/card/sdio_uart.c |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
+ drivers/mmc/card/sdio_uart.c |   33 ++++++++++++++++++++++++++++++++-
+ 1 files changed, 32 insertions(+), 1 deletions(-)
 
 
 diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.c
-index ebb5d4b..0a3acfb 100644
+index 0a3acfb..e72e2f2 100644
 --- a/drivers/mmc/card/sdio_uart.c
 +++ b/drivers/mmc/card/sdio_uart.c
-@@ -565,10 +565,14 @@ static void uart_dtr_rts(struct tty_port *tport, int onoff)
- {
- 	struct sdio_uart_port *port =
- 			container_of(tport, struct sdio_uart_port, port);
-+	int ret = sdio_uart_claim_func(port);
-+	if (ret)
-+		return;
- 	if (onoff == 0)
- 		sdio_uart_clear_mctrl(port, TIOCM_DTR | TIOCM_RTS);
- 	else
- 		sdio_uart_set_mctrl(port, TIOCM_DTR | TIOCM_RTS);
-+	sdio_uart_release_func(port);
+@@ -29,6 +29,7 @@
+ #include <linux/module.h>
+ #include <linux/init.h>
+ #include <linux/kernel.h>
++#include <linux/sched.h>
+ #include <linux/mutex.h>
+ #include <linux/seq_file.h>
+ #include <linux/serial_reg.h>
+@@ -214,6 +216,8 @@ static unsigned int sdio_uart_get_mctrl(struct sdio_uart_port *port)
+ 	unsigned char status;
+ 	unsigned int ret;
+ 
++	/* FIXME: What stops this losing the delta bits and breaking
++	   sdio_uart_check_modem_status ? */
+ 	status = sdio_in(port, UART_MSR);
+ 
+ 	ret = 0;
+@@ -495,8 +499,20 @@ static void sdio_uart_check_modem_status(struct sdio_uart_port *port)
+ 		port->icount.rng++;
+ 	if (status & UART_MSR_DDSR)
+ 		port->icount.dsr++;
+-	if (status & UART_MSR_DDCD)
++	if (status & UART_MSR_DDCD) {
+ 		port->icount.dcd++;
++		/* DCD raise - wake for open */
++		if (status & UART_MSR_DCD)
++			wake_up_interruptible(&port->port.open_wait);
++		else {
++			/* DCD drop - hang up if tty attached */
++			tty = tty_port_tty_get(&port->port);
++			if (tty) {
++				tty_hangup(tty);
++				tty_kref_put(tty);
++			}
++		}
++	}
+ 	if (status & UART_MSR_DCTS) {
+ 		port->icount.cts++;
+ 		tty = tty_port_tty_get(&port->port);
+@@ -552,6 +568,20 @@ static void sdio_uart_irq(struct sdio_func *func)
+ 	port->in_sdio_uart_irq = NULL;
  }
  
++static int uart_carrier_raised(struct tty_port *tport)
++{
++	struct sdio_uart_port *port =
++			container_of(tport, struct sdio_uart_port, port);
++	unsigned int ret = sdio_uart_claim_func(port);
++	if (ret)	/* Missing hardware shoudn't block for carrier */
++		return 1;
++	ret = sdio_uart_get_mctrl(port);
++	sdio_uart_release_func(port);
++	if (ret & TIOCM_CAR)
++		return 1;
++	return 0;
++}
++
  /**
+  *	uart_dtr_rts		-	 port helper to set uart signals
+  *	@tport: tty port to be updated
+@@ -1011,6 +1041,7 @@ static const struct file_operations sdio_uart_proc_fops = {
+ 
+ static const struct tty_port_operations sdio_uart_port_ops = {
+ 	.dtr_rts = uart_dtr_rts,
++	.carrier_raised = uart_carrier_raised,
+ 	.shutdown = sdio_uart_shutdown,
+ 	.activate = sdio_uart_activate,
+ };
+
