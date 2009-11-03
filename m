@@ -1,231 +1,123 @@
 From: Alan Cox <alan@linux.intel.com>
-Subject: [PATCH 04/11] sdio_uart: refcount the tty objects
-Date: Tue, 03 Nov 2009 14:17:53 +0000
-Message-ID: <20091103141747.31032.70659.stgit@localhost.localdomain>
+Subject: [PATCH 05/11] sdio_uart: Move the open lock
+Date: Tue, 03 Nov 2009 14:18:04 +0000
+Message-ID: <20091103141758.31032.70695.stgit@localhost.localdomain>
 References: <20091103141525.31032.45206.stgit@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1752719AbZKCObY@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1752891AbZKCObc@vger.kernel.org>
 In-Reply-To: <20091103141525.31032.45206.stgit@localhost.localdomain>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nico@cam.org
 List-Id: linux-mmc@vger.kernel.org
 
-The tty can go away underneath us, so we must refcount it. Do the na=C3=
-=AFve
-implementation initially. We will worry about startup shortly.
+When we move to the tty_port logic the port mutex will protect open v close
+v hangup. Move to this first in the existing open code so we have a bisection
+point.
 
 Signed-off-by: Alan Cox <alan@linux.intel.com>
 ---
 
- drivers/mmc/card/sdio_uart.c |   58 ++++++++++++++++++++++++++++++----=
---------
- 1 files changed, 41 insertions(+), 17 deletions(-)
+ drivers/mmc/card/sdio_uart.c |   20 +++++++++-----------
+ 1 files changed, 9 insertions(+), 11 deletions(-)
 
 
-diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.=
-c
-index 671fe5e..51aeaf6 100644
+diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.c
+index 51aeaf6..f76741d 100644
 --- a/drivers/mmc/card/sdio_uart.c
 +++ b/drivers/mmc/card/sdio_uart.c
-@@ -172,8 +172,13 @@ static void sdio_uart_port_remove(struct sdio_uart=
-_port *port)
+@@ -78,7 +78,6 @@ struct sdio_uart_port {
+ 	struct tty_struct	*tty;
+ 	unsigned int		index;
+ 	unsigned int		opened;
+-	struct mutex		open_lock;
+ 	struct sdio_func	*func;
+ 	struct mutex		func_lock;
+ 	struct task_struct	*in_sdio_uart_irq;
+@@ -103,7 +102,6 @@ static int sdio_uart_add_port(struct sdio_uart_port *port)
+ 	int index, ret = -EBUSY;
+ 
+ 	kref_init(&port->kref);
+-	mutex_init(&port->open_lock);
+ 	mutex_init(&port->func_lock);
+ 	spin_lock_init(&port->write_lock);
+ 
+@@ -166,7 +164,7 @@ static void sdio_uart_port_remove(struct sdio_uart_port *port)
+ 	 * give up on that port ASAP.
+ 	 * Beware: the lock ordering is critical.
+ 	 */
+-	mutex_lock(&port->open_lock);
++	mutex_lock(&port->port.mutex);
+ 	mutex_lock(&port->func_lock);
+ 	func = port->func;
  	sdio_claim_host(func);
- 	port->func =3D NULL;
- 	mutex_unlock(&port->func_lock);
--	if (port->opened)
--		tty_hangup(port->port.tty);
-+	if (port->opened) {
-+		struct tty_struct *tty =3D tty_port_tty_get(&port->port);
-+		/* tty_hangup is async so is this safe as is ?? */
-+		if (tty)
-+			tty_hangup(tty);
-+		tty_kref_put(tty);
-+	}
- 	mutex_unlock(&port->open_lock);
+@@ -179,7 +177,7 @@ static void sdio_uart_port_remove(struct sdio_uart_port *port)
+ 			tty_hangup(tty);
+ 		tty_kref_put(tty);
+ 	}
+-	mutex_unlock(&port->open_lock);
++	mutex_unlock(&port->port.mutex);
  	sdio_release_irq(func);
  	sdio_disable_func(func);
-@@ -392,7 +397,7 @@ static void sdio_uart_stop_rx(struct sdio_uart_port=
- *port)
- static void sdio_uart_receive_chars(struct sdio_uart_port *port,
- 				    unsigned int *status)
- {
--	struct tty_struct *tty =3D port->port.tty;
-+	struct tty_struct *tty =3D tty_port_tty_get(&port->port);
- 	unsigned int ch, flag;
- 	int max_count =3D 256;
-=20
-@@ -429,25 +434,30 @@ static void sdio_uart_receive_chars(struct sdio_u=
-art_port *port,
- 		}
-=20
- 		if ((*status & port->ignore_status_mask & ~UART_LSR_OE) =3D=3D 0)
--			tty_insert_flip_char(tty, ch, flag);
-+			if (tty)
-+				tty_insert_flip_char(tty, ch, flag);
-=20
- 		/*
- 		 * Overrun is special.  Since it's reported immediately,
- 		 * it doesn't affect the current character.
- 		 */
- 		if (*status & ~port->ignore_status_mask & UART_LSR_OE)
--			tty_insert_flip_char(tty, 0, TTY_OVERRUN);
-+			if (tty)
-+				tty_insert_flip_char(tty, 0, TTY_OVERRUN);
-=20
- 		*status =3D sdio_in(port, UART_LSR);
- 	} while ((*status & UART_LSR_DR) && (max_count-- > 0));
--	tty_flip_buffer_push(tty);
-+	if (tty) {
-+		tty_flip_buffer_push(tty);
-+		tty_kref_put(tty);
-+	}
- }
-=20
- static void sdio_uart_transmit_chars(struct sdio_uart_port *port)
- {
- 	struct circ_buf *xmit =3D &port->xmit;
- 	int count;
--	struct tty_struct *tty =3D port->port.tty;
-+	struct tty_struct *tty;
-=20
- 	if (port->x_char) {
- 		sdio_out(port, UART_TX, port->x_char);
-@@ -455,7 +465,10 @@ static void sdio_uart_transmit_chars(struct sdio_u=
-art_port *port)
- 		port->x_char =3D 0;
- 		return;
- 	}
--	if (circ_empty(xmit) || tty->stopped || tty->hw_stopped) {
-+
-+	tty =3D tty_port_tty_get(&port->port);
-+
-+	if (tty =3D=3D NULL || circ_empty(xmit) || tty->stopped || tty->hw_st=
-opped) {
- 		sdio_uart_stop_tx(port);
- 		return;
- 	}
-@@ -474,12 +487,13 @@ static void sdio_uart_transmit_chars(struct sdio_=
-uart_port *port)
-=20
- 	if (circ_empty(xmit))
- 		sdio_uart_stop_tx(port);
-+	tty_kref_put(tty);
- }
-=20
- static void sdio_uart_check_modem_status(struct sdio_uart_port *port)
- {
- 	int status;
--	struct tty_struct *tty =3D port->port.tty;
-+	struct tty_struct *tty;
-=20
- 	status =3D sdio_in(port, UART_MSR);
-=20
-@@ -494,7 +508,8 @@ static void sdio_uart_check_modem_status(struct sdi=
-o_uart_port *port)
- 		port->icount.dcd++;
- 	if (status & UART_MSR_DCTS) {
- 		port->icount.cts++;
--		if (tty->termios->c_cflag & CRTSCTS) {
-+		tty =3D tty_port_tty_get(&port->port);
-+		if (tty && (tty->termios->c_cflag & CRTSCTS)) {
- 			int cts =3D (status & UART_MSR_CTS);
- 			if (tty->hw_stopped) {
- 				if (cts) {
-@@ -509,6 +524,7 @@ static void sdio_uart_check_modem_status(struct sdi=
-o_uart_port *port)
- 				}
- 			}
- 		}
-+		tty_kref_put(tty);
- 	}
- }
-=20
-@@ -548,8 +564,10 @@ static void sdio_uart_irq(struct sdio_func *func)
- static int sdio_uart_startup(struct sdio_uart_port *port)
- {
- 	unsigned long page;
--	int ret;
--	struct tty_struct *tty =3D port->port.tty;
-+	int ret =3D -ENOMEM;
-+	struct tty_struct *tty =3D tty_port_tty_get(&port->port);
-+
-+	/* FIXME: What if it is NULL ?? */
-=20
+ 	sdio_release_host(func);
+@@ -698,14 +696,14 @@ static int sdio_uart_open(struct tty_struct *tty, struct file *filp)
+ 	if (!port)
+ 		return -ENODEV;
+ 
+-	mutex_lock(&port->open_lock);
++	mutex_lock(&port->port.mutex);
+ 
  	/*
- 	 * Set the TTY IO error marker - we will only clear this
-@@ -560,7 +578,7 @@ static int sdio_uart_startup(struct sdio_uart_port =
-*port)
- 	/* Initialise and allocate the transmit buffer. */
- 	page =3D __get_free_page(GFP_KERNEL);
- 	if (!page)
--		return -ENOMEM;
-+		goto err0;
- 	port->xmit.buf =3D (unsigned char *)page;
- 	circ_clear(&port->xmit);
-=20
-@@ -614,6 +632,7 @@ static int sdio_uart_startup(struct sdio_uart_port =
-*port)
- 	sdio_uart_irq(port->func);
-=20
- 	sdio_uart_release_func(port);
-+	tty_kref_put(tty);
- 	return 0;
-=20
- err3:
-@@ -622,12 +641,15 @@ err2:
- 	sdio_uart_release_func(port);
- err1:
- 	free_page((unsigned long)port->xmit.buf);
-+err0:
-+	tty_kref_put(tty);
- 	return ret;
- }
-=20
- static void sdio_uart_shutdown(struct sdio_uart_port *port)
- {
- 	int ret;
-+	struct tty_struct *tty;
-=20
- 	ret =3D sdio_uart_claim_func(port);
- 	if (ret)
-@@ -637,9 +659,11 @@ static void sdio_uart_shutdown(struct sdio_uart_po=
-rt *port)
-=20
- 	/* TODO: wait here for TX FIFO to drain */
-=20
-+	tty =3D tty_port_tty_get(&port->port);
- 	/* Turn off DTR and RTS early. */
--	if (port->port.tty->termios->c_cflag & HUPCL)
-+	if (tty && (tty->termios->c_cflag & HUPCL))
- 		sdio_uart_clear_mctrl(port, TIOCM_DTR | TIOCM_RTS);
-+	tty_kref_put(tty);
-=20
- 	/* Disable interrupts from this port */
- 	sdio_release_irq(port->func);
-@@ -688,11 +712,11 @@ static int sdio_uart_open(struct tty_struct *tty,=
- struct file *filp)
-=20
- 	if (!port->opened) {
- 		tty->driver_data =3D port;
--		port->port.tty =3D tty;
-+		tty_port_tty_set(&port->port, tty);
- 		ret =3D sdio_uart_startup(port);
+ 	 * Make sure not to mess up with a dead port
+ 	 * which has not been closed yet.
+ 	 */
+ 	if (tty->driver_data && tty->driver_data != port) {
+-		mutex_unlock(&port->open_lock);
++		mutex_unlock(&port->port.mutex);
+ 		sdio_uart_port_put(port);
+ 		return -EBUSY;
+ 	}
+@@ -717,13 +715,13 @@ static int sdio_uart_open(struct tty_struct *tty, struct file *filp)
  		if (ret) {
- 			tty->driver_data =3D NULL;
--			port->port.tty =3D NULL;
-+			tty_port_tty_set(&port->port, NULL);
- 			mutex_unlock(&port->open_lock);
+ 			tty->driver_data = NULL;
+ 			tty_port_tty_set(&port->port, NULL);
+-			mutex_unlock(&port->open_lock);
++			mutex_unlock(&port->port.mutex);
  			sdio_uart_port_put(port);
  			return ret;
-@@ -727,7 +751,7 @@ static void sdio_uart_close(struct tty_struct *tty,=
- struct file * filp)
- 		tty->closing =3D 1;
- 		sdio_uart_shutdown(port);
- 		tty_ldisc_flush(tty);
--		port->port.tty =3D NULL;
-+		tty_port_tty_set(&port->port, NULL);
- 		tty->driver_data =3D NULL;
- 		tty->closing =3D 0;
+ 		}
  	}
+ 	port->opened++;
+-	mutex_unlock(&port->open_lock);
++	mutex_unlock(&port->port.mutex);
+ 	return 0;
+ }
+ 
+@@ -734,7 +732,7 @@ static void sdio_uart_close(struct tty_struct *tty, struct file * filp)
+ 	if (!port)
+ 		return;
+ 
+-	mutex_lock(&port->open_lock);
++	mutex_lock(&port->port.mutex);
+ 	BUG_ON(!port->opened);
+ 
+ 	/*
+@@ -743,7 +741,7 @@ static void sdio_uart_close(struct tty_struct *tty, struct file * filp)
+ 	 * is larger than port->count.
+ 	 */
+ 	if (tty->count > port->opened) {
+-		mutex_unlock(&port->open_lock);
++		mutex_unlock(&port->port.mutex);
+ 		return;
+ 	}
+ 
+@@ -755,7 +753,7 @@ static void sdio_uart_close(struct tty_struct *tty, struct file * filp)
+ 		tty->driver_data = NULL;
+ 		tty->closing = 0;
+ 	}
+-	mutex_unlock(&port->open_lock);
++	mutex_unlock(&port->port.mutex);
+ 	sdio_uart_port_put(port);
+ }
+ 
