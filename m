@@ -1,44 +1,81 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH 00/11] Sort out sdio_uart - stage two
-Date: Tue, 03 Nov 2009 14:58:10 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.0911031401170.13333@xanadu.home>
-References: <20091103141525.31032.45206.stgit@localhost.localdomain>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:59071 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751326AbZKCT6G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Nov 2009 14:58:06 -0500
-In-reply-to: <20091103141525.31032.45206.stgit@localhost.localdomain>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + mmc-msm_sdccc-remove-references-to-htc_pwrsink.patch added to -mm tree
+Date: Tue, 03 Nov 2009 16:11:17 -0800
+Message-ID: <200911040011.nA40BHb7006600@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: pavel@ucw.cz, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Cox <alan@linux.intel.com>
-Cc: linux-mmc@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>
-
-On Tue, 3 Nov 2009, Alan Cox wrote:
-
-> With the bugs Nicolas reported hopefully now nailed.
-
-Progress, but still not there yet.
-
-I'm still using the same "cat /dev/ttySDIO0" test with a GPS card.
-
-Yanking the card out does terminate the cat process properly.  Inserting 
-the card back in and restarting cat always fails with:
-
-	cat: /dev/ttySDIO0: Input/output error
-
-The same thing occurs if I terminate cat with ^C instead of pulling the 
-card out.
-
->From what I can see, sdio_uart_open() and sdio_uart_activate() are 
-called on the first cat invocation, and then sdio_uart_close() and 
-sdio_uart_shutdown() when cat is stopped with ^C.  However neither 
-sdio_uart_open() nor sdio_uart_activate() is ever called anymore with 
-any subsequent cat invocations until a reboot.  Some upper layer must 
-have taken upon itself to return -EIO to user space.
 
 
-Nicolas
+The patch titled
+     mmc:: msm_sdcc.c: remove references to htc_pwrsink
+has been added to the -mm tree.  Its filename is
+     mmc-msm_sdccc-remove-references-to-htc_pwrsink.patch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc:: msm_sdcc.c: remove references to htc_pwrsink
+From: Pavel Machek <pavel@ucw.cz>
+
+htc_pwrsing code never went to mainline, remove references to it.
+
+Signed-off-by: Pavel Machek <pavel@ucw.cz>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+
+diff -puN drivers/mmc/host/msm_sdcc.c~mmc-msm_sdccc-remove-references-to-htc_pwrsink drivers/mmc/host/msm_sdcc.c
+--- a/drivers/mmc/host/msm_sdcc.c~mmc-msm_sdccc-remove-references-to-htc_pwrsink
++++ a/drivers/mmc/host/msm_sdcc.c
+@@ -41,7 +41,6 @@
+ #include <asm/mach/mmc.h>
+ #include <mach/msm_iomap.h>
+ #include <mach/dma.h>
+-#include <mach/htc_pwrsink.h>
+ 
+ #include "msm_sdcc.h"
+ 
+@@ -775,13 +774,11 @@ msmsdcc_set_ios(struct mmc_host *mmc, st
+ 
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_OFF:
+-		htc_pwrsink_set(PWRSINK_SDCARD, 0);
+ 		break;
+ 	case MMC_POWER_UP:
+ 		pwr |= MCI_PWR_UP;
+ 		break;
+ 	case MMC_POWER_ON:
+-		htc_pwrsink_set(PWRSINK_SDCARD, 100);
+ 		pwr |= MCI_PWR_ON;
+ 		break;
+ 	}
+_
+
+Patches currently in -mm which might be from pavel@ucw.cz are
+
+origin.patch
+linux-next.patch
+spitz-backlight-fix-brightness-limiting.patch
+scripts-get_maintainerpl-add-roles-and-rolestats.patch
+scripts-get_maintainerpl-fix-non-with-git-blame-and-cleanups.patch
+mmc-msm_sdccc-remove-references-to-htc_pwrsink.patch
+lis3lv02d-axis-remap-and-resource-setup-release.patch
+lis3lv02d-i2c-support.patch
+fatfs-use-common-time_to_tm-in-fat_time_unix2fat.patch
+
