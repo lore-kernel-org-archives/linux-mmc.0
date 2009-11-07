@@ -1,120 +1,52 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: [PATCH] sdhci: add support for the SysKonnect CardBus2SDIO adapter
-Date: Sat, 07 Nov 2009 04:35:22 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.0911070426320.10340@xanadu.home>
+From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Subject: Re: [PATCH 3/3 v2] at91/atmel-mci: inclusion of sd/mmc driver in
+ at91sam9g45 chip and board
+Date: Sat, 7 Nov 2009 12:20:02 +0100
+Message-ID: <20091107122002.1ecf6483@hskinnemoen-d830>
+References: <acfa557032a93e2d3186981b16f7048a5a31028a.1256314995.git.nicolas.ferre@atmel.com>
+	<20090930155557.7dae503b@hskinnemoen-d830>
+	<a3b1332815576dc4d496937b8a5ab69d36818d00.1256314995.git.nicolas.ferre@atmel.com>
+	<cd73a99e0910271243x744c956bl598fef9fd4144840@mail.gmail.com>
+	<20091028083548.38f1d80c@hskinnemoen-d830>
+	<d6cda7730910271753o54acfa04t1225de460083325f@mail.gmail.com>
+	<cd73a99e0910281253x1bb72b74p47cb5110efb0871f@mail.gmail.com>
+	<1256763057.4362.36.camel@ben-desktop>
+	<4AEF12B7.3040704@atmel.com>
+	<4AEF95E0.7040602@bluewatersys.com>
+	<1257216943.4358.66.camel@ben-desktop>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:53015 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751267AbZKGJfR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Nov 2009 04:35:17 -0500
-Received: from xanadu.home ([66.130.28.92]) by VL-MO-MR001.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-4.01 (built Aug  3 2007; 32bit))
- with ESMTP id <0KSQ00FB3FYYFQ10@VL-MO-MR001.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Sat, 07 Nov 2009 04:35:22 -0500 (EST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1751538AbZKGLUG@vger.kernel.org>
+In-Reply-To: <1257216943.4358.66.camel@ben-desktop>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ben Nizette <bn@niasdigital.com>
+Cc: Ryan Mallon <ryan@bluewatersys.com>, David Brownell <dbrownell@users.sourceforge.net>, kernel@avr32linux.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, David Brownell <david-b@pacbell.net>, Andrew Victor <avictor.za@gmail.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org
 
-This is still in use especially to develop SDIO device drivers on 
-laptop machines which are lacking SDIO slots.  This adapter supports
-SDIO cards only due to lack of 136-bit response capability.
-    
-Signed-off-by: Nicolas Pitre <nico@marvell.com>
----
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index e035664..5c3a176 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -285,6 +285,73 @@ static const struct sdhci_pci_fixes sdhci_jmicron = {
- 	.resume		= jmicron_resume,
- };
- 
-+/* SysKonnect CardBus2SDIO extra registers */
-+#define SYSKT_CTRL		0x200
-+#define SYSKT_RDFIFO_STAT	0x204
-+#define SYSKT_WRFIFO_STAT	0x208
-+#define SYSKT_POWER_DATA	0x20c
-+#define   SYSKT_POWER_330	0xef
-+#define   SYSKT_POWER_300	0xf8
-+#define   SYSKT_POWER_184	0xcc
-+#define SYSKT_POWER_CMD		0x20d
-+#define   SYSKT_POWER_START	(1 << 7)
-+#define SYSKT_POWER_STATUS	0x20e
-+#define   SYSKT_POWER_STATUS_OK	(1 << 0)
-+#define SYSKT_BOARD_REV		0x210
-+#define SYSKT_CHIP_REV		0x211
-+#define SYSKT_CONF_DATA		0x212
-+#define   SYSKT_CONF_DATA_1V8	(1 << 2)
-+#define   SYSKT_CONF_DATA_2V5	(1 << 1)
-+#define   SYSKT_CONF_DATA_3V3	(1 << 0)
-+
-+static int syskt_probe(struct sdhci_pci_chip *chip)
-+{
-+	if ((chip->pdev->class & 0x0000FF) == PCI_SDHCI_IFVENDOR) {
-+		chip->pdev->class &= ~0x0000FF;
-+		chip->pdev->class |= PCI_SDHCI_IFDMA;
-+	}
-+	return 0;
-+}
-+
-+static int syskt_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	int tm, ps;
-+
-+	u8 board_rev = readb(slot->host->ioaddr + SYSKT_BOARD_REV);
-+	u8  chip_rev = readb(slot->host->ioaddr + SYSKT_CHIP_REV);
-+	dev_info(&slot->chip->pdev->dev, "SysKonnect CardBus2SDIO, "
-+					 "board rev %d.%d, chip rev %d.%d\n",
-+					 board_rev >> 4, board_rev & 0xf,
-+					 chip_rev >> 4,  chip_rev & 0xf);
-+	if (chip_rev >= 0x20)
-+		slot->host->quirks |= SDHCI_QUIRK_FORCE_DMA;
-+
-+	writeb(SYSKT_POWER_330, slot->host->ioaddr + SYSKT_POWER_DATA);
-+	writeb(SYSKT_POWER_START, slot->host->ioaddr + SYSKT_POWER_CMD);
-+	udelay(50);
-+	tm = 10;  /* Wait max 1 ms */
-+	do {
-+		ps = readw(slot->host->ioaddr + SYSKT_POWER_STATUS);
-+		if (ps & SYSKT_POWER_STATUS_OK)
-+			break;
-+		udelay(100);
-+	} while (--tm);
-+	if (!tm) {
-+		dev_err(&slot->chip->pdev->dev,
-+			"power regulator never stabilized");
-+		writeb(0, slot->host->ioaddr + SYSKT_POWER_CMD);
-+		return -ENODEV;
-+	}
-+
-+	return 0;
-+}
-+
-+static const struct sdhci_pci_fixes sdhci_syskt = {
-+	.quirks		= SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER,
-+	.probe		= syskt_probe,
-+	.probe_slot	= syskt_probe_slot,
-+};
-+
- static int via_probe(struct sdhci_pci_chip *chip)
- {
- 	if (chip->pdev->revision == 0x10)
-@@ -363,6 +430,14 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
- 	},
- 
- 	{
-+		.vendor		= PCI_VENDOR_ID_SYSKONNECT,
-+		.device		= 0x8000,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_syskt,
-+	},
-+
-+	{
- 		.vendor		= PCI_VENDOR_ID_VIA,
- 		.device		= 0x95d0,
- 		.subvendor	= PCI_ANY_ID,
+Ben Nizette <bn@niasdigital.com> wrote:
+> On Tue, 2009-11-03 at 15:30 +1300, Ryan Mallon wrote:
+> > >   
+> > IIRC, we can't mark static inline functions as weak, and we don't want
+> > to turn gpio_is_valid into an actual function call. We could do some
+> > preprocessor magic, but that gets a bit messy.  
+> 
+> Messy but generally accepted.
+
+IIRC the most generally accepted way is to do
+
+static inline bool gpio_is_valid(int pin)
+{
+	/* whatever */
+}
+#define gpio_is_valid gpio_is_valid
+
+in the platform code and
+
+#ifndef gpio_is_valid
+/* provide definition of gpio_is_valid */
+#endif
+
+in the generic code. This way, there's only one symbol to grep for.
+
+Haavard
