@@ -1,52 +1,43 @@
-From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Subject: Re: [PATCH 3/3 v2] at91/atmel-mci: inclusion of sd/mmc driver in
- at91sam9g45 chip and board
-Date: Sat, 7 Nov 2009 12:20:02 +0100
-Message-ID: <20091107122002.1ecf6483@hskinnemoen-d830>
-References: <acfa557032a93e2d3186981b16f7048a5a31028a.1256314995.git.nicolas.ferre@atmel.com>
-	<20090930155557.7dae503b@hskinnemoen-d830>
-	<a3b1332815576dc4d496937b8a5ab69d36818d00.1256314995.git.nicolas.ferre@atmel.com>
-	<cd73a99e0910271243x744c956bl598fef9fd4144840@mail.gmail.com>
-	<20091028083548.38f1d80c@hskinnemoen-d830>
-	<d6cda7730910271753o54acfa04t1225de460083325f@mail.gmail.com>
-	<cd73a99e0910281253x1bb72b74p47cb5110efb0871f@mail.gmail.com>
-	<1256763057.4362.36.camel@ben-desktop>
-	<4AEF12B7.3040704@atmel.com>
-	<4AEF95E0.7040602@bluewatersys.com>
-	<1257216943.4358.66.camel@ben-desktop>
+From: Mike Borsuk <mike@borsuk.org>
+Subject: mmc-spi on pxa2xx, flipping sph bit
+Date: Mon, 9 Nov 2009 14:16:43 -0500
+Message-ID: <20091109191643.GA22840@mixtec.wiredsoul.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1751538AbZKGLUG@vger.kernel.org>
-In-Reply-To: <1257216943.4358.66.camel@ben-desktop>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ben Nizette <bn@niasdigital.com>
-Cc: Ryan Mallon <ryan@bluewatersys.com>, David Brownell <dbrownell@users.sourceforge.net>, kernel@avr32linux.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, David Brownell <david-b@pacbell.net>, Andrew Victor <avictor.za@gmail.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mixtec.wiredsoul.org ([64.5.53.156]:40942 "EHLO
+	mixtec.wiredsoul.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751667AbZKIT0b (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2009 14:26:31 -0500
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-Ben Nizette <bn@niasdigital.com> wrote:
-> On Tue, 2009-11-03 at 15:30 +1300, Ryan Mallon wrote:
-> > >   
-> > IIRC, we can't mark static inline functions as weak, and we don't want
-> > to turn gpio_is_valid into an actual function call. We could do some
-> > preprocessor magic, but that gets a bit messy.  
-> 
-> Messy but generally accepted.
+Hello,
 
-IIRC the most generally accepted way is to do
+I am working on getting mmc_spi to work with a an ARM PXA270 on 2.6.31
+I am able to successfully mount the fs on a Transcend mini-sd card
+(though some i/o errors are reported during init sequence),
+but some cards such as SanDisk Ultra II MiniSD 2GB fail to initialize.
+The card is identified but then every command sent to it appears to
+return an error.  The block driver reports errors such as:
 
-static inline bool gpio_is_valid(int pin)
-{
-	/* whatever */
-}
-#define gpio_is_valid gpio_is_valid
+  mmcblk0: error -38 sending status command
+  mmcblk0: error -84 sending stop command, response 0x8, card status 0xff04
+  mmcblk0: error -38 sending status command
+  mmcblk0: error -38 sending read/write command, response 0x4, card \
+  status 0xff04 end_request: I/O error, dev mmcblk0, sector 3969984
 
-in the platform code and
+Interestingly, if I toggle the value for the SPH bit in the SSCR1
+register, which should control the SSP port's clock phase, the SanDisk
+card starts working but the Transcend card then fails to even be
+detected.
 
-#ifndef gpio_is_valid
-/* provide definition of gpio_is_valid */
-#endif
+Does anyone know if this indicates timing issues on the board, chip
+configuration problems or anything else in particular?
 
-in the generic code. This way, there's only one symbol to grep for.
-
-Haavard
+-- 
+Michael Borsuk
+mike@borsuk.org
+http://www.borsuk.org
