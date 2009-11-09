@@ -1,53 +1,61 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH] mmci-omap: free irq resource
-Date: Mon, 9 Nov 2009 14:27:49 -0800
-Message-ID: <20091109142749.0d8f6967.akpm@linux-foundation.org>
-References: <20091101115905.GB15144@localhost.localdomain>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:57470 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750837AbZKIW2D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2009 17:28:03 -0500
-In-Reply-To: <20091101115905.GB15144@localhost.localdomain>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + mmci-omap-free-irq-resource.patch added to -mm tree
+Date: Mon, 09 Nov 2009 14:28:10 -0800
+Message-ID: <200911092228.nA9MSA1m027766@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: ladis@linux-mips.org, linux-mmc@vger.kernel.org, tony@atomide.com
 List-Id: linux-mmc@vger.kernel.org
-To: Ladislav Michl <ladis@linux-mips.org>
-Cc: Ladislav.Michl@seznam.cz, Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-mmc@vger.kernel.org
 
-On Sun, 1 Nov 2009 12:59:05 +0100
-Ladislav.Michl@seznam.cz wrote:
 
-> Free IRQ on remove.
-> 
-> Signed-off-by: Ladislav Michl <ladis@linux-mips.org>
-> Acked-by: Tony Lindgren <tony@atomide.com>
-> 
-> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-> index 5d773b8..5f970e2 100644
-> --- a/drivers/mmc/host/omap.c
-> +++ b/drivers/mmc/host/omap.c
-> @@ -1529,6 +1529,7 @@ static int mmc_omap_remove(struct platform_device *pdev)
->  		host->pdata->cleanup(&pdev->dev);
->  
->  	mmc_omap_fclk_enable(host, 0);
-> +	free_irq(host->irq, host);
->  	clk_put(host->fclk);
->  	clk_disable(host->iclk);
->  	clk_put(host->iclk);
+The patch titled
+     mmci-omap: free irq resource
+has been added to the -mm tree.  Its filename is
+     mmci-omap-free-irq-resource.patch
 
-This is a poor changelog.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-The reader doesn't know what the implication of the bug is.  I _assume_
-that it means that the driver can only be loaded a single time.  That
-on a second modprobe, it fails to allocate the interrupt and fails.
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-In which case this is a fairly serious bug and perhaps the patch should
-be backported into the -stable tree.
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
-Or I could be all wrong about all of that.  This is why it's better if
-the patch submitter *explains* these things, rather than leaving others
-to guess.
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmci-omap: free irq resource
+From: Ladislav Michl <ladis@linux-mips.org>
+
+Free IRQ on remove.
+
+Signed-off-by: Ladislav Michl <ladis@linux-mips.org>
+Acked-by: Tony Lindgren <tony@atomide.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+
+diff -puN drivers/mmc/host/omap.c~mmci-omap-free-irq-resource drivers/mmc/host/omap.c
+--- a/drivers/mmc/host/omap.c~mmci-omap-free-irq-resource
++++ a/drivers/mmc/host/omap.c
+@@ -1529,6 +1529,7 @@ static int mmc_omap_remove(struct platfo
+ 		host->pdata->cleanup(&pdev->dev);
+ 
+ 	mmc_omap_fclk_enable(host, 0);
++	free_irq(host->irq, host);
+ 	clk_put(host->fclk);
+ 	clk_disable(host->iclk);
+ 	clk_put(host->iclk);
+_
+
+Patches currently in -mm which might be from ladis@linux-mips.org are
+
+mmci-omap-free-irq-resource.patch
+linux-next.patch
 
