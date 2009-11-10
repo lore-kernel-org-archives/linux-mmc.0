@@ -1,55 +1,33 @@
-From: Ben Dooks <ben@simtec.co.uk>
-Subject: s3cmci: convert missed s3c2410_gpio calls to gpiolib calls
-Date: Tue, 10 Nov 2009 17:15:50 +0000
-Message-ID: <20091110171550.185534014@fluff.org.uk>
+From: "CYR Burt" <Burt.Cyr@alcatel-lucent.com>
+Subject: New Micron e-MMC support...
+Date: Tue, 10 Nov 2009 15:46:03 -0600
+Message-ID: <1C96910CABCE3949A1662F4803CA0F640397CBC9@USDALSMBS05.ad3.ad.alcatel.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aeryn.fluff.org.uk ([87.194.8.8]:46891 "EHLO
-	kira.home.fluff.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1757363AbZKJRPw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2009 12:15:52 -0500
-Content-Disposition: inline; filename=simtec/ready/sdmmc-fix-missing-gpio-call.patch
+Received: from audl751.usa.alcatel.com ([143.209.238.164]:51270 "EHLO
+	audl751.usa.alcatel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752298AbZKJWHu convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2009 17:07:50 -0500
+Content-class: urn:content-classes:message
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Simtec Linux Team <linux@simtec.co.uk>
+To: linux-embedded@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Convert two missed s3c2410 specific gpio calls to gpiolib calls.
 
-Signed-off-by: Ben Dooks <ben@simtec.co.uk>
-Signed-off-by: Simtec Linux Team <linux@simtec.co.uk>
+Hi,
 
----
- drivers/mmc/host/s3cmci.c |    8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+I was looking to see if the Micron eMMC 2/4GB devices are currently
+supported in the latest stable kernel (31.6). It looks like Russell King
+did the MMC core work, but I'm not sure if any testing has been done on
+the Micron 2/4GB models which are currently sampling.
 
-Index: b/drivers/mmc/host/s3cmci.c
-===================================================================
---- a/drivers/mmc/host/s3cmci.c	2009-11-03 22:31:33.000000000 +0000
-+++ b/drivers/mmc/host/s3cmci.c	2009-11-03 22:53:23.000000000 +0000
-@@ -1302,10 +1302,8 @@ static int s3cmci_get_ro(struct mmc_host
- 	if (pdata->no_wprotect)
- 		return 0;
- 
--	ret = s3c2410_gpio_getpin(pdata->gpio_wprotect);
--
--	if (pdata->wprotect_invert)
--		ret = !ret;
-+	ret = gpio_get_value(pdata->gpio_wprotect) ? 1 : 0;
-+	ret ^= pdata->wprotect_invert;
- 
- 	return ret;
- }
-@@ -1654,7 +1652,7 @@ static int __devinit s3cmci_probe(struct
- 			goto probe_free_irq;
- 		}
- 
--		host->irq_cd = s3c2410_gpio_getirq(host->pdata->gpio_detect);
-+		host->irq_cd = gpio_to_irq(host->pdata->gpio_detect);
- 
- 		if (host->irq_cd >= 0) {
- 			if (request_irq(host->irq_cd, s3cmci_irq_cd,
+Any insights would be greatly appreciated.
 
--- 
-Ben (ben@fluff.org, http://www.fluff.org/)
+Thanks
 
-  'a smiley only costs 4 bytes'
+
+Burt Cyr
+Alcatel-Lucent
