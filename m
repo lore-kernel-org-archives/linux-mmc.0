@@ -1,83 +1,55 @@
-From: akpm@linux-foundation.org
-Subject: + mmci-omap-remove-bogus-check-for-host-iclk.patch added to -mm tree
-Date: Mon, 09 Nov 2009 14:33:19 -0800
-Message-ID: <200911092233.nA9MXJRM007469@imap1.linux-foundation.org>
+From: Ben Dooks <ben@simtec.co.uk>
+Subject: s3cmci: convert missed s3c2410_gpio calls to gpiolib calls
+Date: Tue, 10 Nov 2009 17:15:50 +0000
+Message-ID: <20091110171550.185534014@fluff.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:53826 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753898AbZKIWdW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2009 17:33:22 -0500
+Received: from aeryn.fluff.org.uk ([87.194.8.8]:46891 "EHLO
+	kira.home.fluff.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1757363AbZKJRPw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2009 12:15:52 -0500
+Content-Disposition: inline; filename=simtec/ready/sdmmc-fix-missing-gpio-call.patch
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: ladis@linux-mips.org, linux-mmc@vger.kernel.org, tony@atomide.com
+To: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Simtec Linux Team <linux@simtec.co.uk>
 
+Convert two missed s3c2410 specific gpio calls to gpiolib calls.
 
-The patch titled
-     mmci-omap: remove bogus check for host->iclk
-has been added to the -mm tree.  Its filename is
-     mmci-omap-remove-bogus-check-for-host-iclk.patch
+Signed-off-by: Ben Dooks <ben@simtec.co.uk>
+Signed-off-by: Simtec Linux Team <linux@simtec.co.uk>
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmci-omap: remove bogus check for host->iclk
-From: Ladislav Michl <ladis@linux-mips.org>
-
-Remove check for host->iclk being NULL from error path since we already
-know it is non-null and use return value from clk_get.
-
-Signed-off-by: Ladislav Michl <ladis@linux-mips.org>
-Acked-by: Tony Lindgren <tony@atomide.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
+ drivers/mmc/host/s3cmci.c |    8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
 
-
-diff -puN drivers/mmc/host/omap.c~mmci-omap-remove-bogus-check-for-host-iclk drivers/mmc/host/omap.c
---- a/drivers/mmc/host/omap.c~mmci-omap-remove-bogus-check-for-host-iclk
-+++ a/drivers/mmc/host/omap.c
-@@ -1459,8 +1459,10 @@ static int __init mmc_omap_probe(struct 
- 		goto err_ioremap;
+Index: b/drivers/mmc/host/s3cmci.c
+===================================================================
+--- a/drivers/mmc/host/s3cmci.c	2009-11-03 22:31:33.000000000 +0000
++++ b/drivers/mmc/host/s3cmci.c	2009-11-03 22:53:23.000000000 +0000
+@@ -1302,10 +1302,8 @@ static int s3cmci_get_ro(struct mmc_host
+ 	if (pdata->no_wprotect)
+ 		return 0;
  
- 	host->iclk = clk_get(&pdev->dev, "ick");
--	if (IS_ERR(host->iclk))
-+	if (IS_ERR(host->iclk)) {
-+		ret = PTR_ERR(host->iclk);
- 		goto err_free_mmc_host;
-+	}
- 	clk_enable(host->iclk);
+-	ret = s3c2410_gpio_getpin(pdata->gpio_wprotect);
+-
+-	if (pdata->wprotect_invert)
+-		ret = !ret;
++	ret = gpio_get_value(pdata->gpio_wprotect) ? 1 : 0;
++	ret ^= pdata->wprotect_invert;
  
- 	host->fclk = clk_get(&pdev->dev, "fck");
-@@ -1500,10 +1502,8 @@ err_free_irq:
- err_free_fclk:
- 	clk_put(host->fclk);
- err_free_iclk:
--	if (host->iclk != NULL) {
--		clk_disable(host->iclk);
--		clk_put(host->iclk);
--	}
-+	clk_disable(host->iclk);
-+	clk_put(host->iclk);
- err_free_mmc_host:
- 	iounmap(host->virt_base);
- err_ioremap:
-_
+ 	return ret;
+ }
+@@ -1654,7 +1652,7 @@ static int __devinit s3cmci_probe(struct
+ 			goto probe_free_irq;
+ 		}
+ 
+-		host->irq_cd = s3c2410_gpio_getirq(host->pdata->gpio_detect);
++		host->irq_cd = gpio_to_irq(host->pdata->gpio_detect);
+ 
+ 		if (host->irq_cd >= 0) {
+ 			if (request_irq(host->irq_cd, s3cmci_irq_cd,
 
-Patches currently in -mm which might be from ladis@linux-mips.org are
+-- 
+Ben (ben@fluff.org, http://www.fluff.org/)
 
-mmci-omap-free-irq-resource.patch
-linux-next.patch
-mmci-omap-remove-bogus-check-for-host-iclk.patch
-
+  'a smiley only costs 4 bytes'
