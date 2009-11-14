@@ -1,54 +1,67 @@
-From: akpm@linux-foundation.org
-Subject: [merged] mmci-omap-free-irq-resource.patch removed from -mm tree
-Date: Fri, 13 Nov 2009 11:26:57 -0800
-Message-ID: <200911131926.nADJQvUB029431@imap1.linux-foundation.org>
+From: Tomas Winkler <tomas.winkler@intel.com>
+Subject: [net-next 1/2] iwmc3200top: use prefered style for the device table.
+Date: Sat, 14 Nov 2009 20:36:35 +0200
+Message-ID: <1258223796-8486-1-git-send-email-tomas.winkler@intel.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:49608 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932208AbZKMT1F (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Nov 2009 14:27:05 -0500
+Received: from mga09.intel.com ([134.134.136.24]:6297 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751156AbZKNSgf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 14 Nov 2009 13:36:35 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ladis@linux-mips.org, linux-mmc@vger.kernel.org, tony@atomide.com, mm-commits@vger.kernel.org
+To: davem@davemloft.net, netdev@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: yi.zhu@intel.com, inaky.perez-gonzalez@intel.com, guy.cohen@intel.com, ron.rindjunsky@intel.com, Tomas Winkler <tomas.winkler@intel.com>
 
+Use device id number directly accompany with
+comment rather then a #define
 
-The patch titled
-     mmci-omap: free irq resource
-has been removed from the -mm tree.  Its filename was
-     mmci-omap-free-irq-resource.patch
-
-This patch was dropped because it was merged into mainline or a subsystem tree
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmci-omap: free irq resource
-From: Ladislav Michl <ladis@linux-mips.org>
-
-Free IRQ on remove.
-
-Signed-off-by: Ladislav Michl <ladis@linux-mips.org>
-Acked-by: Tony Lindgren <tony@atomide.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
 ---
+ drivers/misc/iwmc3200top/main.c |   14 +++-----------
+ 1 files changed, 3 insertions(+), 11 deletions(-)
 
-
-diff -puN drivers/mmc/host/omap.c~mmci-omap-free-irq-resource drivers/mmc/host/omap.c
---- a/drivers/mmc/host/omap.c~mmci-omap-free-irq-resource
-+++ a/drivers/mmc/host/omap.c
-@@ -1529,6 +1529,7 @@ static int mmc_omap_remove(struct platfo
- 		host->pdata->cleanup(&pdev->dev);
+diff --git a/drivers/misc/iwmc3200top/main.c b/drivers/misc/iwmc3200top/main.c
+index 6e4e491..a1ce97e 100644
+--- a/drivers/misc/iwmc3200top/main.c
++++ b/drivers/misc/iwmc3200top/main.c
+@@ -62,15 +62,6 @@ MODULE_VERSION(DRIVER_VERSION);
+ MODULE_LICENSE("GPL");
+ MODULE_AUTHOR(DRIVER_COPYRIGHT);
  
- 	mmc_omap_fclk_enable(host, 0);
-+	free_irq(host->irq, host);
- 	clk_put(host->fclk);
- 	clk_disable(host->iclk);
- 	clk_put(host->iclk);
-_
+-
+-/* FIXME: These can be found in sdio_ids.h in newer kernels */
+-#ifndef SDIO_INTEL_VENDOR_ID
+-#define SDIO_INTEL_VENDOR_ID			0x0089
+-#endif
+-#ifndef SDIO_DEVICE_ID_INTEL_IWMC3200TOP
+-#define SDIO_DEVICE_ID_INTEL_IWMC3200TOP	0x1404
+-#endif
+-
+ /*
+  * This workers main task is to wait for OP_OPR_ALIVE
+  * from TOP FW until ALIVE_MSG_TIMOUT timeout is elapsed.
+@@ -662,8 +653,9 @@ static void iwmct_remove(struct sdio_func *func)
+ 
+ 
+ static const struct sdio_device_id iwmct_ids[] = {
+-	{ SDIO_DEVICE(SDIO_INTEL_VENDOR_ID, SDIO_DEVICE_ID_INTEL_IWMC3200TOP)},
+-	{ /* end: all zeroes */	},
++	/* Intel Wireless MultiCom 3200 Top Driver */
++	{ SDIO_DEVICE(SDIO_VENDOR_ID_INTEL, 0x1404)},
++	{ },	/* Terminating entry */
+ };
+ 
+ MODULE_DEVICE_TABLE(sdio, iwmct_ids);
+-- 
+1.6.0.6
 
-Patches currently in -mm which might be from ladis@linux-mips.org are
+---------------------------------------------------------------------
+Intel Israel (74) Limited
 
-linux-next.patch
-mmci-omap-remove-bogus-check-for-host-iclk.patch
+This e-mail and any attachments may contain confidential material for
+the sole use of the intended recipient(s). Any review or distribution
+by others is strictly prohibited. If you are not the intended
+recipient, please contact the sender and delete all copies.
 
