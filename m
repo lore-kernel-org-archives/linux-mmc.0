@@ -1,107 +1,210 @@
-From: Ben Hutchings <ben@decadent.org.uk>
-Subject: Re: [PATCH] mmc: add module parameter to set whether cards are
- assumed removable
-Date: Mon, 16 Nov 2009 22:31:49 +0000
-Message-ID: <1258410709.2792.9.camel@localhost>
-References: <1257914676.2237.57.camel@localhost>
-	 <20091116122329.847916b6.akpm@linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature"; boundary="=-W9vWkOllP0aZEQaTRHND"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from shadbolt.e.decadent.org.uk ([88.96.1.126]:46665 "EHLO
-	shadbolt.e.decadent.org.uk" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753587AbZKPWbt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Nov 2009 17:31:49 -0500
-In-Reply-To: <20091116122329.847916b6.akpm@linux-foundation.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable.patch added to -mm tree
+Date: Mon, 16 Nov 2009 14:49:12 -0800
+Message-ID: <200911162249.nAGMnCtv030639@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: ben@decadent.org.uk, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, 504391@bugs.debian.org, Wouter van Heyst <larstiq@larstiq.dyndns.org>, Pierre Ossman <pierre@ossman.eu>
 
 
---=-W9vWkOllP0aZEQaTRHND
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+The patch titled
+     mmc: add module parameter to set whether cards are assumed removable
+has been added to the -mm tree.  Its filename is
+     mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable.patch
 
-On Mon, 2009-11-16 at 12:23 -0800, Andrew Morton wrote:
-> On Wed, 11 Nov 2009 04:44:36 +0000
-> Ben Hutchings <ben@decadent.org.uk> wrote:
->=20
-> > Some people run general-purpose distribution kernels on netbooks with
-> > a card that is physically non-removable or logically non-removable
-> > (e.g. used for /home) and cannot be cleanly unmounted during suspend.
-> > Add a module parameter to set whether cards are assumed removable or
-> > non-removable, with the default set by CONFIG_MMC_UNSAFE_RESUME.
-> >=20
->=20
-> The description really doesn't give me enough info to work out what's
-> happening here and why this is being proposed.  But it smells nasty.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc: add module parameter to set whether cards are assumed removable
+From: Ben Hutchings <ben@decadent.org.uk>
+
+Some people run general-purpose distribution kernels on netbooks with
+a card that is physically non-removable or logically non-removable
+(e.g. used for /home) and cannot be cleanly unmounted during suspend.
+Add a module parameter to set whether cards are assumed removable or
+non-removable, with the default set by CONFIG_MMC_UNSAFE_RESUME.
 
 In general, it is not possible to tell whether a card present in an MMC
-slot after resume is the same that was there before suspend.  So there
-are two possible behaviours, each of which will cause data loss in some
-cases:
+slot after resume is the same that was there before suspend.  So there are
+two possible behaviours, each of which will cause data loss in some cases:
 
-CONFIG_MMC_UNSAFE_RESUME=3Dn (default): Cards are assumed to be removed
-during suspend.  Any filesystem on them must be unmounted before
-suspend; otherwise, buffered writes will be lost.
+CONFIG_MMC_UNSAFE_RESUME=n (default): Cards are assumed to be removed
+during suspend.  Any filesystem on them must be unmounted before suspend;
+otherwise, buffered writes will be lost.
 
-CONFIG_MMC_UNSAFE_RESUME=3Dy: Cards are assumed to remain present during
+CONFIG_MMC_UNSAFE_RESUME=y: Cards are assumed to remain present during
 suspend.  They must not be swapped during suspend; otherwise, buffered
 writes will be flushed to the wrong card.
 
 Currently the choice is made at compile time and this allows that to be
 overridden at module load time.
 
-[...]
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index d98b0e2..010c964 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -48,6 +48,22 @@ int use_spi_crc =3D 1;
-> >  module_param(use_spi_crc, bool, 0);
-> > =20
-> >  /*
-> > + * We normally treat cards as removed during suspend if they are not
-> > + * known to be on a non-removable bus, to avoid the risk of writing
-> > + * back data to a different card after resume.  Allow this to be
-> > + * overridden if necessary.
-> > + */
->=20
-> So we have a module parameter which nobody knows about.  If they don't
-> set this parameter which they don't know about, the kernel will trash
-> their filesystem??
-[...]
+Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
-No, because it's set to 1 by default.  There is no change in the default
-behaviour.
+ drivers/mmc/core/Kconfig |    4 +++-
+ drivers/mmc/core/core.c  |   16 ++++++++++++++++
+ drivers/mmc/core/core.h  |    2 ++
+ drivers/mmc/core/mmc.c   |   23 +----------------------
+ drivers/mmc/core/sd.c    |   21 +--------------------
+ 5 files changed, 23 insertions(+), 43 deletions(-)
 
-Ben.
-
---=20
-Ben Hutchings
-The two most common things in the universe are hydrogen and stupidity.
-
---=-W9vWkOllP0aZEQaTRHND
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iQIVAwUASwHSyue/yOyVhhEJAQISAw//WPHwVO/H7yYuH3uH0mXxSsd2tXRD83KO
-jUJ2km6J5ofDNS9MOYgigXOJibd75EajB5W40iJtCxixA7tK2aLJpcKcuRbJ35eZ
-QcQRcMyhG/kVcY8q4kCTgZJdTCRcf+4GoGSyht2JOVxymxjA14tHQvXbu29d4peu
-SPHKYoz6F3jMqErhJ4KsKvfp1AIhx3mrbVhd5kAzaWp1hjfc7lAwNawl88QqsGGY
-J12waj9mTKhOpPUggUvXgF1JF91l58sxKYJJ/A3v4TWxloNm/R0J0LLpcuU7r9Qe
-f8yKd12bizCmHvBKYOAgExPH2sT3tVfd2jb7yBN29Ya9X1kRZ9x91SOMZNvVM4+C
-hA7UrgXoZE16P4u9dRATH4dNRENTEOtAtCUFjkM6krywM5kQiEBvWixuuguBSa2A
-DwzsQLQto+GCmYzgN3HMtWRjOzp7CGDEwqo2YmfR/UkiKiMMTy4rGTV6c43ePerw
-WWXyTOdEwH/W4kJtGiksv4p0geUaJHa4Ol0lzCumPyILs3WaWKH5W3MZlM0oOvm8
-wfNl0U1j0ZYRZCwSxSvMwNaZ2wqeeviMHuTf84zIuggvwChaWpsVOGtaEzalWdeP
-G26/Zf/5Nrwn8s3Of6DQmMgCb5amGH4h3ShQ1y0dP9GSKYSsubHgZN6Hzmxk2wWO
-ROAb4pRQKRQ=
-=tVra
------END PGP SIGNATURE-----
-
---=-W9vWkOllP0aZEQaTRHND--
+diff -puN drivers/mmc/core/Kconfig~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/Kconfig
+--- a/drivers/mmc/core/Kconfig~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
++++ a/drivers/mmc/core/Kconfig
+@@ -3,7 +3,7 @@
+ #
+ 
+ config MMC_UNSAFE_RESUME
+-	bool "Allow unsafe resume (DANGEROUS)"
++	bool "Assume MMC/SD cards are non-removable (DANGEROUS)"
+ 	help
+ 	  If you say Y here, the MMC layer will assume that all cards
+ 	  stayed in their respective slots during the suspend. The
+@@ -14,3 +14,5 @@ config MMC_UNSAFE_RESUME
+ 	  This option is usually just for embedded systems which use
+ 	  a MMC/SD card for rootfs. Most people should say N here.
+ 
++	  This option sets a default which can be overridden by the
++	  module parameter "removable=0" or "removable=1".
+diff -puN drivers/mmc/core/core.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
++++ a/drivers/mmc/core/core.c
+@@ -48,6 +48,22 @@ int use_spi_crc = 1;
+ module_param(use_spi_crc, bool, 0);
+ 
+ /*
++ * We normally treat cards as removed during suspend if they are not
++ * known to be on a non-removable bus, to avoid the risk of writing
++ * back data to a different card after resume.  Allow this to be
++ * overridden if necessary.
++ */
++#ifdef CONFIG_MMC_UNSAFE_RESUME
++int mmc_assume_removable;
++#else
++int mmc_assume_removable = 1;
++#endif
++module_param_named(removable, mmc_assume_removable, bool, 0644);
++MODULE_PARM_DESC(
++	removable,
++	"MMC/SD cards are removable and may be removed during suspend");
++
++/*
+  * Internal function. Schedule delayed work in the MMC work queue.
+  */
+ static int mmc_schedule_delayed_work(struct delayed_work *work,
+diff -puN drivers/mmc/core/core.h~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/core.h
+--- a/drivers/mmc/core/core.h~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
++++ a/drivers/mmc/core/core.h
+@@ -64,7 +64,9 @@ int mmc_attach_mmc(struct mmc_host *host
+ int mmc_attach_sd(struct mmc_host *host, u32 ocr);
+ int mmc_attach_sdio(struct mmc_host *host, u32 ocr);
+ 
++/* Module parameters */
+ extern int use_spi_crc;
++extern int mmc_assume_removable;
+ 
+ /* Debugfs information for hosts and cards */
+ void mmc_add_host_debugfs(struct mmc_host *host);
+diff -puN drivers/mmc/core/mmc.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/mmc.c
+--- a/drivers/mmc/core/mmc.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
++++ a/drivers/mmc/core/mmc.c
+@@ -602,25 +602,6 @@ static int mmc_awake(struct mmc_host *ho
+ 	return err;
+ }
+ 
+-#ifdef CONFIG_MMC_UNSAFE_RESUME
+-
+-static const struct mmc_bus_ops mmc_ops = {
+-	.awake = mmc_awake,
+-	.sleep = mmc_sleep,
+-	.remove = mmc_remove,
+-	.detect = mmc_detect,
+-	.suspend = mmc_suspend,
+-	.resume = mmc_resume,
+-	.power_restore = mmc_power_restore,
+-};
+-
+-static void mmc_attach_bus_ops(struct mmc_host *host)
+-{
+-	mmc_attach_bus(host, &mmc_ops);
+-}
+-
+-#else
+-
+ static const struct mmc_bus_ops mmc_ops = {
+ 	.awake = mmc_awake,
+ 	.sleep = mmc_sleep,
+@@ -645,15 +626,13 @@ static void mmc_attach_bus_ops(struct mm
+ {
+ 	const struct mmc_bus_ops *bus_ops;
+ 
+-	if (host->caps & MMC_CAP_NONREMOVABLE)
++	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
+ 		bus_ops = &mmc_ops_unsafe;
+ 	else
+ 		bus_ops = &mmc_ops;
+ 	mmc_attach_bus(host, bus_ops);
+ }
+ 
+-#endif
+-
+ /*
+  * Starting point for MMC card init.
+  */
+diff -puN drivers/mmc/core/sd.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/sd.c
+--- a/drivers/mmc/core/sd.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
++++ a/drivers/mmc/core/sd.c
+@@ -606,23 +606,6 @@ static void mmc_sd_power_restore(struct 
+ 	mmc_release_host(host);
+ }
+ 
+-#ifdef CONFIG_MMC_UNSAFE_RESUME
+-
+-static const struct mmc_bus_ops mmc_sd_ops = {
+-	.remove = mmc_sd_remove,
+-	.detect = mmc_sd_detect,
+-	.suspend = mmc_sd_suspend,
+-	.resume = mmc_sd_resume,
+-	.power_restore = mmc_sd_power_restore,
+-};
+-
+-static void mmc_sd_attach_bus_ops(struct mmc_host *host)
+-{
+-	mmc_attach_bus(host, &mmc_sd_ops);
+-}
+-
+-#else
+-
+ static const struct mmc_bus_ops mmc_sd_ops = {
+ 	.remove = mmc_sd_remove,
+ 	.detect = mmc_sd_detect,
+@@ -643,15 +626,13 @@ static void mmc_sd_attach_bus_ops(struct
+ {
+ 	const struct mmc_bus_ops *bus_ops;
+ 
+-	if (host->caps & MMC_CAP_NONREMOVABLE)
++	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
+ 		bus_ops = &mmc_sd_ops_unsafe;
+ 	else
+ 		bus_ops = &mmc_sd_ops;
+ 	mmc_attach_bus(host, bus_ops);
+ }
+ 
+-#endif
