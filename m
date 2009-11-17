@@ -1,40 +1,46 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: [PATCH] drivers: MMC: enable SDHCI-S3C on S5PC1XX platform
-Date: Tue, 17 Nov 2009 08:52:54 +0100
-Message-ID: <1258444374-21479-1-git-send-email-m.szyprowski@samsung.com>
+From: Stefan Richter <stefanr@s5r6.in-berlin.de>
+Subject: Re: [PATCH] mmc: add module parameter to set whether cards are assumed
+ removable
+Date: Tue, 17 Nov 2009 08:53:00 +0100
+Message-ID: <4B02565C.1030406@s5r6.in-berlin.de>
+References: <1257914676.2237.57.camel@localhost>	 <20091116122329.847916b6.akpm@linux-foundation.org> <1258410709.2792.9.camel@localhost>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, ben-linux@fluff.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hp3.statik.tu-cottbus.de ([141.43.120.68]:34944 "EHLO
+	hp3.statik.tu-cottbus.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754189AbZKQHxV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Nov 2009 02:53:21 -0500
+In-Reply-To: <1258410709.2792.9.camel@localhost>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ben Hutchings <ben@decadent.org.uk>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, 504391@bugs.debian.org, Wouter van Heyst <larstiq@larstiq.dyndns.org>, Pierre Ossman <pierre@ossman.eu>
 
-From: Kyungmin Park <kyungmin.park@samsung.com>
+Ben Hutchings wrote:
+> In general, it is not possible to tell whether a card present in an MMC
+> slot after resume is the same that was there before suspend.
 
-Samsung S5PC100 SoC has SDHCI controller compatible to the one known from
-S3C64xx SoCs. Enable support for sdhci-s3c driver also on S5PC1xx platform.
+That's true for virtually all storage devices, not just MMC.
 
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-Acked-by: Ben Dooks <ben-linux@fluff.org>
----
- drivers/mmc/host/Kconfig |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+> So there are two possible behaviours, each of which will cause data
+> loss in some cases:
+> 
+> CONFIG_MMC_UNSAFE_RESUME=n (default): Cards are assumed to be removed
+> during suspend.  Any filesystem on them must be unmounted before
+> suspend; otherwise, buffered writes will be lost.
+> 
+> CONFIG_MMC_UNSAFE_RESUME=y: Cards are assumed to remain present during
+> suspend.  They must not be swapped during suspend; otherwise, buffered
+> writes will be flushed to the wrong card.
+> 
+> Currently the choice is made at compile time and this allows that to be
+> overridden at module load time.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 432ae83..faddf82 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -96,7 +96,7 @@ config MMC_SDHCI_PLTFM
- 
- config MMC_SDHCI_S3C
- 	tristate "SDHCI support on Samsung S3C SoC"
--	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
-+	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX || PLAT_S5PC1XX)
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  often referrered to as the HSMMC block in some of the Samsung S3C
+Can't the kernel flush the write buffer at suspend time, so that you can
+remove this choice for good?
 -- 
-1.6.4
+Stefan Richter
+-=====-==--= =-== =---=
+http://arcgraph.de/sr/
