@@ -1,46 +1,37 @@
-From: Stefan Richter <stefanr@s5r6.in-berlin.de>
-Subject: Re: [PATCH] mmc: add module parameter to set whether cards are assumed
- removable
-Date: Tue, 17 Nov 2009 08:53:00 +0100
-Message-ID: <4B02565C.1030406@s5r6.in-berlin.de>
-References: <1257914676.2237.57.camel@localhost>	 <20091116122329.847916b6.akpm@linux-foundation.org> <1258410709.2792.9.camel@localhost>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Subject: Re: [PATCH 2/7] mmc: Don't use PF_MEMALLOC
+Date: Tue, 17 Nov 2009 10:29:03 +0000
+Message-ID: <20091117102903.7cb45ff3@lxorguk.ukuu.org.uk>
+References: <20091117161551.3DD4.A69D9226@jp.fujitsu.com>
+	<20091117161711.3DDA.A69D9226@jp.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hp3.statik.tu-cottbus.de ([141.43.120.68]:34944 "EHLO
-	hp3.statik.tu-cottbus.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754189AbZKQHxV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Nov 2009 02:53:21 -0500
-In-Reply-To: <1258410709.2792.9.camel@localhost>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20091117161711.3DDA.A69D9226@jp.fujitsu.com>
+Sender: owner-linux-mm@kvack.org
+Cc: LKML <linux-kernel@vger.kernel.org>, kosaki.motohiro@jp.fujitsu.com, linux-mm <linux-mm@kvack.org>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Hutchings <ben@decadent.org.uk>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, 504391@bugs.debian.org, Wouter van Heyst <larstiq@larstiq.dyndns.org>, Pierre Ossman <pierre@ossman.eu>
 
-Ben Hutchings wrote:
-> In general, it is not possible to tell whether a card present in an MMC
-> slot after resume is the same that was there before suspend.
+On Tue, 17 Nov 2009 16:17:50 +0900 (JST)
+KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com> wrote:
 
-That's true for virtually all storage devices, not just MMC.
+> Non MM subsystem must not use PF_MEMALLOC. Memory reclaim need few
+> memory, anyone must not prevent it. Otherwise the system cause
+> mysterious hang-up and/or OOM Killer invokation.
 
-> So there are two possible behaviours, each of which will cause data
-> loss in some cases:
-> 
-> CONFIG_MMC_UNSAFE_RESUME=n (default): Cards are assumed to be removed
-> during suspend.  Any filesystem on them must be unmounted before
-> suspend; otherwise, buffered writes will be lost.
-> 
-> CONFIG_MMC_UNSAFE_RESUME=y: Cards are assumed to remain present during
-> suspend.  They must not be swapped during suspend; otherwise, buffered
-> writes will be flushed to the wrong card.
-> 
-> Currently the choice is made at compile time and this allows that to be
-> overridden at module load time.
+So now what happens if we are paging and all our memory is tied up for
+writeback to a device or CIFS etc which can no longer allocate the memory
+to complete the write out so the MM can reclaim ?
 
-Can't the kernel flush the write buffer at suspend time, so that you can
-remove this choice for good?
--- 
-Stefan Richter
--=====-==--= =-== =---=
-http://arcgraph.de/sr/
+Am I missing something or is this patch set not addressing the case where
+the writeback thread needs to inherit PF_MEMALLOC somehow (at least for
+the I/O in question and those blocking it)
+
+Alan
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
