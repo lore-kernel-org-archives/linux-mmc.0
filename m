@@ -1,56 +1,55 @@
-From: Marc Zyngier <maz@misterjones.org>
-Subject: Re: [PATCH] drivers: MMC: enable SDHCI-S3C on S5PC1XX platform
-Date: Tue, 17 Nov 2009 12:11:43 +0100
-Message-ID: <20091117121143.09246257@life-in-the-fast-lane>
-References: <1258444374-21479-1-git-send-email-m.szyprowski@samsung.com>
+From: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+Subject: Re: [PATCH 2/7] mmc: Don't use PF_MEMALLOC
+Date: Tue, 17 Nov 2009 20:58:04 +0900 (JST)
+Message-ID: <20091117200618.3DFF.A69D9226@jp.fujitsu.com>
+References: <20091117161711.3DDA.A69D9226@jp.fujitsu.com> <20091117102903.7cb45ff3@lxorguk.ukuu.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1258444374-21479-1-git-send-email-m.szyprowski@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, kyungmin.park@samsung.com, ben-linux@fluff.org, m.szyprowski@samsung.com
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20091117102903.7cb45ff3@lxorguk.ukuu.org.uk>
+Sender: owner-linux-mm@kvack.org
+To: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Cc: kosaki.motohiro@jp.fujitsu.com, LKML <linux-kernel@vger.kernel.org>, linux-mm <linux-mm@kvack.org>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 17 Nov 2009 08:52:54 +0100
-Marek Szyprowski <m.szyprowski@samsung.com> wrote:
-
-> From: Kyungmin Park <kyungmin.park@samsung.com>
+> On Tue, 17 Nov 2009 16:17:50 +0900 (JST)
+> KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com> wrote:
 > 
-> Samsung S5PC100 SoC has SDHCI controller compatible to the one known
-> from S3C64xx SoCs. Enable support for sdhci-s3c driver also on
-> S5PC1xx platform.
+> > Non MM subsystem must not use PF_MEMALLOC. Memory reclaim need few
+> > memory, anyone must not prevent it. Otherwise the system cause
+> > mysterious hang-up and/or OOM Killer invokation.
 > 
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> Acked-by: Ben Dooks <ben-linux@fluff.org>
-> ---
->  drivers/mmc/host/Kconfig |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 432ae83..faddf82 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -96,7 +96,7 @@ config MMC_SDHCI_PLTFM
->  
->  config MMC_SDHCI_S3C
->  	tristate "SDHCI support on Samsung S3C SoC"
-> -	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
-> +	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX ||
-> PLAT_S5PC1XX) help
->  	  This selects the Secure Digital Host Controller Interface
-> (SDHCI) often referrered to as the HSMMC block in some of the Samsung
-> S3C
+> So now what happens if we are paging and all our memory is tied up for
+> writeback to a device or CIFS etc which can no longer allocate the memory
+> to complete the write out so the MM can reclaim ?
 
-I think it was Ben that suggested once to introduce a HAVE_SDHCI_S3C
-symbol, selected by interested parties (S3C, S5P, S5PC...).
+Probably my answer is not so simple. sorry.
 
-Given the way Samsung SoCs are assembled (from an IP point of view), it
-would make sense for one SoC to describe its features in
-"HAVE_FEATURE_FOO" terms rather than each subsystem depending an ever
-growing list of SoC.
+reason1: MM reclaim does both dropping clean memory and writing out dirty pages.
+reason2: if all memory is exhausted, maybe we can't recover it. it is
+fundamental limitation of Virtual Memory subsystem. and, min-watermark is
+decided by number of system physcal memory, but # of I/O issue (i.e. # of
+pages of used by writeback thread) is mainly decided # of devices. 
+then, we can't gurantee min-watermark is sufficient on any systems.
+Only reasonable solution is mempool like reservation, I think.
+IOW, any reservation memory shouldn't share unrelated subsystem. otherwise
+we lost any gurantee.
 
-	M.
--- 
-Fast. Cheap. Reliable. Pick two.
+So, I think we need to hear why many developer don't use mempool,
+instead use PF_MEMALLOC.
+
+> Am I missing something or is this patch set not addressing the case where
+> the writeback thread needs to inherit PF_MEMALLOC somehow (at least for
+> the I/O in question and those blocking it)
+
+Yes, probably my patchset isn't perfect. honestly I haven't understand
+why so many developer prefer to use PF_MEMALLOC.
+
+
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
