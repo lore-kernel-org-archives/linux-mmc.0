@@ -1,43 +1,42 @@
-From: Ben Dooks <ben-linux@fluff.org>
-Subject: Re: [PATCH] drivers: MMC: enable SDHCI-S3C on S5PC1XX platform
-Date: Tue, 17 Nov 2009 13:01:18 +0000
-Message-ID: <20091117130116.GY23772@trinity.fluff.org>
-References: <1258444374-21479-1-git-send-email-m.szyprowski@samsung.com> <20091117121143.09246257@life-in-the-fast-lane>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: [PATCH 2/7] mmc: Don't use PF_MEMALLOC
+Date: Tue, 17 Nov 2009 21:47:06 +0100
+Message-ID: <1258490826.3918.29.camel@laptop>
+References: <20091117161711.3DDA.A69D9226@jp.fujitsu.com>
+	 <20091117102903.7cb45ff3@lxorguk.ukuu.org.uk>
+	 <20091117200618.3DFF.A69D9226@jp.fujitsu.com>  <4B029C40.2020803@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20091117121143.09246257@life-in-the-fast-lane>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Marc Zyngier <maz@misterjones.org>
-Cc: Marek Szyprowski <m.szyprowski@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, kyungmin.park@samsung.com, ben-linux@fluff.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <4B029C40.2020803@gmail.com>
+Sender: owner-linux-mm@kvack.org
+To: Minchan Kim <minchan.kim@gmail.com>
+Cc: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>, Alan Cox <alan@lxorguk.ukuu.org.uk>, LKML <linux-kernel@vger.kernel.org>, linux-mm <linux-mm@kvack.org>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Nov 17, 2009 at 12:11:43PM +0100, Marc Zyngier wrote:
-> On Tue, 17 Nov 2009 08:52:54 +0100
-> Marek Szyprowski <m.szyprowski@samsung.com> wrote:
-> 
-> I think it was Ben that suggested once to introduce a HAVE_SDHCI_S3C
-> symbol, selected by interested parties (S3C, S5P, S5PC...).
+On Tue, 2009-11-17 at 21:51 +0900, Minchan Kim wrote:
+> I think it's because mempool reserves memory. 
+> (# of I/O issue\0 is hard to be expected.
+> How do we determine mempool size of each block driver?
+> For example,  maybe, server use few I/O for nand. 
+> but embedded system uses a lot of I/O. 
 
-Yes, I did mention this and it is an option to either replace the patch
-now or to do at a later date to tidy things up. I'm not going to reject
-this patch now (or force a rewrite at this late stage)
+No, you scale the mempool to the minimum amount required to make
+progress -- this includes limiting the 'concurrency' when handing out
+mempool objects.
 
-I'll try and look at acking the last set of SDHCI patches Thomas sent
-and see if akpm will pick them up for linux-mmc.
+If you run into such tight corners often enough to notice it, there's
+something else wrong.
 
-> Given the way Samsung SoCs are assembled (from an IP point of view), it
-> would make sense for one SoC to describe its features in
-> "HAVE_FEATURE_FOO" terms rather than each subsystem depending an ever
-> growing list of SoC.
+I fully agree with ripping out PF_MEMALLOC from pretty much everything,
+including the VM, getting rid of the various abuse outside of the VM
+seems like a very good start.
 
-Yes, I was feeling that this is something that we should probably discuss
-either on linux-arm-kernel or to a wide audience. It might not suit
-everyone's taste, etc.
 
--- 
-Ben
 
-Q:      What's a light-year?
-A:      One-third less calories than a regular year.
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
