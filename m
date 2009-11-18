@@ -1,66 +1,71 @@
-From: Ladislav Michl <Ladislav.Michl@seznam.cz>
-Subject: Re: [PATCH] mmci-omap: free irq resource
-Date: Wed, 18 Nov 2009 20:05:20 +0100
-Message-ID: <20091118190520.GA7941@localhost.localdomain>
-References: <20091101115905.GB15144@localhost.localdomain> <20091109142749.0d8f6967.akpm@linux-foundation.org>
-Reply-To: Ladislav Michl <ladis@linux-mips.org>
+From: Cory Maccarrone <darkstar6262@gmail.com>
+Subject: Re: [PATCH] [mmc-omap] Add support for 16-bit and 32-bit registers
+Date: Wed, 18 Nov 2009 13:09:22 -0800
+Message-ID: <6cb013310911181309w6e21b8e9o62fad1a80f300c08@mail.gmail.com>
+References: <1258255495.4209.3.camel@runt> <20091118184152.GA6865@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.seznam.cz ([77.75.72.43]:33473 "EHLO smtp.seznam.cz"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757883AbZKRSF3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 Nov 2009 13:05:29 -0500
-Content-Disposition: inline
-In-Reply-To: <20091109142749.0d8f6967.akpm@linux-foundation.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20091118184152.GA6865@localhost.localdomain>
+Sender: linux-omap-owner@vger.kernel.org
+To: Ladislav Michl <ladis@linux-mips.org>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-mmc@vger.kernel.org
 
-On Mon, Nov 09, 2009 at 02:27:49PM -0800, Andrew Morton wrote:
-> On Sun, 1 Nov 2009 12:59:05 +0100
-> Ladislav.Michl@seznam.cz wrote:
-> 
-> > Free IRQ on remove.
-> > 
-> > Signed-off-by: Ladislav Michl <ladis@linux-mips.org>
-> > Acked-by: Tony Lindgren <tony@atomide.com>
-> > 
-> > diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-> > index 5d773b8..5f970e2 100644
-> > --- a/drivers/mmc/host/omap.c
-> > +++ b/drivers/mmc/host/omap.c
-> > @@ -1529,6 +1529,7 @@ static int mmc_omap_remove(struct platform_device *pdev)
-> >  		host->pdata->cleanup(&pdev->dev);
-> >  
-> >  	mmc_omap_fclk_enable(host, 0);
-> > +	free_irq(host->irq, host);
-> >  	clk_put(host->fclk);
-> >  	clk_disable(host->iclk);
-> >  	clk_put(host->iclk);
-> 
-> This is a poor changelog.
+On Wed, Nov 18, 2009 at 10:41 AM, Ladislav Michl
+<Ladislav.Michl@seznam.cz> wrote:
+> On Sat, Nov 14, 2009 at 07:24:55PM -0800, Cory Maccarrone wrote:
+>> The omap850 and omap730 use 16-bit registers instead of 32-bit, requ=
+iring
+>> a modification of the register addresses in the mmc-omap driver. =C2=
+=A0To
+>> make this as portable as possible, I made the following changes:
+>
+> Hmm, I would not trade portability anyone currently needs for complex=
+ity...
 
-I'm sorry for that as well as for sending this patch twice. I will do better
-next time.
+Agreed, this solution is more complicated than it probably needs to be.
 
-> The reader doesn't know what the implication of the bug is.  I _assume_
-> that it means that the driver can only be loaded a single time.  That
-> on a second modprobe, it fails to allocate the interrupt and fails.
+>
+>> * Moved register address offsets from drivers/mmc/host/omap.c to
+>> =C2=A0 drivers/mmc/host/omap.h
+>> * Implemented a lookup table for 16-bit and 32-bit register offsets
+>> * Added a reg_size field in the mmc_omap_host structure
+>> * Added code in mmc_omap_probe() to populate the reg_size
+>> =C2=A0 field based on processor in use
+>> * Added inline function to return the register offset based on
+>> =C2=A0 the register size and register name
+>> * Modified mmc-omap driver to use the new inline function to call ou=
+t
+>> =C2=A0 register names
+>
+> All this could be probably done by making register definition an inde=
+x and
+> shifting it left by one or two depending on CPU. No lookup table need=
+ed.
 
-This is perfectly correct assumption.
+Ah, good point, I hadn't considered that.  I'll rework my
+implementation to do that and resubmit.
 
-> In which case this is a fairly serious bug and perhaps the patch should
-> be backported into the -stable tree.
+>
+>> This change should allow the omap7xx-series of processors to correct=
+ly
+>> utilize the MMC driver.
+>
+> Did you test it? It does not work on 5910, see here:
+> http://thread.gmane.org/gmane.linux.kernel.mmc/649
 
-There is no point backporting it as this driver is broken for ages without
-single complain.
-(details here: http://article.gmane.org/gmane.linux.kernel.mmc/649)
+Not sure why it wouldn't work on the 5910.  I tested it on my device,
+and it works properly for me, but then I don't have an omap-based
+device that uses 32-bit register definitions.  I'm confused at the
+post you have above though...Is that with my patch, or is that with
+something else?  It seems to reference the status of current git,
+which I don't think this patch shouldn't be in.
 
-> Or I could be all wrong about all of that.  This is why it's better if
-> the patch submitter *explains* these things, rather than leaving others
-> to guess.
-
-Best regards,
-	ladis
+- Cory
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
