@@ -1,71 +1,41 @@
-From: Cory Maccarrone <darkstar6262@gmail.com>
+From: Ladislav Michl <Ladislav.Michl@seznam.cz>
 Subject: Re: [PATCH] [mmc-omap] Add support for 16-bit and 32-bit registers
-Date: Wed, 18 Nov 2009 13:09:22 -0800
-Message-ID: <6cb013310911181309w6e21b8e9o62fad1a80f300c08@mail.gmail.com>
-References: <1258255495.4209.3.camel@runt> <20091118184152.GA6865@localhost.localdomain>
+Date: Thu, 19 Nov 2009 00:35:41 +0100
+Message-ID: <20091118233541.GA25192@localhost.localdomain>
+References: <1258255495.4209.3.camel@runt> <20091118184152.GA6865@localhost.localdomain> <6cb013310911181309w6e21b8e9o62fad1a80f300c08@mail.gmail.com>
+Reply-To: Ladislav Michl <ladis@linux-mips.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20091118184152.GA6865@localhost.localdomain>
-Sender: linux-omap-owner@vger.kernel.org
-To: Ladislav Michl <ladis@linux-mips.org>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.seznam.cz ([77.75.72.43]:47391 "EHLO smtp.seznam.cz"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752671AbZKRWfe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 18 Nov 2009 17:35:34 -0500
+Content-Disposition: inline
+In-Reply-To: <6cb013310911181309w6e21b8e9o62fad1a80f300c08@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Cory Maccarrone <darkstar6262@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 
-On Wed, Nov 18, 2009 at 10:41 AM, Ladislav Michl
-<Ladislav.Michl@seznam.cz> wrote:
-> On Sat, Nov 14, 2009 at 07:24:55PM -0800, Cory Maccarrone wrote:
->> The omap850 and omap730 use 16-bit registers instead of 32-bit, requ=
-iring
->> a modification of the register addresses in the mmc-omap driver. =C2=
-=A0To
->> make this as portable as possible, I made the following changes:
->
-> Hmm, I would not trade portability anyone currently needs for complex=
-ity...
+On Wed, Nov 18, 2009 at 01:09:22PM -0800, Cory Maccarrone wrote:
+> On Wed, Nov 18, 2009 at 10:41 AM, Ladislav Michl
+> <Ladislav.Michl@seznam.cz> wrote:
+> > Did you test it? It does not work on 5910, see here:
+> > http://thread.gmane.org/gmane.linux.kernel.mmc/649
+> 
+> Not sure why it wouldn't work on the 5910.  I tested it on my device,
+> and it works properly for me, but then I don't have an omap-based
+> device that uses 32-bit register definitions.  I'm confused at the
+> post you have above though...Is that with my patch, or is that with
+> something else?  It seems to reference the status of current git,
+> which I don't think this patch shouldn't be in.
 
-Agreed, this solution is more complicated than it probably needs to be.
+To put it clear, current git does not work and it is unrelated to your patch.
+If driver works for you with your patch, then either your MMC card or
+controller in your SoC survives multiple init sequences or it has something
+to do with clock settings or... You can find two more people confirming
+this here: http://www.spinics.net/lists/linux-omap/msg09547.html
+I'll probably need to find some time to read MMC spec.
 
->
->> * Moved register address offsets from drivers/mmc/host/omap.c to
->> =C2=A0 drivers/mmc/host/omap.h
->> * Implemented a lookup table for 16-bit and 32-bit register offsets
->> * Added a reg_size field in the mmc_omap_host structure
->> * Added code in mmc_omap_probe() to populate the reg_size
->> =C2=A0 field based on processor in use
->> * Added inline function to return the register offset based on
->> =C2=A0 the register size and register name
->> * Modified mmc-omap driver to use the new inline function to call ou=
-t
->> =C2=A0 register names
->
-> All this could be probably done by making register definition an inde=
-x and
-> shifting it left by one or two depending on CPU. No lookup table need=
-ed.
-
-Ah, good point, I hadn't considered that.  I'll rework my
-implementation to do that and resubmit.
-
->
->> This change should allow the omap7xx-series of processors to correct=
-ly
->> utilize the MMC driver.
->
-> Did you test it? It does not work on 5910, see here:
-> http://thread.gmane.org/gmane.linux.kernel.mmc/649
-
-Not sure why it wouldn't work on the 5910.  I tested it on my device,
-and it works properly for me, but then I don't have an omap-based
-device that uses 32-bit register definitions.  I'm confused at the
-post you have above though...Is that with my patch, or is that with
-something else?  It seems to reference the status of current git,
-which I don't think this patch shouldn't be in.
-
-- Cory
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+	ladis
