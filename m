@@ -1,25 +1,26 @@
-From: David Miller <davem@davemloft.net>
-Subject: Re: [net-next 1/1] iwmc3200top: revamp fw name handling
-Date: Wed, 18 Nov 2009 23:30:08 -0800 (PST)
-Message-ID: <20091118.233008.18598625.davem@davemloft.net>
-References: <1258588519-7939-1-git-send-email-tomas.winkler@intel.com>
+From: "Johnson, Charles F" <charles.f.johnson@intel.com>
+Subject: UFS Drivers - Anyone looking into?
+Date: Thu, 19 Nov 2009 08:22:18 -0800
+Message-ID: <0D4616E6925F9541919B60692F61509E462FA627@orsmsx502.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <1258588519-7939-1-git-send-email-tomas.winkler@intel.com>
-Sender: netdev-owner@vger.kernel.org
-To: tomas.winkler@intel.com
-Cc: netdev@vger.kernel.org, linux-mmc@vger.kernel.org, yi.zhu@intel.com, inaky.perez-gonzalez@intel.com, guy.cohen@intel.com, ron.rindjunsky@intel.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:55800 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756885AbZKSQWN convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2009 11:22:13 -0500
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-From: Tomas Winkler <tomas.winkler@intel.com>
-Date: Thu, 19 Nov 2009 01:55:19 +0200
+Given that JEDEC is spec'ing UFS which appears to be the follow-on to eMMC, does anyone know if any driver work has started on this ??
+With SCSI over Unipro - I would expect a Unipro transport driver to be added to the SCSI subsystem ? Any thoughts?
 
-> 1. define macro for handling firmware api version
-> 2. add MODULE_FIRMWARE
-> 3. cleanup iwmct_fw_load style
-> 
-> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-
-Applied, thanks.
+Charles Johnson
+Ultra-Mobility Group
+UPSG Architecture
+Intel Corporation
+charles.f.johnson@intel.com
+ 
