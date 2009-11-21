@@ -1,40 +1,209 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: crash in mmc subsystem during suspend
-Date: Fri, 20 Nov 2009 15:10:58 +0000
-Message-ID: <1258729858.2235.29.camel@localhost.localdomain>
-References: <1258707087.2235.6.camel@localhost.localdomain>
-Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+From: akpm@linux-foundation.org
+Subject: [to-be-updated] atmel-mci-change-use-of-dma-slave-interface.patch removed from -mm tree
+Date: Fri, 20 Nov 2009 16:09:18 -0800
+Message-ID: <200911210009.nAL09Ijo002195@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f221.google.com ([209.85.220.221]:42551 "EHLO
-	mail-fx0-f221.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753389AbZKTPKz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Nov 2009 10:10:55 -0500
-Received: by fxm21 with SMTP id 21so3776707fxm.21
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Nov 2009 07:11:01 -0800 (PST)
-In-Reply-To: <1258707087.2235.6.camel@localhost.localdomain>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:43014 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753622AbZKUAJt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Nov 2009 19:09:49 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: nicolas.ferre@atmel.com, hskinnemoen@atmel.com, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
-On Fri, 2009-11-20 at 08:51 +0000, Daniel Drake wrote:
-> We're busy testing the suspend/resume functionality on the new OLPC
-> XO-1.5 laptop. This uses a SD card as its primary disk, which is on a
-> SDHCI controller on the VIA VX855 chipset. We are running Linux v2.6.31
-> 
-> We are occasionally encountering a crash from below mmc_rescan() during
-> suspend:
 
-OK, I just realised that our kernel includes various non-upstream
-patches (yet), some of which are executing during suspend/resume and may
-be a contributing factor to this problem.
-(the patches allow us to retain power to our SDIO wifi card during
-suspend)
+The patch titled
+     atmel-mci: change use of dma slave interface
+has been removed from the -mm tree.  Its filename was
+     atmel-mci-change-use-of-dma-slave-interface.patch
 
-Nevertheless, any help on our battle to stable suspend/resume and the
-other bits we're working on is always appreciated. :)
+This patch was dropped because an updated version will be merged
 
-Daniel
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
+------------------------------------------------------
+Subject: atmel-mci: change use of dma slave interface
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+
+Allow the use of another DMA controller driver in atmel-mci sd/mmc driver.
+ This adds a generic dma_slave pointer to the mci platform structure where
+we can store DMA controller information.  In atmel-mci we use information
+provided by this structure to initialize the driver (with new helper
+functions that are architecture dependant).
+
+This also adds at32/avr32 chip modifications to cope with this new access
+method.
+
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Haavard Skinnemoen <hskinnemoen@atmel.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ arch/avr32/mach-at32ap/at32ap700x.c |    6 +
+ drivers/mmc/host/atmel-mci.c        |   82 +++++++++++++++++++-------
+ include/linux/atmel-mci.h           |    3 
+ 3 files changed, 68 insertions(+), 23 deletions(-)
+
+diff -puN arch/avr32/mach-at32ap/at32ap700x.c~atmel-mci-change-use-of-dma-slave-interface arch/avr32/mach-at32ap/at32ap700x.c
+--- a/arch/avr32/mach-at32ap/at32ap700x.c~atmel-mci-change-use-of-dma-slave-interface
++++ a/arch/avr32/mach-at32ap/at32ap700x.c
+@@ -1323,7 +1323,7 @@ struct platform_device *__init
+ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ {
+ 	struct platform_device		*pdev;
+-	struct dw_dma_slave		*dws = &data->dma_slave;
++	struct dw_dma_slave		*dws;
+ 	u32				pioa_mask;
+ 	u32				piob_mask;
+ 
+@@ -1342,6 +1342,8 @@ at32_add_device_mci(unsigned int id, str
+ 				ARRAY_SIZE(atmel_mci0_resource)))
+ 		goto fail;
+ 
++	dws = kzalloc(sizeof(struct dw_dma_slave), GFP_KERNEL);
++
+ 	dws->dma_dev = &dw_dmac0_device.dev;
+ 	dws->reg_width = DW_DMA_SLAVE_WIDTH_32BIT;
+ 	dws->cfg_hi = (DWC_CFGH_SRC_PER(0)
+@@ -1349,6 +1351,8 @@ at32_add_device_mci(unsigned int id, str
+ 	dws->cfg_lo &= ~(DWC_CFGL_HS_DST_POL
+ 				| DWC_CFGL_HS_SRC_POL);
+ 
++	data->dma_slave = dws;
++
+ 	if (platform_device_add_data(pdev, data,
+ 				sizeof(struct mci_platform_data)))
+ 		goto fail;
+diff -puN drivers/mmc/host/atmel-mci.c~atmel-mci-change-use-of-dma-slave-interface drivers/mmc/host/atmel-mci.c
+--- a/drivers/mmc/host/atmel-mci.c~atmel-mci-change-use-of-dma-slave-interface
++++ a/drivers/mmc/host/atmel-mci.c
+@@ -1582,16 +1582,71 @@ static void __exit atmci_cleanup_slot(st
+ }
+ 
+ #ifdef CONFIG_MMC_ATMELMCI_DMA
+-static bool filter(struct dma_chan *chan, void *slave)
++static struct device *find_slave_dev(void *slave)
++{
++	if (!slave)
++		return NULL;
++
++	if (cpu_is_at32ap7000())
++		return ((struct dw_dma_slave *)slave)->dma_dev;
++	else
++		return ((struct at_dma_slave *)slave)->dma_dev;
++}
++
++static void setup_dma_addr(struct mci_platform_data *pdata,
++			dma_addr_t tx_addr, dma_addr_t rx_addr)
+ {
+-	struct dw_dma_slave *dws = slave;
++	if (!pdata)
++		return;
++
++	if (cpu_is_at32ap7000()) {
++		struct dw_dma_slave *dws = pdata->dma_slave;
++
++		dws->tx_reg = tx_addr;
++		dws->rx_reg = rx_addr;
++	} else {
++		struct at_dma_slave *ats = pdata->dma_slave;
+ 
+-	if (dws->dma_dev == chan->device->dev) {
+-		chan->private = dws;
++		ats->tx_reg = tx_addr;
++		ats->rx_reg = rx_addr;
++	}
++}
++
++static bool filter(struct dma_chan *chan, void *slave)
++{
++	if (find_slave_dev(slave) == chan->device->dev) {
++		chan->private = slave;
+ 		return true;
+-	} else
++	} else {
+ 		return false;
++	}
++}
++
++static void atmci_configure_dma(struct atmel_mci *host)
++{
++	struct mci_platform_data	*pdata;
++
++	if (host == NULL)
++		return;
++
++	pdata = host->pdev->dev.platform_data;
++
++	if (pdata && find_slave_dev(pdata->dma_slave)) {
++		dma_cap_mask_t mask;
++
++		setup_dma_addr(pdata, host->mapbase + MCI_TDR,
++				      host->mapbase + MCI_RDR);
++
++		/* Try to grab a DMA channel */
++		dma_cap_zero(mask);
++		dma_cap_set(DMA_SLAVE, mask);
++		host->dma.chan = dma_request_channel(mask, filter, pdata->dma_slave);
++	}
++	if (!host->dma.chan)
++		dev_notice(&host->pdev->dev, "DMA not available, using PIO\n");
+ }
++#else
++static void atmci_configure_dma(struct atmel_mci *host) {}
+ #endif
+ 
+ static int __init atmci_probe(struct platform_device *pdev)
+@@ -1645,22 +1700,7 @@ static int __init atmci_probe(struct pla
+ 	if (ret)
+ 		goto err_request_irq;
+ 
+-#ifdef CONFIG_MMC_ATMELMCI_DMA
+-	if (pdata->dma_slave.dma_dev) {
+-		struct dw_dma_slave *dws = &pdata->dma_slave;
+-		dma_cap_mask_t mask;
+-
+-		dws->tx_reg = regs->start + MCI_TDR;
+-		dws->rx_reg = regs->start + MCI_RDR;
+-
+-		/* Try to grab a DMA channel */
+-		dma_cap_zero(mask);
+-		dma_cap_set(DMA_SLAVE, mask);
+-		host->dma.chan = dma_request_channel(mask, filter, dws);
+-	}
+-	if (!host->dma.chan)
+-		dev_notice(&pdev->dev, "DMA not available, using PIO\n");
+-#endif /* CONFIG_MMC_ATMELMCI_DMA */
++	atmci_configure_dma(host);
+ 
+ 	platform_set_drvdata(pdev, host);
+ 
+diff -puN include/linux/atmel-mci.h~atmel-mci-change-use-of-dma-slave-interface include/linux/atmel-mci.h
+--- a/include/linux/atmel-mci.h~atmel-mci-change-use-of-dma-slave-interface
++++ a/include/linux/atmel-mci.h
+@@ -4,6 +4,7 @@
+ #define ATMEL_MCI_MAX_NR_SLOTS	2
+ 
+ #include <linux/dw_dmac.h>
++#include <mach/at_hdmac.h>
+ 
+ /**
+  * struct mci_slot_pdata - board-specific per-slot configuration
+@@ -34,7 +35,7 @@ struct mci_slot_pdata {
+  * @slot: Per-slot configuration data.
+  */
+ struct mci_platform_data {
+-	struct dw_dma_slave	dma_slave;
++	void			*dma_slave;
+ 	struct mci_slot_pdata	slot[ATMEL_MCI_MAX_NR_SLOTS];
+ };
+ 
+_
+
+Patches currently in -mm which might be from nicolas.ferre@atmel.com are
+
+linux-next.patch
+atmel-mci-change-use-of-dma-slave-interface.patch
+mmc-atmel-mci-new-mci2-module-support-in-atmel-mci-driver.patch
 
