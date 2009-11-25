@@ -1,14 +1,14 @@
 From: <cliffcai.sh@gmail.com>
-Subject: [PATCH] [PATCH][mmc/host]:Blackfin SD Host Controller Driver
-Date: Wed, 25 Nov 2009 17:40:35 +0800
-Message-ID: <1259142035-29160-1-git-send-email-cliffcai.sh@gmail.com>
+Subject: [PATCH v2] [mmc/host]:Blackfin SD Host Controller Driver
+Date: Wed, 25 Nov 2009 19:25:11 +0800
+Message-ID: <1259148311-31724-1-git-send-email-cliffcai.sh@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from nwd2mail10.analog.com ([137.71.25.55]:49499 "EHLO
+Received: from nwd2mail10.analog.com ([137.71.25.55]:61089 "EHLO
 	nwd2mail10.analog.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758114AbZKYB4l (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Nov 2009 20:56:41 -0500
+	with ESMTP id S933742AbZKYDlT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Nov 2009 22:41:19 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
@@ -16,22 +16,25 @@ Cc: linux-kernel@vger.kernel.org, cliff.cai@analog.com, Cliff Cai <cliffcai.sh@g
 
 From: Cliff Cai <cliffcai.sh@gmail.com>
 
+v2-v1 change:remove mmc host before releasing it in sdh_probe().
+
 Signed-off-by: Cliff Cai <cliffcai.sh@gmail.com>
 ---
- drivers/mmc/host/Kconfig    |   18 ++
+ drivers/mmc/host/Kconfig    |   19 ++
  drivers/mmc/host/Makefile   |    1 +
  drivers/mmc/host/bfin_sdh.c |  634 +++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 653 insertions(+), 0 deletions(-)
+ 3 files changed, 654 insertions(+), 0 deletions(-)
  create mode 100644 drivers/mmc/host/bfin_sdh.c
 
 diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index d00a35d..588813f 100644
+index 432ae83..ed8b193 100644
 --- a/drivers/mmc/host/Kconfig
 +++ b/drivers/mmc/host/Kconfig
-@@ -242,3 +242,21 @@ config MMC_TMIO
- 	  This provides support for the SD/MMC cell found in TC6393XB,
- 	  T7L66XB and also ipaq ASIC3
+@@ -357,3 +357,22 @@ config MMC_VIA_SDMMC
+ 	  If you have a controller with this interface, say Y or M here.
  
+ 	  If unsure, say N.
++
 +config SDH_BFIN
 +	tristate "Blackfin Secure Digital Host support"
 +	depends on MMC && ((BF54x && !BF544) || (BF51x && !BF512))
@@ -51,14 +54,17 @@ index d00a35d..588813f 100644
 +	help
 +	  If you say yes here SD-Cards may work on the EZkit.
 diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 3d3a4a3..0af1f7a 100644
+index abcb040..256905c 100644
 --- a/drivers/mmc/host/Makefile
 +++ b/drivers/mmc/host/Makefile
-@@ -29,3 +29,4 @@ endif
- obj-$(CONFIG_MMC_S3C)   	+= s3cmci.o
- obj-$(CONFIG_MMC_SDRICOH_CS)	+= sdricoh_cs.o
+@@ -34,6 +34,7 @@ obj-$(CONFIG_MMC_SDRICOH_CS)	+= sdricoh_cs.o
  obj-$(CONFIG_MMC_TMIO)		+= tmio_mmc.o
+ obj-$(CONFIG_MMC_CB710)	+= cb710-mmc.o
+ obj-$(CONFIG_MMC_VIA_SDMMC)	+= via-sdmmc.o
 +obj-$(CONFIG_SDH_BFIN)		+= bfin_sdh.o
+ 
+ ifeq ($(CONFIG_CB710_DEBUG),y)
+ 	CFLAGS-cb710-mmc	+= -DDEBUG
 diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
 new file mode 100644
 index 0000000..d299b6b
