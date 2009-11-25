@@ -1,145 +1,72 @@
-From: akpm@linux-foundation.org
-Subject: + blackfin-sd-host-controller-driver-fix-fix.patch added to -mm tree
-Date: Wed, 25 Nov 2009 14:09:17 -0800
-Message-ID: <200911252209.nAPM9HGY027214@imap1.linux-foundation.org>
+From: Mike Frysinger <vapier.adi@gmail.com>
+Subject: Re: [PATCH v4][mmc/host]:Blackfin SD Host Controller Driver
+Date: Wed, 25 Nov 2009 17:25:20 -0500
+Message-ID: <8bd0f97a0911251425q178993fete79b675e2730bdec@mail.gmail.com>
+References: <1259162390-378-1-git-send-email-cliffcai.sh@gmail.com>
+	<20091125140422.cdee4a0d.akpm@linux-foundation.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:42600 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759013AbZKYWKX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2009 17:10:23 -0500
+Received: from mail-yx0-f188.google.com ([209.85.210.188]:55380 "EHLO
+	mail-yx0-f188.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759124AbZKYWZd convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2009 17:25:33 -0500
+In-Reply-To: <20091125140422.cdee4a0d.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: akpm@linux-foundation.org, cliffcai.sh@gmail.com, cooloney@kernel.org, linux-mmc@vger.kernel.org, vapier@gentoo.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: cliffcai.sh@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, cliff.cai@analog.com, Bryan Wu <cooloney@kernel.org>
 
+On Wed, Nov 25, 2009 at 17:04, Andrew Morton wrote:
+> On Wed, 25 Nov 2009 23:19:50 +0800 cliffcai.sh wrote:
+>> +struct dma_desc_array {
+>> + =C2=A0 =C2=A0 unsigned long =C2=A0 start_addr;
+>> + =C2=A0 =C2=A0 unsigned short =C2=A0cfg;
+>> + =C2=A0 =C2=A0 unsigned short =C2=A0x_count;
+>> + =C2=A0 =C2=A0 short =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 x_modify;
+>> +} __attribute__((packed));
+>
+> __packed is preferred.
 
-The patch titled
-     blackfin-sd-host-controller-driver-fix-fix
-has been added to the -mm tree.  Its filename is
-     blackfin-sd-host-controller-driver-fix-fix.patch
+we should move this into the Blackfin dma.h at any rate
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+>> +static void sdh_start_cmd(struct sdh_host *host, struct mmc_command=
+ *cmd)
+>> +{
+>> + =C2=A0 =C2=A0 unsigned int sdh_cmd;
+>> + =C2=A0 =C2=A0 unsigned int stat_mask;
+>> +
+>> + =C2=A0 =C2=A0 dev_dbg(mmc_dev(host->mmc), "%s enter cmd: 0x%p\n", =
+__func__, cmd);
+>> + =C2=A0 =C2=A0 WARN_ON(host->cmd !=3D NULL);
+>> + =C2=A0 =C2=A0 host->cmd =3D cmd;
+>> +
+>> + =C2=A0 =C2=A0 sdh_cmd =3D 0;
+>> + =C2=A0 =C2=A0 stat_mask =3D 0;
+>> +
+>> + =C2=A0 =C2=A0 sdh_cmd |=3D cmd->opcode;
+>> +
+>> + =C2=A0 =C2=A0 if (cmd->flags & MMC_RSP_PRESENT) {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 sdh_cmd |=3D CMD_RSP;
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 stat_mask |=3D CMD_RESP_=
+END;
+>> + =C2=A0 =C2=A0 } else
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 stat_mask |=3D CMD_SENT;
+>
+> Arguably wrong from a coding-style POV and looks weird IMO. =C2=A0Add=
+s a bit
+> of risk that subsequent coders will think they're writing in python a=
+dn
+> will add bugs.
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+i dont really get what you're referring to here.  the code in question
+looks ifne to me, and i dont see anything "python-esque" about it
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+> Fixes:
+>
+> - =C2=A0 =C2=A0 =C2=A0 } else
+> + =C2=A0 =C2=A0 =C2=A0 } else }
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: blackfin-sd-host-controller-driver-fix-fix
-From: Andrew Morton <akpm@linux-foundation.org>
-
-imadope
-
-Cc: <linux-mmc@vger.kernel.org>
-Cc: Bryan Wu <cooloney@kernel.org>
-Cc: Cliff Cai <cliffcai.sh@gmail.com>
-Cc: Mike Frysinger <vapier@gentoo.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/bfin_sdh.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff -puN drivers/mmc/host/bfin_sdh.c~blackfin-sd-host-controller-driver-fix-fix drivers/mmc/host/bfin_sdh.c
---- a/drivers/mmc/host/bfin_sdh.c~blackfin-sd-host-controller-driver-fix-fix
-+++ a/drivers/mmc/host/bfin_sdh.c
-@@ -307,7 +307,7 @@ static int sdh_data_done(struct sdh_host
- 	if (host->mrq->stop) {
- 		sdh_stop_clock(host);
- 		sdh_start_cmd(host, host->mrq->stop);
--	} else }
-+	} else {
- 		sdh_finish_request(host, host->mrq);
- 	}
- 
-_
-
-Patches currently in -mm which might be from akpm@linux-foundation.org are
-
-drivers-media-dvb-dvb-core-dvb_frontendc-needs-semaphoreh.patch
-linux-next.patch
-linux-next-git-rejects.patch
-next-remove-localversion.patch
-i-need-old-gcc.patch
-recordmcount-stfu.patch
-include-linux-compiler-gcc4h-gcc-402-doesnt-understand-__builtin_object_size.patch
-drivers-gpu-drm-i915-i915_dmac-fix-unused-var.patch
-arch-x86-kernel-cpu-cpufreq-acpi-cpufreqc-avoid-cross-cpu-interrupts-by-using-smp_call_function_any.patch
-acpi-remove-nid_inval.patch
-drivers-acpi-acpi_padc-squish-warning.patch
-cmpc_acpi-add-support-for-classmate-pc-acpi-devices.patch
-cmpc_acpi-add-support-for-classmate-pc-acpi-devices-checkpatch-fixes.patch
-drivers-gpu-drm-radeon-radeon_combiosc-fix-warning.patch
-timer-stats-fix-del_timer_sync-and-try_to_del_timer_sync.patch
-kbuild-generate-modulesbuiltin-fix-2-checkpatch-fixes.patch
-drivers-leds-leds-ss4200c-fix-return-statement.patch
-mtd-nand-fix-multi-chip-suspend-problem-fix.patch
-3x59x-fix-pci-resource-management.patch
-bluetooth-fix-for-acer-bluetooth-optical-rechargeable-mouse.patch
-atmel_serial-add-poll_get_char-and-poll_put_char-uart_ops.patch
-st-fix-test-of-value-range-in-st_set_options.patch
-scsi-add-hpsa-driver-for-hp-smart-array-controllers.patch
-block-add-helpers-to-run-flush_dcache_page-against-a-bio-and-a-requests-pages-checkpatch-fixes.patch
-aoe-switch-to-the-new-bio_flush_dcache_pages-interface.patch
-wusb-use-sizeof-struct-rather-than-pointer.patch
-raw-fix-rawctl-compat-ioctls-breakage-on-amd64-and-itanic.patch
-fs-improve-remountro-vs-buffercache-coherency.patch
-percpu-avoid-calling-__pcpu_ptr_to_addrnull.patch
-readahead-add-blk_run_backing_dev.patch
-mmap-dont-return-enomem-when-mapcount-is-temporarily-exceeded-in-munmap-checkpatch-fixes.patch
-dev-mem-cleanup-unxlate_dev_mem_ptr-calls-fix.patch
-dev-mem-cleanup-unxlate_dev_mem_ptr-calls-fix-fix.patch
-oom-kill-show-virtual-size-and-rss-information-of-the-killed-process-fix.patch
-oom-kill-fix-numa-consraint-check-with-nodemask-v42-checkpatch-fixes.patch
-mm-mlocking-in-try_to_unmap_one-fix-fix.patch
-mm-memory_hotplug-make-offline_pages-static.patch
-frv-duplicate-output_buffer-of-e03-checkpatch-fixes.patch
-procfs-allow-threads-to-rename-siblings-via-proc-pid-tasks-tid-comm-cleanup.patch
-floppy-add-an-extra-bound-check-on-ioctl-arguments-fix.patch
-drivers-misc-add-driver-for-texas-instruments-dac7512-update.patch
-rwsem-fix-rwsem_is_locked-bugs-fix.patch
-kernelh-add-printk_ratelimited-and-pr_level_rl-checkpatch-fixes.patch
-kernelh-add-printk_ratelimited-and-pr_level_rl-rename.patch
-errh-add-helper-function-to-simplify-pointer-error-checking-fix.patch
-msm_sdccc-add-missing-include-fix-compilation-checkpatch-fixes.patch
-blackfin-sd-host-controller-driver-fix.patch
-blackfin-sd-host-controller-driver-fix-fix.patch
-crc32-minor-optimizations-and-cleanup-checkpatch-fixes.patch
-hwmon-w83627ehf-updates-checkpatch-fixes.patch
-spi-controller-driver-for-designware-spi-core-fix.patch
-spidev-use-declare_bitmap-instead-of-declaring-the-array-checkpatch-fixes.patch
-gpiolib-add-names-file-in-gpio-chip-sysfs.patch
-mb862xxfb-add-acceleration-support-for-coral-p-coral-pa-imageblt-copyarea-fillrect-fix.patch
-mb862xxfb-add-acceleration-support-for-coral-p-coral-pa-imageblt-copyarea-fillrect-fix2.patch
-mb862xxfb-add-acceleration-support-for-coral-p-coral-pa-imageblt-copyarea-fillrect-fix2-fix-3.patch
-ext2-avoid-warn-messages-when-failing-to-write-to-the-superblock-checkpatch-fixes.patch
-memcg-coalesce-charging-via-percpu-storage-fix.patch
-char-cyclades-fix-compiler-warning.patch
-aio-dont-zero-out-the-pages-array-inside-struct-dio-fix.patch
-direct-io-cleanup-blockdev_direct_io-locking-checkpatch-fixes.patch
-drivers-media-video-cx23885-needs-kfifo-conversion.patch
-drivers-media-video-cx23885-needs-kfifo-updates.patch
-zlib-optimize-inffast-when-copying-direct-from-output-checkpatch-fixes.patch
-lib-add-support-for-lzo-compressed-kernels-checkpatch-fixes.patch
-lib-add-support-for-lzo-compressed-kernels-checkpatch-fixes-cleanup.patch
-net-netfilter-ipvs-ip_vs_wrrc-use-lib-gcdc-fix.patch
-reiser4-export-remove_from_page_cache-fix.patch
-reiser4.patch
-reiser4-remove-simple_prepare_write-usage-checkpatch-fixes.patch
-fs-reiser4-contextc-current_is_pdflush-got-removed.patch
-reiser4-fix.patch
-reiser4-disable.patch
-slab-leaks3-default-y.patch
-put_bh-debug.patch
-getblk-handle-2tb-devices.patch
-getblk-handle-2tb-devices-fix.patch
-undeprecate-pci_find_device.patch
-notify_change-callers-must-hold-i_mutex.patch
-
+guessing you actually meant '{' there
+-mike
