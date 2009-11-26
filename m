@@ -1,33 +1,64 @@
 From: Jassi Brar <jassi.brar@samsung.com>
-Subject: [PATCH 3/5] SPI S3C64XX: Header for passing platform data
-Date: Thu, 26 Nov 2009 15:48:17 +0900
-Message-ID: <1259218097-9845-1-git-send-email-jassi.brar@samsung.com>
+Subject: [PATCH 4/5] SPI S3C64XX: Define SPI controller platform devices
+Date: Thu, 26 Nov 2009 15:48:23 +0900
+Message-ID: <1259218103-9875-1-git-send-email-jassi.brar@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ganesha.gnumonks.org ([213.95.27.120]:40631 "EHLO
+Received: from ganesha.gnumonks.org ([213.95.27.120]:40642 "EHLO
 	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932864AbZKZGxQ (ORCPT
+	with ESMTP id S932859AbZKZGxQ (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Nov 2009 01:53:16 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: dbrownell@users.sourceforge.net, ben-linux@fluff.org, Jassi Brar <jassi.brar@samsung.com>
 
-We need a way to pass controller specific information to the
-SPI device driver. For that purpose a new header is made.
+Platform devices for SPI Controller of S3C64XX are defined
+and exported for machines to include.
+Also, controller setup helper functions are defined for
+machine code to set runtime configuration of the controller
+and the bus.
 
 Signed-off-by: Jassi Brar <jassi.brar@samsung.com>
 ---
- arch/arm/plat-s3c64xx/include/plat/spi.h |   68 ++++++++++++++++++++++++++++++
- 1 files changed, 68 insertions(+), 0 deletions(-)
- create mode 100644 arch/arm/plat-s3c64xx/include/plat/spi.h
+ arch/arm/plat-s3c/include/plat/devs.h |    3 +
+ arch/arm/plat-s3c64xx/Makefile        |    1 +
+ arch/arm/plat-s3c64xx/dev-spi.c       |  175 +++++++++++++++++++++++++++++++++
+ 3 files changed, 179 insertions(+), 0 deletions(-)
+ create mode 100644 arch/arm/plat-s3c64xx/dev-spi.c
 
-diff --git a/arch/arm/plat-s3c64xx/include/plat/spi.h b/arch/arm/plat-s3c64xx/include/plat/spi.h
+diff --git a/arch/arm/plat-s3c/include/plat/devs.h b/arch/arm/plat-s3c/include/plat/devs.h
+index 0f540ea..0fa30e2 100644
+--- a/arch/arm/plat-s3c/include/plat/devs.h
++++ b/arch/arm/plat-s3c/include/plat/devs.h
+@@ -28,6 +28,9 @@ extern struct platform_device s3c64xx_device_iis0;
+ extern struct platform_device s3c64xx_device_iis1;
+ extern struct platform_device s3c64xx_device_iisv4;
+ 
++extern struct platform_device s3c64xx_device_spi0;
++extern struct platform_device s3c64xx_device_spi1;
++
+ extern struct platform_device s3c_device_fb;
+ extern struct platform_device s3c_device_usb;
+ extern struct platform_device s3c_device_lcd;
+diff --git a/arch/arm/plat-s3c64xx/Makefile b/arch/arm/plat-s3c64xx/Makefile
+index b85b435..ee7f534 100644
+--- a/arch/arm/plat-s3c64xx/Makefile
++++ b/arch/arm/plat-s3c64xx/Makefile
+@@ -37,6 +37,7 @@ obj-$(CONFIG_S3C64XX_DMA)	+= dma.o
+ 
+ # Device setup
+ 
++obj-$(CONFIG_SPI_S3C64XX) += dev-spi.o
+ obj-$(CONFIG_S3C64XX_SETUP_I2C0) += setup-i2c0.o
+ obj-$(CONFIG_S3C64XX_SETUP_I2C1) += setup-i2c1.o
+ obj-$(CONFIG_S3C64XX_SETUP_FB_24BPP) += setup-fb-24bpp.o
+diff --git a/arch/arm/plat-s3c64xx/dev-spi.c b/arch/arm/plat-s3c64xx/dev-spi.c
 new file mode 100644
-index 0000000..d65ddfd
+index 0000000..2540d3e
 --- /dev/null
-+++ b/arch/arm/plat-s3c64xx/include/plat/spi.h
-@@ -0,0 +1,68 @@
-+/* linux/arch/arm/plat-s3c64xx/include/plat/spi.h
++++ b/arch/arm/plat-s3c64xx/dev-spi.c
+@@ -0,0 +1,175 @@
++/* linux/arch/arm/plat-s3c64xx/dev-spi.c
 + *
 + * Copyright (C) 2009 Samsung Electronics Ltd.
 + *	Jaswinder Singh <jassi.brar@samsung.com>
@@ -37,64 +68,171 @@ index 0000000..d65ddfd
 + * published by the Free Software Foundation.
 + */
 +
-+#ifndef __S3C64XX_PLAT_SPI_H
-+#define __S3C64XX_PLAT_SPI_H __FILE__
++#include <linux/kernel.h>
++#include <linux/string.h>
++#include <linux/platform_device.h>
++#include <linux/dma-mapping.h>
 +
-+#define S3C64XX_SPI_SRCCLK_PCLK		0
-+#define S3C64XX_SPI_SRCCLK_SPIBUS	1
-+#define S3C64XX_SPI_SRCCLK_48M		2
++#include <mach/dma.h>
++#include <mach/map.h>
++#include <mach/gpio.h>
 +
-+#define BUSNUM(b)		(b)
++#include <plat/spi.h>
++#include <plat/gpio-bank-c.h>
++#include <plat/gpio-cfg.h>
++#include <plat/irqs.h>
 +
-+/**
-+ * struct s3c64xx_spi_csinfo - ChipSelect description
-+ * @fb_delay: Slave specific feedback delay.
-+ * @set_level: CS line control.
++static char *spi_src_clks[] = {"pclk", "spi-bus", "spi_48m"};
++
++/* SPI Controller platform_devices */
++
++/* Since we emulate multi-cs capability, we do not touch the GPC-3,7.
++ * The emulated CS is toggled by board specific mechanism, as it can
++ * be either some immediate GPIO or some signal out of some other
++ * chip in between ... or some yet another way.
++ * We simply do not assume anything about CS.
 + */
-+struct s3c64xx_spi_csinfo {
-+	u8 fb_delay;
-+	void (*set_level)(int lvl);
++static int s3c64xx_spi_cfg_gpio(struct platform_device *pdev)
++{
++	switch (pdev->id) {
++	case 0:
++		s3c_gpio_cfgpin(S3C64XX_GPC(0), S3C64XX_GPC0_SPI_MISO0);
++		s3c_gpio_cfgpin(S3C64XX_GPC(1), S3C64XX_GPC1_SPI_CLKO);
++		s3c_gpio_cfgpin(S3C64XX_GPC(2), S3C64XX_GPC2_SPI_MOSIO);
++		s3c_gpio_setpull(S3C64XX_GPC(0), S3C_GPIO_PULL_UP);
++		s3c_gpio_setpull(S3C64XX_GPC(1), S3C_GPIO_PULL_UP);
++		s3c_gpio_setpull(S3C64XX_GPC(2), S3C_GPIO_PULL_UP);
++		break;
++
++	case 1:
++		s3c_gpio_cfgpin(S3C64XX_GPC(4), S3C64XX_GPC4_SPI_MISO1);
++		s3c_gpio_cfgpin(S3C64XX_GPC(5), S3C64XX_GPC5_SPI_CLK1);
++		s3c_gpio_cfgpin(S3C64XX_GPC(6), S3C64XX_GPC6_SPI_MOSI1);
++		s3c_gpio_setpull(S3C64XX_GPC(4), S3C_GPIO_PULL_UP);
++		s3c_gpio_setpull(S3C64XX_GPC(5), S3C_GPIO_PULL_UP);
++		s3c_gpio_setpull(S3C64XX_GPC(6), S3C_GPIO_PULL_UP);
++		break;
++
++	default:
++		dev_err(&pdev->dev, "Invalid SPI Controller number!");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static struct resource s3c64xx_spi0_resource[] = {
++	[0] = {
++		.start = S3C64XX_PA_SPI0,
++		.end   = S3C64XX_PA_SPI0 + 0x100 - 1,
++		.flags = IORESOURCE_MEM,
++	},
++	[1] = {
++		.start = DMACH_SPI0_TX,
++		.end   = DMACH_SPI0_TX,
++		.flags = IORESOURCE_DMA,
++	},
++	[2] = {
++		.start = DMACH_SPI0_RX,
++		.end   = DMACH_SPI0_RX,
++		.flags = IORESOURCE_DMA,
++	},
++	[3] = {
++		.start = IRQ_SPI0,
++		.end   = IRQ_SPI0,
++		.flags = IORESOURCE_IRQ,
++	},
 +};
 +
-+/**
-+ * struct s3c64xx_spi_cntrlr_info - SPI Controller defining structure
-+ * @src_clk_nr: Clock source index for the CLK_CFG[SPI_CLKSEL] field.
-+ * @src_clk_name: Platform name of the corresponding clock.
-+ * @src_clk: Pointer to the source clock.
-+ * @num_cs: Number of CS this controller emulates.
-+ * @cs: Array describing each CS.
-+ * @cfg_gpio: Configure pins for this SPI controller.
-+ * @fifo_lvl_mask: All tx fifo_lvl fields start at offset-6
-+ * @rx_lvl_offset: Depends on tx fifo_lvl field and bus number
-+ * @high_speed: If the controller supports HIGH_SPEED_EN bit
-+ */
-+struct s3c64xx_spi_cntrlr_info {
-+	int src_clk_nr;
-+	char *src_clk_name;
-+	struct clk *src_clk;
-+
-+	int num_cs;
-+	struct s3c64xx_spi_csinfo *cs;
-+
-+	int (*cfg_gpio)(struct platform_device *pdev);
-+
-+	/* Following two fields are for future compatibility */
-+	int fifo_lvl_mask;
-+	int rx_lvl_offset;
-+	int high_speed;
++static struct s3c64xx_spi_cntrlr_info s3c64xx_spi0_pdata = {
++	.cfg_gpio = s3c64xx_spi_cfg_gpio,
++	.fifo_lvl_mask = 0x7f,
++	.rx_lvl_offset = 13,
 +};
 +
-+/**
-+ * s3c64xx_spi_set_info - SPI Controller configure callback by the board
-+ *				initialization code.
-+ * @cntrlr: SPI controller number the configuration is for.
-+ * @src_clk_nr: Clock the SPI controller is to use to generate SPI clocks.
-+ * @cs: Pointer to the array of CS descriptions.
-+ * @num_cs: Number of elements in the 'cs' array.
-+ */
-+extern void s3c64xx_spi_set_info(int cntrlr, int src_clk_nr, int num_cs);
++static u64 spi_dmamask = DMA_BIT_MASK(32);
 +
-+#endif /* __S3C64XX_PLAT_SPI_H */
++struct platform_device s3c64xx_device_spi0 = {
++	.name		  = "s3c64xx-spi",
++	.id		  = 0,
++	.num_resources	  = ARRAY_SIZE(s3c64xx_spi0_resource),
++	.resource	  = s3c64xx_spi0_resource,
++	.dev = {
++		.dma_mask		= &spi_dmamask,
++		.coherent_dma_mask	= DMA_BIT_MASK(32),
++		.platform_data = &s3c64xx_spi0_pdata,
++	},
++};
++EXPORT_SYMBOL(s3c64xx_device_spi0);
++
++static struct resource s3c64xx_spi1_resource[] = {
++	[0] = {
++		.start = S3C64XX_PA_SPI1,
++		.end   = S3C64XX_PA_SPI1 + 0x100 - 1,
++		.flags = IORESOURCE_MEM,
++	},
++	[1] = {
++		.start = DMACH_SPI1_TX,
++		.end   = DMACH_SPI1_TX,
++		.flags = IORESOURCE_DMA,
++	},
++	[2] = {
++		.start = DMACH_SPI1_RX,
++		.end   = DMACH_SPI1_RX,
++		.flags = IORESOURCE_DMA,
++	},
++	[3] = {
++		.start = IRQ_SPI1,
++		.end   = IRQ_SPI1,
++		.flags = IORESOURCE_IRQ,
++	},
++};
++
++static struct s3c64xx_spi_cntrlr_info s3c64xx_spi1_pdata = {
++	.cfg_gpio = s3c64xx_spi_cfg_gpio,
++	.fifo_lvl_mask = 0x7f,
++	.rx_lvl_offset = 13,
++};
++
++struct platform_device s3c64xx_device_spi1 = {
++	.name		  = "s3c64xx-spi",
++	.id		  = 1,
++	.num_resources	  = ARRAY_SIZE(s3c64xx_spi1_resource),
++	.resource	  = s3c64xx_spi1_resource,
++	.dev = {
++		.dma_mask		= &spi_dmamask,
++		.coherent_dma_mask	= DMA_BIT_MASK(32),
++		.platform_data = &s3c64xx_spi1_pdata,
++	},
++};
++EXPORT_SYMBOL(s3c64xx_device_spi1);
++
++void __init s3c64xx_spi_set_info(int cntrlr, int src_clk_nr, int num_cs)
++{
++	/* Reject invalid configuration */
++	if (!num_cs || src_clk_nr < 0
++			|| src_clk_nr > S3C64XX_SPI_SRCCLK_48M) {
++		printk(KERN_ERR "%s: Invalid SPI configuration\n", __func__);
++		return;
++	}
++
++	switch (cntrlr) {
++	case 0:
++		s3c64xx_spi0_pdata.num_cs = num_cs;
++		s3c64xx_spi0_pdata.src_clk_nr = src_clk_nr;
++		s3c64xx_spi0_pdata.src_clk_name = spi_src_clks[src_clk_nr];
++		break;
++	case 1:
++		s3c64xx_spi1_pdata.num_cs = num_cs;
++		s3c64xx_spi1_pdata.src_clk_nr = src_clk_nr;
++		s3c64xx_spi1_pdata.src_clk_name = spi_src_clks[src_clk_nr];
++		break;
++	default:
++		printk(KERN_ERR "%s: Invalid SPI controller(%d)\n",
++							__func__, cntrlr);
++		return;
++	}
++}
 -- 
 1.6.2.5
 
