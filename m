@@ -1,74 +1,37 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH v4][mmc/host]:Blackfin SD Host Controller Driver
-Date: Wed, 25 Nov 2009 14:43:07 -0800
-Message-ID: <20091125144307.5e7d6d6f.akpm@linux-foundation.org>
-References: <1259162390-378-1-git-send-email-cliffcai.sh@gmail.com>
-	<20091125140422.cdee4a0d.akpm@linux-foundation.org>
-	<8bd0f97a0911251425q178993fete79b675e2730bdec@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: Jassi Brar <jassi.brar@samsung.com>
+Subject: [PATCH 1/5] SPI S3C64XX: Add SPI controller register base
+Date: Thu, 26 Nov 2009 15:48:05 +0900
+Message-ID: <1259218085-9785-1-git-send-email-jassi.brar@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:51028 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759846AbZKYWno (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2009 17:43:44 -0500
-In-Reply-To: <8bd0f97a0911251425q178993fete79b675e2730bdec@mail.gmail.com>
+Received: from ganesha.gnumonks.org ([213.95.27.120]:40629 "EHLO
+	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932338AbZKZGxQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Nov 2009 01:53:16 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mike Frysinger <vapier.adi@gmail.com>
-Cc: cliffcai.sh@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, cliff.cai@analog.com, Bryan Wu <cooloney@kernel.org>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: dbrownell@users.sourceforge.net, ben-linux@fluff.org, Jassi Brar <jassi.brar@samsung.com>
 
-On Wed, 25 Nov 2009 17:25:20 -0500
-Mike Frysinger <vapier.adi@gmail.com> wrote:
+Added SPI controller register base.
 
-> >> +static void sdh_start_cmd(struct sdh_host *host, struct mmc_command *cmd)
-> >> +{
-> >> + __ __ unsigned int sdh_cmd;
-> >> + __ __ unsigned int stat_mask;
-> >> +
-> >> + __ __ dev_dbg(mmc_dev(host->mmc), "%s enter cmd: 0x%p\n", __func__, cmd);
-> >> + __ __ WARN_ON(host->cmd != NULL);
-> >> + __ __ host->cmd = cmd;
-> >> +
-> >> + __ __ sdh_cmd = 0;
-> >> + __ __ stat_mask = 0;
-> >> +
-> >> + __ __ sdh_cmd |= cmd->opcode;
-> >> +
-> >> + __ __ if (cmd->flags & MMC_RSP_PRESENT) {
-> >> + __ __ __ __ __ __ sdh_cmd |= CMD_RSP;
-> >> + __ __ __ __ __ __ stat_mask |= CMD_RESP_END;
-> >> + __ __ } else
-> >> + __ __ __ __ __ __ stat_mask |= CMD_SENT;
+Signed-off-by: Jassi Brar <jassi.brar@samsung.com>
+---
+ arch/arm/mach-s3c6400/include/mach/map.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-(ftso gmail)
+diff --git a/arch/arm/mach-s3c6400/include/mach/map.h b/arch/arm/mach-s3c6400/include/mach/map.h
+index fc8b223..25f5593 100644
+--- a/arch/arm/mach-s3c6400/include/mach/map.h
++++ b/arch/arm/mach-s3c6400/include/mach/map.h
+@@ -48,6 +48,8 @@
+ #define S3C64XX_PA_IIS1		(0x7F003000)
+ #define S3C64XX_PA_TIMER	(0x7F006000)
+ #define S3C64XX_PA_IIC0		(0x7F004000)
++#define S3C64XX_PA_SPI0		(0x7F00B000)
++#define S3C64XX_PA_SPI1		(0x7F00C000)
+ #define S3C64XX_PA_IISV4	(0x7F00D000)
+ #define S3C64XX_PA_IIC1		(0x7F00F000)
+ 
+-- 
+1.6.2.5
 
-> > Arguably wrong from a coding-style POV and looks weird IMO. __Adds a bit
-> > of risk that subsequent coders will think they're writing in python adn
-> > will add bugs.
-> 
-> i dont really get what you're referring to here.  the code in question
-> looks ifne to me, and i dont see anything "python-esque" about it
-
-Code like
-
-	if (expr) {
-		line1;
-		line2;
-	} else
-		line3;
-
-looks odd and can cause people to later add bugs along the lines of
-
-	if (expr) {
-		line1;
-		line2;
-	} else
-+		line3a;
-		line3;
-
-this is particularly the case if line3 is long, or is preceded by a
-comment.  This has happened in the past.
-
-Adding the missing braces reduces the risk that this will occur.
