@@ -1,195 +1,199 @@
-From: don.mullis@gmail.com
-Subject: [PATCH 2.6.32-rc8 3/3] mmc: Add SD_STATUS register dump to debugfs
-Date: Sun, 29 Nov 2009 19:43:47 -0800
-Message-ID: <87y6lor824.fsf@gmail.com>
-Reply-To: <873a3wsncj.fsf@gmail.com>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] mmc: add module parameter to set whether cards are assumed
+ removable
+Date: Mon, 30 Nov 2009 14:38:41 +0200
+Message-ID: <4B13BCD1.9040000@nokia.com>
+References: <1257914676.2237.57.camel@localhost>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f171.google.com ([209.85.222.171]:38282 "EHLO
-	mail-pz0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752374AbZK3Dnn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Nov 2009 22:43:43 -0500
-Received: by pzk1 with SMTP id 1so2211098pzk.33
-        for <linux-mmc@vger.kernel.org>; Sun, 29 Nov 2009 19:43:50 -0800 (PST)
+Received: from smtp.nokia.com ([192.100.122.230]:44842 "EHLO
+	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751416AbZK3MjB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Nov 2009 07:39:01 -0500
+In-Reply-To: <1257914676.2237.57.camel@localhost>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: don.mullis@gmail.com
+To: Ben Hutchings <ben@decadent.org.uk>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, "504391@bugs.debian.org" <504391@bugs.debian.org>, Wouter van Heyst <larstiq@larstiq.dyndns.org>
 
-Add a file to debugfs to read back the SD_STATUS register from an SD
-card.  SD_STATUS contains performance-related information.
+Ben Hutchings wrote:
+> Some people run general-purpose distribution kernels on netbooks with
+> a card that is physically non-removable or logically non-removable
+> (e.g. used for /home) and cannot be cleanly unmounted during suspend.
+> Add a module parameter to set whether cards are assumed removable or
+> non-removable, with the default set by CONFIG_MMC_UNSAFE_RESUME.
+> 
+> Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+> ---
 
-Signed-off-by: don.mullis@gmail.com
----
- drivers/mmc/core/debugfs.c |   56 +++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/sd_ops.c  |   51 ++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/sd_ops.h  |    1 
- include/linux/mmc/sd.h     |    1 
- 4 files changed, 109 insertions(+)
+You do not cater for having more than one slot e.g. N900 has two:
+one internal non-removable and one external that is removable.
 
-Index: linux-2.6/drivers/mmc/core/sd_ops.c
-===================================================================
---- linux-2.6.orig/drivers/mmc/core/sd_ops.c	2009-11-02 15:10:28.000000000 -0800
-+++ linux-2.6/drivers/mmc/core/sd_ops.c	2009-11-02 15:19:01.000000000 -0800
-@@ -299,6 +299,57 @@ int mmc_app_send_scr(struct mmc_card *ca
- 	return 0;
- }
- 
-+int mmc_send_sd_status(struct mmc_card *card, u32 *sd_status)
-+{
-+	int err;
-+	struct mmc_request mrq;
-+	struct mmc_command cmd;
-+	struct mmc_data data;
-+	struct scatterlist sg;
-+	int i;
-+
-+	BUG_ON(!card);
-+	BUG_ON(!card->host);
-+	BUG_ON(!sd_status);
-+
-+	err = mmc_app_cmd(card->host, card);
-+	if (err)
-+		return err;
-+
-+	memset(&mrq, 0, sizeof(struct mmc_request));
-+	memset(&cmd, 0, sizeof(struct mmc_command));
-+	memset(&data, 0, sizeof(struct mmc_data));
-+
-+	mrq.cmd = &cmd;
-+	mrq.data = &data;
-+
-+	cmd.opcode = SD_APP_SEND_SD_STATUS;
-+	cmd.arg = 0;  /* not used */
-+	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+
-+	data.blksz = 16*sizeof(u32);
-+	data.blocks = 1;
-+	data.flags = MMC_DATA_READ;
-+	data.sg = &sg;
-+	data.sg_len = 1;
-+
-+	sg_init_one(&sg, sd_status, 16*sizeof(u32));
-+
-+	mmc_set_data_timeout(&data, card);
-+
-+	mmc_wait_for_req(card->host, &mrq);
-+
-+	if (cmd.error)
-+		return cmd.error;
-+	if (data.error)
-+		return data.error;
-+
-+	for (i = 0; i < 16; i++)
-+		sd_status[i] = be32_to_cpu(sd_status[i]);
-+
-+	return 0;
-+}
-+
- int mmc_sd_switch(struct mmc_card *card, int mode, int group,
- 	u8 value, u8 *resp)
- {
-Index: linux-2.6/drivers/mmc/core/sd_ops.h
-===================================================================
---- linux-2.6.orig/drivers/mmc/core/sd_ops.h	2009-11-02 15:10:28.000000000 -0800
-+++ linux-2.6/drivers/mmc/core/sd_ops.h	2009-11-02 15:19:01.000000000 -0800
-@@ -13,6 +13,7 @@
- #define _MMC_SD_OPS_H
- 
- int mmc_app_set_bus_width(struct mmc_card *card, int width);
-+int mmc_send_sd_status(struct mmc_card *card, u32 *sd_status);
- int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
- int mmc_send_if_cond(struct mmc_host *host, u32 ocr);
- int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca);
-Index: linux-2.6/include/linux/mmc/sd.h
-===================================================================
---- linux-2.6.orig/include/linux/mmc/sd.h	2009-11-02 15:10:28.000000000 -0800
-+++ linux-2.6/include/linux/mmc/sd.h	2009-11-02 15:19:01.000000000 -0800
-@@ -26,6 +26,7 @@
- #define SD_APP_SEND_NUM_WR_BLKS  22   /* adtc                    R1  */
- #define SD_APP_OP_COND           41   /* bcr  [31:0] OCR         R3  */
- #define SD_APP_SEND_SCR          51   /* adtc                    R1  */
-+#define SD_APP_SEND_SD_STATUS    13   /* adtc                    R1  */
- 
- /*
-  * SD_SWITCH argument format:
-Index: linux-2.6/drivers/mmc/core/debugfs.c
-===================================================================
---- linux-2.6.orig/drivers/mmc/core/debugfs.c	2009-11-02 15:10:28.000000000 -0800
-+++ linux-2.6/drivers/mmc/core/debugfs.c	2009-11-03 12:29:23.000000000 -0800
-@@ -17,6 +17,7 @@
- 
- #include "core.h"
- #include "mmc_ops.h"
-+#include "sd_ops.h"
- 
- /* The debugfs functions are optimized away when CONFIG_DEBUG_FS isn't set. */
- static int mmc_ios_show(struct seq_file *s, void *data)
-@@ -246,6 +247,56 @@ static struct file_operations mmc_dbg_ex
- 	.release	= mmc_ext_csd_release,
- };
- 
-+static int mmc_card_sd_status_show(struct seq_file *s, void *data)
-+{
-+	struct mmc_card	*card = s->private;
-+	u32		sd_status[16];
-+	int		ret;
-+
-+	mmc_claim_host(card->host);
-+
-+	/*
-+	 * Fields as defined in the Simplified SD Spec, available from
-+	 * http://www.sdcard.org/developers/tech/sdcard/pls/
-+	 */
-+	ret = mmc_send_sd_status(card, sd_status);
-+	if (!ret) {
-+		int i;
-+		const int WIDTH = 24;
-+
-+		for (i = 0; i < 16; i++)
-+			seq_printf(s, "%3d: %8x\n", 511-i*32, sd_status[i]);
-+		seq_printf(s, "\n");
-+
-+		seq_printf(s, "%-*s %d\n", WIDTH, "SPEED_CLASS:",
-+			UNSTUFF_BITS_ARRAY(sd_status, 440, 8)*2);
-+		seq_printf(s, "%-*s %01x\n", WIDTH, "PERFORMANCE_MOVE (MB/s):",
-+			UNSTUFF_BITS_ARRAY(sd_status, 432, 8));
-+		seq_printf(s, "%-*s %01x\n", WIDTH, "AU_SIZE (kB):",
-+			(1<<(UNSTUFF_BITS_ARRAY(sd_status, 428, 4)-1))*16);
-+		seq_printf(s, "%-*s %d\n", WIDTH, "ERASE_SIZE (AU):",
-+			UNSTUFF_BITS_ARRAY(sd_status, 408, 16));
-+		seq_printf(s, "%-*s %d\n", WIDTH, "ERASE_TIMEOUT (sec):",
-+			UNSTUFF_BITS_ARRAY(sd_status, 402, 6));
-+	}
-+
-+	mmc_release_host(card->host);
-+
-+	return ret;
-+}
-+
-+static int mmc_card_sd_status_open(struct inode *inode, struct file *file)
-+{
-+	return single_open(file, mmc_card_sd_status_show, inode->i_private);
-+}
-+
-+static const struct file_operations mmc_dbg_card_sd_status_fops = {
-+	.open		= mmc_card_sd_status_open,
-+	.read		= seq_read,
-+	.llseek		= seq_lseek,
-+	.release	= single_release,
-+};
-+
- void mmc_add_card_debugfs(struct mmc_card *card)
- {
- 	struct mmc_host	*host = card->host;
-@@ -278,6 +329,11 @@ void mmc_add_card_debugfs(struct mmc_car
- 					&mmc_dbg_ext_csd_fops))
- 			goto err;
- 
-+	if (mmc_card_sd(card))
-+		if (!debugfs_create_file("sd_status", S_IRUSR, root, card,
-+					&mmc_dbg_card_sd_status_fops))
-+			goto err;
-+
- 	return;
- 
- err:
+What about a sysfs entry instead e.g.
+
+ /sys/class/mmc-host/mmc*/nonremovable
+
+
+
+>  drivers/mmc/core/Kconfig |    4 +++-
+>  drivers/mmc/core/core.c  |   16 ++++++++++++++++
+>  drivers/mmc/core/core.h  |    2 ++
+>  drivers/mmc/core/mmc.c   |   23 +----------------------
+>  drivers/mmc/core/sd.c    |   21 +--------------------
+>  5 files changed, 23 insertions(+), 43 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+> index ab37a6d..bb22ffd 100644
+> --- a/drivers/mmc/core/Kconfig
+> +++ b/drivers/mmc/core/Kconfig
+> @@ -3,7 +3,7 @@
+>  #
+>  
+>  config MMC_UNSAFE_RESUME
+> -	bool "Allow unsafe resume (DANGEROUS)"
+> +	bool "Assume MMC/SD cards are non-removable (DANGEROUS)"
+>  	help
+>  	  If you say Y here, the MMC layer will assume that all cards
+>  	  stayed in their respective slots during the suspend. The
+> @@ -14,3 +14,5 @@ config MMC_UNSAFE_RESUME
+>  	  This option is usually just for embedded systems which use
+>  	  a MMC/SD card for rootfs. Most people should say N here.
+>  
+> +	  This option sets a default which can be overridden by the
+> +	  module parameter "removable=0" or "removable=1".
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index d98b0e2..010c964 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -48,6 +48,22 @@ int use_spi_crc = 1;
+>  module_param(use_spi_crc, bool, 0);
+>  
+>  /*
+> + * We normally treat cards as removed during suspend if they are not
+> + * known to be on a non-removable bus, to avoid the risk of writing
+> + * back data to a different card after resume.  Allow this to be
+> + * overridden if necessary.
+> + */
+> +#ifdef CONFIG_MMC_UNSAFE_RESUME
+> +int mmc_assume_removable;
+> +#else
+> +int mmc_assume_removable = 1;
+> +#endif
+> +module_param_named(removable, mmc_assume_removable, bool, 0644);
+> +MODULE_PARM_DESC(
+> +	removable,
+> +	"MMC/SD cards are removable and may be removed during suspend");
+> +
+> +/*
+>   * Internal function. Schedule delayed work in the MMC work queue.
+>   */
+>  static int mmc_schedule_delayed_work(struct delayed_work *work,
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> index 1c68783..d20b7bc 100644
+> --- a/drivers/mmc/core/core.h
+> +++ b/drivers/mmc/core/core.h
+> @@ -64,7 +64,9 @@ int mmc_attach_mmc(struct mmc_host *host, u32 ocr);
+>  int mmc_attach_sd(struct mmc_host *host, u32 ocr);
+>  int mmc_attach_sdio(struct mmc_host *host, u32 ocr);
+>  
+> +/* Module parameters */
+>  extern int use_spi_crc;
+> +extern int mmc_assume_removable;
+>  
+>  /* Debugfs information for hosts and cards */
+>  void mmc_add_host_debugfs(struct mmc_host *host);
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index bfefce3..c111894 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -602,25 +602,6 @@ static int mmc_awake(struct mmc_host *host)
+>  	return err;
+>  }
+>  
+> -#ifdef CONFIG_MMC_UNSAFE_RESUME
+> -
+> -static const struct mmc_bus_ops mmc_ops = {
+> -	.awake = mmc_awake,
+> -	.sleep = mmc_sleep,
+> -	.remove = mmc_remove,
+> -	.detect = mmc_detect,
+> -	.suspend = mmc_suspend,
+> -	.resume = mmc_resume,
+> -	.power_restore = mmc_power_restore,
+> -};
+> -
+> -static void mmc_attach_bus_ops(struct mmc_host *host)
+> -{
+> -	mmc_attach_bus(host, &mmc_ops);
+> -}
+> -
+> -#else
+> -
+>  static const struct mmc_bus_ops mmc_ops = {
+>  	.awake = mmc_awake,
+>  	.sleep = mmc_sleep,
+> @@ -645,15 +626,13 @@ static void mmc_attach_bus_ops(struct mmc_host *host)
+>  {
+>  	const struct mmc_bus_ops *bus_ops;
+>  
+> -	if (host->caps & MMC_CAP_NONREMOVABLE)
+> +	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
+>  		bus_ops = &mmc_ops_unsafe;
+>  	else
+>  		bus_ops = &mmc_ops;
+>  	mmc_attach_bus(host, bus_ops);
+>  }
+>  
+> -#endif
+> -
+>  /*
+>   * Starting point for MMC card init.
+>   */
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 10b2a4d..fdd414e 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -606,23 +606,6 @@ static void mmc_sd_power_restore(struct mmc_host *host)
+>  	mmc_release_host(host);
+>  }
+>  
+> -#ifdef CONFIG_MMC_UNSAFE_RESUME
+> -
+> -static const struct mmc_bus_ops mmc_sd_ops = {
+> -	.remove = mmc_sd_remove,
+> -	.detect = mmc_sd_detect,
+> -	.suspend = mmc_sd_suspend,
+> -	.resume = mmc_sd_resume,
+> -	.power_restore = mmc_sd_power_restore,
+> -};
+> -
+> -static void mmc_sd_attach_bus_ops(struct mmc_host *host)
+> -{
+> -	mmc_attach_bus(host, &mmc_sd_ops);
+> -}
+> -
+> -#else
+> -
+>  static const struct mmc_bus_ops mmc_sd_ops = {
+>  	.remove = mmc_sd_remove,
+>  	.detect = mmc_sd_detect,
+> @@ -643,15 +626,13 @@ static void mmc_sd_attach_bus_ops(struct mmc_host *host)
+>  {
+>  	const struct mmc_bus_ops *bus_ops;
+>  
+> -	if (host->caps & MMC_CAP_NONREMOVABLE)
+> +	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
+>  		bus_ops = &mmc_sd_ops_unsafe;
+>  	else
+>  		bus_ops = &mmc_sd_ops;
+>  	mmc_attach_bus(host, bus_ops);
+>  }
+>  
+> -#endif
+> -
+>  /*
+>   * Starting point for SD card init.
+>   */
+
