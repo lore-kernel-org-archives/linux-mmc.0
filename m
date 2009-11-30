@@ -1,109 +1,56 @@
 From: don.mullis@gmail.com
-Subject: [PATCH 2.6.32-rc8 1/3] mmc: Unify and generalize UNSTUFF_BITS macro
-Date: Sun, 29 Nov 2009 19:28:12 -0800
-Message-ID: <873a3wsncj.fsf@gmail.com>
+Subject: [PATCH 2.6.32-rc8 2/3] mmc: Clean up mmc_decode_scr() implementation
+Date: Sun, 29 Nov 2009 19:38:36 -0800
+Message-ID: <87zl64r8ar.fsf@gmail.com>
+Reply-To: <873a3wsncj.fsf@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f171.google.com ([209.85.222.171]:65184 "EHLO
-	mail-pz0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752761AbZK3D2I (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Nov 2009 22:28:08 -0500
-Received: by pzk1 with SMTP id 1so2203840pzk.33
-        for <linux-mmc@vger.kernel.org>; Sun, 29 Nov 2009 19:28:14 -0800 (PST)
+Received: from mail-pw0-f42.google.com ([209.85.160.42]:36603 "EHLO
+	mail-pw0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752687AbZK3Did (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Nov 2009 22:38:33 -0500
+Received: by pwi3 with SMTP id 3so1917040pwi.21
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Nov 2009 19:38:39 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: don.mullis@gmail.com
 
-Unify duplicated implementations of UNSTUFF_BITS() into a shared .h file.
-Recode UNSTUFF_BITS() as an invocation of a new more general macro
-UNSTUFF_BITS_ARRAY() that works on arrays of any multiple of 32 bits.
+In mmc_decode_scr(), back out coercion of 128-bit-oriented
+UNSTUFF_BITS() macro to work on 64-bit raw_scr field; invoke
+UNSTUFF_BITS_ARRAY() instead.
+
+Tested by verifying that /sys output for scr register is unchanged.
 
 Signed-off-by: don.mullis@gmail.com
 ---
- drivers/mmc/core/core.h |   21 +++++++++++++++++++++
- drivers/mmc/core/mmc.c  |   14 --------------
- drivers/mmc/core/sd.c   |   14 --------------
- 3 files changed, 21 insertions(+), 28 deletions(-)
+ drivers/mmc/core/sd.c |   10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
 
 Index: linux-2.6/drivers/mmc/core/sd.c
 ===================================================================
---- linux-2.6.orig/drivers/mmc/core/sd.c	2009-11-02 13:02:23.000000000 -0800
-+++ linux-2.6/drivers/mmc/core/sd.c	2009-11-02 15:10:28.000000000 -0800
-@@ -41,20 +41,6 @@ static const unsigned int tacc_mant[] = 
- 	35,	40,	45,	50,	55,	60,	70,	80,
- };
+--- linux-2.6.orig/drivers/mmc/core/sd.c	2009-09-29 12:50:36.000000000 -0700
++++ linux-2.6/drivers/mmc/core/sd.c	2009-11-01 22:30:37.000000000 -0800
+@@ -163,20 +163,16 @@ static int mmc_decode_scr(struct mmc_car
+ {
+ 	struct sd_scr *scr = &card->scr;
+ 	unsigned int scr_struct;
+-	u32 resp[4];
  
--#define UNSTUFF_BITS(resp,start,size)					\
--	({								\
--		const int __size = size;				\
--		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
--		const int __off = 3 - ((start) / 32);			\
--		const int __shft = (start) & 31;			\
--		u32 __res;						\
--									\
--		__res = resp[__off] >> __shft;				\
--		if (__size + __shft > 32)				\
--			__res |= resp[__off-1] << ((32 - __shft) % 32);	\
--		__res & __mask;						\
--	})
+-	resp[3] = card->raw_scr[1];
+-	resp[2] = card->raw_scr[0];
 -
- /*
-  * Given the decoded CSD structure, decode the raw CID to our CID structure.
-  */
-Index: linux-2.6/drivers/mmc/core/core.h
-===================================================================
---- linux-2.6.orig/drivers/mmc/core/core.h	2009-11-02 13:02:23.000000000 -0800
-+++ linux-2.6/drivers/mmc/core/core.h	2009-11-02 15:12:01.000000000 -0800
-@@ -13,6 +13,27 @@
+-	scr_struct = UNSTUFF_BITS(resp, 60, 4);
++	scr_struct = UNSTUFF_BITS_ARRAY(card->raw_scr, 60, 4);
+ 	if (scr_struct != 0) {
+ 		printk(KERN_ERR "%s: unrecognised SCR structure version %d\n",
+ 			mmc_hostname(card->host), scr_struct);
+ 		return -EINVAL;
+ 	}
  
- #include <linux/delay.h>
+-	scr->sda_vsn = UNSTUFF_BITS(resp, 56, 4);
+-	scr->bus_widths = UNSTUFF_BITS(resp, 48, 4);
++	scr->sda_vsn =    UNSTUFF_BITS_ARRAY(card->raw_scr, 56, 4);
++	scr->bus_widths = UNSTUFF_BITS_ARRAY(card->raw_scr, 48, 4);
  
-+#define UNSTUFF_BITS_ARRAY(u32_array, start, size)			\
-+	({								\
-+		const int __size = size;				\
-+		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
-+		const int __off = (sizeof(u32_array)/4-1) - ((start) / 32); \
-+		const int __shft = (start) & 31;			\
-+		u32 __res;						\
-+									\
-+		__res = (u32_array)[__off] >> __shft;			\
-+		if (__size + __shft > 32)				\
-+			__res |= (u32_array)[__off-1]			\
-+				<< ((32 - __shft) % 32); 		\
-+		__res & __mask;						\
-+	})
-+
-+/*
-+ * Specific to 128-bit arrays, e.g. raw_cid[] and raw_csd[].
-+ */
-+#define UNSTUFF_BITS(resp, start, size)	\
-+	UNSTUFF_BITS_ARRAY(*(u32(*)[4])resp, start, size)
-+
- #define MMC_CMD_RETRIES        3
- 
- struct mmc_bus_ops {
-Index: linux-2.6/drivers/mmc/core/mmc.c
-===================================================================
---- linux-2.6.orig/drivers/mmc/core/mmc.c	2009-11-02 13:02:23.000000000 -0800
-+++ linux-2.6/drivers/mmc/core/mmc.c	2009-11-02 13:02:23.000000000 -0800
-@@ -39,20 +39,6 @@ static const unsigned int tacc_mant[] = 
- 	35,	40,	45,	50,	55,	60,	70,	80,
- };
- 
--#define UNSTUFF_BITS(resp,start,size)					\
--	({								\
--		const int __size = size;				\
--		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
--		const int __off = 3 - ((start) / 32);			\
--		const int __shft = (start) & 31;			\
--		u32 __res;						\
--									\
--		__res = resp[__off] >> __shft;				\
--		if (__size + __shft > 32)				\
--			__res |= resp[__off-1] << ((32 - __shft) % 32);	\
--		__res & __mask;						\
--	})
--
- /*
-  * Given the decoded CSD structure, decode the raw CID to our CID structure.
-  */
+ 	return 0;
+ }
