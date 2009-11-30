@@ -1,86 +1,35 @@
-From: Pierre Ossman <pierre@ossman.eu>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: [PATCH] mmc: add module parameter to set whether cards are
  assumed removable
-Date: Mon, 30 Nov 2009 13:39:49 +0100
-Message-ID: <20091130133949.794fef00@mjolnir.ossman.eu>
+Date: Mon, 30 Nov 2009 12:48:44 +0000
+Message-ID: <20091130124844.6ec0b8da@lxorguk.ukuu.org.uk>
 References: <1257914676.2237.57.camel@localhost>
-	<20091116122329.847916b6.akpm@linux-foundation.org>
-	<1258410709.2792.9.camel@localhost>
-	<4B02565C.1030406@s5r6.in-berlin.de>
+	<4B13BCD1.9040000@nokia.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-29976-1259584796-0001-2"
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753101AbZK3Mju@vger.kernel.org>
-In-Reply-To: <4B02565C.1030406@s5r6.in-berlin.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Richter <stefanr@s5r6.in-berlin.de>
-Cc: Ben Hutchings <ben@decadent.org.uk>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, 504391@bugs.debian.org, Wouter van Heyst <larstiq@larstiq.dyndns.org>
-List-Id: linux-mmc@vger.kernel.org
-
-This is a MIME-formatted message.  If you see this text it means that your
-E-mail software does not support MIME-formatted messages.
-
---=_freyr.ossman.eu-29976-1259584796-0001-2
 Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, 17 Nov 2009 08:53:00 +0100
-Stefan Richter <stefanr@s5r6.in-berlin.de> wrote:
-
-> Ben Hutchings wrote:
-> > In general, it is not possible to tell whether a card present in an MMC
-> > slot after resume is the same that was there before suspend.
->=20
-> That's true for virtually all storage devices, not just MMC.
->=20
-> > So there are two possible behaviours, each of which will cause data
-> > loss in some cases:
-> >=20
-> > CONFIG_MMC_UNSAFE_RESUME=3Dn (default): Cards are assumed to be removed
-> > during suspend.  Any filesystem on them must be unmounted before
-> > suspend; otherwise, buffered writes will be lost.
-> >=20
-> > CONFIG_MMC_UNSAFE_RESUME=3Dy: Cards are assumed to remain present during
-> > suspend.  They must not be swapped during suspend; otherwise, buffered
-> > writes will be flushed to the wrong card.
-> >=20
-> > Currently the choice is made at compile time and this allows that to be
-> > overridden at module load time.
->=20
-> Can't the kernel flush the write buffer at suspend time, so that you can
-> remove this choice for good?
-
-I'm afraid that's insufficient. What it would need to do is to is
-flush everything (to make sure what's on disk matches what's in
-memory), but also read back the filesystem on resume to verify that
-nothing else modified it (i.e. making sure what's on disk still matches
-what's in memory).
-
-Another way of putting it is that the kernel needs to umount/mount
-around suspend in a way that's transparent to users of the filesystem.
-
-Until we have such a system in place then everything will be hacks
-which only shift around the problem.
-
-Rgds
---=20
-     -- Pierre Ossman
-
-  WARNING: This correspondence is being monitored by FRA, a
-  Swedish intelligence agency. Make sure your server uses
-  encryption for SMTP traffic and consider using PGP for
-  end-to-end encryption.
-
---=_freyr.ossman.eu-29976-1259584796-0001-2
-Content-Type: application/pgp-signature; name="signature.asc"
 Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename=signature.asc
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from earthlight.etchedpixels.co.uk ([81.2.110.250]:52591 "EHLO
+	www.etchedpixels.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752812AbZK3Mqs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Nov 2009 07:46:48 -0500
+In-Reply-To: <4B13BCD1.9040000@nokia.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Ben Hutchings <ben@decadent.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, "504391@bugs.debian.org" <504391@bugs.debian.org>, Wouter van Heyst <larstiq@larstiq.dyndns.org>
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.13 (GNU/Linux)
+> You do not cater for having more than one slot e.g. N900 has two:
+> one internal non-removable and one external that is removable.
+> 
+> What about a sysfs entry instead e.g.
+> 
+>  /sys/class/mmc-host/mmc*/nonremovable
 
-iEYEARECAAYFAksTvRcACgkQ7b8eESbyJLiMGgCfVpmnb/sdZcz4qn+TFVfkfILI
-OvEAmwfjDQUPebeN2Iv/ThmnXXfMswKm
-=o000
------END PGP SIGNATURE-----
+That continues the assumption that the user will somehow ever know about
+this stuff and configure it. Almost nobody will.
 
---=_freyr.ossman.eu-29976-1259584796-0001-2--
+Not only does it need to be per-port there needs to be a credible
+description of how it will automatically happen - who configures it,
+when, how and is the data needed available.
+
