@@ -1,60 +1,109 @@
-From: Mike Frysinger <vapier.adi@gmail.com>
-Subject: Re: [PATCH v4][mmc/host]:Blackfin SD Host Controller Driver
-Date: Sun, 29 Nov 2009 16:39:16 -0500
-Message-ID: <8bd0f97a0911291339v7b0195dfjeb2065d011b47dc7@mail.gmail.com>
-References: <1259162390-378-1-git-send-email-cliffcai.sh@gmail.com>
-	<20091125140422.cdee4a0d.akpm@linux-foundation.org> <8bd0f97a0911251425q178993fete79b675e2730bdec@mail.gmail.com>
-	<20091125144307.5e7d6d6f.akpm@linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: don.mullis@gmail.com
+Subject: [PATCH 2.6.32-rc8 1/3] mmc: Unify and generalize UNSTUFF_BITS macro
+Date: Sun, 29 Nov 2009 19:28:12 -0800
+Message-ID: <873a3wsncj.fsf@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f212.google.com ([209.85.217.212]:65502 "EHLO
-	mail-gx0-f212.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752425AbZK2Vja convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Nov 2009 16:39:30 -0500
-In-Reply-To: <20091125144307.5e7d6d6f.akpm@linux-foundation.org>
+Received: from mail-pz0-f171.google.com ([209.85.222.171]:65184 "EHLO
+	mail-pz0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752761AbZK3D2I (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Nov 2009 22:28:08 -0500
+Received: by pzk1 with SMTP id 1so2203840pzk.33
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Nov 2009 19:28:14 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: cliffcai.sh@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, cliff.cai@analog.com, Bryan Wu <cooloney@kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: don.mullis@gmail.com
 
-On Wed, Nov 25, 2009 at 17:43, Andrew Morton wrote:
-> On Wed, 25 Nov 2009 17:25:20 -0500 Mike Frysinger wrote:
->> > Arguably wrong from a coding-style POV and looks weird IMO. __Adds=
- a bit
->> > of risk that subsequent coders will think they're writing in pytho=
-n adn
->> > will add bugs.
->>
->> i dont really get what you're referring to here. =C2=A0the code in q=
-uestion
->> looks ifne to me, and i dont see anything "python-esque" about it
->
-> Code like
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (expr) {
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0line1;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0line2;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0} else
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0line3;
->
-> looks odd and can cause people to later add bugs along the lines of
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (expr) {
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0line1;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0line2;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0} else
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 line3a;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0line3;
->
-> this is particularly the case if line3 is long, or is preceded by a
-> comment. =C2=A0This has happened in the past.
->
-> Adding the missing braces reduces the risk that this will occur.
+Unify duplicated implementations of UNSTUFF_BITS() into a shared .h file.
+Recode UNSTUFF_BITS() as an invocation of a new more general macro
+UNSTUFF_BITS_ARRAY() that works on arrays of any multiple of 32 bits.
 
-*shrug* people can screw up braces regardless of how many statements
-and/or branches there are.  i doubt people are going to get confused
-and think kernel code is python, but if you really want to be pedantic
-about braces, doesnt matter that much to me.
--mike
+Signed-off-by: don.mullis@gmail.com
+---
+ drivers/mmc/core/core.h |   21 +++++++++++++++++++++
+ drivers/mmc/core/mmc.c  |   14 --------------
+ drivers/mmc/core/sd.c   |   14 --------------
+ 3 files changed, 21 insertions(+), 28 deletions(-)
+
+Index: linux-2.6/drivers/mmc/core/sd.c
+===================================================================
+--- linux-2.6.orig/drivers/mmc/core/sd.c	2009-11-02 13:02:23.000000000 -0800
++++ linux-2.6/drivers/mmc/core/sd.c	2009-11-02 15:10:28.000000000 -0800
+@@ -41,20 +41,6 @@ static const unsigned int tacc_mant[] = 
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+ 
+-#define UNSTUFF_BITS(resp,start,size)					\
+-	({								\
+-		const int __size = size;				\
+-		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
+-		const int __off = 3 - ((start) / 32);			\
+-		const int __shft = (start) & 31;			\
+-		u32 __res;						\
+-									\
+-		__res = resp[__off] >> __shft;				\
+-		if (__size + __shft > 32)				\
+-			__res |= resp[__off-1] << ((32 - __shft) % 32);	\
+-		__res & __mask;						\
+-	})
+-
+ /*
+  * Given the decoded CSD structure, decode the raw CID to our CID structure.
+  */
+Index: linux-2.6/drivers/mmc/core/core.h
+===================================================================
+--- linux-2.6.orig/drivers/mmc/core/core.h	2009-11-02 13:02:23.000000000 -0800
++++ linux-2.6/drivers/mmc/core/core.h	2009-11-02 15:12:01.000000000 -0800
+@@ -13,6 +13,27 @@
+ 
+ #include <linux/delay.h>
+ 
++#define UNSTUFF_BITS_ARRAY(u32_array, start, size)			\
++	({								\
++		const int __size = size;				\
++		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
++		const int __off = (sizeof(u32_array)/4-1) - ((start) / 32); \
++		const int __shft = (start) & 31;			\
++		u32 __res;						\
++									\
++		__res = (u32_array)[__off] >> __shft;			\
++		if (__size + __shft > 32)				\
++			__res |= (u32_array)[__off-1]			\
++				<< ((32 - __shft) % 32); 		\
++		__res & __mask;						\
++	})
++
++/*
++ * Specific to 128-bit arrays, e.g. raw_cid[] and raw_csd[].
++ */
++#define UNSTUFF_BITS(resp, start, size)	\
++	UNSTUFF_BITS_ARRAY(*(u32(*)[4])resp, start, size)
++
+ #define MMC_CMD_RETRIES        3
+ 
+ struct mmc_bus_ops {
+Index: linux-2.6/drivers/mmc/core/mmc.c
+===================================================================
+--- linux-2.6.orig/drivers/mmc/core/mmc.c	2009-11-02 13:02:23.000000000 -0800
++++ linux-2.6/drivers/mmc/core/mmc.c	2009-11-02 13:02:23.000000000 -0800
+@@ -39,20 +39,6 @@ static const unsigned int tacc_mant[] = 
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+ 
+-#define UNSTUFF_BITS(resp,start,size)					\
+-	({								\
+-		const int __size = size;				\
+-		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
+-		const int __off = 3 - ((start) / 32);			\
+-		const int __shft = (start) & 31;			\
+-		u32 __res;						\
+-									\
+-		__res = resp[__off] >> __shft;				\
+-		if (__size + __shft > 32)				\
+-			__res |= resp[__off-1] << ((32 - __shft) % 32);	\
+-		__res & __mask;						\
+-	})
+-
+ /*
+  * Given the decoded CSD structure, decode the raw CID to our CID structure.
+  */
