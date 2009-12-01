@@ -1,157 +1,79 @@
-From: akpm@linux-foundation.org
-Subject: + ricoh_mmc-port-from-driver-to-pci-quirk-update.patch added to -mm tree
-Date: Mon, 30 Nov 2009 13:49:35 -0800
-Message-ID: <200911302149.nAULnZrM013790@imap1.linux-foundation.org>
+From: Daniel Drake <dsd@laptop.org>
+Subject: Re: crash in mmc subsystem during suspend
+Date: Tue, 01 Dec 2009 12:49:26 +0000
+Message-ID: <1259671766.2124.34.camel@localhost.localdomain>
+References: <1258707087.2235.6.camel@localhost.localdomain>
+	 <1258729858.2235.29.camel@localhost.localdomain>
+	 <20091121123149.GA18478@console-pimps.org>
+Mime-Version: 1.0
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:53519 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752628AbZK3Vtl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Nov 2009 16:49:41 -0500
+Received: from mail-bw0-f227.google.com ([209.85.218.227]:63925 "EHLO
+	mail-bw0-f227.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753112AbZLAMtZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2009 07:49:25 -0500
+Received: by bwz27 with SMTP id 27so3378987bwz.21
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Dec 2009 04:49:30 -0800 (PST)
+In-Reply-To: <20091121123149.GA18478@console-pimps.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: maximlevitsky@gmail.com, linux-mmc@vger.kernel.org, philipl@overt.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: linux-mmc@vger.kernel.org
 
+On Sat, 2009-11-21 at 12:31 +0000, Matt Fleming wrote:
+> Fancy giving this patch a try? I think it's just a case of removing too
+> many funcs in the error path.
 
-The patch titled
-     ricoh_mmc-port-from-driver-to-pci-quirk update
-has been added to the -mm tree.  Its filename is
-     ricoh_mmc-port-from-driver-to-pci-quirk-update.patch
+Thanks!
+Yes, I agree that looks like the culprit.
+I applied something very similar to your patch and the crash went away.
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+The one additional change I made is in sdio_bus.c :
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: ricoh_mmc-port-from-driver-to-pci-quirk update
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-
-This patch solves nasty problem original driver has.
-Original goal of the ricoh_mmc was to disable this device because
-then, mmc cards can be read using standard SDHCI controller,
-thus avoiding writing of yet another driver.
-However, the act of disablement, makes other pci functions that belong to
-this controller (xD and memstick) shift up one level, thus pci core has now wrong idea
-about these devices.
-
-To fix this issue, this patch moves the driver into pci quirk section, thus it
-is executes before the pci is enumerated, and therefore solving that issue,
-also same sequence of commands is performed on resume for same reasons.
-
-Also regardless of the above, this way is cleaner.
-
-You still need to set CONFIG_MMC_RICOH_MMC
-to enable this quirk
-
-Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Philip Langdale <philipl@overt.org>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/Kconfig |   13 +++++++++++++
- drivers/pci/quirks.c     |   21 ++++++++++++++++++---
- 2 files changed, 31 insertions(+), 3 deletions(-)
-
-diff -puN drivers/mmc/host/Kconfig~ricoh_mmc-port-from-driver-to-pci-quirk-update drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~ricoh_mmc-port-from-driver-to-pci-quirk-update
-+++ a/drivers/mmc/host/Kconfig
-@@ -55,6 +55,19 @@ config MMC_SDHCI_PCI
- 
- 	  If unsure, say N.
- 
-+config MMC_RICOH_MMC
-+	bool "Ricoh MMC Controller Disabler  (EXPERIMENTAL)"
-+	depends on MMC_SDHCI_PCI
-+	help
-+	  This adds a pci quirk to disable Ricoh MMC Controller. This
-+	  proprietary controller is unnecessary because the SDHCI driver
-+	  supports MMC cards on the SD controller, but if it is not
-+	  disabled, it will steal the MMC cards away - rendering them
-+	  useless. It is safe to select this even if you don't
-+	  have a Ricoh based card reader.
-+
-+	  If unsure, say Y.
-+
- config MMC_SDHCI_OF
- 	tristate "SDHCI support on OpenFirmware platforms"
- 	depends on MMC_SDHCI && PPC_OF
-diff -puN drivers/pci/quirks.c~ricoh_mmc-port-from-driver-to-pci-quirk-update drivers/pci/quirks.c
---- a/drivers/pci/quirks.c~ricoh_mmc-port-from-driver-to-pci-quirk-update
-+++ a/drivers/pci/quirks.c
-@@ -2522,9 +2522,11 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_I
- 
- /*
-  * This is a quirk for Ricoh MMC controller found as a part of
-- * multifunction chip.
-- * It is very similiar and based on ricoh_mmc driver written by Philip Langdale
-- * Thanks for these magic sequences.
-+ * mulifunction chip.
-+
-+ * This is very similiar and based on ricoh_mmc driver
-+ * written by Philip Langdale. Thank you for these magic sequencies.
-+
-  * These chips implement the four main memory card
-  * controllers (SD, MMC, MS, xD) and one or both
-  * of cardbus or firewire. It happens that they implement SD and MMC
-@@ -2536,8 +2538,13 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_I
-  * It seems to be the case that the relevant PCI registers to deactivate the
-  * MMC controller live on PCI function 0, which might be the cardbus controller
-  * or the firewire controller, depending on the particular chip in question
-+
-+ * This has to be done early, because as soon as we disable the MMC controller
-+ * other pci functions shift up one level, e.g. function #2 becames function
-+ * #1, and therefore is confusing the pci core.
-  */
- 
-+#ifdef CONFIG_MMC_RICOH_MMC
- static void ricoh_mmc_fixup_rl5c476(struct pci_dev *dev)
+ void sdio_remove_func(struct sdio_func *func)
  {
- 	/* disable via cardbus interface */
-@@ -2560,6 +2567,9 @@ static void ricoh_mmc_fixup_rl5c476(stru
- 	pci_write_config_byte(dev, 0xB7, disable | 0x02);
- 	pci_write_config_byte(dev, 0x8E, write_enable);
- 	pci_write_config_byte(dev, 0x8D, write_target);
-+
-+	printk(KERN_NOTICE "pci: Ricoh MMC controller disabled\n");
-+	printk(KERN_NOTICE "pci: mmc cards will be supported through SDHCI\n");
+-       if (sdio_func_present(func))
+-               device_del(&func->dev);
++       if (!sdio_func_present(func))
++               return;
+ 
++       device_del(&func->dev);
+        put_device(&func->dev);
  }
- 
- static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
-@@ -2581,6 +2591,9 @@ static void ricoh_mmc_fixup_r5c832(struc
- 	pci_write_config_byte(dev, 0xCA, 0x57);
- 	pci_write_config_byte(dev, 0xCB, disable | 0x02);
- 	pci_write_config_byte(dev, 0xCA, write_enable);
-+
-+	printk(KERN_NOTICE "pci: Ricoh MMC controller disabled\n");
-+	printk(KERN_NOTICE "pci: mmc cards will be supported through SDHCI\n");
- }
- 
- DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476,
-@@ -2596,6 +2609,8 @@ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RI
- DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832,
- 	ricoh_mmc_fixup_r5c832);
- 
-+#endif /*CONFIG_MMC_RICOH_MMC*/
-+
- 
- static void pci_do_fixups(struct pci_dev *dev, struct pci_fixup *f,
- 			  struct pci_fixup *end)
-_
 
-Patches currently in -mm which might be from maximlevitsky@gmail.com are
+I think this is necessary because the error path will go mmc_sdio_remove
+--> sdio_remove_func
+Hence sdio_remove_func() will be called when sdio_add_func() was never
+called beforehand, so there is no func->dev reference to drop.
 
-linux-next.patch
-ricoh_mmc-port-from-driver-to-pci-quirk.patch
-ricoh_mmc-port-from-driver-to-pci-quirk-update.patch
-rtc-disable-hpet-emulation-on-suspend.patch
+Do you agree? I'm not certain about this one.
+
+Thanks!
+Daniel
+
+
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index cdb845b..cdec9c8 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -516,7 +516,8 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
+>  	 * The number of functions on the card is encoded inside
+>  	 * the ocr.
+>  	 */
+> -	card->sdio_funcs = funcs = (ocr & 0x70000000) >> 28;
+> +	funcs = (ocr & 0x70000000) >> 28;
+> +	card->sdio_funcs = 0;
+>  
+>  	/*
+>  	 * If needed, disconnect card detection pull-up resistor.
+> @@ -528,7 +529,7 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
+>  	/*
+>  	 * Initialize (but don't add) all present functions.
+>  	 */
+> -	for (i = 0;i < funcs;i++) {
+> +	for (i = 0;i < funcs;i++,card->sdio_funcs++) {
+>  		err = sdio_init_func(host->card, i + 1);
+>  		if (err)
+>  			goto remove;
 
