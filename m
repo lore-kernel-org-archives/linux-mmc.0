@@ -1,33 +1,42 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: [PATCH] sdio: Initialise SDIO functions and update card->sdio_funcs in lockstep
-Date: Tue,  1 Dec 2009 14:50:56 +0000
-Message-ID: <1259679056-10343-1-git-send-email-matt@console-pimps.org>
+From: Daniel Drake <dsd@laptop.org>
+Subject: [PATCH] sdio: Fix crash in mmc_attach_sdio() error path
+Date: Tue,  1 Dec 2009 15:13:00 +0000 (GMT)
+Message-ID: <20091201151300.A34C29D404F@zog.reactivated.net>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:41677 "EHLO
-	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751898AbZLAOtK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2009 09:49:10 -0500
+Received: from queueout02-winn.ispmail.ntl.com ([81.103.221.56]:55807 "EHLO
+	queueout02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753462AbZLAP1d (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2009 10:27:33 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, Daniel Drake <dsd@laptop.org>
+To: akpm@linux-foundation.org
+Cc: linux-mmc@vger.kernel.org, matt@console-pimps.org
 
-We need to accurately track how many SDIO functions have been
-initialised (and keep card->sdio_funcs in sync) so that we don't try to
-remove more functions than we initialised if we hit the error path in
-mmc_attach_sdio().
+At http://dev.laptop.org/ticket/9707 we are seeing a crash in
+the error path of mmc_attach_sdio()
 
-Without this patch if we hit the error path in mmc_attach_sdio() we run
-the risk of deferencing invalid memory in sdio_remove_func(), leading to
-a crash.
+BUG: unable to handle kernel paging request at 6b6b6c57
+IP: [<b066d6e2>] sdio_remove_func+0x9/0x27
+Call Trace:
+[<b066cfb4>] ? mmc_sdio_remove+0x34/0x65
+[<b066d1fc>] ? mmc_attach_sdio+0x217/0x240
+[<b066a22f>] ? mmc_rescan+0x1a2/0x20f
+[<b042e9a0>] ? worker_thread+0x156/0x1e1
 
-Signed-off-by: Matt Fleming <matt@console-pimps.org>
+Matt Fleming pointed out that this is because more cards are being
+removed than have been initialized/added in the error path.
+
+Fix the error path to handle failures gracefully. Based on earlier
+patch from Matt.
+
+Signed-off-by: Daniel Drake <dsd@laptop.org>
 ---
- drivers/mmc/core/sdio.c |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/core/sdio.c     |    6 ++++--
+ drivers/mmc/core/sdio_bus.c |    7 +++++--
+ 2 files changed, 9 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index cdb845b..8002797 100644
+index cdb845b..fa07d4f 100644
 --- a/drivers/mmc/core/sdio.c
 +++ b/drivers/mmc/core/sdio.c
 @@ -516,7 +516,8 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
@@ -40,7 +49,7 @@ index cdb845b..8002797 100644
  
  	/*
  	 * If needed, disconnect card detection pull-up resistor.
-@@ -528,7 +529,7 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
+@@ -528,10 +529,11 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
  	/*
  	 * Initialize (but don't add) all present functions.
  	 */
@@ -49,6 +58,32 @@ index cdb845b..8002797 100644
  		err = sdio_init_func(host->card, i + 1);
  		if (err)
  			goto remove;
++		card->sdio_funcs = i + 1;
+ 	}
+ 
+ 	mmc_release_host(host);
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index d37464e..9e060c8 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -248,12 +248,15 @@ int sdio_add_func(struct sdio_func *func)
+ /*
+  * Unregister a SDIO function with the driver model, and
+  * (eventually) free it.
++ * This function can be called through error paths where sdio_add_func() was
++ * never executed (because a failure occurred at an earlier point).
+  */
+ void sdio_remove_func(struct sdio_func *func)
+ {
+-	if (sdio_func_present(func))
+-		device_del(&func->dev);
++	if (!sdio_func_present(func))
++		return;
+ 
++	device_del(&func->dev);
+ 	put_device(&func->dev);
+ }
+ 
 -- 
-1.6.4.rc0
+1.6.2.5
 
