@@ -1,36 +1,48 @@
-From: Eric Miao <eric.y.miao@gmail.com>
-Subject: Re: [PATCH] MMC: pxamci: call pdata->setpower even when regulator is
-	used
-Date: Wed, 2 Dec 2009 12:34:53 +0800
-Message-ID: <f17812d70912012034t57ebde8fmb7f7971109436775@mail.gmail.com>
-References: <1259233813-2724-1-git-send-email-daniel@caiaq.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Daniel Drake <dsd@laptop.org>
+Subject: [PATCH] sdio: Fix reference counting in sdio_remove_func()
+Date: Wed,  2 Dec 2009 09:22:19 +0000 (GMT)
+Message-ID: <20091202092219.2AD329D404F@zog.reactivated.net>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f192.google.com ([209.85.221.192]:39005 "EHLO
-	mail-qy0-f192.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753719AbZLBEfH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2009 23:35:07 -0500
-Received: by qyk30 with SMTP id 30so2499993qyk.33
-        for <linux-mmc@vger.kernel.org>; Tue, 01 Dec 2009 20:35:13 -0800 (PST)
-In-Reply-To: <1259233813-2724-1-git-send-email-daniel@caiaq.de>
+Received: from mtaout01-winn.ispmail.ntl.com ([81.103.221.47]:25455 "EHLO
+	mtaout01-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751320AbZLBJWQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2009 04:22:16 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Mack <daniel@caiaq.de>
-Cc: linux-arm-kernel@lists.infradead.org, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org
+To: akpm@linux-foundation.org
+Cc: linux-mmc@vger.kernel.org, matt@console-pimps.org
 
-On Thu, Nov 26, 2009 at 7:10 PM, Daniel Mack <daniel@caiaq.de> wrote:
-> On platforms where the vmmc regulator is used, it might still be
-> necessary to call the platform data's setpower() callback in order to
-> drive GPIOs to power up hardware.
->
-> I can't see any pxamci user with power regulators enabled, hence this
-> shouldn't break anything.
->
+sdio_remove_func() needs to be more careful about reference counting.
+It can be called in error paths where sdio_add_func() has never been called
+e.g. mmc_attach_sdio error path --> mmc_sdio_remove --> sdio_remove_func
 
-I was thinking about this for quite a time, and I'm afraid that this patch
-solves only one corner case - that some specific actions need to be
-taken _after_ mmc regulator is adjusted, while excluding the possibility
-for that to happen _before_. I wonder maybe for those corner cases,
-if one can just manipulate the vmmc regulator and other specific stuffs
-within ->setpower().
+Signed-off-by: Daniel Drake <dsd@laptop.org>
+---
+ drivers/mmc/core/sdio_bus.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index d37464e..9e060c8 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -248,12 +248,15 @@ int sdio_add_func(struct sdio_func *func)
+ /*
+  * Unregister a SDIO function with the driver model, and
+  * (eventually) free it.
++ * This function can be called through error paths where sdio_add_func() was
++ * never executed (because a failure occurred at an earlier point).
+  */
+ void sdio_remove_func(struct sdio_func *func)
+ {
+-	if (sdio_func_present(func))
+-		device_del(&func->dev);
++	if (!sdio_func_present(func))
++		return;
+ 
++	device_del(&func->dev);
+ 	put_device(&func->dev);
+ }
+ 
+-- 
+1.6.2.5
+
