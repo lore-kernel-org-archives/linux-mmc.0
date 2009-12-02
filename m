@@ -1,58 +1,84 @@
-From: Eric Miao <eric.y.miao@gmail.com>
-Subject: Re: [PATCH] mmc: pxamci: call mmc_remove_host() before freeing
-	resources
-Date: Wed, 2 Dec 2009 23:02:55 +0800
-Message-ID: <f17812d70912020702n318089f0rd2e129b0e45458b2@mail.gmail.com>
-References: <1259687838-31722-1-git-send-email-daniel@caiaq.de>
-	<f17812d70912011650h48a6c391s426ffc8b4b653fc8@mail.gmail.com>
-	<20091202110326.GZ14091@buzzloop.caiaq.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: akpm@linux-foundation.org
+Subject: + sdio-initialise-sdio-functions-and-update-card-sdio_funcs-in-lockstep.patch added to -mm tree
+Date: Wed, 02 Dec 2009 15:49:44 -0800
+Message-ID: <200912022349.nB2NnidU027871@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from qw-out-2122.google.com ([74.125.92.25]:61940 "EHLO
-	qw-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751940AbZLBPDJ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2009 10:03:09 -0500
-In-Reply-To: <20091202110326.GZ14091@buzzloop.caiaq.de>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:48423 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752866AbZLBXuO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2009 18:50:14 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Mack <daniel@caiaq.de>
-Cc: Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, stable@kernel.org
+To: mm-commits@vger.kernel.org
+Cc: matt@console-pimps.org, dsd@laptop.org, linux-mmc@vger.kernel.org
 
-On Wed, Dec 2, 2009 at 7:03 PM, Daniel Mack <daniel@caiaq.de> wrote:
-> On Wed, Dec 02, 2009 at 08:50:44AM +0800, Eric Miao wrote:
->> On Wed, Dec 2, 2009 at 1:17 AM, Daniel Mack <daniel@caiaq.de> wrote:
->> > mmc_remove_host() will cause the mmc core to switch off the bus po=
-wer by
->> > eventually calling pxamci_set_ios(). This function uses the regula=
-tor or
->> > the GPIO which have been freed already.
->> >
->> > This causes the following Oops on module unload.
->> >
->
-> [...]
->
->> >
->> > Signed-off-by: Daniel Mack <daniel@caiaq.de>
->> > Reported-by: Sven Neumann <s.neumann@raumfeld.com>
->> > Cc: Pierre Ossman <pierre@ossman.eu>
->> > Cc: Eric Miao <eric.y.miao@gmail.com>
->> > Cc: linux-mmc@vger.kernel.org
->> > Cc: linux-arm-kernel@lists.infradead.org
->> > Cc: stable@kernel.org
->> > ---
->> > =C2=A0drivers/mmc/host/pxamci.c | =C2=A0 =C2=A04 ++--
->>
->> Looks like a correct fix to me.
->>
->> Acked-by: Eric Miao <eric.y.miao@gmail.com>
->
-> Would be good to still get this into .32 - who will take care of pick=
-ing
-> this?
->
 
-I'll send a pull request, and see if Russell will be happy to send
-another one in such a short time :)
+The patch titled
+     sdio: initialise SDIO functions and update card->sdio_funcs in lockstep
+has been added to the -mm tree.  Its filename is
+     sdio-initialise-sdio-functions-and-update-card-sdio_funcs-in-lockstep.patch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: sdio: initialise SDIO functions and update card->sdio_funcs in lockstep
+From: Matt Fleming <matt@console-pimps.org>
+
+We need to accurately track how many SDIO functions have been initialised
+(and keep card->sdio_funcs in sync) so that we don't try to remove more
+functions than we initialised if we hit the error path in
+mmc_attach_sdio().
+
+Without this patch if we hit the error path in mmc_attach_sdio() we run
+the risk of deferencing invalid memory in sdio_remove_func(), leading to a
+crash.
+
+Signed-off-by: Matt Fleming <matt@console-pimps.org>
+Cc: Daniel Drake <dsd@laptop.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/core/sdio.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff -puN drivers/mmc/core/sdio.c~sdio-initialise-sdio-functions-and-update-card-sdio_funcs-in-lockstep drivers/mmc/core/sdio.c
+--- a/drivers/mmc/core/sdio.c~sdio-initialise-sdio-functions-and-update-card-sdio_funcs-in-lockstep
++++ a/drivers/mmc/core/sdio.c
+@@ -516,7 +516,8 @@ int mmc_attach_sdio(struct mmc_host *hos
+ 	 * The number of functions on the card is encoded inside
+ 	 * the ocr.
+ 	 */
+-	card->sdio_funcs = funcs = (ocr & 0x70000000) >> 28;
++	funcs = (ocr & 0x70000000) >> 28;
++	card->sdio_funcs = 0;
+ 
+ 	/*
+ 	 * If needed, disconnect card detection pull-up resistor.
+@@ -528,7 +529,7 @@ int mmc_attach_sdio(struct mmc_host *hos
+ 	/*
+ 	 * Initialize (but don't add) all present functions.
+ 	 */
+-	for (i = 0;i < funcs;i++) {
++	for (i = 0;i < funcs;i++, card->sdio_funcs++) {
+ 		err = sdio_init_func(host->card, i + 1);
+ 		if (err)
+ 			goto remove;
+_
+
+Patches currently in -mm which might be from matt@console-pimps.org are
+
+linux-next.patch
+sdio-initialise-sdio-functions-and-update-card-sdio_funcs-in-lockstep.patch
+
