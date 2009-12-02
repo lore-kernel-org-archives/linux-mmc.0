@@ -1,28 +1,54 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH] sdio: Fix reference counting in sdio_remove_func()
-Date: Wed, 2 Dec 2009 09:43:59 +0000
-Message-ID: <20091202094359.GA6659@console-pimps.org>
-References: <20091202092219.2AD329D404F@zog.reactivated.net>
+From: Daniel Mack <daniel@caiaq.de>
+Subject: Re: [PATCH] mmc: pxamci: call mmc_remove_host() before freeing
+ resources
+Date: Wed, 2 Dec 2009 12:03:26 +0100
+Message-ID: <20091202110326.GZ14091@buzzloop.caiaq.de>
+References: <1259687838-31722-1-git-send-email-daniel@caiaq.de>
+ <f17812d70912011650h48a6c391s426ffc8b4b653fc8@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:43994 "EHLO
-	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754034AbZLBJmM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2009 04:42:12 -0500
+Received: from buzzloop.caiaq.de ([212.112.241.133]:35484 "EHLO
+	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751035AbZLBLDZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2009 06:03:25 -0500
 Content-Disposition: inline
-In-Reply-To: <20091202092219.2AD329D404F@zog.reactivated.net>
+In-Reply-To: <f17812d70912011650h48a6c391s426ffc8b4b653fc8@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
+To: Eric Miao <eric.y.miao@gmail.com>
+Cc: Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, stable@kernel.org
 
-On Wed, Dec 02, 2009 at 09:22:19AM +0000, Daniel Drake wrote:
-> sdio_remove_func() needs to be more careful about reference counting.
-> It can be called in error paths where sdio_add_func() has never been called
-> e.g. mmc_attach_sdio error path --> mmc_sdio_remove --> sdio_remove_func
-> 
-> Signed-off-by: Daniel Drake <dsd@laptop.org>
+On Wed, Dec 02, 2009 at 08:50:44AM +0800, Eric Miao wrote:
+> On Wed, Dec 2, 2009 at 1:17 AM, Daniel Mack <daniel@caiaq.de> wrote:
+> > mmc_remove_host() will cause the mmc core to switch off the bus pow=
+er by
+> > eventually calling pxamci_set_ios(). This function uses the regulat=
+or or
+> > the GPIO which have been freed already.
+> >
+> > This causes the following Oops on module unload.
+> >
 
-Reviewed-by: Matt Fleming <matt@console-pimps.org>
+[...]
+
+> >
+> > Signed-off-by: Daniel Mack <daniel@caiaq.de>
+> > Reported-by: Sven Neumann <s.neumann@raumfeld.com>
+> > Cc: Pierre Ossman <pierre@ossman.eu>
+> > Cc: Eric Miao <eric.y.miao@gmail.com>
+> > Cc: linux-mmc@vger.kernel.org
+> > Cc: linux-arm-kernel@lists.infradead.org
+> > Cc: stable@kernel.org
+> > ---
+> > =A0drivers/mmc/host/pxamci.c | =A0 =A04 ++--
+>=20
+> Looks like a correct fix to me.
+>=20
+> Acked-by: Eric Miao <eric.y.miao@gmail.com>
+
+Would be good to still get this into .32 - who will take care of pickin=
+g
+this?
 
