@@ -1,64 +1,71 @@
-From: Daniel Mack <daniel@caiaq.de>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Subject: Re: [PATCH] mmc: move regulator handling to core
-Date: Thu, 3 Dec 2009 14:14:23 +0100
-Message-ID: <20091203131423.GV14091@buzzloop.caiaq.de>
+Date: Thu, 3 Dec 2009 13:22:41 +0000
+Message-ID: <20091203132241.GB31533@rakim.wolfsonmicro.main>
 References: <1259844390-10541-1-git-send-email-daniel@caiaq.de>
  <20091203130627.GA31254@rakim.wolfsonmicro.main>
+ <20091203131423.GV14091@buzzloop.caiaq.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from buzzloop.caiaq.de ([212.112.241.133]:35765 "EHLO
-	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754167AbZLCNO0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Dec 2009 08:14:26 -0500
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1755980AbZLCNWj@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20091203130627.GA31254@rakim.wolfsonmicro.main>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+In-Reply-To: <20091203131423.GV14091@buzzloop.caiaq.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Daniel Mack <daniel@caiaq.de>
 Cc: linux-kernel@vger.kernel.org, Liam Girdwood <lrg@slimlogic.co.uk>, Pierre Ossman <pierre@ossman.eu>, Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, Adrian Hunter <adrian.hunter@nokia.com>, David Brownell <dbrownell@users.sourceforge.net>, Russell King <rmk+kernel@arm.linux.org.uk>, Linus Walleij <linus.walleij@stericsson.com>, Eric Miao <eric.y.miao@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Cliff Brake <cbrake@bec-systems.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Dec 03, 2009 at 01:06:27PM +0000, Mark Brown wrote:
-> On Thu, Dec 03, 2009 at 01:46:30PM +0100, Daniel Mack wrote:
-> > At the moment, regulator operations are done from individual mmc host
-> > drivers. This is a problem because the regulators are not claimed
-> > exclusively but the mmc core enables and disables them according to the
-> 
-> This is historical, they can all be converted to regulator_get_exclusive()
-> so the move to the core (while good) isn't required for this reason.
+On Thu, Dec 03, 2009 at 02:14:23PM +0100, Daniel Mack wrote:
+> On Thu, Dec 03, 2009 at 01:06:27PM +0000, Mark Brown wrote:
 
-Is it? What if you share one regulator for two slots? While this isn't a
-problem I have met in real life, this should still be considered.
+> > This is historical, they can all be converted to regulator_get_exclusive()
+> > so the move to the core (while good) isn't required for this reason.
 
-The problem I _did_ see, however, was a warning when the regulator was
-marked as always_on in its constraints. What happens then is that
-regulator_is_enabled() will always return 1, causing the pxamci code to
+> Is it? What if you share one regulator for two slots? While this isn't a
+> problem I have met in real life, this should still be considered.
 
- - call regulator_disable() on power off, but
- - _not_ call regulator_enable() in the oposite case
+I agree, this is a configuration which I have also seen, but there was a
+strong insistence that the power off had to function as expected.  An
+approach which allows shared regulators is generally always preferable
+since it copes with a wider range of system designs.
 
-and that brings the regulator's reference count out of sync.
+> The problem I _did_ see, however, was a warning when the regulator was
+> marked as always_on in its constraints. What happens then is that
+> regulator_is_enabled() will always return 1, causing the pxamci code to
 
-Making those drivers claim their regulators exclusively _does_ solve the
-first problem, but not the latter.
+...
 
-> >  	case MMC_POWER_OFF:
-> > -		if(host->vcc &&
-> > -		   regulator_is_enabled(host->vcc))
-> > -			regulator_disable(host->vcc);
-> > +		if(mmc->vcc && mmc->vcc_enabled) {
-> > +			regulator_disable(mmc->vcc);
-> > +			mmc->vcc_enabled = 0;
-> > +		}
-> 
-> Can the MMC core actually tolerate the MMC power not getting killed when
-> expected?  My understanding from previous discussion was that it wasn't
-> able to do so.  If it is then conversion to using regulator_get_exclusive()
-> isn't desirable, of course.
+> Making those drivers claim their regulators exclusively _does_ solve the
+> first problem, but not the latter.
 
-I would expect the power to be killed when the last user stops using it.
-Which should result in the same effect if you only have one host, one
-regulator, and one user.
+Yeah, there's currently an assumption that the constraints will be
+suitable for the driver there.  A driver that can handle sharing should
+always cope here, it's one reason to prefer them.
 
-Daniel
+> > >  	case MMC_POWER_OFF:
+> > > -		if(host->vcc &&
+> > > -		   regulator_is_enabled(host->vcc))
+> > > -			regulator_disable(host->vcc);
+> > > +		if(mmc->vcc && mmc->vcc_enabled) {
+> > > +			regulator_disable(mmc->vcc);
+> > > +			mmc->vcc_enabled = 0;
+> > > +		}
 
+> > Can the MMC core actually tolerate the MMC power not getting killed when
+> > expected?  My understanding from previous discussion was that it wasn't
+> > able to do so.  If it is then conversion to using regulator_get_exclusive()
+> > isn't desirable, of course.
+
+> I would expect the power to be killed when the last user stops using it.
+> Which should result in the same effect if you only have one host, one
+> regulator, and one user.
+
+Yes, it's always fine in that case (modulo always_on and/or regulators
+without power control).  This goes back to the thing about using
+regulator_get_exclusive(), the message given was that the MMC drivers
+really needed to be able to guarantee that the power would be removed
+when that was requested.
+
+Like I say, if there isn't a *strict* requirement but it's only
+desirable (possibly strongly desirable) then your approach is obviously
+preferable.
