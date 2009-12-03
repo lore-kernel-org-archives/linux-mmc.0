@@ -1,37 +1,62 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+From: Daniel Mack <daniel@caiaq.de>
 Subject: Re: [PATCH] mmc: move regulator handling to core
-Date: Thu, 3 Dec 2009 15:09:55 +0000
-Message-ID: <20091203150955.GA10297@rakim.wolfsonmicro.main>
+Date: Thu, 3 Dec 2009 20:20:44 +0100
+Message-ID: <20091203192044.GJ14091@buzzloop.caiaq.de>
 References: <1259844390-10541-1-git-send-email-daniel@caiaq.de>
- <20091203130627.GA31254@rakim.wolfsonmicro.main>
- <20091203131423.GV14091@buzzloop.caiaq.de>
- <20091203132241.GB31533@rakim.wolfsonmicro.main>
- <20091203145825.GA26651@n2100.arm.linux.org.uk>
+ <4B17CADB.1070406@nokia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756338AbZLCPJz@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from buzzloop.caiaq.de ([212.112.241.133]:58946 "EHLO
+	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756508AbZLCTUn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Dec 2009 14:20:43 -0500
 Content-Disposition: inline
-In-Reply-To: <20091203145825.GA26651@n2100.arm.linux.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Daniel Mack <daniel@caiaq.de>, Matt Fleming <matt@console-pimps.org>, David Brownell <dbrownell@users.sourceforge.net>, Eric Miao <eric.y.miao@gmail.com>, Linus Walleij <linus.walleij@stericsson.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Cliff Brake <cbrake@bec-systems.com>, Pierre Ossman <pierre@ossman.eu>, Liam Girdwood <lrg@slimlogic.co.uk>, Robert Jarzmik <robert.jarzmik@free.fr>, Andrew Morton <akpm@linux-foundation.org>, linux-arm-kernel@lists.infradead.org, Adrian Hunter <adrian.hunter@nokia.com>
+In-Reply-To: <4B17CADB.1070406@nokia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@slimlogic.co.uk>, Pierre Ossman <pierre@ossman.eu>, Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, David Brownell <dbrownell@users.sourceforge.net>, Russell King <rmk+kernel@arm.linux.org.uk>, Linus Walleij <linus.walleij@stericsson.com>, Eric Miao <eric.y.miao@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Cliff Brake <cbrake@bec-systems.com>, "Lavinen Jarkko (Nokia-D/Helsinki)" <jarkko.lavinen@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Thu, Dec 03, 2009 at 02:58:25PM +0000, Russell King - ARM Linux wrote:
-> On Thu, Dec 03, 2009 at 01:22:41PM +0000, Mark Brown wrote:
+On Thu, Dec 03, 2009 at 04:27:39PM +0200, Adrian Hunter wrote:
+> gDaniel Mack wrote:
 
-> > without power control).  This goes back to the thing about using
-> > regulator_get_exclusive(), the message given was that the MMC drivers
-> > really needed to be able to guarantee that the power would be removed
-> > when that was requested.
+[...]
 
-> If you take some cards through a series of steps and they stop responding,
-> it's normally because you've caused their internal state machine to
-> transition to "invalid" mode.
+> > drivers/mmc/core/core.c   |   36 ++++++++++++++++++++----------------
+> > drivers/mmc/core/host.c   |    3 +++
+> > drivers/mmc/host/mmci.c   |   28 ++++++++++++----------------
+> > drivers/mmc/host/mmci.h   |    1 -
+> > drivers/mmc/host/pxamci.c |   20 ++++++++------------
+> > include/linux/mmc/host.h  |   10 ++++++----
+> 
+> What about arch/arm/mach-omap2/mmc-twl4030.c ?
 
-> Further commands are ignored.  The only recovery is to power cycle them.
+Argh, missed that one. And this particular case doesn't fit to my
+modifications. I don't know the code well ...  We would need to
+have a struct mmc_host * in all the functions there calling
+mmc_regulator_{set,get}_ocr. Any idea how to resolve that?
 
-I assume that this is something it's desirable to be able to do in the
-face of poor hardware rather than something that the Linux MMC stack is
-actively using in normal operation (modulo issues with the general
-quality of implementation of MMC hardware)?
+> >--- a/drivers/mmc/core/host.c
+> >+++ b/drivers/mmc/core/host.c
+> >@@ -18,6 +18,7 @@
+> > #include <linux/leds.h>
+> > #include <linux/mmc/host.h>
+> >+#include <linux/regulator/consumer.h>
+> > #include "core.h"
+> > #include "host.h"
+> >@@ -154,6 +155,8 @@ void mmc_remove_host(struct mmc_host *host)
+> > 	mmc_remove_host_debugfs(host);
+> > #endif
+> >+	regulator_put(host->vcc);
+> >+
+> 
+> If the core is doing a 'regulator_put()' shouldn't it also be doing
+> a 'regulator_get()'?  Why not leave it to the drivers?
+
+Yes, I can change the patch to do that, no problem. The major reason why
+I didn't put the regulator_get() to the mmc core is that I need to have
+the platform_device to obtain its name.
+
+Daniel
+
