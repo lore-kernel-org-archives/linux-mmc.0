@@ -1,142 +1,85 @@
-From: Tomas Winkler <tomas.winkler@intel.com>
-Subject: [net-2.6 3/3] iwmc3200top: simplify imwct_tx
-Date: Mon, 14 Dec 2009 22:30:23 +0200
-Message-ID: <1260822623-16480-3-git-send-email-tomas.winkler@intel.com>
-References: <1260822623-16480-1-git-send-email-tomas.winkler@intel.com>
- <1260822623-16480-2-git-send-email-tomas.winkler@intel.com>
-Content-Type: text/plain; charset="us-ascii"
+From: Albert Herranz <albert_herranz@yahoo.es>
+Subject: Re: [RFC PATCH 1/2] sdhci-of: reorganize driver to support additional
+ hardware
+Date: Mon, 14 Dec 2009 22:14:02 +0100
+Message-ID: <4B26AA9A.70607@yahoo.es>
+References: <1260819206-30074-1-git-send-email-albert_herranz@yahoo.es> <1260819206-30074-2-git-send-email-albert_herranz@yahoo.es> <20091214202707.GA5300@oksana.dev.rtsoft.ru>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:31106 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757543AbZLNUad (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Dec 2009 15:30:33 -0500
-In-Reply-To: <1260822623-16480-2-git-send-email-tomas.winkler@intel.com>
+Received: from smtp106.mail.ukl.yahoo.com ([77.238.184.38]:43023 "HELO
+	smtp106.mail.ukl.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S932643AbZLNVOL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2009 16:14:11 -0500
+In-Reply-To: <20091214202707.GA5300@oksana.dev.rtsoft.ru>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: davem@davemloft.net, netdev@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: yi.zhu@intel.com, inaky.perez-gonzalez@intel.com, guy.cohen@intel.com, ron.rindjunsky@intel.com, Tomas Winkler <tomas.winkler@intel.com>
+To: avorontsov@ru.mvista.com
+Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
 
-1. remove address argument since we use same address IWMC_SDIO_DATA_ADDR in
-    all cases
-2. add __iwmct_tx - non locking tx function for already locked contexts
+Anton Vorontsov wrote:
+> On Mon, Dec 14, 2009 at 08:33:25PM +0100, Albert Herranz wrote:
+>> This patch breaks down sdhci-of into a core portion and a eSDHC portion,
+>> clearing the path to easily support additional hardware using the same
+>> OF driver.
+>>
+>> Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
+> 
+> Looks really good, thanks a lot for your work!
+> 
+> Few minor nits down below.
+> 
+> [...]
+>> +++ b/drivers/mmc/host/sdhci-of-core.c
+> 
+> Not sure if adding -core prefix makes things better (it
+> actually makes the patch harder to review).
+> 
+> Can we leave the core in sdhci-of.c, and just factor out
+> esdhc stuff from it?
+> 
 
-Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
----
- drivers/misc/iwmc3200top/fw-download.c |    4 +-
- drivers/misc/iwmc3200top/iwmc3200top.h |    4 +--
- drivers/misc/iwmc3200top/main.c        |   34 +++++++++++++++----------------
- 3 files changed, 19 insertions(+), 23 deletions(-)
+I wanted to preserve the module name (sdhci-of). I basically renamed sdhci-of.c to sdhci-of-core.c to avoid a recursive rule in the Makefile.
+Is there an easy way to make the module build as sdhci-of from sdhci-of.c + sdhci-of-esdhc.c + whatever ?
 
-diff --git a/drivers/misc/iwmc3200top/fw-download.c b/drivers/misc/iwmc3200top/fw-download.c
-index 07055af..9dbaeb5 100644
---- a/drivers/misc/iwmc3200top/fw-download.c
-+++ b/drivers/misc/iwmc3200top/fw-download.c
-@@ -228,7 +228,7 @@ static int iwmct_download_section(struct iwmct_priv *priv, const u8 *p_sec,
- 		hdr->cmd = cpu_to_le32(cmd);
- 		/* send it down */
- 		/* TODO: add more proper sending and error checking */
--		ret = iwmct_tx(priv, 0, parser->buf, trans_size);
-+		ret = iwmct_tx(priv, parser->buf, trans_size);
- 		if (ret != 0) {
- 			LOG_INFO(priv, FW_DOWNLOAD,
- 				"iwmct_tx returned %d\n", ret);
-@@ -280,7 +280,7 @@ static int iwmct_kick_fw(struct iwmct_priv *priv, bool jump)
- 	LOG_HEXDUMP(FW_DOWNLOAD, parser->buf, sizeof(*hdr));
- 	/* send it down */
- 	/* TODO: add more proper sending and error checking */
--	ret = iwmct_tx(priv, 0, parser->buf, IWMC_SDIO_BLK_SIZE);
-+	ret = iwmct_tx(priv, parser->buf, IWMC_SDIO_BLK_SIZE);
- 	if (ret)
- 		LOG_INFO(priv, FW_DOWNLOAD, "iwmct_tx returned %d", ret);
- 
-diff --git a/drivers/misc/iwmc3200top/iwmc3200top.h b/drivers/misc/iwmc3200top/iwmc3200top.h
-index 43bd510..740ff07 100644
---- a/drivers/misc/iwmc3200top/iwmc3200top.h
-+++ b/drivers/misc/iwmc3200top/iwmc3200top.h
-@@ -196,9 +196,7 @@ struct iwmct_priv {
- 	struct list_head read_req_list;
- };
- 
--extern int iwmct_tx(struct iwmct_priv *priv, unsigned int addr,
--		void *src, int count);
--
-+extern int iwmct_tx(struct iwmct_priv *priv, void *src, int count);
- extern int iwmct_fw_load(struct iwmct_priv *priv);
- 
- extern void iwmct_dbg_init_params(struct iwmct_priv *drv);
-diff --git a/drivers/misc/iwmc3200top/main.c b/drivers/misc/iwmc3200top/main.c
-index 3862794..dd0a391 100644
---- a/drivers/misc/iwmc3200top/main.c
-+++ b/drivers/misc/iwmc3200top/main.c
-@@ -49,6 +49,20 @@ MODULE_LICENSE("GPL");
- MODULE_AUTHOR(DRIVER_COPYRIGHT);
- MODULE_FIRMWARE(FW_NAME(FW_API_VER));
- 
-+
-+static inline int __iwmct_tx(struct iwmct_priv *priv, void *src, int count)
-+{
-+	return sdio_memcpy_toio(priv->func, IWMC_SDIO_DATA_ADDR, src, count);
-+
-+}
-+int iwmct_tx(struct iwmct_priv *priv, void *src, int count)
-+{
-+	int ret;
-+	sdio_claim_host(priv->func);
-+	ret =  __iwmct_tx(priv, src, count);
-+	sdio_release_host(priv->func);
-+	return ret;
-+}
- /*
-  * This workers main task is to wait for OP_OPR_ALIVE
-  * from TOP FW until ALIVE_MSG_TIMOUT timeout is elapsed.
-@@ -158,27 +172,12 @@ int iwmct_send_hcmd(struct iwmct_priv *priv, u8 *cmd, u16 len)
- 	}
- 
- 	memcpy(buf, cmd, len);
--
--	sdio_claim_host(priv->func);
--	ret = sdio_memcpy_toio(priv->func, IWMC_SDIO_DATA_ADDR, buf,
--			       FW_HCMD_BLOCK_SIZE);
--	sdio_release_host(priv->func);
-+	ret = iwmct_tx(priv, buf, FW_HCMD_BLOCK_SIZE);
- 
- 	kfree(buf);
- 	return ret;
- }
- 
--int iwmct_tx(struct iwmct_priv *priv, unsigned int addr,
--	void *src, int count)
--{
--	int ret;
--
--	sdio_claim_host(priv->func);
--	ret = sdio_memcpy_toio(priv->func, addr, src, count);
--	sdio_release_host(priv->func);
--
--	return ret;
--}
- 
- static void iwmct_irq_read_worker(struct work_struct *ws)
- {
-@@ -273,8 +272,7 @@ static void iwmct_irq_read_worker(struct work_struct *ws)
- 
- 		if (barker & BARKER_DNLOAD_SYNC_MSK) {
- 			/* Send the same barker back */
--			ret = sdio_memcpy_toio(priv->func, IWMC_SDIO_DATA_ADDR,
--					       buf, iosize);
-+			ret = __iwmct_tx(priv, buf, iosize);
- 			if (ret) {
- 				LOG_ERROR(priv, IRQ,
- 					 "error %d echoing barker\n", ret);
--- 
-1.6.0.6
+> [...]
+>> +#include <linux/mmc/host.h>
+>> +#include <asm/machdep.h>
+>> +#include "sdhci-of.h"
+>> +
+> 
+> You still need to include sdhci.h. Files need to include all
+> the headers they need. I.e., here you should not rely on the
+> fact that sdhci-of.h includes sdhci.h.
+> 
 
----------------------------------------------------------------------
-Intel Israel (74) Limited
+Including sdhci.h more than once currently results in duplicate definition errors because that header file is not protected with #ifdef'ery.
+I can fix sdhci.h and then explicitly include it again.
 
-This e-mail and any attachments may contain confidential material for
-the sole use of the intended recipient(s). Any review or distribution
-by others is strictly prohibited. If you are not the intended
-recipient, please contact the sender and delete all copies.
+> [...]
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/sdhci-of.h
+>> @@ -0,0 +1,42 @@
+> [...]
+>> +extern struct sdhci_of_data sdhci_esdhc;
+>> +
+>> +#endif /* __SDHCI_OF_H */
+>> +
+>> -- 
+>> 1.6.3.3
+> 
+> Unneeded empty line at the end of sdhci-of.h.
+> 
 
+Thanks.
+
+> If you'll manage to resend the patches before Linus roll the -rc1
+> out, I'd be glad to beg Andrew to send this for v2.6.33. Because
+> it will be a pity if it has to wait for 2.6.34.
+> 
+
+I'll try, as long as we solve nit #1 quickly enough :)
+
+Cheers,
+Albert
