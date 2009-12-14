@@ -1,26 +1,75 @@
-From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Subject: Re: [PATCH] atmel-mci.c: use resource size()
-Date: Mon, 14 Dec 2009 20:35:42 +0100
-Message-ID: <20091214203542.31f7a179@hskinnemoen-d830>
-References: <BD79186B4FD85F4B8E60E381CAEE19090200E9EA@mi8nycmail19.Mi8.com>
+From: Anton Vorontsov <avorontsov@ru.mvista.com>
+Subject: Re: [RFC PATCH 1/2] sdhci-of: reorganize driver to support
+ additional hardware
+Date: Mon, 14 Dec 2009 23:27:07 +0300
+Message-ID: <20091214202707.GA5300@oksana.dev.rtsoft.ru>
+References: <1260819206-30074-1-git-send-email-albert_herranz@yahoo.es>
+ <1260819206-30074-2-git-send-email-albert_herranz@yahoo.es>
+Reply-To: avorontsov@ru.mvista.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay.atmel.no ([80.232.32.139]:60965 "EHLO relay.atmel.no"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757764AbZLNUKH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Dec 2009 15:10:07 -0500
-In-Reply-To: <BD79186B4FD85F4B8E60E381CAEE19090200E9EA@mi8nycmail19.Mi8.com>
+Received: from imap.ru.mvista.com ([213.79.90.228]:4233 "EHLO
+	buildserver.ru.mvista.com" rhost-flags-OK-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751404AbZLNU1J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2009 15:27:09 -0500
+Content-Disposition: inline
+In-Reply-To: <1260819206-30074-2-git-send-email-albert_herranz@yahoo.es>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: H Hartley Sweeten <hartleys@visionengravers.com>
-Cc: kernel list <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, "Ferre, Nicolas" <Nicolas.FERRE@atmel.com>
+To: Albert Herranz <albert_herranz@yahoo.es>
+Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
 
-"H Hartley Sweeten" <hartleys@visionengravers.com> wrote:
-> Use resource_size().
+On Mon, Dec 14, 2009 at 08:33:25PM +0100, Albert Herranz wrote:
+> This patch breaks down sdhci-of into a core portion and a eSDHC portion,
+> clearing the path to easily support additional hardware using the same
+> OF driver.
 > 
-> Signed-off-by: H Hartley Sweeten <hsweeten@visionengravers.com>
-> Cc: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+> Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
 
-Acked-by: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Looks really good, thanks a lot for your work!
+
+Few minor nits down below.
+
+[...]
+> +++ b/drivers/mmc/host/sdhci-of-core.c
+
+Not sure if adding -core prefix makes things better (it
+actually makes the patch harder to review).
+
+Can we leave the core in sdhci-of.c, and just factor out
+esdhc stuff from it?
+
+[...]
+> +#include <linux/mmc/host.h>
+> +#include <asm/machdep.h>
+> +#include "sdhci-of.h"
+> +
+
+You still need to include sdhci.h. Files need to include all
+the headers they need. I.e., here you should not rely on the
+fact that sdhci-of.h includes sdhci.h.
+
+[...]
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-of.h
+> @@ -0,0 +1,42 @@
+[...]
+> +extern struct sdhci_of_data sdhci_esdhc;
+> +
+> +#endif /* __SDHCI_OF_H */
+> +
+> -- 
+> 1.6.3.3
+
+Unneeded empty line at the end of sdhci-of.h.
+
+
+If you'll manage to resend the patches before Linus roll the -rc1
+out, I'd be glad to beg Andrew to send this for v2.6.33. Because
+it will be a pity if it has to wait for 2.6.34.
+
+-- 
+Anton Vorontsov
+email: cbouatmailru@gmail.com
+irc://irc.freenode.net/bd2
