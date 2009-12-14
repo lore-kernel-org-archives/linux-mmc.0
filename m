@@ -1,36 +1,39 @@
-From: "H Hartley Sweeten" <hartleys@visionengravers.com>
-Subject: [PATCH] au1xmmc.c: use resource_size()
-Date: Mon, 14 Dec 2009 14:28:06 -0500
-Message-ID: <BD79186B4FD85F4B8E60E381CAEE19090200E9FB@mi8nycmail19.Mi8.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Albert Herranz <albert_herranz@yahoo.es>
+Subject: [RFC PATCH 0/2] mmc: wii: sdhci controller support
+Date: Mon, 14 Dec 2009 20:33:24 +0100
+Message-ID: <1260819206-30074-1-git-send-email-albert_herranz@yahoo.es>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod6og101.obsmtp.com ([64.18.1.181]:58962 "EHLO
-	exprod6og101.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757282AbZLNT2M convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2009 14:28:12 -0500
-Content-class: urn:content-classes:message
+Received: from smtp141.mail.ukl.yahoo.com ([77.238.184.72]:46161 "HELO
+	smtp141.mail.ukl.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1752721AbZLNTkW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2009 14:40:22 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: kernel list <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: akpm@linux-foundation.org, avorontsov@ru.mvista.com, Albert Herranz <albert_herranz@yahoo.es>
 
-Use resource_size().
+This patch set adds support for the SDHCI controllers found in the
+"Hollywood" chipset of the Nintendo Wii video game console.
 
-Signed-off-by: H Hartley Sweeten <hsweeten@visionengravers.com>
+First, the existing sdhci-of driver is splitted into a core part and
+a eSDHC-only part. Then the Nintendo Wii SDHCI support is added as an
+add-on to that, re-using common code.
 
----
+Albert Herranz (2):
+  sdhci-of: reorganize driver to support additional hardware
+  sdhci-of: add support for the wii sdhci controller
 
-diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
-index d3f5561..2d2119b 100644
---- a/drivers/mmc/host/au1xmmc.c
-+++ b/drivers/mmc/host/au1xmmc.c
-@@ -963,7 +963,7 @@ static int __devinit au1xmmc_probe(struct platform_device *pdev)
- 		goto out1;
- 	}
- 
--	host->ioarea = request_mem_region(r->start, r->end - r->start + 1,
-+	host->ioarea = request_mem_region(r->start, resource_size(r),
- 					   pdev->name);
- 	if (!host->ioarea) {
- 		dev_err(&pdev->dev, "mmio already in use\n"); 
+ drivers/mmc/host/Kconfig          |   37 ++++-
+ drivers/mmc/host/Makefile         |    6 +-
+ drivers/mmc/host/sdhci-of-core.c  |  230 +++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-of-esdhc.c |  142 ++++++++++++++++
+ drivers/mmc/host/sdhci-of-hlwd.c  |   64 +++++++
+ drivers/mmc/host/sdhci-of.c       |  336 -------------------------------------
+ drivers/mmc/host/sdhci-of.h       |   43 +++++
+ 7 files changed, 518 insertions(+), 340 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-of-core.c
+ create mode 100644 drivers/mmc/host/sdhci-of-esdhc.c
+ create mode 100644 drivers/mmc/host/sdhci-of-hlwd.c
+ delete mode 100644 drivers/mmc/host/sdhci-of.c
+ create mode 100644 drivers/mmc/host/sdhci-of.h
+
