@@ -1,75 +1,104 @@
-From: Anton Vorontsov <avorontsov@ru.mvista.com>
-Subject: Re: [RFC PATCH 1/2] sdhci-of: reorganize driver to support
- additional hardware
-Date: Mon, 14 Dec 2009 23:27:07 +0300
-Message-ID: <20091214202707.GA5300@oksana.dev.rtsoft.ru>
-References: <1260819206-30074-1-git-send-email-albert_herranz@yahoo.es>
- <1260819206-30074-2-git-send-email-albert_herranz@yahoo.es>
-Reply-To: avorontsov@ru.mvista.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+From: Tomas Winkler <tomas.winkler@intel.com>
+Subject: [net-2.6 1/3] iwmc3200top: clean up fw_download
+Date: Mon, 14 Dec 2009 22:30:21 +0200
+Message-ID: <1260822623-16480-1-git-send-email-tomas.winkler@intel.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imap.ru.mvista.com ([213.79.90.228]:4233 "EHLO
-	buildserver.ru.mvista.com" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751404AbZLNU1J (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2009 15:27:09 -0500
-Content-Disposition: inline
-In-Reply-To: <1260819206-30074-2-git-send-email-albert_herranz@yahoo.es>
+Received: from mga02.intel.com ([134.134.136.20]:31106 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752088AbZLNUa2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Dec 2009 15:30:28 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Albert Herranz <albert_herranz@yahoo.es>
-Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
+To: davem@davemloft.net, netdev@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: yi.zhu@intel.com, inaky.perez-gonzalez@intel.com, guy.cohen@intel.com, ron.rindjunsky@intel.com, Tomas Winkler <tomas.winkler@intel.com>
 
-On Mon, Dec 14, 2009 at 08:33:25PM +0100, Albert Herranz wrote:
-> This patch breaks down sdhci-of into a core portion and a eSDHC portion,
-> clearing the path to easily support additional hardware using the same
-> OF driver.
-> 
-> Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
+1. removed redundant NULL-pointers checks in iwmct_fw_load
+as release_firmware and kfree are NULL pointer friendly
+2. remove redundant memset of the parser since the structure
+is fully initialized in iwmct_fw_parser_init function
 
-Looks really good, thanks a lot for your work!
+Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+---
+ drivers/misc/iwmc3200top/fw-download.c |   20 ++++++--------------
+ 1 files changed, 6 insertions(+), 14 deletions(-)
 
-Few minor nits down below.
-
-[...]
-> +++ b/drivers/mmc/host/sdhci-of-core.c
-
-Not sure if adding -core prefix makes things better (it
-actually makes the patch harder to review).
-
-Can we leave the core in sdhci-of.c, and just factor out
-esdhc stuff from it?
-
-[...]
-> +#include <linux/mmc/host.h>
-> +#include <asm/machdep.h>
-> +#include "sdhci-of.h"
-> +
-
-You still need to include sdhci.h. Files need to include all
-the headers they need. I.e., here you should not rely on the
-fact that sdhci-of.h includes sdhci.h.
-
-[...]
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-of.h
-> @@ -0,0 +1,42 @@
-[...]
-> +extern struct sdhci_of_data sdhci_esdhc;
-> +
-> +#endif /* __SDHCI_OF_H */
-> +
-> -- 
-> 1.6.3.3
-
-Unneeded empty line at the end of sdhci-of.h.
-
-
-If you'll manage to resend the patches before Linus roll the -rc1
-out, I'd be glad to beg Andrew to send this for v2.6.33. Because
-it will be a pity if it has to wait for 2.6.34.
-
+diff --git a/drivers/misc/iwmc3200top/fw-download.c b/drivers/misc/iwmc3200top/fw-download.c
+index 50d431e..474be92 100644
+--- a/drivers/misc/iwmc3200top/fw-download.c
++++ b/drivers/misc/iwmc3200top/fw-download.c
+@@ -50,8 +50,7 @@ static int iwmct_fw_parser_init(struct iwmct_priv *priv, const u8 *file,
+ 	parser->file = file;
+ 	parser->file_size = file_size;
+ 	parser->cur_pos = 0;
+-	parser->buf = NULL;
+-
++	parser->entry_point = 0;
+ 	parser->buf = kzalloc(block_size, GFP_KERNEL);
+ 	if (!parser->buf) {
+ 		LOG_ERROR(priv, FW_DOWNLOAD, "kzalloc error\n");
+@@ -298,8 +297,6 @@ int iwmct_fw_load(struct iwmct_priv *priv)
+ 	__le32 addr;
+ 	int ret;
+ 
+-	/* clear parser struct */
+-	memset(&priv->parser, 0, sizeof(struct iwmct_parser));
+ 
+ 	/* get the firmware */
+ 	ret = request_firmware(&raw, fw_name, &priv->func->dev);
+@@ -317,6 +314,7 @@ int iwmct_fw_load(struct iwmct_priv *priv)
+ 
+ 	LOG_INFO(priv, FW_DOWNLOAD, "Read firmware '%s'\n", fw_name);
+ 
++	/* clear parser struct */
+ 	ret = iwmct_fw_parser_init(priv, raw->data, raw->size, priv->trans_len);
+ 	if (ret < 0) {
+ 		LOG_ERROR(priv, FW_DOWNLOAD,
+@@ -324,7 +322,6 @@ int iwmct_fw_load(struct iwmct_priv *priv)
+ 		goto exit;
+ 	}
+ 
+-	/* checksum  */
+ 	if (!iwmct_checksum(priv)) {
+ 		LOG_ERROR(priv, FW_DOWNLOAD, "checksum error\n");
+ 		ret = -EINVAL;
+@@ -333,23 +330,18 @@ int iwmct_fw_load(struct iwmct_priv *priv)
+ 
+ 	/* download firmware to device */
+ 	while (iwmct_parse_next_section(priv, &pdata, &len, &addr)) {
+-		if (iwmct_download_section(priv, pdata, len, addr)) {
++		ret = iwmct_download_section(priv, pdata, len, addr);
++		if (ret) {
+ 			LOG_ERROR(priv, FW_DOWNLOAD,
+ 				  "%s download section failed\n", fw_name);
+-			ret = -EIO;
+ 			goto exit;
+ 		}
+ 	}
+ 
+-	iwmct_kick_fw(priv, !!(priv->barker & BARKER_DNLOAD_JUMP_MSK));
++	ret = iwmct_kick_fw(priv, !!(priv->barker & BARKER_DNLOAD_JUMP_MSK));
+ 
+ exit:
+ 	kfree(priv->parser.buf);
+-
+-	if (raw)
+-		release_firmware(raw);
+-
+-	raw = NULL;
+-
++	release_firmware(raw);
+ 	return ret;
+ }
 -- 
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
+1.6.0.6
+
+---------------------------------------------------------------------
+Intel Israel (74) Limited
+
+This e-mail and any attachments may contain confidential material for
+the sole use of the intended recipient(s). Any review or distribution
+by others is strictly prohibited. If you are not the intended
+recipient, please contact the sender and delete all copies.
+
