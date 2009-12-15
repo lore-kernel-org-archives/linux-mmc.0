@@ -1,50 +1,72 @@
-From: Anton Vorontsov <avorontsov@ru.mvista.com>
-Subject: Re: [RFC PATCH v2 0/4] mmc: wii: sdhci controller support
-Date: Tue, 15 Dec 2009 01:45:52 +0300
-Message-ID: <20091214224552.GA21934@oksana.dev.rtsoft.ru>
-References: <1260829459-23518-1-git-send-email-albert_herranz@yahoo.es>
-Reply-To: avorontsov@ru.mvista.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imap.ru.mvista.com ([213.79.90.228]:4542 "EHLO
-	buildserver.ru.mvista.com" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932327AbZLNWp6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2009 17:45:58 -0500
-Content-Disposition: inline
-In-Reply-To: <1260829459-23518-1-git-send-email-albert_herranz@yahoo.es>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: [folded] blackfin-sd-host-controller-driver-fix-fix-fix.patch removed from -mm tree
+Date: Mon, 14 Dec 2009 17:11:42 -0800
+Message-ID: <200912150111.nBF1BgKU023379@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: akpm@linux-foundation.org, cliffcai.sh@gmail.com, cooloney@kernel.org, linux-mmc@vger.kernel.org, vapier@gentoo.org, mm-commits@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Albert Herranz <albert_herranz@yahoo.es>
-Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
-
-On Mon, Dec 14, 2009 at 11:24:15PM +0100, Albert Herranz wrote:
-> This patch set adds support for the SDHCI controllers found in the
-> "Hollywood" chipset of the Nintendo Wii video game console.
-> 
-> First, the existing sdhci-of driver is splitted into a core part and
-> a eSDHC-only part. Then the Nintendo Wii SDHCI support is added as an
-> add-on to that, re-using common code.
-
-All four patches
-
-Acked-by: Anton Vorontsov <avorontsov@ru.mvista.com>
 
 
-Andrew,
+The patch titled
+     blackfin-sd-host-controller-driver-fix-fix-fix
+has been removed from the -mm tree.  Its filename was
+     blackfin-sd-host-controller-driver-fix-fix-fix.patch
 
-The patches appears to
+This patch was dropped because it was folded into blackfin-sd-host-controller-driver.patch
 
-- build fine, modular and built-in;
-- sparse clean;
-- checkpatch clean;
-- actually work on a real hardware (tested with eSDHC);
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-Would you mind merging them for 2.6.33?
+------------------------------------------------------
+Subject: blackfin-sd-host-controller-driver-fix-fix-fix
+From: Andrew Morton <akpm@linux-foundation.org>
 
-Thanks!
+Cc: <linux-mmc@vger.kernel.org>
+Cc: Bryan Wu <cooloney@kernel.org>
+Cc: Cliff Cai <cliffcai.sh@gmail.com>
+Cc: Mike Frysinger <vapier@gentoo.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
--- 
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
+ drivers/mmc/host/bfin_sdh.c |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff -puN drivers/mmc/host/bfin_sdh.c~blackfin-sd-host-controller-driver-fix-fix-fix drivers/mmc/host/bfin_sdh.c
+--- a/drivers/mmc/host/bfin_sdh.c~blackfin-sd-host-controller-driver-fix-fix-fix
++++ a/drivers/mmc/host/bfin_sdh.c
+@@ -162,6 +162,7 @@ static int sdh_setup_data(struct sdh_hos
+ 				i, host->sg_cpu[i].start_addr,
+ 				host->sg_cpu[i].cfg, host->sg_cpu[i].x_count,
+ 				host->sg_cpu[i].x_modify);
++		}
+ 	}
+ 	flush_dcache_range((unsigned int)host->sg_cpu,
+ 		(unsigned int)host->sg_cpu +
+_
+
+Patches currently in -mm which might be from akpm@linux-foundation.org are
+
+origin.patch
+mmap-dont-return-enomem-when-mapcount-is-temporarily-exceeded-in-munmap.patch
+dev-mem-cleanup-unxlate_dev_mem_ptr-calls.patch
+oom-kill-fix-numa-consraint-check-with-nodemask-v42.patch
+mm-mlocking-in-try_to_unmap_one.patch
+mm-memory_hotplug-make-offline_pages-static.patch
+mm-hugetlb-fix-hugepage-memory-leak-in-mincore.patch
+mm-hugetlb-add-hugepage-support-to-pagemap.patch
+procfs-allow-threads-to-rename-siblings-via-proc-pid-tasks-tid-comm.patch
+floppy-add-an-extra-bound-check-on-ioctl-arguments.patch
+rwsem-fix-rwsem_is_locked-bugs.patch
+kernelh-add-printk_ratelimited-and-pr_level_rl.patch
+errh-add-helper-function-to-simplify-pointer-error-checking.patch
+cs5535-add-a-generic-mfgpt-driver.patch
+cs5535-add-a-generic-clock-event-mfgpt-driver.patch
+drivers-scsi-sym53c8xx_2-sym_gluec-rename-skip_spaces-to-sym_skip_spaces.patch
+lib-introduce-strim.patch
+blackfin-sd-host-controller-driver.patch
+blackfin-sd-host-controller-driver-fix-fix-fix.patch
+crc32-minor-optimizations-and-cleanup-checkpatch-fixes.patch
+hwmon-w83627ehf-updates-checkpatch-fixes.patch
+lis3-update-documentation-to-match-latest-changes-fix.patch
+
