@@ -1,215 +1,89 @@
 From: akpm@linux-foundation.org
-Subject: [merged] mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable.patch removed from -mm tree
-Date: Tue, 15 Dec 2009 13:58:52 -0800
-Message-ID: <200912152158.nBFLwqvW015852@imap1.linux-foundation.org>
+Subject: [merged] drivers-mmc-move-dereference-after-null-test.patch removed from -mm tree
+Date: Tue, 15 Dec 2009 13:58:30 -0800
+Message-ID: <200912152158.nBFLwUBG015824@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:56821 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:39913 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933832AbZLOWAA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Dec 2009 17:00:00 -0500
+	by vger.kernel.org with ESMTP id S1755618AbZLOWFv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Dec 2009 17:05:51 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ben@decadent.org.uk, larstiq@larstiq.dyndns.org, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
+To: julia@diku.dk, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     mmc: add module parameter to set whether cards are assumed removable
+     drivers/mmc: Move dereference after NULL test
 has been removed from the -mm tree.  Its filename was
-     mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable.patch
+     drivers-mmc-move-dereference-after-null-test.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: add module parameter to set whether cards are assumed removable
-From: Ben Hutchings <ben@decadent.org.uk>
+Subject: drivers/mmc: Move dereference after NULL test
+From: Julia Lawall <julia@diku.dk>
 
-Some people run general-purpose distribution kernels on netbooks with
-a card that is physically non-removable or logically non-removable
-(e.g. used for /home) and cannot be cleanly unmounted during suspend.
-Add a module parameter to set whether cards are assumed removable or
-non-removable, with the default set by CONFIG_MMC_UNSAFE_RESUME.
+If the NULL test on mrq is needed, then the derefernce should be after the
+NULL test.
 
-In general, it is not possible to tell whether a card present in an MMC
-slot after resume is the same that was there before suspend.  So there are
-two possible behaviours, each of which will cause data loss in some cases:
+A simplified version of the semantic match that detects this problem is as
+follows (http://coccinelle.lip6.fr/):
 
-CONFIG_MMC_UNSAFE_RESUME=n (default): Cards are assumed to be removed
-during suspend.  Any filesystem on them must be unmounted before suspend;
-otherwise, buffered writes will be lost.
+// <smpl>
+@match exists@
+expression x, E;
+identifier fld;
+@@
 
-CONFIG_MMC_UNSAFE_RESUME=y: Cards are assumed to remain present during
-suspend.  They must not be swapped during suspend; otherwise, buffered
-writes will be flushed to the wrong card.
+* x->fld
+  ... when != \(x = E\|&x\)
+* x == NULL
+// </smpl>
 
-Currently the choice is made at compile time and this allows that to be
-overridden at module load time.
-
-Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
-Cc: Wouter van Heyst <larstiq@larstiq.dyndns.org>
+Signed-off-by: Julia Lawall <julia@diku.dk>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/Kconfig |    4 +++-
- drivers/mmc/core/core.c  |   16 ++++++++++++++++
- drivers/mmc/core/core.h  |    2 ++
- drivers/mmc/core/mmc.c   |   23 +----------------------
- drivers/mmc/core/sd.c    |   21 +--------------------
- 5 files changed, 23 insertions(+), 43 deletions(-)
+ drivers/mmc/host/s3cmci.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff -puN drivers/mmc/core/Kconfig~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/Kconfig
---- a/drivers/mmc/core/Kconfig~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
-+++ a/drivers/mmc/core/Kconfig
-@@ -3,7 +3,7 @@
- #
- 
- config MMC_UNSAFE_RESUME
--	bool "Allow unsafe resume (DANGEROUS)"
-+	bool "Assume MMC/SD cards are non-removable (DANGEROUS)"
- 	help
- 	  If you say Y here, the MMC layer will assume that all cards
- 	  stayed in their respective slots during the suspend. The
-@@ -14,3 +14,5 @@ config MMC_UNSAFE_RESUME
- 	  This option is usually just for embedded systems which use
- 	  a MMC/SD card for rootfs. Most people should say N here.
- 
-+	  This option sets a default which can be overridden by the
-+	  module parameter "removable=0" or "removable=1".
-diff -puN drivers/mmc/core/core.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/core.c
---- a/drivers/mmc/core/core.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
-+++ a/drivers/mmc/core/core.c
-@@ -48,6 +48,22 @@ int use_spi_crc = 1;
- module_param(use_spi_crc, bool, 0);
- 
- /*
-+ * We normally treat cards as removed during suspend if they are not
-+ * known to be on a non-removable bus, to avoid the risk of writing
-+ * back data to a different card after resume.  Allow this to be
-+ * overridden if necessary.
-+ */
-+#ifdef CONFIG_MMC_UNSAFE_RESUME
-+int mmc_assume_removable;
-+#else
-+int mmc_assume_removable = 1;
-+#endif
-+module_param_named(removable, mmc_assume_removable, bool, 0644);
-+MODULE_PARM_DESC(
-+	removable,
-+	"MMC/SD cards are removable and may be removed during suspend");
-+
-+/*
-  * Internal function. Schedule delayed work in the MMC work queue.
-  */
- static int mmc_schedule_delayed_work(struct delayed_work *work,
-diff -puN drivers/mmc/core/core.h~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/core.h
---- a/drivers/mmc/core/core.h~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
-+++ a/drivers/mmc/core/core.h
-@@ -54,7 +54,9 @@ int mmc_attach_mmc(struct mmc_host *host
- int mmc_attach_sd(struct mmc_host *host, u32 ocr);
- int mmc_attach_sdio(struct mmc_host *host, u32 ocr);
- 
-+/* Module parameters */
- extern int use_spi_crc;
-+extern int mmc_assume_removable;
- 
- /* Debugfs information for hosts and cards */
- void mmc_add_host_debugfs(struct mmc_host *host);
-diff -puN drivers/mmc/core/mmc.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/mmc.c
---- a/drivers/mmc/core/mmc.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
-+++ a/drivers/mmc/core/mmc.c
-@@ -602,25 +602,6 @@ static int mmc_awake(struct mmc_host *ho
- 	return err;
- }
- 
--#ifdef CONFIG_MMC_UNSAFE_RESUME
--
--static const struct mmc_bus_ops mmc_ops = {
--	.awake = mmc_awake,
--	.sleep = mmc_sleep,
--	.remove = mmc_remove,
--	.detect = mmc_detect,
--	.suspend = mmc_suspend,
--	.resume = mmc_resume,
--	.power_restore = mmc_power_restore,
--};
--
--static void mmc_attach_bus_ops(struct mmc_host *host)
--{
--	mmc_attach_bus(host, &mmc_ops);
--}
--
--#else
--
- static const struct mmc_bus_ops mmc_ops = {
- 	.awake = mmc_awake,
- 	.sleep = mmc_sleep,
-@@ -645,15 +626,13 @@ static void mmc_attach_bus_ops(struct mm
+diff -puN drivers/mmc/host/s3cmci.c~drivers-mmc-move-dereference-after-null-test drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~drivers-mmc-move-dereference-after-null-test
++++ a/drivers/mmc/host/s3cmci.c
+@@ -820,7 +820,7 @@ fail_request:
+ static void finalize_request(struct s3cmci_host *host)
  {
- 	const struct mmc_bus_ops *bus_ops;
+ 	struct mmc_request *mrq = host->mrq;
+-	struct mmc_command *cmd = host->cmd_is_stop ? mrq->stop : mrq->cmd;
++	struct mmc_command *cmd;
+ 	int debug_as_failure = 0;
  
--	if (host->caps & MMC_CAP_NONREMOVABLE)
-+	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
- 		bus_ops = &mmc_ops_unsafe;
- 	else
- 		bus_ops = &mmc_ops;
- 	mmc_attach_bus(host, bus_ops);
- }
+ 	if (host->complete_what != COMPLETION_FINALIZE)
+@@ -828,6 +828,7 @@ static void finalize_request(struct s3cm
  
--#endif
--
- /*
-  * Starting point for MMC card init.
-  */
-diff -puN drivers/mmc/core/sd.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable drivers/mmc/core/sd.c
---- a/drivers/mmc/core/sd.c~mmc-add-module-parameter-to-set-whether-cards-are-assumed-removable
-+++ a/drivers/mmc/core/sd.c
-@@ -606,23 +606,6 @@ static void mmc_sd_power_restore(struct 
- 	mmc_release_host(host);
- }
+ 	if (!mrq)
+ 		return;
++	cmd = host->cmd_is_stop ? mrq->stop : mrq->cmd;
  
--#ifdef CONFIG_MMC_UNSAFE_RESUME
--
--static const struct mmc_bus_ops mmc_sd_ops = {
--	.remove = mmc_sd_remove,
--	.detect = mmc_sd_detect,
--	.suspend = mmc_sd_suspend,
--	.resume = mmc_sd_resume,
--	.power_restore = mmc_sd_power_restore,
--};
--
--static void mmc_sd_attach_bus_ops(struct mmc_host *host)
--{
--	mmc_attach_bus(host, &mmc_sd_ops);
--}
--
--#else
--
- static const struct mmc_bus_ops mmc_sd_ops = {
- 	.remove = mmc_sd_remove,
- 	.detect = mmc_sd_detect,
-@@ -643,15 +626,13 @@ static void mmc_sd_attach_bus_ops(struct
- {
- 	const struct mmc_bus_ops *bus_ops;
- 
--	if (host->caps & MMC_CAP_NONREMOVABLE)
-+	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
- 		bus_ops = &mmc_sd_ops_unsafe;
- 	else
- 		bus_ops = &mmc_sd_ops;
- 	mmc_attach_bus(host, bus_ops);
- }
- 
--#endif
--
- /*
-  * Starting point for SD card init.
-  */
+ 	if (cmd->data && (cmd->error == 0) &&
+ 	    (cmd->data->error == 0)) {
 _
 
-Patches currently in -mm which might be from ben@decadent.org.uk are
+Patches currently in -mm which might be from julia@diku.dk are
 
 origin.patch
 linux-next.patch
+drivers-media-video-move-dereference-after-null-test.patch
+drivers-isdn-eliminate-duplicated-test.patch
+drivers-scsi-libsas-use-sam_good.patch
+drivers-scsi-remove-unnecessary-null-test.patch
+drivers-message-move-dereference-after-null-test.patch
+drivers-block-dac960c-use-dac960_v2_controller.patch
+drivers-usb-wusbcore-introduce-missing-usb_free_urb.patch
+drivers-video-move-dereference-after-null-test.patch
+drivers-char-ipmi-use-kcs_idle_state.patch
+drivers-edac-introduce-missing-kfree.patch
 
