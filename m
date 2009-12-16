@@ -1,54 +1,104 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [RFC PATCH v2 0/4] mmc: wii: sdhci controller support
-Date: Wed, 16 Dec 2009 14:53:03 +0100
-Message-ID: <20091216135303.GC4283@pengutronix.de>
-References: <1260829459-23518-1-git-send-email-albert_herranz@yahoo.es> <20091214224552.GA21934@oksana.dev.rtsoft.ru> <20091216124234.GB4283@pengutronix.de> <20091216130634.GA31326@oksana.dev.rtsoft.ru>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="da4uJneut+ArUgXk"
+From: Tomas Winkler <tomas.winkler@intel.com>
+Subject: [net-next 1/3] iwmc3200top: clean up fw_download
+Date: Wed, 16 Dec 2009 16:26:24 +0200
+Message-ID: <1260973586-10243-1-git-send-email-tomas.winkler@intel.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:49693 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756555AbZLPNxI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Dec 2009 08:53:08 -0500
-Content-Disposition: inline
-In-Reply-To: <20091216130634.GA31326@oksana.dev.rtsoft.ru>
+Received: from mga09.intel.com ([134.134.136.24]:62360 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756632AbZLPO0b (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Dec 2009 09:26:31 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <avorontsov@ru.mvista.com>
-Cc: Albert Herranz <albert_herranz@yahoo.es>, linux-mmc@vger.kernel.org, akpm@linux-foundation.org
+To: davem@davemloft.net, netdev@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: yi.zhu@intel.com, inaky.perez-gonzalez@intel.com, guy.cohen@intel.com, ron.rindjunsky@intel.com, Tomas Winkler <tomas.winkler@intel.com>
 
+1. removed redundant NULL-pointers checks in iwmct_fw_load
+as release_firmware and kfree are NULL pointer friendly
+2. remove redundant memset of the parser since the structure
+is fully initialized in iwmct_fw_parser_init function
 
---da4uJneut+ArUgXk
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+---
+ drivers/misc/iwmc3200top/fw-download.c |   20 ++++++--------------
+ 1 files changed, 6 insertions(+), 14 deletions(-)
 
-Hi Anton,
+diff --git a/drivers/misc/iwmc3200top/fw-download.c b/drivers/misc/iwmc3200top/fw-download.c
+index 50d431e..474be92 100644
+--- a/drivers/misc/iwmc3200top/fw-download.c
++++ b/drivers/misc/iwmc3200top/fw-download.c
+@@ -50,8 +50,7 @@ static int iwmct_fw_parser_init(struct iwmct_priv *priv, const u8 *file,
+ 	parser->file = file;
+ 	parser->file_size = file_size;
+ 	parser->cur_pos = 0;
+-	parser->buf = NULL;
+-
++	parser->entry_point = 0;
+ 	parser->buf = kzalloc(block_size, GFP_KERNEL);
+ 	if (!parser->buf) {
+ 		LOG_ERROR(priv, FW_DOWNLOAD, "kzalloc error\n");
+@@ -298,8 +297,6 @@ int iwmct_fw_load(struct iwmct_priv *priv)
+ 	__le32 addr;
+ 	int ret;
+ 
+-	/* clear parser struct */
+-	memset(&priv->parser, 0, sizeof(struct iwmct_parser));
+ 
+ 	/* get the firmware */
+ 	ret = request_firmware(&raw, fw_name, &priv->func->dev);
+@@ -317,6 +314,7 @@ int iwmct_fw_load(struct iwmct_priv *priv)
+ 
+ 	LOG_INFO(priv, FW_DOWNLOAD, "Read firmware '%s'\n", fw_name);
+ 
++	/* clear parser struct */
+ 	ret = iwmct_fw_parser_init(priv, raw->data, raw->size, priv->trans_len);
+ 	if (ret < 0) {
+ 		LOG_ERROR(priv, FW_DOWNLOAD,
+@@ -324,7 +322,6 @@ int iwmct_fw_load(struct iwmct_priv *priv)
+ 		goto exit;
+ 	}
+ 
+-	/* checksum  */
+ 	if (!iwmct_checksum(priv)) {
+ 		LOG_ERROR(priv, FW_DOWNLOAD, "checksum error\n");
+ 		ret = -EINVAL;
+@@ -333,23 +330,18 @@ int iwmct_fw_load(struct iwmct_priv *priv)
+ 
+ 	/* download firmware to device */
+ 	while (iwmct_parse_next_section(priv, &pdata, &len, &addr)) {
+-		if (iwmct_download_section(priv, pdata, len, addr)) {
++		ret = iwmct_download_section(priv, pdata, len, addr);
++		if (ret) {
+ 			LOG_ERROR(priv, FW_DOWNLOAD,
+ 				  "%s download section failed\n", fw_name);
+-			ret = -EIO;
+ 			goto exit;
+ 		}
+ 	}
+ 
+-	iwmct_kick_fw(priv, !!(priv->barker & BARKER_DNLOAD_JUMP_MSK));
++	ret = iwmct_kick_fw(priv, !!(priv->barker & BARKER_DNLOAD_JUMP_MSK));
+ 
+ exit:
+ 	kfree(priv->parser.buf);
+-
+-	if (raw)
+-		release_firmware(raw);
+-
+-	raw = NULL;
+-
++	release_firmware(raw);
+ 	return ret;
+ }
+-- 
+1.6.0.6
 
-> In anyway, I'll happily ack your work regardless ARM OF, since OF
-> acceptance could be a long story. I.e., all the above is FYI, just
-> an interesting idea.
+---------------------------------------------------------------------
+Intel Israel (74) Limited
 
-Yup, I know such work is going on, but I think I need that driver earlier t=
-han
-that :)
+This e-mail and any attachments may contain confidential material for
+the sole use of the intended recipient(s). Any review or distribution
+by others is strictly prohibited. If you are not the intended
+recipient, please contact the sender and delete all copies.
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---da4uJneut+ArUgXk
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAkso5j4ACgkQD27XaX1/VRvpewCgqkmeEg2Wjkvtg8aVdAzF0k1E
-IUwAn2xSZgZ4omjoEkgowcGKR3jEfss9
-=gj+2
------END PGP SIGNATURE-----
-
---da4uJneut+ArUgXk--
