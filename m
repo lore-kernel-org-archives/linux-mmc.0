@@ -1,142 +1,55 @@
-From: Tomas Winkler <tomas.winkler@intel.com>
-Subject: [net-next 3/3] iwmc3200top: simplify imwct_tx
-Date: Wed, 16 Dec 2009 16:26:26 +0200
-Message-ID: <1260973586-10243-3-git-send-email-tomas.winkler@intel.com>
-References: <1260973586-10243-1-git-send-email-tomas.winkler@intel.com>
- <1260973586-10243-2-git-send-email-tomas.winkler@intel.com>
-Content-Type: text/plain; charset="us-ascii"
+From: Albert Herranz <albert_herranz@yahoo.es>
+Subject: Re: [RFC PATCH v2 0/4] mmc: wii: sdhci controller support
+Date: Wed, 16 Dec 2009 23:35:44 +0100
+Message-ID: <4B2960C0.1060206@yahoo.es>
+References: <1260829459-23518-1-git-send-email-albert_herranz@yahoo.es> <20091214224552.GA21934@oksana.dev.rtsoft.ru>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:62360 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756111AbZLPO0f (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Dec 2009 09:26:35 -0500
-In-Reply-To: <1260973586-10243-2-git-send-email-tomas.winkler@intel.com>
+Received: from smtp108.mail.ukl.yahoo.com ([77.238.184.40]:28311 "HELO
+	smtp108.mail.ukl.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S932571AbZLPWfv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Dec 2009 17:35:51 -0500
+In-Reply-To: <20091214224552.GA21934@oksana.dev.rtsoft.ru>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: davem@davemloft.net, netdev@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: yi.zhu@intel.com, inaky.perez-gonzalez@intel.com, guy.cohen@intel.com, ron.rindjunsky@intel.com, Tomas Winkler <tomas.winkler@intel.com>
+To: avorontsov@ru.mvista.com
+Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
 
-1. remove address argument since we use same address IWMC_SDIO_DATA_ADDR in
-    all cases
-2. add __iwmct_tx - non locking tx function for already locked contexts
+Anton Vorontsov wrote:
+> On Mon, Dec 14, 2009 at 11:24:15PM +0100, Albert Herranz wrote:
+>> This patch set adds support for the SDHCI controllers found in the
+>> "Hollywood" chipset of the Nintendo Wii video game console.
+>>
+>> First, the existing sdhci-of driver is splitted into a core part and
+>> a eSDHC-only part. Then the Nintendo Wii SDHCI support is added as an
+>> add-on to that, re-using common code.
+> 
+> All four patches
+> 
+> Acked-by: Anton Vorontsov <avorontsov@ru.mvista.com>
+> 
+> 
+> Andrew,
+> 
+> The patches appears to
+> 
+> - build fine, modular and built-in;
+> - sparse clean;
+> - checkpatch clean;
+> - actually work on a real hardware (tested with eSDHC);
+> 
+> Would you mind merging them for 2.6.33?
+> 
 
-Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
----
- drivers/misc/iwmc3200top/fw-download.c |    4 +-
- drivers/misc/iwmc3200top/iwmc3200top.h |    4 +--
- drivers/misc/iwmc3200top/main.c        |   34 +++++++++++++++----------------
- 3 files changed, 19 insertions(+), 23 deletions(-)
+It would be nice, indeed.
+Specially now that the Wii patches got pulled in for 2.6.33.
 
-diff --git a/drivers/misc/iwmc3200top/fw-download.c b/drivers/misc/iwmc3200top/fw-download.c
-index 07055af..9dbaeb5 100644
---- a/drivers/misc/iwmc3200top/fw-download.c
-+++ b/drivers/misc/iwmc3200top/fw-download.c
-@@ -228,7 +228,7 @@ static int iwmct_download_section(struct iwmct_priv *priv, const u8 *p_sec,
- 		hdr->cmd = cpu_to_le32(cmd);
- 		/* send it down */
- 		/* TODO: add more proper sending and error checking */
--		ret = iwmct_tx(priv, 0, parser->buf, trans_size);
-+		ret = iwmct_tx(priv, parser->buf, trans_size);
- 		if (ret != 0) {
- 			LOG_INFO(priv, FW_DOWNLOAD,
- 				"iwmct_tx returned %d\n", ret);
-@@ -280,7 +280,7 @@ static int iwmct_kick_fw(struct iwmct_priv *priv, bool jump)
- 	LOG_HEXDUMP(FW_DOWNLOAD, parser->buf, sizeof(*hdr));
- 	/* send it down */
- 	/* TODO: add more proper sending and error checking */
--	ret = iwmct_tx(priv, 0, parser->buf, IWMC_SDIO_BLK_SIZE);
-+	ret = iwmct_tx(priv, parser->buf, IWMC_SDIO_BLK_SIZE);
- 	if (ret)
- 		LOG_INFO(priv, FW_DOWNLOAD, "iwmct_tx returned %d", ret);
- 
-diff --git a/drivers/misc/iwmc3200top/iwmc3200top.h b/drivers/misc/iwmc3200top/iwmc3200top.h
-index 43bd510..740ff07 100644
---- a/drivers/misc/iwmc3200top/iwmc3200top.h
-+++ b/drivers/misc/iwmc3200top/iwmc3200top.h
-@@ -196,9 +196,7 @@ struct iwmct_priv {
- 	struct list_head read_req_list;
- };
- 
--extern int iwmct_tx(struct iwmct_priv *priv, unsigned int addr,
--		void *src, int count);
--
-+extern int iwmct_tx(struct iwmct_priv *priv, void *src, int count);
- extern int iwmct_fw_load(struct iwmct_priv *priv);
- 
- extern void iwmct_dbg_init_params(struct iwmct_priv *drv);
-diff --git a/drivers/misc/iwmc3200top/main.c b/drivers/misc/iwmc3200top/main.c
-index 3862794..dd0a391 100644
---- a/drivers/misc/iwmc3200top/main.c
-+++ b/drivers/misc/iwmc3200top/main.c
-@@ -49,6 +49,20 @@ MODULE_LICENSE("GPL");
- MODULE_AUTHOR(DRIVER_COPYRIGHT);
- MODULE_FIRMWARE(FW_NAME(FW_API_VER));
- 
-+
-+static inline int __iwmct_tx(struct iwmct_priv *priv, void *src, int count)
-+{
-+	return sdio_memcpy_toio(priv->func, IWMC_SDIO_DATA_ADDR, src, count);
-+
-+}
-+int iwmct_tx(struct iwmct_priv *priv, void *src, int count)
-+{
-+	int ret;
-+	sdio_claim_host(priv->func);
-+	ret =  __iwmct_tx(priv, src, count);
-+	sdio_release_host(priv->func);
-+	return ret;
-+}
- /*
-  * This workers main task is to wait for OP_OPR_ALIVE
-  * from TOP FW until ALIVE_MSG_TIMOUT timeout is elapsed.
-@@ -158,27 +172,12 @@ int iwmct_send_hcmd(struct iwmct_priv *priv, u8 *cmd, u16 len)
- 	}
- 
- 	memcpy(buf, cmd, len);
--
--	sdio_claim_host(priv->func);
--	ret = sdio_memcpy_toio(priv->func, IWMC_SDIO_DATA_ADDR, buf,
--			       FW_HCMD_BLOCK_SIZE);
--	sdio_release_host(priv->func);
-+	ret = iwmct_tx(priv, buf, FW_HCMD_BLOCK_SIZE);
- 
- 	kfree(buf);
- 	return ret;
- }
- 
--int iwmct_tx(struct iwmct_priv *priv, unsigned int addr,
--	void *src, int count)
--{
--	int ret;
--
--	sdio_claim_host(priv->func);
--	ret = sdio_memcpy_toio(priv->func, addr, src, count);
--	sdio_release_host(priv->func);
--
--	return ret;
--}
- 
- static void iwmct_irq_read_worker(struct work_struct *ws)
- {
-@@ -273,8 +272,7 @@ static void iwmct_irq_read_worker(struct work_struct *ws)
- 
- 		if (barker & BARKER_DNLOAD_SYNC_MSK) {
- 			/* Send the same barker back */
--			ret = sdio_memcpy_toio(priv->func, IWMC_SDIO_DATA_ADDR,
--					       buf, iosize);
-+			ret = __iwmct_tx(priv, buf, iosize);
- 			if (ret) {
- 				LOG_ERROR(priv, IRQ,
- 					 "error %d echoing barker\n", ret);
--- 
-1.6.0.6
+Having SDHCI support enables both storage (mmcblk) and networking (b43-sdio).
 
----------------------------------------------------------------------
-Intel Israel (74) Limited
+> Thanks!
+> 
 
-This e-mail and any attachments may contain confidential material for
-the sole use of the intended recipient(s). Any review or distribution
-by others is strictly prohibited. If you are not the intended
-recipient, please contact the sender and delete all copies.
-
+Thanks,
+Albert
