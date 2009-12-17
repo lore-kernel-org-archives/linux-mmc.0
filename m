@@ -1,194 +1,179 @@
-From: akpm@linux-foundation.org
-Subject: + sdhci-of-add-support-for-the-wii-sdhci-controller.patch added to -mm tree
-Date: Wed, 16 Dec 2009 14:48:04 -0800
-Message-ID: <200912162248.nBGMm4o4019647@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: albert_herranz@yahoo.es, linux-mmc@vger.kernel.org
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH/RFC] tmio_mmc: keep card-detect interrupts enabled
+Date: Thu, 17 Dec 2009 21:25:52 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.0912172113510.5991@axis700.grange>
+References: <Pine.LNX.4.64.0911061127240.4389@axis700.grange>
+ <c09aa50a0911090242l35d0dfb2vec0cdeff8b86d33e@mail.gmail.com>
+ <Pine.LNX.4.64.0911091530030.4289@axis700.grange>
+ <c09aa50a0911091218i681449e0r5cb96b9db3e0def6@mail.gmail.com>
+ <Pine.LNX.4.64.0911092134440.4289@axis700.grange>
+ <c09aa50a0911091736k27d66483t9012e296bfbf578a@mail.gmail.com>
+ <Pine.LNX.4.64.0911282002490.3696@axis700.grange>
+ <Pine.LNX.4.64.0912162223170.5283@axis700.grange>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=KOI8-R
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1764905AbZLQU0X@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.0912162223170.5283@axis700.grange>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Andrew
 
-The patch titled
-     sdhci-of: add support for the wii sdhci controller
-has been added to the -mm tree.  Its filename is
-     sdhci-of-add-support-for-the-wii-sdhci-controller.patch
+I originally submitted this [1] patch on the 6th of November, then=20
+accidentally the MMC list got dropped from CC and the discussion moved =
+to=20
+another irrelevant list, Ian's last reply is at [2]. Unfortunately, Ian=
+=20
+hasn't replied to my reminders since then, and I don't see this patch=20
+anywhere upstream. Is there any way we could get it into 2.6.33?
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+Thanks
+Guennadi
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+[1] http://thread.gmane.org/gmane.linux.kernel.mmc/704
+[2] http://thread.gmane.org/gmane.linux.drivers.video-input-infrastruct=
+ure/11981/focus=3D11995
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+On Wed, 16 Dec 2009, Guennadi Liakhovetski wrote:
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+> On Sat, 28 Nov 2009, Guennadi Liakhovetski wrote:
+>=20
+> > On Tue, 10 Nov 2009, Ian Molton wrote:
+> >=20
+> > > Well if they are only masked they shouldnt stop being asserted. B=
+ut we
+> > > should unmask them again.
+> > >=20
+> > > Im not really sure we should mask them anyway, with the card poss=
+ibly
+> > > being gone... Will need to look into it further.
+> >=20
+> > Hi Ian
+> >=20
+> > What's the status of this patch? Are you going to queue it for 2.6.=
+33?
+>=20
+> Ian, ping? I still don't see this patch in any (Linus' / next) upstre=
+am=20
+> tree and the merge window will be closing soon. Any update?
+>=20
+> Thanks
+> Guennadi
+>=20
+> >=20
+> > Thanks
+> > Guennadi
+> >=20
+> > >=20
+> > > 2009/11/9 Guennadi Liakhovetski <g.liakhovetski@gmx.de>:
+> > > > (re-adding accidentally dropped ML)
+> > > >
+> > > > On Mon, 9 Nov 2009, Ian Molton wrote:
+> > > >
+> > > >> Well, I presume we want to know when the card gets removed :)
+> > > >
+> > > > Sure, that's why we shouldn't mask those interrupts:-) If they =
+do get
+> > > > masked and missed, I do not know, if the interrupt remains pend=
+ing in this
+> > > > case, because they never get detected then:)
+> > > >
+> > > >>
+> > > >> 2009/11/9 Guennadi Liakhovetski <g.liakhovetski@gmx.de>:
+> > > >> > Hi Ian
+> > > >> >
+> > > >> > Why did you drop all CCs?
+> > > >> >
+> > > >> > On Mon, 9 Nov 2009, Ian Molton wrote:
+> > > >> >
+> > > >> >> I havent looked at the consequences for the driver if a ins=
+ert IRQ
+> > > >> >> occurs during IO, however it seems logical that we should n=
+ot
+> > > >> >> permanently mask the IRQ.
+> > > >> >>
+> > > >> >> I presume that the IRQ remains pending?
+> > > >> >
+> > > >> > Don't know, never checked. Is this important to know?
+> > > >> >
+> > > >> > Thanks
+> > > >> > Guennadi
+> > > >> >
+> > > >> >>
+> > > >> >> 2009/11/6 Guennadi Liakhovetski <g.liakhovetski@gmx.de>:
+> > > >> >> > On SuperH platforms the SDHI controller does not produce =
+any command IRQs
+> > > >> >> > after a completed IO. This leads to card-detect interrupt=
+s staying
+> > > >> >> > disabled. Do not disable card-detect interrupts on DATA I=
+RQs.
+> > > >> >> >
+> > > >> >> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.=
+de>
+> > > >> >> > ---
+> > > >> >> >
+> > > >> >> > Marked as RFC because I'm not really sure this is a corre=
+ct approach to
+> > > >> >> > fix this problem, and whether this will have negative eff=
+ect on other
+> > > >> >> > tmio_mmc MFD users.
+> > > >> >> >
+> > > >> >> > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/ho=
+st/tmio_mmc.h
+> > > >> >> > index c676767..0b31d44 100644
+> > > >> >> > --- a/drivers/mmc/host/tmio_mmc.h
+> > > >> >> > +++ b/drivers/mmc/host/tmio_mmc.h
+> > > >> >> > @@ -55,10 +55,8 @@
+> > > >> >> > =A0/* Define some IRQ masks */
+> > > >> >> > =A0/* This is the mask used at reset by the chip */
+> > > >> >> > =A0#define TMIO_MASK_ALL =A0 =A0 =A0 =A0 =A0 0x837f031d
+> > > >> >> > -#define TMIO_MASK_READOP =A0(TMIO_STAT_RXRDY | TMIO_STAT=
+_DATAEND | \
+> > > >> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 TMIO_STAT_CARD_REMOVE | TMI=
+O_STAT_CARD_INSERT)
+> > > >> >> > -#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DA=
+TAEND | \
+> > > >> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 TMIO_STAT_CARD_REMOVE | TMI=
+O_STAT_CARD_INSERT)
+> > > >> >> > +#define TMIO_MASK_READOP =A0(TMIO_STAT_RXRDY | TMIO_STAT=
+_DATAEND)
+> > > >> >> > +#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DA=
+TAEND)
+> > > >> >> > =A0#define TMIO_MASK_CMD =A0 =A0 (TMIO_STAT_CMDRESPEND | =
+TMIO_STAT_CMDTIMEOUT | \
+> > > >> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0TMIO_STAT_CARD_REMOVE | TM=
+IO_STAT_CARD_INSERT)
+> > > >> >> > =A0#define TMIO_MASK_IRQ =A0 =A0 (TMIO_MASK_READOP | TMIO=
+_MASK_WRITEOP | TMIO_MASK_CMD)
+> > > >
+> > > > Thanks
+> > > > Guennadi
+> > > > ---
+> > > > Guennadi Liakhovetski, Ph.D.
+> > > > Freelance Open-Source Software Developer
+> > > > http://www.open-technology.de/
+> > > >
+> > >=20
+> > >=20
+> > >=20
+> > > --=20
+> > > Ian Molton
+> > > Linux, Automotive, and other hacking:
+> > > http://www.mnementh.co.uk/
+> > >=20
+> >=20
+> > ---
+> > Guennadi Liakhovetski
+> >=20
+>=20
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
+>=20
 
-------------------------------------------------------
-Subject: sdhci-of: add support for the wii sdhci controller
-From: Albert Herranz <albert_herranz@yahoo.es>
-
-Add support for the Secure Digital Host Controller Interface found on the
-"Hollywood" chipset of the Nintendo Wii video game console.
-
-Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
-
- drivers/mmc/host/Kconfig         |   13 +++++
- drivers/mmc/host/Makefile        |    1 
- drivers/mmc/host/sdhci-of-core.c |    3 +
- drivers/mmc/host/sdhci-of-hlwd.c |   65 +++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-of.h      |    1 
- 5 files changed, 82 insertions(+), 1 deletion(-)
-
-diff -puN drivers/mmc/host/Kconfig~sdhci-of-add-support-for-the-wii-sdhci-controller drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~sdhci-of-add-support-for-the-wii-sdhci-controller
-+++ a/drivers/mmc/host/Kconfig
-@@ -55,7 +55,7 @@ config MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_S
- 	  has the effect of scrambling the addresses and formats of data
- 	  accessed in sizes other than the datum size.
- 
--	  This is the case for the Freescale eSDHC.
-+	  This is the case for the Freescale eSDHC and Nintendo Wii SDHCI.
- 
- config MMC_SDHCI_PCI
- 	tristate "SDHCI support on PCI bus"
-@@ -103,6 +103,17 @@ config MMC_SDHCI_OF_ESDHC
- 
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_OF_HLWD
-+	bool "SDHCI OF support for the Nintendo Wii SDHCI controllers"
-+	depends on MMC_SDHCI_OF
-+	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
-+	help
-+	  This selects the Secure Digital Host Controller Interface (SDHCI)
-+	  found in the "Hollywood" chipset of the Nintendo Wii video game
-+	  console.
-+
-+	  If unsure, say N.
-+
- config MMC_SDHCI_PLTFM
- 	tristate "SDHCI support on the platform specific bus"
- 	depends on MMC_SDHCI
-diff -puN drivers/mmc/host/Makefile~sdhci-of-add-support-for-the-wii-sdhci-controller drivers/mmc/host/Makefile
---- a/drivers/mmc/host/Makefile~sdhci-of-add-support-for-the-wii-sdhci-controller
-+++ a/drivers/mmc/host/Makefile
-@@ -39,6 +39,7 @@ obj-$(CONFIG_SDH_BFIN)		+= bfin_sdh.o
- obj-$(CONFIG_MMC_SDHCI_OF)	+= sdhci-of.o
- sdhci-of-y				:= sdhci-of-core.o
- sdhci-of-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
-+sdhci-of-$(CONFIG_MMC_SDHCI_OF_HLWD)	+= sdhci-of-hlwd.o
- 
- ifeq ($(CONFIG_CB710_DEBUG),y)
- 	CFLAGS-cb710-mmc	+= -DDEBUG
-diff -puN drivers/mmc/host/sdhci-of-core.c~sdhci-of-add-support-for-the-wii-sdhci-controller drivers/mmc/host/sdhci-of-core.c
---- a/drivers/mmc/host/sdhci-of-core.c~sdhci-of-add-support-for-the-wii-sdhci-controller
-+++ a/drivers/mmc/host/sdhci-of-core.c
-@@ -196,6 +196,9 @@ static const struct of_device_id sdhci_o
- 	{ .compatible = "fsl,mpc8536-esdhc", .data = &sdhci_esdhc, },
- 	{ .compatible = "fsl,esdhc", .data = &sdhci_esdhc, },
- #endif
-+#ifdef CONFIG_MMC_SDHCI_OF_HLWD
-+	{ .compatible = "nintendo,hollywood-sdhci", .data = &sdhci_hlwd, },
-+#endif
- 	{ .compatible = "generic-sdhci", },
- 	{},
- };
-diff -puN /dev/null drivers/mmc/host/sdhci-of-hlwd.c
---- /dev/null
-+++ a/drivers/mmc/host/sdhci-of-hlwd.c
-@@ -0,0 +1,65 @@
-+/*
-+ * drivers/mmc/host/sdhci-of-hlwd.c
-+ *
-+ * Nintendo Wii Secure Digital Host Controller Interface.
-+ * Copyright (C) 2009 The GameCube Linux Team
-+ * Copyright (C) 2009 Albert Herranz
-+ *
-+ * Based on sdhci-of-esdhc.c
-+ *
-+ * Copyright (c) 2007 Freescale Semiconductor, Inc.
-+ * Copyright (c) 2009 MontaVista Software, Inc.
-+ *
-+ * Authors: Xiaobo Xie <X.Xie@freescale.com>
-+ *	    Anton Vorontsov <avorontsov@ru.mvista.com>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or (at
-+ * your option) any later version.
-+ */
-+
-+#include <linux/delay.h>
-+#include <linux/mmc/host.h>
-+#include "sdhci-of.h"
-+#include "sdhci.h"
-+
-+/*
-+ * Ops and quirks for the Nintendo Wii SDHCI controllers.
-+ */
-+
-+/*
-+ * We need a small delay after each write, or things go horribly wrong.
-+ */
-+#define SDHCI_HLWD_WRITE_DELAY	5 /* usecs */
-+
-+static void sdhci_hlwd_writel(struct sdhci_host *host, u32 val, int reg)
-+{
-+	sdhci_be32bs_writel(host, val, reg);
-+	udelay(SDHCI_HLWD_WRITE_DELAY);
-+}
-+
-+static void sdhci_hlwd_writew(struct sdhci_host *host, u16 val, int reg)
-+{
-+	sdhci_be32bs_writew(host, val, reg);
-+	udelay(SDHCI_HLWD_WRITE_DELAY);
-+}
-+
-+static void sdhci_hlwd_writeb(struct sdhci_host *host, u8 val, int reg)
-+{
-+	sdhci_be32bs_writeb(host, val, reg);
-+	udelay(SDHCI_HLWD_WRITE_DELAY);
-+}
-+
-+struct sdhci_of_data sdhci_hlwd = {
-+	.quirks = SDHCI_QUIRK_32BIT_DMA_ADDR |
-+		  SDHCI_QUIRK_32BIT_DMA_SIZE,
-+	.ops = {
-+		.readl = sdhci_be32bs_readl,
-+		.readw = sdhci_be32bs_readw,
-+		.readb = sdhci_be32bs_readb,
-+		.writel = sdhci_hlwd_writel,
-+		.writew = sdhci_hlwd_writew,
-+		.writeb = sdhci_hlwd_writeb,
-+	},
-+};
-diff -puN drivers/mmc/host/sdhci-of.h~sdhci-of-add-support-for-the-wii-sdhci-controller drivers/mmc/host/sdhci-of.h
---- a/drivers/mmc/host/sdhci-of.h~sdhci-of-add-support-for-the-wii-sdhci-controller
-+++ a/drivers/mmc/host/sdhci-of.h
-@@ -37,5 +37,6 @@ extern void sdhci_be32bs_writew(struct s
- extern void sdhci_be32bs_writeb(struct sdhci_host *host, u8 val, int reg);
- 
- extern struct sdhci_of_data sdhci_esdhc;
-+extern struct sdhci_of_data sdhci_hlwd;
- 
- #endif /* __SDHCI_OF_H */
-_
-
-Patches currently in -mm which might be from albert_herranz@yahoo.es are
-
-origin.patch
-linux-next.patch
-sdhci-protect-header-file-against-multi-inclusion.patch
-sdhci-of-rename-main-driver-file-prior-to-reorganization.patch
-sdhci-of-reorganize-driver-to-support-additional-hardware.patch
-sdhci-of-add-support-for-the-wii-sdhci-controller.patch
-sdio-recognize-io-card-without-powercycle.patch
-
+Guennadi Liakhovetski
