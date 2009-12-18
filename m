@@ -1,56 +1,66 @@
 From: akpm@linux-foundation.org
-Subject: [merged] sdhci-protect-header-file-against-multi-inclusion.patch removed from -mm tree
-Date: Fri, 18 Dec 2009 12:26:42 -0800
-Message-ID: <200912182026.nBIKQgwa016548@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: albert_herranz@yahoo.es, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
+Subject: [merged] sdio-fix-reference-counting-in-sdio_remove_func.patch removed from -mm tree
+Date: Fri, 18 Dec 2009 12:26:37 -0800
+Message-ID: <200912182026.nBIKQbwB016542@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:47943 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755598AbZLRU0p (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Dec 2009 15:26:45 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: dsd@laptop.org, linux-mmc@vger.kernel.org, matt@console-pimps.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     sdhci: protect header file against multi inclusion
+     sdio: fix reference counting in sdio_remove_func()
 has been removed from the -mm tree.  Its filename was
-     sdhci-protect-header-file-against-multi-inclusion.patch
+     sdio-fix-reference-counting-in-sdio_remove_func.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sdhci: protect header file against multi inclusion
-From: Albert Herranz <albert_herranz@yahoo.es>
+Subject: sdio: fix reference counting in sdio_remove_func()
+From: Daniel Drake <dsd@laptop.org>
 
-Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
+sdio_remove_func() needs to be more careful about reference counting.  It
+can be called in error paths where sdio_add_func() has never been called
+e.g.  mmc_attach_sdio error path --> mmc_sdio_remove --> sdio_remove_func
+
+Signed-off-by: Daniel Drake <dsd@laptop.org>
+Reviewed-by: Matt Fleming <matt@console-pimps.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci.h |    4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/core/sdio_bus.c |    7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff -puN drivers/mmc/host/sdhci.h~sdhci-protect-header-file-against-multi-inclusion drivers/mmc/host/sdhci.h
---- a/drivers/mmc/host/sdhci.h~sdhci-protect-header-file-against-multi-inclusion
-+++ a/drivers/mmc/host/sdhci.h
-@@ -8,6 +8,8 @@
-  * the Free Software Foundation; either version 2 of the License, or (at
-  * your option) any later version.
+diff -puN drivers/mmc/core/sdio_bus.c~sdio-fix-reference-counting-in-sdio_remove_func drivers/mmc/core/sdio_bus.c
+--- a/drivers/mmc/core/sdio_bus.c~sdio-fix-reference-counting-in-sdio_remove_func
++++ a/drivers/mmc/core/sdio_bus.c
+@@ -248,12 +248,15 @@ int sdio_add_func(struct sdio_func *func
+ /*
+  * Unregister a SDIO function with the driver model, and
+  * (eventually) free it.
++ * This function can be called through error paths where sdio_add_func() was
++ * never executed (because a failure occurred at an earlier point).
   */
-+#ifndef __SDHCI_H
-+#define __SDHCI_H
+ void sdio_remove_func(struct sdio_func *func)
+ {
+-	if (sdio_func_present(func))
+-		device_del(&func->dev);
++	if (!sdio_func_present(func))
++		return;
  
- #include <linux/scatterlist.h>
- #include <linux/compiler.h>
-@@ -408,3 +410,5 @@ extern void sdhci_remove_host(struct sdh
- extern int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state);
- extern int sdhci_resume_host(struct sdhci_host *host);
- #endif
-+
-+#endif /* __SDHCI_H */
++	device_del(&func->dev);
+ 	put_device(&func->dev);
+ }
+ 
 _
 
-Patches currently in -mm which might be from albert_herranz@yahoo.es are
+Patches currently in -mm which might be from dsd@laptop.org are
 
-sdio-recognize-io-card-without-powercycle.patch
 
