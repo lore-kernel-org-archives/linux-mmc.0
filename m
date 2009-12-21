@@ -1,53 +1,155 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH/RFC] tmio_mmc: keep card-detect interrupts enabled
-Date: Sun, 20 Dec 2009 18:20:48 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.0912201807370.14323@axis700.grange>
-References: <Pine.LNX.4.64.0911061127240.4389@axis700.grange>
- <c09aa50a0911090242l35d0dfb2vec0cdeff8b86d33e@mail.gmail.com>
- <Pine.LNX.4.64.0911091530030.4289@axis700.grange>
- <c09aa50a0911091218i681449e0r5cb96b9db3e0def6@mail.gmail.com>
- <Pine.LNX.4.64.0911092134440.4289@axis700.grange>
- <c09aa50a0911091736k27d66483t9012e296bfbf578a@mail.gmail.com>
- <Pine.LNX.4.64.0911282002490.3696@axis700.grange>
- <Pine.LNX.4.64.0912162223170.5283@axis700.grange>
- <Pine.LNX.4.64.0912172113510.5991@axis700.grange>
- <20091217131239.0dfd5534.akpm@linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Phaneendra Kumar Alapati <phani@embwise.com>
+Subject: [PATCH] OMAP35xx:SDIO IRQ Support for OMAP35xx
+Date: Mon, 21 Dec 2009 18:34:06 +0530
+Message-ID: <1261400646-7641-1-git-send-email-phani@embwise.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:39897 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1751946AbZLTRUa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 20 Dec 2009 12:20:30 -0500
-In-Reply-To: <20091217131239.0dfd5534.akpm@linux-foundation.org>
+Received: from mail-yx0-f187.google.com ([209.85.210.187]:55846 "EHLO
+	mail-yx0-f187.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751436AbZLUNE3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Dec 2009 08:04:29 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
+To: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>
+Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@nokia.com>, "Paasikivi Teemu.3 (EXT-Ixonos/Tampere)" <ext-teemu.3.paasikivi@nokia.com>, Phaneendra Kumar Alapati <phani@embwise.com>
 
-Hi Andrew
+This patch adds SDIO IRQ support for OMAP35xx. Tested on OMAP3530EVM
+with Marvell 88W8686 card and below are the observed throughput results
+(ttcp utility): 13Mbps (Downlink), 10.5 Mbps(Uplink)
 
-On Thu, 17 Dec 2009, Andrew Morton wrote:
-
-> On Thu, 17 Dec 2009 21:25:52 +0100 (CET)
-> Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
-> 
-> > I originally submitted this [1] patch on the 6th of November, then 
-> > accidentally the MMC list got dropped from CC and the discussion moved to 
-> > another irrelevant list, Ian's last reply is at [2]. Unfortunately, Ian 
-> > hasn't replied to my reminders since then, and I don't see this patch 
-> > anywhere upstream. Is there any way we could get it into 2.6.33?
-> 
-> Please redo and retest it against curent mainline and do a full resend.
-
-As I tried to re-test, I found out, that some other patches from Ian are 
-currently missing in the mainline, so, even though this my specific patch 
-doesn't depend on those changes, unfortunately, I currently cannot test 
-tmio_mmc on sh. Will resubmit as soon as those patches hit mainline.
-
-Thanks
-Guennadi
+Signed-off-by: Phaneendra Kumar <phani@embwise.com>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mmc/host/omap_hsmmc.c |   55 ++++++++++++++++++++++++++++++++++++----
+ 1 files changed, 49 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 4b23225..fa94580 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -100,6 +100,10 @@
+ #define SRD			(1 << 26)
+ #define SOFTRESET		(1 << 1)
+ #define RESETDONE		(1 << 0)
++#define CIRQ		(1 << 8)
++#define CIRQ_ENABLE	(1 << 8)
++#define CTPL		(1 << 11)
++#define CLKEXTFREE	(1 << 16)
+ 
+ /*
+  * FIXME: Most likely all the data using these _DEVID defines should come
+@@ -171,6 +175,7 @@ struct omap_hsmmc_host {
+ 	int			vdd;
+ 	int			protect_card;
+ 	int			reqs_blocked;
++	int			sdio_int;
+ 
+ 	struct	omap_mmc_platform_data	*pdata;
+ };
+@@ -436,6 +441,13 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
+ 	else
+ 		OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
+ 
++	if (host->sdio_int) {
++		OMAP_HSMMC_WRITE(host->base, ISE,
++			(OMAP_HSMMC_READ(host->base, ISE) | CIRQ_ENABLE));
++		OMAP_HSMMC_WRITE(host->base, IE,
++			(OMAP_HSMMC_READ(host->base, IE) | CIRQ_ENABLE));
++	}
++
+ 	host->response_busy = 0;
+ 	if (cmd->flags & MMC_RSP_PRESENT) {
+ 		if (cmd->flags & MMC_RSP_136)
+@@ -640,6 +652,17 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+ 
+ 	spin_lock(&host->irq_lock);
+ 
++	data = host->data;
++	status = OMAP_HSMMC_READ(host->base, STAT);
++	dev_dbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
++
++	if (host->mmc->caps & MMC_CAP_SDIO_IRQ) {
++		if (status & CIRQ) {
++			dev_dbg(mmc_dev(host->mmc), "SDIO Card Interrupt\n");
++			mmc_signal_sdio_irq(host->mmc);
++		}
++	}
++
+ 	if (host->mrq == NULL) {
+ 		OMAP_HSMMC_WRITE(host->base, STAT,
+ 			OMAP_HSMMC_READ(host->base, STAT));
+@@ -649,10 +672,6 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+ 		return IRQ_HANDLED;
+ 	}
+ 
+-	data = host->data;
+-	status = OMAP_HSMMC_READ(host->base, STAT);
+-	dev_dbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
+-
+ 	if (status & ERR) {
+ #ifdef CONFIG_MMC_DEBUG
+ 		omap_hsmmc_report_irq(host, status);
+@@ -1254,6 +1273,25 @@ static int omap_hsmmc_get_ro(struct mmc_host *mmc)
+ 	return mmc_slot(host).get_ro(host->dev, 0);
+ }
+ 
++static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
++{
++	struct omap_hsmmc_host *host = mmc_priv(mmc);
++
++	host->sdio_int = enable;
++	if (enable) {
++		OMAP_HSMMC_WRITE(host->base, ISE,
++			(OMAP_HSMMC_READ(host->base, ISE) | CIRQ_ENABLE));
++		OMAP_HSMMC_WRITE(host->base, IE,
++			(OMAP_HSMMC_READ(host->base, IE) | CIRQ_ENABLE));
++	} else {
++		OMAP_HSMMC_WRITE(host->base, IE,
++			(OMAP_HSMMC_READ(host->base, IE) & (~CIRQ_ENABLE)));
++		OMAP_HSMMC_WRITE(host->base, ISE,
++			(OMAP_HSMMC_READ(host->base, ISE) & (~CIRQ_ENABLE)));
++	}
++
++}
++
+ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
+ {
+ 	u32 hctl, capa, value;
+@@ -1519,7 +1557,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
+ 	.set_ios = omap_hsmmc_set_ios,
+ 	.get_cd = omap_hsmmc_get_cd,
+ 	.get_ro = omap_hsmmc_get_ro,
+-	/* NYET -- enable_sdio_irq */
++	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+ };
+ 
+ static const struct mmc_host_ops omap_hsmmc_ps_ops = {
+@@ -1529,7 +1567,7 @@ static const struct mmc_host_ops omap_hsmmc_ps_ops = {
+ 	.set_ios = omap_hsmmc_set_ios,
+ 	.get_cd = omap_hsmmc_get_cd,
+ 	.get_ro = omap_hsmmc_get_ro,
+-	/* NYET -- enable_sdio_irq */
++	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+ };
+ 
+ #ifdef CONFIG_DEBUG_FS
+@@ -1657,6 +1695,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->mapbase	= res->start;
+ 	host->base	= ioremap(host->mapbase, SZ_4K);
+ 	host->power_mode = -1;
++	host->sdio_int = 0;
+ 
+ 	platform_set_drvdata(pdev, host);
+ 	INIT_WORK(&host->mmc_carddetect_work, omap_hsmmc_detect);
+@@ -1744,6 +1783,10 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (mmc_slot(host).nonremovable)
+ 		mmc->caps |= MMC_CAP_NONREMOVABLE;
+ 
++	mmc->caps |= MMC_CAP_SDIO_IRQ;
++	OMAP_HSMMC_WRITE(host->base, CON,
++			OMAP_HSMMC_READ(host->base, CON) | (CTPL | CLKEXTFREE));
++
+ 	omap_hsmmc_conf_bus_power(host);
+ 
+ 	/* Select DMA lines */
+-- 
+1.6.3.3
+
