@@ -1,40 +1,60 @@
-From: Yauhen Kharuzhy <yauhen.kharuzhy@promwad.com>
-Subject: [PATCH] at91_mci: Enable 4-bit bus mode for AT91SAM9RL64 CPU
-Date: Thu, 24 Dec 2009 15:37:11 +0200
-Message-ID: <1261661831-750-1-git-send-email-yauhen.kharuzhy@promwad.com>
+From: Peter Huewe <PeterHuewe@gmx.de>
+Subject: [PATCH] arch/avr32: Fix build failure for avr32 caused by typo
+Date: Fri, 25 Dec 2009 20:08:45 +0100
+Message-ID: <200912252008.45602.PeterHuewe@gmx.de>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f225.google.com ([209.85.220.225]:58170 "EHLO
-	mail-fx0-f225.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751441AbZLXNhd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Dec 2009 08:37:33 -0500
-Received: by fxm25 with SMTP id 25so2789808fxm.21
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Dec 2009 05:37:31 -0800 (PST)
+Received: from mail.gmx.net ([213.165.64.20]:52508 "HELO mail.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1753071AbZLYTIv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 25 Dec 2009 14:08:51 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ivan Kuten <ivan.kuten@promwad.com>, Yauhen Kharuzhy <yauhen.kharuzhy@promwad.com>
+Cc: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Andrew Morton <akpm@linux-foundation.org>, Peter Ma <pma@mediamatech.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, peterhuewe@gmx.de
 
-AT91SAM9RL64 CPU has 4-bit SD/MMC mode support, so enable them.
+This patch fixes a build failure introduced by the patch
+  atmel-mci: change use of dma slave interface by Nicolas Ferre
+by changing mci_dma_slave to the correct name of mci_dma_data
 
-Signed-off-by: Yauhen Kharuzhy <yauhen.kharuzhy@promwad.com>
+This should make the avr32 tree build again.
+
+References:
+http://kisskb.ellerman.id.au/kisskb/buildresult/1893610/
+http://git.kernel.org/?p=linux/kernel/git/sfr/linux-next.git;a=commitdiff;h=2635d1ba711560d521f6218c585a3e0401f566e1
+
+Patch against Linus' tree.
+
+Signed-off-by: Peter Huewe <peterhuewe@gmx.de>
 ---
- drivers/mmc/host/at91_mci.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+ arch/avr32/mach-at32ap/at32ap700x.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
-index 63924e0..cb4a63b 100644
---- a/drivers/mmc/host/at91_mci.c
-+++ b/drivers/mmc/host/at91_mci.c
-@@ -1017,7 +1017,8 @@ static int __init at91_mci_probe(struct platform_device *pdev)
- 	host->bus_mode = 0;
- 	host->board = pdev->dev.platform_data;
- 	if (host->board->wire4) {
--		if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
-+		if (cpu_is_at91sam9260() || cpu_is_at91sam9263()
-+			|| cpu_is_at91sam9rl())
- 			mmc->caps |= MMC_CAP_4_BIT_DATA;
- 		else
- 			dev_warn(&pdev->dev, "4 wire bus mode not supported"
+diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
+index 1aa1ea5..7d4ed42 100644
+--- a/arch/avr32/mach-at32ap/at32ap700x.c
++++ b/arch/avr32/mach-at32ap/at32ap700x.c
+@@ -1325,7 +1325,7 @@ struct platform_device *__init
+ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ {
+ 	struct platform_device		*pdev;
+-	struct mci_dma_slave		*slave;
++	struct mci_dma_data	        *slave;
+ 	u32				pioa_mask;
+ 	u32				piob_mask;
+ 
+@@ -1344,7 +1344,7 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ 				ARRAY_SIZE(atmel_mci0_resource)))
+ 		goto fail;
+ 
+-	slave = kzalloc(sizeof(struct mci_dma_slave), GFP_KERNEL);
++	slave = kzalloc(sizeof(struct mci_dma_data), GFP_KERNEL);
+ 
+ 	slave->sdata.dma_dev = &dw_dmac0_device.dev;
+ 	slave->sdata.reg_width = DW_DMA_SLAVE_WIDTH_32BIT;
 -- 
-1.6.5.7
+1.6.4.4
 
