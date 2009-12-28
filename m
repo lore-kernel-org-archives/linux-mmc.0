@@ -1,24 +1,42 @@
-From: Peter Huewe <PeterHuewe@gmx.de>
-Subject: [PATCH] arch/avr32: Fix build failure for avr32 caused by typo
-Date: Fri, 25 Dec 2009 20:08:45 +0100
-Message-ID: <200912252008.45602.PeterHuewe@gmx.de>
+From: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
+Subject: Re: [PATCH] arch/avr32: Fix build failure for avr32 caused by typo
+Date: Mon, 28 Dec 2009 09:13:18 +0100
+Message-ID: <20091228091318.454c4713@hcegtvedt.norway.atmel.com>
+References: <200912252008.45602.PeterHuewe@gmx.de>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:52508 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1753071AbZLYTIv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 25 Dec 2009 14:08:51 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1751922AbZL1IPy@vger.kernel.org>
+In-Reply-To: <200912252008.45602.PeterHuewe@gmx.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Huewe <PeterHuewe@gmx.de>
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Andrew Morton <akpm@linux-foundation.org>, Peter Ma <pma@mediamatech.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, peterhuewe@gmx.de
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, Andrew Morton <akpm@linux-foundation.org>, Peter Ma <pma@mediamatech.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, peterhuewe@gmx.de
 
-This patch fixes a build failure introduced by the patch
-  atmel-mci: change use of dma slave interface by Nicolas Ferre
-by changing mci_dma_slave to the correct name of mci_dma_data
+On Fri, 25 Dec 2009 20:08:45 +0100
+Peter Huewe <PeterHuewe@gmx.de> wrote:
+
+> This patch fixes a build failure introduced by the patch
+>   atmel-mci: change use of dma slave interface by Nicolas Ferre
+> by changing mci_dma_slave to the correct name of mci_dma_data
+> 
+> This should make the avr32 tree build again.
+> 
+
+Ah, great, I have not gotten around to test this yet. Thanks for the
+patch. I've done some minor changes and also fixed the kzalloc/kfree
+error handling. Please see the inlined patch below.
+
+>From c8d4b6c01b19044467867b24e218b8a59ed04291 Mon Sep 17 00:00:00 2001
+From: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
+Date: Mon, 28 Dec 2009 09:08:00 +0100
+Subject: [PATCH] avr32: Fix build failure when using atmel-mci caused by typo
+
+This patch fixes a build failure introduced by the patch atmel-mci: change use
+of dma slave interface by Nicolas Ferre by changing mci_dma_slave to the
+correct name of mci_dma_data.
+
+It also will only free the struct mci_dma_data if it has been allocated.
 
 This should make the avr32 tree build again.
 
@@ -29,12 +47,13 @@ http://git.kernel.org/?p=linux/kernel/git/sfr/linux-next.git;a=commitdiff;h=2635
 Patch against Linus' tree.
 
 Signed-off-by: Peter Huewe <peterhuewe@gmx.de>
+Signed-off-by: Hans-Christian Egtvedt <hans-christian.egtvedt@atmel.com>
 ---
- arch/avr32/mach-at32ap/at32ap700x.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ arch/avr32/mach-at32ap/at32ap700x.c |   13 +++++++------
+ 1 files changed, 7 insertions(+), 6 deletions(-)
 
 diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
-index 1aa1ea5..7d4ed42 100644
+index 1aa1ea5..6e093c3 100644
 --- a/arch/avr32/mach-at32ap/at32ap700x.c
 +++ b/arch/avr32/mach-at32ap/at32ap700x.c
 @@ -1325,7 +1325,7 @@ struct platform_device *__init
@@ -42,7 +61,7 @@ index 1aa1ea5..7d4ed42 100644
  {
  	struct platform_device		*pdev;
 -	struct mci_dma_slave		*slave;
-+	struct mci_dma_data	        *slave;
++	struct mci_dma_data		*slave;
  	u32				pioa_mask;
  	u32				piob_mask;
  
@@ -55,6 +74,48 @@ index 1aa1ea5..7d4ed42 100644
  
  	slave->sdata.dma_dev = &dw_dmac0_device.dev;
  	slave->sdata.reg_width = DW_DMA_SLAVE_WIDTH_32BIT;
+@@ -1357,7 +1357,7 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ 
+ 	if (platform_device_add_data(pdev, data,
+ 				sizeof(struct mci_platform_data)))
+-		goto fail;
++		goto fail_free;
+ 
+ 	/* CLK line is common to both slots */
+ 	pioa_mask = 1 << 10;
+@@ -1381,7 +1381,7 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ 		/* Slot is unused */
+ 		break;
+ 	default:
+-		goto fail;
++		goto fail_free;
+ 	}
+ 
+ 	select_peripheral(PIOA, pioa_mask, PERIPH_A, 0);
+@@ -1408,7 +1408,7 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ 		break;
+ 	default:
+ 		if (!data->slot[0].bus_width)
+-			goto fail;
++			goto fail_free;
+ 
+ 		data->slot[1].bus_width = 0;
+ 		break;
+@@ -1419,9 +1419,10 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ 	platform_device_add(pdev);
+ 	return pdev;
+ 
++fail_free:
++	kfree(slave);
+ fail:
+ 	data->dma_slave = NULL;
+-	kfree(slave);
+ 	platform_device_put(pdev);
+ 	return NULL;
+ }
 -- 
-1.6.4.4
+1.6.0.4
 
+-- 
+Best regards,
+Hans-Christian Egtvedt
