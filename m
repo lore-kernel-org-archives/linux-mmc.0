@@ -1,57 +1,86 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: mmc_spi and flash cards
-Date: Sat, 02 Jan 2010 14:17:51 +0000
-Message-ID: <m3d41slhf4.fsf@phlog.console-pimps.org>
-References: <f96d234e0911180757l22af9e5dq4fa27db7f260c104@mail.gmail.com>
-	<f96d234e0912280958u559c41e6yd47eea5526b6cbda@mail.gmail.com>
-Mime-Version: 1.0
+From: Ben Nizette <bn@niasdigital.com>
+Subject: [PATCH v3] mmc: Make ID freq configurable
+Date: Sun, 3 Jan 2010 09:23:30 +1100
+Message-ID: <AD8E15FA-A476-4275-A750-5EB587A93CEC@niasdigital.com>
+References: <1246492196.2980.17.camel@linux-51e8.site> <20090702135849.21370282@hskinnemoen-d830> <1246537056.2980.60.camel@linux-51e8.site> <4B3E570C.2060602@yahoo.es> <63809451-ED1D-487A-AE63-F72B23D136D8@niasdigital.com> <4B3F019F.6010306@yahoo.es> <49985427-DCB9-40E1-815B-43C812B41DE3@niasdigital.com> <20100102130809.121b7e10@mjolnir.ossman.eu>
+Mime-Version: 1.0 (Apple Message framework v1077)
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:47577 "EHLO
-	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751361Ab0ABOR7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Jan 2010 09:17:59 -0500
-In-Reply-To: <f96d234e0912280958u559c41e6yd47eea5526b6cbda@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1752023Ab0ABWXk@vger.kernel.org>
+In-Reply-To: <20100102130809.121b7e10@mjolnir.ossman.eu>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Pierre Ossman <pierre@ossman.eu>
+Cc: Hein_Tibosch <hein_tibosch@yahoo.es>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Cliff Brake <cliff.brake@gmail.com>
-Cc: linux-mmc@vger.kernel.org
 
-On Mon, 28 Dec 2009 12:58:28 -0500, Cliff Brake <cliff.brake@gmail.com> wrote:
+
+On 02/01/2010, at 11:08 PM, Pierre Ossman wrote:
+
+> On Sat, 2 Jan 2010 20:07:01 +1100
+> Ben Nizette <bn@niasdigital.com> wrote:
 > 
-> >> STOP_TRANSMISSION
-> >> bit 3 -> R1_SPI_COM_CRC (the CRC of the last command failed)
+>> 
+>> Pierre, thoughts?  All my cards were borderline spec but Hein's got a mainstream, common card which seems to completely ignore the spec.  Can we just take the few-hundred-uS hit and allow initialization down at the bottom end, say 100kHz?
+>> 
 > 
-> mmc0: req done (CMD18): 0: 00000000 00000000 00000000 00000000
-> mmc0:     4096 bytes transferred: 0
-> mmc0:     (CMD12): -84: 00000008 00000000 00000000 00000000
-> 
+> Broken cards seem to be all over the spectrum, so I wouldn't be
+> suprised if you find ones that break if you go too low as well.
 
-That's weird.
+Yea good point, though given there might not even be a One Freq to Rule Them All, how about:
 
-> mmc_spi spi1.0:   mmc_spi: CMD12, resp R1B
-> mmc_spi spi1.0:   ... CMD12 response SPI_R1B: resp 0040 00000000
-> 
-> >> bit 6, R1_SPI_PARAMETER (commands argument, block length) was out of allowed range for this card.
-> 
+---8<---
 
-And that just seems completely bogus; the STOP_TRANSMISSION command
-doesn't require any parameters.
+From: Ben Nizette <bn@niasdigital.com>
+Subject: [PATCH v3] mmc: Make ID freq configurable
 
-Having read mmc_spi_response_get() I'm wondering if it's actually trying
-to interpret a busy signal as a response code. Would you mind giving
-this patch a go and seeing if the BUG_ON() triggers?
+While the SD spec specifies a range of frequencies for the ID phase from 100-400kHz, not all cards play by the rules.  This patch adds a Kconfig option to allow the user to tweak this to their card/host config, though the default of 250kHz should be fine for all spec-abiding cards and most others besides.
 
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index d55fe4f..3e36ff4 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -310,6 +310,7 @@ static int mmc_spi_response_get(struct mmc_spi_host *host,
+Signed-off-by: Ben Nizette <bn@niasdigital.com>
+
+---
+diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+index ab37a6d..a8e5003 100644
+--- a/drivers/mmc/core/Kconfig
++++ b/drivers/mmc/core/Kconfig
+@@ -14,3 +14,15 @@ config MMC_UNSAFE_RESUME
+          This option is usually just for embedded systems which use
+          a MMC/SD card for rootfs. Most people should say N here.
  
- checkstatus:
- 	bitshift = 0;
-+	BUG_ON(*cp == 0xff);
- 	if (*cp & 0x80)	{
- 		/* Houston, we have an ugly card with a bit-shifted response */
- 		rotator = *cp++ << 8;
-
++config MMC_ID_FREQ
++       int "SD/MMC Card initialisation frequency (Hz)"
++       default 250000
++       help
++         The SD card specification allows for initialisation
++         frequencies from 100-400kHz however some broken cards are
++         known not to work across this whole range.
++
++         If you're having problems with a particular card not being
++         detected, you may try adjusting this frequency up or down
++         but for widest compatibility just leave it default.
++
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 7dab2e5..2eab68f 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -891,12 +891,17 @@ static void mmc_power_up(struct mmc_host *host)
+         */
+        mmc_delay(10);
+ 
+-       if (host->f_min > 400000) {
+-               pr_warning("%s: Minimum clock frequency too high for "
+-                               "identification mode\n", mmc_hostname(host));
++       /*
++        * CONFIG_MMC_ID_FREQ defaults to 250kHz which should be fine
++        * for most card/host combos.
++        */
++       if (host->f_min > CONFIG_MMC_ID_FREQ) {
++               pr_warning("%s: The host cannot reach the requested ID clock "
++                               "rate, identification may fail\n",
++                               mmc_hostname(host));
+                host->ios.clock = host->f_min;
+        } else
+-               host->ios.clock = 400000;
++               host->ios.clock = CONFIG_MMC_ID_FREQ;
+ 
+        host->ios.power_mode = MMC_POWER_ON;
+        mmc_set_ios(host);
