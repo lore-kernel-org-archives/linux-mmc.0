@@ -1,59 +1,52 @@
 From: Ben Nizette <bn@niasdigital.com>
-Subject: [PATCH v2] mmc: lower init clock frequency to 300kHz
-Date: Sat, 2 Jan 2010 10:11:10 +1100
-Message-ID: <2A48D9AC-90D7-405F-A64C-0703F5FEC175@niasdigital.com>
+Subject: Re: [PATCH v2] mmc: lower init clock frequency to 300kHz
+Date: Sat, 2 Jan 2010 20:07:01 +1100
+Message-ID: <49985427-DCB9-40E1-815B-43C812B41DE3@niasdigital.com>
+References: <1246492196.2980.17.camel@linux-51e8.site>	<20090702135849.21370282@hskinnemoen-d830> <1246537056.2980.60.camel@linux-51e8.site> <4B3E570C.2060602@yahoo.es> <63809451-ED1D-487A-AE63-F72B23D136D8@niasdigital.com> <4B3F019F.6010306@yahoo.es>
 Mime-Version: 1.0 (Apple Message framework v1077)
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from outbound.icp-qv1-irony-out6.iinet.net.au ([203.59.1.109]:35158
-	"EHLO outbound.icp-qv1-irony-out6.iinet.net.au" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751992Ab0AAXLR convert rfc822-to-8bit
+Received: from outbound.icp-qv1-irony-out3.iinet.net.au ([203.59.1.148]:53787
+	"EHLO outbound.icp-qv1-irony-out3.iinet.net.au" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752593Ab0ABJHP convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 1 Jan 2010 18:11:17 -0500
+	Sat, 2 Jan 2010 04:07:15 -0500
+In-Reply-To: <4B3F019F.6010306@yahoo.es>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Ossman <pierre@ossman.eu>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, Hein_Tibosch <hein_tibosch@yahoo.es>, Sascha Hauer <s.hauer@pengutronix.de>
+To: Hein_Tibosch <hein_tibosch@yahoo.es>
+Cc: Pierre Ossman <pierre@ossman.eu>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
 
 
-A good few months ago, commit
+(Adding linux CCs)
 
-commit 8dfd0374be84793360db7fff2e635d2cd3bbcb21
-Author: Sascha Hauer <s.hauer@pengutronix.de>
-Date:   Thu Apr 9 08:32:02 2009 +0200
+On 02/01/2010, at 7:19 PM, Hein_Tibosch wrote:
 
-    MMC core: limit minimum initialization frequency to 400kHz
+> Almost good: on my Kingston Elite Pro (50x) SD-card, initialization will
+> only succeed if F <= 282258 Hz.
 
-broke a few setups with cards which don't quite adhere to the MMC spec - 400kHz is just too fast for them.  In my testing, all of the cards which fail at 400kHz are OK by about 350Khz but this patch drops the floor to 300 to be on the safe side.
+...
 
-Dropping the floor also means that the warning will trigger on some valid setups, albeit ones which won't run particularly crappy cards.  This patch then slightly softens the language of said warning to make it clear it isn't always a problem.
+> 
+> I checked some datasheets of several makes:
+> 
+> Delkin microSD min 0 max 400
+> Swissbit min 0 max 400
+> Sandisk 100 - 400
+> Toshiba 100 - 400
+> ST electronics 0 400
+> SD-specification: Issue continues clock in frequency range of 100KHz-400KHz
+>  If the Average frequency of the SDCLK is less than 100KHz then the card
+>  may not be able to respond within the 1-second limit
+> 
+> So what about 100 or 150 Khz?
 
-V1 of this patch dropped the floor all the way to 50kHz on the basis that it was only for a few 100 bytes so that very low speed shouldn't matter.  After some discussion [1] the consensus was that 50 was too slow after all so this patch is a bit more sensible.
+Ah geez, yeah this something else I was hoping to avoid with the V1 patch - an endless stream of "oh shit, this card's even /moore/ broken!  Patch it, patch it good"
 
-Signed-off-by: Ben Nizette <bn@niasdigital.com>
+Pierre, thoughts?  All my cards were borderline spec but Hein's got a mainstream, common card which seems to completely ignore the spec.  Can we just take the few-hundred-uS hit and allow initialization down at the bottom end, say 100kHz?
 
-[1] http://lkml.org/lkml/2009/7/1/529
+<overkill> Or a KConfig option? </overkill>
 
----
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 7dab2e5..49f0eae 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -891,12 +891,12 @@ static void mmc_power_up(struct mmc_host *host)
- 	 */
- 	mmc_delay(10);
- 
--	if (host->f_min > 400000) {
--		pr_warning("%s: Minimum clock frequency too high for "
-+	if (host->f_min > 300000) {
-+		pr_warning("%s: Minimum clock frequency may be too high for "
- 				"identification mode\n", mmc_hostname(host));
- 		host->ios.clock = host->f_min;
- 	} else
--		host->ios.clock = 400000;
-+		host->ios.clock = 300000;
- 
- 	host->ios.power_mode = MMC_POWER_ON;
- 	mmc_set_ios(host);
+	--Ben.
 
