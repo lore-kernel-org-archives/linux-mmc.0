@@ -1,52 +1,72 @@
-From: Ben Nizette <bn@niasdigital.com>
+From: Pierre Ossman <pierre@ossman.eu>
 Subject: Re: [PATCH v2] mmc: lower init clock frequency to 300kHz
-Date: Sat, 2 Jan 2010 20:07:01 +1100
-Message-ID: <49985427-DCB9-40E1-815B-43C812B41DE3@niasdigital.com>
-References: <1246492196.2980.17.camel@linux-51e8.site>	<20090702135849.21370282@hskinnemoen-d830> <1246537056.2980.60.camel@linux-51e8.site> <4B3E570C.2060602@yahoo.es> <63809451-ED1D-487A-AE63-F72B23D136D8@niasdigital.com> <4B3F019F.6010306@yahoo.es>
-Mime-Version: 1.0 (Apple Message framework v1077)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Date: Sat, 2 Jan 2010 13:08:09 +0100
+Message-ID: <20100102130809.121b7e10@mjolnir.ossman.eu>
+References: <1246492196.2980.17.camel@linux-51e8.site>
+	<20090702135849.21370282@hskinnemoen-d830>
+	<1246537056.2980.60.camel@linux-51e8.site>
+	<4B3E570C.2060602@yahoo.es>
+	<63809451-ED1D-487A-AE63-F72B23D136D8@niasdigital.com>
+	<4B3F019F.6010306@yahoo.es>
+	<49985427-DCB9-40E1-815B-43C812B41DE3@niasdigital.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-26580-1262434098-0001-2"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from outbound.icp-qv1-irony-out3.iinet.net.au ([203.59.1.148]:53787
-	"EHLO outbound.icp-qv1-irony-out3.iinet.net.au" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752593Ab0ABJHP convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 2 Jan 2010 04:07:15 -0500
-In-Reply-To: <4B3F019F.6010306@yahoo.es>
+Received: from 82-117-125-11.tcdsl.calypso.net ([82.117.125.11]:51927 "EHLO
+	smtp.ossman.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751311Ab0ABMIQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 2 Jan 2010 07:08:16 -0500
+In-Reply-To: <49985427-DCB9-40E1-815B-43C812B41DE3@niasdigital.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hein_Tibosch <hein_tibosch@yahoo.es>
-Cc: Pierre Ossman <pierre@ossman.eu>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
+To: Ben Nizette <bn@niasdigital.com>
+Cc: Hein_Tibosch <hein_tibosch@yahoo.es>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
 
+This is a MIME-formatted message.  If you see this text it means that your
+E-mail software does not support MIME-formatted messages.
 
-(Adding linux CCs)
+--=_freyr.ossman.eu-26580-1262434098-0001-2
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-On 02/01/2010, at 7:19 PM, Hein_Tibosch wrote:
+On Sat, 2 Jan 2010 20:07:01 +1100
+Ben Nizette <bn@niasdigital.com> wrote:
 
-> Almost good: on my Kingston Elite Pro (50x) SD-card, initialization will
-> only succeed if F <= 282258 Hz.
+>=20
+> Pierre, thoughts?  All my cards were borderline spec but Hein's got a mai=
+nstream, common card which seems to completely ignore the spec.  Can we jus=
+t take the few-hundred-uS hit and allow initialization down at the bottom e=
+nd, say 100kHz?
+>=20
 
-...
+Broken cards seem to be all over the spectrum, so I wouldn't be
+suprised if you find ones that break if you go too low as well.
 
-> 
-> I checked some datasheets of several makes:
-> 
-> Delkin microSD min 0 max 400
-> Swissbit min 0 max 400
-> Sandisk 100 - 400
-> Toshiba 100 - 400
-> ST electronics 0 400
-> SD-specification: Issue continues clock in frequency range of 100KHz-400KHz
->  If the Average frequency of the SDCLK is less than 100KHz then the card
->  may not be able to respond within the 1-second limit
-> 
-> So what about 100 or 150 Khz?
+Basically you'll just have to try something and watch the bug reports.
+Perhaps doing the bisect approach and choosing the intermediate value
+each time? I.e. halvway between 400 and 100 for now (250). If that is
+too fast, then halway between that and 100 (175), and so on.
 
-Ah geez, yeah this something else I was hoping to avoid with the V1 patch - an endless stream of "oh shit, this card's even /moore/ broken!  Patch it, patch it good"
+Rgds
+--=20
+     -- Pierre Ossman
 
-Pierre, thoughts?  All my cards were borderline spec but Hein's got a mainstream, common card which seems to completely ignore the spec.  Can we just take the few-hundred-uS hit and allow initialization down at the bottom end, say 100kHz?
+  WARNING: This correspondence is being monitored by FRA, a
+  Swedish intelligence agency. Make sure your server uses
+  encryption for SMTP traffic and consider using PGP for
+  end-to-end encryption.
 
-<overkill> Or a KConfig option? </overkill>
+--=_freyr.ossman.eu-26580-1262434098-0001-2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename=signature.asc
 
-	--Ben.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.13 (GNU/Linux)
 
+iEYEARECAAYFAks/Ny0ACgkQ7b8eESbyJLhkWwCdEW8fCGvxdmCgG3bWao/5VMRz
+s/IAnjRKKidbbCZlt0MAGg+cAuH/K7Ee
+=QdN+
+-----END PGP SIGNATURE-----
+
+--=_freyr.ossman.eu-26580-1262434098-0001-2--
