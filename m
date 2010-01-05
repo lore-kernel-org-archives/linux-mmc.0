@@ -1,65 +1,135 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH v3] mmc: Make ID freq configurable
-Date: Tue, 5 Jan 2010 13:24:22 +0100
-Message-ID: <20100105122422.GI6923@pengutronix.de>
-References: <20090702135849.21370282@hskinnemoen-d830> <1246537056.2980.60.camel@linux-51e8.site> <4B3E570C.2060602@yahoo.es> <63809451-ED1D-487A-AE63-F72B23D136D8@niasdigital.com> <4B3F019F.6010306@yahoo.es> <49985427-DCB9-40E1-815B-43C812B41DE3@niasdigital.com> <20100102130809.121b7e10@mjolnir.ossman.eu> <AD8E15FA-A476-4275-A750-5EB587A93CEC@niasdigital.com> <20100103003804.66021fe9@mjolnir.ossman.eu> <4B425889.8010703@yahoo.es>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1752332Ab0AEMYi@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4B425889.8010703@yahoo.es>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Hein_Tibosch <hein_tibosch@yahoo.es>
-Cc: Pierre Ossman <pierre@ossman.eu>, Ben Nizette <bn@niasdigital.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
+From: akpm@linux-foundation.org
+Subject: + davinci-mmc-add-support-for-8bit-mmc-cards.patch added to -mm tree
+Date: Tue, 05 Jan 2010 14:49:07 -0800
+Message-ID: <201001052249.o05Mn7gD025152@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: vipin.bhandari@ti.com, chaithrika@ti.com, david-b@pacbell.net, linux-mmc@vger.kernel.org, sudhakar.raj@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jan 05, 2010 at 05:07:21AM +0800, Hein_Tibosch wrote:
-> On 3-1-2010 07:38, Pierre Ossman wrote:
->>
->> <cut>
->> We all use the same pool of cards so we
->> should all be using the same init sequence. If there isn't a single
->> frequency where all cards will work, then we'll have to make something
->> more advanced where the kernel will try the init several times with
->> different clocking.
->
-> On 4-1-2010 20:15, Sascha Hauer wrote:
->> The problem was that in some setups the mxcmmc driver allows frequencies
->> as low as a few Hz and the card initialization took ages. Increasing the
->> frequency to 400kHz seemed sensible since it's the value the spec
->> describes. 50kHz should be fine as well.
->>
->
-> I tried out several main-stream sd-cards and with the Atmel (AP7) controller
-> they all initialize with F between 138 (=f_min) and 280 Khz.
->
-> Below a patch which tries mmc-initialization using several frequencies
-> from an array 400, 300, 200 and 100. When it comes to 200 Khz, it works.
-> The two failed attempts lasted about 10 ms together.
->
-> It looks like a hell-of-a-patch but that's because the indentation changes.
->
-> Note that the new mmc_host member f_init will be used later in power_restore
-> and resume. As power_up always comes first, it should have a descend value
-> by then.
->
-> But I still wonder, why not just keep using Sascha's patch, changing 400000
-> to 50000? Has anyone ever had problems with mmc-init on 50 Khz?
 
-I already wrote it to Hein in private, once again for the rest:
+The patch titled
+     davinci: MMC: add support for 8bit MMC cards
+has been added to the -mm tree.  Its filename is
+     davinci-mmc-add-support-for-8bit-mmc-cards.patch
 
-The original reason to increase the minimum frequency was that the
-Freescale i.MX MMC core allows minimum frequencies of just a few Hz.
-With this the card initialisation took ages, so we increased the minimum
-frequency. 400kHz seemed like a good value since all cards should
-support this, but I'm also fine with any other value between 50kHz and
-400kHz.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-Sascha
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: davinci: MMC: add support for 8bit MMC cards
+From: Vipin Bhandari <vipin.bhandari@ti.com>
+
+Add support for 8bit MMC cards.  The controller data width is configurable
+depending on the wires setting in the platform data structure.
+
+MMC 8bit is tested on OMAPL137 and MMC 4bit is tested on OMAPL138 EVM.
+
+Signed-off-by: Vipin Bhandari <vipin.bhandari@ti.com>
+Cc: David Brownell <david-b@pacbell.net>
+Cc: Chaithrika U S <chaithrika@ti.com>
+Cc: Sudhakar Rajashekhara <sudhakar.raj@ti.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/davinci_mmc.c |   45 ++++++++++++++++++++++++-------
+ 1 file changed, 35 insertions(+), 10 deletions(-)
+
+diff -puN drivers/mmc/host/davinci_mmc.c~davinci-mmc-add-support-for-8bit-mmc-cards drivers/mmc/host/davinci_mmc.c
+--- a/drivers/mmc/host/davinci_mmc.c~davinci-mmc-add-support-for-8bit-mmc-cards
++++ a/drivers/mmc/host/davinci_mmc.c
+@@ -73,6 +73,7 @@
+ /* DAVINCI_MMCCTL definitions */
+ #define MMCCTL_DATRST         (1 << 0)
+ #define MMCCTL_CMDRST         (1 << 1)
++#define MMCCTL_WIDTH_8_BIT    (1 << 8)
+ #define MMCCTL_WIDTH_4_BIT    (1 << 2)
+ #define MMCCTL_DATEG_DISABLED (0 << 6)
+ #define MMCCTL_DATEG_RISING   (1 << 6)
+@@ -791,22 +792,42 @@ static void calculate_clk_divider(struct
+ 
+ static void mmc_davinci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+-	unsigned int mmc_pclk = 0;
+ 	struct mmc_davinci_host *host = mmc_priv(mmc);
+ 
+-	mmc_pclk = host->mmc_input_clk;
+ 	dev_dbg(mmc_dev(host->mmc),
+ 		"clock %dHz busmode %d powermode %d Vdd %04x\n",
+ 		ios->clock, ios->bus_mode, ios->power_mode,
+ 		ios->vdd);
+-	if (ios->bus_width == MMC_BUS_WIDTH_4) {
+-		dev_dbg(mmc_dev(host->mmc), "Enabling 4 bit mode\n");
+-		writel(readl(host->base + DAVINCI_MMCCTL) | MMCCTL_WIDTH_4_BIT,
+-			host->base + DAVINCI_MMCCTL);
+-	} else {
+-		dev_dbg(mmc_dev(host->mmc), "Disabling 4 bit mode\n");
+-		writel(readl(host->base + DAVINCI_MMCCTL) & ~MMCCTL_WIDTH_4_BIT,
++
++	switch (ios->bus_width) {
++	case MMC_BUS_WIDTH_8:
++		dev_dbg(mmc_dev(host->mmc), "Enabling 8 bit mode\n");
++		writel((readl(host->base + DAVINCI_MMCCTL) &
++			~MMCCTL_WIDTH_4_BIT) | MMCCTL_WIDTH_8_BIT,
+ 			host->base + DAVINCI_MMCCTL);
++		break;
++	case MMC_BUS_WIDTH_4:
++		dev_dbg(mmc_dev(host->mmc), "Enabling 4 bit mode\n");
++		if (host->version == MMC_CTLR_VERSION_2)
++			writel((readl(host->base + DAVINCI_MMCCTL) &
++				~MMCCTL_WIDTH_8_BIT) | MMCCTL_WIDTH_4_BIT,
++				host->base + DAVINCI_MMCCTL);
++		else
++			writel(readl(host->base + DAVINCI_MMCCTL) |
++				MMCCTL_WIDTH_4_BIT,
++				host->base + DAVINCI_MMCCTL);
++		break;
++	case MMC_BUS_WIDTH_1:
++		dev_dbg(mmc_dev(host->mmc), "Enabling 1 bit mode\n");
++		if (host->version == MMC_CTLR_VERSION_2)
++			writel(readl(host->base + DAVINCI_MMCCTL) &
++				~(MMCCTL_WIDTH_8_BIT | MMCCTL_WIDTH_4_BIT),
++				host->base + DAVINCI_MMCCTL);
++		else
++			writel(readl(host->base + DAVINCI_MMCCTL) &
++				~MMCCTL_WIDTH_4_BIT,
++				host->base + DAVINCI_MMCCTL);
++		break;
+ 	}
+ 
+ 	calculate_clk_divider(mmc, ios);
+@@ -1189,10 +1210,14 @@ static int __init davinci_mmcsd_probe(st
+ 
+ 	/* REVISIT:  someday, support IRQ-driven card detection.  */
+ 	mmc->caps |= MMC_CAP_NEEDS_POLL;
++	mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+ 
+-	if (!pdata || pdata->wires == 4 || pdata->wires == 0)
++	if (pdata && (pdata->wires == 4 || pdata->wires == 0))
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 
++	if (pdata && (pdata->wires == 8))
++		mmc->caps |= (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA);
++
+ 	host->version = pdata->version;
+ 
+ 	mmc->ops = &mmc_davinci_ops;
+_
+
+Patches currently in -mm which might be from vipin.bhandari@ti.com are
+
+davinci-mmc-add-support-for-8bit-mmc-cards.patch
+
