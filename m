@@ -1,75 +1,69 @@
-From: Pavel Machek <pavel@ucw.cz>
+From: Hein_Tibosch <hein_tibosch@yahoo.es>
 Subject: Re: [PATCH v2] mmc: lower init clock frequency to 300kHz
-Date: Wed, 6 Jan 2010 08:01:42 +0100
-Message-ID: <20100106070141.GC1382@ucw.cz>
-References: <2A48D9AC-90D7-405F-A64C-0703F5FEC175@niasdigital.com>
+Date: Wed, 06 Jan 2010 17:01:03 +0800
+Message-ID: <4B44514F.7080307@yahoo.es>
+References: <2A48D9AC-90D7-405F-A64C-0703F5FEC175@niasdigital.com> <20100106070141.GC1382@ucw.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:40024 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751656Ab0AFHDP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2010 02:03:15 -0500
-Content-Disposition: inline
-In-Reply-To: <2A48D9AC-90D7-405F-A64C-0703F5FEC175@niasdigital.com>
+Received: from smtp-vbr9.xs4all.nl ([194.109.24.29]:4346 "EHLO
+	smtp-vbr9.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753520Ab0AFJLd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2010 04:11:33 -0500
+In-Reply-To: <20100106070141.GC1382@ucw.cz>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Nizette <bn@niasdigital.com>
-Cc: Pierre Ossman <pierre@ossman.eu>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, Hein_Tibosch <hein_tibosch@yahoo.es>, Sascha Hauer <s.hauer@pengutronix.de>
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Ben Nizette <bn@niasdigital.com>, Pierre Ossman <pierre@ossman.eu>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, Sascha Hauer <s.hauer@pengutronix.de>
 
-On Sat 2010-01-02 10:11:10, Ben Nizette wrote:
-> 
-> A good few months ago, commit
-> 
-> commit 8dfd0374be84793360db7fff2e635d2cd3bbcb21
-> Author: Sascha Hauer <s.hauer@pengutronix.de>
-> Date:   Thu Apr 9 08:32:02 2009 +0200
-> 
->     MMC core: limit minimum initialization frequency to 400kHz
-> 
-> broke a few setups with cards which don't quite adhere to the MMC spec - 400kHz is just too fast for them.  In my testing, all of the cards which fail at 400kHz are OK by about 350Khz but this patch drops the floor to 300 to be on the safe side.
-> 
-> Dropping the floor also means that the warning will trigger on some valid setups, albeit ones which won't run particularly crappy cards.  This patch then slightly softens the language of said warning to make it clear it isn't always a problem.
-> 
-> V1 of this patch dropped the floor all the way to 50kHz on the basis that it was only for a few 100 bytes so that very low speed shouldn't matter.  After some discussion [1] the consensus was that 50 was too slow after all so this patch is a bit more sensible.
-> 
+On 6-1-2010 15:01, Pavel Machek wrote:
+> Machine with minimum clock of 1MHz is clearly broken, yet you issue
+> "soft" warning.
+>
+> What about:
+>
+>      if (f_min > 400k)
+>      	print existing warning
+>      else if (f_min > 300k)
+>         print warning 'if your card does not work, its broken,  but
+> 	      	           	your host is unhelpful'
+>      clock = f_min
+>      if (clock < 3o0)
+>      	 clock = 300
+>
+> ?
+>   
+Later in this thread I mentioned that initialization at 300 Khz is
+too fast for some platforms/cards (avr32 AP7000/main-stream cards).
+They will report CRC-errors so the above won't work.
 
-(please wrap).
+I have looked at the time it will take to exchange the initial data (about
+85 bytes), using different busses and frequencies:
+	
+        Intface:  8-bits  4-bits  SPI
+Bus-freq:
+400000 (Hz)       0.213   0.425    1.700 (ms)
+300000            0.283   0.567    2.267
+200000            0.425   0.850    3.400
+100000            0.850   1.700    6.800
+50000             1.700   3.400   13.600
+100               850     1700    6800
 
-> @@ -891,12 +891,12 @@ static void mmc_power_up(struct mmc_host *host)
->  	 */
->  	mmc_delay(10);
->  
-> -	if (host->f_min > 400000) {
-> -		pr_warning("%s: Minimum clock frequency too high for "
-> +	if (host->f_min > 300000) {
-> +		pr_warning("%s: Minimum clock frequency may be too high for "
->  				"identification mode\n", mmc_hostname(host));
->  		host->ios.clock = host->f_min;
->  	} else
-> -		host->ios.clock = 400000;
-> +		host->ios.clock = 300000;
->  
->  	host->ios.power_mode = MMC_POWER_ON;
->  	mmc_set_ios(host);
+These are netto times, without the msleep's for power-up and without
+overhead.
 
-Machine with minimum clock of 1MHz is clearly broken, yet you issue
-"soft" warning.
+Looking at this table, I would use a fixed bottom of 100 Khz:
 
-What about:
+	if (f_min > 400k)
+		print existing warning
+	clock = max (100k, host->f_min);
 
-     if (f_min > 400k)
-     	print existing warning
-     else if (f_min > 300k)
-        print warning 'if your card does not work, its broken,  but
-	      	           	your host is unhelpful'
-     clock = f_min
-     if (clock < 3o0)
-     	 clock = 300
+Regards, Hein
 
-?
-								Pavel
 
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+
+
+
+
+
