@@ -1,95 +1,75 @@
-From: "Huang Changming-R66093" <r66093@freescale.com>
-Subject: RE: [PATCH 3/3] MMC/SD: add callback function to detect card
-Date: Wed, 6 Jan 2010 10:40:33 +0800
-Message-ID: <AB6F3DC934B5CA4F85B023CE4B5B2547E9FF6F@zch01exm24.fsl.freescale.net>
-References: <1259913309-27146-1-git-send-email-r66093@freescale.com>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [PATCH v2] mmc: lower init clock frequency to 300kHz
+Date: Wed, 6 Jan 2010 08:01:42 +0100
+Message-ID: <20100106070141.GC1382@ucw.cz>
+References: <2A48D9AC-90D7-405F-A64C-0703F5FEC175@niasdigital.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from az33egw02.freescale.net ([192.88.158.103]:39089 "EHLO
-	az33egw02.freescale.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754576Ab0AFCke convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jan 2010 21:40:34 -0500
-Received: from az33smr02.freescale.net (az33smr02.freescale.net [10.64.34.200])
-	by az33egw02.freescale.net (8.14.3/az33egw02) with ESMTP id o062eYpq010516
-	for <linux-mmc@vger.kernel.org>; Tue, 5 Jan 2010 19:40:34 -0700 (MST)
-Received: from zch01exm24.fsl.freescale.net (zch01exm24.ap.freescale.net [10.192.129.208])
-	by az33smr02.freescale.net (8.13.1/8.13.0) with ESMTP id o062eaq4021915
-	for <linux-mmc@vger.kernel.org>; Tue, 5 Jan 2010 20:40:36 -0600 (CST)
-Content-class: urn:content-classes:message
-In-Reply-To: <1259913309-27146-1-git-send-email-r66093@freescale.com>
+Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:40024 "EHLO
+	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751656Ab0AFHDP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2010 02:03:15 -0500
+Content-Disposition: inline
+In-Reply-To: <2A48D9AC-90D7-405F-A64C-0703F5FEC175@niasdigital.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <R66093@freescale.com>, linux-mmc@vger.kernel.org
+To: Ben Nizette <bn@niasdigital.com>
+Cc: Pierre Ossman <pierre@ossman.eu>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, Hein_Tibosch <hein_tibosch@yahoo.es>, Sascha Hauer <s.hauer@pengutronix.de>
 
-Dear all,
-Have any advice about these patchs for SDHC?
+On Sat 2010-01-02 10:11:10, Ben Nizette wrote:
+> 
+> A good few months ago, commit
+> 
+> commit 8dfd0374be84793360db7fff2e635d2cd3bbcb21
+> Author: Sascha Hauer <s.hauer@pengutronix.de>
+> Date:   Thu Apr 9 08:32:02 2009 +0200
+> 
+>     MMC core: limit minimum initialization frequency to 400kHz
+> 
+> broke a few setups with cards which don't quite adhere to the MMC spec - 400kHz is just too fast for them.  In my testing, all of the cards which fail at 400kHz are OK by about 350Khz but this patch drops the floor to 300 to be on the safe side.
+> 
+> Dropping the floor also means that the warning will trigger on some valid setups, albeit ones which won't run particularly crappy cards.  This patch then slightly softens the language of said warning to make it clear it isn't always a problem.
+> 
+> V1 of this patch dropped the floor all the way to 50kHz on the basis that it was only for a few 100 bytes so that very low speed shouldn't matter.  After some discussion [1] the consensus was that 50 was too slow after all so this patch is a bit more sensible.
+> 
 
-Thanks and Best Regards
-Jerry Huang
- 
-Beijing office, Freescale Semiconductor
- 
+(please wrap).
 
-> -----Original Message-----
-> From: Huang Changming-R66093 
-> Sent: Friday, December 04, 2009 3:55 PM
-> To: linux-mmc@vger.kernel.org
-> Cc: Huang Changming-R66093
-> Subject: [PATCH 3/3] MMC/SD: add callback function to detect card
-> 
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> 
-> Add callback function to check if the card has been removed.
-> 
-> in order to check if the card has been removed, the function 
-> mmc_send_status will send commad CMD13 to card and ask the 
-> card to send its status register to driver, which will 
-> generate interrupt repeatly and make the system bad.
-> Therefore, get_cd callback is used to detect the card if the 
-> driver has.
-> 
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> ---
->  drivers/mmc/core/mmc.c |    5 ++++-
->  drivers/mmc/core/sd.c  |    5 ++++-
->  2 files changed, 8 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c 
-> index 06084db..c5c676d 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -494,7 +494,10 @@ static void mmc_detect(struct mmc_host *host)
->  	/*
->  	 * Just check if our card has been removed.
+> @@ -891,12 +891,12 @@ static void mmc_power_up(struct mmc_host *host)
 >  	 */
-> -	err = mmc_send_status(host->card, NULL);
-> +	if (host->ops->get_cd)
-> +		err = !host->ops->get_cd(host);
-> +	else
-> +		err = mmc_send_status(host->card, NULL);
+>  	mmc_delay(10);
 >  
->  	mmc_release_host(host);
+> -	if (host->f_min > 400000) {
+> -		pr_warning("%s: Minimum clock frequency too high for "
+> +	if (host->f_min > 300000) {
+> +		pr_warning("%s: Minimum clock frequency may be too high for "
+>  				"identification mode\n", mmc_hostname(host));
+>  		host->ios.clock = host->f_min;
+>  	} else
+> -		host->ios.clock = 400000;
+> +		host->ios.clock = 300000;
 >  
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c 
-> index cd81c39..3cf1f38 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -548,7 +548,10 @@ static void mmc_sd_detect(struct mmc_host *host)
->  	/*
->  	 * Just check if our card has been removed.
->  	 */
-> -	err = mmc_send_status(host->card, NULL);
-> +	if (host->ops->get_cd)
-> +		err = !host->ops->get_cd(host);
-> +	else
-> +		err = mmc_send_status(host->card, NULL);
->  
->  	mmc_release_host(host);
->  
-> --
-> 1.6.4
-> 
-> 
+>  	host->ios.power_mode = MMC_POWER_ON;
+>  	mmc_set_ios(host);
+
+Machine with minimum clock of 1MHz is clearly broken, yet you issue
+"soft" warning.
+
+What about:
+
+     if (f_min > 400k)
+     	print existing warning
+     else if (f_min > 300k)
+        print warning 'if your card does not work, its broken,  but
+	      	           	your host is unhelpful'
+     clock = f_min
+     if (clock < 3o0)
+     	 clock = 300
+
+?
+								Pavel
+
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
