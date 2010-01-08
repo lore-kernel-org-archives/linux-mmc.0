@@ -1,38 +1,43 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [PATCH] MMC: Atmel host kconfig cleanup for everyone else
-Date: Fri,  8 Jan 2010 16:40:44 +0100
-Message-ID: <1262965244-18894-1-git-send-email-nicolas.ferre@atmel.com>
+From: akpm@linux-foundation.org
+Subject: [patch 22/42] mmc: allow for MMC v4.4
+Date: Fri, 08 Jan 2010 14:43:01 -0800
+Message-ID: <201001082243.o08Mh1RD018492@imap1.linux-foundation.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.atmel.fr ([81.80.104.162]:65194 "EHLO atmel-es2.atmel.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752980Ab0AHObf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jan 2010 09:31:35 -0500
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:35721 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753416Ab0AHWrk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jan 2010 17:47:40 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
-Cc: jic23@cam.ac.uk, linux-kernel@vger.kernel.org, kernel@avr32linux.org, Nicolas Ferre <nicolas.ferre@atmel.com>
+To: torvalds@linux-foundation.org
+Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, linux-mmc@vger.kernel.org
 
-This prevents those without an Atmel chip having a line in kernel configuration
-which says "Atmel SD/MMC Driver" without any option.
+From: Adrian Hunter <adrian.hunter@nokia.com>
 
-Signed-off-by: Jonathan Cameron <jic23@cam.ac.uk>
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+JEDEC eMMC specification version 4.4 (MMCA 4.4) defines Extended CSD
+structure versions up to 5.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
- drivers/mmc/host/Kconfig |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index ce1d288..c268062 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -193,6 +193,7 @@ config MMC_AU1X
+ drivers/mmc/core/mmc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff -puN drivers/mmc/core/mmc.c~mmc-allow-for-mmc-v44 drivers/mmc/core/mmc.c
+--- a/drivers/mmc/core/mmc.c~mmc-allow-for-mmc-v44
++++ a/drivers/mmc/core/mmc.c
+@@ -207,7 +207,7 @@ static int mmc_read_ext_csd(struct mmc_c
+ 	}
  
- choice
- 	prompt "Atmel SD/MMC Driver"
-+	depends on AVR32 || ARCH_AT91
- 	default MMC_ATMELMCI if AVR32
- 	help
- 	  Choose which driver to use for the Atmel MCI Silicon
--- 
-1.5.6.5
-
+ 	card->ext_csd.rev = ext_csd[EXT_CSD_REV];
+-	if (card->ext_csd.rev > 3) {
++	if (card->ext_csd.rev > 5) {
+ 		printk(KERN_ERR "%s: unrecognised EXT_CSD structure "
+ 			"version %d\n", mmc_hostname(card->host),
+ 			card->ext_csd.rev);
+_
