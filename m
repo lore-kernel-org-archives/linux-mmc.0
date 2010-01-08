@@ -1,52 +1,62 @@
-From: akpm@linux-foundation.org
-Subject: [patch 19/42] mmc_block: add dev_t initialization check
-Date: Fri, 08 Jan 2010 14:42:58 -0800
-Message-ID: <201001082242.o08Mgw16018479@imap1.linux-foundation.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [Bugme-new] [Bug 14983] New: SD card reader stopped working
+ completely
+Date: Fri, 8 Jan 2010 15:05:25 -0800
+Message-ID: <20100108150525.331a6f5d.akpm@linux-foundation.org>
+References: <bug-14983-10286@http.bugzilla.kernel.org/>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:41828 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:48788 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753622Ab0AHWuH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jan 2010 17:50:07 -0500
+	by vger.kernel.org with ESMTP id S1751396Ab0AHXFk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jan 2010 18:05:40 -0500
+In-Reply-To: <bug-14983-10286@http.bugzilla.kernel.org/>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, EXT-Anna.Lemehova@nokia.com, adrian.hunter@nokia.com, linux-mmc@vger.kernel.org, stable@kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, peter.kraus@geeksonbikes.net
 
-From: Anna Lemehova <EXT-Anna.Lemehova@nokia.com>
 
-When a card is removed before mmc_blk_probe() has called add_disk(), then
-the minor field is uninitialized and has value 0.  This caused
-mmc_blk_put() to always release devidx 0 even if 0 was still in use.  Then
-the next mmc_blk_probe() used the first free idx of 0, which oopses in
-sysfs, since it is used by another card.
+(switched to email.  Please respond via emailed reply-to-all, not via the
+bugzilla web interface).
 
-Signed-off-by: Anna Lemehova <EXT-Anna.Lemehova@nokia.com>
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: <linux-mmc@vger.kernel.org>
-Cc: <stable@kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
+On Mon, 4 Jan 2010 10:22:53 GMT
+bugzilla-daemon@bugzilla.kernel.org wrote:
 
- drivers/mmc/card/block.c |    5 +++++
- 1 file changed, 5 insertions(+)
+> http://bugzilla.kernel.org/show_bug.cgi?id=14983
+> 
+>            Summary: SD card reader stopped working completely
+>            Product: Drivers
+>            Version: 2.5
+>     Kernel Version: 2.6.30 trough 2.6.32
+>           Platform: All
+>         OS/Version: Linux
+>               Tree: Mainline
+>             Status: NEW
+>           Severity: normal
+>           Priority: P1
+>          Component: MMC/SD
+>         AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
+>         ReportedBy: peter.kraus@geeksonbikes.net
+>                 CC: peter.kraus@geeksonbikes.net
+>         Regression: Yes
+> 
+> 
+> Created an attachment (id=24428)
+>  --> (http://bugzilla.kernel.org/attachment.cgi?id=24428)
+> working 2.6.29 kernel config
+> 
+> Hello.
+> My Ricoh card reader, which used to work absolutely fine, stopped working in
+> newer kernels.
+> 
+> - it works with kernel 2.6.29
+> 
 
-diff -puN drivers/mmc/card/block.c~mmc_block-add-dev_t-initialization-check drivers/mmc/card/block.c
---- a/drivers/mmc/card/block.c~mmc_block-add-dev_t-initialization-check
-+++ a/drivers/mmc/card/block.c
-@@ -85,7 +85,12 @@ static void mmc_blk_put(struct mmc_blk_d
- 	mutex_lock(&open_lock);
- 	md->usage--;
- 	if (md->usage == 0) {
-+		int devmaj = MAJOR(disk_devt(md->disk));
- 		int devidx = MINOR(disk_devt(md->disk)) >> MMC_SHIFT;
-+
-+		if (!devmaj)
-+			devidx = md->disk->first_minor >> MMC_SHIFT;
-+
- 		__clear_bit(devidx, dev_use);
- 
- 		put_disk(md->disk);
-_
+This is a regression.  There's additional info at the bugzilla link.
+
+Could someone please work with Peter on this?
+
+Thanks.
