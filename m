@@ -1,69 +1,38 @@
-From: Hein_Tibosch <hein_tibosch@yahoo.es>
-Subject: Re: [PATCH v2] mmc: lower init clock frequency to 300kHz
-Date: Wed, 06 Jan 2010 17:01:03 +0800
-Message-ID: <4B44514F.7080307@yahoo.es>
-References: <2A48D9AC-90D7-405F-A64C-0703F5FEC175@niasdigital.com> <20100106070141.GC1382@ucw.cz>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: [PATCH] MMC: Atmel host kconfig cleanup for everyone else
+Date: Fri,  8 Jan 2010 16:40:44 +0100
+Message-ID: <1262965244-18894-1-git-send-email-nicolas.ferre@atmel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-vbr9.xs4all.nl ([194.109.24.29]:4346 "EHLO
-	smtp-vbr9.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753520Ab0AFJLd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2010 04:11:33 -0500
-In-Reply-To: <20100106070141.GC1382@ucw.cz>
+Received: from mail.atmel.fr ([81.80.104.162]:65194 "EHLO atmel-es2.atmel.fr"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752980Ab0AHObf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jan 2010 09:31:35 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Ben Nizette <bn@niasdigital.com>, Pierre Ossman <pierre@ossman.eu>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, Sascha Hauer <s.hauer@pengutronix.de>
+To: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
+Cc: jic23@cam.ac.uk, linux-kernel@vger.kernel.org, kernel@avr32linux.org, Nicolas Ferre <nicolas.ferre@atmel.com>
 
-On 6-1-2010 15:01, Pavel Machek wrote:
-> Machine with minimum clock of 1MHz is clearly broken, yet you issue
-> "soft" warning.
->
-> What about:
->
->      if (f_min > 400k)
->      	print existing warning
->      else if (f_min > 300k)
->         print warning 'if your card does not work, its broken,  but
-> 	      	           	your host is unhelpful'
->      clock = f_min
->      if (clock < 3o0)
->      	 clock = 300
->
-> ?
->   
-Later in this thread I mentioned that initialization at 300 Khz is
-too fast for some platforms/cards (avr32 AP7000/main-stream cards).
-They will report CRC-errors so the above won't work.
+This prevents those without an Atmel chip having a line in kernel configuration
+which says "Atmel SD/MMC Driver" without any option.
 
-I have looked at the time it will take to exchange the initial data (about
-85 bytes), using different busses and frequencies:
-	
-        Intface:  8-bits  4-bits  SPI
-Bus-freq:
-400000 (Hz)       0.213   0.425    1.700 (ms)
-300000            0.283   0.567    2.267
-200000            0.425   0.850    3.400
-100000            0.850   1.700    6.800
-50000             1.700   3.400   13.600
-100               850     1700    6800
+Signed-off-by: Jonathan Cameron <jic23@cam.ac.uk>
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+---
+ drivers/mmc/host/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-These are netto times, without the msleep's for power-up and without
-overhead.
-
-Looking at this table, I would use a fixed bottom of 100 Khz:
-
-	if (f_min > 400k)
-		print existing warning
-	clock = max (100k, host->f_min);
-
-Regards, Hein
-
-
-
-
-
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index ce1d288..c268062 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -193,6 +193,7 @@ config MMC_AU1X
+ 
+ choice
+ 	prompt "Atmel SD/MMC Driver"
++	depends on AVR32 || ARCH_AT91
+ 	default MMC_ATMELMCI if AVR32
+ 	help
+ 	  Choose which driver to use for the Atmel MCI Silicon
+-- 
+1.5.6.5
 
