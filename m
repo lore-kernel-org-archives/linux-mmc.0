@@ -1,152 +1,143 @@
 From: akpm@linux-foundation.org
-Subject: + davinci-mmc-updates-to-suspend-resume-implementation.patch added to -mm tree
-Date: Tue, 12 Jan 2010 15:37:44 -0800
-Message-ID: <201001122337.o0CNbjaC002222@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:43509 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754762Ab0ALXhs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jan 2010 18:37:48 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [folded] ricoh_mmc-port-from-driver-to-pci-quirk-update.patch removed from -mm tree
+Date: Tue, 12 Jan 2010 15:42:51 -0800
+Message-ID: <201001122342.o0CNgpmd002539@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: maximlevitsky@gmail.com, linux-mmc@vger.kernel.org, philipl@overt.org, mm-commits@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: chaithrika@ti.com, khilman@deeprootsystems.com, linux-mmc@vger.kernel.org
 
 
 The patch titled
-     davinci: mmc: updates to suspend/resume implementation
-has been added to the -mm tree.  Its filename is
-     davinci-mmc-updates-to-suspend-resume-implementation.patch
+     ricoh_mmc-port-from-driver-to-pci-quirk update
+has been removed from the -mm tree.  Its filename was
+     ricoh_mmc-port-from-driver-to-pci-quirk-update.patch
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+This patch was dropped because it was folded into ricoh_mmc-port-from-driver-to-pci-quirk.patch
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: davinci: mmc: updates to suspend/resume implementation
-From: Chaithrika U S <chaithrika@ti.com>
+Subject: ricoh_mmc-port-from-driver-to-pci-quirk update
+From: Maxim Levitsky <maximlevitsky@gmail.com>
 
-Improve the suspend and resume callbacks in DaVinci MMC host controller
-driver.  Modify the reset status of the contorller and clock during
-suspend and resume.  Also migrate the power management callbacks from
-platform driver to dev_pm_ops structure.
+This patch solves nasty problem original driver has.
+Original goal of the ricoh_mmc was to disable this device because
+then, mmc cards can be read using standard SDHCI controller,
+thus avoiding writing of yet another driver.
+However, the act of disablement, makes other pci functions that belong to
+this controller (xD and memstick) shift up one level, thus pci core has now wrong idea
+about these devices.
 
-Tested on DA850/OMAP-L138 EVM. This testing requires patches
-which add suspen-to-RAM support to DA850/OMAP-L138 SoC[1].
+To fix this issue, this patch moves the driver into pci quirk section, thus it
+is executes before the pci is enumerated, and therefore solving that issue,
+also same sequence of commands is performed on resume for same reasons.
 
-[1]http://linux.davincidsp.com/pipermail/davinci-linux-open-source/
-2009-September/016118.html
+Also regardless of the above, this way is cleaner.
 
-Signed-off-by: Chaithrika U S <chaithrika@ti.com>
-Acked-by: Kevin Hilman <khilman@deeprootsystems.com>
+You still need to set CONFIG_MMC_RICOH_MMC
+to enable this quirk
+
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: Philip Langdale <philipl@overt.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/davinci_mmc.c |   51 ++++++++++++++++++++++++++-----
- 1 file changed, 43 insertions(+), 8 deletions(-)
+ drivers/mmc/host/Kconfig |   13 +++++++++++++
+ drivers/pci/quirks.c     |   21 ++++++++++++++++++---
+ 2 files changed, 31 insertions(+), 3 deletions(-)
 
-diff -puN drivers/mmc/host/davinci_mmc.c~davinci-mmc-updates-to-suspend-resume-implementation drivers/mmc/host/davinci_mmc.c
---- a/drivers/mmc/host/davinci_mmc.c~davinci-mmc-updates-to-suspend-resume-implementation
-+++ a/drivers/mmc/host/davinci_mmc.c
-@@ -171,6 +171,7 @@ struct mmc_davinci_host {
- #define DAVINCI_MMC_DATADIR_READ	1
- #define DAVINCI_MMC_DATADIR_WRITE	2
- 	unsigned char data_dir;
-+	unsigned char suspended;
+diff -puN drivers/mmc/host/Kconfig~ricoh_mmc-port-from-driver-to-pci-quirk-update drivers/mmc/host/Kconfig
+--- a/drivers/mmc/host/Kconfig~ricoh_mmc-port-from-driver-to-pci-quirk-update
++++ a/drivers/mmc/host/Kconfig
+@@ -55,6 +55,19 @@ config MMC_SDHCI_PCI
  
- 	/* buffer is used during PIO of one scatterlist segment, and
- 	 * is updated along with buffer_bytes_left.  bytes_left applies
-@@ -1322,32 +1323,66 @@ static int __exit davinci_mmcsd_remove(s
- }
+ 	  If unsure, say N.
  
- #ifdef CONFIG_PM
--static int davinci_mmcsd_suspend(struct platform_device *pdev, pm_message_t msg)
-+static int davinci_mmcsd_suspend(struct device *dev)
++config MMC_RICOH_MMC
++	bool "Ricoh MMC Controller Disabler  (EXPERIMENTAL)"
++	depends on MMC_SDHCI_PCI
++	help
++	  This adds a pci quirk to disable Ricoh MMC Controller. This
++	  proprietary controller is unnecessary because the SDHCI driver
++	  supports MMC cards on the SD controller, but if it is not
++	  disabled, it will steal the MMC cards away - rendering them
++	  useless. It is safe to select this even if you don't
++	  have a Ricoh based card reader.
++
++	  If unsure, say Y.
++
+ config MMC_SDHCI_OF
+ 	tristate "SDHCI support on OpenFirmware platforms"
+ 	depends on MMC_SDHCI && PPC_OF
+diff -puN drivers/pci/quirks.c~ricoh_mmc-port-from-driver-to-pci-quirk-update drivers/pci/quirks.c
+--- a/drivers/pci/quirks.c~ricoh_mmc-port-from-driver-to-pci-quirk-update
++++ a/drivers/pci/quirks.c
+@@ -2522,9 +2522,11 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_I
+ 
+ /*
+  * This is a quirk for Ricoh MMC controller found as a part of
+- * multifunction chip.
+- * It is very similiar and based on ricoh_mmc driver written by Philip Langdale
+- * Thanks for these magic sequences.
++ * mulifunction chip.
++
++ * This is very similiar and based on ricoh_mmc driver
++ * written by Philip Langdale. Thank you for these magic sequencies.
++
+  * These chips implement the four main memory card
+  * controllers (SD, MMC, MS, xD) and one or both
+  * of cardbus or firewire. It happens that they implement SD and MMC
+@@ -2536,8 +2538,13 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_I
+  * It seems to be the case that the relevant PCI registers to deactivate the
+  * MMC controller live on PCI function 0, which might be the cardbus controller
+  * or the firewire controller, depending on the particular chip in question
++
++ * This has to be done early, because as soon as we disable the MMC controller
++ * other pci functions shift up one level, e.g. function #2 becames function
++ * #1, and therefore is confusing the pci core.
+  */
+ 
++#ifdef CONFIG_MMC_RICOH_MMC
+ static void ricoh_mmc_fixup_rl5c476(struct pci_dev *dev)
  {
-+	struct platform_device *pdev = to_platform_device(dev);
- 	struct mmc_davinci_host *host = platform_get_drvdata(pdev);
-+	struct pm_message msg = { PM_EVENT_SUSPEND };
-+	int ret;
- 
--	return mmc_suspend_host(host->mmc, msg);
-+	mmc_host_enable(host->mmc);
-+	ret = mmc_suspend_host(host->mmc, msg);
-+	if (!ret) {
-+		writel(0, host->base + DAVINCI_MMCIM);
-+		mmc_davinci_reset_ctrl(host, 1);
-+		mmc_host_disable(host->mmc);
-+		clk_disable(host->clk);
-+		host->suspended = 1;
-+	} else {
-+		host->suspended = 0;
-+		mmc_host_disable(host->mmc);
-+	}
+ 	/* disable via cardbus interface */
+@@ -2560,6 +2567,9 @@ static void ricoh_mmc_fixup_rl5c476(stru
+ 	pci_write_config_byte(dev, 0xB7, disable | 0x02);
+ 	pci_write_config_byte(dev, 0x8E, write_enable);
+ 	pci_write_config_byte(dev, 0x8D, write_target);
 +
-+	return ret;
++	printk(KERN_NOTICE "pci: Ricoh MMC controller disabled\n");
++	printk(KERN_NOTICE "pci: mmc cards will be supported through SDHCI\n");
  }
  
--static int davinci_mmcsd_resume(struct platform_device *pdev)
-+static int davinci_mmcsd_resume(struct device *dev)
- {
-+	struct platform_device *pdev = to_platform_device(dev);
- 	struct mmc_davinci_host *host = platform_get_drvdata(pdev);
-+	int ret;
- 
--	return mmc_resume_host(host->mmc);
-+	if (!host->suspended)
-+		return 0;
+ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
+@@ -2581,6 +2591,9 @@ static void ricoh_mmc_fixup_r5c832(struc
+ 	pci_write_config_byte(dev, 0xCA, 0x57);
+ 	pci_write_config_byte(dev, 0xCB, disable | 0x02);
+ 	pci_write_config_byte(dev, 0xCA, write_enable);
 +
-+	clk_enable(host->clk);
-+	mmc_host_enable(host->mmc);
-+
-+	mmc_davinci_reset_ctrl(host, 0);
-+	ret = mmc_resume_host(host->mmc);
-+	if (!ret)
-+		host->suspended = 0;
-+
-+	return ret;
++	printk(KERN_NOTICE "pci: Ricoh MMC controller disabled\n");
++	printk(KERN_NOTICE "pci: mmc cards will be supported through SDHCI\n");
  }
-+
-+static struct dev_pm_ops davinci_mmcsd_pm = {
-+	.suspend        = davinci_mmcsd_suspend,
-+	.resume         = davinci_mmcsd_resume,
-+};
-+
-+#define davinci_mmcsd_pm_ops (&davinci_mmcsd_pm)
- #else
--#define davinci_mmcsd_suspend	NULL
--#define davinci_mmcsd_resume	NULL
-+#define davinci_mmcsd_pm_ops NULL
- #endif
  
- static struct platform_driver davinci_mmcsd_driver = {
- 	.driver		= {
- 		.name	= "davinci_mmc",
- 		.owner	= THIS_MODULE,
-+		.pm	= davinci_mmcsd_pm_ops,
- 	},
- 	.remove		= __exit_p(davinci_mmcsd_remove),
--	.suspend	= davinci_mmcsd_suspend,
--	.resume		= davinci_mmcsd_resume,
- };
+ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476,
+@@ -2596,6 +2609,8 @@ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RI
+ DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832,
+ 	ricoh_mmc_fixup_r5c832);
  
- static int __init davinci_mmcsd_init(void)
++#endif /*CONFIG_MMC_RICOH_MMC*/
++
+ 
+ static void pci_do_fixups(struct pci_dev *dev, struct pci_fixup *f,
+ 			  struct pci_fixup *end)
 _
 
-Patches currently in -mm which might be from chaithrika@ti.com are
+Patches currently in -mm which might be from maximlevitsky@gmail.com are
 
 linux-next.patch
-davinci-mmc-add-support-for-8bit-mmc-cards.patch
-davinci-mmc-add-a-function-to-control-reset-state-of-the-controller.patch
-davinci-mmc-updates-to-suspend-resume-implementation.patch
+ricoh_mmc-port-from-driver-to-pci-quirk.patch
+ricoh_mmc-port-from-driver-to-pci-quirk-update.patch
 
