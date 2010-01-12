@@ -1,55 +1,108 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v5 resubmit] mmc-omap: Add support for 16-bit and
- 32-bit registers
-Date: Mon, 11 Jan 2010 15:31:54 -0800
-Message-ID: <20100111233153.GG5055@atomide.com>
-References: <1263059536-11397-1-git-send-email-darkstar6262@gmail.com>
- <20100111104402.GA2587@localhost.localdomain>
- <6cb013311001111114g6cd49663ja9f2099b6431d28@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:54555 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751430Ab0AKXbt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jan 2010 18:31:49 -0500
-Content-Disposition: inline
-In-Reply-To: <6cb013311001111114g6cd49663ja9f2099b6431d28@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + davinci-mmc-add-a-function-to-control-reset-state-of-the-controller.patch added to -mm tree
+Date: Tue, 12 Jan 2010 15:37:42 -0800
+Message-ID: <201001122337.o0CNbgau002217@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: chaithrika@ti.com, khilman@deeprootsystems.com, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Cory Maccarrone <darkstar6262@gmail.com>
-Cc: Ladislav Michl <ladis@linux-mips.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Marek Belisko <marek.belisko@open-nandra.com>
 
-* Cory Maccarrone <darkstar6262@gmail.com> [100111 11:13]:
-> On Mon, Jan 11, 2010 at 2:44 AM, Ladislav Michl
-> <Ladislav.Michl@seznam.cz> wrote:
-> >
-> > This patch differs from v5 you sent earlier:
-> > =C2=A0Subject: [PATCH v5] mmc-omap: Add support for 16-bit and 32-b=
-it registers
-> > =C2=A0Date: Mon, 23 Nov 2009 10:37:28 -0800
-> > =C2=A0Message-Id: <1259001448-9574-1-git-send-email-darkstar6262@gm=
-ail.com>
-> >
-> > Patch below is not going to work with 32-bit wide registers. Whoeve=
-r is going
-> > to apply it, please don't. Use original version referred above.
-> >
-> > <snip>
-> >
-> > This is not going to work =C2=A0 =C2=A0 =C2=A0 ^^^^^^^^^^^^
->=20
-> Ah, right, good catch.  I thought I got the same one submitted -- thi=
-s
-> is an older one.  Sorry about that.
 
-I'll add the working v5 into omap-testing so we can make sure it works =
-with
-other omaps. Will not merge it further, it still needs to get to mainli=
-ne
-via linux-mmc list.
+The patch titled
+     davinci: mmc: add a function to control reset state of the controller
+has been added to the -mm tree.  Its filename is
+     davinci-mmc-add-a-function-to-control-reset-state-of-the-controller.patch
 
-Regards,
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-Tony
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: davinci: mmc: add a function to control reset state of the controller
+From: Chaithrika U S <chaithrika@ti.com>
+
+Add a helper function which will aid in changing the reset status of the
+controller.
+
+Signed-off-by: Chaithrika U S <chaithrika@ti.com>
+Acked-by: Kevin Hilman <khilman@deeprootsystems.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/davinci_mmc.c |   37 +++++++++++++------------------
+ 1 file changed, 16 insertions(+), 21 deletions(-)
+
+diff -puN drivers/mmc/host/davinci_mmc.c~davinci-mmc-add-a-function-to-control-reset-state-of-the-controller drivers/mmc/host/davinci_mmc.c
+--- a/drivers/mmc/host/davinci_mmc.c~davinci-mmc-add-a-function-to-control-reset-state-of-the-controller
++++ a/drivers/mmc/host/davinci_mmc.c
+@@ -905,19 +905,26 @@ static void mmc_davinci_cmd_done(struct 
+ 	}
+ }
+ 
+-static void
+-davinci_abort_data(struct mmc_davinci_host *host, struct mmc_data *data)
++static inline void mmc_davinci_reset_ctrl(struct mmc_davinci_host *host,
++								int val)
+ {
+ 	u32 temp;
+ 
+-	/* reset command and data state machines */
+ 	temp = readl(host->base + DAVINCI_MMCCTL);
+-	writel(temp | MMCCTL_CMDRST | MMCCTL_DATRST,
+-		host->base + DAVINCI_MMCCTL);
++	if (val)	/* reset */
++		temp |= MMCCTL_CMDRST | MMCCTL_DATRST;
++	else		/* enable */
++		temp &= ~(MMCCTL_CMDRST | MMCCTL_DATRST);
+ 
+-	temp &= ~(MMCCTL_CMDRST | MMCCTL_DATRST);
+-	udelay(10);
+ 	writel(temp, host->base + DAVINCI_MMCCTL);
++	udelay(10);
++}
++
++static void
++davinci_abort_data(struct mmc_davinci_host *host, struct mmc_data *data)
++{
++	mmc_davinci_reset_ctrl(host, 1);
++	mmc_davinci_reset_ctrl(host, 0);
+ }
+ 
+ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
+@@ -1121,15 +1128,8 @@ static inline void mmc_davinci_cpufreq_d
+ #endif
+ static void __init init_mmcsd_host(struct mmc_davinci_host *host)
+ {
+-	/* DAT line portion is diabled and in reset state */
+-	writel(readl(host->base + DAVINCI_MMCCTL) | MMCCTL_DATRST,
+-		host->base + DAVINCI_MMCCTL);
+-
+-	/* CMD line portion is diabled and in reset state */
+-	writel(readl(host->base + DAVINCI_MMCCTL) | MMCCTL_CMDRST,
+-		host->base + DAVINCI_MMCCTL);
+ 
+-	udelay(10);
++	mmc_davinci_reset_ctrl(host, 1);
+ 
+ 	writel(0, host->base + DAVINCI_MMCCLK);
+ 	writel(MMCCLK_CLKEN, host->base + DAVINCI_MMCCLK);
+@@ -1137,12 +1137,7 @@ static void __init init_mmcsd_host(struc
+ 	writel(0x1FFF, host->base + DAVINCI_MMCTOR);
+ 	writel(0xFFFF, host->base + DAVINCI_MMCTOD);
+ 
+-	writel(readl(host->base + DAVINCI_MMCCTL) & ~MMCCTL_DATRST,
+-		host->base + DAVINCI_MMCCTL);
+-	writel(readl(host->base + DAVINCI_MMCCTL) & ~MMCCTL_CMDRST,
+-		host->base + DAVINCI_MMCCTL);
