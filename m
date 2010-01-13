@@ -1,66 +1,90 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-atmel-host-kconfig-cleanup-for-everyone-else.patch added to -mm tree
-Date: Tue, 12 Jan 2010 15:44:40 -0800
-Message-ID: <201001122344.o0CNieGX002586@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:51053 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754054Ab0ALXpF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jan 2010 18:45:05 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Philip Langdale <philipl@overt.org>
+Subject: Re: [PATCH v2] port ricoh_mmc to be pci quirk
+Date: Tue, 12 Jan 2010 17:23:59 -0800
+Message-ID: <20100112172359.7ae7b30b@fido2.homeip.net>
+References: <1259021583.16650.9.camel@maxim-laptop>
+	<20091123162119.3777e14d@fido2.homeip.net>
+	<1259160947.10147.1.camel@maxim-laptop>
+	<1259161121.10147.4.camel@maxim-laptop>
+	<20091125085324.1ef9ae1f@fido2.homeip.net>
+	<20091125113501.1f4d42b9.akpm@linux-foundation.org>
+	<1259192401.15916.48.camel@maxim-laptop>
+	<20091125173019.74d0ddb9@fido2.homeip.net>
+	<1259279520.3991.5.camel@maxim-laptop>
+	<1259279584.3991.6.camel@maxim-laptop>
+	<20091126235551.2db699e3@fido2.homeip.net>
+	<1262964284.12577.27.camel@maxim-laptop>
+	<20100108074001.5df6c997@fido2.homeip.net>
+	<20100112154350.8fa96829.akpm@linux-foundation.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1753764Ab0AMBYP@vger.kernel.org>
+In-Reply-To: <20100112154350.8fa96829.akpm@linux-foundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Pierre Ossman <pierre@ossman.eu>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: nicolas.ferre@atmel.com, jic23@cam.ac.uk, linux-mmc@vger.kernel.org
 
+On Tue, 12 Jan 2010 15:43:50 -0800
+Andrew Morton <akpm@linux-foundation.org> wrote:
 
-The patch titled
-     mmc: Atmel host kconfig cleanup for everyone else
-has been added to the -mm tree.  Its filename is
-     mmc-atmel-host-kconfig-cleanup-for-everyone-else.patch
+> (cc linux-mmc)
+> 
+> On Fri, 8 Jan 2010 07:40:01 -0800
+> Philip Langdale <philipl@overt.org> wrote:
+> 
+> > On Fri, 08 Jan 2010 17:24:44 +0200
+> > Maxim Levitsky <maximlevitsky@gmail.com> wrote:
+> > 
+> > > On Thu, 2009-11-26 at 23:55 -0800, Philip Langdale wrote: 
+> > > > On Fri, 27 Nov 2009 01:53:04 +0200
+> > > > Maxim Levitsky <maximlevitsky@gmail.com> wrote:
+> > > > 
+> > > > > >From 2d3002e29c329d76ca4e26d9f427814151a9648c Mon Sep 17
+> > > > > >00:00:00 2001
+> > > > > From: Maxim Levitsky <maximlevitsky@gmail.com>
+> > > > > Date: Fri, 27 Nov 2009 00:53:28 +0200
+> > > > > Subject: [PATCH] port ricoh_mmc to be pci quirk
+> > > > > 
+> > > > > This patch solves nasty problem original driver has.
+> > > > > Original goal of the ricoh_mmc was to disable this device
+> > > > > because then, mmc cards can be read using standard SDHCI
+> > > > > controller, thus avoiding writing of yet another driver.
+> > > > > However, the act of disablement, makes other pci functions
+> > > > > that belong to this controller (xD and memstick) shift up one
+> > > > > level, thus pci core has now wrong idea about these devices.
+> > > > > 
+> > > > > To fix this issue, this patch moves the driver into pci quirk
+> > > > > section, thus it is executes before the pci is enumerated, and
+> > > > > therefore solving that issue, also same sequence of commands
+> > > > > is performed on resume for same reasons.
+> > > > > 
+> > > > > Also regardless of the above, this way is cleaner.
+> > > > > 
+> > > > > You still need to set CONFIG_MMC_RICOH_MMC
+> > > > > to enable this quirk
+> > > > 
+> > > > I like it. Only comment is that I'd like the printks to identify
+> > > > which controller is involved. If Andrew is happy with the CONFIG
+> > > > mechanism, then you've got an ack from me.
+> > > > 
+> > > > Thanks for doing this.
+> > > 
+> > > Hi, do you plan to include this patch in the kernel?
+> > 
+> > That's Andrew's call, but to the extent that my opinion matters, I
+> > support it being included.
+> >  
+> 
+> I have a note here that Pierre had issues with the patch.  I'm
+> uncertain whether those are now resolved?
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+The last comment from Pierre I have is from the 25th of November and
+says:
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+> I have no objections to this patch.
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+:-)
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: Atmel host kconfig cleanup for everyone else
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-
-This prevents those without an Atmel chip having a line in kernel
-configuration which says "Atmel SD/MMC Driver" without any option.
-
-Signed-off-by: Jonathan Cameron <jic23@cam.ac.uk>
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/Kconfig |    1 +
- 1 file changed, 1 insertion(+)
-
-diff -puN drivers/mmc/host/Kconfig~mmc-atmel-host-kconfig-cleanup-for-everyone-else drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~mmc-atmel-host-kconfig-cleanup-for-everyone-else
-+++ a/drivers/mmc/host/Kconfig
-@@ -189,6 +189,7 @@ config MMC_AU1X
- 
- choice
- 	prompt "Atmel SD/MMC Driver"
-+	depends on AVR32 || ARCH_AT91
- 	default MMC_ATMELMCI if AVR32
- 	help
- 	  Choose which driver to use for the Atmel MCI Silicon
-_
-
-Patches currently in -mm which might be from nicolas.ferre@atmel.com are
-
-mmc-atmel-host-kconfig-cleanup-for-everyone-else.patch
-
+--phil
