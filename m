@@ -1,7 +1,7 @@
 From: Greg Kroah-Hartman <gregkh@suse.de>
-Subject: [PATCH 26/52] mmc_block: add dev_t initialization check
-Date: Thu, 14 Jan 2010 14:27:05 -0800
-Message-ID: <1263508051-7868-26-git-send-email-gregkh@suse.de>
+Subject: [PATCH 27/52] mmc_block: fix probe error cleanup bug
+Date: Thu, 14 Jan 2010 14:27:06 -0800
+Message-ID: <1263508051-7868-27-git-send-email-gregkh@suse.de>
 References: <20100114222551.GA7839@suse.de>
  <1263508051-7868-1-git-send-email-gregkh@suse.de>
  <1263508051-7868-2-git-send-email-gregkh@suse.de>
@@ -28,54 +28,43 @@ References: <20100114222551.GA7839@suse.de>
  <1263508051-7868-23-git-send-email-gregkh@suse.de>
  <1263508051-7868-24-git-send-email-gregkh@suse.de>
  <1263508051-7868-25-git-send-email-gregkh@suse.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kroah.org ([198.145.64.141]:60591 "EHLO coco.kroah.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755926Ab0ANW2k (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 14 Jan 2010 17:28:40 -0500
-In-Reply-To: <1263508051-7868-25-git-send-email-gregkh@suse.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+ <1263508051-7868-26-git-send-email-gregkh@suse.de>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1756850Ab0ANWfo@vger.kernel.org>
+In-Reply-To: <1263508051-7868-26-git-send-email-gregkh@suse.de>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@kernel.org, stable-review@kernel.org
-Cc: torvalds@linux-foundation.org, akpm@linux-foundation.org, Anna Lemehova <EXT-Anna.Lemehova@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>
+Cc: torvalds@linux-foundation.org, akpm@linux-foundation.org, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>
+List-Id: linux-mmc@vger.kernel.org
 
-From: Anna Lemehova <EXT-Anna.Lemehova@nokia.com>
+From: Jarkko Lavinen <jarkko.lavinen@nokia.com>
 
-commit 7d92df692994472cab6045bbd9d0e2c4afa4365f upstream.
+commit 0a74ff29b8dd8b748f8856352f9a9b5c6cc362cc upstream.
 
-When a card is removed before mmc_blk_probe() has called add_disk(), then
-the minor field is uninitialized and has value 0.  This caused
-mmc_blk_put() to always release devidx 0 even if 0 was still in use.  Then
-the next mmc_blk_probe() used the first free idx of 0, which oopses in
-sysfs, since it is used by another card.
+If mmc_blk_set_blksize() fails mmc_blk_probe() the request queue and its
+thread have been set up and they need to be shut down properly before
+putting the disk.
 
-Signed-off-by: Anna Lemehova <EXT-Anna.Lemehova@nokia.com>
+Signed-off-by: Jarkko Lavinen <jarkko.lavinen@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
 ---
- drivers/mmc/card/block.c |    5 +++++
- 1 files changed, 5 insertions(+), 0 deletions(-)
+ drivers/mmc/card/block.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 85f0e8c..5988573 100644
+index 5988573..ee87911 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -85,7 +85,12 @@ static void mmc_blk_put(struct mmc_blk_data *md)
- 	mutex_lock(&open_lock);
- 	md->usage--;
- 	if (md->usage == 0) {
-+		int devmaj = MAJOR(disk_devt(md->disk));
- 		int devidx = MINOR(disk_devt(md->disk)) >> MMC_SHIFT;
-+
-+		if (!devmaj)
-+			devidx = md->disk->first_minor >> MMC_SHIFT;
-+
- 		__clear_bit(devidx, dev_use);
+@@ -618,6 +618,7 @@ static int mmc_blk_probe(struct mmc_card *card)
+ 	return 0;
  
- 		put_disk(md->disk);
+  out:
++	mmc_cleanup_queue(&md->queue);
+ 	mmc_blk_put(md);
+ 
+ 	return err;
 -- 
 1.6.6
-
