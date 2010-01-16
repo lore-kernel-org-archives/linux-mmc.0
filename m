@@ -1,35 +1,35 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH 5/8] omap_hsmmc: RX51: set padconfs to pull down when
- powering off eMMC
-Date: Fri, 15 Jan 2010 15:11:06 +0200
-Message-ID: <4B50696A.6050904@nokia.com>
-References: <20100113114010.7615.84920.sendpatchset@ahunter-work.research.nokia.com> <20100113114048.7615.51097.sendpatchset@ahunter-work.research.nokia.com> <20100113203745.GK2986@atomide.com> <20100113203958.GL2986@atomide.com> <20100113210042.GM2986@atomide.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 03/03] mmc: Balance tmio-mmc cell enable()/disable()
+ calls
+Date: Fri, 15 Jan 2010 16:06:02 -0800
+Message-ID: <20100115160602.f1523a68.akpm@linux-foundation.org>
+References: <20091127045956.15251.84958.sendpatchset@rxone.opensource.se>
+	<20091127050022.15251.43017.sendpatchset@rxone.opensource.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20100113210042.GM2986@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, linux-omap Mailing List <linux-omap@vger.kernel.org>, Madhusudhan Chikkature <madhu.cr@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:46029 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758357Ab0APAGl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2010 19:06:41 -0500
+In-Reply-To: <20091127050022.15251.43017.sendpatchset@rxone.opensource.se>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ian@mnementh.co.uk, lethal@linux-sh.org, philipp.zabel@gmail.com, pierre@ossman.eu
 
-Tony Lindgren wrote:
-> * Tony Lindgren <tony@atomide.com> [100113 12:38]:
->> * Tony Lindgren <tony@atomide.com> [100113 12:36]:
->>> You might want to check what happens in omap off-idle mode in these cases
->>> and see if enabling OMAP_PIN_OFF_INPUT_PULLDOWN makes any difference in
->>> power consumption in off state. That probably does not matter unless the
->>> floating lines cause the eMMC to do something on it's own :)
->> Or OMAP_PIN_OFF_OUTPUT_LOW actually.
+On Fri, 27 Nov 2009 14:00:22 +0900
+Magnus Damm <magnus.damm@gmail.com> wrote:
+
+> From: Magnus Damm <damm@opensource.se>
 > 
-> One more time.. Most likely OMAP_PIN_OFF_INPUT_PULLDOWN is safer
-> in general as the OMAP_PIN_OFF_OUTPUT_LOW does not work for all
-> pins. According to the TRM, OMAP_PIN_OFF_OUTPUT_LOW only works
-> for pins where at least one of the mux modes supports output
-> mode.
+> This patch adds cell->disable() calls to the tmio-mmc
+> probe() error handling and the remove() function.
+> 
 
-While eMMC is on, it is better if the lines are pulled up,
-irrespective of whether OMAP is OFF, just to keep to the
-MMC specification.
+This patch still doesn't apply due to linux-next changes which never
+got merged into 2.6.33-rcX.
 
+If you think it should go into 2.6.33 then please redo a patch against
+mainline and we'll cheerily trash the problematic stuff in linux-next.
