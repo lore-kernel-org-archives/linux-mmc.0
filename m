@@ -1,135 +1,161 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH V2 5/10] omap: Add functions for dynamic remuxing of pins
-Date: Sun, 17 Jan 2010 03:33:28 +0200
-Message-ID: <20100117013328.17308.2865.sendpatchset@ahunter-work.research.nokia.com>
+Subject: [PATCH V2 6/10] omap: RX51: Remux to pull eMMC lines down when powering off
+Date: Sun, 17 Jan 2010 03:33:36 +0200
+Message-ID: <20100117013336.17308.685.sendpatchset@ahunter-work.research.nokia.com>
 References: <20100117013250.17308.17861.sendpatchset@ahunter-work.research.nokia.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:58022 "EHLO
+Received: from smtp.nokia.com ([192.100.122.233]:58035 "EHLO
 	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753237Ab0AQBeF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jan 2010 20:34:05 -0500
+	with ESMTP id S1753265Ab0AQBeS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jan 2010 20:34:18 -0500
 In-Reply-To: <20100117013250.17308.17861.sendpatchset@ahunter-work.research.nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>
 Cc: Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Paul Walmsley <paul@pwsan.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
->From 33beb5bc36cba739971dc8919a6929925ad3dafc Mon Sep 17 00:00:00 2001
-From: Tony Lindgren <tony@atomide.com>
-Date: Wed, 13 Jan 2010 10:27:17 -0800
-Subject: [PATCH] omap: Add functions for dynamic remuxing of pins
+>From 58f549be326b94b9e1eb74f31d751d01605229d5 Mon Sep 17 00:00:00 2001
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Date: Fri, 15 Jan 2010 15:18:39 +0200
+Subject: [PATCH] omap: RX51: Remux to pull eMMC lines down when powering off
 
-Make the omap_mux_read and write available for board code,
-and rename omap_mux_set_board_signals into omap_mux_write_array.
+It has been discovered that, when eMMC is powered off, current
+will flow from OMAP eMMC data pull-ups to the eMMC voltage supply.
+Configuring pads for OMAP off-mode does not help because eMMC is
+powered off independently of OMAP off-mode.  Hence the pads are
+now re-configured when eMMC is powered on or off.
 
-In some cases we want to change the signals dynamically,
-mostly for power management.
-
-Note that we cannot use the signal names as they are set
-__init to save memory.
-
-Signed-off-by: Tony Lindgren <tony@atomide.com>
+Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 ---
- arch/arm/mach-omap2/mux.c |   22 +++++++++++-----------
- arch/arm/mach-omap2/mux.h |   24 ++++++++++++++++++++++++
- 2 files changed, 35 insertions(+), 11 deletions(-)
+ arch/arm/mach-omap2/board-rx51-peripherals.c |   43 +++++++++++++++++++++++++-
+ arch/arm/mach-omap2/hsmmc.c                  |    8 +++++
+ arch/arm/mach-omap2/hsmmc.h                  |    2 +
+ arch/arm/plat-omap/include/plat/mmc.h        |    1 +
+ 4 files changed, 53 insertions(+), 1 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/mux.c b/arch/arm/mach-omap2/mux.c
-index a8febd3..50298b4 100644
---- a/arch/arm/mach-omap2/mux.c
-+++ b/arch/arm/mach-omap2/mux.c
-@@ -51,7 +51,7 @@ struct omap_mux_entry {
- static unsigned long mux_phys;
- static void __iomem *mux_base;
+diff --git a/arch/arm/mach-omap2/board-rx51-peripherals.c b/arch/arm/mach-omap2/board-rx51-peripherals.c
+index ab07ca2..4377a4c 100644
+--- a/arch/arm/mach-omap2/board-rx51-peripherals.c
++++ b/arch/arm/mach-omap2/board-rx51-peripherals.c
+@@ -209,6 +209,46 @@ static struct twl4030_madc_platform_data rx51_madc_data = {
+ 	.irq_line		= 1,
+ };
  
--static inline u16 omap_mux_read(u16 reg)
-+u16 omap_mux_read(u16 reg)
- {
- 	if (cpu_is_omap24xx())
- 		return __raw_readb(mux_base + reg);
-@@ -59,7 +59,7 @@ static inline u16 omap_mux_read(u16 reg)
- 		return __raw_readw(mux_base + reg);
- }
- 
--static inline void omap_mux_write(u16 val, u16 reg)
-+void omap_mux_write(u16 val, u16 reg)
- {
- 	if (cpu_is_omap24xx())
- 		__raw_writeb(val, mux_base + reg);
-@@ -67,6 +67,14 @@ static inline void omap_mux_write(u16 val, u16 reg)
- 		__raw_writew(val, mux_base + reg);
- }
- 
-+void omap_mux_write_array(struct omap_board_mux *board_mux)
++/* Enable input logic and pull all lines up when eMMC is on. */
++static struct omap_board_mux rx51_mmc2_on_mux[] = {
++	OMAP3_MUX(SDMMC2_CMD, OMAP_PIN_INPUT_PULLUP | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT0, OMAP_PIN_INPUT_PULLUP | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT1, OMAP_PIN_INPUT_PULLUP | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT2, OMAP_PIN_INPUT_PULLUP | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT3, OMAP_PIN_INPUT_PULLUP | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT4, OMAP_PIN_INPUT_PULLUP | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT5, OMAP_PIN_INPUT_PULLUP | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT6, OMAP_PIN_INPUT_PULLUP | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT7, OMAP_PIN_INPUT_PULLUP | OMAP_MUX_MODE0),
++	{ .reg_offset = OMAP_MUX_TERMINATOR },
++};
++
++/* Disable input logic and pull all lines down when eMMC is off. */
++static struct omap_board_mux rx51_mmc2_off_mux[] = {
++	OMAP3_MUX(SDMMC2_CMD, OMAP_PULL_ENA | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT0, OMAP_PULL_ENA | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT1, OMAP_PULL_ENA | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT2, OMAP_PULL_ENA | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT3, OMAP_PULL_ENA | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT4, OMAP_PULL_ENA | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT5, OMAP_PULL_ENA | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT6, OMAP_PULL_ENA | OMAP_MUX_MODE0),
++	OMAP3_MUX(SDMMC2_DAT7, OMAP_PULL_ENA | OMAP_MUX_MODE0),
++	{ .reg_offset = OMAP_MUX_TERMINATOR },
++};
++
++/*
++ * Current flows to eMMC when eMMC is off and the data lines are pulled up,
++ * so pull them down. N.B. we pull 8 lines because we are using 8 lines.
++ */
++static void rx51_mmc2_remux(struct device *dev, int slot, int power_on)
 +{
-+	while (board_mux->reg_offset !=  OMAP_MUX_TERMINATOR) {
-+		omap_mux_write(board_mux->value, board_mux->reg_offset);
-+		board_mux++;
-+	}
++	if (power_on)
++		omap_mux_write_array(rx51_mmc2_on_mux);
++	else
++		omap_mux_write_array(rx51_mmc2_off_mux);
 +}
 +
- #if defined(CONFIG_ARCH_OMAP24XX) && defined(CONFIG_OMAP_MUX)
+ static struct omap2_hsmmc_info mmc[] __initdata = {
+ 	{
+ 		.name		= "external",
+@@ -222,11 +262,12 @@ static struct omap2_hsmmc_info mmc[] __initdata = {
+ 	{
+ 		.name		= "internal",
+ 		.mmc		= 2,
+-		.wires		= 8,
++		.wires		= 8, /* See also rx51_mmc2_remux */
+ 		.gpio_cd	= -EINVAL,
+ 		.gpio_wp	= -EINVAL,
+ 		.nonremovable	= true,
+ 		.power_saving	= true,
++		.remux		= rx51_mmc2_remux,
+ 	},
+ 	{}	/* Terminator */
+ };
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 2a88f49..0ac5e4e 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -48,6 +48,9 @@ static void hsmmc1_before_set_reg(struct device *dev, int slot,
+ 	u32 reg, prog_io;
+ 	struct omap_mmc_platform_data *mmc = dev->platform_data;
  
- static struct omap_mux_cfg arch_mux_cfg;
-@@ -833,14 +841,6 @@ static void __init omap_mux_set_cmdline_signals(void)
- 	kfree(options);
- }
- 
--static void __init omap_mux_set_board_signals(struct omap_board_mux *board_mux)
--{
--	while (board_mux->reg_offset !=  OMAP_MUX_TERMINATOR) {
--		omap_mux_write(board_mux->value, board_mux->reg_offset);
--		board_mux++;
--	}
--}
--
- static int __init omap_mux_copy_names(struct omap_mux *src,
- 					struct omap_mux *dst)
++	if (mmc->slots[0].remux)
++		mmc->slots[0].remux(dev, slot, power_on);
++
+ 	/*
+ 	 * Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0..3) and the
+ 	 * card with Vcc regulator (from twl4030 or whatever).  OMAP has both
+@@ -121,6 +124,9 @@ static void hsmmc23_before_set_reg(struct device *dev, int slot,
  {
-@@ -992,7 +992,7 @@ static void omap_mux_init_package(struct omap_mux *superset,
- static void omap_mux_init_signals(struct omap_board_mux *board_mux)
- {
- 	omap_mux_set_cmdline_signals();
--	omap_mux_set_board_signals(board_mux);
-+	omap_mux_write_array(board_mux);
- }
+ 	struct omap_mmc_platform_data *mmc = dev->platform_data;
  
- #else
-diff --git a/arch/arm/mach-omap2/mux.h b/arch/arm/mach-omap2/mux.h
-index d8b4d5a..f8c2e7a 100644
---- a/arch/arm/mach-omap2/mux.h
-+++ b/arch/arm/mach-omap2/mux.h
-@@ -147,6 +147,30 @@ u16 omap_mux_get_gpio(int gpio);
- void omap_mux_set_gpio(u16 val, int gpio);
++	if (mmc->slots[0].remux)
++		mmc->slots[0].remux(dev, slot, power_on);
++
+ 	if (power_on) {
+ 		/* Only MMC2 supports a CLKIN */
+ 		if (mmc->slots[0].internal_clock) {
+@@ -184,6 +190,8 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+ 		mmc->slots[0].switch_pin = c->gpio_cd;
+ 		mmc->slots[0].gpio_wp = c->gpio_wp;
  
- /**
-+ * omap_mux_read() - read mux register
-+ * @mux_offset:		Offset of the mux register
-+ *
-+ */
-+u16 omap_mux_read(u16 mux_offset);
++		mmc->slots[0].remux = c->remux;
 +
-+/**
-+ * omap_mux_write() - write mux register
-+ * @val:		New mux register value
-+ * @mux_offset:		Offset of the mux register
-+ *
-+ * This should be only needed for dynamic remuxing of non-gpio signals.
-+ */
-+void omap_mux_write(u16 val, u16 mux_offset);
-+
-+/**
-+ * omap_mux_write_array() - write an array of mux registers
-+ * @board_mux:		Array of mux registers terminated by MAP_MUX_TERMINATOR
-+ *
-+ * This should be only needed for dynamic remuxing of non-gpio signals.
-+ */
-+void omap_mux_write_array(struct omap_board_mux *board_mux);
-+
-+/**
-  * omap3_mux_init() - initialize mux system with board specific set
-  * @board_mux:		Board specific mux table
-  * @flags:		OMAP package type used for the board
+ 		if (c->cover_only)
+ 			mmc->slots[0].cover = 1;
+ 
+diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+index e946b5f..f641f59 100644
+--- a/arch/arm/mach-omap2/hsmmc.h
++++ b/arch/arm/mach-omap2/hsmmc.h
+@@ -19,6 +19,8 @@ struct omap2_hsmmc_info {
+ 	char	*name;		/* or NULL for default */
+ 	struct device *dev;	/* returned: pointer to mmc adapter */
+ 	int	ocr_mask;	/* temporary HACK */
++	/* Remux (pad configuation) when powering on/off */
++	void (*remux)(struct device *dev, int slot, int power_on);
+ };
+ 
+ #if defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index 515701b..8b23d32 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -105,6 +105,7 @@ struct omap_mmc_platform_data {
+ 		int (*get_ro)(struct device *dev, int slot);
+ 		int (*set_sleep)(struct device *dev, int slot, int sleep,
+ 				 int vdd, int cardsleep);
++		void (*remux)(struct device *dev, int slot, int power_on);
+ 		/* Call back before enabling / disabling regulators */
+ 		void (*before_set_reg)(struct device *dev, int slot,
+ 				       int power_on, int vdd);
 -- 
 1.6.0.4
 
