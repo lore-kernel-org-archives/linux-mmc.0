@@ -1,39 +1,34 @@
 From: Mike Frysinger <vapier@gentoo.org>
-Subject: [PATCH 1/3] mmc: bfin_sdh: fix unused sg warning on BF51x/BF52x systems
-Date: Tue, 19 Jan 2010 03:02:09 -0500
-Message-ID: <1263888131-25656-1-git-send-email-vapier@gentoo.org>
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754696Ab0ASICN@vger.kernel.org>
+Subject: [PATCH 2/3] mmc: bfin_sdh: drop redundant MMC depend string
+Date: Tue, 19 Jan 2010 03:02:10 -0500
+Message-ID: <1263888131-25656-2-git-send-email-vapier@gentoo.org>
+References: <1263888131-25656-1-git-send-email-vapier@gentoo.org>
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1754987Ab0ASICZ@vger.kernel.org>
+In-Reply-To: <1263888131-25656-1-git-send-email-vapier@gentoo.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@nokia.com>, Andrew Morton <akpm@linux-foundation.org>
 Cc: linux-kernel@vger.kernel.org, uclinux-dist-devel@blackfin.uclinux.org
 List-Id: linux-mmc@vger.kernel.org
 
-The local sg variable is only used with BF54x code.
+The host/Kconfig file is only included when MMC is selected.
 
 Signed-off-by: Mike Frysinger <vapier@gentoo.org>
 ---
- drivers/mmc/host/bfin_sdh.c |    2 +-
+ drivers/mmc/host/Kconfig |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
-index 3343a57..f218a99 100644
---- a/drivers/mmc/host/bfin_sdh.c
-+++ b/drivers/mmc/host/bfin_sdh.c
-@@ -115,7 +115,6 @@ static int sdh_setup_data(struct sdh_host *host, struct mmc_data *data)
- 	unsigned int length;
- 	unsigned int data_ctl;
- 	unsigned int dma_cfg;
--	struct scatterlist *sg;
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index ce1d288..f6af92a 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -399,7 +399,7 @@ config MMC_VIA_SDMMC
  
- 	dev_dbg(mmc_dev(host->mmc), "%s enter flags: 0x%x\n", __func__, data->flags);
- 	host->data = data;
-@@ -151,6 +150,7 @@ static int sdh_setup_data(struct sdh_host *host, struct mmc_data *data)
- #if defined(CONFIG_BF54x)
- 	dma_cfg |= DMAFLOW_ARRAY | NDSIZE_5 | RESTART | WDSIZE_32 | DMAEN;
- 	{
-+		struct scatterlist *sg;
- 		int i;
- 		for_each_sg(data->sg, sg, host->dma_len, i) {
- 			host->sg_cpu[i].start_addr = sg_dma_address(sg);
+ config SDH_BFIN
+ 	tristate "Blackfin Secure Digital Host support"
+-	depends on MMC && ((BF54x && !BF544) || (BF51x && !BF512))
++	depends on (BF54x && !BF544) || (BF51x && !BF512)
+ 	help
+ 	  If you say yes here you will get support for the Blackfin on-chip
+ 	  Secure Digital Host interface.  This includes support for MMC and
 -- 
 1.6.6
