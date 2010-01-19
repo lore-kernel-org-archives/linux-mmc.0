@@ -1,46 +1,47 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 03/03] mmc: Balance tmio-mmc cell enable()/disable() calls
-Date: Tue, 19 Jan 2010 23:25:18 +0900
-Message-ID: <aec7e5c31001190625x2b0629f7xdef38dc6edc43586@mail.gmail.com>
-References: <20091127045956.15251.84958.sendpatchset@rxone.opensource.se>
-	 <20091127050022.15251.43017.sendpatchset@rxone.opensource.se>
-	 <20100115160602.f1523a68.akpm@linux-foundation.org>
+From: VK <noreply@vk.com>
+Subject: =?UTF-8?Q?Maxim_Sine_amarE_Kneshuk_si_V=C3=A1s_p=C5=99idal_do_p=C5=99=C3?=
+ =?UTF-8?Q?=A1tel_na_str=C3=A1nce_VK.com?=
+Date: Tue, 19 Jan 2010 22:16:57 +0300
+Message-ID: <ed9698a6a6e688c51d1f28921c8f4ba2@localhost.localdomain>
+Reply-To: VK <noreply@vk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f42.google.com ([209.85.160.42]:38452 "EHLO
-	mail-pw0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753220Ab0ASOZT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2010 09:25:19 -0500
-In-Reply-To: <20100115160602.f1523a68.akpm@linux-foundation.org>
+Received: from cs120.vk.com ([93.186.224.120]:51139 "EHLO vk.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750817Ab0ASTQ7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 19 Jan 2010 14:16:59 -0500
+Received: from localhost
+	([127.0.0.1] helo=localhost.localdomain ident=www-data)
+	by vk.com with esmtp (Exim 4.69)
+	(envelope-from <noreply@vk.com>)
+	id 1NXJZR-0007ir-Dm
+	for linux-mmc@vger.kernel.org; Tue, 19 Jan 2010 22:16:57 +0300
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ian@mnementh.co.uk, lethal@linux-sh.org, philipp.zabel@gmail.com, pierre@ossman.eu
+To: =?UTF-8?Q?Dobr=C3=BD_den?= <linux-mmc@vger.kernel.org>
 
-On Sat, Jan 16, 2010 at 9:06 AM, Andrew Morton
-<akpm@linux-foundation.org> wrote:
-> On Fri, 27 Nov 2009 14:00:22 +0900
-> Magnus Damm <magnus.damm@gmail.com> wrote:
->
->> From: Magnus Damm <damm@opensource.se>
->>
->> This patch adds cell->disable() calls to the tmio-mmc
->> probe() error handling and the remove() function.
->>
->
-> This patch still doesn't apply due to linux-next changes which never
-> got merged into 2.6.33-rcX.
+Dobr=C3=BD den,
 
-Good news is that the linux-next issue seems solved now thanks to help
-from Samuel Ortiz.
+Maxim Sine amarE Kneshuk si V=C3=A1s p=C5=99idal do p=C5=99=C3=A1tel na=
+ str=C3=A1nce VK.com
 
-> If you think it should go into 2.6.33 then please redo a patch against
-> mainline and we'll cheerily trash the problematic stuff in linux-next.
+Pomoc=C3=AD sv=C3=A9 e-mailov=C3=A9 adresy a automaticky vytvo=C5=99en=C3=
+=A9ho hesla: x2XZY7B4, m=C5=AF=C5=BEete zaj=C3=ADt na str=C3=A1nku a pr=
+ohl=C3=A9dnout si profily Va=C5=A1ich p=C5=99=C3=A1tel.
 
-Nah, this patch is not urgent. It may also break other platforms, so I
-prefer to resend it later.
+VK.com je str=C3=A1nka, kter=C3=A1 ka=C5=BEd=C3=BD den umo=C5=BE=C5=88u=
+je des=C3=ADtk=C3=A1m milion=C5=AF lid=C3=AD naj=C3=ADt star=C3=A9 p=C5=
+=99=C3=A1tele a z=C5=AFstavat s nimi ve spojen=C3=AD, sd=C3=ADlet s nim=
+i fotky i nejd=C5=AFle=C5=BEit=C4=9Bj=C5=A1=C3=AD ud=C3=A1losti.
 
-Thanks,
+Abyste se dostal(a) na str=C3=A1nku, p=C5=99ejd=C4=9Bte na odkaz:
+http://vk.com/login.php?regemail=3Dlinux-mmc@vger.kernel.org#x2XZY7B4
 
-/ magnus
+Upozorn=C4=9Bn=C3=AD: Pokud budete toto pozv=C3=A1n=C3=AD ignorovat, Va=
+=C5=A1e registrace nebude aktivov=C3=A1na.
+
+Hodn=C4=9B =C5=A1t=C4=9Bst=C3=AD!
+
+
