@@ -1,55 +1,46 @@
-From: Mike Frysinger <vapier@gentoo.org>
-Subject: [PATCH 3/3] mmc: bfin_sdh: set timeout based on actual card data
-Date: Tue, 19 Jan 2010 03:02:11 -0500
-Message-ID: <1263888131-25656-3-git-send-email-vapier@gentoo.org>
-References: <1263888131-25656-1-git-send-email-vapier@gentoo.org>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH 03/03] mmc: Balance tmio-mmc cell enable()/disable() calls
+Date: Tue, 19 Jan 2010 23:25:18 +0900
+Message-ID: <aec7e5c31001190625x2b0629f7xdef38dc6edc43586@mail.gmail.com>
+References: <20091127045956.15251.84958.sendpatchset@rxone.opensource.se>
+	 <20091127050022.15251.43017.sendpatchset@rxone.opensource.se>
+	 <20100115160602.f1523a68.akpm@linux-foundation.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.gentoo.org ([140.211.166.183]:57436 "EHLO smtp.gentoo.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755114Ab0ASICd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 19 Jan 2010 03:02:33 -0500
-In-Reply-To: <1263888131-25656-1-git-send-email-vapier@gentoo.org>
+Received: from mail-pw0-f42.google.com ([209.85.160.42]:38452 "EHLO
+	mail-pw0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753220Ab0ASOZT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2010 09:25:19 -0500
+In-Reply-To: <20100115160602.f1523a68.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@nokia.com>, Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, uclinux-dist-devel@blackfin.uclinux.org, Cliff Cai <cliff.cai@analog.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ian@mnementh.co.uk, lethal@linux-sh.org, philipp.zabel@gmail.com, pierre@ossman.eu
 
-From: Cliff Cai <cliff.cai@analog.com>
+On Sat, Jan 16, 2010 at 9:06 AM, Andrew Morton
+<akpm@linux-foundation.org> wrote:
+> On Fri, 27 Nov 2009 14:00:22 +0900
+> Magnus Damm <magnus.damm@gmail.com> wrote:
+>
+>> From: Magnus Damm <damm@opensource.se>
+>>
+>> This patch adds cell->disable() calls to the tmio-mmc
+>> probe() error handling and the remove() function.
+>>
+>
+> This patch still doesn't apply due to linux-next changes which never
+> got merged into 2.6.33-rcX.
 
-The hardcoded value doesn't really work for all cards.
+Good news is that the linux-next issue seems solved now thanks to help
+from Samuel Ortiz.
 
-Signed-off-by: Cliff Cai <cliff.cai@analog.com>
-Signed-off-by: Mike Frysinger <vapier@gentoo.org>
----
- drivers/mmc/host/bfin_sdh.c |    8 ++++++--
- 1 files changed, 6 insertions(+), 2 deletions(-)
+> If you think it should go into 2.6.33 then please redo a patch against
+> mainline and we'll cheerily trash the problematic stuff in linux-next.
 
-diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
-index f218a99..56f7b44 100644
---- a/drivers/mmc/host/bfin_sdh.c
-+++ b/drivers/mmc/host/bfin_sdh.c
-@@ -115,6 +115,7 @@ static int sdh_setup_data(struct sdh_host *host, struct mmc_data *data)
- 	unsigned int length;
- 	unsigned int data_ctl;
- 	unsigned int dma_cfg;
-+	unsigned int cycle_ns, timeout;
- 
- 	dev_dbg(mmc_dev(host->mmc), "%s enter flags: 0x%x\n", __func__, data->flags);
- 	host->data = data;
-@@ -135,8 +136,11 @@ static int sdh_setup_data(struct sdh_host *host, struct mmc_data *data)
- 	data_ctl |= ((ffs(data->blksz) - 1) << 4);
- 
- 	bfin_write_SDH_DATA_CTL(data_ctl);
--
--	bfin_write_SDH_DATA_TIMER(0xFFFF);
-+	/* the time of a host clock period in ns */
-+	cycle_ns = 1000000000 / (get_sclk() / (2 * (host->clk_div + 1)));
-+	timeout = data->timeout_ns / cycle_ns;
-+	timeout += data->timeout_clks;
-+	bfin_write_SDH_DATA_TIMER(timeout);
- 	SSYNC();
- 
- 	if (data->flags & MMC_DATA_READ) {
--- 
-1.6.6
+Nah, this patch is not urgent. It may also break other platforms, so I
+prefer to resend it later.
 
+Thanks,
+
+/ magnus
