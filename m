@@ -1,159 +1,43 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH V2 5/10] omap: Add functions for dynamic remuxing of pins
-Date: Wed, 20 Jan 2010 10:05:01 +0200
-Message-ID: <4B56B92D.6000009@nokia.com>
-References: <20100117013250.17308.17861.sendpatchset@ahunter-work.research.nokia.com> <20100117013328.17308.2865.sendpatchset@ahunter-work.research.nokia.com> <20100120012120.GJ10318@atomide.com>
+From: Lars-Peter Clausen <lars@metafoo.de>
+Subject: [PATCH 2/2] s3cmci: s3cmci_card_present: Use no_detect to decide
+	whether there is a card detect pin
+Date: Wed, 20 Jan 2010 09:16:01 +0100
+Message-ID: <1263975361-29376-2-git-send-email-lars@metafoo.de>
+References: <1263975361-29376-1-git-send-email-lars@metafoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:61264 "EHLO
-	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752508Ab0ATIGx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2010 03:06:53 -0500
-In-Reply-To: <20100120012120.GJ10318@atomide.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1263975361-29376-1-git-send-email-lars@metafoo.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ben-linux@fluff.org
+Cc: Lars-Peter Clausen <lars@metafoo.de>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, Paul Walmsley <paul@pwsan.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-Tony Lindgren wrote:
-> * Adrian Hunter <adrian.hunter@nokia.com> [100116 17:31]:
->> From 33beb5bc36cba739971dc8919a6929925ad3dafc Mon Sep 17 00:00:00 2001
->> From: Tony Lindgren <tony@atomide.com>
->> Date: Wed, 13 Jan 2010 10:27:17 -0800
->> Subject: [PATCH] omap: Add functions for dynamic remuxing of pins
->>
->> Make the omap_mux_read and write available for board code,
->> and rename omap_mux_set_board_signals into omap_mux_write_array.
->>
->> In some cases we want to change the signals dynamically,
->> mostly for power management.
->>
->> Note that we cannot use the signal names as they are set
->> __init to save memory.
-> 
-> I'll try to merge this as a fix since it fixes dynamic remuxing.
-> 
-> Adrian, can I add your Acked-by?
+---
+ drivers/mmc/host/s3cmci.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Sure.
-
-Acked-by: Adrian Hunter <adrian.hunter@nokia.com>
-
-> 
-> Regards,
-> 
-> Tony
->  
->> Signed-off-by: Tony Lindgren <tony@atomide.com>
->> ---
->>  arch/arm/mach-omap2/mux.c |   22 +++++++++++-----------
->>  arch/arm/mach-omap2/mux.h |   24 ++++++++++++++++++++++++
->>  2 files changed, 35 insertions(+), 11 deletions(-)
->>
->> diff --git a/arch/arm/mach-omap2/mux.c b/arch/arm/mach-omap2/mux.c
->> index a8febd3..50298b4 100644
->> --- a/arch/arm/mach-omap2/mux.c
->> +++ b/arch/arm/mach-omap2/mux.c
->> @@ -51,7 +51,7 @@ struct omap_mux_entry {
->>  static unsigned long mux_phys;
->>  static void __iomem *mux_base;
->>  
->> -static inline u16 omap_mux_read(u16 reg)
->> +u16 omap_mux_read(u16 reg)
->>  {
->>  	if (cpu_is_omap24xx())
->>  		return __raw_readb(mux_base + reg);
->> @@ -59,7 +59,7 @@ static inline u16 omap_mux_read(u16 reg)
->>  		return __raw_readw(mux_base + reg);
->>  }
->>  
->> -static inline void omap_mux_write(u16 val, u16 reg)
->> +void omap_mux_write(u16 val, u16 reg)
->>  {
->>  	if (cpu_is_omap24xx())
->>  		__raw_writeb(val, mux_base + reg);
->> @@ -67,6 +67,14 @@ static inline void omap_mux_write(u16 val, u16 reg)
->>  		__raw_writew(val, mux_base + reg);
->>  }
->>  
->> +void omap_mux_write_array(struct omap_board_mux *board_mux)
->> +{
->> +	while (board_mux->reg_offset !=  OMAP_MUX_TERMINATOR) {
->> +		omap_mux_write(board_mux->value, board_mux->reg_offset);
->> +		board_mux++;
->> +	}
->> +}
->> +
->>  #if defined(CONFIG_ARCH_OMAP24XX) && defined(CONFIG_OMAP_MUX)
->>  
->>  static struct omap_mux_cfg arch_mux_cfg;
->> @@ -833,14 +841,6 @@ static void __init omap_mux_set_cmdline_signals(void)
->>  	kfree(options);
->>  }
->>  
->> -static void __init omap_mux_set_board_signals(struct omap_board_mux *board_mux)
->> -{
->> -	while (board_mux->reg_offset !=  OMAP_MUX_TERMINATOR) {
->> -		omap_mux_write(board_mux->value, board_mux->reg_offset);
->> -		board_mux++;
->> -	}
->> -}
->> -
->>  static int __init omap_mux_copy_names(struct omap_mux *src,
->>  					struct omap_mux *dst)
->>  {
->> @@ -992,7 +992,7 @@ static void omap_mux_init_package(struct omap_mux *superset,
->>  static void omap_mux_init_signals(struct omap_board_mux *board_mux)
->>  {
->>  	omap_mux_set_cmdline_signals();
->> -	omap_mux_set_board_signals(board_mux);
->> +	omap_mux_write_array(board_mux);
->>  }
->>  
->>  #else
->> diff --git a/arch/arm/mach-omap2/mux.h b/arch/arm/mach-omap2/mux.h
->> index d8b4d5a..f8c2e7a 100644
->> --- a/arch/arm/mach-omap2/mux.h
->> +++ b/arch/arm/mach-omap2/mux.h
->> @@ -147,6 +147,30 @@ u16 omap_mux_get_gpio(int gpio);
->>  void omap_mux_set_gpio(u16 val, int gpio);
->>  
->>  /**
->> + * omap_mux_read() - read mux register
->> + * @mux_offset:		Offset of the mux register
->> + *
->> + */
->> +u16 omap_mux_read(u16 mux_offset);
->> +
->> +/**
->> + * omap_mux_write() - write mux register
->> + * @val:		New mux register value
->> + * @mux_offset:		Offset of the mux register
->> + *
->> + * This should be only needed for dynamic remuxing of non-gpio signals.
->> + */
->> +void omap_mux_write(u16 val, u16 mux_offset);
->> +
->> +/**
->> + * omap_mux_write_array() - write an array of mux registers
->> + * @board_mux:		Array of mux registers terminated by MAP_MUX_TERMINATOR
->> + *
->> + * This should be only needed for dynamic remuxing of non-gpio signals.
->> + */
->> +void omap_mux_write_array(struct omap_board_mux *board_mux);
->> +
->> +/**
->>   * omap3_mux_init() - initialize mux system with board specific set
->>   * @board_mux:		Board specific mux table
->>   * @flags:		OMAP package type used for the board
->> -- 
->> 1.6.0.4
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index b9c96cc..2fdf768 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -1179,7 +1179,7 @@ static int s3cmci_card_present(struct mmc_host *mmc)
+ 	struct s3c24xx_mci_pdata *pdata = host->pdata;
+ 	int ret;
+ 
+-	if (pdata->gpio_detect == 0)
++	if (pdata->no_detect)
+ 		return -ENOSYS;
+ 
+ 	ret = gpio_get_value(pdata->gpio_detect) ? 0 : 1;
+-- 
+1.5.6.5
