@@ -1,50 +1,40 @@
-From: Lars-Peter Clausen <lars@metafoo.de>
-Subject: [PATCH 1/2] s3cmci: Initialize default platform data no_wprotect and
-	no_detect with 1
-Date: Wed, 20 Jan 2010 09:16:00 +0100
-Message-ID: <1263975361-29376-1-git-send-email-lars@metafoo.de>
+From: Sergei Shtylyov <sshtylyov@ru.mvista.com>
+Subject: Re: [PATCH 1/2] s3cmci: Initialize default platform data no_wprotect
+ and	no_detect with 1
+Date: Wed, 20 Jan 2010 13:44:26 +0300
+Message-ID: <4B56DE8A.70209@ru.mvista.com>
+References: <1263975361-29376-1-git-send-email-lars@metafoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ben-linux@fluff.org
-Cc: Lars-Peter Clausen <lars@metafoo.de>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gateway-1237.mvista.com ([206.112.117.35]:3067 "HELO
+	gateway-1237.mvista.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1752872Ab0ATKoy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2010 05:44:54 -0500
+In-Reply-To: <1263975361-29376-1-git-send-email-lars@metafoo.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Lars-Peter Clausen <lars@metafoo.de>
+Cc: ben-linux@fluff.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-If no platform_data was givin to the device it's going to use it's default
-platform data struct which has all fields initialized to zero.
-As a result the driver is going to try to request gpio0 both as write protect
-and card detect pin. Which of course will fail and makes the driver unusable
+Hello.
 
-Previously to the introduction of no_wprotect and no_detect the behavior was
-to assume that if no platform data was given there is no write protect or card
-detect pin.
-This patch restores that behavior.
----
- drivers/mmc/host/s3cmci.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+Lars-Peter Clausen wrote:
 
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index d96e1ab..b9c96cc 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -1360,6 +1360,8 @@ static struct mmc_host_ops s3cmci_ops = {
- static struct s3c24xx_mci_pdata s3cmci_def_pdata = {
- 	/* This is currently here to avoid a number of if (host->pdata)
- 	 * checks. Any zero fields to ensure reasonable defaults are picked. */
-+	 .no_wprotect = 1,
-+	 .no_detect = 1,
- };
- 
- #ifdef CONFIG_CPU_FREQ
--- 
-1.5.6.5
+> If no platform_data was givin to the device it's going to use it's default
+> platform data struct which has all fields initialized to zero.
+> As a result the driver is going to try to request gpio0 both as write protect
+> and card detect pin. Which of course will fail and makes the driver unusable
+>
+> Previously to the introduction of no_wprotect and no_detect the behavior was
+> to assume that if no platform data was given there is no write protect or card
+> detect pin.
+> This patch restores that behavior.
+>   
+
+   The very idea of the default platform data seems dubious...
+
+WBR, Sergei
+
+
