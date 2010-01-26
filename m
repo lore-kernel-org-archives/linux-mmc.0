@@ -1,53 +1,76 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH V2 5/10] omap: Add functions for dynamic remuxing of
- pins
-Date: Fri, 22 Jan 2010 09:17:16 -0800
-Message-ID: <20100122171716.GR23467@atomide.com>
-References: <20100117013250.17308.17861.sendpatchset@ahunter-work.research.nokia.com>
- <20100117013328.17308.2865.sendpatchset@ahunter-work.research.nokia.com>
- <20100120012120.GJ10318@atomide.com>
- <4B56B92D.6000009@nokia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: akpm@linux-foundation.org
+Subject: + mmc-bfin_sdh-fix-unused-sg-warning-on-bf51x-bf52x-systems.patch added to -mm tree
+Date: Mon, 25 Jan 2010 16:05:58 -0800
+Message-ID: <201001260005.o0Q05wrX019150@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:65296 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753807Ab0AVRRJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2010 12:17:09 -0500
-Content-Disposition: inline
-In-Reply-To: <4B56B92D.6000009@nokia.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:59685 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751323Ab0AZAGB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2010 19:06:01 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, Paul Walmsley <paul@pwsan.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+To: mm-commits@vger.kernel.org
+Cc: vapier@gentoo.org, linux-mmc@vger.kernel.org
 
-* Adrian Hunter <adrian.hunter@nokia.com> [100120 00:04]:
-> Tony Lindgren wrote:
-> >* Adrian Hunter <adrian.hunter@nokia.com> [100116 17:31]:
-> >>From 33beb5bc36cba739971dc8919a6929925ad3dafc Mon Sep 17 00:00:00 2001
-> >>From: Tony Lindgren <tony@atomide.com>
-> >>Date: Wed, 13 Jan 2010 10:27:17 -0800
-> >>Subject: [PATCH] omap: Add functions for dynamic remuxing of pins
-> >>
-> >>Make the omap_mux_read and write available for board code,
-> >>and rename omap_mux_set_board_signals into omap_mux_write_array.
-> >>
-> >>In some cases we want to change the signals dynamically,
-> >>mostly for power management.
-> >>
-> >>Note that we cannot use the signal names as they are set
-> >>__init to save memory.
-> >
-> >I'll try to merge this as a fix since it fixes dynamic remuxing.
-> >
-> >Adrian, can I add your Acked-by?
-> 
-> Sure.
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@nokia.com>
 
-Already got the omap-fixes-for-linus queued up, so I'd rather
-not start messing again. So a bit too late for your ack, but
-thanks anyways for testing.
+The patch titled
+     mmc: bfin_sdh: fix unused sg warning on BF51x/BF52x systems
+has been added to the -mm tree.  Its filename is
+     mmc-bfin_sdh-fix-unused-sg-warning-on-bf51x-bf52x-systems.patch
 
-Tony
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc: bfin_sdh: fix unused sg warning on BF51x/BF52x systems
+From: Mike Frysinger <vapier@gentoo.org>
+
+The local sg variable is only used with BF54x code.
+
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/bfin_sdh.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff -puN drivers/mmc/host/bfin_sdh.c~mmc-bfin_sdh-fix-unused-sg-warning-on-bf51x-bf52x-systems drivers/mmc/host/bfin_sdh.c
+--- a/drivers/mmc/host/bfin_sdh.c~mmc-bfin_sdh-fix-unused-sg-warning-on-bf51x-bf52x-systems
++++ a/drivers/mmc/host/bfin_sdh.c
+@@ -115,7 +115,6 @@ static int sdh_setup_data(struct sdh_hos
+ 	unsigned int length;
+ 	unsigned int data_ctl;
+ 	unsigned int dma_cfg;
+-	struct scatterlist *sg;
+ 
+ 	dev_dbg(mmc_dev(host->mmc), "%s enter flags: 0x%x\n", __func__, data->flags);
+ 	host->data = data;
+@@ -151,6 +150,7 @@ static int sdh_setup_data(struct sdh_hos
+ #if defined(CONFIG_BF54x)
+ 	dma_cfg |= DMAFLOW_ARRAY | NDSIZE_5 | RESTART | WDSIZE_32 | DMAEN;
+ 	{
++		struct scatterlist *sg;
+ 		int i;
+ 		for_each_sg(data->sg, sg, host->dma_len, i) {
+ 			host->sg_cpu[i].start_addr = sg_dma_address(sg);
+_
+
+Patches currently in -mm which might be from vapier@gentoo.org are
+
+linux-next.patch
+mmc-bfin_sdh-fix-unused-sg-warning-on-bf51x-bf52x-systems.patch
+mmc-bfin_sdh-drop-redundant-mmc-depend-string.patch
+mmc-bfin_sdh-set-timeout-based-on-actual-card-data.patch
+fbdev-bf54x-lq043fb-bfin-t350mcqb-fb-drop-custom-mmap-handler.patch
+
