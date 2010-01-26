@@ -1,80 +1,37 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-bfin_sdh-set-timeout-based-on-actual-card-data.patch added to -mm tree
-Date: Mon, 25 Jan 2010 16:06:02 -0800
-Message-ID: <201001260006.o0Q062dQ019158@imap1.linux-foundation.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 3/3] mmc: bfin_sdh: set timeout based on actual card
+ data
+Date: Mon, 25 Jan 2010 16:07:33 -0800
+Message-ID: <20100125160733.d7930d71.akpm@linux-foundation.org>
+References: <1263888131-25656-1-git-send-email-vapier@gentoo.org>
+	<1263888131-25656-3-git-send-email-vapier@gentoo.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:36425 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:53138 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751466Ab0AZAGH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2010 19:06:07 -0500
+	by vger.kernel.org with ESMTP id S1751697Ab0AZAHw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2010 19:07:52 -0500
+In-Reply-To: <1263888131-25656-3-git-send-email-vapier@gentoo.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: cliff.cai@analog.com, linux-mmc@vger.kernel.org, vapier@gentoo.org
+To: Mike Frysinger <vapier@gentoo.org>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@nokia.com>, linux-kernel@vger.kernel.org, uclinux-dist-devel@blackfin.uclinux.org, Cliff Cai <cliff.cai@analog.com>
 
+On Tue, 19 Jan 2010 03:02:11 -0500
+Mike Frysinger <vapier@gentoo.org> wrote:
 
-The patch titled
-     mmc: bfin_sdh: set timeout based on actual card data
-has been added to the -mm tree.  Its filename is
-     mmc-bfin_sdh-set-timeout-based-on-actual-card-data.patch
+> From: Cliff Cai <cliff.cai@analog.com>
+> 
+> The hardcoded value doesn't really work for all cards.
+> 
+> Signed-off-by: Cliff Cai <cliff.cai@analog.com>
+> Signed-off-by: Mike Frysinger <vapier@gentoo.org>
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+Please don't write crappy changelogs.  
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: bfin_sdh: set timeout based on actual card data
-From: Cliff Cai <cliff.cai@analog.com>
-
-The hardcoded value doesn't really work for all cards.
-
-Signed-off-by: Cliff Cai <cliff.cai@analog.com>
-Signed-off-by: Mike Frysinger <vapier@gentoo.org>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/bfin_sdh.c |    8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
-
-diff -puN drivers/mmc/host/bfin_sdh.c~mmc-bfin_sdh-set-timeout-based-on-actual-card-data drivers/mmc/host/bfin_sdh.c
---- a/drivers/mmc/host/bfin_sdh.c~mmc-bfin_sdh-set-timeout-based-on-actual-card-data
-+++ a/drivers/mmc/host/bfin_sdh.c
-@@ -115,6 +115,7 @@ static int sdh_setup_data(struct sdh_hos
- 	unsigned int length;
- 	unsigned int data_ctl;
- 	unsigned int dma_cfg;
-+	unsigned int cycle_ns, timeout;
- 
- 	dev_dbg(mmc_dev(host->mmc), "%s enter flags: 0x%x\n", __func__, data->flags);
- 	host->data = data;
-@@ -135,8 +136,11 @@ static int sdh_setup_data(struct sdh_hos
- 	data_ctl |= ((ffs(data->blksz) - 1) << 4);
- 
- 	bfin_write_SDH_DATA_CTL(data_ctl);
--
--	bfin_write_SDH_DATA_TIMER(0xFFFF);
-+	/* the time of a host clock period in ns */
-+	cycle_ns = 1000000000 / (get_sclk() / (2 * (host->clk_div + 1)));
-+	timeout = data->timeout_ns / cycle_ns;
-+	timeout += data->timeout_clks;
-+	bfin_write_SDH_DATA_TIMER(timeout);
- 	SSYNC();
- 
- 	if (data->flags & MMC_DATA_READ) {
-_
-
-Patches currently in -mm which might be from cliff.cai@analog.com are
-
-linux-next.patch
-mmc-bfin_sdh-set-timeout-based-on-actual-card-data.patch
+How am I to determine whether we want this fix in 2.6.33 and possibly
+earlier?  How is anyone whose 2.6.32.x kernel "doesn't really work" to
+determine whether this patch might fix it?
 
