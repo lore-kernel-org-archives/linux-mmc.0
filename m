@@ -1,22 +1,22 @@
 From: akpm@linux-foundation.org
-Subject: + mmc-bfin_sdh-drop-redundant-mmc-depend-string.patch added to -mm tree
-Date: Mon, 25 Jan 2010 16:06:00 -0800
-Message-ID: <201001260006.o0Q060Ca019154@imap1.linux-foundation.org>
+Subject: + mmc-bfin_sdh-set-timeout-based-on-actual-card-data.patch added to -mm tree
+Date: Mon, 25 Jan 2010 16:06:02 -0800
+Message-ID: <201001260006.o0Q062dQ019158@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:35114 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:36425 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751325Ab0AZAGC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2010 19:06:02 -0500
+	by vger.kernel.org with ESMTP id S1751466Ab0AZAGH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2010 19:06:07 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: mm-commits@vger.kernel.org
-Cc: vapier@gentoo.org, linux-mmc@vger.kernel.org
+Cc: cliff.cai@analog.com, linux-mmc@vger.kernel.org, vapier@gentoo.org
 
 
 The patch titled
-     mmc: bfin_sdh: drop redundant MMC depend string
+     mmc: bfin_sdh: set timeout based on actual card data
 has been added to the -mm tree.  Its filename is
-     mmc-bfin_sdh-drop-redundant-mmc-depend-string.patch
+     mmc-bfin_sdh-set-timeout-based-on-actual-card-data.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -32,38 +32,49 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: bfin_sdh: drop redundant MMC depend string
-From: Mike Frysinger <vapier@gentoo.org>
+Subject: mmc: bfin_sdh: set timeout based on actual card data
+From: Cliff Cai <cliff.cai@analog.com>
 
-The host/Kconfig file is only included when MMC is selected.
+The hardcoded value doesn't really work for all cards.
 
+Signed-off-by: Cliff Cai <cliff.cai@analog.com>
 Signed-off-by: Mike Frysinger <vapier@gentoo.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/Kconfig |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/bfin_sdh.c |    8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff -puN drivers/mmc/host/Kconfig~mmc-bfin_sdh-drop-redundant-mmc-depend-string drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~mmc-bfin_sdh-drop-redundant-mmc-depend-string
-+++ a/drivers/mmc/host/Kconfig
-@@ -396,7 +396,7 @@ config MMC_VIA_SDMMC
+diff -puN drivers/mmc/host/bfin_sdh.c~mmc-bfin_sdh-set-timeout-based-on-actual-card-data drivers/mmc/host/bfin_sdh.c
+--- a/drivers/mmc/host/bfin_sdh.c~mmc-bfin_sdh-set-timeout-based-on-actual-card-data
++++ a/drivers/mmc/host/bfin_sdh.c
+@@ -115,6 +115,7 @@ static int sdh_setup_data(struct sdh_hos
+ 	unsigned int length;
+ 	unsigned int data_ctl;
+ 	unsigned int dma_cfg;
++	unsigned int cycle_ns, timeout;
  
- config SDH_BFIN
- 	tristate "Blackfin Secure Digital Host support"
--	depends on MMC && ((BF54x && !BF544) || (BF51x && !BF512))
-+	depends on (BF54x && !BF544) || (BF51x && !BF512)
- 	help
- 	  If you say yes here you will get support for the Blackfin on-chip
- 	  Secure Digital Host interface.  This includes support for MMC and
+ 	dev_dbg(mmc_dev(host->mmc), "%s enter flags: 0x%x\n", __func__, data->flags);
+ 	host->data = data;
+@@ -135,8 +136,11 @@ static int sdh_setup_data(struct sdh_hos
+ 	data_ctl |= ((ffs(data->blksz) - 1) << 4);
+ 
+ 	bfin_write_SDH_DATA_CTL(data_ctl);
+-
+-	bfin_write_SDH_DATA_TIMER(0xFFFF);
++	/* the time of a host clock period in ns */
++	cycle_ns = 1000000000 / (get_sclk() / (2 * (host->clk_div + 1)));
++	timeout = data->timeout_ns / cycle_ns;
++	timeout += data->timeout_clks;
++	bfin_write_SDH_DATA_TIMER(timeout);
+ 	SSYNC();
+ 
+ 	if (data->flags & MMC_DATA_READ) {
 _
 
-Patches currently in -mm which might be from vapier@gentoo.org are
+Patches currently in -mm which might be from cliff.cai@analog.com are
 
 linux-next.patch
-mmc-bfin_sdh-fix-unused-sg-warning-on-bf51x-bf52x-systems.patch
-mmc-bfin_sdh-drop-redundant-mmc-depend-string.patch
 mmc-bfin_sdh-set-timeout-based-on-actual-card-data.patch
-fbdev-bf54x-lq043fb-bfin-t350mcqb-fb-drop-custom-mmap-handler.patch
 
