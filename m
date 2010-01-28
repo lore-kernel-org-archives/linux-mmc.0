@@ -1,112 +1,38 @@
-From: Ben Dooks <ben-linux@fluff.org>
-Subject: [PATCH] sdhci: add adma descriptor set call
-Date: Thu, 28 Jan 2010 05:29:56 +0000
-Message-ID: <1264656597-19965-2-git-send-email-ben-linux@fluff.org>
-References: <1264656597-19965-1-git-send-email-ben-linux@fluff.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1264656597-19965-1-git-send-email-ben-linux@fluff.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-samsung-soc@vger.kernel.org, pierre@ossman.eu, linux-mmc@vger.kernel.org, akpm@linux-foundation.org
-Cc: Ben Dooks <ben-linux@fluff.org>
+From: Peter Korsgaard <jacmet@sunsite.dk>
+Subject: Re: [PATCH-Resend] S3C: sdhci: Enable ADMA feature in S3C sdhci controller.
+Date: Thu, 28 Jan 2010 13:37:40 +0100
+Message-ID: <874om6pfqj.fsf@macbook.be.48ers.dk>
+References: <1264643438-6317-1-git-send-email-thomas.ab@samsung.com>
+	<20100128041334.GQ10014@trinity.fluff.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ew0-f219.google.com ([209.85.219.219]:58496 "EHLO
+	mail-ew0-f219.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752146Ab0A1Mhp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2010 07:37:45 -0500
+Received: by ewy19 with SMTP id 19so687731ewy.21
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Jan 2010 04:37:44 -0800 (PST)
+In-Reply-To: <20100128041334.GQ10014@trinity.fluff.org> (Ben Dooks's message
+	of "Thu, 28 Jan 2010 04:13:34 +0000")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ben Dooks <ben-linux@fluff.org>
+Cc: Thomas Abraham <thomas.ab@samsung.com>, linux-mmc@vger.kernel.org, kgene.kim@samsung.com
 
-The code to write the ADMA descriptor into memory is repeated several
-times throughout sdhci_adma_table_pre, and thus should be moved into a
-common function. This will also be useful if the patch to make the write
-more efficient is accepted.
+>>>>> "Ben" == Ben Dooks <ben-linux@fluff.org> writes:
 
-Signed-off-by: Ben Dooks <ben-linux@fluff.org>
----
- drivers/mmc/host/sdhci.c |   51 +++++++++++++++++++---------------------------
- 1 files changed, 21 insertions(+), 30 deletions(-)
+ Ben> On Thu, Jan 28, 2010 at 10:50:38AM +0900, Thomas Abraham wrote:
+ >> This patch enables ADMA feature in S3C SDHCI controller driver. This patch
+ >> depends on the following patch.
+ >> 
+ >> [PATCH] sdhci: Add new quirk in sdhci driver and update ADMA descriptor build.
+ >> 
+ >> Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
+ Ben> Acked-by: Ben Dooks <ben-linux@fluff.org>
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 8be2613..391eb08 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -376,6 +376,20 @@ static void sdhci_kunmap_atomic(void *buffer, unsigned long *flags)
- 	local_irq_restore(*flags);
- }
- 
-+static void sdhci_set_adma_desc(u8 *desc, u32 addr, int len, unsigned cmd)
-+{
-+	desc[7] = (addr >> 24) & 0xff;
-+	desc[6] = (addr >> 16) & 0xff;
-+	desc[5] = (addr >> 8) & 0xff;
-+	desc[4] = (addr >> 0) & 0xff;
-+
-+	desc[3] = (len >> 8) & 0xff;
-+	desc[2] = (len >> 0) & 0xff;
-+
-+	desc[0] = cmd & 0xff;
-+	desc[1] = cmd >> 8;
-+}
-+
- static int sdhci_adma_table_pre(struct sdhci_host *host,
- 	struct mmc_data *data)
- {
-@@ -443,19 +457,11 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 				sdhci_kunmap_atomic(buffer, &flags);
- 			}
- 
--			desc[7] = (align_addr >> 24) & 0xff;
--			desc[6] = (align_addr >> 16) & 0xff;
--			desc[5] = (align_addr >> 8) & 0xff;
--			desc[4] = (align_addr >> 0) & 0xff;
-+			/* tran, valid */
-+			sdhci_set_adma_desc(desc, align_addr, offset, 0x21);
- 
- 			BUG_ON(offset > 65536);
- 
--			desc[3] = (offset >> 8) & 0xff;
--			desc[2] = (offset >> 0) & 0xff;
--
--			desc[1] = 0x00;
--			desc[0] = 0x21; /* tran, valid */
--
- 			align += 4;
- 			align_addr += 4;
- 
-@@ -465,19 +471,10 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 			len -= offset;
- 		}
- 
--		desc[7] = (addr >> 24) & 0xff;
--		desc[6] = (addr >> 16) & 0xff;
--		desc[5] = (addr >> 8) & 0xff;
--		desc[4] = (addr >> 0) & 0xff;
--
- 		BUG_ON(len > 65536);
- 
--		desc[3] = (len >> 8) & 0xff;
--		desc[2] = (len >> 0) & 0xff;
--
--		desc[1] = 0x00;
--		desc[0] = 0x21; /* tran, valid */
--
-+		/* tran, valid */
-+		sdhci_set_adma_desc(desc, addr, len, 0x21);
- 		desc += 8;
- 
- 		/*
-@@ -499,15 +496,9 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		/*
- 		* Add a terminating entry.
- 		*/
--		desc[7] = 0;
--		desc[6] = 0;
--		desc[5] = 0;
--		desc[4] = 0;
--
--		desc[3] = 0;
--		desc[2] = 0;
--		desc[1] = 0x00;
--		desc[0] = 0x03; /* nop, end, valid */
-+
-+		/* nop, end, valid */
-+		sdhci_set_adma_desc(desc, 0, 0, 0x3);
- 	}
- 
- 	/*
+If this solves the DMA issues, shouldn't we get rid of the
+CONFIG_MMC_SDHCI_S3C_DMA kconfig and just always use DMA?
+
 -- 
-1.6.0.4
+Bye, Peter Korsgaard
