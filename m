@@ -1,61 +1,10 @@
 From: Ben Dooks <ben-linux@fluff.org>
-Subject: Re: [PATCH-Resend] S3C: sdhci: Enable ADMA feature in S3C sdhci
-	controller.
-Date: Thu, 28 Jan 2010 04:13:34 +0000
-Message-ID: <20100128041334.GQ10014@trinity.fluff.org>
-References: <1264643438-6317-1-git-send-email-thomas.ab@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from trinity.fluff.org ([89.16.178.74]:55187 "EHLO trinity.fluff.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752229Ab0A1ENn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 27 Jan 2010 23:13:43 -0500
-Content-Disposition: inline
-In-Reply-To: <1264643438-6317-1-git-send-email-thomas.ab@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: SDHCI ADMA clenaups
+Date: Thu, 28 Jan 2010 05:29:55 +0000
+Message-ID: <1264656597-19965-1-git-send-email-ben-linux@fluff.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-samsung-soc@vger.kernel.org, pierre@ossman.eu, linux-mmc@vger.kernel.org, akpm@linux-foundation.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Abraham <thomas.ab@samsung.com>
-Cc: linux-mmc@vger.kernel.org, ben-linux@fluff.org, kgene.kim@samsung.com
 
-On Thu, Jan 28, 2010 at 10:50:38AM +0900, Thomas Abraham wrote:
-> This patch enables ADMA feature in S3C SDHCI controller driver. This patch
-> depends on the following patch.
-> 
-> [PATCH] sdhci: Add new quirk in sdhci driver and update ADMA descriptor build.
-> 
-> Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
-Acked-by: Ben Dooks <ben-linux@fluff.org>
-> ---
->  drivers/mmc/host/sdhci-s3c.c |    7 +------
->  1 files changed, 1 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 7400ba0..03f7e3b 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -341,12 +341,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  	host->irq = irq;
->  
->  	/* Setup quirks for the controller */
-> -
-> -	/* Currently with ADMA enabled we are getting some length
-> -	 * interrupts that are not being dealt with, do disable
-> -	 * ADMA until this is sorted out. */
-> -	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-> -	host->quirks |= SDHCI_QUIRK_32BIT_ADMA_SIZE;
-> +	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
->  
->  #ifndef CONFIG_MMC_SDHCI_S3C_DMA
->  
-> -- 
-> 1.5.3.4
-> 
-
--- 
--- 
-Ben
-
-Q:      What's a light-year?
-A:      One-third less calories than a regular year.
-
+ADMA code cleanps for SDHCI driver. Makes the code shorter and more efficient.
