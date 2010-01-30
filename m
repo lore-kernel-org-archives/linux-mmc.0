@@ -1,108 +1,53 @@
-From: akpm@linux-foundation.org
-Subject: + sdhci-improve-sdhci-sdhci_set_adma_desc-code.patch added to -mm tree
-Date: Fri, 29 Jan 2010 15:21:48 -0800
-Message-ID: <201001292321.o0TNLmVE016027@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: ben-linux@fluff.org, linux-mmc@vger.kernel.org, pierre@ossman.eu
+From: Philip Langdale <philipl@overt.org>
+Subject: Re: [PATCH v3] port ricoh_mmc to pci quirk
+Date: Fri, 29 Jan 2010 18:18:57 -0800
+Message-ID: <20100129181857.1f23f013@fido2.homeip.net>
+References: <20091125085324.1ef9ae1f@fido2.homeip.net>
+	<20091125113501.1f4d42b9.akpm@linux-foundation.org>
+	<1259192401.15916.48.camel@maxim-laptop>
+	<20091125173019.74d0ddb9@fido2.homeip.net>
+	<1259279520.3991.5.camel@maxim-laptop>
+	<1259279584.3991.6.camel@maxim-laptop>
+	<20091126235551.2db699e3@fido2.homeip.net>
+	<1262964284.12577.27.camel@maxim-laptop>
+	<20100108074001.5df6c997@fido2.homeip.net>
+	<20100112154350.8fa96829.akpm@linux-foundation.org>
+	<20100113064657.GB10955@pengutronix.de>
+	<1264772255.4620.3.camel@maxim-laptop>
+	<20100129080639.3b484a59@fido2.homeip.net>
+	<1264803033.7095.4.camel@maxim-laptop>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from usul.overt.org ([204.11.33.43]:34454 "EHLO usul.overt.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754435Ab0A3CTM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Jan 2010 21:19:12 -0500
+In-Reply-To: <1264803033.7095.4.camel@maxim-laptop>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, Andrew Morton <akpm@linux-foundation.org>, Pierre Ossman <pierre@ossman.eu>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
+On Sat, 30 Jan 2010 00:10:33 +0200
+Maxim Levitsky <maximlevitsky@gmail.com> wrote:
 
-The patch titled
-     sdhci: improve sdhci sdhci_set_adma_desc() code
-has been added to the -mm tree.  Its filename is
-     sdhci-improve-sdhci-sdhci_set_adma_desc-code.patch
+> Well, I have nothing against this, but, even Linus himself stated that
+> he dislikes broken printk lines.
+> 
+> I also noticed that some DECLARE_FIXUP in this file are longer that
+> 80, and since breaking this doesn't add any value, I thought that is
+> ok. Remember that main purpose of 80 char limit is to make code
+> simpler.
+> 
+> However, I don't really care if you insist.
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+I don't want to be obnoxious either - if no one else is concerned about
+the lines, I won't kick up a fuss.
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+And thanks for sticking with this patch - I want to see it in soon too;
+I'd like to sort out the new PCI-e Ricoh parts which are going to need
+a new magic sequence.
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: sdhci: improve sdhci sdhci_set_adma_desc() code
-From: Ben Dooks <ben-linux@fluff.org>
-
-sdhci_set_adma_desc() is using byte-writes to write data in a specified
-order into memory.  Change to using __le16 for the two byte and __le32 for
-the four byte cases and use the cpu_to_{le16,le32} to do the conversion
-before writing.
-
-This will reduce the size of the code and the number of writes as we no
-longer need to chop the data up before writing.
-
-As an example on ARM S3C64XX SoC, in little-endian configuration:
-
- 000000d4 <sdhci_set_adma_desc>:
--      d8:	e1a0c423 	lsr	ip, r3, #8
--      dc:	e1a0ec21 	lsr	lr, r1, #24
--      e0:	e1a04821 	lsr	r4, r1, #16
--      e4:	e1a05421 	lsr	r5, r1, #8
--      e8:	e1a06442 	asr	r6, r2, #8
--      ec:	e5c0c001 	strb	ip, [r0, #1]
--      f0:	e5c0e007 	strb	lr, [r0, #7]
--      f4:	e5c04006 	strb	r4, [r0, #6]
--      f8:	e5c05005 	strb	r5, [r0, #5]
--      fc:	e5c01004 	strb	r1, [r0, #4]
--     100:	e5c06003 	strb	r6, [r0, #3]
--     104:	e5c02002 	strb	r2, [r0, #2]
--     108:	e5c03000 	strb	r3, [r0]
-+      d4:	e5801004 	str	r1, [r0, #4]
-+      d8:	e1c030b0 	strh	r3, [r0]
-+      dc:	e1c020b2 	strh	r2, [r0, #2]
-
-Signed-off-by: Ben Dooks <ben-linux@fluff.org>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/sdhci.c |   16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
-
-diff -puN drivers/mmc/host/sdhci.c~sdhci-improve-sdhci-sdhci_set_adma_desc-code drivers/mmc/host/sdhci.c
---- a/drivers/mmc/host/sdhci.c~sdhci-improve-sdhci-sdhci_set_adma_desc-code
-+++ a/drivers/mmc/host/sdhci.c
-@@ -378,16 +378,16 @@ static void sdhci_kunmap_atomic(void *bu
- 
- static void sdhci_set_adma_desc(u8 *desc, u32 addr, int len, unsigned cmd)
- {
--	desc[7] = (addr >> 24) & 0xff;
--	desc[6] = (addr >> 16) & 0xff;
--	desc[5] = (addr >> 8) & 0xff;
--	desc[4] = (addr >> 0) & 0xff;
-+	__le32 *dataddr = (__le32 __force *)(desc + 4);
-+	__le16 *cmdlen = (__le16 __force *)desc;
- 
--	desc[3] = (len >> 8) & 0xff;
--	desc[2] = (len >> 0) & 0xff;
-+	/* SDHCI specification says ADMA descriptors should be 4 byte
-+	 * aligned, so using 16 or 32bit operations should be safe. */
- 
--	desc[0] = cmd & 0xff;
--	desc[1] = cmd >> 8;
-+	cmdlen[0] = cpu_to_le16(cmd);
-+	cmdlen[1] = cpu_to_le16(len);
-+
-+	dataddr[0] = cpu_to_le32(addr);
- }
- 
- static int sdhci_adma_table_pre(struct sdhci_host *host,
-_
-
-Patches currently in -mm which might be from ben-linux@fluff.org are
-
-origin.patch
-linux-next.patch
-sdhci-add-adma-descriptor-set-call.patch
-sdhci-improve-sdhci-sdhci_set_adma_desc-code.patch
-
+--phil
