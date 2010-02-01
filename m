@@ -1,62 +1,41 @@
-From: Johan Kristell <johan.kristell@axis.com>
-Subject: [PATCH-Resend] mmc_test: block addressed cards
-Date: Mon, 1 Feb 2010 13:04:55 +0100
-Message-ID: <4B66C367.7090003@axis.com>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: Re: [PATCH] Port ricoh_mmc to pci quirk
+Date: Mon, 01 Feb 2010 17:45:47 +0200
+Message-ID: <1265039147.3785.9.camel@maxim-laptop>
+References: <1264772255.4620.3.camel@maxim-laptop>
+	 <1264886914-30179-1-git-send-email-maximlevitsky@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from miranda.se.axis.com ([193.13.178.8]:53106 "EHLO
-	miranda.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750970Ab0BAMFI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Feb 2010 07:05:08 -0500
+Received: from fg-out-1718.google.com ([72.14.220.156]:61144 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752371Ab0BAPpx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Feb 2010 10:45:53 -0500
+In-Reply-To: <1264886914-30179-1-git-send-email-maximlevitsky@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Philip Langdale <philipl@overt.org>, Pierre Ossman <pierre@ossman.eu>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-The tests in mmc_test assumes that all cards are byte addressable.
-This patch updates the tests to also work with cards that use block
-addresses.
+On Sat, 2010-01-30 at 23:28 +0200, Maxim Levitsky wrote: 
+> This patch solves nasty problem original driver had.
+> Original goal of the ricoh_mmc, was to disable this device because
+> then, mmc cards can be read using standard SDHCI controller,
+> thus avoiding the need in yet another driver.
+> However, the act of disablement, makes other pci functions that belong to
+> this controller (xD and memstick) shift up one level, thus pci core has now wrong idea
+> about these devices.
+> 
+> To fix this issue, this patch moves the driver into pci quirk section, thus it
+> is executed before the pci is enumerated, and therefore solve that issue,
+> also the same is preformed on resume for same reasons.
+> 
+> Also regardless of the above, this way is cleaner.
+You probably didn't notice that patch, because I used git-send-email,
+and forgot to set subject properly.
+This meant to be next version of this patch.
 
-	Signed-off-by: Johan Kristell <johan.kristell@axis.com>
----
+Best regards,
+Maxim Levitsky
 
---- linux-2.6/drivers/mmc/card/mmc_test.c	2010-01-11 10:57:02.000000000 +0100
-+++ linux-2.6-devel/drivers/mmc/card/mmc_test.c	2010-01-11 09:52:42.000000000 +0100
-@@ -74,6 +74,9 @@ static void mmc_test_prepare_mrq(struct 
- 	}
- 
- 	mrq->cmd->arg = dev_addr;
-+	if (!mmc_card_blockaddr(test->card))
-+		mrq->cmd->arg <<= 9;
-+
- 	mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
- 
- 	if (blocks == 1)
-@@ -190,7 +193,7 @@ static int __mmc_test_prepare(struct mmc
- 	}
- 
- 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
--		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
-+		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
- 		if (ret)
- 			return ret;
- 	}
-@@ -219,7 +222,7 @@ static int mmc_test_cleanup(struct mmc_t
- 	memset(test->buffer, 0, 512);
- 
- 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
--		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
-+		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
- 		if (ret)
- 			return ret;
- 	}
-@@ -426,7 +429,7 @@ static int mmc_test_transfer(struct mmc_
- 		for (i = 0;i < sectors;i++) {
- 			ret = mmc_test_buffer_transfer(test,
- 				test->buffer + i * 512,
--				dev_addr + i * 512, 512, 0);
-+				dev_addr + i, 512, 0);
- 			if (ret)
- 				return ret;
- 		}
