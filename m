@@ -1,104 +1,210 @@
-From: Vasily Khoruzhick <anarsoul@gmail.com>
-Subject: [PATCH v2] Enable DMA for Ricoh reader on Lenovo laptops
-Date: Tue, 2 Feb 2010 18:17:15 +0200
-Message-ID: <201002021817.35773.anarsoul@gmail.com>
-References: <201002011111.13010.anarsoul@gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH V2 0/10] omap_hsmmc changes V2
+Date: Tue, 2 Feb 2010 18:17:30 -0800
+Message-ID: <20100203021730.GU22747@atomide.com>
+References: <1264149200.1920.11.camel@Nokia-N900-51-1>
+ <20100122171427.GQ23467@atomide.com>
+ <20100202031241.GP22747@atomide.com>
+ <4B67EED7.8040801@nokia.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed;
-  boundary="nextPart3537305.1mcWgbFrQn";
-  protocol="application/pgp-signature";
-  micalg=pgp-sha1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f215.google.com ([209.85.220.215]:34944 "EHLO
-	mail-fx0-f215.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750966Ab0BBQSj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2010 11:18:39 -0500
-Received: by fxm7 with SMTP id 7so253886fxm.28
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Feb 2010 08:18:37 -0800 (PST)
-In-Reply-To: <201002011111.13010.anarsoul@gmail.com>
+Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:54232 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756308Ab0BCCRI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2010 21:17:08 -0500
+Content-Disposition: inline
+In-Reply-To: <4B67EED7.8040801@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "madhu.cr@ti.com" <madhu.cr@ti.com>, "paul@pwsan.com" <paul@pwsan.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
---nextPart3537305.1mcWgbFrQn
-Content-Type: multipart/mixed;
-  boundary="Boundary-01=_LAFaLuKr/39Frdh"
-Content-Transfer-Encoding: 7bit
+* Adrian Hunter <adrian.hunter@nokia.com> [100202 01:21]:
+> From 10920ef5efbfced940eea0932e314b5a63ac706c Mon Sep 17 00:00:00 2001
+> From: Adrian Hunter <adrian.hunter@nokia.com>
+> Date: Tue, 2 Feb 2010 10:53:38 +0200
+> Subject: [PATCH] omap_hsmmc: allow compile without regulator framework
+> 
+> It is still possible to use the omap_hsmmc module
+> without the regulator framework.  Accordingly, ifdef
+> out regulator-specific functions.
 
+Thanks that fixes the 2430 compile issue. Adding this into omap for-next.
 
---Boundary-01=_LAFaLuKr/39Frdh
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: base64
-Content-Disposition: inline
+Regards,
 
-0JIg0YHQvtC+0LHRidC10L3QuNC4INC+0YIgMSDRhNC10LLRgNCw0LvRjyAyMDEwIDExOjEwOjUz
-INCw0LLRgtC+0YAgVmFzaWx5IEtob3J1emhpY2sg0L3QsNC/0LjRgdCw0Ls6Cj4gUmljb2ggU0Qv
-TU1DIGNhcmQgcmVhZGVyIG9uIExlbm92byBsYXB0b3BzICgzMDAwIG4xMDAsIDMwMDAgbjIwMCkg
-ZG9lc24ndAo+IGFubm91bmNlIERNQSBjYXBhYmlsaXR5LCBob3dldmVyIGl0IHN1cHBvcnRzIERN
-QS4gV2l0aG91dCB0aGlzIHBhdGNoIGF1ZGlvCj4gY2xpY2tzIGFuZCBjdXJzb3IgaXMgamVya3kg
-ZHVyaW5nIGNhcmQgYWNjZXNzLgoKSXQgc2VlbXMgdGhhdCBSaWNvaCBSNUM4MjIgY2FyZCByZWFk
-ZXIgb24gbWVudGlvbmVkIGxhcHRvcHMgbmVlZCBvbmUgbW9yZSAKcXVpcmsuIEhlcmUncyB1cGRh
-dGVkIHBhdGNoLgo=
-
---Boundary-01=_LAFaLuKr/39Frdh
-Content-Type: text/x-patch;
-  charset="iso-8859-15";
-  name="0001-Enable-DMA-for-Ricoh-reader-on-Lenovo-laptops.patch"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: inline;
-	filename="0001-Enable-DMA-for-Ricoh-reader-on-Lenovo-laptops.patch"
-
-=46rom 3b93e891e0e37afefc1f1eca461dcfc3ded879f9 Mon Sep 17 00:00:00 2001
-=46rom: Vasily Khoruzhick <anarsoul@gmail.com>
-Date: Tue, 2 Feb 2010 18:12:54 +0200
-Subject: [PATCH v2] Enable DMA for Ricoh reader on Lenovo laptops
-
-Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
-=2D--
- drivers/mmc/host/sdhci-pci.c |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 5c3a176..d49e5ff 100644
-=2D-- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -80,13 +80,17 @@ struct sdhci_pci_chip {
-=20
- static int ricoh_probe(struct sdhci_pci_chip *chip)
- {
-=2D	if (chip->pdev->subsystem_vendor =3D=3D PCI_VENDOR_ID_IBM)
-+	if (chip->pdev->subsystem_vendor =3D=3D PCI_VENDOR_ID_IBM ||
-+	    chip->pdev->subsystem_vendor =3D=3D PCI_VENDOR_ID_LENOVO)
- 		chip->quirks |=3D SDHCI_QUIRK_CLOCK_BEFORE_RESET;
-=20
- 	if (chip->pdev->subsystem_vendor =3D=3D PCI_VENDOR_ID_SAMSUNG ||
- 	    chip->pdev->subsystem_vendor =3D=3D PCI_VENDOR_ID_SONY)
- 		chip->quirks |=3D SDHCI_QUIRK_NO_CARD_NO_RESET;
-=20
-+	if (chip->pdev->subsystem_vendor =3D=3D PCI_VENDOR_ID_LENOVO)
-+		chip->quirks |=3D SDHCI_QUIRK_FORCE_DMA;
-+
- 	return 0;
- }
-=20
-=2D-=20
-1.6.6.1
-
-
---Boundary-01=_LAFaLuKr/39Frdh--
-
---nextPart3537305.1mcWgbFrQn
-Content-Type: application/pgp-signature; name=signature.asc 
-Content-Description: This is a digitally signed message part.
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.14 (GNU/Linux)
-
-iEYEABECAAYFAktoUB8ACgkQRM6pQpltKE5ZKwCfUUxCybDD8p66WbQ8mMGwoVF2
-6G0AnicQg5//dG9Z6CfmDIQwBFqvRPGe
-=iTJ2
------END PGP SIGNATURE-----
-
---nextPart3537305.1mcWgbFrQn--
+Tony
+ 
+> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+> ---
+> drivers/mmc/host/omap_hsmmc.c |  133 ++++++++++++++++++++++++-----------------
+> 1 files changed, 79 insertions(+), 54 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index af37477..83f0aff 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -236,6 +236,8 @@ static int omap_hsmmc_resume_cdirq(struct device *dev, int slot)
+> 
+> #endif
+> 
+> +#ifdef CONFIG_REGULATOR
+> +
+> static int omap_hsmmc_1_set_power(struct device *dev, int slot, int power_on,
+> 				  int vdd)
+> {
+> @@ -357,59 +359,6 @@ static int omap_hsmmc_23_set_sleep(struct device *dev, int slot, int sleep,
+> 		return regulator_enable(host->vcc_aux);
+> }
+> 
+> -static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+> -{
+> -	int ret;
+> -
+> -	if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+> -		pdata->suspend = omap_hsmmc_suspend_cdirq;
+> -		pdata->resume = omap_hsmmc_resume_cdirq;
+> -		if (pdata->slots[0].cover)
+> -			pdata->slots[0].get_cover_state =
+> -					omap_hsmmc_get_cover_state;
+> -		else
+> -			pdata->slots[0].card_detect = omap_hsmmc_card_detect;
+> -		pdata->slots[0].card_detect_irq =
+> -				gpio_to_irq(pdata->slots[0].switch_pin);
+> -		ret = gpio_request(pdata->slots[0].switch_pin, "mmc_cd");
+> -		if (ret)
+> -			return ret;
+> -		ret = gpio_direction_input(pdata->slots[0].switch_pin);
+> -		if (ret)
+> -			goto err_free_sp;
+> -	} else
+> -		pdata->slots[0].switch_pin = -EINVAL;
+> -
+> -	if (gpio_is_valid(pdata->slots[0].gpio_wp)) {
+> -		pdata->slots[0].get_ro = omap_hsmmc_get_wp;
+> -		ret = gpio_request(pdata->slots[0].gpio_wp, "mmc_wp");
+> -		if (ret)
+> -			goto err_free_cd;
+> -		ret = gpio_direction_input(pdata->slots[0].gpio_wp);
+> -		if (ret)
+> -			goto err_free_wp;
+> -	} else
+> -		pdata->slots[0].gpio_wp = -EINVAL;
+> -
+> -	return 0;
+> -
+> -err_free_wp:
+> -	gpio_free(pdata->slots[0].gpio_wp);
+> -err_free_cd:
+> -	if (gpio_is_valid(pdata->slots[0].switch_pin))
+> -err_free_sp:
+> -		gpio_free(pdata->slots[0].switch_pin);
+> -	return ret;
+> -}
+> -
+> -static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
+> -{
+> -	if (gpio_is_valid(pdata->slots[0].gpio_wp))
+> -		gpio_free(pdata->slots[0].gpio_wp);
+> -	if (gpio_is_valid(pdata->slots[0].switch_pin))
+> -		gpio_free(pdata->slots[0].switch_pin);
+> -}
+> -
+> static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+> {
+> 	struct regulator *reg;
+> @@ -488,6 +437,82 @@ static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
+> 	mmc_slot(host).set_sleep = NULL;
+> }
+> 
+> +static inline int omap_hsmmc_have_reg(void)
+> +{
+> +	return 1;
+> +}
+> +
+> +#else
+> +
+> +static inline int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+> +{
+> +	return -EINVAL;
+> +}
+> +
+> +static inline void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
+> +{
+> +}
+> +
+> +static inline int omap_hsmmc_have_reg(void)
+> +{
+> +	return 0;
+> +}
+> +
+> +#endif
+> +
+> +static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+> +{
+> +	int ret;
+> +
+> +	if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+> +		pdata->suspend = omap_hsmmc_suspend_cdirq;
+> +		pdata->resume = omap_hsmmc_resume_cdirq;
+> +		if (pdata->slots[0].cover)
+> +			pdata->slots[0].get_cover_state =
+> +					omap_hsmmc_get_cover_state;
+> +		else
+> +			pdata->slots[0].card_detect = omap_hsmmc_card_detect;
+> +		pdata->slots[0].card_detect_irq =
+> +				gpio_to_irq(pdata->slots[0].switch_pin);
+> +		ret = gpio_request(pdata->slots[0].switch_pin, "mmc_cd");
+> +		if (ret)
+> +			return ret;
+> +		ret = gpio_direction_input(pdata->slots[0].switch_pin);
+> +		if (ret)
+> +			goto err_free_sp;
+> +	} else
+> +		pdata->slots[0].switch_pin = -EINVAL;
+> +
+> +	if (gpio_is_valid(pdata->slots[0].gpio_wp)) {
+> +		pdata->slots[0].get_ro = omap_hsmmc_get_wp;
+> +		ret = gpio_request(pdata->slots[0].gpio_wp, "mmc_wp");
+> +		if (ret)
+> +			goto err_free_cd;
+> +		ret = gpio_direction_input(pdata->slots[0].gpio_wp);
+> +		if (ret)
+> +			goto err_free_wp;
+> +	} else
+> +		pdata->slots[0].gpio_wp = -EINVAL;
+> +
+> +	return 0;
+> +
+> +err_free_wp:
+> +	gpio_free(pdata->slots[0].gpio_wp);
+> +err_free_cd:
+> +	if (gpio_is_valid(pdata->slots[0].switch_pin))
+> +err_free_sp:
+> +		gpio_free(pdata->slots[0].switch_pin);
+> +	return ret;
+> +}
+> +
+> +static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
+> +{
+> +	if (gpio_is_valid(pdata->slots[0].gpio_wp))
+> +		gpio_free(pdata->slots[0].gpio_wp);
+> +	if (gpio_is_valid(pdata->slots[0].switch_pin))
+> +		gpio_free(pdata->slots[0].switch_pin);
+> +}
+> +
+> /*
+>  * Stop clock to the card
+>  */
+> @@ -2119,7 +2144,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+> 		}
+> 	}
+> 
+> -	if (!mmc_slot(host).set_power) {
+> +	if (omap_hsmmc_have_reg() && !mmc_slot(host).set_power) {
+> 		ret = omap_hsmmc_reg_get(host);
+> 		if (ret)
+> 			goto err_reg;
+> -- 
+> 1.6.0.4
