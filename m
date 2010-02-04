@@ -1,81 +1,71 @@
 From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Hand on resume if sd/mmc card was removed while system was
- suspended/hibernated
-Date: Wed, 03 Feb 2010 19:47:21 +0200
-Message-ID: <1265219241.12549.8.camel@maxim-laptop>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH] MMC: fix hang if card was removed during suspend and unsafe resume was enabled
+Date: Fri,  5 Feb 2010 01:18:15 +0200
+Message-ID: <1265325495-4220-1-git-send-email-maximlevitsky@gmail.com>
+References: <1265219241.12549.8.camel@maxim-laptop>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f215.google.com ([209.85.220.215]:49617 "EHLO
-	mail-fx0-f215.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932740Ab0BCRr0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Feb 2010 12:47:26 -0500
+Received: from mail-fx0-f220.google.com ([209.85.220.220]:46606 "EHLO
+	mail-fx0-f220.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758475Ab0BDXSe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2010 18:18:34 -0500
+In-Reply-To: <1265219241.12549.8.camel@maxim-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: linux-pm <linux-pm@lists.linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: Philip Langdale <philipl@overt.org>, Andrew Morton <akpm@linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Maxim Levitsky <maximlevitsky@gmail.com>
 
-Hi,
+Currently removal of the card leads to del_disk called indirectly by mmc core.
+This function expects userspace to be running, which isn't when .resume is called
 
-This is what I get, if I remove mmc card while system is suspended:
+Fix that by removing the code that did that in mmc_resume_host. It is possible
+because card detection logic will kick it later and remove the card.
 
-<4>[15241.041945] Call Trace:
-<4>[15241.042047]  [<ffffffff8106620a>] ? prepare_to_wait+0x2a/0x90
-<4>[15241.042159]  [<ffffffff810790bd>] ? trace_hardirqs_on+0xd/0x10
-<4>[15241.042271]  [<ffffffff8140db12>] ? _raw_spin_unlock_irqrestore+0x42/0x80
-<4>[15241.042386]  [<ffffffff8112a390>] ? bdi_sched_wait+0x0/0x20
-<4>[15241.042496]  [<ffffffff8112a39e>] bdi_sched_wait+0xe/0x20
-<4>[15241.042606]  [<ffffffff8140af6f>] __wait_on_bit+0x5f/0x90
-<4>[15241.042714]  [<ffffffff8112a390>] ? bdi_sched_wait+0x0/0x20
-<4>[15241.042824]  [<ffffffff8140b018>] out_of_line_wait_on_bit+0x78/0x90
-<4>[15241.042935]  [<ffffffff81065fd0>] ? wake_bit_function+0x0/0x40
-<4>[15241.043045]  [<ffffffff8112a2d3>] ? bdi_queue_work+0xa3/0xe0
-<4>[15241.043155]  [<ffffffff8112a37f>] bdi_sync_writeback+0x6f/0x80
-<4>[15241.043265]  [<ffffffff8112a3d2>] sync_inodes_sb+0x22/0x120
-<4>[15241.043375]  [<ffffffff8112f1d2>] __sync_filesystem+0x82/0x90
-<4>[15241.043485]  [<ffffffff8112f3db>] sync_filesystem+0x4b/0x70
-<4>[15241.043594]  [<ffffffff811391de>] fsync_bdev+0x2e/0x60
-<4>[15241.043704]  [<ffffffff812226be>] invalidate_partition+0x2e/0x50
-<4>[15241.043816]  [<ffffffff8116b92f>] del_gendisk+0x3f/0x140
-<4>[15241.043926]  [<ffffffffa00c0233>] mmc_blk_remove+0x33/0x60 [mmc_block]
-<4>[15241.044043]  [<ffffffff81338977>] mmc_bus_remove+0x17/0x20
-<4>[15241.044152]  [<ffffffff812ce746>] __device_release_driver+0x66/0xc0
-<4>[15241.044264]  [<ffffffff812ce89d>] device_release_driver+0x2d/0x40
-<4>[15241.044375]  [<ffffffff812cd9b5>] bus_remove_device+0xb5/0x120
-<4>[15241.044486]  [<ffffffff812cb46f>] device_del+0x12f/0x1a0
-<4>[15241.044593]  [<ffffffff81338a5b>] mmc_remove_card+0x5b/0x90
-<4>[15241.044702]  [<ffffffff8133ac27>] mmc_sd_remove+0x27/0x50
-<4>[15241.044811]  [<ffffffff81337d8c>] mmc_resume_host+0x10c/0x140
-<4>[15241.044929]  [<ffffffffa00850e9>] sdhci_resume_host+0x69/0xa0 [sdhci]
-<4>[15241.045044]  [<ffffffffa0bdc39e>] sdhci_pci_resume+0x8e/0xb0 [sdhci_pci]
-<4>[15241.045159]  [<ffffffff8124b0a2>] pci_legacy_resume+0x42/0x60
-<4>[15241.045268]  [<ffffffff8124b148>] pci_pm_restore+0x88/0xb0
-<4>[15241.045378]  [<ffffffff812d3942>] pm_op+0x1a2/0x1c0
-<4>[15241.045483]  [<ffffffff812d44cd>] dpm_resume_end+0x14d/0x520
-<4>[15241.045593]  [<ffffffff8108c0f1>] hibernation_snapshot+0xd1/0x290
-<4>[15241.045704]  [<ffffffff8108c3ad>] hibernate+0xfd/0x200
-<4>[15241.045811]  [<ffffffff8108ac5c>] state_store+0xec/0x100
-<4>[15241.045919]  [<ffffffff81172e17>] ? sysfs_get_active_two+0x27/0x60
-<4>[15241.046032]  [<ffffffff8122db07>] kobj_attr_store+0x17/0x20
-<4>[15241.046141]  [<ffffffff811710a6>] sysfs_write_file+0xe6/0x170
-<4>[15241.046253]  [<ffffffff811087f8>] vfs_write+0xb8/0x1a0
-<4>[15241.046361]  [<ffffffff811089d1>] sys_write+0x51/0x90
-<4>[15241.046470]  [<ffffffff8100305b>] system_call_fastpath+0x16/0x1b
-<4>[15241.046579] INFO: lockdep is turned off.
+Also make mtd workqueue freezeable, so it won't attempt to add/remove the card
+while userspace is frozen.
 
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+---
+ drivers/mmc/core/core.c |    9 ++-------
+ 1 files changed, 2 insertions(+), 7 deletions(-)
 
-It seems that del_disk can't be called from .resume methods.
-It sleeps for threads that are frozen at that point.
-
-Since I wrote my own driver (for xD cards) I have seen same problem.
-
-I solved this (it is just very nice that way anyway) by a freezable 
-kernel thread that polls for card state changes, 
-and thus calls del_disk (indirectly) after system got fully resumed.
-
-What do you think?
-
-Best regards,
-	Maxim Levitsky
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 30acd52..879d48d 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1257,7 +1257,6 @@ int mmc_suspend_host(struct mmc_host *host, pm_message_t state)
+ 	if (host->caps & MMC_CAP_DISABLE)
+ 		cancel_delayed_work(&host->disable);
+ 	cancel_delayed_work(&host->detect);
+-	mmc_flush_scheduled_work();
+ 
+ 	mmc_bus_get(host);
+ 	if (host->bus_ops && !host->bus_dead) {
+@@ -1300,15 +1299,11 @@ int mmc_resume_host(struct mmc_host *host)
+ 		mmc_select_voltage(host, host->ocr);
+ 		BUG_ON(!host->bus_ops->resume);
+ 		err = host->bus_ops->resume(host);
++
+ 		if (err) {
+ 			printk(KERN_WARNING "%s: error %d during resume "
+ 					    "(card was removed?)\n",
+ 					    mmc_hostname(host), err);
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_release_host(host);
+ 			/* no need to bother upper layers */
+ 			err = 0;
+ 		}
+@@ -1332,7 +1327,7 @@ static int __init mmc_init(void)
+ {
+ 	int ret;
+ 
+-	workqueue = create_singlethread_workqueue("kmmcd");
++	workqueue = create_freezeable_workqueue("kmmcd");
+ 	if (!workqueue)
+ 		return -ENOMEM;
+ 
+-- 
+1.6.3.3
 
