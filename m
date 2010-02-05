@@ -1,67 +1,96 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: [PATCH] MMC: fix hang if card was removed during
- suspend and unsafe resume was enabled
-Date: Fri, 05 Feb 2010 10:31:42 +0200
-Message-ID: <1265358702.3424.8.camel@maxim-laptop>
-References: <1265219241.12549.8.camel@maxim-laptop>
-	<1265325495-4220-1-git-send-email-maximlevitsky@gmail.com>
-	<20100204160957.1c51cc1b.akpm@linux-foundation.org>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] MMC: fix hang if card was removed during suspend and
+ unsafe resume was enabled
+Date: Fri, 05 Feb 2010 12:17:14 +0200
+Message-ID: <4B6BF02A.2080501@nokia.com>
+References: <1265219241.12549.8.camel@maxim-laptop>	<1265325495-4220-1-git-send-email-maximlevitsky@gmail.com> <20100204160957.1c51cc1b.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-pm-bounces@lists.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.nokia.com ([192.100.122.230]:57498 "EHLO
+	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751005Ab0BEKRk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Feb 2010 05:17:40 -0500
 In-Reply-To: <20100204160957.1c51cc1b.akpm@linux-foundation.org>
-List-Unsubscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
-	<mailto:linux-pm-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linux-foundation.org/pipermail/linux-pm>
-List-Post: <mailto:linux-pm@lists.linux-foundation.org>
-List-Help: <mailto:linux-pm-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
-	<mailto:linux-pm-request@lists.linux-foundation.org?subject=subscribe>
-Sender: linux-pm-bounces@lists.linux-foundation.org
-Errors-To: linux-pm-bounces@lists.linux-foundation.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Jorg Schummer <ext-jorg.2.schummer@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, linux-pm <linux-pm@lists.linux-foundation.org>, Philip Langdale <philipl@overt.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Philip Langdale <philipl@overt.org>, linux-kernel <linux-kernel@vger.kernel.org>, "Schummer Jorg.2 (EXT-Tieto/Espoo)" <ext-jorg.2.schummer@nokia.com>, nico@fluxnic.net, nico@marvell.com
 
-On Thu, 2010-02-04 at 16:09 -0800, Andrew Morton wrote: 
+ext Andrew Morton wrote:
 > On Fri,  5 Feb 2010 01:18:15 +0200 Maxim Levitsky <maximlevitsky@gmail.com> wrote:
 > 
-> > Currently removal of the card leads to del_disk called indirectly by mmc core.
-> > This function expects userspace to be running, which isn't when .resume is called
-> > 
-> > Fix that by removing the code that did that in mmc_resume_host. It is possible
-> > because card detection logic will kick it later and remove the card.
+>> Currently removal of the card leads to del_disk called indirectly by mmc core.
+>> This function expects userspace to be running, which isn't when .resume is called
+>>
+>> Fix that by removing the code that did that in mmc_resume_host. It is possible
+>> because card detection logic will kick it later and remove the card.
 > 
 > I don't really understand.  The above implies that to trigger this bug,
 > one needs to physically remove the card during a resume operation.  ie:
 > a human-vs-computer race.  Sounds unlikely?
 > 
 > So...  exactly what steps does the user need to take to trigger this
+> bug?
+> 
+>> Also make mtd workqueue freezeable, so it won't attempt to add/remove the card
+>> while userspace is frozen.
+>>
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 30acd52..879d48d 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1257,7 +1257,6 @@ int mmc_suspend_host(struct mmc_host *host, pm_message_t state)
+>>  	if (host->caps & MMC_CAP_DISABLE)
+>>  		cancel_delayed_work(&host->disable);
+>>  	cancel_delayed_work(&host->detect);
+>> -	mmc_flush_scheduled_work();
+>>  
+>>  	mmc_bus_get(host);
+>>  	if (host->bus_ops && !host->bus_dead) {
+>> @@ -1300,15 +1299,11 @@ int mmc_resume_host(struct mmc_host *host)
+>>  		mmc_select_voltage(host, host->ocr);
+>>  		BUG_ON(!host->bus_ops->resume);
+>>  		err = host->bus_ops->resume(host);
+>> +
+>>  		if (err) {
+>>  			printk(KERN_WARNING "%s: error %d during resume "
+>>  					    "(card was removed?)\n",
+>>  					    mmc_hostname(host), err);
+>> -			if (host->bus_ops->remove)
+>> -				host->bus_ops->remove(host);
+>> -			mmc_claim_host(host);
+>> -			mmc_detach_bus(host);
+>> -			mmc_release_host(host);
+> 
+> afacit that code's been there since March 2009.  I'd have thought that
+> someone would have noticed "kernel hangs on resume" before now.
+> 
+> Do you think the patch should be backported into 2.6.32.x and eariler?
 
-Sorry for describing this poorly.
-The steps are:
+It looks like the code was introduced in 2.6.32.x by commit
 
--> Have a kernel with CONFIG_MMC_UNSAFE_RESUME
--> Insert MMC/SD card
--> Suspend/hibernate the system
--> While system is hibernated/suspended pull the card off
--> Resume the system
--> Hang
+95cdfb72b9bc568803f395c266152c71b034b461
 
+cc'ing the author Nicolas Pitre
 
-if CONFIG_MMC_UNSAFE_RESUME is set, mmc core allows the user to
-suspend/resume the card normally assuming he won't change the card or
-modify it in another system. The former case is actually handled quite
-well.
+> 
+>>  			/* no need to bother upper layers */
+>>  			err = 0;
+>>  		}
+>> @@ -1332,7 +1327,7 @@ static int __init mmc_init(void)
+>>  {
+>>  	int ret;
+>>  
+>> -	workqueue = create_singlethread_workqueue("kmmcd");
+>> +	workqueue = create_freezeable_workqueue("kmmcd");
+>>  	if (!workqueue)
+>>  		return -ENOMEM;
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-if CONFIG_MMC_UNSAFE_RESUME isn't set, it removes the card during
-suspend, and I now think (and will test) that this will still hang the
-system this time on suspend.
-
-Maybe we can make del_disk behave well if called with userspace frozen?
-After all if user calls it, very likely that hardware is absent thus
-there is no point in syncing (which I think triggers the hang)....
-
-Best regards,
-Maxim Levitsky
