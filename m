@@ -1,77 +1,103 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: [PATCH] MMC: fix hang if card was removed during suspend and
- unsafe resume was enabled
-Date: Fri, 05 Feb 2010 21:58:59 +0200
-Message-ID: <1265399939.23033.2.camel@maxim-laptop>
-References: <1265219241.12549.8.camel@maxim-laptop>
-	 <1265325495-4220-1-git-send-email-maximlevitsky@gmail.com>
-	 <20100204160957.1c51cc1b.akpm@linux-foundation.org>
-	 <1265358702.3424.8.camel@maxim-laptop>
-	 <20100205061335.b664aa20.akpm@linux-foundation.org>
-	 <1265379560.14522.2.camel@maxim-laptop>
-	 <20100205063911.05eca1c6.akpm@linux-foundation.org>
-	 <1265385120.16817.6.camel@maxim-laptop>
-	 <20100205102630.361f0c88.akpm@linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: [PATCH 3/5] SDIO: Don't use CMD[357] as part of a powered SDIO resume
+Date: Tue, 09 Feb 2010 15:29:24 -0500
+Message-ID: <1265747366-6676-4-git-send-email-nico@fluxnic.net>
+References: <1265747366-6676-1-git-send-email-nico@fluxnic.net>
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fg-out-1718.google.com ([72.14.220.153]:50165 "EHLO
-	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933844Ab0BET7E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Feb 2010 14:59:04 -0500
-In-Reply-To: <20100205102630.361f0c88.akpm@linux-foundation.org>
+Received: from relais.videotron.ca ([24.201.245.36]:12186 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751378Ab0BIU3w (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Feb 2010 15:29:52 -0500
+Received: from localhost.localdomain ([66.130.28.92])
+ by VL-MH-MR002.ip.videotron.ca
+ (Sun Java(tm) System Messaging Server 6.3-4.01 (built Aug  3 2007; 32bit))
+ with ESMTP id <0KXL00I4TCXNVXE0@VL-MH-MR002.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Tue, 09 Feb 2010 15:29:49 -0500 (EST)
+In-reply-to: <1265747366-6676-1-git-send-email-nico@fluxnic.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, Philip Langdale <philipl@overt.org>, linux-kernel <linux-kernel@vger.kernel.org>, Jorg Schummer <ext-jorg.2.schummer@nokia.com>, linux-pm <linux-pm@lists.linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org
 
-On Fri, 2010-02-05 at 10:26 -0800, Andrew Morton wrote: 
-> On Fri, 05 Feb 2010 17:52:00 +0200
-> Maxim Levitsky <maximlevitsky@gmail.com> wrote:
-> 
-> > > > <4>[15241.042047]  [<ffffffff8106620a>] ? prepare_to_wait+0x2a/0x90
-> > > > <4>[15241.042159]  [<ffffffff810790bd>] ? trace_hardirqs_on+0xd/0x10
-> > > > <4>[15241.042271]  [<ffffffff8140db12>] ? _raw_spin_unlock_irqrestore+0x42/0x80
-> > > > <4>[15241.042386]  [<ffffffff8112a390>] ? bdi_sched_wait+0x0/0x20
-> > > > <4>[15241.042496]  [<ffffffff8112a39e>] bdi_sched_wait+0xe/0x20
-> > > > <4>[15241.042606]  [<ffffffff8140af6f>] __wait_on_bit+0x5f/0x90
-> > > > <4>[15241.042714]  [<ffffffff8112a390>] ? bdi_sched_wait+0x0/0x20
-> > > > <4>[15241.042824]  [<ffffffff8140b018>] out_of_line_wait_on_bit+0x78/0x90
-> > > > <4>[15241.042935]  [<ffffffff81065fd0>] ? wake_bit_function+0x0/0x40
-> > > > <4>[15241.043045]  [<ffffffff8112a2d3>] ? bdi_queue_work+0xa3/0xe0
-> > > > <4>[15241.043155]  [<ffffffff8112a37f>] bdi_sync_writeback+0x6f/0x80
-> > > > <4>[15241.043265]  [<ffffffff8112a3d2>] sync_inodes_sb+0x22/0x120
-> > > > <4>[15241.043375]  [<ffffffff8112f1d2>] __sync_filesystem+0x82/0x90
-> > > > <4>[15241.043485]  [<ffffffff8112f3db>] sync_filesystem+0x4b/0x70
-> > > > <4>[15241.043594]  [<ffffffff811391de>] fsync_bdev+0x2e/0x60
-> > > > <4>[15241.043704]  [<ffffffff812226be>] invalidate_partition+0x2e/0x50
-> > > > <4>[15241.043816]  [<ffffffff8116b92f>] del_gendisk+0x3f/0x140
-> > > > <4>[15241.043926]  [<ffffffffa00c0233>] mmc_blk_remove+0x33/0x60 [mmc_block]
-> > > > <4>[15241.044043]  [<ffffffff81338977>] mmc_bus_remove+0x17/0x20
-> > > > <4>[15241.044152]  [<ffffffff812ce746>] __device_release_driver+0x66/0xc0
-> > > > <4>[15241.044264]  [<ffffffff812ce89d>] device_release_driver+0x2d/0x40
-> > > > <4>[15241.044375]  [<ffffffff812cd9b5>] bus_remove_device+0xb5/0x120
-> > > > <4>[15241.044486]  [<ffffffff812cb46f>] device_del+0x12f/0x1a0
-> > > > <4>[15241.044593]  [<ffffffff81338a5b>] mmc_remove_card+0x5b/0x90
-> > > > <4>[15241.044702]  [<ffffffff8133ac27>] mmc_sd_remove+0x27/0x50
-> > > > <4>[15241.044811]  [<ffffffff81337d8c>] mmc_resume_host+0x10c/0x140
-> > > > <4>[15241.044929]  [<ffffffffa00850e9>] sdhci_resume_host+0x69/0xa0 [sdhci]
-> > > > <4>[15241.045044]  [<ffffffffa0bdc39e>] sdhci_pci_resume+0x8e/0xb0 [sdhci_pci]
-> > > 
-> > > So what's the hang?  del_gendisk is doing IO?  I'd assumed that it was
-> > > because it was calling kobject_uevent, but userspace is frozen.
-> > 
-> > This is a backtrace of a hang.
-> 
-> But why did it hang?  Because the BDI worker threads are trying to
-> perform IO through a suspended device?
-> 
-Something like that I guess.
-Also this is 100% reproducible, and I can reproduce this with my own
-driver too (by making the card detection workqueue be non freezable)
+From: Chris Ball <cjb@laptop.org>
 
+Seen on a Marvell 8686 SDIO card and Via VX855 controller:  we must avoid
+sending CMD3/5/7 on a resume where power has been maintained, because the
+8686 will refuse to respond to them and the MMC stack will give up on
+the card.
 
-Best regards,
-Maxim Levitsky
+Signed-off-by: Chris Ball <cjb@laptop.org>
+Signed-off-by: Nicolas Pitre <nico@marvell.com>
+---
+ drivers/mmc/core/sdio.c |   19 +++++++++++--------
+ 1 files changed, 11 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 06b6408..7d8ba64 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -224,7 +224,7 @@ static int sdio_enable_hs(struct mmc_card *card)
+  * we're trying to reinitialise.
+  */
+ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+-			      struct mmc_card *oldcard)
++			      struct mmc_card *oldcard, int powered_resume)
+ {
+ 	struct mmc_card *card;
+ 	int err;
+@@ -235,9 +235,11 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 	/*
+ 	 * Inform the card of the voltage
+ 	 */
+-	err = mmc_send_io_op_cond(host, host->ocr, &ocr);
+-	if (err)
+-		goto err;
++	if (!powered_resume) {
++		err = mmc_send_io_op_cond(host, host->ocr, &ocr);
++		if (err)
++			goto err;
++	}
+ 
+ 	/*
+ 	 * For SPI, enable CRC as appropriate.
+@@ -262,7 +264,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 	/*
+ 	 * For native busses:  set card RCA and quit open drain mode.
+ 	 */
+-	if (!mmc_host_is_spi(host)) {
++	if (!powered_resume && !mmc_host_is_spi(host)) {
+ 		err = mmc_send_relative_addr(host, &card->rca);
+ 		if (err)
+ 			goto remove;
+@@ -273,7 +275,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 	/*
+ 	 * Select card, as all following commands rely on that.
+ 	 */
+-	if (!mmc_host_is_spi(host)) {
++	if (!powered_resume && !mmc_host_is_spi(host)) {
+ 		err = mmc_select_card(card);
+ 		if (err)
+ 			goto remove;
+@@ -437,7 +439,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 
+ 	/* Basic card reinitialization. */
+ 	mmc_claim_host(host);
+-	err = mmc_sdio_init_card(host, host->ocr, host->card);
++	err = mmc_sdio_init_card(host, host->ocr, host->card,
++				 (host->pm_flags & MMC_PM_KEEP_POWER));
+ 	mmc_release_host(host);
+ 
+ 	/*
+@@ -507,7 +510,7 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
+ 	/*
+ 	 * Detect and init the card.
+ 	 */
+-	err = mmc_sdio_init_card(host, host->ocr, NULL);
++	err = mmc_sdio_init_card(host, host->ocr, NULL, 0);
+ 	if (err)
+ 		goto err;
+ 	card = host->card;
+-- 
+1.7.0.rc2.1.g694b5
 
