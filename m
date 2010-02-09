@@ -1,48 +1,149 @@
 From: Nicolas Pitre <nico@fluxnic.net>
-Subject: [PATCH 4/5] SDIO: kick the interrupt thread upon a resume
-Date: Tue, 09 Feb 2010 15:29:25 -0500
-Message-ID: <1265747366-6676-5-git-send-email-nico@fluxnic.net>
+Subject: [PATCH 2/5] SDIO: sdhci support for suspend mode PM features
+Date: Tue, 09 Feb 2010 15:29:23 -0500
+Message-ID: <1265747366-6676-3-git-send-email-nico@fluxnic.net>
 References: <1265747366-6676-1-git-send-email-nico@fluxnic.net>
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from relais.videotron.ca ([24.201.245.36]:12186 "EHLO
 	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752259Ab0BIU3w (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Feb 2010 15:29:52 -0500
+	with ESMTP id S1751762Ab0BIU3v (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Feb 2010 15:29:51 -0500
 Received: from localhost.localdomain ([66.130.28.92])
  by VL-MH-MR002.ip.videotron.ca
  (Sun Java(tm) System Messaging Server 6.3-4.01 (built Aug  3 2007; 32bit))
  with ESMTP id <0KXL00I4TCXNVXE0@VL-MH-MR002.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Tue, 09 Feb 2010 15:29:49 -0500 (EST)
+ linux-mmc@vger.kernel.org; Tue, 09 Feb 2010 15:29:48 -0500 (EST)
 In-reply-to: <1265747366-6676-1-git-send-email-nico@fluxnic.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: linux-mmc@vger.kernel.org
 
-Some SDIO cards may suspend while keeping function interrupts active
-especially in the powered suspend case.  Upon resume we need to kick
-the SDIO interrupt thread to check for pending interrupts and to restart
-card IRQ detection at the host controller level.
+Tested with an XO v1.5 from OLPC.
 
 Signed-off-by: Nicolas Pitre <nico@marvell.com>
 ---
- drivers/mmc/core/sdio.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-pci.c |   17 ++++++++++++++---
+ drivers/mmc/host/sdhci.c     |   26 +++++++++++++++++---------
+ 2 files changed, 31 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 7d8ba64..5840de1 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -441,6 +441,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	mmc_claim_host(host);
- 	err = mmc_sdio_init_card(host, host->ocr, host->card,
- 				 (host->pm_flags & MMC_PM_KEEP_POWER));
-+	if (!err && host->sdio_irqs)
-+		mmc_signal_sdio_irq(host);
- 	mmc_release_host(host);
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 5c3a176..dbf0543 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -501,6 +501,7 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
+ {
+ 	struct sdhci_pci_chip *chip;
+ 	struct sdhci_pci_slot *slot;
++	mmc_pm_flag_t pm_flags = 0;
+ 	int i, ret;
  
- 	/*
+ 	chip = pci_get_drvdata(pdev);
+@@ -519,6 +520,8 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
+ 				sdhci_resume_host(chip->slots[i]->host);
+ 			return ret;
+ 		}
++
++		pm_flags |= slot->host->mmc->pm_flags;
+ 	}
+ 
+ 	if (chip->fixes && chip->fixes->suspend) {
+@@ -531,9 +534,15 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
+ 	}
+ 
+ 	pci_save_state(pdev);
+-	pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
+-	pci_disable_device(pdev);
+-	pci_set_power_state(pdev, pci_choose_state(pdev, state));
++	if (pm_flags & MMC_PM_KEEP_POWER) {
++		if (pm_flags & MMC_PM_WAKE_SDIO_IRQ)
++			pci_enable_wake(pdev, PCI_D3hot, 1);
++		pci_set_power_state(pdev, PCI_D3hot);
++	} else {
++		pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
++		pci_disable_device(pdev);
++		pci_set_power_state(pdev, pci_choose_state(pdev, state));
++	}
+ 
+ 	return 0;
+ }
+@@ -653,6 +662,8 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
+ 			goto unmap;
+ 	}
+ 
++	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto remove;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c279fbc..5b3efc4 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -174,20 +174,31 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
+ }
+ 
+-static void sdhci_init(struct sdhci_host *host)
++static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
++
++static void sdhci_init(struct sdhci_host *host, int soft)
+ {
+-	sdhci_reset(host, SDHCI_RESET_ALL);
++	if (soft)
++		sdhci_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
++	else
++		sdhci_reset(host, SDHCI_RESET_ALL);
+ 
+ 	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK,
+ 		SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
+ 		SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_INDEX |
+ 		SDHCI_INT_END_BIT | SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
+ 		SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE);
++
++	if (soft) {
++		/* force clock reconfiguration */
++		host->clock = 0;
++		sdhci_set_ios(host->mmc, &host->mmc->ios);
++	}
+ }
+ 
+ static void sdhci_reinit(struct sdhci_host *host)
+ {
+-	sdhci_init(host);
++	sdhci_init(host, 0);
+ 	sdhci_enable_card_detection(host);
+ }
+ 
+@@ -1610,16 +1621,13 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 	if (ret)
+ 		return ret;
+ 
+-	sdhci_init(host);
++	sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
+ 	mmiowb();
+ 
+ 	ret = mmc_resume_host(host->mmc);
+-	if (ret)
+-		return ret;
+-
+ 	sdhci_enable_card_detection(host);
+ 
+-	return 0;
++	return ret;
+ }
+ 
+ EXPORT_SYMBOL_GPL(sdhci_resume_host);
+@@ -1874,7 +1882,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (ret)
+ 		goto untasklet;
+ 
+-	sdhci_init(host);
++	sdhci_init(host, 0);
+ 
+ #ifdef CONFIG_MMC_DEBUG
+ 	sdhci_dumpregs(host);
 -- 
 1.7.0.rc2.1.g694b5
 
