@@ -1,49 +1,79 @@
-From: David Vrabel <david.vrabel@csr.com>
-Subject: Re: [PATCH 5/5] SDIO: put active devices into 1-bit mode during suspend
-Date: Wed, 10 Feb 2010 16:49:37 +0000
-Message-ID: <4B72E3A1.4020902@csr.com>
-References: <1265747366-6676-1-git-send-email-nico@fluxnic.net>	<1265747366-6676-6-git-send-email-nico@fluxnic.net>	<4B7298EF.4070604@csr.com> <m38wb115nk.fsf@pullcord.laptop.org>	<4B72D8CC.9030605@csr.com> <m31vgt127c.fsf@pullcord.laptop.org>
+From: akpm@linux-foundation.org
+Subject: [patch 2/8] mmc_test: block addressed cards
+Date: Wed, 10 Feb 2010 13:56:34 -0800
+Message-ID: <201002102156.o1ALuZ6x001258@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-d.mailcontrol.com ([85.115.60.190]:58525 "EHLO
-	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754843Ab0BJQur (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Feb 2010 11:50:47 -0500
-Received: from rly06d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
-	by rly06d.srv.mailcontrol.com (MailControl) with ESMTP id o1AGob1a029788
-	for <linux-mmc@vger.kernel.org>; Wed, 10 Feb 2010 16:50:43 GMT
-Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
-	by rly06d.srv.mailcontrol.com (MailControl) id o1AGnlUO024702
-	for <linux-mmc@vger.kernel.org>; Wed, 10 Feb 2010 16:49:47 GMT
-In-Reply-To: <m31vgt127c.fsf@pullcord.laptop.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:33281 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751452Ab0BJV4u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Feb 2010 16:56:50 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Nicolas Pitre <nico@fluxnic.net>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: akpm@linux-foundation.org, johan.kristell@axis.com, linux-mmc@vger.kernel.org
 
-Chris Ball wrote:
-> Hi David,
-> 
->    > I couldn't find anything in the SDIO specification (you know the
->    > section number?).  Part A2 has a requirement that the controller
->    > be placed into 1-bit mode but this doesn't mean that the card has
->    > to be.
-> 
-> I think it's part E1 section 8, and does specify that it's necessary
-> for both host and card.
+From: Johan Kristell <johan.kristell@axis.com>
 
-Found it now, thanks.  The patch is fine as is.
+This patch fixes a bug in the multiblock write tests where the written
+data is read back for verifying one block at a time.  The tests in
+mmc_test assumes that all cards are byte addressable.  
 
-(FWIW, my confusion arose because CSR chips can assert interrupts in
-4-bit mode even without SDCLK.)
+This will cause the multi block write tests to fail, leading the user of
+the mmc_test driver thinking there is something wrong with the sdhci
+driver they are testing.
 
-David
--- 
-David Vrabel, Senior Software Engineer, Drivers
-CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
-Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
+The start address for the block is calculated as: blocknum * 512. For
+block addressable cards the blocknum alone should be used.
 
+Signed-off-by: Johan Kristell <johan.kristell@axis.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+ drivers/mmc/card/mmc_test.c |    9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff -puN drivers/mmc/card/mmc_test.c~mmc_test-block-addressed-cards drivers/mmc/card/mmc_test.c
+--- a/drivers/mmc/card/mmc_test.c~mmc_test-block-addressed-cards
++++ a/drivers/mmc/card/mmc_test.c
+@@ -74,6 +74,9 @@ static void mmc_test_prepare_mrq(struct 
+ 	}
+ 
+ 	mrq->cmd->arg = dev_addr;
++	if (!mmc_card_blockaddr(test->card))
++		mrq->cmd->arg <<= 9;
++
+ 	mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+ 
+ 	if (blocks == 1)
+@@ -190,7 +193,7 @@ static int __mmc_test_prepare(struct mmc
+ 	}
+ 
+ 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
+-		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
++		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -219,7 +222,7 @@ static int mmc_test_cleanup(struct mmc_t
+ 	memset(test->buffer, 0, 512);
+ 
+ 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
+-		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
++		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -426,7 +429,7 @@ static int mmc_test_transfer(struct mmc_
+ 		for (i = 0;i < sectors;i++) {
+ 			ret = mmc_test_buffer_transfer(test,
+ 				test->buffer + i * 512,
+-				dev_addr + i * 512, 512, 0);
++				dev_addr + i, 512, 0);
+ 			if (ret)
+ 				return ret;
+ 		}
+_
