@@ -1,45 +1,37 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: [patch 5/8] mmc: fix hang if card was removed during suspend
- and unsafe resume was enabled
-Date: Thu, 11 Feb 2010 18:39:43 +0200
-Message-ID: <1265906383.9788.2.camel@maxim-laptop>
-References: <201002102156.o1ALudbX001270@imap1.linux-foundation.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 1/5] SDIO: introduce API for special power management
+ features
+Date: Thu, 11 Feb 2010 12:32:51 -0800
+Message-ID: <20100211123251.f77dbddd.akpm@linux-foundation.org>
+References: <1265747366-6676-1-git-send-email-nico@fluxnic.net>
+	<1265747366-6676-2-git-send-email-nico@fluxnic.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f215.google.com ([209.85.220.215]:39331 "EHLO
-	mail-fx0-f215.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756127Ab0BKQjx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Feb 2010 11:39:53 -0500
-Received: by fxm7 with SMTP id 7so1420536fxm.28
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Feb 2010 08:39:51 -0800 (PST)
-In-Reply-To: <201002102156.o1ALudbX001270@imap1.linux-foundation.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:46975 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755734Ab0BKUdZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Feb 2010 15:33:25 -0500
+In-Reply-To: <1265747366-6676-2-git-send-email-nico@fluxnic.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org
-Cc: torvalds@linux-foundation.org, dwmw2@infradead.org, ext-jorg.2.schummer@nokia.com, linux-mmc@vger.kernel.org, nico@fluxnic.net, rjw@sisk.pl, stable@kernel.org
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: linux-mmc@vger.kernel.org
 
-On Wed, 2010-02-10 at 13:56 -0800, akpm@linux-foundation.org wrote: 
-> From: Maxim Levitsky <maximlevitsky@gmail.com>
-> 
-> Presently the following operations lead to a hang:
-> 
-> -> Have a kernel with CONFIG_MMC_UNSAFE_RESUME
-> -> Insert MMC/SD card
-> -> Suspend/hibernate the system
-> -> While system is hibernated/suspended pull the card off
-> -> Resume the system
-> -> Hang
+On Tue, 09 Feb 2010 15:29:22 -0500
+Nicolas Pitre <nico@fluxnic.net> wrote:
 
-I would like to withdraw this patch.
-Although it fixes the case of CONFIG_MMC_UNSAFE_RESUME=y
-it doesn't fix the case of CONFIG_MMC_UNSAFE_RESUME=n
+> +	BUG_ON(!func);
+> +	BUG_ON(!func->card);
+> +
+> +	host = func->card->host;
 
-It is more like a workaround for real problem, problem that del_gendisk
-hangs when it is called while userspace is frozen.
-I bet that this is a regression.
+It's a bit redundant to check for null and then deref the pointer - the
+kernel will reliably oops on the NULL deref, which gives us the same
+info.
 
-Best regards,
-Maxim Levitsky
+I guess the BUG_ON is more useful in the case where a double-deref is
+being performed, as it can otherwise be a bit hard to work out which
+pointer was NULL.
 
