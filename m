@@ -1,128 +1,83 @@
-From: akpm@linux-foundation.org
-Subject: [patch 5/8] mmc: fix hang if card was removed during suspend and unsafe resume was enabled
-Date: Wed, 10 Feb 2010 13:56:39 -0800
-Message-ID: <201002102156.o1ALudbX001270@imap1.linux-foundation.org>
+From: Mike Rapoport <mike@compulab.co.il>
+Subject: Re: [PATCH 0/3] mmc: omap_hsmmc: support SDIO cards
+Date: Thu, 11 Feb 2010 10:29:07 +0200
+Message-ID: <4B73BFD3.8090106@compulab.co.il>
+References: <cover.1265801967.git.david.vrabel@csr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:55283 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755507Ab0BJV5S (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Feb 2010 16:57:18 -0500
+Received: from compulab.co.il ([67.18.134.219]:57283 "EHLO compulab.co.il"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751259Ab0BKIag (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Feb 2010 03:30:36 -0500
+In-Reply-To: <cover.1265801967.git.david.vrabel@csr.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, maximlevitsky@gmail.com, dwmw2@infradead.org, ext-jorg.2.schummer@nokia.com, linux-mmc@vger.kernel.org, nico@fluxnic.net, rjw@sisk.pl, stable@kernel.org
+To: David Vrabel <david.vrabel@csr.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com
 
-From: Maxim Levitsky <maximlevitsky@gmail.com>
+Hi David,
 
-Presently the following operations lead to a hang:
+David Vrabel wrote:
+> These patches add support for SDIO cards to the omap_hsmmc driver.  Less
+> restrictions on the sizes of transfers, power management changes to 
+> prevent SDIO cards from being turned off and losing all state, and card
+> interrupts.
+> 
+> I've been unable to test these exact patches as I only have an N900 for 
+> testing and the N900 support in mainline is incomplete.
 
--> Have a kernel with CONFIG_MMC_UNSAFE_RESUME
--> Insert MMC/SD card
--> Suspend/hibernate the system
--> While system is hibernated/suspended pull the card off
--> Resume the system
--> Hang
+I've tried your patches on CM-T35 that has 8686 SDIO and the result was
+absence of MMC/SDIO devices at all :( Morover, kmmcd hangs:
 
-[<ffffffff8106620a>] ? prepare_to_wait+0x2a/0x90
-[<ffffffff810790bd>] ? trace_hardirqs_on+0xd/0x10
-[<ffffffff8140db12>] ? _raw_spin_unlock_irqrestore+0x42/0x80
-[<ffffffff8112a390>] ? bdi_sched_wait+0x0/0x20
-[<ffffffff8112a39e>] bdi_sched_wait+0xe/0x20
-[<ffffffff8140af6f>] __wait_on_bit+0x5f/0x90
-[<ffffffff8112a390>] ? bdi_sched_wait+0x0/0x20
-[<ffffffff8140b018>] out_of_line_wait_on_bit+0x78/0x90
-[<ffffffff81065fd0>] ? wake_bit_function+0x0/0x40
-[<ffffffff8112a2d3>] ? bdi_queue_work+0xa3/0xe0
-[<ffffffff8112a37f>] bdi_sync_writeback+0x6f/0x80
-[<ffffffff8112a3d2>] sync_inodes_sb+0x22/0x120
-[<ffffffff8112f1d2>] __sync_filesystem+0x82/0x90
-[<ffffffff8112f3db>] sync_filesystem+0x4b/0x70
-[<ffffffff811391de>] fsync_bdev+0x2e/0x60
-[<ffffffff812226be>] invalidate_partition+0x2e/0x50
-[<ffffffff8116b92f>] del_gendisk+0x3f/0x140
-[<ffffffffa00c0233>] mmc_blk_remove+0x33/0x60 [mmc_block]
-[<ffffffff81338977>] mmc_bus_remove+0x17/0x20
-[<ffffffff812ce746>] __device_release_driver+0x66/0xc0
-[<ffffffff812ce89d>] device_release_driver+0x2d/0x40
-[<ffffffff812cd9b5>] bus_remove_device+0xb5/0x120
-[<ffffffff812cb46f>] device_del+0x12f/0x1a0
-[<ffffffff81338a5b>] mmc_remove_card+0x5b/0x90
-[<ffffffff8133ac27>] mmc_sd_remove+0x27/0x50
-[<ffffffff81337d8c>] mmc_resume_host+0x10c/0x140
-[<ffffffffa00850e9>] sdhci_resume_host+0x69/0xa0 [sdhci]
-[<ffffffffa0bdc39e>] sdhci_pci_resume+0x8e/0xb0 [sdhci_pci]
+[  399.427764] INFO: task kmmcd:149 blocked for more than 120 seconds.
 
-because del_gendisk() tries to perform writeout when some devices are in
-the suspended state.
+[  399.434082] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+disables this message.
 
-If CONFIG_MMC_UNSAFE_RESUME is set, mmc core allows the user to
-suspend/resume the card normally assuming he won't change the card or
-modify it in another system.  The former case is actually handled quite
-well.
+[  399.442016] kmmcd         D c027f804     0   149      2 0x00000000
 
-If CONFIG_MMC_UNSAFE_RESUME isn't set, it removes the card during suspend,
-and I now think (and will test) that this will still hang the system this
-time on suspend.
+[  399.448333] [<c027f804>] (schedule+0x274/0x2ac) from [<c027fa08>]
+(schedule_timeout+0x18/0x17c)
+
+[  399.457122] [<c027fa08>] (schedule_timeout+0x18/0x17c) from
+[<c027f484>] (wait_for_common+0xc0/0x14c)
+
+[  399.466461] [<c027f484>] (wait_for_common+0xc0/0x14c) from
+[<c01e61e0>] (mmc_wait_for_req+0x1f4/0x214)
+
+[  399.475860] [<c01e61e0>] (mmc_wait_for_req+0x1f4/0x214) from
+[<c01e6264>] (mmc_wait_for_cmd+0x64/0x74)
+
+[  399.485290] [<c01e6264>] (mmc_wait_for_cmd+0x64/0x74) from
+[<c01e86b0>] (mmc_go_idle+0x60/0xac)
+
+[  399.494079] [<c01e86b0>] (mmc_go_idle+0x60/0xac) from [<c01e6bb8>]
+(mmc_rescan+0x150/0x208)
+
+[  399.502532] [<c01e6bb8>] (mmc_rescan+0x150/0x208) from [<c005e288>]
+(worker_thread+0xf0/0x168)
+
+[  399.511260] [<c005e288>] (worker_thread+0xf0/0x168) from [<c0060dbc>]
+(kthread+0x7c/0x84)
+
+[  399.519531] [<c0060dbc>] (kthread+0x7c/0x84) from [<c002ae50>]
+(kernel_thread_exit+0x0/0x8)
 
 
-Fix that by removing the code that did that in mmc_resume_host.  It is
-possible because card detection logic will kick it later and remove the
-card.
+I'll try to debug it more today and see what is going on wrong...
 
-Also make mtd workqueue freezeable, so it won't attempt to add/remove the
-card while userspace is frozen.
+> David Vrabel (3):
+>   mmc: omap_hsmmc: use packet sync'd DMA
+>   mmc: omap_hsmmc: don't turn SDIO cards off when idle
+>   mmc: omap_hsmmc: enable SDIO card interrupts
+> 
+>  drivers/mmc/host/omap_hsmmc.c |  123 ++++++++++++++++++++++++++---------------
+>  1 files changed, 78 insertions(+), 45 deletions(-)
+> 
 
-Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: David Woodhouse <dwmw2@infradead.org>
-Cc: Jorg Schummer <ext-jorg.2.schummer@nokia.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>
-Cc: <linux-mmc@vger.kernel.org>
-Cc: <stable@kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
 
- drivers/mmc/core/core.c |    9 ++-------
- 1 file changed, 2 insertions(+), 7 deletions(-)
-
-diff -puN drivers/mmc/core/core.c~mmc-fix-hang-if-card-was-removed-during-suspend-and-unsafe-resume-was-enabled drivers/mmc/core/core.c
---- a/drivers/mmc/core/core.c~mmc-fix-hang-if-card-was-removed-during-suspend-and-unsafe-resume-was-enabled
-+++ a/drivers/mmc/core/core.c
-@@ -1257,7 +1257,6 @@ int mmc_suspend_host(struct mmc_host *ho
- 	if (host->caps & MMC_CAP_DISABLE)
- 		cancel_delayed_work(&host->disable);
- 	cancel_delayed_work(&host->detect);
--	mmc_flush_scheduled_work();
- 
- 	mmc_bus_get(host);
- 	if (host->bus_ops && !host->bus_dead) {
-@@ -1300,15 +1299,11 @@ int mmc_resume_host(struct mmc_host *hos
- 		mmc_select_voltage(host, host->ocr);
- 		BUG_ON(!host->bus_ops->resume);
- 		err = host->bus_ops->resume(host);
-+
- 		if (err) {
- 			printk(KERN_WARNING "%s: error %d during resume "
- 					    "(card was removed?)\n",
- 					    mmc_hostname(host), err);
--			if (host->bus_ops->remove)
--				host->bus_ops->remove(host);
--			mmc_claim_host(host);
--			mmc_detach_bus(host);
--			mmc_release_host(host);
- 			/* no need to bother upper layers */
- 			err = 0;
- 		}
-@@ -1332,7 +1327,7 @@ static int __init mmc_init(void)
- {
- 	int ret;
- 
--	workqueue = create_singlethread_workqueue("kmmcd");
-+	workqueue = create_freezeable_workqueue("kmmcd");
- 	if (!workqueue)
- 		return -ENOMEM;
- 
-_
+-- 
+Sincerely yours,
+Mike.
