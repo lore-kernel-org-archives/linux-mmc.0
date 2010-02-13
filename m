@@ -1,46 +1,32 @@
-From: Vasily Khoruzhick <anarsoul@gmail.com>
-Subject: Re: [PATCH v2] Enable DMA for Ricoh reader on Lenovo laptops
-Date: Sun, 14 Feb 2010 00:38:02 +0200
-Message-ID: <201002140038.05614.anarsoul@gmail.com>
-References: <201002011111.13010.anarsoul@gmail.com> <201002021817.35773.anarsoul@gmail.com>
+From: PATRICK CHAN <patrickchan117@yahoo.com.hk>
+Subject: (unknown)
+Date: Sun, 14 Feb 2010 00:16:50 +0100
+Message-ID: <20100214001650.109148k0lxt4zm5e@mail.livenet.ch>
+Reply-To: patrickchan002@yahoo.com.hk
 Mime-Version: 1.0
-Content-Type: multipart/signed;
-  boundary="nextPart1710098.Tdrmcay00Z";
-  protocol="application/pgp-signature";
-  micalg=pgp-sha1
+Content-Type: text/plain;
+ charset=UTF-8;
+ DelSp="Yes";
+ format="flowed"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f216.google.com ([209.85.218.216]:58043 "EHLO
-	mail-bw0-f216.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757093Ab0BMWph (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Feb 2010 17:45:37 -0500
-Received: by bwz8 with SMTP id 8so1892735bwz.38
-        for <linux-mmc@vger.kernel.org>; Sat, 13 Feb 2010 14:45:36 -0800 (PST)
-In-Reply-To: <201002021817.35773.anarsoul@gmail.com>
+Received: from plasma.jpberlin.de ([213.203.238.10]:41617 "EHLO
+	mail.jpberlin.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1758081Ab0BMXvi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Feb 2010 18:51:38 -0500
+Subject: 
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
---nextPart1710098.Tdrmcay00Z
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: base64
 
-0JIg0YHQvtC+0LHRidC10L3QuNC4INC+0YIgMiDRhNC10LLRgNCw0LvRjyAyMDEwIDE4OjE3OjE1
-INCw0LLRgtC+0YAgVmFzaWx5IEtob3J1emhpY2sg0L3QsNC/0LjRgdCw0Ls6Cj4gSXQgc2VlbXMg
-dGhhdCBSaWNvaCBSNUM4MjIgY2FyZCByZWFkZXIgb24gbWVudGlvbmVkIGxhcHRvcHMgbmVlZCBv
-bmUgbW9yZQo+IHF1aXJrLiBIZXJlJ3MgdXBkYXRlZCBwYXRjaC4KClBpbmcgOikK
 
---nextPart1710098.Tdrmcay00Z
-Content-Type: application/pgp-signature; name=signature.asc 
-Content-Description: This is a digitally signed message part.
+Good Day,
+I am Mr. Patrick Chan; I work with Hang Seng Bank Ltd. I have a  
+Private Business proposal of $24.5million USD. Kindly correspond to  
+this email for more details of this proposal.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.14 (GNU/Linux)
+Regards,
 
-iEYEABECAAYFAkt3Kc0ACgkQRM6pQpltKE7FDQCfWpEEj84mvqCRgasFpqGfxFdQ
-bocAnipz7KaQRvDmUg3JhD0R4GDyuJmU
-=AIJt
------END PGP SIGNATURE-----
+Patrick Chan
 
---nextPart1710098.Tdrmcay00Z--
