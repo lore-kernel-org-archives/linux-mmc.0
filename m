@@ -1,435 +1,337 @@
-From: Pierre Ossman <pierre-list@ossman.eu>
-Subject: Re: Subject: [PATCH] v2.6.32: Add new device IDs and quircks for
- MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
-Date: Sat, 13 Feb 2010 13:22:37 +0100
-Message-ID: <20100213132237.7c35603a@mjolnir.ossman.eu>
-References: <84ABC3D12F787146ABE5E1D559D966F3AD49A9@cd-exch2003.nt-fsrvr.o2micro.com>
+From: Martin Fuzzey <mfuzzey@gmail.com>
+Subject: [PATCH V7] mxc : Add i.MX21 support to mxcmmc driver
+Date: Sat, 13 Feb 2010 16:36:32 +0100
+Message-ID: <20100213153617.21144.68460.stgit@srv002.fuzzey.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1; protocol="application/pgp-signature"; boundary="=_freyr.ossman.eu-20385-1266063760-0001-2"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 82-117-125-11.tcdsl.calypso.net ([82.117.125.11]:45606 "EHLO
-	smtp.ossman.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754343Ab0BMM2M (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 13 Feb 2010 07:28:12 -0500
-In-Reply-To: <84ABC3D12F787146ABE5E1D559D966F3AD49A9@cd-exch2003.nt-fsrvr.o2micro.com>
+Received: from mail-ew0-f228.google.com ([209.85.219.228]:59677 "EHLO
+	mail-ew0-f228.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753195Ab0BMPgg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Feb 2010 10:36:36 -0500
+Received: by ewy28 with SMTP id 28so2620820ewy.28
+        for <linux-mmc@vger.kernel.org>; Sat, 13 Feb 2010 07:36:34 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Hardys Lv(WH)" <hardys.lv@o2micro.com>, linux-mmc@vger.kernel.org
-Cc: stable@kernel.org, linux-kernel@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org
+Cc: Pierre Ossman <pierre@ossman.eu>
 
-This is a MIME-formatted message.  If you see this text it means that your
-E-mail software does not support MIME-formatted messages.
+Even though the i.MX21 SDHC module has the same revision number as the i.MX27
+one there are a few differences!!
+        Some interrupt enables are inverted.
+        FIFO is only 16 bits wide.
+        The argument is written to 2x16bit registers (vs 1x32).
+        Interrupts must be acknowledged via the INT_CNTR register.
+        Card clock must be enabled for each request.
+	For writes DMA must be enabled on command response not before.
 
---=_freyr.ossman.eu-20385-1266063760-0001-2
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Martin Fuzzey <mfuzzey@gmail.com>
 
-This should go to linux-mmc@vger.kernel.org (cc:d). And you should
-probably resend it with the patch as an attachment as your mail client
-seems to fudge it up pretty heavily. Lastly, have a look at
-Documentation/SubmittingPatches as there is some formalia you need to
-take care of.
+---
+Changes from V6 (April 2009):
+Minor stylistic changes suggested by Robby Cai:
+        factorize enables in mxcmci_set_int_cntr()
+        remove redundant local variable in mxcmci_push() and mxcmci_pull()
+Rebased to 2.6.33-rc8
 
-Rgds
-Pierre
+ arch/arm/mach-mx2/clock_imx21.c |    4 -
+ drivers/mmc/host/mxcmmc.c       |  159 ++++++++++++++++++++++++++++++---------
+ 2 files changed, 123 insertions(+), 40 deletions(-)
 
-On Thu, 4 Feb 2010 15:23:29 +0800
-"Hardys Lv(WH)" <hardys.lv@o2micro.com> wrote:
+diff --git a/arch/arm/mach-mx2/clock_imx21.c b/arch/arm/mach-mx2/clock_imx21.c
+index 1a6bc31..9f24748 100644
+--- a/arch/arm/mach-mx2/clock_imx21.c
++++ b/arch/arm/mach-mx2/clock_imx21.c
+@@ -939,8 +939,8 @@ static struct clk_lookup lookups[] = {
+ 	_REGISTER_CLOCK(NULL, "gpt1", gpt_clk[1])
+ 	_REGISTER_CLOCK(NULL, "gpt1", gpt_clk[2])
+ 	_REGISTER_CLOCK(NULL, "pwm", pwm_clk[0])
+-	_REGISTER_CLOCK(NULL, "sdhc1", sdhc_clk[0])
+-	_REGISTER_CLOCK(NULL, "sdhc2", sdhc_clk[1])
++	_REGISTER_CLOCK("mxc-mmc.0", NULL, sdhc_clk[0])
++	_REGISTER_CLOCK("mxc-mmc.1", NULL, sdhc_clk[1])
+ 	_REGISTER_CLOCK(NULL, "cspi1", cspi_clk[0])
+ 	_REGISTER_CLOCK(NULL, "cspi2", cspi_clk[1])
+ 	_REGISTER_CLOCK(NULL, "cspi3", cspi_clk[2])
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 60a2b69..ec5593b 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -56,6 +56,8 @@
+ #define MMC_REG_INT_CNTR		0x24
+ #define MMC_REG_CMD			0x28
+ #define MMC_REG_ARG			0x2C
++#define MMC_REG_ARGH			0x2C
++#define MMC_REG_ARGL			0x30
+ #define MMC_REG_RES_FIFO		0x34
+ #define MMC_REG_BUFFER_ACCESS		0x38
+ 
+@@ -142,6 +144,49 @@ struct mxcmci_host {
+ 
+ static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
+ 
++static void mxcmci_write_arg(struct mxcmci_host *host, u32 arg)
++{
++	if (cpu_is_mx21()) {
++		writel(arg >> 16, host->base + MMC_REG_ARGH);
++		writel(arg & 0xFFFF, host->base + MMC_REG_ARGL);
++	} else {
++		writel(arg, host->base + MMC_REG_ARG);
++	}
++}
++
++static void mxcmci_ack_int(struct mxcmci_host *host, u32 stat)
++{
++	if (cpu_is_mx21()) {
++		u32 intclr = readl(host->base + MMC_REG_INT_CNTR);
++
++		if (stat & STATUS_DATA_TRANS_DONE)
++			intclr |= INT_READ_OP_EN;
++		if (stat & STATUS_WRITE_OP_DONE)
++			intclr |= INT_WRITE_OP_DONE_EN;
++		if (stat & STATUS_END_CMD_RESP)
++			intclr |= INT_END_CMD_RES_EN;
++
++		writel(intclr, host->base + MMC_REG_INT_CNTR);
++	}
++}
++
++static inline void mxcmci_set_int_cntr(struct mxcmci_host *host, u32 enables)
++{
++	if (cpu_is_mx21()) /* some interrupt enables have reverse polarity */
++		enables ^=  0x1F;
++	writel(enables, host->base + MMC_REG_INT_CNTR);
++}
++
++static inline void mxcmci_start_clock(struct mxcmci_host *host)
++{
++	writew(STR_STP_CLK_START_CLK, host->base + MMC_REG_STR_STP_CLK);
++}
++
++static inline void mxcmci_stop_clock(struct mxcmci_host *host)
++{
++	writew(STR_STP_CLK_STOP_CLK, host->base + MMC_REG_STR_STP_CLK);
++}
++
+ static inline int mxcmci_use_dma(struct mxcmci_host *host)
+ {
+ 	return host->do_dma;
+@@ -216,7 +261,10 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+ 	}
+ 	wmb();
+ 
+-	imx_dma_enable(host->dma);
++	/* MX21: unreliable writes if dma enabled here - do on command done */
++	if (mxcmci_use_dma(host) &&
++			(!cpu_is_mx21() || host->dma_dir == DMA_FROM_DEVICE))
++		imx_dma_enable(host->dma);
+ #endif /* HAS_DMA */
+ 	return 0;
+ }
+@@ -248,15 +296,19 @@ static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
+ 	}
+ 
+ 	if (mxcmci_use_dma(host))
+-		writel(INT_READ_OP_EN | INT_WRITE_OP_DONE_EN |
+-				INT_END_CMD_RES_EN,
+-				host->base + MMC_REG_INT_CNTR);
++		mxcmci_set_int_cntr(host,
++			INT_READ_OP_EN | INT_WRITE_OP_DONE_EN |
++			INT_END_CMD_RES_EN);
+ 	else
+-		writel(INT_END_CMD_RES_EN, host->base + MMC_REG_INT_CNTR);
++		mxcmci_set_int_cntr(host, INT_END_CMD_RES_EN);
+ 
+ 	writew(cmd->opcode, host->base + MMC_REG_CMD);
+-	writel(cmd->arg, host->base + MMC_REG_ARG);
++	mxcmci_write_arg(host, cmd->arg);
+ 	writew(cmdat, host->base + MMC_REG_CMD_DAT_CONT);
++	if (cpu_is_mx21()) {
++		/* i.MX21 requires clock start after submitting command */
++		mxcmci_start_clock(host);
++	}
+ 
+ 	return 0;
+ }
+@@ -264,7 +316,7 @@ static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
+ static void mxcmci_finish_request(struct mxcmci_host *host,
+ 		struct mmc_request *req)
+ {
+-	writel(0, host->base + MMC_REG_INT_CNTR);
++	mxcmci_set_int_cntr(host, 0);
+ 
+ 	host->req = NULL;
+ 	host->cmd = NULL;
+@@ -369,19 +421,29 @@ static int mxcmci_poll_status(struct mxcmci_host *host, u32 mask)
+ static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
+ {
+ 	unsigned int stat;
+-	u32 *buf = _buf;
+-
+-	while (bytes > 3) {
+-		stat = mxcmci_poll_status(host,
++	u16 *buf16 = _buf;
++	u32 *buf32 = _buf;
++	int count = 0;
++	int fifo_size = host->cmdat & CMD_DAT_CONT_BUS_WIDTH_4 ? 64 : 16;
++	int buffer_width = cpu_is_mx21() ? 2 : 4;
++
++	while (bytes >= buffer_width) {
++		if (count % fifo_size == 0) {
++			stat = mxcmci_poll_status(host,
+ 				STATUS_BUF_READ_RDY | STATUS_READ_OP_DONE);
+-		if (stat)
+-			return stat;
+-		*buf++ = readl(host->base + MMC_REG_BUFFER_ACCESS);
+-		bytes -= 4;
++			if (stat)
++				return stat;
++		}
++		if (buffer_width == 2)
++			*buf16++ = (u16)readl(
++				host->base + MMC_REG_BUFFER_ACCESS);
++		else
++			*buf32++ = readl(host->base + MMC_REG_BUFFER_ACCESS);
++		bytes -= buffer_width;
++		count += buffer_width;
+ 	}
+ 
+ 	if (bytes) {
+-		u8 *b = (u8 *)buf;
+ 		u32 tmp;
+ 
+ 		stat = mxcmci_poll_status(host,
+@@ -389,7 +451,10 @@ static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
+ 		if (stat)
+ 			return stat;
+ 		tmp = readl(host->base + MMC_REG_BUFFER_ACCESS);
+-		memcpy(b, &tmp, bytes);
++		if (buffer_width == 2)
++			memcpy((u8 *)buf16, &tmp, bytes);
++		else
++			memcpy((u8 *)buf32, &tmp, bytes);
+ 	}
+ 
+ 	return 0;
+@@ -398,33 +463,41 @@ static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
+ static int mxcmci_push(struct mxcmci_host *host, void *_buf, int bytes)
+ {
+ 	unsigned int stat;
+-	u32 *buf = _buf;
+-
+-	while (bytes > 3) {
+-		stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+-		if (stat)
+-			return stat;
+-		writel(*buf++, host->base + MMC_REG_BUFFER_ACCESS);
+-		bytes -= 4;
++	u16 *buf16 = _buf;
++	u32 *buf32 = _buf;
++	int count = 0;
++	int fifo_size = host->cmdat & CMD_DAT_CONT_BUS_WIDTH_4 ? 64 : 16;
++	int buffer_width = cpu_is_mx21() ? 2 : 4;
++
++	while (bytes >= buffer_width) {
++		if (count % fifo_size == 0) {
++			stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
++			if (stat)
++				return stat;
++		}
++		if (buffer_width == 2)
++			writel(*buf16++, host->base + MMC_REG_BUFFER_ACCESS);
++		else
++			writel(*buf32++, host->base + MMC_REG_BUFFER_ACCESS);
++		bytes -= buffer_width;
++		count += buffer_width;
+ 	}
+ 
+ 	if (bytes) {
+-		u8 *b = (u8 *)buf;
+ 		u32 tmp;
+ 
+ 		stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+ 		if (stat)
+ 			return stat;
+ 
+-		memcpy(&tmp, b, bytes);
++		if (buffer_width == 2)
++			memcpy(&tmp, (u8 *)buf16, bytes);
++		else
++			memcpy(&tmp, (u8 *)buf32, bytes);
+ 		writel(tmp, host->base + MMC_REG_BUFFER_ACCESS);
+ 	}
+ 
+-	stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+-	if (stat)
+-		return stat;
+-
+-	return 0;
++	return mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+ }
+ 
+ static int mxcmci_transfer_data(struct mxcmci_host *host)
+@@ -511,13 +584,20 @@ static void mxcmci_cmd_done(struct mxcmci_host *host, unsigned int stat)
+ 		return;
+ 	}
+ 
++	if (!host->data)
++		return;
++
++#ifdef HAS_DMA
+ 	/* For the DMA case the DMA engine handles the data transfer
+ 	 * automatically. For non DMA we have to do it ourselves.
+ 	 * Don't do it in interrupt context though.
+ 	 */
+-	if (!mxcmci_use_dma(host) && host->data)
++	if (mxcmci_use_dma(host)) {
++		if (cpu_is_mx21() && host->dma_dir == DMA_TO_DEVICE)
++			imx_dma_enable(host->dma);
++	} else
++#endif
+ 		schedule_work(&host->datawork);
+-
+ }
+ 
+ static irqreturn_t mxcmci_irq(int irq, void *devid)
+@@ -527,6 +607,7 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
+ 
+ 	stat = readl(host->base + MMC_REG_STATUS);
+ 	writel(stat, host->base + MMC_REG_STATUS);
++	mxcmci_ack_int(host, stat);
+ 
+ 	dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
+ 
+@@ -637,9 +718,9 @@ static void mxcmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	if (ios->clock) {
+ 		mxcmci_set_clk_rate(host, ios->clock);
+-		writew(STR_STP_CLK_START_CLK, host->base + MMC_REG_STR_STP_CLK);
++		mxcmci_start_clock(host);
+ 	} else {
+-		writew(STR_STP_CLK_STOP_CLK, host->base + MMC_REG_STR_STP_CLK);
++		mxcmci_stop_clock(host);
+ 	}
+ 
+ 	host->clock = ios->clock;
+@@ -751,7 +832,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 	/* recommended in data sheet */
+ 	writew(0x2db4, host->base + MMC_REG_READ_TO);
+ 
+-	writel(0, host->base + MMC_REG_INT_CNTR);
++	mxcmci_set_int_cntr(host, 0);
+ 
+ #ifdef HAS_DMA
+ 	host->dma = imx_dma_request_by_prio(DRIVER_NAME, DMA_PRIO_LOW);
+@@ -768,7 +849,9 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	ret = imx_dma_config_channel(host->dma,
+-				     IMX_DMA_MEMSIZE_32 | IMX_DMA_TYPE_FIFO,
++				    (cpu_is_mx21() ?
++					IMX_DMA_MEMSIZE_16 : IMX_DMA_MEMSIZE_32)
++					| IMX_DMA_TYPE_FIFO,
+ 				     IMX_DMA_MEMSIZE_32 | IMX_DMA_TYPE_LINEAR,
+ 				     r->start, 0);
+ 	if (ret) {
 
-> =20
->=20
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
->=20
-> index e035664..f38bd1f 100644
->=20
-> --- a/drivers/mmc/host/sdhci-pci.c
->=20
-> +++ b/drivers/mmc/host/sdhci-pci.c
->=20
-> @@ -285,6 +285,73 @@ static const struct sdhci_pci_fixes sdhci_jmicron =3D
-> {
->=20
->         .resume             =3D jmicron_resume,
->=20
->  };
->=20
-> =20
->=20
-> +/* SysKonnect CardBus2SDIO extra registers */
->=20
-> +#define SYSKT_CTRL             0x200
->=20
-> +#define SYSKT_RDFIFO_STAT       0x204
->=20
-> +#define SYSKT_WRFIFO_STAT       0x208
->=20
-> +#define SYSKT_POWER_DATA       0x20c
->=20
-> +#define   SYSKT_POWER_330    0xef
->=20
-> +#define   SYSKT_POWER_300    0xf8
->=20
-> +#define   SYSKT_POWER_184    0xcc
->=20
-> +#define SYSKT_POWER_CMD                0x20d
->=20
-> +#define   SYSKT_POWER_START        (1 << 7)
->=20
-> +#define SYSKT_POWER_STATUS 0x20e
->=20
-> +#define   SYSKT_POWER_STATUS_OK       (1 << 0)
->=20
-> +#define SYSKT_BOARD_REV                  0x210
->=20
-> +#define SYSKT_CHIP_REV             0x211
->=20
-> +#define SYSKT_CONF_DATA          0x212
->=20
-> +#define   SYSKT_CONF_DATA_1V8     (1 << 2)
->=20
-> +#define   SYSKT_CONF_DATA_2V5     (1 << 1)
->=20
-> +#define   SYSKT_CONF_DATA_3V3     (1 << 0)
->=20
-> +
->=20
-> +static int syskt_probe(struct sdhci_pci_chip *chip)
->=20
-> +{
->=20
-> +       if ((chip->pdev->class & 0x0000FF) =3D=3D PCI_SDHCI_IFVENDOR) {
->=20
-> +                chip->pdev->class &=3D ~0x0000FF;
->=20
-> +                chip->pdev->class |=3D PCI_SDHCI_IFDMA;
->=20
-> +       }
->=20
-> +       return 0;
->=20
-> +}
->=20
-> +
->=20
-> +static int syskt_probe_slot(struct sdhci_pci_slot *slot)
->=20
-> +{
->=20
-> +       int tm, ps;
->=20
-> +
->=20
-> +       u8 board_rev =3D readb(slot->host->ioaddr + SYSKT_BOARD_REV);
->=20
-> +       u8  chip_rev =3D readb(slot->host->ioaddr + SYSKT_CHIP_REV);
->=20
-> +       dev_info(&slot->chip->pdev->dev, "SysKonnect CardBus2SDIO, "
->=20
-> +                                            "board rev %d.%d, chip rev
-> %d.%d\n",
->=20
-> +                                            board_rev >> 4, board_rev &
-> 0xf,
->=20
-> +                                            chip_rev >> 4,  chip_rev &
-> 0xf);
->=20
-> +       if (chip_rev >=3D 0x20)
->=20
-> +                slot->host->quirks |=3D SDHCI_QUIRK_FORCE_DMA;
->=20
-> +
->=20
-> +       writeb(SYSKT_POWER_330, slot->host->ioaddr + SYSKT_POWER_DATA);
->=20
-> +       writeb(SYSKT_POWER_START, slot->host->ioaddr + SYSKT_POWER_CMD);
->=20
-> +       udelay(50);
->=20
-> +       tm =3D 10;  /* Wait max 1 ms */
->=20
-> +       do {
->=20
-> +                ps =3D readw(slot->host->ioaddr + SYSKT_POWER_STATUS);
->=20
-> +                if (ps & SYSKT_POWER_STATUS_OK)
->=20
-> +                          break;
->=20
-> +                udelay(100);
->=20
-> +       } while (--tm);
->=20
-> +       if (!tm) {
->=20
-> +                dev_err(&slot->chip->pdev->dev,
->=20
-> +                          "power regulator never stabilized");
->=20
-> +                writeb(0, slot->host->ioaddr + SYSKT_POWER_CMD);
->=20
-> +                return -ENODEV;
->=20
-> +       }
->=20
-> +
->=20
-> +       return 0;
->=20
-> +}
->=20
-> +
->=20
-> +static const struct sdhci_pci_fixes sdhci_syskt =3D {
->=20
-> +       .quirks                =3D SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER,
->=20
-> +       .probe                =3D syskt_probe,
->=20
-> +       .probe_slot       =3D syskt_probe_slot,
->=20
-> +};
->=20
-> +
->=20
->  static int via_probe(struct sdhci_pci_chip *chip)
->=20
->  {
->=20
->         if (chip->pdev->revision =3D=3D 0x10)
->=20
-> @@ -297,6 +364,14 @@ static const struct sdhci_pci_fixes sdhci_via =3D {
->=20
->         .probe                =3D via_probe,
->=20
->  };
->=20
-> =20
->=20
-> +#ifndef PCI_DEVICE_ID_O2_8120
->=20
-> +#define PCI_DEVICE_ID_O2_8120                  0x8120
->=20
-> +#endif
->=20
-> +
->=20
-> +#ifndef PCI_DEVICE_ID_O2_8220
->=20
-> +#define PCI_DEVICE_ID_O2_8220                  0x8220
->=20
-> +#endif
->=20
-> +
->=20
->  static const struct pci_device_id pci_ids[] __devinitdata =3D {
->=20
->         {
->=20
->                   .vendor               =3D PCI_VENDOR_ID_RICOH,
->=20
-> @@ -363,6 +438,14 @@ static const struct pci_device_id pci_ids[]
-> __devinitdata =3D {
->=20
->         },
->=20
-> =20
->=20
->         {
->=20
-> +                .vendor               =3D PCI_VENDOR_ID_SYSKONNECT,
->=20
-> +                .device               =3D 0x8000,
->=20
-> +                .subvendor        =3D PCI_ANY_ID,
->=20
-> +                .subdevice        =3D PCI_ANY_ID,
->=20
-> +                .driver_data       =3D (kernel_ulong_t)&sdhci_syskt,
->=20
-> +       },
->=20
-> +
->=20
-> +       {
->=20
->                   .vendor               =3D PCI_VENDOR_ID_VIA,
->=20
->                   .device               =3D 0x95d0,
->=20
->                   .subvendor        =3D PCI_ANY_ID,
->=20
-> @@ -370,6 +453,22 @@ static const struct pci_device_id pci_ids[]
-> __devinitdata =3D {
->=20
->                   .driver_data       =3D (kernel_ulong_t)&sdhci_via,
->=20
->         },
->=20
-> =20
->=20
-> +       {
->=20
-> +                .vendor               =3D PCI_VENDOR_ID_O2,
->=20
-> +                .device               =3D PCI_DEVICE_ID_O2_8120,
->=20
-> +                .subvendor        =3D PCI_ANY_ID,
->=20
-> +                .subdevice        =3D PCI_ANY_ID,
->=20
-> +                .driver_data       =3D (kernel_ulong_t)&sdhci_o2,
->=20
-> +       },
->=20
-> +
->=20
-> +       {
->=20
-> +                .vendor               =3D PCI_VENDOR_ID_O2,
->=20
-> +                .device               =3D PCI_DEVICE_ID_O2_8220,
->=20
-> +                .subvendor        =3D PCI_ANY_ID,
->=20
-> +                .subdevice        =3D PCI_ANY_ID,
->=20
-> +                .driver_data       =3D (kernel_ulong_t)&sdhci_o2,
->=20
-> +       },
->=20
-> +
->=20
->         {        /* Generic SD host controller */
->=20
->                   PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8),
-> 0xFFFF00)
->=20
->         },
->=20
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->=20
-> index c279fbc..b2c26ff 100644
->=20
-> --- a/drivers/mmc/host/sdhci.c
->=20
-> +++ b/drivers/mmc/host/sdhci.c
->=20
-> @@ -478,6 +478,15 @@ static int sdhci_adma_table_pre(struct sdhci_host
-> *host,
->=20
->                   desc[1] =3D 0x00;
->=20
->                   desc[0] =3D 0x21; /* tran, valid */
->=20
-> =20
->=20
-> +                /*
->=20
-> +                * Some host controller only doesn't support attribute
-> nop
->=20
-> +                * as the last ADMA table entry.
->=20
-> +               */
->=20
-> +                if ((host->quirks & SDHCI_QUICK_ADMA_TABLE_ENTRY) &&
->=20
-> +                          (i =3D=3D (host->sg_count-1))) {
->=20
-> +                          desc[0] =3D 0x23; /* tran, valid, end*/
->=20
-> +                }
->=20
-> +
->=20
->                   desc +=3D 8;
->=20
-> =20
->=20
->                   /*
->=20
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->=20
-> index ce5f1d7..2fa8245 100644
->=20
-> --- a/drivers/mmc/host/sdhci.h
->=20
-> +++ b/drivers/mmc/host/sdhci.h
->=20
-> @@ -8,6 +8,8 @@
->=20
->   * the Free Software Foundation; either version 2 of the License, or
-> (at
->=20
->   * your option) any later version.
->=20
->   */
->=20
-> +#ifndef __SDHCI_H
->=20
-> +#define __SDHCI_H
->=20
-> =20
->=20
->  #include <linux/scatterlist.h>
->=20
->  #include <linux/compiler.h>
->=20
-> @@ -234,6 +236,8 @@ struct sdhci_host {
->=20
->  #define SDHCI_QUIRK_DELAY_AFTER_POWER                     (1<<23)
->=20
->  /* Controller uses SDCLK instead of TMCLK for data timeouts */
->=20
->  #define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK                (1<<24)
->=20
-> +/* Controller only support ADMA table entry with attr=3D0x21 or 0x23 */
->=20
-> +#define SDHCI_QUICK_ADMA_TABLE_ENTRY                        (1<<25)
->=20
-> =20
->=20
->         int                        irq;             /* Device IRQ */
->=20
->         void __iomem *                  ioaddr;               /* Mapped
-> address */
->=20
-> @@ -408,3 +412,5 @@ extern void sdhci_remove_host(struct sdhci_host
-> *host, int dead);
->=20
->  extern int sdhci_suspend_host(struct sdhci_host *host, pm_message_t
-> state);
->=20
->  extern int sdhci_resume_host(struct sdhci_host *host);
->=20
->  #endif
->=20
-> +
->=20
-> +#endif /* __SDHCI_H */
->=20
-
-
---=20
-     -- Pierre Ossman
-
-  WARNING: This correspondence is being monitored by FRA, a
-  Swedish intelligence agency. Make sure your server uses
-  encryption for SMTP traffic and consider using PGP for
-  end-to-end encryption.
-
---=_freyr.ossman.eu-20385-1266063760-0001-2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename=signature.asc
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.13 (GNU/Linux)
-
-iEYEARECAAYFAkt2mZAACgkQ7b8eESbyJLgLrwCfXDR3T6/IkaSVWAQHEQ1O+qP9
-Gr8AoLgqBN2lwAGSGyCS0cCfWiI558dE
-=l7G1
------END PGP SIGNATURE-----
-
---=_freyr.ossman.eu-20385-1266063760-0001-2--
