@@ -1,37 +1,39 @@
-From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH 3/3] [U300] Set f_max to 24 MHz for MMC
-Date: Mon, 15 Feb 2010 12:24:00 +0100
-Message-ID: <1266233040-17124-1-git-send-email-linus.walleij@stericsson.com>
+From: David Vrabel <david.vrabel@csr.com>
+Subject: Re: [PATCH 3/3] [U300] Set f_max to 24 MHz for MMC
+Date: Mon, 15 Feb 2010 11:58:06 +0000
+Message-ID: <4B7936CE.9020402@csr.com>
+References: <1266233040-17124-1-git-send-email-linus.walleij@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:55619 "EHLO df.lth.se"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755187Ab0BOLYF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 15 Feb 2010 06:24:05 -0500
+Received: from cluster-d.mailcontrol.com ([85.115.60.190]:48428 "EHLO
+	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755436Ab0BOL7F (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2010 06:59:05 -0500
+Received: from rly13d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
+	by rly13d.srv.mailcontrol.com (MailControl) with ESMTP id o1FBwqgc007023
+	for <linux-mmc@vger.kernel.org>; Mon, 15 Feb 2010 11:59:00 GMT
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+	by rly13d.srv.mailcontrol.com (MailControl) id o1FBw8Ab002700
+	for <linux-mmc@vger.kernel.org>; Mon, 15 Feb 2010 11:58:08 GMT
+In-Reply-To: <1266233040-17124-1-git-send-email-linus.walleij@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: Linus Walleij <linus.walleij@stericsson.com>
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-This employs the frequency setting mechanism introduced to the
-MMCI to specify that this system can actually be clocked at 24 MHz.
+Linus Walleij wrote:
+> 
+> +	mmci_card->mmc0_plat_data.f_max = 24*1024*1024;
 
-Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
----
- arch/arm/mach-u300/mmc.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+Is the frequency really 25165824 Hz and not 24000000 Hz?
 
-diff --git a/arch/arm/mach-u300/mmc.c b/arch/arm/mach-u300/mmc.c
-index 8bf466b..5681563 100644
---- a/arch/arm/mach-u300/mmc.c
-+++ b/arch/arm/mach-u300/mmc.c
-@@ -104,6 +104,7 @@ int __devinit mmc_init(struct amba_device *adev)
- 	 * we have a regulator we can control instead.
- 	 */
- 	/* Nominally 2.85V on our platform */
-+	mmci_card->mmc0_plat_data.f_max = 24*1024*1024;
- 	mmci_card->mmc0_plat_data.status = mmc_status;
- 	mmci_card->mmc0_plat_data.gpio_wp = -1;
- 	mmci_card->mmc0_plat_data.gpio_cd = -1;
+David
 -- 
-1.6.3.3
+David Vrabel, Senior Software Engineer, Drivers
+CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
+Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
 
+
+Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
