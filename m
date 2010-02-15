@@ -1,39 +1,43 @@
-From: David Vrabel <david.vrabel@csr.com>
-Subject: Re: [PATCH 3/3] [U300] Set f_max to 24 MHz for MMC
-Date: Mon, 15 Feb 2010 11:58:06 +0000
-Message-ID: <4B7936CE.9020402@csr.com>
-References: <1266233040-17124-1-git-send-email-linus.walleij@stericsson.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: [PATCH] tmio_mmc: use 100ms mmc_detect_change() delay
+Date: Mon, 15 Feb 2010 21:12:29 +0900
+Message-ID: <20100215121229.23116.16376.sendpatchset@t400s>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-d.mailcontrol.com ([85.115.60.190]:48428 "EHLO
-	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755436Ab0BOL7F (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2010 06:59:05 -0500
-Received: from rly13d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
-	by rly13d.srv.mailcontrol.com (MailControl) with ESMTP id o1FBwqgc007023
-	for <linux-mmc@vger.kernel.org>; Mon, 15 Feb 2010 11:59:00 GMT
-Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
-	by rly13d.srv.mailcontrol.com (MailControl) id o1FBw8Ab002700
-	for <linux-mmc@vger.kernel.org>; Mon, 15 Feb 2010 11:58:08 GMT
-In-Reply-To: <1266233040-17124-1-git-send-email-linus.walleij@stericsson.com>
+Received: from mail-yx0-f200.google.com ([209.85.210.200]:49124 "EHLO
+	mail-yx0-f200.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754135Ab0BOMMt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2010 07:12:49 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@stericsson.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Magnus Damm <magnus.damm@gmail.com>, akpm@linux-foundation.org, linux-sh@vger.kernel.org
 
-Linus Walleij wrote:
-> 
-> +	mmci_card->mmc0_plat_data.f_max = 24*1024*1024;
+From: Magnus Damm <damm@opensource.se>
 
-Is the frequency really 25165824 Hz and not 24000000 Hz?
+This patch changes the tmio_mmc driver to wait 100ms
+before checking the card detect status. This type of
+delay is quite common among mmc drivers, it seems that
+most hardware platforms need to give the hardware some
+time to settle before checking card availabilty.
 
-David
--- 
-David Vrabel, Senior Software Engineer, Drivers
-CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
-Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
+Hotplug is half-broken without this patch on the sh7724
+Ecovec board. Hot plugging seems ok but eject is never
+detected without this patch.
 
+Signed-off-by: Magnus Damm <damm@opensource.se>
+---
 
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+ drivers/mmc/host/tmio_mmc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- 0001/drivers/mmc/host/tmio_mmc.c
++++ work/drivers/mmc/host/tmio_mmc.c	2010-02-15 20:28:15.000000000 +0900
+@@ -323,7 +323,7 @@ static irqreturn_t tmio_mmc_irq(int irq,
+ 		if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
+ 			ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
+ 				TMIO_STAT_CARD_REMOVE);
+-			mmc_detect_change(host->mmc, 0);
++			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+ 		}
+ 
+ 		/* CRC and other errors */
