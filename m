@@ -1,37 +1,42 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support
-Date: Mon, 15 Feb 2010 21:15:49 +0900
-Message-ID: <aec7e5c31002150415r1ce02e24ua9aa786d41fea36a@mail.gmail.com>
-References: <4B790102.4050907@renesas.com>
+From: "Linus Walleij" <linus.walleij@stericsson.com>
+Subject: RE: [PATCH 3/3] [U300] Set f_max to 24 MHz for MMC
+Date: Mon, 15 Feb 2010 14:04:07 +0100
+Message-ID: <A6D19A13FE030A409EC4362C172E091F0E84AFAD@eseldmw101.eemea.ericsson.se>
+References: <1266233040-17124-1-git-send-email-linus.walleij@stericsson.com>
+	<4B7936CE.9020402@csr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f224.google.com ([209.85.217.224]:58585 "EHLO
-	mail-gx0-f224.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754078Ab0BOMPu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2010 07:15:50 -0500
-Received: by gxk24 with SMTP id 24so4900646gxk.1
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Feb 2010 04:15:49 -0800 (PST)
-In-Reply-To: <4B790102.4050907@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-class: urn:content-classes:message
+In-Reply-To: <4B7936CE.9020402@csr.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: David Vrabel <david.vrabel@csr.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yusuke Goda <goda.yusuke@renesas.com>
-Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
 
-Hi Goda-san,
+[David Vrabel]
 
-2010/2/15 Yusuke Goda <goda.yusuke@renesas.com>:
-> Enable MMC_CAP_MMC_HIGHSPEED support in the tmio_mmc driver if
-> pdata->cap_highspeed is set.
->
-> Signed-off-by: Yusuke Goda <goda.yusuke@renesas.com>
+> Linus Walleij wrote:
+> > 
+> > +	mmci_card->mmc0_plat_data.f_max = 24*1024*1024;
+> 
+> Is the frequency really 25165824 Hz and not 24000000 Hz?
 
-Thanks for your patch, it looks fine to me.
-Acked-by: Magnus Damm <damm@opensource.se>
+It's actually 18900000 Hz. This f_max is a physical
+limitation and a property of the SoC, so that figure
+comes from some semiconductor person.
 
-If no one objects then I'll hack up a patch for the sh_mobile_sdhi
-driver that sets pdata->cah_highspeed to 1.
+When combined with the U300 clock framework, the
+min() function will resolve to min(18900000, 24000000)
+i.e. 18900000 Hz.
 
-Cheers,
-
-/ magnus
+Linus Walleij
