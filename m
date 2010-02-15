@@ -1,55 +1,48 @@
-From: Yusuke Goda <goda.yusuke@renesas.com>
-Subject: tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support
-Date: Mon, 15 Feb 2010 17:08:34 +0900
-Message-ID: <4B790102.4050907@renesas.com>
+From: Vasily Khoruzhick <anarsoul@gmail.com>
+Subject: Re: [PATCH v2] Enable DMA for Ricoh reader on Lenovo laptops
+Date: Mon, 15 Feb 2010 11:49:53 +0200
+Message-ID: <201002151150.00761.anarsoul@gmail.com>
+References: <201002011111.13010.anarsoul@gmail.com> <201002150106.13925.anarsoul@gmail.com> <1266189652.11083.1.camel@maxim-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-2022-JP
+Content-Type: multipart/signed;
+  boundary="nextPart2523236.PFUjp42kus";
+  protocol="application/pgp-signature";
+  micalg=pgp-sha1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.renesas.com ([202.234.163.13]:55066 "EHLO
-	mail04.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755356Ab0BOIJR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2010 03:09:17 -0500
+Received: from fg-out-1718.google.com ([72.14.220.155]:29457 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754640Ab0BOJuP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2010 04:50:15 -0500
+Received: by fg-out-1718.google.com with SMTP id 19so145378fgg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Feb 2010 01:50:14 -0800 (PST)
+In-Reply-To: <1266189652.11083.1.camel@maxim-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: akpm@linux-foundation.org, Magnus Damm <magnus.damm@gmail.com>
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
-Enable MMC_CAP_MMC_HIGHSPEED support in the tmio_mmc driver if
-pdata->cap_highspeed is set.
+--nextPart2523236.PFUjp42kus
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: base64
 
-Signed-off-by: Yusuke Goda <goda.yusuke@renesas.com>
----
- drivers/mmc/host/tmio_mmc.c |    2 ++
- include/linux/mfd/tmio.h    |    1 +
- 2 files changed, 3 insertions(+), 0 deletions(-)
+0JIg0YHQvtC+0LHRidC10L3QuNC4INC+0YIgMTUg0YTQtdCy0YDQsNC70Y8gMjAxMCAwMToyMDo1
+MiDQsNCy0YLQvtGAIE1heGltIExldml0c2t5INC90LDQv9C40YHQsNC7OgogCj4gQWNlciBBc3Bp
+cmUgNTcyMC4KClNvIG15IHBhdGNoIHdpdGggcXVpcmsgYWRkaXRpb24gZm9yIExlbm92byB3aWxs
+IG5vdCB3b3JrIGZvciB5b3UuIE1heWJlIGl0J2xsIApiZSBiZXR0ZXIgdG8gZW5hYmxlIERNQSBi
+eSBkZWZhdWx0IG9uIGFsbCBSaWNvaCByZWFkZXJzPwogClJlZ2FyZHMsClZhc2lseQo=
 
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index e22c3fa..a8ca83f 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -550,6 +550,8 @@ static int __devinit tmio_mmc_probe(struct platform_device *dev)
+--nextPart2523236.PFUjp42kus
+Content-Type: application/pgp-signature; name=signature.asc 
+Content-Description: This is a digitally signed message part.
 
- 	mmc->ops = &tmio_mmc_ops;
- 	mmc->caps = MMC_CAP_4_BIT_DATA;
-+	if (pdata->cap_highspeed)
-+		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
- 	mmc->f_max = pdata->hclk;
- 	mmc->f_min = mmc->f_max / 512;
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index 9cb1834..695199a 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -60,6 +60,7 @@ void tmio_core_mmc_clk_div(void __iomem *cnf, int shift, int state);
-  */
- struct tmio_mmc_data {
- 	const unsigned int		hclk;
-+	int 				cap_highspeed;
- 	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
- };
--- 
-1.6.4.3
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.14 (GNU/Linux)
 
+iEYEABECAAYFAkt5GMgACgkQRM6pQpltKE5UqwCgzNL2jz+5hKVMlYzRVioXxQwq
+nG4AnjrJKFfSmvv4EEc/TVQ4qCfrSXVN
+=29pn
+-----END PGP SIGNATURE-----
 
+--nextPart2523236.PFUjp42kus--
