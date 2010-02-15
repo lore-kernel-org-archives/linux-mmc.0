@@ -1,112 +1,78 @@
 From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH 1/3] [MMCI] remove custom DBG macro and printk
-Date: Mon, 15 Feb 2010 12:23:36 +0100
-Message-ID: <1266233016-16554-1-git-send-email-linus.walleij@stericsson.com>
+Subject: [PATCH 2/3] [MMCI] Pass max frequency from platform
+Date: Mon, 15 Feb 2010 12:23:49 +0100
+Message-ID: <1266233029-16839-1-git-send-email-linus.walleij@stericsson.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:55601 "EHLO df.lth.se"
+Received: from mail.df.lth.se ([194.47.250.12]:55610 "EHLO df.lth.se"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754963Ab0BOLXi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 15 Feb 2010 06:23:38 -0500
+	id S1754963Ab0BOLXw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 15 Feb 2010 06:23:52 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: Linus Walleij <linus.walleij@stericsson.com>
 
-This removes the custom DBG macro in favor of the in-kernel
-dev_dbg() macro. Probably a leftover from a time when dev_dbg()
-didn't yet exist. Also remove a printk() in favor of dev_err().
+This introduce the field f_max into the mmci_platform_data,
+making it possible to pass in a desired block clocking frequency
+from a board configuration. This is often more desirable than
+using a module parameter. We keep the module parameter as a
+fallback as well as the default frequency specified for this
+parameter if a parameter is not provided.
 
 Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
 ---
- drivers/mmc/host/mmci.c |   26 ++++++++++++--------------
- 1 files changed, 12 insertions(+), 14 deletions(-)
+ drivers/mmc/host/mmci.c   |   15 ++++++++++++++-
+ include/linux/amba/mmci.h |    4 ++++
+ 2 files changed, 18 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 72f23e9..2ea7dad 100644
+index 2ea7dad..9b0b763 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -37,9 +37,6 @@
+@@ -807,7 +807,20 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
  
- #define DRIVER_NAME "mmci-pl18x"
- 
--#define DBG(host,fmt,args...)	\
--	pr_debug("%s: %s: " fmt, mmc_hostname(host->mmc), __func__ , args)
--
- static unsigned int fmax = 515633;
- 
- /*
-@@ -106,8 +103,8 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- {
- 	void __iomem *base = host->base;
- 
--	DBG(host, "op %02x arg %08x flags %08x\n",
--	    cmd->opcode, cmd->arg, cmd->flags);
-+	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
-+		cmd->opcode, cmd->arg, cmd->flags);
- 
- 	if (readl(base + MMCICOMMAND) & MCI_CPSM_ENABLE) {
- 		writel(0, base + MMCICOMMAND);
-@@ -291,8 +288,8 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 	int blksz_bits;
- 	int ret;
- 
--	DBG(host, "blksz %04x blks %04x flags %08x\n",
--	    data->blksz, data->blocks, data->flags);
-+	dev_dbg(mmc_dev(host->mmc), "blksz %04x blks %04x flags %08x\n",
-+		data->blksz, data->blocks, data->flags);
- 
- 	host->data = data;
- 	host->size = data->blksz;
-@@ -498,7 +495,7 @@ static irqreturn_t mmci_pio_irq(int irq, void *dev_id)
- 
- 	status = readl(base + MMCISTATUS);
- 
--	DBG(host, "irq1 %08x\n", status);
-+	dev_dbg(mmc_dev(host->mmc), "irq1 (pio) %08x\n", status);
- 
- 	do {
- 		unsigned long flags;
-@@ -592,7 +589,7 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 		status &= readl(host->base + MMCIMASK0);
- 		writel(status, host->base + MMCICLEAR);
- 
--		DBG(host, "irq0 %08x\n", status);
-+		dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
- 
- 		data = host->data;
- 		if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_TXUNDERRUN|
-@@ -619,8 +616,8 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	WARN_ON(host->mrq != NULL);
- 
- 	if (mrq->data && !is_power_of_2(mrq->data->blksz)) {
--		printk(KERN_ERR "%s: Unsupported block size (%d bytes)\n",
--			mmc_hostname(mmc), mrq->data->blksz);
-+		dev_err(mmc_dev(mmc), "unsupported block size (%d bytes)\n",
-+			mrq->data->blksz);
- 		mrq->cmd->error = -EINVAL;
- 		mmc_request_done(mmc, mrq);
- 		return;
-@@ -773,8 +770,8 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
- 
- 	host->hw_designer = amba_manf(dev);
- 	host->hw_revision = amba_rev(dev);
--	DBG(host, "designer ID = 0x%02x\n", host->hw_designer);
--	DBG(host, "revision = 0x%01x\n", host->hw_revision);
-+	dev_dbg(mmc_dev(mmc), "designer ID = 0x%02x\n", host->hw_designer);
-+	dev_dbg(mmc_dev(mmc), "revision = 0x%01x\n", host->hw_revision);
- 
- 	host->clk = clk_get(&dev->dev, NULL);
- 	if (IS_ERR(host->clk)) {
-@@ -799,7 +796,8 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
- 		if (ret < 0)
- 			goto clk_disable;
- 		host->mclk = clk_get_rate(host->clk);
--		DBG(host, "eventual mclk rate: %u Hz\n", host->mclk);
-+		dev_dbg(mmc_dev(mmc), "eventual mclk rate: %u Hz\n",
-+			host->mclk);
- 	}
- 	host->base = ioremap(dev->res.start, resource_size(&dev->res));
- 	if (!host->base) {
+ 	mmc->ops = &mmci_ops;
+ 	mmc->f_min = (host->mclk + 511) / 512;
+-	mmc->f_max = min(host->mclk, fmax);
++	/*
++	 * If the platform data supplies a maximum operating
++	 * frequency, this takes precedence. Else, we fall back
++	 * to using the module parameter, which has a (low)
++	 * default value in case it is not specified. Either
++	 * value must not exceed the clock rate into the block,
++	 * of course.
++	 */
++	if (plat->f_max)
++		mmc->f_max = min(host->mclk, plat->f_max);
++	else
++		mmc->f_max = min(host->mclk, fmax);
++	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
++
+ #ifdef CONFIG_REGULATOR
+ 	/* If we're using the regulator framework, try to fetch a regulator */
+ 	host->vcc = regulator_get(&dev->dev, "vmmc");
+diff --git a/include/linux/amba/mmci.h b/include/linux/amba/mmci.h
+index a4937a8..0c89072 100644
+--- a/include/linux/amba/mmci.h
++++ b/include/linux/amba/mmci.h
+@@ -9,6 +9,9 @@
+ /**
+  * struct mmci_platform_data - platform configuration for the MMCI
+  * (also known as PL180) block.
++ * @f_max: the maximum operational frequency for this host in this
++ * platform configuration. When this is specified it takes precedence
++ * over the module parameter for the same frequency.
+  * @ocr_mask: available voltages on the 4 pins from the block, this
+  * is ignored if a regulator is used, see the MMC_VDD_* masks in
+  * mmc/host.h
+@@ -35,6 +38,7 @@
+  * bidirectional channel
+  */
+ struct mmci_platform_data {
++	unsigned int f_max;
+ 	unsigned int ocr_mask;
+ 	u32 (*translate_vdd)(struct device *, unsigned int);
+ 	unsigned int (*status)(struct device *);
 -- 
 1.6.3.3
 
