@@ -1,121 +1,63 @@
-From: Vasily Khoruzhick <anarsoul@gmail.com>
-Subject: Re: [PATCH v2] Enable DMA for Ricoh reader on Lenovo laptops
-Date: Mon, 15 Feb 2010 18:20:39 +0200
-Message-ID: <201002151820.45110.anarsoul@gmail.com>
-References: <201002011111.13010.anarsoul@gmail.com> <201002151150.00761.anarsoul@gmail.com> <1266249504.10662.5.camel@maxim-laptop>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support
+Date: Mon, 15 Feb 2010 19:00:55 +0100
+Message-ID: <63386a3d1002151000m77c9a02dhbcd626ff2a42b3ef@mail.gmail.com>
+References: <4B790102.4050907@renesas.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed;
-  boundary="nextPart2746475.8CnnaAgiEy";
-  protocol="application/pgp-signature";
-  micalg=pgp-sha1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fg-out-1718.google.com ([72.14.220.158]:10749 "EHLO
-	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752029Ab0BOQVD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2010 11:21:03 -0500
-Received: by fg-out-1718.google.com with SMTP id 16so119007fgg.1
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Feb 2010 08:21:01 -0800 (PST)
-In-Reply-To: <1266249504.10662.5.camel@maxim-laptop>
+Received: from mail-bw0-f213.google.com ([209.85.218.213]:57934 "EHLO
+	mail-bw0-f213.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755897Ab0BOSHf convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2010 13:07:35 -0500
+Received: by bwz5 with SMTP id 5so1285697bwz.1
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Feb 2010 10:07:34 -0800 (PST)
+In-Reply-To: <4B790102.4050907@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: linux-mmc@vger.kernel.org
+To: Yusuke Goda <goda.yusuke@renesas.com>
+Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org, Magnus Damm <magnus.damm@gmail.com>
 
---nextPart2746475.8CnnaAgiEy
-Content-Type: multipart/mixed;
-  boundary="Boundary-01=_XRXeLRGouPiv9hW"
-Content-Transfer-Encoding: 7bit
+2010/2/15 Yusuke Goda <goda.yusuke@renesas.com>:
 
+> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> index 9cb1834..695199a 100644
+> --- a/include/linux/mfd/tmio.h
+> +++ b/include/linux/mfd/tmio.h
+> @@ -60,6 +60,7 @@ void tmio_core_mmc_clk_div(void __iomem *cnf, int s=
+hift, int state);
+> =A0*/
+> =A0struct tmio_mmc_data {
+> =A0 =A0 =A0 =A0const unsigned int =A0 =A0 =A0 =A0 =A0 =A0 =A0hclk;
+> + =A0 =A0 =A0 int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 cap_highspeed;
 
---Boundary-01=_XRXeLRGouPiv9hW
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: inline
+If this is really a bool, then declare it as a bool.
 
-=D0=92 =D1=81=D0=BE=D0=BE=D0=B1=D1=89=D0=B5=D0=BD=D0=B8=D0=B8 =D0=BE=D1=82 =
-15 =D1=84=D0=B5=D0=B2=D1=80=D0=B0=D0=BB=D1=8F 2010 17:58:24 =D0=B0=D0=B2=D1=
-=82=D0=BE=D1=80 Maxim Levitsky =D0=BD=D0=B0=D0=BF=D0=B8=D1=81=D0=B0=D0=BB:
-> Not sure if I need the SDHCI_QUIRK_CLOCK_BEFORE_RESET.
+But isn't it better to be able to specify arbitary caps for the platfor=
+m?
+So make this an
 
-Driver sometimes doesn't detect card without this quirk for me.
+unsigned long capabilities;
 
-> What I don't get is why DMA capability isn't advertised?
->=20
-> Since xD and memstick portions do support DMA, I can't belive that they
-> don't use DMA in SD/SDHCI portion.=20
->=20
-> Ah, I forgot that SDHCI is handled by microsoft driver.... Maybe it
-> doesn't test the DMA bits.
->=20
-> If we were to follow the way MS driver works, we wouldn't need the
-> quirks, right?
+instead?  Else you will get in trouble the day you want to tag
+on something else (like MMC_CAP_SD_HIGHSPEED), and it
+doesn't make sense to extend the struct with bools for just about
+everything.
 
-We need generic quirk for ricoh readers, see attached patch
+Such a change would result in:
 
-Regards
-Vasily
+> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.=
+c
+> (...)
+>        mmc->caps =3D MMC_CAP_4_BIT_DATA;
+> +       if (pdata->cap_highspeed)
+> +               mmc->caps |=3D MMC_CAP_MMC_HIGHSPEED;
 
---Boundary-01=_XRXeLRGouPiv9hW
-Content-Type: text/x-patch;
-  charset="utf-8";
-  name="0001-Enable-DMA-on-Ricoh-sdhci-reader-by-default.patch"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: inline;
-	filename="0001-Enable-DMA-on-Ricoh-sdhci-reader-by-default.patch"
+mmc->caps |=3D pdata->capabilities;
 
-=46rom 9cbd6c6667d8a2fce583e1e2e7c253b75ec1b675 Mon Sep 17 00:00:00 2001
-=46rom: Vasily Khoruzhick <anarsoul@gmail.com>
-Date: Mon, 15 Feb 2010 18:10:41 +0200
-Subject: [PATCH] Enable DMA on Ricoh sdhci reader by default
+=2E.and then set .capabilities to MMC_CAP_MMC_HIGHSPEED in the
+platform data.
 
-Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
-=2D--
- drivers/mmc/host/sdhci-pci.c |    7 +++----
- 1 files changed, 3 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 5c3a176..12f5b09 100644
-=2D-- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -80,9 +80,6 @@ struct sdhci_pci_chip {
-=20
- static int ricoh_probe(struct sdhci_pci_chip *chip)
- {
-=2D	if (chip->pdev->subsystem_vendor =3D=3D PCI_VENDOR_ID_IBM)
-=2D		chip->quirks |=3D SDHCI_QUIRK_CLOCK_BEFORE_RESET;
-=2D
- 	if (chip->pdev->subsystem_vendor =3D=3D PCI_VENDOR_ID_SAMSUNG ||
- 	    chip->pdev->subsystem_vendor =3D=3D PCI_VENDOR_ID_SONY)
- 		chip->quirks |=3D SDHCI_QUIRK_NO_CARD_NO_RESET;
-@@ -92,7 +89,9 @@ static int ricoh_probe(struct sdhci_pci_chip *chip)
-=20
- static const struct sdhci_pci_fixes sdhci_ricoh =3D {
- 	.probe		=3D ricoh_probe,
-=2D	.quirks		=3D SDHCI_QUIRK_32BIT_DMA_ADDR,
-+	.quirks		=3D SDHCI_QUIRK_32BIT_DMA_ADDR |
-+			  SDHCI_QUIRK_FORCE_DMA |
-+			  SDHCI_QUIRK_CLOCK_BEFORE_RESET,
- };
-=20
- static const struct sdhci_pci_fixes sdhci_ene_712 =3D {
-=2D-=20
-1.6.6.1
-
-
---Boundary-01=_XRXeLRGouPiv9hW--
-
---nextPart2746475.8CnnaAgiEy
-Content-Type: application/pgp-signature; name=signature.asc 
-Content-Description: This is a digitally signed message part.
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.14 (GNU/Linux)
-
-iEYEABECAAYFAkt5dF0ACgkQRM6pQpltKE7HrwCcDEV42Q47aiOAxkuEjPTepo8n
-OswAnRwRA7aQmZyZ0RsOhy6z+LjTjP12
-=DmqC
------END PGP SIGNATURE-----
-
---nextPart2746475.8CnnaAgiEy--
+Linus
