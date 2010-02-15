@@ -1,7 +1,7 @@
 From: "Linus Walleij" <linus.walleij@stericsson.com>
 Subject: RE: [PATCH 3/3] [U300] Set f_max to 24 MHz for MMC
-Date: Mon, 15 Feb 2010 14:04:07 +0100
-Message-ID: <A6D19A13FE030A409EC4362C172E091F0E84AFAD@eseldmw101.eemea.ericsson.se>
+Date: Mon, 15 Feb 2010 14:07:13 +0100
+Message-ID: <A6D19A13FE030A409EC4362C172E091F0E84AFBD@eseldmw101.eemea.ericsson.se>
 References: <1266233040-17124-1-git-send-email-linus.walleij@stericsson.com>
 	<4B7936CE.9020402@csr.com>
 Mime-Version: 1.0
@@ -31,12 +31,10 @@ List-Id: linux-mmc@vger.kernel.org
 > 
 > Is the frequency really 25165824 Hz and not 24000000 Hz?
 
-It's actually 18900000 Hz. This f_max is a physical
-limitation and a property of the SoC, so that figure
-comes from some semiconductor person.
+Or, yes it is 24000000, as was your question, hm,
+the 1024 was probably out of habit, I'll change to
+24*1000*1000.
 
-When combined with the U300 clock framework, the
-min() function will resolve to min(18900000, 24000000)
-i.e. 18900000 Hz.
+Sorry for getting it all backwards, I need vacation.
 
 Linus Walleij
