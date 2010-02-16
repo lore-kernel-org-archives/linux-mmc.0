@@ -1,74 +1,42 @@
-From: akpm@linux-foundation.org
-Subject: + tmio_mmc-keep-card-detect-interrupts-enabled.patch added to -mm tree
-Date: Tue, 16 Feb 2010 13:52:03 -0800
-Message-ID: <201002162152.o1GLq3Wj007162@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: g.liakhovetski@gmx.de, a.beregalov@gmail.com, damm@opensource.se, ian@mnementh.co.uk, lethal@linux-sh.org, linux-mmc@vger.kernel.org, pierre@ossman.eu
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support
+Date: Tue, 16 Feb 2010 14:32:41 -0800
+Message-ID: <20100216143241.d915ae54.akpm@linux-foundation.org>
+References: <4B790102.4050907@renesas.com>
+	<aec7e5c31002150415r1ce02e24ua9aa786d41fea36a@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:51415 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933126Ab0BPWcs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Feb 2010 17:32:48 -0500
+In-Reply-To: <aec7e5c31002150415r1ce02e24ua9aa786d41fea36a@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: Yusuke Goda <goda.yusuke@renesas.com>, linux-mmc@vger.kernel.org
 
+On Mon, 15 Feb 2010 21:15:49 +0900
+Magnus Damm <magnus.damm@gmail.com> wrote:
 
-The patch titled
-     tmio_mmc: keep card-detect interrupts enabled
-has been added to the -mm tree.  Its filename is
-     tmio_mmc-keep-card-detect-interrupts-enabled.patch
+> Hi Goda-san,
+> 
+> 2010/2/15 Yusuke Goda <goda.yusuke@renesas.com>:
+> > Enable MMC_CAP_MMC_HIGHSPEED support in the tmio_mmc driver if
+> > pdata->cap_highspeed is set.
+> >
+> > Signed-off-by: Yusuke Goda <goda.yusuke@renesas.com>
+> 
+> Thanks for your patch, it looks fine to me.
+> Acked-by: Magnus Damm <damm@opensource.se>
+> 
+> If no one objects then I'll hack up a patch for the sh_mobile_sdhi
+> driver that sets pdata->cah_highspeed to 1.
+> 
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+Would prefer to see the interrelated patches in a single series please.
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: tmio_mmc: keep card-detect interrupts enabled
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-
-On SuperH platforms the SDHI controller does not produce any command IRQs after
-a completed IO. This leads to card-detect interrupts staying disabled. Do not
-disable card-detect interrupts on DATA IRQs.
-
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Ian Molton <ian@mnementh.co.uk>
-Cc: Magnus Damm <damm@opensource.se>
-Cc: Paul Mundt <lethal@linux-sh.org>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Alexander Beregalov <a.beregalov@gmail.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/tmio_mmc.h |    6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
-
-diff -puN drivers/mmc/host/tmio_mmc.h~tmio_mmc-keep-card-detect-interrupts-enabled drivers/mmc/host/tmio_mmc.h
---- a/drivers/mmc/host/tmio_mmc.h~tmio_mmc-keep-card-detect-interrupts-enabled
-+++ a/drivers/mmc/host/tmio_mmc.h
-@@ -55,10 +55,8 @@
- /* Define some IRQ masks */
- /* This is the mask used at reset by the chip */
- #define TMIO_MASK_ALL           0x837f031d
--#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND | \
--		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
--#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND | \
--		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
-+#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND)
-+#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND)
- #define TMIO_MASK_CMD     (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT | \
- 		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
- #define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
-_
-
-Patches currently in -mm which might be from g.liakhovetski@gmx.de are
-
-linux-next.patch
-tmio_mmc-keep-card-detect-interrupts-enabled.patch
+Linus Walleij's suggestion sounded good, too.
 
