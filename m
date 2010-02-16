@@ -1,74 +1,80 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] tmio_mmc: keep card-detect interrupts enabled
-Date: Tue, 16 Feb 2010 10:34:55 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1002161028200.4778@axis700.grange>
-References: <Pine.LNX.4.64.0911061127240.4389@axis700.grange>
- <c09aa50a0911090242l35d0dfb2vec0cdeff8b86d33e@mail.gmail.com>
- <Pine.LNX.4.64.0911091530030.4289@axis700.grange>
- <c09aa50a0911091218i681449e0r5cb96b9db3e0def6@mail.gmail.com>
- <Pine.LNX.4.64.0911092134440.4289@axis700.grange>
- <c09aa50a0911091736k27d66483t9012e296bfbf578a@mail.gmail.com>
- <Pine.LNX.4.64.0911282002490.3696@axis700.grange>
- <Pine.LNX.4.64.0912162223170.5283@axis700.grange>
- <Pine.LNX.4.64.0912172113510.5991@axis700.grange>
- <20091217131239.0dfd5534.akpm@linux-foundation.org>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH v2] tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support
+Date: Tue, 16 Feb 2010 18:57:43 +0900
+Message-ID: <aec7e5c31002160157t4bad8803te84b12c65e98a092@mail.gmail.com>
+References: <4B7A0450.8000303@renesas.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:59983 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1756814Ab0BPJe7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 16 Feb 2010 04:34:59 -0500
-In-Reply-To: <20091217131239.0dfd5534.akpm@linux-foundation.org>
+Received: from mail-yw0-f176.google.com ([209.85.211.176]:61113 "EHLO
+	mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756814Ab0BPJ5o convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Feb 2010 04:57:44 -0500
+Received: by ywh6 with SMTP id 6so4321937ywh.4
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Feb 2010 01:57:43 -0800 (PST)
+In-Reply-To: <4B7A0450.8000303@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <damm@opensource.se>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
+To: Yusuke Goda <goda.yusuke@renesas.com>
+Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org, linus.ml.walleij@gmail.com, Ian Molton <ian@mnementh.co.uk>
 
-On SuperH platforms the SDHI controller does not produce any command IRQs after
-a completed IO. This leads to card-detect interrupts staying disabled. Do not
-disable card-detect interrupts on DATA IRQs.
+Goda-san,
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
-On Thu, 17 Dec 2009, Andrew Morton wrote:
+[CC Ian]
 
-> On Thu, 17 Dec 2009 21:25:52 +0100 (CET)
-> Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
-> 
-> > I originally submitted this [1] patch on the 6th of November, then 
-> > accidentally the MMC list got dropped from CC and the discussion moved to 
-> > another irrelevant list, Ian's last reply is at [2]. Unfortunately, Ian 
-> > hasn't replied to my reminders since then, and I don't see this patch 
-> > anywhere upstream. Is there any way we could get it into 2.6.33?
-> 
-> Please redo and retest it against curent mainline and do a full resend.
+Thanks for your v2 patch. Let's wait and see what Ian thinks. It's a
+quite trivial change though so I would be surprised if he had any
+objections.
 
-Re-testing this patch has again become possible now, after Magnus has 
-posted his INTC and the "tmio_mmc: use 100ms mmc_detect_change() delay" 
-patches. Successfully tested on Migo-R (sh7722) and MS7724SE (sh7724). 
-Andrew, please apply.
+Cheers,
 
- drivers/mmc/host/tmio_mmc.h |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
+/ magnus
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 692dc23..dafecfb 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -55,10 +55,8 @@
- /* Define some IRQ masks */
- /* This is the mask used at reset by the chip */
- #define TMIO_MASK_ALL           0x837f031d
--#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND | \
--		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
--#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND | \
--		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
-+#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND)
-+#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND)
- #define TMIO_MASK_CMD     (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT | \
- 		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
- #define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
--- 
-1.6.2.4
-
+2010/2/16 Yusuke Goda <goda.yusuke@renesas.com>:
+> Enable MMC_CAP_XX support in the tmio_mmc driver if
+> pdata->capabilities is set.
+>
+>
+> Signed-off-by: Yusuke Goda <goda.yusuke@renesas.com>
+> ---
+> =A0drivers/mmc/host/tmio_mmc.c | =A0 =A01 +
+> =A0include/linux/mfd/tmio.h =A0 =A0| =A0 =A01 +
+> =A02 files changed, 2 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.=
+c
+> index e22c3fa..e2c0cc9 100644
+> --- a/drivers/mmc/host/tmio_mmc.c
+> +++ b/drivers/mmc/host/tmio_mmc.c
+> @@ -550,6 +550,7 @@ static int __devinit tmio_mmc_probe(struct platfo=
+rm_device *dev)
+>
+> =A0 =A0 =A0 =A0mmc->ops =3D &tmio_mmc_ops;
+> =A0 =A0 =A0 =A0mmc->caps =3D MMC_CAP_4_BIT_DATA;
+> + =A0 =A0 =A0 mmc->caps |=3D pdata->capabilities;
+> =A0 =A0 =A0 =A0mmc->f_max =3D pdata->hclk;
+> =A0 =A0 =A0 =A0mmc->f_min =3D mmc->f_max / 512;
+> =A0 =A0 =A0 =A0mmc->ocr_avail =3D MMC_VDD_32_33 | MMC_VDD_33_34;
+> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> index 9cb1834..37d9414 100644
+> --- a/include/linux/mfd/tmio.h
+> +++ b/include/linux/mfd/tmio.h
+> @@ -60,6 +60,7 @@ void tmio_core_mmc_clk_div(void __iomem *cnf, int s=
+hift, int state);
+> =A0*/
+> =A0struct tmio_mmc_data {
+> =A0 =A0 =A0 =A0const unsigned int =A0 =A0 =A0 =A0 =A0 =A0 =A0hclk;
+> + =A0 =A0 =A0 unsigned long =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 capab=
+ilities;
+> =A0 =A0 =A0 =A0void (*set_pwr)(struct platform_device *host, int stat=
+e);
+> =A0 =A0 =A0 =A0void (*set_clk_div)(struct platform_device *host, int =
+state);
+> =A0};
+> --
+> 1.6.4.3
+>
+>
+>
+>
