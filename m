@@ -1,42 +1,51 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support
-Date: Tue, 16 Feb 2010 14:32:41 -0800
-Message-ID: <20100216143241.d915ae54.akpm@linux-foundation.org>
-References: <4B790102.4050907@renesas.com>
-	<aec7e5c31002150415r1ce02e24ua9aa786d41fea36a@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] tmio_mmc: keep card-detect interrupts enabled
+Date: Tue, 16 Feb 2010 23:44:38 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1002162343190.4778@axis700.grange>
+References: <Pine.LNX.4.64.0911061127240.4389@axis700.grange>
+ <c09aa50a0911090242l35d0dfb2vec0cdeff8b86d33e@mail.gmail.com>
+ <Pine.LNX.4.64.0911091530030.4289@axis700.grange>
+ <c09aa50a0911091218i681449e0r5cb96b9db3e0def6@mail.gmail.com>
+ <Pine.LNX.4.64.0911092134440.4289@axis700.grange>
+ <c09aa50a0911091736k27d66483t9012e296bfbf578a@mail.gmail.com>
+ <Pine.LNX.4.64.0911282002490.3696@axis700.grange>
+ <Pine.LNX.4.64.0912162223170.5283@axis700.grange>
+ <Pine.LNX.4.64.0912172113510.5991@axis700.grange>
+ <20091217131239.0dfd5534.akpm@linux-foundation.org>
+ <Pine.LNX.4.64.1002161028200.4778@axis700.grange>
+ <20100216135146.beacf701.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:51415 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933126Ab0BPWcs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Feb 2010 17:32:48 -0500
-In-Reply-To: <aec7e5c31002150415r1ce02e24ua9aa786d41fea36a@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20100216135146.beacf701.akpm@linux-foundation.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <damm@opensource.se>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: Yusuke Goda <goda.yusuke@renesas.com>, linux-mmc@vger.kernel.org
 
-On Mon, 15 Feb 2010 21:15:49 +0900
-Magnus Damm <magnus.damm@gmail.com> wrote:
+On Tue, 16 Feb 2010, Andrew Morton wrote:
 
-> Hi Goda-san,
+> On Tue, 16 Feb 2010 10:34:55 +0100 (CET)
+> Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
 > 
-> 2010/2/15 Yusuke Goda <goda.yusuke@renesas.com>:
-> > Enable MMC_CAP_MMC_HIGHSPEED support in the tmio_mmc driver if
-> > pdata->cap_highspeed is set.
-> >
-> > Signed-off-by: Yusuke Goda <goda.yusuke@renesas.com>
+> > On SuperH platforms the SDHI controller does not produce any command IRQs after
+> > a completed IO. This leads to card-detect interrupts staying disabled. Do not
+> > disable card-detect interrupts on DATA IRQs.
+> > 
 > 
-> Thanks for your patch, it looks fine to me.
-> Acked-by: Magnus Damm <damm@opensource.se>
+> Why is the current code disabling card-detect interrupts on DATA IRQs? 
+> Was that just a bug?
 > 
-> If no one objects then I'll hack up a patch for the sh_mobile_sdhi
-> driver that sets pdata->cah_highspeed to 1.
-> 
+> What effect will this change have for current users of this driver?
 
-Would prefer to see the interrelated patches in a single series please.
+Unfortunately, I cannot answer these questions, best I can do is refer you 
+to this reply from Ian:
 
-Linus Walleij's suggestion sounded good, too.
+http://article.gmane.org/gmane.linux.drivers.video-input-infrastructure/11995
 
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
