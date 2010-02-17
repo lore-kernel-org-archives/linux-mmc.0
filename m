@@ -1,79 +1,54 @@
-From: akpm@linux-foundation.org
-Subject: + tmio_mmc-use-100ms-mmc_detect_change-delay.patch added to -mm tree
-Date: Tue, 16 Feb 2010 14:51:34 -0800
-Message-ID: <201002162251.o1GMpYsV009935@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: damm@opensource.se, ian@mnementh.co.uk, lethal@linux-sh.org, linux-mmc@vger.kernel.org, philipp.zabel@gmail.com, pierre@ossman.eu
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: Re: [PATCH v2] Enable DMA for Ricoh reader on Lenovo laptops
+Date: Wed, 17 Feb 2010 02:35:35 +0200
+Message-ID: <1266366935.4820.0.camel@maxim-laptop>
+References: <201002011111.13010.anarsoul@gmail.com>
+	 <201002151150.00761.anarsoul@gmail.com>
+	 <1266249504.10662.5.camel@maxim-laptop>
+	 <201002151820.45110.anarsoul@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-fx0-f215.google.com ([209.85.220.215]:38420 "EHLO
+	mail-fx0-f215.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933626Ab0BQAfl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Feb 2010 19:35:41 -0500
+Received: by fxm7 with SMTP id 7so7963510fxm.28
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Feb 2010 16:35:38 -0800 (PST)
+In-Reply-To: <201002151820.45110.anarsoul@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Vasily Khoruzhick <anarsoul@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
+On Mon, 2010-02-15 at 18:20 +0200, Vasily Khoruzhick wrote:=20
+> =D0=92 =D1=81=D0=BE=D0=BE=D0=B1=D1=89=D0=B5=D0=BD=D0=B8=D0=B8 =D0=BE=D1=
+=82 15 =D1=84=D0=B5=D0=B2=D1=80=D0=B0=D0=BB=D1=8F 2010 17:58:24 =D0=B0=D0=
+=B2=D1=82=D0=BE=D1=80 Maxim Levitsky =D0=BD=D0=B0=D0=BF=D0=B8=D1=81=D0=B0=
+=D0=BB:
+> > Not sure if I need the SDHCI_QUIRK_CLOCK_BEFORE_RESET.
+>=20
+> Driver sometimes doesn't detect card without this quirk for me.
+>=20
+> > What I don't get is why DMA capability isn't advertised?
+> >=20
+> > Since xD and memstick portions do support DMA, I can't belive that =
+they
+> > don't use DMA in SD/SDHCI portion.=20
+> >=20
+> > Ah, I forgot that SDHCI is handled by microsoft driver.... Maybe it
+> > doesn't test the DMA bits.
+> >=20
+> > If we were to follow the way MS driver works, we wouldn't need the
+> > quirks, right?
+>=20
+> We need generic quirk for ricoh readers, see attached patch
+>=20
+> Regards
+> Vasily
+Tested-by: Maxim Levitsky <maximlevitsky@gmail.com>
 
-The patch titled
-     tmio_mmc: use 100ms mmc_detect_change() delay
-has been added to the -mm tree.  Its filename is
-     tmio_mmc-use-100ms-mmc_detect_change-delay.patch
-
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: tmio_mmc: use 100ms mmc_detect_change() delay
-From: Magnus Damm <damm@opensource.se>
-
-Change the tmio_mmc driver to wait 100ms before checking the card detect
-status.  This type of delay is quite common among mmc drivers, it seems
-that most hardware platforms need to give the hardware some time to settle
-before checking card availabilty.
-
-Hotplug is half-broken without this patch on the sh7724 Ecovec board.  Hot
-plugging seems ok but eject is never detected without this patch.
-
-Signed-off-by: Magnus Damm <damm@opensource.se>
-Cc: Ian Molton <ian@mnementh.co.uk>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Philipp Zabel <philipp.zabel@gmail.com>
-Cc: Paul Mundt <lethal@linux-sh.org>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/tmio_mmc.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff -puN drivers/mmc/host/tmio_mmc.c~tmio_mmc-use-100ms-mmc_detect_change-delay drivers/mmc/host/tmio_mmc.c
---- a/drivers/mmc/host/tmio_mmc.c~tmio_mmc-use-100ms-mmc_detect_change-delay
-+++ a/drivers/mmc/host/tmio_mmc.c
-@@ -332,7 +332,7 @@ static irqreturn_t tmio_mmc_irq(int irq,
- 		if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
- 			ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
- 				TMIO_STAT_CARD_REMOVE);
--			mmc_detect_change(host->mmc, 0);
-+			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
- 		}
- 
- 		/* CRC and other errors */
-_
-
-Patches currently in -mm which might be from damm@opensource.se are
-
-linux-next.patch
-clocksource-add-argument-to-resume-callback.patch
-clocksource-start-cmt-at-clocksource-resume.patch
-clocksource-add-suspend-callback.patch
-mmc-remove-const-from-tmio-mmc-platform-data-v2.patch
-mmc-balance-tmio-mmc-cell-enable-disable-calls.patch
-tmio_mmc-use-100ms-mmc_detect_change-delay.patch
-tmio_mmc-keep-card-detect-interrupts-enabled.patch
+Best regards,
+Maxim Levitsky
 
