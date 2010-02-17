@@ -1,76 +1,49 @@
 From: Magnus Damm <magnus.damm@gmail.com>
-Subject: [PATCH 05/05] tmio_mmc: Balance cell enable()/disable() calls
-Date: Wed, 17 Feb 2010 16:38:23 +0900
-Message-ID: <20100217073823.32726.10307.sendpatchset@t400s>
+Subject: [PATCH 01/05] tmio_mmc: Keep card-detect interrupts enabled
+Date: Wed, 17 Feb 2010 16:37:45 +0900
+Message-ID: <20100217073745.32726.24254.sendpatchset@t400s>
 References: <20100217073735.32726.12020.sendpatchset@t400s>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f176.google.com ([209.85.211.176]:61066 "EHLO
-	mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934100Ab0BQHio (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Feb 2010 02:38:44 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <20100217073735.32726.12020.sendpatchset@t400s>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: sameo@linux.intel.com, linux-sh@vger.kernel.org, linus.ml.walleij@gmail.com, akpm@linux-foundation.org, goda.yusuke@renesas.com, ian@mnementh.co.uk, lethal@linux-sh.org, Magnus Damm <magnus.damm@gmail.com>, g.liakhovetski@gmx.de
+List-Id: linux-mmc@vger.kernel.org
 
-From: Magnus Damm <damm@opensource.se>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-This patch adds cell->disable() calls to the tmio-mmc
-probe() error handling and the remove() function.
+On SuperH platforms the SDHI controller does not produce any command IRQs after
+a completed IO. This leads to card-detect interrupts staying disabled. Do not
+disable card-detect interrupts on DATA IRQs.
 
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Signed-off-by: Magnus Damm <damm@opensource.se>
 ---
 
- Previously posted to linux-mmc 20091126 as
- "[PATCH 03/03] mmc: Balance tmio-mmc cell enable()/disable() calls"
+ Previously posted by Guennadi to linux-mmc 20100216 as
+ "[PATCH] tmio_mmc: keep card-detect interrupts enabled"
 
- drivers/mmc/host/tmio_mmc.c |   10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ drivers/mmc/host/tmio_mmc.h |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
 
---- 0004/drivers/mmc/host/tmio_mmc.c
-+++ work/drivers/mmc/host/tmio_mmc.c	2010-02-17 15:54:01.000000000 +0900
-@@ -569,14 +569,14 @@ static int __devinit tmio_mmc_probe(stru
- 	if (ret >= 0)
- 		host->irq = ret;
- 	else
--		goto unmap_ctl;
-+		goto cell_disable;
- 
- 	disable_mmc_irqs(host, TMIO_MASK_ALL);
- 
- 	ret = request_irq(host->irq, tmio_mmc_irq, IRQF_DISABLED |
- 		IRQF_TRIGGER_FALLING, dev_name(&dev->dev), host);
- 	if (ret)
--		goto unmap_ctl;
-+		goto cell_disable;
- 
- 	mmc_add_host(mmc);
- 
-@@ -588,6 +588,9 @@ static int __devinit tmio_mmc_probe(stru
- 
- 	return 0;
- 
-+cell_disable:
-+	if (cell->disable)
-+		cell->disable(dev);
- unmap_ctl:
- 	iounmap(host->ctl);
- host_free:
-@@ -598,6 +601,7 @@ out:
- 
- static int __devexit tmio_mmc_remove(struct platform_device *dev)
- {
-+	struct mfd_cell	*cell = (struct mfd_cell *)dev->dev.platform_data;
- 	struct mmc_host *mmc = platform_get_drvdata(dev);
- 
- 	platform_set_drvdata(dev, NULL);
-@@ -606,6 +610,8 @@ static int __devexit tmio_mmc_remove(str
- 		struct tmio_mmc_host *host = mmc_priv(mmc);
- 		mmc_remove_host(mmc);
- 		free_irq(host->irq, host);
-+		if (cell->disable)
-+			cell->disable(dev);
- 		iounmap(host->ctl);
- 		mmc_free_host(mmc);
- 	}
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 692dc23..dafecfb 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -55,10 +55,8 @@
+ /* Define some IRQ masks */
+ /* This is the mask used at reset by the chip */
+ #define TMIO_MASK_ALL           0x837f031d
+-#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND | \
+-		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
+-#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND | \
+-		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
++#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND)
++#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND)
+ #define TMIO_MASK_CMD     (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT | \
+ 		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
+ #define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
+-- 
+1.6.2.4
+
+--
