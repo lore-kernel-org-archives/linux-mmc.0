@@ -1,49 +1,111 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: [PATCH 01/05] tmio_mmc: Keep card-detect interrupts enabled
-Date: Wed, 17 Feb 2010 16:37:45 +0900
-Message-ID: <20100217073745.32726.24254.sendpatchset@t400s>
-References: <20100217073735.32726.12020.sendpatchset@t400s>
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20100217073735.32726.12020.sendpatchset@t400s>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: sameo@linux.intel.com, linux-sh@vger.kernel.org, linus.ml.walleij@gmail.com, akpm@linux-foundation.org, goda.yusuke@renesas.com, ian@mnementh.co.uk, lethal@linux-sh.org, Magnus Damm <magnus.damm@gmail.com>, g.liakhovetski@gmx.de
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH 1/3] mmc: omap_hsmmc: use packet sync'd DMA
+Date: Wed, 17 Feb 2010 11:21:14 -0600
+Message-ID: <003601caaff5$9bf1e4d0$544ff780@am.dhcp.ti.com>
+References: <cover.1265801967.git.david.vrabel@csr.com> <846fbf1a68cde5fd2d7c7ab084ace239c8de6867.1265801967.git.david.vrabel@csr.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:42513 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751941Ab0BQRVY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 17 Feb 2010 12:21:24 -0500
+In-Reply-To: <846fbf1a68cde5fd2d7c7ab084ace239c8de6867.1265801967.git.david.vrabel@csr.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'David Vrabel' <david.vrabel@csr.com>, linux-mmc@vger.kernel.org
+Cc: linux-omap@vger.kernel.org
 
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-On SuperH platforms the SDHI controller does not produce any command IRQs after
-a completed IO. This leads to card-detect interrupts staying disabled. Do not
-disable card-detect interrupts on DATA IRQs.
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Signed-off-by: Magnus Damm <damm@opensource.se>
----
+> -----Original Message-----
+> From: David Vrabel [mailto:david.vrabel@csr.com]
+> Sent: Wednesday, February 10, 2010 5:52 AM
+> To: linux-mmc@vger.kernel.org
+> Cc: David Vrabel; linux-omap@vger.kernel.org; madhu.cr@ti.com
+> Subject: [PATCH 1/3] mmc: omap_hsmmc: use packet sync'd DMA
+> 
+> Use packet sync'd DMA in the omap_hsmmc driver to avoid the
+> restriction that transfers must be a multiple of the block size.  This
+> is required for byte-mode transfers to SDIO cards.
+> 
+What is the typical scenario here? Is it IO_RW_EXTENDED with block_mode
+turned off? 
 
- Previously posted by Guennadi to linux-mmc 20100216 as
- "[PATCH] tmio_mmc: keep card-detect interrupts enabled"
+> Signed-off-by: David Vrabel <david.vrabel@csr.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |   17 +++++------------
+>  1 files changed, 5 insertions(+), 12 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 4b23225..e7142a2 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -114,6 +114,7 @@
+> 
+>  #define MMC_TIMEOUT_MS		20
+>  #define OMAP_MMC_MASTER_CLOCK	96000000
+> +#define OMAP_HSMMC_FIFO_WORDS	(512/4)
+>  #define DRIVER_NAME		"mmci-omap-hs"
+> 
+>  /* Timeouts for entering power saving states on inactivity, msec */
+> @@ -887,12 +888,12 @@ static void omap_hsmmc_config_dma_params(struct
+> omap_hsmmc_host *host,
+>  	dma_ch = host->dma_ch;
+>  	if (data->flags & MMC_DATA_WRITE) {
+>  		omap_set_dma_dest_params(dma_ch, 0, OMAP_DMA_AMODE_CONSTANT,
+> -			(host->mapbase + OMAP_HSMMC_DATA), 0, 0);
+> +			(host->mapbase + OMAP_HSMMC_DATA), 0,
+> OMAP_HSMMC_FIFO_WORDS);
+>  		omap_set_dma_src_params(dma_ch, 0, OMAP_DMA_AMODE_POST_INC,
+>  			sg_dma_address(sgl), 0, 0);
+>  	} else {
+>  		omap_set_dma_src_params(dma_ch, 0, OMAP_DMA_AMODE_CONSTANT,
+> -			(host->mapbase + OMAP_HSMMC_DATA), 0, 0);
+> +			(host->mapbase + OMAP_HSMMC_DATA), 0,
+> OMAP_HSMMC_FIFO_WORDS);
+>  		omap_set_dma_dest_params(dma_ch, 0, OMAP_DMA_AMODE_POST_INC,
+>  			sg_dma_address(sgl), 0, 0);
+>  	}
+> @@ -901,7 +902,7 @@ static void omap_hsmmc_config_dma_params(struct
+> omap_hsmmc_host *host,
+>  	nblk = sg_dma_len(sgl) / blksz;
+> 
+>  	omap_set_dma_transfer_params(dma_ch, OMAP_DMA_DATA_TYPE_S32,
+> -			blksz / 4, nblk, OMAP_DMA_SYNC_FRAME,
+> +			blksz / 4, nblk, OMAP_DMA_SYNC_PACKET,
+>  			omap_hsmmc_get_dma_sync_dev(host, data),
+>  			!(data->flags & MMC_DATA_WRITE));
+> 
 
- drivers/mmc/host/tmio_mmc.h |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
+How does this configuration help? Isn't the PACKET again a multiple of
+blksz?
+ 
+> @@ -944,17 +945,9 @@ static void omap_hsmmc_dma_cb(int lch, u16 ch_status,
+> void *data)
+>  static int omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
+>  					struct mmc_request *req)
+>  {
+> -	int dma_ch = 0, ret = 0, err = 1, i;
+> +	int dma_ch = 0, ret = 0, err = 1;
+>  	struct mmc_data *data = req->data;
+> 
+> -	/* Sanity check: all the SG entries must be aligned by block size.
+> */
+> -	for (i = 0; i < data->sg_len; i++) {
+> -		struct scatterlist *sgl;
+> -
+> -		sgl = data->sg + i;
+> -		if (sgl->length % data->blksz)
+> -			return -EINVAL;
+> -	}
+>  	if ((data->blksz % 4) != 0)
+>  		/* REVISIT: The MMC buffer increments only when MSB is
+> written.
+>  		 * Return error for blksz which is non multiple of four.
+> --
+> 1.6.3.3
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 692dc23..dafecfb 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -55,10 +55,8 @@
- /* Define some IRQ masks */
- /* This is the mask used at reset by the chip */
- #define TMIO_MASK_ALL           0x837f031d
--#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND | \
--		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
--#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND | \
--		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
-+#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND)
-+#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND)
- #define TMIO_MASK_CMD     (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT | \
- 		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
- #define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
--- 
-1.6.2.4
 
---
