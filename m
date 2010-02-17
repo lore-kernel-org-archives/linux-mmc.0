@@ -1,61 +1,48 @@
 From: Magnus Damm <magnus.damm@gmail.com>
-Subject: [PATCH 02/05] tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support V2
-Date: Wed, 17 Feb 2010 16:37:55 +0900
-Message-ID: <20100217073755.32726.32930.sendpatchset@t400s>
+Subject: [PATCH 03/05] tmio_mmc: Use 100ms mmc_detect_change() delay
+Date: Wed, 17 Feb 2010 16:38:04 +0900
+Message-ID: <20100217073804.32726.27721.sendpatchset@t400s>
 References: <20100217073735.32726.12020.sendpatchset@t400s>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-yx0-f200.google.com ([209.85.210.200]:44338 "EHLO
 	mail-yx0-f200.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934064Ab0BQHiQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Feb 2010 02:38:16 -0500
+	with ESMTP id S934064Ab0BQHi0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Feb 2010 02:38:26 -0500
 In-Reply-To: <20100217073735.32726.12020.sendpatchset@t400s>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: sameo@linux.intel.com, linux-sh@vger.kernel.org, linus.ml.walleij@gmail.com, g.liakhovetski@gmx.de, goda.yusuke@renesas.com, ian@mnementh.co.uk, lethal@linux-sh.org, akpm@linux-foundation.org, Magnus Damm <magnus.damm@gmail.com>
+Cc: sameo@linux.intel.com, linux-sh@vger.kernel.org, linus.ml.walleij@gmail.com, Magnus Damm <magnus.damm@gmail.com>, goda.yusuke@renesas.com, ian@mnementh.co.uk, lethal@linux-sh.org, akpm@linux-foundation.org, g.liakhovetski@gmx.de
 
-From: Yusuke Goda <goda.yusuke@renesas.com>
+From: Magnus Damm <damm@opensource.se>
 
-Enable MMC_CAP_XX support in the tmio_mmc driver if
-pdata->capabilities is set.
+This patch changes the tmio_mmc driver to wait 100ms
+before checking the card detect status. This type of
+delay is quite common among mmc drivers, it seems that
+most hardware platforms need to give the hardware some
+time to settle before checking card availabilty.
 
-Signed-off-by: Yusuke Goda <goda.yusuke@renesas.com>
+Hotplug is half-broken without this patch on the sh7724
+Ecovec board. Hot insertion seems ok but eject is never
+detected without this patch.
+
 Signed-off-by: Magnus Damm <damm@opensource.se>
 ---
 
- Previously posted by Goda-san to linux-mmc 20100216 as
- "[PATCH v2] tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support"
+ Previously posted to linux-mmc 20100215 as
+ "[PATCH] tmio_mmc: use 100ms mmc_detect_change() delay"
 
- drivers/mmc/host/tmio_mmc.c |    1 +
- include/linux/mfd/tmio.h    |    1 +
- 2 files changed, 2 insertions(+), 0 deletions(-)
+ drivers/mmc/host/tmio_mmc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index e22c3fa..e2c0cc9 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -550,6 +550,7 @@ static int __devinit tmio_mmc_probe(struct platform_device *dev)
-
- 	mmc->ops = &tmio_mmc_ops;
- 	mmc->caps = MMC_CAP_4_BIT_DATA;
-+	mmc->caps |= pdata->capabilities;
- 	mmc->f_max = pdata->hclk;
- 	mmc->f_min = mmc->f_max / 512;
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index 9cb1834..37d9414 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -60,6 +60,7 @@ void tmio_core_mmc_clk_div(void __iomem *cnf, int shift, int state);
-  */
- struct tmio_mmc_data {
- 	const unsigned int		hclk;
-+	unsigned long			capabilities;
- 	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
- };
--- 
-1.6.4.3
-
-
-
+--- 0001/drivers/mmc/host/tmio_mmc.c
++++ work/drivers/mmc/host/tmio_mmc.c	2010-02-15 20:28:15.000000000 +0900
+@@ -323,7 +323,7 @@ static irqreturn_t tmio_mmc_irq(int irq,
+ 		if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
+ 			ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
+ 				TMIO_STAT_CARD_REMOVE);
+-			mmc_detect_change(host->mmc, 0);
++			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+ 		}
+ 
+ 		/* CRC and other errors */
