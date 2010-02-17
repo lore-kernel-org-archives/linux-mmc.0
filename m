@@ -1,46 +1,76 @@
 From: Magnus Damm <magnus.damm@gmail.com>
-Subject: [PATCH 04/05] tmio_mmc: Remove const from platform data V3
-Date: Wed, 17 Feb 2010 16:38:14 +0900
-Message-ID: <20100217073814.32726.87689.sendpatchset@t400s>
+Subject: [PATCH 05/05] tmio_mmc: Balance cell enable()/disable() calls
+Date: Wed, 17 Feb 2010 16:38:23 +0900
+Message-ID: <20100217073823.32726.10307.sendpatchset@t400s>
 References: <20100217073735.32726.12020.sendpatchset@t400s>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-yw0-f176.google.com ([209.85.211.176]:61066 "EHLO
 	mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934064Ab0BQHif (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Feb 2010 02:38:35 -0500
+	with ESMTP id S934100Ab0BQHio (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Feb 2010 02:38:44 -0500
 In-Reply-To: <20100217073735.32726.12020.sendpatchset@t400s>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: sameo@linux.intel.com, linux-sh@vger.kernel.org, linus.ml.walleij@gmail.com, g.liakhovetski@gmx.de, goda.yusuke@renesas.com, ian@mnementh.co.uk, lethal@linux-sh.org, Magnus Damm <magnus.damm@gmail.com>, akpm@linux-foundation.org
+Cc: sameo@linux.intel.com, linux-sh@vger.kernel.org, linus.ml.walleij@gmail.com, akpm@linux-foundation.org, goda.yusuke@renesas.com, ian@mnementh.co.uk, lethal@linux-sh.org, Magnus Damm <magnus.damm@gmail.com>, g.liakhovetski@gmx.de
 
 From: Magnus Damm <damm@opensource.se>
 
-Remove const from the tmio-mmc platform data hclk V3.
-This change makes it possible to remove the type cast
-from the sh_mobile_sdhi driver which is using the clock
-framework to get the clock rate.
+This patch adds cell->disable() calls to the tmio-mmc
+probe() error handling and the remove() function.
 
 Signed-off-by: Magnus Damm <damm@opensource.se>
 ---
 
- Previously posted V2 to linux-mmc 20091126 as
- "[PATCH 02/03] mmc: Remove const from tmio-mmc platform data V2"
+ Previously posted to linux-mmc 20091126 as
+ "[PATCH 03/03] mmc: Balance tmio-mmc cell enable()/disable() calls"
 
- Changes from V2:
- - rediff to fit on top of capabilities patch
+ drivers/mmc/host/tmio_mmc.c |   10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
- include/linux/mfd/tmio.h |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
---- 0003/include/linux/mfd/tmio.h
-+++ work/include/linux/mfd/tmio.h	2010-02-17 15:52:15.000000000 +0900
-@@ -59,7 +59,7 @@ void tmio_core_mmc_clk_div(void __iomem 
-  * data for the MMC controller
-  */
- struct tmio_mmc_data {
--	const unsigned int		hclk;
-+	unsigned int			hclk;
- 	unsigned long			capabilities;
- 	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
+--- 0004/drivers/mmc/host/tmio_mmc.c
++++ work/drivers/mmc/host/tmio_mmc.c	2010-02-17 15:54:01.000000000 +0900
+@@ -569,14 +569,14 @@ static int __devinit tmio_mmc_probe(stru
+ 	if (ret >= 0)
+ 		host->irq = ret;
+ 	else
+-		goto unmap_ctl;
++		goto cell_disable;
+ 
+ 	disable_mmc_irqs(host, TMIO_MASK_ALL);
+ 
+ 	ret = request_irq(host->irq, tmio_mmc_irq, IRQF_DISABLED |
+ 		IRQF_TRIGGER_FALLING, dev_name(&dev->dev), host);
+ 	if (ret)
+-		goto unmap_ctl;
++		goto cell_disable;
+ 
+ 	mmc_add_host(mmc);
+ 
+@@ -588,6 +588,9 @@ static int __devinit tmio_mmc_probe(stru
+ 
+ 	return 0;
+ 
++cell_disable:
++	if (cell->disable)
++		cell->disable(dev);
+ unmap_ctl:
+ 	iounmap(host->ctl);
+ host_free:
+@@ -598,6 +601,7 @@ out:
+ 
+ static int __devexit tmio_mmc_remove(struct platform_device *dev)
+ {
++	struct mfd_cell	*cell = (struct mfd_cell *)dev->dev.platform_data;
+ 	struct mmc_host *mmc = platform_get_drvdata(dev);
+ 
+ 	platform_set_drvdata(dev, NULL);
+@@ -606,6 +610,8 @@ static int __devexit tmio_mmc_remove(str
+ 		struct tmio_mmc_host *host = mmc_priv(mmc);
+ 		mmc_remove_host(mmc);
+ 		free_irq(host->irq, host);
++		if (cell->disable)
++			cell->disable(dev);
+ 		iounmap(host->ctl);
+ 		mmc_free_host(mmc);
+ 	}
