@@ -1,56 +1,41 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: [PATCH 3/3] mmc: omap_hsmmc: enable SDIO card interrupts
-Date: Thu, 18 Feb 2010 11:03:30 -0600
-Message-ID: <001901cab0bc$4bf61880$544ff780@am.dhcp.ti.com>
-References: <cover.1265801967.git.david.vrabel@csr.com> <846fbf1a68cde5fd2d7c7ab084ace239c8de6867.1265801967.git.david.vrabel@csr.com> <f4f02c7875316b7f65466a5ac06f5b2b2960aa96.1265801967.git.david.vrabel@csr.com> <9ce6cf93ba1e6c3fd239f732ea5889a856948db3.1265801967.git.david.vrabel@csr.com> <004901cab001$6b19f6c0$544ff780@am.dhcp.ti.com> <4B7C4608.5010008@csr.com> <001b01cab031$0f34e010$544ff780@am.dhcp.ti.com> <4B7D2F72.2070307@csr.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+From: "George G. Davis" <gdavis@mvista.com>
+Subject: [PATCH] mmc: sdhci: Make consistent use of CONFIG_MMC_DEBUG for "DEBUG"ging
+Date: Thu, 18 Feb 2010 12:32:12 -0500
+Message-ID: <1266514332-19876-1-git-send-email-gdavis@mvista.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:34134 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758720Ab0BRRD4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 18 Feb 2010 12:03:56 -0500
-In-Reply-To: <4B7D2F72.2070307@csr.com>
+Received: from qmta04.emeryville.ca.mail.comcast.net ([76.96.30.40]:52408 "EHLO
+	qmta04.emeryville.ca.mail.comcast.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758142Ab0BRRcY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Feb 2010 12:32:24 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'David Vrabel' <david.vrabel@csr.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: "George G. Davis" <gdavis@mvista.com>, Ben Dooks <ben-linux@fluff.org>
 
+The "6882a8c sdhci: Add better ADMA error reporting" commit added
+sdhci_show_adma_error() which is built when DEBUG is defined.
+Since we already have CONFIG_MMC_DEBUG used elsewhere in this driver,
+may as well make consistent use of that config knob instead.
 
+Signed-off-by: George G. Davis <gdavis@mvista.com>
+Cc: Ben Dooks <ben-linux@fluff.org>
+---
+ drivers/mmc/host/sdhci.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-> -----Original Message-----
-> From: David Vrabel [mailto:david.vrabel@csr.com]
-> Sent: Thursday, February 18, 2010 6:16 AM
-> To: Madhusudhan
-> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org
-> Subject: Re: [PATCH 3/3] mmc: omap_hsmmc: enable SDIO card interrupts
-> 
-> Madhusudhan wrote:
-> >
-> > My question was more related to the idle path. In a scenario where
-> > you start using the SDIO functionality and after some time you leave
-> > the SDIO card idle, does the FCLK still remain enabled? Or do you see
-> > that sdio_irq_thread exits and disables the FCLK?
-> 
-> What do you mean by "leave the SDIO card idle"?
-> 
-
-I meant a state where the SDIO card is not doing any active transfers. Does
-it work that way?
-
-Regards,
-Madhu
-
-> David
-> --
-> David Vrabel, Senior Software Engineer, Drivers
-> CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
-> Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
-> 
-> 
-> Member of the CSR plc group of companies. CSR plc registered in England
-> and Wales, registered number 4187346, registered office Churchill House,
-> Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c279fbc..6c2978c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1398,7 +1398,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
+ 		sdhci_finish_command(host);
+ }
+ 
+-#ifdef DEBUG
++#ifdef CONFIG_MMC_DEBUG
+ static void sdhci_show_adma_error(struct sdhci_host *host)
+ {
+ 	const char *name = mmc_hostname(host->mmc);
+-- 
+1.6.3.3.311.g43dd
 
