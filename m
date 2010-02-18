@@ -1,97 +1,59 @@
-From: "George G. Davis" <gdavis@mvista.com>
-Subject: [RFC/PATCH] mmc: sdhci: Add 8-bit bus width support
-Date: Thu, 18 Feb 2010 15:05:54 -0500
-Message-ID: <1266523554-23709-1-git-send-email-gdavis@mvista.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from qmta08.emeryville.ca.mail.comcast.net ([76.96.30.80]:38035 "EHLO
-	qmta08.emeryville.ca.mail.comcast.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752683Ab0BRUGJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Feb 2010 15:06:09 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH 3/3] mmc: omap_hsmmc: enable SDIO card interrupts
+Date: Thu, 18 Feb 2010 14:20:38 -0600
+Message-ID: <004701cab0d7$d5c00970$544ff780@am.dhcp.ti.com>
+References: <cover.1265801967.git.david.vrabel@csr.com> <846fbf1a68cde5fd2d7c7ab084ace239c8de6867.1265801967.git.david.vrabel@csr.com> <f4f02c7875316b7f65466a5ac06f5b2b2960aa96.1265801967.git.david.vrabel@csr.com> <9ce6cf93ba1e6c3fd239f732ea5889a856948db3.1265801967.git.david.vrabel@csr.com> <004901cab001$6b19f6c0$544ff780@am.dhcp.ti.com> <4B7C4608.5010008@csr.com> <alpine.DEB.2.00.1002171254040.24812@utopia.booyaka.com> <4B7D3EAE.1010908@csr.com> <alpine.DEB.2.00.1002180951330.24812@utopia.booyaka.com> <004001cab0c9$b208b2b0$544ff780@am.dhcp.ti.com> <alpine.LFD.2.00.1002181412590.1946@xanadu.home>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <alpine.LFD.2.00.1002181412590.1946@xanadu.home>
+Sender: linux-omap-owner@vger.kernel.org
+To: 'Nicolas Pitre' <nico@fluxnic.net>
+Cc: 'Paul Walmsley' <paul@pwsan.com>, 'David Vrabel' <david.vrabel@csr.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: "George G. Davis" <gdavis@mvista.com>, JiebingLi <jiebing.li@intel.com>, FengTang <feng.tang@intel.com>, GermanMonroy <german.monroy@intel.com>
 
-Although the "SD Host Controller Simplified Specification Version 2.00"
-does not clearly document support for 8-bit bus width, it does show
-an "Extended Data Transfer Width" field in bit-5 of the Host Control
-Register.  Furthermore, while googling around for more details on this
-feature, I came across the "MMC: MMC/SD/CE-ATA/SDIO driver for Intel
-Moorestown platform" [1] which implements 8-bit bus width support
-but was rejected for other reasons.  My experimentation has revealed
-that setting the "Extended Data Transfer Width" bit in addition to
-the "Data Transfer Width" bit as done in [1] does in fact enable
-8-bit mode.  Alas, we need a better method of specifying host
-capabilities for the myriad SDHCI based devices, e.g. passing host
-capabilities into sdhci_add_host() via platform data as done for
-other host drivers.  Resolving this host capabilities issue via
-platform data may also eliminate the need for some of the quirks,
-e.g. SDHCI_QUIRK_FORCE_1_BIT_DATA would not be necessary if platform
-data specifies bus_width = 1, etc.,.
 
-Comments and/or feedback greatly appreciated.
 
-[1] http://patchwork.kernel.org/patch/20993/
+> -----Original Message-----
+> From: Nicolas Pitre [mailto:nico@fluxnic.net]
+> Sent: Thursday, February 18, 2010 1:27 PM
+> To: Madhusudhan
+> Cc: 'Paul Walmsley'; 'David Vrabel'; linux-mmc@vger.kernel.org; linux-
+> omap@vger.kernel.org
+> Subject: RE: [PATCH 3/3] mmc: omap_hsmmc: enable SDIO card interrupts
+> 
+> On Thu, 18 Feb 2010, Madhusudhan wrote:
+> 
+> > If I look in the mainline kernel today there is only one SDIO card
+> driver "
+> > sdio_uart.c". And at least I don't see a way I can test any of these
+> > features myself.
+> 
+> There are many other SDIO drivers in the kernel today:
+> 
+>  - The libertas wireless driver supports many interfaces, including
+>    PCMCIA/CF, USB, SDIO and SPI.  Chips known to work with the SDIO
+>    interface are the Marvell 8686 and 8688.
+> 
+>  - There is a BlueTooth HCI SDIO driver implementing the standard SDIO
+>    BlueTooth class.
+> 
+>  - The Marvell 8688 mentioned above is also a BlueTooth device through
+>    an additional SDIO "function".
+> 
+>  - Intel Wireless WiMAX Connection 2400 over SDIO.
+> 
+> And the sdio_uart.c driver can be used with SDIO GPS receivers for
+> example.
+> 
 
-Signed-off-by: George G. Davis <gdavis@mvista.com>
-Cc: JiebingLi <jiebing.li@intel.com>
-Cc: FengTang <feng.tang@intel.com>
-Cc: GermanMonroy <german.monroy@intel.com>
----
- drivers/mmc/host/sdhci.c |   17 ++++++++++++++---
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 15 insertions(+), 3 deletions(-)
+This is good information. Any known SDIO cards commercially available using
+the above chips?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6c2978c..6c05d80 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1147,10 +1147,19 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
- 
--	if (ios->bus_width == MMC_BUS_WIDTH_4)
-+	switch (ios->bus_width) {
-+	case MMC_BUS_WIDTH_8:
- 		ctrl |= SDHCI_CTRL_4BITBUS;
--	else
-+		ctrl |= SDHCI_CTRL_8BITBUS;
-+		break;
-+	case MMC_BUS_WIDTH_4:
-+		ctrl |= SDHCI_CTRL_4BITBUS;
-+		ctrl &= ~SDHCI_CTRL_8BITBUS;
-+		break;
-+	default:
- 		ctrl &= ~SDHCI_CTRL_4BITBUS;
-+		ctrl &= ~SDHCI_CTRL_8BITBUS;
-+	}
- 
- 	if (ios->timing == MMC_TIMING_SD_HS)
- 		ctrl |= SDHCI_CTRL_HISPD;
-@@ -1783,8 +1792,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	mmc->f_max = host->max_clk;
- 	mmc->caps = MMC_CAP_SDIO_IRQ;
- 
--	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
-+	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA)) {
- 		mmc->caps |= MMC_CAP_4_BIT_DATA;
-+		mmc->caps |= MMC_CAP_8_BIT_DATA;
-+	}
- 
- 	if (caps & SDHCI_CAN_DO_HISPD)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 9ba4268..6bd46e5 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -72,6 +72,7 @@
- #define   SDHCI_CTRL_ADMA1	0x08
- #define   SDHCI_CTRL_ADMA32	0x10
- #define   SDHCI_CTRL_ADMA64	0x18
-+#define  SDHCI_CTRL_8BITBUS	0x20
- 
- #define SDHCI_POWER_CONTROL	0x29
- #define  SDHCI_POWER_ON		0x01
--- 
-1.6.3.3.311.g43dd
+Thanks,
+Madhu
+> 
+> Nicolas
 
