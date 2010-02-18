@@ -1,74 +1,52 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: RE: [PATCH 3/3] mmc: omap_hsmmc: enable SDIO card interrupts
-Date: Thu, 18 Feb 2010 13:21:21 -0700 (MST)
-Message-ID: <alpine.DEB.2.00.1002181231520.24812@utopia.booyaka.com>
-References: <cover.1265801967.git.david.vrabel@csr.com> <846fbf1a68cde5fd2d7c7ab084ace239c8de6867.1265801967.git.david.vrabel@csr.com> <f4f02c7875316b7f65466a5ac06f5b2b2960aa96.1265801967.git.david.vrabel@csr.com> <9ce6cf93ba1e6c3fd239f732ea5889a856948db3.1265801967.git.david.vrabel@csr.com>
- <004901cab001$6b19f6c0$544ff780@am.dhcp.ti.com> <4B7C4608.5010008@csr.com> <alpine.DEB.2.00.1002171254040.24812@utopia.booyaka.com> <4B7D3EAE.1010908@csr.com> <alpine.DEB.2.00.1002180951330.24812@utopia.booyaka.com>
- <004001cab0c9$b208b2b0$544ff780@am.dhcp.ti.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <004001cab0c9$b208b2b0$544ff780@am.dhcp.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: 'David Vrabel' <david.vrabel@csr.com>, sakoman@gmail.com, r-woodruff2@ti.com, sawant@ti.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+From: "George G. Davis" <gdavis@mvista.com>
+Subject: [RFC/PATCH] mmc: sdhci: Enable high speed support for MMC cards
+Date: Thu, 18 Feb 2010 15:27:53 -0500
+Message-ID: <1266524873-24274-1-git-send-email-gdavis@mvista.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from qmta12.westchester.pa.mail.comcast.net ([76.96.59.227]:40940
+	"EHLO qmta12.westchester.pa.mail.comcast.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753789Ab0BRU2E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Feb 2010 15:28:04 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: "George G. Davis" <gdavis@mvista.com>
 
-Hi,
+Allow high speed mode for high speed capable ver 4.x MMC cards.
 
-(cc'ing Steve, Richard, Anand)
+Comments and/or feedback appreciated.
 
-On Thu, 18 Feb 2010, Madhusudhan wrote:
+Signed-off-by: George G. Davis <gdavis@mvista.com>
+---
+ drivers/mmc/host/sdhci.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
 
-> Not to add further confusion but as far as I understand SDIO should be 
-> able to asynchronously wakeup OMAP regardless of MMC clocks being OFF . 
-> As per the SDIO spec DAT1 line is used for signaling the card interrupt 
-> to the host. The TRM clearly shows a GPIO connected to DAT1 line for 
-> wakeup through the SDIO interrupt. Wouldn't this help?
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 6c05d80..a935316 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1161,7 +1161,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		ctrl &= ~SDHCI_CTRL_8BITBUS;
+ 	}
+ 
+-	if (ios->timing == MMC_TIMING_SD_HS)
++	if (ios->timing == MMC_TIMING_SD_HS ||
++	    ios->timing == MMC_TIMING_MMC_HS)
+ 		ctrl |= SDHCI_CTRL_HISPD;
+ 	else
+ 		ctrl &= ~SDHCI_CTRL_HISPD;
+@@ -1797,8 +1798,10 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		mmc->caps |= MMC_CAP_8_BIT_DATA;
+ 	}
+ 
+-	if (caps & SDHCI_CAN_DO_HISPD)
++	if (caps & SDHCI_CAN_DO_HISPD) {
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
++		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
++	}
+ 
+ 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+-- 
+1.6.3.3.311.g43dd
 
-Is the integration code in arch/arm/*omap* set to enable wakeup on the 
-DAT1 ball on the OMAP?  I don't see any trace of that in the code.  That 
-would surely prevent wakeup from succeeding on an off-mode enabled kernel.  
-Sounds like there may be other problems.  Why not give it a try with an 
-SDIO card and see if you can get it to work?
-
-> Definitely these are good features that are being added. Just that there 
-> are confusions around and not everyone has a setup to validate these 
-> features.
-
-Hopefully someone inside TI is validating SDIO wakeup on Linux?
-
-> If I look in the mainline kernel today there is only one SDIO card 
-> driver " sdio_uart.c".
-
-[paul@twilight current]$ find . -name "*sdio*c" -print | fgrep -v /core/
-./drivers/ssb/sdio.c
-./drivers/bluetooth/btsdio.c
-./drivers/bluetooth/btmrvl_sdio.c
-./drivers/mmc/host/mvsdio.c
-./drivers/net/wimax/i2400m/sdio-rx.c
-./drivers/net/wimax/i2400m/sdio-tx.c
-./drivers/net/wimax/i2400m/sdio.c
-./drivers/net/wimax/i2400m/sdio-fw.c
-./drivers/net/wireless/iwmc3200wifi/sdio.c
-./drivers/net/wireless/libertas/if_sdio.c
-./drivers/net/wireless/wl12xx/wl1251_sdio.c
-./drivers/net/wireless/b43/sdio.c
-./drivers/media/dvb/siano/smssdio.c
-[paul@twilight current]$
-
-There appear to be least seven SDIO card drivers in 2.6.34-rc7. At least 
-one of these is for a TI chip - the wl1251.  I think some of the 
-Gumstix Overo OMAP3 boards are using an SDIO-connected Marvell Libertas:
-
-http://www.gumstix.com/store/catalog/product_info.php?products_id=252
-  
-David is probably testing with a Bluetooth card - maybe he can comment 
-further.
-
-> And at least I don't see a way I can test any of these features myself.
-
-Could you clarify?
-
-
-- Paul
