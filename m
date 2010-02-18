@@ -1,65 +1,40 @@
-From: Cesar Augusto <cesaraugusto@qatar.io>
-Subject: Loan Offer
-Date: Thu, 18 Feb 2010 10:10:04 +0000
-Message-ID: <20100218101004.u58cnh1c0004gk0o@mail.idngh.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	DelSp=Yes	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "George G. Davis" <gdavis@mvista.com>
+Subject: [PATCH] mmc: sdhci: Fix SDHCI_INT_ADMA_ERROR typo in SDHCI_INT_DATA_MASK
+Date: Thu, 18 Feb 2010 11:50:29 -0500
+Message-ID: <1266511829-18464-1-git-send-email-gdavis@mvista.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.idngh.com ([41.204.36.5]:56327 "EHLO idngh.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758419Ab0BRPgt convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Feb 2010 10:36:49 -0500
-Content-Disposition: inline
+Received: from qmta04.emeryville.ca.mail.comcast.net ([76.96.30.40]:39485 "EHLO
+	qmta04.emeryville.ca.mail.comcast.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757886Ab0BRQvX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Feb 2010 11:51:23 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Pierre Ossman <pierre@ossman.eu>, "George G. Davis" <gdavis@mvista.com>
 
+The "4accfe2 sdhci: catch ADMA errors" commit added SDHCI_ADMA_ERROR to
+the definition of SDHCI_INT_DATA_MASK but obviously intended to use
+SDHCI_INT_ADMA_ERROR.
 
+Signed-off-by: George G. Davis <gdavis@mvista.com>
+Cc: Pierre Ossman <pierre@ossman.eu>
+---
+ drivers/mmc/host/sdhci.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-I am Cesar Augusto of Cesar Augusto=AE Corporation.
-We give out loans to business people and individuals for just 3% intere=
-st
-rate.We give out local and international loan via account transfer to =20
-qualified
-borrowers.
-
-If you are interested in getting loan from our company,contact us with =
-the
-following details to help us send you our loan terms and repayment Plan=
-=2E
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D
-=46IRST NAME:...........
-LAST NAME:.......
-ADDRESS:................
-COUNTRY:..............
-PHONE NUMBER:.........
-=46AX NUMBER: ...........
-OCCUPATION:...........
-MONTHLY INCOME...........
-AGE:...............
-LOAN AMOUNT NEEDED:.......
-LOAN DURATION:........
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-   Mode of Payment:
-* Payment by bank to bank transfer
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-
-Regards,
-Cesar Augusto.
-Email: cesaraugusto@qatar.io
-
-----------------------------------------------------------------
-This message was sent using IMP, the Internet Messaging Program.
-
-
-
---=20
-This message has been scanned for viruses and
-dangerous content by MailScanner, and is
-believed to be clean.
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 842f46f..9ba4268 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -127,7 +127,7 @@
+ #define  SDHCI_INT_DATA_MASK	(SDHCI_INT_DATA_END | SDHCI_INT_DMA_END | \
+ 		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL | \
+ 		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
+-		SDHCI_INT_DATA_END_BIT | SDHCI_ADMA_ERROR)
++		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR)
+ #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
+ 
+ #define SDHCI_ACMD12_ERR	0x3C
+-- 
+1.6.3.3.311.g43dd
 
