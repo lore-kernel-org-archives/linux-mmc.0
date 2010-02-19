@@ -1,7 +1,7 @@
 From: Anton Vorontsov <avorontsov@ru.mvista.com>
-Subject: [PATCH 2/3] sdhci-pltfm: Implement platform data passing
-Date: Fri, 19 Feb 2010 22:48:29 +0300
-Message-ID: <20100219194829.GB16636@oksana.dev.rtsoft.ru>
+Subject: [PATCH 1/3] sdhci: Implement CAP_CLOCK_BASE_BROKEN quirk
+Date: Fri, 19 Feb 2010 22:48:27 +0300
+Message-ID: <20100219194827.GA16636@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -11,132 +11,46 @@ To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Richard =?utf-8?Q?R=C3=B6jfors?= <richard.rojfors.ext@mocean-labs.com>, Pierre Ossman <pierre@ossman.eu>, Ben Dooks <ben@simtec.co.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This includes platform ops, quirks and (de)initialization callbacks.
+Some hosts (e.g. as found in CNS3xxx SOCs) report wrong value in
+CLOCK_BASE capability field, and currently there is no way to
+force the SDHCI core to use the platform-provided base clock value.
+
+This patch implements CAP_CLOCK_BASE_BROKEN quirk. When enabled,
+the SDHCI core will always use base clock frequency provided by
+the platform.
 
 Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
 ---
- drivers/mmc/host/sdhci-pltfm.c |   24 ++++++++++++++++++++----
- drivers/mmc/host/sdhci-pltfm.h |   27 +++++++++++++++++++++++++++
- 2 files changed, 47 insertions(+), 4 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-pltfm.h
+ drivers/mmc/host/sdhci.c |    3 ++-
+ drivers/mmc/host/sdhci.h |    2 ++
+ 2 files changed, 4 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 297f40a..d0a52cb 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -31,6 +31,7 @@
- #include <linux/io.h>
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c279fbc..aedf4a1 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1745,7 +1745,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	host->max_clk =
+ 		(caps & SDHCI_CLOCK_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
+ 	host->max_clk *= 1000000;
+-	if (host->max_clk == 0) {
++	if (host->max_clk == 0 || host->quirks &
++			SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN) {
+ 		if (!host->ops->get_max_clock) {
+ 			printk(KERN_ERR
+ 			       "%s: Hardware doesn't specify base clock "
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 842f46f..831bf7f 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -236,6 +236,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_DELAY_AFTER_POWER			(1<<23)
+ /* Controller uses SDCLK instead of TMCLK for data timeouts */
+ #define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
++/* Controller reports wrong base clock capability */
++#define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
  
- #include "sdhci.h"
-+#include "sdhci-pltfm.h"
- 
- /*****************************************************************************\
-  *                                                                           *
-@@ -49,12 +50,11 @@ static struct sdhci_ops sdhci_pltfm_ops = {
- 
- static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- {
-+	struct sdhci_pltfm_data *pdata = pdev->dev.platform_data;
- 	struct sdhci_host *host;
- 	struct resource *iomem;
- 	int ret;
- 
--	BUG_ON(pdev == NULL);
--
- 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!iomem) {
- 		ret = -ENOMEM;
-@@ -76,7 +76,12 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- 	}
- 
- 	host->hw_name = "platform";
--	host->ops = &sdhci_pltfm_ops;
-+	if (pdata && pdata->ops)
-+		host->ops = pdata->ops;
-+	else
-+		host->ops = &sdhci_pltfm_ops;
-+	if (pdata)
-+		host->quirks = pdata->quirks;
- 	host->irq = platform_get_irq(pdev, 0);
- 
- 	if (!request_mem_region(iomem->start, resource_size(iomem),
-@@ -93,6 +98,12 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- 		goto err_remap;
- 	}
- 
-+	if (pdata && pdata->init) {
-+		ret = pdata->init(host);
-+		if (ret)
-+			goto err_plat_init;
-+	}
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err_add_host;
-@@ -102,6 +113,9 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_add_host:
-+	if (pdata && pdata->exit)
-+		pdata->exit(host);
-+err_plat_init:
- 	iounmap(host->ioaddr);
- err_remap:
- 	release_mem_region(iomem->start, resource_size(iomem));
-@@ -114,6 +128,7 @@ err:
- 
- static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
- {
-+	struct sdhci_pltfm_data *pdata = pdev->dev.platform_data;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	int dead;
-@@ -125,6 +140,8 @@ static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
- 		dead = 1;
- 
- 	sdhci_remove_host(host, dead);
-+	if (pdata && pdata->exit)
-+		pdata->exit(host);
- 	iounmap(host->ioaddr);
- 	release_mem_region(iomem->start, resource_size(iomem));
- 	sdhci_free_host(host);
-@@ -165,4 +182,3 @@ MODULE_DESCRIPTION("Secure Digital Host Controller Interface platform driver");
- MODULE_AUTHOR("Mocean Laboratories <info@mocean-labs.com>");
- MODULE_LICENSE("GPL v2");
- MODULE_ALIAS("platform:sdhci");
--
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-new file mode 100644
-index 0000000..0aaa334
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -0,0 +1,27 @@
-+/*
-+ * Platform data declarations for the sdhci-pltfm driver.
-+ *
-+ * Copyright (c) 2010 MontaVista Software, LLC.
-+ *
-+ * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or (at
-+ * your option) any later version.
-+ */
-+
-+#ifndef _SDHCI_PLTFM_H
-+#define _SDHCI_PLTFM_H
-+
-+struct sdhci_ops;
-+struct sdhci_host;
-+
-+struct sdhci_pltfm_data {
-+	struct sdhci_ops *ops;
-+	unsigned int quirks;
-+	int (*init)(struct sdhci_host *host);
-+	void (*exit)(struct sdhci_host *host);
-+};
-+
-+#endif /* _SDHCI_PLTFM_H */
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
 -- 
 1.7.0
