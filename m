@@ -1,56 +1,62 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH 3/3] mmc: omap_hsmmc: enable SDIO card interrupts
-Date: Thu, 18 Feb 2010 18:45:18 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.1002181841400.1946@xanadu.home>
-References: <cover.1265801967.git.david.vrabel@csr.com>
- <f4f02c7875316b7f65466a5ac06f5b2b2960aa96.1265801967.git.david.vrabel@csr.com>
- <9ce6cf93ba1e6c3fd239f732ea5889a856948db3.1265801967.git.david.vrabel@csr.com>
- <004901cab001$6b19f6c0$544ff780@am.dhcp.ti.com> <4B7C4608.5010008@csr.com>
- <alpine.DEB.2.00.1002171254040.24812@utopia.booyaka.com>
- <4B7D3EAE.1010908@csr.com>
- <alpine.DEB.2.00.1002180951330.24812@utopia.booyaka.com>
- <004001cab0c9$b208b2b0$544ff780@am.dhcp.ti.com>
- <alpine.DEB.2.00.1002181231520.24812@utopia.booyaka.com>
- <5e088bd91002181416l33dc2fe4u8d2a09d12ea0344e@mail.gmail.com>
+From: Samuel Ortiz <sameo@linux.intel.com>
+Subject: Re: [PATCH 00/05] tmio_mmc: SDHI hotplug and random fixes
+Date: Fri, 19 Feb 2010 12:46:21 +0100
+Message-ID: <20100219114620.GE10255@sortiz.org>
+References: <20100217073735.32726.12020.sendpatchset@t400s>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="Boundary_(ID_7P4RKl45WtjhNS5Je5FVKg)"
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-reply-to: <5e088bd91002181416l33dc2fe4u8d2a09d12ea0344e@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Steve Sakoman <sakoman@gmail.com>
-Cc: Paul Walmsley <paul@pwsan.com>, Madhusudhan <madhu.cr@ti.com>, David Vrabel <david.vrabel@csr.com>, r-woodruff2@ti.com, sawant@ti.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga06.intel.com ([134.134.136.21]:28564 "EHLO
+	orsmga101.jf.intel.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751446Ab0BSLpH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Feb 2010 06:45:07 -0500
+Content-Disposition: inline
+In-Reply-To: <20100217073735.32726.12020.sendpatchset@t400s>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linus.ml.walleij@gmail.com, g.liakhovetski@gmx.de, goda.yusuke@renesas.com, ian@mnementh.co.uk, lethal@linux-sh.org, akpm@linux-foundation.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Magnus,
 
---Boundary_(ID_7P4RKl45WtjhNS5Je5FVKg)
-Content-type: TEXT/PLAIN; charset=ISO-8859-1
-Content-transfer-encoding: 8BIT
-
-On Thu, 18 Feb 2010, Steve Sakoman wrote:
-
-> On Thu, Feb 18, 2010 at 12:21 PM, Paul Walmsley <paul@pwsan.com> wrote:
+On Wed, Feb 17, 2010 at 04:37:35PM +0900, Magnus Damm wrote:
+> tmio_mmc: SDHI hotplug and random fixes
 > 
-> > (cc'ing Steve, Richard, Anand)
+> [PATCH 01/05] tmio_mmc: Keep card-detect interrupts enabled
+> [PATCH 02/05] tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support V2
+> [PATCH 03/05] tmio_mmc: Use 100ms mmc_detect_change() delay
+> [PATCH 04/05] tmio_mmc: Remove const from platform data V3
+> [PATCH 05/05] tmio_mmc: Balance cell enable()/disable() calls
 > 
-> > There appear to be least seven SDIO card drivers in 2.6.34-rc7. At least
-> > one of these is for a TI chip - the wl1251.  I think some of the
-> > Gumstix Overo OMAP3 boards are using an SDIO-connected Marvell Libertas:
-> >
-> > http://www.gumstix.com/store/catalog/product_info.php?products_id=252
+> These patches are a collection of fixes for SDHI hotplug and
+> other minor improvements for the tmio_mmc driver.
 > 
-> That is correct, a Wi2Wi wifi module is connected via mmc2 on the
-> Overo Air and Fire products.
+> The first and the third patch contain tmio-mmc specific fixes
+> for SDHI hotplug. Hot insertion and eject have been tested using
+> the sh-2.6 tree with the two SDHI blocks provided by the sh7724
+> processor using Ecovec24 and ms7724se boards. The single SDHI
+> block included in sh7722 has been tested on Migo-R.
 > 
-> Data rates are pretty low with the existing OMAP SDIO driver.   Any
-> chance this patch would improve that situation?
+> The second patch is the ground work to allow the SDHI mfd driver
+> to enable MMC_CAP_MMC_HIGHSPEED.
+> 
+> The last two patches are just random improvements and fixes for
+> the tmio_mmc driver.
+Since some of this code depends on the tmio.h changes, I'm taking this
+patchset. Please let me know if that's fine with you.
 
-Without proper SDIO interrupt support at the controller level, the core 
-SDIO code does poll for pending SDIO interrupts periodically.  So yes, 
-this patch is certainly going to help throughput.
+Cheers,
+Samuel.
 
 
-Nicolas
+> Signed-off-by: Magnus Damm <damm@opensource.se>
+> ---
+> 
+>  drivers/mmc/host/tmio_mmc.c |   13 ++++++++++---
+>  drivers/mmc/host/tmio_mmc.h |    6 ++----
+>  include/linux/mfd/tmio.h    |    3 ++-
+>  3 files changed, 14 insertions(+), 8 deletions(-)
 
---Boundary_(ID_7P4RKl45WtjhNS5Je5FVKg)--
+-- 
+Intel Open Source Technology Centre
+http://oss.intel.com/
