@@ -1,48 +1,68 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH] mxcmmc: fixed max_seg_size value on initialization.
-Date: Wed, 24 Feb 2010 12:35:47 -0800
-Message-ID: <20100224123547.ab622be2.akpm@linux-foundation.org>
-References: <1264506004-17827-1-git-send-email-vzapolskiy@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: akpm@linux-foundation.org
+Subject: + mxcmmc-fixed-max_seg_size-value-on-initialization.patch added to -mm tree
+Date: Wed, 24 Feb 2010 12:59:21 -0800
+Message-ID: <201002242059.o1OKxLsI020031@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:47129 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:58897 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757966Ab0BXUgH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Feb 2010 15:36:07 -0500
-In-Reply-To: <1264506004-17827-1-git-send-email-vzapolskiy@gmail.com>
+	by vger.kernel.org with ESMTP id S1758041Ab0BXVAC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Feb 2010 16:00:02 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vladimir Zapolskiy <vzapolskiy@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>, Pierre Ossman <pierre@ossman.eu>
+To: mm-commits@vger.kernel.org
+Cc: vzapolskiy@gmail.com, linux-mmc@vger.kernel.org, pierre@ossman.eu, s.hauer@pengutronix.de
 
-On Tue, 26 Jan 2010 14:40:04 +0300 Vladimir Zapolskiy <vzapolskiy@gmail.com> wrote:
 
-> Signed-off-by: Vladimir Zapolskiy <vzapolskiy@gmail.com>
-> Cc: Sascha Hauer <s.hauer@pengutronix.de>
-> Cc: Pierre Ossman <pierre@ossman.eu>
-> ---
->  drivers/mmc/host/mxcmmc.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 60a2b69..faa7b76 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -708,7 +708,7 @@ static int mxcmci_probe(struct platform_device *pdev)
->  	mmc->max_blk_size = 2048;
->  	mmc->max_blk_count = 65535;
->  	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
-> -	mmc->max_seg_size = mmc->max_seg_size;
-> +	mmc->max_seg_size = mmc->max_req_size;
->  
->  	host = mmc_priv(mmc);
->  	host->base = ioremap(r->start, resource_size(r));
+The patch titled
+     mxcmmc: fixed max_seg_size value on initialization.
+has been added to the -mm tree.  Its filename is
+     mxcmmc-fixed-max_seg_size-value-on-initialization.patch
 
-Please don't send unchangelogged patches.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-I am not able to determine the user-visible impact of this bug hence I
-am not able to determine which kernel(s) we should merge this patch
-into.
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mxcmmc: fixed max_seg_size value on initialization.
+From: Vladimir Zapolskiy <vzapolskiy@gmail.com>
+
+-ENOCHANGELOG
+
+Signed-off-by: Vladimir Zapolskiy <vzapolskiy@gmail.com>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Pierre Ossman <pierre@ossman.eu>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/mxcmmc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff -puN drivers/mmc/host/mxcmmc.c~mxcmmc-fixed-max_seg_size-value-on-initialization drivers/mmc/host/mxcmmc.c
+--- a/drivers/mmc/host/mxcmmc.c~mxcmmc-fixed-max_seg_size-value-on-initialization
++++ a/drivers/mmc/host/mxcmmc.c
+@@ -708,7 +708,7 @@ static int mxcmci_probe(struct platform_
+ 	mmc->max_blk_size = 2048;
+ 	mmc->max_blk_count = 65535;
+ 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+-	mmc->max_seg_size = mmc->max_seg_size;
++	mmc->max_seg_size = mmc->max_req_size;
+ 
+ 	host = mmc_priv(mmc);
+ 	host->base = ioremap(r->start, resource_size(r));
+_
+
+Patches currently in -mm which might be from vzapolskiy@gmail.com are
+
+linux-next.patch
+mxcmmc-fixed-max_seg_size-value-on-initialization.patch
 
