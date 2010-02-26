@@ -1,15 +1,11 @@
 From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [PATCH 5/7] mmc: at91_mci: enable large data blocks
-Date: Fri, 26 Feb 2010 19:39:33 +0100
-Message-ID: <ff9a79b6fbed698f446c537550255e571884918a.1267209149.git.nicolas.ferre@atmel.com>
-References: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
+Subject: [PATCH 1/7] mmc: at91_mci: fix pointer errors
+Date: Fri, 26 Feb 2010 19:39:29 +0100
+Message-ID: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
-In-Reply-To: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
-References: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
 	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -25,33 +21,35 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Wolfgang Muees <wolfgang.mues@auerswald.de>
 
-This patch is setting some max_ variables for the IO elevator, so the elevator
-will put requests for large data blocks to the driver. This is critical for
-a) speed
-and
-b) wear leveling of the flash chip controller: Otherwise the controller will
-treat the SD card badly with millions of single 4 KByte write commands. This
-will lead to a shorter life time for the SD cards.
+Fixes two pointer errors, one which leads to memory overwrites if used with
+large chunks of data.
 
 Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
 Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 ---
- drivers/mmc/host/at91_mci.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
+ drivers/mmc/host/at91_mci.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
-index 28fd565..4c30c56 100644
+index 63924e0..6835104 100644
 --- a/drivers/mmc/host/at91_mci.c
 +++ b/drivers/mmc/host/at91_mci.c
-@@ -934,6 +934,9 @@ static int __init at91_mci_probe(struct platform_device *pdev)
- 	mmc->max_blk_size  = MCI_MAXBLKSIZE;
- 	mmc->max_blk_count = MCI_BLKATONCE;
- 	mmc->max_req_size  = MCI_BUFSIZE;
-+	mmc->max_phys_segs = MCI_BLKATONCE;
-+	mmc->max_hw_segs   = MCI_BLKATONCE;
-+	mmc->max_seg_size  = MCI_BUFSIZE;
+@@ -227,11 +227,13 @@ static inline void at91_mci_sg_to_dma(struct at91mci_host *host, struct mmc_data
+ 			for (index = 0; index < (amount / 4); index++)
+ 				*dmabuf++ = swab32(sgbuffer[index]);
+ 		} else {
+-			memcpy(dmabuf, sgbuffer, amount);
+-			dmabuf += amount;
++			char *tmpv = (char *)dmabuf;
++			memcpy(tmpv, sgbuffer, amount);
++			tmpv += amount;
++			dmabuf = (unsigned *)tmpv;
+ 		}
  
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
+-		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
++		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
+ 
+ 		if (size == 0)
+ 			break;
 -- 
 1.5.6.5
