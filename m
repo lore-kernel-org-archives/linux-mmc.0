@@ -1,73 +1,56 @@
-From: Dan Carpenter <error27@gmail.com>
-Subject: Re: [PATCH 1/7] mmc: at91_mci: fix pointer errors
-Date: Fri, 26 Feb 2010 23:20:46 +0300
-Message-ID: <20100226201934.GG8417@bicker>
-References: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, avictor.za@gmail.com, wolfgang.mues@auerswald.de, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: [PATCH] Subject: MMC: Enable DMA on Ricoh sdhci reader by default
+Date: Fri, 26 Feb 2010 23:25:11 +0200
+Message-ID: <1267219511-20657-1-git-send-email-maximlevitsky@gmail.com>
+References: <20100224120038.3f0ec412.akpm@linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from fg-out-1718.google.com ([72.14.220.157]:4860 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966163Ab0BZVZT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Feb 2010 16:25:19 -0500
+In-Reply-To: <20100224120038.3f0ec412.akpm@linux-foundation.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Vasily Khoruzhick <anarsoul@gmail.com>, linux-kernel@vger.kernel.org
 
-On Fri, Feb 26, 2010 at 07:39:29PM +0100, Nicolas Ferre wrote:
-> From: Wolfgang Muees <wolfgang.mues@auerswald.de>
-> 
-> Fixes two pointer errors, one which leads to memory overwrites if used with
-> large chunks of data.
-> 
-> Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
-> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-> ---
->  drivers/mmc/host/at91_mci.c |    8 +++++---
->  1 files changed, 5 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
-> index 63924e0..6835104 100644
-> --- a/drivers/mmc/host/at91_mci.c
-> +++ b/drivers/mmc/host/at91_mci.c
-> @@ -227,11 +227,13 @@ static inline void at91_mci_sg_to_dma(struct at91mci_host *host, struct mmc_data
->  			for (index = 0; index < (amount / 4); index++)
->  				*dmabuf++ = swab32(sgbuffer[index]);
->  		} else {
-> -			memcpy(dmabuf, sgbuffer, amount);
-> -			dmabuf += amount;
-> +			char *tmpv = (char *)dmabuf;
-> +			memcpy(tmpv, sgbuffer, amount);
-> +			tmpv += amount;
-> +			dmabuf = (unsigned *)tmpv;
->  		}
->  
-> -		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
-> +		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
+From: Vasily Khoruzhick <anarsoul@gmail.com>
 
-Please put spaces around the minus sign.
+This card reader doesn't advertise, however DMA works well.
+Probably windows SDHCI driver assumes that all readers support DMA
+and thus we see that bug.
 
-	kunmap_atomic(((void *)sgbuffer) - sg->offset, KM_BIO_SRC_IRQ);
+Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
+Tested-by: Maxim Levitsky <maximlevitsky@gmail.com>
+---
+ drivers/mmc/host/sdhci-pci.c |    7 +++----
+ 1 files changed, 3 insertions(+), 4 deletions(-)
 
-regards,
-dan carpenter
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 5c3a176..12f5b09 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -80,9 +80,6 @@ struct sdhci_pci_chip {
+ 
+ static int ricoh_probe(struct sdhci_pci_chip *chip)
+ {
+-	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_IBM)
+-		chip->quirks |= SDHCI_QUIRK_CLOCK_BEFORE_RESET;
+-
+ 	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG ||
+ 	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
+ 		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
+@@ -92,7 +89,9 @@ static int ricoh_probe(struct sdhci_pci_chip *chip)
+ 
+ static const struct sdhci_pci_fixes sdhci_ricoh = {
+ 	.probe		= ricoh_probe,
+-	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR,
++	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
++			  SDHCI_QUIRK_FORCE_DMA |
++			  SDHCI_QUIRK_CLOCK_BEFORE_RESET,
+ };
+ 
+ static const struct sdhci_pci_fixes sdhci_ene_712 = {
+-- 
+1.6.3.3
 
->  
->  		if (size == 0)
->  			break;
-> -- 
-> 1.5.6.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
