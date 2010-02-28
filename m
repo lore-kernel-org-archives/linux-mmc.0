@@ -1,56 +1,54 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: [PATCH] Subject: MMC: Enable DMA on Ricoh sdhci reader by default
-Date: Fri, 26 Feb 2010 23:25:11 +0200
-Message-ID: <1267219511-20657-1-git-send-email-maximlevitsky@gmail.com>
-References: <20100224120038.3f0ec412.akpm@linux-foundation.org>
+From: Samuel Ortiz <sameo@linux.intel.com>
+Subject: Re: [PATCH 00/05] tmio_mmc: SDHI hotplug and random fixes
+Date: Sun, 28 Feb 2010 20:03:52 +0100
+Message-ID: <20100228190351.GD3589@sortiz.org>
+References: <20100217073735.32726.12020.sendpatchset@t400s>
+ <20100219114620.GE10255@sortiz.org>
+ <aec7e5c31002212043hf9dd9b6rbe72328592d455ae@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fg-out-1718.google.com ([72.14.220.157]:4860 "EHLO
-	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966163Ab0BZVZT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Feb 2010 16:25:19 -0500
-In-Reply-To: <20100224120038.3f0ec412.akpm@linux-foundation.org>
+Received: from mga12.intel.com ([143.182.124.36]:18738 "EHLO
+	azsmga102.ch.intel.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1031841Ab0B1TCn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Feb 2010 14:02:43 -0500
+Content-Disposition: inline
+In-Reply-To: <aec7e5c31002212043hf9dd9b6rbe72328592d455ae@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Vasily Khoruzhick <anarsoul@gmail.com>, linux-kernel@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linus.ml.walleij@gmail.com, g.liakhovetski@gmx.de, goda.yusuke@renesas.com, ian@mnementh.co.uk, lethal@linux-sh.org, akpm@linux-foundation.org
 
-From: Vasily Khoruzhick <anarsoul@gmail.com>
+Hi Magnus,
 
-This card reader doesn't advertise, however DMA works well.
-Probably windows SDHCI driver assumes that all readers support DMA
-and thus we see that bug.
+On Mon, Feb 22, 2010 at 01:43:54PM +0900, Magnus Damm wrote:
+> Hi Samuel,
+> 
+> On Fri, Feb 19, 2010 at 8:46 PM, Samuel Ortiz <sameo@linux.intel.com> wrote:
+> > On Wed, Feb 17, 2010 at 04:37:35PM +0900, Magnus Damm wrote:
+> >> tmio_mmc: SDHI hotplug and random fixes
+> >>
+> >> [PATCH 01/05] tmio_mmc: Keep card-detect interrupts enabled
+> >> [PATCH 02/05] tmio_mmc: Add MMC_CAP_MMC_HIGHSPEED support V2
+> >> [PATCH 03/05] tmio_mmc: Use 100ms mmc_detect_change() delay
+> >> [PATCH 04/05] tmio_mmc: Remove const from platform data V3
+> >> [PATCH 05/05] tmio_mmc: Balance cell enable()/disable() calls
+> >>
+> > Since some of this code depends on the tmio.h changes, I'm taking this
+> > patchset. Please let me know if that's fine with you.
+> 
+> Sounds great, thank you! I've just posted two patches for
+> sh_mobile_sdhi, please pick them up as well if possible.
+Done, thanks a lot.
 
-Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
-Tested-by: Maxim Levitsky <maximlevitsky@gmail.com>
----
- drivers/mmc/host/sdhci-pci.c |    7 +++----
- 1 files changed, 3 insertions(+), 4 deletions(-)
+Cheers,
+Samuel.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 5c3a176..12f5b09 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -80,9 +80,6 @@ struct sdhci_pci_chip {
- 
- static int ricoh_probe(struct sdhci_pci_chip *chip)
- {
--	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_IBM)
--		chip->quirks |= SDHCI_QUIRK_CLOCK_BEFORE_RESET;
--
- 	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG ||
- 	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
- 		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
-@@ -92,7 +89,9 @@ static int ricoh_probe(struct sdhci_pci_chip *chip)
- 
- static const struct sdhci_pci_fixes sdhci_ricoh = {
- 	.probe		= ricoh_probe,
--	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR,
-+	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
-+			  SDHCI_QUIRK_FORCE_DMA |
-+			  SDHCI_QUIRK_CLOCK_BEFORE_RESET,
- };
- 
- static const struct sdhci_pci_fixes sdhci_ene_712 = {
+
+> Thanks,
+> 
+> / magnus
+
 -- 
-1.6.3.3
-
+Intel Open Source Technology Centre
+http://oss.intel.com/
