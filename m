@@ -1,132 +1,37 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
-	<u.kleine-koenig@pengutronix.de>
+From: Thomas Gleixner <tglx@linutronix.de>
 Subject: Re: 2.6.33-rc8-rt1 on Beagle
-Date: Mon, 1 Mar 2010 16:06:57 +0100
-Message-ID: <20100301150657.GG16049@pengutronix.de>
-References: <alpine.LFD.2.00.0910141115020.9428@localhost.localdomain> <alpine.LFD.2.00.0911061743210.12138@localhost.localdomain> <alpine.LFD.2.00.0911101326280.2725@localhost.localdomain> <alpine.LFD.2.00.1001212102220.2906@localhost.localdomain> <alpine.LFD.2.00.1002181748460.2811@localhost.localdomain> <alpine.LFD.2.00.1002212322450.2811@localhost.localdomain> <20100222132927.GC5416@bicker> <4B84D20B.9080600@osadl.org> <2A3DCF3DA181AD40BDE86A3150B27B6B030CDCBE65@dbde02.ent.ti.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030CDCC2FD@dbde02.ent.ti.com>
+Date: Mon, 1 Mar 2010 17:14:54 +0100 (CET)
+Message-ID: <alpine.LFD.2.00.1003011713210.4245@localhost.localdomain>
+References: <alpine.LFD.2.00.0910141115020.9428@localhost.localdomain> <alpine.LFD.2.00.0911061743210.12138@localhost.localdomain> <alpine.LFD.2.00.0911101326280.2725@localhost.localdomain> <alpine.LFD.2.00.1001212102220.2906@localhost.localdomain>
+ <alpine.LFD.2.00.1002181748460.2811@localhost.localdomain> <alpine.LFD.2.00.1002212322450.2811@localhost.localdomain> <20100222132927.GC5416@bicker> <4B84D20B.9080600@osadl.org> <2A3DCF3DA181AD40BDE86A3150B27B6B030CDCBE65@dbde02.ent.ti.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B030CDCC2FD@dbde02.ent.ti.com> <20100301150657.GG16049@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <2A3DCF3DA181AD40BDE86A3150B27B6B030CDCC2FD@dbde02.ent.ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Chatterjee, Amit" <amit.chatterjee@ti.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, rt-users <linux-rt-users@vger.kernel.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-963598006-1267460096=:4245"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from www.tglx.de ([62.245.132.106]:55983 "EHLO www.tglx.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750844Ab0CAQPD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 1 Mar 2010 11:15:03 -0500
+In-Reply-To: <20100301150657.GG16049@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?ISO-8859-15?Q?Uwe_Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>
+Cc: "Chatterjee, Amit" <amit.chatterjee@ti.com>, LKML <linux-kernel@vger.kernel.org>, rt-users <linux-rt-users@vger.kernel.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hello,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-On Thu, Feb 25, 2010 at 04:36:23PM +0530, Chatterjee, Amit wrote:
-> Migrated to 2.6.33-rc8-rt2 but still am facing the same issue.
->=20
-> Regards,
-> Amit
->=20
-> -----Original Message-----
-> From: linux-rt-users-owner@vger.kernel.org [mailto:linux-rt-users-own=
-er@vger.kernel.org] On Behalf Of Chatterjee, Amit
-> Sent: Wednesday, February 24, 2010 5:50 PM
-> To: LKML; rt-users
-> Subject: 2.6.33-rc8-rt1 on Beagle
->=20
-> Hi,
-> 	I am facing NULL pointer deference error with beagle board. The boot=
-args used are -
->=20
-> setenv bootargs 'console=3DttyS2,115200n8 root=3D/dev/mmcblk0p2 rootw=
-ait rootfstype=3Dext3 omapfb.mode=3Ddvi:800x600MR-24@60 omapdss.def_dis=
-p=3Ddvi omapfb.vram=3D0:8M,1:2M,2:4M mem=3D216M'
-> setenv bootcmd 'mmc init;fatload mmc 0 0x80200000 uImage;bootm 0x8020=
-0000'
->=20
-> The crash log is as follows -
->=20
-> Waiting for root device /dev/mmcblk0p2...
-> Unable to handle kernel NULL pointer dereference at virtual address 0=
-0000000
-> pgd =3D c0004000
-> [00000000] *pgd=3D00000000
-> Internal error: Oops: 805 [#1] PREEMPT
-> last sysfs file:
-> Modules linked in:
-> CPU: 0    Not tainted  (2.6.33-rc8-rt1 #3)
-> PC is at rt_spin_lock_slowlock+0x64/0x220
-This corresponds to:
+--8323328-963598006-1267460096=:4245
+Content-Type: TEXT/PLAIN; charset=iso-8859-1
+Content-Transfer-Encoding: 8BIT
 
-	BUG_ON(rt_mutex_owner(lock) =3D=3D current);
+On Mon, 1 Mar 2010, Uwe Kleine-König wrote:
+> You might want to report that to the author(s) of
+> drivers/mmc/host/omap_hsmmc.c.
 
-in rt_spin_lock_slowlock.  If you had CONFIG_BUG_VERBOSE this would hav=
-e
-been more obvious.
+FYI, thats fixed in 33-rt3 and the fix is going mainline as well.
 
-> LR is at rt_spin_lock_slowlock+0x24/0x220
-> pc : [<c029f85c>]    lr : [<c029f81c>]    psr: 60000093
-> sp : cd1a1ed8  ip : cd1a1f08  fp : 00000053
-> r10: cd3bc664  r9 : c039c8c4  r8 : cd3bc400
-> r7 : cd1a0000  r6 : cd3bc664  r5 : 60000013  r4 : cd3bc664
-> r3 : 00000000  r2 : cd3fb480  r1 : 00000000  r0 : cd1a1ed8
-> Flags: nZCv  IRQs off  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
-> Control: 10c5387d  Table: 80004019  DAC: 00000017
-> Process irq/83-mmc0 (pid: 355, stack limit =3D 0xcd1a02e8)
-> Stack: (0xcd1a1ed8 to 0xcd1a2000)
-> 1ec0:                                                       00000001 =
-00000006
-> 1ee0: cd070040 c0397f48 00000001 cd3fb480 ffffffff 00000002 cd3bc664 =
-60000013
-> 1f00: 00000000 cd1a0000 00000000 c029f9f0 00000000 cd3bc600 cd0c3ef4 =
-cd3bc664
-> 1f20: 00000000 cd3bc400 cd3bc664 c0213850 cd0c2000 cd0c201c cd3fb480 =
-00000017
-> 1f40: 00000000 cd3bc600 00000000 00018000 00000001 00000000 cd3bc664 =
-c020bb94
-> 1f60: cd0c3f24 c02145fc c039c880 cd3d07c0 cd1a0000 cd3d07e4 08000000 =
-c039c8c4
-> 1f80: c039c8dc c00768e8 cd3d07c0 00000032 cd1a1f88 cd021e58 cd1a1fbc =
-c0076828
-> 1fa0: cd3d07c0 00000000 00000000 00000000 00000000 c0060ae8 00000000 =
-00000000
-> 1fc0: cd1a1fc0 cd1a1fc0 cd1a1fc8 cd1a1fc8 00000000 00000000 cd1a1fd8 =
-cd1a1fd8
-> 1fe0: 00000000 00000000 00000000 00000000 00000000 c0028ec4 107fcd00 =
-0a33ef94
-> [<c029f85c>] (rt_spin_lock_slowlock+0x64/0x220) from [<c0213850>] (om=
-ap_hsmmc_request+0x44/0x400)
-> [<c0213850>] (omap_hsmmc_request+0x44/0x400) from [<c020bb94>] (mmc_r=
-equest_done+0x64/0x90)
-> [<c020bb94>] (mmc_request_done+0x64/0x90) from [<c02145fc>] (omap_hsm=
-mc_irq+0x364/0x46c)
-> [<c02145fc>] (omap_hsmmc_irq+0x364/0x46c) from [<c00768e8>] (irq_thre=
-ad+0xc0/0x208)
-> [<c00768e8>] (irq_thread+0xc0/0x208) from [<c0060ae8>] (kthread+0x78/=
-0x80)
-> [<c0060ae8>] (kthread+0x78/0x80) from [<c0028ec4>] (kernel_thread_exi=
-t+0x0/0x8)
-> Code: e597300c e1520003 1a000002 e3a03000 (e5833000)
+Thanks,
 
-I assume the problem is that the function omap_hsmmc_request tries to b=
-e
-clever in a non-rt compatible way:
-=09
-	/*
-	 * Prevent races with the interrupt handler because of unexpected
-	 * interrupts, but not if we are already in interrupt context i.e.
-	 * retries.
-	 */
-	if (!in_interrupt()) {
-		spin_lock_irqsave(&host->irq_lock, host->flags);
-
-But looking at the backtrace in this context in_interrupt() would be
-true in !PREEMPT_RT.
-
-You might want to report that to the author(s) of
-drivers/mmc/host/omap_hsmmc.c.
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig        =
-    |
-Industrial Linux Solutions                 | http://www.pengutronix.de/=
-  |
+	tglx
+--8323328-963598006-1267460096=:4245--
