@@ -1,229 +1,30 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-at91_mci-use-dma-buffer-for-read.patch added to -mm tree
-Date: Tue, 02 Mar 2010 13:35:03 -0800
-Message-ID: <201003022135.o22LZ3vC030829@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: wolfgang.mues@auerswald.de, avictor.za@gmail.com, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 4/7] mmc: at91_mci: use DMA buffer for read
+Date: Tue, 2 Mar 2010 13:34:34 -0800
+Message-ID: <20100302133434.761df661.akpm@linux-foundation.org>
+References: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
+	<0374bbdf963e39fc012ad7885f9036c00dbb4079.1267209149.git.nicolas.ferre@atmel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:54017 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752552Ab0CBVfl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2010 16:35:41 -0500
+In-Reply-To: <0374bbdf963e39fc012ad7885f9036c00dbb4079.1267209149.git.nicolas.ferre@atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, wolfgang.mues@auerswald.de, avictor.za@gmail.com
 
+On Fri, 26 Feb 2010 19:39:32 +0100
+Nicolas Ferre <nicolas.ferre@atmel.com> wrote:
 
-The patch titled
-     mmc: at91_mci: use DMA buffer for read
-has been added to the -mm tree.  Its filename is
-     mmc-at91_mci-use-dma-buffer-for-read.patch
+> +		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+It's a feature of kunmap_atomic() that it will accept a pointer to any
+location in the page.  So the subtraction isn't strictly needed.
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: at91_mci: use DMA buffer for read
-From: Wolfgang Muees <wolfgang.mues@auerswald.de>
-
-Convert the read to use the DMA buffer as well.  The old code was doing
-double-buffering DMA with the PDC; no way to make it work.  Replace it
-with a single-PDC approach.  It also simplify things removing the need for
-a pre_dma_read() function.
-
-[nicolas.ferre@atmel.com coding style modifications]
-Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Andrew Victor <avictor.za@gmail.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/at91_mci.c |  128 ++++++++--------------------------
- 1 file changed, 32 insertions(+), 96 deletions(-)
-
-diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-use-dma-buffer-for-read drivers/mmc/host/at91_mci.c
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-use-dma-buffer-for-read
-+++ a/drivers/mmc/host/at91_mci.c
-@@ -251,80 +251,14 @@ static inline void at91_mci_sg_to_dma(st
- }
- 
- /*
-- * Prepare a dma read
-- */
--static void at91_mci_pre_dma_read(struct at91mci_host *host)
--{
--	int i;
--	struct scatterlist *sg;
--	struct mmc_command *cmd;
--	struct mmc_data *data;
--
--	pr_debug("pre dma read\n");
--
--	cmd = host->cmd;
--	if (!cmd) {
--		pr_debug("no command\n");
--		return;
--	}
--
--	data = cmd->data;
--	if (!data) {
--		pr_debug("no data\n");
--		return;
--	}
--
--	for (i = 0; i < 2; i++) {
--		/* nothing left to transfer */
--		if (host->transfer_index >= data->sg_len) {
--			pr_debug("Nothing left to transfer (index = %d)\n", host->transfer_index);
--			break;
--		}
--
--		/* Check to see if this needs filling */
--		if (i == 0) {
--			if (at91_mci_read(host, ATMEL_PDC_RCR) != 0) {
--				pr_debug("Transfer active in current\n");
--				continue;
--			}
--		}
--		else {
--			if (at91_mci_read(host, ATMEL_PDC_RNCR) != 0) {
--				pr_debug("Transfer active in next\n");
--				continue;
--			}
--		}
--
--		/* Setup the next transfer */
--		pr_debug("Using transfer index %d\n", host->transfer_index);
--
--		sg = &data->sg[host->transfer_index++];
--		pr_debug("sg = %p\n", sg);
--
--		sg->dma_address = dma_map_page(NULL, sg_page(sg), sg->offset, sg->length, DMA_FROM_DEVICE);
--
--		pr_debug("dma address = %08X, length = %d\n", sg->dma_address, sg->length);
--
--		if (i == 0) {
--			at91_mci_write(host, ATMEL_PDC_RPR, sg->dma_address);
--			at91_mci_write(host, ATMEL_PDC_RCR, (data->blksz & 0x3) ? sg->length : sg->length / 4);
--		}
--		else {
--			at91_mci_write(host, ATMEL_PDC_RNPR, sg->dma_address);
--			at91_mci_write(host, ATMEL_PDC_RNCR, (data->blksz & 0x3) ? sg->length : sg->length / 4);
--		}
--	}
--
--	pr_debug("pre dma read done\n");
--}
--
--/*
-  * Handle after a dma read
-  */
- static void at91_mci_post_dma_read(struct at91mci_host *host)
- {
- 	struct mmc_command *cmd;
- 	struct mmc_data *data;
-+	unsigned int len, i, size;
-+	unsigned *dmabuf = host->buffer;
- 
- 	pr_debug("post dma read\n");
- 
-@@ -340,42 +274,39 @@ static void at91_mci_post_dma_read(struc
- 		return;
- 	}
- 
--	while (host->in_use_index < host->transfer_index) {
--		struct scatterlist *sg;
-+	size = data->blksz * data->blocks;
-+	len = data->sg_len;
- 
--		pr_debug("finishing index %d\n", host->in_use_index);
-+	at91_mci_write(host, AT91_MCI_IDR, AT91_MCI_ENDRX);
-+	at91_mci_write(host, AT91_MCI_IER, AT91_MCI_RXBUFF);
- 
--		sg = &data->sg[host->in_use_index++];
-+	for (i = 0; i < len; i++) {
-+		struct scatterlist *sg;
-+		int amount;
-+		unsigned int *sgbuffer;
- 
--		pr_debug("Unmapping page %08X\n", sg->dma_address);
-+		sg = &data->sg[i];
- 
--		dma_unmap_page(NULL, sg->dma_address, sg->length, DMA_FROM_DEVICE);
-+		sgbuffer = kmap_atomic(sg_page(sg), KM_BIO_SRC_IRQ) + sg->offset;
-+		amount = min(size, sg->length);
-+		size -= amount;
- 
- 		if (cpu_is_at91rm9200()) {	/* AT91RM9200 errata */
--			unsigned int *buffer;
- 			int index;
--
--			/* Swap the contents of the buffer */
--			buffer = kmap_atomic(sg_page(sg), KM_BIO_SRC_IRQ) + sg->offset;
--			pr_debug("buffer = %p, length = %d\n", buffer, sg->length);
--
--			for (index = 0; index < (sg->length / 4); index++)
--				buffer[index] = swab32(buffer[index]);
--
--			kunmap_atomic(buffer, KM_BIO_SRC_IRQ);
-+			for (index = 0; index < (amount / 4); index++)
-+				sgbuffer[index] = swab32(*dmabuf++);
-+		} else {
-+			char *tmpv = (char *)dmabuf;
-+			memcpy(sgbuffer, tmpv, amount);
-+			tmpv += amount;
-+			dmabuf = (unsigned *)tmpv;
- 		}
- 
--		flush_dcache_page(sg_page(sg));
--
--		data->bytes_xfered += sg->length;
--	}
--
--	/* Is there another transfer to trigger? */
--	if (host->transfer_index < data->sg_len)
--		at91_mci_pre_dma_read(host);
--	else {
--		at91_mci_write(host, AT91_MCI_IDR, AT91_MCI_ENDRX);
--		at91_mci_write(host, AT91_MCI_IER, AT91_MCI_RXBUFF);
-+		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
-+		dmac_flush_range((void *)sgbuffer, ((void *)sgbuffer) + amount);
-+		data->bytes_xfered += amount;
-+		if (size == 0)
-+			break;
- 	}
- 
- 	pr_debug("post dma read done\n");
-@@ -610,7 +541,12 @@ static void at91_mci_send_command(struct
- 				 */
- 				host->total_length = 0;
- 
--				at91_mci_pre_dma_read(host);
-+				at91_mci_write(host, ATMEL_PDC_RPR, host->physical_address);
-+				at91_mci_write(host, ATMEL_PDC_RCR, (data->blksz & 0x3) ?
-+					(blocks * block_length) : (blocks * block_length) / 4);
-+				at91_mci_write(host, ATMEL_PDC_RNPR, 0);
-+				at91_mci_write(host, ATMEL_PDC_RNCR, 0);
-+
- 				ier = AT91_MCI_ENDRX /* | AT91_MCI_RXBUFF */;
- 			}
- 			else {
-_
-
-Patches currently in -mm which might be from wolfgang.mues@auerswald.de are
-
-mmc-at91_mci-fix-pointer-errors.patch
-mmc-at91_mci-fix-timeout-errors.patch
-mmc-at91_mci-use-one-coherent-dma-buffer.patch
-mmc-at91_mci-use-dma-buffer-for-read.patch
-mmc-at91_mci-enable-large-data-blocks.patch
-mmc-at91_mci-enable-mmc_cap_sdio_irq-only-when-it-actually-works.patch
-mmc-at91_mci-introduce-per-mci-revision-conditional-code.patch
+And if the subtraction is removed, the (void*) cast can also be removed.
 
