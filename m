@@ -1,148 +1,67 @@
-From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [PATCH] mmc: omap_hsmmc: Fix conditional locking
-Date: Mon, 1 Mar 2010 20:01:44 +0100 (CET)
-Message-ID: <alpine.LFD.2.00.1003011952470.4245@localhost.localdomain>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: LKML <linux-kernel@vger.kernel.org>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin.patch added to -mm tree
+Date: Tue, 02 Mar 2010 12:37:43 -0800
+Message-ID: <201003022037.o22Kbhb5028235@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42941 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751391Ab0CBUid (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2010 15:38:33 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: lars@metafoo.de, ben-linux@fluff.org, linux-mmc@vger.kernel.org, stable@kernel.org
 
-Conditional locking on (!in_interrupt()) is broken by design and there
-is no reason to keep the host->irq_lock across the call to
-mmc_request_done(). Also the host->protect_card magic hack does not
-depend on the context
 
-Fix the mess by dropping host->irq_lock before calling
-mmc_request_done().
+The patch titled
+     s3cmci: s3cmci_card_present: Use no_detect to decide whether there is a card detect pin
+has been added to the -mm tree.  Its filename is
+     s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin.patch
 
-Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 4b23225..99a3383 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -468,14 +468,6 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
- 	if (host->use_dma)
- 		cmdreg |= DMA_EN;
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: s3cmci: s3cmci_card_present: Use no_detect to decide whether there is a card detect pin
+From: Lars-Peter Clausen <lars@metafoo.de>
+
+Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Ben Dooks <ben-linux@fluff.org>
+Cc: <linux-mmc@vger.kernel.org>
+Cc: <stable@kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/s3cmci.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin
++++ a/drivers/mmc/host/s3cmci.c
+@@ -1179,7 +1179,7 @@ static int s3cmci_card_present(struct mm
+ 	struct s3c24xx_mci_pdata *pdata = host->pdata;
+ 	int ret;
  
--	/*
--	 * In an interrupt context (i.e. STOP command), the spinlock is unlocked
--	 * by the interrupt handler, otherwise (i.e. for a new request) it is
--	 * unlocked here.
--	 */
--	if (!in_interrupt())
--		spin_unlock_irqrestore(&host->irq_lock, host->flags);
--
- 	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
- 	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
- }
-@@ -506,7 +498,9 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
- 		}
+-	if (pdata->gpio_detect == 0)
++	if (pdata->no_detect)
+ 		return -ENOSYS;
  
- 		host->mrq = NULL;
-+		spin_unlock(&host->irq_lock);
- 		mmc_request_done(host->mmc, mrq);
-+		spin_lock(&host->irq_lock);
- 		return;
- 	}
- 
-@@ -523,7 +517,9 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
- 
- 	if (!data->stop) {
- 		host->mrq = NULL;
-+		spin_unlock(&host->irq_lock);
- 		mmc_request_done(host->mmc, data->mrq);
-+		spin_lock(&host->irq_lock);
- 		return;
- 	}
- 	omap_hsmmc_start_command(host, data->stop, NULL);
-@@ -551,7 +547,9 @@ omap_hsmmc_cmd_done(struct omap_hsmmc_host *host, struct mmc_command *cmd)
- 	}
- 	if ((host->data == NULL && !host->response_busy) || cmd->error) {
- 		host->mrq = NULL;
-+		spin_unlock(&host->irq_lock);
- 		mmc_request_done(host->mmc, cmd->mrq);
-+		spin_lock(&host->irq_lock);
- 	}
- }
- 
-@@ -1077,37 +1075,31 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
- 	int err;
- 
-+	spin_lock_irqsave(&host->irq_lock, host->flags);
- 	/*
--	 * Prevent races with the interrupt handler because of unexpected
--	 * interrupts, but not if we are already in interrupt context i.e.
--	 * retries.
-+	 * Protect the card from I/O if there is a possibility
-+	 * it can be removed.
- 	 */
--	if (!in_interrupt()) {
--		spin_lock_irqsave(&host->irq_lock, host->flags);
--		/*
--		 * Protect the card from I/O if there is a possibility
--		 * it can be removed.
--		 */
--		if (host->protect_card) {
--			if (host->reqs_blocked < 3) {
--				/*
--				 * Ensure the controller is left in a consistent
--				 * state by resetting the command and data state
--				 * machines.
--				 */
--				omap_hsmmc_reset_controller_fsm(host, SRD);
--				omap_hsmmc_reset_controller_fsm(host, SRC);
--				host->reqs_blocked += 1;
--			}
--			req->cmd->error = -EBADF;
--			if (req->data)
--				req->data->error = -EBADF;
--			spin_unlock_irqrestore(&host->irq_lock, host->flags);
--			mmc_request_done(mmc, req);
--			return;
--		} else if (host->reqs_blocked)
--			host->reqs_blocked = 0;
--	}
-+	if (host->protect_card) {
-+		if (host->reqs_blocked < 3) {
-+			/*
-+			 * Ensure the controller is left in a consistent
-+			 * state by resetting the command and data state
-+			 * machines.
-+			 */
-+			omap_hsmmc_reset_controller_fsm(host, SRD);
-+			omap_hsmmc_reset_controller_fsm(host, SRC);
-+			host->reqs_blocked += 1;
-+		}
-+		req->cmd->error = -EBADF;
-+		if (req->data)
-+			req->data->error = -EBADF;
-+		spin_unlock_irqrestore(&host->irq_lock, host->flags);
-+		mmc_request_done(mmc, req);
-+		return;
-+	} else if (host->reqs_blocked)
-+		host->reqs_blocked = 0;
-+
- 	WARN_ON(host->mrq != NULL);
- 	host->mrq = req;
- 	err = omap_hsmmc_prepare_data(host, req);
-@@ -1116,13 +1108,13 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
- 		if (req->data)
- 			req->data->error = err;
- 		host->mrq = NULL;
--		if (!in_interrupt())
--			spin_unlock_irqrestore(&host->irq_lock, host->flags);
-+		spin_unlock_irqrestore(&host->irq_lock, host->flags);
- 		mmc_request_done(mmc, req);
- 		return;
- 	}
- 
- 	omap_hsmmc_start_command(host, req->cmd, req->data);
-+	spin_unlock_irqrestore(&host->irq_lock, host->flags);
- }
- 
- /* Routine to configure clock values. Exposed API to core */
+ 	ret = gpio_get_value(pdata->gpio_detect) ? 0 : 1;
+_
+
+Patches currently in -mm which might be from lars@metafoo.de are
+
+linux-next.patch
+s3cmci-initialize-default-platform-data-no_wprotect-and-no_detect-with-1.patch
+s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin.patch
+
