@@ -1,19 +1,22 @@
 From: akpm@linux-foundation.org
-Subject: + mmc-at91_mci-introduce-per-mci-revision-conditional-code.patch added to -mm tree
-Date: Tue, 02 Mar 2010 13:35:11 -0800
-Message-ID: <201003022135.o22LZCcf030844@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: nicolas.ferre@atmel.com, avictor.za@gmail.com, linux-mmc@vger.kernel.org, wolfgang.mues@auerswald.de
+Subject: + mmc-at91_mci-fix-timeout-errors.patch added to -mm tree
+Date: Tue, 02 Mar 2010 13:34:59 -0800
+Message-ID: <201003022134.o22LYxr3030820@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42468 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752984Ab0CBVfo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2010 16:35:44 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: wolfgang.mues@auerswald.de, avictor.za@gmail.com, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com
 
 
 The patch titled
-     mmc: at91_mci: introduce per-mci-revision conditional code
+     mmc: at91_mci: fix timeout errors
 has been added to the -mm tree.  Its filename is
-     mmc-at91_mci-introduce-per-mci-revision-conditional-code.patch
+     mmc-at91_mci-fix-timeout-errors.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -29,104 +32,49 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: at91_mci: introduce per-mci-revision conditional code
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: mmc: at91_mci: fix timeout errors
+From: Wolfgang Muees <wolfgang.mues@auerswald.de>
 
-We used to manage features and differences on a per-cpu basis.  As several
-cpus share the same mci revision, this patch aggregates cpus that have the
-same IP revision in one defined constant.  We use the
-at91mci_is_mci1rev2xx() funtion name not to mess with newer Atmel sd/mmc
-IP called "MCI2".  _rev2 naming could have been confusing...
+Fix two timeout errors, one for slow SDHC cards and one for slow users
+while inserting SD cards.
 
+Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
 Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Wolfgang Muees <wolfgang.mues@auerswald.de>
 Cc: Andrew Victor <avictor.za@gmail.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/at91_mci.c |   27 +++++++++++++++++++--------
- 1 file changed, 19 insertions(+), 8 deletions(-)
+ drivers/mmc/host/at91_mci.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-introduce-per-mci-revision-conditional-code drivers/mmc/host/at91_mci.c
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-introduce-per-mci-revision-conditional-code
+diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-fix-timeout-errors drivers/mmc/host/at91_mci.c
+--- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-fix-timeout-errors
 +++ a/drivers/mmc/host/at91_mci.c
-@@ -78,6 +78,17 @@
+@@ -756,7 +756,8 @@ static void at91_mci_request(struct mmc_
+ 	host->request = mrq;
+ 	host->flags = 0;
  
- #define DRIVER_NAME "at91_mci"
+-	mod_timer(&host->timer, jiffies +  HZ);
++	/* more than 1s timeout needed with slow SD cards */
++	mod_timer(&host->timer, jiffies +  msecs_to_jiffies(2000));
  
-+static inline int at91mci_is_mci1rev2xx(void)
-+{
-+	return (   cpu_is_at91sam9260()
-+		|| cpu_is_at91sam9263()
-+		|| cpu_is_at91cap9()
-+		|| cpu_is_at91sam9rl()
-+		|| cpu_is_at91sam9g10()
-+		|| cpu_is_at91sam9g20()
-+		);
-+}
-+
- #define FL_SENT_COMMAND	(1 << 0)
- #define FL_SENT_STOP	(1 << 1)
- 
-@@ -204,8 +215,8 @@ static inline void at91_mci_sg_to_dma(st
- 	size = data->blksz * data->blocks;
- 	len = data->sg_len;
- 
--	/* AT91SAM926[0/3] Data Write Operation and number of bytes erratum */
--	if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
-+	/* MCI1 rev2xx Data Write Operation and number of bytes erratum */
-+	if (at91mci_is_mci1rev2xx())
- 		if (host->total_length == 12)
- 			memset(dmabuf, 0, 12);
- 
-@@ -398,7 +409,7 @@ static void at91_mci_enable(struct at91m
- 	at91_mci_write(host, AT91_MCI_DTOR, AT91_MCI_DTOMUL_1M | AT91_MCI_DTOCYC);
- 	mr = AT91_MCI_PDCMODE | 0x34a;
- 
--	if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
-+	if (at91mci_is_mci1rev2xx())
- 		mr |= AT91_MCI_RDPROOF | AT91_MCI_WRPROOF;
- 
- 	at91_mci_write(host, AT91_MCI_MR, mr);
-@@ -555,10 +566,10 @@ static void at91_mci_send_command(struct
- 				 */
- 				host->total_length = block_length * blocks;
- 				/*
--				 * AT91SAM926[0/3] Data Write Operation and
-+				 * MCI1 rev2xx Data Write Operation and
- 				 * number of bytes erratum
- 				 */
--				if (cpu_is_at91sam9260 () || cpu_is_at91sam9263())
-+				if (at91mci_is_mci1rev2xx())
- 					if (host->total_length < 12)
- 						host->total_length = 12;
- 
-@@ -943,7 +954,7 @@ static int __init at91_mci_probe(struct 
- 	host->bus_mode = 0;
- 	host->board = pdev->dev.platform_data;
- 	if (host->board->wire4) {
--		if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
-+		if (at91mci_is_mci1rev2xx())
- 			mmc->caps |= MMC_CAP_4_BIT_DATA;
- 		else
- 			dev_warn(&pdev->dev, "4 wire bus mode not supported"
-@@ -959,8 +970,8 @@ static int __init at91_mci_probe(struct 
+ 	at91_mci_process_next(host);
+ }
+@@ -944,7 +945,8 @@ static irqreturn_t at91_mmc_det_irq(int 
+ 			pr_debug("****** Resetting SD-card bus width ******\n");
+ 			at91_mci_write(host, AT91_MCI_SDCR, at91_mci_read(host, AT91_MCI_SDCR) & ~AT91_MCI_SDCBUS);
+ 		}
+-		mmc_detect_change(host->mmc, msecs_to_jiffies(100));
++		/* 0.5s needed because of early card detect switch firing */
++		mmc_detect_change(host->mmc, msecs_to_jiffies(500));
  	}
- 
- 	/* Add SDIO capability when available */
--	if (cpu_is_at91sam9260() || cpu_is_at91sam9263()) {
--		/* AT91SAM9260/9263 erratum */
-+	if (at91mci_is_mci1rev2xx()) {
-+		/* at91mci MCI1 rev2xx sdio interrupt erratum */
- 		if (host->board->wire4 || !host->board->slot_b)
- 			mmc->caps |= MMC_CAP_SDIO_IRQ;
- 	}
+ 	return IRQ_HANDLED;
+ }
 _
 
-Patches currently in -mm which might be from nicolas.ferre@atmel.com are
+Patches currently in -mm which might be from wolfgang.mues@auerswald.de are
 
-mmc-atmel-host-kconfig-cleanup-for-everyone-else.patch
 mmc-at91_mci-fix-pointer-errors.patch
 mmc-at91_mci-fix-timeout-errors.patch
 mmc-at91_mci-use-one-coherent-dma-buffer.patch
