@@ -1,56 +1,50 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [PATCH] mmc: at91_mci: correct kunmap_atomic()
-Date: Wed,  3 Mar 2010 15:17:35 +0100
-Message-ID: <1267625855-32695-1-git-send-email-nicolas.ferre@atmel.com>
-References: <20100302133434.761df661.akpm@linux-foundation.org>
+From: Pavel Kiryukhin <vksavl@gmail.com>
+Subject: cmd12 fails to stop out of range reads on Sandisk 2Gb microSD card.
+Date: Thu, 04 Mar 2010 00:43:13 +0300
+Message-ID: <4B8ED7F1.5040204@gmail.com>
+Reply-To: vksavl@gmail.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.atmel.fr ([81.80.104.162]:35422 "EHLO atmel-es2.atmel.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753742Ab0CCNGl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Mar 2010 08:06:41 -0500
-In-Reply-To: <20100302133434.761df661.akpm@linux-foundation.org>
+Received: from mail-bw0-f209.google.com ([209.85.218.209]:63751 "EHLO
+	mail-bw0-f209.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756620Ab0CCVll (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2010 16:41:41 -0500
+Received: by bwz1 with SMTP id 1so291817bwz.21
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Mar 2010 13:41:39 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, wolfgang.mues@auerswald.de, avictor.za@gmail.com, Nicolas Ferre <nicolas.ferre@atmel.com>
+To: linux-mmc@vger.kernel.org
+Cc: vksavl@gmail.com
 
-kunmap_atomic() accepts a pointer to any location in the page so we do not need
-the subtraction and cast.
+Hi,
+There was an issue reported by Cliff Brake some time ago regarding 
+Sandisk 2Gb SD card behavior.
+(http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg00982.html)
+It seems I have similar issue with Sandisk 2Gb microSD:
+CMD18 read last 8 blocks available (512 bytes each). After the reception 
+of last bytes of last block cmd12 is send to stop transmit. But while 
+command is send card continue transmit. And the first byte received is 
+data error token with valid value 0x8 - out of range. Then 0fxff follows 
+and 8-th byte should be response to cmd12. The problem is: 2Gb sandisk 
+card send 0xc2 and refuse accept any other commands - e.g. it responds 
+with 0x4 to subsequent cmd17. But other card (no name) responds with 0 
+instead of 0xc2.
 
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
----
-Andrew,
-I created a new patch that you can stack at the top of the previous
-patch series. I guess that you cannot fold it in other patches as the
-kunmap_atomic() correction impacts two different patches.
+8 ff ff ff ff ff ff ff c2 3f ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  [Sandisk (SU02G)]
 
-Thanks.
+8 ff ff ff ff ff ff ff 0 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff   [other card (SD02G)]
 
- drivers/mmc/host/at91_mci.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
-index 55507da..91dc60c 100644
---- a/drivers/mmc/host/at91_mci.c
-+++ b/drivers/mmc/host/at91_mci.c
-@@ -248,7 +248,7 @@ static inline void at91_mci_sg_to_dma(struct at91mci_host *host, struct mmc_data
- 			dmabuf = (unsigned *)tmpv;
- 		}
- 
--		kunmap_atomic(((void *)sgbuffer) - sg->offset, KM_BIO_SRC_IRQ);
-+		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
- 
- 		if (size == 0)
- 			break;
-@@ -313,7 +313,7 @@ static void at91_mci_post_dma_read(struct at91mci_host *host)
- 			dmabuf = (unsigned *)tmpv;
- 		}
- 
--		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
-+		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
- 		dmac_flush_range((void *)sgbuffer, ((void *)sgbuffer) + amount);
- 		data->bytes_xfered += amount;
- 		if (size == 0)
--- 
-1.5.6.5
+I can catch this condition, but it's not clear how to resume - card 
+keeps sending 0x4 (illegal command) response.
+Is this a known issue? I'm using rather old 2.6.19 code (with some 
+backports form upstream), but I didn't find proper fix in later code. 
+Workaround I use at the moment - report smaller disk size - violating 
+block is not read and card can be mounted (m.b. with warnings related to 
+cheat with size).
+Any help would be highly appreciated!
+--
+Thanks,
+Pavel Kiryukhin
 
