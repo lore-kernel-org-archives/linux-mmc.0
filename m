@@ -1,25 +1,50 @@
-From: "Barker J Rod" <harryhamlin4565@gmail.com>
-Subject: US Surgery Centers - 85k records and 14k emails
-Date: Tue, 2 Mar 2010 22:26:44 -0600
-Message-ID: <OFD2D1F74A.301D1501-ON862576DB.00186BC1@rectoria.uadec.mx>
-Reply-To: mary462441@gmail.com
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.rectoria.uadec.mx ([148.212.9.13]:4840 "EHLO
-	mail.rectoria.uadec.mx" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751165Ab0CCFVm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2010 00:21:42 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfgang =?iso-8859-1?q?M=FCes?= <wolfgang.mues@auerswald.de>
+Subject: Re: [PATCH 4/7] mmc: at91_mci: use DMA buffer for read
+Date: Wed, 3 Mar 2010 08:34:31 +0100
+Message-ID: <201003030834.31457.wolfgang.mues@auerswald.de>
+References: <20100302133434.761df661.akpm@linux-foundation.org>
+Mime-Version: 1.0
+Content-Type: Text/Plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100302133434.761df661.akpm@linux-foundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, avictor.za@gmail.com
 List-Id: linux-mmc@vger.kernel.org
-To: yag_info@infosphere.or.jp, middling6lvo@nr8istifling.com, 128570@wcbs.dayport.com, dharris@cityofvacaville.com, service@tdc.org.tw
 
+Hi Andrew,
 
+Am Dienstag, 2. M=E4rz 2010 schrieb Andrew Morton:
+> Nicolas Ferre <nicolas.ferre@atmel.com> wrote:
+> > +		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
+>=20
+> It's a feature of kunmap_atomic() that it will accept a pointer to an=
+y
+> location in the page.  So the subtraction isn't strictly needed.
+>=20
+> And if the subtraction is removed, the (void*) cast can also be remov=
+ed.
 
-Email me at this address for a catalog of all our US lists: Lea.Landry@smartlistbuy.net
+I did not know this. Thank you for pointing this out. So this part of t=
+he=20
+patch (which was purely cosmetic because I have seen no error without t=
+he=20
+subtraction) can be omitted.
 
-Also, ask about our sale pricing for more than one list.  
-  
-
-
-
-
- please email rembox@smartlistbuy.net 
+best regards
+=20
+i. A. Wolfgang M=FCes
+--=20
+Auerswald Gesellschaft f=FCr Datensysteme mbH
+Hardware Development
+Telefon: +49 (0)5306 9219 562
+Telefax: +49 (0)5306 9219 94=20
+E-Mail: Wolfgang.Mues@Auerswald.de
+Web: http://www.auerswald.de
+=20
+--------------------------------------------------------------
+Auerswald Gesellschaft f=FCr Datensysteme mbH
+Vor den Grash=F6fen 1, 38162 Cremlingen
+Registriert beim AG Braunschweig HRB 7499
+Gesch=E4ftsf=FChrer: Dipl-Ing. Gerhard Auerswald
