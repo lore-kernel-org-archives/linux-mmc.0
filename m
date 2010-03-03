@@ -1,50 +1,98 @@
-From: Wolfgang =?iso-8859-1?q?M=FCes?= <wolfgang.mues@auerswald.de>
-Subject: Re: [PATCH 4/7] mmc: at91_mci: use DMA buffer for read
-Date: Wed, 3 Mar 2010 08:34:31 +0100
-Message-ID: <201003030834.31457.wolfgang.mues@auerswald.de>
-References: <20100302133434.761df661.akpm@linux-foundation.org>
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: RE: [PATCH] mmc: omap_hsmmc: Fix conditional locking
+Date: Wed, 3 Mar 2010 11:16:25 +0100 (CET)
+Message-ID: <alpine.LFD.2.00.1003030756120.4245@localhost.localdomain>
+References: <alpine.LFD.2.00.1003011952470.4245@localhost.localdomain> <010101caba72$1dd1d790$544ff780@am.dhcp.ti.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100302133434.761df661.akpm@linux-foundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, avictor.za@gmail.com
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from www.tglx.de ([62.245.132.106]:46186 "EHLO www.tglx.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751751Ab0CCKQd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Mar 2010 05:16:33 -0500
+In-Reply-To: <010101caba72$1dd1d790$544ff780@am.dhcp.ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Madhusudhan <madhu.cr@ti.com>
+Cc: 'LKML' <linux-kernel@vger.kernel.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Andrew,
+On Tue, 2 Mar 2010, Madhusudhan wrote:
+> > Conditional locking on (!in_interrupt()) is broken by design and there
+> > is no reason to keep the host->irq_lock across the call to
+> > mmc_request_done(). Also the host->protect_card magic hack does not
+> > depend on the context
+> > 
+> 
+> Can you please elaborate why the existing logic is broken?
 
-Am Dienstag, 2. M=E4rz 2010 schrieb Andrew Morton:
-> Nicolas Ferre <nicolas.ferre@atmel.com> wrote:
-> > +		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
->=20
-> It's a feature of kunmap_atomic() that it will accept a pointer to an=
-y
-> location in the page.  So the subtraction isn't strictly needed.
->=20
-> And if the subtraction is removed, the (void*) cast can also be remov=
-ed.
+Locks are only to be held to serialize data or state. 
 
-I did not know this. Thank you for pointing this out. So this part of t=
-he=20
-patch (which was purely cosmetic because I have seen no error without t=
-he=20
-subtraction) can be omitted.
+The mmc_request_done() call does _NOT_ require that at all. So
+dropping the lock there is the right thing to do.
 
-best regards
-=20
-i. A. Wolfgang M=FCes
---=20
-Auerswald Gesellschaft f=FCr Datensysteme mbH
-Hardware Development
-Telefon: +49 (0)5306 9219 562
-Telefax: +49 (0)5306 9219 94=20
-E-Mail: Wolfgang.Mues@Auerswald.de
-Web: http://www.auerswald.de
-=20
---------------------------------------------------------------
-Auerswald Gesellschaft f=FCr Datensysteme mbH
-Vor den Grash=F6fen 1, 38162 Cremlingen
-Registriert beim AG Braunschweig HRB 7499
-Gesch=E4ftsf=FChrer: Dipl-Ing. Gerhard Auerswald
+Also conditional locking on in_interrupt() is generally a nono as it
+relies on assumptions which are not necessarily true in all
+circumstances. Just one simple example: interrupt threading will make
+it explode nicely and it did already with the realtime patches
+applied.
+
+Such code constructs prevent us to do generic changes to the kernel
+behaviour without any real good reason.
+
+> It locks at the new request and unlocks just before issuing the cmd. Further
+> IRQ handler has these calls hence the !in_interrupt check.
+
+Aside of the conditional locking I have several issues with that code:
+
+1) The code flow is massively unreadable:
+
+   omap_hsmmc_start_command()
+   {
+	.....
+	if (!in_interrupt())
+	   spin_unlock_irq();
+   }
+ 
+   omap_hsmmc_request()
+   {
+	if (!in_interrupt())
+	   spin_lock_irq();
+
+	omap_hsmmc_start_command();
+   }
+
+We generally want to see the lock/unlock pairs in one function and not
+having to figure out where the heck unlock happens.
+
+2) The point of unlocking is patently wrong
+
+   omap_hsmmc_start_command()
+   {
+	.....
+	if (!in_interrupt())
+	   spin_unlock_irq();
+--->
+	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
+--->
+        OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
+   }
+
+What happens, if you get a spurious interrupt here ? Same for SMP,
+though you are probably protected by the core mmc code request
+serialization there.
+
+> How does this patch improve that? In fact with your patch for a data
+> transfer cmd there are several lock-unlock calls.
+
+1) The patch simply removes conditional locking and moves the lock
+   sections to those places which protect something. Aside of that it
+   makes the code easier to understand.
+
+2) What's the point of not having those lock/unlocks ? On UP the
+   spinlock is a NOOP anyway, so you won't even notice. On SMP you
+   won't notice either, simply because the lock is cache hot and
+   almost never contended.
+
+Thanks,
+
+	tglx
