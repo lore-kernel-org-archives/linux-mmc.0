@@ -1,117 +1,85 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: [PATCH] mmc: omap_hsmmc: Fix conditional locking
-Date: Wed, 3 Mar 2010 16:52:39 -0600
-Message-ID: <007d01cabb24$39c26b60$544ff780@am.dhcp.ti.com>
-References: <alpine.LFD.2.00.1003011952470.4245@localhost.localdomain> <010101caba72$1dd1d790$544ff780@am.dhcp.ti.com> <alpine.LFD.2.00.1003030756120.4245@localhost.localdomain>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <alpine.LFD.2.00.1003030756120.4245@localhost.localdomain>
-Sender: linux-omap-owner@vger.kernel.org
-To: 'Thomas Gleixner' <tglx@linutronix.de>
-Cc: 'LKML' <linux-kernel@vger.kernel.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + mmc-at91_mci-correct-kunmap_atomic.patch added to -mm tree
+Date: Thu, 04 Mar 2010 12:42:15 -0800
+Message-ID: <201003042042.o24KgFGL028715@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:48763 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756378Ab0CDUm0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2010 15:42:26 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: nicolas.ferre@atmel.com, avictor.za@gmail.com, linux-mmc@vger.kernel.org, wolfgang.mues@auerswald.de
 
 
+The patch titled
+     mmc: at91_mci: correct kunmap_atomic()
+has been added to the -mm tree.  Its filename is
+     mmc-at91_mci-correct-kunmap_atomic.patch
 
-> -----Original Message-----
-> From: Thomas Gleixner [mailto:tglx@linutronix.de]
-> Sent: Wednesday, March 03, 2010 4:16 AM
-> To: Madhusudhan
-> Cc: 'LKML'; linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org
-> Subject: RE: [PATCH] mmc: omap_hsmmc: Fix conditional locking
-> 
-> On Tue, 2 Mar 2010, Madhusudhan wrote:
-> > > Conditional locking on (!in_interrupt()) is broken by design and there
-> > > is no reason to keep the host->irq_lock across the call to
-> > > mmc_request_done(). Also the host->protect_card magic hack does not
-> > > depend on the context
-> > >
-> >
-> > Can you please elaborate why the existing logic is broken?
-> 
-> Locks are only to be held to serialize data or state.
-> 
-> The mmc_request_done() call does _NOT_ require that at all. So
-> dropping the lock there is the right thing to do.
-> 
-> Also conditional locking on in_interrupt() is generally a nono as it
-> relies on assumptions which are not necessarily true in all
-> circumstances. Just one simple example: interrupt threading will make
-> it explode nicely and it did already with the realtime patches
-> applied.
-> 
-> Such code constructs prevent us to do generic changes to the kernel
-> behaviour without any real good reason.
-> 
-> > It locks at the new request and unlocks just before issuing the cmd.
-> Further
-> > IRQ handler has these calls hence the !in_interrupt check.
-> 
-> Aside of the conditional locking I have several issues with that code:
-> 
-> 1) The code flow is massively unreadable:
-> 
->    omap_hsmmc_start_command()
->    {
-> 	.....
-> 	if (!in_interrupt())
-> 	   spin_unlock_irq();
->    }
-> 
->    omap_hsmmc_request()
->    {
-> 	if (!in_interrupt())
-> 	   spin_lock_irq();
-> 
-> 	omap_hsmmc_start_command();
->    }
-> 
-> We generally want to see the lock/unlock pairs in one function and not
-> having to figure out where the heck unlock happens.
-> 
-> 2) The point of unlocking is patently wrong
-> 
->    omap_hsmmc_start_command()
->    {
-> 	.....
-> 	if (!in_interrupt())
-> 	   spin_unlock_irq();
-> --->
-> 	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
-> --->
->         OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
->    }
-> 
-> What happens, if you get a spurious interrupt here ? Same for SMP,
-> though you are probably protected by the core mmc code request
-> serialization there.
-> 
-> > How does this patch improve that? In fact with your patch for a data
-> > transfer cmd there are several lock-unlock calls.
-> 
-> 1) The patch simply removes conditional locking and moves the lock
->    sections to those places which protect something. Aside of that it
->    makes the code easier to understand.
-> 
-> 2) What's the point of not having those lock/unlocks ? On UP the
->    spinlock is a NOOP anyway, so you won't even notice. On SMP you
->    won't notice either, simply because the lock is cache hot and
->    almost never contended.
-> 
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-Sounds reasonable.Readbility is still a factor but works for me as the main
-intention here is to remove the in_interrupt conditional.
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-Acked-by: Madhusudhan Chikkature<madhu.cr@ti.com>
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
-Best Regards,
-Madhu
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
+------------------------------------------------------
+Subject: mmc: at91_mci: correct kunmap_atomic()
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-> Thanks,
-> 
-> 	tglx
+kunmap_atomic() accepts a pointer to any location in the page so we do not
+need the subtraction and cast.
+
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Wolfgang Muees <wolfgang.mues@auerswald.de>
+Cc: Andrew Victor <avictor.za@gmail.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/at91_mci.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-correct-kunmap_atomic drivers/mmc/host/at91_mci.c
+--- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-correct-kunmap_atomic
++++ a/drivers/mmc/host/at91_mci.c
+@@ -248,7 +248,7 @@ static inline void at91_mci_sg_to_dma(st
+ 			dmabuf = (unsigned *)tmpv;
+ 		}
+ 
+-		kunmap_atomic(((void *)sgbuffer) - sg->offset, KM_BIO_SRC_IRQ);
++		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
+ 
+ 		if (size == 0)
+ 			break;
+@@ -313,7 +313,7 @@ static void at91_mci_post_dma_read(struc
+ 			dmabuf = (unsigned *)tmpv;
+ 		}
+ 
+-		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
++		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
+ 		dmac_flush_range((void *)sgbuffer, ((void *)sgbuffer) + amount);
+ 		data->bytes_xfered += amount;
+ 		if (size == 0)
+_
+
+Patches currently in -mm which might be from nicolas.ferre@atmel.com are
+
+mmc-atmel-host-kconfig-cleanup-for-everyone-else.patch
+mmc-at91_mci-fix-pointer-errors.patch
+mmc-at91_mci-fix-timeout-errors.patch
+mmc-at91_mci-use-one-coherent-dma-buffer.patch
+mmc-at91_mci-use-dma-buffer-for-read.patch
+mmc-at91_mci-enable-large-data-blocks.patch
+mmc-at91_mci-enable-mmc_cap_sdio_irq-only-when-it-actually-works.patch
+mmc-at91_mci-introduce-per-mci-revision-conditional-code.patch
+mmc-at91_mci-correct-kunmap_atomic.patch
 
