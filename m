@@ -1,121 +1,110 @@
 From: akpm@linux-foundation.org
-Subject: [patch 099/160] sdhci: add adma descriptor set call
-Date: Fri, 05 Mar 2010 13:43:26 -0800
-Message-ID: <201003052143.o25LhR34029763@imap1.linux-foundation.org>
+Subject: [patch 114/160] mmc: at91_mci: introduce per-mci-revision conditional code
+Date: Fri, 05 Mar 2010 13:43:44 -0800
+Message-ID: <201003052143.o25LhiW0029856@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:35059 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:40794 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755337Ab0CEVnv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:51 -0500
+	by vger.kernel.org with ESMTP id S1755640Ab0CEVny (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:54 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, ben-linux@fluff.org, linux-mmc@vger.kernel.org, pierre@ossman.eu
+Cc: akpm@linux-foundation.org, nicolas.ferre@atmel.com, avictor.za@gmail.com, linux-mmc@vger.kernel.org, wolfgang.mues@auerswald.de
 
-From: Ben Dooks <ben-linux@fluff.org>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-The code to write the ADMA descriptor into memory is repeated several
-times throughout sdhci_adma_table_pre, and thus should be moved into a
-common function.  This will also be useful if the patch to make the write
-more efficient is accepted.
+We used to manage features and differences on a per-cpu basis.  As several
+cpus share the same mci revision, this patch aggregates cpus that have the
+same IP revision in one defined constant.  We use the
+at91mci_is_mci1rev2xx() funtion name not to mess with newer Atmel sd/mmc
+IP called "MCI2".  _rev2 naming could have been confusing...
 
-Signed-off-by: Ben Dooks <ben-linux@fluff.org>
-Cc: Pierre Ossman <pierre@ossman.eu>
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Wolfgang Muees <wolfgang.mues@auerswald.de>
+Cc: Andrew Victor <avictor.za@gmail.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci.c |   50 ++++++++++++++-----------------------
- 1 file changed, 20 insertions(+), 30 deletions(-)
+ drivers/mmc/host/at91_mci.c |   27 +++++++++++++++++++--------
+ 1 file changed, 19 insertions(+), 8 deletions(-)
 
-diff -puN drivers/mmc/host/sdhci.c~sdhci-add-adma-descriptor-set-call drivers/mmc/host/sdhci.c
---- a/drivers/mmc/host/sdhci.c~sdhci-add-adma-descriptor-set-call
-+++ a/drivers/mmc/host/sdhci.c
-@@ -376,6 +376,20 @@ static void sdhci_kunmap_atomic(void *bu
- 	local_irq_restore(*flags);
- }
+diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-introduce-per-mci-revision-conditional-code drivers/mmc/host/at91_mci.c
+--- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-introduce-per-mci-revision-conditional-code
++++ a/drivers/mmc/host/at91_mci.c
+@@ -78,6 +78,17 @@
  
-+static void sdhci_set_adma_desc(u8 *desc, u32 addr, int len, unsigned cmd)
+ #define DRIVER_NAME "at91_mci"
+ 
++static inline int at91mci_is_mci1rev2xx(void)
 +{
-+	desc[7] = (addr >> 24) & 0xff;
-+	desc[6] = (addr >> 16) & 0xff;
-+	desc[5] = (addr >> 8) & 0xff;
-+	desc[4] = (addr >> 0) & 0xff;
-+
-+	desc[3] = (len >> 8) & 0xff;
-+	desc[2] = (len >> 0) & 0xff;
-+
-+	desc[0] = cmd & 0xff;
-+	desc[1] = cmd >> 8;
++	return (   cpu_is_at91sam9260()
++		|| cpu_is_at91sam9263()
++		|| cpu_is_at91cap9()
++		|| cpu_is_at91sam9rl()
++		|| cpu_is_at91sam9g10()
++		|| cpu_is_at91sam9g20()
++		);
 +}
 +
- static int sdhci_adma_table_pre(struct sdhci_host *host,
- 	struct mmc_data *data)
- {
-@@ -443,19 +457,11 @@ static int sdhci_adma_table_pre(struct s
- 				sdhci_kunmap_atomic(buffer, &flags);
- 			}
+ #define FL_SENT_COMMAND	(1 << 0)
+ #define FL_SENT_STOP	(1 << 1)
  
--			desc[7] = (align_addr >> 24) & 0xff;
--			desc[6] = (align_addr >> 16) & 0xff;
--			desc[5] = (align_addr >> 8) & 0xff;
--			desc[4] = (align_addr >> 0) & 0xff;
-+			/* tran, valid */
-+			sdhci_set_adma_desc(desc, align_addr, offset, 0x21);
+@@ -204,8 +215,8 @@ static inline void at91_mci_sg_to_dma(st
+ 	size = data->blksz * data->blocks;
+ 	len = data->sg_len;
  
- 			BUG_ON(offset > 65536);
+-	/* AT91SAM926[0/3] Data Write Operation and number of bytes erratum */
+-	if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
++	/* MCI1 rev2xx Data Write Operation and number of bytes erratum */
++	if (at91mci_is_mci1rev2xx())
+ 		if (host->total_length == 12)
+ 			memset(dmabuf, 0, 12);
  
--			desc[3] = (offset >> 8) & 0xff;
--			desc[2] = (offset >> 0) & 0xff;
--
--			desc[1] = 0x00;
--			desc[0] = 0x21; /* tran, valid */
--
- 			align += 4;
- 			align_addr += 4;
+@@ -398,7 +409,7 @@ static void at91_mci_enable(struct at91m
+ 	at91_mci_write(host, AT91_MCI_DTOR, AT91_MCI_DTOMUL_1M | AT91_MCI_DTOCYC);
+ 	mr = AT91_MCI_PDCMODE | 0x34a;
  
-@@ -465,19 +471,10 @@ static int sdhci_adma_table_pre(struct s
- 			len -= offset;
- 		}
+-	if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
++	if (at91mci_is_mci1rev2xx())
+ 		mr |= AT91_MCI_RDPROOF | AT91_MCI_WRPROOF;
  
--		desc[7] = (addr >> 24) & 0xff;
--		desc[6] = (addr >> 16) & 0xff;
--		desc[5] = (addr >> 8) & 0xff;
--		desc[4] = (addr >> 0) & 0xff;
--
- 		BUG_ON(len > 65536);
+ 	at91_mci_write(host, AT91_MCI_MR, mr);
+@@ -555,10 +566,10 @@ static void at91_mci_send_command(struct
+ 				 */
+ 				host->total_length = block_length * blocks;
+ 				/*
+-				 * AT91SAM926[0/3] Data Write Operation and
++				 * MCI1 rev2xx Data Write Operation and
+ 				 * number of bytes erratum
+ 				 */
+-				if (cpu_is_at91sam9260 () || cpu_is_at91sam9263())
++				if (at91mci_is_mci1rev2xx())
+ 					if (host->total_length < 12)
+ 						host->total_length = 12;
  
--		desc[3] = (len >> 8) & 0xff;
--		desc[2] = (len >> 0) & 0xff;
--
--		desc[1] = 0x00;
--		desc[0] = 0x21; /* tran, valid */
--
-+		/* tran, valid */
-+		sdhci_set_adma_desc(desc, addr, len, 0x21);
- 		desc += 8;
+@@ -943,7 +954,7 @@ static int __init at91_mci_probe(struct 
+ 	host->bus_mode = 0;
+ 	host->board = pdev->dev.platform_data;
+ 	if (host->board->wire4) {
+-		if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
++		if (at91mci_is_mci1rev2xx())
+ 			mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 		else
+ 			dev_warn(&pdev->dev, "4 wire bus mode not supported"
+@@ -959,8 +970,8 @@ static int __init at91_mci_probe(struct 
+ 	}
  
- 		/*
-@@ -490,16 +487,9 @@ static int sdhci_adma_table_pre(struct s
- 	/*
- 	 * Add a terminating entry.
- 	 */
--	desc[7] = 0;
--	desc[6] = 0;
--	desc[5] = 0;
--	desc[4] = 0;
--
--	desc[3] = 0;
--	desc[2] = 0;
- 
--	desc[1] = 0x00;
--	desc[0] = 0x03; /* nop, end, valid */
-+	/* nop, end, valid */
-+	sdhci_set_adma_desc(desc, 0, 0, 0x3);
- 
- 	/*
- 	 * Resync align buffer as we might have changed it.
+ 	/* Add SDIO capability when available */
+-	if (cpu_is_at91sam9260() || cpu_is_at91sam9263()) {
+-		/* AT91SAM9260/9263 erratum */
++	if (at91mci_is_mci1rev2xx()) {
++		/* at91mci MCI1 rev2xx sdio interrupt erratum */
+ 		if (host->board->wire4 || !host->board->slot_b)
+ 			mmc->caps |= MMC_CAP_SDIO_IRQ;
+ 	}
 _
