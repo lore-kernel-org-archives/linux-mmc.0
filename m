@@ -1,76 +1,56 @@
 From: akpm@linux-foundation.org
-Subject: [patch 098/160] sdio: add quirk to clamp byte mode transfer
+Subject: [patch 097/160] mmc: bfin_sdh: set timeout based on actual card data
 Date: Fri, 05 Mar 2010 13:43:25 -0800
-Message-ID: <201003052143.o25LhQHR029757@imap1.linux-foundation.org>
+Message-ID: <201003052143.o25LhPCM029753@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:44152 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:51553 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755358Ab0CEVn3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:29 -0500
+	by vger.kernel.org with ESMTP id S1755358Ab0CEVn2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:28 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, bzhao@marvell.com, linux-mmc@vger.kernel.org, nico@marvell.com
+Cc: akpm@linux-foundation.org, cliff.cai@analog.com, linux-mmc@vger.kernel.org, vapier@gentoo.org
 
-From: Bing Zhao <bzhao@marvell.com>
+From: Cliff Cai <cliff.cai@analog.com>
 
-Some SDIO cards expect byte transfers not to exceed the configured block
-transfer size.  Add a quirk to that effect.
+The hardcoded value doesn't really work for all cards.
 
-Patches to make use of this quirk will be sent separately.
-
-Signed-off-by: Bing Zhao <bzhao@marvell.com>
-Signed-off-by: Nicolas Pitre <nico@marvell.com>
+Signed-off-by: Cliff Cai <cliff.cai@analog.com>
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/sdio_io.c |    7 ++++++-
- include/linux/mmc/card.h   |    7 +++++++
- 2 files changed, 13 insertions(+), 1 deletion(-)
+ drivers/mmc/host/bfin_sdh.c |    8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff -puN drivers/mmc/core/sdio_io.c~sdio-add-quirk-to-clamp-byte-mode-transfer drivers/mmc/core/sdio_io.c
---- a/drivers/mmc/core/sdio_io.c~sdio-add-quirk-to-clamp-byte-mode-transfer
-+++ a/drivers/mmc/core/sdio_io.c
-@@ -189,7 +189,12 @@ static inline unsigned int sdio_max_byte
- {
- 	unsigned mval =	min(func->card->host->max_seg_size,
- 			    func->card->host->max_blk_size);
--	mval = min(mval, func->max_blksize);
-+
-+	if (mmc_blksz_for_byte_mode(func->card))
-+		mval = min(mval, func->cur_blksize);
-+	else
-+		mval = min(mval, func->max_blksize);
-+
- 	return min(mval, 512u); /* maximum size for byte mode */
- }
+diff -puN drivers/mmc/host/bfin_sdh.c~mmc-bfin_sdh-set-timeout-based-on-actual-card-data drivers/mmc/host/bfin_sdh.c
+--- a/drivers/mmc/host/bfin_sdh.c~mmc-bfin_sdh-set-timeout-based-on-actual-card-data
++++ a/drivers/mmc/host/bfin_sdh.c
+@@ -115,6 +115,7 @@ static int sdh_setup_data(struct sdh_hos
+ 	unsigned int length;
+ 	unsigned int data_ctl;
+ 	unsigned int dma_cfg;
++	unsigned int cycle_ns, timeout;
  
-diff -puN include/linux/mmc/card.h~sdio-add-quirk-to-clamp-byte-mode-transfer include/linux/mmc/card.h
---- a/include/linux/mmc/card.h~sdio-add-quirk-to-clamp-byte-mode-transfer
-+++ a/include/linux/mmc/card.h
-@@ -99,6 +99,8 @@ struct mmc_card {
- #define MMC_STATE_BLOCKADDR	(1<<3)		/* card uses block-addressing */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
-+#define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-+						/* for byte mode */
+ 	dev_dbg(mmc_dev(host->mmc), "%s enter flags: 0x%x\n", __func__, data->flags);
+ 	host->data = data;
+@@ -135,8 +136,11 @@ static int sdh_setup_data(struct sdh_hos
+ 	data_ctl |= ((ffs(data->blksz) - 1) << 4);
  
- 	u32			raw_cid[4];	/* raw card CID */
- 	u32			raw_csd[4];	/* raw card CSD */
-@@ -139,6 +141,11 @@ static inline int mmc_card_lenient_fn0(c
- 	return c->quirks & MMC_QUIRK_LENIENT_FN0;
- }
+ 	bfin_write_SDH_DATA_CTL(data_ctl);
+-
+-	bfin_write_SDH_DATA_TIMER(0xFFFF);
++	/* the time of a host clock period in ns */
++	cycle_ns = 1000000000 / (get_sclk() / (2 * (host->clk_div + 1)));
++	timeout = data->timeout_ns / cycle_ns;
++	timeout += data->timeout_clks;
++	bfin_write_SDH_DATA_TIMER(timeout);
+ 	SSYNC();
  
-+static inline int mmc_blksz_for_byte_mode(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_BLKSZ_FOR_BYTE_MODE;
-+}
-+
- #define mmc_card_name(c)	((c)->cid.prod_name)
- #define mmc_card_id(c)		(dev_name(&(c)->dev))
- 
+ 	if (data->flags & MMC_DATA_READ) {
 _
