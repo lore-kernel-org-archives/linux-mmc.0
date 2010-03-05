@@ -1,56 +1,37 @@
-From: akpm@linux-foundation.org
-Subject: [patch 109/160] mmc: at91_mci: fix timeout errors
-Date: Fri, 05 Mar 2010 13:43:39 -0800
-Message-ID: <201003052143.o25LhdVZ029827@imap1.linux-foundation.org>
+From: Albert Herranz <albert_herranz@yahoo.es>
+Subject: Re: + sdio-pass-whitelisted-cis-funce-tuples-to-sdio-drivers.patch
+ added to -mm tree
+Date: Fri, 05 Mar 2010 23:18:11 +0100
+Message-ID: <4B918323.6030103@yahoo.es>
+References: <200909132245.n8DMj6l2007798@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:52971 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755666Ab0CEVn6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:58 -0500
+Received: from smtp128.mail.ukl.yahoo.com ([77.238.184.59]:46332 "HELO
+	smtp128.mail.ukl.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1754348Ab0CEWYz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 17:24:55 -0500
+In-Reply-To: <200909132245.n8DMj6l2007798@imap1.linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, wolfgang.mues@auerswald.de, avictor.za@gmail.com, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com
+To: akpm@linux-foundation.org
+Cc: linux-mmc@vger.kernel.org
 
-From: Wolfgang Muees <wolfgang.mues@auerswald.de>
+akpm@linux-foundation.org wrote:
+> The patch titled
+>      sdio: pass whitelisted cis funce tuples to sdio drivers
+> has been added to the -mm tree.  Its filename is
+>      sdio-pass-whitelisted-cis-funce-tuples-to-sdio-drivers.patch
+> 
 
-Fix two timeout errors, one for slow SDHC cards and one for slow users
-while inserting SD cards.
+Hi,
 
-Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Andrew Victor <avictor.za@gmail.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
+Are there any objections to this patch?
 
- drivers/mmc/host/at91_mci.c |    6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+It's been in -mm now for nearly 6 months. AFAIK there's no report against it, and it fixes problems for at least 2 drivers:
+- the Nintendo Wii SDHCI controller (for which the patch was cooked)
+- the Silex's SX-SDWAG SDIO Wi-Fi card (http://marc.info/?l=linux-mmc&m=126624571025203)
 
-diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-fix-timeout-errors drivers/mmc/host/at91_mci.c
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-fix-timeout-errors
-+++ a/drivers/mmc/host/at91_mci.c
-@@ -756,7 +756,8 @@ static void at91_mci_request(struct mmc_
- 	host->request = mrq;
- 	host->flags = 0;
- 
--	mod_timer(&host->timer, jiffies +  HZ);
-+	/* more than 1s timeout needed with slow SD cards */
-+	mod_timer(&host->timer, jiffies +  msecs_to_jiffies(2000));
- 
- 	at91_mci_process_next(host);
- }
-@@ -944,7 +945,8 @@ static irqreturn_t at91_mmc_det_irq(int 
- 			pr_debug("****** Resetting SD-card bus width ******\n");
- 			at91_mci_write(host, AT91_MCI_SDCR, at91_mci_read(host, AT91_MCI_SDCR) & ~AT91_MCI_SDCBUS);
- 		}
--		mmc_detect_change(host->mmc, msecs_to_jiffies(100));
-+		/* 0.5s needed because of early card detect switch firing */
-+		mmc_detect_change(host->mmc, msecs_to_jiffies(500));
- 	}
- 	return IRQ_HANDLED;
- }
-_
+Thanks,
+Albert
