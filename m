@@ -1,157 +1,85 @@
 From: akpm@linux-foundation.org
-Subject: [patch 110/160] mmc: at91_mci: use one coherent DMA buffer
-Date: Fri, 05 Mar 2010 13:43:40 -0800
-Message-ID: <201003052143.o25LheCj029834@imap1.linux-foundation.org>
+Subject: [patch 100/160] sdhci: improve sdhci sdhci_set_adma_desc() code
+Date: Fri, 05 Mar 2010 13:43:29 -0800
+Message-ID: <201003052143.o25LhTCW029767@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:34810 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:48306 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755456Ab0CEVnw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:52 -0500
+	by vger.kernel.org with ESMTP id S1754740Ab0CEVns (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:48 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, wolfgang.mues@auerswald.de, avictor.za@gmail.com, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com
+Cc: akpm@linux-foundation.org, ben-linux@fluff.org, linux-mmc@vger.kernel.org, pierre@ossman.eu
 
-From: Wolfgang Muees <wolfgang.mues@auerswald.de>
+From: Ben Dooks <ben-linux@fluff.org>
 
-The TX DMA buffer is allocated only once, because the
-allocation/deallocation of the buffer for EACH chunk of data is
-time-consuming and prone to memory fragmentation.
+sdhci_set_adma_desc() is using byte-writes to write data in a specified
+order into memory.  Change to using __le16 for the two byte and __le32 for
+the four byte cases and use the cpu_to_{le16,le32} to do the conversion
+before writing.
 
-Using a coherent DMA buffer avoids extra data cache calls.
+This will reduce the size of the code and the number of writes as we no
+longer need to chop the data up before writing.
 
-[nicolas.ferre@atmel.com: coding style modifications]
-Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Andrew Victor <avictor.za@gmail.com>
+As an example on ARM S3C64XX SoC, in little-endian configuration:
+
+ 000000d4 <sdhci_set_adma_desc>:
+-      d8:	e1a0c423 	lsr	ip, r3, #8
+-      dc:	e1a0ec21 	lsr	lr, r1, #24
+-      e0:	e1a04821 	lsr	r4, r1, #16
+-      e4:	e1a05421 	lsr	r5, r1, #8
+-      e8:	e1a06442 	asr	r6, r2, #8
+-      ec:	e5c0c001 	strb	ip, [r0, #1]
+-      f0:	e5c0e007 	strb	lr, [r0, #7]
+-      f4:	e5c04006 	strb	r4, [r0, #6]
+-      f8:	e5c05005 	strb	r5, [r0, #5]
+-      fc:	e5c01004 	strb	r1, [r0, #4]
+-     100:	e5c06003 	strb	r6, [r0, #3]
+-     104:	e5c02002 	strb	r2, [r0, #2]
+-     108:	e5c03000 	strb	r3, [r0]
++      d4:	e5801004 	str	r1, [r0, #4]
++      d8:	e1c030b0 	strh	r3, [r0]
++      dc:	e1c020b2 	strh	r2, [r0, #2]
+
+Signed-off-by: Ben Dooks <ben-linux@fluff.org>
+Cc: Pierre Ossman <pierre@ossman.eu>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/at91_mci.c |   49 ++++++++++++++++------------------
- 1 file changed, 24 insertions(+), 25 deletions(-)
+ drivers/mmc/host/sdhci.c |   16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
-diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-use-one-coherent-dma-buffer drivers/mmc/host/at91_mci.c
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-use-one-coherent-dma-buffer
-+++ a/drivers/mmc/host/at91_mci.c
-@@ -88,6 +88,10 @@
- #define at91_mci_read(host, reg)	__raw_readl((host)->baseaddr + (reg))
- #define at91_mci_write(host, reg, val)	__raw_writel((val), (host)->baseaddr + (reg))
+diff -puN drivers/mmc/host/sdhci.c~sdhci-improve-sdhci-sdhci_set_adma_desc-code drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~sdhci-improve-sdhci-sdhci_set_adma_desc-code
++++ a/drivers/mmc/host/sdhci.c
+@@ -378,16 +378,16 @@ static void sdhci_kunmap_atomic(void *bu
  
-+#define MCI_BLKSIZE 		512
-+#define MCI_MAXBLKSIZE 		4095
-+#define MCI_BLKATONCE 		256
-+#define MCI_BUFSIZE 		(MCI_BLKSIZE * MCI_BLKATONCE)
+ static void sdhci_set_adma_desc(u8 *desc, u32 addr, int len, unsigned cmd)
+ {
+-	desc[7] = (addr >> 24) & 0xff;
+-	desc[6] = (addr >> 16) & 0xff;
+-	desc[5] = (addr >> 8) & 0xff;
+-	desc[4] = (addr >> 0) & 0xff;
++	__le32 *dataddr = (__le32 __force *)(desc + 4);
++	__le16 *cmdlen = (__le16 __force *)desc;
  
- /*
-  * Low level type for this driver
-@@ -604,7 +608,6 @@ static void at91_mci_send_command(struct
- 				/*
- 				 * Handle a read
- 				 */
--				host->buffer = NULL;
- 				host->total_length = 0;
+-	desc[3] = (len >> 8) & 0xff;
+-	desc[2] = (len >> 0) & 0xff;
++	/* SDHCI specification says ADMA descriptors should be 4 byte
++	 * aligned, so using 16 or 32bit operations should be safe. */
  
- 				at91_mci_pre_dma_read(host);
-@@ -623,20 +626,8 @@ static void at91_mci_send_command(struct
- 					if (host->total_length < 12)
- 						host->total_length = 12;
- 
--				host->buffer = kmalloc(host->total_length, GFP_KERNEL);
--				if (!host->buffer) {
--					pr_debug("Can't alloc tx buffer\n");
--					cmd->error = -ENOMEM;
--					mmc_request_done(host->mmc, host->request);
--					return;
--				}
--
- 				at91_mci_sg_to_dma(host, data);
- 
--				host->physical_address = dma_map_single(NULL,
--						host->buffer, host->total_length,
--						DMA_TO_DEVICE);
--
- 				pr_debug("Transmitting %d bytes\n", host->total_length);
- 
- 				at91_mci_write(host, ATMEL_PDC_TPR, host->physical_address);
-@@ -703,14 +694,6 @@ static void at91_mci_completed_command(s
- 	cmd->resp[2] = at91_mci_read(host, AT91_MCI_RSPR(2));
- 	cmd->resp[3] = at91_mci_read(host, AT91_MCI_RSPR(3));
- 
--	if (host->buffer) {
--		dma_unmap_single(NULL,
--				host->physical_address, host->total_length,
--				DMA_TO_DEVICE);
--		kfree(host->buffer);
--		host->buffer = NULL;
--	}
--
- 	pr_debug("Status = %08X/%08x [%08X %08X %08X %08X]\n",
- 		 status, at91_mci_read(host, AT91_MCI_SR),
- 		 cmd->resp[0], cmd->resp[1], cmd->resp[2], cmd->resp[3]);
-@@ -1012,12 +995,12 @@ static int __init at91_mci_probe(struct 
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
- 	mmc->caps = MMC_CAP_SDIO_IRQ;
- 
--	mmc->max_blk_size = 4095;
--	mmc->max_blk_count = mmc->max_req_size;
-+	mmc->max_blk_size  = MCI_MAXBLKSIZE;
-+	mmc->max_blk_count = MCI_BLKATONCE;
-+	mmc->max_req_size  = MCI_BUFSIZE;
- 
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
--	host->buffer = NULL;
- 	host->bus_mode = 0;
- 	host->board = pdev->dev.platform_data;
- 	if (host->board->wire4) {
-@@ -1028,6 +1011,14 @@ static int __init at91_mci_probe(struct 
- 				" - using 1 wire\n");
- 	}
- 
-+	host->buffer = dma_alloc_coherent(&pdev->dev, MCI_BUFSIZE,
-+					&host->physical_address, GFP_KERNEL);
-+	if (!host->buffer) {
-+		ret = -ENOMEM;
-+		dev_err(&pdev->dev, "Can't allocate transmit buffer\n");
-+		goto fail5;
-+	}
+-	desc[0] = cmd & 0xff;
+-	desc[1] = cmd >> 8;
++	cmdlen[0] = cpu_to_le16(cmd);
++	cmdlen[1] = cpu_to_le16(len);
 +
- 	/*
- 	 * Reserve GPIOs ... board init code makes sure these pins are set
- 	 * up as GPIOs with the right direction (input, except for vcc)
-@@ -1036,7 +1027,7 @@ static int __init at91_mci_probe(struct 
- 		ret = gpio_request(host->board->det_pin, "mmc_detect");
- 		if (ret < 0) {
- 			dev_dbg(&pdev->dev, "couldn't claim card detect pin\n");
--			goto fail5;
-+			goto fail4b;
- 		}
- 	}
- 	if (host->board->wp_pin) {
-@@ -1136,6 +1127,10 @@ fail3:
- fail4:
- 	if (host->board->det_pin)
- 		gpio_free(host->board->det_pin);
-+fail4b:
-+	if (host->buffer)
-+		dma_free_coherent(&pdev->dev, MCI_BUFSIZE,
-+				host->buffer, host->physical_address);
- fail5:
- 	mmc_free_host(mmc);
- fail6:
-@@ -1158,6 +1153,10 @@ static int __exit at91_mci_remove(struct
++	dataddr[0] = cpu_to_le32(addr);
+ }
  
- 	host = mmc_priv(mmc);
- 
-+	if (host->buffer)
-+		dma_free_coherent(&pdev->dev, MCI_BUFSIZE,
-+				host->buffer, host->physical_address);
-+
- 	if (host->board->det_pin) {
- 		if (device_can_wakeup(&pdev->dev))
- 			free_irq(gpio_to_irq(host->board->det_pin), host);
+ static int sdhci_adma_table_pre(struct sdhci_host *host,
 _
