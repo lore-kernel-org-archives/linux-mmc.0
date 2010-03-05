@@ -1,73 +1,44 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Bug in mmc.c  == stops eMMC toshiba from working - sector check not
- good
-Date: Thu, 4 Mar 2010 21:01:16 -0800
-Message-ID: <43E4817426ED174AA81263BCECB4351D1315CEEB23@sc-vexch3.marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Thomas Abraham <thomas.ab@samsung.com>
+Subject: [PATCH] SDHCI: Modify checks to determine the presense of card.
+Date: Fri, 05 Mar 2010 12:29:37 +0530
+Message-ID: <1267772377-14723-1-git-send-email-thomas.ab@samsung.com>
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dakia2.marvell.com ([65.219.4.35]:53021 "EHLO
-	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750744Ab0CEFBS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 00:01:18 -0500
-Received: from maili.marvell.com (maili.marvell.com [10.68.76.51])
-	by dakia2.marvell.com (Spam & Virus Firewall) with ESMTP id 7D5A8A25DC
-	for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2010 21:01:17 -0800 (PST)
-Received: from maili.marvell.com (maili.marvell.com [10.68.76.51]) by dakia2.marvell.com with ESMTP id 6axbOATzswoUyvRU for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2010 21:01:17 -0800 (PST)
-Received: from MSI-MTA.marvell.com (msi-mta.marvell.com [10.68.76.91])
-	by maili.marvell.com (Postfix) with ESMTP id 6577D8763D
-	for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2010 21:01:17 -0800 (PST)
-Content-Language: en-US
+Received: from mailout1.samsung.com ([203.254.224.24]:60792 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754141Ab0CEG6l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 01:58:41 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Lennert Buijtenhek <buytenh@marvell.com>, Nicolas Pitre <nico@marvell.com>
+To: linux-mmc@vger.kernel.org
+Cc: ben-linux@fluff.org, linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.ab@samsung.com>
 
+In the sdhci_request function, the card is determined to be present based
+on the SDCD pin status. SDHCI host controllers that do not use SDCD pin
+but rely on other mechanism such as external pin interrupts, update the
+host flags with SDHCI_DEVICE_DEAD flag based on the card insertion status.
+This patch modifies the sdhci_request function such that the it uses
+both the SDCD status and SDHCI_DEVICE_DEAD host flag to determine if the
+card is inserted or not.
 
-Folks
+Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
+---
+ drivers/mmc/host/sdhci.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Toshiba part eMMC -- 2GB fails in standard linux.  The part is NOT sector addressable yet linux tries to do this.  See incorrect code below in mmc.c and notes below
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c279fbc..f1a6ebe 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1106,7 +1106,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+ 				SDHCI_CARD_PRESENT;
+ 
+-	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
++	if (!present && host->flags & SDHCI_DEVICE_DEAD) {
+ 		host->mrq->cmd->error = -ENOMEDIUM;
+ 		tasklet_schedule(&host->finish_tasklet);
+ 	} else
+-- 
+1.6.6.rc2
 
-The tosbiha part HAS  ext_csd.sectors
-
-from mmc.c
-static int mmc_read_ext_csd(struct mmc_card *card)
-
-if (card->ext_csd.rev >= 2) {
-card->ext_csd.sectors =
-ext_csd[EXT_CSD_SEC_CNT + 0] << 0 |
-ext_csd[EXT_CSD_SEC_CNT + 1] << 8 |
-ext_csd[EXT_CSD_SEC_CNT + 2] << 16 |
-ext_csd[EXT_CSD_SEC_CNT + 3] << 24;
-if (card->ext_csd.sectors)
-mmc_card_set_blockaddr(card);
-}
-
-when set cause code in block.c to not make address byte oriented
-
-static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-.....
-                brq.cmd.arg = blk_rq_pos(req);
-                if (!mmc_card_blockaddr(card))
-                        brq.cmd.arg <<= 9;
-
-
-The Toshiba card HAS ext_csd.sectors even though the CMD1 response says it does not do sector addressing -- returning the ocr register.
-
-The Simplified Physical Layer Spec defines for the OCR register
-bit 29 as reserved and bit 30 as CCS -- High Capacity Card
-
-The JEDEC Standard No. 84-A43 defines the OCR register Table 31 (OCR Register)
-bits 29 and 30
-00 == byte mode
-10 == sector mode
-
-
-I can change the code to save the ocr on the CMD1 and use the value of bit 30 to select Sector Mode IF there is a sector table.   
-
-Are there any other thoughts ?
-
-regards,
-
-Philip
