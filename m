@@ -1,110 +1,42 @@
 From: akpm@linux-foundation.org
-Subject: [patch 114/160] mmc: at91_mci: introduce per-mci-revision conditional code
-Date: Fri, 05 Mar 2010 13:43:44 -0800
-Message-ID: <201003052143.o25LhiW0029856@imap1.linux-foundation.org>
+Subject: [patch 107/160] s3cmci: s3cmci_card_present: Use no_detect to decide whether there is a card detect pin
+Date: Fri, 05 Mar 2010 13:43:37 -0800
+Message-ID: <201003052143.o25LhbcL029811@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:40794 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42260 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755640Ab0CEVny (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:54 -0500
+	by vger.kernel.org with ESMTP id S1755654Ab0CEVn5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:57 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, nicolas.ferre@atmel.com, avictor.za@gmail.com, linux-mmc@vger.kernel.org, wolfgang.mues@auerswald.de
+Cc: akpm@linux-foundation.org, lars@metafoo.de, ben-linux@fluff.org, linux-mmc@vger.kernel.org, stable@kernel.org
 
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
+From: Lars-Peter Clausen <lars@metafoo.de>
 
-We used to manage features and differences on a per-cpu basis.  As several
-cpus share the same mci revision, this patch aggregates cpus that have the
-same IP revision in one defined constant.  We use the
-at91mci_is_mci1rev2xx() funtion name not to mess with newer Atmel sd/mmc
-IP called "MCI2".  _rev2 naming could have been confusing...
-
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Wolfgang Muees <wolfgang.mues@auerswald.de>
-Cc: Andrew Victor <avictor.za@gmail.com>
+Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Ben Dooks <ben-linux@fluff.org>
 Cc: <linux-mmc@vger.kernel.org>
+Cc: <stable@kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/at91_mci.c |   27 +++++++++++++++++++--------
- 1 file changed, 19 insertions(+), 8 deletions(-)
+ drivers/mmc/host/s3cmci.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-introduce-per-mci-revision-conditional-code drivers/mmc/host/at91_mci.c
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-introduce-per-mci-revision-conditional-code
-+++ a/drivers/mmc/host/at91_mci.c
-@@ -78,6 +78,17 @@
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin
++++ a/drivers/mmc/host/s3cmci.c
+@@ -1179,7 +1179,7 @@ static int s3cmci_card_present(struct mm
+ 	struct s3c24xx_mci_pdata *pdata = host->pdata;
+ 	int ret;
  
- #define DRIVER_NAME "at91_mci"
+-	if (pdata->gpio_detect == 0)
++	if (pdata->no_detect)
+ 		return -ENOSYS;
  
-+static inline int at91mci_is_mci1rev2xx(void)
-+{
-+	return (   cpu_is_at91sam9260()
-+		|| cpu_is_at91sam9263()
-+		|| cpu_is_at91cap9()
-+		|| cpu_is_at91sam9rl()
-+		|| cpu_is_at91sam9g10()
-+		|| cpu_is_at91sam9g20()
-+		);
-+}
-+
- #define FL_SENT_COMMAND	(1 << 0)
- #define FL_SENT_STOP	(1 << 1)
- 
-@@ -204,8 +215,8 @@ static inline void at91_mci_sg_to_dma(st
- 	size = data->blksz * data->blocks;
- 	len = data->sg_len;
- 
--	/* AT91SAM926[0/3] Data Write Operation and number of bytes erratum */
--	if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
-+	/* MCI1 rev2xx Data Write Operation and number of bytes erratum */
-+	if (at91mci_is_mci1rev2xx())
- 		if (host->total_length == 12)
- 			memset(dmabuf, 0, 12);
- 
-@@ -398,7 +409,7 @@ static void at91_mci_enable(struct at91m
- 	at91_mci_write(host, AT91_MCI_DTOR, AT91_MCI_DTOMUL_1M | AT91_MCI_DTOCYC);
- 	mr = AT91_MCI_PDCMODE | 0x34a;
- 
--	if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
-+	if (at91mci_is_mci1rev2xx())
- 		mr |= AT91_MCI_RDPROOF | AT91_MCI_WRPROOF;
- 
- 	at91_mci_write(host, AT91_MCI_MR, mr);
-@@ -555,10 +566,10 @@ static void at91_mci_send_command(struct
- 				 */
- 				host->total_length = block_length * blocks;
- 				/*
--				 * AT91SAM926[0/3] Data Write Operation and
-+				 * MCI1 rev2xx Data Write Operation and
- 				 * number of bytes erratum
- 				 */
--				if (cpu_is_at91sam9260 () || cpu_is_at91sam9263())
-+				if (at91mci_is_mci1rev2xx())
- 					if (host->total_length < 12)
- 						host->total_length = 12;
- 
-@@ -943,7 +954,7 @@ static int __init at91_mci_probe(struct 
- 	host->bus_mode = 0;
- 	host->board = pdev->dev.platform_data;
- 	if (host->board->wire4) {
--		if (cpu_is_at91sam9260() || cpu_is_at91sam9263())
-+		if (at91mci_is_mci1rev2xx())
- 			mmc->caps |= MMC_CAP_4_BIT_DATA;
- 		else
- 			dev_warn(&pdev->dev, "4 wire bus mode not supported"
-@@ -959,8 +970,8 @@ static int __init at91_mci_probe(struct 
- 	}
- 
- 	/* Add SDIO capability when available */
--	if (cpu_is_at91sam9260() || cpu_is_at91sam9263()) {
--		/* AT91SAM9260/9263 erratum */
-+	if (at91mci_is_mci1rev2xx()) {
-+		/* at91mci MCI1 rev2xx sdio interrupt erratum */
- 		if (host->board->wire4 || !host->board->slot_b)
- 			mmc->caps |= MMC_CAP_SDIO_IRQ;
- 	}
+ 	ret = gpio_get_value(pdata->gpio_detect) ? 0 : 1;
 _
