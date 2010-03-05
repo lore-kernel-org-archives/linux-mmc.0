@@ -1,85 +1,60 @@
 From: akpm@linux-foundation.org
-Subject: [patch 100/160] sdhci: improve sdhci sdhci_set_adma_desc() code
-Date: Fri, 05 Mar 2010 13:43:29 -0800
-Message-ID: <201003052143.o25LhTCW029767@imap1.linux-foundation.org>
+Subject: [patch 116/160] mmc: enable DMA on Ricoh sdhci reader by default
+Date: Fri, 05 Mar 2010 13:43:46 -0800
+Message-ID: <201003052143.o25LhknS029867@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:48306 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:55964 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754740Ab0CEVns (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:43:48 -0500
+	by vger.kernel.org with ESMTP id S1755565Ab0CEVoA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Mar 2010 16:44:00 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, ben-linux@fluff.org, linux-mmc@vger.kernel.org, pierre@ossman.eu
+Cc: akpm@linux-foundation.org, anarsoul@gmail.com, HaraldWelte@viatech.com, linux-mmc@vger.kernel.org, maximlevitsky@gmail.com, preining@logic.at
 
-From: Ben Dooks <ben-linux@fluff.org>
+From: Vasily Khoruzhick <anarsoul@gmail.com>
 
-sdhci_set_adma_desc() is using byte-writes to write data in a specified
-order into memory.  Change to using __le16 for the two byte and __le32 for
-the four byte cases and use the cpu_to_{le16,le32} to do the conversion
-before writing.
+This card reader doesn't advertise, however DMA works well.  Probably
+windows SDHCI driver assumes that all readers support DMA and thus we see
+that bug.
 
-This will reduce the size of the code and the number of writes as we no
-longer need to chop the data up before writing.
-
-As an example on ARM S3C64XX SoC, in little-endian configuration:
-
- 000000d4 <sdhci_set_adma_desc>:
--      d8:	e1a0c423 	lsr	ip, r3, #8
--      dc:	e1a0ec21 	lsr	lr, r1, #24
--      e0:	e1a04821 	lsr	r4, r1, #16
--      e4:	e1a05421 	lsr	r5, r1, #8
--      e8:	e1a06442 	asr	r6, r2, #8
--      ec:	e5c0c001 	strb	ip, [r0, #1]
--      f0:	e5c0e007 	strb	lr, [r0, #7]
--      f4:	e5c04006 	strb	r4, [r0, #6]
--      f8:	e5c05005 	strb	r5, [r0, #5]
--      fc:	e5c01004 	strb	r1, [r0, #4]
--     100:	e5c06003 	strb	r6, [r0, #3]
--     104:	e5c02002 	strb	r2, [r0, #2]
--     108:	e5c03000 	strb	r3, [r0]
-+      d4:	e5801004 	str	r1, [r0, #4]
-+      d8:	e1c030b0 	strh	r3, [r0]
-+      dc:	e1c020b2 	strh	r2, [r0, #2]
-
-Signed-off-by: Ben Dooks <ben-linux@fluff.org>
-Cc: Pierre Ossman <pierre@ossman.eu>
+Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
+Tested-by: Maxim Levitsky <maximlevitsky@gmail.com>
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: Harald Welte <HaraldWelte@viatech.com>
+Cc: Norbert Preining <preining@logic.at>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci.c |   16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sdhci-pci.c |    7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
 
-diff -puN drivers/mmc/host/sdhci.c~sdhci-improve-sdhci-sdhci_set_adma_desc-code drivers/mmc/host/sdhci.c
---- a/drivers/mmc/host/sdhci.c~sdhci-improve-sdhci-sdhci_set_adma_desc-code
-+++ a/drivers/mmc/host/sdhci.c
-@@ -378,16 +378,16 @@ static void sdhci_kunmap_atomic(void *bu
+diff -puN drivers/mmc/host/sdhci-pci.c~mmc-enable-dma-on-ricoh-sdhci-reader-by-default drivers/mmc/host/sdhci-pci.c
+--- a/drivers/mmc/host/sdhci-pci.c~mmc-enable-dma-on-ricoh-sdhci-reader-by-default
++++ a/drivers/mmc/host/sdhci-pci.c
+@@ -80,9 +80,6 @@ struct sdhci_pci_chip {
  
- static void sdhci_set_adma_desc(u8 *desc, u32 addr, int len, unsigned cmd)
+ static int ricoh_probe(struct sdhci_pci_chip *chip)
  {
--	desc[7] = (addr >> 24) & 0xff;
--	desc[6] = (addr >> 16) & 0xff;
--	desc[5] = (addr >> 8) & 0xff;
--	desc[4] = (addr >> 0) & 0xff;
-+	__le32 *dataddr = (__le32 __force *)(desc + 4);
-+	__le16 *cmdlen = (__le16 __force *)desc;
+-	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_IBM)
+-		chip->quirks |= SDHCI_QUIRK_CLOCK_BEFORE_RESET;
+-
+ 	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG ||
+ 	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
+ 		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
+@@ -92,7 +89,9 @@ static int ricoh_probe(struct sdhci_pci_
  
--	desc[3] = (len >> 8) & 0xff;
--	desc[2] = (len >> 0) & 0xff;
-+	/* SDHCI specification says ADMA descriptors should be 4 byte
-+	 * aligned, so using 16 or 32bit operations should be safe. */
+ static const struct sdhci_pci_fixes sdhci_ricoh = {
+ 	.probe		= ricoh_probe,
+-	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR,
++	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
++			  SDHCI_QUIRK_FORCE_DMA |
++			  SDHCI_QUIRK_CLOCK_BEFORE_RESET,
+ };
  
--	desc[0] = cmd & 0xff;
--	desc[1] = cmd >> 8;
-+	cmdlen[0] = cpu_to_le16(cmd);
-+	cmdlen[1] = cpu_to_le16(len);
-+
-+	dataddr[0] = cpu_to_le32(addr);
- }
- 
- static int sdhci_adma_table_pre(struct sdhci_host *host,
+ static const struct sdhci_pci_fixes sdhci_ene_712 = {
 _
