@@ -1,88 +1,173 @@
-From: Patch from Johan Kristell <linuxtv-commits-bounces-dJidKbW2IEtAfugRpC6u6w@public.gmane.org>
-Subject: [linuxtv-commits] [git:v4l-dvb/master] mmc_test: block addressed
-	cards
-Date: Sat, 06 Mar 2010 15:26:03 +0100
-Message-ID: <E1Nnux9-0000fV-RS@www.linuxtv.org>
-Reply-To: linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Fix conditional locking
+Date: Sat, 06 Mar 2010 14:54:15 +0200
+Message-ID: <4B925077.1060803@nokia.com>
+References: <alpine.LFD.2.00.1003011952470.4245@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linuxtv-commits-bounces+gcvl-linuxtv-commits=m.gmane.org-dJidKbW2IEtAfugRpC6u6w@public.gmane.org>
-List-Unsubscribe: <http://www.linuxtv.org/cgi-bin/mailman/options/linuxtv-commits>,
-	<mailto:linuxtv-commits-request-dJidKbW2IEtAfugRpC6u6w@public.gmane.org?subject=unsubscribe>
-List-Post: <mailto:linuxtv-commits-dJidKbW2IEtAfugRpC6u6w@public.gmane.org>
-List-Help: <mailto:linuxtv-commits-request-dJidKbW2IEtAfugRpC6u6w@public.gmane.org?subject=help>
-List-Subscribe: <http://www.linuxtv.org/cgi-bin/mailman/listinfo/linuxtv-commits>,
-	<mailto:linuxtv-commits-request-dJidKbW2IEtAfugRpC6u6w@public.gmane.org?subject=subscribe>
-Sender: linuxtv-commits-bounces-dJidKbW2IEtAfugRpC6u6w@public.gmane.org
-Errors-To: linuxtv-commits-bounces+gcvl-linuxtv-commits=m.gmane.org-dJidKbW2IEtAfugRpC6u6w@public.gmane.org
-To: linuxtv-commits-dJidKbW2IEtAfugRpC6u6w@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Johan Kristell <johan.kristell-VrBV9hrLPhE@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <alpine.LFD.2.00.1003011952470.4245@localhost.localdomain>
+Sender: linux-omap-owner@vger.kernel.org
+To: Thomas Gleixner <tglx@linutronix.de>
+Cc: LKML <linux-kernel@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Madhusudhan Chikkature <madhu.cr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Johan Kristell <johan.kristell-VrBV9hrLPhE@public.gmane.org>
+Thomas Gleixner wrote:
+> Conditional locking on (!in_interrupt()) is broken by design and there
+> is no reason to keep the host->irq_lock across the call to
+> mmc_request_done(). Also the host->protect_card magic hack does not
+> depend on the context
 
-This patch fixes a bug in the multiblock write tests where the written
-data is read back for verifying one block at a time.  The tests in
-mmc_test assumes that all cards are byte addressable.
+Card protect does depend on not being invoked in the middle of a request.
+For example, it could result in a open-ended read being started but never
+stopped.
 
-This will cause the multi block write tests to fail, leading the user of
-the mmc_test driver thinking there is something wrong with the sdhci
-driver they are testing.
+in_interrupt() can be replaced with a new flag 'in_request' that is set
+in omap_hsmmc_request() and cleared after mmc_request_done()
 
-The start address for the block is calculated as: blocknum * 512. For
-block addressable cards the blocknum alone should be used.
+Also, as you allude to in another email, the spinlock, while preventing an
+oops, does not stop the unwanted interrupt, which will cause problems.
 
-Signed-off-by: Johan Kristell <johan.kristell-VrBV9hrLPhE@public.gmane.org>
-Cc: <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Signed-off-by: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Signed-off-by: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+I can make the necessary changes but it will be a few days before
+I have the time.
 
- drivers/mmc/card/mmc_test.c |    9 ++++++---
- 1 files changed, 6 insertions(+), 3 deletions(-)
+> 
+> Fix the mess by dropping host->irq_lock before calling
+> mmc_request_done().
+> 
+> Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 4b23225..99a3383 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -468,14 +468,6 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
+>  	if (host->use_dma)
+>  		cmdreg |= DMA_EN;
+>  
+> -	/*
+> -	 * In an interrupt context (i.e. STOP command), the spinlock is unlocked
+> -	 * by the interrupt handler, otherwise (i.e. for a new request) it is
+> -	 * unlocked here.
+> -	 */
+> -	if (!in_interrupt())
+> -		spin_unlock_irqrestore(&host->irq_lock, host->flags);
+> -
+>  	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
+>  	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
+>  }
+> @@ -506,7 +498,9 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
+>  		}
+>  
+>  		host->mrq = NULL;
+> +		spin_unlock(&host->irq_lock);
+>  		mmc_request_done(host->mmc, mrq);
+> +		spin_lock(&host->irq_lock);
+>  		return;
+>  	}
+>  
+> @@ -523,7 +517,9 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
+>  
+>  	if (!data->stop) {
+>  		host->mrq = NULL;
+> +		spin_unlock(&host->irq_lock);
+>  		mmc_request_done(host->mmc, data->mrq);
+> +		spin_lock(&host->irq_lock);
+>  		return;
+>  	}
+>  	omap_hsmmc_start_command(host, data->stop, NULL);
+> @@ -551,7 +547,9 @@ omap_hsmmc_cmd_done(struct omap_hsmmc_host *host, struct mmc_command *cmd)
+>  	}
+>  	if ((host->data == NULL && !host->response_busy) || cmd->error) {
+>  		host->mrq = NULL;
+> +		spin_unlock(&host->irq_lock);
+>  		mmc_request_done(host->mmc, cmd->mrq);
+> +		spin_lock(&host->irq_lock);
+>  	}
+>  }
+>  
+> @@ -1077,37 +1075,31 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
+>  	struct omap_hsmmc_host *host = mmc_priv(mmc);
+>  	int err;
+>  
+> +	spin_lock_irqsave(&host->irq_lock, host->flags);
+>  	/*
+> -	 * Prevent races with the interrupt handler because of unexpected
+> -	 * interrupts, but not if we are already in interrupt context i.e.
+> -	 * retries.
+> +	 * Protect the card from I/O if there is a possibility
+> +	 * it can be removed.
+>  	 */
+> -	if (!in_interrupt()) {
+> -		spin_lock_irqsave(&host->irq_lock, host->flags);
+> -		/*
+> -		 * Protect the card from I/O if there is a possibility
+> -		 * it can be removed.
+> -		 */
+> -		if (host->protect_card) {
+> -			if (host->reqs_blocked < 3) {
+> -				/*
+> -				 * Ensure the controller is left in a consistent
+> -				 * state by resetting the command and data state
+> -				 * machines.
+> -				 */
+> -				omap_hsmmc_reset_controller_fsm(host, SRD);
+> -				omap_hsmmc_reset_controller_fsm(host, SRC);
+> -				host->reqs_blocked += 1;
+> -			}
+> -			req->cmd->error = -EBADF;
+> -			if (req->data)
+> -				req->data->error = -EBADF;
+> -			spin_unlock_irqrestore(&host->irq_lock, host->flags);
+> -			mmc_request_done(mmc, req);
+> -			return;
+> -		} else if (host->reqs_blocked)
+> -			host->reqs_blocked = 0;
+> -	}
+> +	if (host->protect_card) {
+> +		if (host->reqs_blocked < 3) {
+> +			/*
+> +			 * Ensure the controller is left in a consistent
+> +			 * state by resetting the command and data state
+> +			 * machines.
+> +			 */
+> +			omap_hsmmc_reset_controller_fsm(host, SRD);
+> +			omap_hsmmc_reset_controller_fsm(host, SRC);
+> +			host->reqs_blocked += 1;
+> +		}
+> +		req->cmd->error = -EBADF;
+> +		if (req->data)
+> +			req->data->error = -EBADF;
+> +		spin_unlock_irqrestore(&host->irq_lock, host->flags);
+> +		mmc_request_done(mmc, req);
+> +		return;
+> +	} else if (host->reqs_blocked)
+> +		host->reqs_blocked = 0;
+> +
+>  	WARN_ON(host->mrq != NULL);
+>  	host->mrq = req;
+>  	err = omap_hsmmc_prepare_data(host, req);
+> @@ -1116,13 +1108,13 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
+>  		if (req->data)
+>  			req->data->error = err;
+>  		host->mrq = NULL;
+> -		if (!in_interrupt())
+> -			spin_unlock_irqrestore(&host->irq_lock, host->flags);
+> +		spin_unlock_irqrestore(&host->irq_lock, host->flags);
+>  		mmc_request_done(mmc, req);
+>  		return;
+>  	}
+>  
+>  	omap_hsmmc_start_command(host, req->cmd, req->data);
+> +	spin_unlock_irqrestore(&host->irq_lock, host->flags);
+>  }
+>  
+>  /* Routine to configure clock values. Exposed API to core */
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
----
-
-http://git.linuxtv.org/v4l-dvb.git?a=commitdiff;h=c286d03cce118e9fb8dda8da43f9131c169c5a75
-
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index b9f1e84..e7f8027 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -74,6 +74,9 @@ static void mmc_test_prepare_mrq(struct mmc_test_card *test,
- 	}
- 
- 	mrq->cmd->arg = dev_addr;
-+	if (!mmc_card_blockaddr(test->card))
-+		mrq->cmd->arg <<= 9;
-+
- 	mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
- 
- 	if (blocks == 1)
-@@ -190,7 +193,7 @@ static int __mmc_test_prepare(struct mmc_test_card *test, int write)
- 	}
- 
- 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
--		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
-+		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
- 		if (ret)
- 			return ret;
- 	}
-@@ -219,7 +222,7 @@ static int mmc_test_cleanup(struct mmc_test_card *test)
- 	memset(test->buffer, 0, 512);
- 
- 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
--		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
-+		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
- 		if (ret)
- 			return ret;
- 	}
-@@ -426,7 +429,7 @@ static int mmc_test_transfer(struct mmc_test_card *test,
- 		for (i = 0;i < sectors;i++) {
- 			ret = mmc_test_buffer_transfer(test,
- 				test->buffer + i * 512,
--				dev_addr + i * 512, 512, 0);
-+				dev_addr + i, 512, 0);
- 			if (ret)
- 				return ret;
- 		}
