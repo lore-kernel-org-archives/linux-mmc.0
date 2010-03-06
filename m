@@ -1,78 +1,88 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: core.c patch for f_min has minimum frequency too low for standard
- sdhci controller
-Date: Fri, 5 Mar 2010 21:10:52 -0800
-Message-ID: <43E4817426ED174AA81263BCECB4351D1315CEEB66@sc-vexch3.marvell.com>
+From: Patch from Johan Kristell <linuxtv-commits-bounces-dJidKbW2IEtAfugRpC6u6w@public.gmane.org>
+Subject: [linuxtv-commits] [git:v4l-dvb/master] mmc_test: block addressed
+	cards
+Date: Sat, 06 Mar 2010 15:26:03 +0100
+Message-ID: <E1Nnux9-0000fV-RS@www.linuxtv.org>
+Reply-To: linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dakia2.marvell.com ([65.219.4.35]:55019 "EHLO
-	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751246Ab0CFFKy convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 6 Mar 2010 00:10:54 -0500
-Received: from maili.marvell.com (maili.marvell.com [10.68.76.51])
-	by dakia2.marvell.com (Spam & Virus Firewall) with ESMTP id EDFE9AF7D5
-	for <linux-mmc@vger.kernel.org>; Fri,  5 Mar 2010 21:10:53 -0800 (PST)
-Received: from maili.marvell.com (maili.marvell.com [10.68.76.51]) by dakia2.marvell.com with ESMTP id fR2GCm88Fx0CQTDW for <linux-mmc@vger.kernel.org>; Fri, 05 Mar 2010 21:10:53 -0800 (PST)
-Received: from MSI-MTA.marvell.com (msi-mta.marvell.com [10.68.76.91])
-	by maili.marvell.com (Postfix) with ESMTP id DD339878CB
-	for <linux-mmc@vger.kernel.org>; Fri,  5 Mar 2010 21:10:53 -0800 (PST)
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linuxtv-commits-bounces+gcvl-linuxtv-commits=m.gmane.org-dJidKbW2IEtAfugRpC6u6w@public.gmane.org>
+List-Unsubscribe: <http://www.linuxtv.org/cgi-bin/mailman/options/linuxtv-commits>,
+	<mailto:linuxtv-commits-request-dJidKbW2IEtAfugRpC6u6w@public.gmane.org?subject=unsubscribe>
+List-Post: <mailto:linuxtv-commits-dJidKbW2IEtAfugRpC6u6w@public.gmane.org>
+List-Help: <mailto:linuxtv-commits-request-dJidKbW2IEtAfugRpC6u6w@public.gmane.org?subject=help>
+List-Subscribe: <http://www.linuxtv.org/cgi-bin/mailman/listinfo/linuxtv-commits>,
+	<mailto:linuxtv-commits-request-dJidKbW2IEtAfugRpC6u6w@public.gmane.org?subject=subscribe>
+Sender: linuxtv-commits-bounces-dJidKbW2IEtAfugRpC6u6w@public.gmane.org
+Errors-To: linuxtv-commits-bounces+gcvl-linuxtv-commits=m.gmane.org-dJidKbW2IEtAfugRpC6u6w@public.gmane.org
+To: linuxtv-commits-dJidKbW2IEtAfugRpC6u6w@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Johan Kristell <johan.kristell-VrBV9hrLPhE@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Lennert Buijtenhek <buytenh@marvell.com>, Nicolas Pitre <nico@marvell.com>
 
+From: Johan Kristell <johan.kristell-VrBV9hrLPhE@public.gmane.org>
 
-There is an upcoming patch for core.c  shown in the git tree shown below.
+This patch fixes a bug in the multiblock write tests where the written
+data is read back for verifying one block at a time.  The tests in
+mmc_test assumes that all cards are byte addressable.
 
-A standard sdhci.c controller running at 50MHz can divide the speed down to 50MHz/256 or 193000 bits/sec.  This MINIMUM value is larger than the +#define MMC_INIT_FREQ 64000 and will invoke the error message in
+This will cause the multi block write tests to fail, leading the user of
+the mmc_test driver thinking there is something wrong with the sdhci
+driver they are testing.
 
-static void mmc_power_up(struct mmc_host *host) in core.c
+The start address for the block is calculated as: blocknum * 512. For
+block addressable cards the blocknum alone should be used.
 
-		pr_warning("%s: Minimum clock frequency too high for "
-				"identification mode\n", mmc_hostname(host));
+Signed-off-by: Johan Kristell <johan.kristell-VrBV9hrLPhE@public.gmane.org>
+Cc: <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Signed-off-by: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Signed-off-by: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 
+ drivers/mmc/card/mmc_test.c |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
 
-=======
+---
 
-The minimum value should be raised to a more appropriate value.
+http://git.linuxtv.org/v4l-dvb.git?a=commitdiff;h=c286d03cce118e9fb8dda8da43f9131c169c5a75
 
-Philip
-
-==== upcoming patch in git tree for 2.6.34 ===
-
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -907,12 +907,12 @@ static void mmc_power_up(struct mmc_host *host)
-*/
-mmc_delay(10);
-- if (host->f_min > 400000) {
-+ if (host->f_min > MMC_INIT_FREQ) {
-pr_warning("%s: Minimum clock frequency too high for "
-"identification mode\n", mmc_hostname(host));
-host->ios.clock = host->f_min;
-} else
-- host->ios.clock = 400000;
-+ host->ios.clock = MMC_INIT_FREQ;
-host->ios.power_mode = MMC_POWER_ON;
-mmc_set_ios(host); 
-
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -15,6 +15,16 @@
-#define MMC_CMD_RETRIES 3
-+/* Spec says initialisation must happen at or below 400kHz.
-+ * Some MMC cards fail to initialise at 400kHz (even as low as 200kHz) and
-+ * Some host controllers (eg. tmio_mmc) cannot garantee to set the clock below
-+ * 400kHz (it rounds to the closest clock freq available).
-+ *
-+ * 64 kHz seems like a good speed/reliability compromise.
-+ */
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index b9f1e84..e7f8027 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -74,6 +74,9 @@ static void mmc_test_prepare_mrq(struct mmc_test_card *test,
+ 	}
+ 
+ 	mrq->cmd->arg = dev_addr;
++	if (!mmc_card_blockaddr(test->card))
++		mrq->cmd->arg <<= 9;
 +
-+#define MMC_INIT_FREQ 64000
-+
-struct mmc_bus_ops {
-int (*awake)(struct mmc_host *);
-int (*sleep)(struct mmc_host *); 
+ 	mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+ 
+ 	if (blocks == 1)
+@@ -190,7 +193,7 @@ static int __mmc_test_prepare(struct mmc_test_card *test, int write)
+ 	}
+ 
+ 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
+-		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
++		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -219,7 +222,7 @@ static int mmc_test_cleanup(struct mmc_test_card *test)
+ 	memset(test->buffer, 0, 512);
+ 
+ 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
+-		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
++		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -426,7 +429,7 @@ static int mmc_test_transfer(struct mmc_test_card *test,
+ 		for (i = 0;i < sectors;i++) {
+ 			ret = mmc_test_buffer_transfer(test,
+ 				test->buffer + i * 512,
+-				dev_addr + i * 512, 512, 0);
++				dev_addr + i, 512, 0);
+ 			if (ret)
+ 				return ret;
+ 		}
