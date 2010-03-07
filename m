@@ -1,173 +1,149 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Fix conditional locking
-Date: Sat, 06 Mar 2010 14:54:15 +0200
-Message-ID: <4B925077.1060803@nokia.com>
-References: <alpine.LFD.2.00.1003011952470.4245@localhost.localdomain>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <alpine.LFD.2.00.1003011952470.4245@localhost.localdomain>
-Sender: linux-omap-owner@vger.kernel.org
-To: Thomas Gleixner <tglx@linutronix.de>
-Cc: LKML <linux-kernel@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Madhusudhan Chikkature <madhu.cr@ti.com>
+From: Cory Maccarrone <darkstar6262@gmail.com>
+Subject: [PATCH] mmc-omap: Add support for 16-bit and 32-bit registers
+Date: Sun,  7 Mar 2010 09:47:58 -0800
+Message-ID: <1267984078-6036-1-git-send-email-darkstar6262@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:59791 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754473Ab0CGRsS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Mar 2010 12:48:18 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
+Cc: Ladislav Michl <ladis@linux-mips.org>, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Marek Belisko <marek.belisko@open-nandra.com>, Cory Maccarrone <darkstar6262@gmail.com>
 
-Thomas Gleixner wrote:
-> Conditional locking on (!in_interrupt()) is broken by design and there
-> is no reason to keep the host->irq_lock across the call to
-> mmc_request_done(). Also the host->protect_card magic hack does not
-> depend on the context
+From: Marek Belisko <marek.belisko@open-nandra.com>
 
-Card protect does depend on not being invoked in the middle of a request.
-For example, it could result in a open-ended read being started but never
-stopped.
+The omap850 and omap730 use 16-bit registers instead of 32-bit, requiring
+a modification of the register addresses in the mmc-omap driver.  To resolve
+this, a bit shift is performed on base register addresses, either by 1 or 2
+bits depending on the CPU in use.  This yields the correct registers for
+each CPU.
 
-in_interrupt() can be replaced with a new flag 'in_request' that is set
-in omap_hsmmc_request() and cleared after mmc_request_done()
+Signed-off-by: Marek Belisko <marek.belisko@open-nandra.com>
+Signed-off-by: Cory Maccarrone <darkstar6262@gmail.com>
+Signed-off-by: Tony Lindgren <tony@atomide.com>
+---
+ drivers/mmc/host/omap.c |   62 +++++++++++++++++++++++++----------------------
+ 1 files changed, 33 insertions(+), 29 deletions(-)
 
-Also, as you allude to in another email, the spinlock, while preventing an
-oops, does not stop the unwanted interrupt, which will cause problems.
+This is a resubmit of a patch I sent in several months ago.  Tony Lindgren merged
+this into linux-omap's master and testing branches but has stated that he will not
+merge it further as linux-mmc needs to approve this.  There hasn't been any comments
+raised on either of the linux-omap or linux-mmc mailing lists about problems.  Due to
+the unique nature of the omap7xx platform, this patch is required for MMC card access.
+Is there any chance this can be included into the next -rc cycle, as it is a fix for
+devices that have 16-bit registers?
 
-I can make the necessary changes but it will be a few days before
-I have the time.
-
-> 
-> Fix the mess by dropping host->irq_lock before calling
-> mmc_request_done().
-> 
-> Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 4b23225..99a3383 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -468,14 +468,6 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
->  	if (host->use_dma)
->  		cmdreg |= DMA_EN;
->  
-> -	/*
-> -	 * In an interrupt context (i.e. STOP command), the spinlock is unlocked
-> -	 * by the interrupt handler, otherwise (i.e. for a new request) it is
-> -	 * unlocked here.
-> -	 */
-> -	if (!in_interrupt())
-> -		spin_unlock_irqrestore(&host->irq_lock, host->flags);
-> -
->  	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
->  	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
->  }
-> @@ -506,7 +498,9 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
->  		}
->  
->  		host->mrq = NULL;
-> +		spin_unlock(&host->irq_lock);
->  		mmc_request_done(host->mmc, mrq);
-> +		spin_lock(&host->irq_lock);
->  		return;
->  	}
->  
-> @@ -523,7 +517,9 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
->  
->  	if (!data->stop) {
->  		host->mrq = NULL;
-> +		spin_unlock(&host->irq_lock);
->  		mmc_request_done(host->mmc, data->mrq);
-> +		spin_lock(&host->irq_lock);
->  		return;
->  	}
->  	omap_hsmmc_start_command(host, data->stop, NULL);
-> @@ -551,7 +547,9 @@ omap_hsmmc_cmd_done(struct omap_hsmmc_host *host, struct mmc_command *cmd)
->  	}
->  	if ((host->data == NULL && !host->response_busy) || cmd->error) {
->  		host->mrq = NULL;
-> +		spin_unlock(&host->irq_lock);
->  		mmc_request_done(host->mmc, cmd->mrq);
-> +		spin_lock(&host->irq_lock);
->  	}
->  }
->  
-> @@ -1077,37 +1075,31 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
->  	struct omap_hsmmc_host *host = mmc_priv(mmc);
->  	int err;
->  
-> +	spin_lock_irqsave(&host->irq_lock, host->flags);
->  	/*
-> -	 * Prevent races with the interrupt handler because of unexpected
-> -	 * interrupts, but not if we are already in interrupt context i.e.
-> -	 * retries.
-> +	 * Protect the card from I/O if there is a possibility
-> +	 * it can be removed.
->  	 */
-> -	if (!in_interrupt()) {
-> -		spin_lock_irqsave(&host->irq_lock, host->flags);
-> -		/*
-> -		 * Protect the card from I/O if there is a possibility
-> -		 * it can be removed.
-> -		 */
-> -		if (host->protect_card) {
-> -			if (host->reqs_blocked < 3) {
-> -				/*
-> -				 * Ensure the controller is left in a consistent
-> -				 * state by resetting the command and data state
-> -				 * machines.
-> -				 */
-> -				omap_hsmmc_reset_controller_fsm(host, SRD);
-> -				omap_hsmmc_reset_controller_fsm(host, SRC);
-> -				host->reqs_blocked += 1;
-> -			}
-> -			req->cmd->error = -EBADF;
-> -			if (req->data)
-> -				req->data->error = -EBADF;
-> -			spin_unlock_irqrestore(&host->irq_lock, host->flags);
-> -			mmc_request_done(mmc, req);
-> -			return;
-> -		} else if (host->reqs_blocked)
-> -			host->reqs_blocked = 0;
-> -	}
-> +	if (host->protect_card) {
-> +		if (host->reqs_blocked < 3) {
-> +			/*
-> +			 * Ensure the controller is left in a consistent
-> +			 * state by resetting the command and data state
-> +			 * machines.
-> +			 */
-> +			omap_hsmmc_reset_controller_fsm(host, SRD);
-> +			omap_hsmmc_reset_controller_fsm(host, SRC);
-> +			host->reqs_blocked += 1;
-> +		}
-> +		req->cmd->error = -EBADF;
-> +		if (req->data)
-> +			req->data->error = -EBADF;
-> +		spin_unlock_irqrestore(&host->irq_lock, host->flags);
-> +		mmc_request_done(mmc, req);
-> +		return;
-> +	} else if (host->reqs_blocked)
-> +		host->reqs_blocked = 0;
-> +
->  	WARN_ON(host->mrq != NULL);
->  	host->mrq = req;
->  	err = omap_hsmmc_prepare_data(host, req);
-> @@ -1116,13 +1108,13 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
->  		if (req->data)
->  			req->data->error = err;
->  		host->mrq = NULL;
-> -		if (!in_interrupt())
-> -			spin_unlock_irqrestore(&host->irq_lock, host->flags);
-> +		spin_unlock_irqrestore(&host->irq_lock, host->flags);
->  		mmc_request_done(mmc, req);
->  		return;
->  	}
->  
->  	omap_hsmmc_start_command(host, req->cmd, req->data);
-> +	spin_unlock_irqrestore(&host->irq_lock, host->flags);
->  }
->  
->  /* Routine to configure clock values. Exposed API to core */
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index c6d7e8e..53362c4 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -38,30 +38,30 @@
+ #include <plat/fpga.h>
+ 
+ #define	OMAP_MMC_REG_CMD	0x00
+-#define	OMAP_MMC_REG_ARGL	0x04
+-#define	OMAP_MMC_REG_ARGH	0x08
+-#define	OMAP_MMC_REG_CON	0x0c
+-#define	OMAP_MMC_REG_STAT	0x10
+-#define	OMAP_MMC_REG_IE		0x14
+-#define	OMAP_MMC_REG_CTO	0x18
+-#define	OMAP_MMC_REG_DTO	0x1c
+-#define	OMAP_MMC_REG_DATA	0x20
+-#define	OMAP_MMC_REG_BLEN	0x24
+-#define	OMAP_MMC_REG_NBLK	0x28
+-#define	OMAP_MMC_REG_BUF	0x2c
+-#define OMAP_MMC_REG_SDIO	0x34
+-#define	OMAP_MMC_REG_REV	0x3c
+-#define	OMAP_MMC_REG_RSP0	0x40
+-#define	OMAP_MMC_REG_RSP1	0x44
+-#define	OMAP_MMC_REG_RSP2	0x48
+-#define	OMAP_MMC_REG_RSP3	0x4c
+-#define	OMAP_MMC_REG_RSP4	0x50
+-#define	OMAP_MMC_REG_RSP5	0x54
+-#define	OMAP_MMC_REG_RSP6	0x58
+-#define	OMAP_MMC_REG_RSP7	0x5c
+-#define	OMAP_MMC_REG_IOSR	0x60
+-#define	OMAP_MMC_REG_SYSC	0x64
+-#define	OMAP_MMC_REG_SYSS	0x68
++#define	OMAP_MMC_REG_ARGL	0x01
++#define	OMAP_MMC_REG_ARGH	0x02
++#define	OMAP_MMC_REG_CON	0x03
++#define	OMAP_MMC_REG_STAT	0x04
++#define	OMAP_MMC_REG_IE		0x05
++#define	OMAP_MMC_REG_CTO	0x06
++#define	OMAP_MMC_REG_DTO	0x07
++#define	OMAP_MMC_REG_DATA	0x08
++#define	OMAP_MMC_REG_BLEN	0x09
++#define	OMAP_MMC_REG_NBLK	0x0a
++#define	OMAP_MMC_REG_BUF	0x0b
++#define	OMAP_MMC_REG_SDIO	0x0d
++#define	OMAP_MMC_REG_REV	0x0f
++#define	OMAP_MMC_REG_RSP0	0x10
++#define	OMAP_MMC_REG_RSP1	0x11
++#define	OMAP_MMC_REG_RSP2	0x12
++#define	OMAP_MMC_REG_RSP3	0x13
++#define	OMAP_MMC_REG_RSP4	0x14
++#define	OMAP_MMC_REG_RSP5	0x15
++#define	OMAP_MMC_REG_RSP6	0x16
++#define	OMAP_MMC_REG_RSP7	0x17
++#define	OMAP_MMC_REG_IOSR	0x18
++#define	OMAP_MMC_REG_SYSC	0x19
++#define	OMAP_MMC_REG_SYSS	0x1a
+ 
+ #define	OMAP_MMC_STAT_CARD_ERR		(1 << 14)
+ #define	OMAP_MMC_STAT_CARD_IRQ		(1 << 13)
+@@ -77,8 +77,9 @@
+ #define	OMAP_MMC_STAT_CARD_BUSY		(1 <<  2)
+ #define	OMAP_MMC_STAT_END_OF_CMD	(1 <<  0)
+ 
+-#define OMAP_MMC_READ(host, reg)	__raw_readw((host)->virt_base + OMAP_MMC_REG_##reg)
+-#define OMAP_MMC_WRITE(host, reg, val)	__raw_writew((val), (host)->virt_base + OMAP_MMC_REG_##reg)
++#define OMAP_MMC_REG(host, reg)		(OMAP_MMC_REG_##reg << (host)->reg_shift)
++#define OMAP_MMC_READ(host, reg)	__raw_readw((host)->virt_base + OMAP_MMC_REG(host, reg))
++#define OMAP_MMC_WRITE(host, reg, val)	__raw_writew((val), (host)->virt_base + OMAP_MMC_REG(host, reg))
+ 
+ /*
+  * Command types
+@@ -132,6 +133,7 @@ struct mmc_omap_host {
+ 	int			irq;
+ 	unsigned char		bus_mode;
+ 	unsigned char		hw_bus_mode;
++	unsigned int		reg_shift;
+ 
+ 	struct work_struct	cmd_abort_work;
+ 	unsigned		abort:1;
+@@ -679,9 +681,9 @@ mmc_omap_xfer_data(struct mmc_omap_host *host, int write)
+ 	host->data->bytes_xfered += n;
+ 
+ 	if (write) {
+-		__raw_writesw(host->virt_base + OMAP_MMC_REG_DATA, host->buffer, n);
++		__raw_writesw(host->virt_base + OMAP_MMC_REG(host, DATA), host->buffer, n);
+ 	} else {
+-		__raw_readsw(host->virt_base + OMAP_MMC_REG_DATA, host->buffer, n);
++		__raw_readsw(host->virt_base + OMAP_MMC_REG(host, DATA), host->buffer, n);
+ 	}
+ }
+ 
+@@ -899,7 +901,7 @@ mmc_omap_prepare_dma(struct mmc_omap_host *host, struct mmc_data *data)
+ 	int dst_port = 0;
+ 	int sync_dev = 0;
+ 
+-	data_addr = host->phys_base + OMAP_MMC_REG_DATA;
++	data_addr = host->phys_base + OMAP_MMC_REG(host, DATA);
+ 	frame = data->blksz;
+ 	count = sg_dma_len(sg);
+ 
+@@ -1492,6 +1494,8 @@ static int __init mmc_omap_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
++	host->reg_shift = (cpu_is_omap7xx() ? 1 : 2);
++
+ 	return 0;
+ 
+ err_plat_cleanup:
+-- 
+1.6.3.3
 
