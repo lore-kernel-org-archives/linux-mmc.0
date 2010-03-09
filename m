@@ -1,158 +1,55 @@
 From: akpm@linux-foundation.org
-Subject: [merged] sdio-sdhci-support-for-suspend-mode-pm-features.patch removed from -mm tree
-Date: Tue, 09 Mar 2010 11:08:12 -0800
-Message-ID: <201003091908.o29J8CHX031429@imap1.linux-foundation.org>
+Subject: [merged] mmc-atmel-host-kconfig-cleanup-for-everyone-else.patch removed from -mm tree
+Date: Tue, 09 Mar 2010 11:07:48 -0800
+Message-ID: <201003091907.o29J7mUJ031384@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:35713 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:47305 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756005Ab0CITWO (ORCPT
+	by vger.kernel.org with ESMTP id S1756002Ab0CITWO (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2010 14:22:14 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: nico@fluxnic.net, linux-mmc@vger.kernel.org, nico@marvell.com, mm-commits@vger.kernel.org
+To: nicolas.ferre@atmel.com, jic23@cam.ac.uk, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     sdio: sdhci support for suspend mode PM features
+     mmc: Atmel host kconfig cleanup for everyone else
 has been removed from the -mm tree.  Its filename was
-     sdio-sdhci-support-for-suspend-mode-pm-features.patch
+     mmc-atmel-host-kconfig-cleanup-for-everyone-else.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sdio: sdhci support for suspend mode PM features
-From: Nicolas Pitre <nico@fluxnic.net>
+Subject: mmc: Atmel host kconfig cleanup for everyone else
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-Tested with an XO v1.5 from OLPC.
+This prevents those without an Atmel chip having a line in kernel
+configuration which says "Atmel SD/MMC Driver" without any option.
 
-Signed-off-by: Nicolas Pitre <nico@marvell.com>
+Signed-off-by: Jonathan Cameron <jic23@cam.ac.uk>
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci-pci.c |   17 ++++++++++++++---
- drivers/mmc/host/sdhci.c     |   26 +++++++++++++++++---------
- 2 files changed, 31 insertions(+), 12 deletions(-)
+ drivers/mmc/host/Kconfig |    1 +
+ 1 file changed, 1 insertion(+)
 
-diff -puN drivers/mmc/host/sdhci-pci.c~sdio-sdhci-support-for-suspend-mode-pm-features drivers/mmc/host/sdhci-pci.c
---- a/drivers/mmc/host/sdhci-pci.c~sdio-sdhci-support-for-suspend-mode-pm-features
-+++ a/drivers/mmc/host/sdhci-pci.c
-@@ -501,6 +501,7 @@ static int sdhci_pci_suspend (struct pci
- {
- 	struct sdhci_pci_chip *chip;
- 	struct sdhci_pci_slot *slot;
-+	mmc_pm_flag_t pm_flags = 0;
- 	int i, ret;
+diff -puN drivers/mmc/host/Kconfig~mmc-atmel-host-kconfig-cleanup-for-everyone-else drivers/mmc/host/Kconfig
+--- a/drivers/mmc/host/Kconfig~mmc-atmel-host-kconfig-cleanup-for-everyone-else
++++ a/drivers/mmc/host/Kconfig
+@@ -189,6 +189,7 @@ config MMC_AU1X
  
- 	chip = pci_get_drvdata(pdev);
-@@ -519,6 +520,8 @@ static int sdhci_pci_suspend (struct pci
- 				sdhci_resume_host(chip->slots[i]->host);
- 			return ret;
- 		}
-+
-+		pm_flags |= slot->host->mmc->pm_flags;
- 	}
- 
- 	if (chip->fixes && chip->fixes->suspend) {
-@@ -531,9 +534,15 @@ static int sdhci_pci_suspend (struct pci
- 	}
- 
- 	pci_save_state(pdev);
--	pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
--	pci_disable_device(pdev);
--	pci_set_power_state(pdev, pci_choose_state(pdev, state));
-+	if (pm_flags & MMC_PM_KEEP_POWER) {
-+		if (pm_flags & MMC_PM_WAKE_SDIO_IRQ)
-+			pci_enable_wake(pdev, PCI_D3hot, 1);
-+		pci_set_power_state(pdev, PCI_D3hot);
-+	} else {
-+		pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
-+		pci_disable_device(pdev);
-+		pci_set_power_state(pdev, pci_choose_state(pdev, state));
-+	}
- 
- 	return 0;
- }
-@@ -653,6 +662,8 @@ static struct sdhci_pci_slot * __devinit
- 			goto unmap;
- 	}
- 
-+	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto remove;
-diff -puN drivers/mmc/host/sdhci.c~sdio-sdhci-support-for-suspend-mode-pm-features drivers/mmc/host/sdhci.c
---- a/drivers/mmc/host/sdhci.c~sdio-sdhci-support-for-suspend-mode-pm-features
-+++ a/drivers/mmc/host/sdhci.c
-@@ -174,20 +174,31 @@ static void sdhci_reset(struct sdhci_hos
- 		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
- }
- 
--static void sdhci_init(struct sdhci_host *host)
-+static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
-+
-+static void sdhci_init(struct sdhci_host *host, int soft)
- {
--	sdhci_reset(host, SDHCI_RESET_ALL);
-+	if (soft)
-+		sdhci_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
-+	else
-+		sdhci_reset(host, SDHCI_RESET_ALL);
- 
- 	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK,
- 		SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
- 		SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_INDEX |
- 		SDHCI_INT_END_BIT | SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
- 		SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE);
-+
-+	if (soft) {
-+		/* force clock reconfiguration */
-+		host->clock = 0;
-+		sdhci_set_ios(host->mmc, &host->mmc->ios);
-+	}
- }
- 
- static void sdhci_reinit(struct sdhci_host *host)
- {
--	sdhci_init(host);
-+	sdhci_init(host, 0);
- 	sdhci_enable_card_detection(host);
- }
- 
-@@ -1600,16 +1611,13 @@ int sdhci_resume_host(struct sdhci_host 
- 	if (ret)
- 		return ret;
- 
--	sdhci_init(host);
-+	sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
- 	mmiowb();
- 
- 	ret = mmc_resume_host(host->mmc);
--	if (ret)
--		return ret;
--
- 	sdhci_enable_card_detection(host);
- 
--	return 0;
-+	return ret;
- }
- 
- EXPORT_SYMBOL_GPL(sdhci_resume_host);
-@@ -1864,7 +1872,7 @@ int sdhci_add_host(struct sdhci_host *ho
- 	if (ret)
- 		goto untasklet;
- 
--	sdhci_init(host);
-+	sdhci_init(host, 0);
- 
- #ifdef CONFIG_MMC_DEBUG
- 	sdhci_dumpregs(host);
+ choice
+ 	prompt "Atmel SD/MMC Driver"
++	depends on AVR32 || ARCH_AT91
+ 	default MMC_ATMELMCI if AVR32
+ 	help
+ 	  Choose which driver to use for the Atmel MCI Silicon
 _
 
-Patches currently in -mm which might be from nico@fluxnic.net are
+Patches currently in -mm which might be from nicolas.ferre@atmel.com are
 
-linux-next.patch
 
