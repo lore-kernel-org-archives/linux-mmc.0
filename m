@@ -1,460 +1,250 @@
 From: akpm@linux-foundation.org
-Subject: [merged] ricoh_mmc-port-from-driver-to-pci-quirk.patch removed from -mm tree
-Date: Tue, 09 Mar 2010 11:07:42 -0800
-Message-ID: <201003091907.o29J7grF031377@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: maximlevitsky@gmail.com, linux-mmc@vger.kernel.org, philipl@overt.org, w.sang@pengutronix.de, mm-commits@vger.kernel.org
+Subject: [merged] sdio-introduce-api-for-special-power-management-features.patch removed from -mm tree
+Date: Tue, 09 Mar 2010 11:08:09 -0800
+Message-ID: <201003091908.o29J89T7031424@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:60300 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755612Ab0CITJC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2010 14:09:02 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: nico@fluxnic.net, linux-mmc@vger.kernel.org, nico@marvell.com, mm-commits@vger.kernel.org
 
 
 The patch titled
-     ricoh_mmc: port from driver to pci quirk
+     sdio: introduce API for special power management features
 has been removed from the -mm tree.  Its filename was
-     ricoh_mmc-port-from-driver-to-pci-quirk.patch
+     sdio-introduce-api-for-special-power-management-features.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: ricoh_mmc: port from driver to pci quirk
-From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: sdio: introduce API for special power management features
+From: Nicolas Pitre <nico@fluxnic.net>
 
-This patch solves nasty problem original driver has.
+This patch series provides the core changes needed to allow SDIO cards to
+remain powered and active while the host system is suspended, and let them
+wake up the host system when needed.  This is used to implement
+wake-on-lan with SDIO wireless cards at the moment.  Patches to add that
+support to the libertas driver will be posted separately.
 
-Original goal of the ricoh_mmc was to disable this device because then,
-mmc cards can be read using standard SDHCI controller, thus avoiding
-writing of yet another driver.
 
-However, the act of disablement, makes other pci functions that belong to
-this controller (xD and memstick) shift up one level, thus pci core has
-now wrong idea about these devices.
 
-To fix this issue, this patch moves the driver into the pci quirk section,
-thus it is executes before the pci is enumerated, and therefore solving
-that issue, also same sequence of commands is performed on resume for same
-reasons.
+This patch:
 
-Also regardless of the above, this way is cleaner.  You still need to set
-CONFIG_MMC_RICOH_MMC to enable this quirk
+Some SDIO cards have the ability to keep on running autonomously when the
+host system is suspended, and wake it up when needed.  This however
+requires that the host controller preserve power to the card, and
+configure itself appropriately for wake-up.
 
-Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-Acked-by: Philip Langdale <philipl@overt.org>
-Acked-by: Wolfram Sang <w.sang@pengutronix.de>
+There is however 4 layers of abstractions involved: the host controller
+driver, the MMC core code, the SDIO card management code, and the actual
+SDIO function driver.  To make things simple and manageable, host drivers
+must advertise their PM capabilities with a feature bitmask, then function
+drivers can query and set those features from their suspend method.  Then
+each layer in the suspend call chain is expected to act upon those bits
+accordingly.
+
+[akpm@linux-foundation.org: fix typo in comment]
+Signed-off-by: Nicolas Pitre <nico@marvell.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/Kconfig     |   10 -
- drivers/mmc/host/Makefile    |    1 
- drivers/mmc/host/ricoh_mmc.c |  262 ---------------------------------
- drivers/pci/quirks.c         |   85 ++++++++++
- 4 files changed, 88 insertions(+), 270 deletions(-)
+ drivers/mmc/core/core.c       |   12 +++++--
+ drivers/mmc/core/sdio_io.c    |   49 ++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h      |    5 +++
+ include/linux/mmc/pm.h        |   30 +++++++++++++++++++
+ include/linux/mmc/sdio_func.h |    5 +++
+ 5 files changed, 98 insertions(+), 3 deletions(-)
 
-diff -puN drivers/mmc/host/Kconfig~ricoh_mmc-port-from-driver-to-pci-quirk drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~ricoh_mmc-port-from-driver-to-pci-quirk
-+++ a/drivers/mmc/host/Kconfig
-@@ -69,20 +69,16 @@ config MMC_SDHCI_PCI
- 	  If unsure, say N.
+diff -puN drivers/mmc/core/core.c~sdio-introduce-api-for-special-power-management-features drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~sdio-introduce-api-for-special-power-management-features
++++ a/drivers/mmc/core/core.c
+@@ -1151,6 +1151,9 @@ void mmc_stop_host(struct mmc_host *host
+ 	cancel_delayed_work(&host->detect);
+ 	mmc_flush_scheduled_work();
  
- config MMC_RICOH_MMC
--	tristate "Ricoh MMC Controller Disabler  (EXPERIMENTAL)"
-+	bool "Ricoh MMC Controller Disabler  (EXPERIMENTAL)"
- 	depends on MMC_SDHCI_PCI
- 	help
--	  This selects the disabler for the Ricoh MMC Controller. This
-+	  This adds a pci quirk to disable Ricoh MMC Controller. This
- 	  proprietary controller is unnecessary because the SDHCI driver
- 	  supports MMC cards on the SD controller, but if it is not
- 	  disabled, it will steal the MMC cards away - rendering them
--	  useless. It is safe to select this driver even if you don't
-+	  useless. It is safe to select this even if you don't
- 	  have a Ricoh based card reader.
- 
--
--	  To compile this driver as a module, choose M here:
--	  the module will be called ricoh_mmc.
--
- 	  If unsure, say Y.
- 
- config MMC_SDHCI_OF
-diff -puN drivers/mmc/host/Makefile~ricoh_mmc-port-from-driver-to-pci-quirk drivers/mmc/host/Makefile
---- a/drivers/mmc/host/Makefile~ricoh_mmc-port-from-driver-to-pci-quirk
-+++ a/drivers/mmc/host/Makefile
-@@ -12,7 +12,6 @@ obj-$(CONFIG_MMC_IMX)		+= imxmmc.o
- obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
- obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
- obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
--obj-$(CONFIG_MMC_RICOH_MMC)	+= ricoh_mmc.o
- obj-$(CONFIG_MMC_SDHCI_PLTFM)	+= sdhci-pltfm.o
- obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
- obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
-diff -puN drivers/mmc/host/ricoh_mmc.c~ricoh_mmc-port-from-driver-to-pci-quirk /dev/null
---- a/drivers/mmc/host/ricoh_mmc.c
-+++ /dev/null
-@@ -1,262 +0,0 @@
--/*
-- *  ricoh_mmc.c - Dummy driver to disable the Rioch MMC controller.
-- *
-- *  Copyright (C) 2007 Philip Langdale, All Rights Reserved.
-- *
-- * This program is free software; you can redistribute it and/or modify
-- * it under the terms of the GNU General Public License as published by
-- * the Free Software Foundation; either version 2 of the License, or (at
-- * your option) any later version.
-- */
--
--/*
-- * This is a conceptually ridiculous driver, but it is required by the way
-- * the Ricoh multi-function chips (R5CXXX) work. These chips implement
-- * the four main memory card controllers (SD, MMC, MS, xD) and one or both
-- * of cardbus or firewire. It happens that they implement SD and MMC
-- * support as separate controllers (and PCI functions). The linux SDHCI
-- * driver supports MMC cards but the chip detects MMC cards in hardware
-- * and directs them to the MMC controller - so the SDHCI driver never sees
-- * them. To get around this, we must disable the useless MMC controller.
-- * At that point, the SDHCI controller will start seeing them. As a bonus,
-- * a detection event occurs immediately, even if the MMC card is already
-- * in the reader.
-- *
-- * It seems to be the case that the relevant PCI registers to deactivate the
-- * MMC controller live on PCI function 0, which might be the cardbus controller
-- * or the firewire controller, depending on the particular chip in question. As
-- * such, it makes what this driver has to do unavoidably ugly. Such is life.
-- */
--
--#include <linux/pci.h>
--
--#define DRIVER_NAME "ricoh-mmc"
--
--static const struct pci_device_id pci_ids[] __devinitdata = {
--	{
--		.vendor		= PCI_VENDOR_ID_RICOH,
--		.device		= PCI_DEVICE_ID_RICOH_R5C843,
--		.subvendor	= PCI_ANY_ID,
--		.subdevice	= PCI_ANY_ID,
--	},
--	{ /* end: all zeroes */ },
--};
--
--MODULE_DEVICE_TABLE(pci, pci_ids);
--
--static int ricoh_mmc_disable(struct pci_dev *fw_dev)
--{
--	u8 write_enable;
--	u8 write_target;
--	u8 disable;
--
--	if (fw_dev->device == PCI_DEVICE_ID_RICOH_RL5C476) {
--		/* via RL5C476 */
--
--		pci_read_config_byte(fw_dev, 0xB7, &disable);
--		if (disable & 0x02) {
--			printk(KERN_INFO DRIVER_NAME
--				": Controller already disabled. " \
--				"Nothing to do.\n");
--			return -ENODEV;
--		}
--
--		pci_read_config_byte(fw_dev, 0x8E, &write_enable);
--		pci_write_config_byte(fw_dev, 0x8E, 0xAA);
--		pci_read_config_byte(fw_dev, 0x8D, &write_target);
--		pci_write_config_byte(fw_dev, 0x8D, 0xB7);
--		pci_write_config_byte(fw_dev, 0xB7, disable | 0x02);
--		pci_write_config_byte(fw_dev, 0x8E, write_enable);
--		pci_write_config_byte(fw_dev, 0x8D, write_target);
--	} else {
--		/* via R5C832 */
--
--		pci_read_config_byte(fw_dev, 0xCB, &disable);
--		if (disable & 0x02) {
--			printk(KERN_INFO DRIVER_NAME
--			       ": Controller already disabled. " \
--				"Nothing to do.\n");
--			return -ENODEV;
--		}
--
--		pci_read_config_byte(fw_dev, 0xCA, &write_enable);
--		pci_write_config_byte(fw_dev, 0xCA, 0x57);
--		pci_write_config_byte(fw_dev, 0xCB, disable | 0x02);
--		pci_write_config_byte(fw_dev, 0xCA, write_enable);
--	}
--
--	printk(KERN_INFO DRIVER_NAME
--	       ": Controller is now disabled.\n");
--
--	return 0;
--}
--
--static int ricoh_mmc_enable(struct pci_dev *fw_dev)
--{
--	u8 write_enable;
--	u8 write_target;
--	u8 disable;
--
--	if (fw_dev->device == PCI_DEVICE_ID_RICOH_RL5C476) {
--		/* via RL5C476 */
--
--		pci_read_config_byte(fw_dev, 0x8E, &write_enable);
--		pci_write_config_byte(fw_dev, 0x8E, 0xAA);
--		pci_read_config_byte(fw_dev, 0x8D, &write_target);
--		pci_write_config_byte(fw_dev, 0x8D, 0xB7);
--		pci_read_config_byte(fw_dev, 0xB7, &disable);
--		pci_write_config_byte(fw_dev, 0xB7, disable & ~0x02);
--		pci_write_config_byte(fw_dev, 0x8E, write_enable);
--		pci_write_config_byte(fw_dev, 0x8D, write_target);
--	} else {
--		/* via R5C832 */
--
--		pci_read_config_byte(fw_dev, 0xCA, &write_enable);
--		pci_read_config_byte(fw_dev, 0xCB, &disable);
--		pci_write_config_byte(fw_dev, 0xCA, 0x57);
--		pci_write_config_byte(fw_dev, 0xCB, disable & ~0x02);
--		pci_write_config_byte(fw_dev, 0xCA, write_enable);
--	}
--
--	printk(KERN_INFO DRIVER_NAME
--	       ": Controller is now re-enabled.\n");
--
--	return 0;
--}
--
--static int __devinit ricoh_mmc_probe(struct pci_dev *pdev,
--				     const struct pci_device_id *ent)
--{
--	u8 rev;
--	u8 ctrlfound = 0;
--
--	struct pci_dev *fw_dev = NULL;
--
--	BUG_ON(pdev == NULL);
--	BUG_ON(ent == NULL);
--
--	pci_read_config_byte(pdev, PCI_CLASS_REVISION, &rev);
--
--	printk(KERN_INFO DRIVER_NAME
--		": Ricoh MMC controller found at %s [%04x:%04x] (rev %x)\n",
--		pci_name(pdev), (int)pdev->vendor, (int)pdev->device,
--		(int)rev);
--
--	while ((fw_dev =
--		pci_get_device(PCI_VENDOR_ID_RICOH,
--			PCI_DEVICE_ID_RICOH_RL5C476, fw_dev))) {
--		if (PCI_SLOT(pdev->devfn) == PCI_SLOT(fw_dev->devfn) &&
--		    PCI_FUNC(fw_dev->devfn) == 0 &&
--		    pdev->bus == fw_dev->bus) {
--			if (ricoh_mmc_disable(fw_dev) != 0)
--				return -ENODEV;
--
--			pci_set_drvdata(pdev, fw_dev);
--
--			++ctrlfound;
--			break;
--		}
--	}
--
--	fw_dev = NULL;
--
--	while (!ctrlfound &&
--	    (fw_dev = pci_get_device(PCI_VENDOR_ID_RICOH,
--					PCI_DEVICE_ID_RICOH_R5C832, fw_dev))) {
--		if (PCI_SLOT(pdev->devfn) == PCI_SLOT(fw_dev->devfn) &&
--		    PCI_FUNC(fw_dev->devfn) == 0 &&
--		    pdev->bus == fw_dev->bus) {
--			if (ricoh_mmc_disable(fw_dev) != 0)
--				return -ENODEV;
--
--			pci_set_drvdata(pdev, fw_dev);
--
--			++ctrlfound;
--		}
--	}
--
--	if (!ctrlfound) {
--		printk(KERN_WARNING DRIVER_NAME
--		       ": Main Ricoh function not found. Cannot disable controller.\n");
--		return -ENODEV;
--	}
--
--	return 0;
--}
--
--static void __devexit ricoh_mmc_remove(struct pci_dev *pdev)
--{
--	struct pci_dev *fw_dev = NULL;
--
--	fw_dev = pci_get_drvdata(pdev);
--	BUG_ON(fw_dev == NULL);
--
--	ricoh_mmc_enable(fw_dev);
--
--	pci_set_drvdata(pdev, NULL);
--}
--
--static int ricoh_mmc_suspend_late(struct pci_dev *pdev, pm_message_t state)
--{
--	struct pci_dev *fw_dev = NULL;
--
--	fw_dev = pci_get_drvdata(pdev);
--	BUG_ON(fw_dev == NULL);
--
--	printk(KERN_INFO DRIVER_NAME ": Suspending.\n");
--
--	ricoh_mmc_enable(fw_dev);
--
--	return 0;
--}
--
--static int ricoh_mmc_resume_early(struct pci_dev *pdev)
--{
--	struct pci_dev *fw_dev = NULL;
--
--	fw_dev = pci_get_drvdata(pdev);
--	BUG_ON(fw_dev == NULL);
--
--	printk(KERN_INFO DRIVER_NAME ": Resuming.\n");
--
--	ricoh_mmc_disable(fw_dev);
--
--	return 0;
--}
--
--static struct pci_driver ricoh_mmc_driver = {
--	.name = 	DRIVER_NAME,
--	.id_table =	pci_ids,
--	.probe = 	ricoh_mmc_probe,
--	.remove =	__devexit_p(ricoh_mmc_remove),
--	.suspend_late =	ricoh_mmc_suspend_late,
--	.resume_early =	ricoh_mmc_resume_early,
--};
--
--/*****************************************************************************\
-- *                                                                           *
-- * Driver init/exit                                                          *
-- *                                                                           *
--\*****************************************************************************/
--
--static int __init ricoh_mmc_drv_init(void)
--{
--	printk(KERN_INFO DRIVER_NAME
--		": Ricoh MMC Controller disabling driver\n");
--	printk(KERN_INFO DRIVER_NAME ": Copyright(c) Philip Langdale\n");
--
--	return pci_register_driver(&ricoh_mmc_driver);
--}
--
--static void __exit ricoh_mmc_drv_exit(void)
--{
--	pci_unregister_driver(&ricoh_mmc_driver);
--}
--
--module_init(ricoh_mmc_drv_init);
--module_exit(ricoh_mmc_drv_exit);
--
--MODULE_AUTHOR("Philip Langdale <philipl@alumni.utexas.net>");
--MODULE_DESCRIPTION("Ricoh MMC Controller disabling driver");
--MODULE_LICENSE("GPL");
--
-diff -puN drivers/pci/quirks.c~ricoh_mmc-port-from-driver-to-pci-quirk drivers/pci/quirks.c
---- a/drivers/pci/quirks.c~ricoh_mmc-port-from-driver-to-pci-quirk
-+++ a/drivers/pci/quirks.c
-@@ -2533,6 +2533,91 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_I
- 
- #endif	/* CONFIG_PCI_IOV */
- 
-+/*
-+ * This is a quirk for the Ricoh MMC controller found as a part of
-+ * some mulifunction chips.
++	/* clear pm flags now and let card drivers set them as needed */
++	host->pm_flags = 0;
 +
-+ * This is very similiar and based on the ricoh_mmc driver written by
-+ * Philip Langdale. Thank you for these magic sequences.
+ 	mmc_bus_get(host);
+ 	if (host->bus_ops && !host->bus_dead) {
+ 		if (host->bus_ops->remove)
+@@ -1273,12 +1276,13 @@ int mmc_suspend_host(struct mmc_host *ho
+ 			mmc_claim_host(host);
+ 			mmc_detach_bus(host);
+ 			mmc_release_host(host);
++			host->pm_flags = 0;
+ 			err = 0;
+ 		}
+ 	}
+ 	mmc_bus_put(host);
+ 
+-	if (!err)
++	if (!err && !(host->pm_flags & MMC_PM_KEEP_POWER))
+ 		mmc_power_off(host);
+ 
+ 	return err;
+@@ -1296,8 +1300,10 @@ int mmc_resume_host(struct mmc_host *hos
+ 
+ 	mmc_bus_get(host);
+ 	if (host->bus_ops && !host->bus_dead) {
+-		mmc_power_up(host);
+-		mmc_select_voltage(host, host->ocr);
++		if (!(host->pm_flags & MMC_PM_KEEP_POWER)) {
++			mmc_power_up(host);
++			mmc_select_voltage(host, host->ocr);
++		}
+ 		BUG_ON(!host->bus_ops->resume);
+ 		err = host->bus_ops->resume(host);
+ 		if (err) {
+diff -puN drivers/mmc/core/sdio_io.c~sdio-introduce-api-for-special-power-management-features drivers/mmc/core/sdio_io.c
+--- a/drivers/mmc/core/sdio_io.c~sdio-introduce-api-for-special-power-management-features
++++ a/drivers/mmc/core/sdio_io.c
+@@ -640,3 +640,52 @@ void sdio_f0_writeb(struct sdio_func *fu
+ 		*err_ret = ret;
+ }
+ EXPORT_SYMBOL_GPL(sdio_f0_writeb);
++
++/**
++ *	sdio_get_host_pm_caps - get host power management capabilities
++ *	@func: SDIO function attached to host
 + *
-+ * These chips implement the four main memory card controllers (SD, MMC, MS, xD)
-+ * and one or both of cardbus or firewire.
++ *	Returns a capability bitmask corresponding to power management
++ *	features supported by the host controller that the card function
++ *	might rely upon during a system suspend.  The host doesn't need
++ *	to be claimed, nor the function active, for this information to be
++ *	obtained.
++ */
++mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func)
++{
++	BUG_ON(!func);
++	BUG_ON(!func->card);
++
++	return func->card->host->pm_caps;
++}
++EXPORT_SYMBOL_GPL(sdio_get_host_pm_caps);
++
++/**
++ *	sdio_set_host_pm_flags - set wanted host power management capabilities
++ *	@func: SDIO function attached to host
 + *
-+ * It happens that they implement SD and MMC
-+ * support as separate controllers (and PCI functions). The linux SDHCI
-+ * driver supports MMC cards but the chip detects MMC cards in hardware
-+ * and directs them to the MMC controller - so the SDHCI driver never sees
-+ * them.
++ *	Set a capability bitmask corresponding to wanted host controller
++ *	power management features for the upcoming suspend state.
++ *	This must be called, if needed, each time the suspend method of
++ *	the function driver is called, and must contain only bits that
++ *	were returned by sdio_get_host_pm_caps().
++ *	The host doesn't need to be claimed, nor the function active,
++ *	for this information to be set.
++ */
++int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
++{
++	struct mmc_host *host;
++
++	BUG_ON(!func);
++	BUG_ON(!func->card);
++
++	host = func->card->host;
++
++	if (flags & ~host->pm_caps)
++		return -EINVAL;
++
++	/* function suspend methods are serialized, hence no lock needed */
++	host->pm_flags |= flags;
++	return 0;
++}
++EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
+diff -puN include/linux/mmc/host.h~sdio-introduce-api-for-special-power-management-features include/linux/mmc/host.h
+--- a/include/linux/mmc/host.h~sdio-introduce-api-for-special-power-management-features
++++ a/include/linux/mmc/host.h
+@@ -14,6 +14,7 @@
+ #include <linux/sched.h>
+ 
+ #include <linux/mmc/core.h>
++#include <linux/mmc/pm.h>
+ 
+ struct mmc_ios {
+ 	unsigned int	clock;			/* clock rate */
+@@ -152,6 +153,8 @@ struct mmc_host {
+ #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
+ #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
+ 
++	mmc_pm_flag_t		pm_caps;	/* supported pm features */
++
+ 	/* host specific block data */
+ 	unsigned int		max_seg_size;	/* see blk_queue_max_segment_size */
+ 	unsigned short		max_hw_segs;	/* see blk_queue_max_hw_segments */
+@@ -197,6 +200,8 @@ struct mmc_host {
+ 	struct task_struct	*sdio_irq_thread;
+ 	atomic_t		sdio_irq_thread_abort;
+ 
++	mmc_pm_flag_t		pm_flags;	/* requested pm features */
++
+ #ifdef CONFIG_LEDS_TRIGGERS
+ 	struct led_trigger	*led;		/* activity led */
+ #endif
+diff -puN /dev/null include/linux/mmc/pm.h
+--- /dev/null
++++ a/include/linux/mmc/pm.h
+@@ -0,0 +1,30 @@
++/*
++ * linux/include/linux/mmc/pm.h
 + *
-+ * To get around this, we must disable the useless MMC controller.
-+ * At that point, the SDHCI controller will start seeing them
-+ * It seems to be the case that the relevant PCI registers to deactivate the
-+ * MMC controller live on PCI function 0, which might be the cardbus controller
-+ * or the firewire controller, depending on the particular chip in question
++ * Author:	Nicolas Pitre
++ * Copyright:	(C) 2009 Marvell Technology Group Ltd.
 + *
-+ * This has to be done early, because as soon as we disable the MMC controller
-+ * other pci functions shift up one level, e.g. function #2 becomes function
-+ * #1, and this will confuse the pci core.
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
 + */
 +
-+#ifdef CONFIG_MMC_RICOH_MMC
-+static void ricoh_mmc_fixup_rl5c476(struct pci_dev *dev)
-+{
-+	/* disable via cardbus interface */
-+	u8 write_enable;
-+	u8 write_target;
-+	u8 disable;
++#ifndef LINUX_MMC_PM_H
++#define LINUX_MMC_PM_H
 +
-+	/* disable must be done via function #0 */
-+	if (PCI_FUNC(dev->devfn))
-+		return;
++/*
++ * These flags are used to describe power management features that
++ * some cards (typically SDIO cards) might wish to benefit from when
++ * the host system is being suspended.  There are several layers of
++ * abstractions involved, from the host controller driver, to the MMC core
++ * code, to the SDIO core code, to finally get to the actual SDIO function
++ * driver.  This file is therefore used for common definitions shared across
++ * all those layers.
++ */
 +
-+	pci_read_config_byte(dev, 0xB7, &disable);
-+	if (disable & 0x02)
-+		return;
++typedef unsigned int mmc_pm_flag_t;
 +
-+	pci_read_config_byte(dev, 0x8E, &write_enable);
-+	pci_write_config_byte(dev, 0x8E, 0xAA);
-+	pci_read_config_byte(dev, 0x8D, &write_target);
-+	pci_write_config_byte(dev, 0x8D, 0xB7);
-+	pci_write_config_byte(dev, 0xB7, disable | 0x02);
-+	pci_write_config_byte(dev, 0x8E, write_enable);
-+	pci_write_config_byte(dev, 0x8D, write_target);
++#define MMC_PM_KEEP_POWER	(1 << 0)	/* preserve card power during suspend */
++#define MMC_PM_WAKE_SDIO_IRQ	(1 << 1)	/* wake up host system on SDIO IRQ assertion */
 +
-+	dev_notice(&dev->dev, "proprietary Ricoh MMC controller disabled (via cardbus function)\n");
-+	dev_notice(&dev->dev, "MMC cards are now supported by standard SDHCI controller\n");
-+}
-+DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476, ricoh_mmc_fixup_rl5c476);
-+DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_RL5C476, ricoh_mmc_fixup_rl5c476);
++#endif
+diff -puN include/linux/mmc/sdio_func.h~sdio-introduce-api-for-special-power-management-features include/linux/mmc/sdio_func.h
+--- a/include/linux/mmc/sdio_func.h~sdio-introduce-api-for-special-power-management-features
++++ a/include/linux/mmc/sdio_func.h
+@@ -15,6 +15,8 @@
+ #include <linux/device.h>
+ #include <linux/mod_devicetable.h>
+ 
++#include <linux/mmc/pm.h>
 +
-+static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
-+{
-+	/* disable via firewire interface */
-+	u8 write_enable;
-+	u8 disable;
+ struct mmc_card;
+ struct sdio_func;
+ 
+@@ -153,5 +155,8 @@ extern unsigned char sdio_f0_readb(struc
+ extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
+ 	unsigned int addr, int *err_ret);
+ 
++extern mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func);
++extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
 +
-+	/* disable must be done via function #0 */
-+	if (PCI_FUNC(dev->devfn))
-+		return;
-+
-+	pci_read_config_byte(dev, 0xCB, &disable);
-+
-+	if (disable & 0x02)
-+		return;
-+
-+	pci_read_config_byte(dev, 0xCA, &write_enable);
-+	pci_write_config_byte(dev, 0xCA, 0x57);
-+	pci_write_config_byte(dev, 0xCB, disable | 0x02);
-+	pci_write_config_byte(dev, 0xCA, write_enable);
-+
-+	dev_notice(&dev->dev, "proprietary Ricoh MMC controller disabled (via firewire function)\n");
-+	dev_notice(&dev->dev, "MMC cards are now supported by standard SDHCI controller\n");
-+}
-+DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
-+DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
-+#endif /*CONFIG_MMC_RICOH_MMC*/
-+
-+
- static void pci_do_fixups(struct pci_dev *dev, struct pci_fixup *f,
- 			  struct pci_fixup *end)
- {
+ #endif
+ 
 _
 
-Patches currently in -mm which might be from maximlevitsky@gmail.com are
+Patches currently in -mm which might be from nico@fluxnic.net are
 
 linux-next.patch
 
