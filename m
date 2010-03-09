@@ -1,63 +1,54 @@
 From: akpm@linux-foundation.org
-Subject: [merged] mmc-at91_mci-correct-kunmap_atomic.patch removed from -mm tree
-Date: Tue, 09 Mar 2010 11:08:53 -0800
-Message-ID: <201003091908.o29J8rJ3031479@imap1.linux-foundation.org>
+Subject: [merged] mmc-bfin_sdh-drop-redundant-mmc-depend-string.patch removed from -mm tree
+Date: Tue, 09 Mar 2010 11:07:54 -0800
+Message-ID: <201003091907.o29J7sjU031392@imap1.linux-foundation.org>
 Reply-To: linux-kernel@vger.kernel.org
 Return-path: <mm-commits-owner@vger.kernel.org>
 Sender: mm-commits-owner@vger.kernel.org
-To: nicolas.ferre@atmel.com, avictor.za@gmail.com, linux-mmc@vger.kernel.org, wolfgang.mues@auerswald.de, mm-commits@vger.kernel.org
+To: vapier@gentoo.org, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     mmc: at91_mci: correct kunmap_atomic()
+     mmc: bfin_sdh: drop redundant MMC depend string
 has been removed from the -mm tree.  Its filename was
-     mmc-at91_mci-correct-kunmap_atomic.patch
+     mmc-bfin_sdh-drop-redundant-mmc-depend-string.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: at91_mci: correct kunmap_atomic()
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: mmc: bfin_sdh: drop redundant MMC depend string
+From: Mike Frysinger <vapier@gentoo.org>
 
-kunmap_atomic() accepts a pointer to any location in the page so we do not
-need the subtraction and cast.
+The host/Kconfig file is only included when MMC is selected.
 
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Wolfgang Muees <wolfgang.mues@auerswald.de>
-Cc: Andrew Victor <avictor.za@gmail.com>
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/at91_mci.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/Kconfig |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-correct-kunmap_atomic drivers/mmc/host/at91_mci.c
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-correct-kunmap_atomic
-+++ a/drivers/mmc/host/at91_mci.c
-@@ -248,7 +248,7 @@ static inline void at91_mci_sg_to_dma(st
- 			dmabuf = (unsigned *)tmpv;
- 		}
+diff -puN drivers/mmc/host/Kconfig~mmc-bfin_sdh-drop-redundant-mmc-depend-string drivers/mmc/host/Kconfig
+--- a/drivers/mmc/host/Kconfig~mmc-bfin_sdh-drop-redundant-mmc-depend-string
++++ a/drivers/mmc/host/Kconfig
+@@ -396,7 +396,7 @@ config MMC_VIA_SDMMC
  
--		kunmap_atomic(((void *)sgbuffer) - sg->offset, KM_BIO_SRC_IRQ);
-+		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
- 
- 		if (size == 0)
- 			break;
-@@ -313,7 +313,7 @@ static void at91_mci_post_dma_read(struc
- 			dmabuf = (unsigned *)tmpv;
- 		}
- 
--		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
-+		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
- 		dmac_flush_range((void *)sgbuffer, ((void *)sgbuffer) + amount);
- 		data->bytes_xfered += amount;
- 		if (size == 0)
+ config SDH_BFIN
+ 	tristate "Blackfin Secure Digital Host support"
+-	depends on MMC && ((BF54x && !BF544) || (BF51x && !BF512))
++	depends on (BF54x && !BF544) || (BF51x && !BF512)
+ 	help
+ 	  If you say yes here you will get support for the Blackfin on-chip
+ 	  Secure Digital Host interface.  This includes support for MMC and
 _
 
-Patches currently in -mm which might be from nicolas.ferre@atmel.com are
+Patches currently in -mm which might be from vapier@gentoo.org are
 
+linux-next.patch
+fbdev-bf54x-lq043fb-bfin-t350mcqb-fb-drop-custom-mmap-handler.patch
+blackfin-remove-the-obsolete-and-unnecessary-dma-api-comments.patch
 
