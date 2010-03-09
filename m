@@ -1,11 +1,11 @@
 From: akpm@linux-foundation.org
-Subject: [merged] mmc-at91_mci-enable-large-data-blocks.patch removed from -mm tree
-Date: Tue, 09 Mar 2010 11:08:44 -0800
-Message-ID: <201003091908.o29J8ixe031467@imap1.linux-foundation.org>
+Subject: [merged] mmc-at91_mci-fix-pointer-errors.patch removed from -mm tree
+Date: Tue, 09 Mar 2010 11:08:31 -0800
+Message-ID: <201003091908.o29J8Vju031447@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:59226 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:54743 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755912Ab0CITJ4 (ORCPT
+	by vger.kernel.org with ESMTP id S1755909Ab0CITJ4 (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2010 14:09:56 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -13,29 +13,20 @@ To: wolfgang.mues@auerswald.de, avictor.za@gmail.com, linux-mmc@vger.kernel.org,
 
 
 The patch titled
-     mmc: at91_mci: enable large data blocks
+     mmc: at91_mci: fix pointer errors
 has been removed from the -mm tree.  Its filename was
-     mmc-at91_mci-enable-large-data-blocks.patch
+     mmc-at91_mci-fix-pointer-errors.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: at91_mci: enable large data blocks
+Subject: mmc: at91_mci: fix pointer errors
 From: Wolfgang Muees <wolfgang.mues@auerswald.de>
 
-This patch is setting some max_ variables for the IO elevator, so the
-elevator will put requests for large data blocks to the driver.  This is
-critical for
-
-a) speed
-
-and
-
-b) wear leveling of the flash chip controller: Otherwise the controller
-   will treat the SD card badly with millions of single 4 KByte write
-   commands.  This will lead to a shorter life time for the SD cards.
+Fixes two pointer errors, one which leads to memory overwrites if used
+with large chunks of data.
 
 Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
 Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
@@ -44,22 +35,29 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/at91_mci.c |    3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/at91_mci.c |    8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-enable-large-data-blocks drivers/mmc/host/at91_mci.c
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-enable-large-data-blocks
+diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-fix-pointer-errors drivers/mmc/host/at91_mci.c
+--- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-fix-pointer-errors
 +++ a/drivers/mmc/host/at91_mci.c
-@@ -934,6 +934,9 @@ static int __init at91_mci_probe(struct 
- 	mmc->max_blk_size  = MCI_MAXBLKSIZE;
- 	mmc->max_blk_count = MCI_BLKATONCE;
- 	mmc->max_req_size  = MCI_BUFSIZE;
-+	mmc->max_phys_segs = MCI_BLKATONCE;
-+	mmc->max_hw_segs   = MCI_BLKATONCE;
-+	mmc->max_seg_size  = MCI_BUFSIZE;
+@@ -227,11 +227,13 @@ static inline void at91_mci_sg_to_dma(st
+ 			for (index = 0; index < (amount / 4); index++)
+ 				*dmabuf++ = swab32(sgbuffer[index]);
+ 		} else {
+-			memcpy(dmabuf, sgbuffer, amount);
+-			dmabuf += amount;
++			char *tmpv = (char *)dmabuf;
++			memcpy(tmpv, sgbuffer, amount);
++			tmpv += amount;
++			dmabuf = (unsigned *)tmpv;
+ 		}
  
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
+-		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
++		kunmap_atomic(((void *)sgbuffer) - sg->offset, KM_BIO_SRC_IRQ);
+ 
+ 		if (size == 0)
+ 			break;
 _
 
 Patches currently in -mm which might be from wolfgang.mues@auerswald.de are
