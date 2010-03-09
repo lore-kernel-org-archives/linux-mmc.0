@@ -1,73 +1,64 @@
 From: akpm@linux-foundation.org
-Subject: [merged] mmc-enable-dma-on-ricoh-sdhci-reader-by-default.patch removed from -mm tree
-Date: Tue, 09 Mar 2010 11:08:56 -0800
-Message-ID: <201003091908.o29J8uPO031483@imap1.linux-foundation.org>
+Subject: [merged] s3cmci-initialize-default-platform-data-no_wprotect-and-no_detect-with-1.patch removed from -mm tree
+Date: Tue, 09 Mar 2010 11:08:24 -0800
+Message-ID: <201003091908.o29J8Oja031441@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:59490 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:44987 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756018Ab0CITW3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2010 14:22:29 -0500
+	by vger.kernel.org with ESMTP id S1756052Ab0CITWa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2010 14:22:30 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: anarsoul@gmail.com, HaraldWelte@viatech.com, linux-mmc@vger.kernel.org, maximlevitsky@gmail.com, preining@logic.at, mm-commits@vger.kernel.org
+To: lars@metafoo.de, ben-linux@fluff.org, linux-mmc@vger.kernel.org, stable@kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     mmc: enable DMA on Ricoh sdhci reader by default
+     s3cmci: initialize default platform data no_wprotect and no_detect with 1
 has been removed from the -mm tree.  Its filename was
-     mmc-enable-dma-on-ricoh-sdhci-reader-by-default.patch
+     s3cmci-initialize-default-platform-data-no_wprotect-and-no_detect-with-1.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: enable DMA on Ricoh sdhci reader by default
-From: Vasily Khoruzhick <anarsoul@gmail.com>
+Subject: s3cmci: initialize default platform data no_wprotect and no_detect with 1
+From: Lars-Peter Clausen <lars@metafoo.de>
 
-This card reader doesn't advertise, however DMA works well.  Probably
-windows SDHCI driver assumes that all readers support DMA and thus we see
-that bug.
+If no platform_data was givin to the device it's going to use it's default
+platform data struct which has all fields initialized to zero.  As a
+result the driver is going to try to request gpio0 both as write protect
+and card detect pin.  Which of course will fail and makes the driver
+unusable
 
-Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
-Tested-by: Maxim Levitsky <maximlevitsky@gmail.com>
-Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Harald Welte <HaraldWelte@viatech.com>
-Cc: Norbert Preining <preining@logic.at>
+Previously to the introduction of no_wprotect and no_detect the behavior
+was to assume that if no platform data was given there is no write protect
+or card detect pin.  This patch restores that behavior.
+
+Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Ben Dooks <ben-linux@fluff.org>
 Cc: <linux-mmc@vger.kernel.org>
+Cc: <stable@kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci-pci.c |    7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+ drivers/mmc/host/s3cmci.c |    2 ++
+ 1 file changed, 2 insertions(+)
 
-diff -puN drivers/mmc/host/sdhci-pci.c~mmc-enable-dma-on-ricoh-sdhci-reader-by-default drivers/mmc/host/sdhci-pci.c
---- a/drivers/mmc/host/sdhci-pci.c~mmc-enable-dma-on-ricoh-sdhci-reader-by-default
-+++ a/drivers/mmc/host/sdhci-pci.c
-@@ -80,9 +80,6 @@ struct sdhci_pci_chip {
- 
- static int ricoh_probe(struct sdhci_pci_chip *chip)
- {
--	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_IBM)
--		chip->quirks |= SDHCI_QUIRK_CLOCK_BEFORE_RESET;
--
- 	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG ||
- 	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
- 		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
-@@ -92,7 +89,9 @@ static int ricoh_probe(struct sdhci_pci_
- 
- static const struct sdhci_pci_fixes sdhci_ricoh = {
- 	.probe		= ricoh_probe,
--	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR,
-+	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
-+			  SDHCI_QUIRK_FORCE_DMA |
-+			  SDHCI_QUIRK_CLOCK_BEFORE_RESET,
+diff -puN drivers/mmc/host/s3cmci.c~s3cmci-initialize-default-platform-data-no_wprotect-and-no_detect-with-1 drivers/mmc/host/s3cmci.c
+--- a/drivers/mmc/host/s3cmci.c~s3cmci-initialize-default-platform-data-no_wprotect-and-no_detect-with-1
++++ a/drivers/mmc/host/s3cmci.c
+@@ -1360,6 +1360,8 @@ static struct mmc_host_ops s3cmci_ops = 
+ static struct s3c24xx_mci_pdata s3cmci_def_pdata = {
+ 	/* This is currently here to avoid a number of if (host->pdata)
+ 	 * checks. Any zero fields to ensure reasonable defaults are picked. */
++	 .no_wprotect = 1,
++	 .no_detect = 1,
  };
  
- static const struct sdhci_pci_fixes sdhci_ene_712 = {
+ #ifdef CONFIG_CPU_FREQ
 _
 
-Patches currently in -mm which might be from anarsoul@gmail.com are
+Patches currently in -mm which might be from lars@metafoo.de are
 
-linux-next.patch
 
