@@ -1,72 +1,55 @@
 From: akpm@linux-foundation.org
-Subject: [merged] mmc-at91_mci-enable-mmc_cap_sdio_irq-only-when-it-actually-works.patch removed from -mm tree
-Date: Tue, 09 Mar 2010 11:08:47 -0800
-Message-ID: <201003091908.o29J8lLd031470@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:35137 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756028Ab0CITWZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2010 14:22:25 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [merged] sdio-kick-the-interrupt-thread-upon-a-resume.patch removed from -mm tree
+Date: Tue, 09 Mar 2010 11:08:18 -0800
+Message-ID: <201003091908.o29J8IRP031435@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: nico@fluxnic.net, linux-mmc@vger.kernel.org, nico@marvell.com, mm-commits@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: nicolas.ferre@atmel.com, avictor.za@gmail.com, linux-mmc@vger.kernel.org, wolfgang.mues@auerswald.de, mm-commits@vger.kernel.org
 
 
 The patch titled
-     mmc: at91_mci: Enable MMC_CAP_SDIO_IRQ only when it actually works.
+     sdio: kick the interrupt thread upon a resume
 has been removed from the -mm tree.  Its filename was
-     mmc-at91_mci-enable-mmc_cap_sdio_irq-only-when-it-actually-works.patch
+     sdio-kick-the-interrupt-thread-upon-a-resume.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: at91_mci: Enable MMC_CAP_SDIO_IRQ only when it actually works.
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: sdio: kick the interrupt thread upon a resume
+From: Nicolas Pitre <nico@fluxnic.net>
 
-According to the datasheets AT91SAM9261 does not support SDIO interrupts,
-and AT91SAM9260/9263 have an erratum requiring 4bit mode while using slot
-B for the interrupt to work.
+Some SDIO cards may suspend while keeping function interrupts active
+especially in the powered suspend case.  Upon resume we need to kick the
+SDIO interrupt thread to check for pending interrupts and to restart card
+IRQ detection at the host controller level.
 
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Wolfgang Muees <wolfgang.mues@auerswald.de>
-Cc: Andrew Victor <avictor.za@gmail.com>
+Signed-off-by: Nicolas Pitre <nico@marvell.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/at91_mci.c |    9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+ drivers/mmc/core/sdio.c |    2 ++
+ 1 file changed, 2 insertions(+)
 
-diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-enable-mmc_cap_sdio_irq-only-when-it-actually-works drivers/mmc/host/at91_mci.c
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-enable-mmc_cap_sdio_irq-only-when-it-actually-works
-+++ a/drivers/mmc/host/at91_mci.c
-@@ -929,7 +929,7 @@ static int __init at91_mci_probe(struct 
- 	mmc->f_min = 375000;
- 	mmc->f_max = 25000000;
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
--	mmc->caps = MMC_CAP_SDIO_IRQ;
-+	mmc->caps = 0;
+diff -puN drivers/mmc/core/sdio.c~sdio-kick-the-interrupt-thread-upon-a-resume drivers/mmc/core/sdio.c
+--- a/drivers/mmc/core/sdio.c~sdio-kick-the-interrupt-thread-upon-a-resume
++++ a/drivers/mmc/core/sdio.c
+@@ -441,6 +441,8 @@ static int mmc_sdio_resume(struct mmc_ho
+ 	mmc_claim_host(host);
+ 	err = mmc_sdio_init_card(host, host->ocr, host->card,
+ 				 (host->pm_flags & MMC_PM_KEEP_POWER));
++	if (!err && host->sdio_irqs)
++		mmc_signal_sdio_irq(host);
+ 	mmc_release_host(host);
  
- 	mmc->max_blk_size  = MCI_MAXBLKSIZE;
- 	mmc->max_blk_count = MCI_BLKATONCE;
-@@ -958,6 +958,13 @@ static int __init at91_mci_probe(struct 
- 		goto fail5;
- 	}
- 
-+	/* Add SDIO capability when available */
-+	if (cpu_is_at91sam9260() || cpu_is_at91sam9263()) {
-+		/* AT91SAM9260/9263 erratum */
-+		if (host->board->wire4 || !host->board->slot_b)
-+			mmc->caps |= MMC_CAP_SDIO_IRQ;
-+	}
-+
  	/*
- 	 * Reserve GPIOs ... board init code makes sure these pins are set
- 	 * up as GPIOs with the right direction (input, except for vcc)
 _
 
-Patches currently in -mm which might be from nicolas.ferre@atmel.com are
+Patches currently in -mm which might be from nico@fluxnic.net are
 
+linux-next.patch
 
