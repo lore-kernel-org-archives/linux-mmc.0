@@ -1,55 +1,68 @@
 From: akpm@linux-foundation.org
-Subject: [merged] sdio-kick-the-interrupt-thread-upon-a-resume.patch removed from -mm tree
-Date: Tue, 09 Mar 2010 11:08:18 -0800
-Message-ID: <201003091908.o29J8IRP031435@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: nico@fluxnic.net, linux-mmc@vger.kernel.org, nico@marvell.com, mm-commits@vger.kernel.org
+Subject: [merged] mmc-at91_mci-fix-timeout-errors.patch removed from -mm tree
+Date: Tue, 09 Mar 2010 11:08:34 -0800
+Message-ID: <201003091908.o29J8YpL031450@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:40531 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756023Ab0CITWT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2010 14:22:19 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: wolfgang.mues@auerswald.de, avictor.za@gmail.com, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com, mm-commits@vger.kernel.org
 
 
 The patch titled
-     sdio: kick the interrupt thread upon a resume
+     mmc: at91_mci: fix timeout errors
 has been removed from the -mm tree.  Its filename was
-     sdio-kick-the-interrupt-thread-upon-a-resume.patch
+     mmc-at91_mci-fix-timeout-errors.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sdio: kick the interrupt thread upon a resume
-From: Nicolas Pitre <nico@fluxnic.net>
+Subject: mmc: at91_mci: fix timeout errors
+From: Wolfgang Muees <wolfgang.mues@auerswald.de>
 
-Some SDIO cards may suspend while keeping function interrupts active
-especially in the powered suspend case.  Upon resume we need to kick the
-SDIO interrupt thread to check for pending interrupts and to restart card
-IRQ detection at the host controller level.
+Fix two timeout errors, one for slow SDHC cards and one for slow users
+while inserting SD cards.
 
-Signed-off-by: Nicolas Pitre <nico@marvell.com>
+Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Andrew Victor <avictor.za@gmail.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/sdio.c |    2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/at91_mci.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff -puN drivers/mmc/core/sdio.c~sdio-kick-the-interrupt-thread-upon-a-resume drivers/mmc/core/sdio.c
---- a/drivers/mmc/core/sdio.c~sdio-kick-the-interrupt-thread-upon-a-resume
-+++ a/drivers/mmc/core/sdio.c
-@@ -441,6 +441,8 @@ static int mmc_sdio_resume(struct mmc_ho
- 	mmc_claim_host(host);
- 	err = mmc_sdio_init_card(host, host->ocr, host->card,
- 				 (host->pm_flags & MMC_PM_KEEP_POWER));
-+	if (!err && host->sdio_irqs)
-+		mmc_signal_sdio_irq(host);
- 	mmc_release_host(host);
+diff -puN drivers/mmc/host/at91_mci.c~mmc-at91_mci-fix-timeout-errors drivers/mmc/host/at91_mci.c
+--- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-fix-timeout-errors
++++ a/drivers/mmc/host/at91_mci.c
+@@ -756,7 +756,8 @@ static void at91_mci_request(struct mmc_
+ 	host->request = mrq;
+ 	host->flags = 0;
  
- 	/*
+-	mod_timer(&host->timer, jiffies +  HZ);
++	/* more than 1s timeout needed with slow SD cards */
++	mod_timer(&host->timer, jiffies +  msecs_to_jiffies(2000));
+ 
+ 	at91_mci_process_next(host);
+ }
+@@ -944,7 +945,8 @@ static irqreturn_t at91_mmc_det_irq(int 
+ 			pr_debug("****** Resetting SD-card bus width ******\n");
+ 			at91_mci_write(host, AT91_MCI_SDCR, at91_mci_read(host, AT91_MCI_SDCR) & ~AT91_MCI_SDCBUS);
+ 		}
+-		mmc_detect_change(host->mmc, msecs_to_jiffies(100));
++		/* 0.5s needed because of early card detect switch firing */
++		mmc_detect_change(host->mmc, msecs_to_jiffies(500));
+ 	}
+ 	return IRQ_HANDLED;
+ }
 _
 
-Patches currently in -mm which might be from nico@fluxnic.net are
+Patches currently in -mm which might be from wolfgang.mues@auerswald.de are
 
-linux-next.patch
 
