@@ -1,54 +1,114 @@
 From: akpm@linux-foundation.org
-Subject: [merged] s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin.patch removed from -mm tree
-Date: Tue, 09 Mar 2010 11:08:28 -0800
-Message-ID: <201003091908.o29J8SJZ031444@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:52758 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756049Ab0CITW3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2010 14:22:29 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [merged] sdhci-add-adma-descriptor-set-call.patch removed from -mm tree
+Date: Tue, 09 Mar 2010 11:08:02 -0800
+Message-ID: <201003091908.o29J823o031409@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: ben-linux@fluff.org, linux-mmc@vger.kernel.org, pierre@ossman.eu, mm-commits@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: lars@metafoo.de, ben-linux@fluff.org, linux-mmc@vger.kernel.org, stable@kernel.org, mm-commits@vger.kernel.org
 
 
 The patch titled
-     s3cmci: s3cmci_card_present: Use no_detect to decide whether there is a card detect pin
+     sdhci: add adma descriptor set call
 has been removed from the -mm tree.  Its filename was
-     s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin.patch
+     sdhci-add-adma-descriptor-set-call.patch
 
 This patch was dropped because it was merged into mainline or a subsystem tree
 
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: s3cmci: s3cmci_card_present: Use no_detect to decide whether there is a card detect pin
-From: Lars-Peter Clausen <lars@metafoo.de>
+Subject: sdhci: add adma descriptor set call
+From: Ben Dooks <ben-linux@fluff.org>
 
-Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
-Cc: Ben Dooks <ben-linux@fluff.org>
+The code to write the ADMA descriptor into memory is repeated several
+times throughout sdhci_adma_table_pre, and thus should be moved into a
+common function.  This will also be useful if the patch to make the write
+more efficient is accepted.
+
+Signed-off-by: Ben Dooks <ben-linux@fluff.org>
+Cc: Pierre Ossman <pierre@ossman.eu>
 Cc: <linux-mmc@vger.kernel.org>
-Cc: <stable@kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/s3cmci.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c |   50 ++++++++++++++-----------------------
+ 1 file changed, 20 insertions(+), 30 deletions(-)
 
-diff -puN drivers/mmc/host/s3cmci.c~s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin drivers/mmc/host/s3cmci.c
---- a/drivers/mmc/host/s3cmci.c~s3cmci-s3cmci_card_present-use-no_detect-to-decide-whether-there-is-a-card-detect-pin
-+++ a/drivers/mmc/host/s3cmci.c
-@@ -1179,7 +1179,7 @@ static int s3cmci_card_present(struct mm
- 	struct s3c24xx_mci_pdata *pdata = host->pdata;
- 	int ret;
+diff -puN drivers/mmc/host/sdhci.c~sdhci-add-adma-descriptor-set-call drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~sdhci-add-adma-descriptor-set-call
++++ a/drivers/mmc/host/sdhci.c
+@@ -376,6 +376,20 @@ static void sdhci_kunmap_atomic(void *bu
+ 	local_irq_restore(*flags);
+ }
  
--	if (pdata->gpio_detect == 0)
-+	if (pdata->no_detect)
- 		return -ENOSYS;
++static void sdhci_set_adma_desc(u8 *desc, u32 addr, int len, unsigned cmd)
++{
++	desc[7] = (addr >> 24) & 0xff;
++	desc[6] = (addr >> 16) & 0xff;
++	desc[5] = (addr >> 8) & 0xff;
++	desc[4] = (addr >> 0) & 0xff;
++
++	desc[3] = (len >> 8) & 0xff;
++	desc[2] = (len >> 0) & 0xff;
++
++	desc[0] = cmd & 0xff;
++	desc[1] = cmd >> 8;
++}
++
+ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 	struct mmc_data *data)
+ {
+@@ -443,19 +457,11 @@ static int sdhci_adma_table_pre(struct s
+ 				sdhci_kunmap_atomic(buffer, &flags);
+ 			}
  
- 	ret = gpio_get_value(pdata->gpio_detect) ? 0 : 1;
-_
-
-Patches currently in -mm which might be from lars@metafoo.de are
-
-
+-			desc[7] = (align_addr >> 24) & 0xff;
+-			desc[6] = (align_addr >> 16) & 0xff;
+-			desc[5] = (align_addr >> 8) & 0xff;
+-			desc[4] = (align_addr >> 0) & 0xff;
++			/* tran, valid */
++			sdhci_set_adma_desc(desc, align_addr, offset, 0x21);
+ 
+ 			BUG_ON(offset > 65536);
+ 
+-			desc[3] = (offset >> 8) & 0xff;
+-			desc[2] = (offset >> 0) & 0xff;
+-
+-			desc[1] = 0x00;
+-			desc[0] = 0x21; /* tran, valid */
+-
+ 			align += 4;
+ 			align_addr += 4;
+ 
+@@ -465,19 +471,10 @@ static int sdhci_adma_table_pre(struct s
+ 			len -= offset;
+ 		}
+ 
+-		desc[7] = (addr >> 24) & 0xff;
+-		desc[6] = (addr >> 16) & 0xff;
+-		desc[5] = (addr >> 8) & 0xff;
+-		desc[4] = (addr >> 0) & 0xff;
+-
+ 		BUG_ON(len > 65536);
+ 
+-		desc[3] = (len >> 8) & 0xff;
+-		desc[2] = (len >> 0) & 0xff;
+-
+-		desc[1] = 0x00;
+-		desc[0] = 0x21; /* tran, valid */
+-
++		/* tran, valid */
++		sdhci_set_adma_desc(desc, addr, len, 0x21);
+ 		desc += 8;
+ 
+ 		/*
+@@ -490,16 +487,9 @@ static int sdhci_adma_table_pre(struct s
+ 	/*
+ 	 * Add a terminating entry.
+ 	 */
+-	desc[7] = 0;
+-	desc[6] = 0;
+-	desc[5] = 0;
+-	desc[4] = 0;
