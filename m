@@ -1,298 +1,88 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH 03/03] omap hsmmc: adaptation of sdma descriptor autoloading
-	feature
-Date: Wed, 10 Mar 2010 19:42:25 +0530
-Message-ID: <618f0c911003100612l33b1fec9s163720a5a93a1787@mail.gmail.com>
+From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
+Subject: RE: [PATCH 01/03] omap hsmmc: prevent race between dma and hsmmc
+ callback
+Date: Wed, 10 Mar 2010 19:57:50 +0530
+Message-ID: <EAF47CD23C76F840A9E7FCE10091EFAB02C46F13B4__16693.2475324304$1268231832$gmane$org@dbde02.ent.ti.com>
+References: <618f0c911003100611q42e7f23cuc3c8d3f116ca7eb3@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-omap-owner@vger.kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:55709 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752763Ab0CJO2I convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2010 09:28:08 -0500
+In-Reply-To: <618f0c911003100611q42e7f23cuc3c8d3f116ca7eb3@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>linux-
+Cc: Adrian Hunter <adrian.hunter@nokia.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>
 
-See previous post http://patchwork.kernel.org/patch/82909/.
-Rebased to 2.6.34-rc1
-
-CC: Adrian Hunter <adrian.hunter@nokia.com>
-CC: Madhusudhan C <madhu.cr@ti.com>
-CC: Tony Lindgren <tony@atomide.com>
-Signed-off-by: Venkatraman S <svenkatr@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |  143 +++++++++++++++++++++++++++++++++++------
- 1 files changed, 122 insertions(+), 21 deletions(-)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index ea2a082..131d889 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -102,6 +102,7 @@
- #define SRD			(1 << 26)
- #define SOFTRESET		(1 << 1)
- #define RESETDONE		(1 << 0)
-+#define DMA_ICR_QUIET		0xD00
-
- /*
-  * FIXME: Most likely all the data using these _DEVID defines should come
-@@ -118,6 +119,12 @@
- #define OMAP_MMC_MASTER_CLOCK	96000000
- #define DRIVER_NAME		"mmci-omap-hs"
-
-+#define DMA_TYPE_NODMA	0
-+#define DMA_TYPE_SDMA	1
-+#define DMA_TYPE_SDMA_DLOAD 2
-+
-+#define DMA_CTRL_BUF_SIZE	(PAGE_SIZE * 3)
-+
- /* Timeouts for entering power saving states on inactivity, msec */
- #define OMAP_MMC_DISABLED_TIMEOUT	100
- #define OMAP_MMC_SLEEP_TIMEOUT		1000
-@@ -172,7 +179,11 @@ struct omap_hsmmc_host {
- 	u32			bytesleft;
- 	int			suspended;
- 	int			irq;
--	int			use_dma, dma_ch;
-+	int			dma_caps;
-+	int			dma_in_use;
-+	int			dma_ch;
-+	void			*dma_ctrl_buf;
-+	dma_addr_t		dma_ctrl_buf_phy;
- 	int			dma_line_tx, dma_line_rx;
- 	int			slot_id;
- 	int			got_dbclk;
-@@ -768,7 +779,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host
-*host, struct mmc_command *cmd,
- 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
- 	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
-
--	if (host->use_dma)
-+	if (host->dma_in_use)
- 		OMAP_HSMMC_WRITE(host->base, IE,
- 				 INT_EN_MASK & ~(BRR_ENABLE | BWR_ENABLE));
- 	else
-@@ -803,7 +814,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host
-*host, struct mmc_command *cmd,
- 			cmdreg &= ~(DDIR);
- 	}
-
--	if (host->use_dma)
-+	if (host->dma_in_use)
- 		cmdreg |= DMA_EN;
-
- 	/*
-@@ -850,7 +861,7 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host,
-struct mmc_data *data)
-
- 	host->data = NULL;
-
--	if (host->use_dma && host->dma_ch != -1)
-+	if (host->dma_in_use && host->dma_ch != -1)
- 		dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->dma_len,
- 			omap_hsmmc_get_dma_dir(host, data));
-
-@@ -900,7 +911,7 @@ static void omap_hsmmc_dma_cleanup(struct
-omap_hsmmc_host *host, int errno)
- {
- 	host->data->error = errno;
-
--	if (host->use_dma && host->dma_ch != -1) {
-+	if (host->dma_in_use && host->dma_ch != -1) {
- 		dma_unmap_sg(mmc_dev(host->mmc), host->data->sg, host->dma_len,
- 			omap_hsmmc_get_dma_dir(host, host->data));
- 		omap_free_dma(host->dma_ch);
-@@ -1253,7 +1264,6 @@ static void omap_hsmmc_config_dma_params(struct
-omap_hsmmc_host *host,
- 			omap_hsmmc_get_dma_sync_dev(host, data),
- 			!(data->flags & MMC_DATA_WRITE));
-
--	omap_start_dma(dma_ch);
- }
-
- /*
-@@ -1268,21 +1278,32 @@ static void omap_hsmmc_dma_cb(int lch, u16
-ch_status, void *data)
-
- 	if (host->dma_ch < 0)
- 		return;
--
--	host->dma_sg_idx++;
--	if (host->dma_sg_idx < host->dma_len) {
--		/* Fire up the next transfer. */
--		omap_hsmmc_config_dma_params(host, host->data,
-+	if (host->dma_in_use == DMA_TYPE_SDMA) {
-+		host->dma_sg_idx++;
-+		if (host->dma_sg_idx < host->dma_len) {
-+			/* Fire up the next transfer. */
-+			omap_hsmmc_config_dma_params(host, host->data,
- 					   host->data->sg + host->dma_sg_idx);
--		return;
-+			omap_start_dma(host->dma_ch);
-+			return;
-+		}
- 	}
-
- }
-
-+static int omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host)
-+{
-+	if (host->dma_in_use == DMA_TYPE_SDMA)
-+		omap_start_dma(host->dma_ch);
-+	else if (host->dma_in_use == DMA_TYPE_SDMA_DLOAD)
-+		return omap_start_dma_sglist_transfers(host->dma_ch, -1);
-+
-+	return 0;
-+}
- /*
-- * Routine to configure and start DMA for the MMC card
-+ * Routine to configure DMA for the MMC card
-  */
--static int omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
-+static int omap_hsmmc_configure_sdma(struct omap_hsmmc_host *host,
- 					struct mmc_request *req)
- {
- 	int dma_ch = 0, ret = 0, err = 1, i;
-@@ -1339,6 +1360,56 @@ static int omap_hsmmc_start_dma_transfer(struct
-omap_hsmmc_host *host,
- 	return 0;
- }
-
-+static int omap_hsmmc_configure_sdma_sglist(struct omap_hsmmc_host *host,
-+		struct mmc_request *req)
-+{
-+	int i;
-+	struct omap_dma_sglist_node *sglist, *snode;
-+	struct mmc_data *data = req->data;
-+	int blksz;
-+	int dmadir = omap_hsmmc_get_dma_dir(host, data);
-+	struct omap_dma_sglist_type2a_params *t2p;
-+
-+	sglist = (struct omap_dma_sglist_node *) host->dma_ctrl_buf;
-+	snode = sglist;
-+	blksz = host->data->blksz;
-+
-+	if ((host->dma_len * sizeof(*snode)) > DMA_CTRL_BUF_SIZE) {
-+		dev_err(mmc_dev(host->mmc), "not enough sglist memory %d\n",
-+			host->dma_len);
-+		return -ENOMEM;
-+	}
-+	for (i = 0; i < host->dma_len; snode++, i++) {
-+		snode->desc_type = OMAP_DMA_SGLIST_DESCRIPTOR_TYPE2a;
-+		snode->num_of_elem = blksz / 4;
-+		t2p = &snode->sg_node.t2a;
-+
-+		if (dmadir == DMA_FROM_DEVICE) {
-+			t2p->src_addr = host->mapbase + OMAP_HSMMC_DATA;
-+			t2p->dst_addr = sg_dma_address(data->sg + i);
-+		} else {
-+			t2p->dst_addr = host->mapbase + OMAP_HSMMC_DATA;
-+			t2p->src_addr = sg_dma_address(data->sg + i);
-+		}
-+		snode->flags =
-+			OMAP_DMA_LIST_DST_VALID | OMAP_DMA_LIST_SRC_VALID;
-+
-+		t2p->cfn_fn = sg_dma_len(data->sg + i) / host->data->blksz;
-+		t2p->cicr = DMA_ICR_QUIET;
-+
-+		t2p->dst_frame_idx_or_pkt_size = 0;
-+		t2p->src_frame_idx_or_pkt_size = 0;
-+		t2p->dst_elem_idx = 0;
-+		t2p->src_elem_idx = 0;
-+	}
-+	dev_dbg(mmc_dev(host->mmc), "new sglist %x len =%d\n",
-+			host->dma_ctrl_buf_phy, i);
-+	omap_set_dma_sglist_mode(host->dma_ch, sglist,
-+			host->dma_ctrl_buf_phy, i, NULL);
-+	omap_dma_set_sglist_fastmode(host->dma_ch, 1);
-+	return 0;
-+}
-+
- static void set_data_timeout(struct omap_hsmmc_host *host,
- 			     unsigned int timeout_ns,
- 			     unsigned int timeout_clks)
-@@ -1400,14 +1471,23 @@ omap_hsmmc_prepare_data(struct omap_hsmmc_host
-*host, struct mmc_request *req)
- 					| (req->data->blocks << 16));
- 	set_data_timeout(host, req->data->timeout_ns, req->data->timeout_clks);
-
--	if (host->use_dma) {
--		ret = omap_hsmmc_start_dma_transfer(host, req);
--		if (ret != 0) {
--			dev_dbg(mmc_dev(host->mmc), "MMC start dma failure\n");
-+	if (host->dma_caps & DMA_TYPE_SDMA) {
-+		ret = omap_hsmmc_configure_sdma(host, req);
-+		if (ret)
- 			return ret;
--		}
-+		host->dma_in_use = DMA_TYPE_SDMA;
- 	}
--	return 0;
-+	if ((host->dma_caps & DMA_TYPE_SDMA_DLOAD) &&
-+		host->data->sg_len > 4) {
-+		ret = omap_hsmmc_configure_sdma_sglist(host, req);
-+		if (ret)
-+			return ret;
-+		host->dma_in_use = DMA_TYPE_SDMA_DLOAD;
-+
-+	}
-+	ret = omap_hsmmc_start_dma_transfer(host);
-+	return ret;
-+
- }
-
- /*
-@@ -1999,7 +2079,9 @@ static int __init omap_hsmmc_probe(struct
-platform_device *pdev)
- 	host->mmc	= mmc;
- 	host->pdata	= pdata;
- 	host->dev	= &pdev->dev;
--	host->use_dma	= 1;
-+	host->dma_caps	= DMA_TYPE_SDMA;
-+	host->dma_in_use	= DMA_TYPE_NODMA;
-+	host->dma_ctrl_buf = NULL;
- 	host->dev->dma_mask = &pdata->dma_mask;
- 	host->dma_ch	= -1;
- 	host->irq	= irq;
-@@ -2081,6 +2163,15 @@ static int __init omap_hsmmc_probe(struct
-platform_device *pdev)
- 							" clk failed\n");
- 	}
-
-+	if (cpu_is_omap44xx() || cpu_is_omap3630()) {
-+		host->dma_ctrl_buf = dma_alloc_coherent(NULL,
-+					DMA_CTRL_BUF_SIZE,
-+					&host->dma_ctrl_buf_phy,
-+					0);
-+		if (host->dma_ctrl_buf != NULL)
-+			host->dma_caps |= DMA_TYPE_SDMA_DLOAD;
-+	}
-+
- 	/* Since we do only SG emulation, we can have as many segs
- 	 * as we want. */
- 	mmc->max_phys_segs = 1024;
-@@ -2207,6 +2298,10 @@ err_reg:
- err_irq_cd_init:
- 	free_irq(host->irq, host);
- err_irq:
-+	if (host->dma_ctrl_buf)
-+		dma_free_coherent(NULL, DMA_CTRL_BUF_SIZE,
-+				host->dma_ctrl_buf,
-+				host->dma_ctrl_buf_phy);
- 	mmc_host_disable(host->mmc);
- 	clk_disable(host->iclk);
- 	clk_put(host->fclk);
-@@ -2234,6 +2329,12 @@ static int omap_hsmmc_remove(struct
-platform_device *pdev)
- 	if (host) {
- 		mmc_host_enable(host->mmc);
- 		mmc_remove_host(host->mmc);
-+
-+		if (host->dma_ctrl_buf != NULL) {
-+			dma_free_coherent(NULL, DMA_CTRL_BUF_SIZE,
-+				host->dma_ctrl_buf,
-+				host->dma_ctrl_buf_phy);
-+		}
- 		if (host->use_reg)
- 			omap_hsmmc_reg_put(host);
- 		if (host->pdata->cleanup)
--- 
-1.6.3.3
+> -----Original Message-----
+> From: linux-omap-owner@vger.kernel.org [mailto:linux-omap-owner@vger.kernel.org] On Behalf Of
+> Venkatraman S
+> Sent: Wednesday, March 10, 2010 7:42 PM
+> To: linux-omap@vger.kernel.org; linux-arm-kernel@lists.infradead.org; linux-mmc@vger.kernel.org
+> Cc: Adrian Hunter; Chikkature Rajashekar, Madhusudhan; Tony Lindgren
+> Subject: [PATCH 01/03] omap hsmmc: prevent race between dma and hsmmc callback
+> 
+> See previous post http://patchwork.kernel.org/patch/82907/
+> Rebased to 2.6.34-rc1 and fixed comment alignment.
+>
+Why did you dropped change log in all your patches? You should retain that and
+just change the patch version in the subject.
+ 
+> CC: Adrian Hunter <adrian.hunter@nokia.com>
+> CC: Madhusudhan C <madhu.cr@ti.com>
+> CC: Tony Lindgren <tony@atomide.com>
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |   19 +++++++++++--------
+>  1 files changed, 11 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 83f0aff..ea2a082 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1046,8 +1046,18 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+> 
+>  	if (end_cmd || ((status & CC) && host->cmd))
+>  		omap_hsmmc_cmd_done(host, host->cmd);
+> -	if ((end_trans || (status & TC)) && host->mrq)
+> +	if ((end_trans || (status & TC)) && host->mrq) {
+>  		omap_hsmmc_xfer_done(host, data);
+> +		if (host->dma_ch != -1) {
+> +			omap_free_dma(host->dma_ch);
+> +			host->dma_ch = -1;
+> +			/*
+> +			 * Callback: run in interrupt context.
+> +			 * mutex_unlock will throw a kernel warning if used.
+> +			 */
+> +			up(&host->sem);
+> +		}
+> +	}
+> 
+>  	spin_unlock(&host->irq_lock);
+> 
+> @@ -1267,13 +1277,6 @@ static void omap_hsmmc_dma_cb(int lch, u16
+> ch_status, void *data)
+>  		return;
+>  	}
+> 
+> -	omap_free_dma(host->dma_ch);
+> -	host->dma_ch = -1;
+> -	/*
+> -	 * DMA Callback: run in interrupt context.
+> -	 * mutex_unlock will throw a kernel warning if used.
+> -	 */
+> -	up(&host->sem);
+>  }
+> 
+>  /*
+> --
+> 1.6.3.3
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
