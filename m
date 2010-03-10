@@ -1,36 +1,64 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH 00/03 v7] sDMA descriptor loading feature and omap hsmmc
-	adaptations
-Date: Wed, 10 Mar 2010 19:41:21 +0530
-Message-ID: <618f0c911003100611r6d256075p3ca7af3d66070efe@mail.gmail.com>
+Subject: [PATCH 01/03] omap hsmmc: prevent race between dma and hsmmc callback
+Date: Wed, 10 Mar 2010 19:41:38 +0530
+Message-ID: <618f0c911003100611q42e7f23cuc3c8d3f116ca7eb3@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f176.google.com ([209.85.223.176]:37056 "EHLO
-	mail-iw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755016Ab0CJOLW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2010 09:11:22 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
 To: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>
+List-Id: linux-mmc@vger.kernel.org
 
-This series was posted 10 days back
-(http://www.mail-archive.com/linux-omap@vger.kernel.org/msg24713.html)
-and I have received one comment, which I have fixed in this series.
-Also rebased to latest 34-rc1.
+See previous post http://patchwork.kernel.org/patch/82907/
+Rebased to 2.6.34-rc1 and fixed comment alignment.
 
-Changes since v6:
- * Fixed comment alignment
- * removed incorrect whitespace alignment
- * rebased to 2.6.34-rc1
+CC: Adrian Hunter <adrian.hunter@nokia.com>
+CC: Madhusudhan C <madhu.cr@ti.com>
+CC: Tony Lindgren <tony@atomide.com>
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   19 +++++++++++--------
+ 1 files changed, 11 insertions(+), 8 deletions(-)
 
-Venkatraman S (3):
-     MMC:  prevent race between dma  and hsmmc callback
-     sDMA: descriptor autoloading feature
-     MMC: omap hsmmc adaptation of descriptor autoloading feature
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 83f0aff..ea2a082 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1046,8 +1046,18 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
 
- arch/arm/plat-omap/dma.c              |  269 ++++++++++++++++++++++++++++++++-
- arch/arm/plat-omap/include/plat/dma.h |  170 +++++++++++++++++++++
- drivers/mmc/host/omap_hsmmc.c         |  162 ++++++++++++++++----
- 3 files changed, 571 insertions(+), 30 deletions(-)
+ 	if (end_cmd || ((status & CC) && host->cmd))
+ 		omap_hsmmc_cmd_done(host, host->cmd);
+-	if ((end_trans || (status & TC)) && host->mrq)
++	if ((end_trans || (status & TC)) && host->mrq) {
+ 		omap_hsmmc_xfer_done(host, data);
++		if (host->dma_ch != -1) {
++			omap_free_dma(host->dma_ch);
++			host->dma_ch = -1;
++			/*
++			 * Callback: run in interrupt context.
++			 * mutex_unlock will throw a kernel warning if used.
++			 */
++			up(&host->sem);
++		}
++	}
+
+ 	spin_unlock(&host->irq_lock);
+
+@@ -1267,13 +1277,6 @@ static void omap_hsmmc_dma_cb(int lch, u16
+ch_status, void *data)
+ 		return;
+ 	}
+
+-	omap_free_dma(host->dma_ch);
+-	host->dma_ch = -1;
+-	/*
+-	 * DMA Callback: run in interrupt context.
+-	 * mutex_unlock will throw a kernel warning if used.
+-	 */
+-	up(&host->sem);
+ }
+
+ /*
+-- 
+1.6.3.3
