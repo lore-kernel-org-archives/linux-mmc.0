@@ -1,42 +1,94 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: Re: [PATCH 01/03] omap hsmmc: prevent race between dma and hsmmc
-	callback
-Date: Wed, 10 Mar 2010 20:50:57 +0530
-Message-ID: <618f0c911003100720n78ea2765l287631c85de1fe8@mail.gmail.com>
-References: <618f0c911003100611q42e7f23cuc3c8d3f116ca7eb3@mail.gmail.com>
-	 <EAF47CD23C76F840A9E7FCE10091EFAB02C46F13B4@dbde02.ent.ti.com>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH 01/03] omap hsmmc: prevent race between dma and hsmmc callback
+Date: Wed, 10 Mar 2010 10:47:29 -0600
+Message-ID: <006401cac071$5f4c3df0$544ff780@am.dhcp.ti.com>
+References: <618f0c911003010325q201fbcedr776da21c709ac421@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f176.google.com ([209.85.223.176]:61785 "EHLO
-	mail-iw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752825Ab0CJPU6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2010 10:20:58 -0500
-In-Reply-To: <EAF47CD23C76F840A9E7FCE10091EFAB02C46F13B4@dbde02.ent.ti.com>
+Received: from comal.ext.ti.com ([198.47.26.152]:51904 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756284Ab0CJQri (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 10 Mar 2010 11:47:38 -0500
+In-Reply-To: <618f0c911003010325q201fbcedr776da21c709ac421@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@nokia.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>
+To: 'Venkatraman S' <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org
 
-Shilimkar, Santosh wrote:
->> -----Original Message-----
->> From: linux-omap-owner@vger.kernel.org [mailto:linux-omap-owner@vger.kernel.org] On Behalf Of
->> Venkatraman S
->> Sent: Wednesday, March 10, 2010 7:42 PM
->> To: linux-omap@vger.kernel.org; linux-arm-kernel@lists.infradead.org; linux-mmc@vger.kernel.org
->> Cc: Adrian Hunter; Chikkature Rajashekar, Madhusudhan; Tony Lindgren
->> Subject: [PATCH 01/03] omap hsmmc: prevent race between dma and hsmmc callback
->>
->> See previous post http://patchwork.kernel.org/patch/82907/
->> Rebased to 2.6.34-rc1 and fixed comment alignment.
->>
-> Why did you dropped change log in all your patches? You should retain that and
-> just change the patch version in the subject.
->
 
-My bad. I just edited the merge commit to point to the previous
-threads and posted it.
-Should I post them again ?
 
-Thanks and regards,
-Venkat.
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Venkatraman S
+> Sent: Monday, March 01, 2010 5:26 AM
+> To: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
+> linux-omap@vger.kernel.org
+> Subject: [PATCH 01/03] omap hsmmc: prevent race between dma and hsmmc
+> callback
+> 
+> It is observed that sometimes the MMC Transfer Complete (TC) is not
+> received when DMA completion callback is processed (or takes too long
+> to process)
+> This patch moves the releasing of DMA channel from dma callback to the
+> mmc transfer complete handler.
+> This is observed consistently when descriptor loading is used (see the
+> rest of the series)
+> 
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |   19 +++++++++++--------
+>  1 files changed, 11 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 83f0aff..06337f6 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1046,8 +1046,18 @@ static irqreturn_t omap_hsmmc_irq(int irq, void
+> *dev_id)
+> 
+>  	if (end_cmd || ((status & CC) && host->cmd))
+>  		omap_hsmmc_cmd_done(host, host->cmd);
+> -	if ((end_trans || (status & TC)) && host->mrq)
+> +	if ((end_trans || (status & TC)) && host->mrq) {
+>  		omap_hsmmc_xfer_done(host, data);
+> +		if (host->dma_ch != -1) {
+> +			omap_free_dma(host->dma_ch);
+> +			host->dma_ch = -1;
+
+Why is this necessary? The core is notified of xfer complete only when TC is
+received which is good enough.
+
+> +		/*
+> +		 * Callback: run in interrupt context.
+> +		 * mutex_unlock will throw a kernel warning if used.
+> +		 */
+> +			up(&host->sem);
+> +		}
+> +	}
+> 
+>  	spin_unlock(&host->irq_lock);
+> 
+> @@ -1267,13 +1277,6 @@ static void omap_hsmmc_dma_cb(int lch, u16
+> ch_status, void *data)
+>  		return;
+>  	}
+> 
+> -	omap_free_dma(host->dma_ch);
+> -	host->dma_ch = -1;
+> -	/*
+> -	 * DMA Callback: run in interrupt context.
+> -	 * mutex_unlock will throw a kernel warning if used.
+> -	 */
+> -	up(&host->sem);
+>  }
+> 
+>  /*
+> --
+> 1.6.3.3
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
