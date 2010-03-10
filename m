@@ -1,59 +1,139 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 03/03] omap hsmmc: adaptation of sdma descriptor
- autoloading feature
-Date: Wed, 10 Mar 2010 14:41:10 -0800
-Message-ID: <20100310224110.GW2900@atomide.com>
-References: <618f0c911003100612l33b1fec9s163720a5a93a1787@mail.gmail.com>
+From: akpm@linux-foundation.org
+Subject: [patch 004/220] sdio: recognize io card without powercycle
+Date: Wed, 10 Mar 2010 15:20:37 -0800
+Message-ID: <201003102320.o2ANKb8r009971@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:55435 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757354Ab0CJWjx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2010 17:39:53 -0500
-Content-Disposition: inline
-In-Reply-To: <618f0c911003100612l33b1fec9s163720a5a93a1787@mail.gmail.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:46705 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754206Ab0CJXVK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2010 18:21:10 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>
+To: torvalds@linux-foundation.org
+Cc: akpm@linux-foundation.org, albert_herranz@yahoo.es, linux-mmc@vger.kernel.org
 
-* Venkatraman S <svenkatr@ti.com> [100310 06:08]:
-> @@ -1400,14 +1471,23 @@ omap_hsmmc_prepare_data(struct omap_hsmmc_host
-> *host, struct mmc_request *req)
->  					| (req->data->blocks << 16));
->  	set_data_timeout(host, req->data->timeout_ns, req->data->timeout_clks);
-> 
-> -	if (host->use_dma) {
-> -		ret = omap_hsmmc_start_dma_transfer(host, req);
-> -		if (ret != 0) {
-> -			dev_dbg(mmc_dev(host->mmc), "MMC start dma failure\n");
-> +	if (host->dma_caps & DMA_TYPE_SDMA) {
-> +		ret = omap_hsmmc_configure_sdma(host, req);
-> +		if (ret)
->  			return ret;
-> -		}
-> +		host->dma_in_use = DMA_TYPE_SDMA;
->  	}
-> -	return 0;
-> +	if ((host->dma_caps & DMA_TYPE_SDMA_DLOAD) &&
-> +		host->data->sg_len > 4) {
-> +		ret = omap_hsmmc_configure_sdma_sglist(host, req);
-> +		if (ret)
-> +			return ret;
-> +		host->dma_in_use = DMA_TYPE_SDMA_DLOAD;
-> +
-> +	}
-> +	ret = omap_hsmmc_start_dma_transfer(host);
-> +	return ret;
-> +
->  }
+From: Albert Herranz <albert_herranz@yahoo.es>
 
-Does the driver still work in PIO mode?
+SDIO Simplified Specification V2.00 states that it is strongly recommended
+that the host executes either a power reset or issues a CMD52 (I/O Reset)
+to re-initialize an I/O only card or the I/O portion of a combo card. 
+Additionally, the CMD52 must be issued first because it cannot be issued
+after a CMD0.
 
-We need to have the drivers capable to fail over to PIO mode
-as the DMA channels can run out.
+With this patch the Nintendo Wii SDIO-based WLAN card is detected after a
+system reset, without requiring a complete system powercycle.
 
-Regards,
+Signed-off-by: Albert Herranz <albert_herranz@yahoo.es>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
-Tony
+ drivers/mmc/core/core.c     |    1 
+ drivers/mmc/core/sdio_ops.c |   36 ++++++++++++++++++++++++++++------
+ drivers/mmc/core/sdio_ops.h |    1 
+ 3 files changed, 32 insertions(+), 6 deletions(-)
+
+diff -puN drivers/mmc/core/core.c~sdio-recognize-io-card-without-powercycle drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~sdio-recognize-io-card-without-powercycle
++++ a/drivers/mmc/core/core.c
+@@ -1089,6 +1089,7 @@ void mmc_rescan(struct work_struct *work
+ 	mmc_claim_host(host);
+ 
+ 	mmc_power_up(host);
++	sdio_reset(host);
+ 	mmc_go_idle(host);
+ 
+ 	mmc_send_if_cond(host, host->ocr_avail);
+diff -puN drivers/mmc/core/sdio_ops.c~sdio-recognize-io-card-without-powercycle drivers/mmc/core/sdio_ops.c
+--- a/drivers/mmc/core/sdio_ops.c~sdio-recognize-io-card-without-powercycle
++++ a/drivers/mmc/core/sdio_ops.c
+@@ -67,13 +67,13 @@ int mmc_send_io_op_cond(struct mmc_host 
+ 	return err;
+ }
+ 
+-int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+-	unsigned addr, u8 in, u8* out)
++static int mmc_io_rw_direct_host(struct mmc_host *host, int write, unsigned fn,
++	unsigned addr, u8 in, u8 *out)
+ {
+ 	struct mmc_command cmd;
+ 	int err;
+ 
+-	BUG_ON(!card);
++	BUG_ON(!host);
+ 	BUG_ON(fn > 7);
+ 
+ 	/* sanity check */
+@@ -90,11 +90,11 @@ int mmc_io_rw_direct(struct mmc_card *ca
+ 	cmd.arg |= in;
+ 	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_AC;
+ 
+-	err = mmc_wait_for_cmd(card->host, &cmd, 0);
++	err = mmc_wait_for_cmd(host, &cmd, 0);
+ 	if (err)
+ 		return err;
+ 
+-	if (mmc_host_is_spi(card->host)) {
++	if (mmc_host_is_spi(host)) {
+ 		/* host driver already reported errors */
+ 	} else {
+ 		if (cmd.resp[0] & R5_ERROR)
+@@ -106,7 +106,7 @@ int mmc_io_rw_direct(struct mmc_card *ca
+ 	}
+ 
+ 	if (out) {
+-		if (mmc_host_is_spi(card->host))
++		if (mmc_host_is_spi(host))
+ 			*out = (cmd.resp[0] >> 8) & 0xFF;
+ 		else
+ 			*out = cmd.resp[0] & 0xFF;
+@@ -115,6 +115,13 @@ int mmc_io_rw_direct(struct mmc_card *ca
+ 	return 0;
+ }
+ 
++int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
++	unsigned addr, u8 in, u8 *out)
++{
++	BUG_ON(!card);
++	return mmc_io_rw_direct_host(card->host, write, fn, addr, in, out);
++}
++
+ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz)
+ {
+@@ -182,3 +189,20 @@ int mmc_io_rw_extended(struct mmc_card *
+ 	return 0;
+ }
+ 
++int sdio_reset(struct mmc_host *host)
++{
++	int ret;
++	u8 abort;
++
++	/* SDIO Simplified Specification V2.0, 4.4 Reset for SDIO */
++
++	ret = mmc_io_rw_direct_host(host, 0, 0, SDIO_CCCR_ABORT, 0, &abort);
++	if (ret)
++		abort = 0x08;
++	else
++		abort |= 0x08;
++
++	ret = mmc_io_rw_direct_host(host, 1, 0, SDIO_CCCR_ABORT, abort, NULL);
++	return ret;
++}
++
+diff -puN drivers/mmc/core/sdio_ops.h~sdio-recognize-io-card-without-powercycle drivers/mmc/core/sdio_ops.h
+--- a/drivers/mmc/core/sdio_ops.h~sdio-recognize-io-card-without-powercycle
++++ a/drivers/mmc/core/sdio_ops.h
+@@ -17,6 +17,7 @@ int mmc_io_rw_direct(struct mmc_card *ca
+ 	unsigned addr, u8 in, u8* out);
+ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz);
++int sdio_reset(struct mmc_host *host);
+ 
+ #endif
+ 
+_
