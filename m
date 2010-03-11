@@ -1,29 +1,63 @@
-From: Edward Falk <Edward.Falk@palm.com>
-Subject: Any work being done on MMC write protect?
-Date: Wed, 10 Mar 2010 20:01:24 -0800
-Message-ID: <4B986B14.6040304@palm.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: Re: [PATCH 03/03] omap hsmmc: adaptation of sdma descriptor
+	autoloading feature
+Date: Thu, 11 Mar 2010 16:22:19 +0530
+Message-ID: <618f0c911003110252i36d6fc31wbaef4ad7a17565b1@mail.gmail.com>
+References: <618f0c911003010327s290fcce1ud665b5a16392aea1@mail.gmail.com>
+	 <011301cac0b6$542b1190$544ff780@am.dhcp.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-relay2.palm.com ([64.28.152.243]:53265 "EHLO
-	smtp-relay2.palm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756173Ab0CKELZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2010 23:11:25 -0500
-Received: from peregrine.palm1.palmone.com (peregrine.palm1.palmone.com [148.92.213.4])
-	by mailhost02.palm.com (8.13.6+Sun/8.12.10) with ESMTP id o2B3x9g8008589
-	for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2010 19:59:10 -0800 (PST)
+Received: from mail-iw0-f182.google.com ([209.85.223.182]:62106 "EHLO
+	mail-iw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756670Ab0CKKwV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Mar 2010 05:52:21 -0500
+In-Reply-To: <011301cac0b6$542b1190$544ff780@am.dhcp.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Madhusudhan <madhu.cr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org
 
-I've written some ioctls (for the 2.6.29 kernel) which implement 
-SEND_WRITE_PROT and SET_WRITE_PROT.  However I can't get them to work -- 
-the former throws a CRC error and the latter returns success but doesn't 
-actually write-protect the device.
-
-I was wondering if anybody else had done any work in this area.
-
-If anybody wants the code, I can send a patch along.
-
-	-ed falk
+Madhusudhan <madhu.cr@ti.com> wrote:
+>> -----Original Message-----
+>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+>> owner@vger.kernel.org] On Behalf Of Venkatraman S
+>> Sent: Monday, March 01, 2010 5:27 AM
+>> To: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
+>> linux-omap@vger.kernel.org
+>> Subject: [PATCH 03/03] omap hsmmc: adaptation of sdma descriptor
+>> autoloading feature
+>>
+>> Start to use the sDMA descriptor autoloading feature.
+>> For large datablocks, the MMC driver has to repeatedly setup, program
+>> and teardown the
+>> dma channel for each element of the sglist received in omap_hsmmc_request.
+>>
+>> By using descriptor autoloading, transfers from / to each element of
+>> the sglist is pre programmed
+>> into a linked list. The sDMA driver completes the entire transaction
+>> and provides a single interrupt.
+>>
+>> Due to this, number of dma interrupts for a typical 100MB transfer on the
+>> MMC is
+>> reduced from 25000 to about 400 (approximate). Transfer speeds are
+>> improved by ~5%
+>> (Though it varies on the size of read / write & improves on huge
+>> transfers)
+>>
+>> Descriptor autoloading is available only in 3630 and 4430 (as of now).
+>> Hence normal DMA
+>> mode is also retained.
+>>
+>> Tested on omap4430 sdp.
+>>
+>> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+>
+> I don't see any issues with this patch except the concern I had on the first
+> patch in the series. Why is that change linked to this series?
+>
+  Thanks. The problem was seen only in the context of using descriptor
+load. Would
+you prefer that I post it as a separate patch ?
+Regards,
+Venkat.
