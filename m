@@ -1,134 +1,75 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: [PATCH 03/03] omap hsmmc: adaptation of sdma descriptor autoloading feature
-Date: Thu, 11 Mar 2010 20:29:10 -0600
-Message-ID: <009901cac18b$cc93e5a0$544ff780@am.dhcp.ti.com>
-References: <618f0c911003010327s290fcce1ud665b5a16392aea1@mail.gmail.com> <011301cac0b6$542b1190$544ff780@am.dhcp.ti.com> <618f0c911003110252i36d6fc31wbaef4ad7a17565b1@mail.gmail.com> <004401cac137$cccbf0c0$544ff780@am.dhcp.ti.com> <618f0c911003110942s2f663928ie1203244fbd32da7@mail.gmail.com>
+From: <gregkh@suse.de>
+Subject: patch s3cmci-initialize-default-platform-data-no_wprotect-and-no_detect-with-1.patch added to 2.6.33-stable tree
+Date: Thu, 11 Mar 2010 16:45:27 -0800
+Message-ID: <12683547271901@site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:36251 "EHLO comal.ext.ti.com"
+Received: from kroah.org ([198.145.64.141]:50747 "EHLO coco.kroah.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751287Ab0CLC3S convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Mar 2010 21:29:18 -0500
-In-Reply-To: <618f0c911003110942s2f663928ie1203244fbd32da7@mail.gmail.com>
+	id S1753002Ab0CLCtq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Mar 2010 21:49:46 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Venkatraman S' <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org
+To: lars@metafoo.de, akpm@linux-foundation.org, ben-linux@fluff.org, gregkh@suse.de, linux-mmc@vger.kernel.org, torvalds@linux-foundation.org
+Cc: stable@kernel.org, stable-commits@vger.kernel.org
 
 
+This is a note to let you know that we have just queued up the patch titled
 
-> -----Original Message-----
-> From: svenkatr@gmail.com [mailto:svenkatr@gmail.com] On Behalf Of
-> Venkatraman S
-> Sent: Thursday, March 11, 2010 11:43 AM
-> To: Madhusudhan
-> Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
-> linux-omap@vger.kernel.org
-> Subject: Re: [PATCH 03/03] omap hsmmc: adaptation of sdma descriptor
-> autoloading feature
->=20
-> Madhusudhan <madhu.cr@ti.com> wrote:
-> >> -----Original Message-----
-> >> From: svenkatr@gmail.com [mailto:svenkatr@gmail.com] On Behalf Of
-> >> Venkatraman S
-> >> Sent: Thursday, March 11, 2010 4:52 AM
-> >> To: Madhusudhan
-> >> Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.or=
-g;
-> >> linux-omap@vger.kernel.org
-> >> Subject: Re: [PATCH 03/03] omap hsmmc: adaptation of sdma descript=
-or
-> >> autoloading feature
-> >>
-> >> Madhusudhan <madhu.cr@ti.com> wrote:
-> >> >> -----Original Message-----
-> >> >> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> >> >> owner@vger.kernel.org] On Behalf Of Venkatraman S
-> >> >> Sent: Monday, March 01, 2010 5:27 AM
-> >> >> To: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead=
-=2Eorg;
-> >> >> linux-omap@vger.kernel.org
-> >> >> Subject: [PATCH 03/03] omap hsmmc: adaptation of sdma descripto=
-r
-> >> >> autoloading feature
-> >> >>
-> >> >> Start to use the sDMA descriptor autoloading feature.
-> >> >> For large datablocks, the MMC driver has to repeatedly setup,
-> program
-> >> >> and teardown the
-> >> >> dma channel for each element of the sglist received in
-> >> omap_hsmmc_request.
-> >> >>
-> >> >> By using descriptor autoloading, transfers from / to each eleme=
-nt of
-> >> >> the sglist is pre programmed
-> >> >> into a linked list. The sDMA driver completes the entire transa=
-ction
-> >> >> and provides a single interrupt.
-> >> >>
-> >> >> Due to this, number of dma interrupts for a typical 100MB trans=
-fer
-> on
-> >> the
-> >> >> MMC is
-> >> >> reduced from 25000 to about 400 (approximate). Transfer speeds =
-are
-> >> >> improved by ~5%
-> >> >> (Though it varies on the size of read / write & improves on hug=
-e
-> >> >> transfers)
-> >> >>
-> >> >> Descriptor autoloading is available only in 3630 and 4430 (as o=
-f
-> now).
-> >> >> Hence normal DMA
-> >> >> mode is also retained.
-> >> >>
-> >> >> Tested on omap4430 sdp.
-> >> >>
-> >> >> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> >> >
-> >> > I don't see any issues with this patch except the concern I had =
-on
-> the
-> >> first
-> >> > patch in the series. Why is that change linked to this series?
-> >> >
-> >> =A0 Thanks. The problem was seen only in the context of using desc=
-riptor
-> >> load. Would
-> >> you prefer that I post it as a separate patch ?
-> >
-> > My point is why that change is needed for this feature to work?
-> >
-> > When DMA is completed and a callback is received the ch can be free=
-d.
-> Once
-> > TC is received the core is notified of the same.
-> >
-> > Can the first patch be dropped? Or do you see issues?
-> Yes there are issues without this patch when the scatterlist is large
-> (300+ blocks), where the dma completion interrupt is received but the
-> mmc driver hangs waiting for TC. I don't see the issue if I delay the
-> execution of omap_free_dma inside the dma callback.
+    Subject: s3cmci: initialize default platform data no_wprotect and no_detect with 1
 
-This is strange. Ideally after the dma cb is received the transfer comp=
-lete
-interrupt should fire.
+to the 2.6.33-stable tree.  Its filename is
 
-Your first patch would break a corner erroneous case the driver is alre=
-ady
-handling. A scenario where TC was received before DMA cb came. There is
-timeout logic in the driver which handles this case to let the request
-succeed if a dma cb was received after a while otherwise err out. See t=
-he
-function omap_hsmmc_start_dma_transfer.
+    s3cmci-initialize-default-platform-data-no_wprotect-and-no_detect-with-1.patch
 
-Is there a way to keep both the cases handled? If not we have to make
-changes based on which of these scenario is very odd.
+A git repo of this tree can be found at 
+    http://www.kernel.org/git/?p=linux/kernel/git/stable/stable-queue.git;a=summary
 
-Regards,
-Madhu
+
+>From c212808a1ba6bfba489006399b8152a047305acf Mon Sep 17 00:00:00 2001
+From: Lars-Peter Clausen <lars@metafoo.de>
+Date: Fri, 5 Mar 2010 13:43:35 -0800
+Subject: s3cmci: initialize default platform data no_wprotect and no_detect with 1
+
+From: Lars-Peter Clausen <lars@metafoo.de>
+
+commit c212808a1ba6bfba489006399b8152a047305acf upstream.
+
+If no platform_data was givin to the device it's going to use it's default
+platform data struct which has all fields initialized to zero.  As a
+result the driver is going to try to request gpio0 both as write protect
+and card detect pin.  Which of course will fail and makes the driver
+unusable
+
+Previously to the introduction of no_wprotect and no_detect the behavior
+was to assume that if no platform data was given there is no write protect
+or card detect pin.  This patch restores that behavior.
+
+Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Ben Dooks <ben-linux@fluff.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+---
+ drivers/mmc/host/s3cmci.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -1360,6 +1360,8 @@ static struct mmc_host_ops s3cmci_ops =
+ static struct s3c24xx_mci_pdata s3cmci_def_pdata = {
+ 	/* This is currently here to avoid a number of if (host->pdata)
+ 	 * checks. Any zero fields to ensure reasonable defaults are picked. */
++	 .no_wprotect = 1,
++	 .no_detect = 1,
+ };
+ 
+ #ifdef CONFIG_CPU_FREQ
+
+
+Patches currently in stable-queue which might be from lars@metafoo.de are
 
