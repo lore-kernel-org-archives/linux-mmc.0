@@ -1,33 +1,43 @@
-From: Kevin Hilman <khilman@deeprootsystems.com>
-Subject: Re: [PATCH v2] davinci: MMC: Pass number of SG segments as platform data
-Date: Fri, 12 Mar 2010 15:36:35 -0800
-Message-ID: <87ljdx3yf0.fsf@deeprootsystems.com>
-References: <1268397249-7654-1-git-send-email-sudhakar.raj@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f209.google.com ([209.85.218.209]:56071 "EHLO
-	mail-bw0-f209.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933475Ab0CLXgn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2010 18:36:43 -0500
-In-Reply-To: <1268397249-7654-1-git-send-email-sudhakar.raj@ti.com> (Sudhakar Rajashekhara's message of "Fri\, 12 Mar 2010 18\:04\:09 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+From: Greg KH <gregkh@suse.de>
+Subject: [patch 108/123] s3cmci: s3cmci_card_present: Use no_detect to decide whether there is a card detect pin
+Date: Fri, 12 Mar 2010 16:13:26 -0800
+Message-ID: <20100313001514.586476887@kvm.kroah.org>
+References: <20100313001618.GA9811@kroah.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100313001618.GA9811@kroah.com>
+In-Reply-To: <20100313001618.GA9811@kroah.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@kernel.org
+Cc: stable-review@kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, alan@lxorguk.ukuu.org.uk, Lars-Peter Clausen <lars@metafoo.de>, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sudhakar Rajashekhara <sudhakar.raj@ti.com>
-Cc: linux-kernel@vger.kernel.org, davinci-linux-open-source@linux.davincidsp.com, akpm@linux-foundation.org, linux-mmc@vger.kernel.org
 
-Sudhakar Rajashekhara <sudhakar.raj@ti.com> writes:
+2.6.33-stable review patch.  If anyone has any objections, please let me know.
 
-> On some platforms like DM355, the number of EDMA parameter
-> slots available for EDMA_SLOT_ANY usage are few. In such cases,
-> if MMC/SD uses 16 slots for each instance of MMC controller,
-> then the number of slots available for other modules will be
-> very few.
->
-> By passing the number of EDMA slots to be used in MMC driver
-> from platform data, EDMA slots available for other purposes
-> can be controlled.
->
-> Signed-off-by: Sudhakar Rajashekhara <sudhakar.raj@ti.com>
+-----------------
 
-Acked-by: Kevin Hilman <khilman@deeprootsystems.com>
+From: Lars-Peter Clausen <lars@metafoo.de>
+
+commit dc2ed552804f3a2ae41c0ffe4bc09879ec8f7396 upstream.
+
+Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Ben Dooks <ben-linux@fluff.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+---
+ drivers/mmc/host/s3cmci.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -1179,7 +1179,7 @@ static int s3cmci_card_present(struct mm
+ 	struct s3c24xx_mci_pdata *pdata = host->pdata;
+ 	int ret;
+ 
+-	if (pdata->gpio_detect == 0)
++	if (pdata->no_detect)
+ 		return -ENOSYS;
+ 
+ 	ret = gpio_get_value(pdata->gpio_detect) ? 0 : 1;
