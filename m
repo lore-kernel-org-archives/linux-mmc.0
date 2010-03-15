@@ -1,61 +1,57 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Patch: eMMC boot partition needs to be deactivated for linux to
- find user partitions
-Date: Fri, 12 Mar 2010 21:09:27 -0800
-Message-ID: <53E1B390-48DD-4E33-B51F-1B039AFD13A2@marvell.com>
-References: <43E4817426ED174AA81263BCECB4351D131745CF98@sc-vexch3.marvell.com>
+From: UBS International Holdings BV <info@yahoo.com>
+Subject: Investment consultant
+Date: Mon, 15 Mar 2010 02:11:34 +0100
+Message-ID: <20100315021134.etbv2gn268oswgw0@webmail.ventelo.no>
+Reply-To: hhbeuker@live.nl
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain;
+	charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dakia2.marvell.com ([65.219.4.35]:35448 "EHLO
-	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750699Ab0CMFJa convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Mar 2010 00:09:30 -0500
-In-Reply-To: <43E4817426ED174AA81263BCECB4351D131745CF98@sc-vexch3.marvell.com>
-Content-Language: en-US
+Received: from smtp.bluecom.no ([193.75.75.28]:44413 "EHLO smtp.bluecom.no"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754838Ab0COEtd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 15 Mar 2010 00:49:33 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Nicolas Pitre <nico@marvell.com>, Lennert Buijtenhek <buytenh@marvell.com>, "pierre@ossman.eu" <pierre@ossman.eu>
 
-Some eMMC chips have a boot partition that is meant to be used to load in low level boot code.
-This partition is available when the chip is powered up.  Normally the boot loader would disable
-access to the partition once boot code was loaded in before passing control to linux.  
 
-if booting occurs from another device (not the eMMC chip) the partition will not be disabled by
-the boot loader and control will be passed to linux.  This will cause linux to not recognize user
-partitions on the chip unless access to the boot partition is deactivated.
+UBS International Holdings BV
+Herengracht 600
+NL-1017 CJ Amsterdam, Netherlands.
+www.ubs.com/investmentbank
 
-See JEDEC Standard 84-A44 (eMMC 4.4 spec) -- Page 139
+Greetings,
 
-signed off by:  Philip Rakity <prakity@marvell.com>
-diff -ru linux-2.6.32.8/drivers/mmc/core/mmc.c linux-2.6.32.8 copy/drivers/mmc/core/mmc.c
---- linux-2.6.32.8/drivers/mmc/core/mmc.c	2010-02-09 04:57:19.000000000 -0800
-+++ linux-2.6.32.8 copy/drivers/mmc/core/mmc.c	2010-03-12 20:56:16.000000000 -0800
-@@ -430,6 +432,13 @@
- 	}
- 
- 	/*
-+	* ensure eMMC private booting PARTITION is not enabled
-+	* see JEDEC Standard No. 84-A44 - Page 139 
-+	*/
-+	mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+		EXT_CSD_BOOT_CONFIG, 0x0);
-+
-+	/*
- 	 * Compute bus speed.
- 	 */
- 	max_dtr = (unsigned int)-1;
-diff -ru linux-2.6.32.8/include/linux/mmc/mmc.h linux-2.6.32.8 copy/include/linux/mmc/mmc.h
---- linux-2.6.32.8/include/linux/mmc/mmc.h	2010-02-09 04:57:19.000000000 -0800
-+++ linux-2.6.32.8 copy/include/linux/mmc/mmc.h	2010-03-12 20:53:48.000000000 -0800
-@@ -251,6 +252,7 @@
-  * EXT_CSD fields
-  */
- 
-+#define EXT_CSD_BOOT_CONFIG	179 /* R/W */
- #define EXT_CSD_BUS_WIDTH	183	/* R/W */
- #define EXT_CSD_HS_TIMING	185	/* R/W */
- #define EXT_CSD_CARD_TYPE	196	/* RO */
+I am an investment consultant working with UBS International Holdings BV
+in the Netherlands. I will be happy to work this transaction out with you
+if you have a corporate or personal Bank Account and if you are reliable
+and honest. I need strong Assurance that you will never let me down, as I
+can arrange and provide you details/documentatal proof so that
+funds($8.5million) will be transferred into your account as the next of
+kin to the late depositor(Abbas Farhan al-Jabouri, who was an Election
+candidate and also a business man). Abbas Farhan al-Jabouri and his two
+relatives were executed in Mohammed al Malih, near Mandali onthe 29th of
+January 2009. During one of our periodic auditing I discovered a dormant
+accounts with the said balance (Eight million, five Hundred thousand
+Dollars only), this account have not been operated for some years now.
+
+At this moment I will not be able to issue more details about this
+business, until your response is received.
+
+If you are not familiar with my Bank profile, please take a moment of your
+very busy schedules to read about my Bank
+website(www.ubs.com/investmentbank). I look forward to hearing from you as
+soon as possible via my private email; hhbeuker@live.nl
+
+Thank you for your time and attention.
+
+Warmest Regards,
+Mr. Beuker Hendrik
+Investment Consultant.
+UBS.
+
+
+
 
