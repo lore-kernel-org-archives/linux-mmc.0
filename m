@@ -1,52 +1,38 @@
-From: "Johnson, Charles F" <charles.f.johnson@intel.com>
-Subject: RE: Features vs versions (Was: Patch: eMMC boot partition needs to
- be deactivated for linux to find user partitions)
-Date: Mon, 15 Mar 2010 11:54:45 -0700
-Message-ID: <0D4616E6925F9541919B60692F61509E59BF24EC@orsmsx502.amr.corp.intel.com>
-References: <43E4817426ED174AA81263BCECB4351D131745CF98@sc-vexch3.marvell.com>
- <53E1B390-48DD-4E33-B51F-1B039AFD13A2@marvell.com>
- <4B9DEAE2.3030707@nokia.com> <4B9E7D4D.1030807@efalk.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v2] davinci: MMC: Pass number of SG segments as platform
+ data
+Date: Mon, 15 Mar 2010 14:40:37 -0700
+Message-ID: <20100315144037.bf47d74f.akpm@linux-foundation.org>
+References: <1268397249-7654-1-git-send-email-sudhakar.raj@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:45843 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965653Ab0COS4r convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Mar 2010 14:56:47 -0400
-In-Reply-To: <4B9E7D4D.1030807@efalk.org>
-Content-Language: en-US
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:34769 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932093Ab0COVko (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Mar 2010 17:40:44 -0400
+In-Reply-To: <1268397249-7654-1-git-send-email-sudhakar.raj@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Edward Falk <falk@efalk.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Sudhakar Rajashekhara <sudhakar.raj@ti.com>
+Cc: linux-kernel@vger.kernel.org, davinci-linux-open-source@linux.davincidsp.com, linux-mmc@vger.kernel.org, Kevin Hilman <khilman@deeprootsystems.com>
 
-At the back of the document is a change list for each revision.  On the 84-A44 spec I have it is Annex B, on page 209. 
+On Fri, 12 Mar 2010 18:04:09 +0530
+Sudhakar Rajashekhara <sudhakar.raj@ti.com> wrote:
 
-Charles Johnson
-Ultra-Mobility Group
-UPSG Architecture
-Intel Corporation
-charles.f.johnson@intel.com
- 
+> On some platforms like DM355, the number of EDMA parameter
+> slots available for EDMA_SLOT_ANY usage are few. In such cases,
+> if MMC/SD uses 16 slots for each instance of MMC controller,
+> then the number of slots available for other modules will be
+> very few.
+> 
+> By passing the number of EDMA slots to be used in MMC driver
+> from platform data, EDMA slots available for other purposes
+> can be controlled.
 
------Original Message-----
-From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Edward Falk
-Sent: Monday, March 15, 2010 11:33 AM
-To: linux-mmc@vger.kernel.org
-Subject: Features vs versions (Was: Patch: eMMC boot partition needs to be deactivated for linux to find user partitions)
+It's unclear what the runtime effects of this change are.  I assumed
+(without justification) that they're minor and I scheduled the patch for
+2.6.35.
 
-Adrian Hunter wrote:
-
-> That switch command should not be used for devices that do not
-> support it e.g. eMMC 4.3 and before.
-
-I've been wondering about this -- how can you tell which feature is 
-available in which version of the standard?  I have 84-A44 in front of 
-me now, and I can't see it.  Do I need to just obtain older versions of 
-the standards doc and compare them by hand?
-
-	-ed falk
---
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+If that was the wrong decision then blame the changelog ;)
