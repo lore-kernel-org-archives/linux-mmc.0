@@ -1,144 +1,145 @@
-From: akpm@linux-foundation.org
-Subject: + davinci-mmc-pass-number-of-sg-segments-as-platform-data.patch added to -mm tree
-Date: Mon, 15 Mar 2010 14:40:42 -0700
-Message-ID: <201003152140.o2FLegJa024186@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: sudhakar.raj@ti.com, khilman@deeprootsystems.com, linux-mmc@vger.kernel.org
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: Patch: eMMC boot partition needs to be deactivated for linux to
+ find user partitions
+Date: Mon, 15 Mar 2010 18:44:32 -0700
+Message-ID: <1EB6A91B-CBF1-4B35-BC60-F0C5E3C74D2D@marvell.com>
+References: <43E4817426ED174AA81263BCECB4351D131745CF98@sc-vexch3.marvell.com>
+ <53E1B390-48DD-4E33-B51F-1B039AFD13A2@marvell.com>
+ <4B9DEAE2.3030707@nokia.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from dakia2.marvell.com ([65.219.4.35]:60197 "EHLO
+	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965901Ab0CPBof convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Mar 2010 21:44:35 -0400
+In-Reply-To: <4B9DEAE2.3030707@nokia.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Nicolas Pitre <nico@marvell.com>, Lennert Buijtenhek <buytenh@marvell.com>, "pierre@ossman.eu" <pierre@ossman.eu>
 
 
-The patch titled
-     davinci: mmc: pass number of SG segments as platform data
-has been added to the -mm tree.  Its filename is
-     davinci-mmc-pass-number-of-sg-segments-as-platform-data.patch
+Adiran,
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+snip for mmc_debug below
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+I will forward to you under full logs.
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+Philip
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+Without mod the following error occurs
+==============================
 
-------------------------------------------------------
-Subject: davinci: mmc: pass number of SG segments as platform data
-From: Sudhakar Rajashekhara <sudhakar.raj@ti.com>
+mmc1: req done (CMD6): 0: 00000900 00000000 00000000 00000000
+mmc1: clock 48000000Hz busmode 2 powermode 2 cs 0 Vdd 7 width 3 timing 1
+pxa-sdh [platform_set_8_bit()]: EXIT: mmc1 SD_CE_ATA_2 = 1100
+mmc1: new high speed MMC card at address 0001
+mmc1: starting CMD16 arg 00000200 flags 00000095
+pxa-sdh [platform_specific_card_detect()]: EXIT: mmc1 card_detect_ok = 0000
+pxa-sdh [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
+mmc1: req done (CMD16): 0: 00000900 00000000 00000000 00000000
+mmcblk0: mmc1:0001 M2G1DD 1.90 GiB
+ mmcblk0:<7>mmc1: starting CMD18 arg 00000000 flags 000000b5
+mmc1:     blksz 512 blocks 8 flags 00000200 tsac 150 ms nsac 1000
+mmc1:     CMD12 arg 00000000 flags 0000049d
+pxa-sdh [platform_specific_card_detect()]: EXIT: mmc1 card_detect_ok = 0000
+pxa-sdh [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
+pxa-sdh [sdhci_irq()]: *** mmc1 got interrupt: 0x00000002
+pxa-sdh [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
+mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+mmc1:     4096 bytes transferred: 0
+mmc1:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+ unknown partition table
 
-On some platforms like DM355, the number of EDMA parameter slots available
-for EDMA_SLOT_ANY usage are few.  In such cases, if MMC/SD uses 16 slots
-for each instance of MMC controller, then the number of slots available
-for other modules will be very few.
 
-By passing the number of EDMA slots to be used in MMC driver from platform
-data, EDMA slots available for other purposes can be controlled.
+with the patch 
+===========
 
-Signed-off-by: Sudhakar Rajashekhara <sudhakar.raj@ti.com>
-Acked-by: Kevin Hilman <khilman@deeprootsystems.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
+mmc1: req done (CMD6): 0: 00000900 00000000 00000000 00000000
+mmc1: clock 48000000Hz busmode 2 powermode 2 cs 0 Vdd 7 width 3 timing 1
+pxa-sdh [platform_set_8_bit()]: EXIT: mmc1 SD_CE_ATA_2 = 1100
+mmc1: new high speed MMC card at address 0001
+mmc1: starting CMD16 arg 00000200 flags 00000095
+pxa-sdh [platform_specific_card_detect()]: EXIT: mmc1 card_detect_ok = 0000
+pxa-sdh [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
+mmc1: req done (CMD16): 0: 00000900 00000000 00000000 00000000
+mmcblk0: mmc1:0001 M2G1DD 1.90 GiB
+ mmcblk0:<7>mmc1: starting CMD18 arg 00000000 flags 000000b5
+mmc1:     blksz 512 blocks 8 flags 00000200 tsac 150 ms nsac 1000
+mmc1:     CMD12 arg 00000000 flags 0000049d
+pxa-sdh [platform_specific_card_detect()]: EXIT: mmc1 card_detect_ok = 0000
+pxa-sdh [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
+pxa-sdh [sdhci_irq()]: *** mmc1 got interrupt: 0x00000002
+pxa-sdh [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
+mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+mmc1:     4096 bytes transferred: 0
+mmc1:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+ p1 p2 p3 p4
 
- arch/arm/mach-davinci/include/mach/mmc.h |    3 ++
- drivers/mmc/host/davinci_mmc.c           |   24 ++++++++++++++-------
- 2 files changed, 20 insertions(+), 7 deletions(-)
 
-diff -puN arch/arm/mach-davinci/include/mach/mmc.h~davinci-mmc-pass-number-of-sg-segments-as-platform-data arch/arm/mach-davinci/include/mach/mmc.h
---- a/arch/arm/mach-davinci/include/mach/mmc.h~davinci-mmc-pass-number-of-sg-segments-as-platform-data
-+++ a/arch/arm/mach-davinci/include/mach/mmc.h
-@@ -22,6 +22,9 @@ struct davinci_mmc_config {
- 
- 	/* Version of the MMC/SD controller */
- 	u8	version;
-+
-+	/* Number of sg segments */
-+	u8	nr_sg;
- };
- void davinci_setup_mmc(int module, struct davinci_mmc_config *config);
- 
-diff -puN drivers/mmc/host/davinci_mmc.c~davinci-mmc-pass-number-of-sg-segments-as-platform-data drivers/mmc/host/davinci_mmc.c
---- a/drivers/mmc/host/davinci_mmc.c~davinci-mmc-pass-number-of-sg-segments-as-platform-data
-+++ a/drivers/mmc/host/davinci_mmc.c
-@@ -137,15 +137,15 @@
- 
- /*
-  * One scatterlist dma "segment" is at most MAX_CCNT rw_threshold units,
-- * and we handle up to NR_SG segments.  MMC_BLOCK_BOUNCE kicks in only
-+ * and we handle up to MAX_NR_SG segments.  MMC_BLOCK_BOUNCE kicks in only
-  * for drivers with max_hw_segs == 1, making the segments bigger (64KB)
-- * than the page or two that's otherwise typical.  NR_SG == 16 gives at
-- * least the same throughput boost, using EDMA transfer linkage instead
-- * of spending CPU time copying pages.
-+ * than the page or two that's otherwise typical. nr_sg (passed from
-+ * platform data) == 16 gives at least the same throughput boost, using
-+ * EDMA transfer linkage instead of spending CPU time copying pages.
-  */
- #define MAX_CCNT	((1 << 16) - 1)
- 
--#define NR_SG		16
-+#define MAX_NR_SG	16
- 
- static unsigned rw_threshold = 32;
- module_param(rw_threshold, uint, S_IRUGO);
-@@ -192,7 +192,7 @@ struct mmc_davinci_host {
- 	struct edmacc_param	tx_template;
- 	struct edmacc_param	rx_template;
- 	unsigned		n_link;
--	u32			links[NR_SG - 1];
-+	u32			links[MAX_NR_SG - 1];
- 
- 	/* For PIO we walk scatterlists one segment at a time. */
- 	unsigned int		sg_len;
-@@ -202,6 +202,8 @@ struct mmc_davinci_host {
- 	u8 version;
- 	/* for ns in one cycle calculation */
- 	unsigned ns_in_one_cycle;
-+	/* Number of sg segments */
-+	u8 nr_sg;
- #ifdef CONFIG_CPU_FREQ
- 	struct notifier_block	freq_transition;
- #endif
-@@ -568,6 +570,7 @@ davinci_release_dma_channels(struct mmc_
- 
- static int __init davinci_acquire_dma_channels(struct mmc_davinci_host *host)
- {
-+	u32 link_size;
- 	int r, i;
- 
- 	/* Acquire master DMA write channel */
-@@ -593,7 +596,8 @@ static int __init davinci_acquire_dma_ch
- 	/* Allocate parameter RAM slots, which will later be bound to a
- 	 * channel as needed to handle a scatterlist.
- 	 */
--	for (i = 0; i < ARRAY_SIZE(host->links); i++) {
-+	link_size = min_t(unsigned, host->nr_sg, ARRAY_SIZE(host->links));
-+	for (i = 0; i < link_size; i++) {
- 		r = edma_alloc_slot(EDMA_CTLR(host->txdma), EDMA_SLOT_ANY);
- 		if (r < 0) {
- 			dev_dbg(mmc_dev(host->mmc), "dma PaRAM alloc --> %d\n",
-@@ -1202,6 +1206,12 @@ static int __init davinci_mmcsd_probe(st
- 
- 	init_mmcsd_host(host);
- 
-+	if (pdata->nr_sg)
-+		host->nr_sg = pdata->nr_sg - 1;
-+
-+	if (host->nr_sg > MAX_NR_SG || !host->nr_sg)
-+		host->nr_sg = MAX_NR_SG;
-+
- 	host->use_dma = use_dma;
- 	host->irq = irq;
- 
-_
 
-Patches currently in -mm which might be from sudhakar.raj@ti.com are
 
-davinci-mmc-pass-number-of-sg-segments-as-platform-data.patch
+On Mar 15, 2010, at 1:08 AM, Adrian Hunter wrote:
+
+> Philip Rakity wrote:
+>> Some eMMC chips have a boot partition that is meant to be used to load in low level boot code.
+>> This partition is available when the chip is powered up.  Normally the boot loader would disable
+>> access to the partition once boot code was loaded in before passing control to linux.  
+>> 
+>> if booting occurs from another device (not the eMMC chip) the partition will not be disabled by
+>> the boot loader and control will be passed to linux.  This will cause linux to not recognize user
+>> partitions on the chip unless access to the boot partition is deactivated.
+>> 
+>> See JEDEC Standard 84-A44 (eMMC 4.4 spec) -- Page 139
+> 
+> Page 139 doesn't say anything about why you need that switch command.
+> Please provide a more useful reference or delete this.
+> 
+> Boot mode is terminated by CMD1, so that switch command should not
+> be needed.  Please explain why it is needed in more detail.
+> 
+> That switch command should not be used for devices that do not
+> support it e.g. eMMC 4.3 and before.
+> 
+> 
+>> 
+>> signed off by:  Philip Rakity <prakity@marvell.com>
+>> diff -ru linux-2.6.32.8/drivers/mmc/core/mmc.c linux-2.6.32.8 copy/drivers/mmc/core/mmc.c
+>> --- linux-2.6.32.8/drivers/mmc/core/mmc.c	2010-02-09 04:57:19.000000000 -0800
+>> +++ linux-2.6.32.8 copy/drivers/mmc/core/mmc.c	2010-03-12 20:56:16.000000000 -0800
+>> @@ -430,6 +432,13 @@
+>> 	}
+>> 
+>> 	/*
+>> +	* ensure eMMC private booting PARTITION is not enabled
+>> +	* see JEDEC Standard No. 84-A44 - Page 139 
+>> +	*/
+>> +	mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +		EXT_CSD_BOOT_CONFIG, 0x0);
+>> +
+>> +	/*
+>> 	 * Compute bus speed.
+>> 	 */
+>> 	max_dtr = (unsigned int)-1;
+>> diff -ru linux-2.6.32.8/include/linux/mmc/mmc.h linux-2.6.32.8 copy/include/linux/mmc/mmc.h
+>> --- linux-2.6.32.8/include/linux/mmc/mmc.h	2010-02-09 04:57:19.000000000 -0800
+>> +++ linux-2.6.32.8 copy/include/linux/mmc/mmc.h	2010-03-12 20:53:48.000000000 -0800
+>> @@ -251,6 +252,7 @@
+>>  * EXT_CSD fields
+>>  */
+>> 
+>> +#define EXT_CSD_BOOT_CONFIG	179 /* R/W */
+>> #define EXT_CSD_BUS_WIDTH	183	/* R/W */
+>> #define EXT_CSD_HS_TIMING	185	/* R/W */
+>> #define EXT_CSD_CARD_TYPE	196	/* RO */
+>> 
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> 
+> 
 
