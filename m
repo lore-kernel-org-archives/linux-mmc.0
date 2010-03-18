@@ -1,23 +1,34 @@
-From: "Guzman palindrome" <ufology2010@gmail.com>
-Subject: US New Business Database - 4.8 million records all with emails
-Date: 18 Mar 2010 10:07:49 +0700
-Message-ID: <THAIBRIDGElZz02H67y00000716@THAIBRIDGE>
-Reply-To: buckrutgers2382@gmail.com
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: Highmem issues with MMC filesystem
+Date: Thu, 18 Mar 2010 09:23:52 +0000
+Message-ID: <20100318092352.GD8267@n2100.arm.linux.org.uk>
+References: <037201cac5d7$6c5b8c60$LocalHost@wipblrx0099946> <alpine.LFD.2.00.1003170946250.31128@xanadu.home> <043e01cac5df$c3ec1b90$LocalHost@wipblrx0099946> <alpine.LFD.2.00.1003171050160.31128@xanadu.home>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.thaibridg.com ([115.178.62.160]:4849 "EHLO THAIBRIDGE"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750794Ab0CREAB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 18 Mar 2010 00:00:01 -0400
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:37965 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751107Ab0CRJYM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Mar 2010 05:24:12 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.2.00.1003171050160.31128@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: stock@evergreeninsurance.net, info@houstonholistichealthclinic.com, cwhite@mantelmasters.com, calixto@cultura.com.br, eps_m@hotmail.com
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: Hemanth V <hemanthv@ti.com>, pierre@ossman.eu, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-For details, samples and counts on our US listings please
-email me at my other email address  Cruz.Romo@lowestpricelists.Co.CC
+On Wed, Mar 17, 2010 at 10:58:48AM -0400, Nicolas Pitre wrote:
+> On Wed, 17 Mar 2010, Hemanth V wrote:
+> > Nicolas, Russel are there any more details available which might help
+> > in investigating this further.
+> 
+> The only conclusion I came to so far is that ARMv5 where highmem works 
+> just fine in all cases has VIVT cache whereas ARMv6 has VIPT cache.  
+> And the problem with VIPT caches occurs when direct DMA is involved, 
+> otherwise there is no problem if PIO or NFS is used.  Sprinkling some 
+> flush_cache_all() in a few places makes things work, but this is not a 
+> satisfactory solution.
 
-  
-
-
-
-
-to adjust your subscription status email to rembox@lowestpricelists.Co.CC
+This sounds like the problem we had with the DMA API.  Since that's now
+fixed, there shouldn't be a problem with the latest (-rc) kernels, or
+a kernel with my old streaming DMA patches applied.
