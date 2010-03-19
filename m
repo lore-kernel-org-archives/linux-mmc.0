@@ -1,55 +1,35 @@
-From: Catalin Marinas <catalin.marinas@arm.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Subject: Re: Highmem issues with MMC filesystem
-Date: Fri, 19 Mar 2010 18:26:52 +0000
-Message-ID: <1269023212.22473.5.camel@e102109-lin.cambridge.arm.com>
-References: <alpine.LFD.2.00.1003191348231.31128@xanadu.home>
+Date: Fri, 19 Mar 2010 18:38:20 +0000
+Message-ID: <20100319183820.GB27710@n2100.arm.linux.org.uk>
+References: <alpine.LFD.2.00.1003171050160.31128@xanadu.home> <20100318092352.GD8267@n2100.arm.linux.org.uk> <c70ff3ad1003180415x58e29baaj9b8b77e6378cb0cb@mail.gmail.com> <20100318112453.GA19544@n2100.arm.linux.org.uk> <alpine.LFD.2.00.1003180904440.31128@xanadu.home> <1269009677.31227.10.camel@e102109-lin.cambridge.arm.com> <20100319144647.GG21280@n2100.arm.linux.org.uk> <1269010320.31227.13.camel@e102109-lin.cambridge.arm.com> <alpine.LFD.2.00.1003191347230.31128@xanadu.home> <alpine.LFD.2.00.1003191359440.31128@xanadu.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:65313 "EHLO
-	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751013Ab0CSS1q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Mar 2010 14:27:46 -0400
-In-Reply-To: <alpine.LFD.2.00.1003191348231.31128@xanadu.home>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:48425 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750966Ab0CSSjs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Mar 2010 14:39:48 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.2.00.1003191359440.31128@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Nicolas Pitre <nico@fluxnic.net>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Jamie Lokier <jamie@shareable.org>, "V, Hemanth" <hemanthv@ti.com>, linux-mmc@vger.kernel.org, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, pierre@ossman.eu, saeed bishara <saeed.bishara@gmail.com>, linux-arm-kernel@lists.infradead.org
+Cc: Catalin Marinas <catalin.marinas@arm.com>, linux-mmc@vger.kernel.org, Hemanth V <hemanthv@ti.com>, saeed bishara <saeed.bishara@gmail.com>, pierre@ossman.eu, linux-arm-kernel@lists.infradead.org
 
-On Fri, 2010-03-19 at 17:59 +0000, Nicolas Pitre wrote:
-> On Fri, 19 Mar 2010, Russell King - ARM Linux wrote:
-> 
-> > On Fri, Mar 19, 2010 at 09:17:19AM -0400, Nicolas Pitre wrote:
-> > > And in this case, the same SATA driver is used on two different system,
-> > > one being ARMv5 with absolutely no issues with highmem, and the other
-> > > being ARMv6 with highmem problems.  So that pretty much rules out IDE
-> > > driver bugs.
-> >
-> > No it doesn't - there's more changes between ARMv5 and ARMv6 than just
-> > the cache model.  There's weak memory ordering effects too.
-> 
-> Sure.  But at the moment we have:
-> 
->  - ARMv5 without highmem -> works
-> 
->  - ARMv5 with highmem -> works
-> 
->  - ARMv6 without highmem -> works
-> 
->  - ARMv6 with highmem -> fails
-> 
-> In all four cases the SATA driver, the hard disk and the filesystem on
-> it are identical.  In the two ARMv5 cases the system and the kernel are
-> identical.  Ditto for the two ARMv6 cases.
+On Fri, Mar 19, 2010 at 02:27:24PM -0400, Nicolas Pitre wrote:
+> But on ARMv6 this is different.  The L1 cache is VIPT and it therefore 
+> doesn't have to be flushed as often as a VIVT cache.  Still, as far as I 
+> know, the highmem code currently always flush any page to be unmapped.  
+> But somewhere somehow an unmapped highmem page becomes subject to DMA 
+> and apparently can still be L1 cached.
 
-Which ARMv6 processor is this?
+This does not explain the corrupted ext2 metadata, which is in lowmem
+pages.
 
-Is the SATA driver using DMA (I think I read this in the thread but it
-started as MMC issues and got confused)?
+Let's get a fresh set of clear bug reports giving all relevant information.
+Let's not continue to scatter small little bits of information in multiple
+emails.
 
-Thanks.
-
--- 
-Catalin
-
+>From now on, I'm ignoring this thread completely; it's a waste of time
+to continue with it.
