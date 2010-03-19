@@ -1,39 +1,76 @@
-From: Jamie Lokier <jamie@shareable.org>
-Subject: Re: Highmem issues with MMC filesystem
-Date: Fri, 19 Mar 2010 01:55:23 +0000
-Message-ID: <20100319015523.GD14108@shareable.org>
-References: <alpine.LFD.2.00.1003170946250.31128@xanadu.home> <043e01cac5df$c3ec1b90$LocalHost@wipblrx0099946> <alpine.LFD.2.00.1003171050160.31128@xanadu.home> <20100318092352.GD8267@n2100.arm.linux.org.uk> <c70ff3ad1003180415x58e29baaj9b8b77e6378cb0cb@mail.gmail.com> <20100318112453.GA19544@n2100.arm.linux.org.uk> <alpine.LFD.2.00.1003180904440.31128@xanadu.home> <EAF47CD23C76F840A9E7FCE10091EFAB02C489CB4A@dbde02.ent.ti.com> <20100318141930.GF19544@n2100.arm.linux.org.uk> <alpine.LFD.2.00.1003181205020.31128@xanadu.home>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: [PATCH] mmc: fix incorrect interpretation of card type bits
+Date: Fri, 19 Mar 2010 08:24:56 +0200
+Message-ID: <4BA318B8.5060408@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail2.shareable.org ([80.68.89.115]:35244 "EHLO
-	mail2.shareable.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752896Ab0CSBz3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Mar 2010 21:55:29 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.LFD.2.00.1003181205020.31128@xanadu.home>
+Received: from smtp.nokia.com ([192.100.105.134]:61632 "EHLO
+	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750705Ab0CSGZC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Mar 2010 02:25:02 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nico@fluxnic.net>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "V, Hemanth" <hemanthv@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "pierre@ossman.eu" <pierre@ossman.eu>, saeed bishara <saeed.bishara@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Nicolas Pitre wrote:
-> Data read from a DMA based block device is corrupted in memory and 
-> causing all sorts of misbehavior such as segmentation faults in user 
-> space, or EXT2 complaining about broken filesystem metadata.
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Date: Fri, 19 Mar 2010 08:06:54 +0200
+Subject: [PATCH] mmc: fix incorrect interpretation of card type bits
 
-I doubt it is related, but just in case: I've seen similar on a
-no-doubt completely unrelated ARM9 system on now-ancient kernels:
-occasional ext3 metadata corruption.
+In the extended CSD register the CARD_TYPE is an 8-bit value
+of which the upper 6 bits were reserved in JEDEC specifications
+prior to version 4.4.  In version 4.4 two of the reserved bits
+were designated for identifying support for the newly added
+High-Speed Dual Data Rate.  Unfortunately the mmc_read_ext_csd()
+function required that the reserved bits be zero instead of
+ignoring them as it should.
 
-In my case it was due to a bug in the chip's IDE driver, which did:
+This patch makes mmc_read_ext_csd() ignore the CARD_TYPE bits
+that are reserved or not yet supported.  It also stops the
+function jumping to the end as though an error occurred, when
+it is only warns that the CARD_TYPE bits (that it does interpret)
+are invalid.
 
-   1. Setup DMA address register.
-   2. Appropriate cache flushes.
-   3. Write to remaining DMA registers to start DMA.
+Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+---
+ drivers/mmc/core/mmc.c  |    3 +--
+ include/linux/mmc/mmc.h |    1 +
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-It turned out step 1 causes the DMA controller to begin reading from
-that address into an internal 128-byte FIFO, before officially
-starting DMA.  Moving step 2 before step 1 fixed that.
-
--- Jamie
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 0eac6c8..e041c00 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -225,7 +225,7 @@ static int mmc_read_ext_csd(struct mmc_card *card)
+ 			mmc_card_set_blockaddr(card);
+ 	}
+ 
+-	switch (ext_csd[EXT_CSD_CARD_TYPE]) {
++	switch (ext_csd[EXT_CSD_CARD_TYPE] & EXT_CSD_CARD_TYPE_MASK) {
+ 	case EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
+ 		card->ext_csd.hs_max_dtr = 52000000;
+ 		break;
+@@ -237,7 +237,6 @@ static int mmc_read_ext_csd(struct mmc_card *card)
+ 		printk(KERN_WARNING "%s: card is mmc v4 but doesn't "
+ 			"support any high-speed modes.\n",
+ 			mmc_hostname(card->host));
+-		goto out;
+ 	}
+ 
+ 	if (card->ext_csd.rev >= 3) {
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index c02c8db..8a49cbf 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -268,6 +268,7 @@ struct _mmc_csd {
+ 
+ #define EXT_CSD_CARD_TYPE_26	(1<<0)	/* Card can run at 26MHz */
+ #define EXT_CSD_CARD_TYPE_52	(1<<1)	/* Card can run at 52MHz */
++#define EXT_CSD_CARD_TYPE_MASK	0x3	/* Mask out reserved and DDR bits */
+ 
+ #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
+ #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
+-- 
+1.6.0.4
