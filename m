@@ -1,190 +1,289 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: Patch: eMMC boot partition needs to be deactivated for linux to
- find user partitions
-Date: Fri, 19 Mar 2010 22:12:22 -0700
-Message-ID: <3A9599CE-49EE-4A18-89E0-22B17090CA43@marvell.com>
-References: <43E4817426ED174AA81263BCECB4351D131745CF98@sc-vexch3.marvell.com>
- <53E1B390-48DD-4E33-B51F-1B039AFD13A2@marvell.com>
- <4B9DEAE2.3030707@nokia.com>
+From: David MOUSSAUD <d.moussaud@gmail.com>
+Subject: the at91 mmc controller does not recognized my sdio wifi chip after a
+	reset.
+Date: Sun, 21 Mar 2010 10:56:54 +0100
+Message-ID: <cdd918981003210256p6843c5a6i34dd48c4d198c8ed@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="_002_3A9599CE49EE4A1889E022B17090CA43marvellcom_"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dakia2.marvell.com ([65.219.4.35]:56819 "EHLO
-	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752037Ab0CTFMZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 20 Mar 2010 01:12:25 -0400
-In-Reply-To: <4B9DEAE2.3030707@nokia.com>
-Content-Language: en-US
+Received: from mail-fx0-f227.google.com ([209.85.220.227]:63491 "EHLO
+	mail-fx0-f227.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751991Ab0CUJ5Q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Mar 2010 05:57:16 -0400
+Received: by fxm27 with SMTP id 27so3833905fxm.28
+        for <linux-mmc@vger.kernel.org>; Sun, 21 Mar 2010 02:57:14 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Nicolas Pitre <nico@marvell.com>, Lennert Buijtenhek <buytenh@marvell.com>, Andrew Morton <akpm@linux-foundation.org>
+To: linux-mmc@vger.kernel.org, libertas-dev@lists.infradead.org
 
---_002_3A9599CE49EE4A1889E022B17090CA43marvellcom_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Hello,
+
+I'm writting to the both mmc & libertas mailing list  because i might
+think the problem is related.
+
+I'm using a prototype board running a  AT91sam9g20 processor. I have a
+libertas sdio wifi chip connected to my MCI controller.
+I've applied the 2.6.32 bsp patch.
+
+When I power up the board (power on reset), the sdio chip is well
+probed by the mci controller.
+But when i reset the board, the mmc_rescan function failed because the call to
+
+/*
+* First we search for SDIO...
+*/
+err = mmc_send_io_op_cond(host, 0, &ocr);
+
+return 110;
+
+so my sdio chip is not recognized by my kernel.
+
+I've tried to apply that patch "sdio : recognize io card without
+powercycle" (http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=516a82422209e078345d0ca54b16793d7bfd4782
+) without success.
+
+Here is a dump of the mmc dialogue when the board is only reseted :
+
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: starting CMD52 arg 00000c00 flags 00000195
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Sending command 52 as 00001874, arg = 00000C00, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+MCI irq: status = 0000C0E5, C07F0001, 00000001
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Command ready
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Status = 00000001/0000c0e5 [00001000 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: req done (CMD52): 0: 00001000 00000000 00000000 00000000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: starting CMD52 arg 80000c08 flags 00000195
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Sending command 52 as 00001874, arg = 80000C08, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+MCI irq: status = 0000C0E5, C07F0001, 00000001
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Command ready
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Status = 00000001/0000c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: req done (CMD52): 0: 00001008 00000000 00000000 00000000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: clock 400000Hz busmode 1 powermode 2 cs 1 Vdd 21 width 0 timing
+0
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+clkdiv = 124. mcck = 397312
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+MMC: Setting controller bus width to 1
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: starting CMD0 arg 00000000 flags 000000c0
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Sending command 0 as 00000800, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+MCI irq: status = 0000C0E5, C07F0001, 00000001
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Command ready
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Status = 00000001/0000c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: req done (CMD0): 0: 00001008 00000000 00000000 00000000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 21 width 0 timing
+0
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+clkdiv = 124. mcck = 397312
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+MMC: Setting controller bus width to 1
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: starting CMD8 arg 000001aa flags 000002f5
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Sending command 8 as 00001848, arg = 000001AA, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+MMC: Response timeout
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Error detected and set to -110/0 (cmd = 8, retries = 0)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: req done (CMD8): -110: 00001008 00000000 00000000 00000000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: starting CMD5 arg 00000000 flags 000002e1
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Sending command 5 as 00001845, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+MMC: Response timeout
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Error detected and set to -110/0 (cmd = 5, retries = 3)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+mmc0: req failed (CMD5): -110, retrying...
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.160000]
+Sending command 5 as 00001845, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+MMC: Response timeout
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Error detected and set to -110/0 (cmd = 5, retries = 2)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+mmc0: req failed (CMD5): -110, retrying...
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Sending command 5 as 00001845, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+MMC: Response timeout
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Error detected and set to -110/0 (cmd = 5, retries = 1)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+mmc0: req failed (CMD5): -110, retrying...
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Sending command 5 as 00001845, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+MMC: Response timeout
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Error detected and set to -110/0 (cmd = 5, retries = 0)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+mmc0: req done (CMD5): -110: 00001008 00000000 00000000 00000000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+mmc0: starting CMD55 arg 00000000 flags 000000f5
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.170000]
+Sending command 55 as 00001877, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+MMC: Response timeout
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+Error detected and set to -110/0 (cmd = 55, retries = 0)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: req done (CMD55): -110: 00001008 00000000 00000000 00000000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: starting CMD55 arg 00000000 flags 000000f5
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+Sending command 55 as 00001877, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+MMC: Response timeout
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+Completed command
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:21 at91sam9260custom user.debug kernel: [    1.180000]
+Error detected and set to -110/0 (cmd = 55, retries = 0)
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: req done (CMD55): -110: 00001008 00000000 00000000 00000000
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: starting CMD55 arg 00000000 flags 000000f5
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Sending command 55 as 00001877, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+MMC: Response timeout
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Completed command
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Error detected and set to -110/0 (cmd = 55, retries = 0)
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: req done (CMD55): -110: 00001008 00000000 00000000 00000000
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: starting CMD55 arg 00000000 flags 000000f5
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Sending command 55 as 00001877, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+MMC: Response timeout
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Completed command
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Error detected and set to -110/0 (cmd = 55, retries = 0)
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: req done (CMD55): -110: 00001008 00000000 00000000 00000000
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: starting CMD1 arg 00000000 flags 000000e1
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Clearing timeout
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Clearing: SR = 0000C0E4
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Clearing: SR = 0000C0E4
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Clearing: SR = 0000C0E4
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Clearing: SR = 0000C0E4
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Sending command 1 as 00001841, arg = 00000000, blocks = 0, length = 0
+(MR = 00009B7C)
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+MCI irq: status = 0010C0E4, C07F0001, 00100000
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+MMC: Response timeout
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Completed command
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Status = 00100000/0010c0e5 [00001008 00000000 00000000 00000000]
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+Error detected and set to -110/0 (cmd = 1, retries = 0)
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: req done (CMD1): -110: 00001008 00000000 00000000 00000000
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+mmc0: clock 0Hz busmode 1 powermode 0 cs 0 Vdd 0 width 0 timing 0
+Jan  1 01:00:22 at91sam9260custom user.debug kernel: [    1.180000]
+MMC: Setting controller bus width to 1
 
 
-Adrian,
+Thanks in advance for any tips,
+Regards,
 
-Thank you for the feedback.  I have amended the patch.  I tested the patch =
-against mmc4.3 or earlier cards and it works.
-Your comment about the switch boot config not being supported by earlier ca=
-rds is handled by NOT checking for any errors.=20
-
-The reason the patch is needed is because when our  boot loader gets loaded=
- from the private boot area, it sets the partition to the private boot area=
- and then hands control to a secondary loader.  Normally our boot loader wo=
-uld disable access to the partition once boot code was loaded in before pas=
-sing control to linux but if the process is stopped or the kernel is loaded=
- from another device the partition number is not reset. =20
-
-We can fix this but it seems good practice for linux to reset the flash to =
-a normal state.
-
-The other concerns I believe were addressed earlier.  The trace showing wha=
-t was happening with and without the patch.
-
-regards,
-Philip
-
-signed-off-by: Philip Rakity <prakity@marvell.com>
-diff -ru linux-2.6.32.8/drivers/mmc/core/mmc.c linux-2.6.32.8 copy/drivers/=
-mmc/core/mmc.c
---- linux-2.6.32.8/drivers/mmc/core/mmc.c	2010-02-09 04:57:19.000000000 -08=
-00
-+++ linux-2.6.32.8 copy/drivers/mmc/core/mmc.c	2010-03-12 20:56:16.00000000=
-0 -0800
-@@ -430,6 +432,13 @@
- 	}
-=20
- 	/*
-+	* ensure eMMC private booting PARTITION is not enabled
-+	*/
-+	mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+		EXT_CSD_BOOT_CONFIG, 0x0);
-+
-+	/*
- 	 * Compute bus speed.
- 	 */
- 	max_dtr =3D (unsigned int)-1;
-diff -ru linux-2.6.32.8/include/linux/mmc/mmc.h linux-2.6.32.8 copy/include=
-/linux/mmc/mmc.h
---- linux-2.6.32.8/include/linux/mmc/mmc.h	2010-02-09 04:57:19.000000000 -0=
-800
-+++ linux-2.6.32.8 copy/include/linux/mmc/mmc.h	2010-03-12 20:53:48.0000000=
-00 -0800
-@@ -251,6 +252,7 @@
-  * EXT_CSD fields
-  */
-=20
-+#define EXT_CSD_BOOT_CONFIG	179 /* R/W */
- #define EXT_CSD_BUS_WIDTH	183	/* R/W */
- #define EXT_CSD_HS_TIMING	185	/* R/W */
- #define EXT_CSD_CARD_TYPE	196	/* RO */
-
-
-
-On Mar 15, 2010, at 1:08 AM, Adrian Hunter wrote:
-
-> Philip Rakity wrote:
->> Some eMMC chips have a boot partition that is meant to be used to load i=
-n low level boot code.
->> This partition is available when the chip is powered up.  Normally the b=
-oot loader would disable
->> access to the partition once boot code was loaded in before passing cont=
-rol to linux. =20
->>=20
->> if booting occurs from another device (not the eMMC chip) the partition =
-will not be disabled by
->> the boot loader and control will be passed to linux.  This will cause li=
-nux to not recognize user
->> partitions on the chip unless access to the boot partition is deactivate=
-d.
->>=20
->> See JEDEC Standard 84-A44 (eMMC 4.4 spec) -- Page 139
->=20
-> Page 139 doesn't say anything about why you need that switch command.
-> Please provide a more useful reference or delete this.
->=20
-> Boot mode is terminated by CMD1, so that switch command should not
-> be needed.  Please explain why it is needed in more detail.
->=20
-> That switch command should not be used for devices that do not
-> support it e.g. eMMC 4.3 and before.
->=20
->=20
->>=20
->> signed off by:  Philip Rakity <prakity@marvell.com>
->> diff -ru linux-2.6.32.8/drivers/mmc/core/mmc.c linux-2.6.32.8 copy/drive=
-rs/mmc/core/mmc.c
->> --- linux-2.6.32.8/drivers/mmc/core/mmc.c	2010-02-09 04:57:19.000000000 =
--0800
->> +++ linux-2.6.32.8 copy/drivers/mmc/core/mmc.c	2010-03-12 20:56:16.00000=
-0000 -0800
->> @@ -430,6 +432,13 @@
->> 	}
->>=20
->> 	/*
->> +	* ensure eMMC private booting PARTITION is not enabled
->> +	* see JEDEC Standard No. 84-A44 - Page 139=20
->> +	*/
->> +	mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> +		EXT_CSD_BOOT_CONFIG, 0x0);
->> +
->> +	/*
->> 	 * Compute bus speed.
->> 	 */
->> 	max_dtr =3D (unsigned int)-1;
->> diff -ru linux-2.6.32.8/include/linux/mmc/mmc.h linux-2.6.32.8 copy/incl=
-ude/linux/mmc/mmc.h
->> --- linux-2.6.32.8/include/linux/mmc/mmc.h	2010-02-09 04:57:19.000000000=
- -0800
->> +++ linux-2.6.32.8 copy/include/linux/mmc/mmc.h	2010-03-12 20:53:48.0000=
-00000 -0800
->> @@ -251,6 +252,7 @@
->>  * EXT_CSD fields
->>  */
->>=20
->> +#define EXT_CSD_BOOT_CONFIG	179 /* R/W */
->> #define EXT_CSD_BUS_WIDTH	183	/* R/W */
->> #define EXT_CSD_HS_TIMING	185	/* R/W */
->> #define EXT_CSD_CARD_TYPE	196	/* RO */
->>=20
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>=20
->=20
-
---_002_3A9599CE49EE4A1889E022B17090CA43marvellcom_
-Content-Type: text/plain; name="eMMCPartitionPatch.txt"
-Content-Description: eMMCPartitionPatch.txt
-Content-Disposition: attachment; filename="eMMCPartitionPatch.txt"; size=1030;
-	creation-date="Fri, 19 Mar 2010 22:12:23 GMT";
-	modification-date="Fri, 19 Mar 2010 22:12:23 GMT"
-Content-Transfer-Encoding: base64
-
-c2lnbmVkLW9mZi1ieTogUGhpbGlwIFJha2l0eSA8cHJha2l0eUBtYXJ2ZWxsLmNvbT4NCmRpZmYg
-LXJ1IGxpbnV4LTIuNi4zMi44L2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgbGludXgtMi42LjMyLjgg
-Y29weS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQotLS0gbGludXgtMi42LjMyLjgvZHJpdmVycy9t
-bWMvY29yZS9tbWMuYwkyMDEwLTAyLTA5IDA0OjU3OjE5LjAwMDAwMDAwMCAtMDgwMA0KKysrIGxp
-bnV4LTIuNi4zMi44IGNvcHkvZHJpdmVycy9tbWMvY29yZS9tbWMuYwkyMDEwLTAzLTEyIDIwOjU2
-OjE2LjAwMDAwMDAwMCAtMDgwMA0KQEAgLTQzMCw2ICs0MzIsMTMgQEANCiAJfQ0KIA0KIAkvKg0K
-KwkqIGVuc3VyZSBlTU1DIHByaXZhdGUgYm9vdGluZyBQQVJUSVRJT04gaXMgbm90IGVuYWJsZWQN
-CisJKi8NCisJbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0KKwkJRVhU
-X0NTRF9CT09UX0NPTkZJRywgMHgwKTsNCisNCisJLyoNCiAJICogQ29tcHV0ZSBidXMgc3BlZWQu
-DQogCSAqLw0KIAltYXhfZHRyID0gKHVuc2lnbmVkIGludCktMTsNCmRpZmYgLXJ1IGxpbnV4LTIu
-Ni4zMi44L2luY2x1ZGUvbGludXgvbW1jL21tYy5oIGxpbnV4LTIuNi4zMi44IGNvcHkvaW5jbHVk
-ZS9saW51eC9tbWMvbW1jLmgNCi0tLSBsaW51eC0yLjYuMzIuOC9pbmNsdWRlL2xpbnV4L21tYy9t
-bWMuaAkyMDEwLTAyLTA5IDA0OjU3OjE5LjAwMDAwMDAwMCAtMDgwMA0KKysrIGxpbnV4LTIuNi4z
-Mi44IGNvcHkvaW5jbHVkZS9saW51eC9tbWMvbW1jLmgJMjAxMC0wMy0xMiAyMDo1Mzo0OC4wMDAw
-MDAwMDAgLTA4MDANCkBAIC0yNTEsNiArMjUyLDcgQEANCiAgKiBFWFRfQ1NEIGZpZWxkcw0KICAq
-Lw0KIA0KKyNkZWZpbmUgRVhUX0NTRF9CT09UX0NPTkZJRwkxNzkgLyogUi9XICovDQogI2RlZmlu
-ZSBFWFRfQ1NEX0JVU19XSURUSAkxODMJLyogUi9XICovDQogI2RlZmluZSBFWFRfQ1NEX0hTX1RJ
-TUlORwkxODUJLyogUi9XICovDQogI2RlZmluZSBFWFRfQ1NEX0NBUkRfVFlQRQkxOTYJLyogUk8g
-Ki8NCg==
-
---_002_3A9599CE49EE4A1889E022B17090CA43marvellcom_--
+D.MOUSSAUD.
