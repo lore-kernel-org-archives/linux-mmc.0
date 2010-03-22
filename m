@@ -1,36 +1,112 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH 3/3] sdhci-pltfm: Do not print errors in case of an
- extended iomem size
-Date: Mon, 22 Mar 2010 12:30:52 -0700
-Message-ID: <20100322123052.10820d0f.akpm@linux-foundation.org>
-References: <20100316183400.GA24191@oksana.dev.rtsoft.ru>
-	<20100316183430.GC25670@oksana.dev.rtsoft.ru>
-	<4BA0708C.8070402@pelagicore.com>
+From: akpm@linux-foundation.org
+Subject: + sdhci-implement-cap_clock_base_broken-quirk.patch added to -mm tree
+Date: Mon, 22 Mar 2010 12:30:57 -0700
+Message-ID: <201003221930.o2MJUv3H022731@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:40965 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754970Ab0CVTbU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Mar 2010 15:31:20 -0400
-In-Reply-To: <4BA0708C.8070402@pelagicore.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: avorontsov@ru.mvista.com, ben@simtec.co.uk, david.vrabel@csr.com, linux-mmc@vger.kernel.org, pierre@ossman.eu, richard.rojfors@pelagicore.com
 List-Id: linux-mmc@vger.kernel.org
-To: Richard =?ISO-8859-1?Q?R=F6jfors?= <richard.rojfors@pelagicore.com>
-Cc: Anton Vorontsov <avorontsov@ru.mvista.com>, David Vrabel <david.vrabel@csr.com>, Pierre Ossman <pierre@ossman.eu>, Ben Dooks <ben@simtec.co.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, 17 Mar 2010 07:02:52 +0100
-Richard R__jfors <richard.rojfors@pelagicore.com> wrote:
 
-> On 3/16/10 7:34 PM, Anton Vorontsov wrote:
-> > Some hosts have an extended SDHCI iomem size, so the driver should
-> > only print errors if the iomem size is less than 0x100.
-> 
-> With this change you allow a bigger resource than we really need.
-> I think you should also change request_mem_region and ioremap to only
-> request and map the actual needed size. (0x100)
+The patch titled
+     sdhci: implement CAP_CLOCK_BASE_BROKEN quirk
+has been added to the -mm tree.  Its filename is
+     sdhci-implement-cap_clock_base_broken-quirk.patch
 
-I merged these three with a note-to-self that some updates are expected
-(hint).
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
+*** Remember to use Documentation/SubmitChecklist when testing your cod=
+e ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mm=
+otm/
+
+------------------------------------------------------
+Subject: sdhci: implement CAP_CLOCK_BASE_BROKEN quirk
+=46rom: Anton Vorontsov <avorontsov@ru.mvista.com>
+
+Some hosts (e.g.  as found in CNS3xxx SOCs) report wrong value in
+CLOCK_BASE capability field, and currently there is no way to force the
+SDHCI core to use the platform-provided base clock value.
+
+This patch implements CAP_CLOCK_BASE_BROKEN quirk.  When enabled, the
+SDHCI core will always use base clock frequency provided by the platfor=
+m.
+
+Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
+Cc: Richard R=F6jfors <richard.rojfors@pelagicore.com>
+Cc: David Vrabel <david.vrabel@csr.com>
+Cc: Pierre Ossman <pierre@ossman.eu>
+Cc: Ben Dooks <ben@simtec.co.uk>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/sdhci.c |    3 ++-
+ drivers/mmc/host/sdhci.h |    2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff -puN drivers/mmc/host/sdhci.c~sdhci-implement-cap_clock_base_broke=
+n-quirk drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~sdhci-implement-cap_clock_base_broken-qu=
+irk
++++ a/drivers/mmc/host/sdhci.c
+@@ -1743,7 +1743,8 @@ int sdhci_add_host(struct sdhci_host *ho
+ 	host->max_clk =3D
+ 		(caps & SDHCI_CLOCK_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
+ 	host->max_clk *=3D 1000000;
+-	if (host->max_clk =3D=3D 0) {
++	if (host->max_clk =3D=3D 0 || host->quirks &
++			SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN) {
+ 		if (!host->ops->get_max_clock) {
+ 			printk(KERN_ERR
+ 			       "%s: Hardware doesn't specify base clock "
+diff -puN drivers/mmc/host/sdhci.h~sdhci-implement-cap_clock_base_broke=
+n-quirk drivers/mmc/host/sdhci.h
+--- a/drivers/mmc/host/sdhci.h~sdhci-implement-cap_clock_base_broken-qu=
+irk
++++ a/drivers/mmc/host/sdhci.h
+@@ -236,6 +236,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_DELAY_AFTER_POWER			(1<<23)
+ /* Controller uses SDCLK instead of TMCLK for data timeouts */
+ #define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
++/* Controller reports wrong base clock capability */
++#define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
+=20
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
+_
+
+Patches currently in -mm which might be from avorontsov@ru.mvista.com a=
+re
+
+linux-next.patch
+gpiolib-introduce-chip-addition-removal-notifier.patch
+of-gpio-add-support-for-two-stage-registration-for-the-of_gpio_chips.pa=
+tch
+of-gpio-implement-gpiolib-notifier-hooks.patch
+of-gpio-implement-gpiolib-notifier-hooks-fix.patch
+of-gpio-implement-gpiolib-notifier-hooks-fix-fix2.patch
+powerpc-mcu_mpc8349emitx-remove-of-gpio-handling-stuff.patch
+gpiolib-cosmetic-improvements-for-error-handling-in-gpiochip_add.patch
+sdhci-implement-cap_clock_base_broken-quirk.patch
+sdhci-pltfm-implement-platform-data-passing.patch
+sdhci-pltfm-do-not-print-errors-in-case-of-an-extended-iomem-size.patch
+
+--
+To unsubscribe from this list: send the line "unsubscribe mm-commits" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
