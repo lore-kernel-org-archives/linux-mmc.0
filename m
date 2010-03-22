@@ -1,196 +1,82 @@
-From: David MOUSSAUD <d.moussaud@gmail.com>
-Subject: the at91 mci controller does not recognized my libertas 8686 sdio
-	wifi chip after a reset
-Date: Sun, 21 Mar 2010 11:27:59 +0100
-Message-ID: <cdd918981003210327h2e182f1dsd7bbe541cee53ab1@mail.gmail.com>
+From: Fred LIU <a18596@motorola.com>
+Subject: bug in drivers/mmc/core/core.c
+Date: Mon, 22 Mar 2010 14:56:36 +0800
+Message-ID: <edce52581003212356r4fd5cfd6hd0209345f21fc79a@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/mixed; boundary=001636284858f66a9d04825e33f0
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f227.google.com ([209.85.220.227]:53812 "EHLO
-	mail-fx0-f227.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751993Ab0CUK2U (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Mar 2010 06:28:20 -0400
-Received: by fxm27 with SMTP id 27so3848477fxm.28
-        for <linux-mmc@vger.kernel.org>; Sun, 21 Mar 2010 03:28:19 -0700 (PDT)
+Received: from exprod5og110.obsmtp.com ([64.18.0.20]:49148 "EHLO
+	exprod5og110.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751206Ab0CVH3S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Mar 2010 03:29:18 -0400
+Received: from il06vts04.mot.com (il06vts04.mot.com [129.188.137.144])
+	by mdgate1.mot.com (8.14.3/8.14.3) with SMTP id o2M6vE53029351
+	for <linux-mmc@vger.kernel.org>; Mon, 22 Mar 2010 00:57:14 -0600 (MDT)
+Received: from mail-qy0-f203.google.com (mail-qy0-f203.google.com [209.85.221.203])
+	by mdgate1.mot.com (8.14.3/8.14.3) with ESMTP id o2M6jxQo026977
+	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Mon, 22 Mar 2010 00:57:14 -0600 (MDT)
+Received: by mail-qy0-f203.google.com with SMTP id 41so50769qyk.21
+        for <linux-mmc@vger.kernel.org>; Sun, 21 Mar 2010 23:56:57 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, libertas-dev@lists.infradead.org
+To: linux-mmc@vger.kernel.org
 
-Hello,
+--001636284858f66a9d04825e33f0
+Content-Type: text/plain; charset=ISO-8859-1
 
-I'm writting to the both mmc & libertas mailing list  because i might
-think the problem is related.
+Hi, greetings,
 
-I'm using a prototype board running a  AT91sam9g20 processor. I have a
-libertas sdio wifi chip connected to my MCI controller.
-I've applied the 2.6.32 bsp patch.
+I think below line has a bug in core.c.
 
-When I power up the board (power on reset), the sdio chip is well
-probed by the mci controller.
-But when i reset the board, the mmc_rescan function failed because the call to
+According to SD specification, the maximum identification frequency is
+400 KHz (physical_layer_2.0.pdf, page 123).
+But the original code would set higher than 400 KHz if the f_min is
+higher than 400 KHz. Conversely, if f_min is lower than 400 KHz, it is
+always set as 400 KHz. This is wrong also.
 
-/*
-* First we search for SDIO...
-*/
-err = mmc_send_io_op_cond(host, 0, &ocr);
+========================================================
 
-return 110;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 3168ebd..0cf7e5c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -907,7 +907,7 @@ static void mmc_power_up(struct mmc_host *host)
+ 	 */
+ 	mmc_delay(10);
 
-so my sdio chip is not recognized by my kernel.
+-	if (host->f_min > 400000) {
++	if (host->f_min < 400000) {
+ 		pr_warning("%s: Minimum clock frequency too high for "
+ 				"identification mode\n", mmc_hostname(host));
+ 		host->ios.clock = host->f_min;
 
-I've tried to apply that patch "sdio : recognize io card without
-powercycle" ( 516a82422209e078345d0ca54b16793d7bfd4782 ) without success.
+===========================================================
 
-Here is a dump of the mmc dialogue when the board is only reseted :
-[    1.160000] mmc0: starting CMD52 arg 00000c00 flags 00000195
-   [    1.160000] Sending command 52 as 00001874, arg = 00000C00,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.160000] MCI irq: status = 0000C0E5, C07F0001, 00000001
-   [    1.160000] Command ready
-   [    1.160000] Completed command
-   [    1.160000] Status = 00000001/0000c0e5 [00001000 00000000
-00000000 00000000]
-   [    1.160000] mmc0: req done (CMD52): 0: 00001000 00000000 00000000 00000000
-   [    1.160000] mmc0: starting CMD52 arg 80000c08 flags 00000195
-   [    1.160000] Sending command 52 as 00001874, arg = 80000C08,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.160000] MCI irq: status = 0000C0E5, C07F0001, 00000001
-   [    1.160000] Command ready
-   [    1.160000] Completed command
-   [    1.160000] Status = 00000001/0000c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.160000] mmc0: req done (CMD52): 0: 00001008 00000000 00000000 00000000
-   [    1.160000] mmc0: clock 400000Hz busmode 1 powermode 2 cs 1 Vdd
-21 width 0 timing 0
-   [    1.160000] clkdiv = 124. mcck = 397312
-   [    1.160000] MMC: Setting controller bus width to 1
-   [    1.160000] mmc0: starting CMD0 arg 00000000 flags 000000c0
-   [    1.160000] Sending command 0 as 00000800, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.160000] MCI irq: status = 0000C0E5, C07F0001, 00000001
-   [    1.160000] Command ready
-   [    1.160000] Completed command
-   [    1.160000] Status = 00000001/0000c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.160000] mmc0: req done (CMD0): 0: 00001008 00000000 00000000 00000000
-   [    1.160000] mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd
-21 width 0 timing 0
-   [    1.160000] clkdiv = 124. mcck = 397312
-   [    1.160000] MMC: Setting controller bus width to 1
-   [    1.160000] mmc0: starting CMD8 arg 000001aa flags 000002f5
-   [    1.160000] Sending command 8 as 00001848, arg = 000001AA,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.160000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.160000] MMC: Response timeout
-   [    1.160000] Completed command
-   [    1.160000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.160000] Error detected and set to -110/0 (cmd = 8, retries = 0)
-   [    1.160000] mmc0: req done (CMD8): -110: 00001008 00000000
-00000000 00000000
-   [    1.160000] mmc0: starting CMD5 arg 00000000 flags 000002e1
-   [    1.160000] Sending command 5 as 00001845, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.160000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.160000] MMC: Response timeout
-   [    1.160000] Completed command
-   [    1.160000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.160000] Error detected and set to -110/0 (cmd = 5, retries = 3)
-   [    1.160000] mmc0: req failed (CMD5): -110, retrying...
-   [    1.160000] Sending command 5 as 00001845, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.170000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.170000] MMC: Response timeout
-   [    1.170000] Completed command
-   [    1.170000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.170000] Error detected and set to -110/0 (cmd = 5, retries = 2)
-   [    1.170000] mmc0: req failed (CMD5): -110, retrying...
-   [    1.170000] Sending command 5 as 00001845, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.170000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.170000] MMC: Response timeout
-   [    1.170000] Completed command
-   [    1.170000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.170000] Error detected and set to -110/0 (cmd = 5, retries = 1)
-   [    1.170000] mmc0: req failed (CMD5): -110, retrying...
-   [    1.170000] Sending command 5 as 00001845, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.170000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.170000] MMC: Response timeout
-   [    1.170000] Completed command
-   [    1.170000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.170000] Error detected and set to -110/0 (cmd = 5, retries = 0)
-   [    1.170000] mmc0: req done (CMD5): -110: 00001008 00000000
-00000000 00000000
-   [    1.170000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-   [    1.170000] Sending command 55 as 00001877, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.180000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.180000] MMC: Response timeout
-   [    1.180000] Completed command
-   [    1.180000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.180000] Error detected and set to -110/0 (cmd = 55, retries = 0)
-   [    1.180000] mmc0: req done (CMD55): -110: 00001008 00000000
-00000000 00000000
-   [    1.180000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-   [    1.180000] Sending command 55 as 00001877, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.180000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.180000] MMC: Response timeout
-   [    1.180000] Completed command
-   [    1.180000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.180000] Error detected and set to -110/0 (cmd = 55, retries = 0)
-   [    1.180000] mmc0: req done (CMD55): -110: 00001008 00000000
-00000000 00000000
-   [    1.180000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-   [    1.180000] Sending command 55 as 00001877, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.180000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.180000] MMC: Response timeout
-   [    1.180000] Completed command
-   [    1.180000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.180000] Error detected and set to -110/0 (cmd = 55, retries = 0)
-   [    1.180000] mmc0: req done (CMD55): -110: 00001008 00000000
-00000000 00000000
-   [    1.180000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-   [    1.180000] Sending command 55 as 00001877, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.180000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.180000] MMC: Response timeout
-   [    1.180000] Completed command
-   [    1.180000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.180000] Error detected and set to -110/0 (cmd = 55, retries = 0)
-   [    1.180000] mmc0: req done (CMD55): -110: 00001008 00000000
-00000000 00000000
-   [    1.180000] mmc0: starting CMD1 arg 00000000 flags 000000e1
-   [    1.180000] Clearing timeout
-   [    1.180000] Clearing: SR = 0000C0E4
-   [    1.180000] Clearing: SR = 0000C0E4
-   [    1.180000] Clearing: SR = 0000C0E4
-   [    1.180000] Clearing: SR = 0000C0E4
-   [    1.180000] Sending command 1 as 00001841, arg = 00000000,
-blocks = 0, length = 0 (MR = 00009B7C)
-   [    1.180000] MCI irq: status = 0010C0E4, C07F0001, 00100000
-   [    1.180000] MMC: Response timeout
-   [    1.180000] Completed command
-   [    1.180000] Status = 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-   [    1.180000] Error detected and set to -110/0 (cmd = 1, retries = 0)
-   [    1.180000] mmc0: req done (CMD1): -110: 00001008 00000000
-00000000 00000000
-   [    1.180000] mmc0: clock 0Hz busmode 1 powermode 0 cs 0 Vdd 0
-width 0 timing 0
-   [    1.180000] MMC: Setting controller bus width to 1
+Best regards,
+Fred
 
-Thanks in advance for any tips,
-Regards,
+--001636284858f66a9d04825e33f0
+Content-Type: application/octet-stream;
+	name="0001-mmc-Maximum-frequency-of-identification-mode-is-400-.patch"
+Content-Disposition: attachment;
+	filename="0001-mmc-Maximum-frequency-of-identification-mode-is-400-.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_g72x92f20
 
-D.MOUSSAUD.
+RnJvbSA2YzUzODI4MzY5NjQxZWQ3MzcwMjdjZTVkYWIwYTZiNTQ3Yjc5ODI0IE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQ0KRnJvbTogZnJlZCA8ZnJlZEBmcmVkLWRlc2t0b3AuKG5vbmUpPg0KRGF0
+ZTogTW9uLCAyMiBNYXIgMjAxMCAxNDo1MzozNCArMDgwMA0KU3ViamVjdDogW1BBVENIXSBbbW1j
+XSBNYXhpbXVtIGZyZXF1ZW5jeSBvZiBpZGVudGlmaWNhdGlvbiBtb2RlIGlzIDQwMCBLSHoNCg0K
+LS0tDQogZHJpdmVycy9tbWMvY29yZS9jb3JlLmMgfCAgICAyICstDQogMSBmaWxlcyBjaGFuZ2Vk
+LCAxIGluc2VydGlvbnMoKyksIDEgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9kcml2ZXJz
+L21tYy9jb3JlL2NvcmUuYyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQppbmRleCAzMTY4ZWJk
+Li4wY2Y3ZTVjIDEwMDY0NA0KLS0tIGEvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMNCisrKyBiL2Ry
+aXZlcnMvbW1jL2NvcmUvY29yZS5jDQpAQCAtOTA3LDcgKzkwNyw3IEBAIHN0YXRpYyB2b2lkIG1t
+Y19wb3dlcl91cChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpDQogCSAqLw0KIAltbWNfZGVsYXkoMTAp
+Ow0KIA0KLQlpZiAoaG9zdC0+Zl9taW4gPiA0MDAwMDApIHsNCisJaWYgKGhvc3QtPmZfbWluIDwg
+NDAwMDAwKSB7DQogCQlwcl93YXJuaW5nKCIlczogTWluaW11bSBjbG9jayBmcmVxdWVuY3kgdG9v
+IGhpZ2ggZm9yICINCiAJCQkJImlkZW50aWZpY2F0aW9uIG1vZGVcbiIsIG1tY19ob3N0bmFtZSho
+b3N0KSk7DQogCQlob3N0LT5pb3MuY2xvY2sgPSBob3N0LT5mX21pbjsNCi0tIA0KMS42LjMuMw0K
+DQo=
+--001636284858f66a9d04825e33f0--
