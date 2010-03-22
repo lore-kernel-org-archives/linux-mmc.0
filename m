@@ -1,212 +1,91 @@
-From: David MOUSSAUD <d.moussaud@gmail.com>
-Subject: the at91 mci controller does not recognized my libertas 8686 sdio
-	wifi chip after a reset
-Date: Mon, 22 Mar 2010 20:15:48 +0100
-Message-ID: <cdd918981003221215p51d41b51mf8433caca099495@mail.gmail.com>
+From: akpm@linux-foundation.org
+Subject: + sdhci-pltfm-do-not-print-errors-in-case-of-an-extended-iomem-size.patch added to -mm tree
+Date: Mon, 22 Mar 2010 12:31:02 -0700
+Message-ID: <201003221931.o2MJV2Yx022738@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f223.google.com ([209.85.220.223]:63589 "EHLO
-	mail-fx0-f223.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755416Ab0CVTQK convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Mar 2010 15:16:10 -0400
-Received: by fxm23 with SMTP id 23so1086004fxm.21
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Mar 2010 12:16:08 -0700 (PDT)
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:50929 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750918Ab0CVTbU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Mar 2010 15:31:20 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: avorontsov@ru.mvista.com, ben@simtec.co.uk, david.vrabel@csr.com, linux-mmc@vger.kernel.org, pierre@ossman.eu, richard.rojfors@pelagicore.com
 
-Hello,
 
-I'm using a prototype board running a =A0AT91sam9g20 processor. I have =
-a
-libertas sdio wifi chip connected to my MCI controller.
-I've applied the 2.6.32 bsp patch.
+The patch titled
+     sdhci-pltfm: do not print errors in case of an extended iomem size
+has been added to the -mm tree.  Its filename is
+     sdhci-pltfm-do-not-print-errors-in-case-of-an-extended-iomem-size.=
+patch
 
-When I power up the board (power on reset), the sdio chip is well
-probed by the mci controller.
-But when i reset the board, the mmc_rescan function failed because the =
-call to
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-/*
-* First we search for SDIO...
-*/
-err =3D mmc_send_io_op_cond(host, 0, &ocr);
+*** Remember to use Documentation/SubmitChecklist when testing your cod=
+e ***
 
-return 110;
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
-so my sdio chip is not recognized by my kernel.
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mm=
+otm/
 
-I've tried to apply that patch "sdio : recognize io card without
-powercycle" ( 516a82422209e078345d0ca54b16793d7bfd4782 ) without succes=
-s.
+------------------------------------------------------
+Subject: sdhci-pltfm: do not print errors in case of an extended iomem =
+size
+=46rom: Anton Vorontsov <avorontsov@ru.mvista.com>
 
-Here is a dump of the mmc dialogue when the board is only reseted :
-[ =A0 =A01.160000] mmc0: starting CMD52 arg 00000c00 flags 00000195
-=A0[ =A0 =A01.160000] Sending command 52 as 00001874, arg =3D 00000C00,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.160000] MCI irq: status =3D 0000C0E5, C07F0001, 00000001
-=A0[ =A0 =A01.160000] Command ready
-=A0[ =A0 =A01.160000] Completed command
-=A0[ =A0 =A01.160000] Status =3D 00000001/0000c0e5 [00001000 00000000
-00000000 00000000]
-=A0[ =A0 =A01.160000] mmc0: req done (CMD52): 0: 00001000 00000000 0000=
-0000 00000000
-=A0[ =A0 =A01.160000] mmc0: starting CMD52 arg 80000c08 flags 00000195
-=A0[ =A0 =A01.160000] Sending command 52 as 00001874, arg =3D 80000C08,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.160000] MCI irq: status =3D 0000C0E5, C07F0001, 00000001
-=A0[ =A0 =A01.160000] Command ready
-=A0[ =A0 =A01.160000] Completed command
-=A0[ =A0 =A01.160000] Status =3D 00000001/0000c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.160000] mmc0: req done (CMD52): 0: 00001008 00000000 0000=
-0000 00000000
-=A0[ =A0 =A01.160000] mmc0: clock 400000Hz busmode 1 powermode 2 cs 1 V=
-dd
-21 width 0 timing 0
-=A0[ =A0 =A01.160000] clkdiv =3D 124. mcck =3D 397312
-=A0[ =A0 =A01.160000] MMC: Setting controller bus width to 1
-=A0[ =A0 =A01.160000] mmc0: starting CMD0 arg 00000000 flags 000000c0
-=A0[ =A0 =A01.160000] Sending command 0 as 00000800, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.160000] MCI irq: status =3D 0000C0E5, C07F0001, 00000001
-=A0[ =A0 =A01.160000] Command ready
-=A0[ =A0 =A01.160000] Completed command
-=A0[ =A0 =A01.160000] Status =3D 00000001/0000c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.160000] mmc0: req done (CMD0): 0: 00001008 00000000 00000=
-000 00000000
-=A0[ =A0 =A01.160000] mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 V=
-dd
-21 width 0 timing 0
-=A0[ =A0 =A01.160000] clkdiv =3D 124. mcck =3D 397312
-=A0[ =A0 =A01.160000] MMC: Setting controller bus width to 1
-=A0[ =A0 =A01.160000] mmc0: starting CMD8 arg 000001aa flags 000002f5
-=A0[ =A0 =A01.160000] Sending command 8 as 00001848, arg =3D 000001AA,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.160000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.160000] MMC: Response timeout
-=A0[ =A0 =A01.160000] Completed command
-=A0[ =A0 =A01.160000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.160000] Error detected and set to -110/0 (cmd =3D 8, retr=
-ies =3D 0)
-=A0[ =A0 =A01.160000] mmc0: req done (CMD8): -110: 00001008 00000000
-00000000 00000000
-=A0[ =A0 =A01.160000] mmc0: starting CMD5 arg 00000000 flags 000002e1
-=A0[ =A0 =A01.160000] Sending command 5 as 00001845, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.160000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.160000] MMC: Response timeout
-=A0[ =A0 =A01.160000] Completed command
-=A0[ =A0 =A01.160000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.160000] Error detected and set to -110/0 (cmd =3D 5, retr=
-ies =3D 3)
-=A0[ =A0 =A01.160000] mmc0: req failed (CMD5): -110, retrying...
-=A0[ =A0 =A01.160000] Sending command 5 as 00001845, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.170000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.170000] MMC: Response timeout
-=A0[ =A0 =A01.170000] Completed command
-=A0[ =A0 =A01.170000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.170000] Error detected and set to -110/0 (cmd =3D 5, retr=
-ies =3D 2)
-=A0[ =A0 =A01.170000] mmc0: req failed (CMD5): -110, retrying...
-=A0[ =A0 =A01.170000] Sending command 5 as 00001845, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.170000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.170000] MMC: Response timeout
-=A0[ =A0 =A01.170000] Completed command
-=A0[ =A0 =A01.170000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.170000] Error detected and set to -110/0 (cmd =3D 5, retr=
-ies =3D 1)
-=A0[ =A0 =A01.170000] mmc0: req failed (CMD5): -110, retrying...
-=A0[ =A0 =A01.170000] Sending command 5 as 00001845, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.170000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.170000] MMC: Response timeout
-=A0[ =A0 =A01.170000] Completed command
-=A0[ =A0 =A01.170000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.170000] Error detected and set to -110/0 (cmd =3D 5, retr=
-ies =3D 0)
-=A0[ =A0 =A01.170000] mmc0: req done (CMD5): -110: 00001008 00000000
-00000000 00000000
-=A0[ =A0 =A01.170000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-=A0[ =A0 =A01.170000] Sending command 55 as 00001877, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.180000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.180000] MMC: Response timeout
-=A0[ =A0 =A01.180000] Completed command
-=A0[ =A0 =A01.180000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.180000] Error detected and set to -110/0 (cmd =3D 55, ret=
-ries =3D 0)
-=A0[ =A0 =A01.180000] mmc0: req done (CMD55): -110: 00001008 00000000
-00000000 00000000
-=A0[ =A0 =A01.180000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-=A0[ =A0 =A01.180000] Sending command 55 as 00001877, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.180000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.180000] MMC: Response timeout
-=A0[ =A0 =A01.180000] Completed command
-=A0[ =A0 =A01.180000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.180000] Error detected and set to -110/0 (cmd =3D 55, ret=
-ries =3D 0)
-=A0[ =A0 =A01.180000] mmc0: req done (CMD55): -110: 00001008 00000000
-00000000 00000000
-=A0[ =A0 =A01.180000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-=A0[ =A0 =A01.180000] Sending command 55 as 00001877, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.180000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.180000] MMC: Response timeout
-=A0[ =A0 =A01.180000] Completed command
-=A0[ =A0 =A01.180000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.180000] Error detected and set to -110/0 (cmd =3D 55, ret=
-ries =3D 0)
-=A0[ =A0 =A01.180000] mmc0: req done (CMD55): -110: 00001008 00000000
-00000000 00000000
-=A0[ =A0 =A01.180000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-=A0[ =A0 =A01.180000] Sending command 55 as 00001877, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.180000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.180000] MMC: Response timeout
-=A0[ =A0 =A01.180000] Completed command
-=A0[ =A0 =A01.180000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.180000] Error detected and set to -110/0 (cmd =3D 55, ret=
-ries =3D 0)
-=A0[ =A0 =A01.180000] mmc0: req done (CMD55): -110: 00001008 00000000
-00000000 00000000
-=A0[ =A0 =A01.180000] mmc0: starting CMD1 arg 00000000 flags 000000e1
-=A0[ =A0 =A01.180000] Clearing timeout
-=A0[ =A0 =A01.180000] Clearing: SR =3D 0000C0E4
-=A0[ =A0 =A01.180000] Clearing: SR =3D 0000C0E4
-=A0[ =A0 =A01.180000] Clearing: SR =3D 0000C0E4
-=A0[ =A0 =A01.180000] Clearing: SR =3D 0000C0E4
-=A0[ =A0 =A01.180000] Sending command 1 as 00001841, arg =3D 00000000,
-blocks =3D 0, length =3D 0 (MR =3D 00009B7C)
-=A0[ =A0 =A01.180000] MCI irq: status =3D 0010C0E4, C07F0001, 00100000
-=A0[ =A0 =A01.180000] MMC: Response timeout
-=A0[ =A0 =A01.180000] Completed command
-=A0[ =A0 =A01.180000] Status =3D 00100000/0010c0e5 [00001008 00000000
-00000000 00000000]
-=A0[ =A0 =A01.180000] Error detected and set to -110/0 (cmd =3D 1, retr=
-ies =3D 0)
-=A0[ =A0 =A01.180000] mmc0: req done (CMD1): -110: 00001008 00000000
-00000000 00000000
-=A0[ =A0 =A01.180000] mmc0: clock 0Hz busmode 1 powermode 0 cs 0 Vdd 0
-width 0 timing 0
-=A0[ =A0 =A01.180000] MMC: Setting controller bus width to 1
+Some hosts have an extended SDHCI iomem size, so the driver should
+only print errors if the iomem size is less than 0x100.
 
-Thanks in advance for any suggestion,
-Regards,
+Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
+Cc: Richard R=F6jfors <richard.rojfors@pelagicore.com>
+Cc: David Vrabel <david.vrabel@csr.com>
+Cc: Pierre Ossman <pierre@ossman.eu>
+Cc: Ben Dooks <ben@simtec.co.uk>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
-D.MOUSSAUD.
+ drivers/mmc/host/sdhci-pltfm.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff -puN drivers/mmc/host/sdhci-pltfm.c~sdhci-pltfm-do-not-print-error=
+s-in-case-of-an-extended-iomem-size drivers/mmc/host/sdhci-pltfm.c
+--- a/drivers/mmc/host/sdhci-pltfm.c~sdhci-pltfm-do-not-print-errors-in=
+-case-of-an-extended-iomem-size
++++ a/drivers/mmc/host/sdhci-pltfm.c
+@@ -61,7 +61,7 @@ static int __devinit sdhci_pltfm_probe(s
+ 		goto err;
+ 	}
+=20
+-	if (resource_size(iomem) !=3D 0x100)
++	if (resource_size(iomem) < 0x100)
+ 		dev_err(&pdev->dev, "Invalid iomem size. You may "
+ 			"experience problems.\n");
+=20
+_
+
+Patches currently in -mm which might be from avorontsov@ru.mvista.com a=
+re
+
+linux-next.patch
+gpiolib-introduce-chip-addition-removal-notifier.patch
+of-gpio-add-support-for-two-stage-registration-for-the-of_gpio_chips.pa=
+tch
+of-gpio-implement-gpiolib-notifier-hooks.patch
+of-gpio-implement-gpiolib-notifier-hooks-fix.patch
+of-gpio-implement-gpiolib-notifier-hooks-fix-fix2.patch
+powerpc-mcu_mpc8349emitx-remove-of-gpio-handling-stuff.patch
+gpiolib-cosmetic-improvements-for-error-handling-in-gpiochip_add.patch
+sdhci-implement-cap_clock_base_broken-quirk.patch
+sdhci-pltfm-implement-platform-data-passing.patch
+sdhci-pltfm-do-not-print-errors-in-case-of-an-extended-iomem-size.patch
+
