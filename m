@@ -1,72 +1,113 @@
-From: akpm@linux-foundation.org
-Subject: [patch 30/36] mmc: fix incorrect interpretation of card type bits
-Date: Tue, 23 Mar 2010 13:35:40 -0700
-Message-ID: <201003232035.o2NKZewC024543@imap1.linux-foundation.org>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: [PATCH] mmc: fix race condition between dma and omap_hsmmc callback
+Date: Wed, 24 Mar 2010 18:30:52 +0530
+Message-ID: <618f0c911003240600m1a38935av68f31a232ed8b8ad@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:35024 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753102Ab0CWUfq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Mar 2010 16:35:46 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, linux-mmc@vger.kernel.org
 
-From: Adrian Hunter <adrian.hunter@nokia.com>
+This patch addresses the possible race condition between the dma
+callback and hsmmc callback.
+All the 'post data transfer' cleanup activities are now done in the
+MMC TC handler.
+The schedule_timeout in omap_hsmmc_start_dma_transfer is hence not
+needed (which, incidentally,
+was also throwing a "schedule while atomic" warning when executed).
+Tested on OMAP4430 SDP.
 
-In the extended CSD register the CARD_TYPE is an 8-bit value of which the
-upper 6 bits were reserved in JEDEC specifications prior to version 4.4. 
-In version 4.4 two of the reserved bits were designated for identifying
-support for the newly added High-Speed Dual Data Rate.  Unfortunately the
-mmc_read_ext_csd() function required that the reserved bits be zero
-instead of ignoring them as it should.
-
-This patch makes mmc_read_ext_csd() ignore the CARD_TYPE bits that are
-reserved or not yet supported.  It also stops the function jumping to the
-end as though an error occurred, when it is only warns that the CARD_TYPE
-bits (that it does interpret) are invalid.
-
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+CC: Adrian Hunter <adrian.hunter@nokia.com>
+CC: Madhusudhan C <madhu.cr@ti.com>
+CC: Tony Lindgren <tony@atomide.com>
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
 ---
+ drivers/mmc/host/omap_hsmmc.c |   40 ++++++++++++++++------------------------
+ 1 files changed, 16 insertions(+), 24 deletions(-)
 
- drivers/mmc/core/mmc.c  |    3 +--
- include/linux/mmc/mmc.h |    1 +
- 2 files changed, 2 insertions(+), 2 deletions(-)
+The previous discussion about this patch is here
+https://patchwork.kernel.org/patch/82907/
+As requested, this is now posted as a separate patch instead of
+clubbing with another feature.
 
-diff -puN drivers/mmc/core/mmc.c~mmc-fix-incorrect-interpretation-of-card-type-bits drivers/mmc/core/mmc.c
---- a/drivers/mmc/core/mmc.c~mmc-fix-incorrect-interpretation-of-card-type-bits
-+++ a/drivers/mmc/core/mmc.c
-@@ -225,7 +225,7 @@ static int mmc_read_ext_csd(struct mmc_c
- 			mmc_card_set_blockaddr(card);
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 83f0aff..9a70b36 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1046,8 +1046,18 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+
+ 	if (end_cmd || ((status & CC) && host->cmd))
+ 		omap_hsmmc_cmd_done(host, host->cmd);
+-	if ((end_trans || (status & TC)) && host->mrq)
++	if ((end_trans || (status & TC)) && host->mrq) {
++		if (host->dma_ch != -1) {
++			omap_free_dma(host->dma_ch);
++			host->dma_ch = -1;
++			/*
++			 * Callback run in interrupt context.
++			 * mutex_unlock will throw a kernel warning if used.
++			 */
++			up(&host->sem);
++		}
+ 		omap_hsmmc_xfer_done(host, data);
++	}
+
+ 	spin_unlock(&host->irq_lock);
+
+@@ -1267,13 +1277,6 @@ static void omap_hsmmc_dma_cb(int lch, u16
+ch_status, void *data)
+ 		return;
  	}
- 
--	switch (ext_csd[EXT_CSD_CARD_TYPE]) {
-+	switch (ext_csd[EXT_CSD_CARD_TYPE] & EXT_CSD_CARD_TYPE_MASK) {
- 	case EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
- 		card->ext_csd.hs_max_dtr = 52000000;
- 		break;
-@@ -237,7 +237,6 @@ static int mmc_read_ext_csd(struct mmc_c
- 		printk(KERN_WARNING "%s: card is mmc v4 but doesn't "
- 			"support any high-speed modes.\n",
- 			mmc_hostname(card->host));
--		goto out;
- 	}
- 
- 	if (card->ext_csd.rev >= 3) {
-diff -puN include/linux/mmc/mmc.h~mmc-fix-incorrect-interpretation-of-card-type-bits include/linux/mmc/mmc.h
---- a/include/linux/mmc/mmc.h~mmc-fix-incorrect-interpretation-of-card-type-bits
-+++ a/include/linux/mmc/mmc.h
-@@ -268,6 +268,7 @@ struct _mmc_csd {
- 
- #define EXT_CSD_CARD_TYPE_26	(1<<0)	/* Card can run at 26MHz */
- #define EXT_CSD_CARD_TYPE_52	(1<<1)	/* Card can run at 52MHz */
-+#define EXT_CSD_CARD_TYPE_MASK	0x3	/* Mask out reserved and DDR bits */
- 
- #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
- #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
-_
+
+-	omap_free_dma(host->dma_ch);
+-	host->dma_ch = -1;
+-	/*
+-	 * DMA Callback: run in interrupt context.
+-	 * mutex_unlock will throw a kernel warning if used.
+-	 */
+-	up(&host->sem);
+ }
+
+ /*
+@@ -1282,7 +1285,7 @@ static void omap_hsmmc_dma_cb(int lch, u16
+ch_status, void *data)
+ static int omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
+ 					struct mmc_request *req)
+ {
+-	int dma_ch = 0, ret = 0, err = 1, i;
++	int dma_ch = 0, ret = 0, i;
+ 	struct mmc_data *data = req->data;
+
+ 	/* Sanity check: all the SG entries must be aligned by block size. */
+@@ -1300,22 +1303,11 @@ static int
+omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
+ 		return -EINVAL;
+
+ 	/*
+-	 * If for some reason the DMA transfer is still active,
+-	 * we wait for timeout period and free the dma
++	 * Can't process the request if the previous
++	 * request is still active
+ 	 */
+-	if (host->dma_ch != -1) {
+-		set_current_state(TASK_UNINTERRUPTIBLE);
+-		schedule_timeout(100);
+-		if (down_trylock(&host->sem)) {
+-			omap_free_dma(host->dma_ch);
+-			host->dma_ch = -1;
+-			up(&host->sem);
+-			return err;
+-		}
+-	} else {
+-		if (down_trylock(&host->sem))
+-			return err;
+-	}
++	if (down_trylock(&host->sem))
++			return -EBUSY;
+
+ 	ret = omap_request_dma(omap_hsmmc_get_dma_sync_dev(host, data),
+ 			       "MMC/SD", omap_hsmmc_dma_cb, host, &dma_ch);
+-- 
+1.6.3.3
