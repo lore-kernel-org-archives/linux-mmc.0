@@ -1,85 +1,45 @@
-From: akpm@linux-foundation.org
-Subject: [merged] mmc-fix-incorrect-interpretation-of-card-type-bits.patch removed from -mm tree
-Date: Fri, 26 Mar 2010 12:37:19 -0400
-Message-ID: <201003261938.o2QJcIMw016679@imap1.linux-foundation.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH] ARM: fix highmem with VIPT cache and DMA
+Date: Fri, 26 Mar 2010 23:09:39 +0000
+Message-ID: <20100326230939.GF29179@n2100.arm.linux.org.uk>
+References: <alpine.LFD.2.00.1003251638030.694@xanadu.home> <1269610458.807.49.camel@e102109-lin.cambridge.arm.com> <alpine.LFD.2.00.1003261144020.694@xanadu.home>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:45852 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753126Ab0CZTi0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Mar 2010 15:38:26 -0400
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:46955 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754390Ab0CZXJ4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Mar 2010 19:09:56 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.2.00.1003261144020.694@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@nokia.com, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: Catalin Marinas <catalin.marinas@arm.com>, Hemanth V <hemanthv@ti.com>, linux-mmc@vger.kernel.org, pierre@ossman.eu, saeed bishara <saeed.bishara@gmail.com>, linux-arm-kernel@lists.infradead.org
 
+On Fri, Mar 26, 2010 at 11:51:58AM -0400, Nicolas Pitre wrote:
+> On Fri, 26 Mar 2010, Catalin Marinas wrote:
+> 
+> > On Thu, 2010-03-25 at 21:02 +0000, Nicolas Pitre wrote:
+> > > --- a/arch/arm/include/asm/highmem.h
+> > > +++ b/arch/arm/include/asm/highmem.h
+> > > @@ -11,7 +11,11 @@
+> > > 
+> > >  #define kmap_prot              PAGE_KERNEL
+> > > 
+> > > -#define flush_cache_kmaps()    flush_cache_all()
+> > > +#define flush_cache_kmaps() \
+> > > +       do { \
+> > > +               if (cache_is_vivt()) \
+> > > +                       flush_cache_all(); \
+> > > +       } while (0)
+> > 
+> > Do the aliasing VIPT caches need flushing as well?
+> 
+> No idea.  Highmem is not supported with aliasing VIPT at the moment 
+> anyway -- see commit 3f973e2216.  I don't have hardware with aliasing 
+> VIPT cache either.
 
-The patch titled
-     mmc: fix incorrect interpretation of card type bits
-has been removed from the -mm tree.  Its filename was
-     mmc-fix-incorrect-interpretation-of-card-type-bits.patch
-
-This patch was dropped because it was merged into mainline or a subsystem tree
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: fix incorrect interpretation of card type bits
-From: Adrian Hunter <adrian.hunter@nokia.com>
-
-In the extended CSD register the CARD_TYPE is an 8-bit value of which the
-upper 6 bits were reserved in JEDEC specifications prior to version 4.4. 
-In version 4.4 two of the reserved bits were designated for identifying
-support for the newly added High-Speed Dual Data Rate.  Unfortunately the
-mmc_read_ext_csd() function required that the reserved bits be zero
-instead of ignoring them as it should.
-
-This patch makes mmc_read_ext_csd() ignore the CARD_TYPE bits that are
-reserved or not yet supported.  It also stops the function jumping to the
-end as though an error occurred, when it is only warns that the CARD_TYPE
-bits (that it does interpret) are invalid.
-
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/core/mmc.c  |    3 +--
- include/linux/mmc/mmc.h |    1 +
- 2 files changed, 2 insertions(+), 2 deletions(-)
-
-diff -puN drivers/mmc/core/mmc.c~mmc-fix-incorrect-interpretation-of-card-type-bits drivers/mmc/core/mmc.c
---- a/drivers/mmc/core/mmc.c~mmc-fix-incorrect-interpretation-of-card-type-bits
-+++ a/drivers/mmc/core/mmc.c
-@@ -225,7 +225,7 @@ static int mmc_read_ext_csd(struct mmc_c
- 			mmc_card_set_blockaddr(card);
- 	}
- 
--	switch (ext_csd[EXT_CSD_CARD_TYPE]) {
-+	switch (ext_csd[EXT_CSD_CARD_TYPE] & EXT_CSD_CARD_TYPE_MASK) {
- 	case EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
- 		card->ext_csd.hs_max_dtr = 52000000;
- 		break;
-@@ -237,7 +237,6 @@ static int mmc_read_ext_csd(struct mmc_c
- 		printk(KERN_WARNING "%s: card is mmc v4 but doesn't "
- 			"support any high-speed modes.\n",
- 			mmc_hostname(card->host));
--		goto out;
- 	}
- 
- 	if (card->ext_csd.rev >= 3) {
-diff -puN include/linux/mmc/mmc.h~mmc-fix-incorrect-interpretation-of-card-type-bits include/linux/mmc/mmc.h
---- a/include/linux/mmc/mmc.h~mmc-fix-incorrect-interpretation-of-card-type-bits
-+++ a/include/linux/mmc/mmc.h
-@@ -268,6 +268,7 @@ struct _mmc_csd {
- 
- #define EXT_CSD_CARD_TYPE_26	(1<<0)	/* Card can run at 26MHz */
- #define EXT_CSD_CARD_TYPE_52	(1<<1)	/* Card can run at 52MHz */
-+#define EXT_CSD_CARD_TYPE_MASK	0x3	/* Mask out reserved and DDR bits */
- 
- #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
- #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
-_
-
-Patches currently in -mm which might be from adrian.hunter@nokia.com are
-
-origin.patch
-
+I don't think we'll ever support aliasing VIPT caches with highmem -
+it'd quadruple the amount of kmap space that's required for things like
+KM_USER*.
