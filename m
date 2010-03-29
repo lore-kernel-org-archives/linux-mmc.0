@@ -1,45 +1,44 @@
-From: Daniel Mack <daniel@caiaq.de>
-Subject: libertas: DAT1 signal IRQ in 1-bit SDIO mode
-Date: Mon, 29 Mar 2010 20:24:14 +0200
-Message-ID: <20100329182414.GJ30801@buzzloop.caiaq.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH 0/5] ARM: PrimeCell DMA patches v4
+Date: Tue, 30 Mar 2010 01:35:28 +0200
+Message-ID: <1269905728-5452-1-git-send-email-linus.walleij@stericsson.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from buzzloop.caiaq.de ([212.112.241.133]:58019 "EHLO
-	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750925Ab0C2SYT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Mar 2010 14:24:19 -0400
-Content-Disposition: inline
+Received: from mail.df.lth.se ([194.47.250.12]:56342 "EHLO df.lth.se"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752742Ab0C3AQJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 29 Mar 2010 20:16:09 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: libertas-dev@lists.infradead.org
-Cc: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, Dan Williams <dan.j.williams@intel.com>, Grant Likely <grant.likely@secretlab.ca>
+Cc: spi-devel-general@lists.sourceforge.net, linux-mmc@vger.kernel.org, STEricsson_nomadik_linux@list.st.com, Linus Walleij <linus.walleij@stericsson.com>
 
-Hi,
+This is a fourth iteration of the PrimeCell DMA API on top of the
+generic DMA devices (sibling to the DMA engine). It's based on
+the suggestion from Russell to try and define a specific extension
+subset for DMA devices.
 
-I'm still fighting with a MX31 SDHC controller connected to a 8686
-module via SDIO. As the libertas firmware uses multiblock transfers,
-this can't work in 4bit SDIO mode due to a bug in the SDHC controller
-of the MX31 silicon. This is now finally also confirmed by Freescale.
+Since last iteration the changes are:
 
-So the only way around this is to use 1-bit transfers. This appears to
-work stable now as long as I don't let the host controller announce the
-capability of serving SDIO IRQs (MMC_CAP_SDIO_IRQ). The IRQ flag is then
-polled by the MMC core which is a performance drawback of course, but at
-least it finally works.
+- Some necessary extensions to the DMA engine were folded into
+  the generic DMA engine framework and are now pending in Dan's
+  -next tree.
 
-However, I also implemented code for proper SDIO IRQ hardware handling
-for this controller, but the hardware condition is never triggered. I
-measured with an oscilloscope and found out the 8686 does not actually
-drive the DAT1 line (which is used as IRQ in 1-bit SDIO mode) low when
-it is supposed to do.
+- I have now also implemented support for the PL022 PrimeCell.
 
-My question is - did anyone ever use the chip in this mode? Is that a
-firmware bug?
+PL011, PL022 and PL180 drivers were tested on the U300 with the
+COH 901 318 DMA device.
 
-Any pointers appreciated - I would like to post my pending patches for
-that issue asap, but need to clear that last issue first.
+The PL011 driver was also tested on the U8500 with the pending
+DMA40 DMA device.
 
-Thanks,
-Daniel
+We're running huge and high-speed transfers on all peripherals.
+It works.
 
+Patches will be added to the patch tracker soonish, but if this
+is eventually OK:ed by Russell I guess it will have to go in
+through Dan's DMA tree. Also Grant has to OK it as maintainer of
+the SPI subsystem.
+
+Yours,
+Linus Walleij
+ST-Ericsson SA
