@@ -1,318 +1,423 @@
 From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH 2/6] ARM: add generic PrimeCell interface to COH 901 318
-Date: Tue, 30 Mar 2010 01:36:04 +0200
-Message-ID: <1269905764-5977-1-git-send-email-linus.walleij@stericsson.com>
+Subject: [PATCH 6/6] ARM: config U300 PL180 PL011 PL022 for DMA
+Date: Tue, 30 Mar 2010 01:36:48 +0200
+Message-ID: <1269905808-7015-1-git-send-email-linus.walleij@stericsson.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:56364 "EHLO df.lth.se"
+Received: from mail.df.lth.se ([194.47.250.12]:56368 "EHLO df.lth.se"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752504Ab0C3ARL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 29 Mar 2010 20:17:11 -0400
+	id S1752504Ab0C3ARp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 29 Mar 2010 20:17:45 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, Dan Williams <dan.j.williams@intel.com>, Grant Likely <grant.likely@secretlab.ca>
 Cc: spi-devel-general@lists.sourceforge.net, linux-mmc@vger.kernel.org, STEricsson_nomadik_linux@list.st.com, Linus Walleij <linus.walleij@stericsson.com>
 
-This extends the DMA engine driver for the COH 901 318 used in the
-U300 platform with the generic PrimeCell interface,
+This will configure the platform data for the PL180, PL011 and
+PL022 PrimeCells found in the U300 to use DMA with the generic
+PrimeCell DMA engine.
 
 Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
 ---
- drivers/dma/coh901318.c     |  146 +++++++++++++++++++++++++++++++++++++++++++
- drivers/dma/coh901318_lli.c |   78 ++++++++++++++++++++++-
- 2 files changed, 221 insertions(+), 3 deletions(-)
+ arch/arm/mach-u300/core.c |  173 ++++++++++++++++++++++++++++++++++++++++-----
+ arch/arm/mach-u300/mmc.c  |   13 +++-
+ arch/arm/mach-u300/spi.c  |   21 ++++--
+ 3 files changed, 181 insertions(+), 26 deletions(-)
 
-diff --git a/drivers/dma/coh901318.c b/drivers/dma/coh901318.c
-index 4233440..1d5ed16 100644
---- a/drivers/dma/coh901318.c
-+++ b/drivers/dma/coh901318.c
-@@ -21,6 +21,7 @@
- #include <linux/uaccess.h>
- #include <linux/debugfs.h>
+diff --git a/arch/arm/mach-u300/core.c b/arch/arm/mach-u300/core.c
+index 5f34eb6..7f7e738 100644
+--- a/arch/arm/mach-u300/core.c
++++ b/arch/arm/mach-u300/core.c
+@@ -3,7 +3,7 @@
+  * arch/arm/mach-u300/core.c
+  *
+  *
+- * Copyright (C) 2007-2010 ST-Ericsson AB
++ * Copyright (C) 2007-2010 ST-Ericsson SA
+  * License terms: GNU General Public License (GPL) version 2
+  * Core platform support, IRQ handling and device definitions.
+  * Author: Linus Walleij <linus.walleij@stericsson.com>
+@@ -16,7 +16,9 @@
+ #include <linux/device.h>
+ #include <linux/mm.h>
+ #include <linux/termios.h>
++#include <linux/dmaengine.h>
+ #include <linux/amba/bus.h>
++#include <linux/amba/serial.h>
+ #include <linux/platform_device.h>
+ #include <linux/gpio.h>
  #include <mach/coh901318.h>
-+#include <linux/amba/dma.h>
- 
- #include "coh901318_lli.h"
- 
-@@ -72,6 +73,9 @@ struct coh901318_chan {
- 	unsigned long nbr_active_done;
- 	unsigned long busy;
- 
-+	u32 amba_addr;
-+	u32 amba_ctrl;
+@@ -92,10 +94,20 @@ void __init u300_map_io(void)
+  * Declaration of devices found on the U300 board and
+  * their respective memory locations.
+  */
 +
- 	struct coh901318_base *base;
++static struct amba_pl011_data uart0_plat_data = {
++#ifdef CONFIG_COH901318
++	.dma_filter = coh901318_filter_id,
++	.dma_rx_param = (void *) U300_DMA_UART0_RX,
++	.dma_tx_param = (void *) U300_DMA_UART0_TX,
++#endif
++};
++
+ static struct amba_device uart0_device = {
+ 	.dev = {
++		.coherent_dma_mask = ~0,
+ 		.init_name = "uart0", /* Slow device at 0x3000 offset */
+-		.platform_data = NULL,
++		.platform_data = &uart0_plat_data,
+ 	},
+ 	.res = {
+ 		.start = U300_UART0_BASE,
+@@ -107,10 +119,19 @@ static struct amba_device uart0_device = {
+ 
+ /* The U335 have an additional UART1 on the APP CPU */
+ #ifdef CONFIG_MACH_U300_BS335
++static struct amba_pl011_data uart1_plat_data = {
++#ifdef CONFIG_COH901318
++	.dma_filter = coh901318_filter_id,
++	.dma_rx_param = (void *) U300_DMA_UART1_RX,
++	.dma_tx_param = (void *) U300_DMA_UART1_TX,
++#endif
++};
++
+ static struct amba_device uart1_device = {
+ 	.dev = {
++		.coherent_dma_mask = ~0,
+ 		.init_name = "uart1", /* Fast device at 0x7000 offset */
+-		.platform_data = NULL,
++		.platform_data = &uart1_plat_data,
+ 	},
+ 	.res = {
+ 		.start = U300_UART1_BASE,
+@@ -949,20 +970,21 @@ const struct coh_dma_channel chan_config[U300_DMA_CHANNELS] = {
+ 		.priority_high = 0,
+ 		.dev_addr = U300_MSL_BASE + 6 * 0x40 + 0x220,
+ 	},
++	/*
++	 * Don't set up device address, burst count or size of src
++	 * or dst bus for this peripheral - handled by PrimeCell
++	 * DMA extension.
++	 */
+ 	{
+ 		.number = U300_DMA_MMCSD_RX_TX,
+ 		.name = "MMCSD RX TX",
+ 		.priority_high = 0,
+-		.dev_addr =  U300_MMCSD_BASE + 0x080,
+ 		.param.config = COH901318_CX_CFG_CH_DISABLE |
+ 				COH901318_CX_CFG_LCR_DISABLE |
+ 				COH901318_CX_CFG_TC_IRQ_ENABLE |
+ 				COH901318_CX_CFG_BE_IRQ_ENABLE,
+ 		.param.ctrl_lli_chained = 0 |
+ 				COH901318_CX_CTRL_TC_ENABLE |
+-				COH901318_CX_CTRL_BURST_COUNT_32_BYTES |
+-				COH901318_CX_CTRL_SRC_BUS_SIZE_32_BITS |
+-				COH901318_CX_CTRL_DST_BUS_SIZE_32_BITS |
+ 				COH901318_CX_CTRL_MASTER_MODE_M1RW |
+ 				COH901318_CX_CTRL_TCP_ENABLE |
+ 				COH901318_CX_CTRL_TC_IRQ_ENABLE |
+@@ -971,9 +993,6 @@ const struct coh_dma_channel chan_config[U300_DMA_CHANNELS] = {
+ 				COH901318_CX_CTRL_DDMA_LEGACY,
+ 		.param.ctrl_lli = 0 |
+ 				COH901318_CX_CTRL_TC_ENABLE |
+-				COH901318_CX_CTRL_BURST_COUNT_32_BYTES |
+-				COH901318_CX_CTRL_SRC_BUS_SIZE_32_BITS |
+-				COH901318_CX_CTRL_DST_BUS_SIZE_32_BITS |
+ 				COH901318_CX_CTRL_MASTER_MODE_M1RW |
+ 				COH901318_CX_CTRL_TCP_ENABLE |
+ 				COH901318_CX_CTRL_TC_IRQ_ENABLE |
+@@ -982,9 +1001,6 @@ const struct coh_dma_channel chan_config[U300_DMA_CHANNELS] = {
+ 				COH901318_CX_CTRL_DDMA_LEGACY,
+ 		.param.ctrl_lli_last = 0 |
+ 				COH901318_CX_CTRL_TC_ENABLE |
+-				COH901318_CX_CTRL_BURST_COUNT_32_BYTES |
+-				COH901318_CX_CTRL_SRC_BUS_SIZE_32_BITS |
+-				COH901318_CX_CTRL_DST_BUS_SIZE_32_BITS |
+ 				COH901318_CX_CTRL_MASTER_MODE_M1RW |
+ 				COH901318_CX_CTRL_TCP_DISABLE |
+ 				COH901318_CX_CTRL_TC_IRQ_ENABLE |
+@@ -1003,15 +1019,76 @@ const struct coh_dma_channel chan_config[U300_DMA_CHANNELS] = {
+ 		.name = "MSPRO RX",
+ 		.priority_high = 0,
+ 	},
++	/*
++	 * Don't set up device address, burst count or size of src
++	 * or dst bus for this peripheral - handled by PrimeCell
++	 * DMA extension.
++	 */
+ 	{
+ 		.number = U300_DMA_UART0_TX,
+ 		.name = "UART0 TX",
+ 		.priority_high = 0,
++		.param.config = COH901318_CX_CFG_CH_DISABLE |
++				COH901318_CX_CFG_LCR_DISABLE |
++				COH901318_CX_CFG_TC_IRQ_ENABLE |
++				COH901318_CX_CFG_BE_IRQ_ENABLE,
++		.param.ctrl_lli_chained = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_ENABLE |
++				COH901318_CX_CTRL_TC_IRQ_DISABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
++		.param.ctrl_lli = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_ENABLE |
++				COH901318_CX_CTRL_TC_IRQ_ENABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
++		.param.ctrl_lli_last = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_ENABLE |
++				COH901318_CX_CTRL_TC_IRQ_ENABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
+ 	},
+ 	{
+ 		.number = U300_DMA_UART0_RX,
+ 		.name = "UART0 RX",
+ 		.priority_high = 0,
++		.param.config = COH901318_CX_CFG_CH_DISABLE |
++				COH901318_CX_CFG_LCR_DISABLE |
++				COH901318_CX_CFG_TC_IRQ_ENABLE |
++				COH901318_CX_CFG_BE_IRQ_ENABLE,
++		.param.ctrl_lli_chained = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_ENABLE |
++				COH901318_CX_CTRL_TC_IRQ_DISABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
++		.param.ctrl_lli = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_ENABLE |
++				COH901318_CX_CTRL_TC_IRQ_ENABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
++		.param.ctrl_lli_last = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_ENABLE |
++				COH901318_CX_CTRL_TC_IRQ_ENABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
+ 	},
+ 	{
+ 		.number = U300_DMA_APEX_TX,
+@@ -1241,15 +1318,77 @@ const struct coh_dma_channel chan_config[U300_DMA_CHANNELS] = {
+ 		.name = "XGAM PDI",
+ 		.priority_high = 0,
+ 	},
++	/*
++	 * Don't set up device address, burst count or size of src
++	 * or dst bus for this peripheral - handled by PrimeCell
++	 * DMA extension.
++	 */
+ 	{
+ 		.number = U300_DMA_SPI_TX,
+ 		.name = "SPI TX",
+ 		.priority_high = 0,
++		.param.config = COH901318_CX_CFG_CH_DISABLE |
++				COH901318_CX_CFG_LCR_DISABLE |
++				COH901318_CX_CFG_TC_IRQ_ENABLE |
++				COH901318_CX_CFG_BE_IRQ_ENABLE,
++		.param.ctrl_lli_chained = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_DISABLE |
++				COH901318_CX_CTRL_TC_IRQ_DISABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
++		.param.ctrl_lli = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_DISABLE |
++				COH901318_CX_CTRL_TC_IRQ_ENABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
++		.param.ctrl_lli_last = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_DISABLE |
++				COH901318_CX_CTRL_TC_IRQ_ENABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
+ 	},
+ 	{
+ 		.number = U300_DMA_SPI_RX,
+ 		.name = "SPI RX",
+ 		.priority_high = 0,
++		.param.config = COH901318_CX_CFG_CH_DISABLE |
++				COH901318_CX_CFG_LCR_DISABLE |
++				COH901318_CX_CFG_TC_IRQ_ENABLE |
++				COH901318_CX_CFG_BE_IRQ_ENABLE,
++		.param.ctrl_lli_chained = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_DISABLE |
++				COH901318_CX_CTRL_TC_IRQ_DISABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
++		.param.ctrl_lli = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_DISABLE |
++				COH901318_CX_CTRL_TC_IRQ_ENABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
++		.param.ctrl_lli_last = 0 |
++				COH901318_CX_CTRL_TC_ENABLE |
++				COH901318_CX_CTRL_MASTER_MODE_M1RW |
++				COH901318_CX_CTRL_TCP_DISABLE |
++				COH901318_CX_CTRL_TC_IRQ_ENABLE |
++				COH901318_CX_CTRL_HSP_ENABLE |
++				COH901318_CX_CTRL_HSS_DISABLE |
++				COH901318_CX_CTRL_DDMA_LEGACY,
++
+ 	},
+ 	{
+ 		.number = U300_DMA_GENERAL_PURPOSE_0,
+@@ -1577,7 +1716,7 @@ static void __init u300_init_check_chip(void)
+ #endif
+ #ifdef CONFIG_MACH_U300_BS335
+ 	if ((val & 0xFF00U) != 0xf000 && (val & 0xFF00U) != 0xf100) {
+-		printk(KERN_ERR "Platform configured for BS365 " \
++		printk(KERN_ERR "Platform configured for BS335 " \
+ 		       " with DB3350 but %s detected, expect problems!",
+ 		       chipname);
+ 	}
+@@ -1654,12 +1793,12 @@ void __init u300_init_devices(void)
+ 	/* Register subdevices on the I2C buses */
+ 	u300_i2c_register_board_devices();
+ 
+-	/* Register subdevices on the SPI bus */
+-	u300_spi_register_board_devices();
+-
+ 	/* Register the platform devices */
+ 	platform_add_devices(platform_devs, ARRAY_SIZE(platform_devs));
+ 
++	/* Register subdevices on the SPI bus */
++	u300_spi_register_board_devices();
++
+ #ifndef CONFIG_MACH_U300_SEMI_IS_SHARED
+ 	/*
+ 	 * Enable SEMI self refresh. Self-refresh of the SDRAM is entered when
+diff --git a/arch/arm/mach-u300/mmc.c b/arch/arm/mach-u300/mmc.c
+index 88506d0..3acb710 100644
+--- a/arch/arm/mach-u300/mmc.c
++++ b/arch/arm/mach-u300/mmc.c
+@@ -3,11 +3,11 @@
+  * arch/arm/mach-u300/mmc.c
+  *
+  *
+- * Copyright (C) 2009 ST-Ericsson AB
++ * Copyright (C) 2009 ST-Ericsson SA
+  * License terms: GNU General Public License (GPL) version 2
+  *
+  * Author: Linus Walleij <linus.walleij@stericsson.com>
+- * Author: Johan Lundin <johan.lundin@stericsson.com>
++ * Author: Johan Lundin
+  * Author: Jonas Aaberg <jonas.aberg@stericsson.com>
+  */
+ #include <linux/device.h>
+@@ -19,8 +19,11 @@
+ #include <linux/regulator/consumer.h>
+ #include <linux/regulator/machine.h>
+ #include <linux/gpio.h>
++#include <linux/dmaengine.h>
+ #include <linux/amba/mmci.h>
+ #include <linux/slab.h>
++#include <mach/coh901318.h>
++#include <mach/dma_channels.h>
+ 
+ #include "mmc.h"
+ #include "padmux.h"
+@@ -108,6 +111,12 @@ int __devinit mmc_init(struct amba_device *adev)
+ 	mmci_card->mmc0_plat_data.gpio_cd = -1;
+ 	mmci_card->mmc0_plat_data.capabilities = MMC_CAP_MMC_HIGHSPEED |
+ 		MMC_CAP_SD_HIGHSPEED | MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
++#ifdef CONFIG_COH901318
++	mmci_card->mmc0_plat_data.dma_filter = coh901318_filter_id;
++	mmci_card->mmc0_plat_data.dma_rx_param =
++		(void *) U300_DMA_MMCSD_RX_TX;
++	/* Don't specify a TX channel, this RX channel is bidirectional */
++#endif
+ 
+ 	mmcsd_device->platform_data = (void *) &mmci_card->mmc0_plat_data;
+ 
+diff --git a/arch/arm/mach-u300/spi.c b/arch/arm/mach-u300/spi.c
+index f0e887b..243c999 100644
+--- a/arch/arm/mach-u300/spi.c
++++ b/arch/arm/mach-u300/spi.c
+@@ -11,6 +11,9 @@
+ #include <linux/spi/spi.h>
+ #include <linux/amba/pl022.h>
+ #include <linux/err.h>
++#include <mach/coh901318.h>
++#include <mach/dma_channels.h>
++
+ #include "padmux.h"
+ 
+ /*
+@@ -32,11 +35,8 @@ static void select_dummy_chip(u32 chipselect)
+ struct pl022_config_chip dummy_chip_info = {
+ 	/* Nominally this is LOOPBACK_DISABLED, but this is our dummy chip! */
+ 	.lbm = LOOPBACK_ENABLED,
+-	/*
+-	 * available POLLING_TRANSFER and INTERRUPT_TRANSFER,
+-	 * DMA_TRANSFER does not work
+-	 */
+-	.com_mode = INTERRUPT_TRANSFER,
++	/* available POLLING_TRANSFER, INTERRUPT_TRANSFER, DMA_TRANSFER */
++	.com_mode = DMA_TRANSFER,
+ 	.iface = SSP_INTERFACE_MOTOROLA_SPI,
+ 	/* We can only act as master but SSP_SLAVE is possible in theory */
+ 	.hierarchy = SSP_MASTER,
+@@ -83,8 +83,6 @@ static struct spi_board_info u300_spi_devices[] = {
+ static struct pl022_ssp_controller ssp_platform_data = {
+ 	/* If you have several SPI buses this varies, we have only bus 0 */
+ 	.bus_id = 0,
+-	/* Set this to 1 when we think we got DMA working */
+-	.enable_dma = 0,
+ 	/*
+ 	 * On the APP CPU GPIO 4, 5 and 6 are connected as generic
+ 	 * chip selects for SPI. (Same on U330, U335 and U365.)
+@@ -92,6 +90,14 @@ static struct pl022_ssp_controller ssp_platform_data = {
+ 	 * and do padmuxing accordingly too.
+ 	 */
+ 	.num_chipselect = 3,
++#ifdef CONFIG_COH901318
++	.enable_dma = 1,
++	.dma_filter = coh901318_filter_id,
++	.dma_rx_param = (void *) U300_DMA_SPI_RX,
++	.dma_tx_param = (void *) U300_DMA_SPI_TX,
++#else
++	.enable_dma = 0,
++#endif
  };
  
-@@ -190,6 +194,9 @@ static inline struct coh901318_chan *to_coh901318_chan(struct dma_chan *chan)
- static inline dma_addr_t
- cohc_dev_addr(struct coh901318_chan *cohc)
- {
-+	/* PrimeCell supplied address will take precedence */
-+	if (cohc->amba_addr)
-+		return cohc->amba_addr;
- 	return cohc->base->platform->chan_conf[cohc->id].dev_addr;
- }
  
-@@ -1055,6 +1062,14 @@ coh901318_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
+@@ -117,6 +123,7 @@ void __init u300_spi_init(struct amba_device *adev)
+ 	}
  
- 	params = cohc_chan_param(cohc);
- 	config = params->config;
-+	/*
-+	 * Add primecell-specific control on top, make
-+	 * sure the bits you set per peripheral channel are
-+	 * cleared in the default config from the platform.
-+	 */
-+	ctrl_chained |= cohc->amba_ctrl;
-+	ctrl_last |= cohc->amba_ctrl;
-+	ctrl |= cohc->amba_ctrl;
- 
- 	if (direction == DMA_TO_DEVICE) {
- 		u32 tx_flags = COH901318_CX_CTRL_PRDD_SOURCE |
-@@ -1113,6 +1128,12 @@ coh901318_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
- 	if (ret)
- 		goto err_lli_fill;
- 
-+	/*
-+	 * Set the default ctrl for the channel to the one from the lli,
-+	 * things may have changed due to odd buffer alignment etc.
-+	 */
-+	coh901318_set_ctrl(cohc, lli->control);
-+
- 	COH_DBG(coh901318_list_print(cohc, lli));
- 
- 	/* Pick a descriptor to handle this transfer */
-@@ -1239,6 +1260,131 @@ coh901318_control(struct dma_chan *chan, enum dma_ctrl_cmd cmd)
- 
- 	return 0;
  }
 +
-+/*
-+ * Here we wrap in the PrimeCell dma interface
-+ */
-+struct burst_table {
-+	int burst_8bit;
-+	int burst_16bit;
-+	int burst_32bit;
-+	u32 reg;
-+};
-+
-+static const struct burst_table burst_sizes[] = {
-+	{
-+		.burst_8bit = 64,
-+		.burst_16bit = 32,
-+		.burst_32bit = 16,
-+		.reg = COH901318_CX_CTRL_BURST_COUNT_64_BYTES,
-+	},
-+	{
-+		.burst_8bit = 48,
-+		.burst_16bit = 24,
-+		.burst_32bit = 12,
-+		.reg = COH901318_CX_CTRL_BURST_COUNT_48_BYTES,
-+	},
-+	{
-+		.burst_8bit = 32,
-+		.burst_16bit = 16,
-+		.burst_32bit = 8,
-+		.reg = COH901318_CX_CTRL_BURST_COUNT_32_BYTES,
-+	},
-+	{
-+		.burst_8bit = 16,
-+		.burst_16bit = 8,
-+		.burst_32bit = 4,
-+		.reg = COH901318_CX_CTRL_BURST_COUNT_16_BYTES,
-+	},
-+	{
-+		.burst_8bit = 8,
-+		.burst_16bit = 4,
-+		.burst_32bit = 2,
-+		.reg = COH901318_CX_CTRL_BURST_COUNT_8_BYTES,
-+	},
-+	{
-+		.burst_8bit = 4,
-+		.burst_16bit = 2,
-+		.burst_32bit = 1,
-+		.reg = COH901318_CX_CTRL_BURST_COUNT_4_BYTES,
-+	},
-+	{
-+		.burst_8bit = 2,
-+		.burst_16bit = 1,
-+		.burst_32bit = 0,
-+		.reg = COH901318_CX_CTRL_BURST_COUNT_2_BYTES,
-+	},
-+	{
-+		.burst_8bit = 1,
-+		.burst_16bit = 0,
-+		.burst_32bit = 0,
-+		.reg = COH901318_CX_CTRL_BURST_COUNT_1_BYTE,
-+	},
-+};
-+
-+void dma_set_ambaconfig(struct dma_chan *chan,
-+			struct amba_dma_channel_config *config)
-+{
-+	struct coh901318_chan *cohc = to_coh901318_chan(chan);
-+	int maxburst = config->maxburst;
-+	u32 amba_ctrl = 0;
-+	int i = 0;
-+
-+	dev_dbg(COHC_2_DEV(cohc), "configure channel for %d byte transfers\n",
-+		config->addr_width);
-+	switch (config->addr_width)  {
-+	case 1:
-+		amba_ctrl |=
-+			COH901318_CX_CTRL_SRC_BUS_SIZE_8_BITS |
-+			COH901318_CX_CTRL_DST_BUS_SIZE_8_BITS;
-+
-+		while (i < ARRAY_SIZE(burst_sizes)) {
-+			if (burst_sizes[i].burst_8bit <= maxburst)
-+				break;
-+			i++;
-+		}
-+
-+		break;
-+	case 2:
-+		amba_ctrl |=
-+			COH901318_CX_CTRL_SRC_BUS_SIZE_16_BITS |
-+			COH901318_CX_CTRL_DST_BUS_SIZE_16_BITS;
-+
-+		while (i < ARRAY_SIZE(burst_sizes)) {
-+			if (burst_sizes[i].burst_16bit <= maxburst)
-+				break;
-+			i++;
-+		}
-+
-+		break;
-+	case 4:
-+		/* Direction doesn't matter here, it's 32/32 bits */
-+		amba_ctrl |=
-+			COH901318_CX_CTRL_SRC_BUS_SIZE_32_BITS |
-+			COH901318_CX_CTRL_DST_BUS_SIZE_32_BITS;
-+
-+		while (i < ARRAY_SIZE(burst_sizes)) {
-+			if (burst_sizes[i].burst_32bit <= maxburst)
-+				break;
-+			i++;
-+		}
-+
-+		break;
-+	default:
-+		dev_err(COHC_2_DEV(cohc),
-+			"bad ambaconfig: alien address width\n");
-+		return;
-+	}
-+
-+	amba_ctrl |= burst_sizes[i].reg;
-+	dev_dbg(COHC_2_DEV(cohc),
-+		"selected burst size %d bytes for address width %d bytes, maxburst %d\n",
-+		burst_sizes[i].burst_8bit, config->addr_width, maxburst);
-+
-+	cohc->amba_addr = config->addr;
-+	cohc->amba_ctrl = amba_ctrl;
-+}
-+
- void coh901318_base_init(struct dma_device *dma, const int *pick_chans,
- 			 struct coh901318_base *base)
+ void __init u300_spi_register_board_devices(void)
  {
-diff --git a/drivers/dma/coh901318_lli.c b/drivers/dma/coh901318_lli.c
-index 9f7e0e6..f37db49 100644
---- a/drivers/dma/coh901318_lli.c
-+++ b/drivers/dma/coh901318_lli.c
-@@ -153,6 +153,39 @@ coh901318_lli_fill_memcpy(struct coh901318_pool *pool,
- 	lli->src_addr = src;
- 	lli->dst_addr = dst;
- 
-+	/*
-+	 * The DMA hardware will increase its pointer by 1,
-+	 * 2 or 4 bytes at a time depending on configuration.
-+	 * If using som oddly-aligned buffer this will cause
-+	 * performance problems.
-+	 */
-+#if 0
-+	ctrl_chained &= ~COH901318_CX_CTRL_SRC_BUS_SIZE_MASK;
-+	ctrl_eom &= ~COH901318_CX_CTRL_SRC_BUS_SIZE_MASK;
-+	ctrl_chained &= ~COH901318_CX_CTRL_DST_BUS_SIZE_MASK;
-+	ctrl_eom &= ~COH901318_CX_CTRL_DST_BUS_SIZE_MASK;
-+	if (src & 0x01) {
-+		ctrl_chained |= COH901318_CX_CTRL_SRC_BUS_SIZE_8_BITS;
-+		ctrl_eom |= COH901318_CX_CTRL_SRC_BUS_SIZE_8_BITS;
-+	} else if (src & 0x02) {
-+		ctrl_chained |= COH901318_CX_CTRL_SRC_BUS_SIZE_16_BITS;
-+		ctrl_eom |= COH901318_CX_CTRL_SRC_BUS_SIZE_16_BITS;
-+	} else {
-+		ctrl_chained |= COH901318_CX_CTRL_SRC_BUS_SIZE_32_BITS;
-+		ctrl_eom |= COH901318_CX_CTRL_SRC_BUS_SIZE_32_BITS;
-+	}
-+	if (dst & 0x01) {
-+		ctrl_chained |= COH901318_CX_CTRL_DST_BUS_SIZE_8_BITS;
-+		ctrl_eom |= COH901318_CX_CTRL_SRC_DST_SIZE_8_BITS;
-+	} else if (dst & 0x02) {
-+		ctrl_chained |= COH901318_CX_CTRL_DST_BUS_SIZE_16_BITS;
-+		ctrl_eom |= COH901318_CX_CTRL_DST_BUS_SIZE_16_BITS;
-+	} else {
-+		ctrl_chained |= COH901318_CX_CTRL_DST_BUS_SIZE_32_BITS;
-+		ctrl_eom |= COH901318_CX_CTRL_DST_BUS_SIZE_32_BITS;
-+	}
-+#endif
-+
- 	while (lli->link_addr) {
- 		lli->control = ctrl_chained | MAX_DMA_PACKET_SIZE;
- 		lli->src_addr = src;
-@@ -268,13 +301,52 @@ coh901318_lli_fill_sg(struct coh901318_pool *pool,
- 		else
- 			ctrl_sg = ctrl ? ctrl : ctrl_last;
- 
--
--		if (dir == DMA_TO_DEVICE)
-+		/*
-+		 * If the physical address is only divisible by 1 or
-+		 * two, we have to lower the destination bus size to
-+		 * the least common denominator
-+		 */
-+		if (dir == DMA_TO_DEVICE) {
- 			/* increment source address */
- 			src = sg_phys(sg);
--		else
-+#if 0
-+			ctrl_sg &= ~COH901318_CX_CTRL_SRC_BUS_SIZE_MASK;
-+			ctrl_chained &= ~COH901318_CX_CTRL_SRC_BUS_SIZE_MASK;
-+			if (src & 0x01) {
-+				pr_err("Aligned src buffer to 8bit access\n");
-+				ctrl_sg |= COH901318_CX_CTRL_SRC_BUS_SIZE_8_BITS;
-+				ctrl_chained |= COH901318_CX_CTRL_SRC_BUS_SIZE_8_BITS;
-+			} else if (src & 0x02) {
-+				pr_err("Aligned src buffer to 16bit access\n");
-+				ctrl_sg |= COH901318_CX_CTRL_SRC_BUS_SIZE_16_BITS;
-+				ctrl_chained |= COH901318_CX_CTRL_SRC_BUS_SIZE_16_BITS;
-+			} else {
-+				pr_err("Aligned src buffer to 32bit access\n");
-+				ctrl_sg |= COH901318_CX_CTRL_SRC_BUS_SIZE_32_BITS;
-+				ctrl_chained |= COH901318_CX_CTRL_SRC_BUS_SIZE_32_BITS;
-+			}
-+#endif
-+		} else {
- 			/* increment destination address */
- 			dst =  sg_phys(sg);
-+#if 0
-+			ctrl_sg &= ~COH901318_CX_CTRL_DST_BUS_SIZE_MASK;
-+			ctrl_chained &= ~COH901318_CX_CTRL_DST_BUS_SIZE_MASK;
-+			if (dst & 0x01) {
-+				pr_err("Aligned dst buffer to 8bit access\n");
-+				ctrl_sg |= COH901318_CX_CTRL_DST_BUS_SIZE_8_BITS;
-+				ctrl_chained |= COH901318_CX_CTRL_DST_BUS_SIZE_8_BITS;
-+			} else if (dst & 0x02) {
-+				pr_err("Aligned dst buffer to 16bit access\n");
-+				ctrl_sg |= COH901318_CX_CTRL_DST_BUS_SIZE_16_BITS;
-+				ctrl_chained |= COH901318_CX_CTRL_DST_BUS_SIZE_16_BITS;
-+			} else {
-+				pr_err("Aligned dst buffer to 32bit access\n");
-+				ctrl_sg |= COH901318_CX_CTRL_DST_BUS_SIZE_32_BITS;
-+				ctrl_chained |= COH901318_CX_CTRL_DST_BUS_SIZE_32_BITS;
-+			}
-+#endif
-+		}
- 
- 		bytes_to_transfer = sg_dma_len(sg);
- 
+ 	/* Register any SPI devices */
 -- 
 1.6.3.3
 
