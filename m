@@ -1,31 +1,19 @@
 From: Daniel Mack <daniel@caiaq.de>
-Subject: [PATCH 3/3] ARM: MXC: mxcmmc: work around a bug in the SDHC busy line handling
-Date: Tue, 30 Mar 2010 20:32:01 +0200
-Message-ID: <1269973921-29611-3-git-send-email-daniel@caiaq.de>
-References: <1269973921-29611-1-git-send-email-daniel@caiaq.de>
+Subject: [PATCH 1/3] ARM: MXC: mxcmmc: misc cleanups
+Date: Tue, 30 Mar 2010 20:31:59 +0200
+Message-ID: <1269973921-29611-1-git-send-email-daniel@caiaq.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from buzzloop.caiaq.de ([212.112.241.133]:44830 "EHLO
+Received: from buzzloop.caiaq.de ([212.112.241.133]:44817 "EHLO
 	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755877Ab0C3ScW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2010 14:32:22 -0400
-In-Reply-To: <1269973921-29611-1-git-send-email-daniel@caiaq.de>
+	with ESMTP id S1755849Ab0C3ScT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2010 14:32:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
 Cc: linux-mmc@vger.kernel.org, Daniel Mack <daniel@caiaq.de>, Sascha Hauer <s.hauer@pengutronix.de>, Dan Williams <dan.j.williams@intel.com>, Volker Ernst <volker.ernst@txtr.com>, Jiri Kosina <jkosina@suse.cz>
 
-MX3 SoCs have a silicon bug which corrupts CRC calculation of
-multi-block transfers when connected SDIO peripheral doesn't drive the
-BUSY line as required by the specs.
-
-One way to prevent this is to only allow 1-bit transfers.
-
-Another way is playing tricks with the DMA engine, but this isn't
-mainline yet. So for now, we live with the performance drawback of 1-bit
-transfers until a nicer solution is found.
-
-This patch introduces a new host controller callback 'init_card' which
-is for now only called from mmc_sdio_init_card().
+Add some more debug information and fix a couple of coding style things
+in mxcmmc.c.
 
 Signed-off-by: Daniel Mack <daniel@caiaq.de>
 Cc: Sascha Hauer <s.hauer@pengutronix.de>
@@ -33,72 +21,96 @@ Cc: Dan Williams <dan.j.williams@intel.com>
 Cc: Volker Ernst <volker.ernst@txtr.com>
 Cc: Jiri Kosina <jkosina@suse.cz>
 ---
- drivers/mmc/core/sdio.c   |    6 ++++++
- drivers/mmc/host/mxcmmc.c |   14 ++++++++++++++
- include/linux/mmc/host.h  |    3 +++
- 3 files changed, 23 insertions(+), 0 deletions(-)
+ drivers/mmc/host/mxcmmc.c |   28 +++++++++++++++++-----------
+ 1 files changed, 17 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 2dd4cfe..b9dee28 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -296,6 +296,12 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
- 	card->type = MMC_TYPE_SDIO;
- 
- 	/*
-+	 * Call the optional HC's init_card function to handle quirks.
-+	 */
-+	if (host->ops->init_card)
-+		host->ops->init_card(host, card);
-+
-+	/*
- 	 * For native busses:  set card RCA and quit open drain mode.
- 	 */
- 	if (!powered_resume && !mmc_host_is_spi(host)) {
 diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 83a4545..f584c1b 100644
+index 2df9041..21037ff 100644
 --- a/drivers/mmc/host/mxcmmc.c
 +++ b/drivers/mmc/host/mxcmmc.c
-@@ -708,11 +708,25 @@ static void mxcmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	spin_unlock_irqrestore(&host->lock, flags);
+@@ -151,6 +151,8 @@ static void mxcmci_softreset(struct mxcmci_host *host)
+ {
+ 	int i;
+ 
++	dev_dbg(mmc_dev(host->mmc), "mxcmci_softreset\n");
++
+ 	/* reset sequence */
+ 	writew(STR_STP_CLK_RESET, host->base + MMC_REG_STR_STP_CLK);
+ 	writew(STR_STP_CLK_RESET | STR_STP_CLK_START_CLK,
+@@ -290,21 +292,29 @@ static int mxcmci_finish_data(struct mxcmci_host *host, unsigned int stat)
+ 		dev_dbg(mmc_dev(host->mmc), "request failed. status: 0x%08x\n",
+ 				stat);
+ 		if (stat & STATUS_CRC_READ_ERR) {
++			dev_err(mmc_dev(host->mmc), "%s: -EILSEQ\n", __func__);
+ 			data->error = -EILSEQ;
+ 		} else if (stat & STATUS_CRC_WRITE_ERR) {
+ 			u32 err_code = (stat >> 9) & 0x3;
+-			if (err_code == 2) /* No CRC response */
++			if (err_code == 2) { /* No CRC response */
++				dev_err(mmc_dev(host->mmc),
++					"%s: No CRC -ETIMEDOUT\n", __func__);
+ 				data->error = -ETIMEDOUT;
+-			else
++			} else {
++				dev_err(mmc_dev(host->mmc),
++					"%s: -EILSEQ\n", __func__);
+ 				data->error = -EILSEQ;
++			}
+ 		} else if (stat & STATUS_TIME_OUT_READ) {
++			dev_err(mmc_dev(host->mmc),
++				"%s: read -ETIMEDOUT\n", __func__);
+ 			data->error = -ETIMEDOUT;
+ 		} else {
++			dev_err(mmc_dev(host->mmc), "%s: -EIO\n", __func__);
+ 			data->error = -EIO;
+ 		}
+-	} else {
++	} else
+ 		data->bytes_xfered = host->datasize;
+-	}
+ 
+ 	data_error = data->error;
+ 
+@@ -433,8 +443,6 @@ static int mxcmci_transfer_data(struct mxcmci_host *host)
+ 	struct scatterlist *sg;
+ 	int stat, i;
+ 
+-	host->datasize = 0;
+-
+ 	host->data = data;
+ 	host->datasize = 0;
+ 
+@@ -471,9 +479,8 @@ static void mxcmci_datawork(struct work_struct *work)
+ 			mxcmci_finish_request(host, host->req);
+ 			return;
+ 		}
+-	} else {
++	} else
+ 		mxcmci_finish_request(host, host->req);
+-	}
  }
  
-+static void mxcmci_init_card(struct mmc_host *host, struct mmc_card *card)
-+{
-+	/*
-+	 * MX3 SoCs have a silicon bug which corrupts CRC calculation of
-+	 * multi-block transfers when connected SDIO peripheral doesn't
-+	 * drive the BUSY line as required by the specs.
-+	 * One way to prevent this is to only allow 1-bit transfers.
-+	 */
-+
-+	if (cpu_is_mx3() && card->type == MMC_TYPE_SDIO)
-+		host->caps &= ~MMC_CAP_4_BIT_DATA;
-+}
-+
- static const struct mmc_host_ops mxcmci_ops = {
- 	.request		= mxcmci_request,
- 	.set_ios		= mxcmci_set_ios,
- 	.get_ro			= mxcmci_get_ro,
- 	.enable_sdio_irq	= mxcmci_enable_sdio_irq,
-+	.init_card		= mxcmci_init_card,
- };
+ #ifdef HAS_DMA
+@@ -495,9 +502,8 @@ static void mxcmci_data_done(struct mxcmci_host *host, unsigned int stat)
+ 			mxcmci_finish_request(host, host->req);
+ 			return;
+ 		}
+-	} else {
++	} else
+ 		mxcmci_finish_request(host, host->req);
+-	}
+ }
+ #endif /* HAS_DMA */
  
- static int mxcmci_probe(struct platform_device *pdev)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 43eaf5c..3196c84 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -108,6 +108,9 @@ struct mmc_host_ops {
- 	int	(*get_cd)(struct mmc_host *host);
+@@ -512,7 +518,7 @@ static void mxcmci_cmd_done(struct mxcmci_host *host, unsigned int stat)
+ 	}
  
- 	void	(*enable_sdio_irq)(struct mmc_host *host, int enable);
-+
-+	/* optional callback for HC quirks */
-+	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
- };
- 
- struct mmc_card;
+ 	/* For the DMA case the DMA engine handles the data transfer
+-	 * automatically. For non DMA we have to do it ourselves.
++	 * automatically. For non DMA we have to to it ourselves.
+ 	 * Don't do it in interrupt context though.
+ 	 */
+ 	if (!mxcmci_use_dma(host) && host->data)
 -- 
 1.7.0
 
