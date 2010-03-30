@@ -1,72 +1,57 @@
-From: Daniel Mack <daniel@caiaq.de>
-Subject: Re: libertas: DAT1 signal IRQ in 1-bit SDIO mode
-Date: Tue, 30 Mar 2010 11:05:40 +0200
-Message-ID: <20100330090540.GM30801@buzzloop.caiaq.de>
-References: <20100329182414.GJ30801@buzzloop.caiaq.de>
- <4BB0FE7A.6090709@embwise.com>
+From: Linus WALLEIJ <linus.walleij@stericsson.com>
+Subject: RE: [PATCH 0/5] ARM: PrimeCell DMA patches v4
+Date: Tue, 30 Mar 2010 11:57:12 +0200
+Message-ID: <CEE6BB42CAD6E947908279175AF8470A039B48CC@EXDCVYMBSTM006.EQ1STM.local>
+References: <1269905728-5452-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from buzzloop.caiaq.de ([212.112.241.133]:44022 "EHLO
-	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754562Ab0C3JFp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2010 05:05:45 -0400
-Content-Disposition: inline
-In-Reply-To: <4BB0FE7A.6090709@embwise.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1269905728-5452-1-git-send-email-linus.walleij@stericsson.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Russell King <linux@arm.linux.org.uk>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grant Likely <grant.likely@secretlab.ca>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "spi-devel-general@lists.sourceforge.net" <spi-devel-general@lists.sourceforge.net>, Dan Williams <dan.j.williams@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Alagu Sankar <alagusankar@embwise.com>
-Cc: libertas-dev@lists.infradead.org, linux-mmc@vger.kernel.org
 
-Hi Alagu,
+[Self]
 
-thanks a lot for your comprehensive answer.
+> This is a fourth iteration of the PrimeCell DMA API on top of the
+> generic DMA devices (sibling to the DMA engine). It's based on
+> the suggestion from Russell to try and define a specific extension
+> subset for DMA devices.
 
-On Tue, Mar 30, 2010 at 12:54:42AM +0530, Alagu Sankar wrote:
->    We have used at-least three different WiFi chipsets on an iMX31 host
->    including the Marvell 8686.  It was on a LogicPD reference platform
->    running an older 2.6.1x kernel with a commercial SDIO stack solution.  The
->    only problem we had with the platform was that it was not providing enough
->    current for the 8686 module, but again that is nothing to do with the
->    iMX31 as such.  It was not a smooth sailing developing the host driver for
->    iMX31.  After investing a lot of time on the driver, we figured out a way
->    of doing multi-block transfers.  For SDIO multi-block writes, we do
+Russell & Grant can you give some hint on the direction you
+see for this patch set?
 
-The MX31 has a silicon bug which leads to CRC corruption for multi-block
-transfers. This is also what the SDHC signals in its error flags. I've
-had technical support from Freescale and they confirmed this bug.
-According the the Errata I've been sent, the only ways to get around
-this are to use 1-bit transfers or single-block transfers only. The
-latter isn't possible for 8686 as the firmware requires the 'real'
-firmware to be downloaded with multiblock transfers (CMD53).
+The problem we're facing is that next I will start adding DMA
+support for the U8500 and the MMCI derivate found in that platform
+doesn't *have* a PIO IRQ, which means the system cannot even
+boot without some solid DMA framework in place. (It is currently
+unbootable from the released kernels.)
 
->    multiple DMA transfers each with the block size.  For example if you are
->    doing a multi-block write of 10 blocks of 256 byte each, then following is
->    the sequence that works fine
-> 
->    - Configure the controller for 10 blocks and 256 byte block size (like any
->    other typical transfer)
->    - Configure the DMA controller to do only the first 256 bytes
->    - Wait for the DMA Completion handler and then initiate the next 256 bytes
->    - Continue this until all the blocks are transferred.
+So unless there is some outstanding issue with this approach
+we pretty much need this now to keep working on mainlining
+the U8500.
 
-So what you're doing is you split up multiblock transfers into single
-blocks? I might lack some knowledge here, but AFAIK that can't work for
-every peripheral as the other side is well aware of the command it is
-been issued, and can hence bail out if not fed correctly. Like the
-firmware download of the 8686 does, according to my findings.
+I would very much like to have the DMA patches for PrimeCell
+support pushed through Dan's tree, but that requires your ACKs
+of course, and it will inevitably collide with other PrimeCell
+patches for the next merge window (many submitted by myself
+admittedly).
 
-Did you ever try that technique without DMA?
+I can feed all the PrimeCell stuff to Dan if all agree that this
+is a good approach. Another approach is to apply the latest
+patches from Dan's tree to ARM and SPI alike and then feed
+the PrimeCell stuff through the ARM tree.
 
->    If this is too much try for now and would like to still continue with the
->    1-bit mode, you can try setting the ECSI bit in CCCR - Bus Interface
->    Control Register (This should be done inside the libertas driver once
->    during the initialization).  This has helped us running the card in 1-bit
->    mode and get SDIO interrupts as well.
-
-Ok, I'll give that a try later today.
-
-Again, thanks for your help.
-
-Daniel
-
+Yours,
+Linus Walleij
