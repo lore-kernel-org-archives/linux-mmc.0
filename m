@@ -1,45 +1,62 @@
-From: Daniel Mack <daniel@caiaq.de>
-Subject: Re: [PATCH] libertas/sdio: set ECSI and SCSI bits for 1-bit
- transfers
-Date: Tue, 30 Mar 2010 20:40:46 +0200
-Message-ID: <20100330184046.GY30801@buzzloop.caiaq.de>
-References: <1269970733-24681-1-git-send-email-daniel@caiaq.de>
- <1269974259.3019.52.camel@localhost.localdomain>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: Re: [PATCH]omap hsmmc: fix incorrect capability reporting
+Date: Wed, 31 Mar 2010 00:12:55 +0530
+Message-ID: <618f0c911003301142w660f77afk3ced01187792fecc@mail.gmail.com>
+References: <618f0c911003300737w5562c18as1bfcb21671919718@mail.gmail.com>
+	 <002a01cad020$47be5fb0$544ff780@am.dhcp.ti.com>
+	 <618f0c911003301111r3781661asa444dd35042772c3@mail.gmail.com>
+	 <4BB2430A.80701@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from buzzloop.caiaq.de ([212.112.241.133]:58923 "EHLO
-	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752546Ab0C3Sku (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2010 14:40:50 -0400
-Content-Disposition: inline
-In-Reply-To: <1269974259.3019.52.camel@localhost.localdomain>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <4BB2430A.80701@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Nishanth Menon <nm@ti.com>
+Cc: "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Williams <dcbw@redhat.com>
-Cc: linux-kernel@vger.kernel.org, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, David Brownell <dbrownell@users.sourceforge.net>
 
-On Tue, Mar 30, 2010 at 11:37:39AM -0700, Dan Williams wrote:
-> On Tue, 2010-03-30 at 19:38 +0200, Daniel Mack wrote:
-> > When operating in 1-bit mode, SDAT1 is used as dedicated interrupt line.
-> > However, the 8686 will only drive this line when the ECSI and SCSI bits
-> > are set in the CCCR_IF register.
-> 
-> While this looks fine enough to me, I don't have enough knowledge of the
-> SDIO stack to know whether or not this would be considered a layering
-> violation or not.  Given that I don't think there's an active maintainer
-> for the SDIO subsystem though, I'd say it's fine enough for me...
-> 
-> Any thoughts David since it appears to be at least somewhat SPI related?
+Nishanth Menon <nm@ti.com> wrote:
+> S, Venkatraman had written, on 03/30/2010 01:11 PM, the following:
+> [..]
+>>>>
+>>>> diff --git a/drivers/mmc/host/omap_hsmmc.c
+>>>> b/drivers/mmc/host/omap_hsmmc.c
+>>>> index 83f0aff..dbf83a6 100644
+>>>> --- a/drivers/mmc/host/omap_hsmmc.c
+>>>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>>>> @@ -2093,7 +2093,7 @@ static int __init omap_hsmmc_probe(struct
+>>>> platform_device *pdev)
+>>>>
+>>>> =A0 =A0 =A0if (mmc_slot(host).wires >=3D 8)
+>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_8_BIT_DATA;
+>>>> - =A0 =A0 else if (mmc_slot(host).wires >=3D 4)
+>>>> + =A0 =A0 if (mmc_slot(host).wires >=3D 4)
+>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_4_BIT_DATA;
+>>>>
+>>> Since 8-bit is the max how about:
+>>>
+>>> =A0 =A0 =A0 if (mmc_slot(host).wires =3D=3D 8)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_8_BIT_DATA | MMC=
+_CAP_4_BIT_DATA;
+>>> =A0 =A0 =A0 if (mmc_slot(host).wires =3D=3D 4)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_4_BIT_DATA;
+>>>
+>>> This would be little easy to read the code.
+>>
+>> Sure. Works for me.
+>
+> nitpicky comment: might be better off using a switch(mmc_slot(host).w=
+ires)
+> statement instead of using =3D=3D if that is the intention here..
 
-I believe that these bits in question are just abused in this case. The
-device is not in SPI mode, so according to the specs, the bits shouldn't
-make any difference. This makes me think that this is specific to
-libertas, and doesn't belong in any lower level.
+Too verbose for just 2 cases, with the 'case's and 'default's adding
+nothing to readability. YMMV.
 
-> Acked-by: Dan Williams <dcbw@redhat.com>
-
-Thanks!
-
-Daniel
-
+Thanks,
+Venkat.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
