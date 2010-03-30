@@ -1,70 +1,100 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: [PATCH]omap hsmmc: fix incorrect capability reporting
-Date: Tue, 30 Mar 2010 10:47:19 -0500
-Message-ID: <002a01cad020$47be5fb0$544ff780@am.dhcp.ti.com>
-References: <618f0c911003300737w5562c18as1bfcb21671919718@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+From: Daniel Mack <daniel@caiaq.de>
+Subject: [PATCH] libertas/sdio: set ECSI and SCSI bits for 1-bit transfers
+Date: Tue, 30 Mar 2010 19:38:53 +0200
+Message-ID: <1269970733-24681-1-git-send-email-daniel@caiaq.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:41316 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753679Ab0C3PrZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2010 11:47:25 -0400
-In-Reply-To: <618f0c911003300737w5562c18as1bfcb21671919718@mail.gmail.com>
+Received: from buzzloop.caiaq.de ([212.112.241.133]:55007 "EHLO
+	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751531Ab0C3Rjn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2010 13:39:43 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Venkatraman S' <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, kishore.kadiyala@ti.com
+To: linux-kernel@vger.kernel.org
+Cc: Daniel Mack <daniel@caiaq.de>, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Dan Williams <dcbw@redhat.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
 
+When operating in 1-bit mode, SDAT1 is used as dedicated interrupt line.
+However, the 8686 will only drive this line when the ECSI and SCSI bits
+are set in the CCCR_IF register.
 
+Thanks to Alagu Sankar for pointing me in the right direction.
 
-> -----Original Message-----
-> From: svenkatr@gmail.com [mailto:svenkatr@gmail.com] On Behalf Of
-> Venkatraman S
-> Sent: Tuesday, March 30, 2010 9:37 AM
-> To: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org;
-> kishore.kadiyala@ti.com
-> Cc: Madhusudhan Chikkature
-> Subject: [PATCH]omap hsmmc: fix incorrect capability reporting
-> 
-> MMC slots that support 8 bit mode also support 4 bit mode.
-> The capability flag has to reflect this, otherwise SDHC cards operate
-> in 1 bit mode.
-> 
-> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 83f0aff..dbf83a6 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2093,7 +2093,7 @@ static int __init omap_hsmmc_probe(struct
-> platform_device *pdev)
-> 
->  	if (mmc_slot(host).wires >= 8)
->  		mmc->caps |= MMC_CAP_8_BIT_DATA;
-> -	else if (mmc_slot(host).wires >= 4)
-> +	if (mmc_slot(host).wires >= 4)
->  		mmc->caps |= MMC_CAP_4_BIT_DATA;
-> 
+Signed-off-by: Daniel Mack <daniel@caiaq.de>
+Cc: Alagu Sankar <alagusankar@embwise.com>
+Cc: Volker Ernst <volker.ernst@txtr.com>
+Cc: Dan Williams <dcbw@redhat.com>
+Cc: John W. Linville <linville@tuxdriver.com>
+Cc: Holger Schurig <hs4233@mail.mn-solutions.de>
+Cc: Bing Zhao <bzhao@marvell.com>
+Cc: libertas-dev@lists.infradead.org
+Cc: linux-wireless@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/net/wireless/libertas/if_sdio.c |   24 ++++++++++++++++++++++++
+ include/linux/mmc/sdio.h                |    2 ++
+ 2 files changed, 26 insertions(+), 0 deletions(-)
 
-Since 8-bit is the max how about:
-
-  	if (mmc_slot(host).wires == 8)
-  		mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA;
-	if (mmc_slot(host).wires == 4)
-  		mmc->caps |= MMC_CAP_4_BIT_DATA;
-
-This would be little easy to read the code.
-
-Regards,
-Madhu
-
->  	if (mmc_slot(host).nonremovable)
-> --
-> 1.6.3.3
+diff --git a/drivers/net/wireless/libertas/if_sdio.c b/drivers/net/wireless/libertas/if_sdio.c
+index 7a73f62..d3170f2 100644
+--- a/drivers/net/wireless/libertas/if_sdio.c
++++ b/drivers/net/wireless/libertas/if_sdio.c
+@@ -34,6 +34,8 @@
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/sdio_func.h>
+ #include <linux/mmc/sdio_ids.h>
++#include <linux/mmc/sdio.h>
++#include <linux/mmc/host.h>
+ 
+ #include "host.h"
+ #include "decl.h"
+@@ -942,6 +944,7 @@ static int if_sdio_probe(struct sdio_func *func,
+ 	int ret, i;
+ 	unsigned int model;
+ 	struct if_sdio_packet *packet;
++	struct mmc_host *host = func->card->host;
+ 
+ 	lbs_deb_enter(LBS_DEB_SDIO);
+ 
+@@ -1022,6 +1025,27 @@ static int if_sdio_probe(struct sdio_func *func,
+ 	if (ret)
+ 		goto disable;
+ 
++	/* For 1-bit transfers, we need to enable the interrupt flags in
++	 * the CCCR register. Temporarily set the function number to 0
++	 * for that. */
++	if ((host->caps & MMC_CAP_SDIO_IRQ) &&
++	    (host->ios.bus_width == MMC_BUS_WIDTH_1)) {
++		unsigned int num = func->num;
++		u8 reg;
++
++		func->num = 0;
++		reg = sdio_readb(func, SDIO_CCCR_IF, &ret);
++		if (ret)
++			goto release_int;
++
++		reg |= SDIO_BUS_ECSI | SDIO_BUS_SCSI;
++		sdio_writeb(func, reg, SDIO_CCCR_IF, &ret);
++		if (ret)
++			goto release_int;
++
++		func->num = num;
++	}
++
+ 	card->ioport = sdio_readb(func, IF_SDIO_IOPORT, &ret);
+ 	if (ret)
+ 		goto release_int;
+diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+index 0ebaef5..329a8fa 100644
+--- a/include/linux/mmc/sdio.h
++++ b/include/linux/mmc/sdio.h
+@@ -94,6 +94,8 @@
+ 
+ #define  SDIO_BUS_WIDTH_1BIT	0x00
+ #define  SDIO_BUS_WIDTH_4BIT	0x02
++#define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
++#define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
+ 
+ #define  SDIO_BUS_ASYNC_INT	0x20
+ 
+-- 
+1.7.0
 
