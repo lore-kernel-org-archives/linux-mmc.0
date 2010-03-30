@@ -1,116 +1,109 @@
-From: Daniel Mack <daniel@caiaq.de>
-Subject: [PATCH 1/3] ARM: MXC: mxcmmc: misc cleanups
-Date: Tue, 30 Mar 2010 20:31:59 +0200
-Message-ID: <1269973921-29611-1-git-send-email-daniel@caiaq.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from buzzloop.caiaq.de ([212.112.241.133]:44817 "EHLO
-	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755849Ab0C3ScT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2010 14:32:19 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Dan Williams <dcbw@redhat.com>
+Subject: Re: [PATCH] libertas/sdio: set ECSI and SCSI bits for 1-bit
+ transfers
+Date: Tue, 30 Mar 2010 11:37:39 -0700
+Message-ID: <1269974259.3019.52.camel@localhost.localdomain>
+References: <1269970733-24681-1-git-send-email-daniel@caiaq.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1269970733-24681-1-git-send-email-daniel@caiaq.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Daniel Mack <daniel@caiaq.de>
+Cc: linux-kernel@vger.kernel.org, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, David Brownell <dbrownell@users.sourceforge.net>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-mmc@vger.kernel.org, Daniel Mack <daniel@caiaq.de>, Sascha Hauer <s.hauer@pengutronix.de>, Dan Williams <dan.j.williams@intel.com>, Volker Ernst <volker.ernst@txtr.com>, Jiri Kosina <jkosina@suse.cz>
 
-Add some more debug information and fix a couple of coding style things
-in mxcmmc.c.
+On Tue, 2010-03-30 at 19:38 +0200, Daniel Mack wrote:
+> When operating in 1-bit mode, SDAT1 is used as dedicated interrupt line.
+> However, the 8686 will only drive this line when the ECSI and SCSI bits
+> are set in the CCCR_IF register.
 
-Signed-off-by: Daniel Mack <daniel@caiaq.de>
-Cc: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Dan Williams <dan.j.williams@intel.com>
-Cc: Volker Ernst <volker.ernst@txtr.com>
-Cc: Jiri Kosina <jkosina@suse.cz>
----
- drivers/mmc/host/mxcmmc.c |   28 +++++++++++++++++-----------
- 1 files changed, 17 insertions(+), 11 deletions(-)
+While this looks fine enough to me, I don't have enough knowledge of the
+SDIO stack to know whether or not this would be considered a layering
+violation or not.  Given that I don't think there's an active maintainer
+for the SDIO subsystem though, I'd say it's fine enough for me...
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 2df9041..21037ff 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -151,6 +151,8 @@ static void mxcmci_softreset(struct mxcmci_host *host)
- {
- 	int i;
- 
-+	dev_dbg(mmc_dev(host->mmc), "mxcmci_softreset\n");
-+
- 	/* reset sequence */
- 	writew(STR_STP_CLK_RESET, host->base + MMC_REG_STR_STP_CLK);
- 	writew(STR_STP_CLK_RESET | STR_STP_CLK_START_CLK,
-@@ -290,21 +292,29 @@ static int mxcmci_finish_data(struct mxcmci_host *host, unsigned int stat)
- 		dev_dbg(mmc_dev(host->mmc), "request failed. status: 0x%08x\n",
- 				stat);
- 		if (stat & STATUS_CRC_READ_ERR) {
-+			dev_err(mmc_dev(host->mmc), "%s: -EILSEQ\n", __func__);
- 			data->error = -EILSEQ;
- 		} else if (stat & STATUS_CRC_WRITE_ERR) {
- 			u32 err_code = (stat >> 9) & 0x3;
--			if (err_code == 2) /* No CRC response */
-+			if (err_code == 2) { /* No CRC response */
-+				dev_err(mmc_dev(host->mmc),
-+					"%s: No CRC -ETIMEDOUT\n", __func__);
- 				data->error = -ETIMEDOUT;
--			else
-+			} else {
-+				dev_err(mmc_dev(host->mmc),
-+					"%s: -EILSEQ\n", __func__);
- 				data->error = -EILSEQ;
-+			}
- 		} else if (stat & STATUS_TIME_OUT_READ) {
-+			dev_err(mmc_dev(host->mmc),
-+				"%s: read -ETIMEDOUT\n", __func__);
- 			data->error = -ETIMEDOUT;
- 		} else {
-+			dev_err(mmc_dev(host->mmc), "%s: -EIO\n", __func__);
- 			data->error = -EIO;
- 		}
--	} else {
-+	} else
- 		data->bytes_xfered = host->datasize;
--	}
- 
- 	data_error = data->error;
- 
-@@ -433,8 +443,6 @@ static int mxcmci_transfer_data(struct mxcmci_host *host)
- 	struct scatterlist *sg;
- 	int stat, i;
- 
--	host->datasize = 0;
--
- 	host->data = data;
- 	host->datasize = 0;
- 
-@@ -471,9 +479,8 @@ static void mxcmci_datawork(struct work_struct *work)
- 			mxcmci_finish_request(host, host->req);
- 			return;
- 		}
--	} else {
-+	} else
- 		mxcmci_finish_request(host, host->req);
--	}
- }
- 
- #ifdef HAS_DMA
-@@ -495,9 +502,8 @@ static void mxcmci_data_done(struct mxcmci_host *host, unsigned int stat)
- 			mxcmci_finish_request(host, host->req);
- 			return;
- 		}
--	} else {
-+	} else
- 		mxcmci_finish_request(host, host->req);
--	}
- }
- #endif /* HAS_DMA */
- 
-@@ -512,7 +518,7 @@ static void mxcmci_cmd_done(struct mxcmci_host *host, unsigned int stat)
- 	}
- 
- 	/* For the DMA case the DMA engine handles the data transfer
--	 * automatically. For non DMA we have to do it ourselves.
-+	 * automatically. For non DMA we have to to it ourselves.
- 	 * Don't do it in interrupt context though.
- 	 */
- 	if (!mxcmci_use_dma(host) && host->data)
--- 
-1.7.0
+Any thoughts David since it appears to be at least somewhat SPI related?
 
+Acked-by: Dan Williams <dcbw@redhat.com>
+
+> Thanks to Alagu Sankar for pointing me in the right direction.
+> 
+> Signed-off-by: Daniel Mack <daniel@caiaq.de>
+> Cc: Alagu Sankar <alagusankar@embwise.com>
+> Cc: Volker Ernst <volker.ernst@txtr.com>
+> Cc: Dan Williams <dcbw@redhat.com>
+> Cc: John W. Linville <linville@tuxdriver.com>
+> Cc: Holger Schurig <hs4233@mail.mn-solutions.de>
+> Cc: Bing Zhao <bzhao@marvell.com>
+> Cc: libertas-dev@lists.infradead.org
+> Cc: linux-wireless@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> ---
+>  drivers/net/wireless/libertas/if_sdio.c |   24 ++++++++++++++++++++++++
+>  include/linux/mmc/sdio.h                |    2 ++
+>  2 files changed, 26 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/net/wireless/libertas/if_sdio.c b/drivers/net/wireless/libertas/if_sdio.c
+> index 7a73f62..d3170f2 100644
+> --- a/drivers/net/wireless/libertas/if_sdio.c
+> +++ b/drivers/net/wireless/libertas/if_sdio.c
+> @@ -34,6 +34,8 @@
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/sdio_func.h>
+>  #include <linux/mmc/sdio_ids.h>
+> +#include <linux/mmc/sdio.h>
+> +#include <linux/mmc/host.h>
+>  
+>  #include "host.h"
+>  #include "decl.h"
+> @@ -942,6 +944,7 @@ static int if_sdio_probe(struct sdio_func *func,
+>  	int ret, i;
+>  	unsigned int model;
+>  	struct if_sdio_packet *packet;
+> +	struct mmc_host *host = func->card->host;
+>  
+>  	lbs_deb_enter(LBS_DEB_SDIO);
+>  
+> @@ -1022,6 +1025,27 @@ static int if_sdio_probe(struct sdio_func *func,
+>  	if (ret)
+>  		goto disable;
+>  
+> +	/* For 1-bit transfers, we need to enable the interrupt flags in
+> +	 * the CCCR register. Temporarily set the function number to 0
+> +	 * for that. */
+> +	if ((host->caps & MMC_CAP_SDIO_IRQ) &&
+> +	    (host->ios.bus_width == MMC_BUS_WIDTH_1)) {
+> +		unsigned int num = func->num;
+> +		u8 reg;
+> +
+> +		func->num = 0;
+> +		reg = sdio_readb(func, SDIO_CCCR_IF, &ret);
+> +		if (ret)
+> +			goto release_int;
+> +
+> +		reg |= SDIO_BUS_ECSI | SDIO_BUS_SCSI;
+> +		sdio_writeb(func, reg, SDIO_CCCR_IF, &ret);
+> +		if (ret)
+> +			goto release_int;
+> +
+> +		func->num = num;
+> +	}
+> +
+>  	card->ioport = sdio_readb(func, IF_SDIO_IOPORT, &ret);
+>  	if (ret)
+>  		goto release_int;
+> diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+> index 0ebaef5..329a8fa 100644
+> --- a/include/linux/mmc/sdio.h
+> +++ b/include/linux/mmc/sdio.h
+> @@ -94,6 +94,8 @@
+>  
+>  #define  SDIO_BUS_WIDTH_1BIT	0x00
+>  #define  SDIO_BUS_WIDTH_4BIT	0x02
+> +#define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
+> +#define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
+>  
+>  #define  SDIO_BUS_ASYNC_INT	0x20
+>  
