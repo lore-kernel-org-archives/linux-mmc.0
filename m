@@ -1,80 +1,78 @@
-From: Daniel Mack <daniel-rDUAYElUppE@public.gmane.org>
-Subject: Re: [PATCH] libertas/sdio: set ECSI and SCSI bits for 1-bit
- transfers
-Date: Wed, 31 Mar 2010 11:08:36 +0200
-Message-ID: <20100331090836.GA30801@buzzloop.caiaq.de>
+From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Subject: Re: [PATCH] libertas/sdio: set ECSI and SCSI bits for 1-bit transfers
+Date: Wed, 31 Mar 2010 11:49:49 +0200
+Message-ID: <k2he2d7436a1003310249v63878e0ahe1b398401937a225@mail.gmail.com>
 References: <1269970733-24681-1-git-send-email-daniel@caiaq.de>
- <x2ve2d7436a1003310207t16a7d1d6r7853de2dfa647c6c@mail.gmail.com>
+	 <x2ve2d7436a1003310207t16a7d1d6r7853de2dfa647c6c@mail.gmail.com>
+	 <20100331090836.GA30801@buzzloop.caiaq.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-2
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <x2ve2d7436a1003310207t16a7d1d6r7853de2dfa647c6c-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: =?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirqus-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alagu Sankar <alagusankar-LW5URSxhY0VBDgjK7y7TUQ@public.gmane.org>, Volker Ernst <volker.ernst-YiJBWufK+bc@public.gmane.org>, Dan Williams <dcbw-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Holger Schurig <hs4233-x6+DxXLjN1AJvtFkdXX2Hg4jNU5vUVPG@public.gmane.org>, Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ww0-f46.google.com ([74.125.82.46]:62826 "EHLO
+	mail-ww0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933051Ab0CaJtx convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2010 05:49:53 -0400
+In-Reply-To: <20100331090836.GA30801@buzzloop.caiaq.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Daniel Mack <daniel@caiaq.de>
+Cc: linux-kernel@vger.kernel.org, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Dan Williams <dcbw@redhat.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Wed, Mar 31, 2010 at 11:07:06AM +0200, Micha=C5=82 Miros=C5=82aw wro=
-te:
-> 2010/3/30 Daniel Mack <daniel-rDUAYElUppE@public.gmane.org>:
-> [...]
-> > @@ -1022,6 +1025,27 @@ static int if_sdio_probe(struct sdio_func *f=
-unc,
-> > =C2=A0 =C2=A0 =C2=A0 =C2=A0if (ret)
-> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0goto disable=
-;
-> >
-> > + =C2=A0 =C2=A0 =C2=A0 /* For 1-bit transfers, we need to enable th=
-e interrupt flags in
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* the CCCR register. Temporarily set t=
-he function number to 0
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* for that. */
-> > + =C2=A0 =C2=A0 =C2=A0 if ((host->caps & MMC_CAP_SDIO_IRQ) &&
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 (host->ios.bus_width =3D=3D MM=
-C_BUS_WIDTH_1)) {
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 unsigned int num=
- =3D func->num;
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 u8 reg;
-> > +
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 func->num =3D 0;
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 reg =3D sdio_rea=
-db(func, SDIO_CCCR_IF, &ret);
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ret)
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 goto release_int;
-> > +
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 reg |=3D SDIO_BU=
-S_ECSI | SDIO_BUS_SCSI;
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 sdio_writeb(func=
-, reg, SDIO_CCCR_IF, &ret);
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ret)
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 goto release_int;
-> > +
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 func->num =3D nu=
-m;
-> > + =C2=A0 =C2=A0 =C2=A0 }
-> > +
-> > =C2=A0 =C2=A0 =C2=A0 =C2=A0card->ioport =3D sdio_readb(func, IF_SDI=
-O_IOPORT, &ret);
-> > =C2=A0 =C2=A0 =C2=A0 =C2=A0if (ret)
-> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0goto release=
-_int;
->=20
-> You should probably just use mmc_io_rw_direct() in this case instead
-> of abusing func->num.
+W dniu 31 marca 2010 11:08 u=BFytkownik Daniel Mack <daniel@caiaq.de> n=
+apisa=B3:
+> On Wed, Mar 31, 2010 at 11:07:06AM +0200, Micha=B3 Miros=B3aw wrote:
+>> 2010/3/30 Daniel Mack <daniel@caiaq.de>:
+>> [...]
+>> > @@ -1022,6 +1025,27 @@ static int if_sdio_probe(struct sdio_func *=
+func,
+>> > =A0 =A0 =A0 =A0if (ret)
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto disable;
+>> >
+>> > + =A0 =A0 =A0 /* For 1-bit transfers, we need to enable the interr=
+upt flags in
+>> > + =A0 =A0 =A0 =A0* the CCCR register. Temporarily set the function=
+ number to 0
+>> > + =A0 =A0 =A0 =A0* for that. */
+>> > + =A0 =A0 =A0 if ((host->caps & MMC_CAP_SDIO_IRQ) &&
+>> > + =A0 =A0 =A0 =A0 =A0 (host->ios.bus_width =3D=3D MMC_BUS_WIDTH_1)=
+) {
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int num =3D func->num;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 u8 reg;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 func->num =3D 0;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D sdio_readb(func, SDIO_CCCR_I=
+=46, &ret);
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto release_int;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D SDIO_BUS_ECSI | SDIO_BUS_SC=
+SI;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdio_writeb(func, reg, SDIO_CCCR_IF,=
+ &ret);
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto release_int;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 func->num =3D num;
+>> > + =A0 =A0 =A0 }
+>> > +
+>> > =A0 =A0 =A0 =A0card->ioport =3D sdio_readb(func, IF_SDIO_IOPORT, &=
+ret);
+>> > =A0 =A0 =A0 =A0if (ret)
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto release_int;
+>>
+>> You should probably just use mmc_io_rw_direct() in this case instead
+>> of abusing func->num.
+>
+> Hmm, that function isn't exported, and I didn't want to change this. =
+You
+> say you'd prefer that? I can cook up something that does it, no probl=
+em.
 
-Hmm, that function isn't exported, and I didn't want to change this. Yo=
-u
-say you'd prefer that? I can cook up something that does it, no problem=
-=2E
+BTW, I can't see any exported functions to access fn#0 directly from
+drivers. Maybe it's time to introduce them now - at least CCCR has
+some vendor-defined parts that drivers may want to access and there is
+a lot of place in CIS area that can be (ab)used by devices.
 
-
-Daniel
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireles=
-s" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best Regards,
+Micha=B3 Miros=B3aw
