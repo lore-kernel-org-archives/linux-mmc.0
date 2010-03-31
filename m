@@ -1,48 +1,99 @@
 From: Daniel Mack <daniel@caiaq.de>
-Subject: Re: [PATCH 2/3] ARM: MXC: mxcmmc: Teach the driver SDIO operations
-Date: Wed, 31 Mar 2010 15:29:46 +0200
-Message-ID: <20100331132946.GH30807@buzzloop.caiaq.de>
-References: <1269973921-29611-1-git-send-email-daniel@caiaq.de>
- <1269973921-29611-2-git-send-email-daniel@caiaq.de>
- <20100331130339.GX2241@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH] libertas/sdio: set ECSI bit for 1-bit transfers
+Date: Wed, 31 Mar 2010 15:31:49 +0200
+Message-ID: <1270042309-18606-1-git-send-email-daniel@caiaq.de>
+References: <k2he2d7436a1003310249v63878e0ahe1b398401937a225@mail.gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from buzzloop.caiaq.de ([212.112.241.133]:50202 "EHLO
+Received: from buzzloop.caiaq.de ([212.112.241.133]:43577 "EHLO
 	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757673Ab0CaN3v (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2010 09:29:51 -0400
-Content-Disposition: inline
-In-Reply-To: <20100331130339.GX2241@pengutronix.de>
+	with ESMTP id S933319Ab0CaNcW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2010 09:32:22 -0400
+In-Reply-To: <k2he2d7436a1003310249v63878e0ahe1b398401937a225@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Volker Ernst <volker.ernst@txtr.com>, Jiri Kosina <jkosina@suse.cz>
+To: linux-kernel@vger.kernel.org
+Cc: mirqus@gmail.com, Daniel Mack <daniel@caiaq.de>, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Dan Williams <dcbw@redhat.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Wed, Mar 31, 2010 at 03:03:39PM +0200, Sascha Hauer wrote:
-> On Tue, Mar 30, 2010 at 08:32:00PM +0200, Daniel Mack wrote:
-> > +static void mxcmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
-> > +{
-> > +	struct mxcmci_host *host = mmc_priv(mmc);
-> > +	unsigned long flags;
-> > +	u32 int_cntr;
-> > +
-> > +	spin_lock_irqsave(&host->lock, flags);
-> > +	host->use_sdio = enable;
-> > +	int_cntr = readl(host->base + MMC_REG_INT_CNTR);
-> > +
-> > +	if (enable)
-> > +		int_cntr |= INT_SDIO_IRQ_EN;
-> > +	else
-> > +		int_cntr &= ~INT_SDIO_IRQ_EN;
-> > +
-> > +	writel(int_cntr, host->base + MMC_REG_INT_CNTR);
-> > +	spin_unlock_irqrestore(&host->lock, flags);
-> 
-> The other places where MMC_REG_INT_CNTR is touched should be protected
-> by this spinlock aswell.
+When operating in 1-bit mode, SDAT1 is used as dedicated interrupt line.
+However, the 8686 will only drive this line when the ECSI bit is set in
+the CCCR_IF register.
 
-Hmm, all other place don't do a read/modify/write cycle, so I'd say the
-don't need protection?
+Thanks to Alagu Sankar for pointing me in the right direction.
 
-Daniel
+Signed-off-by: Daniel Mack <daniel@caiaq.de>
+Cc: Alagu Sankar <alagusankar@embwise.com>
+Cc: Volker Ernst <volker.ernst@txtr.com>
+Cc: Dan Williams <dcbw@redhat.com>
+Cc: John W. Linville <linville@tuxdriver.com>
+Cc: Holger Schurig <hs4233@mail.mn-solutions.de>
+Cc: Bing Zhao <bzhao@marvell.com>
+Cc: libertas-dev@lists.infradead.org
+Cc: linux-wireless@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/net/wireless/libertas/if_sdio.c |   21 +++++++++++++++++++++
+ include/linux/mmc/sdio.h                |    2 ++
+ 2 files changed, 23 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/net/wireless/libertas/if_sdio.c b/drivers/net/wireless/libertas/if_sdio.c
+index 7a73f62..f89bb8b 100644
+--- a/drivers/net/wireless/libertas/if_sdio.c
++++ b/drivers/net/wireless/libertas/if_sdio.c
+@@ -34,6 +34,8 @@
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/sdio_func.h>
+ #include <linux/mmc/sdio_ids.h>
++#include <linux/mmc/sdio.h>
++#include <linux/mmc/host.h>
+ 
+ #include "host.h"
+ #include "decl.h"
+@@ -942,6 +944,7 @@ static int if_sdio_probe(struct sdio_func *func,
+ 	int ret, i;
+ 	unsigned int model;
+ 	struct if_sdio_packet *packet;
++	struct mmc_host *host = func->card->host;
+ 
+ 	lbs_deb_enter(LBS_DEB_SDIO);
+ 
+@@ -1022,6 +1025,24 @@ static int if_sdio_probe(struct sdio_func *func,
+ 	if (ret)
+ 		goto disable;
+ 
++	/* For 1-bit transfers, we need to enable the interrupt flag in
++	 * the CCCR register. Set the MMC_QUIRK_LENIENT_FN0 bit to allow
++	 * access to non-vendor registers. */
++	if ((host->caps & MMC_CAP_SDIO_IRQ) &&
++	    (host->ios.bus_width == MMC_BUS_WIDTH_1)) {
++		u8 reg;
++
++		func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
++		reg = sdio_f0_readb(func, SDIO_CCCR_IF, &ret);
++		if (ret)
++			goto release_int;
++
++		reg |= SDIO_BUS_ECSI;
++		sdio_f0_writeb(func, reg, SDIO_CCCR_IF, &ret);
++		if (ret)
++			goto release_int;
++	}
++
+ 	card->ioport = sdio_readb(func, IF_SDIO_IOPORT, &ret);
+ 	if (ret)
+ 		goto release_int;
+diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+index 0ebaef5..329a8fa 100644
+--- a/include/linux/mmc/sdio.h
++++ b/include/linux/mmc/sdio.h
+@@ -94,6 +94,8 @@
+ 
+ #define  SDIO_BUS_WIDTH_1BIT	0x00
+ #define  SDIO_BUS_WIDTH_4BIT	0x02
++#define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
++#define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
+ 
+ #define  SDIO_BUS_ASYNC_INT	0x20
+ 
+-- 
+1.7.0
+
