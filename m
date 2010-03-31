@@ -1,78 +1,32 @@
-From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Subject: Re: [PATCH] libertas/sdio: set ECSI and SCSI bits for 1-bit transfers
-Date: Wed, 31 Mar 2010 11:49:49 +0200
-Message-ID: <k2he2d7436a1003310249v63878e0ahe1b398401937a225@mail.gmail.com>
-References: <1269970733-24681-1-git-send-email-daniel@caiaq.de>
-	 <x2ve2d7436a1003310207t16a7d1d6r7853de2dfa647c6c@mail.gmail.com>
-	 <20100331090836.GA30801@buzzloop.caiaq.de>
+From: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Subject: [RFC] OMAP4-hsmmc: card-detect/regulator changes
+Date: Wed, 31 Mar 2010 17:21:08 +0530
+Message-ID: <h2p7f9d1ffb1003310451t85fbbb6eo3e3d06617a5a8f00@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f46.google.com ([74.125.82.46]:62826 "EHLO
-	mail-ww0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933051Ab0CaJtx convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2010 05:49:53 -0400
-In-Reply-To: <20100331090836.GA30801@buzzloop.caiaq.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: adrian.hunter@nokia.com, Madhusudhan <madhu.cr@ti.com>, jarkko.lavinen@nokia.com
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Mack <daniel@caiaq.de>
-Cc: linux-kernel@vger.kernel.org, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Dan Williams <dcbw@redhat.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
 
-W dniu 31 marca 2010 11:08 u=BFytkownik Daniel Mack <daniel@caiaq.de> n=
-apisa=B3:
-> On Wed, Mar 31, 2010 at 11:07:06AM +0200, Micha=B3 Miros=B3aw wrote:
->> 2010/3/30 Daniel Mack <daniel@caiaq.de>:
->> [...]
->> > @@ -1022,6 +1025,27 @@ static int if_sdio_probe(struct sdio_func *=
-func,
->> > =A0 =A0 =A0 =A0if (ret)
->> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto disable;
->> >
->> > + =A0 =A0 =A0 /* For 1-bit transfers, we need to enable the interr=
-upt flags in
->> > + =A0 =A0 =A0 =A0* the CCCR register. Temporarily set the function=
- number to 0
->> > + =A0 =A0 =A0 =A0* for that. */
->> > + =A0 =A0 =A0 if ((host->caps & MMC_CAP_SDIO_IRQ) &&
->> > + =A0 =A0 =A0 =A0 =A0 (host->ios.bus_width =3D=3D MMC_BUS_WIDTH_1)=
-) {
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int num =3D func->num;
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 u8 reg;
->> > +
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 func->num =3D 0;
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D sdio_readb(func, SDIO_CCCR_I=
-=46, &ret);
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto release_int;
->> > +
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D SDIO_BUS_ECSI | SDIO_BUS_SC=
-SI;
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdio_writeb(func, reg, SDIO_CCCR_IF,=
- &ret);
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto release_int;
->> > +
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 func->num =3D num;
->> > + =A0 =A0 =A0 }
->> > +
->> > =A0 =A0 =A0 =A0card->ioport =3D sdio_readb(func, IF_SDIO_IOPORT, &=
-ret);
->> > =A0 =A0 =A0 =A0if (ret)
->> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto release_int;
->>
->> You should probably just use mmc_io_rw_direct() in this case instead
->> of abusing func->num.
->
-> Hmm, that function isn't exported, and I didn't want to change this. =
-You
-> say you'd prefer that? I can cook up something that does it, no probl=
-em.
+Hi,
+I am trying to implement card-detect and regulator changes for HSMMC
+driver on OMAP4.
 
-BTW, I can't see any exported functions to access fn#0 directly from
-drivers. Maybe it's time to introduce them now - at least CCCR has
-some vendor-defined parts that drivers may want to access and there is
-a lot of place in CIS area that can be (ab)used by devices.
+In OMAP4, hsmmc doesn't use any gpio line for card detect and instead
+uses interrupt line
+from TWL6030 which also provides a register for
+status[Inserted/removed] of the removable Card.
 
-Best Regards,
-Micha=B3 Miros=B3aw
+Currently all the gpio related stuff moved from board file "hsmmc.c"
+to driver file "omap_hsmmc.c"
+[http://marc.info/?l=linux-mmc&m=126369200005981&w=2]and since the
+card-detect implementation
+for twl6030 uses I2c read/write it doesn't make sense to have the
+card-detect implementation in board file.
+
+And the regulator changes can remain in driver file.
+
+Regards,
+Kishore
