@@ -1,175 +1,44 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH 2/3] ARM: MXC: mxcmmc: Teach the driver SDIO operations
-Date: Wed, 31 Mar 2010 15:03:39 +0200
-Message-ID: <20100331130339.GX2241@pengutronix.de>
-References: <1269973921-29611-1-git-send-email-daniel@caiaq.de> <1269973921-29611-2-git-send-email-daniel@caiaq.de>
+From: Daniel Mack <daniel@caiaq.de>
+Subject: Re: [PATCH] libertas/sdio: set ECSI and SCSI bits for 1-bit
+ transfers
+Date: Wed, 31 Mar 2010 15:08:55 +0200
+Message-ID: <20100331130855.GG30807@buzzloop.caiaq.de>
+References: <1269970733-24681-1-git-send-email-daniel@caiaq.de>
+ <x2ve2d7436a1003310207t16a7d1d6r7853de2dfa647c6c@mail.gmail.com>
+ <20100331090836.GA30801@buzzloop.caiaq.de>
+ <k2he2d7436a1003310249v63878e0ahe1b398401937a225@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:57965 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932682Ab0CaNDo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2010 09:03:44 -0400
+Received: from buzzloop.caiaq.de ([212.112.241.133]:52535 "EHLO
+	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933277Ab0CaNI7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2010 09:08:59 -0400
 Content-Disposition: inline
-In-Reply-To: <1269973921-29611-2-git-send-email-daniel@caiaq.de>
+In-Reply-To: <k2he2d7436a1003310249v63878e0ahe1b398401937a225@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Mack <daniel@caiaq.de>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Volker Ernst <volker.ernst@txtr.com>, Jiri Kosina <jkosina@suse.cz>
+To: =?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirqus@gmail.com>
+Cc: linux-kernel@vger.kernel.org, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Dan Williams <dcbw@redhat.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Tue, Mar 30, 2010 at 08:32:00PM +0200, Daniel Mack wrote:
-> Successfully tested on MX31 hardware using libertas SDIO peripherals.
-> 
-> Signed-off-by: Daniel Mack <daniel@caiaq.de>
-> Cc: Sascha Hauer <s.hauer@pengutronix.de>
-> Cc: Dan Williams <dan.j.williams@intel.com>
-> Cc: Volker Ernst <volker.ernst@txtr.com>
-> Cc: Jiri Kosina <jkosina@suse.cz>
-> ---
->  drivers/mmc/host/mxcmmc.c |   55 ++++++++++++++++++++++++++++++++++++--------
->  1 files changed, 45 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 21037ff..83a4545 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -119,6 +119,7 @@ struct mxcmci_host {
->  	int			detect_irq;
->  	int			dma;
->  	int			do_dma;
-> +	int			use_sdio;
->  	unsigned int		power_mode;
->  	struct imxmmc_platform_data *pdata;
->  
-> @@ -138,6 +139,7 @@ struct mxcmci_host {
->  	int			clock;
->  
->  	struct work_struct	datawork;
-> +	spinlock_t		lock;
->  };
->  
->  static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
-> @@ -226,6 +228,8 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
->  static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
->  		unsigned int cmdat)
->  {
-> +	u32 int_cntr;
-> +
->  	WARN_ON(host->cmd != NULL);
->  	host->cmd = cmd;
->  
-> @@ -249,13 +253,15 @@ static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
->  		return -EINVAL;
->  	}
->  
-> +	int_cntr = INT_END_CMD_RES_EN;
-> +
->  	if (mxcmci_use_dma(host))
-> -		writel(INT_READ_OP_EN | INT_WRITE_OP_DONE_EN |
-> -				INT_END_CMD_RES_EN,
-> -				host->base + MMC_REG_INT_CNTR);
-> -	else
-> -		writel(INT_END_CMD_RES_EN, host->base + MMC_REG_INT_CNTR);
-> +		int_cntr |= INT_READ_OP_EN | INT_WRITE_OP_DONE_EN;
-> +
-> +	if (host->use_sdio)
-> +		int_cntr |= INT_SDIO_IRQ_EN;
->  
-> +	writel(int_cntr, host->base + MMC_REG_INT_CNTR);
->  	writew(cmd->opcode, host->base + MMC_REG_CMD);
->  	writel(cmd->arg, host->base + MMC_REG_ARG);
->  	writew(cmdat, host->base + MMC_REG_CMD_DAT_CONT);
-> @@ -266,7 +272,12 @@ static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
->  static void mxcmci_finish_request(struct mxcmci_host *host,
->  		struct mmc_request *req)
->  {
-> -	writel(0, host->base + MMC_REG_INT_CNTR);
-> +	u32 int_cntr = 0;
-> +
-> +	if (host->use_sdio)
-> +		int_cntr |= INT_SDIO_IRQ_EN;
-> +
-> +	writel(int_cntr, host->base + MMC_REG_INT_CNTR);
->  
->  	host->req = NULL;
->  	host->cmd = NULL;
-> @@ -536,8 +547,12 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
->  
->  	dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
->  
-> +	if ((stat & STATUS_SDIO_INT_ACTIVE) && host->use_sdio)
-> +		mmc_signal_sdio_irq(host->mmc);
-> +
->  	if (stat & STATUS_END_CMD_RESP)
->  		mxcmci_cmd_done(host, stat);
-> +
->  #ifdef HAS_DMA
->  	if (mxcmci_use_dma(host) &&
->  		  (stat & (STATUS_DATA_TRANS_DONE | STATUS_WRITE_OP_DONE)))
-> @@ -674,11 +689,30 @@ static int mxcmci_get_ro(struct mmc_host *mmc)
->  	return -ENOSYS;
->  }
->  
-> +static void mxcmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
-> +{
-> +	struct mxcmci_host *host = mmc_priv(mmc);
-> +	unsigned long flags;
-> +	u32 int_cntr;
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +	host->use_sdio = enable;
-> +	int_cntr = readl(host->base + MMC_REG_INT_CNTR);
-> +
-> +	if (enable)
-> +		int_cntr |= INT_SDIO_IRQ_EN;
-> +	else
-> +		int_cntr &= ~INT_SDIO_IRQ_EN;
-> +
-> +	writel(int_cntr, host->base + MMC_REG_INT_CNTR);
-> +	spin_unlock_irqrestore(&host->lock, flags);
+On Wed, Mar 31, 2010 at 11:49:49AM +0200, Micha=C5=82 Miros=C5=82aw wro=
+te:
+> W dniu 31 marca 2010 11:08 u=C5=BCytkownik Daniel Mack <daniel@caiaq.=
+de> napisa=C5=82:
+> > Hmm, that function isn't exported, and I didn't want to change this=
+=2E You
+> > say you'd prefer that? I can cook up something that does it, no pro=
+blem.
+>=20
+> BTW, I can't see any exported functions to access fn#0 directly from
+> drivers. Maybe it's time to introduce them now - at least CCCR has
+> some vendor-defined parts that drivers may want to access and there i=
+s
+> a lot of place in CIS area that can be (ab)used by devices.
 
-The other places where MMC_REG_INT_CNTR is touched should be protected
-by this spinlock aswell.
+In fact, there is sdio_f0_{read,write}b() - I overlooked them. Will
+resend a new patch.
 
-Sascha
-
-> +}
->  
->  static const struct mmc_host_ops mxcmci_ops = {
-> -	.request	= mxcmci_request,
-> -	.set_ios	= mxcmci_set_ios,
-> -	.get_ro		= mxcmci_get_ro,
-> +	.request		= mxcmci_request,
-> +	.set_ios		= mxcmci_set_ios,
-> +	.get_ro			= mxcmci_get_ro,
-> +	.enable_sdio_irq	= mxcmci_enable_sdio_irq,
->  };
->  
->  static int mxcmci_probe(struct platform_device *pdev)
-> @@ -706,7 +740,7 @@ static int mxcmci_probe(struct platform_device *pdev)
->  	}
->  
->  	mmc->ops = &mxcmci_ops;
-> -	mmc->caps = MMC_CAP_4_BIT_DATA;
-> +	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
->  
->  	/* MMC core transfer sizes tunable parameters */
->  	mmc->max_hw_segs = 64;
-> @@ -725,6 +759,7 @@ static int mxcmci_probe(struct platform_device *pdev)
->  
->  	host->mmc = mmc;
->  	host->pdata = pdev->dev.platform_data;
-> +	spin_lock_init(&host->lock);
->  
->  	if (host->pdata && host->pdata->ocr_avail)
->  		mmc->ocr_avail = host->pdata->ocr_avail;
-> -- 
-> 1.7.0
-> 
-> 
-
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Thanks for checking,
+Daniel
