@@ -1,135 +1,102 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [Bugme-new] [Bug 15656] New: System sluggish when using ENE SD
- card reader
-Date: Thu, 1 Apr 2010 15:30:35 -0700
-Message-ID: <20100401153035.8668b681.akpm@linux-foundation.org>
-References: <bug-15656-10286@https.bugzilla.kernel.org/>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH] Disable the non working eMMC on Zoom2/3
+Date: Thu, 1 Apr 2010 17:58:48 -0500
+Message-ID: <009a01cad1ee$e3bbae70$544ff780@am.dhcp.ti.com>
+References: <37310.192.168.10.89.1270081542.squirrel@dbdmail.itg.ti.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030D32CEE8@dbde02.ent.ti.com> <008601cad1bd$6d0022b0$544ff780@am.dhcp.ti.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030D32D372@dbde02.ent.ti.com> <4BB51740.2060802@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain;
+	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:55155 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756677Ab0DAWbQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Apr 2010 18:31:16 -0400
-In-Reply-To: <bug-15656-10286@https.bugzilla.kernel.org/>
+Received: from devils.ext.ti.com ([198.47.26.153]:58453 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751222Ab0DAW6z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Apr 2010 18:58:55 -0400
+In-Reply-To: <4BB51740.2060802@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, theholyettlz@googlemail.com
+To: 'Nishanth Menon' <nm@ti.com>, "'Ghorai, Sukumar'" <s-ghorai@ti.com>
+Cc: tony@atomide.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
 
-(switched to email.  Please respond via emailed reply-to-all, not via the
-bugzilla web interface).
 
-On Wed, 31 Mar 2010 11:09:28 GMT
-bugzilla-daemon@bugzilla.kernel.org wrote:
+> -----Original Message-----
+> From: Nishanth Menon [mailto:nm@ti.com]
+> Sent: Thursday, April 01, 2010 4:59 PM
+> To: Ghorai, Sukumar
+> Cc: Chikkature Rajashekar, Madhusudhan; tony@atomide.com; linux-
+> omap@vger.kernel.org; linux-mmc@vger.kernel.org
+> Subject: Re: [PATCH] Disable the non working eMMC on Zoom2/3
+> 
+> Ghorai, Sukumar had written, on 04/01/2010 01:34 PM, the following:
+> 
+> >>>> -----Original Message-----
+> >>>> From: linux-omap-owner@vger.kernel.org [mailto:linux-omap-
+> >>>> owner@vger.kernel.org] On Behalf Of Chikkature Rajashekar,
+> Madhusudhan
+> >>>> Sent: 2010-04-01 05:56
+> >>>> To: tony@atomide.com
+> >>>> Cc: linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org
+> >>>> Subject: [PATCH] Disable the non working eMMC on Zoom2/3
+> >>>>
+> >>>> From: Madhusudhan Chikkature <madhu.cr@ti.com>
+> >>>> Date: Wed, 31 Mar 2010 12:29:19 -0400
+> >>>> Subject: [PATCH] Zoom2/3: Disable MMC
+> >>>>
+> >>>> The eMMC on Zoom2/3 seems to have a lower EXT_CSD Rev.This causes the
+> >>>> writes to fail since the card size is not detected correctly by the
+> >> MMC
+> >>>> core. Disable the MMC2 support for Zoom2/3.
+> >>>
+> >>> [Ghorai] Please let us know the EXT_CSD Rev you see in zoom3 and the
+> >> exact
+> >>> problem. Because we never face any issue for eMMC in ZOOM3. Because we
+> >>> have the same eMMC device in 3630-SDP and could have the same problem.
+> >>>
+> >> On Zoom3 the EXT_CSD Rev reported by eMMC is zero. See the log
+> attached.
+> >>
+> >> Hence the failures which are reported by people on the list. I had
+> already
+> >> bought this problem up on the list previously and was discussed, right?
+> >> From the log you can also see that a 16GB device is detected as a 1GB.
+> >
+> > [Ghorai] I feel it's an issue with eMMC in pilot-board. And production-
+> board is working fine. And I feel outside TI people having production
+> board only. And 16GB eMMC device is a very good size to work with
+> different things. Otherwise we are talking about MMC#2 boot, eMMC boot,
+> 16GB eMMC device in zoom,.. all these information in different page/ link
+> looks very misleading information, if really having such problem.
+> > I the mean time I will check this in Pilot board too and think you
+> checked in pilot board only.
+> >
+> Ref [1] I believe tony has the brand new zoom board - I think your
+> assumption here might be flawed..
+> 
 
-> https://bugzilla.kernel.org/show_bug.cgi?id=15656
-> 
->            Summary: System sluggish when using ENE SD card reader
->            Product: Drivers
->            Version: 2.5
->     Kernel Version: 2.6.33 and earlier
->           Platform: All
->         OS/Version: Linux
->               Tree: Mainline
->             Status: NEW
->           Severity: normal
->           Priority: P1
->          Component: MMC/SD
->         AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
->         ReportedBy: theholyettlz@googlemail.com
->         Regression: No
-> 
-> 
-> My system becomes incredibly sluggish (jerky X cursor, choppy audio) when
-> accessing an SD card with my notebook's built-in ENE card reader. The kernel
-> was compiled with full pre-emption enabled.
-> 
-> >From lspci -nn:
-> 
-> 
-> 0c:07.0 FLASH memory [0501]: ENE Technology Inc ENE PCI Memory Stick Card
-> Reader Controller [1524:0730]
-> 0c:07.1 SD Host controller [0805]: ENE Technology Inc ENE PCI SmartMedia / xD
-> Card Reader Controller [1524:0750]
-> 0c:07.3 FLASH memory [0501]: ENE Technology Inc ENE PCI Secure Digital / MMC
-> Card Reader Controller [1524:0751]
-> 
-> 
-> >From dmesg|grep sdhci,
-> 
-> 
-> sdhci: Secure Digital Host Controller Interface driver
-> sdhci: Copyright(c) Pierre Ossman
-> sdhci-pci 0000:0c:07.1: SDHCI controller found [1524:0750] (rev 0)
-> sdhci-pci 0000:0c:07.1: PCI INT A -> GSI 16 (level, low) -> IRQ 16
-> sdhci-pci 0000:0c:07.3: SDHCI controller found [1524:0751] (rev 0)
-> sdhci-pci 0000:0c:07.3: enabling device (0000 -> 0002)
-> sdhci-pci 0000:0c:07.3: PCI INT A -> GSI 16 (level, low) -> IRQ 16
-> sdhci-pci 0000:0c:07.3: PCI INT A disabled
-> sdhci-pci 0000:0c:07.1: PCI INT A disabled
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0xf (was 0x482001ff,
-> writing 0x48200105)
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0x4 (was 0x0, writing
-> 0xf0f00400)
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0x3 (was 0x800000,
-> writing 0x802010)
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0x1 (was 0x2100000,
-> writing 0x2100106)
-> sdhci-pci 0000:0c:07.3: restoring config space at offset 0x4 (was 0x0, writing
-> 0xf0f00100)
-> sdhci-pci 0000:0c:07.3: restoring config space at offset 0x1 (was 0x2100000,
-> writing 0x2100002)
-> sdhci-pci 0000:0c:07.1: PCI INT A -> GSI 16 (level, low) -> IRQ 16
-> sdhci-pci 0000:0c:07.3: PCI INT A -> GSI 16 (level, low) -> IRQ 16
-> sdhci-pci 0000:0c:07.3: PCI INT A disabled
-> sdhci-pci 0000:0c:07.1: PCI INT A disabled
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0xf (was 0x482001ff,
-> writing 0x48200105)
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0x4 (was 0x0, writing
-> 0xf0f00400)
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0x3 (was 0x800000,
-> writing 0x802010)
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0x1 (was 0x2100000,
-> writing 0x2100106)
-> sdhci-pci 0000:0c:07.3: restoring config space at offset 0x4 (was 0x0, writing
-> 0xf0f00100)
-> sdhci-pci 0000:0c:07.3: restoring config space at offset 0x1 (was 0x2100000,
-> writing 0x2100002)
-> sdhci-pci 0000:0c:07.1: PCI INT A -> GSI 16 (level, low) -> IRQ 16
-> sdhci-pci 0000:0c:07.3: PCI INT A -> GSI 16 (level, low) -> IRQ 16
-> sdhci-pci 0000:0c:07.3: PCI INT A disabled
-> sdhci-pci 0000:0c:07.1: PCI INT A disabled
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0xf (was 0x482001ff,
-> writing 0x48200105)
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0x4 (was 0x0, writing
-> 0xf0f00400)
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0x3 (was 0x800000,
-> writing 0x802010)
-> sdhci-pci 0000:0c:07.1: restoring config space at offset 0x1 (was 0x2100000,
-> writing 0x2100106)
-> sdhci-pci 0000:0c:07.3: restoring config space at offset 0x4 (was 0x0, writing
-> 0xf0f00100)
-> sdhci-pci 0000:0c:07.3: restoring config space at offset 0x1 (was 0x2100000,
-> writing 0x2100002)
-> sdhci-pci 0000:0c:07.1: PCI INT A -> GSI 16 (level, low) -> IRQ 16
-> sdhci-pci 0000:0c:07.3: PCI INT A -> GSI 16 (level, low) -> IRQ 16
-> 
-> 
-> and finally dmesg|grep mmc:
-> 
-> 
-> sr0: scsi3-mmc drive: 24x/24x writer dvd-ram cd/rw xa/form2 cdda tray
-> Registered led device: mmc0::
-> mmc0: SDHCI controller on PCI [0000:0c:07.1] using PIO
-> Registered led device: mmc1::
-> mmc1: SDHCI controller on PCI [0000:0c:07.3] using PIO
-> mmc1: new high speed SDHC card at address 0007
-> mmcblk0: mmc1:0007 SD16G 15.0 GiB 
->  mmcblk0: p1
-> SELinux: initialized (dev mmcblk0p1, type vfat), uses genfs_contexts
-> mmc1: card 0007 removed
-> 
+Wait, I just looked up the serial number on the board. The one I was using
+is a pilot version where this problem exists.
+
+I happen to get an other board which is production unit with ser # 1013089
+Rev B. The eMMC on this board has no issue. It reports the EXT_CSD Rev 2
+which is correct and works fine.
+
+http://omappedia.org/wiki/Zoom_Resources
+
+There is a table here which could help.
+
+Tony, do you care to just look up the serial number of your board?
+
+But again there are several boards out there which could have this
+non-working eMMC. So what do we do?? It does not make sense to keep
+something enabled which does not work.
+
+Regards,
+Madhu
+
+> --
+> Regards,
+> Nishanth Menon
+> Ref:
+> [1] http://marc.info/?l=linux-omap&m=126938456103707&w=2
 
