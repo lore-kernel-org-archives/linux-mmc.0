@@ -1,61 +1,113 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: Is anyone working on SD/MMC driver for i.MX35 ?
-Date: Mon, 5 Apr 2010 22:21:03 +0400
-Message-ID: <20100405182103.GB3316@oksana.dev.rtsoft.ru>
-References: <20100401125739.GE2045@bluebox.local>
- <20100401132017.GA30804@buzzloop.caiaq.de>
- <20100401132234.GG2045@bluebox.local>
- <20100402012932.GE13989@pengutronix.de>
+From: Dan Williams <dcbw@redhat.com>
+Subject: Re: [PATCH] libertas/sdio: set ECSI bit for 1-bit transfers
+Date: Mon, 05 Apr 2010 19:42:39 -0700
+Message-ID: <1270521759.24724.6.camel@localhost.localdomain>
+References: <k2he2d7436a1003310249v63878e0ahe1b398401937a225@mail.gmail.com>
+	 <1270042309-18606-1-git-send-email-daniel@caiaq.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f209.google.com ([209.85.218.209]:45045 "EHLO
-	mail-bw0-f209.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751847Ab0DESVI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Apr 2010 14:21:08 -0400
-Received: by bwz1 with SMTP id 1so2973990bwz.21
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Apr 2010 11:21:06 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20100402012932.GE13989@pengutronix.de>
+Received: from mx1.redhat.com ([209.132.183.28]:35477 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757102Ab0DFCn1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 5 Apr 2010 22:43:27 -0400
+In-Reply-To: <1270042309-18606-1-git-send-email-daniel@caiaq.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "Hans J. Koch" <hjk@linutronix.de>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Daniel Mack <daniel@caiaq.de>, John Ogness <jogness@linutronix.de>
+To: Daniel Mack <daniel@caiaq.de>
+Cc: linux-kernel@vger.kernel.org, mirqus@gmail.com, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Fri, Apr 02, 2010 at 03:29:32AM +0200, Wolfram Sang wrote:
-> On Thu, Apr 01, 2010 at 03:22:35PM +0200, Hans J. Koch wrote:
-> > On Thu, Apr 01, 2010 at 03:20:17PM +0200, Daniel Mack wrote:
-> > > On Thu, Apr 01, 2010 at 02:57:40PM +0200, Hans J. Koch wrote:
-> > > > I need to get the MMC interface of an i.MX35 to work in the near future.
-> > > > To avoid duplicate work, I'd like to know if anybody already started
-> > > > work on this.
-> > > 
-> > > Is the controller very different from the one which is already supported
-> > > for MX31?
-> > 
-> > Yep. Completely different beast. Unfortunately.
+On Wed, 2010-03-31 at 15:31 +0200, Daniel Mack wrote:
+> When operating in 1-bit mode, SDAT1 is used as dedicated interrupt line.
+> However, the 8686 will only drive this line when the ECSI bit is set in
+> the CCCR_IF register.
 > 
-> (CCing linux-mmc)
+> Thanks to Alagu Sankar for pointing me in the right direction.
+
+Could you modify the patch to do this *only* for the 8686?  Apparently
+only the 8686 this hardware "quirk" and thus this might have odd
+side-effects on the 8688 or the 8385.
+
+Check the 'struct if_sdio_card' model member and compare it to
+IF_SDIO_MODEL_8686 like if_sdio_probe() does.
+
+Thanks!
+Dan
+
+> Signed-off-by: Daniel Mack <daniel@caiaq.de>
+> Cc: Alagu Sankar <alagusankar@embwise.com>
+> Cc: Volker Ernst <volker.ernst@txtr.com>
+> Cc: Dan Williams <dcbw@redhat.com>
+> Cc: John W. Linville <linville@tuxdriver.com>
+> Cc: Holger Schurig <hs4233@mail.mn-solutions.de>
+> Cc: Bing Zhao <bzhao@marvell.com>
+> Cc: libertas-dev@lists.infradead.org
+> Cc: linux-wireless@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> ---
+>  drivers/net/wireless/libertas/if_sdio.c |   21 +++++++++++++++++++++
+>  include/linux/mmc/sdio.h                |    2 ++
+>  2 files changed, 23 insertions(+), 0 deletions(-)
 > 
-> And it is a mess, really :(
-> 
-> The kernel already has an esdhc-driver (and Anton already worked around a
-> number of hardware-bugs), but is tied into an of-driver because the core was
-> also used on PowerPC. There, it utilizes a 32-bit-byte-swaper which is not
-> needed on ARM. So, one has to rip all that out, generalize the sdhc-platform
-> support (possibly also abstract the quirk support) and make sure nothing
-> breaks.
+> diff --git a/drivers/net/wireless/libertas/if_sdio.c b/drivers/net/wireless/libertas/if_sdio.c
+> index 7a73f62..f89bb8b 100644
+> --- a/drivers/net/wireless/libertas/if_sdio.c
+> +++ b/drivers/net/wireless/libertas/if_sdio.c
+> @@ -34,6 +34,8 @@
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/sdio_func.h>
+>  #include <linux/mmc/sdio_ids.h>
+> +#include <linux/mmc/sdio.h>
+> +#include <linux/mmc/host.h>
+>  
+>  #include "host.h"
+>  #include "decl.h"
+> @@ -942,6 +944,7 @@ static int if_sdio_probe(struct sdio_func *func,
+>  	int ret, i;
+>  	unsigned int model;
+>  	struct if_sdio_packet *packet;
+> +	struct mmc_host *host = func->card->host;
+>  
+>  	lbs_deb_enter(LBS_DEB_SDIO);
+>  
+> @@ -1022,6 +1025,24 @@ static int if_sdio_probe(struct sdio_func *func,
+>  	if (ret)
+>  		goto disable;
+>  
+> +	/* For 1-bit transfers, we need to enable the interrupt flag in
+> +	 * the CCCR register. Set the MMC_QUIRK_LENIENT_FN0 bit to allow
+> +	 * access to non-vendor registers. */
+> +	if ((host->caps & MMC_CAP_SDIO_IRQ) &&
+> +	    (host->ios.bus_width == MMC_BUS_WIDTH_1)) {
+> +		u8 reg;
+> +
+> +		func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
+> +		reg = sdio_f0_readb(func, SDIO_CCCR_IF, &ret);
+> +		if (ret)
+> +			goto release_int;
+> +
+> +		reg |= SDIO_BUS_ECSI;
+> +		sdio_f0_writeb(func, reg, SDIO_CCCR_IF, &ret);
+> +		if (ret)
+> +			goto release_int;
+> +	}
+> +
+>  	card->ioport = sdio_readb(func, IF_SDIO_IOPORT, &ret);
+>  	if (ret)
+>  		goto release_int;
+> diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+> index 0ebaef5..329a8fa 100644
+> --- a/include/linux/mmc/sdio.h
+> +++ b/include/linux/mmc/sdio.h
+> @@ -94,6 +94,8 @@
+>  
+>  #define  SDIO_BUS_WIDTH_1BIT	0x00
+>  #define  SDIO_BUS_WIDTH_4BIT	0x02
+> +#define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
+> +#define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
+>  
+>  #define  SDIO_BUS_ASYNC_INT	0x20
+>  
 
-FYI, there is sdhci-pltfm driver, + some patches to add
-quirks support:
 
-http://lkml.org/lkml/2010/3/16/337
-
-These patches are already in the -mm tree.
-
-Thanks,
-
--- 
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
