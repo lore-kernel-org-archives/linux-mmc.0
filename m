@@ -1,107 +1,58 @@
-From: Dan Williams <dcbw@redhat.com>
-Subject: Re: [PATCH] libertas/sdio: 8686: set ECSI bit for 1-bit transfers
-Date: Tue, 06 Apr 2010 09:07:34 -0700
-Message-ID: <1270570054.2969.3.camel@localhost.localdomain>
-References: <1270521759.24724.6.camel@localhost.localdomain>
-	 <1270543964-18130-1-git-send-email-daniel@caiaq.de>
+From: akpm@linux-foundation.org
+Subject: [patch 08/29] omap hsmmc: fix a bug in card remove scenario
+Date: Tue, 06 Apr 2010 14:34:49 -0700
+Message-ID: <201004062134.o36LYn5g009660@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33775 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751665Ab0DFQII (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 6 Apr 2010 12:08:08 -0400
-In-Reply-To: <1270543964-18130-1-git-send-email-daniel@caiaq.de>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:40326 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756836Ab0DFVez (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Apr 2010 17:34:55 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Mack <daniel@caiaq.de>
-Cc: linux-kernel@vger.kernel.org, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, stable@kernel.org
+To: torvalds@linux-foundation.org
+Cc: akpm@linux-foundation.org, madhu.cr@ti.com, adrian.hunter@nokia.com, linux-mmc@vger.kernel.org
 
-On Tue, 2010-04-06 at 10:52 +0200, Daniel Mack wrote:
-> When operating in 1-bit mode, SDAT1 is used as dedicated interrupt line.
-> However, the 8686 will only drive this line when the ECSI bit is set in
-> the CCCR_IF register.
-> 
-> Thanks to Alagu Sankar for pointing me in the right direction.
-> 
-> Signed-off-by: Daniel Mack <daniel@caiaq.de>
-> Cc: Alagu Sankar <alagusankar@embwise.com>
-> Cc: Volker Ernst <volker.ernst@txtr.com>
-> Cc: Dan Williams <dcbw@redhat.com>
-> Cc: John W. Linville <linville@tuxdriver.com>
-> Cc: Holger Schurig <hs4233@mail.mn-solutions.de>
-> Cc: Bing Zhao <bzhao@marvell.com>
-> Cc: libertas-dev@lists.infradead.org
-> Cc: linux-wireless@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org
+From: Madhusudhan Chikkature <madhu.cr@ti.com>
 
-Acked-by: Dan Williams <dcbw@redhat.com>
+The reset of data lines when the card is removed from the cage results in
+a failure.The failure is seen if the card is removed from the cage when TC
+is pending after a CMD with data received CC.The reset logic leaves the
+controller in a state where niether a TC is received nor DTO.
 
-> ---
->  drivers/net/wireless/libertas/if_sdio.c |   22 ++++++++++++++++++++++
->  include/linux/mmc/sdio.h                |    2 ++
->  2 files changed, 24 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/net/wireless/libertas/if_sdio.c b/drivers/net/wireless/libertas/if_sdio.c
-> index 7a73f62..33206a9 100644
-> --- a/drivers/net/wireless/libertas/if_sdio.c
-> +++ b/drivers/net/wireless/libertas/if_sdio.c
-> @@ -34,6 +34,8 @@
->  #include <linux/mmc/card.h>
->  #include <linux/mmc/sdio_func.h>
->  #include <linux/mmc/sdio_ids.h>
-> +#include <linux/mmc/sdio.h>
-> +#include <linux/mmc/host.h>
->  
->  #include "host.h"
->  #include "decl.h"
-> @@ -942,6 +944,7 @@ static int if_sdio_probe(struct sdio_func *func,
->  	int ret, i;
->  	unsigned int model;
->  	struct if_sdio_packet *packet;
-> +	struct mmc_host *host = func->card->host;
->  
->  	lbs_deb_enter(LBS_DEB_SDIO);
->  
-> @@ -1022,6 +1025,25 @@ static int if_sdio_probe(struct sdio_func *func,
->  	if (ret)
->  		goto disable;
->  
-> +	/* For 1-bit transfers to the 8686 model, we need to enable the
-> +	 * interrupt flag in the CCCR register. Set the MMC_QUIRK_LENIENT_FN0
-> +	 * bit to allow access to non-vendor registers. */
-> +	if ((card->model == IF_SDIO_MODEL_8686) &&
-> +	    (host->caps & MMC_CAP_SDIO_IRQ) &&
-> +	    (host->ios.bus_width == MMC_BUS_WIDTH_1)) {
-> +		u8 reg;
-> +
-> +		func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
-> +		reg = sdio_f0_readb(func, SDIO_CCCR_IF, &ret);
-> +		if (ret)
-> +			goto release_int;
-> +
-> +		reg |= SDIO_BUS_ECSI;
-> +		sdio_f0_writeb(func, reg, SDIO_CCCR_IF, &ret);
-> +		if (ret)
-> +			goto release_int;
-> +	}
-> +
->  	card->ioport = sdio_readb(func, IF_SDIO_IOPORT, &ret);
->  	if (ret)
->  		goto release_int;
-> diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
-> index 0ebaef5..329a8fa 100644
-> --- a/include/linux/mmc/sdio.h
-> +++ b/include/linux/mmc/sdio.h
-> @@ -94,6 +94,8 @@
->  
->  #define  SDIO_BUS_WIDTH_1BIT	0x00
->  #define  SDIO_BUS_WIDTH_4BIT	0x02
-> +#define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
-> +#define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
->  
->  #define  SDIO_BUS_ASYNC_INT	0x20
->  
+The rest code can be safely removed here since it is taken care in the IRQ
+handler.
 
+Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
+ drivers/mmc/host/omap_hsmmc.c |    9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
+
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-a-bug-in-card-remove-scenario drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-a-bug-in-card-remove-scenario
++++ a/drivers/mmc/host/omap_hsmmc.c
+@@ -1179,15 +1179,10 @@ static void omap_hsmmc_detect(struct wor
+ 		carddetect = -ENOSYS;
+ 	}
+ 
+-	if (carddetect) {
++	if (carddetect)
+ 		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+-	} else {
+-		mmc_host_enable(host->mmc);
+-		omap_hsmmc_reset_controller_fsm(host, SRD);
+-		mmc_host_lazy_disable(host->mmc);
+-
++	else
+ 		mmc_detect_change(host->mmc, (HZ * 50) / 1000);
+-	}
+ }
+ 
+ /*
+_
