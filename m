@@ -1,92 +1,33 @@
 From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH 02/11] ARM: MMCI: pass max frequency from platform
-Date: Thu,  8 Apr 2010 01:12:23 +0200
-Message-ID: <1270681943-4985-1-git-send-email-linus.walleij@stericsson.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:65418 "EHLO df.lth.se"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1756269Ab0DGXM5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 7 Apr 2010 19:12:57 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
+Date: Thu,  8 Apr 2010 01:12:00 +0200
+Message-ID: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: akpm@linux-foundation.org, Russell King - ARM Linux <linux@arm.linux.org.uk>, Grant Likely <grant.likely@secretlab.ca>, Dan Williams <dan.j.williams@intel.com>
 Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, STEricsson_nomadik_linux@list.st.com, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
+List-Id: linux-mmc@vger.kernel.org
 
-This introduce the field f_max into the mmci_platform_data,
-making it possible to pass in a desired block clocking frequency
-from a board configuration. This is often more desirable than
-using a module parameter. We keep the module parameter as a
-fallback as well as the default frequency specified for this
-parameter if a parameter is not provided.
+This is the fifth iteration of this ever growing patch set
+for PrimeCell DMA support, reposting the entire series.
 
-This also adds some kerneldoc style documentation to the
-platform data struct in mmci.h.
+This now depend on stuff pending in Dan Williams async_tx
+(DMA Devices/Engine) tree and Andrew Mortons tree where
+the new DMA40 driver for U8500 is queued.
 
-Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
----
- drivers/mmc/host/mmci.c   |   13 ++++++++++++-
- include/linux/amba/mmci.h |   23 ++++++++++++++++++++++-
- 2 files changed, 34 insertions(+), 2 deletions(-)
+I suggest putting these into Andrews tree now, since:
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 7e70c1a..ff115d9 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -631,7 +631,18 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
- 
- 	mmc->ops = &mmci_ops;
- 	mmc->f_min = (host->mclk + 511) / 512;
--	mmc->f_max = min(host->mclk, fmax);
-+	/*
-+	 * If the platform data supplies a maximum operating
-+	 * frequency, this takes precedence. Else, we fall back
-+	 * to using the module parameter, which has a (low)
-+	 * default value in case it is not specified. Either
-+	 * value must not exceed the clock rate into the block,
-+	 * of course.
-+	 */
-+	if (plat->f_max)
-+		mmc->f_max = min(host->mclk, plat->f_max);
-+	else
-+		mmc->f_max = min(host->mclk, fmax);
- 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
- 
- #ifdef CONFIG_REGULATOR
-diff --git a/include/linux/amba/mmci.h b/include/linux/amba/mmci.h
-index 6b42417..7e466fe 100644
---- a/include/linux/amba/mmci.h
-+++ b/include/linux/amba/mmci.h
-@@ -6,8 +6,29 @@
- 
- #include <linux/mmc/host.h>
- 
-+/**
-+ * struct mmci_platform_data - platform configuration for the MMCI
-+ * (also known as PL180) block.
-+ * @f_max: the maximum operational frequency for this host in this
-+ * platform configuration. When this is specified it takes precedence
-+ * over the module parameter for the same frequency.
-+ * @ocr_mask: available voltages on the 4 pins from the block, this
-+ * is ignored if a regulator is used, see the MMC_VDD_* masks in
-+ * mmc/host.h
-+ * @translate_vdd: a callback function to translate a MMC_VDD_*
-+ * mask into a value to be binary or:ed and written into the
-+ * MMCIPWR register of the block
-+ * @status: if no GPIO read function was given to the block in
-+ * gpio_wp (below) this function will be called to determine
-+ * whether a card is present in the MMC slot or not
-+ * @gpio_wp: read this GPIO pin to see if the card is write protected
-+ * @gpio_cd: read this GPIO pin to detect card insertion
-+ * @capabilities: the capabilities of the block as implemented in
-+ * this platform, signify anything MMC_CAP_* from mmc/host.h
-+ */
- struct mmci_platform_data {
--	unsigned int ocr_mask;			/* available voltages */
-+	unsigned int f_max;
-+	unsigned int ocr_mask;
- 	u32 (*translate_vdd)(struct device *, unsigned int);
- 	unsigned int (*status)(struct device *);
- 	int	gpio_wp;
--- 
-1.6.3.3
+A) 4 of the patches it touches MMCI code which is hanled
+   by Andrew
 
+B) It extends the DMA40 driver which is now pending in
+   his tree as well.
+
+C) Since there doesn't seem to be any consensus of whether
+   this is the right way forward, it needs some wider
+   testing I believe.
+
+OK?
+
+Yours,
+Linus Walleij
