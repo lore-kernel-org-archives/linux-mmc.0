@@ -1,71 +1,92 @@
-From: akpm@linux-foundation.org
-Subject: [merged] omap-hsmmc-fix-a-bug-in-card-remove-scenario.patch removed from -mm tree
-Date: Wed, 07 Apr 2010 11:49:41 -0400
-Message-ID: <201004071851.o37Ip7FC001264@imap1.linux-foundation.org>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH 02/11] ARM: MMCI: pass max frequency from platform
+Date: Thu,  8 Apr 2010 01:12:23 +0200
+Message-ID: <1270681943-4985-1-git-send-email-linus.walleij@stericsson.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:49632 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756503Ab0DGSvR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Apr 2010 14:51:17 -0400
+Received: from mail.df.lth.se ([194.47.250.12]:65418 "EHLO df.lth.se"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1756269Ab0DGXM5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 7 Apr 2010 19:12:57 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: madhu.cr@ti.com, adrian.hunter@nokia.com, linux-mmc@vger.kernel.org, mm-commits@vger.kernel.org
+To: akpm@linux-foundation.org, Russell King - ARM Linux <linux@arm.linux.org.uk>, Grant Likely <grant.likely@secretlab.ca>, Dan Williams <dan.j.williams@intel.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, STEricsson_nomadik_linux@list.st.com, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
 
+This introduce the field f_max into the mmci_platform_data,
+making it possible to pass in a desired block clocking frequency
+from a board configuration. This is often more desirable than
+using a module parameter. We keep the module parameter as a
+fallback as well as the default frequency specified for this
+parameter if a parameter is not provided.
 
-The patch titled
-     omap hsmmc: fix a bug in card remove scenario
-has been removed from the -mm tree.  Its filename was
-     omap-hsmmc-fix-a-bug-in-card-remove-scenario.patch
+This also adds some kerneldoc style documentation to the
+platform data struct in mmci.h.
 
-This patch was dropped because it was merged into mainline or a subsystem tree
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: omap hsmmc: fix a bug in card remove scenario
-From: Madhusudhan Chikkature <madhu.cr@ti.com>
-
-The reset of data lines when the card is removed from the cage results in
-a failure.The failure is seen if the card is removed from the cage when TC
-is pending after a CMD with data received CC.The reset logic leaves the
-controller in a state where niether a TC is received nor DTO.
-
-The rest code can be safely removed here since it is taken care in the IRQ
-handler.
-
-Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
 ---
+ drivers/mmc/host/mmci.c   |   13 ++++++++++++-
+ include/linux/amba/mmci.h |   23 ++++++++++++++++++++++-
+ 2 files changed, 34 insertions(+), 2 deletions(-)
 
- drivers/mmc/host/omap_hsmmc.c |    9 ++-------
- 1 file changed, 2 insertions(+), 7 deletions(-)
-
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-a-bug-in-card-remove-scenario drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-a-bug-in-card-remove-scenario
-+++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -1179,15 +1179,10 @@ static void omap_hsmmc_detect(struct wor
- 		carddetect = -ENOSYS;
- 	}
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 7e70c1a..ff115d9 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -631,7 +631,18 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
  
--	if (carddetect) {
-+	if (carddetect)
- 		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
--	} else {
--		mmc_host_enable(host->mmc);
--		omap_hsmmc_reset_controller_fsm(host, SRD);
--		mmc_host_lazy_disable(host->mmc);
--
+ 	mmc->ops = &mmci_ops;
+ 	mmc->f_min = (host->mclk + 511) / 512;
+-	mmc->f_max = min(host->mclk, fmax);
++	/*
++	 * If the platform data supplies a maximum operating
++	 * frequency, this takes precedence. Else, we fall back
++	 * to using the module parameter, which has a (low)
++	 * default value in case it is not specified. Either
++	 * value must not exceed the clock rate into the block,
++	 * of course.
++	 */
++	if (plat->f_max)
++		mmc->f_max = min(host->mclk, plat->f_max);
 +	else
- 		mmc_detect_change(host->mmc, (HZ * 50) / 1000);
--	}
- }
++		mmc->f_max = min(host->mclk, fmax);
+ 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
  
- /*
-_
-
-Patches currently in -mm which might be from madhu.cr@ti.com are
-
-origin.patch
+ #ifdef CONFIG_REGULATOR
+diff --git a/include/linux/amba/mmci.h b/include/linux/amba/mmci.h
+index 6b42417..7e466fe 100644
+--- a/include/linux/amba/mmci.h
++++ b/include/linux/amba/mmci.h
+@@ -6,8 +6,29 @@
+ 
+ #include <linux/mmc/host.h>
+ 
++/**
++ * struct mmci_platform_data - platform configuration for the MMCI
++ * (also known as PL180) block.
++ * @f_max: the maximum operational frequency for this host in this
++ * platform configuration. When this is specified it takes precedence
++ * over the module parameter for the same frequency.
++ * @ocr_mask: available voltages on the 4 pins from the block, this
++ * is ignored if a regulator is used, see the MMC_VDD_* masks in
++ * mmc/host.h
++ * @translate_vdd: a callback function to translate a MMC_VDD_*
++ * mask into a value to be binary or:ed and written into the
++ * MMCIPWR register of the block
++ * @status: if no GPIO read function was given to the block in
++ * gpio_wp (below) this function will be called to determine
++ * whether a card is present in the MMC slot or not
++ * @gpio_wp: read this GPIO pin to see if the card is write protected
++ * @gpio_cd: read this GPIO pin to detect card insertion
++ * @capabilities: the capabilities of the block as implemented in
++ * this platform, signify anything MMC_CAP_* from mmc/host.h
++ */
+ struct mmci_platform_data {
+-	unsigned int ocr_mask;			/* available voltages */
++	unsigned int f_max;
++	unsigned int ocr_mask;
+ 	u32 (*translate_vdd)(struct device *, unsigned int);
+ 	unsigned int (*status)(struct device *);
+ 	int	gpio_wp;
+-- 
+1.6.3.3
 
