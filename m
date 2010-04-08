@@ -1,108 +1,84 @@
-From: Linus WALLEIJ <linus.walleij@stericsson.com>
-Subject: RE: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
-Date: Thu, 8 Apr 2010 08:35:08 +0200
-Message-ID: <CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local>
-References: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com>
- <v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH] Disable the non working eMMC on Zoom2/3
+Date: Thu, 8 Apr 2010 12:11:27 -0500
+Message-ID: <003801cad73e$86841df0$544ff780@am.dhcp.ti.com>
+References: <37310.192.168.10.89.1270081542.squirrel@dbdmail.itg.ti.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030D32CEE8@dbde02.ent.ti.com> <008601cad1bd$6d0022b0$544ff780@am.dhcp.ti.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030D32D372@dbde02.ent.ti.com> <4BB51740.2060802@ti.com> <009a01cad1ee$e3bbae70$544ff780@am.dhcp.ti.com> <20100407114938.GF7153@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog109.obsmtp.com ([207.126.144.127]:51205 "EHLO
-	eu1sys200aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756151Ab0DHGgC convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Apr 2010 02:36:02 -0400
-In-Reply-To: <v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com>
-Content-Language: en-US
+Received: from devils.ext.ti.com ([198.47.26.153]:52672 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932833Ab0DHRL3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Apr 2010 13:11:29 -0400
+In-Reply-To: <20100407114938.GF7153@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: 'Tony Lindgren' <tony@atomide.com>
+Cc: 'Nishanth Menon' <nm@ti.com>, "'Ghorai, Sukumar'" <s-ghorai@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-[Dan]
 
-> > I suggest putting these into Andrews tree now, since:
+
+> -----Original Message-----
+> From: Tony Lindgren [mailto:tony@atomide.com]
+> Sent: Wednesday, April 07, 2010 6:50 AM
+> To: Madhusudhan
+> Cc: 'Nishanth Menon'; 'Ghorai, Sukumar'; linux-omap@vger.kernel.org;
+> linux-mmc@vger.kernel.org
+> Subject: Re: [PATCH] Disable the non working eMMC on Zoom2/3
+> 
+> * Madhusudhan <madhu.cr@ti.com> [100401 15:54]:
+> 
+> <snip>
+> 
+> > > Ref [1] I believe tony has the brand new zoom board - I think your
+> > > assumption here might be flawed..
+> > >
 > >
-> > A) 4 of the patches it touches MMCI code which is hanled
-> > =A0 by Andrew
->=20
-> Ok, but it looks like they do not have a build dependency on dma bits
-> so they could be merged separately i.e. on top of the async_tx branch=
-=2E
-
-Well:
-
-[PATCH 04/11] ARM: define the PrimeCell DMA API v5
-Is independent. (One .h-file.)
-
-[PATCH 05/11] ARM: add generic PrimeCell interface to COH 901 318 v5
-[PATCH 06/11] ARM: add generic PrimeCell interface to DMA40 v1
-Depends on 04 AND has a merge dependency on the recent patches for gene=
-ric
-channel control and status, and then the DMA40 driver which is now
-Picked into Andrews -mm. So the whole thing does depend on async_tx
-HEAD.
-
-Is it possible to move the two DMA40 patches over from -mm to async_tx
-to atleast lower the complexity a little bit? (Should be to just
-apply them...)
-
-If this is done, you could apply the above three patches to the
-async_tx tree.
-
-[PATCH 07/11] ARM: add PrimeCell generic DMA to MMCI/PL180 v5
-This is where is starts to get complicated because this patch
-Depends on 01, 02, 03, 04. So it has to be applied to a tree
-which contains all of it.
-
-[PATCH 08/11] ARM: add PrimeCell generic DMA to PL011 v5
-Just depends on 04 (that's the idea, a generic PrimeCell interface)
-so could be applied to the async_tx tree
-if the others go in there.
-
-[PATCH 09/11] ARM: add PrimeCell generic DMA to PL022 v5
-Same thing, plus it is Acked-by: Grant and OK to merge into
-async_tx if 04 is there.
-
-[PATCH 10/11] ARM: config U300 PL180 PL011 PL022 for DMA v5
-[PATCH 11/11] ARM: config Ux500 PL011 PL022 for DMA v1
-These should go in through the ARM tree really, it's platform
-data.
-
-> > B) It extends the DMA40 driver which is now pending in
-> > =A0 his tree as well.
+> > Wait, I just looked up the serial number on the board. The one I was
+> using
+> > is a pilot version where this problem exists.
 > >
-> > C) Since there doesn't seem to be any consensus of whether
-> > =A0 this is the right way forward, it needs some wider
-> > =A0 testing I believe.
->=20
-> No consensus with respect to which pieces, the Primecell driver or
-> something outside of drivers/dma?  Forgive me for missing recent
-> conversations if this has been discussed to death already.
+> > I happen to get an other board which is production unit with ser #
+> 1013089
+> > Rev B. The eMMC on this board has no issue. It reports the EXT_CSD Rev 2
+> > which is correct and works fine.
+> >
+> > http://omappedia.org/wiki/Zoom_Resources
+> >
+> > There is a table here which could help.
+> >
+> > Tony, do you care to just look up the serial number of your board?
+> 
+> Sorry for the delay in replying, I've been travelling for a few weeks
+> and been in meetings quite a bit. Anyways, it's a 1013037 REV A board,
+> which seems to be production in the table above.
+> 
 
-Well, I'd want Russell to comment on that, I think from the
-PrimeCell point of view it is important that the file we put
-in place in <linux/amba/dma.h> is something that will really
-be likely to a good path forward for all PrimeCell and derivates.
-And I really would like Russell to ACK that first, he historically
-watches over the PrimeCell stuff.
+That means we can not assume all production units have a working eMMC.
+Would you mind sharing your bootup log? When this device is detected 
+something like below is a clear issue.
 
-But that said I think we're pretty solid:
-- Implementation for three vastly different PrimeCells
-- Implementation for two vastly different DMA engines
-- It works in these combos (we've had lots of internal testing on these=
-)
+mmcblk1: mmc1:0001 STM16G 1.00 GiB 
+mmcblk1: p1 p2
 
-> I can go ahead and queue up the dma bits unless you would prefer, and
-> Andrew agrees, to take this all through the -mm tree?
+Regards,
+Madhu
 
-If it's OK with Russell, putting 04-06 plus 09 through async_tx=20
-tree is a good starter.
-
-07 is problematic and require the entire series to be applied
-in one go, 08 could be applied as well but needs Russells ACK.
-
-Yours,
-Linus Walleij
+> > But again there are several boards out there which could have this
+> > non-working eMMC. So what do we do?? It does not make sense to keep
+> > something enabled which does not work.
+> 
+> There's arm kernel parameter for ATAG_REVISION that can be passed from
+> bootloader and then the board-*.c code can initialize things accordingly
+> based on the board revision.
+> 
+> Regards,
+> 
+> Tony
+> 
+> 
+> > > [1] http://marc.info/?l=linux-omap&m=126938456103707&w=2
+> >
 
