@@ -1,52 +1,36 @@
-From: James Bottomley <James.Bottomley@suse.de>
-Subject: Re: How to make kernel block layer generate bigger request in the
- request queue?
-Date: Sat, 10 Apr 2010 09:58:23 -0500
-Message-ID: <1270911503.2806.194.camel@mulgrave.site>
-References: <CE761E84DADF2947A4AF22FB8D97A4731CAF351C@shsmsx501.ccr.corp.intel.com>
-	 <4BBFBE3E.5070605@gmail.com>  <yq1y6gwt62p.fsf@sermon.lab.mkp.net>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
+Date: Sun, 11 Apr 2010 16:13:39 +0200
+Message-ID: <n2n63386a3d1004110713w74a16713g13f32219b610d3a6@mail.gmail.com>
+References: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com>
+	 <v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com>
+	 <CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-ide-owner@vger.kernel.org>
-In-Reply-To: <yq1y6gwt62p.fsf@sermon.lab.mkp.net>
-Sender: linux-ide-owner@vger.kernel.org
-To: "Martin K. Petersen" <martin.petersen@oracle.com>
-Cc: Robert Hancock <hancockrwd@gmail.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bw0-f219.google.com ([209.85.218.219]:41388 "EHLO
+	mail-bw0-f219.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752057Ab0DKONm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Apr 2010 10:13:42 -0400
+In-Reply-To: <CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Dan Williams <dan.j.williams@intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Fri, 2010-04-09 at 22:05 -0400, Martin K. Petersen wrote:
-> >>>>> "Robert" == Robert Hancock <hancockrwd@gmail.com> writes:
-> 
-> >> Did I miss something to make the block layer generate bigger size
-> >> data for every request in the request queue?  Below is part of my
-> >> source code. Any comments are highly appreciated. Thank you in
-> >> advance.
-> 
-> Robert> 8 sectors is 4KB, that's the size of a page. If the pages that
-> Robert> are being written are not physically contiguous that may be the
-> Robert> best the block layer can do with the constraints you've given it
-> Robert> (not supporting any more than 1 DMA segment). 
-> 
-> Correct.  It's quite unlikely for pages to be contiguous so this is the
-> best we can do.
+Russell,
 
-Actually, average servers do about 50% contiguous on average since we
-changed the mm layer to allocate in ascending physical page order ...
-this figure is highly sensitive to mm changes though, and can vary from
-release to release.
+are you OK with pushing these patches from this series:
 
-Just in case anyone is thinking of it, there's no way we'd alter the
-block layer to copy into physically contiguous since the overhead would
-be pretty horrific.  However, if the platform has an iommu, you can use
-it to map physically discontinuous to bus contiguous and fit everything
-into a single sg element.
+patch 01 - <linux/amba/dma.h>
+patch 08 - DMA for drivers/serial/amba-pl011.c
 
-> Having recently done a cleanup of our segment handling I became aware
-> that there are many MMC devices that are single-element only.  This was
-> probably a sufficient approach for 32MB devices but it's time to get
-> with the program and implement proper scatter-gather.
+through Dan's async_tx / DMAengine tree?
 
-James
+I think those are the ones which need your Acked-by to proceed.
 
+If you have some other idea of how these patches should be twisted
+around please let me know!
 
+Yours,
+Linus Walleij
