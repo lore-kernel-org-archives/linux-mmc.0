@@ -1,80 +1,49 @@
 From: Maurus Cuelenaere <mcuelenaere@gmail.com>
-Subject: [PATCH 1/2] [RESEND] s3c6410: Add new quirk in sdhci driver and
-	update ADMA descriptor build.
-Date: Sun, 11 Apr 2010 17:22:43 +0200
-Message-ID: <l2kb2e8f9f71004110822te95806d0ycc0a6a7d80a4af7a@mail.gmail.com>
+Subject: [PATCH 2/2] [RESEND] s3c6410: Enable ADMA feature in 6410 sdhci
+	controller.
+Date: Sun, 11 Apr 2010 17:22:45 +0200
+Message-ID: <x2tb2e8f9f71004110822n11576a7drd43b424f05803097@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f219.google.com ([209.85.218.219]:57486 "EHLO
+Received: from mail-bw0-f219.google.com ([209.85.218.219]:61240 "EHLO
 	mail-bw0-f219.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752112Ab0DKPXE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Apr 2010 11:23:04 -0400
-Received: by bwz19 with SMTP id 19so24381bwz.21
-        for <linux-mmc@vger.kernel.org>; Sun, 11 Apr 2010 08:23:03 -0700 (PDT)
+	with ESMTP id S1752106Ab0DKPXG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Apr 2010 11:23:06 -0400
+Received: by mail-bw0-f219.google.com with SMTP id 19so24362bwz.21
+        for <linux-mmc@vger.kernel.org>; Sun, 11 Apr 2010 08:23:05 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, sdhci-devel@lists.ossman.eu
 Cc: Thomas Abraham <thomas.ab@samsung.com>, Ben Dooks <ben-linux@fluff.org>, kgene.kim@samsung.com
 
-The s3c6410 sdhci controller does not support the 'End' attribute and
-NOP attribute in the same 8-Byte ADMA descriptor. This patch adds a
-new quirk to identify sdhci host contollers with such behaviour.
-In addition to this, for controllers using the new quirk, the last
-entry in the ADMA descritor table is marked with the 'End' attribute
-(instead of using a NOP descriptor with 'End' attribute).
+This patch enables ADMA feature in 6410 SDHCI controller
+driver.
 
 Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
 Acked-by: Ben Dooks <ben-linux@fluff.org>
 ---
- drivers/mmc/host/sdhci.c |   20 +++++++++++++++-----
- drivers/mmc/host/sdhci.h |    2 ++
- 2 files changed, 17 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c |    7 +------
+ 1 files changed, 1 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9d4fdfa..db5d566 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -496,12 +496,22 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		WARN_ON((desc - host->adma_desc) > (128 * 2 + 1) * 4);
- 	}
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 2136794..ad3a78e 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -317,12 +317,7 @@ static int __devinit sdhci_s3c_probe(struct
+platform_device *pdev)
+ 	host->irq = irq;
 
--	/*
--	 * Add a terminating entry.
--	 */
-+	if (host->quirks & SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC) {
-+		/*
-+		* Mark the last descriptor as the terminating descriptor
-+		*/
-+		if (desc != host->adma_desc) {
-+			desc -= 8;
-+			desc[0] |= 0x2; /* end */
-+		}
-+	} else {
-+		/*
-+		* Add a terminating entry.
-+		*/
+ 	/* Setup quirks for the controller */
+-
+-	/* Currently with ADMA enabled we are getting some length
+-	 * interrupts that are not being dealt with, do disable
+-	 * ADMA until this is sorted out. */
+-	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+-	host->quirks |= SDHCI_QUIRK_32BIT_ADMA_SIZE;
++	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
 
--	/* nop, end, valid */
--	sdhci_set_adma_desc(desc, 0, 0, 0x3);
-+		/* nop, end, valid */
-+		sdhci_set_adma_desc(desc, 0, 0, 0x3);
-+	}
+ #ifndef CONFIG_MMC_SDHCI_S3C_DMA
 
- 	/*
- 	 * Resync align buffer as we might have changed it.
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 842f46f..7ba0006 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -236,6 +236,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_DELAY_AFTER_POWER			(1<<23)
- /* Controller uses SDCLK instead of TMCLK for data timeouts */
- #define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
-+/* Controller cannot support End Attribute in NOP ADMA descriptor */
-+#define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<25)
-
- 	int			irq;		/* Device IRQ */
- 	void __iomem *		ioaddr;		/* Mapped address */
 -- 
 1.7.0.4
