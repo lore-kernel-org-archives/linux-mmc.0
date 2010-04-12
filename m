@@ -1,45 +1,40 @@
-From: Maurus Cuelenaere <mcuelenaere@gmail.com>
-Subject: [PATCH] SDHCI: Enable multiblock transfers in sdhci-s3c
-Date: Sun, 11 Apr 2010 17:22:47 +0200
-Message-ID: <v2qb2e8f9f71004110822l83c55548rbd4dc0279dd3e369@mail.gmail.com>
+From: "Martin K. Petersen" <martin.petersen@oracle.com>
+Subject: Re: How to make kernel block layer generate bigger request in the request queue?
+Date: Mon, 12 Apr 2010 14:26:41 -0400
+Message-ID: <yq1d3y4msri.fsf@sermon.lab.mkp.net>
+References: <CE761E84DADF2947A4AF22FB8D97A4731CAF351C@shsmsx501.ccr.corp.intel.com>
+	<4BBFBE3E.5070605@gmail.com> <yq1y6gwt62p.fsf@sermon.lab.mkp.net>
+	<1270911503.2806.194.camel@mulgrave.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f219.google.com ([209.85.218.219]:57486 "EHLO
-	mail-bw0-f219.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752119Ab0DKPXI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Apr 2010 11:23:08 -0400
-Received: by mail-bw0-f219.google.com with SMTP id 19so24381bwz.21
-        for <linux-mmc@vger.kernel.org>; Sun, 11 Apr 2010 08:23:07 -0700 (PDT)
+Received: from rcsinet12.oracle.com ([148.87.113.124]:63757 "EHLO
+	rcsinet12.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752659Ab0DLS2o (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Apr 2010 14:28:44 -0400
+In-Reply-To: <1270911503.2806.194.camel@mulgrave.site> (James Bottomley's
+	message of "Sat, 10 Apr 2010 09:58:23 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, sdhci-devel@lists.ossman.eu
-Cc: Ben Dooks <ben-linux@fluff.org>
+To: James Bottomley <James.Bottomley@suse.de>
+Cc: "Martin K. Petersen" <martin.petersen@oracle.com>, Robert Hancock <hancockrwd@gmail.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Wifi over SDIO doesn't correctly work without multiblock, so enable
-this. This patch depends on the following patch:
+>>>>> "James" == James Bottomley <James.Bottomley@suse.de> writes:
 
-[PATCH] S3C: sdhci: Enable ADMA feature in S3C sdhci controller.
+>> Correct.  It's quite unlikely for pages to be contiguous so this is
+>> the best we can do.
 
-Signed-off-by: Maurus Cuelenaere <mcuelenaere@gmail.com>
----
- drivers/mmc/host/sdhci-s3c.c |    3 ---
- 1 files changed, 0 insertions(+), 3 deletions(-)
+James> Actually, average servers do about 50% contiguous on average
+James> since we changed the mm layer to allocate in ascending physical
+James> page order ...  this figure is highly sensitive to mm changes
+James> though, and can vary from release to release.
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 2136794..2c1a618 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -330,9 +330,6 @@ static int __devinit sdhci_s3c_probe(struct
-platform_device *pdev)
- 	 * support as well. */
- 	host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+Interesting.  When did this happen?
 
--	/* PIO currently has problems with multi-block IO */
--	host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK;
--
- #endif /* CONFIG_MMC_SDHCI_S3C_DMA */
+Last time I gathered data on segment merge efficiency (1 year+ ago) I
+found that adjacent pages were quite rare for a normal fs type workload.
+Certainly not in the 50% ballpark.  I'll take another look when I have a
+moment...
 
- 	/* It seems we do not get an DATA transfer complete on non-busy
 -- 
-1.7.0.4
+Martin K. Petersen	Oracle Linux Engineering
