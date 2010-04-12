@@ -1,37 +1,56 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
-Date: Mon, 12 Apr 2010 20:23:45 +0100
-Message-ID: <20100412192345.GN3048@n2100.arm.linux.org.uk>
-References: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com> <v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com> <CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local> <n2n63386a3d1004110713w74a16713g13f32219b610d3a6@mail.gmail.com>
+From: James Bottomley <James.Bottomley@suse.de>
+Subject: Re: How to make kernel block layer generate bigger request in the
+ request queue?
+Date: Mon, 12 Apr 2010 14:58:29 -0500
+Message-ID: <1271102309.4428.85.camel@mulgrave.site>
+References: <CE761E84DADF2947A4AF22FB8D97A4731CAF351C@shsmsx501.ccr.corp.intel.com>
+	 <4BBFBE3E.5070605@gmail.com> <yq1y6gwt62p.fsf@sermon.lab.mkp.net>
+	 <1270911503.2806.194.camel@mulgrave.site>
+	 <yq1d3y4msri.fsf@sermon.lab.mkp.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:47332 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753383Ab0DLTYM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Apr 2010 15:24:12 -0400
-Content-Disposition: inline
-In-Reply-To: <n2n63386a3d1004110713w74a16713g13f32219b610d3a6@mail.gmail.com>
+Received: from cantor.suse.de ([195.135.220.2]:37477 "EHLO mx1.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753355Ab0DLT6g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 12 Apr 2010 15:58:36 -0400
+In-Reply-To: <yq1d3y4msri.fsf@sermon.lab.mkp.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: Dan Williams <dan.j.williams@intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: "Martin K. Petersen" <martin.petersen@oracle.com>
+Cc: Robert Hancock <hancockrwd@gmail.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Sun, Apr 11, 2010 at 04:13:39PM +0200, Linus Walleij wrote:
-> Russell,
+On Mon, 2010-04-12 at 14:26 -0400, Martin K. Petersen wrote:
+> >>>>> "James" == James Bottomley <James.Bottomley@suse.de> writes:
 > 
-> are you OK with pushing these patches from this series:
+> >> Correct.  It's quite unlikely for pages to be contiguous so this is
+> >> the best we can do.
 > 
-> patch 01 - <linux/amba/dma.h>
-> patch 08 - DMA for drivers/serial/amba-pl011.c
+> James> Actually, average servers do about 50% contiguous on average
+> James> since we changed the mm layer to allocate in ascending physical
+> James> page order ...  this figure is highly sensitive to mm changes
+> James> though, and can vary from release to release.
 > 
-> through Dan's async_tx / DMAengine tree?
-> 
-> I think those are the ones which need your Acked-by to proceed.
-> 
-> If you have some other idea of how these patches should be twisted
-> around please let me know!
+> Interesting.  When did this happen?
 
-I do think it would be of value for someone to try to get this working
-on the Realview boards to ensure that these patches are well proven...
-unfortunately I don't have the bandwidth to do that at present.
+The initial work was done by Bill Irwin, years ago.  For a while it was
+good, but then after Mel Gorman did the page reclaim code, we became
+highly sensitive to the reclaim algorithms for this, so it's fluctuated
+a bit ever since.  Even with all this, the efficiency is highly
+dependent on the amount of free memory: once the machine starts running
+to exhaustion (excluding page cache, since that usually allocates
+correctly to begin with) the contiguity really drops.
+
+> Last time I gathered data on segment merge efficiency (1 year+ ago) I
+> found that adjacent pages were quite rare for a normal fs type workload.
+> Certainly not in the 50% ballpark.  I'll take another look when I have a
+> moment...
+
+I got 60% with an I/O bound test with about a gigabyte of free memory a
+while ago (2.6.31, I think).  Even for machines approaching memory
+starvation, 30% seems achievable.
+
+James
+
+
