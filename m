@@ -1,56 +1,129 @@
-From: James Bottomley <James.Bottomley@suse.de>
-Subject: Re: How to make kernel block layer generate bigger request in the
- request queue?
-Date: Mon, 12 Apr 2010 14:58:29 -0500
-Message-ID: <1271102309.4428.85.camel@mulgrave.site>
-References: <CE761E84DADF2947A4AF22FB8D97A4731CAF351C@shsmsx501.ccr.corp.intel.com>
-	 <4BBFBE3E.5070605@gmail.com> <yq1y6gwt62p.fsf@sermon.lab.mkp.net>
-	 <1270911503.2806.194.camel@mulgrave.site>
-	 <yq1d3y4msri.fsf@sermon.lab.mkp.net>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] mmc: fix race condition between dma and omap_hsmmc callback
+Date: Tue, 13 Apr 2010 12:47:05 +0300
+Message-ID: <4BC43D99.6030809@nokia.com>
+References: <618f0c911003240600m1a38935av68f31a232ed8b8ad@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor.suse.de ([195.135.220.2]:37477 "EHLO mx1.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753355Ab0DLT6g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 12 Apr 2010 15:58:36 -0400
-In-Reply-To: <yq1d3y4msri.fsf@sermon.lab.mkp.net>
+Received: from smtp.nokia.com ([192.100.122.230]:45603 "EHLO
+	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751231Ab0DMJre (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Apr 2010 05:47:34 -0400
+In-Reply-To: <618f0c911003240600m1a38935av68f31a232ed8b8ad@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Martin K. Petersen" <martin.petersen@oracle.com>
-Cc: Robert Hancock <hancockrwd@gmail.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Venkatraman S <svenkatr@ti.com>
+Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>
 
-On Mon, 2010-04-12 at 14:26 -0400, Martin K. Petersen wrote:
-> >>>>> "James" == James Bottomley <James.Bottomley@suse.de> writes:
+Venkatraman S wrote:
+> This patch addresses the possible race condition between the dma
+> callback and hsmmc callback.
+
+Can you explain the problem in more detail?  If the final DMA interrupt
+comes before TC then all should be well.  If it comes after, then we need
+to be sure that the DMA has finished - particularly in the "read" case.
+Neither the existing code nor this patch seems to address that issue.
+
+Also, how can we be sure the final DMA interrupt doesn't race with the
+start of the next request?
+
+> All the 'post data transfer' cleanup activities are now done in the
+> MMC TC handler.
+> The schedule_timeout in omap_hsmmc_start_dma_transfer is hence not
+> needed (which, incidentally,
+> was also throwing a "schedule while atomic" warning when executed).
+> Tested on OMAP4430 SDP.
 > 
-> >> Correct.  It's quite unlikely for pages to be contiguous so this is
-> >> the best we can do.
+> CC: Adrian Hunter <adrian.hunter@nokia.com>
+> CC: Madhusudhan C <madhu.cr@ti.com>
+> CC: Tony Lindgren <tony@atomide.com>
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |   40 ++++++++++++++++------------------------
+>  1 files changed, 16 insertions(+), 24 deletions(-)
 > 
-> James> Actually, average servers do about 50% contiguous on average
-> James> since we changed the mm layer to allocate in ascending physical
-> James> page order ...  this figure is highly sensitive to mm changes
-> James> though, and can vary from release to release.
+> The previous discussion about this patch is here
+> https://patchwork.kernel.org/patch/82907/
+> As requested, this is now posted as a separate patch instead of
+> clubbing with another feature.
 > 
-> Interesting.  When did this happen?
-
-The initial work was done by Bill Irwin, years ago.  For a while it was
-good, but then after Mel Gorman did the page reclaim code, we became
-highly sensitive to the reclaim algorithms for this, so it's fluctuated
-a bit ever since.  Even with all this, the efficiency is highly
-dependent on the amount of free memory: once the machine starts running
-to exhaustion (excluding page cache, since that usually allocates
-correctly to begin with) the contiguity really drops.
-
-> Last time I gathered data on segment merge efficiency (1 year+ ago) I
-> found that adjacent pages were quite rare for a normal fs type workload.
-> Certainly not in the 50% ballpark.  I'll take another look when I have a
-> moment...
-
-I got 60% with an I/O bound test with about a gigabyte of free memory a
-while ago (2.6.31, I think).  Even for machines approaching memory
-starvation, 30% seems achievable.
-
-James
-
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 83f0aff..9a70b36 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1046,8 +1046,18 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+> 
+>  	if (end_cmd || ((status & CC) && host->cmd))
+>  		omap_hsmmc_cmd_done(host, host->cmd);
+> -	if ((end_trans || (status & TC)) && host->mrq)
+> +	if ((end_trans || (status & TC)) && host->mrq) {
+> +		if (host->dma_ch != -1) {
+> +			omap_free_dma(host->dma_ch);
+> +			host->dma_ch = -1;
+> +			/*
+> +			 * Callback run in interrupt context.
+> +			 * mutex_unlock will throw a kernel warning if used.
+> +			 */
+> +			up(&host->sem);
+> +		}
+>  		omap_hsmmc_xfer_done(host, data);
+> +	}
+> 
+>  	spin_unlock(&host->irq_lock);
+> 
+> @@ -1267,13 +1277,6 @@ static void omap_hsmmc_dma_cb(int lch, u16
+> ch_status, void *data)
+>  		return;
+>  	}
+> 
+> -	omap_free_dma(host->dma_ch);
+> -	host->dma_ch = -1;
+> -	/*
+> -	 * DMA Callback: run in interrupt context.
+> -	 * mutex_unlock will throw a kernel warning if used.
+> -	 */
+> -	up(&host->sem);
+>  }
+> 
+>  /*
+> @@ -1282,7 +1285,7 @@ static void omap_hsmmc_dma_cb(int lch, u16
+> ch_status, void *data)
+>  static int omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
+>  					struct mmc_request *req)
+>  {
+> -	int dma_ch = 0, ret = 0, err = 1, i;
+> +	int dma_ch = 0, ret = 0, i;
+>  	struct mmc_data *data = req->data;
+> 
+>  	/* Sanity check: all the SG entries must be aligned by block size. */
+> @@ -1300,22 +1303,11 @@ static int
+> omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
+>  		return -EINVAL;
+> 
+>  	/*
+> -	 * If for some reason the DMA transfer is still active,
+> -	 * we wait for timeout period and free the dma
+> +	 * Can't process the request if the previous
+> +	 * request is still active
+>  	 */
+> -	if (host->dma_ch != -1) {
+> -		set_current_state(TASK_UNINTERRUPTIBLE);
+> -		schedule_timeout(100);
+> -		if (down_trylock(&host->sem)) {
+> -			omap_free_dma(host->dma_ch);
+> -			host->dma_ch = -1;
+> -			up(&host->sem);
+> -			return err;
+> -		}
+> -	} else {
+> -		if (down_trylock(&host->sem))
+> -			return err;
+> -	}
+> +	if (down_trylock(&host->sem))
+> +			return -EBUSY;
+> 
+>  	ret = omap_request_dma(omap_hsmmc_get_dma_sync_dev(host, data),
+>  			       "MMC/SD", omap_hsmmc_dma_cb, host, &dma_ch);
 
