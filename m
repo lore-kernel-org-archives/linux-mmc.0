@@ -1,46 +1,33 @@
-From: "John W. Linville" <linville@tuxdriver.com>
+From: Daniel Mack <daniel@caiaq.de>
 Subject: Re: [PATCH] libertas/sdio: 8686: set ECSI bit for 1-bit transfers
-Date: Tue, 13 Apr 2010 09:06:54 -0400
-Message-ID: <20100413130653.GA6331@tuxdriver.com>
-References: <1270521759.24724.6.camel@localhost.localdomain> <1270543964-18130-1-git-send-email-daniel@caiaq.de> <1270570054.2969.3.camel@localhost.localdomain> <20100413102954.GH30801@buzzloop.caiaq.de>
+Date: Tue, 13 Apr 2010 15:21:52 +0200
+Message-ID: <20100413132152.GK30801@buzzloop.caiaq.de>
+References: <1270521759.24724.6.camel@localhost.localdomain>
+ <1270543964-18130-1-git-send-email-daniel@caiaq.de>
+ <1270570054.2969.3.camel@localhost.localdomain>
+ <20100413102954.GH30801@buzzloop.caiaq.de>
+ <20100413130653.GA6331@tuxdriver.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from buzzloop.caiaq.de ([212.112.241.133]:47123 "EHLO
+	buzzloop.caiaq.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751815Ab0DMNWC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Apr 2010 09:22:02 -0400
 Content-Disposition: inline
-In-Reply-To: <20100413102954.GH30801@buzzloop.caiaq.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Daniel Mack <daniel@caiaq.de>
-Cc: Dan Williams <dcbw@redhat.com>, linux-kernel@vger.kernel.org, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, stable@kernel.org
+In-Reply-To: <20100413130653.GA6331@tuxdriver.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "John W. Linville" <linville@tuxdriver.com>
+Cc: Dan Williams <dcbw@redhat.com>, linux-kernel@vger.kernel.org, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, stable@kernel.org
 
-On Tue, Apr 13, 2010 at 12:29:54PM +0200, Daniel Mack wrote:
-> On Tue, Apr 06, 2010 at 09:07:34AM -0700, Dan Williams wrote:
-> > On Tue, 2010-04-06 at 10:52 +0200, Daniel Mack wrote:
-> > > When operating in 1-bit mode, SDAT1 is used as dedicated interrupt line.
-> > > However, the 8686 will only drive this line when the ECSI bit is set in
-> > > the CCCR_IF register.
-> > > 
-> > > Thanks to Alagu Sankar for pointing me in the right direction.
-> > > 
-> > > Signed-off-by: Daniel Mack <daniel@caiaq.de>
-> > > Cc: Alagu Sankar <alagusankar@embwise.com>
-> > > Cc: Volker Ernst <volker.ernst@txtr.com>
-> > > Cc: Dan Williams <dcbw@redhat.com>
-> > > Cc: John W. Linville <linville@tuxdriver.com>
-> > > Cc: Holger Schurig <hs4233@mail.mn-solutions.de>
-> > > Cc: Bing Zhao <bzhao@marvell.com>
-> > > Cc: libertas-dev@lists.infradead.org
-> > > Cc: linux-wireless@vger.kernel.org
-> > > Cc: linux-mmc@vger.kernel.org
-> > 
-> > Acked-by: Dan Williams <dcbw@redhat.com>
+On Tue, Apr 13, 2010 at 09:06:54AM -0400, John W. Linville wrote:
+> On Tue, Apr 13, 2010 at 12:29:54PM +0200, Daniel Mack wrote:
+> > Was this picked by anyone?
+> > Just asking because I didn't see it in the wireless-2.6.git yet.
 > 
-> Was this picked by anyone?
-> Just asking because I didn't see it in the wireless-2.6.git yet.
+> It is in wireless-next-2.6, queued for 2.6.35.
 
-It is in wireless-next-2.6, queued for 2.6.35.
+Thanks a lot!
 
-John
--- 
-John W. Linville		Someday the world will need a hero, and you
-linville@tuxdriver.com			might be all we have.  Be ready.
+Daniel
