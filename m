@@ -1,71 +1,48 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: RE: How to make kernel block layer generate bigger request in the
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Subject: Re: How to make kernel block layer generate bigger request in the
  request queue?
-Date: Tue, 13 Apr 2010 23:06:40 +0800
-Message-ID: <CE761E84DADF2947A4AF22FB8D97A4731CB7230B@shsmsx501.ccr.corp.intel.com>
+Date: Tue, 13 Apr 2010 16:20:34 +0100
+Message-ID: <20100413162034.445a388b@lxorguk.ukuu.org.uk>
 References: <CE761E84DADF2947A4AF22FB8D97A4731CAF351C@shsmsx501.ccr.corp.intel.com>
-	 <4BBFBE3E.5070605@gmail.com> <yq1y6gwt62p.fsf@sermon.lab.mkp.net>
-	 <1270911503.2806.194.camel@mulgrave.site>
-	 <yq1d3y4msri.fsf@sermon.lab.mkp.net>
- <1271102309.4428.85.camel@mulgrave.site>
+	<4BBFBE3E.5070605@gmail.com>
+	<yq1y6gwt62p.fsf@sermon.lab.mkp.net>
+	<1270911503.2806.194.camel@mulgrave.site>
+	<yq1d3y4msri.fsf@sermon.lab.mkp.net>
+	<1271102309.4428.85.camel@mulgrave.site>
+	<CE761E84DADF2947A4AF22FB8D97A4731CB7230B@shsmsx501.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-ide-owner@vger.kernel.org>
-In-Reply-To: <1271102309.4428.85.camel@mulgrave.site>
-Content-Language: en-US
+In-Reply-To: <CE761E84DADF2947A4AF22FB8D97A4731CB7230B@shsmsx501.ccr.corp.intel.com>
 Sender: linux-ide-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@suse.de>, "Martin K. Petersen" <martin.petersen@oracle.com>
-Cc: Robert Hancock <hancockrwd@gmail.com>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Cc: James Bottomley <James.Bottomley@suse.de>, "Martin K. Petersen" <martin.petersen@oracle.com>, Robert Hancock <hancockrwd@gmail.com>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-VGhhbmtzIGEgbG90IGZvciBhbGwgdGhlIHJlc3BvbnNlcyB0byBteSBxdWVzdGlvbi4NClRvIGJl
-IGhvbmVzdCwgSSBjYW4gbm90IGZ1bGx5IHVuZGVyc3RhbmQgd2hhdCB5b3UgYXJlIGRpc2N1c3Np
-bmcgYnV0IGp1c3QgdHJ5IHRvIHVuZGVyc3RhbmQgaXQgYmV0dGVyIC0NCkJlbG93IGlzIHBhcnQg
-b2YgdGhlIGxvZyB3aGVuIEkgZGVidWdnaW5nIG15IGRyaXZlciBjb2RlLiBJdCBvdXRwdXRzIHRo
-ZSBzdGFydCBzZWN0b3IgYW5kIHRoZSBzZWN0b3IgbnVtYmVyIG9mIGV2ZXJ5IHJlYWQvd3JpdGUg
-cmVxdWVzdCBpbiB0aGUgcmVxdWVzdCBxdWV1ZSBvZiBibG9jayBsYXllci4NCkl0IHNlZW1zIHRo
-YXQgbWFueSBvZiB0aGUgcmVxdWVzdGVkIHNlY3RvcnMgYXJlIGNvbnRpZ3VvdXMuIEFuZCBJIGp1
-c3QgY3VyaW91cyB3aHkgdGhlIGJsb2NrIGxheWVyIGRvZXMgbm90IG1lcmdlIHRoZXNlIGNvbnRp
-Z3VvdXMgc2VjdG9ycyBpbnRvIG9uZSBzaW5nbGUgcmVxdWVzdD8gRm9yIGV4YW1wbGUsIGlmIHRo
-ZSBibG9jayBsYXllciBnZW5lcmF0ZSAnc3RhcnRfc2VjdDogNDg3NzYsIG5zZWN0OiA2NCwgcnc6
-IHInIGluc3RlYWQgb2YgYmVsb3cgcmVxdWVzdHMsIEkgdGhpbmsgdGhlIHBlcmZvcm1hbmNlIHdp
-bGwgYmUgYmV0dGVyLg0KLi4uDQpzdGFydF9zZWN0OiA0ODc3NiwgbnNlY3Q6IDgsIHJ3OiByDQpz
-dGFydF9zZWN0OiA0ODc4NCwgbnNlY3Q6IDgsIHJ3OiByDQpzdGFydF9zZWN0OiA0ODc5MiwgbnNl
-Y3Q6IDgsIHJ3OiByDQpzdGFydF9zZWN0OiA0ODgwMCwgbnNlY3Q6IDgsIHJ3OiByDQpzdGFydF9z
-ZWN0OiA0ODgwOCwgbnNlY3Q6IDgsIHJ3OiByDQpzdGFydF9zZWN0OiA0ODgxNiwgbnNlY3Q6IDgs
-IHJ3OiByDQpzdGFydF9zZWN0OiA0ODgyNCwgbnNlY3Q6IDgsIHJ3OiByDQpzdGFydF9zZWN0OiA0
-ODgzMiwgbnNlY3Q6IDgsIHJ3OiByDQouLi4NCg0KVGhhbmtzLg0KDQpSZWdhcmRzLA0KWXVucGVu
-Zw0KDQo+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj5Gcm9tOiBKYW1lcyBCb3R0b21sZXkg
-W21haWx0bzpKYW1lcy5Cb3R0b21sZXlAc3VzZS5kZV0NCj5TZW50OiAyMDEwxOo01MIxM8jVIDM6
-NTgNCj5UbzogTWFydGluIEsuIFBldGVyc2VuDQo+Q2M6IFJvYmVydCBIYW5jb2NrOyBHYW8sIFl1
-bnBlbmc7IGxpbnV4LWlkZUB2Z2VyLmtlcm5lbC5vcmc7DQo+bGludXgtbW1jQHZnZXIua2VybmVs
-Lm9yZw0KPlN1YmplY3Q6IFJlOiBIb3cgdG8gbWFrZSBrZXJuZWwgYmxvY2sgbGF5ZXIgZ2VuZXJh
-dGUgYmlnZ2VyIHJlcXVlc3QgaW4gdGhlDQo+cmVxdWVzdCBxdWV1ZT8NCj4NCj5PbiBNb24sIDIw
-MTAtMDQtMTIgYXQgMTQ6MjYgLTA0MDAsIE1hcnRpbiBLLiBQZXRlcnNlbiB3cm90ZToNCj4+ID4+
-Pj4+ICJKYW1lcyIgPT0gSmFtZXMgQm90dG9tbGV5IDxKYW1lcy5Cb3R0b21sZXlAc3VzZS5kZT4g
-d3JpdGVzOg0KPj4NCj4+ID4+IENvcnJlY3QuICBJdCdzIHF1aXRlIHVubGlrZWx5IGZvciBwYWdl
-cyB0byBiZSBjb250aWd1b3VzIHNvIHRoaXMgaXMNCj4+ID4+IHRoZSBiZXN0IHdlIGNhbiBkby4N
-Cj4+DQo+PiBKYW1lcz4gQWN0dWFsbHksIGF2ZXJhZ2Ugc2VydmVycyBkbyBhYm91dCA1MCUgY29u
-dGlndW91cyBvbiBhdmVyYWdlDQo+PiBKYW1lcz4gc2luY2Ugd2UgY2hhbmdlZCB0aGUgbW0gbGF5
-ZXIgdG8gYWxsb2NhdGUgaW4gYXNjZW5kaW5nIHBoeXNpY2FsDQo+PiBKYW1lcz4gcGFnZSBvcmRl
-ciAuLi4gIHRoaXMgZmlndXJlIGlzIGhpZ2hseSBzZW5zaXRpdmUgdG8gbW0gY2hhbmdlcw0KPj4g
-SmFtZXM+IHRob3VnaCwgYW5kIGNhbiB2YXJ5IGZyb20gcmVsZWFzZSB0byByZWxlYXNlLg0KPj4N
-Cj4+IEludGVyZXN0aW5nLiAgV2hlbiBkaWQgdGhpcyBoYXBwZW4/DQo+DQo+VGhlIGluaXRpYWwg
-d29yayB3YXMgZG9uZSBieSBCaWxsIElyd2luLCB5ZWFycyBhZ28uICBGb3IgYSB3aGlsZSBpdCB3
-YXMNCj5nb29kLCBidXQgdGhlbiBhZnRlciBNZWwgR29ybWFuIGRpZCB0aGUgcGFnZSByZWNsYWlt
-IGNvZGUsIHdlIGJlY2FtZQ0KPmhpZ2hseSBzZW5zaXRpdmUgdG8gdGhlIHJlY2xhaW0gYWxnb3Jp
-dGhtcyBmb3IgdGhpcywgc28gaXQncyBmbHVjdHVhdGVkDQo+YSBiaXQgZXZlciBzaW5jZS4gIEV2
-ZW4gd2l0aCBhbGwgdGhpcywgdGhlIGVmZmljaWVuY3kgaXMgaGlnaGx5DQo+ZGVwZW5kZW50IG9u
-IHRoZSBhbW91bnQgb2YgZnJlZSBtZW1vcnk6IG9uY2UgdGhlIG1hY2hpbmUgc3RhcnRzIHJ1bm5p
-bmcNCj50byBleGhhdXN0aW9uIChleGNsdWRpbmcgcGFnZSBjYWNoZSwgc2luY2UgdGhhdCB1c3Vh
-bGx5IGFsbG9jYXRlcw0KPmNvcnJlY3RseSB0byBiZWdpbiB3aXRoKSB0aGUgY29udGlndWl0eSBy
-ZWFsbHkgZHJvcHMuDQo+DQo+PiBMYXN0IHRpbWUgSSBnYXRoZXJlZCBkYXRhIG9uIHNlZ21lbnQg
-bWVyZ2UgZWZmaWNpZW5jeSAoMSB5ZWFyKyBhZ28pIEkNCj4+IGZvdW5kIHRoYXQgYWRqYWNlbnQg
-cGFnZXMgd2VyZSBxdWl0ZSByYXJlIGZvciBhIG5vcm1hbCBmcyB0eXBlIHdvcmtsb2FkLg0KPj4g
-Q2VydGFpbmx5IG5vdCBpbiB0aGUgNTAlIGJhbGxwYXJrLiAgSSdsbCB0YWtlIGFub3RoZXIgbG9v
-ayB3aGVuIEkgaGF2ZSBhDQo+PiBtb21lbnQuLi4NCj4NCj5JIGdvdCA2MCUgd2l0aCBhbiBJL08g
-Ym91bmQgdGVzdCB3aXRoIGFib3V0IGEgZ2lnYWJ5dGUgb2YgZnJlZSBtZW1vcnkgYQ0KPndoaWxl
-IGFnbyAoMi42LjMxLCBJIHRoaW5rKS4gIEV2ZW4gZm9yIG1hY2hpbmVzIGFwcHJvYWNoaW5nIG1l
-bW9yeQ0KPnN0YXJ2YXRpb24sIDMwJSBzZWVtcyBhY2hpZXZhYmxlLg0KPg0KPkphbWVzDQo+DQoN
-Cg==
+> And I just curious why the block layer does not merge these contiguous sectors into one single request? For example, if > the block layer generate 'start_sect: 48776, nsect: 64, rw: r' instead of below requests, I think the performance will 
+> be better.
+
+You said earlier "My hardware doesn't support scatter/gather"
+
+> start_sect: 48776, nsect: 8, rw: r
+> start_sect: 48784, nsect: 8, rw: r
+> start_sect: 48792, nsect: 8, rw: r
+> start_sect: 48800, nsect: 8, rw: r
+> start_sect: 48808, nsect: 8, rw: r
+> start_sect: 48816, nsect: 8, rw: r
+> start_sect: 48824, nsect: 8, rw: r
+> start_sect: 48832, nsect: 8, rw: r
+
+Print the bus address of each request and you will probably find they are
+not contiguous so they have not been merged because your hardware could
+not do that transfer and you have no IOMMU.
+
+If the overhead per command is really really huge you can preallocate an
+internal buffer of say 32K or 64K in your driver and tell the block layer
+you do scatter gather, then copy the buffers into a linear chunk. I'd be
+very surprised if that was a win overall on any vaguely sane hardware but
+flash with erase block overhead and the like might be one of the less
+sane cases.
+
+Alan
