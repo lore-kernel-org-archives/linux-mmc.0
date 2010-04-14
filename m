@@ -1,55 +1,100 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-sd-clean-up-redundant-memset.patch added to -mm tree
-Date: Tue, 13 Apr 2010 12:50:59 -0700
-Message-ID: <201004131950.o3DJoxUP024066@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: asselsm@gmail.com, linux-mmc@vger.kernel.org
+From: Dan Williams <dan.j.williams@intel.com>
+Subject: Re: [PATCH 05/11] ARM: add generic PrimeCell interface to COH 901 318
+	v5
+Date: Wed, 14 Apr 2010 15:40:02 -0700
+Message-ID: <r2re9c3a7c21004141540o90fcbb07ja92dffcd71364f8b@mail.gmail.com>
+References: <1270681973-5763-1-git-send-email-linus.walleij@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:50847 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756070Ab0DNWkC convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Apr 2010 18:40:02 -0400
+In-Reply-To: <1270681973-5763-1-git-send-email-linus.walleij@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: akpm@linux-foundation.org, Russell King - ARM Linux <linux@arm.linux.org.uk>, Grant Likely <grant.likely@secretlab.ca>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, STEricsson_nomadik_linux@list.st.com, linux-kernel@vger.kernel.org
 
+Hi Linus,
 
-The patch titled
-     mmc: sd: clean up redundant memset
-has been added to the -mm tree.  Its filename is
-     mmc-sd-clean-up-redundant-memset.patch
+On Wed, Apr 7, 2010 at 4:12 PM, Linus Walleij
+<linus.walleij@stericsson.com> wrote:
+> This extends the DMA engine driver for the COH 901 318 used in the
+> U300 platform with the generic PrimeCell interface.
+>
+> Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+> ---
+> =A0drivers/dma/coh901318.c =A0 =A0 | =A0146 +++++++++++++++++++++++++=
+++++++++++++++++++
+> =A0drivers/dma/coh901318_lli.c | =A0 78 ++++++++++++++++++++++-
+> =A02 files changed, 221 insertions(+), 3 deletions(-)
+>
+[..]
+> diff --git a/drivers/dma/coh901318_lli.c b/drivers/dma/coh901318_lli.=
+c
+> index 9f7e0e6..f37db49 100644
+> --- a/drivers/dma/coh901318_lli.c
+> +++ b/drivers/dma/coh901318_lli.c
+> @@ -153,6 +153,39 @@ coh901318_lli_fill_memcpy(struct coh901318_pool =
+*pool,
+> =A0 =A0 =A0 =A0lli->src_addr =3D src;
+> =A0 =A0 =A0 =A0lli->dst_addr =3D dst;
+>
+> + =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0* The DMA hardware will increase its pointer by 1,
+> + =A0 =A0 =A0 =A0* 2 or 4 bytes at a time depending on configuration.
+> + =A0 =A0 =A0 =A0* If using som oddly-aligned buffer this will cause
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+s/som/some/
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+> + =A0 =A0 =A0 =A0* performance problems.
+> + =A0 =A0 =A0 =A0*/
+> +#if 0
+> + =A0 =A0 =A0 ctrl_chained &=3D ~COH901318_CX_CTRL_SRC_BUS_SIZE_MASK;
+> + =A0 =A0 =A0 ctrl_eom &=3D ~COH901318_CX_CTRL_SRC_BUS_SIZE_MASK;
+> + =A0 =A0 =A0 ctrl_chained &=3D ~COH901318_CX_CTRL_DST_BUS_SIZE_MASK;
+> + =A0 =A0 =A0 ctrl_eom &=3D ~COH901318_CX_CTRL_DST_BUS_SIZE_MASK;
+> + =A0 =A0 =A0 if (src & 0x01) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_chained |=3D COH901318_CX_CTRL_SRC=
+_BUS_SIZE_8_BITS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_eom |=3D COH901318_CX_CTRL_SRC_BUS=
+_SIZE_8_BITS;
+> + =A0 =A0 =A0 } else if (src & 0x02) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_chained |=3D COH901318_CX_CTRL_SRC=
+_BUS_SIZE_16_BITS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_eom |=3D COH901318_CX_CTRL_SRC_BUS=
+_SIZE_16_BITS;
+> + =A0 =A0 =A0 } else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_chained |=3D COH901318_CX_CTRL_SRC=
+_BUS_SIZE_32_BITS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_eom |=3D COH901318_CX_CTRL_SRC_BUS=
+_SIZE_32_BITS;
+> + =A0 =A0 =A0 }
+> + =A0 =A0 =A0 if (dst & 0x01) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_chained |=3D COH901318_CX_CTRL_DST=
+_BUS_SIZE_8_BITS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_eom |=3D COH901318_CX_CTRL_SRC_DST=
+_SIZE_8_BITS;
+> + =A0 =A0 =A0 } else if (dst & 0x02) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_chained |=3D COH901318_CX_CTRL_DST=
+_BUS_SIZE_16_BITS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_eom |=3D COH901318_CX_CTRL_DST_BUS=
+_SIZE_16_BITS;
+> + =A0 =A0 =A0 } else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_chained |=3D COH901318_CX_CTRL_DST=
+_BUS_SIZE_32_BITS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_eom |=3D COH901318_CX_CTRL_DST_BUS=
+_SIZE_32_BITS;
+> + =A0 =A0 =A0 }
+> +#endif
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+It looks like this bit twiddling code is duplicated three times.  Can
+it be moved to a static inline in a header file and hide the #if 0
+there as well.  I assume you want it for documentation purposes in
+case someone in the future has an unaligned usage model?
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: sd: clean up redundant memset
-From: Mark Asselstine <asselsm@gmail.com>
-
-The clearing of mrq via a memset at the top of the for loop in
-mmc_wait_for_app_cmd() is not required as mrq is not used and there is
-another clearing of mrq just below.  We remove the first memset since if
-the initial tests in the for loop fail the memset is not required.
-
-Signed-off-by: Mark Asselstine <asselsm@gmail.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/core/sd_ops.c |    2 --
- 1 file changed, 2 deletions(-)
-
-diff -puN drivers/mmc/core/sd_ops.c~mmc-sd-clean-up-redundant-memset drivers/mmc/core/sd_ops.c
---- a/drivers/mmc/core/sd_ops.c~mmc-sd-clean-up-redundant-memset
-+++ a/drivers/mmc/core/sd_ops.c
-@@ -79,8 +79,6 @@ int mmc_wait_for_app_cmd(struct mmc_host
- 	 * we cannot use the retries field in mmc_command.
- 	 */
- 	for (i = 0;i <= retries;i++) {
--		memset(&mrq, 0, sizeof(struct mmc_request));
+--
+Dan
