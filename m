@@ -1,101 +1,55 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: Re: [PATCH] mmc: fix race condition between dma and omap_hsmmc
-	callback
-Date: Sun, 18 Apr 2010 19:07:00 +0530
-Message-ID: <x2s618f0c911004180637gde02aecn57c650cc19d142f0@mail.gmail.com>
-References: <618f0c911003240600m1a38935av68f31a232ed8b8ad@mail.gmail.com>
-	 <4BC43D99.6030809@nokia.com>
+From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Subject: RE: How to make kernel block layer generate bigger request in the
+ request queue?
+Date: Mon, 19 Apr 2010 14:42:38 +0800
+Message-ID: <CE761E84DADF2947A4AF22FB8D97A4731CC5D11D@shsmsx501.ccr.corp.intel.com>
+References: <CE761E84DADF2947A4AF22FB8D97A4731CAF351C@shsmsx501.ccr.corp.intel.com>
+	<4BBFBE3E.5070605@gmail.com>	<yq1y6gwt62p.fsf@sermon.lab.mkp.net>
+	<1270911503.2806.194.camel@mulgrave.site>
+	<yq1d3y4msri.fsf@sermon.lab.mkp.net>
+	<1271102309.4428.85.camel@mulgrave.site>
+	<CE761E84DADF2947A4AF22FB8D97A4731CB7230B@shsmsx501.ccr.corp.intel.com>
+ <20100413162034.445a388b@lxorguk.ukuu.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:49651 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753126Ab0DRNhB convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Apr 2010 09:37:01 -0400
-In-Reply-To: <4BC43D99.6030809@nokia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-ide-owner@vger.kernel.org>
+In-Reply-To: <20100413162034.445a388b@lxorguk.ukuu.org.uk>
+Content-Language: en-US
+Sender: linux-ide-owner@vger.kernel.org
+To: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Cc: James Bottomley <James.Bottomley@suse.de>, "Martin K. Petersen" <martin.petersen@oracle.com>, Robert Hancock <hancockrwd@gmail.com>, "linux-ide@vger.kernel.org" <linux-ide@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>
 
-On Tue, Apr 13, 2010 at 3:17 PM, Adrian Hunter <adrian.hunter@nokia.com=
-> wrote:
-> Venkatraman S wrote:
->>
->> This patch addresses the possible race condition between the dma
->> callback and hsmmc callback.
->
-> Can you explain the problem in more detail? =A0If the final DMA inter=
-rupt
-> comes before TC then all should be well.
-   Actually it isn't, with descriptor loading. If the DMA callback arri=
-ves
-"too early", the MMC TC is missed sometimes. The last transfer in the l=
-og
-below is actually stalled waiting for TC. This happens more often when =
-the
-transfer is large (> 300 blocks)
-
->If it comes after, then we need
-> to be sure that the DMA has finished - particularly in the "read" cas=
-e.
-> Neither the existing code nor this patch seems to address that issue.
->
-   With this patch the assumption is that MMC TC correctly signals the
-end of read / write as requested. I don't know if there are any specifi=
-c reasons
-to believe otherwise.
-
-> Also, how can we be sure the final DMA interrupt doesn't race with th=
-e
-> start of the next request?
->
-Till the time omap_hsmmc_xfer_done is called, the next request is not
-expected to arrive.
-The requests are implicitly serialised by host->sem, which is released
-only on the DMA callback.
-The code releases the semaphore only after freeing the DMA channel.
------------------------------------------------------------------------=
-----------------------
-
-mmc0: starting CMD17 arg 00000066 flags 000000b5
-mmc0:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
-mmci-omap-hs mmci-omap-hs.0: mmc0: CMD17, argument 0x00000066
-mmci-omap-hs mmci-omap-hs.0: IRQ Status is 1
-mmci-omap-hs mmci-omap-hs.0: final dma callback
-mmci-omap-hs mmci-omap-hs.0: IRQ Status is 2
-mmc0: req done (CMD17): 0: 00000900 00000000 00000000 00000000
-mmc0:     512 bytes transferred: 0
-mmc0: starting CMD18 arg 000025df flags 000000b5
-mmc0:     blksz 512 blocks 32 flags 00000200 tsac 100 ms nsac 0
-mmc0:     CMD12 arg 00000000 flags 0000049d
-mmci-omap-hs mmci-omap-hs.0: mmc0: CMD18, argument 0x000025df
-mmci-omap-hs mmci-omap-hs.0: IRQ Status is 1
-mmci-omap-hs mmci-omap-hs.0: IRQ Status is 2
-mmci-omap-hs mmci-omap-hs.0: mmc0: CMD12, argument 0x00000000
-mmci-omap-hs mmci-omap-hs.0: final dma callback
-mmci-omap-hs mmci-omap-hs.0: IRQ Status is 3
-mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-mmc0:     16384 bytes transferred: 0
-mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
-mmc0: starting CMD18 arg 000025ff flags 000000b5
-mmc0:     blksz 512 blocks 192 flags 00000200 tsac 100 ms nsac 0
-mmc0:     CMD12 arg 00000000 flags 0000049d
-mmci-omap-hs mmci-omap-hs.0: new sglist 9fd00000 len =3D23
-mmci-omap-hs mmci-omap-hs.0: mmc0: CMD18, argument 0x000025ff
-mmci-omap-hs mmci-omap-hs.0: IRQ Status is 1
-mmci-omap-hs mmci-omap-hs.0: final dma callback
-mmci-omap-hs mmci-omap-hs.0: IRQ Status is 2
-mmci-omap-hs mmci-omap-hs.0: mmc0: CMD12, argument 0x00000000
-mmci-omap-hs mmci-omap-hs.0: IRQ Status is 3
-mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-mmc0:     98304 bytes transferred: 0
-mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
-mmc0: starting CMD18 arg 000026bf flags 000000b5
-mmc0:     blksz 512 blocks 512 flags 00000200 tsac 100 ms nsac 0
-mmc0:     CMD12 arg 00000000 flags 0000049d
-mmci-omap-hs mmci-omap-hs.0: new sglist 9fd00000 len =3D26
-mmci-omap-hs mmci-omap-hs.0: mmc0: CMD18, argument 0x000026bf
-mmci-omap-hs mmci-omap-hs.0: IRQ Status is 1
-mmci-omap-hs mmci-omap-hs.0: final dma callback
+VGhhbmtzIGEgbG90IHRvIEFsYW4gZm9yIHRoaXMgc3VnZ2VzdGlvbi4gSSB0aGluayBpdCBtYWtl
+cyBzZW5zZSB0byBzaW11bGF0ZSBhIHNjYXR0ZXIgZ2F0aGVyIGluIGRyaXZlciBmb3IgdGhpcyBj
+YXNlLiBJJ2xsIHRyeSBpdCBsYXRlciBhbmQgZXhwZWN0IHRvIHNlZSB0aGUgaW1wcm92ZWQgcGVy
+Zm9ybWFuY2UuDQoNCj4tLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPkZyb206IEFsYW4gQ294
+IFttYWlsdG86YWxhbkBseG9yZ3VrLnVrdXUub3JnLnVrXQ0KPlNlbnQ6IDIwMTDE6jTUwjEzyNUg
+MjM6MjENCj5UbzogR2FvLCBZdW5wZW5nDQo+Q2M6IEphbWVzIEJvdHRvbWxleTsgTWFydGluIEsu
+IFBldGVyc2VuOyBSb2JlcnQgSGFuY29jazsNCj5saW51eC1pZGVAdmdlci5rZXJuZWwub3JnOyBs
+aW51eC1tbWNAdmdlci5rZXJuZWwub3JnDQo+U3ViamVjdDogUmU6IEhvdyB0byBtYWtlIGtlcm5l
+bCBibG9jayBsYXllciBnZW5lcmF0ZSBiaWdnZXIgcmVxdWVzdCBpbiB0aGUNCj5yZXF1ZXN0IHF1
+ZXVlPw0KPg0KPj4gQW5kIEkganVzdCBjdXJpb3VzIHdoeSB0aGUgYmxvY2sgbGF5ZXIgZG9lcyBu
+b3QgbWVyZ2UgdGhlc2UgY29udGlndW91cyBzZWN0b3JzDQo+aW50byBvbmUgc2luZ2xlIHJlcXVl
+c3Q/IEZvciBleGFtcGxlLCBpZiA+IHRoZSBibG9jayBsYXllciBnZW5lcmF0ZSAnc3RhcnRfc2Vj
+dDoNCj40ODc3NiwgbnNlY3Q6IDY0LCBydzogcicgaW5zdGVhZCBvZiBiZWxvdyByZXF1ZXN0cywg
+SSB0aGluayB0aGUgcGVyZm9ybWFuY2Ugd2lsbA0KPj4gYmUgYmV0dGVyLg0KPg0KPllvdSBzYWlk
+IGVhcmxpZXIgIk15IGhhcmR3YXJlIGRvZXNuJ3Qgc3VwcG9ydCBzY2F0dGVyL2dhdGhlciINCj4N
+Cj4+IHN0YXJ0X3NlY3Q6IDQ4Nzc2LCBuc2VjdDogOCwgcnc6IHINCj4+IHN0YXJ0X3NlY3Q6IDQ4
+Nzg0LCBuc2VjdDogOCwgcnc6IHINCj4+IHN0YXJ0X3NlY3Q6IDQ4NzkyLCBuc2VjdDogOCwgcnc6
+IHINCj4+IHN0YXJ0X3NlY3Q6IDQ4ODAwLCBuc2VjdDogOCwgcnc6IHINCj4+IHN0YXJ0X3NlY3Q6
+IDQ4ODA4LCBuc2VjdDogOCwgcnc6IHINCj4+IHN0YXJ0X3NlY3Q6IDQ4ODE2LCBuc2VjdDogOCwg
+cnc6IHINCj4+IHN0YXJ0X3NlY3Q6IDQ4ODI0LCBuc2VjdDogOCwgcnc6IHINCj4+IHN0YXJ0X3Nl
+Y3Q6IDQ4ODMyLCBuc2VjdDogOCwgcnc6IHINCj4NCj5QcmludCB0aGUgYnVzIGFkZHJlc3Mgb2Yg
+ZWFjaCByZXF1ZXN0IGFuZCB5b3Ugd2lsbCBwcm9iYWJseSBmaW5kIHRoZXkgYXJlDQo+bm90IGNv
+bnRpZ3VvdXMgc28gdGhleSBoYXZlIG5vdCBiZWVuIG1lcmdlZCBiZWNhdXNlIHlvdXIgaGFyZHdh
+cmUgY291bGQNCj5ub3QgZG8gdGhhdCB0cmFuc2ZlciBhbmQgeW91IGhhdmUgbm8gSU9NTVUuDQo+
+DQo+SWYgdGhlIG92ZXJoZWFkIHBlciBjb21tYW5kIGlzIHJlYWxseSByZWFsbHkgaHVnZSB5b3Ug
+Y2FuIHByZWFsbG9jYXRlIGFuDQo+aW50ZXJuYWwgYnVmZmVyIG9mIHNheSAzMksgb3IgNjRLIGlu
+IHlvdXIgZHJpdmVyIGFuZCB0ZWxsIHRoZSBibG9jayBsYXllcg0KPnlvdSBkbyBzY2F0dGVyIGdh
+dGhlciwgdGhlbiBjb3B5IHRoZSBidWZmZXJzIGludG8gYSBsaW5lYXIgY2h1bmsuIEknZCBiZQ0K
+PnZlcnkgc3VycHJpc2VkIGlmIHRoYXQgd2FzIGEgd2luIG92ZXJhbGwgb24gYW55IHZhZ3VlbHkg
+c2FuZSBoYXJkd2FyZSBidXQNCj5mbGFzaCB3aXRoIGVyYXNlIGJsb2NrIG92ZXJoZWFkIGFuZCB0
+aGUgbGlrZSBtaWdodCBiZSBvbmUgb2YgdGhlIGxlc3MNCj5zYW5lIGNhc2VzLg0KPg0KPkFsYW4N
+Cg==
