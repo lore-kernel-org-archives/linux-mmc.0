@@ -1,96 +1,104 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: Re: [PATCH] mmc: fix race condition between dma and omap_hsmmc
-	callback
-Date: Mon, 19 Apr 2010 15:06:24 +0530
-Message-ID: <h2y618f0c911004190236wd64b071dkee00026da2077d05@mail.gmail.com>
-References: <618f0c911003240600m1a38935av68f31a232ed8b8ad@mail.gmail.com>
-	 <4BC43D99.6030809@nokia.com>
-	 <x2s618f0c911004180637gde02aecn57c650cc19d142f0@mail.gmail.com>
-	 <4BCC0F32.6020409@nokia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <4BCC0F32.6020409@nokia.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tony Lindgren <tony@atomide.com>
+From: akpm@linux-foundation.org
+Subject: + mmc-atmel-mci-enable-sd-high-speed-support.patch added to -mm tree
+Date: Mon, 19 Apr 2010 16:33:30 -0700
+Message-ID: <201004192333.o3JNXU4c016233@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: nicolas.ferre@atmel.com, haavard.skinnemoen@atmel.com, linux-mmc@vger.kernel.org, maciej.sosnowski@intel.com
 List-Id: linux-mmc@vger.kernel.org
 
-Adrian Hunter <adrian.hunter@nokia.com> wrote:
-> Venkatraman S wrote:
->>
->> On Tue, Apr 13, 2010 at 3:17 PM, Adrian Hunter <adrian.hunter@nokia.=
-com>
->> wrote:
->>>
->>> Venkatraman S wrote:
->>>>
->>>> This patch addresses the possible race condition between the dma
->>>> callback and hsmmc callback.
->>>
->>> Can you explain the problem in more detail? =A0If the final DMA int=
-errupt
->>> comes before TC then all should be well.
->>
->> =A0 Actually it isn't, with descriptor loading. If the DMA callback =
-arrives
->> "too early", the MMC TC is missed sometimes. The last transfer in th=
-e log
->> below is actually stalled waiting for TC. This happens more often wh=
-en the
->> transfer is large (> 300 blocks)
->
-> You seem to be saying that, in the case of descriptor loading, the DM=
-A
-> callback
-> does not indicate that the DMA is complete. =A0Isn't that a problem w=
-ith
-> descriptor
-> loading?
->
-  My understanding from the existing code
-<snip>
-        /*
-         * If for some reason the DMA transfer is still active,
-         * we wait for timeout period and free the dma
-         */
-        if (host->dma_ch !=3D -1) {
-                set_current_state(TASK_UNINTERRUPTIBLE);
-</snip>
- is that it's rare, but not impossible, for the DMA to be active even
-when the TC has been received.
-  At the same time, I found one issue in descriptor loading
-after I sent the email yesterday, which could fix the problem I am seei=
-ng.
 
->>
->>> If it comes after, then we need
->>> to be sure that the DMA has finished - particularly in the "read" c=
-ase.
->>> Neither the existing code nor this patch seems to address that issu=
-e.
->>>
->> =A0 With this patch the assumption is that MMC TC correctly signals =
-the
->> end of read / write as requested. I don't know if there are any spec=
-ific
->> reasons
->> to believe otherwise.
->
-> It would be nice if there were a way to check that the DMA is complet=
-e. i.e.
-> if TC is received but DMA is not complete then set an error by callin=
-g
-> omap_hsmmc_dma_cleanup() instead of omap_hsmmc_xfer_done()
->
-  Yes, I was testing such a mechanism as well.  Is it better to abort t=
-he
-transfer by setting an error, or do the omap_hsmmc_xfer_done() at the
-callback of whichever
-interrupt comes last ?
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The patch titled
+     mmc: atmel-mci: enable SD high speed support
+has been added to the -mm tree.  Its filename is
+     mmc-atmel-mci-enable-sd-high-speed-support.patch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc: atmel-mci: enable SD high speed support
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+
+Enable high speed support for atmel-mci driver.  This support is dependent
+of the revision of the IP and, of course, the capacity of the SD card
+used.
+
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Reviewed-by: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Cc: Maciej Sosnowski <maciej.sosnowski@intel.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/atmel-mci.c |   22 +++++++++++++++++++---
+ 1 file changed, 19 insertions(+), 3 deletions(-)
+
+diff -puN drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-enable-sd-high-speed-support drivers/mmc/host/atmel-mci.c
+--- a/drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-enable-sd-high-speed-support
++++ a/drivers/mmc/host/atmel-mci.c
+@@ -951,10 +951,21 @@ static void atmci_set_ios(struct mmc_hos
+ 		if (mci_has_rwproof())
+ 			host->mode_reg |= (MCI_MR_WRPROOF | MCI_MR_RDPROOF);
+ 
+-		if (list_empty(&host->queue))
++		if (atmci_is_mci2()) {
++			/* setup High Speed mode in relation with card capacity */
++			if (ios->timing == MMC_TIMING_SD_HS)
++				host->cfg_reg |= MCI_CFG_HSMODE;
++			else
++				host->cfg_reg &= ~MCI_CFG_HSMODE;
++		}
++
++		if (list_empty(&host->queue)) {
+ 			mci_writel(host, MR, host->mode_reg);
+-		else
++			if (atmci_is_mci2())
++				mci_writel(host, CFG, host->cfg_reg);
++		} else {
+ 			host->need_clock_update = true;
++		}
+ 
+ 		spin_unlock_bh(&host->lock);
+ 	} else {
+@@ -1051,8 +1062,11 @@ static void atmci_request_end(struct atm
+ 	 * necessary if set_ios() is called when a different slot is
+ 	 * busy transfering data.
+ 	 */
+-	if (host->need_clock_update)
++	if (host->need_clock_update) {
+ 		mci_writel(host, MR, host->mode_reg);
++		if (atmci_is_mci2())
++			mci_writel(host, CFG, host->cfg_reg);
++	}
+ 
+ 	host->cur_slot->mrq = NULL;
+ 	host->mrq = NULL;
+@@ -1563,6 +1577,8 @@ static int __init atmci_init_slot(struct
+ 	mmc->f_min = DIV_ROUND_UP(host->bus_hz, 512);
+ 	mmc->f_max = host->bus_hz / 2;
+ 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
++	if (atmci_is_mci2())
++		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+ 	if (slot_data->bus_width >= 4)
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 
+_
+
+Patches currently in -mm which might be from nicolas.ferre@atmel.com are
+
+linux-next.patch
+mmc-atmel-mci-enable-sd-high-speed-support.patch
+
