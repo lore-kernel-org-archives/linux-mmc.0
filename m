@@ -1,104 +1,31 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-atmel-mci-enable-sd-high-speed-support.patch added to -mm tree
-Date: Mon, 19 Apr 2010 16:33:30 -0700
-Message-ID: <201004192333.o3JNXU4c016233@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: nicolas.ferre@atmel.com, haavard.skinnemoen@atmel.com, linux-mmc@vger.kernel.org, maciej.sosnowski@intel.com
+From: "Sidney Osborn" <williammacy@r220-pw-doscedros.ibys.com.br>
+Subject: direct marketing list
+Date: 19 Apr 2010 22:04:36 -0300
+Message-ID: <SERVER-02nEMzAUor0300000272@SERVER-02.galmo.local>
+Reply-To: williammacy@r220-pw-doscedros.ibys.com.br
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from r220-pw-doscedros.ibys.com.br ([187.0.91.52]:60583 "EHLO
+	SERVER-02.galmo.local" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751860Ab0DTBY4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Apr 2010 21:24:56 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: biogassendi@fr.st, cwag@cwag.org, harley@londonsmiling.com, linux-mmc@vger.kernel.org, james@molloyspharmacy.com
+
+Larry,
+
+Contact me at the email address below for a catalog of all our USA lists.
+
+Also, this week we are offering reduced costs for more than one list.  
+  
+
+Regards,
 
 
-The patch titled
-     mmc: atmel-mci: enable SD high speed support
-has been added to the -mm tree.  Its filename is
-     mmc-atmel-mci-enable-sd-high-speed-support.patch
+Eve Small
+Email Address: Leonard.Peacock@infodat2010 .co.cc
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: atmel-mci: enable SD high speed support
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-
-Enable high speed support for atmel-mci driver.  This support is dependent
-of the revision of the IP and, of course, the capacity of the SD card
-used.
-
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Reviewed-by: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Cc: Maciej Sosnowski <maciej.sosnowski@intel.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/atmel-mci.c |   22 +++++++++++++++++++---
- 1 file changed, 19 insertions(+), 3 deletions(-)
-
-diff -puN drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-enable-sd-high-speed-support drivers/mmc/host/atmel-mci.c
---- a/drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-enable-sd-high-speed-support
-+++ a/drivers/mmc/host/atmel-mci.c
-@@ -951,10 +951,21 @@ static void atmci_set_ios(struct mmc_hos
- 		if (mci_has_rwproof())
- 			host->mode_reg |= (MCI_MR_WRPROOF | MCI_MR_RDPROOF);
- 
--		if (list_empty(&host->queue))
-+		if (atmci_is_mci2()) {
-+			/* setup High Speed mode in relation with card capacity */
-+			if (ios->timing == MMC_TIMING_SD_HS)
-+				host->cfg_reg |= MCI_CFG_HSMODE;
-+			else
-+				host->cfg_reg &= ~MCI_CFG_HSMODE;
-+		}
-+
-+		if (list_empty(&host->queue)) {
- 			mci_writel(host, MR, host->mode_reg);
--		else
-+			if (atmci_is_mci2())
-+				mci_writel(host, CFG, host->cfg_reg);
-+		} else {
- 			host->need_clock_update = true;
-+		}
- 
- 		spin_unlock_bh(&host->lock);
- 	} else {
-@@ -1051,8 +1062,11 @@ static void atmci_request_end(struct atm
- 	 * necessary if set_ios() is called when a different slot is
- 	 * busy transfering data.
- 	 */
--	if (host->need_clock_update)
-+	if (host->need_clock_update) {
- 		mci_writel(host, MR, host->mode_reg);
-+		if (atmci_is_mci2())
-+			mci_writel(host, CFG, host->cfg_reg);
-+	}
- 
- 	host->cur_slot->mrq = NULL;
- 	host->mrq = NULL;
-@@ -1563,6 +1577,8 @@ static int __init atmci_init_slot(struct
- 	mmc->f_min = DIV_ROUND_UP(host->bus_hz, 512);
- 	mmc->f_max = host->bus_hz / 2;
- 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
-+	if (atmci_is_mci2())
-+		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
- 	if (slot_data->bus_width >= 4)
- 		mmc->caps |= MMC_CAP_4_BIT_DATA;
- 
-_
-
-Patches currently in -mm which might be from nicolas.ferre@atmel.com are
-
-linux-next.patch
-mmc-atmel-mci-enable-sd-high-speed-support.patch
-
+email rembox@infodat2010. co.cc for delisting
