@@ -1,65 +1,57 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 7/8] SH: Add SDHI DMA support to kfr2r09
-Date: Wed, 21 Apr 2010 17:37:31 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1004211735470.5292@axis700.grange>
-References: <Pine.LNX.4.64.1004211715050.5292@axis700.grange>
+From: "kishore kadiyala" <kishore.kadiyala@ti.com>
+Subject: [PATCH 0/7] Adding MMC Support on OMAP4430 SDP
+Date: Wed, 21 Apr 2010 23:48:48 +0530 (IST)
+Message-ID: <63265.10.24.255.18.1271873928.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:47827 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1755772Ab0DUPhQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 21 Apr 2010 11:37:16 -0400
-In-Reply-To: <Pine.LNX.4.64.1004211715050.5292@axis700.grange>
+Received: from comal.ext.ti.com ([198.47.26.152]:33671 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753899Ab0DUSTG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 21 Apr 2010 14:19:06 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
-Cc: linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: madhu.cr@ti.com, jarkko.lavinen@nokia.com, tony@atomide.com, rmk+lkml@arm.linux.org.uk, santosh.shilimkar@ti.com
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- arch/sh/boards/mach-kfr2r09/setup.c |   10 ++++++++++
- 1 files changed, 10 insertions(+), 0 deletions(-)
+This patch series basically adds board and regulator support for
+MMC1 and MMC2 controllers on OMAP4.
 
-diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-index b2cd0ed..6e76747 100644
---- a/arch/sh/boards/mach-kfr2r09/setup.c
-+++ b/arch/sh/boards/mach-kfr2r09/setup.c
-@@ -10,6 +10,7 @@
- #include <linux/init.h>
- #include <linux/platform_device.h>
- #include <linux/interrupt.h>
-+#include <linux/mfd/sh_mobile_sdhi.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mtd/onenand.h>
- #include <linux/delay.h>
-@@ -25,6 +26,7 @@
- #include <video/sh_mobile_lcdc.h>
- #include <asm/suspend.h>
- #include <asm/clock.h>
-+#include <asm/dmaengine.h>
- #include <asm/machvec.h>
- #include <asm/io.h>
- #include <cpu/sh7724.h>
-@@ -356,10 +358,18 @@ static struct resource kfr2r09_sh_sdhi0_resources[] = {
- 	},
- };
- 
-+static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
-+	.dma_slave_tx = SHDMA_SLAVE_SDHI0_TX,
-+	.dma_slave_rx = SHDMA_SLAVE_SDHI0_RX,
-+};
-+
- static struct platform_device kfr2r09_sh_sdhi0_device = {
- 	.name           = "sh_mobile_sdhi",
- 	.num_resources  = ARRAY_SIZE(kfr2r09_sh_sdhi0_resources),
- 	.resource       = kfr2r09_sh_sdhi0_resources,
-+	.dev = {
-+		.platform_data	= &sh7724_sdhi0_data,
-+	},
- 	.archdata = {
- 		.hwblk_id = HWBLK_SDHI0,
- 	},
--- 
-1.6.2.4
+This is based on latest mainline version 2.6.34-rc4 and boot tested on
+OMAP4430 SDP.
+
+This patch series has dependencies on OMAP4 i2c support and regulator
+which was posted earlier
+[1] http://www.mail-archive.com/linux-omap@vger.kernel.org/msg26256.html
+[2] http://www.mail-archive.com/linux-i2c@vger.kernel.org/msg02755.html
+[3] https://patchwork.kernel.org/patch/79967/
+
+
+Kishore Kadiyala (5):
+  OMAP4-HSMMC: FIX for MMC5 Controller IRQ Base
+  OMAP4-HSMMC: Adding HSMMC support for OMAP4430 Board file
+  OMAP4-HSMMC: Adding Card detect support
+  OMAP4-HSMMC: Addind MMC-TWL regulator changes
+  OMAP4-HSMMC: Adds Dummy Interface clock's for MMC controllers
+
+Santosh Shilimkar (1):
+  OMAP4: Fix for CONTROL register Base
+
+Kishore Kadiyala (1):
+  OMAP4-HSMMC: Adding OMAP4 Support
+
+ arch/arm/configs/omap_4430sdp_defconfig    |   19 +++-
+ arch/arm/mach-omap2/Makefile               |    3 +-
+ arch/arm/mach-omap2/board-4430sdp.c        |   40 ++++-
+ arch/arm/mach-omap2/clock44xx_data.c       |    5 +
+ arch/arm/mach-omap2/devices.c              |    2 +-
+ arch/arm/mach-omap2/hsmmc.c                |  217 ++++++++++++++++++++++++----
+ arch/arm/mach-omap2/hsmmc.h                |    1 +
+ arch/arm/plat-omap/include/plat/control.h  |   17 +++
+ arch/arm/plat-omap/include/plat/mmc.h      |    3 +-
+ arch/arm/plat-omap/include/plat/omap44xx.h |    2 +-
+ drivers/mmc/host/omap_hsmmc.c              |   29 +----
+ 11 files changed, 272 insertions(+), 66 deletions(-)
+
 
