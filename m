@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 6/8] SH: Add SDHI DMA support to ms7724se
-Date: Wed, 21 Apr 2010 17:37:28 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1004211735180.5292@axis700.grange>
+Subject: [PATCH 8/8] SH: Add SDHI DMA support to migor
+Date: Wed, 21 Apr 2010 17:37:35 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1004211736120.5292@axis700.grange>
 References: <Pine.LNX.4.64.1004211715050.5292@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
@@ -14,69 +14,48 @@ List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- arch/sh/boards/mach-se/7724/setup.c |   19 +++++++++++++++++++
- 1 files changed, 19 insertions(+), 0 deletions(-)
+ arch/sh/boards/mach-migor/setup.c |   11 +++++++++++
+ 1 files changed, 11 insertions(+), 0 deletions(-)
 
-diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
-index 66cdbc3..70ddc92 100644
---- a/arch/sh/boards/mach-se/7724/setup.c
-+++ b/arch/sh/boards/mach-se/7724/setup.c
-@@ -14,6 +14,7 @@
- #include <linux/device.h>
+diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
+index 7da0fc9..242a623 100644
+--- a/arch/sh/boards/mach-migor/setup.c
++++ b/arch/sh/boards/mach-migor/setup.c
+@@ -12,6 +12,7 @@
  #include <linux/interrupt.h>
- #include <linux/platform_device.h>
+ #include <linux/input.h>
+ #include <linux/input/sh_keysc.h>
 +#include <linux/mfd/sh_mobile_sdhi.h>
  #include <linux/mtd/physmap.h>
- #include <linux/delay.h>
- #include <linux/smc91x.h>
+ #include <linux/mtd/nand.h>
+ #include <linux/i2c.h>
 @@ -24,6 +25,7 @@
- #include <video/sh_mobile_lcdc.h>
- #include <media/sh_mobile_ceu.h>
- #include <sound/sh_fsi.h>
+ #include <media/ov772x.h>
+ #include <media/tw9910.h>
+ #include <asm/clock.h>
 +#include <asm/dmaengine.h>
+ #include <asm/machvec.h>
  #include <asm/io.h>
- #include <asm/heartbeat.h>
- #include <asm/sh_eth.h>
-@@ -456,11 +458,20 @@ static struct resource sdhi0_cn7_resources[] = {
+ #include <asm/suspend.h>
+@@ -402,10 +404,19 @@ static struct resource sdhi_cn9_resources[] = {
  	},
  };
  
-+static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
++static struct sh_mobile_sdhi_info sh7724_sdhi_data = {
 +	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
 +	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
 +	.tmio_flags	= TMIO_IMMEDIATE_RX_COMPLETE,
 +};
 +
- static struct platform_device sdhi0_cn7_device = {
- 	.name           = "sh_mobile_sdhi",
- 	.id		= 0,
- 	.num_resources  = ARRAY_SIZE(sdhi0_cn7_resources),
- 	.resource       = sdhi0_cn7_resources,
+ static struct platform_device sdhi_cn9_device = {
+ 	.name		= "sh_mobile_sdhi",
+ 	.num_resources	= ARRAY_SIZE(sdhi_cn9_resources),
+ 	.resource	= sdhi_cn9_resources,
 +	.dev = {
-+		.platform_data	= &sh7724_sdhi0_data,
++		.platform_data	= &sh7724_sdhi_data,
 +	},
  	.archdata = {
- 		.hwblk_id = HWBLK_SDHI0,
- 	},
-@@ -479,11 +490,19 @@ static struct resource sdhi1_cn8_resources[] = {
- 	},
- };
- 
-+static struct sh_mobile_sdhi_info sh7724_sdhi1_data = {
-+	.dma_slave_tx = SHDMA_SLAVE_SDHI1_TX,
-+	.dma_slave_rx = SHDMA_SLAVE_SDHI1_RX,
-+};
-+
- static struct platform_device sdhi1_cn8_device = {
- 	.name           = "sh_mobile_sdhi",
- 	.id		= 1,
- 	.num_resources  = ARRAY_SIZE(sdhi1_cn8_resources),
- 	.resource       = sdhi1_cn8_resources,
-+	.dev = {
-+		.platform_data	= &sh7724_sdhi1_data,
-+	},
- 	.archdata = {
- 		.hwblk_id = HWBLK_SDHI1,
+ 		.hwblk_id = HWBLK_SDHI,
  	},
 -- 
 1.6.2.4
