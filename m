@@ -1,52 +1,52 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: + sdhci-rename-sdhci-i-o-accessor-functions.patch added to -mm
- tree
-Date: Fri, 30 Apr 2010 12:33:32 -0700
-Message-ID: <20100430123332.13d75668.akpm@linux-foundation.org>
-References: <201004292229.o3TMTQcA015391@imap1.linux-foundation.org>
-	<871vdxphra.fsf@linux-g6p1.site>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
+Date: Thu, 22 Apr 2010 12:00:25 +0100
+Message-ID: <20100422110025.GC20008@n2100.arm.linux.org.uk>
+References: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com> <v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com> <CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local> <t2qe9c3a7c21004141815x70ecf123p4364802681417da9@mail.gmail.com> <q2o63386a3d1004162158v296379fat2b376d5c4c087378@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:43709 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751043Ab0D3TeX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Apr 2010 15:34:23 -0400
-In-Reply-To: <871vdxphra.fsf@linux-g6p1.site>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:36017 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759145Ab0D3T7T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Apr 2010 15:59:19 -0400
+Content-Disposition: inline
+In-Reply-To: <q2o63386a3d1004162158v296379fat2b376d5c4c087378@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: cbouatmailru@gmail.com, linux-mmc@vger.kernel.org, zgao6@marvell.com, Wolfram Sang <w.sang@pengutronix.de>, Ben Dooks <ben-linux@fluff.org>
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: Dan Williams <dan.j.williams@intel.com>, Linus WALLEIJ <linus.walleij@stericsson.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Fri, 30 Apr 2010 07:38:17 +0100
-Matt Fleming <matt@console-pimps.org> wrote:
-
-> On Thu, 29 Apr 2010 15:29:26 -0700, akpm@linux-foundation.org wrote:
-> > Subject: sdhci: build fix: rename SDHCI I/O accessor functions
-> > From: Matt Fleming <matt@console-pimps.org>
-> > 
-> > Unfortunately some architectures #define their read{b,w,l} and
-> > write{b,w,l} I/O accessors which makes the SDHCI I/O accessor functions of
-> > the same names subject to preprocessing.  This leads to the following
-> > compiler error,
-> > 
-> > In file included from drivers/mmc/host/sdhci.c:26:
-> > drivers/mmc/host/sdhci.h:318:35: error: macro "writel" passed 3 arguments, but takes just 2
-> > 
-> > Rename the SDHCI I/O functions so that CONFIG_MMC_SDHCI_IO_ACCESSORS can
-> > be enabled for architectures that implement their read{b,w,l} and
-> > write{b,w,l} functions with macros.
-> > 
-> > Signed-off-by: Matt Fleming <matt@console-pimps.org>
-> > Cc: Zhangfei Gao <zgao6@marvell.com>
-> > Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
-> > Cc: <linux-mmc@vger.kernel.org>
-> > Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+On Sat, Apr 17, 2010 at 06:58:49AM +0200, Linus Walleij wrote:
+> 2010/4/15 Dan Williams <dan.j.williams@intel.com>:
 > 
-> Hi Andrew,
+> > Getting closer... I have pushed out the dma40 driver (v3), 4, and 6.
 > 
-> this patch got a couple more ACKs from Wolfram Sang and Ben Dooks. Would
-> like me to respin the patch?
+> That's great!
+> 
+> > The other patch in -mm I could take as well but that needs an ack from
+> > Russell.
+> 
+> Nah, I'll push that in through Russells tree hopefully, it needs rebasing on
+> the latest board setup code anyway.
+> 
+> > 5 is pending the review comment and 9 does not apply cleanly (does it
+> > depend on something in the spi tree?)
+> 
+> OK I'm sending updated versions soon, along with a DMA40 bug fix
+> all on top of async_tx instead.
+> 
+> Number 9 fails since it is based on -next where all the #include <slab.h>
+> business has taken place, I don't know how that is resolved in the end
+> but it now includes that include and applies cleanly on async_tx.
+> 
+> I'll keep working on getting the PL011 and PL180 DMA tested on the
+> RealView somehow so those can also be accepted.
 
-I updated the changelog text, thanks.
+So has this (which has now been applied to Dan's tree) been tested
+as I asked on Versatile platforms, or do we have something that could
+be incompatible with those platforms?
+
+I'm basically not acking or applying these patches until something
+along those lines has happened.  (And unfortunately I don't have the
+resources to apply to this at present.)
