@@ -1,81 +1,44 @@
 From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 4/8] MMC: add DMA support to tmio_mmc driver, when used on
-	SuperH
-Date: Wed, 21 Apr 2010 20:12:52 -0400
-Message-ID: <n2saec7e5c31004211712t9441f0r50950ec918bea2e3@mail.gmail.com>
+Subject: Re: [PATCH 5/8] SH: Add SDHI DMA support to ecovec
+Date: Wed, 21 Apr 2010 20:16:29 -0400
+Message-ID: <p2iaec7e5c31004211716z430581dfn9a695537d4d8489a@mail.gmail.com>
 References: <Pine.LNX.4.64.1004211715050.5292@axis700.grange>
-	 <Pine.LNX.4.64.1004211733400.5292@axis700.grange>
+	 <Pine.LNX.4.64.1004211734460.5292@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1004211733400.5292@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:37193 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754292Ab0DVAVb convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Apr 2010 20:21:31 -0400
+In-Reply-To: <Pine.LNX.4.64.1004211734460.5292@axis700.grange>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>
-List-Id: linux-mmc@vger.kernel.org
-
-Hi Guennadi,
 
 On Wed, Apr 21, 2010 at 11:37 AM, Guennadi Liakhovetski
 <g.liakhovetski@gmx.de> wrote:
-> SDHI controllers on SuperH, served by the tmio_mmc driver, can use sl=
-ave DMA
-> for data transfer. This patch adds support for the dmaengine API to t=
-mio_mmc
-> and the necessary interfacing to the sh_mobile_sdhi MFD driver.
+> @@ -442,6 +444,8 @@ static void sdhi0_set_pwr(struct platform_device =
+*pdev, int state)
+> =A0}
 >
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
+> =A0static struct sh_mobile_sdhi_info sdhi0_info =3D {
+> + =A0 =A0 =A0 .dma_slave_tx =3D SHDMA_SLAVE_SDHI0_TX,
+> + =A0 =A0 =A0 .dma_slave_rx =3D SHDMA_SLAVE_SDHI0_RX,
+> =A0 =A0 =A0 =A0.set_pwr =3D sdhi0_set_pwr,
+> =A0};
 >
-> It could be further broken down into MMC and MFD parts if required, I
-> think.
+> @@ -478,6 +482,9 @@ static void sdhi1_set_pwr(struct platform_device =
+*pdev, int state)
+> =A0}
 >
-> =A0drivers/mfd/sh_mobile_sdhi.c =A0 =A0 =A0 | =A0 25 +++-
-> =A0drivers/mmc/host/tmio_mmc.c =A0 =A0 =A0 =A0| =A0346 ++++++++++++++=
-++++++++++++++++++----
-> =A0drivers/mmc/host/tmio_mmc.h =A0 =A0 =A0 =A0| =A0 11 ++
-> =A0include/linux/mfd/sh_mobile_sdhi.h | =A0 =A03 +
-> =A0include/linux/mfd/tmio.h =A0 =A0 =A0 =A0 =A0 | =A0 10 +
-> =A05 files changed, 359 insertions(+), 36 deletions(-)
+> =A0static struct sh_mobile_sdhi_info sdhi1_info =3D {
+> + =A0 =A0 =A0 .dma_slave_tx =3D SHDMA_SLAVE_SDHI1_TX,
+> + =A0 =A0 =A0 .dma_slave_rx =3D SHDMA_SLAVE_SDHI1_RX,
+> + =A0 =A0 =A0 .tmio_flags =3D TMIO_DEFER_RX_COMPLETE,
 
-[snip]
-
-> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.=
-c
-> index b2b577f..fafd8c9 100644
-> --- a/drivers/mmc/host/tmio_mmc.c
-> +++ b/drivers/mmc/host/tmio_mmc.c
-> @@ -29,12 +29,21 @@
-> =A0#include <linux/irq.h>
-> =A0#include <linux/device.h>
-> =A0#include <linux/delay.h>
-> +#include <linux/dmaengine.h>
-> =A0#include <linux/mmc/host.h>
-> =A0#include <linux/mfd/core.h>
-> =A0#include <linux/mfd/tmio.h>
->
-> =A0#include "tmio_mmc.h"
->
-> +static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool ena=
-ble)
-> +{
-> +#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
-> + =A0 =A0 =A0 /* Switch DMA mode on or off - SuperH specific? */
-> + =A0 =A0 =A0 sd_ctrl_write16(host, 0xd8, enable ? 2 : 0);
-> +#endif
-> +}
-> +
-
-Uhh.. #ifdefs. =3D)
-
-Can't this register setting be implented in the SDHI driver?
-
-In general I realize that you need to extend the logic in the tmio_mmc
-driver quite a bit to implement DMA support, but I wonder if it is
-possible to extend the tmio_mmc driver with callbacks and use them to
-hook in the DMA code?
-
-Thanks!
+This is a bit odd. How come SDHI1 needs this flag and SDHI0 doesn't?
 
 / magnus
