@@ -1,98 +1,75 @@
-From: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH 5/7] OMAP4-HSMMC: Adds Dummy Interface clock's for MMC
-	controllers
-Date: Thu, 22 Apr 2010 09:41:54 +0530
-Message-ID: <m2j7f9d1ffb1004212111pc6fbe8d7p36d81f06cc6c8dea@mail.gmail.com>
-References: <63593.10.24.255.18.1271874056.squirrel@dbdmail.itg.ti.com>
-	 <alpine.DEB.2.00.1004211912540.24256@utopia.booyaka.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 6/8] SH: Add SDHI DMA support to ms7724se
+Date: Thu, 22 Apr 2010 08:20:48 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1004220813110.4655@axis700.grange>
+References: <Pine.LNX.4.64.1004211715050.5292@axis700.grange>
+ <Pine.LNX.4.64.1004211735180.5292@axis700.grange>
+ <m2xaec7e5c31004211718t85936386k6c0f09684b17b10f@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=ISO-8859-15
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:44190 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751126Ab0DVELz convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Apr 2010 00:11:55 -0400
-In-Reply-To: <alpine.DEB.2.00.1004211912540.24256@utopia.booyaka.com>
+Received: from mail.gmx.net ([213.165.64.20]:33697 "HELO mail.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1752313Ab0DVGUs convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Apr 2010 02:20:48 -0400
+In-Reply-To: <m2xaec7e5c31004211718t85936386k6c0f09684b17b10f@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Walmsley <paul@pwsan.com>
-Cc: kishore kadiyala <kishore.kadiyala@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com, jarkko.lavinen@nokia.com, tony@atomide.com, rmk+lkml@arm.linux.org.uk, santosh.shilimkar@ti.com
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>
 
-On Thu, Apr 22, 2010 at 6:44 AM, Paul Walmsley <paul@pwsan.com> wrote:
-> Kishore,
->
-> On Wed, 21 Apr 2010, kishore kadiyala wrote:
->
->> This patch adds dummy Interface clocks for MMC controllers
->
-> Um, your patch removes the existing dummy interface clocks and adds t=
-hem
-> back again. =A0Or is there some other point?
+On Wed, 21 Apr 2010, Magnus Damm wrote:
 
-My bad , will repost in New series.
+> On Wed, Apr 21, 2010 at 11:37 AM, Guennadi Liakhovetski
+> <g.liakhovetski@gmx.de> wrote:
+> > @@ -456,11 +458,20 @@ static struct resource sdhi0_cn7_resources[] =
+=3D {
+> > =A0 =A0 =A0 =A0},
+> > =A0};
+> >
+> > +static struct sh_mobile_sdhi_info sh7724_sdhi0_data =3D {
+> > + =A0 =A0 =A0 .dma_slave_tx =A0 =3D SHDMA_SLAVE_SDHI0_TX,
+> > + =A0 =A0 =A0 .dma_slave_rx =A0 =3D SHDMA_SLAVE_SDHI0_RX,
+> > + =A0 =A0 =A0 .tmio_flags =A0 =A0 =3D TMIO_IMMEDIATE_RX_COMPLETE,
+> > +};
+> > +
+> > =A0static struct platform_device sdhi0_cn7_device =3D {
+> > =A0 =A0 =A0 =A0.name =A0 =A0 =A0 =A0 =A0 =3D "sh_mobile_sdhi",
+> > =A0 =A0 =A0 =A0.id =A0 =A0 =A0 =A0 =A0 =A0 =3D 0,
+> > =A0 =A0 =A0 =A0.num_resources =A0=3D ARRAY_SIZE(sdhi0_cn7_resources=
+),
+> > =A0 =A0 =A0 =A0.resource =A0 =A0 =A0 =3D sdhi0_cn7_resources,
+> > + =A0 =A0 =A0 .dev =3D {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .platform_data =A0=3D &sh7724_sdhi0_d=
+ata,
+> > + =A0 =A0 =A0 },
+> > =A0 =A0 =A0 =A0.archdata =3D {
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.hwblk_id =3D HWBLK_SDHI0,
+> > =A0 =A0 =A0 =A0},
+> > @@ -479,11 +490,19 @@ static struct resource sdhi1_cn8_resources[] =
+=3D {
+> > =A0 =A0 =A0 =A0},
+> > =A0};
+> >
+> > +static struct sh_mobile_sdhi_info sh7724_sdhi1_data =3D {
+> > + =A0 =A0 =A0 .dma_slave_tx =3D SHDMA_SLAVE_SDHI1_TX,
+> > + =A0 =A0 =A0 .dma_slave_rx =3D SHDMA_SLAVE_SDHI1_RX,
+>=20
+> And these two are the opposite of Ecovec even though both are sh7724?=
+ Hm..
 
-Regards,
-Kishore
->
->> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
->> ---
->> =A0arch/arm/mach-omap2/clock44xx_data.c | =A0 10 +++++-----
->> =A01 files changed, 5 insertions(+), 5 deletions(-)
->>
->> diff --git a/arch/arm/mach-omap2/clock44xx_data.c b/arch/arm/mach-om=
-ap2/clock44xx_data.c
->> index 1dd7dc8..6177a89 100644
->> --- a/arch/arm/mach-omap2/clock44xx_data.c
->> +++ b/arch/arm/mach-omap2/clock44xx_data.c
->> @@ -2675,11 +2675,11 @@ static struct omap_clk omap44xx_clks[] =3D {
->> =A0 =A0 =A0 CLK("omap-mcspi.2", =A0 =A0 "ick", =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> =A0 =A0 =A0 CLK("omap-mcspi.3", =A0 =A0 "ick", =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> =A0 =A0 =A0 CLK("omap-mcspi.4", =A0 =A0 "ick", =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> - =A0 =A0 CLK("mmci-omap-hs.0", =A0 "ick", =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> - =A0 =A0 CLK("mmci-omap-hs.1", =A0 "ick", =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> - =A0 =A0 CLK("mmci-omap-hs.2", =A0 "ick", =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> - =A0 =A0 CLK("mmci-omap-hs.3", =A0 "ick", =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> - =A0 =A0 CLK("mmci-omap-hs.4", =A0 "ick", =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> + =A0 =A0 CLK("mmci-omap-hs.0", =A0 "ick", =A0 =A0 =A0 =A0 =A0&dummy=
-_ck, =A0 =A0 =A0CK_443X),
->> + =A0 =A0 CLK("mmci-omap-hs.1", =A0 "ick", =A0 =A0 =A0 =A0 =A0&dummy=
-_ck, =A0 =A0 =A0CK_443X),
->> + =A0 =A0 CLK("mmci-omap-hs.2", =A0 "ick", =A0 =A0 =A0 =A0 =A0&dummy=
-_ck, =A0 =A0 =A0CK_443X),
->> + =A0 =A0 CLK("mmci-omap-hs.3", =A0 "ick", =A0 =A0 =A0 =A0 =A0&dummy=
-_ck, =A0 =A0 =A0CK_443X),
->> + =A0 =A0 CLK("mmci-omap-hs.4", =A0 "ick", =A0 =A0 =A0 =A0 =A0&dummy=
-_ck, =A0 =A0 =A0CK_443X),
->> =A0 =A0 =A0 CLK(NULL, =A0 =A0 =A0 "uart1_ick", =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> =A0 =A0 =A0 CLK(NULL, =A0 =A0 =A0 "uart2_ick", =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> =A0 =A0 =A0 CLK(NULL, =A0 =A0 =A0 "uart3_ick", =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0&dummy_ck, =A0 =A0 =A0CK_443X),
->> --
->> 1.6.3.3
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-omap=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
->
->
-> - Paul
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-omap"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+Right, that's wrong. I mean, yes, they did behave differently in my tes=
+ts.=20
+On both boards I only could test one slot, so, I just presume the other=
+=20
+one should behave equally. So, this flag should be present on SE and no=
+t=20
+on ecovec. Will fix in the next revision, thanks.
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+=46reelance Open-Source Software Developer
+http://www.open-technology.de/
