@@ -1,54 +1,65 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 6/8] SH: Add SDHI DMA support to ms7724se
-Date: Wed, 21 Apr 2010 20:18:26 -0400
-Message-ID: <m2xaec7e5c31004211718t85936386k6c0f09684b17b10f@mail.gmail.com>
-References: <Pine.LNX.4.64.1004211715050.5292@axis700.grange>
-	 <Pine.LNX.4.64.1004211735180.5292@axis700.grange>
+From: Paul Walmsley <paul@pwsan.com>
+Subject: Re: [PATCH 5/7] OMAP4-HSMMC: Adds Dummy Interface clock's for MMC
+     controllers
+Date: Wed, 21 Apr 2010 19:14:46 -0600 (MDT)
+Message-ID: <alpine.DEB.2.00.1004211912540.24256@utopia.booyaka.com>
+References: <63593.10.24.255.18.1271874056.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1004211735180.5292@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from utopia.booyaka.com ([72.9.107.138]:37720 "EHLO
+	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753569Ab0DVBOr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Apr 2010 21:14:47 -0400
+In-Reply-To: <63593.10.24.255.18.1271874056.squirrel@dbdmail.itg.ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: kishore kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com, jarkko.lavinen@nokia.com, tony@atomide.com, rmk+lkml@arm.linux.org.uk, santosh.shilimkar@ti.com
 
-On Wed, Apr 21, 2010 at 11:37 AM, Guennadi Liakhovetski
-<g.liakhovetski@gmx.de> wrote:
-> @@ -456,11 +458,20 @@ static struct resource sdhi0_cn7_resources[] =3D=
- {
-> =A0 =A0 =A0 =A0},
-> =A0};
->
-> +static struct sh_mobile_sdhi_info sh7724_sdhi0_data =3D {
-> + =A0 =A0 =A0 .dma_slave_tx =A0 =3D SHDMA_SLAVE_SDHI0_TX,
-> + =A0 =A0 =A0 .dma_slave_rx =A0 =3D SHDMA_SLAVE_SDHI0_RX,
-> + =A0 =A0 =A0 .tmio_flags =A0 =A0 =3D TMIO_IMMEDIATE_RX_COMPLETE,
-> +};
-> +
-> =A0static struct platform_device sdhi0_cn7_device =3D {
-> =A0 =A0 =A0 =A0.name =A0 =A0 =A0 =A0 =A0 =3D "sh_mobile_sdhi",
-> =A0 =A0 =A0 =A0.id =A0 =A0 =A0 =A0 =A0 =A0 =3D 0,
-> =A0 =A0 =A0 =A0.num_resources =A0=3D ARRAY_SIZE(sdhi0_cn7_resources),
-> =A0 =A0 =A0 =A0.resource =A0 =A0 =A0 =3D sdhi0_cn7_resources,
-> + =A0 =A0 =A0 .dev =3D {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .platform_data =A0=3D &sh7724_sdhi0_dat=
-a,
-> + =A0 =A0 =A0 },
-> =A0 =A0 =A0 =A0.archdata =3D {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.hwblk_id =3D HWBLK_SDHI0,
-> =A0 =A0 =A0 =A0},
-> @@ -479,11 +490,19 @@ static struct resource sdhi1_cn8_resources[] =3D=
- {
-> =A0 =A0 =A0 =A0},
-> =A0};
->
-> +static struct sh_mobile_sdhi_info sh7724_sdhi1_data =3D {
-> + =A0 =A0 =A0 .dma_slave_tx =3D SHDMA_SLAVE_SDHI1_TX,
-> + =A0 =A0 =A0 .dma_slave_rx =3D SHDMA_SLAVE_SDHI1_RX,
+Kishore,
 
-And these two are the opposite of Ecovec even though both are sh7724? H=
-m..
+On Wed, 21 Apr 2010, kishore kadiyala wrote:
 
-/ magnus
+> This patch adds dummy Interface clocks for MMC controllers
+
+Um, your patch removes the existing dummy interface clocks and adds them 
+back again.  Or is there some other point?
+
+> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+> ---
+>  arch/arm/mach-omap2/clock44xx_data.c |   10 +++++-----
+>  1 files changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/arch/arm/mach-omap2/clock44xx_data.c b/arch/arm/mach-omap2/clock44xx_data.c
+> index 1dd7dc8..6177a89 100644
+> --- a/arch/arm/mach-omap2/clock44xx_data.c
+> +++ b/arch/arm/mach-omap2/clock44xx_data.c
+> @@ -2675,11 +2675,11 @@ static struct omap_clk omap44xx_clks[] = {
+>  	CLK("omap-mcspi.2",	"ick",				&dummy_ck,	CK_443X),
+>  	CLK("omap-mcspi.3",	"ick",				&dummy_ck,	CK_443X),
+>  	CLK("omap-mcspi.4",	"ick",				&dummy_ck,	CK_443X),
+> -	CLK("mmci-omap-hs.0",	"ick",			&dummy_ck,	CK_443X),
+> -	CLK("mmci-omap-hs.1",	"ick",			&dummy_ck,	CK_443X),
+> -	CLK("mmci-omap-hs.2",	"ick",			&dummy_ck,	CK_443X),
+> -	CLK("mmci-omap-hs.3",	"ick",			&dummy_ck,	CK_443X),
+> -	CLK("mmci-omap-hs.4",	"ick",			&dummy_ck,	CK_443X),
+> +	CLK("mmci-omap-hs.0",	"ick",		&dummy_ck,	CK_443X),
+> +	CLK("mmci-omap-hs.1",	"ick",		&dummy_ck,	CK_443X),
+> +	CLK("mmci-omap-hs.2",	"ick",		&dummy_ck,	CK_443X),
+> +	CLK("mmci-omap-hs.3",	"ick",		&dummy_ck,	CK_443X),
+> +	CLK("mmci-omap-hs.4",	"ick",		&dummy_ck,	CK_443X),
+>  	CLK(NULL,	"uart1_ick",			&dummy_ck,	CK_443X),
+>  	CLK(NULL,	"uart2_ick",			&dummy_ck,	CK_443X),
+>  	CLK(NULL,	"uart3_ick",			&dummy_ck,	CK_443X),
+> -- 
+> 1.6.3.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+
+- Paul
