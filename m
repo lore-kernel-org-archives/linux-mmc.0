@@ -1,120 +1,99 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 2/8] SH: add DMA slave IDs for two SDHI controllers, add
-  slaves to sh7722
-Date: Thu, 22 Apr 2010 11:38:59 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1004221136220.4655@axis700.grange>
+Subject: Re: [PATCH 4/8] MMC: add DMA support to tmio_mmc driver, when used
+ on  SuperH
+Date: Thu, 22 Apr 2010 11:51:03 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1004221139270.4655@axis700.grange>
 References: <Pine.LNX.4.64.1004211715050.5292@axis700.grange>
- <Pine.LNX.4.64.1004211732340.5292@axis700.grange>
- <j2xaec7e5c31004211702v9ba71743jedd24562f8dea0a5@mail.gmail.com>
- <Pine.LNX.4.64.1004220824200.4655@axis700.grange>
- <n2saec7e5c31004220005w331e3a0el4ef829558a74b132@mail.gmail.com>
+ <Pine.LNX.4.64.1004211733400.5292@axis700.grange>
+ <n2saec7e5c31004211712t9441f0r50950ec918bea2e3@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:34004 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1752504Ab0DVJi4 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Apr 2010 05:38:56 -0400
-In-Reply-To: <n2saec7e5c31004220005w331e3a0el4ef829558a74b132@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <n2saec7e5c31004211712t9441f0r50950ec918bea2e3@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
 To: Magnus Damm <magnus.damm@gmail.com>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>
+Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 22 Apr 2010, Magnus Damm wrote:
+On Wed, 21 Apr 2010, Magnus Damm wrote:
 
-> On Thu, Apr 22, 2010 at 3:28 PM, Guennadi Liakhovetski
+> Hi Guennadi,
+>=20
+> On Wed, Apr 21, 2010 at 11:37 AM, Guennadi Liakhovetski
 > <g.liakhovetski@gmx.de> wrote:
-> > On Wed, 21 Apr 2010, Magnus Damm wrote:
-> >> On Wed, Apr 21, 2010 at 11:36 AM, Guennadi Liakhovetski
-> >> <g.liakhovetski@gmx.de> wrote:
-> >> > SuperH SDHI controllers can use DMA, add slave IDs to the header=
- and slave
-> >> > definitions to sh7722.
-> >> >
-> >> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> >> > ---
-> >> > =A0arch/sh/include/asm/dmaengine.h =A0 =A0 =A0 =A0| =A0 =A04 +++=
-+
-> >> > =A0arch/sh/kernel/cpu/sh4a/setup-sh7722.c | =A0 10 ++++++++++
-> >> > =A02 files changed, 14 insertions(+), 0 deletions(-)
-> >> >
-> >> > diff --git a/arch/sh/include/asm/dmaengine.h b/arch/sh/include/a=
-sm/dmaengine.h
-> >> > index 2a02b61..876e601 100644
-> >> > --- a/arch/sh/include/asm/dmaengine.h
-> >> > +++ b/arch/sh/include/asm/dmaengine.h
-> >> > @@ -29,6 +29,10 @@ enum {
-> >> > =A0 =A0 =A0 =A0SHDMA_SLAVE_SIUA_RX,
-> >> > =A0 =A0 =A0 =A0SHDMA_SLAVE_SIUB_TX,
-> >> > =A0 =A0 =A0 =A0SHDMA_SLAVE_SIUB_RX,
-> >> > + =A0 =A0 =A0 SHDMA_SLAVE_SDHI0_RX,
-> >> > + =A0 =A0 =A0 SHDMA_SLAVE_SDHI0_TX,
-> >> > + =A0 =A0 =A0 SHDMA_SLAVE_SDHI1_RX,
-> >> > + =A0 =A0 =A0 SHDMA_SLAVE_SDHI1_TX,
-> >> > =A0};
-> >> >
-> >> > =A0#endif
-> >>
-> >> Thanks for your work on this. Two SDHIs may be enough for most
-> >> processor types, but I think the G3 processor actually has three. =
-With
-> >> that in mind, I think it makes more sense to keep the slave ids
-> >> together with the processor specific bits in for instance
-> >> arch/sh/include/cpu-sh4/cpu/sh7722.h.
-> >>
-> >> If you have time, can you please make a patch that moves the slave=
- ids
-> >> into the processor specific header files? This on top of the other
-> >> code in the sh/dmaengine topic branch.
+> > SDHI controllers on SuperH, served by the tmio_mmc driver, can use =
+slave DMA
+> > for data transfer. This patch adds support for the dmaengine API to=
+ tmio_mmc
+> > and the necessary interfacing to the sh_mobile_sdhi MFD driver.
 > >
-> > Ok, yes, first, I forgot to mention - this patch series is based on=
- your
-> > earlier SH dmaengine patches. Secondly - sure, we can move these de=
-fines
-> > in cpu-specific headers, otoh - why? This is just an enum, it doesn=
-'t take
-> > space in binaries, and having them all together helps uniformity an=
-d
-> > avoids duplication, I think. So, I would just add those SDHI2 macro=
-s to
-> > this list. The important thing is, the actual slave definition arra=
-y are
-> > per-CPU. Which is now the case after your patch series.
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > ---
+> >
+> > It could be further broken down into MMC and MFD parts if required,=
+ I
+> > think.
+> >
+> > =A0drivers/mfd/sh_mobile_sdhi.c =A0 =A0 =A0 | =A0 25 +++-
+> > =A0drivers/mmc/host/tmio_mmc.c =A0 =A0 =A0 =A0| =A0346 ++++++++++++=
+++++++++++++++++++++----
+> > =A0drivers/mmc/host/tmio_mmc.h =A0 =A0 =A0 =A0| =A0 11 ++
+> > =A0include/linux/mfd/sh_mobile_sdhi.h | =A0 =A03 +
+> > =A0include/linux/mfd/tmio.h =A0 =A0 =A0 =A0 =A0 | =A0 10 +
+> > =A05 files changed, 359 insertions(+), 36 deletions(-)
 >=20
-> Like you say, the actual slave definition array is per processor type=
-=2E
-> But the available hardware blocks varies with processor type, and we
-> already have other processor specific information in the cpu-specific
-> headers. It does not add any code size, true.
+> [snip]
 >=20
-> The reasons why I prefer them to be split out are:
+> > diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mm=
+c.c
+> > index b2b577f..fafd8c9 100644
+> > --- a/drivers/mmc/host/tmio_mmc.c
+> > +++ b/drivers/mmc/host/tmio_mmc.c
+> > @@ -29,12 +29,21 @@
+> > =A0#include <linux/irq.h>
+> > =A0#include <linux/device.h>
+> > =A0#include <linux/delay.h>
+> > +#include <linux/dmaengine.h>
+> > =A0#include <linux/mmc/host.h>
+> > =A0#include <linux/mfd/core.h>
+> > =A0#include <linux/mfd/tmio.h>
+> >
+> > =A0#include "tmio_mmc.h"
+> >
+> > +static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool e=
+nable)
+> > +{
+> > +#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
+> > + =A0 =A0 =A0 /* Switch DMA mode on or off - SuperH specific? */
+> > + =A0 =A0 =A0 sd_ctrl_write16(host, 0xd8, enable ? 2 : 0);
+> > +#endif
+> > +}
+> > +
 >=20
-> 1) When someone adds support for a new processor it's easy to
-> implement the same type of information in the new cpu-specific header
-> as other processors. Adding and removing things from a global list of
-> processor blocks in a driver/framework specific header file hidden
-> somewhere is not going to happen. Also, people usually only focus on
-> one processor at a time. A long global list is just going to make
-> people confused. "Why is there a SDHI2 there when I only have SDHI on
-> my processor?"
->=20
-> 2) Having them in a global list adds an unneccesary point of patch
-> serialization.
->=20
-> 3) We keep other things like GPIOs and HWBLK in cpu-specific headers
-> already, why be special?
+> Uhh.. #ifdefs. =3D)
 
-ok... you mean headers like arch/sh/include/cpu-sh4/cpu/sh7722.h, yeah,=
+Yeah, I know. But that's the only location in the patch and...
+
+> Can't this register setting be implented in the SDHI driver?
+
+I'm awaiting comments from Ian, maybe other tmio users. Maybe this=20
+register is generic, even though I don't see any other tmio-containing=20
+chips implementing DMA.
+
+> In general I realize that you need to extend the logic in the tmio_mm=
+c
+> driver quite a bit to implement DMA support, but I wonder if it is
+> possible to extend the tmio_mmc driver with callbacks and use them to
+> hook in the DMA code?
+
+As you see, this is all generic dmaengine API, nothing SH-specific. The=
 =20
-that makes sense, agree. Will redo.
-
-> 4) Having it in a global list may encourage people to include this
-> header from drivers. Isn't it better to force the drivers to use this
-> value as a cookie instead? This prevents people from adding hardware
-> block specific workarounds to the driver that may or may not work on
-> all processors...
+only SH-specific part is filtering of channels, and that's hidden in SH=
+=20
+platform code and passed as cookies to tmio. And if DMA is not used, al=
+l=20
+that code just remqins inactive.
 
 Thanks
 Guennadi
