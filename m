@@ -1,47 +1,35 @@
-From: akpm@linux-foundation.org
-Subject: + sdhci-pltfm-implement-platform-data-passing-fix.patch added to -mm tree
-Date: Fri, 23 Apr 2010 11:33:09 -0700
-Message-ID: <201004231833.o3NIX9Xw004976@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
+From: Anton Vorontsov <avorontsov@mvista.com>
+Subject: [PATCH] sdhci-pltfm: Add kernel-doc for struct sdhci_pltfm_data
+Date: Fri, 23 Apr 2010 22:26:19 +0400
+Message-ID: <20100423182619.GA8743@oksana.dev.rtsoft.ru>
+References: <20100316183400.GA24191@oksana.dev.rtsoft.ru>
+ <20100316183429.GB25670@oksana.dev.rtsoft.ru>
+ <4BA0732B.7040007@pelagicore.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: avorontsov@mvista.com, ben@simtec.co.uk, david.vrabel@csr.com, linux-mmc@vger.kernel.org, pierre@ossman.eu, richard.rojfors@pelagicore.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from imap.ru.mvista.com ([213.79.90.228]:54380 "EHLO
+	buildserver.ru.mvista.com" rhost-flags-OK-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751236Ab0DWSvS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Apr 2010 14:51:18 -0400
+Content-Disposition: inline
+In-Reply-To: <4BA0732B.7040007@pelagicore.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>, Richard =?utf-8?Q?R=C3=B6jfors?= <richard.rojfors@pelagicore.com>
+Cc: David Vrabel <david.vrabel@csr.com>, Pierre Ossman <pierre@ossman.eu>, Ben Dooks <ben@simtec.co.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
 
-The patch titled
-     sdhci-pltfm-implement-platform-data-passing-fix
-has been added to the -mm tree.  Its filename is
-     sdhci-pltfm-implement-platform-data-passing-fix.patch
-
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your cod=
-e ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mm=
-otm/
-
-------------------------------------------------------
-Subject: sdhci-pltfm-implement-platform-data-passing-fix
-=46rom: Anton Vorontsov <avorontsov@mvista.com>
+Suggested-by: Richard R=C3=B6jfors <richard.rojfors@pelagicore.com>
+Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
+---
 
 On Wed, Mar 17, 2010 at 07:14:03AM +0100, Richard R=C3=B6jfors wrote:
 > On 3/16/10 7:34 PM, Anton Vorontsov wrote:
 > > This includes platform ops, quirks and (de)initialization callbacks=
 =2E
->
+>=20
 > Good idea, just a doc comment below.
 [....]
 > > +struct sdhci_pltfm_data {
@@ -50,27 +38,25 @@ On Wed, Mar 17, 2010 at 07:14:03AM +0100, Richard R=C3=B6jfors wrote:
 > > +	int (*init)(struct sdhci_host *host);
 > > +	void (*exit)(struct sdhci_host *host);
 > > +};
->
+>=20
 > I would like to see this struct kernel-doc:ed.
 
-Suggested-by: Richard Rojfors <richard.rojfors@pelagicore.com>
-Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
-Cc: Richard R=F6jfors <richard.rojfors@pelagicore.com>
-Cc: David Vrabel <david.vrabel@csr.com>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Ben Dooks <ben@simtec.co.uk>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
+Done, thanks!
+
+Andrew,
+
+Please fold this patch into
+sdhci-pltfm-implement-platform-data-passing.patch
+
+Thanks,
 
  include/linux/sdhci-pltfm.h |    8 ++++++++
- 1 file changed, 8 insertions(+)
+ 1 files changed, 8 insertions(+), 0 deletions(-)
 
-diff -puN include/linux/sdhci-pltfm.h~sdhci-pltfm-implement-platform-da=
-ta-passing-fix include/linux/sdhci-pltfm.h
---- a/include/linux/sdhci-pltfm.h~sdhci-pltfm-implement-platform-data-p=
-assing-fix
-+++ a/include/linux/sdhci-pltfm.h
+diff --git a/include/linux/sdhci-pltfm.h b/include/linux/sdhci-pltfm.h
+index 0aaa334..0239bd7 100644
+--- a/include/linux/sdhci-pltfm.h
++++ b/include/linux/sdhci-pltfm.h
 @@ -17,6 +17,14 @@
  struct sdhci_ops;
  struct sdhci_host;
@@ -87,14 +73,6 @@ ks
  struct sdhci_pltfm_data {
  	struct sdhci_ops *ops;
  	unsigned int quirks;
-_
+--=20
+1.7.0.5
 
-Patches currently in -mm which might be from avorontsov@mvista.com are
-
-sdhci-pltfm-implement-platform-data-passing-fix.patch
-
---
-To unsubscribe from this list: send the line "unsubscribe mm-commits" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
