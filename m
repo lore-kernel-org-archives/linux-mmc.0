@@ -1,55 +1,33 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
+From: Matt Fleming <matt@console-pimps.org>
 Subject: Re: mmc: sdhci.h compile error
-Date: Mon, 26 Apr 2010 14:17:04 +0400
-Message-ID: <20100426101704.GB2092@oksana.dev.rtsoft.ru>
+Date: Mon, 26 Apr 2010 12:18:29 +0100
+Message-ID: <87mxwqzcl6.fsf@linux-g6p1.site>
 References: <m2w309424b61004210443x612468b3n3caabe87e9717165@mail.gmail.com>
- <87zl0rb20u.fsf@linux-g6p1.site>
+	<87zl0rb20u.fsf@linux-g6p1.site>
+	<g2g309424b61004260046hc2773535o2885383daf414b4b@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:52374 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754013Ab0DZKRJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2010 06:17:09 -0400
-Received: by wyg36 with SMTP id 36so1106680wyg.19
-        for <linux-mmc@vger.kernel.org>; Mon, 26 Apr 2010 03:17:06 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <87zl0rb20u.fsf@linux-g6p1.site>
+Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:56726 "EHLO
+	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753563Ab0DZLSd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2010 07:18:33 -0400
+In-Reply-To: <g2g309424b61004260046hc2773535o2885383daf414b4b@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: zhangfei gao <zhangfei.gao@gmail.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Anton Vorontsov <avorontsov@ru.mvista.com>, Andrew Morton <akpm@linux-foundation.org>
 
-On Sun, Apr 25, 2010 at 11:28:17PM +0100, Matt Fleming wrote:
-> On Wed, 21 Apr 2010 19:43:32 +0800, zhangfei gao <zhangfei.gao@gmail.com> wrote:
-> > 
-> > There is compile error when we enable CONFIG_MMC_SDHCI_IO_ACCESSORS,
-> > and include header file #include "sdhci.h"
-> > error: macro "writel" passed 3 arguments, but takes just 2
-> > 
+On Mon, 26 Apr 2010 15:46:31 +0800, zhangfei gao <zhangfei.gao@gmail.com> wrote:
+> Hi, Matt
 > 
-> Interesting...
-> 
-> It was Anton Vorontsov that added this code; presumably the code has
-> never been compiled for an ARM board (or any other architecture that
-> #define's their I/O accessors in asm/io.h).
+> We also rename the function name to pass compile.
+> Besides, here is typo error drivers/mmc/host/sdhci.h, though it is not
+> a big deal.
 
-Yep, there wasn't any need for these accessors on other platforms.
+Good catch! How did you notice that? Did you see a failure at runtime or
+did you spot it by reading the code? If you were seeing a bug at runtime
+then this patch should also be sent to stable@kernel.org.
 
-> It would be better if all architectures declared their I/O accessors as
-> static inline, but I'm not volunteering to touch all those headers ;-)
-> Renaming the SDHCI ops is definitely the easiest option. Anton, do you
-> have a problem with the attached patch to rename the SDHCI accessor
-> functions?
-
-Looks OK.
-
-Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
-(for -next, I presume)
-
-Thanks!
-
--- 
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
+I don't have any hardware to test this patch but the change looks like
+it makes sense.
