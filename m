@@ -1,31 +1,25 @@
-From: "Jamel N Bouchard" <jenifferknowles@barracuda.sipri.org>
-Subject: b2b database
-Date: Tue, 27 Apr 2010 04:34:14 +0200 (CEST)
-Message-ID: <20100427023414.3360F3824AC@barracuda.sipri.org>
+From: "peachtree Estes" <jenifferknowles@barracuda.sipri.org>
+Subject: mailing list database
+Date: Tue, 27 Apr 2010 04:38:53 +0200 (CEST)
+Message-ID: <20100427023853.72F04385425@barracuda.sipri.org>
 Reply-To: jenifferknowles@barracuda.sipri.org
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from barracuda.sipri.org ([193.10.14.85]:36389 "EHLO
+Received: from barracuda.sipri.org ([193.10.14.85]:38810 "EHLO
 	barracuda.sipri.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753826Ab0D0Cqa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2010 22:46:30 -0400
+	with ESMTP id S1752046Ab0D0C4X (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2010 22:56:23 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ashleypark75@gmail.com, deborahmore@boltoncountry.com, darklordreturns_blogger@yahoo.com, dslusher@gmail.com
+To: lee@lifethymehealth.com, martin@tm.net.my, peter@nhsynergy.com, morgan@synergycompanies.org, linux-mmc@vger.kernel.org
 
-Jan,
+I have many good quality American Contact Lists at much lower prices than most sites. Contact me here:  successtools@gmx.com for a complete catalogue of what we have.
 
-Contact me at the email address below for a catalog of all our USA lists.
+Best Regards
 
-Also, this week we are offering reduced costs for more than one list.  
+
+Cleo Davidson
+ 
   
 
-Regards,
 
-
-Efren Guidry
-Email Address: successtools@gmx.com
-
-
-
-
-cease further emails please email  
+this is the link which will purge you from any futures please email  
