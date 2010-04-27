@@ -1,91 +1,128 @@
-From: Grazvydas Ignotas <notasas@gmail.com>
-Subject: [PATCH] sdio: add new function for RAW (Read after Write) operation
-Date: Wed, 28 Apr 2010 00:18:08 +0300
-Message-ID: <1272403088-4727-1-git-send-email-notasas@gmail.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 1/2] MMC: Add support MMCIF for SuperH
+Date: Tue, 27 Apr 2010 15:02:27 -0700
+Message-ID: <20100427150227.24a1ba25.akpm@linux-foundation.org>
+References: <4BD6B926.3020704@renesas.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:56016 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754553Ab0D0VSP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Apr 2010 17:18:15 -0400
-Received: by wye20 with SMTP id 20so261826wye.19
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Apr 2010 14:18:13 -0700 (PDT)
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:35572 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757162Ab0D0WCo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Apr 2010 18:02:44 -0400
+In-Reply-To: <4BD6B926.3020704@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Grazvydas Ignotas <notasas@gmail.com>
+To: Yusuke Goda <yusuke.goda.sx@renesas.com>
+Cc: ben@decadent.org.uk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org
 
-SDIO specification allows RAW (Read after Write) operation using
-IO_RW_DIRECT command (CMD52) by setting the RAW bit. This operation is
-similar to ordinary read/write commands, except that both write and read
-are performed using single command/response pair. The Linux SDIO layer
-already supports this internaly, only external function is missing for
-drivers to make use, which is added by this patch.
+On Tue, 27 Apr 2010 19:15:02 +0900
+Yusuke Goda <yusuke.goda.sx@renesas.com> wrote:
 
-This type of command is required to implement proper power save mode
-support in wl1251 wifi driver.
+> 
+>  MMCIF is MMC Host Interface in SuperH.
+>
+> ...
+>
+> +static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
+> +{
+> +	int i;
+> +	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
+> +
+> +	sh_mmcif_bitclr(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
+> +	sh_mmcif_bitclr(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR);
+> +
+> +	if (!clk)
+> +		return;
+> +	if (p->sup_pclk && clk == host->clk) {
+> +			sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
+> +	} else {
+> +		for (i = 1; (unsigned int)host->clk / (1 << i) >= clk; i++)
+> +			;
 
-Signed-off-by: Grazvydas Ignotas <notasas@gmail.com>
----
- drivers/mmc/core/sdio_io.c    |   31 +++++++++++++++++++++++++++++++
- include/linux/mmc/sdio_func.h |    3 +++
- 2 files changed, 34 insertions(+), 0 deletions(-)
+I suspect this could be clarified.  Perhaps
 
-diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index ff27c8c..3f681be 100644
---- a/drivers/mmc/core/sdio_io.c
-+++ b/drivers/mmc/core/sdio_io.c
-@@ -406,6 +406,37 @@ void sdio_writeb(struct sdio_func *func, u8 b, unsigned int addr, int *err_ret)
- EXPORT_SYMBOL_GPL(sdio_writeb);
- 
- /**
-+ *	sdio_writeb_readb - write and read a byte from SDIO function
-+ *	@func: SDIO function to access
-+ *	@b: byte to write
-+ *	@addr: address to write to
-+ *	@err_ret: optional status value from transfer
-+ *
-+ *	Performs a RAW (Read after Write) operation as defined by SDIO spec -
-+ *	single byte is written to address space of a given SDIO function and
-+ *	response is read back from the same address, both using single request.
-+ *	If there is a problem with the operation, 0xff is returned and
-+ *	@err_ret will contain the error code.
-+ */
-+u8 sdio_writeb_readb(struct sdio_func *func, u8 b,
-+	unsigned int addr, int *err_ret)
-+{
-+	int ret;
-+	u8 val;
-+
-+	BUG_ON(!func);
-+
-+	ret = mmc_io_rw_direct(func->card, 1, func->num, addr, b, &val);
-+	if (err_ret)
-+		*err_ret = ret;
-+	if (ret)
-+		val = 0xff;
-+
-+	return val;
-+}
-+EXPORT_SYMBOL_GPL(sdio_writeb_readb);
-+
-+/**
-  *	sdio_memcpy_fromio - read a chunk of memory from a SDIO function
-  *	@func: SDIO function to access
-  *	@dst: buffer to store the data
-diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-index c6c0cce..8974b19 100644
---- a/include/linux/mmc/sdio_func.h
-+++ b/include/linux/mmc/sdio_func.h
-@@ -145,6 +145,9 @@ extern void sdio_writew(struct sdio_func *func, u16 b,
- extern void sdio_writel(struct sdio_func *func, u32 b,
- 	unsigned int addr, int *err_ret);
- 
-+extern u8 sdio_writeb_readb(struct sdio_func *func, u8 b,
-+	unsigned int addr, int *err_ret);
-+
- extern int sdio_memcpy_toio(struct sdio_func *func, unsigned int addr,
- 	void *src, int count);
- extern int sdio_writesb(struct sdio_func *func, unsigned int addr,
--- 
-1.6.3.3
+	i = ilog2(__roundup_pow_of_two(host->clk));
 
+If that's wrong then include/linux/log2.h has various tools which can
+surely be used.  If they're not appropriate then please feel free to
+propose additions.
+
+> +		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, (i - 1) << 16);
+> +	}
+> +	sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
+> +}
+> +
+>
+> ...
+>
+> +static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
+> +{
+> +	u32 state1, state2;
+> +	int ret, timeout = 10000000;
+> +
+> +	host->sd_error = 0;
+> +	host->wait_int = 0;
+> +
+> +	state1 = sh_mmcif_readl(host, MMCIF_CE_HOST_STS1);
+> +	state2 = sh_mmcif_readl(host, MMCIF_CE_HOST_STS2);
+> +	pr_debug("%s: ERR HOST_STS1 = %08x\n", \
+> +			DRIVER_NAME, sh_mmcif_readl(host, MMCIF_CE_HOST_STS1));
+> +	pr_debug("%s: ERR HOST_STS2 = %08x\n", \
+> +			DRIVER_NAME, sh_mmcif_readl(host, MMCIF_CE_HOST_STS2));
+> +
+> +	if (state1 & STS1_CMDSEQ) {
+> +		pr_debug("%s: Forced end of command sequence\n", DRIVER_NAME);
+> +		sh_mmcif_bitset(host, MMCIF_CE_CMD_CTRL, CMD_CTRL_BREAK);
+> +		sh_mmcif_bitset(host, MMCIF_CE_CMD_CTRL, ~CMD_CTRL_BREAK);
+> +		while (1) {
+> +			timeout--;
+> +			if (timeout < 0) {
+> +				pr_err(DRIVER_NAME": Forceed end of " \
+> +					"command sequence timeout err\n");
+> +				return -EILSEQ;
+> +			}
+> +			if (!(sh_mmcif_readl(host, MMCIF_CE_HOST_STS1)
+> +								& STS1_CMDSEQ))
+> +				break;
+> +			mdelay(1);
+> +		}
+> +		sh_mmcif_sync_reset(host);
+> +		return -EILSEQ;
+
+Good heavens, what is EILSEQ?
+
+<googles a bit>
+
+    "An illegal multibyte sequence was found in the input.  This
+     usually means that you have the wrong charactor encoding, for
+     instance the MicrosoftCorporation version of latin-1 (aka
+     iso_8859_1(7)) (which has it's own stuff like "smart quotes" in
+     the reserved bytes) instead of the real latin (or perhaps
+     utf8(7))."
+
+Why on earth are driver writers using this in the kernel???  Imagine
+the confusion which ensues when this error code propagates all the way
+back to some poor user's console.  They'll be scrabbling around with
+language encodings not even suspecting that their hardware is busted.
+
+People do this *a lot*.  They go grubbing through errno.h and grab
+something which looks vaguely appropriate.  But it's wrong.
+
+If your hardware is busted then return -EIO and emit a printk to tell
+the operator what broke.
+
+> +	}
+> +
+> +	if (state2 & STS2_CRC_ERR)
+> +		ret = -EILSEQ;
+> +	else if (state2 & STS2_TIMEOUT_ERR)
+> +		ret = -ETIMEDOUT;
+> +	else
+> +		ret = -EILSEQ;
+> +	return ret;
+> +}
+>
+> ...
+>
