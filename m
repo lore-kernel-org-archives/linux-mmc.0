@@ -1,97 +1,50 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH] Disable the non working eMMC on Zoom2/3
-Date: Wed, 28 Apr 2010 12:45:53 -0700
-Message-ID: <20100428194553.GH7225@atomide.com>
-References: <2A3DCF3DA181AD40BDE86A3150B27B6B030D32CEE8@dbde02.ent.ti.com>
- <008601cad1bd$6d0022b0$544ff780@am.dhcp.ti.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030D32D372@dbde02.ent.ti.com>
- <4BB51740.2060802@ti.com>
- <009a01cad1ee$e3bbae70$544ff780@am.dhcp.ti.com>
- <20100407114938.GF7153@atomide.com>
- <003801cad73e$86841df0$544ff780@am.dhcp.ti.com>
- <20100427182111.GE7225@atomide.com>
- <20100428192322.GG7225@atomide.com>
- <006801cae709$e136fe40$544ff780@am.dhcp.ti.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [Bug 15836] Commit 6ad696d2cf535772dff659298ec7e7260e344595
+ breaks my SD card reader [197b:2381]
+Date: Wed, 28 Apr 2010 23:41:39 +0100
+Message-ID: <87d3xjxkrg.fsf@linux-g6p1.site>
+References: <bug-15836-27@https.bugzilla.kernel.org/>
+	<201004262048.o3QKml95025961@demeter.kernel.org>
+	<20100426135800.28378e99.akpm@linux-foundation.org>
+	<1272365957.10657.15.camel@manwe.use.schlund.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <006801cae709$e136fe40$544ff780@am.dhcp.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: 'Nishanth Menon' <nm@ti.com>, "'Ghorai, Sukumar'" <s-ghorai@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:56394 "EHLO
+	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757314Ab0D1Wln (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Apr 2010 18:41:43 -0400
+In-Reply-To: <1272365957.10657.15.camel@manwe.use.schlund.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephan Suerken <absurd@olurdix.de>
+Cc: linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org, Andi Kleen <andi@firstfloor.org>, Andrew Morton <akpm@linux-foundation.org>
 
-* Madhusudhan <madhu.cr@ti.com> [100428 12:30]:
+On Tue, 27 Apr 2010 12:59:17 +0200, Stephan Suerken <absurd@olurdix.de> wrote:
+> On Mon, 2010-04-26 at 13:58 -0700, Andrew Morton wrote:
+> (...)
+> > > https://bugzilla.kernel.org/show_bug.cgi?id=15836
+> > > 
+> > 
+> > OK, I give up.
 > 
+> Ok, I guess it would be very helpful, first of all, if someone could
+> affirm the buggy behavior on the same or similar hardware with kernels
+> >=2.6.32.
 > 
-> > -----Original Message-----
-> > From: Tony Lindgren [mailto:tony@atomide.com]
-> > Sent: Wednesday, April 28, 2010 2:23 PM
-> > To: Madhusudhan
-> > Cc: 'Nishanth Menon'; 'Ghorai, Sukumar'; linux-omap@vger.kernel.org;
-> > linux-mmc@vger.kernel.org
-> > Subject: Re: [PATCH] Disable the non working eMMC on Zoom2/3
-> > 
-> > * Tony Lindgren <tony@atomide.com> [100427 11:16]:
-> > > * Madhusudhan <madhu.cr@ti.com> [100408 10:07]:
-> > > > > >
-> > > > > > Tony, do you care to just look up the serial number of your board?
-> > > > >
-> > > > > Sorry for the delay in replying, I've been travelling for a few
-> > weeks
-> > > > > and been in meetings quite a bit. Anyways, it's a 1013037 REV A
-> > board,
-> > > > > which seems to be production in the table above.
-> > > > >
-> > > >
-> > > > That means we can not assume all production units have a working eMMC.
-> > > > Would you mind sharing your bootup log? When this device is detected
-> > > > something like below is a clear issue.
-> > > >
-> > > > mmcblk1: mmc1:0001 STM16G 1.00 GiB
-> > > > mmcblk1: p1 p2
-> > 
-> > For the eMMC I seem to have that:
-> > 
-> > [    0.978363] mmc1: new high speed MMC card at address 0001
-> > [    0.984344] mmcblk1: mmc1:0001 STM16G 1.00 GiB
-> > [    0.989105]  mmcblk1: unknown partition table
-> > ...
-> > 
-> > zoom:~# fdisk -l /dev/mmcblk1
-> > [  120.306396] mmcblk1: retrying using single block read
-> > [  120.503692] mmcblk1: retrying using single block read
-> > [  120.683593] mmcblk1: error -110 transferring data, sector 2097144, nr
-> > 8, card status 0x900
-> > [  120.691894] end_request: I/O error, dev mmcblk1, sector 2097144
-> > [  120.872680] mmcblk1: error -110 transferring data, sector 2097145, nr
-> > 7, card status 0x900
-> > ...
-> > 
-> > > Hmm, finally got around looking into this again. Looks like the mmc
-> > > is now working on my zoom3 with the current Linus' tree at commit
-> > > 7c6bd2010fced38444c9fd658f4c6ce61bd185bf. So I guess something that
-> > > we had in omap-fixes fixed this. Or maybe some fix for drivers/mmc?
-> > >
-> > > This is with the debug_ll patch applied:
-> > >
-> > > https://patchwork.kernel.org/patch/87532/
-> > 
-> > For the microSD card, turns out the card I used was flakey. So
-> > that should explain some of the problems. I'm almost certain
-> > I tried with two different cards earlier though. In any case,
-> > let's assume the problem is only the eMMC.
-> > 
-> Sorry, I did not get a complete picture. Your earlier email said that with
-> Linus tree eMMC on your Zoom3 is working. Is that correct?
+> The bug occurs on a "HP HDX 16" laptop; attaching some hardware
+> information...
 
-Nope, now the microSD is working, eMMC is not working.
- 
-> IMHO, an omap level fix can not solve the problem with eMMC because as I can
-> see from the log you provided above that a 16G device is detected as 1G.
-> This is certainly due to the issue I mentioned earlier. 
+Stephan,
 
-OK
+this one definitely looks strange. Have you tried running other
+diagnostic tools on you SD card, e.g. fsck? How about on your hard disks
+or other mass storage devices? Is it always the same block that's
+reported as bad? Were you doing any suspend/hibernation
+during these tests? It might also be an idea to turn on
+CONFIG_DEBUG_PAGEALLOC and run badblocks again.
 
-Tony
+If you turn off CONFIG_HOTPLUG and CONFIG_HIBERNATION on a recent kernel
+does it work then?
+
+I'm pretty stumped as to what is going on here...
