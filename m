@@ -1,50 +1,42 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [Bug 15836] Commit 6ad696d2cf535772dff659298ec7e7260e344595
- breaks my SD card reader [197b:2381]
-Date: Wed, 28 Apr 2010 23:41:39 +0100
-Message-ID: <87d3xjxkrg.fsf@linux-g6p1.site>
-References: <bug-15836-27@https.bugzilla.kernel.org/>
-	<201004262048.o3QKml95025961@demeter.kernel.org>
-	<20100426135800.28378e99.akpm@linux-foundation.org>
-	<1272365957.10657.15.camel@manwe.use.schlund.de>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: Re: [PATCH 1/4] MMC: atmel-mci: fix two parameters swapped
+Date: Thu, 29 Apr 2010 09:45:35 +0200
+Message-ID: <4BD9391F.6070707@atmel.com>
+References: <bfa27c51250b39deeccbf6f3a656db4e0b73ce92.1272378853.git.nicolas.ferre@atmel.com>	<bfa27c51250b39deeccbf6f3a656db4e0b73ce92.1272378853.git.nicolas.ferre@atmel.com>
+	<20100428112245.23e99d70.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:56394 "EHLO
-	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757314Ab0D1Wln (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Apr 2010 18:41:43 -0400
-In-Reply-To: <1272365957.10657.15.camel@manwe.use.schlund.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20100428112245.23e99d70.akpm@linux-foundation.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, kernel@avr32linux.org, haavard.skinnemoen@atmel.com, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephan Suerken <absurd@olurdix.de>
-Cc: linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org, Andi Kleen <andi@firstfloor.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On Tue, 27 Apr 2010 12:59:17 +0200, Stephan Suerken <absurd@olurdix.de> wrote:
-> On Mon, 2010-04-26 at 13:58 -0700, Andrew Morton wrote:
-> (...)
-> > > https://bugzilla.kernel.org/show_bug.cgi?id=15836
-> > > 
-> > 
-> > OK, I give up.
-> 
-> Ok, I guess it would be very helpful, first of all, if someone could
-> affirm the buggy behavior on the same or similar hardware with kernels
-> >=2.6.32.
-> 
-> The bug occurs on a "HP HDX 16" laptop; attaching some hardware
-> information...
+Le 28/04/2010 20:22, Andrew Morton :
+> Patches 1-3 (at least) appear to be applicable to 2.6.33.x and perhaps
+> earlier.
 
-Stephan,
+Correct.
 
-this one definitely looks strange. Have you tried running other
-diagnostic tools on you SD card, e.g. fsck? How about on your hard disks
-or other mass storage devices? Is it always the same block that's
-reported as bad? Were you doing any suspend/hibernation
-during these tests? It might also be an idea to turn on
-CONFIG_DEBUG_PAGEALLOC and run badblocks again.
+> But you didn't cc stable@kernel.org and there was no Cc:
+> <stable@kernel.org> in the changelog and in this case I'd prefer not to
+> make that decision myself?
 
-If you turn off CONFIG_HOTPLUG and CONFIG_HIBERNATION on a recent kernel
-does it work then?
+You are right. In fact I was waiting for feedback before pushing this
+also to "stable"...
 
-I'm pretty stumped as to what is going on here...
+I keep this in mind and will do this when it will be merged in mainline.
+
+Thanks, best regards,
+-- 
+Nicolas Ferre
