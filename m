@@ -1,66 +1,61 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 1/2 v2] MMC:Add support MMCIF for SuperH
-Date: Fri, 30 Apr 2010 12:51:37 +0900
-Message-ID: <o2uaec7e5c31004292051yff981cebg3bd05e2684036ae4@mail.gmail.com>
-References: <4BD7C240.5050800@renesas.com>
-	 <20100427221705.1628375b.akpm@linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100427221705.1628375b.akpm@linux-foundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>, ben@decadent.org.uk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + mmc-sdhci_int_data_mask-typo-error.patch added to -mm tree
+Date: Thu, 29 Apr 2010 15:26:32 -0700
+Message-ID: <201004292226.o3TMQW9M015239@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: zgao6@marvell.com, linux-mmc@vger.kernel.org, matt@console-pimps.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Andrew,
 
-Thanks for your review!
+The patch titled
+     mmc: SDHCI_INT_DATA_MASK typo error
+has been added to the -mm tree.  Its filename is
+     mmc-sdhci_int_data_mask-typo-error.patch
 
-On Wed, Apr 28, 2010 at 11:17 AM, Andrew Morton
-<akpm@linux-foundation.org> wrote:
-> On Wed, 28 Apr 2010 14:06:08 +0900 Yusuke Goda <yusuke.goda.sx@renesa=
-s.com> wrote:
->
->> + =A0 =A0 time =3D wait_event_interruptible_timeout(host->intr_wait,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->wait_int =3D=3D 1 ||
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->sd_error =3D=3D 1, h=
-ost->timeout);
->> + =A0 =A0 if (host->wait_int !=3D 1 && (time =3D=3D 0 || host->sd_er=
-ror !=3D 0))
->> + =A0 =A0 =A0 =A0 =A0 =A0 return sh_mmcif_error_manage(host);
->
-> wait_event_interruptible_timeout() will return early with -ERESTARTSY=
-S
-> if the calling process gets signalled (eg, ^C was hit).
->
-> The driver uses wait_event_interruptible_timeout() rather a lot and t=
-he
-> two sites I looked at seem to handle the signal_pending() case
-> correctly.
->
-> But incorrectly handling signals with interruptible waits is a
-> frequently-occurring error in drivers. =A0Did you deliberately cater =
-for
-> this case, and have you runtime tested it?
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-My plan is to use this driver on SH-Mobile ARM (sh7372), and I'd be
-happy to fix up the driver to become a bit less non-standard wrt
-blocking compared to the other MMC host drivers. Is it possible that
-Goda-san fixes up whatever minor bits that need rework and that you
-pick up at that point?
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-I'd like to rework the MMCIF blocking code and perhaps also add
-dmaengine support as feature patches on top of Goda-sans work if
-that's ok with you. Better PM is also on the TODO. Not sure if any of
-these features will make it in time for the 2.6.35 merge window
-though.
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
-It would be very useful to have the MMCIF driver as-is in 2.6.35
-mainline to begin with if possible. Or do you think the driver needs
-to be reworked more before that can happen?
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-Thanks,
+------------------------------------------------------
+Subject: mmc: SDHCI_INT_DATA_MASK typo error
+From: Zhangfei Gao <zgao6@marvell.com>
 
-/ magnus
+Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
+Reviewed-by: Matt Fleming <matt@console-pimps.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/sdhci.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff -puN drivers/mmc/host/sdhci.h~mmc-sdhci_int_data_mask-typo-error drivers/mmc/host/sdhci.h
+--- a/drivers/mmc/host/sdhci.h~mmc-sdhci_int_data_mask-typo-error
++++ a/drivers/mmc/host/sdhci.h
+@@ -127,7 +127,7 @@
+ #define  SDHCI_INT_DATA_MASK	(SDHCI_INT_DATA_END | SDHCI_INT_DMA_END | \
+ 		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL | \
+ 		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
+-		SDHCI_INT_DATA_END_BIT | SDHCI_ADMA_ERROR)
++		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR)
+ #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
+ 
+ #define SDHCI_ACMD12_ERR	0x3C
+_
+
+Patches currently in -mm which might be from zgao6@marvell.com are
+
+mmc-sdhci_int_data_mask-typo-error.patch
+
