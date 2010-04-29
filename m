@@ -1,58 +1,52 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
-Date: Fri, 30 Apr 2010 20:30:12 +0200
-Message-ID: <n2k63386a3d1004301130udb419791p7ee48d109ab209b5@mail.gmail.com>
-References: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com>
-	<v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com>
-	<CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local>
-	<t2qe9c3a7c21004141815x70ecf123p4364802681417da9@mail.gmail.com>
-	<q2o63386a3d1004162158v296379fat2b376d5c4c087378@mail.gmail.com>
-	<20100422110025.GC20008@n2100.arm.linux.org.uk>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: mmc: sdhci.h compile error
+Date: Thu, 29 Apr 2010 15:28:56 -0700
+Message-ID: <20100429152856.30585944.akpm@linux-foundation.org>
+References: <m2w309424b61004210443x612468b3n3caabe87e9717165@mail.gmail.com>
+	<87zl0rb20u.fsf@linux-g6p1.site>
+	<20100426101704.GB2092@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20100422110025.GC20008@n2100.arm.linux.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>
-Cc: Linus WALLEIJ <linus.walleij@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Grant Likely <grant.likely@secretlab.ca>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Dan Williams <dan.j.williams@intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:53812 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932688Ab0D3RIc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Apr 2010 13:08:32 -0400
+In-Reply-To: <20100426101704.GB2092@oksana.dev.rtsoft.ru>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Matt Fleming <matt@console-pimps.org>, zhangfei gao <zhangfei.gao@gmail.com>, linux-mmc@vger.kernel.org
 
-2010/4/22 Russell King - ARM Linux <linux@arm.linux.org.uk>:
+On Mon, 26 Apr 2010 14:17:04 +0400
+Anton Vorontsov <cbouatmailru@gmail.com> wrote:
 
->> I'll keep working on getting the PL011 and PL180 DMA tested on the
->> RealView somehow so those can also be accepted.
->
-> So has this (which has now been applied to Dan's tree) been tested
-> as I asked on Versatile platforms, or do we have something that could
-> be incompatible with those platforms?
+> On Sun, Apr 25, 2010 at 11:28:17PM +0100, Matt Fleming wrote:
+> > On Wed, 21 Apr 2010 19:43:32 +0800, zhangfei gao <zhangfei.gao@gmail.com> wrote:
+> > > 
+> > > There is compile error when we enable CONFIG_MMC_SDHCI_IO_ACCESSORS,
+> > > and include header file #include "sdhci.h"
+> > > error: macro "writel" passed 3 arguments, but takes just 2
+> > > 
+> > 
+> > Interesting...
+> > 
+> > It was Anton Vorontsov that added this code; presumably the code has
+> > never been compiled for an ARM board (or any other architecture that
+> > #define's their I/O accessors in asm/io.h).
+> 
+> Yep, there wasn't any need for these accessors on other platforms.
+> 
+> > It would be better if all architectures declared their I/O accessors as
+> > static inline, but I'm not volunteering to touch all those headers ;-)
+> > Renaming the SDHCI ops is definitely the easiest option. Anton, do you
+> > have a problem with the attached patch to rename the SDHCI accessor
+> > functions?
+> 
+> Looks OK.
+> 
+> Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+> (for -next, I presume)
 
-I tested them on U300 which has an unmodified PL011 block, both with
-and without DMA support compiled in. I have tested the Pl180 mods
-on the U300 as well, it has a slightly modified PL180 block.
-I have no other hardware...
-
-I will try too boot it up in the QEMU emulator, it has an emulated
-PL011 atleast that should account for something? I don't think
-it emulates the PL180 though. :-(
-
-> I'm basically not acking or applying these patches until something
-> along those lines has happened. =A0(And unfortunately I don't have the
-> resources to apply to this at present.)
-
-I understand this. I will have to try to dig out some ARM reference
-design from somewhere, I cannot afford one sadly.
-
-ARM Ltd. people on this list: if you can send me a versatile
-machine, mail me in private for post address...
-
-Yours,
-Linus Walleij
+Why not for 2.6.34?
