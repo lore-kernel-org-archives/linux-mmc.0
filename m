@@ -1,38 +1,66 @@
-From: Andi Kleen <andi@firstfloor.org>
-Subject: Re: [Bug 15836] Commit 6ad696d2cf535772dff659298ec7e7260e344595
-	breaks my SD card reader [197b:2381]
-Date: Fri, 30 Apr 2010 19:06:14 +0200
-Message-ID: <20100430170614.GA22807@gargoyle.fritz.box>
-References: <bug-15836-27@https.bugzilla.kernel.org/> <201004262048.o3QKml95025961@demeter.kernel.org> <20100426135800.28378e99.akpm@linux-foundation.org>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH 1/2 v2] MMC:Add support MMCIF for SuperH
+Date: Fri, 30 Apr 2010 12:51:37 +0900
+Message-ID: <o2uaec7e5c31004292051yff981cebg3bd05e2684036ae4@mail.gmail.com>
+References: <4BD7C240.5050800@renesas.com>
+	 <20100427221705.1628375b.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from one.firstfloor.org ([213.235.205.2]:42139 "EHLO
-	one.firstfloor.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932592Ab0D3RDp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Apr 2010 13:03:45 -0400
-Content-Disposition: inline
-In-Reply-To: <20100426135800.28378e99.akpm@linux-foundation.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100427221705.1628375b.akpm@linux-foundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org, Stephan =?iso-8859-1?Q?S=FCrken?= <absurd@olurdix.de>
+Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>, ben@decadent.org.uk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-> Can anyone suggest how 6ad696d2cf535772dff659298ec7e7260e344595 ("mm:
-> allow memory hotplug and hibernation in the same kernel") could have
-> caused the mmc failures which Stephan is reporting in the above
-> bugzilla record?
+Hi Andrew,
 
-The mission information is which CONFIG_* option changes the behaviour.
-(or maybe it's in the bugzilla, i just skimmed it very quickly)
+Thanks for your review!
 
-presumably it's either hibernation or memory hotadd that introduces
-the problem.
+On Wed, Apr 28, 2010 at 11:17 AM, Andrew Morton
+<akpm@linux-foundation.org> wrote:
+> On Wed, 28 Apr 2010 14:06:08 +0900 Yusuke Goda <yusuke.goda.sx@renesa=
+s.com> wrote:
+>
+>> + =A0 =A0 time =3D wait_event_interruptible_timeout(host->intr_wait,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->wait_int =3D=3D 1 ||
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->sd_error =3D=3D 1, h=
+ost->timeout);
+>> + =A0 =A0 if (host->wait_int !=3D 1 && (time =3D=3D 0 || host->sd_er=
+ror !=3D 0))
+>> + =A0 =A0 =A0 =A0 =A0 =A0 return sh_mmcif_error_manage(host);
+>
+> wait_event_interruptible_timeout() will return early with -ERESTARTSY=
+S
+> if the calling process gets signalled (eg, ^C was hit).
+>
+> The driver uses wait_event_interruptible_timeout() rather a lot and t=
+he
+> two sites I looked at seem to handle the signal_pending() case
+> correctly.
+>
+> But incorrectly handling signals with interruptible waits is a
+> frequently-occurring error in drivers. =A0Did you deliberately cater =
+for
+> this case, and have you runtime tested it?
 
-My patch just allowed to have both together.
+My plan is to use this driver on SH-Mobile ARM (sh7372), and I'd be
+happy to fix up the driver to become a bit less non-standard wrt
+blocking compared to the other MMC host drivers. Is it possible that
+Goda-san fixes up whatever minor bits that need rework and that you
+pick up at that point?
 
-Once it's determined which one it is one could do a second bisect
-with that option always on (and the other off)? Or maybe it's not a 
-regression.
+I'd like to rework the MMCIF blocking code and perhaps also add
+dmaengine support as feature patches on top of Goda-sans work if
+that's ok with you. Better PM is also on the TODO. Not sure if any of
+these features will make it in time for the 2.6.35 merge window
+though.
 
--Andi
+It would be very useful to have the MMCIF driver as-is in 2.6.35
+mainline to begin with if possible. Or do you think the driver needs
+to be reworked more before that can happen?
+
+Thanks,
+
+/ magnus
