@@ -1,52 +1,59 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: mmc: sdhci.h compile error
-Date: Thu, 29 Apr 2010 15:28:56 -0700
-Message-ID: <20100429152856.30585944.akpm@linux-foundation.org>
-References: <m2w309424b61004210443x612468b3n3caabe87e9717165@mail.gmail.com>
-	<87zl0rb20u.fsf@linux-g6p1.site>
-	<20100426101704.GB2092@oksana.dev.rtsoft.ru>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH] Disable the non working eMMC on Zoom2/3
+Date: Fri, 30 Apr 2010 11:57:30 -0500
+Message-ID: <006f01cae886$38da6920$544ff780@am.dhcp.ti.com>
+References: <2A3DCF3DA181AD40BDE86A3150B27B6B030D32CEE8@dbde02.ent.ti.com> <008601cad1bd$6d0022b0$544ff780@am.dhcp.ti.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030D32D372@dbde02.ent.ti.com> <4BB51740.2060802@ti.com> <009a01cad1ee$e3bbae70$544ff780@am.dhcp.ti.com> <20100407114938.GF7153@atomide.com> <003801cad73e$86841df0$544ff780@am.dhcp.ti.com> <20100427182111.GE7225@atomide.com> <20100428192322.GG7225@atomide.com> <006801cae709$e136fe40$544ff780@am.dhcp.ti.com> <20100428194553.GH7225@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain;
+	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:53812 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932688Ab0D3RIc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Apr 2010 13:08:32 -0400
-In-Reply-To: <20100426101704.GB2092@oksana.dev.rtsoft.ru>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:55008 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753031Ab0D3Q5g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 30 Apr 2010 12:57:36 -0400
+In-Reply-To: <20100428194553.GH7225@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: Matt Fleming <matt@console-pimps.org>, zhangfei gao <zhangfei.gao@gmail.com>, linux-mmc@vger.kernel.org
+To: 'Tony Lindgren' <tony@atomide.com>
+Cc: 'Nishanth Menon' <nm@ti.com>, "'Ghorai, Sukumar'" <s-ghorai@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Mon, 26 Apr 2010 14:17:04 +0400
-Anton Vorontsov <cbouatmailru@gmail.com> wrote:
+<snip>
 
-> On Sun, Apr 25, 2010 at 11:28:17PM +0100, Matt Fleming wrote:
-> > On Wed, 21 Apr 2010 19:43:32 +0800, zhangfei gao <zhangfei.gao@gmail.com> wrote:
-> > > 
-> > > There is compile error when we enable CONFIG_MMC_SDHCI_IO_ACCESSORS,
-> > > and include header file #include "sdhci.h"
-> > > error: macro "writel" passed 3 arguments, but takes just 2
-> > > 
-> > 
-> > Interesting...
-> > 
-> > It was Anton Vorontsov that added this code; presumably the code has
-> > never been compiled for an ARM board (or any other architecture that
-> > #define's their I/O accessors in asm/io.h).
+> > >
+> > > > Hmm, finally got around looking into this again. Looks like the mmc
+> > > > is now working on my zoom3 with the current Linus' tree at commit
+> > > > 7c6bd2010fced38444c9fd658f4c6ce61bd185bf. So I guess something that
+> > > > we had in omap-fixes fixed this. Or maybe some fix for drivers/mmc?
+> > > >
+> > > > This is with the debug_ll patch applied:
+> > > >
+> > > > https://patchwork.kernel.org/patch/87532/
+> > >
+> > > For the microSD card, turns out the card I used was flakey. So
+> > > that should explain some of the problems. I'm almost certain
+> > > I tried with two different cards earlier though. In any case,
+> > > let's assume the problem is only the eMMC.
+> > >
+> > Sorry, I did not get a complete picture. Your earlier email said that
+> with
+> > Linus tree eMMC on your Zoom3 is working. Is that correct?
 > 
-> Yep, there wasn't any need for these accessors on other platforms.
+> Nope, now the microSD is working, eMMC is not working.
 > 
-> > It would be better if all architectures declared their I/O accessors as
-> > static inline, but I'm not volunteering to touch all those headers ;-)
-> > Renaming the SDHCI ops is definitely the easiest option. Anton, do you
-> > have a problem with the attached patch to rename the SDHCI accessor
-> > functions?
+> > IMHO, an omap level fix can not solve the problem with eMMC because as I
+> can
+> > see from the log you provided above that a 16G device is detected as 1G.
+> > This is certainly due to the issue I mentioned earlier.
 > 
-> Looks OK.
-> 
-> Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
-> (for -next, I presume)
+> OK
 
-Why not for 2.6.34?
+This means that some production boards still have this issue with eMMC. So
+my patch disables the support for MMC2 on zoom boards. Would you consider
+that?
+
+Regards,
+Madhu
+> 
+> Tony
+
