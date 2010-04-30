@@ -1,59 +1,94 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: [PATCH] Disable the non working eMMC on Zoom2/3
-Date: Fri, 30 Apr 2010 11:57:30 -0500
-Message-ID: <006f01cae886$38da6920$544ff780@am.dhcp.ti.com>
-References: <2A3DCF3DA181AD40BDE86A3150B27B6B030D32CEE8@dbde02.ent.ti.com> <008601cad1bd$6d0022b0$544ff780@am.dhcp.ti.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030D32D372@dbde02.ent.ti.com> <4BB51740.2060802@ti.com> <009a01cad1ee$e3bbae70$544ff780@am.dhcp.ti.com> <20100407114938.GF7153@atomide.com> <003801cad73e$86841df0$544ff780@am.dhcp.ti.com> <20100427182111.GE7225@atomide.com> <20100428192322.GG7225@atomide.com> <006801cae709$e136fe40$544ff780@am.dhcp.ti.com> <20100428194553.GH7225@atomide.com>
+From: Stephan =?ISO-8859-1?Q?S=FCrken?= <absurd@olurdix.de>
+Subject: Re: [Bug 15836] Commit 6ad696d2cf535772dff659298ec7e7260e344595
+	breaks my SD card reader [197b:2381]
+Date: Fri, 30 Apr 2010 18:53:30 +0200
+Message-ID: <1272646410.6394.29.camel@weslok.olx.intra>
+References: <bug-15836-2531@https.bugzilla.kernel.org/>
+	 <201004282338.o3SNcfHW007926@demeter.kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:55008 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753031Ab0D3Q5g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 30 Apr 2010 12:57:36 -0400
-In-Reply-To: <20100428194553.GH7225@atomide.com>
+Received: from moutng.kundenserver.de ([212.227.17.8]:62915 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750889Ab0D3QzK convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Apr 2010 12:55:10 -0400
+In-Reply-To: <201004282338.o3SNcfHW007926@demeter.kernel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Tony Lindgren' <tony@atomide.com>
-Cc: 'Nishanth Menon' <nm@ti.com>, "'Ghorai, Sukumar'" <s-ghorai@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+To: bugzilla-daemon@bugzilla.kernel.org, matt@console-pimps.org
+Cc: Andi Kleen <andi@firstfloor.org>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 
-<snip>
+Matt,
 
-> > >
-> > > > Hmm, finally got around looking into this again. Looks like the mmc
-> > > > is now working on my zoom3 with the current Linus' tree at commit
-> > > > 7c6bd2010fced38444c9fd658f4c6ce61bd185bf. So I guess something that
-> > > > we had in omap-fixes fixed this. Or maybe some fix for drivers/mmc?
-> > > >
-> > > > This is with the debug_ll patch applied:
-> > > >
-> > > > https://patchwork.kernel.org/patch/87532/
-> > >
-> > > For the microSD card, turns out the card I used was flakey. So
-> > > that should explain some of the problems. I'm almost certain
-> > > I tried with two different cards earlier though. In any case,
-> > > let's assume the problem is only the eMMC.
-> > >
-> > Sorry, I did not get a complete picture. Your earlier email said that
-> with
-> > Linus tree eMMC on your Zoom3 is working. Is that correct?
-> 
-> Nope, now the microSD is working, eMMC is not working.
-> 
-> > IMHO, an omap level fix can not solve the problem with eMMC because as I
-> can
-> > see from the log you provided above that a 16G device is detected as 1G.
-> > This is certainly due to the issue I mentioned earlier.
-> 
-> OK
+On Wed, 2010-04-28 at 23:38 +0000, bugzilla-daemon@bugzilla.kernel.org =
+wrote:=20
+> https://bugzilla.kernel.org/show_bug.cgi?id=3D15836
+(...)=20
+> this one definitely looks strange.
 
-This means that some production boards still have this issue with eMMC. So
-my patch disables the support for MMC2 on zoom boards. Would you consider
-that?
+ok, I am desperate. Maybe its time to just throw out any information I
+can think of right now, hoping for some educated guess ;).
 
-Regards,
-Madhu
-> 
-> Tony
+> Have you tried running other diagnostic tools on you SD card, e.g. fs=
+ck?
+
+Actually, s.th. like "mkfs;fsck --force" was my initial test before I
+switched to badblocks.
+
+As for bad media, the laptop is my working horse. I work on it every
+day; when I work on it, the sd card is in use. I had no issues with it
+whatsoever until I switched to 2.6.32, and I continue to have no issues
+(sticking to a 2.6.30 kernel) with the very same card. And yes, after I
+found the kernel upgrade broke it, I tested with a different sd card
+with the same results.
+
+So it's definitely not a media problem.
+
+> How about on your hard disks or other mass storage devices?
+
+Ok, good point (although I booted from the hard disk for the tests). I
+run the same badblocks test (with a "bad" kernel) on a hard disk
+partition and on an usb stick without issues.
+
+So it's not a general mass storage problem.
+
+> Is it always the same block that's reported as bad?
+
+Ok, good point. I noted that they seem to be different, but I did not
+care much yet. Now I have retested on a bad kernel (actually stock
+2.6.33.2), running the test 5 times (0-4) in a row, and this three time=
+s
+on three bootups; the number is the first found bad blocks:
+
+Boot 0:
+0   14144
+1-4 64
+Boot 1 (warm boot):
+0   64
+1-4 64
+Boot 2 (cold boot):
+0   140
+1-4 76
+
+=46wiw, read-only badblock tests always work fine.
+
+> Were you doing any suspend/hibernation during these tests?
+
+No, all tests after fresh reboot.
+
+> It might also be an idea to turn on
+> CONFIG_DEBUG_PAGEALLOC and run badblocks again.
+>=20
+> If you turn off CONFIG_HOTPLUG and CONFIG_HIBERNATION on a recent ker=
+nel
+> does it work then?
+
+Ok, later ;).
+
+Thx,
+
+Stephan
+--=20
+Stephan S=C3=BCrken <absurd at olurdix.de>
 
