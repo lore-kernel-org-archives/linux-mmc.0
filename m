@@ -1,7 +1,7 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
+From: Dan Williams <dan.j.williams@intel.com>
 Subject: Re: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
-Date: Sun, 2 May 2010 01:04:37 +0200
-Message-ID: <x2u63386a3d1005011604kaee33364l880e90a4e2453e0f@mail.gmail.com>
+Date: Sat, 1 May 2010 16:25:52 -0700
+Message-ID: <h2ue9c3a7c21005011625u4a523dbbs5bdc6869a0bcc71@mail.gmail.com>
 References: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com>
 	 <v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com>
 	 <CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local>
@@ -14,46 +14,47 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f219.google.com ([209.85.218.219]:32973 "EHLO
-	mail-bw0-f219.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754726Ab0EAXEi convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 May 2010 19:04:38 -0400
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:33842 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755339Ab0EAXZx convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 May 2010 19:25:53 -0400
 In-Reply-To: <20100501224429.GA17693@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Dan Williams <dan.j.williams@intel.com>, Linus WALLEIJ <linus.walleij@stericsson.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Linus Walleij <linus.ml.walleij@gmail.com>, Linus WALLEIJ <linus.walleij@stericsson.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-2010/5/2 Russell King - ARM Linux <linux@arm.linux.org.uk>:
-
+On Sat, May 1, 2010 at 3:44 PM, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> On Sat, May 01, 2010 at 03:00:09PM -0700, Dan Williams wrote:
+>> Just to clarify are you nak'ing these patches for upstream inclusion
+>> until this testing occurs? =A0Or do we just need a !ARCH_VERSATILE
+>> somewhere to allow any incompatibilities to be worked out later
+>> in-tree?
+>
+> What I don't want to do is to get into the situation where we throw
+> this patchset into the kernel and then find that we have to invent a
+> whole new implementation in the various primecell drivers to support
+> the Versatile hardware.
+>
 > Versatile has some MUXing on three of the DMA signals, so (eg) we
 > really don't want UARTs claiming DMAs just because they're in existen=
 ce
 > and not in use - that would prevent DMAs from being used for (eg) AAC=
 I
 > or MMC.
+>
+> The alternative is that we could just take the attitude that Versatil=
+e/
+> Realview will never have DMA support implemented, but that seems rath=
+er
+> silly, as they've tended to be the first platforms I get new CPU
+> architectures for. =A0(This is why DMA coherency stuff on new archite=
+ctures
+> tends to be left for others to do...)
 
-As long as Versatile doesn't specify any filter function or
-data for the channel allocation function (it currently doesn't and defa=
-ults
-to NULL) it won't even try to call the DMA engine to allocate a channel
-for say the UART.
+Ok, it will be good to have this approach vetted on a challenging
+arch.  We'll see where things stand when the merge window opens.
 
-There is nothing blocking some other peripheral from grabbing a
-muxed channel in that case.
-
-But the implementation of the DMA engine would be better of
-handling the muxing dynamically I believe, so when the PL011
-driver (say) requests a DMA channel, it doesn't mean it requests the
-*physical* channel and holds it (unless the driver is very na=EFvely
-implemented) it nominally means it reserves a placeholder in the
-DMA engine.
-
-When the driver issues a request to perform a DMA transfer, it will pul=
-l
-out a physical channel and use that, then return it. If there is too
-much combat about the physical channels, you configure out DMA
-for the least wanted PrimeCells.
-
-Yours,
-Linus Walleij
+--
+Dan
