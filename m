@@ -1,59 +1,66 @@
-From: Ben Dooks <ben-linux@fluff.org>
-Subject: Re: PATCH: sdhci.h fix typo
-Date: Thu, 29 Apr 2010 09:36:14 +0100
-Message-ID: <20100429083614.GD2589@trinity.fluff.org>
-References: <x2g309424b61004290105l9ac20be7w46b202b96eb8a7d1@mail.gmail.com>
+From: Stephan =?ISO-8859-1?Q?S=FCrken?= <absurd@olurdix.de>
+Subject: Re: [Bug 15836] Commit 6ad696d2cf535772dff659298ec7e7260e344595
+	breaks my SD card reader [197b:2381]
+Date: Sat, 01 May 2010 20:47:41 +0200
+Message-ID: <1272739661.10538.30.camel@weslok.olx.intra>
+References: <bug-15836-27@https.bugzilla.kernel.org/>
+	 <201004262048.o3QKml95025961@demeter.kernel.org>
+	 <20100426135800.28378e99.akpm@linux-foundation.org>
+	 <20100430170614.GA22807@gargoyle.fritz.box>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from trinity.fluff.org ([89.16.178.74]:55794 "EHLO trinity.fluff.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754191Ab0D3VOg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 30 Apr 2010 17:14:36 -0400
-Content-Disposition: inline
-In-Reply-To: <x2g309424b61004290105l9ac20be7w46b202b96eb8a7d1@mail.gmail.com>
+Received: from moutng.kundenserver.de ([212.227.17.8]:58358 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756915Ab0EASsv convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 May 2010 14:48:51 -0400
+In-Reply-To: <20100430170614.GA22807@gargoyle.fritz.box>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Wolfram Sang <w.sang@pengutronix.de>
+To: Andi Kleen <andi@firstfloor.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org
 
-On Thu, Apr 29, 2010 at 04:05:06PM +0800, zhangfei gao wrote:
-> Hi,
-> 
-> Here is one typo erro in sdhci.h, though it does not impact the stability.
-> 
-> Thanks
-> 
-> >From 1fbcb05dbab2e5e5de72060f0481a279fa3eda18 Mon Sep 17 00:00:00 2001
-> From: Zhangfei Gao <zgao6@marvell.com>
-> Date: Thu, 22 Apr 2010 11:25:17 +0800
-> Subject: [PATCH] mmc: SDHCI_INT_DATA_MASK typo error
-> 
-> Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
-> Reviewed-by: Matt Fleming <matt@console-pimps.org>
-> ---
->  drivers/mmc/host/sdhci.h |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 842f46f..9ba4268 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -127,7 +127,7 @@
->  #define  SDHCI_INT_DATA_MASK	(SDHCI_INT_DATA_END | SDHCI_INT_DMA_END | \
->  		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL | \
->  		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
-> -		SDHCI_INT_DATA_END_BIT | SDHCI_ADMA_ERROR)
-> +		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR)
+On Fri, 2010-04-30 at 19:06 +0200, Andi Kleen wrote:
+> The mission information is which CONFIG_* option changes the behaviou=
+r.
+> (or maybe it's in the bugzilla, i just skimmed it very quickly)
+>=20
+> presumably it's either hibernation or memory hotadd that introduces
+> the problem.
+>=20
+> My patch just allowed to have both together.
+>=20
+> Once it's determined which one it is one could do a second bisect
+> with that option always on (and the other off)? Or maybe it's not a=20
+> regression.
 
-Hmm, how did I end up missing this one? A definite bug, SDHCI_ADMA_ERROR
-value is 0x54. Currentlyt there is no INT definiton for the 0x4, and
-SDHCI_INT_SPACE_AVAIL is 0x10. We end up adding SDHCI_INT_CARD_INSERT to
-the list of interrupts for SDHCI_INT_DATA_MASK.
+Thx Andi. I now get the obvious: the way I built the kernels (using
+standard Debian configs as template, having both CONFIG_MEMORY_HOTPLUG
+and CONIG_HIBERNATION enabled), without your commit,
+CONFIG_MEMORY_HOTPLUG was implicitly turned off. Bummer.
 
--- 
-Ben
+Enabling CONFIG_MEMORY_HOTPLUG actually enables the bug.
 
-Q:      What's a light-year?
-A:      One-third less calories than a regular year.
+I explicitly confirmed this on top of 2.6.33.2:
+
+config-2.6.33.2.git19f00f0-config-2.6.33-2-amd64.nohiber:CONFIG_MEMORY_=
+HOTPLUG=3Dy
+=3D>"bad"
+config-2.6.33.2.git19f00f0-config-2.6.33-2-amd64.nohotplug:# CONFIG_MEM=
+ORY_HOTPLUG is not set
+=3D>"good"
+
+So any code enabled by CONFIG_MEMORY_HOTPLUG is the winner, presumable
+somewhere in the mmc code (?).
+
+I am not sure how to proceed, now. To bisect I would need to guess/find
+a "good" kernel first, if there is one. Maybe some hints how to best
+debug the code in question would be more helpful...
+
+Thx,
+
+Stephan
+--=20
+Stephan S=C3=BCrken <absurd at olurdix.de>
 
