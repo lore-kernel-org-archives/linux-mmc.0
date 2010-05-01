@@ -1,40 +1,40 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
-Date: Sat, 1 May 2010 23:44:29 +0100
-Message-ID: <20100501224429.GA17693@n2100.arm.linux.org.uk>
-References: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com> <v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com> <CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local> <t2qe9c3a7c21004141815x70ecf123p4364802681417da9@mail.gmail.com> <q2o63386a3d1004162158v296379fat2b376d5c4c087378@mail.gmail.com> <20100422110025.GC20008@n2100.arm.linux.org.uk> <g2qe9c3a7c21005011500l11511d43i12d971775b139c3b@mail.gmail.com>
+From: Andi Kleen <andi@firstfloor.org>
+Subject: Re: [Bug 15836] Commit 6ad696d2cf535772dff659298ec7e7260e344595
+	breaks my SD card reader [197b:2381]
+Date: Sun, 2 May 2010 01:04:43 +0200
+Message-ID: <20100501230443.GB8074@gargoyle.fritz.box>
+References: <bug-15836-27@https.bugzilla.kernel.org/> <201004262048.o3QKml95025961@demeter.kernel.org> <20100426135800.28378e99.akpm@linux-foundation.org> <20100430170614.GA22807@gargoyle.fritz.box> <1272739661.10538.30.camel@weslok.olx.intra>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:50750 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753745Ab0EAWpG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 May 2010 18:45:06 -0400
+Received: from one.firstfloor.org ([213.235.205.2]:37177 "EHLO
+	one.firstfloor.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757655Ab0EAXCK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 May 2010 19:02:10 -0400
 Content-Disposition: inline
-In-Reply-To: <g2qe9c3a7c21005011500l11511d43i12d971775b139c3b@mail.gmail.com>
+In-Reply-To: <1272739661.10538.30.camel@weslok.olx.intra>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: Linus Walleij <linus.ml.walleij@gmail.com>, Linus WALLEIJ <linus.walleij@stericsson.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Stephan =?iso-8859-1?Q?S=FCrken?= <absurd@olurdix.de>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org
 
-On Sat, May 01, 2010 at 03:00:09PM -0700, Dan Williams wrote:
-> Just to clarify are you nak'ing these patches for upstream inclusion
-> until this testing occurs?  Or do we just need a !ARCH_VERSATILE
-> somewhere to allow any incompatibilities to be worked out later
-> in-tree?
+> I explicitly confirmed this on top of 2.6.33.2:
 
-What I don't want to do is to get into the situation where we throw
-this patchset into the kernel and then find that we have to invent a
-whole new implementation in the various primecell drivers to support
-the Versatile hardware.
+Thanks that makes a bit more sense.
 
-Versatile has some MUXing on three of the DMA signals, so (eg) we
-really don't want UARTs claiming DMAs just because they're in existence
-and not in use - that would prevent DMAs from being used for (eg) AACI
-or MMC.
+> 
+> config-2.6.33.2.git19f00f0-config-2.6.33-2-amd64.nohiber:CONFIG_MEMORY_HOTPLUG=y
+> =>"bad"
+> config-2.6.33.2.git19f00f0-config-2.6.33-2-amd64.nohotplug:# CONFIG_MEMORY_HOTPLUG is not set
+> =>"good"
+> 
+> So any code enabled by CONFIG_MEMORY_HOTPLUG is the winner, presumable
+> somewhere in the mmc code (?).
 
-The alternative is that we could just take the attitude that Versatile/
-Realview will never have DMA support implemented, but that seems rather
-silly, as they've tended to be the first platforms I get new CPU
-architectures for.  (This is why DMA coherency stuff on new architectures
-tends to be left for others to do...)
+I doubt the mmc code really knows anything about memory hotplug.
+Must be some subtle side effect.
+
+Can send the diff of two boot logs with memory hotplug on and off?
+I wonder if you have the same memory layout in both cases.
+
+-Andi
