@@ -1,7 +1,7 @@
 From: Linus Walleij <linus.ml.walleij@gmail.com>
 Subject: Re: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
-Date: Sun, 2 May 2010 01:48:34 +0200
-Message-ID: <u2q63386a3d1005011648k5fa29ae9y9e03d3c94594902b@mail.gmail.com>
+Date: Sun, 2 May 2010 02:21:13 +0200
+Message-ID: <r2u63386a3d1005011721v66d04172nc0e5163115006267@mail.gmail.com>
 References: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com>
 	 <v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com>
 	 <CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local>
@@ -11,37 +11,80 @@ References: <1270681920-4461-1-git-send-email-linus.walleij@stericsson.com>
 	 <g2qe9c3a7c21005011500l11511d43i12d971775b139c3b@mail.gmail.com>
 	 <20100501224429.GA17693@n2100.arm.linux.org.uk>
 	 <x2u63386a3d1005011604kaee33364l880e90a4e2453e0f@mail.gmail.com>
-	 <z2ye9c3a7c21005011628r7c0c2b5bq36126db83d3ea5e3@mail.gmail.com>
+	 <20100501232823.GB17693@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f219.google.com ([209.85.218.219]:53584 "EHLO
+Received: from mail-bw0-f219.google.com ([209.85.218.219]:40112 "EHLO
 	mail-bw0-f219.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753711Ab0EAXsg convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 May 2010 19:48:36 -0400
-In-Reply-To: <z2ye9c3a7c21005011628r7c0c2b5bq36126db83d3ea5e3@mail.gmail.com>
+	with ESMTP id S1753912Ab0EBAVO convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 May 2010 20:21:14 -0400
+In-Reply-To: <20100501232823.GB17693@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Linus WALLEIJ <linus.walleij@stericsson.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Dan Williams <dan.j.williams@intel.com>, Linus WALLEIJ <linus.walleij@stericsson.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-2010/5/2 Dan Williams <dan.j.williams@intel.com>:
-> On Sat, May 1, 2010 at 4:04 PM, Linus Walleij
+2010/5/2 Russell King - ARM Linux <linux@arm.linux.org.uk>:
 
->> When the driver issues a request to perform a DMA transfer, it will =
-pull
->> out a physical channel and use that, then return it. If there is too
->> much combat about the physical channels, you configure out DMA
->> for the least wanted PrimeCells.
->>
+>> But the implementation of the DMA engine would be better of
+>> handling the muxing dynamically I believe, so when the PL011
+>> driver (say) requests a DMA channel, it doesn't mean it requests the
+>> *physical* channel and holds it (unless the driver is very na=C4=8Fv=
+ely
+>> implemented) it nominally means it reserves a placeholder in the
+>> DMA engine.
 >
-> Could you simulate this by publishing more struct dma_chans than are
-> physically present, and then handle the muxing internal to the driver=
-?
-> =A0Or am I misunderstanding the usage model?
+> So what happens if we try to use DMA with the PL011 but the physical
+> channels are already in use? =C2=A0From what I can see, it assumes th=
+at it
+> always has access to the transmit channel, and there's no recovery if
+> it doesn't.
+>
+> Plus if we can't get DMA for the RX path, it _permanently_ disables
+> all DMA for the device.
 
-Yes exactly that way. What I had in mind atleast.
+OK now I get it.. the point of crux is that you need the drivers to be
+coded to switch seamlessly back to interrupt mode and retry with
+DMA on next transaction nevertheless if possible.
+
+That is definately possible with the current API, so it's nothing block=
+ing
+the stuff pending in Dan's tree.
+
+However when it comes to the PL011/PL180 drivers you got me there,
+it surely does assume you either have the channel and can use it
+or else there is some permanent error on it.
+
+I'll twist these patches around a bit, it shouldn't be too hard to come=
+ up
+with some convincing code.
+
+> Three physical channels shared between: AACI Tx, AACI Rx, MMCI 0, MMC=
+I 1,
+> UART3 Tx, UART3 Rx.
+> (...)
+> All you need is to load both the AACI
+> and MMCI drivers, and if they want to use the DMA channels, you're
+> already wanting 4 channels with only 3 available.
+
+Yep, that's where it kicks in. (What's the name of this DMA controller
+BTW? Is that PL080?)
+
+(I read it as MMCI is bidirectional also on the Versatile, as it is
+on the U300.)
+
+However: this way of using the DMA dynamically instead of statically
+leads to the situation where a UART or two MMCs are using up the
+DMA channels and AACI cannot use it, and need to fall back to
+interrupts. Since the Audio traffic is likely to be more important, thi=
+s
+is perhaps not so optimal, so a static assignment of DMA channels
+may be desired after all in a practical scenario.
+
+But I'll surely make a try to make all DMA allocation from the
+PrimeCells dynamic!
 
 Yours,
 Linus Walleij
