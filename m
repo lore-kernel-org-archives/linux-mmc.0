@@ -1,162 +1,255 @@
-From: Linus WALLEIJ <linus.walleij@stericsson.com>
-Subject: RE: [PATCH 00/11] ARM: PrimeCell DMA Interface v5
-Date: Tue, 4 May 2010 15:05:51 +0200
-Message-ID: <CEE6BB42CAD6E947908279175AF8470A025A636C13@EXDCVYMBSTM006.EQ1STM.local>
-References: <v2se9c3a7c21004071645u8180f4d7p3b4b1f96de11303e@mail.gmail.com>
- <CEE6BB42CAD6E947908279175AF8470A03A50F78@EXDCVYMBSTM006.EQ1STM.local>
- <t2qe9c3a7c21004141815x70ecf123p4364802681417da9@mail.gmail.com>
- <q2o63386a3d1004162158v296379fat2b376d5c4c087378@mail.gmail.com>
- <20100422110025.GC20008@n2100.arm.linux.org.uk>
- <g2qe9c3a7c21005011500l11511d43i12d971775b139c3b@mail.gmail.com>
- <20100501224429.GA17693@n2100.arm.linux.org.uk>
- <x2u63386a3d1005011604kaee33364l880e90a4e2453e0f@mail.gmail.com>
- <20100501232823.GB17693@n2100.arm.linux.org.uk>
- <r2u63386a3d1005011721v66d04172nc0e5163115006267@mail.gmail.com>
- <20100502081844.GA7061@n2100.arm.linux.org.uk>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 1/9 v2] sh: define DMA slaves per CPU type, remove now
+ redundant header
+Date: Tue, 4 May 2010 16:06:18 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1005041336080.4925@axis700.grange>
+References: <Pine.LNX.4.64.1005041318200.4925@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100502081844.GA7061@n2100.arm.linux.org.uk>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Dan Williams <dan.j.williams@intel.com>, Grant Likely <grant.likely@secretlab.ca>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.gmx.net ([213.165.64.20]:34481 "HELO mail.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1754057Ab0EDOGM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 4 May 2010 10:06:12 -0400
+In-Reply-To: <Pine.LNX.4.64.1005041318200.4925@axis700.grange>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
+Cc: linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>
 
-The latest patchset is now also tested on the ARM-RealView
-PB11MPCore. My best friends over at Ericsson AB helped me
-out by lending me their board for a short session.
+Now that DMA slave IDs are only used used in platform specific code and have
+become opaque cookies for the rest of the code, we can make the, CPU specific
+too.
 
-See bootlog below...
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
-- UART console comes up fine and is interactive
-- MMCI card mounts and you can list and copy files
+This patch is new in v2 - added per request from Magnus.
 
-No DMA in use since the PL081 in this machine does not
-have a driver yet, but no regressions in sight.
+ arch/sh/include/asm/dmaengine.h        |   34 --------------------------------
+ arch/sh/include/asm/siu.h              |    2 -
+ arch/sh/include/cpu-sh4/cpu/sh7722.h   |   15 ++++++++++++++
+ arch/sh/include/cpu-sh4/cpu/sh7724.h   |   19 +++++++++++++++++
+ arch/sh/kernel/cpu/sh4a/setup-sh7722.c |    1 -
+ arch/sh/kernel/cpu/sh4a/setup-sh7724.c |    2 +-
+ arch/sh/kernel/cpu/sh4a/setup-sh7780.c |    3 +-
+ arch/sh/kernel/cpu/sh4a/setup-sh7785.c |    2 +-
+ sound/soc/sh/siu.h                     |    3 +-
+ sound/soc/sh/siu_pcm.c                 |    9 +++----
+ 10 files changed, 42 insertions(+), 48 deletions(-)
+ delete mode 100644 arch/sh/include/asm/dmaengine.h
 
-This should be similar to Versatile or Integrator.
+diff --git a/arch/sh/include/asm/dmaengine.h b/arch/sh/include/asm/dmaengine.h
+deleted file mode 100644
+index 2a02b61..0000000
+--- a/arch/sh/include/asm/dmaengine.h
++++ /dev/null
+@@ -1,34 +0,0 @@
+-/*
+- * Header for the new SH dmaengine driver
+- *
+- * Copyright (C) 2010 Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+- */
+-#ifndef ASM_DMAENGINE_H
+-#define ASM_DMAENGINE_H
+-
+-#include <linux/sh_dma.h>
+-
+-enum {
+-	SHDMA_SLAVE_SCIF0_TX,
+-	SHDMA_SLAVE_SCIF0_RX,
+-	SHDMA_SLAVE_SCIF1_TX,
+-	SHDMA_SLAVE_SCIF1_RX,
+-	SHDMA_SLAVE_SCIF2_TX,
+-	SHDMA_SLAVE_SCIF2_RX,
+-	SHDMA_SLAVE_SCIF3_TX,
+-	SHDMA_SLAVE_SCIF3_RX,
+-	SHDMA_SLAVE_SCIF4_TX,
+-	SHDMA_SLAVE_SCIF4_RX,
+-	SHDMA_SLAVE_SCIF5_TX,
+-	SHDMA_SLAVE_SCIF5_RX,
+-	SHDMA_SLAVE_SIUA_TX,
+-	SHDMA_SLAVE_SIUA_RX,
+-	SHDMA_SLAVE_SIUB_TX,
+-	SHDMA_SLAVE_SIUB_RX,
+-};
+-
+-#endif
+diff --git a/arch/sh/include/asm/siu.h b/arch/sh/include/asm/siu.h
+index e8d4142..1d95c78 100644
+--- a/arch/sh/include/asm/siu.h
++++ b/arch/sh/include/asm/siu.h
+@@ -11,8 +11,6 @@
+ #ifndef ASM_SIU_H
+ #define ASM_SIU_H
+ 
+-#include <asm/dmaengine.h>
+-
+ struct device;
+ 
+ struct siu_platform {
+diff --git a/arch/sh/include/cpu-sh4/cpu/sh7722.h b/arch/sh/include/cpu-sh4/cpu/sh7722.h
+index 4856040..7a5b8a3 100644
+--- a/arch/sh/include/cpu-sh4/cpu/sh7722.h
++++ b/arch/sh/include/cpu-sh4/cpu/sh7722.h
+@@ -235,4 +235,19 @@ enum {
+ 	HWBLK_NR,
+ };
+ 
++enum {
++	SHDMA_SLAVE_SCIF0_TX,
++	SHDMA_SLAVE_SCIF0_RX,
++	SHDMA_SLAVE_SCIF1_TX,
++	SHDMA_SLAVE_SCIF1_RX,
++	SHDMA_SLAVE_SCIF2_TX,
++	SHDMA_SLAVE_SCIF2_RX,
++	SHDMA_SLAVE_SIUA_TX,
++	SHDMA_SLAVE_SIUA_RX,
++	SHDMA_SLAVE_SIUB_TX,
++	SHDMA_SLAVE_SIUB_RX,
++	SHDMA_SLAVE_SDHI0_TX,
++	SHDMA_SLAVE_SDHI0_RX,
++};
++
+ #endif /* __ASM_SH7722_H__ */
+diff --git a/arch/sh/include/cpu-sh4/cpu/sh7724.h b/arch/sh/include/cpu-sh4/cpu/sh7724.h
+index 0cd1f71..fbbf550 100644
+--- a/arch/sh/include/cpu-sh4/cpu/sh7724.h
++++ b/arch/sh/include/cpu-sh4/cpu/sh7724.h
+@@ -283,4 +283,23 @@ enum {
+ 	HWBLK_NR,
+ };
+ 
++enum {
++	SHDMA_SLAVE_SCIF0_TX,
++	SHDMA_SLAVE_SCIF0_RX,
++	SHDMA_SLAVE_SCIF1_TX,
++	SHDMA_SLAVE_SCIF1_RX,
++	SHDMA_SLAVE_SCIF2_TX,
++	SHDMA_SLAVE_SCIF2_RX,
++	SHDMA_SLAVE_SCIF3_TX,
++	SHDMA_SLAVE_SCIF3_RX,
++	SHDMA_SLAVE_SCIF4_TX,
++	SHDMA_SLAVE_SCIF4_RX,
++	SHDMA_SLAVE_SCIF5_TX,
++	SHDMA_SLAVE_SCIF5_RX,
++	SHDMA_SLAVE_SDHI0_TX,
++	SHDMA_SLAVE_SDHI0_RX,
++	SHDMA_SLAVE_SDHI1_TX,
++	SHDMA_SLAVE_SDHI1_RX,
++};
++
+ #endif /* __ASM_SH7724_H__ */
+diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7722.c b/arch/sh/kernel/cpu/sh4a/setup-sh7722.c
+index fe28f52..5ea2d03 100644
+--- a/arch/sh/kernel/cpu/sh4a/setup-sh7722.c
++++ b/arch/sh/kernel/cpu/sh4a/setup-sh7722.c
+@@ -17,7 +17,6 @@
+ #include <linux/usb/m66592.h>
+ 
+ #include <asm/clock.h>
+-#include <asm/dmaengine.h>
+ #include <asm/mmzone.h>
+ #include <asm/siu.h>
+ 
+diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7724.c b/arch/sh/kernel/cpu/sh4a/setup-sh7724.c
+index c4572b1..06a0683 100644
+--- a/arch/sh/kernel/cpu/sh4a/setup-sh7724.c
++++ b/arch/sh/kernel/cpu/sh4a/setup-sh7724.c
+@@ -18,13 +18,13 @@
+ #include <linux/mm.h>
+ #include <linux/serial_sci.h>
+ #include <linux/uio_driver.h>
++#include <linux/sh_dma.h>
+ #include <linux/sh_timer.h>
+ #include <linux/io.h>
+ #include <linux/notifier.h>
+ 
+ #include <asm/suspend.h>
+ #include <asm/clock.h>
+-#include <asm/dmaengine.h>
+ #include <asm/mmzone.h>
+ 
+ #include <cpu/dma-register.h>
+diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7780.c b/arch/sh/kernel/cpu/sh4a/setup-sh7780.c
+index c3fcb39..b309f63 100644
+--- a/arch/sh/kernel/cpu/sh4a/setup-sh7780.c
++++ b/arch/sh/kernel/cpu/sh4a/setup-sh7780.c
+@@ -12,10 +12,9 @@
+ #include <linux/serial.h>
+ #include <linux/io.h>
+ #include <linux/serial_sci.h>
++#include <linux/sh_dma.h>
+ #include <linux/sh_timer.h>
+ 
+-#include <asm/dmaengine.h>
+-
+ #include <cpu/dma-register.h>
+ 
+ static struct plat_sci_port scif0_platform_data = {
+diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7785.c b/arch/sh/kernel/cpu/sh4a/setup-sh7785.c
+index 771ae76..9cbde9d 100644
+--- a/arch/sh/kernel/cpu/sh4a/setup-sh7785.c
++++ b/arch/sh/kernel/cpu/sh4a/setup-sh7785.c
+@@ -13,9 +13,9 @@
+ #include <linux/serial_sci.h>
+ #include <linux/io.h>
+ #include <linux/mm.h>
++#include <linux/sh_dma.h>
+ #include <linux/sh_timer.h>
+ 
+-#include <asm/dmaengine.h>
+ #include <asm/mmzone.h>
+ 
+ #include <cpu/dma-register.h>
+diff --git a/sound/soc/sh/siu.h b/sound/soc/sh/siu.h
+index c0bfab8..492b1ca 100644
+--- a/sound/soc/sh/siu.h
++++ b/sound/soc/sh/siu.h
+@@ -71,8 +71,7 @@ struct siu_firmware {
+ #include <linux/dmaengine.h>
+ #include <linux/interrupt.h>
+ #include <linux/io.h>
+-
+-#include <asm/dmaengine.h>
++#include <linux/sh_dma.h>
+ 
+ #include <sound/core.h>
+ #include <sound/pcm.h>
+diff --git a/sound/soc/sh/siu_pcm.c b/sound/soc/sh/siu_pcm.c
+index ba7f8d0..f7b7fcf 100644
+--- a/sound/soc/sh/siu_pcm.c
++++ b/sound/soc/sh/siu_pcm.c
+@@ -32,7 +32,6 @@
+ #include <sound/pcm_params.h>
+ #include <sound/soc-dai.h>
+ 
+-#include <asm/dmaengine.h>
+ #include <asm/siu.h>
+ 
+ #include "siu.h"
+@@ -359,13 +358,13 @@ static int siu_pcm_open(struct snd_pcm_substream *ss)
+ 	if (ss->stream == SNDRV_PCM_STREAM_PLAYBACK) {
+ 		siu_stream = &port_info->playback;
+ 		param = &siu_stream->param;
+-		param->slave_id = port ? SHDMA_SLAVE_SIUB_TX :
+-			SHDMA_SLAVE_SIUA_TX;
++		param->slave_id = port ? pdata->dma_slave_tx_b :
++			pdata->dma_slave_tx_a;
+ 	} else {
+ 		siu_stream = &port_info->capture;
+ 		param = &siu_stream->param;
+-		param->slave_id = port ? SHDMA_SLAVE_SIUB_RX :
+-			SHDMA_SLAVE_SIUA_RX;
++		param->slave_id = port ? pdata->dma_slave_rx_b :
++			pdata->dma_slave_rx_a;
+ 	}
+ 
+ 	param->dma_dev = pdata->dma_dev;
+-- 
+1.6.2.4
 
-Is this OK now Russell?
-
-Yours,
-Linus Walleij
-
-
-Uncompressing Linux... done, booting the kernel.
-Linux version 2.6.34-rc6-next-20100503-00033-gc482e92 (linus@fecusia) (gcc vers0
-CPU: ARMv6-compatible processor [410fb020] revision 0 (ARMv7), cr=00c5387f
-CPU: VIPT nonaliasing data cache, VIPT nonaliasing instruction cache
-Machine: ARM-RealView PB11MPCore
-Ignoring unrecognised tag 0x00000000
-Memory policy: ECC disabled, Data cache writeback
-Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 32512
-Kernel command line: root=/dev/nfs nfsroot=192.168.0.3:/export/rootfs/rootfs-ant
-PID hash table entries: 512 (order: -1, 2048 bytes)
-Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)
-Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)
-Memory: 128MB = 128MB total
-Memory: 120360k/120360k available, 10712k reserved, 0K highmem
-Virtual kernel memory layout:
-    vector  : 0xffff0000 - 0xffff1000   (   4 kB)
-    fixmap  : 0xfff00000 - 0xfffe0000   ( 896 kB)
-    DMA     : 0xffc00000 - 0xffe00000   (   2 MB)
-    vmalloc : 0xc8800000 - 0xf8000000   ( 760 MB)
-    lowmem  : 0xc0000000 - 0xc8000000   ( 128 MB)
-    modules : 0xbf000000 - 0xc0000000   (  16 MB)
-      .init : 0xc0008000 - 0xc0672000   (6568 kB)
-      .text : 0xc0672000 - 0xc0909000   (2652 kB)
-      .data : 0xc0922000 - 0xc093d400   ( 109 kB)
-Hierarchical RCU implementation.
-NR_IRQS:128
-Console: colour dummy device 80x30
-Calibrating delay loop... 83.76 BogoMIPS (lpj=418816)
-Mount-cache hash table entries: 512
-CPU: Testing write buffer coherency: ok
-NET: Registered protocol family 16
-L2X0 cache controller enabled
-Serial: AMBA PL011 UART driver
-dev:uart0: ttyAMA0 at MMIO 0x10009000 (irq = 36) is a AMBA/PL011
-console [ttyAMA0] enabled
-dev:uart1: ttyAMA1 at MMIO 0x1000a000 (irq = 37) is a AMBA/PL011
-dev:uart2: ttyAMA2 at MMIO 0x1000b000 (irq = 78) is a AMBA/PL011
-fpga:uart3: ttyAMA3 at MMIO 0x1000c000 (irq = 79) is a AMBA/PL011
-bio: create slab <bio-0> at 0
-Advanced Linux Sound Architecture Driver Version 1.0.23.
-Switching to clocksource timer3
-NET: Registered protocol family 2
-IP route cache hash table entries: 1024 (order: 0, 4096 bytes)
-TCP established hash table entries: 4096 (order: 3, 32768 bytes)
-TCP bind hash table entries: 4096 (order: 2, 16384 bytes)
-TCP: Hash tables configured (established 4096 bind 4096)
-TCP reno registered
-UDP hash table entries: 256 (order: 0, 4096 bytes)
-UDP-Lite hash table entries: 256 (order: 0, 4096 bytes)
-NET: Registered protocol family 1
-RPC: Registered udp transport module.
-RPC: Registered tcp transport module.
-RPC: Registered tcp NFSv4.1 backchannel transport module.
-msgmni has been set to 235
-io scheduler noop registered
-io scheduler deadline registered (default)
-CLCD: RealView hardware, XVGA display
-Console: switching to colour frame buffer device 128x48
-armflash.0-0: Found 2 x16 devices at 0x0 in 32-bit bank
- Intel/Sharp Extended Query Table at 0x010A
- Intel/Sharp Extended Query Table at 0x010A
- Intel/Sharp Extended Query Table at 0x010A
- Intel/Sharp Extended Query Table at 0x010A
- Intel/Sharp Extended Query Table at 0x010A
-Using buffer write method
-Using auto-unlock on power-up/resume
-cfi_cmdset_0001: Erase suspend on write enabled
-armflash.0-1: Found 2 x16 devices at 0x0 in 32-bit bank
- Intel/Sharp Extended Query Table at 0x010A
- Intel/Sharp Extended Query Table at 0x010A
- Intel/Sharp Extended Query Table at 0x010A
- Intel/Sharp Extended Query Table at 0x010A
- Intel/Sharp Extended Query Table at 0x010A
-Using buffer write method
-Using auto-unlock on power-up/resume
-cfi_cmdset_0001: Erase suspend on write enabled
-Concatenating MTD devices:
-(0): "armflash.0-0"
-(1): "armflash.0-1"
-into device "armflash.0"
-RedBoot partition parsing not available
-afs partition parsing not available
-smsc911x: Driver version 2008-10-21.
-smsc911x-mdio: probed
-eth0: attached PHY driver [SMSC LAN911x Internal PHY] (mii_bus:phy_addr=0:01, i)
-net eth0: MAC Address: 00:02:f7:00:3a:80
-mice: PS/2 mouse device common for all mice
-mmci-pl18x fpga:mmc0: mmc0: MMCI/PL180 manf 41 rev 0 cfg 00 at 0x000000001000500
-mmci-pl18x fpga:mmc0: IRQ 46, 47 (pio)
-aaci-pl041 fpga:aaci: ARM AC'97 Interface at 0x0000000010004000, irq 32, fifo 52
-ALSA device list:
-  #0: ARM AC'97 Interface at 0x0000000010004000, irq 32
-TCP cubic registered
-NET: Registered protocol family 17
-VFP support v0.3: implementor 41 architecture 1 part 20 variant b rev 3
-mmc0: host does not support reading read-only switch. assuming write-enable.
-mmc0: new SD card at address e624
-mmcblk0: mmc0:e624 SU256 241 MiB
- mmcblk0: p1
-net eth0: SMSC911x/921x identified at 0xc8880000, IRQ: 41
-atkbd serio0: keyboard reset failed on fpga:kmi0
-IP-Config: Complete:
-     device=eth0, addr=192.168.0.4, mask=255.255.255.0, gw=192.168.0.1,
-     host=arm11mpcore, domain=, nis-domain=(none),
-     bootserver=192.168.0.3, rootserver=192.168.0.3, rootpath=
-Warning: unable to open an initial console.
-Freeing init memory: 6568K
-input: AT Raw Set 2 keyboard as /class/input/input0
-
-Please press Enter to activate this console.
-starting pid 342, tty '/dev/ttyAMA0': '/bin/sh -sc ". /etc/profile"'
-root@ME:/
-root@ME:/
-
-Yours,
-Linus Walleij
