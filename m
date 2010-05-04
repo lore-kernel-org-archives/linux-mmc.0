@@ -1,70 +1,107 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: [PATCH v8 0/2] sDMA descriptor autoloading feature
-Date: Tue, 4 May 2010 18:15:29 -0500
-Message-ID: <00ea01caebdf$affcb8d0$544ff780@am.dhcp.ti.com>
-References: <i2x618f0c911004291034g7f5b377ds5efaf74c901bc036@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+From: akpm@linux-foundation.org
+Subject: + s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build.patch added to -mm tree
+Date: Tue, 04 May 2010 16:46:06 -0700
+Message-ID: <201005042346.o44Nk6Oi025952@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:55427 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S934608Ab0EDXPj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 4 May 2010 19:15:39 -0400
-In-Reply-To: <i2x618f0c911004291034g7f5b377ds5efaf74c901bc036@mail.gmail.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:37532 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754139Ab0EDXqa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 May 2010 19:46:30 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Venkatraman S' <svenkatr@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: 'Tony Lindgren' <tony@atomide.com>, 'Adrian Hunter' <adrian.hunter@nokia.com>, 'Santosh Shilimkar' <santosh.shilimkar@ti.com>
+To: mm-commits@vger.kernel.org
+Cc: mcuelenaere@gmail.com, ben-linux@fluff.org, linux-mmc@vger.kernel.org, thomas.ab@samsung.com
 
 
+The patch titled
+     mmc: s3c6410: add new quirk in sdhci driver and update ADMA descriptor build.
+has been added to the -mm tree.  Its filename is
+     s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build.patch
 
-> -----Original Message-----
-> From: svenkatr@gmail.com [mailto:svenkatr@gmail.com] On Behalf Of
-> Venkatraman S
-> Sent: Thursday, April 29, 2010 12:35 PM
-> To: linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org; linux-arm-
-> kernel@lists.infradead.org
-> Cc: Madhusudhan Chikkature; Tony Lindgren; Adrian Hunter; Santosh
-> Shilimkar
-> Subject: [PATCH v8 0/2] sDMA descriptor autoloading feature
-> 
->     This patch series is the introduction of new sDMA feature: descriptor
-> autoloading (v8) and it's adoption by the OMAP HSMMC driver.
-> 
->    The previous version (v7) was blocked on achieving proper interrupt
-> syncronisation
-> between the MMC and DMA callback in the HSMMC driver.
->   Thanks to Adrian Hunter's patch,
-> https://patchwork.kernel.org/patch/94670/
-> this has been cleaned up.
-> 
-> Current version is based on for-next branch + Adrian Hunter's
-> interrupt syncronisation patch
-> (https://patchwork.kernel.org/patch/94670)
-> 
-> Changes since v7:
->   * Removed the 'fix race condition between DMA and HSMMC callback'
-> part of the series
->   * Added memory barries in start and resume sglist transfer for cpu
-> buffer syncronization
->   * Cleanup and comments
-> 
-> This has been tested on OMAP3430, OMAP3630 and OMAP4430 SDP
-> for MMC file transfer and as boot file system.
-> 
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-The HSMMC driver changes look good to me. I can ACK that but am not a DMA
-expert to review your changes to the DMA driver.
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-> Venkatraman S:
->     sDMA: descriptor autoloading feature
->     MMC: omap hsmmc adoption of descriptor autoloading feature
-> 
->  arch/arm/plat-omap/dma.c              |  289
-> ++++++++++++++++++++++++++++++++-
->  arch/arm/plat-omap/include/plat/dma.h |  170 +++++++++++++++++++
->  drivers/mmc/host/omap_hsmmc.c         |  148 ++++++++++++++---
->  3 files changed, 583 insertions(+), 24 deletions(-)
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc: s3c6410: add new quirk in sdhci driver and update ADMA descriptor build.
+From: Maurus Cuelenaere <mcuelenaere@gmail.com>
+
+The s3c6410 sdhci controller does not support the 'End' attribute and NOP
+attribute in the same 8-Byte ADMA descriptor.  This patch adds a new quirk
+to identify sdhci host contollers with such behaviour.  In addition to
+this, for controllers using the new quirk, the last entry in the ADMA
+descritor table is marked with the 'End' attribute (instead of using a NOP
+descriptor with 'End' attribute).
+
+Signed-off-by: Maurus Cuelenaere <mcuelenaere@gmail.com>
+Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
+Acked-by: Ben Dooks <ben-linux@fluff.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/sdhci.c |   20 +++++++++++++++-----
+ drivers/mmc/host/sdhci.h |    2 ++
+ 2 files changed, 17 insertions(+), 5 deletions(-)
+
+diff -puN drivers/mmc/host/sdhci.c~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build
++++ a/drivers/mmc/host/sdhci.c
+@@ -496,12 +496,22 @@ static int sdhci_adma_table_pre(struct s
+ 		WARN_ON((desc - host->adma_desc) > (128 * 2 + 1) * 4);
+ 	}
+ 
+-	/*
+-	 * Add a terminating entry.
+-	 */
++	if (host->quirks & SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC) {
++		/*
++		* Mark the last descriptor as the terminating descriptor
++		*/
++		if (desc != host->adma_desc) {
++			desc -= 8;
++			desc[0] |= 0x2; /* end */
++		}
++	} else {
++		/*
++		* Add a terminating entry.
++		*/
+ 
+-	/* nop, end, valid */
+-	sdhci_set_adma_desc(desc, 0, 0, 0x3);
++		/* nop, end, valid */
++		sdhci_set_adma_desc(desc, 0, 0, 0x3);
++	}
+ 
+ 	/*
+ 	 * Resync align buffer as we might have changed it.
+diff -puN drivers/mmc/host/sdhci.h~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build drivers/mmc/host/sdhci.h
+--- a/drivers/mmc/host/sdhci.h~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build
++++ a/drivers/mmc/host/sdhci.h
+@@ -238,6 +238,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
+ /* Controller reports wrong base clock capability */
+ #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
++/* Controller cannot support End Attribute in NOP ADMA descriptor */
++#define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
+ 
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
+_
+
+Patches currently in -mm which might be from mcuelenaere@gmail.com are
+
+s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build.patch
+s3c6410-enable-adma-feature-in-6410-sdhci-controller.patch
+sdhci-enable-multiblock-transfers-in-sdhci-s3c.patch
+s3c-rtc-driver-add-support-for-s3c64xx.patch
 
