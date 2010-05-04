@@ -1,7 +1,8 @@
 From: "kishore kadiyala" <kishore.kadiyala@ti.com>
-Subject: [PATCH v2 0/5] Adding MMC Support on OMAP4430 SDP
-Date: Tue, 4 May 2010 21:31:14 +0530 (IST)
-Message-ID: <35156.10.24.255.17.1272988874.squirrel@dbdmail.itg.ti.com>
+Subject: [PATCH v2 1/5] OMAP4-HSMMC: Adding HSMMC support for OMAP4430
+     Board file
+Date: Tue, 4 May 2010 21:31:23 +0530 (IST)
+Message-ID: <35156.10.24.255.17.1272988883.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
@@ -11,41 +12,111 @@ To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 Cc: tony@atomide.com, madhu.cr@ti.com, jarkko.lavinen@nokia.com, rmk@arm.linux.org.uk, paul@pwsan.com
 List-Id: linux-mmc@vger.kernel.org
 
-Adding board and regulator support for MMC1 and MMC2 controllers
-on OMAP4.
+This patch adds MMC1 and MMC2 Controller data for OMAP4430 Board
+file.
 
-V2:
-- Rebased to Mainline version 2.6.34-rc6
-- The Patch series has dependencies on I2c and Regulator support
-  posted earlier
-  [1] http://www.mail-archive.com/linux-omap@vger.kernel.org/msg26256.html
-  [2] http://www.mail-archive.com/linux-i2c@vger.kernel.org/msg02755.html
-  [3] https://patchwork.kernel.org/patch/94054/
-- Tested on both OMAP4430 SDP and OMAP3430 SDP
-  [Also omap_hsmmc.c as Kernel Module]
+Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+---
+ arch/arm/mach-omap2/Makefile        |    3 +-
+ arch/arm/mach-omap2/board-4430sdp.c |   39 ++++++++++++++++++++++++++++------
+ 2 files changed, 34 insertions(+), 8 deletions(-)
 
-V1:
-  http://www.mail-archive.com/linux-omap@vger.kernel.org/msg26858.html
+diff --git a/arch/arm/mach-omap2/Makefile b/arch/arm/mach-omap2/Makefile
+index ffe600a..65d8d11 100644
+--- a/arch/arm/mach-omap2/Makefile
++++ b/arch/arm/mach-omap2/Makefile
+@@ -140,7 +140,8 @@ obj-$(CONFIG_MACH_IGEP0020)		+= board-igep0020.o \
+ 					   hsmmc.o
+ obj-$(CONFIG_MACH_OMAP3_TOUCHBOOK)	+= board-omap3touchbook.o \
+ 					   hsmmc.o
+-obj-$(CONFIG_MACH_OMAP_4430SDP)		+= board-4430sdp.o
++obj-$(CONFIG_MACH_OMAP_4430SDP)		+= board-4430sdp.o \
++					   hsmmc.o
 
-Kishore Kadiyala (5):
-  OMAP4-HSMMC: Adding HSMMC support for OMAP4430 Board file
-  OMAP4-HSMMC: Adding Card detect support
-  OMAP4-HSMMC: Addind MMC-TWL regulator changes
-  OMAP4-HSMMC: Adds Dummy Interface clock's for MMC controllers
-  OMAP4-HSMMC: Enabling MMC support in OMAP4430SDP defconfig
+ obj-$(CONFIG_MACH_OMAP3517EVM)		+= board-am3517evm.o
 
- arch/arm/configs/omap_4430sdp_defconfig   |   19 ++++-
- arch/arm/mach-omap2/Makefile              |    3 +-
- arch/arm/mach-omap2/board-4430sdp.c       |   40 ++++++++--
- arch/arm/mach-omap2/clock44xx_data.c      |    5 +
- arch/arm/mach-omap2/hsmmc.c               |  123 ++++++++++++++++++++++++++---
- arch/arm/mach-omap2/hsmmc.h               |    1 +
- arch/arm/plat-omap/include/plat/control.h |   17 ++++
- arch/arm/plat-omap/include/plat/mmc.h     |    2 +
- drivers/mfd/twl6030-irq.c                 |   27 ++++++
- drivers/mmc/host/omap_hsmmc.c             |   18 ++++-
- include/linux/i2c/twl.h                   |   42 ++++++++++
- 11 files changed, 276 insertions(+), 21 deletions(-)
+diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
+index f1b9708..c4e61d5 100644
+--- a/arch/arm/mach-omap2/board-4430sdp.c
++++ b/arch/arm/mach-omap2/board-4430sdp.c
+@@ -33,6 +33,7 @@
+ #include <plat/control.h>
+ #include <plat/timer-gp.h>
+ #include <plat/usb.h>
++#include "hsmmc.h"
 
+ #define ETHERNET_KS8851_IRQ		34
+ #define ETHERNET_KS8851_POWER_ENABLE	48
+@@ -93,16 +94,27 @@ static struct omap_musb_board_data musb_board_data = {
+ 	.power			= 100,
+ };
 
+-static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
++static struct omap2_hsmmc_info mmc[] = {
+ 	{
+-		.supply = "vmmc",
++		.mmc		= 1,
++		.wires		= 8,
++		/* "mmc0_cd" is not a gpio interrupt
++		 * but is a phoenix interrupt
++		 */
++		.gpio_cd	= TWL6030_IRQ_BASE + MMCDETECT_INTR_OFFSET,
++		.gpio_wp	= -EINVAL,
+ 	},
+ 	{
+-		.supply = "vmmc",
+-	},
+-	{
+-		.supply = "vmmc",
++		.mmc		= 2,
++		.wires		= 8,
++		.gpio_cd	= -EINVAL,
++		.gpio_wp	= -EINVAL,
++		.nonremovable   = true,
+ 	},
++	{}	/* Terminator */
++};
++
++static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
+ 	{
+ 		.supply = "vmmc",
+ 	},
+@@ -111,6 +123,18 @@ static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
+ 	},
+ };
+
++static int __init sdp4430_mmc_init(void)
++{
++	omap2_hsmmc_init(mmc);
++
++	/* link regulators to MMC adapters ... we "know" the
++	 * regulators will be set up only *after* we return.
++	 */
++	sdp4430_vmmc_supply[0].dev = mmc[0].dev;
++	sdp4430_vmmc_supply[1].dev = mmc[1].dev;
++	return 0;
++}
++
+ static struct regulator_init_data sdp4430_vaux1 = {
+ 	.constraints = {
+ 		.min_uV			= 1000000,
+@@ -162,7 +186,7 @@ static struct regulator_init_data sdp4430_vmmc = {
+ 					| REGULATOR_CHANGE_MODE
+ 					| REGULATOR_CHANGE_STATUS,
+ 	},
+-	.num_consumer_supplies  = 5,
++	.num_consumer_supplies  = 2,
+ 	.consumer_supplies      = sdp4430_vmmc_supply,
+ };
+
+@@ -281,6 +305,7 @@ static void __init omap_4430sdp_init(void)
+ 	omap4_i2c_init();
+ 	platform_add_devices(sdp4430_devices, ARRAY_SIZE(sdp4430_devices));
+ 	omap_serial_init();
++	sdp4430_mmc_init();
+ 	/* OMAP4 SDP uses internal transceiver so register nop transceiver */
+ 	usb_nop_xceiv_register();
+ 	/* FIXME: allow multi-omap to boot until musb is updated for omap4 */
+-- 
+1.6.3.3
 
