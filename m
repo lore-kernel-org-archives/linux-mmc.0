@@ -1,230 +1,270 @@
 From: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH 4/7] OMAP4-HSMMC: Addind MMC-TWL regulator changes
-Date: Tue, 4 May 2010 11:33:17 +0530
-Message-ID: <l2k7f9d1ffb1005032303o6e0c63ddq653487090053377@mail.gmail.com>
-References: <63579.10.24.255.18.1271874048.squirrel@dbdmail.itg.ti.com>
-	 <20100421210023.GI18272@atomide.com>
+Subject: Re: [PATCH 3/7] OMAP4-HSMMC: Adding Card detect support
+Date: Tue, 4 May 2010 11:41:52 +0530
+Message-ID: <w2o7f9d1ffb1005032311udda8b2clcee872f93a51ac51@mail.gmail.com>
+References: <63568.10.24.255.18.1271874040.squirrel@dbdmail.itg.ti.com>
+	 <20100421190827.GH18272@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:47273 "EHLO
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:42755 "EHLO
 	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753619Ab0EDGDS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 May 2010 02:03:18 -0400
-In-Reply-To: <20100421210023.GI18272@atomide.com>
+	with ESMTP id S1754782Ab0EDGLx convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 May 2010 02:11:53 -0400
+In-Reply-To: <20100421190827.GH18272@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>
 Cc: kishore kadiyala <kishore.kadiyala@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com, jarkko.lavinen@nokia.com, rmk+lkml@arm.linux.org.uk, santosh.shilimkar@ti.com
 
-On Thu, Apr 22, 2010 at 2:30 AM, Tony Lindgren <tony@atomide.com> wrote=
-:
+On Thu, Apr 22, 2010 at 12:38 AM, Tony Lindgren <tony@atomide.com> wrot=
+e:
 > * kishore kadiyala <kishore.kadiyala@ti.com> [100421 11:16]:
->> This patch adds PBIAS Configuration during POWER ON and OFF.
->> Also it adds MMC1 Card detect configuration on Phoenix
+>> Since OMAP4's card detection doesn't support GPIO,this patch
+>> basically moves card detection API from driver to Board file so
+>> that it can handle in both GPIO and NON-GPIO case.
+>> This Patch also adds a flag which can differentiate whether the
+>> card-detect line is GPIO or NON-GPIO.
 >>
 >> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
 >> ---
->> =A0arch/arm/mach-omap2/hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0145 =
-+++++++++++++++++++++++------
->> =A0arch/arm/plat-omap/include/plat/control.h | =A0 17 ++++
->> =A02 files changed, 134 insertions(+), 28 deletions(-)
+>> =A0arch/arm/mach-omap2/board-4430sdp.c =A0 | =A0 =A01 +
+>> =A0arch/arm/mach-omap2/hsmmc.c =A0 =A0 =A0 =A0 =A0 | =A0 74 ++++++++=
++++++++++++++++++++++++++
+>> =A0arch/arm/mach-omap2/hsmmc.h =A0 =A0 =A0 =A0 =A0 | =A0 =A01 +
+>> =A0arch/arm/plat-omap/include/plat/mmc.h | =A0 =A03 +-
+>> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 | =A0 29 +---------=
+--
+>> =A05 files changed, 81 insertions(+), 27 deletions(-)
 >>
+>> diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-oma=
+p2/board-4430sdp.c
+>> index eae7c80..4e8f74e 100644
+>> --- a/arch/arm/mach-omap2/board-4430sdp.c
+>> +++ b/arch/arm/mach-omap2/board-4430sdp.c
+>> @@ -89,6 +89,7 @@ static struct omap2_hsmmc_info mmc[] =3D {
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* but is a phoenix interrupt
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 .gpio_cd =A0 =A0 =A0 =A0=3D 384,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 .cd_type =A0 =A0 =A0 =A0=3D true,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 .gpio_wp =A0 =A0 =A0 =A0=3D -EINVAL,
+>> =A0 =A0 =A0 },
+>> =A0 =A0 =A0 {
 >> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc=
 =2Ec
->> index ca3d4c9..7653434 100644
+>> index 9ad2295..ca3d4c9 100644
 >> --- a/arch/arm/mach-omap2/hsmmc.c
 >> +++ b/arch/arm/mach-omap2/hsmmc.c
->> @@ -26,11 +26,18 @@
->>
->> =A0static u16 control_pbias_offset;
->> =A0static u16 control_devconf1_offset;
->> +static u16 control_mmc1;
+>> @@ -13,6 +13,8 @@
+>> =A0#include <linux/slab.h>
+>> =A0#include <linux/string.h>
+>> =A0#include <linux/delay.h>
+>> +#include <linux/gpio.h>
+>> +#include <linux/i2c/twl.h>
+>> =A0#include <mach/hardware.h>
+>> =A0#include <plat/control.h>
+>> =A0#include <plat/mmc.h>
+>> @@ -27,7 +29,11 @@ static u16 control_devconf1_offset;
 >>
 >> =A0#define HSMMC_NAME_LEN =A0 =A0 =A0 9
 >>
->> =A0/* Phoenix Registers */
->> -#define TWL6030_MMCCTRL =A0 =A0 =A00xEE
->> +#define TWL6030_MMCCTRL =A0 =A0 =A0 =A0 =A0 =A0 =A00xEE
->> +#define VMMC_AUTO_OFF =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x1 << 3)
->> +#define SW_FC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x1 <=
-< 2)
->> +
->> +#define TWL6030_CFG_INPUT_PUPD3 =A0 =A0 =A00xF2
->> +#define MMC_PU =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x1 << =
-3)
->> +#define MMC_PD =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x1 << =
-2)
+>> +/* Phoenix Registers */
+>> +#define TWL6030_MMCCTRL =A0 =A0 =A00xEE
 >
-> These defines need to go to twl code.
+> This define belongs to the twl code.
+
+Agreed.
+
 >
 >> =A0static struct hsmmc_controller {
->> =A0 =A0 =A0 struct omap_mmc_platform_data =A0 *mmc;
->> @@ -120,27 +127,38 @@ static void hsmmc1_before_set_reg(struct devic=
-e *dev, int slot,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D=
- ~OMAP243X_MMC1_ACTIVE_OVERWRITE;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, OM=
-AP243X_CONTROL_DEVCONF1);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (!cpu_is_omap44xx()) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc->slots[0].internal=
-_clock) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D om=
-ap_ctrl_readl(OMAP2_CONTROL_DEVCONF0);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D O=
-MAP2_MMCSDIO1ADPCLKISEL;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_=
-writel(reg, OMAP2_CONTROL_DEVCONF0);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>> + =A0 =A0 struct omap_mmc_platform_data =A0 *mmc;
+>> =A0 =A0 =A0 char =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0name[HSMMC_NAME_LEN + 1];
+>> =A0} hsmmc[OMAP34XX_NR_MMC];
 >>
->> - =A0 =A0 =A0 =A0 =A0 =A0 if (mmc->slots[0].internal_clock) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(OM=
-AP2_CONTROL_DEVCONF0);
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D OMAP2_MMCSDIO1ADP=
-CLKISEL;
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, OMAP=
-2_CONTROL_DEVCONF0);
->> - =A0 =A0 =A0 =A0 =A0 =A0 }
->> -
->> - =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_offs=
-et);
->> - =A0 =A0 =A0 =A0 =A0 =A0 if (cpu_is_omap3630()) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Set MMC I/O to 52Mhz */
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 prog_io =3D omap_ctrl_read=
-l(OMAP343X_CONTROL_PROG_IO1);
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 prog_io |=3D OMAP3630_PRG_=
-SDMMC1_SPEEDCTRL;
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(prog_io, =
-OMAP343X_CONTROL_PROG_IO1);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(co=
-ntrol_pbias_offset);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (cpu_is_omap3630()) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Set MMC=
- I/O to 52Mhz */
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 prog_io =3D
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_=
-readl(OMAP343X_CONTROL_PROG_IO1);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 prog_io |=3D=
- OMAP3630_PRG_SDMMC1_SPEEDCTRL;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_=
-writel(prog_io,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 OMAP343X_CONTROL_PROG_IO1);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D O=
-MAP2_PBIASSPEEDCTRL0;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~OMAP2_PBIASLITEP=
-WRDNZ0;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D OMAP2_PBIASSPEEDC=
-TRL0;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(co=
-ntrol_pbias_offset);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIA=
-SLITE_PWRDNZ |
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> - =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~OMAP2_PBIASLITEPWRDNZ0;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offs=
-et);
->> =A0 =A0 =A0 } else {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_of=
-fset);
->> - =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~OMAP2_PBIASLITEPWRDNZ0;
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (!cpu_is_omap44xx())
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~OMAP2_PBIASLITEP=
-WRDNZ0;
->> + =A0 =A0 =A0 =A0 =A0 =A0 else
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIA=
-SLITE_PWRDNZ |
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 OMAP4_MMC1_PWRDNZ);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offs=
-et);
->> =A0 =A0 =A0 }
->> =A0}
->> @@ -155,16 +173,36 @@ static void hsmmc1_after_set_reg(struct device=
- *dev, int slot,
+>> @@ -42,6 +48,50 @@ static int hsmmc_get_context_loss(struct device *=
+dev)
+>> =A0#define hsmmc_get_context_loss NULL
+>> =A0#endif
 >>
->> =A0 =A0 =A0 if (power_on) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_of=
-fset);
->> - =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP2_PBIASLITEPWRDNZ0 | OMAP2_P=
-BIASSPEEDCTRL0);
->> - =A0 =A0 =A0 =A0 =A0 =A0 if ((1 << vdd) <=3D MMC_VDD_165_195)
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~OMAP2_PBIASLITEV=
-MODE0;
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (!cpu_is_omap44xx())
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP2_PBIASLITEP=
-WRDNZ0 | OMAP2_PBIASSPEEDCTRL0);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D OMAP2_PBIASLITEVM=
-ODE0;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D OMAP4_MMC1_PBIASL=
-ITE_PWRDNZ;
->> + =A0 =A0 =A0 =A0 =A0 =A0 if ((1 << vdd) <=3D MMC_VDD_165_195) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!cpu_is_omap44xx()) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~=
-OMAP2_PBIASLITEVMODE0;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~=
-OMAP4_MMC1_PBIASLITE_VMODE;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (=
-OMAP4_MMC1_PBIASLITE_PWRDNZ |
+>> +static int twl_mmc_get_cover_state(struct device *dev, int slot)
+>> +{
+>> + =A0 =A0 struct omap_mmc_platform_data *mmc =3D dev->platform_data;
+>> +
+>> + =A0 =A0 /* NOTE: assumes card detect signal is active-low */
+>> + =A0 =A0 return !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
+>> +}
+>> +
+>> +static int twl_mmc_card_detect(int irq)
+>> +{
+>> + =A0 =A0 unsigned i;
+>> + =A0 =A0 u8 read_reg;
+>> + =A0 =A0 unsigned res;
+>> +
+>> +
+>> + =A0 =A0 for (i =3D 0; i < ARRAY_SIZE(hsmmc); i++) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 struct omap_mmc_platform_data *mmc;
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 mmc =3D hsmmc[i].mmc;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (!mmc)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 continue;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (irq !=3D mmc->slots[0].card_detect_irq=
+)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 continue;
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (mmc->slots[0].nongpio_cd) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* BIT0 of REG_MMC_CTRL
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* 0 - Card not present
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* 1 - Card present
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 res =3D twl_i2c_read_u8(TW=
+L6030_MODULE_ID0,
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+ =A0 &read_reg, TWL6030_MMCCTRL);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (res >=3D 0)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return rea=
+d_reg & 0x1;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return !gpio_get_value_can=
+sleep
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 (mmc->slots[0].switch_pin);
 >> + =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!cpu_is_omap44xx())
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D O=
-MAP2_PBIASLITEVMODE0;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (=
-OMAP4_MMC1_PBIASLITE_VMODE |
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1=
-_PBIASLITE_PWRDNZ |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* NOTE: assumes card dete=
+ct signal is active-low */
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return !gpio_get_value_can=
+sleep
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 OMAP4_MMC1_PWRDNZ);
+ =A0 (mmc->slots[0].switch_pin);
 >> + =A0 =A0 =A0 =A0 =A0 =A0 }
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offs=
-et);
->> =A0 =A0 =A0 } else {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_of=
-fset);
->> - =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP2_PBIASSPEEDCTRL0 | OMAP2_PB=
-IASLITEPWRDNZ0 |
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP2_PBIASLITEVMODE0);
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (!cpu_is_omap44xx())
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP2_PBIASSPEED=
-CTRL0 |
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP2_PBIA=
-SLITEPWRDNZ0 | OMAP2_PBIASLITEVMODE0);
->> + =A0 =A0 =A0 =A0 =A0 =A0 else
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg |=3D (OMAP4_MMC1_PB=
-IASLITE_PWRDNZ |
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1=
-_PBIASLITE_VMODE |
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1=
-_PWRDNZ);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offs=
-et);
->> =A0 =A0 =A0 }
->> =A0}
+>> + =A0 =A0 }
+>> + =A0 =A0 return -ENOSYS;
+>> +}
 >
-> This all should be set once during init. Please don't sprinkle
-> cpu_is_omapxxxx() tests all over the code. That makes the code
-> hard to maintain.
->
-> Instead, please just register the omap4 specific functions
-> once during init. If something cannot be currently defined
-> that way, making that change should be a separate patch
-> before adding the omap4 code.
+> You should just register a separate twl_card_detect function during i=
+nit
+> instead of doing these tests over and over again.
 
-Agreed, i will doing it in next version.
+Agreed.
+
+>
+>> =A0static void hsmmc1_before_set_reg(struct device *dev, int slot,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int =
+power_on, int vdd)
+>> =A0{
+>> @@ -189,8 +239,32 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc=
+_info
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->get_context_loss_count =3D hsmmc_ge=
+t_context_loss;
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].switch_pin =3D c->gpio_cd;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].nongpio_cd =3D c->cd_type;
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].gpio_wp =3D c->gpio_wp;
+>>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 /* TWL Card detect can be GPIO based or NO=
+N-GPIO Based */
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (!c->cd_type) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (gpio_is_valid(c->gpio_=
+cd)) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
+[0].card_detect_irq =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 gpio_to_irq(c->gpio_cd);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (c->cov=
+er_only)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 mmc->slots[0].get_cover_state =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 twl_mmc_get_cover_state;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 mmc->slots[0].card_detect =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 twl_mmc_card_detect;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
+[0].switch_pin =3D -EINVAL;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 } else {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].card_detect_=
+irq =3D c->gpio_cd;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (c->cover_only)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
+[0].get_cover_state =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 twl_mmc_get_cover_state;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
+[0].card_detect =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 twl_mmc_card_detect;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 }
+>> +
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].remux =3D c->remux;
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (c->cover_only)
+>
+> Once you register separate twl_card_detect during init, this part wil=
+l
+> not be needed.
+
+Agreed
+
+>
+>> diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc=
+=2Eh
+>> index 36f0ba8..3dfc43a 100644
+>> --- a/arch/arm/mach-omap2/hsmmc.h
+>> +++ b/arch/arm/mach-omap2/hsmmc.h
+>> @@ -17,6 +17,7 @@ struct omap2_hsmmc_info {
+>> =A0 =A0 =A0 bool =A0 =A0no_off; =A0 =A0 =A0 =A0 /* power_saving and =
+power is not to go off */
+>> =A0 =A0 =A0 bool =A0 =A0vcc_aux_disable_is_sleep; /* Regulator off r=
+emapped to sleep */
+>> =A0 =A0 =A0 int =A0 =A0 gpio_cd; =A0 =A0 =A0 =A0/* or -EINVAL */
+>> + =A0 =A0 bool =A0 =A0cd_type; =A0 =A0 =A0 =A0/* Card detect Type:NO=
+N-GPIO=3Dtrue,GPIO=3Dflase */
+>> =A0 =A0 =A0 int =A0 =A0 gpio_wp; =A0 =A0 =A0 =A0/* or -EINVAL */
+>> =A0 =A0 =A0 char =A0 =A0*name; =A0 =A0 =A0 =A0 =A0/* or NULL for def=
+ault */
+>> =A0 =A0 =A0 struct device *dev; =A0 =A0 /* returned: pointer to mmc =
+adapter */
+>> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-o=
+map/include/plat/mmc.h
+>> index a1bac07..521decc 100644
+>> --- a/arch/arm/plat-omap/include/plat/mmc.h
+>> +++ b/arch/arm/plat-omap/include/plat/mmc.h
+>> @@ -103,6 +103,7 @@ struct omap_mmc_platform_data {
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned vcc_aux_disable_is_sleep:1;
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 int switch_pin; =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 /* gpio (card detect) */
+>> + =A0 =A0 =A0 =A0 =A0 =A0 unsigned nongpio_cd:1; =A0/* NON-GPIO=3Dtr=
+ue , GPIO=3Dfalse */
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 int gpio_wp; =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0/* gpio (write protect) */
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 int (*set_bus_mode)(struct device *dev, =
+int slot, int bus_mode);
+>> @@ -132,7 +133,7 @@ struct omap_mmc_platform_data {
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Card detection IRQs */
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 int card_detect_irq;
+>> - =A0 =A0 =A0 =A0 =A0 =A0 int (*card_detect)(struct device *dev, int=
+ slot);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 int (*card_detect)(int irq);
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int ban_openended:1;
+>>
+>
+> Why are you removing *dev from card_detect?
+
+My fault and will retain in next version
+
+>
+> Will comment further after that all is fixed. Please also make sure
+> omap_hsmmc.c compiles and works as a module.
+
+Sure will test omap_hsmmc.c as module .
 
 Regards,
-kishore
+Kishore
