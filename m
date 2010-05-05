@@ -1,35 +1,45 @@
 From: kishore kadiyala <kishorek.kadiyala@gmail.com>
 Subject: Re: [PATCH v2 3/5] OMAP4-HSMMC: Adding MMC-TWL regulator changes
-Date: Wed, 5 May 2010 12:17:08 +0530
-Message-ID: <u2p7f9d1ffb1005042347wa11a98feu95d62a8ca85fb1ef@mail.gmail.com>
+Date: Wed, 5 May 2010 12:19:08 +0530
+Message-ID: <l2x7f9d1ffb1005042349wea6b4c1cwa264576612731342@mail.gmail.com>
 References: <35156.10.24.255.17.1272988897.squirrel@dbdmail.itg.ti.com>
-	 <alpine.DEB.2.00.1005041704390.20898@utopia.booyaka.com>
+	 <E0D41E29EB0DAC4E9F3FF173962E9E94026F8C6E6E@dbde02.ent.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:63102 "EHLO
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:37143 "EHLO
 	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756360Ab0EEGrL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2010 02:47:11 -0400
-In-Reply-To: <alpine.DEB.2.00.1005041704390.20898@utopia.booyaka.com>
+	with ESMTP id S1756875Ab0EEGtJ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2010 02:49:09 -0400
+In-Reply-To: <E0D41E29EB0DAC4E9F3FF173962E9E94026F8C6E6E@dbde02.ent.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Walmsley <paul@pwsan.com>
-Cc: kishore kadiyala <kishore.kadiyala@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, madhu.cr@ti.com, jarkko.lavinen@nokia.com, rmk@arm.linux.org.uk
+To: "G, Manjunath Kondaiah" <manjugk@ti.com>
+Cc: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "tony@atomide.com" <tony@atomide.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "jarkko.lavinen@nokia.com" <jarkko.lavinen@nokia.com>, "rmk@arm.linux.org.uk" <rmk@arm.linux.org.uk>, "paul@pwsan.com" <paul@pwsan.com>
 
-On Wed, May 5, 2010 at 4:41 AM, Paul Walmsley <paul@pwsan.com> wrote:
-> Hello,
+On Wed, May 5, 2010 at 8:53 AM, G, Manjunath Kondaiah <manjugk@ti.com> =
+wrote:
 >
-> On Tue, 4 May 2010, kishore kadiyala wrote:
 >
+>> -----Original Message-----
+>> From: linux-omap-owner@vger.kernel.org
+>> [mailto:linux-omap-owner@vger.kernel.org] On Behalf Of
+>> kishore kadiyala
+>> Sent: Tuesday, May 04, 2010 9:32 PM
+>> To: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org
+>> Cc: tony@atomide.com; Chikkature Rajashekar, Madhusudhan;
+>> jarkko.lavinen@nokia.com; rmk@arm.linux.org.uk; paul@pwsan.com
+>> Subject: [PATCH v2 3/5] OMAP4-HSMMC: Adding MMC-TWL regulator change=
+s
+>>
 >> This patch adds PBIAS Configuration during POWER ON and OFF.
 >> Also it adds MMC1 Card detect configuration on Phoenix
 >>
 >> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
 >> ---
->> =A0arch/arm/mach-omap2/hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0121 =
-++++++++++++++++++++++++++---
+>> =A0arch/arm/mach-omap2/hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0121
+>> ++++++++++++++++++++++++++---
 >> =A0arch/arm/plat-omap/include/plat/control.h | =A0 17 ++++
 >> =A0include/linux/i2c/twl.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0=
  42 +++++++++-
@@ -56,8 +66,8 @@ On Wed, May 5, 2010 at 4:41 AM, Paul Walmsley <paul@pwsan.com> wrote:
 >>
 >> =A0#define HSMMC_NAME_LEN =A0 =A0 =A0 9
 >>
->> @@ -43,7 +45,7 @@ static int hsmmc_get_context_loss(struct device *d=
-ev)
+>> @@ -43,7 +45,7 @@ static int hsmmc_get_context_loss(struct
+>> device *dev)
 >> =A0#define hsmmc_get_context_loss NULL
 >> =A0#endif
 >>
@@ -68,8 +78,8 @@ ev)
 power_on, int vdd)
 >> =A0{
 >> =A0 =A0 =A0 u32 reg, prog_io;
->> @@ -96,7 +98,7 @@ static void hsmmc1_before_set_reg(struct device *d=
-ev, int slot,
+>> @@ -96,7 +98,7 @@ static void hsmmc1_before_set_reg(struct
+>> device *dev, int slot,
 >> =A0 =A0 =A0 }
 >> =A0}
 >>
@@ -79,8 +89,8 @@ ev, int slot,
 ower_on, int vdd)
 >> =A0{
 >> =A0 =A0 =A0 u32 reg;
->> @@ -120,6 +122,61 @@ static void hsmmc1_after_set_reg(struct device =
-*dev, int slot,
+>> @@ -120,6 +122,61 @@ static void hsmmc1_after_set_reg(struct
+>> device *dev, int slot,
 >> =A0 =A0 =A0 }
 >> =A0}
 >>
@@ -92,15 +102,15 @@ wer_on, int vdd)
 >> + =A0 =A0 u32 reg;
 >> +
 >> + =A0 =A0 /*
->> + =A0 =A0 =A0* Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0..=
-3) and the
->> + =A0 =A0 =A0* card with Vcc regulator (from twl4030 or whatever). =A0=
-OMAP has both
+>> + =A0 =A0 =A0* Assume we power both OMAP VMMC1 (for CMD, CLK,
+>> DAT0..3) and the
+>> + =A0 =A0 =A0* card with Vcc regulator (from twl4030 or whatever).
+>> OMAP has both
 >> + =A0 =A0 =A0* 1.8V and 3.0V modes, controlled by the PBIAS register=
 =2E
 >> + =A0 =A0 =A0*
->> + =A0 =A0 =A0* In 8-bit modes, OMAP VMMC1A (for DAT4..7) needs a sup=
-ply, which
+>> + =A0 =A0 =A0* In 8-bit modes, OMAP VMMC1A (for DAT4..7) needs a
+>> supply, which
 >> + =A0 =A0 =A0* is most naturally TWL VSIM; those pins also use PBIAS=
 =2E
 >> + =A0 =A0 =A0*
@@ -109,25 +119,18 @@ ply, which
 >> + =A0 =A0 if (power_on) {
 >> + =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_offs=
 et);
->> + =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ | O=
-MAP4_MMC1_PWRDNZ);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ |
+>> OMAP4_MMC1_PWRDNZ);
 >> + =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offset=
 );
 >> + =A0 =A0 } else {
 >> + =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_offs=
 et);
->> + =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ | O=
-MAP4_MMC1_PWRDNZ);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ |
+>> OMAP4_MMC1_PWRDNZ);
 >> + =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offset=
 );
 >> + =A0 =A0 }
->
-> If the code in both branches of the conditional is identical, what's =
-the
-> point of keeping the conditional?
-
-Agree and will correct
->
 >> +}
 >> +
 >> +static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot=
@@ -176,8 +179,8 @@ et);
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0i=
 nt power_on, int vdd)
 >> =A0{
->> @@ -140,6 +197,24 @@ static void hsmmc23_before_set_reg(struct devic=
-e *dev, int slot,
+>> @@ -140,6 +197,24 @@ static void
+>> hsmmc23_before_set_reg(struct device *dev, int slot,
 >> =A0 =A0 =A0 }
 >> =A0}
 >>
@@ -203,13 +206,13 @@ able to configure"
 >> + =A0 =A0 return ret;
 >> +}
 >> +
->> =A0static struct omap_mmc_platform_data *hsmmc_data[OMAP34XX_NR_MMC]=
- __initdata;
+>> =A0static struct omap_mmc_platform_data
+>> *hsmmc_data[OMAP34XX_NR_MMC] __initdata;
 >>
 >> =A0void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers=
 )
->> @@ -147,13 +222,28 @@ void __init omap2_hsmmc_init(struct omap2_hsmm=
-c_info
+>> @@ -147,13 +222,28 @@ void __init omap2_hsmmc_init(struct
+>> omap2_hsmmc_info
 >> =A0 =A0 =A0 struct omap2_hsmmc_info *c;
 >> =A0 =A0 =A0 int nr_hsmmc =3D ARRAY_SIZE(hsmmc_data);
 >> =A0 =A0 =A0 int i;
@@ -222,15 +225,15 @@ PBIAS_LITE;
 OL_DEVCONF1;
 >> + =A0 =A0 if (!cpu_is_omap44xx()) {
 >> + =A0 =A0 =A0 =A0 =A0 =A0 if (cpu_is_omap2430()) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D O=
-MAP243X_CONTROL_PBIAS_LITE;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_devconf1_offset =3D=
- OMAP243X_CONTROL_DEVCONF1;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D
+>> OMAP243X_CONTROL_PBIAS_LITE;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_devconf1_offset =3D
+>> OMAP243X_CONTROL_DEVCONF1;
 >> + =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D O=
-MAP343X_CONTROL_PBIAS_LITE;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_devconf1_offset =3D=
- OMAP343X_CONTROL_DEVCONF1;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D
+>> OMAP343X_CONTROL_PBIAS_LITE;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_devconf1_offset =3D
+>> OMAP343X_CONTROL_DEVCONF1;
 >> + =A0 =A0 =A0 =A0 =A0 =A0 }
 >> =A0 =A0 =A0 } else {
 >> - =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D OMAP343X_CONTROL_=
@@ -259,8 +262,8 @@ PEEDCTRL);
 >> =A0 =A0 =A0 }
 >>
 >> =A0 =A0 =A0 for (c =3D controllers; c->mmc; c++) {
->> @@ -186,6 +276,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_=
-info *controllers)
+>> @@ -186,6 +276,7 @@ void __init omap2_hsmmc_init(struct
+>> omap2_hsmmc_info *controllers)
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].wires =3D c->wires;
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].internal_clock =3D !c->ext=
 _clock;
@@ -270,38 +273,41 @@ _clock;
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->get_context_loss_count =3D hsmmc_ge=
 t_context_loss;
 >>
->> @@ -220,10 +311,18 @@ void __init omap2_hsmmc_init(struct omap2_hsmm=
-c_info
+>> @@ -220,10 +311,18 @@ void __init omap2_hsmmc_init(struct
+>> omap2_hsmmc_info
 >>
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 switch (c->mmc) {
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 case 1:
 >> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* on-chip level shifting =
 via PBIAS0/PBIAS1 */
 >> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].before_set_r=
-eg =3D hsmmc1_before_set_reg;
+eg =3D
+>> hsmmc1_before_set_reg;
 >> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].after_set_re=
-g =3D hsmmc1_after_set_reg;
+g =3D
+>> hsmmc1_after_set_reg;
 >> -
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (cpu_is_omap44xx()) {
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* on-chip=
- level shifting via PBIAS0/PBIAS1 */
+ level shifting via
+>> PBIAS0/PBIAS1 */
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
 [0].before_set_reg =3D
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 omap4_hsmmc1_before_set_reg;
+>> +
+>> omap4_hsmmc1_before_set_reg;
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
 [0].after_set_reg =3D
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 omap4_hsmmc1_after_set_reg;
+>> +
+>> omap4_hsmmc1_after_set_reg;
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
 [0].before_set_reg =3D
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 omap_hsmmc1_before_set_reg;
+>> +
+>> omap_hsmmc1_before_set_reg;
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
 [0].after_set_reg =3D
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 omap_hsmmc1_after_set_reg;
+>> +
+>> omap_hsmmc1_after_set_reg;
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Omap3630 HSMMC1 suppo=
 rts only 4-bit */
@@ -309,8 +315,8 @@ rts only 4-bit */
  c->wires > 4) {
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 c->wires=
  =3D 4;
->> diff --git a/arch/arm/plat-omap/include/plat/control.h b/arch/arm/pl=
-at-omap/include/plat/control.h
+>> diff --git a/arch/arm/plat-omap/include/plat/control.h
+>> b/arch/arm/plat-omap/include/plat/control.h
 >> index a56deee..6d17a61 100644
 >> --- a/arch/arm/plat-omap/include/plat/control.h
 >> +++ b/arch/arm/plat-omap/include/plat/control.h
@@ -322,8 +328,8 @@ at-omap/include/plat/control.h
 >> +#define OMAP44XX_CONTROL_MMC1 =A0 =A0 =A0 =A0 =A0 0x628
 >> +#define OMAP44XX_CONTROL_PBIAS_LITE =A0 =A0 0x600
 >> =A0/*
->> =A0 * REVISIT: This list of registers is not comprehensive - there a=
-re more
+>> =A0 * REVISIT: This list of registers is not comprehensive -
+>> there are more
 >> =A0 * that should be added.
 >> @@ -252,6 +255,20 @@
 >> =A0#define OMAP2_PBIASLITEPWRDNZ0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << =
@@ -373,8 +379,8 @@ re more
 >>
 >> =A0#define TWL4030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 0x4030
 >> =A0#define TWL6030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 0x6030
->> @@ -174,11 +181,40 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg,=
- unsigned
+>> @@ -174,11 +181,40 @@ int twl_i2c_read(u8 mod_no, u8 *value,
+>> u8 reg, unsigned
 >> =A0int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
 >> =A0int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
 >>
@@ -390,17 +396,17 @@ re more
 >> + =A0 =A0 int res =3D -1;
 >> + =A0 =A0 u8 reg_val =3D 0;
 >> +
->> + =A0 =A0 /* Unmasking the Card detect Interrupt line for MMC1 from =
-Phoenix */
+>> + =A0 =A0 /* Unmasking the Card detect Interrupt line for MMC1
+>> from Phoenix */
 >> + =A0 =A0 if (twl_class_is_6030()) {
 >> + =A0 =A0 =A0 =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCDETECT=
 _INT_MASK,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 REG_INT_MSK_LINE_B);
+>> +
+>> REG_INT_MSK_LINE_B);
 >> + =A0 =A0 =A0 =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCDETECT=
 _INT_MASK,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 REG_INT_MSK_STS_B);
+>> +
+>> REG_INT_MSK_STS_B);
 >> + =A0 =A0 }
 >> +
 >> + =A0 =A0 /*
@@ -412,34 +418,35 @@ _INT_MASK,
 >> + =A0 =A0 twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_MMCC=
 TRL);
 >> + =A0 =A0 res =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 TWL6030_CFG_INPUT_PUPD3);
+>> +
+>> TWL6030_CFG_INPUT_PUPD3);
 >> + =A0 =A0 if (res < 0)
 >> + =A0 =A0 =A0 =A0 =A0 =A0 return -EINVAL;
+>
+> Use return res; since "twl_i2c_read_u8" will be handling all types of
+> Errors.
+
+Agree
+
+>
 >> + =A0 =A0 reg_val =3D 0;
 >> + =A0 =A0 reg_val &=3D ~(MMC_PU | MMC_PD);
+>
+>
 >> + =A0 =A0 twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 TWL6030_CFG_INPUT_PUPD3);
->> + =A0 =A0 return 0;
->> +}
 >> +
->> =A0/*---------------------------------------------------------------=
--------*/
->>
->> =A0/*
->> --
->> 1.6.3.3
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-omap=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
+>> TWL6030_CFG_INPUT_PUPD3);
 >
+> reg_val is always zero.
+> You can replace with "twl_i2c_write_u8(TWL6030_MODULE_ID0, 0,
+> TWL6030_CFG_INPUT_PUPD3);
+
+I think should read the value first using "twl_i2c_read_u8" and set/res=
+et bits
+accordingly.
+
 >
-> - Paul
+> -Manjunath
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-omap"=
  in
