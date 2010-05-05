@@ -1,56 +1,70 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor autoloading feature
-Date: Wed, 5 May 2010 12:21:09 -0500
-Message-ID: <003901caec77$5a69d8b0$544ff780@am.dhcp.ti.com>
-References: <w2y618f0c911004291035qfec16290re9e236ae1e13a970@mail.gmail.com> <EAF47CD23C76F840A9E7FCE10091EFAB02C52D16D2@dbde02.ent.ti.com> <v2i618f0c911005050919m600f069ex34ba1175315cde5a@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] Disable the non working eMMC on Zoom2/3
+Date: Wed, 5 May 2010 11:27:27 -0700
+Message-ID: <20100505182727.GA29604@atomide.com>
+References: <2A3DCF3DA181AD40BDE86A3150B27B6B030D32D372@dbde02.ent.ti.com>
+ <4BB51740.2060802@ti.com>
+ <009a01cad1ee$e3bbae70$544ff780@am.dhcp.ti.com>
+ <20100407114938.GF7153@atomide.com>
+ <003801cad73e$86841df0$544ff780@am.dhcp.ti.com>
+ <20100427182111.GE7225@atomide.com>
+ <20100428192322.GG7225@atomide.com>
+ <006801cae709$e136fe40$544ff780@am.dhcp.ti.com>
+ <20100428194553.GH7225@atomide.com>
+ <006f01cae886$38da6920$544ff780@am.dhcp.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:55709 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751254Ab0EERV3 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2010 13:21:29 -0400
-In-Reply-To: <v2i618f0c911005050919m600f069ex34ba1175315cde5a@mail.gmail.com>
+Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:57440 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757649Ab0EES1a (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2010 14:27:30 -0400
+Content-Disposition: inline
+In-Reply-To: <006f01cae886$38da6920$544ff780@am.dhcp.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Venkatraman S' <svenkatr@ti.com>, "'Shilimkar, Santosh'" <santosh.shilimkar@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, 'Adrian Hunter' <adrian.hunter@nokia.com>, "'Kadiyala, Kishore'" <kishore.kadiyala@ti.com>, 'Tony Lindgren' <tony@atomide.com>
+To: Madhusudhan <madhu.cr@ti.com>
+Cc: 'Nishanth Menon' <nm@ti.com>, "'Ghorai, Sukumar'" <s-ghorai@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-<snip>
+* Madhusudhan <madhu.cr@ti.com> [100430 09:52]:
+> <snip>
+> 
+> > > >
+> > > > > Hmm, finally got around looking into this again. Looks like the mmc
+> > > > > is now working on my zoom3 with the current Linus' tree at commit
+> > > > > 7c6bd2010fced38444c9fd658f4c6ce61bd185bf. So I guess something that
+> > > > > we had in omap-fixes fixed this. Or maybe some fix for drivers/mmc?
+> > > > >
+> > > > > This is with the debug_ll patch applied:
+> > > > >
+> > > > > https://patchwork.kernel.org/patch/87532/
+> > > >
+> > > > For the microSD card, turns out the card I used was flakey. So
+> > > > that should explain some of the problems. I'm almost certain
+> > > > I tried with two different cards earlier though. In any case,
+> > > > let's assume the problem is only the eMMC.
+> > > >
+> > > Sorry, I did not get a complete picture. Your earlier email said that
+> > with
+> > > Linus tree eMMC on your Zoom3 is working. Is that correct?
+> > 
+> > Nope, now the microSD is working, eMMC is not working.
+> > 
+> > > IMHO, an omap level fix can not solve the problem with eMMC because as I
+> > can
+> > > see from the log you provided above that a 16G device is detected as 1G.
+> > > This is certainly due to the issue I mentioned earlier.
+> > 
+> > OK
+> 
+> This means that some production boards still have this issue with eMMC. So
+> my patch disables the support for MMC2 on zoom boards. Would you consider
+> that?
 
-> >> + =A0 =A0 if (cpu_is_omap44xx() || cpu_is_omap3630()) {
-> > Can we avoid above by passing this part of platform data??
-> > devices.c
->=20
-> I am not clear about the method. The board files export the
-> omap_mmc_platform_data.
-> Does it imply that all board files have to change and export
-> the capability so that it can be queried ?
->=20
+But is it also broken on zoom2?
 
-I don=92t see why this capability needs to be passed from the platform =
-data.
-As this feature is dependant on omap it is okay to have a cpu check in =
-the
-driver as the patch is doing it.
+And what about this "Simulate multi mmc card as one big" patch?
 
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 host->dma_ctrl_buf =3D dma_alloc_coheren=
-t(NULL,
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 DMA_CTRL_BUF_SIZE,
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 &host->dma_ctrl_buf_phy,
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 0);
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 if (host->dma_ctrl_buf !=3D NULL)
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->dma_caps |=3D DMA_=
-TYPE_SDMA_DLOAD;
-> >> + =A0 =A0 }
-> >> +
-> >> =A0 =A0 =A0 /* Since we do only SG emulation, we can have as many =
-segs
-> >> =A0 =A0 =A0 =A0* as we want. */
-> > Not your patch but above commenting style isn't right
-> OK
+Regards,
 
+Tony
