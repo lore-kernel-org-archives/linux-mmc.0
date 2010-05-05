@@ -1,71 +1,448 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: Re: [PATCH v8 0/2] sDMA descriptor autoloading feature
-Date: Wed, 5 May 2010 10:08:30 +0530
-Message-ID: <q2r618f0c911005042138t81e86b09g444d2772ddc30b29@mail.gmail.com>
-References: <i2x618f0c911004291034g7f5b377ds5efaf74c901bc036@mail.gmail.com>
-	 <00ea01caebdf$affcb8d0$544ff780@am.dhcp.ti.com>
+From: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Subject: Re: [PATCH v2 3/5] OMAP4-HSMMC: Adding MMC-TWL regulator changes
+Date: Wed, 5 May 2010 12:17:08 +0530
+Message-ID: <u2p7f9d1ffb1005042347wa11a98feu95d62a8ca85fb1ef@mail.gmail.com>
+References: <35156.10.24.255.17.1272988897.squirrel@dbdmail.itg.ti.com>
+	 <alpine.DEB.2.00.1005041704390.20898@utopia.booyaka.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <00ea01caebdf$affcb8d0$544ff780@am.dhcp.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@nokia.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:63102 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756360Ab0EEGrL convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2010 02:47:11 -0400
+In-Reply-To: <alpine.DEB.2.00.1005041704390.20898@utopia.booyaka.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Paul Walmsley <paul@pwsan.com>
+Cc: kishore kadiyala <kishore.kadiyala@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, madhu.cr@ti.com, jarkko.lavinen@nokia.com, rmk@arm.linux.org.uk
 
-On Wed, May 5, 2010 at 4:45 AM, Madhusudhan <madhu.cr@ti.com> wrote:
->> -----Original Message-----
->> From: svenkatr@gmail.com [mailto:svenkatr@gmail.com] On Behalf Of
->> Venkatraman S
->> Sent: Thursday, April 29, 2010 12:35 PM
->> To: linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org; linux-arm=
--
->> kernel@lists.infradead.org
->> Cc: Madhusudhan Chikkature; Tony Lindgren; Adrian Hunter; Santosh
->> Shilimkar
->> Subject: [PATCH v8 0/2] sDMA descriptor autoloading feature
+On Wed, May 5, 2010 at 4:41 AM, Paul Walmsley <paul@pwsan.com> wrote:
+> Hello,
+>
+> On Tue, 4 May 2010, kishore kadiyala wrote:
+>
+>> This patch adds PBIAS Configuration during POWER ON and OFF.
+>> Also it adds MMC1 Card detect configuration on Phoenix
 >>
->> =A0 =A0 This patch series is the introduction of new sDMA feature: d=
-escriptor
->> autoloading (v8) and it's adoption by the OMAP HSMMC driver.
+>> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+>> ---
+>> =A0arch/arm/mach-omap2/hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0121 =
+++++++++++++++++++++++++++---
+>> =A0arch/arm/plat-omap/include/plat/control.h | =A0 17 ++++
+>> =A0include/linux/i2c/twl.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0=
+ 42 +++++++++-
+>> =A03 files changed, 166 insertions(+), 14 deletions(-)
 >>
->> =A0 =A0The previous version (v7) was blocked on achieving proper int=
-errupt
->> syncronisation
->> between the MMC and DMA callback in the HSMMC driver.
->> =A0 Thanks to Adrian Hunter's patch,
->> https://patchwork.kernel.org/patch/94670/
->> this has been cleaned up.
+>> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc=
+=2Ec
+>> index f5ca16c..a73f011 100644
+>> --- a/arch/arm/mach-omap2/hsmmc.c
+>> +++ b/arch/arm/mach-omap2/hsmmc.c
+>> @@ -14,6 +14,7 @@
+>> =A0#include <linux/string.h>
+>> =A0#include <linux/delay.h>
+>> =A0#include <linux/i2c/twl.h>
+>> +#include <linux/platform_device.h>
+>> =A0#include <mach/hardware.h>
+>> =A0#include <plat/control.h>
+>> =A0#include <plat/mmc.h>
+>> @@ -25,6 +26,7 @@
 >>
->> Current version is based on for-next branch + Adrian Hunter's
->> interrupt syncronisation patch
->> (https://patchwork.kernel.org/patch/94670)
+>> =A0static u16 control_pbias_offset;
+>> =A0static u16 control_devconf1_offset;
+>> +static u16 control_mmc1;
 >>
->> Changes since v7:
->> =A0 * Removed the 'fix race condition between DMA and HSMMC callback=
-'
->> part of the series
->> =A0 * Added memory barries in start and resume sglist transfer for c=
-pu
->> buffer syncronization
->> =A0 * Cleanup and comments
+>> =A0#define HSMMC_NAME_LEN =A0 =A0 =A0 9
 >>
->> This has been tested on OMAP3430, OMAP3630 and OMAP4430 SDP
->> for MMC file transfer and as boot file system.
+>> @@ -43,7 +45,7 @@ static int hsmmc_get_context_loss(struct device *d=
+ev)
+>> =A0#define hsmmc_get_context_loss NULL
+>> =A0#endif
+>>
+>> -static void hsmmc1_before_set_reg(struct device *dev, int slot,
+>> +static void omap_hsmmc1_before_set_reg(struct device *dev, int slot=
+,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int =
+power_on, int vdd)
+>> =A0{
+>> =A0 =A0 =A0 u32 reg, prog_io;
+>> @@ -96,7 +98,7 @@ static void hsmmc1_before_set_reg(struct device *d=
+ev, int slot,
+>> =A0 =A0 =A0 }
+>> =A0}
+>>
+>> -static void hsmmc1_after_set_reg(struct device *dev, int slot,
+>> +static void omap_hsmmc1_after_set_reg(struct device *dev, int slot,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int p=
+ower_on, int vdd)
+>> =A0{
+>> =A0 =A0 =A0 u32 reg;
+>> @@ -120,6 +122,61 @@ static void hsmmc1_after_set_reg(struct device =
+*dev, int slot,
+>> =A0 =A0 =A0 }
+>> =A0}
+>>
+>> +static void omap4_hsmmc1_before_set_reg(struct device *dev, int slo=
+t,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int po=
+wer_on, int vdd)
+>> +{
+>> + =A0 =A0 u32 reg;
+>> +
+>> + =A0 =A0 /*
+>> + =A0 =A0 =A0* Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0..=
+3) and the
+>> + =A0 =A0 =A0* card with Vcc regulator (from twl4030 or whatever). =A0=
+OMAP has both
+>> + =A0 =A0 =A0* 1.8V and 3.0V modes, controlled by the PBIAS register=
+=2E
+>> + =A0 =A0 =A0*
+>> + =A0 =A0 =A0* In 8-bit modes, OMAP VMMC1A (for DAT4..7) needs a sup=
+ply, which
+>> + =A0 =A0 =A0* is most naturally TWL VSIM; those pins also use PBIAS=
+=2E
+>> + =A0 =A0 =A0*
+>> + =A0 =A0 =A0* FIXME handle VMMC1A as needed ...
+>> + =A0 =A0 =A0*/
+>> + =A0 =A0 if (power_on) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_offs=
+et);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ | O=
+MAP4_MMC1_PWRDNZ);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offset=
+);
+>> + =A0 =A0 } else {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_offs=
+et);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ | O=
+MAP4_MMC1_PWRDNZ);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offset=
+);
+>> + =A0 =A0 }
+>
+> If the code in both branches of the conditional is identical, what's =
+the
+> point of keeping the conditional?
+
+Agree and will correct
+>
+>> +}
+>> +
+>> +static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot=
+,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int pow=
+er_on, int vdd)
+>> +{
+>> + =A0 =A0 u32 reg;
+>> +
+>> + =A0 =A0 /* 100ms delay required for PBIAS configuration */
+>> + =A0 =A0 msleep(100);
+>> +
+>> + =A0 =A0 if (power_on) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_offs=
+et);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D OMAP4_MMC1_PBIASLITE_PWRDNZ;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if ((1 << vdd) <=3D MMC_VDD_165_195) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~OMAP4_MMC1_PBIAS=
+LITE_VMODE;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP4_MMC1_PBIAS=
+LITE_PWRDNZ |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 } else {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP4_MMC1_PBIAS=
+LITE_VMODE |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1=
+_PBIASLITE_PWRDNZ |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 OMAP4_MMC1_PWRDNZ);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 }
+>> + =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offset=
+);
+>> + =A0 =A0 } else {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_pbias_offs=
+et);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0reg |=3D (OMAP4_MMC1_PBIASLITE_PWRDNZ |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PBIASLITE_VMODE=
+ | OMAP4_MMC1_PWRDNZ);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_pbias_offset=
+);
+>> + =A0 =A0 }
+>> +}
+>> +
+>> =A0static void hsmmc23_before_set_reg(struct device *dev, int slot,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0i=
+nt power_on, int vdd)
+>> =A0{
+>> @@ -140,6 +197,24 @@ static void hsmmc23_before_set_reg(struct devic=
+e *dev, int slot,
+>> =A0 =A0 =A0 }
+>> =A0}
+>>
+>> +static int mmc_twl_late_init(struct device *dev)
+>> +{
+>> + =A0 =A0 int ret =3D 0;
+>> + =A0 =A0 struct platform_device *pdev =3D container_of(dev,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 struct platform_device, dev);
+>> +
+>> + =A0 =A0 if (cpu_is_omap44xx()) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 /* MMC1 Card detect Configuration */
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (pdev->id =3D=3D 0) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D omap4_hsmmc1_card_=
+detect_config();
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret < 0)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Un=
+able to configure"
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 "Card detect for MMC1\n");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 }
+>> + =A0 =A0 }
+>> + =A0 =A0 return ret;
+>> +}
+>> +
+>> =A0static struct omap_mmc_platform_data *hsmmc_data[OMAP34XX_NR_MMC]=
+ __initdata;
+>>
+>> =A0void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers=
+)
+>> @@ -147,13 +222,28 @@ void __init omap2_hsmmc_init(struct omap2_hsmm=
+c_info
+>> =A0 =A0 =A0 struct omap2_hsmmc_info *c;
+>> =A0 =A0 =A0 int nr_hsmmc =3D ARRAY_SIZE(hsmmc_data);
+>> =A0 =A0 =A0 int i;
+>> + =A0 =A0 u32 reg;
+>>
+>> - =A0 =A0 if (cpu_is_omap2430()) {
+>> - =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D OMAP243X_CONTROL_=
+PBIAS_LITE;
+>> - =A0 =A0 =A0 =A0 =A0 =A0 control_devconf1_offset =3D OMAP243X_CONTR=
+OL_DEVCONF1;
+>> + =A0 =A0 if (!cpu_is_omap44xx()) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (cpu_is_omap2430()) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D O=
+MAP243X_CONTROL_PBIAS_LITE;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_devconf1_offset =3D=
+ OMAP243X_CONTROL_DEVCONF1;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 } else {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D O=
+MAP343X_CONTROL_PBIAS_LITE;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 control_devconf1_offset =3D=
+ OMAP343X_CONTROL_DEVCONF1;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 }
+>> =A0 =A0 =A0 } else {
+>> - =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D OMAP343X_CONTROL_=
+PBIAS_LITE;
+>> - =A0 =A0 =A0 =A0 =A0 =A0 control_devconf1_offset =3D OMAP343X_CONTR=
+OL_DEVCONF1;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 control_pbias_offset =3D OMAP44XX_CONTROL_=
+PBIAS_LITE;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 control_mmc1 =3D OMAP44XX_CONTROL_MMC1;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap_ctrl_readl(control_mmc1);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP4_CONTROL_SDMMC1_PUSTRENGTHG=
+RP0 |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_CONTROL_SDMMC1_PUSTR=
+ENGTHGRP1);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_CONTROL_SDMMC1_PUSTRENGTH=
+GRP2 |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_CONTROL_SDMMC1_PUSTR=
+ENGTHGRP3);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP4_CONTROL_SDMMC1_DR0_SPEEDCT=
+RL |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_CONTROL_SDMMC1_DR1_S=
+PEEDCTRL |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_CONTROL_SDMMC1_DR2_S=
+PEEDCTRL);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 omap_ctrl_writel(reg, control_mmc1);
+>> =A0 =A0 =A0 }
+>>
+>> =A0 =A0 =A0 for (c =3D controllers; c->mmc; c++) {
+>> @@ -186,6 +276,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_=
+info *controllers)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].wires =3D c->wires;
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].internal_clock =3D !c->ext=
+_clock;
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->dma_mask =3D 0xffffffff;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 mmc->init =3D mmc_twl_late_init;
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->get_context_loss_count =3D hsmmc_ge=
+t_context_loss;
+>>
+>> @@ -220,10 +311,18 @@ void __init omap2_hsmmc_init(struct omap2_hsmm=
+c_info
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 switch (c->mmc) {
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 case 1:
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* on-chip level shifting =
+via PBIAS0/PBIAS1 */
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].before_set_r=
+eg =3D hsmmc1_before_set_reg;
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].after_set_re=
+g =3D hsmmc1_after_set_reg;
+>> -
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (cpu_is_omap44xx()) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* on-chip=
+ level shifting via PBIAS0/PBIAS1 */
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
+[0].before_set_reg =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 omap4_hsmmc1_before_set_reg;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
+[0].after_set_reg =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 omap4_hsmmc1_after_set_reg;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
+[0].before_set_reg =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 omap_hsmmc1_before_set_reg;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots=
+[0].after_set_reg =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 omap_hsmmc1_after_set_reg;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Omap3630 HSMMC1 suppo=
+rts only 4-bit */
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (cpu_is_omap3630() &&=
+ c->wires > 4) {
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 c->wires=
+ =3D 4;
+>> diff --git a/arch/arm/plat-omap/include/plat/control.h b/arch/arm/pl=
+at-omap/include/plat/control.h
+>> index a56deee..6d17a61 100644
+>> --- a/arch/arm/plat-omap/include/plat/control.h
+>> +++ b/arch/arm/plat-omap/include/plat/control.h
+>> @@ -207,6 +207,9 @@
+>> =A0/* 44xx control status register offset */
+>> =A0#define OMAP44XX_CONTROL_STATUS =A0 =A0 =A0 =A0 =A0 =A0 =A00x2c4
+>>
+>> +/* 44xx-only CONTROL_GENERAL register offsets */
+>> +#define OMAP44XX_CONTROL_MMC1 =A0 =A0 =A0 =A0 =A0 0x628
+>> +#define OMAP44XX_CONTROL_PBIAS_LITE =A0 =A0 0x600
+>> =A0/*
+>> =A0 * REVISIT: This list of registers is not comprehensive - there a=
+re more
+>> =A0 * that should be added.
+>> @@ -252,6 +255,20 @@
+>> =A0#define OMAP2_PBIASLITEPWRDNZ0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << =
+1)
+>> =A0#define OMAP2_PBIASLITEVMODE0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 <=
+< 0)
+>>
+>> +/* CONTROL_PBIAS_LITE bits for OMAP4 */
+>> +#define OMAP4_MMC1_PWRDNZ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(1=
+ << 26)
+>> +#define OMAP4_MMC1_PBIASLITE_HIZ_MODE =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+(1 << 25)
+>> +#define OMAP4_MMC1_PBIASLITE_PWRDNZ =A0 =A0 =A0 =A0 =A0(1 << 22)
+>> +#define OMAP4_MMC1_PBIASLITE_VMODE =A0 =A0 =A0 =A0 =A0 (1 << 21)
+>> +
+>> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP0 =A0(1 << 31)
+>> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP1 =A0(1 << 30)
+>> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP2 =A0(1 << 29)
+>> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP3 =A0(1 << 28)
+>> +#define OMAP4_CONTROL_SDMMC1_DR0_SPEEDCTRL =A0 (1 << 27)
+>> +#define OMAP4_CONTROL_SDMMC1_DR1_SPEEDCTRL =A0 (1 << 26)
+>> +#define OMAP4_CONTROL_SDMMC1_DR2_SPEEDCTRL =A0 (1 << 25)
+>> +
+>> =A0/* CONTROL_PROG_IO1 bits */
+>> =A0#define OMAP3630_PRG_SDMMC1_SPEEDCTRL =A0 =A0 =A0 =A0(1 << 20)
+>>
+>> diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
+>> index eb198db..423a355 100644
+>> --- a/include/linux/i2c/twl.h
+>> +++ b/include/linux/i2c/twl.h
+>> @@ -142,6 +142,13 @@
+>> =A0#define TWL6030_CHARGER_FAULT_INT_MASK =A0 =A0 =A0 0x60
+>>
+>> =A0#define TWL6030_MMCCTRL =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+0xEE
+>> +#define VMMC_AUTO_OFF =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+(0x1 << 3)
+>> +#define SW_FC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0(0x1 << 2)
+>> +
+>> +#define TWL6030_CFG_INPUT_PUPD3 =A0 =A0 =A0 =A0 =A0 =A0 =A00xF2
+>> +#define MMC_PU =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 (0x1 << 3)
+>> +#define MMC_PD =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 (0x1 << 2)
+>> +
+>>
+>> =A0#define TWL4030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 0x4030
+>> =A0#define TWL6030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 0x6030
+>> @@ -174,11 +181,40 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg,=
+ unsigned
+>> =A0int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
+>> =A0int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
+>>
+>> -/*
+>> - * MMC1 Controller on OMAP4 uses Phoenix Irq for Card detect.
+>> - */
+>> +/* MMC1 Controller on OMAP4 uses Phoenix Irq for Card detect */
+>> =A0int twl6030_mmc_card_detect(struct device *dev, int slot);
+>>
+>> +/* Configuring Card Detect for MMC1 */
+>> +static inline int omap4_hsmmc1_card_detect_config(void)
+>> +{
+>> + =A0 =A0 int res =3D -1;
+>> + =A0 =A0 u8 reg_val =3D 0;
+>> +
+>> + =A0 =A0 /* Unmasking the Card detect Interrupt line for MMC1 from =
+Phoenix */
+>> + =A0 =A0 if (twl_class_is_6030()) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCDETECT=
+_INT_MASK,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 REG_INT_MSK_LINE_B);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCDETECT=
+_INT_MASK,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 REG_INT_MSK_STS_B);
+>> + =A0 =A0 }
+>> +
+>> + =A0 =A0 /*
+>> + =A0 =A0 =A0* Intially Configuring MMC_CTRL for receving interrupts=
+ &
+>> + =A0 =A0 =A0* Card status on TWL6030 for MMC1
+>> + =A0 =A0 =A0*/
+>> + =A0 =A0 reg_val |=3D (SW_FC & ~VMMC_AUTO_OFF);
+>> + =A0 =A0 twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_MMCC=
+TRL);
+>> + =A0 =A0 res =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 TWL6030_CFG_INPUT_PUPD3);
+>> + =A0 =A0 if (res < 0)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 return -EINVAL;
+>> + =A0 =A0 reg_val =3D 0;
+>> + =A0 =A0 reg_val &=3D ~(MMC_PU | MMC_PD);
+>> + =A0 =A0 twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 TWL6030_CFG_INPUT_PUPD3);
+>> + =A0 =A0 return 0;
+>> +}
+>> +
+>> =A0/*---------------------------------------------------------------=
+-------*/
+>>
+>> =A0/*
+>> --
+>> 1.6.3.3
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-omap=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >>
 >
-> The HSMMC driver changes look good to me. I can ACK that but am not a=
- DMA
-> expert to review your changes to the DMA driver.
 >
-Thanks. Can you please add your acked-by to 2/2 of this series so that
-patchworks can pick it up.
-
-Regards,
-Venkat.
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> - Paul
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap"=
+ in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
