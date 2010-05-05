@@ -1,655 +1,422 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH v8 1/2] sDMA: descriptor autoloading feature
-Date: Wed, 05 May 2010 13:05:08 +0300
-Message-ID: <4BE142D4.5010106@nokia.com>
-References: <l2i618f0c911004291035ja334efb0o5016c5cb70c4b5bc@mail.gmail.com>
+Subject: Re: [PATCH v2 3/5] OMAP4-HSMMC: Adding MMC-TWL regulator changes
+Date: Wed, 05 May 2010 13:31:56 +0300
+Message-ID: <4BE1491C.20005@nokia.com>
+References: <35156.10.24.255.17.1272988897.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1; format=flowed
+Content-Type: text/plain; charset=us-ascii; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.105.134]:58246 "EHLO
-	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932398Ab0EEKFb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2010 06:05:31 -0400
-In-Reply-To: <l2i618f0c911004291035ja334efb0o5016c5cb70c4b5bc@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <35156.10.24.255.17.1272988897.squirrel@dbdmail.itg.ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: kishore kadiyala <kishore.kadiyala@ti.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "Lavinen Jarkko (Nokia-D/Helsinki)" <jarkko.lavinen@nokia.com>, "rmk@arm.linux.org.uk" <rmk@arm.linux.org.uk>, "paul@pwsan.com" <paul@pwsan.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
 
-Venkatraman S wrote:
->>From d46f8a00728cc6c1fbdfce69435759c8cc49f25c Mon Sep 17 00:00:00 2001
-> From: Venkatraman S <svenkatr@ti.com>
-> Date: Thu, 29 Apr 2010 22:34:04 +0530
-> Subject: [PATCH 1/2] sDMA: descriptor autoloading feature
+kishore kadiyala wrote:
+> This patch adds PBIAS Configuration during POWER ON and OFF.
+> Also it adds MMC1 Card detect configuration on Phoenix
 > 
-> Add sDMA driver support for descriptor autoloading feature.
->  Descriptor autoloading is OMAP sDMA v5 hardware capability that can
-> be exploited for scatter gather
->  scenarios, currently available in OMAP3630 and OMAP4430.
-> 
->   The feature works as described below.
->   1) A sDMA channel is programmed to be in 'linked list' mode.
->   2) The client (sDMA user) provides a list of descriptors in a linked
-> list format.
->   3) Each of the 'descriptor' (element in the linked list) contains an
-> updated set of DMA
->   configuration register values.
->   4) Client starts DMA transfer.
->   5) sDMA controller loads the first element to its register
-> configuration memory and executes the
->   transfer.
->   6) After completion, loads the next element (in linked list) to
-> configuration memory and executes
->   the transfer, without MCU intervention.
->   7) Interrupt is generated after all transfers are completed; this
-> can be configured to be done
->   differently.
-> 
->   Configurations and additional features
->   1) Fast mode & non-fast mode
->         Fast mode/non-fast decides on how the first transfer begins.
-> In non-fast mode, the first
->         element in the linked list is loaded only after completing the
-> transfer according to the
->         configurations already in the sDMA channel registers. In fast mode,
-> the loading of the first
->         element precedes the transfer.
-> 
->   2) Pause / resume of transfers
->         A transfer can be paused after a descriptor set has been loaded,
-> provided the 'pause
->         bit' is set in the linked list element.
->         An ongoing transfer cannot be paused. If the 'pause bit' is set,
-> transfer is not
->         started after loading the register set from memory.
->         Such a transfer can be resumed later.
-> 
->   3) Descriptor types
->         3 possible configurations of descriptors (initialized as linked list elements)
->         are possible. Type 1 provides the maximum flexibility, which contains most
->         register definitions of a DMA logical channel. Fewer options are
-> present in type
->         2. Type 3 can just modify source/destinations address of transfers. In all
->         transfers, unmodified registers settings are maintained for the next transfer.
-> 
->         Patch provides options / API for
->             1) Setting up a descriptor loading for DMA channel for sg type transfers
->             2) configuration with linked list elements
->             3) Starting / pause and resume of the said transfers, query state
->             4) Clearing the sglist mode
-> 
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> CC: Adrian Hunter <adrian.hunter@nokia.com>
-> CC: Madhusudhan C <madhu.cr@ti.com>
-> CC: Shilimkar Santosh <santosh.shilimkar@ti.com>
-> CC: Tony Lindgren <tony@atomide.com>
+
+As I understand it, the PBIAS configuration is required for HSMMC
+irrespective of how the power is supplied, thus it is not TWL related.
+The TWL stuff should not be in hsmmc.c.
+
+Also I would suggest the only change to omap_hsmmc is:
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index e9caf69..f792cff 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -465,8 +465,6 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+        int ret;
+ 
+        if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+-               pdata->suspend = omap_hsmmc_suspend_cdirq;
+-               pdata->resume = omap_hsmmc_resume_cdirq;
+                if (pdata->slots[0].cover)
+                        pdata->slots[0].get_cover_state =
+                                        omap_hsmmc_get_cover_state;
+@@ -2160,6 +2158,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+                                "Unable to grab MMC CD IRQ\n");
+                        goto err_irq_cd;
+                }
++               pdata->suspend = omap_hsmmc_suspend_cdirq;
++               pdata->resume = omap_hsmmc_resume_cdirq;
+        }
+ 
+        OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
+
+
+And that the late init function is used to do the rest e.g.
+find a home for these 3 functions:
+
+static int omap4_twl6030_hsmmc_late_init(struct device *dev)
+{
+	int ret = 0;
+	struct platform_device *pdev = container_of(dev,
+					struct platform_device, dev);
+	struct omap_mmc_platform_data *pdata = dev->platform_data;
+
+	/* MMC1 Card detect Configuration */
+	if (pdev->id == 0) {
+		ret = omap4_hsmmc1_card_detect_config();
+		if (ret < 0)
+			pr_err("Unable to configure Card detect for MMC1\n");
+		pdata->slots[0].card_detect = twl6030_mmc_card_detect;
+		pdata->slots[0].card_detect_irq = TWL6030_IRQ_BASE +
+						  MMCDETECT_INTR_OFFSET;
+	}
+	return ret;
+}
+
+static __init void omap4_twl6030_hsmmc_set_late_init(struct device *dev)
+{
+	struct omap_mmc_platform_data *pdata = dev->platform_data;
+
+	pdata->init = omap4_twl6030_hsmmc_late_init;
+}
+
+void __init omap4_twl6030_hsmmc_init(struct omap2_hsmmc_info *controllers)
+{
+	struct omap2_hsmmc_info *c;
+
+	omap2_hsmmc_init(controllers);
+
+	for (c = controllers; c->mmc; c++)
+		omap4_twl6030_hsmmc_set_late_init(c->dev);
+}
+
+And then the board file becomes:
+
+static struct omap2_hsmmc_info mmc[] = {
+	{
+		.mmc		= 1,
+		.wires		= 8,
+		.gpio_cd	= -EINVAL,
+		.gpio_wp	= -EINVAL,
+	},
+	{
+		.mmc		= 2,
+		.wires		= 8,
+		.gpio_cd	= -EINVAL,
+		.gpio_wp	= -EINVAL,
+		.nonremovable   = true,
+	},
+	{}	/* Terminator */
+};
+
+static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
+	{
+		.supply		= "vmmc",
+		.dev_name	= "mmci-omap-hs.0",
+	},
+	{
+		.supply		= "vmmc",
+		.dev_name	= "mmci-omap-hs.1",
+	},
+};
+
+static int __init sdp4430_mmc_init(void)
+{
+	omap4_twl6030_hsmmc_init(mmc);
+	return 0;
+}
+
+And in fact sdp4430_mmc_init() doesn't need to exist.
+
+> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
 > ---
->  Changes from v7:
->    * Added wmb() calls between descriptor data structure update and
-> start/resume of transfer
->    * Added proper commit log about the feature
+>  arch/arm/mach-omap2/hsmmc.c               |  121 ++++++++++++++++++++++++++---
+>  arch/arm/plat-omap/include/plat/control.h |   17 ++++
+>  include/linux/i2c/twl.h                   |   42 +++++++++-
+>  3 files changed, 166 insertions(+), 14 deletions(-)
 > 
->  arch/arm/plat-omap/dma.c              |  289 ++++++++++++++++++++++++++++++++-
->  arch/arm/plat-omap/include/plat/dma.h |  170 +++++++++++++++++++
->  2 files changed, 458 insertions(+), 1 deletions(-)
+> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+> index f5ca16c..a73f011 100644
+> --- a/arch/arm/mach-omap2/hsmmc.c
+> +++ b/arch/arm/mach-omap2/hsmmc.c
+> @@ -14,6 +14,7 @@
+>  #include <linux/string.h>
+>  #include <linux/delay.h>
+>  #include <linux/i2c/twl.h>
+> +#include <linux/platform_device.h>
+>  #include <mach/hardware.h>
+>  #include <plat/control.h>
+>  #include <plat/mmc.h>
+> @@ -25,6 +26,7 @@
 > 
-> diff --git a/arch/arm/plat-omap/dma.c b/arch/arm/plat-omap/dma.c
-> index f6c9bdc..d8d4df8 100644
-> --- a/arch/arm/plat-omap/dma.c
-> +++ b/arch/arm/plat-omap/dma.c
-> @@ -46,12 +46,40 @@ enum { DMA_CH_ALLOC_DONE, DMA_CH_PARAMS_SET_DONE,
-> DMA_CH_STARTED,
->  enum { DMA_CHAIN_STARTED, DMA_CHAIN_NOTSTARTED };
+>  static u16 control_pbias_offset;
+>  static u16 control_devconf1_offset;
+> +static u16 control_mmc1;
+> 
+>  #define HSMMC_NAME_LEN	9
+> 
+> @@ -43,7 +45,7 @@ static int hsmmc_get_context_loss(struct device *dev)
+>  #define hsmmc_get_context_loss NULL
 >  #endif
 > 
-> +/* CDP Register bitmaps */
-> +#define DMA_LIST_CDP_DST_VALID (BIT(0))
-> +#define DMA_LIST_CDP_SRC_VALID (BIT(2))
-> +#define DMA_LIST_CDP_TYPE1     (BIT(4))
-> +#define DMA_LIST_CDP_TYPE2     (BIT(5))
-> +#define DMA_LIST_CDP_TYPE3     (BIT(4) | BIT(5))
-> +#define DMA_LIST_CDP_PAUSEMODE (BIT(7))
-> +#define DMA_LIST_CDP_LISTMODE  (BIT(8))
-> +#define DMA_LIST_CDP_FASTMODE  (BIT(10))
-> +/* CAPS register bitmaps */
-> +#define DMA_CAPS_SGLIST_SUPPORT        (BIT(20))
-> +
-> +#define DMA_LIST_DESC_PAUSE    (BIT(0))
-> +#define DMA_LIST_DESC_SRC_VALID        (BIT(24))
-> +#define DMA_LIST_DESC_DST_VALID        (BIT(26))
-> +#define DMA_LIST_DESC_BLK_END  (BIT(28))
-> +
-
-The () are not needed around BIT()
-
->  #define OMAP_DMA_ACTIVE                        0x01
->  #define OMAP2_DMA_CSR_CLEAR_MASK       0xffe
-> 
->  #define OMAP_FUNC_MUX_ARM_BASE         (0xfffe1000 + 0xec)
-> +#define OMAP_DMA_INVALID_FRAME_COUNT   (0xffff)
-> +#define OMAP_DMA_INVALID_ELEM_COUNT    (0xffffff)
-> +#define OMAP_DMA_INVALID_DESCRIPTOR_POINTER    (0xfffffffc)
-
-The () are not needed around literals
-
-> 
->  static int enable_1510_mode;
-> +static int dma_caps0_status;
-> +
-> +struct omap_dma_list_config_params {
-> +       unsigned int num_elem;
-> +       struct omap_dma_sglist_node *sghead;
-> +       dma_addr_t sgheadphy;
-> +       unsigned int pausenode;
-> +};
-> 
->  static struct omap_dma_global_context_registers {
->         u32 dma_irqenable_l0;
-> @@ -74,9 +102,10 @@ struct omap_dma_lch {
->         int next_linked_ch;
->         int state;
->         int chain_id;
-> -
->         int status;
-> +       struct omap_dma_list_config_params list_config;
->  #endif
-> +
->         long flags;
->  };
-> 
-> @@ -214,6 +243,76 @@ static void clear_lch_regs(int lch)
->                 __raw_writew(0, lch_base + i);
+> -static void hsmmc1_before_set_reg(struct device *dev, int slot,
+> +static void omap_hsmmc1_before_set_reg(struct device *dev, int slot,
+>  				  int power_on, int vdd)
+>  {
+>  	u32 reg, prog_io;
+> @@ -96,7 +98,7 @@ static void hsmmc1_before_set_reg(struct device *dev, int slot,
+>  	}
 >  }
 > 
-> +static inline void omap_dma_list_set_ntype(struct omap_dma_sglist_node *node,
-> +                                          int value)
-> +{
-> +       node->num_of_elem |= ((value) << 29);
-> +}
-> +
-> +static void omap_set_dma_sglist_pausebit(
-> +               struct omap_dma_list_config_params *lcfg, int nelem, int set)
-> +{
-> +       struct omap_dma_sglist_node *sgn = lcfg->sghead;
-> +
-> +       if (nelem > 0 && nelem < lcfg->num_elem) {
-> +               lcfg->pausenode = nelem;
-> +               sgn += nelem;
-> +
-> +               if (set)
-> +                       sgn->next_desc_add_ptr |= DMA_LIST_DESC_PAUSE;
-> +               else
-> +                       sgn->next_desc_add_ptr &= ~(DMA_LIST_DESC_PAUSE);
-> +       }
-> +}
-> +
-> +static int dma_sglist_set_phy_params(struct omap_dma_sglist_node *sghead,
-> +               dma_addr_t phyaddr, int nelem)
-> +{
-> +       struct omap_dma_sglist_node *sgcurr, *sgprev;
-> +       dma_addr_t elem_paddr = phyaddr;
-> +
-> +       for (sgprev = sghead;
-> +               sgprev < sghead + nelem;
-> +               sgprev++) {
-> +
-> +               sgcurr = sgprev + 1;
-> +               sgprev->next = sgcurr;
-> +               elem_paddr += (int)sizeof(*sgcurr);
-> +               sgprev->next_desc_add_ptr = elem_paddr;
-> +
-> +               switch (sgcurr->desc_type) {
-> +               case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE1:
-> +                       omap_dma_list_set_ntype(sgprev, 1);
-> +                       break;
-> +
-> +               case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE2a:
-> +               /* intentional no break */
-> +               case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE2b:
-> +                       omap_dma_list_set_ntype(sgprev, 2);
-> +                       break;
-> +
-> +               case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE3a:
-> +                       /* intentional no break */
-> +               case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE3b:
-> +                       omap_dma_list_set_ntype(sgprev, 3);
-> +                       break;
-> +
-> +               default:
-> +                       return -EINVAL;
-> +
-> +               }
-> +               if (sgcurr->flags & OMAP_DMA_LIST_SRC_VALID)
-> +                       sgprev->num_of_elem |= DMA_LIST_DESC_SRC_VALID;
-> +               if (sgcurr->flags & OMAP_DMA_LIST_DST_VALID)
-> +                       sgprev->num_of_elem |= DMA_LIST_DESC_DST_VALID;
-> +               if (sgcurr->flags & OMAP_DMA_LIST_NOTIFY_BLOCK_END)
-> +                       sgprev->num_of_elem |= DMA_LIST_DESC_BLK_END;
-> +       }
-> +       sgprev--;
-> +       sgprev->next_desc_add_ptr = OMAP_DMA_INVALID_DESCRIPTOR_POINTER;
-> +       return 0;
-> +}
-> +
->  void omap_set_dma_priority(int lch, int dst_port, int priority)
+> -static void hsmmc1_after_set_reg(struct device *dev, int slot,
+> +static void omap_hsmmc1_after_set_reg(struct device *dev, int slot,
+>  				 int power_on, int vdd)
 >  {
->         unsigned long reg;
-> @@ -825,6 +924,7 @@ void omap_free_dma(int lch)
->                 /* Make sure the DMA transfer is stopped. */
->                 dma_write(0, CCR(lch));
->                 omap_clear_dma(lch);
-> +               omap_clear_dma_sglist_mode(lch);
->         }
+>  	u32 reg;
+> @@ -120,6 +122,61 @@ static void hsmmc1_after_set_reg(struct device *dev, int slot,
+>  	}
+>  }
 > 
->         spin_lock_irqsave(&dma_chan_lock, flags);
-> @@ -1818,6 +1918,192 @@ int omap_get_dma_chain_src_pos(int chain_id)
->  EXPORT_SYMBOL(omap_get_dma_chain_src_pos);
->  #endif /* ifndef CONFIG_ARCH_OMAP1 */
-> 
-> +int omap_set_dma_sglist_mode(int lch, struct omap_dma_sglist_node *sgparams,
-> +       dma_addr_t padd, int nelem, struct omap_dma_channel_params *chparams)
+> +static void omap4_hsmmc1_before_set_reg(struct device *dev, int slot,
+> +				  int power_on, int vdd)
 > +{
-> +       struct omap_dma_list_config_params *lcfg;
-> +       int l = DMA_LIST_CDP_LISTMODE; /* Enable Linked list mode in CDP */
+> +	u32 reg;
 > +
-> +       if ((dma_caps0_status & DMA_CAPS_SGLIST_SUPPORT) == 0) {
-> +               printk(KERN_ERR "omap DMA: sglist feature not supported\n");
-> +               return -EPERM;
-> +       }
-> +       if (dma_chan[lch].flags & OMAP_DMA_ACTIVE) {
-> +               printk(KERN_ERR "omap DMA: configuring active DMA channel\n");
-> +               return -EPERM;
-> +       }
-> +
-> +       if (padd == 0) {
-> +               printk(KERN_ERR "omap DMA: sglist invalid dma_addr\n");
-> +               return -EINVAL;
-> +       }
-> +       lcfg = &dma_chan[lch].list_config;
-> +
-> +       lcfg->sghead = sgparams;
-> +       lcfg->num_elem = nelem;
-> +       lcfg->sgheadphy = padd;
-> +       lcfg->pausenode = -1;
-> +
-> +
-> +       if (NULL == chparams)
-> +               l |= DMA_LIST_CDP_FASTMODE;
-> +       else
-> +               omap_set_dma_params(lch, chparams);
-> +
-> +       dma_write(l, CDP(lch));
-> +       dma_write(0, CCDN(lch)); /* Reset List index numbering */
-> +       /* Initialize frame and element counters to invalid values */
-> +       dma_write(OMAP_DMA_INVALID_FRAME_COUNT, CCFN(lch));
-> +       dma_write(OMAP_DMA_INVALID_ELEM_COUNT, CCEN(lch));
-> +
-> +       return dma_sglist_set_phy_params(sgparams, lcfg->sgheadphy, nelem);
-> +
+> +	/*
+> +	 * Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0..3) and the
+> +	 * card with Vcc regulator (from twl4030 or whatever).  OMAP has both
+> +	 * 1.8V and 3.0V modes, controlled by the PBIAS register.
+> +	 *
+> +	 * In 8-bit modes, OMAP VMMC1A (for DAT4..7) needs a supply, which
+> +	 * is most naturally TWL VSIM; those pins also use PBIAS.
+> +	 *
+> +	 * FIXME handle VMMC1A as needed ...
+> +	 */
+> +	if (power_on) {
+> +		reg = omap_ctrl_readl(control_pbias_offset);
+> +		reg &= ~(OMAP4_MMC1_PBIASLITE_PWRDNZ | OMAP4_MMC1_PWRDNZ);
+> +		omap_ctrl_writel(reg, control_pbias_offset);
+> +	} else {
+> +		reg = omap_ctrl_readl(control_pbias_offset);
+> +		reg &= ~(OMAP4_MMC1_PBIASLITE_PWRDNZ | OMAP4_MMC1_PWRDNZ);
+> +		omap_ctrl_writel(reg, control_pbias_offset);
+> +	}
 > +}
-> +EXPORT_SYMBOL(omap_set_dma_sglist_mode);
 > +
-> +void omap_clear_dma_sglist_mode(int lch)
+> +static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
+> +				 int power_on, int vdd)
 > +{
-> +       /* Clear entire CDP which is related to sglist handling */
-> +       dma_write(0, CDP(lch));
-> +       dma_write(0, CCDN(lch));
-> +       /**
-> +        * Put back the original enabled irqs, which
-> +        * could have been overwritten by type 1 or type 2
-> +        * descriptors
-> +        */
-> +       dma_write(dma_chan[lch].enabled_irqs, CICR(lch));
-> +       return;
-> +}
-> +EXPORT_SYMBOL(omap_clear_dma_sglist_mode);
+> +	u32 reg;
 > +
-> +int omap_start_dma_sglist_transfers(int lch, int pauseafter)
+> +	/* 100ms delay required for PBIAS configuration */
+> +	msleep(100);
+> +
+> +	if (power_on) {
+> +		reg = omap_ctrl_readl(control_pbias_offset);
+> +		reg |= OMAP4_MMC1_PBIASLITE_PWRDNZ;
+> +		if ((1 << vdd) <= MMC_VDD_165_195) {
+> +			reg &= ~OMAP4_MMC1_PBIASLITE_VMODE;
+> +			reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ |
+> +						OMAP4_MMC1_PWRDNZ);
+> +		} else {
+> +			reg |= (OMAP4_MMC1_PBIASLITE_VMODE |
+> +				OMAP4_MMC1_PBIASLITE_PWRDNZ |
+> +					OMAP4_MMC1_PWRDNZ);
+> +		}
+> +		omap_ctrl_writel(reg, control_pbias_offset);
+> +	} else {
+> +		reg = omap_ctrl_readl(control_pbias_offset);
+> +		 reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ |
+> +			OMAP4_MMC1_PBIASLITE_VMODE | OMAP4_MMC1_PWRDNZ);
+> +		omap_ctrl_writel(reg, control_pbias_offset);
+> +	}
+> +}
+> +
+>  static void hsmmc23_before_set_reg(struct device *dev, int slot,
+>  				   int power_on, int vdd)
+>  {
+> @@ -140,6 +197,24 @@ static void hsmmc23_before_set_reg(struct device *dev, int slot,
+>  	}
+>  }
+> 
+> +static int mmc_twl_late_init(struct device *dev)
 > +{
-> +       struct omap_dma_list_config_params *lcfg;
-> +       struct omap_dma_sglist_node *sgn;
-> +       unsigned int l, type_id;
+> +	int ret = 0;
+> +	struct platform_device *pdev = container_of(dev,
+> +					struct platform_device, dev);
 > +
-> +       lcfg = &dma_chan[lch].list_config;
-> +       sgn = lcfg->sghead;
-> +
-> +       lcfg->pausenode = 0;
-> +       omap_set_dma_sglist_pausebit(lcfg, pauseafter, 1);
-> +
-> +       /* Program the head descriptor's properties into CDP */
-> +       switch (lcfg->sghead->desc_type) {
-> +       case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE1:
-> +               type_id = DMA_LIST_CDP_TYPE1;
-> +               break;
-> +       case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE2a:
-> +       case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE2b:
-> +               type_id = DMA_LIST_CDP_TYPE2;
-> +               break;
-> +       case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE3a:
-> +       case OMAP_DMA_SGLIST_DESCRIPTOR_TYPE3b:
-> +               type_id = DMA_LIST_CDP_TYPE3;
-> +               break;
-> +       default:
-> +               return -EINVAL;
-> +       }
-> +
-> +       l = dma_read(CDP(lch));
-> +       l |= type_id;
-> +       if (lcfg->sghead->flags & OMAP_DMA_LIST_SRC_VALID)
-> +               l |= DMA_LIST_CDP_SRC_VALID;
-> +       if (lcfg->sghead->flags & OMAP_DMA_LIST_DST_VALID)
-> +               l |= DMA_LIST_CDP_DST_VALID;
-> +
-> +       dma_write(l, CDP(lch));
-> +       dma_write((lcfg->sgheadphy), CNDP(lch));
-> +       /**
-> +        * Barrier needed as writes to the
-> +        * descriptor memory needs to be flushed
-> +        * before it's used by DMA controller
-> +        */
-> +       wmb();
-> +       omap_start_dma(lch);
-> +
-> +       return 0;
+> +	if (cpu_is_omap44xx()) {
+> +		/* MMC1 Card detect Configuration */
+> +		if (pdev->id == 0) {
+> +			ret = omap4_hsmmc1_card_detect_config();
+> +			if (ret < 0)
+> +				pr_err("Unable to configure"
+> +					"Card detect for MMC1\n");
+> +		}
+> +	}
+> +	return ret;
 > +}
-> +EXPORT_SYMBOL(omap_start_dma_sglist_transfers);
 > +
-> +int omap_resume_dma_sglist_transfers(int lch, int pauseafter)
+>  static struct omap_mmc_platform_data *hsmmc_data[OMAP34XX_NR_MMC] __initdata;
+> 
+>  void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+> @@ -147,13 +222,28 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info
+>  	struct omap2_hsmmc_info *c;
+>  	int nr_hsmmc = ARRAY_SIZE(hsmmc_data);
+>  	int i;
+> +	u32 reg;
+> 
+> -	if (cpu_is_omap2430()) {
+> -		control_pbias_offset = OMAP243X_CONTROL_PBIAS_LITE;
+> -		control_devconf1_offset = OMAP243X_CONTROL_DEVCONF1;
+> +	if (!cpu_is_omap44xx()) {
+> +		if (cpu_is_omap2430()) {
+> +			control_pbias_offset = OMAP243X_CONTROL_PBIAS_LITE;
+> +			control_devconf1_offset = OMAP243X_CONTROL_DEVCONF1;
+> +		} else {
+> +			control_pbias_offset = OMAP343X_CONTROL_PBIAS_LITE;
+> +			control_devconf1_offset = OMAP343X_CONTROL_DEVCONF1;
+> +		}
+>  	} else {
+> -		control_pbias_offset = OMAP343X_CONTROL_PBIAS_LITE;
+> -		control_devconf1_offset = OMAP343X_CONTROL_DEVCONF1;
+> +		control_pbias_offset = OMAP44XX_CONTROL_PBIAS_LITE;
+> +		control_mmc1 = OMAP44XX_CONTROL_MMC1;
+> +		reg = omap_ctrl_readl(control_mmc1);
+> +		reg |= (OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP0 |
+> +			OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP1);
+> +		reg &= ~(OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP2 |
+> +			OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP3);
+> +		reg |= (OMAP4_CONTROL_SDMMC1_DR0_SPEEDCTRL |
+> +			OMAP4_CONTROL_SDMMC1_DR1_SPEEDCTRL |
+> +			OMAP4_CONTROL_SDMMC1_DR2_SPEEDCTRL);
+> +		omap_ctrl_writel(reg, control_mmc1);
+>  	}
+> 
+>  	for (c = controllers; c->mmc; c++) {
+> @@ -186,6 +276,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+>  		mmc->slots[0].wires = c->wires;
+>  		mmc->slots[0].internal_clock = !c->ext_clock;
+>  		mmc->dma_mask = 0xffffffff;
+> +		mmc->init = mmc_twl_late_init;
+> 
+>  		mmc->get_context_loss_count = hsmmc_get_context_loss;
+> 
+> @@ -220,10 +311,18 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info
+> 
+>  		switch (c->mmc) {
+>  		case 1:
+> -			/* on-chip level shifting via PBIAS0/PBIAS1 */
+> -			mmc->slots[0].before_set_reg = hsmmc1_before_set_reg;
+> -			mmc->slots[0].after_set_reg = hsmmc1_after_set_reg;
+> -
+> +			if (cpu_is_omap44xx()) {
+> +				/* on-chip level shifting via PBIAS0/PBIAS1 */
+> +				mmc->slots[0].before_set_reg =
+> +						omap4_hsmmc1_before_set_reg;
+> +				mmc->slots[0].after_set_reg =
+> +						omap4_hsmmc1_after_set_reg;
+> +			} else {
+> +				mmc->slots[0].before_set_reg =
+> +						omap_hsmmc1_before_set_reg;
+> +				mmc->slots[0].after_set_reg =
+> +						omap_hsmmc1_after_set_reg;
+> +			}
+>  			/* Omap3630 HSMMC1 supports only 4-bit */
+>  			if (cpu_is_omap3630() && c->wires > 4) {
+>  				c->wires = 4;
+> diff --git a/arch/arm/plat-omap/include/plat/control.h b/arch/arm/plat-omap/include/plat/control.h
+> index a56deee..6d17a61 100644
+> --- a/arch/arm/plat-omap/include/plat/control.h
+> +++ b/arch/arm/plat-omap/include/plat/control.h
+> @@ -207,6 +207,9 @@
+>  /* 44xx control status register offset */
+>  #define OMAP44XX_CONTROL_STATUS		0x2c4
+> 
+> +/* 44xx-only CONTROL_GENERAL register offsets */
+> +#define OMAP44XX_CONTROL_MMC1           0x628
+> +#define OMAP44XX_CONTROL_PBIAS_LITE     0x600
+>  /*
+>   * REVISIT: This list of registers is not comprehensive - there are more
+>   * that should be added.
+> @@ -252,6 +255,20 @@
+>  #define OMAP2_PBIASLITEPWRDNZ0		(1 << 1)
+>  #define OMAP2_PBIASLITEVMODE0		(1 << 0)
+> 
+> +/* CONTROL_PBIAS_LITE bits for OMAP4 */
+> +#define OMAP4_MMC1_PWRDNZ			(1 << 26)
+> +#define OMAP4_MMC1_PBIASLITE_HIZ_MODE		(1 << 25)
+> +#define OMAP4_MMC1_PBIASLITE_PWRDNZ		(1 << 22)
+> +#define OMAP4_MMC1_PBIASLITE_VMODE		(1 << 21)
+> +
+> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP0	(1 << 31)
+> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP1	(1 << 30)
+> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP2	(1 << 29)
+> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP3	(1 << 28)
+> +#define OMAP4_CONTROL_SDMMC1_DR0_SPEEDCTRL	(1 << 27)
+> +#define OMAP4_CONTROL_SDMMC1_DR1_SPEEDCTRL	(1 << 26)
+> +#define OMAP4_CONTROL_SDMMC1_DR2_SPEEDCTRL	(1 << 25)
+> +
+>  /* CONTROL_PROG_IO1 bits */
+>  #define OMAP3630_PRG_SDMMC1_SPEEDCTRL	(1 << 20)
+> 
+> diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
+> index eb198db..423a355 100644
+> --- a/include/linux/i2c/twl.h
+> +++ b/include/linux/i2c/twl.h
+> @@ -142,6 +142,13 @@
+>  #define TWL6030_CHARGER_FAULT_INT_MASK 	0x60
+> 
+>  #define TWL6030_MMCCTRL			0xEE
+> +#define VMMC_AUTO_OFF			(0x1 << 3)
+> +#define SW_FC				(0x1 << 2)
+> +
+> +#define TWL6030_CFG_INPUT_PUPD3		0xF2
+> +#define MMC_PU				(0x1 << 3)
+> +#define MMC_PD				(0x1 << 2)
+> +
+> 
+>  #define TWL4030_CLASS_ID 		0x4030
+>  #define TWL6030_CLASS_ID 		0x6030
+> @@ -174,11 +181,40 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg, unsigned
+>  int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
+>  int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
+> 
+> -/*
+> - * MMC1 Controller on OMAP4 uses Phoenix Irq for Card detect.
+> - */
+> +/* MMC1 Controller on OMAP4 uses Phoenix Irq for Card detect */
+>  int twl6030_mmc_card_detect(struct device *dev, int slot);
+> 
+> +/* Configuring Card Detect for MMC1 */
+> +static inline int omap4_hsmmc1_card_detect_config(void)
 > +{
-> +       struct omap_dma_list_config_params *lcfg;
-> +       struct omap_dma_sglist_node *sgn;
-> +       int l, sys_cf;
+> +	int res = -1;
+> +	u8 reg_val = 0;
 > +
-> +       lcfg = &dma_chan[lch].list_config;
-> +       sgn = lcfg->sghead;
+> +	/* Unmasking the Card detect Interrupt line for MMC1 from Phoenix */
+> +	if (twl_class_is_6030()) {
+> +		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
+> +							REG_INT_MSK_LINE_B);
+> +		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
+> +							REG_INT_MSK_STS_B);
+> +	}
 > +
-> +       /* Maintain the pause state in descriptor */
-> +       omap_set_dma_sglist_pausebit(lcfg, lcfg->pausenode, 0);
-> +       omap_set_dma_sglist_pausebit(lcfg, pauseafter, 1);
-> +
-> +       /**
-> +        * Barrier needed as writes to the
-> +        * descriptor memory needs to be flushed
-> +        * before it's used by DMA controller
-> +        */
-> +       wmb();
-> +
-> +       /* Errata i557 - pausebit should be cleared in no standby mode */
-> +       sys_cf = dma_read(OCP_SYSCONFIG);
-> +       l = sys_cf;
-> +       /* Middle mode reg set no Standby */
-> +       l &= ~(BIT(12) | BIT(13));
-> +       dma_write(l, OCP_SYSCONFIG);
-> +
-> +       /* Clear pause bit in CDP */
-> +       l = dma_read(CDP(lch));
-> +       l &= ~(DMA_LIST_CDP_PAUSEMODE);
-> +       dma_write(l, CDP(lch));
-> +
-> +       omap_start_dma(lch);
-> +
-> +       /* Errata i557 - put in the old value */
-> +       dma_write(sys_cf, OCP_SYSCONFIG);
-> +       return 0;
+> +	/*
+> +	 * Intially Configuring MMC_CTRL for receving interrupts &
+> +	 * Card status on TWL6030 for MMC1
+> +	 */
+> +	reg_val |= (SW_FC & ~VMMC_AUTO_OFF);
+> +	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_MMCCTRL);
+> +	res = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
+> +						TWL6030_CFG_INPUT_PUPD3);
+> +	if (res < 0)
+> +		return -EINVAL;
+> +	reg_val = 0;
+> +	reg_val &= ~(MMC_PU | MMC_PD);
+> +	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
+> +						TWL6030_CFG_INPUT_PUPD3);
+> +	return 0;
 > +}
-> +EXPORT_SYMBOL(omap_resume_dma_sglist_transfers);
 > +
-> +void omap_release_dma_sglist(int lch)
-> +{
-> +       omap_clear_dma_sglist_mode(lch);
-> +       omap_free_dma(lch);
-> +
-> +       return;
-> +}
-> +EXPORT_SYMBOL(omap_release_dma_sglist);
-> +
-> +int omap_get_completed_sglist_nodes(int lch)
-> +{
-> +       int list_count;
-> +
-> +       list_count = dma_read(CCDN(lch));
-> +       return list_count & 0xffff; /* only 16 LSB bits are valid */
-> +}
-> +EXPORT_SYMBOL(omap_get_completed_sglist_nodes);
-> +
-> +int omap_dma_sglist_is_paused(int lch)
-> +{
-> +       int list_state;
-> +       list_state = dma_read(CDP(lch));
-> +       return (list_state & DMA_LIST_CDP_PAUSEMODE) ? 1 : 0;
-> +}
-> +EXPORT_SYMBOL(omap_dma_sglist_is_paused);
-> +
-> +void omap_dma_set_sglist_fastmode(int lch, int fastmode)
-> +{
-> +       int l = dma_read(CDP(lch));
-> +
-> +       if (fastmode)
-> +               l |= DMA_LIST_CDP_FASTMODE;
-> +       else
-> +               l &= ~(DMA_LIST_CDP_FASTMODE);
-> +       dma_write(l, CDP(lch));
-> +}
-> +EXPORT_SYMBOL(omap_dma_set_sglist_fastmode);
-> +
->  /*----------------------------------------------------------------------------*/
+>  /*----------------------------------------------------------------------*/
 > 
->  #ifdef CONFIG_ARCH_OMAP1
-> @@ -2066,6 +2352,7 @@ static int __init omap_init_dma(void)
->                         r = -ENOMEM;
->                         goto out_free;
->                 }
-> +               dma_caps0_status = dma_read(CAPS_0);
->         }
-> 
->         if (cpu_is_omap15xx()) {
-> diff --git a/arch/arm/plat-omap/include/plat/dma.h
-> b/arch/arm/plat-omap/include/plat/dma.h
-> index 02232ca..7490df9 100644
-> --- a/arch/arm/plat-omap/include/plat/dma.h
-> +++ b/arch/arm/plat-omap/include/plat/dma.h
-> @@ -115,8 +115,12 @@
->  #define OMAP1_DMA_COLOR_U(n)           (0x40 * (n) + 0x22)
->  #define OMAP1_DMA_CCR2(n)              (0x40 * (n) + 0x24)
->  #define OMAP1_DMA_LCH_CTRL(n)          (0x40 * (n) + 0x2a)     /* not on 15xx */
-> +#define OMAP1_DMA_COLOR(n)             0
->  #define OMAP1_DMA_CCEN(n)              0
->  #define OMAP1_DMA_CCFN(n)              0
-> +#define OMAP1_DMA_CDP(n)               0
-> +#define OMAP1_DMA_CNDP(n)              0
-> +#define OMAP1_DMA_CCDN(n)              0
-> 
->  /* Channel specific registers only on omap2 */
->  #define OMAP_DMA4_CSSA(n)              (0x60 * (n) + 0x9c)
-> @@ -135,6 +139,8 @@
->  #define OMAP1_DMA_IRQSTATUS_L0         0
->  #define OMAP1_DMA_IRQENABLE_L0         0
->  #define OMAP1_DMA_OCP_SYSCONFIG                0
-> +#define OMAP1_DMA_CAPS_0               0
-> +
->  #define OMAP_DMA4_HW_ID                        0
->  #define OMAP_DMA4_CAPS_0_L             0
->  #define OMAP_DMA4_CAPS_0_U             0
-> @@ -463,6 +469,83 @@ struct omap_dma_channel_params {
->  #endif
->  };
-> 
-> +struct omap_dma_sglist_type1_params {
-> +       u32 src_addr;
-> +       u32 dst_addr;
-> +       u16 cfn_fn;
-> +       u16 cicr;
-> +       u16 dst_elem_idx;
-> +       u16 src_elem_idx;
-> +       u32 dst_frame_idx_or_pkt_size;
-> +       u32 src_frame_idx_or_pkt_size;
-> +       u32 color;
-> +       u32 csdp;
-> +       u32 clnk_ctrl;
-> +       u32 ccr;
-> +};
-> +
-> +struct omap_dma_sglist_type2a_params {
-> +       u32 src_addr;
-> +       u32 dst_addr;
-> +       u16 cfn_fn;
-> +       u16 cicr;
-> +       u16 dst_elem_idx;
-> +       u16 src_elem_idx;
-> +       u32 dst_frame_idx_or_pkt_size;
-> +       u32 src_frame_idx_or_pkt_size;
-> +};
-> +
-> +struct omap_dma_sglist_type2b_params {
-> +       u32 src_or_dest_addr;
-> +       u16 cfn_fn;
-> +       u16 cicr;
-> +       u16 dst_elem_idx;
-> +       u16 src_elem_idx;
-> +       u32 dst_frame_idx_or_pkt_size;
-> +       u32 src_frame_idx_or_pkt_size;
-> +};
-> +
-> +struct omap_dma_sglist_type3a_params {
-> +       u32 src_addr;
-> +       u32 dst_addr;
-> +};
-> +
-> +struct omap_dma_sglist_type3b_params {
-> +       u32 src_or_dest_addr;
-> +};
-> +
-> +enum omap_dma_sglist_descriptor_select {
-> +       OMAP_DMA_SGLIST_DESCRIPTOR_TYPE1,
-> +       OMAP_DMA_SGLIST_DESCRIPTOR_TYPE2a,
-> +       OMAP_DMA_SGLIST_DESCRIPTOR_TYPE2b,
-> +       OMAP_DMA_SGLIST_DESCRIPTOR_TYPE3a,
-> +       OMAP_DMA_SGLIST_DESCRIPTOR_TYPE3b,
-> +};
-> +
-> +union omap_dma_sglist_node_type{
-> +       struct omap_dma_sglist_type1_params t1;
-> +       struct omap_dma_sglist_type2a_params t2a;
-> +       struct omap_dma_sglist_type2b_params t2b;
-> +       struct omap_dma_sglist_type3a_params t3a;
-> +       struct omap_dma_sglist_type3b_params t3b;
-> +};
-> +
-> +struct omap_dma_sglist_node {
-> +
-> +       /* Common elements for all descriptors */
-> +       dma_addr_t next_desc_add_ptr;
-> +       u32 num_of_elem;
-> +       /* Type specific elements */
-> +       union omap_dma_sglist_node_type sg_node;
-> +       /* Control fields */
-> +       unsigned short flags;
-> +       /* Fields that can be set in flags variable */
-> +       #define OMAP_DMA_LIST_SRC_VALID         BIT(0)
-> +       #define OMAP_DMA_LIST_DST_VALID         BIT(1)
-> +       #define OMAP_DMA_LIST_NOTIFY_BLOCK_END  BIT(2)
-> +       enum omap_dma_sglist_descriptor_select desc_type;
-> +       struct omap_dma_sglist_node *next;
-> +};
-> 
->  extern void omap_set_dma_priority(int lch, int dst_port, int priority);
->  extern int omap_request_dma(int dev_id, const char *dev_name,
-> @@ -548,6 +631,93 @@ extern int omap_modify_dma_chain_params(int chain_id,
->  extern int omap_dma_chain_status(int chain_id);
->  #endif
-> 
-> +/**
-> + * omap_set_dma_sglist_mode()  Switch channel to scatter gather mode
-> + * @lch:       Logical channel to switch to sglist mode
-> + * @sghead:    Contains the descriptor elements to be executed
-> + *             Should be allocated using dma_alloc_coherent
-> + * @padd:      The dma address of sghead, as returned by dma_alloc_coherent
-> + * @nelem:     Number of elements in sghead
-> + * @chparams:  DMA channel transfer parameters. Can be NULL
-> + */
-> +extern int omap_set_dma_sglist_mode(int lch,
-> +       struct omap_dma_sglist_node *sghead, dma_addr_t padd,
-> +       int nelem, struct omap_dma_channel_params *chparams);
-> +
-> +/**
-> + * omap_clear_dma_sglist_mode()        Switch from scatter gather mode
-> + *                             to normal mode
-> + * @lch:       The logical channel to be switched to normal mode
-> + *
-> + * Switches the requested logical channel to normal mode
-> + * from scatter gather mode
-> + */
-> +extern void omap_clear_dma_sglist_mode(int lch);
-> +
-> +/**
-> + * omap_start_dma_sglist_transfers()   Starts the sglist transfer
-> + * @lch:       logical channel on which sglist transfer to be started
-> + * @pauseafter:        index of the element on which to pause the transfer
-> + *             set to -1 if no pause is needed till end of transfer
-> + *
-> + * Start the dma transfer in list mode
-> + * The index (in pauseafter) is absolute (from the head of the list)
-> + * User should have previously called omap_set_dma_sglist_mode()
-> + */
-> +extern int omap_start_dma_sglist_transfers(int lch, int pauseafter);
-> +
-> +/**
-> + * omap_resume_dma_sglist_transfers()  Resumes a previously paused
-> + *                                     sglist transfer
-> + * @lch:       The logical channel to be resumed
-> + * @pauseafter:        The index of sglist to be paused again
-> + *             set to -1 if no pause is needed till end of transfer
-> + *
-> + * Resume the previously paused transfer
-> + * The index (in pauseafter) is absolute (from the head of the list)
-> + */
-> +extern int omap_resume_dma_sglist_transfers(int lch, int pauseafter);
-> +
-> +/**
-> + * omap_release_dma_sglist()   Releases a previously requested
-> + *                             DMA channel which is in sglist mode
-> + * @lch:       The logical channel to be released
-> + */
-> +extern void omap_release_dma_sglist(int lch);
-> +
-> +/**
-> + * omap_get_completed_sglist_nodes()   Returns a list of completed
-> + *                                     sglist nodes
-> + * @lch:       The logical on which the query is to be made
-> + *
-> + * Returns the number of completed elements in the linked list
-> + * The value is transient if the API is invoked for an ongoing transfer
-> + */
-> +int omap_get_completed_sglist_nodes(int lch);
-> +
-> +/**
-> + * omap_dma_sglist_is_paused() Query is the logical channel in
-> + *                             sglist mode is paused or note
-> + * @lch:       The logical on which the query is to be made
-> + *
-> + * Returns non zero if the linked list is currently in pause state
-> + */
-> +int omap_dma_sglist_is_paused(int lch);
-> +
-> +/**
-> + * omap_dma_set_sglist_fastmode() Set the sglist transfer to fastmode
-> + * @lch:       The logical channel which is to be changed to fastmode
-> + * @fastmode:  Set or clear the fastmode status
-> + *             1 = set fastmode
-> + *             0 = clear fastmode
-> + *
-> + * In fastmode, DMA register settings are updated from the first element
-> + * of the linked list, before initiating the tranfer.
-> + * In non-fastmode, the first element is used only after completing the
-> + * transfer as already configured in the registers
-> + */
-> +void omap_dma_set_sglist_fastmode(int lch, int fastmode);
-> +
->  #if defined(CONFIG_ARCH_OMAP1) && defined(CONFIG_FB_OMAP)
->  #include <mach/lcd_dma.h>
->  #else
-> --
-> 1.6.3.3
-> 
+>  /*
 
