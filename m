@@ -1,379 +1,436 @@
-From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Subject: RE: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor
- autoloading 	feature
-Date: Wed, 5 May 2010 15:02:11 +0530
-Message-ID: <EAF47CD23C76F840A9E7FCE10091EFAB02C52D16D2@dbde02.ent.ti.com>
-References: <w2y618f0c911004291035qfec16290re9e236ae1e13a970@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Viresh KUMAR <viresh.kumar@st.com>
+Subject: [PATCH] sdhci-spear: ST SPEAr based SDHCI controller glue
+Date: Wed,  5 May 2010 15:05:18 +0530
+Message-ID: <1273052118-15513-1-git-send-email-viresh.kumar@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:50994 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934337Ab0EEJcd convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2010 05:32:33 -0400
-In-Reply-To: <w2y618f0c911004291035qfec16290re9e236ae1e13a970@mail.gmail.com>
-Content-Language: en-US
+Received: from eu1sys200aog112.obsmtp.com ([207.126.144.133]:50980 "EHLO
+	eu1sys200aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751342Ab0EEKCj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2010 06:02:39 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel@lists.arm.lin
-Cc: "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Adrian Hunter <adrian.hunter@nokia.com>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, Tony Lindgren <tony@atomide.com>
+To: pierre@ossman.eu
+Cc: linux-mmc@vger.kernel.org, shiraz.hashim@st.com, Viresh Kumar <viresh.kumar@st.com>
 
+This patch adds glue layer for support of sdhci driver on ST SPEAr platform.
 
-> -----Original Message-----
-> From: svenkatr@gmail.com [mailto:svenkatr@gmail.com] On Behalf Of Venkatraman S
-> Sent: Thursday, April 29, 2010 11:05 PM
-> To: linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org; linux-arm-kernel@lists.arm.linux.org.uk
-> Cc: Chikkature Rajashekar, Madhusudhan; Adrian Hunter; Kadiyala, Kishore; Shilimkar, Santosh; Tony
-> Lindgren
-> Subject: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor autoloading feature
-> 
-> From 1c63dd42fc6c563c931168779ce73401332faa52 Mon Sep 17 00:00:00 2001
-> From: Venkatraman S <svenkatr@ti.com>
-> Date: Thu, 29 Apr 2010 22:43:31 +0530
-> Subject: [PATCH 2/2] omap hsmmc: adaptation of sdma descriptor
-> autoloading feature
-> 
-> Start to use the sDMA descriptor autoloading feature.
-> For large datablocks, the MMC driver has to repeatedly setup,
-> program and teardown the dma channel for each element of the
-> sglist received in omap_hsmmc_request.
-> 
-> By using descriptor autoloading, transfers from / to each element of
-> the sglist is pre programmed into a linked list. The sDMA driver
-> completes the entire transaction and provides a single interrupt.
-> 
-> Due to this, number of dma interrupts for a typical 100MB transfer on the MMC is
-> reduced from 25000 to about 400 (approximate). Transfer speeds are
-> improved by ~5%.
-> (Though it varies on the size of read / write & improves on huge transfers)
-> 
-> Descriptor autoloading is available only in 3630 and 4430 (as of now).
-> Hence normal DMA mode is also retained.
-> 
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> CC: Adrian Hunter <adrian.hunter@nokia.com>
-> CC: Madhusudhan C <madhu.cr@ti.com>
-> CC: Shilimkar Santosh <santosh.shilimkar@ti.com>
-> CC: Tony Lindgren <tony@atomide.com>
-> ---
->  Changes since previous version
->   * Rebased to Adrian Hunter's interrupt syncronisation patch
->              https://patchwork.kernel.org/patch/94670/
->   * Rename ICR name definition
->  drivers/mmc/host/omap_hsmmc.c |  148 ++++++++++++++++++++++++++++++++++------
->  1 files changed, 125 insertions(+), 23 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 65093d4..095fd94 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -102,6 +102,8 @@
->  #define SRD			(1 << 26)
->  #define SOFTRESET		(1 << 1)
->  #define RESETDONE		(1 << 0)
-> +/* End of superblock indicator for sglist transfers */
-> +#define DMA_ICR_SGLIST_END	0x4D00
-> 
->  /*
->   * FIXME: Most likely all the data using these _DEVID defines should come
-> @@ -118,6 +120,12 @@
->  #define OMAP_MMC_MASTER_CLOCK	96000000
->  #define DRIVER_NAME		"mmci-omap-hs"
-> 
-> +#define DMA_TYPE_NODMA	0
-" DMA_TYPE_NODMA" doesn't make sense
-> +#define DMA_TYPE_SDMA	1
-> +#define DMA_TYPE_SDMA_DLOAD 2
+Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+---
+ MAINTAINERS                     |    6 +
+ drivers/mmc/host/Kconfig        |   12 ++
+ drivers/mmc/host/Makefile       |    1 +
+ drivers/mmc/host/sdhci-spear.c  |  300 +++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/sdhci-spear.h |   42 ++++++
+ 5 files changed, 361 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-spear.c
+ create mode 100644 include/linux/mmc/sdhci-spear.h
 
-How about ??
-#define TRANSFER_NODMA			0
-#define TRANSFER_SDMA_NORMAL		1
-#define TRANSFER_SDMA_DESCRIPTOR	2
-I think ADMA is also in pipeline, so it can become then
-#define TRANSFER_ADMA_DESCRIPTOR	3
-> +
-> +#define DMA_CTRL_BUF_SIZE	(PAGE_SIZE * 3)
-> +
->  /* Timeouts for entering power saving states on inactivity, msec */
->  #define OMAP_MMC_DISABLED_TIMEOUT	100
->  #define OMAP_MMC_SLEEP_TIMEOUT		1000
-> @@ -170,7 +178,11 @@ struct omap_hsmmc_host {
->  	u32			bytesleft;
->  	int			suspended;
->  	int			irq;
-> -	int			use_dma, dma_ch;
-> +	int			dma_caps;
-> +	int			dma_in_use;
-This flag isn't necessary. What you are doing is
-just renaming it. Can't you avoid that ??
-Inudertand the intent behind "dma_in_use " instead
-of "use_dma", but you can surely avoid this change.
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 0369b22..bbff70a 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -4938,6 +4938,12 @@ L:	linux-mmc@vger.kernel.org
+ S:	Maintained
+ F:	drivers/mmc/host/sdhci-s3c.c
+ 
++SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) ST SPEAR DRIVER
++M:	Viresh Kumar <viresh.kumar@st.com>
++L:	linux-mmc@vger.kernel.org
++S:	Maintained
++F:	drivers/mmc/host/sdhci-spear.c
++
+ SECURITY SUBSYSTEM
+ M:	James Morris <jmorris@namei.org>
+ L:	linux-security-module@vger.kernel.org (suggested Cc:)
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 2e13b94..40eae7e 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -136,6 +136,18 @@ config MMC_SDHCI_S3C
+ 
+ 	  If unsure, say N.
+ 
++config MMC_SDHCI_SPEAR
++	tristate "SDHCI support on ST SPEAr platform"
++	depends on MMC_SDHCI && PLAT_SPEAR
++	help
++	  This selects the Secure Digital Host Controller Interface (SDHCI)
++	  often referrered to as the HSMMC block in some of the ST SPEAR range
++	  of SoC
++
++	  If you have a controller with this interface, say Y or M here.
++
++	  If unsure, say N.
++
+ config MMC_SDHCI_S3C_DMA
+ 	bool "DMA support on S3C SDHCI"
+ 	depends on MMC_SDHCI_S3C && EXPERIMENTAL
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index f480397..d00a9fa 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -14,6 +14,7 @@ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
+ obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+ obj-$(CONFIG_MMC_SDHCI_PLTFM)	+= sdhci-pltfm.o
+ obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
++obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
+ obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
+ obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
+ obj-$(CONFIG_MMC_OMAP)		+= omap.o
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+new file mode 100644
+index 0000000..6d3f740
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -0,0 +1,300 @@
++/*
++ * drivers/mmc/host/sdhci-spear.c
++ *
++ * Support of SDHCI platform devices for spear soc family
++ *
++ * Copyright (C) 2010 ST Microelectronics
++ * Viresh Kumar<viresh.kumar@st.com>
++ *
++ * Inspired by sdhci-pltfm.c
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#include <linux/clk.h>
++#include <linux/delay.h>
++#include <linux/gpio.h>
++#include <linux/highmem.h>
++#include <linux/interrupt.h>
++#include <linux/irq.h>
++#include <linux/platform_device.h>
++#include <linux/slab.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/sdhci-spear.h>
++#include <linux/io.h>
++#include "sdhci.h"
++
++struct spear_sdhci {
++	struct clk *clk;
++	struct sdhci_plat_data *data;
++};
++
++/* sdhci ops */
++static struct sdhci_ops sdhci_pltfm_ops = {
++	/* Nothing to do for now. */
++};
++
++/* gpio card detection interrupt handler */
++static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
++{
++	struct platform_device *pdev = dev_id;
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct spear_sdhci *sdhci =
++		(struct spear_sdhci *)(pdev->dev.platform_data);
++	unsigned long gpio_irq_type;
++	int val;
++
++	val = gpio_get_value(sdhci->data->card_int_gpio);
++
++	/* val == 1 -> card removed, val == 0 -> card inserted */
++	/* if card removed - set irq for low level, else vice versa */
++	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
++	set_irq_type(irq, gpio_irq_type);
++
++	if (sdhci->data->card_power_gpio >= 0) {
++		if (!sdhci->data->power_always_enb) {
++			/* if card inserted, give power, otherwise remove it */
++			val = sdhci->data->power_active_high ? !val : val ;
++			gpio_set_value(sdhci->data->card_power_gpio, val);
++		}
++	}
++
++	/* inform sdhci driver about card insertion/removal */
++	tasklet_schedule(&host->card_tasklet);
++
++	return IRQ_HANDLED;
++}
++
++static int __devinit sdhci_probe(struct platform_device *pdev)
++{
++	struct sdhci_host *host;
++	struct resource *iomem;
++	struct spear_sdhci *sdhci;
++	int ret;
++
++	BUG_ON(pdev == NULL);
++
++	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!iomem) {
++		ret = -ENOMEM;
++		dev_dbg(&pdev->dev, "memory resource not defined\n");
++		goto err;
++	}
++
++	if (!request_mem_region(iomem->start, resource_size(iomem),
++				"spear-sdhci")) {
++		ret = -EBUSY;
++		dev_dbg(&pdev->dev, "cannot request region\n");
++		goto err;
++	}
++
++	sdhci = kzalloc(sizeof(*sdhci), GFP_KERNEL);
++	if (!sdhci) {
++		ret = -ENOMEM;
++		dev_dbg(&pdev->dev, "cannot allocate memory for sdhci\n");
++		goto err_kzalloc;
++	}
++
++	/* clk enable */
++	sdhci->clk = clk_get(&pdev->dev, NULL);
++	if (IS_ERR(sdhci->clk)) {
++		ret = PTR_ERR(sdhci->clk);
++		dev_dbg(&pdev->dev, "Error getting clock\n");
++		goto err_clk_get;
++	}
++
++	ret = clk_enable(sdhci->clk);
++	if (ret) {
++		dev_dbg(&pdev->dev, "Error enabling clock\n");
++		goto err_clk_enb;
++	}
++
++	/* overwrite platform_data */
++	sdhci->data = (struct sdhci_plat_data *)(pdev->dev.platform_data);
++	pdev->dev.platform_data = sdhci;
++
++	if (pdev->dev.parent)
++		host = sdhci_alloc_host(pdev->dev.parent, 0);
++	else
++		host = sdhci_alloc_host(&pdev->dev, 0);
++
++	if (IS_ERR(host)) {
++		ret = PTR_ERR(host);
++		dev_dbg(&pdev->dev, "error allocating host\n");
++		goto err_alloc_host;
++	}
++
++	host->hw_name = "sdhci";
++	host->ops = &sdhci_pltfm_ops;
++	host->irq = platform_get_irq(pdev, 0);
++	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
++
++	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
++	if (!host->ioaddr) {
++		ret = -ENOMEM;
++		dev_dbg(&pdev->dev, "failed to remap registers\n");
++		goto err_ioremap;
++	}
++
++	ret = sdhci_add_host(host);
++	if (ret) {
++		dev_dbg(&pdev->dev, "error adding host\n");
++		goto err_add_host;
++	}
++
++	platform_set_drvdata(pdev, host);
++
++	/*
++	 * It is optional to use GPIOs for sdhci Power control & sdhci card
++	 * interrupt detection. If sdhci->data is NULL, then use original sdhci
++	 * lines otherwise GPIO lines.
++	 * If GPIO is selected for power control, then power should be disabled
++	 * after card removal and should be enabled when card insertion
++	 * interrupt occurs
++	 */
++	if (!sdhci->data)
++		return 0;
++
++	if (sdhci->data->card_power_gpio >= 0) {
++		int val = 0;
++
++		ret = gpio_request(sdhci->data->card_power_gpio, "sdhci");
++		if (ret < 0) {
++			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
++					sdhci->data->card_power_gpio);
++			goto err_pgpio_request;
++		}
++
++		if (sdhci->data->power_always_enb)
++			val = sdhci->data->power_active_high;
++		else
++			val = !sdhci->data->power_active_high;
++
++		ret = gpio_direction_output(sdhci->data->card_power_gpio, val);
++		if (ret) {
++			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
++					sdhci->data->card_power_gpio);
++			goto err_pgpio_direction;
++		}
++
++		gpio_set_value(sdhci->data->card_power_gpio, 1);
++	}
++
++	if (sdhci->data->card_int_gpio >= 0) {
++		ret = gpio_request(sdhci->data->card_int_gpio, "sdhci");
++		if (ret < 0) {
++			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
++					sdhci->data->card_int_gpio);
++			goto err_igpio_request;
++		}
++
++		ret = gpio_direction_input(sdhci->data->card_int_gpio);
++		if (ret) {
++			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
++					sdhci->data->card_int_gpio);
++			goto err_igpio_direction;
++		}
++		ret = request_irq(gpio_to_irq(sdhci->data->card_int_gpio),
++				sdhci_gpio_irq, IRQF_TRIGGER_LOW,
++				mmc_hostname(host->mmc), pdev);
++		if (ret) {
++			dev_dbg(&pdev->dev, "gpio request irq fail: %d\n",
++					sdhci->data->card_int_gpio);
++			goto err_igpio_request_irq;
++		}
++
++	}
++
++	return 0;
++
++err_igpio_request_irq:
++err_igpio_direction:
++	if (sdhci->data->card_int_gpio >= 0)
++		gpio_free(sdhci->data->card_int_gpio);
++err_igpio_request:
++err_pgpio_direction:
++	if (sdhci->data->card_power_gpio >= 0)
++		gpio_free(sdhci->data->card_power_gpio);
++err_pgpio_request:
++	platform_set_drvdata(pdev, NULL);
++	sdhci_remove_host(host, 1);
++err_add_host:
++	iounmap(host->ioaddr);
++err_ioremap:
++	sdhci_free_host(host);
++err_alloc_host:
++	clk_disable(sdhci->clk);
++err_clk_enb:
++	clk_put(sdhci->clk);
++err_clk_get:
++	kfree(sdhci);
++err_kzalloc:
++	release_mem_region(iomem->start, resource_size(iomem));
++err:
++	dev_err(&pdev->dev, "spear-sdhci probe failed: %d\n", ret);
++	return ret;
++}
++
++static int __devexit sdhci_remove(struct platform_device *pdev)
++{
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	struct spear_sdhci *sdhci =
++		(struct spear_sdhci *)(pdev->dev.platform_data);
++	int dead;
++	u32 scratch;
++
++	if (sdhci->data) {
++		if (sdhci->data->card_int_gpio >= 0) {
++			free_irq(gpio_to_irq(sdhci->data->card_int_gpio), pdev);
++			gpio_free(sdhci->data->card_int_gpio);
++		}
++
++		if (sdhci->data->card_power_gpio >= 0)
++			gpio_free(sdhci->data->card_power_gpio);
++	}
++
++	platform_set_drvdata(pdev, NULL);
++	dead = 0;
++	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
++	if (scratch == (u32)-1)
++		dead = 1;
++
++	sdhci_remove_host(host, dead);
++	iounmap(host->ioaddr);
++	sdhci_free_host(host);
++	clk_disable(sdhci->clk);
++	clk_put(sdhci->clk);
++	kfree(sdhci);
++	if (iomem)
++		release_mem_region(iomem->start, resource_size(iomem));
++
++	return 0;
++}
++
++static struct platform_driver sdhci_driver = {
++	.driver = {
++		.name	= "sdhci",
++		.owner	= THIS_MODULE,
++	},
++	.probe		= sdhci_probe,
++	.remove		= __devexit_p(sdhci_remove),
++};
++
++static int __init sdhci_init(void)
++{
++	return platform_driver_register(&sdhci_driver);
++}
++module_init(sdhci_init);
++
++static void __exit sdhci_exit(void)
++{
++	platform_driver_unregister(&sdhci_driver);
++}
++module_exit(sdhci_exit);
++
++MODULE_DESCRIPTION("SPEAr Secure Digital Host Controller Interface driver");
++MODULE_AUTHOR("Viresh Kumar <viresh.kumar@st.com>");
++MODULE_LICENSE("GPL v2");
+diff --git a/include/linux/mmc/sdhci-spear.h b/include/linux/mmc/sdhci-spear.h
+new file mode 100644
+index 0000000..9188c97
+--- /dev/null
++++ b/include/linux/mmc/sdhci-spear.h
+@@ -0,0 +1,42 @@
++/*
++ * include/linux/mmc/sdhci-spear.h
++ *
++ * SDHCI declarations specific to ST SPEAr platform
++ *
++ * Copyright (C) 2010 ST Microelectronics
++ * Viresh Kumar<viresh.kumar@st.com>
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#ifndef MMC_SDHCI_SPEAR_H
++#define MMC_SDHCI_SPEAR_H
++
++#include <linux/platform_device.h>
++/*
++ * struct sdhci_plat_data: spear sdhci platform data structure
++ *
++ * @card_power_gpio: gpio pin for enabling/disabling power to sdhci socket
++ * @power_active_high: if set, enable power to sdhci socket by setting
++ *			card_power_gpio
++ * @power_always_enb: If set, then enable power on probe, otherwise enable only
++ *			on card insertion and disable on card removal.
++ * card_int_gpio: gpio pin used for card detection
++ */
++struct sdhci_plat_data {
++	int card_power_gpio;
++	int power_active_high;
++	int power_always_enb;
++	int card_int_gpio;
++};
++
++/* This function is used to set platform_data field of pdev->dev */
++static inline void
++sdhci_set_plat_data(struct platform_device *pdev, struct sdhci_plat_data *data)
++{
++	pdev->dev.platform_data = data;
++}
++
++#endif /* MMC_SDHCI_SPEAR_H */
+-- 
+1.6.0.2
 
-> +	int			dma_ch;
-> +	void			*dma_ctrl_buf;
-> +	dma_addr_t		dma_ctrl_buf_phy;
->  	int			dma_line_tx, dma_line_rx;
->  	int			slot_id;
->  	int			got_dbclk;
-> @@ -527,7 +539,7 @@ static void omap_hsmmc_enable_irq(struct
-> omap_hsmmc_host *host)
->  {
->  	unsigned int irq_mask;
-> 
-> -	if (host->use_dma)
-> +	if (host->dma_in_use)
-This will go with no flag change.
->  		irq_mask = INT_EN_MASK & ~(BRR_ENABLE | BWR_ENABLE);
->  	else
->  		irq_mask = INT_EN_MASK;
-> @@ -813,7 +825,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host
-> *host, struct mmc_command *cmd,
->  			cmdreg &= ~(DDIR);
->  	}
-> 
-> -	if (host->use_dma)
-> +	if (host->dma_in_use)
-ditto
->  		cmdreg |= DMA_EN;
-> 
->  	host->req_in_progress = 1;
-> @@ -842,7 +854,7 @@ static void omap_hsmmc_request_done(struct
-> omap_hsmmc_host *host, struct mmc_req
-> 
->  	omap_hsmmc_disable_irq(host);
->  	/* Do not complete the request if DMA is still in progress */
-> -	if (mrq->data && host->use_dma && dma_ch != -1)
-> +	if (mrq->data && host->dma_in_use && dma_ch != -1)
-ditto
->  		return;
->  	host->mrq = NULL;
->  	mmc_request_done(host->mmc, mrq);
-> @@ -920,7 +932,7 @@ static void omap_hsmmc_dma_cleanup(struct
-> omap_hsmmc_host *host, int errno)
->  	host->dma_ch = -1;
->  	spin_unlock(&host->irq_lock);
-> 
-> -	if (host->use_dma && dma_ch != -1) {
-> +	if (host->dma_in_use && dma_ch != -1) {
-ditto
->  		dma_unmap_sg(mmc_dev(host->mmc), host->data->sg, host->dma_len,
->  			omap_hsmmc_get_dma_dir(host, host->data));
->  		omap_free_dma(dma_ch);
-> @@ -1266,7 +1278,6 @@ static void omap_hsmmc_config_dma_params(struct
-> omap_hsmmc_host *host,
->  			omap_hsmmc_get_dma_sync_dev(host, data),
->  			!(data->flags & MMC_DATA_WRITE));
-> 
-> -	omap_start_dma(dma_ch);
->  }
-> 
->  /*
-> @@ -1279,21 +1290,23 @@ static void omap_hsmmc_dma_cb(int lch, u16
-> ch_status, void *cb_data)
->  	int dma_ch, req_in_progress;
-> 
->  	if (ch_status & OMAP2_DMA_MISALIGNED_ERR_IRQ)
-> -		dev_dbg(mmc_dev(host->mmc), "MISALIGNED_ADRS_ERR\n");
-> +		dev_dbg(mmc_dev(host->mmc), "Misaligned address error\n");
-> 
->  	spin_lock(&host->irq_lock);
->  	if (host->dma_ch < 0) {
->  		spin_unlock(&host->irq_lock);
->  		return;
->  	}
-> -
-> -	host->dma_sg_idx++;
-> -	if (host->dma_sg_idx < host->dma_len) {
-> -		/* Fire up the next transfer. */
-> -		omap_hsmmc_config_dma_params(host, data,
-> +	if (host->dma_in_use == DMA_TYPE_SDMA) {
-> +		host->dma_sg_idx++;
-> +		if (host->dma_sg_idx < host->dma_len) {
-> +			/* Fire up the next transfer. */
-> +			omap_hsmmc_config_dma_params(host, data,
->  					   data->sg + host->dma_sg_idx);
-> -		spin_unlock(&host->irq_lock);
-> -		return;
-> +			omap_start_dma(host->dma_ch);
-> +			spin_unlock(&host->irq_lock);
-> +			return;
-> +		}
->  	}
-> 
->  	dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->dma_len,
-> @@ -1315,10 +1328,19 @@ static void omap_hsmmc_dma_cb(int lch, u16
-> ch_status, void *cb_data)
->  	}
->  }
-> 
-> +static int omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host)
-> +{
-> +	if (host->dma_in_use == DMA_TYPE_SDMA)
-> +		omap_start_dma(host->dma_ch);
-> +	else if (host->dma_in_use == DMA_TYPE_SDMA_DLOAD)
-> +		return omap_start_dma_sglist_transfers(host->dma_ch, -1);
-Instead of "-1" , some macro for "NO_PAUSE" would have been better. 
-> +
-> +	return 0;
-> +}
->  /*
-> - * Routine to configure and start DMA for the MMC card
-> + * Routine to configure DMA for the MMC card
->   */
-> -static int omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
-> +static int omap_hsmmc_configure_sdma(struct omap_hsmmc_host *host,
->  					struct mmc_request *req)
->  {
->  	int dma_ch = 0, ret = 0, i;
-> @@ -1359,6 +1381,56 @@ static int omap_hsmmc_start_dma_transfer(struct
-> omap_hsmmc_host *host,
->  	return 0;
->  }
-> 
-> +static int omap_hsmmc_configure_sdma_sglist(struct omap_hsmmc_host *host,
-> +		struct mmc_request *req)
-> +{
-> +	int i;
-> +	struct omap_dma_sglist_node *sglist, *snode;
-> +	struct mmc_data *data = req->data;
-> +	int blksz;
-> +	int dmadir = omap_hsmmc_get_dma_dir(host, data);
-> +	struct omap_dma_sglist_type2a_params *t2p;
-> +
-> +	sglist = (struct omap_dma_sglist_node *) host->dma_ctrl_buf;
-> +	snode = sglist;
-> +	blksz = host->data->blksz;
-> +
-> +	if ((host->dma_len * sizeof(*snode)) > DMA_CTRL_BUF_SIZE) {
-> +		dev_err(mmc_dev(host->mmc), "not enough sglist memory %d\n",
-> +			host->dma_len);
-> +		return -ENOMEM;
-> +	}
-> +	for (i = 0; i < host->dma_len; snode++, i++) {
-> +		snode->desc_type = OMAP_DMA_SGLIST_DESCRIPTOR_TYPE2a;
-> +		snode->num_of_elem = blksz / 4;
-> +		t2p = &snode->sg_node.t2a;
-> +
-> +		if (dmadir == DMA_FROM_DEVICE) {
-> +			t2p->src_addr = host->mapbase + OMAP_HSMMC_DATA;
-> +			t2p->dst_addr = sg_dma_address(data->sg + i);
-> +		} else {
-> +			t2p->dst_addr = host->mapbase + OMAP_HSMMC_DATA;
-> +			t2p->src_addr = sg_dma_address(data->sg + i);
-> +		}
-> +		snode->flags =
-> +			OMAP_DMA_LIST_DST_VALID | OMAP_DMA_LIST_SRC_VALID;
-> +
-> +		t2p->cfn_fn = sg_dma_len(data->sg + i) / host->data->blksz;
-> +		t2p->cicr = DMA_ICR_SGLIST_END;
-> +
-> +		t2p->dst_frame_idx_or_pkt_size = 0;
-> +		t2p->src_frame_idx_or_pkt_size = 0;
-> +		t2p->dst_elem_idx = 0;
-> +		t2p->src_elem_idx = 0;
-> +	}
-> +	dev_dbg(mmc_dev(host->mmc), "new sglist %x len =%d\n",
-> +			host->dma_ctrl_buf_phy, i);
-> +	omap_set_dma_sglist_mode(host->dma_ch, sglist,
-> +			host->dma_ctrl_buf_phy, i, NULL);
-> +	omap_dma_set_sglist_fastmode(host->dma_ch, 1);
-
-You should check for return value of above two. If any one of above fails
-the transfer will fail BADLY
-> +	return 0;
-> +}
-> +
->  static void set_data_timeout(struct omap_hsmmc_host *host,
->  			     unsigned int timeout_ns,
->  			     unsigned int timeout_clks)
-> @@ -1420,14 +1492,23 @@ omap_hsmmc_prepare_data(struct omap_hsmmc_host
-> *host, struct mmc_request *req)
->  					| (req->data->blocks << 16));
->  	set_data_timeout(host, req->data->timeout_ns, req->data->timeout_clks);
-> 
-> -	if (host->use_dma) {
-> -		ret = omap_hsmmc_start_dma_transfer(host, req);
-> -		if (ret != 0) {
-> -			dev_dbg(mmc_dev(host->mmc), "MMC start dma failure\n");
-> +	if (host->dma_caps & DMA_TYPE_SDMA) {
-> +		ret = omap_hsmmc_configure_sdma(host, req);
-> +		if (ret)
->  			return ret;
-> -		}
-> +		host->dma_in_use = DMA_TYPE_SDMA;
->  	}
-> -	return 0;
-> +	if ((host->dma_caps & DMA_TYPE_SDMA_DLOAD) &&
-> +		host->data->sg_len > 4) {
-> +		ret = omap_hsmmc_configure_sdma_sglist(host, req);
-> +		if (ret)
-> +			return ret;
-> +		host->dma_in_use = DMA_TYPE_SDMA_DLOAD;
-> +
-> +	}
-> +	ret = omap_hsmmc_start_dma_transfer(host);
-> +	return ret;
-> +
->  }
-> 
->  /*
-> @@ -2007,7 +2088,9 @@ static int __init omap_hsmmc_probe(struct
-> platform_device *pdev)
->  	host->mmc	= mmc;
->  	host->pdata	= pdata;
->  	host->dev	= &pdev->dev;
-> -	host->use_dma	= 1;
-> +	host->dma_caps	= DMA_TYPE_SDMA;
-> +	host->dma_in_use	= DMA_TYPE_NODMA;
-> +	host->dma_ctrl_buf = NULL;
->  	host->dev->dma_mask = &pdata->dma_mask;
->  	host->dma_ch	= -1;
->  	host->irq	= irq;
-> @@ -2088,6 +2171,15 @@ static int __init omap_hsmmc_probe(struct
-> platform_device *pdev)
->  							" clk failed\n");
->  	}
-> 
-> +	if (cpu_is_omap44xx() || cpu_is_omap3630()) {
-Can we avoid above by passing this part of platform data??
-devices.c
-> +		host->dma_ctrl_buf = dma_alloc_coherent(NULL,
-> +					DMA_CTRL_BUF_SIZE,
-> +					&host->dma_ctrl_buf_phy,
-> +					0);
-> +		if (host->dma_ctrl_buf != NULL)
-> +			host->dma_caps |= DMA_TYPE_SDMA_DLOAD;
-> +	}
-> +
->  	/* Since we do only SG emulation, we can have as many segs
->  	 * as we want. */
-Not your patch but above commenting style isn't right
->  	mmc->max_phys_segs = 1024;
-> @@ -2213,6 +2305,10 @@ err_reg:
->  err_irq_cd_init:
->  	free_irq(host->irq, host);
->  err_irq:
-> +	if (host->dma_ctrl_buf)
-> +		dma_free_coherent(NULL, DMA_CTRL_BUF_SIZE,
-> +				host->dma_ctrl_buf,
-> +				host->dma_ctrl_buf_phy);
->  	mmc_host_disable(host->mmc);
->  	clk_disable(host->iclk);
->  	clk_put(host->fclk);
-> @@ -2240,6 +2336,12 @@ static int omap_hsmmc_remove(struct
-> platform_device *pdev)
->  	if (host) {
->  		mmc_host_enable(host->mmc);
->  		mmc_remove_host(host->mmc);
-> +
-> +		if (host->dma_ctrl_buf != NULL) {
-> +			dma_free_coherent(NULL, DMA_CTRL_BUF_SIZE,
-> +				host->dma_ctrl_buf,
-> +				host->dma_ctrl_buf_phy);
-> +		}
->  		if (host->use_reg)
->  			omap_hsmmc_reg_put(host);
->  		if (host->pdata->cleanup)
-> --
-> 1.6.3.3
