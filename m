@@ -1,110 +1,104 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH v2 3/5] OMAP4-HSMMC: Adding MMC-TWL regulator changes
-Date: Wed, 05 May 2010 13:31:56 +0300
-Message-ID: <4BE1491C.20005@nokia.com>
-References: <35156.10.24.255.17.1272988897.squirrel@dbdmail.itg.ti.com>
+Subject: Re: [PATCH v2 1/5] OMAP4-HSMMC: Adding HSMMC support for OMAP4430
+      Board file
+Date: Wed, 05 May 2010 13:32:37 +0300
+Message-ID: <4BE14945.5040300@nokia.com>
+References: <35156.10.24.255.17.1272988883.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <35156.10.24.255.17.1272988897.squirrel@dbdmail.itg.ti.com>
+In-Reply-To: <35156.10.24.255.17.1272988883.squirrel@dbdmail.itg.ti.com>
 Sender: linux-omap-owner@vger.kernel.org
 To: kishore kadiyala <kishore.kadiyala@ti.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "Lavinen Jarkko (Nokia-D/Helsinki)" <jarkko.lavinen@nokia.com>, "rmk@arm.linux.org.uk" <rmk@arm.linux.org.uk>, "paul@pwsan.com" <paul@pwsan.com>
 List-Id: linux-mmc@vger.kernel.org
 
 kishore kadiyala wrote:
-> This patch adds PBIAS Configuration during POWER ON and OFF.
-> Also it adds MMC1 Card detect configuration on Phoenix
+> This patch adds MMC1 and MMC2 Controller data for OMAP4430 Board
+> file.
 > 
+> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+> ---
+>  arch/arm/mach-omap2/Makefile        |    3 +-
+>  arch/arm/mach-omap2/board-4430sdp.c |   39 ++++++++++++++++++++++++++++------
+>  2 files changed, 34 insertions(+), 8 deletions(-)
+> 
+> diff --git a/arch/arm/mach-omap2/Makefile b/arch/arm/mach-omap2/Makefile
+> index ffe600a..65d8d11 100644
+> --- a/arch/arm/mach-omap2/Makefile
+> +++ b/arch/arm/mach-omap2/Makefile
+> @@ -140,7 +140,8 @@ obj-$(CONFIG_MACH_IGEP0020)		+= board-igep0020.o \
+>  					   hsmmc.o
+>  obj-$(CONFIG_MACH_OMAP3_TOUCHBOOK)	+= board-omap3touchbook.o \
+>  					   hsmmc.o
+> -obj-$(CONFIG_MACH_OMAP_4430SDP)		+= board-4430sdp.o
+> +obj-$(CONFIG_MACH_OMAP_4430SDP)		+= board-4430sdp.o \
+> +					   hsmmc.o
+> 
+>  obj-$(CONFIG_MACH_OMAP3517EVM)		+= board-am3517evm.o
+> 
+> diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
+> index f1b9708..c4e61d5 100644
+> --- a/arch/arm/mach-omap2/board-4430sdp.c
+> +++ b/arch/arm/mach-omap2/board-4430sdp.c
+> @@ -33,6 +33,7 @@
+>  #include <plat/control.h>
+>  #include <plat/timer-gp.h>
+>  #include <plat/usb.h>
+> +#include "hsmmc.h"
+> 
+>  #define ETHERNET_KS8851_IRQ		34
+>  #define ETHERNET_KS8851_POWER_ENABLE	48
+> @@ -93,16 +94,27 @@ static struct omap_musb_board_data musb_board_data = {
+>  	.power			= 100,
+>  };
+> 
+> -static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
+> +static struct omap2_hsmmc_info mmc[] = {
+>  	{
+> -		.supply = "vmmc",
+> +		.mmc		= 1,
+> +		.wires		= 8,
+> +		/* "mmc0_cd" is not a gpio interrupt
+> +		 * but is a phoenix interrupt
+> +		 */
+> +		.gpio_cd	= TWL6030_IRQ_BASE + MMCDETECT_INTR_OFFSET,
+> +		.gpio_wp	= -EINVAL,
+>  	},
+>  	{
+> -		.supply = "vmmc",
+> -	},
+> -	{
+> -		.supply = "vmmc",
+> +		.mmc		= 2,
+> +		.wires		= 8,
+> +		.gpio_cd	= -EINVAL,
+> +		.gpio_wp	= -EINVAL,
+> +		.nonremovable   = true,
+>  	},
+> +	{}	/* Terminator */
+> +};
+> +
+> +static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
+>  	{
+>  		.supply = "vmmc",
+>  	},
+> @@ -111,6 +123,18 @@ static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
+>  	},
+>  };
+> 
+> +static int __init sdp4430_mmc_init(void)
+> +{
+> +	omap2_hsmmc_init(mmc);
+> +
+> +	/* link regulators to MMC adapters ... we "know" the
+> +	 * regulators will be set up only *after* we return.
+> +	 */
+> +	sdp4430_vmmc_supply[0].dev = mmc[0].dev;
+> +	sdp4430_vmmc_supply[1].dev = mmc[1].dev;
 
-As I understand it, the PBIAS configuration is required for HSMMC
-irrespective of how the power is supplied, thus it is not TWL related.
-The TWL stuff should not be in hsmmc.c.
-
-Also I would suggest the only change to omap_hsmmc is:
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index e9caf69..f792cff 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -465,8 +465,6 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
-        int ret;
- 
-        if (gpio_is_valid(pdata->slots[0].switch_pin)) {
--               pdata->suspend = omap_hsmmc_suspend_cdirq;
--               pdata->resume = omap_hsmmc_resume_cdirq;
-                if (pdata->slots[0].cover)
-                        pdata->slots[0].get_cover_state =
-                                        omap_hsmmc_get_cover_state;
-@@ -2160,6 +2158,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
-                                "Unable to grab MMC CD IRQ\n");
-                        goto err_irq_cd;
-                }
-+               pdata->suspend = omap_hsmmc_suspend_cdirq;
-+               pdata->resume = omap_hsmmc_resume_cdirq;
-        }
- 
-        OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
-
-
-And that the late init function is used to do the rest e.g.
-find a home for these 3 functions:
-
-static int omap4_twl6030_hsmmc_late_init(struct device *dev)
-{
-	int ret = 0;
-	struct platform_device *pdev = container_of(dev,
-					struct platform_device, dev);
-	struct omap_mmc_platform_data *pdata = dev->platform_data;
-
-	/* MMC1 Card detect Configuration */
-	if (pdev->id == 0) {
-		ret = omap4_hsmmc1_card_detect_config();
-		if (ret < 0)
-			pr_err("Unable to configure Card detect for MMC1\n");
-		pdata->slots[0].card_detect = twl6030_mmc_card_detect;
-		pdata->slots[0].card_detect_irq = TWL6030_IRQ_BASE +
-						  MMCDETECT_INTR_OFFSET;
-	}
-	return ret;
-}
-
-static __init void omap4_twl6030_hsmmc_set_late_init(struct device *dev)
-{
-	struct omap_mmc_platform_data *pdata = dev->platform_data;
-
-	pdata->init = omap4_twl6030_hsmmc_late_init;
-}
-
-void __init omap4_twl6030_hsmmc_init(struct omap2_hsmmc_info *controllers)
-{
-	struct omap2_hsmmc_info *c;
-
-	omap2_hsmmc_init(controllers);
-
-	for (c = controllers; c->mmc; c++)
-		omap4_twl6030_hsmmc_set_late_init(c->dev);
-}
-
-And then the board file becomes:
-
-static struct omap2_hsmmc_info mmc[] = {
-	{
-		.mmc		= 1,
-		.wires		= 8,
-		.gpio_cd	= -EINVAL,
-		.gpio_wp	= -EINVAL,
-	},
-	{
-		.mmc		= 2,
-		.wires		= 8,
-		.gpio_cd	= -EINVAL,
-		.gpio_wp	= -EINVAL,
-		.nonremovable   = true,
-	},
-	{}	/* Terminator */
-};
+Can do this instead I think:
 
 static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
 	{
@@ -117,306 +111,30 @@ static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
 	},
 };
 
-static int __init sdp4430_mmc_init(void)
-{
-	omap4_twl6030_hsmmc_init(mmc);
-	return 0;
-}
 
-And in fact sdp4430_mmc_init() doesn't need to exist.
 
-> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-> ---
->  arch/arm/mach-omap2/hsmmc.c               |  121 ++++++++++++++++++++++++++---
->  arch/arm/plat-omap/include/plat/control.h |   17 ++++
->  include/linux/i2c/twl.h                   |   42 +++++++++-
->  3 files changed, 166 insertions(+), 14 deletions(-)
-> 
-> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-> index f5ca16c..a73f011 100644
-> --- a/arch/arm/mach-omap2/hsmmc.c
-> +++ b/arch/arm/mach-omap2/hsmmc.c
-> @@ -14,6 +14,7 @@
->  #include <linux/string.h>
->  #include <linux/delay.h>
->  #include <linux/i2c/twl.h>
-> +#include <linux/platform_device.h>
->  #include <mach/hardware.h>
->  #include <plat/control.h>
->  #include <plat/mmc.h>
-> @@ -25,6 +26,7 @@
-> 
->  static u16 control_pbias_offset;
->  static u16 control_devconf1_offset;
-> +static u16 control_mmc1;
-> 
->  #define HSMMC_NAME_LEN	9
-> 
-> @@ -43,7 +45,7 @@ static int hsmmc_get_context_loss(struct device *dev)
->  #define hsmmc_get_context_loss NULL
->  #endif
-> 
-> -static void hsmmc1_before_set_reg(struct device *dev, int slot,
-> +static void omap_hsmmc1_before_set_reg(struct device *dev, int slot,
->  				  int power_on, int vdd)
->  {
->  	u32 reg, prog_io;
-> @@ -96,7 +98,7 @@ static void hsmmc1_before_set_reg(struct device *dev, int slot,
->  	}
->  }
-> 
-> -static void hsmmc1_after_set_reg(struct device *dev, int slot,
-> +static void omap_hsmmc1_after_set_reg(struct device *dev, int slot,
->  				 int power_on, int vdd)
->  {
->  	u32 reg;
-> @@ -120,6 +122,61 @@ static void hsmmc1_after_set_reg(struct device *dev, int slot,
->  	}
->  }
-> 
-> +static void omap4_hsmmc1_before_set_reg(struct device *dev, int slot,
-> +				  int power_on, int vdd)
-> +{
-> +	u32 reg;
-> +
-> +	/*
-> +	 * Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0..3) and the
-> +	 * card with Vcc regulator (from twl4030 or whatever).  OMAP has both
-> +	 * 1.8V and 3.0V modes, controlled by the PBIAS register.
-> +	 *
-> +	 * In 8-bit modes, OMAP VMMC1A (for DAT4..7) needs a supply, which
-> +	 * is most naturally TWL VSIM; those pins also use PBIAS.
-> +	 *
-> +	 * FIXME handle VMMC1A as needed ...
-> +	 */
-> +	if (power_on) {
-> +		reg = omap_ctrl_readl(control_pbias_offset);
-> +		reg &= ~(OMAP4_MMC1_PBIASLITE_PWRDNZ | OMAP4_MMC1_PWRDNZ);
-> +		omap_ctrl_writel(reg, control_pbias_offset);
-> +	} else {
-> +		reg = omap_ctrl_readl(control_pbias_offset);
-> +		reg &= ~(OMAP4_MMC1_PBIASLITE_PWRDNZ | OMAP4_MMC1_PWRDNZ);
-> +		omap_ctrl_writel(reg, control_pbias_offset);
-> +	}
-> +}
-> +
-> +static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
-> +				 int power_on, int vdd)
-> +{
-> +	u32 reg;
-> +
-> +	/* 100ms delay required for PBIAS configuration */
-> +	msleep(100);
-> +
-> +	if (power_on) {
-> +		reg = omap_ctrl_readl(control_pbias_offset);
-> +		reg |= OMAP4_MMC1_PBIASLITE_PWRDNZ;
-> +		if ((1 << vdd) <= MMC_VDD_165_195) {
-> +			reg &= ~OMAP4_MMC1_PBIASLITE_VMODE;
-> +			reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ |
-> +						OMAP4_MMC1_PWRDNZ);
-> +		} else {
-> +			reg |= (OMAP4_MMC1_PBIASLITE_VMODE |
-> +				OMAP4_MMC1_PBIASLITE_PWRDNZ |
-> +					OMAP4_MMC1_PWRDNZ);
-> +		}
-> +		omap_ctrl_writel(reg, control_pbias_offset);
-> +	} else {
-> +		reg = omap_ctrl_readl(control_pbias_offset);
-> +		 reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ |
-> +			OMAP4_MMC1_PBIASLITE_VMODE | OMAP4_MMC1_PWRDNZ);
-> +		omap_ctrl_writel(reg, control_pbias_offset);
-> +	}
-> +}
-> +
->  static void hsmmc23_before_set_reg(struct device *dev, int slot,
->  				   int power_on, int vdd)
->  {
-> @@ -140,6 +197,24 @@ static void hsmmc23_before_set_reg(struct device *dev, int slot,
->  	}
->  }
-> 
-> +static int mmc_twl_late_init(struct device *dev)
-> +{
-> +	int ret = 0;
-> +	struct platform_device *pdev = container_of(dev,
-> +					struct platform_device, dev);
-> +
-> +	if (cpu_is_omap44xx()) {
-> +		/* MMC1 Card detect Configuration */
-> +		if (pdev->id == 0) {
-> +			ret = omap4_hsmmc1_card_detect_config();
-> +			if (ret < 0)
-> +				pr_err("Unable to configure"
-> +					"Card detect for MMC1\n");
-> +		}
-> +	}
-> +	return ret;
-> +}
-> +
->  static struct omap_mmc_platform_data *hsmmc_data[OMAP34XX_NR_MMC] __initdata;
-> 
->  void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
-> @@ -147,13 +222,28 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info
->  	struct omap2_hsmmc_info *c;
->  	int nr_hsmmc = ARRAY_SIZE(hsmmc_data);
->  	int i;
-> +	u32 reg;
-> 
-> -	if (cpu_is_omap2430()) {
-> -		control_pbias_offset = OMAP243X_CONTROL_PBIAS_LITE;
-> -		control_devconf1_offset = OMAP243X_CONTROL_DEVCONF1;
-> +	if (!cpu_is_omap44xx()) {
-> +		if (cpu_is_omap2430()) {
-> +			control_pbias_offset = OMAP243X_CONTROL_PBIAS_LITE;
-> +			control_devconf1_offset = OMAP243X_CONTROL_DEVCONF1;
-> +		} else {
-> +			control_pbias_offset = OMAP343X_CONTROL_PBIAS_LITE;
-> +			control_devconf1_offset = OMAP343X_CONTROL_DEVCONF1;
-> +		}
->  	} else {
-> -		control_pbias_offset = OMAP343X_CONTROL_PBIAS_LITE;
-> -		control_devconf1_offset = OMAP343X_CONTROL_DEVCONF1;
-> +		control_pbias_offset = OMAP44XX_CONTROL_PBIAS_LITE;
-> +		control_mmc1 = OMAP44XX_CONTROL_MMC1;
-> +		reg = omap_ctrl_readl(control_mmc1);
-> +		reg |= (OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP0 |
-> +			OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP1);
-> +		reg &= ~(OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP2 |
-> +			OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP3);
-> +		reg |= (OMAP4_CONTROL_SDMMC1_DR0_SPEEDCTRL |
-> +			OMAP4_CONTROL_SDMMC1_DR1_SPEEDCTRL |
-> +			OMAP4_CONTROL_SDMMC1_DR2_SPEEDCTRL);
-> +		omap_ctrl_writel(reg, control_mmc1);
->  	}
-> 
->  	for (c = controllers; c->mmc; c++) {
-> @@ -186,6 +276,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
->  		mmc->slots[0].wires = c->wires;
->  		mmc->slots[0].internal_clock = !c->ext_clock;
->  		mmc->dma_mask = 0xffffffff;
-> +		mmc->init = mmc_twl_late_init;
-> 
->  		mmc->get_context_loss_count = hsmmc_get_context_loss;
-> 
-> @@ -220,10 +311,18 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info
-> 
->  		switch (c->mmc) {
->  		case 1:
-> -			/* on-chip level shifting via PBIAS0/PBIAS1 */
-> -			mmc->slots[0].before_set_reg = hsmmc1_before_set_reg;
-> -			mmc->slots[0].after_set_reg = hsmmc1_after_set_reg;
-> -
-> +			if (cpu_is_omap44xx()) {
-> +				/* on-chip level shifting via PBIAS0/PBIAS1 */
-> +				mmc->slots[0].before_set_reg =
-> +						omap4_hsmmc1_before_set_reg;
-> +				mmc->slots[0].after_set_reg =
-> +						omap4_hsmmc1_after_set_reg;
-> +			} else {
-> +				mmc->slots[0].before_set_reg =
-> +						omap_hsmmc1_before_set_reg;
-> +				mmc->slots[0].after_set_reg =
-> +						omap_hsmmc1_after_set_reg;
-> +			}
->  			/* Omap3630 HSMMC1 supports only 4-bit */
->  			if (cpu_is_omap3630() && c->wires > 4) {
->  				c->wires = 4;
-> diff --git a/arch/arm/plat-omap/include/plat/control.h b/arch/arm/plat-omap/include/plat/control.h
-> index a56deee..6d17a61 100644
-> --- a/arch/arm/plat-omap/include/plat/control.h
-> +++ b/arch/arm/plat-omap/include/plat/control.h
-> @@ -207,6 +207,9 @@
->  /* 44xx control status register offset */
->  #define OMAP44XX_CONTROL_STATUS		0x2c4
-> 
-> +/* 44xx-only CONTROL_GENERAL register offsets */
-> +#define OMAP44XX_CONTROL_MMC1           0x628
-> +#define OMAP44XX_CONTROL_PBIAS_LITE     0x600
->  /*
->   * REVISIT: This list of registers is not comprehensive - there are more
->   * that should be added.
-> @@ -252,6 +255,20 @@
->  #define OMAP2_PBIASLITEPWRDNZ0		(1 << 1)
->  #define OMAP2_PBIASLITEVMODE0		(1 << 0)
-> 
-> +/* CONTROL_PBIAS_LITE bits for OMAP4 */
-> +#define OMAP4_MMC1_PWRDNZ			(1 << 26)
-> +#define OMAP4_MMC1_PBIASLITE_HIZ_MODE		(1 << 25)
-> +#define OMAP4_MMC1_PBIASLITE_PWRDNZ		(1 << 22)
-> +#define OMAP4_MMC1_PBIASLITE_VMODE		(1 << 21)
-> +
-> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP0	(1 << 31)
-> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP1	(1 << 30)
-> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP2	(1 << 29)
-> +#define OMAP4_CONTROL_SDMMC1_PUSTRENGTHGRP3	(1 << 28)
-> +#define OMAP4_CONTROL_SDMMC1_DR0_SPEEDCTRL	(1 << 27)
-> +#define OMAP4_CONTROL_SDMMC1_DR1_SPEEDCTRL	(1 << 26)
-> +#define OMAP4_CONTROL_SDMMC1_DR2_SPEEDCTRL	(1 << 25)
-> +
->  /* CONTROL_PROG_IO1 bits */
->  #define OMAP3630_PRG_SDMMC1_SPEEDCTRL	(1 << 20)
-> 
-> diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
-> index eb198db..423a355 100644
-> --- a/include/linux/i2c/twl.h
-> +++ b/include/linux/i2c/twl.h
-> @@ -142,6 +142,13 @@
->  #define TWL6030_CHARGER_FAULT_INT_MASK 	0x60
-> 
->  #define TWL6030_MMCCTRL			0xEE
-> +#define VMMC_AUTO_OFF			(0x1 << 3)
-> +#define SW_FC				(0x1 << 2)
-> +
-> +#define TWL6030_CFG_INPUT_PUPD3		0xF2
-> +#define MMC_PU				(0x1 << 3)
-> +#define MMC_PD				(0x1 << 2)
-> +
-> 
->  #define TWL4030_CLASS_ID 		0x4030
->  #define TWL6030_CLASS_ID 		0x6030
-> @@ -174,11 +181,40 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg, unsigned
->  int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
->  int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
-> 
-> -/*
-> - * MMC1 Controller on OMAP4 uses Phoenix Irq for Card detect.
-> - */
-> +/* MMC1 Controller on OMAP4 uses Phoenix Irq for Card detect */
->  int twl6030_mmc_card_detect(struct device *dev, int slot);
-> 
-> +/* Configuring Card Detect for MMC1 */
-> +static inline int omap4_hsmmc1_card_detect_config(void)
-> +{
-> +	int res = -1;
-> +	u8 reg_val = 0;
-> +
-> +	/* Unmasking the Card detect Interrupt line for MMC1 from Phoenix */
-> +	if (twl_class_is_6030()) {
-> +		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
-> +							REG_INT_MSK_LINE_B);
-> +		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
-> +							REG_INT_MSK_STS_B);
-> +	}
-> +
-> +	/*
-> +	 * Intially Configuring MMC_CTRL for receving interrupts &
-> +	 * Card status on TWL6030 for MMC1
-> +	 */
-> +	reg_val |= (SW_FC & ~VMMC_AUTO_OFF);
-> +	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_MMCCTRL);
-> +	res = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
-> +						TWL6030_CFG_INPUT_PUPD3);
-> +	if (res < 0)
-> +		return -EINVAL;
-> +	reg_val = 0;
-> +	reg_val &= ~(MMC_PU | MMC_PD);
-> +	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
-> +						TWL6030_CFG_INPUT_PUPD3);
+
 > +	return 0;
 > +}
 > +
->  /*----------------------------------------------------------------------*/
+>  static struct regulator_init_data sdp4430_vaux1 = {
+>  	.constraints = {
+>  		.min_uV			= 1000000,
+> @@ -162,7 +186,7 @@ static struct regulator_init_data sdp4430_vmmc = {
+>  					| REGULATOR_CHANGE_MODE
+>  					| REGULATOR_CHANGE_STATUS,
+>  	},
+> -	.num_consumer_supplies  = 5,
+> +	.num_consumer_supplies  = 2,
+>  	.consumer_supplies      = sdp4430_vmmc_supply,
+>  };
 > 
->  /*
+> @@ -281,6 +305,7 @@ static void __init omap_4430sdp_init(void)
+>  	omap4_i2c_init();
+>  	platform_add_devices(sdp4430_devices, ARRAY_SIZE(sdp4430_devices));
+>  	omap_serial_init();
+> +	sdp4430_mmc_init();
+>  	/* OMAP4 SDP uses internal transceiver so register nop transceiver */
+>  	usb_nop_xceiv_register();
+>  	/* FIXME: allow multi-omap to boot until musb is updated for omap4 */
 
