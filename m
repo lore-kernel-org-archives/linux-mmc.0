@@ -1,70 +1,47 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH] Disable the non working eMMC on Zoom2/3
-Date: Wed, 5 May 2010 11:27:27 -0700
-Message-ID: <20100505182727.GA29604@atomide.com>
-References: <2A3DCF3DA181AD40BDE86A3150B27B6B030D32D372@dbde02.ent.ti.com>
- <4BB51740.2060802@ti.com>
- <009a01cad1ee$e3bbae70$544ff780@am.dhcp.ti.com>
- <20100407114938.GF7153@atomide.com>
- <003801cad73e$86841df0$544ff780@am.dhcp.ti.com>
- <20100427182111.GE7225@atomide.com>
- <20100428192322.GG7225@atomide.com>
- <006801cae709$e136fe40$544ff780@am.dhcp.ti.com>
- <20100428194553.GH7225@atomide.com>
- <006f01cae886$38da6920$544ff780@am.dhcp.ti.com>
+From: "Mr. Beuker Hendrik" <info@mail.com>
+Subject: Good day
+Date: Wed, 05 May 2010 14:54:43 -0300
+Message-ID: <20100505145443.myctw2z0pwwg8s80@mail.uepa.br>
+Reply-To: mrbeukerhendrik@yahoo.com.hk
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset=ISO-8859-1;
+	DelSp="Yes";
+	format="flowed"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:57440 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757649Ab0EES1a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2010 14:27:30 -0400
+Received: from ns.uepa.br ([200.129.144.2]:60010 "EHLO srv1.uepa.br"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758021Ab0EESp3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 5 May 2010 14:45:29 -0400
 Content-Disposition: inline
-In-Reply-To: <006f01cae886$38da6920$544ff780@am.dhcp.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: 'Nishanth Menon' <nm@ti.com>, "'Ghorai, Sukumar'" <s-ghorai@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-* Madhusudhan <madhu.cr@ti.com> [100430 09:52]:
-> <snip>
-> 
-> > > >
-> > > > > Hmm, finally got around looking into this again. Looks like the mmc
-> > > > > is now working on my zoom3 with the current Linus' tree at commit
-> > > > > 7c6bd2010fced38444c9fd658f4c6ce61bd185bf. So I guess something that
-> > > > > we had in omap-fixes fixed this. Or maybe some fix for drivers/mmc?
-> > > > >
-> > > > > This is with the debug_ll patch applied:
-> > > > >
-> > > > > https://patchwork.kernel.org/patch/87532/
-> > > >
-> > > > For the microSD card, turns out the card I used was flakey. So
-> > > > that should explain some of the problems. I'm almost certain
-> > > > I tried with two different cards earlier though. In any case,
-> > > > let's assume the problem is only the eMMC.
-> > > >
-> > > Sorry, I did not get a complete picture. Your earlier email said that
-> > with
-> > > Linus tree eMMC on your Zoom3 is working. Is that correct?
-> > 
-> > Nope, now the microSD is working, eMMC is not working.
-> > 
-> > > IMHO, an omap level fix can not solve the problem with eMMC because as I
-> > can
-> > > see from the log you provided above that a 16G device is detected as 1G.
-> > > This is certainly due to the issue I mentioned earlier.
-> > 
-> > OK
-> 
-> This means that some production boards still have this issue with eMMC. So
-> my patch disables the support for MMC2 on zoom boards. Would you consider
-> that?
 
-But is it also broken on zoom2?
 
-And what about this "Simulate multi mmc card as one big" patch?
+Good day,
 
-Regards,
+My name is Mr. Beuker Hendrik: I work in the Euro Lottery. I am soliciting
+your assistance for a swift transfer of 1,528,000 GBP, should you be
+willing to assist me in this project, and you will be giving me just 25%
+of your winnings.
 
-Tony
+Just as a brief, you just have to register online; due to my position in
+the company I can make it happen that you would be a winner of the above
+stated amount. Naturally, every body would like to play a lottery if they
+are assured of winning. I am assuring you today to be a winner, please do
+not take for granted this once in a life time opportunity as we both stand
+to collectively gain from this at the success of the transaction.
+
+Should you be willing to assist me in this transaction please do respond to
+
+E-mail: mrbeukerhendrik@yahoo.com.hk
+
+Warmest Regards,
+Mr. Beuker Hendrik
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
+
