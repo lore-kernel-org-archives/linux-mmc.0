@@ -1,128 +1,90 @@
-From: Ben Dooks <ben-linux@fluff.org>
-Subject: Re: +
-	s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-bui
-	ld.patch added to -mm tree
-Date: Thu, 6 May 2010 02:21:03 +0100
-Message-ID: <20100506012103.GR2589@trinity.fluff.org>
-References: <201005042346.o44Nk6Oi025952@imap1.linux-foundation.org>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH] Disable the non working eMMC on Zoom2/3
+Date: Wed, 5 May 2010 20:35:51 -0500
+Message-ID: <00a501caecbc$761ded40$544ff780@am.dhcp.ti.com>
+References: <2A3DCF3DA181AD40BDE86A3150B27B6B030D32D372@dbde02.ent.ti.com> <4BB51740.2060802@ti.com> <009a01cad1ee$e3bbae70$544ff780@am.dhcp.ti.com> <20100407114938.GF7153@atomide.com> <003801cad73e$86841df0$544ff780@am.dhcp.ti.com> <20100427182111.GE7225@atomide.com> <20100428192322.GG7225@atomide.com> <006801cae709$e136fe40$544ff780@am.dhcp.ti.com> <20100428194553.GH7225@atomide.com> <006f01cae886$38da6920$544ff780@am.dhcp.ti.com> <20100505182727.GA29604@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from trinity.fluff.org ([89.16.178.74]:50840 "EHLO trinity.fluff.org"
+Received: from comal.ext.ti.com ([198.47.26.152]:52216 "EHLO comal.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751338Ab0EFBVK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 5 May 2010 21:21:10 -0400
-Content-Disposition: inline
-In-Reply-To: <201005042346.o44Nk6Oi025952@imap1.linux-foundation.org>
+	id S1752785Ab0EFBfz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 5 May 2010 21:35:55 -0400
+In-Reply-To: <20100505182727.GA29604@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org
-Cc: mm-commits@vger.kernel.org, mcuelenaere@gmail.com, ben-linux@fluff.org, linux-mmc@vger.kernel.org, thomas.ab@samsung.com
+To: 'Tony Lindgren' <tony@atomide.com>
+Cc: 'Nishanth Menon' <nm@ti.com>, "'Ghorai, Sukumar'" <s-ghorai@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Tue, May 04, 2010 at 04:46:06PM -0700, akpm@linux-foundation.org wrote:
-> 
-> The patch titled
->      mmc: s3c6410: add new quirk in sdhci driver and update ADMA descriptor build.
-> has been added to the -mm tree.  Its filename is
->      s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build.patch
-> 
-> Before you just go and hit "reply", please:
->    a) Consider who else should be cc'ed
->    b) Prefer to cc a suitable mailing list as well
->    c) Ideally: find the original patch on the mailing list and do a
->       reply-to-all to that, adding suitable additional cc's
-> 
-> *** Remember to use Documentation/SubmitChecklist when testing your code ***
-> 
-> See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-> out what to do about this
-> 
-> The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-> 
-> ------------------------------------------------------
-> Subject: mmc: s3c6410: add new quirk in sdhci driver and update ADMA descriptor build.
-> From: Maurus Cuelenaere <mcuelenaere@gmail.com>
 
-originally from Thomas Abraham <thomas.ab@samsung.com>
-and resent by Maurus Cuelenaere <mcuelenaere@gmail.com>
 
-see also same with second patch.
+> -----Original Message-----
+> From: Tony Lindgren [mailto:tony@atomide.com]
+> Sent: Wednesday, May 05, 2010 1:27 PM
+> To: Madhusudhan
+> Cc: 'Nishanth Menon'; 'Ghorai, Sukumar'; linux-omap@vger.kernel.org;
+> linux-mmc@vger.kernel.org
+> Subject: Re: [PATCH] Disable the non working eMMC on Zoom2/3
+> 
+> * Madhusudhan <madhu.cr@ti.com> [100430 09:52]:
+> > <snip>
+> >
+> > > > >
+> > > > > > Hmm, finally got around looking into this again. Looks like the
+> mmc
+> > > > > > is now working on my zoom3 with the current Linus' tree at
+> commit
+> > > > > > 7c6bd2010fced38444c9fd658f4c6ce61bd185bf. So I guess something
+> that
+> > > > > > we had in omap-fixes fixed this. Or maybe some fix for
+> drivers/mmc?
+> > > > > >
+> > > > > > This is with the debug_ll patch applied:
+> > > > > >
+> > > > > > https://patchwork.kernel.org/patch/87532/
+> > > > >
+> > > > > For the microSD card, turns out the card I used was flakey. So
+> > > > > that should explain some of the problems. I'm almost certain
+> > > > > I tried with two different cards earlier though. In any case,
+> > > > > let's assume the problem is only the eMMC.
+> > > > >
+> > > > Sorry, I did not get a complete picture. Your earlier email said
+> that
+> > > with
+> > > > Linus tree eMMC on your Zoom3 is working. Is that correct?
+> > >
+> > > Nope, now the microSD is working, eMMC is not working.
+> > >
+> > > > IMHO, an omap level fix can not solve the problem with eMMC because
+> as I
+> > > can
+> > > > see from the log you provided above that a 16G device is detected as
+> 1G.
+> > > > This is certainly due to the issue I mentioned earlier.
+> > >
+> > > OK
+> >
+> > This means that some production boards still have this issue with eMMC.
+> So
+> > my patch disables the support for MMC2 on zoom boards. Would you
+> consider
+> > that?
+> 
+> But is it also broken on zoom2?
+>
+
+Yes.
+
+> And what about this "Simulate multi mmc card as one big" patch?
+>
+Did not get you, what patch are you referring to?
+
+Regards,
+Madhu
  
-> The s3c6410 sdhci controller does not support the 'End' attribute and NOP
-> attribute in the same 8-Byte ADMA descriptor.  This patch adds a new quirk
-> to identify sdhci host contollers with such behaviour.  In addition to
-> this, for controllers using the new quirk, the last entry in the ADMA
-> descritor table is marked with the 'End' attribute (instead of using a NOP
-> descriptor with 'End' attribute).
+> Regards,
 > 
-> Signed-off-by: Maurus Cuelenaere <mcuelenaere@gmail.com>
-> Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
-> Acked-by: Ben Dooks <ben-linux@fluff.org>
-> Cc: <linux-mmc@vger.kernel.org>
-> Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-> ---
-> 
->  drivers/mmc/host/sdhci.c |   20 +++++++++++++++-----
->  drivers/mmc/host/sdhci.h |    2 ++
->  2 files changed, 17 insertions(+), 5 deletions(-)
-> 
-> diff -puN drivers/mmc/host/sdhci.c~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build drivers/mmc/host/sdhci.c
-> --- a/drivers/mmc/host/sdhci.c~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build
-> +++ a/drivers/mmc/host/sdhci.c
-> @@ -496,12 +496,22 @@ static int sdhci_adma_table_pre(struct s
->  		WARN_ON((desc - host->adma_desc) > (128 * 2 + 1) * 4);
->  	}
->  
-> -	/*
-> -	 * Add a terminating entry.
-> -	 */
-> +	if (host->quirks & SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC) {
-> +		/*
-> +		* Mark the last descriptor as the terminating descriptor
-> +		*/
-> +		if (desc != host->adma_desc) {
-> +			desc -= 8;
-> +			desc[0] |= 0x2; /* end */
-> +		}
-> +	} else {
-> +		/*
-> +		* Add a terminating entry.
-> +		*/
->  
-> -	/* nop, end, valid */
-> -	sdhci_set_adma_desc(desc, 0, 0, 0x3);
-> +		/* nop, end, valid */
-> +		sdhci_set_adma_desc(desc, 0, 0, 0x3);
-> +	}
->  
->  	/*
->  	 * Resync align buffer as we might have changed it.
-> diff -puN drivers/mmc/host/sdhci.h~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build drivers/mmc/host/sdhci.h
-> --- a/drivers/mmc/host/sdhci.h~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build
-> +++ a/drivers/mmc/host/sdhci.h
-> @@ -238,6 +238,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
->  /* Controller reports wrong base clock capability */
->  #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
-> +/* Controller cannot support End Attribute in NOP ADMA descriptor */
-> +#define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
->  
->  	int			irq;		/* Device IRQ */
->  	void __iomem *		ioaddr;		/* Mapped address */
-> _
-> 
-> Patches currently in -mm which might be from mcuelenaere@gmail.com are
-> 
-> s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build.patch
-> s3c6410-enable-adma-feature-in-6410-sdhci-controller.patch
-> sdhci-enable-multiblock-transfers-in-sdhci-s3c.patch
-> s3c-rtc-driver-add-support-for-s3c64xx.patch
-> 
-
--- 
--- 
-Ben
-
-Q:      What's a light-year?
-A:      One-third less calories than a regular year.
+> Tony
 
