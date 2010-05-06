@@ -1,54 +1,43 @@
-From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Subject: RE: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor
- 	autoloading feature
-Date: Thu, 6 May 2010 15:08:35 +0530
-Message-ID: <EAF47CD23C76F840A9E7FCE10091EFAB02C5387482@dbde02.ent.ti.com>
-References: <w2y618f0c911004291035qfec16290re9e236ae1e13a970@mail.gmail.com>
-	 <EAF47CD23C76F840A9E7FCE10091EFAB02C52D16D2@dbde02.ent.ti.com>
-	 <v2i618f0c911005050919m600f069ex34ba1175315cde5a@mail.gmail.com>
-	 <EAF47CD23C76F840A9E7FCE10091EFAB02C5387398@dbde02.ent.ti.com>
- <v2n7f9d1ffb1005060202r91efbe3habb936f75227ffa6@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] Disable the non working eMMC on Zoom2/3
+Date: Thu, 6 May 2010 08:30:45 -0700
+Message-ID: <20100506153044.GL29604@atomide.com>
+References: <009a01cad1ee$e3bbae70$544ff780@am.dhcp.ti.com>
+ <20100407114938.GF7153@atomide.com>
+ <003801cad73e$86841df0$544ff780@am.dhcp.ti.com>
+ <20100427182111.GE7225@atomide.com>
+ <20100428192322.GG7225@atomide.com>
+ <006801cae709$e136fe40$544ff780@am.dhcp.ti.com>
+ <20100428194553.GH7225@atomide.com>
+ <006f01cae886$38da6920$544ff780@am.dhcp.ti.com>
+ <20100505182727.GA29604@atomide.com>
+ <00a501caecbc$761ded40$544ff780@am.dhcp.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <v2n7f9d1ffb1005060202r91efbe3habb936f75227ffa6@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
-To: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.arm.linux.org.uk" <linux-arm-kernel@lists.arm.linux.org.uk>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Adrian Hunter <adrian.hunter@nokia.com>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, Tony Lindgren <tony@atomide.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:61365 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755564Ab0EFPaq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 May 2010 11:30:46 -0400
+Content-Disposition: inline
+In-Reply-To: <00a501caecbc$761ded40$544ff780@am.dhcp.ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Madhusudhan <madhu.cr@ti.com>
+Cc: 'Nishanth Menon' <nm@ti.com>, "'Ghorai, Sukumar'" <s-ghorai@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-> -----Original Message-----
-> From: kishore kadiyala [mailto:kishorek.kadiyala@gmail.com]
-> Sent: Thursday, May 06, 2010 2:32 PM
-> To: Shilimkar, Santosh
-> Cc: S, Venkatraman; linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org; linux-arm-
-> kernel@lists.arm.linux.org.uk; Chikkature Rajashekar, Madhusudhan; Adrian Hunter; Kadiyala, Kishore;
-> Tony Lindgren
-> Subject: Re: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor autoloading feature
+* Madhusudhan <madhu.cr@ti.com> [100505 18:31]:
 > 
-> <<snip>>
 > 
-> >> I am not clear about the method. The board files export the
-> >> omap_mmc_platform_data.
-> >> Does it imply that all board files have to change and export
-> >> the capability so that it can be queried ?
-> > No. You don't have to modify the board files. This would need
-> > change in devices.c which common for all omap boards.
+> > -----Original Message-----
+> > From: Tony Lindgren [mailto:tony@atomide.com]
+> 
+> > And what about this "Simulate multi mmc card as one big" patch?
 > >
-> > I don't have a strong opinion on this point but just put forth an
-> > alternate way to avoid such SOC specific check in drivers.
-> > You can take call on this
-> 
-> Agree. How about adding a flag in hsmmc.h & omap_mmc_platform_data,
-> that would take care of SDMA & SDMA_DLAOD in the driver instead  going
-> with SOC check .
+> Did not get you, what patch are you referring to?
 
-Good idea Kishore. 
-Venkat,
-Can you do what kishore is suggesting.
+Oops sorry forgot the link:
 
-Regards,
-Santosh
+https://patchwork.kernel.org/patch/87944/
 
+Tony
