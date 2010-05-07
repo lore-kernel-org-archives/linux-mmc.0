@@ -1,76 +1,114 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH 0/7] DMAENGINE: fixes and PrimeCells
-Date: Fri, 7 May 2010 18:10:28 +0200
-Message-ID: <k2k63386a3d1005070910kcdb516dcga60c24043b1b44de@mail.gmail.com>
-References: <1272848060-28049-1-git-send-email-linus.walleij@stericsson.com>
-	 <i2t63386a3d1005070213u2ad32613w694be1ecbeb46856@mail.gmail.com>
-	 <20100507093256.GB19936@n2100.arm.linux.org.uk>
-	 <x2j63386a3d1005070443yfadbaf3ct8686a8f7aae6412f@mail.gmail.com>
-	 <j2r1b68c6791005070531u57b4b1basc56d45d0e06b1d04@mail.gmail.com>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor 	autoloading feature
+Date: Fri, 7 May 2010 11:59:46 -0500
+Message-ID: <000601caee06$b2c8a9b0$544ff780@am.dhcp.ti.com>
+References: <w2y618f0c911004291035qfec16290re9e236ae1e13a970@mail.gmail.com> <EAF47CD23C76F840A9E7FCE10091EFAB02C52D16D2@dbde02.ent.ti.com> <v2i618f0c911005050919m600f069ex34ba1175315cde5a@mail.gmail.com> <EAF47CD23C76F840A9E7FCE10091EFAB02C5387398@dbde02.ent.ti.com> <v2n7f9d1ffb1005060202r91efbe3habb936f75227ffa6@mail.gmail.com> <EAF47CD23C76F840A9E7FCE10091EFAB02C5387482@dbde02.ent.ti.com> <004501caed38$03e7b9f0$544ff780@am.dhcp.ti.com> <EAF47CD23C76F840A9E7FCE10091EFAB02C538792A@dbde02.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f219.google.com ([209.85.218.219]:51891 "EHLO
-	mail-bw0-f219.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755974Ab0EGQKc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 May 2010 12:10:32 -0400
-In-Reply-To: <j2r1b68c6791005070531u57b4b1basc56d45d0e06b1d04@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <EAF47CD23C76F840A9E7FCE10091EFAB02C538792A@dbde02.ent.ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: "'Shilimkar, Santosh'" <santosh.shilimkar@ti.com>, 'kishore kadiyala' <kishorek.kadiyala@gmail.com>
+Cc: "'S, Venkatraman'" <svenkatr@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, 'Adrian Hunter' <adrian.hunter@nokia.com>, "'Kadiyala, Kishore'" <kishore.kadiyala@ti.com>, 'Tony Lindgren' <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: jassi brar <jassisinghbrar@gmail.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Ben Dooks <ben-linux@fluff.org>, Dan Williams <dan.j.williams@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-2010/5/7 jassi brar <jassisinghbrar@gmail.com>:
-> On Fri, May 7, 2010 at 8:43 PM, Linus Walleij
-> <linus.ml.walleij@gmail.com> wrote:
->> 2010/5/7 Russell King - ARM Linux <linux@arm.linux.org.uk>:
->>>
->>> Or let me put it another way - if people are happy for Linux to support
->>> new ARM CPU architectures, but with very little attention given to DMA
->>> support on those architectures, then feel free to box the ARM platforms
->>> into a corner on DMA support - but on the understanding that _you_ will
->>> have to deal with the DMA API breakage on those architectures yourself.
->>> Because with ARM platforms not having DMA support, there's absolutely
->>> no way to run any checks what so ever on DMA when the CPU architecture
->>> support is created.
->>
->> I'm doing the best I can to meet exactly this goal. The changes done in
->> the DMA engine were done towards the end of making the DMA
->> engine support *any* DMA controller for the PrimeCells,
->
-> with due respect, I think DMA Engine API is very restricting. And it is not
-> just the 'async' character of it but also some desirable features like
-> Circular-Linked-Buffer are missing. It may be good enough for Mem->Mem
-> but is found wanting for Mem<->Dev transfers.
-> I would like to see some new API defined that address reasonable
-> requirements of extant platform specific implementations.
 
-I understand these concerns, however I believe the DMAdevices/DMAengine
-API can surely be refactored towards this end. Dan Williams has proved
-*very* cooperative in doing changes and testing for regressions in the
-DMAengine, and I see no fundamental problem with it.
 
-Surely circular linked buffers and other goodies can be retrofitted into the
-DMAengine without a complete redesign? I only see a new slave call
-to support that really, in addition to the existing sglist interface.
+> -----Original Message-----
+> From: Shilimkar, Santosh [mailto:santosh.shilimkar@ti.com]
+> Sent: Thursday, May 06, 2010 11:52 PM
+> To: Chikkature Rajashekar, Madhusudhan; 'kishore kadiyala'
+> Cc: S, Venkatraman; linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org;
+> linux-arm-kernel@lists.arm.linux.org.uk; 'Adrian Hunter'; Kadiyala,
+> Kishore; 'Tony Lindgren'
+> Subject: RE: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor
+> autoloading feature
+> 
+> > -----Original Message-----
+> > From: Chikkature Rajashekar, Madhusudhan
+> > Sent: Thursday, May 06, 2010 9:50 PM
+> > To: Shilimkar, Santosh; 'kishore kadiyala'
+> > Cc: S, Venkatraman; linux-omap@vger.kernel.org; linux-
+> mmc@vger.kernel.org; linux-arm-
+> > kernel@lists.arm.linux.org.uk; 'Adrian Hunter'; Kadiyala, Kishore; 'Tony
+> Lindgren'
+> > Subject: RE: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor
+> autoloading feature
+> >
+> >
+> >
+> > > -----Original Message-----
+> > > From: Shilimkar, Santosh [mailto:santosh.shilimkar@ti.com]
+> > > Sent: Thursday, May 06, 2010 4:39 AM
+> > > To: kishore kadiyala
+> > > Cc: S, Venkatraman; linux-omap@vger.kernel.org; linux-
+> mmc@vger.kernel.org;
+> > > linux-arm-kernel@lists.arm.linux.org.uk; Chikkature Rajashekar,
+> > > Madhusudhan; Adrian Hunter; Kadiyala, Kishore; Tony Lindgren
+> > > Subject: RE: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor
+> > > autoloading feature
+> > >
+> > > > -----Original Message-----
+> > > > From: kishore kadiyala [mailto:kishorek.kadiyala@gmail.com]
+> > > > Sent: Thursday, May 06, 2010 2:32 PM
+> > > > To: Shilimkar, Santosh
+> > > > Cc: S, Venkatraman; linux-omap@vger.kernel.org; linux-
+> > > mmc@vger.kernel.org; linux-arm-
+> > > > kernel@lists.arm.linux.org.uk; Chikkature Rajashekar, Madhusudhan;
+> > > Adrian Hunter; Kadiyala, Kishore;
+> > > > Tony Lindgren
+> > > > Subject: Re: [PATCH v8 2/2] omap hsmmc: adaptation of sdma
+> descriptor
+> > > autoloading feature
+> > > >
+> > > > <<snip>>
+> > > >
+> > > > >> I am not clear about the method. The board files export the
+> > > > >> omap_mmc_platform_data.
+> > > > >> Does it imply that all board files have to change and export
+> > > > >> the capability so that it can be queried ?
+> > > > > No. You don't have to modify the board files. This would need
+> > > > > change in devices.c which common for all omap boards.
+> > > > >
+> > > > > I don't have a strong opinion on this point but just put forth an
+> > > > > alternate way to avoid such SOC specific check in drivers.
+> > > > > You can take call on this
+> > > >
+> > > > Agree. How about adding a flag in hsmmc.h & omap_mmc_platform_data,
+> > > > that would take care of SDMA & SDMA_DLAOD in the driver instead
+> going
+> > > > with SOC check .
+> > >
+> > > Good idea Kishore.
+> > > Venkat,
+> > > Can you do what kishore is suggesting.
+> > >
+> > omap_mmc_platform_data is MMC specific platform data. Why add a SDMA
+> > specific feature capability into it? Even though you add it there, you
+> will
+> > still need to have a cpu check before that can be set in a common code.
+> >
+> 
+> CPU checks are allowed to be in the platform files. That is where such
+> machine/SOC specific differentiation should be done and not in the device
+> drivers.
+> That way device drivers remains clean and portable.
+> 
+> I want to stop this thread here since neither the patch author nor the
+> file
+> maintainer thinks that cpu checks in the device drivers is bad idea.
+> 
+> Please decide within yourself and move on.
+> 
 
-I remember we discussed circular buffer device->device transfers with
-Dan some while ago, and he was all for including that but wanted some
-real-world example to go along with it.
+I am not saying that it is wrong. My point here is that adding this
+particular flag into MMC platform data to differentiate a SDMA specific
+feature which got introduced post certain SOC may not be needed. But you can
+always post your comments on the list which will be looked at by a wider
+audience and finally the right patch will go in. 
 
->> So now I guess I have to make it tick on the block known as PL080/PL081
->> as well, and I'll have a try at it.
->
-> I always hoped the pl080 core would be segregated out of S3C implementation,
-> but for some new common DMA API.
+> Regards,
+> Santosh
 
-Well, I don't see any fundamental problems with DMAengine, just wanted
-extensions really.
-
-I don't know if I'll be able to provide the nice breakout of the PL080 core
-from S3C that you'd like to see but I will try to hack something up as
-a proof-of-concept that the DMAengine can support the PrimeCells
-found on the RealView.
-
-Yours,
-Linus Walleij
