@@ -1,37 +1,63 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH 0/7] DMAENGINE: fixes and PrimeCells
-Date: Fri, 7 May 2010 11:13:57 +0200
-Message-ID: <i2t63386a3d1005070213u2ad32613w694be1ecbeb46856@mail.gmail.com>
-References: <1272848060-28049-1-git-send-email-linus.walleij@stericsson.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 5/7] ARM: add PrimeCell generic DMA to PL011 v6
+Date: Fri, 7 May 2010 10:23:57 +0100
+Message-ID: <20100507092357.GA19936@n2100.arm.linux.org.uk>
+References: <1272848113-29359-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f219.google.com ([209.85.218.219]:34903 "EHLO
-	mail-bw0-f219.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751754Ab0EGJOA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 May 2010 05:14:00 -0400
-In-Reply-To: <1272848060-28049-1-git-send-email-linus.walleij@stericsson.com>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:46971 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753797Ab0EGJYO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 May 2010 05:24:14 -0400
+Content-Disposition: inline
+In-Reply-To: <1272848113-29359-1-git-send-email-linus.walleij@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: Dan Williams <dan.j.williams@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Dan is this patch set OK?
+On Mon, May 03, 2010 at 02:55:13AM +0200, Linus Walleij wrote:
+> +	/* Map DMA buffers */
+> +	sglen = dma_map_sg(uap->port.dev, &dmarx->scatter_a,
+> +			   1, DMA_FROM_DEVICE);
+> +	if (sglen != 1)
+> +		goto err_rx_sgmap_a;
+> +
+> +	sglen = dma_map_sg(uap->port.dev, &dmarx->scatter_b,
+> +			   1, DMA_FROM_DEVICE);
+> +	if (sglen != 1)
+> +		goto err_rx_sgmap_b;
+> +
+> +	sglen = dma_map_sg(uap->port.dev, &dmatx->scatter,
+> +			   1, DMA_TO_DEVICE);
+> +	if (sglen != 1)
+> +		goto err_tx_sgmap;
 
-Sorry if you're busy, just need to check...
 
-Patches 1 thru 4 should be uncontroversial, only affects
-our ST-Ericsson platforms and have been thorougly reviewed.
+So as soon as we allocate these, we hand them over to DMA device ownership...
 
-As posted elsewhere this is tested on an ARM reference
-design now as well, which IMHO would make it OK to apply
-also the PL011 patch, nr 5.
+> +	/* Else proceed to copy the TX chars to the DMA buffer and fire DMA */
+> +	count = uart_circ_chars_pending(xmit);
+> +	if (count > PL011_DMA_BUFFER_SIZE)
+> +		count = PL011_DMA_BUFFER_SIZE;
+> +
+> +	if (xmit->tail < xmit->head)
+> +		memcpy(&dmatx->tx_dma_buf[0], &xmit->buf[xmit->tail], count);
+> +	else {
+> +		size_t first = UART_XMIT_SIZE - xmit->tail;
+> +		size_t second = xmit->head;
+> +
+> +		memcpy(&dmatx->tx_dma_buf[0], &xmit->buf[xmit->tail], first);
+> +		memcpy(&dmatx->tx_dma_buf[first], &xmit->buf[0], second);
+> +	}
 
-(OK Russell?)
+But here we write to the buffers without switching them to CPU ownership.
+Only one device of {CPU, DMA} actively owns the DMA buffer at any one time,
+and only the active owner is permited under DMA API rules to access that
+buffer.
 
-Nr 6 and 7 depend on changes in Russells -next branch
-so unless you want to bring in the ARM next to your tree
-as well, you can wait with these.
+Consider the situation where you've written to the first half of a cache
+line, but the DMA device has yet to read from the second half of that
+cache line - the result is a corrupted transfer.
 
-Yours,
-Linus Walleij
