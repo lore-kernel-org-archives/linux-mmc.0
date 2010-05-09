@@ -1,147 +1,51 @@
-From: Nishanth Menon <menon.nishanth@gmail.com>
-Subject: Re: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor 	autoloading
- feature
-Date: Sun, 09 May 2010 11:06:37 -0500
-Message-ID: <4BE6DD8D.6030201@gmail.com>
-References: <w2y618f0c911004291035qfec16290re9e236ae1e13a970@mail.gmail.com>	 <EAF47CD23C76F840A9E7FCE10091EFAB02C52D16D2@dbde02.ent.ti.com>	 <v2i618f0c911005050919m600f069ex34ba1175315cde5a@mail.gmail.com>	 <EAF47CD23C76F840A9E7FCE10091EFAB02C5387398@dbde02.ent.ti.com>	 <v2n7f9d1ffb1005060202r91efbe3habb936f75227ffa6@mail.gmail.com>	 <EAF47CD23C76F840A9E7FCE10091EFAB02C5387482@dbde02.ent.ti.com>	 <004501caed38$03e7b9f0$544ff780@am.dhcp.ti.com>	 <EAF47CD23C76F840A9E7FCE10091EFAB02C538792A@dbde02.ent.ti.com>	 <000601caee06$b2c8a9b0$544ff780@am.dhcp.ti.com>	 <4BE4694F.3060901@ti.com> <x2r618f0c911005090351meff49918t941a904edb8027c3@mail.gmail.com>
+From: Dan Williams <dan.j.williams@intel.com>
+Subject: Re: [PATCH 0/7] DMAENGINE: fixes and PrimeCells
+Date: Sun, 9 May 2010 10:26:26 -0700
+Message-ID: <k2le9c3a7c21005091026y9140dd46i8020c49ebef7c06c@mail.gmail.com>
+References: <1272848060-28049-1-git-send-email-linus.walleij@stericsson.com>
+	 <20100507093256.GB19936@n2100.arm.linux.org.uk>
+	 <x2j63386a3d1005070443yfadbaf3ct8686a8f7aae6412f@mail.gmail.com>
+	 <j2r1b68c6791005070531u57b4b1basc56d45d0e06b1d04@mail.gmail.com>
+	 <k2k63386a3d1005070910kcdb516dcga60c24043b1b44de@mail.gmail.com>
+	 <m2u1b68c6791005071937s5b2bbb60p6de395a6c06a963e@mail.gmail.com>
+	 <w2re9c3a7c21005081524z2a52a078nad8d316553dfde80@mail.gmail.com>
+	 <l2j1b68c6791005082048j5deaf863g2887c968ff841f2f@mail.gmail.com>
+	 <h2ie9c3a7c21005090047lf1157930t9a625073c87e8cea@mail.gmail.com>
+	 <l2r1b68c6791005090306ld948bebfqa1e7d22321e302aa@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:45164 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753868Ab0EIQGv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 May 2010 12:06:51 -0400
-In-Reply-To: <x2r618f0c911005090351meff49918t941a904edb8027c3@mail.gmail.com>
+Received: from mail-px0-f174.google.com ([209.85.212.174]:64807 "EHLO
+	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750904Ab0EIR05 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 May 2010 13:26:57 -0400
+In-Reply-To: <l2r1b68c6791005090306ld948bebfqa1e7d22321e302aa@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: Nishanth Menon <nm@ti.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, kishore kadiyala <kishorek.kadiyala@gmail.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.arm.linux.org.uk" <linux-arm-kernel@lists.arm.linux.org.uk>, Adrian Hunter <adrian.hunter@nokia.com>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, Tony Lindgren <tony@atomide.com>
+To: jassi brar <jassisinghbrar@gmail.com>
+Cc: Linus Walleij <linus.ml.walleij@gmail.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 05/09/2010 05:51 AM, Venkatraman S wrote:
-> Nishanth Menon<nm@ti.com>  wrote:
->> Chikkature Rajashekar, Madhusudhan had written, on 05/07/2010 11:59 AM, the
->> following:
->>>
->>>>
->>>>> -----Original Message-----
->>>>> From: Chikkature Rajashekar, Madhusudhan
->>>>> Sent: Thursday, May 06, 2010 9:50 PM
->>>>> To: Shilimkar, Santosh; 'kishore kadiyala'
->>>>> Cc: S, Venkatraman; linux-omap@vger.kernel.org; linux-
->>>>
->>>> mmc@vger.kernel.org; linux-arm-
->>>>>
->>>>> kernel@lists.arm.linux.org.uk; 'Adrian Hunter'; Kadiyala, Kishore; 'Tony
->>>>
->>>> Lindgren'
->>>>>
->>>>> Subject: RE: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor
->>>>
->>>> autoloading feature
->>>>>
->>>>>
->>>>>> -----Original Message-----
->>>>>> From: Shilimkar, Santosh [mailto:santosh.shilimkar@ti.com]
->>>>>> Sent: Thursday, May 06, 2010 4:39 AM
->>>>>> To: kishore kadiyala
->>>>>> Cc: S, Venkatraman; linux-omap@vger.kernel.org; linux-
->>>>
->>>> mmc@vger.kernel.org;
->>>>>>
->>>>>> linux-arm-kernel@lists.arm.linux.org.uk; Chikkature Rajashekar,
->>>>>> Madhusudhan; Adrian Hunter; Kadiyala, Kishore; Tony Lindgren
->>>>>> Subject: RE: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor
->>>>>> autoloading feature
->>>>>>
->>>>>>> -----Original Message-----
->>>>>>> From: kishore kadiyala [mailto:kishorek.kadiyala@gmail.com]
->>>>>>> Sent: Thursday, May 06, 2010 2:32 PM
->>>>>>> To: Shilimkar, Santosh
->>>>>>> Cc: S, Venkatraman; linux-omap@vger.kernel.org; linux-
->>>>>>
->>>>>> mmc@vger.kernel.org; linux-arm-
->>>>>>>
->>>>>>> kernel@lists.arm.linux.org.uk; Chikkature Rajashekar, Madhusudhan;
->>>>>>
->>>>>> Adrian Hunter; Kadiyala, Kishore;
->>>>>>>
->>>>>>> Tony Lindgren
->>>>>>> Subject: Re: [PATCH v8 2/2] omap hsmmc: adaptation of sdma
->>>>
->>>> descriptor
->>>>>>
->>>>>> autoloading feature
->>>>>>>
->>>>>>> <<snip>>
->>>>>>>
->>>>>>>>> I am not clear about the method. The board files export the
->>>>>>>>> omap_mmc_platform_data.
->>>>>>>>> Does it imply that all board files have to change and export
->>>>>>>>> the capability so that it can be queried ?
->>>>>>>>
->>>>>>>> No. You don't have to modify the board files. This would need
->>>>>>>> change in devices.c which common for all omap boards.
->>>>>>>>
->>>>>>>> I don't have a strong opinion on this point but just put forth an
->>>>>>>> alternate way to avoid such SOC specific check in drivers.
->>>>>>>> You can take call on this
->>>>>>>
->>>>>>> Agree. How about adding a flag in hsmmc.h&  omap_mmc_platform_data,
->>>>>>> that would take care of SDMA&  SDMA_DLAOD in the driver instead
->>>>
->>>> going
->>>>>>>
->>>>>>> with SOC check .
->>>>>>
->>>>>> Good idea Kishore.
->>>>>> Venkat,
->>>>>> Can you do what kishore is suggesting.
->>>>>>
->>>>> omap_mmc_platform_data is MMC specific platform data. Why add a SDMA
->>>>> specific feature capability into it? Even though you add it there, you
->>>>
->>>> will
->>>>>
->>>>> still need to have a cpu check before that can be set in a common code.
->>>>>
->>>> CPU checks are allowed to be in the platform files. That is where such
->>>> machine/SOC specific differentiation should be done and not in the device
->>>> drivers.
->>>> That way device drivers remains clean and portable.
->>>>
->>>> I want to stop this thread here since neither the patch author nor the
->>>> file
->>>> maintainer thinks that cpu checks in the device drivers is bad idea.
->>>>
->>>> Please decide within yourself and move on.
->>>>
->>>
->>> I am not saying that it is wrong. My point here is that adding this
->>> particular flag into MMC platform data to differentiate a SDMA specific
->>> feature which got introduced post certain SOC may not be needed. But you
->>> can
->>> always post your comments on the list which will be looked at by a wider
->>> audience and finally the right patch will go in.
->>
->> Please see [1] for SOC specific feature handling. any reasons we can't
->> handle it by adding a new feature?
->>
->> [1]
->> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=blob;f=arch/arm/plat-omap/include/plat/cpu.h#l439
->>
->
-> Thanks. I can add a new feature here, but I see that the API is tied
-> to OMAP3, whereas the DMA feature is common
-> to 3630, OMAP4 and mostly everything after that. I can work on an
-> upgrade, but do you see that
-> as a dependency and done on the context of this patch ?
-> Regards,
-> Venkat.
+On Sun, May 9, 2010 at 3:06 AM, jassi brar <jassisinghbrar@gmail.com> wrote:
+> This discussion is purely about what the current DMA API misses and what
+> a generic DMA API should do. So, that the current DMA API fills up those
+> gap, if possible. I would love to get started implementing the generic
+> DMA API for reference but my priorities are decided by my employer.
 
-Yes, I am aware that the current APIs are tied to OMAP3, no reason that 
-we cant introduce a OMAP version independent feature.. Yes, IMHO, this 
-is an SOC specific feature that has no place in a platform data.. lets 
-not misuse that.
-Regards,
-NM
+Well, the only significant miss that has been identified so far is
+dynamic channel allocation for the device-to-mem case.  Everything
+else can be done with small tweaks to the existing interface.  But
+some of this discussion reminds me of Section 2.4 of
+Documentaion/SubmittingPatches:
+
+4) Don't over-design.
+
+Don't try to anticipate nebulous future cases which may or may not
+be useful:  "Make it as simple as you can, and no simpler."
+
+Let's just wait for the code before outlining what can and cannot be
+done, especially given where we started [1].
+
+--
+Dan
+
+[1]: http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=blob;f=include/linux/dmaengine.h;hb=v2.6.18#l160
