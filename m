@@ -1,446 +1,328 @@
-From: Viresh KUMAR <viresh.kumar@st.com>
-Subject: Re: [PATCH] sdhci-spear: ST SPEAr based SDHCI controller glue
-Date: Mon, 10 May 2010 08:57:31 +0530
-Message-ID: <4BE77D23.7080705@st.com>
-References: <1273052118-15513-1-git-send-email-viresh.kumar@st.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: Re: [PATCH v8 2/2] omap hsmmc: adaptation of sdma descriptor
+	autoloading feature
+Date: Mon, 10 May 2010 18:01:25 +0530
+Message-ID: <i2h618f0c911005100531y94ddfd07l707946d460f357af@mail.gmail.com>
+References: <w2y618f0c911004291035qfec16290re9e236ae1e13a970@mail.gmail.com>
+	 <EAF47CD23C76F840A9E7FCE10091EFAB02C5387398@dbde02.ent.ti.com>
+	 <v2n7f9d1ffb1005060202r91efbe3habb936f75227ffa6@mail.gmail.com>
+	 <EAF47CD23C76F840A9E7FCE10091EFAB02C5387482@dbde02.ent.ti.com>
+	 <004501caed38$03e7b9f0$544ff780@am.dhcp.ti.com>
+	 <EAF47CD23C76F840A9E7FCE10091EFAB02C538792A@dbde02.ent.ti.com>
+	 <000601caee06$b2c8a9b0$544ff780@am.dhcp.ti.com>
+	 <4BE4694F.3060901@ti.com>
+	 <x2r618f0c911005090351meff49918t941a904edb8027c3@mail.gmail.com>
+	 <4BE6DD8D.6030201@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:53276 "EHLO
-	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754919Ab0EJD14 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 May 2010 23:27:56 -0400
-In-Reply-To: <1273052118-15513-1-git-send-email-viresh.kumar@st.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <4BE6DD8D.6030201@gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Nishanth Menon <menon.nishanth@gmail.com>
+Cc: Nishanth Menon <nm@ti.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, kishore kadiyala <kishorek.kadiyala@gmail.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.arm.linux.org.uk" <linux-arm-kernel@lists.arm.linux.org.uk>, Adrian Hunter <adrian.hunter@nokia.com>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Viresh KUMAR <viresh.kumar@st.com>
-Cc: pierre@ossman.eu, linux-mmc@vger.kernel.org, shiraz.hashim@st.com
 
-On 5/5/2010 3:05 PM, Viresh KUMAR wrote:
-> This patch adds glue layer for support of sdhci driver on ST SPEAr platform.
-> 
-> Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
-> ---
->  MAINTAINERS                     |    6 +
->  drivers/mmc/host/Kconfig        |   12 ++
->  drivers/mmc/host/Makefile       |    1 +
->  drivers/mmc/host/sdhci-spear.c  |  300 +++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/sdhci-spear.h |   42 ++++++
->  5 files changed, 361 insertions(+), 0 deletions(-)
->  create mode 100644 drivers/mmc/host/sdhci-spear.c
->  create mode 100644 include/linux/mmc/sdhci-spear.h
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 0369b22..bbff70a 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -4938,6 +4938,12 @@ L:	linux-mmc@vger.kernel.org
->  S:	Maintained
->  F:	drivers/mmc/host/sdhci-s3c.c
->  
-> +SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) ST SPEAR DRIVER
-> +M:	Viresh Kumar <viresh.kumar@st.com>
-> +L:	linux-mmc@vger.kernel.org
-> +S:	Maintained
-> +F:	drivers/mmc/host/sdhci-spear.c
-> +
->  SECURITY SUBSYSTEM
->  M:	James Morris <jmorris@namei.org>
->  L:	linux-security-module@vger.kernel.org (suggested Cc:)
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 2e13b94..40eae7e 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -136,6 +136,18 @@ config MMC_SDHCI_S3C
->  
->  	  If unsure, say N.
->  
-> +config MMC_SDHCI_SPEAR
-> +	tristate "SDHCI support on ST SPEAr platform"
-> +	depends on MMC_SDHCI && PLAT_SPEAR
-> +	help
-> +	  This selects the Secure Digital Host Controller Interface (SDHCI)
-> +	  often referrered to as the HSMMC block in some of the ST SPEAR range
-> +	  of SoC
-> +
-> +	  If you have a controller with this interface, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
->  config MMC_SDHCI_S3C_DMA
->  	bool "DMA support on S3C SDHCI"
->  	depends on MMC_SDHCI_S3C && EXPERIMENTAL
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index f480397..d00a9fa 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -14,6 +14,7 @@ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
->  obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
->  obj-$(CONFIG_MMC_SDHCI_PLTFM)	+= sdhci-pltfm.o
->  obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
-> +obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
->  obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
->  obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
->  obj-$(CONFIG_MMC_OMAP)		+= omap.o
-> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-> new file mode 100644
-> index 0000000..6d3f740
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-spear.c
-> @@ -0,0 +1,300 @@
-> +/*
-> + * drivers/mmc/host/sdhci-spear.c
-> + *
-> + * Support of SDHCI platform devices for spear soc family
-> + *
-> + * Copyright (C) 2010 ST Microelectronics
-> + * Viresh Kumar<viresh.kumar@st.com>
-> + *
-> + * Inspired by sdhci-pltfm.c
-> + *
-> + * This file is licensed under the terms of the GNU General Public
-> + * License version 2. This program is licensed "as is" without any
-> + * warranty of any kind, whether express or implied.
-> + */
-> +
-> +#include <linux/clk.h>
-> +#include <linux/delay.h>
-> +#include <linux/gpio.h>
-> +#include <linux/highmem.h>
-> +#include <linux/interrupt.h>
-> +#include <linux/irq.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/slab.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/sdhci-spear.h>
-> +#include <linux/io.h>
-> +#include "sdhci.h"
-> +
-> +struct spear_sdhci {
-> +	struct clk *clk;
-> +	struct sdhci_plat_data *data;
-> +};
-> +
-> +/* sdhci ops */
-> +static struct sdhci_ops sdhci_pltfm_ops = {
-> +	/* Nothing to do for now. */
-> +};
-> +
-> +/* gpio card detection interrupt handler */
-> +static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
-> +{
-> +	struct platform_device *pdev = dev_id;
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> +	struct spear_sdhci *sdhci =
-> +		(struct spear_sdhci *)(pdev->dev.platform_data);
-> +	unsigned long gpio_irq_type;
-> +	int val;
-> +
-> +	val = gpio_get_value(sdhci->data->card_int_gpio);
-> +
-> +	/* val == 1 -> card removed, val == 0 -> card inserted */
-> +	/* if card removed - set irq for low level, else vice versa */
-> +	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
-> +	set_irq_type(irq, gpio_irq_type);
-> +
-> +	if (sdhci->data->card_power_gpio >= 0) {
-> +		if (!sdhci->data->power_always_enb) {
-> +			/* if card inserted, give power, otherwise remove it */
-> +			val = sdhci->data->power_active_high ? !val : val ;
-> +			gpio_set_value(sdhci->data->card_power_gpio, val);
-> +		}
-> +	}
-> +
-> +	/* inform sdhci driver about card insertion/removal */
-> +	tasklet_schedule(&host->card_tasklet);
-> +
-> +	return IRQ_HANDLED;
-> +}
-> +
-> +static int __devinit sdhci_probe(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host;
-> +	struct resource *iomem;
-> +	struct spear_sdhci *sdhci;
-> +	int ret;
-> +
-> +	BUG_ON(pdev == NULL);
-> +
-> +	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +	if (!iomem) {
-> +		ret = -ENOMEM;
-> +		dev_dbg(&pdev->dev, "memory resource not defined\n");
-> +		goto err;
-> +	}
-> +
-> +	if (!request_mem_region(iomem->start, resource_size(iomem),
-> +				"spear-sdhci")) {
-> +		ret = -EBUSY;
-> +		dev_dbg(&pdev->dev, "cannot request region\n");
-> +		goto err;
-> +	}
-> +
-> +	sdhci = kzalloc(sizeof(*sdhci), GFP_KERNEL);
-> +	if (!sdhci) {
-> +		ret = -ENOMEM;
-> +		dev_dbg(&pdev->dev, "cannot allocate memory for sdhci\n");
-> +		goto err_kzalloc;
-> +	}
-> +
-> +	/* clk enable */
-> +	sdhci->clk = clk_get(&pdev->dev, NULL);
-> +	if (IS_ERR(sdhci->clk)) {
-> +		ret = PTR_ERR(sdhci->clk);
-> +		dev_dbg(&pdev->dev, "Error getting clock\n");
-> +		goto err_clk_get;
-> +	}
-> +
-> +	ret = clk_enable(sdhci->clk);
-> +	if (ret) {
-> +		dev_dbg(&pdev->dev, "Error enabling clock\n");
-> +		goto err_clk_enb;
-> +	}
-> +
-> +	/* overwrite platform_data */
-> +	sdhci->data = (struct sdhci_plat_data *)(pdev->dev.platform_data);
-> +	pdev->dev.platform_data = sdhci;
-> +
-> +	if (pdev->dev.parent)
-> +		host = sdhci_alloc_host(pdev->dev.parent, 0);
-> +	else
-> +		host = sdhci_alloc_host(&pdev->dev, 0);
-> +
-> +	if (IS_ERR(host)) {
-> +		ret = PTR_ERR(host);
-> +		dev_dbg(&pdev->dev, "error allocating host\n");
-> +		goto err_alloc_host;
-> +	}
-> +
-> +	host->hw_name = "sdhci";
-> +	host->ops = &sdhci_pltfm_ops;
-> +	host->irq = platform_get_irq(pdev, 0);
-> +	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
-> +
-> +	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
-> +	if (!host->ioaddr) {
-> +		ret = -ENOMEM;
-> +		dev_dbg(&pdev->dev, "failed to remap registers\n");
-> +		goto err_ioremap;
-> +	}
-> +
-> +	ret = sdhci_add_host(host);
-> +	if (ret) {
-> +		dev_dbg(&pdev->dev, "error adding host\n");
-> +		goto err_add_host;
-> +	}
-> +
-> +	platform_set_drvdata(pdev, host);
-> +
-> +	/*
-> +	 * It is optional to use GPIOs for sdhci Power control & sdhci card
-> +	 * interrupt detection. If sdhci->data is NULL, then use original sdhci
-> +	 * lines otherwise GPIO lines.
-> +	 * If GPIO is selected for power control, then power should be disabled
-> +	 * after card removal and should be enabled when card insertion
-> +	 * interrupt occurs
-> +	 */
-> +	if (!sdhci->data)
-> +		return 0;
-> +
-> +	if (sdhci->data->card_power_gpio >= 0) {
-> +		int val = 0;
-> +
-> +		ret = gpio_request(sdhci->data->card_power_gpio, "sdhci");
-> +		if (ret < 0) {
-> +			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
-> +					sdhci->data->card_power_gpio);
-> +			goto err_pgpio_request;
-> +		}
-> +
-> +		if (sdhci->data->power_always_enb)
-> +			val = sdhci->data->power_active_high;
-> +		else
-> +			val = !sdhci->data->power_active_high;
-> +
-> +		ret = gpio_direction_output(sdhci->data->card_power_gpio, val);
-> +		if (ret) {
-> +			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
-> +					sdhci->data->card_power_gpio);
-> +			goto err_pgpio_direction;
-> +		}
-> +
-> +		gpio_set_value(sdhci->data->card_power_gpio, 1);
-> +	}
-> +
-> +	if (sdhci->data->card_int_gpio >= 0) {
-> +		ret = gpio_request(sdhci->data->card_int_gpio, "sdhci");
-> +		if (ret < 0) {
-> +			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
-> +					sdhci->data->card_int_gpio);
-> +			goto err_igpio_request;
-> +		}
-> +
-> +		ret = gpio_direction_input(sdhci->data->card_int_gpio);
-> +		if (ret) {
-> +			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
-> +					sdhci->data->card_int_gpio);
-> +			goto err_igpio_direction;
-> +		}
-> +		ret = request_irq(gpio_to_irq(sdhci->data->card_int_gpio),
-> +				sdhci_gpio_irq, IRQF_TRIGGER_LOW,
-> +				mmc_hostname(host->mmc), pdev);
-> +		if (ret) {
-> +			dev_dbg(&pdev->dev, "gpio request irq fail: %d\n",
-> +					sdhci->data->card_int_gpio);
-> +			goto err_igpio_request_irq;
-> +		}
-> +
-> +	}
-> +
-> +	return 0;
-> +
-> +err_igpio_request_irq:
-> +err_igpio_direction:
-> +	if (sdhci->data->card_int_gpio >= 0)
-> +		gpio_free(sdhci->data->card_int_gpio);
-> +err_igpio_request:
-> +err_pgpio_direction:
-> +	if (sdhci->data->card_power_gpio >= 0)
-> +		gpio_free(sdhci->data->card_power_gpio);
-> +err_pgpio_request:
-> +	platform_set_drvdata(pdev, NULL);
-> +	sdhci_remove_host(host, 1);
-> +err_add_host:
-> +	iounmap(host->ioaddr);
-> +err_ioremap:
-> +	sdhci_free_host(host);
-> +err_alloc_host:
-> +	clk_disable(sdhci->clk);
-> +err_clk_enb:
-> +	clk_put(sdhci->clk);
-> +err_clk_get:
-> +	kfree(sdhci);
-> +err_kzalloc:
-> +	release_mem_region(iomem->start, resource_size(iomem));
-> +err:
-> +	dev_err(&pdev->dev, "spear-sdhci probe failed: %d\n", ret);
-> +	return ret;
-> +}
-> +
-> +static int __devexit sdhci_remove(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> +	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +	struct spear_sdhci *sdhci =
-> +		(struct spear_sdhci *)(pdev->dev.platform_data);
-> +	int dead;
-> +	u32 scratch;
-> +
-> +	if (sdhci->data) {
-> +		if (sdhci->data->card_int_gpio >= 0) {
-> +			free_irq(gpio_to_irq(sdhci->data->card_int_gpio), pdev);
-> +			gpio_free(sdhci->data->card_int_gpio);
-> +		}
-> +
-> +		if (sdhci->data->card_power_gpio >= 0)
-> +			gpio_free(sdhci->data->card_power_gpio);
-> +	}
-> +
-> +	platform_set_drvdata(pdev, NULL);
-> +	dead = 0;
-> +	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-> +	if (scratch == (u32)-1)
-> +		dead = 1;
-> +
-> +	sdhci_remove_host(host, dead);
-> +	iounmap(host->ioaddr);
-> +	sdhci_free_host(host);
-> +	clk_disable(sdhci->clk);
-> +	clk_put(sdhci->clk);
-> +	kfree(sdhci);
-> +	if (iomem)
-> +		release_mem_region(iomem->start, resource_size(iomem));
-> +
-> +	return 0;
-> +}
-> +
-> +static struct platform_driver sdhci_driver = {
-> +	.driver = {
-> +		.name	= "sdhci",
-> +		.owner	= THIS_MODULE,
-> +	},
-> +	.probe		= sdhci_probe,
-> +	.remove		= __devexit_p(sdhci_remove),
-> +};
-> +
-> +static int __init sdhci_init(void)
-> +{
-> +	return platform_driver_register(&sdhci_driver);
-> +}
-> +module_init(sdhci_init);
-> +
-> +static void __exit sdhci_exit(void)
-> +{
-> +	platform_driver_unregister(&sdhci_driver);
-> +}
-> +module_exit(sdhci_exit);
-> +
-> +MODULE_DESCRIPTION("SPEAr Secure Digital Host Controller Interface driver");
-> +MODULE_AUTHOR("Viresh Kumar <viresh.kumar@st.com>");
-> +MODULE_LICENSE("GPL v2");
-> diff --git a/include/linux/mmc/sdhci-spear.h b/include/linux/mmc/sdhci-spear.h
-> new file mode 100644
-> index 0000000..9188c97
-> --- /dev/null
-> +++ b/include/linux/mmc/sdhci-spear.h
-> @@ -0,0 +1,42 @@
-> +/*
-> + * include/linux/mmc/sdhci-spear.h
-> + *
-> + * SDHCI declarations specific to ST SPEAr platform
-> + *
-> + * Copyright (C) 2010 ST Microelectronics
-> + * Viresh Kumar<viresh.kumar@st.com>
-> + *
-> + * This file is licensed under the terms of the GNU General Public
-> + * License version 2. This program is licensed "as is" without any
-> + * warranty of any kind, whether express or implied.
-> + */
-> +
-> +#ifndef MMC_SDHCI_SPEAR_H
-> +#define MMC_SDHCI_SPEAR_H
-> +
-> +#include <linux/platform_device.h>
-> +/*
-> + * struct sdhci_plat_data: spear sdhci platform data structure
-> + *
-> + * @card_power_gpio: gpio pin for enabling/disabling power to sdhci socket
-> + * @power_active_high: if set, enable power to sdhci socket by setting
-> + *			card_power_gpio
-> + * @power_always_enb: If set, then enable power on probe, otherwise enable only
-> + *			on card insertion and disable on card removal.
-> + * card_int_gpio: gpio pin used for card detection
-> + */
-> +struct sdhci_plat_data {
-> +	int card_power_gpio;
-> +	int power_active_high;
-> +	int power_always_enb;
-> +	int card_int_gpio;
-> +};
-> +
-> +/* This function is used to set platform_data field of pdev->dev */
-> +static inline void
-> +sdhci_set_plat_data(struct platform_device *pdev, struct sdhci_plat_data *data)
-> +{
-> +	pdev->dev.platform_data = data;
-> +}
-> +
-> +#endif /* MMC_SDHCI_SPEAR_H */
+Nishanth Menon <menon.nishanth@gmail.com> wrote:
+> On 05/09/2010 05:51 AM, Venkatraman S wrote:
+>>
+>> Nishanth Menon<nm@ti.com> =A0wrote:
+>>>
+>>> Chikkature Rajashekar, Madhusudhan had written, on 05/07/2010 11:59=
+ AM,
+>>> the
+>>> following:
+>>>>
+>>>>>
+>>>>>>>> Subject: Re: [PATCH v8 2/2] omap hsmmc: adaptation of sdma
+>>>>>
+>>>>> descriptor
+>>>>>>>
+>>>>>>> autoloading feature
+>>>>>>>>
+>>>>>>>> <<snip>>
+>>>>>>>>
+>>>>>>>>>> I am not clear about the method. The board files export the
+>>>>>>>>>> omap_mmc_platform_data.
+>>>>>>>>>> Does it imply that all board files have to change and export
+>>>>>>>>>> the capability so that it can be queried ?
+>>>>>>>>>
+>>>>>>>>> No. You don't have to modify the board files. This would need
+>>>>>>>>> change in devices.c which common for all omap boards.
+>>>>>>>>>
+>>>>>>>>> I don't have a strong opinion on this point but just put fort=
+h an
+>>>>>>>>> alternate way to avoid such SOC specific check in drivers.
+>>>>>>>>> You can take call on this
+>>>>>>>>
+>>>>>>>> Agree. How about adding a flag in hsmmc.h& =A0omap_mmc_platfor=
+m_data,
+>>>>>>>> that would take care of SDMA& =A0SDMA_DLAOD in the driver inst=
+ead
+>>>>>
+>>>>> going
+>>>>>>>>
+>>>>>>>> with SOC check .
+>>>>>>>
+>>>>>>> Good idea Kishore.
+>>>>>>> Venkat,
+>>>>>>> Can you do what kishore is suggesting.
+>>>>>>>
+>>>>>> omap_mmc_platform_data is MMC specific platform data. Why add a =
+SDMA
+>>>>>> specific feature capability into it? Even though you add it ther=
+e, you
+>>>>>
+>>>>> will
+>>>>>>
+>>>>>> still need to have a cpu check before that can be set in a commo=
+n
+>>>>>> code.
+>>>>>>
+>>>>> CPU checks are allowed to be in the platform files. That is where=
+ such
+>>>>> machine/SOC specific differentiation should be done and not in th=
+e
+>>>>> device
+>>>>> drivers.
+>>>>> That way device drivers remains clean and portable.
+>>>>>
+>>>>> I want to stop this thread here since neither the patch author no=
+r the
+>>>>> file
+>>>>> maintainer thinks that cpu checks in the device drivers is bad id=
+ea.
+>>>>>
+>>>>> Please decide within yourself and move on.
+>>>>>
+>>>>
+>>>> I am not saying that it is wrong. My point here is that adding thi=
+s
+>>>> particular flag into MMC platform data to differentiate a SDMA spe=
+cific
+>>>> feature which got introduced post certain SOC may not be needed. B=
+ut you
+>>>> can
+>>>> always post your comments on the list which will be looked at by a=
+ wider
+>>>> audience and finally the right patch will go in.
+>>>
+>>> Please see [1] for SOC specific feature handling. any reasons we ca=
+n't
+>>> handle it by adding a new feature?
+>>>
+>>> [1]
+>>>
+>>> http://git.kernel.org/?p=3Dlinux/kernel/git/torvalds/linux-2.6.git;=
+a=3Dblob;f=3Darch/arm/plat-omap/include/plat/cpu.h#l439
+>>>
+>>
+>> Thanks. I can add a new feature here, but I see that the API is tied
+>> to OMAP3, whereas the DMA feature is common
+>> to 3630, OMAP4 and mostly everything after that. I can work on an
+>> upgrade, but do you see that
+>> as a dependency and done on the context of this patch ?
+>> Regards,
+>> Venkat.
+>
+> Yes, I am aware that the current APIs are tied to OMAP3, no reason th=
+at we
+> cant introduce a OMAP version independent feature.. Yes, IMHO, this i=
+s an
+> SOC specific feature that has no place in a platform data.. lets not =
+misuse
+> that.
+> Regards,
+> NM
 
-Pierre,
 
-Is this patch fine? Or do i need to do some modifications?
+Draft patch for this is here (Tested ok). I will post this as part of
+the series if this looks ok...
+This doesn't have all existing feature checks for OMAP4, but they seem =
+to be not
+needed/used anyway..
 
-regards,
-viresh kumar.
+---
+ arch/arm/mach-omap2/clock3xxx_data.c  |    2 -
+ arch/arm/mach-omap2/id.c              |   25 +++++++++++++++--------
+ arch/arm/plat-omap/include/plat/cpu.h |   36 +++++++++++++++++--------=
+---------
+ 3 files changed, 36 insertions(+), 27 deletions(-)
+
+Index: linux-omap-2.6/arch/arm/mach-omap2/id.c
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+--- linux-omap-2.6.orig/arch/arm/mach-omap2/id.c	2010-05-09
+23:29:28.000000000 +0530
++++ linux-omap-2.6/arch/arm/mach-omap2/id.c	2010-05-10 17:39:29.0000000=
+00 +0530
+@@ -28,7 +28,7 @@
+ static struct omap_chip_id omap_chip;
+ static unsigned int omap_revision;
+
+-u32 omap3_features;
++u32 omap_features;
+
+ unsigned int omap_rev(void)
+ {
+@@ -161,14 +161,14 @@
+ #define OMAP3_CHECK_FEATURE(status,feat)				\
+ 	if (((status & OMAP3_ ##feat## _MASK) 				\
+ 		>> OMAP3_ ##feat## _SHIFT) !=3D FEAT_ ##feat## _NONE) { 	\
+-		omap3_features |=3D OMAP3_HAS_ ##feat;			\
++		omap_features |=3D OMAP_HAS_ ##feat;			\
+ 	}
+
+ void __init omap3_check_features(void)
+ {
+ 	u32 status;
+
+-	omap3_features =3D 0;
++	omap_features =3D 0;
+
+ 	status =3D omap_ctrl_readl(OMAP3_CONTROL_OMAP_STATUS);
+
+@@ -178,7 +178,7 @@
+ 	OMAP3_CHECK_FEATURE(status, NEON);
+ 	OMAP3_CHECK_FEATURE(status, ISP);
+ 	if (cpu_is_omap3630())
+-		omap3_features |=3D OMAP3_HAS_192MHZ_CLK;
++		omap_features |=3D OMAP_HAS_192MHZ_CLK | OMAP_HAS_SDMA_DLOAD;
+
+ 	/*
+ 	 * TODO: Get additional info (where applicable)
+@@ -267,6 +267,12 @@
+ 	}
+ }
+
++void __init omap4_check_features(void)
++{
++	omap_features =3D OMAP_HAS_SDMA_DLOAD;
++
++}
++
+ void __init omap4_check_revision(void)
+ {
+ 	u32 idcode;
+@@ -294,7 +300,7 @@
+ }
+
+ #define OMAP3_SHOW_FEATURE(feat)		\
+-	if (omap3_has_ ##feat())		\
++	if (omap_has_ ##feat())		\
+ 		printk(#feat" ");
+
+ void __init omap3_cpuinfo(void)
+@@ -314,20 +320,20 @@
+ 		/*
+ 		 * AM35xx devices
+ 		 */
+-		if (omap3_has_sgx()) {
++		if (omap_has_sgx()) {
+ 			omap_revision =3D OMAP3517_REV(rev);
+ 			strcpy(cpu_name, "AM3517");
+ 		} else {
+ 			/* Already set in omap3_check_revision() */
+ 			strcpy(cpu_name, "AM3505");
+ 		}
+-	} else if (omap3_has_iva() && omap3_has_sgx()) {
++	} else if (omap_has_iva() && omap_has_sgx()) {
+ 		/* OMAP3430, OMAP3525, OMAP3515, OMAP3503 devices */
+ 		strcpy(cpu_name, "OMAP3430/3530");
+-	} else if (omap3_has_iva()) {
++	} else if (omap_has_iva()) {
+ 		omap_revision =3D OMAP3525_REV(rev);
+ 		strcpy(cpu_name, "OMAP3525");
+-	} else if (omap3_has_sgx()) {
++	} else if (omap_has_sgx()) {
+ 		omap_revision =3D OMAP3515_REV(rev);
+ 		strcpy(cpu_name, "OMAP3515");
+ 	} else {
+@@ -386,6 +392,7 @@
+ 		return;
+ 	} else if (cpu_is_omap44xx()) {
+ 		omap4_check_revision();
++		omap4_check_features();
+ 		return;
+ 	} else {
+ 		pr_err("OMAP revision unknown, please fix!\n");
+Index: linux-omap-2.6/arch/arm/plat-omap/include/plat/cpu.h
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+--- linux-omap-2.6.orig/arch/arm/plat-omap/include/plat/cpu.h	2010-05-0=
+9
+23:24:15.000000000 +0530
++++ linux-omap-2.6/arch/arm/plat-omap/include/plat/cpu.h	2010-05-10
+17:53:04.000000000 +0530
+@@ -434,28 +434,30 @@
+ void omap2_check_revision(void);
+
+ /*
+- * Runtime detection of OMAP3 features
++ * Runtime detection of OMAP features
+  */
+-extern u32 omap3_features;
++extern u32 omap_features;
+
+-#define OMAP3_HAS_L2CACHE		BIT(0)
+-#define OMAP3_HAS_IVA			BIT(1)
+-#define OMAP3_HAS_SGX			BIT(2)
+-#define OMAP3_HAS_NEON			BIT(3)
+-#define OMAP3_HAS_ISP			BIT(4)
+-#define OMAP3_HAS_192MHZ_CLK		BIT(5)
++#define OMAP_HAS_L2CACHE		BIT(0)
++#define OMAP_HAS_IVA			BIT(1)
++#define OMAP_HAS_SGX			BIT(2)
++#define OMAP_HAS_NEON			BIT(3)
++#define OMAP_HAS_ISP			BIT(4)
++#define OMAP_HAS_192MHZ_CLK		BIT(5)
++#define OMAP_HAS_SDMA_DLOAD		BIT(6)
+
+-#define OMAP3_HAS_FEATURE(feat,flag)			\
+-static inline unsigned int omap3_has_ ##feat(void)	\
++#define OMAP_HAS_FEATURE(feat, flag)			\
++static inline unsigned int omap_has_ ##feat(void)	\
+ {							\
+-	return (omap3_features & OMAP3_HAS_ ##flag);	\
++	return (omap_features & OMAP_HAS_ ##flag);	\
+ }							\
+
+-OMAP3_HAS_FEATURE(l2cache, L2CACHE)
+-OMAP3_HAS_FEATURE(sgx, SGX)
+-OMAP3_HAS_FEATURE(iva, IVA)
+-OMAP3_HAS_FEATURE(neon, NEON)
+-OMAP3_HAS_FEATURE(isp, ISP)
+-OMAP3_HAS_FEATURE(192mhz_clk, 192MHZ_CLK)
++OMAP_HAS_FEATURE(l2cache, L2CACHE)
++OMAP_HAS_FEATURE(sgx, SGX)
++OMAP_HAS_FEATURE(iva, IVA)
++OMAP_HAS_FEATURE(neon, NEON)
++OMAP_HAS_FEATURE(isp, ISP)
++OMAP_HAS_FEATURE(192mhz_clk, 192MHZ_CLK)
++OMAP_HAS_FEATURE(sdma_dload, SDMA_DLOAD)
+
+ #endif
+Index: linux-omap-2.6/arch/arm/mach-omap2/clock3xxx_data.c
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+--- linux-omap-2.6.orig/arch/arm/mach-omap2/clock3xxx_data.c	2010-05-10
+14:41:39.000000000 +0530
++++ linux-omap-2.6/arch/arm/mach-omap2/clock3xxx_data.c	2010-05-10
+14:41:50.000000000 +0530
+@@ -3510,7 +3510,7 @@
+ 			cpu_clkflg |=3D CK_3430ES2;
+ 		}
+ 	}
+-	if (omap3_has_192mhz_clk())
++	if (omap_has_192mhz_clk())
+ 		omap_96m_alwon_fck =3D omap_96m_alwon_fck_3630;
+
+ 	if (cpu_is_omap3630()) {
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
