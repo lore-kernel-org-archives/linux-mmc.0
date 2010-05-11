@@ -1,26 +1,35 @@
-From: Paul Mundt <lethal@linux-sh.org>
-Subject: Re: [PATCH 0/9 v3] add DMA support to tmio_mmc, using dmaengine API, use it on SH
-Date: Tue, 11 May 2010 21:38:36 +0900
-Message-ID: <20100511123836.GA22690@linux-sh.org>
-References: <Pine.LNX.4.64.1005071625260.4777@axis700.grange> <Pine.LNX.4.64.1005111156170.6810@axis700.grange>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:48261 "EHLO
-	master.linux-sh.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755604Ab0EKMjl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2010 08:39:41 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1005111156170.6810@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: [PATCH] MMC: at91_mci: modify cache flush routines
+Date: Tue, 11 May 2010 19:09:53 +0200
+Message-ID: <1273597793-28104-1-git-send-email-nicolas.ferre@atmel.com>
+References: <20100511134409.GB27201@n2100.arm.linux.org.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100511134409.GB27201@n2100.arm.linux.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, akpm@linux-foundation.org, linux-mmc@vger.kernel.org, avictor.za@gmail.com, linux@arm.linux.org.uk
+Cc: linux-kernel@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
 
-On Tue, May 11, 2010 at 12:07:07PM +0200, Guennadi Liakhovetski wrote:
-> 2.6.35 release is approaching and Ian hasn't found time yet to review this 
-> series, so I was wondering, maybe you could take it into mm at least for 
-> now?
-> 
-Note that the tmio_mmc tree has also been dropped from -next due to being
-unreachable. I'm not sure how this impacts the pending changes, though.
+As we were using an internal dma flushing routine, this patch changes to the
+DMA API flush_kernel_dcache_page(). Driver is able to compile now.
+
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+---
+ drivers/mmc/host/at91_mci.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
+index a6dd7da..813d208 100644
+--- a/drivers/mmc/host/at91_mci.c
++++ b/drivers/mmc/host/at91_mci.c
+@@ -315,7 +315,7 @@ static void at91_mci_post_dma_read(struct at91mci_host *host)
+ 		}
+ 
+ 		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
+-		dmac_flush_range((void *)sgbuffer, ((void *)sgbuffer) + amount);
++		flush_kernel_dcache_page(sg_page(sg));
+ 		data->bytes_xfered += amount;
+ 		if (size == 0)
+ 			break;
+-- 
+1.5.6.5
