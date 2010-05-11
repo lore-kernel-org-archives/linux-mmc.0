@@ -1,49 +1,60 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/3] sh: disable SD-card write-protection detection on kfr2r09
-Date: Tue, 11 May 2010 11:52:39 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1005111152000.6810@axis700.grange>
-References: <Pine.LNX.4.64.1005111146330.6810@axis700.grange>
+Subject: Re: [PATCH 0/9 v3] add DMA support to tmio_mmc, using dmaengine API,
+ use it on SH
+Date: Tue, 11 May 2010 12:07:07 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1005111156170.6810@axis700.grange>
+References: <Pine.LNX.4.64.1005071625260.4777@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1005111146330.6810@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
-Cc: Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.gmx.net ([213.165.64.20]:49012 "HELO mail.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1754704Ab0EKKHF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 11 May 2010 06:07:05 -0400
+In-Reply-To: <Pine.LNX.4.64.1005071625260.4777@axis700.grange>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
 
-kfr2r09 board has a micro-SD card slot, therefore card write-protection
-detection cannot work there, disable it.
+Hi Andrew
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+2.6.35 release is approaching and Ian hasn't found time yet to review this 
+series, so I was wondering, maybe you could take it into mm at least for 
+now?
+
+Thanks
+Guennadi
+
+On Fri, 7 May 2010, Guennadi Liakhovetski wrote:
+
+> Following this email I'll send two patches, that split
+> 
+> [PATCH 4/9 v2] MMC: add DMA support to tmio_mmc driver, when used on SuperH
+> 
+> into two parts: mfd and mmc. Also adding MFD maintainer to CC, which I've 
+> forgotten to do on previous iterations (sorry, Samuel). Otherwise no 
+> changes, that's why I'm also not resending other patches. Hopefully 
+> reviewing will become easier this way.
+> 
+> Here's the original description again:
+> 
+> This patch series adds DMA support to the tmio_mmc SD/MMC host driver, 
+> using the dmaengine API. DMA is enabled on SuperH platforms and ARM 
+> shmobile boards, both use the sh_mobile_sdhi MFD driver. Other TMIO MFD 
+> implementations are unaffected. The patch transparently falls back to PIO 
+> if no DMA is configured by the MFD driver, or if DMA initialisation or 
+> execution fails.
+> 
+> Thanks
+> Guennadi
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
+> 
+
 ---
- arch/sh/boards/mach-kfr2r09/setup.c |    6 ++++--
- 1 files changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-index 95850aa..68994a1 100644
---- a/arch/sh/boards/mach-kfr2r09/setup.c
-+++ b/arch/sh/boards/mach-kfr2r09/setup.c
-@@ -11,6 +11,7 @@
- #include <linux/platform_device.h>
- #include <linux/interrupt.h>
- #include <linux/mfd/sh_mobile_sdhi.h>
-+#include <linux/mfd/tmio.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mtd/onenand.h>
- #include <linux/delay.h>
-@@ -358,8 +359,9 @@ static struct resource kfr2r09_sh_sdhi0_resources[] = {
- };
- 
- static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
--	.dma_slave_tx = SHDMA_SLAVE_SDHI0_TX,
--	.dma_slave_rx = SHDMA_SLAVE_SDHI0_RX,
-+	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
-+	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
-+	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
- };
- 
- static struct platform_device kfr2r09_sh_sdhi0_device = {
--- 
-1.6.2.4
-
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
