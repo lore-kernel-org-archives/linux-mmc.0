@@ -1,60 +1,53 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [PATCH 1/7] DMAENGINE: add generic PrimeCell interface to COH 901
-	318 v6
-Date: Tue, 11 May 2010 09:53:23 -0700
-Message-ID: <AANLkTim7Tp8lCwMbQwW5QiQ49j7idFFUWdU3x8azIlok@mail.gmail.com>
-References: <1272848076-28315-1-git-send-email-linus.walleij@stericsson.com>
-	 <AANLkTinAVhnpjgVTtbZYYKb1t_DInVwTKkkJRzcO97RX@mail.gmail.com>
+From: akpm@linux-foundation.org
+Subject: [patch 07/17] mmc: atmel-mci: fix in debugfs: response value printing
+Date: Tue, 11 May 2010 14:06:50 -0700
+Message-ID: <201005112106.o4BL6onu023085@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f174.google.com ([209.85.212.174]:58444 "EHLO
-	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755697Ab0EKQx0 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2010 12:53:26 -0400
-In-Reply-To: <AANLkTinAVhnpjgVTtbZYYKb1t_DInVwTKkkJRzcO97RX@mail.gmail.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:56701 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751032Ab0EKVG4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2010 17:06:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@stericsson.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: akpm@linux-foundation.org, nicolas.ferre@atmel.com, hskinnemoen@atmel.com, linux-mmc@vger.kernel.org
 
-On Tue, May 11, 2010 at 9:37 AM, Dan Williams <dan.j.williams@intel.com=
-> wrote:
-> On Sun, May 2, 2010 at 5:54 PM, Linus Walleij
-> <linus.walleij@stericsson.com> wrote:
->> This extends the DMA engine driver for the COH 901 318 used in the
->> U300 platform with the generic PrimeCell interface.
->>
->> Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
->> ---
->> =A0drivers/dma/coh901318.c | =A0146 ++++++++++++++++++++++++++++++++=
-+++++++++++++++
->> =A01 files changed, 146 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/dma/coh901318.c b/drivers/dma/coh901318.c
->> index 4233440..1d5ed16 100644
->> --- a/drivers/dma/coh901318.c
->> +++ b/drivers/dma/coh901318.c
-> [..]
->> +void dma_set_ambaconfig(struct dma_chan *chan,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct amba_dma_channe=
-l_config *config)
->
-> What happens when two primecell dma devices are present on one soc?
-> Can that happen? =A0In that case we'll have conflicting providers of
-> dma_set_ambaconfig().
->
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-=2E..the ->device_control() method is already approaching an ioctl()
-let's just add the argument parameter to complete the capability,
-i.e.:
+In debugfs, printing of command response reports resp[2] twice: fix it to
+resp[3].
 
-int (*device_control)(struct dma_chan *chan, enum dma_ctrl_cmd cmd,
-unsigned long arg);
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Haavard Skinnemoen <hskinnemoen@atmel.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
-This might also be useful be useful for the mux case to change that
-configuration at runtime.
+ drivers/mmc/host/atmel-mci.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
---
-Dan
+diff -puN drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-fix-in-debugfs-response-value-printing drivers/mmc/host/atmel-mci.c
+--- a/drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-fix-in-debugfs-response-value-printing
++++ a/drivers/mmc/host/atmel-mci.c
+@@ -266,7 +266,7 @@ static int atmci_req_show(struct seq_fil
+ 				"CMD%u(0x%x) flg %x rsp %x %x %x %x err %d\n",
+ 				cmd->opcode, cmd->arg, cmd->flags,
+ 				cmd->resp[0], cmd->resp[1], cmd->resp[2],
+-				cmd->resp[2], cmd->error);
++				cmd->resp[3], cmd->error);
+ 		if (data)
+ 			seq_printf(s, "DATA %u / %u * %u flg %x err %d\n",
+ 				data->bytes_xfered, data->blocks,
+@@ -276,7 +276,7 @@ static int atmci_req_show(struct seq_fil
+ 				"CMD%u(0x%x) flg %x rsp %x %x %x %x err %d\n",
+ 				stop->opcode, stop->arg, stop->flags,
+ 				stop->resp[0], stop->resp[1], stop->resp[2],
+-				stop->resp[2], stop->error);
++				stop->resp[3], stop->error);
+ 	}
+ 
+ 	spin_unlock_bh(&slot->host->lock);
+_
