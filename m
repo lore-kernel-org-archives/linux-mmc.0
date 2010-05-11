@@ -1,35 +1,46 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [PATCH] MMC: at91_mci: modify cache flush routines
-Date: Tue, 11 May 2010 19:09:53 +0200
-Message-ID: <1273597793-28104-1-git-send-email-nicolas.ferre@atmel.com>
-References: <20100511134409.GB27201@n2100.arm.linux.org.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100511134409.GB27201@n2100.arm.linux.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, akpm@linux-foundation.org, linux-mmc@vger.kernel.org, avictor.za@gmail.com, linux@arm.linux.org.uk
-Cc: linux-kernel@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>
+From: Dan Williams <dan.j.williams@intel.com>
+Subject: Re: [PATCH 1/7] DMAENGINE: add generic PrimeCell interface to COH 901
+	318 v6
+Date: Tue, 11 May 2010 09:37:42 -0700
+Message-ID: <AANLkTinAVhnpjgVTtbZYYKb1t_DInVwTKkkJRzcO97RX@mail.gmail.com>
+References: <1272848076-28315-1-git-send-email-linus.walleij@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pz0-f204.google.com ([209.85.222.204]:65338 "EHLO
+	mail-pz0-f204.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751056Ab0EKQhm convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2010 12:37:42 -0400
+In-Reply-To: <1272848076-28315-1-git-send-email-linus.walleij@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-As we were using an internal dma flushing routine, this patch changes to the
-DMA API flush_kernel_dcache_page(). Driver is able to compile now.
+On Sun, May 2, 2010 at 5:54 PM, Linus Walleij
+<linus.walleij@stericsson.com> wrote:
+> This extends the DMA engine driver for the COH 901 318 used in the
+> U300 platform with the generic PrimeCell interface.
+>
+> Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+> ---
+> =A0drivers/dma/coh901318.c | =A0146 +++++++++++++++++++++++++++++++++=
+++++++++++++++
+> =A01 files changed, 146 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/dma/coh901318.c b/drivers/dma/coh901318.c
+> index 4233440..1d5ed16 100644
+> --- a/drivers/dma/coh901318.c
+> +++ b/drivers/dma/coh901318.c
+[..]
+> +void dma_set_ambaconfig(struct dma_chan *chan,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct amba_dma_channel=
+_config *config)
 
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
----
- drivers/mmc/host/at91_mci.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+What happens when two primecell dma devices are present on one soc?
+Can that happen?  In that case we'll have conflicting providers of
+dma_set_ambaconfig().
 
-diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
-index a6dd7da..813d208 100644
---- a/drivers/mmc/host/at91_mci.c
-+++ b/drivers/mmc/host/at91_mci.c
-@@ -315,7 +315,7 @@ static void at91_mci_post_dma_read(struct at91mci_host *host)
- 		}
- 
- 		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
--		dmac_flush_range((void *)sgbuffer, ((void *)sgbuffer) + amount);
-+		flush_kernel_dcache_page(sg_page(sg));
- 		data->bytes_xfered += amount;
- 		if (size == 0)
- 			break;
--- 
-1.5.6.5
+--
+Dan
