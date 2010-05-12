@@ -1,28 +1,88 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH 0/9 v3] add DMA support to tmio_mmc, using dmaengine
- API, use it on SH
-Date: Wed, 12 May 2010 15:55:29 -0700
-Message-ID: <20100512155529.636a58f6.akpm@linux-foundation.org>
-References: <Pine.LNX.4.64.1005071625260.4777@axis700.grange>
-	<Pine.LNX.4.64.1005111156170.6810@axis700.grange>
+From: <gregkh@suse.de>
+Subject: patch mmc-atmel-mci-prevent-kernel-oops-while-removing-card.patch added to 2.6.32-stable tree
+Date: Wed, 12 May 2010 16:19:48 -0700
+Message-ID: <1273706388434@kroah.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1005111156170.6810@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kroah.org ([198.145.64.141]:45685 "EHLO coco.kroah.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758381Ab0ELXT7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 12 May 2010 19:19:59 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: nicolas.ferre@atmel.com, akpm@linux-foundation.org, gregkh@suse.de, hskinnemoen@atmel.com, linux-mmc@vger.kernel.org, torvalds@linux-foundation.org
+Cc: stable@kernel.org, stable-commits@vger.kernel.org
 
-On Tue, 11 May 2010 12:07:07 +0200 (CEST)
-Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
 
-> 2.6.35 release is approaching and Ian hasn't found time yet to review this 
-> series, so I was wondering, maybe you could take it into mm at least for 
-> now?
+This is a note to let you know that we have just queued up the patch titled
 
-Well I did, but I don't know how useful that was.
+    Subject: mmc: atmel-mci: prevent kernel oops while removing card
 
-WHo is the most appropriate tree-maintainer to review and possibly
-merge these?
+to the 2.6.32-stable tree.  Its filename is
+
+    mmc-atmel-mci-prevent-kernel-oops-while-removing-card.patch
+
+A git repo of this tree can be found at 
+    http://www.kernel.org/git/?p=linux/kernel/git/stable/stable-queue.git;a=summary
+
+
+>From 009a891b22395fc86e5f34057d79fffee4509ab5 Mon Sep 17 00:00:00 2001
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Date: Tue, 11 May 2010 14:06:49 -0700
+Subject: mmc: atmel-mci: prevent kernel oops while removing card
+
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+
+commit 009a891b22395fc86e5f34057d79fffee4509ab5 upstream.
+
+The removing of an SD card in certain circumstances can lead to a kernel
+oops if we do not make sure that the "data" field of the host structure is
+valid.  This patch adds a test in atmci_dma_cleanup() function and also
+calls atmci_stop_dma() before throwing away the reference to data.
+
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Haavard Skinnemoen <hskinnemoen@atmel.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+---
+ drivers/mmc/host/atmel-mci.c |    9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -530,9 +530,10 @@ static void atmci_dma_cleanup(struct atm
+ {
+ 	struct mmc_data			*data = host->data;
+ 
+-	dma_unmap_sg(&host->pdev->dev, data->sg, data->sg_len,
+-		     ((data->flags & MMC_DATA_WRITE)
+-		      ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
++	if (data)
++		dma_unmap_sg(&host->pdev->dev, data->sg, data->sg_len,
++			     ((data->flags & MMC_DATA_WRITE)
++			      ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
+ }
+ 
+ static void atmci_stop_dma(struct atmel_mci *host)
+@@ -1037,8 +1038,8 @@ static void atmci_command_complete(struc
+ 			"command error: status=0x%08x\n", status);
+ 
+ 		if (cmd->data) {
+-			host->data = NULL;
+ 			atmci_stop_dma(host);
++			host->data = NULL;
+ 			mci_writel(host, IDR, MCI_NOTBUSY
+ 					| MCI_TXRDY | MCI_RXRDY
+ 					| ATMCI_DATA_ERROR_FLAGS);
+
+
+Patches currently in stable-queue which might be from nicolas.ferre@atmel.com are
+
+queue-2.6.32/mmc-atmel-mci-remove-data-error-interrupt-after-xfer.patch
+queue-2.6.32/mmc-atmel-mci-prevent-kernel-oops-while-removing-card.patch
+queue-2.6.32/mmc-atmel-mci-fix-two-parameters-swapped.patch
