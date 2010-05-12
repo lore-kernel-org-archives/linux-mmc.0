@@ -1,78 +1,71 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [PATCH 1/7] DMAENGINE: add generic PrimeCell interface to COH 901
-	318 v6
-Date: Wed, 12 May 2010 11:35:21 -0700
-Message-ID: <AANLkTilwcXmNjiuosbmaBudH965dNg3C7VIwlxNWkbzd@mail.gmail.com>
-References: <1272848076-28315-1-git-send-email-linus.walleij@stericsson.com>
-	 <AANLkTinAVhnpjgVTtbZYYKb1t_DInVwTKkkJRzcO97RX@mail.gmail.com>
-	 <AANLkTim7Tp8lCwMbQwW5QiQ49j7idFFUWdU3x8azIlok@mail.gmail.com>
-	 <CEE6BB42CAD6E947908279175AF8470A025A6DE803@EXDCVYMBSTM006.EQ1STM.local>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] omap_hsmmc: improve interrupt synchronisation
+Date: Wed, 12 May 2010 12:52:13 -0700
+Message-ID: <20100512125213.36631d2d.akpm@linux-foundation.org>
+References: <4BEA5DD5.9010308@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:60475 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754692Ab0ELSfW convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 May 2010 14:35:22 -0400
-In-Reply-To: <CEE6BB42CAD6E947908279175AF8470A025A6DE803@EXDCVYMBSTM006.EQ1STM.local>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <4BEA5DD5.9010308@nokia.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Venkatraman S <svenkatr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-omap Mailing List <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus WALLEIJ <linus.walleij@stericsson.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Wed, May 12, 2010 at 12:39 AM, Linus WALLEIJ
-<linus.walleij@stericsson.com> wrote:
-> [Dan]
+On Wed, 12 May 2010 10:50:45 +0300
+Adrian Hunter <adrian.hunter@nokia.com> wrote:
+
+> >From ad2e1cd024ccf9144b6620cfe808893719db738f Mon Sep 17 00:00:00 2001
+> From: Adrian Hunter <adrian.hunter@nokia.com>
+> Date: Wed, 14 Apr 2010 16:26:45 +0300
+> Subject: [PATCH] omap_hsmmc: improve interrupt synchronisation
+> 
+> The following changes were needed:
+> 	- do not use in_interrupt() because it will not work
+> 	with threaded interrupts
+> 
+> In addition, the following improvements were made:
+> 	- ensure DMA is unmapped only after the final DMA interrupt
+> 	- ensure a request is completed only after the final DMA interrupt
+> 	- disable controller interrupts when a request is not in progress
+> 	- remove the spin-lock protecting the start of a new request from
+> 	an unexpected interrupt because the locking was complicated and
+> 	a 'req_in_progress' flag suffices (since the spin-lock only defers
+> 	the unexpected interrupts anyway)
+> 	- instead use the spin-lock to protect the MMC interrupt handler
+> 	from the DMA interrupt handler
+> 	- remove the semaphore preventing DMA from being started while
+> 	the previous DMA is still in progress - the other changes make that
+> 	impossible, so it is now a BUG_ON condition
+> 	- ensure the controller interrupt status is clear before exiting
+> 	the interrrupt handler
+> 
+> In general, these changes make the code safer but do not fix any specific
+> bugs so backporting is not necessary.
+> 
 >
->> >> +void dma_set_ambaconfig(struct dma_chan *chan,
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct amba_dma_cha=
-nnel_config *config)
->> >
->> > What happens when two primecell dma devices are present on one soc=
-?
->> > Can that happen? =A0In that case we'll have conflicting providers =
-of
->> > dma_set_ambaconfig().
->> >
->>
->> ...the ->device_control() method is already approaching an ioctl()
->> let's just add the argument parameter to complete the capability,
->> i.e.:
->>
->> int (*device_control)(struct dma_chan *chan, enum dma_ctrl_cmd cmd,
->> unsigned long arg);
+> ...
 >
-> So the unsigned long arg is to match an ioctl? Okidoki...
->
-> If it was only for in-kernel use a void* would be preferred
-> I believe since assuming unsigned long to be =3D=3D bus width
-> is ... well, disturbing, since we'll be casting this into
-> a struct pointer.
+> +static void omap_hsmmc_request_done(struct omap_hsmmc_host *host, struct mmc_request *mrq)
+> +{
+> +	int dma_ch;
+> +
+> +	spin_lock(&host->irq_lock);
+> +	host->req_in_progress = 0;
+> +	dma_ch = host->dma_ch;
+> +	spin_unlock(&host->irq_lock);
+> +
+> +	omap_hsmmc_disable_irq(host);
+> +	/* Do not complete the request if DMA is still in progress */
+> +	if (mrq->data && host->use_dma && dma_ch != -1)
+> +		return;
+> +	host->mrq = NULL;
+> +	mmc_request_done(host->mmc, mrq);
+> +}
 
-It's safe to assume that Linux does not run on any architecture where
-sizeof(unsigned long) < sizeof(void *).
+Are we sure that irq_lock doesn't need to be taken in an irq-safe fashion?
 
-> So this should also be used for the AMBA configuration stuff
-> then, so I have to make first a patch to convert all the
-> device_control functions and then a patch on top of that to
-> implement the AMBA call as a device_control() thingie?
->
-> (Should work out...)
->
-> Just a bit of work, so will take some more hours :-)
 
-Apologies for not discovering this earlier in the review process, but
-it gets rid of the last bit of 'specialness' of the Primecell api and
-I can see it allowing other weird commands to be implemented
-generically down the road.  Just let me know if you want to run any
-compile tests for you.
+send_init_stream() doesn't report an error if its busywait times out.
 
-> I will just have to make a proof-of-concept for the AMBA config
-> interface for Russell first, then I'll be on the ioctl-like API.
-
-Ok, I really appreciate your patience, I'll see what I can do to push
-this post-rc1 if things turn out that way.
-
-Regards,
-Dan
