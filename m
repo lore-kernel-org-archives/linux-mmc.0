@@ -1,70 +1,43 @@
-From: Andrew Morton <akpm@linux-foundation.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Subject: Re: [PATCH] MMC: at91_mci: modify cache flush routines
-Date: Wed, 12 May 2010 14:19:29 -0700
-Message-ID: <20100512141929.80c13953.akpm@linux-foundation.org>
-References: <20100511134409.GB27201@n2100.arm.linux.org.uk>
-	<1273597793-28104-1-git-send-email-nicolas.ferre@atmel.com>
+Date: Wed, 12 May 2010 22:30:59 +0100
+Message-ID: <20100512213059.GF22371@n2100.arm.linux.org.uk>
+References: <20100511134409.GB27201@n2100.arm.linux.org.uk> <1273597793-28104-1-git-send-email-nicolas.ferre@atmel.com> <20100512141929.80c13953.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:39177 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757833Ab0ELVUO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 May 2010 17:20:14 -0400
-In-Reply-To: <1273597793-28104-1-git-send-email-nicolas.ferre@atmel.com>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:43140 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756052Ab0ELVbW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 May 2010 17:31:22 -0400
+Content-Disposition: inline
+In-Reply-To: <20100512141929.80c13953.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, avictor.za@gmail.com, linux@arm.linux.org.uk, linux-kernel@vger.kernel.org, James Bottomley <James.Bottomley@HansenPartnership.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, avictor.za@gmail.com, linux-kernel@vger.kernel.org, James Bottomley <James.Bottomley@HansenPartnership.com>
 
-On Tue, 11 May 2010 19:09:53 +0200
-Nicolas Ferre <nicolas.ferre@atmel.com> wrote:
+On Wed, May 12, 2010 at 02:19:29PM -0700, Andrew Morton wrote:
+> The flush_kernel_dcache_page() documentation specifically says that
+> thou shalt run flush_kernel_dcache_page() _prior_ to kunmapping the
+> page.
 
-> As we were using an internal dma flushing routine, this patch changes to the
-> DMA API flush_kernel_dcache_page(). Driver is able to compile now.
-> 
-> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-> ---
->  drivers/mmc/host/at91_mci.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
-> index a6dd7da..813d208 100644
-> --- a/drivers/mmc/host/at91_mci.c
-> +++ b/drivers/mmc/host/at91_mci.c
-> @@ -315,7 +315,7 @@ static void at91_mci_post_dma_read(struct at91mci_host *host)
->  		}
->  
->  		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
-> -		dmac_flush_range((void *)sgbuffer, ((void *)sgbuffer) + amount);
-> +		flush_kernel_dcache_page(sg_page(sg));
->  		data->bytes_xfered += amount;
->  		if (size == 0)
->  			break;
+Hmm, interesting - I can't see why that would be, but it doesn't make
+any difference for ARM (and this is an ARM only driver).
 
-The flush_kernel_dcache_page() documentation specifically says that
-thou shalt run flush_kernel_dcache_page() _prior_ to kunmapping the
-page.
+> I don't know if that makes a difference in the real world, but heck why
+> not:
 
-I don't know if that makes a difference in the real world, but heck why
-not:
+In the interests of stopping cut'n'paste bugs into other drivers, I'd
+say this is a good idea even if it makes no difference to ARM.
 
---- a/drivers/mmc/host/at91_mci.c~mmc-at91_mci-modify-cache-flush-routines-fix
-+++ a/drivers/mmc/host/at91_mci.c
-@@ -314,8 +314,8 @@ static void at91_mci_post_dma_read(struc
- 			dmabuf = (unsigned *)tmpv;
- 		}
- 
--		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
- 		flush_kernel_dcache_page(sg_page(sg));
-+		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
- 		data->bytes_xfered += amount;
- 		if (size == 0)
- 			break;
-_
+> However, I'm wondering why you chose flush_kernel_dcache_page() instead
+> of plain old flush_dcache_page().  Is this a pagecache or possibly
+> direct-io page we're dealing with here?
 
-However, I'm wondering why you chose flush_kernel_dcache_page() instead
-of plain old flush_dcache_page().  Is this a pagecache or possibly
-direct-io page we're dealing with here?
+It's whatever the block layers hand us - which would be page cache pages,
+and I'd assume also DIO pages (I'm not up on DIO stuff though.)
 
+It's also my understanding that the preferred interface for drivers which
+write to page cache pages is flush_kernel_dcache_page() rather than
+flush_dcache_page().
