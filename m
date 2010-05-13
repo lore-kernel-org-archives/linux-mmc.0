@@ -1,57 +1,35 @@
-From: "kishore kadiyala" <kishore.kadiyala@ti.com>
-Subject: [PATCH v3 5/5] OMAP4 HSMMC: Enable HSMMC support
-Date: Fri, 14 May 2010 01:42:06 +0530 (IST)
-Message-ID: <12482.10.24.255.17.1273781526.squirrel@dbdmail.itg.ti.com>
+From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
+Subject: Re: [PATCH] mmc: drop the "state" argument to mmc_suspend_host()
+Date: Thu, 13 May 2010 23:35:29 +0200
+Message-ID: <20100513213529.GA26715@rere.qmqm.pl>
+References: <d071c94414fc069d9360ae62a37fd2ad0b68110f.1273777159.git.matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:34165 "EHLO arroyo.ext.ti.com"
+Received: from rere.qmqm.pl ([89.167.52.164]:33478 "EHLO rere.qmqm.pl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932749Ab0EMUMQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 13 May 2010 16:12:16 -0400
+	id S1757445Ab0EMVmJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 13 May 2010 17:42:09 -0400
+Content-Disposition: inline
+In-Reply-To: <d071c94414fc069d9360ae62a37fd2ad0b68110f.1273777159.git.matt@console-pimps.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Kevin Hilman <khilman@deeprootsystems.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Manuel Lauss <manuel.lauss@gmail.com>, Cliff Cai <cliff.cai@analog.com>, Pavel Pisa <ppisa@pikron.com>, David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@codeaurora.org>, Bryan Huntsman <bryanh@codeaurora.org>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Ben Dooks <ben-linux@fluff.org>, Anton Vorontsov <avorontsov@ru.mvista.com>, Sascha Sommer <saschasommer@freenet.de>, Alex Dubov <oakad@yahoo.com>, Ian Molton <ian@mnementh.co.uk>, Joseph Chan <JosephChan@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Pierre Ossman <pierre@ossman.eu>
 
-Enables HSMMC support for OMAP4430 defconfig
+On Thu, May 13, 2010 at 08:01:45PM +0100, Matt Fleming wrote:
+> Even though many mmc host drivers pass a pm_message_t argument to
+> mmc_suspend_host() that argument isn't used the by MMC core. As host
+> drivers are converted to dev_pm_ops they'll have to construct
+> pm_message_t's (as they won't be passed by the PM subsystem any more)
+> just to appease the mmc suspend interface.
+>=20
+> We might as well just delete the unused paramter.
+>=20
+> Signed-off-by: Matt Fleming <matt@console-pimps.org>
 
-Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
----
- arch/arm/configs/omap_4430sdp_defconfig |   19 ++++++++++++++++++-
- 1 files changed, 18 insertions(+), 1 deletions(-)
+Acked-by: Micha=B3 Miros=B3aw <mirq-linux@rere.qmqm.pl>
 
-diff --git a/arch/arm/configs/omap_4430sdp_defconfig b/arch/arm/configs/omap_4430sdp_defconfig
-index b7ddc7a..d6b9c5d 100644
---- a/arch/arm/configs/omap_4430sdp_defconfig
-+++ b/arch/arm/configs/omap_4430sdp_defconfig
-@@ -552,7 +552,24 @@ CONFIG_DUMMY_CONSOLE=y
- # CONFIG_SOUND is not set
- # CONFIG_HID_SUPPORT is not set
- # CONFIG_USB_SUPPORT is not set
--# CONFIG_MMC is not set
-+CONFIG_MMC=y
-+# CONFIG_MMC_DEBUG is not set
-+# CONFIG_MMC_UNSAFE_RESUME is not set
-+
-+#
-+# MMC/SD/SDIO Card Drivers
-+#
-+CONFIG_MMC_BLOCK=y
-+CONFIG_MMC_BLOCK_BOUNCE=y
-+# CONFIG_SDIO_UART is not set
-+# CONFIG_MMC_TEST is not set
-+
-+#
-+# MMC/SD/SDIO Host Controller Drivers
-+#
-+# CONFIG_MMC_SDHCI is not set
-+# CONFIG_MMC_OMAP is not set
-+CONFIG_MMC_OMAP_HS=y
- # CONFIG_MEMSTICK is not set
- # CONFIG_NEW_LEDS is not set
- # CONFIG_ACCESSIBILITY is not set
--- 
-1.6.3.3
-
+(For cb710-mmc part.)
 
