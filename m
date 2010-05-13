@@ -1,214 +1,178 @@
 From: "kishore kadiyala" <kishore.kadiyala@ti.com>
-Subject: [PATCH v3 2/5] OMAP4 HSMMC: Adding hsmmc support to board file
-Date: Fri, 14 May 2010 01:41:37 +0530 (IST)
-Message-ID: <12490.10.24.255.17.1273781497.squirrel@dbdmail.itg.ti.com>
+Subject: [PATCH v3 3/5] OMAP4 HSMMC: Adding card detect support for MMC1
+     Controller
+Date: Fri, 14 May 2010 01:41:44 +0530 (IST)
+Message-ID: <12500.10.24.255.17.1273781504.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:34145 "EHLO arroyo.ext.ti.com"
+Received: from comal.ext.ti.com ([198.47.26.152]:46387 "EHLO comal.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753692Ab0EMULv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 13 May 2010 16:11:51 -0400
+	id S1753692Ab0EMUL6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 13 May 2010 16:11:58 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: tony@atomide.com, madhu.cr@ti.com, jarkko.lavinen@nokia.com, rmk@arm.linux.org.uk, paul@pwsan.com, adrian.hunter@nokia.com
+Cc: tony@atomide.com, madhu.cr@ti.com, jarkko.lavinen@nokia.com, rmk@arm.linux.org.uk, paul@pwsan.com
 
-Support for MMC1 & MMC2 controllers is added to the board file.
-Also includes configuration of MMC1 Card detect initially.
+Adds card detect callback function which gives the status of
+the card.For MMC1 Controller, Card detect interrupt is provided by
+twl6030 and card status is provided by MMCCTRL reg of twl6030.
 
 Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
 ---
- arch/arm/mach-omap2/Makefile        |    3 +-
- arch/arm/mach-omap2/board-4430sdp.c |   64 +++++++++++++++++++++++++++++++----
- include/linux/i2c/twl.h             |   44 ++++++++++++++++++++++++
- 3 files changed, 103 insertions(+), 8 deletions(-)
+ arch/arm/mach-omap2/hsmmc.c           |    1 +
+ arch/arm/plat-omap/include/plat/mmc.h |    1 +
+ drivers/mfd/twl6030-irq.c             |   23 +++++++++++++++++++++++
+ drivers/mmc/host/omap_hsmmc.c         |   31 ++++++++++++++++++++++++++-----
+ include/linux/i2c/twl.h               |    3 +++
+ 5 files changed, 54 insertions(+), 5 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/Makefile b/arch/arm/mach-omap2/Makefile
-index ffe600a..65d8d11 100644
---- a/arch/arm/mach-omap2/Makefile
-+++ b/arch/arm/mach-omap2/Makefile
-@@ -140,7 +140,8 @@ obj-$(CONFIG_MACH_IGEP0020)		+= board-igep0020.o \
- 					   hsmmc.o
- obj-$(CONFIG_MACH_OMAP3_TOUCHBOOK)	+= board-omap3touchbook.o \
- 					   hsmmc.o
--obj-$(CONFIG_MACH_OMAP_4430SDP)		+= board-4430sdp.o
-+obj-$(CONFIG_MACH_OMAP_4430SDP)		+= board-4430sdp.o \
-+					   hsmmc.o
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 9ad2295..679188c 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -189,6 +189,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+ 		mmc->get_context_loss_count = hsmmc_get_context_loss;
 
- obj-$(CONFIG_MACH_OMAP3517EVM)		+= board-am3517evm.o
+ 		mmc->slots[0].switch_pin = c->gpio_cd;
++		mmc->slots[0].cd_type = c->cd_type;
+ 		mmc->slots[0].gpio_wp = c->gpio_wp;
 
-diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
-index d86e22d..70c8ab7 100644
---- a/arch/arm/mach-omap2/board-4430sdp.c
-+++ b/arch/arm/mach-omap2/board-4430sdp.c
-@@ -32,6 +32,8 @@
- #include <plat/control.h>
- #include <plat/timer-gp.h>
- #include <plat/usb.h>
-+#include <plat/mmc.h>
-+#include "hsmmc.h"
+ 		mmc->slots[0].remux = c->remux;
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index e4e595b..38fa033 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -14,6 +14,7 @@
+ #include <linux/types.h>
+ #include <linux/device.h>
+ #include <linux/mmc/host.h>
++#include <linux/i2c/twl.h>
 
- static struct platform_device sdp4430_lcd_device = {
- 	.name		= "sdp4430_lcd",
-@@ -68,24 +70,71 @@ static struct omap_musb_board_data musb_board_data = {
- 	.power			= 100,
- };
+ #include <plat/board.h>
 
--static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
--	{
--		.supply = "vmmc",
--	},
-+static struct omap2_hsmmc_info mmc[] = {
- 	{
--		.supply = "vmmc",
-+		.mmc		= 1,
-+		.wires		= 8,
-+		.gpio_cd	= TWL6030_IRQ_BASE + MMCDETECT_INTR_OFFSET,
-+		.cd_type	= NON_GPIO,
-+		.gpio_wp	= -EINVAL,
- 	},
- 	{
--		.supply = "vmmc",
-+		.mmc		= 2,
-+		.wires		= 8,
-+		.gpio_cd	= -EINVAL,
-+		.gpio_wp	= -EINVAL,
-+		.nonremovable   = true,
- 	},
-+	{}	/* Terminator */
-+};
-+
-+static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
- 	{
- 		.supply = "vmmc",
-+		.dev_name = "mmci-omap-hs.0",
- 	},
- 	{
- 		.supply = "vmmc",
-+		.dev_name = "mmci-omap-hs.1",
- 	},
- };
+diff --git a/drivers/mfd/twl6030-irq.c b/drivers/mfd/twl6030-irq.c
+index 10bf228..ca8b30b 100644
+--- a/drivers/mfd/twl6030-irq.c
++++ b/drivers/mfd/twl6030-irq.c
+@@ -223,6 +223,29 @@ int twl6030_interrupt_mask(u8 bit_mask, u8 offset)
+ }
+ EXPORT_SYMBOL(twl6030_interrupt_mask);
 
-+static int omap4_twl6030_hsmmc_late_init(struct device *dev)
++int twl6030_mmc_card_detect(int host_id, int slot)
 +{
-+	int ret = 0;
-+	struct platform_device *pdev = container_of(dev,
-+				struct platform_device, dev);
-+	struct omap_mmc_platform_data *pdata = dev->platform_data;
++	int ret = -ENOSYS;
++	u8 read_reg;
 +
-+	/* MMC1 Card detect Configuration */
-+	if (pdev->id == 0) {
-+		ret = omap4_hsmmc1_card_detect_config();
-+		if (ret < 0)
-+			pr_err("Unable to configure Card detect for MMC1\n");
-+		pdata->slots[0].card_detect_irq = TWL6030_IRQ_BASE +
-+						MMCDETECT_INTR_OFFSET;
++	switch (host_id) {
++	case 0:
++		/*
++		 * BIT0 of REG_MMC_CTRL
++		 * 0 - Card not present ,1 - Card present
++		 */
++		ret = twl_i2c_read_u8(TWL6030_MODULE_ID0,
++			&read_reg, TWL6030_MMCCTRL);
++		if (ret >= 0)
++			ret = read_reg & STS_MMC;
++		break;
++	default:
++		pr_err("Unkown MMC controller %d in %s\n", host_id, __func__);
 +	}
 +	return ret;
 +}
++EXPORT_SYMBOL(twl6030_mmc_card_detect);
 +
-+static __init void omap4_twl6030_hsmmc_set_late_init(struct device *dev)
+ int twl6030_init_irq(int irq_num, unsigned irq_base, unsigned irq_end)
+ {
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index e9caf69..e25db63 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -190,9 +190,16 @@ struct omap_hsmmc_host {
+ static int omap_hsmmc_card_detect(struct device *dev, int slot)
+ {
+ 	struct omap_mmc_platform_data *mmc = dev->platform_data;
++	struct platform_device *pdev = container_of(dev,
++					struct platform_device, dev);
++	int ret = -ENOSYS;
+
+-	/* NOTE: assumes card detect signal is active-low */
+-	return !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
++	if (mmc->slots[0].cd_type == GPIO)
++		/* NOTE: assumes card detect signal is active-low */
++		ret = !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
++	else
++		ret = twl6030_mmc_card_detect(pdev->id, slot);
++	return ret;
+ }
+
+ static int omap_hsmmc_get_wp(struct device *dev, int slot)
+@@ -465,8 +472,6 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+ 	int ret;
+
+ 	if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+-		pdata->suspend = omap_hsmmc_suspend_cdirq;
+-		pdata->resume = omap_hsmmc_resume_cdirq;
+ 		if (pdata->slots[0].cover)
+ 			pdata->slots[0].get_cover_state =
+ 					omap_hsmmc_get_cover_state;
+@@ -505,6 +510,16 @@ err_free_sp:
+ 	return ret;
+ }
+
++static int omap_hsmmc_non_gpio_init(struct omap_mmc_platform_data *pdata)
 +{
-+	struct omap_mmc_platform_data *pdata = dev->platform_data;
 +
-+	pdata->init =	omap4_twl6030_hsmmc_late_init;
-+}
-+
-+static int __init omap4_twl6030_hsmmc_init(struct omap2_hsmmc_info *controllers)
-+{
-+	struct omap2_hsmmc_info *c;
-+
-+	omap2_hsmmc_init(controllers);
-+	for (c = controllers; c->mmc; c++)
-+		omap4_twl6030_hsmmc_set_late_init(c->dev);
-+
++	if (pdata->slots[0].switch_pin > 0) {
++		pdata->slots[0].card_detect = omap_hsmmc_card_detect;
++		pdata->slots[0].card_detect_irq = pdata->slots[0].switch_pin;
++	}
 +	return 0;
 +}
 +
- static struct regulator_init_data sdp4430_vaux1 = {
- 	.constraints = {
- 		.min_uV			= 1000000,
-@@ -137,7 +186,7 @@ static struct regulator_init_data sdp4430_vmmc = {
- 					| REGULATOR_CHANGE_MODE
- 					| REGULATOR_CHANGE_STATUS,
- 	},
--	.num_consumer_supplies  = 5,
-+	.num_consumer_supplies  = 2,
- 	.consumer_supplies      = sdp4430_vmmc_supply,
- };
+ static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
+ {
+ 	if (gpio_is_valid(pdata->slots[0].gpio_wp))
+@@ -1977,7 +1992,11 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (res == NULL)
+ 		return -EBUSY;
 
-@@ -256,6 +305,7 @@ static void __init omap_4430sdp_init(void)
- 	omap4_i2c_init();
- 	platform_add_devices(sdp4430_devices, ARRAY_SIZE(sdp4430_devices));
- 	omap_serial_init();
-+	omap4_twl6030_hsmmc_init(mmc);
- 	/* OMAP4 SDP uses internal transceiver so register nop transceiver */
- 	usb_nop_xceiv_register();
- 	/* FIXME: allow multi-omap to boot until musb is updated for omap4 */
+-	ret = omap_hsmmc_gpio_init(pdata);
++	if (pdata->slots[0].cd_type == GPIO)
++		ret = omap_hsmmc_gpio_init(pdata);
++	else
++		ret =  omap_hsmmc_non_gpio_init(pdata);
++
+ 	if (ret)
+ 		goto err;
+
+@@ -2160,6 +2179,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 				"Unable to grab MMC CD IRQ\n");
+ 			goto err_irq_cd;
+ 		}
++		pdata->suspend = omap_hsmmc_suspend_cdirq;
++		pdata->resume = omap_hsmmc_resume_cdirq;
+ 	}
+
+ 	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
 diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
-index fb6784e..f382d59 100644
+index f382d59..ce67b9a 100644
 --- a/include/linux/i2c/twl.h
 +++ b/include/linux/i2c/twl.h
-@@ -141,6 +141,15 @@
- #define TWL6030_CHARGER_CTRL_INT_MASK 	0x10
- #define TWL6030_CHARGER_FAULT_INT_MASK 	0x60
-
-+#define TWL6030_MMCCTRL			0xEE
-+#define VMMC_AUTO_OFF			(0x1 << 3)
-+#define SW_FC				(0x1 << 2)
-+#define STS_MMC				0x1
-+
-+#define TWL6030_CFG_INPUT_PUPD3		0xF2
-+#define MMC_PU				(0x1 << 3)
-+#define MMC_PD				(0x1 << 2)
-+
-
- #define TWL4030_CLASS_ID 		0x4030
- #define TWL6030_CLASS_ID 		0x6030
-@@ -173,6 +182,41 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg, unsigned num_bytes);
+@@ -182,6 +182,9 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg, unsigned num_bytes);
  int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
  int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
 
-+/* Configuring Card Detect for MMC1 */
-+static inline int omap4_hsmmc1_card_detect_config(void)
-+{
-+	int res = -1;
-+	u8 reg_val = 0;
++/* MMC1 Controller on OMAP4 uses Phoenix Irq for Card detect */
++int twl6030_mmc_card_detect(int host_id, int slot);
 +
-+	/* Unmasking the Card detect Interrupt line for MMC1 from Phoenix */
-+	if (twl_class_is_6030()) {
-+		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
-+							REG_INT_MSK_LINE_B);
-+		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
-+							REG_INT_MSK_STS_B);
-+	}
-+
-+	/*
-+	 * Intially Configuring MMC_CTRL for receving interrupts &
-+	 * Card status on TWL6030 for MMC1
-+	 */
-+	res = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val, TWL6030_MMCCTRL);
-+	if (res < 0)
-+		return res;
-+	reg_val &= ~VMMC_AUTO_OFF;
-+	reg_val |= SW_FC;
-+	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_MMCCTRL);
-+
-+	res = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
-+						TWL6030_CFG_INPUT_PUPD3);
-+	if (res < 0)
-+		return res;
-+	reg_val &= ~(MMC_PU | MMC_PD);
-+	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
-+						TWL6030_CFG_INPUT_PUPD3);
-+	return res;
-+}
-+
- /*----------------------------------------------------------------------*/
-
- /*
+ /* Configuring Card Detect for MMC1 */
+ static inline int omap4_hsmmc1_card_detect_config(void)
+ {
 -- 
 1.6.3.3
+
 
