@@ -1,58 +1,28 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 2/3 v2] mfd: pass platform flags down to the tmio_mmc driver
-Date: Thu, 13 May 2010 18:08:08 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1005131806420.8527@axis700.grange>
-References: <Pine.LNX.4.64.1005111146330.6810@axis700.grange>
- <Pine.LNX.4.64.1005111151380.6810@axis700.grange>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] MMC: OMAP HS-MMC: convert to dev_pm_ops
+Date: Thu, 13 May 2010 19:48:14 +0100
+Message-ID: <87k4r74p01.fsf@linux-g6p1.site>
+References: <1273615036-4516-1-git-send-email-khilman@deeprootsystems.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:59067 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1758971Ab0EMQH6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 13 May 2010 12:07:58 -0400
-In-Reply-To: <Pine.LNX.4.64.1005111151380.6810@axis700.grange>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:51591 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756474Ab0EMSx6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 May 2010 14:53:58 -0400
+In-Reply-To: <1273615036-4516-1-git-send-email-khilman@deeprootsystems.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
-Cc: Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org
+To: Kevin Hilman <khilman@deeprootsystems.com>
+Cc: linux-omap@vger.kernel.org, Madhusudhan Chikkature <madhu.cr@ti.com>, Adrian Hunter <adrian.hunter@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, Tony Lindgren <tony@atomide.com>, Denis Karpov <ext-denis.2.karpov@nokia.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
+On Tue, 11 May 2010 14:57:16 -0700, Kevin Hilman <khilman@deeprootsystems.com> wrote:
+> 
+> Note that dev_pm_ops version of the suspend hook no longer takes a
+> 'state' argument.  However, the MMC core function mmc_suspend_host()
+> still takes a 'state' argument, but it is unused, so a dummy
+> state variable was created to pass to the MMC core.
 
-v1 -> v2:
-
-it's better without a NULL dereference
-
- drivers/mfd/sh_mobile_sdhi.c       |    2 ++
- include/linux/mfd/sh_mobile_sdhi.h |    1 +
- 2 files changed, 3 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mfd/sh_mobile_sdhi.c b/drivers/mfd/sh_mobile_sdhi.c
-index dafa988..7970fe8 100644
---- a/drivers/mfd/sh_mobile_sdhi.c
-+++ b/drivers/mfd/sh_mobile_sdhi.c
-@@ -106,6 +106,8 @@ static int __init sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	mmc_data->hclk = clk_get_rate(priv->clk);
- 	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
- 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
-+	if (p)
-+		mmc_data->flags = p->tmio_flags;
- 
- 	if (p && p->dma_slave_tx >= 0 && p->dma_slave_rx >= 0) {
- 		priv->param_tx.slave_id = p->dma_slave_tx;
-diff --git a/include/linux/mfd/sh_mobile_sdhi.h b/include/linux/mfd/sh_mobile_sdhi.h
-index c305461..c7b47f8 100644
---- a/include/linux/mfd/sh_mobile_sdhi.h
-+++ b/include/linux/mfd/sh_mobile_sdhi.h
-@@ -4,6 +4,7 @@
- struct sh_mobile_sdhi_info {
- 	int dma_slave_tx;
- 	int dma_slave_rx;
-+	unsigned long tmio_flags;
- 	void (*set_pwr)(struct platform_device *pdev, int state);
- };
- 
--- 
-1.6.2.4
-
+Hmm.. instead of passing this dummy state argument why don't we just
+remove the argument from mmc_suspend_host()? Like you said, it's unused,
+so I don't see a reason to keep it around?
