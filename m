@@ -1,38 +1,23 @@
-From: Harald Welte <HaraldWelte@viatech.com>
-Subject: Re: [PATCH] mmc: drop the "state" argument to mmc_suspend_host()
-Date: Fri, 14 May 2010 09:57:42 +0200
-Message-ID: <20100514075742.GA21531@prithivi.gnumonks.org>
-References: <d071c94414fc069d9360ae62a37fd2ad0b68110f.1273777159.git.matt@console-pimps.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 0/3] tmio: Support board-specified voltages
+Date: Fri, 14 May 2010 12:34:33 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1005141228510.6147@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ganesha.gnumonks.org ([213.95.27.120]:47894 "EHLO
-	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758830Ab0ENK3T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 May 2010 06:29:19 -0400
-Content-Disposition: inline
-In-Reply-To: <d071c94414fc069d9360ae62a37fd2ad0b68110f.1273777159.git.matt@console-pimps.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
+Cc: Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Thu, May 13, 2010 at 08:01:45PM +0100, Matt Fleming wrote:
-> Even though many mmc host drivers pass a pm_message_t argument to
-> mmc_suspend_host() that argument isn't used the by MMC core. As host
-> drivers are converted to dev_pm_ops they'll have to construct
-> pm_message_t's (as they won't be passed by the PM subsystem any more)
-> just to appease the mmc suspend interface.
-> 
-> We might as well just delete the unused paramter.
-> 
-> Signed-off-by: Matt Fleming <matt@console-pimps.org>
+This patch series allows users to specify, which card voltages their 
+system supports, when using the tmio_mmc driver. Also applied to the 
+ap4evb sh7372 board. Applies on top of all my previoud patches for tmio / 
+sdhi.
 
-for via-sdmmc:
-
-Acked-by: Harald Welte <laforge@gnumonks.org>
-
--- 
-- Harald Welte <HaraldWelte@viatech.com>	    http://linux.via.com.tw/
-============================================================================
-VIA Free and Open Source Software Liaison
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
