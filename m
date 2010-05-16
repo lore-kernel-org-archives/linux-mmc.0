@@ -1,44 +1,36 @@
-From: Grazvydas Ignotas <notasas@gmail.com>
-Subject: Re: [PATCH] sdio: add new function for RAW (Read after Write)
-	operation
-Date: Sat, 15 May 2010 23:46:31 +0300
-Message-ID: <AANLkTimyIuNIUTnT5BVE_tJHGhwHMa8hBDd4yB4H-Zcu@mail.gmail.com>
-References: <1272403088-4727-1-git-send-email-notasas@gmail.com>
-	 <AANLkTinEGhNI_n25FVZ4NrLr6ClNw3JVusnJVDZdQchn@mail.gmail.com>
-	 <20100514150620.70323c76.akpm@linux-foundation.org>
-	 <AANLkTilCD2wylI_11B_S9-SbktXvUYgYB7d224XIMRt1@mail.gmail.com>
-	 <AANLkTikSe8_KhkAzxRDizWB9o1FnCxulqvB2P3HVO7Gs@mail.gmail.com>
-	 <AANLkTin5TMVmq92bueC-0zZZbjcYM1MObLzPPY4ucq0h@mail.gmail.com>
+From: Sascha Sommer <saschasommer@freenet.de>
+Subject: Re: [PATCH] mmc: drop the "state" argument to mmc_suspend_host()
+Date: Sun, 16 May 2010 20:20:18 +0200
+Message-ID: <201005162020.18511.saschasommer@freenet.de>
+References: <d071c94414fc069d9360ae62a37fd2ad0b68110f.1273777159.git.matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:65271 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752181Ab0EOUqc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 May 2010 16:46:32 -0400
-Received: by gyg13 with SMTP id 13so1573843gyg.19
-        for <linux-mmc@vger.kernel.org>; Sat, 15 May 2010 13:46:31 -0700 (PDT)
-In-Reply-To: <AANLkTin5TMVmq92bueC-0zZZbjcYM1MObLzPPY4ucq0h@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <d071c94414fc069d9360ae62a37fd2ad0b68110f.1273777159.git.matt@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Kevin Hilman <khilman@deeprootsystems.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Manuel Lauss <manuel.lauss@gmail.com>, Cliff Cai <cliff.cai@analog.com>, =?utf-8?q?Micha=C5=82_Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>, Pavel Pisa <ppisa@pikron.com>, David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@codeaurora.org>, Bryan Huntsman <bryanh@codeaurora.org>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Ben Dooks <ben-linux@fluff.org>, Anton Vorontsov <avorontsov@ru.mvista.com>, Alex Dubov <oakad@yahoo.com>, Ian Molton <ian@mnementh.co.uk>, Joseph Chan <JosephChan@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Pierre Ossman <pierre@ossman.eu>
 List-Id: linux-mmc@vger.kernel.org
-To: Dmitry Shmidt <dimitrysh@google.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Kalle Valo <kalle.valo@iki.fi>, linux-mmc@vger.kernel.org
 
-On Sat, May 15, 2010 at 7:25 PM, Dmitry Shmidt <dimitrysh@google.com> wrote:
-> Hi Grazvydas,
->
-> You are right.
-> mmc_io_rw_direct() implementation doesn't check R/W flag and returns
-> data if "out" != NULL.
-> So if SDIO spec "demands" WRITE flag and wl1251 ignores it anyway,
-> then we should use WRITE.
-> You function name is slightly confusing I would say, but I am fine
-> with the patch.
+Hi,
 
-I found it a bit hard to find a fitting name that would be similar to
-other SDIO function names so I'm open to suggestions. Few other names:
+Am Donnerstag 13 Mai 2010 21:01:45 schrieb Matt Fleming:
+> Even though many mmc host drivers pass a pm_message_t argument to
+> mmc_suspend_host() that argument isn't used the by MMC core. As host
+> drivers are converted to dev_pm_ops they'll have to construct
+> pm_message_t's (as they won't be passed by the PM subsystem any more)
+> just to appease the mmc suspend interface.
+> 
+> We might as well just delete the unused paramter.
+> 
+> Signed-off-by: Matt Fleming <matt@console-pimps.org>
 
-sdio_read_after_write_b
-sdio_rawb
+Acked-by: Sascha Sommer <saschasommer@freenet.de>
 
-Maybe our kernel veteran Andrew can suggest us something? :-)
+(for sdricoh_cs)
+
+Regards
+
+Sascha
