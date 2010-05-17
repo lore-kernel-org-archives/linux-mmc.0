@@ -1,179 +1,445 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: Status of tmio_mmc DMA support for SDIO
-Date: Mon, 17 May 2010 12:35:08 +0900
-Message-ID: <AANLkTimfjwXgMTh5Fw1_YJZNLthKW27TSnDxnlnLn2hs@mail.gmail.com>
-References: <A0C4AD4CC48F4CAAA4C9CB027472149D@RSI45>
-	 <Pine.LNX.4.64.1005140843320.6147@axis700.grange>
-	 <AANLkTikKmiRe0f9UXQo3bkwxjCVPzivTrTEYyzY3DcMB@mail.gmail.com>
-	 <Pine.LNX.4.64.1005141953160.6147@axis700.grange>
-	 <1B215080664E44FE81F6BA1DCFA65A38@RSI45>
+From: Viresh KUMAR <viresh.kumar@st.com>
+Subject: Re: [PATCH] sdhci-spear: ST SPEAr based SDHCI controller glue
+Date: Mon, 17 May 2010 09:06:24 +0530
+Message-ID: <4BF0B9B8.5010108@st.com>
+References: <1273052118-15513-1-git-send-email-viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=0016361643c55509270486c1e931
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:36093 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752618Ab0EQDfK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 16 May 2010 23:35:10 -0400
-In-Reply-To: <1B215080664E44FE81F6BA1DCFA65A38@RSI45>
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:42378 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752618Ab0EQDg4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 16 May 2010 23:36:56 -0400
+In-Reply-To: <1273052118-15513-1-git-send-email-viresh.kumar@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Charles D. Krebs" <ckrebs@therealtimegroup.com>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-sh@vger.kernel.org, sailaja.sdn@redpinesignals.com, linux-mmc@vger.kernel.org
+To: akpm@linux-foundation.org
+Cc: pierre@ossman.eu, linux-mmc@vger.kernel.org, shiraz.hashim@st.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Linus Walleij <linus.ml.walleij@gmail.com>
 
---0016361643c55509270486c1e931
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On 5/5/2010 3:05 PM, Viresh KUMAR wrote:
+> This patch adds glue layer for support of sdhci driver on ST SPEAr platform.
+> 
+> Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+> ---
+>  MAINTAINERS                     |    6 +
+>  drivers/mmc/host/Kconfig        |   12 ++
+>  drivers/mmc/host/Makefile       |    1 +
+>  drivers/mmc/host/sdhci-spear.c  |  300 +++++++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/sdhci-spear.h |   42 ++++++
+>  5 files changed, 361 insertions(+), 0 deletions(-)
+>  create mode 100644 drivers/mmc/host/sdhci-spear.c
+>  create mode 100644 include/linux/mmc/sdhci-spear.h
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 0369b22..bbff70a 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -4938,6 +4938,12 @@ L:	linux-mmc@vger.kernel.org
+>  S:	Maintained
+>  F:	drivers/mmc/host/sdhci-s3c.c
+>  
+> +SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) ST SPEAR DRIVER
+> +M:	Viresh Kumar <viresh.kumar@st.com>
+> +L:	linux-mmc@vger.kernel.org
+> +S:	Maintained
+> +F:	drivers/mmc/host/sdhci-spear.c
+> +
+>  SECURITY SUBSYSTEM
+>  M:	James Morris <jmorris@namei.org>
+>  L:	linux-security-module@vger.kernel.org (suggested Cc:)
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 2e13b94..40eae7e 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -136,6 +136,18 @@ config MMC_SDHCI_S3C
+>  
+>  	  If unsure, say N.
+>  
+> +config MMC_SDHCI_SPEAR
+> +	tristate "SDHCI support on ST SPEAr platform"
+> +	depends on MMC_SDHCI && PLAT_SPEAR
+> +	help
+> +	  This selects the Secure Digital Host Controller Interface (SDHCI)
+> +	  often referrered to as the HSMMC block in some of the ST SPEAR range
+> +	  of SoC
+> +
+> +	  If you have a controller with this interface, say Y or M here.
+> +
+> +	  If unsure, say N.
+> +
+>  config MMC_SDHCI_S3C_DMA
+>  	bool "DMA support on S3C SDHCI"
+>  	depends on MMC_SDHCI_S3C && EXPERIMENTAL
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index f480397..d00a9fa 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -14,6 +14,7 @@ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
+>  obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+>  obj-$(CONFIG_MMC_SDHCI_PLTFM)	+= sdhci-pltfm.o
+>  obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
+> +obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
+>  obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
+>  obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
+>  obj-$(CONFIG_MMC_OMAP)		+= omap.o
+> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+> new file mode 100644
+> index 0000000..6d3f740
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-spear.c
+> @@ -0,0 +1,300 @@
+> +/*
+> + * drivers/mmc/host/sdhci-spear.c
+> + *
+> + * Support of SDHCI platform devices for spear soc family
+> + *
+> + * Copyright (C) 2010 ST Microelectronics
+> + * Viresh Kumar<viresh.kumar@st.com>
+> + *
+> + * Inspired by sdhci-pltfm.c
+> + *
+> + * This file is licensed under the terms of the GNU General Public
+> + * License version 2. This program is licensed "as is" without any
+> + * warranty of any kind, whether express or implied.
+> + */
+> +
+> +#include <linux/clk.h>
+> +#include <linux/delay.h>
+> +#include <linux/gpio.h>
+> +#include <linux/highmem.h>
+> +#include <linux/interrupt.h>
+> +#include <linux/irq.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/slab.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/sdhci-spear.h>
+> +#include <linux/io.h>
+> +#include "sdhci.h"
+> +
+> +struct spear_sdhci {
+> +	struct clk *clk;
+> +	struct sdhci_plat_data *data;
+> +};
+> +
+> +/* sdhci ops */
+> +static struct sdhci_ops sdhci_pltfm_ops = {
+> +	/* Nothing to do for now. */
+> +};
+> +
+> +/* gpio card detection interrupt handler */
+> +static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
+> +{
+> +	struct platform_device *pdev = dev_id;
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct spear_sdhci *sdhci =
+> +		(struct spear_sdhci *)(pdev->dev.platform_data);
+> +	unsigned long gpio_irq_type;
+> +	int val;
+> +
+> +	val = gpio_get_value(sdhci->data->card_int_gpio);
+> +
+> +	/* val == 1 -> card removed, val == 0 -> card inserted */
+> +	/* if card removed - set irq for low level, else vice versa */
+> +	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
+> +	set_irq_type(irq, gpio_irq_type);
+> +
+> +	if (sdhci->data->card_power_gpio >= 0) {
+> +		if (!sdhci->data->power_always_enb) {
+> +			/* if card inserted, give power, otherwise remove it */
+> +			val = sdhci->data->power_active_high ? !val : val ;
+> +			gpio_set_value(sdhci->data->card_power_gpio, val);
+> +		}
+> +	}
+> +
+> +	/* inform sdhci driver about card insertion/removal */
+> +	tasklet_schedule(&host->card_tasklet);
+> +
+> +	return IRQ_HANDLED;
+> +}
+> +
+> +static int __devinit sdhci_probe(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host;
+> +	struct resource *iomem;
+> +	struct spear_sdhci *sdhci;
+> +	int ret;
+> +
+> +	BUG_ON(pdev == NULL);
+> +
+> +	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	if (!iomem) {
+> +		ret = -ENOMEM;
+> +		dev_dbg(&pdev->dev, "memory resource not defined\n");
+> +		goto err;
+> +	}
+> +
+> +	if (!request_mem_region(iomem->start, resource_size(iomem),
+> +				"spear-sdhci")) {
+> +		ret = -EBUSY;
+> +		dev_dbg(&pdev->dev, "cannot request region\n");
+> +		goto err;
+> +	}
+> +
+> +	sdhci = kzalloc(sizeof(*sdhci), GFP_KERNEL);
+> +	if (!sdhci) {
+> +		ret = -ENOMEM;
+> +		dev_dbg(&pdev->dev, "cannot allocate memory for sdhci\n");
+> +		goto err_kzalloc;
+> +	}
+> +
+> +	/* clk enable */
+> +	sdhci->clk = clk_get(&pdev->dev, NULL);
+> +	if (IS_ERR(sdhci->clk)) {
+> +		ret = PTR_ERR(sdhci->clk);
+> +		dev_dbg(&pdev->dev, "Error getting clock\n");
+> +		goto err_clk_get;
+> +	}
+> +
+> +	ret = clk_enable(sdhci->clk);
+> +	if (ret) {
+> +		dev_dbg(&pdev->dev, "Error enabling clock\n");
+> +		goto err_clk_enb;
+> +	}
+> +
+> +	/* overwrite platform_data */
+> +	sdhci->data = (struct sdhci_plat_data *)(pdev->dev.platform_data);
+> +	pdev->dev.platform_data = sdhci;
+> +
+> +	if (pdev->dev.parent)
+> +		host = sdhci_alloc_host(pdev->dev.parent, 0);
+> +	else
+> +		host = sdhci_alloc_host(&pdev->dev, 0);
+> +
+> +	if (IS_ERR(host)) {
+> +		ret = PTR_ERR(host);
+> +		dev_dbg(&pdev->dev, "error allocating host\n");
+> +		goto err_alloc_host;
+> +	}
+> +
+> +	host->hw_name = "sdhci";
+> +	host->ops = &sdhci_pltfm_ops;
+> +	host->irq = platform_get_irq(pdev, 0);
+> +	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
+> +
+> +	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
+> +	if (!host->ioaddr) {
+> +		ret = -ENOMEM;
+> +		dev_dbg(&pdev->dev, "failed to remap registers\n");
+> +		goto err_ioremap;
+> +	}
+> +
+> +	ret = sdhci_add_host(host);
+> +	if (ret) {
+> +		dev_dbg(&pdev->dev, "error adding host\n");
+> +		goto err_add_host;
+> +	}
+> +
+> +	platform_set_drvdata(pdev, host);
+> +
+> +	/*
+> +	 * It is optional to use GPIOs for sdhci Power control & sdhci card
+> +	 * interrupt detection. If sdhci->data is NULL, then use original sdhci
+> +	 * lines otherwise GPIO lines.
+> +	 * If GPIO is selected for power control, then power should be disabled
+> +	 * after card removal and should be enabled when card insertion
+> +	 * interrupt occurs
+> +	 */
+> +	if (!sdhci->data)
+> +		return 0;
+> +
+> +	if (sdhci->data->card_power_gpio >= 0) {
+> +		int val = 0;
+> +
+> +		ret = gpio_request(sdhci->data->card_power_gpio, "sdhci");
+> +		if (ret < 0) {
+> +			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
+> +					sdhci->data->card_power_gpio);
+> +			goto err_pgpio_request;
+> +		}
+> +
+> +		if (sdhci->data->power_always_enb)
+> +			val = sdhci->data->power_active_high;
+> +		else
+> +			val = !sdhci->data->power_active_high;
+> +
+> +		ret = gpio_direction_output(sdhci->data->card_power_gpio, val);
+> +		if (ret) {
+> +			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
+> +					sdhci->data->card_power_gpio);
+> +			goto err_pgpio_direction;
+> +		}
+> +
+> +		gpio_set_value(sdhci->data->card_power_gpio, 1);
+> +	}
+> +
+> +	if (sdhci->data->card_int_gpio >= 0) {
+> +		ret = gpio_request(sdhci->data->card_int_gpio, "sdhci");
+> +		if (ret < 0) {
+> +			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
+> +					sdhci->data->card_int_gpio);
+> +			goto err_igpio_request;
+> +		}
+> +
+> +		ret = gpio_direction_input(sdhci->data->card_int_gpio);
+> +		if (ret) {
+> +			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
+> +					sdhci->data->card_int_gpio);
+> +			goto err_igpio_direction;
+> +		}
+> +		ret = request_irq(gpio_to_irq(sdhci->data->card_int_gpio),
+> +				sdhci_gpio_irq, IRQF_TRIGGER_LOW,
+> +				mmc_hostname(host->mmc), pdev);
+> +		if (ret) {
+> +			dev_dbg(&pdev->dev, "gpio request irq fail: %d\n",
+> +					sdhci->data->card_int_gpio);
+> +			goto err_igpio_request_irq;
+> +		}
+> +
+> +	}
+> +
+> +	return 0;
+> +
+> +err_igpio_request_irq:
+> +err_igpio_direction:
+> +	if (sdhci->data->card_int_gpio >= 0)
+> +		gpio_free(sdhci->data->card_int_gpio);
+> +err_igpio_request:
+> +err_pgpio_direction:
+> +	if (sdhci->data->card_power_gpio >= 0)
+> +		gpio_free(sdhci->data->card_power_gpio);
+> +err_pgpio_request:
+> +	platform_set_drvdata(pdev, NULL);
+> +	sdhci_remove_host(host, 1);
+> +err_add_host:
+> +	iounmap(host->ioaddr);
+> +err_ioremap:
+> +	sdhci_free_host(host);
+> +err_alloc_host:
+> +	clk_disable(sdhci->clk);
+> +err_clk_enb:
+> +	clk_put(sdhci->clk);
+> +err_clk_get:
+> +	kfree(sdhci);
+> +err_kzalloc:
+> +	release_mem_region(iomem->start, resource_size(iomem));
+> +err:
+> +	dev_err(&pdev->dev, "spear-sdhci probe failed: %d\n", ret);
+> +	return ret;
+> +}
+> +
+> +static int __devexit sdhci_remove(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	struct spear_sdhci *sdhci =
+> +		(struct spear_sdhci *)(pdev->dev.platform_data);
+> +	int dead;
+> +	u32 scratch;
+> +
+> +	if (sdhci->data) {
+> +		if (sdhci->data->card_int_gpio >= 0) {
+> +			free_irq(gpio_to_irq(sdhci->data->card_int_gpio), pdev);
+> +			gpio_free(sdhci->data->card_int_gpio);
+> +		}
+> +
+> +		if (sdhci->data->card_power_gpio >= 0)
+> +			gpio_free(sdhci->data->card_power_gpio);
+> +	}
+> +
+> +	platform_set_drvdata(pdev, NULL);
+> +	dead = 0;
+> +	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
+> +	if (scratch == (u32)-1)
+> +		dead = 1;
+> +
+> +	sdhci_remove_host(host, dead);
+> +	iounmap(host->ioaddr);
+> +	sdhci_free_host(host);
+> +	clk_disable(sdhci->clk);
+> +	clk_put(sdhci->clk);
+> +	kfree(sdhci);
+> +	if (iomem)
+> +		release_mem_region(iomem->start, resource_size(iomem));
+> +
+> +	return 0;
+> +}
+> +
+> +static struct platform_driver sdhci_driver = {
+> +	.driver = {
+> +		.name	= "sdhci",
+> +		.owner	= THIS_MODULE,
+> +	},
+> +	.probe		= sdhci_probe,
+> +	.remove		= __devexit_p(sdhci_remove),
+> +};
+> +
+> +static int __init sdhci_init(void)
+> +{
+> +	return platform_driver_register(&sdhci_driver);
+> +}
+> +module_init(sdhci_init);
+> +
+> +static void __exit sdhci_exit(void)
+> +{
+> +	platform_driver_unregister(&sdhci_driver);
+> +}
+> +module_exit(sdhci_exit);
+> +
+> +MODULE_DESCRIPTION("SPEAr Secure Digital Host Controller Interface driver");
+> +MODULE_AUTHOR("Viresh Kumar <viresh.kumar@st.com>");
+> +MODULE_LICENSE("GPL v2");
+> diff --git a/include/linux/mmc/sdhci-spear.h b/include/linux/mmc/sdhci-spear.h
+> new file mode 100644
+> index 0000000..9188c97
+> --- /dev/null
+> +++ b/include/linux/mmc/sdhci-spear.h
+> @@ -0,0 +1,42 @@
+> +/*
+> + * include/linux/mmc/sdhci-spear.h
+> + *
+> + * SDHCI declarations specific to ST SPEAr platform
+> + *
+> + * Copyright (C) 2010 ST Microelectronics
+> + * Viresh Kumar<viresh.kumar@st.com>
+> + *
+> + * This file is licensed under the terms of the GNU General Public
+> + * License version 2. This program is licensed "as is" without any
+> + * warranty of any kind, whether express or implied.
+> + */
+> +
+> +#ifndef MMC_SDHCI_SPEAR_H
+> +#define MMC_SDHCI_SPEAR_H
+> +
+> +#include <linux/platform_device.h>
+> +/*
+> + * struct sdhci_plat_data: spear sdhci platform data structure
+> + *
+> + * @card_power_gpio: gpio pin for enabling/disabling power to sdhci socket
+> + * @power_active_high: if set, enable power to sdhci socket by setting
+> + *			card_power_gpio
+> + * @power_always_enb: If set, then enable power on probe, otherwise enable only
+> + *			on card insertion and disable on card removal.
+> + * card_int_gpio: gpio pin used for card detection
+> + */
+> +struct sdhci_plat_data {
+> +	int card_power_gpio;
+> +	int power_active_high;
+> +	int power_always_enb;
+> +	int card_int_gpio;
+> +};
+> +
+> +/* This function is used to set platform_data field of pdev->dev */
+> +static inline void
+> +sdhci_set_plat_data(struct platform_device *pdev, struct sdhci_plat_data *data)
+> +{
+> +	pdev->dev.platform_data = data;
+> +}
+> +
+> +#endif /* MMC_SDHCI_SPEAR_H */
 
-Hi Charles,
+Andrew,
 
-On Sat, May 15, 2010 at 4:43 AM, Charles D. Krebs
-<ckrebs@therealtimegroup.com> wrote:
->>> Just saw this - am I right in thinking someone has written SDIO
->>> support for TMIO ? Im afraid I dont appear to have the preceeding
->>> emails.
->>
->> This is the first email regarding TMIO SDIO that I'm aware of - from
->> Charles, he's sent it tothe sh ML and to me and I've added you and the m=
-mc
->> list to CC.
->
-> To clarify - I didn't write that code. =A0It was developed by some of the
-> Kernel guys over at Renesas Japan specifically for my request to support
-> SDIO under their BSP for 2.6.33. =A0The code in tmio and sh_mobile_sdhi
-> replaces a previously closed source module for SD support on the hardware
-> due to licensing restrictions of the SD consortium. =A0Apparently those i=
-ssues
-> were resolved and now the complete SD stack is integrated into the Kernel
-> directly. =A0However, the transition didn't include support for SDIO, so =
-the
-> patch to tmio was provided in the interim.
->
-> Magnus - Do you know the author for the SDIO patch?
+Is this patch set fine? Or does it require any modifications?
 
-I believe that the patch was written by one of the BSP guys at
-Renesas. I guess I'm to blame for not posting anything better
-upstream, but I decided to hold until I could test this feature
-properly myself. There are a bunch of SDHI/tmio_mmc related patches
-posted for 2.6.35 already, and I guess SDIO would be targeted for
-2.6.36.
-
-The SDIO patch I've seen is not exactly upstream quality, but I've
-been working a bit on trying to come up with a more long term
-solution. At this point it's a bit stalled since my Wifi SDIO cards
-that i've ordered are still on hold for some unknown reason. I have
-however tested some other SDIO cards with the SDHI/tmio_mmc drivers
-and they seem ok. At least the one that actually has a linux driver.
-The quality of the driver for that card is far from perfect, so I'd
-like to test with hardware that has upstream SDIO drivers (broadcomm
-and perhaps also atheros chipsets) before claiming that SDIO works.
-
-FYI, you don't really need any patch for SDIO support. You can do SDIO
-on a non-SDIO host by the automatic polling mode that the kernel
-provides for you. So the SDHI/tmio_mmc code should work out of the box
-as-is. You may want to enable the IRQ pin feature, but for that you
-need to patch the SDHI/tmio_MMC driver(s).
-
-I've attached my prototype SDIO patch. It's a scaled down version of
-the BSP patch, but still in a hackish state.
-
-/ magnus
-
---0016361643c55509270486c1e931
-Content-Type: application/octet-stream;
-	name="linux-2.6.35-pre-sdhi-sdio-rewrite-20100427b.patch"
-Content-Disposition: attachment;
-	filename="linux-2.6.35-pre-sdhi-sdio-rewrite-20100427b.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_g9aqnd0z0
-
-RnJvbTogTWFnbnVzIERhbW0gPGRhbW1Ab3BlbnNvdXJjZS5zZT4KClNpZ25lZC1vZmYtYnk6IE1h
-Z251cyBEYW1tIDxkYW1tQG9wZW5zb3VyY2Uuc2U+Ci0tLQoKIGFyY2gvc2gva2VybmVsL2NwdS9z
-aDRhL3NldHVwLXNoNzcyNC5jIHwgICAgNCArLS0KIGRyaXZlcnMvbWZkL3NoX21vYmlsZV9zZGhp
-LmMgICAgICAgICAgIHwgICAgMiAtCiBkcml2ZXJzL21tYy9ob3N0L3RtaW9fbW1jLmMgICAgICAg
-ICAgICB8ICAgNDEgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKy0KIGRyaXZlcnMvbW1j
-L2hvc3QvdG1pb19tbWMuaCAgICAgICAgICAgIHwgICAgMiArCiA0IGZpbGVzIGNoYW5nZWQsIDQ1
-IGluc2VydGlvbnMoKyksIDQgZGVsZXRpb25zKC0pCgotLS0gMDAwMS9hcmNoL3NoL2tlcm5lbC9j
-cHUvc2g0YS9zZXR1cC1zaDc3MjQuYworKysgd29yay9hcmNoL3NoL2tlcm5lbC9jcHUvc2g0YS9z
-ZXR1cC1zaDc3MjQuYwkyMDEwLTA0LTI3IDE5OjQ1OjIwLjAwMDAwMDAwMCArMDkwMApAQCAtMTA1
-OSw3ICsxMDU5LDcgQEAgc3RhdGljIHN0cnVjdCBpbnRjX2dyb3VwIGdyb3Vwc1tdIF9faW5pdAog
-c3RhdGljIHN0cnVjdCBpbnRjX21hc2tfcmVnIG1hc2tfcmVnaXN0ZXJzW10gX19pbml0ZGF0YSA9
-IHsKIAl7IDB4YTQwODAwODAsIDB4YTQwODAwYzAsIDgsIC8qIElNUjAgLyBJTUNSMCAqLwogCSAg
-eyAwLCBUTVUxX1RVTkkyLCBUTVUxX1RVTkkxLCBUTVUxX1RVTkkwLAotCSAgICAwLCBESVNBQkxF
-RCwgRU5BQkxFRCwgRU5BQkxFRCB9IH0sCisJICAgIDAsIEVOQUJMRUQsIEVOQUJMRUQsIEVOQUJM
-RUQgfSB9LAogCXsgMHhhNDA4MDA4NCwgMHhhNDA4MDBjNCwgOCwgLyogSU1SMSAvIElNQ1IxICov
-CiAJICB7IFZJT19WT1UsIFZJT19WRVUxLCBWSU9fQkVVMCwgVklPX0NFVTAsCiAJICAgIERNQUMw
-QV9ERUkzLCBETUFDMEFfREVJMiwgRE1BQzBBX0RFSTEsIERNQUMwQV9ERUkwIH0gfSwKQEAgLTEw
-ODEsNyArMTA4MSw3IEBAIHN0YXRpYyBzdHJ1Y3QgaW50Y19tYXNrX3JlZyBtYXNrX3JlZ2lzdGUK
-IAkgIHsgSTJDMF9EVEVJLCBJMkMwX1dBSVRJLCBJMkMwX1RBQ0tJLCBJMkMwX0FMSSwKIAkgICAg
-STJDMV9EVEVJLCBJMkMxX1dBSVRJLCBJMkMxX1RBQ0tJLCBJMkMxX0FMSSB9IH0sCiAJeyAweGE0
-MDgwMGEwLCAweGE0MDgwMGUwLCA4LCAvKiBJTVI4IC8gSU1DUjggKi8KLQkgIHsgRElTQUJMRUQs
-IERJU0FCTEVELCBFTkFCTEVELCBFTkFCTEVELAorCSAgeyBESVNBQkxFRCwgRU5BQkxFRCwgRU5B
-QkxFRCwgRU5BQkxFRCwKIAkgICAgMCwgMCwgU0NJRkE1LCBGU0kgfSB9LAogCXsgMHhhNDA4MDBh
-NCwgMHhhNDA4MDBlNCwgOCwgLyogSU1SOSAvIElNQ1I5ICovCiAJICB7IDAsIDAsIDAsIENNVCwg
-MCwgVVNCMSwgVVNCMCwgMCB9IH0sCi0tLSAwMDAxL2RyaXZlcnMvbWZkL3NoX21vYmlsZV9zZGhp
-LmMKKysrIHdvcmsvZHJpdmVycy9tZmQvc2hfbW9iaWxlX3NkaGkuYwkyMDEwLTA0LTI3IDE5OjQ1
-OjIwLjAwMDAwMDAwMCArMDkwMApAQCAtOTgsNyArOTgsNyBAQCBzdGF0aWMgaW50IF9faW5pdCBz
-aF9tb2JpbGVfc2RoaV9wcm9iZShzCiAKIAlwcml2LT5tbWNfZGF0YS5oY2xrID0gY2xrX2dldF9y
-YXRlKHByaXYtPmNsayk7CiAJcHJpdi0+bW1jX2RhdGEuc2V0X3B3ciA9IHNoX21vYmlsZV9zZGhp
-X3NldF9wd3I7Ci0JcHJpdi0+bW1jX2RhdGEuY2FwYWJpbGl0aWVzID0gTU1DX0NBUF9NTUNfSElH
-SFNQRUVEOworCXByaXYtPm1tY19kYXRhLmNhcGFiaWxpdGllcyA9IE1NQ19DQVBfTU1DX0hJR0hT
-UEVFRCB8IE1NQ19DQVBfU0RJT19JUlE7CiAKIAltZW1jcHkoJnByaXYtPmNlbGxfbW1jLCAmc2hf
-bW9iaWxlX3NkaGlfY2VsbCwgc2l6ZW9mKHByaXYtPmNlbGxfbW1jKSk7CiAJcHJpdi0+Y2VsbF9t
-bWMuZHJpdmVyX2RhdGEgPSAmcHJpdi0+bW1jX2RhdGE7Ci0tLSAwMDAxL2RyaXZlcnMvbW1jL2hv
-c3QvdG1pb19tbWMuYworKysgd29yay9kcml2ZXJzL21tYy9ob3N0L3RtaW9fbW1jLmMJMjAxMC0w
-NC0yNyAxOTo0NTo0OS4wMDAwMDAwMDAgKzA5MDAKQEAgLTMwLDYgKzMwLDcgQEAKICNpbmNsdWRl
-IDxsaW51eC9kZXZpY2UuaD4KICNpbmNsdWRlIDxsaW51eC9kZWxheS5oPgogI2luY2x1ZGUgPGxp
-bnV4L21tYy9ob3N0Lmg+CisjaW5jbHVkZSA8bGludXgvbW1jL3NkaW8uaD4KICNpbmNsdWRlIDxs
-aW51eC9tZmQvY29yZS5oPgogI2luY2x1ZGUgPGxpbnV4L21mZC90bWlvLmg+CiAKQEAgLTU0LDgg
-KzU1LDEwIEBAIHN0YXRpYyB2b2lkIHRtaW9fbW1jX3NldF9jbG9jayhzdHJ1Y3QgdG0KIAogc3Rh
-dGljIHZvaWQgdG1pb19tbWNfY2xrX3N0b3Aoc3RydWN0IHRtaW9fbW1jX2hvc3QgKmhvc3QpCiB7
-CisjaWYgMAogCXNkX2N0cmxfd3JpdGUxNihob3N0LCBDVExfQ0xLX0FORF9XQUlUX0NUTCwgMHgw
-MDAwKTsKIAltc2xlZXAoMTApOworI2VuZGlmCiAJc2RfY3RybF93cml0ZTE2KGhvc3QsIENUTF9T
-RF9DQVJEX0NMS19DVEwsIH4weDAxMDAgJgogCQlzZF9jdHJsX3JlYWQxNihob3N0LCBDVExfU0Rf
-Q0FSRF9DTEtfQ1RMKSk7CiAJbXNsZWVwKDEwKTsKQEAgLTY2LDggKzY5LDEwIEBAIHN0YXRpYyB2
-b2lkIHRtaW9fbW1jX2Nsa19zdGFydChzdHJ1Y3QgdG0KIAlzZF9jdHJsX3dyaXRlMTYoaG9zdCwg
-Q1RMX1NEX0NBUkRfQ0xLX0NUTCwgMHgwMTAwIHwKIAkJc2RfY3RybF9yZWFkMTYoaG9zdCwgQ1RM
-X1NEX0NBUkRfQ0xLX0NUTCkpOwogCW1zbGVlcCgxMCk7CisjaWYgMAogCXNkX2N0cmxfd3JpdGUx
-Nihob3N0LCBDVExfQ0xLX0FORF9XQUlUX0NUTCwgMHgwMTAwKTsKIAltc2xlZXAoMTApOworI2Vu
-ZGlmCiB9CiAKIHN0YXRpYyB2b2lkIHJlc2V0KHN0cnVjdCB0bWlvX21tY19ob3N0ICpob3N0KQpA
-QCAtMjk4LDkgKzMwMywyNiBAQCBzdGF0aWMgaXJxcmV0dXJuX3QgdG1pb19tbWNfaXJxKGludCBp
-cnEsCiB7CiAJc3RydWN0IHRtaW9fbW1jX2hvc3QgKmhvc3QgPSBkZXZpZDsKIAl1bnNpZ25lZCBp
-bnQgaXJlZywgaXJxX21hc2ssIHN0YXR1czsKKwl1bnNpZ25lZCBpbnQgc2Rpb19pcmVnLCBzZGlv
-X2lycV9tYXNrLCBzZGlvX3N0YXR1czsKIAogCXByX2RlYnVnKCJNTUMgSVJRIGJlZ2luXG4iKTsK
-IAorCXNkaW9faXJlZyA9IDA7CisJaWYgKGhvc3QtPm1tYy0+Y2FwcyAmIE1NQ19DQVBfU0RJT19J
-UlEpIHsKKwkJc2Rpb19zdGF0dXMgPSBzZF9jdHJsX3JlYWQxNihob3N0LCBDVExfU0RJT19TVEFU
-VVMpOworCQlzZGlvX2lycV9tYXNrID0gc2RfY3RybF9yZWFkMTYoaG9zdCwgQ1RMX1NESU9fSVJR
-X01BU0spOworCQlzZGlvX2lyZWcgPSBzZGlvX3N0YXR1cyAmIDB4YzAwNyAmIH5zZGlvX2lycV9t
-YXNrOworCisJCWlmIChzZGlvX2lyZWcpCisJCQlwcmludGsoInh4eHh4eHh4eHh4eHh4IHNkaW8g
-MHglMDh4XG4iLCBzZGlvX2lyZWcpOworCisJCXNkX2N0cmxfd3JpdGUxNihob3N0LCBDVExfU0RJ
-T19TVEFUVVMsIHNkaW9fc3RhdHVzICYgfjB4YzAwNyk7CisKKwkJaWYgKHNkaW9faXJlZyAmIDEp
-IHsKKwkJCW1tY19zaWduYWxfc2Rpb19pcnEoaG9zdC0+bW1jKTsKKwkJfQorCX0KKwogCXN0YXR1
-cyA9IHNkX2N0cmxfcmVhZDMyKGhvc3QsIENUTF9TVEFUVVMpOwogCWlycV9tYXNrID0gc2RfY3Ry
-bF9yZWFkMzIoaG9zdCwgQ1RMX0lSUV9NQVNLKTsKIAlpcmVnID0gc3RhdHVzICYgVE1JT19NQVNL
-X0lSUSAmIH5pcnFfbWFzazsKQEAgLTMwOCw3ICszMzAsNyBAQCBzdGF0aWMgaXJxcmV0dXJuX3Qg
-dG1pb19tbWNfaXJxKGludCBpcnEsCiAJcHJfZGVidWdfc3RhdHVzKHN0YXR1cyk7CiAJcHJfZGVi
-dWdfc3RhdHVzKGlyZWcpOwogCi0JaWYgKCFpcmVnKSB7CisJaWYgKCFpcmVnICYmICFzZGlvX2ly
-ZWcpIHsKIAkJZGlzYWJsZV9tbWNfaXJxcyhob3N0LCBzdGF0dXMgJiB+aXJxX21hc2spOwogCiAJ
-CXByX2RlYnVnKCJ0bWlvX21tYzogU3B1cmlvdXMgaXJxLCBkaXNhYmxpbmchICIKQEAgLTQ2Miwx
-MCArNDg0LDI3IEBAIHN0YXRpYyBpbnQgdG1pb19tbWNfZ2V0X3JvKHN0cnVjdCBtbWNfaG8KIAly
-ZXR1cm4gKHNkX2N0cmxfcmVhZDE2KGhvc3QsIENUTF9TVEFUVVMpICYgVE1JT19TVEFUX1dSUFJP
-VEVDVCkgPyAwIDogMTsKIH0KIAorc3RhdGljIHZvaWQgdG1pb19tbWNfZW5hYmxlX3NkaW9faXJx
-KHN0cnVjdCBtbWNfaG9zdCAqbW1jLCBpbnQgZW5hYmxlKQoreworCXN0cnVjdCB0bWlvX21tY19o
-b3N0ICpob3N0ID0gbW1jX3ByaXYobW1jKTsKKworCXByaW50aygiZW5hYmxlX3NkaW9faXJxICVk
-XG4iLCBlbmFibGUpOworCisJaWYgKGVuYWJsZSkgeworCQlzZF9jdHJsX3dyaXRlMTYoaG9zdCwg
-Q1RMX1RSQU5TQUNUSU9OX0NUTCwgMHgwMDAxKTsKKwkJc2RfY3RybF93cml0ZTE2KGhvc3QsIENU
-TF9TRElPX0lSUV9NQVNLLCAweDAwMDYpOworCX0gZWxzZSB7CisJCXNkX2N0cmxfd3JpdGUxNiho
-b3N0LCBDVExfU0RJT19JUlFfTUFTSywgMHhjMDA3KTsKKwkJc2RfY3RybF93cml0ZTE2KGhvc3Qs
-IENUTF9UUkFOU0FDVElPTl9DVEwsIDB4MDAwMCk7CisJfQorCit9CisKIHN0YXRpYyBzdHJ1Y3Qg
-bW1jX2hvc3Rfb3BzIHRtaW9fbW1jX29wcyA9IHsKIAkucmVxdWVzdAk9IHRtaW9fbW1jX3JlcXVl
-c3QsCiAJLnNldF9pb3MJPSB0bWlvX21tY19zZXRfaW9zLAogCS5nZXRfcm8gICAgICAgICA9IHRt
-aW9fbW1jX2dldF9ybywKKwkuZW5hYmxlX3NkaW9faXJxID0gdG1pb19tbWNfZW5hYmxlX3NkaW9f
-aXJxLAogfTsKIAogI2lmZGVmIENPTkZJR19QTQotLS0gMDAwMS9kcml2ZXJzL21tYy9ob3N0L3Rt
-aW9fbW1jLmgKKysrIHdvcmsvZHJpdmVycy9tbWMvaG9zdC90bWlvX21tYy5oCTIwMTAtMDQtMjcg
-MTk6NDU6MjAuMDAwMDAwMDAwICswOTAwCkBAIC0yNCw2ICsyNCw4IEBACiAjZGVmaW5lIENUTF9T
-RF9FUlJPUl9ERVRBSUxfU1RBVFVTIDB4MmMKICNkZWZpbmUgQ1RMX1NEX0RBVEFfUE9SVCAweDMw
-CiAjZGVmaW5lIENUTF9UUkFOU0FDVElPTl9DVEwgMHgzNAorI2RlZmluZSBDVExfU0RJT19TVEFU
-VVMgMHgzNgorI2RlZmluZSBDVExfU0RJT19JUlFfTUFTSyAweDM4CiAjZGVmaW5lIENUTF9SRVNF
-VF9TRCAweGUwCiAjZGVmaW5lIENUTF9TRElPX1JFR1MgMHgxMDAKICNkZWZpbmUgQ1RMX0NMS19B
-TkRfV0FJVF9DVEwgMHgxMzgK
---0016361643c55509270486c1e931--
+viresh.
