@@ -1,34 +1,32 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: MMC insert remove issue
-Date: Tue, 18 May 2010 11:09:18 -0400
-Message-ID: <m3632lb61t.fsf@pullcord.laptop.org>
-References: <AANLkTimg_VbK2uPZNCn3Il8klv22JhF7iEe-MTCA5NYe@mail.gmail.com>
+From: Kevin Hilman <khilman@deeprootsystems.com>
+Subject: Re: [PATCH] MMC: OMAP HS-MMC: convert to dev_pm_ops
+Date: Tue, 18 May 2010 09:34:47 -0700
+Message-ID: <87ocgdqic8.fsf@deeprootsystems.com>
+References: <1273615036-4516-1-git-send-email-khilman@deeprootsystems.com>
+	<87k4r74p01.fsf@linux-g6p1.site> <87ljbmmnp2.fsf@deeprootsystems.com>
+	<20100514225720.GA13046@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43941 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757294Ab0ERPrq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 18 May 2010 11:47:46 -0400
-In-Reply-To: <AANLkTimg_VbK2uPZNCn3Il8klv22JhF7iEe-MTCA5NYe@mail.gmail.com>
-	(Madhav Chauhan's message of "Tue, 18 May 2010 20:02:32 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100514225720.GA13046@console-pimps.org> (Matt Fleming's message of "Fri\, 14 May 2010 23\:57\:20 +0100")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: linux-omap@vger.kernel.org, Madhusudhan Chikkature <madhu.cr@ti.com>, Adrian Hunter <adrian.hunter@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, Tony Lindgren <tony@atomide.com>, Denis Karpov <ext-denis.2.karpov@nokia.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Madhav Chauhan <madhav.imsec@gmail.com>
-Cc: linux-mmc@vger.kernel.org
 
-Hi,
+Matt Fleming <matt@console-pimps.org> writes:
 
-   > In one ARM based boards I am facing soft lock up issue while
-   > inserting/removing MMC/SD card continuously having 2K files.  Can
-   > someone point me where should i look whether host controller
-   > driver or MMC block layer/Kernel block layer??
+> On Fri, May 14, 2010 at 09:51:21AM -0700, Kevin Hilman wrote:
+>> 
+>> I don't see a reason either, but it requires patching the MMC core as
+>> well as all the users.  As I'm not an MMC core person, I thought this
+>> best left to someone in that domain.
+>> 
+>> Fixing the core and callers could easily be done on top of this patch.
+>
+> I've sent a patch that fixes up all the callers now and Andrew has taken
+> it into -mm.
 
-Could be any of the above, but perhaps most likely your host
-controller driver -- which one are you using?  Can you perform
-alt-sysrq-t when the lockup happens, or get a kgdb backtrace?
+Very nice,  Thanks.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>
-One Laptop Per Child
+Kevin
