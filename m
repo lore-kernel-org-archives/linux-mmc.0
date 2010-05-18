@@ -1,46 +1,55 @@
-From: Linus WALLEIJ <linus.walleij@stericsson.com>
-Subject: PrimeCell interface
-Date: Mon, 17 May 2010 21:09:50 +0200
-Message-ID: <CEE6BB42CAD6E947908279175AF8470A025A72621C@EXDCVYMBSTM006.EQ1STM.local>
-References: <1272848076-28315-1-git-send-email-linus.walleij@stericsson.com>
-	 <AANLkTinAVhnpjgVTtbZYYKb1t_DInVwTKkkJRzcO97RX@mail.gmail.com>
- <AANLkTim7Tp8lCwMbQwW5QiQ49j7idFFUWdU3x8azIlok@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v4 0/5] Adding MMC Support on OMAP4430 SDP
+Date: Mon, 17 May 2010 19:50:27 -0700
+Message-ID: <20100518025026.GF5818@atomide.com>
+References: <22422.10.24.255.17.1273947606.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:37803 "EHLO
-	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755299Ab0EQTKR convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 17 May 2010 15:10:17 -0400
-In-Reply-To: <AANLkTim7Tp8lCwMbQwW5QiQ49j7idFFUWdU3x8azIlok@mail.gmail.com>
-Content-Language: en-US
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:61834 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753149Ab0ERCuh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 May 2010 22:50:37 -0400
+Content-Disposition: inline
+In-Reply-To: <22422.10.24.255.17.1273947606.squirrel@dbdmail.itg.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Williams <dan.j.williams@intel.com>, "dan.j.williams@gmail.com" <dan.j.williams@gmail.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: kishore kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com, jarkko.lavinen@nokia.com, rmk@arm.linux.org.uk, paul@pwsan.com, santosh.shilimkar@ti.com
 
-Dan, I think you'd better back out/revert the PrimeCell patches
-from your next branch for the time being, i.e. these commits:
+Hi,
 
-ARM: add generic PrimeCell interface to DMA40 v1
-ARM: define the PrimeCell DMA API v5
+* kishore kadiyala <kishore.kadiyala@ti.com> [100515 11:15]:
+> Adding MMC1 and MMC2 controllers support for OMAP4
+> 
+> V4:
+> - Rebased to "for_next" branch[LO].
+> - The first 3 patches [1,2,3] in the series are Minimal set of changes
+>   with which MMC1/MMC2 works [No card detect for MMC1]on OMAP4 but with
+>   dependencies on following patches [Not in "for_next" branch]
+>   [1] I2c patches
+>       a)https://patchwork.kernel.org/patch/98937/
+>       b)https://patchwork.kernel.org/patch/98936/
+>       c)https://patchwork.kernel.org/patch/98939/
+>       d)https://patchwork.kernel.org/patch/79735/
 
-Russell don't want that merged before we can also do it on
-the Versatile, and while I'm already far up that road it will
-also involve switching to the ioctl()-like API and that
-is easier done with a separate patch for that and then
-new PrimeCell patches.
+I've taken the updated versions of the I2C patches,
+and fixed them not to break omap3_defconfig.
 
-Instead, please cherry-pick the DMA40 bug fixes I sent off
-earlier, two patches from the latest patch set named:
+>   [2] Regulator pacth
+>       a)https://patchwork.kernel.org/patch/94054/
+>   [3] hsmmc-clk patch
+>       a)https://patchwork.kernel.org/patch/96821/
 
-DMAENGINE: DMA40 bug when checking paused status
-DMAENGINE: DMA40 fix for allocation of logical channels
+I've picked up these too.
 
-Also the platform data for DMA40 would be nice to feed in
-once you have synced in Russells ARM tree.
+> - The patches 4,5 adds card detect feature for MMC1
 
-Yours,
-Linus Walleij
+I only took 1 - 3 out of the MMC patches, it's too
+late to start changing the other stuff.
+
+I've reposted the whole series for a quick review.
+
+Regards,
+
+Tony
