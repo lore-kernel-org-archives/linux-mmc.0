@@ -1,78 +1,67 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 8/10 v2] SH: Add SDHI DMA support to ms7724se
-Date: Wed, 19 May 2010 20:34:32 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1005191809310.3099@axis700.grange>
-References: <Pine.LNX.4.64.1005191750400.3099@axis700.grange>
+Subject: [PATCH 1/3] tmio: add a platform flag to disable card write-protection
+ detection
+Date: Wed, 19 May 2010 20:36:02 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1005191817300.3099@axis700.grange>
+References: <Pine.LNX.4.64.1005191815491.3099@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:42331 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1752044Ab0ESSer (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 May 2010 14:34:47 -0400
-In-Reply-To: <Pine.LNX.4.64.1005191750400.3099@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1005191815491.3099@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
+Cc: Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>
-Cc: Andrew Morton <akpm@linux-foundation.org>, dan.j.williams@intel.com, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, sameo@linux.intel.com, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
+
+Write-protection status is not always available, e.g., micro-SD cards do not
+have a write-protection switch at all. This patch adds a flag to let platforms
+force tmio_mmc to consider the card writable.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Acked-by: Ian Molton <ian@mnementh.co.uk>
 ---
- arch/sh/boards/mach-se/7724/setup.c |   17 +++++++++++++++++
- 1 files changed, 17 insertions(+), 0 deletions(-)
+ drivers/mmc/host/tmio_mmc.c |    5 ++++-
+ include/linux/mfd/tmio.h    |    4 ++++
+ 2 files changed, 8 insertions(+), 1 deletions(-)
 
-diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
-index 66cdbc3..553cdfe 100644
---- a/arch/sh/boards/mach-se/7724/setup.c
-+++ b/arch/sh/boards/mach-se/7724/setup.c
-@@ -14,6 +14,7 @@
- #include <linux/device.h>
- #include <linux/interrupt.h>
- #include <linux/platform_device.h>
-+#include <linux/mfd/sh_mobile_sdhi.h>
- #include <linux/mtd/physmap.h>
- #include <linux/delay.h>
- #include <linux/smc91x.h>
-@@ -456,11 +457,19 @@ static struct resource sdhi0_cn7_resources[] = {
- 	},
- };
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 7e79ba4..11c19b0 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -640,8 +640,11 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ static int tmio_mmc_get_ro(struct mmc_host *mmc)
+ {
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct mfd_cell	*cell = host->pdev->dev.platform_data;
++	struct tmio_mmc_data *pdata = cell->driver_data;
  
-+static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
-+	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
-+	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
-+};
-+
- static struct platform_device sdhi0_cn7_device = {
- 	.name           = "sh_mobile_sdhi",
- 	.id		= 0,
- 	.num_resources  = ARRAY_SIZE(sdhi0_cn7_resources),
- 	.resource       = sdhi0_cn7_resources,
-+	.dev = {
-+		.platform_data	= &sh7724_sdhi0_data,
-+	},
- 	.archdata = {
- 		.hwblk_id = HWBLK_SDHI0,
- 	},
-@@ -479,11 +488,19 @@ static struct resource sdhi1_cn8_resources[] = {
- 	},
- };
+-	return (sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT) ? 0 : 1;
++	return ((pdata->flags & TMIO_MMC_WRPROTECT_DISABLE) ||
++		(sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT)) ? 0 : 1;
+ }
  
-+static struct sh_mobile_sdhi_info sh7724_sdhi1_data = {
-+	.dma_slave_tx	= SHDMA_SLAVE_SDHI1_TX,
-+	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
-+};
+ static const struct mmc_host_ops tmio_mmc_ops = {
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 360fc95..feeed0b 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -50,6 +50,9 @@
+ 		tmio_iowrite16((val) >> 16, (base) + ((reg + 2) << (shift))); \
+ 	} while (0)
+ 
++/* tmio MMC platform flags */
++#define TMIO_MMC_WRPROTECT_DISABLE	(1 << 0)
 +
- static struct platform_device sdhi1_cn8_device = {
- 	.name           = "sh_mobile_sdhi",
- 	.id		= 1,
- 	.num_resources  = ARRAY_SIZE(sdhi1_cn8_resources),
- 	.resource       = sdhi1_cn8_resources,
-+	.dev = {
-+		.platform_data	= &sh7724_sdhi1_data,
-+	},
- 	.archdata = {
- 		.hwblk_id = HWBLK_SDHI1,
- 	},
+ int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
+ int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
+ void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);
+@@ -66,6 +69,7 @@ struct tmio_mmc_dma {
+ struct tmio_mmc_data {
+ 	unsigned int			hclk;
+ 	unsigned long			capabilities;
++	unsigned long			flags;
+ 	struct tmio_mmc_dma		*dma;
+ 	void (*set_pwr)(struct platform_device *host, int state);
+ 	void (*set_clk_div)(struct platform_device *host, int state);
 -- 
 1.6.2.4
-
