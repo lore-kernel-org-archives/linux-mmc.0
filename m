@@ -1,101 +1,248 @@
-From: "kishore kadiyala" <kishore.kadiyala@ti.com>
-Subject: Re: [PATCH v4 0/5] Adding MMC Support on OMAP4430 SDP
-Date: Wed, 19 May 2010 21:14:49 +0530
-Message-ID: <05ec01caf76a$3a02da60$LocalHost@wipblrx0099945A>
-References: <22422.10.24.255.17.1273947606.squirrel@dbdmail.itg.ti.com> <20100518025026.GF5818@atomide.com> <20100519000912.GX5818@atomide.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 1/10 v2] sh: define DMA slaves per CPU type, remove now
+ redundant header
+Date: Wed, 19 May 2010 20:33:54 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1005191755580.3099@axis700.grange>
+References: <Pine.LNX.4.64.1005191750400.3099@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	format=flowed;
-	charset="iso-8859-1";
-	reply-type=original
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com, jarkko.lavinen@nokia.com, rmk@arm.linux.org.uk, paul@pwsan.com, santosh.shilimkar@ti.com
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1005191750400.3099@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Ian Molton <ian@mnementh.co.uk>
+Cc: Andrew Morton <akpm@linux-foundation.org>, dan.j.williams@intel.com, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, sameo@linux.intel.com, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+Now that DMA slave IDs are only used used in platform specific code and have
+become opaque cookies for the rest of the code, we can make the, CPU specific
+too.
 
------ Original Message ----- 
-From: "Tony Lindgren" <tony@atomide.com>
-To: "kishore kadiyala" <kishore.kadiyala@ti.com>
-Cc: <linux-mmc@vger.kernel.org>; <linux-omap@vger.kernel.org>; 
-<madhu.cr@ti.com>; <jarkko.lavinen@nokia.com>; <rmk@arm.linux.org.uk>; 
-<paul@pwsan.com>; <santosh.shilimkar@ti.com>
-Sent: Wednesday, May 19, 2010 5:39 AM
-Subject: Re: [PATCH v4 0/5] Adding MMC Support on OMAP4430 SDP
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ arch/sh/include/asm/dmaengine.h        |   34 --------------------------------
+ arch/sh/include/asm/siu.h              |    2 -
+ arch/sh/include/cpu-sh4/cpu/sh7722.h   |   15 ++++++++++++++
+ arch/sh/include/cpu-sh4/cpu/sh7724.h   |   19 +++++++++++++++++
+ arch/sh/kernel/cpu/sh4a/setup-sh7722.c |    1 -
+ arch/sh/kernel/cpu/sh4a/setup-sh7724.c |    2 +-
+ arch/sh/kernel/cpu/sh4a/setup-sh7780.c |    3 +-
+ arch/sh/kernel/cpu/sh4a/setup-sh7785.c |    2 +-
+ sound/soc/sh/siu.h                     |    3 +-
+ sound/soc/sh/siu_pcm.c                 |    9 +++----
+ 10 files changed, 42 insertions(+), 48 deletions(-)
+ delete mode 100644 arch/sh/include/asm/dmaengine.h
 
-
->* Tony Lindgren <tony@atomide.com> [100517 19:45]:
->> Hi,
->>
->> * kishore kadiyala <kishore.kadiyala@ti.com> [100515 11:15]:
->> > Adding MMC1 and MMC2 controllers support for OMAP4
->> >
->> > V4:
->> > - Rebased to "for_next" branch[LO].
->> > - The first 3 patches [1,2,3] in the series are Minimal set of changes
->> >   with which MMC1/MMC2 works [No card detect for MMC1]on OMAP4 but with
->> >   dependencies on following patches [Not in "for_next" branch]
->> >   [1] I2c patches
->> >       a)https://patchwork.kernel.org/patch/98937/
->> >       b)https://patchwork.kernel.org/patch/98936/
->> >       c)https://patchwork.kernel.org/patch/98939/
->> >       d)https://patchwork.kernel.org/patch/79735/
->>
->> I've taken the updated versions of the I2C patches,
->> and fixed them not to break omap3_defconfig.
->>
->> >   [2] Regulator pacth
->> >       a)https://patchwork.kernel.org/patch/94054/
->> >   [3] hsmmc-clk patch
->> >       a)https://patchwork.kernel.org/patch/96821/
->>
->> I've picked up these too.
->>
->> > - The patches 4,5 adds card detect feature for MMC1
->>
->> I only took 1 - 3 out of the MMC patches, it's too
->> late to start changing the other stuff.
->>
->> I've reposted the whole series for a quick review.
->
-> FYI, the MMC on omap4 is not quite there yet at least
-> on my board. It mostly detects the card with
-> omap_4430sdp_defconfig, but fails always unless
-> CONFIG_RTC_DRV_TWL92330=y.. This is without CONFIG_SMP
-> as it oopses.
-
-Hope you are referring CONFIG_RTC_DRV_TWL92330 to omap3_defconfig
-and not to omap_4430sdp_defconfig.
-
-With omap_4430sdp_defconfig , I've tested on 4430SDP and Blaze and always
-Cards on MMC1 & MMC2 gets detected once bootedup.
-
->
-> Also MMC is never detected with omap3_defconfig.
-
-With omap3_defconfig  +  disabling "CONFIG_OMAP_RESET_CLOCKS",
-I've tested on 4430SDP and Blaze and always Cards on MMC1 & MMC2
-gets detected on bootup.
-
->
-> Santosh & Kishore, maybe take a look at that, otherwise
-> it looks like we still don't have a very usable support
-> for omap4.
->
-> I've piled all these patches into linux-omap master branch
-> for easy testing. Let me know if I missed some patch.
-
-Following is the commit ID :1674c0ceabfb7726246989874bb4da7bcb55ea89
-used on LO master branch for testing. All the patches were merged.
-
-Regards,
-Kishore
-
->
-> Regards,
->
-> Tony
-> 
+diff --git a/arch/sh/include/asm/dmaengine.h b/arch/sh/include/asm/dmaengine.h
+deleted file mode 100644
+index 2a02b61..0000000
+--- a/arch/sh/include/asm/dmaengine.h
++++ /dev/null
+@@ -1,34 +0,0 @@
+-/*
+- * Header for the new SH dmaengine driver
+- *
+- * Copyright (C) 2010 Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+- */
+-#ifndef ASM_DMAENGINE_H
+-#define ASM_DMAENGINE_H
+-
+-#include <linux/sh_dma.h>
+-
+-enum {
+-	SHDMA_SLAVE_SCIF0_TX,
+-	SHDMA_SLAVE_SCIF0_RX,
+-	SHDMA_SLAVE_SCIF1_TX,
+-	SHDMA_SLAVE_SCIF1_RX,
+-	SHDMA_SLAVE_SCIF2_TX,
+-	SHDMA_SLAVE_SCIF2_RX,
+-	SHDMA_SLAVE_SCIF3_TX,
+-	SHDMA_SLAVE_SCIF3_RX,
+-	SHDMA_SLAVE_SCIF4_TX,
+-	SHDMA_SLAVE_SCIF4_RX,
+-	SHDMA_SLAVE_SCIF5_TX,
+-	SHDMA_SLAVE_SCIF5_RX,
+-	SHDMA_SLAVE_SIUA_TX,
+-	SHDMA_SLAVE_SIUA_RX,
+-	SHDMA_SLAVE_SIUB_TX,
+-	SHDMA_SLAVE_SIUB_RX,
+-};
+-
+-#endif
+diff --git a/arch/sh/include/asm/siu.h b/arch/sh/include/asm/siu.h
+index e8d4142..1d95c78 100644
+--- a/arch/sh/include/asm/siu.h
++++ b/arch/sh/include/asm/siu.h
+@@ -11,8 +11,6 @@
+ #ifndef ASM_SIU_H
+ #define ASM_SIU_H
+ 
+-#include <asm/dmaengine.h>
+-
+ struct device;
+ 
+ struct siu_platform {
+diff --git a/arch/sh/include/cpu-sh4/cpu/sh7722.h b/arch/sh/include/cpu-sh4/cpu/sh7722.h
+index 4856040..7a5b8a3 100644
+--- a/arch/sh/include/cpu-sh4/cpu/sh7722.h
++++ b/arch/sh/include/cpu-sh4/cpu/sh7722.h
+@@ -235,4 +235,19 @@ enum {
+ 	HWBLK_NR,
+ };
+ 
++enum {
++	SHDMA_SLAVE_SCIF0_TX,
++	SHDMA_SLAVE_SCIF0_RX,
++	SHDMA_SLAVE_SCIF1_TX,
++	SHDMA_SLAVE_SCIF1_RX,
++	SHDMA_SLAVE_SCIF2_TX,
++	SHDMA_SLAVE_SCIF2_RX,
++	SHDMA_SLAVE_SIUA_TX,
++	SHDMA_SLAVE_SIUA_RX,
++	SHDMA_SLAVE_SIUB_TX,
++	SHDMA_SLAVE_SIUB_RX,
++	SHDMA_SLAVE_SDHI0_TX,
++	SHDMA_SLAVE_SDHI0_RX,
++};
++
+ #endif /* __ASM_SH7722_H__ */
+diff --git a/arch/sh/include/cpu-sh4/cpu/sh7724.h b/arch/sh/include/cpu-sh4/cpu/sh7724.h
+index 0cd1f71..fbbf550 100644
+--- a/arch/sh/include/cpu-sh4/cpu/sh7724.h
++++ b/arch/sh/include/cpu-sh4/cpu/sh7724.h
+@@ -283,4 +283,23 @@ enum {
+ 	HWBLK_NR,
+ };
+ 
++enum {
++	SHDMA_SLAVE_SCIF0_TX,
++	SHDMA_SLAVE_SCIF0_RX,
++	SHDMA_SLAVE_SCIF1_TX,
++	SHDMA_SLAVE_SCIF1_RX,
++	SHDMA_SLAVE_SCIF2_TX,
++	SHDMA_SLAVE_SCIF2_RX,
++	SHDMA_SLAVE_SCIF3_TX,
++	SHDMA_SLAVE_SCIF3_RX,
++	SHDMA_SLAVE_SCIF4_TX,
++	SHDMA_SLAVE_SCIF4_RX,
++	SHDMA_SLAVE_SCIF5_TX,
++	SHDMA_SLAVE_SCIF5_RX,
++	SHDMA_SLAVE_SDHI0_TX,
++	SHDMA_SLAVE_SDHI0_RX,
++	SHDMA_SLAVE_SDHI1_TX,
++	SHDMA_SLAVE_SDHI1_RX,
++};
++
+ #endif /* __ASM_SH7724_H__ */
+diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7722.c b/arch/sh/kernel/cpu/sh4a/setup-sh7722.c
+index fe28f52..5ea2d03 100644
+--- a/arch/sh/kernel/cpu/sh4a/setup-sh7722.c
++++ b/arch/sh/kernel/cpu/sh4a/setup-sh7722.c
+@@ -17,7 +17,6 @@
+ #include <linux/usb/m66592.h>
+ 
+ #include <asm/clock.h>
+-#include <asm/dmaengine.h>
+ #include <asm/mmzone.h>
+ #include <asm/siu.h>
+ 
+diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7724.c b/arch/sh/kernel/cpu/sh4a/setup-sh7724.c
+index c4572b1..06a0683 100644
+--- a/arch/sh/kernel/cpu/sh4a/setup-sh7724.c
++++ b/arch/sh/kernel/cpu/sh4a/setup-sh7724.c
+@@ -18,13 +18,13 @@
+ #include <linux/mm.h>
+ #include <linux/serial_sci.h>
+ #include <linux/uio_driver.h>
++#include <linux/sh_dma.h>
+ #include <linux/sh_timer.h>
+ #include <linux/io.h>
+ #include <linux/notifier.h>
+ 
+ #include <asm/suspend.h>
+ #include <asm/clock.h>
+-#include <asm/dmaengine.h>
+ #include <asm/mmzone.h>
+ 
+ #include <cpu/dma-register.h>
+diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7780.c b/arch/sh/kernel/cpu/sh4a/setup-sh7780.c
+index c3fcb39..b309f63 100644
+--- a/arch/sh/kernel/cpu/sh4a/setup-sh7780.c
++++ b/arch/sh/kernel/cpu/sh4a/setup-sh7780.c
+@@ -12,10 +12,9 @@
+ #include <linux/serial.h>
+ #include <linux/io.h>
+ #include <linux/serial_sci.h>
++#include <linux/sh_dma.h>
+ #include <linux/sh_timer.h>
+ 
+-#include <asm/dmaengine.h>
+-
+ #include <cpu/dma-register.h>
+ 
+ static struct plat_sci_port scif0_platform_data = {
+diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7785.c b/arch/sh/kernel/cpu/sh4a/setup-sh7785.c
+index 771ae76..9cbde9d 100644
+--- a/arch/sh/kernel/cpu/sh4a/setup-sh7785.c
++++ b/arch/sh/kernel/cpu/sh4a/setup-sh7785.c
+@@ -13,9 +13,9 @@
+ #include <linux/serial_sci.h>
+ #include <linux/io.h>
+ #include <linux/mm.h>
++#include <linux/sh_dma.h>
+ #include <linux/sh_timer.h>
+ 
+-#include <asm/dmaengine.h>
+ #include <asm/mmzone.h>
+ 
+ #include <cpu/dma-register.h>
+diff --git a/sound/soc/sh/siu.h b/sound/soc/sh/siu.h
+index c0bfab8..492b1ca 100644
+--- a/sound/soc/sh/siu.h
++++ b/sound/soc/sh/siu.h
+@@ -71,8 +71,7 @@ struct siu_firmware {
+ #include <linux/dmaengine.h>
+ #include <linux/interrupt.h>
+ #include <linux/io.h>
+-
+-#include <asm/dmaengine.h>
++#include <linux/sh_dma.h>
+ 
+ #include <sound/core.h>
+ #include <sound/pcm.h>
+diff --git a/sound/soc/sh/siu_pcm.c b/sound/soc/sh/siu_pcm.c
+index ba7f8d0..f7b7fcf 100644
+--- a/sound/soc/sh/siu_pcm.c
++++ b/sound/soc/sh/siu_pcm.c
+@@ -32,7 +32,6 @@
+ #include <sound/pcm_params.h>
+ #include <sound/soc-dai.h>
+ 
+-#include <asm/dmaengine.h>
+ #include <asm/siu.h>
+ 
+ #include "siu.h"
+@@ -359,13 +358,13 @@ static int siu_pcm_open(struct snd_pcm_substream *ss)
+ 	if (ss->stream == SNDRV_PCM_STREAM_PLAYBACK) {
+ 		siu_stream = &port_info->playback;
+ 		param = &siu_stream->param;
+-		param->slave_id = port ? SHDMA_SLAVE_SIUB_TX :
+-			SHDMA_SLAVE_SIUA_TX;
++		param->slave_id = port ? pdata->dma_slave_tx_b :
++			pdata->dma_slave_tx_a;
+ 	} else {
+ 		siu_stream = &port_info->capture;
+ 		param = &siu_stream->param;
+-		param->slave_id = port ? SHDMA_SLAVE_SIUB_RX :
+-			SHDMA_SLAVE_SIUA_RX;
++		param->slave_id = port ? pdata->dma_slave_rx_b :
++			pdata->dma_slave_rx_a;
+ 	}
+ 
+ 	param->dma_dev = pdata->dma_dev;
+-- 
+1.6.2.4
 
