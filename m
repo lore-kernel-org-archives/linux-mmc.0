@@ -1,460 +1,733 @@
-From: akpm@linux-foundation.org
-Subject: + sdhci-spear-st-spear-based-sdhci-controller-glue.patch added to -mm tree
-Date: Wed, 19 May 2010 14:10:22 -0700
-Message-ID: <201005192110.o4JLAMqH006279@imap1.linux-foundation.org>
+From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
+Subject: MMC: SD-combo (IO+mem) card support
+Date: Thu, 20 May 2010 00:28:43 +0200
+Message-ID: <20100519222843.GA31141@rere.qmqm.pl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:49077 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751353Ab0ESVLF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 May 2010 17:11:05 -0400
+Received: from rere.qmqm.pl ([89.167.52.164]:42085 "EHLO rere.qmqm.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750943Ab0ESW2o (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 May 2010 18:28:44 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: viresh.kumar@st.com, linus.ml.walleij@gmail.com, linux-mmc@vger.kernel.org, rmk@arm.linux.org.uk, shiraz.hashim@st.com
+To: linux-mmc@vger.kernel.org
 
+This is a rough patch to support SD Combo cards. Based on simplified
+SDIO spec v.2.0 and some experimentation. Real changes are in sdio.c.
+Most of sd.c diff is moving code around to factor out some common
+functions.
 
-The patch titled
-     sdhci-spear: ST SPEAr based SDHCI controller glue
-has been added to the -mm tree.  Its filename is
-     sdhci-spear-st-spear-based-sdhci-controller-glue.patch
+Signed-off-by: Micha=B3 Miros=B3aw <mirq-linux@rere.qmqm.pl>
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: sdhci-spear: ST SPEAr based SDHCI controller glue
-From: Viresh KUMAR <viresh.kumar@st.com>
-
-Add a glue layer to support the sdhci driver on the ST SPEAr platform.
-
-Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
-Cc: <shiraz.hashim@st.com>
-Cc: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: Russell King <rmk@arm.linux.org.uk>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- MAINTAINERS                     |    6 
- drivers/mmc/host/Kconfig        |   12 +
- drivers/mmc/host/Makefile       |    1 
- drivers/mmc/host/sdhci-spear.c  |  300 ++++++++++++++++++++++++++++++
- include/linux/mmc/sdhci-spear.h |   42 ++++
- 5 files changed, 361 insertions(+)
-
-diff -puN MAINTAINERS~sdhci-spear-st-spear-based-sdhci-controller-glue MAINTAINERS
---- a/MAINTAINERS~sdhci-spear-st-spear-based-sdhci-controller-glue
-+++ a/MAINTAINERS
-@@ -5001,6 +5001,12 @@ L:	linux-mmc@vger.kernel.org
- S:	Maintained
- F:	drivers/mmc/host/sdhci-s3c.c
- 
-+SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) ST SPEAR DRIVER
-+M:	Viresh Kumar <viresh.kumar@st.com>
-+L:	linux-mmc@vger.kernel.org
-+S:	Maintained
-+F:	drivers/mmc/host/sdhci-spear.c
+diff -urN linux-2.6.34-br1/drivers/mmc/core/bus.c linux-2.6.34-br1-sd1/=
+drivers/mmc/core/bus.c
+--- linux-2.6.34-br1/drivers/mmc/core/bus.c	2010-05-16 23:17:36.0000000=
+00 +0200
++++ linux-2.6.34-br1-sd1/drivers/mmc/core/bus.c	2010-05-19 02:44:15.000=
+000000 +0200
+@@ -36,6 +36,7 @@
+ 	case MMC_TYPE_SD:
+ 		return sprintf(buf, "SD\n");
+ 	case MMC_TYPE_SDIO:
++	case MMC_TYPE_SD_COMBO:
+ 		return sprintf(buf, "SDIO\n");
+ 	default:
+ 		return -EFAULT;
+@@ -72,6 +73,7 @@
+ 		type =3D "SD";
+ 		break;
+ 	case MMC_TYPE_SDIO:
++	case MMC_TYPE_SD_COMBO:
+ 		type =3D "SDIO";
+ 		break;
+ 	default:
+@@ -239,6 +241,10 @@
+ 	case MMC_TYPE_SDIO:
+ 		type =3D "SDIO";
+ 		break;
++	case MMC_TYPE_SD_COMBO:
++		type =3D "SD-combo";
++		if (mmc_card_blockaddr(card))
++			type =3D "SDHC-combo";
+ 	default:
+ 		type =3D "?";
+ 		break;
+diff -urN linux-2.6.34-br1/drivers/mmc/core/core.c linux-2.6.34-br1-sd1=
+/drivers/mmc/core/core.c
+--- linux-2.6.34-br1/drivers/mmc/core/core.c	2010-05-16 23:17:36.000000=
+000 +0200
++++ linux-2.6.34-br1-sd1/drivers/mmc/core/core.c	2010-05-19 02:44:18.00=
+0000000 +0200
+@@ -1099,8 +1099,15 @@
+ 	 */
+ 	err =3D mmc_send_io_op_cond(host, 0, &ocr);
+ 	if (!err) {
+-		if (mmc_attach_sdio(host, ocr))
+-			mmc_power_off(host);
++		if (mmc_attach_sdio(host, ocr)) {
++			mmc_claim_host(host);
++			/* try SDMEM (but not MMC) even if SDIO is broken */
++			if (mmc_send_app_op_cond(host, 0, &ocr))
++				goto out_fail;
 +
- SECURITY SUBSYSTEM
- M:	James Morris <jmorris@namei.org>
- L:	linux-security-module@vger.kernel.org (suggested Cc:)
-diff -puN drivers/mmc/host/Kconfig~sdhci-spear-st-spear-based-sdhci-controller-glue drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~sdhci-spear-st-spear-based-sdhci-controller-glue
-+++ a/drivers/mmc/host/Kconfig
-@@ -136,6 +136,18 @@ config MMC_SDHCI_S3C
- 
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_SPEAR
-+	tristate "SDHCI support on ST SPEAr platform"
-+	depends on MMC_SDHCI && PLAT_SPEAR
-+	help
-+	  This selects the Secure Digital Host Controller Interface (SDHCI)
-+	  often referrered to as the HSMMC block in some of the ST SPEAR range
-+	  of SoC
-+
-+	  If you have a controller with this interface, say Y or M here.
-+
-+	  If unsure, say N.
-+
- config MMC_SDHCI_S3C_DMA
- 	bool "DMA support on S3C SDHCI"
- 	depends on MMC_SDHCI_S3C && EXPERIMENTAL
-diff -puN drivers/mmc/host/Makefile~sdhci-spear-st-spear-based-sdhci-controller-glue drivers/mmc/host/Makefile
---- a/drivers/mmc/host/Makefile~sdhci-spear-st-spear-based-sdhci-controller-glue
-+++ a/drivers/mmc/host/Makefile
-@@ -14,6 +14,7 @@ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
- obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
- obj-$(CONFIG_MMC_SDHCI_PLTFM)	+= sdhci-pltfm.o
- obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
-+obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
- obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
- obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
- obj-$(CONFIG_MMC_OMAP)		+= omap.o
-diff -puN /dev/null drivers/mmc/host/sdhci-spear.c
---- /dev/null
-+++ a/drivers/mmc/host/sdhci-spear.c
-@@ -0,0 +1,300 @@
-+/*
-+ * drivers/mmc/host/sdhci-spear.c
-+ *
-+ * Support of SDHCI platform devices for spear soc family
-+ *
-+ * Copyright (C) 2010 ST Microelectronics
-+ * Viresh Kumar<viresh.kumar@st.com>
-+ *
-+ * Inspired by sdhci-pltfm.c
-+ *
-+ * This file is licensed under the terms of the GNU General Public
-+ * License version 2. This program is licensed "as is" without any
-+ * warranty of any kind, whether express or implied.
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/delay.h>
-+#include <linux/gpio.h>
-+#include <linux/highmem.h>
-+#include <linux/interrupt.h>
-+#include <linux/irq.h>
-+#include <linux/platform_device.h>
-+#include <linux/slab.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/sdhci-spear.h>
-+#include <linux/io.h>
-+#include "sdhci.h"
-+
-+struct spear_sdhci {
-+	struct clk *clk;
-+	struct sdhci_plat_data *data;
-+};
-+
-+/* sdhci ops */
-+static struct sdhci_ops sdhci_pltfm_ops = {
-+	/* Nothing to do for now. */
-+};
-+
-+/* gpio card detection interrupt handler */
-+static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
-+{
-+	struct platform_device *pdev = dev_id;
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct spear_sdhci *sdhci =
-+		(struct spear_sdhci *)(pdev->dev.platform_data);
-+	unsigned long gpio_irq_type;
-+	int val;
-+
-+	val = gpio_get_value(sdhci->data->card_int_gpio);
-+
-+	/* val == 1 -> card removed, val == 0 -> card inserted */
-+	/* if card removed - set irq for low level, else vice versa */
-+	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
-+	set_irq_type(irq, gpio_irq_type);
-+
-+	if (sdhci->data->card_power_gpio >= 0) {
-+		if (!sdhci->data->power_always_enb) {
-+			/* if card inserted, give power, otherwise remove it */
-+			val = sdhci->data->power_active_high ? !val : val ;
-+			gpio_set_value(sdhci->data->card_power_gpio, val);
++			if (mmc_attach_sd(host, ocr))
++				mmc_power_off(host);
 +		}
-+	}
-+
-+	/* inform sdhci driver about card insertion/removal */
-+	tasklet_schedule(&host->card_tasklet);
-+
-+	return IRQ_HANDLED;
+ 		goto out;
+ 	}
+=20
+@@ -1124,6 +1137,7 @@
+ 		goto out;
+ 	}
+=20
++out_fail:
+ 	mmc_release_host(host);
+ 	mmc_power_off(host);
+=20
+diff -urN linux-2.6.34-br1/drivers/mmc/core/sd.c linux-2.6.34-br1-sd1/d=
+rivers/mmc/core/sd.c
+--- linux-2.6.34-br1/drivers/mmc/core/sd.c	2010-05-16 23:17:36.00000000=
+0 +0200
++++ linux-2.6.34-br1-sd1/drivers/mmc/core/sd.c	2010-05-19 02:44:18.0000=
+00000 +0200
+@@ -238,22 +238,22 @@
+ /*
+  * Test if the card supports high-speed mode and, if so, switch to it.
+  */
+-static int mmc_switch_hs(struct mmc_card *card)
++int mmc_switch_hs(struct mmc_card *card)
+ {
+ 	int err;
+ 	u8 *status;
+=20
+ 	if (card->scr.sda_vsn < SCR_SPEC_VER_1)
+-		return 0;
++		return -EOPNOTSUPP;
+=20
+ 	if (!(card->csd.cmdclass & CCC_SWITCH))
+-		return 0;
++		return -EOPNOTSUPP;
+=20
+ 	if (!(card->host->caps & MMC_CAP_SD_HIGHSPEED))
+-		return 0;
++		return -EOPNOTSUPP;
+=20
+ 	if (card->sw_caps.hs_max_dtr =3D=3D 0)
+-		return 0;
++		return -EOPNOTSUPP;
+=20
+ 	err =3D -EIO;
+=20
+@@ -272,9 +272,7 @@
+ 		printk(KERN_WARNING "%s: Problem switching card "
+ 			"into high-speed mode!\n",
+ 			mmc_hostname(card->host));
+-	} else {
+-		mmc_card_set_highspeed(card);
+-		mmc_set_timing(card->host, MMC_TIMING_SD_HS);
++		err =3D -EOPNOTSUPP;
+ 	}
+=20
+ out:
+@@ -320,26 +318,13 @@
+ 	NULL,
+ };
+=20
+-static struct device_type sd_type =3D {
++struct device_type sd_type =3D {
+ 	.groups =3D sd_attr_groups,
+ };
+=20
+-/*
+- * Handle the detection and initialisation of a card.
+- *
+- * In the case of a resume, "oldcard" will contain the card
+- * we're trying to reinitialise.
+- */
+-static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+-	struct mmc_card *oldcard)
++int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
+ {
+-	struct mmc_card *card;
+ 	int err;
+-	u32 cid[4];
+-	unsigned int max_dtr;
+-
+-	BUG_ON(!host);
+-	WARN_ON(!host->claimed);
+=20
+ 	/*
+ 	 * Since we're changing the OCR value, we seem to
+@@ -361,7 +346,7 @@
+=20
+ 	err =3D mmc_send_app_op_cond(host, ocr, NULL);
+ 	if (err)
+-		goto err;
++		return err;
+=20
+ 	/*
+ 	 * Fetch CID from card.
+@@ -370,14 +355,132 @@
+ 		err =3D mmc_send_cid(host, cid);
+ 	else
+ 		err =3D mmc_all_send_cid(host, cid);
++=09
++	return err;
 +}
 +
-+static int __devinit sdhci_probe(struct platform_device *pdev)
++int mmc_sd_get_csd(struct mmc_host *host, struct mmc_card *card)
 +{
-+	struct sdhci_host *host;
-+	struct resource *iomem;
-+	struct spear_sdhci *sdhci;
-+	int ret;
-+
-+	BUG_ON(pdev == NULL);
-+
-+	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	if (!iomem) {
-+		ret = -ENOMEM;
-+		dev_dbg(&pdev->dev, "memory resource not defined\n");
-+		goto err;
-+	}
-+
-+	if (!request_mem_region(iomem->start, resource_size(iomem),
-+				"spear-sdhci")) {
-+		ret = -EBUSY;
-+		dev_dbg(&pdev->dev, "cannot request region\n");
-+		goto err;
-+	}
-+
-+	sdhci = kzalloc(sizeof(*sdhci), GFP_KERNEL);
-+	if (!sdhci) {
-+		ret = -ENOMEM;
-+		dev_dbg(&pdev->dev, "cannot allocate memory for sdhci\n");
-+		goto err_kzalloc;
-+	}
-+
-+	/* clk enable */
-+	sdhci->clk = clk_get(&pdev->dev, NULL);
-+	if (IS_ERR(sdhci->clk)) {
-+		ret = PTR_ERR(sdhci->clk);
-+		dev_dbg(&pdev->dev, "Error getting clock\n");
-+		goto err_clk_get;
-+	}
-+
-+	ret = clk_enable(sdhci->clk);
-+	if (ret) {
-+		dev_dbg(&pdev->dev, "Error enabling clock\n");
-+		goto err_clk_enb;
-+	}
-+
-+	/* overwrite platform_data */
-+	sdhci->data = (struct sdhci_plat_data *)(pdev->dev.platform_data);
-+	pdev->dev.platform_data = sdhci;
-+
-+	if (pdev->dev.parent)
-+		host = sdhci_alloc_host(pdev->dev.parent, 0);
-+	else
-+		host = sdhci_alloc_host(&pdev->dev, 0);
-+
-+	if (IS_ERR(host)) {
-+		ret = PTR_ERR(host);
-+		dev_dbg(&pdev->dev, "error allocating host\n");
-+		goto err_alloc_host;
-+	}
-+
-+	host->hw_name = "sdhci";
-+	host->ops = &sdhci_pltfm_ops;
-+	host->irq = platform_get_irq(pdev, 0);
-+	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
-+
-+	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
-+	if (!host->ioaddr) {
-+		ret = -ENOMEM;
-+		dev_dbg(&pdev->dev, "failed to remap registers\n");
-+		goto err_ioremap;
-+	}
-+
-+	ret = sdhci_add_host(host);
-+	if (ret) {
-+		dev_dbg(&pdev->dev, "error adding host\n");
-+		goto err_add_host;
-+	}
-+
-+	platform_set_drvdata(pdev, host);
++	int err;
 +
 +	/*
-+	 * It is optional to use GPIOs for sdhci Power control & sdhci card
-+	 * interrupt detection. If sdhci->data is NULL, then use original sdhci
-+	 * lines otherwise GPIO lines.
-+	 * If GPIO is selected for power control, then power should be disabled
-+	 * after card removal and should be enabled when card insertion
-+	 * interrupt occurs
++	 * Fetch CSD from card.
 +	 */
-+	if (!sdhci->data)
-+		return 0;
++	err =3D mmc_send_csd(card, card->raw_csd);
+ 	if (err)
+-		goto err;
++		return err;
+=20
+-	if (oldcard) {
+-		if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) !=3D 0) {
+-			err =3D -ENOENT;
+-			goto err;
++	err =3D mmc_decode_csd(card);
++	if (err)
++		return err;
 +
-+	if (sdhci->data->card_power_gpio >= 0) {
-+		int val = 0;
-+
-+		ret = gpio_request(sdhci->data->card_power_gpio, "sdhci");
-+		if (ret < 0) {
-+			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
-+					sdhci->data->card_power_gpio);
-+			goto err_pgpio_request;
-+		}
-+
-+		if (sdhci->data->power_always_enb)
-+			val = sdhci->data->power_active_high;
-+		else
-+			val = !sdhci->data->power_active_high;
-+
-+		ret = gpio_direction_output(sdhci->data->card_power_gpio, val);
-+		if (ret) {
-+			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
-+					sdhci->data->card_power_gpio);
-+			goto err_pgpio_direction;
-+		}
-+
-+		gpio_set_value(sdhci->data->card_power_gpio, 1);
-+	}
-+
-+	if (sdhci->data->card_int_gpio >= 0) {
-+		ret = gpio_request(sdhci->data->card_int_gpio, "sdhci");
-+		if (ret < 0) {
-+			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
-+					sdhci->data->card_int_gpio);
-+			goto err_igpio_request;
-+		}
-+
-+		ret = gpio_direction_input(sdhci->data->card_int_gpio);
-+		if (ret) {
-+			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
-+					sdhci->data->card_int_gpio);
-+			goto err_igpio_direction;
-+		}
-+		ret = request_irq(gpio_to_irq(sdhci->data->card_int_gpio),
-+				sdhci_gpio_irq, IRQF_TRIGGER_LOW,
-+				mmc_hostname(host->mmc), pdev);
-+		if (ret) {
-+			dev_dbg(&pdev->dev, "gpio request irq fail: %d\n",
-+					sdhci->data->card_int_gpio);
-+			goto err_igpio_request_irq;
-+		}
-+
-+	}
-+
++	mmc_decode_cid(card);
 +	return 0;
-+
-+err_igpio_request_irq:
-+err_igpio_direction:
-+	if (sdhci->data->card_int_gpio >= 0)
-+		gpio_free(sdhci->data->card_int_gpio);
-+err_igpio_request:
-+err_pgpio_direction:
-+	if (sdhci->data->card_power_gpio >= 0)
-+		gpio_free(sdhci->data->card_power_gpio);
-+err_pgpio_request:
-+	platform_set_drvdata(pdev, NULL);
-+	sdhci_remove_host(host, 1);
-+err_add_host:
-+	iounmap(host->ioaddr);
-+err_ioremap:
-+	sdhci_free_host(host);
-+err_alloc_host:
-+	clk_disable(sdhci->clk);
-+err_clk_enb:
-+	clk_put(sdhci->clk);
-+err_clk_get:
-+	kfree(sdhci);
-+err_kzalloc:
-+	release_mem_region(iomem->start, resource_size(iomem));
-+err:
-+	dev_err(&pdev->dev, "spear-sdhci probe failed: %d\n", ret);
-+	return ret;
 +}
 +
-+static int __devexit sdhci_remove(struct platform_device *pdev)
++int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
++	bool reinit)
 +{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	struct spear_sdhci *sdhci =
-+		(struct spear_sdhci *)(pdev->dev.platform_data);
-+	int dead;
-+	u32 scratch;
++	int err;
 +
-+	if (sdhci->data) {
-+		if (sdhci->data->card_int_gpio >= 0) {
-+			free_irq(gpio_to_irq(sdhci->data->card_int_gpio), pdev);
-+			gpio_free(sdhci->data->card_int_gpio);
-+		}
++	if (!reinit) {
++		/*
++		 * Fetch SCR from card.
++		 */
++		err =3D mmc_app_send_scr(card, card->raw_scr);
++		if (err)
++			return err;
 +
-+		if (sdhci->data->card_power_gpio >= 0)
-+			gpio_free(sdhci->data->card_power_gpio);
++		err =3D mmc_decode_scr(card);
++		if (err)
++			return err;
++
++		/*
++		 * Fetch switch information from card.
++		 */
++		err =3D mmc_read_switch(card);
++		if (err)
++			return err;
 +	}
 +
-+	platform_set_drvdata(pdev, NULL);
-+	dead = 0;
-+	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-+	if (scratch == (u32)-1)
-+		dead = 1;
++	/*
++	 * For SPI, enable CRC as appropriate.
++	 * This CRC enable is located AFTER the reading of the
++	 * card registers because some SDHC cards are not able
++	 * to provide valid CRCs for non-512-byte blocks.
++	 */
++	if (mmc_host_is_spi(host)) {
++		err =3D mmc_spi_set_crc(host, use_spi_crc);
++		if (err)
++			return err;
++	}
 +
-+	sdhci_remove_host(host, dead);
-+	iounmap(host->ioaddr);
-+	sdhci_free_host(host);
-+	clk_disable(sdhci->clk);
-+	clk_put(sdhci->clk);
-+	kfree(sdhci);
-+	if (iomem)
-+		release_mem_region(iomem->start, resource_size(iomem));
++	/*
++	 * Check if read-only switch is active.
++	 */
++	if (!reinit) {
++		int ro =3D -1;
++
++		if (host->ops->get_ro)
++			ro =3D host->ops->get_ro(host);
++
++		if (ro < 0) {
++			printk(KERN_WARNING "%s: host does not "
++				"support reading read-only "
++				"switch. assuming write-enable.\n",
++				mmc_hostname(host));
++		} else if (ro > 0) {
++			mmc_card_set_readonly(card);
+ 		}
++	}
 +
 +	return 0;
 +}
 +
-+static struct platform_driver sdhci_driver = {
-+	.driver = {
-+		.name	= "sdhci",
-+		.owner	= THIS_MODULE,
-+	},
-+	.probe		= sdhci_probe,
-+	.remove		= __devexit_p(sdhci_remove),
-+};
-+
-+static int __init sdhci_init(void)
++unsigned mmc_sd_get_max_clock(struct mmc_card *card)
 +{
-+	return platform_driver_register(&sdhci_driver);
-+}
-+module_init(sdhci_init);
++	unsigned max_dtr =3D (unsigned int)-1;
 +
-+static void __exit sdhci_exit(void)
++	if (mmc_card_highspeed(card)) {
++		if (max_dtr > card->sw_caps.hs_max_dtr)
++			max_dtr =3D card->sw_caps.hs_max_dtr;
++	} else if (max_dtr > card->csd.max_dtr) {
++		max_dtr =3D card->csd.max_dtr;
++	}
++
++	return max_dtr;
++}
++
++void mmc_sd_go_highspeed(struct mmc_card *card)
 +{
-+	platform_driver_unregister(&sdhci_driver);
++	mmc_card_set_highspeed(card);
++	mmc_set_timing(card->host, MMC_TIMING_SD_HS);
 +}
-+module_exit(sdhci_exit);
 +
-+MODULE_DESCRIPTION("SPEAr Secure Digital Host Controller Interface driver");
-+MODULE_AUTHOR("Viresh Kumar <viresh.kumar@st.com>");
-+MODULE_LICENSE("GPL v2");
-diff -puN /dev/null include/linux/mmc/sdhci-spear.h
---- /dev/null
-+++ a/include/linux/mmc/sdhci-spear.h
-@@ -0,0 +1,42 @@
 +/*
-+ * include/linux/mmc/sdhci-spear.h
++ * Handle the detection and initialisation of a card.
 + *
-+ * SDHCI declarations specific to ST SPEAr platform
-+ *
-+ * Copyright (C) 2010 ST Microelectronics
-+ * Viresh Kumar<viresh.kumar@st.com>
-+ *
-+ * This file is licensed under the terms of the GNU General Public
-+ * License version 2. This program is licensed "as is" without any
-+ * warranty of any kind, whether express or implied.
++ * In the case of a resume, "oldcard" will contain the card
++ * we're trying to reinitialise.
 + */
-+
-+#ifndef MMC_SDHCI_SPEAR_H
-+#define MMC_SDHCI_SPEAR_H
-+
-+#include <linux/platform_device.h>
-+/*
-+ * struct sdhci_plat_data: spear sdhci platform data structure
-+ *
-+ * @card_power_gpio: gpio pin for enabling/disabling power to sdhci socket
-+ * @power_active_high: if set, enable power to sdhci socket by setting
-+ *			card_power_gpio
-+ * @power_always_enb: If set, then enable power on probe, otherwise enable only
-+ *			on card insertion and disable on card removal.
-+ * card_int_gpio: gpio pin used for card detection
-+ */
-+struct sdhci_plat_data {
-+	int card_power_gpio;
-+	int power_active_high;
-+	int power_always_enb;
-+	int card_int_gpio;
-+};
-+
-+/* This function is used to set platform_data field of pdev->dev */
-+static inline void
-+sdhci_set_plat_data(struct platform_device *pdev, struct sdhci_plat_data *data)
++static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
++	struct mmc_card *oldcard)
 +{
-+	pdev->dev.platform_data = data;
-+}
++	struct mmc_card *card;
++	int err;
++	u32 cid[4];
++	unsigned int max_dtr;
 +
-+#endif /* MMC_SDHCI_SPEAR_H */
-_
-
-Patches currently in -mm which might be from viresh.kumar@st.com are
-
-linux-next.patch
-sdhci-spear-st-spear-based-sdhci-controller-glue.patch
++	BUG_ON(!host);
++	WARN_ON(!host->claimed);
++
++	err =3D mmc_sd_get_cid(host, ocr, cid);
++	if (err)
++		return err;
++
++	if (oldcard) {
++		if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) !=3D 0)
++			return -ENOENT;
+=20
+ 		card =3D oldcard;
+ 	} else {
+@@ -385,10 +488,8 @@
+ 		 * Allocate card structure.
+ 		 */
+ 		card =3D mmc_alloc_card(host, &sd_type);
+-		if (IS_ERR(card)) {
+-			err =3D PTR_ERR(card);
+-			goto err;
+-		}
++		if (IS_ERR(card))
++			return PTR_ERR(card);
+=20
+ 		card->type =3D MMC_TYPE_SD;
+ 		memcpy(card->raw_cid, cid, sizeof(card->raw_cid));
+@@ -400,24 +501,15 @@
+ 	if (!mmc_host_is_spi(host)) {
+ 		err =3D mmc_send_relative_addr(host, &card->rca);
+ 		if (err)
+-			goto free_card;
++			return err;
+=20
+ 		mmc_set_bus_mode(host, MMC_BUSMODE_PUSHPULL);
+ 	}
+=20
+-	if (!oldcard) {
+-		/*
+-		 * Fetch CSD from card.
+-		 */
+-		err =3D mmc_send_csd(card, card->raw_csd);
++	if (oldcard =3D=3D NULL) {
++		err =3D mmc_sd_get_csd(host, card);
+ 		if (err)
+-			goto free_card;
+-
+-		err =3D mmc_decode_csd(card);
+-		if (err)
+-			goto free_card;
+-
+-		mmc_decode_cid(card);
++			return err;
+ 	}
+=20
+ 	/*
+@@ -426,60 +518,26 @@
+ 	if (!mmc_host_is_spi(host)) {
+ 		err =3D mmc_select_card(card);
+ 		if (err)
+-			goto free_card;
++			return err;
+ 	}
+=20
+-	if (!oldcard) {
+-		/*
+-		 * Fetch SCR from card.
+-		 */
+-		err =3D mmc_app_send_scr(card, card->raw_scr);
+-		if (err)
+-			goto free_card;
+-
+-		err =3D mmc_decode_scr(card);
+-		if (err < 0)
+-			goto free_card;
+-
+-		/*
+-		 * Fetch switch information from card.
+-		 */
+-		err =3D mmc_read_switch(card);
+-		if (err)
+-			goto free_card;
+-	}
+-
+-	/*
+-	 * For SPI, enable CRC as appropriate.
+-	 * This CRC enable is located AFTER the reading of the
+-	 * card registers because some SDHC cards are not able
+-	 * to provide valid CRCs for non-512-byte blocks.
+-	 */
+-	if (mmc_host_is_spi(host)) {
+-		err =3D mmc_spi_set_crc(host, use_spi_crc);
+-		if (err)
+-			goto free_card;
+-	}
++	err =3D mmc_sd_setup_card(host, card, oldcard !=3D NULL);
++	if (err)
++		goto free_card;
+=20
+ 	/*
+ 	 * Attempt to change to high-speed (if supported)
+ 	 */
+ 	err =3D mmc_switch_hs(card);
+-	if (err)
++	if (err && err !=3D -EOPNOTSUPP)
+ 		goto free_card;
++	if (!err)=09
++		mmc_sd_go_highspeed(card);
+=20
+ 	/*
+ 	 * Compute bus speed.
+ 	 */
+-	max_dtr =3D (unsigned int)-1;
+-
+-	if (mmc_card_highspeed(card)) {
+-		if (max_dtr > card->sw_caps.hs_max_dtr)
+-			max_dtr =3D card->sw_caps.hs_max_dtr;
+-	} else if (max_dtr > card->csd.max_dtr) {
+-		max_dtr =3D card->csd.max_dtr;
+-	}
+-
++	max_dtr =3D mmc_sd_get_max_clock(card);
+ 	mmc_set_clock(host, max_dtr);
+=20
+ 	/*
+@@ -494,30 +552,12 @@
+ 		mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+ 	}
+=20
+-	/*
+-	 * Check if read-only switch is active.
+-	 */
+-	if (!oldcard) {
+-		if (!host->ops->get_ro || host->ops->get_ro(host) < 0) {
+-			printk(KERN_WARNING "%s: host does not "
+-				"support reading read-only "
+-				"switch. assuming write-enable.\n",
+-				mmc_hostname(host));
+-		} else {
+-			if (host->ops->get_ro(host) > 0)
+-				mmc_card_set_readonly(card);
+-		}
+-	}
+-
+-	if (!oldcard)
+-		host->card =3D card;
+-
++	host->card =3D card;
+ 	return 0;
+=20
+ free_card:
+ 	if (!oldcard)
+ 		mmc_remove_card(card);
+-err:
+=20
+ 	return err;
+ }
+diff -urN linux-2.6.34-br1/drivers/mmc/core/sd.h linux-2.6.34-br1-sd1/d=
+rivers/mmc/core/sd.h
+--- linux-2.6.34-br1/drivers/mmc/core/sd.h	1970-01-01 01:00:00.00000000=
+0 +0100
++++ linux-2.6.34-br1-sd1/drivers/mmc/core/sd.h	2010-05-19 04:40:56.0000=
+00000 +0200
+@@ -0,0 +1,16 @@
++#ifndef _MMC_CORE_SD_H
++#define _MMC_CORE_SD_H
++
++#include <linux/mmc/card.h>
++
++extern struct device_type sd_type;
++
++int mmc_switch_hs(struct mmc_card *card);
++int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid);
++int mmc_sd_get_csd(struct mmc_host *host, struct mmc_card *card);
++int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
++	bool reinit);
++unsigned mmc_sd_get_max_clock(struct mmc_card *card);
++void mmc_sd_go_highspeed(struct mmc_card *card);
++
++#endif
+diff -urN linux-2.6.34-br1/drivers/mmc/core/sdio.c linux-2.6.34-br1-sd1=
+/drivers/mmc/core/sdio.c
+--- linux-2.6.34-br1/drivers/mmc/core/sdio.c	2010-05-16 23:17:36.000000=
+000 +0200
++++ linux-2.6.34-br1-sd1/drivers/mmc/core/sdio.c	2010-05-19 02:44:18.00=
+0000000 +0200
+@@ -18,6 +18,7 @@
+=20
+ #include "core.h"
+ #include "bus.h"
++#include "sd.h"
+ #include "sdio_bus.h"
+ #include "mmc_ops.h"
+ #include "sd_ops.h"
+@@ -144,10 +145,10 @@
+ 	u8 ctrl;
+=20
+ 	if (!(card->host->caps & MMC_CAP_4_BIT_DATA))
+-		return 0;
++		return -EOPNOTSUPP;
+=20
+ 	if (card->cccr.low_speed && !card->cccr.wide_bus)
+-		return 0;
++		return -EOPNOTSUPP;
+=20
+ 	ret =3D mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_IF, 0, &ctrl);
+ 	if (ret)
+@@ -159,8 +160,6 @@
+ 	if (ret)
+ 		return ret;
+=20
+-	mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+-
+ 	return 0;
+ }
+=20
+@@ -230,10 +229,10 @@
+ 	u8 speed;
+=20
+ 	if (!(card->host->caps & MMC_CAP_SD_HIGHSPEED))
+-		return 0;
++		return -EOPNOTSUPP;
+=20
+ 	if (!card->cccr.high_speed)
+-		return 0;
++		return -EOPNOTSUPP;
+=20
+ 	ret =3D mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_SPEED, 0, &speed);
+ 	if (ret)
+@@ -245,9 +244,6 @@
+ 	if (ret)
+ 		return ret;
+=20
+-	mmc_card_set_highspeed(card);
+-	mmc_set_timing(card->host, MMC_TIMING_SD_HS);
+-
+ 	return 0;
+ }
+=20
+@@ -261,7 +257,8 @@
+ 			      struct mmc_card *oldcard, int powered_resume)
+ {
+ 	struct mmc_card *card;
+-	int err;
++	int err, flag;
++	unsigned max_dtr;
+=20
+ 	BUG_ON(!host);
+ 	WARN_ON(!host->claimed);
+@@ -295,6 +292,31 @@
+=20
+ 	card->type =3D MMC_TYPE_SDIO;
+=20
++	if (!oldcard || oldcard->type =3D=3D MMC_TYPE_SDIO) {
++		u32 cid[4];
++
++		err =3D mmc_sd_get_cid(host, host->ocr & ocr, cid);
++		if (!err) {
++			if (oldcard && oldcard->type =3D=3D MMC_TYPE_SDIO) {
++				err =3D -ENOENT;
++				goto remove;
++			}
++			card->type =3D MMC_TYPE_SD_COMBO;
++			memcpy(card->raw_cid, cid, sizeof(card->raw_cid));
++		}
++	} else if (oldcard->type =3D=3D MMC_TYPE_SD_COMBO) {
++		u32 cid[4];
++
++		err =3D mmc_sd_get_cid(host, host->ocr & ocr, cid);
++		if (err)
++			goto remove;
++
++		if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) !=3D 0) {
++			err =3D -ENOENT;
++			goto remove;
++		}
++	}
++
+ 	/*
+ 	 * For native busses:  set card RCA and quit open drain mode.
+ 	 */
+@@ -307,6 +329,15 @@
+ 	}
+=20
+ 	/*
++	 * Read CSD, before selecting the card
++	 */
++	if (oldcard =3D=3D NULL && card->type =3D=3D MMC_TYPE_SD_COMBO) {
++		err =3D mmc_sd_get_csd(host, card);
++		if (err)
++			return err;
++	}
++
++	/*
+ 	 * Select card, as all following commands rely on that.
+ 	 */
+ 	if (!powered_resume && !mmc_host_is_spi(host)) {
+@@ -333,21 +364,55 @@
+ 		int same =3D (card->cis.vendor =3D=3D oldcard->cis.vendor &&
+ 			    card->cis.device =3D=3D oldcard->cis.device);
+ 		mmc_remove_card(card);
+-		if (!same) {
+-			err =3D -ENOENT;
+-			goto err;
+-		}
++		if (!same)
++			return -ENOENT;
++
+ 		card =3D oldcard;
+ 		return 0;
+ 	}
+=20
++	if (card->type =3D=3D MMC_TYPE_SD_COMBO) {
++		err =3D mmc_sd_setup_card(host, card, oldcard !=3D NULL);
++		/* handle as SDIO-only card if memory init failed */
++		if (err) {
++			mmc_go_idle(host);
++			if (mmc_host_is_spi(host))
++				/* should not fail, as it worked previously */
++				mmc_spi_set_crc(host, use_spi_crc);
++			card->type =3D MMC_TYPE_SDIO;
++		} else
++			card->dev.type =3D &sd_type;
++	}
++
++	/*
++	 * If needed, disconnect card detection pull-up resistor.
++	 */
++	err =3D sdio_disable_cd(card);
++	if (err)
++		goto remove;
++
+ 	/*
+ 	 * Switch to high-speed (if supported).
+ 	 */
++	flag =3D 1;
++
+ 	err =3D sdio_enable_hs(card);
+-	if (err)
++	if (err =3D=3D -EOPNOTSUPP)
++		flag =3D 0;
++	else if (err)
+ 		goto remove;
+=20
++	if (card->type =3D=3D MMC_TYPE_SD_COMBO) {
++		err =3D mmc_switch_hs(card);
++		if (err =3D=3D -EOPNOTSUPP)
++			flag =3D 0;
++		else if (err)
++			goto remove;
++	}
++
++	if (flag)
++		mmc_sd_go_highspeed(card);
++
+ 	/*
+ 	 * Change to the card's maximum speed.
+ 	 */
+@@ -358,17 +423,44 @@
+ 		 * high-speed, but it seems that 50 MHz is
+ 		 * mandatory.
+ 		 */
+-		mmc_set_clock(host, 50000000);
++		max_dtr =3D 50000000;
+ 	} else {
+-		mmc_set_clock(host, card->cis.max_dtr);
++		max_dtr =3D card->cis.max_dtr;
+ 	}
+=20
++	if (card->type =3D=3D MMC_TYPE_SD_COMBO)
++		max_dtr =3D min_t(unsigned, max_dtr, mmc_sd_get_max_clock(card));
++
++	mmc_set_clock(host, max_dtr);
++
+ 	/*
+ 	 * Switch to wider bus (if supported).
+ 	 */
+-	err =3D sdio_enable_wide(card);
+-	if (err)
+-		goto remove;
++	flag =3D 1;
++
++	if (card->type =3D=3D MMC_TYPE_SD_COMBO) {
++		if ((host->caps & MMC_CAP_4_BIT_DATA) &&
++			(card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
++			err =3D mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
++			if (err)
++				goto remove;
++		} else
++			flag =3D 0;
++	}
++
++	if (flag) {
++		err =3D sdio_enable_wide(card);
++		if (err && err !=3D -EOPNOTSUPP)
++			goto remove;
++		if (err) {
++			if (card->type =3D=3D MMC_TYPE_SD_COMBO)
++				mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
++			flag =3D 0;
++		}
++	}
++
++	if (flag)
++		mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+=20
+ 	if (!oldcard)
+ 		host->card =3D card;
+@@ -568,13 +660,6 @@
+ 	card->sdio_funcs =3D 0;
+=20
+ 	/*
+-	 * If needed, disconnect card detection pull-up resistor.
+-	 */
+-	err =3D sdio_disable_cd(card);
+-	if (err)
+-		goto remove;
+-
+-	/*
+ 	 * Initialize (but don't add) all present functions.
+ 	 */
+ 	for (i =3D 0; i < funcs; i++, card->sdio_funcs++) {
+diff -urN linux-2.6.34-br1/include/linux/mmc/card.h linux-2.6.34-br1-sd=
+1/include/linux/mmc/card.h
+--- linux-2.6.34-br1/include/linux/mmc/card.h	2010-05-16 23:17:36.00000=
+0000 +0200
++++ linux-2.6.34-br1-sd1/include/linux/mmc/card.h	2010-05-19 02:44:18.0=
+00000000 +0200
+@@ -92,6 +92,7 @@
+ #define MMC_TYPE_MMC		0		/* MMC card */
+ #define MMC_TYPE_SD		1		/* SD card */
+ #define MMC_TYPE_SDIO		2		/* SDIO card */
++#define MMC_TYPE_SD_COMBO	3		/* SD combo (IO+mem) card */
+ 	unsigned int		state;		/* (our) card state */
+ #define MMC_STATE_PRESENT	(1<<0)		/* present in sysfs */
+ #define MMC_STATE_READONLY	(1<<1)		/* card is read-only */
 
