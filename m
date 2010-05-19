@@ -1,122 +1,212 @@
-From: akpm@linux-foundation.org
-Subject: + sdio-add-new-function-for-raw-read-after-write-operation.patch added to -mm tree
-Date: Wed, 19 May 2010 12:52:31 -0700
-Message-ID: <201005191952.o4JJqVtq002369@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: notasas@gmail.com, dimitrysh@google.com, kalle.valo@iki.fi, linux-mmc@vger.kernel.org
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] sdhci-spear: ST SPEAr based SDHCI controller glue
+Date: Wed, 19 May 2010 14:10:13 -0700
+Message-ID: <20100519141013.ccb8ca9d.akpm@linux-foundation.org>
+References: <1273052118-15513-1-git-send-email-viresh.kumar@st.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:33032 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751318Ab0ESVLA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 May 2010 17:11:00 -0400
+In-Reply-To: <1273052118-15513-1-git-send-email-viresh.kumar@st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Viresh KUMAR <viresh.kumar@st.com>
+Cc: pierre@ossman.eu, linux-mmc@vger.kernel.org, shiraz.hashim@st.com
+
+On Wed,  5 May 2010 15:05:18 +0530
+Viresh KUMAR <viresh.kumar@st.com> wrote:
+
+> This patch adds glue layer for support of sdhci driver on ST SPEAr platform.
+> 
+
+Looks OK to my untrained eye.  A few very minor things:
+
+>
+> ...
+>
+> +static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
+> +{
+> +	struct platform_device *pdev = dev_id;
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct spear_sdhci *sdhci =
+> +		(struct spear_sdhci *)(pdev->dev.platform_data);
+
+Seems wrong to open-code all of this.  There should be a
+
+void *platform_device_get_platform_data(struct platform_device *);
+
+but I can't find it.  The code can use dev_get_platdata(), however.
 
 
-The patch titled
-     sdio: add new function for RAW (Read after Write) operation
-has been added to the -mm tree.  Its filename is
-     sdio-add-new-function-for-raw-read-after-write-operation.patch
+Also, you don't _have_ to initialise things at the definition site.  If
+you were to do:
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+	struct platform_device *pdev;
+	struct sdhci_host *host;
+	struct spear_sdhci *sdhci;
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+	pdev = dev_id;
+	host = platform_get_drvdata(pdev);
+	sdhci = (struct spear_sdhci *)(pdev->dev.platform_data);
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+then you wouldn't need to do weird things to fit the code in 80-cols.
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+Also, platform_data has type void*, so the typecast here is unneeded
+and, because it defeats typechecking it is undesirable.
 
-------------------------------------------------------
-Subject: sdio: add new function for RAW (Read after Write) operation
-From: Grazvydas Ignotas <notasas@gmail.com>
+> +	unsigned long gpio_irq_type;
+> +	int val;
+> +
+> +	val = gpio_get_value(sdhci->data->card_int_gpio);
+> +
+> +	/* val == 1 -> card removed, val == 0 -> card inserted */
+> +	/* if card removed - set irq for low level, else vice versa */
+> +	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
+> +	set_irq_type(irq, gpio_irq_type);
+> +
+> +	if (sdhci->data->card_power_gpio >= 0) {
+> +		if (!sdhci->data->power_always_enb) {
+> +			/* if card inserted, give power, otherwise remove it */
+> +			val = sdhci->data->power_active_high ? !val : val ;
+> +			gpio_set_value(sdhci->data->card_power_gpio, val);
+> +		}
+> +	}
+> +
+> +	/* inform sdhci driver about card insertion/removal */
+> +	tasklet_schedule(&host->card_tasklet);
+> +
+> +	return IRQ_HANDLED;
+> +}
+> +
+> +static int __devinit sdhci_probe(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host;
+> +	struct resource *iomem;
+> +	struct spear_sdhci *sdhci;
+> +	int ret;
+> +
+> +	BUG_ON(pdev == NULL);
+> +
+> +	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	if (!iomem) {
+> +		ret = -ENOMEM;
+> +		dev_dbg(&pdev->dev, "memory resource not defined\n");
+> +		goto err;
+> +	}
+> +
+> +	if (!request_mem_region(iomem->start, resource_size(iomem),
+> +				"spear-sdhci")) {
+> +		ret = -EBUSY;
+> +		dev_dbg(&pdev->dev, "cannot request region\n");
+> +		goto err;
+> +	}
+> +
+> +	sdhci = kzalloc(sizeof(*sdhci), GFP_KERNEL);
+> +	if (!sdhci) {
+> +		ret = -ENOMEM;
+> +		dev_dbg(&pdev->dev, "cannot allocate memory for sdhci\n");
+> +		goto err_kzalloc;
+> +	}
+> +
+> +	/* clk enable */
+> +	sdhci->clk = clk_get(&pdev->dev, NULL);
+> +	if (IS_ERR(sdhci->clk)) {
+> +		ret = PTR_ERR(sdhci->clk);
+> +		dev_dbg(&pdev->dev, "Error getting clock\n");
+> +		goto err_clk_get;
+> +	}
+> +
+> +	ret = clk_enable(sdhci->clk);
+> +	if (ret) {
+> +		dev_dbg(&pdev->dev, "Error enabling clock\n");
+> +		goto err_clk_enb;
+> +	}
+> +
+> +	/* overwrite platform_data */
+> +	sdhci->data = (struct sdhci_plat_data *)(pdev->dev.platform_data);
 
-SDIO specification allows RAW (Read after Write) operation using
-IO_RW_DIRECT command (CMD52) by setting the RAW bit.  This operation is
-similar to ordinary read/write commands, except that both write and read
-are performed using single command/response pair.  The Linux SDIO layer
-already supports this internaly, only external function is missing for
-drivers to make use, which is added by this patch.
+Similarly.
 
-This type of command is required to implement proper power save mode
-support in wl1251 wifi driver.
+> +	pdev->dev.platform_data = sdhci;
+> +
+> +	if (pdev->dev.parent)
+> +		host = sdhci_alloc_host(pdev->dev.parent, 0);
+> +	else
+> +		host = sdhci_alloc_host(&pdev->dev, 0);
+> +
+> +	if (IS_ERR(host)) {
+> +		ret = PTR_ERR(host);
+> +		dev_dbg(&pdev->dev, "error allocating host\n");
+> +		goto err_alloc_host;
+> +	}
+> +
+> +	host->hw_name = "sdhci";
+> +	host->ops = &sdhci_pltfm_ops;
+> +	host->irq = platform_get_irq(pdev, 0);
+> +	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
+> +
+> +	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
+> +	if (!host->ioaddr) {
+> +		ret = -ENOMEM;
+> +		dev_dbg(&pdev->dev, "failed to remap registers\n");
+> +		goto err_ioremap;
+> +	}
+> +
+> +	ret = sdhci_add_host(host);
+> +	if (ret) {
+> +		dev_dbg(&pdev->dev, "error adding host\n");
+> +		goto err_add_host;
+> +	}
+> +
+> +	platform_set_drvdata(pdev, host);
+> +
+>
+> ...
+>
+> +static int __devexit sdhci_remove(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	struct spear_sdhci *sdhci =
+> +		(struct spear_sdhci *)(pdev->dev.platform_data);
 
-Android has similar patch for G1 in it's tree for the same reason:
+Again.
 
-http://android.git.kernel.org/?p=kernel/common.git;a=commitdiff;h=74a47786f6ecbe6c1cf9fb15efe6a968451deb52
-
-Signed-off-by: Grazvydas Ignotas <notasas@gmail.com>
-Acked-by: Kalle Valo <kalle.valo@iki.fi>
-Cc: Dmitry Shmidt <dimitrysh@google.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/core/sdio_io.c    |   31 +++++++++++++++++++++++++++++++
- include/linux/mmc/sdio_func.h |    3 +++
- 2 files changed, 34 insertions(+)
-
-diff -puN drivers/mmc/core/sdio_io.c~sdio-add-new-function-for-raw-read-after-write-operation drivers/mmc/core/sdio_io.c
---- a/drivers/mmc/core/sdio_io.c~sdio-add-new-function-for-raw-read-after-write-operation
-+++ a/drivers/mmc/core/sdio_io.c
-@@ -406,6 +406,37 @@ void sdio_writeb(struct sdio_func *func,
- EXPORT_SYMBOL_GPL(sdio_writeb);
- 
- /**
-+ *	sdio_writeb_readb - write and read a byte from SDIO function
-+ *	@func: SDIO function to access
-+ *	@b: byte to write
-+ *	@addr: address to write to
-+ *	@err_ret: optional status value from transfer
-+ *
-+ *	Performs a RAW (Read after Write) operation as defined by SDIO spec -
-+ *	single byte is written to address space of a given SDIO function and
-+ *	response is read back from the same address, both using single request.
-+ *	If there is a problem with the operation, 0xff is returned and
-+ *	@err_ret will contain the error code.
-+ */
-+u8 sdio_writeb_readb(struct sdio_func *func, u8 b,
-+	unsigned int addr, int *err_ret)
-+{
-+	int ret;
-+	u8 val;
-+
-+	BUG_ON(!func);
-+
-+	ret = mmc_io_rw_direct(func->card, 1, func->num, addr, b, &val);
-+	if (err_ret)
-+		*err_ret = ret;
-+	if (ret)
-+		val = 0xff;
-+
-+	return val;
-+}
-+EXPORT_SYMBOL_GPL(sdio_writeb_readb);
-+
-+/**
-  *	sdio_memcpy_fromio - read a chunk of memory from a SDIO function
-  *	@func: SDIO function to access
-  *	@dst: buffer to store the data
-diff -puN include/linux/mmc/sdio_func.h~sdio-add-new-function-for-raw-read-after-write-operation include/linux/mmc/sdio_func.h
---- a/include/linux/mmc/sdio_func.h~sdio-add-new-function-for-raw-read-after-write-operation
-+++ a/include/linux/mmc/sdio_func.h
-@@ -145,6 +145,9 @@ extern void sdio_writew(struct sdio_func
- extern void sdio_writel(struct sdio_func *func, u32 b,
- 	unsigned int addr, int *err_ret);
- 
-+extern u8 sdio_writeb_readb(struct sdio_func *func, u8 b,
-+	unsigned int addr, int *err_ret);
-+
- extern int sdio_memcpy_toio(struct sdio_func *func, unsigned int addr,
- 	void *src, int count);
- extern int sdio_writesb(struct sdio_func *func, unsigned int addr,
-_
-
-Patches currently in -mm which might be from notasas@gmail.com are
-
-linux-next.patch
-sdio-add-new-function-for-raw-read-after-write-operation.patch
-fbdev-move-fbio_waitforvsync-to-linux-fbh.patch
-fbdev-move-fbio_waitforvsync-to-linux-fbh-update.patch
+> +	int dead;
+> +	u32 scratch;
+> +
+> +	if (sdhci->data) {
+> +		if (sdhci->data->card_int_gpio >= 0) {
+> +			free_irq(gpio_to_irq(sdhci->data->card_int_gpio), pdev);
+> +			gpio_free(sdhci->data->card_int_gpio);
+> +		}
+> +
+> +		if (sdhci->data->card_power_gpio >= 0)
+> +			gpio_free(sdhci->data->card_power_gpio);
+> +	}
+> +
+> +	platform_set_drvdata(pdev, NULL);
+> +	dead = 0;
+> +	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
+> +	if (scratch == (u32)-1)
+> +		dead = 1;
+> +
+> +	sdhci_remove_host(host, dead);
+> +	iounmap(host->ioaddr);
+> +	sdhci_free_host(host);
+> +	clk_disable(sdhci->clk);
+> +	clk_put(sdhci->clk);
+> +	kfree(sdhci);
+> +	if (iomem)
+> +		release_mem_region(iomem->start, resource_size(iomem));
+> +
+> +	return 0;
+> +}
+>
+> ...
+>
 
