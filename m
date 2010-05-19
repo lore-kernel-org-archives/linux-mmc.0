@@ -1,62 +1,88 @@
-From: Madhav Chauhan <madhav.imsec@gmail.com>
-Subject: Re: MMC insert remove issue
-Date: Wed, 19 May 2010 18:59:58 +0530
-Message-ID: <AANLkTilDl243C5bvJGr1Id_lAItr9QLq6k6Q0qab7bDf@mail.gmail.com>
-References: <AANLkTimg_VbK2uPZNCn3Il8klv22JhF7iEe-MTCA5NYe@mail.gmail.com>
-	 <m3632lb61t.fsf@pullcord.laptop.org>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH v4 0/5] Adding MMC Support on OMAP4430 SDP
+Date: Wed, 19 May 2010 10:25:38 -0500
+Message-ID: <002201caf767$895965f0$544ff780@am.dhcp.ti.com>
+References: <22422.10.24.255.17.1273947606.squirrel@dbdmail.itg.ti.com> <20100518025026.GF5818@atomide.com> <20100519000912.GX5818@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:34170 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751454Ab0ESN36 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 May 2010 09:29:58 -0400
-Received: by pwi5 with SMTP id 5so1538062pwi.19
-        for <linux-mmc@vger.kernel.org>; Wed, 19 May 2010 06:29:58 -0700 (PDT)
-In-Reply-To: <m3632lb61t.fsf@pullcord.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20100519000912.GX5818@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: 'Tony Lindgren' <tony@atomide.com>, 'kishore kadiyala' <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, jarkko.lavinen@nokia.com, rmk@arm.linux.org.uk, paul@pwsan.com, santosh.shilimkar@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-Hi Chris,
-Thanks for your response...
-Below is the back trace for Soft lock up occured also my host
-controller uses the SDHCI interface.
 
- [  118.038802] BUG: spinlock lockup on CPU#0, mmcqd/1284, c42e7200
-[  118.043248] [<c047f164>] (dump_stack+0x0/0x14) from [<c02adf30>]
-(_raw_spin_lock+0x12c/0x16c)
-[  118.051745] [<c02ade04>] (_raw_spin_lock+0x0/0x16c) from
-[<c0481c24>] (_spin_lock_irq+0x14/0x18)
-[  118.060505]  r8:c33b4b7c r7:c33b4a40 r6:c42e721c r5:c42e7214 r4:c459=
-4000
-[  118.067182] [<c0481c10>] (_spin_lock_irq+0x0/0x18) from
-[<c0370504>] (mmc_queue_thread+0x48/0xe8)
-[  118.076029] [<c03704bc>] (mmc_queue_thread+0x0/0xe8) from
-[<c016ef04>] (kthread+0x54/0x80)
-[  118.084269] [<c016eeb0>] (kthread+0x0/0x80) from [<c015d9a8>]
-(do_exit+0x0/0x640)
-[  118.091728]  r5:00000000 r4:00000000
+
+> -----Original Message-----
+> From: Tony Lindgren [mailto:tony@atomide.com]
+> Sent: Tuesday, May 18, 2010 7:09 PM
+> To: kishore kadiyala
+> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org;
+> madhu.cr@ti.com; jarkko.lavinen@nokia.com; rmk@arm.linux.org.uk;
+> paul@pwsan.com; santosh.shilimkar@ti.com
+> Subject: Re: [PATCH v4 0/5] Adding MMC Support on OMAP4430 SDP
+> 
+> * Tony Lindgren <tony@atomide.com> [100517 19:45]:
+> > Hi,
+> >
+> > * kishore kadiyala <kishore.kadiyala@ti.com> [100515 11:15]:
+> > > Adding MMC1 and MMC2 controllers support for OMAP4
+> > >
+> > > V4:
+> > > - Rebased to "for_next" branch[LO].
+> > > - The first 3 patches [1,2,3] in the series are Minimal set of changes
+> > >   with which MMC1/MMC2 works [No card detect for MMC1]on OMAP4 but
+> with
+> > >   dependencies on following patches [Not in "for_next" branch]
+> > >   [1] I2c patches
+> > >       a)https://patchwork.kernel.org/patch/98937/
+> > >       b)https://patchwork.kernel.org/patch/98936/
+> > >       c)https://patchwork.kernel.org/patch/98939/
+> > >       d)https://patchwork.kernel.org/patch/79735/
+> >
+> > I've taken the updated versions of the I2C patches,
+> > and fixed them not to break omap3_defconfig.
+> >
+> > >   [2] Regulator pacth
+> > >       a)https://patchwork.kernel.org/patch/94054/
+> > >   [3] hsmmc-clk patch
+> > >       a)https://patchwork.kernel.org/patch/96821/
+> >
+> > I've picked up these too.
+> >
+> > > - The patches 4,5 adds card detect feature for MMC1
+> >
+> > I only took 1 - 3 out of the MMC patches, it's too
+> > late to start changing the other stuff.
+> >
+> > I've reposted the whole series for a quick review.
+> 
+> FYI, the MMC on omap4 is not quite there yet at least
+> on my board. It mostly detects the card with
+> omap_4430sdp_defconfig, but fails always unless
+> CONFIG_RTC_DRV_TWL92330=y.. This is without CONFIG_SMP
+> as it oopses.
+> 
+
+I did try the omap_4430sdp_defconfig on the master branch. On my SDP the MMC
+cards were detected fine without any dependency on CONFIG_RTC_DRV_TWL92330.
 
 Regards,
-Madhav
+Madhu
 
-On Tue, May 18, 2010 at 8:39 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> =A0 > In one ARM based boards I am facing soft lock up issue while
-> =A0 > inserting/removing MMC/SD card continuously having 2K files. =A0=
-Can
-> =A0 > someone point me where should i look whether host controller
-> =A0 > driver or MMC block layer/Kernel block layer??
->
-> Could be any of the above, but perhaps most likely your host
-> controller driver -- which one are you using? =A0Can you perform
-> alt-sysrq-t when the lockup happens, or get a kgdb backtrace?
->
-> - Chris.
-> --
-> Chris Ball =A0 <cjb@laptop.org>
-> One Laptop Per Child
->
+> Also MMC is never detected with omap3_defconfig.
+> 
+> Santosh & Kishore, maybe take a look at that, otherwise
+> it looks like we still don't have a very usable support
+> for omap4.
+> 
+> I've piled all these patches into linux-omap master branch
+> for easy testing. Let me know if I missed some patch.
+> 
+> Regards,
+> 
+> Tony
+
