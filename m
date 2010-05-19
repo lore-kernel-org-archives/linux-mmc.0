@@ -1,36 +1,61 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 0/2] tmio: Support board-specified voltages
-Date: Wed, 19 May 2010 20:37:11 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1005191825160.3099@axis700.grange>
+Subject: [PATCH 2/2] sh: allow platforms to specify SD-card supported voltages
+Date: Wed, 19 May 2010 20:37:36 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1005191828330.3099@axis700.grange>
+References: <Pine.LNX.4.64.1005191825160.3099@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:45844 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1753006Ab0ESSg6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 May 2010 14:36:58 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1005191825160.3099@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
 To: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
 Cc: Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Andrew Morton <akpm@linux-foundation.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Just re-sending with Ian's ack added. This used to be a series of 3 
-patches, patch 3 is ARM specific and will be merged via the architecture 
-tree.
+Boards can have different supplied voltages on different SD card slots. This
+information has to be passed down to the SD/MMC driver.
 
-Applies on top of
-
-"[PATCH 0/10] add DMA support to tmio_mmc, using dmaengine API, use it on SH"
-and
-"[PATCH 0/3] tmio: let platforms decide upon write-protection availability"
-
-patch series.
-
-Andrew, please, apply.
-
-Thanks
-Guennadi
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Acked-by: Ian Molton <ian@mnementh.co.uk>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mfd/sh_mobile_sdhi.c       |    4 +++-
+ include/linux/mfd/sh_mobile_sdhi.h |    3 +++
+ 2 files changed, 6 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mfd/sh_mobile_sdhi.c b/drivers/mfd/sh_mobile_sdhi.c
+index 7970fe8..d9e4701 100644
+--- a/drivers/mfd/sh_mobile_sdhi.c
++++ b/drivers/mfd/sh_mobile_sdhi.c
+@@ -106,8 +106,10 @@ static int __init sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	mmc_data->hclk = clk_get_rate(priv->clk);
+ 	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
+ 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
+-	if (p)
++	if (p) {
+ 		mmc_data->flags = p->tmio_flags;
++		mmc_data->ocr_mask = p->tmio_ocr_mask;
++	}
+ 
+ 	if (p && p->dma_slave_tx >= 0 && p->dma_slave_rx >= 0) {
+ 		priv->param_tx.slave_id = p->dma_slave_tx;
+diff --git a/include/linux/mfd/sh_mobile_sdhi.h b/include/linux/mfd/sh_mobile_sdhi.h
+index c7b47f8..4906780 100644
+--- a/include/linux/mfd/sh_mobile_sdhi.h
++++ b/include/linux/mfd/sh_mobile_sdhi.h
+@@ -1,10 +1,13 @@
+ #ifndef __SH_MOBILE_SDHI_H__
+ #define __SH_MOBILE_SDHI_H__
+ 
++#include <linux/types.h>
++
+ struct sh_mobile_sdhi_info {
+ 	int dma_slave_tx;
+ 	int dma_slave_rx;
+ 	unsigned long tmio_flags;
++	u32 tmio_ocr_mask;	/* available MMC voltages */
+ 	void (*set_pwr)(struct platform_device *pdev, int state);
+ };
+ 
+-- 
+1.6.2.4
+
