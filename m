@@ -1,33 +1,50 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 0/3] tmio: let platforms decide upon write-protection
- availability
-Date: Wed, 19 May 2010 20:35:57 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1005191815491.3099@axis700.grange>
+Subject: [PATCH 3/3] sh: disable SD-card write-protection detection on kfr2r09
+Date: Wed, 19 May 2010 20:36:13 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1005191819280.3099@axis700.grange>
+References: <Pine.LNX.4.64.1005191815491.3099@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:48118 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1752044Ab0ESSfr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 May 2010 14:35:47 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1005191815491.3099@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
 To: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
 Cc: Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+List-Id: linux-mmc@vger.kernel.org
 
-No changes to patches themselves, just re-sending with an ack added.
+kfr2r09 board has a micro-SD card slot, therefore card write-protection
+detection cannot work there, disable it.
 
-Applies on top of the
-
-"[PATCH 0/10] add DMA support to tmio_mmc, using dmaengine API, use it on SH"
-
-patch series.
-
-Andrew, please, apply.
-
-Thanks
-Guennadi
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Acked-by: Ian Molton <ian@mnementh.co.uk>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ arch/sh/boards/mach-kfr2r09/setup.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
+index 95850aa..68994a1 100644
+--- a/arch/sh/boards/mach-kfr2r09/setup.c
++++ b/arch/sh/boards/mach-kfr2r09/setup.c
+@@ -11,6 +11,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/interrupt.h>
+ #include <linux/mfd/sh_mobile_sdhi.h>
++#include <linux/mfd/tmio.h>
+ #include <linux/mtd/physmap.h>
+ #include <linux/mtd/onenand.h>
+ #include <linux/delay.h>
+@@ -358,8 +359,9 @@ static struct resource kfr2r09_sh_sdhi0_resources[] = {
+ };
+ 
+ static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
+-	.dma_slave_tx = SHDMA_SLAVE_SDHI0_TX,
+-	.dma_slave_rx = SHDMA_SLAVE_SDHI0_RX,
++	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
++	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
++	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
+ };
+ 
+ static struct platform_device kfr2r09_sh_sdhi0_device = {
+-- 
+1.6.2.4
+
