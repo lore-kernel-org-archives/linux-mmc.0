@@ -1,62 +1,189 @@
-From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Subject: RE: [PATCH v4 0/5] Adding MMC Support on OMAP4430 SDP
-Date: Thu, 20 May 2010 10:32:18 +0530
-Message-ID: <EAF47CD23C76F840A9E7FCE10091EFAB02C56668DE@dbde02.ent.ti.com>
-References: <22422.10.24.255.17.1273947606.squirrel@dbdmail.itg.ti.com>
- <20100518025026.GF5818@atomide.com> <20100519000912.GX5818@atomide.com>
- <05ec01caf76a$3a02da60$LocalHost@wipblrx0099945A>
- <20100520005800.GK5818@atomide.com>
+From: Viresh KUMAR <viresh.kumar@st.com>
+Subject: Re: [PATCH] sdhci-spear: ST SPEAr based SDHCI controller glue
+Date: Thu, 20 May 2010 10:47:59 +0530
+Message-ID: <4BF4C607.6070604@st.com>
+References: <1273052118-15513-1-git-send-email-viresh.kumar@st.com> <20100519141013.ccb8ca9d.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20100520005800.GK5818@atomide.com>
-Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "jarkko.lavinen@nokia.com" <jarkko.lavinen@nokia.com>, "rmk@arm.linux.org.uk" <rmk@arm.linux.org.uk>, "paul@pwsan.com" <paul@pwsan.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:35481 "EHLO
+	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752826Ab0ETFSS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 May 2010 01:18:18 -0400
+In-Reply-To: <20100519141013.ccb8ca9d.akpm@linux-foundation.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: pierre@ossman.eu, linux-mmc@vger.kernel.org, shiraz.hashim@st.com
 
-> -----Original Message-----
-> From: Tony Lindgren [mailto:tony@atomide.com]
-> Sent: Thursday, May 20, 2010 6:28 AM
-> To: Kadiyala, Kishore
-> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; Chikkature Rajashekar, Madhusudhan;
-> jarkko.lavinen@nokia.com; rmk@arm.linux.org.uk; paul@pwsan.com; Shilimkar, Santosh
-> Subject: Re: [PATCH v4 0/5] Adding MMC Support on OMAP4430 SDP
+On 5/20/2010 2:40 AM, Andrew Morton wrote:
+> On Wed,  5 May 2010 15:05:18 +0530
+> Viresh KUMAR <viresh.kumar@st.com> wrote:
 > 
-> * kishore kadiyala <kishore.kadiyala@ti.com> [100519 08:39]:
-> > >
-> > >FYI, the MMC on omap4 is not quite there yet at least
-> > >on my board. It mostly detects the card with
-> > >omap_4430sdp_defconfig, but fails always unless
-> > >CONFIG_RTC_DRV_TWL92330=y.. This is without CONFIG_SMP
-> > >as it oopses.
-> >
-> > Hope you are referring CONFIG_RTC_DRV_TWL92330 to omap3_defconfig
-> > and not to omap_4430sdp_defconfig.
+>> This patch adds glue layer for support of sdhci driver on ST SPEAr platform.
+>>
 > 
-> Sorry I meant CONFIG_RTC_DRV_TWL4030 in the omap_4430sdp_defconfig.
-> If you take that out, MMC is never detected.
+> Looks OK to my untrained eye.  A few very minor things:
 > 
-> > With omap_4430sdp_defconfig , I've tested on 4430SDP and Blaze and always
-> > Cards on MMC1 & MMC2 gets detected once bootedup.
+>>
+>> ...
+>>
+>> +static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
+>> +{
+>> +	struct platform_device *pdev = dev_id;
+>> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+>> +	struct spear_sdhci *sdhci =
+>> +		(struct spear_sdhci *)(pdev->dev.platform_data);
 > 
-> Are you able to actually mount root on the MMC with let's say
-> current linux-omap master branch?
+> Seems wrong to open-code all of this.  There should be a
 > 
-> > >Also MMC is never detected with omap3_defconfig.
-> >
-> > With omap3_defconfig  +  disabling "CONFIG_OMAP_RESET_CLOCKS",
-> > I've tested on 4430SDP and Blaze and always Cards on MMC1 & MMC2
-> > gets detected on bootup.
+> void *platform_device_get_platform_data(struct platform_device *);
 > 
-> That should be fixed so CONFIG_OMAP_RESET_CLOCKS works. Otherwise
-> we're relying on some random clocks being enabled.
-> 
-The fix for this is already in Paul's queue now.
+> but I can't find it.  The code can use dev_get_platdata(), however.
 
-https://patchwork.kernel.org/patch/101094/
+OK.
 
-Regards,
-Santosh
+> 
+> 
+> Also, you don't _have_ to initialise things at the definition site.  If
+> you were to do:
+> 
+> 	struct platform_device *pdev;
+> 	struct sdhci_host *host;
+> 	struct spear_sdhci *sdhci;
+> 
+> 	pdev = dev_id;
+> 	host = platform_get_drvdata(pdev);
+> 	sdhci = (struct spear_sdhci *)(pdev->dev.platform_data);
+> 
+> then you wouldn't need to do weird things to fit the code in 80-cols.
+> 
+> Also, platform_data has type void*, so the typecast here is unneeded
+> and, because it defeats typechecking it is undesirable.
+
+OK.
+
+> 
+>> +	unsigned long gpio_irq_type;
+>> +	int val;
+>> +
+>> +	val = gpio_get_value(sdhci->data->card_int_gpio);
+>> +
+>> +	/* val == 1 -> card removed, val == 0 -> card inserted */
+>> +	/* if card removed - set irq for low level, else vice versa */
+>> +	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
+>> +	set_irq_type(irq, gpio_irq_type);
+>> +
+>> +	if (sdhci->data->card_power_gpio >= 0) {
+>> +		if (!sdhci->data->power_always_enb) {
+>> +			/* if card inserted, give power, otherwise remove it */
+>> +			val = sdhci->data->power_active_high ? !val : val ;
+>> +			gpio_set_value(sdhci->data->card_power_gpio, val);
+>> +		}
+>> +	}
+>> +
+>> +	/* inform sdhci driver about card insertion/removal */
+>> +	tasklet_schedule(&host->card_tasklet);
+>> +
+>> +	return IRQ_HANDLED;
+>> +}
+>> +
+>> +static int __devinit sdhci_probe(struct platform_device *pdev)
+>> +{
+>> +	struct sdhci_host *host;
+>> +	struct resource *iomem;
+>> +	struct spear_sdhci *sdhci;
+>> +	int ret;
+>> +
+>> +	BUG_ON(pdev == NULL);
+>> +
+>> +	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>> +	if (!iomem) {
+>> +		ret = -ENOMEM;
+>> +		dev_dbg(&pdev->dev, "memory resource not defined\n");
+>> +		goto err;
+>> +	}
+>> +
+>> +	if (!request_mem_region(iomem->start, resource_size(iomem),
+>> +				"spear-sdhci")) {
+>> +		ret = -EBUSY;
+>> +		dev_dbg(&pdev->dev, "cannot request region\n");
+>> +		goto err;
+>> +	}
+>> +
+>> +	sdhci = kzalloc(sizeof(*sdhci), GFP_KERNEL);
+>> +	if (!sdhci) {
+>> +		ret = -ENOMEM;
+>> +		dev_dbg(&pdev->dev, "cannot allocate memory for sdhci\n");
+>> +		goto err_kzalloc;
+>> +	}
+>> +
+>> +	/* clk enable */
+>> +	sdhci->clk = clk_get(&pdev->dev, NULL);
+>> +	if (IS_ERR(sdhci->clk)) {
+>> +		ret = PTR_ERR(sdhci->clk);
+>> +		dev_dbg(&pdev->dev, "Error getting clock\n");
+>> +		goto err_clk_get;
+>> +	}
+>> +
+>> +	ret = clk_enable(sdhci->clk);
+>> +	if (ret) {
+>> +		dev_dbg(&pdev->dev, "Error enabling clock\n");
+>> +		goto err_clk_enb;
+>> +	}
+>> +
+>> +	/* overwrite platform_data */
+>> +	sdhci->data = (struct sdhci_plat_data *)(pdev->dev.platform_data);
+> 
+> Similarly.
+
+OK.
+
+> 
+>> +	pdev->dev.platform_data = sdhci;
+>> +
+>> +	if (pdev->dev.parent)
+>> +		host = sdhci_alloc_host(pdev->dev.parent, 0);
+>> +	else
+>> +		host = sdhci_alloc_host(&pdev->dev, 0);
+>> +
+>> +	if (IS_ERR(host)) {
+>> +		ret = PTR_ERR(host);
+>> +		dev_dbg(&pdev->dev, "error allocating host\n");
+>> +		goto err_alloc_host;
+>> +	}
+>> +
+>> +	host->hw_name = "sdhci";
+>> +	host->ops = &sdhci_pltfm_ops;
+>> +	host->irq = platform_get_irq(pdev, 0);
+>> +	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
+>> +
+>> +	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
+>> +	if (!host->ioaddr) {
+>> +		ret = -ENOMEM;
+>> +		dev_dbg(&pdev->dev, "failed to remap registers\n");
+>> +		goto err_ioremap;
+>> +	}
+>> +
+>> +	ret = sdhci_add_host(host);
+>> +	if (ret) {
+>> +		dev_dbg(&pdev->dev, "error adding host\n");
+>> +		goto err_add_host;
+>> +	}
+>> +
+>> +	platform_set_drvdata(pdev, host);
+>> +
+>>
+>> ...
+>>
+>> +static int __devexit sdhci_remove(struct platform_device *pdev)
+>> +{
+>> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+>> +	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>> +	struct spear_sdhci *sdhci =
+>> +		(struct spear_sdhci *)(pdev->dev.platform_data);
+> 
+> Again.
+
+OK. Will be corrected everywhere.
