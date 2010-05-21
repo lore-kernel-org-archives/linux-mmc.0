@@ -1,19 +1,19 @@
 From: akpm@linux-foundation.org
-Subject: + sh-allow-platforms-to-specify-sd-card-supported-voltages.patch added to -mm tree
-Date: Fri, 21 May 2010 12:39:19 -0700
-Message-ID: <201005211939.o4LJdKoW030317@imap1.linux-foundation.org>
+Subject: + sdio-add-new-function-for-raw-read-after-write-operation-update.patch added to -mm tree
+Date: Fri, 21 May 2010 13:36:30 -0700
+Message-ID: <201005212036.o4LKaUjE032720@imap1.linux-foundation.org>
 Reply-To: linux-kernel@vger.kernel.org
 Return-path: <mm-commits-owner@vger.kernel.org>
 Sender: mm-commits-owner@vger.kernel.org
 To: mm-commits@vger.kernel.org
-Cc: g.liakhovetski@gmx.de, ian@mnementh.co.uk, lethal@linux-sh.org, linux-mmc@vger.kernel.org, magnus.damm@gmail.com, sameo@linux.intel.com
+Cc: notasas@gmail.com, dimitrysh@google.com, kalle.valo@iki.fi, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     sh: allow platforms to specify SD-card supported voltages
+     sdio-add-new-function-for-raw-read-after-write-operation update
 has been added to the -mm tree.  Its filename is
-     sh-allow-platforms-to-specify-sd-card-supported-voltages.patch
+     sdio-add-new-function-for-raw-read-after-write-operation-update.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -29,78 +29,74 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sh: allow platforms to specify SD-card supported voltages
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: sdio-add-new-function-for-raw-read-after-write-operation update
+From: Grazvydas Ignotas <notasas@gmail.com>
 
-Boards can have different supplied voltages on different SD card slots. This
-information has to be passed down to the SD/MMC driver.
+Here is updated version that addresses your comments (removes BUG()
+and improves argument name).
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Acked-by: Ian Molton <ian@mnementh.co.uk>
-Cc: Samuel Ortiz <sameo@linux.intel.com>
-Cc: Magnus Damm <magnus.damm@gmail.com>
-Cc: Paul Mundt <lethal@linux-sh.org>
+Signed-off-by: Grazvydas Ignotas <notasas@gmail.com>
+Cc: Kalle Valo <kalle.valo@iki.fi>
+Cc: Dmitry Shmidt <dimitrysh@google.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mfd/sh_mobile_sdhi.c       |    4 +++-
- include/linux/mfd/sh_mobile_sdhi.h |    3 +++
- 2 files changed, 6 insertions(+), 1 deletion(-)
+ drivers/mmc/core/sdio_io.c    |    9 ++++-----
+ include/linux/mmc/sdio_func.h |    2 +-
+ 2 files changed, 5 insertions(+), 6 deletions(-)
 
-diff -puN drivers/mfd/sh_mobile_sdhi.c~sh-allow-platforms-to-specify-sd-card-supported-voltages drivers/mfd/sh_mobile_sdhi.c
---- a/drivers/mfd/sh_mobile_sdhi.c~sh-allow-platforms-to-specify-sd-card-supported-voltages
-+++ a/drivers/mfd/sh_mobile_sdhi.c
-@@ -107,8 +107,10 @@ static int __init sh_mobile_sdhi_probe(s
- 	mmc_data->hclk = clk_get_rate(priv->clk);
- 	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
- 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
--	if (p)
-+	if (p) {
- 		mmc_data->flags = p->tmio_flags;
-+		mmc_data->ocr_mask = p->tmio_ocr_mask;
-+	}
+diff -puN drivers/mmc/core/sdio_io.c~sdio-add-new-function-for-raw-read-after-write-operation-update drivers/mmc/core/sdio_io.c
+--- a/drivers/mmc/core/sdio_io.c~sdio-add-new-function-for-raw-read-after-write-operation-update
++++ a/drivers/mmc/core/sdio_io.c
+@@ -408,7 +408,7 @@ EXPORT_SYMBOL_GPL(sdio_writeb);
+ /**
+  *	sdio_writeb_readb - write and read a byte from SDIO function
+  *	@func: SDIO function to access
+- *	@b: byte to write
++ *	@write_byte: byte to write
+  *	@addr: address to write to
+  *	@err_ret: optional status value from transfer
+  *
+@@ -418,15 +418,14 @@ EXPORT_SYMBOL_GPL(sdio_writeb);
+  *	If there is a problem with the operation, 0xff is returned and
+  *	@err_ret will contain the error code.
+  */
+-u8 sdio_writeb_readb(struct sdio_func *func, u8 b,
++u8 sdio_writeb_readb(struct sdio_func *func, u8 write_byte,
+ 	unsigned int addr, int *err_ret)
+ {
+ 	int ret;
+ 	u8 val;
  
- 	if (p && p->dma_slave_tx >= 0 && p->dma_slave_rx >= 0) {
- 		priv->param_tx.slave_id = p->dma_slave_tx;
-diff -puN include/linux/mfd/sh_mobile_sdhi.h~sh-allow-platforms-to-specify-sd-card-supported-voltages include/linux/mfd/sh_mobile_sdhi.h
---- a/include/linux/mfd/sh_mobile_sdhi.h~sh-allow-platforms-to-specify-sd-card-supported-voltages
-+++ a/include/linux/mfd/sh_mobile_sdhi.h
-@@ -1,10 +1,13 @@
- #ifndef __SH_MOBILE_SDHI_H__
- #define __SH_MOBILE_SDHI_H__
+-	BUG_ON(!func);
+-
+-	ret = mmc_io_rw_direct(func->card, 1, func->num, addr, b, &val);
++	ret = mmc_io_rw_direct(func->card, 1, func->num, addr,
++			write_byte, &val);
+ 	if (err_ret)
+ 		*err_ret = ret;
+ 	if (ret)
+diff -puN include/linux/mmc/sdio_func.h~sdio-add-new-function-for-raw-read-after-write-operation-update include/linux/mmc/sdio_func.h
+--- a/include/linux/mmc/sdio_func.h~sdio-add-new-function-for-raw-read-after-write-operation-update
++++ a/include/linux/mmc/sdio_func.h
+@@ -145,7 +145,7 @@ extern void sdio_writew(struct sdio_func
+ extern void sdio_writel(struct sdio_func *func, u32 b,
+ 	unsigned int addr, int *err_ret);
  
-+#include <linux/types.h>
-+
- struct sh_mobile_sdhi_info {
- 	int dma_slave_tx;
- 	int dma_slave_rx;
- 	unsigned long tmio_flags;
-+	u32 tmio_ocr_mask;	/* available MMC voltages */
- 	void (*set_pwr)(struct platform_device *pdev, int state);
- };
+-extern u8 sdio_writeb_readb(struct sdio_func *func, u8 b,
++extern u8 sdio_writeb_readb(struct sdio_func *func, u8 write_byte,
+ 	unsigned int addr, int *err_ret);
  
+ extern int sdio_memcpy_toio(struct sdio_func *func, unsigned int addr,
 _
 
-Patches currently in -mm which might be from g.liakhovetski@gmx.de are
+Patches currently in -mm which might be from notasas@gmail.com are
 
 origin.patch
 linux-next.patch
-media-ak881x-needs-slabh.patch
-sh-define-dma-slaves-per-cpu-type-remove-now-redundant-header.patch
-sh-add-dma-slaves-for-two-sdhi-controllers-to-sh7722.patch
-sh-add-dma-slave-definitions-to-sh7724.patch
-mmc-prepare-tmio_mmc-for-passing-of-dma-configuration-from-the-mfd-cell.patch
-sh-prepare-the-sdhi-mfd-driver-to-pass-dma-configuration-to-tmio_mmcc.patch
-mmc-add-dma-support-to-tmio_mmc-driver-when-used-on-superh.patch
-sh-add-sdhi-dma-support-to-ecovec.patch
-sh-add-sdhi-dma-support-to-ms7724se.patch
-sh-add-sdhi-dma-support-to-kfr2r09.patch
-sh-add-sdhi-dma-support-to-migor.patch
-arm-add-dma-support-to-sh7372-enable-dma-for-sdhi.patch
-tmio-add-a-platform-flag-to-disable-card-write-protection-detection.patch
-mfd-pass-platform-flags-down-to-the-tmio_mmc-driver.patch
-sh-disable-sd-card-write-protection-detection-on-kfr2r09.patch
-mmc-let-mfds-provide-supported-vdd-card-voltages-to-tmio_mmc.patch
-sh-allow-platforms-to-specify-sd-card-supported-voltages.patch
+sdio-add-new-function-for-raw-read-after-write-operation.patch
+sdio-add-new-function-for-raw-read-after-write-operation-update.patch
+fbdev-move-fbio_waitforvsync-to-linux-fbh.patch
+fbdev-move-fbio_waitforvsync-to-linux-fbh-update.patch
 
