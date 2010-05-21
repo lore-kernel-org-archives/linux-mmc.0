@@ -1,49 +1,35 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [RFC][PATCH] mmc: add an ioctl for erasing
-Date: Fri, 21 May 2010 10:07:15 -0400
-Message-ID: <20100521140714.GB15070@infradead.org>
-References: <4BF68EFC.70101@nokia.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 0/3] tmio: let platforms decide upon write-protection
+ availability
+Date: Fri, 21 May 2010 12:38:27 -0700
+Message-ID: <20100521123827.a8d7a87a.akpm@linux-foundation.org>
+References: <Pine.LNX.4.64.1005191815491.3099@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([18.85.46.34]:35317 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755483Ab0EUOHS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2010 10:07:18 -0400
-Content-Disposition: inline
-In-Reply-To: <4BF68EFC.70101@nokia.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:43368 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758213Ab0EUTif (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2010 15:38:35 -0400
+In-Reply-To: <Pine.LNX.4.64.1005191815491.3099@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
 
-On Fri, May 21, 2010 at 04:47:40PM +0300, Adrian Hunter wrote:
->> From f3baf566eb33a22bf12a48e4cdc7c99611bde934 Mon Sep 17 00:00:00 2001
-> From: Adrian Hunter <adrian.hunter@nokia.com>
-> Date: Wed, 5 May 2010 14:07:55 +0300
-> Subject: [PATCH] mmc: add an ioctl for erasing
->
-> As SD and MMC cards have a NAND core, they can support an erase
-> operation that is typically 10x to 100x faster than writing.
->
-> In addition, eMMCv4.4 also offers:
-> 	o Secure Erase
-> 	o Trim
-> 	o Secure Trim
->
-> The "secure" variants also ensure that any copies of the data
-> (for example remnants of garbage collection) are also erased.
->
-> "Trim" is the same as "erase" except that individual sectors
-> can be erased instead of whole Erase Groups.
->
-> The Erase Operation and its variants are not supported by
-> default and drivers must set MMC_CAP_ERASE.  This is because
-> the operation can take a long time and drivers that rely on
-> polling the status may perform very badly.  Also drivers
-> may need changes to support the very long erase timeouts.
+On Wed, 19 May 2010 20:35:57 +0200 (CEST)
+Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
 
-Please don't add new device specific ioctls.  Just implement the
-block layer discard operation to make the discard ioctl work on MMC
-device.  We can talk about adding a secure erase variant of it then.
+> No changes to patches themselves, just re-sending with an ack added.
+> 
+> Applies on top of the
+> 
+> "[PATCH 0/10] add DMA support to tmio_mmc, using dmaengine API, use it on SH"
+> 
+> patch series.
+> 
+
+Paul, are you planning on merging the tem patches in the
+above-mentioned series for 2.6.35-rc1?
 
