@@ -1,102 +1,81 @@
-From: akpm@linux-foundation.org
-Subject: + sdio-add-new-function-for-raw-read-after-write-operation-update.patch added to -mm tree
-Date: Fri, 21 May 2010 13:36:30 -0700
-Message-ID: <201005212036.o4LKaUjE032720@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: notasas@gmail.com, dimitrysh@google.com, kalle.valo@iki.fi, linux-mmc@vger.kernel.org
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [Bugme-new] [Bug 15876] New: MMC initialisation: valid devices
+ fail to init due to frequency check
+Date: Fri, 21 May 2010 14:48:51 -0700
+Message-ID: <20100521144851.d8c4342e.akpm@linux-foundation.org>
+References: <bug-15876-10286@https.bugzilla.kernel.org/>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:40313 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755483Ab0EUVtg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2010 17:49:36 -0400
+In-Reply-To: <bug-15876-10286@https.bugzilla.kernel.org/>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, nick@leverton.org
 
 
-The patch titled
-     sdio-add-new-function-for-raw-read-after-write-operation update
-has been added to the -mm tree.  Its filename is
-     sdio-add-new-function-for-raw-read-after-write-operation-update.patch
+(switched to email.  Please respond via emailed reply-to-all, not via the
+bugzilla web interface).
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+On Thu, 29 Apr 2010 10:26:39 GMT
+bugzilla-daemon@bugzilla.kernel.org wrote:
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: sdio-add-new-function-for-raw-read-after-write-operation update
-From: Grazvydas Ignotas <notasas@gmail.com>
-
-Here is updated version that addresses your comments (removes BUG()
-and improves argument name).
-
-Signed-off-by: Grazvydas Ignotas <notasas@gmail.com>
-Cc: Kalle Valo <kalle.valo@iki.fi>
-Cc: Dmitry Shmidt <dimitrysh@google.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/core/sdio_io.c    |    9 ++++-----
- include/linux/mmc/sdio_func.h |    2 +-
- 2 files changed, 5 insertions(+), 6 deletions(-)
-
-diff -puN drivers/mmc/core/sdio_io.c~sdio-add-new-function-for-raw-read-after-write-operation-update drivers/mmc/core/sdio_io.c
---- a/drivers/mmc/core/sdio_io.c~sdio-add-new-function-for-raw-read-after-write-operation-update
-+++ a/drivers/mmc/core/sdio_io.c
-@@ -408,7 +408,7 @@ EXPORT_SYMBOL_GPL(sdio_writeb);
- /**
-  *	sdio_writeb_readb - write and read a byte from SDIO function
-  *	@func: SDIO function to access
-- *	@b: byte to write
-+ *	@write_byte: byte to write
-  *	@addr: address to write to
-  *	@err_ret: optional status value from transfer
-  *
-@@ -418,15 +418,14 @@ EXPORT_SYMBOL_GPL(sdio_writeb);
-  *	If there is a problem with the operation, 0xff is returned and
-  *	@err_ret will contain the error code.
-  */
--u8 sdio_writeb_readb(struct sdio_func *func, u8 b,
-+u8 sdio_writeb_readb(struct sdio_func *func, u8 write_byte,
- 	unsigned int addr, int *err_ret)
- {
- 	int ret;
- 	u8 val;
- 
--	BUG_ON(!func);
--
--	ret = mmc_io_rw_direct(func->card, 1, func->num, addr, b, &val);
-+	ret = mmc_io_rw_direct(func->card, 1, func->num, addr,
-+			write_byte, &val);
- 	if (err_ret)
- 		*err_ret = ret;
- 	if (ret)
-diff -puN include/linux/mmc/sdio_func.h~sdio-add-new-function-for-raw-read-after-write-operation-update include/linux/mmc/sdio_func.h
---- a/include/linux/mmc/sdio_func.h~sdio-add-new-function-for-raw-read-after-write-operation-update
-+++ a/include/linux/mmc/sdio_func.h
-@@ -145,7 +145,7 @@ extern void sdio_writew(struct sdio_func
- extern void sdio_writel(struct sdio_func *func, u32 b,
- 	unsigned int addr, int *err_ret);
- 
--extern u8 sdio_writeb_readb(struct sdio_func *func, u8 b,
-+extern u8 sdio_writeb_readb(struct sdio_func *func, u8 write_byte,
- 	unsigned int addr, int *err_ret);
- 
- extern int sdio_memcpy_toio(struct sdio_func *func, unsigned int addr,
-_
-
-Patches currently in -mm which might be from notasas@gmail.com are
-
-origin.patch
-linux-next.patch
-sdio-add-new-function-for-raw-read-after-write-operation.patch
-sdio-add-new-function-for-raw-read-after-write-operation-update.patch
-fbdev-move-fbio_waitforvsync-to-linux-fbh.patch
-fbdev-move-fbio_waitforvsync-to-linux-fbh-update.patch
+> https://bugzilla.kernel.org/show_bug.cgi?id=15876
+> 
+>            Summary: MMC initialisation: valid devices fail to init due to
+>                     frequency check
+>            Product: Drivers
+>            Version: 2.5
+>     Kernel Version: 2.6.31
+>           Platform: All
+>         OS/Version: Linux
+>               Tree: Mainline
+>             Status: NEW
+>           Severity: normal
+>           Priority: P1
+>          Component: Flash/Memory Technology Devices
+>         AssignedTo: dwmw2@infradead.org
+>         ReportedBy: nick@leverton.org
+>         Regression: Yes
+> 
+> 
+> I have a commercially available development board with MMC card socket (Atmel
+> ATSTK1006 with AP7000).  Prior to 2.6.31 this board could successfully
+> initialise and use MMC cards.  Since the minimum frequency enforcement to 400
+> KHz was added in commit 8dfd0374be84793360db7fff2e635d2cd3bbcb21, this board
+> can no longer detect MMC cards.
+> 
+> Thanks to the following diagnostic patch: http://lkml.org/lkml/2010/1/4/291  I
+> narrowed down the frequency range supported by this board.  The host->f_min
+> here is 136719 Hz.
+> 
+> atmel_mci atmel_mci.0: Atmel MCI controller at 0xfff02400 irq 28, 1 slots
+>  mmc_rescan: trying 400000 Hz
+>  Waiting for root device /dev/mmcblk0p1...
+>  mmc_rescan: trying 300000 Hz
+>  mmc_rescan: trying 200000 Hz
+>  mmc_rescan: trying 136719 Hz
+>  mmc0: host does not support reading read-only switch. assuming 
+> write-enable.
+>  mmc0: new SD card at address 8fe4
+>  mmcblk0: mmc0:8fe4 SD02G 1.84 GiB
+> 
+> I understand that the MMC spec allows frequency ranges between about 400 KHZ
+> and 138 KHz.  It seems that enforcing the minimum frequency to be the highest
+> from the specification is causing the problem and causes an otherwise
+> within-spec device such as this to fail to initialise.
+> 
+> Other AVR32/AP7000 boards such as NGW100 seem OK with the same cards (Sandisk
+> 2Gb) by the way and do work at full speed.  It seems it may be due to this
+> particular board layout that, although just about within spec, it is limited to
+> the lower end of the range.
+> 
+> Could I please ask the MMC people to re-visit this frequency check issue ?  I'm
+> opening this bug as a marker, thank you :)
+> 
 
