@@ -1,7 +1,7 @@
 From: akpm@linux-foundation.org
-Subject: + sh-disable-sd-card-write-protection-detection-on-kfr2r09.patch added to -mm tree
-Date: Fri, 21 May 2010 12:39:15 -0700
-Message-ID: <201005211939.o4LJdFGG030302@imap1.linux-foundation.org>
+Subject: + sh-allow-platforms-to-specify-sd-card-supported-voltages.patch added to -mm tree
+Date: Fri, 21 May 2010 12:39:19 -0700
+Message-ID: <201005211939.o4LJdKoW030317@imap1.linux-foundation.org>
 Reply-To: linux-kernel@vger.kernel.org
 Return-path: <mm-commits-owner@vger.kernel.org>
 Sender: mm-commits-owner@vger.kernel.org
@@ -11,9 +11,9 @@ List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     sh: disable SD-card write-protection detection on kfr2r09
+     sh: allow platforms to specify SD-card supported voltages
 has been added to the -mm tree.  Its filename is
-     sh-disable-sd-card-write-protection-detection-on-kfr2r09.patch
+     sh-allow-platforms-to-specify-sd-card-supported-voltages.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -29,11 +29,11 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sh: disable SD-card write-protection detection on kfr2r09
+Subject: sh: allow platforms to specify SD-card supported voltages
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-kfr2r09 board has a micro-SD card slot, therefore card write-protection
-detection cannot work there, disable it.
+Boards can have different supplied voltages on different SD card slots. This
+information has to be passed down to the SD/MMC driver.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Acked-by: Ian Molton <ian@mnementh.co.uk>
@@ -44,32 +44,42 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- arch/sh/boards/mach-kfr2r09/setup.c |    6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mfd/sh_mobile_sdhi.c       |    4 +++-
+ include/linux/mfd/sh_mobile_sdhi.h |    3 +++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
 
-diff -puN arch/sh/boards/mach-kfr2r09/setup.c~sh-disable-sd-card-write-protection-detection-on-kfr2r09 arch/sh/boards/mach-kfr2r09/setup.c
---- a/arch/sh/boards/mach-kfr2r09/setup.c~sh-disable-sd-card-write-protection-detection-on-kfr2r09
-+++ a/arch/sh/boards/mach-kfr2r09/setup.c
-@@ -11,6 +11,7 @@
- #include <linux/platform_device.h>
- #include <linux/interrupt.h>
- #include <linux/mfd/sh_mobile_sdhi.h>
-+#include <linux/mfd/tmio.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mtd/onenand.h>
- #include <linux/delay.h>
-@@ -358,8 +359,9 @@ static struct resource kfr2r09_sh_sdhi0_
+diff -puN drivers/mfd/sh_mobile_sdhi.c~sh-allow-platforms-to-specify-sd-card-supported-voltages drivers/mfd/sh_mobile_sdhi.c
+--- a/drivers/mfd/sh_mobile_sdhi.c~sh-allow-platforms-to-specify-sd-card-supported-voltages
++++ a/drivers/mfd/sh_mobile_sdhi.c
+@@ -107,8 +107,10 @@ static int __init sh_mobile_sdhi_probe(s
+ 	mmc_data->hclk = clk_get_rate(priv->clk);
+ 	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
+ 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
+-	if (p)
++	if (p) {
+ 		mmc_data->flags = p->tmio_flags;
++		mmc_data->ocr_mask = p->tmio_ocr_mask;
++	}
+ 
+ 	if (p && p->dma_slave_tx >= 0 && p->dma_slave_rx >= 0) {
+ 		priv->param_tx.slave_id = p->dma_slave_tx;
+diff -puN include/linux/mfd/sh_mobile_sdhi.h~sh-allow-platforms-to-specify-sd-card-supported-voltages include/linux/mfd/sh_mobile_sdhi.h
+--- a/include/linux/mfd/sh_mobile_sdhi.h~sh-allow-platforms-to-specify-sd-card-supported-voltages
++++ a/include/linux/mfd/sh_mobile_sdhi.h
+@@ -1,10 +1,13 @@
+ #ifndef __SH_MOBILE_SDHI_H__
+ #define __SH_MOBILE_SDHI_H__
+ 
++#include <linux/types.h>
++
+ struct sh_mobile_sdhi_info {
+ 	int dma_slave_tx;
+ 	int dma_slave_rx;
+ 	unsigned long tmio_flags;
++	u32 tmio_ocr_mask;	/* available MMC voltages */
+ 	void (*set_pwr)(struct platform_device *pdev, int state);
  };
  
- static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
--	.dma_slave_tx = SHDMA_SLAVE_SDHI0_TX,
--	.dma_slave_rx = SHDMA_SLAVE_SDHI0_RX,
-+	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
-+	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
-+	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
- };
- 
- static struct platform_device kfr2r09_sh_sdhi0_device = {
 _
 
 Patches currently in -mm which might be from g.liakhovetski@gmx.de are
