@@ -1,22 +1,19 @@
 From: akpm@linux-foundation.org
-Subject: + mmc-let-mfds-provide-supported-vdd-card-voltages-to-tmio_mmc.patch added to -mm tree
-Date: Fri, 21 May 2010 12:39:17 -0700
-Message-ID: <201005211939.o4LJdH8V030314@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:34354 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S934042Ab0EUTjX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2010 15:39:23 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: + mfd-pass-platform-flags-down-to-the-tmio_mmc-driver.patch added to -mm tree
+Date: Fri, 21 May 2010 12:39:13 -0700
+Message-ID: <201005211939.o4LJdDLj030297@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
 To: mm-commits@vger.kernel.org
 Cc: g.liakhovetski@gmx.de, ian@mnementh.co.uk, lethal@linux-sh.org, linux-mmc@vger.kernel.org, magnus.damm@gmail.com, sameo@linux.intel.com
+List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     mmc: let MFD's provide supported Vdd card voltages to tmio_mmc
+     mfd: pass platform flags down to the tmio_mmc driver
 has been added to the -mm tree.  Its filename is
-     mmc-let-mfds-provide-supported-vdd-card-voltages-to-tmio_mmc.patch
+     mfd-pass-platform-flags-down-to-the-tmio_mmc-driver.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -32,7 +29,7 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc: let MFD's provide supported Vdd card voltages to tmio_mmc
+Subject: mfd: pass platform flags down to the tmio_mmc driver
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
@@ -44,36 +41,33 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/tmio_mmc.c |    5 ++++-
- include/linux/mfd/tmio.h    |    1 +
- 2 files changed, 5 insertions(+), 1 deletion(-)
+ drivers/mfd/sh_mobile_sdhi.c       |    2 ++
+ include/linux/mfd/sh_mobile_sdhi.h |    1 +
+ 2 files changed, 3 insertions(+)
 
-diff -puN drivers/mmc/host/tmio_mmc.c~mmc-let-mfds-provide-supported-vdd-card-voltages-to-tmio_mmc drivers/mmc/host/tmio_mmc.c
---- a/drivers/mmc/host/tmio_mmc.c~mmc-let-mfds-provide-supported-vdd-card-voltages-to-tmio_mmc
-+++ a/drivers/mmc/host/tmio_mmc.c
-@@ -845,7 +845,10 @@ static int __devinit tmio_mmc_probe(stru
- 	mmc->caps |= pdata->capabilities;
- 	mmc->f_max = pdata->hclk;
- 	mmc->f_min = mmc->f_max / 512;
--	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-+	if (pdata->ocr_mask)
-+		mmc->ocr_avail = pdata->ocr_mask;
-+	else
-+		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+diff -puN drivers/mfd/sh_mobile_sdhi.c~mfd-pass-platform-flags-down-to-the-tmio_mmc-driver drivers/mfd/sh_mobile_sdhi.c
+--- a/drivers/mfd/sh_mobile_sdhi.c~mfd-pass-platform-flags-down-to-the-tmio_mmc-driver
++++ a/drivers/mfd/sh_mobile_sdhi.c
+@@ -107,6 +107,8 @@ static int __init sh_mobile_sdhi_probe(s
+ 	mmc_data->hclk = clk_get_rate(priv->clk);
+ 	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
+ 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
++	if (p)
++		mmc_data->flags = p->tmio_flags;
  
- 	/* Tell the MFD core we are ready to be enabled */
- 	if (cell->enable) {
-diff -puN include/linux/mfd/tmio.h~mmc-let-mfds-provide-supported-vdd-card-voltages-to-tmio_mmc include/linux/mfd/tmio.h
---- a/include/linux/mfd/tmio.h~mmc-let-mfds-provide-supported-vdd-card-voltages-to-tmio_mmc
-+++ a/include/linux/mfd/tmio.h
-@@ -70,6 +70,7 @@ struct tmio_mmc_data {
- 	unsigned int			hclk;
- 	unsigned long			capabilities;
- 	unsigned long			flags;
-+	u32				ocr_mask;	/* available voltages */
- 	struct tmio_mmc_dma		*dma;
- 	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
+ 	if (p && p->dma_slave_tx >= 0 && p->dma_slave_rx >= 0) {
+ 		priv->param_tx.slave_id = p->dma_slave_tx;
+diff -puN include/linux/mfd/sh_mobile_sdhi.h~mfd-pass-platform-flags-down-to-the-tmio_mmc-driver include/linux/mfd/sh_mobile_sdhi.h
+--- a/include/linux/mfd/sh_mobile_sdhi.h~mfd-pass-platform-flags-down-to-the-tmio_mmc-driver
++++ a/include/linux/mfd/sh_mobile_sdhi.h
+@@ -4,6 +4,7 @@
+ struct sh_mobile_sdhi_info {
+ 	int dma_slave_tx;
+ 	int dma_slave_rx;
++	unsigned long tmio_flags;
+ 	void (*set_pwr)(struct platform_device *pdev, int state);
+ };
+ 
 _
 
 Patches currently in -mm which might be from g.liakhovetski@gmx.de are
