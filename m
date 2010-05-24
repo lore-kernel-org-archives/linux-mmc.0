@@ -1,59 +1,86 @@
-From: Viresh KUMAR <viresh.kumar@st.com>
-Subject: [PATCH V2 Incremental] sdhci-spear: ST SPEAr based SDHCI controller glue
-Date: Mon, 24 May 2010 10:39:56 +0530
-Message-ID: <1274677796-17233-1-git-send-email-viresh.kumar@st.com>
+From: Niko Jokinen <ext-niko.k.jokinen@nokia.com>
+Subject: [PATCH] mmc_test: block addressed cards
+Date: Mon, 24 May 2010 16:34:32 +0300
+Message-ID: <1274708072-16264-1-git-send-email-ext-niko.k.jokinen@nokia.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:34550 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750908Ab0EXFKd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2010 01:10:33 -0400
+Received: from smtp.nokia.com ([192.100.122.230]:53427 "EHLO
+	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753126Ab0EXNe7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2010 09:34:59 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
-Cc: shiraz.hashim@st.com, Viresh Kumar <viresh.kumar@st.com>
+To: ext-niko.k.jokinen@nokia.com
+Cc: Johan Kristell <johan.kristell@axis.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-This patch is a incremental patch over V1 of sdhci-spear patch.
-It contains following changes from V1:
-- dev_get_platdata is used to get dev->platform_data
+From: Johan Kristell <johan.kristell@axis.com>
 
-Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+This patch fixes a bug in the multiblock write tests where the written
+data is read back for verifying one block at a time.  The tests in
+mmc_test assumes that all cards are byte addressable.
+
+This will cause the multi block write tests to fail, leading the user of
+the mmc_test driver thinking there is something wrong with the sdhci
+driver they are testing.
+
+The start address for the block is calculated as: blocknum * 512. For
+block addressable cards the blocknum alone should be used.
+
+Signed-off-by: Johan Kristell <johan.kristell@axis.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+
+backported from mainline commit
+c286d03cce118e9fb8dda8da43f9131c169c5a75
+
+Fixes: NB#164938 - Misaligned in-kernel MMC transfer hangs task
+
 ---
- drivers/mmc/host/sdhci-spear.c |    8 +++-----
- 1 files changed, 3 insertions(+), 5 deletions(-)
+ drivers/mmc/card/mmc_test.c |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 6d3f740..d70c54c 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -41,8 +41,7 @@ static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
- {
- 	struct platform_device *pdev = dev_id;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
--	struct spear_sdhci *sdhci =
--		(struct spear_sdhci *)(pdev->dev.platform_data);
-+	struct spear_sdhci *sdhci = dev_get_platdata(&pdev->dev);
- 	unsigned long gpio_irq_type;
- 	int val;
- 
-@@ -112,7 +111,7 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index b9f1e84..e7f8027 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -74,6 +74,9 @@ static void mmc_test_prepare_mrq(struct mmc_test_card *test,
  	}
  
- 	/* overwrite platform_data */
--	sdhci->data = (struct sdhci_plat_data *)(pdev->dev.platform_data);
-+	sdhci->data = dev_get_platdata(&pdev->dev);
- 	pdev->dev.platform_data = sdhci;
+ 	mrq->cmd->arg = dev_addr;
++	if (!mmc_card_blockaddr(test->card))
++		mrq->cmd->arg <<= 9;
++
+ 	mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
  
- 	if (pdev->dev.parent)
-@@ -241,8 +240,7 @@ static int __devexit sdhci_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	struct spear_sdhci *sdhci =
--		(struct spear_sdhci *)(pdev->dev.platform_data);
-+	struct spear_sdhci *sdhci = dev_get_platdata(&pdev->dev);
- 	int dead;
- 	u32 scratch;
+ 	if (blocks == 1)
+@@ -190,7 +193,7 @@ static int __mmc_test_prepare(struct mmc_test_card *test, int write)
+ 	}
  
+ 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
+-		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
++		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -219,7 +222,7 @@ static int mmc_test_cleanup(struct mmc_test_card *test)
+ 	memset(test->buffer, 0, 512);
+ 
+ 	for (i = 0;i < BUFFER_SIZE / 512;i++) {
+-		ret = mmc_test_buffer_transfer(test, test->buffer, i * 512, 512, 1);
++		ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -426,7 +429,7 @@ static int mmc_test_transfer(struct mmc_test_card *test,
+ 		for (i = 0;i < sectors;i++) {
+ 			ret = mmc_test_buffer_transfer(test,
+ 				test->buffer + i * 512,
+-				dev_addr + i * 512, 512, 0);
++				dev_addr + i, 512, 0);
+ 			if (ret)
+ 				return ret;
+ 		}
 -- 
-1.6.0.2
+1.6.0.4
 
