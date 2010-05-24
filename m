@@ -1,121 +1,59 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/3 v2] ARM: mach-shmobile: add support for the second
- SD-/MMC-card slot on ap4evb
-Date: Sun, 23 May 2010 16:12:46 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1005231611390.3571@axis700.grange>
-References: <Pine.LNX.4.64.1005141228510.6147@axis700.grange>
- <Pine.LNX.4.64.1005141233510.6147@axis700.grange>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Viresh KUMAR <viresh.kumar@st.com>
+Subject: [PATCH V2 Incremental] sdhci-spear: ST SPEAr based SDHCI controller glue
+Date: Mon, 24 May 2010 10:39:56 +0530
+Message-ID: <1274677796-17233-1-git-send-email-viresh.kumar@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.gmx.net ([213.165.64.20]:34573 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S1754788Ab0EWOMc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 23 May 2010 10:12:32 -0400
-In-Reply-To: <Pine.LNX.4.64.1005141233510.6147@axis700.grange>
+Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:34550 "EHLO
+	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750908Ab0EXFKd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2010 01:10:33 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
-Cc: Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
+Cc: shiraz.hashim@st.com, Viresh Kumar <viresh.kumar@st.com>
 
-The ap4evb board is equipped with two card slots: one SD-card slot and one
-SD-/MMC-card slot. The latter is connected to the second SDHI interface on
-sh7372 (SDHI1). Its power supply can be jumpered either to 1.8 or 3.3V, we fix
-it at default 1.8V for now.
+This patch is a incremental patch over V1 of sdhci-spear patch.
+It contains following changes from V1:
+- dev_get_platdata is used to get dev->platform_data
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
 ---
+ drivers/mmc/host/sdhci-spear.c |    8 +++-----
+ 1 files changed, 3 insertions(+), 5 deletions(-)
 
-v1 -> v2:
-
-updated to the current genesis tree
-
- arch/arm/mach-shmobile/board-ap4evb.c |   44 +++++++++++++++++++++++++++++++-
- 1 files changed, 42 insertions(+), 2 deletions(-)
-
-diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
-index e02e09a..6c23d74 100644
---- a/arch/arm/mach-shmobile/board-ap4evb.c
-+++ b/arch/arm/mach-shmobile/board-ap4evb.c
-@@ -25,6 +25,7 @@
- #include <linux/platform_device.h>
- #include <linux/delay.h>
- #include <linux/mfd/sh_mobile_sdhi.h>
-+#include <linux/mmc/host.h>
- #include <linux/mtd/mtd.h>
- #include <linux/mtd/partitions.h>
- #include <linux/mtd/physmap.h>
-@@ -233,8 +234,8 @@ static struct platform_device keysc_device = {
- 
- /* SDHI0 */
- static struct sh_mobile_sdhi_info sdhi0_info = {
--	.dma_slave_tx = SHDMA_SLAVE_SDHI0_TX,
--	.dma_slave_rx = SHDMA_SLAVE_SDHI0_RX,
-+	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
-+	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
- };
- 
- static struct resource sdhi0_resources[] = {
-@@ -260,6 +261,36 @@ static struct platform_device sdhi0_device = {
- 	},
- };
- 
-+/* SDHI1 */
-+static struct sh_mobile_sdhi_info sdhi1_info = {
-+	.dma_slave_tx	= SHDMA_SLAVE_SDHI1_TX,
-+	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
-+	.tmio_ocr_mask	= MMC_VDD_165_195,
-+};
-+
-+static struct resource sdhi1_resources[] = {
-+	[0] = {
-+		.name	= "SDHI1",
-+		.start  = 0xe6860000,
-+		.end    = 0xe68601ff,
-+		.flags  = IORESOURCE_MEM,
-+	},
-+	[1] = {
-+		.start  = evt2irq(0x0e80),
-+		.flags  = IORESOURCE_IRQ,
-+	},
-+};
-+
-+static struct platform_device sdhi1_device = {
-+	.name           = "sh_mobile_sdhi",
-+	.num_resources  = ARRAY_SIZE(sdhi1_resources),
-+	.resource       = sdhi1_resources,
-+	.id             = 1,
-+	.dev	= {
-+		.platform_data	= &sdhi1_info,
-+	},
-+};
-+
- /* USB1 */
- void usb1_host_port_power(int port, int power)
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+index 6d3f740..d70c54c 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -41,8 +41,7 @@ static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
  {
-@@ -379,6 +410,7 @@ static struct platform_device *ap4evb_devices[] __initdata = {
- 	&smc911x_device,
- 	&keysc_device,
- 	&sdhi0_device,
-+	&sdhi1_device,
- 	&usb1_host_device,
- 	&lcdc_device,
- 	&mipidsi0_device,
-@@ -544,6 +576,14 @@ static void __init ap4evb_init(void)
- 	/* setup USB phy */
- 	__raw_writew(0x8a0a, 0xE6058130);	/* USBCR2 */
+ 	struct platform_device *pdev = dev_id;
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
+-	struct spear_sdhci *sdhci =
+-		(struct spear_sdhci *)(pdev->dev.platform_data);
++	struct spear_sdhci *sdhci = dev_get_platdata(&pdev->dev);
+ 	unsigned long gpio_irq_type;
+ 	int val;
  
-+	/* SDHI1 */
-+	gpio_request(GPIO_FN_SDHICMD1, NULL);
-+	gpio_request(GPIO_FN_SDHICLK1, NULL);
-+	gpio_request(GPIO_FN_SDHID1_3, NULL);
-+	gpio_request(GPIO_FN_SDHID1_2, NULL);
-+	gpio_request(GPIO_FN_SDHID1_1, NULL);
-+	gpio_request(GPIO_FN_SDHID1_0, NULL);
-+
- 	sh7372_add_standard_devices();
+@@ -112,7 +111,7 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
+ 	}
  
- 	platform_add_devices(ap4evb_devices, ARRAY_SIZE(ap4evb_devices));
+ 	/* overwrite platform_data */
+-	sdhci->data = (struct sdhci_plat_data *)(pdev->dev.platform_data);
++	sdhci->data = dev_get_platdata(&pdev->dev);
+ 	pdev->dev.platform_data = sdhci;
+ 
+ 	if (pdev->dev.parent)
+@@ -241,8 +240,7 @@ static int __devexit sdhci_remove(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
+ 	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	struct spear_sdhci *sdhci =
+-		(struct spear_sdhci *)(pdev->dev.platform_data);
++	struct spear_sdhci *sdhci = dev_get_platdata(&pdev->dev);
+ 	int dead;
+ 	u32 scratch;
+ 
 -- 
-1.6.2.4
+1.6.0.2
 
