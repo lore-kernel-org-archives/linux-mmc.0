@@ -1,7 +1,7 @@
 From: Greg KH <gregkh@suse.de>
-Subject: [09/34] mmc: atmel-mci: remove data error interrupt after xfer
-Date: Mon, 24 May 2010 15:59:41 -0700
-Message-ID: <20100524230350.146100807@clark.site>
+Subject: [08/34] mmc: atmel-mci: prevent kernel oops while removing card
+Date: Mon, 24 May 2010 15:59:40 -0700
+Message-ID: <20100524230350.055339389@clark.site>
 References: <20100524230418.GA12770@kroah.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20100524230418.GA12770@kroah.com>
@@ -16,11 +16,12 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-commit abc2c9fdf636c4335a8d72ac3c5ae152bca44b68 upstream.
+commit 009a891b22395fc86e5f34057d79fffee4509ab5 upstream.
 
-Disable data error interrupts while we are actually recording that there
-is not such errors.  This will prevent, in some cases, the warning message
-printed at new request queuing (in atmci_start_request()).
+The removing of an SD card in certain circumstances can lead to a kernel
+oops if we do not make sure that the "data" field of the host structure is
+valid.  This patch adds a test in atmci_dma_cleanup() function and also
+calls atmci_stop_dma() before throwing away the reference to data.
 
 Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 Cc: Haavard Skinnemoen <hskinnemoen@atmel.com>
@@ -30,16 +31,32 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
 
 ---
- drivers/mmc/host/atmel-mci.c |    1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/atmel-mci.c |    9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
 --- a/drivers/mmc/host/atmel-mci.c
 +++ b/drivers/mmc/host/atmel-mci.c
-@@ -1230,6 +1230,7 @@ static void atmci_tasklet_func(unsigned
- 			} else {
- 				data->bytes_xfered = data->blocks * data->blksz;
- 				data->error = 0;
-+				mci_writel(host, IDR, ATMCI_DATA_ERROR_FLAGS);
- 			}
+@@ -530,9 +530,10 @@ static void atmci_dma_cleanup(struct atm
+ {
+ 	struct mmc_data			*data = host->data;
  
- 			if (!data->stop) {
+-	dma_unmap_sg(&host->pdev->dev, data->sg, data->sg_len,
+-		     ((data->flags & MMC_DATA_WRITE)
+-		      ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
++	if (data)
++		dma_unmap_sg(&host->pdev->dev, data->sg, data->sg_len,
++			     ((data->flags & MMC_DATA_WRITE)
++			      ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
+ }
+ 
+ static void atmci_stop_dma(struct atmel_mci *host)
+@@ -1037,8 +1038,8 @@ static void atmci_command_complete(struc
+ 			"command error: status=0x%08x\n", status);
+ 
+ 		if (cmd->data) {
+-			host->data = NULL;
+ 			atmci_stop_dma(host);
++			host->data = NULL;
+ 			mci_writel(host, IDR, MCI_NOTBUSY
+ 					| MCI_TXRDY | MCI_RXRDY
+ 					| ATMCI_DATA_ERROR_FLAGS);
