@@ -1,7 +1,7 @@
 From: Greg KH <gregkh@suse.de>
-Subject: [10/39] mmc: atmel-mci: fix two parameters swapped
-Date: Mon, 24 May 2010 16:15:22 -0700
-Message-ID: <20100524231814.097165007@clark.site>
+Subject: [12/39] mmc: atmel-mci: remove data error interrupt after xfer
+Date: Mon, 24 May 2010 16:15:24 -0700
+Message-ID: <20100524231814.281230896@clark.site>
 References: <20100524231840.GA17857@kroah.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20100524231840.GA17857@kroah.com>
@@ -16,12 +16,13 @@ List-Id: linux-mmc@vger.kernel.org
 ------------------
 From: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-commit ebb1fea9b3adf25d7e2f643c614163af4f93a17f upstream.
+commit abc2c9fdf636c4335a8d72ac3c5ae152bca44b68 upstream.
 
-Two parameters were swapped in the calls to atmci_init_slot().
+Disable data error interrupts while we are actually recording that there
+is not such errors.  This will prevent, in some cases, the warning message
+printed at new request queuing (in atmci_start_request()).
 
 Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Reported-by: Anders Grahn <anders.grahn@hd-wireless.se>
 Cc: Haavard Skinnemoen <hskinnemoen@atmel.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
@@ -29,24 +30,16 @@ Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
 
 ---
- drivers/mmc/host/atmel-mci.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/atmel-mci.c |    1 +
+ 1 file changed, 1 insertion(+)
 
 --- a/drivers/mmc/host/atmel-mci.c
 +++ b/drivers/mmc/host/atmel-mci.c
-@@ -1750,13 +1750,13 @@ static int __init atmci_probe(struct pla
- 	ret = -ENODEV;
- 	if (pdata->slot[0].bus_width) {
- 		ret = atmci_init_slot(host, &pdata->slot[0],
--				MCI_SDCSEL_SLOT_A, 0);
-+				0, MCI_SDCSEL_SLOT_A);
- 		if (!ret)
- 			nr_slots++;
- 	}
- 	if (pdata->slot[1].bus_width) {
- 		ret = atmci_init_slot(host, &pdata->slot[1],
--				MCI_SDCSEL_SLOT_B, 1);
-+				1, MCI_SDCSEL_SLOT_B);
- 		if (!ret)
- 			nr_slots++;
- 	}
+@@ -1293,6 +1293,7 @@ static void atmci_tasklet_func(unsigned
+ 			} else {
+ 				data->bytes_xfered = data->blocks * data->blksz;
+ 				data->error = 0;
++				mci_writel(host, IDR, ATMCI_DATA_ERROR_FLAGS);
+ 			}
+ 
+ 			if (!data->stop) {
