@@ -1,27 +1,45 @@
-From: "Angelique Emery" <mary@mail.patranusa.com>
-Subject: Oncology Doctors marketing email list
-Date: Mon, 24 May 2010 23:53:32 +0700 (WIT)
-Message-ID: <20100524165333.CE68A14912B@mail.patranusa.com>
-Reply-To: mary@mail.patranusa.com
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.patranusa.com ([119.252.162.93]:25 "EHLO
-	mail.patranusa.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754343Ab0EXRyi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2010 13:54:38 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Greg KH <gregkh@suse.de>
+Subject: [09/34] mmc: atmel-mci: remove data error interrupt after xfer
+Date: Mon, 24 May 2010 15:59:41 -0700
+Message-ID: <20100524230350.146100807@clark.site>
+References: <20100524230418.GA12770@kroah.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100524230418.GA12770@kroah.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@kernel.org
+Cc: stable-review@kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, alan@lxorguk.ukuu.org.uk, Nicolas Ferre <nicolas.ferre@atmel.com>, Haavard Skinnemoen <hskinnemoen@atmel.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jobs@evergreenschool.org, axied@hotmail.com, tammy.zander@quickstart-ether.com, webmaster@cultureholidays.com, dennywidjaja@hotmail.com
 
-Here's some of the healthcare lists we have:
+2.6.34-stable review patch.  If anyone has any objections, please let us know.
 
-Physicians (34 specialties) - 788k records, 17k emails, 200k fax numbers
-Chiropractors - 108,421 total records * 3,414 emails * 6,553 fax numbers
-US Surgery Centers - 85k records and 14k emails
+------------------
 
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-Theres many more too, just send me an email here for additional info/samples: German.Hess@inspiresuccess.in
+commit abc2c9fdf636c4335a8d72ac3c5ae152bca44b68 upstream.
 
-  
+Disable data error interrupts while we are actually recording that there
+is not such errors.  This will prevent, in some cases, the warning message
+printed at new request queuing (in atmci_start_request()).
 
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Haavard Skinnemoen <hskinnemoen@atmel.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
 
-Forward email to disappear@inspiresuccess.in to purge you from our records
+---
+ drivers/mmc/host/atmel-mci.c |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -1230,6 +1230,7 @@ static void atmci_tasklet_func(unsigned
+ 			} else {
+ 				data->bytes_xfered = data->blocks * data->blksz;
+ 				data->error = 0;
++				mci_writel(host, IDR, ATMCI_DATA_ERROR_FLAGS);
+ 			}
+ 
+ 			if (!data->stop) {
