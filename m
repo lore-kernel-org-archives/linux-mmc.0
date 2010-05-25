@@ -1,38 +1,131 @@
-From: Ian Molton <ian@mnementh.co.uk>
-Subject: Re: [PATCH 0/3] tmio: let platforms decide upon write-protection
-	availability
-Date: Tue, 25 May 2010 20:09:14 +0100
-Message-ID: <AANLkTilWMqVAhK17jdAXLzqWjXbHrxlLuE1oKEquCJj0@mail.gmail.com>
-References: <Pine.LNX.4.64.1005191815491.3099@axis700.grange>
-	<20100521123827.a8d7a87a.akpm@linux-foundation.org> <20100522073332.GA17814@linux-sh.org>
-	<20100522081018.GD17814@linux-sh.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20100522081018.GD17814@linux-sh.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Paul Mundt <lethal@linux-sh.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+From: akpm@linux-foundation.org
+Subject: + drivers-mmc-host-use-err_cast.patch added to -mm tree
+Date: Tue, 25 May 2010 15:56:26 -0700
+Message-ID: <201005252256.o4PMuQcu019919@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:53300 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751024Ab0EYW43 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 May 2010 18:56:29 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: julia@diku.dk, linux-mmc@vger.kernel.org
 
-Hey,
 
-I know I'm probably not the worlds promptest or easiest maintainer to
-work with, but I'd just like to say a quick thanks to everyone
-involved with the tmio-mmc driver. You've all put in a lot of effort
-to make it what it is today.
+The patch titled
+     drivers/mmc/host: use ERR_CAST
+has been added to the -mm tree.  Its filename is
+     drivers-mmc-host-use-err_cast.patch
 
-Its really nice to see it being used in such a huge array of devices -
-something which was my goal since the very beginning when I helped
-author the MFD core. Back then ASIC3 was the only similar device I
-knew of, and tmio-mmc owes some thanks to the early ASIC3 work as well
-as a couple of people in Toshiba who were willing to stick their necks
-out enough to get me what little documentation (register specs and
-little more) that they could.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-Cheers guys!
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
--- 
-Ian Molton
-Linux, Automotive, and other hacking:
-http://www.mnementh.co.uk/
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: drivers/mmc/host: use ERR_CAST
+From: Julia Lawall <julia@diku.dk>
+
+Use ERR_CAST(x) rather than ERR_PTR(PTR_ERR(x)).  The former makes more
+clear what is the purpose of the operation, which otherwise looks like a
+no-op.
+
+The semantic patch that makes this change is as follows:
+(http://coccinelle.lip6.fr/)
+
+// <smpl>
+@@
+type T;
+T x;
+identifier f;
+@@
+
+T f (...) { <+...
+- ERR_PTR(PTR_ERR(x))
++ x
+ ...+> }
+
+@@
+expression x;
+@@
+
+- ERR_PTR(PTR_ERR(x))
++ ERR_CAST(x)
+// </smpl>
+
+Signed-off-by: Julia Lawall <julia@diku.dk>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/sdhci-pci.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff -puN drivers/mmc/host/sdhci-pci.c~drivers-mmc-host-use-err_cast drivers/mmc/host/sdhci-pci.c
+--- a/drivers/mmc/host/sdhci-pci.c~drivers-mmc-host-use-err_cast
++++ a/drivers/mmc/host/sdhci-pci.c
+@@ -628,7 +628,7 @@ static struct sdhci_pci_slot * __devinit
+ 	host = sdhci_alloc_host(&pdev->dev, sizeof(struct sdhci_pci_slot));
+ 	if (IS_ERR(host)) {
+ 		dev_err(&pdev->dev, "cannot allocate host\n");
+-		return ERR_PTR(PTR_ERR(host));
++		return ERR_CAST(host);
+ 	}
+ 
+ 	slot = sdhci_priv(host);
+_
+
+Patches currently in -mm which might be from julia@diku.dk are
+
+origin.patch
+linux-next.patch
+drivers-scsi-aacraid-eliminate-use-after-free.patch
+arch-x86-pci-use-kasprintf.patch
+fs-btrfs-use-memdup_user.patch
+drivers-media-use-memdup_user.patch
+drivers-i2c-use-memdup_user.patch
+drivers-ieee1394-use-memdup_user.patch
+drivers-infiniband-core-use-memdup_user.patch
+drivers-ide-use-memdup_user.patch
+drivers-isdn-use-memdup_user.patch
+net-can-use-memdup_user.patch
+net-dccp-use-memdup_user.patch
+drivers-net-use-memdup_user.patch
+drivers-net-cxgb3-use-memdup_user.patch
+drivers-net-wan-use-memdup_user.patch
+drivers-net-wireless-prism54-use-memdup_user.patch
+drivers-s390-net-use-memdup_user.patch
+drivers-scsi-libsas-use-sam_good.patch
+drivers-scsi-remove-unnecessary-null-test.patch
+drivers-message-move-dereference-after-null-test.patch
+drivers-scsi-correct-the-size-argument-to-kmalloc.patch
+drivers-scsi-use-memdup_user.patch
+drivers-block-use-memdup_user.patch
+drivers-staging-dream-camera-use-memdup_user.patch
+drivers-usb-gadget-use-memdup_user.patch
+mm-use-memdup_user.patch
+drivers-char-vtc-use-memdup_user.patch
+drivers-message-i2o-i2o_configc-use-memdup_user.patch
+fs-autofs4-use-memdup_user.patch
+drivers-video-via-use-memdup_user.patch
+drivers-telephony-ixjc-use-memdup_user.patch
+drivers-char-ppdevc-use-kasprintf.patch
+drivers-char-applicomc-use-memdup_user.patch
+ipc-semc-use-err_cast.patch
+crypto-use-err_cast.patch
+drivers-mmc-host-use-err_cast.patch
+fs-ubifs-use-err_cast.patch
+fs-btrfs-use-err_cast.patch
+mm-use-err_cast.patch
+fs-ceph-use-err_cast.patch
+fs-affs-use-err_cast.patch
+
