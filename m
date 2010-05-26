@@ -1,41 +1,46 @@
 From: akpm@linux-foundation.org
-Subject: [patch 012/203] mmc: SDHCI_INT_DATA_MASK typo error
-Date: Wed, 26 May 2010 14:42:02 -0700
-Message-ID: <201005262142.o4QLg219015351@imap1.linux-foundation.org>
+Subject: [patch 016/203] sdhci: enable multiblock transfers in sdhci-s3c
+Date: Wed, 26 May 2010 14:42:05 -0700
+Message-ID: <201005262142.o4QLg5DE015367@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:37166 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:58957 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754323Ab0EZV5e (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2010 17:57:34 -0400
+	by vger.kernel.org with ESMTP id S1754209Ab0EZWBN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2010 18:01:13 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, zgao6@marvell.com, linux-mmc@vger.kernel.org, matt@console-pimps.org
+Cc: akpm@linux-foundation.org, mcuelenaere@gmail.com, ben-linux@fluff.org, linux-mmc@vger.kernel.org, thomas.ab@samsung.com
 
-From: Zhangfei Gao <zgao6@marvell.com>
+From: Maurus Cuelenaere <mcuelenaere@gmail.com>
 
-Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
-Reviewed-by: Matt Fleming <matt@console-pimps.org>
+Wifi over SDIO doesn't work correctly without multiblock, so enable this. 
+This patch depends on the following patches:
+
+Signed-off-by: Maurus Cuelenaere <mcuelenaere@gmail.com>
+Cc: Thomas Abraham <thomas.ab@samsung.com>
+Cc: Ben Dooks <ben-linux@fluff.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci.h |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-s3c.c |    3 ---
+ 1 file changed, 3 deletions(-)
 
-diff -puN drivers/mmc/host/sdhci.h~mmc-sdhci_int_data_mask-typo-error drivers/mmc/host/sdhci.h
---- a/drivers/mmc/host/sdhci.h~mmc-sdhci_int_data_mask-typo-error
-+++ a/drivers/mmc/host/sdhci.h
-@@ -127,7 +127,7 @@
- #define  SDHCI_INT_DATA_MASK	(SDHCI_INT_DATA_END | SDHCI_INT_DMA_END | \
- 		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL | \
- 		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
--		SDHCI_INT_DATA_END_BIT | SDHCI_ADMA_ERROR)
-+		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR)
- #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
+diff -puN drivers/mmc/host/sdhci-s3c.c~sdhci-enable-multiblock-transfers-in-sdhci-s3c drivers/mmc/host/sdhci-s3c.c
+--- a/drivers/mmc/host/sdhci-s3c.c~sdhci-enable-multiblock-transfers-in-sdhci-s3c
++++ a/drivers/mmc/host/sdhci-s3c.c
+@@ -325,9 +325,6 @@ static int __devinit sdhci_s3c_probe(str
+ 	 * support as well. */
+ 	host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
  
- #define SDHCI_ACMD12_ERR	0x3C
+-	/* PIO currently has problems with multi-block IO */
+-	host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK;
+-
+ #endif /* CONFIG_MMC_SDHCI_S3C_DMA */
+ 
+ 	/* It seems we do not get an DATA transfer complete on non-busy
 _
