@@ -1,434 +1,509 @@
 From: akpm@linux-foundation.org
-Subject: [patch 021/203] sdhci-spear: ST SPEAr based SDHCI controller glue
-Date: Wed, 26 May 2010 14:42:10 -0700
-Message-ID: <201005262142.o4QLgAdZ015394@imap1.linux-foundation.org>
+Subject: [patch 017/203] omap_hsmmc: improve interrupt synchronisation
+Date: Wed, 26 May 2010 14:42:06 -0700
+Message-ID: <201005262142.o4QLg6Yo015371@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:33194 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:55555 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753367Ab0EZWNo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2010 18:13:44 -0400
+	by vger.kernel.org with ESMTP id S1753367Ab0EZWNq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2010 18:13:46 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, viresh.kumar@st.com, linus.ml.walleij@gmail.com, linux-mmc@vger.kernel.org, rmk@arm.linux.org.uk, shiraz.hashim@st.com
+Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, svenkatr@ti.com, tony@atomide.com
 
-From: Viresh KUMAR <viresh.kumar@st.com>
+From: Adrian Hunter <adrian.hunter@nokia.com>
 
-Add a glue layer to support the sdhci driver on the ST SPEAr platform.
+The following changes were needed:
+	- do not use in_interrupt() because it will not work
+	with threaded interrupts
 
-Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
-Cc: <shiraz.hashim@st.com>
-Cc: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: Russell King <rmk@arm.linux.org.uk>
+In addition, the following improvements were made:
+	- ensure DMA is unmapped only after the final DMA interrupt
+	- ensure a request is completed only after the final DMA interrupt
+	- disable controller interrupts when a request is not in progress
+	- remove the spin-lock protecting the start of a new request from
+	an unexpected interrupt because the locking was complicated and
+	a 'req_in_progress' flag suffices (since the spin-lock only defers
+	the unexpected interrupts anyway)
+	- instead use the spin-lock to protect the MMC interrupt handler
+	from the DMA interrupt handler
+	- remove the semaphore preventing DMA from being started while
+	the previous DMA is still in progress - the other changes make that
+	impossible, so it is now a BUG_ON condition
+	- ensure the controller interrupt status is clear before exiting
+	the interrrupt handler
+
+In general, these changes make the code safer but do not fix any specific
+bugs so backporting is not necessary.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+Tested-by: Venkatraman S <svenkatr@ti.com>
+Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+Acked-by: Tony Lindgren <tony@atomide.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- MAINTAINERS                     |    6 
- drivers/mmc/host/Kconfig        |   12 +
- drivers/mmc/host/Makefile       |    1 
- drivers/mmc/host/sdhci-spear.c  |  298 ++++++++++++++++++++++++++++++
- include/linux/mmc/sdhci-spear.h |   42 ++++
- 5 files changed, 359 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c |  260 ++++++++++++++++----------------
+ 1 file changed, 133 insertions(+), 127 deletions(-)
 
-diff -puN MAINTAINERS~sdhci-spear-st-spear-based-sdhci-controller-glue MAINTAINERS
---- a/MAINTAINERS~sdhci-spear-st-spear-based-sdhci-controller-glue
-+++ a/MAINTAINERS
-@@ -5004,6 +5004,12 @@ L:	linux-mmc@vger.kernel.org
- S:	Maintained
- F:	drivers/mmc/host/sdhci-s3c.c
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-improve-interrupt-synchronisation drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap_hsmmc-improve-interrupt-synchronisation
++++ a/drivers/mmc/host/omap_hsmmc.c
+@@ -157,12 +157,10 @@ struct omap_hsmmc_host {
+ 	 */
+ 	struct	regulator	*vcc;
+ 	struct	regulator	*vcc_aux;
+-	struct	semaphore	sem;
+ 	struct	work_struct	mmc_carddetect_work;
+ 	void	__iomem		*base;
+ 	resource_size_t		mapbase;
+ 	spinlock_t		irq_lock; /* Prevent races with irq handler */
+-	unsigned long		flags;
+ 	unsigned int		id;
+ 	unsigned int		dma_len;
+ 	unsigned int		dma_sg_idx;
+@@ -183,6 +181,7 @@ struct omap_hsmmc_host {
+ 	int			protect_card;
+ 	int			reqs_blocked;
+ 	int			use_reg;
++	int			req_in_progress;
  
-+SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) ST SPEAR DRIVER
-+M:	Viresh Kumar <viresh.kumar@st.com>
-+L:	linux-mmc@vger.kernel.org
-+S:	Maintained
-+F:	drivers/mmc/host/sdhci-spear.c
-+
- SECURITY SUBSYSTEM
- M:	James Morris <jmorris@namei.org>
- L:	linux-security-module@vger.kernel.org (suggested Cc:)
-diff -puN drivers/mmc/host/Kconfig~sdhci-spear-st-spear-based-sdhci-controller-glue drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~sdhci-spear-st-spear-based-sdhci-controller-glue
-+++ a/drivers/mmc/host/Kconfig
-@@ -136,6 +136,18 @@ config MMC_SDHCI_S3C
+ 	struct	omap_mmc_platform_data	*pdata;
+ };
+@@ -524,6 +523,27 @@ static void omap_hsmmc_stop_clock(struct
+ 		dev_dbg(mmc_dev(host->mmc), "MMC Clock is not stoped\n");
+ }
  
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_SPEAR
-+	tristate "SDHCI support on ST SPEAr platform"
-+	depends on MMC_SDHCI && PLAT_SPEAR
-+	help
-+	  This selects the Secure Digital Host Controller Interface (SDHCI)
-+	  often referrered to as the HSMMC block in some of the ST SPEAR range
-+	  of SoC
-+
-+	  If you have a controller with this interface, say Y or M here.
-+
-+	  If unsure, say N.
-+
- config MMC_SDHCI_S3C_DMA
- 	bool "DMA support on S3C SDHCI"
- 	depends on MMC_SDHCI_S3C && EXPERIMENTAL
-diff -puN drivers/mmc/host/Makefile~sdhci-spear-st-spear-based-sdhci-controller-glue drivers/mmc/host/Makefile
---- a/drivers/mmc/host/Makefile~sdhci-spear-st-spear-based-sdhci-controller-glue
-+++ a/drivers/mmc/host/Makefile
-@@ -14,6 +14,7 @@ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
- obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
- obj-$(CONFIG_MMC_SDHCI_PLTFM)	+= sdhci-pltfm.o
- obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
-+obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
- obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
- obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
- obj-$(CONFIG_MMC_OMAP)		+= omap.o
-diff -puN /dev/null drivers/mmc/host/sdhci-spear.c
---- /dev/null
-+++ a/drivers/mmc/host/sdhci-spear.c
-@@ -0,0 +1,298 @@
-+/*
-+ * drivers/mmc/host/sdhci-spear.c
-+ *
-+ * Support of SDHCI platform devices for spear soc family
-+ *
-+ * Copyright (C) 2010 ST Microelectronics
-+ * Viresh Kumar<viresh.kumar@st.com>
-+ *
-+ * Inspired by sdhci-pltfm.c
-+ *
-+ * This file is licensed under the terms of the GNU General Public
-+ * License version 2. This program is licensed "as is" without any
-+ * warranty of any kind, whether express or implied.
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/delay.h>
-+#include <linux/gpio.h>
-+#include <linux/highmem.h>
-+#include <linux/interrupt.h>
-+#include <linux/irq.h>
-+#include <linux/platform_device.h>
-+#include <linux/slab.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/sdhci-spear.h>
-+#include <linux/io.h>
-+#include "sdhci.h"
-+
-+struct spear_sdhci {
-+	struct clk *clk;
-+	struct sdhci_plat_data *data;
-+};
-+
-+/* sdhci ops */
-+static struct sdhci_ops sdhci_pltfm_ops = {
-+	/* Nothing to do for now. */
-+};
-+
-+/* gpio card detection interrupt handler */
-+static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
++static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host)
 +{
-+	struct platform_device *pdev = dev_id;
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct spear_sdhci *sdhci = dev_get_platdata(&pdev->dev);
-+	unsigned long gpio_irq_type;
-+	int val;
++	unsigned int irq_mask;
 +
-+	val = gpio_get_value(sdhci->data->card_int_gpio);
-+
-+	/* val == 1 -> card removed, val == 0 -> card inserted */
-+	/* if card removed - set irq for low level, else vice versa */
-+	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
-+	set_irq_type(irq, gpio_irq_type);
-+
-+	if (sdhci->data->card_power_gpio >= 0) {
-+		if (!sdhci->data->power_always_enb) {
-+			/* if card inserted, give power, otherwise remove it */
-+			val = sdhci->data->power_active_high ? !val : val ;
-+			gpio_set_value(sdhci->data->card_power_gpio, val);
-+		}
-+	}
-+
-+	/* inform sdhci driver about card insertion/removal */
-+	tasklet_schedule(&host->card_tasklet);
-+
-+	return IRQ_HANDLED;
-+}
-+
-+static int __devinit sdhci_probe(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host;
-+	struct resource *iomem;
-+	struct spear_sdhci *sdhci;
-+	int ret;
-+
-+	BUG_ON(pdev == NULL);
-+
-+	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	if (!iomem) {
-+		ret = -ENOMEM;
-+		dev_dbg(&pdev->dev, "memory resource not defined\n");
-+		goto err;
-+	}
-+
-+	if (!request_mem_region(iomem->start, resource_size(iomem),
-+				"spear-sdhci")) {
-+		ret = -EBUSY;
-+		dev_dbg(&pdev->dev, "cannot request region\n");
-+		goto err;
-+	}
-+
-+	sdhci = kzalloc(sizeof(*sdhci), GFP_KERNEL);
-+	if (!sdhci) {
-+		ret = -ENOMEM;
-+		dev_dbg(&pdev->dev, "cannot allocate memory for sdhci\n");
-+		goto err_kzalloc;
-+	}
-+
-+	/* clk enable */
-+	sdhci->clk = clk_get(&pdev->dev, NULL);
-+	if (IS_ERR(sdhci->clk)) {
-+		ret = PTR_ERR(sdhci->clk);
-+		dev_dbg(&pdev->dev, "Error getting clock\n");
-+		goto err_clk_get;
-+	}
-+
-+	ret = clk_enable(sdhci->clk);
-+	if (ret) {
-+		dev_dbg(&pdev->dev, "Error enabling clock\n");
-+		goto err_clk_enb;
-+	}
-+
-+	/* overwrite platform_data */
-+	sdhci->data = dev_get_platdata(&pdev->dev);
-+	pdev->dev.platform_data = sdhci;
-+
-+	if (pdev->dev.parent)
-+		host = sdhci_alloc_host(pdev->dev.parent, 0);
++	if (host->use_dma)
++		irq_mask = INT_EN_MASK & ~(BRR_ENABLE | BWR_ENABLE);
 +	else
-+		host = sdhci_alloc_host(&pdev->dev, 0);
++		irq_mask = INT_EN_MASK;
 +
-+	if (IS_ERR(host)) {
-+		ret = PTR_ERR(host);
-+		dev_dbg(&pdev->dev, "error allocating host\n");
-+		goto err_alloc_host;
-+	}
-+
-+	host->hw_name = "sdhci";
-+	host->ops = &sdhci_pltfm_ops;
-+	host->irq = platform_get_irq(pdev, 0);
-+	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
-+
-+	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
-+	if (!host->ioaddr) {
-+		ret = -ENOMEM;
-+		dev_dbg(&pdev->dev, "failed to remap registers\n");
-+		goto err_ioremap;
-+	}
-+
-+	ret = sdhci_add_host(host);
-+	if (ret) {
-+		dev_dbg(&pdev->dev, "error adding host\n");
-+		goto err_add_host;
-+	}
-+
-+	platform_set_drvdata(pdev, host);
-+
-+	/*
-+	 * It is optional to use GPIOs for sdhci Power control & sdhci card
-+	 * interrupt detection. If sdhci->data is NULL, then use original sdhci
-+	 * lines otherwise GPIO lines.
-+	 * If GPIO is selected for power control, then power should be disabled
-+	 * after card removal and should be enabled when card insertion
-+	 * interrupt occurs
-+	 */
-+	if (!sdhci->data)
-+		return 0;
-+
-+	if (sdhci->data->card_power_gpio >= 0) {
-+		int val = 0;
-+
-+		ret = gpio_request(sdhci->data->card_power_gpio, "sdhci");
-+		if (ret < 0) {
-+			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
-+					sdhci->data->card_power_gpio);
-+			goto err_pgpio_request;
-+		}
-+
-+		if (sdhci->data->power_always_enb)
-+			val = sdhci->data->power_active_high;
-+		else
-+			val = !sdhci->data->power_active_high;
-+
-+		ret = gpio_direction_output(sdhci->data->card_power_gpio, val);
-+		if (ret) {
-+			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
-+					sdhci->data->card_power_gpio);
-+			goto err_pgpio_direction;
-+		}
-+
-+		gpio_set_value(sdhci->data->card_power_gpio, 1);
-+	}
-+
-+	if (sdhci->data->card_int_gpio >= 0) {
-+		ret = gpio_request(sdhci->data->card_int_gpio, "sdhci");
-+		if (ret < 0) {
-+			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
-+					sdhci->data->card_int_gpio);
-+			goto err_igpio_request;
-+		}
-+
-+		ret = gpio_direction_input(sdhci->data->card_int_gpio);
-+		if (ret) {
-+			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
-+					sdhci->data->card_int_gpio);
-+			goto err_igpio_direction;
-+		}
-+		ret = request_irq(gpio_to_irq(sdhci->data->card_int_gpio),
-+				sdhci_gpio_irq, IRQF_TRIGGER_LOW,
-+				mmc_hostname(host->mmc), pdev);
-+		if (ret) {
-+			dev_dbg(&pdev->dev, "gpio request irq fail: %d\n",
-+					sdhci->data->card_int_gpio);
-+			goto err_igpio_request_irq;
-+		}
-+
-+	}
-+
-+	return 0;
-+
-+err_igpio_request_irq:
-+err_igpio_direction:
-+	if (sdhci->data->card_int_gpio >= 0)
-+		gpio_free(sdhci->data->card_int_gpio);
-+err_igpio_request:
-+err_pgpio_direction:
-+	if (sdhci->data->card_power_gpio >= 0)
-+		gpio_free(sdhci->data->card_power_gpio);
-+err_pgpio_request:
-+	platform_set_drvdata(pdev, NULL);
-+	sdhci_remove_host(host, 1);
-+err_add_host:
-+	iounmap(host->ioaddr);
-+err_ioremap:
-+	sdhci_free_host(host);
-+err_alloc_host:
-+	clk_disable(sdhci->clk);
-+err_clk_enb:
-+	clk_put(sdhci->clk);
-+err_clk_get:
-+	kfree(sdhci);
-+err_kzalloc:
-+	release_mem_region(iomem->start, resource_size(iomem));
-+err:
-+	dev_err(&pdev->dev, "spear-sdhci probe failed: %d\n", ret);
-+	return ret;
++	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
++	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
++	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
 +}
 +
-+static int __devexit sdhci_remove(struct platform_device *pdev)
++static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
 +{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	struct spear_sdhci *sdhci = dev_get_platdata(&pdev->dev);
-+	int dead;
-+	u32 scratch;
-+
-+	if (sdhci->data) {
-+		if (sdhci->data->card_int_gpio >= 0) {
-+			free_irq(gpio_to_irq(sdhci->data->card_int_gpio), pdev);
-+			gpio_free(sdhci->data->card_int_gpio);
-+		}
-+
-+		if (sdhci->data->card_power_gpio >= 0)
-+			gpio_free(sdhci->data->card_power_gpio);
-+	}
-+
-+	platform_set_drvdata(pdev, NULL);
-+	dead = 0;
-+	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-+	if (scratch == (u32)-1)
-+		dead = 1;
-+
-+	sdhci_remove_host(host, dead);
-+	iounmap(host->ioaddr);
-+	sdhci_free_host(host);
-+	clk_disable(sdhci->clk);
-+	clk_put(sdhci->clk);
-+	kfree(sdhci);
-+	if (iomem)
-+		release_mem_region(iomem->start, resource_size(iomem));
-+
-+	return 0;
++	OMAP_HSMMC_WRITE(host->base, ISE, 0);
++	OMAP_HSMMC_WRITE(host->base, IE, 0);
++	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
 +}
 +
-+static struct platform_driver sdhci_driver = {
-+	.driver = {
-+		.name	= "sdhci",
-+		.owner	= THIS_MODULE,
-+	},
-+	.probe		= sdhci_probe,
-+	.remove		= __devexit_p(sdhci_remove),
-+};
+ #ifdef CONFIG_PM
+ 
+ /*
+@@ -592,9 +612,7 @@ static int omap_hsmmc_context_restore(st
+ 		&& time_before(jiffies, timeout))
+ 		;
+ 
+-	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+-	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
+-	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
++	omap_hsmmc_disable_irq(host);
+ 
+ 	/* Do not initialize card-specific things if the power is off */
+ 	if (host->power_mode == MMC_POWER_OFF)
+@@ -697,6 +715,8 @@ static void send_init_stream(struct omap
+ 		return;
+ 
+ 	disable_irq(host->irq);
 +
-+static int __init sdhci_init(void)
++	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
+ 	OMAP_HSMMC_WRITE(host->base, CON,
+ 		OMAP_HSMMC_READ(host->base, CON) | INIT_STREAM);
+ 	OMAP_HSMMC_WRITE(host->base, CMD, INIT_STREAM_CMD);
+@@ -762,17 +782,7 @@ omap_hsmmc_start_command(struct omap_hsm
+ 		mmc_hostname(host->mmc), cmd->opcode, cmd->arg);
+ 	host->cmd = cmd;
+ 
+-	/*
+-	 * Clear status bits and enable interrupts
+-	 */
+-	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+-	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
+-
+-	if (host->use_dma)
+-		OMAP_HSMMC_WRITE(host->base, IE,
+-				 INT_EN_MASK & ~(BRR_ENABLE | BWR_ENABLE));
+-	else
+-		OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
++	omap_hsmmc_enable_irq(host);
+ 
+ 	host->response_busy = 0;
+ 	if (cmd->flags & MMC_RSP_PRESENT) {
+@@ -806,13 +816,7 @@ omap_hsmmc_start_command(struct omap_hsm
+ 	if (host->use_dma)
+ 		cmdreg |= DMA_EN;
+ 
+-	/*
+-	 * In an interrupt context (i.e. STOP command), the spinlock is unlocked
+-	 * by the interrupt handler, otherwise (i.e. for a new request) it is
+-	 * unlocked here.
+-	 */
+-	if (!in_interrupt())
+-		spin_unlock_irqrestore(&host->irq_lock, host->flags);
++	host->req_in_progress = 1;
+ 
+ 	OMAP_HSMMC_WRITE(host->base, ARG, cmd->arg);
+ 	OMAP_HSMMC_WRITE(host->base, CMD, cmdreg);
+@@ -827,6 +831,23 @@ omap_hsmmc_get_dma_dir(struct omap_hsmmc
+ 		return DMA_FROM_DEVICE;
+ }
+ 
++static void omap_hsmmc_request_done(struct omap_hsmmc_host *host, struct mmc_request *mrq)
 +{
-+	return platform_driver_register(&sdhci_driver);
-+}
-+module_init(sdhci_init);
++	int dma_ch;
 +
-+static void __exit sdhci_exit(void)
-+{
-+	platform_driver_unregister(&sdhci_driver);
-+}
-+module_exit(sdhci_exit);
++	spin_lock(&host->irq_lock);
++	host->req_in_progress = 0;
++	dma_ch = host->dma_ch;
++	spin_unlock(&host->irq_lock);
 +
-+MODULE_DESCRIPTION("SPEAr Secure Digital Host Controller Interface driver");
-+MODULE_AUTHOR("Viresh Kumar <viresh.kumar@st.com>");
-+MODULE_LICENSE("GPL v2");
-diff -puN /dev/null include/linux/mmc/sdhci-spear.h
---- /dev/null
-+++ a/include/linux/mmc/sdhci-spear.h
-@@ -0,0 +1,42 @@
++	omap_hsmmc_disable_irq(host);
++	/* Do not complete the request if DMA is still in progress */
++	if (mrq->data && host->use_dma && dma_ch != -1)
++		return;
++	host->mrq = NULL;
++	mmc_request_done(host->mmc, mrq);
++}
++
+ /*
+  * Notify the transfer complete to MMC core
+  */
+@@ -843,25 +864,19 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_h
+ 			return;
+ 		}
+ 
+-		host->mrq = NULL;
+-		mmc_request_done(host->mmc, mrq);
++		omap_hsmmc_request_done(host, mrq);
+ 		return;
+ 	}
+ 
+ 	host->data = NULL;
+ 
+-	if (host->use_dma && host->dma_ch != -1)
+-		dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->dma_len,
+-			omap_hsmmc_get_dma_dir(host, data));
+-
+ 	if (!data->error)
+ 		data->bytes_xfered += data->blocks * (data->blksz);
+ 	else
+ 		data->bytes_xfered = 0;
+ 
+ 	if (!data->stop) {
+-		host->mrq = NULL;
+-		mmc_request_done(host->mmc, data->mrq);
++		omap_hsmmc_request_done(host, data->mrq);
+ 		return;
+ 	}
+ 	omap_hsmmc_start_command(host, data->stop, NULL);
+@@ -887,10 +902,8 @@ omap_hsmmc_cmd_done(struct omap_hsmmc_ho
+ 			cmd->resp[0] = OMAP_HSMMC_READ(host->base, RSP10);
+ 		}
+ 	}
+-	if ((host->data == NULL && !host->response_busy) || cmd->error) {
+-		host->mrq = NULL;
+-		mmc_request_done(host->mmc, cmd->mrq);
+-	}
++	if ((host->data == NULL && !host->response_busy) || cmd->error)
++		omap_hsmmc_request_done(host, cmd->mrq);
+ }
+ 
+ /*
+@@ -898,14 +911,19 @@ omap_hsmmc_cmd_done(struct omap_hsmmc_ho
+  */
+ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
+ {
++	int dma_ch;
++
+ 	host->data->error = errno;
+ 
+-	if (host->use_dma && host->dma_ch != -1) {
++	spin_lock(&host->irq_lock);
++	dma_ch = host->dma_ch;
++	host->dma_ch = -1;
++	spin_unlock(&host->irq_lock);
++
++	if (host->use_dma && dma_ch != -1) {
+ 		dma_unmap_sg(mmc_dev(host->mmc), host->data->sg, host->dma_len,
+ 			omap_hsmmc_get_dma_dir(host, host->data));
+-		omap_free_dma(host->dma_ch);
+-		host->dma_ch = -1;
+-		up(&host->sem);
++		omap_free_dma(dma_ch);
+ 	}
+ 	host->data = NULL;
+ }
+@@ -967,28 +985,21 @@ static inline void omap_hsmmc_reset_cont
+ 			__func__);
+ }
+ 
+-/*
+- * MMC controller IRQ handler
+- */
+-static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
++static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+ {
+-	struct omap_hsmmc_host *host = dev_id;
+ 	struct mmc_data *data;
+-	int end_cmd = 0, end_trans = 0, status;
+-
+-	spin_lock(&host->irq_lock);
++	int end_cmd = 0, end_trans = 0;
+ 
+-	if (host->mrq == NULL) {
+-		OMAP_HSMMC_WRITE(host->base, STAT,
+-			OMAP_HSMMC_READ(host->base, STAT));
+-		/* Flush posted write */
+-		OMAP_HSMMC_READ(host->base, STAT);
+-		spin_unlock(&host->irq_lock);
+-		return IRQ_HANDLED;
++	if (!host->req_in_progress) {
++		do {
++			OMAP_HSMMC_WRITE(host->base, STAT, status);
++			/* Flush posted write */
++			status = OMAP_HSMMC_READ(host->base, STAT);
++		} while (status & INT_EN_MASK);
++		return;
+ 	}
+ 
+ 	data = host->data;
+-	status = OMAP_HSMMC_READ(host->base, STAT);
+ 	dev_dbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
+ 
+ 	if (status & ERR) {
+@@ -1041,15 +1052,27 @@ static irqreturn_t omap_hsmmc_irq(int ir
+ 	}
+ 
+ 	OMAP_HSMMC_WRITE(host->base, STAT, status);
+-	/* Flush posted write */
+-	OMAP_HSMMC_READ(host->base, STAT);
+ 
+ 	if (end_cmd || ((status & CC) && host->cmd))
+ 		omap_hsmmc_cmd_done(host, host->cmd);
+ 	if ((end_trans || (status & TC)) && host->mrq)
+ 		omap_hsmmc_xfer_done(host, data);
++}
+ 
+-	spin_unlock(&host->irq_lock);
 +/*
-+ * include/linux/mmc/sdhci-spear.h
-+ *
-+ * SDHCI declarations specific to ST SPEAr platform
-+ *
-+ * Copyright (C) 2010 ST Microelectronics
-+ * Viresh Kumar<viresh.kumar@st.com>
-+ *
-+ * This file is licensed under the terms of the GNU General Public
-+ * License version 2. This program is licensed "as is" without any
-+ * warranty of any kind, whether express or implied.
++ * MMC controller IRQ handler
 + */
-+
-+#ifndef MMC_SDHCI_SPEAR_H
-+#define MMC_SDHCI_SPEAR_H
-+
-+#include <linux/platform_device.h>
-+/*
-+ * struct sdhci_plat_data: spear sdhci platform data structure
-+ *
-+ * @card_power_gpio: gpio pin for enabling/disabling power to sdhci socket
-+ * @power_active_high: if set, enable power to sdhci socket by setting
-+ *			card_power_gpio
-+ * @power_always_enb: If set, then enable power on probe, otherwise enable only
-+ *			on card insertion and disable on card removal.
-+ * card_int_gpio: gpio pin used for card detection
-+ */
-+struct sdhci_plat_data {
-+	int card_power_gpio;
-+	int power_active_high;
-+	int power_always_enb;
-+	int card_int_gpio;
-+};
-+
-+/* This function is used to set platform_data field of pdev->dev */
-+static inline void
-+sdhci_set_plat_data(struct platform_device *pdev, struct sdhci_plat_data *data)
++static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
 +{
-+	pdev->dev.platform_data = data;
-+}
++	struct omap_hsmmc_host *host = dev_id;
++	int status;
 +
-+#endif /* MMC_SDHCI_SPEAR_H */
++	status = OMAP_HSMMC_READ(host->base, STAT);
++	do {
++		omap_hsmmc_do_irq(host, status);
++		/* Flush posted write */
++		status = OMAP_HSMMC_READ(host->base, STAT);
++	} while (status & INT_EN_MASK);
+ 
+ 	return IRQ_HANDLED;
+ }
+@@ -1244,31 +1267,47 @@ static void omap_hsmmc_config_dma_params
+ /*
+  * DMA call back function
+  */
+-static void omap_hsmmc_dma_cb(int lch, u16 ch_status, void *data)
++static void omap_hsmmc_dma_cb(int lch, u16 ch_status, void *cb_data)
+ {
+-	struct omap_hsmmc_host *host = data;
++	struct omap_hsmmc_host *host = cb_data;
++	struct mmc_data *data = host->mrq->data;
++	int dma_ch, req_in_progress;
+ 
+ 	if (ch_status & OMAP2_DMA_MISALIGNED_ERR_IRQ)
+ 		dev_dbg(mmc_dev(host->mmc), "MISALIGNED_ADRS_ERR\n");
+ 
+-	if (host->dma_ch < 0)
++	spin_lock(&host->irq_lock);
++	if (host->dma_ch < 0) {
++		spin_unlock(&host->irq_lock);
+ 		return;
++	}
+ 
+ 	host->dma_sg_idx++;
+ 	if (host->dma_sg_idx < host->dma_len) {
+ 		/* Fire up the next transfer. */
+-		omap_hsmmc_config_dma_params(host, host->data,
+-					   host->data->sg + host->dma_sg_idx);
++		omap_hsmmc_config_dma_params(host, data,
++					   data->sg + host->dma_sg_idx);
++		spin_unlock(&host->irq_lock);
+ 		return;
+ 	}
+ 
+-	omap_free_dma(host->dma_ch);
++	dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->dma_len,
++		omap_hsmmc_get_dma_dir(host, data));
++
++	req_in_progress = host->req_in_progress;
++	dma_ch = host->dma_ch;
+ 	host->dma_ch = -1;
+-	/*
+-	 * DMA Callback: run in interrupt context.
+-	 * mutex_unlock will throw a kernel warning if used.
+-	 */
+-	up(&host->sem);
++	spin_unlock(&host->irq_lock);
++
++	omap_free_dma(dma_ch);
++
++	/* If DMA has finished after TC, complete the request */
++	if (!req_in_progress) {
++		struct mmc_request *mrq = host->mrq;
++
++		host->mrq = NULL;
++		mmc_request_done(host->mmc, mrq);
++	}
+ }
+ 
+ /*
+@@ -1277,7 +1316,7 @@ static void omap_hsmmc_dma_cb(int lch, u
+ static int omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
+ 					struct mmc_request *req)
+ {
+-	int dma_ch = 0, ret = 0, err = 1, i;
++	int dma_ch = 0, ret = 0, i;
+ 	struct mmc_data *data = req->data;
+ 
+ 	/* Sanity check: all the SG entries must be aligned by block size. */
+@@ -1294,23 +1333,7 @@ static int omap_hsmmc_start_dma_transfer
+ 		 */
+ 		return -EINVAL;
+ 
+-	/*
+-	 * If for some reason the DMA transfer is still active,
+-	 * we wait for timeout period and free the dma
+-	 */
+-	if (host->dma_ch != -1) {
+-		set_current_state(TASK_UNINTERRUPTIBLE);
+-		schedule_timeout(100);
+-		if (down_trylock(&host->sem)) {
+-			omap_free_dma(host->dma_ch);
+-			host->dma_ch = -1;
+-			up(&host->sem);
+-			return err;
+-		}
+-	} else {
+-		if (down_trylock(&host->sem))
+-			return err;
+-	}
++	BUG_ON(host->dma_ch != -1);
+ 
+ 	ret = omap_request_dma(omap_hsmmc_get_dma_sync_dev(host, data),
+ 			       "MMC/SD", omap_hsmmc_dma_cb, host, &dma_ch);
+@@ -1410,37 +1433,27 @@ static void omap_hsmmc_request(struct mm
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+ 	int err;
+ 
+-	/*
+-	 * Prevent races with the interrupt handler because of unexpected
+-	 * interrupts, but not if we are already in interrupt context i.e.
+-	 * retries.
+-	 */
+-	if (!in_interrupt()) {
+-		spin_lock_irqsave(&host->irq_lock, host->flags);
+-		/*
+-		 * Protect the card from I/O if there is a possibility
+-		 * it can be removed.
+-		 */
+-		if (host->protect_card) {
+-			if (host->reqs_blocked < 3) {
+-				/*
+-				 * Ensure the controller is left in a consistent
+-				 * state by resetting the command and data state
+-				 * machines.
+-				 */
+-				omap_hsmmc_reset_controller_fsm(host, SRD);
+-				omap_hsmmc_reset_controller_fsm(host, SRC);
+-				host->reqs_blocked += 1;
+-			}
+-			req->cmd->error = -EBADF;
+-			if (req->data)
+-				req->data->error = -EBADF;
+-			spin_unlock_irqrestore(&host->irq_lock, host->flags);
+-			mmc_request_done(mmc, req);
+-			return;
+-		} else if (host->reqs_blocked)
+-			host->reqs_blocked = 0;
+-	}
++	BUG_ON(host->req_in_progress);
++	BUG_ON(host->dma_ch != -1);
++	if (host->protect_card) {
++		if (host->reqs_blocked < 3) {
++			/*
++			 * Ensure the controller is left in a consistent
++			 * state by resetting the command and data state
++			 * machines.
++			 */
++			omap_hsmmc_reset_controller_fsm(host, SRD);
++			omap_hsmmc_reset_controller_fsm(host, SRC);
++			host->reqs_blocked += 1;
++		}
++		req->cmd->error = -EBADF;
++		if (req->data)
++			req->data->error = -EBADF;
++		req->cmd->retries = 0;
++		mmc_request_done(mmc, req);
++		return;
++	} else if (host->reqs_blocked)
++		host->reqs_blocked = 0;
+ 	WARN_ON(host->mrq != NULL);
+ 	host->mrq = req;
+ 	err = omap_hsmmc_prepare_data(host, req);
+@@ -1449,8 +1462,6 @@ static void omap_hsmmc_request(struct mm
+ 		if (req->data)
+ 			req->data->error = err;
+ 		host->mrq = NULL;
+-		if (!in_interrupt())
+-			spin_unlock_irqrestore(&host->irq_lock, host->flags);
+ 		mmc_request_done(mmc, req);
+ 		return;
+ 	}
+@@ -2019,7 +2030,6 @@ static int __init omap_hsmmc_probe(struc
+ 	mmc->f_min	= 400000;
+ 	mmc->f_max	= 52000000;
+ 
+-	sema_init(&host->sem, 1);
+ 	spin_lock_init(&host->irq_lock);
+ 
+ 	host->iclk = clk_get(&pdev->dev, "ick");
+@@ -2162,8 +2172,7 @@ static int __init omap_hsmmc_probe(struc
+ 		}
+ 	}
+ 
+-	OMAP_HSMMC_WRITE(host->base, ISE, INT_EN_MASK);
+-	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
++	omap_hsmmc_disable_irq(host);
+ 
+ 	mmc_host_lazy_disable(host->mmc);
+ 
+@@ -2283,10 +2292,7 @@ static int omap_hsmmc_suspend(struct pla
+ 		mmc_host_enable(host->mmc);
+ 		ret = mmc_suspend_host(host->mmc, state);
+ 		if (ret == 0) {
+-			OMAP_HSMMC_WRITE(host->base, ISE, 0);
+-			OMAP_HSMMC_WRITE(host->base, IE, 0);
+-
+-
++			omap_hsmmc_disable_irq(host);
+ 			OMAP_HSMMC_WRITE(host->base, HCTL,
+ 				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
+ 			mmc_host_disable(host->mmc);
 _
