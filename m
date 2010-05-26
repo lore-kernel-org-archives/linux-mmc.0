@@ -1,161 +1,102 @@
 From: akpm@linux-foundation.org
-Subject: [patch 011/203] mmc: atmel-mci: Add support for SDIO interrupts
-Date: Wed, 26 May 2010 14:42:01 -0700
-Message-ID: <201005262142.o4QLg1YP015344@imap1.linux-foundation.org>
+Subject: [patch 006/203] davinci: mmc: add a function to control reset state of the controller
+Date: Wed, 26 May 2010 14:41:57 -0700
+Message-ID: <201005262141.o4QLfvbI015324@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:46588 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:37583 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752831Ab0EZWEL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2010 18:04:11 -0400
+	by vger.kernel.org with ESMTP id S1753601Ab0EZWJP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2010 18:09:15 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, anders.grahn@hd-wireless.se, hskinnemoen@atmel.com, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com
+Cc: akpm@linux-foundation.org, chaithrika@ti.com, khilman@deeprootsystems.com, linux-mmc@vger.kernel.org, sudhakar.raj@ti.com, vipin.bhandari@ti.com
 
-From: Anders Grahn <anders.grahn@hd-wireless.se>
+From: Chaithrika U S <chaithrika@ti.com>
 
-Atmel-mci support for SDIO interrupts.  This adds the enable_sdio_irq()
-function and the configuration of sdio irq mask per slot.  With this irq
-mask information, we keep the idea of multiple slot per sd/mmc host (not
-only A and B).  MMC_CAP_SDIO_IRQ is added according to slot configuration.
+Add a helper function which will aid in changing the reset
+status of the controller.
 
-A new little function is added to run mmc_signal_sdio_irq() during
-interrupt handling routine.
-
-Signed-off-by: Anders Grahn <anders.grahn@hd-wireless.se>
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: Haavard Skinnemoen <hskinnemoen@atmel.com>
+Signed-off-by: Chaithrika U S <chaithrika@ti.com>
+Signed-off-by: Kevin Hilman <khilman@deeprootsystems.com>
+Cc: Vipin Bhandari <vipin.bhandari@ti.com>
+Cc: Sudhakar Rajashekhara <sudhakar.raj@ti.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/atmel-mci.c |   42 +++++++++++++++++++++++++++++----
- 1 file changed, 38 insertions(+), 4 deletions(-)
+ drivers/mmc/host/davinci_mmc.c |   37 +++++++++++++------------------
+ 1 file changed, 16 insertions(+), 21 deletions(-)
 
-diff -puN drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-add-support-for-sdio-interrupts drivers/mmc/host/atmel-mci.c
---- a/drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-add-support-for-sdio-interrupts
-+++ a/drivers/mmc/host/atmel-mci.c
-@@ -173,6 +173,7 @@ struct atmel_mci {
-  * @mmc: The mmc_host representing this slot.
-  * @host: The MMC controller this slot is using.
-  * @sdc_reg: Value of SDCR to be written before using this slot.
-+ * @sdio_irq: SDIO irq mask for this slot.
-  * @mrq: mmc_request currently being processed or waiting to be
-  *	processed, or NULL when the slot is idle.
-  * @queue_node: List node for placing this node in the @queue list of
-@@ -191,6 +192,7 @@ struct atmel_mci_slot {
- 	struct atmel_mci	*host;
- 
- 	u32			sdc_reg;
-+	u32			sdio_irq;
- 
- 	struct mmc_request	*mrq;
- 	struct list_head	queue_node;
-@@ -792,7 +794,7 @@ static void atmci_start_request(struct a
- 	mci_writel(host, SDCR, slot->sdc_reg);
- 
- 	iflags = mci_readl(host, IMR);
--	if (iflags)
-+	if (iflags & ~(MCI_SDIOIRQA | MCI_SDIOIRQB))
- 		dev_warn(&slot->mmc->class_dev, "WARNING: IMR=0x%08x\n",
- 				iflags);
- 
-@@ -1041,11 +1043,23 @@ static int atmci_get_cd(struct mmc_host 
- 	return present;
+diff -puN drivers/mmc/host/davinci_mmc.c~davinci-mmc-add-a-function-to-control-reset-state-of-the-controller drivers/mmc/host/davinci_mmc.c
+--- a/drivers/mmc/host/davinci_mmc.c~davinci-mmc-add-a-function-to-control-reset-state-of-the-controller
++++ a/drivers/mmc/host/davinci_mmc.c
+@@ -909,19 +909,26 @@ static void mmc_davinci_cmd_done(struct 
+ 	}
  }
  
-+static void atmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
-+{
-+	struct atmel_mci_slot	*slot = mmc_priv(mmc);
-+	struct atmel_mci	*host = slot->host;
-+
-+	if (enable)
-+		mci_writel(host, IER, slot->sdio_irq);
-+	else
-+		mci_writel(host, IDR, slot->sdio_irq);
+-static void
+-davinci_abort_data(struct mmc_davinci_host *host, struct mmc_data *data)
++static inline void mmc_davinci_reset_ctrl(struct mmc_davinci_host *host,
++								int val)
+ {
+ 	u32 temp;
+ 
+-	/* reset command and data state machines */
+ 	temp = readl(host->base + DAVINCI_MMCCTL);
+-	writel(temp | MMCCTL_CMDRST | MMCCTL_DATRST,
+-		host->base + DAVINCI_MMCCTL);
++	if (val)	/* reset */
++		temp |= MMCCTL_CMDRST | MMCCTL_DATRST;
++	else		/* enable */
++		temp &= ~(MMCCTL_CMDRST | MMCCTL_DATRST);
+ 
+-	temp &= ~(MMCCTL_CMDRST | MMCCTL_DATRST);
+-	udelay(10);
+ 	writel(temp, host->base + DAVINCI_MMCCTL);
++	udelay(10);
 +}
 +
- static const struct mmc_host_ops atmci_ops = {
- 	.request	= atmci_request,
- 	.set_ios	= atmci_set_ios,
- 	.get_ro		= atmci_get_ro,
- 	.get_cd		= atmci_get_cd,
-+	.enable_sdio_irq = atmci_enable_sdio_irq,
- };
- 
- /* Called with host->lock held */
-@@ -1497,6 +1511,19 @@ static void atmci_cmd_interrupt(struct a
- 	tasklet_schedule(&host->tasklet);
++static void
++davinci_abort_data(struct mmc_davinci_host *host, struct mmc_data *data)
++{
++	mmc_davinci_reset_ctrl(host, 1);
++	mmc_davinci_reset_ctrl(host, 0);
  }
  
-+static void atmci_sdio_interrupt(struct atmel_mci *host, u32 status)
-+{
-+	int	i;
-+
-+	for (i = 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
-+		struct atmel_mci_slot *slot = host->slot[i];
-+		if (slot && (status & slot->sdio_irq)) {
-+			mmc_signal_sdio_irq(slot->mmc);
-+		}
-+	}
-+}
-+
-+
- static irqreturn_t atmci_interrupt(int irq, void *dev_id)
+ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
+@@ -1125,15 +1132,8 @@ static inline void mmc_davinci_cpufreq_d
+ #endif
+ static void __init init_mmcsd_host(struct mmc_davinci_host *host)
  {
- 	struct atmel_mci	*host = dev_id;
-@@ -1536,6 +1563,10 @@ static irqreturn_t atmci_interrupt(int i
+-	/* DAT line portion is diabled and in reset state */
+-	writel(readl(host->base + DAVINCI_MMCCTL) | MMCCTL_DATRST,
+-		host->base + DAVINCI_MMCCTL);
+-
+-	/* CMD line portion is diabled and in reset state */
+-	writel(readl(host->base + DAVINCI_MMCCTL) | MMCCTL_CMDRST,
+-		host->base + DAVINCI_MMCCTL);
  
- 		if (pending & MCI_CMDRDY)
- 			atmci_cmd_interrupt(host, status);
-+
-+		if (pending & (MCI_SDIOIRQA | MCI_SDIOIRQB))
-+			atmci_sdio_interrupt(host, status);
-+
- 	} while (pass_count++ < 5);
+-	udelay(10);
++	mmc_davinci_reset_ctrl(host, 1);
  
- 	return pass_count ? IRQ_HANDLED : IRQ_NONE;
-@@ -1558,7 +1589,7 @@ static irqreturn_t atmci_detect_interrup
+ 	writel(0, host->base + DAVINCI_MMCCLK);
+ 	writel(MMCCLK_CLKEN, host->base + DAVINCI_MMCCLK);
+@@ -1141,12 +1141,7 @@ static void __init init_mmcsd_host(struc
+ 	writel(0x1FFF, host->base + DAVINCI_MMCTOR);
+ 	writel(0xFFFF, host->base + DAVINCI_MMCTOD);
  
- static int __init atmci_init_slot(struct atmel_mci *host,
- 		struct mci_slot_pdata *slot_data, unsigned int id,
--		u32 sdc_reg)
-+		u32 sdc_reg, u32 sdio_irq)
- {
- 	struct mmc_host			*mmc;
- 	struct atmel_mci_slot		*slot;
-@@ -1574,11 +1605,14 @@ static int __init atmci_init_slot(struct
- 	slot->wp_pin = slot_data->wp_pin;
- 	slot->detect_is_active_high = slot_data->detect_is_active_high;
- 	slot->sdc_reg = sdc_reg;
-+	slot->sdio_irq = sdio_irq;
+-	writel(readl(host->base + DAVINCI_MMCCTL) & ~MMCCTL_DATRST,
+-		host->base + DAVINCI_MMCCTL);
+-	writel(readl(host->base + DAVINCI_MMCCTL) & ~MMCCTL_CMDRST,
+-		host->base + DAVINCI_MMCCTL);
+-
+-	udelay(10);
++	mmc_davinci_reset_ctrl(host, 0);
+ }
  
- 	mmc->ops = &atmci_ops;
- 	mmc->f_min = DIV_ROUND_UP(host->bus_hz, 512);
- 	mmc->f_max = host->bus_hz / 2;
- 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
-+	if (sdio_irq)
-+		mmc->caps |= MMC_CAP_SDIO_IRQ;
- 	if (atmci_is_mci2())
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
- 	if (slot_data->bus_width >= 4)
-@@ -1769,13 +1803,13 @@ static int __init atmci_probe(struct pla
- 	ret = -ENODEV;
- 	if (pdata->slot[0].bus_width) {
- 		ret = atmci_init_slot(host, &pdata->slot[0],
--				0, MCI_SDCSEL_SLOT_A);
-+				0, MCI_SDCSEL_SLOT_A, MCI_SDIOIRQA);
- 		if (!ret)
- 			nr_slots++;
- 	}
- 	if (pdata->slot[1].bus_width) {
- 		ret = atmci_init_slot(host, &pdata->slot[1],
--				1, MCI_SDCSEL_SLOT_B);
-+				1, MCI_SDCSEL_SLOT_B, MCI_SDIOIRQB);
- 		if (!ret)
- 			nr_slots++;
- 	}
+ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
 _
