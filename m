@@ -1,83 +1,81 @@
 From: akpm@linux-foundation.org
-Subject: [patch 009/203] mmc: atmel-mci: enable SD high speed support
-Date: Wed, 26 May 2010 14:41:59 -0700
-Message-ID: <201005262141.o4QLfx6G015336@imap1.linux-foundation.org>
+Subject: [patch 014/203] mmc: s3c6410: add new quirk in sdhci driver and update ADMA descriptor build
+Date: Wed, 26 May 2010 14:42:04 -0700
+Message-ID: <201005262142.o4QLg4Bf015359@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:34746 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:44475 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752831Ab0EZWCV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2010 18:02:21 -0400
+	by vger.kernel.org with ESMTP id S1754866Ab0EZWCn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2010 18:02:43 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, nicolas.ferre@atmel.com, haavard.skinnemoen@atmel.com, linux-mmc@vger.kernel.org, maciej.sosnowski@intel.com
+Cc: akpm@linux-foundation.org, thomas.ab@samsung.com, ben-linux@fluff.org, linux-mmc@vger.kernel.org, mcuelenaere@gmail.com
 
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
+From: Thomas Abraham <thomas.ab@samsung.com>
 
-Enable high speed support for atmel-mci driver.  This support is dependent
-of the revision of the IP and, of course, the capacity of the SD card
-used.
+The s3c6410 sdhci controller does not support the 'End' attribute and NOP
+attribute in the same 8-Byte ADMA descriptor.  This patch adds a new quirk
+to identify sdhci host contollers with such behaviour.  In addition to
+this, for controllers using the new quirk, the last entry in the ADMA
+descritor table is marked with the 'End' attribute (instead of using a NOP
+descriptor with 'End' attribute).
 
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-Reviewed-by: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Cc: Maciej Sosnowski <maciej.sosnowski@intel.com>
+Signed-off-by: Maurus Cuelenaere <mcuelenaere@gmail.com>
+Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
+Acked-by: Ben Dooks <ben-linux@fluff.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/atmel-mci.c |   22 +++++++++++++++++++---
- 1 file changed, 19 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci.c |   20 +++++++++++++++-----
+ drivers/mmc/host/sdhci.h |    2 ++
+ 2 files changed, 17 insertions(+), 5 deletions(-)
 
-diff -puN drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-enable-sd-high-speed-support drivers/mmc/host/atmel-mci.c
---- a/drivers/mmc/host/atmel-mci.c~mmc-atmel-mci-enable-sd-high-speed-support
-+++ a/drivers/mmc/host/atmel-mci.c
-@@ -952,10 +952,21 @@ static void atmci_set_ios(struct mmc_hos
- 		if (mci_has_rwproof())
- 			host->mode_reg |= (MCI_MR_WRPROOF | MCI_MR_RDPROOF);
+diff -puN drivers/mmc/host/sdhci.c~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build
++++ a/drivers/mmc/host/sdhci.c
+@@ -496,12 +496,22 @@ static int sdhci_adma_table_pre(struct s
+ 		WARN_ON((desc - host->adma_desc) > (128 * 2 + 1) * 4);
+ 	}
  
--		if (list_empty(&host->queue))
-+		if (atmci_is_mci2()) {
-+			/* setup High Speed mode in relation with card capacity */
-+			if (ios->timing == MMC_TIMING_SD_HS)
-+				host->cfg_reg |= MCI_CFG_HSMODE;
-+			else
-+				host->cfg_reg &= ~MCI_CFG_HSMODE;
+-	/*
+-	 * Add a terminating entry.
+-	 */
++	if (host->quirks & SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC) {
++		/*
++		* Mark the last descriptor as the terminating descriptor
++		*/
++		if (desc != host->adma_desc) {
++			desc -= 8;
++			desc[0] |= 0x2; /* end */
 +		}
-+
-+		if (list_empty(&host->queue)) {
- 			mci_writel(host, MR, host->mode_reg);
--		else
-+			if (atmci_is_mci2())
-+				mci_writel(host, CFG, host->cfg_reg);
-+		} else {
- 			host->need_clock_update = true;
-+		}
++	} else {
++		/*
++		* Add a terminating entry.
++		*/
  
- 		spin_unlock_bh(&host->lock);
- 	} else {
-@@ -1052,8 +1063,11 @@ static void atmci_request_end(struct atm
- 	 * necessary if set_ios() is called when a different slot is
- 	 * busy transfering data.
- 	 */
--	if (host->need_clock_update)
-+	if (host->need_clock_update) {
- 		mci_writel(host, MR, host->mode_reg);
-+		if (atmci_is_mci2())
-+			mci_writel(host, CFG, host->cfg_reg);
+-	/* nop, end, valid */
+-	sdhci_set_adma_desc(desc, 0, 0, 0x3);
++		/* nop, end, valid */
++		sdhci_set_adma_desc(desc, 0, 0, 0x3);
 +	}
  
- 	host->cur_slot->mrq = NULL;
- 	host->mrq = NULL;
-@@ -1565,6 +1579,8 @@ static int __init atmci_init_slot(struct
- 	mmc->f_min = DIV_ROUND_UP(host->bus_hz, 512);
- 	mmc->f_max = host->bus_hz / 2;
- 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
-+	if (atmci_is_mci2())
-+		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
- 	if (slot_data->bus_width >= 4)
- 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 	/*
+ 	 * Resync align buffer as we might have changed it.
+diff -puN drivers/mmc/host/sdhci.h~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build drivers/mmc/host/sdhci.h
+--- a/drivers/mmc/host/sdhci.h~s3c6410-add-new-quirk-in-sdhci-driver-and-update-adma-descriptor-build
++++ a/drivers/mmc/host/sdhci.h
+@@ -238,6 +238,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
+ /* Controller reports wrong base clock capability */
+ #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
++/* Controller cannot support End Attribute in NOP ADMA descriptor */
++#define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
  
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
 _
