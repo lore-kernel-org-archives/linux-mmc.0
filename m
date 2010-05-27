@@ -1,94 +1,74 @@
-From: akpm@linux-foundation.org
-Subject: [patch 018/203] mmc: OMAP HS-MMC: convert to dev_pm_ops
-Date: Wed, 26 May 2010 14:42:07 -0700
-Message-ID: <201005262142.o4QLg736015375@imap1.linux-foundation.org>
+From: =?utf-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>
+Subject: [PATCH] mxcmmc: add card detect through DAT3 possibility
+Date: Thu, 27 May 2010 19:54:44 +0200
+Message-ID: <1274982884-13205-1-git-send-email-eric@eukrea.com>
+References: <1274287568-30253-9-git-send-email-eric@eukrea.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:41994 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754217Ab0EZWPZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2010 18:15:25 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1274287568-30253-9-git-send-email-eric@eukrea.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, khilman@deeprootsystems.com, adrian.hunter@nokia.com, ext-denis.2.karpov@nokia.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, tony@atomide.com
 
-From: Kevin Hilman <khilman@deeprootsystems.com>
-
-Convert PM operations to use dev_pm_ops.  This will facilitate the runtime
-PM coversion which will add to dev_pm_ops hooks.
-
-Note that dev_pm_ops version of the suspend hook no longer takes a 'state'
-argument.  However, the MMC core function mmc_suspend_host() still takes a
-'state' argument, but it is unused, so a dummy state variable was created
-to pass to the MMC core.
-
-In the future, the MMC core should be converted to drop this state
-argument and the rest of the MMC drivers could be easily converted to
-dev_pm_ops as well.
-
-Signed-off-by: Kevin Hilman <khilman@deeprootsystems.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Matt Fleming <matt@console-pimps.org>
-Cc: Tony Lindgren <tony@atomide.com>
-Cc: Denis Karpov <ext-denis.2.karpov@nokia.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/omap_hsmmc.c |   15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
-
-diff -puN drivers/mmc/host/omap_hsmmc.c~mmc-omap-hs-mmc-convert-to-dev_pm_ops drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~mmc-omap-hs-mmc-convert-to-dev_pm_ops
-+++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -2267,10 +2267,12 @@ static int omap_hsmmc_remove(struct plat
- }
- 
- #ifdef CONFIG_PM
--static int omap_hsmmc_suspend(struct platform_device *pdev, pm_message_t state)
-+static int omap_hsmmc_suspend(struct device *dev)
- {
- 	int ret = 0;
-+	struct platform_device *pdev = to_platform_device(dev);
- 	struct omap_hsmmc_host *host = platform_get_drvdata(pdev);
-+	pm_message_t state = PMSG_SUSPEND; /* unused by MMC core */
- 
- 	if (host && host->suspended)
- 		return 0;
-@@ -2316,9 +2318,10 @@ static int omap_hsmmc_suspend(struct pla
- }
- 
- /* Routine to resume the MMC device */
--static int omap_hsmmc_resume(struct platform_device *pdev)
-+static int omap_hsmmc_resume(struct device *dev)
- {
- 	int ret = 0;
-+	struct platform_device *pdev = to_platform_device(dev);
- 	struct omap_hsmmc_host *host = platform_get_drvdata(pdev);
- 
- 	if (host && !host->suspended)
-@@ -2369,13 +2372,17 @@ clk_en_err:
- #define omap_hsmmc_resume		NULL
- #endif
- 
--static struct platform_driver omap_hsmmc_driver = {
--	.remove		= omap_hsmmc_remove,
-+static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
- 	.suspend	= omap_hsmmc_suspend,
- 	.resume		= omap_hsmmc_resume,
-+};
-+
-+static struct platform_driver omap_hsmmc_driver = {
-+	.remove		= omap_hsmmc_remove,
- 	.driver		= {
- 		.name = DRIVER_NAME,
- 		.owner = THIS_MODULE,
-+		.pm = &omap_hsmmc_dev_pm_ops,
- 	},
- };
- 
-_
+U2lnbmVkLW9mZi1ieTogRXJpYyBCw6luYXJkIDxlcmljQGV1a3JlYS5jb20+ClRvOiBzLmhhdWVy
+QHBlbmd1dHJvbml4LmRlCkNjOiBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcK
+Q2M6IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcKLS0tCiBhcmNoL2FybS9wbGF0LW14Yy9pbmNs
+dWRlL21hY2gvbW1jLmggfCAgICAzICsrKwogZHJpdmVycy9tbWMvaG9zdC9teGNtbWMuYyAgICAg
+ICAgICAgIHwgICAxNiArKysrKysrKysrKysrLS0tCiAyIGZpbGVzIGNoYW5nZWQsIDE2IGluc2Vy
+dGlvbnMoKyksIDMgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvYXJjaC9hcm0vcGxhdC1teGMv
+aW5jbHVkZS9tYWNoL21tYy5oIGIvYXJjaC9hcm0vcGxhdC1teGMvaW5jbHVkZS9tYWNoL21tYy5o
+CmluZGV4IGRlMjEyOGQuLjI5MTE1ZjQgMTAwNjQ0Ci0tLSBhL2FyY2gvYXJtL3BsYXQtbXhjL2lu
+Y2x1ZGUvbWFjaC9tbWMuaAorKysgYi9hcmNoL2FybS9wbGF0LW14Yy9pbmNsdWRlL21hY2gvbW1j
+LmgKQEAgLTMxLDYgKzMxLDkgQEAgc3RydWN0IGlteG1tY19wbGF0Zm9ybV9kYXRhIHsKIAogCS8q
+IGFkanVzdCBzbG90IHZvbHRhZ2UgKi8KIAl2b2lkICgqc2V0cG93ZXIpKHN0cnVjdCBkZXZpY2Ug
+KiwgdW5zaWduZWQgaW50IHZkZCk7CisKKwkvKiBlbmFibGUgY2FyZCBkZXRlY3QgdXNpbmcgREFU
+MyAqLworCWludCBkYXQzX2NhcmRfZGV0ZWN0OwogfTsKIAogI2VuZGlmCmRpZmYgLS1naXQgYS9k
+cml2ZXJzL21tYy9ob3N0L214Y21tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9teGNtbWMuYwppbmRl
+eCBlYzE4ZTNiLi43NGM4N2UwIDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L214Y21tYy5j
+CisrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbXhjbW1jLmMKQEAgLTExOSw2ICsxMTksNyBAQCBzdHJ1
+Y3QgbXhjbWNpX2hvc3QgewogCWludAkJCWRldGVjdF9pcnE7CiAJaW50CQkJZG1hOwogCWludAkJ
+CWRvX2RtYTsKKwlpbnQJCQlkZWZhdWx0X2lycV9tYXNrOwogCWludAkJCXVzZV9zZGlvOwogCXVu
+c2lnbmVkIGludAkJcG93ZXJfbW9kZTsKIAlzdHJ1Y3QgaW14bW1jX3BsYXRmb3JtX2RhdGEgKnBk
+YXRhOwpAQCAtMjI4LDcgKzIyOSw3IEBAIHN0YXRpYyBpbnQgbXhjbWNpX3NldHVwX2RhdGEoc3Ry
+dWN0IG14Y21jaV9ob3N0ICpob3N0LCBzdHJ1Y3QgbW1jX2RhdGEgKmRhdGEpCiBzdGF0aWMgaW50
+IG14Y21jaV9zdGFydF9jbWQoc3RydWN0IG14Y21jaV9ob3N0ICpob3N0LCBzdHJ1Y3QgbW1jX2Nv
+bW1hbmQgKmNtZCwKIAkJdW5zaWduZWQgaW50IGNtZGF0KQogewotCXUzMiBpbnRfY250cjsKKwl1
+MzIgaW50X2NudHIgPSBob3N0LT5kZWZhdWx0X2lycV9tYXNrOwogCXVuc2lnbmVkIGxvbmcgZmxh
+Z3M7CiAKIAlXQVJOX09OKGhvc3QtPmNtZCAhPSBOVUxMKTsKQEAgLTI3NSw3ICsyNzYsNyBAQCBz
+dGF0aWMgaW50IG14Y21jaV9zdGFydF9jbWQoc3RydWN0IG14Y21jaV9ob3N0ICpob3N0LCBzdHJ1
+Y3QgbW1jX2NvbW1hbmQgKmNtZCwKIHN0YXRpYyB2b2lkIG14Y21jaV9maW5pc2hfcmVxdWVzdChz
+dHJ1Y3QgbXhjbWNpX2hvc3QgKmhvc3QsCiAJCXN0cnVjdCBtbWNfcmVxdWVzdCAqcmVxKQogewot
+CXUzMiBpbnRfY250ciA9IDA7CisJdTMyIGludF9jbnRyID0gaG9zdC0+ZGVmYXVsdF9pcnFfbWFz
+azsKIAl1bnNpZ25lZCBsb25nIGZsYWdzOwogCiAJc3Bpbl9sb2NrX2lycXNhdmUoJmhvc3QtPmxv
+Y2ssIGZsYWdzKTsKQEAgLTU4NSw2ICs1ODYsOSBAQCBzdGF0aWMgaXJxcmV0dXJuX3QgbXhjbWNp
+X2lycShpbnQgaXJxLCB2b2lkICpkZXZpZCkKIAkJICAoc3RhdCAmIChTVEFUVVNfREFUQV9UUkFO
+U19ET05FIHwgU1RBVFVTX1dSSVRFX09QX0RPTkUpKSkKIAkJbXhjbWNpX2RhdGFfZG9uZShob3N0
+LCBzdGF0KTsKICNlbmRpZgorCWlmIChob3N0LT5kZWZhdWx0X2lycV9tYXNrICYmCisJCSAgKHN0
+YXQgJiAoU1RBVFVTX0NBUkRfSU5TRVJUSU9OIHwgU1RBVFVTX0NBUkRfUkVNT1ZBTCkpKQorCQlt
+bWNfZGV0ZWN0X2NoYW5nZShob3N0LT5tbWMsIG1zZWNzX3RvX2ppZmZpZXMoMjAwKSk7CiAJcmV0
+dXJuIElSUV9IQU5ETEVEOwogfQogCkBAIC04MDksNiArODEzLDEyIEBAIHN0YXRpYyBpbnQgbXhj
+bWNpX3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpCiAJZWxzZQogCQltbWMtPm9j
+cl9hdmFpbCA9IE1NQ19WRERfMzJfMzMgfCBNTUNfVkREXzMzXzM0OwogCisJaWYgKGhvc3QtPnBk
+YXRhICYmIGhvc3QtPnBkYXRhLT5kYXQzX2NhcmRfZGV0ZWN0KQorCQlob3N0LT5kZWZhdWx0X2ly
+cV9tYXNrID0KKwkJCUlOVF9DQVJEX0lOU0VSVElPTl9FTiB8IElOVF9DQVJEX1JFTU9WQUxfRU47
+CisJZWxzZQorCQlob3N0LT5kZWZhdWx0X2lycV9tYXNrID0gMDsKKwogCWhvc3QtPnJlcyA9IHI7
+CiAJaG9zdC0+aXJxID0gaXJxOwogCkBAIC04MzUsNyArODQ1LDcgQEAgc3RhdGljIGludCBteGNt
+Y2lfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKIAkvKiByZWNvbW1lbmRlZCBp
+biBkYXRhIHNoZWV0ICovCiAJd3JpdGV3KDB4MmRiNCwgaG9zdC0+YmFzZSArIE1NQ19SRUdfUkVB
+RF9UTyk7CiAKLQl3cml0ZWwoMCwgaG9zdC0+YmFzZSArIE1NQ19SRUdfSU5UX0NOVFIpOworCXdy
+aXRlbChob3N0LT5kZWZhdWx0X2lycV9tYXNrLCBob3N0LT5iYXNlICsgTU1DX1JFR19JTlRfQ05U
+Uik7CiAKICNpZmRlZiBIQVNfRE1BCiAJaG9zdC0+ZG1hID0gaW14X2RtYV9yZXF1ZXN0X2J5X3By
+aW8oRFJJVkVSX05BTUUsIERNQV9QUklPX0xPVyk7Ci0tIAoxLjYuMy4zCgoKX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWls
+aW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0
+cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
