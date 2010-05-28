@@ -1,113 +1,80 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [RFC] [PATCH 2/2] mmc: implement SD-combo (IO+mem) support
-Date: Fri, 28 May 2010 14:51:50 -0700
-Message-ID: <20100528145150.5257af9f.akpm@linux-foundation.org>
-References: <1-1000-12432-1274803827-7569@rere.qmqm.pl>
-	<2-1000-12432-1274803827-7569@rere.qmqm.pl>
+From: Marcel Holtmann <marcel@holtmann.org>
+Subject: Re: Question of RFKILL for bluetooth, hci_core.c
+Date: Sat, 29 May 2010 00:57:57 +0200
+Message-ID: <1275087477.4706.85.camel@aeonflux.t-mobile.de>
+References: <AANLkTiloq_U8CpoSYw-Vl4Tww27QFP_Wirs37iJLb7yP@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <2-1000-12432-1274803827-7569@rere.qmqm.pl>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?Q?Micha=C5=82_Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from senator.holtmann.net ([87.106.208.187]:42844 "EHLO
+	mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750855Ab0E1W6j (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 May 2010 18:58:39 -0400
+In-Reply-To: <AANLkTiloq_U8CpoSYw-Vl4Tww27QFP_Wirs37iJLb7yP@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, zgao6@marvell.com
 
-On Tue, 25 May 2010 18:10:28 +0200 (CEST)
-Micha__ Miros__aw <mirq-linux@rere.qmqm.pl> wrote:
+Hi Zhangfei,
 
-> ---
+first of all, please use linux-bluetooth mailing list and not the MCC
+one.
 
-There's really nothing at all to be said?  I don't even know what
-"SD-combo" _is_.  Help us out here!
+> We found you have submitted one patch adding rfkill for bluetoogh.
+> 
+> commit 611b30f74b5d8ca036a9923b3bf6e0ee10a21a53
+> Author: Marcel Holtmann <marcel@holtmann.org>
+> Date:   Mon Jun 8 14:41:38 2009 +0200
+> 
+>     Bluetooth: Add native RFKILL soft-switch support for all devices
+> 
+>     With the re-write of the RFKILL subsystem it is now possible to easily
+>     integrate RFKILL soft-switch support into the Bluetooth subsystem. All
+>     Bluetooth devices will now get automatically RFKILL support.
+> 
+>     Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+> 
+> Question 1,
+> Once hci_register_dev is called, the rfkill_alloc is called, the
+> result is the rfkill number is increased one by one,  the application
+> may not know which rfkill it is.
+> For example, insmod bt.ko -> rfkill0, rmmod bt; insmod bt.ko->
+> rfkill1, ~~ rfkill2, 3
+> Same effect would happen when echo 0 > /sys/class/rfkill/rfkill0/state.
+> 
+> The reason is rfkill_register would increase rfkill->idx.
+> int __must_check rfkill_register(struct rfkill *rfkill)
+> {
+>         static unsigned long rfkill_no;
+> ~~~
+>         rfkill->idx = rfkill_no;
+>         dev_set_name(dev, "rfkill%lu", rfkill_no);
+>         rfkill_no++;
+> 
+> ~~~
+> }
+> 
+> Quesiton 2.
+> In fact, we have own rfkill to control power on and off, then
+> currently both our own rfkill and bluetooth rfkill need to be enabled.
+> 
+> I am not sure what's the purpose of the rfkill adding in
+> hci_register_dev, just wander could we add one default state as
+> enabled for such rfkill. Then we could ignore this rfkill, no matter
+> the number is increased one by one.
 
-Why do we need this patch?  What happens if we don't have it?  Where's
-the value to our users?  etcetera.
+And second it is clearly the soft RFKILL switch. As usual a device can
+also have a hard kill switch.
+
+The index numbers are irrelevant. If the RFKILL switch is assigned to a
+device is will be a child of its parent, so it is easy to figure out
+where it belong. In case of platform switches it is impossible anyway
+and hence we have implemented CHANGE_ALL support.
+
+Regards
+
+Marcel
 
 
->
-> ...
->
-> @@ -144,10 +145,10 @@ static int sdio_enable_wide(struct mmc_card *card)
->  	u8 ctrl;
->  
->  	if (!(card->host->caps & MMC_CAP_4_BIT_DATA))
-> -		return 0;
-> +		return -EOPNOTSUPP;
-
-grr.
-
-"The requested operation is not supported on this type of object. 
- This usually occurs if you are trying to accept(2) a non SOCK_STREAM
- socket."
-
-So if this EOPNOTSUPP gets propagated back to userspace, our poor user
-will be looking at his networking code wondering what he did wrong!
-
-Please, just because an error code sounds appropriate, that doesn't
-mean that it was the correct thing to use.  ENXIO might be appropriate,
-but when in doubt, plain old EIO is good.
-
-> +static int sdio_enable_hs(struct mmc_card *card)
-> +{
-> +	int err;
-> +
-> +	err = mmc_sdio_switch_hs(card, true);
-> +	if (err)
-> +		return err;
-> +
-> +	if (card->type == MMC_TYPE_SD_COMBO) {
-> +		err = mmc_sd_switch_hs(card);
-> +		if (err == -EOPNOTSUPP)
-> +			mmc_sdio_switch_hs(card, false);
-> +	}
-
-Now, if the EOPNOTSUPP is purely for internal use and never gets
-propagated back to userspace then I _guess_ that's acceptable.  It's a
-kind of internal overloading of an inappropriate identifier for MMC's
-own usage.
-
-But it would be clearer and cleaner to not borrow the Unix errnos in
-this fashion.  Better to define a set of MMC-specific error codes and
-put them in an MMC-specific header file.
-
-> @@ -295,6 +356,34 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
->  
->  	card->type = MMC_TYPE_SDIO;
->  
-> +	if (!oldcard || oldcard->type == MMC_TYPE_SDIO) {
-> +		u32 cid[4];
-> +
-> +		err = mmc_sd_get_cid(host, host->ocr & ocr, cid);
-> +		if (!err) {
-> +			/* this is SD-combo card */
-> +			if (oldcard && oldcard->type == MMC_TYPE_SDIO) {
-> +				err = -ENOENT;
-> +				goto remove;
-> +			}
-> +			card->type = MMC_TYPE_SD_COMBO;
-> +			memcpy(card->raw_cid, cid, sizeof(card->raw_cid));
-> +		}
-> +	} else if (oldcard->type == MMC_TYPE_SD_COMBO) {
-> +		u32 cid[4];
-> +
-> +		err = mmc_sd_get_cid(host, host->ocr & ocr, cid);
-> +		if (err) {
-> +			/* this is SDIO-only card */
-> +			goto remove;
-> +		}
-> +
-> +		if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0) {
-> +			err = -ENOENT;
-> +			goto remove;
-> +		}
-> +	}
-
-Be aware that gcc has a habit of being inefficient with local
-variables.  It will probably allocate 32 bytes of stack for the above
-two cid[] arrays.  But it could have allocated just 16 bytes.
-
-It's not a big problem in this particular case, but it should be
-remembered.  Unfortunately any C-level workaround for this involves
-making the source code nastier :(
