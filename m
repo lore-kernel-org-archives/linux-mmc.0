@@ -1,65 +1,39 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Question of RFKILL for bluetooth, hci_core.c
-Date: Fri, 28 May 2010 15:34:39 +0800
-Message-ID: <AANLkTiloq_U8CpoSYw-Vl4Tww27QFP_Wirs37iJLb7yP@mail.gmail.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [RFC] [PATCH 1/2] mmc: split mmc_sd_init_card()
+Date: Fri, 28 May 2010 14:40:27 -0700
+Message-ID: <20100528144027.3c868841.akpm@linux-foundation.org>
+References: <1-1000-12432-1274803827-7569@rere.qmqm.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:48047 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754552Ab0E1Hek (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 May 2010 03:34:40 -0400
-Received: by gyg13 with SMTP id 13so691844gyg.19
-        for <linux-mmc@vger.kernel.org>; Fri, 28 May 2010 00:34:39 -0700 (PDT)
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:49573 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753494Ab0E1Vkd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 May 2010 17:40:33 -0400
+In-Reply-To: <1-1000-12432-1274803827-7569@rere.qmqm.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: marcel@holtmann.org
-Cc: linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, zgao6@marvell.com
+To: =?UTF-8?Q?Micha=C5=82_Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi, Marcel
+On Tue, 25 May 2010 18:10:28 +0200 (CEST)
+Micha__ Miros__aw <mirq-linux@rere.qmqm.pl> wrote:
 
-We found you have submitted one patch adding rfkill for bluetoogh.
+> This is needed to avoid code duplication in SD-combo support.
 
-commit 611b30f74b5d8ca036a9923b3bf6e0ee10a21a53
-Author: Marcel Holtmann <marcel@holtmann.org>
-Date:   Mon Jun 8 14:41:38 2009 +0200
+hm.  Perhaps you could have told us a bit more about it than this.
 
-    Bluetooth: Add native RFKILL soft-switch support for all devices
+> +int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
+> +int mmc_sd_get_csd(struct mmc_host *host, struct mmc_card *card)
+> +int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+> +unsigned mmc_sd_get_max_clock(struct mmc_card *card)
+> +void mmc_sd_go_highspeed(struct mmc_card *card)
 
-    With the re-write of the RFKILL subsystem it is now possible to easily
-    integrate RFKILL soft-switch support into the Bluetooth subsystem. All
-    Bluetooth devices will now get automatically RFKILL support.
+These are global symbols, but they are not exported to (other) modules.
+That's odd.  I'd have expected to see them either `static' or
+EXPORT_MODULE()d.
 
-    Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+I'll take the lack of a signed-off-by: and the "RFC" as signal to not
+apply these patches.
 
-Question 1,
-Once hci_register_dev is called, the rfkill_alloc is called, the
-result is the rfkill number is increased one by one,  the application
-may not know which rfkill it is.
-For example, insmod bt.ko -> rfkill0, rmmod bt; insmod bt.ko->
-rfkill1, ~~ rfkill2, 3
-Same effect would happen when echo 0 > /sys/class/rfkill/rfkill0/state.
-
-The reason is rfkill_register would increase rfkill->idx.
-int __must_check rfkill_register(struct rfkill *rfkill)
-{
-        static unsigned long rfkill_no;
-~~~
-        rfkill->idx = rfkill_no;
-        dev_set_name(dev, "rfkill%lu", rfkill_no);
-        rfkill_no++;
-
-~~~
-}
-
-Quesiton 2.
-In fact, we have own rfkill to control power on and off, then
-currently both our own rfkill and bluetooth rfkill need to be enabled.
-
-I am not sure what's the purpose of the rfkill adding in
-hci_register_dev, just wander could we add one default state as
-enabled for such rfkill. Then we could ignore this rfkill, no matter
-the number is increased one by one.
-
-Thanks
-Zhangfei
