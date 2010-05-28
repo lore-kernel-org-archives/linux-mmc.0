@@ -1,74 +1,65 @@
-From: =?utf-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>
-Subject: [PATCH] mxcmmc: add card detect through DAT3 possibility
-Date: Thu, 27 May 2010 19:54:44 +0200
-Message-ID: <1274982884-13205-1-git-send-email-eric@eukrea.com>
-References: <1274287568-30253-9-git-send-email-eric@eukrea.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Question of RFKILL for bluetooth, hci_core.c
+Date: Fri, 28 May 2010 15:34:39 +0800
+Message-ID: <AANLkTiloq_U8CpoSYw-Vl4Tww27QFP_Wirs37iJLb7yP@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1274287568-30253-9-git-send-email-eric@eukrea.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:48047 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754552Ab0E1Hek (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 May 2010 03:34:40 -0400
+Received: by gyg13 with SMTP id 13so691844gyg.19
+        for <linux-mmc@vger.kernel.org>; Fri, 28 May 2010 00:34:39 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: marcel@holtmann.org
+Cc: linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, zgao6@marvell.com
 
-U2lnbmVkLW9mZi1ieTogRXJpYyBCw6luYXJkIDxlcmljQGV1a3JlYS5jb20+ClRvOiBzLmhhdWVy
-QHBlbmd1dHJvbml4LmRlCkNjOiBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcK
-Q2M6IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcKLS0tCiBhcmNoL2FybS9wbGF0LW14Yy9pbmNs
-dWRlL21hY2gvbW1jLmggfCAgICAzICsrKwogZHJpdmVycy9tbWMvaG9zdC9teGNtbWMuYyAgICAg
-ICAgICAgIHwgICAxNiArKysrKysrKysrKysrLS0tCiAyIGZpbGVzIGNoYW5nZWQsIDE2IGluc2Vy
-dGlvbnMoKyksIDMgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvYXJjaC9hcm0vcGxhdC1teGMv
-aW5jbHVkZS9tYWNoL21tYy5oIGIvYXJjaC9hcm0vcGxhdC1teGMvaW5jbHVkZS9tYWNoL21tYy5o
-CmluZGV4IGRlMjEyOGQuLjI5MTE1ZjQgMTAwNjQ0Ci0tLSBhL2FyY2gvYXJtL3BsYXQtbXhjL2lu
-Y2x1ZGUvbWFjaC9tbWMuaAorKysgYi9hcmNoL2FybS9wbGF0LW14Yy9pbmNsdWRlL21hY2gvbW1j
-LmgKQEAgLTMxLDYgKzMxLDkgQEAgc3RydWN0IGlteG1tY19wbGF0Zm9ybV9kYXRhIHsKIAogCS8q
-IGFkanVzdCBzbG90IHZvbHRhZ2UgKi8KIAl2b2lkICgqc2V0cG93ZXIpKHN0cnVjdCBkZXZpY2Ug
-KiwgdW5zaWduZWQgaW50IHZkZCk7CisKKwkvKiBlbmFibGUgY2FyZCBkZXRlY3QgdXNpbmcgREFU
-MyAqLworCWludCBkYXQzX2NhcmRfZGV0ZWN0OwogfTsKIAogI2VuZGlmCmRpZmYgLS1naXQgYS9k
-cml2ZXJzL21tYy9ob3N0L214Y21tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9teGNtbWMuYwppbmRl
-eCBlYzE4ZTNiLi43NGM4N2UwIDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L214Y21tYy5j
-CisrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbXhjbW1jLmMKQEAgLTExOSw2ICsxMTksNyBAQCBzdHJ1
-Y3QgbXhjbWNpX2hvc3QgewogCWludAkJCWRldGVjdF9pcnE7CiAJaW50CQkJZG1hOwogCWludAkJ
-CWRvX2RtYTsKKwlpbnQJCQlkZWZhdWx0X2lycV9tYXNrOwogCWludAkJCXVzZV9zZGlvOwogCXVu
-c2lnbmVkIGludAkJcG93ZXJfbW9kZTsKIAlzdHJ1Y3QgaW14bW1jX3BsYXRmb3JtX2RhdGEgKnBk
-YXRhOwpAQCAtMjI4LDcgKzIyOSw3IEBAIHN0YXRpYyBpbnQgbXhjbWNpX3NldHVwX2RhdGEoc3Ry
-dWN0IG14Y21jaV9ob3N0ICpob3N0LCBzdHJ1Y3QgbW1jX2RhdGEgKmRhdGEpCiBzdGF0aWMgaW50
-IG14Y21jaV9zdGFydF9jbWQoc3RydWN0IG14Y21jaV9ob3N0ICpob3N0LCBzdHJ1Y3QgbW1jX2Nv
-bW1hbmQgKmNtZCwKIAkJdW5zaWduZWQgaW50IGNtZGF0KQogewotCXUzMiBpbnRfY250cjsKKwl1
-MzIgaW50X2NudHIgPSBob3N0LT5kZWZhdWx0X2lycV9tYXNrOwogCXVuc2lnbmVkIGxvbmcgZmxh
-Z3M7CiAKIAlXQVJOX09OKGhvc3QtPmNtZCAhPSBOVUxMKTsKQEAgLTI3NSw3ICsyNzYsNyBAQCBz
-dGF0aWMgaW50IG14Y21jaV9zdGFydF9jbWQoc3RydWN0IG14Y21jaV9ob3N0ICpob3N0LCBzdHJ1
-Y3QgbW1jX2NvbW1hbmQgKmNtZCwKIHN0YXRpYyB2b2lkIG14Y21jaV9maW5pc2hfcmVxdWVzdChz
-dHJ1Y3QgbXhjbWNpX2hvc3QgKmhvc3QsCiAJCXN0cnVjdCBtbWNfcmVxdWVzdCAqcmVxKQogewot
-CXUzMiBpbnRfY250ciA9IDA7CisJdTMyIGludF9jbnRyID0gaG9zdC0+ZGVmYXVsdF9pcnFfbWFz
-azsKIAl1bnNpZ25lZCBsb25nIGZsYWdzOwogCiAJc3Bpbl9sb2NrX2lycXNhdmUoJmhvc3QtPmxv
-Y2ssIGZsYWdzKTsKQEAgLTU4NSw2ICs1ODYsOSBAQCBzdGF0aWMgaXJxcmV0dXJuX3QgbXhjbWNp
-X2lycShpbnQgaXJxLCB2b2lkICpkZXZpZCkKIAkJICAoc3RhdCAmIChTVEFUVVNfREFUQV9UUkFO
-U19ET05FIHwgU1RBVFVTX1dSSVRFX09QX0RPTkUpKSkKIAkJbXhjbWNpX2RhdGFfZG9uZShob3N0
-LCBzdGF0KTsKICNlbmRpZgorCWlmIChob3N0LT5kZWZhdWx0X2lycV9tYXNrICYmCisJCSAgKHN0
-YXQgJiAoU1RBVFVTX0NBUkRfSU5TRVJUSU9OIHwgU1RBVFVTX0NBUkRfUkVNT1ZBTCkpKQorCQlt
-bWNfZGV0ZWN0X2NoYW5nZShob3N0LT5tbWMsIG1zZWNzX3RvX2ppZmZpZXMoMjAwKSk7CiAJcmV0
-dXJuIElSUV9IQU5ETEVEOwogfQogCkBAIC04MDksNiArODEzLDEyIEBAIHN0YXRpYyBpbnQgbXhj
-bWNpX3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpCiAJZWxzZQogCQltbWMtPm9j
-cl9hdmFpbCA9IE1NQ19WRERfMzJfMzMgfCBNTUNfVkREXzMzXzM0OwogCisJaWYgKGhvc3QtPnBk
-YXRhICYmIGhvc3QtPnBkYXRhLT5kYXQzX2NhcmRfZGV0ZWN0KQorCQlob3N0LT5kZWZhdWx0X2ly
-cV9tYXNrID0KKwkJCUlOVF9DQVJEX0lOU0VSVElPTl9FTiB8IElOVF9DQVJEX1JFTU9WQUxfRU47
-CisJZWxzZQorCQlob3N0LT5kZWZhdWx0X2lycV9tYXNrID0gMDsKKwogCWhvc3QtPnJlcyA9IHI7
-CiAJaG9zdC0+aXJxID0gaXJxOwogCkBAIC04MzUsNyArODQ1LDcgQEAgc3RhdGljIGludCBteGNt
-Y2lfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKIAkvKiByZWNvbW1lbmRlZCBp
-biBkYXRhIHNoZWV0ICovCiAJd3JpdGV3KDB4MmRiNCwgaG9zdC0+YmFzZSArIE1NQ19SRUdfUkVB
-RF9UTyk7CiAKLQl3cml0ZWwoMCwgaG9zdC0+YmFzZSArIE1NQ19SRUdfSU5UX0NOVFIpOworCXdy
-aXRlbChob3N0LT5kZWZhdWx0X2lycV9tYXNrLCBob3N0LT5iYXNlICsgTU1DX1JFR19JTlRfQ05U
-Uik7CiAKICNpZmRlZiBIQVNfRE1BCiAJaG9zdC0+ZG1hID0gaW14X2RtYV9yZXF1ZXN0X2J5X3By
-aW8oRFJJVkVSX05BTUUsIERNQV9QUklPX0xPVyk7Ci0tIAoxLjYuMy4zCgoKX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWls
-aW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0
-cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
+Hi, Marcel
+
+We found you have submitted one patch adding rfkill for bluetoogh.
+
+commit 611b30f74b5d8ca036a9923b3bf6e0ee10a21a53
+Author: Marcel Holtmann <marcel@holtmann.org>
+Date:   Mon Jun 8 14:41:38 2009 +0200
+
+    Bluetooth: Add native RFKILL soft-switch support for all devices
+
+    With the re-write of the RFKILL subsystem it is now possible to easily
+    integrate RFKILL soft-switch support into the Bluetooth subsystem. All
+    Bluetooth devices will now get automatically RFKILL support.
+
+    Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+
+Question 1,
+Once hci_register_dev is called, the rfkill_alloc is called, the
+result is the rfkill number is increased one by one,  the application
+may not know which rfkill it is.
+For example, insmod bt.ko -> rfkill0, rmmod bt; insmod bt.ko->
+rfkill1, ~~ rfkill2, 3
+Same effect would happen when echo 0 > /sys/class/rfkill/rfkill0/state.
+
+The reason is rfkill_register would increase rfkill->idx.
+int __must_check rfkill_register(struct rfkill *rfkill)
+{
+        static unsigned long rfkill_no;
+~~~
+        rfkill->idx = rfkill_no;
+        dev_set_name(dev, "rfkill%lu", rfkill_no);
+        rfkill_no++;
+
+~~~
+}
+
+Quesiton 2.
+In fact, we have own rfkill to control power on and off, then
+currently both our own rfkill and bluetooth rfkill need to be enabled.
+
+I am not sure what's the purpose of the rfkill adding in
+hci_register_dev, just wander could we add one default state as
+enabled for such rfkill. Then we could ignore this rfkill, no matter
+the number is increased one by one.
+
+Thanks
+Zhangfei
