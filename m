@@ -1,48 +1,55 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH] [MMC] omap: Remove BUG_ON for disabled interrupts
-Date: Mon, 31 May 2010 16:37:48 +0300
-Message-ID: <20100531133748.GG30216@atomide.com>
-References: <1275186443-8242-1-git-send-email-darkstar6262@gmail.com>
+From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
+Subject: Re: [RFC] [PATCH 1/2] mmc: split mmc_sd_init_card()
+Date: Mon, 31 May 2010 17:58:46 +0200
+Message-ID: <20100531155846.GA9493@rere.qmqm.pl>
+References: <1-1000-12432-1274803827-7569@rere.qmqm.pl> <20100528144027.3c868841.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:57888 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754240Ab0EaNho (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 May 2010 09:37:44 -0400
+Received: from rere.qmqm.pl ([89.167.52.164]:51168 "EHLO rere.qmqm.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754938Ab0EaP6r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 31 May 2010 11:58:47 -0400
 Content-Disposition: inline
-In-Reply-To: <1275186443-8242-1-git-send-email-darkstar6262@gmail.com>
+In-Reply-To: <20100528144027.3c868841.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Cory Maccarrone <darkstar6262@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, akpm@linux-foundation.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-* Cory Maccarrone <darkstar6262@gmail.com> [100530 05:22]:
-> This change removes a BUG_ON for when interrupts are disabled
-> during an MMC request.  During boot, interrupts can be disabled
-> when a request is made, causing this bug to be triggered.  In reality,
-> there's no reason this should halt the kernel, as the driver has proved
-> reliable in spite of disabled interrupts, and additionally, there's
-> nothing in this code that would require interrupts to be enabled.
-> 
-> Signed-off-by: Cory Maccarrone <darkstar6262@gmail.com>
-> ---
->  drivers/mmc/host/omap.c |    1 -
->  1 files changed, 0 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-> index 2b28168..d98ddcf 100644
-> --- a/drivers/mmc/host/omap.c
-> +++ b/drivers/mmc/host/omap.c
-> @@ -1157,7 +1157,6 @@ static void mmc_omap_start_request(struct mmc_omap_host *host,
->  	mmc_omap_start_command(host, req->cmd);
->  	if (host->dma_in_use)
->  		omap_start_dma(host->dma_ch);
-> -	BUG_ON(irqs_disabled());
->  }
->  
->  static void mmc_omap_request(struct mmc_host *mmc, struct mmc_request *req)
+Thanks for your review!
 
-This looks safe to me.
+On Fri, May 28, 2010 at 02:40:27PM -0700, Andrew Morton wrote:
+> On Tue, 25 May 2010 18:10:28 +0200 (CEST)
+> Micha__ Miros__aw <mirq-linux@rere.qmqm.pl> wrote:
+> > This is needed to avoid code duplication in SD-combo support.
+> hm.  Perhaps you could have told us a bit more about it than this.
+> > +int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
+> > +int mmc_sd_get_csd(struct mmc_host *host, struct mmc_card *card)
+> > +int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card=
+,
+> > +unsigned mmc_sd_get_max_clock(struct mmc_card *card)
+> > +void mmc_sd_go_highspeed(struct mmc_card *card)
+> These are global symbols, but they are not exported to (other) module=
+s.
+> That's odd.  I'd have expected to see them either `static' or
+> EXPORT_MODULE()d.
 
-Acked-by: Tony Lindgren <tony@atomide.com>
+This is all contained in mmc_core.ko and needs not be exported to other
+modules. A SD-combo card is a SD (memory) and SDIO in one package - the
+only changes needed are in initialization sequence, after which both
+parts are mostly independent.
+
+> I'll take the lack of a signed-off-by: and the "RFC" as signal to not
+> apply these patches.
+
+I would like for this to get tested by other people first, but it looks
+like not many kernel developers use SD combo cards.
+
+I'll resend the patches after applying your suggestions from the other
+mail.
+
+Best Regards,
+Micha=B3 Miros=B3aw
+
