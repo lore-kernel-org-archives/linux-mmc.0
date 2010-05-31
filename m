@@ -1,29 +1,36 @@
 From: Paul Mundt <lethal@linux-sh.org>
-Subject: Re: [PATCH 3/3 v2] ARM: mach-shmobile: add support for the second SD-/MMC-card slot on ap4evb
-Date: Mon, 31 May 2010 13:49:01 +0900
-Message-ID: <20100531044900.GC20358@linux-sh.org>
-References: <Pine.LNX.4.64.1005141228510.6147@axis700.grange> <Pine.LNX.4.64.1005141233510.6147@axis700.grange> <Pine.LNX.4.64.1005231611390.3571@axis700.grange>
+Subject: Re: [PATCH 9/9 v2] ARM: mach-shmobile: add DMA support to sh7372, enable DMA for SDHI
+Date: Mon, 31 May 2010 13:50:08 +0900
+Message-ID: <20100531045008.GE20358@linux-sh.org>
+References: <Pine.LNX.4.64.1005041318200.4925@axis700.grange> <Pine.LNX.4.64.1005041424330.4925@axis700.grange> <Pine.LNX.4.64.1005231546310.3571@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:49522 "EHLO
+Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:49539 "EHLO
 	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750933Ab0EaEtT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 May 2010 00:49:19 -0400
+	with ESMTP id S1750933Ab0EaEu1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 May 2010 00:50:27 -0400
 Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1005231611390.3571@axis700.grange>
+In-Reply-To: <Pine.LNX.4.64.1005231546310.3571@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, linux-arm-kernel@lists.infradead.org
 
-On Sun, May 23, 2010 at 04:12:46PM +0200, Guennadi Liakhovetski wrote:
-> The ap4evb board is equipped with two card slots: one SD-card slot and one
-> SD-/MMC-card slot. The latter is connected to the second SDHI interface on
-> sh7372 (SDHI1). Its power supply can be jumpered either to 1.8 or 3.3V, we fix
-> it at default 1.8V for now.
+On Sun, May 23, 2010 at 03:49:47PM +0200, Guennadi Liakhovetski wrote:
+> This adds DMA support for the sh7372 sh-mobile ARM core, using the shdma
+> dmaengine driver, and uses DMA for the SDHI SD-card controller on this SoC.
 > 
 > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-
-Now that all of the dependencies are out of the way, I've applied this
-too.
+> ---
+> 
+> v1 -> v2:
+> 
+> 1. updated to the current genesis tree HEAD
+> 2. adjusted the topic line to match platform preferences
+> 3. moved DMA platform devices to the top of the file, so that other 
+> devices can reference them.
+> 
+> Paul, this should be ready for you to merge now.
+> 
+Applied, thanks.
