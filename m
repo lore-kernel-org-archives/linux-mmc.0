@@ -1,65 +1,32 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
+From: Christoph Hellwig <hch@infradead.org>
 Subject: Re: [RFC][PATCH] mmc: add an ioctl for erasing
-Date: Mon, 31 May 2010 11:45:37 +0300
-Message-ID: <4C037731.5030301@nokia.com>
-References: <4BF68EFC.70101@nokia.com> <20100521140714.GB15070@infradead.org>
+Date: Mon, 31 May 2010 04:47:09 -0400
+Message-ID: <20100531084709.GA7784@infradead.org>
+References: <4BF68EFC.70101@nokia.com> <20100521140714.GB15070@infradead.org> <4C037731.5030301@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.105.134]:49502 "EHLO
-	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753491Ab0EaIqP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 May 2010 04:46:15 -0400
-In-Reply-To: <20100521140714.GB15070@infradead.org>
+Received: from bombadil.infradead.org ([18.85.46.34]:60319 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754459Ab0EaIrM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 May 2010 04:47:12 -0400
+Content-Disposition: inline
+In-Reply-To: <4C037731.5030301@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 
-Christoph Hellwig wrote:
-> On Fri, May 21, 2010 at 04:47:40PM +0300, Adrian Hunter wrote:
->>> From f3baf566eb33a22bf12a48e4cdc7c99611bde934 Mon Sep 17 00:00:00 2001
->> From: Adrian Hunter <adrian.hunter@nokia.com>
->> Date: Wed, 5 May 2010 14:07:55 +0300
->> Subject: [PATCH] mmc: add an ioctl for erasing
->>
->> As SD and MMC cards have a NAND core, they can support an erase
->> operation that is typically 10x to 100x faster than writing.
->>
->> In addition, eMMCv4.4 also offers:
->> 	o Secure Erase
->> 	o Trim
->> 	o Secure Trim
->>
->> The "secure" variants also ensure that any copies of the data
->> (for example remnants of garbage collection) are also erased.
->>
->> "Trim" is the same as "erase" except that individual sectors
->> can be erased instead of whole Erase Groups.
->>
->> The Erase Operation and its variants are not supported by
->> default and drivers must set MMC_CAP_ERASE.  This is because
->> the operation can take a long time and drivers that rely on
->> polling the status may perform very badly.  Also drivers
->> may need changes to support the very long erase timeouts.
-> 
-> Please don't add new device specific ioctls.  Just implement the
-> block layer discard operation to make the discard ioctl work on MMC
-> device.  We can talk about adding a secure erase variant of it then.
+On Mon, May 31, 2010 at 11:45:37AM +0300, Adrian Hunter wrote:
+> Sorry for the slow reply, I have been away.
+>
+> Connecting erase to discard was rejected for performance reasons in 2008.
+> Refer:
+>
+> 	http://thread.gmane.org/gmane.linux.file-systems/25378/focus=25606
 
-Sorry for the slow reply, I have been away.
+The discard implementation changed a lot since those days.  Discard
+requests now have their own request size limitation which is separate
+form that for normal requests, and we also store the alignment
+requirement for them separately.
 
-Connecting erase to discard was rejected for performance reasons in 2008.
-Refer:
-
-	http://thread.gmane.org/gmane.linux.file-systems/25378/focus=25606
-
-
-We may want to connect MMC trim to discard, but I suspect it might have the
-same performance problems.
-
-My requirement is to expose erase and secure erase to userspace.  The discard
-operation is not appropriate and the discard ioctl is too limited.
-
-I could shift the ioctls to the block layer?
