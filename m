@@ -1,41 +1,29 @@
-From: Cory Maccarrone <darkstar6262@gmail.com>
-Subject: [PATCH] [MMC] omap: Remove BUG_ON for disabled interrupts
-Date: Sat, 29 May 2010 19:27:23 -0700
-Message-ID: <1275186443-8242-1-git-send-email-darkstar6262@gmail.com>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH 3/3 v2] ARM: mach-shmobile: add support for the second SD-/MMC-card slot on ap4evb
+Date: Mon, 31 May 2010 13:49:01 +0900
+Message-ID: <20100531044900.GC20358@linux-sh.org>
+References: <Pine.LNX.4.64.1005141228510.6147@axis700.grange> <Pine.LNX.4.64.1005141233510.6147@axis700.grange> <Pine.LNX.4.64.1005231611390.3571@axis700.grange>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:63221 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754548Ab0E3C1n (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 29 May 2010 22:27:43 -0400
+Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:49522 "EHLO
+	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750933Ab0EaEtT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 May 2010 00:49:19 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1005231611390.3571@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: akpm@linux-foundation.org, Cory Maccarrone <darkstar6262@gmail.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-This change removes a BUG_ON for when interrupts are disabled
-during an MMC request.  During boot, interrupts can be disabled
-when a request is made, causing this bug to be triggered.  In reality,
-there's no reason this should halt the kernel, as the driver has proved
-reliable in spite of disabled interrupts, and additionally, there's
-nothing in this code that would require interrupts to be enabled.
+On Sun, May 23, 2010 at 04:12:46PM +0200, Guennadi Liakhovetski wrote:
+> The ap4evb board is equipped with two card slots: one SD-card slot and one
+> SD-/MMC-card slot. The latter is connected to the second SDHI interface on
+> sh7372 (SDHI1). Its power supply can be jumpered either to 1.8 or 3.3V, we fix
+> it at default 1.8V for now.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Signed-off-by: Cory Maccarrone <darkstar6262@gmail.com>
----
- drivers/mmc/host/omap.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 2b28168..d98ddcf 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -1157,7 +1157,6 @@ static void mmc_omap_start_request(struct mmc_omap_host *host,
- 	mmc_omap_start_command(host, req->cmd);
- 	if (host->dma_in_use)
- 		omap_start_dma(host->dma_ch);
--	BUG_ON(irqs_disabled());
- }
- 
- static void mmc_omap_request(struct mmc_host *mmc, struct mmc_request *req)
--- 
-1.7.0.4
-
+Now that all of the dependencies are out of the way, I've applied this
+too.
