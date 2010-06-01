@@ -1,55 +1,107 @@
-From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-Subject: Re: [RFC] [PATCH 1/2] mmc: split mmc_sd_init_card()
-Date: Mon, 31 May 2010 17:58:46 +0200
-Message-ID: <20100531155846.GA9493@rere.qmqm.pl>
-References: <1-1000-12432-1274803827-7569@rere.qmqm.pl> <20100528144027.3c868841.akpm@linux-foundation.org>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: Question of RFKILL for bluetooth, hci_core.c
+Date: Tue, 1 Jun 2010 13:53:35 +0800
+Message-ID: <AANLkTimDk8Nr0ih5VAVi84jKQ3ResR73kTodFoxg9IAG@mail.gmail.com>
+References: <AANLkTiloq_U8CpoSYw-Vl4Tww27QFP_Wirs37iJLb7yP@mail.gmail.com>
+	<1275087477.4706.85.camel@aeonflux.t-mobile.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rere.qmqm.pl ([89.167.52.164]:51168 "EHLO rere.qmqm.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754938Ab0EaP6r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 31 May 2010 11:58:47 -0400
-Content-Disposition: inline
-In-Reply-To: <20100528144027.3c868841.akpm@linux-foundation.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:33816 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751578Ab0FAFxg convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Jun 2010 01:53:36 -0400
+Received: by iwn6 with SMTP id 6so672478iwn.19
+        for <linux-mmc@vger.kernel.org>; Mon, 31 May 2010 22:53:36 -0700 (PDT)
+In-Reply-To: <1275087477.4706.85.camel@aeonflux.t-mobile.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Marcel Holtmann <marcel@holtmann.org>
+Cc: linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, zgao6@marvell.com
 
-Thanks for your review!
+Hi, Marcel
 
-On Fri, May 28, 2010 at 02:40:27PM -0700, Andrew Morton wrote:
-> On Tue, 25 May 2010 18:10:28 +0200 (CEST)
-> Micha__ Miros__aw <mirq-linux@rere.qmqm.pl> wrote:
-> > This is needed to avoid code duplication in SD-combo support.
-> hm.  Perhaps you could have told us a bit more about it than this.
-> > +int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
-> > +int mmc_sd_get_csd(struct mmc_host *host, struct mmc_card *card)
-> > +int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card=
-,
-> > +unsigned mmc_sd_get_max_clock(struct mmc_card *card)
-> > +void mmc_sd_go_highspeed(struct mmc_card *card)
-> These are global symbols, but they are not exported to (other) module=
-s.
-> That's odd.  I'd have expected to see them either `static' or
-> EXPORT_MODULE()d.
 
-This is all contained in mmc_core.ko and needs not be exported to other
-modules. A SD-combo card is a SD (memory) and SDIO in one package - the
-only changes needed are in initialization sequence, after which both
-parts are mostly independent.
 
-> I'll take the lack of a signed-off-by: and the "RFC" as signal to not
-> apply these patches.
+On Sat, May 29, 2010 at 6:57 AM, Marcel Holtmann <marcel@holtmann.org> =
+wrote:
+> Hi Zhangfei,
+>
+> first of all, please use linux-bluetooth mailing list and not the MCC
+> one.
+>
+>> We found you have submitted one patch adding rfkill for bluetoogh.
+>>
+>> commit 611b30f74b5d8ca036a9923b3bf6e0ee10a21a53
+>> Author: Marcel Holtmann <marcel@holtmann.org>
+>> Date: =A0 Mon Jun 8 14:41:38 2009 +0200
+>>
+>> =A0 =A0 Bluetooth: Add native RFKILL soft-switch support for all dev=
+ices
+>>
+>> =A0 =A0 With the re-write of the RFKILL subsystem it is now possible=
+ to easily
+>> =A0 =A0 integrate RFKILL soft-switch support into the Bluetooth subs=
+ystem. All
+>> =A0 =A0 Bluetooth devices will now get automatically RFKILL support.
+>>
+>> =A0 =A0 Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+>>
+>> Question 1,
+>> Once hci_register_dev is called, the rfkill_alloc is called, the
+>> result is the rfkill number is increased one by one, =A0the applicat=
+ion
+>> may not know which rfkill it is.
+>> For example, insmod bt.ko -> rfkill0, rmmod bt; insmod bt.ko->
+>> rfkill1, ~~ rfkill2, 3
+>> Same effect would happen when echo 0 > /sys/class/rfkill/rfkill0/sta=
+te.
+>>
+>> The reason is rfkill_register would increase rfkill->idx.
+>> int __must_check rfkill_register(struct rfkill *rfkill)
+>> {
+>> =A0 =A0 =A0 =A0 static unsigned long rfkill_no;
+>> ~~~
+>> =A0 =A0 =A0 =A0 rfkill->idx =3D rfkill_no;
+>> =A0 =A0 =A0 =A0 dev_set_name(dev, "rfkill%lu", rfkill_no);
+>> =A0 =A0 =A0 =A0 rfkill_no++;
+>>
+>> ~~~
+>> }
+>>
+>> Quesiton 2.
+>> In fact, we have own rfkill to control power on and off, then
+>> currently both our own rfkill and bluetooth rfkill need to be enable=
+d.
+>>
+>> I am not sure what's the purpose of the rfkill adding in
+>> hci_register_dev, just wander could we add one default state as
+>> enabled for such rfkill. Then we could ignore this rfkill, no matter
+>> the number is increased one by one.
+>
+> And second it is clearly the soft RFKILL switch. As usual a device ca=
+n
+> also have a hard kill switch.
+>
+> The index numbers are irrelevant. If the RFKILL switch is assigned to=
+ a
+> device is will be a child of its parent, so it is easy to figure out
+> where it belong. In case of platform switches it is impossible anyway
+> and hence we have implemented CHANGE_ALL support.
+>
 
-I would like for this to get tested by other people first, but it looks
-like not many kernel developers use SD combo cards.
+Thanks for your explanation, however how to get hard kill switch.
+Ususally we enable wifi via "echo 1 > sys/class/rfkill/rfkill0/state",
+and enable bt via "echo 1 > sys/class/rfkill/rfkill1/state".
+This method highly depends on the indelx number.
 
-I'll resend the patches after applying your suggestions from the other
-mail.
+Could you kindly share me how to set hard kill switch, which may
+irrelevant with the index number.
 
-Best Regards,
-Micha=B3 Miros=B3aw
-
+> Regards
+>
+> Marcel
+>
+>
+>
