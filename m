@@ -1,114 +1,96 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH] Recognize CSD structure version 3
-Date: Tue, 01 Jun 2010 12:51:30 +0300
-Message-ID: <4C04D822.5040208@nokia.com>
-References: <20100531064035.GA25269@july>
+From: Marcel Holtmann <marcel@holtmann.org>
+Subject: Re: Question of RFKILL for bluetooth, hci_core.c
+Date: Tue, 01 Jun 2010 13:00:11 -0700
+Message-ID: <1275422411.2182.6.camel@localhost.localdomain>
+References: <AANLkTiloq_U8CpoSYw-Vl4Tww27QFP_Wirs37iJLb7yP@mail.gmail.com>
+	 <1275087477.4706.85.camel@aeonflux.t-mobile.de>
+	 <AANLkTimDk8Nr0ih5VAVi84jKQ3ResR73kTodFoxg9IAG@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.230]:24996 "EHLO
-	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751364Ab0FAJwd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Jun 2010 05:52:33 -0400
-In-Reply-To: <20100531064035.GA25269@july>
+Received: from senator.holtmann.net ([87.106.208.187]:41715 "EHLO
+	mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756264Ab0FAUA4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Jun 2010 16:00:56 -0400
+In-Reply-To: <AANLkTimDk8Nr0ih5VAVi84jKQ3ResR73kTodFoxg9IAG@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, zgao6@marvell.com
 
-Kyungmin Park wrote:
-> The eMMC spec 4.4 and 4.3 + additional feature chips has CSD structur=
-e version 3
+Hi Zangfei,
 
-That is not exactly correct.  There is no CSD structure version 1.3.  I=
-nstead
-there are two fields for CSD structure version.  One in CSD and one in =
-Extended CSD.
+> > first of all, please use linux-bluetooth mailing list and not the MCC
+> > one.
+> >
+> >> We found you have submitted one patch adding rfkill for bluetoogh.
+> >>
+> >> commit 611b30f74b5d8ca036a9923b3bf6e0ee10a21a53
+> >> Author: Marcel Holtmann <marcel@holtmann.org>
+> >> Date:   Mon Jun 8 14:41:38 2009 +0200
+> >>
+> >>     Bluetooth: Add native RFKILL soft-switch support for all devices
+> >>
+> >>     With the re-write of the RFKILL subsystem it is now possible to easily
+> >>     integrate RFKILL soft-switch support into the Bluetooth subsystem. All
+> >>     Bluetooth devices will now get automatically RFKILL support.
+> >>
+> >>     Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+> >>
+> >> Question 1,
+> >> Once hci_register_dev is called, the rfkill_alloc is called, the
+> >> result is the rfkill number is increased one by one,  the application
+> >> may not know which rfkill it is.
+> >> For example, insmod bt.ko -> rfkill0, rmmod bt; insmod bt.ko->
+> >> rfkill1, ~~ rfkill2, 3
+> >> Same effect would happen when echo 0 > /sys/class/rfkill/rfkill0/state.
+> >>
+> >> The reason is rfkill_register would increase rfkill->idx.
+> >> int __must_check rfkill_register(struct rfkill *rfkill)
+> >> {
+> >>         static unsigned long rfkill_no;
+> >> ~~~
+> >>         rfkill->idx = rfkill_no;
+> >>         dev_set_name(dev, "rfkill%lu", rfkill_no);
+> >>         rfkill_no++;
+> >>
+> >> ~~~
+> >> }
+> >>
+> >> Quesiton 2.
+> >> In fact, we have own rfkill to control power on and off, then
+> >> currently both our own rfkill and bluetooth rfkill need to be enabled.
+> >>
+> >> I am not sure what's the purpose of the rfkill adding in
+> >> hci_register_dev, just wander could we add one default state as
+> >> enabled for such rfkill. Then we could ignore this rfkill, no matter
+> >> the number is increased one by one.
+> >
+> > And second it is clearly the soft RFKILL switch. As usual a device can
+> > also have a hard kill switch.
+> >
+> > The index numbers are irrelevant. If the RFKILL switch is assigned to a
+> > device is will be a child of its parent, so it is easy to figure out
+> > where it belong. In case of platform switches it is impossible anyway
+> > and hence we have implemented CHANGE_ALL support.
+> >
+> 
+> Thanks for your explanation, however how to get hard kill switch.
+> Ususally we enable wifi via "echo 1 > sys/class/rfkill/rfkill0/state",
+> and enable bt via "echo 1 > sys/class/rfkill/rfkill1/state".
+> This method highly depends on the indelx number.
 
-In CSD there is:
+just use the rfkill utility. Using the sysfs is a bad idea.
 
-CSD_STRUCTURE [127:126]
-Describes the version of the CSD structure.
-Table 44 =97 CSD register structure
-CSD_STRUCTURE    CSD Structure Version    Valid for System Specificatio=
-n Version
-0                CSD version No.          1.0 Allocated by MMCA
-1                CSD version No.          1.1 Allocated by MMCA
-2                CSD version No.          1.2 Version 4.1=964.2=964.3
-3                Version is coded in the CSD_STRUCTURE byte in the EXT_=
-CSD register
+> Could you kindly share me how to set hard kill switch, which may
+> irrelevant with the index number.
 
-So the 3 does not mean version 1.3 it just means look at Extended CSD i=
-nstead.
-But the Extended CSD field does not define CSD structure version 3 at a=
-ll.
+You can not set hard states from software. They are meant for physical
+RFKILL switches.
 
-CSD_STRUCTURE [194]
-This field is a continuation of the CSD_STRUCTURE field in the CSD regi=
-ster
-Table 78 =97 CSD register structure
-CSD_STRUCTURE    CSD structure version    Valid for System Specificatio=
-n Version
-0                CSD version No. 1.0      Allocated by MMCA
-1                CSD version No. 1.1      Allocated by MMCA
-2                CSD version No. 1.2      Version 4.1=964.2=964.3-4.4
-3=96255            Reserved for future use
+Regards
 
-> To probe these chip properly and make it simple.
-> it doesn't check CSD structure.
->=20
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 89f7a25..9e42bc6 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -118,15 +118,12 @@ static int mmc_decode_csd(struct mmc_card *card=
-)
->  	u32 *resp =3D card->raw_csd;
-> =20
->  	/*
-> -	 * We only understand CSD structure v1.1 and v1.2.
-> +	 * We understand all CSD structure v1.1, v1.2 and v1.3.
+Marcel
 
-This comment is not correct. v1.3 does not exist.
-
->  	 * v1.2 has extra information in bits 15, 11 and 10.
->  	 */
->  	csd_struct =3D UNSTUFF_BITS(resp, 126, 2);
-> -	if (csd_struct !=3D 1 && csd_struct !=3D 2) {
-> -		printk(KERN_ERR "%s: unrecognised CSD structure version %d\n",
-
-I don't agree with removing this validation without a reason.  Instead
-extend it to 3.
-
-To support the '3' value properly, the Extended CSD CSD_STRUCTURE
-field needs to be validated also i.e. in mmc_read_ext_csd() do
-something like:
-
-
-	u32 *resp =3D card->raw_csd;
-
-	if (UNSTUFF_BITS(resp, 126, 2) =3D=3D 3) {
-		check ext_csd[194]
-	}
-
-
-
-
-> +	printk(KERN_DEBUG "%s: recognised CSD structure version %d\n",
->  			mmc_hostname(card->host), csd_struct);
-> -		return -EINVAL;
-> -	}
-> =20
->  	csd->mmca_vsn	 =3D UNSTUFF_BITS(resp, 122, 4);
->  	m =3D UNSTUFF_BITS(resp, 115, 4);
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
 
