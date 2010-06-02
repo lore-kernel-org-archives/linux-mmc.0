@@ -1,96 +1,156 @@
-From: Marcel Holtmann <marcel@holtmann.org>
-Subject: Re: Question of RFKILL for bluetooth, hci_core.c
-Date: Tue, 01 Jun 2010 13:00:11 -0700
-Message-ID: <1275422411.2182.6.camel@localhost.localdomain>
-References: <AANLkTiloq_U8CpoSYw-Vl4Tww27QFP_Wirs37iJLb7yP@mail.gmail.com>
-	 <1275087477.4706.85.camel@aeonflux.t-mobile.de>
-	 <AANLkTimDk8Nr0ih5VAVi84jKQ3ResR73kTodFoxg9IAG@mail.gmail.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH] Recognize CSD structure version 3
+Date: Wed, 2 Jun 2010 17:12:41 +0900
+Message-ID: <AANLkTinx9jQPysr5tnWRkEFGx6d6UJQSrizSNedE_xyR@mail.gmail.com>
+References: <20100531064035.GA25269@july>
+	<4C04D822.5040208@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from senator.holtmann.net ([87.106.208.187]:41715 "EHLO
-	mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756264Ab0FAUA4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Jun 2010 16:00:56 -0400
-In-Reply-To: <AANLkTimDk8Nr0ih5VAVi84jKQ3ResR73kTodFoxg9IAG@mail.gmail.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:53325 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752684Ab0FBIMm convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Jun 2010 04:12:42 -0400
+Received: by vws11 with SMTP id 11so2239814vws.19
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Jun 2010 01:12:42 -0700 (PDT)
+In-Reply-To: <4C04D822.5040208@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, zgao6@marvell.com
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
-Hi Zangfei,
+Hi
 
-> > first of all, please use linux-bluetooth mailing list and not the MCC
-> > one.
-> >
-> >> We found you have submitted one patch adding rfkill for bluetoogh.
-> >>
-> >> commit 611b30f74b5d8ca036a9923b3bf6e0ee10a21a53
-> >> Author: Marcel Holtmann <marcel@holtmann.org>
-> >> Date:   Mon Jun 8 14:41:38 2009 +0200
-> >>
-> >>     Bluetooth: Add native RFKILL soft-switch support for all devices
-> >>
-> >>     With the re-write of the RFKILL subsystem it is now possible to easily
-> >>     integrate RFKILL soft-switch support into the Bluetooth subsystem. All
-> >>     Bluetooth devices will now get automatically RFKILL support.
-> >>
-> >>     Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
-> >>
-> >> Question 1,
-> >> Once hci_register_dev is called, the rfkill_alloc is called, the
-> >> result is the rfkill number is increased one by one,  the application
-> >> may not know which rfkill it is.
-> >> For example, insmod bt.ko -> rfkill0, rmmod bt; insmod bt.ko->
-> >> rfkill1, ~~ rfkill2, 3
-> >> Same effect would happen when echo 0 > /sys/class/rfkill/rfkill0/state.
-> >>
-> >> The reason is rfkill_register would increase rfkill->idx.
-> >> int __must_check rfkill_register(struct rfkill *rfkill)
-> >> {
-> >>         static unsigned long rfkill_no;
-> >> ~~~
-> >>         rfkill->idx = rfkill_no;
-> >>         dev_set_name(dev, "rfkill%lu", rfkill_no);
-> >>         rfkill_no++;
-> >>
-> >> ~~~
-> >> }
-> >>
-> >> Quesiton 2.
-> >> In fact, we have own rfkill to control power on and off, then
-> >> currently both our own rfkill and bluetooth rfkill need to be enabled.
-> >>
-> >> I am not sure what's the purpose of the rfkill adding in
-> >> hci_register_dev, just wander could we add one default state as
-> >> enabled for such rfkill. Then we could ignore this rfkill, no matter
-> >> the number is increased one by one.
-> >
-> > And second it is clearly the soft RFKILL switch. As usual a device can
-> > also have a hard kill switch.
-> >
-> > The index numbers are irrelevant. If the RFKILL switch is assigned to a
-> > device is will be a child of its parent, so it is easy to figure out
-> > where it belong. In case of platform switches it is impossible anyway
-> > and hence we have implemented CHANGE_ALL support.
-> >
-> 
-> Thanks for your explanation, however how to get hard kill switch.
-> Ususally we enable wifi via "echo 1 > sys/class/rfkill/rfkill0/state",
-> and enable bt via "echo 1 > sys/class/rfkill/rfkill1/state".
-> This method highly depends on the indelx number.
+On Tue, Jun 1, 2010 at 6:51 PM, Adrian Hunter <adrian.hunter@nokia.com>=
+ wrote:
+> Kyungmin Park wrote:
+>>
+>> The eMMC spec 4.4 and 4.3 + additional feature chips has CSD structu=
+re
+>> version 3
+>
+> That is not exactly correct. =A0There is no CSD structure version 1.3=
+=2E
+> =A0Instead
+> there are two fields for CSD structure version. =A0One in CSD and one=
+ in
+> Extended CSD.
+>
+> In CSD there is:
+>
+> CSD_STRUCTURE [127:126]
+> Describes the version of the CSD structure.
+> Table 44 =97 CSD register structure
+> CSD_STRUCTURE =A0 =A0CSD Structure Version =A0 =A0Valid for System Sp=
+ecification
+> Version
+> 0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0CSD version No. =A0 =A0 =A0 =A0 =A01=
+=2E0 Allocated by MMCA
+> 1 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0CSD version No. =A0 =A0 =A0 =A0 =A01=
+=2E1 Allocated by MMCA
+> 2 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0CSD version No. =A0 =A0 =A0 =A0 =A01=
+=2E2 Version 4.1=964.2=964.3
+> 3 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0Version is coded in the CSD_STRUCTUR=
+E byte in the EXT_CSD
+> register
+>
+> So the 3 does not mean version 1.3 it just means look at Extended CSD
+> instead.
+> But the Extended CSD field does not define CSD structure version 3 at=
+ all.
+>
+> CSD_STRUCTURE [194]
+> This field is a continuation of the CSD_STRUCTURE field in the CSD re=
+gister
+> Table 78 =97 CSD register structure
+> CSD_STRUCTURE =A0 =A0CSD structure version =A0 =A0Valid for System Sp=
+ecification
+> Version
+> 0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0CSD version No. 1.0 =A0 =A0 =A0Alloc=
+ated by MMCA
+> 1 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0CSD version No. 1.1 =A0 =A0 =A0Alloc=
+ated by MMCA
+> 2 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0CSD version No. 1.2 =A0 =A0 =A0Versi=
+on 4.1=964.2=964.3-4.4
+> 3=96255 =A0 =A0 =A0 =A0 =A0 =A0Reserved for future use
 
-just use the rfkill utility. Using the sysfs is a bad idea.
+Thank you for Info. I got the eMMC v4.4 spec yesterday.
 
-> Could you kindly share me how to set hard kill switch, which may
-> irrelevant with the index number.
+>
+>> To probe these chip properly and make it simple.
+>> it doesn't check CSD structure.
+>>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> ---
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 89f7a25..9e42bc6 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -118,15 +118,12 @@ static int mmc_decode_csd(struct mmc_card *car=
+d)
+>> =A0 =A0 =A0 =A0u32 *resp =3D card->raw_csd;
+>> =A0 =A0 =A0 =A0/*
+>> - =A0 =A0 =A0 =A0* We only understand CSD structure v1.1 and v1.2.
+>> + =A0 =A0 =A0 =A0* We understand all CSD structure v1.1, v1.2 and v1=
+=2E3.
+>
+> This comment is not correct. v1.3 does not exist.
 
-You can not set hard states from software. They are meant for physical
-RFKILL switches.
+I will fix it correctly.
 
-Regards
+>
+>> =A0 =A0 =A0 =A0 * v1.2 has extra information in bits 15, 11 and 10.
+>> =A0 =A0 =A0 =A0 */
+>> =A0 =A0 =A0 =A0csd_struct =3D UNSTUFF_BITS(resp, 126, 2);
+>> - =A0 =A0 =A0 if (csd_struct !=3D 1 && csd_struct !=3D 2) {
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_ERR "%s: unrecognised CSD =
+structure version
+>> %d\n",
+>
+> I don't agree with removing this validation without a reason. =A0Inst=
+ead
+> extend it to 3.
 
-Marcel
+With above description. it has all meaning. even though we don't use
+the '0' value.
+Do you want to check if csd_struct =3D=3D 0 case then fail?
 
+>
+> To support the '3' value properly, the Extended CSD CSD_STRUCTURE
+> field needs to be validated also i.e. in mmc_read_ext_csd() do
+> something like:
+>
+>
+> =A0 =A0 =A0 =A0u32 *resp =3D card->raw_csd;
+>
+> =A0 =A0 =A0 =A0if (UNSTUFF_BITS(resp, 126, 2) =3D=3D 3) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0check ext_csd[194]
+> =A0 =A0 =A0 =A0}
 
+I wonder are there any use case of csd version? it's just check
+routine for proper operation.
+basically no problem to display csd version and ext_csd version.
+
+Thank you,
+Kyungmin Park
+>
+>
+>
+>
+>> + =A0 =A0 =A0 printk(KERN_DEBUG "%s: recognised CSD structure versio=
+n %d\n",
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_hostname(card->ho=
+st), csd_struct);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EINVAL;
+>> - =A0 =A0 =A0 }
+>> =A0 =A0 =A0 =A0csd->mmca_vsn =A0 =A0=3D UNSTUFF_BITS(resp, 122, 4);
+>> =A0 =A0 =A0 =A0m =3D UNSTUFF_BITS(resp, 115, 4);
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>>
+>
+>
