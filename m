@@ -1,42 +1,44 @@
-From: Philip Langdale <philipl@overt.org>
-Subject: Re: [PATCH] mmc: make sdhci work with ricoh mmc controller
-Date: Thu, 3 Jun 2010 10:05:10 -0700
-Message-ID: <20100603100510.37d02c2b@fido5>
-References: <1275516180.30272.4.camel@maxim-laptop>
-	<1275527787-3783-1-git-send-email-maximlevitsky@gmail.com>
-	<20100603091113.7b1d6fc0@fido5>
-	<1275582709.2563.19.camel@maxim-laptop>
-	<20100603093914.3397ac42@fido5>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [RFC] [PATCH 1/2] mmc: split mmc_sd_init_card()
+Date: Thu, 03 Jun 2010 13:21:23 -0400
+Message-ID: <m3hblk8224.fsf@pullcord.laptop.org>
+References: <1-1000-12432-1274803827-7569@rere.qmqm.pl>
+	<20100528144027.3c868841.akpm@linux-foundation.org>
+	<20100531155846.GA9493@rere.qmqm.pl> <4C0774A8.2030704@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from usul.saidi.cx ([204.11.33.34]:60072 "EHLO usul.overt.org"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752155Ab0FCRFQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 3 Jun 2010 13:05:16 -0400
-In-Reply-To: <20100603093914.3397ac42@fido5>
+Received: from void.printf.net ([89.145.121.20]:43960 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753289Ab0FCRUZ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Jun 2010 13:20:25 -0400
+In-Reply-To: <4C0774A8.2030704@nokia.com> (Adrian Hunter's message of "Thu, 03
+	Jun 2010 12:23:52 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: linux-kernel <linux-kernel@vger.kernel.org>, adq_dvb@lidskialf.net, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: =?utf-8?Q?Micha=C5=82_Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>, Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Thu, 3 Jun 2010 09:39:14 -0700
-Philip Langdale <philipl@overt.org> wrote:
+Hi,
 
-> > > 
-> > > Have you been able to establish if 4bit and high-speed operations
-> > > work correctly through the MMC controller? I note that you didn't
-> > > set SDHCI_CAN_DO_HISPD.
-> > Didn't test that yet, will do.
-> > I hope my MMCPlus card can do high-speed.
-> 
-> I should get a chance today to test this as well; I'll let you know
-> what I see.
-> 
+   > That is a bit vague.  An SD card is a memory.  An SDIO "card" is
+   > an I/O connection made using the same physical interface as an SD
+   > card and a very similar protocal to SD cards (at least with
+   > respect to reading and writing).  I do not understand how a card
+   > can be SD and SDIO.  Are you sure you are not talking about a
+   > controller that supports SD and SDIO?  A lot of controllers do
+   > that.
 
-Ok, I was able to try it out and setting HISPD works and 4bit seems
-to work too. My MMCplus cards run at the same speed with either
-controller.
+Adrian, I presume we're talking about something like:
 
---phil
+http://www.arasan.com/products/sd/SD-Combo-Flyer.pdf
+
+Micha=C5=82, could you let us know which SD-combo device(s) in particul=
+ar
+you've been working with?
+
+- Chris.
+--=20
+Chris Ball   <cjb@laptop.org>
+One Laptop Per Child
