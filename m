@@ -1,77 +1,153 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [RFC] [PATCH 1/2] mmc: split mmc_sd_init_card()
-Date: Thu, 03 Jun 2010 12:23:52 +0300
-Message-ID: <4C0774A8.2030704@nokia.com>
-References: <1-1000-12432-1274803827-7569@rere.qmqm.pl> <20100528144027.3c868841.akpm@linux-foundation.org> <20100531155846.GA9493@rere.qmqm.pl>
+From: Philip Langdale <philipl@overt.org>
+Subject: Re: [PATCH] mmc: make sdhci work with ricoh mmc controller
+Date: Thu, 3 Jun 2010 09:11:13 -0700
+Message-ID: <20100603091113.7b1d6fc0@fido5>
+References: <1275516180.30272.4.camel@maxim-laptop>
+	<1275527787-3783-1-git-send-email-maximlevitsky@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.230]:44764 "EHLO
-	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751850Ab0FCJYN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Jun 2010 05:24:13 -0400
-In-Reply-To: <20100531155846.GA9493@rere.qmqm.pl>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1275527787-3783-1-git-send-email-maximlevitsky@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: linux-kernel <linux-kernel@vger.kernel.org>, adq_dvb@lidskialf.net, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Micha=B3 Miros=B3aw wrote:
-> Thanks for your review!
->=20
-> On Fri, May 28, 2010 at 02:40:27PM -0700, Andrew Morton wrote:
->> On Tue, 25 May 2010 18:10:28 +0200 (CEST)
->> Micha__ Miros__aw <mirq-linux@rere.qmqm.pl> wrote:
->>> This is needed to avoid code duplication in SD-combo support.
->> hm.  Perhaps you could have told us a bit more about it than this.
->>> +int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
->>> +int mmc_sd_get_csd(struct mmc_host *host, struct mmc_card *card)
->>> +int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card=
-,
->>> +unsigned mmc_sd_get_max_clock(struct mmc_card *card)
->>> +void mmc_sd_go_highspeed(struct mmc_card *card)
->> These are global symbols, but they are not exported to (other) modul=
-es.
->> That's odd.  I'd have expected to see them either `static' or
->> EXPORT_MODULE()d.
->=20
-> This is all contained in mmc_core.ko and needs not be exported to oth=
-er
-> modules. A SD-combo card is a SD (memory) and SDIO in one package - t=
-he
-> only changes needed are in initialization sequence, after which both
-> parts are mostly independent.
+On Thu,  3 Jun 2010 04:16:27 +0300
+Maxim Levitsky <maximlevitsky@gmail.com> wrote:
 
-That is a bit vague.  An SD card is a memory.  An SDIO "card" is an
-I/O connection made using the same physical interface as an SD card
-and a very similar protocal to SD cards (at least with respect to
-reading and writing).  I do not understand how a card can be SD and
-SDIO.  Are you sure you are not talking about a controller that support=
-s
-SD and SDIO?  A lot of controllers do that.
+> The current way of disabling it is not well tested by vendor
+> and has all kinds of bugs that show up on resume from ram/disk.
+> 
+> Old way of disabling is still supported by
+> continuing to use CONFIG_MMC_RICOH_MMC.
+>
+> Based on
+> 'http://list.drzeus.cx/pipermail/sdhci-devel/2007-December/002085.html'
 
->=20
->> I'll take the lack of a signed-off-by: and the "RFC" as signal to no=
-t
->> apply these patches.
->=20
-> I would like for this to get tested by other people first, but it loo=
-ks
-> like not many kernel developers use SD combo cards.
->=20
-> I'll resend the patches after applying your suggestions from the othe=
-r
-> mail.
->=20
-> Best Regards,
-> Micha=B3 Miros=B3aw
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+As long as this doesn't limit the performance of MMC cards, I can't
+complain.
 
+BTW, the new PCIe native controllers from Ricoh don't require the
+MMC controller to be disabled - the SD controller sees the cards by
+default; I guess some bit has to be twiddled by the MMC driver.
+
+> Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+> CC: adq_dvb@lidskialf.net
+> CC: linux-mmc@vger.kernel.org <linux-mmc@vger.kernel.org>
+> ---
+>  drivers/mmc/host/sdhci-pci.c |   34
+> ++++++++++++++++++++++++++++++++++ drivers/mmc/host/sdhci.c     |
+> 5 ++++- drivers/mmc/host/sdhci.h     |    2 ++
+>  3 files changed, 40 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci.c
+> b/drivers/mmc/host/sdhci-pci.c index 65483fd..3843780 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -17,6 +17,7 @@
+>  #include <linux/pci.h>
+>  #include <linux/dma-mapping.h>
+>  #include <linux/slab.h>
+> +#include <linux/device.h>
+>  
+>  #include <linux/mmc/host.h>
+>  
+> @@ -85,6 +86,26 @@ static int ricoh_probe(struct sdhci_pci_chip *chip)
+>  	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
+>  		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
+>  
+> +	/* To disable hardware races against MMC part */
+> +	device_disable_async_suspend(&chip->pci_dev->dev);
+> +	return 0;
+> +}
+
+It would be nice if this could be more selective so it only happens
+if it's really needed.
+
+> +
+> +static int ricoh_mmc_probe_slot(struct sdhci_pci_slot *slot)
+> +{
+> +	slot->host->caps =
+> +		((0x21 << SDHCI_TIMEOUT_CLK_SHIFT)
+> +			& SDHCI_TIMEOUT_CLK_MASK) |
+> +
+> +		((0x21 << SDHCI_CLOCK_BASE_SHIFT)
+> +			& SDHCI_CLOCK_BASE_MASK) |
+> +
+> +		SDHCI_TIMEOUT_CLK_UNIT |
+> +		SDHCI_CAN_VDD_330 |
+> +		SDHCI_CAN_DO_SDMA ;
+
+Have you been able to establish if 4bit and high-speed operations
+work correctly through the MMC controller? I note that you didn't
+set SDHCI_CAN_DO_HISPD.
+
+> +
+> +	/* To disable hardware races against SDHC part */
+> +	device_disable_async_suspend(&slot->chip->pci_dev->dev);
+>  	return 0;
+>  }
+>  
+> @@ -95,6 +116,11 @@ static const struct sdhci_pci_fixes sdhci_ricoh =
+> { SDHCI_QUIRK_CLOCK_BEFORE_RESET,
+>  };
+>  
+> +static const struct sdhci_pci_fixes sdhci_ricoh_mmc = {
+> +	.probe_slot	= ricoh_mmc_probe_slot,
+> +	.quirks		= SDHCI_QUIRK_NO_CARD_NO_RESET,
+> +};
+> +
+>  static const struct sdhci_pci_fixes sdhci_ene_712 = {
+>  	.quirks		= SDHCI_QUIRK_SINGLE_POWER_WRITE |
+>  			  SDHCI_QUIRK_BROKEN_DMA,
+> @@ -374,6 +400,14 @@ static const struct pci_device_id pci_ids[]
+> __devinitdata = { },
+>  
+>  	{
+> +		.vendor         = PCI_VENDOR_ID_RICOH,
+> +		.device         = 0x843,
+> +		.subvendor      = PCI_ANY_ID,
+> +		.subdevice      = PCI_ANY_ID,
+> +		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
+> +	},
+> +
+> +	{
+>  		.vendor		= PCI_VENDOR_ID_ENE,
+>  		.device		= PCI_DEVICE_ID_ENE_CB712_SD,
+>  		.subvendor	= PCI_ANY_ID,
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index c6d1bd8..dbd9367 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1687,7 +1687,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>  			host->version);
+>  	}
+>  
+> -	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> +	if (host->caps)
+> +		caps = host->caps;
+> +	else
+> +		caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+
+I'd prefer keying this off an explicit quirk.
+
+>  
+>  	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+>  		host->flags |= SDHCI_USE_SDMA;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index c846813..b41581a 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -292,6 +292,8 @@ struct sdhci_host {
+>  
+>  	struct timer_list	timer;		/* Timer for
+> timeouts */ 
+> +	unsigned int		caps;		/*
+> Alternative capabilities */ +
+>  	unsigned long		private[0]
+> ____cacheline_aligned; };
+>  
+
+--phil
