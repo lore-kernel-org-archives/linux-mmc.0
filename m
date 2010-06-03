@@ -1,131 +1,110 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: [PATCH] mmc: make sdhci work with ricoh mmc controller
-Date: Thu,  3 Jun 2010 04:16:27 +0300
-Message-ID: <1275527787-3783-1-git-send-email-maximlevitsky@gmail.com>
-References: <1275516180.30272.4.camel@maxim-laptop>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: [PATCH v2] Recognize CSD structure version 3
+Date: Thu, 03 Jun 2010 13:20:07 +0900
+Message-ID: <20100603042007.GA15347@july>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fg-out-1718.google.com ([72.14.220.159]:20529 "EHLO
-	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758189Ab0FCBQf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Jun 2010 21:16:35 -0400
-In-Reply-To: <1275516180.30272.4.camel@maxim-laptop>
+Received: from mailout5.samsung.com ([203.254.224.35]:41467 "EHLO
+	mailout5.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750811Ab0FCEUQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Jun 2010 00:20:16 -0400
+Received: from epmmp1 (mailout5.samsung.com [203.254.224.35])
+ by mailout1.samsung.com
+ (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTP id <0L3F00JCV81PIU@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 03 Jun 2010 13:20:14 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0L3F00M0M81PHQ@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 03 Jun 2010 13:20:13 +0900 (KST)
+Content-disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Langdale <philipl@overt.org>
-Cc: linux-kernel <linux-kernel@vger.kernel.org>, Maxim Levitsky <maximlevitsky@gmail.com>, adq_dvb@lidskialf.net, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org, adrian.hunter@nokia.com
 
-The current way of disabling it is not well tested by vendor
-and has all kinds of bugs that show up on resume from ram/disk.
+The eMMC spec 4.4 and 4.3 + additional feature chips has CSD structure version 3
+and version 3 have to check the CSD_STRUCTURE byte in the EXT_CSD register.
 
-Old way of disabling is still supported by
-continuing to use CONFIG_MMC_RICOH_MMC.
+Also fix EXT_CSD revision message.
 
-Based on 'http://list.drzeus.cx/pipermail/sdhci-devel/2007-December/002085.html'
-
-Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-CC: adq_dvb@lidskialf.net
-CC: linux-mmc@vger.kernel.org <linux-mmc@vger.kernel.org>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
- drivers/mmc/host/sdhci-pci.c |   34 ++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c     |    5 ++++-
- drivers/mmc/host/sdhci.h     |    2 ++
- 3 files changed, 40 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 65483fd..3843780 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -17,6 +17,7 @@
- #include <linux/pci.h>
- #include <linux/dma-mapping.h>
- #include <linux/slab.h>
-+#include <linux/device.h>
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 89f7a25..95c4fb2 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -114,17 +114,18 @@ static int mmc_decode_cid(struct mmc_card *card)
+ static int mmc_decode_csd(struct mmc_card *card)
+ {
+ 	struct mmc_csd *csd = &card->csd;
+-	unsigned int e, m, csd_struct;
++	unsigned int e, m;
+ 	u32 *resp = card->raw_csd;
  
- #include <linux/mmc/host.h>
- 
-@@ -85,6 +86,26 @@ static int ricoh_probe(struct sdhci_pci_chip *chip)
- 	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
- 		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
- 
-+	/* To disable hardware races against MMC part */
-+	device_disable_async_suspend(&chip->pci_dev->dev);
-+	return 0;
-+}
-+
-+static int ricoh_mmc_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	slot->host->caps =
-+		((0x21 << SDHCI_TIMEOUT_CLK_SHIFT)
-+			& SDHCI_TIMEOUT_CLK_MASK) |
-+
-+		((0x21 << SDHCI_CLOCK_BASE_SHIFT)
-+			& SDHCI_CLOCK_BASE_MASK) |
-+
-+		SDHCI_TIMEOUT_CLK_UNIT |
-+		SDHCI_CAN_VDD_330 |
-+		SDHCI_CAN_DO_SDMA ;
-+
-+	/* To disable hardware races against SDHC part */
-+	device_disable_async_suspend(&slot->chip->pci_dev->dev);
- 	return 0;
- }
- 
-@@ -95,6 +116,11 @@ static const struct sdhci_pci_fixes sdhci_ricoh = {
- 			  SDHCI_QUIRK_CLOCK_BEFORE_RESET,
- };
- 
-+static const struct sdhci_pci_fixes sdhci_ricoh_mmc = {
-+	.probe_slot	= ricoh_mmc_probe_slot,
-+	.quirks		= SDHCI_QUIRK_NO_CARD_NO_RESET,
-+};
-+
- static const struct sdhci_pci_fixes sdhci_ene_712 = {
- 	.quirks		= SDHCI_QUIRK_SINGLE_POWER_WRITE |
- 			  SDHCI_QUIRK_BROKEN_DMA,
-@@ -374,6 +400,14 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
- 	},
- 
- 	{
-+		.vendor         = PCI_VENDOR_ID_RICOH,
-+		.device         = 0x843,
-+		.subvendor      = PCI_ANY_ID,
-+		.subdevice      = PCI_ANY_ID,
-+		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
-+	},
-+
-+	{
- 		.vendor		= PCI_VENDOR_ID_ENE,
- 		.device		= PCI_DEVICE_ID_ENE_CB712_SD,
- 		.subvendor	= PCI_ANY_ID,
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c6d1bd8..dbd9367 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1687,7 +1687,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 			host->version);
+ 	/*
+ 	 * We only understand CSD structure v1.1 and v1.2.
+ 	 * v1.2 has extra information in bits 15, 11 and 10.
++	 * also support the for eMMC v4.4 & v4.41.
+ 	 */
+-	csd_struct = UNSTUFF_BITS(resp, 126, 2);
+-	if (csd_struct != 1 && csd_struct != 2) {
++	csd->structure = UNSTUFF_BITS(resp, 126, 2);
++	if (csd->structure == 0) {
+ 		printk(KERN_ERR "%s: unrecognised CSD structure version %d\n",
+-			mmc_hostname(card->host), csd_struct);
++			mmc_hostname(card->host), csd->structure);
+ 		return -EINVAL;
  	}
  
--	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+	if (host->caps)
-+		caps = host->caps;
-+	else
-+		caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+@@ -207,11 +208,22 @@ static int mmc_read_ext_csd(struct mmc_card *card)
+ 		goto out;
+ 	}
  
- 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
- 		host->flags |= SDHCI_USE_SDMA;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c846813..b41581a 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -292,6 +292,8 @@ struct sdhci_host {
- 
- 	struct timer_list	timer;		/* Timer for timeouts */
- 
-+	unsigned int		caps;		/* Alternative capabilities */
++	/* Version is coded in the CSD_STRUCTURE byte in the EXT_CSD register */
++	if (card->csd.structure == 3) {
++		int ext_csd_struct = ext_csd[EXT_CSD_STRUCTURE];
++		if (ext_csd_struct > 2) {
++			printk(KERN_ERR "%s: unrecognised EXT_CSD structure "
++				"version %d\n", mmc_hostname(card->host),
++					ext_csd_struct);
++			err = -EINVAL;
++			goto out;
++		}
++	}
 +
- 	unsigned long		private[0] ____cacheline_aligned;
+ 	card->ext_csd.rev = ext_csd[EXT_CSD_REV];
+ 	if (card->ext_csd.rev > 5) {
+-		printk(KERN_ERR "%s: unrecognised EXT_CSD structure "
+-			"version %d\n", mmc_hostname(card->host),
+-			card->ext_csd.rev);
++		printk(KERN_ERR "%s: unrecognised EXT_CSD revision %d\n",
++			mmc_hostname(card->host), card->ext_csd.rev);
+ 		err = -EINVAL;
+ 		goto out;
+ 	}
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index d02d2c6..c83c7a7 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -24,6 +24,7 @@ struct mmc_cid {
  };
  
--- 
-1.7.0.4
-
+ struct mmc_csd {
++	unsigned char		structure;
+ 	unsigned char		mmca_vsn;
+ 	unsigned short		cmdclass;
+ 	unsigned short		tacc_clks;
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 8a49cbf..52ce988 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -254,6 +254,7 @@ struct _mmc_csd {
+ #define EXT_CSD_BUS_WIDTH	183	/* R/W */
+ #define EXT_CSD_HS_TIMING	185	/* R/W */
+ #define EXT_CSD_CARD_TYPE	196	/* RO */
++#define EXT_CSD_STRUCTURE	194	/* RO */
+ #define EXT_CSD_REV		192	/* RO */
+ #define EXT_CSD_SEC_CNT		212	/* RO, 4 bytes */
+ #define EXT_CSD_S_A_TIMEOUT	217
