@@ -1,50 +1,221 @@
-From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-Subject: Re: [RFC] [PATCH 1/2] mmc: split mmc_sd_init_card()
-Date: Thu, 3 Jun 2010 20:37:34 +0200
-Message-ID: <20100603183734.GA9141@rere.qmqm.pl>
-References: <1-1000-12432-1274803827-7569@rere.qmqm.pl> <20100528144027.3c868841.akpm@linux-foundation.org> <20100531155846.GA9493@rere.qmqm.pl> <4C0774A8.2030704@nokia.com> <m3hblk8224.fsf@pullcord.laptop.org>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: [PATCH 3/4] mmc_block: Add BLKDISCARD, BLKSECDISCARD and BLKDISCARDZEROES
+ support
+Date: Fri, 04 Jun 2010 00:13:25 +0300
+Message-ID: <4C081AF5.50306@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rere.qmqm.pl ([89.167.52.164]:40090 "EHLO rere.qmqm.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753520Ab0FCShf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 3 Jun 2010 14:37:35 -0400
-Content-Disposition: inline
-In-Reply-To: <m3hblk8224.fsf@pullcord.laptop.org>
+Received: from smtp.nokia.com ([192.100.105.134]:51141 "EHLO
+	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754907Ab0FCVOK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Jun 2010 17:14:10 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 
-On Thu, Jun 03, 2010 at 01:21:23PM -0400, Chris Ball wrote:
->    > That is a bit vague.  An SD card is a memory.  An SDIO "card" is
->    > an I/O connection made using the same physical interface as an S=
-D
->    > card and a very similar protocal to SD cards (at least with
->    > respect to reading and writing).  I do not understand how a card
->    > can be SD and SDIO.  Are you sure you are not talking about a
->    > controller that supports SD and SDIO?  A lot of controllers do
->    > that.
-> Adrian, I presume we're talking about something like:
-> http://www.arasan.com/products/sd/SD-Combo-Flyer.pdf
-> Micha=B3, could you let us know which SD-combo device(s) in particula=
-r
-> you've been working with?
+>From 15f8b6cda53848ced93a20554584dc860baab8b7 Mon Sep 17 00:00:00 2001
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Date: Thu, 3 Jun 2010 10:47:12 +0300
+Subject: [PATCH 3/4] mmc_block: Add BLKDISCARD, BLKSECDISCARD and BLKDISCARDZEROES support
 
-The card I'm using is one I'm working on (SDIO-like card interoperating
-with optional SD memory card) and I can't disclose what it really is no=
-r
-when it will be available.
+Add implementations for ioctls BLKDISCARD and BLKSECDISCARD, and
+flag the I/O queue if the SD/MMC card zeroes erased sectors.
+N.B. SD/MMC cards set erased sectors either to ones or zeroes.
 
-Spectec SDG-810 (GPS with micro-SD slot) looks like a similar SD-combo =
-card.
+Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+---
+ drivers/mmc/card/block.c |  152 ++++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/card/queue.c |    2 +
+ 2 files changed, 154 insertions(+), 0 deletions(-)
 
-Answering Adrian's question: SDIO uses separate command set (CMD5 for
-init, CMD52 and CMD53 for IO transactions) than SD memory and so the
-parts can coexist in one card (provided some additional constraints are
-met). The SDIO specification covers the details.
-
-Best Regards,
-Micha=B3 Miros=B3aw
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index cb9fbc8..67f59bc 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -31,6 +31,7 @@
+ #include <linux/mutex.h>
+ #include <linux/scatterlist.h>
+ #include <linux/string_helpers.h>
++#include <linux/delay.h>
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -138,9 +139,160 @@ mmc_blk_getgeo(struct block_device *bdev, struct hd_geometry *geo)
+ 	return 0;
+ }
+ 
++static int mmc_blk_check_eod(struct block_device *bdev, unsigned int from,
++			     unsigned int nr)
++{
++	unsigned int maxsector;
++
++	if (!nr)
++		return 0;
++
++	maxsector = bdev->bd_inode->i_size >> 9;
++	if (maxsector && (maxsector < nr || maxsector - nr < from))
++		return 1;
++
++	return 0;
++}
++
++static void mmc_blk_erase_throttle(struct mmc_blk_data *md)
++{
++	struct mmc_card *card = md->queue.card;
++	struct request_queue *q = md->queue.queue;
++	int i, ok;
++
++	for (i = 0; i < 40; i++) {
++		spin_lock_irq(q->queue_lock);
++		ok = elv_queue_empty(q);
++		spin_unlock_irq(q->queue_lock);
++		if (ok)
++			break;
++		mmc_release_host(card->host);
++		msleep(50);
++		mmc_claim_host(card->host);
++	}
++}
++
++static int mmc_blk_erase(struct mmc_blk_data *md, unsigned int from,
++			 unsigned int nr)
++{
++	struct mmc_card *card = md->queue.card;
++	unsigned int n, arg;
++	int err;
++
++	if (!mmc_can_erase(card))
++		return -EOPNOTSUPP;
++
++	if (mmc_can_trim(card))
++		arg = MMC_TRIM_ARG;
++	else
++		arg = MMC_ERASE_ARG;
++
++	mmc_claim_host(card->host);
++	n = card->max_erase - (from % card->max_erase);
++	do {
++		/*
++		 * Do not allow the BLKDISCARD ioctl to have priority over
++		 * scheduled I/O.
++		 */
++		mmc_blk_erase_throttle(md);
++		if (n > nr)
++			n = nr;
++		err = mmc_erase(card, from, n, arg);
++		if (err)
++			break;
++		from += n;
++		nr -= n;
++		n = card->max_erase;
++	} while (nr);
++	mmc_release_host(card->host);
++
++	return err;
++}
++
++static int mmc_blk_secure_erase(struct mmc_blk_data *md, unsigned int from,
++				unsigned int nr)
++{
++	struct mmc_card *card = md->queue.card;
++	unsigned int arg;
++	int err;
++
++	if (!mmc_can_secure_erase_trim(card))
++		return -EOPNOTSUPP;
++
++	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
++		arg = MMC_SECURE_TRIM1_ARG;
++	else
++		arg = MMC_SECURE_ERASE_ARG;
++
++	mmc_claim_host(card->host);
++	/*
++	 * Secure erase can be very inefficient when used with any size
++	 * significantly smaller than the size of the whole card, so do not
++	 * break up the original request, but still wait for scheduled I/O
++	 * in case the user is trying to securely erase one partition in
++	 * small pieces while still using another partition on the same card.
++	 */
++	mmc_blk_erase_throttle(md);
++	err = mmc_erase(card, from, nr, arg);
++	if (!err && arg == MMC_SECURE_TRIM1_ARG)
++		err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
++	mmc_release_host(card->host);
++
++	return err;
++}
++
++static int mmc_blk_ioctl_discard(struct block_device *bdev, uint64_t start,
++				 uint64_t len, int secure)
++{
++	struct mmc_blk_data *md = bdev->bd_disk->private_data;
++	unsigned int from, nr;
++
++	if ((start & 511) || (len & 511))
++		return -EINVAL;
++
++	start >>= 9;
++	len >>= 9;
++
++	if (start > UINT_MAX || len > UINT_MAX)
++		return -EINVAL;
++
++	from = start;
++	nr = len;
++
++	if (mmc_blk_check_eod(bdev, from, nr))
++		return -EINVAL;
++
++	if (bdev != bdev->bd_contains)
++		from += bdev->bd_part->start_sect;
++
++	if (secure)
++		return mmc_blk_secure_erase(md, from, nr);
++	else
++		return mmc_blk_erase(md, from, nr);
++}
++
++static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
++			 unsigned cmd, unsigned long arg)
++{
++	uint64_t range[2];
++	int secure = 0;
++
++	switch (cmd) {
++	case BLKSECDISCARD:
++		secure = 1;
++	case BLKDISCARD:
++		if (copy_from_user(range, (void __user *)arg, sizeof(range)))
++			return -EFAULT;
++
++		return mmc_blk_ioctl_discard(bdev, range[0], range[1], secure);
++	}
++	return -ENOTTY;
++}
++
+ static const struct block_device_operations mmc_bdops = {
+ 	.open			= mmc_blk_open,
+ 	.release		= mmc_blk_release,
++	.ioctl			= mmc_blk_ioctl,
+ 	.getgeo			= mmc_blk_getgeo,
+ 	.owner			= THIS_MODULE,
+ };
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index d6ded24..9b760d7 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -130,6 +130,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock
+ 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
+ 	blk_queue_ordered(mq->queue, QUEUE_ORDERED_DRAIN, NULL);
+ 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
++	if (card->erased_byte == 0)
++		mq->queue->limits.discard_zeroes_data = 1;
+ 
+ #ifdef CONFIG_MMC_BLOCK_BOUNCE
+ 	if (host->max_hw_segs == 1) {
+-- 
+1.6.3.3
