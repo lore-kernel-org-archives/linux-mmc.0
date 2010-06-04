@@ -1,65 +1,115 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: Libertas/SDIO deep sleep mode
-Date: Fri, 04 Jun 2010 10:59:14 -0400
-Message-ID: <m3631y7sjh.fsf@pullcord.laptop.org>
-References: <20100604121245.GW2695@buzzloop.caiaq.de>
+From: Philip Langdale <philipl@overt.org>
+Subject: Re: [PATCH] mmc: make sdhci work with ricoh mmc controller
+Date: Fri, 4 Jun 2010 08:05:51 -0700
+Message-ID: <20100604080551.3dba90af@fido5>
+References: <1275516180.30272.4.camel@maxim-laptop>
+	<1275527787-3783-1-git-send-email-maximlevitsky@gmail.com>
+	<20100603091113.7b1d6fc0@fido5>
+	<1275582709.2563.19.camel@maxim-laptop>
+	<20100603093914.3397ac42@fido5>
+	<20100603100510.37d02c2b@fido5>
+	<1275586531.2594.3.camel@maxim-laptop>
+	<20100603214223.61325b5d@fido5>
+	<1275646048.26010.22.camel@maxim-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53914 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756441Ab0FDO5Q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 4 Jun 2010 10:57:16 -0400
-In-Reply-To: <20100604121245.GW2695@buzzloop.caiaq.de> (Daniel Mack's message
-	of "Fri, 4 Jun 2010 14:12:45 +0200")
+Received: from usul.saidi.cx ([204.11.33.34]:35414 "EHLO usul.overt.org"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752354Ab0FDPF4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 4 Jun 2010 11:05:56 -0400
+In-Reply-To: <1275646048.26010.22.camel@maxim-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Mack <daniel@caiaq.de>
-Cc: libertas-dev@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Sven Neumann <s.neumann@raumfeld.com>
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: linux-kernel <linux-kernel@vger.kernel.org>, adq_dvb@lidskialf.net, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi,
+On Fri, 04 Jun 2010 13:07:28 +0300
+Maxim Levitsky <maximlevitsky@gmail.com> wrote:
 
-   > Hi, I read about the recently added features in the libertas
-   > driver to send the chip to its deep-sleep mode when the system
-   > suspends, so the wakeup phase is shortened.
 
-I think there might be a bit of terminology confusion here -- as
-I understand it, "deep sleep" refers to putting the 8686 into a
-power-saving mode after a certain amount of idle time, while the
-rest of the system is running.
+> > 
+> > On this subject:
+> > 
+> > 1) Would it make sense to have the hard-coded caps reflect the full
+> > set of caps you see on the sdhci side?
+> This would be ugly cause two driver instances would have to talk one
+> with another. A global variable will be necessary.
 
-If you want to preserve power to the 8686 over a system suspend,
-that's a largely different set of code, which isn't complete in
-mainline yet; as you've seen, the MMC and SDHCI side of it is
-upstream, but not libertas or pxamci code yet.
+Instead of doing it at runtime, we could read them offline and then
+write them in. Of course, I suspect there's some variation in
+capabilities of Ricoh parts - I know there's at least two generations
+of MMC controllers with the same PCI IDs. :-/
+ 
+> 
+> > 
+> > 2) We ought to be able to set the MMC high-speed flag for this
+> > controller; I've tried it out and it works fine. The default sdhci
+> > code will never set this flag. I think it would need to an
+> > additional quirk. Pierre argued against setting it on the basis
+> > that SD high speed has slightly different timings; I haven't seen
+> > hardware where this has been an issue.
+> > 
+> > > However that suspend/resume race is tough one.
+> > > The problem seems that controller doesn't like both devices to be
+> > > poked at same time, and normally they won't, but here on resume
+> > > both are tested for a card, and this is done asynchronously by
+> > > mmc core.
+> > > 
+> > > I will get to bottom of this sooner or later (I hope).
+> > 
+> > Hmm. So, if the issue is the test, then you should be able to
+> > serialize in mmc core instead of forcing sync resume in general. An
+> > ugly way would be a quirk that says to serialize all card tests if
+> > the controller is present in the system. In practice it would be
+> > fine as systems won't have arbitrary other sdhci controllers if
+> > they have this ricoh mmc thing. But yes, it isn't clean. :-P
+> This seems to be worse that I thought.
+> The problem is that mmc controller tells that card is removed on
+> resume (after a while it reappears)
+> 
+> This brings a question though, are MMC and SD cards electrically
+> different?
+> If not them its interesting how the controller distinguishes between
+> them.
 
-   > * The "Parentless device registered during a PM transaction"
-   > looks like a bug to me. Note that I added kobject_name(&dev->kobj)
-   > to the output to get a clue about what's going on.
+They are not. I suspect the controller pokes the card using SPI mode
+just enough to tell them apart.
+ 
+> 
+> This isn't a show stopper though, cause the cards are
+> removed/reinserted anyway unless CONFIG_MMC_UNSAFE_RESUME is set.
+> The fact that this triggers system hang is another story, and sooner
+> or later will be fixed ether by some hack in mmc code or by making
+> del_gendisk not hang when userspace is frozen.
+> 
+> 
+> It not due to interleaving, because I tried binding sdhci-pci to only
+> mmc interface, and yet same problem happens.
+> 
+> Magically, if async suspend is disabled everything works, and it well
+> tested. and that despite me disabling async suspend on all 4
+> functions. (And I know that this works, and makes pm core suspend
+> them in order from 0 to 4 and synchronously.
+> I tried adding large delays to simulate delays caused by waiting for
+> other devices, but it didn't help.
+> 
+> I''l get to bottom of this.
 
-Not sure what's going on there.
+I'm not familiar with what pm core allows but can you tell it to
+serialise the functions but still handle the device asynchronously?
+That would still allow the maximum possible asynchrony.
 
-   > * The firmware survives the suspend/resume transition and works
-   > fine after that. I just wonder why, as the voltage was switched
-   > off?
+> 
+> 
+> > 
+> > --phil
+> 
+> 
+> 
 
-That's odd.  Perhaps the 8686 is being alternatively powered somehow
-on your hardware?
 
-   > * I believe that if we need to keep the power switched on, there
-   > should be a call to sdio_set_host_pm_flags(MMC_PM_KEEP_POWER)
-   > somewhere in the libertas_sdio layer, right? How should the
-   > pxamci core get to know it shouldn't switch off its regulator?
 
-That's right.  We're using this code at OLPC, to go into system
-suspend with the 8686 powered and then be woken when a new packet
-arrives.  The libertas side of that code hasn't been submitted yet,
-but you're welcome to check it out at our git repo:
 
-http://dev.laptop.org/git/olpc-2.6/commit/?h=olpc-2.6.31&id=db09aa1f537f7d5eae6e52ecf59cdf3571150ee6
-http://dev.laptop.org/git/olpc-2.6/log/drivers/net/wireless/libertas?h=olpc-2.6.31
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>
-One Laptop Per Child
+--phil
