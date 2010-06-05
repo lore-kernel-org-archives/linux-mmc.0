@@ -1,57 +1,74 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: [PATCH] SDHCI: add no hi-speed bit quirk support
-Date: Sat, 05 Jun 2010 13:50:09 +0900
-Message-ID: <20100605045009.GA25452@july>
+From: =?UTF-8?Q?Micha=C5=82=20Miros=C5=82aw=20?=
+	<mirq-linux@rere.qmqm.pl>
+Subject: (unknown)
+Date: Sat,  5 Jun 2010 19:29:24 +0200 (CEST)
+Message-ID: <1-1000-17336-1275758964-1828@rere.qmqm.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:40688 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751298Ab0FEEuR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Jun 2010 00:50:17 -0400
-Received: from epmmp1 (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
- with ESMTP id <0L3I00LD2YRSWW90@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Sat, 05 Jun 2010 13:50:16 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0L3I00DETYRSI9@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Sat, 05 Jun 2010 13:50:16 +0900 (KST)
-Content-disposition: inline
+Received: from rere.qmqm.pl ([89.167.52.164]:35038 "EHLO rere.qmqm.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932686Ab0FER30 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 5 Jun 2010 13:29:26 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@nokia.com>, Chris Ball <cjb@laptop.org>
 
-Some SDHCI controllr like s5pc110 doesn't have HISPD bit at HOSTCTL register.
+=46rom 46eda5101dd303feac7f8353023f78bf4f7fd2fe Mon Sep 17 00:00:00 200=
+1
+=46rom: =3D?UTF-8?q?Micha=3DC5=3D82=3D20Miros=3DC5=3D82aw?=3D <mirq-lin=
+ux@rere.qmqm.pl>
+Date: Sat, 5 Jun 2010 19:04:01 +0200
+Subject: [PATCH 0/2] mmc: Add support for SD combo cards
+MIME-Version: 1.0
+Content-Type: text/plain; charset=3DUTF-8
+Content-Transfer-Encoding: 8bit
 
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c6d1bd8..cba08ce 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1164,7 +1164,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	else
- 		ctrl &= ~SDHCI_CTRL_4BITBUS;
- 
--	if (ios->timing == MMC_TIMING_SD_HS)
-+	if (ios->timing == MMC_TIMING_SD_HS &&
-+	    !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
- 		ctrl |= SDHCI_CTRL_HISPD;
- 	else
- 		ctrl &= ~SDHCI_CTRL_HISPD;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c846813..a78152d 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -240,6 +240,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
- /* Controller cannot support End Attribute in NOP ADMA descriptor */
- #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
-+/* Controller doesn't have HISPD bit field in HI-SPEED SD card */
-+#define SDHCI_QUIRK_NO_HISPD_BIT			(1<<27)
- 
- 	int			irq;		/* Device IRQ */
- 	void __iomem *		ioaddr;		/* Mapped address */
+This adds support for SD combo cards to MMC/SD driver stack.
+
+SD combo consists of SD memory and SDIO parts in one package. Since
+the parts have a separate SD command sets, after initialization, they
+can be treated as independent cards on one bus.
+
+Changes are divided into two patches. First is just moving initializati=
+on
+code around so that SD memory part init can be called from SDIO init.
+Second patch is a proper change enabling SD memory along SDIO.
+I tried to move as much no-op changes to the first patch so that it's
+easier to follow the required changes to initialization flow for SDIO c=
+ards.
+
+This is based on Simplified SDIO spec v.2.00. The init sequence is slig=
+htly
+modified to follow current SD memory init implementation. Command seque=
+nces,
+assuming SD memory and SDIO indeed ignore unknown commands, are the sam=
+e as
+before for both parts.
+
+Changes from v1:
+ - more no-op changes moved to first patch
+ - eliminated internal abuse of EOPNOTSUPP
+ - fixed a bug in resume path (not tested)
+ - eliminated unnecessary CID memcpy in SD combo init
+
+Best Regards,
+Micha=C5=82 Miros=C5=82aw
+
+
+Micha=C5=82 Miros=C5=82aw (2):
+  mmc: split mmc_sd_init_card()
+  mmc: implement SD-combo (IO+mem) support
+
+ drivers/mmc/core/bus.c   |    9 ++
+ drivers/mmc/core/core.c  |   12 ++-
+ drivers/mmc/core/sd.c    |  249 +++++++++++++++++++++++++++-----------=
+--------
+ drivers/mmc/core/sd.h    |   17 +++
+ drivers/mmc/core/sdio.c  |  174 +++++++++++++++++++++++++-------
+ include/linux/mmc/card.h |    1 +
+ 6 files changed, 320 insertions(+), 142 deletions(-)
+ create mode 100644 drivers/mmc/core/sd.h
+
