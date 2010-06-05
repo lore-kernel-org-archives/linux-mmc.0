@@ -1,43 +1,41 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: + mmc-recognize-csd-structure.patch added to -mm tree
-Date: Sat, 5 Jun 2010 00:12:26 +0100
-Message-ID: <20100604231226.GA14477@void.printf.net>
-References: <201006042236.o54MaLod022299@imap1.linux-foundation.org>
+Subject: Re: [Bugme-new] [Bug 16119] New: jmb38x recognized and works only
+	if a card is plugged in during boot
+Date: Sat, 5 Jun 2010 01:27:31 +0100
+Message-ID: <20100605002729.GA15004@void.printf.net>
+References: <bug-16119-10286@https.bugzilla.kernel.org/> <20100604162014.7635ca51.akpm@linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51532 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:59723 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757467Ab0FDXr4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 4 Jun 2010 19:47:56 -0400
+	id S932168Ab0FEA1f (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 4 Jun 2010 20:27:35 -0400
 Content-Disposition: inline
-In-Reply-To: <201006042236.o54MaLod022299@imap1.linux-foundation.org>
+In-Reply-To: <20100604162014.7635ca51.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org, kmpark@infradead.org, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, eugene.shalygin@gmail.com
 
-Hi,
+On Fri, Jun 04, 2010 at 04:20:14PM -0700, Andrew Morton wrote:
+> hm, I don't know who wold be the appropriate person to look into this. 
+> Let's try the mailing list.
 
-On Fri, Jun 04, 2010 at 03:36:21PM -0700, akpm@linux-foundation.org wrote:
-> diff -puN drivers/mmc/core/mmc.c~mmc-recognize-csd-structure drivers/mmc/core/mmc.c
-> --- a/drivers/mmc/core/mmc.c~mmc-recognize-csd-structure
-> +++ a/drivers/mmc/core/mmc.c
-> @@ -114,17 +114,18 @@ static int mmc_decode_cid(struct mmc_car
->  static int mmc_decode_csd(struct mmc_card *card)
->  {
->  	struct mmc_csd *csd = &card->csd;
-> -	unsigned int e, m, csd_struct;
-> +	unsigned int e, m;
->  	u32 *resp = card->raw_csd;
->  
->  	/*
->  	 * We only understand CSD structure v1.1 and v1.2.
->  	 * v1.2 has extra information in bits 15, 11 and 10.
-> +	 * also support the for eMMC v4.4 & v4.41.
->  	 */
+Eugene, could you please try adding:
 
-Minor typo here.  I suggest "We also support eMMC v4.4 & v4.41."
+options sdhci debug_quirks=1
 
+to a new file named /etc/modprobe.d/sdhci-quirk.conf and rebooting?
+Please include `lspci -n` and `dmesg` output in your reply.
+
+It would also be useful to know whether you see the same problem when 
+booting (say) a Fedora 13 livecd, since the link below claims that 
+Fedora doesn't share this bug:
+
+https://bugs.launchpad.net/ubuntu/+source/linux/+bug/258446
+
+- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>
 One Laptop Per Child
