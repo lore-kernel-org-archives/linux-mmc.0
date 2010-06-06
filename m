@@ -1,139 +1,137 @@
 From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: [PATCH] mmc: make sdhci work with ricoh mmc controller
-Date: Mon, 07 Jun 2010 00:24:35 +0300
-Message-ID: <1275859475.3151.4.camel@maxim-laptop>
-References: <1275516180.30272.4.camel@maxim-laptop>
-	 <1275527787-3783-1-git-send-email-maximlevitsky@gmail.com>
-	 <20100603091113.7b1d6fc0@fido5> <1275582709.2563.19.camel@maxim-laptop>
-	 <20100603093914.3397ac42@fido5> <20100603100510.37d02c2b@fido5>
-	 <1275586531.2594.3.camel@maxim-laptop> <20100603214223.61325b5d@fido5>
-	 <1275646048.26010.22.camel@maxim-laptop>  <20100604080551.3dba90af@fido5>
-	 <1275665602.4596.14.camel@maxim-laptop>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH 1/2] mmc: make sdhci work with ricoh mmc controller
+Date: Mon,  7 Jun 2010 00:28:50 +0300
+Message-ID: <1275859731-2898-1-git-send-email-maximlevitsky@gmail.com>
+References: <1275859475.3151.4.camel@maxim-laptop>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fg-out-1718.google.com ([72.14.220.157]:31416 "EHLO
-	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754042Ab0FFVYv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Jun 2010 17:24:51 -0400
-In-Reply-To: <1275665602.4596.14.camel@maxim-laptop>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:63597 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755144Ab0FFV3C (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Jun 2010 17:29:02 -0400
+In-Reply-To: <1275859475.3151.4.camel@maxim-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Langdale <philipl@overt.org>
-Cc: linux-kernel <linux-kernel@vger.kernel.org>, adq_dvb@lidskialf.net, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Philip Langdale <philipl@overt.org>, linux-kernel <linux-kernel@vger.kernel.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Andrew de Quincey <adq_dvb@lidskialf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Fri, 2010-06-04 at 18:33 +0300, Maxim Levitsky wrote: 
-> On Fri, 2010-06-04 at 08:05 -0700, Philip Langdale wrote: 
-> > On Fri, 04 Jun 2010 13:07:28 +0300
-> > Maxim Levitsky <maximlevitsky@gmail.com> wrote:
-> > 
-> > 
-> > > > 
-> > > > On this subject:
-> > > > 
-> > > > 1) Would it make sense to have the hard-coded caps reflect the full
-> > > > set of caps you see on the sdhci side?
-> > > This would be ugly cause two driver instances would have to talk one
-> > > with another. A global variable will be necessary.
-> > 
-> > Instead of doing it at runtime, we could read them offline and then
-> > write them in. Of course, I suspect there's some variation in
-> > capabilities of Ricoh parts - I know there's at least two generations
-> > of MMC controllers with the same PCI IDs. :-/
-> Nothing against that, although the caps on main controller are broken
-> too, since it doesn't advertise DMA support...
-> 
-> > 
-> > > 
-> > > > 
-> > > > 2) We ought to be able to set the MMC high-speed flag for this
-> > > > controller; I've tried it out and it works fine. The default sdhci
-> > > > code will never set this flag. I think it would need to an
-> > > > additional quirk. Pierre argued against setting it on the basis
-> > > > that SD high speed has slightly different timings; I haven't seen
-> > > > hardware where this has been an issue.
-> > > > 
-> > > > > However that suspend/resume race is tough one.
-> > > > > The problem seems that controller doesn't like both devices to be
-> > > > > poked at same time, and normally they won't, but here on resume
-> > > > > both are tested for a card, and this is done asynchronously by
-> > > > > mmc core.
-> > > > > 
-> > > > > I will get to bottom of this sooner or later (I hope).
-> > > > 
-> > > > Hmm. So, if the issue is the test, then you should be able to
-> > > > serialize in mmc core instead of forcing sync resume in general. An
-> > > > ugly way would be a quirk that says to serialize all card tests if
-> > > > the controller is present in the system. In practice it would be
-> > > > fine as systems won't have arbitrary other sdhci controllers if
-> > > > they have this ricoh mmc thing. But yes, it isn't clean. :-P
-> > > This seems to be worse that I thought.
-> > > The problem is that mmc controller tells that card is removed on
-> > > resume (after a while it reappears)
-> > > 
-> > > This brings a question though, are MMC and SD cards electrically
-> > > different?
-> > > If not them its interesting how the controller distinguishes between
-> > > them.
-> > 
-> > They are not. I suspect the controller pokes the card using SPI mode
-> > just enough to tell them apart.
-> >  
-> > > 
-> > > This isn't a show stopper though, cause the cards are
-> > > removed/reinserted anyway unless CONFIG_MMC_UNSAFE_RESUME is set.
-> > > The fact that this triggers system hang is another story, and sooner
-> > > or later will be fixed ether by some hack in mmc code or by making
-> > > del_gendisk not hang when userspace is frozen.
-> > > 
-> > > 
-> > > It not due to interleaving, because I tried binding sdhci-pci to only
-> > > mmc interface, and yet same problem happens.
-> > > 
-> > > Magically, if async suspend is disabled everything works, and it well
-> > > tested. and that despite me disabling async suspend on all 4
-> > > functions. (And I know that this works, and makes pm core suspend
-> > > them in order from 0 to 4 and synchronously.
-> > > I tried adding large delays to simulate delays caused by waiting for
-> > > other devices, but it didn't help.
-> > > 
-> > > I''l get to bottom of this.
-> > 
-> > I'm not familiar with what pm core allows but can you tell it to
-> > serialise the functions but still handle the device asynchronously?
-> > That would still allow the maximum possible asynchrony.
-> I did that, and I am quite confident that its timing that makes the
-> difference.
-> (Or, and this is the worst thing to happen, there is an unrelated device
-> that must be enabled before mmc....)
-> 
-> Since controller like I suspected from the beginning pokes at the card,
-> it might be tricky to keep mmc card alive after suspend.
-> I leave this problem as is for now, and in future when I finish exams, I
-> am going to understand exactly what is going on.
-> 
-> Still, despite that feel I have just opened a can of worms, still I
-> think that its better to stick to the way things are done in windows
-> because hackish or not, things were tested by vendor well enough.
-> 
-> And just to think that all the trouble is literally due to
-> Microsoft..... grrrrrr.
+The current way of disabling it is not well tested by vendor
+and has all kinds of bugs that show up on resume from ram/disk.
+
+Old way of disabling is still supported by
+continuing to use CONFIG_MMC_RICOH_MMC.
+
+Based on 'http://list.drzeus.cx/pipermail/sdhci-devel/2007-December/002085.html'
+Most of the credit for this goes to Andrew de Quincey
 
 
-Found the case.
-The problem was just that we need to wait a bit for mmc device to
-appear.
-It probably pokes the card to see if it is mmc or not.
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+CC: Andrew de Quincey <adq_dvb@lidskialf.net>
+CC: linux-mmc@vger.kernel.org <linux-mmc@vger.kernel.org>
+---
+ drivers/mmc/host/sdhci-pci.c |   31 +++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c     |    3 ++-
+ drivers/mmc/host/sdhci.h     |    4 ++++
+ 3 files changed, 37 insertions(+), 1 deletions(-)
 
-Now the reader is prefect.
-(Well, there is still hang if card is really removed on resume due to
-problem in linux (and it is pure software issue). The fix is more or
-less known, so I tackle this after exams.
-And of course memstick part that I more or less reverse engineer.
-Again later I will write a driver.
-
-Best regards,
-Maxim Levitsky
-
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 65483fd..c4bcaeb 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -17,6 +17,7 @@
+ #include <linux/pci.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/slab.h>
++#include <linux/device.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -84,7 +85,21 @@ static int ricoh_probe(struct sdhci_pci_chip *chip)
+ 	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG ||
+ 	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
+ 		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
++	return 0;
++}
++
++static int ricoh_mmc_probe_slot(struct sdhci_pci_slot *slot)
++{
++	slot->host->caps =
++		((0x21 << SDHCI_TIMEOUT_CLK_SHIFT)
++			& SDHCI_TIMEOUT_CLK_MASK) |
+ 
++		((0x21 << SDHCI_CLOCK_BASE_SHIFT)
++			& SDHCI_CLOCK_BASE_MASK) |
++
++		SDHCI_TIMEOUT_CLK_UNIT |
++		SDHCI_CAN_VDD_330 |
++		SDHCI_CAN_DO_SDMA;
+ 	return 0;
+ }
+ 
+@@ -95,6 +110,14 @@ static const struct sdhci_pci_fixes sdhci_ricoh = {
+ 			  SDHCI_QUIRK_CLOCK_BEFORE_RESET,
+ };
+ 
++static const struct sdhci_pci_fixes sdhci_ricoh_mmc = {
++	.probe_slot	= ricoh_mmc_probe_slot,
++	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
++			  SDHCI_QUIRK_CLOCK_BEFORE_RESET |
++			  SDHCI_QUIRK_NO_CARD_NO_RESET |
++			  SDHCI_QUIRK_MISSING_CAPS
++};
++
+ static const struct sdhci_pci_fixes sdhci_ene_712 = {
+ 	.quirks		= SDHCI_QUIRK_SINGLE_POWER_WRITE |
+ 			  SDHCI_QUIRK_BROKEN_DMA,
+@@ -374,6 +397,14 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
+ 	},
+ 
+ 	{
++		.vendor         = PCI_VENDOR_ID_RICOH,
++		.device         = 0x843,
++		.subvendor      = PCI_ANY_ID,
++		.subdevice      = PCI_ANY_ID,
++		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
++	},
++
++	{
+ 		.vendor		= PCI_VENDOR_ID_ENE,
+ 		.device		= PCI_DEVICE_ID_ENE_CB712_SD,
+ 		.subvendor	= PCI_ANY_ID,
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c6d1bd8..483b78e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1687,7 +1687,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			host->version);
+ 	}
+ 
+-	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
++	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
++		sdhci_readl(host, SDHCI_CAPABILITIES);
+ 
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c846813..b1839a3 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -240,6 +240,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
+ /* Controller cannot support End Attribute in NOP ADMA descriptor */
+ #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
++/* Controller is missing device caps. Use caps provided by host */
++#define SDHCI_QUIRK_MISSING_CAPS			(1<<27)
+ 
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
+@@ -292,6 +294,8 @@ struct sdhci_host {
+ 
+ 	struct timer_list	timer;		/* Timer for timeouts */
+ 
++	unsigned int		caps;		/* Alternative capabilities */
++
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
+-- 
+1.7.0.4
 
