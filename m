@@ -1,66 +1,26 @@
-From: Philip Langdale <philipl@overt.org>
-Subject: Re: [PATCH 2/2] mmc: fix mmc card disappearence on resume on ricoh mmc
- controllers
-Date: Sun, 06 Jun 2010 19:22:42 -0400
-Message-ID: <648846745cc9a3a023fa12f306caabf6@localhost>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 2/2] mmc: fix mmc card disappearence on resume on ricoh
+	mmc controllers
+Date: Mon, 7 Jun 2010 00:23:13 +0100
+Message-ID: <20100606232313.GA5444@void.printf.net>
 References: <1275859475.3151.4.camel@maxim-laptop> <1275859731-2898-2-git-send-email-maximlevitsky@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from usul.saidi.cx ([204.11.33.34]:39155 "EHLO usul.overt.org"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752014Ab0FFXWy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 6 Jun 2010 19:22:54 -0400
+Received: from void.printf.net ([89.145.121.20]:55050 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752014Ab0FFXXO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 6 Jun 2010 19:23:14 -0400
+Content-Disposition: inline
 In-Reply-To: <1275859731-2898-2-git-send-email-maximlevitsky@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Philip Langdale <philipl@overt.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
+Hi,
 
-On Mon,  7 Jun 2010 00:28:51 +0300, Maxim Levitsky
-<maximlevitsky@gmail.com> wrote:
-> The reason was that it takes time for controller to detect the card.
-> So wait a bit for the card to appear.
-> In worst case scenario, when you suspend the system with mmc card,
-> and actually remove it, the resume will be delayed maximum by 2 seconds
-
-I suspect it's probably sending an SD id command to the card and then that
-has to time out on MMC cards.
-
-Acked-by: Philip Langdale <philipl@overt.org>
-
-> Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-> ---
->  drivers/mmc/host/sdhci-pci.c |    3 ++-
->  drivers/mmc/host/sdhci.c     |   18 ++++++++++++++++++
->  drivers/mmc/host/sdhci.h     |    2 ++
->  3 files changed, 22 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index c4bcaeb..49d863c 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -115,7 +115,8 @@ static const struct sdhci_pci_fixes sdhci_ricoh_mmc
-= {
->  	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
->  			  SDHCI_QUIRK_CLOCK_BEFORE_RESET |
->  			  SDHCI_QUIRK_NO_CARD_NO_RESET |
-> -			  SDHCI_QUIRK_MISSING_CAPS
-> +			  SDHCI_QUIRK_MISSING_CAPS |
-> +			  SDHCI_QUIRK_WAIT_CARD_ON_RESUME
->  };
->  
->  static const struct sdhci_pci_fixes sdhci_ene_712 = {
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 483b78e..6cda505 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1612,6 +1612,24 @@ int sdhci_resume_host(struct sdhci_host *host)
->  {
->  	int ret;
->  
+On Mon, Jun 07, 2010 at 12:28:51AM +0300, Maxim Levitsky wrote:
 > +	/* Some controllers (especialy the ricoh mmc controller) delay
 > +		card detection on resume (probably since the controller
 > +		has to poke the card to determine if its MMC or not */
@@ -74,26 +34,10 @@ Acked-by: Philip Langdale <philipl@overt.org>
 > +			if (sdhci_readl(host, SDHCI_PRESENT_STATE)
 > +							& SDHCI_CARD_PRESENT) {
 > +				break;
-> +			}
-> +			cpu_relax();
-> +	}
-> +
-> +
->  	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
->  		if (host->ops->enable_dma)
->  			host->ops->enable_dma(host);
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index b1839a3..c9d099c 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -242,6 +242,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
->  /* Controller is missing device caps. Use caps provided by host */
->  #define SDHCI_QUIRK_MISSING_CAPS			(1<<27)
-> +/* Card doesn't appear immediatly on resume from low power state */
-> +#define SDHCI_QUIRK_WAIT_CARD_ON_RESUME			(1<<28)
->  
->  	int			irq;		/* Device IRQ */
->  	void __iomem *		ioaddr;		/* Mapped address */
 
---phil
+It looks like your editor is set to four-space instead of eight-space
+tab characters, else you wouldn't be using so many tabs here. 
+
+-- 
+Chris Ball   <cjb@laptop.org>
+One Laptop Per Child
