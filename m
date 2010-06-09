@@ -1,7 +1,7 @@
 From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: [PATCH 3/5] sdhci-s3c: increase the timeout value
-Date: Wed, 09 Jun 2010 11:39:41 +0200
-Message-ID: <1276076383-24825-4-git-send-email-m.szyprowski@samsung.com>
+Subject: [PATCH 1/5] sdhci-s3c: depend on plat-samsung
+Date: Wed, 09 Jun 2010 11:39:39 +0200
+Message-ID: <1276076383-24825-2-git-send-email-m.szyprowski@samsung.com>
 References: <1276076383-24825-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,28 +21,29 @@ To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, lin
 Cc: kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, m.szyprowski@samsung.com
 List-Id: linux-mmc@vger.kernel.org
 
-This patch increases the timeout value on sdhci-s3c controller by using
-SDHCI_QUIRK_BROKEN_TIMEOUT_VAL quirk. Without it most transfers from
-external mmc cards fails on Samsung s5pv210 SoCs based systems. Tested
-on Samsung Aquila board.
+Most Samsung SoC have support for SDHCI block, so make the driver
+dependent on the Samsung platform instead on listing all SoCs in the
+Kconfig (and updating it again when support for the new SoC variant is
+added).
 
 Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
- drivers/mmc/host/sdhci-s3c.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ drivers/mmc/host/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index ad30f07..2b6cb44 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -331,6 +331,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	 * transfers, not sure if this is a problem with this specific
- 	 * SDHCI block, or a missing configuration that needs to be set. */
- 	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
-+	host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index e171e77..acf5bf6 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -123,7 +123,7 @@ config MMC_SDHCI_PLTFM
  
- 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
- 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+ config MMC_SDHCI_S3C
+ 	tristate "SDHCI support on Samsung S3C SoC"
+-	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
++	depends on MMC_SDHCI && PLAT_SAMSUNG
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+ 	  often referrered to as the HSMMC block in some of the Samsung S3C
 -- 
 1.7.1.240.g225c
