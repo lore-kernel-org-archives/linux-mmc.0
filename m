@@ -1,45 +1,62 @@
 From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: [PATCH] SDHCI-S3C fixes and enhancements (platform specific code)
-Date: Wed, 09 Jun 2010 11:39:02 +0200
-Message-ID: <1276076345-24370-1-git-send-email-m.szyprowski@samsung.com>
+Subject: [PATCH 2/5] sdhci-s3c: add missing remove function
+Date: Wed, 09 Jun 2010 11:39:40 +0200
+Message-ID: <1276076383-24825-3-git-send-email-m.szyprowski@samsung.com>
+References: <1276076383-24825-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.w1.samsung.com ([210.118.77.12]:61857 "EHLO
-	mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757175Ab0FIJjL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jun 2010 05:39:11 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-reply-to: <1276076383-24825-1-git-send-email-m.szyprowski@samsung.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, ben-linux@fluff.org, kgene.kim@samsung.com
+Cc: kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, m.szyprowski@samsung.com
+List-Id: linux-mmc@vger.kernel.org
 
-Hello,
+Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |   20 ++++++++++++++++++++
+ 1 files changed, 20 insertions(+), 0 deletions(-)
 
-This series includes various fixes to sdhci-s3c driver as well as a
-major feature enhancement. This patch series is prepared to get complete
-sdhci support on Samsung Aquila board.
-
-A quick overview on the patches:
-
-#1 - trivial compilation break fix
-#2 - add support for various methods of notifying the host driver about
-     the card insertion/removal (should be compatible with existing code)
-#3 - add sdhci driver platform data for all hsmmc controllers on Samsung
-     Aquila board
-
-Changes to the sdhci-s3c driver itself will be posted in a separate
-patch series for easier merging, please refer to the "[PATCH] SDHCI-S3C
-fixes and enhancements (driver specific code)" thread.
-
-A complete list of patches:
-
-[PATCH 1/3] s3c64xx: Fix build without SDHCI controllers
-[PATCH 2/3] Samsung: sdhci-s3c: add support for new card detection methods
-[PATCH 3/3] s5pv210: Aquila: add definitions for sdhci devices
-
-Best regards
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index af21792..ad30f07 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -365,6 +365,26 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 
+ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ {
++	struct sdhci_host *host =  platform_get_drvdata(pdev);
++	struct sdhci_s3c *sc = sdhci_priv(host);
++	int ptr;
++
++	sdhci_remove_host(host, 1);
++
++	for (ptr = 0; ptr < 3; ptr++) {
++		clk_disable(sc->clk_bus[ptr]);
++		clk_put(sc->clk_bus[ptr]);
++	}
++	clk_disable(sc->clk_io);
++	clk_put(sc->clk_io);
++
++	iounmap(host->ioaddr);
++	release_resource(sc->ioarea);
++	kfree(sc->ioarea);
++
++	sdhci_free_host(host);
++	platform_set_drvdata(pdev, NULL);
++
+ 	return 0;
+ }
+ 
 -- 
-Marek Szyprowski
-Samsung Poland R&D Center
+1.7.1.240.g225c
