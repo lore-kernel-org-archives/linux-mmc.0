@@ -1,157 +1,159 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: Question of RFKILL for bluetooth, hci_core.c
-Date: Wed, 9 Jun 2010 14:03:23 +0800
-Message-ID: <AANLkTimeLQRbLOCuFYhsW6KPD0CkrzlopfMw95PmKF4o@mail.gmail.com>
-References: <AANLkTiloq_U8CpoSYw-Vl4Tww27QFP_Wirs37iJLb7yP@mail.gmail.com>
-	<1275087477.4706.85.camel@aeonflux.t-mobile.de>
-	<AANLkTimDk8Nr0ih5VAVi84jKQ3ResR73kTodFoxg9IAG@mail.gmail.com>
-	<1275422411.2182.6.camel@localhost.localdomain>
-	<AANLkTilYabovivjqHrluD5upFb9LhP9p8M_Cfdx86V-a@mail.gmail.com>
-	<1276029627.2182.52.camel@localhost.localdomain>
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: [PATCH 3/3] s5pv210: Aquila: add definitions for sdhci devices
+Date: Wed, 09 Jun 2010 11:39:05 +0200
+Message-ID: <1276076345-24370-4-git-send-email-m.szyprowski@samsung.com>
+References: <1276076345-24370-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:43823 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751268Ab0FIGDY convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jun 2010 02:03:24 -0400
-Received: by iwn37 with SMTP id 37so5512092iwn.19
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Jun 2010 23:03:23 -0700 (PDT)
-In-Reply-To: <1276029627.2182.52.camel@localhost.localdomain>
+Received: from mailout4.w1.samsung.com ([210.118.77.14]:34311 "EHLO
+	mailout4.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757183Ab0FIJjM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jun 2010 05:39:12 -0400
+In-reply-to: <1276076345-24370-1-git-send-email-m.szyprowski@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marcel Holtmann <marcel@holtmann.org>
-Cc: linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, zgao6@marvell.com
+To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, ben-linux@fluff.org, kgene.kim@samsung.com
 
-Hi, Marcel
+This patch add support for SDHCI blocks on Samsung Aquila board. The
+following host controllers are defined:
+1. Internal MoviNAND device (permanently wired to the controller)
+2. Internal WiFI SDIO device (card is activated by power regualor)
+3. External MMC/SD socket (card detection is provided by external
+gpio interrupt)
 
-On Wed, Jun 9, 2010 at 4:40 AM, Marcel Holtmann <marcel@holtmann.org> w=
-rote:
-> Hi Zangfei,
->
->> >> > first of all, please use linux-bluetooth mailing list and not t=
-he MCC
->> >> > one.
->> >> >
->> >> >> We found you have submitted one patch adding rfkill for blueto=
-ogh.
->> >> >>
->> >> >> commit 611b30f74b5d8ca036a9923b3bf6e0ee10a21a53
->> >> >> Author: Marcel Holtmann <marcel@holtmann.org>
->> >> >> Date: =A0 Mon Jun 8 14:41:38 2009 +0200
->> >> >>
->> >> >> =A0 =A0 Bluetooth: Add native RFKILL soft-switch support for a=
-ll devices
->> >> >>
->> >> >> =A0 =A0 With the re-write of the RFKILL subsystem it is now po=
-ssible to easily
->> >> >> =A0 =A0 integrate RFKILL soft-switch support into the Bluetoot=
-h subsystem. All
->> >> >> =A0 =A0 Bluetooth devices will now get automatically RFKILL su=
-pport.
->> >> >>
->> >> >> =A0 =A0 Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
->> >> >>
->> >> >> Question 1,
->> >> >> Once hci_register_dev is called, the rfkill_alloc is called, t=
-he
->> >> >> result is the rfkill number is increased one by one, =A0the ap=
-plication
->> >> >> may not know which rfkill it is.
->> >> >> For example, insmod bt.ko -> rfkill0, rmmod bt; insmod bt.ko->
->> >> >> rfkill1, ~~ rfkill2, 3
->> >> >> Same effect would happen when echo 0 > /sys/class/rfkill/rfkil=
-l0/state.
->> >> >>
->> >> >> The reason is rfkill_register would increase rfkill->idx.
->> >> >> int __must_check rfkill_register(struct rfkill *rfkill)
->> >> >> {
->> >> >> =A0 =A0 =A0 =A0 static unsigned long rfkill_no;
->> >> >> ~~~
->> >> >> =A0 =A0 =A0 =A0 rfkill->idx =3D rfkill_no;
->> >> >> =A0 =A0 =A0 =A0 dev_set_name(dev, "rfkill%lu", rfkill_no);
->> >> >> =A0 =A0 =A0 =A0 rfkill_no++;
->> >> >>
->> >> >> ~~~
->> >> >> }
->> >> >>
->> >> >> Quesiton 2.
->> >> >> In fact, we have own rfkill to control power on and off, then
->> >> >> currently both our own rfkill and bluetooth rfkill need to be =
-enabled.
->> >> >>
->> >> >> I am not sure what's the purpose of the rfkill adding in
->> >> >> hci_register_dev, just wander could we add one default state a=
-s
->> >> >> enabled for such rfkill. Then we could ignore this rfkill, no =
-matter
->> >> >> the number is increased one by one.
->> >> >
->> >> > And second it is clearly the soft RFKILL switch. As usual a dev=
-ice can
->> >> > also have a hard kill switch.
->> >> >
->> >> > The index numbers are irrelevant. If the RFKILL switch is assig=
-ned to a
->> >> > device is will be a child of its parent, so it is easy to figur=
-e out
->> >> > where it belong. In case of platform switches it is impossible =
-anyway
->> >> > and hence we have implemented CHANGE_ALL support.
->> >> >
->> >>
->> >> Thanks for your explanation, however how to get hard kill switch.
->> >> Ususally we enable wifi via "echo 1 > sys/class/rfkill/rfkill0/st=
-ate",
->> >> and enable bt via "echo 1 > sys/class/rfkill/rfkill1/state".
->> >> This method highly depends on the indelx number.
->> >
->> > just use the rfkill utility. Using the sysfs is a bad idea.
->> >
->> >> Could you kindly share me how to set hard kill switch, which may
->> >> irrelevant with the index number.
->> >
->> > You can not set hard states from software. They are meant for phys=
-ical
->> > RFKILL switches.
->> >
->>
->> For how to use rfkill utility?
->> Do you mean rfkill tool.
->>
->> $rfkill block bluetooth
->> to stop Bluetooth and
->>
->> $rfkill unblock bluetooth
->> to resume Bluetooth.
->>
->> If not, is there any example?
->> I looking for example in kernel, and find many driver use rfkill_all=
-oc
->> just one time, for example in probe or _init, then the rfkill number
->> would be keep same.
->
-> I am not really following your question here. What are you trying to
-> achieve?
->
-> Regards
->
-> Marcel
+Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ arch/arm/mach-s5pv210/Kconfig       |    4 ++
+ arch/arm/mach-s5pv210/mach-aquila.c |   66 +++++++++++++++++++++++++++++++++++
+ 2 files changed, 70 insertions(+), 0 deletions(-)
 
+diff --git a/arch/arm/mach-s5pv210/Kconfig b/arch/arm/mach-s5pv210/Kconfig
+index b7a2f38..dcc9d74 100644
+--- a/arch/arm/mach-s5pv210/Kconfig
++++ b/arch/arm/mach-s5pv210/Kconfig
+@@ -57,7 +57,11 @@ config MACH_AQUILA
+ 	select CPU_S5PV210
+ 	select ARCH_SPARSEMEM_ENABLE
+ 	select S5PV210_SETUP_FB_24BPP
++	select S5PV210_SETUP_SDHCI
+ 	select S3C_DEV_FB
++	select S3C_DEV_HSMMC
++	select S3C_DEV_HSMMC1
++	select S3C_DEV_HSMMC2
+ 	select S5PC110_DEV_ONENAND
+ 	help
+ 	  Machine support for the Samsung Aquila target based on S5PC110 SoC
+diff --git a/arch/arm/mach-s5pv210/mach-aquila.c b/arch/arm/mach-s5pv210/mach-aquila.c
+index fb9dbb2..1b7fe79 100644
+--- a/arch/arm/mach-s5pv210/mach-aquila.c
++++ b/arch/arm/mach-s5pv210/mach-aquila.c
+@@ -13,6 +13,7 @@
+ #include <linux/init.h>
+ #include <linux/serial_core.h>
+ #include <linux/fb.h>
++#include <linux/gpio.h>
+ 
+ #include <asm/mach/arch.h>
+ #include <asm/mach/map.h>
+@@ -22,12 +23,15 @@
+ #include <mach/map.h>
+ #include <mach/regs-clock.h>
+ #include <mach/regs-fb.h>
++#include <mach/regs-gpio.h>
+ 
+ #include <plat/regs-serial.h>
+ #include <plat/s5pv210.h>
+ #include <plat/devs.h>
+ #include <plat/cpu.h>
+ #include <plat/fb.h>
++#include <plat/gpio-cfg.h>
++#include <plat/sdhci.h>
+ 
+ /* Following are default values for UCON, ULCON and UFCON UART registers */
+ #define S5PV210_UCON_DEFAULT	(S3C2410_UCON_TXILEVEL |	\
+@@ -116,9 +120,66 @@ static struct s3c_fb_platdata aquila_lcd_pdata __initdata = {
+ 	.setup_gpio	= s5pv210_fb_gpio_setup_24bpp,
+ };
+ 
++/* MoviNAND */
++static struct s3c_sdhci_platdata aquila_hsmmc0_data __initdata = {
++	.max_width		= 4,
++	.cd_type		= S3C_SDHCI_CD_PERMANENT,
++};
++
++/* Wireless LAN */
++static struct s3c_sdhci_platdata aquila_hsmmc1_data __initdata = {
++	.max_width		= 4,
++	.cd_type		= S3C_SDHCI_CD_EXTERNAL,
++	/* ext_cd_{init,cleanup} callbacks will be added later */
++};
++
++/* External Flash */
++#define AQUILA_EXT_FLASH_IRQ	IRQ_EINT(28)	/* S5PV210_GPH3(4) */
++#define AQUILA_EXT_FLASH_EN	S5PV210_MP05(4)
++#define AQUILA_EXT_FLASH_CD	S5PV210_GPH3(4)
++
++static irqreturn_t aquila_ext_flash_card_detect_isr(int irq, void *dev_id)
++{
++	void (*notify_func)(struct platform_device *, int state) = dev_id;
++	notify_func(&s3c_device_hsmmc2, !gpio_get_value(AQUILA_EXT_FLASH_CD));
++	return IRQ_HANDLED;
++}
++
++static int aquila_ext_flash_card_detect_init(
++		void (*notify_func)(struct platform_device *, int state))
++{
++	gpio_request(AQUILA_EXT_FLASH_EN, "FLASH_EN");
++	gpio_direction_output(AQUILA_EXT_FLASH_EN, 1);
++
++	if (request_irq(AQUILA_EXT_FLASH_IRQ, aquila_ext_flash_card_detect_isr,
++				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
++				"SDHCI card detect", notify_func))
++		printk(KERN_ERR "Error: cannot request irq for External Flash\n");
++	return 0;
++}
++
++static int aquila_ext_flash_card_detect_cleanup(
++		void (*notify_func)(struct platform_device *, int state))
++{
++	free_irq(AQUILA_EXT_FLASH_IRQ, notify_func);
++	gpio_direction_output(AQUILA_EXT_FLASH_EN, 0);
++	gpio_free(AQUILA_EXT_FLASH_EN);
++	return 0;
++}
++
++static struct s3c_sdhci_platdata aquila_hsmmc2_data __initdata = {
++	.max_width		= 4,
++	.cd_type		= S3C_SDHCI_CD_EXTERNAL,
++	.ext_cd_init		= aquila_ext_flash_card_detect_init,
++	.ext_cd_cleanup		= aquila_ext_flash_card_detect_cleanup,
++};
++
+ static struct platform_device *aquila_devices[] __initdata = {
+ 	&s3c_device_fb,
+ 	&s5pc110_device_onenand,
++	&s3c_device_hsmmc0,
++	&s3c_device_hsmmc1,
++	&s3c_device_hsmmc2,
+ };
+ 
+ static void __init aquila_map_io(void)
+@@ -130,6 +191,11 @@ static void __init aquila_map_io(void)
+ 
+ static void __init aquila_machine_init(void)
+ {
++	/* SDHCI */
++	s3c_sdhci0_set_platdata(&aquila_hsmmc0_data);
++	s3c_sdhci1_set_platdata(&aquila_hsmmc1_data);
++	s3c_sdhci2_set_platdata(&aquila_hsmmc2_data);
++
+ 	/* FB */
+ 	s3c_fb_set_platdata(&aquila_lcd_pdata);
+ 
+-- 
+1.7.1.240.g225c
 
-Thanks for your help.
-The rfkill tool give a good example of how to block or unblock to all
-rfkill with the same type, and it is better than sysfs since it has
-nothing to do with the rfkill number.
-http://wireless.kernel.org/en/users/Documentation/rfkill
-
-Thanks
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
