@@ -1,72 +1,130 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: [PATCH] sdhci-s3c: Add SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK quirk for Samsung SoC
-Date: Thu, 10 Jun 2010 20:39:51 +0900
-Message-ID: <1276169991-16396-1-git-send-email-kgene.kim@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ganesha.gnumonks.org ([213.95.27.120]:56646 "EHLO
-	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752823Ab0FJLnW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 07:43:22 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: [PATCH 5/5 fixed] sdhci-s3c: add support for new card detection methods
+Date: Thu, 10 Jun 2010 14:06:03 +0200
+Message-ID: <1276171563-6612-1-git-send-email-m.szyprowski@samsung.com>
+References: <1276076383-24825-6-git-send-email-m.szyprowski@samsung.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1276076383-24825-6-git-send-email-m.szyprowski@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org
-Cc: ben-linux@fluff.org, Lee Hyuk <hyuk1.lee@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>
 
-From: Lee Hyuk <hyuk1.lee@samsung.com>
+On some Samsung SoCs not all SDHCI controllers have card detect (CD)
+line. For some embedded designs it is not even needed, because ususally
+the device (like SDIO flash memory or wifi controller) is permanently
+wired to the controller. There are also systems which have a card detect
+line connected to some of the external interrupt lines or the presence
+of the card depends on some other actions (like enabling a power
+regulator).
 
-On Samsung's SDMMC hosts the timeout clock is derivied from the SD
-Clock, which is set dynamically.
-So, checked 'SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK' quirk and removed
-'sdhci_s3c_get_timeout_clk' callback which doesn't need any more.
+This patch adds support for all these cases. The following card
+detection methods are possible:
 
-Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
-Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+1. internal sdhci host card detect line
+2. external event
+3. no card detect line, controller will poll for the card
+4. no card detect line, card is permanently wired to the controller
+(once detected host won't poll it any more)
+
+By default, all existing code would use method #1, what is compatible
+with the previous version of the driver.
+
+In case of external event, two callbacks must be provided in platdata:
+ext_cd_init and ext_cd_cleanup. Both of them get a callback to a
+function that notifies the s3c-sdhci host contoller as their argument.
+That callback function should be called from the even dispatcher to let
+host notice the card insertion/removal.
+
+This patch adds changes to sdhci-s3c driver.
+
+Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
- drivers/mmc/host/sdhci-s3c.c |   10 +++-------
- 1 files changed, 3 insertions(+), 7 deletions(-)
+
+This is a quick resend, in the previous version one line was missing in the
+sdhci_s3c_remove() function causing a compilation break.
+
+ drivers/mmc/host/sdhci-s3c.c |   39 +++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 39 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index af21792..ca09382 100644
+index 615008d..f472295 100644
 --- a/drivers/mmc/host/sdhci-s3c.c
 +++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -110,11 +110,6 @@ static unsigned int sdhci_s3c_get_max_clk(struct sdhci_host *host)
- 	return max;
- }
- 
--static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *host)
--{
--	return sdhci_s3c_get_max_clk(host) / 1000000;
--}
--
- /**
-  * sdhci_s3c_consider_clock - consider one the bus clocks for current setting
-  * @ourhost: Our SDHCI instance.
-@@ -188,7 +183,6 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
- 
- 		ourhost->cur_clk = best_src;
- 		host->max_clk = clk_get_rate(clk);
--		host->timeout_clk = sdhci_s3c_get_timeout_clk(host);
- 
- 		ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
- 		ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;
-@@ -211,7 +205,6 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
- 
- static struct sdhci_ops sdhci_s3c_ops = {
- 	.get_max_clock		= sdhci_s3c_get_max_clk,
--	.get_timeout_clock	= sdhci_s3c_get_timeout_clk,
- 	.set_clock		= sdhci_s3c_set_clock,
+@@ -242,6 +242,29 @@ static struct sdhci_ops sdhci_s3c_ops = {
+ 	.get_min_clock		= sdhci_s3c_get_min_clock,
  };
  
-@@ -335,6 +328,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
++static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
++{
++	struct sdhci_host *host;
++	unsigned long flags;
++
++	local_irq_save(flags);
++	host = platform_get_drvdata(dev);
++	if (host) {
++		if (state) {
++			dev_info(&dev->dev, "card inserted.\n");
++			host->flags &= ~SDHCI_DEVICE_DEAD;
++			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++			tasklet_schedule(&host->card_tasklet);
++		} else {
++			dev_info(&dev->dev, "card removed.\n");
++			host->flags |= SDHCI_DEVICE_DEAD;
++			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++			tasklet_schedule(&host->card_tasklet);
++		}
++	}
++	local_irq_restore(flags);
++}
++
+ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ {
+ 	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
+@@ -362,6 +385,13 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
+ 	host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+ 
++	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
++	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
++		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++
++	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
++		host->mmc->caps = MMC_CAP_NONREMOVABLE;
++
  	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
  			 SDHCI_QUIRK_32BIT_DMA_SIZE);
  
-+	/* HSMMC on Samsung SoCs uses SDCLK as timeout clock. */
-+	host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
+@@ -371,6 +401,11 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		goto err_add_host;
+ 	}
+ 
++	/* pdata->ext_cd_init might call sdhci_s3c_notify_change immediately,
++	   so it can be called only after sdhci_add_host() */
++	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
++		pdata->ext_cd_init(&sdhci_s3c_notify_change);
 +
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(dev, "sdhci_add_host() failed\n");
+ 	return 0;
+ 
+  err_add_host:
+@@ -395,10 +430,14 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 
+ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ {
++	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
+ 	struct sdhci_host *host =  platform_get_drvdata(pdev);
+ 	struct sdhci_s3c *sc = sdhci_priv(host);
+ 	int ptr;
+ 
++	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
++		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
++
+ 	sdhci_remove_host(host, 1);
+ 
+ 	for (ptr = 0; ptr < 3; ptr++) {
 -- 
-1.6.2.5
-
+1.7.1.240.g225c
