@@ -1,57 +1,32 @@
-From: Mark Hills <mark@pogo.org.uk>
-Subject: Re: SD card on Dell D420 (Ricoh R5C822)
-Date: Thu, 10 Jun 2010 09:08:03 +0100 (BST)
-Message-ID: <alpine.NEB.2.01.1006100902200.15823@jrf.vwaro.pbz>
-References: <alpine.NEB.2.01.1006100007290.6369@jrf.vwaro.pbz> <m3r5kfg1us.fsf@pullcord.laptop.org>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 1/4] block: Allow drivers to implement BLKDISCARD and add
+ BLKSECDISCARD
+Date: Thu, 10 Jun 2010 04:19:50 -0400
+Message-ID: <20100610081950.GA15888@infradead.org>
+References: <4C081AEC.7010302@nokia.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx.ij.cx ([212.13.201.15]:56164 "EHLO wes.ijneb.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752524Ab0FJIII (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Jun 2010 04:08:08 -0400
-In-Reply-To: <m3r5kfg1us.fsf@pullcord.laptop.org>
+Received: from bombadil.infradead.org ([18.85.46.34]:49153 "EHLO
+	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752064Ab0FJIUB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 04:20:01 -0400
+Content-Disposition: inline
+In-Reply-To: <4C081AEC.7010302@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Jens Axboe <axboe@kernel.dk>, Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
 
-On Wed, 9 Jun 2010, Chris Ball wrote:
+On Fri, Jun 04, 2010 at 12:13:16AM +0300, Adrian Hunter wrote:
+> SD/MMC cards provide an erase operation that is too inefficient to
+> allow file systems to use it, however it is still useful for
+> userspace tools because it is still 10 - 100 times faster than
+> writing zeroes.  Allow the MMC block driver to provide its own
+> BLKDISCARD implementation for this purpose.
 
-> Hi Mark,
-> 
->    >   mmc0: error -84 whilst initialising SD card
-> 
-> Not sure how much this'll help, but:
-> 
-> errno -84 is defined in include/asm-generic/errno.h as EILSEQ, and
-> there are two occurences of EILSEQ in sdhci.c, one of which has a
-> printk next to it that you aren't seeing.  So, it's likely that you're
-> seeing:
-> 
->     else if (intmask & (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX))
->         host->cmd->error = -EILSEQ;
-> 
-> So, it seems like your controller is returning a successful command
-> response, but with some sort of data error attached.  Have you tried
-> multiple SD cards, and are they known-working?
+That's no good reason.  Almost all current SSD TRIM implementations
+have the same issue, that's why filesustems require the -o discard
+option to enabled it.  In addition I've not actually seen any numbers
+from you on a current kernel.
 
-I have two SD cards -- a 2GB Crucial, and a 32MB Sandisk (actually a 
-micro-SD in an adaptor). Both cards work in a USB card reader with the 
-same kernel, and in my digital radio.
- 
-> If you're sure it's not the card, try passing debug_quirks=1 to the
-> sdhci module.  (Let me know if you're not sure how to do that.)
-
-I've tried this with 2.6.35-rc2, and the result is the same. I also diff'd 
-the dmesg, with no relevant differences.
-
-> Thanks,
-> 
-> - Chris.
->
-
-Thanks 
-
--- 
-Mark
