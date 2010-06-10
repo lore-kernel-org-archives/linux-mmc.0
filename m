@@ -1,98 +1,57 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH 1/4] block: Allow drivers to implement BLKDISCARD and
- add BLKSECDISCARD
-Date: Thu, 10 Jun 2010 09:58:54 +0300
-Message-ID: <4C108D2E.2080500@nokia.com>
-References: <4C081AEC.7010302@nokia.com>
+From: Mark Hills <mark@pogo.org.uk>
+Subject: Re: SD card on Dell D420 (Ricoh R5C822)
+Date: Thu, 10 Jun 2010 09:08:03 +0100 (BST)
+Message-ID: <alpine.NEB.2.01.1006100902200.15823@jrf.vwaro.pbz>
+References: <alpine.NEB.2.01.1006100007290.6369@jrf.vwaro.pbz> <m3r5kfg1us.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:17485 "EHLO
-	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752115Ab0FJHAG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 03:00:06 -0400
-In-Reply-To: <4C081AEC.7010302@nokia.com>
+Received: from mx.ij.cx ([212.13.201.15]:56164 "EHLO wes.ijneb.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752524Ab0FJIII (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Jun 2010 04:08:08 -0400
+In-Reply-To: <m3r5kfg1us.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Adrian Hunter wrote:
-> From 328a858c01be1e0d08f4a4b1f43d9fd117a295e5 Mon Sep 17 00:00:00 2001
-> From: Adrian Hunter <adrian.hunter@nokia.com>
-> Date: Thu, 3 Jun 2010 10:46:04 +0300
-> Subject: [PATCH 1/4] block: Allow drivers to implement BLKDISCARD and add BLKSECDISCARD
-> 
-> SD/MMC cards provide an erase operation that is too inefficient to
-> allow file systems to use it, however it is still useful for
-> userspace tools because it is still 10 - 100 times faster than
-> writing zeroes.  Allow the MMC block driver to provide its own
-> BLKDISCARD implementation for this purpose.
-> 
-> In addition, eMMC v4.4 cards can provide a secure erase operation
-> which guarantees that all copies of the discarded sectors (for
-> example created by garbage collection) will also be erased.  For
-> this a new ioctl BLKSECDISCARD is added.
+On Wed, 9 Jun 2010, Chris Ball wrote:
 
-Ping?
-
+> Hi Mark,
 > 
-> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
-> ---
->  block/compat_ioctl.c |    1 +
->  block/ioctl.c        |    9 +++++++++
->  include/linux/fs.h   |    1 +
->  3 files changed, 11 insertions(+), 0 deletions(-)
+>    >   mmc0: error -84 whilst initialising SD card
 > 
-> diff --git a/block/compat_ioctl.c b/block/compat_ioctl.c
-> index f26051f..24a146d 100644
-> --- a/block/compat_ioctl.c
-> +++ b/block/compat_ioctl.c
-> @@ -753,6 +753,7 @@ long compat_blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg)
->  	case BLKFLSBUF:
->  	case BLKROSET:
->  	case BLKDISCARD:
-> +	case BLKSECDISCARD:
->  	/*
->  	 * the ones below are implemented in blkdev_locked_ioctl,
->  	 * but we call blkdev_ioctl, which gets the lock for us
-> diff --git a/block/ioctl.c b/block/ioctl.c
-> index e8eb679..985aa88 100644
-> --- a/block/ioctl.c
-> +++ b/block/ioctl.c
-> @@ -232,12 +232,21 @@ int blkdev_ioctl(struct block_device *bdev, fmode_t mode, unsigned cmd,
->  		if (!(mode & FMODE_WRITE))
->  			return -EBADF;
->  
-> +		ret = __blkdev_driver_ioctl(bdev, mode, cmd, arg);
-> +		if (ret != -ENOTTY)
-> +			return ret;
-> +
->  		if (copy_from_user(range, (void __user *)arg, sizeof(range)))
->  			return -EFAULT;
->  
->  		return blk_ioctl_discard(bdev, range[0], range[1]);
->  	}
->  
-> +	case BLKSECDISCARD:
-> +		if (!(mode & FMODE_WRITE))
-> +			return -EBADF;
-> +		return __blkdev_driver_ioctl(bdev, mode, cmd, arg);
-> +
->  	case HDIO_GETGEO: {
->  		struct hd_geometry geo;
->  
-> diff --git a/include/linux/fs.h b/include/linux/fs.h
-> index 3428393..25a6058 100644
-> --- a/include/linux/fs.h
-> +++ b/include/linux/fs.h
-> @@ -309,6 +309,7 @@ struct inodes_stat_t {
->  #define BLKALIGNOFF _IO(0x12,122)
->  #define BLKPBSZGET _IO(0x12,123)
->  #define BLKDISCARDZEROES _IO(0x12,124)
-> +#define BLKSECDISCARD _IO(0x12,125)
->  
->  #define BMAP_IOCTL 1		/* obsolete - kept for compatibility */
->  #define FIBMAP	   _IO(0x00,1)	/* bmap access */
+> Not sure how much this'll help, but:
+> 
+> errno -84 is defined in include/asm-generic/errno.h as EILSEQ, and
+> there are two occurences of EILSEQ in sdhci.c, one of which has a
+> printk next to it that you aren't seeing.  So, it's likely that you're
+> seeing:
+> 
+>     else if (intmask & (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX))
+>         host->cmd->error = -EILSEQ;
+> 
+> So, it seems like your controller is returning a successful command
+> response, but with some sort of data error attached.  Have you tried
+> multiple SD cards, and are they known-working?
 
+I have two SD cards -- a 2GB Crucial, and a 32MB Sandisk (actually a 
+micro-SD in an adaptor). Both cards work in a USB card reader with the 
+same kernel, and in my digital radio.
+ 
+> If you're sure it's not the card, try passing debug_quirks=1 to the
+> sdhci module.  (Let me know if you're not sure how to do that.)
+
+I've tried this with 2.6.35-rc2, and the result is the same. I also diff'd 
+the dmesg, with no relevant differences.
+
+> Thanks,
+> 
+> - Chris.
+>
+
+Thanks 
+
+-- 
+Mark
