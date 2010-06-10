@@ -1,67 +1,45 @@
-From: akpm@linux-foundation.org
-Subject: + s5pc110-sdhci-s3c-support-on-s5pc110.patch added to -mm tree
-Date: Thu, 10 Jun 2010 13:43:17 -0700
-Message-ID: <201006102043.o5AKhHK1022728@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: kmpark@infradead.org, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] s5pc110: SDHCI-s3c can override host capabilities
+Date: Thu, 10 Jun 2010 13:43:04 -0700
+Message-ID: <20100610134304.c109811a.akpm@linux-foundation.org>
+References: <20100605024053.GA23419@july>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:36555 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1759722Ab0FJUnw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 16:43:52 -0400
+In-Reply-To: <20100605024053.GA23419@july>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kyungmin Park <kmpark@infradead.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org
 
+On Sat, 05 Jun 2010 11:40:53 +0900
+Kyungmin Park <kmpark@infradead.org> wrote:
 
-The patch titled
-     s5pc110: SDHCI-s3c support on s5pc110
-has been added to the -mm tree.  Its filename is
-     s5pc110-sdhci-s3c-support-on-s5pc110.patch
+> From: Kyungmin Park <kmpark@infradead.org>
+> To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, akpm@linux-foundation.org, ben-linux@fluff.org
+> Subject: [PATCH] s5pc110: SDHCI-s3c can override host capabilities
+> Date: Sat, 05 Jun 2010 11:40:53 +0900
+> User-Agent: Mutt/1.5.14 (2007-02-12)
+> 
+> Each board can override the default sdhci host capabilities.
+> Some board has broken features by hardwares and support 8-bit bandwidth.
+> 
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+The way this patch was presented, it will go into git with an Author:
+address of "kmpark@infradead.org", but a Signed-off-by: address of
+"kyungmin.park@samsung.com".  Which is a little odd.
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+The way to prevent that is to put an explicit "From:" line at the top
+of the changelog.  If that line is absent, people's tools will fall
+back to the From: line in the mail headers, which is what happened
+here.
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: s5pc110: SDHCI-s3c support on s5pc110
-From: Kyungmin Park <kmpark@infradead.org>
-
-s5pc110 (aka s5pv210) uses the same SDHCI IP.
-
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/Kconfig |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff -puN drivers/mmc/host/Kconfig~s5pc110-sdhci-s3c-support-on-s5pc110 drivers/mmc/host/Kconfig
---- a/drivers/mmc/host/Kconfig~s5pc110-sdhci-s3c-support-on-s5pc110
-+++ a/drivers/mmc/host/Kconfig
-@@ -123,7 +123,7 @@ config MMC_SDHCI_PLTFM
- 
- config MMC_SDHCI_S3C
- 	tristate "SDHCI support on Samsung S3C SoC"
--	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
-+	depends on MMC_SDHCI && PLAT_SAMSUNG
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  often referrered to as the HSMMC block in some of the Samsung S3C
-_
-
-Patches currently in -mm which might be from kmpark@infradead.org are
-
-mmc-recognize-csd-structure.patch
-mmc-recognize-csd-structure-fix.patch
-s5pc110-sdhci-s3c-can-override-host-capabilities.patch
-s5pc110-sdhci-s3c-support-on-s5pc110.patch
-sdhci-add-no-hi-speed-bit-quirk-support.patch
+Please let me know if you want me to make any changes to these three
+patches.
 
