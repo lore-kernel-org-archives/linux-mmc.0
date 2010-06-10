@@ -1,68 +1,65 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: SD card on Dell D420 (Ricoh R5C822)
-Date: Thu, 10 Jun 2010 12:39:40 +0300
-Message-ID: <1276162780.18013.3.camel@dell20>
-References: <alpine.NEB.2.01.1006100007290.6369@jrf.vwaro.pbz>
-	 <m3r5kfg1us.fsf@pullcord.laptop.org>
-	 <alpine.NEB.2.01.1006100902200.15823@jrf.vwaro.pbz>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH 3/5] sdhci-s3c: increase the timeout value
+Date: Thu, 10 Jun 2010 19:46:13 +0900
+Message-ID: <019301cb088a$29134970$7b39dc50$%kim@samsung.com>
+References: <1276076383-24825-1-git-send-email-m.szyprowski@samsung.com>
+ <1276076383-24825-4-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:46223 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752361Ab0FJJjs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 05:39:48 -0400
-Received: by bwz7 with SMTP id 7so6579bwz.19
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Jun 2010 02:39:46 -0700 (PDT)
-In-Reply-To: <alpine.NEB.2.01.1006100902200.15823@jrf.vwaro.pbz>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1276076383-24825-4-git-send-email-m.szyprowski@samsung.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Marek Szyprowski' <m.szyprowski@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: kyungmin.park@samsung.com, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Hills <mark@pogo.org.uk>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Thu, 2010-06-10 at 09:08 +0100, Mark Hills wrote:
-> On Wed, 9 Jun 2010, Chris Ball wrote:
+Marek Szyprowski wrote:
 > 
-> > Hi Mark,
-> > 
-> >    >   mmc0: error -84 whilst initialising SD card
-> > 
-> > Not sure how much this'll help, but:
-> > 
-> > errno -84 is defined in include/asm-generic/errno.h as EILSEQ, and
-> > there are two occurences of EILSEQ in sdhci.c, one of which has a
-> > printk next to it that you aren't seeing.  So, it's likely that you're
-> > seeing:
-> > 
-> >     else if (intmask & (SDHCI_INT_CRC | SDHCI_INT_END_BIT | SDHCI_INT_INDEX))
-> >         host->cmd->error = -EILSEQ;
-> > 
-> > So, it seems like your controller is returning a successful command
-> > response, but with some sort of data error attached.  Have you tried
-> > multiple SD cards, and are they known-working?
+> This patch increases the timeout value on sdhci-s3c controller by using
+> SDHCI_QUIRK_BROKEN_TIMEOUT_VAL quirk. Without it most transfers from
+> external mmc cards fails on Samsung s5pv210 SoCs based systems. Tested
+> on Samsung Aquila board.
 > 
-> I have two SD cards -- a 2GB Crucial, and a 32MB Sandisk (actually a 
-> micro-SD in an adaptor). Both cards work in a USB card reader with the 
-> same kernel, and in my digital radio.
->  
-> > If you're sure it's not the card, try passing debug_quirks=1 to the
-> > sdhci module.  (Let me know if you're not sure how to do that.)
+
+Hi,
+
+Seems to use max timeout value, 0xE.
+However, should be use SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK.
+Because basically, Samsung MMC used sdclock as timeout clock.
+
+Please refer to below URL:
+http://article.gmane.org/gmane.linux.kernel.mmc/304
+
+And new patch with SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK will be submitted.
+
+> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
 > 
-> I've tried this with 2.6.35-rc2, and the result is the same. I also diff'd 
-> the dmesg, with no relevant differences.
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index ad30f07..2b6cb44 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -331,6 +331,7 @@ static int __devinit sdhci_s3c_probe(struct
+platform_device
+> *pdev)
+>  	 * transfers, not sure if this is a problem with this specific
+>  	 * SDHCI block, or a missing configuration that needs to be set. */
+>  	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
+> +	host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> 
+>  	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
+>  			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+> --
 
-Could you disable the CONFIG_MMC_RICOH_MMC and try again?
-This setting is only relevant to MMC cards, and I have seen some
-problems with it.
-
-Also please post lsmod, dmesg, lspci output.
-
-Did you do a suspend/resume cycle before this test?
-
-You can also contact me via IRC (freenode, oftc, my nick MaximLevitsky),
-and I try do some debugging.
+Thanks.
 
 Best regards,
-	Maxim Levitsky
-
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
