@@ -1,56 +1,61 @@
-From: Mark Hills <mark@pogo.org.uk>
-Subject: Re: SD card on Dell D420 (Ricoh R5C822)
-Date: Thu, 10 Jun 2010 23:54:22 +0100 (BST)
-Message-ID: <alpine.NEB.2.01.1006102345450.23786@jrf.vwaro.pbz>
-References: <alpine.NEB.2.01.1006100007290.6369@jrf.vwaro.pbz>  <m3r5kfg1us.fsf@pullcord.laptop.org>  <alpine.NEB.2.01.1006100902200.15823@jrf.vwaro.pbz>  <1276162780.18013.3.camel@dell20>  <alpine.NEB.2.01.1006102243010.10395@jrf.vwaro.pbz>
- <1276208162.3113.4.camel@maxim-laptop>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH] s5pc110: SDHCI-s3c can override host capabilities
+Date: Fri, 11 Jun 2010 08:06:45 +0900
+Message-ID: <AANLkTinwSxo4OqWlwQE-RxpG8WubLku2-77k2q7DPphr@mail.gmail.com>
+References: <20100605024053.GA23419@july>
+	<20100610134304.c109811a.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx.ij.cx ([212.13.201.15]:65235 "EHLO wes.ijneb.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751145Ab0FJWyY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Jun 2010 18:54:24 -0400
-In-Reply-To: <1276208162.3113.4.camel@maxim-laptop>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:46574 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754373Ab0FJXGq convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 19:06:46 -0400
+Received: by pvg16 with SMTP id 16so188827pvg.19
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Jun 2010 16:06:45 -0700 (PDT)
+In-Reply-To: <20100610134304.c109811a.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org
 
-On Fri, 11 Jun 2010, Maxim Levitsky wrote:
+hi,
 
-> On Thu, 2010-06-10 at 22:54 +0100, Mark Hills wrote: 
-> > On Thu, 10 Jun 2010, Maxim Levitsky wrote:
-[...] 
-> > > Did you do a suspend/resume cycle before this test?
-> > 
-> > No, I didn't suspect or resume the laptop. The dmesg is from a cold 
-> > reboot, where I let the machine boot, then inserted the card (and the same 
-> > in the previous email)
-> 
-> In fact, you need to undo the work of CONFIG_MMC_RICOH_MMC you need to
-> shutdown the system and then boot into kernel that hasn't this option.
-> But anyway, I don't think its to blame.
+On Fri, Jun 11, 2010 at 5:43 AM, Andrew Morton
+<akpm@linux-foundation.org> wrote:
+> On Sat, 05 Jun 2010 11:40:53 +0900
+> Kyungmin Park <kmpark@infradead.org> wrote:
+>
+>> From: Kyungmin Park <kmpark@infradead.org>
+>> To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,=
+ akpm@linux-foundation.org, ben-linux@fluff.org
+>> Subject: [PATCH] s5pc110: SDHCI-s3c can override host capabilities
+>> Date: Sat, 05 Jun 2010 11:40:53 +0900
+>> User-Agent: Mutt/1.5.14 (2007-02-12)
+>>
+>> Each board can override the default sdhci host capabilities.
+>> Some board has broken features by hardwares and support 8-bit bandwi=
+dth.
+>>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>
+> The way this patch was presented, it will go into git with an Author:
+> address of "kmpark@infradead.org", but a Signed-off-by: address of
+> "kyungmin.park@samsung.com". =A0Which is a little odd.
+>
+> The way to prevent that is to put an explicit "From:" line at the top
+> of the changelog. =A0If that line is absent, people's tools will fall
+> back to the From: line in the mail headers, which is what happened
+> here.
+>
+> Please let me know if you want me to make any changes to these three
+> patches.
+>
+No problem, please fix it freely.
 
-Sorry, perhaps I wasn't clear. I did a full kernel compile, installing it 
-and the new modules (without CONFIG_MMC_RICOH_MMC), then I re-booted and 
-tried again to produce the new dmesg.
- 
-> Thanks for kernel log I hope I get enough clues from it.
-> I am interested in this problem because this isn't first time I seen it.
+Next time, I'll add the From line.
+One more, mails from Marek has duplicated patches, so please ignore it.
 
-Okay, well it is promising that you think it should be working. Good luck 
-finding any clues.
- 
-> It might be related to too high clock or hispeed mode that card doesn't
-> support.
-> 
-> As suggested, try 'debug_quirks=1' too.
-
-I have tried with and without this, with the same error.
- 
-> Best regards,
-> Maxim Levitsky
-
--- 
-Mark
+Thank you,
+Kyungmin Park
