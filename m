@@ -1,61 +1,62 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH] s5pc110: SDHCI-s3c can override host capabilities
-Date: Fri, 11 Jun 2010 08:06:45 +0900
-Message-ID: <AANLkTinwSxo4OqWlwQE-RxpG8WubLku2-77k2q7DPphr@mail.gmail.com>
-References: <20100605024053.GA23419@july>
-	<20100610134304.c109811a.akpm@linux-foundation.org>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH 1/5] sdhci-s3c: depend on plat-samsung
+Date: Fri, 11 Jun 2010 09:29:38 +0900
+Message-ID: <000701cb08fd$2f8e15a0$8eaa40e0$%kim@samsung.com>
+References: <1276076383-24825-1-git-send-email-m.szyprowski@samsung.com>
+ <1276076383-24825-2-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:46574 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754373Ab0FJXGq convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 19:06:46 -0400
-Received: by pvg16 with SMTP id 16so188827pvg.19
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Jun 2010 16:06:45 -0700 (PDT)
-In-Reply-To: <20100610134304.c109811a.akpm@linux-foundation.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1276076383-24825-2-git-send-email-m.szyprowski@samsung.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Marek Szyprowski' <m.szyprowski@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: kyungmin.park@samsung.com, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org
 
-hi,
+Marek Szyprowski wrote:
+> 
+> Most Samsung SoC have support for SDHCI block, so make the driver
+> dependent on the Samsung platform instead on listing all SoCs in the
+> Kconfig (and updating it again when support for the new SoC variant is
+> added).
+> 
+Hi, Marek
 
-On Fri, Jun 11, 2010 at 5:43 AM, Andrew Morton
-<akpm@linux-foundation.org> wrote:
-> On Sat, 05 Jun 2010 11:40:53 +0900
-> Kyungmin Park <kmpark@infradead.org> wrote:
->
->> From: Kyungmin Park <kmpark@infradead.org>
->> To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,=
- akpm@linux-foundation.org, ben-linux@fluff.org
->> Subject: [PATCH] s5pc110: SDHCI-s3c can override host capabilities
->> Date: Sat, 05 Jun 2010 11:40:53 +0900
->> User-Agent: Mutt/1.5.14 (2007-02-12)
->>
->> Each board can override the default sdhci host capabilities.
->> Some board has broken features by hardwares and support 8-bit bandwi=
-dth.
->>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->
-> The way this patch was presented, it will go into git with an Author:
-> address of "kmpark@infradead.org", but a Signed-off-by: address of
-> "kyungmin.park@samsung.com". =A0Which is a little odd.
->
-> The way to prevent that is to put an explicit "From:" line at the top
-> of the changelog. =A0If that line is absent, people's tools will fall
-> back to the From: line in the mail headers, which is what happened
-> here.
->
-> Please let me know if you want me to make any changes to these three
-> patches.
->
-No problem, please fix it freely.
+Kyungmin Park already submitted same patch.
 
-Next time, I'll add the From line.
-One more, mails from Marek has duplicated patches, so please ignore it.
+And Andrew Morton added to the -mm tree.
+http://www.spinics.net/lists/mm-commits/msg79159.html
 
-Thank you,
-Kyungmin Park
+But, I think your comment is better...
+
+> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/host/Kconfig |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index e171e77..acf5bf6 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -123,7 +123,7 @@ config MMC_SDHCI_PLTFM
+> 
+>  config MMC_SDHCI_S3C
+>  	tristate "SDHCI support on Samsung S3C SoC"
+> -	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
+> +	depends on MMC_SDHCI && PLAT_SAMSUNG
+>  	help
+>  	  This selects the Secure Digital Host Controller Interface (SDHCI)
+>  	  often referrered to as the HSMMC block in some of the Samsung S3C
+> --
+
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
