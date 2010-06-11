@@ -1,112 +1,165 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH] sdhci-s3c: Add SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK quirk
-	for Samsung SoC
-Date: Fri, 11 Jun 2010 12:32:46 +0900
-Message-ID: <AANLkTim2LzIh7dadCAWCo6jltS4CYA8gLKaiQne_VzqK@mail.gmail.com>
-References: <1276169991-16396-1-git-send-email-kgene.kim@samsung.com>
+From: Ben Dooks <ben-linux@fluff.org>
+Subject: Re: + s5pc110-sdhci-s3c-can-override-host-capabilities.patch added
+	to -mm tree
+Date: Fri, 11 Jun 2010 04:48:32 +0100
+Message-ID: <20100611034830.GH3498@trinity.fluff.org>
+References: <201006102043.o5AKhEtI022722@imap1.linux-foundation.org> <20100611003414.GB3498@trinity.fluff.org> <AANLkTim-ltyN6dj-eKUKXIMxOe18ipzvos6m68hGpSve@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:56535 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754301Ab0FKDcr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 23:32:47 -0400
-In-Reply-To: <1276169991-16396-1-git-send-email-kgene.kim@samsung.com>
+Received: from trinity.fluff.org ([89.16.178.74]:41570 "EHLO trinity.fluff.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754446Ab0FKDsi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Jun 2010 23:48:38 -0400
+Content-Disposition: inline
+In-Reply-To: <AANLkTim-ltyN6dj-eKUKXIMxOe18ipzvos6m68hGpSve@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, Lee Hyuk <hyuk1.lee@samsung.com>
+To: Kyungmin Park <kmpark@infradead.org>
+Cc: Ben Dooks <ben-linux@fluff.org>, akpm@linux-foundation.org, mm-commits@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi,
+On Fri, Jun 11, 2010 at 12:24:00PM +0900, Kyungmin Park wrote:
+> On Fri, Jun 11, 2010 at 9:34 AM, Ben Dooks <ben-linux@fluff.org> wrot=
+e:
+> > On Thu, Jun 10, 2010 at 01:43:14PM -0700, akpm@linux-foundation.org=
+ wrote:
+> >>
+> >> The patch titled
+> >> =A0 =A0 =A0s5pc110: SDHCI-s3c can override host capabilities
+> >> has been added to the -mm tree. =A0Its filename is
+> >> =A0 =A0 =A0s5pc110-sdhci-s3c-can-override-host-capabilities.patch
+> >>
+> >> Before you just go and hit "reply", please:
+> >> =A0 =A0a) Consider who else should be cc'ed
+> >> =A0 =A0b) Prefer to cc a suitable mailing list as well
+> >> =A0 =A0c) Ideally: find the original patch on the mailing list and=
+ do a
+> >> =A0 =A0 =A0 reply-to-all to that, adding suitable additional cc's
+> >>
+> >> *** Remember to use Documentation/SubmitChecklist when testing you=
+r code ***
+> >>
+> >> See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+> >> out what to do about this
+> >>
+> >> The current -mm tree may be found at http://userweb.kernel.org/~ak=
+pm/mmotm/
+> >>
+> >> ------------------------------------------------------
+> >> Subject: s5pc110: SDHCI-s3c can override host capabilities
+> >> From: Kyungmin Park <kmpark@infradead.org>
+> >>
+> >> Each board can override the default sdhci host capabilities.
+> >> Some board has broken features by hardwares and support 8-bit band=
+width.
+> >
+> > I'd much rather see a mask to remove unsupported features than simp=
+ly
+> > override the already read hardware mask.
+>=20
+> what do you mean? please see the Marek patch, each boards can use its
+> own connection and configurations. So there's default caps (it's from
+> you) and board can override it for their own purpose.
 
-On Thu, Jun 10, 2010 at 8:39 PM, Kukjin Kim <kgene.kim@samsung.com> wro=
-te:
-> From: Lee Hyuk <hyuk1.lee@samsung.com>
->
-> On Samsung's SDMMC hosts the timeout clock is derivied from the SD
-> Clock, which is set dynamically.
-> So, checked 'SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK' quirk and removed
-> 'sdhci_s3c_get_timeout_clk' callback which doesn't need any more.
->
-> Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
-> Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
-> ---
-> =A0drivers/mmc/host/sdhci-s3c.c | =A0 10 +++-------
-> =A01 files changed, 3 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3=
-c.c
-> index af21792..ca09382 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -110,11 +110,6 @@ static unsigned int sdhci_s3c_get_max_clk(struct=
- sdhci_host *host)
-> =A0 =A0 =A0 =A0return max;
-> =A0}
->
-> -static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *hos=
-t)
-> -{
-> - =A0 =A0 =A0 return sdhci_s3c_get_max_clk(host) / 1000000;
-> -}
-> -
-> =A0/**
-> =A0* sdhci_s3c_consider_clock - consider one the bus clocks for curre=
-nt setting
-> =A0* @ourhost: Our SDHCI instance.
-> @@ -188,7 +183,6 @@ static void sdhci_s3c_set_clock(struct sdhci_host=
- *host, unsigned int clock)
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ourhost->cur_clk =3D best_src;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->max_clk =3D clk_get_rate(clk);
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->timeout_clk =3D sdhci_s3c_get_tim=
-eout_clk(host);
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctrl =3D readl(host->ioaddr + S3C_SDHC=
-I_CONTROL2);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctrl &=3D ~S3C_SDHCI_CTRL2_SELBASECLK_=
-MASK;
-> @@ -211,7 +205,6 @@ static void sdhci_s3c_set_clock(struct sdhci_host=
- *host, unsigned int clock)
->
-> =A0static struct sdhci_ops sdhci_s3c_ops =3D {
-> =A0 =A0 =A0 =A0.get_max_clock =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_get_ma=
-x_clk,
-> - =A0 =A0 =A0 .get_timeout_clock =A0 =A0 =A0=3D sdhci_s3c_get_timeout=
-_clk,
-> =A0 =A0 =A0 =A0.set_clock =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_se=
-t_clock,
-> =A0};
->
-> @@ -335,6 +328,9 @@ static int __devinit sdhci_s3c_probe(struct platf=
-orm_device *pdev)
-> =A0 =A0 =A0 =A0host->quirks |=3D (SDHCI_QUIRK_32BIT_DMA_ADDR |
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SDHCI_QUIRK_32BIT_DMA=
-_SIZE);
->
-> + =A0 =A0 =A0 /* HSMMC on Samsung SoCs uses SDCLK as timeout clock. *=
-/
-> + =A0 =A0 =A0 host->quirks |=3D SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
+I'm having a rethink about the whole caps, it may not have been such a =
+good
+idea to do that way. Having the .caps fields means that each board that
+needs to override it has to know all the caps for the controller meanin=
+g
+it is much more difficult to share a standard platform data structure
+across the system.
 
-How do you know Samsung SoCs use SDCLK in the spec?
+Note, for this we already have a max_width field, we could have easily
+used that to force the 8bit capability off in the driver too.
+=20
+> Thank you,
+> Kyungmin Park
+>=20
+> >
+> >> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> >> Cc: <linux-mmc@vger.kernel.org>
+> >> Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+> >> ---
+> >>
+> >> =A0arch/arm/plat-samsung/dev-hsmmc.c =A0| =A0 =A02 ++
+> >> =A0arch/arm/plat-samsung/dev-hsmmc1.c | =A0 =A02 ++
+> >> =A0arch/arm/plat-samsung/dev-hsmmc2.c | =A0 =A02 ++
+> >> =A03 files changed, 6 insertions(+)
+> >>
+> >> diff -puN arch/arm/plat-samsung/dev-hsmmc.c~s5pc110-sdhci-s3c-can-=
+override-host-capabilities arch/arm/plat-samsung/dev-hsmmc.c
+> >> --- a/arch/arm/plat-samsung/dev-hsmmc.c~s5pc110-sdhci-s3c-can-over=
+ride-host-capabilities
+> >> +++ a/arch/arm/plat-samsung/dev-hsmmc.c
+> >> @@ -65,4 +65,6 @@ void s3c_sdhci0_set_platdata(struct s3c_
+> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_gpio =3D pd->cfg_gpio;
+> >> =A0 =A0 =A0 if (pd->cfg_card)
+> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_card =3D pd->cfg_card;
+> >> + =A0 =A0 if (pd->host_caps)
+> >> + =A0 =A0 =A0 =A0 =A0 =A0 set->host_caps =3D pd->host_caps;
+> >> =A0}
+> >> diff -puN arch/arm/plat-samsung/dev-hsmmc1.c~s5pc110-sdhci-s3c-can=
+-override-host-capabilities arch/arm/plat-samsung/dev-hsmmc1.c
+> >> --- a/arch/arm/plat-samsung/dev-hsmmc1.c~s5pc110-sdhci-s3c-can-ove=
+rride-host-capabilities
+> >> +++ a/arch/arm/plat-samsung/dev-hsmmc1.c
+> >> @@ -65,4 +65,6 @@ void s3c_sdhci1_set_platdata(struct s3c_
+> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_gpio =3D pd->cfg_gpio;
+> >> =A0 =A0 =A0 if (pd->cfg_card)
+> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_card =3D pd->cfg_card;
+> >> + =A0 =A0 if (pd->host_caps)
+> >> + =A0 =A0 =A0 =A0 =A0 =A0 set->host_caps =3D pd->host_caps;
+> >> =A0}
+> >> diff -puN arch/arm/plat-samsung/dev-hsmmc2.c~s5pc110-sdhci-s3c-can=
+-override-host-capabilities arch/arm/plat-samsung/dev-hsmmc2.c
+> >> --- a/arch/arm/plat-samsung/dev-hsmmc2.c~s5pc110-sdhci-s3c-can-ove=
+rride-host-capabilities
+> >> +++ a/arch/arm/plat-samsung/dev-hsmmc2.c
+> >> @@ -66,4 +66,6 @@ void s3c_sdhci2_set_platdata(struct s3c_
+> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_gpio =3D pd->cfg_gpio;
+> >> =A0 =A0 =A0 if (pd->cfg_card)
+> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_card =3D pd->cfg_card;
+> >> + =A0 =A0 if (pd->host_caps)
+> >> + =A0 =A0 =A0 =A0 =A0 =A0 set->host_caps =3D pd->host_caps;
+> >> =A0}
+> >> _
+> >>
+> >> Patches currently in -mm which might be from kmpark@infradead.org =
+are
+> >>
+> >> mmc-recognize-csd-structure.patch
+> >> mmc-recognize-csd-structure-fix.patch
+> >> s5pc110-sdhci-s3c-can-override-host-capabilities.patch
+> >> s5pc110-sdhci-s3c-support-on-s5pc110.patch
+> >> sdhci-add-no-hi-speed-bit-quirk-support.patch
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-mm=
+c" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.ht=
+ml
+> >
+> > --
+> > --
+> > Ben
+> >
+> > Q: =A0 =A0 =A0What's a light-year?
+> > A: =A0 =A0 =A0One-third less calories than a regular year.
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
+> >
 
-Is it also true at s3c64xx series?
+--=20
+--=20
+Ben
 
-Thank you,
-Kyungmin Park
+Q:      What's a light-year?
+A:      One-third less calories than a regular year.
 
-> +
-> =A0 =A0 =A0 =A0ret =3D sdhci_add_host(host);
-> =A0 =A0 =A0 =A0if (ret) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_err(dev, "sdhci_add_host() failed\=
-n");
-> --
-> 1.6.2.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
-ng-soc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
