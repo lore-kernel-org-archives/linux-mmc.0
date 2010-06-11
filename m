@@ -1,32 +1,31 @@
 From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: + s5pc110-sdhci-s3c-can-override-host-capabilities.patch added to
-	-mm tree
-Date: Fri, 11 Jun 2010 12:24:00 +0900
-Message-ID: <AANLkTim-ltyN6dj-eKUKXIMxOe18ipzvos6m68hGpSve@mail.gmail.com>
-References: <201006102043.o5AKhEtI022722@imap1.linux-foundation.org>
-	<20100611003414.GB3498@trinity.fluff.org>
+Subject: Re: + sdhci-add-no-hi-speed-bit-quirk-support.patch added to -mm tree
+Date: Fri, 11 Jun 2010 12:25:32 +0900
+Message-ID: <AANLkTik5ANblTvTGh-4f9IL7VW8iPmQtRiN0BIDWjFGc@mail.gmail.com>
+References: <201006102043.o5AKhJjl022731@imap1.linux-foundation.org>
+	<20100611004229.GD3498@trinity.fluff.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:41447 "EHLO
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:61147 "EHLO
 	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754382Ab0FKDYB convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 23:24:01 -0400
-In-Reply-To: <20100611003414.GB3498@trinity.fluff.org>
+	with ESMTP id S1754301Ab0FKDZd convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 23:25:33 -0400
+In-Reply-To: <20100611004229.GD3498@trinity.fluff.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ben Dooks <ben-linux@fluff.org>
 Cc: akpm@linux-foundation.org, mm-commits@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Fri, Jun 11, 2010 at 9:34 AM, Ben Dooks <ben-linux@fluff.org> wrote:
-> On Thu, Jun 10, 2010 at 01:43:14PM -0700, akpm@linux-foundation.org w=
+On Fri, Jun 11, 2010 at 9:42 AM, Ben Dooks <ben-linux@fluff.org> wrote:
+> On Thu, Jun 10, 2010 at 01:43:19PM -0700, akpm@linux-foundation.org w=
 rote:
 >>
 >> The patch titled
->> =A0 =A0 =A0s5pc110: SDHCI-s3c can override host capabilities
+>> =A0 =A0 =A0SDHCI: add no hi-speed bit quirk support
 >> has been added to the -mm tree. =A0Its filename is
->> =A0 =A0 =A0s5pc110-sdhci-s3c-can-override-host-capabilities.patch
+>> =A0 =A0 =A0sdhci-add-no-hi-speed-bit-quirk-support.patch
 >>
 >> Before you just go and hit "reply", please:
 >> =A0 =A0a) Consider who else should be cc'ed
@@ -45,70 +44,78 @@ code ***
 /mmotm/
 >>
 >> ------------------------------------------------------
->> Subject: s5pc110: SDHCI-s3c can override host capabilities
+>> Subject: SDHCI: add no hi-speed bit quirk support
 >> From: Kyungmin Park <kmpark@infradead.org>
 >>
->> Each board can override the default sdhci host capabilities.
->> Some board has broken features by hardwares and support 8-bit bandwi=
-dth.
+>> Some SDHCI controllers like s5pc110 don't have an HISPD bit in the H=
+OSTCTL
+>> register.
 >
-> I'd much rather see a mask to remove unsupported features than simply
-> override the already read hardware mask.
+> It would be nice for someone at Samsung to (a) explain the difference=
+s
+> from the base SDHCI spec for all their hardware (the databooks are of=
+ten
+> vague in this area) and (b) for the information for the extra registe=
+rs
+> this IP block has to be explained in more detail (and the platform co=
+de
+> checked for this too).
 
-what do you mean? please see the Marek patch, each boards can use its
-own connection and configurations. So there's default caps (it's from
-you) and board can override it for their own purpose.
+I hope also.
 
 Thank you,
 Kyungmin Park
 
+>
+> The CTRL2/CTRL3 registers definitions in the datasheets leave out use=
+ful
+> information such as how the feedback and filtering bits should be set
+> and how they depend on things such as the card type and bus speed.
 >
 >> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 >> Cc: <linux-mmc@vger.kernel.org>
 >> Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 >> ---
 >>
->> =A0arch/arm/plat-samsung/dev-hsmmc.c =A0| =A0 =A02 ++
->> =A0arch/arm/plat-samsung/dev-hsmmc1.c | =A0 =A02 ++
->> =A0arch/arm/plat-samsung/dev-hsmmc2.c | =A0 =A02 ++
->> =A03 files changed, 6 insertions(+)
+>> =A0drivers/mmc/host/sdhci.c | =A0 =A03 ++-
+>> =A0drivers/mmc/host/sdhci.h | =A0 =A02 ++
+>> =A02 files changed, 4 insertions(+), 1 deletion(-)
 >>
->> diff -puN arch/arm/plat-samsung/dev-hsmmc.c~s5pc110-sdhci-s3c-can-ov=
-erride-host-capabilities arch/arm/plat-samsung/dev-hsmmc.c
->> --- a/arch/arm/plat-samsung/dev-hsmmc.c~s5pc110-sdhci-s3c-can-overri=
-de-host-capabilities
->> +++ a/arch/arm/plat-samsung/dev-hsmmc.c
->> @@ -65,4 +65,6 @@ void s3c_sdhci0_set_platdata(struct s3c_
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_gpio =3D pd->cfg_gpio;
->> =A0 =A0 =A0 if (pd->cfg_card)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_card =3D pd->cfg_card;
->> + =A0 =A0 if (pd->host_caps)
->> + =A0 =A0 =A0 =A0 =A0 =A0 set->host_caps =3D pd->host_caps;
->> =A0}
->> diff -puN arch/arm/plat-samsung/dev-hsmmc1.c~s5pc110-sdhci-s3c-can-o=
-verride-host-capabilities arch/arm/plat-samsung/dev-hsmmc1.c
->> --- a/arch/arm/plat-samsung/dev-hsmmc1.c~s5pc110-sdhci-s3c-can-overr=
-ide-host-capabilities
->> +++ a/arch/arm/plat-samsung/dev-hsmmc1.c
->> @@ -65,4 +65,6 @@ void s3c_sdhci1_set_platdata(struct s3c_
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_gpio =3D pd->cfg_gpio;
->> =A0 =A0 =A0 if (pd->cfg_card)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_card =3D pd->cfg_card;
->> + =A0 =A0 if (pd->host_caps)
->> + =A0 =A0 =A0 =A0 =A0 =A0 set->host_caps =3D pd->host_caps;
->> =A0}
->> diff -puN arch/arm/plat-samsung/dev-hsmmc2.c~s5pc110-sdhci-s3c-can-o=
-verride-host-capabilities arch/arm/plat-samsung/dev-hsmmc2.c
->> --- a/arch/arm/plat-samsung/dev-hsmmc2.c~s5pc110-sdhci-s3c-can-overr=
-ide-host-capabilities
->> +++ a/arch/arm/plat-samsung/dev-hsmmc2.c
->> @@ -66,4 +66,6 @@ void s3c_sdhci2_set_platdata(struct s3c_
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_gpio =3D pd->cfg_gpio;
->> =A0 =A0 =A0 if (pd->cfg_card)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set->cfg_card =3D pd->cfg_card;
->> + =A0 =A0 if (pd->host_caps)
->> + =A0 =A0 =A0 =A0 =A0 =A0 set->host_caps =3D pd->host_caps;
->> =A0}
+>> diff -puN drivers/mmc/host/sdhci.c~sdhci-add-no-hi-speed-bit-quirk-s=
+upport drivers/mmc/host/sdhci.c
+>> --- a/drivers/mmc/host/sdhci.c~sdhci-add-no-hi-speed-bit-quirk-suppo=
+rt
+>> +++ a/drivers/mmc/host/sdhci.c
+>> @@ -1164,7 +1164,8 @@ static void sdhci_set_ios(struct mmc_hos
+>> =A0 =A0 =A0 else
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl &=3D ~SDHCI_CTRL_4BITBUS;
+>>
+>> - =A0 =A0 if (ios->timing =3D=3D MMC_TIMING_SD_HS)
+>> + =A0 =A0 if (ios->timing =3D=3D MMC_TIMING_SD_HS &&
+>> + =A0 =A0 =A0 =A0 !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D SDHCI_CTRL_HISPD;
+>> =A0 =A0 =A0 else
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl &=3D ~SDHCI_CTRL_HISPD;
+>> diff -puN drivers/mmc/host/sdhci.h~sdhci-add-no-hi-speed-bit-quirk-s=
+upport drivers/mmc/host/sdhci.h
+>> --- a/drivers/mmc/host/sdhci.h~sdhci-add-no-hi-speed-bit-quirk-suppo=
+rt
+>> +++ a/drivers/mmc/host/sdhci.h
+>> @@ -240,6 +240,8 @@ struct sdhci_host {
+>> =A0#define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN =A0 =A0 =A0 =A0 =A0 =A0=
+(1<<25)
+>> =A0/* Controller cannot support End Attribute in NOP ADMA descriptor=
+ */
+>> =A0#define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC =A0 =A0 =A0 =A0 =A0 =A0=
+(1<<26)
+>> +/* Controller doesn't have HISPD bit field in HI-SPEED SD card */
+>> +#define SDHCI_QUIRK_NO_HISPD_BIT =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 (1<<27)
+>>
+>> =A0 =A0 =A0 int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 irq; =A0 =A0=
+ =A0 =A0 =A0 =A0/* Device IRQ */
+>> =A0 =A0 =A0 void __iomem * =A0 =A0 =A0 =A0 =A0ioaddr; =A0 =A0 =A0 =A0=
+ /* Mapped address */
 >> _
 >>
 >> Patches currently in -mm which might be from kmpark@infradead.org ar=
@@ -133,9 +140,4 @@ e
 > Q: =A0 =A0 =A0What's a light-year?
 > A: =A0 =A0 =A0One-third less calories than a regular year.
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >
