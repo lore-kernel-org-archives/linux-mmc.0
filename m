@@ -1,29 +1,29 @@
 From: Ben Dooks <ben-linux@fluff.org>
-Subject: Re: + s5pc110-sdhci-s3c-support-on-s5pc110.patch added to -mm tree
-Date: Fri, 11 Jun 2010 01:36:32 +0100
-Message-ID: <20100611003632.GC3498@trinity.fluff.org>
-References: <201006102043.o5AKhHK1022728@imap1.linux-foundation.org>
+Subject: Re: + sdhci-add-no-hi-speed-bit-quirk-support.patch added to -mm
+	tree
+Date: Fri, 11 Jun 2010 01:42:29 +0100
+Message-ID: <20100611004229.GD3498@trinity.fluff.org>
+References: <201006102043.o5AKhJjl022731@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from trinity.fluff.org ([89.16.178.74]:39514 "EHLO trinity.fluff.org"
+Received: from trinity.fluff.org ([89.16.178.74]:48806 "EHLO trinity.fluff.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754038Ab0FKAgh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Jun 2010 20:36:37 -0400
+	id S1754178Ab0FKAmh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Jun 2010 20:42:37 -0400
 Content-Disposition: inline
-In-Reply-To: <201006102043.o5AKhHK1022728@imap1.linux-foundation.org>
+In-Reply-To: <201006102043.o5AKhJjl022731@imap1.linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: akpm@linux-foundation.org
 Cc: mm-commits@vger.kernel.org, kmpark@infradead.org, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
 
-
-On Thu, Jun 10, 2010 at 01:43:17PM -0700, akpm@linux-foundation.org wrote:
+On Thu, Jun 10, 2010 at 01:43:19PM -0700, akpm@linux-foundation.org wrote:
 > 
 > The patch titled
->      s5pc110: SDHCI-s3c support on s5pc110
+>      SDHCI: add no hi-speed bit quirk support
 > has been added to the -mm tree.  Its filename is
->      s5pc110-sdhci-s3c-support-on-s5pc110.patch
+>      sdhci-add-no-hi-speed-bit-quirk-support.patch
 > 
 > Before you just go and hit "reply", please:
 >    a) Consider who else should be cc'ed
@@ -39,38 +39,72 @@ On Thu, Jun 10, 2010 at 01:43:17PM -0700, akpm@linux-foundation.org wrote:
 > The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 > 
 > ------------------------------------------------------
-> Subject: s5pc110: SDHCI-s3c support on s5pc110
+> Subject: SDHCI: add no hi-speed bit quirk support
 > From: Kyungmin Park <kmpark@infradead.org>
 > 
-> s5pc110 (aka s5pv210) uses the same SDHCI IP.
-> 
+> Some SDHCI controllers like s5pc110 don't have an HISPD bit in the HOSTCTL
+> register.
+
+It would be nice for someone at Samsung to (a) explain the differences
+from the base SDHCI spec for all their hardware (the databooks are often
+vague in this area) and (b) for the information for the extra registers
+this IP block has to be explained in more detail (and the platform code
+checked for this too).
+
+The CTRL2/CTRL3 registers definitions in the datasheets leave out useful
+information such as how the feedback and filtering bits should be set
+and how they depend on things such as the card type and bus speed.
+ 
 > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> 
 > Cc: <linux-mmc@vger.kernel.org>
 > Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 > ---
 > 
->  drivers/mmc/host/Kconfig |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci.c |    3 ++-
+>  drivers/mmc/host/sdhci.h |    2 ++
+>  2 files changed, 4 insertions(+), 1 deletion(-)
 > 
-> diff -puN drivers/mmc/host/Kconfig~s5pc110-sdhci-s3c-support-on-s5pc110 drivers/mmc/host/Kconfig
-> --- a/drivers/mmc/host/Kconfig~s5pc110-sdhci-s3c-support-on-s5pc110
-> +++ a/drivers/mmc/host/Kconfig
-> @@ -123,7 +123,7 @@ config MMC_SDHCI_PLTFM
+> diff -puN drivers/mmc/host/sdhci.c~sdhci-add-no-hi-speed-bit-quirk-support drivers/mmc/host/sdhci.c
+> --- a/drivers/mmc/host/sdhci.c~sdhci-add-no-hi-speed-bit-quirk-support
+> +++ a/drivers/mmc/host/sdhci.c
+> @@ -1164,7 +1164,8 @@ static void sdhci_set_ios(struct mmc_hos
+>  	else
+>  		ctrl &= ~SDHCI_CTRL_4BITBUS;
 >  
->  config MMC_SDHCI_S3C
->  	tristate "SDHCI support on Samsung S3C SoC"
-> -	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
-> +	depends on MMC_SDHCI && PLAT_SAMSUNG
+> -	if (ios->timing == MMC_TIMING_SD_HS)
+> +	if (ios->timing == MMC_TIMING_SD_HS &&
+> +	    !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+>  		ctrl |= SDHCI_CTRL_HISPD;
+>  	else
+>  		ctrl &= ~SDHCI_CTRL_HISPD;
+> diff -puN drivers/mmc/host/sdhci.h~sdhci-add-no-hi-speed-bit-quirk-support drivers/mmc/host/sdhci.h
+> --- a/drivers/mmc/host/sdhci.h~sdhci-add-no-hi-speed-bit-quirk-support
+> +++ a/drivers/mmc/host/sdhci.h
+> @@ -240,6 +240,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
+>  /* Controller cannot support End Attribute in NOP ADMA descriptor */
+>  #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
+> +/* Controller doesn't have HISPD bit field in HI-SPEED SD card */
+> +#define SDHCI_QUIRK_NO_HISPD_BIT			(1<<27)
+>  
+>  	int			irq;		/* Device IRQ */
+>  	void __iomem *		ioaddr;		/* Mapped address */
+> _
+> 
+> Patches currently in -mm which might be from kmpark@infradead.org are
+> 
+> mmc-recognize-csd-structure.patch
+> mmc-recognize-csd-structure-fix.patch
+> s5pc110-sdhci-s3c-can-override-host-capabilities.patch
+> s5pc110-sdhci-s3c-support-on-s5pc110.patch
+> sdhci-add-no-hi-speed-bit-quirk-support.patch
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I've no problem with drivers being made available across the
-PLAT_SAMSUNG range when they are truly generic, however the SDHCI
-is only almost generic.
-
-I'm not sure whether to ask for this one to be held until we've had
-some time to discuss what we do about these on the relevant mailing
-lists or say ok, this is what we should do.
-
+-- 
 -- 
 Ben
 
