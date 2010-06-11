@@ -1,62 +1,112 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH 1/5] sdhci-s3c: depend on plat-samsung
-Date: Fri, 11 Jun 2010 09:29:38 +0900
-Message-ID: <000701cb08fd$2f8e15a0$8eaa40e0$%kim@samsung.com>
-References: <1276076383-24825-1-git-send-email-m.szyprowski@samsung.com>
- <1276076383-24825-2-git-send-email-m.szyprowski@samsung.com>
+From: Ben Dooks <ben-linux@fluff.org>
+Subject: Re: + s5pc110-sdhci-s3c-can-override-host-capabilities.patch added
+	to -mm tree
+Date: Fri, 11 Jun 2010 01:34:14 +0100
+Message-ID: <20100611003414.GB3498@trinity.fluff.org>
+References: <201006102043.o5AKhEtI022722@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1276076383-24825-2-git-send-email-m.szyprowski@samsung.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Marek Szyprowski' <m.szyprowski@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: kyungmin.park@samsung.com, ben-linux@fluff.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from trinity.fluff.org ([89.16.178.74]:39401 "EHLO trinity.fluff.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754038Ab0FKAeZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Jun 2010 20:34:25 -0400
+Content-Disposition: inline
+In-Reply-To: <201006102043.o5AKhEtI022722@imap1.linux-foundation.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: akpm@linux-foundation.org
+Cc: mm-commits@vger.kernel.org, kmpark@infradead.org, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
 
-Marek Szyprowski wrote:
+On Thu, Jun 10, 2010 at 01:43:14PM -0700, akpm@linux-foundation.org wrote:
 > 
-> Most Samsung SoC have support for SDHCI block, so make the driver
-> dependent on the Samsung platform instead on listing all SoCs in the
-> Kconfig (and updating it again when support for the new SoC variant is
-> added).
+> The patch titled
+>      s5pc110: SDHCI-s3c can override host capabilities
+> has been added to the -mm tree.  Its filename is
+>      s5pc110-sdhci-s3c-can-override-host-capabilities.patch
 > 
-Hi, Marek
+> Before you just go and hit "reply", please:
+>    a) Consider who else should be cc'ed
+>    b) Prefer to cc a suitable mailing list as well
+>    c) Ideally: find the original patch on the mailing list and do a
+>       reply-to-all to that, adding suitable additional cc's
+> 
+> *** Remember to use Documentation/SubmitChecklist when testing your code ***
+> 
+> See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+> out what to do about this
+> 
+> The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+> 
+> ------------------------------------------------------
+> Subject: s5pc110: SDHCI-s3c can override host capabilities
+> From: Kyungmin Park <kmpark@infradead.org>
+> 
+> Each board can override the default sdhci host capabilities.
+> Some board has broken features by hardwares and support 8-bit bandwidth.
 
-Kyungmin Park already submitted same patch.
-
-And Andrew Morton added to the -mm tree.
-http://www.spinics.net/lists/mm-commits/msg79159.html
-
-But, I think your comment is better...
-
-> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+I'd much rather see a mask to remove unsupported features than simply
+override the already read hardware mask.
+ 
 > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> Cc: <linux-mmc@vger.kernel.org>
+> Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 > ---
->  drivers/mmc/host/Kconfig |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index e171e77..acf5bf6 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -123,7 +123,7 @@ config MMC_SDHCI_PLTFM
+>  arch/arm/plat-samsung/dev-hsmmc.c  |    2 ++
+>  arch/arm/plat-samsung/dev-hsmmc1.c |    2 ++
+>  arch/arm/plat-samsung/dev-hsmmc2.c |    2 ++
+>  3 files changed, 6 insertions(+)
 > 
->  config MMC_SDHCI_S3C
->  	tristate "SDHCI support on Samsung S3C SoC"
-> -	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
-> +	depends on MMC_SDHCI && PLAT_SAMSUNG
->  	help
->  	  This selects the Secure Digital Host Controller Interface (SDHCI)
->  	  often referrered to as the HSMMC block in some of the Samsung S3C
+> diff -puN arch/arm/plat-samsung/dev-hsmmc.c~s5pc110-sdhci-s3c-can-override-host-capabilities arch/arm/plat-samsung/dev-hsmmc.c
+> --- a/arch/arm/plat-samsung/dev-hsmmc.c~s5pc110-sdhci-s3c-can-override-host-capabilities
+> +++ a/arch/arm/plat-samsung/dev-hsmmc.c
+> @@ -65,4 +65,6 @@ void s3c_sdhci0_set_platdata(struct s3c_
+>  		set->cfg_gpio = pd->cfg_gpio;
+>  	if (pd->cfg_card)
+>  		set->cfg_card = pd->cfg_card;
+> +	if (pd->host_caps)
+> +		set->host_caps = pd->host_caps;
+>  }
+> diff -puN arch/arm/plat-samsung/dev-hsmmc1.c~s5pc110-sdhci-s3c-can-override-host-capabilities arch/arm/plat-samsung/dev-hsmmc1.c
+> --- a/arch/arm/plat-samsung/dev-hsmmc1.c~s5pc110-sdhci-s3c-can-override-host-capabilities
+> +++ a/arch/arm/plat-samsung/dev-hsmmc1.c
+> @@ -65,4 +65,6 @@ void s3c_sdhci1_set_platdata(struct s3c_
+>  		set->cfg_gpio = pd->cfg_gpio;
+>  	if (pd->cfg_card)
+>  		set->cfg_card = pd->cfg_card;
+> +	if (pd->host_caps)
+> +		set->host_caps = pd->host_caps;
+>  }
+> diff -puN arch/arm/plat-samsung/dev-hsmmc2.c~s5pc110-sdhci-s3c-can-override-host-capabilities arch/arm/plat-samsung/dev-hsmmc2.c
+> --- a/arch/arm/plat-samsung/dev-hsmmc2.c~s5pc110-sdhci-s3c-can-override-host-capabilities
+> +++ a/arch/arm/plat-samsung/dev-hsmmc2.c
+> @@ -66,4 +66,6 @@ void s3c_sdhci2_set_platdata(struct s3c_
+>  		set->cfg_gpio = pd->cfg_gpio;
+>  	if (pd->cfg_card)
+>  		set->cfg_card = pd->cfg_card;
+> +	if (pd->host_caps)
+> +		set->host_caps = pd->host_caps;
+>  }
+> _
+> 
+> Patches currently in -mm which might be from kmpark@infradead.org are
+> 
+> mmc-recognize-csd-structure.patch
+> mmc-recognize-csd-structure-fix.patch
+> s5pc110-sdhci-s3c-can-override-host-capabilities.patch
+> s5pc110-sdhci-s3c-support-on-s5pc110.patch
+> sdhci-add-no-hi-speed-bit-quirk-support.patch
+> 
 > --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+-- 
+-- 
+Ben
 
-Thanks.
+Q:      What's a light-year?
+A:      One-third less calories than a regular year.
 
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
