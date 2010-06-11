@@ -1,76 +1,108 @@
-From: Kyungmin Park <kyungmin.park@samsung.com>
-Subject: Re: [PATCH 1/3] s3c64xx: Fix build without SDHCI controllers
-Date: Fri, 11 Jun 2010 12:30:53 +0900
-Message-ID: <AANLkTimPp36K_SmFm053cu9f9Znb8SFHVcKAn8bjD1PI@mail.gmail.com>
-References: <1276076345-24370-1-git-send-email-m.szyprowski@samsung.com>
-	<1276076345-24370-2-git-send-email-m.szyprowski@samsung.com>
-	<000801cb0900$f64bbdc0$e2e33940$%kim@samsung.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH] sdhci-s3c: Add SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK quirk
+	for Samsung SoC
+Date: Fri, 11 Jun 2010 12:32:46 +0900
+Message-ID: <AANLkTim2LzIh7dadCAWCo6jltS4CYA8gLKaiQne_VzqK@mail.gmail.com>
+References: <1276169991-16396-1-git-send-email-kgene.kim@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <000801cb0900$f64bbdc0$e2e33940$%kim@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: Marek Szyprowski <m.szyprowski@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:56535 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754301Ab0FKDcr convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2010 23:32:47 -0400
+In-Reply-To: <1276169991-16396-1-git-send-email-kgene.kim@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kukjin Kim <kgene.kim@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, Lee Hyuk <hyuk1.lee@samsung.com>
 
-On Fri, Jun 11, 2010 at 9:56 AM, Kukjin Kim <kgene.kim@samsung.com> wro=
+Hi,
+
+On Thu, Jun 10, 2010 at 8:39 PM, Kukjin Kim <kgene.kim@samsung.com> wro=
 te:
-> Marek Szyprowski wrote:
->>
->> This patch fixes the following compilation problem if only NCP machi=
-ne
->> is selected:
->>
->> arch/arm/mach-s3c64xx/s3c6410.c: In function =91s3c6410_map_io=92:
->> arch/arm/mach-s3c64xx/s3c6410.c:51: error: implicit declaration of f=
-unction
->> =91s3c6410_default_sdhci2=92
->>
->> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->> =A0arch/arm/plat-samsung/include/plat/sdhci.h | =A0 =A01 +
->> =A01 files changed, 1 insertions(+), 0 deletions(-)
->>
->> diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/p=
-lat-
->> samsung/include/plat/sdhci.h
->> index 13f9fb2..c2044e5 100644
->> --- a/arch/arm/plat-samsung/include/plat/sdhci.h
->> +++ b/arch/arm/plat-samsung/include/plat/sdhci.h
->> @@ -166,6 +166,7 @@ static inline void s3c6410_default_sdhci2(void) =
-{ }
->> =A0#else
->> =A0static inline void s3c6410_default_sdhci0(void) { }
->> =A0static inline void s3c6410_default_sdhci1(void) { }
->> +static inline void s3c6410_default_sdhci2(void) { }
->> =A0static inline void s3c6400_default_sdhci0(void) { }
->> =A0static inline void s3c6400_default_sdhci1(void) { }
->>
->> --
+> From: Lee Hyuk <hyuk1.lee@samsung.com>
 >
-> Maybe missed in Maurus' patch 'S3C64XX: add HSMMC2 support'
-> commit 92b118f6968ae0788ac659af47b464acd9a754a1
+> On Samsung's SDMMC hosts the timeout clock is derivied from the SD
+> Clock, which is set dynamically.
+> So, checked 'SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK' quirk and removed
+> 'sdhci_s3c_get_timeout_clk' callback which doesn't need any more.
+>
+> Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+> Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+> ---
+> =A0drivers/mmc/host/sdhci-s3c.c | =A0 10 +++-------
+> =A01 files changed, 3 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3=
+c.c
+> index af21792..ca09382 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -110,11 +110,6 @@ static unsigned int sdhci_s3c_get_max_clk(struct=
+ sdhci_host *host)
+> =A0 =A0 =A0 =A0return max;
+> =A0}
+>
+> -static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *hos=
+t)
+> -{
+> - =A0 =A0 =A0 return sdhci_s3c_get_max_clk(host) / 1000000;
+> -}
+> -
+> =A0/**
+> =A0* sdhci_s3c_consider_clock - consider one the bus clocks for curre=
+nt setting
+> =A0* @ourhost: Our SDHCI instance.
+> @@ -188,7 +183,6 @@ static void sdhci_s3c_set_clock(struct sdhci_host=
+ *host, unsigned int clock)
+>
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ourhost->cur_clk =3D best_src;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->max_clk =3D clk_get_rate(clk);
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->timeout_clk =3D sdhci_s3c_get_tim=
+eout_clk(host);
+>
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctrl =3D readl(host->ioaddr + S3C_SDHC=
+I_CONTROL2);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctrl &=3D ~S3C_SDHCI_CTRL2_SELBASECLK_=
+MASK;
+> @@ -211,7 +205,6 @@ static void sdhci_s3c_set_clock(struct sdhci_host=
+ *host, unsigned int clock)
+>
+> =A0static struct sdhci_ops sdhci_s3c_ops =3D {
+> =A0 =A0 =A0 =A0.get_max_clock =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_get_ma=
+x_clk,
+> - =A0 =A0 =A0 .get_timeout_clock =A0 =A0 =A0=3D sdhci_s3c_get_timeout=
+_clk,
+> =A0 =A0 =A0 =A0.set_clock =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_se=
+t_clock,
+> =A0};
+>
+> @@ -335,6 +328,9 @@ static int __devinit sdhci_s3c_probe(struct platf=
+orm_device *pdev)
+> =A0 =A0 =A0 =A0host->quirks |=3D (SDHCI_QUIRK_32BIT_DMA_ADDR |
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SDHCI_QUIRK_32BIT_DMA=
+_SIZE);
+>
+> + =A0 =A0 =A0 /* HSMMC on Samsung SoCs uses SDCLK as timeout clock. *=
+/
+> + =A0 =A0 =A0 host->quirks |=3D SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
 
-Which kernel tree do you use?
-it's against the latest kernel.
+How do you know Samsung SoCs use SDCLK in the spec?
+
+Is it also true at s3c64xx series?
 
 Thank you,
 Kyungmin Park
 
->
-> Also need 'static inline s3c6400_default_sdhci2(void) { }'
-> Could you re-submit updated patch including s3c6400_default_sdhci2()?
->
-> Thanks.
->
-> Best regards,
-> Kgene.
+> +
+> =A0 =A0 =A0 =A0ret =3D sdhci_add_host(host);
+> =A0 =A0 =A0 =A0if (ret) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_err(dev, "sdhci_add_host() failed\=
+n");
 > --
-> Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-> SW Solution Development Team, Samsung Electronics Co., Ltd.
+> 1.6.2.5
 >
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-samsu=
