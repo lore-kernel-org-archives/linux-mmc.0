@@ -1,78 +1,36 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: [PATCH v3] mmc: make sdhci work with ricoh mmc controller
-Date: Fri, 11 Jun 2010 22:08:06 +0300
-Message-ID: <1276283286.8557.28.camel@maxim-laptop>
-References: <1275859475.3151.4.camel@maxim-laptop>
-	 <1275859731-2898-1-git-send-email-maximlevitsky@gmail.com>
-	 <b99ba230e4a7f8b2174d7f52f1e7324c@localhost>
-	 <1275871052.24091.7.camel@maxim-laptop>  <20100606184139.5505d2a5@fido5>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:44958 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760253Ab0FKTIO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jun 2010 15:08:14 -0400
-In-Reply-To: <20100606184139.5505d2a5@fido5>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+From: maximlevitsky@gmail.com
+Subject: [PATCH v4] mmc: make sdhci work with ricoh mmc controller
+Date: Fri, 11 Jun 2010 22:15:02 +0300
+Message-ID: <4c128b3a.51a3cc0a.3161.30ab@mx.google.com>
+References: <1276283286.8557.28.camel@maxim-laptop>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1276283286.8557.28.camel@maxim-laptop>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Philip Langdale <philipl@overt.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, Andrew de Quincey <adq_dvb@lidskialf.net>
+Cc: linux-mmc@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, Andrew de Quincey <adq_dvb@lidskialf.net>, Maxim Levitsky <maximlevitsky@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Ok, now I tested it well, and sdhci + mmc controller finally work well.
+From: Maxim Levitsky <maximlevitsky@gmail.com>
 
-I found out that small delay is all needed to make the mmc work fine
-after resume with or without card.
+The current way of disabling it is not well tested by vendor
+and has all kinds of bugs that show up on resume from ram/disk.
 
-Its not that pretty solution as it might increase the resume time (I use
-a delay of 1/2sec, while around 300 ms is enough)
-With parallel resume it probably be unnoticeable.
+Old way of disabling is still supported by
+continuing to use CONFIG_MMC_RICOH_MMC.
 
-It might be not enough for other mmc cards (slower?) but then the
-problem isn't that big deal, you just reinsert the card after resume or
-don't suspend with it if first place.
+Based on 'http://list.drzeus.cx/pipermail/sdhci-devel/2007-December/002085.html'
+Most of the credit for this goes to Andrew de Quincey
 
-I will at future do some reverse engineering.
-Maybe I find a bit to that will tell that controller is currently busy
-checking if card is mmc or not.
 
-I did quite a lot of testing, and it works. 
-commit bd9596e86d2321f3f97a90ec157371c366925357
-Author: Maxim Levitsky <maximlevitsky@gmail.com>
-Date:   Mon Jun 7 02:04:40 2010 +0300
-
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+CC: Andrew de Quincey <adq_dvb@lidskialf.net>
+CC: linux-mmc@vger.kernel.org <linux-mmc@vger.kernel.org>
 ---
+ drivers/mmc/host/sdhci-pci.c |   41 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c     |    3 ++-
+ drivers/mmc/host/sdhci.h     |    4 ++++
+ 3 files changed, 47 insertions(+), 1 deletions(-)
 
-    mmc: make sdhci work with ricoh mmc controller
-    
-    The current way of disabling it is not well tested by vendor
-    and has all kinds of bugs that show up on resume from ram/disk.
-    
-    Old way of disabling is still supported by
-    continuing to use CONFIG_MMC_RICOH_MMC.
-    
-    Based on 'http://list.drzeus.cx/pipermail/sdhci-devel/2007-December/002085.html'
-    Most of the credit for this goes to Andrew de Quincey
-    
-    
-    Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-    CC: Andrew de Quincey <adq_dvb@lidskialf.net>
-    CC: linux-mmc@vger.kernel.org <linux-mmc@vger.kernel.org>
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 569e94d..85d15de 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1259,8 +1259,6 @@ int mmc_suspend_host(struct mmc_host *host)
- 
- 	if (host->caps & MMC_CAP_DISABLE)
- 		cancel_delayed_work(&host->disable);
--	cancel_delayed_work(&host->detect);
--	mmc_flush_scheduled_work();
- 
- 	mmc_bus_get(host);
- 	if (host->bus_ops && !host->bus_dead) {
 diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
 index 65483fd..e021431 100644
 --- a/drivers/mmc/host/sdhci-pci.c
@@ -183,5 +141,5 @@ index c846813..b1839a3 100644
  	unsigned long		private[0] ____cacheline_aligned;
  };
  
-
-
+-- 
+1.7.0.4
