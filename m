@@ -1,67 +1,57 @@
-From: Kyungmin Park <kyungmin.park@samsung.com>
-Subject: [PATCH 3/3] SDHCI: 8-bit data transfer width support
-Date: Sat, 12 Jun 2010 14:45:02 +0900
-Message-ID: <20100612054502.GA25686@july>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: [PATCH V2 0/4] Add MMC erase and secure erase
+Date: Sun, 13 Jun 2010 13:01:34 +0300
+Message-ID: <4C14AC7E.6030308@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:34819 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751743Ab0FLFpK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Jun 2010 01:45:10 -0400
-Received: from epmmp1 (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
- with ESMTP id <0L3V00GZCZZ9SH60@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Sat, 12 Jun 2010 14:45:09 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0L3V003UDZZ9IJ@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Sat, 12 Jun 2010 14:45:09 +0900 (KST)
-Content-disposition: inline
+Received: from smtp.nokia.com ([192.100.105.134]:55271 "EHLO
+	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753320Ab0FMKB4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Jun 2010 06:01:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
+To: jens.axboe@oracle.com
+Cc: hch@lst.de, Andrew Morton <akpm@linux-foundation.org>, Kyungmin Park <kmpark@infradead.org>, LKML <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Madhusudhan Chikkature <madhu.cr@ti.com>
 
-From: Kyungmin Park <kyungmin.park@samsung.com>
+Hi
 
-Some host constroller such as s5pc110 has WIDE8 support feature.
+Add ability to do MMC erase and secure erase operations from userspace,
+using the BLKDISCARD ioctl and a newly created BLKSECDISCARD ioctl.
 
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/sdhci.c |    5 +++++
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 6 insertions(+), 0 deletions(-)
+Changes from V1
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 142419c..6cf018a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1159,6 +1159,11 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
- 
-+	if (ios->bus_width == MMC_BUS_WIDTH_8)
-+		ctrl |= SDHCI_CTRL_8BITBUS;
-+	else
-+		ctrl &= ~SDHCI_CTRL_8BITBUS;
-+
- 	if (ios->bus_width == MMC_BUS_WIDTH_4)
- 		ctrl |= SDHCI_CTRL_4BITBUS;
- 	else
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c846813..eb5efe0 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -72,6 +72,7 @@
- #define   SDHCI_CTRL_ADMA1	0x08
- #define   SDHCI_CTRL_ADMA32	0x10
- #define   SDHCI_CTRL_ADMA64	0x18
-+#define  SDHCI_CTRL_8BITBUS	0x20
- 
- #define SDHCI_POWER_CONTROL	0x29
- #define  SDHCI_POWER_ON		0x01
--- 
-1.5.3.3
+- use discard I/O requests instead of implementing BLKDISCARD in mmc_block
+- do not validate erase size for MMC erases, instead round to erase size
+- rename MMC max_erase to pref_erase and expose it through sysfs as
+"preferred_erase_size"
 
+Adrian Hunter (4):
+      block: Add BLKSECDISCARD
+      mmc: Add erase, secure erase, trim and secure trim operations
+      mmc_block: Add discard and secure discard support
+      omap_hsmmc: Add erase capability
+
+ block/compat_ioctl.c          |    1 +
+ block/ioctl.c                 |    5 +
+ drivers/mmc/card/block.c      |  125 +++++++++++++++-
+ drivers/mmc/card/queue.c      |   16 ++-
+ drivers/mmc/core/core.c       |  346 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/core.h       |    2 +
+ drivers/mmc/core/mmc.c        |   47 ++++++-
+ drivers/mmc/core/sd.c         |   82 ++++++++++
+ drivers/mmc/core/sd_ops.c     |   48 ++++++
+ drivers/mmc/core/sd_ops.h     |    1 +
+ drivers/mmc/host/omap_hsmmc.c |   13 ++-
+ include/linux/fs.h            |    1 +
+ include/linux/mmc/card.h      |   19 +++
+ include/linux/mmc/core.h      |   19 +++
+ include/linux/mmc/host.h      |    1 +
+ include/linux/mmc/mmc.h       |   24 ++-
+ include/linux/mmc/sd.h        |    5 +
+ 17 files changed, 742 insertions(+), 13 deletions(-)
+
+
+Regards
+Adrian
