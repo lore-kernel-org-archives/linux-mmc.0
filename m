@@ -1,161 +1,123 @@
-From: Philip Langdale <philipl@overt.org>
-Subject: Re: [PATCH v4] mmc: make sdhci work with ricoh mmc controller
-Date: Sun, 13 Jun 2010 09:06:11 -0700
-Message-ID: <20100613090611.18bcfe08@fido5>
-References: <1276283286.8557.28.camel@maxim-laptop>
-	<4c128b3a.51a3cc0a.3161.30ab@mx.google.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: [PATCH 2/2 RE-SEND] ARM: S5PV210: Add support HSMMC on Samsung SMDKV210
+Date: Mon, 14 Jun 2010 16:19:43 +0900
+Message-ID: <1276499983-19463-1-git-send-email-kgene.kim@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from usul.saidi.cx ([204.11.33.34]:35772 "EHLO usul.overt.org"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753055Ab0FMQGP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 13 Jun 2010 12:06:15 -0400
-In-Reply-To: <4c128b3a.51a3cc0a.3161.30ab@mx.google.com>
+Received: from ganesha.gnumonks.org ([213.95.27.120]:56748 "EHLO
+	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755445Ab0FNHYN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jun 2010 03:24:13 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: maximlevitsky@gmail.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, Andrew de Quincey <adq_dvb@lidskialf.net>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org
+Cc: ben-linux@fluff.org, Lee Hyuk <hyuk1.lee@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>
 
-On Fri, 11 Jun 2010 22:15:02 +0300
-maximlevitsky@gmail.com wrote:
+From: Lee Hyuk <hyuk1.lee@samsung.com>
 
-> From: Maxim Levitsky <maximlevitsky@gmail.com>
-> 
-> The current way of disabling it is not well tested by vendor
-> and has all kinds of bugs that show up on resume from ram/disk.
-> 
-> Old way of disabling is still supported by
-> continuing to use CONFIG_MMC_RICOH_MMC.
-> 
-> Based on
-> 'http://list.drzeus.cx/pipermail/sdhci-devel/2007-December/002085.html'
-> Most of the credit for this goes to Andrew de Quincey
-> 
-> 
-> Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-> CC: Andrew de Quincey <adq_dvb@lidskialf.net>
-> CC: linux-mmc@vger.kernel.org <linux-mmc@vger.kernel.org>
+This patch adds support HSMMC on Samsung SMDKV210, and gpio configuration for
+S5PV210 hsmmc3.
 
-Acked-by: Philip Langdale <philipl@overt.org>
+Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+---
 
-> ---
->  drivers/mmc/host/sdhci-pci.c |   41
-> +++++++++++++++++++++++++++++++++++++++++
-> drivers/mmc/host/sdhci.c     |    3 ++- drivers/mmc/host/sdhci.h
-> |    4 ++++ 3 files changed, 47 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci.c
-> b/drivers/mmc/host/sdhci-pci.c index 65483fd..e021431 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -17,6 +17,7 @@
->  #include <linux/pci.h>
->  #include <linux/dma-mapping.h>
->  #include <linux/slab.h>
-> +#include <linux/device.h>
->  
->  #include <linux/mmc/host.h>
->  
-> @@ -84,7 +85,30 @@ static int ricoh_probe(struct sdhci_pci_chip *chip)
->  	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG ||
->  	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
->  		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
-> +	return 0;
-> +}
-> +
-> +static int ricoh_mmc_probe_slot(struct sdhci_pci_slot *slot)
-> +{
-> +	slot->host->caps =
-> +		((0x21 << SDHCI_TIMEOUT_CLK_SHIFT)
-> +			& SDHCI_TIMEOUT_CLK_MASK) |
-> +
-> +		((0x21 << SDHCI_CLOCK_BASE_SHIFT)
-> +			& SDHCI_CLOCK_BASE_MASK) |
->  
-> +		SDHCI_TIMEOUT_CLK_UNIT |
-> +		SDHCI_CAN_VDD_330 |
-> +		SDHCI_CAN_DO_SDMA;
-> +	return 0;
-> +}
-> +
-> +static int ricoh_mmc_resume(struct sdhci_pci_chip *chip)
-> +{
-> +	/* Apply a delay to allow controller to settle */
-> +	/* Otherwise it becomes confused if card state changed
-> +		during suspend */
-> +	msleep(500);
->  	return 0;
->  }
->  
-> @@ -95,6 +119,15 @@ static const struct sdhci_pci_fixes sdhci_ricoh =
-> { SDHCI_QUIRK_CLOCK_BEFORE_RESET,
->  };
->  
-> +static const struct sdhci_pci_fixes sdhci_ricoh_mmc = {
-> +	.probe_slot	= ricoh_mmc_probe_slot,
-> +	.resume		= ricoh_mmc_resume,
-> +	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
-> +			  SDHCI_QUIRK_CLOCK_BEFORE_RESET |
-> +			  SDHCI_QUIRK_NO_CARD_NO_RESET |
-> +			  SDHCI_QUIRK_MISSING_CAPS
-> +};
-> +
->  static const struct sdhci_pci_fixes sdhci_ene_712 = {
->  	.quirks		= SDHCI_QUIRK_SINGLE_POWER_WRITE |
->  			  SDHCI_QUIRK_BROKEN_DMA,
-> @@ -374,6 +407,14 @@ static const struct pci_device_id pci_ids[]
-> __devinitdata = { },
->  
->  	{
-> +		.vendor         = PCI_VENDOR_ID_RICOH,
-> +		.device         = 0x843,
-> +		.subvendor      = PCI_ANY_ID,
-> +		.subdevice      = PCI_ANY_ID,
-> +		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
-> +	},
-> +
-> +	{
->  		.vendor		= PCI_VENDOR_ID_ENE,
->  		.device		= PCI_DEVICE_ID_ENE_CB712_SD,
->  		.subvendor	= PCI_ANY_ID,
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c6d1bd8..483b78e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1687,7 +1687,8 @@ int sdhci_add_host(struct sdhci_host *host)
->  			host->version);
->  	}
->  
-> -	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-> +	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ?
-> host->caps :
-> +		sdhci_readl(host, SDHCI_CAPABILITIES);
->  
->  	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
->  		host->flags |= SDHCI_USE_SDMA;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index c846813..b1839a3 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -240,6 +240,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
->  /* Controller cannot support End Attribute in NOP ADMA descriptor */
->  #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
-> +/* Controller is missing device caps. Use caps provided by host */
-> +#define SDHCI_QUIRK_MISSING_CAPS			(1<<27)
->  
->  	int			irq;		/* Device IRQ
-> */ void __iomem *		ioaddr;		/* Mapped
-> address */ @@ -292,6 +294,8 @@ struct sdhci_host {
->  
->  	struct timer_list	timer;		/* Timer for
-> timeouts */ 
-> +	unsigned int		caps;		/*
-> Alternative capabilities */ +
->  	unsigned long		private[0]
-> ____cacheline_aligned; };
->  
+Changes since previous patch:
 
---phil
+- Adding missed call s5pv210_default_sdhci3() in s5pv210_map_io()
+
+ arch/arm/mach-s5pv210/Kconfig            |    5 +++++
+ arch/arm/mach-s5pv210/cpu.c              |    1 +
+ arch/arm/mach-s5pv210/include/mach/map.h |    1 +
+ arch/arm/mach-s5pv210/mach-smdkv210.c    |    4 ++++
+ arch/arm/mach-s5pv210/setup-sdhci-gpio.c |   20 ++++++++++++++++++++
+ 5 files changed, 31 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-s5pv210/Kconfig b/arch/arm/mach-s5pv210/Kconfig
+index 0761eac..6aee967 100644
+--- a/arch/arm/mach-s5pv210/Kconfig
++++ b/arch/arm/mach-s5pv210/Kconfig
+@@ -72,9 +72,14 @@ config MACH_SMDKV210
+ 	select CPU_S5PV210
+ 	select ARCH_SPARSEMEM_ENABLE
+ 	select SAMSUNG_DEV_ADC
++	select S3C_DEV_HSMMC
++	select S3C_DEV_HSMMC1
++	select S3C_DEV_HSMMC2
++	select S3C_DEV_HSMMC3
+ 	select SAMSUNG_DEV_TS
+ 	select S3C_DEV_WDT
+ 	select HAVE_S3C2410_WATCHDOG
++	select S5PV210_SETUP_SDHCI
+ 	help
+ 	  Machine support for Samsung SMDKV210
+ 
+diff --git a/arch/arm/mach-s5pv210/cpu.c b/arch/arm/mach-s5pv210/cpu.c
+index 411a4a9..765034e 100644
+--- a/arch/arm/mach-s5pv210/cpu.c
++++ b/arch/arm/mach-s5pv210/cpu.c
+@@ -86,6 +86,7 @@ void __init s5pv210_map_io(void)
+ 	s5pv210_default_sdhci0();
+ 	s5pv210_default_sdhci1();
+ 	s5pv210_default_sdhci2();
++	s5pv210_default_sdhci3();
+ 
+ 	/* the i2c devices are directly compatible with s3c2440 */
+ 	s3c_i2c0_setname("s3c2440-i2c");
+diff --git a/arch/arm/mach-s5pv210/include/mach/map.h b/arch/arm/mach-s5pv210/include/mach/map.h
+index 34eb168..fa9d7c2 100644
+--- a/arch/arm/mach-s5pv210/include/mach/map.h
++++ b/arch/arm/mach-s5pv210/include/mach/map.h
+@@ -97,6 +97,7 @@
+ #define S3C_PA_HSMMC0		S5PV210_PA_HSMMC(0)
+ #define S3C_PA_HSMMC1		S5PV210_PA_HSMMC(1)
+ #define S3C_PA_HSMMC2		S5PV210_PA_HSMMC(2)
++#define S3C_PA_HSMMC3		S5PV210_PA_HSMMC(3)
+ #define S3C_PA_IIC		S5PV210_PA_IIC0
+ #define S3C_PA_IIC1		S5PV210_PA_IIC1
+ #define S3C_PA_IIC2		S5PV210_PA_IIC2
+diff --git a/arch/arm/mach-s5pv210/mach-smdkv210.c b/arch/arm/mach-s5pv210/mach-smdkv210.c
+index 0d46279..b08f376 100644
+--- a/arch/arm/mach-s5pv210/mach-smdkv210.c
++++ b/arch/arm/mach-s5pv210/mach-smdkv210.c
+@@ -77,6 +77,10 @@ static struct platform_device *smdkv210_devices[] __initdata = {
+ 	&s5pv210_device_iis0,
+ 	&s5pv210_device_ac97,
+ 	&s3c_device_adc,
++	&s3c_device_hsmmc0,
++	&s3c_device_hsmmc1,
++	&s3c_device_hsmmc2,
++	&s3c_device_hsmmc3,
+ 	&s3c_device_ts,
+ 	&s3c_device_wdt,
+ };
+diff --git a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c b/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
+index fe7d86d..415f62c 100644
+--- a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
++++ b/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
+@@ -102,3 +102,23 @@ void s5pv210_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
+ 	s3c_gpio_setpull(S5PV210_GPG2(2), S3C_GPIO_PULL_UP);
+ 	s3c_gpio_cfgpin(S5PV210_GPG2(2), S3C_GPIO_SFN(2));
+ }
++
++void s5pv210_setup_sdhci3_cfg_gpio(struct platform_device *dev, int width)
++{
++	unsigned int gpio;
++
++	/* Set all the necessary GPG1[0:2] pins to special-function 2 */
++	for (gpio = S5PV210_GPG3(0); gpio < S5PV210_GPG3(2); gpio++) {
++		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
++		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
++	}
++
++	/* Data pin GPG1[3:6] to special-function 2 */
++	for (gpio = S5PV210_GPG3(3); gpio <= S5PV210_GPG3(6); gpio++) {
++		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
++		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
++	}
++
++	s3c_gpio_setpull(S5PV210_GPG3(2), S3C_GPIO_PULL_UP);
++	s3c_gpio_cfgpin(S5PV210_GPG3(2), S3C_GPIO_SFN(2));
++}
+-- 
+1.6.2.5
+
