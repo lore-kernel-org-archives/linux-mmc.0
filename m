@@ -1,33 +1,90 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH V2 0/4] Add MMC erase and secure erase
-Date: Mon, 14 Jun 2010 13:21:50 +0200
-Message-ID: <20100614112150.GA5364@lst.de>
-References: <4C14AC7E.6030308@nokia.com> <20100614080921.GA28316@lst.de> <4C160E0E.4010802@nokia.com>
+From: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Subject: [PATCH v5] OMAP: Fix for bus width which improves SD card's
+	peformance.
+Date: Mon, 14 Jun 2010 21:40:59 +0530
+Message-ID: <AANLkTikNlJLiJeXwbBuS_KGPN6soAlKLQH1EUeJCKYi2@mail.gmail.com>
+References: <003b01cad0f0$6ea78040$544ff780@am.dhcp.ti.com>
+	<20100406163211.GA29117@nokia.com>
+	<4BBB6767.7010202@ti.com>
+	<20100406165720.GA17916@nokia.com>
+	<00b401cad5e0$1d1868d0$544ff780@am.dhcp.ti.com>
+	<4BBBC628.9030207@ti.com>
+	<00c901cad5e7$9de54350$544ff780@am.dhcp.ti.com>
+	<4BBBD87C.1040307@ti.com>
+	<003601cad73c$98c3aa50$544ff780@am.dhcp.ti.com>
+	<s2l7f9d1ffb1004190836l9ba703c5lab13638d968a5c55@mail.gmail.com>
+	<h2h7f9d1ffb1004190851gf08897awf198d3c8e5f9dbce@mail.gmail.com>
+	<008f01cae1b2$6262c970$544ff780@am.dhcp.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from verein.lst.de ([213.95.11.210]:34908 "EHLO verein.lst.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750874Ab0FNLWK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Jun 2010 07:22:10 -0400
-Content-Disposition: inline
-In-Reply-To: <4C160E0E.4010802@nokia.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:61992 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752005Ab0FNQmS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jun 2010 12:42:18 -0400
+In-Reply-To: <008f01cae1b2$6262c970$544ff780@am.dhcp.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Christoph Hellwig <hch@lst.de>, "jens.axboe@oracle.com" <jens.axboe@oracle.com>, Andrew Morton <akpm@linux-foundation.org>, Kyungmin Park <kmpark@infradead.org>, LKML <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Madhusudhan Chikkature <madhu.cr@ti.com>
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: Madhusudhan <madhu.cr@ti.com>, akpm@linux-foundation.org, tony@atomide.com, Nishanth Menon <nm@ti.com>, felipe.balbi@nokia.com, Vimal Singh <vimal.newwork@gmail.com>, "S, Venkatraman" <svenkatr@ti.com>, "Lavinen Jarkko (Nokia-D/Helsinki)" <jarkko.lavinen@nokia.com>
 
-On Mon, Jun 14, 2010 at 02:10:06PM +0300, Adrian Hunter wrote:
-> Needs a bio flag, a request flag, setup the request flag based on the
-> bio flag, prevent merging secure and non-secure discards, prevent drivers
-> doing non-secure discards for secure discards.
-> 
-> Seems like a lot of little changes for something that no one wants.
-> Shouldn't it wait for someone to need it first?
+This patch improves low speeds for SD cards.
+OMAP-MMC controller's can support maximum bus width of '8'.
+when bus width is mentioned as "8" in controller data,the SD
+stack will check whether bus width is "4" and if not it will
+set bus width to "1" and there by degrading performance.
+This patch fixes the issue and improves the performance of
+SD cards.
 
-I know that some people have asked for this.  But if you want to keep
-it in the driver for now that's fine to me.  But in that case please:
+Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
+Signed-off-by: Nishanth Menon <nm@ti.com>
+Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+Tested-by: Jarkko Nikula <jhnikula@gmail.com>
+---
+In V5 : Rebasing on 2.6.35-rc3
+In V4 : Updated with Nishanth's comments and appened his Signed-off
+	http://marc.info/?t=127169149300006&r=1&w=2
+In V3 : Updated  with Madhu's comments  and appended Tested by Nikula
+In V2 : Appended Signed-off by Venkat and Ack by Madhu
 
- (a) make it entirely driver private and leave no traces of it in the
-     block layer
- (b) split it into a separate patch from the discard support
+Here are my experiment numbers, on a Class 6 SDHC card:
+Read peformance is increased by 220%
+Write Performance is increased by 52%
+
+ drivers/mmc/host/omap_hsmmc.c |   17 +++++++++++++++--
+ 1 files changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index b032828..a0c8515 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2096,10 +2096,23 @@ static int __init omap_hsmmc_probe(struct
+platform_device *pdev)
+ 	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+ 		     MMC_CAP_WAIT_WHILE_BUSY;
+
+-	if (mmc_slot(host).wires >= 8)
++	switch (mmc_slot(host).wires) {
++	case 8:
+ 		mmc->caps |= MMC_CAP_8_BIT_DATA;
+-	else if (mmc_slot(host).wires >= 4)
++		/* Fall through */
++	case 4:
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
++		break;
++	case 1:
++		/* Nothing to crib here */
++	case 0:
++		/* Assuming nothing was given by board, Core use's 1-Bit */
++		break;
++	default:
++		/* Completely unexpected.. Core goes with 1-Bit Width */
++		dev_crit(mmc_dev(host->mmc), "Invalid width %d\n used!"
++			"using 1 instead\n", mmc_slot(host).wires);
++	}
+
+ 	if (mmc_slot(host).nonremovable)
+ 		mmc->caps |= MMC_CAP_NONREMOVABLE;
+-- 
+1.6.3.3
