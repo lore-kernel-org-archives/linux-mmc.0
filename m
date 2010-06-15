@@ -1,7 +1,7 @@
 From: akpm@linux-foundation.org
-Subject: + sdhci-remove-useless-set_clock-check.patch added to -mm tree
-Date: Tue, 15 Jun 2010 13:17:49 -0700
-Message-ID: <201006152017.o5FKHnlT028485@imap1.linux-foundation.org>
+Subject: + sdhci-dont-assign-mmc-caps-at-sdhci-directly.patch added to -mm tree
+Date: Tue, 15 Jun 2010 13:17:51 -0700
+Message-ID: <201006152017.o5FKHp5I028489@imap1.linux-foundation.org>
 Reply-To: linux-kernel@vger.kernel.org
 Return-path: <mm-commits-owner@vger.kernel.org>
 Sender: mm-commits-owner@vger.kernel.org
@@ -11,9 +11,9 @@ List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     sdhci: remove useless set_clock() check
+     sdhci: don't assign mmc->caps at SDHCI directly
 has been added to the -mm tree.  Its filename is
-     sdhci-remove-useless-set_clock-check.patch
+     sdhci-dont-assign-mmc-caps-at-sdhci-directly.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -29,11 +29,10 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sdhci: remove useless set_clock() check
+Subject: sdhci: don't assign mmc->caps at SDHCI directly
 From: Kyungmin Park <kyungmin.park@samsung.com>
 
-When using QUIRK_NONSTANDARD_CLOCK, it checks the set_clock() function
-which is not used actually.  So delete it.
+Some host controllers can set mmc->caps before sdhci_add_host().
 
 Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 Cc: <linux-mmc@vger.kernel.org>
@@ -43,18 +42,18 @@ Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
  drivers/mmc/host/sdhci.c |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff -puN drivers/mmc/host/sdhci.c~sdhci-remove-useless-set_clock-check drivers/mmc/host/sdhci.c
---- a/drivers/mmc/host/sdhci.c~sdhci-remove-useless-set_clock-check
+diff -puN drivers/mmc/host/sdhci.c~sdhci-dont-assign-mmc-caps-at-sdhci-directly drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~sdhci-dont-assign-mmc-caps-at-sdhci-directly
 +++ a/drivers/mmc/host/sdhci.c
-@@ -1787,7 +1787,7 @@ int sdhci_add_host(struct sdhci_host *ho
- 	 */
- 	mmc->ops = &sdhci_ops;
- 	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK &&
--			host->ops->set_clock && host->ops->get_min_clock)
-+			host->ops->get_min_clock)
- 		mmc->f_min = host->ops->get_min_clock(host);
+@@ -1792,7 +1792,7 @@ int sdhci_add_host(struct sdhci_host *ho
  	else
  		mmc->f_min = host->max_clk / 256;
+ 	mmc->f_max = host->max_clk;
+-	mmc->caps = MMC_CAP_SDIO_IRQ;
++	mmc->caps |= MMC_CAP_SDIO_IRQ;
+ 
+ 	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
 _
 
 Patches currently in -mm which might be from kyungmin.park@samsung.com are
