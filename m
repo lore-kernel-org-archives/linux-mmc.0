@@ -1,127 +1,119 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: [PATCH 2/3] sdhci-s3c: add support for the non standard minimal clock
- value
-Date: Wed, 16 Jun 2010 08:49:55 +0200
-Message-ID: <1276670996-17729-3-git-send-email-m.szyprowski@samsung.com>
-References: <1276670996-17729-1-git-send-email-m.szyprowski@samsung.com>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH V2 4/4] omap_hsmmc: Add erase capability
+Date: Wed, 16 Jun 2010 17:39:00 -0500
+Message-ID: <008d01cb0da4$b730fdf0$544ff780@am.dhcp.ti.com>
+References: <4C14AC91.6020202@nokia.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1276670996-17729-1-git-send-email-m.szyprowski@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, ben-linux@fluff.org, kgene.kim@samsung.com
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from devils.ext.ti.com ([198.47.26.153]:54743 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754808Ab0FPWjk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jun 2010 18:39:40 -0400
+In-Reply-To: <4C14AC91.6020202@nokia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Adrian Hunter' <adrian.hunter@nokia.com>, 'Andrew Morton' <akpm@linux-foundation.org>
+Cc: 'Kyungmin Park' <kmpark@infradead.org>, 'LKML' <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-S3C SDHCI host controller can change the source for generating mmc clock.
-By default host bus clock is used, what causes some problems on machines
-with 133MHz bus, because the SDHCI divider cannot be as high get proper
-clock value for identification mode. This is not a problem for the
-controller, because it can generate lower frequencies from other clock
-sources. This patch adds a new quirk to SDHCI driver to calculate the
-minimal supported clock frequency.
 
-This fixes the flood of the following warnings on Samsung S5PV210 SoCs:
-mmc0: Minimum clock frequency too high for identification mode
 
-Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/sdhci-of-esdhc.c |    1 +
- drivers/mmc/host/sdhci-s3c.c      |   29 +++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c          |    2 +-
- drivers/mmc/host/sdhci.h          |    2 ++
- 4 files changed, 33 insertions(+), 1 deletions(-)
+> -----Original Message-----
+> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
+> Sent: Sunday, June 13, 2010 5:02 AM
+> To: Andrew Morton
+> Cc: Kyungmin Park; Madhusudhan Chikkature; LKML; linux-mmc@vger.kernel.org
+> Subject: [PATCH V2 4/4] omap_hsmmc: Add erase capability
+> 
+> From 101ce0365d6ce1abc8518f4776ea723038eeb5ae Mon Sep 17 00:00:00 2001
+> From: Adrian Hunter <adrian.hunter@nokia.com>
+> Date: Tue, 18 May 2010 17:33:13 +0300
+> Subject: [PATCH 4/4] omap_hsmmc: Add erase capability
+> 
+> Disable the data (busy) timeout for erases and set the
+> MMC_CAP_ERASE capability.
+> 
+> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |   13 ++++++++++---
+>  1 files changed, 10 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index b032828..5cbbe09 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -28,6 +28,7 @@
+>  #include <linux/clk.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/core.h>
+> +#include <linux/mmc/mmc.h>
+>  #include <linux/io.h>
+>  #include <linux/semaphore.h>
+>  #include <linux/gpio.h>
+> @@ -78,6 +79,7 @@
+>  #define INT_EN_MASK		0x307F0033
+>  #define BWR_ENABLE		(1 << 4)
+>  #define BRR_ENABLE		(1 << 5)
+> +#define DTO_ENABLE		(1 << 20)
+>  #define INIT_STREAM		(1 << 1)
+>  #define DP_SELECT		(1 << 21)
+>  #define DDIR			(1 << 4)
+> @@ -523,7 +525,8 @@ static void omap_hsmmc_stop_clock(struct
+> omap_hsmmc_host *host)
+>  		dev_dbg(mmc_dev(host->mmc), "MMC Clock is not stoped\n");
+>  }
+> 
+> -static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host)
+> +static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
+> +				  struct mmc_command *cmd)
+>  {
+>  	unsigned int irq_mask;
+> 
+> @@ -532,6 +535,10 @@ static void omap_hsmmc_enable_irq(struct
+> omap_hsmmc_host *host)
+>  	else
+>  		irq_mask = INT_EN_MASK;
+> 
+> +	/* Disable timeout for erases */
+> +	if (cmd->opcode == MMC_ERASE)
+> +		irq_mask &= ~DTO_ENABLE;
+> +
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index c8623de..64b3f79 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -124,6 +124,7 @@ struct sdhci_of_data sdhci_esdhc = {
- 		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
- 		  SDHCI_QUIRK_NO_BUSY_IRQ |
- 		  SDHCI_QUIRK_NONSTANDARD_CLOCK |
-+		  SDHCI_QUIRK_NONSTANDARD_MINCLOCK |
- 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		  SDHCI_QUIRK_PIO_NEEDS_DELAY |
- 		  SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET |
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index ad30f07..b67414f 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -209,10 +209,37 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
- 	}
- }
- 
-+/**
-+ * sdhci_s3c_get_min_clock - callback to get minimal supported clock value
-+ * @host: The SDHCI host being queried
-+ *
-+ * To init mmc host properly a minimal clock value is needed. For high system
-+ * bus clock's values the standard formula gives values out of allowed range.
-+ * The clock still can be set to lower values, if clock source other then
-+ * system bus is selected.
-+*/
-+static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_s3c *ourhost = to_s3c(host);
-+	unsigned int delta, min = UINT_MAX;
-+	int src;
-+
-+	for (src = 0; src < MAX_BUS_CLK; src++) {
-+		delta = sdhci_s3c_consider_clock(ourhost, src, 0);
-+		if (delta == UINT_MAX)
-+			continue;
-+		/* delta is a negative value in this case */
-+		if (-delta < min)
-+			min = -delta;
-+	}
-+	return min;
-+}
-+
- static struct sdhci_ops sdhci_s3c_ops = {
- 	.get_max_clock		= sdhci_s3c_get_max_clk,
- 	.get_timeout_clock	= sdhci_s3c_get_timeout_clk,
- 	.set_clock		= sdhci_s3c_set_clock,
-+	.get_min_clock		= sdhci_s3c_get_min_clock,
- };
- 
- static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
-@@ -316,6 +343,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	host->quirks = 0;
- 	host->irq = irq;
- 
-+	host->quirks |= SDHCI_QUIRK_NONSTANDARD_MINCLOCK;
-+
- 	/* Setup quirks for the controller */
- 	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c6d1bd8..8b3ee53 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1785,7 +1785,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 * Set host parameters.
- 	 */
- 	mmc->ops = &sdhci_ops;
--	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK &&
-+	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_MINCLOCK &&
- 			host->ops->set_clock && host->ops->get_min_clock)
- 		mmc->f_min = host->ops->get_min_clock(host);
- 	else
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c846813..3fd87c2 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -240,6 +240,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
- /* Controller cannot support End Attribute in NOP ADMA descriptor */
- #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
-+/* Controller has nonstandard clock management */
-+#define SDHCI_QUIRK_NONSTANDARD_MINCLOCK		(1<<27)
- 
- 	int			irq;		/* Device IRQ */
- 	void __iomem *		ioaddr;		/* Mapped address */
--- 
-1.7.1.240.g225c
+I wonder is it safe to setup something based on the opcode? 
+
+When I first posted the driver I remember some comments on checks in the
+driver for opcode were considered as layer violation.
+
+But I don't see any other way of dealing with this. So it should be fine.
+
+Regards,
+Madhu
+
+>  	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+>  	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+>  	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+> @@ -782,7 +789,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host,
+> struct mmc_command *cmd,
+>  		mmc_hostname(host->mmc), cmd->opcode, cmd->arg);
+>  	host->cmd = cmd;
+> 
+> -	omap_hsmmc_enable_irq(host);
+> +	omap_hsmmc_enable_irq(host, cmd);
+> 
+>  	host->response_busy = 0;
+>  	if (cmd->flags & MMC_RSP_PRESENT) {
+> @@ -2094,7 +2101,7 @@ static int __init omap_hsmmc_probe(struct
+> platform_device *pdev)
+>  	mmc->max_seg_size = mmc->max_req_size;
+> 
+>  	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+> -		     MMC_CAP_WAIT_WHILE_BUSY;
+> +		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE;
+> 
+>  	if (mmc_slot(host).wires >= 8)
+>  		mmc->caps |= MMC_CAP_8_BIT_DATA;
+> --
+> 1.6.3.3
+
