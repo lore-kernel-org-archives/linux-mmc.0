@@ -1,119 +1,141 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: [PATCH V2 4/4] omap_hsmmc: Add erase capability
-Date: Wed, 16 Jun 2010 17:39:00 -0500
-Message-ID: <008d01cb0da4$b730fdf0$544ff780@am.dhcp.ti.com>
-References: <4C14AC91.6020202@nokia.com>
+From: Matthieu CASTET <matthieu.castet@parrot.com>
+Subject: sdhci : reduce irq off latency
+Date: Thu, 17 Jun 2010 11:07:15 +0200
+Message-ID: <4C19E5C3.2080700@parrot.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="------------060701060907000003090709"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:54743 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754808Ab0FPWjk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jun 2010 18:39:40 -0400
-In-Reply-To: <4C14AC91.6020202@nokia.com>
+Received: from co202.xi-lite.net ([149.6.83.202]:57010 "EHLO co202.xi-lite.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752285Ab0FQJN6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 17 Jun 2010 05:13:58 -0400
+Received: from ONYX.xi-lite.lan (unknown [193.34.35.243])
+	by co202.xi-lite.net (Postfix) with ESMTPS id D41632602F8
+	for <linux-mmc@vger.kernel.org>; Thu, 17 Jun 2010 11:07:17 +0200 (CEST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Adrian Hunter' <adrian.hunter@nokia.com>, 'Andrew Morton' <akpm@linux-foundation.org>
-Cc: 'Kyungmin Park' <kmpark@infradead.org>, 'LKML' <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+
+--------------060701060907000003090709
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+
+sdhci code got tasklets (sdhci_tasklet_card and sdhci_tasklet_finish),
+that does :
+{
+spin_lock_irqsave
+
+if (cond) {
+sdhci_reset
+sdhci_reset
+}
+
+spin_unlock_irqrestore
+}
+
+sdhci_reset {
+...
+while (read_reg) {
+if (timeout == 0)
+    break;
+timeout--;
+mdelay(1);
+}
+...
+}
 
 
+The problem is that sdhci_reset [1] does busy pooling (with a 
+granularity of 1 ms) on a register up to a timeout of 100 ms.
 
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> Sent: Sunday, June 13, 2010 5:02 AM
-> To: Andrew Morton
-> Cc: Kyungmin Park; Madhusudhan Chikkature; LKML; linux-mmc@vger.kernel.org
-> Subject: [PATCH V2 4/4] omap_hsmmc: Add erase capability
-> 
-> From 101ce0365d6ce1abc8518f4776ea723038eeb5ae Mon Sep 17 00:00:00 2001
-> From: Adrian Hunter <adrian.hunter@nokia.com>
-> Date: Tue, 18 May 2010 17:33:13 +0300
-> Subject: [PATCH 4/4] omap_hsmmc: Add erase capability
-> 
-> Disable the data (busy) timeout for erases and set the
-> MMC_CAP_ERASE capability.
-> 
-> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |   13 ++++++++++---
->  1 files changed, 10 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index b032828..5cbbe09 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -28,6 +28,7 @@
->  #include <linux/clk.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/core.h>
-> +#include <linux/mmc/mmc.h>
->  #include <linux/io.h>
->  #include <linux/semaphore.h>
->  #include <linux/gpio.h>
-> @@ -78,6 +79,7 @@
->  #define INT_EN_MASK		0x307F0033
->  #define BWR_ENABLE		(1 << 4)
->  #define BRR_ENABLE		(1 << 5)
-> +#define DTO_ENABLE		(1 << 20)
->  #define INIT_STREAM		(1 << 1)
->  #define DP_SELECT		(1 << 21)
->  #define DDIR			(1 << 4)
-> @@ -523,7 +525,8 @@ static void omap_hsmmc_stop_clock(struct
-> omap_hsmmc_host *host)
->  		dev_dbg(mmc_dev(host->mmc), "MMC Clock is not stoped\n");
->  }
-> 
-> -static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host)
-> +static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
-> +				  struct mmc_command *cmd)
->  {
->  	unsigned int irq_mask;
-> 
-> @@ -532,6 +535,10 @@ static void omap_hsmmc_enable_irq(struct
-> omap_hsmmc_host *host)
->  	else
->  		irq_mask = INT_EN_MASK;
-> 
-> +	/* Disable timeout for erases */
-> +	if (cmd->opcode == MMC_ERASE)
-> +		irq_mask &= ~DTO_ENABLE;
-> +
+With the current code, we got irq off during 2*1ms. With the attached 
+patch we reduce irq off to 30 us.
 
-I wonder is it safe to setup something based on the opcode? 
+Note that worst case 100 ms irq off still exist.
 
-When I first posted the driver I remember some comments on checks in the
-driver for opcode were considered as layer violation.
+Signed-off-by: Matthieu CASTET <matthieu.castet@parrot.com>
 
-But I don't see any other way of dealing with this. So it should be fine.
 
-Regards,
-Madhu
+--------------060701060907000003090709
+Content-Type: text/x-diff; name="sdhci.diff"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline; filename="sdhci.diff"
 
->  	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->  	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
->  	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
-> @@ -782,7 +789,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host,
-> struct mmc_command *cmd,
->  		mmc_hostname(host->mmc), cmd->opcode, cmd->arg);
->  	host->cmd = cmd;
-> 
-> -	omap_hsmmc_enable_irq(host);
-> +	omap_hsmmc_enable_irq(host, cmd);
-> 
->  	host->response_busy = 0;
->  	if (cmd->flags & MMC_RSP_PRESENT) {
-> @@ -2094,7 +2101,7 @@ static int __init omap_hsmmc_probe(struct
-> platform_device *pdev)
->  	mmc->max_seg_size = mmc->max_req_size;
-> 
->  	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
-> -		     MMC_CAP_WAIT_WHILE_BUSY;
-> +		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE;
-> 
->  	if (mmc_slot(host).wires >= 8)
->  		mmc->caps |= MMC_CAP_8_BIT_DATA;
-> --
-> 1.6.3.3
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c6d1bd8..03d6bde 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -157,18 +157,17 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 		host->clock = 0;
+ 
+ 	/* Wait max 100 ms */
+-	timeout = 100;
++	timeout = jiffies + msecs_to_jiffies(100);
+ 
+ 	/* hw clears the bit when it's done */
+ 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+-		if (timeout == 0) {
++		if (time_is_before_jiffies(timeout)) {
+ 			printk(KERN_ERR "%s: Reset 0x%x never completed.\n",
+ 				mmc_hostname(host->mmc), (int)mask);
+ 			sdhci_dumpregs(host);
+ 			return;
+ 		}
+-		timeout--;
+-		mdelay(1);
++		cpu_relax();
+ 	}
+ 
+ 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
+@@ -882,7 +881,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	WARN_ON(host->cmd);
+ 
+ 	/* Wait max 10 ms */
+-	timeout = 10;
++	timeout = jiffies + msecs_to_jiffies(10);
+ 
+ 	mask = SDHCI_CMD_INHIBIT;
+ 	if ((cmd->data != NULL) || (cmd->flags & MMC_RSP_BUSY))
+@@ -894,7 +893,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		mask &= ~SDHCI_DATA_INHIBIT;
+ 
+ 	while (sdhci_readl(host, SDHCI_PRESENT_STATE) & mask) {
+-		if (timeout == 0) {
++		if (time_is_before_jiffies(timeout)) {
+ 			printk(KERN_ERR "%s: Controller never released "
+ 				"inhibit bit(s).\n", mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+@@ -902,8 +901,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 			tasklet_schedule(&host->finish_tasklet);
+ 			return;
+ 		}
+-		timeout--;
+-		mdelay(1);
++		cpu_relax();
+ 	}
+ 
+ 	mod_timer(&host->timer, jiffies + 10 * HZ);
+@@ -1007,17 +1005,16 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ 
+ 	/* Wait max 20 ms */
+-	timeout = 20;
++	timeout = jiffies + msecs_to_jiffies(20)
+ 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+ 		& SDHCI_CLOCK_INT_STABLE)) {
+-		if (timeout == 0) {
++		if (time_is_before_jiffies(timeout)) {
+ 			printk(KERN_ERR "%s: Internal clock never "
+ 				"stabilised.\n", mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+ 			return;
+ 		}
+-		timeout--;
+-		mdelay(1);
++		cpu_relax();
+ 	}
+ 
+ 	clk |= SDHCI_CLOCK_CARD_EN;
 
+--------------060701060907000003090709--
