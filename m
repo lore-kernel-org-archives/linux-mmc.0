@@ -1,102 +1,95 @@
-From: =?utf-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>
-Subject: [PATCH] mxcmmc: convert to pm_ops and enable/disable clock
-Date: Thu, 17 Jun 2010 20:59:07 +0200
-Message-ID: <1276801147-4103-7-git-send-email-eric@eukrea.com>
-References: <1276801147-4103-1-git-send-email-eric@eukrea.com>
- <1276801147-4103-2-git-send-email-eric@eukrea.com>
- <1276801147-4103-3-git-send-email-eric@eukrea.com>
- <1276801147-4103-4-git-send-email-eric@eukrea.com>
- <1276801147-4103-5-git-send-email-eric@eukrea.com>
- <1276801147-4103-6-git-send-email-eric@eukrea.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: akpm@linux-foundation.org
+Subject: + mmc-omap-fix-for-bus-width-which-improves-sd-cards-peformance.patch added to -mm tree
+Date: Thu, 17 Jun 2010 13:11:22 -0700
+Message-ID: <201006172011.o5HKBM3e024837@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp3-g21.free.fr ([212.27.42.3]:50107 "EHLO smtp3-g21.free.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757354Ab0FQS7j (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 17 Jun 2010 14:59:39 -0400
-In-Reply-To: <1276801147-4103-6-git-send-email-eric@eukrea.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:45502 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933245Ab0FQULg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jun 2010 16:11:36 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: s.hauer@pengutronix.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: mm-commits@vger.kernel.org
+Cc: kishore.kadiyala@ti.com, adrian.hunter@nokia.com, jhnikula@gmail.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com, matt@console-pimps.org, nm@ti.com, svenkatr@ti.com, tony@atomide.com
 
-Signed-off-by: Eric B=C3=A9nard <eric@eukrea.com>
-Cc: s.hauer@pengutronix.de
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
+
+The patch titled
+     mmc: omap: fix for bus width which improves SD card's  peformance.
+has been added to the -mm tree.  Its filename is
+     mmc-omap-fix-for-bus-width-which-improves-sd-cards-peformance.patch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc: omap: fix for bus width which improves SD card's  peformance.
+From: Kishore Kadiyala <kishore.kadiyala@ti.com>
+
+This patch improves low speeds for SD cards.
+
+OMAP-MMC controller's can support maximum bus width of '8'.  when bus
+width is mentioned as "8" in controller data,the SD stack will check
+whether bus width is "4" and if not it will set bus width to "1" and there
+by degrading performance.  This patch fixes the issue and improves the
+performance of SD cards.
+
+Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
+Signed-off-by: Nishanth Menon <nm@ti.com>
+Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+Tested-by: Jarkko Nikula <jhnikula@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Matt Fleming <matt@console-pimps.org>
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
- drivers/mmc/host/mxcmmc.c |   32 ++++++++++++++++++--------------
- 1 files changed, 18 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index fdf33e8..350f78e 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -936,43 +936,47 @@ static int mxcmci_remove(struct platform_device *=
-pdev)
- }
-=20
- #ifdef CONFIG_PM
--static int mxcmci_suspend(struct platform_device *dev, pm_message_t st=
-ate)
-+static int mxcmci_suspend(struct device *dev)
- {
--	struct mmc_host *mmc =3D platform_get_drvdata(dev);
-+	struct mmc_host *mmc =3D dev_get_drvdata(dev);
-+	struct mxcmci_host *host =3D mmc_priv(mmc);
- 	int ret =3D 0;
-=20
- 	if (mmc)
- 		ret =3D mmc_suspend_host(mmc);
-+	clk_disable(host->clk);
-=20
- 	return ret;
- }
-=20
--static int mxcmci_resume(struct platform_device *dev)
-+static int mxcmci_resume(struct device *dev)
- {
--	struct mmc_host *mmc =3D platform_get_drvdata(dev);
--	struct mxcmci_host *host;
-+	struct mmc_host *mmc =3D dev_get_drvdata(dev);
-+	struct mxcmci_host *host =3D mmc_priv(mmc);
- 	int ret =3D 0;
-=20
--	if (mmc) {
--		host =3D mmc_priv(mmc);
-+	clk_enable(host->clk);
-+	if (mmc)
- 		ret =3D mmc_resume_host(mmc);
--	}
-=20
- 	return ret;
- }
--#else
--#define mxcmci_suspend  NULL
--#define mxcmci_resume   NULL
--#endif /* CONFIG_PM */
-+
-+static const struct dev_pm_ops mxcmci_pm_ops =3D {
-+	.suspend	=3D mxcmci_suspend,
-+	.resume		=3D mxcmci_resume,
-+};
-+#endif
-=20
- static struct platform_driver mxcmci_driver =3D {
- 	.probe		=3D mxcmci_probe,
- 	.remove		=3D mxcmci_remove,
--	.suspend	=3D mxcmci_suspend,
--	.resume		=3D mxcmci_resume,
- 	.driver		=3D {
- 		.name		=3D DRIVER_NAME,
- 		.owner		=3D THIS_MODULE,
-+#ifdef CONFIG_PM
-+		.pm	=3D &mxcmci_pm_ops,
-+#endif
- 	}
- };
-=20
---=20
-1.6.3.3
+ drivers/mmc/host/omap_hsmmc.c |   17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff -puN drivers/mmc/host/omap_hsmmc.c~mmc-omap-fix-for-bus-width-which-improves-sd-cards-peformance drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~mmc-omap-fix-for-bus-width-which-improves-sd-cards-peformance
++++ a/drivers/mmc/host/omap_hsmmc.c
+@@ -2096,10 +2096,23 @@ static int __init omap_hsmmc_probe(struc
+ 	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+ 		     MMC_CAP_WAIT_WHILE_BUSY;
+ 
+-	if (mmc_slot(host).wires >= 8)
++	switch (mmc_slot(host).wires) {
++	case 8:
+ 		mmc->caps |= MMC_CAP_8_BIT_DATA;
+-	else if (mmc_slot(host).wires >= 4)
++		/* Fall through */
++	case 4:
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
++		break;
++	case 1:
++		/* Nothing to crib here */
++	case 0:
++		/* Assuming nothing was given by board, Core use's 1-Bit */
++		break;
++	default:
++		/* Completely unexpected.. Core goes with 1-Bit Width */
++		dev_crit(mmc_dev(host->mmc), "Invalid width %d\n used!"
++			"using 1 instead\n", mmc_slot(host).wires);
++	}
+ 
+ 	if (mmc_slot(host).nonremovable)
+ 		mmc->caps |= MMC_CAP_NONREMOVABLE;
+_
+
+Patches currently in -mm which might be from kishore.kadiyala@ti.com are
+
+mmc-omap-fix-for-bus-width-which-improves-sd-cards-peformance.patch
 
