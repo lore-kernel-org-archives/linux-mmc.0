@@ -1,88 +1,62 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH v5 2/2] OMAP4 HSMMC: Adding card detect support for MMC1
-  Controller
-Date: Thu, 17 Jun 2010 13:27:37 -0700
-Message-ID: <20100617132737.d952d191.akpm@linux-foundation.org>
-References: <43584.10.24.255.17.1276788439.squirrel@dbdmail.itg.ti.com>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: [PATCH] Two fixes for my mmc/sd cardreader
+Date: Fri, 18 Jun 2010 00:21:35 +0300
+Message-ID: <1276809695.28201.13.camel@maxim-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:43664 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757508Ab0FQU1r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jun 2010 16:27:47 -0400
-In-Reply-To: <43584.10.24.255.17.1276788439.squirrel@dbdmail.itg.ti.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:46241 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759948Ab0FQVVk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jun 2010 17:21:40 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: kishore kadiyala <kishore.kadiyala@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, madhu.cr@ti.com, adrian.hunter@nokia.com
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-pm <linux-pm@lists.linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Philip Langdale <philipl@overt.org>
 
-On Thu, 17 Jun 2010 20:57:19 +0530 (IST)
-"kishore kadiyala" <kishore.kadiyala@ti.com> wrote:
+Hi,
 
-> Adding card detect callback function which gives the status of
-> the card .For MMC1 Controller, Card detect interrupt source is
-> twl6030 and card present/absent status is provided by MMCCTRL
-> register of twl6030.
-> 
->
-> ...
->
-> 
-> +	int ret = -ENOSYS;
-> +	int ret = -ENOSYS;
+These are 2 fixes for my card reader.
 
-ENOSYS seems an inappropriate errno to use in a driver.
 
-"ENOSYS -- The system doesn't support that function.  For example, if
-you call setpgid() on a system without job control, you'll get an
-ENOSYS error."
+First patch fixes old issue with system hand on suspend to disk/ram with
+mmc card inserted.
+I updated description, and pm notification registration order.
+I think this patch can an should go to 2.6.35, because it fixes long
+standing and nasty regression.
 
-I think it means "you the programmer tried to do something in a syscall
-which didn't make sense in this context".
+The second patch is a result of my work trying to understand why my card
+reader sometimes dies on resume.
+This reader has a special MMC function which steals MMC cards, and until
+now had no driver. A way to disable it was found, and while it works, it
+has (at least here) a side effect of killing the controller on resume
+from ram/disk (and it happens often, and doesn't depend of whether card
+was in slot or not during suspend).
 
-I'm not sure what _is_ appropraite here.  There's always EIO I guess. 
-ENODEV?
+Fortunately it turned out that MMC part is _almost_ standard SDHCI
+controller.
+This patch adds support for this device to standard sdhci driver.
+Unfortunately, this support still contais small hack.
+It waits 1/2 of a second on resume before initializing the controller.
+Not doing so, and resuming with MMC card present results in confused
+controller. It is not dead though. A card reinsert makes it work again
+with all cards.
+Yet the 1st patch is must for this because otherwise mmc core seeing
+that controller doesn't respond, removes the card, therefore hangs the
+system.
+It doesn't happen when I wait these 1/2 of second though.
 
-This happens a lot.  The userspace errnos just don't map well onto
-kernel-internal operations.  it was a mistake - we should have defined a kernel-internal namespace and perhaps type for such things.  Oh well.
+I think that this patch is also ok for 2.6.35, because it only adds new
+functionality.
+You are free to disable MMC controller using the same
+CONFIG_MMC_RICOH_MMC.
 
-> +/* Configuring Card Detect for MMC1 */
-> +static inline int omap4_hsmmc1_card_detect_config(void)
-> +{
-> +	int res = -1;
-> +	u8 reg_val = 0;
-> +
-> +	/* Unmasking the Card detect Interrupt line for MMC1 from Phoenix */
-> +	if (twl_class_is_6030()) {
-> +		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
-> +							REG_INT_MSK_LINE_B);
-> +		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
-> +							REG_INT_MSK_STS_B);
-> +	}
-> +
-> +
-> +	/*
-> +	 * Intially Configuring MMC_CTRL for receving interrupts &
-> +	 * Card status on TWL6030 for MMC1
-> +	 */
-> +	res = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val, TWL6030_MMCCTRL);
-> +	if (res < 0)
-> +		return res;
-> +	reg_val &= ~VMMC_AUTO_OFF;
-> +	reg_val |= SW_FC;
-> +	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_MMCCTRL);
-> +
-> +	 /* Configuring CFG_INPUT_PUPD3 */
-> +	res = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
-> +						TWL6030_CFG_INPUT_PUPD3);
-> +	if (res < 0)
-> +		return res;
-> +	reg_val &= ~(MMC_PU | MMC_PD);
-> +	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_CFG_INPUT_PUPD3);
-> +	return res;
-> +}
+If you don't disable it though, instead of full lack of functionality
+you will get full featured MMC controller.
 
-This is waaaaay to large to be inlined.  Why not put it in a .c file?
+Best regards,
+Maxim Levitsky
+
+
 
