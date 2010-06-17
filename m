@@ -1,255 +1,408 @@
-From: "kishore kadiyala" <kishore.kadiyala@ti.com>
-Subject: [PATCH v5 2/2] OMAP4 HSMMC: Adding card detect support for MMC1
-     Controller
-Date: Thu, 17 Jun 2010 20:57:19 +0530 (IST)
-Message-ID: <43584.10.24.255.17.1276788439.squirrel@dbdmail.itg.ti.com>
+From: Alan Cox <alan@linux.intel.com>
+Subject: [PATCH] MMC driver full patch for Moorestown platform
+Date: Thu, 17 Jun 2010 16:17:00 +0100
+Message-ID: <20100617151623.9951.41387.stgit@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: tony@atomide.com, madhu.cr@ti.com, akpm@linux-foundation.org, adrian.hunter@nokia.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:30500 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754473Ab0FQPkJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 17 Jun 2010 11:40:09 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: pierre@ossman.eu, linux-mmc@vger.kernel.org
 
-Adding card detect callback function which gives the status of
-the card .For MMC1 Controller, Card detect interrupt source is
-twl6030 and card present/absent status is provided by MMCCTRL
-register of twl6030.
+From: JiebingLi <jiebing.li@intel.com>
 
-Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+This patch enables Moorestown Langwell A-3 platform.
+
+The main thrust of this is adding support for serialization of devices as
+we do on various other bits of hardware with bugs. We also deal with spurious
+interrupts and clock rewriting.
+
+The PCI handling code is slightly tweaked so that the driver specific methods
+can override the number of slots, and a method provided so devices can indicate
+they only support one slot even if the PCI config says otherwise.
+
+The serialization support is as clean as we can see how to make it and as
+general as possible - with just one pair of tiny changes to the core code
+that can be used by any future driver with such limits.
+
+Quirks tidied up by Alan Cox
+
+Signed-off-by: JiebingLi <jiebing.li@intel.com>
+Signed-off-by: Alan Cox <alan@linux.intel.com>
 ---
- arch/arm/mach-omap2/board-4430sdp.c   |   11 +++++--
- arch/arm/mach-omap2/hsmmc.c           |    1 +
- arch/arm/plat-omap/include/plat/mmc.h |    1 +
- drivers/mfd/twl6030-irq.c             |   23 ++++++++++++++++
- drivers/mmc/host/omap_hsmmc.c         |   30 ++++++++++++++++++---
- include/linux/i2c/twl.h               |   46 +++++++++++++++++++++++++++++++++
- 6 files changed, 104 insertions(+), 8 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
-index e4a5d66..1cf6f3b 100644
---- a/arch/arm/mach-omap2/board-4430sdp.c
-+++ b/arch/arm/mach-omap2/board-4430sdp.c
-@@ -144,6 +144,7 @@ static struct omap2_hsmmc_info mmc[] = {
- 	{
- 		.mmc		= 1,
- 		.wires		= 8,
-+		.cd_type	= NON_GPIO,
- 		.gpio_wp	= -EINVAL,
- 	},
- 	{
-@@ -174,10 +175,14 @@ static int omap4_twl6030_hsmmc_late_init(struct device *dev)
- 				struct platform_device, dev);
- 	struct omap_mmc_platform_data *pdata = dev->platform_data;
+ drivers/mmc/core/core.c      |    6 ++
+ drivers/mmc/host/sdhci-pci.c |   48 ++++++++++++++++++-
+ drivers/mmc/host/sdhci.c     |  108 ++++++++++++++++++++++++++++++++++--------
+ drivers/mmc/host/sdhci.h     |    7 +++
+ include/linux/mmc/host.h     |    2 +
+ include/linux/pci_ids.h      |    2 +
+ 6 files changed, 151 insertions(+), 22 deletions(-)
 
--	/* Setting MMC1 Card detect Irq */
--	if (pdev->id == 0)
-+	/* MMC1 Card detect Configuration */
-+	if (pdev->id == 0) {
-+		ret = omap4_hsmmc1_card_detect_config();
-+		if (ret < 0)
-+			pr_err("Unable to configure Card detect for MMC1\n");
- 		pdata->slots[0].card_detect_irq = TWL6030_IRQ_BASE +
--						MMCDETECT_INTR_OFFSET;
-+							MMCDETECT_INTR_OFFSET;
-+	}
- 	return ret;
- }
 
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 1ef54b0..8a8f7b1 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -265,6 +265,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
- 		mmc->get_context_loss_count = hsmmc_get_context_loss;
-
- 		mmc->slots[0].switch_pin = c->gpio_cd;
-+		mmc->slots[0].cd_type = c->cd_type;
- 		mmc->slots[0].gpio_wp = c->gpio_wp;
-
- 		mmc->slots[0].remux = c->remux;
-diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
-index ed60c0f..cd42c77 100644
---- a/arch/arm/plat-omap/include/plat/mmc.h
-+++ b/arch/arm/plat-omap/include/plat/mmc.h
-@@ -14,6 +14,7 @@
- #include <linux/types.h>
- #include <linux/device.h>
- #include <linux/mmc/host.h>
-+#include <linux/i2c/twl.h>
-
- #include <plat/board.h>
-
-diff --git a/drivers/mfd/twl6030-irq.c b/drivers/mfd/twl6030-irq.c
-index 10bf228..f17e4e7 100644
---- a/drivers/mfd/twl6030-irq.c
-+++ b/drivers/mfd/twl6030-irq.c
-@@ -223,6 +223,29 @@ int twl6030_interrupt_mask(u8 bit_mask, u8 offset)
- }
- EXPORT_SYMBOL(twl6030_interrupt_mask);
-
-+int twl6030_mmc_card_detect(int host_id, int slot)
-+{
-+	int ret = -ENOSYS;
-+	u8 read_reg;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 569e94d..10d1c8d 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -213,9 +213,15 @@ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
+ 	mrq->done_data = &complete;
+ 	mrq->done = mmc_wait_done;
+ 
++	if (host->port_mutex)
++		mutex_lock(host->port_mutex);
 +
-+	switch (host_id) {
-+	case 0:
-+		/*
-+		 * BIT0 of REG_MMC_CTRL
-+		 * 0 - Card not present ,1 - Card present
-+		 */
-+		ret = twl_i2c_read_u8(TWL6030_MODULE_ID0,
-+					&read_reg, TWL6030_MMCCTRL);
-+		if (ret >= 0)
-+			ret = read_reg & STS_MMC;
-+		break;
-+	default:
-+		pr_err("Unkown MMC controller %d in %s\n", host_id, __func__);
-+	}
-+	return ret;
-+}
-+EXPORT_SYMBOL(twl6030_mmc_card_detect);
+ 	mmc_start_request(host, mrq);
+ 
+ 	wait_for_completion(&complete);
 +
- int twl6030_init_irq(int irq_num, unsigned irq_base, unsigned irq_end)
- {
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index b032828..5d5bd29 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -189,9 +189,16 @@ struct omap_hsmmc_host {
- static int omap_hsmmc_card_detect(struct device *dev, int slot)
- {
- 	struct omap_mmc_platform_data *mmc = dev->platform_data;
-+	struct platform_device *pdev = container_of(dev,
-+				struct platform_device, dev);
-+	int ret = -ENOSYS;
-
--	/* NOTE: assumes card detect signal is active-low */
--	return !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
-+	if (mmc->slots[0].cd_type == GPIO)
-+		/* NOTE: assumes card detect signal is active-low */
-+		ret = !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
-+	else
-+		ret = twl6030_mmc_card_detect(pdev->id, slot);
-+	return ret;
++	if (host->port_mutex)
++		mutex_unlock(host->port_mutex);
  }
-
- static int omap_hsmmc_get_wp(struct device *dev, int slot)
-@@ -464,8 +471,6 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
- 	int ret;
-
- 	if (gpio_is_valid(pdata->slots[0].switch_pin)) {
--		pdata->suspend = omap_hsmmc_suspend_cdirq;
--		pdata->resume = omap_hsmmc_resume_cdirq;
- 		if (pdata->slots[0].cover)
- 			pdata->slots[0].get_cover_state =
- 					omap_hsmmc_get_cover_state;
-@@ -504,6 +509,15 @@ err_free_sp:
- 	return ret;
- }
-
-+static int omap_hsmmc_non_gpio_init(struct omap_mmc_platform_data *pdata)
+ 
+ EXPORT_SYMBOL(mmc_wait_for_req);
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 65483fd..9ce725b 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -39,6 +39,8 @@
+ 
+ #define MAX_SLOTS			8
+ 
++static DEFINE_MUTEX(port_mutex);
++
+ struct sdhci_pci_chip;
+ struct sdhci_pci_slot;
+ 
+@@ -364,6 +366,30 @@ static const struct sdhci_pci_fixes sdhci_via = {
+ 	.probe		= via_probe,
+ };
+ 
++static int single_slot(struct sdhci_pci_chip *chip)
 +{
-+	if (pdata->slots[0].switch_pin > 0) {
-+		pdata->slots[0].card_detect = omap_hsmmc_card_detect;
-+		pdata->slots[0].card_detect_irq = pdata->slots[0].switch_pin;
-+	}
++	chip->num_slots = 1;
 +	return 0;
 +}
 +
- static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
- {
- 	if (gpio_is_valid(pdata->slots[0].gpio_wp))
-@@ -1988,7 +2002,11 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
- 	if (res == NULL)
- 		return -EBUSY;
-
--	ret = omap_hsmmc_gpio_init(pdata);
-+	if (pdata->slots[0].cd_type == GPIO)
-+		ret = omap_hsmmc_gpio_init(pdata);
-+	else
-+		ret =  omap_hsmmc_non_gpio_init(pdata);
++/*
++ * ADMA operation is disabled for Moorestown platform due to
++ * hardware bugs.
++ */
++static const struct sdhci_pci_fixes sdhci_intel_mrst_hc0 = {
++	.quirks		= SDHCI_QUIRK_BROKEN_ADMA |
++			  SDHCI_QUIRK_SERIALIZE |
++			  SDHCI_QUIRK_BROKEN_RESETALL |
++			  SDHCI_QUIRK_FORCE_FULL_SPEED_MODE,
++};
 +
- 	if (ret)
- 		goto err;
-
-@@ -2170,6 +2188,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
- 				"Unable to grab MMC CD IRQ\n");
- 			goto err_irq_cd;
- 		}
-+		pdata->suspend = omap_hsmmc_suspend_cdirq;
-+		pdata->resume = omap_hsmmc_resume_cdirq;
++static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1 = {
++	.quirks		= SDHCI_QUIRK_BROKEN_ADMA |
++			  SDHCI_QUIRK_BROKEN_RESETALL |
++			  SDHCI_QUIRK_FORCE_FULL_SPEED_MODE,
++	.probe		= single_slot
++};
++
+ static const struct pci_device_id pci_ids[] __devinitdata = {
+ 	{
+ 		.vendor		= PCI_VENDOR_ID_RICOH,
+@@ -445,6 +471,22 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
+ 		.driver_data	= (kernel_ulong_t)&sdhci_via,
+ 	},
+ 
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_MRST_SD0,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrst_hc0,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_MRST_SD1,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrst_hc1,
++	},
++
+ 	{	/* Generic SD host controller */
+ 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
+ 	},
+@@ -643,6 +685,9 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
+ 
+ 	host->irq = pdev->irq;
+ 
++	if (host->quirks & SDHCI_QUIRK_SERIALIZE)
++		host->mmc->port_mutex = &port_mutex;
++
+ 	ret = pci_request_region(pdev, bar, mmc_hostname(host->mmc));
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "cannot request region\n");
+@@ -728,6 +773,7 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
+ 		return ret;
+ 
+ 	slots = PCI_SLOT_INFO_SLOTS(slots) + 1;
++
+ 	dev_dbg(&pdev->dev, "found %d slot(s)\n", slots);
+ 	if (slots == 0)
+ 		return -ENODEV;
+@@ -769,7 +815,7 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
+ 			goto free;
  	}
-
- 	omap_hsmmc_disable_irq(host);
-diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
-index 6de90bf..38ef529 100644
---- a/include/linux/i2c/twl.h
-+++ b/include/linux/i2c/twl.h
-@@ -141,6 +141,14 @@
- #define TWL6030_CHARGER_CTRL_INT_MASK 	0x10
- #define TWL6030_CHARGER_FAULT_INT_MASK 	0x60
-
-+#define TWL6030_MMCCTRL			0xEE
-+#define VMMC_AUTO_OFF			(0x1 << 3)
-+#define SW_FC				(0x1 << 2)
-+#define STS_MMC				0x1
+ 
+-	for (i = 0;i < slots;i++) {
++	for (i = 0;i < chip->num_slots;i++) {
+ 		slot = sdhci_pci_probe_slot(pdev, chip, first_bar + i);
+ 		if (IS_ERR(slot)) {
+ 			for (i--;i >= 0;i--)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c6d1bd8..e720106 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -162,9 +162,11 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	/* hw clears the bit when it's done */
+ 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+ 		if (timeout == 0) {
+-			printk(KERN_ERR "%s: Reset 0x%x never completed.\n",
+-				mmc_hostname(host->mmc), (int)mask);
+-			sdhci_dumpregs(host);
++			if (!(host->quirks & SDHCI_QUIRK_BROKEN_RESETALL)) {
++				printk(KERN_ERR "%s: Reset 0x%x never completed.\n",
++					mmc_hostname(host->mmc), (int)mask);
++				sdhci_dumpregs(host);
++			}
+ 			return;
+ 		}
+ 		timeout--;
+@@ -179,10 +181,19 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ 
+ static void sdhci_init(struct sdhci_host *host, int soft)
+ {
+-	if (soft)
+-		sdhci_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
+-	else
+-		sdhci_reset(host, SDHCI_RESET_ALL);
++	u32 intmask;
 +
-+#define TWL6030_CFG_INPUT_PUPD3		0xF2
-+#define MMC_PU				(0x1 << 3)
-+#define MMC_PD				(0x1 << 2)
-
- #define TWL4030_CLASS_ID 		0x4030
- #define TWL6030_CLASS_ID 		0x6030
-@@ -173,6 +181,44 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg, unsigned num_bytes);
- int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
- int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
-
-+/* MMC1 Controller on OMAP4 uses Phoenix Irq for Card detect */
-+int twl6030_mmc_card_detect(int host_id, int slot);
++	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
++	sdhci_writel(host,
++		intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE),
++		SDHCI_INT_STATUS);
 +
-+/* Configuring Card Detect for MMC1 */
-+static inline int omap4_hsmmc1_card_detect_config(void)
-+{
-+	int res = -1;
-+	u8 reg_val = 0;
-+
-+	/* Unmasking the Card detect Interrupt line for MMC1 from Phoenix */
-+	if (twl_class_is_6030()) {
-+		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
-+							REG_INT_MSK_LINE_B);
-+		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
-+							REG_INT_MSK_STS_B);
++	if (!(host->quirks & SDHCI_QUIRK_BROKEN_RESETALL)) {
++		if (soft)
++			sdhci_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
++		else
++			sdhci_reset(host, SDHCI_RESET_ALL);
 +	}
+ 
+ 	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK,
+ 		SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
+@@ -195,6 +206,9 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+ 		host->clock = 0;
+ 		sdhci_set_ios(host->mmc, &host->mmc->ios);
+ 	}
 +
-+	/*
-+	 * Intially Configuring MMC_CTRL for receving interrupts &
-+	 * Card status on TWL6030 for MMC1
-+	 */
-+	res = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val, TWL6030_MMCCTRL);
-+	if (res < 0)
-+		return res;
-+	reg_val &= ~VMMC_AUTO_OFF;
-+	reg_val |= SW_FC;
-+	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_MMCCTRL);
++	/* disable wakeup signal during initialization */
++	sdhci_writeb(host, 0x0, SDHCI_WAKE_UP_CONTROL);
+ }
+ 
+ static void sdhci_reinit(struct sdhci_host *host)
+@@ -625,11 +639,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_data *data)
+ 			break;
+ 	}
+ 
+-	if (count >= 0xF) {
+-		printk(KERN_WARNING "%s: Too large timeout requested!\n",
+-			mmc_hostname(host->mmc));
++	if (count >= 0xF)
+ 		count = 0xE;
+-	}
+ 
+ 	return count;
+ }
+@@ -873,6 +884,36 @@ static void sdhci_finish_data(struct sdhci_host *host)
+ 		tasklet_schedule(&host->finish_tasklet);
+ }
+ 
++/*
++ * HW problem exists in LNW A3 so clock register has to be set
++ * for every command if both SDIO0 and SDIO1 are enabled.
++ */
++static void sdhci_clock_reset(struct sdhci_host *host)
++{
++	u16 clk;
++	unsigned long timeout;
 +
-+	 /* Configuring CFG_INPUT_PUPD3 */
-+	res = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
-+						TWL6030_CFG_INPUT_PUPD3);
-+	if (res < 0)
-+		return res;
-+	reg_val &= ~(MMC_PU | MMC_PD);
-+	twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_CFG_INPUT_PUPD3);
-+	return res;
++	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++
++	clk |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	/* Wait max 10 ms */
++	timeout = 10;
++	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++		& SDHCI_CLOCK_INT_STABLE)) {
++		if (timeout == 0) {
++			printk(KERN_ERR "%s: Internal clock never "
++				"stabilised.\n",
++				mmc_hostname(host->mmc));
++			sdhci_dumpregs(host);
++			return;
++		}
++		timeout--;
++		mdelay(1);
++	}
 +}
 +
- /*----------------------------------------------------------------------*/
-
- /*
--- 
-1.6.3.3
-
+ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	int flags;
+@@ -940,6 +981,9 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	if (cmd->data)
+ 		flags |= SDHCI_CMD_DATA;
+ 
++	if (host->quirks & SDHCI_QUIRK_SERIALIZE)
++		sdhci_clock_reset(host);
++
+ 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
+ }
+ 
+@@ -1159,12 +1203,23 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+ 
+-	if (ios->bus_width == MMC_BUS_WIDTH_4)
++	if (ios->bus_width == MMC_BUS_WIDTH_8) {
++		ctrl |= SDHCI_CTRL_8BITBUS;
++		ctrl &= ~SDHCI_CTRL_4BITBUS;
++	} else if (ios->bus_width == MMC_BUS_WIDTH_4) {
++		ctrl &= ~SDHCI_CTRL_8BITBUS;
+ 		ctrl |= SDHCI_CTRL_4BITBUS;
+-	else
++	} else {
++		ctrl &= ~SDHCI_CTRL_8BITBUS;
+ 		ctrl &= ~SDHCI_CTRL_4BITBUS;
++	}
+ 
+-	if (ios->timing == MMC_TIMING_SD_HS)
++/*
++ * For LNW A3, HISPD bit has to be cleared in order to enable 50MHz clock
++ */
++	if (!(host->quirks & SDHCI_QUIRK_FORCE_FULL_SPEED_MODE) &&
++		(ios->timing == MMC_TIMING_SD_HS ||
++		ios->timing == MMC_TIMING_MMC_HS))
+ 		ctrl |= SDHCI_CTRL_HISPD;
+ 	else
+ 		ctrl &= ~SDHCI_CTRL_HISPD;
+@@ -1365,11 +1420,18 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
+ {
+ 	BUG_ON(intmask == 0);
+ 
++	/*
++	 * Intel MRST:
++	 * HW problem exists in LNW A3 which leads to fake interrupt on SDIO1
++	 * if SDIO0 and SDIO1 are both enabled.
++	 */
+ 	if (!host->cmd) {
+-		printk(KERN_ERR "%s: Got command interrupt 0x%08x even "
+-			"though no command operation was in progress.\n",
+-			mmc_hostname(host->mmc), (unsigned)intmask);
+-		sdhci_dumpregs(host);
++		if (!(host->quirks & SDHCI_QUIRK_SERIALIZE)) {
++			printk(KERN_ERR "%s: Got command interrupt 0x%08x even "
++				"though no command operation in progress.\n",
++				mmc_hostname(host->mmc), (unsigned)intmask);
++			sdhci_dumpregs(host);
++		}
+ 		return;
+ 	}
+ 
+@@ -1676,7 +1738,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (debug_quirks)
+ 		host->quirks = debug_quirks;
+ 
+-	sdhci_reset(host, SDHCI_RESET_ALL);
++	if (!(host->quirks & SDHCI_QUIRK_BROKEN_RESETALL))
++		sdhci_reset(host, SDHCI_RESET_ALL);
+ 
+ 	host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
+ 	host->version = (host->version & SDHCI_SPEC_VER_MASK)
+@@ -1796,8 +1859,11 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 
++	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
++		mmc->caps |= MMC_CAP_8_BIT_DATA;
++
+ 	if (caps & SDHCI_CAN_DO_HISPD)
+-		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
++		mmc->caps |= (MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED);
+ 
+ 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+@@ -1855,7 +1921,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	} else {
+ 		mmc->max_blk_size = (caps & SDHCI_MAX_BLOCK_MASK) >>
+ 				SDHCI_MAX_BLOCK_SHIFT;
+-		if (mmc->max_blk_size >= 3) {
++		if (mmc->max_blk_size > 3) {
+ 			printk(KERN_WARNING "%s: Invalid maximum block size, "
+ 				"assuming 512 bytes\n", mmc_hostname(mmc));
+ 			mmc->max_blk_size = 0;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c846813..cf96152 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -67,6 +67,7 @@
+ #define  SDHCI_CTRL_LED		0x01
+ #define  SDHCI_CTRL_4BITBUS	0x02
+ #define  SDHCI_CTRL_HISPD	0x04
++#define  SDHCI_CTRL_8BITBUS	0x20
+ #define  SDHCI_CTRL_DMA_MASK	0x18
+ #define   SDHCI_CTRL_SDMA	0x00
+ #define   SDHCI_CTRL_ADMA1	0x08
+@@ -240,6 +241,12 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
+ /* Controller cannot support End Attribute in NOP ADMA descriptor */
+ #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
++/* Controller can only handle full speed mode */
++#define SDHCI_QUIRK_FORCE_FULL_SPEED_MODE		(1<<27)
++/* Controller has an issue with software reset all function */
++#define SDHCI_QUIRK_BROKEN_RESETALL			(1<<28)
++/* Controller has an issue when its two slots enabled together */
++#define SDHCI_QUIRK_SERIALIZE				(1<<29)
+ 
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index f65913c..648740e 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -211,6 +211,8 @@ struct mmc_host {
+ 
+ 	struct dentry		*debugfs_root;
+ 
++	struct mutex		*port_mutex;
++
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
+diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
+index 4eb4679..f5ebea1 100644
+--- a/include/linux/pci_ids.h
++++ b/include/linux/pci_ids.h
+@@ -2398,6 +2398,8 @@
+ #define PCI_DEVICE_ID_INTEL_82375	0x0482
+ #define PCI_DEVICE_ID_INTEL_82424	0x0483
+ #define PCI_DEVICE_ID_INTEL_82378	0x0484
++#define PCI_DEVICE_ID_INTEL_MRST_SD0	0x0807
++#define PCI_DEVICE_ID_INTEL_MRST_SD1	0x0808
+ #define PCI_DEVICE_ID_INTEL_I960	0x0960
+ #define PCI_DEVICE_ID_INTEL_I960RM	0x0962
+ #define PCI_DEVICE_ID_INTEL_8257X_SOL	0x1062
 
