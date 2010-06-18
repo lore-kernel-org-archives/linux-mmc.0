@@ -1,109 +1,139 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: sdhci : reduce irq off latency
-Date: Fri, 18 Jun 2010 17:26:53 +0900
-Message-ID: <AANLkTimlnN-Cs3tgO1_3cM6qV7uH6TFBEEFUm_tHrcBF@mail.gmail.com>
-References: <4C19E5C3.2080700@parrot.com>
-	<AANLkTinZ8If_JswEhoOShRZbQSjlh1uKgFYasnsfFeRx@mail.gmail.com>
-	<4C1B26CD.5070405@parrot.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v2] Recognize CSD structure version 3
+Date: Fri, 18 Jun 2010 17:57:22 +0800
+Message-ID: <AANLkTinGblB_HbMdb421IHVuVAfJoAOx_TeyMCmEu-iX@mail.gmail.com>
+References: <20100603042007.GA15347@july>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:33776 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756992Ab0FRIdD convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Jun 2010 04:33:03 -0400
-Received: by gwj15 with SMTP id 15so422074gwj.19
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Jun 2010 01:33:01 -0700 (PDT)
-In-Reply-To: <4C1B26CD.5070405@parrot.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:58003 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754556Ab0FRJ5W convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Jun 2010 05:57:22 -0400
+Received: by iwn9 with SMTP id 9so891466iwn.19
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Jun 2010 02:57:22 -0700 (PDT)
+In-Reply-To: <20100603042007.GA15347@july>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matthieu CASTET <matthieu.castet@parrot.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Kyungmin Park <kmpark@infradead.org>
+Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org, adrian.hunter@nokia.com
 
-The main problem is sdhci_send_command function. it loops at while
-function infinitely.
+Hi, Kyungmin
 
-I just modify it to use udelay at there. then it's working well.
-also I reduce the granularity as 1 usec instead of 10 usec (as you sugg=
-ested).
-it's also works.
+I have verified on marvell pxa688 platform for sandisk 4.4 emmc, it wor=
+ks.
+Thanks for sharing.
 
-Thank you,
-Kyungmin Park
+Thanks
+zhangfei
 
-On Fri, Jun 18, 2010 at 4:57 PM, Matthieu CASTET
-<matthieu.castet@parrot.com> wrote:
-> Hi,
+On Thu, Jun 3, 2010 at 12:20 PM, Kyungmin Park <kmpark@infradead.org> w=
+rote:
+> The eMMC spec 4.4 and 4.3 + additional feature chips has CSD structur=
+e version 3
+> and version 3 have to check the CSD_STRUCTURE byte in the EXT_CSD reg=
+ister.
 >
-> Thanks you for the test.
+> Also fix EXT_CSD revision message.
 >
-> here a new version of the patch. It doesn't replace mdelay with jiffi=
-es
-> anymore. It changes mdelay to udelay (the granularity of 1 ms becomes=
- 10
-> us).
-> I didn't mesure irq off latency with this patch.
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 89f7a25..95c4fb2 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -114,17 +114,18 @@ static int mmc_decode_cid(struct mmc_card *card=
+)
+> =A0static int mmc_decode_csd(struct mmc_card *card)
+> =A0{
+> =A0 =A0 =A0 =A0struct mmc_csd *csd =3D &card->csd;
+> - =A0 =A0 =A0 unsigned int e, m, csd_struct;
+> + =A0 =A0 =A0 unsigned int e, m;
+> =A0 =A0 =A0 =A0u32 *resp =3D card->raw_csd;
 >
-> Matthieu
+> =A0 =A0 =A0 =A0/*
+> =A0 =A0 =A0 =A0 * We only understand CSD structure v1.1 and v1.2.
+> =A0 =A0 =A0 =A0 * v1.2 has extra information in bits 15, 11 and 10.
+> + =A0 =A0 =A0 =A0* also support the for eMMC v4.4 & v4.41.
+> =A0 =A0 =A0 =A0 */
+> - =A0 =A0 =A0 csd_struct =3D UNSTUFF_BITS(resp, 126, 2);
+> - =A0 =A0 =A0 if (csd_struct !=3D 1 && csd_struct !=3D 2) {
+> + =A0 =A0 =A0 csd->structure =3D UNSTUFF_BITS(resp, 126, 2);
+> + =A0 =A0 =A0 if (csd->structure =3D=3D 0) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0printk(KERN_ERR "%s: unrecognised CSD =
+structure version %d\n",
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostname(card->host=
+), csd_struct);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostname(card->host=
+), csd->structure);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return -EINVAL;
+> =A0 =A0 =A0 =A0}
 >
+> @@ -207,11 +208,22 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
+rd)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto out;
+> =A0 =A0 =A0 =A0}
 >
-> Kyungmin Park a =E9crit :
->>
->> Hi,
->>
->> Not good news. This patch make a hang at probe time.
->> it's tested against commit 7e27d6e778cd87b6f2415515d7127eba53fe5d02
->> Author: Linus Torvalds <torvalds@linux-foundation.org>
->> Date: =A0 Fri Jun 11 19:14:04 2010 -0700
->>
->> =A0 =A0Linux 2.6.35-rc3
->>
->> Thank you,
->> Kyungmin Park
->>
->> On Thu, Jun 17, 2010 at 6:07 PM, Matthieu CASTET
->> <matthieu.castet@parrot.com> wrote:
->>>
->>> sdhci code got tasklets (sdhci_tasklet_card and sdhci_tasklet_finis=
-h),
->>> that does :
->>> {
->>> spin_lock_irqsave
->>>
->>> if (cond) {
->>> sdhci_reset
->>> sdhci_reset
->>> }
->>>
->>> spin_unlock_irqrestore
->>> }
->>>
->>> sdhci_reset {
->>> ...
->>> while (read_reg) {
->>> if (timeout =3D=3D 0)
->>> =A0break;
->>> timeout--;
->>> mdelay(1);
->>> }
->>> ...
->>> }
->>>
->>>
->>> The problem is that sdhci_reset [1] does busy pooling (with a granu=
-larity
->>> of
->>> 1 ms) on a register up to a timeout of 100 ms.
->>>
->>> With the current code, we got irq off during 2*1ms. With the attach=
-ed
->>> patch
->>> we reduce irq off to 30 us.
->>>
->>> Note that worst case 100 ms irq off still exist.
->>>
->>> Signed-off-by: Matthieu CASTET <matthieu.castet@parrot.com>
->>>
->>>
+> + =A0 =A0 =A0 /* Version is coded in the CSD_STRUCTURE byte in the EX=
+T_CSD register */
+> + =A0 =A0 =A0 if (card->csd.structure =3D=3D 3) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 int ext_csd_struct =3D ext_csd[EXT_CSD_=
+STRUCTURE];
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ext_csd_struct > 2) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_ERR "%s: un=
+recognised EXT_CSD structure "
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "versio=
+n %d\n", mmc_hostname(card->host),
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 ext_csd_struct);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D -EINVAL;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 }
+> +
+> =A0 =A0 =A0 =A0card->ext_csd.rev =3D ext_csd[EXT_CSD_REV];
+> =A0 =A0 =A0 =A0if (card->ext_csd.rev > 5) {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_ERR "%s: unrecognised EXT_C=
+SD structure "
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "version %d\n", mmc_hos=
+tname(card->host),
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.rev);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_ERR "%s: unrecognised EXT_C=
+SD revision %d\n",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostname(card->host=
+), card->ext_csd.rev);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D -EINVAL;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto out;
+> =A0 =A0 =A0 =A0}
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index d02d2c6..c83c7a7 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -24,6 +24,7 @@ struct mmc_cid {
+> =A0};
+>
+> =A0struct mmc_csd {
+> + =A0 =A0 =A0 unsigned char =A0 =A0 =A0 =A0 =A0 structure;
+> =A0 =A0 =A0 =A0unsigned char =A0 =A0 =A0 =A0 =A0 mmca_vsn;
+> =A0 =A0 =A0 =A0unsigned short =A0 =A0 =A0 =A0 =A0cmdclass;
+> =A0 =A0 =A0 =A0unsigned short =A0 =A0 =A0 =A0 =A0tacc_clks;
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 8a49cbf..52ce988 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -254,6 +254,7 @@ struct _mmc_csd {
+> =A0#define EXT_CSD_BUS_WIDTH =A0 =A0 =A0183 =A0 =A0 /* R/W */
+> =A0#define EXT_CSD_HS_TIMING =A0 =A0 =A0185 =A0 =A0 /* R/W */
+> =A0#define EXT_CSD_CARD_TYPE =A0 =A0 =A0196 =A0 =A0 /* RO */
+> +#define EXT_CSD_STRUCTURE =A0 =A0 =A0194 =A0 =A0 /* RO */
+> =A0#define EXT_CSD_REV =A0 =A0 =A0 =A0 =A0 =A0192 =A0 =A0 /* RO */
+> =A0#define EXT_CSD_SEC_CNT =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0212 =A0 =A0=
+ /* RO, 4 bytes */
+> =A0#define EXT_CSD_S_A_TIMEOUT =A0 =A0217
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >
