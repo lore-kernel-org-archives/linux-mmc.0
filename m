@@ -1,74 +1,56 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: sdhci : reduce irq off latency
-Date: Fri, 18 Jun 2010 09:16:41 +0900
-Message-ID: <AANLkTinZ8If_JswEhoOShRZbQSjlh1uKgFYasnsfFeRx@mail.gmail.com>
-References: <4C19E5C3.2080700@parrot.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: change initial clock setting
+Date: Fri, 18 Jun 2010 13:05:44 +0900
+Message-ID: <4C1AF098.1080400@samsung.com>
+Reply-To: jh80.chung@samsung.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:42572 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760005Ab0FRAQm convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jun 2010 20:16:42 -0400
-Received: by vws18 with SMTP id 18so100806vws.19
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Jun 2010 17:16:41 -0700 (PDT)
-In-Reply-To: <4C19E5C3.2080700@parrot.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:16302 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750720Ab0FREFq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Jun 2010 00:05:46 -0400
+Received: from epmmp2 (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
+ with ESMTP id <0L4600E5XZDKE6A0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 18 Jun 2010 13:05:44 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0L4600FUZZDK0R@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 18 Jun 2010 13:05:44 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matthieu CASTET <matthieu.castet@parrot.com>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: kyungmin.park@samsung.com, ben-linux@fluff.org
 
-Hi,
+This patch is bug fixed..
+I think that host->ios.clock(initial clock) will be set lower than 400KHz.
+But in this code, if host->f_min is higher than 400KHz, print warning message and set higher than 400KHz.
+And We use SDHCI_QUIRK_NONSTANDARD_CLOCK..so using get_min_clock function. 
+but didn't effect nothing through used get_min_clock function.
 
-Not good news. This patch make a hang at probe time.
-it's tested against commit 7e27d6e778cd87b6f2415515d7127eba53fe5d02
-Author: Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Fri Jun 11 19:14:04 2010 -0700
 
-    Linux 2.6.35-rc3
+ Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/core/core.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
-Thank you,
-Kyungmin Park
-
-On Thu, Jun 17, 2010 at 6:07 PM, Matthieu CASTET
-<matthieu.castet@parrot.com> wrote:
-> sdhci code got tasklets (sdhci_tasklet_card and sdhci_tasklet_finish)=
-,
-> that does :
-> {
-> spin_lock_irqsave
->
-> if (cond) {
-> sdhci_reset
-> sdhci_reset
-> }
->
-> spin_unlock_irqrestore
-> }
->
-> sdhci_reset {
-> ...
-> while (read_reg) {
-> if (timeout =3D=3D 0)
-> =A0 break;
-> timeout--;
-> mdelay(1);
-> }
-> ...
-> }
->
->
-> The problem is that sdhci_reset [1] does busy pooling (with a granula=
-rity of
-> 1 ms) on a register up to a timeout of 100 ms.
->
-> With the current code, we got irq off during 2*1ms. With the attached=
- patch
-> we reduce irq off to 30 us.
->
-> Note that worst case 100 ms irq off still exist.
->
-> Signed-off-by: Matthieu CASTET <matthieu.castet@parrot.com>
->
->
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 569e94d..9cd5767 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -910,9 +910,9 @@ static void mmc_power_up(struct mmc_host *host)
+ 	if (host->f_min > 400000) {
+ 		pr_warning("%s: Minimum clock frequency too high for "
+ 				"identification mode\n", mmc_hostname(host));
+-		host->ios.clock = host->f_min;
+-	} else
+ 		host->ios.clock = 400000;
++	} else
++		host->ios.clock = host->f_min;
+ 
+ 	host->ios.power_mode = MMC_POWER_ON;
+ 	mmc_set_ios(host);
+-- 1.6.0.4 
