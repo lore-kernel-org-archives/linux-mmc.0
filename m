@@ -1,87 +1,213 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: [PATCH] Two fixes for my mmc/sd cardreader
-Date: Mon, 21 Jun 2010 22:50:55 +0300
-Message-ID: <1277149855.5409.2.camel@maxim-laptop>
-References: <1276809695.28201.13.camel@maxim-laptop>
-	 <1277148104.4241.1.camel@maxim-laptop>
-	 <20100621123921.045e245f.akpm@linux-foundation.org>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH 1/2] MMC: fix all hangs related to mmc/sd card insert/removal
+ during suspend/resume.
+Date: Mon, 21 Jun 2010 23:04:12 +0300
+Message-ID: <4C1FC5BC.20008@nokia.com>
+References: <1276809695.28201.13.camel@maxim-laptop> <1276809814-28683-1-git-send-email-maximlevitsky@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:45797 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932105Ab0FUTvA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2010 15:51:00 -0400
-In-Reply-To: <20100621123921.045e245f.akpm@linux-foundation.org>
+Received: from smtp.nokia.com ([192.100.105.134]:50663 "EHLO
+	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751144Ab0FUUEs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2010 16:04:48 -0400
+In-Reply-To: <1276809814-28683-1-git-send-email-maximlevitsky@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-pm <linux-pm@lists.linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Philip Langdale <philipl@overt.org>
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-pm <linux-pm@lists.linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Philip Langdale <philipl@overt.org>
 
-On Mon, 2010-06-21 at 12:39 -0700, Andrew Morton wrote: 
-> On Mon, 21 Jun 2010 22:21:44 +0300
-> Maxim Levitsky <maximlevitsky@gmail.com> wrote:
+ext Maxim Levitsky wrote:
+> If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
+> suspend, the card will be removed, therefore this patch doesn't change
+> the behavior of this option.
 > 
-> > On Fri, 2010-06-18 at 00:21 +0300, Maxim Levitsky wrote: 
-> > > Hi,
-> > > 
-> > > These are 2 fixes for my card reader.
-> > > 
-> > > 
-> > > First patch fixes old issue with system hand on suspend to disk/ram with
-> > > mmc card inserted.
-> > > I updated description, and pm notification registration order.
-> > > I think this patch can an should go to 2.6.35, because it fixes long
-> > > standing and nasty regression.
-> > > 
-> > > The second patch is a result of my work trying to understand why my card
-> > > reader sometimes dies on resume.
-> > > This reader has a special MMC function which steals MMC cards, and until
-> > > now had no driver. A way to disable it was found, and while it works, it
-> > > has (at least here) a side effect of killing the controller on resume
-> > > from ram/disk (and it happens often, and doesn't depend of whether card
-> > > was in slot or not during suspend).
-> > > 
-> > > Fortunately it turned out that MMC part is _almost_ standard SDHCI
-> > > controller.
-> > > This patch adds support for this device to standard sdhci driver.
-> > > Unfortunately, this support still contais small hack.
-> > > It waits 1/2 of a second on resume before initializing the controller.
-> > > Not doing so, and resuming with MMC card present results in confused
-> > > controller. It is not dead though. A card reinsert makes it work again
-> > > with all cards.
-> > > Yet the 1st patch is must for this because otherwise mmc core seeing
-> > > that controller doesn't respond, removes the card, therefore hangs the
-> > > system.
-> > > It doesn't happen when I wait these 1/2 of second though.
-> > > 
-> > > I think that this patch is also ok for 2.6.35, because it only adds new
-> > > functionality.
-> > > You are free to disable MMC controller using the same
-> > > CONFIG_MMC_RICOH_MMC.
-> > > 
-> > > If you don't disable it though, instead of full lack of functionality
-> > > you will get full featured MMC controller.
-> > > 
-> > > Best regards,
-> > > Maxim Levitsky
-> > > 
-> > > 
-> > > 
-> > ping
+> However the removal will be done by pm notifier, which runs while
+> userspace is still not frozen and thus can freely use del_gendisk,
+> without the risk of deadlock which would happen otherwise.
 > 
-> hey, that was only three days.  I commonly leave things to bake on the
-> mailing list for a while, see what people have to say about it. 
-> Particularly with subsystems like MMC.
+> 
+> Card detect workqueue is now freezeable,
+> therefore if you do use CONFIG_MMC_UNSAFE_RESUME,
+> and remove the card during suspend, the removal will be
+> detected as soon as userspace is unfrozen, again at the moment
+> it is safe to call del_gendisk.
+> 
+> Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
+> 
+> Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+> ---
+>  drivers/mmc/core/core.c  |   54 +++++++++++++++++++++++++++------------------
+>  drivers/mmc/core/host.c  |    6 +++++
+>  include/linux/mmc/host.h |    3 ++
+>  3 files changed, 41 insertions(+), 22 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 569e94d..0cba53a 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1259,26 +1259,11 @@ int mmc_suspend_host(struct mmc_host *host)
+>  
+>  	if (host->caps & MMC_CAP_DISABLE)
+>  		cancel_delayed_work(&host->disable);
+> -	cancel_delayed_work(&host->detect);
+> -	mmc_flush_scheduled_work();
+>  
+>  	mmc_bus_get(host);
+>  	if (host->bus_ops && !host->bus_dead) {
+>  		if (host->bus_ops->suspend)
+>  			err = host->bus_ops->suspend(host);
+> -		if (err == -ENOSYS || !host->bus_ops->resume) {
+> -			/*
+> -			 * We simply "remove" the card in this case.
+> -			 * It will be redetected on resume.
+> -			 */
+> -			if (host->bus_ops->remove)
+> -				host->bus_ops->remove(host);
+> -			mmc_claim_host(host);
+> -			mmc_detach_bus(host);
+> -			mmc_release_host(host);
+> -			host->pm_flags = 0;
+> -			err = 0;
+> -		}
+>  	}
+>  	mmc_bus_put(host);
+>  
+> @@ -1310,12 +1295,6 @@ int mmc_resume_host(struct mmc_host *host)
+>  			printk(KERN_WARNING "%s: error %d during resume "
+>  					    "(card was removed?)\n",
+>  					    mmc_hostname(host), err);
+> -			if (host->bus_ops->remove)
+> -				host->bus_ops->remove(host);
+> -			mmc_claim_host(host);
+> -			mmc_detach_bus(host);
+> -			mmc_release_host(host);
+> -			/* no need to bother upper layers */
+>  			err = 0;
+>  		}
+>  	}
+> @@ -1330,6 +1309,37 @@ int mmc_resume_host(struct mmc_host *host)
+>  	return err;
+>  }
+>  
+> +/* Do the card removal on suspend if card is assumed removeable
+> + * Do that in pm notifier while userspace isn't yet frozen, so we will be able
+> +   to sync the card.
+> +*/
+> +int mmc_pm_notify(struct notifier_block *notify_block,
+> +					unsigned long mode, void *unused)
+> +{
+> +	struct mmc_host *host = container_of(
+> +		notify_block, struct mmc_host, pm_notify);
+> +
+> +
+> +	switch (mode) {
+> +	case PM_HIBERNATION_PREPARE:
+> +	case PM_SUSPEND_PREPARE:
+> +
+> +		if (!host->bus_ops || host->bus_ops->suspend)
+> +			break;
+> +
+> +		if (host->bus_ops->remove)
+> +			host->bus_ops->remove(host);
+> +		mmc_claim_host(host);
+> +		mmc_detach_bus(host);
+> +		mmc_release_host(host);
+> +		host->pm_flags = 0;
+> +		break;
 
-Sure.
+Is it possible that you receive PM_SUSPEND_PREPARE
+but there is no suspend and therefore no resume
+and therefore the card is removed but not detected
+again?
 
-I just posted the patches on weekend, thought they weren't noticed...
-Anyway confirm again that I didn't yet seen any problem with my card
-reader.
-(I test it regularly)
+Is it possible that you are racing with kmmcd and the
+card is added after you receive PM_SUSPEND_PREPARE but
+before kmmcd is frozen?
 
-Best regards,
-Maxim Levitsky
+> +
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+>  EXPORT_SYMBOL(mmc_resume_host);
+>  
+>  #endif
+> @@ -1338,7 +1348,7 @@ static int __init mmc_init(void)
+>  {
+>  	int ret;
+>  
+> -	workqueue = create_singlethread_workqueue("kmmcd");
+> +	workqueue = create_freezeable_workqueue("kmmcd");
+>  	if (!workqueue)
+>  		return -ENOMEM;
+>  
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 4735390..8a631c8 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -17,6 +17,7 @@
+>  #include <linux/pagemap.h>
+>  #include <linux/leds.h>
+>  #include <linux/slab.h>
+> +#include <linux/suspend.h>
+>  
+>  #include <linux/mmc/host.h>
+>  
+> @@ -85,6 +86,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>  	init_waitqueue_head(&host->wq);
+>  	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+>  	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
+> +	host->pm_notify.notifier_call = mmc_pm_notify;
+> +
+>  
+>  	/*
+>  	 * By default, hosts do not support SGIO or large requests.
+> @@ -133,6 +136,7 @@ int mmc_add_host(struct mmc_host *host)
+>  #endif
+>  
+>  	mmc_start_host(host);
+> +	register_pm_notifier(&host->pm_notify);
+>  
+>  	return 0;
+>  }
+> @@ -149,6 +153,7 @@ EXPORT_SYMBOL(mmc_add_host);
+>   */
+>  void mmc_remove_host(struct mmc_host *host)
+>  {
+> +	unregister_pm_notifier(&host->pm_notify);
+>  	mmc_stop_host(host);
+>  
+>  #ifdef CONFIG_DEBUG_FS
+> @@ -158,6 +163,7 @@ void mmc_remove_host(struct mmc_host *host)
+>  	device_del(&host->class_dev);
+>  
+>  	led_trigger_unregister_simple(host->led);
+> +
+>  }
+>  
+>  EXPORT_SYMBOL(mmc_remove_host);
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index f65913c..b45812d 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -124,6 +124,7 @@ struct mmc_host {
+>  	unsigned int		f_min;
+>  	unsigned int		f_max;
+>  	u32			ocr_avail;
+> +	struct notifier_block	pm_notify;
+>  
+>  #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
+>  #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
+> @@ -257,6 +258,8 @@ int mmc_card_can_sleep(struct mmc_host *host);
+>  int mmc_host_enable(struct mmc_host *host);
+>  int mmc_host_disable(struct mmc_host *host);
+>  int mmc_host_lazy_disable(struct mmc_host *host);
+> +int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
+> +
+>  
+>  static inline void mmc_set_disable_delay(struct mmc_host *host,
+>  					 unsigned int disable_delay)
 
