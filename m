@@ -1,311 +1,183 @@
-From: Saeed Bishara <saeed@marvell.com>
-Subject: [PATCH] MMC: add support for the Marvell platform SDHCI controller
-Date: Tue, 22 Jun 2010 17:09:02 +0300
-Message-ID: <1277215742-25994-1-git-send-email-saeed@marvell.com>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: Re: [PATCH 1/2] MMC: fix all hangs related to mmc/sd card
+ insert/removal during suspend/resume.
+Date: Wed, 23 Jun 2010 00:17:30 +0300
+Message-ID: <1277241450.10907.4.camel@maxim-laptop>
+References: <1276809695.28201.13.camel@maxim-laptop>
+	 <201006212226.15859.rjw@sisk.pl> <1277165029.7793.10.camel@maxim-laptop>
+	 <201006221119.06210.rjw@sisk.pl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dakia2.marvell.com ([65.219.4.35]:54976 "EHLO
-	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754236Ab0FVOJG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jun 2010 10:09:06 -0400
+Received: from fg-out-1718.google.com ([72.14.220.152]:19220 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753707Ab0FVVRh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jun 2010 17:17:37 -0400
+In-Reply-To: <201006221119.06210.rjw@sisk.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: saeed.bishara@gmail.com, Saeed Bishara <saeed@marvell.com>
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, linux-pm <linux-pm@lists.linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Philip Langdale <philipl@overt.org>
 
-This patch implements the driver for the platfrom SDHCI controllers that found on some of Marvell's SoC's.
+On Tue, 2010-06-22 at 11:19 +0200, Rafael J. Wysocki wrote: 
+> On Tuesday, June 22, 2010, Maxim Levitsky wrote:
+> > On Mon, 2010-06-21 at 22:26 +0200, Rafael J. Wysocki wrote: 
+> > > On Monday, June 21, 2010, Maxim Levitsky wrote:
+> > > > On Mon, 2010-06-21 at 23:04 +0300, Adrian Hunter wrote: 
+> > > > > ext Maxim Levitsky wrote:
+> > > > > > If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
+> > > > > > suspend, the card will be removed, therefore this patch doesn't change
+> > > > > > the behavior of this option.
+> > > > > > 
+> > > > > > However the removal will be done by pm notifier, which runs while
+> > > > > > userspace is still not frozen and thus can freely use del_gendisk,
+> > > > > > without the risk of deadlock which would happen otherwise.
+> > > > > > 
+> > > > > > 
+> > > > > > Card detect workqueue is now freezeable,
+> > > > > > therefore if you do use CONFIG_MMC_UNSAFE_RESUME,
+> > > > > > and remove the card during suspend, the removal will be
+> > > > > > detected as soon as userspace is unfrozen, again at the moment
+> > > > > > it is safe to call del_gendisk.
+> > > > > > 
+> > > > > > Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
+> > > > > > 
+> > > > > > Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+> > > > > > ---
+> > > > > >  drivers/mmc/core/core.c  |   54 +++++++++++++++++++++++++++------------------
+> > > > > >  drivers/mmc/core/host.c  |    6 +++++
+> > > > > >  include/linux/mmc/host.h |    3 ++
+> > > > > >  3 files changed, 41 insertions(+), 22 deletions(-)
+> > > > > > 
+> > > > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > > > > > index 569e94d..0cba53a 100644
+> > > > > > --- a/drivers/mmc/core/core.c
+> > > > > > +++ b/drivers/mmc/core/core.c
+> > > > > > @@ -1259,26 +1259,11 @@ int mmc_suspend_host(struct mmc_host *host)
+> > > > > >  
+> > > > > >  	if (host->caps & MMC_CAP_DISABLE)
+> > > > > >  		cancel_delayed_work(&host->disable);
+> > > > > > -	cancel_delayed_work(&host->detect);
+> > > > > > -	mmc_flush_scheduled_work();
+> > > > > >  
+> > > > > >  	mmc_bus_get(host);
+> > > > > >  	if (host->bus_ops && !host->bus_dead) {
+> > > > > >  		if (host->bus_ops->suspend)
+> > > > > >  			err = host->bus_ops->suspend(host);
+> > > > > > -		if (err == -ENOSYS || !host->bus_ops->resume) {
+> > > > > > -			/*
+> > > > > > -			 * We simply "remove" the card in this case.
+> > > > > > -			 * It will be redetected on resume.
+> > > > > > -			 */
+> > > > > > -			if (host->bus_ops->remove)
+> > > > > > -				host->bus_ops->remove(host);
+> > > > > > -			mmc_claim_host(host);
+> > > > > > -			mmc_detach_bus(host);
+> > > > > > -			mmc_release_host(host);
+> > > > > > -			host->pm_flags = 0;
+> > > > > > -			err = 0;
+> > > > > > -		}
+> > > > > >  	}
+> > > > > >  	mmc_bus_put(host);
+> > > > > >  
+> > > > > > @@ -1310,12 +1295,6 @@ int mmc_resume_host(struct mmc_host *host)
+> > > > > >  			printk(KERN_WARNING "%s: error %d during resume "
+> > > > > >  					    "(card was removed?)\n",
+> > > > > >  					    mmc_hostname(host), err);
+> > > > > > -			if (host->bus_ops->remove)
+> > > > > > -				host->bus_ops->remove(host);
+> > > > > > -			mmc_claim_host(host);
+> > > > > > -			mmc_detach_bus(host);
+> > > > > > -			mmc_release_host(host);
+> > > > > > -			/* no need to bother upper layers */
+> > > > > >  			err = 0;
+> > > > > >  		}
+> > > > > >  	}
+> > > > > > @@ -1330,6 +1309,37 @@ int mmc_resume_host(struct mmc_host *host)
+> > > > > >  	return err;
+> > > > > >  }
+> > > > > >  
+> > > > > > +/* Do the card removal on suspend if card is assumed removeable
+> > > > > > + * Do that in pm notifier while userspace isn't yet frozen, so we will be able
+> > > > > > +   to sync the card.
+> > > > > > +*/
+> > > > > > +int mmc_pm_notify(struct notifier_block *notify_block,
+> > > > > > +					unsigned long mode, void *unused)
+> > > > > > +{
+> > > > > > +	struct mmc_host *host = container_of(
+> > > > > > +		notify_block, struct mmc_host, pm_notify);
+> > > > > > +
+> > > > > > +
+> > > > > > +	switch (mode) {
+> > > > > > +	case PM_HIBERNATION_PREPARE:
+> > > > > > +	case PM_SUSPEND_PREPARE:
+> > > > > > +
+> > > > > > +		if (!host->bus_ops || host->bus_ops->suspend)
+> > > > > > +			break;
+> > > > > > +
+> > > > > > +		if (host->bus_ops->remove)
+> > > > > > +			host->bus_ops->remove(host);
+> > > > > > +		mmc_claim_host(host);
+> > > > > > +		mmc_detach_bus(host);
+> > > > > > +		mmc_release_host(host);
+> > > > > > +		host->pm_flags = 0;
+> > > > > > +		break;
+> > > > > 
+> > > > > Is it possible that you receive PM_SUSPEND_PREPARE
+> > > > > but there is no suspend and therefore no resume
+> > > > > and therefore the card is removed but not detected
+> > > > > again?
+> > > > This is very good point.
+> > > > The solution is to kick mmc detection thread from this notifier.
+> > > > on resume.
+> > > > I update the patch.
+> > > > 
+> > > > > 
+> > > > > Is it possible that you are racing with kmmcd and the
+> > > > > card is added after you receive PM_SUSPEND_PREPARE but
+> > > > > before kmmcd is frozen?
+> > > > This is unlikely but valid race.
+> > > > I afraid I don't know nice way to solve it right now.
+> > > > I can add some ad-hoc variable to tell interrupt handler not to kick the
+> > > > detection workqueue after suspend notifier was called.
+> > > > 
+> > > > I wish there was a generic freeze_workqueue function.
+> > > 
+> > > There are freezable workqueues that are automatically frozen during suspend
+> > > by the process freezer.  However, at the moment they need to be singlethread
+> > > and I'm not sure if using one in this particular case is appropriate.
+> > 
+> > I *do* use freezable  work-queue.
+> 
+> I overlooked that, sorry.
+> 
+> > However since this is pm notifier, it is called before userspace and the
+> > workqueue is frozen.
+> > Therefore I would like manually to freeze the workqueue from the pm
+> > notifier.
+> 
+> No, that won't work.  You need to find an alternative solution.  I guess you
+> may insert a work item that's going to sleep until a condition is
+> satisfied (analogous to a workqueue barrier) and wait for it to 
+This screams to be done in generic way.
+Something like suspend_workqueue() and resume_workqueue();
 
-Signed-off-by: Saeed Bishara <saeed@marvell.com>
----
- drivers/mmc/host/Kconfig    |   12 ++
- drivers/mmc/host/Makefile   |    1 +
- drivers/mmc/host/sdhci-mv.c |  243 +++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 256 insertions(+), 0 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-mv.c
+In addition to that I just found that .suspend function sometimes can
+return -ENOSYS, which triggers card removal. I wrongly remove that chunk
+of code.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index f06d06e..a33bc29 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -121,6 +121,18 @@ config MMC_SDHCI_PLTFM
- 
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_MV
-+	tristate "SDHCI support on Marvell's soc"
-+	depends on MMC_SDHCI
-+	select MMC_SDHCI_IO_ACCESSORS
-+	help
-+	  This selects the Secure Digital Host Controller Interface in
-+	  Marvell's SoC controllers.
-+
-+	  If you have a controller with this interface, say Y or M here.
-+
-+	  If unsure, say N.
-+
- config MMC_SDHCI_S3C
- 	tristate "SDHCI support on Samsung S3C SoC"
- 	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index e30c2ee..2061fbd 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -13,6 +13,7 @@ obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
- obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
- obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
- obj-$(CONFIG_MMC_SDHCI_PLTFM)	+= sdhci-pltfm.o
-+obj-$(CONFIG_MMC_SDHCI_MV)	+= sdhci-mv.o
- obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
- obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
- obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
-diff --git a/drivers/mmc/host/sdhci-mv.c b/drivers/mmc/host/sdhci-mv.c
-new file mode 100644
-index 0000000..86951ef
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-mv.c
-@@ -0,0 +1,243 @@
-+/*
-+ * sdhci-mv.c Support for SDHCI platform devices
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-+ */
-+
-+/* Supports:
-+ * SDHCI platform devices found on Marvell SoC's
-+ *
-+ * Based on  sdhci-pltfm.c
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/delay.h>
-+#include <linux/err.h>
-+#include <linux/platform_device.h>
-+#include <linux/io.h>
-+#include <linux/mmc/host.h>
-+#include "sdhci.h"
-+
-+struct sdhci_mv_host {
-+#if defined(CONFIG_HAVE_CLK)
-+	struct clk		*clk;
-+#endif
-+};
-+
-+/*****************************************************************************\
-+ *                                                                           *
-+ * SDHCI core callbacks                                                      *
-+ *                                                                           *
-+\*****************************************************************************/
-+static u16 mv_readw(struct sdhci_host *host, int reg)
-+{
-+	u16 ret;
-+
-+	switch (reg) {
-+	case SDHCI_HOST_VERSION:
-+	case SDHCI_SLOT_INT_STATUS:
-+		/* those registers don't exist */
-+		return 0;
-+	default:
-+		ret = readw(host->ioaddr + reg);
-+	}
-+	return ret;
-+}
-+
-+static u32 mv_readl(struct sdhci_host *host, int reg)
-+{
-+	u32 ret;
-+
-+	switch (reg) {
-+	case SDHCI_CAPABILITIES:
-+		ret = readl(host->ioaddr + reg);
-+		/* Mask the support for 3.0V */
-+		ret &= ~SDHCI_CAN_VDD_300;
-+		break;
-+	default:
-+		ret = readl(host->ioaddr + reg);
-+	}
-+	return ret;
-+}
-+
-+static struct sdhci_ops sdhci_mv_ops = {
-+	.read_w	= mv_readw,
-+	.read_l	= mv_readl,
-+};
-+
-+/*****************************************************************************\
-+ *                                                                           *
-+ * Device probing/removal                                                    *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+static int __devinit sdhci_mv_probe(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host;
-+	struct sdhci_mv_host *mv_host;
-+	struct resource *iomem;
-+	int ret;
-+
-+	BUG_ON(pdev == NULL);
-+
-+	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	if (!iomem) {
-+		ret = -ENOMEM;
-+		goto err;
-+	}
-+
-+	if (resource_size(iomem) != 0x100)
-+		dev_err(&pdev->dev, "Invalid iomem size. You may "
-+			"experience problems.\n");
-+
-+	if (pdev->dev.parent)
-+		host = sdhci_alloc_host(pdev->dev.parent, sizeof(*mv_host));
-+	else
-+		host = sdhci_alloc_host(&pdev->dev, sizeof(*mv_host));
-+
-+	if (IS_ERR(host)) {
-+		ret = PTR_ERR(host);
-+		goto err;
-+	}
-+
-+	mv_host = sdhci_priv(host);
-+	host->hw_name = "marvell-sdhci";
-+	host->ops = &sdhci_mv_ops;
-+	host->irq = platform_get_irq(pdev, 0);
-+	host->quirks =  SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
-+			SDHCI_QUIRK_NO_BUSY_IRQ |
-+			SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-+			SDHCI_QUIRK_FORCE_DMA;
-+
-+	if (!devm_request_mem_region(&pdev->dev, iomem->start,
-+				     resource_size(iomem),
-+				     mmc_hostname(host->mmc))) {
-+		dev_err(&pdev->dev, "cannot request region\n");
-+		ret = -EBUSY;
-+		goto err_request;
-+	}
-+
-+	host->ioaddr = devm_ioremap(&pdev->dev, iomem->start,
-+				    resource_size(iomem));
-+	if (!host->ioaddr) {
-+		dev_err(&pdev->dev, "failed to remap registers\n");
-+		ret = -ENOMEM;
-+		goto err_request;
-+	}
-+
-+#if defined(CONFIG_HAVE_CLK)
-+	mv_host->clk = clk_get(&pdev->dev, NULL);
-+	if (IS_ERR(mv_host->clk))
-+		dev_notice(&pdev->dev, "cannot get clkdev\n");
-+	else
-+		clk_enable(mv_host->clk);
-+#endif
-+
-+	ret = sdhci_add_host(host);
-+	if (ret)
-+		goto err_request;
-+
-+	platform_set_drvdata(pdev, host);
-+
-+	return 0;
-+
-+err_request:
-+	sdhci_free_host(host);
-+err:
-+	printk(KERN_ERR"Probing of sdhci-mv failed: %d\n", ret);
-+	return ret;
-+}
-+
-+static int __devexit sdhci_mv_remove(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+#if defined(CONFIG_HAVE_CLK)
-+	struct sdhci_mv_host *mv_host = sdhci_priv(host);
-+	struct clk *clk = mv_host->clk;
-+#endif
-+	int dead;
-+	u32 scratch;
-+
-+	dead = 0;
-+	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-+	if (scratch == (u32)-1)
-+		dead = 1;
-+
-+	sdhci_remove_host(host, dead);
-+	sdhci_free_host(host);
-+	platform_set_drvdata(pdev, NULL);
-+#if defined(CONFIG_HAVE_CLK)
-+	if (!IS_ERR(clk)) {
-+		clk_disable(clk);
-+		clk_put(clk);
-+	}
-+#endif
-+
-+	return 0;
-+}
-+
-+#ifdef CONFIG_PM
-+static int sdhci_mv_suspend(struct platform_device *pdev, pm_message_t state)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(&pdev->dev);
-+
-+	return sdhci_suspend_host(host, state);
-+}
-+
-+static int sdhci_mv_resume(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(&pdev->dev);
-+
-+	return sdhci_resume_host(host);
-+}
-+#else
-+#define sdhci_mv_suspend NULL
-+#define sdhci_mv_resume NULL
-+#endif
-+
-+static struct platform_driver sdhci_mv_driver = {
-+	.driver = {
-+		.name	= "sdhci-mv",
-+		.owner	= THIS_MODULE,
-+	},
-+	.probe		= sdhci_mv_probe,
-+	.remove		= __devexit_p(sdhci_mv_remove),
-+	.suspend	= sdhci_mv_suspend,
-+	.resume		= sdhci_mv_resume,
-+};
-+
-+/*****************************************************************************\
-+ *                                                                           *
-+ * Driver init/exit                                                          *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+static int __init sdhci_mv_init(void)
-+{
-+	return platform_driver_register(&sdhci_mv_driver);
-+}
-+
-+static void __exit sdhci_mv_exit(void)
-+{
-+	platform_driver_unregister(&sdhci_mv_driver);
-+}
-+
-+module_init(sdhci_mv_init);
-+module_exit(sdhci_mv_exit);
-+
-+MODULE_DESCRIPTION("Marvell SDHCI platform driver");
-+MODULE_AUTHOR("Saeed Bishara <saeed@marvell.com>");
-+MODULE_LICENSE("GPL v2");
-+MODULE_ALIAS("platform:sdhci-mv");
-+
--- 
-1.6.0.4
+To make the thing picture perfect I would have to invest more time to
+it, I will do so as soon as I finish my exams.
+
+Meanwhile the current patch already fixes all but corner cases or rather
+nasty hang on suspend with any MMC/SD card inserted.
+
+
+Best regards,
+Maxim Levitsky
+
+
+
+
 
