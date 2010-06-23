@@ -1,54 +1,62 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH] initialise DMA engine before MMC
-Date: Wed, 23 Jun 2010 08:47:43 +0200
-Message-ID: <AANLkTikndTP49meKLd1bh7De04wUHrFovpgwbIrpYGF9@mail.gmail.com>
-References: <Pine.LNX.4.64.1006071312060.12965@axis700.grange>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] MMC: add support for the Marvell platform SDHCI controller
+Date: Wed, 23 Jun 2010 12:52:07 +0100
+Message-ID: <87631a6k60.fsf@linux-g6p1.site>
+References: <1277215742-25994-1-git-send-email-saeed@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1006071312060.12965@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-kernel@vger.kernel.org, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:35824 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750967Ab0FWLwJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Jun 2010 07:52:09 -0400
+In-Reply-To: <1277215742-25994-1-git-send-email-saeed@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Saeed Bishara <saeed@marvell.com>
+Cc: saeed.bishara@gmail.com, linux-mmc@vger.kernel.org
 
-2010/6/7 Guennadi Liakhovetski <g.liakhovetski@gmx.de>:
+On Tue, 22 Jun 2010 17:09:02 +0300, Saeed Bishara <saeed@marvell.com> wrote:
+> This patch implements the driver for the platfrom SDHCI controllers that found on some of Marvell's SoC's.
+> 
+> Signed-off-by: Saeed Bishara <saeed@marvell.com>
 
-> To use DMA engine based DMA with MMC in a non-modular build, the DMA
-> engine has to initialise before MMC.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
-> diff --git a/drivers/Makefile b/drivers/Makefile
-> index 91874e0..b713e75 100644
-> --- a/drivers/Makefile
-> +++ b/drivers/Makefile
-> @@ -92,6 +92,7 @@ obj-$(CONFIG_EISA) =A0 =A0 =A0 =A0 =A0 =A0+=3D eisa=
-/
-> =A0obj-y =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0+=3D lgue=
-st/
-> =A0obj-$(CONFIG_CPU_FREQ) =A0 =A0 =A0 =A0 +=3D cpufreq/
-> =A0obj-$(CONFIG_CPU_IDLE) =A0 =A0 =A0 =A0 +=3D cpuidle/
-> +obj-$(CONFIG_DMA_ENGINE) =A0 =A0 =A0 +=3D dma/
-> =A0obj-$(CONFIG_MMC) =A0 =A0 =A0 =A0 =A0 =A0 =A0+=3D mmc/
-> =A0obj-$(CONFIG_MEMSTICK) =A0 =A0 =A0 =A0 +=3D memstick/
-> =A0obj-$(CONFIG_NEW_LEDS) =A0 =A0 =A0 =A0 +=3D leds/
-> @@ -102,7 +103,6 @@ obj-$(CONFIG_CRYPTO) =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0+=3D crypto/
-> =A0obj-$(CONFIG_SUPERH) =A0 =A0 =A0 =A0 =A0 +=3D sh/
-> =A0obj-$(CONFIG_ARCH_SHMOBILE) =A0 =A0+=3D sh/
-> =A0obj-$(CONFIG_GENERIC_TIME) =A0 =A0 +=3D clocksource/
-> -obj-$(CONFIG_DMA_ENGINE) =A0 =A0 =A0 +=3D dma/
-> =A0obj-$(CONFIG_DCA) =A0 =A0 =A0 =A0 =A0 =A0 =A0+=3D dca/
-> =A0obj-$(CONFIG_HID) =A0 =A0 =A0 =A0 =A0 =A0 =A0+=3D hid/
-> =A0obj-$(CONFIG_PPC_PS3) =A0 =A0 =A0 =A0 =A0+=3D ps3/
+That's a nice, small driver ;-)
 
-What I did was to move my DMA engines to subsystem_initcall(), with thi=
-s
-approach I would have had to rearrange a lot of subsystems I think.
+[...]
 
-But if it's easier for you this way by all means do it.
+> +
+> +	if (!devm_request_mem_region(&pdev->dev, iomem->start,
+> +				     resource_size(iomem),
+> +				     mmc_hostname(host->mmc))) {
+> +		dev_err(&pdev->dev, "cannot request region\n");
+> +		ret = -EBUSY;
+> +		goto err_request;
+> +	}
+> +
+> +	host->ioaddr = devm_ioremap(&pdev->dev, iomem->start,
+> +				    resource_size(iomem));
+> +	if (!host->ioaddr) {
+> +		dev_err(&pdev->dev, "failed to remap registers\n");
+> +		ret = -ENOMEM;
+> +		goto err_request;
+> +	}
 
-Yours,
-Linus Walleij
+If you fail to remap the registers shouldn't you release the mem_region
+you've allocated above?
+
+> +
+> +#if defined(CONFIG_HAVE_CLK)
+> +	mv_host->clk = clk_get(&pdev->dev, NULL);
+> +	if (IS_ERR(mv_host->clk))
+> +		dev_notice(&pdev->dev, "cannot get clkdev\n");
+> +	else
+> +		clk_enable(mv_host->clk);
+> +#endif
+> +
+> +	ret = sdhci_add_host(host);
+> +	if (ret)
+> +		goto err_request;
+
+Likewise here, I think you should be iounmap()'ing the registers if this
+fails. Otherwise this looks good.
