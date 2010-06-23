@@ -1,68 +1,54 @@
-From: Stephen Rothwell <sfr@canb.auug.org.au>
-Subject: MMC tree (Was: Re: [PATCH 1/2] MMC: fix all hangs related to mmc/sd
- card insert/removal during suspend/resume.)
-Date: Wed, 23 Jun 2010 13:08:37 +1000
-Message-ID: <20100623130837.eaa40f99.sfr@canb.auug.org.au>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: MMC tree (Was: Re: [PATCH 1/2] MMC: fix all hangs
+ related to mmc/sd card insert/removal during suspend/resume.)
+Date: Tue, 22 Jun 2010 20:52:23 -0700
+Message-ID: <20100622205223.b84736c8.akpm@linux-foundation.org>
 References: <1276809695.28201.13.camel@maxim-laptop>
 	<201006221119.06210.rjw@sisk.pl>
 	<1277241450.10907.4.camel@maxim-laptop>
 	<201006222353.21349.rjw@sisk.pl>
 	<20100622152006.d0ec0cef.akpm@linux-foundation.org>
+	<20100623130837.eaa40f99.sfr@canb.auug.org.au>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pgp-signature";
- micalg="PGP-SHA1";
- boundary="Signature=_Wed__23_Jun_2010_13_08_37_+1000_Z8FcY.AGmnt+_+eV"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from chilli.pcug.org.au ([203.10.76.44]:56315 "EHLO smtps.tip.net.au"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750994Ab0FWDIr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 22 Jun 2010 23:08:47 -0400
-In-Reply-To: <20100622152006.d0ec0cef.akpm@linux-foundation.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-pm-bounces@lists.linux-foundation.org>
+In-Reply-To: <20100623130837.eaa40f99.sfr@canb.auug.org.au>
+List-Unsubscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
+	<mailto:linux-pm-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linux-foundation.org/pipermail/linux-pm>
+List-Post: <mailto:linux-pm@lists.linux-foundation.org>
+List-Help: <mailto:linux-pm-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
+	<mailto:linux-pm-request@lists.linux-foundation.org?subject=subscribe>
+Sender: linux-pm-bounces@lists.linux-foundation.org
+Errors-To: linux-pm-bounces@lists.linux-foundation.org
+To: Stephen Rothwell <sfr@canb.auug.org.au>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Pierre@smtp1.linux-foundation.org, Ossman <drzeus-list@drzeus.cx>, linux-pm <linux-pm@lists.linux-foundation.org>, Philip Langdale <philipl@overt.org>, Adrian Hunter <adrian.hunter@nokia.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Maxim Levitsky <maximlevitsky@gmail.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-pm <linux-pm@lists.linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Philip Langdale <philipl@overt.org>, Pierre Ossman <drzeus-list@drzeus.cx>
 
---Signature=_Wed__23_Jun_2010_13_08_37_+1000_Z8FcY.AGmnt+_+eV
-Content-Type: text/plain; charset=US-ASCII
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Wed, 23 Jun 2010 13:08:37 +1000 Stephen Rothwell <sfr@canb.auug.org.au> wrote:
 
-Hi Andrew,
-
-On Tue, 22 Jun 2010 15:20:06 -0700 Andrew Morton <akpm@linux-foundation.org=
-> wrote:
->
-> On Tue, 22 Jun 2010 23:53:21 +0200 "Rafael J. Wysocki" <rjw@sisk.pl> wrot=
-e:
+> Hi Andrew,
+> 
+> On Tue, 22 Jun 2010 15:20:06 -0700 Andrew Morton <akpm@linux-foundation.org> wrote:
 > >
-> > Andrew, who's maintaining MMC now?
->=20
-> Pierre stopped doing it, so I'm now pretending to.
+> > On Tue, 22 Jun 2010 23:53:21 +0200 "Rafael J. Wysocki" <rjw@sisk.pl> wrote:
+> > >
+> > > Andrew, who's maintaining MMC now?
+> > 
+> > Pierre stopped doing it, so I'm now pretending to.
+> 
+> So I guess I should remove the mmc tree (currently empty) from
+> linux-next, then?
 
-So I guess I should remove the mmc tree (currently empty) from
-linux-next, then?
+yup.
 
-> I actually pretend to maintain a huge number of subsystems and should
-> sprinkle akpms all over MAINTAINERS so stuff doesn't get lost.
+> > I actually pretend to maintain a huge number of subsystems and should
+> > sprinkle akpms all over MAINTAINERS so stuff doesn't get lost.
+> 
+> How about splitting these subsystems out of -mm and adding them to
+> linux-next?
 
-How about splitting these subsystems out of -mm and adding them to
-linux-next?
-
---=20
-Cheers,
-Stephen Rothwell                    sfr@canb.auug.org.au
-http://www.canb.auug.org.au/~sfr/
-
---Signature=_Wed__23_Jun_2010_13_08_37_+1000_Z8FcY.AGmnt+_+eV
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAkwherUACgkQjjKRsyhoI8yeXgCeJcv3/agHa9Ob0z3v1l7dYu6Y
-olgAn29DzJRIBKtmuE4GV9WMWmECG5T7
-=yUFg
------END PGP SIGNATURE-----
-
---Signature=_Wed__23_Jun_2010_13_08_37_+1000_Z8FcY.AGmnt+_+eV--
+Sigh.  Need to get onto that.  I suppose you'd prefer something that
+actually compiles a bit, too.
