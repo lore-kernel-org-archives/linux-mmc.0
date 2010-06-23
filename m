@@ -1,54 +1,54 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: MMC tree (Was: Re: [PATCH 1/2] MMC: fix all hangs
- related to mmc/sd card insert/removal during suspend/resume.)
-Date: Tue, 22 Jun 2010 20:52:23 -0700
-Message-ID: <20100622205223.b84736c8.akpm@linux-foundation.org>
-References: <1276809695.28201.13.camel@maxim-laptop>
-	<201006221119.06210.rjw@sisk.pl>
-	<1277241450.10907.4.camel@maxim-laptop>
-	<201006222353.21349.rjw@sisk.pl>
-	<20100622152006.d0ec0cef.akpm@linux-foundation.org>
-	<20100623130837.eaa40f99.sfr@canb.auug.org.au>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH] initialise DMA engine before MMC
+Date: Wed, 23 Jun 2010 08:47:43 +0200
+Message-ID: <AANLkTikndTP49meKLd1bh7De04wUHrFovpgwbIrpYGF9@mail.gmail.com>
+References: <Pine.LNX.4.64.1006071312060.12965@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-pm-bounces@lists.linux-foundation.org>
-In-Reply-To: <20100623130837.eaa40f99.sfr@canb.auug.org.au>
-List-Unsubscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
-	<mailto:linux-pm-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linux-foundation.org/pipermail/linux-pm>
-List-Post: <mailto:linux-pm@lists.linux-foundation.org>
-List-Help: <mailto:linux-pm-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
-	<mailto:linux-pm-request@lists.linux-foundation.org?subject=subscribe>
-Sender: linux-pm-bounces@lists.linux-foundation.org
-Errors-To: linux-pm-bounces@lists.linux-foundation.org
-To: Stephen Rothwell <sfr@canb.auug.org.au>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Pierre@smtp1.linux-foundation.org, Ossman <drzeus-list@drzeus.cx>, linux-pm <linux-pm@lists.linux-foundation.org>, Philip Langdale <philipl@overt.org>, Adrian Hunter <adrian.hunter@nokia.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1006071312060.12965@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-kernel@vger.kernel.org, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 23 Jun 2010 13:08:37 +1000 Stephen Rothwell <sfr@canb.auug.org.au> wrote:
+2010/6/7 Guennadi Liakhovetski <g.liakhovetski@gmx.de>:
 
-> Hi Andrew,
-> 
-> On Tue, 22 Jun 2010 15:20:06 -0700 Andrew Morton <akpm@linux-foundation.org> wrote:
-> >
-> > On Tue, 22 Jun 2010 23:53:21 +0200 "Rafael J. Wysocki" <rjw@sisk.pl> wrote:
-> > >
-> > > Andrew, who's maintaining MMC now?
-> > 
-> > Pierre stopped doing it, so I'm now pretending to.
-> 
-> So I guess I should remove the mmc tree (currently empty) from
-> linux-next, then?
+> To use DMA engine based DMA with MMC in a non-modular build, the DMA
+> engine has to initialise before MMC.
+>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+> diff --git a/drivers/Makefile b/drivers/Makefile
+> index 91874e0..b713e75 100644
+> --- a/drivers/Makefile
+> +++ b/drivers/Makefile
+> @@ -92,6 +92,7 @@ obj-$(CONFIG_EISA) =A0 =A0 =A0 =A0 =A0 =A0+=3D eisa=
+/
+> =A0obj-y =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0+=3D lgue=
+st/
+> =A0obj-$(CONFIG_CPU_FREQ) =A0 =A0 =A0 =A0 +=3D cpufreq/
+> =A0obj-$(CONFIG_CPU_IDLE) =A0 =A0 =A0 =A0 +=3D cpuidle/
+> +obj-$(CONFIG_DMA_ENGINE) =A0 =A0 =A0 +=3D dma/
+> =A0obj-$(CONFIG_MMC) =A0 =A0 =A0 =A0 =A0 =A0 =A0+=3D mmc/
+> =A0obj-$(CONFIG_MEMSTICK) =A0 =A0 =A0 =A0 +=3D memstick/
+> =A0obj-$(CONFIG_NEW_LEDS) =A0 =A0 =A0 =A0 +=3D leds/
+> @@ -102,7 +103,6 @@ obj-$(CONFIG_CRYPTO) =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0+=3D crypto/
+> =A0obj-$(CONFIG_SUPERH) =A0 =A0 =A0 =A0 =A0 +=3D sh/
+> =A0obj-$(CONFIG_ARCH_SHMOBILE) =A0 =A0+=3D sh/
+> =A0obj-$(CONFIG_GENERIC_TIME) =A0 =A0 +=3D clocksource/
+> -obj-$(CONFIG_DMA_ENGINE) =A0 =A0 =A0 +=3D dma/
+> =A0obj-$(CONFIG_DCA) =A0 =A0 =A0 =A0 =A0 =A0 =A0+=3D dca/
+> =A0obj-$(CONFIG_HID) =A0 =A0 =A0 =A0 =A0 =A0 =A0+=3D hid/
+> =A0obj-$(CONFIG_PPC_PS3) =A0 =A0 =A0 =A0 =A0+=3D ps3/
 
-yup.
+What I did was to move my DMA engines to subsystem_initcall(), with thi=
+s
+approach I would have had to rearrange a lot of subsystems I think.
 
-> > I actually pretend to maintain a huge number of subsystems and should
-> > sprinkle akpms all over MAINTAINERS so stuff doesn't get lost.
-> 
-> How about splitting these subsystems out of -mm and adding them to
-> linux-next?
+But if it's easier for you this way by all means do it.
 
-Sigh.  Need to get onto that.  I suppose you'd prefer something that
-actually compiles a bit, too.
+Yours,
+Linus Walleij
