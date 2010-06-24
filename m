@@ -1,107 +1,105 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH V3 5/5] mmc_block: Add support for secure discard
-Date: Thu, 24 Jun 2010 11:44:30 +0300
-Message-ID: <20100624084430.25444.24879.sendpatchset@ahunter-work.research.nokia.com>
-References: <20100624084351.25444.30143.sendpatchset@ahunter-work.research.nokia.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100624084351.25444.30143.sendpatchset@ahunter-work.research.nokia.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
+From: Linus WALLEIJ <linus.walleij@stericsson.com>
+Subject: RE: [PATCH 07/12] mmci: pass power_mode to the translate_vdd callback
+Date: Thu, 24 Jun 2010 10:56:09 +0200
+Message-ID: <CEE6BB42CAD6E947908279175AF8470A025FD0D483@EXDCVYMBSTM006.EQ1STM.local>
+References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com>
+	<1277198267-10860-7-git-send-email-rabin.vincent@stericsson.com>
+	<AANLkTil2Cb4alVFkfEjXApMgIdkmNvEEarWkT9AhXIdU@mail.gmail.com>
+	<20100624082746.GA12453@bnru01.bnr.st.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20100624082746.GA12453@bnru01.bnr.st.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Rabin VINCENT <rabin.vincent@stericsson.com>, Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
->From 3104475071c1f4959912a1529b179c912cbfb56f Mon Sep 17 00:00:00 2001
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Date: Wed, 23 Jun 2010 15:55:50 +0300
-Subject: [PATCH 5/5] mmc_block: Add support for secure discard
+[Rabin]
 
-Secure discard is implemented by Secure Trim if the discard
-is unaligned or Secure Erase otherwise.
+> On Wed, Jun 23, 2010 at 00:03:47 +0200, Linus Walleij wrote:
+> > 2010/6/22 Rabin Vincent <rabin.vincent@stericsson.com>:
+> > > @@ -17,7 +17,8 @@
+> > > =A0* mmc/host.h
+> > > =A0* @translate_vdd: a callback function to translate a MMC_VDD_*
+> > > =A0* mask into a value to be binary or:ed and written into the
+> > > - * MMCIPWR register of the block
+> > > + * MMCIPWR register of the block. =A0May also control external power
+> > > + * based on the power_mode.
+> >
+> > Actually this callback is named like that for a reason: it is to be
+> used
+> > to translate the MMC_VDD_* into a u8:4 bitmask for the MMCIPWR
+> > register, 4 bits possibly routed out of the PL180 block on some
+> > designs (never seen in practice, but could be used in theory).
+> >
+> > So it translates a voltage into a 4-bit bitmask, hence the name.
+> >
+> > Now the semantics are altered to have other side-effects in
+> > the platform, so the function should be renamed, something like
+> > platform_vdd_handler() would be more appropriate.
+> >
+> =
 
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
----
- drivers/mmc/card/block.c |   46 +++++++++++++++++++++++++++++++++++++++++++---
- drivers/mmc/card/queue.c |    3 +++
- 2 files changed, 46 insertions(+), 3 deletions(-)
+> This is already inside platform data, so how about just -
+> >vdd_handler()?
+> Or ->set_power(), like some other drivers?
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index af14ae1..2e96ae5 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -275,6 +275,42 @@ out:
- 	return err ? 0 : 1;
- }
- 
-+static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
-+				       struct request *req)
-+{
-+	struct mmc_blk_data *md = mq->data;
-+	struct mmc_card *card = md->queue.card;
-+	unsigned int from, nr, arg;
-+	int err = 0;
-+
-+	mmc_claim_host(card->host);
-+
-+	if (!mmc_can_secure_erase_trim(card)) {
-+		err = -EOPNOTSUPP;
-+		goto out;
-+	}
-+
-+	from = blk_rq_pos(req);
-+	nr = blk_rq_sectors(req);
-+
-+	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
-+		arg = MMC_SECURE_TRIM1_ARG;
-+	else
-+		arg = MMC_SECURE_ERASE_ARG;
-+
-+	err = mmc_erase(card, from, nr, arg);
-+	if (!err && arg == MMC_SECURE_TRIM1_ARG)
-+		err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
-+out:
-+	spin_lock_irq(&md->lock);
-+	__blk_end_request(req, err, blk_rq_bytes(req));
-+	spin_unlock_irq(&md->lock);
-+
-+	mmc_release_host(card->host);
-+
-+	return err ? 0 : 1;
-+}
-+
- static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- {
- 	struct mmc_blk_data *md = mq->data;
-@@ -505,10 +541,14 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 
- static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- {
--	if (blk_discard_rq(req))
--		return mmc_blk_issue_discard_rq(mq, req);
--	else
-+	if (blk_discard_rq(req)) {
-+		if (blk_secure_rq(req))
-+			return mmc_blk_issue_secdiscard_rq(mq, req);
-+		else
-+			return mmc_blk_issue_discard_rq(mq, req);
-+	} else {
- 		return mmc_blk_issue_rw_rq(mq, req);
-+	}
- }
- 
- static inline int mmc_blk_readonly(struct mmc_card *card)
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 37f648f..b1ac755 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -141,6 +141,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock
- 			mq->queue->limits.discard_alignment =
- 							card->erase_size << 9;
- 		}
-+		if (mmc_can_secure_erase_trim(card))
-+			queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD,
-+						mq->queue);
- 	}
- 
- #ifdef CONFIG_MMC_BLOCK_BOUNCE
--- 
-1.6.3.3
+Any of these look good to me atleast.
+
+But now another thing I came to think of (the fun never
+ends):
+
+Since the ux500 also have a regulator for this and since
+that mechanism is mutually exclusive in the code (since the
+semantics implied that it was only a voltage translation
+function) you should also remove the condition that this
+only gets called in case there is no regulator.
+
+> Note that we'd also like to use this to do the board-specific settings
+> for the *DIREN and FBCLK bits, which replace the Voltage bits on some
+> ST
+> variants, like so:
+> =
+
+> +static u32 mop500_sdi0_translate_vdd(struct device *dev, unsigned int
+> vdd,
+> +				     unsigned char power_mode)
+> +{
+> +	if (power_mode =3D=3D MMC_POWER_UP)
+> +		gpio_set_value(gpio_sdmmc_en, 1);
+> +	else if (power_mode =3D=3D MMC_POWER_OFF)
+> +		gpio_set_value(gpio_sdmmc_en, 0);
+> +
+> +	return MCI_FBCLKEN | MCI_CMDDIREN | MCI_DATA0DIREN |
+> +	       MCI_DATA2DIREN | MCI_DATA31DIREN;
+> +}
+
+OK just update the kerneldoc to reflect the fact that the platform
+can OR on any *custom* bits it like to the PWR register in this
+function.
+
+Side notice: some of bits are for the ST version only, when you
+patch in the latter, can you take this opportunity to also
+rename MCI_FBCLKEN to MCI_ST_FBCLKEN and so on for all stuff
+that is ST-specific? I think I am the sinner here, we had no
+convention for how to do this naming when we first began
+modifying this driver. It should be crystal clear that all
+custom extensions are named MCI_<VENDOR>_FOO.
+
+As a consequence, anything that is OR:ed into from the
+vdd_handler() should typically be MCI_<VENDOR>_FOO, and
+it will be clear why it's there.
+
+Yours,
+Linus Walleij
