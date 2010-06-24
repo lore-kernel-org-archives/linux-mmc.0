@@ -1,70 +1,72 @@
-From: Rabin VINCENT <rabin.vincent@stericsson.com>
-Subject: Re: [PATCH 07/12] mmci: pass power_mode to the translate_vdd
- callback
-Date: Thu, 24 Jun 2010 13:57:47 +0530
-Message-ID: <20100624082746.GA12453@bnru01.bnr.st.com>
-References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com>
- <1277198267-10860-7-git-send-email-rabin.vincent@stericsson.com>
- <AANLkTil2Cb4alVFkfEjXApMgIdkmNvEEarWkT9AhXIdU@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: [PATCH V3 0/5] Add MMC erase and secure erase V3
+Date: Thu, 24 Jun 2010 11:43:51 +0300
+Message-ID: <20100624084351.25444.30143.sendpatchset@ahunter-work.research.nokia.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog111.obsmtp.com ([207.126.144.131]:41321 "EHLO
-	eu1sys200aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751102Ab0FXI2C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jun 2010 04:28:02 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTil2Cb4alVFkfEjXApMgIdkmNvEEarWkT9AhXIdU@mail.gmail.com>
+Received: from smtp.nokia.com ([192.100.105.134]:45952 "EHLO
+	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753375Ab0FXIoT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jun 2010 04:44:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>, Jens Axboe <axboe@kernel.dk>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On Wed, Jun 23, 2010 at 00:03:47 +0200, Linus Walleij wrote:
-> 2010/6/22 Rabin Vincent <rabin.vincent@stericsson.com>:
-> > @@ -17,7 +17,8 @@
-> > =A0* mmc/host.h
-> > =A0* @translate_vdd: a callback function to translate a MMC_VDD_*
-> > =A0* mask into a value to be binary or:ed and written into the
-> > - * MMCIPWR register of the block
-> > + * MMCIPWR register of the block. =A0May also control external pow=
-er
-> > + * based on the power_mode.
->=20
-> Actually this callback is named like that for a reason: it is to be u=
-sed
-> to translate the MMC_VDD_* into a u8:4 bitmask for the MMCIPWR
-> register, 4 bits possibly routed out of the PL180 block on some
-> designs (never seen in practice, but could be used in theory).
->=20
-> So it translates a voltage into a 4-bit bitmask, hence the name.
->=20
-> Now the semantics are altered to have other side-effects in
-> the platform, so the function should be renamed, something like
-> platform_vdd_handler() would be more appropriate.
->=20
+Hi
 
-This is already inside platform data, so how about just ->vdd_handler()=
-?
-Or ->set_power(), like some other drivers?
+Add ability to do MMC erase and secure erase operations from userspace,
+using the BLKDISCARD ioctl and a newly created BLKSECDISCARD ioctl.
 
-Note that we'd also like to use this to do the board-specific settings
-for the *DIREN and FBCLK bits, which replace the Voltage bits on some S=
-T
-variants, like so:
+This is version 3 of these patches.
 
-+static u32 mop500_sdi0_translate_vdd(struct device *dev, unsigned int =
-vdd,
-+				     unsigned char power_mode)
-+{
-+	if (power_mode =3D=3D MMC_POWER_UP)
-+		gpio_set_value(gpio_sdmmc_en, 1);
-+	else if (power_mode =3D=3D MMC_POWER_OFF)
-+		gpio_set_value(gpio_sdmmc_en, 0);
-+
-+	return MCI_FBCLKEN | MCI_CMDDIREN | MCI_DATA0DIREN |
-+	       MCI_DATA2DIREN | MCI_DATA31DIREN;
-+}
+Changes from V2
 
-Rabin
+- move the addition of BLKSECDISCARD to a separate patch and implement it
+using I/O requests
+- move the MMC support of secure discard to a separate patch and support
+the secure discard I/O request
+
+Changes from V1
+
+- use discard I/O requests instead of implementing BLKDISCARD in mmc_block
+- do not validate erase size for MMC erases, instead round to erase size
+- rename MMC max_erase to pref_erase and expose it through sysfs as
+preferred_erase_size
+
+
+Adrian Hunter (5):
+      mmc: Add erase, secure erase, trim and secure trim operations
+      mmc_block: Add discard support
+      omap_hsmmc: Add erase capability
+      block: Add secure discard
+      mmc_block: Add support for secure discard
+
+ block/blk-core.c              |    6 +-
+ block/blk-lib.c               |    6 +
+ block/compat_ioctl.c          |    1 +
+ block/elevator.c              |    4 +
+ block/ioctl.c                 |   15 ++-
+ drivers/mmc/card/block.c      |   82 ++++++++++-
+ drivers/mmc/card/queue.c      |   19 ++-
+ drivers/mmc/core/core.c       |  346 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/core.h       |    2 +
+ drivers/mmc/core/mmc.c        |   47 ++++++-
+ drivers/mmc/core/sd.c         |   82 ++++++++++
+ drivers/mmc/core/sd_ops.c     |   48 ++++++
+ drivers/mmc/core/sd_ops.h     |    1 +
+ drivers/mmc/host/omap_hsmmc.c |   13 ++-
+ include/linux/bio.h           |    7 +-
+ include/linux/blkdev.h        |   10 +-
+ include/linux/fs.h            |    2 +
+ include/linux/mmc/card.h      |   19 +++
+ include/linux/mmc/core.h      |   19 +++
+ include/linux/mmc/host.h      |    1 +
+ include/linux/mmc/mmc.h       |   24 ++-
+ include/linux/mmc/sd.h        |    5 +
+ kernel/trace/blktrace.c       |    8 +
+ 23 files changed, 746 insertions(+), 21 deletions(-)
+
+ 
+Regards
+Adrian
+
