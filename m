@@ -1,7 +1,7 @@
 From: Anton Vorontsov <avorontsov@mvista.com>
-Subject: [PATCH 1/3] sdhci-pltfm: Switch to module device table matching
-Date: Fri, 25 Jun 2010 22:06:27 +0400
-Message-ID: <20100625180627.GA18241@oksana.dev.rtsoft.ru>
+Subject: [PATCH 3/3] sdhci-pltfm: Add support for CNS3xxx SoC devices
+Date: Fri, 25 Jun 2010 22:06:44 +0400
+Message-ID: <20100625180644.GC18241@oksana.dev.rtsoft.ru>
 References: <20100625180527.GA11280@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
@@ -13,100 +13,179 @@ To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Ben Dooks <ben@simtec.co.uk>, Richard =?utf-8?Q?R=C3=B6jfors?= <richard.rojfors@pelagicore.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Sometimes want to place SoC-specific parts alongside with the generic
-driver, and to do so, we have to switch the driver over to the module
-device table matching.
-
-Note that drivers/mmc/host/sdhci-pltfm.h is so far empty, but it'll
-hold SoC-specific driver data handlers soon.
+There's nothing special, just SoC-specific ops and quirks.
 
 Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
 ---
- drivers/mmc/host/sdhci-pltfm.c |   14 +++++++++++++-
- drivers/mmc/host/sdhci-pltfm.h |   14 ++++++++++++++
- 2 files changed, 27 insertions(+), 1 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-pltfm.h
+ drivers/mmc/host/Kconfig         |    9 ++++
+ drivers/mmc/host/Makefile        |    1 +
+ drivers/mmc/host/sdhci-cns3xxx.c |   97 ++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pltfm.c   |    3 +
+ drivers/mmc/host/sdhci-pltfm.h   |    4 ++
+ 5 files changed, 114 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-cns3xxx.c
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index b6ee0d7..4c043bb 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -24,6 +24,7 @@
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index e171e77..d40e39b 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -121,6 +121,15 @@ config MMC_SDHCI_PLTFM
  
- #include <linux/delay.h>
- #include <linux/highmem.h>
-+#include <linux/mod_devicetable.h>
- #include <linux/platform_device.h>
+ 	  If unsure, say N.
  
- #include <linux/mmc/host.h>
-@@ -32,6 +33,7 @@
- #include <linux/sdhci-pltfm.h>
- 
- #include "sdhci.h"
-+#include "sdhci-pltfm.h"
- 
- /*****************************************************************************\
-  *                                                                           *
-@@ -51,10 +53,14 @@ static struct sdhci_ops sdhci_pltfm_ops = {
- static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- {
- 	struct sdhci_pltfm_data *pdata = pdev->dev.platform_data;
-+	const struct platform_device_id *platid = platform_get_device_id(pdev);
- 	struct sdhci_host *host;
- 	struct resource *iomem;
- 	int ret;
- 
-+	if (!pdata && platid && platid->driver_data)
-+		pdata = (void *)platid->driver_data;
++config MMC_SDHCI_CNS3XXX
++	bool "SDHCI support on the Cavium Networks CNS3xxx SoC"
++	depends on ARCH_CNS3XXX
++	depends on MMC_SDHCI_PLTFM
++	help
++	  This selects the SDHCI support for CNS3xxx System-on-Chip devices.
 +
- 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!iomem) {
- 		ret = -ENOMEM;
-@@ -150,6 +156,12 @@ static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+static const struct platform_device_id sdhci_pltfm_ids[] = {
-+	{ "sdhci", },
-+	{ },
-+};
-+MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
++	  If unsure, say N.
 +
- static struct platform_driver sdhci_pltfm_driver = {
- 	.driver = {
- 		.name	= "sdhci",
-@@ -157,6 +169,7 @@ static struct platform_driver sdhci_pltfm_driver = {
- 	},
- 	.probe		= sdhci_pltfm_probe,
- 	.remove		= __devexit_p(sdhci_pltfm_remove),
-+	.id_table	= sdhci_pltfm_ids,
- };
+ config MMC_SDHCI_S3C
+ 	tristate "SDHCI support on Samsung S3C SoC"
+ 	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 28622d5..070c5f3 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -38,6 +38,7 @@ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
  
- /*****************************************************************************\
-@@ -181,4 +194,3 @@ module_exit(sdhci_drv_exit);
- MODULE_DESCRIPTION("Secure Digital Host Controller Interface platform driver");
- MODULE_AUTHOR("Mocean Laboratories <info@mocean-labs.com>");
- MODULE_LICENSE("GPL v2");
--MODULE_ALIAS("platform:sdhci");
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+ obj-$(CONFIG_MMC_SDHCI_PLTFM)			+= sdhci-platform.o
+ sdhci-platform-y				:= sdhci-pltfm.o
++sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX)	+= sdhci-cns3xxx.o
+ 
+ obj-$(CONFIG_MMC_SDHCI_OF)	+= sdhci-of.o
+ sdhci-of-y				:= sdhci-of-core.o
+diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
 new file mode 100644
-index 0000000..4aa07a9
+index 0000000..b7050b3
 --- /dev/null
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -0,0 +1,14 @@
++++ b/drivers/mmc/host/sdhci-cns3xxx.c
+@@ -0,0 +1,97 @@
 +/*
++ * SDHCI support for CNS3xxx SoC
++ *
++ * Copyright 2008 Cavium Networks
 + * Copyright 2010 MontaVista Software, LLC.
 + *
-+ * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
++ * Authors: Scott Shu
++ *	    Anton Vorontsov <avorontsov@mvista.com>
 + *
 + * This program is free software; you can redistribute it and/or modify
 + * it under the terms of the GNU General Public License version 2 as
 + * published by the Free Software Foundation.
 + */
 +
-+#ifndef _DRIVERS_MMC_SDHCI_PLTFM_H
-+#define _DRIVERS_MMC_SDHCI_PLTFM_H
++#include <linux/delay.h>
++#include <linux/device.h>
++#include <linux/mmc/host.h>
++#include <linux/sdhci-pltfm.h>
++#include <mach/cns3xxx.h>
++#include "sdhci.h"
++#include "sdhci-pltfm.h"
 +
-+#endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
++static unsigned int sdhci_cns3xxx_get_max_clk(struct sdhci_host *host)
++{
++	return 150000000;
++}
++
++static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	struct device *dev = mmc_dev(host->mmc);
++	int div = 1;
++	u16 clk;
++	unsigned long timeout;
++
++	if (clock == host->clock)
++		return;
++
++	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++
++	if (clock == 0)
++		goto out;
++
++	while (host->max_clk / div > clock) {
++		/*
++		 * On CNS3xxx divider grows linearly up to 4, and then
++		 * exponentially up to 256.
++		 */
++		if (div < 4)
++			div += 1;
++		else if (div < 256)
++			div *= 2;
++		else
++			break;
++	}
++
++	dev_dbg(dev, "desired SD clock: %d, actual: %d\n",
++		clock, host->max_clk / div);
++
++	/* Divide by 3 is special. */
++	if (div != 3)
++		div >>= 1;
++
++	clk = div << SDHCI_DIVIDER_SHIFT;
++	clk |= SDHCI_CLOCK_INT_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	timeout = 20;
++	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++			& SDHCI_CLOCK_INT_STABLE)) {
++		if (timeout == 0) {
++			dev_warn(dev, "clock is unstable");
++			break;
++		}
++		timeout--;
++		mdelay(1);
++	}
++
++	clk |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++out:
++	host->clock = clock;
++}
++
++static struct sdhci_ops sdhci_cns3xxx_ops = {
++	.get_max_clock	= sdhci_cns3xxx_get_max_clk,
++	.set_clock	= sdhci_cns3xxx_set_clock,
++};
++
++struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
++	.ops = &sdhci_cns3xxx_ops,
++	.quirks = SDHCI_QUIRK_BROKEN_DMA |
++		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
++		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
++		  SDHCI_QUIRK_NONSTANDARD_CLOCK,
++};
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index 4c043bb..e045e3c 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -158,6 +158,9 @@ static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
+ 
+ static const struct platform_device_id sdhci_pltfm_ids[] = {
+ 	{ "sdhci", },
++#ifdef CONFIG_MMC_SDHCI_CNS3XXX
++	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
++#endif
+ 	{ },
+ };
+ MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index 4aa07a9..900f329 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -11,4 +11,8 @@
+ #ifndef _DRIVERS_MMC_SDHCI_PLTFM_H
+ #define _DRIVERS_MMC_SDHCI_PLTFM_H
+ 
++#include <linux/sdhci-pltfm.h>
++
++extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
++
+ #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
 -- 
 1.7.0.5
