@@ -1,36 +1,39 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] MMC: remove regulator refcount fiddling in mmc core
-Date: Fri, 25 Jun 2010 12:22:32 +0100
-Message-ID: <20100625112232.GA21217@opensource.wolfsonmicro.com>
-References: <1277392337-27627-1-git-send-email-linus.walleij@stericsson.com>
+From: Anton Vorontsov <avorontsov@mvista.com>
+Subject: [PATCH 0/3] Add support for CNS3xxx SDHCI hosts
+Date: Fri, 25 Jun 2010 22:05:27 +0400
+Message-ID: <20100625180527.GA11280@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:54178 "EHLO
-	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753206Ab0FYLWe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Jun 2010 07:22:34 -0400
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1277392337-27627-1-git-send-email-linus.walleij@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Ben Dooks <ben@simtec.co.uk>, Richard =?utf-8?Q?R=C3=B6jfors?= <richard.rojfors@pelagicore.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org, Liam Girdwood <lrg@slimlogic.co.uk>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@nokia.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Sundar Iyer <sundar.iyer@stericsson.com>, Bengt Jonsson <bengt.jonsson@stericsson.com>
 
-On Thu, Jun 24, 2010 at 05:12:17PM +0200, Linus Walleij wrote:
+Hi all,
 
-> Currently the mmc_regulator_set_ocr() fiddles with the regulator
-> refcount by selectively calling regulator_[enable|disable]
-> depending on the state of the regulator. This will confuse the
-> reference count if case the regulator is for example shared with
-> other MMC slots or user for other stuff than the MMC card.
+Ben Dooks once suggested that we'd better keep SDHCI SoC-specific
+stuff in the driver/mmc/, as it's done for SDHCI S3C, eSDHC and
+HLWD devices. This helps maintain the code, and keeps MMC-specific
+stuff out of the platform code.
 
-> Push regulator_[enable|disable] out into the MMC host drivers
-> and remove this from the MMC core so the reference count can be
-> trusted.
+We already do this for OpenFirmware platforms (see sdhci-of-*),
+but the infrastructure isn't ready for the platform devices.
 
-So, the feedback from folks at the time this was originally written was
-that the MMC code was unable to cope with sharing regulators since it
-really needs to be able to set specific voltages.  This needn't be a
-showstopper since people can force a single voltage in the constraints
-but it does need to be considered here.
+This patch set adds CNS3xxx SoC support. But to not duplicate the
+sdhci-pltfm code, it converts the driver to module device table
+matching, and then just adds CNS3xxx-specific driver_data.
+
+Further more, as OF and Platform buses are going to be merged
+soon, this patch set also helps the transition.
+
+Plus, if anybody is willing, sdhci-s3c can be merged into
+sdhci-pltfm (need to implement struct clk handling for this).
+
+Thanks,
+
+-- 
+Anton Vorontsov
+email: cbouatmailru@gmail.com
+irc://irc.freenode.net/bd2
