@@ -1,79 +1,59 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH] mmc: change initial clock setting
-Date: Sat, 26 Jun 2010 17:57:45 +0100
-Message-ID: <87tyopg29i.fsf@linux-g6p1.site>
-References: <4C1AF098.1080400@samsung.com> <87iq5gfr6j.fsf@linux-g6p1.site> <4C1EEAA1.4020005@samsung.com>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH] MMC: remove regulator refcount fiddling in mmc core
+Date: Sat, 26 Jun 2010 19:37:20 +0200
+Message-ID: <AANLkTikiPByvzfbj-gwfyozWb5MMJXSWuINFbrLdcwtU@mail.gmail.com>
+References: <1277392337-27627-1-git-send-email-linus.walleij@stericsson.com>
+	<20100625112232.GA21217@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arkanian.console-pimps.org ([212.110.184.194]:37017 "EHLO
-	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753294Ab0FZQ5t convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 26 Jun 2010 12:57:49 -0400
-In-Reply-To: <4C1EEAA1.4020005@samsung.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:64508 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753516Ab0FZRhX convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Jun 2010 13:37:23 -0400
+In-Reply-To: <20100625112232.GA21217@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jh80.chung@samsung.com
-Cc: kyungmin.park@samsung.com, ben-linux@fluff.org, linux-mmc@vger.kernel.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org, Liam Girdwood <lrg@slimlogic.co.uk>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@nokia.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Sundar Iyer <sundar.iyer@stericsson.com>, Bengt Jonsson <bengt.g.jonsson@stericsson.com>
 
-On Mon, 21 Jun 2010 13:29:21 +0900, Jaehoon Chung <jh80.chung@samsung.c=
-om> wrote:
-> On 2010-06-18 =EC=98=A4=ED=9B=84 9:42, Matt Fleming wrote:
-> > On Fri, 18 Jun 2010 13:05:44 +0900, Jaehoon Chung <jh80.chung@samsu=
-ng.com> wrote:
-> >> This patch is bug fixed..
-> >> I think that host->ios.clock(initial clock) will be set lower than=
- 400KHz.
-> >> But in this code, if host->f_min is higher than 400KHz, print warn=
-ing message and set higher than 400KHz.
-> >> And We use SDHCI_QUIRK_NONSTANDARD_CLOCK..so using get_min_clock f=
-unction.=20
-> >> but didn't effect nothing through used get_min_clock function.
-> >=20
-> > I'm a little confused. What problem are you fixing with this patch?=
- What
-> > issue are you seeing? SDHCI_QUIRK_NONSTANDARD_CLOCK is only for sdh=
-ci.
-> > If this is the old "my card won't initialise at 400kHz" chestnut I =
-don't
-> > think a solution has ever been agreed upon. The problem was that wh=
-ile
-> > some cards won't initialise at 400kHz, some controllers will try to
-> > initialise at too low a frequency which causes other problems.
-> >=20
-> > Sascha Hauer explains the reason for setting ios.clock to 400kHz he=
-re,
-> >=20
-> >        http://lkml.org/lkml/2010/1/5/120
-> >=20
-> > So I think your patch will cause problems.
-> >=20
-> > Which driver are you using? The driver should have set the f_min va=
-lue
-> > to be <=3D 400kHz. Maybe it is a good idea to set the value of ios.=
-clock
-> > to 400kHz if the driver has set a bogus f_min value, we will at lea=
-st
-> > have a fighting chance of initialising the card (though I would say=
- that
-> > the driver was broken, but at least core.c will print a warning).
-> >=20
->=20
-> when ios.clock is higher than 400KHz, why not change 400KHz?(if 400KH=
-z seemed like good value)
-> if clock value is higher than 400KHz, i think card can't initialize..=
-=2Emaybe
+2010/6/25 Mark Brown <broonie@opensource.wolfsonmicro.com>:
+> On Thu, Jun 24, 2010 at 05:12:17PM +0200, Linus Walleij wrote:
+>
+>> Currently the mmc_regulator_set_ocr() fiddles with the regulator
+>> refcount by selectively calling regulator_[enable|disable]
+>> depending on the state of the regulator. This will confuse the
+>> reference count if case the regulator is for example shared with
+>> other MMC slots or user for other stuff than the MMC card.
+>
+>> Push regulator_[enable|disable] out into the MMC host drivers
+>> and remove this from the MMC core so the reference count can be
+>> trusted.
+>
+> So, the feedback from folks at the time this was originally written w=
+as
+> that the MMC code was unable to cope with sharing regulators since it
+> really needs to be able to set specific voltages. =A0This needn't be =
+a
+> showstopper since people can force a single voltage in the constraint=
+s
+> but it does need to be considered here.
 
-I think this part of your patch is OK.
+Well hm, that's not strictly true. If you only provide one standard
+voltage ONLY in your OCR mask, i.e. MMC_VDD_* then you can use
+the same regulator for two or more MMC cards.
 
-> when sdhci controller set f_min value(ie, 300KHz), clock changed 400K=
-Hz in core.c.
-> just this code purpose to print warning message?
+=46urther that's a perfectly reasonable thing to do if you have e.g.
+two embedded eMMC cards and you know which voltage they like
+to operate on ... so share the same regulator, why not. The above
+assumption comes from a slot-based world.
 
-Well, the purpose of the code is to set the clock to 400kHz if the valu=
-e
-of f_min is too low, as having a low value can cause some controllers t=
-o
-break.
+Another argument is that a function named
+mmc_regulator_set_ocr() shouldn't be enabling/disabling regulators
+anyway because it's hopeless to read the code, and the other
+functions in mmc/core.c only deals with voltages, not on/off:ing.
+(Maybe it's just me who have a hard time reading code like that.)
+
+Yours,
+Linus Walleij
