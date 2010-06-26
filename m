@@ -1,191 +1,79 @@
-From: Anton Vorontsov <avorontsov@mvista.com>
-Subject: [PATCH 3/3] sdhci-pltfm: Add support for CNS3xxx SoC devices
-Date: Fri, 25 Jun 2010 22:06:44 +0400
-Message-ID: <20100625180644.GC18241@oksana.dev.rtsoft.ru>
-References: <20100625180527.GA11280@oksana.dev.rtsoft.ru>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] mmc: change initial clock setting
+Date: Sat, 26 Jun 2010 17:57:45 +0100
+Message-ID: <87tyopg29i.fsf@linux-g6p1.site>
+References: <4C1AF098.1080400@samsung.com> <87iq5gfr6j.fsf@linux-g6p1.site> <4C1EEAA1.4020005@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20100625180527.GA11280@oksana.dev.rtsoft.ru>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Ben Dooks <ben@simtec.co.uk>, Richard =?utf-8?Q?R=C3=B6jfors?= <richard.rojfors@pelagicore.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:37017 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753294Ab0FZQ5t convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 26 Jun 2010 12:57:49 -0400
+In-Reply-To: <4C1EEAA1.4020005@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: jh80.chung@samsung.com
+Cc: kyungmin.park@samsung.com, ben-linux@fluff.org, linux-mmc@vger.kernel.org
 
-There's nothing special, just SoC-specific ops and quirks.
+On Mon, 21 Jun 2010 13:29:21 +0900, Jaehoon Chung <jh80.chung@samsung.c=
+om> wrote:
+> On 2010-06-18 =EC=98=A4=ED=9B=84 9:42, Matt Fleming wrote:
+> > On Fri, 18 Jun 2010 13:05:44 +0900, Jaehoon Chung <jh80.chung@samsu=
+ng.com> wrote:
+> >> This patch is bug fixed..
+> >> I think that host->ios.clock(initial clock) will be set lower than=
+ 400KHz.
+> >> But in this code, if host->f_min is higher than 400KHz, print warn=
+ing message and set higher than 400KHz.
+> >> And We use SDHCI_QUIRK_NONSTANDARD_CLOCK..so using get_min_clock f=
+unction.=20
+> >> but didn't effect nothing through used get_min_clock function.
+> >=20
+> > I'm a little confused. What problem are you fixing with this patch?=
+ What
+> > issue are you seeing? SDHCI_QUIRK_NONSTANDARD_CLOCK is only for sdh=
+ci.
+> > If this is the old "my card won't initialise at 400kHz" chestnut I =
+don't
+> > think a solution has ever been agreed upon. The problem was that wh=
+ile
+> > some cards won't initialise at 400kHz, some controllers will try to
+> > initialise at too low a frequency which causes other problems.
+> >=20
+> > Sascha Hauer explains the reason for setting ios.clock to 400kHz he=
+re,
+> >=20
+> >        http://lkml.org/lkml/2010/1/5/120
+> >=20
+> > So I think your patch will cause problems.
+> >=20
+> > Which driver are you using? The driver should have set the f_min va=
+lue
+> > to be <=3D 400kHz. Maybe it is a good idea to set the value of ios.=
+clock
+> > to 400kHz if the driver has set a bogus f_min value, we will at lea=
+st
+> > have a fighting chance of initialising the card (though I would say=
+ that
+> > the driver was broken, but at least core.c will print a warning).
+> >=20
+>=20
+> when ios.clock is higher than 400KHz, why not change 400KHz?(if 400KH=
+z seemed like good value)
+> if clock value is higher than 400KHz, i think card can't initialize..=
+=2Emaybe
 
-Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
----
- drivers/mmc/host/Kconfig         |    9 ++++
- drivers/mmc/host/Makefile        |    1 +
- drivers/mmc/host/sdhci-cns3xxx.c |   97 ++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-pltfm.c   |    3 +
- drivers/mmc/host/sdhci-pltfm.h   |    4 ++
- 5 files changed, 114 insertions(+), 0 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-cns3xxx.c
+I think this part of your patch is OK.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index e171e77..d40e39b 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -121,6 +121,15 @@ config MMC_SDHCI_PLTFM
- 
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_CNS3XXX
-+	bool "SDHCI support on the Cavium Networks CNS3xxx SoC"
-+	depends on ARCH_CNS3XXX
-+	depends on MMC_SDHCI_PLTFM
-+	help
-+	  This selects the SDHCI support for CNS3xxx System-on-Chip devices.
-+
-+	  If unsure, say N.
-+
- config MMC_SDHCI_S3C
- 	tristate "SDHCI support on Samsung S3C SoC"
- 	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 28622d5..070c5f3 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -38,6 +38,7 @@ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- 
- obj-$(CONFIG_MMC_SDHCI_PLTFM)			+= sdhci-platform.o
- sdhci-platform-y				:= sdhci-pltfm.o
-+sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX)	+= sdhci-cns3xxx.o
- 
- obj-$(CONFIG_MMC_SDHCI_OF)	+= sdhci-of.o
- sdhci-of-y				:= sdhci-of-core.o
-diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
-new file mode 100644
-index 0000000..b7050b3
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-cns3xxx.c
-@@ -0,0 +1,97 @@
-+/*
-+ * SDHCI support for CNS3xxx SoC
-+ *
-+ * Copyright 2008 Cavium Networks
-+ * Copyright 2010 MontaVista Software, LLC.
-+ *
-+ * Authors: Scott Shu
-+ *	    Anton Vorontsov <avorontsov@mvista.com>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#include <linux/delay.h>
-+#include <linux/device.h>
-+#include <linux/mmc/host.h>
-+#include <linux/sdhci-pltfm.h>
-+#include <mach/cns3xxx.h>
-+#include "sdhci.h"
-+#include "sdhci-pltfm.h"
-+
-+static unsigned int sdhci_cns3xxx_get_max_clk(struct sdhci_host *host)
-+{
-+	return 150000000;
-+}
-+
-+static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+	struct device *dev = mmc_dev(host->mmc);
-+	int div = 1;
-+	u16 clk;
-+	unsigned long timeout;
-+
-+	if (clock == host->clock)
-+		return;
-+
-+	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-+
-+	if (clock == 0)
-+		goto out;
-+
-+	while (host->max_clk / div > clock) {
-+		/*
-+		 * On CNS3xxx divider grows linearly up to 4, and then
-+		 * exponentially up to 256.
-+		 */
-+		if (div < 4)
-+			div += 1;
-+		else if (div < 256)
-+			div *= 2;
-+		else
-+			break;
-+	}
-+
-+	dev_dbg(dev, "desired SD clock: %d, actual: %d\n",
-+		clock, host->max_clk / div);
-+
-+	/* Divide by 3 is special. */
-+	if (div != 3)
-+		div >>= 1;
-+
-+	clk = div << SDHCI_DIVIDER_SHIFT;
-+	clk |= SDHCI_CLOCK_INT_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+	timeout = 20;
-+	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-+			& SDHCI_CLOCK_INT_STABLE)) {
-+		if (timeout == 0) {
-+			dev_warn(dev, "clock is unstable");
-+			break;
-+		}
-+		timeout--;
-+		mdelay(1);
-+	}
-+
-+	clk |= SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+out:
-+	host->clock = clock;
-+}
-+
-+static struct sdhci_ops sdhci_cns3xxx_ops = {
-+	.get_max_clock	= sdhci_cns3xxx_get_max_clk,
-+	.set_clock	= sdhci_cns3xxx_set_clock,
-+};
-+
-+struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
-+	.ops = &sdhci_cns3xxx_ops,
-+	.quirks = SDHCI_QUIRK_BROKEN_DMA |
-+		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-+		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
-+		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-+		  SDHCI_QUIRK_NONSTANDARD_CLOCK,
-+};
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 4c043bb..e045e3c 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -158,6 +158,9 @@ static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
- 
- static const struct platform_device_id sdhci_pltfm_ids[] = {
- 	{ "sdhci", },
-+#ifdef CONFIG_MMC_SDHCI_CNS3XXX
-+	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
-+#endif
- 	{ },
- };
- MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index 4aa07a9..900f329 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -11,4 +11,8 @@
- #ifndef _DRIVERS_MMC_SDHCI_PLTFM_H
- #define _DRIVERS_MMC_SDHCI_PLTFM_H
- 
-+#include <linux/sdhci-pltfm.h>
-+
-+extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
-+
- #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
--- 
-1.7.0.5
+> when sdhci controller set f_min value(ie, 300KHz), clock changed 400K=
+Hz in core.c.
+> just this code purpose to print warning message?
+
+Well, the purpose of the code is to set the clock to 400kHz if the valu=
+e
+of f_min is too low, as having a low value can cause some controllers t=
+o
+break.
