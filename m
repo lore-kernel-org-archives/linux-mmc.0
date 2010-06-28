@@ -1,87 +1,60 @@
-From: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH v5 2/2] OMAP4 HSMMC: Adding card detect support for MMC1
-	Controller
-Date: Mon, 28 Jun 2010 21:40:56 +0530
-Message-ID: <AANLkTimVB7N0Oa9bDbYfSfcivy6afhvHW5Bdt-8dWVxD@mail.gmail.com>
-References: <43584.10.24.255.17.1276788439.squirrel@dbdmail.itg.ti.com>
-	<4C1FB2A0.6000503@nokia.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 2/3] SDHCI: Don't assign mmc->caps at SDHCI directly
+Date: Mon, 28 Jun 2010 11:34:15 -0700
+Message-ID: <20100628113415.a36c1348.akpm@linux-foundation.org>
+References: <20100612054450.GA25682@july>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:39187 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752401Ab0F1QK6 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Jun 2010 12:10:58 -0400
-In-Reply-To: <4C1FB2A0.6000503@nokia.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:59565 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750808Ab0F1Seu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Jun 2010 14:34:50 -0400
+In-Reply-To: <20100612054450.GA25682@july>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: kishore kadiyala <kishore.kadiyala@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: Kyungmin Park <kyungmin.park@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, Olof Johansson <olof@lixom.net>, Colin Cross <ccross@android.com>
 
-Adrian ,
+On Sat, 12 Jun 2010 14:44:50 +0900
+Kyungmin Park <kyungmin.park@samsung.com> wrote:
 
-Sorry for the late response
+> From: Kyungmin Park <kyungmin.park@samsung.com>
+> 
+> Some host controller can set mmc->caps before sdhci_add_host.
+> 
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 4321e0c..142419c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1791,7 +1791,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	else
+>  		mmc->f_min = host->max_clk / 256;
+>  	mmc->f_max = host->max_clk;
+> -	mmc->caps = MMC_CAP_SDIO_IRQ;
+> +	mmc->caps |= MMC_CAP_SDIO_IRQ;
+>  
+>  	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+>  		mmc->caps |= MMC_CAP_4_BIT_DATA;
 
-<snip>
->
-> As per my email 5/5/10, I would suggest the only change to omap_hsmmc=
- is:
+A great shower of MMC patches have magically turned up in linux-next,
+apparently via some tree of Grant's.  Those patches changed the above
+code to look like:
 
-Agreed  and followed the changes mostly but made some more changes on t=
-op of it.
+        if (!(host->quirks & SDHCI_QUIRK_NO_SDIO_IRQ))
+                mmc->caps |= MMC_CAP_SDIO_IRQ;
 
->
-<snip>
-> And that the late init function is used to do the rest e.g.
-> find a home for these 3 functions:
+So it appears that this bug is fixed in that code as well.  So I'll
+drop your patch.  If the above changes end up not getting merged into
+mainline then your fix will be lost.
 
-I agree just having the 3 functions makes it work.
+That fix was unchangelogged.  In fact the patch was completely
+unchangelogged and I haven't looked at it at all and as far as I can
+tell none of it has been sent to the mmc list.
 
->
-> static int omap4_twl6030_hsmmc_late_init(struct device *dev)
-> {
-> =A0 =A0 =A0 =A0int ret =3D 0;
-> =A0 =A0 =A0 =A0struct platform_device *pdev =3D container_of(dev,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0struct platform_device, dev);
-> =A0 =A0 =A0 =A0struct omap_mmc_platform_data *pdata =3D dev->platform=
-_data;
->
-> =A0 =A0 =A0 =A0/* MMC1 Card detect Configuration */
-> =A0 =A0 =A0 =A0if (pdev->id =3D=3D 0) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D omap4_hsmmc1_card_detect_confi=
-g();
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (ret < 0)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pr_err("Unable to conf=
-igure Card detect for MMC1\n");
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].card_detect =3D twl603=
-0_mmc_card_detect;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].card_detect_irq =3D TW=
-L6030_IRQ_BASE +
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0MMCDETECT_INTR_OFFSET;
-> =A0 =A0 =A0 =A0}
-> =A0 =A0 =A0 =A0return ret;
-
-<snip>
-
-=46ew Comments below:
-
-1) In the above function, initializing "card_detect"  in the driver as
-done in omap_hsmmc_gpio_init might be more readable and this has been
-done in nongpio_init instead.
-Even having initialization of  "card_detect_irq" inside nongpio_init is=
- fine.
-
-2)Also calling omap_hsmmc_gpio_init in case of a card detect line
-which is not GPIO
-doesn't make sense though it assigns -EINVAL to switch_pin in case of
-invalid GPIO
-which is intended for a non-removable card .
-
-3) And also having some thing like GPIO and NON_GPIO flag to
-distinguish might make sense.
-
-Regards,
-Kishore
