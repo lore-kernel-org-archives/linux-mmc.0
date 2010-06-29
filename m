@@ -1,46 +1,77 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH 3/3] SDHCI: 8-bit data transfer width support
-Date: Mon, 28 Jun 2010 12:48:29 -0700
-Message-ID: <AANLkTim4yfMX60NoHODkc695R7k0ZwRKPVTXB_JOg7C_@mail.gmail.com>
-References: <20100612054502.GA25686@july> <20100628113948.7778048d.akpm@linux-foundation.org>
-	<AANLkTilBSjjmninq8VNxgFe2I41-b9guo5VKuiZWnAwU@mail.gmail.com>
-	<20100628193334.GA1926@lixom.net>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH v5 2/2] OMAP4 HSMMC: Adding card detect support for MMC1
+ 	Controller
+Date: Tue, 29 Jun 2010 10:30:31 +0300
+Message-ID: <4C29A117.50707@nokia.com>
+References: <43584.10.24.255.17.1276788439.squirrel@dbdmail.itg.ti.com>	<4C1FB2A0.6000503@nokia.com> <AANLkTimVB7N0Oa9bDbYfSfcivy6afhvHW5Bdt-8dWVxD@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:55925 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751479Ab0F1Tsu convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Jun 2010 15:48:50 -0400
-Received: by qyk38 with SMTP id 38so1264428qyk.19
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Jun 2010 12:48:49 -0700 (PDT)
-In-Reply-To: <20100628193334.GA1926@lixom.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <AANLkTimVB7N0Oa9bDbYfSfcivy6afhvHW5Bdt-8dWVxD@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Cc: kishore kadiyala <kishore.kadiyala@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: Colin Cross <ccross@android.com>, Andrew Morton <akpm@linux-foundation.org>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
 
-On Mon, Jun 28, 2010 at 12:33 PM, Olof Johansson <olof@lixom.net> wrote=
-:
-> On Mon, Jun 28, 2010 at 11:56:26AM -0700, Colin Cross wrote:
->> These patches are not coming from the tegra/for-next branch, they ar=
-e
->> coming from Grant's devicetree-next branch. =A0Grant, why are these
->> patches in your tree, and why is tegra/for-next in your tree? =A0It'=
-s
->> going to cause conflicts when we rebase our for-next branch. =A0Plea=
-se
->> remove tegra and this sdhci patch from your tree.
->
-> Yeah, this seems to be a mixup by Grant. I gave him a few patches I h=
-ad
-> picked up locally to work with, and he seems to have published the
-> work accidentally.
+ext kishore kadiyala wrote:
+> Adrian ,
+> 
+> Sorry for the late response
+> 
+> <snip>
+>> As per my email 5/5/10, I would suggest the only change to omap_hsmmc is:
+> 
+> Agreed  and followed the changes mostly but made some more changes on top of it.
+> 
+> <snip>
+>> And that the late init function is used to do the rest e.g.
+>> find a home for these 3 functions:
+> 
+> I agree just having the 3 functions makes it work.
+> 
+>> static int omap4_twl6030_hsmmc_late_init(struct device *dev)
+>> {
+>>        int ret = 0;
+>>        struct platform_device *pdev = container_of(dev,
+>>                                        struct platform_device, dev);
+>>        struct omap_mmc_platform_data *pdata = dev->platform_data;
+>>
+>>        /* MMC1 Card detect Configuration */
+>>        if (pdev->id == 0) {
+>>                ret = omap4_hsmmc1_card_detect_config();
+>>                if (ret < 0)
+>>                        pr_err("Unable to configure Card detect for MMC1\n");
+>>                pdata->slots[0].card_detect = twl6030_mmc_card_detect;
+>>                pdata->slots[0].card_detect_irq = TWL6030_IRQ_BASE +
+>>                                                  MMCDETECT_INTR_OFFSET;
+>>        }
+>>        return ret;
+> 
+> <snip>
+> 
+> Few Comments below:
+> 
+> 1) In the above function, initializing "card_detect"  in the driver as
+> done in omap_hsmmc_gpio_init might be more readable and this has been
+> done in nongpio_init instead.
+> Even having initialization of  "card_detect_irq" inside nongpio_init is fine.
 
-Hi Colin,
+The problem is that referencing twl6030 from omap_hsmmc.c is not ok.
+The driver must work with any platform and that is the reason that
+platform data provides callbacks.
 
-I've fixed it now.  Profuse apologies, sorry for the noise, and I owe
-you a beer or 3.
+> 
+> 2)Also calling omap_hsmmc_gpio_init in case of a card detect line
+> which is not GPIO
+> doesn't make sense though it assigns -EINVAL to switch_pin in case of
+> invalid GPIO
+> which is intended for a non-removable card .
+> 
+> 3) And also having some thing like GPIO and NON_GPIO flag to
+> distinguish might make sense.
+> 
+> Regards,
+> Kishore
+> 
 
-g.
