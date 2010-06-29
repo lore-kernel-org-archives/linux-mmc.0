@@ -1,104 +1,86 @@
-From: Grazvydas Ignotas <notasas@gmail.com>
-Subject: [PATCH 3/3] omap: pandora: pass wl1251 information to SDIO core
-Date: Tue, 29 Jun 2010 16:49:25 +0300
-Message-ID: <1277819365-2761-4-git-send-email-notasas@gmail.com>
-References: <1277819365-2761-1-git-send-email-notasas@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:40737 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755153Ab0F2Nth (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Jun 2010 09:49:37 -0400
-In-Reply-To: <1277819365-2761-1-git-send-email-notasas@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + sdhci-8-bit-data-transfer-width-support.patch added to -mm tree
+Date: Tue, 29 Jun 2010 11:37:03 -0700
+Message-ID: <201006291837.o5TIb1VB021767@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: kyungmin.park@samsung.com, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-omap@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Adrian Hunter <adrian.hunter@nokia.com>, Tony Lindgren <tony@atomide.com>, Bob Copeland <me@bobcopeland.com>, Kalle Valo <kvalo@adurom.com>, Grazvydas Ignotas <notasas@gmail.com>
 
-Pandora has TI WL1251 attached on MMC3, which is non-standard SDIO chip.
-Make use MMC_QUIRK_NONSTD_SDIO to tell SDIO core about it.
 
-Signed-off-by: Grazvydas Ignotas <notasas@gmail.com>
+The patch titled
+     sdhci: 8-bit data transfer width support
+has been added to the -mm tree.  Its filename is
+     sdhci-8-bit-data-transfer-width-support.patch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: sdhci: 8-bit data transfer width support
+From: Kyungmin Park <kyungmin.park@samsung.com>
+
+Some host controllers such as s5pc110 support the WIDE8 feature.
+
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
- arch/arm/mach-omap2/board-omap3pandora.c |   16 ++++++++++++++++
- arch/arm/mach-omap2/hsmmc.c              |    1 +
- arch/arm/mach-omap2/hsmmc.h              |    4 ++++
- 3 files changed, 21 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/board-omap3pandora.c b/arch/arm/mach-omap2/board-omap3pandora.c
-index db06dc9..ebbfb49 100644
---- a/arch/arm/mach-omap2/board-omap3pandora.c
-+++ b/arch/arm/mach-omap2/board-omap3pandora.c
-@@ -29,6 +29,7 @@
- #include <linux/input.h>
- #include <linux/input/matrix_keypad.h>
- #include <linux/gpio_keys.h>
-+#include <linux/mmc/card.h>
+ drivers/mmc/host/sdhci.c |    5 +++++
+ drivers/mmc/host/sdhci.h |    1 +
+ 2 files changed, 6 insertions(+)
+
+diff -puN drivers/mmc/host/sdhci.c~sdhci-8-bit-data-transfer-width-support drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~sdhci-8-bit-data-transfer-width-support
++++ a/drivers/mmc/host/sdhci.c
+@@ -1159,6 +1159,11 @@ static void sdhci_set_ios(struct mmc_hos
  
- #include <asm/mach-types.h>
- #include <asm/mach/arch.h>
-@@ -227,6 +228,20 @@ static struct platform_device pandora_dss_device = {
- 	},
- };
+ 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
  
-+static void pandora_wl1251_init_card(struct mmc_card *card)
-+{
-+	/*
-+	 * We have TI wl1251 attached to MMC3. Pass this information to
-+	 * SDIO core because it can't be probed by normal methods.
-+	 */
-+	card->quirks |= MMC_QUIRK_NONSTD_SDIO;
-+	card->cccr.wide_bus = 1;
-+	card->cis.vendor = 0x104c;
-+	card->cis.device = 0x9066;
-+	card->cis.blksize = 512;
-+	card->cis.max_dtr = 20000000;
-+}
++	if (ios->bus_width == MMC_BUS_WIDTH_8)
++		ctrl |= SDHCI_CTRL_8BITBUS;
++	else
++		ctrl &= ~SDHCI_CTRL_8BITBUS;
 +
- static struct omap2_hsmmc_info omap3pandora_mmc[] = {
- 	{
- 		.mmc		= 1,
-@@ -248,6 +263,7 @@ static struct omap2_hsmmc_info omap3pandora_mmc[] = {
- 		.wires		= 4,
- 		.gpio_cd	= -EINVAL,
- 		.gpio_wp	= -EINVAL,
-+		.init_card	= pandora_wl1251_init_card,
- 	},
- 	{}	/* Terminator */
- };
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 1ef54b0..c8f647b 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -268,6 +268,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
- 		mmc->slots[0].gpio_wp = c->gpio_wp;
+ 	if (ios->bus_width == MMC_BUS_WIDTH_4)
+ 		ctrl |= SDHCI_CTRL_4BITBUS;
+ 	else
+diff -puN drivers/mmc/host/sdhci.h~sdhci-8-bit-data-transfer-width-support drivers/mmc/host/sdhci.h
+--- a/drivers/mmc/host/sdhci.h~sdhci-8-bit-data-transfer-width-support
++++ a/drivers/mmc/host/sdhci.h
+@@ -72,6 +72,7 @@
+ #define   SDHCI_CTRL_ADMA1	0x08
+ #define   SDHCI_CTRL_ADMA32	0x10
+ #define   SDHCI_CTRL_ADMA64	0x18
++#define  SDHCI_CTRL_8BITBUS	0x20
  
- 		mmc->slots[0].remux = c->remux;
-+		mmc->slots[0].init_card = c->init_card;
- 
- 		if (c->cover_only)
- 			mmc->slots[0].cover = 1;
-diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
-index 36f0ba8..1fe6f01 100644
---- a/arch/arm/mach-omap2/hsmmc.h
-+++ b/arch/arm/mach-omap2/hsmmc.h
-@@ -6,6 +6,8 @@
-  * published by the Free Software Foundation.
-  */
- 
-+struct mmc_card;
-+
- struct omap2_hsmmc_info {
- 	u8	mmc;		/* controller 1/2/3 */
- 	u8	wires;		/* 1/4/8 wires */
-@@ -23,6 +25,8 @@ struct omap2_hsmmc_info {
- 	int	ocr_mask;	/* temporary HACK */
- 	/* Remux (pad configuation) when powering on/off */
- 	void (*remux)(struct device *dev, int slot, int power_on);
-+	/* init some special card */
-+	void (*init_card)(struct mmc_card *card);
- };
- 
- #if defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
--- 
-1.6.3.3
+ #define SDHCI_POWER_CONTROL	0x29
+ #define  SDHCI_POWER_ON		0x01
+_
+
+Patches currently in -mm which might be from kyungmin.park@samsung.com are
+
+linux-next.patch
+mmc-recognize-csd-structure.patch
+mmc-recognize-csd-structure-fix.patch
+s5pc110-sdhci-s3c-can-override-host-capabilities.patch
+s5pc110-sdhci-s3c-support-on-s5pc110.patch
+sdhci-add-no-hi-speed-bit-quirk-support.patch
+sdhci-remove-useless-set_clock-check.patch
+sdhci-8-bit-data-transfer-width-support.patch
+sdhci-dont-assign-mmc-caps-at-sdhci-directly.patch
 
