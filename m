@@ -1,132 +1,41 @@
-From: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH v5 2/2] OMAP4 HSMMC: Adding card detect support for MMC1
-	Controller
-Date: Tue, 29 Jun 2010 14:08:10 +0530
-Message-ID: <AANLkTiltTZ8D5M77N-b-MS67onGSYaF1NHKYQO20WgBY@mail.gmail.com>
-References: <43584.10.24.255.17.1276788439.squirrel@dbdmail.itg.ti.com>
-	<4C1FB2A0.6000503@nokia.com>
-	<AANLkTimVB7N0Oa9bDbYfSfcivy6afhvHW5Bdt-8dWVxD@mail.gmail.com>
-	<4C29A117.50707@nokia.com>
-	<AANLkTilVq_MrO0s3hiKLqeOokivjZ5F9G6VT78gSGGGE@mail.gmail.com>
-	<4C29AC5E.10409@nokia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:61655 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751069Ab0F2IiL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Jun 2010 04:38:11 -0400
-In-Reply-To: <4C29AC5E.10409@nokia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Grazvydas Ignotas <notasas@gmail.com>
+Subject: [PATCH 0/3] add non-standard SDIO card support
+Date: Tue, 29 Jun 2010 16:49:22 +0300
+Message-ID: <1277819365-2761-1-git-send-email-notasas@gmail.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-omap@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Adrian Hunter <adrian.hunter@nokia.com>, Tony Lindgren <tony@atomide.com>, Bob Copeland <me@bobcopeland.com>, Kalle Valo <kvalo@adurom.com>, Grazvydas Ignotas <notasas@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: kishore kadiyala <kishore.kadiyala@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
-On Tue, Jun 29, 2010 at 1:48 PM, Adrian Hunter <adrian.hunter@nokia.com=
-> wrote:
-> kishore kadiyala wrote:
->>
->> On Tue, Jun 29, 2010 at 1:00 PM, Adrian Hunter <adrian.hunter@nokia.=
-com>
->> wrote:
->>>
->>> ext kishore kadiyala wrote:
->>>>
->>>> Adrian ,
->>>>
->>>> Sorry for the late response
->>>>
->>>> <snip>
->>>>>
->>>>> As per my email 5/5/10, I would suggest the only change to omap_h=
-smmc
->>>>> is:
->>>>
->>>> Agreed =A0and followed the changes mostly but made some more chang=
-es on
->>>> top
->>>> of it.
->>>>
->>>> <snip>
->>>>>
->>>>> And that the late init function is used to do the rest e.g.
->>>>> find a home for these 3 functions:
->>>>
->>>> I agree just having the 3 functions makes it work.
->>>>
->>>>> static int omap4_twl6030_hsmmc_late_init(struct device *dev)
->>>>> {
->>>>> =A0 =A0 =A0int ret =3D 0;
->>>>> =A0 =A0 =A0struct platform_device *pdev =3D container_of(dev,
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0struct platform_device, dev);
->>>>> =A0 =A0 =A0struct omap_mmc_platform_data *pdata =3D dev->platform=
-_data;
->>>>>
->>>>> =A0 =A0 =A0/* MMC1 Card detect Configuration */
->>>>> =A0 =A0 =A0if (pdev->id =3D=3D 0) {
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D omap4_hsmmc1_card_detect_confi=
-g();
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0if (ret < 0)
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pr_err("Unable to conf=
-igure Card detect for
->>>>> MMC1\n");
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].card_detect =3D twl603=
-0_mmc_card_detect;
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].card_detect_irq =3D TW=
-L6030_IRQ_BASE +
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0MMCDETECT_INTR_OFFSET;
->>>>> =A0 =A0 =A0}
->>>>> =A0 =A0 =A0return ret;
->>>>
->>>> <snip>
->>>>
->>>> Few Comments below:
->>>>
->>>> 1) In the above function, initializing "card_detect" =A0in the dri=
-ver as
->>>> done in omap_hsmmc_gpio_init might be more readable and this has b=
-een
->>>> done in nongpio_init instead.
->>>> Even having initialization of =A0"card_detect_irq" inside nongpio_=
-init is
->>>> fine.
->>>
->>> The problem is that referencing twl6030 from omap_hsmmc.c is not ok=
-=2E
->>> The driver must work with any platform and that is the reason that
->>> platform data provides callbacks.
->>
->> ok, in that case how about having handler initialized in
->> mach-omap2/hsmmc.c =A0for both gpio and non-gpio case.
->
-> Unless twl6030 is part of OMAP4 then it doesn't belong in hsmmc.c eit=
-her
+This is my attempt to make SDIO interfaced TI WL1251 wifi chip usable
+on mainline kernels. It's driver has already been merged several releases
+back, but the problem is current SDIO core can't detect the card because
+it's not following SDIO standards and does not have any required SDIO
+registers. Currenty attempting to use this chip only results in several
+pages of complains about invalid register data from SDIO core.
+WL1251 is used on various HTC devices and Pandora handheld at least.
 
-ok, I'll make changes as suggested and post next version.
+People wanting to use this are forced to use forked trees or patches.
+My solution to this problem is to add new MMC quirk that will tell SDIO
+core not to access any SDIO registers and rely on host's init_card
+callback instead, which is now responsible for filling card related
+structures for SDIO core to function. Patches 2 and 3 set up the card
+for pandora, similar method could be used for MSM too.
 
-Regards,
-Kishore
->
->>
->> -Kishore
->>>>
->>>> 2)Also calling omap_hsmmc_gpio_init in case of a card detect line
->>>> which is not GPIO
->>>> doesn't make sense though it assigns -EINVAL to switch_pin in case=
- of
->>>> invalid GPIO
->>>> which is intended for a non-removable card .
->>>>
->>>> 3) And also having some thing like GPIO and NON_GPIO flag to
->>>> distinguish might make sense.
->>>>
->>>> Regards,
->>>> Kishore
->>>>
->>>
->>
->
->
+Only patches 2,3 depend on each other, so patch 1 can be merged separately.
+
+Grazvydas Ignotas (3):
+  sdio: allow non-standard SDIO cards
+  omap_hsmmc: add init_card pass-through callback
+  omap: pandora: pass information about wl1251 to SDIO core
+
+ arch/arm/mach-omap2/board-omap3pandora.c |   16 +++++++++++++
+ arch/arm/mach-omap2/hsmmc.c              |    1 +
+ arch/arm/mach-omap2/hsmmc.h              |    4 +++
+ arch/arm/plat-omap/include/plat/mmc.h    |    2 +
+ drivers/mmc/core/sdio.c                  |   36 +++++++++++++++++++++++++-----
+ drivers/mmc/host/omap_hsmmc.c            |   10 ++++++++
+ include/linux/mmc/card.h                 |    2 +
+ 7 files changed, 65 insertions(+), 6 deletions(-)
+
