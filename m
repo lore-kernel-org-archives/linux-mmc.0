@@ -1,127 +1,48 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-add-jz4740-mmc-driver-fix.patch added to -mm tree
-Date: Wed, 30 Jun 2010 13:55:44 -0700
-Message-ID: <201006302055.o5UKtiYv025867@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: akpm@linux-foundation.org, lars@metafoo.de, linux-mmc@vger.kernel.org, matt@console-pimps.org
-List-Id: linux-mmc@vger.kernel.org
-
-
-The patch titled
-     mmc-add-jz4740-mmc-driver-fix
-has been added to the -mm tree.  Its filename is
-     mmc-add-jz4740-mmc-driver-fix.patch
-
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc-add-jz4740-mmc-driver-fix
 From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH V3 4/5] block: Add secure discard
+Date: Wed, 30 Jun 2010 15:09:47 -0700
+Message-ID: <20100630150947.d53200ac.akpm@linux-foundation.org>
+References: <20100624084351.25444.30143.sendpatchset@ahunter-work.research.nokia.com>
+	<20100624084423.25444.1011.sendpatchset@ahunter-work.research.nokia.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:59550 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753562Ab0F3WKo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jun 2010 18:10:44 -0400
+In-Reply-To: <20100624084423.25444.1011.sendpatchset@ahunter-work.research.nokia.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Jens Axboe <axboe@kernel.dk>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>
 
-uninline jz4740_mmc_wait_irq()
+On Thu, 24 Jun 2010 11:44:23 +0300
+Adrian Hunter <adrian.hunter@nokia.com> wrote:
 
-For it is large and has four callsites.
+> >From b25b9a499f255ee5999c219525d82ef40382318c Mon Sep 17 00:00:00 2001
+> From: Adrian Hunter <adrian.hunter@nokia.com>
+> Date: Wed, 23 Jun 2010 15:41:38 +0300
+> Subject: [PATCH 4/5] block: Add secure discard
+> 
+> Secure discard is the same as discard except that all copies
+> of the discarded sectors (perhaps created by garbage collection)
+> must also be erased.
 
-Cc: <linux-mmc@vger.kernel.org>
-Cc: Lars-Peter Clausen <lars@metafoo.de>
-Cc: Matt Fleming <matt@console-pimps.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
+That's not an awfully informative changelog.
 
- drivers/mmc/host/jz4740_mmc.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+>From a quick peek at the code it seems that you took your earlier
+design sketch:
 
-diff -puN drivers/mmc/host/jz4740_mmc.c~mmc-add-jz4740-mmc-driver-fix drivers/mmc/host/jz4740_mmc.c
---- a/drivers/mmc/host/jz4740_mmc.c~mmc-add-jz4740-mmc-driver-fix
-+++ a/drivers/mmc/host/jz4740_mmc.c
-@@ -188,7 +188,7 @@ static void jz4740_mmc_request_done(stru
- 	mmc_request_done(host->mmc, req);
- }
- 
--static inline unsigned int jz4740_mmc_wait_irq(struct jz4740_mmc_host *host,
-+static unsigned int jz4740_mmc_wait_irq(struct jz4740_mmc_host *host,
- 	unsigned int irq)
- {
- 	unsigned int timeout = JZ4740_MMC_MAX_TIMEOUT;
-_
+On Mon, Jun 14, 2010 at 02:10:06PM +0300, Adrian Hunter wrote:
+> Needs a bio flag, a request flag, setup the request flag based on the
+> bio flag, prevent merging secure and non-secure discards, prevent drivers
+> doing non-secure discards for secure discards.
+> 
+> Seems like a lot of little changes for something that no one wants.
+> Shouldn't it wait for someone to need it first?
 
-Patches currently in -mm which might be from akpm@linux-foundation.org are
+and changed your mind and implemented it.
 
-origin.patch
-drivers-gpio-is-platform-neutral.patch
-fs-fcntlc-kill_fasync_rcu-fa_lock-must-be-irq-safe.patch
-ipc-semc-bugfix-for-semop-not-reporting-successful-operation.patch
-linux-next.patch
-next-remove-localversion.patch
-i-need-old-gcc.patch
-revert-ed5aa19b93da2c094b6647762774a8022e4e1d6c.patch
-revert-9652e31db6d841e291531547b3f4f12b5aeb42a9.patch
-revert-fdc8302019d9bc10729cd3e8d348571e833388aa.patch
-revert-324d76561842e551051e2a897b958b0539f6867b.patch
-revert-e92e80797e7eaaf2a9bbd586c63f7c6bd3177276.patch
-revert-d04ab5241f301bdcad2f6beb0ecd326bd82100a7.patch
-revert-3ab7269a6058c136795ce9417f7051a0edde60db.patch
-revert-4624469822455b4accc886557f6c997ccdd59066.patch
-include-linux-fsh-complete-hexification-of-fmode_-constants.patch
-cpuidle-avoid-using-smp_processor_id-in-preemptible-code-nr_iowait_cpu.patch
-acpi-fix-bogus-preemption-logic-fix.patch
-intel_menlow-fix-memory-leaks-in-error-path-fix.patch
-x86-cpufreq-make-trace_power_frequency-cpufreq-driver-independent-fix.patch
-compal-laptop-added-jhl90-battery-hwmon-interface.patch
-gcc-46-btrfs-clean-up-unused-variables-bugs-fix.patch
-dib3000mc-reduce-large-stack-usage-fix.patch
-hpet-factor-timer-allocate-from-open.patch
-leds-route-kbd-leds-through-the-generic-leds-layer.patch
-arch-um-drivers-remove-duplicate-structure-field-initialization.patch
-3x59x-fix-pci-resource-management.patch
-altera_uart-simplify-altera_uart_console_putc-checkpatch-fixes.patch
-serial-mcf-dont-take-spinlocks-in-already-protected-functions-fix.patch
-scsi-remove-private-bit-macros.patch
-vfs-use-kmalloc-to-allocate-fdmem-if-possible.patch
-mm.patch
-mm-vmap-area-cache-fix.patch
-mm-track-the-root-oldest-anon_vma-fix.patch
-oom-improve-commentary-in-dump_tasks.patch
-oom-sacrifice-child-with-highest-badness-score-for-parent-protect-dereferencing-of-tasks-comm.patch
-oom-select-task-from-tasklist-for-mempolicy-ooms-add-has_intersects_mems_allowed-uma-variant.patch
-mempolicy-reduce-stack-size-of-migrate_pages-fix.patch
-radix-tree-implement-function-radix_tree_range_tag_if_tagged-checkpatch-fixes.patch
-frv-duplicate-output_buffer-of-e03-checkpatch-fixes.patch
-include-linux-compiler-gcch-use-__same_type-in-__must_be_array.patch
-drivers-misc-support-for-the-pressure-sensor-bmp085-from-bosch-sensortec-fix.patch
-drivers-misc-support-for-the-pressure-sensor-bmp085-from-bosch-sensortec-update-checkpatch-fixes.patch
-mmc-recognize-csd-structure-fix.patch
-mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume.patch
-mmc-add-jz4740-mmc-driver-checkpatch-fixes.patch
-mmc-add-jz4740-mmc-driver-fix.patch
-fix-vc-vc_origin-on-take_over_console-checkpatch-fixes.patch
-rtc-fixes-and-new-functionality-for-fm3130-fix.patch
-drivers-video-via-via-gpioc-fix-warning.patch
-delay-accounting-re-implement-c-for-getdelaysc-to-report-information-on-a-target-command-checkpatch-fixes.patch
-kfifo-add-example-files-to-the-kernel-sample-directory-checkpatch-fixes.patch
-vfs-add-super-operation-writeback_inodes-fix.patch
-reiser4-export-remove_from_page_cache-fix.patch
-reiser4-export-find_get_pages.patch
-reiser4.patch
-reiser4-writeback_inodes-implementation-fix.patch
-reiser4-fixups.patch
-reiser4-broke.patch
-journal_add_journal_head-debug.patch
-slab-leaks3-default-y.patch
-put_bh-debug.patch
-getblk-handle-2tb-devices.patch
-
+Is that a correct interpretation?
