@@ -1,68 +1,73 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH V3 1/5] mmc: Add erase, secure erase, trim and secure
- trim operations
-Date: Thu, 01 Jul 2010 13:49:32 +0300
-Message-ID: <4C2C72BC.1050207@nokia.com>
-References: <20100624084351.25444.30143.sendpatchset@ahunter-work.research.nokia.com>	<20100624084400.25444.57158.sendpatchset@ahunter-work.research.nokia.com> <20100630152144.3822fe6b.akpm@linux-foundation.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v5 1/2] OMAP HSMMC: Adding a Flag to determine the type
+ of Card detect
+Date: Thu, 1 Jul 2010 15:32:16 +0300
+Message-ID: <20100701123216.GP2822@atomide.com>
+References: <43583.10.24.255.17.1276788418.squirrel@dbdmail.itg.ti.com>
+ <20100617131911.de257575.akpm@linux-foundation.org>
+ <AANLkTikInbivUfkulAf7RZyaIjRo9GuxvQjRHHE1duCY@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:62185 "EHLO
-	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752548Ab0GAKu3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2010 06:50:29 -0400
-In-Reply-To: <20100630152144.3822fe6b.akpm@linux-foundation.org>
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:53761 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755548Ab0GAMcK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2010 08:32:10 -0400
+Content-Disposition: inline
+In-Reply-To: <AANLkTikInbivUfkulAf7RZyaIjRo9GuxvQjRHHE1duCY@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-kernel Mailing List <linux-kernel@vger.kernel.org>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
+To: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, kishore kadiyala <kishore.kadiyala@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com
 
-Andrew Morton wrote:
-> On Thu, 24 Jun 2010 11:44:00 +0300
-> Adrian Hunter <adrian.hunter@nokia.com> wrote:
-> 
->> SD/MMC cards tend to support an erase operation.  In addition,
->> eMMC v4.4 cards can support secure erase, trim and secure trim
->> operations that are all variants of the basic erase command.
-> 
-> The patch proposes a new userspace interface via sysfs, yes?
-,
-Just two read-only values
+* kishore kadiyala <kishorek.kadiyala@gmail.com> [100621 09:49]:
+> On Fri, Jun 18, 2010 at 1:49 AM, Andrew Morton
+> <akpm@linux-foundation.org> wrote:
+> > On Thu, 17 Jun 2010 20:56:58 +0530 (IST)
+> > "kishore kadiyala" <kishore.kadiyala@ti.com> wrote:
+> >
+> >> --- a/arch/arm/plat-omap/include/plat/mmc.h
+> >> +++ b/arch/arm/plat-omap/include/plat/mmc.h
+> >> @@ -43,6 +43,9 @@
+> >>
+> >> =C2=A0#define OMAP_MMC_MAX_SLOTS =C2=A0 2
+> >>
+> >> +#define NON_GPIO =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 0
+> >> +#define GPIO =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 1
+> >
+> > I'm counting about seven different definitions of "GPIO" in the ker=
+nel
+> > already.
+> >
+> > drivers/hwmon/it87.c:
+> > #define GPIO =C2=A0 =C2=A00x07
+> >
+> > drivers/media/dvb/dvb-usb/ec168.h:
+> > =C2=A0 =C2=A0 =C2=A0 =C2=A0GPIO =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =3D 0x04,
+> >
+> > drivers/net/hamachi.c:
+> > =C2=A0 =C2=A0 =C2=A0 =C2=A0GPIO=3D0x6E
+> >
+> > drivers/staging/rtl8187se/r8180_hw.h:
+> > #define GPIO 0x91
+> >
+> > etcetera. =C2=A0It's a crazy identifier to use in a header file, an=
+d
+> > the chances of a miscompile-causing collision are increasing.
+> >
+> >
+> > enum cd_type {
+> > =C2=A0 =C2=A0 =C2=A0 =C2=A0CD_TYPE_NON_GPIO =3D 0,
+> > =C2=A0 =C2=A0 =C2=A0 =C2=A0CD_TYPE_GPIO =3D 1,
+> > };
+>=20
+> OK , Will repost with above changes
 
-> 
-> Please fully describe that interface and its operation in the
-> changelog.  It'd also be nice to add permanent documentation for it.
-> 
+Please also do it the other way around where you pass CD_TYPE_NON_GPIO
+in the flags in the platform data. Then there's no need to patch
+all the existing boards.
 
-OK
-
->>From reading the code, it appears that erase_size and
-> preferred_erase_size have units in bytes.  But users shouldn't need to
-> read the code to find that out.  What are the alignemnt and size
-> requirements on these?  What is their position in /sys?  What do they
-> actually *do* and what is the difference between them?
-> 
-> etetera.  People want to review this code and other people actually
-> want to use it.  I'm not sure that I want to try to review this code
-> when nobody's told me what interface it implements and how it's
-> supposed to work.  Seems that whoever implemented BLKDISCARD didn't
-> want anyone to use it either.  Sigh.
-> 
-> 
-> All of mmc core appears to use 32-bit quantities to represent sectors,
-> yes?  Why didn't it use sector_t?  What are the implications of this?
-
-SD/MMC addressing uses 32-bit values.  There is a known 2TB limit for
-SD/MMC cards.  As cards are only just getting to 64GB, that limit is
-some way off, and it is not clear NAND technology can get there in
-a SD/MMC package anyway.
-
-I don't know why sector_t is not used.  I guess it would complicate doing
-division since it can be 64-bit.
-
-The implications are minimal.  In the unlikely event SD/MMC cards ever
-exceed 2TB some changes will be needed, but the standard would have to
-change to allow that first.
-
-
+Tony
