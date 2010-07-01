@@ -1,112 +1,101 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH 3/3] sdhci-pltfm: Add support for CNS3xxx SoC devices
-Date: Thu, 1 Jul 2010 13:48:39 -0700
-Message-ID: <20100701134839.d7cb4841.akpm@linux-foundation.org>
-References: <20100625180527.GA11280@oksana.dev.rtsoft.ru>
-	<20100625180644.GC18241@oksana.dev.rtsoft.ru>
+From: akpm@linux-foundation.org
+Subject: + sdhci-pltfm-reorganize-makefile-entries-to-support-soc-devices.patch added to -mm tree
+Date: Thu, 01 Jul 2010 13:51:58 -0700
+Message-ID: <201007012051.o61KpwCf026055@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:57302 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755647Ab0GAUs7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2010 16:48:59 -0400
-In-Reply-To: <20100625180644.GC18241@oksana.dev.rtsoft.ru>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: avorontsov@mvista.com, ben@simtec.co.uk, linux-mmc@vger.kernel.org, richard.rojfors@pelagicore.com
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <avorontsov@mvista.com>
-Cc: Ben Dooks <ben@simtec.co.uk>, Richard =?ISO-8859-1?Q?R=F6jfors?= <richard.rojfors@pelagicore.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-
-On Fri, 25 Jun 2010 22:06:44 +0400
-Anton Vorontsov <avorontsov@mvista.com> wrote:
-
-> There's nothing special, just SoC-specific ops and quirks.
-> 
-> ...
->
-> +static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
-> +{
-> +	struct device *dev = mmc_dev(host->mmc);
-> +	int div = 1;
-> +	u16 clk;
-> +	unsigned long timeout;
-> +
-> +	if (clock == host->clock)
-> +		return;
-
-I assume that mmc core prevents this function from being exectued twice
-at the same time?
-
-> +	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> +
-> +	if (clock == 0)
-> +		goto out;
-> +
-> +	while (host->max_clk / div > clock) {
-> +		/*
-> +		 * On CNS3xxx divider grows linearly up to 4, and then
-> +		 * exponentially up to 256.
-> +		 */
-> +		if (div < 4)
-> +			div += 1;
-> +		else if (div < 256)
-> +			div *= 2;
-> +		else
-> +			break;
-> +	}
-> +
-> +	dev_dbg(dev, "desired SD clock: %d, actual: %d\n",
-> +		clock, host->max_clk / div);
-> +
-> +	/* Divide by 3 is special. */
-> +	if (div != 3)
-> +		div >>= 1;
-> +
-> +	clk = div << SDHCI_DIVIDER_SHIFT;
-> +	clk |= SDHCI_CLOCK_INT_EN;
-> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +
-> +	timeout = 20;
-> +	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-> +			& SDHCI_CLOCK_INT_STABLE)) {
-> +		if (timeout == 0) {
-> +			dev_warn(dev, "clock is unstable");
-> +			break;
-> +		}
-> +		timeout--;
-> +		mdelay(1);
-
-Could we have used the more polite msleep() here?
-
-> +	}
-> +
-> +	clk |= SDHCI_CLOCK_CARD_EN;
-> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +out:
-> +	host->clock = clock;
-> +}
-> +
->
-> ...
->
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -158,6 +158,9 @@ static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
->  
->  static const struct platform_device_id sdhci_pltfm_ids[] = {
->  	{ "sdhci", },
-> +#ifdef CONFIG_MMC_SDHCI_CNS3XXX
-> +	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
-> +#endif
-
-What the heck is this kernel_ulong_t thing and why did `struct
-platform_device_id' see a need to invent it??
 
 
->  	{ },
->  };
->  MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
->
-> ...
->
+The patch titled
+     sdhci-pltfm: reorganize Makefile entries to support SoC devices
+has been added to the -mm tree.  Its filename is
+     sdhci-pltfm-reorganize-makefile-entries-to-support-soc-devices.pat=
+ch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your cod=
+e ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mm=
+otm/
+
+------------------------------------------------------
+Subject: sdhci-pltfm: reorganize Makefile entries to support SoC device=
+s
+=46rom: Anton Vorontsov <avorontsov@mvista.com>
+
+Due to build system limitations, intermediate and final objects can't h=
+ave
+the same names.  And as we're going to start building SoC-specific
+objects, let's rename the module to sdhci-platform, into which we'll li=
+nk
+sdhci-pltfm and SoC-specifc objects.
+
+There should be no issue in renaming as the driver uses modalias
+mechanism.
+
+This is exactly the same approach as in sdhci-of driver.
+
+Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
+Cc: Ben Dooks <ben@simtec.co.uk>
+Cc: Richard R=F6jfors <richard.rojfors@pelagicore.com>=20
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/Makefile |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff -puN drivers/mmc/host/Makefile~sdhci-pltfm-reorganize-makefile-ent=
+ries-to-support-soc-devices drivers/mmc/host/Makefile
+--- a/drivers/mmc/host/Makefile~sdhci-pltfm-reorganize-makefile-entries=
+-to-support-soc-devices
++++ a/drivers/mmc/host/Makefile
+@@ -12,7 +12,6 @@ obj-$(CONFIG_MMC_IMX)		+=3D imxmmc.o
+ obj-$(CONFIG_MMC_MXC)		+=3D mxcmmc.o
+ obj-$(CONFIG_MMC_SDHCI)		+=3D sdhci.o
+ obj-$(CONFIG_MMC_SDHCI_PCI)	+=3D sdhci-pci.o
+-obj-$(CONFIG_MMC_SDHCI_PLTFM)	+=3D sdhci-pltfm.o
+ obj-$(CONFIG_MMC_SDHCI_S3C)	+=3D sdhci-s3c.o
+ obj-$(CONFIG_MMC_SDHCI_SPEAR)	+=3D sdhci-spear.o
+ obj-$(CONFIG_MMC_WBSD)		+=3D wbsd.o
+@@ -38,6 +37,9 @@ obj-$(CONFIG_SDH_BFIN)		+=3D bfin_sdh.o
+ obj-$(CONFIG_MMC_SH_MMCIF)	+=3D sh_mmcif.o
+ obj-$(CONFIG_MMC_JZ4740)	+=3D jz4740_mmc.o
+=20
++obj-$(CONFIG_MMC_SDHCI_PLTFM)			+=3D sdhci-platform.o
++sdhci-platform-y				:=3D sdhci-pltfm.o
++
+ obj-$(CONFIG_MMC_SDHCI_OF)	+=3D sdhci-of.o
+ sdhci-of-y				:=3D sdhci-of-core.o
+ sdhci-of-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+=3D sdhci-of-esdhc.o
+_
+
+Patches currently in -mm which might be from avorontsov@mvista.com are
+
+origin.patch
+linux-next.patch
+sdhci-pltfm-switch-to-module-device-table-matching.patch
+sdhci-pltfm-reorganize-makefile-entries-to-support-soc-devices.patch
+sdhci-pltfm-add-support-for-cns3xxx-soc-devices.patch
+
+--
+To unsubscribe from this list: send the line "unsubscribe mm-commits" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
