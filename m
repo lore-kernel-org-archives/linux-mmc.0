@@ -1,59 +1,68 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH V3 4/5] block: Add secure discard
-Date: Thu, 01 Jul 2010 13:18:37 +0300
-Message-ID: <4C2C6B7D.60905@nokia.com>
-References: <20100624084351.25444.30143.sendpatchset@ahunter-work.research.nokia.com>	<20100624084423.25444.1011.sendpatchset@ahunter-work.research.nokia.com> <20100630150947.d53200ac.akpm@linux-foundation.org>
+Subject: Re: [PATCH V3 1/5] mmc: Add erase, secure erase, trim and secure
+ trim operations
+Date: Thu, 01 Jul 2010 13:49:32 +0300
+Message-ID: <4C2C72BC.1050207@nokia.com>
+References: <20100624084351.25444.30143.sendpatchset@ahunter-work.research.nokia.com>	<20100624084400.25444.57158.sendpatchset@ahunter-work.research.nokia.com> <20100630152144.3822fe6b.akpm@linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.230]:42585 "EHLO
-	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754314Ab0GAKTG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2010 06:19:06 -0400
-In-Reply-To: <20100630150947.d53200ac.akpm@linux-foundation.org>
+Received: from smtp.nokia.com ([192.100.122.233]:62185 "EHLO
+	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752548Ab0GAKu3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2010 06:50:29 -0400
+In-Reply-To: <20100630152144.3822fe6b.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Jens Axboe <axboe@kernel.dk>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>
+Cc: linux-kernel Mailing List <linux-kernel@vger.kernel.org>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
 
 Andrew Morton wrote:
-> On Thu, 24 Jun 2010 11:44:23 +0300
+> On Thu, 24 Jun 2010 11:44:00 +0300
 > Adrian Hunter <adrian.hunter@nokia.com> wrote:
 > 
->> >From b25b9a499f255ee5999c219525d82ef40382318c Mon Sep 17 00:00:00 2001
->> From: Adrian Hunter <adrian.hunter@nokia.com>
->> Date: Wed, 23 Jun 2010 15:41:38 +0300
->> Subject: [PATCH 4/5] block: Add secure discard
->>
->> Secure discard is the same as discard except that all copies
->> of the discarded sectors (perhaps created by garbage collection)
->> must also be erased.
+>> SD/MMC cards tend to support an erase operation.  In addition,
+>> eMMC v4.4 cards can support secure erase, trim and secure trim
+>> operations that are all variants of the basic erase command.
 > 
-> That's not an awfully informative changelog.
+> The patch proposes a new userspace interface via sysfs, yes?
+,
+Just two read-only values
+
 > 
->>From a quick peek at the code it seems that you took your earlier
-> design sketch:
-> 
-> On Mon, Jun 14, 2010 at 02:10:06PM +0300, Adrian Hunter wrote:
->> Needs a bio flag, a request flag, setup the request flag based on the
->> bio flag, prevent merging secure and non-secure discards, prevent drivers
->> doing non-secure discards for secure discards.
->>
->> Seems like a lot of little changes for something that no one wants.
->> Shouldn't it wait for someone to need it first?
-> 
-> and changed your mind and implemented it.
-> 
-> Is that a correct interpretation?
+> Please fully describe that interface and its operation in the
+> changelog.  It'd also be nice to add permanent documentation for it.
 > 
 
-Yes.  It does allude to that in "[PATCH V3 0/5] Add MMC erase and secure erase V3"
-i.e.
+OK
 
-Changes from V2
+>>From reading the code, it appears that erase_size and
+> preferred_erase_size have units in bytes.  But users shouldn't need to
+> read the code to find that out.  What are the alignemnt and size
+> requirements on these?  What is their position in /sys?  What do they
+> actually *do* and what is the difference between them?
+> 
+> etetera.  People want to review this code and other people actually
+> want to use it.  I'm not sure that I want to try to review this code
+> when nobody's told me what interface it implements and how it's
+> supposed to work.  Seems that whoever implemented BLKDISCARD didn't
+> want anyone to use it either.  Sigh.
+> 
+> 
+> All of mmc core appears to use 32-bit quantities to represent sectors,
+> yes?  Why didn't it use sector_t?  What are the implications of this?
 
-- move the addition of BLKSECDISCARD to a separate patch and implement it
-using I/O requests
-- move the MMC support of secure discard to a separate patch and support
-the secure discard I/O request
+SD/MMC addressing uses 32-bit values.  There is a known 2TB limit for
+SD/MMC cards.  As cards are only just getting to 64GB, that limit is
+some way off, and it is not clear NAND technology can get there in
+a SD/MMC package anyway.
+
+I don't know why sector_t is not used.  I guess it would complicate doing
+division since it can be 64-bit.
+
+The implications are minimal.  In the unlikely event SD/MMC cards ever
+exceed 2TB some changes will be needed, but the standard would have to
+change to allow that first.
+
+
