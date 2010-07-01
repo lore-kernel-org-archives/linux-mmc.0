@@ -1,48 +1,125 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v5 2/2] OMAP4 HSMMC: Adding card detect support for
- MMC1 Controller
-Date: Thu, 1 Jul 2010 15:33:43 +0300
-Message-ID: <20100701123342.GQ2822@atomide.com>
-References: <43584.10.24.255.17.1276788439.squirrel@dbdmail.itg.ti.com>
- <20100617131520.3b676052.akpm@linux-foundation.org>
+From: Lars-Peter Clausen <lars@metafoo.de>
+Subject: Re: [PATCH v3] MMC: Add JZ4740 mmc driver
+Date: Thu, 01 Jul 2010 17:45:57 +0200
+Message-ID: <4C2CB835.5010106@metafoo.de>
+References: <1276924111-11158-19-git-send-email-lars@metafoo.de>	<1277688041-23522-1-git-send-email-lars@metafoo.de> <20100630135525.1f6a9704.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20100617131520.3b676052.akpm@linux-foundation.org>
-Sender: linux-omap-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100630135525.1f6a9704.akpm@linux-foundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
-Cc: kishore kadiyala <kishore.kadiyala@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com, adrian.hunter@nokia.com
+Cc: Ralf Baechle <ralf@linux-mips.org>, linux-mips@linux-mips.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-* Andrew Morton <akpm@linux-foundation.org> [100617 23:09]:
-> On Thu, 17 Jun 2010 20:57:19 +0530 (IST)
-> "kishore kadiyala" <kishore.kadiyala@ti.com> wrote:
-> 
-> > Adding card detect callback function which gives the status of
-> > the card .For MMC1 Controller, Card detect interrupt source is
-> > twl6030 and card present/absent status is provided by MMCCTRL
-> > register of twl6030.
-> > 
-> > Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-> > ---
-> >  arch/arm/mach-omap2/board-4430sdp.c   |   11 +++++--
-> >  arch/arm/mach-omap2/hsmmc.c           |    1 +
-> >  arch/arm/plat-omap/include/plat/mmc.h |    1 +
-> >  drivers/mfd/twl6030-irq.c             |   23 ++++++++++++++++
-> >  drivers/mmc/host/omap_hsmmc.c         |   30 ++++++++++++++++++---
-> >  include/linux/i2c/twl.h               |   46 +++++++++++++++++++++++++++++++++
-> >  6 files changed, 104 insertions(+), 8 deletions(-)
-> 
-> I assume this depends on "[PATCH v5 1/2] OMAP HSMMC: Adding a Flag to
-> determine the type of Card detect"?
-> 
-> It's all a bit too remote from my (ever-expanding) work area, so I'll
-> assume that Tony or someone will look after these.
- 
-Yeah we'll queue these via the omap patches once everybody is
-happy with them.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-Regards,
+Hi
 
-Tony
+Andrew Morton wrote:
+> On Mon, 28 Jun 2010 03:20:41 +0200
+> Lars-Peter Clausen <lars@metafoo.de> wrote:
+> 
+>> This patch adds support for the mmc controller on JZ4740 SoCs.
+>>
+>> Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+>> Cc: Andrew Morton <akpm@linux-foundation.org>
+>> Cc: Matt Fleming <matt@console-pimps.org>
+>> Cc: linux-mmc@vger.kernel.org
+>>
+>> ...
+>>
+>> +#define JZ4740_MMC_MAX_TIMEOUT 10000000
+> 
+> That was a really big timeout.  How long do 1e7 readw's take?  Oh well.
+> 
+
+Hm, right. It doesn't hurt though. I'll do some tests and to try to come up with a
+more realistic value.
+
+>> ...
+>>
+>> +static void jz4740_mmc_clock_disable(struct jz4740_mmc_host *host)
+>> +{
+>> +	uint32_t status;
+>> +
+>> +	writew(JZ_MMC_STRPCL_CLOCK_STOP, host->base + JZ_REG_MMC_STRPCL);
+>> +	do {
+>> +		status = readl(host->base + JZ_REG_MMC_STATUS);
+>> +	} while (status & JZ_MMC_STATUS_CLK_EN);
+>> +}
+>> +
+>> +static void jz4740_mmc_reset(struct jz4740_mmc_host *host)
+>> +{
+>> +	uint32_t status;
+>> +
+>> +	writew(JZ_MMC_STRPCL_RESET, host->base + JZ_REG_MMC_STRPCL);
+>> +	udelay(10);
+>> +	do {
+>> +		status = readl(host->base + JZ_REG_MMC_STATUS);
+>> +	} while (status & JZ_MMC_STATUS_IS_RESETTING);
+>> +}
+> 
+> Maybe these should have a timeout too?
+
+Its very unlikely that these will ever timeout. But right, to be on the safe, there
+should be a timeout as well.
+
+> 
+>> ...
+>>
+>> +static inline unsigned int jz4740_mmc_wait_irq(struct jz4740_mmc_host *host,
+>> +	unsigned int irq)
+>> +{
+>> +	unsigned int timeout = JZ4740_MMC_MAX_TIMEOUT;
+>> +	uint16_t status;
+>> +
+>> +	do {
+>> +		status = readw(host->base + JZ_REG_MMC_IREG);
+>> +	} while (!(status & irq) && --timeout);
+>> +
+>> +	return timeout;
+>> +}
+> 
+> This guy's too big to inline.  Recent gcc's know that and they tend to
+> uninline such things behind your back anwyay.
+
+Actually, even without the inline attribute and compiling with -Os gcc will inline
+this function by itself.
+
+> 
+>> ...
+>>
+>> +struct jz4740_mmc_platform_data {
+>> +	int gpio_power;
+>> +	int gpio_card_detect;
+>> +	int gpio_read_only;
+>> +	unsigned card_detect_active_low:1;
+>> +	unsigned read_only_active_low:1;
+>> +	unsigned power_active_low:1;
+>> +
+>> +	unsigned data_1bit:1;
+>> +};
+> 
+> The bitfields will all share the same word, so modification of one
+> field can race against modification of another field.  Hence some form
+> of locking which covers *all* the bitfields is needed.
+> 
+> Is that a problem in this driver?
+> 
+They are all read-only in the driver.
+
+
+Thanks for reviewing the patch
+- - Lars
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iEYEARECAAYFAkwsuDQACgkQBX4mSR26RiOiMACeMMNj4koCYFAUnxyM0LBr+wOZ
+x6oAnizk5CaAvZjQ2doXrD6ZYgDeNjSr
+=92D2
+-----END PGP SIGNATURE-----
