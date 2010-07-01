@@ -1,61 +1,112 @@
-From: Lars-Peter Clausen <lars@metafoo.de>
-Subject: Re: [PATCH v3] MMC: Add JZ4740 mmc driver
-Date: Thu, 01 Jul 2010 17:47:33 +0200
-Message-ID: <4C2CB895.3030402@metafoo.de>
-References: <1276924111-11158-19-git-send-email-lars@metafoo.de> <1277688041-23522-1-git-send-email-lars@metafoo.de> <87aaqd1tmr.fsf@linux-g6p1.site>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 3/3] sdhci-pltfm: Add support for CNS3xxx SoC devices
+Date: Thu, 1 Jul 2010 13:48:39 -0700
+Message-ID: <20100701134839.d7cb4841.akpm@linux-foundation.org>
+References: <20100625180527.GA11280@oksana.dev.rtsoft.ru>
+	<20100625180644.GC18241@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailhost.informatik.uni-hamburg.de ([134.100.9.70]:43126 "EHLO
-	mailhost.informatik.uni-hamburg.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752142Ab0GAPr5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2010 11:47:57 -0400
-In-Reply-To: <87aaqd1tmr.fsf@linux-g6p1.site>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:57302 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755647Ab0GAUs7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2010 16:48:59 -0400
+In-Reply-To: <20100625180644.GC18241@oksana.dev.rtsoft.ru>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: linux-mips@linux-mips.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, Ralf Baechle <ralf@linux-mips.org>
+To: Anton Vorontsov <avorontsov@mvista.com>
+Cc: Ben Dooks <ben@simtec.co.uk>, Richard =?ISO-8859-1?Q?R=F6jfors?= <richard.rojfors@pelagicore.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
+On Fri, 25 Jun 2010 22:06:44 +0400
+Anton Vorontsov <avorontsov@mvista.com> wrote:
 
-Matt Fleming wrote:
-> On Mon, 28 Jun 2010 03:20:41 +0200, Lars-Peter Clausen <lars@metafoo.de> wrote:
->> This patch adds support for the mmc controller on JZ4740 SoCs.
->>
->> Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
->> Cc: Andrew Morton <akpm@linux-foundation.org>
->> Cc: Matt Fleming <matt@console-pimps.org>
->> Cc: linux-mmc@vger.kernel.org
->>
->> ---
->> Changes since v1
->> - Do not request IRQ with IRQF_DISABLED since it is a noop now
->> - Use a generous slack for the timeout timer. It does not need to be accurate.
->> Changes since v2
->> - Use sg_mapping_to iterate over sg elements in mmc read and write functions
->> - Use bitops instead of a spinlock and a variable for testing whether a request
->>   has been finished.
->> - Rework irq and timeout handling in order to get rid of locking in hot paths
+> There's nothing special, just SoC-specific ops and quirks.
 > 
-> Acked-by: Matt Fleming <matt@console-pimps.org>
-> 
-> Are you planning on maintaining this driver? If so, it'd be a good idea
-> to update MAINTAINERS.
+> ...
+>
+> +static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
+> +{
+> +	struct device *dev = mmc_dev(host->mmc);
+> +	int div = 1;
+> +	u16 clk;
+> +	unsigned long timeout;
+> +
+> +	if (clock == host->clock)
+> +		return;
 
-Hi
+I assume that mmc core prevents this function from being exectued twice
+at the same time?
 
-Thanks for reviewing the patch.
-I guess I should send a MAINTAINERS patch which adds entries for all of the JZ4740
-drivers.
+> +	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> +
+> +	if (clock == 0)
+> +		goto out;
+> +
+> +	while (host->max_clk / div > clock) {
+> +		/*
+> +		 * On CNS3xxx divider grows linearly up to 4, and then
+> +		 * exponentially up to 256.
+> +		 */
+> +		if (div < 4)
+> +			div += 1;
+> +		else if (div < 256)
+> +			div *= 2;
+> +		else
+> +			break;
+> +	}
+> +
+> +	dev_dbg(dev, "desired SD clock: %d, actual: %d\n",
+> +		clock, host->max_clk / div);
+> +
+> +	/* Divide by 3 is special. */
+> +	if (div != 3)
+> +		div >>= 1;
+> +
+> +	clk = div << SDHCI_DIVIDER_SHIFT;
+> +	clk |= SDHCI_CLOCK_INT_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +
+> +	timeout = 20;
+> +	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+> +			& SDHCI_CLOCK_INT_STABLE)) {
+> +		if (timeout == 0) {
+> +			dev_warn(dev, "clock is unstable");
+> +			break;
+> +		}
+> +		timeout--;
+> +		mdelay(1);
 
-- - Lars
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+Could we have used the more polite msleep() here?
 
-iEYEARECAAYFAkwsuJUACgkQBX4mSR26RiNHVgCfTq+tc2I1QBniqijyUjNDxPIX
-GsEAn1xgPWz+L0uqHWthzJ+lMtFaUBtY
-=nVt9
------END PGP SIGNATURE-----
+> +	}
+> +
+> +	clk |= SDHCI_CLOCK_CARD_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +out:
+> +	host->clock = clock;
+> +}
+> +
+>
+> ...
+>
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -158,6 +158,9 @@ static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
+>  
+>  static const struct platform_device_id sdhci_pltfm_ids[] = {
+>  	{ "sdhci", },
+> +#ifdef CONFIG_MMC_SDHCI_CNS3XXX
+> +	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
+> +#endif
+
+What the heck is this kernel_ulong_t thing and why did `struct
+platform_device_id' see a need to invent it??
+
+
+>  	{ },
+>  };
+>  MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
+>
+> ...
+>
