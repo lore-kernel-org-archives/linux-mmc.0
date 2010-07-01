@@ -1,22 +1,22 @@
 From: akpm@linux-foundation.org
-Subject: + sdhci-pltfm-switch-to-module-device-table-matching.patch added to -mm tree
-Date: Thu, 01 Jul 2010 13:51:53 -0700
-Message-ID: <201007012051.o61KprJa026049@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: avorontsov@mvista.com, ben@simtec.co.uk, linux-mmc@vger.kernel.org, richard.rojfors@pelagicore.com
+Subject: + omap-pandora-pass-wl1251-information-to-sdio-core.patch added to -mm tree
+Date: Thu, 01 Jul 2010 15:31:39 -0700
+Message-ID: <201007012231.o61MVddO001599@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:51250 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932199Ab0GAWct (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2010 18:32:49 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: notasas@gmail.com, adrian.hunter@nokia.com, kishore.kadiyala@ti.com, kvalo@adurom.com, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk, madhu.cr@ti.com, me@bobcopeland.com, tony@atomide.com
 
 
 The patch titled
-     sdhci-pltfm: switch to module device table matching
+     omap: pandora: pass wl1251 information to SDIO core
 has been added to the -mm tree.  Its filename is
-     sdhci-pltfm-switch-to-module-device-table-matching.patch
+     omap-pandora-pass-wl1251-information-to-sdio-core.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -24,136 +24,115 @@ Before you just go and hit "reply", please:
    c) Ideally: find the original patch on the mailing list and do a
       reply-to-all to that, adding suitable additional cc's
 
-*** Remember to use Documentation/SubmitChecklist when testing your cod=
-e ***
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
 See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
 out what to do about this
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mm=
-otm/
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sdhci-pltfm: switch to module device table matching
-=46rom: Anton Vorontsov <avorontsov@mvista.com>
+Subject: omap: pandora: pass wl1251 information to SDIO core
+From: Grazvydas Ignotas <notasas@gmail.com>
 
-Sometimes want to place SoC-specific parts alongside with the generic
-driver, and to do so, we have to switch the driver over to the module
-device table matching.
+Pandora has TI WL1251 attached on MMC3, which is non-standard SDIO chip.
+Make use MMC_QUIRK_NONSTD_SDIO to tell SDIO core about it.
 
-Note that drivers/mmc/host/sdhci-pltfm.h is so far empty, but it'll hol=
-d
-SoC-specific driver data handlers soon.
-
-Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
-Cc: Ben Dooks <ben@simtec.co.uk>
-Cc: Richard R=F6jfors <richard.rojfors@pelagicore.com>=20
+Signed-off-by: Grazvydas Ignotas <notasas@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: Bob Copeland <me@bobcopeland.com>
+Cc: Kalle Valo <kvalo@adurom.com>
+Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
+Cc: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: Russell King <linux@arm.linux.org.uk>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci-pltfm.c |   14 +++++++++++++-
- drivers/mmc/host/sdhci-pltfm.h |   14 ++++++++++++++
- 2 files changed, 27 insertions(+), 1 deletion(-)
+ arch/arm/mach-omap2/board-omap3pandora.c |   16 ++++++++++++++++
+ arch/arm/mach-omap2/hsmmc.c              |    1 +
+ arch/arm/mach-omap2/hsmmc.h              |    4 ++++
+ 3 files changed, 21 insertions(+)
 
-diff -puN drivers/mmc/host/sdhci-pltfm.c~sdhci-pltfm-switch-to-module-d=
-evice-table-matching drivers/mmc/host/sdhci-pltfm.c
---- a/drivers/mmc/host/sdhci-pltfm.c~sdhci-pltfm-switch-to-module-devic=
-e-table-matching
-+++ a/drivers/mmc/host/sdhci-pltfm.c
-@@ -24,6 +24,7 @@
-=20
- #include <linux/delay.h>
- #include <linux/highmem.h>
-+#include <linux/mod_devicetable.h>
- #include <linux/platform_device.h>
-=20
- #include <linux/mmc/host.h>
-@@ -32,6 +33,7 @@
- #include <linux/sdhci-pltfm.h>
-=20
- #include "sdhci.h"
-+#include "sdhci-pltfm.h"
-=20
- /*********************************************************************=
-********\
-  *                                                                    =
-       *
-@@ -51,10 +53,14 @@ static struct sdhci_ops sdhci_pltfm_ops=20
- static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- {
- 	struct sdhci_pltfm_data *pdata =3D pdev->dev.platform_data;
-+	const struct platform_device_id *platid =3D platform_get_device_id(pd=
-ev);
- 	struct sdhci_host *host;
- 	struct resource *iomem;
- 	int ret;
-=20
-+	if (!pdata && platid && platid->driver_data)
-+		pdata =3D (void *)platid->driver_data;
-+
- 	iomem =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!iomem) {
- 		ret =3D -ENOMEM;
-@@ -150,6 +156,12 @@ static int __devexit sdhci_pltfm_remove(
- 	return 0;
- }
-=20
-+static const struct platform_device_id sdhci_pltfm_ids[] =3D {
-+	{ "sdhci", },
-+	{ },
-+};
-+MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
-+
- static struct platform_driver sdhci_pltfm_driver =3D {
- 	.driver =3D {
- 		.name	=3D "sdhci",
-@@ -157,6 +169,7 @@ static struct platform_driver sdhci_pltf
+diff -puN arch/arm/mach-omap2/board-omap3pandora.c~omap-pandora-pass-wl1251-information-to-sdio-core arch/arm/mach-omap2/board-omap3pandora.c
+--- a/arch/arm/mach-omap2/board-omap3pandora.c~omap-pandora-pass-wl1251-information-to-sdio-core
++++ a/arch/arm/mach-omap2/board-omap3pandora.c
+@@ -29,6 +29,7 @@
+ #include <linux/input.h>
+ #include <linux/input/matrix_keypad.h>
+ #include <linux/gpio_keys.h>
++#include <linux/mmc/card.h>
+ 
+ #include <asm/mach-types.h>
+ #include <asm/mach/arch.h>
+@@ -227,6 +228,20 @@ static struct platform_device pandora_ds
  	},
- 	.probe		=3D sdhci_pltfm_probe,
- 	.remove		=3D __devexit_p(sdhci_pltfm_remove),
-+	.id_table	=3D sdhci_pltfm_ids,
  };
-=20
- /*********************************************************************=
-********\
-@@ -181,4 +194,3 @@ module_exit(sdhci_drv_exit);
- MODULE_DESCRIPTION("Secure Digital Host Controller Interface platform =
-driver");
- MODULE_AUTHOR("Mocean Laboratories <info@mocean-labs.com>");
- MODULE_LICENSE("GPL v2");
--MODULE_ALIAS("platform:sdhci");
-diff -puN /dev/null drivers/mmc/host/sdhci-pltfm.h
---- /dev/null
-+++ a/drivers/mmc/host/sdhci-pltfm.h
-@@ -0,0 +1,14 @@
-+/*
-+ * Copyright 2010 MontaVista Software, LLC.
-+ *
-+ * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
-+ *
-+ * This program is free software; you can redistribute it and/or modif=
-y
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
+ 
++static void pandora_wl1251_init_card(struct mmc_card *card)
++{
++	/*
++	 * We have TI wl1251 attached to MMC3. Pass this information to
++	 * SDIO core because it can't be probed by normal methods.
++	 */
++	card->quirks |= MMC_QUIRK_NONSTD_SDIO;
++	card->cccr.wide_bus = 1;
++	card->cis.vendor = 0x104c;
++	card->cis.device = 0x9066;
++	card->cis.blksize = 512;
++	card->cis.max_dtr = 20000000;
++}
 +
-+#ifndef _DRIVERS_MMC_SDHCI_PLTFM_H
-+#define _DRIVERS_MMC_SDHCI_PLTFM_H
+ static struct omap2_hsmmc_info omap3pandora_mmc[] = {
+ 	{
+ 		.mmc		= 1,
+@@ -248,6 +263,7 @@ static struct omap2_hsmmc_info omap3pand
+ 		.wires		= 4,
+ 		.gpio_cd	= -EINVAL,
+ 		.gpio_wp	= -EINVAL,
++		.init_card	= pandora_wl1251_init_card,
+ 	},
+ 	{}	/* Terminator */
+ };
+diff -puN arch/arm/mach-omap2/hsmmc.c~omap-pandora-pass-wl1251-information-to-sdio-core arch/arm/mach-omap2/hsmmc.c
+--- a/arch/arm/mach-omap2/hsmmc.c~omap-pandora-pass-wl1251-information-to-sdio-core
++++ a/arch/arm/mach-omap2/hsmmc.c
+@@ -268,6 +268,7 @@ void __init omap2_hsmmc_init(struct omap
+ 		mmc->slots[0].gpio_wp = c->gpio_wp;
+ 
+ 		mmc->slots[0].remux = c->remux;
++		mmc->slots[0].init_card = c->init_card;
+ 
+ 		if (c->cover_only)
+ 			mmc->slots[0].cover = 1;
+diff -puN arch/arm/mach-omap2/hsmmc.h~omap-pandora-pass-wl1251-information-to-sdio-core arch/arm/mach-omap2/hsmmc.h
+--- a/arch/arm/mach-omap2/hsmmc.h~omap-pandora-pass-wl1251-information-to-sdio-core
++++ a/arch/arm/mach-omap2/hsmmc.h
+@@ -6,6 +6,8 @@
+  * published by the Free Software Foundation.
+  */
+ 
++struct mmc_card;
 +
-+#endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
+ struct omap2_hsmmc_info {
+ 	u8	mmc;		/* controller 1/2/3 */
+ 	u8	wires;		/* 1/4/8 wires */
+@@ -23,6 +25,8 @@ struct omap2_hsmmc_info {
+ 	int	ocr_mask;	/* temporary HACK */
+ 	/* Remux (pad configuation) when powering on/off */
+ 	void (*remux)(struct device *dev, int slot, int power_on);
++	/* init some special card */
++	void (*init_card)(struct mmc_card *card);
+ };
+ 
+ #if defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
 _
 
-Patches currently in -mm which might be from avorontsov@mvista.com are
+Patches currently in -mm which might be from notasas@gmail.com are
 
-origin.patch
 linux-next.patch
-sdhci-pltfm-switch-to-module-device-table-matching.patch
-sdhci-pltfm-reorganize-makefile-entries-to-support-soc-devices.patch
-sdhci-pltfm-add-support-for-cns3xxx-soc-devices.patch
+sdio-allow-non-standard-sdio-cards.patch
+omap_hsmmc-add-init_card-pass-through-callback.patch
+omap-pandora-pass-wl1251-information-to-sdio-core.patch
 
---
-To unsubscribe from this list: send the line "unsubscribe mm-commits" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
