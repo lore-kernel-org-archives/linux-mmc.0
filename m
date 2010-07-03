@@ -1,7 +1,7 @@
 From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: [PATCH v2 2/3] ARM: S5PV210: Add support SDMMC WP through EXT_INT on SMDKV210
-Date: Sat,  3 Jul 2010 10:00:43 +0900
-Message-ID: <1278118844-21770-3-git-send-email-kgene.kim@samsung.com>
+Subject: [PATCH v2 3/3] sdhci-s3c: Add SDHCI_QUIRK_NO_WP_BIT quirk
+Date: Sat,  3 Jul 2010 10:00:44 +0900
+Message-ID: <1278118844-21770-4-git-send-email-kgene.kim@samsung.com>
 References: <1278118844-21770-1-git-send-email-kgene.kim@samsung.com>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-Reply-To: <1278118844-21770-1-git-send-email-kgene.kim@samsung.com>
@@ -12,70 +12,133 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Hyuk Lee <hyuk1.lee@samsung.com>
 
-S5PV210 HSMMC host controller doesn't have the Write Protection pin which
-should be connnected with SDMMC card WP pin. So send the allocated GPIO number
-which is connected with WP pin of SD slot in order to implement get_ro function
-in sdhci-s3c.
+If host controller doesn't have WP pin which should be connnected with SDMMC
+card WP pin, can implement get_ro function with using the allocated gpio.
+In order to use this quirk wp_gpio in the platform data must be set.
 
 Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
 Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
 ---
- arch/arm/mach-s5pv210/mach-smdkv210.c |   22 ++++++++++++++++++++++
- 1 files changed, 22 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c |   44 ++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c     |    3 ++
+ drivers/mmc/host/sdhci.h     |    3 ++
+ 3 files changed, 50 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm/mach-s5pv210/mach-smdkv210.c b/arch/arm/mach-s5pv210/mach-smdkv210.c
-index b08f376..89b469f 100644
---- a/arch/arm/mach-s5pv210/mach-smdkv210.c
-+++ b/arch/arm/mach-s5pv210/mach-smdkv210.c
-@@ -12,6 +12,7 @@
- #include <linux/types.h>
- #include <linux/init.h>
- #include <linux/serial_core.h>
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index af21792..ed9376d 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -18,11 +18,13 @@
+ #include <linux/slab.h>
+ #include <linux/clk.h>
+ #include <linux/io.h>
 +#include <linux/gpio.h>
  
- #include <asm/mach/arch.h>
- #include <asm/mach/map.h>
-@@ -27,6 +28,7 @@
- #include <plat/cpu.h>
- #include <plat/adc.h>
- #include <plat/ts.h>
-+#include <plat/sdhci.h>
+ #include <linux/mmc/host.h>
  
- /* Following are default values for UCON, ULCON and UFCON UART registers */
- #define S5PV210_UCON_DEFAULT	(S3C2410_UCON_TXILEVEL |	\
-@@ -91,6 +93,22 @@ static struct s3c2410_ts_mach_info s3c_ts_platform __initdata = {
- 	.oversampling_shift	= 2,
- };
+ #include <plat/sdhci.h>
+ #include <plat/regs-sdhci.h>
++#include <plat/gpio-cfg.h>
  
-+static struct s3c_sdhci_platdata smdkv210_hsmmc0_pdata __initdata = {
-+	.wp_gpio		= S5PV210_GPH0(7),
-+};
-+
-+static struct s3c_sdhci_platdata smdkv210_hsmmc1_pdata __initdata = {
-+	.wp_gpio		= S5PV210_GPH0(7),
-+};
-+
-+static struct s3c_sdhci_platdata smdkv210_hsmmc2_pdata __initdata = {
-+	.wp_gpio		= S5PV210_GPH3(1),
-+};
-+
-+static struct s3c_sdhci_platdata smdkv210_hsmmc3_pdata __initdata = {
-+	.wp_gpio		= S5PV210_GPH1(0),
-+};
-+
- static void __init smdkv210_map_io(void)
- {
- 	s5p_init_io(NULL, 0, S5P_VA_CHIPID);
-@@ -101,6 +119,10 @@ static void __init smdkv210_map_io(void)
- static void __init smdkv210_machine_init(void)
- {
- 	s3c24xx_ts_set_platdata(&s3c_ts_platform);
-+	s3c_sdhci0_set_platdata(&smdkv210_hsmmc0_pdata);
-+	s3c_sdhci1_set_platdata(&smdkv210_hsmmc1_pdata);
-+	s3c_sdhci2_set_platdata(&smdkv210_hsmmc2_pdata);
-+	s3c_sdhci3_set_platdata(&smdkv210_hsmmc3_pdata);
- 	platform_add_devices(smdkv210_devices, ARRAY_SIZE(smdkv210_devices));
+ #include "sdhci.h"
+ 
+@@ -209,6 +211,36 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
  }
  
++/**
++ * sdhci_s3c_get_ro - callback for get_ro
++ * @host: The SDHCI host being changed
++ *
++ * If the WP pin is connected with GPIO, can get the value which indicates
++ * the card is locked or not.
++*/
++static int sdhci_s3c_get_ro(struct mmc_host *mmc)
++{
++	struct sdhci_s3c *sc;
++	struct sdhci_host *host;
++
++	host = mmc_priv(mmc);
++	sc = sdhci_priv(host);
++
++	return gpio_get_value(sc->pdata->wp_gpio);
++}
++
++/**
++ * sdhci_s3c_cfg_wp - configure GPIO for WP pin
++ * @gpio_num: GPIO number which connected with WP line from SD/MMC slot
++ *
++ * Configure GPIO for using WP line
++*/
++static void sdhci_s3c_cfg_wp(unsigned int gpio_num)
++{
++	s3c_gpio_cfgpin(gpio_num, S3C_GPIO_INPUT);
++	s3c_gpio_setpull(gpio_num, S3C_GPIO_PULL_UP);
++}
++
+ static struct sdhci_ops sdhci_s3c_ops = {
+ 	.get_max_clock		= sdhci_s3c_get_max_clk,
+ 	.get_timeout_clock	= sdhci_s3c_get_timeout_clk,
+@@ -311,6 +343,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	if (pdata->cfg_gpio)
+ 		pdata->cfg_gpio(pdev, pdata->max_width);
+ 
++	if (pdata->wp_gpio)
++		sdhci_s3c_ops.get_ro = sdhci_s3c_get_ro;
++
+ 	host->hw_name = "samsung-hsmmc";
+ 	host->ops = &sdhci_s3c_ops;
+ 	host->quirks = 0;
+@@ -335,6 +370,15 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
+ 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+ 
++	/* Controller's WP pin donsn't connected with SD card. So we allocate
++	 * a GPIO for getting WP data from SD card and use that data as
++	 * the return value of the get_ro function */
++	host->quirks |= SDHCI_QUIRK_NO_WP_BIT;
++
++	/* to configure gpio pin as a card write protection signal */
++	if (pdata->wp_gpio)
++		sdhci_s3c_cfg_wp(pdata->wp_gpio);
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(dev, "sdhci_add_host() failed\n");
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c6d1bd8..2f8dfbc 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1192,6 +1192,9 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+ 
+ 	host = mmc_priv(mmc);
+ 
++	if ((host->quirks & SDHCI_QUIRK_NO_WP_BIT) && host->ops->get_ro)
++		return host->ops->get_ro(mmc);
++
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (host->flags & SDHCI_DEVICE_DEAD)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c846813..f479e22 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -240,6 +240,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
+ /* Controller cannot support End Attribute in NOP ADMA descriptor */
+ #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
++/* Controller has no write-protect pin connected with SD card */
++#define SDHCI_QUIRK_NO_WP_BIT                          (1<<27)
+ 
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
+@@ -312,6 +314,7 @@ struct sdhci_ops {
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
++	int		(*get_ro)(struct mmc_host *mmc);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
 1.6.2.5
