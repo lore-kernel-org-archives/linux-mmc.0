@@ -1,20 +1,20 @@
 From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH 2/3] ARM: S5PV210: Add support SDMMC WP through EXT_INT	on
- SMDKV210
-Date: Sat, 03 Jul 2010 10:14:19 +0900
-Message-ID: <009301cb1a4d$12ac8050$380580f0$%kim@samsung.com>
+Subject: RE: [PATCH 1/3] ARM: SAMSUNG: Add the member of platdata to	implement
+ SDMMC Write Protection
+Date: Sat, 03 Jul 2010 10:15:26 +0900
+Message-ID: <009401cb1a4d$3abd4e80$b037eb80$%kim@samsung.com>
 References: <1276601268-7226-1-git-send-email-kgene.kim@samsung.com>
- <1276601268-7226-3-git-send-email-kgene.kim@samsung.com>
- <20100615115947.GC7248@trinity.fluff.org>
+ <1276601268-7226-2-git-send-email-kgene.kim@samsung.com>
+ <20100615120245.GD7248@trinity.fluff.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:36618 "EHLO
+Received: from mailout4.samsung.com ([203.254.224.34]:36812 "EHLO
 	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753009Ab0GCBOR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jul 2010 21:14:17 -0400
-In-reply-to: <20100615115947.GC7248@trinity.fluff.org>
+	with ESMTP id S1752916Ab0GCBPY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jul 2010 21:15:24 -0400
+In-reply-to: <20100615120245.GD7248@trinity.fluff.org>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -23,171 +23,134 @@ Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsu
 
 Ben Dooks wrote:
 > 
-> On Tue, Jun 15, 2010 at 08:27:47PM +0900, Kukjin Kim wrote:
+> On Tue, Jun 15, 2010 at 08:27:46PM +0900, Kukjin Kim wrote:
 > > From: Lee Hyuk <hyuk1.lee@samsung.com>
 > >
-> > S5PV210 HSMMC host controller doesn't have the Write Protection pin
-which
-> > should be connnected with SDMMC card WP pin. So allocated a GPIO in
-order
-> to
-> > get the data from SDMMC card WP pin with EXT_INT and implement get_ro
-and
-> > cfg_wp function.
-> >
+> > This patch adds the members of platdata which are cfg_wp and get_ro.
+> > The cfg_wp is the function for setting the specific GPIO for WP pin
+> > and get_ro is the function for getting data from the assigned GPIO.
+> 
+> Why not just pass gpio numbers, and have the sdhci-s3c driver claim them
+> if they are valid?
+> 
+Ok..fixed it as your comments.
+
 > > Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
 > > Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
 > > ---
-> >  arch/arm/mach-s5pv210/mach-smdkv210.c |    2 +
-> >  arch/arm/mach-s5pv210/setup-sdhci.c   |   72
-> +++++++++++++++++++++++++++++++++
-> >  2 files changed, 74 insertions(+), 0 deletions(-)
+> >  arch/arm/plat-samsung/dev-hsmmc.c          |    4 ++++
+> >  arch/arm/plat-samsung/dev-hsmmc1.c         |    4 ++++
+> >  arch/arm/plat-samsung/dev-hsmmc2.c         |    4 ++++
+> >  arch/arm/plat-samsung/dev-hsmmc3.c         |    4 ++++
+> >  arch/arm/plat-samsung/include/plat/sdhci.h |    6 ++++++
+> >  5 files changed, 22 insertions(+), 0 deletions(-)
 > >
-> > diff --git a/arch/arm/mach-s5pv210/mach-smdkv210.c b/arch/arm/mach-
-> s5pv210/mach-smdkv210.c
-> > index b08f376..18cdb8c 100644
-> > --- a/arch/arm/mach-s5pv210/mach-smdkv210.c
-> > +++ b/arch/arm/mach-s5pv210/mach-smdkv210.c
-> > @@ -27,6 +27,7 @@
-> >  #include <plat/cpu.h>
-> >  #include <plat/adc.h>
-> >  #include <plat/ts.h>
-> > +#include <plat/sdhci.h>
-> >
-> >  /* Following are default values for UCON, ULCON and UFCON UART
-registers
-> */
-> >  #define S5PV210_UCON_DEFAULT	(S3C2410_UCON_TXILEVEL |	\
-> > @@ -101,6 +102,7 @@ static void __init smdkv210_map_io(void)
-> >  static void __init smdkv210_machine_init(void)
-> >  {
-> >  	s3c24xx_ts_set_platdata(&s3c_ts_platform);
-> > +	s3c_sdhci_set_platdata();
-> 
-> hmm, did you really want to call it this? also, no argument specified.
-> 
-No..fixed it.
-
-> >  	platform_add_devices(smdkv210_devices,
-> ARRAY_SIZE(smdkv210_devices));
+> > diff --git a/arch/arm/plat-samsung/dev-hsmmc.c
+b/arch/arm/plat-samsung/dev-
+> hsmmc.c
+> > index 4c05b39..f2bae6f 100644
+> > --- a/arch/arm/plat-samsung/dev-hsmmc.c
+> > +++ b/arch/arm/plat-samsung/dev-hsmmc.c
+> > @@ -65,4 +65,8 @@ void s3c_sdhci0_set_platdata(struct s3c_sdhci_platdata
+> *pd)
+> >  		set->cfg_gpio = pd->cfg_gpio;
+> >  	if (pd->cfg_card)
+> >  		set->cfg_card = pd->cfg_card;
+> > +	if (pd->cfg_wp)
+> > +		set->cfg_wp = pd->cfg_wp;
+> > +	if (pd->get_ro)
+> > +		set->get_ro = pd->get_ro;
 > >  }
-> >
-> > diff --git a/arch/arm/mach-s5pv210/setup-sdhci.c b/arch/arm/mach-
-> s5pv210/setup-sdhci.c
-> > index 51815ec..b553b36 100644
-> > --- a/arch/arm/mach-s5pv210/setup-sdhci.c
-> > +++ b/arch/arm/mach-s5pv210/setup-sdhci.c
-> > @@ -15,13 +15,17 @@
-> >  #include <linux/interrupt.h>
-> >  #include <linux/platform_device.h>
-> >  #include <linux/io.h>
-> > +#include <linux/gpio.h>
-> >
-> >  #include <linux/mmc/card.h>
-> >  #include <linux/mmc/host.h>
-> >
-> > +#include <plat/gpio-cfg.h>
-> >  #include <plat/regs-sdhci.h>
-> >  #include <plat/sdhci.h>
-> >
-> > +#include <mach/map.h>
-> > +
-> >  /* clock sources for the mmc bus clock, order as for the ctrl2[5..4] */
-> >
-> >  char *s5pv210_hsmmc_clksrcs[4] = {
-> > @@ -61,3 +65,71 @@ void s5pv210_setup_sdhci_cfg_card(struct
-> platform_device *dev,
-> >  	writel(ctrl2, r + S3C_SDHCI_CONTROL2);
-> >  	writel(ctrl3, r + S3C_SDHCI_CONTROL3);
+> > diff --git a/arch/arm/plat-samsung/dev-hsmmc1.c
+b/arch/arm/plat-samsung/dev-
+> hsmmc1.c
+> > index e49bc4c..b326e0d 100644
+> > --- a/arch/arm/plat-samsung/dev-hsmmc1.c
+> > +++ b/arch/arm/plat-samsung/dev-hsmmc1.c
+> > @@ -65,4 +65,8 @@ void s3c_sdhci1_set_platdata(struct s3c_sdhci_platdata
+> *pd)
+> >  		set->cfg_gpio = pd->cfg_gpio;
+> >  	if (pd->cfg_card)
+> >  		set->cfg_card = pd->cfg_card;
+> > +	if (pd->cfg_wp)
+> > +		set->cfg_wp = pd->cfg_wp;
+> > +	if (pd->get_ro)
+> > +		set->get_ro = pd->get_ro;
 > >  }
-> > +
-> > +static int s5pv210_sdhci_get_ro(struct mmc_host *mmc)
-> > +{
-> > +	int gpio_dat;
-> > +
-> > +	if ((mmc->index == 0 && s3c_hsmmc0_def_platdata.cfg_wp != NULL) ||
-> > +		(mmc->index == 1 && s3c_hsmmc1_def_platdata.cfg_wp !=
-> NULL)) {
-> > +		gpio_dat = __raw_readl((S5P_VA_GPIO + 0xC00) + 0x04);
-> > +		return !!(gpio_dat & 0x80);
-> > +	} else if (mmc->index == 2 && s3c_hsmmc2_def_platdata.cfg_wp !=
-> NULL) {
-> > +		gpio_dat = __raw_readl((S5P_VA_GPIO + 0xC00) + 0x64);
-> > +		return !!(gpio_dat & 0x2);
-> > +	} else if (mmc->index == 3 && s3c_hsmmc3_def_platdata.cfg_wp !=
-> NULL) {
-> > +		gpio_dat = __raw_readl((S5P_VA_GPIO + 0xC00) + 0x24);
-> > +		return !!(gpio_dat & 0x1);
-> > +	} else
-> > +		return 0;
+> > diff --git a/arch/arm/plat-samsung/dev-hsmmc2.c
+b/arch/arm/plat-samsung/dev-
+> hsmmc2.c
+> > index 824580b..3474ef2 100644
+> > --- a/arch/arm/plat-samsung/dev-hsmmc2.c
+> > +++ b/arch/arm/plat-samsung/dev-hsmmc2.c
+> > @@ -66,4 +66,8 @@ void s3c_sdhci2_set_platdata(struct s3c_sdhci_platdata
+> *pd)
+> >  		set->cfg_gpio = pd->cfg_gpio;
+> >  	if (pd->cfg_card)
+> >  		set->cfg_card = pd->cfg_card;
+> > +	if (pd->cfg_wp)
+> > +		set->cfg_wp = pd->cfg_wp;
+> > +	if (pd->get_ro)
+> > +		set->get_ro = pd->get_ro;
+> >  }
+> > diff --git a/arch/arm/plat-samsung/dev-hsmmc3.c
+b/arch/arm/plat-samsung/dev-
+> hsmmc3.c
+> > index 05d5ea4..1da8ea7 100644
+> > --- a/arch/arm/plat-samsung/dev-hsmmc3.c
+> > +++ b/arch/arm/plat-samsung/dev-hsmmc3.c
+> > @@ -69,4 +69,8 @@ void s3c_sdhci3_set_platdata(struct s3c_sdhci_platdata
+> *pd)
+> >  		set->cfg_gpio = pd->cfg_gpio;
+> >  	if (pd->cfg_card)
+> >  		set->cfg_card = pd->cfg_card;
+> > +	if (pd->cfg_wp)
+> > +		set->cfg_wp = pd->cfg_wp;
+> > +	if (pd->get_ro)
+> > +		set->get_ro = pd->get_ro;
+> >  }
+> > diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-
+> samsung/include/plat/sdhci.h
+> > index 1314ffa..da198d8 100644
+> > --- a/arch/arm/plat-samsung/include/plat/sdhci.h
+> > +++ b/arch/arm/plat-samsung/include/plat/sdhci.h
+> > @@ -29,6 +29,8 @@ struct mmc_ios;
+> >   *            is necessary the controllers and/or GPIO blocks require
+the
+> >   *	      changing of driver-strength and other controls dependant on
+> >   *	      the card and speed of operation.
+> > + * @cfg_wp: Configure the GPIO in order to allocate WP pin.
+> > + * @get_ro: Call back function for getting data from the allocated
+GPIO.
 > 
-> Why not use the gpio layer? really, this sort of thing is what it is
-> there for.
-> 
-Ok..used it.
-
-> > +}
-> > +
-> > +static void s5pv210_setup_sdhci_gpio_wp(int dev_id)
-> > +{
-> > +	switch (dev_id) {
-> > +	case 0:
-> > +	case 1:
-> > +		s3c_gpio_cfgpin(S5PV210_GPH0(7), S3C_GPIO_INPUT);
-> > +		s3c_gpio_setpull(S5PV210_GPH0(7), S3C_GPIO_PULL_UP);
-> > +		break;
-> > +	case 2:
-> > +		s3c_gpio_cfgpin(S5PV210_GPH3(1), S3C_GPIO_INPUT);
-> > +		s3c_gpio_setpull(S5PV210_GPH3(1), S3C_GPIO_PULL_UP);
-> > +		break;
-> > +	case 3:
-> > +		s3c_gpio_cfgpin(S5PV210_GPH1(0), S3C_GPIO_INPUT);
-> > +		s3c_gpio_setpull(S5PV210_GPH1(0), S3C_GPIO_PULL_UP);
-> > +		break;
-> > +	default:
-> > +		break;
-> 
-> again, if you'd use the gpio layer, at-lesat the cfgpin() wouldn't
-> have been necessary.
+> if you just used gpio calls and passed a gpio number here,
+> you'd not need cfg_wp.
 > 
 OK.
 
-> > +	}
-> > +}
+> >   *
+> >   * Initialisation data specific to either the machine or the platform
+> >   * for the device driver to use or call-back when configuring gpio or
+> > @@ -45,6 +47,8 @@ struct s3c_sdhci_platdata {
+> >  			    void __iomem *regbase,
+> >  			    struct mmc_ios *ios,
+> >  			    struct mmc_card *card);
+> > +	void	(*cfg_wp)(int dev_id);
+> > +	int	(*get_ro)(struct mmc_host *mmc);
+> >  };
+> >
+> >  /**
+> > @@ -234,6 +238,8 @@ extern void s5pv210_setup_sdhci_cfg_card(struct
+> platform_device *dev,
+> >  					   struct mmc_ios *ios,
+> >  					   struct mmc_card *card);
+> >
+> > +extern void s3c_sdhci_set_platdata(void);
 > > +
-> > +static struct s3c_sdhci_platdata hsmmc0_platdata = {
-> > +	.cfg_wp         = s5pv210_setup_sdhci_gpio_wp,
-> > +	.get_ro         = s5pv210_sdhci_get_ro,
-> > +};
-> > +
-> > +static struct s3c_sdhci_platdata hsmmc1_platdata = {
-> > +	.cfg_wp         = s5pv210_setup_sdhci_gpio_wp,
-> > +	.get_ro         = s5pv210_sdhci_get_ro,
-> > +};
-> > +
-> > +static struct s3c_sdhci_platdata hsmmc2_platdata = {
-> > +	.cfg_wp         = s5pv210_setup_sdhci_gpio_wp,
-> > +	.get_ro         = s5pv210_sdhci_get_ro,
-> > +};
-> > +
-> > +static struct s3c_sdhci_platdata hsmmc3_platdata = {
-> > +	.cfg_wp         = s5pv210_setup_sdhci_gpio_wp,
-> > +	.get_ro         = s5pv210_sdhci_get_ro,
-> > +};
-> > +
-> > +void s3c_sdhci_set_platdata(void)
-> > +{
-> > +	s3c_sdhci0_set_platdata(&hsmmc0_platdata);
-> > +	s3c_sdhci1_set_platdata(&hsmmc1_platdata);
-> > +	s3c_sdhci2_set_platdata(&hsmmc2_platdata);
-> > +	s3c_sdhci3_set_platdata(&hsmmc3_platdata);
-> > +}
-> > +EXPORT_SYMBOL(s3c_sdhci_set_platdata);
-> 
-> There is _NO NEED_ to export these, they really should not be used outside
-> of the machine initialisation.
+> >  #ifdef CONFIG_S3C_DEV_HSMMC
+> >  static inline void s5pv210_default_sdhci0(void)
+> >  {
 
-Yeah, you're right.
 
 Thanks.
 
