@@ -1,7 +1,7 @@
 From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: [PATCH v2 3/3] sdhci-s3c: Add SDHCI_QUIRK_NO_WP_BIT quirk
-Date: Sat,  3 Jul 2010 10:00:44 +0900
-Message-ID: <1278118844-21770-4-git-send-email-kgene.kim@samsung.com>
+Subject: [PATCH v2 1/3] ARM: SAMSUNG: Add the member of platdata to implement SDMMC Write Protection
+Date: Sat,  3 Jul 2010 10:00:42 +0900
+Message-ID: <1278118844-21770-2-git-send-email-kgene.kim@samsung.com>
 References: <1278118844-21770-1-git-send-email-kgene.kim@samsung.com>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-Reply-To: <1278118844-21770-1-git-send-email-kgene.kim@samsung.com>
@@ -12,133 +12,90 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Hyuk Lee <hyuk1.lee@samsung.com>
 
-If host controller doesn't have WP pin which should be connnected with SDMMC
-card WP pin, can implement get_ro function with using the allocated gpio.
-In order to use this quirk wp_gpio in the platform data must be set.
+This patch adds the members of platdata which is wp_gpio.
+The wp_gpio is a gpio_number which is connected with WP pin of SD Slot.
 
 Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
 Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
 ---
- drivers/mmc/host/sdhci-s3c.c |   44 ++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c     |    3 ++
- drivers/mmc/host/sdhci.h     |    3 ++
- 3 files changed, 50 insertions(+), 0 deletions(-)
+ arch/arm/plat-samsung/dev-hsmmc.c          |    2 ++
+ arch/arm/plat-samsung/dev-hsmmc1.c         |    2 ++
+ arch/arm/plat-samsung/dev-hsmmc2.c         |    2 ++
+ arch/arm/plat-samsung/dev-hsmmc3.c         |    2 ++
+ arch/arm/plat-samsung/include/plat/sdhci.h |    2 ++
+ 5 files changed, 10 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index af21792..ed9376d 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -18,11 +18,13 @@
- #include <linux/slab.h>
- #include <linux/clk.h>
- #include <linux/io.h>
-+#include <linux/gpio.h>
+diff --git a/arch/arm/plat-samsung/dev-hsmmc.c b/arch/arm/plat-samsung/dev-hsmmc.c
+index 4c05b39..a9e02b4 100644
+--- a/arch/arm/plat-samsung/dev-hsmmc.c
++++ b/arch/arm/plat-samsung/dev-hsmmc.c
+@@ -61,6 +61,8 @@ void s3c_sdhci0_set_platdata(struct s3c_sdhci_platdata *pd)
  
- #include <linux/mmc/host.h>
+ 	set->max_width = pd->max_width;
  
- #include <plat/sdhci.h>
- #include <plat/regs-sdhci.h>
-+#include <plat/gpio-cfg.h>
++	if (pd->wp_gpio)
++		set->wp_gpio = pd->wp_gpio;
+ 	if (pd->cfg_gpio)
+ 		set->cfg_gpio = pd->cfg_gpio;
+ 	if (pd->cfg_card)
+diff --git a/arch/arm/plat-samsung/dev-hsmmc1.c b/arch/arm/plat-samsung/dev-hsmmc1.c
+index e49bc4c..5c05ada 100644
+--- a/arch/arm/plat-samsung/dev-hsmmc1.c
++++ b/arch/arm/plat-samsung/dev-hsmmc1.c
+@@ -61,6 +61,8 @@ void s3c_sdhci1_set_platdata(struct s3c_sdhci_platdata *pd)
  
- #include "sdhci.h"
+ 	set->max_width = pd->max_width;
  
-@@ -209,6 +211,36 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
- 	}
- }
++	if (pd->wp_gpio)
++		set->wp_gpio = pd->wp_gpio;
+ 	if (pd->cfg_gpio)
+ 		set->cfg_gpio = pd->cfg_gpio;
+ 	if (pd->cfg_card)
+diff --git a/arch/arm/plat-samsung/dev-hsmmc2.c b/arch/arm/plat-samsung/dev-hsmmc2.c
+index 824580b..b724800 100644
+--- a/arch/arm/plat-samsung/dev-hsmmc2.c
++++ b/arch/arm/plat-samsung/dev-hsmmc2.c
+@@ -62,6 +62,8 @@ void s3c_sdhci2_set_platdata(struct s3c_sdhci_platdata *pd)
  
-+/**
-+ * sdhci_s3c_get_ro - callback for get_ro
-+ * @host: The SDHCI host being changed
-+ *
-+ * If the WP pin is connected with GPIO, can get the value which indicates
-+ * the card is locked or not.
-+*/
-+static int sdhci_s3c_get_ro(struct mmc_host *mmc)
-+{
-+	struct sdhci_s3c *sc;
-+	struct sdhci_host *host;
-+
-+	host = mmc_priv(mmc);
-+	sc = sdhci_priv(host);
-+
-+	return gpio_get_value(sc->pdata->wp_gpio);
-+}
-+
-+/**
-+ * sdhci_s3c_cfg_wp - configure GPIO for WP pin
-+ * @gpio_num: GPIO number which connected with WP line from SD/MMC slot
-+ *
-+ * Configure GPIO for using WP line
-+*/
-+static void sdhci_s3c_cfg_wp(unsigned int gpio_num)
-+{
-+	s3c_gpio_cfgpin(gpio_num, S3C_GPIO_INPUT);
-+	s3c_gpio_setpull(gpio_num, S3C_GPIO_PULL_UP);
-+}
-+
- static struct sdhci_ops sdhci_s3c_ops = {
- 	.get_max_clock		= sdhci_s3c_get_max_clk,
- 	.get_timeout_clock	= sdhci_s3c_get_timeout_clk,
-@@ -311,6 +343,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	if (pdata->cfg_gpio)
- 		pdata->cfg_gpio(pdev, pdata->max_width);
+ 	set->max_width = pd->max_width;
  
-+	if (pdata->wp_gpio)
-+		sdhci_s3c_ops.get_ro = sdhci_s3c_get_ro;
-+
- 	host->hw_name = "samsung-hsmmc";
- 	host->ops = &sdhci_s3c_ops;
- 	host->quirks = 0;
-@@ -335,6 +370,15 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
- 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
++	if (pd->wp_gpio)
++		set->wp_gpio = pd->wp_gpio;
+ 	if (pd->cfg_gpio)
+ 		set->cfg_gpio = pd->cfg_gpio;
+ 	if (pd->cfg_card)
+diff --git a/arch/arm/plat-samsung/dev-hsmmc3.c b/arch/arm/plat-samsung/dev-hsmmc3.c
+index 57bd394..e9b23dc 100644
+--- a/arch/arm/plat-samsung/dev-hsmmc3.c
++++ b/arch/arm/plat-samsung/dev-hsmmc3.c
+@@ -65,6 +65,8 @@ void s3c_sdhci3_set_platdata(struct s3c_sdhci_platdata *pd)
  
-+	/* Controller's WP pin donsn't connected with SD card. So we allocate
-+	 * a GPIO for getting WP data from SD card and use that data as
-+	 * the return value of the get_ro function */
-+	host->quirks |= SDHCI_QUIRK_NO_WP_BIT;
-+
-+	/* to configure gpio pin as a card write protection signal */
-+	if (pdata->wp_gpio)
-+		sdhci_s3c_cfg_wp(pdata->wp_gpio);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(dev, "sdhci_add_host() failed\n");
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c6d1bd8..2f8dfbc 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1192,6 +1192,9 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+ 	set->max_width = pd->max_width;
  
- 	host = mmc_priv(mmc);
++	if (pd->wp_gpio)
++		set->wp_gpio = pd->wp_gpio;
+ 	if (pd->cfg_gpio)
+ 		set->cfg_gpio = pd->cfg_gpio;
+ 	if (pd->cfg_card)
+diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-samsung/include/plat/sdhci.h
+index 1314ffa..3491e18 100644
+--- a/arch/arm/plat-samsung/include/plat/sdhci.h
++++ b/arch/arm/plat-samsung/include/plat/sdhci.h
+@@ -24,6 +24,7 @@ struct mmc_ios;
+  * struct s3c_sdhci_platdata() - Platform device data for Samsung SDHCI
+  * @max_width: The maximum number of data bits supported.
+  * @host_caps: Standard MMC host capabilities bit field.
++ * @wp_gpio: The gpio number using for WP.
+  * @cfg_gpio: Configure the GPIO for a specific card bit-width
+  * @cfg_card: Configure the interface for a specific card and speed. This
+  *            is necessary the controllers and/or GPIO blocks require the
+@@ -37,6 +38,7 @@ struct mmc_ios;
+ struct s3c_sdhci_platdata {
+ 	unsigned int	max_width;
+ 	unsigned int	host_caps;
++	unsigned int	wp_gpio;
  
-+	if ((host->quirks & SDHCI_QUIRK_NO_WP_BIT) && host->ops->get_ro)
-+		return host->ops->get_ro(mmc);
-+
- 	spin_lock_irqsave(&host->lock, flags);
+ 	char		**clocks;	/* set of clock sources */
  
- 	if (host->flags & SDHCI_DEVICE_DEAD)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c846813..f479e22 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -240,6 +240,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
- /* Controller cannot support End Attribute in NOP ADMA descriptor */
- #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
-+/* Controller has no write-protect pin connected with SD card */
-+#define SDHCI_QUIRK_NO_WP_BIT                          (1<<27)
- 
- 	int			irq;		/* Device IRQ */
- 	void __iomem *		ioaddr;		/* Mapped address */
-@@ -312,6 +314,7 @@ struct sdhci_ops {
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
-+	int		(*get_ro)(struct mmc_host *mmc);
- };
- 
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
 1.6.2.5
