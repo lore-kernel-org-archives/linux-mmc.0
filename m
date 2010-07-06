@@ -1,83 +1,116 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: RE: [PATCH 05/15] omap: hsmmc: add virtual card detect support
-Date: Tue, 06 Jul 2010 13:00:11 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1007061249280.6020@xanadu.home>
+From: Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>
+Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
+Date: Tue, 06 Jul 2010 13:42:26 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1007061316010.6020@xanadu.home>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
- <1278376666-3509-6-git-send-email-ohad@wizery.com>
- <alpine.LFD.2.00.1007052134460.6020@xanadu.home>
- <AANLkTim4E4LlFERmfYA1M0HLBOoRAsQuvdW6QBNu6pC0@mail.gmail.com>
- <AANLkTinE5LygUWJsJSEE2miZF1GK58LTr8zErkuu_7yM@mail.gmail.com>
- <822D79B5C25543B1A6F148B39E061459@am.dhcp.ti.com>
+ <1278376666-3509-12-git-send-email-ohad@wizery.com>
+ <4C32EF19.1000604@nokia.com>
+ <AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com>
+ <4C3306F4.8060907@nokia.com>
+ <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com>
+ <4C333E0D.2070601@nokia.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-reply-to: <822D79B5C25543B1A6F148B39E061459@am.dhcp.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: 'Ohad Ben-Cohen' <ohad@wizery.com>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, 'Luciano Coelho' <luciano.coelho@nokia.com>, 'Andrew Morton' <akpm@linux-foundation.org>, 'San Mehat' <san@google.com>, "'Pandita, Vikram'" <vikram.pandita@ti.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <4C333E0D.2070601-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+Cc: ext Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 6 Jul 2010, Madhusudhan wrote:
+On Tue, 6 Jul 2010, Roger Quadros wrote:
 
+> On 07/06/2010 03:53 PM, ext Ohad Ben-Cohen wrote:
+> > Hi Roger,
+> > 
+> > On Tue, Jul 6, 2010 at 1:35 PM, Roger Quadros<roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+> > wrote:
+> > > My point is that shouldn't this be handled by SDIO core?
+> > 
+> > Care to explain what you mean / give a code example ?
 > 
+> If the Power enable GPIO can be treated as SDIO slot supply (i.e. vmmc), then
+> the SDIO/MMC core should tackle it, just like it deals with supply for slots
+> with removable cards.
+
+Exact.
+
+> > You need card detect events in order to trigger card&  sdio function
+> > initialization and removals.
+
+Why would you trigger function initialization and removal?  Just to turn 
+off power?  That's a bit like pulling off the battery from your laptop 
+when you want to suspend it.  There is a better way to go about things.
+
+> > Please share any alternative approach you may be thinking on.
 > 
-> > -----Original Message-----
-> > From: Ohad Ben-Cohen [mailto:ohad@wizery.com]
-> > Sent: Tuesday, July 06, 2010 6:48 AM
-> > To: Nicolas Pitre
-> > Cc: linux-wireless@vger.kernel.org; linux-mmc@vger.kernel.org; linux-
-> > omap@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
-> > linux@arm.linux.org.uk; Chikkature Rajashekar Madhusudhan; Luciano Coelho;
-> > Andrew Morton; San Mehat; Pandita, Vikram
-> > Subject: Re: [PATCH 05/15] omap: hsmmc: add virtual card detect support
-> > 
-> > On Tue, Jul 6, 2010 at 1:22 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> > > Note: the wl1271 device does support standard card detection, but
-> > > AFAIK there's a limitation to use that with the specific omap
-> > > controller the device is hardwired to. I will try to get more info
-> > > about that, but probably Madhu can comment on that better.
-> > 
-> > 
-> > Some correction and additional info:
-> > 
-> > The wl1271 device has an issue which makes the standard card detect
-> > mechanism irrelevant: it is always up, even if the power enable gpio
-> > input of the device is down (the power enable input does not supply
-> > the power to the chip, it's just logical digital high/low input upon
-> > which the device reacts).  That's why we must use software control for
-> > emulating card detect with that device.
-> > 
-> > In addition, as far as I could find out, the card detect mechanism on
-> > the ZOOM is implemented by mechanical means, and thus is not relevant
-> > for hardwired embedded SDIO devices (I'm not even sure card detect is
-> > supported for the 3rd mmc controller).
+> OK, this is how I see it.
 > 
-> The card detect is supported through T2 GPIO interrupts only for MMC1 and
-> MMC2. Such a mechanism is not present for MMC3 to which the WLAN chip is
-> hardwired.
+> - Treat the non-removable card as non-removable. So no need to do card detect
+> emulation.
+> 
+> - Treat the GPIO power enable on wl1271 as VMMC supply. Use fixed regulator
+> framework to define this regulator & supply. Even though you mention that it
+> is not actually a supply, it fits well in the fixed supply framework.
+> 
+> - When the host controller is enumerated, the mmc core will power up the slot,
+> find the sdio card, and probe the function driver (i.e. wl1271_sdio).
+> 
+> - if interface is not in use, the function driver must release the sdio host,
+> and this should eventually disable the vmmc supply.
+> 
+> - Whenever the wlan interface must be brought up, wl1271_sdio, can claim the
+> sdio host. this will cause the vmmc supply to be enabled, for as long as the
+> interface is up.
+> 
+> Does this address all issues?
 
-Many existing implementations simply have no (or a broken) card 
-detection signal.  In that case, either the host controller passes the 
-MMC_CAP_NEEDS_POLL flag to the core so that the bus is probed on a 
-regular interval for card presence.  Or, like in this case where the 
-"card" is always hardwired on the board, you simply rely on the initial 
-probe which is always performed at least once when the host controller 
-driver is registered.
+This is mostly all good, except that claiming/releasing the SDIO host is 
+about access to the bus.  It must be claimed right before doing any IO, 
+and released right after that, even when the card is expected to remain 
+powered.  This is not the proper place to hook power control.
 
-Now the issue of having the card powered off when not in use is a valid 
-one, whether or not it is actually hardwired on the board or 
-hot insertable/removable.  This fake insertion thing is not the best way 
-to go about it.
+Another function pair would be needed instead, which would do almost 
+like the suspend/resume code is already doing.  Something like:
 
-It would be way more useful, generic, and less hackish to simply improve 
-the generic code so to power down the card when it is 1) not claimed by 
-any function driver, and 2) provide an API to let a function driver 
-signify to the core and host controller that it is not interested by the 
-hardware at the moment (if the network interface is not up for example) 
-and therefore the core could again power down the card.  This would work 
-in all cases with no need for exceptions  for so called "enbedded 
-controllers".
+/*
+ * Indicate to the core SDIO layer that we're not requiring that the
+ * function remain powered.  If all functions for the card are in the 
+ * same "no power" state, then the host controller can remove power from
+ * the card.  Note: the function driver must preserve hardware states if
+ * necessary.
+ */
+int sdio_release_power(struct sdio_func *func);
+
+/*
+ * Indicate to the core SDIO layer that we want power back for this
+ * SDIO function.  The power may or may not actually have been removed
+ * since last call to sdio_release_power(), so the function driver must 
+ * not assume any preserved state at the hardware level and re-perform
+ * all the necessary hardware config.  This function returns 0 when
+ * power is actually restored, or some error code if this cannot be 
+ * achieved.  One error reason might be that the card is no longer 
+ * available on the bus (was removed while powered down and card 
+ * detection didn't trigger yet).
+ */
+int sdio_claim_power(struct sdio_func *func);
+
+That's it.  When the network interface is down and the hardware is not 
+needed, you call sdio_release_power().  When the request to activate the 
+network interface is received, you call sdio_claim_power() and configure 
+the hardware appropriately.  If sdio_claim_power() returns an error, 
+then you just return an error to the network request, and eventually the 
+driver's remove method will be called if this is indeed because the card 
+was removed.
+
+In the core SDIO code, this is almost identical to a suspend/resume 
+request, except that the request comes from the function driver instead 
+of the core MMC code.
 
 
 Nicolas
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
