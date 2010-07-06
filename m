@@ -1,32 +1,102 @@
-From: Viresh KUMAR <viresh.kumar@st.com>
-Subject: Query: spear sdhci: Getting DATA CRC Error Interrupt with SD and
- MicroSD cards.
-Date: Mon, 05 Jul 2010 14:43:02 +0530
-Message-ID: <4C31A21E.6020503@st.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:45576 "EHLO
-	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752156Ab0GEJkU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jul 2010 05:40:20 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 00/15] wlan+omap+mmc: out-of-the-box WLAN support for ZOOM2/3
+Date: Tue,  6 Jul 2010 03:37:31 +0300
+Message-ID: <1278376666-3509-1-git-send-email-ohad@wizery.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org
 
-Hello,
+From: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 
-We have ARASAN SDHCI controller in SPEAr1300, and using sdhci.c
-and sdhci-spear.c drivers.
+The ZOOM2/3 boards include TI's wl1271 wlan sdio device,
+hardwired to the 3rd mmc controller.
 
-When we insert MMC card then it works fine, we are able to run
-mmc_test on it. But when we insert SD or MicroSD card then we get
--84 error and it was due to DATA CRC Error Interrupt.
-I have also tried FORCE_1_BIT quirk and running SDHCI at around 800 MHz.
+These patches add support for WLAN on the ZOOM2/3 boards
+using only mainline components (most notably mac80211 and wl1271).
 
-Can somebody please help me on this?? Anything that i can try to test??
+Patches were tested on both ZOOM2 and ZOOM3.
 
+In short, these patches add software control for emulating
+card detect events, add board configurations to support the
+wl1271 device, and update the wl1271 driver to make use of
+these new mechanisms.
 
-viresh.
+Software card detect emulation is based on Android's
+EMBEDDED_SDIO patch by San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> (thanks, San!).
+
+These patches span over several differnt subsystems, but since
+they are highly dependent on each other, it is preferrable
+to pull them all together into a single tree (once approved).
+
+Patches are available at:
+
+git://wizery.com/pub/linux-2.6.git wl1271
+
+And will also be sent as a follow-on to this message to the
+omap, mmc, arm and wireless mailing lists.
+
+Patches are based on mainline 2.6.35-rc4, but can easily be applied
+on wireless-testing (with two minor conflicts). If desired, I can
+rebase to wireless-testing and resend.
+
+Note: last missing part for full mainline community support
+of the wl1271 on ZOOM is the firmware, and for that there is already
+on-going TI work to provide it in linux-firmware. Hopefully
+that would be resolved soon.
+
+Thanks,
+
+Ohad Ben-Cohen (15):
+  sdio: add TI + wl1271 ids
+  wireless: wl1271: remove SDIO IDs from driver
+  omap: mmc: prepare for software card detect support
+  mmc: support embedded data field in mmc_host
+  omap: hsmmc: add virtual card detect support
+  omap zoom2: wlan board muxing
+  omap zoom3: wlan board muxing
+  wireless: wl1271: make wl12xx.h common to both spi and sdio
+  wireless: wl12xx: support pdata SDIO handlers
+  wireless: wl1271: support return value for the set power func
+  wireless: wl1271: introduce platform device support
+  wireless: wl1271: take irq info from platform data
+  wireless: wl1271: make ref_clock configurable by board
+  omap: zoom: add WLAN device
+  omap: zoom: enable WLAN device
+
+ arch/arm/mach-omap2/Kconfig                   |    5 +
+ arch/arm/mach-omap2/Makefile                  |    1 +
+ arch/arm/mach-omap2/board-zoom-peripherals.c  |   15 ++
+ arch/arm/mach-omap2/board-zoom-wlan.c         |  129 ++++++++++++++++
+ arch/arm/mach-omap2/board-zoom2.c             |   15 ++
+ arch/arm/mach-omap2/board-zoom3.c             |   15 ++
+ arch/arm/mach-omap2/hsmmc.c                   |    4 +
+ arch/arm/mach-omap2/hsmmc.h                   |    5 +
+ arch/arm/mach-omap2/include/mach/board-zoom.h |    5 +
+ arch/arm/plat-omap/include/plat/mmc.h         |    5 +
+ drivers/mmc/core/Kconfig                      |    8 +
+ drivers/mmc/host/omap_hsmmc.c                 |   37 +++++-
+ drivers/net/wireless/wl12xx/Kconfig           |    1 +
+ drivers/net/wireless/wl12xx/wl1251_sdio.c     |    2 +-
+ drivers/net/wireless/wl12xx/wl1251_spi.c      |    2 +-
+ drivers/net/wireless/wl12xx/wl1271.h          |    8 +-
+ drivers/net/wireless/wl12xx/wl1271_boot.c     |   13 +-
+ drivers/net/wireless/wl12xx/wl1271_boot.h     |    1 -
+ drivers/net/wireless/wl12xx/wl1271_io.h       |    8 +-
+ drivers/net/wireless/wl12xx/wl1271_main.c     |    4 +-
+ drivers/net/wireless/wl12xx/wl1271_sdio.c     |  204 +++++++++++++++++++------
+ drivers/net/wireless/wl12xx/wl1271_spi.c      |    8 +-
+ include/linux/mmc/host.h                      |   16 ++
+ include/linux/mmc/sdio_ids.h                  |    3 +
+ include/linux/spi/wl12xx.h                    |   34 ----
+ include/linux/wl12xx.h                        |   37 +++++
+ 26 files changed, 486 insertions(+), 99 deletions(-)
+ create mode 100644 arch/arm/mach-omap2/board-zoom-wlan.c
+ delete mode 100644 include/linux/spi/wl12xx.h
+ create mode 100644 include/linux/wl12xx.h
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
