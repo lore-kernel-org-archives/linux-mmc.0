@@ -1,13 +1,13 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH 02/15] wireless: wl1271: remove SDIO IDs from driver
-Date: Tue,  6 Jul 2010 03:37:33 +0300
-Message-ID: <1278376666-3509-3-git-send-email-ohad@wizery.com>
+Subject: [PATCH 05/15] omap: hsmmc: add virtual card detect support
+Date: Tue,  6 Jul 2010 03:37:36 +0300
+Message-ID: <1278376666-3509-6-git-send-email-ohad@wizery.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-bw0-f46.google.com ([209.85.214.46]:37901 "EHLO
 	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756852Ab0GFAju (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jul 2010 20:39:50 -0400
+	with ESMTP id S1754846Ab0GFAkL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jul 2010 20:40:11 -0400
 In-Reply-To: <1278376666-3509-1-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -16,33 +16,79 @@ Cc: linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Raj
 
 From: Ohad Ben-Cohen <ohadb@ti.com>
 
-Remove SDIO IDs from the driver code since now it is
-included in linux/mmc/sdio_ids.h.
+Add support for software emulation of card detect
+events.
+
+This is required for specific controllers
+that are hard wired with embedded SDIO devices
+(such as TI's wl1271 WLAN device).
+
+Board-specific configuration is required to
+enable this software card detect control.
+
+Based on Android's EMBEDDED SDIO patch by
+San Mehat <san@android.com>.
 
 Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
 ---
- drivers/net/wireless/wl12xx/wl1271_sdio.c |    8 --------
- 1 files changed, 0 insertions(+), 8 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   37 ++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 36 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/net/wireless/wl12xx/wl1271_sdio.c b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-index d3d6f30..9903ae9 100644
---- a/drivers/net/wireless/wl12xx/wl1271_sdio.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-@@ -37,14 +37,6 @@
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index b032828..60694df 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1208,6 +1208,38 @@ static void omap_hsmmc_detect(struct work_struct *work)
+ 		mmc_detect_change(host->mmc, (HZ * 50) / 1000);
+ }
  
- #define RX71_WL1271_IRQ_GPIO		42
++#ifdef CONFIG_MMC_EMBEDDED_SDIO
++static void omap_hsmmc_set_embedded_data(void *dev_id, void *priv)
++{
++	struct omap_hsmmc_host *host = dev_id;
++	struct mmc_host *mmc = host->mmc;
++
++	mmc_set_embedded_data(mmc, priv);
++}
++
++static void omap_hsmmc_virtual_detect(void *dev_id, int carddetect)
++{
++	struct omap_hsmmc_host *host = dev_id;
++
++	printk(KERN_DEBUG "%s: card detect %d\n", mmc_hostname(host->mmc),
++							carddetect);
++
++	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
++
++	if (carddetect)
++		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
++	else
++		mmc_detect_change(host->mmc, (HZ * 50) / 1000);
++}
++#else
++static void omap_hsmmc_set_embedded_data(void *dev_id, void *priv)
++{
++}
++static void omap_hsmmc_virtual_detect(void *dev_id, int carddetect)
++{
++}
++#endif
++
+ /*
+  * ISR for handling card insertion and removal
+  */
+@@ -2170,7 +2202,10 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 				"Unable to grab MMC CD IRQ\n");
+ 			goto err_irq_cd;
+ 		}
+-	}
++	} else if (mmc_slot(host).register_embedded_control)
++		mmc_slot(host).register_embedded_control(host,
++					omap_hsmmc_virtual_detect,
++					omap_hsmmc_set_embedded_data);
  
--#ifndef SDIO_VENDOR_ID_TI
--#define SDIO_VENDOR_ID_TI		0x0097
--#endif
--
--#ifndef SDIO_DEVICE_ID_TI_WL1271
--#define SDIO_DEVICE_ID_TI_WL1271	0x4076
--#endif
--
- static const struct sdio_device_id wl1271_devices[] = {
- 	{ SDIO_DEVICE(SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271) },
- 	{}
+ 	omap_hsmmc_disable_irq(host);
+ 
 -- 
 1.7.0.4
 
