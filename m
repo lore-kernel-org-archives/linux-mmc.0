@@ -1,139 +1,185 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH 13/15] wireless: wl1271: make ref_clock configurable by board
-Date: Tue,  6 Jul 2010 03:37:44 +0300
-Message-ID: <1278376666-3509-14-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 14/15] omap: zoom: add WLAN device
+Date: Tue,  6 Jul 2010 03:37:45 +0300
+Message-ID: <1278376666-3509-15-git-send-email-ohad@wizery.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:37901 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757167Ab0GFAk5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jul 2010 20:40:57 -0400
-In-Reply-To: <1278376666-3509-1-git-send-email-ohad@wizery.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1278376666-3509-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Ohad Ben-Cohen <ohadb@ti.com>
 
-From: Ohad Ben-Cohen <ohadb@ti.com>
+From: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 
-The wl1271 device is using a reference clock that may change
-between board to board.
+Add WLAN platform device and control
+functions (power and virtual card detect)
+in order to allow software to control the
+embedded SDIO WLAN device which resides on
+the ZOOM board (TI's wl1271 device).
 
-Make the ref_clock parameter configurable by the board
-files that set up the device, instead of having a hard coded
-value in the driver source itself.
+Based on Android's WLAN control functions by
+San Mehat <san-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>.
 
-Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
+Signed-off-by: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 ---
- drivers/net/wireless/wl12xx/wl1271.h      |    1 +
- drivers/net/wireless/wl12xx/wl1271_boot.c |   13 +++++++++----
- drivers/net/wireless/wl12xx/wl1271_boot.h |    1 -
- drivers/net/wireless/wl12xx/wl1271_sdio.c |    2 ++
- drivers/net/wireless/wl12xx/wl1271_spi.c  |    2 ++
- include/linux/wl12xx.h                    |    1 +
- 6 files changed, 15 insertions(+), 5 deletions(-)
+ arch/arm/mach-omap2/board-zoom-wlan.c         |  129 +++++++++++++++++++++++++
+ arch/arm/mach-omap2/include/mach/board-zoom.h |    5 +
+ 2 files changed, 134 insertions(+), 0 deletions(-)
+ create mode 100644 arch/arm/mach-omap2/board-zoom-wlan.c
 
-diff --git a/drivers/net/wireless/wl12xx/wl1271.h b/drivers/net/wireless/wl12xx/wl1271.h
-index 2df57cc..cb3126d 100644
---- a/drivers/net/wireless/wl12xx/wl1271.h
-+++ b/drivers/net/wireless/wl12xx/wl1271.h
-@@ -362,6 +362,7 @@ struct wl1271 {
- 	void (*set_embedded_data)(void *priv);
- 
- 	int irq;
-+	int ref_clock;
- 
- 	spinlock_t wl_lock;
- 
-diff --git a/drivers/net/wireless/wl12xx/wl1271_boot.c b/drivers/net/wireless/wl12xx/wl1271_boot.c
-index 1a36d8a..fa1b8b9 100644
---- a/drivers/net/wireless/wl12xx/wl1271_boot.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_boot.c
-@@ -455,17 +455,22 @@ int wl1271_boot(struct wl1271 *wl)
- {
- 	int ret = 0;
- 	u32 tmp, clk, pause;
-+	int ref_clock = wl->ref_clock;
- 
- 	wl1271_boot_hw_version(wl);
- 
--	if (REF_CLOCK == 0 || REF_CLOCK == 2 || REF_CLOCK == 4)
-+	if (ref_clock == 0 || ref_clock == 2 || ref_clock == 4)
- 		/* ref clk: 19.2/38.4/38.4-XTAL */
- 		clk = 0x3;
--	else if (REF_CLOCK == 1 || REF_CLOCK == 3)
-+	else if (ref_clock == 1 || ref_clock == 3)
- 		/* ref clk: 26/52 */
- 		clk = 0x5;
-+	else {
-+		ret = -EINVAL;
-+		goto out;
+diff --git a/arch/arm/mach-omap2/board-zoom-wlan.c b/arch/arm/mach-omap2/board-zoom-wlan.c
+new file mode 100644
+index 0000000..7ed5139
+--- /dev/null
++++ b/arch/arm/mach-omap2/board-zoom-wlan.c
+@@ -0,0 +1,129 @@
++/* mach-omap2/board-zoom-wlan.c
++ *
++ * Board support for wl1271 embedded SDIO device.
++ *
++ * Copyright (C) 2010 Texas Instruments, Inc.
++ *
++ * This file is licensed under the terms of the GNU General Public License
++ * version 2. This program is licensed "as is" without any warranty of any
++ * kind, whether express or implied.
++ */
++
++#include <linux/kernel.h>
++#include <linux/init.h>
++#include <linux/platform_device.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/sdio_ids.h>
++#include <linux/err.h>
++#include <linux/gpio.h>
++#include <linux/wl12xx.h>
++
++#include "mux.h"
++
++#ifdef CONFIG_OMAP_ZOOM_WLAN
++
++/* these are zoom-specific board numbers */
++#define OMAP_ZOOM_WLAN_PMENA_GPIO	(101)
++#define OMAP_ZOOM_WLAN_IRQ_GPIO		(162)
++
++/* wl1271 virtual 'card detect' status */
++static int omap_zoom_wlan_cd;
++static void (*wlan_set_virtual_cd)(void *dev_id, int card_present);
++static void (*wlan_set_data)(void *dev_id, void *priv);
++static void *wlan_host_devid;
++
++int omap_zoom_wlan_register_embedded_control(void *dev_id,
++			void (*set_virtual_cd)(void *dev_id, int card_present),
++			void (*set_data)(void *dev_id, void *priv))
++{
++	if (wlan_host_devid || wlan_set_virtual_cd || wlan_set_data)
++		return -EBUSY;
++
++	wlan_set_virtual_cd = set_virtual_cd;
++	wlan_set_data = set_data;
++	wlan_host_devid = dev_id;
++
++	return 0;
++}
++
++int omap_zoom_wlan_get_virtual_cd(void)
++{
++	return omap_zoom_wlan_cd;
++}
++
++static void omap_zoom_wlan_set_embedded_data(void *priv)
++{
++	if (wlan_set_data)
++		wlan_set_data(wlan_host_devid, priv);
++	else
++		pr_err("%s: host controller not registered yet\n", __func__);
++}
++
++static void omap_zoom_wlan_set_carddetect(bool card_present)
++{
++	omap_zoom_wlan_cd = card_present ? 1 : 0;
++
++	pr_info("%s: %d\n", __func__, omap_zoom_wlan_cd);
++
++	if (wlan_set_virtual_cd)
++		wlan_set_virtual_cd(wlan_host_devid, omap_zoom_wlan_cd);
++	else
++		pr_err("%s: host controller not registered yet\n", __func__);
++}
++
++static void omap_zoom_wlan_power(bool enable)
++{
++	int val = enable ? 1 : 0;
++
++	pr_info("%s: set power %d\n", __func__, val);
++
++	gpio_set_value(OMAP_ZOOM_WLAN_PMENA_GPIO, val);
++}
++
++struct wl12xx_platform_data omap_zoom_wlan_control = {
++	.set_power = omap_zoom_wlan_power,
++	.set_carddetect = omap_zoom_wlan_set_carddetect,
++	.set_embedded_data = omap_zoom_wlan_set_embedded_data,
++	/* ZOOM ref clock is 26 MHz */
++	.board_ref_clock = 1,
++	.irq = OMAP_GPIO_IRQ(OMAP_ZOOM_WLAN_IRQ_GPIO),
++};
++
++static struct platform_device omap_zoom_wlan_device = {
++	.name = "wl1271_sdio",
++	.id = 1,
++	.dev = {
++		.platform_data = &omap_zoom_wlan_control,
++	},
++};
++
++int __init omap_zoom_wlan_init(void)
++{
++	int ret;
++
++	ret = gpio_request(OMAP_ZOOM_WLAN_PMENA_GPIO, "wlan_power");
++	if (ret < 0) {
++		pr_err("%s: power gpio request failed: %d\n", __func__, ret);
++		return ret;
 +	}
- 
--	if (REF_CLOCK != 0) {
-+	if (ref_clock != 0) {
- 		u16 val;
- 		/* Set clock type (open drain) */
- 		val = wl1271_top_reg_read(wl, OCP_REG_CLK_TYPE);
-@@ -514,7 +519,7 @@ int wl1271_boot(struct wl1271 *wl)
- 	wl1271_debug(DEBUG_BOOT, "clk2 0x%x", clk);
- 
- 	/* 2 */
--	clk |= (REF_CLOCK << 1) << 4;
-+	clk |= (ref_clock << 1) << 4;
- 	wl1271_write32(wl, DRPW_SCRATCH_START, clk);
- 
- 	wl1271_set_partition(wl, &part_table[PART_WORK]);
-diff --git a/drivers/net/wireless/wl12xx/wl1271_boot.h b/drivers/net/wireless/wl12xx/wl1271_boot.h
-index f829699..f73b0b1 100644
---- a/drivers/net/wireless/wl12xx/wl1271_boot.h
-+++ b/drivers/net/wireless/wl12xx/wl1271_boot.h
-@@ -46,7 +46,6 @@ struct wl1271_static_data {
- /* delay between retries */
- #define INIT_LOOP_DELAY 50
- 
--#define REF_CLOCK            2
- #define WU_COUNTER_PAUSE_VAL 0x3FF
- #define WELP_ARM_COMMAND_VAL 0x4
- 
-diff --git a/drivers/net/wireless/wl12xx/wl1271_sdio.c b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-index 0af0dce..4ed097f 100644
---- a/drivers/net/wireless/wl12xx/wl1271_sdio.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-@@ -270,6 +270,8 @@ static int wl1271_plat_probe(struct platform_device *pdev)
- 	wl->if_plat_priv = pdev;
- 	platform_set_drvdata(pdev, wl);
- 
-+	wl->ref_clock = pdata->board_ref_clock;
 +
- 	wl->set_embedded_data = pdata->set_embedded_data;
- 	if (!wl->set_embedded_data) {
- 		wl1271_error("set embedded_data func missing in platform data");
-diff --git a/drivers/net/wireless/wl12xx/wl1271_spi.c b/drivers/net/wireless/wl12xx/wl1271_spi.c
-index 85a167f..2cb125b 100644
---- a/drivers/net/wireless/wl12xx/wl1271_spi.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_spi.c
-@@ -373,6 +373,8 @@ static int __devinit wl1271_probe(struct spi_device *spi)
- 		goto out_free;
- 	}
- 
-+	wl->ref_clock = pdata->ref_clock;
++	gpio_direction_output(OMAP_ZOOM_WLAN_PMENA_GPIO, 0);
 +
- 	wl->irq = spi->irq;
- 	if (wl->irq < 0) {
- 		wl1271_error("irq missing in platform data");
-diff --git a/include/linux/wl12xx.h b/include/linux/wl12xx.h
-index 4106184..9053d9c 100644
---- a/include/linux/wl12xx.h
-+++ b/include/linux/wl12xx.h
-@@ -31,6 +31,7 @@ struct wl12xx_platform_data {
- 	/* SDIO only: IRQ number if WLAN_IRQ line is used, 0 for SDIO IRQs */
- 	int irq;
- 	bool use_eeprom;
-+	int board_ref_clock;
- };
- 
- #endif
++	ret = gpio_request(OMAP_ZOOM_WLAN_IRQ_GPIO, "wlan_irq");
++	if (ret < 0) {
++		pr_err("%s: gpio request failed: %d\n", __func__, ret);
++		return ret;
++	}
++	gpio_direction_input(OMAP_ZOOM_WLAN_IRQ_GPIO);
++
++	ret = platform_device_register(&omap_zoom_wlan_device);
++
++	return ret;
++}
++
++#else
++int __init omap_zoom_wlan_init(void)
++{
++	return 0;
++}
++#endif /* CONFIG_OMAP_ZOOM_WLAN */
+diff --git a/arch/arm/mach-omap2/include/mach/board-zoom.h b/arch/arm/mach-omap2/include/mach/board-zoom.h
+index c93b29e..61bbd81 100644
+--- a/arch/arm/mach-omap2/include/mach/board-zoom.h
++++ b/arch/arm/mach-omap2/include/mach/board-zoom.h
+@@ -3,3 +3,8 @@
+  */
+ extern int __init zoom_debugboard_init(void);
+ extern void __init zoom_peripherals_init(void);
++int __init omap_zoom_wlan_init(void);
++int omap_zoom_wlan_register_embedded_control(void *dev_id,
++			void (*set_virtual_cd)(void *dev_id, int card_present),
++			void (*set_data)(void *dev_id, void *priv));
++int omap_zoom_wlan_get_virtual_cd(void);
 -- 
 1.7.0.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
