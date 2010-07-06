@@ -1,52 +1,79 @@
 From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
-Date: Tue, 6 Jul 2010 12:30:50 +0300
-Message-ID: <AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com>
+Subject: Re: [PATCH 05/15] omap: hsmmc: add virtual card detect support
+Date: Tue, 6 Jul 2010 13:22:26 +0300
+Message-ID: <AANLkTim4E4LlFERmfYA1M0HLBOoRAsQuvdW6QBNu6pC0@mail.gmail.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
-	<1278376666-3509-12-git-send-email-ohad@wizery.com> <4C32EF19.1000604@nokia.com>
+	<1278376666-3509-6-git-send-email-ohad@wizery.com> <alpine.LFD.2.00.1007052134460.6020@xanadu.home>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <4C32EF19.1000604-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <alpine.LFD.2.00.1007052134460.6020-QuJgVwGFrdf/9pzu0YdTqQ@public.gmane.org>
 Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
-Cc: "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
+To: Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>
+Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "Pandita, Vikram" <vikram.pandita-l0cyMroinI0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Roger,
+Hi Nicolas,
 
-On Tue, Jul 6, 2010 at 11:53 AM, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org> wrote:
-> Could you please explain why you need to do this?
+On Tue, Jul 6, 2010 at 4:45 AM, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org> wrote:
+> On Tue, 6 Jul 2010, Ohad Ben-Cohen wrote:
+>
+>> From: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
+>>
+>> Add support for software emulation of card detect
+>> events.
+>>
+>> This is required for specific controllers
+>> that are hard wired with embedded SDIO devices
+>> (such as TI's wl1271 WLAN device).
+>
+> Why?
+>
+> Many instances of hardwired SDIO based WLAN devices do exist already,
+> and they don't need extra card detect events to be generated. =A0The =
+core
+> MMC code already triggers a probe for cards whenever a new host
+> controller is registered.
 
-To minimize power consumption when the wlan device is not in use, we
-would like to keep the device powered off as long as the interface is
-down, and only power it on when the user brings up the interface.
+We prefer not to power up the chip as early as boot time; instead, we
+would like to have it powered off until the wlan interface is brought
+up, power it on when the interface is brought up,
+and power it off again as soon as the interface is brought down again
+(to minimize power consumption when the wlan is not in use).
 
-Whenever the chip is powered on, it must be initialized and
-reconfigured by mmc_attach_sdio, and the wl1271 driver have to wait
-for that phase to successfully complete (essentially waiting for the
-sdio_driver's probe function to be called).
+=46or that we can't rely on the probing done when the controller is
+registered, we want to have a mechanism to allow dynamic detection and
+removal of the card.
 
-To make sure this SDIO init step occurs correctly every time we toggle
-the device's power back on, and to prevent potential races, we also
-have to make sure that the sdio function is removed every time we
-power off the chip (the driver waits for the sdio_driver's remove
-function to be called).
+Note: the wl1271 device does support standard card detection, but
+AFAIK there's a limitation to use that with the specific omap
+controller the device is hardwired to. I will try to get more info
+about that, but probably Madhu can comment on that better.
 
-That's why we let the mmc layer think that the card is removed:
-physically it is still there, but for all practical purposes it is
-really removed, because once you power off the chip, you must
-reinitialize it again next time you power it on, as if the card was
-really removed and re-inserted.
+>> Board-specific configuration is required to
+>> enable this software card detect control.
+>
+> Could you elaborate please?
+
+Please check out the last patch - that patch is doing that configuratio=
+n.
+In essence, this virtual card detect mechanism is enabled only for
+specific controllers which we know there's an embedded sdio device
+hardwired to. This knowledge is board-specific, and that's why we
+enable this mechanism in the board files, per a specific mmc
+controller.
 
 Thanks,
 Ohad.
 
+
 >
-> br,
-> -roger
+>
+> Nicolas
 >
 --
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+To unsubscribe from this list: send the line "unsubscribe linux-wireles=
+s" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
