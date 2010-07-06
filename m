@@ -1,13 +1,13 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH 04/15] mmc: support embedded data field in mmc_host
-Date: Tue,  6 Jul 2010 03:37:35 +0300
-Message-ID: <1278376666-3509-5-git-send-email-ohad@wizery.com>
+Subject: [PATCH 03/15] omap: mmc: prepare for software card detect support
+Date: Tue,  6 Jul 2010 03:37:34 +0300
+Message-ID: <1278376666-3509-4-git-send-email-ohad@wizery.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-bw0-f46.google.com ([209.85.214.46]:37901 "EHLO
 	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754846Ab0GFAkD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jul 2010 20:40:03 -0400
+	with ESMTP id S1756838Ab0GFAjz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jul 2010 20:39:55 -0400
 In-Reply-To: <1278376666-3509-1-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -16,72 +16,74 @@ Cc: linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Raj
 
 From: Ohad Ben-Cohen <ohadb@ti.com>
 
-Add support to set/get mmc_host private embedded
-data.
+Make it possible for board files to give the
+host controller two handlers needed for emulating
+card detect events in software:
 
-This is needed to allow software to dynamically
-create (and remove) SDIO functions which represents
-embedded SDIO devices.
+* The virtual_get_cd handler will allow the host
+controller to query the status of the software
+card detect (for the given controller/slot).
 
-Typically, it will be used to set the context of
-a driver that is creating a new SDIO function
-(and would then expect to be able to get that context
-back upon creation of the new sdio func).
+* The register_embedded_control will allow the host
+controller to register handlers that will be used by
+board devices to:
+    1. trigger a software card detect event
+    2. set private data (e.g. device context) that can later
+       be used by an sdio function driver
 
 Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
 ---
- drivers/mmc/core/Kconfig |    8 ++++++++
- include/linux/mmc/host.h |   16 ++++++++++++++++
- 2 files changed, 24 insertions(+), 0 deletions(-)
+ arch/arm/mach-omap2/hsmmc.c           |    4 ++++
+ arch/arm/mach-omap2/hsmmc.h           |    5 +++++
+ arch/arm/plat-omap/include/plat/mmc.h |    5 +++++
+ 3 files changed, 14 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-index bb22ffd..ab27eb3 100644
---- a/drivers/mmc/core/Kconfig
-+++ b/drivers/mmc/core/Kconfig
-@@ -16,3 +16,11 @@ config MMC_UNSAFE_RESUME
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 1ef54b0..1361128 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -269,6 +269,10 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
  
- 	  This option sets a default which can be overridden by the
- 	  module parameter "removable=0" or "removable=1".
-+
-+config MMC_EMBEDDED_SDIO
-+	boolean "MMC embedded SDIO device support"
-+	help
-+	  If you say Y here, support will be added for embedded SDIO
-+	  devices (e.g. hardwired embedded WLAN SDIO devices).
-+	  Such devices require software support for emulating
-+	  card detect events.
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index f65913c..9a48486 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -209,6 +209,10 @@ struct mmc_host {
- 	struct led_trigger	*led;		/* activity led */
- #endif
+ 		mmc->slots[0].remux = c->remux;
  
-+#ifdef CONFIG_MMC_EMBEDDED_SDIO
-+	void			*embedded_data;
-+#endif
++		mmc->slots[0].register_embedded_control =
++						c->register_embedded_control;
++		mmc->slots[0].virtual_get_cd = c->virtual_get_cd;
 +
- 	struct dentry		*debugfs_root;
+ 		if (c->cover_only)
+ 			mmc->slots[0].cover = 1;
  
- 	unsigned long		private[0] ____cacheline_aligned;
-@@ -264,5 +268,17 @@ static inline void mmc_set_disable_delay(struct mmc_host *host,
- 	host->disable_delay = disable_delay;
- }
+diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+index 36f0ba8..dc12c90 100644
+--- a/arch/arm/mach-omap2/hsmmc.h
++++ b/arch/arm/mach-omap2/hsmmc.h
+@@ -23,6 +23,11 @@ struct omap2_hsmmc_info {
+ 	int	ocr_mask;	/* temporary HACK */
+ 	/* Remux (pad configuation) when powering on/off */
+ 	void (*remux)(struct device *dev, int slot, int power_on);
++	/* following methods are for embedded sdio devices, e.g. wl1271 */
++	int (*register_embedded_control)(void *dev_id,
++			void (*set_virtual_cd)(void *dev_id, int card_present),
++			void (*set_embedded_data)(void *dev_id, void *priv));
++	int (*virtual_get_cd)(void);
+ };
  
-+#ifdef CONFIG_MMC_EMBEDDED_SDIO
-+static inline void *mmc_get_embedded_data(struct mmc_host *host)
-+{
-+	return host->embedded_data;
-+}
-+
-+static inline void mmc_set_embedded_data(struct mmc_host *host, void *data)
-+{
-+	host->embedded_data = data;
-+}
-+#endif
-+
- #endif
+ #if defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index c835f1e..0f5bf12 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -140,6 +140,11 @@ struct omap_mmc_platform_data {
+ 
+ 		unsigned int ban_openended:1;
+ 
++		/* Embedded SDIO devices control */
++		int (*register_embedded_control)(void *dev_id,
++			void (*set_virtual_cd)(void *dev_id, int card_present),
++			void (*set_embedded_data)(void *dev_id, void *priv));
++		int (*virtual_get_cd)(void);
+ 	} slots[OMAP_MMC_MAX_SLOTS];
+ };
  
 -- 
 1.7.0.4
