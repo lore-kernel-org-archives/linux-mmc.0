@@ -1,42 +1,43 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH 05/15] omap: hsmmc: add virtual card detect support
-Date: Tue, 6 Jul 2010 16:44:48 +0300
-Message-ID: <AANLkTikyeaVRxLDVjGmCOtcw9vZtHspKDK22Xojk7n8x@mail.gmail.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 14/15] omap: zoom: add WLAN device
+Date: Tue, 6 Jul 2010 16:47:33 +0300
+Message-ID: <AANLkTilARXB6NVMOAC7lW1HSOzDnONveS0oK6MomvDy0@mail.gmail.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
-	<1278376666-3509-6-git-send-email-ohad@wizery.com> <alpine.LFD.2.00.1007052134460.6020@xanadu.home>
-	<AANLkTim4E4LlFERmfYA1M0HLBOoRAsQuvdW6QBNu6pC0@mail.gmail.com>
-	<AANLkTinE5LygUWJsJSEE2miZF1GK58LTr8zErkuu_7yM@mail.gmail.com>
-	<4C3323EA.902@nokia.com>
+	<1278376666-3509-15-git-send-email-ohad@wizery.com> <4C33228D.8000908@nokia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:64219 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751823Ab0GFNpM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 09:45:12 -0400
-In-Reply-To: <4C3323EA.902@nokia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <4C33228D.8000908-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+Cc: "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Roger Quadros <roger.quadros@nokia.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Pandita, Vikram" <vikram.pandita@ti.com>
 
-On Tue, Jul 6, 2010 at 3:39 PM, Roger Quadros <roger.quadros@nokia.com> wrote:
-> Just to clarify, is the wl1271 device always powered on the board?
+Hi Roger,
 
-Yes.
-
-> And this GPIO power enable (OMAP_ZOOM_WLAN_PMENA_GPIO) is used to gate this
-> supply internally?
-
-Yes. It's a digital input that the chip does not draw current from
-(well, only a very minimal one).
-
-> and what do these do ?
+On Tue, Jul 6, 2010 at 3:33 PM, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>=
+ wrote:
+>> +static void omap_zoom_wlan_power(bool enable)
+>> +{
+>> + =A0 =A0 =A0 int val =3D enable ? 1 : 0;
+>> +
+>> + =A0 =A0 =A0 pr_info("%s: set power %d\n", __func__, val);
+>> +
+>> + =A0 =A0 =A0 gpio_set_value(OMAP_ZOOM_WLAN_PMENA_GPIO, val);
+>> +}
 >
-> set_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
->
-> clear_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
+> Can we consider that OMAP_ZOOM_WLAN_PMENA_GPIO is equivalent to vmmc =
+supply
+> or equivalent to supply voltage to the SDIO card?
 
-This is an internal driver bit that maintains the power state of the chip.
-AFAICT, it does not "do" anything. The only place I can see it is
-being used is in a debugfs entry.
+Not really, this gpio does not supply power to the chip. It's only a
+digital indication that instructs the chip to go into on or off mode.
+
+Thanks,
+Ohad.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireles=
+s" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
