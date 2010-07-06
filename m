@@ -1,53 +1,53 @@
 From: Roger Quadros <roger.quadros@nokia.com>
-Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
-Date: Tue, 06 Jul 2010 13:35:32 +0300
-Message-ID: <4C3306F4.8060907@nokia.com>
-References: <1278376666-3509-1-git-send-email-ohad@wizery.com> 	<1278376666-3509-12-git-send-email-ohad@wizery.com> <4C32EF19.1000604@nokia.com> <AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com>
+Subject: Re: [PATCH 05/15] omap: hsmmc: add virtual card detect support
+Date: Tue, 06 Jul 2010 14:02:15 +0300
+Message-ID: <4C330D37.4090104@nokia.com>
+References: <1278376666-3509-1-git-send-email-ohad@wizery.com> 	<1278376666-3509-6-git-send-email-ohad@wizery.com> <alpine.LFD.2.00.1007052134460.6020@xanadu.home> <AANLkTim4E4LlFERmfYA1M0HLBOoRAsQuvdW6QBNu6pC0@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.105.134]:47830 "EHLO
-	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754463Ab0GFKfy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 06:35:54 -0400
-In-Reply-To: <AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com>
+Received: from smtp.nokia.com ([192.100.122.233]:16668 "EHLO
+	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751311Ab0GFLDH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 07:03:07 -0400
+In-Reply-To: <AANLkTim4E4LlFERmfYA1M0HLBOoRAsQuvdW6QBNu6pC0@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ext Ohad Ben-Cohen <ohad@wizery.com>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, Ohad Ben-Cohen <ohadb@ti.com>
+Cc: Nicolas Pitre <nico@fluxnic.net>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Pandita, Vikram" <vikram.pandita@ti.com>
 
-Hi Ohad,
+On 07/06/2010 01:22 PM, ext Ohad Ben-Cohen wrote:
+> Hi Nicolas,
+>
+> On Tue, Jul 6, 2010 at 4:45 AM, Nicolas Pitre<nico@fluxnic.net>  wrote:
+>> On Tue, 6 Jul 2010, Ohad Ben-Cohen wrote:
+>>
+>>> From: Ohad Ben-Cohen<ohadb@ti.com>
+>>>
+>>> Add support for software emulation of card detect
+>>> events.
+>>>
+>>> This is required for specific controllers
+>>> that are hard wired with embedded SDIO devices
+>>> (such as TI's wl1271 WLAN device).
+>>
+>> Why?
+>>
+>> Many instances of hardwired SDIO based WLAN devices do exist already,
+>> and they don't need extra card detect events to be generated.  The core
+>> MMC code already triggers a probe for cards whenever a new host
+>> controller is registered.
+>
+> We prefer not to power up the chip as early as boot time; instead, we
+Why? if the card is hard wired with no card detect then it should be powered up. 
+The function driver should power it down later if required. no?
 
-On 07/06/2010 12:30 PM, ext Ohad Ben-Cohen wrote:
-> Hi Roger,
->
-> On Tue, Jul 6, 2010 at 11:53 AM, Roger Quadros<roger.quadros@nokia.com>  wrote:
->> Could you please explain why you need to do this?
->
-> To minimize power consumption when the wlan device is not in use, we
-> would like to keep the device powered off as long as the interface is
-> down, and only power it on when the user brings up the interface.
->
-Agreed.
+> would like to have it powered off until the wlan interface is brought
+> up, power it on when the interface is brought up,
 
-> Whenever the chip is powered on, it must be initialized and
-> reconfigured by mmc_attach_sdio, and the wl1271 driver have to wait
-> for that phase to successfully complete (essentially waiting for the
-> sdio_driver's probe function to be called).
->
-> To make sure this SDIO init step occurs correctly every time we toggle
-> the device's power back on, and to prevent potential races, we also
-> have to make sure that the sdio function is removed every time we
-> power off the chip (the driver waits for the sdio_driver's remove
-> function to be called).
->
-> That's why we let the mmc layer think that the card is removed:
-> physically it is still there, but for all practical purposes it is
-> really removed, because once you power off the chip, you must
-> reinitialize it again next time you power it on, as if the card was
-> really removed and re-inserted.
->
-My point is that shouldn't this be handled by SDIO core?
-If there are no users for the SDIO function and the card, doesn't the SDIO core 
-power down the slot, and take care of re-initialization when it is powered up?
+If it was powered OFF then how did the wlan interface come into picture?
+
+> and power it off again as soon as the interface is brought down again
+> (to minimize power consumption when the wlan is not in use).
+I agree, we some how need to power down the card when not in use in the right way.
