@@ -1,73 +1,61 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH v2] SDHCI-S3C fixes and enhancements (driver specific
-	code)
-Date: Tue, 6 Jul 2010 14:29:26 +0900
-Message-ID: <AANLkTinY8-9ubunlbbQY8Le1OluqqGbPNa9r_GcCyHwZ@mail.gmail.com>
-References: <1276670996-17729-1-git-send-email-m.szyprowski@samsung.com>
+From: Madhav <singh.madhav@samsung.com>
+Subject: Re: [PATCH RESEND] sdhci-clk-gating-support
+Date: Tue, 06 Jul 2010 11:25:22 +0530
+Message-ID: <3F49B9D37E2841269BAD6E68AAF5B3E2@sisodomain.com>
+References: <23314024.108801278080144319.JavaMail.weblogic@epml07>
+ <m3eiflx47q.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1276670996-17729-1-git-send-email-m.szyprowski@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>, Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, kgene.kim@samsung.com
+Content-Type: text/plain; format=flowed; charset=iso-8859-1; reply-type=original
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:13958 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752472Ab0GFFz1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 01:55:27 -0400
+Received: from epmmp1 (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
+ with ESMTP id <0L5400AEAGGCJ170@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 06 Jul 2010 14:55:24 +0900 (KST)
+Received: from madhavsingh ([107.108.86.158])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0L5400EJ0GGAR3@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 06 Jul 2010 14:55:24 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, kyungmin.park@samsung.com
 
-Hi Andrew,
+> Hi Madhav,
+>
+>> +       host->user = 0;         /*For Clock gating*/
+>> +       host->clk_restore = 0;
+> Also, it's not obvious to me why two variables are necessary.  What's
+> wrong with just setting host->clk_restore when disabling clock, and
+> testing whether it's non-zero instead of testing host->user?
+> (host->user would need a more descriptive name, too.)
+we used host->user for making enable disable in a proper sequence i.e. 
+enable-disable-enable and
+were facing some issues as we were using workqueue.So in current version we 
+tested the patch
+without host->user and it works fine so we can remove it.
+>Some general points:
+> * have you measured whether there's a performance impact from
+>   bringing the clock up and down for every request?
+I will test  this and update you soon.
+> * I'd expect this to be implemented as an MMC capability, so
+>   that it can be avoided on specific controllers.
+Yes we can do this just we need to add one macro for clock gating capability 
+in struct mmc_host  and
+also looking for any other  good alternative  for the same. Do we have such 
+host controllers for them we
+should avoid this??
 
-I hope to merge it at next merge windows.
+>
+> Thanks,
+>
+> - Chris.
+> -- 
+> Chris Ball   <cjb@laptop.org>
+> One Laptop Per Child 
 
-Others any comments?
-
-Thank you,
-Kyungmin Park
-
-On Wed, Jun 16, 2010 at 3:49 PM, Marek Szyprowski
-<m.szyprowski@samsung.com> wrote:
-> Hello,
->
-> This series includes various fixes to sdhci-s3c driver as well as a
-> major feature enhancement. This patch series is prepared to get compl=
-ete
-> sdhci support on Samsung Aquila board.
->
-> A quick overview on the patches:
->
-> #1 - add missing sdhci_s3c_driver_remove() function
-> #2 - introduce new sdhci quirk to get rid of anoying runtime warning =
-and
-> =A0 =A0 possible problems with slow mmc/sd cards
-> #3 - add support for various methods of notifying the host driver abo=
-ut
-> =A0 =A0 the card insertion/removal (should be compatible with existin=
-g code)
->
-> Last patch requires changes to the Samsung platform setup code, which
-> has been posted in a separate patch series for easier merging, please
-> refer to the "[PATCH v2] SDHCI-S3C fixes and enhancements (platform
-> specific code)" thread.
->
-> Changes since V1:
-> - added support for gpio external interrupt card based detect method
-> =A0directly to sdhci-s3c driver
-> - removed duplicate Kconfig patch
-> - removed timeout patch (not really needed)
->
-> A complete list of patches:
->
-> [PATCH 1/3] sdhci-s3c: add missing remove function
-> [PATCH 2/3] sdhci-s3c: add support for the non standard minimal clock=
- value
-> [PATCH 3/3] sdhci-s3c: add support for new card detection methods
->
-> Best regards
-> --
-> Marek Szyprowski
-> Samsung Poland R&D Center
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
-ng-soc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
