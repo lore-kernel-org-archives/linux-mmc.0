@@ -1,74 +1,56 @@
-From: Roger Quadros <roger.quadros@nokia.com>
-Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
-Date: Tue, 06 Jul 2010 17:30:37 +0300
-Message-ID: <4C333E0D.2070601@nokia.com>
-References: <1278376666-3509-1-git-send-email-ohad@wizery.com> 	<1278376666-3509-12-git-send-email-ohad@wizery.com> <4C32EF19.1000604@nokia.com> 	<AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com> 	<4C3306F4.8060907@nokia.com> <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH 05/15] omap: hsmmc: add virtual card detect support
+Date: Tue, 6 Jul 2010 10:34:09 -0500
+Message-ID: <822D79B5C25543B1A6F148B39E061459@am.dhcp.ti.com>
+References: <1278376666-3509-1-git-send-email-ohad@wizery.com> <1278376666-3509-6-git-send-email-ohad@wizery.com> <alpine.LFD.2.00.1007052134460.6020@xanadu.home> <AANLkTim4E4LlFERmfYA1M0HLBOoRAsQuvdW6QBNu6pC0@mail.gmail.com> <AANLkTinE5LygUWJsJSEE2miZF1GK58LTr8zErkuu_7yM@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain;
+	charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:31411 "EHLO
-	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752860Ab0GFOb2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 10:31:28 -0400
-In-Reply-To: <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-reply-to: <AANLkTinE5LygUWJsJSEE2miZF1GK58LTr8zErkuu_7yM@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: 'Ohad Ben-Cohen' <ohad@wizery.com>, 'Nicolas Pitre' <nico@fluxnic.net>
+Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, 'Luciano Coelho' <luciano.coelho@nokia.com>, 'Andrew Morton' <akpm@linux-foundation.org>, 'San Mehat' <san@google.com>, "'Pandita, Vikram'" <vikram.pandita@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: ext Ohad Ben-Cohen <ohad@wizery.com>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>
 
-On 07/06/2010 03:53 PM, ext Ohad Ben-Cohen wrote:
-> Hi Roger,
->
-> On Tue, Jul 6, 2010 at 1:35 PM, Roger Quadros<roger.quadros@nokia.com>  wrote:
->> My point is that shouldn't this be handled by SDIO core?
->
-> Care to explain what you mean / give a code example ?
 
-If the Power enable GPIO can be treated as SDIO slot supply (i.e. vmmc), then 
-the SDIO/MMC core should tackle it, just like it deals with supply for slots 
-with removable cards.
 
-see mmc_regulator_set_ocr()
-mmc_power_up()
-mmc_set_ios()
+> -----Original Message-----
+> From: Ohad Ben-Cohen [mailto:ohad@wizery.com]
+> Sent: Tuesday, July 06, 2010 6:48 AM
+> To: Nicolas Pitre
+> Cc: linux-wireless@vger.kernel.org; linux-mmc@vger.kernel.org; linux-
+> omap@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
+> linux@arm.linux.org.uk; Chikkature Rajashekar Madhusudhan; Luciano Coelho;
+> Andrew Morton; San Mehat; Pandita, Vikram
+> Subject: Re: [PATCH 05/15] omap: hsmmc: add virtual card detect support
+> 
+> On Tue, Jul 6, 2010 at 1:22 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+> > Note: the wl1271 device does support standard card detection, but
+> > AFAIK there's a limitation to use that with the specific omap
+> > controller the device is hardwired to. I will try to get more info
+> > about that, but probably Madhu can comment on that better.
+> 
+> 
+> Some correction and additional info:
+> 
+> The wl1271 device has an issue which makes the standard card detect
+> mechanism irrelevant: it is always up, even if the power enable gpio
+> input of the device is down (the power enable input does not supply
+> the power to the chip, it's just logical digital high/low input upon
+> which the device reacts).  That's why we must use software control for
+> emulating card detect with that device.
+> 
+> In addition, as far as I could find out, the card detect mechanism on
+> the ZOOM is implemented by mechanical means, and thus is not relevant
+> for hardwired embedded SDIO devices (I'm not even sure card detect is
+> supported for the 3rd mmc controller).
 
-in drivers/mmc/core/core.c
+The card detect is supported through T2 GPIO interrupts only for MMC1 and
+MMC2. Such a mechanism is not present for MMC3 to which the WLAN chip is
+hardwired.
 
-and omap_hsmmc_set_ios()
+Regards,
+Madhu
 
-in drivers/mmc/host/omap_hsmmc.c
-
->
->> If there are no users for the SDIO function and the card, doesn't the SDIO
->> core power down the slot and take care of re-initialization when it is
->> powered up?
->
-> You need card detect events in order to trigger card&  sdio function
-> initialization and removals.
->
-> Please share any alternative approach you may be thinking on.
-
-OK, this is how I see it.
-
-- Treat the non-removable card as non-removable. So no need to do card detect 
-emulation.
-
-- Treat the GPIO power enable on wl1271 as VMMC supply. Use fixed regulator 
-framework to define this regulator & supply. Even though you mention that it is 
-not actually a supply, it fits well in the fixed supply framework.
-
-- When the host controller is enumerated, the mmc core will power up the slot, 
-find the sdio card, and probe the function driver (i.e. wl1271_sdio).
-
-- if interface is not in use, the function driver must release the sdio host, 
-and this should eventually disable the vmmc supply.
-
-- Whenever the wlan interface must be brought up, wl1271_sdio, can claim the 
-sdio host. this will cause the vmmc supply to be enabled, for as long as the 
-interface is up.
-
-Does this address all issues?
-
-regards,
--roger
