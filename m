@@ -1,18 +1,19 @@
 From: Luciano Coelho <luciano.coelho@nokia.com>
-Subject: Re: [PATCH 02/15] wireless: wl1271: remove SDIO IDs from driver
-Date: Tue, 06 Jul 2010 10:04:54 +0300
-Message-ID: <1278399894.18287.10.camel@chilepepper>
+Subject: Re: [PATCH 10/15] wireless: wl1271: support return value for the
+ set power func
+Date: Tue, 06 Jul 2010 10:11:29 +0300
+Message-ID: <1278400289.18287.15.camel@chilepepper>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
-	 <1278376666-3509-3-git-send-email-ohad@wizery.com>
+	 <1278376666-3509-11-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.105.134]:28624 "EHLO
-	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753907Ab0GFHF5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 03:05:57 -0400
-In-Reply-To: <1278376666-3509-3-git-send-email-ohad@wizery.com>
+Received: from smtp.nokia.com ([192.100.122.233]:45883 "EHLO
+	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753969Ab0GFHL4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 03:11:56 -0400
+In-Reply-To: <1278376666-3509-11-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ext Ohad Ben-Cohen <ohad@wizery.com>
@@ -21,13 +22,16 @@ Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mm
 On Tue, 2010-07-06 at 02:37 +0200, ext Ohad Ben-Cohen wrote:
 > From: Ohad Ben-Cohen <ohadb@ti.com>
 > 
-> Remove SDIO IDs from the driver code since now it is
-> included in linux/mmc/sdio_ids.h.
+> Make it possible for the set power method to indicate a
+> success/failure return value. This is needed to support
+> more complex power on/off operations such as bringing up
+> (and down) sdio functions.
 > 
 > Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
-> ---
+> --- 
 
 Acked-by: Luciano Coelho <luciano.coelho@nokia.com>
+
 
 -- 
 Cheers,
