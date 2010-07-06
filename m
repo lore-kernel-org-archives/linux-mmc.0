@@ -1,7 +1,7 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH 06/15] omap zoom2: wlan board muxing
-Date: Tue,  6 Jul 2010 03:37:37 +0300
-Message-ID: <1278376666-3509-7-git-send-email-ohad@wizery.com>
+Subject: [PATCH 08/15] wireless: wl1271: make wl12xx.h common to both spi and sdio
+Date: Tue,  6 Jul 2010 03:37:39 +0300
+Message-ID: <1278376666-3509-9-git-send-email-ohad@wizery.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1278376666-3509-1-git-send-email-ohad@wizery.com>
@@ -12,40 +12,139 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ohad Ben-Cohen <ohadb@ti.com>
 
-Add board muxing to support the wlan wl1271 chip that is
-hardwired to mmc2 (third mmc controller) on the ZOOM2.
+Move wl12xx.h outside of the spi-specific location,
+so it can be shared with both spi and sdio solutions.
 
 Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
 ---
- arch/arm/mach-omap2/board-zoom2.c |   15 +++++++++++++++
- 1 files changed, 15 insertions(+), 0 deletions(-)
+ drivers/net/wireless/wl12xx/wl1251_sdio.c |    2 +-
+ drivers/net/wireless/wl12xx/wl1251_spi.c  |    2 +-
+ drivers/net/wireless/wl12xx/wl1271_spi.c  |    2 +-
+ include/linux/spi/wl12xx.h                |   34 -----------------------------
+ include/linux/wl12xx.h                    |   34 +++++++++++++++++++++++++++++
+ 5 files changed, 37 insertions(+), 37 deletions(-)
+ delete mode 100644 include/linux/spi/wl12xx.h
+ create mode 100644 include/linux/wl12xx.h
 
-diff --git a/arch/arm/mach-omap2/board-zoom2.c b/arch/arm/mach-omap2/board-zoom2.c
-index 803ef14..00871be 100644
---- a/arch/arm/mach-omap2/board-zoom2.c
-+++ b/arch/arm/mach-omap2/board-zoom2.c
-@@ -71,6 +71,21 @@ static struct twl4030_platform_data zoom2_twldata = {
+diff --git a/drivers/net/wireless/wl12xx/wl1251_sdio.c b/drivers/net/wireless/wl12xx/wl1251_sdio.c
+index c561332..416d5aa 100644
+--- a/drivers/net/wireless/wl12xx/wl1251_sdio.c
++++ b/drivers/net/wireless/wl12xx/wl1251_sdio.c
+@@ -24,7 +24,7 @@
+ #include <linux/mmc/sdio_func.h>
+ #include <linux/mmc/sdio_ids.h>
+ #include <linux/platform_device.h>
+-#include <linux/spi/wl12xx.h>
++#include <linux/wl12xx.h>
+ #include <linux/irq.h>
  
- #ifdef CONFIG_OMAP_MUX
- static struct omap_board_mux board_mux[] __initdata = {
-+#ifdef CONFIG_OMAP_ZOOM_WLAN
-+	/* WLAN IRQ - GPIO 162 */
-+	OMAP3_MUX(MCBSP1_CLKX, OMAP_MUX_MODE4 | OMAP_PIN_INPUT_PULLUP),
-+	/* WLAN POWER ENABLE - GPIO 101 */
-+	OMAP3_MUX(CAM_D2, OMAP_MUX_MODE4 | OMAP_PIN_OUTPUT),
-+	/* WLAN SDIO: MMC3 CMD */
-+	OMAP3_MUX(MCSPI1_CS1, OMAP_MUX_MODE3 | OMAP_PIN_INPUT_PULLUP),
-+	/* WLAN SDIO: MMC3 CLK */
-+	OMAP3_MUX(ETK_CLK, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-+	/* WLAN SDIO: MMC3 DAT[0-3] */
-+	OMAP3_MUX(ETK_D3, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-+	OMAP3_MUX(ETK_D4, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-+	OMAP3_MUX(ETK_D5, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-+	OMAP3_MUX(ETK_D6, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
+ #include "wl1251.h"
+diff --git a/drivers/net/wireless/wl12xx/wl1251_spi.c b/drivers/net/wireless/wl12xx/wl1251_spi.c
+index e814742..4847b6a 100644
+--- a/drivers/net/wireless/wl12xx/wl1251_spi.c
++++ b/drivers/net/wireless/wl12xx/wl1251_spi.c
+@@ -26,7 +26,7 @@
+ #include <linux/slab.h>
+ #include <linux/crc7.h>
+ #include <linux/spi/spi.h>
+-#include <linux/spi/wl12xx.h>
++#include <linux/wl12xx.h>
+ 
+ #include "wl1251.h"
+ #include "wl1251_reg.h"
+diff --git a/drivers/net/wireless/wl12xx/wl1271_spi.c b/drivers/net/wireless/wl12xx/wl1271_spi.c
+index 5189b81..e866049 100644
+--- a/drivers/net/wireless/wl12xx/wl1271_spi.c
++++ b/drivers/net/wireless/wl12xx/wl1271_spi.c
+@@ -25,7 +25,7 @@
+ #include <linux/module.h>
+ #include <linux/crc7.h>
+ #include <linux/spi/spi.h>
+-#include <linux/spi/wl12xx.h>
++#include <linux/wl12xx.h>
+ #include <linux/slab.h>
+ 
+ #include "wl1271.h"
+diff --git a/include/linux/spi/wl12xx.h b/include/linux/spi/wl12xx.h
+deleted file mode 100644
+index a223ecb..0000000
+--- a/include/linux/spi/wl12xx.h
++++ /dev/null
+@@ -1,34 +0,0 @@
+-/*
+- * This file is part of wl12xx
+- *
+- * Copyright (C) 2009 Nokia Corporation
+- *
+- * Contact: Kalle Valo <kalle.valo@nokia.com>
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License
+- * version 2 as published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it will be useful, but
+- * WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+- * General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+- * 02110-1301 USA
+- *
+- */
+-
+-#ifndef _LINUX_SPI_WL12XX_H
+-#define _LINUX_SPI_WL12XX_H
+-
+-struct wl12xx_platform_data {
+-	void (*set_power)(bool enable);
+-	/* SDIO only: IRQ number if WLAN_IRQ line is used, 0 for SDIO IRQs */
+-	int irq;
+-	bool use_eeprom;
+-};
+-
+-#endif
+diff --git a/include/linux/wl12xx.h b/include/linux/wl12xx.h
+new file mode 100644
+index 0000000..137ac89
+--- /dev/null
++++ b/include/linux/wl12xx.h
+@@ -0,0 +1,34 @@
++/*
++ * This file is part of wl12xx
++ *
++ * Copyright (C) 2009 Nokia Corporation
++ *
++ * Contact: Kalle Valo <kalle.valo@nokia.com>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ *
++ */
++
++#ifndef _LINUX_WL12XX_H
++#define _LINUX_WL12XX_H
++
++struct wl12xx_platform_data {
++	void (*set_power)(bool enable);
++	/* SDIO only: IRQ number if WLAN_IRQ line is used, 0 for SDIO IRQs */
++	int irq;
++	bool use_eeprom;
++};
++
 +#endif
- 	{ .reg_offset = OMAP_MUX_TERMINATOR },
- };
- #else
 -- 
 1.7.0.4
 
