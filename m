@@ -1,39 +1,51 @@
-From: Luciano Coelho <luciano.coelho@nokia.com>
-Subject: Re: [PATCH 10/15] wireless: wl1271: support return value for the
- set power func
-Date: Tue, 06 Jul 2010 10:11:29 +0300
-Message-ID: <1278400289.18287.15.camel@chilepepper>
+From: Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 08/15] wireless: wl1271: make wl12xx.h common to both
+ spi and sdio
+Date: Tue, 06 Jul 2010 10:08:28 +0300
+Message-ID: <1278400108.18287.14.camel@chilepepper>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
-	 <1278376666-3509-11-git-send-email-ohad@wizery.com>
+	 <1278376666-3509-9-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:45883 "EHLO
-	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753969Ab0GFHL4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 03:11:56 -0400
-In-Reply-To: <1278376666-3509-11-git-send-email-ohad@wizery.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1278376666-3509-9-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ext Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Cc: "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>, kalle.valo-X3B1VOXEql0@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: ext Ohad Ben-Cohen <ohad@wizery.com>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, Ohad Ben-Cohen <ohadb@ti.com>
 
 On Tue, 2010-07-06 at 02:37 +0200, ext Ohad Ben-Cohen wrote:
-> From: Ohad Ben-Cohen <ohadb@ti.com>
+> From: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 > 
-> Make it possible for the set power method to indicate a
-> success/failure return value. This is needed to support
-> more complex power on/off operations such as bringing up
-> (and down) sdio functions.
+> Move wl12xx.h outside of the spi-specific location,
+> so it can be shared with both spi and sdio solutions.
 > 
-> Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
-> --- 
+> Signed-off-by: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
+> ---
+>  drivers/net/wireless/wl12xx/wl1251_sdio.c |    2 +-
+>  drivers/net/wireless/wl12xx/wl1251_spi.c  |    2 +-
+>  drivers/net/wireless/wl12xx/wl1271_spi.c  |    2 +-
+>  include/linux/spi/wl12xx.h                |   34
+> -----------------------------
+>  include/linux/wl12xx.h                    |   34
+> +++++++++++++++++++++++++++++
+>  5 files changed, 37 insertions(+), 37 deletions(-)
+>  delete mode 100644 include/linux/spi/wl12xx.h
+>  create mode 100644 include/linux/wl12xx.h 
 
-Acked-by: Luciano Coelho <luciano.coelho@nokia.com>
+For the wl1271 part:
+
+Acked-by: Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+
+For the wl12xx.h and wl1251 parts, this needs to be acked by Kalle Valo.
 
 
 -- 
 Cheers,
 Luca.
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
