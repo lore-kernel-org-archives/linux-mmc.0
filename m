@@ -1,106 +1,45 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH 15/15] omap: zoom: enable WLAN device
-Date: Tue,  6 Jul 2010 03:37:46 +0300
-Message-ID: <1278376666-3509-16-git-send-email-ohad@wizery.com>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH 05/15] omap: hsmmc: add virtual card detect support
+Date: Mon, 05 Jul 2010 21:45:12 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1007052134460.6020@xanadu.home>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
+ <1278376666-3509-6-git-send-email-ohad@wizery.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:37901 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757167Ab0GFAlL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jul 2010 20:41:11 -0400
-In-Reply-To: <1278376666-3509-1-git-send-email-ohad@wizery.com>
+Received: from relais.videotron.ca ([24.201.245.36]:46818 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753914Ab0GFBpO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jul 2010 21:45:14 -0400
+In-reply-to: <1278376666-3509-6-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Ohad Ben-Cohen <ohadb@ti.com>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, San Mehat <san@google.com>, Ohad Ben-Cohen <ohadb@ti.com>
 
-From: Ohad Ben-Cohen <ohadb@ti.com>
+On Tue, 6 Jul 2010, Ohad Ben-Cohen wrote:
 
-Make it possible to build and use TI's wl1271
-device on the ZOOM boards.
+> From: Ohad Ben-Cohen <ohadb@ti.com>
+> 
+> Add support for software emulation of card detect
+> events.
+> 
+> This is required for specific controllers
+> that are hard wired with embedded SDIO devices
+> (such as TI's wl1271 WLAN device).
 
-The device is an embedded SDIO WLAN chip
-that is hardwired to the 3rd mmc controller
-of the ZOOM2/3 boards.
+Why?
 
-Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
----
- arch/arm/mach-omap2/Kconfig                  |    5 +++++
- arch/arm/mach-omap2/Makefile                 |    1 +
- arch/arm/mach-omap2/board-zoom-peripherals.c |   15 +++++++++++++++
- 3 files changed, 21 insertions(+), 0 deletions(-)
+Many instances of hardwired SDIO based WLAN devices do exist already, 
+and they don't need extra card detect events to be generated.  The core 
+MMC code already triggers a probe for cards whenever a new host 
+controller is registered.
 
-diff --git a/arch/arm/mach-omap2/Kconfig b/arch/arm/mach-omap2/Kconfig
-index b31b6f1..7fee11b 100644
---- a/arch/arm/mach-omap2/Kconfig
-+++ b/arch/arm/mach-omap2/Kconfig
-@@ -131,6 +131,11 @@ config MACH_OMAP_ZOOM3
- 	depends on ARCH_OMAP3
- 	select OMAP_PACKAGE_CBP
- 
-+config OMAP_ZOOM_WLAN
-+	bool "OMAP Zoom board WLAN support"
-+	depends on MACH_OMAP_ZOOM2 || MACH_OMAP_ZOOM3
-+	select MMC_EMBEDDED_SDIO
-+
- config MACH_CM_T35
- 	bool "CompuLab CM-T35 module"
- 	depends on ARCH_OMAP3
-diff --git a/arch/arm/mach-omap2/Makefile b/arch/arm/mach-omap2/Makefile
-index ea52b03..ac1bad9 100644
---- a/arch/arm/mach-omap2/Makefile
-+++ b/arch/arm/mach-omap2/Makefile
-@@ -129,6 +129,7 @@ obj-$(CONFIG_MACH_OMAP_ZOOM3)		+= board-zoom3.o \
- 					   board-zoom-peripherals.o \
- 					   hsmmc.o \
- 					   board-zoom-debugboard.o
-+obj-y					+= board-zoom-wlan.o
- obj-$(CONFIG_MACH_OMAP_3630SDP)		+= board-3630sdp.o \
- 					   board-zoom-peripherals.o \
- 					   hsmmc.o
-diff --git a/arch/arm/mach-omap2/board-zoom-peripherals.c b/arch/arm/mach-omap2/board-zoom-peripherals.c
-index 6b39849..3128cd4 100644
---- a/arch/arm/mach-omap2/board-zoom-peripherals.c
-+++ b/arch/arm/mach-omap2/board-zoom-peripherals.c
-@@ -16,11 +16,13 @@
- #include <linux/gpio.h>
- #include <linux/i2c/twl.h>
- #include <linux/regulator/machine.h>
-+#include <linux/mmc/host.h>
- 
- #include <asm/mach-types.h>
- #include <asm/mach/arch.h>
- #include <asm/mach/map.h>
- 
-+#include <mach/board-zoom.h>
- #include <plat/common.h>
- #include <plat/usb.h>
- 
-@@ -168,6 +170,18 @@ static struct omap2_hsmmc_info mmc[] __initdata = {
- 		.nonremovable	= true,
- 		.power_saving	= true,
- 	},
-+#ifdef CONFIG_OMAP_ZOOM_WLAN
-+	{
-+		.mmc		= 3,
-+		.wires		= 4,
-+		.gpio_cd	= -EINVAL,
-+		.gpio_wp	= -EINVAL,
-+		.register_embedded_control =
-+				omap_zoom_wlan_register_embedded_control,
-+		.virtual_get_cd = omap_zoom_wlan_get_virtual_cd,
-+		.ocr_mask	= MMC_VDD_165_195,
-+	},
-+#endif
- 	{}      /* Terminator */
- };
- 
-@@ -282,4 +296,5 @@ void __init zoom_peripherals_init(void)
- 	omap_i2c_init();
- 	usb_musb_init(&musb_board_data);
- 	enable_board_wakeup_source();
-+	omap_zoom_wlan_init();
- }
--- 
-1.7.0.4
+> Board-specific configuration is required to
+> enable this software card detect control.
 
+Could you elaborate please?
+
+
+Nicolas
