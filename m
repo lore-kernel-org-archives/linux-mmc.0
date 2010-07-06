@@ -1,31 +1,40 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 06/15] omap zoom2: wlan board muxing
-Date: Tue, 6 Jul 2010 14:43:22 +0300
-Message-ID: <20100706114316.GM3192@atomide.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH 05/15] omap: hsmmc: add virtual card detect support
+Date: Tue, 6 Jul 2010 14:48:29 +0300
+Message-ID: <AANLkTinE5LygUWJsJSEE2miZF1GK58LTr8zErkuu_7yM@mail.gmail.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
- <1278376666-3509-7-git-send-email-ohad@wizery.com>
+	<1278376666-3509-6-git-send-email-ohad@wizery.com> <alpine.LFD.2.00.1007052134460.6020@xanadu.home>
+	<AANLkTim4E4LlFERmfYA1M0HLBOoRAsQuvdW6QBNu6pC0@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:61058 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752794Ab0GFLnh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 07:43:37 -0400
-Content-Disposition: inline
-In-Reply-To: <1278376666-3509-7-git-send-email-ohad@wizery.com>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:63790 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755047Ab0GFLsu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2010 07:48:50 -0400
+In-Reply-To: <AANLkTim4E4LlFERmfYA1M0HLBOoRAsQuvdW6QBNu6pC0@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Ohad Ben-Cohen <ohadb@ti.com>
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Pandita, Vikram" <vikram.pandita@ti.com>
 
-* Ohad Ben-Cohen <ohad@wizery.com> [100706 03:37]:
-> From: Ohad Ben-Cohen <ohadb@ti.com>
-> 
-> Add board muxing to support the wlan wl1271 chip that is
-> hardwired to mmc2 (third mmc controller) on the ZOOM2.
+On Tue, Jul 6, 2010 at 1:22 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+> Note: the wl1271 device does support standard card detection, but
+> AFAIK there's a limitation to use that with the specific omap
+> controller the device is hardwired to. I will try to get more info
+> about that, but probably Madhu can comment on that better.
 
-I'll pick this and following patch into omap for-next.
 
-Regards,
+Some correction and additional info:
 
-Tony
+The wl1271 device has an issue which makes the standard card detect
+mechanism irrelevant: it is always up, even if the power enable gpio
+input of the device is down (the power enable input does not supply
+the power to the chip, it's just logical digital high/low input upon
+which the device reacts).  That's why we must use software control for
+emulating card detect with that device.
+
+In addition, as far as I could find out, the card detect mechanism on
+the ZOOM is implemented by mechanical means, and thus is not relevant
+for hardwired embedded SDIO devices (I'm not even sure card detect is
+supported for the 3rd mmc controller).
