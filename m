@@ -1,7 +1,7 @@
 From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 07/15] omap zoom3: wlan board muxing
-Date: Tue,  6 Jul 2010 03:37:38 +0300
-Message-ID: <1278376666-3509-8-git-send-email-ohad@wizery.com>
+Subject: [PATCH 09/15] wireless: wl12xx: support pdata SDIO handlers
+Date: Tue,  6 Jul 2010 03:37:40 +0300
+Message-ID: <1278376666-3509-10-git-send-email-ohad@wizery.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1278376666-3509-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
@@ -12,40 +12,47 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 
-Add board muxing to support the wlan wl1271 chip that is
-hardwired to mmc2 (third mmc controller) on the ZOOM3.
+Make it possible for board code to send SDIO handlers to
+the wl12xx driver.
+
+These SDIO handlers are needed to allow software to trigger
+card detect events for hard-wired SDIO devices such as the
+wl1271 device.
 
 Signed-off-by: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 ---
- arch/arm/mach-omap2/board-zoom3.c |   15 +++++++++++++++
- 1 files changed, 15 insertions(+), 0 deletions(-)
+ drivers/net/wireless/wl12xx/wl1271.h |    4 ++++
+ include/linux/wl12xx.h               |    2 ++
+ 2 files changed, 6 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/board-zoom3.c b/arch/arm/mach-omap2/board-zoom3.c
-index 3314704..0b62663 100644
---- a/arch/arm/mach-omap2/board-zoom3.c
-+++ b/arch/arm/mach-omap2/board-zoom3.c
-@@ -46,6 +46,21 @@ static void __init omap_zoom_init_irq(void)
+diff --git a/drivers/net/wireless/wl12xx/wl1271.h b/drivers/net/wireless/wl12xx/wl1271.h
+index 6f1b6b5..fc4d122 100644
+--- a/drivers/net/wireless/wl12xx/wl1271.h
++++ b/drivers/net/wireless/wl12xx/wl1271.h
+@@ -356,6 +356,10 @@ struct wl1271 {
+ 	struct wl1271_if_operations *if_ops;
  
- #ifdef CONFIG_OMAP_MUX
- static struct omap_board_mux board_mux[] __initdata = {
-+#ifdef CONFIG_OMAP_ZOOM_WLAN
-+	/* WLAN IRQ - GPIO 162 */
-+	OMAP3_MUX(MCBSP1_CLKX, OMAP_MUX_MODE4 | OMAP_PIN_INPUT_PULLUP),
-+	/* WLAN POWER ENABLE - GPIO 101 */
-+	OMAP3_MUX(CAM_D2, OMAP_MUX_MODE4 | OMAP_PIN_OUTPUT),
-+	/* WLAN SDIO: MMC3 CMD */
-+	OMAP3_MUX(MCSPI1_CS1, OMAP_MUX_MODE3 | OMAP_PIN_INPUT_PULLUP),
-+	/* WLAN SDIO: MMC3 CLK */
-+	OMAP3_MUX(ETK_CLK, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-+	/* WLAN SDIO: MMC3 DAT[0-3] */
-+	OMAP3_MUX(ETK_D3, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-+	OMAP3_MUX(ETK_D4, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-+	OMAP3_MUX(ETK_D5, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-+	OMAP3_MUX(ETK_D6, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-+#endif
- 	{ .reg_offset = OMAP_MUX_TERMINATOR },
- };
- #else
+ 	void (*set_power)(bool enable);
++	/* SDIO card detect emulation */
++	void (*set_carddetect)(bool card_present);
++	void (*set_embedded_data)(void *priv);
++
+ 	int irq;
+ 
+ 	spinlock_t wl_lock;
+diff --git a/include/linux/wl12xx.h b/include/linux/wl12xx.h
+index 137ac89..4106184 100644
+--- a/include/linux/wl12xx.h
++++ b/include/linux/wl12xx.h
+@@ -26,6 +26,8 @@
+ 
+ struct wl12xx_platform_data {
+ 	void (*set_power)(bool enable);
++	void (*set_carddetect)(bool card_present);
++	void (*set_embedded_data)(void *priv);
+ 	/* SDIO only: IRQ number if WLAN_IRQ line is used, 0 for SDIO IRQs */
+ 	int irq;
+ 	bool use_eeprom;
 -- 
 1.7.0.4
 
