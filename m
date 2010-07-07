@@ -1,254 +1,76 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH V4 4/5] block: Add secure discard
-Date: Wed, 07 Jul 2010 14:17:49 +0300
-Message-ID: <20100707111749.24979.69982.sendpatchset@ahunter-work.research.nokia.com>
-References: <20100707111716.24979.68940.sendpatchset@ahunter-work.research.nokia.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100707111716.24979.68940.sendpatchset@ahunter-work.research.nokia.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>, Jens Axboe <axboe@kernel.dk>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
+Date: Wed, 07 Jul 2010 09:52:15 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1007070937040.6020@xanadu.home>
+References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
+ <1278376666-3509-12-git-send-email-ohad@wizery.com>
+ <4C32EF19.1000604@nokia.com>
+ <AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com>
+ <4C3306F4.8060907@nokia.com>
+ <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com>
+ <4C333E0D.2070601@nokia.com> <alpine.LFD.2.00.1007061316010.6020@xanadu.home>
+ <4C343135.1090101@nokia.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-reply-to: <4C343135.1090101@nokia.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Roger Quadros <roger.quadros@nokia.com>
+Cc: ext Ohad Ben-Cohen <ohad@wizery.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>
 List-Id: linux-mmc@vger.kernel.org
 
->From 1cdd5b576bfafcd53857ed4d37830446e96e8206 Mon Sep 17 00:00:00 2001
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Date: Wed, 23 Jun 2010 15:41:38 +0300
-Subject: [PATCH 4/5] block: Add secure discard
+On Wed, 7 Jul 2010, Roger Quadros wrote:
 
-Secure discard is the same as discard except that all copies
-of the discarded sectors (perhaps created by garbage collection)
-must also be erased.
+> On 07/06/2010 08:42 PM, ext Nicolas Pitre wrote:
+> > On Tue, 6 Jul 2010, Roger Quadros wrote:
+> > 
+> > > OK, this is how I see it.
+> > > 
+> > > - Treat the non-removable card as non-removable. So no need to do card
+> > > detect
+> > > emulation.
+> > > 
+> > > - Treat the GPIO power enable on wl1271 as VMMC supply. Use fixed
+> > > regulator
+> > > framework to define this regulator&  supply. Even though you mention that
+> > > it
+> > > is not actually a supply, it fits well in the fixed supply framework.
+> > > 
+> > > - When the host controller is enumerated, the mmc core will power up the
+> > > slot,
+> > > find the sdio card, and probe the function driver (i.e. wl1271_sdio).
+> > > 
+> > > - if interface is not in use, the function driver must release the sdio
+> > > host,
+> > > and this should eventually disable the vmmc supply.
+> > > 
+> > > - Whenever the wlan interface must be brought up, wl1271_sdio, can claim
+> > > the
+> > > sdio host. this will cause the vmmc supply to be enabled, for as long as
+> > > the
+> > > interface is up.
+> > > 
+> > > Does this address all issues?
+> > 
+> > This is mostly all good, except that claiming/releasing the SDIO host is
+> > about access to the bus.  It must be claimed right before doing any IO,
+> > and released right after that, even when the card is expected to remain
+> > powered.  This is not the proper place to hook power control.
+> 
+> Agreed, but is it so that SDIO power may be removed between a host_release and
+> claim? This appears so from omap_hsmmc host controller.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
----
- block/blk-core.c        |    5 ++++-
- block/blk-lib.c         |    6 ++++++
- block/compat_ioctl.c    |    1 +
- block/elevator.c        |    6 ++++++
- block/ioctl.c           |   15 ++++++++++-----
- include/linux/bio.h     |    2 ++
- include/linux/blkdev.h  |    7 ++++++-
- include/linux/fs.h      |    2 ++
- kernel/trace/blktrace.c |    8 ++++++++
- 9 files changed, 45 insertions(+), 7 deletions(-)
+No, it is not because a host is not claimed that power should be 
+dropped.  The host claim/release is meant to provide exclusive access to 
+the card that's all.
 
-diff --git a/block/blk-core.c b/block/blk-core.c
-index 3c37894..7931081 100644
---- a/block/blk-core.c
-+++ b/block/blk-core.c
-@@ -1513,7 +1513,10 @@ static inline void __generic_make_request(struct bio *bio)
- 		if (bio_check_eod(bio, nr_sectors))
- 			goto end_io;
- 
--		if ((bio->bi_rw & REQ_DISCARD) && !blk_queue_discard(q)) {
-+		if ((bio->bi_rw & REQ_DISCARD) &&
-+		    (!blk_queue_discard(q) ||
-+		     ((bio->bi_rw & REQ_SECURE) &&
-+		      !blk_queue_secdiscard(q)))) {
- 			err = -EOPNOTSUPP;
- 			goto end_io;
- 		}
-diff --git a/block/blk-lib.c b/block/blk-lib.c
-index e16185b..ba8c0f9 100644
---- a/block/blk-lib.c
-+++ b/block/blk-lib.c
-@@ -50,6 +50,12 @@ int blkdev_issue_discard(struct block_device *bdev, sector_t sector,
- 	if (!blk_queue_discard(q))
- 		return -EOPNOTSUPP;
- 
-+	if (flags & BLKDEV_IFL_SECURE) {
-+		if (!blk_queue_secdiscard(q))
-+			return -EOPNOTSUPP;
-+		type |= DISCARD_SECURE;
-+	}
-+
- 	while (nr_sects && !ret) {
- 		unsigned int max_discard_sectors =
- 			min(q->limits.max_discard_sectors, UINT_MAX >> 9);
-diff --git a/block/compat_ioctl.c b/block/compat_ioctl.c
-index f26051f..24a146d 100644
---- a/block/compat_ioctl.c
-+++ b/block/compat_ioctl.c
-@@ -753,6 +753,7 @@ long compat_blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg)
- 	case BLKFLSBUF:
- 	case BLKROSET:
- 	case BLKDISCARD:
-+	case BLKSECDISCARD:
- 	/*
- 	 * the ones below are implemented in blkdev_locked_ioctl,
- 	 * but we call blkdev_ioctl, which gets the lock for us
-diff --git a/block/elevator.c b/block/elevator.c
-index 816a7c8..ec585c9 100644
---- a/block/elevator.c
-+++ b/block/elevator.c
-@@ -83,6 +83,12 @@ int elv_rq_merge_ok(struct request *rq, struct bio *bio)
- 		return 0;
- 
- 	/*
-+	 * Don't merge discard requests and secure discard requests
-+	 */
-+	if ((bio->bi_rw & REQ_SECURE) != (rq->bio->bi_rw & REQ_SECURE))
-+		return 0;
-+
-+	/*
- 	 * different data direction or already started, don't merge
- 	 */
- 	if (bio_data_dir(bio) != rq_data_dir(rq))
-diff --git a/block/ioctl.c b/block/ioctl.c
-index 6f3db6f..afcfe48 100644
---- a/block/ioctl.c
-+++ b/block/ioctl.c
-@@ -114,8 +114,10 @@ static int blkdev_reread_part(struct block_device *bdev)
- }
- 
- static int blk_ioctl_discard(struct block_device *bdev, uint64_t start,
--			     uint64_t len)
-+			     uint64_t len, int secure)
- {
-+	unsigned long flags = BLKDEV_IFL_WAIT;
-+
- 	if (start & 511)
- 		return -EINVAL;
- 	if (len & 511)
-@@ -125,8 +127,9 @@ static int blk_ioctl_discard(struct block_device *bdev, uint64_t start,
- 
- 	if (start + len > (bdev->bd_inode->i_size >> 9))
- 		return -EINVAL;
--	return blkdev_issue_discard(bdev, start, len, GFP_KERNEL,
--				    BLKDEV_IFL_WAIT);
-+	if (secure)
-+		flags |= BLKDEV_IFL_SECURE;
-+	return blkdev_issue_discard(bdev, start, len, GFP_KERNEL, flags);
- }
- 
- static int put_ushort(unsigned long arg, unsigned short val)
-@@ -226,7 +229,8 @@ int blkdev_ioctl(struct block_device *bdev, fmode_t mode, unsigned cmd,
- 		unlock_kernel();
- 		return 0;
- 
--	case BLKDISCARD: {
-+	case BLKDISCARD:
-+	case BLKSECDISCARD: {
- 		uint64_t range[2];
- 
- 		if (!(mode & FMODE_WRITE))
-@@ -235,7 +239,8 @@ int blkdev_ioctl(struct block_device *bdev, fmode_t mode, unsigned cmd,
- 		if (copy_from_user(range, (void __user *)arg, sizeof(range)))
- 			return -EFAULT;
- 
--		return blk_ioctl_discard(bdev, range[0], range[1]);
-+		return blk_ioctl_discard(bdev, range[0], range[1],
-+					 cmd == BLKSECDISCARD);
- 	}
- 
- 	case HDIO_GETGEO: {
-diff --git a/include/linux/bio.h b/include/linux/bio.h
-index 4d379c8..147e631 100644
---- a/include/linux/bio.h
-+++ b/include/linux/bio.h
-@@ -176,6 +176,7 @@ enum rq_flag_bits {
- 	__REQ_INTEGRITY,	/* integrity metadata has been remapped */
- 	__REQ_IO_STAT,		/* account I/O stat */
- 	__REQ_MIXED_MERGE,	/* merge of different types, fail separately */
-+	__REQ_SECURE,		/* secure discard (used with __REQ_DISCARD) */
- 	__REQ_NR_BITS,		/* stops here */
- };
- 
-@@ -215,6 +216,7 @@ enum rq_flag_bits {
- #define REQ_INTEGRITY		(1 << __REQ_INTEGRITY)
- #define REQ_IO_STAT		(1 << __REQ_IO_STAT)
- #define REQ_MIXED_MERGE		(1 << __REQ_MIXED_MERGE)
-+#define REQ_SECURE		(1 << __REQ_SECURE)
- 
- /*
-  * upper 16 bits of bi_rw define the io priority of this bio
-diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index 204fbe2..da643f4 100644
---- a/include/linux/blkdev.h
-+++ b/include/linux/blkdev.h
-@@ -404,6 +404,7 @@ struct request_queue
- #define QUEUE_FLAG_DISCARD     16	/* supports DISCARD */
- #define QUEUE_FLAG_NOXMERGES   17	/* No extended merges */
- #define QUEUE_FLAG_ADD_RANDOM  18	/* Contributes to random pool */
-+#define QUEUE_FLAG_SECDISCARD  19	/* supports SECDISCARD */
- 
- #define QUEUE_FLAG_DEFAULT	((1 << QUEUE_FLAG_IO_STAT) |		\
- 				 (1 << QUEUE_FLAG_CLUSTER) |		\
-@@ -539,6 +540,8 @@ enum {
- #define blk_queue_stackable(q)	\
- 	test_bit(QUEUE_FLAG_STACKABLE, &(q)->queue_flags)
- #define blk_queue_discard(q)	test_bit(QUEUE_FLAG_DISCARD, &(q)->queue_flags)
-+#define blk_queue_secdiscard(q)	(blk_queue_discard(q) && \
-+	test_bit(QUEUE_FLAG_SECDISCARD, &(q)->queue_flags))
- 
- #define blk_noretry_request(rq) \
- 	((rq)->cmd_flags & (REQ_FAILFAST_DEV|REQ_FAILFAST_TRANSPORT| \
-@@ -931,10 +934,12 @@ static inline struct request *blk_map_queue_find_tag(struct blk_queue_tag *bqt,
- }
- enum{
- 	BLKDEV_WAIT,	/* wait for completion */
--	BLKDEV_BARRIER,	/*issue request with barrier */
-+	BLKDEV_BARRIER,	/* issue request with barrier */
-+	BLKDEV_SECURE,	/* secure discard */
- };
- #define BLKDEV_IFL_WAIT		(1 << BLKDEV_WAIT)
- #define BLKDEV_IFL_BARRIER	(1 << BLKDEV_BARRIER)
-+#define BLKDEV_IFL_SECURE	(1 << BLKDEV_SECURE)
- extern int blkdev_issue_flush(struct block_device *, gfp_t, sector_t *,
- 			unsigned long);
- extern int blkdev_issue_discard(struct block_device *bdev, sector_t sector,
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index dc9d185..2f5df1f 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -176,6 +176,7 @@ struct inodes_stat_t {
-  */
- #define DISCARD_NOBARRIER	(WRITE | REQ_DISCARD)
- #define DISCARD_BARRIER		(WRITE | REQ_DISCARD | REQ_HARDBARRIER)
-+#define DISCARD_SECURE		(DISCARD_NOBARRIER | REQ_SECURE)
- 
- #define SEL_IN		1
- #define SEL_OUT		2
-@@ -318,6 +319,7 @@ struct inodes_stat_t {
- #define BLKALIGNOFF _IO(0x12,122)
- #define BLKPBSZGET _IO(0x12,123)
- #define BLKDISCARDZEROES _IO(0x12,124)
-+#define BLKSECDISCARD _IO(0x12,125)
- 
- #define BMAP_IOCTL 1		/* obsolete - kept for compatibility */
- #define FIBMAP	   _IO(0x00,1)	/* bmap access */
-diff --git a/kernel/trace/blktrace.c b/kernel/trace/blktrace.c
-index 3b4a695..a711b47 100644
---- a/kernel/trace/blktrace.c
-+++ b/kernel/trace/blktrace.c
-@@ -667,6 +667,9 @@ static void blk_add_trace_rq(struct request_queue *q, struct request *rq,
- 	if (rq->cmd_flags & REQ_DISCARD)
- 		rw |= REQ_DISCARD;
- 
-+	if (rq->cmd_flags & REQ_SECURE)
-+		rw |= REQ_SECURE;
-+
- 	if (rq->cmd_type == REQ_TYPE_BLOCK_PC) {
- 		what |= BLK_TC_ACT(BLK_TC_PC);
- 		__blk_add_trace(bt, 0, blk_rq_bytes(rq), rw,
-@@ -1773,6 +1776,8 @@ void blk_fill_rwbs(char *rwbs, u32 rw, int bytes)
- 		rwbs[i++] = 'S';
- 	if (rw & REQ_META)
- 		rwbs[i++] = 'M';
-+	if (rw & REQ_SECURE)
-+		rwbs[i++] = 'E';
- 
- 	rwbs[i] = '\0';
- }
-@@ -1785,6 +1790,9 @@ void blk_fill_rwbs_rq(char *rwbs, struct request *rq)
- 	if (rq->cmd_flags & REQ_DISCARD)
- 		rw |= REQ_DISCARD;
- 
-+	if (rq->cmd_flags & REQ_SECURE)
-+		rw |= REQ_SECURE;
-+
- 	bytes = blk_rq_bytes(rq);
- 
- 	blk_fill_rwbs(rwbs, rw, bytes);
--- 
-1.6.3.3
+If the OMAP controller is dropping power to the card upon 
+host->disable() then it is wrong.  AFAICS only the OMAP controller is 
+playing such games at the moment and I suspect the semantics might not 
+be all right.  Shutting down the _controller_ when it is idle might be a 
+good thing, but not power to the _card_.  Only the function driver might 
+know when it is fine to lose power.
+
+
+Nicolas
