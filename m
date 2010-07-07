@@ -1,113 +1,70 @@
-From: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH v5] OMAP: Fix for bus width which improves SD card's
-	peformance.
-Date: Wed, 7 Jul 2010 19:45:43 +0530
-Message-ID: <AANLkTilh9dSHT47E4VlYdbGxVflQYaooeAMm_5bSda7p@mail.gmail.com>
-References: <003b01cad0f0$6ea78040$544ff780@am.dhcp.ti.com>
-	<20100406163211.GA29117@nokia.com>
-	<4BBB6767.7010202@ti.com>
-	<20100406165720.GA17916@nokia.com>
-	<00b401cad5e0$1d1868d0$544ff780@am.dhcp.ti.com>
-	<4BBBC628.9030207@ti.com>
-	<00c901cad5e7$9de54350$544ff780@am.dhcp.ti.com>
-	<4BBBD87C.1040307@ti.com>
-	<003601cad73c$98c3aa50$544ff780@am.dhcp.ti.com>
-	<s2l7f9d1ffb1004190836l9ba703c5lab13638d968a5c55@mail.gmail.com>
-	<h2h7f9d1ffb1004190851gf08897awf198d3c8e5f9dbce@mail.gmail.com>
-	<008f01cae1b2$6262c970$544ff780@am.dhcp.ti.com>
-	<AANLkTikNlJLiJeXwbBuS_KGPN6soAlKLQH1EUeJCKYi2@mail.gmail.com>
-	<AANLkTiks-UvRtQiZtpp-zwlGhMcGNoPZdHKC29lrlFYr@mail.gmail.com>
-	<AANLkTil7PEqhzAcxkErry4ucc1bg07cr7Sj-OpJsGB4e@mail.gmail.com>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH 11/15] wireless: wl1271: introduce platform device support
+Date: Wed, 7 Jul 2010 09:54:08 -0500
+Message-ID: <E6AFC02D8D114C129C8140932818E578@am.dhcp.ti.com>
+References: <1278376666-3509-1-git-send-email-ohad@wizery.com> <1278376666-3509-12-git-send-email-ohad@wizery.com> <4C32EF19.1000604@nokia.com> <AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com> <4C3306F4.8060907@nokia.com> <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com> <4C333E0D.2070601@nokia.com> <alpine.LFD.2.00.1007061316010.6020@xanadu.home> <4C338927.5020400@nokia.com> <4C34347F.8030000@nokia.com> <alpine.LFD.2.00.1007070954010.6020@xanadu.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <AANLkTil7PEqhzAcxkErry4ucc1bg07cr7Sj-OpJsGB4e@mail.gmail.com>
+In-reply-to: <alpine.LFD.2.00.1007070954010.6020@xanadu.home>
 Sender: linux-omap-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: Madhusudhan <madhu.cr@ti.com>, akpm@linux-foundation.org, tony@atomide.com, Nishanth Menon <nm@ti.com>, felipe.balbi@nokia.com, Vimal Singh <vimal.newwork@gmail.com>, "S, Venkatraman" <svenkatr@ti.com>, "Lavinen Jarkko (Nokia-D/Helsinki)" <jarkko.lavinen@nokia.com>
+To: 'Nicolas Pitre' <nico@fluxnic.net>, 'Roger Quadros' <roger.quadros@nokia.com>
+Cc: "'Hunter Adrian (Nokia-MS/Helsinki)'" <adrian.hunter@nokia.com>, 'Ohad Ben-Cohen' <ohad@wizery.com>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, "'Coelho Luciano (Nokia-MS/Helsinki)'" <Luciano.Coelho@nokia.com>, akpm@linux-foundation.org, 'San Mehat' <san@google.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Tony,
 
-Could this patch be taken ?
 
-Thanks,
-kishore
+> -----Original Message-----
+> From: Nicolas Pitre [mailto:nico@fluxnic.net]
+> Sent: Wednesday, July 07, 2010 9:03 AM
+> To: Roger Quadros
+> Cc: Hunter Adrian (Nokia-MS/Helsinki); Ohad Ben-Cohen; linux-
+> wireless@vger.kernel.org; linux-mmc@vger.kernel.org; linux-
+> omap@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
+> linux@arm.linux.org.uk; Chikkature Rajashekar Madhusudhan; Coelho Luciano
+> (Nokia-MS/Helsinki); akpm@linux-foundation.org; San Mehat
+> Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device
+> support
+> 
+> On Wed, 7 Jul 2010, Roger Quadros wrote:
+> 
+> > On 07/06/2010 10:51 PM, Hunter Adrian (Nokia-MS/Helsinki) wrote:
+> > > For eMMC in omap_hsmmc, this is all done via claim_host / release_host
+> > > which call ->enable() / ->disable() methods.  omap_hsmmc makes use of
+> > > mmc_power_restore_host() which calls host->bus_ops->power_restore()
+> > > which is not implemented for SDIO, but for MMC and SD it reinitializes
+> > > the card.
+> 
+> This is IMHO a really bad design.  The power control decision has to
+> come from the top, not from the bottom.  And certainly not with a
+> U-turn dependency the omap_hsmmc is using.
+> 
+> I regret to say this, but the omap_hsmmc driver is becoming a total
+> mess.  The host controller driver has to be a dumb interface serving
+> requests from the hardware used by the upper layer stack, not the place
+> where decisions such as power handling should be made.  Think of it like
+> an ethernet driver.  No ethernet driver in Linux is telling the IP stack
+> when to shut down.
+> 
 
-On Tue, Jun 15, 2010 at 1:37 PM, kishore kadiyala
-<kishorek.kadiyala@gmail.com> wrote:
-> From: Kishore Kadiyala <kishore.kadiyala@ti.com>
->
-> This patch improves low speeds for SD cards.
-> OMAP-MMC controller's can support maximum bus width of '8'.
-> when bus width is mentioned as "8" in controller data,the SD
-> stack will check whether bus width is "4" and if not it will
-> set bus width to "1" and there by degrading performance.
-> This patch fixes the issue and improves the performance of
-> SD cards.
->
-> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> Signed-off-by: Nishanth Menon <nm@ti.com>
-> Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-> Tested-by: Jarkko Nikula <jhnikula@gmail.com>
-> ---
-> In V5 : Rebasing on 2.6.35-rc3
-> In V4 : Updated with Nishanth's comments and appened his Signed-off
-> =A0 =A0 =A0 =A0http://marc.info/?t=3D127169149300006&r=3D1&w=3D2
-> In V3 : Updated =A0with Madhu's comments =A0and appended Tested by Ni=
-kula
-> In V2 : Appended Signed-off by Venkat and Ack by Madhu
->
-> Here are my experiment numbers, on a Class 6 SDHC card:
-> Read peformance is increased by 220%
-> Write Performance is increased by 52%
->
-> =A0drivers/mmc/host/omap_hsmmc.c | =A0 17 +++++++++++++++--
-> =A01 files changed, 15 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
-mmc.c
-> index b032828..a0c8515 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2096,10 +2096,23 @@ static int __init omap_hsmmc_probe(struct
-> =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGH=
-SPEED |
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 MMC_CAP_WAIT_WHILE_BUSY;
->
-> - =A0 =A0 =A0 if (mmc_slot(host).wires >=3D 8)
-> + =A0 =A0 =A0 switch (mmc_slot(host).wires) {
-> + =A0 =A0 =A0 case 8:
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_8_BIT_DATA;
-> - =A0 =A0 =A0 else if (mmc_slot(host).wires >=3D 4)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Fall through */
-> + =A0 =A0 =A0 case 4:
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_4_BIT_DATA;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
-> + =A0 =A0 =A0 case 1:
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Nothing to crib here */
-> + =A0 =A0 =A0 case 0:
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Assuming nothing was given by board,=
- Core use's 1-Bit */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
-> + =A0 =A0 =A0 default:
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Completely unexpected.. Core goes wi=
-th 1-Bit Width */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_crit(mmc_dev(host->mmc), "Invalid w=
-idth %d\n used!"
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "using 1 instead\n", mm=
-c_slot(host).wires);
-> + =A0 =A0 =A0 }
->
-> =A0 =A0 =A0 =A0if (mmc_slot(host).nonremovable)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_NONREMOVABLE;
-> --
-> 1.6.3.3
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The point is that MMC/SD core files were patched to provide this kind of a
+support. Any controller driver can use that framework today, right?. As an
+example omap_hsmmc driver was patched and it works fine.
+
+Why blame the controller driver for using a support provided by core files?
+
+Regards,
+Madhu
+
+> > Shouldn't the power control intelligence (i.e. when to turn power
+> ON/OFF) lie
+> > with the bus drivers?
+> 
+> Absolutely!  And in the SDIO case that should lie with each function
+> drivers.  Please let's stop this omap_hsmmc madness.
+> 
+> 
+> Nicolas
+
