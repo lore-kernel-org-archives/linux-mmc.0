@@ -1,102 +1,139 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: RE: [PATCH 11/15] wireless: wl1271: introduce platform device support
-Date: Wed, 07 Jul 2010 11:46:51 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1007071120351.6020@xanadu.home>
-References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
- <1278376666-3509-12-git-send-email-ohad@wizery.com>
- <4C32EF19.1000604@nokia.com>
- <AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com>
- <4C3306F4.8060907@nokia.com>
- <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com>
- <4C333E0D.2070601@nokia.com> <alpine.LFD.2.00.1007061316010.6020@xanadu.home>
- <4C338927.5020400@nokia.com> <4C34347F.8030000@nokia.com>
- <alpine.LFD.2.00.1007070954010.6020@xanadu.home>
- <E6AFC02D8D114C129C8140932818E578@am.dhcp.ti.com>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH V4 1/5] mmc: Add erase, secure erase, trim and secure
+ trim 	operations
+Date: Wed, 07 Jul 2010 22:05:01 +0300
+Message-ID: <4C34CFDD.5030900@nokia.com>
+References: <20100707111716.24979.68940.sendpatchset@ahunter-work.research.nokia.com>	<20100707111723.24979.32020.sendpatchset@ahunter-work.research.nokia.com> <AANLkTinfDOlL7iKP4Qmb0J4xq_I_nNEnSbokCOkYmCSn@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-reply-to: <E6AFC02D8D114C129C8140932818E578@am.dhcp.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: 'Roger Quadros' <roger.quadros@nokia.com>, "'Hunter Adrian (Nokia-MS/Helsinki)'" <adrian.hunter@nokia.com>, 'Ohad Ben-Cohen' <ohad@wizery.com>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, "'Coelho Luciano (Nokia-MS/Helsinki)'" <Luciano.Coelho@nokia.com>, akpm@linux-foundation.org, 'San Mehat' <san@google.com>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.nokia.com ([192.100.105.134]:23372 "EHLO
+	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756050Ab0GGTGP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2010 15:06:15 -0400
+In-Reply-To: <AANLkTinfDOlL7iKP4Qmb0J4xq_I_nNEnSbokCOkYmCSn@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ben Gardiner <bengardiner@nanometrics.ca>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
 
-On Wed, 7 Jul 2010, Madhusudhan wrote:
+Ben Gardiner wrote:
+> On Wed, Jul 7, 2010 at 7:17 AM, Adrian Hunter <adrian.hunter@nokia.com> wrote:
+>> From 7f01ad3c4be6ec09318176db12db66f353b526e0 Mon Sep 17 00:00:00 2001
+> 
+>> SD/MMC cards tend to support an erase operation.  In addition,
+>> eMMC v4.4 cards can support secure erase, trim and secure trim
+>> operations that are all variants of the basic erase command.
+> 
+> This is great. I am interested primarily in SD media.
+> 
+> Please forgive my naive perspective: it seems that with the features
+> enabled by this patchset and a filesystem that is capable of issuing
+> erase block commands, the wear-leveling on SD media will be improved
+> -- much like with CF TRIM commands. Do you also think that is the
+> case? I would be very interested in hearing your expert opinion on
+> this.
+
+I am sorry but I don't know.  Wear-levelling in cards tends to be kept
+secret by the manufacturers.  However, it is not clear to me that cards
+bother to record whether or not anything has been erased.   For example,
+erase a card twice - it takes the same amount of time the second time
+as the first time, whereas if the card knew it was already erased, why
+wasn't the second time much quicker?
+
+> 
+> I have a couple comments regarding mostly the SD support introduced in
+> this patch. Patches 2..5 of 5 seem fine to me but I'm not sure I'm
+> qualified to add acks or reviewed-by's.
+> 
+>> +int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>> +             unsigned int arg)
+>> +{
+>> +       unsigned int rem, to = from + nr;
+>> +
+>> +       if (!(card->host->caps & MMC_CAP_ERASE) ||
+>> +           !(card->csd.cmdclass & CCC_ERASE))
+>> +               return -EOPNOTSUPP;
+>> +
+>> +       if (!card->erase_size)
+>> +               return -EOPNOTSUPP;
+>> +
+>> +       if (mmc_card_sd(card) && arg != MMC_ERASE_ARG)
+>> +               return -EOPNOTSUPP;
+>> +
+>> +       if ((arg & MMC_SECURE_ARGS) &&
+>> +           !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN))
+>> +               return -EOPNOTSUPP;
+>> +
+>> +       if ((arg & MMC_TRIM_ARGS) &&
+>> +           !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN))
+>> +               return -EOPNOTSUPP;
+>> +
+> 
+>> +int mmc_can_trim(struct mmc_card *card)
+>> +{
+>> +       if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN)
+>> +               return 1;
+>> +       return 0;
+>> +}
+>> +EXPORT_SYMBOL(mmc_can_trim);
+> 
+> It looks like mmc_can_trim(card) would return true when
+> mmc_card_sd(card) is true;
+
+It will return false for SD.  card->ext_csd.sec_feature_support
+is only used by MMC.
+
+> but the mmc_erase function will return
+> -EOPNOTSUPP in such a case. I think that this results in the
+> mmc_blk_issue_discard_rq function (from 2/5) also returning
+> -EOPNOTSUPP whenever mmc_card_sd(card) is true:
+> 
+>>From 2/5:
+> +       if (mmc_can_trim(card))
+> +               arg = MMC_TRIM_ARG;
+> +       else
+> +               arg = MMC_ERASE_ARG;
+> +
+> +       err = mmc_erase(card, from, nr, arg);
+> 
+> Also, there is some duplication between the sec_feature_support
+> checking in mmc_erase and in the mmc_can* functions; If mmc_erase
+> could call the mmc_can_* functions then the the bit-checking logic
+> could be centralized.
+
+I can do that if there is a V5 but I do not think it is worth
+rolling another set of patches just for that.
 
 > 
 > 
-> > -----Original Message-----
-> > From: Nicolas Pitre [mailto:nico@fluxnic.net]
-> > Sent: Wednesday, July 07, 2010 9:03 AM
-> > To: Roger Quadros
-> > Cc: Hunter Adrian (Nokia-MS/Helsinki); Ohad Ben-Cohen; linux-
-> > wireless@vger.kernel.org; linux-mmc@vger.kernel.org; linux-
-> > omap@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
-> > linux@arm.linux.org.uk; Chikkature Rajashekar Madhusudhan; Coelho Luciano
-> > (Nokia-MS/Helsinki); akpm@linux-foundation.org; San Mehat
-> > Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device
-> > support
-> > 
-> > On Wed, 7 Jul 2010, Roger Quadros wrote:
-> > 
-> > > On 07/06/2010 10:51 PM, Hunter Adrian (Nokia-MS/Helsinki) wrote:
-> > > > For eMMC in omap_hsmmc, this is all done via claim_host / release_host
-> > > > which call ->enable() / ->disable() methods.  omap_hsmmc makes use of
-> > > > mmc_power_restore_host() which calls host->bus_ops->power_restore()
-> > > > which is not implemented for SDIO, but for MMC and SD it reinitializes
-> > > > the card.
-> > 
-> > This is IMHO a really bad design.  The power control decision has to
-> > come from the top, not from the bottom.  And certainly not with a
-> > U-turn dependency the omap_hsmmc is using.
-> > 
-> > I regret to say this, but the omap_hsmmc driver is becoming a total
-> > mess.  The host controller driver has to be a dumb interface serving
-> > requests from the hardware used by the upper layer stack, not the place
-> > where decisions such as power handling should be made.  Think of it like
-> > an ethernet driver.  No ethernet driver in Linux is telling the IP stack
-> > when to shut down.
-> > 
+>> /*
+>> + * Fetch and process SD Status register.
+>> + */
+>> +static int mmc_read_ssr(struct mmc_card *card)
+>> +{
 > 
-> The point is that MMC/SD core files were patched to provide this kind of a
-> support. Any controller driver can use that framework today, right?. As an
-> example omap_hsmmc driver was patched and it works fine.
+> It looks like the conventional function prefix for SD-specific
+> functions in the rest of this file is mmc_sd_ ; 'mmc_read_ssr' ->
+> 'mmc_sd_read_ssr'  or -> 'mmc_read_sd_sr' perhaps?
 
-It is not because you are twisting the layers and customizing the core 
-stack around your own controller that it is good software design.
+Well there is also mmc_decode_*, and mmc_read_switch so the other
+functions that do smilar things also do not follow that convention.
 
-And the presence of the mmc_power_restore_host() code doesn't mean it is 
-sane.  My point is that no one should ever use that, not even 
-omap_hsmmc.
+> 
+>> +       ssr = kmalloc(64, GFP_KERNEL);
+> 
+> Why '64' instead of 'sizeof(*ssr)' ?
 
-Proof: it works so fine that now you must come up with yet another 
-contorted hack piled on top called "fake^H^H^H^Hsoftware insert/remove 
-events" to support power handling with SDIO cards.
+sizeof(*ssr) is 4
 
-This MMC_CAP_DISABLE is ridiculous.  Why would this have to be a host 
-capability?  This should be a core feature that should be _transparent_ 
-to all hosts with no changes to any of the host drivers.  When the core 
-code knows that the card can be shut down after some idle period, it 
-should do so with the *existing* API calls, namely the set_ios method.  
-In the SDIO case it would be a simple matter of mapping the 
-sdio_release_power() onto that.  Instead, some contorted power 
-management support was sneaked in, which is misdesigned to the point of 
-breaking proper SDIO support for which more misdesigned features are now 
-needed to work around the former ones.
+> 
+> Best Regards,
+> Ben Gardiner
+> 
+> ---
+> Nanometrics Inc.
+> http://www.nanometrics.ca
+> 
 
-Now the OMAP driver is becoming a stack of its own, making decisions 
-that clearly should be made at a higher level of abstraction.  To me 
-this denotes some laziness from the involved developers who didn't take 
-the time to design something sensible and generic in the core code, but 
-rather hacked a quick solution specific to omap_hmmc.c.  Of course the 
-former would require a greater understanding of common code and some 
-additional effort to make the solution truly generic.  Instead, the easy 
-solution was taken which is to stuff magic behaviors in a host driver 
-while other people are not paying as much attention to it than core 
-code.
-
-Needless to say that I'm not impressed at all.
-
-
-Nicolas
