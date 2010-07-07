@@ -1,127 +1,86 @@
-From: Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
-Date: Wed, 07 Jul 2010 11:02:07 +0300
-Message-ID: <4C34347F.8030000@nokia.com>
-References: <1278376666-3509-1-git-send-email-ohad@wizery.com> <1278376666-3509-12-git-send-email-ohad@wizery.com> <4C32EF19.1000604@nokia.com> <AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com> <4C3306F4.8060907@nokia.com> <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com> <4C333E0D.2070601@nokia.com> <alpine.LFD.2.00.1007061316010.6020@xanadu.home> <4C338927.5020400@nokia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <4C338927.5020400-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Hunter Adrian (Nokia-MS/Helsinki)" <adrian.hunter-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
-Cc: Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: [PATCH V4 3/5] omap_hsmmc: Add erase capability
+Date: Wed, 07 Jul 2010 14:17:41 +0300
+Message-ID: <20100707111741.24979.38696.sendpatchset@ahunter-work.research.nokia.com>
+References: <20100707111716.24979.68940.sendpatchset@ahunter-work.research.nokia.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100707111716.24979.68940.sendpatchset@ahunter-work.research.nokia.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/06/2010 10:51 PM, Hunter Adrian (Nokia-MS/Helsinki) wrote:
-> Nicolas Pitre wrote:
->> On Tue, 6 Jul 2010, Roger Quadros wrote:
->>
->>> On 07/06/2010 03:53 PM, ext Ohad Ben-Cohen wrote:
->>>> Hi Roger,
->>>>
->>>> On Tue, Jul 6, 2010 at 1:35 PM, Roger Quadros<roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
->>>> wrote:
->>>>> My point is that shouldn't this be handled by SDIO core?
->>>> Care to explain what you mean / give a code example ?
->>> If the Power enable GPIO can be treated as SDIO slot supply (i.e. vmmc), then
->>> the SDIO/MMC core should tackle it, just like it deals with supply for slots
->>> with removable cards.
->>
->> Exact.
->>
->>>> You need card detect events in order to trigger card&   sdio function
->>>> initialization and removals.
->>
->> Why would you trigger function initialization and removal?  Just to turn
->> off power?  That's a bit like pulling off the battery from your laptop
->> when you want to suspend it.  There is a better way to go about things.
->>
->>>> Please share any alternative approach you may be thinking on.
->>> OK, this is how I see it.
->>>
->>> - Treat the non-removable card as non-removable. So no need to do card detect
->>> emulation.
->>>
->>> - Treat the GPIO power enable on wl1271 as VMMC supply. Use fixed regulator
->>> framework to define this regulator&  supply. Even though you mention that it
->>> is not actually a supply, it fits well in the fixed supply framework.
->>>
->>> - When the host controller is enumerated, the mmc core will power up the slot,
->>> find the sdio card, and probe the function driver (i.e. wl1271_sdio).
->>>
->>> - if interface is not in use, the function driver must release the sdio host,
->>> and this should eventually disable the vmmc supply.
->>>
->>> - Whenever the wlan interface must be brought up, wl1271_sdio, can claim the
->>> sdio host. this will cause the vmmc supply to be enabled, for as long as the
->>> interface is up.
->>>
->>> Does this address all issues?
->>
->> This is mostly all good, except that claiming/releasing the SDIO host is
->> about access to the bus.  It must be claimed right before doing any IO,
->> and released right after that, even when the card is expected to remain
->> powered.  This is not the proper place to hook power control.
->>
->> Another function pair would be needed instead, which would do almost
->> like the suspend/resume code is already doing.  Something like:
->>
->> /*
->>   * Indicate to the core SDIO layer that we're not requiring that the
->>   * function remain powered.  If all functions for the card are in the
->>   * same "no power" state, then the host controller can remove power from
->>   * the card.  Note: the function driver must preserve hardware states if
->>   * necessary.
->>   */
->> int sdio_release_power(struct sdio_func *func);
->>
->> /*
->>   * Indicate to the core SDIO layer that we want power back for this
->>   * SDIO function.  The power may or may not actually have been removed
->>   * since last call to sdio_release_power(), so the function driver must
->>   * not assume any preserved state at the hardware level and re-perform
->>   * all the necessary hardware config.  This function returns 0 when
->>   * power is actually restored, or some error code if this cannot be
->>   * achieved.  One error reason might be that the card is no longer
->>   * available on the bus (was removed while powered down and card
->>   * detection didn't trigger yet).
->>   */
->> int sdio_claim_power(struct sdio_func *func);
->>
->> That's it.  When the network interface is down and the hardware is not
->> needed, you call sdio_release_power().  When the request to activate the
->> network interface is received, you call sdio_claim_power() and configure
->> the hardware appropriately.  If sdio_claim_power() returns an error,
->> then you just return an error to the network request, and eventually the
->> driver's remove method will be called if this is indeed because the card
->> was removed.
->>
->> In the core SDIO code, this is almost identical to a suspend/resume
->> request, except that the request comes from the function driver instead
->> of the core MMC code.
->
-> For eMMC in omap_hsmmc, this is all done via claim_host / release_host
-> which call ->enable() / ->disable() methods.  omap_hsmmc makes use of
-> mmc_power_restore_host() which calls host->bus_ops->power_restore()
-> which is not implemented for SDIO, but for MMC and SD it reinitializes
-> the card.
+>From db31a11109e7f0c89a7a9ca70ad03beff354aa8e Mon Sep 17 00:00:00 2001
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Date: Tue, 18 May 2010 17:33:13 +0300
+Subject: [PATCH 3/5] omap_hsmmc: Add erase capability
 
-Shouldn't the power control intelligence (i.e. when to turn power ON/OFF) lie 
-with the bus drivers?
+Disable the data (busy) timeout for erases and set the
+MMC_CAP_ERASE capability.
 
->
-> Set omap2_hsmmc_info mmc[x] {.nonremovable=true, .power_saving=true} and
-> implement host->bus_ops->power_restore() for SDIO, then the power will
-> go off 9 seconds after sdio_release_host() is called.  Then tweak omap_hsmmc
-> so that it doesn't wait 9 seconds for the SDIO case
->
-is the wl1271 supposed to be used only with omap_hsmmc? We need to have a 
-solution that works neatly irrespective of which host controller is being used.
+Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   13 ++++++++++---
+ 1 files changed, 10 insertions(+), 3 deletions(-)
 
-regards,
--roger
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index a0c8515..868498d 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -28,6 +28,7 @@
+ #include <linux/clk.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/core.h>
++#include <linux/mmc/mmc.h>
+ #include <linux/io.h>
+ #include <linux/semaphore.h>
+ #include <linux/gpio.h>
+@@ -78,6 +79,7 @@
+ #define INT_EN_MASK		0x307F0033
+ #define BWR_ENABLE		(1 << 4)
+ #define BRR_ENABLE		(1 << 5)
++#define DTO_ENABLE		(1 << 20)
+ #define INIT_STREAM		(1 << 1)
+ #define DP_SELECT		(1 << 21)
+ #define DDIR			(1 << 4)
+@@ -523,7 +525,8 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
+ 		dev_dbg(mmc_dev(host->mmc), "MMC Clock is not stoped\n");
+ }
+ 
+-static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host)
++static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
++				  struct mmc_command *cmd)
+ {
+ 	unsigned int irq_mask;
+ 
+@@ -532,6 +535,10 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host)
+ 	else
+ 		irq_mask = INT_EN_MASK;
+ 
++	/* Disable timeout for erases */
++	if (cmd->opcode == MMC_ERASE)
++		irq_mask &= ~DTO_ENABLE;
++
+ 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+ 	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+ 	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+@@ -782,7 +789,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
+ 		mmc_hostname(host->mmc), cmd->opcode, cmd->arg);
+ 	host->cmd = cmd;
+ 
+-	omap_hsmmc_enable_irq(host);
++	omap_hsmmc_enable_irq(host, cmd);
+ 
+ 	host->response_busy = 0;
+ 	if (cmd->flags & MMC_RSP_PRESENT) {
+@@ -2094,7 +2101,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	mmc->max_seg_size = mmc->max_req_size;
+ 
+ 	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+-		     MMC_CAP_WAIT_WHILE_BUSY;
++		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE;
+ 
+ 	switch (mmc_slot(host).wires) {
+ 	case 8:
+-- 
+1.6.3.3
