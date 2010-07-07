@@ -1,148 +1,166 @@
-From: Ben Gardiner <bengardiner@nanometrics.ca>
-Subject: Re: [PATCH V4 1/5] mmc: Add erase, secure erase, trim and secure trim
-	operations
-Date: Wed, 7 Jul 2010 16:41:14 -0400
-Message-ID: <AANLkTikWNzuAOQlQkixgX4ARcjVSxaKDN77LTeE0isC-@mail.gmail.com>
-References: <20100707111716.24979.68940.sendpatchset@ahunter-work.research.nokia.com>
-	<20100707111723.24979.32020.sendpatchset@ahunter-work.research.nokia.com>
-	<AANLkTinfDOlL7iKP4Qmb0J4xq_I_nNEnSbokCOkYmCSn@mail.gmail.com>
-	<4C34CFDD.5030900@nokia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: akpm@linux-foundation.org
+Subject: + mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-fix.patch added to -mm tree
+Date: Wed, 07 Jul 2010 14:36:16 -0700
+Message-ID: <201007072136.o67LaGUv027942@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:59984 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755945Ab0GGUlQ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2010 16:41:16 -0400
-In-Reply-To: <4C34CFDD.5030900@nokia.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:44934 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757457Ab0GGVg1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2010 17:36:27 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>, Kyungmin Park <kmpark@infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
+To: mm-commits@vger.kernel.org
+Cc: akpm@linux-foundation.org, david-b@pacbell.net, linux-mmc@vger.kernel.org, maximlevitsky@gmail.com, randy.dunlap@oracle.com, stern@rowland.harvard.edu
 
-On Wed, Jul 7, 2010 at 3:05 PM, Adrian Hunter <adrian.hunter@nokia.com>=
- wrote:
-> Ben Gardiner wrote:
->>
->> On Wed, Jul 7, 2010 at 7:17 AM, Adrian Hunter <adrian.hunter@nokia.c=
-om>
->> wrote:
->>>
->>> From 7f01ad3c4be6ec09318176db12db66f353b526e0 Mon Sep 17 00:00:00 2=
-001
->>
->>> SD/MMC cards tend to support an erase operation. =A0In addition,
->>> eMMC v4.4 cards can support secure erase, trim and secure trim
->>> operations that are all variants of the basic erase command.
->>
->> This is great. I am interested primarily in SD media.
->>
->> Please forgive my naive perspective: it seems that with the features
->> enabled by this patchset and a filesystem that is capable of issuing
->> erase block commands, the wear-leveling on SD media will be improved
->> -- much like with CF TRIM commands. Do you also think that is the
->> case? I would be very interested in hearing your expert opinion on
->> this.
->
-> I am sorry but I don't know. =A0Wear-levelling in cards tends to be k=
-ept
-> secret by the manufacturers. =A0However, it is not clear to me that c=
-ards
-> bother to record whether or not anything has been erased. =A0 For exa=
-mple,
-> erase a card twice - it takes the same amount of time the second time
-> as the first time, whereas if the card knew it was already erased, wh=
-y
-> wasn't the second time much quicker?
 
-No worries. I'm happy to hear your opinion anyways.
+The patch titled
+     mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-fix
+has been added to the -mm tree.  Its filename is
+     mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-fix.patch
 
-Interesting observation re: erase time of cards, I assume that is
-"erase" as in the SD erase operations as proposed in this patch as
-opposed to erase as in 'mkfs'.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
->>
->> I have a couple comments regarding mostly the SD support introduced =
-in
->> this patch. Patches 2..5 of 5 seem fine to me but I'm not sure I'm
->> qualified to add acks or reviewed-by's.
->>
->>> +int mmc_erase(struct mmc_card *card, unsigned int from, unsigned i=
-nt nr,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 unsigned int arg)
->>> +{
->>> + =A0 =A0 =A0 unsigned int rem, to =3D from + nr;
->>> +
->>> + =A0 =A0 =A0 if (!(card->host->caps & MMC_CAP_ERASE) ||
->>> + =A0 =A0 =A0 =A0 =A0 !(card->csd.cmdclass & CCC_ERASE))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EOPNOTSUPP;
->>> +
->>> + =A0 =A0 =A0 if (!card->erase_size)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EOPNOTSUPP;
->>> +
->>> + =A0 =A0 =A0 if (mmc_card_sd(card) && arg !=3D MMC_ERASE_ARG)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EOPNOTSUPP;
->>> +
->>> + =A0 =A0 =A0 if ((arg & MMC_SECURE_ARGS) &&
->>> + =A0 =A0 =A0 =A0 =A0 !(card->ext_csd.sec_feature_support & EXT_CSD=
-_SEC_ER_EN))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EOPNOTSUPP;
->>> +
->>> + =A0 =A0 =A0 if ((arg & MMC_TRIM_ARGS) &&
->>> + =A0 =A0 =A0 =A0 =A0 !(card->ext_csd.sec_feature_support & EXT_CSD=
-_SEC_GB_CL_EN))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EOPNOTSUPP;
->>> +
->>
->>> +int mmc_can_trim(struct mmc_card *card)
->>> +{
->>> + =A0 =A0 =A0 if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_G=
-B_CL_EN)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 1;
->>> + =A0 =A0 =A0 return 0;
->>> +}
->>> +EXPORT_SYMBOL(mmc_can_trim);
->>
->> It looks like mmc_can_trim(card) would return true when
->> mmc_card_sd(card) is true;
->
-> It will return false for SD. =A0card->ext_csd.sec_feature_support
-> is only used by MMC.
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-Makes sense now, thanks.
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
->>> /*
->>> + * Fetch and process SD Status register.
->>> + */
->>> +static int mmc_read_ssr(struct mmc_card *card)
->>> +{
->>
->> It looks like the conventional function prefix for SD-specific
->> functions in the rest of this file is mmc_sd_ ; 'mmc_read_ssr' ->
->> 'mmc_sd_read_ssr' =A0or -> 'mmc_read_sd_sr' perhaps?
->
-> Well there is also mmc_decode_*, and mmc_read_switch so the other
-> functions that do smilar things also do not follow that convention.
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-Good point.
+------------------------------------------------------
+Subject: mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-fix
+From: Andrew Morton <akpm@linux-foundation.org>
 
->>
->>> + =A0 =A0 =A0 ssr =3D kmalloc(64, GFP_KERNEL);
->>
->> Why '64' instead of 'sizeof(*ssr)' ?
->
-> sizeof(*ssr) is 4
+fix CONFIG_PM-n linkage, small cleanups
 
-Right -- my mistake :)
-
-I guess I was _thinking_ 16*sizeof(*ssr)  or SSR_SIZE*sizeof(*ssr)
-instead of a magic number '64'. I see now that this wouldn't be the
-only kmalloc of a magic number in sd.c -- so I'll stop being so picky.
-
-Reviewed-by: Ben Gardiner <bengardiner@nanometrics.ca>
-
+Cc: <linux-mmc@vger.kernel.org>
+Cc: Alan Stern <stern@rowland.harvard.edu>
+Cc: David Brownell <david-b@pacbell.net>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>
+Reported-by: Randy Dunlap <randy.dunlap@oracle.com>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
-Ben Gardiner
-Nanometrics Inc.
-http://www.nanometrics.ca
+
+ drivers/mmc/core/core.c  |    7 +++----
+ include/linux/mmc/host.h |    4 ++++
+ 2 files changed, 7 insertions(+), 4 deletions(-)
+
+diff -puN drivers/mmc/core/core.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-fix drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-fix
++++ a/drivers/mmc/core/core.c
+@@ -1316,11 +1316,12 @@ int mmc_resume_host(struct mmc_host *hos
+ 
+ 	return err;
+ }
++EXPORT_SYMBOL(mmc_resume_host);
+ 
+ /* Do the card removal on suspend if card is assumed removeable
+  * Do that in pm notifier while userspace isn't yet frozen, so we will be able
+-   to sync the card.
+-*/
++ * to sync the card.
++ */
+ int mmc_pm_notify(struct notifier_block *notify_block,
+ 					unsigned long mode, void *unused)
+ {
+@@ -1348,8 +1349,6 @@ int mmc_pm_notify(struct notifier_block 
+ 	return 0;
+ }
+ 
+-EXPORT_SYMBOL(mmc_resume_host);
+-
+ #endif
+ 
+ static int __init mmc_init(void)
+diff -puN include/linux/mmc/host.h~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-fix include/linux/mmc/host.h
+--- a/include/linux/mmc/host.h~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-fix
++++ a/include/linux/mmc/host.h
+@@ -258,8 +258,12 @@ int mmc_card_can_sleep(struct mmc_host *
+ int mmc_host_enable(struct mmc_host *host);
+ int mmc_host_disable(struct mmc_host *host);
+ int mmc_host_lazy_disable(struct mmc_host *host);
++#ifdef CONFIG_PM
+ int mmc_pm_notify(struct notifier_block *notify_block, unsigned long mode,
+ 		  void *unused);
++#else
++#define mmc_pm_notify NULL
++#endif
+ 
+ static inline void mmc_set_disable_delay(struct mmc_host *host,
+ 					 unsigned int disable_delay)
+_
+
+Patches currently in -mm which might be from akpm@linux-foundation.org are
+
+origin.patch
+ipc-semc-bugfix-for-semop-not-reporting-successful-operation.patch
+mm-vmap-area-cache-fix.patch
+linux-next.patch
+next-remove-localversion.patch
+i-need-old-gcc.patch
+revert-ed5aa19b93da2c094b6647762774a8022e4e1d6c.patch
+revert-9652e31db6d841e291531547b3f4f12b5aeb42a9.patch
+revert-fdc8302019d9bc10729cd3e8d348571e833388aa.patch
+revert-324d76561842e551051e2a897b958b0539f6867b.patch
+revert-e92e80797e7eaaf2a9bbd586c63f7c6bd3177276.patch
+revert-d04ab5241f301bdcad2f6beb0ecd326bd82100a7.patch
+revert-3ab7269a6058c136795ce9417f7051a0edde60db.patch
+revert-4624469822455b4accc886557f6c997ccdd59066.patch
+include-linux-fsh-complete-hexification-of-fmode_-constants.patch
+acpi-fix-bogus-preemption-logic-fix.patch
+intel_menlow-fix-memory-leaks-in-error-path-fix.patch
+x86-cpufreq-make-trace_power_frequency-cpufreq-driver-independent-fix.patch
+compal-laptop-added-jhl90-battery-hwmon-interface.patch
+gcc-46-btrfs-clean-up-unused-variables-bugs-fix.patch
+dib3000mc-reduce-large-stack-usage-fix.patch
+hpet-factor-timer-allocate-from-open.patch
+leds-route-kbd-leds-through-the-generic-leds-layer.patch
+arch-um-drivers-remove-duplicate-structure-field-initialization.patch
+3x59x-fix-pci-resource-management.patch
+altera_uart-simplify-altera_uart_console_putc-checkpatch-fixes.patch
+serial-mcf-dont-take-spinlocks-in-already-protected-functions-fix.patch
+sched-make-sched_param-argument-static-variables-in-some-sched_setscheduler-caller.patch
+scsi-remove-private-bit-macros.patch
+vfs-use-kmalloc-to-allocate-fdmem-if-possible.patch
+mm.patch
+mm-track-the-root-oldest-anon_vma-fix.patch
+oom-improve-commentary-in-dump_tasks.patch
+oom-sacrifice-child-with-highest-badness-score-for-parent-protect-dereferencing-of-tasks-comm.patch
+oom-select-task-from-tasklist-for-mempolicy-ooms-add-has_intersects_mems_allowed-uma-variant.patch
+mempolicy-reduce-stack-size-of-migrate_pages-fix.patch
+vmscan-tracing-add-trace-events-for-lru-page-isolation-checkpatch-fixes.patch
+vmscan-simplify-shrink_inactive_list-checkpatch-fixes.patch
+vmscan-remove-unnecessary-temporary-vars-in-do_try_to_free_pages-checkpatch-fixes.patch
+oom-dont-try-to-kill-oom_unkillable-child-checkpatch-fixes.patch
+oom-move-badness-declaration-into-oomh.patch
+frv-duplicate-output_buffer-of-e03-checkpatch-fixes.patch
+include-linux-compiler-gcch-use-__same_type-in-__must_be_array.patch
+drivers-misc-support-for-the-pressure-sensor-bmp085-from-bosch-sensortec-fix.patch
+drivers-misc-support-for-the-pressure-sensor-bmp085-from-bosch-sensortec-update-checkpatch-fixes.patch
+mmc-recognize-csd-structure-fix.patch
+mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume.patch
+mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-fix.patch
+mmc-add-jz4740-mmc-driver-checkpatch-fixes.patch
+mmc-add-jz4740-mmc-driver-fix.patch
+fix-vc-vc_origin-on-take_over_console-checkpatch-fixes.patch
+rtc-fixes-and-new-functionality-for-fm3130-fix.patch
+drivers-video-via-via-gpioc-fix-warning.patch
+delay-accounting-re-implement-c-for-getdelaysc-to-report-information-on-a-target-command-checkpatch-fixes.patch
+lib-bugc-make-warn-implementation-match-the-kernel-panicc-one-checkpatch-fixes.patch
+kfifo-add-example-files-to-the-kernel-sample-directory-checkpatch-fixes.patch
+vfs-add-super-operation-writeback_inodes-fix.patch
+reiser4-export-remove_from_page_cache-fix.patch
+reiser4-export-find_get_pages.patch
+reiser4.patch
+reiser4-writeback_inodes-implementation-fix.patch
+reiser4-fixups.patch
+reiser4-broke.patch
+journal_add_journal_head-debug.patch
+slab-leaks3-default-y.patch
+put_bh-debug.patch
+getblk-handle-2tb-devices.patch
+
