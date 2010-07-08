@@ -1,88 +1,133 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 3/3] sdhci-pltfm: Add support for CNS3xxx SoC devices
-Date: Thu, 8 Jul 2010 19:36:29 +0400
-Message-ID: <20100708153629.GA418@oksana.dev.rtsoft.ru>
-References: <20100625180527.GA11280@oksana.dev.rtsoft.ru>
- <20100625180644.GC18241@oksana.dev.rtsoft.ru>
- <20100701134839.d7cb4841.akpm@linux-foundation.org>
+From: hardik patel <hk5patel@gmail.com>
+Subject: Re: Re: SD Driver : FAT: FAT read failed (blocknr 8) in sd card error
+	while removing sd card during writing
+Date: Thu, 8 Jul 2010 23:38:20 +0530
+Message-ID: <AANLkTimpZg7P4mp2tCIuigu-aKVC8m6vEt5vDVz8nMLS@mail.gmail.com>
+References: <29638758.295271278594347002.JavaMail.weblogic@epml07>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:46971 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756239Ab0GHPgj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 11:36:39 -0400
-Content-Disposition: inline
-In-Reply-To: <20100701134839.d7cb4841.akpm@linux-foundation.org>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:51629 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756326Ab0GHSIV convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 14:08:21 -0400
+Received: by yxk8 with SMTP id 8so200650yxk.19
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Jul 2010 11:08:20 -0700 (PDT)
+In-Reply-To: <29638758.295271278594347002.JavaMail.weblogic@epml07>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Ben Dooks <ben@simtec.co.uk>, Richard =?utf-8?Q?R=C3=B6jfors?= <richard.rojfors@pelagicore.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: singh.madhav@samsung.com
+Cc: Ethan Du <ethan.too@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Sorry for the delayed response,
+Hi Madhav,
 
-On Thu, Jul 01, 2010 at 01:48:39PM -0700, Andrew Morton wrote:
-> On Fri, 25 Jun 2010 22:06:44 +0400
-> Anton Vorontsov <avorontsov@mvista.com> wrote:
-> 
-> > There's nothing special, just SoC-specific ops and quirks.
-> > 
-> > ...
-> >
-> > +static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
-> > +{
-> > +	struct device *dev = mmc_dev(host->mmc);
-> > +	int div = 1;
-> > +	u16 clk;
-> > +	unsigned long timeout;
-> > +
-> > +	if (clock == host->clock)
-> > +		return;
-> 
-> I assume that mmc core prevents this function from being exectued twice
-> at the same time?
+thanks for your interest... I have card detect register so mmc_get_cd
+function i can check whether card is inserted or not ... so in sd host
+controller driver can detect that properly... but i think block driver
+does not detect that .... where i have to flush my request queue... i
+have gone through block.c and queue.c file which generate mmc_block.ko
+file but not sure where to modify... can any one guide me more
 
-Yep, it's called under spin_lock_irqsave(&host->lock, flags).
 
-[...]
-> > +	timeout = 20;
-> > +	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-> > +			& SDHCI_CLOCK_INT_STABLE)) {
-> > +		if (timeout == 0) {
-> > +			dev_warn(dev, "clock is unstable");
-> > +			break;
-> > +		}
-> > +		timeout--;
-> > +		mdelay(1);
-> 
-> Could we have used the more polite msleep() here?
+On Thu, Jul 8, 2010 at 6:35 PM, MADHAV SINGHCHAUHAN
+<singh.madhav@samsung.com> wrote:
+> Card removal not detected by driver?
+> You should see a line of log if card removal is detected:
+> card xxxx removed
+>
+> Would you describe how do you detect card removal/insertion on your b=
+oard?
+>
+> Regards,
+> -Ethan
+>
+> On Thu, Jul 8, 2010 at 6:05 PM, hardik patel <hk5patel@gmail.com> wro=
+te:
+>> I have sd card on board ... During recording/writing SD card, remove
+>> SD card ... then i am getting endless error in dmesg as below :
+>>
+>> end_request: I/O error, dev mmcblk0, sector 24
+>> FAT: FAT read failed (blocknr 8)
+>> mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
+>> sending read/write command, response 0x0, card status 0x0
+>> Block mmc_blk_issue_rq function call 346
+>> end_request: I/O error, dev mmcblk0, sector 4
+>> FAT: FAT read failed (blocknr 4)
+>> MMC: killing requests for dead queue
+>> end_request: I/O error, dev mmcblk0, sector 8
+>> FAT: FAT read failed (blocknr 8)
+>> FAT: FAT read failed (blocknr 4)
+>> FAT: FAT read failed (blocknr 8)
+>> FAT: FAT read failed (blocknr 4)
+>> FAT: FAT read failed (blocknr 8)
+>> FAT: FAT read failed (blocknr 4)
+>> FAT: FAT read failed (blocknr 8)
+>>
+>> How to stop this message ... what is ideal situation when we remove
+>> card while writing ...... can u help me what to do ?
+>>
+>>>When we insert the card hot plug dameon start sending the request to=
+ block layer =A0and kernel block layer
+>>>start sending the request to card.But when you remove the card in be=
+tween request queue is not flushed properly..
+>>>so you need to flush your request queue at appropriate time.Also ple=
+ase note that even that you flush your request queue
+>>>at appropriate time some messages will come.
+>> where is the problem here? sd host controler driver problem or block
+>> driver problem or file system problem
+>>
+>> Note: I have formatted sd card with FAT32 file system .
+>>
+>>
+>>
+>> With EXT3 File system :
+>>
+>> Remove SD card while writing/recording we got error messages like
+>> below. but this is not endless. After some time it stops.
+>>
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> end_request: I/O error, dev mmcblk0, sector 156536
+>> mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
+>> sending read/write command, response 0x0, card status 0x0
+>> mmcblk0: error -110 requesting status
+>> end_request: I/O error, dev mmcblk0, sector 4736
+>> Aborting journal on device mmcblk0p1.
+>> ext3_abort called.
+>> EXT3-fs error (device mmcblk0p1): ext3_journal_start_sb: Detected
+>> aborted journal
+>> Remounting filesystem read-only
+>> end_request: I/O error, dev mmcblk0, sector 4448
+>> journal commit I/O error
+>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at ?http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+>
+>
+>
+>
+>
 
-Unfortunately not, we're in the atomic context.
 
-[...]
-> > --- a/drivers/mmc/host/sdhci-pltfm.c
-> > +++ b/drivers/mmc/host/sdhci-pltfm.c
-> > @@ -158,6 +158,9 @@ static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
-> >  
-> >  static const struct platform_device_id sdhci_pltfm_ids[] = {
-> >  	{ "sdhci", },
-> > +#ifdef CONFIG_MMC_SDHCI_CNS3XXX
-> > +	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
-> > +#endif
-> 
-> What the heck is this kernel_ulong_t thing and why did `struct
-> platform_device_id' see a need to invent it??
 
-It's not only platform_device_id's thing. Sometimes drivers just
-pass a constant instead of a pointer (e.g. DEVICE_IS_FOO,
-DEVICE_IS_BAR), for example see drivers/hwmon/lm75.c (enum
-lm75_type).
+--=20
+Regards,
+Hardik
 
-Other than this I don't think that there's a good reason for it.
-
-Thanks,
-
--- 
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
+"If you are doing what you have always been doing then expect what you
+have always been getting."
