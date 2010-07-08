@@ -1,113 +1,131 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH 04/15] mmc: support embedded data field in mmc_host
+From: "Ghorai, Sukumar" <s-ghorai-l0cyMroinI0@public.gmane.org>
+Subject: RE: [PATCH 15/15] omap: zoom: enable WLAN device
 Date: Thu, 8 Jul 2010 09:09:22 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B5@dbde02.ent.ti.com>
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B7@dbde02.ent.ti.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
- <1278376666-3509-5-git-send-email-ohad@wizery.com>
+ <1278376666-3509-16-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:43538 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753050Ab0GHDjy convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2010 23:39:54 -0400
-In-Reply-To: <1278376666-3509-5-git-send-email-ohad@wizery.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1278376666-3509-16-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-omap-u79uwXL29TbrhsbdSgBK9A@public.gmane.org
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "Ben-cohen, Ohad" <ohadb-l0cyMroinI0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap@vger.kernel.o
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Ben-cohen, Ohad" <ohadb@ti.com>
 
 
 
 > -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Ohad Ben-Cohen
+> From: linux-mmc-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:linux-mmc-
+> owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Ohad Ben-Cohen
 > Sent: Tuesday, July 06, 2010 6:08 AM
-> To: linux-wireless@vger.kernel.org; linux-mmc@vger.kernel.org; linux-
-> omap@vger.kernel.org
-> Cc: linux-arm-kernel@lists.infradead.org; linux@arm.linux.org.uk;
+> To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
+> omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org;
 > Chikkature Rajashekar, Madhusudhan; Luciano Coelho; akpm@linux-
 > foundation.org; San Mehat; Ben-cohen, Ohad
-> Subject: [PATCH 04/15] mmc: support embedded data field in mmc_host
+> Subject: [PATCH 15/15] omap: zoom: enable WLAN device
 > 
-> From: Ohad Ben-Cohen <ohadb@ti.com>
+> From: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 > 
-> Add support to set/get mmc_host private embedded
-> data.
+> Make it possible to build and use TI's wl1271
+> device on the ZOOM boards.
 > 
-> This is needed to allow software to dynamically
-> create (and remove) SDIO functions which represents
-> embedded SDIO devices.
+> The device is an embedded SDIO WLAN chip
+> that is hardwired to the 3rd mmc controller
+> of the ZOOM2/3 boards.
 > 
-> Typically, it will be used to set the context of
-> a driver that is creating a new SDIO function
-> (and would then expect to be able to get that context
-> back upon creation of the new sdio func).
-> 
-> Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
+> Signed-off-by: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
 > ---
->  drivers/mmc/core/Kconfig |    8 ++++++++
->  include/linux/mmc/host.h |   16 ++++++++++++++++
->  2 files changed, 24 insertions(+), 0 deletions(-)
+>  arch/arm/mach-omap2/Kconfig                  |    5 +++++
+>  arch/arm/mach-omap2/Makefile                 |    1 +
+>  arch/arm/mach-omap2/board-zoom-peripherals.c |   15 +++++++++++++++
+>  3 files changed, 21 insertions(+), 0 deletions(-)
 > 
-> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-> index bb22ffd..ab27eb3 100644
-> --- a/drivers/mmc/core/Kconfig
-> +++ b/drivers/mmc/core/Kconfig
-> @@ -16,3 +16,11 @@ config MMC_UNSAFE_RESUME
+> diff --git a/arch/arm/mach-omap2/Kconfig b/arch/arm/mach-omap2/Kconfig
+> index b31b6f1..7fee11b 100644
+> --- a/arch/arm/mach-omap2/Kconfig
+> +++ b/arch/arm/mach-omap2/Kconfig
+> @@ -131,6 +131,11 @@ config MACH_OMAP_ZOOM3
+>  	depends on ARCH_OMAP3
+>  	select OMAP_PACKAGE_CBP
 > 
->  	  This option sets a default which can be overridden by the
->  	  module parameter "removable=0" or "removable=1".
+> +config OMAP_ZOOM_WLAN
+> +	bool "OMAP Zoom board WLAN support"
+> +	depends on MACH_OMAP_ZOOM2 || MACH_OMAP_ZOOM3
+> +	select MMC_EMBEDDED_SDIO
 > +
-> +config MMC_EMBEDDED_SDIO
-> +	boolean "MMC embedded SDIO device support"
-> +	help
-> +	  If you say Y here, support will be added for embedded SDIO
-> +	  devices (e.g. hardwired embedded WLAN SDIO devices).
-> +	  Such devices require software support for emulating
-> +	  card detect events.
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index f65913c..9a48486 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -209,6 +209,10 @@ struct mmc_host {
->  	struct led_trigger	*led;		/* activity led */
->  #endif
+>  config MACH_CM_T35
+>  	bool "CompuLab CM-T35 module"
+>  	depends on ARCH_OMAP3
+> diff --git a/arch/arm/mach-omap2/Makefile b/arch/arm/mach-omap2/Makefile
+> index ea52b03..ac1bad9 100644
+> --- a/arch/arm/mach-omap2/Makefile
+> +++ b/arch/arm/mach-omap2/Makefile
+> @@ -129,6 +129,7 @@ obj-$(CONFIG_MACH_OMAP_ZOOM3)		+= board-
+> zoom3.o \
+>  					   board-zoom-peripherals.o \
+>  					   hsmmc.o \
+>  					   board-zoom-debugboard.o
+> +obj-y					+= board-zoom-wlan.o
+>  obj-$(CONFIG_MACH_OMAP_3630SDP)		+= board-3630sdp.o \
+>  					   board-zoom-peripherals.o \
+>  					   hsmmc.o
+> diff --git a/arch/arm/mach-omap2/board-zoom-peripherals.c b/arch/arm/mach-
+> omap2/board-zoom-peripherals.c
+> index 6b39849..3128cd4 100644
+> --- a/arch/arm/mach-omap2/board-zoom-peripherals.c
+> +++ b/arch/arm/mach-omap2/board-zoom-peripherals.c
+> @@ -16,11 +16,13 @@
+>  #include <linux/gpio.h>
+>  #include <linux/i2c/twl.h>
+>  #include <linux/regulator/machine.h>
+> +#include <linux/mmc/host.h>
 > 
-> +#ifdef CONFIG_MMC_EMBEDDED_SDIO
-> +	void			*embedded_data;
+>  #include <asm/mach-types.h>
+>  #include <asm/mach/arch.h>
+>  #include <asm/mach/map.h>
+> 
+> +#include <mach/board-zoom.h>
+>  #include <plat/common.h>
+>  #include <plat/usb.h>
+> 
+> @@ -168,6 +170,18 @@ static struct omap2_hsmmc_info mmc[] __initdata = {
+>  		.nonremovable	= true,
+>  		.power_saving	= true,
+>  	},
+> +#ifdef CONFIG_OMAP_ZOOM_WLAN
+> +	{
+> +		.mmc		= 3,
+> +		.wires		= 4,
+> +		.gpio_cd	= -EINVAL,
+> +		.gpio_wp	= -EINVAL,
+> +		.register_embedded_control =
+> +				omap_zoom_wlan_register_embedded_control,
+> +		.virtual_get_cd = omap_zoom_wlan_get_virtual_cd,
+> +		.ocr_mask	= MMC_VDD_165_195,
+> +	},
 > +#endif
-> +
->  	struct dentry		*debugfs_root;
+>  	{}      /* Terminator */
+>  };
 > 
->  	unsigned long		private[0] ____cacheline_aligned;
-> @@ -264,5 +268,17 @@ static inline void mmc_set_disable_delay(struct
-> mmc_host *host,
->  	host->disable_delay = disable_delay;
+> @@ -282,4 +296,5 @@ void __init zoom_peripherals_init(void)
+>  	omap_i2c_init();
+>  	usb_musb_init(&musb_board_data);
+>  	enable_board_wakeup_source();
+> +	omap_zoom_wlan_init();
 >  }
-> 
-> +#ifdef CONFIG_MMC_EMBEDDED_SDIO
-> +static inline void *mmc_get_embedded_data(struct mmc_host *host)
-> +{
-> +	return host->embedded_data;
-> +}
-> +
-> +static inline void mmc_set_embedded_data(struct mmc_host *host, void
-> *data)
-> +{
-> +	host->embedded_data = data;
-> +}
-> +#endif
-> +
-[Ghorai] we can avoid CONFIG_MMC_EMBEDDED_SDIO flag itself. Why we are passing fixed data? We can enquire form card for the functions, features,.. and at runtime itself. And we are adding many compile-time/kconfig options in this patch series.
->  #endif
-> 
+[Ghorai] In general we can avoid OMAP_ZOOM_WLAN and MMC_EMBEDDED_SDIO as kconfig option. 1st one is board specific and 2nd one could be generic sdio code. As I mentioned in other patch too.
 > --
 > 1.7.0.4
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
