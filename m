@@ -1,87 +1,88 @@
-From: MADHAV SINGHCHAUHAN <singh.madhav@samsung.com>
-Subject: Re: Re: SD Driver : FAT: FAT read failed (blocknr 8) in sd card error
-	while removing sd card during writing
-Date: Thu, 08 Jul 2010 13:05:47 +0000 (GMT)
-Message-ID: <29638758.295271278594347002.JavaMail.weblogic@epml07>
-Reply-To: singh.madhav@samsung.com
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH 3/3] sdhci-pltfm: Add support for CNS3xxx SoC devices
+Date: Thu, 8 Jul 2010 19:36:29 +0400
+Message-ID: <20100708153629.GA418@oksana.dev.rtsoft.ru>
+References: <20100625180527.GA11280@oksana.dev.rtsoft.ru>
+ <20100625180644.GC18241@oksana.dev.rtsoft.ru>
+ <20100701134839.d7cb4841.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:45697 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754999Ab0GHNFs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 09:05:48 -0400
-Received: from ep_ms13_bk (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
- with ESMTP id <0L5800K7XPPN3T70@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 08 Jul 2010 22:05:47 +0900 (KST)
-Received: from ep_spt01 (ms13.samsung.com [203.254.225.109])
- by ms13.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTP id <0L5800NEVPPN1U@ms13.samsung.com> for linux-mmc@vger.kernel.org;
- Thu, 08 Jul 2010 22:05:47 +0900 (KST)
-Content-return: prohibited
-MIME-version: 1.0
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:46971 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756239Ab0GHPgj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 11:36:39 -0400
+Content-Disposition: inline
+In-Reply-To: <20100701134839.d7cb4841.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ethan Du <ethan.too@gmail.com>, hardik patel <hk5patel@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Ben Dooks <ben@simtec.co.uk>, Richard =?utf-8?Q?R=C3=B6jfors?= <richard.rojfors@pelagicore.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Q2FyZCByZW1vdmFsIG5vdCBkZXRlY3RlZCBieSBkcml2ZXI/IA0KWW91IHNob3VsZCBzZWUgYSBs
-aW5lIG9mIGxvZyBpZiBjYXJkIHJlbW92YWwgaXMgZGV0ZWN0ZWQ6IA0KY2FyZCB4eHh4IHJlbW92
-ZWQgDQoNCldvdWxkIHlvdSBkZXNjcmliZSBob3cgZG8geW91IGRldGVjdCBjYXJkIHJlbW92YWwv
-aW5zZXJ0aW9uIG9uIHlvdXIgYm9hcmQ/IA0KDQpSZWdhcmRzLCANCi1FdGhhbiANCg0KT24gVGh1
-LCBKdWwgOCwgMjAxMCBhdCA2OjA1IFBNLCBoYXJkaWsgcGF0ZWwgPGhrNXBhdGVsQGdtYWlsLmNv
-bT4gd3JvdGU6IA0KPiBJIGhhdmUgc2QgY2FyZCBvbiBib2FyZCAuLi4gRHVyaW5nIHJlY29yZGlu
-Zy93cml0aW5nIFNEIGNhcmQsIHJlbW92ZSANCj4gU0QgY2FyZCAuLi4gdGhlbiBpIGFtIGdldHRp
-bmcgZW5kbGVzcyBlcnJvciBpbiBkbWVzZyBhcyBiZWxvdyA6IA0KPiANCj4gZW5kX3JlcXVlc3Q6
-IEkvTyBlcnJvciwgZGV2IG1tY2JsazAsIHNlY3RvciAyNCANCj4gRkFUOiBGQVQgcmVhZCBmYWls
-ZWQgKGJsb2NrbnIgOCkgDQo+IG1tY2JsazA6IGVycm9yIC0xMTAgc2VuZGluZyBzdGF0dXMgY29t
-YW5kPDM+bW1jYmxrMDogZXJyb3IgLTExMCANCj4gc2VuZGluZyByZWFkL3dyaXRlIGNvbW1hbmQs
-IHJlc3BvbnNlIDB4MCwgY2FyZCBzdGF0dXMgMHgwIA0KPiBCbG9jayBtbWNfYmxrX2lzc3VlX3Jx
-IGZ1bmN0aW9uIGNhbGwgMzQ2IA0KPiBlbmRfcmVxdWVzdDogSS9PIGVycm9yLCBkZXYgbW1jYmxr
-MCwgc2VjdG9yIDQgDQo+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9ja25yIDQpIA0KPiBNTUM6
-IGtpbGxpbmcgcmVxdWVzdHMgZm9yIGRlYWQgcXVldWUgDQo+IGVuZF9yZXF1ZXN0OiBJL08gZXJy
-b3IsIGRldiBtbWNibGswLCBzZWN0b3IgOCANCj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2Nr
-bnIgOCkgDQo+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9ja25yIDQpIA0KPiBGQVQ6IEZBVCBy
-ZWFkIGZhaWxlZCAoYmxvY2tuciA4KSANCj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2NrbnIg
-NCkgDQo+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9ja25yIDgpIA0KPiBGQVQ6IEZBVCByZWFk
-IGZhaWxlZCAoYmxvY2tuciA0KSANCj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2NrbnIgOCkg
-DQo+IA0KPiBIb3cgdG8gc3RvcCB0aGlzIG1lc3NhZ2UgLi4uIHdoYXQgaXMgaWRlYWwgc2l0dWF0
-aW9uIHdoZW4gd2UgcmVtb3ZlIA0KPiBjYXJkIHdoaWxlIHdyaXRpbmcgLi4uLi4uIGNhbiB1IGhl
-bHAgbWUgd2hhdCB0byBkbyA/IA0KPiANCj4+V2hlbiB3ZSBpbnNlcnQgdGhlIGNhcmQgaG90IHBs
-dWcgZGFtZW9uIHN0YXJ0IHNlbmRpbmcgdGhlIHJlcXVlc3QgdG8gYmxvY2sgbGF5ZXIgIGFuZCBr
-ZXJuZWwgYmxvY2sgbGF5ZXINCj4+c3RhcnQgc2VuZGluZyB0aGUgcmVxdWVzdCB0byBjYXJkLkJ1
-dCB3aGVuIHlvdSByZW1vdmUgdGhlIGNhcmQgaW4gYmV0d2VlbiByZXF1ZXN0IHF1ZXVlIGlzIG5v
-dCBmbHVzaGVkIHByb3Blcmx5Li4NCj4+c28geW91IG5lZWQgdG8gZmx1c2ggeW91ciByZXF1ZXN0
-IHF1ZXVlIGF0IGFwcHJvcHJpYXRlIHRpbWUuQWxzbyBwbGVhc2Ugbm90ZSB0aGF0IGV2ZW4gdGhh
-dCB5b3UgZmx1c2ggeW91ciByZXF1ZXN0IHF1ZXVlDQo+PmF0IGFwcHJvcHJpYXRlIHRpbWUgc29t
-ZSBtZXNzYWdlcyB3aWxsIGNvbWUuDQo+IHdoZXJlIGlzIHRoZSBwcm9ibGVtIGhlcmU/IHNkIGhv
-c3QgY29udHJvbGVyIGRyaXZlciBwcm9ibGVtIG9yIGJsb2NrIA0KPiBkcml2ZXIgcHJvYmxlbSBv
-ciBmaWxlIHN5c3RlbSBwcm9ibGVtIA0KPiANCj4gTm90ZTogSSBoYXZlIGZvcm1hdHRlZCBzZCBj
-YXJkIHdpdGggRkFUMzIgZmlsZSBzeXN0ZW0gLiANCj4gDQo+IA0KPiANCj4gV2l0aCBFWFQzIEZp
-bGUgc3lzdGVtIDogDQo+IA0KPiBSZW1vdmUgU0QgY2FyZCB3aGlsZSB3cml0aW5nL3JlY29yZGlu
-ZyB3ZSBnb3QgZXJyb3IgbWVzc2FnZXMgbGlrZSANCj4gYmVsb3cuIGJ1dCB0aGlzIGlzIG5vdCBl
-bmRsZXNzLiBBZnRlciBzb21lIHRpbWUgaXQgc3RvcHMuIA0KPiANCj4gPT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09IA0KPiA9PT09PT09PT09PT09IA0KPiBlbmRfcmVxdWVzdDogSS9PIGVy
-cm9yLCBkZXYgbW1jYmxrMCwgc2VjdG9yIDE1NjUzNiANCj4gbW1jYmxrMDogZXJyb3IgLTExMCBz
-ZW5kaW5nIHN0YXR1cyBjb21hbmQ8Mz5tbWNibGswOiBlcnJvciAtMTEwIA0KPiBzZW5kaW5nIHJl
-YWQvd3JpdGUgY29tbWFuZCwgcmVzcG9uc2UgMHgwLCBjYXJkIHN0YXR1cyAweDAgDQo+IG1tY2Js
-azA6IGVycm9yIC0xMTAgcmVxdWVzdGluZyBzdGF0dXMgDQo+IGVuZF9yZXF1ZXN0OiBJL08gZXJy
-b3IsIGRldiBtbWNibGswLCBzZWN0b3IgNDczNiANCj4gQWJvcnRpbmcgam91cm5hbCBvbiBkZXZp
-Y2UgbW1jYmxrMHAxLiANCj4gZXh0M19hYm9ydCBjYWxsZWQuIA0KPiBFWFQzLWZzIGVycm9yIChk
-ZXZpY2UgbW1jYmxrMHAxKTogZXh0M19qb3VybmFsX3N0YXJ0X3NiOiBEZXRlY3RlZCANCj4gYWJv
-cnRlZCBqb3VybmFsIA0KPiBSZW1vdW50aW5nIGZpbGVzeXN0ZW0gcmVhZC1vbmx5IA0KPiBlbmRf
-cmVxdWVzdDogSS9PIGVycm9yLCBkZXYgbW1jYmxrMCwgc2VjdG9yIDQ0NDggDQo+IGpvdXJuYWwg
-Y29tbWl0IEkvTyBlcnJvciANCj4gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PSANCj4gLS0gDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
-ZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIA0KPiB0aGUgYm9keSBvZiBhIG1lc3Nh
-Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyANCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBh
-dCA/aHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sIA0KPiANCi0tIA0K
-VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
-IGxpbnV4LW1tYyIgaW4gDQp0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
-a2VybmVsLm9yZyANCk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
-cmcvbWFqb3Jkb21vLWluZm8uaHRtbCANCg0KIA0KIA0KIA0KIA0KDQoNCg==
+Sorry for the delayed response,
 
+On Thu, Jul 01, 2010 at 01:48:39PM -0700, Andrew Morton wrote:
+> On Fri, 25 Jun 2010 22:06:44 +0400
+> Anton Vorontsov <avorontsov@mvista.com> wrote:
+> 
+> > There's nothing special, just SoC-specific ops and quirks.
+> > 
+> > ...
+> >
+> > +static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
+> > +{
+> > +	struct device *dev = mmc_dev(host->mmc);
+> > +	int div = 1;
+> > +	u16 clk;
+> > +	unsigned long timeout;
+> > +
+> > +	if (clock == host->clock)
+> > +		return;
+> 
+> I assume that mmc core prevents this function from being exectued twice
+> at the same time?
 
+Yep, it's called under spin_lock_irqsave(&host->lock, flags).
+
+[...]
+> > +	timeout = 20;
+> > +	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+> > +			& SDHCI_CLOCK_INT_STABLE)) {
+> > +		if (timeout == 0) {
+> > +			dev_warn(dev, "clock is unstable");
+> > +			break;
+> > +		}
+> > +		timeout--;
+> > +		mdelay(1);
+> 
+> Could we have used the more polite msleep() here?
+
+Unfortunately not, we're in the atomic context.
+
+[...]
+> > --- a/drivers/mmc/host/sdhci-pltfm.c
+> > +++ b/drivers/mmc/host/sdhci-pltfm.c
+> > @@ -158,6 +158,9 @@ static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
+> >  
+> >  static const struct platform_device_id sdhci_pltfm_ids[] = {
+> >  	{ "sdhci", },
+> > +#ifdef CONFIG_MMC_SDHCI_CNS3XXX
+> > +	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
+> > +#endif
+> 
+> What the heck is this kernel_ulong_t thing and why did `struct
+> platform_device_id' see a need to invent it??
+
+It's not only platform_device_id's thing. Sometimes drivers just
+pass a constant instead of a pointer (e.g. DEVICE_IS_FOO,
+DEVICE_IS_BAR), for example see drivers/hwmon/lm75.c (enum
+lm75_type).
+
+Other than this I don't think that there's a good reason for it.
+
+Thanks,
+
+-- 
+Anton Vorontsov
+email: cbouatmailru@gmail.com
+irc://irc.freenode.net/bd2
