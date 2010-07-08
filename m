@@ -1,17 +1,87 @@
-From: Janssens <tom-coffey@sbcglobal.net>
-Subject: Send your details to claim Seven Hundred And Fifty Thousand Great British Pounds in the Toyota promo.
-Date: Thu, 8 Jul 2010 05:51:49 -0700 (PDT)
-Message-ID: <909670.81045.qm@web82706.mail.mud.yahoo.com>
+From: MADHAV SINGHCHAUHAN <singh.madhav@samsung.com>
+Subject: Re: Re: SD Driver : FAT: FAT read failed (blocknr 8) in sd card error
+	while removing sd card during writing
+Date: Thu, 08 Jul 2010 13:05:47 +0000 (GMT)
+Message-ID: <29638758.295271278594347002.JavaMail.weblogic@epml07>
+Reply-To: singh.madhav@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from web82706.mail.mud.yahoo.com ([68.142.201.87]:48765 "HELO
-	web82706.mail.mud.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1756375Ab0GHMvv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 08:51:51 -0400
+Received: from mailout1.samsung.com ([203.254.224.24]:45697 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754999Ab0GHNFs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 09:05:48 -0400
+Received: from ep_ms13_bk (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
+ with ESMTP id <0L5800K7XPPN3T70@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 08 Jul 2010 22:05:47 +0900 (KST)
+Received: from ep_spt01 (ms13.samsung.com [203.254.225.109])
+ by ms13.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTP id <0L5800NEVPPN1U@ms13.samsung.com> for linux-mmc@vger.kernel.org;
+ Thu, 08 Jul 2010 22:05:47 +0900 (KST)
+Content-return: prohibited
+MIME-version: 1.0
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ethan Du <ethan.too@gmail.com>, hardik patel <hk5patel@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+
+Q2FyZCByZW1vdmFsIG5vdCBkZXRlY3RlZCBieSBkcml2ZXI/IA0KWW91IHNob3VsZCBzZWUgYSBs
+aW5lIG9mIGxvZyBpZiBjYXJkIHJlbW92YWwgaXMgZGV0ZWN0ZWQ6IA0KY2FyZCB4eHh4IHJlbW92
+ZWQgDQoNCldvdWxkIHlvdSBkZXNjcmliZSBob3cgZG8geW91IGRldGVjdCBjYXJkIHJlbW92YWwv
+aW5zZXJ0aW9uIG9uIHlvdXIgYm9hcmQ/IA0KDQpSZWdhcmRzLCANCi1FdGhhbiANCg0KT24gVGh1
+LCBKdWwgOCwgMjAxMCBhdCA2OjA1IFBNLCBoYXJkaWsgcGF0ZWwgPGhrNXBhdGVsQGdtYWlsLmNv
+bT4gd3JvdGU6IA0KPiBJIGhhdmUgc2QgY2FyZCBvbiBib2FyZCAuLi4gRHVyaW5nIHJlY29yZGlu
+Zy93cml0aW5nIFNEIGNhcmQsIHJlbW92ZSANCj4gU0QgY2FyZCAuLi4gdGhlbiBpIGFtIGdldHRp
+bmcgZW5kbGVzcyBlcnJvciBpbiBkbWVzZyBhcyBiZWxvdyA6IA0KPiANCj4gZW5kX3JlcXVlc3Q6
+IEkvTyBlcnJvciwgZGV2IG1tY2JsazAsIHNlY3RvciAyNCANCj4gRkFUOiBGQVQgcmVhZCBmYWls
+ZWQgKGJsb2NrbnIgOCkgDQo+IG1tY2JsazA6IGVycm9yIC0xMTAgc2VuZGluZyBzdGF0dXMgY29t
+YW5kPDM+bW1jYmxrMDogZXJyb3IgLTExMCANCj4gc2VuZGluZyByZWFkL3dyaXRlIGNvbW1hbmQs
+IHJlc3BvbnNlIDB4MCwgY2FyZCBzdGF0dXMgMHgwIA0KPiBCbG9jayBtbWNfYmxrX2lzc3VlX3Jx
+IGZ1bmN0aW9uIGNhbGwgMzQ2IA0KPiBlbmRfcmVxdWVzdDogSS9PIGVycm9yLCBkZXYgbW1jYmxr
+MCwgc2VjdG9yIDQgDQo+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9ja25yIDQpIA0KPiBNTUM6
+IGtpbGxpbmcgcmVxdWVzdHMgZm9yIGRlYWQgcXVldWUgDQo+IGVuZF9yZXF1ZXN0OiBJL08gZXJy
+b3IsIGRldiBtbWNibGswLCBzZWN0b3IgOCANCj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2Nr
+bnIgOCkgDQo+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9ja25yIDQpIA0KPiBGQVQ6IEZBVCBy
+ZWFkIGZhaWxlZCAoYmxvY2tuciA4KSANCj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2NrbnIg
+NCkgDQo+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9ja25yIDgpIA0KPiBGQVQ6IEZBVCByZWFk
+IGZhaWxlZCAoYmxvY2tuciA0KSANCj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2NrbnIgOCkg
+DQo+IA0KPiBIb3cgdG8gc3RvcCB0aGlzIG1lc3NhZ2UgLi4uIHdoYXQgaXMgaWRlYWwgc2l0dWF0
+aW9uIHdoZW4gd2UgcmVtb3ZlIA0KPiBjYXJkIHdoaWxlIHdyaXRpbmcgLi4uLi4uIGNhbiB1IGhl
+bHAgbWUgd2hhdCB0byBkbyA/IA0KPiANCj4+V2hlbiB3ZSBpbnNlcnQgdGhlIGNhcmQgaG90IHBs
+dWcgZGFtZW9uIHN0YXJ0IHNlbmRpbmcgdGhlIHJlcXVlc3QgdG8gYmxvY2sgbGF5ZXIgIGFuZCBr
+ZXJuZWwgYmxvY2sgbGF5ZXINCj4+c3RhcnQgc2VuZGluZyB0aGUgcmVxdWVzdCB0byBjYXJkLkJ1
+dCB3aGVuIHlvdSByZW1vdmUgdGhlIGNhcmQgaW4gYmV0d2VlbiByZXF1ZXN0IHF1ZXVlIGlzIG5v
+dCBmbHVzaGVkIHByb3Blcmx5Li4NCj4+c28geW91IG5lZWQgdG8gZmx1c2ggeW91ciByZXF1ZXN0
+IHF1ZXVlIGF0IGFwcHJvcHJpYXRlIHRpbWUuQWxzbyBwbGVhc2Ugbm90ZSB0aGF0IGV2ZW4gdGhh
+dCB5b3UgZmx1c2ggeW91ciByZXF1ZXN0IHF1ZXVlDQo+PmF0IGFwcHJvcHJpYXRlIHRpbWUgc29t
+ZSBtZXNzYWdlcyB3aWxsIGNvbWUuDQo+IHdoZXJlIGlzIHRoZSBwcm9ibGVtIGhlcmU/IHNkIGhv
+c3QgY29udHJvbGVyIGRyaXZlciBwcm9ibGVtIG9yIGJsb2NrIA0KPiBkcml2ZXIgcHJvYmxlbSBv
+ciBmaWxlIHN5c3RlbSBwcm9ibGVtIA0KPiANCj4gTm90ZTogSSBoYXZlIGZvcm1hdHRlZCBzZCBj
+YXJkIHdpdGggRkFUMzIgZmlsZSBzeXN0ZW0gLiANCj4gDQo+IA0KPiANCj4gV2l0aCBFWFQzIEZp
+bGUgc3lzdGVtIDogDQo+IA0KPiBSZW1vdmUgU0QgY2FyZCB3aGlsZSB3cml0aW5nL3JlY29yZGlu
+ZyB3ZSBnb3QgZXJyb3IgbWVzc2FnZXMgbGlrZSANCj4gYmVsb3cuIGJ1dCB0aGlzIGlzIG5vdCBl
+bmRsZXNzLiBBZnRlciBzb21lIHRpbWUgaXQgc3RvcHMuIA0KPiANCj4gPT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09IA0KPiA9PT09PT09PT09PT09IA0KPiBlbmRfcmVxdWVzdDogSS9PIGVy
+cm9yLCBkZXYgbW1jYmxrMCwgc2VjdG9yIDE1NjUzNiANCj4gbW1jYmxrMDogZXJyb3IgLTExMCBz
+ZW5kaW5nIHN0YXR1cyBjb21hbmQ8Mz5tbWNibGswOiBlcnJvciAtMTEwIA0KPiBzZW5kaW5nIHJl
+YWQvd3JpdGUgY29tbWFuZCwgcmVzcG9uc2UgMHgwLCBjYXJkIHN0YXR1cyAweDAgDQo+IG1tY2Js
+azA6IGVycm9yIC0xMTAgcmVxdWVzdGluZyBzdGF0dXMgDQo+IGVuZF9yZXF1ZXN0OiBJL08gZXJy
+b3IsIGRldiBtbWNibGswLCBzZWN0b3IgNDczNiANCj4gQWJvcnRpbmcgam91cm5hbCBvbiBkZXZp
+Y2UgbW1jYmxrMHAxLiANCj4gZXh0M19hYm9ydCBjYWxsZWQuIA0KPiBFWFQzLWZzIGVycm9yIChk
+ZXZpY2UgbW1jYmxrMHAxKTogZXh0M19qb3VybmFsX3N0YXJ0X3NiOiBEZXRlY3RlZCANCj4gYWJv
+cnRlZCBqb3VybmFsIA0KPiBSZW1vdW50aW5nIGZpbGVzeXN0ZW0gcmVhZC1vbmx5IA0KPiBlbmRf
+cmVxdWVzdDogSS9PIGVycm9yLCBkZXYgbW1jYmxrMCwgc2VjdG9yIDQ0NDggDQo+IGpvdXJuYWwg
+Y29tbWl0IEkvTyBlcnJvciANCj4gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PSANCj4gLS0gDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRo
+ZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIA0KPiB0aGUgYm9keSBvZiBhIG1lc3Nh
+Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyANCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBh
+dCA/aHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sIA0KPiANCi0tIA0K
+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJl
+IGxpbnV4LW1tYyIgaW4gDQp0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
+a2VybmVsLm9yZyANCk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
+cmcvbWFqb3Jkb21vLWluZm8uaHRtbCANCg0KIA0KIA0KIA0KIA0KDQoNCg==
 
 
-SEND INFO TO REDEEM YOUR PRICE:
-NAME        ADDRESS
