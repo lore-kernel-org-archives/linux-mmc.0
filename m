@@ -1,23 +1,19 @@
 From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH 00/15] wlan+omap+mmc: out-of-the-box WLAN support for
- ZOOM2/3
+Subject: RE: [PATCH 14/15] omap: zoom: add WLAN device
 Date: Thu, 8 Jul 2010 09:09:22 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B6@dbde02.ent.ti.com>
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B4@dbde02.ent.ti.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
+ <1278376666-3509-15-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:34497 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753225Ab0GHDj6 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2010 23:39:58 -0400
-In-Reply-To: <1278376666-3509-1-git-send-email-ohad@wizery.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1278376666-3509-15-git-send-email-ohad@wizery.com>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 To: Ohad Ben-Cohen <ohad@wizery.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap@vger.kernel.o
 Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Ben-cohen, Ohad" <ohadb@ti.com>
+List-Id: linux-mmc@vger.kernel.org
 
 
 
@@ -30,100 +26,184 @@ Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org
 > Cc: linux-arm-kernel@lists.infradead.org; linux@arm.linux.org.uk;
 > Chikkature Rajashekar, Madhusudhan; Luciano Coelho; akpm@linux-
 > foundation.org; San Mehat; Ben-cohen, Ohad
-> Subject: [PATCH 00/15] wlan+omap+mmc: out-of-the-box WLAN support for
-> ZOOM2/3
+> Subject: [PATCH 14/15] omap: zoom: add WLAN device
 > 
 > From: Ohad Ben-Cohen <ohadb@ti.com>
 > 
-> The ZOOM2/3 boards include TI's wl1271 wlan sdio device,
-> hardwired to the 3rd mmc controller.
+> Add WLAN platform device and control
+> functions (power and virtual card detect)
+> in order to allow software to control the
+> embedded SDIO WLAN device which resides on
+> the ZOOM board (TI's wl1271 device).
 > 
-> These patches add support for WLAN on the ZOOM2/3 boards
-> using only mainline components (most notably mac80211 and wl1271).
+> Based on Android's WLAN control functions by
+> San Mehat <san@android.com>.
 > 
-> Patches were tested on both ZOOM2 and ZOOM3.
-> 
-> In short, these patches add software control for emulating
-> card detect events, add board configurations to support the
-> wl1271 device, and update the wl1271 driver to make use of
-> these new mechanisms.
-> 
-> Software card detect emulation is based on Android's
-> EMBEDDED_SDIO patch by San Mehat <san@google.com> (thanks, San!).
-> 
-> These patches span over several differnt subsystems, but since
-> they are highly dependent on each other, it is preferrable
-> to pull them all together into a single tree (once approved).
-> 
-> Patches are available at:
-> 
-> git://wizery.com/pub/linux-2.6.git wl1271
-> 
-> And will also be sent as a follow-on to this message to the
-> omap, mmc, arm and wireless mailing lists.
-> 
-> Patches are based on mainline 2.6.35-rc4, but can easily be applied
-> on wireless-testing (with two minor conflicts). If desired, I can
-> rebase to wireless-testing and resend.
-> 
-> Note: last missing part for full mainline community support
-> of the wl1271 on ZOOM is the firmware, and for that there is already
-> on-going TI work to provide it in linux-firmware. Hopefully
-> that would be resolved soon.
-> 
-> Thanks,
-> 
-> Ohad Ben-Cohen (15):
->   sdio: add TI + wl1271 ids
->   wireless: wl1271: remove SDIO IDs from driver
->   omap: mmc: prepare for software card detect support
->   mmc: support embedded data field in mmc_host
->   omap: hsmmc: add virtual card detect support
->   omap zoom2: wlan board muxing
->   omap zoom3: wlan board muxing
->   wireless: wl1271: make wl12xx.h common to both spi and sdio
->   wireless: wl12xx: support pdata SDIO handlers
->   wireless: wl1271: support return value for the set power func
->   wireless: wl1271: introduce platform device support
->   wireless: wl1271: take irq info from platform data
->   wireless: wl1271: make ref_clock configurable by board
->   omap: zoom: add WLAN device
->   omap: zoom: enable WLAN device
-> 
->  arch/arm/mach-omap2/Kconfig                   |    5 +
->  arch/arm/mach-omap2/Makefile                  |    1 +
->  arch/arm/mach-omap2/board-zoom-peripherals.c  |   15 ++
->  arch/arm/mach-omap2/board-zoom-wlan.c         |  129 ++++++++++++++++
->  arch/arm/mach-omap2/board-zoom2.c             |   15 ++
->  arch/arm/mach-omap2/board-zoom3.c             |   15 ++
->  arch/arm/mach-omap2/hsmmc.c                   |    4 +
->  arch/arm/mach-omap2/hsmmc.h                   |    5 +
+> Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
+> ---
+>  arch/arm/mach-omap2/board-zoom-wlan.c         |  129
+> +++++++++++++++++++++++++
 >  arch/arm/mach-omap2/include/mach/board-zoom.h |    5 +
->  arch/arm/plat-omap/include/plat/mmc.h         |    5 +
->  drivers/mmc/core/Kconfig                      |    8 +
->  drivers/mmc/host/omap_hsmmc.c                 |   37 +++++-
->  drivers/net/wireless/wl12xx/Kconfig           |    1 +
->  drivers/net/wireless/wl12xx/wl1251_sdio.c     |    2 +-
->  drivers/net/wireless/wl12xx/wl1251_spi.c      |    2 +-
->  drivers/net/wireless/wl12xx/wl1271.h          |    8 +-
->  drivers/net/wireless/wl12xx/wl1271_boot.c     |   13 +-
->  drivers/net/wireless/wl12xx/wl1271_boot.h     |    1 -
->  drivers/net/wireless/wl12xx/wl1271_io.h       |    8 +-
->  drivers/net/wireless/wl12xx/wl1271_main.c     |    4 +-
->  drivers/net/wireless/wl12xx/wl1271_sdio.c     |  204 +++++++++++++++++++-
-> -----
->  drivers/net/wireless/wl12xx/wl1271_spi.c      |    8 +-
->  include/linux/mmc/host.h                      |   16 ++
->  include/linux/mmc/sdio_ids.h                  |    3 +
->  include/linux/spi/wl12xx.h                    |   34 ----
->  include/linux/wl12xx.h                        |   37 +++++
->  26 files changed, 486 insertions(+), 99 deletions(-)
+>  2 files changed, 134 insertions(+), 0 deletions(-)
 >  create mode 100644 arch/arm/mach-omap2/board-zoom-wlan.c
->  delete mode 100644 include/linux/spi/wl12xx.h
->  create mode 100644 include/linux/wl12xx.h
->
-[Ghorai] This patch series having the CONFIG_MMC_EMBEDDED_SDIO as kconfig option and I feel we should void this. This could be a generic and can be get from sdio card at runtime. Quite long codes are adding in this patch series under this flag.
- 
+> 
+> diff --git a/arch/arm/mach-omap2/board-zoom-wlan.c b/arch/arm/mach-
+> omap2/board-zoom-wlan.c
+> new file mode 100644
+> index 0000000..7ed5139
+> --- /dev/null
+> +++ b/arch/arm/mach-omap2/board-zoom-wlan.c
+> @@ -0,0 +1,129 @@
+> +/* mach-omap2/board-zoom-wlan.c
+> + *
+> + * Board support for wl1271 embedded SDIO device.
+> + *
+> + * Copyright (C) 2010 Texas Instruments, Inc.
+> + *
+> + * This file is licensed under the terms of the GNU General Public
+> License
+> + * version 2. This program is licensed "as is" without any warranty of
+> any
+> + * kind, whether express or implied.
+> + */
+> +
+> +#include <linux/kernel.h>
+> +#include <linux/init.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/sdio_ids.h>
+> +#include <linux/err.h>
+> +#include <linux/gpio.h>
+> +#include <linux/wl12xx.h>
+> +
+> +#include "mux.h"
+> +
+> +#ifdef CONFIG_OMAP_ZOOM_WLAN
+[Ghorai] Again the file itself is zoom specific, why we need the additional flag?
+
+> +
+> +/* these are zoom-specific board numbers */
+> +#define OMAP_ZOOM_WLAN_PMENA_GPIO	(101)
+> +#define OMAP_ZOOM_WLAN_IRQ_GPIO		(162)
+> +
+> +/* wl1271 virtual 'card detect' status */
+> +static int omap_zoom_wlan_cd;
+> +static void (*wlan_set_virtual_cd)(void *dev_id, int card_present);
+> +static void (*wlan_set_data)(void *dev_id, void *priv);
+> +static void *wlan_host_devid;
+> +
+> +int omap_zoom_wlan_register_embedded_control(void *dev_id,
+> +			void (*set_virtual_cd)(void *dev_id, int card_present),
+> +			void (*set_data)(void *dev_id, void *priv))
+> +{
+> +	if (wlan_host_devid || wlan_set_virtual_cd || wlan_set_data)
+> +		return -EBUSY;
+> +
+> +	wlan_set_virtual_cd = set_virtual_cd;
+> +	wlan_set_data = set_data;
+> +	wlan_host_devid = dev_id;
+> +
+> +	return 0;
+> +}
+> +
+> +int omap_zoom_wlan_get_virtual_cd(void)
+> +{
+> +	return omap_zoom_wlan_cd;
+> +}
+> +
+> +static void omap_zoom_wlan_set_embedded_data(void *priv)
+> +{
+> +	if (wlan_set_data)
+> +		wlan_set_data(wlan_host_devid, priv);
+> +	else
+> +		pr_err("%s: host controller not registered yet\n", __func__);
+> +}
+> +
+> +static void omap_zoom_wlan_set_carddetect(bool card_present)
+> +{
+> +	omap_zoom_wlan_cd = card_present ? 1 : 0;
+> +
+> +	pr_info("%s: %d\n", __func__, omap_zoom_wlan_cd);
+> +
+> +	if (wlan_set_virtual_cd)
+> +		wlan_set_virtual_cd(wlan_host_devid, omap_zoom_wlan_cd);
+> +	else
+> +		pr_err("%s: host controller not registered yet\n", __func__);
+> +}
+> +
+> +static void omap_zoom_wlan_power(bool enable)
+> +{
+> +	int val = enable ? 1 : 0;
+> +
+> +	pr_info("%s: set power %d\n", __func__, val);
+> +
+> +	gpio_set_value(OMAP_ZOOM_WLAN_PMENA_GPIO, val);
+> +}
+> +
+> +struct wl12xx_platform_data omap_zoom_wlan_control = {
+> +	.set_power = omap_zoom_wlan_power,
+> +	.set_carddetect = omap_zoom_wlan_set_carddetect,
+> +	.set_embedded_data = omap_zoom_wlan_set_embedded_data,
+> +	/* ZOOM ref clock is 26 MHz */
+> +	.board_ref_clock = 1,
+> +	.irq = OMAP_GPIO_IRQ(OMAP_ZOOM_WLAN_IRQ_GPIO),
+> +};
+> +
+> +static struct platform_device omap_zoom_wlan_device = {
+> +	.name = "wl1271_sdio",
+> +	.id = 1,
+> +	.dev = {
+> +		.platform_data = &omap_zoom_wlan_control,
+> +	},
+> +};
+> +
+> +int __init omap_zoom_wlan_init(void)
+> +{
+> +	int ret;
+> +
+> +	ret = gpio_request(OMAP_ZOOM_WLAN_PMENA_GPIO, "wlan_power");
+> +	if (ret < 0) {
+> +		pr_err("%s: power gpio request failed: %d\n", __func__, ret);
+> +		return ret;
+> +	}
+> +
+> +	gpio_direction_output(OMAP_ZOOM_WLAN_PMENA_GPIO, 0);
+> +
+> +	ret = gpio_request(OMAP_ZOOM_WLAN_IRQ_GPIO, "wlan_irq");
+> +	if (ret < 0) {
+> +		pr_err("%s: gpio request failed: %d\n", __func__, ret);
+> +		return ret;
+> +	}
+> +	gpio_direction_input(OMAP_ZOOM_WLAN_IRQ_GPIO);
+> +
+> +	ret = platform_device_register(&omap_zoom_wlan_device);
+> +
+> +	return ret;
+> +}
+> +
+> +#else
+> +int __init omap_zoom_wlan_init(void)
+> +{
+> +	return 0;
+> +}
+> +#endif /* CONFIG_OMAP_ZOOM_WLAN */
+> diff --git a/arch/arm/mach-omap2/include/mach/board-zoom.h
+> b/arch/arm/mach-omap2/include/mach/board-zoom.h
+> index c93b29e..61bbd81 100644
+> --- a/arch/arm/mach-omap2/include/mach/board-zoom.h
+> +++ b/arch/arm/mach-omap2/include/mach/board-zoom.h
+> @@ -3,3 +3,8 @@
+>   */
+>  extern int __init zoom_debugboard_init(void);
+>  extern void __init zoom_peripherals_init(void);
+> +int __init omap_zoom_wlan_init(void);
+> +int omap_zoom_wlan_register_embedded_control(void *dev_id,
+> +			void (*set_virtual_cd)(void *dev_id, int card_present),
+> +			void (*set_data)(void *dev_id, void *priv));
+> +int omap_zoom_wlan_get_virtual_cd(void);
+> --
+> 1.7.0.4
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
