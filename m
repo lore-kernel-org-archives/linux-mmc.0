@@ -1,18 +1,18 @@
 From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH 06/15] omap zoom2: wlan board muxing
-Date: Thu, 8 Jul 2010 09:09:21 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B3@dbde02.ent.ti.com>
+Subject: RE: [PATCH 04/15] mmc: support embedded data field in mmc_host
+Date: Thu, 8 Jul 2010 09:09:22 +0530
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B5@dbde02.ent.ti.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
- <1278376666-3509-7-git-send-email-ohad@wizery.com>
+ <1278376666-3509-5-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:43527 "EHLO arroyo.ext.ti.com"
+Received: from arroyo.ext.ti.com ([192.94.94.40]:43538 "EHLO arroyo.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753050Ab0GHDjs convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2010 23:39:48 -0400
-In-Reply-To: <1278376666-3509-7-git-send-email-ohad@wizery.com>
+	id S1753050Ab0GHDjy convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2010 23:39:54 -0400
+In-Reply-To: <1278376666-3509-5-git-send-email-ohad@wizery.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -30,47 +30,80 @@ Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org
 > Cc: linux-arm-kernel@lists.infradead.org; linux@arm.linux.org.uk;
 > Chikkature Rajashekar, Madhusudhan; Luciano Coelho; akpm@linux-
 > foundation.org; San Mehat; Ben-cohen, Ohad
-> Subject: [PATCH 06/15] omap zoom2: wlan board muxing
+> Subject: [PATCH 04/15] mmc: support embedded data field in mmc_host
 > 
 > From: Ohad Ben-Cohen <ohadb@ti.com>
 > 
-> Add board muxing to support the wlan wl1271 chip that is
-> hardwired to mmc2 (third mmc controller) on the ZOOM2.
+> Add support to set/get mmc_host private embedded
+> data.
+> 
+> This is needed to allow software to dynamically
+> create (and remove) SDIO functions which represents
+> embedded SDIO devices.
+> 
+> Typically, it will be used to set the context of
+> a driver that is creating a new SDIO function
+> (and would then expect to be able to get that context
+> back upon creation of the new sdio func).
 > 
 > Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
 > ---
->  arch/arm/mach-omap2/board-zoom2.c |   15 +++++++++++++++
->  1 files changed, 15 insertions(+), 0 deletions(-)
+>  drivers/mmc/core/Kconfig |    8 ++++++++
+>  include/linux/mmc/host.h |   16 ++++++++++++++++
+>  2 files changed, 24 insertions(+), 0 deletions(-)
 > 
-> diff --git a/arch/arm/mach-omap2/board-zoom2.c b/arch/arm/mach-
-> omap2/board-zoom2.c
-> index 803ef14..00871be 100644
-> --- a/arch/arm/mach-omap2/board-zoom2.c
-> +++ b/arch/arm/mach-omap2/board-zoom2.c
-> @@ -71,6 +71,21 @@ static struct twl4030_platform_data zoom2_twldata = {
+> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+> index bb22ffd..ab27eb3 100644
+> --- a/drivers/mmc/core/Kconfig
+> +++ b/drivers/mmc/core/Kconfig
+> @@ -16,3 +16,11 @@ config MMC_UNSAFE_RESUME
 > 
->  #ifdef CONFIG_OMAP_MUX
->  static struct omap_board_mux board_mux[] __initdata = {
-> +#ifdef CONFIG_OMAP_ZOOM_WLAN
-[Ghorai] This is zoom board specific file, So why need this additional flag?
-
-> +	/* WLAN IRQ - GPIO 162 */
-> +	OMAP3_MUX(MCBSP1_CLKX, OMAP_MUX_MODE4 | OMAP_PIN_INPUT_PULLUP),
-> +	/* WLAN POWER ENABLE - GPIO 101 */
-> +	OMAP3_MUX(CAM_D2, OMAP_MUX_MODE4 | OMAP_PIN_OUTPUT),
-> +	/* WLAN SDIO: MMC3 CMD */
-> +	OMAP3_MUX(MCSPI1_CS1, OMAP_MUX_MODE3 | OMAP_PIN_INPUT_PULLUP),
-> +	/* WLAN SDIO: MMC3 CLK */
-> +	OMAP3_MUX(ETK_CLK, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-> +	/* WLAN SDIO: MMC3 DAT[0-3] */
-> +	OMAP3_MUX(ETK_D3, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-> +	OMAP3_MUX(ETK_D4, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-> +	OMAP3_MUX(ETK_D5, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
-> +	OMAP3_MUX(ETK_D6, OMAP_MUX_MODE2 | OMAP_PIN_INPUT_PULLUP),
+>  	  This option sets a default which can be overridden by the
+>  	  module parameter "removable=0" or "removable=1".
+> +
+> +config MMC_EMBEDDED_SDIO
+> +	boolean "MMC embedded SDIO device support"
+> +	help
+> +	  If you say Y here, support will be added for embedded SDIO
+> +	  devices (e.g. hardwired embedded WLAN SDIO devices).
+> +	  Such devices require software support for emulating
+> +	  card detect events.
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index f65913c..9a48486 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -209,6 +209,10 @@ struct mmc_host {
+>  	struct led_trigger	*led;		/* activity led */
+>  #endif
+> 
+> +#ifdef CONFIG_MMC_EMBEDDED_SDIO
+> +	void			*embedded_data;
 > +#endif
->  	{ .reg_offset = OMAP_MUX_TERMINATOR },
->  };
->  #else
+> +
+>  	struct dentry		*debugfs_root;
+> 
+>  	unsigned long		private[0] ____cacheline_aligned;
+> @@ -264,5 +268,17 @@ static inline void mmc_set_disable_delay(struct
+> mmc_host *host,
+>  	host->disable_delay = disable_delay;
+>  }
+> 
+> +#ifdef CONFIG_MMC_EMBEDDED_SDIO
+> +static inline void *mmc_get_embedded_data(struct mmc_host *host)
+> +{
+> +	return host->embedded_data;
+> +}
+> +
+> +static inline void mmc_set_embedded_data(struct mmc_host *host, void
+> *data)
+> +{
+> +	host->embedded_data = data;
+> +}
+> +#endif
+> +
+[Ghorai] we can avoid CONFIG_MMC_EMBEDDED_SDIO flag itself. Why we are passing fixed data? We can enquire form card for the functions, features,.. and at runtime itself. And we are adding many compile-time/kconfig options in this patch series.
+>  #endif
+> 
 > --
 > 1.7.0.4
 > 
