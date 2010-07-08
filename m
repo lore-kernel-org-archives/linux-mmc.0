@@ -1,210 +1,157 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH 14/15] omap: zoom: add WLAN device
-Date: Thu, 8 Jul 2010 09:09:22 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B4@dbde02.ent.ti.com>
+From: Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>
+Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
+Date: Thu, 08 Jul 2010 00:34:32 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1007072327380.6020@xanadu.home>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
- <1278376666-3509-15-git-send-email-ohad@wizery.com>
+ <1278376666-3509-12-git-send-email-ohad@wizery.com>
+ <4C32EF19.1000604@nokia.com>
+ <AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com>
+ <4C3306F4.8060907@nokia.com>
+ <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com>
+ <4C333E0D.2070601@nokia.com> <alpine.LFD.2.00.1007061316010.6020@xanadu.home>
+ <4C338927.5020400@nokia.com> <4C34347F.8030000@nokia.com>
+ <alpine.LFD.2.00.1007070954010.6020@xanadu.home> <4C34DC92.80908@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1278376666-3509-15-git-send-email-ohad@wizery.com>
-Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap@vger.kernel.o
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Ben-cohen, Ohad" <ohadb@ti.com>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <4C34DC92.80908-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
+Cc: "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On Wed, 7 Jul 2010, Adrian Hunter wrote:
+
+> Nicolas Pitre wrote:
+> > On Wed, 7 Jul 2010, Roger Quadros wrote:
+> > 
+> > > On 07/06/2010 10:51 PM, Hunter Adrian (Nokia-MS/Helsinki) wrote:
+> > > > For eMMC in omap_hsmmc, this is all done via claim_host / release_host
+> > > > which call ->enable() / ->disable() methods.  omap_hsmmc makes use of
+> > > > mmc_power_restore_host() which calls host->bus_ops->power_restore()
+> > > > which is not implemented for SDIO, but for MMC and SD it reinitializes
+> > > > the card.
+> > 
+> > This is IMHO a really bad design.  The power control decision has to come
+> > from the top, not from the bottom.  And certainly not with a U-turn
+> > dependency the omap_hsmmc is using.
+> 
+> The power control decision does come from the top via mmc_claim_host /
+> mmc_release_host.
+
+NO!!!  THIS IS NOT ABOUT POWER!
+
+To the risk of repeating myself, mmc_claim_host and mmc_release_host are 
+about getting exclusive access to the host controller.  This should not 
+have any relationship with power.  If anything, you might infer some 
+idleness of the host through that, but only to save power at the host 
+controller level, but not at the card level.
+
+> > I regret to say this, but the omap_hsmmc driver is becoming a total mess.
+> > The host controller driver has to be a dumb interface serving requests from
+> > the hardware used by the upper layer stack, not the place where decisions
+> > such as power handling should be made.  Think of it like an ethernet driver.
+> > No ethernet driver in Linux is telling the IP stack when to shut down.
+> 
+> The omap_hsmmc driver does not tell the core to shut down the upper layers.
+
+What is this call to mmc_power_save_host() and mmc_power_restore_host() 
+then?
+
+> Instead the core tells the omap_hsmmc driver that it is "disabled" i.e.
+> not currently being used so it can start taking steps to save power.
+
+That's not how I see things implemented right now.
+
+> That is sensible because not even the upper layers know when the next
+> activity will be.
+
+I don't agree with you.  The upper layer, even if it cannot predict 
+exactly when the next activity will occur, still has a hell of a better 
+visibility on what is going on.  In the context of an MMC/SD card, 
+the upper layer knows about the block subsystem and it can look for 
+dirty blocks that might be flushed in a near future.  In the context of 
+a SDIO card, it is the SDIO function driver that knows when it is 
+important to preserve power to the card and when it is not.
+
+All the host controller driver must do is to simply and dumbly process 
+requests from the core MMC code, including power control requests.
+
+> > > Shouldn't the power control intelligence (i.e. when to turn power ON/OFF)
+> > > lie
+> > > with the bus drivers?
+> > 
+> > Absolutely!  And in the SDIO case that should lie with each function
+> > drivers.  Please let's stop this omap_hsmmc madness.
+> 
+> You are dealing with a trivial case - turn off the power when not in use.
+
+And apparently this cannot be implemented sanely on OMAP without faking 
+a card removal.
+
+> We have 3 power saving actions: enable DPS, put the card to sleep,
+> and finally power it off.  Each increases the latency to start up
+> again and so must be staggered.  With DPS-enabled the host controller can
+> be powered off at any time.  In that case the controller registers must be
+> restored.
+
+You could implement the first one based on some idle period.  The core 
+code probably doesn't need to know as this should be transparent to the 
+upper layer.  But the other two definitely should be handled by the core 
+code.
+
+> There are numerous entry points to the driver.  Checking whether
+> to restore registers at every entry point is error prone and messy.
+
+Please give me something else than this lame excuse.  There is 
+effectively only _one_ main entry point, namely the request method of 
+the mmc_host_ops structure.  You might need to poke at the hardware when 
+the set_ios or the enable_sdio_irq methods are called, and if the 
+controller is latent then you'd only have to update the register cache.  
+This is certainly not what I would call numerous.
+
+> Instead we require that the core tells the driver when to enable and
+> disable.
+
+No you don't.  You are abusing the mmc_claim_host interface with power 
+management issues.  Those power issues are then guessed in the host 
+controller driver, and then it eventually calls back into the core to 
+tell the upper layer to shut off.
+
+What I'm telling you is that:
+
+1) If you want to save power after some idle period you don't need 
+   host->ops->enable and host->ops->disable at all.  Simply keep a timer 
+   alive in your host driver and reset it when a new request comes in.  
+   The code for mmc_host_enable() looks rather redundant, and fishy to 
+   me with its flag to prevent recursion, so this all could be removed.
+
+2) Putting the card to sleep and/or removing power to it must be 
+   completely managed by the core code and certainly not from the host 
+   controller driver.  The fact that mmc_power_save_host() is currently 
+   called from a host driver and not from the core code or function 
+   drivers is completely backward.  Contrary to the suspend/resume 
+   requests which come from the machine bus where the host controller is 
+   attached (yes, this concept applies to you even if you don't have 
+   PCI), the possibility for shutting down power to the card when not in 
+   use must come from the so called "MMC bus driver" like the MMC 
+   block driver, or the SDIO function driver.  Putting a SDIO card to 
+   sleep is card dependent anyway, and that knowledge has to live in the 
+   SDIO function driver for that card, and certainly not in the host 
+   driver nor in the platform code.
+
+3) And yet that does _not_ require any new capability or method to be 
+   implemented in the host controller driver as mmc_set_ios() can do 
+   power handling already.
+
+And incidentally, implementing 3 and 4 would suddenly work for all hosts 
+without any change to the existing host controller drivers and prevent a 
+whole lot of functionality duplications.
 
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Ohad Ben-Cohen
-> Sent: Tuesday, July 06, 2010 6:08 AM
-> To: linux-wireless@vger.kernel.org; linux-mmc@vger.kernel.org; linux-
-> omap@vger.kernel.org
-> Cc: linux-arm-kernel@lists.infradead.org; linux@arm.linux.org.uk;
-> Chikkature Rajashekar, Madhusudhan; Luciano Coelho; akpm@linux-
-> foundation.org; San Mehat; Ben-cohen, Ohad
-> Subject: [PATCH 14/15] omap: zoom: add WLAN device
-> 
-> From: Ohad Ben-Cohen <ohadb@ti.com>
-> 
-> Add WLAN platform device and control
-> functions (power and virtual card detect)
-> in order to allow software to control the
-> embedded SDIO WLAN device which resides on
-> the ZOOM board (TI's wl1271 device).
-> 
-> Based on Android's WLAN control functions by
-> San Mehat <san@android.com>.
-> 
-> Signed-off-by: Ohad Ben-Cohen <ohadb@ti.com>
-> ---
->  arch/arm/mach-omap2/board-zoom-wlan.c         |  129
-> +++++++++++++++++++++++++
->  arch/arm/mach-omap2/include/mach/board-zoom.h |    5 +
->  2 files changed, 134 insertions(+), 0 deletions(-)
->  create mode 100644 arch/arm/mach-omap2/board-zoom-wlan.c
-> 
-> diff --git a/arch/arm/mach-omap2/board-zoom-wlan.c b/arch/arm/mach-
-> omap2/board-zoom-wlan.c
-> new file mode 100644
-> index 0000000..7ed5139
-> --- /dev/null
-> +++ b/arch/arm/mach-omap2/board-zoom-wlan.c
-> @@ -0,0 +1,129 @@
-> +/* mach-omap2/board-zoom-wlan.c
-> + *
-> + * Board support for wl1271 embedded SDIO device.
-> + *
-> + * Copyright (C) 2010 Texas Instruments, Inc.
-> + *
-> + * This file is licensed under the terms of the GNU General Public
-> License
-> + * version 2. This program is licensed "as is" without any warranty of
-> any
-> + * kind, whether express or implied.
-> + */
-> +
-> +#include <linux/kernel.h>
-> +#include <linux/init.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/sdio_ids.h>
-> +#include <linux/err.h>
-> +#include <linux/gpio.h>
-> +#include <linux/wl12xx.h>
-> +
-> +#include "mux.h"
-> +
-> +#ifdef CONFIG_OMAP_ZOOM_WLAN
-[Ghorai] Again the file itself is zoom specific, why we need the additional flag?
-
-> +
-> +/* these are zoom-specific board numbers */
-> +#define OMAP_ZOOM_WLAN_PMENA_GPIO	(101)
-> +#define OMAP_ZOOM_WLAN_IRQ_GPIO		(162)
-> +
-> +/* wl1271 virtual 'card detect' status */
-> +static int omap_zoom_wlan_cd;
-> +static void (*wlan_set_virtual_cd)(void *dev_id, int card_present);
-> +static void (*wlan_set_data)(void *dev_id, void *priv);
-> +static void *wlan_host_devid;
-> +
-> +int omap_zoom_wlan_register_embedded_control(void *dev_id,
-> +			void (*set_virtual_cd)(void *dev_id, int card_present),
-> +			void (*set_data)(void *dev_id, void *priv))
-> +{
-> +	if (wlan_host_devid || wlan_set_virtual_cd || wlan_set_data)
-> +		return -EBUSY;
-> +
-> +	wlan_set_virtual_cd = set_virtual_cd;
-> +	wlan_set_data = set_data;
-> +	wlan_host_devid = dev_id;
-> +
-> +	return 0;
-> +}
-> +
-> +int omap_zoom_wlan_get_virtual_cd(void)
-> +{
-> +	return omap_zoom_wlan_cd;
-> +}
-> +
-> +static void omap_zoom_wlan_set_embedded_data(void *priv)
-> +{
-> +	if (wlan_set_data)
-> +		wlan_set_data(wlan_host_devid, priv);
-> +	else
-> +		pr_err("%s: host controller not registered yet\n", __func__);
-> +}
-> +
-> +static void omap_zoom_wlan_set_carddetect(bool card_present)
-> +{
-> +	omap_zoom_wlan_cd = card_present ? 1 : 0;
-> +
-> +	pr_info("%s: %d\n", __func__, omap_zoom_wlan_cd);
-> +
-> +	if (wlan_set_virtual_cd)
-> +		wlan_set_virtual_cd(wlan_host_devid, omap_zoom_wlan_cd);
-> +	else
-> +		pr_err("%s: host controller not registered yet\n", __func__);
-> +}
-> +
-> +static void omap_zoom_wlan_power(bool enable)
-> +{
-> +	int val = enable ? 1 : 0;
-> +
-> +	pr_info("%s: set power %d\n", __func__, val);
-> +
-> +	gpio_set_value(OMAP_ZOOM_WLAN_PMENA_GPIO, val);
-> +}
-> +
-> +struct wl12xx_platform_data omap_zoom_wlan_control = {
-> +	.set_power = omap_zoom_wlan_power,
-> +	.set_carddetect = omap_zoom_wlan_set_carddetect,
-> +	.set_embedded_data = omap_zoom_wlan_set_embedded_data,
-> +	/* ZOOM ref clock is 26 MHz */
-> +	.board_ref_clock = 1,
-> +	.irq = OMAP_GPIO_IRQ(OMAP_ZOOM_WLAN_IRQ_GPIO),
-> +};
-> +
-> +static struct platform_device omap_zoom_wlan_device = {
-> +	.name = "wl1271_sdio",
-> +	.id = 1,
-> +	.dev = {
-> +		.platform_data = &omap_zoom_wlan_control,
-> +	},
-> +};
-> +
-> +int __init omap_zoom_wlan_init(void)
-> +{
-> +	int ret;
-> +
-> +	ret = gpio_request(OMAP_ZOOM_WLAN_PMENA_GPIO, "wlan_power");
-> +	if (ret < 0) {
-> +		pr_err("%s: power gpio request failed: %d\n", __func__, ret);
-> +		return ret;
-> +	}
-> +
-> +	gpio_direction_output(OMAP_ZOOM_WLAN_PMENA_GPIO, 0);
-> +
-> +	ret = gpio_request(OMAP_ZOOM_WLAN_IRQ_GPIO, "wlan_irq");
-> +	if (ret < 0) {
-> +		pr_err("%s: gpio request failed: %d\n", __func__, ret);
-> +		return ret;
-> +	}
-> +	gpio_direction_input(OMAP_ZOOM_WLAN_IRQ_GPIO);
-> +
-> +	ret = platform_device_register(&omap_zoom_wlan_device);
-> +
-> +	return ret;
-> +}
-> +
-> +#else
-> +int __init omap_zoom_wlan_init(void)
-> +{
-> +	return 0;
-> +}
-> +#endif /* CONFIG_OMAP_ZOOM_WLAN */
-> diff --git a/arch/arm/mach-omap2/include/mach/board-zoom.h
-> b/arch/arm/mach-omap2/include/mach/board-zoom.h
-> index c93b29e..61bbd81 100644
-> --- a/arch/arm/mach-omap2/include/mach/board-zoom.h
-> +++ b/arch/arm/mach-omap2/include/mach/board-zoom.h
-> @@ -3,3 +3,8 @@
->   */
->  extern int __init zoom_debugboard_init(void);
->  extern void __init zoom_peripherals_init(void);
-> +int __init omap_zoom_wlan_init(void);
-> +int omap_zoom_wlan_register_embedded_control(void *dev_id,
-> +			void (*set_virtual_cd)(void *dev_id, int card_present),
-> +			void (*set_data)(void *dev_id, void *priv));
-> +int omap_zoom_wlan_get_virtual_cd(void);
-> --
-> 1.7.0.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Nicolas
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
