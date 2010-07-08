@@ -1,131 +1,130 @@
-From: "Ghorai, Sukumar" <s-ghorai-l0cyMroinI0@public.gmane.org>
-Subject: RE: [PATCH 15/15] omap: zoom: enable WLAN device
+From: "Ghorai, Sukumar" <s-ghorai@ti.com>
+Subject: RE: [PATCH 00/15] wlan+omap+mmc: out-of-the-box WLAN support for
+ ZOOM2/3
 Date: Thu, 8 Jul 2010 09:09:22 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B7@dbde02.ent.ti.com>
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B6@dbde02.ent.ti.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
- <1278376666-3509-16-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1278376666-3509-16-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from devils.ext.ti.com ([198.47.26.153]:34497 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753225Ab0GHDj6 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2010 23:39:58 -0400
+In-Reply-To: <1278376666-3509-1-git-send-email-ohad@wizery.com>
 Content-Language: en-US
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-omap-u79uwXL29TbrhsbdSgBK9A@public.gmane.org
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "Ben-cohen, Ohad" <ohadb-l0cyMroinI0@public.gmane.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap@vger.kernel.o
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Ben-cohen, Ohad" <ohadb@ti.com>
 
 
 
 > -----Original Message-----
-> From: linux-mmc-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:linux-mmc-
-> owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Ohad Ben-Cohen
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Ohad Ben-Cohen
 > Sent: Tuesday, July 06, 2010 6:08 AM
-> To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org;
+> To: linux-wireless@vger.kernel.org; linux-mmc@vger.kernel.org; linux-
+> omap@vger.kernel.org
+> Cc: linux-arm-kernel@lists.infradead.org; linux@arm.linux.org.uk;
 > Chikkature Rajashekar, Madhusudhan; Luciano Coelho; akpm@linux-
 > foundation.org; San Mehat; Ben-cohen, Ohad
-> Subject: [PATCH 15/15] omap: zoom: enable WLAN device
+> Subject: [PATCH 00/15] wlan+omap+mmc: out-of-the-box WLAN support for
+> ZOOM2/3
 > 
-> From: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
+> From: Ohad Ben-Cohen <ohadb@ti.com>
 > 
-> Make it possible to build and use TI's wl1271
-> device on the ZOOM boards.
+> The ZOOM2/3 boards include TI's wl1271 wlan sdio device,
+> hardwired to the 3rd mmc controller.
 > 
-> The device is an embedded SDIO WLAN chip
-> that is hardwired to the 3rd mmc controller
-> of the ZOOM2/3 boards.
+> These patches add support for WLAN on the ZOOM2/3 boards
+> using only mainline components (most notably mac80211 and wl1271).
 > 
-> Signed-off-by: Ohad Ben-Cohen <ohadb-l0cyMroinI0@public.gmane.org>
-> ---
->  arch/arm/mach-omap2/Kconfig                  |    5 +++++
->  arch/arm/mach-omap2/Makefile                 |    1 +
->  arch/arm/mach-omap2/board-zoom-peripherals.c |   15 +++++++++++++++
->  3 files changed, 21 insertions(+), 0 deletions(-)
+> Patches were tested on both ZOOM2 and ZOOM3.
 > 
-> diff --git a/arch/arm/mach-omap2/Kconfig b/arch/arm/mach-omap2/Kconfig
-> index b31b6f1..7fee11b 100644
-> --- a/arch/arm/mach-omap2/Kconfig
-> +++ b/arch/arm/mach-omap2/Kconfig
-> @@ -131,6 +131,11 @@ config MACH_OMAP_ZOOM3
->  	depends on ARCH_OMAP3
->  	select OMAP_PACKAGE_CBP
+> In short, these patches add software control for emulating
+> card detect events, add board configurations to support the
+> wl1271 device, and update the wl1271 driver to make use of
+> these new mechanisms.
 > 
-> +config OMAP_ZOOM_WLAN
-> +	bool "OMAP Zoom board WLAN support"
-> +	depends on MACH_OMAP_ZOOM2 || MACH_OMAP_ZOOM3
-> +	select MMC_EMBEDDED_SDIO
-> +
->  config MACH_CM_T35
->  	bool "CompuLab CM-T35 module"
->  	depends on ARCH_OMAP3
-> diff --git a/arch/arm/mach-omap2/Makefile b/arch/arm/mach-omap2/Makefile
-> index ea52b03..ac1bad9 100644
-> --- a/arch/arm/mach-omap2/Makefile
-> +++ b/arch/arm/mach-omap2/Makefile
-> @@ -129,6 +129,7 @@ obj-$(CONFIG_MACH_OMAP_ZOOM3)		+= board-
-> zoom3.o \
->  					   board-zoom-peripherals.o \
->  					   hsmmc.o \
->  					   board-zoom-debugboard.o
-> +obj-y					+= board-zoom-wlan.o
->  obj-$(CONFIG_MACH_OMAP_3630SDP)		+= board-3630sdp.o \
->  					   board-zoom-peripherals.o \
->  					   hsmmc.o
-> diff --git a/arch/arm/mach-omap2/board-zoom-peripherals.c b/arch/arm/mach-
-> omap2/board-zoom-peripherals.c
-> index 6b39849..3128cd4 100644
-> --- a/arch/arm/mach-omap2/board-zoom-peripherals.c
-> +++ b/arch/arm/mach-omap2/board-zoom-peripherals.c
-> @@ -16,11 +16,13 @@
->  #include <linux/gpio.h>
->  #include <linux/i2c/twl.h>
->  #include <linux/regulator/machine.h>
-> +#include <linux/mmc/host.h>
+> Software card detect emulation is based on Android's
+> EMBEDDED_SDIO patch by San Mehat <san@google.com> (thanks, San!).
 > 
->  #include <asm/mach-types.h>
->  #include <asm/mach/arch.h>
->  #include <asm/mach/map.h>
+> These patches span over several differnt subsystems, but since
+> they are highly dependent on each other, it is preferrable
+> to pull them all together into a single tree (once approved).
 > 
-> +#include <mach/board-zoom.h>
->  #include <plat/common.h>
->  #include <plat/usb.h>
+> Patches are available at:
 > 
-> @@ -168,6 +170,18 @@ static struct omap2_hsmmc_info mmc[] __initdata = {
->  		.nonremovable	= true,
->  		.power_saving	= true,
->  	},
-> +#ifdef CONFIG_OMAP_ZOOM_WLAN
-> +	{
-> +		.mmc		= 3,
-> +		.wires		= 4,
-> +		.gpio_cd	= -EINVAL,
-> +		.gpio_wp	= -EINVAL,
-> +		.register_embedded_control =
-> +				omap_zoom_wlan_register_embedded_control,
-> +		.virtual_get_cd = omap_zoom_wlan_get_virtual_cd,
-> +		.ocr_mask	= MMC_VDD_165_195,
-> +	},
-> +#endif
->  	{}      /* Terminator */
->  };
+> git://wizery.com/pub/linux-2.6.git wl1271
 > 
-> @@ -282,4 +296,5 @@ void __init zoom_peripherals_init(void)
->  	omap_i2c_init();
->  	usb_musb_init(&musb_board_data);
->  	enable_board_wakeup_source();
-> +	omap_zoom_wlan_init();
->  }
-[Ghorai] In general we can avoid OMAP_ZOOM_WLAN and MMC_EMBEDDED_SDIO as kconfig option. 1st one is board specific and 2nd one could be generic sdio code. As I mentioned in other patch too.
-> --
-> 1.7.0.4
+> And will also be sent as a follow-on to this message to the
+> omap, mmc, arm and wireless mailing lists.
 > 
+> Patches are based on mainline 2.6.35-rc4, but can easily be applied
+> on wireless-testing (with two minor conflicts). If desired, I can
+> rebase to wireless-testing and resend.
+> 
+> Note: last missing part for full mainline community support
+> of the wl1271 on ZOOM is the firmware, and for that there is already
+> on-going TI work to provide it in linux-firmware. Hopefully
+> that would be resolved soon.
+> 
+> Thanks,
+> 
+> Ohad Ben-Cohen (15):
+>   sdio: add TI + wl1271 ids
+>   wireless: wl1271: remove SDIO IDs from driver
+>   omap: mmc: prepare for software card detect support
+>   mmc: support embedded data field in mmc_host
+>   omap: hsmmc: add virtual card detect support
+>   omap zoom2: wlan board muxing
+>   omap zoom3: wlan board muxing
+>   wireless: wl1271: make wl12xx.h common to both spi and sdio
+>   wireless: wl12xx: support pdata SDIO handlers
+>   wireless: wl1271: support return value for the set power func
+>   wireless: wl1271: introduce platform device support
+>   wireless: wl1271: take irq info from platform data
+>   wireless: wl1271: make ref_clock configurable by board
+>   omap: zoom: add WLAN device
+>   omap: zoom: enable WLAN device
+> 
+>  arch/arm/mach-omap2/Kconfig                   |    5 +
+>  arch/arm/mach-omap2/Makefile                  |    1 +
+>  arch/arm/mach-omap2/board-zoom-peripherals.c  |   15 ++
+>  arch/arm/mach-omap2/board-zoom-wlan.c         |  129 ++++++++++++++++
+>  arch/arm/mach-omap2/board-zoom2.c             |   15 ++
+>  arch/arm/mach-omap2/board-zoom3.c             |   15 ++
+>  arch/arm/mach-omap2/hsmmc.c                   |    4 +
+>  arch/arm/mach-omap2/hsmmc.h                   |    5 +
+>  arch/arm/mach-omap2/include/mach/board-zoom.h |    5 +
+>  arch/arm/plat-omap/include/plat/mmc.h         |    5 +
+>  drivers/mmc/core/Kconfig                      |    8 +
+>  drivers/mmc/host/omap_hsmmc.c                 |   37 +++++-
+>  drivers/net/wireless/wl12xx/Kconfig           |    1 +
+>  drivers/net/wireless/wl12xx/wl1251_sdio.c     |    2 +-
+>  drivers/net/wireless/wl12xx/wl1251_spi.c      |    2 +-
+>  drivers/net/wireless/wl12xx/wl1271.h          |    8 +-
+>  drivers/net/wireless/wl12xx/wl1271_boot.c     |   13 +-
+>  drivers/net/wireless/wl12xx/wl1271_boot.h     |    1 -
+>  drivers/net/wireless/wl12xx/wl1271_io.h       |    8 +-
+>  drivers/net/wireless/wl12xx/wl1271_main.c     |    4 +-
+>  drivers/net/wireless/wl12xx/wl1271_sdio.c     |  204 +++++++++++++++++++-
+> -----
+>  drivers/net/wireless/wl12xx/wl1271_spi.c      |    8 +-
+>  include/linux/mmc/host.h                      |   16 ++
+>  include/linux/mmc/sdio_ids.h                  |    3 +
+>  include/linux/spi/wl12xx.h                    |   34 ----
+>  include/linux/wl12xx.h                        |   37 +++++
+>  26 files changed, 486 insertions(+), 99 deletions(-)
+>  create mode 100644 arch/arm/mach-omap2/board-zoom-wlan.c
+>  delete mode 100644 include/linux/spi/wl12xx.h
+>  create mode 100644 include/linux/wl12xx.h
+>
+[Ghorai] This patch series having the CONFIG_MMC_EMBEDDED_SDIO as kconfig option and I feel we should void this. This could be a generic and can be get from sdio card at runtime. Quite long codes are adding in this patch series under this flag.
+ 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
