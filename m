@@ -1,39 +1,53 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH 15/15] omap: zoom: enable WLAN device
-Date: Thu, 8 Jul 2010 23:13:52 +0300
-Message-ID: <AANLkTikAq9wgsfxP7LMObEMuaNM9YjhDfk9MzK8tLoXs@mail.gmail.com>
-References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
-	<1278376666-3509-16-git-send-email-ohad@wizery.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B7@dbde02.ent.ti.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] tmio_mmc: Prevents unexpected status clear
+Date: Thu, 8 Jul 2010 14:46:26 -0700
+Message-ID: <20100708144626.2091f6c1.akpm@linux-foundation.org>
+References: <4C33DF98.10409@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:51840 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752438Ab0GHUOP convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 16:14:15 -0400
-In-Reply-To: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B7@dbde02.ent.ti.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:50610 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755325Ab0GHVrE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 17:47:04 -0400
+In-Reply-To: <4C33DF98.10409@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Ben-cohen, Ohad" <ohadb@ti.com>
+To: Yusuke Goda <yusuke.goda.sx@renesas.com>
+Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-On Thu, Jul 8, 2010 at 6:39 AM, Ghorai, Sukumar <s-ghorai@ti.com> wrote=
-:
-> [Ghorai] In general we can avoid OMAP_ZOOM_WLAN and MMC_EMBEDDED_SDIO=
- as kconfig option. 1st one is board specific and 2nd one could be gene=
-ric sdio code. As I mentioned in other patch too.
+On Wed, 07 Jul 2010 10:59:52 +0900
+Yusuke Goda <yusuke.goda.sx@renesas.com> wrote:
 
+> This patch clears only necessary bit.
+> 
+> Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
+> ---
+>  drivers/mmc/host/tmio_mmc.h |    5 +----
+>  1 files changed, 1 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index 64f7d5d..7944604 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -82,10 +82,7 @@
+> 
+>  #define ack_mmc_irqs(host, i) \
+>  	do { \
+> -		u32 mask;\
+> -		mask  = sd_ctrl_read32((host), CTL_STATUS); \
+> -		mask &= ~((i) & TMIO_MASK_IRQ); \
+> -		sd_ctrl_write32((host), CTL_STATUS, mask); \
+> +		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
+>  	} while (0)
 
-Thanks, will get rid of the extra config options.
+Can we have a better changelog please?
 
+What was wrong with the old code?
 
->> --
->> 1.7.0.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+How does the patch fix it?
+
+What are the user-visible runtime effects of the bug?
+
+(It looks like that was a pretty gross bug - how did it pass testing??)
