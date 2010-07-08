@@ -1,133 +1,55 @@
-From: hardik patel <hk5patel@gmail.com>
-Subject: Re: Re: SD Driver : FAT: FAT read failed (blocknr 8) in sd card error
-	while removing sd card during writing
-Date: Thu, 8 Jul 2010 23:38:20 +0530
-Message-ID: <AANLkTimpZg7P4mp2tCIuigu-aKVC8m6vEt5vDVz8nMLS@mail.gmail.com>
-References: <29638758.295271278594347002.JavaMail.weblogic@epml07>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
+Date: Thu, 8 Jul 2010 23:10:33 +0300
+Message-ID: <AANLkTin7jIAIiN_JHMxX74K-EBDtDNwUQMlIf4C6RCHD@mail.gmail.com>
+References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
+	<1278376666-3509-12-git-send-email-ohad@wizery.com> <4C32EF19.1000604@nokia.com>
+	<AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com>
+	<4C3306F4.8060907@nokia.com> <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com>
+	<4C333E0D.2070601@nokia.com> <alpine.LFD.2.00.1007061316010.6020@xanadu.home>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:51629 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756326Ab0GHSIV convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 14:08:21 -0400
-Received: by yxk8 with SMTP id 8so200650yxk.19
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Jul 2010 11:08:20 -0700 (PDT)
-In-Reply-To: <29638758.295271278594347002.JavaMail.weblogic@epml07>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:59482 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754329Ab0GHUKz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 16:10:55 -0400
+In-Reply-To: <alpine.LFD.2.00.1007061316010.6020@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: singh.madhav@samsung.com
-Cc: Ethan Du <ethan.too@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: Roger Quadros <roger.quadros@nokia.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>
 
-Hi Madhav,
+Hi Nicolas and Roger,
 
-thanks for your interest... I have card detect register so mmc_get_cd
-function i can check whether card is inserted or not ... so in sd host
-controller driver can detect that properly... but i think block driver
-does not detect that .... where i have to flush my request queue... i
-have gone through block.c and queue.c file which generate mmc_block.ko
-file but not sure where to modify... can any one guide me more
+On Tue, Jul 6, 2010 at 8:42 PM, Nicolas Pitre <nico@fluxnic.net> wrote:
+> On Tue, 6 Jul 2010, Roger Quadros wrote:
+> > If the Power enable GPIO can be treated as SDIO slot supply (i.e. vmmc), then
+> > the SDIO/MMC core should tackle it, just like it deals with supply for slots
+> > with removable cards.
+>
+...
+> Another function pair would be needed instead, which would do almost
+> like the suspend/resume code is already doing.  Something like:
 
+Thanks a lot for your review and comments, and for taking the time to
+present your approach.
 
-On Thu, Jul 8, 2010 at 6:35 PM, MADHAV SINGHCHAUHAN
-<singh.madhav@samsung.com> wrote:
-> Card removal not detected by driver?
-> You should see a line of log if card removal is detected:
-> card xxxx removed
->
-> Would you describe how do you detect card removal/insertion on your b=
-oard?
->
-> Regards,
-> -Ethan
->
-> On Thu, Jul 8, 2010 at 6:05 PM, hardik patel <hk5patel@gmail.com> wro=
-te:
->> I have sd card on board ... During recording/writing SD card, remove
->> SD card ... then i am getting endless error in dmesg as below :
->>
->> end_request: I/O error, dev mmcblk0, sector 24
->> FAT: FAT read failed (blocknr 8)
->> mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
->> sending read/write command, response 0x0, card status 0x0
->> Block mmc_blk_issue_rq function call 346
->> end_request: I/O error, dev mmcblk0, sector 4
->> FAT: FAT read failed (blocknr 4)
->> MMC: killing requests for dead queue
->> end_request: I/O error, dev mmcblk0, sector 8
->> FAT: FAT read failed (blocknr 8)
->> FAT: FAT read failed (blocknr 4)
->> FAT: FAT read failed (blocknr 8)
->> FAT: FAT read failed (blocknr 4)
->> FAT: FAT read failed (blocknr 8)
->> FAT: FAT read failed (blocknr 4)
->> FAT: FAT read failed (blocknr 8)
->>
->> How to stop this message ... what is ideal situation when we remove
->> card while writing ...... can u help me what to do ?
->>
->>>When we insert the card hot plug dameon start sending the request to=
- block layer =A0and kernel block layer
->>>start sending the request to card.But when you remove the card in be=
-tween request queue is not flushed properly..
->>>so you need to flush your request queue at appropriate time.Also ple=
-ase note that even that you flush your request queue
->>>at appropriate time some messages will come.
->> where is the problem here? sd host controler driver problem or block
->> driver problem or file system problem
->>
->> Note: I have formatted sd card with FAT32 file system .
->>
->>
->>
->> With EXT3 File system :
->>
->> Remove SD card while writing/recording we got error messages like
->> below. but this is not endless. After some time it stops.
->>
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> end_request: I/O error, dev mmcblk0, sector 156536
->> mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
->> sending read/write command, response 0x0, card status 0x0
->> mmcblk0: error -110 requesting status
->> end_request: I/O error, dev mmcblk0, sector 4736
->> Aborting journal on device mmcblk0p1.
->> ext3_abort called.
->> EXT3-fs error (device mmcblk0p1): ext3_journal_start_sb: Detected
->> aborted journal
->> Remounting filesystem read-only
->> end_request: I/O error, dev mmcblk0, sector 4448
->> journal commit I/O error
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at ?http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
->
->
->
->
->
->
->
+I like it !
 
+It'd allow us to lose the software (or fake if you want ;) card detect
+mechanism, which is something that should have been added to each
+platform we wanted to support.
 
+We would only need to make it possible to deliver board-specific data
+to the function driver (e.g., in the case of the wl1271, we need irq
+and board_ref_clock data).  That would require some board-level
+platform-data configuration, which will be specific to the controller
+to which the device is hardwired to. This data should propagate
+through the host controller to the SDIO core so it would eventually be
+accessible by the function driver (e.g. via func->dev.pdata).
 
---=20
-Regards,
-Hardik
+We'll adapt and post follow-up patches.
 
-"If you are doing what you have always been doing then expect what you
-have always been getting."
+Thanks again,
+Ohad.
