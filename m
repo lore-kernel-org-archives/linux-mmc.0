@@ -1,30 +1,68 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 06/15] omap zoom2: wlan board muxing
-Date: Thu, 8 Jul 2010 12:45:48 +0300
-Message-ID: <20100708094548.GB1920@atomide.com>
-References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
- <1278376666-3509-7-git-send-email-ohad@wizery.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B3@dbde02.ent.ti.com>
+From: hardik patel <hk5patel@gmail.com>
+Subject: SD Driver : FAT: FAT read failed (blocknr 8) in sd card error while
+	removing sd card during writing
+Date: Thu, 8 Jul 2010 15:35:52 +0530
+Message-ID: <AANLkTim_7C0pYl_xwPbavrz96GJHiiTngUSWEiMAzGuL@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B3@dbde02.ent.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Ben-cohen, Ohad" <ohadb@ti.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:45918 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753396Ab0GHKFx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 06:05:53 -0400
+Received: by gwj21 with SMTP id 21so263008gwj.19
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Jul 2010 03:05:52 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-* Ghorai, Sukumar <s-ghorai@ti.com> [100708 06:34]:
-> > @@ -71,6 +71,21 @@ static struct twl4030_platform_data zoom2_twldata = {
-> > 
-> >  #ifdef CONFIG_OMAP_MUX
-> >  static struct omap_board_mux board_mux[] __initdata = {
-> > +#ifdef CONFIG_OMAP_ZOOM_WLAN
->
-> [Ghorai] This is zoom board specific file, So why need this additional flag?
+I have sd card on board ... During recording/writing SD card, remove
+SD card ... then i am getting endless error in dmesg as below :
 
-Good point, the ifdef is unnecessary in for both zoom2 and zoom3.
-Will update in my queue to remove the ifdefs.
+end_request: I/O error, dev mmcblk0, sector 24
+FAT: FAT read failed (blocknr 8)
+mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
+sending read/write command, response 0x0, card status 0x0
+Block mmc_blk_issue_rq function call 346
+end_request: I/O error, dev mmcblk0, sector 4
+FAT: FAT read failed (blocknr 4)
+MMC: killing requests for dead queue
+end_request: I/O error, dev mmcblk0, sector 8
+FAT: FAT read failed (blocknr 8)
+FAT: FAT read failed (blocknr 4)
+FAT: FAT read failed (blocknr 8)
+FAT: FAT read failed (blocknr 4)
+FAT: FAT read failed (blocknr 8)
+FAT: FAT read failed (blocknr 4)
+FAT: FAT read failed (blocknr 8)
 
-Tony
+How to stop this message ... what is ideal situation when we remove
+card while writing ...... can u help me what to do ?
+
+where is the problem here? sd host controler driver problem or block
+driver problem or file system problem
+
+Note: I have formatted sd card with FAT32 file system .
+
+
+
+With EXT3 File system :
+
+Remove SD card while writing/recording we got error messages like
+below. but this is not endless. After some time it stops.
+
+==============================
+=============
+end_request: I/O error, dev mmcblk0, sector 156536
+mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
+sending read/write command, response 0x0, card status 0x0
+mmcblk0: error -110 requesting status
+end_request: I/O error, dev mmcblk0, sector 4736
+Aborting journal on device mmcblk0p1.
+ext3_abort called.
+EXT3-fs error (device mmcblk0p1): ext3_journal_start_sb: Detected
+aborted journal
+Remounting filesystem read-only
+end_request: I/O error, dev mmcblk0, sector 4448
+journal commit I/O error
+===========================================
