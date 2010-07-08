@@ -1,55 +1,43 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
-Date: Thu, 8 Jul 2010 23:10:33 +0300
-Message-ID: <AANLkTin7jIAIiN_JHMxX74K-EBDtDNwUQMlIf4C6RCHD@mail.gmail.com>
+Subject: Re: [PATCH 06/15] omap zoom2: wlan board muxing
+Date: Thu, 8 Jul 2010 23:12:53 +0300
+Message-ID: <AANLkTikHwy5d1-Wamt-dmjPRlrwyzuKw_9eJEN01SvBE@mail.gmail.com>
 References: <1278376666-3509-1-git-send-email-ohad@wizery.com>
-	<1278376666-3509-12-git-send-email-ohad@wizery.com> <4C32EF19.1000604@nokia.com>
-	<AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com>
-	<4C3306F4.8060907@nokia.com> <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com>
-	<4C333E0D.2070601@nokia.com> <alpine.LFD.2.00.1007061316010.6020@xanadu.home>
+	<1278376666-3509-7-git-send-email-ohad@wizery.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030E10C9B3@dbde02.ent.ti.com>
+	<20100708094548.GB1920@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:59482 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754329Ab0GHUKz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2010 16:10:55 -0400
-In-Reply-To: <alpine.LFD.2.00.1007061316010.6020@xanadu.home>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20100708094548.GB1920@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: "Ghorai, Sukumar" <s-ghorai@ti.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Ben-cohen, Ohad" <ohadb@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nico@fluxnic.net>
-Cc: Roger Quadros <roger.quadros@nokia.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>
 
-Hi Nicolas and Roger,
-
-On Tue, Jul 6, 2010 at 8:42 PM, Nicolas Pitre <nico@fluxnic.net> wrote:
-> On Tue, 6 Jul 2010, Roger Quadros wrote:
-> > If the Power enable GPIO can be treated as SDIO slot supply (i.e. vmmc), then
-> > the SDIO/MMC core should tackle it, just like it deals with supply for slots
-> > with removable cards.
+On Thu, Jul 8, 2010 at 12:45 PM, Tony Lindgren <tony@atomide.com> wrote=
+:
 >
-...
-> Another function pair would be needed instead, which would do almost
-> like the suspend/resume code is already doing.  Something like:
+> * Ghorai, Sukumar <s-ghorai@ti.com> [100708 06:34]:
+> > > @@ -71,6 +71,21 @@ static struct twl4030_platform_data zoom2_twld=
+ata =3D {
+> > >
+> > > =A0#ifdef CONFIG_OMAP_MUX
+> > > =A0static struct omap_board_mux board_mux[] __initdata =3D {
+> > > +#ifdef CONFIG_OMAP_ZOOM_WLAN
+> >
+> > [Ghorai] This is zoom board specific file, So why need this additio=
+nal flag?
+>
+> Good point, the ifdef is unnecessary in for both zoom2 and zoom3.
+> Will update in my queue to remove the ifdefs.
 
-Thanks a lot for your review and comments, and for taking the time to
-present your approach.
+Thanks a lot, Tony.
 
-I like it !
-
-It'd allow us to lose the software (or fake if you want ;) card detect
-mechanism, which is something that should have been added to each
-platform we wanted to support.
-
-We would only need to make it possible to deliver board-specific data
-to the function driver (e.g., in the case of the wl1271, we need irq
-and board_ref_clock data).  That would require some board-level
-platform-data configuration, which will be specific to the controller
-to which the device is hardwired to. This data should propagate
-through the host controller to the SDIO core so it would eventually be
-accessible by the function driver (e.g. via func->dev.pdata).
-
-We'll adapt and post follow-up patches.
-
-Thanks again,
-Ohad.
+>
+> Tony
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
