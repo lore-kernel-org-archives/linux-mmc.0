@@ -1,169 +1,213 @@
-From: hardik patel <hk5patel@gmail.com>
-Subject: Re: Re: SD Driver : FAT: FAT read failed (blocknr 8) in sd card error
-	while removing sd card during writing
-Date: Fri, 9 Jul 2010 10:11:57 +0530
-Message-ID: <AANLkTilegy2Cjco5sco5ueZt5N3z2qfcirhV_GNo95P-@mail.gmail.com>
-References: <29638758.295271278594347002.JavaMail.weblogic@epml07>
-	<AANLkTimpZg7P4mp2tCIuigu-aKVC8m6vEt5vDVz8nMLS@mail.gmail.com>
-	<AANLkTikNaiPR-H6vnQZOsheNISLk5dOHRTvKCrvPuC0g@mail.gmail.com>
+From: Hanumath Prasad <hanumath.prasad@stericsson.com>
+Subject: [PATCH] mmc: MMC 4.4 DDR support
+Date: Fri, 9 Jul 2010 12:29:40 +0530
+Message-ID: <1278658780-26397-1-git-send-email-hanumath.prasad@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:55214 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750936Ab0GIEl6 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jul 2010 00:41:58 -0400
-Received: by gxk23 with SMTP id 23so953927gxk.19
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Jul 2010 21:41:57 -0700 (PDT)
-In-Reply-To: <AANLkTikNaiPR-H6vnQZOsheNISLk5dOHRTvKCrvPuC0g@mail.gmail.com>
+Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:46996 "EHLO
+	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752878Ab0GIHZb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jul 2010 03:25:31 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Madhav Chauhan <madhav.imsec@gmail.com>
-Cc: singh.madhav@samsung.com, Ethan Du <ethan.too@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-kernel@vger.kernel.org
+Cc: STEricsson_nomadik_linux@list.st.com, linus.walleij@stericsson.com, Hanumath Prasad <hanumath.prasad@stericsson.com>, linux-mmc@vger.kernel.org
 
-I am using 2.6.30 linux kernel version ...
+Add support for Dual Data Rate MMC cards as defined in the 4.4
+specification.
 
-On Fri, Jul 9, 2010 at 9:20 AM, Madhav Chauhan <madhav.imsec@gmail.com>=
- wrote:
-> On Thu, Jul 8, 2010 at 11:38 PM, hardik patel <hk5patel@gmail.com> wr=
-ote:
->> Hi Madhav,
->>
->> thanks for your interest... I have card detect register so mmc_get_c=
-d
->> function i can check whether card is inserted or not ... so in sd ho=
-st
->> controller driver can detect that properly... but i think block driv=
-er
->> does not detect that .... where i have to flush my request queue... =
-i
->> have gone through block.c and queue.c file which generate mmc_block.=
-ko
->> file but not sure where to modify... can any one guide me more
->
-> Which Kernel version you are using??
->>
->>
->> On Thu, Jul 8, 2010 at 6:35 PM, MADHAV SINGHCHAUHAN
->> <singh.madhav@samsung.com> wrote:
->>> Card removal not detected by driver?
->>> You should see a line of log if card removal is detected:
->>> card xxxx removed
->>>
->>> Would you describe how do you detect card removal/insertion on your=
- board?
->>>
->>> Regards,
->>> -Ethan
->>>
->>> On Thu, Jul 8, 2010 at 6:05 PM, hardik patel <hk5patel@gmail.com> w=
-rote:
->>>> I have sd card on board ... During recording/writing SD card, remo=
-ve
->>>> SD card ... then i am getting endless error in dmesg as below :
->>>>
->>>> end_request: I/O error, dev mmcblk0, sector 24
->>>> FAT: FAT read failed (blocknr 8)
->>>> mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
->>>> sending read/write command, response 0x0, card status 0x0
->>>> Block mmc_blk_issue_rq function call 346
->>>> end_request: I/O error, dev mmcblk0, sector 4
->>>> FAT: FAT read failed (blocknr 4)
->>>> MMC: killing requests for dead queue
->>>> end_request: I/O error, dev mmcblk0, sector 8
->>>> FAT: FAT read failed (blocknr 8)
->>>> FAT: FAT read failed (blocknr 4)
->>>> FAT: FAT read failed (blocknr 8)
->>>> FAT: FAT read failed (blocknr 4)
->>>> FAT: FAT read failed (blocknr 8)
->>>> FAT: FAT read failed (blocknr 4)
->>>> FAT: FAT read failed (blocknr 8)
->>>>
->>>> How to stop this message ... what is ideal situation when we remov=
-e
->>>> card while writing ...... can u help me what to do ?
->>>>
->>>>>When we insert the card hot plug dameon start sending the request =
-to block layer =A0and kernel block layer
->>>>>start sending the request to card.But when you remove the card in =
-between request queue is not flushed properly..
->>>>>so you need to flush your request queue at appropriate time.Also p=
-lease note that even that you flush your request queue
->>>>>at appropriate time some messages will come.
->>>> where is the problem here? sd host controler driver problem or blo=
-ck
->>>> driver problem or file system problem
->>>>
->>>> Note: I have formatted sd card with FAT32 file system .
->>>>
->>>>
->>>>
->>>> With EXT3 File system :
->>>>
->>>> Remove SD card while writing/recording we got error messages like
->>>> below. but this is not endless. After some time it stops.
->>>>
->>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D
->>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>> end_request: I/O error, dev mmcblk0, sector 156536
->>>> mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
->>>> sending read/write command, response 0x0, card status 0x0
->>>> mmcblk0: error -110 requesting status
->>>> end_request: I/O error, dev mmcblk0, sector 4736
->>>> Aborting journal on device mmcblk0p1.
->>>> ext3_abort called.
->>>> EXT3-fs error (device mmcblk0p1): ext3_journal_start_sb: Detected
->>>> aborted journal
->>>> Remounting filesystem read-only
->>>> end_request: I/O error, dev mmcblk0, sector 4448
->>>> journal commit I/O error
->>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mm=
-c" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at ?http://vger.kernel.org/majordomo-info.html
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
-l
->>>
->>>
->>>
->>>
->>>
->>>
->>>
->>>
->>
->>
->>
->> --
->> Regards,
->> Hardik
->>
->> "If you are doing what you have always been doing then expect what y=
-ou
->> have always been getting."
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
->
+Cc: linux-mmc@vger.kernel.org
+Acked-by: Linus Walleij <linus.walleij@stericsson.com>
+Signed-off-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
+---
+ drivers/mmc/card/block.c |   10 +++++++---
+ drivers/mmc/core/mmc.c   |   37 +++++++++++++++++++++++++++++++++++--
+ include/linux/mmc/card.h |    5 +++++
+ include/linux/mmc/core.h |    1 +
+ include/linux/mmc/host.h |    4 ++++
+ include/linux/mmc/mmc.h  |   11 +++++++++--
+ 6 files changed, 61 insertions(+), 7 deletions(-)
 
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index cb9fbc8..4eb84eb 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -299,7 +299,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 			readcmd = MMC_READ_SINGLE_BLOCK;
+ 			writecmd = MMC_WRITE_BLOCK;
+ 		}
+-
++		if (mmc_card_ddr_mode(card))
++			brq.data.flags |= MMC_DDR_MODE;
+ 		if (rq_data_dir(req) == READ) {
+ 			brq.cmd.opcode = readcmd;
+ 			brq.data.flags |= MMC_DATA_READ;
+@@ -569,8 +570,11 @@ mmc_blk_set_blksize(struct mmc_blk_data *md, struct mmc_card *card)
+ 	struct mmc_command cmd;
+ 	int err;
+ 
+-	/* Block-addressed cards ignore MMC_SET_BLOCKLEN. */
+-	if (mmc_card_blockaddr(card))
++	/*
++	 * Block-addressed and ddr mode supported cards
++	 * ignore MMC_SET_BLOCKLEN.
++	 */
++	if (mmc_card_blockaddr(card) || mmc_card_ddr_mode(card))
+ 		return 0;
+ 
+ 	mmc_claim_host(card->host);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 89f7a25..1d33503 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -227,6 +227,21 @@ static int mmc_read_ext_csd(struct mmc_card *card)
+ 	}
+ 
+ 	switch (ext_csd[EXT_CSD_CARD_TYPE] & EXT_CSD_CARD_TYPE_MASK) {
++	case EXT_CSD_CARD_TYPE_DDR_52 | EXT_CSD_CARD_TYPE_52 |
++	     EXT_CSD_CARD_TYPE_26:
++		card->ext_csd.hs_max_dtr = 52000000;
++		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_DDR_52;
++		break;
++	case EXT_CSD_CARD_TYPE_DDR_1_2V | EXT_CSD_CARD_TYPE_52 |
++	     EXT_CSD_CARD_TYPE_26:
++		card->ext_csd.hs_max_dtr = 52000000;
++		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_DDR_1_2V;
++		break;
++	case EXT_CSD_CARD_TYPE_DDR_1_8V | EXT_CSD_CARD_TYPE_52 |
++	     EXT_CSD_CARD_TYPE_26:
++		card->ext_csd.hs_max_dtr = 52000000;
++		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_DDR_1_8V;
++		break;
+ 	case EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
+ 		card->ext_csd.hs_max_dtr = 52000000;
+ 		break;
+@@ -444,6 +459,18 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	mmc_set_clock(host, max_dtr);
+ 
+ 	/*
++	 * Activate DDR50 mode (if supported).
++	 */
++	if (mmc_card_highspeed(card)) {
++		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_8V)
++			&& (host->caps & (MMC_CAP_1_8V_DDR)))
++				mmc_card_set_ddr_mode(card);
++		else if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
++			&& (host->caps & (MMC_CAP_1_2V_DDR)))
++				mmc_card_set_ddr_mode(card);
++	}
++
++	/*
+ 	 * Activate wide bus (if supported).
+ 	 */
+ 	if ((card->csd.mmca_vsn >= CSD_SPEC_VER_4) &&
+@@ -451,10 +478,16 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		unsigned ext_csd_bit, bus_width;
+ 
+ 		if (host->caps & MMC_CAP_8_BIT_DATA) {
+-			ext_csd_bit = EXT_CSD_BUS_WIDTH_8;
++			if (mmc_card_ddr_mode(card))
++				ext_csd_bit = EXT_CSD_DDR_BUS_WIDTH_8;
++			else
++				ext_csd_bit = EXT_CSD_BUS_WIDTH_8;
+ 			bus_width = MMC_BUS_WIDTH_8;
+ 		} else {
+-			ext_csd_bit = EXT_CSD_BUS_WIDTH_4;
++			if (mmc_card_ddr_mode(card))
++				ext_csd_bit = EXT_CSD_DDR_BUS_WIDTH_4;
++			else
++				ext_csd_bit = EXT_CSD_BUS_WIDTH_4;
+ 			bus_width = MMC_BUS_WIDTH_4;
+ 		}
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index d02d2c6..7d0aca8 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -44,6 +44,7 @@ struct mmc_ext_csd {
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		sectors;
++	unsigned int            card_type;
+ };
+ 
+ struct sd_scr {
+@@ -97,6 +98,8 @@ struct mmc_card {
+ #define MMC_STATE_READONLY	(1<<1)		/* card is read-only */
+ #define MMC_STATE_HIGHSPEED	(1<<2)		/* card is in high speed mode */
+ #define MMC_STATE_BLOCKADDR	(1<<3)		/* card uses block-addressing */
++#define MMC_STATE_HIGHSPEED_DDR (1<<4)          /* card is in high speed */
++						/* dual data rate mode */
+ 	unsigned int		quirks; 	/* card quirks */
+ #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+ #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
+@@ -129,11 +132,13 @@ struct mmc_card {
+ #define mmc_card_present(c)	((c)->state & MMC_STATE_PRESENT)
+ #define mmc_card_readonly(c)	((c)->state & MMC_STATE_READONLY)
+ #define mmc_card_highspeed(c)	((c)->state & MMC_STATE_HIGHSPEED)
++#define mmc_card_ddr_mode(c)   ((c)->state & MMC_STATE_HIGHSPEED_DDR)
+ #define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
+ 
+ #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
+ #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+ #define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
++#define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
+ #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
+ 
+ static inline int mmc_card_lenient_fn0(const struct mmc_card *c)
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index e4898e9..b31e47a 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -107,6 +107,7 @@ struct mmc_data {
+ #define MMC_DATA_WRITE	(1 << 8)
+ #define MMC_DATA_READ	(1 << 9)
+ #define MMC_DATA_STREAM	(1 << 10)
++#define MMC_DDR_MODE    (1 << 11)
+ 
+ 	unsigned int		bytes_xfered;
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index f65913c..c775290 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -155,6 +155,10 @@ struct mmc_host {
+ #define MMC_CAP_DISABLE		(1 << 7)	/* Can the host be disabled */
+ #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
+ #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
++#define MMC_CAP_1_8V_DDR        (1 << 10)       /* can support */
++						/* DDR mode at 1.8V */
++#define MMC_CAP_1_2V_DDR        (1 << 11)       /* can support */
++						/* DDR mode at 1.2V */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 8a49cbf..fc446de 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -268,11 +268,18 @@ struct _mmc_csd {
+ 
+ #define EXT_CSD_CARD_TYPE_26	(1<<0)	/* Card can run at 26MHz */
+ #define EXT_CSD_CARD_TYPE_52	(1<<1)	/* Card can run at 52MHz */
+-#define EXT_CSD_CARD_TYPE_MASK	0x3	/* Mask out reserved and DDR bits */
++#define EXT_CSD_CARD_TYPE_MASK	0xF     /* Mask out reserved bits */
++#define EXT_CSD_CARD_TYPE_DDR_1_8V  (1<<2)   /* Card can run at 52MHz */
++					     /* DDR mode @1.8V or 3V I/O */
++#define EXT_CSD_CARD_TYPE_DDR_1_2V  (1<<3)   /* Card can run at 52MHz */
++					     /* DDR mode @1.2V I/O */
++#define EXT_CSD_CARD_TYPE_DDR_52       (EXT_CSD_CARD_TYPE_DDR_1_8V  \
++					| EXT_CSD_CARD_TYPE_DDR_1_2V)
+ 
+-#define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
+ #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
+ #define EXT_CSD_BUS_WIDTH_8	2	/* Card is in 8 bit mode */
++#define EXT_CSD_DDR_BUS_WIDTH_4    5    /* Card is in 4 bit DDR mode */
++#define EXT_CSD_DDR_BUS_WIDTH_8    6    /* Card is in 8 bit DDR mode */
+ 
+ /*
+  * MMC_SWITCH access modes
+-- 
+1.6.3.3
 
-
---=20
-Regards,
-Hardik
-
-"If you are doing what you have always been doing then expect what you
-have always been getting."
