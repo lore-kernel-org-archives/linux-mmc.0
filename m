@@ -1,83 +1,63 @@
-From: sonic zhang <sonic.adi@gmail.com>
-Subject: [PATCH] MMC:mmc_spi: Recover from CRC error for SD read/write
-	operation over SPI.
-Date: Fri, 9 Jul 2010 16:03:27 +0800
-Message-ID: <1278662607.16528.8.camel@eight.analog.com>
+From: Roger Quadros <roger.quadros@nokia.com>
+Subject: Re: [PATCH 11/15] wireless: wl1271: introduce platform device support
+Date: Fri, 09 Jul 2010 11:12:52 +0300
+Message-ID: <4C36DA04.3090209@nokia.com>
+References: <1278376666-3509-1-git-send-email-ohad@wizery.com> 	<1278376666-3509-12-git-send-email-ohad@wizery.com> <4C32EF19.1000604@nokia.com> 	<AANLkTintIz-N7MwwtqhVq2LR3Ln5JTNYSbJUBSSClcA-@mail.gmail.com> 	<4C3306F4.8060907@nokia.com> <AANLkTin5W52fPzWToRrAzm56SLZI-taSuI16rCEhLWqH@mail.gmail.com> 	<4C333E0D.2070601@nokia.com> <alpine.LFD.2.00.1007061316010.6020@xanadu.home> <AANLkTin7jIAIiN_JHMxX74K-EBDtDNwUQMlIf4C6RCHD@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from nwd2mail10.analog.com ([137.71.25.55]:49601 "EHLO
-	nwd2mail10.analog.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751959Ab0GIIBN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jul 2010 04:01:13 -0400
+Received: from smtp.nokia.com ([192.100.122.233]:35652 "EHLO
+	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751333Ab0GIINJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jul 2010 04:13:09 -0400
+In-Reply-To: <AANLkTin7jIAIiN_JHMxX74K-EBDtDNwUQMlIf4C6RCHD@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Brownell <dbrownell@users.sourceforge.net>
-Cc: linux-mmc@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>, uclinux-dist-devel <uclinux-dist-devel@blackfin.uclinux.org>
+To: ext Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Nicolas Pitre <nico@fluxnic.net>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>
 
->From 94d1ea57ac2fbe37133e25e99ccb265250f0027d Mon Sep 17 00:00:00 2001
-From: Sonic Zhang <sonic.zhang@analog.com>
-Date: Fri, 9 Jul 2010 15:36:20 +0800
-Subject: [PATCH] MMC:mmc_spi: Recover from CRC error for SD read/write operation over SPI.
+Hi Ohad,
 
-SPI bus is not reliable on all platforms when doing large dada transfer.
-Current mmc spi driver fails SD read/write command immediately, if
-occational CRC error is reported by SD device. This patch makes the
-operation recover from the CRC error by doing last SD command again.
-The retry count is set to 5 to ensure the driver pass any stress test.
+On 07/08/2010 11:10 PM, ext Ohad Ben-Cohen wrote:
+> Hi Nicolas and Roger,
+>
+> On Tue, Jul 6, 2010 at 8:42 PM, Nicolas Pitre<nico@fluxnic.net>  wrote:
+>> On Tue, 6 Jul 2010, Roger Quadros wrote:
+>>> If the Power enable GPIO can be treated as SDIO slot supply (i.e. vmmc), then
+>>> the SDIO/MMC core should tackle it, just like it deals with supply for slots
+>>> with removable cards.
+>>
+> ...
+>> Another function pair would be needed instead, which would do almost
+>> like the suspend/resume code is already doing.  Something like:
+>
+> Thanks a lot for your review and comments, and for taking the time to
+> present your approach.
 
-Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
----
- drivers/mmc/host/mmc_spi.c |   22 ++++++++++++++++++++++
- 1 files changed, 22 insertions(+), 0 deletions(-)
+you're welcome :)
+>
+> I like it !
+>
+> It'd allow us to lose the software (or fake if you want ;) card detect
+> mechanism, which is something that should have been added to each
+> platform we wanted to support.
+>
+> We would only need to make it possible to deliver board-specific data
+> to the function driver (e.g., in the case of the wl1271, we need irq
+> and board_ref_clock data).  That would require some board-level
+> platform-data configuration, which will be specific to the controller
+> to which the device is hardwired to. This data should propagate
+> through the host controller to the SDIO core so it would eventually be
 
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index ad847a2..8192434 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -1055,6 +1055,8 @@ static void mmc_spi_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct mmc_spi_host	*host = mmc_priv(mmc);
- 	int			status = -EINVAL;
-+	int			crc_retry = 5;
-+	struct mmc_command	stop;
- 
- #ifdef DEBUG
- 	/* MMC core and layered drivers *MUST* issue SPI-aware commands */
-@@ -1084,10 +1086,30 @@ static void mmc_spi_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	}
- #endif
- 
-+crc_recover:
- 	/* issue command; then optionally data and stop */
- 	status = mmc_spi_command_send(host, mrq, mrq->cmd, mrq->data != NULL);
- 	if (status == 0 && mrq->data) {
- 		mmc_spi_data_do(host, mrq->cmd, mrq->data, mrq->data->blksz);
-+ 
-+ 		/*
-+ 		 * SPI bus is not reliable when doing large dada transfer.
-+ 		 * If occational crc error is reported by SD device when do
-+ 		 * data read/write over SPI, it can be recovered by doing
-+ 		 * last SD command again. The retry count is set to 5 to
-+ 		 * ensure the driver pass any stress test.
-+ 		 */
-+ 		if (mrq->data->error == -EILSEQ && crc_retry) {
-+ 			stop.opcode = MMC_STOP_TRANSMISSION;
-+ 			stop.arg = 0;
-+ 			stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+ 
-+ 			status = mmc_spi_command_send(host, mrq, &stop, 0);
-+ 			crc_retry--;
-+ 			mrq->data->error = 0;
-+ 			goto crc_recover;
-+ 		}
-+ 
- 		if (mrq->stop)
- 			status = mmc_spi_command_send(host, mrq, mrq->stop, 0);
- 		else
--- 
-1.6.0
+why should platform data go through the host controller? You are already 
+creating a new platform device for wl1271_sdio just to pass platform_data so the 
+platform data for that can be passed directly from board files to this platform 
+device. It doesn't need to go via host controller.
 
+I think this case is specific to wl1271. Ideally wl1271 should have used the 
+SDIO's in-band interrupt delivery mechanism and SDIO Configuration space to 
+provide this information to make it truly plug n play.
 
-
+br,
+-roger
