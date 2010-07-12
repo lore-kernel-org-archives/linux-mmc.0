@@ -1,83 +1,124 @@
-From: sonic zhang <sonic.adi@gmail.com>
-Subject: [PATCH v2] MMC:mmc_spi: Recover from CRC error for SD read/write
-	operation over SPI.
-Date: Mon, 12 Jul 2010 15:50:56 +0800
-Message-ID: <1278921056.22437.1.camel@eight.analog.com>
+From: MADHAV SINGHCHAUHAN <singh.madhav@samsung.com>
+Subject: Re: Re: Re: SD Driver : FAT: FAT read failed (blocknr 8) in sd card
+ error	while removing sd card during writing
+Date: Mon, 12 Jul 2010 08:58:45 +0000 (GMT)
+Message-ID: <11124329.411231278925125067.JavaMail.weblogic@epml07>
+Reply-To: singh.madhav@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from nwd2mail11.analog.com ([137.71.25.57]:12954 "EHLO
-	nwd2mail11.analog.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753375Ab0GLHtO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jul 2010 03:49:14 -0400
+Received: from mailout4.samsung.com ([203.254.224.34]:41786 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752871Ab0GLI6r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jul 2010 04:58:47 -0400
+Received: from ep_ms13_bk (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
+ with ESMTP id <0L5F00FOWSXX7ZD0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 12 Jul 2010 17:58:45 +0900 (KST)
+Received: from ep_spt01 (ms13.samsung.com [203.254.225.109])
+ by ms13.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTP id <0L5F00DEXSXX0A@ms13.samsung.com> for linux-mmc@vger.kernel.org;
+ Mon, 12 Jul 2010 17:58:45 +0900 (KST)
+Content-return: prohibited
+MIME-version: 1.0
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Brownell <dbrownell@users.sourceforge.net>
-Cc: linux-mmc@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>, uclinux-dist-devel <uclinux-dist-devel@blackfin.uclinux.org>
+To: hardik patel <hk5patel@gmail.com>
+Cc: Ethan Du <ethan.too@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
->From 94d1ea57ac2fbe37133e25e99ccb265250f0027d Mon Sep 17 00:00:00 2001
-From: Sonic Zhang <sonic.zhang@analog.com>
-Date: Fri, 9 Jul 2010 15:36:20 +0800
-Subject: [PATCH v2] MMC:mmc_spi: Recover from crc error for SD read/write operation over SPI.
-
-SPI bus is not reliable on all platforms when doing large data transfer.
-Current mmc spi driver fails SD read/write command immediately, if
-occasional CRC error is reported by SD device. This patch makes the
-operation recover from the CRC error by doing last SD command again.
-The retry count is set to 5 to ensure the driver pass any stress test.
-
-Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
----
- drivers/mmc/host/mmc_spi.c |   22 ++++++++++++++++++++++
- 1 files changed, 22 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index ad847a2..8192434 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -1055,6 +1055,8 @@ static void mmc_spi_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct mmc_spi_host	*host = mmc_priv(mmc);
- 	int			status = -EINVAL;
-+	int			crc_retry = 5;
-+	struct mmc_command	stop;
- 
- #ifdef DEBUG
- 	/* MMC core and layered drivers *MUST* issue SPI-aware commands */
-@@ -1084,10 +1086,30 @@ static void mmc_spi_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	}
- #endif
- 
-+crc_recover:
- 	/* issue command; then optionally data and stop */
- 	status = mmc_spi_command_send(host, mrq, mrq->cmd, mrq->data != NULL);
- 	if (status == 0 && mrq->data) {
- 		mmc_spi_data_do(host, mrq->cmd, mrq->data, mrq->data->blksz);
-+ 
-+ 		/*
-+ 		 * SPI bus is not reliable when doing large data transfer.
-+ 		 * If occasional crc error is reported by SD device when do
-+ 		 * data read/write over SPI, it can be recovered by doing
-+ 		 * last SD command again. The retry count is set to 5 to
-+ 		 * ensure the driver pass any stress test.
-+ 		 */
-+ 		if (mrq->data->error == -EILSEQ && crc_retry) {
-+ 			stop.opcode = MMC_STOP_TRANSMISSION;
-+ 			stop.arg = 0;
-+ 			stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+ 
-+ 			status = mmc_spi_command_send(host, mrq, &stop, 0);
-+ 			crc_retry--;
-+ 			mrq->data->error = 0;
-+ 			goto crc_recover;
-+ 		}
-+ 
- 		if (mrq->stop)
- 			status = mmc_spi_command_send(host, mrq, mrq->stop, 0);
- 		else
--- 
-1.6.0
-
+DQoNCiANCkkgYW0gdXNpbmcgMi42LjMwIGxpbnV4IGtlcm5lbCB2ZXJzaW9uIC4uLiANCj4+QXMg
+aSB0b2xkIHlvdSBwcmV2aW91c2x5IHRoYXQgeW91IG5lZWQgdG8gZmx1c2ggcXVldWUgYXMgc29v
+biBhcyBwb3NzaWJsZSBvbmNlIHlvdSByZW1vdmUgdGhlIGNhcmQuDQpTbyBvbmNlIHlvdSByZW1v
+dmUgY2FyZCBtbWNfYmxrX3JlbW92ZSgpIGdldHMgY2FsbGVkIHdoaWNoIGNhbGxzIG1tY19jbGVh
+bnVwX3F1ZXVlKCkgYW5kIGl0IGZ1cnRoZXIgaW50ZW5hbGx5IGNhbGxzDQprdGhyZWFkX3N0b3Ao
+KShzdG9wcyB0aHJlYWQgd2hpY2ggcHJvY2VzcyByZXF1ZXN0cykuU28gY29tcGFyZSB0aGUgbGF0
+ZXN0IGtlcm5lbCB2ZXJzaW9uIHdydCB5b3VyIGtlcm5lbCB2ZXJzaW9uDQphbmQgeW91IHdpbGwg
+ZmluZCB0aGUgZGlmZmVyZW5jZXMgaW4gY2FyZCByZW1vdmUgc2VxdWVuY2Ugc28gZWl0aGVyIHlv
+dSBjYW4gYmFja3BvcnQgdGhlc2UgZnVuY3Rpb25zIG9yIGNoYW5nZSBtYW51YWxseSANCnNlcXVl
+bmNlIG9mIHRoZXNlIGZ1bmN0aW9ucy4NCg0KT24gRnJpLCBKdWwgOSwgMjAxMCBhdCA5OjIwIEFN
+LCBNYWRoYXYgQ2hhdWhhbiA8bWFkaGF2Lmltc2VjQGdtYWlsLmNvbT4gd3JvdGU6IA0KPiBPbiBU
+aHUsIEp1bCA4LCAyMDEwIGF0IDExOjM4IFBNLCBoYXJkaWsgcGF0ZWwgPGhrNXBhdGVsQGdtYWls
+LmNvbT4gd3JvdGU6IA0KPj4gSGkgTWFkaGF2LCANCj4+IA0KPj4gdGhhbmtzIGZvciB5b3VyIGlu
+dGVyZXN0Li4uIEkgaGF2ZSBjYXJkIGRldGVjdCByZWdpc3RlciBzbyBtbWNfZ2V0X2NkIA0KPj4g
+ZnVuY3Rpb24gaSBjYW4gY2hlY2sgd2hldGhlciBjYXJkIGlzIGluc2VydGVkIG9yIG5vdCAuLi4g
+c28gaW4gc2QgaG9zdCANCj4+IGNvbnRyb2xsZXIgZHJpdmVyIGNhbiBkZXRlY3QgdGhhdCBwcm9w
+ZXJseS4uLiBidXQgaSB0aGluayBibG9jayBkcml2ZXIgDQo+PiBkb2VzIG5vdCBkZXRlY3QgdGhh
+dCAuLi4uIHdoZXJlIGkgaGF2ZSB0byBmbHVzaCBteSByZXF1ZXN0IHF1ZXVlLi4uIGkgDQo+PiBo
+YXZlIGdvbmUgdGhyb3VnaCBibG9jay5jIGFuZCBxdWV1ZS5jIGZpbGUgd2hpY2ggZ2VuZXJhdGUg
+bW1jX2Jsb2NrLmtvIA0KPj4gZmlsZSBidXQgbm90IHN1cmUgd2hlcmUgdG8gbW9kaWZ5Li4uIGNh
+biBhbnkgb25lIGd1aWRlIG1lIG1vcmUgDQo+IA0KPiBXaGljaCBLZXJuZWwgdmVyc2lvbiB5b3Ug
+YXJlIHVzaW5nPz8gDQo+PiANCj4+IA0KPj4gT24gVGh1LCBKdWwgOCwgMjAxMCBhdCA2OjM1IFBN
+LCBNQURIQVYgU0lOR0hDSEFVSEFOIA0KPj4gPHNpbmdoLm1hZGhhdkBzYW1zdW5nLmNvbT4gd3Jv
+dGU6IA0KPj4+IENhcmQgcmVtb3ZhbCBub3QgZGV0ZWN0ZWQgYnkgZHJpdmVyPyANCj4+PiBZb3Ug
+c2hvdWxkIHNlZSBhIGxpbmUgb2YgbG9nIGlmIGNhcmQgcmVtb3ZhbCBpcyBkZXRlY3RlZDogDQo+
+Pj4gY2FyZCB4eHh4IHJlbW92ZWQgDQo+Pj4gDQo+Pj4gV291bGQgeW91IGRlc2NyaWJlIGhvdyBk
+byB5b3UgZGV0ZWN0IGNhcmQgcmVtb3ZhbC9pbnNlcnRpb24gb24geW91ciBib2FyZD8gDQo+Pj4g
+DQo+Pj4gUmVnYXJkcywgDQo+Pj4gLUV0aGFuIA0KPj4+IA0KPj4+IE9uIFRodSwgSnVsIDgsIDIw
+MTAgYXQgNjowNSBQTSwgaGFyZGlrIHBhdGVsIDxoazVwYXRlbEBnbWFpbC5jb20+IHdyb3RlOiAN
+Cj4+Pj4gSSBoYXZlIHNkIGNhcmQgb24gYm9hcmQgLi4uIER1cmluZyByZWNvcmRpbmcvd3JpdGlu
+ZyBTRCBjYXJkLCByZW1vdmUgDQo+Pj4+IFNEIGNhcmQgLi4uIHRoZW4gaSBhbSBnZXR0aW5nIGVu
+ZGxlc3MgZXJyb3IgaW4gZG1lc2cgYXMgYmVsb3cgOiANCj4+Pj4gDQo+Pj4+IGVuZF9yZXF1ZXN0
+OiBJL08gZXJyb3IsIGRldiBtbWNibGswLCBzZWN0b3IgMjQgDQo+Pj4+IEZBVDogRkFUIHJlYWQg
+ZmFpbGVkIChibG9ja25yIDgpIA0KPj4+PiBtbWNibGswOiBlcnJvciAtMTEwIHNlbmRpbmcgc3Rh
+dHVzIGNvbWFuZDwzPm1tY2JsazA6IGVycm9yIC0xMTAgDQo+Pj4+IHNlbmRpbmcgcmVhZC93cml0
+ZSBjb21tYW5kLCByZXNwb25zZSAweDAsIGNhcmQgc3RhdHVzIDB4MCANCj4+Pj4gQmxvY2sgbW1j
+X2Jsa19pc3N1ZV9ycSBmdW5jdGlvbiBjYWxsIDM0NiANCj4+Pj4gZW5kX3JlcXVlc3Q6IEkvTyBl
+cnJvciwgZGV2IG1tY2JsazAsIHNlY3RvciA0IA0KPj4+PiBGQVQ6IEZBVCByZWFkIGZhaWxlZCAo
+YmxvY2tuciA0KSANCj4+Pj4gTU1DOiBraWxsaW5nIHJlcXVlc3RzIGZvciBkZWFkIHF1ZXVlIA0K
+Pj4+PiBlbmRfcmVxdWVzdDogSS9PIGVycm9yLCBkZXYgbW1jYmxrMCwgc2VjdG9yIDggDQo+Pj4+
+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9ja25yIDgpIA0KPj4+PiBGQVQ6IEZBVCByZWFkIGZh
+aWxlZCAoYmxvY2tuciA0KSANCj4+Pj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2NrbnIgOCkg
+DQo+Pj4+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9ja25yIDQpIA0KPj4+PiBGQVQ6IEZBVCBy
+ZWFkIGZhaWxlZCAoYmxvY2tuciA4KSANCj4+Pj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2Nr
+bnIgNCkgDQo+Pj4+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9ja25yIDgpIA0KPj4+PiANCj4+
+Pj4gSG93IHRvIHN0b3AgdGhpcyBtZXNzYWdlIC4uLiB3aGF0IGlzIGlkZWFsIHNpdHVhdGlvbiB3
+aGVuIHdlIHJlbW92ZSANCj4+Pj4gY2FyZCB3aGlsZSB3cml0aW5nIC4uLi4uLiBjYW4gdSBoZWxw
+IG1lIHdoYXQgdG8gZG8gPyANCj4+Pj4gDQo+Pj4+PldoZW4gd2UgaW5zZXJ0IHRoZSBjYXJkIGhv
+dCBwbHVnIGRhbWVvbiBzdGFydCBzZW5kaW5nIHRoZSByZXF1ZXN0IHRvIGJsb2NrIGxheWVyICBh
+bmQga2VybmVsIGJsb2NrIGxheWVyIA0KPj4+Pj5zdGFydCBzZW5kaW5nIHRoZSByZXF1ZXN0IHRv
+IGNhcmQuQnV0IHdoZW4geW91IHJlbW92ZSB0aGUgY2FyZCBpbiBiZXR3ZWVuIHJlcXVlc3QgcXVl
+dWUgaXMgbm90IGZsdXNoZWQgcHJvcGVybHkuLiANCj4+Pj4+c28geW91IG5lZWQgdG8gZmx1c2gg
+eW91ciByZXF1ZXN0IHF1ZXVlIGF0IGFwcHJvcHJpYXRlIHRpbWUuQWxzbyBwbGVhc2Ugbm90ZSB0
+aGF0IGV2ZW4gdGhhdCB5b3UgZmx1c2ggeW91ciByZXF1ZXN0IHF1ZXVlIA0KPj4+Pj5hdCBhcHBy
+b3ByaWF0ZSB0aW1lIHNvbWUgbWVzc2FnZXMgd2lsbCBjb21lLiANCj4+Pj4gd2hlcmUgaXMgdGhl
+IHByb2JsZW0gaGVyZT8gc2QgaG9zdCBjb250cm9sZXIgZHJpdmVyIHByb2JsZW0gb3IgYmxvY2sg
+DQo+Pj4+IGRyaXZlciBwcm9ibGVtIG9yIGZpbGUgc3lzdGVtIHByb2JsZW0gDQo+Pj4+IA0KPj4+
+PiBOb3RlOiBJIGhhdmUgZm9ybWF0dGVkIHNkIGNhcmQgd2l0aCBGQVQzMiBmaWxlIHN5c3RlbSAu
+IA0KPj4+PiANCj4+Pj4gDQo+Pj4+IA0KPj4+PiBXaXRoIEVYVDMgRmlsZSBzeXN0ZW0gOiANCj4+
+Pj4gDQo+Pj4+IFJlbW92ZSBTRCBjYXJkIHdoaWxlIHdyaXRpbmcvcmVjb3JkaW5nIHdlIGdvdCBl
+cnJvciBtZXNzYWdlcyBsaWtlIA0KPj4+PiBiZWxvdy4gYnV0IHRoaXMgaXMgbm90IGVuZGxlc3Mu
+IEFmdGVyIHNvbWUgdGltZSBpdCBzdG9wcy4gDQo+Pj4+IA0KPj4+PiA9PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT0gDQo+Pj4+ID09PT09PT09PT09PT0gDQo+Pj4+IGVuZF9yZXF1ZXN0OiBJ
+L08gZXJyb3IsIGRldiBtbWNibGswLCBzZWN0b3IgMTU2NTM2IA0KPj4+PiBtbWNibGswOiBlcnJv
+ciAtMTEwIHNlbmRpbmcgc3RhdHVzIGNvbWFuZDwzPm1tY2JsazA6IGVycm9yIC0xMTAgDQo+Pj4+
+IHNlbmRpbmcgcmVhZC93cml0ZSBjb21tYW5kLCByZXNwb25zZSAweDAsIGNhcmQgc3RhdHVzIDB4
+MCANCj4+Pj4gbW1jYmxrMDogZXJyb3IgLTExMCByZXF1ZXN0aW5nIHN0YXR1cyANCj4+Pj4gZW5k
+X3JlcXVlc3Q6IEkvTyBlcnJvciwgZGV2IG1tY2JsazAsIHNlY3RvciA0NzM2IA0KPj4+PiBBYm9y
+dGluZyBqb3VybmFsIG9uIGRldmljZSBtbWNibGswcDEuIA0KPj4+PiBleHQzX2Fib3J0IGNhbGxl
+ZC4gDQo+Pj4+IEVYVDMtZnMgZXJyb3IgKGRldmljZSBtbWNibGswcDEpOiBleHQzX2pvdXJuYWxf
+c3RhcnRfc2I6IERldGVjdGVkIA0KPj4+PiBhYm9ydGVkIGpvdXJuYWwgDQo+Pj4+IFJlbW91bnRp
+bmcgZmlsZXN5c3RlbSByZWFkLW9ubHkgDQo+Pj4+IGVuZF9yZXF1ZXN0OiBJL08gZXJyb3IsIGRl
+diBtbWNibGswLCBzZWN0b3IgNDQ0OCANCj4+Pj4gam91cm5hbCBjb21taXQgSS9PIGVycm9yIA0K
+Pj4+PiA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09IA0KPj4+PiAt
+LSANCj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
+c3Vic2NyaWJlIGxpbnV4LW1tYyIgaW4gDQo+Pj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBt
+YWpvcmRvbW9Admdlci5rZXJuZWwub3JnIA0KPj4+PiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ID9o
+dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwgDQo+Pj4+IA0KPj4+IC0t
+IA0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
+YnNjcmliZSBsaW51eC1tbWMiIGluIA0KPj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
+cmRvbW9Admdlci5rZXJuZWwub3JnIA0KPj4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6
+Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbCANCj4+PiANCj4+PiANCj4+PiAN
+Cj4+PiANCj4+PiANCj4+PiANCj4+PiANCj4+PiANCj4+IA0KPj4gDQo+PiANCj4+IC0tIA0KPj4g
+UmVnYXJkcywgDQo+PiBIYXJkaWsgDQo+PiANCj4+ICJJZiB5b3UgYXJlIGRvaW5nIHdoYXQgeW91
+IGhhdmUgYWx3YXlzIGJlZW4gZG9pbmcgdGhlbiBleHBlY3Qgd2hhdCB5b3UgDQo+PiBoYXZlIGFs
+d2F5cyBiZWVuIGdldHRpbmcuIiANCj4+IC0tIA0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
+IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgaW4gDQo+PiB0aGUg
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyANCj4+IE1vcmUg
+bWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
+aHRtbCANCj4+IA0KPiANCg0KDQoNCi0tICANClJlZ2FyZHMsIA0KSGFyZGlrIA0KDQoiSWYgeW91
+IGFyZSBkb2luZyB3aGF0IHlvdSBoYXZlIGFsd2F5cyBiZWVuIGRvaW5nIHRoZW4gZXhwZWN0IHdo
+YXQgeW91IA0KaGF2ZSBhbHdheXMgYmVlbiBnZXR0aW5nLiIgDQoNCiANCiANCiANCiANCg0KDQo=
 
 
