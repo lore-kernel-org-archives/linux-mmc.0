@@ -1,217 +1,151 @@
-From: hardik patel <hk5patel@gmail.com>
-Subject: Re: Re: Re: SD Driver : FAT: FAT read failed (blocknr 8) in sd card
-	error while removing sd card during writing
-Date: Tue, 13 Jul 2010 11:18:17 +0530
-Message-ID: <AANLkTinNUYkypPKMqHv4Vbpp5VqtURwYFscswiJJgpeY@mail.gmail.com>
-References: <11124329.411231278925125067.JavaMail.weblogic@epml07>
+From: MADHAV SINGHCHAUHAN <singh.madhav@samsung.com>
+Subject: Re: Re: Re: Re: SD Driver : FAT: FAT read failed (blocknr 8) in sd
+ card	error while removing sd card during writing
+Date: Tue, 13 Jul 2010 06:07:15 +0000 (GMT)
+Message-ID: <1434715.451771279001235044.JavaMail.weblogic@epml07>
+Reply-To: singh.madhav@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:35588 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751184Ab0GMFsS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jul 2010 01:48:18 -0400
-Received: by gxk23 with SMTP id 23so2987122gxk.19
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jul 2010 22:48:18 -0700 (PDT)
-In-Reply-To: <11124329.411231278925125067.JavaMail.weblogic@epml07>
+Received: from mailout1.samsung.com ([203.254.224.24]:27992 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751103Ab0GMGHS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jul 2010 02:07:18 -0400
+Received: from ep_ms13_bk (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
+ with ESMTP id <0L5H00B2WFO3B840@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 13 Jul 2010 15:07:15 +0900 (KST)
+Received: from ep_spt01 (ms13.samsung.com [203.254.225.109])
+ by ms13.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTP id <0L5H00M1WFO31I@ms13.samsung.com> for linux-mmc@vger.kernel.org;
+ Tue, 13 Jul 2010 15:07:15 +0900 (KST)
+Content-return: prohibited
+MIME-version: 1.0
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: singh.madhav@samsung.com
+To: hardik patel <hk5patel@gmail.com>
 Cc: Ethan Du <ethan.too@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Madhav,
-
-I have change the card remove sequence as per latest kernel source
-2.6.34 .... after changing this i face the same issue.... is there any
-way to check card detect status at block layer ? or any other way to
-avoid it ....
-
-After removing card .... when i execute any command on board then also
-i got below error messages :
-
-=46AT: Directory bread(block 3898) failed
-=46AT: Directory bread(block 3899) failed
-=46AT: Directory bread(block 3900) failed
-=46AT: Directory bread(block 3901) failed
-=46AT: Directory bread(block 3902) failed
-
-On Mon, Jul 12, 2010 at 2:28 PM, MADHAV SINGHCHAUHAN
-<singh.madhav@samsung.com> wrote:
->
->
->
-> I am using 2.6.30 linux kernel version ...
->>>As i told you previously that you need to flush queue as soon as pos=
-sible once you remove the card.
-> So once you remove card mmc_blk_remove() gets called which calls mmc_=
-cleanup_queue() and it further intenally calls
-> kthread_stop()(stops thread which process requests).So compare the la=
-test kernel version wrt your kernel version
-> and you will find the differences in card remove sequence so either y=
-ou can backport these functions or change manually
-> sequence of these functions.
->
-> On Fri, Jul 9, 2010 at 9:20 AM, Madhav Chauhan <madhav.imsec@gmail.co=
-m> wrote:
->> On Thu, Jul 8, 2010 at 11:38 PM, hardik patel <hk5patel@gmail.com> w=
-rote:
->>> Hi Madhav,
->>>
->>> thanks for your interest... I have card detect register so mmc_get_=
-cd
->>> function i can check whether card is inserted or not ... so in sd h=
-ost
->>> controller driver can detect that properly... but i think block dri=
-ver
->>> does not detect that .... where i have to flush my request queue...=
- i
->>> have gone through block.c and queue.c file which generate mmc_block=
-=2Eko
->>> file but not sure where to modify... can any one guide me more
->>
->> Which Kernel version you are using??
->>>
->>>
->>> On Thu, Jul 8, 2010 at 6:35 PM, MADHAV SINGHCHAUHAN
->>> <singh.madhav@samsung.com> wrote:
->>>> Card removal not detected by driver?
->>>> You should see a line of log if card removal is detected:
->>>> card xxxx removed
->>>>
->>>> Would you describe how do you detect card removal/insertion on you=
-r board?
->>>>
->>>> Regards,
->>>> -Ethan
->>>>
->>>> On Thu, Jul 8, 2010 at 6:05 PM, hardik patel <hk5patel@gmail.com> =
-wrote:
->>>>> I have sd card on board ... During recording/writing SD card, rem=
-ove
->>>>> SD card ... then i am getting endless error in dmesg as below :
->>>>>
->>>>> end_request: I/O error, dev mmcblk0, sector 24
->>>>> FAT: FAT read failed (blocknr 8)
->>>>> mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
->>>>> sending read/write command, response 0x0, card status 0x0
->>>>> Block mmc_blk_issue_rq function call 346
->>>>> end_request: I/O error, dev mmcblk0, sector 4
->>>>> FAT: FAT read failed (blocknr 4)
->>>>> MMC: killing requests for dead queue
->>>>> end_request: I/O error, dev mmcblk0, sector 8
->>>>> FAT: FAT read failed (blocknr 8)
->>>>> FAT: FAT read failed (blocknr 4)
->>>>> FAT: FAT read failed (blocknr 8)
->>>>> FAT: FAT read failed (blocknr 4)
->>>>> FAT: FAT read failed (blocknr 8)
->>>>> FAT: FAT read failed (blocknr 4)
->>>>> FAT: FAT read failed (blocknr 8)
->>>>>
->>>>> How to stop this message ... what is ideal situation when we remo=
-ve
->>>>> card while writing ...... can u help me what to do ?
->>>>>
->>>>>>When we insert the card hot plug dameon start sending the request=
- to block layer =A0and kernel block layer
->>>>>>start sending the request to card.But when you remove the card in=
- between request queue is not flushed properly..
->>>>>>so you need to flush your request queue at appropriate time.Also =
-please note that even that you flush your request queue
->>>>>>at appropriate time some messages will come.
->>>>> where is the problem here? sd host controler driver problem or bl=
-ock
->>>>> driver problem or file system problem
->>>>>
->>>>> Note: I have formatted sd card with FAT32 file system .
->>>>>
->>>>>
->>>>>
->>>>> With EXT3 File system :
->>>>>
->>>>> Remove SD card while writing/recording we got error messages like
->>>>> below. but this is not endless. After some time it stops.
->>>>>
->>>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D
->>>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>>> end_request: I/O error, dev mmcblk0, sector 156536
->>>>> mmcblk0: error -110 sending status comand<3>mmcblk0: error -110
->>>>> sending read/write command, response 0x0, card status 0x0
->>>>> mmcblk0: error -110 requesting status
->>>>> end_request: I/O error, dev mmcblk0, sector 4736
->>>>> Aborting journal on device mmcblk0p1.
->>>>> ext3_abort called.
->>>>> EXT3-fs error (device mmcblk0p1): ext3_journal_start_sb: Detected
->>>>> aborted journal
->>>>> Remounting filesystem read-only
->>>>> end_request: I/O error, dev mmcblk0, sector 4448
->>>>> journal commit I/O error
->>>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe linux-m=
-mc" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at ?http://vger.kernel.org/majordomo-info.htm=
-l
->>>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mm=
-c" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.ht=
-ml
->>>>
->>>>
->>>>
->>>>
->>>>
->>>>
->>>>
->>>>
->>>
->>>
->>>
->>> --
->>> Regards,
->>> Hardik
->>>
->>> "If you are doing what you have always been doing then expect what =
-you
->>> have always been getting."
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
-l
->>>
->>
->
->
->
-> --
-> Regards,
-> Hardik
->
-> "If you are doing what you have always been doing then expect what yo=
-u
-> have always been getting."
->
->
->
->
->
->
->
->
+DQpIaSBNYWRoYXYsIA0KDQpJIGhhdmUgY2hhbmdlIHRoZSBjYXJkIHJlbW92ZSBzZXF1ZW5jZSBh
+cyBwZXIgbGF0ZXN0IGtlcm5lbCBzb3VyY2UgDQoyLjYuMzQgLi4uLiBhZnRlciBjaGFuZ2luZyB0
+aGlzIGkgZmFjZSB0aGUgc2FtZSBpc3N1ZS4uLi4gaXMgdGhlcmUgYW55IA0Kd2F5IHRvIGNoZWNr
+IGNhcmQgZGV0ZWN0IHN0YXR1cyBhdCBibG9jayBsYXllciA/IG9yIGFueSBvdGhlciB3YXkgdG8g
+DQphdm9pZCBpdCAuLi4uIA0KPj5DYW4gaSBzZWUgeW91ciBjaGFuZ2VzIG1hZGUgYnkgeW91Li5w
+YXN0ZSB5b3VyIGRpZmYgaGVyZS4uLi5BbHNvIGV2ZW4gdGhvdWdoIHlvdSBjaGFuZ2UgdXIgY2Fy
+ZCBkZXRlY3Qgc2VxdWVuY2UNCnN0aWxsIHlvdSB3aWxsIGdldCB0aGVzZSBtZXNzYWdlcyAsLGJ1
+dCBzb21ld2hhdCB5b3UgY2FuIHJlZHVjZSB0aGVzZSBtZXNzYWdlcyBpZiB1ciBjYXJkIHJlbW92
+YWwgc2VxdWVuY2UgaXMgZWZmaWNpZW50Li4NCkJ5IHRoZSB3YXkgZG9lcyB5b3VyIEhvc3QgY29u
+dHJvbGxlciAgc3VwcG9ydCBTREhDST8/V2hhdCB5b3UgdXNlIGluIGNhcmQgZGV0ZWN0IGludGVy
+cnVwdCBoYW5kbGVyIHdvcmtxdWV1ZSBvciB0YXNrbGV0Pz8NCkFmdGVyIHJlbW92aW5nIGNhcmQg
+Li4uLiB3aGVuIGkgZXhlY3V0ZSBhbnkgY29tbWFuZCBvbiBib2FyZCB0aGVuIGFsc28gDQppIGdv
+dCBiZWxvdyBlcnJvciBtZXNzYWdlcyA6IA0KPj5PbmNlIHlvdSByZW1vdmUgeW91ciBjYXJkICBh
+bmQgaWYgeW91IHN0aWxsIGV4ZWN1dGUgYW55IGNvbW1hbmQgaW4gdGhlIG1vdW50IHBvaW50IG9m
+IHRoZSBjYXJkDQp5b3Ugd2lsbCBnZXQgdGhlc2UgdHlwZSBvZiBlcnJvcnMgLi4uaWdub3JlIHRo
+ZW0uLi4NCg0KRkFUOiBEaXJlY3RvcnkgYnJlYWQoYmxvY2sgMzg5OCkgZmFpbGVkIA0KRkFUOiBE
+aXJlY3RvcnkgYnJlYWQoYmxvY2sgMzg5OSkgZmFpbGVkIA0KRkFUOiBEaXJlY3RvcnkgYnJlYWQo
+YmxvY2sgMzkwMCkgZmFpbGVkIA0KRkFUOiBEaXJlY3RvcnkgYnJlYWQoYmxvY2sgMzkwMSkgZmFp
+bGVkIA0KRkFUOiBEaXJlY3RvcnkgYnJlYWQoYmxvY2sgMzkwMikgZmFpbGVkIA0KT24gTW9uLCBK
+dWwgMTIsIDIwMTAgYXQgMjoyOCBQTSwgTUFESEFWIFNJTkdIQ0hBVUhBTiANCjxzaW5naC5tYWRo
+YXZAc2Ftc3VuZy5jb20+IHdyb3RlOiANCj4gDQo+IA0KPiANCj4gSSBhbSB1c2luZyAyLjYuMzAg
+bGludXgga2VybmVsIHZlcnNpb24gLi4uIA0KPj4+QXMgaSB0b2xkIHlvdSBwcmV2aW91c2x5IHRo
+YXQgeW91IG5lZWQgdG8gZmx1c2ggcXVldWUgYXMgc29vbiBhcyBwb3NzaWJsZSBvbmNlIHlvdSBy
+ZW1vdmUgdGhlIGNhcmQuIA0KPiBTbyBvbmNlIHlvdSByZW1vdmUgY2FyZCBtbWNfYmxrX3JlbW92
+ZSgpIGdldHMgY2FsbGVkIHdoaWNoIGNhbGxzIG1tY19jbGVhbnVwX3F1ZXVlKCkgYW5kIGl0IGZ1
+cnRoZXIgaW50ZW5hbGx5IGNhbGxzIA0KPiBrdGhyZWFkX3N0b3AoKShzdG9wcyB0aHJlYWQgd2hp
+Y2ggcHJvY2VzcyByZXF1ZXN0cykuU28gY29tcGFyZSB0aGUgbGF0ZXN0IGtlcm5lbCB2ZXJzaW9u
+IHdydCB5b3VyIGtlcm5lbCB2ZXJzaW9uIA0KPiBhbmQgeW91IHdpbGwgZmluZCB0aGUgZGlmZmVy
+ZW5jZXMgaW4gY2FyZCByZW1vdmUgc2VxdWVuY2Ugc28gZWl0aGVyIHlvdSBjYW4gYmFja3BvcnQg
+dGhlc2UgZnVuY3Rpb25zIG9yIGNoYW5nZSBtYW51YWxseSANCj4gc2VxdWVuY2Ugb2YgdGhlc2Ug
+ZnVuY3Rpb25zLiANCj4gDQo+IE9uIEZyaSwgSnVsIDksIDIwMTAgYXQgOToyMCBBTSwgTWFkaGF2
+IENoYXVoYW4gPG1hZGhhdi5pbXNlY0BnbWFpbC5jb20+IHdyb3RlOiANCj4+IE9uIFRodSwgSnVs
+IDgsIDIwMTAgYXQgMTE6MzggUE0sIGhhcmRpayBwYXRlbCA8aGs1cGF0ZWxAZ21haWwuY29tPiB3
+cm90ZTogDQo+Pj4gSGkgTWFkaGF2LCANCj4+PiANCj4+PiB0aGFua3MgZm9yIHlvdXIgaW50ZXJl
+c3QuLi4gSSBoYXZlIGNhcmQgZGV0ZWN0IHJlZ2lzdGVyIHNvIG1tY19nZXRfY2QgDQo+Pj4gZnVu
+Y3Rpb24gaSBjYW4gY2hlY2sgd2hldGhlciBjYXJkIGlzIGluc2VydGVkIG9yIG5vdCAuLi4gc28g
+aW4gc2QgaG9zdCANCj4+PiBjb250cm9sbGVyIGRyaXZlciBjYW4gZGV0ZWN0IHRoYXQgcHJvcGVy
+bHkuLi4gYnV0IGkgdGhpbmsgYmxvY2sgZHJpdmVyIA0KPj4+IGRvZXMgbm90IGRldGVjdCB0aGF0
+IC4uLi4gd2hlcmUgaSBoYXZlIHRvIGZsdXNoIG15IHJlcXVlc3QgcXVldWUuLi4gaSANCj4+PiBo
+YXZlIGdvbmUgdGhyb3VnaCBibG9jay5jIGFuZCBxdWV1ZS5jIGZpbGUgd2hpY2ggZ2VuZXJhdGUg
+bW1jX2Jsb2NrLmtvIA0KPj4+IGZpbGUgYnV0IG5vdCBzdXJlIHdoZXJlIHRvIG1vZGlmeS4uLiBj
+YW4gYW55IG9uZSBndWlkZSBtZSBtb3JlIA0KPj4gDQo+PiBXaGljaCBLZXJuZWwgdmVyc2lvbiB5
+b3UgYXJlIHVzaW5nPz8gDQo+Pj4gDQo+Pj4gDQo+Pj4gT24gVGh1LCBKdWwgOCwgMjAxMCBhdCA2
+OjM1IFBNLCBNQURIQVYgU0lOR0hDSEFVSEFOIA0KPj4+IDxzaW5naC5tYWRoYXZAc2Ftc3VuZy5j
+b20+IHdyb3RlOiANCj4+Pj4gQ2FyZCByZW1vdmFsIG5vdCBkZXRlY3RlZCBieSBkcml2ZXI/IA0K
+Pj4+PiBZb3Ugc2hvdWxkIHNlZSBhIGxpbmUgb2YgbG9nIGlmIGNhcmQgcmVtb3ZhbCBpcyBkZXRl
+Y3RlZDogDQo+Pj4+IGNhcmQgeHh4eCByZW1vdmVkIA0KPj4+PiANCj4+Pj4gV291bGQgeW91IGRl
+c2NyaWJlIGhvdyBkbyB5b3UgZGV0ZWN0IGNhcmQgcmVtb3ZhbC9pbnNlcnRpb24gb24geW91ciBi
+b2FyZD8gDQo+Pj4+IA0KPj4+PiBSZWdhcmRzLCANCj4+Pj4gLUV0aGFuIA0KPj4+PiANCj4+Pj4g
+T24gVGh1LCBKdWwgOCwgMjAxMCBhdCA2OjA1IFBNLCBoYXJkaWsgcGF0ZWwgPGhrNXBhdGVsQGdt
+YWlsLmNvbT4gd3JvdGU6IA0KPj4+Pj4gSSBoYXZlIHNkIGNhcmQgb24gYm9hcmQgLi4uIER1cmlu
+ZyByZWNvcmRpbmcvd3JpdGluZyBTRCBjYXJkLCByZW1vdmUgDQo+Pj4+PiBTRCBjYXJkIC4uLiB0
+aGVuIGkgYW0gZ2V0dGluZyBlbmRsZXNzIGVycm9yIGluIGRtZXNnIGFzIGJlbG93IDogDQo+Pj4+
+PiANCj4+Pj4+IGVuZF9yZXF1ZXN0OiBJL08gZXJyb3IsIGRldiBtbWNibGswLCBzZWN0b3IgMjQg
+DQo+Pj4+PiBGQVQ6IEZBVCByZWFkIGZhaWxlZCAoYmxvY2tuciA4KSANCj4+Pj4+IG1tY2JsazA6
+IGVycm9yIC0xMTAgc2VuZGluZyBzdGF0dXMgY29tYW5kPDM+bW1jYmxrMDogZXJyb3IgLTExMCAN
+Cj4+Pj4+IHNlbmRpbmcgcmVhZC93cml0ZSBjb21tYW5kLCByZXNwb25zZSAweDAsIGNhcmQgc3Rh
+dHVzIDB4MCANCj4+Pj4+IEJsb2NrIG1tY19ibGtfaXNzdWVfcnEgZnVuY3Rpb24gY2FsbCAzNDYg
+DQo+Pj4+PiBlbmRfcmVxdWVzdDogSS9PIGVycm9yLCBkZXYgbW1jYmxrMCwgc2VjdG9yIDQgDQo+
+Pj4+PiBGQVQ6IEZBVCByZWFkIGZhaWxlZCAoYmxvY2tuciA0KSANCj4+Pj4+IE1NQzoga2lsbGlu
+ZyByZXF1ZXN0cyBmb3IgZGVhZCBxdWV1ZSANCj4+Pj4+IGVuZF9yZXF1ZXN0OiBJL08gZXJyb3Is
+IGRldiBtbWNibGswLCBzZWN0b3IgOCANCj4+Pj4+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9j
+a25yIDgpIA0KPj4+Pj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2NrbnIgNCkgDQo+Pj4+PiBG
+QVQ6IEZBVCByZWFkIGZhaWxlZCAoYmxvY2tuciA4KSANCj4+Pj4+IEZBVDogRkFUIHJlYWQgZmFp
+bGVkIChibG9ja25yIDQpIA0KPj4+Pj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2NrbnIgOCkg
+DQo+Pj4+PiBGQVQ6IEZBVCByZWFkIGZhaWxlZCAoYmxvY2tuciA0KSANCj4+Pj4+IEZBVDogRkFU
+IHJlYWQgZmFpbGVkIChibG9ja25yIDgpIA0KPj4+Pj4gDQo+Pj4+PiBIb3cgdG8gc3RvcCB0aGlz
+IG1lc3NhZ2UgLi4uIHdoYXQgaXMgaWRlYWwgc2l0dWF0aW9uIHdoZW4gd2UgcmVtb3ZlIA0KPj4+
+Pj4gY2FyZCB3aGlsZSB3cml0aW5nIC4uLi4uLiBjYW4gdSBoZWxwIG1lIHdoYXQgdG8gZG8gPyAN
+Cj4+Pj4+IA0KPj4+Pj4+V2hlbiB3ZSBpbnNlcnQgdGhlIGNhcmQgaG90IHBsdWcgZGFtZW9uIHN0
+YXJ0IHNlbmRpbmcgdGhlIHJlcXVlc3QgdG8gYmxvY2sgbGF5ZXIgIGFuZCBrZXJuZWwgYmxvY2sg
+bGF5ZXIgDQo+Pj4+Pj5zdGFydCBzZW5kaW5nIHRoZSByZXF1ZXN0IHRvIGNhcmQuQnV0IHdoZW4g
+eW91IHJlbW92ZSB0aGUgY2FyZCBpbiBiZXR3ZWVuIHJlcXVlc3QgcXVldWUgaXMgbm90IGZsdXNo
+ZWQgcHJvcGVybHkuLiANCj4+Pj4+PnNvIHlvdSBuZWVkIHRvIGZsdXNoIHlvdXIgcmVxdWVzdCBx
+dWV1ZSBhdCBhcHByb3ByaWF0ZSB0aW1lLkFsc28gcGxlYXNlIG5vdGUgdGhhdCBldmVuIHRoYXQg
+eW91IGZsdXNoIHlvdXIgcmVxdWVzdCBxdWV1ZSANCj4+Pj4+PmF0IGFwcHJvcHJpYXRlIHRpbWUg
+c29tZSBtZXNzYWdlcyB3aWxsIGNvbWUuIA0KPj4+Pj4gd2hlcmUgaXMgdGhlIHByb2JsZW0gaGVy
+ZT8gc2QgaG9zdCBjb250cm9sZXIgZHJpdmVyIHByb2JsZW0gb3IgYmxvY2sgDQo+Pj4+PiBkcml2
+ZXIgcHJvYmxlbSBvciBmaWxlIHN5c3RlbSBwcm9ibGVtIA0KPj4+Pj4gDQo+Pj4+PiBOb3RlOiBJ
+IGhhdmUgZm9ybWF0dGVkIHNkIGNhcmQgd2l0aCBGQVQzMiBmaWxlIHN5c3RlbSAuIA0KPj4+Pj4g
+DQo+Pj4+PiANCj4+Pj4+IA0KPj4+Pj4gV2l0aCBFWFQzIEZpbGUgc3lzdGVtIDogDQo+Pj4+PiAN
+Cj4+Pj4+IFJlbW92ZSBTRCBjYXJkIHdoaWxlIHdyaXRpbmcvcmVjb3JkaW5nIHdlIGdvdCBlcnJv
+ciBtZXNzYWdlcyBsaWtlIA0KPj4+Pj4gYmVsb3cuIGJ1dCB0aGlzIGlzIG5vdCBlbmRsZXNzLiBB
+ZnRlciBzb21lIHRpbWUgaXQgc3RvcHMuIA0KPj4+Pj4gDQo+Pj4+PiA9PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT0gDQo+Pj4+PiA9PT09PT09PT09PT09IA0KPj4+Pj4gZW5kX3JlcXVlc3Q6
+IEkvTyBlcnJvciwgZGV2IG1tY2JsazAsIHNlY3RvciAxNTY1MzYgDQo+Pj4+PiBtbWNibGswOiBl
+cnJvciAtMTEwIHNlbmRpbmcgc3RhdHVzIGNvbWFuZDwzPm1tY2JsazA6IGVycm9yIC0xMTAgDQo+
+Pj4+PiBzZW5kaW5nIHJlYWQvd3JpdGUgY29tbWFuZCwgcmVzcG9uc2UgMHgwLCBjYXJkIHN0YXR1
+cyAweDAgDQo+Pj4+PiBtbWNibGswOiBlcnJvciAtMTEwIHJlcXVlc3Rpbmcgc3RhdHVzIA0KPj4+
+Pj4gZW5kX3JlcXVlc3Q6IEkvTyBlcnJvciwgZGV2IG1tY2JsazAsIHNlY3RvciA0NzM2IA0KPj4+
+Pj4gQWJvcnRpbmcgam91cm5hbCBvbiBkZXZpY2UgbW1jYmxrMHAxLiANCj4+Pj4+IGV4dDNfYWJv
+cnQgY2FsbGVkLiANCj4+Pj4+IEVYVDMtZnMgZXJyb3IgKGRldmljZSBtbWNibGswcDEpOiBleHQz
+X2pvdXJuYWxfc3RhcnRfc2I6IERldGVjdGVkIA0KPj4+Pj4gYWJvcnRlZCBqb3VybmFsIA0KPj4+
+Pj4gUmVtb3VudGluZyBmaWxlc3lzdGVtIHJlYWQtb25seSANCj4+Pj4+IGVuZF9yZXF1ZXN0OiBJ
+L08gZXJyb3IsIGRldiBtbWNibGswLCBzZWN0b3IgNDQ0OCANCj4+Pj4+IGpvdXJuYWwgY29tbWl0
+IEkvTyBlcnJvciANCj4+Pj4+ID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT0gDQo+Pj4+PiAtLSANCj4+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
+ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIA0KPj4+Pj4gdGhlIGJvZHkg
+b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgDQo+Pj4+PiBNb3JlIG1h
+am9yZG9tbyBpbmZvIGF0ID9odHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwgDQo+Pj4+PiANCj4+Pj4gLS0gDQo+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
+OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIA0KPj4+PiB0aGUgYm9k
+eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyANCj4+Pj4gTW9yZSBt
+YWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5o
+dG1sIA0KPj4+PiANCj4+Pj4gDQo+Pj4+IA0KPj4+PiANCj4+Pj4gDQo+Pj4+IA0KPj4+PiANCj4+
+Pj4gDQo+Pj4gDQo+Pj4gDQo+Pj4gDQo+Pj4gLS0gDQo+Pj4gUmVnYXJkcywgDQo+Pj4gSGFyZGlr
+IA0KPj4+IA0KPj4+ICJJZiB5b3UgYXJlIGRvaW5nIHdoYXQgeW91IGhhdmUgYWx3YXlzIGJlZW4g
+ZG9pbmcgdGhlbiBleHBlY3Qgd2hhdCB5b3UgDQo+Pj4gaGF2ZSBhbHdheXMgYmVlbiBnZXR0aW5n
+LiIgDQo+Pj4gLS0gDQo+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
+IGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgaW4gDQo+Pj4gdGhlIGJvZHkgb2YgYSBtZXNz
+YWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgDQo+Pj4gTW9yZSBtYWpvcmRvbW8gaW5m
+byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sIA0KPj4+IA0K
+Pj4gDQo+IA0KPiANCj4gDQo+IC0tIA0KPiBSZWdhcmRzLCANCj4gSGFyZGlrIA0KPiANCj4gIklm
+IHlvdSBhcmUgZG9pbmcgd2hhdCB5b3UgaGF2ZSBhbHdheXMgYmVlbiBkb2luZyB0aGVuIGV4cGVj
+dCB3aGF0IHlvdSANCj4gaGF2ZSBhbHdheXMgYmVlbiBnZXR0aW5nLiIgDQo+IA0KPiANCj4gDQo+
+IA0KPiANCj4gDQo+IA0KPiANCg0KDQoNCi0tICANClJlZ2FyZHMsIA0KSGFyZGlrIA0KDQoiSWYg
+eW91IGFyZSBkb2luZyB3aGF0IHlvdSBoYXZlIGFsd2F5cyBiZWVuIGRvaW5nIHRoZW4gZXhwZWN0
+IHdoYXQgeW91IA0KaGF2ZSBhbHdheXMgYmVlbiBnZXR0aW5nLiIgDQoNCiANCiANCiANCiANCg0K
+DQo=
 
 
-
---=20
-Regards,
-Hardik
-
-"If you are doing what you have always been doing then expect what you
-have always been getting."
