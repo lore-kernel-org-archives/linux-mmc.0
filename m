@@ -1,151 +1,265 @@
-From: MADHAV SINGHCHAUHAN <singh.madhav@samsung.com>
-Subject: Re: Re: Re: Re: SD Driver : FAT: FAT read failed (blocknr 8) in sd
- card	error while removing sd card during writing
-Date: Tue, 13 Jul 2010 06:07:15 +0000 (GMT)
-Message-ID: <1434715.451771279001235044.JavaMail.weblogic@epml07>
-Reply-To: singh.madhav@samsung.com
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH V4 4/5] block: Add secure discard
+Date: Tue, 13 Jul 2010 09:40:49 +0300
+Message-ID: <4C3C0A71.2080407@nokia.com>
+References: <20100707111716.24979.68940.sendpatchset@ahunter-work.research.nokia.com> <20100707111749.24979.69982.sendpatchset@ahunter-work.research.nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:27992 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751103Ab0GMGHS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jul 2010 02:07:18 -0400
-Received: from ep_ms13_bk (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
- with ESMTP id <0L5H00B2WFO3B840@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 13 Jul 2010 15:07:15 +0900 (KST)
-Received: from ep_spt01 (ms13.samsung.com [203.254.225.109])
- by ms13.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTP id <0L5H00M1WFO31I@ms13.samsung.com> for linux-mmc@vger.kernel.org;
- Tue, 13 Jul 2010 15:07:15 +0900 (KST)
-Content-return: prohibited
-MIME-version: 1.0
+Received: from smtp.nokia.com ([192.100.122.233]:42768 "EHLO
+	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751128Ab0GMGlt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jul 2010 02:41:49 -0400
+In-Reply-To: <20100707111749.24979.69982.sendpatchset@ahunter-work.research.nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: hardik patel <hk5patel@gmail.com>
-Cc: Ethan Du <ethan.too@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: "Hunter Adrian (Nokia-MS/Helsinki)" <adrian.hunter@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, Jens Axboe <axboe@kernel.dk>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>
 
-DQpIaSBNYWRoYXYsIA0KDQpJIGhhdmUgY2hhbmdlIHRoZSBjYXJkIHJlbW92ZSBzZXF1ZW5jZSBh
-cyBwZXIgbGF0ZXN0IGtlcm5lbCBzb3VyY2UgDQoyLjYuMzQgLi4uLiBhZnRlciBjaGFuZ2luZyB0
-aGlzIGkgZmFjZSB0aGUgc2FtZSBpc3N1ZS4uLi4gaXMgdGhlcmUgYW55IA0Kd2F5IHRvIGNoZWNr
-IGNhcmQgZGV0ZWN0IHN0YXR1cyBhdCBibG9jayBsYXllciA/IG9yIGFueSBvdGhlciB3YXkgdG8g
-DQphdm9pZCBpdCAuLi4uIA0KPj5DYW4gaSBzZWUgeW91ciBjaGFuZ2VzIG1hZGUgYnkgeW91Li5w
-YXN0ZSB5b3VyIGRpZmYgaGVyZS4uLi5BbHNvIGV2ZW4gdGhvdWdoIHlvdSBjaGFuZ2UgdXIgY2Fy
-ZCBkZXRlY3Qgc2VxdWVuY2UNCnN0aWxsIHlvdSB3aWxsIGdldCB0aGVzZSBtZXNzYWdlcyAsLGJ1
-dCBzb21ld2hhdCB5b3UgY2FuIHJlZHVjZSB0aGVzZSBtZXNzYWdlcyBpZiB1ciBjYXJkIHJlbW92
-YWwgc2VxdWVuY2UgaXMgZWZmaWNpZW50Li4NCkJ5IHRoZSB3YXkgZG9lcyB5b3VyIEhvc3QgY29u
-dHJvbGxlciAgc3VwcG9ydCBTREhDST8/V2hhdCB5b3UgdXNlIGluIGNhcmQgZGV0ZWN0IGludGVy
-cnVwdCBoYW5kbGVyIHdvcmtxdWV1ZSBvciB0YXNrbGV0Pz8NCkFmdGVyIHJlbW92aW5nIGNhcmQg
-Li4uLiB3aGVuIGkgZXhlY3V0ZSBhbnkgY29tbWFuZCBvbiBib2FyZCB0aGVuIGFsc28gDQppIGdv
-dCBiZWxvdyBlcnJvciBtZXNzYWdlcyA6IA0KPj5PbmNlIHlvdSByZW1vdmUgeW91ciBjYXJkICBh
-bmQgaWYgeW91IHN0aWxsIGV4ZWN1dGUgYW55IGNvbW1hbmQgaW4gdGhlIG1vdW50IHBvaW50IG9m
-IHRoZSBjYXJkDQp5b3Ugd2lsbCBnZXQgdGhlc2UgdHlwZSBvZiBlcnJvcnMgLi4uaWdub3JlIHRo
-ZW0uLi4NCg0KRkFUOiBEaXJlY3RvcnkgYnJlYWQoYmxvY2sgMzg5OCkgZmFpbGVkIA0KRkFUOiBE
-aXJlY3RvcnkgYnJlYWQoYmxvY2sgMzg5OSkgZmFpbGVkIA0KRkFUOiBEaXJlY3RvcnkgYnJlYWQo
-YmxvY2sgMzkwMCkgZmFpbGVkIA0KRkFUOiBEaXJlY3RvcnkgYnJlYWQoYmxvY2sgMzkwMSkgZmFp
-bGVkIA0KRkFUOiBEaXJlY3RvcnkgYnJlYWQoYmxvY2sgMzkwMikgZmFpbGVkIA0KT24gTW9uLCBK
-dWwgMTIsIDIwMTAgYXQgMjoyOCBQTSwgTUFESEFWIFNJTkdIQ0hBVUhBTiANCjxzaW5naC5tYWRo
-YXZAc2Ftc3VuZy5jb20+IHdyb3RlOiANCj4gDQo+IA0KPiANCj4gSSBhbSB1c2luZyAyLjYuMzAg
-bGludXgga2VybmVsIHZlcnNpb24gLi4uIA0KPj4+QXMgaSB0b2xkIHlvdSBwcmV2aW91c2x5IHRo
-YXQgeW91IG5lZWQgdG8gZmx1c2ggcXVldWUgYXMgc29vbiBhcyBwb3NzaWJsZSBvbmNlIHlvdSBy
-ZW1vdmUgdGhlIGNhcmQuIA0KPiBTbyBvbmNlIHlvdSByZW1vdmUgY2FyZCBtbWNfYmxrX3JlbW92
-ZSgpIGdldHMgY2FsbGVkIHdoaWNoIGNhbGxzIG1tY19jbGVhbnVwX3F1ZXVlKCkgYW5kIGl0IGZ1
-cnRoZXIgaW50ZW5hbGx5IGNhbGxzIA0KPiBrdGhyZWFkX3N0b3AoKShzdG9wcyB0aHJlYWQgd2hp
-Y2ggcHJvY2VzcyByZXF1ZXN0cykuU28gY29tcGFyZSB0aGUgbGF0ZXN0IGtlcm5lbCB2ZXJzaW9u
-IHdydCB5b3VyIGtlcm5lbCB2ZXJzaW9uIA0KPiBhbmQgeW91IHdpbGwgZmluZCB0aGUgZGlmZmVy
-ZW5jZXMgaW4gY2FyZCByZW1vdmUgc2VxdWVuY2Ugc28gZWl0aGVyIHlvdSBjYW4gYmFja3BvcnQg
-dGhlc2UgZnVuY3Rpb25zIG9yIGNoYW5nZSBtYW51YWxseSANCj4gc2VxdWVuY2Ugb2YgdGhlc2Ug
-ZnVuY3Rpb25zLiANCj4gDQo+IE9uIEZyaSwgSnVsIDksIDIwMTAgYXQgOToyMCBBTSwgTWFkaGF2
-IENoYXVoYW4gPG1hZGhhdi5pbXNlY0BnbWFpbC5jb20+IHdyb3RlOiANCj4+IE9uIFRodSwgSnVs
-IDgsIDIwMTAgYXQgMTE6MzggUE0sIGhhcmRpayBwYXRlbCA8aGs1cGF0ZWxAZ21haWwuY29tPiB3
-cm90ZTogDQo+Pj4gSGkgTWFkaGF2LCANCj4+PiANCj4+PiB0aGFua3MgZm9yIHlvdXIgaW50ZXJl
-c3QuLi4gSSBoYXZlIGNhcmQgZGV0ZWN0IHJlZ2lzdGVyIHNvIG1tY19nZXRfY2QgDQo+Pj4gZnVu
-Y3Rpb24gaSBjYW4gY2hlY2sgd2hldGhlciBjYXJkIGlzIGluc2VydGVkIG9yIG5vdCAuLi4gc28g
-aW4gc2QgaG9zdCANCj4+PiBjb250cm9sbGVyIGRyaXZlciBjYW4gZGV0ZWN0IHRoYXQgcHJvcGVy
-bHkuLi4gYnV0IGkgdGhpbmsgYmxvY2sgZHJpdmVyIA0KPj4+IGRvZXMgbm90IGRldGVjdCB0aGF0
-IC4uLi4gd2hlcmUgaSBoYXZlIHRvIGZsdXNoIG15IHJlcXVlc3QgcXVldWUuLi4gaSANCj4+PiBo
-YXZlIGdvbmUgdGhyb3VnaCBibG9jay5jIGFuZCBxdWV1ZS5jIGZpbGUgd2hpY2ggZ2VuZXJhdGUg
-bW1jX2Jsb2NrLmtvIA0KPj4+IGZpbGUgYnV0IG5vdCBzdXJlIHdoZXJlIHRvIG1vZGlmeS4uLiBj
-YW4gYW55IG9uZSBndWlkZSBtZSBtb3JlIA0KPj4gDQo+PiBXaGljaCBLZXJuZWwgdmVyc2lvbiB5
-b3UgYXJlIHVzaW5nPz8gDQo+Pj4gDQo+Pj4gDQo+Pj4gT24gVGh1LCBKdWwgOCwgMjAxMCBhdCA2
-OjM1IFBNLCBNQURIQVYgU0lOR0hDSEFVSEFOIA0KPj4+IDxzaW5naC5tYWRoYXZAc2Ftc3VuZy5j
-b20+IHdyb3RlOiANCj4+Pj4gQ2FyZCByZW1vdmFsIG5vdCBkZXRlY3RlZCBieSBkcml2ZXI/IA0K
-Pj4+PiBZb3Ugc2hvdWxkIHNlZSBhIGxpbmUgb2YgbG9nIGlmIGNhcmQgcmVtb3ZhbCBpcyBkZXRl
-Y3RlZDogDQo+Pj4+IGNhcmQgeHh4eCByZW1vdmVkIA0KPj4+PiANCj4+Pj4gV291bGQgeW91IGRl
-c2NyaWJlIGhvdyBkbyB5b3UgZGV0ZWN0IGNhcmQgcmVtb3ZhbC9pbnNlcnRpb24gb24geW91ciBi
-b2FyZD8gDQo+Pj4+IA0KPj4+PiBSZWdhcmRzLCANCj4+Pj4gLUV0aGFuIA0KPj4+PiANCj4+Pj4g
-T24gVGh1LCBKdWwgOCwgMjAxMCBhdCA2OjA1IFBNLCBoYXJkaWsgcGF0ZWwgPGhrNXBhdGVsQGdt
-YWlsLmNvbT4gd3JvdGU6IA0KPj4+Pj4gSSBoYXZlIHNkIGNhcmQgb24gYm9hcmQgLi4uIER1cmlu
-ZyByZWNvcmRpbmcvd3JpdGluZyBTRCBjYXJkLCByZW1vdmUgDQo+Pj4+PiBTRCBjYXJkIC4uLiB0
-aGVuIGkgYW0gZ2V0dGluZyBlbmRsZXNzIGVycm9yIGluIGRtZXNnIGFzIGJlbG93IDogDQo+Pj4+
-PiANCj4+Pj4+IGVuZF9yZXF1ZXN0OiBJL08gZXJyb3IsIGRldiBtbWNibGswLCBzZWN0b3IgMjQg
-DQo+Pj4+PiBGQVQ6IEZBVCByZWFkIGZhaWxlZCAoYmxvY2tuciA4KSANCj4+Pj4+IG1tY2JsazA6
-IGVycm9yIC0xMTAgc2VuZGluZyBzdGF0dXMgY29tYW5kPDM+bW1jYmxrMDogZXJyb3IgLTExMCAN
-Cj4+Pj4+IHNlbmRpbmcgcmVhZC93cml0ZSBjb21tYW5kLCByZXNwb25zZSAweDAsIGNhcmQgc3Rh
-dHVzIDB4MCANCj4+Pj4+IEJsb2NrIG1tY19ibGtfaXNzdWVfcnEgZnVuY3Rpb24gY2FsbCAzNDYg
-DQo+Pj4+PiBlbmRfcmVxdWVzdDogSS9PIGVycm9yLCBkZXYgbW1jYmxrMCwgc2VjdG9yIDQgDQo+
-Pj4+PiBGQVQ6IEZBVCByZWFkIGZhaWxlZCAoYmxvY2tuciA0KSANCj4+Pj4+IE1NQzoga2lsbGlu
-ZyByZXF1ZXN0cyBmb3IgZGVhZCBxdWV1ZSANCj4+Pj4+IGVuZF9yZXF1ZXN0OiBJL08gZXJyb3Is
-IGRldiBtbWNibGswLCBzZWN0b3IgOCANCj4+Pj4+IEZBVDogRkFUIHJlYWQgZmFpbGVkIChibG9j
-a25yIDgpIA0KPj4+Pj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2NrbnIgNCkgDQo+Pj4+PiBG
-QVQ6IEZBVCByZWFkIGZhaWxlZCAoYmxvY2tuciA4KSANCj4+Pj4+IEZBVDogRkFUIHJlYWQgZmFp
-bGVkIChibG9ja25yIDQpIA0KPj4+Pj4gRkFUOiBGQVQgcmVhZCBmYWlsZWQgKGJsb2NrbnIgOCkg
-DQo+Pj4+PiBGQVQ6IEZBVCByZWFkIGZhaWxlZCAoYmxvY2tuciA0KSANCj4+Pj4+IEZBVDogRkFU
-IHJlYWQgZmFpbGVkIChibG9ja25yIDgpIA0KPj4+Pj4gDQo+Pj4+PiBIb3cgdG8gc3RvcCB0aGlz
-IG1lc3NhZ2UgLi4uIHdoYXQgaXMgaWRlYWwgc2l0dWF0aW9uIHdoZW4gd2UgcmVtb3ZlIA0KPj4+
-Pj4gY2FyZCB3aGlsZSB3cml0aW5nIC4uLi4uLiBjYW4gdSBoZWxwIG1lIHdoYXQgdG8gZG8gPyAN
-Cj4+Pj4+IA0KPj4+Pj4+V2hlbiB3ZSBpbnNlcnQgdGhlIGNhcmQgaG90IHBsdWcgZGFtZW9uIHN0
-YXJ0IHNlbmRpbmcgdGhlIHJlcXVlc3QgdG8gYmxvY2sgbGF5ZXIgIGFuZCBrZXJuZWwgYmxvY2sg
-bGF5ZXIgDQo+Pj4+Pj5zdGFydCBzZW5kaW5nIHRoZSByZXF1ZXN0IHRvIGNhcmQuQnV0IHdoZW4g
-eW91IHJlbW92ZSB0aGUgY2FyZCBpbiBiZXR3ZWVuIHJlcXVlc3QgcXVldWUgaXMgbm90IGZsdXNo
-ZWQgcHJvcGVybHkuLiANCj4+Pj4+PnNvIHlvdSBuZWVkIHRvIGZsdXNoIHlvdXIgcmVxdWVzdCBx
-dWV1ZSBhdCBhcHByb3ByaWF0ZSB0aW1lLkFsc28gcGxlYXNlIG5vdGUgdGhhdCBldmVuIHRoYXQg
-eW91IGZsdXNoIHlvdXIgcmVxdWVzdCBxdWV1ZSANCj4+Pj4+PmF0IGFwcHJvcHJpYXRlIHRpbWUg
-c29tZSBtZXNzYWdlcyB3aWxsIGNvbWUuIA0KPj4+Pj4gd2hlcmUgaXMgdGhlIHByb2JsZW0gaGVy
-ZT8gc2QgaG9zdCBjb250cm9sZXIgZHJpdmVyIHByb2JsZW0gb3IgYmxvY2sgDQo+Pj4+PiBkcml2
-ZXIgcHJvYmxlbSBvciBmaWxlIHN5c3RlbSBwcm9ibGVtIA0KPj4+Pj4gDQo+Pj4+PiBOb3RlOiBJ
-IGhhdmUgZm9ybWF0dGVkIHNkIGNhcmQgd2l0aCBGQVQzMiBmaWxlIHN5c3RlbSAuIA0KPj4+Pj4g
-DQo+Pj4+PiANCj4+Pj4+IA0KPj4+Pj4gV2l0aCBFWFQzIEZpbGUgc3lzdGVtIDogDQo+Pj4+PiAN
-Cj4+Pj4+IFJlbW92ZSBTRCBjYXJkIHdoaWxlIHdyaXRpbmcvcmVjb3JkaW5nIHdlIGdvdCBlcnJv
-ciBtZXNzYWdlcyBsaWtlIA0KPj4+Pj4gYmVsb3cuIGJ1dCB0aGlzIGlzIG5vdCBlbmRsZXNzLiBB
-ZnRlciBzb21lIHRpbWUgaXQgc3RvcHMuIA0KPj4+Pj4gDQo+Pj4+PiA9PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT0gDQo+Pj4+PiA9PT09PT09PT09PT09IA0KPj4+Pj4gZW5kX3JlcXVlc3Q6
-IEkvTyBlcnJvciwgZGV2IG1tY2JsazAsIHNlY3RvciAxNTY1MzYgDQo+Pj4+PiBtbWNibGswOiBl
-cnJvciAtMTEwIHNlbmRpbmcgc3RhdHVzIGNvbWFuZDwzPm1tY2JsazA6IGVycm9yIC0xMTAgDQo+
-Pj4+PiBzZW5kaW5nIHJlYWQvd3JpdGUgY29tbWFuZCwgcmVzcG9uc2UgMHgwLCBjYXJkIHN0YXR1
-cyAweDAgDQo+Pj4+PiBtbWNibGswOiBlcnJvciAtMTEwIHJlcXVlc3Rpbmcgc3RhdHVzIA0KPj4+
-Pj4gZW5kX3JlcXVlc3Q6IEkvTyBlcnJvciwgZGV2IG1tY2JsazAsIHNlY3RvciA0NzM2IA0KPj4+
-Pj4gQWJvcnRpbmcgam91cm5hbCBvbiBkZXZpY2UgbW1jYmxrMHAxLiANCj4+Pj4+IGV4dDNfYWJv
-cnQgY2FsbGVkLiANCj4+Pj4+IEVYVDMtZnMgZXJyb3IgKGRldmljZSBtbWNibGswcDEpOiBleHQz
-X2pvdXJuYWxfc3RhcnRfc2I6IERldGVjdGVkIA0KPj4+Pj4gYWJvcnRlZCBqb3VybmFsIA0KPj4+
-Pj4gUmVtb3VudGluZyBmaWxlc3lzdGVtIHJlYWQtb25seSANCj4+Pj4+IGVuZF9yZXF1ZXN0OiBJ
-L08gZXJyb3IsIGRldiBtbWNibGswLCBzZWN0b3IgNDQ0OCANCj4+Pj4+IGpvdXJuYWwgY29tbWl0
-IEkvTyBlcnJvciANCj4+Pj4+ID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT0gDQo+Pj4+PiAtLSANCj4+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
-ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIA0KPj4+Pj4gdGhlIGJvZHkg
-b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgDQo+Pj4+PiBNb3JlIG1h
-am9yZG9tbyBpbmZvIGF0ID9odHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwgDQo+Pj4+PiANCj4+Pj4gLS0gDQo+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0
-OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIA0KPj4+PiB0aGUgYm9k
-eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyANCj4+Pj4gTW9yZSBt
-YWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5o
-dG1sIA0KPj4+PiANCj4+Pj4gDQo+Pj4+IA0KPj4+PiANCj4+Pj4gDQo+Pj4+IA0KPj4+PiANCj4+
-Pj4gDQo+Pj4gDQo+Pj4gDQo+Pj4gDQo+Pj4gLS0gDQo+Pj4gUmVnYXJkcywgDQo+Pj4gSGFyZGlr
-IA0KPj4+IA0KPj4+ICJJZiB5b3UgYXJlIGRvaW5nIHdoYXQgeW91IGhhdmUgYWx3YXlzIGJlZW4g
-ZG9pbmcgdGhlbiBleHBlY3Qgd2hhdCB5b3UgDQo+Pj4gaGF2ZSBhbHdheXMgYmVlbiBnZXR0aW5n
-LiIgDQo+Pj4gLS0gDQo+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgaW4gDQo+Pj4gdGhlIGJvZHkgb2YgYSBtZXNz
-YWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgDQo+Pj4gTW9yZSBtYWpvcmRvbW8gaW5m
-byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sIA0KPj4+IA0K
-Pj4gDQo+IA0KPiANCj4gDQo+IC0tIA0KPiBSZWdhcmRzLCANCj4gSGFyZGlrIA0KPiANCj4gIklm
-IHlvdSBhcmUgZG9pbmcgd2hhdCB5b3UgaGF2ZSBhbHdheXMgYmVlbiBkb2luZyB0aGVuIGV4cGVj
-dCB3aGF0IHlvdSANCj4gaGF2ZSBhbHdheXMgYmVlbiBnZXR0aW5nLiIgDQo+IA0KPiANCj4gDQo+
-IA0KPiANCj4gDQo+IA0KPiANCg0KDQoNCi0tICANClJlZ2FyZHMsIA0KSGFyZGlrIA0KDQoiSWYg
-eW91IGFyZSBkb2luZyB3aGF0IHlvdSBoYXZlIGFsd2F5cyBiZWVuIGRvaW5nIHRoZW4gZXhwZWN0
-IHdoYXQgeW91IA0KaGF2ZSBhbHdheXMgYmVlbiBnZXR0aW5nLiIgDQoNCiANCiANCiANCiANCg0K
-DQo=
+Hunter Adrian (Nokia-MS/Helsinki) wrote:
+>>From 1cdd5b576bfafcd53857ed4d37830446e96e8206 Mon Sep 17 00:00:00 2001
+> From: Adrian Hunter <adrian.hunter@nokia.com>
+> Date: Wed, 23 Jun 2010 15:41:38 +0300
+> Subject: [PATCH 4/5] block: Add secure discard
+> 
+> Secure discard is the same as discard except that all copies
+> of the discarded sectors (perhaps created by garbage collection)
+> must also be erased.
+> 
+> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 
+Christoph will you comment on this patch?  Is it doing what you
+asked?
+
+> ---
+>  block/blk-core.c        |    5 ++++-
+>  block/blk-lib.c         |    6 ++++++
+>  block/compat_ioctl.c    |    1 +
+>  block/elevator.c        |    6 ++++++
+>  block/ioctl.c           |   15 ++++++++++-----
+>  include/linux/bio.h     |    2 ++
+>  include/linux/blkdev.h  |    7 ++++++-
+>  include/linux/fs.h      |    2 ++
+>  kernel/trace/blktrace.c |    8 ++++++++
+>  9 files changed, 45 insertions(+), 7 deletions(-)
+> 
+> diff --git a/block/blk-core.c b/block/blk-core.c
+> index 3c37894..7931081 100644
+> --- a/block/blk-core.c
+> +++ b/block/blk-core.c
+> @@ -1513,7 +1513,10 @@ static inline void __generic_make_request(struct bio *bio)
+>  		if (bio_check_eod(bio, nr_sectors))
+>  			goto end_io;
+>  
+> -		if ((bio->bi_rw & REQ_DISCARD) && !blk_queue_discard(q)) {
+> +		if ((bio->bi_rw & REQ_DISCARD) &&
+> +		    (!blk_queue_discard(q) ||
+> +		     ((bio->bi_rw & REQ_SECURE) &&
+> +		      !blk_queue_secdiscard(q)))) {
+>  			err = -EOPNOTSUPP;
+>  			goto end_io;
+>  		}
+> diff --git a/block/blk-lib.c b/block/blk-lib.c
+> index e16185b..ba8c0f9 100644
+> --- a/block/blk-lib.c
+> +++ b/block/blk-lib.c
+> @@ -50,6 +50,12 @@ int blkdev_issue_discard(struct block_device *bdev, sector_t sector,
+>  	if (!blk_queue_discard(q))
+>  		return -EOPNOTSUPP;
+>  
+> +	if (flags & BLKDEV_IFL_SECURE) {
+> +		if (!blk_queue_secdiscard(q))
+> +			return -EOPNOTSUPP;
+> +		type |= DISCARD_SECURE;
+> +	}
+> +
+>  	while (nr_sects && !ret) {
+>  		unsigned int max_discard_sectors =
+>  			min(q->limits.max_discard_sectors, UINT_MAX >> 9);
+> diff --git a/block/compat_ioctl.c b/block/compat_ioctl.c
+> index f26051f..24a146d 100644
+> --- a/block/compat_ioctl.c
+> +++ b/block/compat_ioctl.c
+> @@ -753,6 +753,7 @@ long compat_blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg)
+>  	case BLKFLSBUF:
+>  	case BLKROSET:
+>  	case BLKDISCARD:
+> +	case BLKSECDISCARD:
+>  	/*
+>  	 * the ones below are implemented in blkdev_locked_ioctl,
+>  	 * but we call blkdev_ioctl, which gets the lock for us
+> diff --git a/block/elevator.c b/block/elevator.c
+> index 816a7c8..ec585c9 100644
+> --- a/block/elevator.c
+> +++ b/block/elevator.c
+> @@ -83,6 +83,12 @@ int elv_rq_merge_ok(struct request *rq, struct bio *bio)
+>  		return 0;
+>  
+>  	/*
+> +	 * Don't merge discard requests and secure discard requests
+> +	 */
+> +	if ((bio->bi_rw & REQ_SECURE) != (rq->bio->bi_rw & REQ_SECURE))
+> +		return 0;
+> +
+> +	/*
+>  	 * different data direction or already started, don't merge
+>  	 */
+>  	if (bio_data_dir(bio) != rq_data_dir(rq))
+> diff --git a/block/ioctl.c b/block/ioctl.c
+> index 6f3db6f..afcfe48 100644
+> --- a/block/ioctl.c
+> +++ b/block/ioctl.c
+> @@ -114,8 +114,10 @@ static int blkdev_reread_part(struct block_device *bdev)
+>  }
+>  
+>  static int blk_ioctl_discard(struct block_device *bdev, uint64_t start,
+> -			     uint64_t len)
+> +			     uint64_t len, int secure)
+>  {
+> +	unsigned long flags = BLKDEV_IFL_WAIT;
+> +
+>  	if (start & 511)
+>  		return -EINVAL;
+>  	if (len & 511)
+> @@ -125,8 +127,9 @@ static int blk_ioctl_discard(struct block_device *bdev, uint64_t start,
+>  
+>  	if (start + len > (bdev->bd_inode->i_size >> 9))
+>  		return -EINVAL;
+> -	return blkdev_issue_discard(bdev, start, len, GFP_KERNEL,
+> -				    BLKDEV_IFL_WAIT);
+> +	if (secure)
+> +		flags |= BLKDEV_IFL_SECURE;
+> +	return blkdev_issue_discard(bdev, start, len, GFP_KERNEL, flags);
+>  }
+>  
+>  static int put_ushort(unsigned long arg, unsigned short val)
+> @@ -226,7 +229,8 @@ int blkdev_ioctl(struct block_device *bdev, fmode_t mode, unsigned cmd,
+>  		unlock_kernel();
+>  		return 0;
+>  
+> -	case BLKDISCARD: {
+> +	case BLKDISCARD:
+> +	case BLKSECDISCARD: {
+>  		uint64_t range[2];
+>  
+>  		if (!(mode & FMODE_WRITE))
+> @@ -235,7 +239,8 @@ int blkdev_ioctl(struct block_device *bdev, fmode_t mode, unsigned cmd,
+>  		if (copy_from_user(range, (void __user *)arg, sizeof(range)))
+>  			return -EFAULT;
+>  
+> -		return blk_ioctl_discard(bdev, range[0], range[1]);
+> +		return blk_ioctl_discard(bdev, range[0], range[1],
+> +					 cmd == BLKSECDISCARD);
+>  	}
+>  
+>  	case HDIO_GETGEO: {
+> diff --git a/include/linux/bio.h b/include/linux/bio.h
+> index 4d379c8..147e631 100644
+> --- a/include/linux/bio.h
+> +++ b/include/linux/bio.h
+> @@ -176,6 +176,7 @@ enum rq_flag_bits {
+>  	__REQ_INTEGRITY,	/* integrity metadata has been remapped */
+>  	__REQ_IO_STAT,		/* account I/O stat */
+>  	__REQ_MIXED_MERGE,	/* merge of different types, fail separately */
+> +	__REQ_SECURE,		/* secure discard (used with __REQ_DISCARD) */
+>  	__REQ_NR_BITS,		/* stops here */
+>  };
+>  
+> @@ -215,6 +216,7 @@ enum rq_flag_bits {
+>  #define REQ_INTEGRITY		(1 << __REQ_INTEGRITY)
+>  #define REQ_IO_STAT		(1 << __REQ_IO_STAT)
+>  #define REQ_MIXED_MERGE		(1 << __REQ_MIXED_MERGE)
+> +#define REQ_SECURE		(1 << __REQ_SECURE)
+>  
+>  /*
+>   * upper 16 bits of bi_rw define the io priority of this bio
+> diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+> index 204fbe2..da643f4 100644
+> --- a/include/linux/blkdev.h
+> +++ b/include/linux/blkdev.h
+> @@ -404,6 +404,7 @@ struct request_queue
+>  #define QUEUE_FLAG_DISCARD     16	/* supports DISCARD */
+>  #define QUEUE_FLAG_NOXMERGES   17	/* No extended merges */
+>  #define QUEUE_FLAG_ADD_RANDOM  18	/* Contributes to random pool */
+> +#define QUEUE_FLAG_SECDISCARD  19	/* supports SECDISCARD */
+>  
+>  #define QUEUE_FLAG_DEFAULT	((1 << QUEUE_FLAG_IO_STAT) |		\
+>  				 (1 << QUEUE_FLAG_CLUSTER) |		\
+> @@ -539,6 +540,8 @@ enum {
+>  #define blk_queue_stackable(q)	\
+>  	test_bit(QUEUE_FLAG_STACKABLE, &(q)->queue_flags)
+>  #define blk_queue_discard(q)	test_bit(QUEUE_FLAG_DISCARD, &(q)->queue_flags)
+> +#define blk_queue_secdiscard(q)	(blk_queue_discard(q) && \
+> +	test_bit(QUEUE_FLAG_SECDISCARD, &(q)->queue_flags))
+>  
+>  #define blk_noretry_request(rq) \
+>  	((rq)->cmd_flags & (REQ_FAILFAST_DEV|REQ_FAILFAST_TRANSPORT| \
+> @@ -931,10 +934,12 @@ static inline struct request *blk_map_queue_find_tag(struct blk_queue_tag *bqt,
+>  }
+>  enum{
+>  	BLKDEV_WAIT,	/* wait for completion */
+> -	BLKDEV_BARRIER,	/*issue request with barrier */
+> +	BLKDEV_BARRIER,	/* issue request with barrier */
+> +	BLKDEV_SECURE,	/* secure discard */
+>  };
+>  #define BLKDEV_IFL_WAIT		(1 << BLKDEV_WAIT)
+>  #define BLKDEV_IFL_BARRIER	(1 << BLKDEV_BARRIER)
+> +#define BLKDEV_IFL_SECURE	(1 << BLKDEV_SECURE)
+>  extern int blkdev_issue_flush(struct block_device *, gfp_t, sector_t *,
+>  			unsigned long);
+>  extern int blkdev_issue_discard(struct block_device *bdev, sector_t sector,
+> diff --git a/include/linux/fs.h b/include/linux/fs.h
+> index dc9d185..2f5df1f 100644
+> --- a/include/linux/fs.h
+> +++ b/include/linux/fs.h
+> @@ -176,6 +176,7 @@ struct inodes_stat_t {
+>   */
+>  #define DISCARD_NOBARRIER	(WRITE | REQ_DISCARD)
+>  #define DISCARD_BARRIER		(WRITE | REQ_DISCARD | REQ_HARDBARRIER)
+> +#define DISCARD_SECURE		(DISCARD_NOBARRIER | REQ_SECURE)
+>  
+>  #define SEL_IN		1
+>  #define SEL_OUT		2
+> @@ -318,6 +319,7 @@ struct inodes_stat_t {
+>  #define BLKALIGNOFF _IO(0x12,122)
+>  #define BLKPBSZGET _IO(0x12,123)
+>  #define BLKDISCARDZEROES _IO(0x12,124)
+> +#define BLKSECDISCARD _IO(0x12,125)
+>  
+>  #define BMAP_IOCTL 1		/* obsolete - kept for compatibility */
+>  #define FIBMAP	   _IO(0x00,1)	/* bmap access */
+> diff --git a/kernel/trace/blktrace.c b/kernel/trace/blktrace.c
+> index 3b4a695..a711b47 100644
+> --- a/kernel/trace/blktrace.c
+> +++ b/kernel/trace/blktrace.c
+> @@ -667,6 +667,9 @@ static void blk_add_trace_rq(struct request_queue *q, struct request *rq,
+>  	if (rq->cmd_flags & REQ_DISCARD)
+>  		rw |= REQ_DISCARD;
+>  
+> +	if (rq->cmd_flags & REQ_SECURE)
+> +		rw |= REQ_SECURE;
+> +
+>  	if (rq->cmd_type == REQ_TYPE_BLOCK_PC) {
+>  		what |= BLK_TC_ACT(BLK_TC_PC);
+>  		__blk_add_trace(bt, 0, blk_rq_bytes(rq), rw,
+> @@ -1773,6 +1776,8 @@ void blk_fill_rwbs(char *rwbs, u32 rw, int bytes)
+>  		rwbs[i++] = 'S';
+>  	if (rw & REQ_META)
+>  		rwbs[i++] = 'M';
+> +	if (rw & REQ_SECURE)
+> +		rwbs[i++] = 'E';
+>  
+>  	rwbs[i] = '\0';
+>  }
+> @@ -1785,6 +1790,9 @@ void blk_fill_rwbs_rq(char *rwbs, struct request *rq)
+>  	if (rq->cmd_flags & REQ_DISCARD)
+>  		rw |= REQ_DISCARD;
+>  
+> +	if (rq->cmd_flags & REQ_SECURE)
+> +		rw |= REQ_SECURE;
+> +
+>  	bytes = blk_rq_bytes(rq);
+>  
+>  	blk_fill_rwbs(rwbs, rw, bytes);
 
