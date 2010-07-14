@@ -1,92 +1,90 @@
-From: Anton Vorontsov <avorontsov@mvista.com>
-Subject: [PATCH 3/8] sdhci: Clear interrupt status register just once
-Date: Wed, 14 Jul 2010 17:08:01 +0400
-Message-ID: <20100714130801.GC517@oksana.dev.rtsoft.ru>
-References: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
+From: Christian Dietrich <qy03fugy@stud.informatik.uni-erlangen.de>
+Subject: [PATCH 4/5] drivers/mmc/host/msm-sdcc: Remove dead config options
+Date: Wed, 14 Jul 2010 16:04:53 +0200
+Message-ID: <459cdebccb9bfaa88194b47608e7e739339aae55.1279116162.git.qy03fugy__11723.6618571498$1279116375$gmane$org@stud.informatik.uni-erlangen.de>
+References: <c3c850bed3f5714f1efcfad24ad4f8bfcb6b5b54.1279116162.git.qy03fugy@stud.informatik.uni-erlangen.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from faui40.informatik.uni-erlangen.de ([131.188.34.40]:47087 "EHLO
+	faui40.informatik.uni-erlangen.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756520Ab0GNOEz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jul 2010 10:04:55 -0400
 Content-Disposition: inline
-In-Reply-To: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Sender: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Matt Fleming <matt@console-pimps.org>, Albert Herranz <albert_herranz@yahoo.es>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@ozlabs.org, Ben Dooks <ben-linux@fluff.org>, Pierre Ossman <pierre@ossman.eu>
+In-Reply-To: <c3c850bed3f5714f1efcfad24ad4f8bfcb6b5b54.1279116162.git.qy03fugy@stud.informatik.uni-erlangen.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@codeaurora.org>, Bryan Huntsman <bryanh@codeaurora.org>, San Mehat <san@google.com>, Andrew Morton <akpm@linux-foundation.>
+Cc: vamos-dev@i4.informatik.uni-erlangen.de
 
-There's no need to clear the interrupt status register bit-by-bit,
-we can just clear it once. This simplifies irq handler.
+CONFIG_MMC_MSM7X00A_RESUME_IN_WQ and CONFIG_MMC_EMBEDDED_SDIO don't
+exist in Kconfig and is never defined anywhere else, therefore removing
+all references for it from the source code.
 
-Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
+Signed-off-by: Christian Dietrich <qy03fugy@stud.informatik.uni-erlangen.de>
 ---
- drivers/mmc/host/sdhci.c |   23 ++++++-----------------
- 1 files changed, 6 insertions(+), 17 deletions(-)
+ drivers/mmc/host/msm_sdcc.c |   25 -------------------------
+ drivers/mmc/host/msm_sdcc.h |    4 ----
+ 2 files changed, 0 insertions(+), 29 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 748a2e3..9ec245c 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1522,38 +1522,29 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 		goto out;
- 	}
+diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
+index 24e0945..3bd8ff7 100644
+--- a/drivers/mmc/host/msm_sdcc.c
++++ b/drivers/mmc/host/msm_sdcc.c
+@@ -1057,22 +1057,6 @@ msmsdcc_init_dma(struct msmsdcc_host *host)
+ 	return 0;
+ }
  
-+	sdhci_writel(host, intmask, SDHCI_INT_STATUS);
-+
- 	DBG("*** %s got interrupt: 0x%08x\n",
- 		mmc_hostname(host->mmc), intmask);
- 
--	if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
--		sdhci_writel(host, intmask & (SDHCI_INT_CARD_INSERT |
--			SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
-+	if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE))
- 		schedule_work(&host->card_detect_work);
--	}
- 
- 	intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
- 
--	if (intmask & SDHCI_INT_CMD_MASK) {
--		sdhci_writel(host, intmask & SDHCI_INT_CMD_MASK,
--			SDHCI_INT_STATUS);
-+	if (intmask & SDHCI_INT_CMD_MASK)
- 		sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
--	}
- 
--	if (intmask & SDHCI_INT_DATA_MASK) {
--		sdhci_writel(host, intmask & SDHCI_INT_DATA_MASK,
--			SDHCI_INT_STATUS);
-+	if (intmask & SDHCI_INT_DATA_MASK)
- 		sdhci_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
--	}
- 
- 	intmask &= ~(SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK);
- 
- 	intmask &= ~SDHCI_INT_ERROR;
- 
--	if (intmask & SDHCI_INT_BUS_POWER) {
-+	if (intmask & SDHCI_INT_BUS_POWER)
- 		printk(KERN_ERR "%s: Card is consuming too much power!\n",
- 			mmc_hostname(host->mmc));
--		sdhci_writel(host, SDHCI_INT_BUS_POWER, SDHCI_INT_STATUS);
--	}
- 
- 	intmask &= ~SDHCI_INT_BUS_POWER;
- 
-@@ -1566,8 +1557,6 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 		printk(KERN_ERR "%s: Unexpected interrupt 0x%08x.\n",
- 			mmc_hostname(host->mmc), intmask);
- 		sdhci_dumpregs(host);
+-#ifdef CONFIG_MMC_MSM7X00A_RESUME_IN_WQ
+-static void
+-do_resume_work(struct work_struct *work)
+-{
+-	struct msmsdcc_host *host =
+-		container_of(work, struct msmsdcc_host, resume_task);
+-	struct mmc_host	*mmc = host->mmc;
 -
--		sdhci_writel(host, intmask, SDHCI_INT_STATUS);
- 	}
+-	if (mmc) {
+-		mmc_resume_host(mmc);
+-		if (host->stat_irq)
+-			enable_irq(host->stat_irq);
+-	}
+-}
+-#endif
+-
+ static int
+ msmsdcc_probe(struct platform_device *pdev)
+ {
+@@ -1145,15 +1129,6 @@ msmsdcc_probe(struct platform_device *pdev)
+ 	host->dmares = dmares;
+ 	spin_lock_init(&host->lock);
  
- 	result = IRQ_HANDLED;
+-#ifdef CONFIG_MMC_EMBEDDED_SDIO
+-	if (plat->embedded_sdio)
+-		mmc_set_embedded_sdio_data(mmc,
+-					   &plat->embedded_sdio->cis,
+-					   &plat->embedded_sdio->cccr,
+-					   plat->embedded_sdio->funcs,
+-					   plat->embedded_sdio->num_funcs);
+-#endif
+-
+ 	/*
+ 	 * Setup DMA
+ 	 */
+diff --git a/drivers/mmc/host/msm_sdcc.h b/drivers/mmc/host/msm_sdcc.h
+index da0039c..d7dedcf 100644
+--- a/drivers/mmc/host/msm_sdcc.h
++++ b/drivers/mmc/host/msm_sdcc.h
+@@ -235,10 +235,6 @@ struct msmsdcc_host {
+ 	int			cmdpoll;
+ 	struct msmsdcc_stats	stats;
+ 
+-#ifdef CONFIG_MMC_MSM7X00A_RESUME_IN_WQ
+-	struct work_struct	resume_task;
+-#endif
+-
+ 	/* Command parameters */
+ 	unsigned int		cmd_timeout;
+ 	unsigned int		cmd_pio_irqmask;
 -- 
-1.7.0.5
+1.7.0.4
+
