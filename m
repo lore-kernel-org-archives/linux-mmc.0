@@ -1,57 +1,37 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: s5pv210: Why don't use the FIFO for Tx/Rx at MMC
-Date: Wed, 14 Jul 2010 17:11:40 +0900
-Message-ID: <AANLkTilTnE4wDBgS5kxh_kosJjcVHwPKp-oye8aKPjmn@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Sukumar Ghorai <s-ghorai@ti.com>
+Subject: [PATCH] mmc: csd version check updated to support MMC v4.41
+Date: Wed, 14 Jul 2010 13:51:07 +0530
+Message-ID: <1279095667-21255-1-git-send-email-s-ghorai@ti.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:56352 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752267Ab0GNILp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jul 2010 04:11:45 -0400
-Received: by pzk26 with SMTP id 26so1546318pzk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Jul 2010 01:11:40 -0700 (PDT)
+Received: from devils.ext.ti.com ([198.47.26.153]:46933 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752786Ab0GNIVM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jul 2010 04:21:12 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>, arm-linux <linux-arm-kernel@lists.infradead.org>, Ben Dooks <ben-linux@fluff.org>, Marek Szyprowski <m.szyprowski@samsung.com>, =?UTF-8?B?7KCV7J6s
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: Sukumar Ghorai <s-ghorai@ti.com>
 
-Hi,
+ CSD_STRUCTURE [127:126] describes the version of the CSD structure.
+ According to the MMC specificaiton (v4.4.1), 3 is also a valid number.  
 
-In mmc card configuration it don't use the FIFO control for Tx/Rx. Can
-you explain it?
+Signed-off-by: Sukumar Ghorai <s-ghorai@ti.com>
+---
+ Tested on omap4430 ES2.0
 
-In the spec it can support 512 bytes FIFO for data Tx/Rx.
+ drivers/mmc/core/mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-void s5pv210_setup_sdhci_cfg_card(struct platform_device *dev,
-                                    void __iomem *r,
-                                    struct mmc_ios *ios,
-                                    struct mmc_card *card)
-{
-        u32 ctrl2, ctrl3;
-
-        /* don't need to alter anything acording to card-type */
-
-        writel(S3C64XX_SDHCI_CONTROL4_DRIVE_9mA, r + S3C64XX_SDHCI_CONTROL4);
-
-        ctrl2 = readl(r + S3C_SDHCI_CONTROL2);
-        ctrl2 &= S3C_SDHCI_CTRL2_SELBASECLK_MASK;
-        ctrl2 |= (S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR |
-                  S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK |
-                  S3C_SDHCI_CTRL2_ENFBCLKRX |
-                  S3C_SDHCI_CTRL2_DFCNT_NONE |
-                  S3C_SDHCI_CTRL2_ENCLKOUTHOLD);
-
-        if (ios->clock < 25 * 1000000)
-                ctrl3 = (S3C_SDHCI_CTRL3_FCSEL3 |
-                         S3C_SDHCI_CTRL3_FCSEL2 |
-                         S3C_SDHCI_CTRL3_FCSEL1 |
-                         S3C_SDHCI_CTRL3_FCSEL0);
-        else
-                ctrl3 = (S3C_SDHCI_CTRL3_FCSEL1 | S3C_SDHCI_CTRL3_FCSEL0);
-
-        writel(ctrl2, r + S3C_SDHCI_CONTROL2);
-        writel(ctrl3, r + S3C_SDHCI_CONTROL3);
-}
-
-Thank you,
-Kyungmin Park
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 89f7a25..525af33 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -122,7 +122,7 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 	 * v1.2 has extra information in bits 15, 11 and 10.
+ 	 */
+ 	csd_struct = UNSTUFF_BITS(resp, 126, 2);
+-	if (csd_struct != 1 && csd_struct != 2) {
++	if (csd_struct > 3) {
+ 		printk(KERN_ERR "%s: unrecognised CSD structure version %d\n",
+ 			mmc_hostname(card->host), csd_struct);
+ 		return -EINVAL;
