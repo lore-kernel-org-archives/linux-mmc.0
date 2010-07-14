@@ -1,16 +1,15 @@
 From: Anton Vorontsov <avorontsov@mvista.com>
-Subject: [PATCH 7/8] sdhci: Get rid of mdelay()s where it is safe and makes
- sense
-Date: Wed, 14 Jul 2010 17:08:09 +0400
-Message-ID: <20100714130809.GG517@oksana.dev.rtsoft.ru>
+Subject: [PATCH 4/8] sdhci: Use threaded IRQ handler
+Date: Wed, 14 Jul 2010 17:08:03 +0400
+Message-ID: <20100714130803.GD517@oksana.dev.rtsoft.ru>
 References: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imap.ru.mvista.com ([213.79.90.228]:18762 "EHLO
+Received: from imap.ru.mvista.com ([213.79.90.228]:18738 "EHLO
 	buildserver.ru.mvista.com" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1756861Ab0GNNIM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jul 2010 09:08:12 -0400
+	by vger.kernel.org with ESMTP id S1756743Ab0GNNIF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jul 2010 09:08:05 -0400
 Content-Disposition: inline
 In-Reply-To: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,67 +17,114 @@ List-Id: linux-mmc@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: Wolfram Sang <w.sang@pengutronix.de>, Albert Herranz <albert_herranz@yahoo.es>, Matt Fleming <matt@console-pimps.org>, Ben Dooks <ben-linux@fluff.org>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@ozlabs.org
 
-Since we don't run in the atomic context any longer, we can
-turn mdelay()s into msleep()s.
+We only need atomic context to disable SDHCI interrupts, after that
+we can run in a kernel thread.
 
-The only place where the driver is still using mdelay() is
-sdhci_send_command(). There it is possible to use sleepable
-delays too, but we don't actually want to force rescheduling
-in a hot path.
-
-Sure, we might end up calling msleep() there too, just not
-via this safe patch.
+Note that irq handler still grabs an irqsave spinlock, we'll deal
+with it in a subsequent patch.
 
 Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
 ---
- drivers/mmc/host/sdhci-of-esdhc.c |    2 +-
- drivers/mmc/host/sdhci.c          |    6 +++---
- 2 files changed, 4 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci.c |   47 +++++++++++++++++++++++++++------------------
+ 1 files changed, 28 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index c8623de..e9f99fe 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -94,7 +94,7 @@ static void esdhc_set_clock(struct sdhci_host *host, unsigned int clock)
- 	setbits32(host->ioaddr + ESDHC_SYSTEM_CONTROL, ESDHC_CLOCK_IPGEN |
- 		  ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN |
- 		  div << ESDHC_DIVIDER_SHIFT | pre_div << ESDHC_PREDIV_SHIFT);
--	mdelay(100);
-+	msleep(100);
- out:
- 	host->clock = clock;
- }
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 56d5c56..e6adda8 100644
+index 9ec245c..0358b35 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -171,7 +171,7 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
- 			return;
- 		}
- 		timeout--;
--		mdelay(1);
-+		msleep(1);
+@@ -1506,9 +1506,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 	}
+ }
+ 
+-static irqreturn_t sdhci_irq(int irq, void *dev_id)
++static irqreturn_t sdhci_irq_thread(int irq, void *dev_id)
+ {
+-	irqreturn_t result;
+ 	struct sdhci_host* host = dev_id;
+ 	u32 intmask;
+ 	int cardint = 0;
+@@ -1516,17 +1515,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 	spin_lock(&host->lock);
+ 
+ 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+-
+-	if (!intmask || intmask == 0xffffffff) {
+-		result = IRQ_NONE;
+-		goto out;
+-	}
+-
+ 	sdhci_writel(host, intmask, SDHCI_INT_STATUS);
+ 
+-	DBG("*** %s got interrupt: 0x%08x\n",
+-		mmc_hostname(host->mmc), intmask);
+-
+ 	if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE))
+ 		schedule_work(&host->card_detect_work);
+ 
+@@ -1559,10 +1549,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 		sdhci_dumpregs(host);
  	}
  
- 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
-@@ -1019,7 +1019,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 			return;
- 		}
- 		timeout--;
--		mdelay(1);
-+		msleep(1);
- 	}
+-	result = IRQ_HANDLED;
+-
+ 	mmiowb();
+-out:
++
+ 	spin_unlock(&host->lock);
  
- 	clk |= SDHCI_CLOCK_CARD_EN;
-@@ -1086,7 +1086,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
- 	 * can apply clock after applying power
- 	 */
- 	if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
--		mdelay(10);
-+		msleep(10);
+ 	/*
+@@ -1571,7 +1559,28 @@ out:
+ 	if (cardint)
+ 		mmc_signal_sdio_irq(host->mmc);
+ 
+-	return result;
++	/* Restore interrupts */
++	intmask = sdhci_readl(host, SDHCI_INT_ENABLE);
++	sdhci_writel(host, intmask, SDHCI_SIGNAL_ENABLE);
++
++	return IRQ_HANDLED;
++}
++
++static irqreturn_t sdhci_irq(int irq, void *dev_id)
++{
++	struct sdhci_host *host = dev_id;
++	u32 intmask = sdhci_readl(host, SDHCI_INT_STATUS);
++
++	if (!intmask || intmask == 0xffffffff)
++		return IRQ_NONE;
++
++	/* Disable interrupts */
++	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
++
++	DBG("*** %s got interrupt: 0x%08x\n",
++		mmc_hostname(host->mmc), intmask);
++
++	return IRQ_WAKE_THREAD;
  }
  
  /*****************************************************************************\
+@@ -1608,8 +1617,8 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 			host->ops->enable_dma(host);
+ 	}
+ 
+-	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+-			  mmc_hostname(host->mmc), host);
++	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_irq_thread,
++			  IRQF_SHARED, mmc_hostname(host->mmc), host);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -1868,8 +1877,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 	INIT_DELAYED_WORK(&host->timeout_work, sdhci_timeout_work);
+ 
+-	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+-		mmc_hostname(mmc), host);
++	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_irq_thread,
++			  IRQF_SHARED, mmc_hostname(host->mmc), host);
+ 	if (ret)
+ 		return ret;
+ 
 -- 
 1.7.0.5
 
