@@ -1,56 +1,80 @@
-From: Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH] block: Add secure discard
-Date: Thu, 15 Jul 2010 14:02:49 -0600
-Message-ID: <4C3F6969.6030909@kernel.dk>
-References: <20100707111716.24979.68940.sendpatchset@ahunter-work.research.nokia.com>	<20100707111749.24979.69982.sendpatchset@ahunter-work.research.nokia.com>	<4C3C0A71.2080407@nokia.com>	<20100714031632.GA346@lst.de>	<4C3D967F.9070305@nokia.com> <20100715122601.a087f71c.akpm@linux-foundation.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] tmio_mmc: Prevents unexpected status clear
+Date: Thu, 15 Jul 2010 13:25:52 -0700
+Message-ID: <20100715132552.fcb5791b.akpm@linux-foundation.org>
+References: <4C33DF98.10409@renesas.com>
+	<20100708144626.2091f6c1.akpm@linux-foundation.org>
+	<4C3BBE77.8080000@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 0122700014.0.fullrate.dk ([95.166.99.235]:46869 "EHLO kernel.dk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S934593Ab0GOUC6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 15 Jul 2010 16:02:58 -0400
-In-Reply-To: <20100715122601.a087f71c.akpm@linux-foundation.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:50306 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934652Ab0GOU01 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jul 2010 16:26:27 -0400
+In-Reply-To: <4C3BBE77.8080000@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>, Christoph Hellwig <hch@lst.de>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Yusuke Goda <yusuke.goda.sx@renesas.com>
+Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-On 07/15/2010 01:26 PM, Andrew Morton wrote:
-> On Wed, 14 Jul 2010 13:50:39 +0300
-> Adrian Hunter <adrian.hunter@nokia.com> wrote:
+On Tue, 13 Jul 2010 10:16:39 +0900
+Yusuke Goda <yusuke.goda.sx@renesas.com> wrote:
+
+> Hi Andrew
 > 
->> >From 9ba7750fb96d9994e8715b14d8091c37b832b3e6 Mon Sep 17 00:00:00 2001
->> From: Adrian Hunter <adrian.hunter@nokia.com>
->> Date: Wed, 23 Jun 2010 15:41:38 +0300
->> Subject: [PATCH] block: Add secure discard
->>
->> Secure discard is the same as discard except that all copies
->> of the discarded sectors (perhaps created by garbage collection)
->> must also be erased.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
->> ---
->>
->>
->>
->> Here is "[PATCH V4 4/5] block: Add secure discard" applied to
->> git://git.kernel.dk/linux-2.6-block.git for-next.
->>
->> If Jens takes this patch (originally 4th of 5),  Andrew takes patches 1 to 3,
->> and patch 5 waits for this one to propagate, then there will be no dependency
->> problem.
+> Thank you for your comment.
 > 
-> hm, complicated.
+> >>  #define ack_mmc_irqs(host, i) \
+> >>  	do { \
+> >> -		u32 mask;\
+> >> -		mask  = sd_ctrl_read32((host), CTL_STATUS); \
+> >> -		mask &= ~((i) & TMIO_MASK_IRQ); \
+> >> -		sd_ctrl_write32((host), CTL_STATUS, mask); \
+> >> +		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
+> >>  	} while (0)
+> > 
+> > Can we have a better changelog please?
+> > 
+> > What was wrong with the old code?
+> > 
+> > How does the patch fix it?
+> > 
+> > What are the user-visible runtime effects of the bug?
+> > 
+> > (It looks like that was a pretty gross bug - how did it pass testing??)
+> Example
+>  - CMD53(Single block read / Received data size : 64Byte)
 > 
-> I merged all five into -mm.  If Jens sends along some acks then I send
-> all five along to Linus, nice and simple.
+>  1) Send CMD53
+>  2) Receive "CMD53 response"
+>  3) Call tmio_mmc_cmd_irq(host, status);
+> -- original code ----------------------------------------------------
+>  #define ack_mmc_irqs(host, i) \
+> 	do { \
+> 		u32 mask;\
+> 		mask  = sd_ctrl_read32((host), CTL_STATUS); \
+> 	< case 1 >
+> 		mask &= ~((i) & TMIO_MASK_IRQ); \
+> 	< case 2 >
+> 		sd_ctrl_write32((host), CTL_STATUS, mask); \
+> 	} while (0)
+> ---------------------------------------------------------------------
+> 
+> TMIO_STAT_RXRDY status will be cleared by "sd_ctrl_write32((host), CTL_STATUS, mask);"
+> if TMIO_STAT_RXRDY becomes effective between "< case 1 >" and "< case 2 >".
+> 
+> This causes the phenomenon that a TMIO_STAT_RXRDY interrupt does not occur.
+> When received data are small, it rarely occurs.
 > 
 
-I was about to pick them up, but yeah just adds my acks to the series
-and shove them off for the next series.
+OK..
 
--- 
-Jens Axboe
+But with both this patch and "tmio_mmc-revise-limit-on-data-size.patch"
+the changelogs fail to describe the impact of the bug upon our users. 
+So when I sit here trying to work out whether the patches should be
+applied to 2.6.35 and whether they should be backported into -stable, I
+don't have enough information.
 
+What are your thoughts on this?
