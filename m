@@ -1,19 +1,22 @@
 From: akpm@linux-foundation.org
-Subject: + mmc_block-add-discard-support.patch added to -mm tree
-Date: Thu, 15 Jul 2010 12:26:12 -0700
-Message-ID: <201007151926.o6FJQCJ4014715@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
+Subject: + mmc_block-add-support-for-secure-discard.patch added to -mm tree
+Date: Thu, 15 Jul 2010 12:26:19 -0700
+Message-ID: <201007151926.o6FJQKGL014724@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:55885 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934522Ab0GOT1H (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jul 2010 15:27:07 -0400
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: mm-commits@vger.kernel.org
 Cc: adrian.hunter@nokia.com, axboe@kernel.dk, bengardiner@nanometrics.ca, hch@lst.de, kmpark@infradead.org, linux-mmc@vger.kernel.org, madhu.cr@ti.com
-List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     mmc_block: add discard support
+     mmc_block: add support for secure discard
 has been added to the -mm tree.  Its filename is
-     mmc_block-add-discard-support.patch
+     mmc_block-add-support-for-secure-discard.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -29,13 +32,11 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: mmc_block: add discard support
+Subject: mmc_block: add support for secure discard
 From: Adrian Hunter <adrian.hunter@nokia.com>
 
-Enable MMC to service discard requests.  In the case of SD and MMC cards
-that do not support trim, discards become erases.  In the case of cards
-(MMC) that only allow erases in multiples of erase group size, round to
-the nearest completely discarded erase group.
+Secure discard is implemented by Secure Trim if the discard is unaligned
+or Secure Erase otherwise.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 Cc: Jens Axboe <axboe@kernel.dk>
@@ -47,19 +48,19 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/card/block.c |   42 ++++++++++++++++++++++++++++++++++++-
- drivers/mmc/card/queue.c |   16 ++++++++++++--
- 2 files changed, 55 insertions(+), 3 deletions(-)
+ drivers/mmc/card/block.c |   46 ++++++++++++++++++++++++++++++++++---
+ drivers/mmc/card/queue.c |    3 ++
+ 2 files changed, 46 insertions(+), 3 deletions(-)
 
-diff -puN drivers/mmc/card/block.c~mmc_block-add-discard-support drivers/mmc/card/block.c
---- a/drivers/mmc/card/block.c~mmc_block-add-discard-support
+diff -puN drivers/mmc/card/block.c~mmc_block-add-support-for-secure-discard drivers/mmc/card/block.c
+--- a/drivers/mmc/card/block.c~mmc_block-add-support-for-secure-discard
 +++ a/drivers/mmc/card/block.c
-@@ -247,7 +247,40 @@ static u32 get_card_status(struct mmc_ca
- 	return cmd.resp[0];
+@@ -280,6 +280,42 @@ out:
+ 	return err ? 0 : 1;
  }
  
--static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-+static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
++static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
++				       struct request *req)
 +{
 +	struct mmc_blk_data *md = mq->data;
 +	struct mmc_card *card = md->queue.card;
@@ -68,7 +69,7 @@ diff -puN drivers/mmc/card/block.c~mmc_block-add-discard-support drivers/mmc/car
 +
 +	mmc_claim_host(card->host);
 +
-+	if (!mmc_can_erase(card)) {
++	if (!mmc_can_secure_erase_trim(card)) {
 +		err = -EOPNOTSUPP;
 +		goto out;
 +	}
@@ -76,12 +77,14 @@ diff -puN drivers/mmc/card/block.c~mmc_block-add-discard-support drivers/mmc/car
 +	from = blk_rq_pos(req);
 +	nr = blk_rq_sectors(req);
 +
-+	if (mmc_can_trim(card))
-+		arg = MMC_TRIM_ARG;
++	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
++		arg = MMC_SECURE_TRIM1_ARG;
 +	else
-+		arg = MMC_ERASE_ARG;
++		arg = MMC_SECURE_ERASE_ARG;
 +
 +	err = mmc_erase(card, from, nr, arg);
++	if (!err && arg == MMC_SECURE_TRIM1_ARG)
++		err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
 +out:
 +	spin_lock_irq(&md->lock);
 +	__blk_end_request(req, err, blk_rq_bytes(req));
@@ -92,58 +95,40 @@ diff -puN drivers/mmc/card/block.c~mmc_block-add-discard-support drivers/mmc/car
 +	return err ? 0 : 1;
 +}
 +
-+static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
  {
  	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
-@@ -475,6 +508,13 @@ static int mmc_blk_issue_rq(struct mmc_q
- 	return 0;
+@@ -510,10 +546,14 @@ static int mmc_blk_issue_rw_rq(struct mm
+ 
+ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ {
+-	if (req->cmd_flags & REQ_DISCARD)
+-		return mmc_blk_issue_discard_rq(mq, req);
+-	else
++	if (req->cmd_flags & REQ_DISCARD) {
++		if (req->cmd_flags & REQ_SECURE)
++			return mmc_blk_issue_secdiscard_rq(mq, req);
++		else
++			return mmc_blk_issue_discard_rq(mq, req);
++	} else {
+ 		return mmc_blk_issue_rw_rq(mq, req);
++	}
  }
  
-+static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-+{
-+	if (req->cmd_flags & REQ_DISCARD)
-+		return mmc_blk_issue_discard_rq(mq, req);
-+	else
-+		return mmc_blk_issue_rw_rq(mq, req);
-+}
- 
  static inline int mmc_blk_readonly(struct mmc_card *card)
- {
-diff -puN drivers/mmc/card/queue.c~mmc_block-add-discard-support drivers/mmc/card/queue.c
---- a/drivers/mmc/card/queue.c~mmc_block-add-discard-support
+diff -puN drivers/mmc/card/queue.c~mmc_block-add-support-for-secure-discard drivers/mmc/card/queue.c
+--- a/drivers/mmc/card/queue.c~mmc_block-add-support-for-secure-discard
 +++ a/drivers/mmc/card/queue.c
-@@ -30,9 +30,9 @@
- static int mmc_prep_request(struct request_queue *q, struct request *req)
- {
- 	/*
--	 * We only like normal block requests.
-+	 * We only like normal block requests and discards.
- 	 */
--	if (req->cmd_type != REQ_TYPE_FS) {
-+	if (req->cmd_type != REQ_TYPE_FS && !(req->cmd_flags & REQ_DISCARD)) {
- 		blk_dump_rq_flags(req, "MMC bad request");
- 		return BLKPREP_KILL;
+@@ -141,6 +141,9 @@ int mmc_init_queue(struct mmc_queue *mq,
+ 			mq->queue->limits.discard_alignment =
+ 							card->erase_size << 9;
+ 		}
++		if (mmc_can_secure_erase_trim(card))
++			queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD,
++						mq->queue);
  	}
-@@ -130,6 +130,18 @@ int mmc_init_queue(struct mmc_queue *mq,
- 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
- 	blk_queue_ordered(mq->queue, QUEUE_ORDERED_DRAIN);
- 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
-+	if (mmc_can_erase(card)) {
-+		queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, mq->queue);
-+		mq->queue->limits.max_discard_sectors = UINT_MAX;
-+		if (card->erased_byte == 0)
-+			mq->queue->limits.discard_zeroes_data = 1;
-+		if (!mmc_can_trim(card) && is_power_of_2(card->erase_size)) {
-+			mq->queue->limits.discard_granularity =
-+							card->erase_size << 9;
-+			mq->queue->limits.discard_alignment =
-+							card->erase_size << 9;
-+		}
-+	}
  
  #ifdef CONFIG_MMC_BLOCK_BOUNCE
- 	if (host->max_hw_segs == 1) {
 _
 
 Patches currently in -mm which might be from adrian.hunter@nokia.com are
