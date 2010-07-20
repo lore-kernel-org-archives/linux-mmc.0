@@ -1,85 +1,50 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not
- define
-Date: Tue, 20 Jul 2010 13:21:16 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E3107D8@dbde02.ent.ti.com>
-References: <1279607878-2405-1-git-send-email-s-ghorai@ti.com>
- <4C454B99.7090705@nokia.com>
+From: Yusuke Goda <yusuke.goda.sx@renesas.com>
+Subject: [PATCH] tmio_mmc: Make ack_mmc_irqs() write-only
+Date: Tue, 20 Jul 2010 16:51:51 +0900
+Message-ID: <4C455597.2020200@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:44578 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752922Ab0GTHv1 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jul 2010 03:51:27 -0400
-In-Reply-To: <4C454B99.7090705@nokia.com>
-Content-Language: en-US
+Received: from mail.renesas.com ([202.234.163.13]:38899 "EHLO
+	mail03.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752194Ab0GTHxs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jul 2010 03:53:48 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Andrew Morton <akpm@linux-foundation.org>
+To: ian@mnementh.co.uk, damm@opensource.se, sameo@linux.intel.com, Paul Mundt <lethal@linux-sh.org>, g.liakhovetski@gmx.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>
+
+This patch updates ack_mmc_irqs() to acknowledge using write instead
+of read-modify-write. Without this fix the old read-modify-write
+implementation may acknowledge interrupt sources by mistake. The
+driver may if so lock-up waiting forever for an interrupt that will
+never come. Observed with the TMIO_STAT_RXRDY bit together with CMD53
+on AR6002 and BCM4318 SDIO cards in polled mode.
+
+Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
+---
+ drivers/mmc/host/tmio_mmc.h |    5 +----
+ 1 files changed, 1 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 64f7d5d..7944604 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -82,10 +82,7 @@
+
+ #define ack_mmc_irqs(host, i) \
+ 	do { \
+-		u32 mask;\
+-		mask  = sd_ctrl_read32((host), CTL_STATUS); \
+-		mask &= ~((i) & TMIO_MASK_IRQ); \
+-		sd_ctrl_write32((host), CTL_STATUS, mask); \
++		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
+ 	} while (0)
+
+
+-- 
+1.7.0
 
 
 
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> Sent: Tuesday, July 20, 2010 12:39 PM
-> To: Ghorai, Sukumar
-> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; Shilimkar,
-> Santosh; Chikkature Rajashekar, Madhusudhan; Andrew Morton
-> Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not
-> define
-> 
-> Sukumar Ghorai wrote:
-> >     Issue if power_saving option passed from board file and CONFIG_PM
-> not define.
-> >     This is because hosts refer to wrong operation table and that try to
-> power save.
-> 
-> power_saving is not related to power management.  It should work with or
-> without
-> CONFIG_PM.  What problem are you seeing?
-[Ghorai] when CONFIG_PM is not defined but power_saving flag is TRUE, then host operation table point to table which handles in state machine as: ENABLE -> CARDSLEEP -> REGSLEEP -> DISABLED for power/clock cut. And do the reverse for the enable clock/power. 
-And power saving is not required and wont work when CONFIG_PM is not enabled.
-
-So if CONFIG_PM is not enable, then it should do simple clock disable/enable, and not via the power state machine.
-
-> 
-> >
-> > Signed-off-by: Sukumar Ghorai <s-ghorai@ti.com>
-> > Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
-> > CC: Madhusudhan Chikkature <madhu.cr@ti.com>
-> > CC: Andrew Morton <akpm@linux-foundation.org>
-> > ---
-> >  Tested on omap3, omap4430 ES2.0
-> >
-> >  drivers/mmc/host/omap_hsmmc.c |    2 ++
-> >  1 files changed, 2 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/omap_hsmmc.c
-> b/drivers/mmc/host/omap_hsmmc.c
-> > index b032828..f84eed0 100644
-> > --- a/drivers/mmc/host/omap_hsmmc.c
-> > +++ b/drivers/mmc/host/omap_hsmmc.c
-> > @@ -2015,9 +2015,11 @@ static int __init omap_hsmmc_probe(struct
-> platform_device *pdev)
-> >  	platform_set_drvdata(pdev, host);
-> >  	INIT_WORK(&host->mmc_carddetect_work, omap_hsmmc_detect);
-> >
-> > +#ifdef CONFIG_PM
-> >  	if (mmc_slot(host).power_saving)
-> >  		mmc->ops	= &omap_hsmmc_ps_ops;
-> >  	else
-> > +#endif
-> >  		mmc->ops	= &omap_hsmmc_ops;
-> >
-> >  	/*
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-
-Regards,
-Ghorai
