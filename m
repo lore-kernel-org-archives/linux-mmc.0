@@ -1,211 +1,95 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not define
-Date: Wed, 21 Jul 2010 09:33:42 +0300
-Message-ID: <4C4694C6.8050201@nokia.com>
-References: <1279607878-2405-1-git-send-email-s-ghorai@ti.com>	<4C454B99.7090705@nokia.com>	<2A3DCF3DA181AD40BDE86A3150B27B6B030E3107D8@dbde02.ent.ti.com>	<4C4559E5.7090004@nokia.com>	<2A3DCF3DA181AD40BDE86A3150B27B6B030E310805@dbde02.ent.ti.com>	<4C4560EB.8070702@nokia.com>	<2A3DCF3DA181AD40BDE86A3150B27B6B030E31084E@dbde02.ent.ti.com>	<4C4568C6.9050705@nokia.com> <AANLkTilDOxmuOKnC0WpKdmkdRid_MLbiXiRhM5U5pFMX@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <AANLkTilDOxmuOKnC0WpKdmkdRid_MLbiXiRhM5U5pFMX@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Cc: "Ghorai, Sukumar" <s-ghorai@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Andrew Morton <akpm@linux-foundation.org>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: [PATCH v2 00/20] native support for wl1271 on ZOOM
+Date: Wed, 21 Jul 2010 20:33:34 +0300
+Message-ID: <1279733634-21974-1-git-send-email-ohad@wizery.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:59315 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753633Ab0GUReV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2010 13:34:21 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>, Ohad Ben-Cohen <ohad@wizery.com>
 
-kishore kadiyala wrote:
-> Hi Adrian,
-> 
-> Is there any use case or a valid scenario  whether to use
-> omap_hsmmc_ps_ops or omap_hsmmc_ops ?
-> I meant using power_saving option and without power_saving option
+This patch series adds native support for wl1271 on ZOOM.
 
-There are two disadvantages of power_saving:
-	1. It introduces latency to wake-up or re-initialize.
-Waking up a sleeping card can take 10-20ms (or more).  Re-initializing
-a card that was powered off entirely can take 300-1000ms.
-	2. The current implementation powers-up the card even
-if it just wants to suspend and power it off again.
+Changes since v1:
 
-> 
-> Ideally I feel having omap_hsmmc_ps_ops as default with or without
-> CONFIG_PM would be better as it internally has a state handling.
+- introduce a fixed regulator device to control the power of wl1271
+- allow to propagate private board-specific data to SDIO function drivers
+- allow SDIO function driver to control the card's power via new API
+- make it possible to keep the card's power down (without depending
+  on an explicit SDIO function driver power-down request)
 
-Sure, you could rename power_saving to no_power_saving, invert the
-logic and drop it from the board files that had power_saving = true.
-If that is what you want, make a patch and see if anyone comments.
+Thanks to these changes, we no longer need a separate platform
+device (carrying e.g. the external irq information of the device),
+and no longer need to emulate virtual card detect events.
 
-> 
-> Regards,
-> Kishore
-> 
-> On Tue, Jul 20, 2010 at 2:43 PM, Adrian Hunter <adrian.hunter@nokia.com> wrote:
->> Ghorai, Sukumar wrote:
->>>> -----Original Message-----
->>>> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
->>>> Sent: Tuesday, July 20, 2010 2:10 PM
->>>> To: Ghorai, Sukumar
->>>> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; Shilimkar,
->>>> Santosh; Chikkature Rajashekar, Madhusudhan; Andrew Morton
->>>> Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not
->>>> define
->>>>
->>>> Ghorai, Sukumar wrote:
->>>>> Adrian,
->>>>>
->>>>>> -----Original Message-----
->>>>>> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
->>>>>> Sent: Tuesday, July 20, 2010 1:40 PM
->>>>>> To: Ghorai, Sukumar
->>>>>> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; Shilimkar,
->>>>>> Santosh; Chikkature Rajashekar, Madhusudhan; Andrew Morton
->>>>>> Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not
->>>>>> define
->>>>>>
->>>>>> Ghorai, Sukumar wrote:
->>>>>>>> -----Original Message-----
->>>>>>>> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
->>>>>>>> Sent: Tuesday, July 20, 2010 12:39 PM
->>>>>>>> To: Ghorai, Sukumar
->>>>>>>> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; Shilimkar,
->>>>>>>> Santosh; Chikkature Rajashekar, Madhusudhan; Andrew Morton
->>>>>>>> Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM
->>>> not
->>>>>>>> define
->>>>>>>>
->>>>>>>> Sukumar Ghorai wrote:
->>>>>>>>>    Issue if power_saving option passed from board file and
->>>> CONFIG_PM
->>>>>>>> not define.
->>>>>>>>>    This is because hosts refer to wrong operation table and that
->>>> try
->>>>>> to
->>>>>>>> power save.
->>>>>>>>
->>>>>>>> power_saving is not related to power management.  It should work with
->>>>>> or
->>>>>>>> without
->>>>>>>> CONFIG_PM.  What problem are you seeing?
->>>>>>> [Ghorai] when CONFIG_PM is not defined but power_saving flag is TRUE,
->>>>>> then host operation table point to table which handles in state machine
->>>>>> as: ENABLE -> CARDSLEEP -> REGSLEEP -> DISABLED for power/clock cut.
->>>> And
->>>>>> do the reverse for the enable clock/power.
->>>>>>> And power saving is not required and wont work when CONFIG_PM is not
->>>>>> enabled.
->>>>>>
->>>>>> How is that a problem?  It would be useful to know what you need?
->>>>> [Ghorai] do men when CONFIG_PM is not enabled still we should do power
->>>> saving in mmc?
->>>>
->>>> Why not?
->>>>
->>>> Because issue is iclk/fclk is quite depended on PRCM framework when we
->>>> are
->>>> using omap_hsmmc_ps_ops operation table.
->>>>
->>>> iclk is left alone.
->>>>
->>>> fclk is manipulated with or without power_saving.
->>>>
->>>> I still do not understand your problem sorry :-(
->>> [Ghorai] thanks and need input again,  we have two tables -
->>> 1. static const struct mmc_host_ops omap_hsmmc_ops = {
->>> }
->>> --> This is without CONFIG_PM, assumed.
->> No it is independent of CONFIG_PM
->>
->> With CONFIG_PM
->>        - the driver will restore registers if the host controller
->>        has been powered off / on by PRCM
->>        - suspend / resume can be used
->>
->>> 2. static const struct mmc_host_ops omap_hsmmc_ps_ops = {
->>> }
->>> -> this with CONFIG_PM, assumed.
->> No it is independent of CONFIG_PM
->>
->> Without CONFIG_PM
->>        - card will be put to sleep after 1 second
->>        - card will be powered off after another 8 seconds
->>
->>> a. And you feel we should remove #1
->> Nothing should need to be removed.
->>
->>> b. use omap_hsmmc_ps_ops default.
->> With power_saving it is yes.
->>
->>> c. And it should work in all case?
->> It should work in all cases.
->>
->>>>>>> So if CONFIG_PM is not enable, then it should do simple clock
->>>>>> disable/enable, and not via the power state machine.
->>>>>>
->>>>>> If that is what you want, simply change your board file:
->>>>>>
->>>>>> #if CONFIG_PM
->>>>>>        .power_saving = true,
->>>>>> #else
->>>>>>        .power_saving = false,
->>>>>> #end
->>>>> [Ghorai] the fix I send is to guard in MMC/SD host driver to avoid
->>>> mistake in board file(s). And this file is used for multiple omap3, omap4
->>>> boards.
->>>>>>>>> Signed-off-by: Sukumar Ghorai <s-ghorai@ti.com>
->>>>>>>>> Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
->>>>>>>>> CC: Madhusudhan Chikkature <madhu.cr@ti.com>
->>>>>>>>> CC: Andrew Morton <akpm@linux-foundation.org>
->>>>>>>>> ---
->>>>>>>>>  Tested on omap3, omap4430 ES2.0
->>>>>>>>>
->>>>>>>>>  drivers/mmc/host/omap_hsmmc.c |    2 ++
->>>>>>>>>  1 files changed, 2 insertions(+), 0 deletions(-)
->>>>>>>>>
->>>>>>>>> diff --git a/drivers/mmc/host/omap_hsmmc.c
->>>>>>>> b/drivers/mmc/host/omap_hsmmc.c
->>>>>>>>> index b032828..f84eed0 100644
->>>>>>>>> --- a/drivers/mmc/host/omap_hsmmc.c
->>>>>>>>> +++ b/drivers/mmc/host/omap_hsmmc.c
->>>>>>>>> @@ -2015,9 +2015,11 @@ static int __init omap_hsmmc_probe(struct
->>>>>>>> platform_device *pdev)
->>>>>>>>>        platform_set_drvdata(pdev, host);
->>>>>>>>>        INIT_WORK(&host->mmc_carddetect_work, omap_hsmmc_detect);
->>>>>>>>>
->>>>>>>>> +#ifdef CONFIG_PM
->>>>>>>>>        if (mmc_slot(host).power_saving)
->>>>>>>>>                mmc->ops        = &omap_hsmmc_ps_ops;
->>>>>>>>>        else
->>>>>>>>> +#endif
->>>>>>>>>                mmc->ops        = &omap_hsmmc_ops;
->>>>>>>>>
->>>>>>>>>        /*
->>>>>>>>> --
->>>>>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
->>>>>> in
->>>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>>
->>>>>>> Regards,
->>>>>>> Ghorai
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
->>>> in
->>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+The two "board muxing" pathces were already taken by Tony, and
+are resent here just to make it easier for people to use/test these pathces.
+
+The changes to the MMC core really needs careful review; there still
+might be some pitfalls that haven't been covered. E.g., one thing
+we plan to look at next is their bahvior together with SDIO Suspend/Resume.
+
+Special thanks to Roger Quadros and Nicolas Pitre for their extensive
+review and helpful suggestions.
+
+The patches are based on 2.6.35-rc5, and were tested on ZOOM3.
+
+Thanks,
+
+Ohad Ben-Cohen (20):
+  sdio: add TI + wl1271 ids
+  wireless: wl1271: remove SDIO IDs from driver
+  mmc: support embedded data field in mmc_host
+  omap zoom2: wlan board muxing
+  omap zoom3: wlan board muxing
+  wireless: wl1271: make wl12xx.h common to both spi and sdio
+  wireless: wl1271: support return value for the set power func
+  wireless: wl1271: take irq info from private board data
+  wireless: wl1271: make ref_clock configurable by board
+  omap: zoom: add fixed regulator device for wlan
+  omap: hsmmc: support mmc3 regulator power control
+  omap: hsmmc: allow board-specific settings of private mmc data
+  omap: zoom: add mmc3/wl1271 device support
+  mmc: sdio: fully reconfigure oldcard on resume
+  mmc: sdio: verify existence of resume handler
+  mmc: introduce API to control the card's power
+  mmc: sdio: relocate sdio_set_block_size call
+  mmc: sdio: enable a default power off mode of the card
+  omap: zoom: keep the MMC3 wl1271 device powered off
+  wireless: wl1271: call SDIO claim/release power API
+
+ arch/arm/mach-omap2/board-zoom-peripherals.c |   54 +++++++++++++++++++
+ arch/arm/mach-omap2/board-zoom2.c            |   13 +++++
+ arch/arm/mach-omap2/board-zoom3.c            |   13 +++++
+ arch/arm/mach-omap2/hsmmc.c                  |   15 ++++--
+ arch/arm/mach-omap2/hsmmc.h                  |    2 +
+ arch/arm/plat-omap/include/plat/mmc.h        |    5 ++
+ drivers/mmc/core/bus.c                       |    3 +
+ drivers/mmc/core/core.c                      |   50 ++++++++++++++++++
+ drivers/mmc/core/sdio.c                      |   36 +++++++++++--
+ drivers/mmc/core/sdio_bus.c                  |    9 ---
+ drivers/mmc/core/sdio_io.c                   |   50 ++++++++++++++++++
+ drivers/mmc/host/omap_hsmmc.c                |   72 +++++++++++++++++++++++---
+ drivers/net/wireless/wl12xx/wl1251_sdio.c    |    2 +-
+ drivers/net/wireless/wl12xx/wl1251_spi.c     |    2 +-
+ drivers/net/wireless/wl12xx/wl1271.h         |    3 +-
+ drivers/net/wireless/wl12xx/wl1271_boot.c    |    9 ++--
+ drivers/net/wireless/wl12xx/wl1271_boot.h    |    1 -
+ drivers/net/wireless/wl12xx/wl1271_io.h      |    8 ++-
+ drivers/net/wireless/wl12xx/wl1271_main.c    |    4 +-
+ drivers/net/wireless/wl12xx/wl1271_sdio.c    |   31 +++++------
+ drivers/net/wireless/wl12xx/wl1271_spi.c     |    8 ++-
+ include/linux/mmc/card.h                     |    2 +
+ include/linux/mmc/host.h                     |   15 +++++
+ include/linux/mmc/sdio_func.h                |    3 +
+ include/linux/mmc/sdio_ids.h                 |    3 +
+ include/linux/spi/wl12xx.h                   |   34 ------------
+ include/linux/wl12xx.h                       |   35 ++++++++++++
+ 27 files changed, 393 insertions(+), 89 deletions(-)
+ delete mode 100644 include/linux/spi/wl12xx.h
+ create mode 100644 include/linux/wl12xx.h
 
