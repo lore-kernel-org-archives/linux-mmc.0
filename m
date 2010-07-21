@@ -1,76 +1,211 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not
- define
-Date: Wed, 21 Jul 2010 12:03:40 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E38B7ED@dbde02.ent.ti.com>
-References: <1279607878-2405-1-git-send-email-s-ghorai@ti.com>
- <4C454B99.7090705@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E3107D8@dbde02.ent.ti.com>
- <4C4559E5.7090004@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E310805@dbde02.ent.ti.com>
- <4C4560EB.8070702@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E31084E@dbde02.ent.ti.com>
- <4C4568C6.9050705@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E310B10@dbde02.ent.ti.com>
- <4C4690A3.5030503@nokia.com>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not define
+Date: Wed, 21 Jul 2010 09:33:42 +0300
+Message-ID: <4C4694C6.8050201@nokia.com>
+References: <1279607878-2405-1-git-send-email-s-ghorai@ti.com>	<4C454B99.7090705@nokia.com>	<2A3DCF3DA181AD40BDE86A3150B27B6B030E3107D8@dbde02.ent.ti.com>	<4C4559E5.7090004@nokia.com>	<2A3DCF3DA181AD40BDE86A3150B27B6B030E310805@dbde02.ent.ti.com>	<4C4560EB.8070702@nokia.com>	<2A3DCF3DA181AD40BDE86A3150B27B6B030E31084E@dbde02.ent.ti.com>	<4C4568C6.9050705@nokia.com> <AANLkTilDOxmuOKnC0WpKdmkdRid_MLbiXiRhM5U5pFMX@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <4C4690A3.5030503@nokia.com>
-Content-Language: en-US
+In-Reply-To: <AANLkTilDOxmuOKnC0WpKdmkdRid_MLbiXiRhM5U5pFMX@mail.gmail.com>
 Sender: linux-omap-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Andrew Morton <akpm@linux-foundation.org>
+To: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Cc: "Ghorai, Sukumar" <s-ghorai@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Adrian,
-
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> Sent: Wednesday, July 21, 2010 11:46 AM
-> To: Ghorai, Sukumar
-> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; Shilimkar,
-> Santosh; Chikkature Rajashekar, Madhusudhan; Andrew Morton
-> Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not
-> define
+kishore kadiyala wrote:
+> Hi Adrian,
 > 
-> >>> [Ghorai] thanks and need input again,
-> >>> we have two tables -
-> >>> 1. static const struct mmc_host_ops omap_hsmmc_ops = {
-> >>> }
-> >>> --> This is without CONFIG_PM, assumed.
-> >> No it is independent of CONFIG_PM
-> >>
-> >> With CONFIG_PM
-> >> 	- the driver will restore registers if the host controller
-> >> 	has been powered off / on by PRCM
-> >> 	- suspend / resume can be used
-> >>
-> >>> 2. static const struct mmc_host_ops omap_hsmmc_ps_ops = {
-> >>> }
-> >>> -> this with CONFIG_PM, assumed.
-> >> No it is independent of CONFIG_PM
-> >>
-> >> Without CONFIG_PM
-> >> 	- card will be put to sleep after 1 second
-> >> 	- card will be powered off after another 8 seconds
-> >>
-> >>> a. And you feel we should remove #1
-> >> Nothing should need to be removed.
-> >>
-> >>> b. use omap_hsmmc_ps_ops default.
-> >> With power_saving it is yes.
-> > [Ghorai] Is it that power_saving (true or false) is independent of
-> CONFIG_PM?
-> 
-> Yes, power_saving (true or false) *is* independent of CONFIG_PM.
-> 
-[Ghorai] Thanks and would you please reply for query from Kishore and now query from my side too?
-Is there any use case or a valid scenario when to use omap_hsmmc_ps_ops or omap_hsmmc_ops ? I meant using power_saving option and without power_saving option.
+> Is there any use case or a valid scenario  whether to use
+> omap_hsmmc_ps_ops or omap_hsmmc_ops ?
+> I meant using power_saving option and without power_saving option
 
-Ideally I feel having omap_hsmmc_ps_ops as default with or without CONFIG_PM would be better as it internally has a state handling.
+There are two disadvantages of power_saving:
+	1. It introduces latency to wake-up or re-initialize.
+Waking up a sleeping card can take 10-20ms (or more).  Re-initializing
+a card that was powered off entirely can take 300-1000ms.
+	2. The current implementation powers-up the card even
+if it just wants to suspend and power it off again.
 
-Regards,
-Ghorai
+> 
+> Ideally I feel having omap_hsmmc_ps_ops as default with or without
+> CONFIG_PM would be better as it internally has a state handling.
+
+Sure, you could rename power_saving to no_power_saving, invert the
+logic and drop it from the board files that had power_saving = true.
+If that is what you want, make a patch and see if anyone comments.
+
+> 
+> Regards,
+> Kishore
+> 
+> On Tue, Jul 20, 2010 at 2:43 PM, Adrian Hunter <adrian.hunter@nokia.com> wrote:
+>> Ghorai, Sukumar wrote:
+>>>> -----Original Message-----
+>>>> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
+>>>> Sent: Tuesday, July 20, 2010 2:10 PM
+>>>> To: Ghorai, Sukumar
+>>>> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; Shilimkar,
+>>>> Santosh; Chikkature Rajashekar, Madhusudhan; Andrew Morton
+>>>> Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not
+>>>> define
+>>>>
+>>>> Ghorai, Sukumar wrote:
+>>>>> Adrian,
+>>>>>
+>>>>>> -----Original Message-----
+>>>>>> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
+>>>>>> Sent: Tuesday, July 20, 2010 1:40 PM
+>>>>>> To: Ghorai, Sukumar
+>>>>>> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; Shilimkar,
+>>>>>> Santosh; Chikkature Rajashekar, Madhusudhan; Andrew Morton
+>>>>>> Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM not
+>>>>>> define
+>>>>>>
+>>>>>> Ghorai, Sukumar wrote:
+>>>>>>>> -----Original Message-----
+>>>>>>>> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
+>>>>>>>> Sent: Tuesday, July 20, 2010 12:39 PM
+>>>>>>>> To: Ghorai, Sukumar
+>>>>>>>> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; Shilimkar,
+>>>>>>>> Santosh; Chikkature Rajashekar, Madhusudhan; Andrew Morton
+>>>>>>>> Subject: Re: [PATCH] omap: hsmmc funtionality breaks when CONFIG_PM
+>>>> not
+>>>>>>>> define
+>>>>>>>>
+>>>>>>>> Sukumar Ghorai wrote:
+>>>>>>>>>    Issue if power_saving option passed from board file and
+>>>> CONFIG_PM
+>>>>>>>> not define.
+>>>>>>>>>    This is because hosts refer to wrong operation table and that
+>>>> try
+>>>>>> to
+>>>>>>>> power save.
+>>>>>>>>
+>>>>>>>> power_saving is not related to power management.  It should work with
+>>>>>> or
+>>>>>>>> without
+>>>>>>>> CONFIG_PM.  What problem are you seeing?
+>>>>>>> [Ghorai] when CONFIG_PM is not defined but power_saving flag is TRUE,
+>>>>>> then host operation table point to table which handles in state machine
+>>>>>> as: ENABLE -> CARDSLEEP -> REGSLEEP -> DISABLED for power/clock cut.
+>>>> And
+>>>>>> do the reverse for the enable clock/power.
+>>>>>>> And power saving is not required and wont work when CONFIG_PM is not
+>>>>>> enabled.
+>>>>>>
+>>>>>> How is that a problem?  It would be useful to know what you need?
+>>>>> [Ghorai] do men when CONFIG_PM is not enabled still we should do power
+>>>> saving in mmc?
+>>>>
+>>>> Why not?
+>>>>
+>>>> Because issue is iclk/fclk is quite depended on PRCM framework when we
+>>>> are
+>>>> using omap_hsmmc_ps_ops operation table.
+>>>>
+>>>> iclk is left alone.
+>>>>
+>>>> fclk is manipulated with or without power_saving.
+>>>>
+>>>> I still do not understand your problem sorry :-(
+>>> [Ghorai] thanks and need input again,  we have two tables -
+>>> 1. static const struct mmc_host_ops omap_hsmmc_ops = {
+>>> }
+>>> --> This is without CONFIG_PM, assumed.
+>> No it is independent of CONFIG_PM
+>>
+>> With CONFIG_PM
+>>        - the driver will restore registers if the host controller
+>>        has been powered off / on by PRCM
+>>        - suspend / resume can be used
+>>
+>>> 2. static const struct mmc_host_ops omap_hsmmc_ps_ops = {
+>>> }
+>>> -> this with CONFIG_PM, assumed.
+>> No it is independent of CONFIG_PM
+>>
+>> Without CONFIG_PM
+>>        - card will be put to sleep after 1 second
+>>        - card will be powered off after another 8 seconds
+>>
+>>> a. And you feel we should remove #1
+>> Nothing should need to be removed.
+>>
+>>> b. use omap_hsmmc_ps_ops default.
+>> With power_saving it is yes.
+>>
+>>> c. And it should work in all case?
+>> It should work in all cases.
+>>
+>>>>>>> So if CONFIG_PM is not enable, then it should do simple clock
+>>>>>> disable/enable, and not via the power state machine.
+>>>>>>
+>>>>>> If that is what you want, simply change your board file:
+>>>>>>
+>>>>>> #if CONFIG_PM
+>>>>>>        .power_saving = true,
+>>>>>> #else
+>>>>>>        .power_saving = false,
+>>>>>> #end
+>>>>> [Ghorai] the fix I send is to guard in MMC/SD host driver to avoid
+>>>> mistake in board file(s). And this file is used for multiple omap3, omap4
+>>>> boards.
+>>>>>>>>> Signed-off-by: Sukumar Ghorai <s-ghorai@ti.com>
+>>>>>>>>> Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+>>>>>>>>> CC: Madhusudhan Chikkature <madhu.cr@ti.com>
+>>>>>>>>> CC: Andrew Morton <akpm@linux-foundation.org>
+>>>>>>>>> ---
+>>>>>>>>>  Tested on omap3, omap4430 ES2.0
+>>>>>>>>>
+>>>>>>>>>  drivers/mmc/host/omap_hsmmc.c |    2 ++
+>>>>>>>>>  1 files changed, 2 insertions(+), 0 deletions(-)
+>>>>>>>>>
+>>>>>>>>> diff --git a/drivers/mmc/host/omap_hsmmc.c
+>>>>>>>> b/drivers/mmc/host/omap_hsmmc.c
+>>>>>>>>> index b032828..f84eed0 100644
+>>>>>>>>> --- a/drivers/mmc/host/omap_hsmmc.c
+>>>>>>>>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>>>>>>>>> @@ -2015,9 +2015,11 @@ static int __init omap_hsmmc_probe(struct
+>>>>>>>> platform_device *pdev)
+>>>>>>>>>        platform_set_drvdata(pdev, host);
+>>>>>>>>>        INIT_WORK(&host->mmc_carddetect_work, omap_hsmmc_detect);
+>>>>>>>>>
+>>>>>>>>> +#ifdef CONFIG_PM
+>>>>>>>>>        if (mmc_slot(host).power_saving)
+>>>>>>>>>                mmc->ops        = &omap_hsmmc_ps_ops;
+>>>>>>>>>        else
+>>>>>>>>> +#endif
+>>>>>>>>>                mmc->ops        = &omap_hsmmc_ops;
+>>>>>>>>>
+>>>>>>>>>        /*
+>>>>>>>>> --
+>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+>>>>>> in
+>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>
+>>>>>>> Regards,
+>>>>>>> Ghorai
+>>>>>>> --
+>>>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+>>>> in
+>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
