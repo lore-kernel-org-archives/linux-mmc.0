@@ -1,7 +1,7 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v2 17/20] mmc: sdio: relocate sdio_set_block_size call
-Date: Wed, 21 Jul 2010 20:33:51 +0300
-Message-ID: <1279733634-21974-18-git-send-email-ohad@wizery.com>
+Subject: [PATCH v2 19/20] omap: zoom: keep the MMC3 wl1271 device powered off
+Date: Wed, 21 Jul 2010 20:33:53 +0300
+Message-ID: <1279733634-21974-20-git-send-email-ohad@wizery.com>
 References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1279733634-21974-1-git-send-email-ohad@wizery.com>
@@ -10,75 +10,84 @@ To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.k
 Cc: linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>, Ohad Ben-Cohen <ohad@wizery.com>
 List-Id: linux-mmc@vger.kernel.org
 
-To support probing of SDIO function driver while the device
-is powered off, we need to relocate the sdio_set_block_size call
-from the bus probe to an earlier point where we know the device
-is still powered. In addition, we want the block size set also
-when cards are resumed.
+Keep the MMC3 wl1271 WLAN device powered off until its
+SDIO function driver requests otherwise.
 
 Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/mmc/core/sdio.c     |   14 +++++++++++++-
- drivers/mmc/core/sdio_bus.c |    9 ---------
- 2 files changed, 13 insertions(+), 10 deletions(-)
+ arch/arm/mach-omap2/board-zoom-peripherals.c |    1 +
+ arch/arm/mach-omap2/hsmmc.c                  |    3 +++
+ arch/arm/mach-omap2/hsmmc.h                  |    1 +
+ arch/arm/plat-omap/include/plat/mmc.h        |    3 +++
+ drivers/mmc/host/omap_hsmmc.c                |    3 +++
+ 5 files changed, 11 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 79e6fa1..5c0fbfa 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -73,6 +73,12 @@ static int sdio_init_func(struct mmc_card *card, unsigned int fn)
+diff --git a/arch/arm/mach-omap2/board-zoom-peripherals.c b/arch/arm/mach-omap2/board-zoom-peripherals.c
+index 3230801..3ab9125 100644
+--- a/arch/arm/mach-omap2/board-zoom-peripherals.c
++++ b/arch/arm/mach-omap2/board-zoom-peripherals.c
+@@ -217,6 +217,7 @@ static struct omap2_hsmmc_info mmc[] __initdata = {
+ 		.gpio_wp	= -EINVAL,
+ 		.gpio_cd	= -EINVAL,
+ 		.ocr_mask	= MMC_VDD_165_195,
++		.dont_power_card = true,
+ 		.priv_data	= &omap_zoom_wlan_data,
+ 	},
+ 	{}      /* Terminator */
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index f06ddd2..24c4144 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -284,6 +284,9 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+ 		if (c->vcc_aux_disable_is_sleep)
+ 			mmc->slots[0].vcc_aux_disable_is_sleep = 1;
  
- 	card->sdio_func[fn - 1] = func;
- 
-+	/* Set the default block size so the driver is sure it's something
-+	 * sensible. */
-+	ret = sdio_set_block_size(func, 0);
-+	if (ret)
-+		return ret;
++		if (c->dont_power_card)
++			mmc->slots[0].dont_power_card = 1;
 +
- 	/* For each SDIO function initialized, increase the power claim
- 	 * reference count of the card */
- 	atomic_inc(&card->power_claims);
-@@ -510,7 +516,13 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 		if (func && sdio_func_present(func) && func->dev.driver) {
- 			const struct dev_pm_ops *pmops = func->dev.driver->pm;
+ 		mmc->slots[0].priv_data = c->priv_data;
  
--			if (pmops && pmops->resume)
-+			/* Set the default block size so the driver is sure
-+			 * it's something sensible. */
-+			mmc_claim_host(host);
-+			err = sdio_set_block_size(func, 0);
-+			mmc_release_host(host);
+ 		/* NOTE:  MMC slots should have a Vcc regulator set up.
+diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+index 434a3ed..e200786 100644
+--- a/arch/arm/mach-omap2/hsmmc.h
++++ b/arch/arm/mach-omap2/hsmmc.h
+@@ -23,6 +23,7 @@ struct omap2_hsmmc_info {
+ 	int	ocr_mask;	/* temporary HACK */
+ 	/* Remux (pad configuation) when powering on/off */
+ 	void (*remux)(struct device *dev, int slot, int power_on);
++	bool	dont_power_card;/* keep card power off at boot (default is n)*/
+ 	void	*priv_data;	/* private data to SDIO function driver */
+ };
+ 
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index 9db1617..d042494 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -140,6 +140,9 @@ struct omap_mmc_platform_data {
+ 
+ 		unsigned int ban_openended:1;
+ 
++		/* keep this card powered off at boot (default is n) */
++		unsigned int dont_power_card:1;
 +
-+			if (!err && pmops && pmops->resume)
- 				err = pmops->resume(&func->dev);
- 		}
- 	}
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 4a890dc..87269f6 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -119,20 +119,11 @@ static int sdio_bus_probe(struct device *dev)
- 	struct sdio_driver *drv = to_sdio_driver(dev->driver);
- 	struct sdio_func *func = dev_to_sdio_func(dev);
- 	const struct sdio_device_id *id;
--	int ret;
+ 		/* card private data that should be used by function driver */
+ 		void *priv_data;
+ 	} slots[OMAP_MMC_MAX_SLOTS];
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 4ac548e..4fb6634 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2157,6 +2157,9 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (mmc_slot(host).nonremovable)
+ 		mmc->caps |= MMC_CAP_NONREMOVABLE;
  
- 	id = sdio_match_device(func, drv);
- 	if (!id)
- 		return -ENODEV;
++	if (mmc_slot(host).dont_power_card)
++		mmc->caps |= MMC_CAP_DONT_POWER_CARD;
++
+ 	mmc_set_embedded_data(mmc, mmc_slot(host).priv_data);
  
--	/* Set the default block size so the driver is sure it's something
--	 * sensible. */
--	sdio_claim_host(func);
--	ret = sdio_set_block_size(func, 0);
--	sdio_release_host(func);
--	if (ret)
--		return ret;
--
- 	return drv->probe(func, id);
- }
- 
+ 	omap_hsmmc_conf_bus_power(host);
 -- 
 1.7.0.4
 
