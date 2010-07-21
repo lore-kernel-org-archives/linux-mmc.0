@@ -1,93 +1,76 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v2 19/20] omap: zoom: keep the MMC3 wl1271 device powered off
-Date: Wed, 21 Jul 2010 20:33:53 +0300
-Message-ID: <1279733634-21974-20-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v2 18/20] mmc: sdio: enable a default power off mode of the card
+Date: Wed, 21 Jul 2010 20:33:52 +0300
+Message-ID: <1279733634-21974-19-git-send-email-ohad@wizery.com>
 References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>, Ohad Ben-Cohen <ohad@wizery.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1279733634-21974-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Pandita Vikram <vikram.pandita-l0cyMroinI0@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Keep the MMC3 wl1271 WLAN device powered off until its
-SDIO function driver requests otherwise.
+Add support for an SDIO device to stay powered off even without
+the presence of an SDIO function driver. A host should explicitly
+ask for it by means of MMC_CAP_DONT_POWER_CARD, and the SDIO
+function driver should know it needs to call sdio_claim_power
+before accessing the device.
 
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/mach-omap2/board-zoom-peripherals.c |    1 +
- arch/arm/mach-omap2/hsmmc.c                  |    3 +++
- arch/arm/mach-omap2/hsmmc.h                  |    1 +
- arch/arm/plat-omap/include/plat/mmc.h        |    3 +++
- drivers/mmc/host/omap_hsmmc.c                |    3 +++
- 5 files changed, 11 insertions(+), 0 deletions(-)
+ drivers/mmc/core/sdio.c  |   15 +++++++++++++--
+ include/linux/mmc/host.h |    1 +
+ 2 files changed, 14 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/board-zoom-peripherals.c b/arch/arm/mach-omap2/board-zoom-peripherals.c
-index 3230801..3ab9125 100644
---- a/arch/arm/mach-omap2/board-zoom-peripherals.c
-+++ b/arch/arm/mach-omap2/board-zoom-peripherals.c
-@@ -217,6 +217,7 @@ static struct omap2_hsmmc_info mmc[] __initdata = {
- 		.gpio_wp	= -EINVAL,
- 		.gpio_cd	= -EINVAL,
- 		.ocr_mask	= MMC_VDD_165_195,
-+		.dont_power_card = true,
- 		.priv_data	= &omap_zoom_wlan_data,
- 	},
- 	{}      /* Terminator */
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index f06ddd2..24c4144 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -284,6 +284,9 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
- 		if (c->vcc_aux_disable_is_sleep)
- 			mmc->slots[0].vcc_aux_disable_is_sleep = 1;
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 5c0fbfa..164353f 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -80,8 +80,9 @@ static int sdio_init_func(struct mmc_card *card, unsigned int fn)
+ 		return ret;
  
-+		if (c->dont_power_card)
-+			mmc->slots[0].dont_power_card = 1;
+ 	/* For each SDIO function initialized, increase the power claim
+-	 * reference count of the card */
+-	atomic_inc(&card->power_claims);
++	 * reference count of the card, unless explicitly requested not to */
++	if (!(card->host->caps & MMC_CAP_DONT_POWER_CARD))
++		atomic_inc(&card->power_claims);
+ 
+ 	return 0;
+ 
+@@ -607,6 +608,16 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
+ 	mmc_release_host(host);
+ 
+ 	/*
++	 * If power is not required for this card, power it off.
++	 * The sdio function will need to call sdio_claim_power.
++	 */
++	if (!atomic_read(&card->power_claims)) {
++		pr_info("%s: power is not claimed, releasing\n",
++						mmc_hostname(host));
++		mmc_release_power(host);
++	}
 +
- 		mmc->slots[0].priv_data = c->priv_data;
++	/*
+ 	 * First add the card to the driver model...
+ 	 */
+ 	err = mmc_add_card(host->card);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 3675d58..756cf38 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -155,6 +155,7 @@ struct mmc_host {
+ #define MMC_CAP_DISABLE		(1 << 7)	/* Can the host be disabled */
+ #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
+ #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
++#define MMC_CAP_DONT_POWER_CARD	(1 << 10)	/* Keep the card powered off */
  
- 		/* NOTE:  MMC slots should have a Vcc regulator set up.
-diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
-index 434a3ed..e200786 100644
---- a/arch/arm/mach-omap2/hsmmc.h
-+++ b/arch/arm/mach-omap2/hsmmc.h
-@@ -23,6 +23,7 @@ struct omap2_hsmmc_info {
- 	int	ocr_mask;	/* temporary HACK */
- 	/* Remux (pad configuation) when powering on/off */
- 	void (*remux)(struct device *dev, int slot, int power_on);
-+	bool	dont_power_card;/* keep card power off at boot (default is n)*/
- 	void	*priv_data;	/* private data to SDIO function driver */
- };
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
  
-diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
-index 9db1617..d042494 100644
---- a/arch/arm/plat-omap/include/plat/mmc.h
-+++ b/arch/arm/plat-omap/include/plat/mmc.h
-@@ -140,6 +140,9 @@ struct omap_mmc_platform_data {
- 
- 		unsigned int ban_openended:1;
- 
-+		/* keep this card powered off at boot (default is n) */
-+		unsigned int dont_power_card:1;
-+
- 		/* card private data that should be used by function driver */
- 		void *priv_data;
- 	} slots[OMAP_MMC_MAX_SLOTS];
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 4ac548e..4fb6634 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2157,6 +2157,9 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
- 	if (mmc_slot(host).nonremovable)
- 		mmc->caps |= MMC_CAP_NONREMOVABLE;
- 
-+	if (mmc_slot(host).dont_power_card)
-+		mmc->caps |= MMC_CAP_DONT_POWER_CARD;
-+
- 	mmc_set_embedded_data(mmc, mmc_slot(host).priv_data);
- 
- 	omap_hsmmc_conf_bus_power(host);
 -- 
 1.7.0.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
