@@ -1,53 +1,29 @@
-From: Marcel Holtmann <marcel@holtmann.org>
-Subject: Re: [PATCH v2 01/20] sdio: add TI + wl1271 ids
-Date: Wed, 21 Jul 2010 10:58:54 -0700
-Message-ID: <1279735134.3035.9.camel@localhost.localdomain>
-References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-	 <1279733634-21974-2-git-send-email-ohad@wizery.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH v2 10/20] omap: zoom: add fixed regulator device for
+	wlan
+Date: Wed, 21 Jul 2010 18:59:30 +0100
+Message-ID: <20100721175930.GD10930@sirena.org.uk>
+References: <1279733634-21974-1-git-send-email-ohad@wizery.com> <1279733634-21974-11-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from senator.holtmann.net ([87.106.208.187]:34725 "EHLO
-	mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758515Ab0GUR7D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2010 13:59:03 -0400
-In-Reply-To: <1279733634-21974-2-git-send-email-ohad@wizery.com>
+Received: from cassiel.sirena.org.uk ([80.68.93.111]:48374 "EHLO
+	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758597Ab0GUR7g (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2010 13:59:36 -0400
+Content-Disposition: inline
+In-Reply-To: <1279733634-21974-11-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
+Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, linux@arm.linux.org.uk, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, Roger Quadros <roger.quadros@nokia.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 
-Hi Ohad,
+On Wed, Jul 21, 2010 at 08:33:44PM +0300, Ohad Ben-Cohen wrote:
 
-> Add SDIO IDs for TI and for TI's wl1271 wlan device.
-> 
-> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
-> ---
->  include/linux/mmc/sdio_ids.h |    3 +++
->  1 files changed, 3 insertions(+), 0 deletions(-)
-> 
-> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-> index 33b2ea0..0d313c6 100644
-> --- a/include/linux/mmc/sdio_ids.h
-> +++ b/include/linux/mmc/sdio_ids.h
-> @@ -43,4 +43,7 @@
->  #define SDIO_DEVICE_ID_SIANO_NOVA_A0		0x1100
->  #define SDIO_DEVICE_ID_SIANO_STELLAR 		0x5347
->  
-> +#define SDIO_VENDOR_ID_TI			0x0097
-> +#define SDIO_DEVICE_ID_TI_WL1271		0x4076
-> +
+> +static struct regulator_consumer_supply zoom_vmmc3_supply = {
+> +	.supply		= "vmmc",
+> +};
 
-are we still doing this non-sense for no real reason. What is so wrong
-with keeping the IDs inside the driver code?
-
-Personally I don't even see a point for these ID defines at all. Just
-use the bare numbers in SDIO_DEVICE and put a comment above what kind of
-device this is.
-
-Regards
-
-Marcel
-
-
+This looks like a misconfiguration on the consumer - I'd strongly expect
+the consumer to have a dev_name specified also with the name being in
+terms of the consumer device.
