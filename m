@@ -1,44 +1,115 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
-Date: Wed, 21 Jul 2010 14:13:52 -0700
-Message-ID: <20100721141352.d7993493.akpm@linux-foundation.org>
-References: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: akpm@linux-foundation.org
+Subject: + drivers-mmc-host-msm-sdcc-remove-dead-config-options.patch added to -mm tree
+Date: Wed, 21 Jul 2010 14:18:03 -0700
+Message-ID: <201007212118.o6LLI3fc015813@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:37714 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:60807 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754932Ab0GUVO5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2010 17:14:57 -0400
-In-Reply-To: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
+	by vger.kernel.org with ESMTP id S1754143Ab0GUVSo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2010 17:18:44 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <avorontsov@mvista.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Albert Herranz <albert_herranz@yahoo.es>, Matt Fleming <matt@console-pimps.org>, Ben Dooks <ben-linux@fluff.org>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@ozlabs.org
+To: mm-commits@vger.kernel.org
+Cc: qy03fugy@stud.informatik.uni-erlangen.de, davidb@codeaurora.org, dwalker@codeaurora.org, linux-mmc@vger.kernel.org
 
-On Wed, 14 Jul 2010 17:07:28 +0400
-Anton Vorontsov <avorontsov@mvista.com> wrote:
 
-> Hi all,
-> 
-> Currently the sdhci driver does everything in the atomic context.
-> And what is worse, PIO transfers are made from the IRQ handler.
-> 
-> This causes huge latencies (up to 120 ms). On some P2020 SOCs,
-> DMA and card detection is broken, which means that kernel polls
-> for the card via PIO transfers every second. Needless to say
-> that this is quite bad.
-> 
-> So, this patch set reworks sdhci code to avoid atomic context,
-> almost completely. We only do two device memory operations
-> in the atomic context, and all the rest is threaded.
-> 
-> I noticed no throughput drop neither with PIO transfers nor
-> with DMA (tested on MPC8569E CPU), while latencies should be
-> greatly improved.
-> 
+The patch titled
+     drivers/mmc/host/msm-sdcc: remove dead config options
+has been added to the -mm tree.  Its filename is
+     drivers-mmc-host-msm-sdcc-remove-dead-config-options.patch
 
-The patchset looks good to me, but it'd be nice to hear from the other
-people who work on this code, please?
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: drivers/mmc/host/msm-sdcc: remove dead config options
+From: Christian Dietrich <qy03fugy@stud.informatik.uni-erlangen.de>
+
+CONFIG_MMC_MSM7X00A_RESUME_IN_WQ and CONFIG_MMC_EMBEDDED_SDIO don't exist
+in Kconfig and is never defined anywhere else, therefore removing all
+references for it from the source code.
+
+Signed-off-by: Christian Dietrich <qy03fugy@stud.informatik.uni-erlangen.de>
+Acked-by: David Brown <davidb@codeaurora.org>
+Cc: Daniel Walker <dwalker@codeaurora.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/msm_sdcc.c |   25 -------------------------
+ drivers/mmc/host/msm_sdcc.h |    4 ----
+ 2 files changed, 29 deletions(-)
+
+diff -puN drivers/mmc/host/msm_sdcc.c~drivers-mmc-host-msm-sdcc-remove-dead-config-options drivers/mmc/host/msm_sdcc.c
+--- a/drivers/mmc/host/msm_sdcc.c~drivers-mmc-host-msm-sdcc-remove-dead-config-options
++++ a/drivers/mmc/host/msm_sdcc.c
+@@ -1129,15 +1129,6 @@ msmsdcc_probe(struct platform_device *pd
+ 	host->dmares = dmares;
+ 	spin_lock_init(&host->lock);
+ 
+-#ifdef CONFIG_MMC_EMBEDDED_SDIO
+-	if (plat->embedded_sdio)
+-		mmc_set_embedded_sdio_data(mmc,
+-					   &plat->embedded_sdio->cis,
+-					   &plat->embedded_sdio->cccr,
+-					   plat->embedded_sdio->funcs,
+-					   plat->embedded_sdio->num_funcs);
+-#endif
+-
+ 	/*
+ 	 * Setup DMA
+ 	 */
+@@ -1299,22 +1290,6 @@ msmsdcc_probe(struct platform_device *pd
+ }
+ 
+ #ifdef CONFIG_PM
+-#ifdef CONFIG_MMC_MSM7X00A_RESUME_IN_WQ
+-static void
+-do_resume_work(struct work_struct *work)
+-{
+-	struct msmsdcc_host *host =
+-		container_of(work, struct msmsdcc_host, resume_task);
+-	struct mmc_host	*mmc = host->mmc;
+-
+-	if (mmc) {
+-		mmc_resume_host(mmc);
+-		if (host->stat_irq)
+-			enable_irq(host->stat_irq);
+-	}
+-}
+-#endif
+-
+ 
+ static int
+ msmsdcc_suspend(struct platform_device *dev, pm_message_t state)
+diff -puN drivers/mmc/host/msm_sdcc.h~drivers-mmc-host-msm-sdcc-remove-dead-config-options drivers/mmc/host/msm_sdcc.h
+--- a/drivers/mmc/host/msm_sdcc.h~drivers-mmc-host-msm-sdcc-remove-dead-config-options
++++ a/drivers/mmc/host/msm_sdcc.h
+@@ -235,10 +235,6 @@ struct msmsdcc_host {
+ 	int			cmdpoll;
+ 	struct msmsdcc_stats	stats;
+ 
+-#ifdef CONFIG_MMC_MSM7X00A_RESUME_IN_WQ
+-	struct work_struct	resume_task;
+-#endif
+-
+ 	/* Command parameters */
+ 	unsigned int		cmd_timeout;
+ 	unsigned int		cmd_pio_irqmask;
+_
+
+Patches currently in -mm which might be from qy03fugy@stud.informatik.uni-erlangen.de are
+
+drivers-mmc-host-msm-sdcc-remove-dead-config-options.patch
+drivers-rtc-remove-unneeded-ifdef-config_pm.patch
 
