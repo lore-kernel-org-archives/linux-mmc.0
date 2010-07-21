@@ -1,140 +1,173 @@
-From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v2 09/20] wireless: wl1271: make ref_clock configurable by board
-Date: Wed, 21 Jul 2010 20:33:43 +0300
-Message-ID: <1279733634-21974-10-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: [PATCH v2 11/20] omap: hsmmc: support mmc3 regulator power control
+Date: Wed, 21 Jul 2010 20:33:45 +0300
+Message-ID: <1279733634-21974-12-git-send-email-ohad@wizery.com>
 References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1279733634-21974-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Pandita Vikram <vikram.pandita-l0cyMroinI0@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1279733634-21974-1-git-send-email-ohad@wizery.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>, Ohad Ben-Cohen <ohad@wizery.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The wl1271 device is using a reference clock that may change
-between board to board.
+Prepare for mmc3 regulator power control by splitting the power
+control functions of mmc2 and mmc3, and expecting mmc3 to have
+a single, dedicated, regulator support.
 
-Make the ref_clock parameter configurable by the board
-files that set up the device, instead of having a hard coded
-value in the driver source itself.
-
-Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/net/wireless/wl12xx/wl1271.h      |    1 +
- drivers/net/wireless/wl12xx/wl1271_boot.c |    9 +++++----
- drivers/net/wireless/wl12xx/wl1271_boot.h |    1 -
- drivers/net/wireless/wl12xx/wl1271_sdio.c |    7 ++++---
- drivers/net/wireless/wl12xx/wl1271_spi.c  |    2 ++
- include/linux/wl12xx.h                    |    1 +
- 6 files changed, 13 insertions(+), 8 deletions(-)
+ arch/arm/mach-omap2/hsmmc.c   |   10 ++++--
+ drivers/mmc/host/omap_hsmmc.c |   67 ++++++++++++++++++++++++++++++++++++----
+ 2 files changed, 66 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/net/wireless/wl12xx/wl1271.h b/drivers/net/wireless/wl12xx/wl1271.h
-index a21cdb2..595f1a8 100644
---- a/drivers/net/wireless/wl12xx/wl1271.h
-+++ b/drivers/net/wireless/wl12xx/wl1271.h
-@@ -357,6 +357,7 @@ struct wl1271 {
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 1ef54b0..5d3d789 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -174,7 +174,7 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
+ 	}
+ }
  
- 	void (*set_power)(bool enable);
- 	int irq;
-+	int ref_clock;
- 
- 	spinlock_t wl_lock;
- 
-diff --git a/drivers/net/wireless/wl12xx/wl1271_boot.c b/drivers/net/wireless/wl12xx/wl1271_boot.c
-index 1a36d8a..d3f0521 100644
---- a/drivers/net/wireless/wl12xx/wl1271_boot.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_boot.c
-@@ -455,17 +455,18 @@ int wl1271_boot(struct wl1271 *wl)
+-static void hsmmc23_before_set_reg(struct device *dev, int slot,
++static void hsmmc2_before_set_reg(struct device *dev, int slot,
+ 				   int power_on, int vdd)
  {
- 	int ret = 0;
- 	u32 tmp, clk, pause;
-+	int ref_clock = wl->ref_clock;
+ 	struct omap_mmc_platform_data *mmc = dev->platform_data;
+@@ -325,14 +325,16 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+ 				c->transceiver = 1;
+ 			if (c->transceiver && c->wires > 4)
+ 				c->wires = 4;
+-			/* FALLTHROUGH */
+-		case 3:
+ 			if (mmc->slots[0].features & HSMMC_HAS_PBIAS) {
+ 				/* off-chip level shifting, or none */
+-				mmc->slots[0].before_set_reg = hsmmc23_before_set_reg;
++				mmc->slots[0].before_set_reg = hsmmc2_before_set_reg;
+ 				mmc->slots[0].after_set_reg = NULL;
+ 			}
+ 			break;
++		case 3:
++			mmc->slots[0].before_set_reg = NULL;
++			mmc->slots[0].after_set_reg = NULL;
++			break;
+ 		default:
+ 			pr_err("MMC%d configuration not supported!\n", c->mmc);
+ 			kfree(mmc);
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index b032828..4c5a669 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -258,7 +258,7 @@ static int omap_hsmmc_1_set_power(struct device *dev, int slot, int power_on,
+ 	return ret;
+ }
  
- 	wl1271_boot_hw_version(wl);
+-static int omap_hsmmc_23_set_power(struct device *dev, int slot, int power_on,
++static int omap_hsmmc_2_set_power(struct device *dev, int slot, int power_on,
+ 				   int vdd)
+ {
+ 	struct omap_hsmmc_host *host =
+@@ -309,6 +309,31 @@ static int omap_hsmmc_23_set_power(struct device *dev, int slot, int power_on,
+ 	return ret;
+ }
  
--	if (REF_CLOCK == 0 || REF_CLOCK == 2 || REF_CLOCK == 4)
-+	if (ref_clock == 0 || ref_clock == 2 || ref_clock == 4)
- 		/* ref clk: 19.2/38.4/38.4-XTAL */
- 		clk = 0x3;
--	else if (REF_CLOCK == 1 || REF_CLOCK == 3)
-+	else if (ref_clock == 1 || ref_clock == 3)
- 		/* ref clk: 26/52 */
- 		clk = 0x5;
- 
--	if (REF_CLOCK != 0) {
-+	if (ref_clock != 0) {
- 		u16 val;
- 		/* Set clock type (open drain) */
- 		val = wl1271_top_reg_read(wl, OCP_REG_CLK_TYPE);
-@@ -514,7 +515,7 @@ int wl1271_boot(struct wl1271 *wl)
- 	wl1271_debug(DEBUG_BOOT, "clk2 0x%x", clk);
- 
- 	/* 2 */
--	clk |= (REF_CLOCK << 1) << 4;
-+	clk |= (ref_clock << 1) << 4;
- 	wl1271_write32(wl, DRPW_SCRATCH_START, clk);
- 
- 	wl1271_set_partition(wl, &part_table[PART_WORK]);
-diff --git a/drivers/net/wireless/wl12xx/wl1271_boot.h b/drivers/net/wireless/wl12xx/wl1271_boot.h
-index f829699..f73b0b1 100644
---- a/drivers/net/wireless/wl12xx/wl1271_boot.h
-+++ b/drivers/net/wireless/wl12xx/wl1271_boot.h
-@@ -46,7 +46,6 @@ struct wl1271_static_data {
- /* delay between retries */
- #define INIT_LOOP_DELAY 50
- 
--#define REF_CLOCK            2
- #define WU_COUNTER_PAUSE_VAL 0x3FF
- #define WELP_ARM_COMMAND_VAL 0x4
- 
-diff --git a/drivers/net/wireless/wl12xx/wl1271_sdio.c b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-index 75901a6..5967718 100644
---- a/drivers/net/wireless/wl12xx/wl1271_sdio.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-@@ -198,11 +198,12 @@ static int __devinit wl1271_probe(struct sdio_func *func,
- 	func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
- 
- 	wlan_data = mmc_get_embedded_data(func->card->host);
--	if (wlan_data && wlan_data->irq)
-+	if (wlan_data) {
- 		wl->irq = wlan_data->irq;
--	else {
-+		wl->ref_clock = wlan_data->board_ref_clock;
-+	} else {
- 		ret = -EINVAL;
--		wl1271_error("could not get irq!");
-+		wl1271_error("missing wlan data (needed for irq/ref_clk)!");
- 		goto out_free;
- 	}
- 
-diff --git a/drivers/net/wireless/wl12xx/wl1271_spi.c b/drivers/net/wireless/wl12xx/wl1271_spi.c
-index 85a167f..501b8b4 100644
---- a/drivers/net/wireless/wl12xx/wl1271_spi.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_spi.c
-@@ -373,6 +373,8 @@ static int __devinit wl1271_probe(struct spi_device *spi)
- 		goto out_free;
- 	}
- 
-+	wl->ref_clock = pdata->board_ref_clock;
++static int omap_hsmmc_3_set_power(struct device *dev, int slot, int power_on,
++				   int vdd)
++{
++	struct omap_hsmmc_host *host =
++		platform_get_drvdata(to_platform_device(dev));
++	int ret = 0;
 +
- 	wl->irq = spi->irq;
- 	if (wl->irq < 0) {
- 		wl1271_error("irq missing in platform data");
-diff --git a/include/linux/wl12xx.h b/include/linux/wl12xx.h
-index 137ac89..ef6eed9 100644
---- a/include/linux/wl12xx.h
-+++ b/include/linux/wl12xx.h
-@@ -29,6 +29,7 @@ struct wl12xx_platform_data {
- 	/* SDIO only: IRQ number if WLAN_IRQ line is used, 0 for SDIO IRQs */
- 	int irq;
- 	bool use_eeprom;
-+	int board_ref_clock;
- };
++	if (power_on) {
++		ret = mmc_regulator_set_ocr(host->vcc, vdd);
++		/* Enable interface voltage rail, if needed */
++		if (ret == 0 && host->vcc) {
++			ret = regulator_enable(host->vcc);
++			if (ret < 0)
++				ret = mmc_regulator_set_ocr(host->vcc, 0);
++		}
++	} else {
++		if (host->vcc)
++			ret = regulator_disable(host->vcc);
++		if (ret == 0)
++			ret = mmc_regulator_set_ocr(host->vcc, 0);
++	}
++
++	return ret;
++}
++
+ static int omap_hsmmc_1_set_sleep(struct device *dev, int slot, int sleep,
+ 				  int vdd, int cardsleep)
+ {
+@@ -319,7 +344,7 @@ static int omap_hsmmc_1_set_sleep(struct device *dev, int slot, int sleep,
+ 	return regulator_set_mode(host->vcc, mode);
+ }
  
- #endif
+-static int omap_hsmmc_23_set_sleep(struct device *dev, int slot, int sleep,
++static int omap_hsmmc_2_set_sleep(struct device *dev, int slot, int sleep,
+ 				   int vdd, int cardsleep)
+ {
+ 	struct omap_hsmmc_host *host =
+@@ -358,6 +383,31 @@ static int omap_hsmmc_23_set_sleep(struct device *dev, int slot, int sleep,
+ 		return regulator_enable(host->vcc_aux);
+ }
+ 
++static int omap_hsmmc_3_set_sleep(struct device *dev, int slot, int sleep,
++				   int vdd, int cardsleep)
++{
++	struct omap_hsmmc_host *host =
++		platform_get_drvdata(to_platform_device(dev));
++	int err = 0;
++
++	/*
++	 * If we don't see a Vcc regulator, assume it's a fixed
++	 * voltage always-on regulator.
++	 */
++	if (!host->vcc)
++		return 0;
++
++	if (cardsleep) {
++		/* VCC can be turned off if card is asleep */
++		if (sleep)
++			err = mmc_regulator_set_ocr(host->vcc, 0);
++		else
++			err = mmc_regulator_set_ocr(host->vcc, vdd);
++	}
++
++	return err;
++}
++
+ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ {
+ 	struct regulator *reg;
+@@ -370,10 +420,13 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 		mmc_slot(host).set_sleep = omap_hsmmc_1_set_sleep;
+ 		break;
+ 	case OMAP_MMC2_DEVID:
+-	case OMAP_MMC3_DEVID:
+ 		/* Off-chip level shifting, or none */
+-		mmc_slot(host).set_power = omap_hsmmc_23_set_power;
+-		mmc_slot(host).set_sleep = omap_hsmmc_23_set_sleep;
++		mmc_slot(host).set_power = omap_hsmmc_2_set_power;
++		mmc_slot(host).set_sleep = omap_hsmmc_2_set_sleep;
++		break;
++	case OMAP_MMC3_DEVID:
++		mmc_slot(host).set_power = omap_hsmmc_3_set_power;
++		mmc_slot(host).set_sleep = omap_hsmmc_3_set_sleep;
+ 		break;
+ 	default:
+ 		pr_err("MMC%d configuration not supported!\n", host->id);
+@@ -386,9 +439,9 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 		/*
+ 		* HACK: until fixed.c regulator is usable,
+ 		* we don't require a main regulator
+-		* for MMC2 or MMC3
++		* for MMC2
+ 		*/
+-		if (host->id == OMAP_MMC1_DEVID) {
++		if (host->id != OMAP_MMC2_DEVID) {
+ 			ret = PTR_ERR(reg);
+ 			goto err;
+ 		}
 -- 
 1.7.0.4
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
