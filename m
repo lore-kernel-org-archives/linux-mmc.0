@@ -1,73 +1,140 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v2 08/20] wireless: wl1271: take irq info from private board data
-Date: Wed, 21 Jul 2010 20:33:42 +0300
-Message-ID: <1279733634-21974-9-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v2 09/20] wireless: wl1271: make ref_clock configurable by board
+Date: Wed, 21 Jul 2010 20:33:43 +0300
+Message-ID: <1279733634-21974-10-git-send-email-ohad@wizery.com>
 References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:59315 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758422Ab0GURew (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2010 13:34:52 -0400
-In-Reply-To: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1279733634-21974-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Pandita Vikram <vikram.pandita-l0cyMroinI0@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Remove the hard coded irq information, and instead take
-the irq information from the board private data
-which is supplied by the sdio function.
+The wl1271 device is using a reference clock that may change
+between board to board.
 
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+Make the ref_clock parameter configurable by the board
+files that set up the device, instead of having a hard coded
+value in the driver source itself.
+
+Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 ---
- drivers/net/wireless/wl12xx/wl1271_sdio.c |   14 ++++++++------
- 1 files changed, 8 insertions(+), 6 deletions(-)
+ drivers/net/wireless/wl12xx/wl1271.h      |    1 +
+ drivers/net/wireless/wl12xx/wl1271_boot.c |    9 +++++----
+ drivers/net/wireless/wl12xx/wl1271_boot.h |    1 -
+ drivers/net/wireless/wl12xx/wl1271_sdio.c |    7 ++++---
+ drivers/net/wireless/wl12xx/wl1271_spi.c  |    2 ++
+ include/linux/wl12xx.h                    |    1 +
+ 6 files changed, 13 insertions(+), 8 deletions(-)
 
+diff --git a/drivers/net/wireless/wl12xx/wl1271.h b/drivers/net/wireless/wl12xx/wl1271.h
+index a21cdb2..595f1a8 100644
+--- a/drivers/net/wireless/wl12xx/wl1271.h
++++ b/drivers/net/wireless/wl12xx/wl1271.h
+@@ -357,6 +357,7 @@ struct wl1271 {
+ 
+ 	void (*set_power)(bool enable);
+ 	int irq;
++	int ref_clock;
+ 
+ 	spinlock_t wl_lock;
+ 
+diff --git a/drivers/net/wireless/wl12xx/wl1271_boot.c b/drivers/net/wireless/wl12xx/wl1271_boot.c
+index 1a36d8a..d3f0521 100644
+--- a/drivers/net/wireless/wl12xx/wl1271_boot.c
++++ b/drivers/net/wireless/wl12xx/wl1271_boot.c
+@@ -455,17 +455,18 @@ int wl1271_boot(struct wl1271 *wl)
+ {
+ 	int ret = 0;
+ 	u32 tmp, clk, pause;
++	int ref_clock = wl->ref_clock;
+ 
+ 	wl1271_boot_hw_version(wl);
+ 
+-	if (REF_CLOCK == 0 || REF_CLOCK == 2 || REF_CLOCK == 4)
++	if (ref_clock == 0 || ref_clock == 2 || ref_clock == 4)
+ 		/* ref clk: 19.2/38.4/38.4-XTAL */
+ 		clk = 0x3;
+-	else if (REF_CLOCK == 1 || REF_CLOCK == 3)
++	else if (ref_clock == 1 || ref_clock == 3)
+ 		/* ref clk: 26/52 */
+ 		clk = 0x5;
+ 
+-	if (REF_CLOCK != 0) {
++	if (ref_clock != 0) {
+ 		u16 val;
+ 		/* Set clock type (open drain) */
+ 		val = wl1271_top_reg_read(wl, OCP_REG_CLK_TYPE);
+@@ -514,7 +515,7 @@ int wl1271_boot(struct wl1271 *wl)
+ 	wl1271_debug(DEBUG_BOOT, "clk2 0x%x", clk);
+ 
+ 	/* 2 */
+-	clk |= (REF_CLOCK << 1) << 4;
++	clk |= (ref_clock << 1) << 4;
+ 	wl1271_write32(wl, DRPW_SCRATCH_START, clk);
+ 
+ 	wl1271_set_partition(wl, &part_table[PART_WORK]);
+diff --git a/drivers/net/wireless/wl12xx/wl1271_boot.h b/drivers/net/wireless/wl12xx/wl1271_boot.h
+index f829699..f73b0b1 100644
+--- a/drivers/net/wireless/wl12xx/wl1271_boot.h
++++ b/drivers/net/wireless/wl12xx/wl1271_boot.h
+@@ -46,7 +46,6 @@ struct wl1271_static_data {
+ /* delay between retries */
+ #define INIT_LOOP_DELAY 50
+ 
+-#define REF_CLOCK            2
+ #define WU_COUNTER_PAUSE_VAL 0x3FF
+ #define WELP_ARM_COMMAND_VAL 0x4
+ 
 diff --git a/drivers/net/wireless/wl12xx/wl1271_sdio.c b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-index 571c6b9..75901a6 100644
+index 75901a6..5967718 100644
 --- a/drivers/net/wireless/wl12xx/wl1271_sdio.c
 +++ b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-@@ -28,15 +28,14 @@
- #include <linux/mmc/sdio_func.h>
- #include <linux/mmc/sdio_ids.h>
- #include <linux/mmc/card.h>
-+#include <linux/mmc/host.h>
-+#include <linux/wl12xx.h>
- #include <plat/gpio.h>
- 
- #include "wl1271.h"
- #include "wl12xx_80211.h"
- #include "wl1271_io.h"
- 
--
--#define RX71_WL1271_IRQ_GPIO		42
--
- static const struct sdio_device_id wl1271_devices[] = {
- 	{ SDIO_DEVICE(SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271) },
- 	{}
-@@ -178,6 +177,7 @@ static int __devinit wl1271_probe(struct sdio_func *func,
- 				  const struct sdio_device_id *id)
- {
- 	struct ieee80211_hw *hw;
-+	struct wl12xx_platform_data *wlan_data;
- 	struct wl1271 *wl;
- 	int ret;
- 
-@@ -197,9 +197,11 @@ static int __devinit wl1271_probe(struct sdio_func *func,
- 	/* Grab access to FN0 for ELP reg. */
+@@ -198,11 +198,12 @@ static int __devinit wl1271_probe(struct sdio_func *func,
  	func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
  
--	wl->irq = gpio_to_irq(RX71_WL1271_IRQ_GPIO);
--	if (wl->irq < 0) {
--		ret = wl->irq;
-+	wlan_data = mmc_get_embedded_data(func->card->host);
-+	if (wlan_data && wlan_data->irq)
-+		wl->irq = wlan_data->irq;
-+	else {
-+		ret = -EINVAL;
- 		wl1271_error("could not get irq!");
+ 	wlan_data = mmc_get_embedded_data(func->card->host);
+-	if (wlan_data && wlan_data->irq)
++	if (wlan_data) {
+ 		wl->irq = wlan_data->irq;
+-	else {
++		wl->ref_clock = wlan_data->board_ref_clock;
++	} else {
+ 		ret = -EINVAL;
+-		wl1271_error("could not get irq!");
++		wl1271_error("missing wlan data (needed for irq/ref_clk)!");
  		goto out_free;
  	}
+ 
+diff --git a/drivers/net/wireless/wl12xx/wl1271_spi.c b/drivers/net/wireless/wl12xx/wl1271_spi.c
+index 85a167f..501b8b4 100644
+--- a/drivers/net/wireless/wl12xx/wl1271_spi.c
++++ b/drivers/net/wireless/wl12xx/wl1271_spi.c
+@@ -373,6 +373,8 @@ static int __devinit wl1271_probe(struct spi_device *spi)
+ 		goto out_free;
+ 	}
+ 
++	wl->ref_clock = pdata->board_ref_clock;
++
+ 	wl->irq = spi->irq;
+ 	if (wl->irq < 0) {
+ 		wl1271_error("irq missing in platform data");
+diff --git a/include/linux/wl12xx.h b/include/linux/wl12xx.h
+index 137ac89..ef6eed9 100644
+--- a/include/linux/wl12xx.h
++++ b/include/linux/wl12xx.h
+@@ -29,6 +29,7 @@ struct wl12xx_platform_data {
+ 	/* SDIO only: IRQ number if WLAN_IRQ line is used, 0 for SDIO IRQs */
+ 	int irq;
+ 	bool use_eeprom;
++	int board_ref_clock;
+ };
+ 
+ #endif
 -- 
 1.7.0.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
