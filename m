@@ -1,93 +1,353 @@
 From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: RE: [PATCH v3] Samsung: sdhci-s3c: add support for new card detection
-	methods
-Date: Thu, 22 Jul 2010 10:25:44 +0200
-Message-ID: <000501cb2977$7d6cf210$7846d630$%szyprowski@samsung.com>
-References: <1279181721-23333-1-git-send-email-m.szyprowski@samsung.com>
-	<20100715133954.7fcb797a.akpm@linux-foundation.org>
-	<011401cb24af$8eb2cb70$ac186250$%szyprowski@samsung.com>
-	<20100721161133.5c3285d3.akpm@linux-foundation.org>
+Subject: [PATCH v4] Samsung: add new card detection methods in s3c-sdhci driver
+ (platform part)
+Date: Thu, 22 Jul 2010 11:29:40 +0200
+Message-ID: <1279790980-29583-1-git-send-email-m.szyprowski@samsung.com>
+References: <000501cb2977d6cf210846d630$%szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-reply-to: <20100721161133.5c3285d3.akpm@linux-foundation.org>
-Content-language: pl
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: 'Andrew Morton' <akpm@linux-foundation.org>
-Cc: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
+Content-Type: TEXT/PLAIN
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <000501cb2977d6cf210846d630$%szyprowski@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hello,
+On some Samsung SoCs not all SDHCI controllers have card detect (CD)
+line. For some embedded designs it is not even needed, because ususally
+the device (like SDIO flash memory or wifi controller) is permanently
+wired to the controller. There are also systems which have a card detect
+line connected to some of the external interrupt lines or the presence
+of the card depends on some other actions (like enabling a power
+regulator).
 
-On Thursday, July 22, 2010 1:12 AM 
+This patch adds all required changes to platform support code, so
+another patch, which extends the driver with support for the new card
+detection methods can be applied.
 
-> On Fri, 16 Jul 2010 08:24:26 +0200
-> Marek Szyprowski <m.szyprowski@samsung.com> wrote:
-> 
-> > > >  arch/arm/mach-s3c64xx/setup-sdhci-gpio.c   |   14 +++++++++---
-> > > >  arch/arm/mach-s5pc100/setup-sdhci-gpio.c   |   21 ++++++++++++++----
-> -
-> > > >  arch/arm/mach-s5pv210/setup-sdhci-gpio.c   |   22 +++++++++++++++---
-> --
-> > > >  arch/arm/plat-samsung/dev-hsmmc.c          |    5 ++++
-> > > >  arch/arm/plat-samsung/dev-hsmmc1.c         |    5 ++++
-> > > >  arch/arm/plat-samsung/dev-hsmmc2.c         |    5 ++++
-> > > >  arch/arm/plat-samsung/dev-hsmmc3.c         |    5 ++++
-> > > >  arch/arm/plat-samsung/include/plat/sdhci.h |   29
-> > > ++++++++++++++++++++++++++++
-> > > >  8 files changed, 90 insertions(+), 16 deletions(-)
-> > >
-> > > This is quite confusing.  You've already sent a patch called
-> > > "sdhci-s3c: add support for new card detection methods".  It had the
-> > > same changelog as this patch and the same title, but the two patches
-> > > are utterly different!
-> >
-> > The real patch has been split into two for easier merging: 1. the driver
-> > part and 2. samsung platform related part. The part which patch belongs
-> > to is indicated in the last line of the change log.
-> >
-> > I'm really confused how to submit properly a patch that requires changes
-> > to both the driver (which is merged by the proper driver maintainer's
-> > sub-tree) and the platform (which should go through platform maintainer's
-> > tree).
-> 
-> Make the relationship very very clear in the changelog.  Send both
-> patches to both maintainers.  Ask that one of them merge both patches
-> and that the other ack both patches.
+Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
 
-Ok. Thanks for the hint.
+This a resend of the previous patch.
 
-> Anyway, I've forgotten what's happening here.  I appear to be sitting on
-> 
-> sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch
+I hope these changes to platform specific code gets merged soon, so the
+changes to the driver can be merged as well.
 
-This one is independent from the card-detection patches and can be applied
-directly onto linux-next kernel tree.
+The patch has been prepared against linux-next kernel tree from 20100722.
 
-> and
-> sdhci-s3c-add-support-for-new-card-detection-methods.patch
-> 
-> the latter of which is below.
-> 
-> Am I missing something?  Is
-> sdhci-s3c-add-support-for-new-card-detection-methods.patch up to date?
-> 
+Changes since V3:
+- renamed patch to avoid confusion with the patch for the s3c-sdhci driver
+  itself - added "(platform part)" in subject
 
-Ok, I will repost these 2 patches under new names to avoid further
-confusion. Currently there exists two 
-"sdhci-s3c-add-support-for-new-card-detection-methods.patch", both of them 
-are required.
+Changes since V2:
+- added support for HSMMC3 device
+
+Changes since V1:
+- added support for gpio external interrupt card based detect method
+  directly to sdhci-s3c driver
+- removed s3c64xx compilation fix patch from the series
 
 Best regards
---
+-- 
 Marek Szyprowski
 Samsung Poland R&D Center
+
+---
+
+ arch/arm/mach-s3c64xx/setup-sdhci-gpio.c   |   14 +++++++++---
+ arch/arm/mach-s5pc100/setup-sdhci-gpio.c   |   21 ++++++++++++++-----
+ arch/arm/mach-s5pv210/setup-sdhci-gpio.c   |   22 +++++++++++++++-----
+ arch/arm/plat-samsung/dev-hsmmc.c          |    5 ++++
+ arch/arm/plat-samsung/dev-hsmmc1.c         |    5 ++++
+ arch/arm/plat-samsung/dev-hsmmc2.c         |    5 ++++
+ arch/arm/plat-samsung/dev-hsmmc3.c         |    5 ++++
+ arch/arm/plat-samsung/include/plat/sdhci.h |   29 ++++++++++++++++++++++++++++
+ 8 files changed, 90 insertions(+), 16 deletions(-)
+
+diff --git a/arch/arm/mach-s3c64xx/setup-sdhci-gpio.c b/arch/arm/mach-s3c64xx/setup-sdhci-gpio.c
+index a58c0cc..54c311c 100644
+--- a/arch/arm/mach-s3c64xx/setup-sdhci-gpio.c
++++ b/arch/arm/mach-s3c64xx/setup-sdhci-gpio.c
+@@ -22,6 +22,7 @@
+ 
+ void s3c64xx_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
+ {
++	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
+ 	unsigned int gpio;
+ 	unsigned int end;
+ 
+@@ -33,12 +34,15 @@ void s3c64xx_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
+ 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+ 	}
+ 
+-	s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
+-	s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(2));
++	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
++		s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
++		s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(2));
++	}
+ }
+ 
+ void s3c64xx_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
+ {
++	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
+ 	unsigned int gpio;
+ 	unsigned int end;
+ 
+@@ -50,8 +54,10 @@ void s3c64xx_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
+ 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+ 	}
+ 
+-	s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
+-	s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(3));
++	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
++		s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
++		s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(3));
++	}
+ }
+ 
+ void s3c64xx_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
+diff --git a/arch/arm/mach-s5pc100/setup-sdhci-gpio.c b/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
+index 7769c76..e4b6739 100644
+--- a/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
++++ b/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
+@@ -23,6 +23,7 @@
+ 
+ void s5pc100_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
+ {
++	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
+ 	unsigned int gpio;
+ 	unsigned int end;
+ 	unsigned int num;
+@@ -47,12 +48,15 @@ void s5pc100_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
+ 		}
+ 	}
+ 
+-	s3c_gpio_setpull(S5PC100_GPG1(2), S3C_GPIO_PULL_UP);
+-	s3c_gpio_cfgpin(S5PC100_GPG1(2), S3C_GPIO_SFN(2));
++	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
++		s3c_gpio_setpull(S5PC100_GPG1(2), S3C_GPIO_PULL_UP);
++		s3c_gpio_cfgpin(S5PC100_GPG1(2), S3C_GPIO_SFN(2));
++	}
+ }
+ 
+ void s5pc100_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
+ {
++	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
+ 	unsigned int gpio;
+ 	unsigned int end;
+ 
+@@ -64,12 +68,15 @@ void s5pc100_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
+ 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+ 	}
+ 
+-	s3c_gpio_setpull(S5PC100_GPG2(6), S3C_GPIO_PULL_UP);
+-	s3c_gpio_cfgpin(S5PC100_GPG2(6), S3C_GPIO_SFN(2));
++	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
++		s3c_gpio_setpull(S5PC100_GPG2(6), S3C_GPIO_PULL_UP);
++		s3c_gpio_cfgpin(S5PC100_GPG2(6), S3C_GPIO_SFN(2));
++	}
+ }
+ 
+ void s5pc100_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
+ {
++	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
+ 	unsigned int gpio;
+ 	unsigned int end;
+ 
+@@ -81,6 +88,8 @@ void s5pc100_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
+ 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+ 	}
+ 
+-	s3c_gpio_setpull(S5PC100_GPG3(6), S3C_GPIO_PULL_UP);
+-	s3c_gpio_cfgpin(S5PC100_GPG3(6), S3C_GPIO_SFN(2));
++	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
++		s3c_gpio_setpull(S5PC100_GPG3(6), S3C_GPIO_PULL_UP);
++		s3c_gpio_cfgpin(S5PC100_GPG3(6), S3C_GPIO_SFN(2));
++	}
+ }
+diff --git a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c b/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
+index fe7d86d..b3ad243 100644
+--- a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
++++ b/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
+@@ -21,9 +21,11 @@
+ #include <mach/gpio.h>
+ #include <plat/gpio-cfg.h>
+ #include <plat/regs-sdhci.h>
++#include <plat/sdhci.h>
+ 
+ void s5pv210_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
+ {
++	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
+ 	unsigned int gpio;
+ 
+ 	/* Set all the necessary GPG0/GPG1 pins to special-function 2 */
+@@ -48,12 +50,15 @@ void s5pv210_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
+ 		break;
+ 	}
+ 
+-	s3c_gpio_setpull(S5PV210_GPG0(2), S3C_GPIO_PULL_UP);
+-	s3c_gpio_cfgpin(S5PV210_GPG0(2), S3C_GPIO_SFN(2));
++	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
++		s3c_gpio_setpull(S5PV210_GPG0(2), S3C_GPIO_PULL_UP);
++		s3c_gpio_cfgpin(S5PV210_GPG0(2), S3C_GPIO_SFN(2));
++	}
+ }
+ 
+ void s5pv210_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
+ {
++	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
+ 	unsigned int gpio;
+ 
+ 	/* Set all the necessary GPG1[0:1] pins to special-function 2 */
+@@ -68,12 +73,15 @@ void s5pv210_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
+ 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+ 	}
+ 
+-	s3c_gpio_setpull(S5PV210_GPG1(2), S3C_GPIO_PULL_UP);
+-	s3c_gpio_cfgpin(S5PV210_GPG1(2), S3C_GPIO_SFN(2));
++	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
++		s3c_gpio_setpull(S5PV210_GPG1(2), S3C_GPIO_PULL_UP);
++		s3c_gpio_cfgpin(S5PV210_GPG1(2), S3C_GPIO_SFN(2));
++	}
+ }
+ 
+ void s5pv210_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
+ {
++	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
+ 	unsigned int gpio;
+ 
+ 	/* Set all the necessary GPG2[0:1] pins to special-function 2 */
+@@ -99,6 +107,8 @@ void s5pv210_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
+ 		break;
+ 	}
+ 
+-	s3c_gpio_setpull(S5PV210_GPG2(2), S3C_GPIO_PULL_UP);
+-	s3c_gpio_cfgpin(S5PV210_GPG2(2), S3C_GPIO_SFN(2));
++	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
++		s3c_gpio_setpull(S5PV210_GPG2(2), S3C_GPIO_PULL_UP);
++		s3c_gpio_cfgpin(S5PV210_GPG2(2), S3C_GPIO_SFN(2));
++	}
+ }
+diff --git a/arch/arm/plat-samsung/dev-hsmmc.c b/arch/arm/plat-samsung/dev-hsmmc.c
+index 4c05b39..b0f93f1 100644
+--- a/arch/arm/plat-samsung/dev-hsmmc.c
++++ b/arch/arm/plat-samsung/dev-hsmmc.c
+@@ -60,6 +60,11 @@ void s3c_sdhci0_set_platdata(struct s3c_sdhci_platdata *pd)
+ 	struct s3c_sdhci_platdata *set = &s3c_hsmmc0_def_platdata;
+ 
+ 	set->max_width = pd->max_width;
++	set->cd_type = pd->cd_type;
++	set->ext_cd_init = pd->ext_cd_init;
++	set->ext_cd_cleanup = pd->ext_cd_cleanup;
++	set->ext_cd_gpio = pd->ext_cd_gpio;
++	set->ext_cd_gpio_invert = pd->ext_cd_gpio_invert;
+ 
+ 	if (pd->cfg_gpio)
+ 		set->cfg_gpio = pd->cfg_gpio;
+diff --git a/arch/arm/plat-samsung/dev-hsmmc1.c b/arch/arm/plat-samsung/dev-hsmmc1.c
+index e49bc4c..1504fd8 100644
+--- a/arch/arm/plat-samsung/dev-hsmmc1.c
++++ b/arch/arm/plat-samsung/dev-hsmmc1.c
+@@ -60,6 +60,11 @@ void s3c_sdhci1_set_platdata(struct s3c_sdhci_platdata *pd)
+ 	struct s3c_sdhci_platdata *set = &s3c_hsmmc1_def_platdata;
+ 
+ 	set->max_width = pd->max_width;
++	set->cd_type = pd->cd_type;
++	set->ext_cd_init = pd->ext_cd_init;
++	set->ext_cd_cleanup = pd->ext_cd_cleanup;
++	set->ext_cd_gpio = pd->ext_cd_gpio;
++	set->ext_cd_gpio_invert = pd->ext_cd_gpio_invert;
+ 
+ 	if (pd->cfg_gpio)
+ 		set->cfg_gpio = pd->cfg_gpio;
+diff --git a/arch/arm/plat-samsung/dev-hsmmc2.c b/arch/arm/plat-samsung/dev-hsmmc2.c
+index 824580b..b28ef17 100644
+--- a/arch/arm/plat-samsung/dev-hsmmc2.c
++++ b/arch/arm/plat-samsung/dev-hsmmc2.c
+@@ -61,6 +61,11 @@ void s3c_sdhci2_set_platdata(struct s3c_sdhci_platdata *pd)
+ 	struct s3c_sdhci_platdata *set = &s3c_hsmmc2_def_platdata;
+ 
+ 	set->max_width = pd->max_width;
++	set->cd_type = pd->cd_type;
++	set->ext_cd_init = pd->ext_cd_init;
++	set->ext_cd_cleanup = pd->ext_cd_cleanup;
++	set->ext_cd_gpio = pd->ext_cd_gpio;
++	set->ext_cd_gpio_invert = pd->ext_cd_gpio_invert;
+ 
+ 	if (pd->cfg_gpio)
+ 		set->cfg_gpio = pd->cfg_gpio;
+diff --git a/arch/arm/plat-samsung/dev-hsmmc3.c b/arch/arm/plat-samsung/dev-hsmmc3.c
+index 57bd394..85aaf0f 100644
+--- a/arch/arm/plat-samsung/dev-hsmmc3.c
++++ b/arch/arm/plat-samsung/dev-hsmmc3.c
+@@ -64,6 +64,11 @@ void s3c_sdhci3_set_platdata(struct s3c_sdhci_platdata *pd)
+ 	struct s3c_sdhci_platdata *set = &s3c_hsmmc3_def_platdata;
+ 
+ 	set->max_width = pd->max_width;
++	set->cd_type = pd->cd_type;
++	set->ext_cd_init = pd->ext_cd_init;
++	set->ext_cd_cleanup = pd->ext_cd_cleanup;
++	set->ext_cd_gpio = pd->ext_cd_gpio;
++	set->ext_cd_gpio_invert = pd->ext_cd_gpio_invert;
+ 
+ 	if (pd->cfg_gpio)
+ 		set->cfg_gpio = pd->cfg_gpio;
+diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-samsung/include/plat/sdhci.h
+index c52c6f0..2abb08a 100644
+--- a/arch/arm/plat-samsung/include/plat/sdhci.h
++++ b/arch/arm/plat-samsung/include/plat/sdhci.h
+@@ -20,10 +20,31 @@ struct mmc_host;
+ struct mmc_card;
+ struct mmc_ios;
+ 
++enum cd_types {
++	S3C_SDHCI_CD_INTERNAL,	/* use mmc internal CD line */
++	S3C_SDHCI_CD_EXTERNAL,	/* use external callback */
++	S3C_SDHCI_CD_GPIO,	/* use external gpio pin for CD line */
++	S3C_SDHCI_CD_NONE,	/* no CD line, use polling to detect card */
++	S3C_SDHCI_CD_PERMANENT,	/* no CD line, card permanently wired to host */
++};
++
+ /**
+  * struct s3c_sdhci_platdata() - Platform device data for Samsung SDHCI
+  * @max_width: The maximum number of data bits supported.
+  * @host_caps: Standard MMC host capabilities bit field.
++ * @cd_type: Type of Card Detection method (see cd_types enum above)
++ * @ext_cd_init: Initialize external card detect subsystem. Called on
++ *		 sdhci-s3c driver probe when cd_type == S3C_SDHCI_CD_EXTERNAL.
++ *		 notify_func argument is a callback to the sdhci-s3c driver
++ *		 that triggers the card detection event. Callback arguments:
++ *		 dev is pointer to platform device of the host controller,
++ *		 state is new state of the card (0 - removed, 1 - inserted).
++ * @ext_cd_cleanup: Cleanup external card detect subsystem. Called on
++ *		 sdhci-s3c driver remove when cd_type == S3C_SDHCI_CD_EXTERNAL.
++ *		 notify_func argument is the same callback as for ext_cd_init.
++ * @ext_cd_gpio: gpio pin used for external CD line, valid only if
++ *		 cd_type == S3C_SDHCI_CD_GPIO
++ * @ext_cd_gpio_invert: invert values for external CD gpio line
+  * @cfg_gpio: Configure the GPIO for a specific card bit-width
+  * @cfg_card: Configure the interface for a specific card and speed. This
+  *            is necessary the controllers and/or GPIO blocks require the
+@@ -37,9 +58,17 @@ struct mmc_ios;
+ struct s3c_sdhci_platdata {
+ 	unsigned int	max_width;
+ 	unsigned int	host_caps;
++	enum cd_types	cd_type;
+ 
+ 	char		**clocks;	/* set of clock sources */
+ 
++	int		ext_cd_gpio;
++	bool		ext_cd_gpio_invert;
++	int 	(*ext_cd_init)(void (*notify_func)(struct platform_device *,
++						   int state));
++	int 	(*ext_cd_cleanup)(void (*notify_func)(struct platform_device *,
++						      int state));
++
+ 	void	(*cfg_gpio)(struct platform_device *dev, int width);
+ 	void	(*cfg_card)(struct platform_device *dev,
+ 			    void __iomem *regbase,
+-- 
+1.7.1.569.g6f426
