@@ -1,36 +1,39 @@
 From: Roger Quadros <roger.quadros@nokia.com>
-Subject: Re: [PATCH v2 10/20] omap: zoom: add fixed regulator device for	wlan
-Date: Thu, 22 Jul 2010 14:16:13 +0300
-Message-ID: <4C48287D.1000603@nokia.com>
-References: <1279733634-21974-1-git-send-email-ohad@wizery.com> <1279733634-21974-11-git-send-email-ohad@wizery.com> <20100721175930.GD10930@sirena.org.uk>
+Subject: Re: [PATCH v2 18/20] mmc: sdio: enable a default power off mode of
+ the card
+Date: Thu, 22 Jul 2010 14:35:29 +0300
+Message-ID: <4C482D01.1040109@nokia.com>
+References: <1279733634-21974-1-git-send-email-ohad@wizery.com> <1279733634-21974-19-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.230]:56913 "EHLO
+Received: from smtp.nokia.com ([192.100.122.230]:60788 "EHLO
 	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755563Ab0GVLXZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jul 2010 07:23:25 -0400
-In-Reply-To: <20100721175930.GD10930@sirena.org.uk>
+	with ESMTP id S1753313Ab0GVLls (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jul 2010 07:41:48 -0400
+In-Reply-To: <1279733634-21974-19-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ext Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: ext Ohad Ben-Cohen <ohad@wizery.com>
+Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
 
-On 07/21/2010 08:59 PM, ext Mark Brown wrote:
-> On Wed, Jul 21, 2010 at 08:33:44PM +0300, Ohad Ben-Cohen wrote:
+On 07/21/2010 08:33 PM, ext Ohad Ben-Cohen wrote:
+> Add support for an SDIO device to stay powered off even without
+> the presence of an SDIO function driver. A host should explicitly
+> ask for it by means of MMC_CAP_DONT_POWER_CARD, and the SDIO
+> function driver should know it needs to call sdio_claim_power
+> before accessing the device.
 >
->> +static struct regulator_consumer_supply zoom_vmmc3_supply = {
->> +	.supply		= "vmmc",
->> +};
->
-> This looks like a misconfiguration on the consumer - I'd strongly expect
-> the consumer to have a dev_name specified also with the name being in
-> terms of the consumer device.
+> Signed-off-by: Ohad Ben-Cohen<ohad@wizery.com>
 
-you need to add something like
+Shouldn't this be the default behaviour? If there is no function driver for any 
+of the functions of the card, then sdio core shold power off the card.
 
-.dev_name       = "mmci-omap-hs.2"
+I don't see a need for a special capability flag for this.
+
+in fact MMC_CAP_DONT_POWER_CARD does not seem like an mmc host's capability 
+flag, it seems more like a request from the board to keep the card powered off.
 
 regards,
 -roger
