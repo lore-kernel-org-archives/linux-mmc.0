@@ -1,8 +1,8 @@
 From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: [PATCH v4] Samsung: add new card detection methods in s3c-sdhci driver
- (platform part)
-Date: Thu, 22 Jul 2010 11:29:40 +0200
-Message-ID: <1279790980-29583-1-git-send-email-m.szyprowski@samsung.com>
+Subject: [PATCH v4] sdhci-s3c: add support for new card detection methods
+ (driver part)
+Date: Thu, 22 Jul 2010 11:30:03 +0200
+Message-ID: <1279791003-29763-1-git-send-email-m.szyprowski@samsung.com>
 References: <000501cb2977d6cf210846d630$%szyprowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN
@@ -22,332 +22,194 @@ line connected to some of the external interrupt lines or the presence
 of the card depends on some other actions (like enabling a power
 regulator).
 
-This patch adds all required changes to platform support code, so
-another patch, which extends the driver with support for the new card
-detection methods can be applied.
+This patch adds support for all these cases. The following card
+detection methods are possible:
+
+1. internal sdhci host card detect line
+2. external event
+3. external gpio interrupt
+4. no card detect line, controller will poll for the card
+5. no card detect line, card is permanently wired to the controller
+(once detected host won't poll it any more)
+
+By default, all existing code would use method #1, what is compatible
+with the previous version of the driver.
+
+In case of external event, two callbacks must be provided in platdata:
+ext_cd_init and ext_cd_cleanup. Both of them get a callback to a
+function that notifies the s3c-sdhci host contoller as their argument.
+That callback function should be called from the even dispatcher to let
+host notice the card insertion/removal.
+
+In case of external gpio interrupt, a gpio pin number must be provided
+in platdata (ext_cd_gpio parameter), as well as the information about
+the polarity of that gpio pin (ext_cd_gpio_invert). By default
+(ext_cd_gpio_invert == 0) gpio value 0 means 'card has been removed',
+but this can be changed to 'card has been removed' when
+ext_cd_gpio_invert == 1.
+
+This patch adds changes to sdhci-s3c driver, it requires patch with
+relevant platform changes.
 
 Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
 
-This a resend of the previous patch.
-
-I hope these changes to platform specific code gets merged soon, so the
-changes to the driver can be merged as well.
-
-The patch has been prepared against linux-next kernel tree from 20100722.
-
 Changes since V3:
-- renamed patch to avoid confusion with the patch for the s3c-sdhci driver
-  itself - added "(platform part)" in subject
+- renamed patch to avoid confusion with the patch for the s3c-sdhci
+platform changes - added "(driver part)" in subject
 
 Changes since V2:
-- added support for HSMMC3 device
+According to Andrew Morton's suggestion local_irq_save() call in the
+sdhci_s3c_notify_change function has been replaced by spin_lock_irqsave
+(host driver already has a spinlock that is used for protecting internal
+state of the driver).
 
 Changes since V1:
 - added support for gpio external interrupt card based detect method
   directly to sdhci-s3c driver
-- removed s3c64xx compilation fix patch from the series
 
 Best regards
 -- 
 Marek Szyprowski
 Samsung Poland R&D Center
 
----
+--- 
 
- arch/arm/mach-s3c64xx/setup-sdhci-gpio.c   |   14 +++++++++---
- arch/arm/mach-s5pc100/setup-sdhci-gpio.c   |   21 ++++++++++++++-----
- arch/arm/mach-s5pv210/setup-sdhci-gpio.c   |   22 +++++++++++++++-----
- arch/arm/plat-samsung/dev-hsmmc.c          |    5 ++++
- arch/arm/plat-samsung/dev-hsmmc1.c         |    5 ++++
- arch/arm/plat-samsung/dev-hsmmc2.c         |    5 ++++
- arch/arm/plat-samsung/dev-hsmmc3.c         |    5 ++++
- arch/arm/plat-samsung/include/plat/sdhci.h |   29 ++++++++++++++++++++++++++++
- 8 files changed, 90 insertions(+), 16 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c |   75 ++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 75 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm/mach-s3c64xx/setup-sdhci-gpio.c b/arch/arm/mach-s3c64xx/setup-sdhci-gpio.c
-index a58c0cc..54c311c 100644
---- a/arch/arm/mach-s3c64xx/setup-sdhci-gpio.c
-+++ b/arch/arm/mach-s3c64xx/setup-sdhci-gpio.c
-@@ -22,6 +22,7 @@
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index b67414f..0d25285 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -18,6 +18,7 @@
+ #include <linux/slab.h>
+ #include <linux/clk.h>
+ #include <linux/io.h>
++#include <linux/gpio.h>
  
- void s3c64xx_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
- {
-+	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
- 	unsigned int gpio;
- 	unsigned int end;
+ #include <linux/mmc/host.h>
  
-@@ -33,12 +34,15 @@ void s3c64xx_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
- 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
- 	}
+@@ -44,6 +45,8 @@ struct sdhci_s3c {
+ 	struct resource		*ioarea;
+ 	struct s3c_sdhci_platdata *pdata;
+ 	unsigned int		cur_clk;
++	int			ext_cd_irq;
++	int			ext_cd_gpio;
  
--	s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
--	s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(2));
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
-+		s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(2));
-+	}
- }
+ 	struct clk		*clk_io;
+ 	struct clk		*clk_bus[MAX_BUS_CLK];
+@@ -242,6 +245,39 @@ static struct sdhci_ops sdhci_s3c_ops = {
+ 	.get_min_clock		= sdhci_s3c_get_min_clock,
+ };
  
- void s3c64xx_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
- {
-+	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
- 	unsigned int gpio;
- 	unsigned int end;
- 
-@@ -50,8 +54,10 @@ void s3c64xx_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
- 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
- 	}
- 
--	s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
--	s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(3));
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
-+		s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(3));
-+	}
- }
- 
- void s3c64xx_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
-diff --git a/arch/arm/mach-s5pc100/setup-sdhci-gpio.c b/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
-index 7769c76..e4b6739 100644
---- a/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
-+++ b/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
-@@ -23,6 +23,7 @@
- 
- void s5pc100_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
- {
-+	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
- 	unsigned int gpio;
- 	unsigned int end;
- 	unsigned int num;
-@@ -47,12 +48,15 @@ void s5pc100_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
- 		}
- 	}
- 
--	s3c_gpio_setpull(S5PC100_GPG1(2), S3C_GPIO_PULL_UP);
--	s3c_gpio_cfgpin(S5PC100_GPG1(2), S3C_GPIO_SFN(2));
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		s3c_gpio_setpull(S5PC100_GPG1(2), S3C_GPIO_PULL_UP);
-+		s3c_gpio_cfgpin(S5PC100_GPG1(2), S3C_GPIO_SFN(2));
-+	}
- }
- 
- void s5pc100_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
- {
-+	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
- 	unsigned int gpio;
- 	unsigned int end;
- 
-@@ -64,12 +68,15 @@ void s5pc100_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
- 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
- 	}
- 
--	s3c_gpio_setpull(S5PC100_GPG2(6), S3C_GPIO_PULL_UP);
--	s3c_gpio_cfgpin(S5PC100_GPG2(6), S3C_GPIO_SFN(2));
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		s3c_gpio_setpull(S5PC100_GPG2(6), S3C_GPIO_PULL_UP);
-+		s3c_gpio_cfgpin(S5PC100_GPG2(6), S3C_GPIO_SFN(2));
-+	}
- }
- 
- void s5pc100_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
- {
-+	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
- 	unsigned int gpio;
- 	unsigned int end;
- 
-@@ -81,6 +88,8 @@ void s5pc100_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
- 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
- 	}
- 
--	s3c_gpio_setpull(S5PC100_GPG3(6), S3C_GPIO_PULL_UP);
--	s3c_gpio_cfgpin(S5PC100_GPG3(6), S3C_GPIO_SFN(2));
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		s3c_gpio_setpull(S5PC100_GPG3(6), S3C_GPIO_PULL_UP);
-+		s3c_gpio_cfgpin(S5PC100_GPG3(6), S3C_GPIO_SFN(2));
-+	}
- }
-diff --git a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c b/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
-index fe7d86d..b3ad243 100644
---- a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
-+++ b/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
-@@ -21,9 +21,11 @@
- #include <mach/gpio.h>
- #include <plat/gpio-cfg.h>
- #include <plat/regs-sdhci.h>
-+#include <plat/sdhci.h>
- 
- void s5pv210_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
- {
-+	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
- 	unsigned int gpio;
- 
- 	/* Set all the necessary GPG0/GPG1 pins to special-function 2 */
-@@ -48,12 +50,15 @@ void s5pv210_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
- 		break;
- 	}
- 
--	s3c_gpio_setpull(S5PV210_GPG0(2), S3C_GPIO_PULL_UP);
--	s3c_gpio_cfgpin(S5PV210_GPG0(2), S3C_GPIO_SFN(2));
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		s3c_gpio_setpull(S5PV210_GPG0(2), S3C_GPIO_PULL_UP);
-+		s3c_gpio_cfgpin(S5PV210_GPG0(2), S3C_GPIO_SFN(2));
-+	}
- }
- 
- void s5pv210_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
- {
-+	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
- 	unsigned int gpio;
- 
- 	/* Set all the necessary GPG1[0:1] pins to special-function 2 */
-@@ -68,12 +73,15 @@ void s5pv210_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
- 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
- 	}
- 
--	s3c_gpio_setpull(S5PV210_GPG1(2), S3C_GPIO_PULL_UP);
--	s3c_gpio_cfgpin(S5PV210_GPG1(2), S3C_GPIO_SFN(2));
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		s3c_gpio_setpull(S5PV210_GPG1(2), S3C_GPIO_PULL_UP);
-+		s3c_gpio_cfgpin(S5PV210_GPG1(2), S3C_GPIO_SFN(2));
-+	}
- }
- 
- void s5pv210_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
- {
-+	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
- 	unsigned int gpio;
- 
- 	/* Set all the necessary GPG2[0:1] pins to special-function 2 */
-@@ -99,6 +107,8 @@ void s5pv210_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
- 		break;
- 	}
- 
--	s3c_gpio_setpull(S5PV210_GPG2(2), S3C_GPIO_PULL_UP);
--	s3c_gpio_cfgpin(S5PV210_GPG2(2), S3C_GPIO_SFN(2));
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		s3c_gpio_setpull(S5PV210_GPG2(2), S3C_GPIO_PULL_UP);
-+		s3c_gpio_cfgpin(S5PV210_GPG2(2), S3C_GPIO_SFN(2));
-+	}
- }
-diff --git a/arch/arm/plat-samsung/dev-hsmmc.c b/arch/arm/plat-samsung/dev-hsmmc.c
-index 4c05b39..b0f93f1 100644
---- a/arch/arm/plat-samsung/dev-hsmmc.c
-+++ b/arch/arm/plat-samsung/dev-hsmmc.c
-@@ -60,6 +60,11 @@ void s3c_sdhci0_set_platdata(struct s3c_sdhci_platdata *pd)
- 	struct s3c_sdhci_platdata *set = &s3c_hsmmc0_def_platdata;
- 
- 	set->max_width = pd->max_width;
-+	set->cd_type = pd->cd_type;
-+	set->ext_cd_init = pd->ext_cd_init;
-+	set->ext_cd_cleanup = pd->ext_cd_cleanup;
-+	set->ext_cd_gpio = pd->ext_cd_gpio;
-+	set->ext_cd_gpio_invert = pd->ext_cd_gpio_invert;
- 
- 	if (pd->cfg_gpio)
- 		set->cfg_gpio = pd->cfg_gpio;
-diff --git a/arch/arm/plat-samsung/dev-hsmmc1.c b/arch/arm/plat-samsung/dev-hsmmc1.c
-index e49bc4c..1504fd8 100644
---- a/arch/arm/plat-samsung/dev-hsmmc1.c
-+++ b/arch/arm/plat-samsung/dev-hsmmc1.c
-@@ -60,6 +60,11 @@ void s3c_sdhci1_set_platdata(struct s3c_sdhci_platdata *pd)
- 	struct s3c_sdhci_platdata *set = &s3c_hsmmc1_def_platdata;
- 
- 	set->max_width = pd->max_width;
-+	set->cd_type = pd->cd_type;
-+	set->ext_cd_init = pd->ext_cd_init;
-+	set->ext_cd_cleanup = pd->ext_cd_cleanup;
-+	set->ext_cd_gpio = pd->ext_cd_gpio;
-+	set->ext_cd_gpio_invert = pd->ext_cd_gpio_invert;
- 
- 	if (pd->cfg_gpio)
- 		set->cfg_gpio = pd->cfg_gpio;
-diff --git a/arch/arm/plat-samsung/dev-hsmmc2.c b/arch/arm/plat-samsung/dev-hsmmc2.c
-index 824580b..b28ef17 100644
---- a/arch/arm/plat-samsung/dev-hsmmc2.c
-+++ b/arch/arm/plat-samsung/dev-hsmmc2.c
-@@ -61,6 +61,11 @@ void s3c_sdhci2_set_platdata(struct s3c_sdhci_platdata *pd)
- 	struct s3c_sdhci_platdata *set = &s3c_hsmmc2_def_platdata;
- 
- 	set->max_width = pd->max_width;
-+	set->cd_type = pd->cd_type;
-+	set->ext_cd_init = pd->ext_cd_init;
-+	set->ext_cd_cleanup = pd->ext_cd_cleanup;
-+	set->ext_cd_gpio = pd->ext_cd_gpio;
-+	set->ext_cd_gpio_invert = pd->ext_cd_gpio_invert;
- 
- 	if (pd->cfg_gpio)
- 		set->cfg_gpio = pd->cfg_gpio;
-diff --git a/arch/arm/plat-samsung/dev-hsmmc3.c b/arch/arm/plat-samsung/dev-hsmmc3.c
-index 57bd394..85aaf0f 100644
---- a/arch/arm/plat-samsung/dev-hsmmc3.c
-+++ b/arch/arm/plat-samsung/dev-hsmmc3.c
-@@ -64,6 +64,11 @@ void s3c_sdhci3_set_platdata(struct s3c_sdhci_platdata *pd)
- 	struct s3c_sdhci_platdata *set = &s3c_hsmmc3_def_platdata;
- 
- 	set->max_width = pd->max_width;
-+	set->cd_type = pd->cd_type;
-+	set->ext_cd_init = pd->ext_cd_init;
-+	set->ext_cd_cleanup = pd->ext_cd_cleanup;
-+	set->ext_cd_gpio = pd->ext_cd_gpio;
-+	set->ext_cd_gpio_invert = pd->ext_cd_gpio_invert;
- 
- 	if (pd->cfg_gpio)
- 		set->cfg_gpio = pd->cfg_gpio;
-diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-samsung/include/plat/sdhci.h
-index c52c6f0..2abb08a 100644
---- a/arch/arm/plat-samsung/include/plat/sdhci.h
-+++ b/arch/arm/plat-samsung/include/plat/sdhci.h
-@@ -20,10 +20,31 @@ struct mmc_host;
- struct mmc_card;
- struct mmc_ios;
- 
-+enum cd_types {
-+	S3C_SDHCI_CD_INTERNAL,	/* use mmc internal CD line */
-+	S3C_SDHCI_CD_EXTERNAL,	/* use external callback */
-+	S3C_SDHCI_CD_GPIO,	/* use external gpio pin for CD line */
-+	S3C_SDHCI_CD_NONE,	/* no CD line, use polling to detect card */
-+	S3C_SDHCI_CD_PERMANENT,	/* no CD line, card permanently wired to host */
-+};
++static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
++{
++	struct sdhci_host *host;
++	unsigned long flags;
 +
- /**
-  * struct s3c_sdhci_platdata() - Platform device data for Samsung SDHCI
-  * @max_width: The maximum number of data bits supported.
-  * @host_caps: Standard MMC host capabilities bit field.
-+ * @cd_type: Type of Card Detection method (see cd_types enum above)
-+ * @ext_cd_init: Initialize external card detect subsystem. Called on
-+ *		 sdhci-s3c driver probe when cd_type == S3C_SDHCI_CD_EXTERNAL.
-+ *		 notify_func argument is a callback to the sdhci-s3c driver
-+ *		 that triggers the card detection event. Callback arguments:
-+ *		 dev is pointer to platform device of the host controller,
-+ *		 state is new state of the card (0 - removed, 1 - inserted).
-+ * @ext_cd_cleanup: Cleanup external card detect subsystem. Called on
-+ *		 sdhci-s3c driver remove when cd_type == S3C_SDHCI_CD_EXTERNAL.
-+ *		 notify_func argument is the same callback as for ext_cd_init.
-+ * @ext_cd_gpio: gpio pin used for external CD line, valid only if
-+ *		 cd_type == S3C_SDHCI_CD_GPIO
-+ * @ext_cd_gpio_invert: invert values for external CD gpio line
-  * @cfg_gpio: Configure the GPIO for a specific card bit-width
-  * @cfg_card: Configure the interface for a specific card and speed. This
-  *            is necessary the controllers and/or GPIO blocks require the
-@@ -37,9 +58,17 @@ struct mmc_ios;
- struct s3c_sdhci_platdata {
- 	unsigned int	max_width;
- 	unsigned int	host_caps;
-+	enum cd_types	cd_type;
- 
- 	char		**clocks;	/* set of clock sources */
- 
-+	int		ext_cd_gpio;
-+	bool		ext_cd_gpio_invert;
-+	int 	(*ext_cd_init)(void (*notify_func)(struct platform_device *,
-+						   int state));
-+	int 	(*ext_cd_cleanup)(void (*notify_func)(struct platform_device *,
-+						      int state));
++	host = platform_get_drvdata(dev);
++	if (host) {
++		spin_lock_irqsave(&host->lock, flags);
++		if (state) {
++			dev_dbg(&dev->dev, "card inserted.\n");
++			host->flags &= ~SDHCI_DEVICE_DEAD;
++			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++			tasklet_schedule(&host->card_tasklet);
++		} else {
++			dev_dbg(&dev->dev, "card removed.\n");
++			host->flags |= SDHCI_DEVICE_DEAD;
++			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++			tasklet_schedule(&host->card_tasklet);
++		}
++		spin_unlock_irqrestore(&host->lock, flags);
++	}
++}
 +
- 	void	(*cfg_gpio)(struct platform_device *dev, int width);
- 	void	(*cfg_card)(struct platform_device *dev,
- 			    void __iomem *regbase,
++static irqreturn_t sdhci_s3c_gpio_card_detect_isr(int irq, void *dev_id)
++{
++	struct sdhci_s3c *sc = dev_id;
++	int status = gpio_get_value(sc->ext_cd_gpio);
++	if (sc->pdata->ext_cd_gpio_invert)
++		status = !status;
++	sdhci_s3c_notify_change(sc->pdev, status);
++	return IRQ_HANDLED;
++}
++
+ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ {
+ 	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
+@@ -279,6 +315,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	sc->host = host;
+ 	sc->pdev = pdev;
+ 	sc->pdata = pdata;
++	sc->ext_cd_gpio = -1;
+ 
+ 	platform_set_drvdata(pdev, host);
+ 
+@@ -361,6 +398,13 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	 * SDHCI block, or a missing configuration that needs to be set. */
+ 	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
+ 
++	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
++	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
++		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++
++	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
++		host->mmc->caps = MMC_CAP_NONREMOVABLE;
++
+ 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
+ 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+ 
+@@ -370,6 +414,27 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		goto err_add_host;
+ 	}
+ 
++	/* pdata->ext_cd_init might call sdhci_s3c_notify_change immediately,
++	   so it can be called only after sdhci_add_host() */
++	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
++		pdata->ext_cd_init(&sdhci_s3c_notify_change);
++
++	if (pdata->cd_type == S3C_SDHCI_CD_GPIO &&
++	    gpio_is_valid(pdata->ext_cd_gpio)) {
++
++		gpio_request(pdata->ext_cd_gpio, "SDHCI EXT CD");
++		sc->ext_cd_gpio = pdata->ext_cd_gpio;
++
++		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
++		if (sc->ext_cd_irq &&
++		    request_irq(sc->ext_cd_irq, sdhci_s3c_gpio_card_detect_isr,
++				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
++				dev_name(&pdev->dev), sc)) {
++			dev_err(&pdev->dev, "cannot request irq for card detect\n");
++			sc->ext_cd_irq = 0;
++		}
++	}
++
+ 	return 0;
+ 
+  err_add_host:
+@@ -394,10 +459,20 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 
+ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ {
++	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
+ 	struct sdhci_host *host =  platform_get_drvdata(pdev);
+ 	struct sdhci_s3c *sc = sdhci_priv(host);
+ 	int ptr;
+ 
++	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
++		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
++
++	if (sc->ext_cd_irq)
++		free_irq(sc->ext_cd_irq, sdhci_s3c_gpio_card_detect_isr);
++
++	if (sc->ext_cd_gpio != -1)
++		gpio_free(sc->ext_cd_gpio);
++
+ 	sdhci_remove_host(host, 1);
+ 
+ 	for (ptr = 0; ptr < 3; ptr++) {
 -- 
 1.7.1.569.g6f426
