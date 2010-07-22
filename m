@@ -1,80 +1,64 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v2 01/20] sdio: add TI + wl1271 ids
-Date: Fri, 23 Jul 2010 02:38:01 +0300
-Message-ID: <AANLkTilNefqQ08SgI9i_ZzjNTAU2ggd813DU0Hh22JlX@mail.gmail.com>
+Subject: Re: [PATCH v2 00/20] native support for wl1271 on ZOOM
+Date: Fri, 23 Jul 2010 02:56:07 +0300
+Message-ID: <AANLkTinQa8-SePaCmqmMMOcTtJOVfKHq0yH4YCRMuqPg@mail.gmail.com>
 References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-	<1279733634-21974-2-git-send-email-ohad@wizery.com> <1279735134.3035.9.camel@localhost.localdomain>
+	<alpine.LFD.2.00.1007230052320.12562@xanadu.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:47660 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754770Ab0GVXiW convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jul 2010 19:38:22 -0400
-In-Reply-To: <1279735134.3035.9.camel@localhost.localdomain>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <alpine.LFD.2.00.1007230052320.12562@xanadu.home>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, linux@arm.linux.org.uk, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, linux-omap@vger.kernel.org, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marcel Holtmann <marcel@holtmann.org>
-Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
 
-Hi Marcel,
-
-On Wed, Jul 21, 2010 at 8:58 PM, Marcel Holtmann <marcel@holtmann.org> =
-wrote:
->> Add SDIO IDs for TI and for TI's wl1271 wlan device.
+On Fri, Jul 23, 2010 at 1:56 AM, Nicolas Pitre <nico@fluxnic.net> wrote:
+> On Wed, 21 Jul 2010, Ohad Ben-Cohen wrote:
+>
+>> This patch series adds native support for wl1271 on ZOOM.
 >>
->> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
->> ---
->> =A0include/linux/mmc/sdio_ids.h | =A0 =A03 +++
->> =A01 files changed, 3 insertions(+), 0 deletions(-)
+>> Changes since v1:
 >>
->> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_i=
-ds.h
->> index 33b2ea0..0d313c6 100644
->> --- a/include/linux/mmc/sdio_ids.h
->> +++ b/include/linux/mmc/sdio_ids.h
->> @@ -43,4 +43,7 @@
->> =A0#define SDIO_DEVICE_ID_SIANO_NOVA_A0 =A0 =A0 =A0 =A0 0x1100
->> =A0#define SDIO_DEVICE_ID_SIANO_STELLAR =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 0x5347
+>> - introduce a fixed regulator device to control the power of wl1271
+>> - allow to propagate private board-specific data to SDIO function drivers
+>> - allow SDIO function driver to control the card's power via new API
+>> - make it possible to keep the card's power down (without depending
+>> =A0 on an explicit SDIO function driver power-down request)
 >>
->> +#define SDIO_VENDOR_ID_TI =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x=
-0097
->> +#define SDIO_DEVICE_ID_TI_WL1271 =A0 =A0 =A0 =A0 =A0 =A0 0x4076
->> +
+>> Thanks to these changes, we no longer need a separate platform
+>> device (carrying e.g. the external irq information of the device),
+>> and no longer need to emulate virtual card detect events.
+>>
+>> The two "board muxing" pathces were already taken by Tony, and
+>> are resent here just to make it easier for people to use/test these path=
+ces.
+>>
+>> The changes to the MMC core really needs careful review; there still
+>> might be some pitfalls that haven't been covered. E.g., one thing
+>> we plan to look at next is their bahvior together with SDIO Suspend/Resu=
+me.
+>>
+>> Special thanks to Roger Quadros and Nicolas Pitre for their extensive
+>> review and helpful suggestions.
 >
-> are we still doing this non-sense for no real reason.  What is so wro=
-ng
-> with keeping the IDs inside the driver code?
+> FYI, I do intend to review those patches, but I'll be flying home in a
+> couple hours, and once there I'll be gone on vacation for 2 weeks. =A0So
+> this review won't happen right away.
 
-Either way we can't go so wrong here (having global VENDOR_IDs can
-potentially prevent redefinitions of the same ID in different drivers,
-but that's probably not that big of an
-issue too).
-
-But if we prefer people to stop adding IDs to this global pool, let's
-at least make it clear. We can probably seal it with some "please
-don't add new IDs if you don't have to" footnote (care to send such
-patch ? :)
-
-Thanks,
-Ohad.
+Thanks, Nicolas.
 
 
-> Personally I don't even see a point for these ID defines at all. Just
-> use the bare numbers in SDIO_DEVICE and put a comment above what kind=
- of
-> device this is.
->
-> Regards
->
-> Marcel
 >
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-omap"=
- in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> Nicolas
 >
