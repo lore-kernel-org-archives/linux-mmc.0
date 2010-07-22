@@ -1,74 +1,90 @@
-From: akpm@linux-foundation.org
-Subject: + omap-hsmmc-fix-processing-of-all-dma-interrupts-as-block-completion.patch added to -mm tree
-Date: Wed, 21 Jul 2010 16:14:08 -0700
-Message-ID: <201007212314.o6LNE8HC020615@imap1.linux-foundation.org>
+From: Bing Zhao <bzhao@marvell.com>
+Subject: [PATCH] sdio: add MMC_PM_SKIP_RESUME_PROBE to workaround powered resume
+Date: Wed, 21 Jul 2010 18:46:55 -0700
+Message-ID: <1279763215-17574-1-git-send-email-bzhao@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:51546 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755292Ab0GUXOi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2010 19:14:38 -0400
+Received: from dakia2.marvell.com ([65.219.4.35]:40267 "EHLO
+	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753106Ab0GVBUZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2010 21:20:25 -0400
+Received: from maili.marvell.com (maili.marvell.com [10.68.76.51]) by dakia2.marvell.com with ESMTP id oMSCanCDndAMP3k4 for <linux-mmc@vger.kernel.org>; Wed, 21 Jul 2010 18:20:25 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: svenkatr@ti.com, linux-mmc@vger.kernel.org, madhu.cr@ti.com
+To: linux-mmc@vger.kernel.org
+Cc: Bing Zhao <bzhao@marvell.com>, Nicolas Pitre <nico@marvell.com>
 
+Marvell 8686/8688 device will not respond to re-probe attemps
+in powered resume, if the card is in sleep mode.
+The added MMC_PM_SKIP_RESUME_PROBE flag is checked so that
+call to mmc_sdio_init_card() can be skipped.
 
-The patch titled
-     omap hsmmc: fix processing of all dma interrupts as block completion
-has been added to the -mm tree.  Its filename is
-     omap-hsmmc-fix-processing-of-all-dma-interrupts-as-block-completion.patch
-
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: omap hsmmc: fix processing of all dma interrupts as block completion
-From: Venkatraman S <svenkatr@ti.com>
-
-If other informative interrupts are enabled for the DMA channel used by
-hsmmc, those are incorrectly treated as block completion.  This patch lets
-only the block completion interrupt to be processed.
-
-Signed-off-by: Venkatraman S <svenkatr@ti.com>
-Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Bing Zhao <bzhao@marvell.com>
 ---
+ drivers/mmc/core/sdio.c      |   18 +++++++++++++++---
+ drivers/mmc/host/sdhci-pci.c |    3 ++-
+ include/linux/mmc/pm.h       |    1 +
+ 3 files changed, 18 insertions(+), 4 deletions(-)
 
- drivers/mmc/host/omap_hsmmc.c |    7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
-
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-processing-of-all-dma-interrupts-as-block-completion drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-processing-of-all-dma-interrupts-as-block-completion
-+++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -1280,8 +1280,11 @@ static void omap_hsmmc_dma_cb(int lch, u
- 	struct mmc_data *data = host->mrq->data;
- 	int dma_ch, req_in_progress;
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index bd2755e..dc03939 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -606,15 +606,27 @@ static int mmc_sdio_suspend(struct mmc_host *host)
  
--	if (ch_status & OMAP2_DMA_MISALIGNED_ERR_IRQ)
--		dev_dbg(mmc_dev(host->mmc), "MISALIGNED_ADRS_ERR\n");
-+	if (!(ch_status & OMAP_DMA_BLOCK_IRQ)) {
-+		dev_warn(mmc_dev(host->mmc), "unexpected dma status %x\n",
-+			ch_status);
-+		return;
+ static int mmc_sdio_resume(struct mmc_host *host)
+ {
+-	int i, err;
++	int i, err = 0;
+ 
+ 	BUG_ON(!host);
+ 	BUG_ON(!host->card);
+ 
+ 	/* Basic card reinitialization. */
+ 	mmc_claim_host(host);
+-	err = mmc_sdio_init_card(host, host->ocr, host->card,
+-				 (host->pm_flags & MMC_PM_KEEP_POWER));
++
++	/*
++	 * For a powered resume, Marvell 8686/8688 device will not respond
++	 * to re-initialization attemps if the card is in sleep mode.
++	 * The MMC_PM_SKIP_RESUME_PROBE flag is added as a workaround here.
++	 * This is a temporary measure until a fully thought-through
++	 * solution is elaborated.
++	 */
++	if (!(host->pm_flags & MMC_PM_KEEP_POWER) ||
++		!(host->pm_flags & MMC_PM_SKIP_RESUME_PROBE)) {
++			err = mmc_sdio_init_card(host, host->ocr, host->card,
++					host->pm_flags & MMC_PM_KEEP_POWER);
 +	}
++
+ 	if (!err) {
+ 		/* We may have switched to 1-bit mode during suspend. */
+ 		err = sdio_enable_4bit_bus(host->card);
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index e021431..4f793f8 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -703,7 +703,8 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
+ 			goto unmap;
+ 	}
  
- 	spin_lock(&host->irq_lock);
- 	if (host->dma_ch < 0) {
-_
-
-Patches currently in -mm which might be from svenkatr@ti.com are
-
-mmc-omap-fix-for-bus-width-which-improves-sd-cards-peformance.patch
-omap-hsmmc-fix-processing-of-all-dma-interrupts-as-block-completion.patch
+-	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
++	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ
++				| MMC_PM_SKIP_RESUME_PROBE;
+ 
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+diff --git a/include/linux/mmc/pm.h b/include/linux/mmc/pm.h
+index d37aac4..7dbb630 100644
+--- a/include/linux/mmc/pm.h
++++ b/include/linux/mmc/pm.h
+@@ -26,5 +26,6 @@ typedef unsigned int mmc_pm_flag_t;
+ 
+ #define MMC_PM_KEEP_POWER	(1 << 0)	/* preserve card power during suspend */
+ #define MMC_PM_WAKE_SDIO_IRQ	(1 << 1)	/* wake up host system on SDIO IRQ assertion */
++#define MMC_PM_SKIP_RESUME_PROBE	(1 << 2)	/* skip the attempt to reidentify the card in powered resume */
+ 
+ #endif
+-- 
+1.5.3.6
 
