@@ -1,39 +1,51 @@
-From: Roger Quadros <roger.quadros@nokia.com>
-Subject: Re: [PATCH v2 18/20] mmc: sdio: enable a default power off mode of
- the card
-Date: Thu, 22 Jul 2010 14:35:29 +0300
-Message-ID: <4C482D01.1040109@nokia.com>
-References: <1279733634-21974-1-git-send-email-ohad@wizery.com> <1279733634-21974-19-git-send-email-ohad@wizery.com>
+From: Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>
+Subject: Re: [PATCH v2 00/20] native support for wl1271 on ZOOM
+Date: Fri, 23 Jul 2010 00:56:30 +0200 (CEST)
+Message-ID: <alpine.LFD.2.00.1007230052320.12562@xanadu.home>
+References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.230]:60788 "EHLO
-	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753313Ab0GVLls (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jul 2010 07:41:48 -0400
-In-Reply-To: <1279733634-21974-19-git-send-email-ohad@wizery.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <1279733634-21974-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Pandita Vikram <vikram.pandita-l0cyMroinI0@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ext Ohad Ben-Cohen <ohad@wizery.com>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
 
-On 07/21/2010 08:33 PM, ext Ohad Ben-Cohen wrote:
-> Add support for an SDIO device to stay powered off even without
-> the presence of an SDIO function driver. A host should explicitly
-> ask for it by means of MMC_CAP_DONT_POWER_CARD, and the SDIO
-> function driver should know it needs to call sdio_claim_power
-> before accessing the device.
->
-> Signed-off-by: Ohad Ben-Cohen<ohad@wizery.com>
+On Wed, 21 Jul 2010, Ohad Ben-Cohen wrote:
 
-Shouldn't this be the default behaviour? If there is no function driver for any 
-of the functions of the card, then sdio core shold power off the card.
+> This patch series adds native support for wl1271 on ZOOM.
+> 
+> Changes since v1:
+> 
+> - introduce a fixed regulator device to control the power of wl1271
+> - allow to propagate private board-specific data to SDIO function drivers
+> - allow SDIO function driver to control the card's power via new API
+> - make it possible to keep the card's power down (without depending
+>   on an explicit SDIO function driver power-down request)
+> 
+> Thanks to these changes, we no longer need a separate platform
+> device (carrying e.g. the external irq information of the device),
+> and no longer need to emulate virtual card detect events.
+> 
+> The two "board muxing" pathces were already taken by Tony, and
+> are resent here just to make it easier for people to use/test these pathces.
+> 
+> The changes to the MMC core really needs careful review; there still
+> might be some pitfalls that haven't been covered. E.g., one thing
+> we plan to look at next is their bahvior together with SDIO Suspend/Resume.
+> 
+> Special thanks to Roger Quadros and Nicolas Pitre for their extensive
+> review and helpful suggestions.
 
-I don't see a need for a special capability flag for this.
+FYI, I do intend to review those patches, but I'll be flying home in a 
+couple hours, and once there I'll be gone on vacation for 2 weeks.  So 
+this review won't happen right away.
 
-in fact MMC_CAP_DONT_POWER_CARD does not seem like an mmc host's capability 
-flag, it seems more like a request from the board to keep the card powered off.
 
-regards,
--roger
+Nicolas
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
