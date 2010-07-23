@@ -1,82 +1,80 @@
-From: Andreas Feuersinger <andreas.feuersinger@spintower.eu>
-Subject: MXC MMC and Libertas_sdio
-Date: Fri, 23 Jul 2010 13:59:38 +0200
-Message-ID: <20100723135938.619c6cb7@speedy>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: [PATCH v2] sdhci-s3c: Add SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK quirk
+Date: Fri, 23 Jul 2010 21:12:30 +0900
+Message-ID: <1279887150-9373-1-git-send-email-kgene.kim@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fep31.mx.upcmail.net ([62.179.121.49]:40622 "EHLO
-	fep31.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756746Ab0GWMPh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jul 2010 08:15:37 -0400
-Received: from edge04.upcmail.net ([192.168.13.239])
-          by viefep14-int.chello.at
-          (InterMail vM.8.01.02.02 201-2260-120-106-20100312) with ESMTP
-          id <20100723115940.ESNC8381.viefep14-int.chello.at@edge04.upcmail.net>
-          for <linux-mmc@vger.kernel.org>; Fri, 23 Jul 2010 13:59:40 +0200
+Received: from ganesha.gnumonks.org ([213.95.27.120]:33367 "EHLO
+	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759583Ab0GWMVg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jul 2010 08:21:36 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ben-linux@fluff.org, akpm@linux-foundation.org, Hyuk Lee <hyuk1.lee@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>
 
+From: Hyuk Lee <hyuk1.lee@samsung.com>
 
-Hi,
+On Samsung's SDMMC hosts the timeout clock is derivied from the SD Clock
+which is set dynamically. So checked SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+quirk and removed 'sdhci_s3c_get_timeout_clk' callback which doesn't need
+any more.
 
-I'm trying to use the libertas driver on MX27 based hardware. I'm using
-kernel v2.6.22 with libertas and sdio driver ported (mainly 2.6.34).
-The Wlan device is Marvel SD8686 connected via sdio.
+Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+---
+The submitted v1 patch looks missed...so re-sending...
 
-Loading of firmware seems to work using a block size of 512
- sdio_set_block_size(card->func, 512);
+Hi Andrew,
+If no problems, could you please apply this patch?
 
-after loading the firmware I get the following output:
+Changes since v1:
+- re-made this patch againt mmotm-20100720
 
-libertas: waiting for firmware to boot
-libertas: sdio read scratch
-libertas: sdio scratch 0 ; ret: 0
-libertas: sdio read scratch
-libertas: sdio scratch 0 ; ret: 0
-libertas: sdio read scratch
-libertas: sdio scratch 0 ; ret: 0
-libertas: sdio read scratch
-libertas: sdio scratch 220 ; ret: 0
-libertas: sdio host to card type 1, bytes 46
-libertas: sdio host to card worker
-libertas: sdio read scratch
-libertas: sdio scratch 50 ; ret: 0
-libertas: sdio card to host size 50
-libertas: sdio card to host status: 10
-libertas: card->buffer[0] 0 card->buffer[1] 0
-packet of type 1 and size 0 bytes
-libertas: sdio handle cmd
-libertas: response packet too large (4294967292 bytes)
-libertas: problem fetching packet from firmware
+ drivers/mmc/host/sdhci-s3c.c |   10 +++-------
+ 1 files changed, 3 insertions(+), 7 deletions(-)
 
-The latest output goes on forever. Canceling the modprobe command
-results in a Network Interface:
-
-Strg+C 
-libertas: eth1: Marvell WLAN 802.11 adapter
-
-However the problem fetching packet from firmware remains and the
-device does not work.
-I tried several Firmware Versions all resulting as described above.
-
-If I use 32 instead of 512 for the block size the kernel hangs after
-loading helper firmware during the loading process of the "real"
-firmware.
-
-I read about Daniel Mack doing similar stuff for mx31 based systems.
-Did he/you has/have success in that and what were your problems?
-
-I appreciate any help/hints where to dig for the error.
-
-Thanks, 
-Andreas
-
-
-
-
-
-
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 0d25285..48fd161 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -113,11 +113,6 @@ static unsigned int sdhci_s3c_get_max_clk(struct sdhci_host *host)
+ 	return max;
+ }
+ 
+-static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *host)
+-{
+-	return sdhci_s3c_get_max_clk(host) / 1000000;
+-}
+-
+ /**
+  * sdhci_s3c_consider_clock - consider one the bus clocks for current setting
+  * @ourhost: Our SDHCI instance.
+@@ -191,7 +186,6 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
+ 
+ 		ourhost->cur_clk = best_src;
+ 		host->max_clk = clk_get_rate(clk);
+-		host->timeout_clk = sdhci_s3c_get_timeout_clk(host);
+ 
+ 		ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
+ 		ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;
+@@ -240,7 +234,6 @@ static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
+ 
+ static struct sdhci_ops sdhci_s3c_ops = {
+ 	.get_max_clock		= sdhci_s3c_get_max_clk,
+-	.get_timeout_clock	= sdhci_s3c_get_timeout_clk,
+ 	.set_clock		= sdhci_s3c_set_clock,
+ 	.get_min_clock		= sdhci_s3c_get_min_clock,
+ };
+@@ -408,6 +401,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
+ 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+ 
++	/* HSMMC on Samsung SoCs uses SDCLK as timeout clock */
++	host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(dev, "sdhci_add_host() failed\n");
+-- 
+1.6.2.5
 
