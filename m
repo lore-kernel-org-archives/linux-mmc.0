@@ -1,32 +1,38 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH] tmio_mmc: Make ack_mmc_irqs() write-only
-Date: Fri, 23 Jul 2010 20:10:09 +0900
-Message-ID: <AANLkTimSk_YOs7shfthCKgAVHcHyyJLh+P5qHkw_i7pH@mail.gmail.com>
-References: <4C455597.2020200@renesas.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:35716 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752427Ab0GWLKK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jul 2010 07:10:10 -0400
-In-Reply-To: <4C455597.2020200@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: [PATCH v3 0/3] Add support WP on SMDKV210 and SDHCI_QUIRK_NO_WP_BIT quirk
+Date: Fri, 23 Jul 2010 20:56:28 +0900
+Message-ID: <1279886191-9197-1-git-send-email-kgene.kim@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ben-linux@fluff.org, akpm@linux-foundation.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yusuke Goda <yusuke.goda.sx@renesas.com>
-Cc: ian@mnementh.co.uk, damm@opensource.se, sameo@linux.intel.com, Paul Mundt <lethal@linux-sh.org>, g.liakhovetski@gmx.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 
-2010/7/20 Yusuke Goda <yusuke.goda.sx@renesas.com>:
-> This patch updates ack_mmc_irqs() to acknowledge using write instead
-> of read-modify-write. Without this fix the old read-modify-write
-> implementation may acknowledge interrupt sources by mistake. The
-> driver may if so lock-up waiting forever for an interrupt that will
-> never come. Observed with the TMIO_STAT_RXRDY bit together with CMD53
-> on AR6002 and BCM4318 SDIO cards in polled mode.
->
-> Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
+This patch adds support SDMMC write protection pin on SMDKV210.
 
-Simple testing with a BCM4318 card and a MMC card on sh7372 and SDHI
-shows no problems.
+Changes since v2:
+Addressed comments from Marek Szyprowski
 
-Acked-by: Magnus Damm <damm@opensource.se>
+- modified wp_gpio checking method for support gpio number 0.
+- removed unnecessary checking in dev-hsmmc.c
+
+Changes since v1:
+Addressed comments from Ben Dooks, Maurus Cuelenaere and Kyungmin Park
+
+- just pass gpio numbers for support WP as Ben's suggestion
+- use the gpio layer for specific machine
+- use s3c_sdhcix_set_platdata() in machine_init()
+- removed unnecessary EXPORT_SYMBOL
+
+Note: Depends on following patch set
+
+[PATCH v2 1/2] ARM: SAMSUNG: Add device definition for HSMMC3
+[PATCH v2 2/2] ARM: S5PV210: Add support HSMMC on SMDKV210
+[PATCH v4] Samsung: add new card detection methods in s3c-sdhci driver (platform part) from Marek Szyprowski 
+[PATCH v4] sdhci-s3c: add support for new card detection methods (driver part) from Marek Szyprowski 
+
+And this patch set includes the following patches:
+
+[PATCH v3 1/2] ARM: SAMSUNG: Add the member of platdata to implement SDMMC Write Protection
+[PATCH v3 2/2] ARM: S5PV210: Add support SDMMC WP through EXT_INT on SMDKV210
+[PATCH v3 3/3] sdhci-s3c: Add SDHCI_QUIRK_NO_WP_BIT quirk for Samsung SoC
