@@ -1,122 +1,87 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: RE: [PATCH v3 3/3] sdhci-s3c: Add SDHCI_QUIRK_NO_WP_BIT quirk for
-	Samsung SoC
-Date: Fri, 23 Jul 2010 15:17:09 +0200
-Message-ID: <005d01cb2a69$5eeceff0$1cc6cfd0$%szyprowski@samsung.com>
-References: <1279886191-9197-1-git-send-email-kgene.kim@samsung.com>
-	<1279886191-9197-4-git-send-email-kgene.kim@samsung.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: MXC MMC and Libertas_sdio
+Date: Fri, 23 Jul 2010 22:30:53 +0100
+Message-ID: <876305ubqq.fsf@linux-g6p1.site>
+References: <20100723135938.619c6cb7@speedy>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-reply-to: <1279886191-9197-4-git-send-email-kgene.kim@samsung.com>
-Content-language: pl
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: 'Kukjin Kim' <kgene.kim@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: akpm@linux-foundation.org, ben-linux@fluff.org, 'Hyuk Lee' <hyuk1.lee@samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:33587 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753659Ab0GWVaz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jul 2010 17:30:55 -0400
+In-Reply-To: <20100723135938.619c6cb7@speedy>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andreas Feuersinger <andreas.feuersinger@spintower.eu>
+Cc: libertas-dev@lists.infradead.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hello,
+On Fri, 23 Jul 2010 13:59:38 +0200, Andreas Feuersinger <andreas.feuersinger@spintower.eu> wrote:
 
-On Friday, July 23, 2010 1:57 PM Kukjin Kim wrote:
+Cc'ing libertas-dev@lists.infradead.org
 
-> From: Hyuk Lee <hyuk1.lee@samsung.com>
 > 
-> If host controller doesn't have WP pin which should be connnected with
-> SDMMC
-> card WP pin, can implement get_ro function with using the allocated gpio.
-> In order to use this quirk wp_gpio in the platform data must be set.
+> Hi,
 > 
-> Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
-> Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-s3c.c |   43
-> ++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci.c     |    3 ++
->  drivers/mmc/host/sdhci.h     |    3 ++
->  3 files changed, 49 insertions(+), 0 deletions(-)
+> I'm trying to use the libertas driver on MX27 based hardware. I'm using
+> kernel v2.6.22 with libertas and sdio driver ported (mainly 2.6.34).
+> The Wlan device is Marvel SD8686 connected via sdio.
 > 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 0d25285..0b75e57 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -22,6 +22,7 @@
+> Loading of firmware seems to work using a block size of 512
+>  sdio_set_block_size(card->func, 512);
 > 
->  #include <linux/mmc/host.h>
+> after loading the firmware I get the following output:
 > 
-> +#include <plat/gpio-cfg.h>
->  #include <plat/sdhci.h>
->  #include <plat/regs-sdhci.h>
+> libertas: waiting for firmware to boot
+> libertas: sdio read scratch
+> libertas: sdio scratch 0 ; ret: 0
+> libertas: sdio read scratch
+> libertas: sdio scratch 0 ; ret: 0
+> libertas: sdio read scratch
+> libertas: sdio scratch 0 ; ret: 0
+> libertas: sdio read scratch
+> libertas: sdio scratch 220 ; ret: 0
+> libertas: sdio host to card type 1, bytes 46
+> libertas: sdio host to card worker
+> libertas: sdio read scratch
+> libertas: sdio scratch 50 ; ret: 0
+> libertas: sdio card to host size 50
+> libertas: sdio card to host status: 10
+> libertas: card->buffer[0] 0 card->buffer[1] 0
+> packet of type 1 and size 0 bytes
+> libertas: sdio handle cmd
+> libertas: response packet too large (4294967292 bytes)
+> libertas: problem fetching packet from firmware
 > 
-> @@ -213,6 +214,36 @@ static void sdhci_s3c_set_clock(struct sdhci_host
-> *host, unsigned int clock)
->  }
+> The latest output goes on forever. Canceling the modprobe command
+> results in a Network Interface:
 > 
->  /**
-> + * sdhci_s3c_get_ro - callback for get_ro
-> + * @host: The SDHCI host being changed
-> + *
-> + * If the WP pin is connected with GPIO, can get the value which indicates
-> + * the card is locked or not.
-> +*/
-> +static int sdhci_s3c_get_ro(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_s3c *sc;
-> +	struct sdhci_host *host;
-> +
-> +	host = mmc_priv(mmc);
-> +	sc = sdhci_priv(host);
-> +
-> +	return gpio_get_value(sc->pdata->wp_gpio);
-> +}
-> +
-> +/**
-> + * sdhci_s3c_cfg_wp - configure GPIO for WP pin
-> + * @gpio_num: GPIO number which connected with WP line from SD/MMC slot
-> + *
-> + * Configure GPIO for using WP line
-> +*/
-> +static void sdhci_s3c_cfg_wp(unsigned int gpio_num)
-> +{
-> +	s3c_gpio_cfgpin(gpio_num, S3C_GPIO_INPUT);
-> +	s3c_gpio_setpull(gpio_num, S3C_GPIO_PULL_UP);
-> +}
-> +
-> +/**
->   * sdhci_s3c_get_min_clock - callback to get minimal supported clock value
->   * @host: The SDHCI host being queried
->   *
-> @@ -375,6 +406,9 @@ static int __devinit sdhci_s3c_probe(struct
-> platform_device *pdev)
->  	if (pdata->cfg_gpio)
->  		pdata->cfg_gpio(pdev, pdata->max_width);
+> Strg+C 
+> libertas: eth1: Marvell WLAN 802.11 adapter
 > 
-> +	if (gpio_is_valid(pdata->wp_gpio))
-> +		sdhci_s3c_ops.get_ro = sdhci_s3c_get_ro;
-> +
-
-There is still a problem here, but the opposite to the issue from V1 of this
-patch.
-If one apply the current version, he would need to set pdata->wp_gpio to -1 on
-all
-existing platforms to get old behavior of the driver. Leaving it as zero means
-that
-the driver will try to use GPA(0) for write protection.
-
-Adding one more field to pdata (like "bool has_gpio_wp") seems to be unavoidable
-in this case imho.
-
-> (snip)
-
-Best regards
---
-Marek Szyprowski
-Samsung Poland R&D Center
+> However the problem fetching packet from firmware remains and the
+> device does not work.
+> I tried several Firmware Versions all resulting as described above.
+> 
+> If I use 32 instead of 512 for the block size the kernel hangs after
+> loading helper firmware during the loading process of the "real"
+> firmware.
+> 
+> I read about Daniel Mack doing similar stuff for mx31 based systems.
+> Did he/you has/have success in that and what were your problems?
+> 
+> I appreciate any help/hints where to dig for the error.
+> 
+> Thanks, 
+> Andreas
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
