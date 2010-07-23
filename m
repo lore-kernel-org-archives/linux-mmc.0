@@ -1,14 +1,16 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v2 00/20] native support for wl1271 on ZOOM
-Date: Fri, 23 Jul 2010 02:56:07 +0300
-Message-ID: <AANLkTinQa8-SePaCmqmMMOcTtJOVfKHq0yH4YCRMuqPg@mail.gmail.com>
-References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-	<alpine.LFD.2.00.1007230052320.12562@xanadu.home>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH v4] Samsung: add new card detection methods in s3c-sdhci
+	driver (platform part)
+Date: Fri, 23 Jul 2010 09:03:20 +0900
+Message-ID: <004101cb29fa$7ad36bf0$707a43d0$%kim@samsung.com>
+References: <000501cb2977d6cf210846d630$%szyprowski@samsung.com>
+	<1279790980-29583-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <alpine.LFD.2.00.1007230052320.12562@xanadu.home>
+In-reply-to: <1279790980-29583-1-git-send-email-m.szyprowski@samsung.com>
+Content-language: ko
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
 	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -18,47 +20,59 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: linux-arm-kernel-bounces@lists.infradead.org
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nicolas Pitre <nico@fluxnic.net>
-Cc: Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, linux@arm.linux.org.uk, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, linux-omap@vger.kernel.org, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
+To: 'Marek Szyprowski' <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: kyungmin.park@samsung.com, akpm@linux-foundation.org, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jul 23, 2010 at 1:56 AM, Nicolas Pitre <nico@fluxnic.net> wrote:
-> On Wed, 21 Jul 2010, Ohad Ben-Cohen wrote:
->
->> This patch series adds native support for wl1271 on ZOOM.
->>
->> Changes since v1:
->>
->> - introduce a fixed regulator device to control the power of wl1271
->> - allow to propagate private board-specific data to SDIO function drivers
->> - allow SDIO function driver to control the card's power via new API
->> - make it possible to keep the card's power down (without depending
->> =A0 on an explicit SDIO function driver power-down request)
->>
->> Thanks to these changes, we no longer need a separate platform
->> device (carrying e.g. the external irq information of the device),
->> and no longer need to emulate virtual card detect events.
->>
->> The two "board muxing" pathces were already taken by Tony, and
->> are resent here just to make it easier for people to use/test these path=
-ces.
->>
->> The changes to the MMC core really needs careful review; there still
->> might be some pitfalls that haven't been covered. E.g., one thing
->> we plan to look at next is their bahvior together with SDIO Suspend/Resu=
-me.
->>
->> Special thanks to Roger Quadros and Nicolas Pitre for their extensive
->> review and helpful suggestions.
->
-> FYI, I do intend to review those patches, but I'll be flying home in a
-> couple hours, and once there I'll be gone on vacation for 2 weeks. =A0So
-> this review won't happen right away.
+Marek Szyprowski wrote:
+> 
+> On some Samsung SoCs not all SDHCI controllers have card detect (CD)
+> line. For some embedded designs it is not even needed, because ususally
+> the device (like SDIO flash memory or wifi controller) is permanently
+> wired to the controller. There are also systems which have a card detect
+> line connected to some of the external interrupt lines or the presence
+> of the card depends on some other actions (like enabling a power
+> regulator).
+> 
+> This patch adds all required changes to platform support code, so
+> another patch, which extends the driver with support for the new card
+> detection methods can be applied.
+> 
+> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-Thanks, Nicolas.
+Ok..will apply soon.
 
+Thanks.
 
->
->
-> Nicolas
->
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
+
+> ---
+> 
+> This a resend of the previous patch.
+> 
+> I hope these changes to platform specific code gets merged soon, so the
+> changes to the driver can be merged as well.
+> 
+> The patch has been prepared against linux-next kernel tree from 20100722.
+> 
+> Changes since V3:
+> - renamed patch to avoid confusion with the patch for the s3c-sdhci driver
+>   itself - added "(platform part)" in subject
+> 
+> Changes since V2:
+> - added support for HSMMC3 device
+> 
+> Changes since V1:
+> - added support for gpio external interrupt card based detect method
+>   directly to sdhci-s3c driver
+> - removed s3c64xx compilation fix patch from the series
+> 
+> Best regards
+> --
+> Marek Szyprowski
+> Samsung Poland R&D Center
