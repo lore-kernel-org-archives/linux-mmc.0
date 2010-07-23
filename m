@@ -1,132 +1,41 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: RE: [PATCH v4] Samsung: add new card detection methods in s3c-sdhci
- driver (platform part)
-Date: Fri, 23 Jul 2010 07:36:54 +0200
-Message-ID: <003701cb2a29$12eed9a0$38cc8ce0$%szyprowski@samsung.com>
-References: <000501cb2977d6cf210846d630$%szyprowski@samsung.com>
- <1279790980-29583-1-git-send-email-m.szyprowski@samsung.com>
- <004801cb29fe$7fb23ad0$7f16b070$%kim@samsung.com>
+From: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
+Subject: Re: [PATCH v2 10/20] omap: zoom: add fixed regulator device for
+ wlan
+Date: Fri, 23 Jul 2010 10:15:04 +0100
+Message-ID: <20100723091503.GA12300@rakim.wolfsonmicro.main>
+References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
+ <1279733634-21974-11-git-send-email-ohad@wizery.com>
+ <20100721175930.GD10930@sirena.org.uk>
+ <4C48287D.1000603@nokia.com>
+ <AANLkTin2dyLNo1RMQgLG-4DtN-CsXqNNLAfITXDbMIvl@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <004801cb29fe$7fb23ad0$7f16b070$%kim@samsung.com>
-Content-language: pl
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Kukjin Kim' <kgene.kim@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: kyungmin.park@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <AANLkTin2dyLNo1RMQgLG-4DtN-CsXqNNLAfITXDbMIvl-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Cc: Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, Pandita Vikram <vikram.pandita-l0cyMroinI0@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hello,
+On Fri, Jul 23, 2010 at 02:13:38AM +0300, Ohad Ben-Cohen wrote:
+> On Thu, Jul 22, 2010 at 2:16 PM, Roger Quadros <roger.quadros@nokia.c=
+om> wrote:
+> > .dev_name =A0 =A0 =A0 =3D "mmci-omap-hs.2"
 
-On Friday, July 23, 2010 2:32 AM Kukjin Kim wrote:
+> I already set the .dev member of the consumer in a similar manner to
+> how all other regulators are configured in this board - please check
+> out patch 13:
 
-> Marek Szyprowski wrote:
-> >
-> > On some Samsung SoCs not all SDHCI controllers have card detect (CD)
-> > line. For some embedded designs it is not even needed, because ususally
-> > the device (like SDIO flash memory or wifi controller) is permanently
-> > wired to the controller. There are also systems which have a card detect
-> > line connected to some of the external interrupt lines or the presence
-> > of the card depends on some other actions (like enabling a power
-> > regulator).
-> >
-> > This patch adds all required changes to platform support code, so
-> > another patch, which extends the driver with support for the new card
-> > detection methods can be applied.
-> >
-> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> > ---
-> >
-> > This a resend of the previous patch.
-> >
-> > I hope these changes to platform specific code gets merged soon, so the
-> > changes to the driver can be merged as well.
-> >
-> > The patch has been prepared against linux-next kernel tree from 20100722.
-> >
-> > Changes since V3:
-> > - renamed patch to avoid confusion with the patch for the s3c-sdhci
-> driver
-> >   itself - added "(platform part)" in subject
-> >
-> > Changes since V2:
-> > - added support for HSMMC3 device
-> >
-> > Changes since V1:
-> > - added support for gpio external interrupt card based detect method
-> >   directly to sdhci-s3c driver
-> > - removed s3c64xx compilation fix patch from the series
-> >
-> > Best regards
-> > --
-> > Marek Szyprowski
-> > Samsung Poland R&D Center
-> >
-> > ---
-> >
-> >  arch/arm/mach-s3c64xx/setup-sdhci-gpio.c   |   14 +++++++++---
-> >  arch/arm/mach-s5pc100/setup-sdhci-gpio.c   |   21 ++++++++++++++-----
-> >  arch/arm/mach-s5pv210/setup-sdhci-gpio.c   |   22 +++++++++++++++-----
-> >  arch/arm/plat-samsung/dev-hsmmc.c          |    5 ++++
-> >  arch/arm/plat-samsung/dev-hsmmc1.c         |    5 ++++
-> >  arch/arm/plat-samsung/dev-hsmmc2.c         |    5 ++++
-> >  arch/arm/plat-samsung/dev-hsmmc3.c         |    5 ++++
-> >  arch/arm/plat-samsung/include/plat/sdhci.h |   29
-> > ++++++++++++++++++++++++++++
-> >  8 files changed, 90 insertions(+), 16 deletions(-)
-> >
-> 
-> Marek,
-> 
-> Following is build error with this patch.
-> 
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c: In function 's5pc100_setup_sdhci0_cfg_gpio':
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c:51: error: dereferencing pointer to incomplete type
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c:51: error: 'S3C_SDHCI_CD_INTERNAL' undeclared (first use in
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c:51: error: (Each undeclared identifier is reported only once
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c:51: error: for each function it appears in.)
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c: In function 's5pc100_setup_sdhci1_cfg_gpio':
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c:71: error: dereferencing pointer to incomplete type
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c:71: error: 'S3C_SDHCI_CD_INTERNAL' undeclared (first use in
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c: In function 's5pc100_setup_sdhci2_cfg_gpio':
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c:91: error: dereferencing pointer to incomplete type
-> /home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-
-> g
-> pio.c:91: error: 'S3C_SDHCI_CD_INTERNAL' undeclared (first use in
-> make[2]: *** [arch/arm/mach-s5pc100/setup-sdhci-gpio.o] Error 1
-> 
-> and s3c64xx also.
-> 
-> ...we need inclusion <plat/sdhci.h> into the ..s3c64xx/setup-sdhci-gpio.c
-> and ..s5pc100/setup-sdhci-gpio.c.
-> 
-> Will apply with build fix.
+> https://patchwork.kernel.org/patch/113418/
 
-Ok, thank you for merging the patch fixing this issue.
+> Does this look reasonable to you ?
 
-Best regards
+You should really be using dev_name in preference to dev these days
+unless there's a *very* good reason.
 --
-Marek Szyprowski
-Samsung Poland R&D Center
+To unsubscribe from this list: send the line "unsubscribe linux-wireles=
+s" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
