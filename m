@@ -1,28 +1,24 @@
 From: Kukjin Kim <kgene.kim@samsung.com>
 Subject: RE: [PATCH v4] Samsung: add new card detection methods in s3c-sdhci
-	driver (platform part)
-Date: Fri, 23 Jul 2010 09:03:20 +0900
-Message-ID: <004101cb29fa$7ad36bf0$707a43d0$%kim@samsung.com>
+ driver (platform part)
+Date: Fri, 23 Jul 2010 09:32:01 +0900
+Message-ID: <004801cb29fe$7fb23ad0$7f16b070$%kim@samsung.com>
 References: <000501cb2977d6cf210846d630$%szyprowski@samsung.com>
-	<1279790980-29583-1-git-send-email-m.szyprowski@samsung.com>
+ <1279790980-29583-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:65488 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754968Ab0GWAcF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jul 2010 20:32:05 -0400
 In-reply-to: <1279790980-29583-1-git-send-email-m.szyprowski@samsung.com>
 Content-language: ko
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: 'Marek Szyprowski' <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: kyungmin.park@samsung.com, akpm@linux-foundation.org, ben-linux@fluff.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Marek Szyprowski' <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: kyungmin.park@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org
 
 Marek Szyprowski wrote:
 > 
@@ -40,17 +36,6 @@ Marek Szyprowski wrote:
 > 
 > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-
-Ok..will apply soon.
-
-Thanks.
-
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
-
 > ---
 > 
 > This a resend of the previous patch.
@@ -76,3 +61,61 @@ SW Solution Development Team, Samsung Electronics Co., Ltd.
 > --
 > Marek Szyprowski
 > Samsung Poland R&D Center
+> 
+> ---
+> 
+>  arch/arm/mach-s3c64xx/setup-sdhci-gpio.c   |   14 +++++++++---
+>  arch/arm/mach-s5pc100/setup-sdhci-gpio.c   |   21 ++++++++++++++-----
+>  arch/arm/mach-s5pv210/setup-sdhci-gpio.c   |   22 +++++++++++++++-----
+>  arch/arm/plat-samsung/dev-hsmmc.c          |    5 ++++
+>  arch/arm/plat-samsung/dev-hsmmc1.c         |    5 ++++
+>  arch/arm/plat-samsung/dev-hsmmc2.c         |    5 ++++
+>  arch/arm/plat-samsung/dev-hsmmc3.c         |    5 ++++
+>  arch/arm/plat-samsung/include/plat/sdhci.h |   29
+> ++++++++++++++++++++++++++++
+>  8 files changed, 90 insertions(+), 16 deletions(-)
+> 
+
+Marek,
+
+Following is build error with this patch.
+
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c: In function 's5pc100_setup_sdhci0_cfg_gpio':
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c:51: error: dereferencing pointer to incomplete type
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c:51: error: 'S3C_SDHCI_CD_INTERNAL' undeclared (first use in
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c:51: error: (Each undeclared identifier is reported only once
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c:51: error: for each function it appears in.)
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c: In function 's5pc100_setup_sdhci1_cfg_gpio':
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c:71: error: dereferencing pointer to incomplete type
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c:71: error: 'S3C_SDHCI_CD_INTERNAL' undeclared (first use in
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c: In function 's5pc100_setup_sdhci2_cfg_gpio':
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c:91: error: dereferencing pointer to incomplete type
+/home/kgene/linux/linux-2.6-mainline-dev/arch/arm/mach-s5pc100/setup-sdhci-g
+pio.c:91: error: 'S3C_SDHCI_CD_INTERNAL' undeclared (first use in
+make[2]: *** [arch/arm/mach-s5pc100/setup-sdhci-gpio.o] Error 1
+
+and s3c64xx also.
+
+...we need inclusion <plat/sdhci.h> into the ..s3c64xx/setup-sdhci-gpio.c
+and ..s5pc100/setup-sdhci-gpio.c.
+
+Will apply with build fix.
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
+
