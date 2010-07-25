@@ -1,47 +1,102 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v2 10/20] omap: zoom: add fixed regulator device for wlan
-Date: Sun, 25 Jul 2010 13:40:13 +0300
-Message-ID: <AANLkTi=qnAy+c7-xqcscyuy7Q4sgVsedZToEmZHo=y9y@mail.gmail.com>
-References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-	<1279733634-21974-11-git-send-email-ohad@wizery.com> <20100721175930.GD10930@sirena.org.uk>
-	<4C48287D.1000603@nokia.com> <AANLkTin2dyLNo1RMQgLG-4DtN-CsXqNNLAfITXDbMIvl@mail.gmail.com>
-	<20100723091503.GA12300@rakim.wolfsonmicro.main>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Subject: [PATCH] omap: zoom: add fixed regulator device for wl1271
+Date: Sun, 25 Jul 2010 14:14:03 +0300
+Message-ID: <1280056443-12589-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:41886 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751797Ab0GYKkf convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jul 2010 06:40:35 -0400
-In-Reply-To: <20100723091503.GA12300@rakim.wolfsonmicro.main>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:45762 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751286Ab0GYLOa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jul 2010 07:14:30 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Roger Quadros <roger.quadros@nokia.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: linux-omap@vger.kernel.org
+Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-arm-kernel@lists.infradead.org, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>, Ohad Ben-Cohen <ohad@wizery.com>
 
-On Fri, Jul 23, 2010 at 12:15 PM, Mark Brown
-<broonie@opensource.wolfsonmicro.com> wrote:
-> On Fri, Jul 23, 2010 at 02:13:38AM +0300, Ohad Ben-Cohen wrote:
->> On Thu, Jul 22, 2010 at 2:16 PM, Roger Quadros <roger.quadros@nokia.=
-com> wrote:
->> > .dev_name =A0 =A0 =A0 =3D "mmci-omap-hs.2"
->
->> I already set the .dev member of the consumer in a similar manner to
->> how all other regulators are configured in this board - please check
->> out patch 13:
->
->> https://patchwork.kernel.org/patch/113418/
->
->> Does this look reasonable to you ?
->
-> You should really be using dev_name in preference to dev these days
-> unless there's a *very* good reason.
+Add a fixed regulator vmmc device to enable power control
+of the wl1271 wlan device.
 
-Changed, thank you.
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+---
+This patch is a follow-up to a previous wl1271 discussion,
+thus all original recipients are CC'ed.
 
-I'll submit the updated patch now as a standalone patch as it has no
-dependencies on the whole series, and it could only help to start
-trimming that series down.
+ arch/arm/mach-omap2/board-zoom-peripherals.c |   35 ++++++++++++++++++++++++++
+ 1 files changed, 35 insertions(+), 0 deletions(-)
 
->
+diff --git a/arch/arm/mach-omap2/board-zoom-peripherals.c b/arch/arm/mach-omap2/board-zoom-peripherals.c
+index 6b39849..de88635 100644
+--- a/arch/arm/mach-omap2/board-zoom-peripherals.c
++++ b/arch/arm/mach-omap2/board-zoom-peripherals.c
+@@ -16,6 +16,7 @@
+ #include <linux/gpio.h>
+ #include <linux/i2c/twl.h>
+ #include <linux/regulator/machine.h>
++#include <linux/regulator/fixed.h>
+ 
+ #include <asm/mach-types.h>
+ #include <asm/mach/arch.h>
+@@ -27,6 +28,8 @@
+ #include "mux.h"
+ #include "hsmmc.h"
+ 
++#define OMAP_ZOOM_WLAN_PMENA_GPIO	(101)
++
+ /* Zoom2 has Qwerty keyboard*/
+ static int board_keymap[] = {
+ 	KEY(0, 0, KEY_E),
+@@ -106,6 +109,11 @@ static struct regulator_consumer_supply zoom_vmmc2_supply = {
+ 	.supply		= "vmmc",
+ };
+ 
++static struct regulator_consumer_supply zoom_vmmc3_supply = {
++	.supply		= "vmmc",
++	.dev_name	= "mmci-omap-hs.2",
++};
++
+ /* VMMC1 for OMAP VDD_MMC1 (i/o) and MMC1 card */
+ static struct regulator_init_data zoom_vmmc1 = {
+ 	.constraints = {
+@@ -151,6 +159,32 @@ static struct regulator_init_data zoom_vsim = {
+ 	.consumer_supplies      = &zoom_vsim_supply,
+ };
+ 
++static struct regulator_init_data zoom_vmmc3 = {
++	.constraints = {
++		.valid_ops_mask	= REGULATOR_CHANGE_STATUS,
++	},
++	.num_consumer_supplies = 1,
++	.consumer_supplies = &zoom_vmmc3_supply,
++};
++
++static struct fixed_voltage_config zoom_vwlan = {
++	.supply_name = "vwl1271",
++	.microvolts = 1800000, /* 1.8V */
++	.gpio = OMAP_ZOOM_WLAN_PMENA_GPIO,
++	.startup_delay = 70000, /* 70msec */
++	.enable_high = 1,
++	.enabled_at_boot = 0,
++	.init_data = &zoom_vmmc3,
++};
++
++static struct platform_device omap_vwlan_device = {
++	.name		= "reg-fixed-voltage",
++	.id		= 1,
++	.dev = {
++		.platform_data = &zoom_vwlan,
++	},
++};
++
+ static struct omap2_hsmmc_info mmc[] __initdata = {
+ 	{
+ 		.name		= "external",
+@@ -280,6 +314,7 @@ static void enable_board_wakeup_source(void)
+ void __init zoom_peripherals_init(void)
+ {
+ 	omap_i2c_init();
++	platform_device_register(&omap_vwlan_device);
+ 	usb_musb_init(&musb_board_data);
+ 	enable_board_wakeup_source();
+ }
+-- 
+1.7.0.4
+
