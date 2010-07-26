@@ -1,103 +1,62 @@
 From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH v3] Samsung: sdhci-s3c: add support for new card
- detection methods
-Date: Mon, 26 Jul 2010 13:57:08 -0700
-Message-ID: <20100726135708.57048800.akpm@linux-foundation.org>
-References: <1279181721-23333-1-git-send-email-m.szyprowski@samsung.com>
-	<20100715133954.7fcb797a.akpm@linux-foundation.org>
-	<011401cb24af$8eb2cb70$ac186250$%szyprowski@samsung.com>
-	<20100721161133.5c3285d3.akpm@linux-foundation.org>
-	<000501cb2977$7d6cf210$7846d630$%szyprowski@samsung.com>
+Subject: Re: [PATCH] mmc_test: Add performance tests
+Date: Mon, 26 Jul 2010 15:52:34 -0700
+Message-ID: <20100726155234.3aca5a83.akpm@linux-foundation.org>
+References: <4C49601B.5070900@nokia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <000501cb2977$7d6cf210$7846d630$%szyprowski@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: kgene.kim@samsung.com, linux-mmc@vger.kernel.org, kyungmin.park@samsung.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:51474 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754780Ab0GZWwl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Jul 2010 18:52:41 -0400
+In-Reply-To: <4C49601B.5070900@nokia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, 22 Jul 2010 10:25:44 +0200
-Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+On Fri, 23 Jul 2010 12:25:47 +0300
+Adrian Hunter <adrian.hunter@nokia.com> wrote:
 
-> Hello,
-> 
-> On Thursday, July 22, 2010 1:12 AM 
-> 
-> > On Fri, 16 Jul 2010 08:24:26 +0200
-> > Marek Szyprowski <m.szyprowski@samsung.com> wrote:
-> > 
-> > > > >  arch/arm/mach-s3c64xx/setup-sdhci-gpio.c   |   14 +++++++++---
-> > > > >  arch/arm/mach-s5pc100/setup-sdhci-gpio.c   |   21 ++++++++++++++----
-> > -
-> > > > >  arch/arm/mach-s5pv210/setup-sdhci-gpio.c   |   22 +++++++++++++++---
-> > --
-> > > > >  arch/arm/plat-samsung/dev-hsmmc.c          |    5 ++++
-> > > > >  arch/arm/plat-samsung/dev-hsmmc1.c         |    5 ++++
-> > > > >  arch/arm/plat-samsung/dev-hsmmc2.c         |    5 ++++
-> > > > >  arch/arm/plat-samsung/dev-hsmmc3.c         |    5 ++++
-> > > > >  arch/arm/plat-samsung/include/plat/sdhci.h |   29
-> > > > ++++++++++++++++++++++++++++
-> > > > >  8 files changed, 90 insertions(+), 16 deletions(-)
-> > > >
-> > > > This is quite confusing.  You've already sent a patch called
-> > > > "sdhci-s3c: add support for new card detection methods".  It had the
-> > > > same changelog as this patch and the same title, but the two patches
-> > > > are utterly different!
-> > >
-> > > The real patch has been split into two for easier merging: 1. the driver
-> > > part and 2. samsung platform related part. The part which patch belongs
-> > > to is indicated in the last line of the change log.
-> > >
-> > > I'm really confused how to submit properly a patch that requires changes
-> > > to both the driver (which is merged by the proper driver maintainer's
-> > > sub-tree) and the platform (which should go through platform maintainer's
-> > > tree).
-> > 
-> > Make the relationship very very clear in the changelog.  Send both
-> > patches to both maintainers.  Ask that one of them merge both patches
-> > and that the other ack both patches.
-> 
-> Ok. Thanks for the hint.
-> 
-> > Anyway, I've forgotten what's happening here.  I appear to be sitting on
-> > 
-> > sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch
-> 
-> This one is independent from the card-detection patches and can be applied
-> directly onto linux-next kernel tree.
-> 
-> > and
-> > sdhci-s3c-add-support-for-new-card-detection-methods.patch
-> > 
-> > the latter of which is below.
-> > 
-> > Am I missing something?  Is
-> > sdhci-s3c-add-support-for-new-card-detection-methods.patch up to date?
-> > 
-> 
-> Ok, I will repost these 2 patches under new names to avoid further
-> confusion. Currently there exists two 
-> "sdhci-s3c-add-support-for-new-card-detection-methods.patch", both of them 
-> are required.
+> +/*
+> + * Allocate a lot of memory, preferrably max_sz but at least min_sz.  In case
+> + * there isn't much memory do not exceed 1/16th total RAM.
+> + */
+> +static struct mmc_test_mem *mmc_test_alloc_mem(unsigned int min_sz,
+> +					       unsigned int max_sz)
+> +{
+> +	unsigned int max_page_cnt = DIV_ROUND_UP(max_sz, PAGE_SIZE);
+> +	unsigned int min_page_cnt = DIV_ROUND_UP(min_sz, PAGE_SIZE);
+> +	unsigned int page_cnt = 0;
+> +	struct mmc_test_mem *mem;
+> +	struct sysinfo si;
+> +
+> +	si_meminfo(&si);
+> +	if (max_page_cnt > si.totalram >> 4)
+> +		max_page_cnt = si.totalram >> 4;
+> +	if (max_page_cnt < min_page_cnt)
+> +		max_page_cnt = min_page_cnt;
+> +
+> +	mem = kzalloc(sizeof(struct mmc_test_mem), GFP_KERNEL);
+>
+> ...
+>
+> +		gfp_t flags = GFP_KERNEL | GFP_DMA | __GFP_NOWARN |
+> +				__GFP_NORETRY;
+> +
+> +		order = get_order(page_cnt << PAGE_SHIFT);
+> +		while (1) {
+> +			page = alloc_pages(flags, order);
+>
+> ...
+>
 
-So the second(?) patch "[PATCH v4] Samsung: add new card detection
-methods in s3c-sdhci driver (platform part)" has already been applied
-to linux-next by Kukjin Kim, along with modifications which we have not
-been shown.  
+struct sysinfo.totalram returns the total number of pages including
+highmem.  But a GFP_KERNEL allocation can only return lowmem pages. 
+The difference between the two can be 20x (on a 16G i386 box). 
+nr_free_buffer_pages() would be a more accurate thing to use.
 
-But the first patch
-(sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch)
-has not been applied to linux-next by anoyne and the third patch
-"[PATCH v4] sdhci-s3c: add support for new card detection methods
-(driver part)" has not been applied either.
-
-This is a complete mess.  What happens if I apply and merge
-sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch
-and
-sdhci-s3c-add-support-for-new-card-detection-methods-driver-part.patch?
-I have no idea.
-
-I think I'll just drop all of it.  Please sort all of this out then let
-me know what you want me to do.
+Also, I worry about overflows here.  For example, `page_cnt <<
+PAGE_SHIFT' could overflow the unsigned int?  Please check all of that.
