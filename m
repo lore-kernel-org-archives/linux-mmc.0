@@ -1,19 +1,19 @@
 From: akpm@linux-foundation.org
-Subject: + tmio_mmc-allow-2-byte-requests-in-4-bit-mode.patch added to -mm tree
-Date: Mon, 26 Jul 2010 16:03:49 -0700
-Message-ID: <201007262303.o6QN3n5n015124@imap1.linux-foundation.org>
+Subject: + sdhci-s3c-add-sdhci_quirk_data_timeout_uses_sdclk-quirk.patch added to -mm tree
+Date: Mon, 26 Jul 2010 16:40:45 -0700
+Message-ID: <201007262340.o6QNejQs016666@imap1.linux-foundation.org>
 Reply-To: linux-kernel@vger.kernel.org
 Return-path: <mm-commits-owner@vger.kernel.org>
 Sender: mm-commits-owner@vger.kernel.org
 To: mm-commits@vger.kernel.org
-Cc: yusuke.goda.sx@renesas.com, damm@opensource.se, linux-mmc@vger.kernel.org
+Cc: hyuk1.lee@samsung.com, ben-linux@fluff.org, kgene.kim@samsung.com, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     tmio_mmc: allow 2 byte requests in 4-bit mode
+     sdhci-s3c: add SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK quirk
 has been added to the -mm tree.  Its filename is
-     tmio_mmc-allow-2-byte-requests-in-4-bit-mode.patch
+     sdhci-s3c-add-sdhci_quirk_data_timeout_uses_sdclk-quirk.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -29,40 +29,69 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: tmio_mmc: allow 2 byte requests in 4-bit mode
-From: Yusuke Goda <yusuke.goda.sx@renesas.com>
+Subject: sdhci-s3c: add SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK quirk
+From: Hyuk Lee <hyuk1.lee@samsung.com>
 
-Adjust the tmio_mmc block size check to accept 2-byte requests in 4-bit
-mode.  Tested with the SDHI hardware block included in sh7724.
+On Samsung's SDMMC hosts the timeout clock is derivied from the SD Clock
+which is set dynamically.  So checked SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+quirk and removed 'sdhci_s3c_get_timeout_clk' callback which doesn't need
+any more.
 
-Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
-Tested-by: Magnus Damm <damm@opensource.se>
-Acked-by: Magnus Damm <damm@opensource.se>
+Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+Cc: Ben Dooks <ben-linux@fluff.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/tmio_mmc.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c |   10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
 
-diff -puN drivers/mmc/host/tmio_mmc.c~tmio_mmc-allow-2-byte-requests-in-4-bit-mode drivers/mmc/host/tmio_mmc.c
---- a/drivers/mmc/host/tmio_mmc.c~tmio_mmc-allow-2-byte-requests-in-4-bit-mode
-+++ a/drivers/mmc/host/tmio_mmc.c
-@@ -660,8 +660,8 @@ static int tmio_mmc_start_data(struct tm
- 	pr_debug("setup data transfer: blocksize %08x  nr_blocks %d\n",
- 		 data->blksz, data->blocks);
+diff -puN drivers/mmc/host/sdhci-s3c.c~sdhci-s3c-add-sdhci_quirk_data_timeout_uses_sdclk-quirk drivers/mmc/host/sdhci-s3c.c
+--- a/drivers/mmc/host/sdhci-s3c.c~sdhci-s3c-add-sdhci_quirk_data_timeout_uses_sdclk-quirk
++++ a/drivers/mmc/host/sdhci-s3c.c
+@@ -110,11 +110,6 @@ static unsigned int sdhci_s3c_get_max_cl
+ 	return max;
+ }
  
--	/* Hardware cannot perform 1 and 2 byte requests in 4 bit mode */
--	if (data->blksz < 4 && host->mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
-+	/* Hardware cannot perform 1 byte requests in 4 bit mode */
-+	if (data->blksz < 2 && host->mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
- 		pr_err("%s: %d byte block unsupported in 4 bit mode\n",
- 		       mmc_hostname(host->mmc), data->blksz);
- 		return -EINVAL;
+-static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *host)
+-{
+-	return sdhci_s3c_get_max_clk(host) / 1000000;
+-}
+-
+ /**
+  * sdhci_s3c_consider_clock - consider one the bus clocks for current setting
+  * @ourhost: Our SDHCI instance.
+@@ -188,7 +183,6 @@ static void sdhci_s3c_set_clock(struct s
+ 
+ 		ourhost->cur_clk = best_src;
+ 		host->max_clk = clk_get_rate(clk);
+-		host->timeout_clk = sdhci_s3c_get_timeout_clk(host);
+ 
+ 		ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
+ 		ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;
+@@ -211,7 +205,6 @@ static void sdhci_s3c_set_clock(struct s
+ 
+ static struct sdhci_ops sdhci_s3c_ops = {
+ 	.get_max_clock		= sdhci_s3c_get_max_clk,
+-	.get_timeout_clock	= sdhci_s3c_get_timeout_clk,
+ 	.set_clock		= sdhci_s3c_set_clock,
+ };
+ 
+@@ -335,6 +328,9 @@ static int __devinit sdhci_s3c_probe(str
+ 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
+ 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+ 
++	/* HSMMC on Samsung SoCs uses SDCLK as timeout clock */
++	host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(dev, "sdhci_add_host() failed\n");
 _
 
-Patches currently in -mm which might be from yusuke.goda.sx@renesas.com are
+Patches currently in -mm which might be from hyuk1.lee@samsung.com are
 
-tmio_mmc-prevent-unexpected-status-clear.patch
-tmio_mmc-allow-2-byte-requests-in-4-bit-mode.patch
+linux-next.patch
+sdhci-s3c-add-sdhci_quirk_data_timeout_uses_sdclk-quirk.patch
 
