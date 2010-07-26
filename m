@@ -1,56 +1,116 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH] mmc: add device class attribute for ext_csd
-Date: Mon, 26 Jul 2010 20:30:14 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E4177BD@dbde02.ent.ti.com>
-References: <20100726100956.GA17996@july> <4C4D6BF9.1040704@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E4176E6@dbde02.ent.ti.com>
- <4C4D82C8.3040307@nokia.com>
+From: "Gabay, Benzy" <benzyg-l0cyMroinI0@public.gmane.org>
+Subject: RE: [PATCH v2 19/20] omap: zoom: keep the MMC3 wl1271 device
+ powered 	off
+Date: Mon, 26 Jul 2010 13:33:10 -0500
+Message-ID: <676FD6AA0F002F49B89E70F0C5EFD22C131128FA47@dlee04.ent.ti.com>
+References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
+ 	<1279733634-21974-20-git-send-email-ohad@wizery.com>
+ <676FD6AA0F002F49B89E70F0C5EFD22C1311192A47@dlee04.ent.ti.com>
+ <AANLkTim3RWv2-qi9UMg1imwKTJuh3GstdjMTxz64uOHf@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:46567 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751851Ab0GZPA7 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Jul 2010 11:00:59 -0400
-In-Reply-To: <4C4D82C8.3040307@nokia.com>
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <AANLkTim3RWv2-qi9UMg1imwKTJuh3GstdjMTxz64uOHf-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Cc: "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, "Pandita, Vikram" <vikram.pandita-l0cyMroinI0@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-
+Ohad,
 
 > -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> Sent: Monday, July 26, 2010 6:13 PM
-> To: Ghorai, Sukumar
-> Cc: linux-mmc@vger.kernel.org; Andrew Morton
-> Subject: Re: [PATCH] mmc: add device class attribute for ext_csd
-> 
-> Ghorai, Sukumar wrote:
-> > All,
-> > EXT_CSD is 512byte information (read using CMD8) for the MMC (eMMC)
-> device.
-> > And for the latest and upcoming specification, ext_csd are much relevant
-> then past.
+> From: Ohad Ben-Cohen [mailto:ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org]
+> Sent: Thursday, July 22, 2010 6:18 PM
+> To: Gabay, Benzy
+> Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
+> omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org;
+> linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org; Chikkature Rajashekar, Madhusudhan; Luciano
+> Coelho; akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org; San Mehat; Roger Quadros; Tony
+> Lindgren; Nicolas Pitre; Pandita, Vikram; Kalle Valo
+> Subject: Re: [PATCH v2 19/20] omap: zoom: keep the MMC3 wl1271 device
+> powered off
+>=20
+> Hi Gever,
+>=20
+> On Wed, Jul 21, 2010 at 9:55 PM, Gabay, Benzy <benzyg-l0cyMroinI0@public.gmane.org> wrote:
+> > From: Ohad Ben-Cohen [mailto:ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org]
+> > Sent: Wednesday, July 21, 2010 12:34 PM
+> > To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linu=
+x-
+> omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org;
+> Chikkature Rajashekar, Madhusudhan; Luciano Coelho; akpm@linux-
+> foundation.org; San Mehat; Roger Quadros; Tony Lindgren; Nicolas Pitr=
+e;
+> Pandita, Vikram; Kalle Valo; Ohad Ben-Cohen
+> > Subject: [PATCH v2 19/20] omap: zoom: keep the MMC3 wl1271 device
+> powered off
 > >
-> > So please let me know your idea to add and get the same ext_csd as MMC
-> device attribute. This is the same way currently available for csd, cid,
-> src, etc.
-> > (# cat /sys/class/mmc_host/mmc1/mmc1\:0001/ext_csd)
-> 
-> Some of the values in Extended CSD can change so storing
-> it could cause incorrect values to be reported.
-[Ghorai] I was thinking to get the original value as reference, such that we know that host is capable for maximum negotiation, like 8-bit, DDR mode, voltage, etc.
-1. Is there any other way to get the original value supported by card?
-2. If yes, is it worth full to do?
+> > Keep the MMC3 wl1271 WLAN device powered off until its
+> > SDIO function driver requests otherwise.
+> >
+> > Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+> > ---
+> > =A0arch/arm/mach-omap2/board-zoom-peripherals.c | =A0 =A01 +
+> > =A0arch/arm/mach-omap2/hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|=
+ =A0 =A03 +++
+> > =A0arch/arm/mach-omap2/hsmmc.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|=
+ =A0 =A01 +
+> > =A0arch/arm/plat-omap/include/plat/mmc.h =A0 =A0 =A0 =A0| =A0 =A03 =
++++
+> > =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0=
+ =A03 +++
+> > =A05 files changed, 11 insertions(+), 0 deletions(-)
+> >
+> > diff --git a/arch/arm/mach-omap2/board-zoom-peripherals.c
+> b/arch/arm/mach-omap2/board-zoom-peripherals.c
+> > index 3230801..3ab9125 100644
+> > --- a/arch/arm/mach-omap2/board-zoom-peripherals.c
+> > +++ b/arch/arm/mach-omap2/board-zoom-peripherals.c
+> > @@ -217,6 +217,7 @@ static struct omap2_hsmmc_info mmc[] __initdata=
+ =3D
+> {
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.gpio_wp =A0 =A0 =A0 =A0=3D -EINVAL,
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.gpio_cd =A0 =A0 =A0 =A0=3D -EINVAL,
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.ocr_mask =A0 =A0 =A0 =3D MMC_VDD_16=
+5_195,
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .dont_power_card =3D true,
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.priv_data =A0 =A0 =A0=3D &omap_zoom=
+_wlan_data,
+> > =A0 =A0 =A0 =A0},
+> > =A0 =A0 =A0 =A0{} =A0 =A0 =A0/* Terminator */
+> ...
+> > --
+> > 1.7.0.4
+> >
+> > [Benzy Gabay] small comment: Please make sure that all 127x related
+> changes are not bounded only to MMC3.
+> > On OMAP4 WLAN is used on MMC5.
+>=20
+>=20
+> The only place MMC3 is bound is in the board files (see code snippet
+> above), so that should be ok.
+>=20
+> I can probably split this patch to make this more obvious just by
+> reading the diffstat if you prefer.
 
-> Note that Extended CSD is available via debugfs
-> e.g. for device mmc0:0001 with debugfs mounted on /sys/kernel/debug
-> 
->     cat /sys/kernel/debug/mmc0/mmc0\:0001/ext_csd
-[Ghorai] Thanks. I got it.
 
-<<snip>>
+Yep. That will be great.
+
+Benzy
+
+
+>=20
+>=20
+> Thanks,
+> Ohad.
+>=20
+>=20
+> >
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireles=
+s" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
