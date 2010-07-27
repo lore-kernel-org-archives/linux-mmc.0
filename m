@@ -1,76 +1,38 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH] mmc: add device class attribute for ext_csd
-Date: Tue, 27 Jul 2010 10:51:30 +0300
-Message-ID: <4C4E9002.5020808@nokia.com>
-References: <20100726100956.GA17996@july> <4C4D6BF9.1040704@nokia.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030E4176E6@dbde02.ent.ti.com> <4C4D82C8.3040307@nokia.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030E4177BD@dbde02.ent.ti.com>
+From: Ian Molton <ian@mnementh.co.uk>
+Subject: Re: [PATCH] tmio_mmc: Allow 2 byte requests in 4-bit mode
+Date: Tue, 27 Jul 2010 08:57:40 +0100
+Message-ID: <AANLkTinCoSi4s1oNpxptqjA_HEf5Fk92=N_VYNnLR=wF@mail.gmail.com>
+References: <4C4555DA.40203@renesas.com> <AANLkTikVm-GWq6vun-AjqLJ1L7Y+s28CdDJqmCEX4+2R@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:28868 "EHLO
-	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752425Ab0G0Hvp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jul 2010 03:51:45 -0400
-In-Reply-To: <2A3DCF3DA181AD40BDE86A3150B27B6B030E4177BD@dbde02.ent.ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <AANLkTikVm-GWq6vun-AjqLJ1L7Y+s28CdDJqmCEX4+2R@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>, damm@opensource.se, sameo@linux.intel.com, Paul Mundt <lethal@linux-sh.org>, g.liakhovetski@gmx.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-Ghorai, Sukumar wrote:
-> 
->> -----Original Message-----
->> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
->> Sent: Monday, July 26, 2010 6:13 PM
->> To: Ghorai, Sukumar
->> Cc: linux-mmc@vger.kernel.org; Andrew Morton
->> Subject: Re: [PATCH] mmc: add device class attribute for ext_csd
+This change needs to be modified to test what hardware is present.
+this wont work on my hardware TTBOMK.
+
+-- 
+Ian Molton
+Linux, Automotive, and other hacking:
+http://www.mnementh.co.uk/
+
+
+
+On 23 July 2010 12:05, Magnus Damm <magnus.damm@gmail.com> wrote:
+> 2010/7/20 Yusuke Goda <yusuke.goda.sx@renesas.com>:
+>> Adjust the tmio_mmc block size check to accept 2-byte requests in 4-bit mode.
+>> Tested with the SDHI hardware block included in sh7724.
 >>
->> Ghorai, Sukumar wrote:
->>> All,
->>> EXT_CSD is 512byte information (read using CMD8) for the MMC (eMMC)
->> device.
->>> And for the latest and upcoming specification, ext_csd are much relevant
->> then past.
->>> So please let me know your idea to add and get the same ext_csd as MMC
->> device attribute. This is the same way currently available for csd, cid,
->> src, etc.
->>> (# cat /sys/class/mmc_host/mmc1/mmc1\:0001/ext_csd)
->> Some of the values in Extended CSD can change so storing
->> it could cause incorrect values to be reported.
-> [Ghorai] I was thinking to get the original value as reference, such that we know that host is capable for maximum negotiation, like 8-bit, DDR mode, voltage, etc.
-> 1. Is there any other way to get the original value supported by card?
-> 2. If yes, is it worth full to do?
-
-If it is for debugging, would a debug prints do instead e.g.
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 89f7a25..cba87b0 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -249,6 +249,9 @@ static int mmc_read_ext_csd(struct mmc_card *card)
-                                        1 << ext_csd[EXT_CSD_S_A_TIMEOUT];
-        }
- 
-+       pr_debug("%s: initial ext_csd bus width code %02x",
-+                mmc_hostname(host), ext_csd[EXT_CSD_BUS_WIDTH]);
-+
- out:
-        kfree(ext_csd);
- 
-
-
-> 
->> Note that Extended CSD is available via debugfs
->> e.g. for device mmc0:0001 with debugfs mounted on /sys/kernel/debug
->>
->>     cat /sys/kernel/debug/mmc0/mmc0\:0001/ext_csd
-> [Ghorai] Thanks. I got it.
-> 
-> <<snip>>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+>> Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
+>
+> With this patch applied I can use SDIO cards in polling mode with the
+> tmio-mmc driver. Tested with the SDHI hardware block on sh7372 using
+> the b43 driver and BCM4318 hardware and the unfortunately out-of-tree
+> AR6002 "android" driver.
+>
+> Acked-by: Magnus Damm <damm@opensource.se>
+>
