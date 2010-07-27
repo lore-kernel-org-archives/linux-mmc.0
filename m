@@ -1,96 +1,134 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH] mmc: add device class attribute for ext_csd
-Date: Tue, 27 Jul 2010 16:20:13 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B030E417C54@dbde02.ent.ti.com>
-References: <20100726100956.GA17996@july> <4C4D6BF9.1040704@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E4176E6@dbde02.ent.ti.com>
- <4C4D82C8.3040307@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E4177BD@dbde02.ent.ti.com>
- <4C4E9002.5020808@nokia.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH v3] Samsung: sdhci-s3c: add support for new card detection
+ methods
+Date: Tue, 27 Jul 2010 20:27:55 +0900
+Message-ID: <000801cb2d7e$c572b7b0$50582710$%kim@samsung.com>
+References: <1279181721-23333-1-git-send-email-m.szyprowski@samsung.com>
+ <20100715133954.7fcb797a.akpm@linux-foundation.org>
+ <011401cb24af$8eb2cb70$ac186250$%szyprowski@samsung.com>
+ <20100721161133.5c3285d3.akpm@linux-foundation.org>
+ <000501cb2977$7d6cf210$7846d630$%szyprowski@samsung.com>
+ <20100726135708.57048800.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:47134 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755664Ab0G0Kux convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jul 2010 06:50:53 -0400
-In-Reply-To: <4C4E9002.5020808@nokia.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <20100726135708.57048800.akpm@linux-foundation.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Andrew Morton' <akpm@linux-foundation.org>, 'Marek Szyprowski' <m.szyprowski@samsung.com>
+Cc: linux-mmc@vger.kernel.org, kyungmin.park@samsung.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-
-
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> Sent: Tuesday, July 27, 2010 1:22 PM
-> To: Ghorai, Sukumar
-> Cc: linux-mmc@vger.kernel.org; Andrew Morton
-> Subject: Re: [PATCH] mmc: add device class attribute for ext_csd
+Andrew Morton wrote:
 > 
-> Ghorai, Sukumar wrote:
+> On Thu, 22 Jul 2010 10:25:44 +0200
+> Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+> 
+> > Hello,
 > >
-> >> -----Original Message-----
-> >> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> >> Sent: Monday, July 26, 2010 6:13 PM
-> >> To: Ghorai, Sukumar
-> >> Cc: linux-mmc@vger.kernel.org; Andrew Morton
-> >> Subject: Re: [PATCH] mmc: add device class attribute for ext_csd
-> >>
-> >> Ghorai, Sukumar wrote:
-> >>> All,
-> >>> EXT_CSD is 512byte information (read using CMD8) for the MMC (eMMC)
-> >> device.
-> >>> And for the latest and upcoming specification, ext_csd are much
-> relevant
-> >> then past.
-> >>> So please let me know your idea to add and get the same ext_csd as MMC
-> >> device attribute. This is the same way currently available for csd, cid,
-> >> src, etc.
-> >>> (# cat /sys/class/mmc_host/mmc1/mmc1\:0001/ext_csd)
-> >> Some of the values in Extended CSD can change so storing
-> >> it could cause incorrect values to be reported.
-> > [Ghorai] I was thinking to get the original value as reference, such
-> that we know that host is capable for maximum negotiation, like 8-bit, DDR
-> mode, voltage, etc.
-> > 1. Is there any other way to get the original value supported by card?
-> > 2. If yes, is it worth full to do?
+> > On Thursday, July 22, 2010 1:12 AM
+> >
+> > > On Fri, 16 Jul 2010 08:24:26 +0200
+> > > Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+> > >
+> > > > > >  arch/arm/mach-s3c64xx/setup-sdhci-gpio.c   |   14 +++++++++---
+> > > > > >  arch/arm/mach-s5pc100/setup-sdhci-gpio.c   |   21
+> ++++++++++++++----
+> > > -
+> > > > > >  arch/arm/mach-s5pv210/setup-sdhci-gpio.c   |   22
+> +++++++++++++++---
+> > > --
+> > > > > >  arch/arm/plat-samsung/dev-hsmmc.c          |    5 ++++
+> > > > > >  arch/arm/plat-samsung/dev-hsmmc1.c         |    5 ++++
+> > > > > >  arch/arm/plat-samsung/dev-hsmmc2.c         |    5 ++++
+> > > > > >  arch/arm/plat-samsung/dev-hsmmc3.c         |    5 ++++
+> > > > > >  arch/arm/plat-samsung/include/plat/sdhci.h |   29
+> > > > > ++++++++++++++++++++++++++++
+> > > > > >  8 files changed, 90 insertions(+), 16 deletions(-)
+> > > > >
+> > > > > This is quite confusing.  You've already sent a patch called
+> > > > > "sdhci-s3c: add support for new card detection methods".  It had
+the
+> > > > > same changelog as this patch and the same title, but the two
+patches
+> > > > > are utterly different!
+> > > >
+> > > > The real patch has been split into two for easier merging: 1. the
+driver
+> > > > part and 2. samsung platform related part. The part which patch
+belongs
+> > > > to is indicated in the last line of the change log.
+> > > >
+> > > > I'm really confused how to submit properly a patch that requires
+changes
+> > > > to both the driver (which is merged by the proper driver
+maintainer's
+> > > > sub-tree) and the platform (which should go through platform
+maintainer's
+> > > > tree).
+> > >
+> > > Make the relationship very very clear in the changelog.  Send both
+> > > patches to both maintainers.  Ask that one of them merge both patches
+> > > and that the other ack both patches.
+> >
+> > Ok. Thanks for the hint.
+> >
+> > > Anyway, I've forgotten what's happening here.  I appear to be sitting
+on
+> > >
+> > > sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch
+> >
+> > This one is independent from the card-detection patches and can be
+applied
+> > directly onto linux-next kernel tree.
+> >
+> > > and
+> > > sdhci-s3c-add-support-for-new-card-detection-methods.patch
+> > >
+> > > the latter of which is below.
+> > >
+> > > Am I missing something?  Is
+> > > sdhci-s3c-add-support-for-new-card-detection-methods.patch up to date?
+> > >
+> >
+> > Ok, I will repost these 2 patches under new names to avoid further
+> > confusion. Currently there exists two
+> > "sdhci-s3c-add-support-for-new-card-detection-methods.patch", both of
+them
+> > are required.
 > 
-> If it is for debugging, would a debug prints do instead e.g.
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 89f7a25..cba87b0 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -249,6 +249,9 @@ static int mmc_read_ext_csd(struct mmc_card *card)
->                                         1 << ext_csd[EXT_CSD_S_A_TIMEOUT];
->         }
-> 
-> +       pr_debug("%s: initial ext_csd bus width code %02x",
-> +                mmc_hostname(host), ext_csd[EXT_CSD_BUS_WIDTH]);
-> +
-[Ghorai] yes, we need this kind messages in some format.
-So let me add some more important debug print message(s) from ext_csd and submit as a patch.
+> So the second(?) patch "[PATCH v4] Samsung: add new card detection
+> methods in s3c-sdhci driver (platform part)" has already been applied
+> to linux-next by Kukjin Kim, along with modifications which we have not
+> been shown.
 
->  out:
->         kfree(ext_csd);
+Yeah, I applied it in my tree which can be merged linux-next.
 > 
+> But the first patch
+> (sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch)
+> has not been applied to linux-next by anoyne and the third patch
+> "[PATCH v4] sdhci-s3c: add support for new card detection methods
+> (driver part)" has not been applied either.
 > 
-> 
-> >
-> >> Note that Extended CSD is available via debugfs
-> >> e.g. for device mmc0:0001 with debugfs mounted on /sys/kernel/debug
-> >>
-> >>     cat /sys/kernel/debug/mmc0/mmc0\:0001/ext_csd
-> > [Ghorai] Thanks. I got it.
-> >
-> > <<snip>>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
+> This is a complete mess.  What happens if I apply and merge
+> sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch
+> and
+> sdhci-s3c-add-support-for-new-card-detection-methods-driver-part.patch?
+> I have no idea.
 
+Hmm...
+
+> 
+> I think I'll just drop all of it.  Please sort all of this out then let
+> me know what you want me to do.
+
+If any updates, please let me know.
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
