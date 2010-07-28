@@ -1,48 +1,113 @@
-From: Peppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: RE: [PATCH] mmc: add the MMC/SD/SDIO Arasan host controller
-Date: Wed, 28 Jul 2010 11:28:48 +0200
-Message-ID: <107012446AC13D4C90B85672EAF5FB0E9C2E08DF25@SAFEX1MAIL3.st.com>
-References: <1280299127-3075-1-git-send-email-peppe.cavallaro@st.com>
- <4C4FECC8.9060101@csr.com>
+From: Zang Roy-R61911 <r61911@freescale.com>
+Subject: RE: [PATCH 3/3] mmc: Add ESDHC weird register workaround
+Date: Wed, 28 Jul 2010 17:43:00 +0800
+Message-ID: <83024545B35D6445A690EFD603E7869A0512E0@zch01exm23.fsl.freescale.net>
+References: <1280296461-17077-1-git-send-email-tie-fei.zang@freescale.com>
+	<20100728080312.GA16994@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog112.obsmtp.com ([207.126.144.133]:40170 "EHLO
-	eu1sys200aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754465Ab0G1J30 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Jul 2010 05:29:26 -0400
-In-Reply-To: <4C4FECC8.9060101@csr.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+Content-Class: urn:content-classes:message
+In-Reply-To: <20100728080312.GA16994@oksana.dev.rtsoft.ru>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Sender: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: linuxppc-dev@ozlabs.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Vrabel <david.vrabel@csr.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi David,
+ 
 
 > -----Original Message-----
-> From: David Vrabel [mailto:david.vrabel@csr.com]
-> Sent: Wednesday, July 28, 2010 10:40 AM
-> To: Peppe CAVALLARO
-> Cc: linux-mmc@vger.kernel.org
-> Subject: Re: [PATCH] mmc: add the MMC/SD/SDIO Arasan host controller
+> From: Anton Vorontsov [mailto:cbouatmailru@gmail.com] 
+> Sent: Wednesday, July 28, 2010 16:03 PM
+> To: Zang Roy-R61911
+> Cc: linux-mmc-approval@vger.kernel.org; linuxppc-dev@ozlabs.org
+> Subject: Re: [PATCH 3/3] mmc: Add ESDHC weird register workaround
 > 
-> Giuseppe CAVALLARO wrote:
-> > This patch adds the MMC/SD/SDIO Arasan host controller.
-> > Advanced DMA, Single DMA and PIO modes are supported.
-> > The former is the default.
+> On Wed, Jul 28, 2010 at 01:54:21PM +0800, Roy Zang wrote:
+> > P4080 ESDHC controller induces weird register setting.
+> > This patch adds the workaround to correct the weird 
+> register setting.
+> > 
+> > Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
+> > ---
+> >  drivers/mmc/host/sdhci-of-core.c |    5 +++++
+> >  drivers/mmc/host/sdhci.c         |   13 +++++++++++++
+> >  drivers/mmc/host/sdhci.h         |    2 ++
+> >  3 files changed, 20 insertions(+), 0 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-of-core.c 
+> b/drivers/mmc/host/sdhci-of-core.c
+> > index 0c30242..1b6945a 100644
+> > --- a/drivers/mmc/host/sdhci-of-core.c
+> > +++ b/drivers/mmc/host/sdhci-of-core.c
+> > @@ -164,6 +164,11 @@ static int __devinit 
+> sdhci_of_probe(struct of_device *ofdev,
+> >  	if (sdhci_of_wp_inverted(np))
+> >  		host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
+> >  
+> > +	if (of_device_is_compatible(np, "fsl,p4080-esdhc")) {
+> > +		host->quirks |= SDHCI_QUIRK_QORIQ_REG_WEIRD;
+> > +		host->quirks &= ~SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
 > 
-> The Arasan IP is a Standard Host Controller so you should look at using
-> the existing sdhci driver.  The sdhci-s3c driver provides an an example
-> of how to do this.
-
-So I've to move part of my work to another file (e.g. sdhci-stm) obviously reworking all in order to use the existent code (sdhci core etc).
-I'll post a new patch asap
-
-Regards,
-Peppe
+> You do not mention this change in the patch description, why?
+This is not needed any more. Will be removed.
+> 
+> > +	}
+> > +
+> >  	clk = of_get_property(np, "clock-frequency", &size);
+> >  	if (clk && size == sizeof(*clk) && *clk)
+> >  		of_host->clock = *clk;
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 1424d08..b5b3627 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -788,6 +788,15 @@ static void sdhci_prepare_data(struct 
+> sdhci_host *host, struct mmc_data *data)
+> >  		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> >  	}
+> >  
+> > +	/* The default value of DMAS bits of Protocol Control 
+> Register is not
+> > +	 * correct. clear these two bits to use simple DMA */
+> > +#define  ESDHCI_CTRL_DMAS_MASK		0xFFFFFCFF
+> > +	if (host->quirks & SDHCI_QUIRK_QORIQ_REG_WEIRD) {
+> > +		ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
+> > +		ctrl = ctrl & ESDHCI_CTRL_DMAS_MASK;
+> > +		sdhci_writel(host, ctrl, SDHCI_HOST_CONTROL);
+> > +	}
+> 
+> You should implement register quirks via SDHCI IO accessors.
+What does you mean "SDHCI IO accessors?
+It makes more sense to define something like:
+SDHCI_QUIRK_QORIQ_PROCTL_WEIRD.
+Any comment?
 
 > 
-> David
+> See esdhc_writew() for example.
+> 
+> >  	if (!(host->flags & SDHCI_REQ_USE_DMA)) {
+> >  		int flags;
+> >  
+> > @@ -1699,6 +1708,10 @@ int sdhci_add_host(struct sdhci_host *host)
+> >  
+> >  	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> >  
+> > +	 /* Workaround for P4080 host controller capabilities */
+> > +	if (host->quirks & SDHCI_QUIRK_QORIQ_REG_WEIRD)
+> > +		caps &= ~(SDHCI_CAN_VDD_180 | SDHCI_CAN_VDD_330);
+> 
+> Ditto. Make a quirk for cap register. Or implement
+> SDHCI_QUIRK_NO_VDD_180 and SDHCI_QUIRK_NO_VDD_300 quirks
+> instead.
+Second proposal more makes sense to me.
+Thanks.
+Roy
