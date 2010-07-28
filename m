@@ -1,56 +1,52 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 4/4] sdhci-s3c: add regulator support
-Date: Wed, 28 Jul 2010 10:39:55 -0700
-Message-ID: <20100728173954.GD22544@opensource.wolfsonmicro.com>
-References: <1280326797-15792-1-git-send-email-m.szyprowski@samsung.com>
- <1280326797-15792-5-git-send-email-m.szyprowski@samsung.com>
+From: Vitaly Wool <vitalywool@gmail.com>
+Subject: Re: [PATCH v2 03/20] mmc: support embedded data field in mmc_host
+Date: Wed, 28 Jul 2010 21:47:41 +0200
+Message-ID: <AANLkTimzA_JJ-byTDWznbL3YzeJ8LAP4M50onf2_3fBF@mail.gmail.com>
+References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
+	<1279733634-21974-4-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:45697 "EHLO
-	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753352Ab0G1Rjm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Jul 2010 13:39:42 -0400
-Content-Disposition: inline
-In-Reply-To: <1280326797-15792-5-git-send-email-m.szyprowski@samsung.com>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:38532 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750749Ab0G1Trn convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Jul 2010 15:47:43 -0400
+In-Reply-To: <1279733634-21974-4-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, linux@arm.linux.org.uk, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, Roger Quadros <roger.quadros@nokia.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, Jul 28, 2010 at 04:19:57PM +0200, Marek Szyprowski wrote:
+Hi Ohad,
 
->  static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t pm)
->  {
-> +	int ret = 0;
->  	struct sdhci_host *host = platform_get_drvdata(dev);
-> +	struct sdhci_s3c *sc = sdhci_priv(host);
->  
->  	sdhci_suspend_host(host, pm);
-> -	return 0;
+On Wed, Jul 21, 2010 at 7:33 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote=
+:
+> Add support to set/get mmc_host private embedded
+> data.
+>
+> This is needed to allow software to dynamically
+> create (and remove) SDIO functions which represents
+> embedded SDIO devices.
+>
+<snip>
+> @@ -209,6 +209,8 @@ struct mmc_host {
+> =A0 =A0 =A0 =A0struct led_trigger =A0 =A0 =A0*led; =A0 =A0 =A0 =A0 =A0=
+ /* activity led */
+> =A0#endif
+>
+> + =A0 =A0 =A0 void =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*embedded_d=
+ata;
 > +
-> +	if (sc->vmmc)
-> +		ret = regulator_disable(sc->vmmc);
-> +
 
-So, on suspend you disable the regulator...
+To my understanding, this data doesn't belong to mmc_host. It's not a
+host data at all. E. g. imagine a GPIO IRQ for some SDIO chip -- it's
+totally unrelated to host.
 
-> +	struct sdhci_s3c *sc = sdhci_priv(host);
-> +
-> +	if (sc->vmmc) {
-> +		int ret = regulator_disable(sc->vmmc);
-> +		if (ret)
-> +			return ret;
+I think a cleaner way would be to introduce something similar to what
+we have for SPI, e. g. struct sdio_board_info. This board info will
+contain platform-specific stuff and vendor id/chip id for each onboard
+SDIO device. Then the SDIO core will pick up the appropriate data
+basing on vendor id/chip id.
 
-...and on resume you disable it again.  I'm surprised this works
-properly after resume, at the very least the core is going to get
-confused about the reference counts I'd expect.
-
-I suspect this is for something we need to do better in the regulator
-API - restoring the state of the regulators after a resume if the
-hardware changes them.  A lot of regulators just do this in hardware so
-we didn't need to worry about it previously.
-
-> +		mdelay(2);
-
-This could do with some sort of comment.
+~Vitaly
