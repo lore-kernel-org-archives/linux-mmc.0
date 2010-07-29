@@ -1,148 +1,149 @@
 From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: RE: [PATCH 4/4] sdhci-s3c: add regulator support
-Date: Thu, 29 Jul 2010 07:28:04 +0200
-Message-ID: <00af01cb2ede$d54530d0$7fcf9270$%szyprowski@samsung.com>
+Subject: RE: [PATCHv2 1/4] sdhci-s3c: add support for the non standard minimal
+ clock value
+Date: Thu, 29 Jul 2010 07:30:36 +0200
+Message-ID: <00b001cb2edf$33d6a200$9b83e600$%szyprowski@samsung.com>
 References: <1280326797-15792-1-git-send-email-m.szyprowski@samsung.com>
- <1280326797-15792-5-git-send-email-m.szyprowski@samsung.com>
- <4C504326.30708@gmail.com>
+ <1280326797-15792-2-git-send-email-m.szyprowski@samsung.com>
+ <4C505F44.20100@simtec.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <4C504326.30708@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:30641 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752168Ab0G2Fc7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2010 01:32:59 -0400
+In-reply-to: <4C505F44.20100@simtec.co.uk>
 Content-language: pl
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Maurus Cuelenaere' <mcuelenaere@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org, broonie@opensource.wolfsonmicro.com
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Ben Dooks' <ben@simtec.co.uk>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kgene.kim@samsung.com, broonie@opensource.wolfsonmicro.com, kyungmin.park@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org
 
 Hello,
 
-On Wednesday, July 28, 2010 4:48 PM Maurus Cuelenaere wrote:
+On Wednesday, July 28, 2010 6:48 PM Ben Dooks wrote:
 
-
-> -----Original Message-----
-> From: [mailto:mcuelenaere@gmail.com]
-> Sent: 
-> To: Marek Szyprowski
-> Cc: linux-mmc@vger.kernel.org; linux-samsung-soc@vger.kernel.org; linux-
-> arm-kernel@lists.infradead.org; kyungmin.park@samsung.com;
-> kgene.kim@samsung.com; ben-linux@fluff.org; akpm@linux-foundation.org;
-> broonie@opensource.wolfsonmicro.com
-> Subject: Re: [PATCH 4/4] sdhci-s3c: add regulator support
-> 
->  Op 28-07-10 16:19, Marek Szyprowski schreef:
-> > This patch adds support for regulator API to sdhci-s3c driver. Regulators
-> > can be used to disable power in suspended state to reduce dissipated
-> > energy.
-> 
-> I'm not sure about this, when I would try to do this I'd look at
-> implementing
-> this in the sdhci driver itself instead of a subdriver of it.
-
-Well, if you think that sdhci driver is better place for this I can move all
-my changes to the main driver.
-
+> On 28/07/10 15:19, Marek Szyprowski wrote:
+> > S3C SDHCI host controller can change the source for generating mmc clock.
+> > By default host bus clock is used, what causes some problems on machines
+> > with 133MHz bus, because the SDHCI divider cannot be as high get proper
+> > clock value for identification mode. This is not a problem for the
+> > controller, because it can generate lower frequencies from other clock
+> > sources. This patch adds a new quirk to SDHCI driver to calculate the
+> > minimal supported clock frequency.
+> >
+> > This fixes the flood of the following warnings on Samsung S5PV210 SoCs:
+> > mmc0: Minimum clock frequency too high for identification mode
+> >
 > > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 > > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > > ---
-> >  drivers/mmc/host/sdhci-s3c.c |   30 +++++++++++++++++++++++++++++-
-> >  1 files changed, 29 insertions(+), 1 deletions(-)
 > >
+> > Changes since V1:
+> > - rebased onto latest -mm kernel tree
+> >
+> > ---
+> >  drivers/mmc/host/sdhci-of-esdhc.c |    1 +
+> >  drivers/mmc/host/sdhci-s3c.c      |   29 +++++++++++++++++++++++++++++
+> >  drivers/mmc/host/sdhci.c          |    2 +-
+> >  drivers/mmc/host/sdhci.h          |    2 ++
+> >  4 files changed, 33 insertions(+), 1 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-
+> of-esdhc.c
+> > index e9f99fe..763b364 100644
+> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> > @@ -124,6 +124,7 @@ struct sdhci_of_data sdhci_esdhc = {
+> >  		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+> >  		  SDHCI_QUIRK_NO_BUSY_IRQ |
+> >  		  SDHCI_QUIRK_NONSTANDARD_CLOCK |
+> > +		  SDHCI_QUIRK_NONSTANDARD_MINCLOCK |
+> >  		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> >  		  SDHCI_QUIRK_PIO_NEEDS_DELAY |
+> >  		  SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET |
 > > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> > index 606e695..b9d46a5 100644
+> > index d7058ee..5218f2b 100644
 > > --- a/drivers/mmc/host/sdhci-s3c.c
 > > +++ b/drivers/mmc/host/sdhci-s3c.c
-> > @@ -19,6 +19,7 @@
-> >  #include <linux/clk.h>
-> >  #include <linux/io.h>
-> >  #include <linux/gpio.h>
-> > +#include <linux/regulator/consumer.h>
-> >
-> >  #include <linux/mmc/host.h>
-> >
-> > @@ -50,6 +51,7 @@ struct sdhci_s3c {
-> >
-> >  	struct clk		*clk_io;
-> >  	struct clk		*clk_bus[MAX_BUS_CLK];
-> > +	struct regulator	*vmmc;
-> >  };
-> >
-> >  static inline struct sdhci_s3c *to_s3c(struct sdhci_host *host)
-> > @@ -309,6 +311,13 @@ static int __devinit sdhci_s3c_probe(struct
-> platform_device *pdev)
-> >
-> >  	platform_set_drvdata(pdev, host);
-> >
-> > +	sc->vmmc = regulator_get(dev, "vmmc");
-> > +	if (IS_ERR(sc->vmmc)) {
-> > +		dev_warn(dev, "no vmmc regulator found\n");
-> > +		sc->vmmc = NULL;
-> > +	} else
-> > +		regulator_enable(sc->vmmc);
-> > +
-> >  	sc->clk_io = clk_get(dev, "hsmmc");
-> >  	if (IS_ERR(sc->clk_io)) {
-> >  		dev_err(dev, "failed to get io clock\n");
-> > @@ -482,6 +491,11 @@ static int __devexit sdhci_s3c_remove(struct
-> platform_device *pdev)
-> >  	clk_disable(sc->clk_io);
-> >  	clk_put(sc->clk_io);
-> >
-> > +	if (sc->vmmc) {
-> > +		regulator_disable(sc->vmmc);
-> > +		regulator_put(sc->vmmc);
-> > +	}
-> > +
-> >  	iounmap(host->ioaddr);
-> >  	release_resource(sc->ioarea);
-> >  	kfree(sc->ioarea);
-> > @@ -496,15 +510,29 @@ static int __devexit sdhci_s3c_remove(struct
-> platform_device *pdev)
-> >
-> >  static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t
-> pm)
-> >  {
-> > +	int ret = 0;
-> >  	struct sdhci_host *host = platform_get_drvdata(dev);
-> > +	struct sdhci_s3c *sc = sdhci_priv(host);
-> >
-> >  	sdhci_suspend_host(host, pm);
-> > -	return 0;
-> > +
-> > +	if (sc->vmmc)
-> > +		ret = regulator_disable(sc->vmmc);
-> > +
-> > +	return ret;
+> > @@ -203,9 +203,36 @@ static void sdhci_s3c_set_clock(struct sdhci_host
+> *host, unsigned int clock)
+> >  	}
 > >  }
 > >
-> >  static int sdhci_s3c_resume(struct platform_device *dev)
-> >  {
-> >  	struct sdhci_host *host = platform_get_drvdata(dev);
-> > +	struct sdhci_s3c *sc = sdhci_priv(host);
+> > +/**
+> > + * sdhci_s3c_get_min_clock - callback to get minimal supported clock
+> value
+> > + * @host: The SDHCI host being queried
+> > + *
+> > + * To init mmc host properly a minimal clock value is needed. For high
+> system
+> > + * bus clock's values the standard formula gives values out of allowed
+> range.
+> > + * The clock still can be set to lower values, if clock source other
+> then
+> > + * system bus is selected.
+> > +*/
+> > +static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
+> > +{
+> > +	struct sdhci_s3c *ourhost = to_s3c(host);
+> > +	unsigned int delta, min = UINT_MAX;
+> > +	int src;
 > > +
-> > +	if (sc->vmmc) {
-> > +		int ret = regulator_disable(sc->vmmc);
-
-Hmm, I was in a real hurry if I missed this. Should be regulator_enable()
-of course. Looks that I confused patches and posted an older version...
-
-> > +		if (ret)
-> > +			return ret;
-> > +		mdelay(2);
-> 
-> Shouldn't these delays be handled in the regulator framework itself?
-
-This is just a left-over from an older version, should be definitely 
-removed. Sorry for the confusion.
- 
+> > +	for (src = 0; src < MAX_BUS_CLK; src++) {
+> > +		delta = sdhci_s3c_consider_clock(ourhost, src, 0);
+> > +		if (delta == UINT_MAX)
+> > +			continue;
+> > +		/* delta is a negative value in this case */
+> > +		if (-delta < min)
+> > +			min = -delta;
 > > +	}
+> > +	return min;
+> > +}
+> > +
+> >  static struct sdhci_ops sdhci_s3c_ops = {
+> >  	.get_max_clock		= sdhci_s3c_get_max_clk,
+> >  	.set_clock		= sdhci_s3c_set_clock,
+> > +	.get_min_clock		= sdhci_s3c_get_min_clock,
+> >  };
 > >
-> >  	sdhci_resume_host(host);
-> >  	return 0;
+> >  static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+> > @@ -309,6 +336,8 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	host->quirks = 0;
+> >  	host->irq = irq;
+> >
+> > +	host->quirks |= SDHCI_QUIRK_NONSTANDARD_MINCLOCK;
+> > +
+> >  	/* Setup quirks for the controller */
+> >  	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
+> >
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 07b2695..682b285 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -1776,7 +1776,7 @@ int sdhci_add_host(struct sdhci_host *host)
+> >  	 * Set host parameters.
+> >  	 */
+> >  	mmc->ops = &sdhci_ops;
+> > -	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK &&
+> > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_MINCLOCK &&
+> >  			host->ops->get_min_clock)
+> >  		mmc->f_min = host->ops->get_min_clock(host);
+> 
+> We're begining to run out of quirk space, given these fields will
+> be initialised to NULL if not used, then why not just check for
+> the op being present?
 
+Ok, I can remove the quirk and just check if the op is present. However
+having a separate quirk makes the code easier to understand (quirk shows 
+that the particular implementation differs from the standard).
 
 Best regards
 --
 Marek Szyprowski
 Samsung Poland R&D Center
+
+
