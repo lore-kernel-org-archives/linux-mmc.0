@@ -1,50 +1,27 @@
-From: Vitaly Wool <vitalywool@gmail.com>
-Subject: Re: [PATCH v2 03/20] mmc: support embedded data field in mmc_host
-Date: Thu, 29 Jul 2010 18:16:19 +0200
-Message-ID: <AANLkTi=BUX59heXAW2Uf4wZo2dSS19Je54dkQ5u2YGAW@mail.gmail.com>
-References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-	<1279733634-21974-4-git-send-email-ohad@wizery.com>
-	<AANLkTimzA_JJ-byTDWznbL3YzeJ8LAP4M50onf2_3fBF@mail.gmail.com>
-	<AANLkTi=Oy8X1xMOwWL_cKBB1LWULT6=p+adUgB+AuSJS@mail.gmail.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCHv2 4/4] sdhci: add regulator support
+Date: Thu, 29 Jul 2010 10:21:29 -0700
+Message-ID: <20100729172128.GB24781@opensource.wolfsonmicro.com>
+References: <1280406875-31830-1-git-send-email-m.szyprowski@samsung.com>
+ <1280406875-31830-5-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=Oy8X1xMOwWL_cKBB1LWULT6=p+adUgB+AuSJS@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, linux@arm.linux.org.uk, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, Roger Quadros <roger.quadros@nokia.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1280406875-31830-5-git-send-email-m.szyprowski@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ohad,
+On Thu, Jul 29, 2010 at 02:34:35PM +0200, Marek Szyprowski wrote:
+> This patch adds support for regulator API to sdhci core driver. Regulators
+> can be used to disable power in suspended state to reduce dissipated
+> energy.
+> 
+> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-On Thu, Jul 29, 2010 at 8:00 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
->> To my understanding, this data doesn't belong to mmc_host. It's not a
->> host data at all. E. g. imagine a GPIO IRQ for some SDIO chip -- it's
->> totally unrelated to host.
->>
->> I think a cleaner way would be to introduce something similar to what
->> we have for SPI, e. g. struct sdio_board_info. This board info will
->> contain platform-specific stuff and vendor id/chip id for each onboard
->> SDIO device. Then the SDIO core will pick up the appropriate data
->> basing on vendor id/chip id.
->
-> Can you please elaborate some more about your proposal (specifically
-> where does this sdio_board_info get set and how do function drivers
-> access it) ?
->
-> If I understand you correctly, you suggest to have a global,
-> board-specific table of sdio_board_info structures, which would be
-> accessible to the SDIO core (through the host driver ?). When a new
-> SDIO device is found the core would search this table for the
-> appropriate sdio_board_info struct and make it accessible to the SDIO
-> function driver ?
+Looks good from a regulator point of view.
 
-Well, let's look at how it's implemented for SPI. There is the
-function spi_register_board_info in the SPI core which copies the
-board info into the local data structure (a linked list, actually).
-Whenever needed, the core walks through the list to find the
-appropriate board_info basing on some search key.
-
-I think this may be the way to go for SDIO as well.
-
-~Vitaly
+Acked-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
