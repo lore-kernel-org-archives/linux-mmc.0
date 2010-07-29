@@ -1,37 +1,37 @@
-From: Julien Boibessot <julien.boibessot@free.fr>
-Subject: Re: MX27 libertas_sdio SDIO Interrupts vs available bitrate
-Date: Thu, 29 Jul 2010 14:51:43 +0200
-Message-ID: <4C51795F.8000800@free.fr>
-References: <20100729124604.79f88553@speedy>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 02/12] mmci: fix multi block transfers
+Date: Thu, 29 Jul 2010 14:18:58 +0100
+Message-ID: <20100729131858.GB18923@n2100.arm.linux.org.uk>
+References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com> <1277198267-10860-2-git-send-email-rabin.vincent@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1-g21.free.fr ([212.27.42.1]:60903 "EHLO smtp1-g21.free.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753165Ab0G2Mvy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Jul 2010 08:51:54 -0400
-In-Reply-To: <20100729124604.79f88553@speedy>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:52146 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752083Ab0G2NTO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2010 09:19:14 -0400
+Content-Disposition: inline
+In-Reply-To: <1277198267-10860-2-git-send-email-rabin.vincent@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Feuersinger <andreas.feuersinger@spintower.eu>
-Cc: libertas-dev@lists.infradead.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
+To: Rabin Vincent <rabin.vincent@stericsson.com>
+Cc: linux-arm-kernel@lists.infradead.org, STEricsson_nomadik_linux@list.st.com, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
 
-Hi Andreas,
+On Tue, Jun 22, 2010 at 02:47:37PM +0530, Rabin Vincent wrote:
+> Fix the data transfer size to allow multi block transfers to work.
+> 
+> Acked-by: Linus Walleij <linus.walleij@stericsson.com>
+> Signed-off-by: Rabin Vincent <rabin.vincent@stericsson.com>
 
-Andreas Feuersinger a =E9crit :
-> I'm trying to improve throughput of the Marvell 8686 sdio wlan module=
-=2E
-> Unfortunately I have to stick with kernel 2.6.22.
->
-> Everything works except for very bad datarate. So far the mxc_mmc
-> driver does not handle any SDIO interrupts. Could that be the reason
-> for the bad performance?=20
->  =20
-Definitly !
-(I had the same "problem" on my i.MX27 platform before using SDIO
-interrupts)
+The first two patches improve performance on Versatile, from 20.5s to
+read 1MB down to 18.5s - a 10% improvement.
 
-Regards,
-Julien
-http://www.armadeus.com
+I was worried that the first patch would add too much overhead, and
+cause the hardware to overrun - as the ARM version of these primecells
+does not have the capability to stop the clock when the FIFO fills
+up, any increase in IRQ latency to read the FIFO will result in an
+overrun.
+
+So this is good news.  I've applied the first three patches in this
+series, but we do need to sort out the card detect situation properly
+before continuing.
