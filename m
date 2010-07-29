@@ -1,113 +1,263 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 4/4] sdhci-s3c: add regulator support
-Date: Wed, 28 Jul 2010 08:41:49 -0700
-Message-ID: <3482ADFC-0FFB-47AE-B809-C88AC8B92C7F@opensource.wolfsonmicro.com>
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: RE: [PATCHv5 3/4] sdhci-s3c: add support for new card detection
+ methods (driver part)
+Date: Thu, 29 Jul 2010 07:22:45 +0200
+Message-ID: <00ae01cb2ede$17021160$45063420$%szyprowski@samsung.com>
 References: <1280326797-15792-1-git-send-email-m.szyprowski@samsung.com>
-	<1280326797-15792-5-git-send-email-m.szyprowski@samsung.com>
-	<4C504326.30708@gmail.com> (sfid-20100728_154813_432417_3ADF200E)
-Mime-Version: 1.0 (iPad Mail 7B405)
-Content-Type: multipart/mixed; boundary="===============0457660768=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <4C504326.30708@gmail.com> (sfid-20100728_154813_432417_3ADF200E)
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maurus Cuelenaere <mcuelenaere@gmail.com>
-Cc: "kgene.kim@samsung.com" <kgene.kim@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kyungmin.park@samsung.com" <kyungmin.park@samsung.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "ben-linux@fluff.org" <ben-linux@fluff.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Marek Szyprowski <m.szyprowski@samsung.com>
+ <1280326797-15792-4-git-send-email-m.szyprowski@samsung.com>
+ <4C50412C.3080703@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <4C50412C.3080703@gmail.com>
+Content-language: pl
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Maurus Cuelenaere' <mcuelenaere@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org, broonie@opensource.wolfsonmicro.com
 List-Id: linux-mmc@vger.kernel.org
 
+Hello,
 
---===============0457660768==
-Content-Type: multipart/alternative;
-	boundary=Apple-Mail-1--770684855
-Content-Transfer-Encoding: 7bit
+On Wednesday, July 28, 2010 4:40 PM Maurus Cuelenaere wrote:
 
+>  Op 28-07-10 16:19, Marek Szyprowski schreef:
+> > On some Samsung SoCs not all SDHCI controllers have card detect (CD)
+> > line. For some embedded designs it is not even needed, because ususally
+> > the device (like SDIO flash memory or wifi controller) is permanently
+> > wired to the controller. There are also systems which have a card detect
+> > line connected to some of the external interrupt lines or the presence
+> > of the card depends on some other actions (like enabling a power
+> > regulator).
+> >
+> > This patch adds support for all these cases. The following card
+> > detection methods are possible:
+> >
+> > 1. internal sdhci host card detect line
+> > 2. external event
+> > 3. external gpio interrupt
+> > 4. no card detect line, controller will poll for the card
+> > 5. no card detect line, card is permanently wired to the controller
+> > (once detected host won't poll it any more)
+> >
+> > By default, all existing code would use method #1, what is compatible
+> > with the previous version of the driver.
+> >
+> > In case of external event, two callbacks must be provided in platdata:
+> > ext_cd_init and ext_cd_cleanup. Both of them get a callback to a
+> > function that notifies the s3c-sdhci host contoller as their argument.
+> > That callback function should be called from the even dispatcher to let
+> > host notice the card insertion/removal.
+> >
+> > In case of external gpio interrupt, a gpio pin number must be provided
+> > in platdata (ext_cd_gpio parameter), as well as the information about
+> > the polarity of that gpio pin (ext_cd_gpio_invert). By default
+> > (ext_cd_gpio_invert == 0) gpio value 0 means 'card has been removed',
+> > but this can be changed to 'card has been removed' when
+> > ext_cd_gpio_invert == 1.
+> >
+> > This patch adds all required changes to sdhci-s3c driver.
+> >
+> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+> > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> > ---
+> >
+> > Changes since V4:
+> > - adapted to threaded irq approach in sdhci driver
+> > - rebased onto latest -mm kernel tree
+> > - fixed problem when gpio-base card detection was not called on driver
+> > init
+> >
+> > Changes since V3:
+> > - renamed patch to avoid confusion with the patch for the s3c-sdhci
+> > platform changes - added "(driver part)" in subject
+> >
+> > Changes since V2:
+> > According to Andrew Morton's suggestion local_irq_save() call in the
+> > sdhci_s3c_notify_change function has been replaced by spin_lock_irqsave
+> > (host driver already has a spinlock that is used for protecting internal
+> > state of the driver).
+> >
+> > Changes since V1:
+> > - added support for gpio external interrupt card based detect method
+> >   directly to sdhci-s3c driver
+> >
+> > ---
+> >  drivers/mmc/host/sdhci-s3c.c |   78
+> ++++++++++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/sdhci.c     |   47 ++++++++++++++-----------
+> >  drivers/mmc/host/sdhci.h     |    1 +
+> >  3 files changed, 106 insertions(+), 20 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> > index 9938ded..606e695 100644
+> > --- a/drivers/mmc/host/sdhci-s3c.c
+> > +++ b/drivers/mmc/host/sdhci-s3c.c
+> > @@ -18,6 +18,7 @@
+> >  #include <linux/slab.h>
+> >  #include <linux/clk.h>
+> >  #include <linux/io.h>
+> > +#include <linux/gpio.h>
+> >
+> >  #include <linux/mmc/host.h>
+> >
+> > @@ -44,6 +45,8 @@ struct sdhci_s3c {
+> >  	struct resource		*ioarea;
+> >  	struct s3c_sdhci_platdata *pdata;
+> >  	unsigned int		cur_clk;
+> > +	int			ext_cd_irq;
+> > +	int			ext_cd_gpio;
+> >
+> >  	struct clk		*clk_io;
+> >  	struct clk		*clk_bus[MAX_BUS_CLK];
+> > @@ -235,6 +238,36 @@ static struct sdhci_ops sdhci_s3c_ops = {
+> >  	.get_min_clock		= sdhci_s3c_get_min_clock,
+> >  };
+> >
+> > +static void sdhci_s3c_notify_change(struct platform_device *dev, int
+> state)
+> > +{
+> > +	struct sdhci_host *host = platform_get_drvdata(dev);
+> > +	if (host) {
+> > +		mutex_lock(&host->lock);
+> > +		if (state) {
+> > +			dev_dbg(&dev->dev, "card inserted.\n");
+> > +			host->flags &= ~SDHCI_DEVICE_DEAD;
+> > +			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> > +			sdhci_card_detect(host);
+> > +		} else {
+> > +			dev_dbg(&dev->dev, "card removed.\n");
+> > +			host->flags |= SDHCI_DEVICE_DEAD;
+> > +			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> > +			sdhci_card_detect(host);
+> > +		}
+> 
+> You could move the sdhci_card_detect outside the if.
 
---Apple-Mail-1--770684855
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: quoted-printable
+Rigth, I will fix this.
 
-On 28 Jul 2010, at 07:48, Maurus Cuelenaere <mcuelenaere@gmail.com> =
-wrote:
->>=20
->> +	struct sdhci_s3c *sc =3D sdhci_priv(host);
->> +
->> +	if (sc->vmmc) {
->> +		int ret =3D regulator_disable(sc->vmmc);
->> +		if (ret)
->> +			return ret;
->> +		mdelay(2);
->=20
-> Shouldn't these delays be handled in the regulator framework itself?
+> > +		mutex_unlock(&host->lock);
+> > +	}
+> > +}
+> > +
+> > +static irqreturn_t sdhci_s3c_gpio_card_detect_thread(int irq, void
+> *dev_id)
+> > +{
+> > +	struct sdhci_s3c *sc = dev_id;
+> > +	int status = gpio_get_value(sc->ext_cd_gpio);
+> > +	if (sc->pdata->ext_cd_gpio_invert)
+> > +		status = !status;
+> > +	sdhci_s3c_notify_change(sc->pdev, status);
+> > +	return IRQ_HANDLED;
+> > +}
+> > +
+> >  static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+> >  {
+> >  	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
+> > @@ -272,6 +305,7 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	sc->host = host;
+> >  	sc->pdev = pdev;
+> >  	sc->pdata = pdata;
+> > +	sc->ext_cd_gpio = -1;
+> >
+> >  	platform_set_drvdata(pdev, host);
+> >
+> > @@ -355,6 +389,13 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	 * SDHCI block, or a missing configuration that needs to be set. */
+> >  	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
+> >
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
+> > +	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+> > +		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> > +
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+> > +		host->mmc->caps = MMC_CAP_NONREMOVABLE;
+> > +
+> >  	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
+> >  			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+> >
+> > @@ -367,6 +408,33 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  		goto err_add_host;
+> >  	}
+> >
+> > +	/* pdata->ext_cd_init might call sdhci_s3c_notify_change immediately,
+> > +	   so it can be called only after sdhci_add_host() */
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
+> > +		pdata->ext_cd_init(&sdhci_s3c_notify_change);
+> > +
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_GPIO &&
+> > +	    gpio_is_valid(pdata->ext_cd_gpio)) {
+> > +		int status;
+> > +
+> > +		gpio_request(pdata->ext_cd_gpio, "SDHCI EXT CD");
+> 
+> Shouldn't you check the return value of gpio_request()?
 
-A 2ms delay on power down seems suspicious for a regulator. I'm not sure =
-why this is required but if it is I suspect it's due to a large cap on =
-the regulator output and light load rather than something that's always =
-true for whatever regulator is providing the supply.=
+Yes, I it should. I will fix this.
 
---Apple-Mail-1--770684855
-Content-Type: text/html;
-	charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+> 
+> > +		sc->ext_cd_gpio = pdata->ext_cd_gpio;
+> > +
+> > +		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
+> > +		if (sc->ext_cd_irq &&
+> > +		    request_threaded_irq(sc->ext_cd_irq, NULL,
+> sdhci_s3c_gpio_card_detect_thread,
+> > +				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+> > +				dev_name(&pdev->dev), sc)) {
+> > +			dev_err(&pdev->dev, "cannot request irq for card
+> detect\n");
+> > +			sc->ext_cd_irq = 0;
+> > +		}
+> > +
+> > +		status = gpio_get_value(sc->ext_cd_gpio);
+> > +		if (sc->pdata->ext_cd_gpio_invert)
+> > +			status = !status;
+> > +		sdhci_s3c_notify_change(sc->pdev, status);
+> > +	}
+> > +
+> >  	return 0;
+> >
+> >   err_add_host:
+> > @@ -391,10 +459,20 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >
+> >  static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+> >  {
+> > +	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
+> >  	struct sdhci_host *host =  platform_get_drvdata(pdev);
+> >  	struct sdhci_s3c *sc = sdhci_priv(host);
+> >  	int ptr;
+> >
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
+> > +		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
+> > +
+> > +	if (sc->ext_cd_irq)
+> > +		free_irq(sc->ext_cd_irq, sc);
+> > +
+> > +	if (sc->ext_cd_gpio != -1)
+> 
+> Perhaps if (gpio_is_valid(...)) ?
 
-<html><body bgcolor=3D"#FFFFFF"><div><span class=3D"Apple-style-span" =
-style=3D"-webkit-tap-highlight-color: rgba(26, 26, 26, 0.296875); =
--webkit-composition-fill-color: rgba(175, 192, 227, 0.230469); =
--webkit-composition-frame-color: rgba(77, 128, 180, 0.230469); ">On 28 =
-Jul 2010, at 07:48, Maurus Cuelenaere &lt;<a =
-href=3D"mailto:mcuelenaere@gmail.com">mcuelenaere@gmail.com</a>&gt; =
-wrote:</span><br></div><blockquote type=3D"cite"><div><blockquote =
-type=3D"cite"><font class=3D"Apple-style-span" =
-color=3D"#000000"><br></font></blockquote><blockquote =
-type=3D"cite"><span>+<span class=3D"Apple-tab-span" =
-style=3D"white-space:pre">	</span>struct sdhci_s3c *sc =3D =
-sdhci_priv(host);</span><br></blockquote><blockquote =
-type=3D"cite"><span>+</span><br></blockquote><blockquote =
-type=3D"cite"><span>+<span class=3D"Apple-tab-span" =
-style=3D"white-space:pre">	</span>if (sc-&gt;vmmc) =
-{</span><br></blockquote><blockquote type=3D"cite"><span>+<span =
-class=3D"Apple-tab-span" style=3D"white-space:pre">	</span><span =
-class=3D"Apple-tab-span" style=3D"white-space:pre">	</span>int ret =3D=
- regulator_disable(sc-&gt;vmmc);</span><br></blockquote><blockquote =
-type=3D"cite"><span>+<span class=3D"Apple-tab-span" =
-style=3D"white-space:pre">	</span><span class=3D"Apple-tab-span" =
-style=3D"white-space:pre">	</span>if =
-(ret)</span><br></blockquote><blockquote type=3D"cite"><span>+<span =
-class=3D"Apple-tab-span" style=3D"white-space:pre">	</span><span =
-class=3D"Apple-tab-span" style=3D"white-space:pre">	</span><span =
-class=3D"Apple-tab-span" style=3D"white-space:pre">	</span>return =
-ret;</span><br></blockquote><blockquote type=3D"cite"><span>+<span =
-class=3D"Apple-tab-span" style=3D"white-space:pre">	</span><span =
-class=3D"Apple-tab-span" style=3D"white-space:pre">	=
-</span>mdelay(2);</span><br></blockquote><span></span><br><span>Shouldn't =
-these delays be handled in the regulator framework itself?</span><font =
-class=3D"Apple-style-span" color=3D"#000000"><font =
-class=3D"Apple-style-span" =
-color=3D"#0023A3"><br></font></font></div></blockquote><br><div>A 2ms =
-delay on power down seems suspicious for a regulator. I'm not sure why =
-this is required but if it is I suspect it's due to a large cap on the =
-regulator output and light load rather than something that's always true =
-for whatever regulator is providing the supply.</div></body></html>=
+-1 is intentionally assigned in s3c_sdhci_probe() when no gpio pin is used
+for card detection. I can change this to gpio_is_valid() if this increases
+the code readability.
 
---Apple-Mail-1--770684855--
+> 
+> > +		gpio_free(sc->ext_cd_gpio);
+> > +
+> >  	sdhci_remove_host(host, 1);
+> >
+> >  	for (ptr = 0; ptr < 3; ptr++) {
+> 
+> --
+> Maurus Cuelenaere
 
+Thanks for your comments!
 
---===============0457660768==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============0457660768==--
+Best regards
+--
+Marek Szyprowski
+Samsung Poland R&D Center
