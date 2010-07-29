@@ -1,16 +1,15 @@
 From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: RE: [PATCHv5 3/4] sdhci-s3c: add support for new card detection
- methods (driver part)
-Date: Thu, 29 Jul 2010 07:22:45 +0200
-Message-ID: <00ae01cb2ede$17021160$45063420$%szyprowski@samsung.com>
+Subject: RE: [PATCH 4/4] sdhci-s3c: add regulator support
+Date: Thu, 29 Jul 2010 07:28:04 +0200
+Message-ID: <00af01cb2ede$d54530d0$7fcf9270$%szyprowski@samsung.com>
 References: <1280326797-15792-1-git-send-email-m.szyprowski@samsung.com>
- <1280326797-15792-4-git-send-email-m.szyprowski@samsung.com>
- <4C50412C.3080703@gmail.com>
+ <1280326797-15792-5-git-send-email-m.szyprowski@samsung.com>
+ <4C504326.30708@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <4C50412C.3080703@gmail.com>
+In-reply-to: <4C504326.30708@gmail.com>
 Content-language: pl
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: 'Maurus Cuelenaere' <mcuelenaere@gmail.com>
@@ -19,243 +18,129 @@ List-Id: linux-mmc@vger.kernel.org
 
 Hello,
 
-On Wednesday, July 28, 2010 4:40 PM Maurus Cuelenaere wrote:
+On Wednesday, July 28, 2010 4:48 PM Maurus Cuelenaere wrote:
 
+
+> -----Original Message-----
+> From: [mailto:mcuelenaere@gmail.com]
+> Sent: 
+> To: Marek Szyprowski
+> Cc: linux-mmc@vger.kernel.org; linux-samsung-soc@vger.kernel.org; linux-
+> arm-kernel@lists.infradead.org; kyungmin.park@samsung.com;
+> kgene.kim@samsung.com; ben-linux@fluff.org; akpm@linux-foundation.org;
+> broonie@opensource.wolfsonmicro.com
+> Subject: Re: [PATCH 4/4] sdhci-s3c: add regulator support
+> 
 >  Op 28-07-10 16:19, Marek Szyprowski schreef:
-> > On some Samsung SoCs not all SDHCI controllers have card detect (CD)
-> > line. For some embedded designs it is not even needed, because ususally
-> > the device (like SDIO flash memory or wifi controller) is permanently
-> > wired to the controller. There are also systems which have a card detect
-> > line connected to some of the external interrupt lines or the presence
-> > of the card depends on some other actions (like enabling a power
-> > regulator).
-> >
-> > This patch adds support for all these cases. The following card
-> > detection methods are possible:
-> >
-> > 1. internal sdhci host card detect line
-> > 2. external event
-> > 3. external gpio interrupt
-> > 4. no card detect line, controller will poll for the card
-> > 5. no card detect line, card is permanently wired to the controller
-> > (once detected host won't poll it any more)
-> >
-> > By default, all existing code would use method #1, what is compatible
-> > with the previous version of the driver.
-> >
-> > In case of external event, two callbacks must be provided in platdata:
-> > ext_cd_init and ext_cd_cleanup. Both of them get a callback to a
-> > function that notifies the s3c-sdhci host contoller as their argument.
-> > That callback function should be called from the even dispatcher to let
-> > host notice the card insertion/removal.
-> >
-> > In case of external gpio interrupt, a gpio pin number must be provided
-> > in platdata (ext_cd_gpio parameter), as well as the information about
-> > the polarity of that gpio pin (ext_cd_gpio_invert). By default
-> > (ext_cd_gpio_invert == 0) gpio value 0 means 'card has been removed',
-> > but this can be changed to 'card has been removed' when
-> > ext_cd_gpio_invert == 1.
-> >
-> > This patch adds all required changes to sdhci-s3c driver.
-> >
+> > This patch adds support for regulator API to sdhci-s3c driver. Regulators
+> > can be used to disable power in suspended state to reduce dissipated
+> > energy.
+> 
+> I'm not sure about this, when I would try to do this I'd look at
+> implementing
+> this in the sdhci driver itself instead of a subdriver of it.
+
+Well, if you think that sdhci driver is better place for this I can move all
+my changes to the main driver.
+
 > > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 > > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > > ---
-> >
-> > Changes since V4:
-> > - adapted to threaded irq approach in sdhci driver
-> > - rebased onto latest -mm kernel tree
-> > - fixed problem when gpio-base card detection was not called on driver
-> > init
-> >
-> > Changes since V3:
-> > - renamed patch to avoid confusion with the patch for the s3c-sdhci
-> > platform changes - added "(driver part)" in subject
-> >
-> > Changes since V2:
-> > According to Andrew Morton's suggestion local_irq_save() call in the
-> > sdhci_s3c_notify_change function has been replaced by spin_lock_irqsave
-> > (host driver already has a spinlock that is used for protecting internal
-> > state of the driver).
-> >
-> > Changes since V1:
-> > - added support for gpio external interrupt card based detect method
-> >   directly to sdhci-s3c driver
-> >
-> > ---
-> >  drivers/mmc/host/sdhci-s3c.c |   78
-> ++++++++++++++++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci.c     |   47 ++++++++++++++-----------
-> >  drivers/mmc/host/sdhci.h     |    1 +
-> >  3 files changed, 106 insertions(+), 20 deletions(-)
+> >  drivers/mmc/host/sdhci-s3c.c |   30 +++++++++++++++++++++++++++++-
+> >  1 files changed, 29 insertions(+), 1 deletions(-)
 > >
 > > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> > index 9938ded..606e695 100644
+> > index 606e695..b9d46a5 100644
 > > --- a/drivers/mmc/host/sdhci-s3c.c
 > > +++ b/drivers/mmc/host/sdhci-s3c.c
-> > @@ -18,6 +18,7 @@
-> >  #include <linux/slab.h>
+> > @@ -19,6 +19,7 @@
 > >  #include <linux/clk.h>
 > >  #include <linux/io.h>
-> > +#include <linux/gpio.h>
+> >  #include <linux/gpio.h>
+> > +#include <linux/regulator/consumer.h>
 > >
 > >  #include <linux/mmc/host.h>
 > >
-> > @@ -44,6 +45,8 @@ struct sdhci_s3c {
-> >  	struct resource		*ioarea;
-> >  	struct s3c_sdhci_platdata *pdata;
-> >  	unsigned int		cur_clk;
-> > +	int			ext_cd_irq;
-> > +	int			ext_cd_gpio;
+> > @@ -50,6 +51,7 @@ struct sdhci_s3c {
 > >
 > >  	struct clk		*clk_io;
 > >  	struct clk		*clk_bus[MAX_BUS_CLK];
-> > @@ -235,6 +238,36 @@ static struct sdhci_ops sdhci_s3c_ops = {
-> >  	.get_min_clock		= sdhci_s3c_get_min_clock,
+> > +	struct regulator	*vmmc;
 > >  };
 > >
-> > +static void sdhci_s3c_notify_change(struct platform_device *dev, int
-> state)
-> > +{
-> > +	struct sdhci_host *host = platform_get_drvdata(dev);
-> > +	if (host) {
-> > +		mutex_lock(&host->lock);
-> > +		if (state) {
-> > +			dev_dbg(&dev->dev, "card inserted.\n");
-> > +			host->flags &= ~SDHCI_DEVICE_DEAD;
-> > +			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-> > +			sdhci_card_detect(host);
-> > +		} else {
-> > +			dev_dbg(&dev->dev, "card removed.\n");
-> > +			host->flags |= SDHCI_DEVICE_DEAD;
-> > +			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-> > +			sdhci_card_detect(host);
-> > +		}
-> 
-> You could move the sdhci_card_detect outside the if.
-
-Rigth, I will fix this.
-
-> > +		mutex_unlock(&host->lock);
-> > +	}
-> > +}
-> > +
-> > +static irqreturn_t sdhci_s3c_gpio_card_detect_thread(int irq, void
-> *dev_id)
-> > +{
-> > +	struct sdhci_s3c *sc = dev_id;
-> > +	int status = gpio_get_value(sc->ext_cd_gpio);
-> > +	if (sc->pdata->ext_cd_gpio_invert)
-> > +		status = !status;
-> > +	sdhci_s3c_notify_change(sc->pdev, status);
-> > +	return IRQ_HANDLED;
-> > +}
-> > +
-> >  static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
-> >  {
-> >  	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
-> > @@ -272,6 +305,7 @@ static int __devinit sdhci_s3c_probe(struct
+> >  static inline struct sdhci_s3c *to_s3c(struct sdhci_host *host)
+> > @@ -309,6 +311,13 @@ static int __devinit sdhci_s3c_probe(struct
 > platform_device *pdev)
-> >  	sc->host = host;
-> >  	sc->pdev = pdev;
-> >  	sc->pdata = pdata;
-> > +	sc->ext_cd_gpio = -1;
 > >
 > >  	platform_set_drvdata(pdev, host);
 > >
-> > @@ -355,6 +389,13 @@ static int __devinit sdhci_s3c_probe(struct
+> > +	sc->vmmc = regulator_get(dev, "vmmc");
+> > +	if (IS_ERR(sc->vmmc)) {
+> > +		dev_warn(dev, "no vmmc regulator found\n");
+> > +		sc->vmmc = NULL;
+> > +	} else
+> > +		regulator_enable(sc->vmmc);
+> > +
+> >  	sc->clk_io = clk_get(dev, "hsmmc");
+> >  	if (IS_ERR(sc->clk_io)) {
+> >  		dev_err(dev, "failed to get io clock\n");
+> > @@ -482,6 +491,11 @@ static int __devexit sdhci_s3c_remove(struct
 > platform_device *pdev)
-> >  	 * SDHCI block, or a missing configuration that needs to be set. */
-> >  	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
+> >  	clk_disable(sc->clk_io);
+> >  	clk_put(sc->clk_io);
 > >
-> > +	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
-> > +	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
-> > +		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-> > +
-> > +	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
-> > +		host->mmc->caps = MMC_CAP_NONREMOVABLE;
-> > +
-> >  	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
-> >  			 SDHCI_QUIRK_32BIT_DMA_SIZE);
-> >
-> > @@ -367,6 +408,33 @@ static int __devinit sdhci_s3c_probe(struct
-> platform_device *pdev)
-> >  		goto err_add_host;
-> >  	}
-> >
-> > +	/* pdata->ext_cd_init might call sdhci_s3c_notify_change immediately,
-> > +	   so it can be called only after sdhci_add_host() */
-> > +	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
-> > +		pdata->ext_cd_init(&sdhci_s3c_notify_change);
-> > +
-> > +	if (pdata->cd_type == S3C_SDHCI_CD_GPIO &&
-> > +	    gpio_is_valid(pdata->ext_cd_gpio)) {
-> > +		int status;
-> > +
-> > +		gpio_request(pdata->ext_cd_gpio, "SDHCI EXT CD");
-> 
-> Shouldn't you check the return value of gpio_request()?
-
-Yes, I it should. I will fix this.
-
-> 
-> > +		sc->ext_cd_gpio = pdata->ext_cd_gpio;
-> > +
-> > +		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
-> > +		if (sc->ext_cd_irq &&
-> > +		    request_threaded_irq(sc->ext_cd_irq, NULL,
-> sdhci_s3c_gpio_card_detect_thread,
-> > +				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-> > +				dev_name(&pdev->dev), sc)) {
-> > +			dev_err(&pdev->dev, "cannot request irq for card
-> detect\n");
-> > +			sc->ext_cd_irq = 0;
-> > +		}
-> > +
-> > +		status = gpio_get_value(sc->ext_cd_gpio);
-> > +		if (sc->pdata->ext_cd_gpio_invert)
-> > +			status = !status;
-> > +		sdhci_s3c_notify_change(sc->pdev, status);
+> > +	if (sc->vmmc) {
+> > +		regulator_disable(sc->vmmc);
+> > +		regulator_put(sc->vmmc);
 > > +	}
 > > +
-> >  	return 0;
-> >
-> >   err_add_host:
-> > @@ -391,10 +459,20 @@ static int __devinit sdhci_s3c_probe(struct
+> >  	iounmap(host->ioaddr);
+> >  	release_resource(sc->ioarea);
+> >  	kfree(sc->ioarea);
+> > @@ -496,15 +510,29 @@ static int __devexit sdhci_s3c_remove(struct
 > platform_device *pdev)
 > >
-> >  static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+> >  static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t
+> pm)
 > >  {
-> > +	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
-> >  	struct sdhci_host *host =  platform_get_drvdata(pdev);
-> >  	struct sdhci_s3c *sc = sdhci_priv(host);
-> >  	int ptr;
+> > +	int ret = 0;
+> >  	struct sdhci_host *host = platform_get_drvdata(dev);
+> > +	struct sdhci_s3c *sc = sdhci_priv(host);
 > >
-> > +	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
-> > +		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
+> >  	sdhci_suspend_host(host, pm);
+> > -	return 0;
 > > +
-> > +	if (sc->ext_cd_irq)
-> > +		free_irq(sc->ext_cd_irq, sc);
+> > +	if (sc->vmmc)
+> > +		ret = regulator_disable(sc->vmmc);
 > > +
-> > +	if (sc->ext_cd_gpio != -1)
-> 
-> Perhaps if (gpio_is_valid(...)) ?
-
--1 is intentionally assigned in s3c_sdhci_probe() when no gpio pin is used
-for card detection. I can change this to gpio_is_valid() if this increases
-the code readability.
-
-> 
-> > +		gpio_free(sc->ext_cd_gpio);
-> > +
-> >  	sdhci_remove_host(host, 1);
+> > +	return ret;
+> >  }
 > >
-> >  	for (ptr = 0; ptr < 3; ptr++) {
-> 
-> --
-> Maurus Cuelenaere
+> >  static int sdhci_s3c_resume(struct platform_device *dev)
+> >  {
+> >  	struct sdhci_host *host = platform_get_drvdata(dev);
+> > +	struct sdhci_s3c *sc = sdhci_priv(host);
+> > +
+> > +	if (sc->vmmc) {
+> > +		int ret = regulator_disable(sc->vmmc);
 
-Thanks for your comments!
+Hmm, I was in a real hurry if I missed this. Should be regulator_enable()
+of course. Looks that I confused patches and posted an older version...
+
+> > +		if (ret)
+> > +			return ret;
+> > +		mdelay(2);
+> 
+> Shouldn't these delays be handled in the regulator framework itself?
+
+This is just a left-over from an older version, should be definitely 
+removed. Sorry for the confusion.
+ 
+> > +	}
+> >
+> >  	sdhci_resume_host(host);
+> >  	return 0;
+
 
 Best regards
 --
