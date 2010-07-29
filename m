@@ -1,7 +1,7 @@
 From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: [PATCHv6 3/4] sdhci-s3c: add support for new card detection methods
-Date: Thu, 29 Jul 2010 14:34:34 +0200
-Message-ID: <1280406875-31830-4-git-send-email-m.szyprowski@samsung.com>
+Subject: [PATCHv2 4/4] sdhci: add regulator support
+Date: Thu, 29 Jul 2010 14:34:35 +0200
+Message-ID: <1280406875-31830-5-git-send-email-m.szyprowski@samsung.com>
 References: <1280406875-31830-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN
@@ -13,294 +13,100 @@ To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kern
 Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org, broonie@opensource.wolfsonmicro.com
 List-Id: linux-mmc@vger.kernel.org
 
-On some Samsung SoCs not all SDHCI controllers have card detect (CD)
-line. For some embedded designs it is not even needed, because ususally
-the device (like SDIO flash memory or wifi controller) is permanently
-wired to the controller. There are also systems which have a card detect
-line connected to some of the external interrupt lines or the presence
-of the card depends on some other actions (like enabling a power
-regulator).
-
-This patch adds support for all these cases. The following card
-detection methods are possible:
-
-1. internal sdhci host card detect line
-2. external event
-3. external gpio interrupt
-4. no card detect line, controller will poll for the card
-5. no card detect line, card is permanently wired to the controller
-(once detected host won't poll it any more)
-
-By default, all existing code would use method #1, what is compatible
-with the previous version of the driver.
-
-In case of external event, two callbacks must be provided in platdata:
-ext_cd_init and ext_cd_cleanup. Both of them get a callback to a
-function that notifies the s3c-sdhci host contoller as their argument.
-That callback function should be called from the even dispatcher to let
-host notice the card insertion/removal.
-
-In case of external gpio interrupt, a gpio pin number must be provided
-in platdata (ext_cd_gpio parameter), as well as the information about
-the polarity of that gpio pin (ext_cd_gpio_invert). By default
-(ext_cd_gpio_invert == 0) gpio value 0 means 'card has been removed',
-but this can be changed to 'card has been removed' when
-ext_cd_gpio_invert == 1.
-
-This patch adds all required changes to sdhci-s3c driver.
+This patch adds support for regulator API to sdhci core driver. Regulators
+can be used to disable power in suspended state to reduce dissipated
+energy.
 
 Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
 
-Changes since V5:
-- resolved issues reported by Maurus Cuelenaere
-- moved gpio card detection setup code to separate function
-
-Changes since V4:
-- adapted to threaded irq approach in sdhci driver
-- rebased onto latest -mm kernel tree
-- fixed problem when gpio-base card detection was not called on driver
-init
-
-Changes since V3:
-- renamed patch to avoid confusion with the patch for the s3c-sdhci
-platform changes - added "(driver part)" in subject
-
-Changes since V2:
-According to Andrew Morton's suggestion local_irq_save() call in the
-sdhci_s3c_notify_change function has been replaced by spin_lock_irqsave
-(host driver already has a spinlock that is used for protecting internal
-state of the driver).
-
 Changes since V1:
-- added support for gpio external interrupt card based detect method
-  directly to sdhci-s3c driver
+- moved regulator support from sdhci-s3c sub-driver to the main sdhci
+driver
 
 ---
- drivers/mmc/host/sdhci-s3c.c |   85 ++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c     |   47 +++++++++++++----------
- drivers/mmc/host/sdhci.h     |    1 +
- 3 files changed, 113 insertions(+), 20 deletions(-)
+ drivers/mmc/host/sdhci.c |   26 +++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.h |    2 ++
+ 2 files changed, 27 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index f0b819d..da70f73 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -18,6 +18,7 @@
- #include <linux/slab.h>
- #include <linux/clk.h>
- #include <linux/io.h>
-+#include <linux/gpio.h>
- 
- #include <linux/mmc/host.h>
- 
-@@ -44,6 +45,8 @@ struct sdhci_s3c {
- 	struct resource		*ioarea;
- 	struct s3c_sdhci_platdata *pdata;
- 	unsigned int		cur_clk;
-+	int			ext_cd_irq;
-+	int			ext_cd_gpio;
- 
- 	struct clk		*clk_io;
- 	struct clk		*clk_bus[MAX_BUS_CLK];
-@@ -235,6 +238,61 @@ static struct sdhci_ops sdhci_s3c_ops = {
- 	.get_min_clock		= sdhci_s3c_get_min_clock,
- };
- 
-+static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(dev);
-+	if (host) {
-+		mutex_lock(&host->lock);
-+		if (state) {
-+			dev_dbg(&dev->dev, "card inserted.\n");
-+			host->flags &= ~SDHCI_DEVICE_DEAD;
-+			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+		} else {
-+			dev_dbg(&dev->dev, "card removed.\n");
-+			host->flags |= SDHCI_DEVICE_DEAD;
-+			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+		}
-+		sdhci_card_detect(host);
-+		mutex_unlock(&host->lock);
-+	}
-+}
-+
-+static irqreturn_t sdhci_s3c_gpio_card_detect_thread(int irq, void *dev_id)
-+{
-+	struct sdhci_s3c *sc = dev_id;
-+	int status = gpio_get_value(sc->ext_cd_gpio);
-+	if (sc->pdata->ext_cd_gpio_invert)
-+		status = !status;
-+	sdhci_s3c_notify_change(sc->pdev, status);
-+	return IRQ_HANDLED;
-+}
-+
-+static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
-+{
-+	struct s3c_sdhci_platdata *pdata = sc->pdata;
-+	struct device *dev = &sc->pdev->dev;
-+
-+	if (gpio_request(pdata->ext_cd_gpio, "SDHCI EXT CD") == 0) {
-+		sc->ext_cd_gpio = pdata->ext_cd_gpio;
-+		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
-+		if (sc->ext_cd_irq &&
-+		    request_threaded_irq(sc->ext_cd_irq, NULL,
-+					 sdhci_s3c_gpio_card_detect_thread,
-+					 IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-+					 dev_name(dev), sc) == 0) {
-+			int status = gpio_get_value(sc->ext_cd_gpio);
-+			if (pdata->ext_cd_gpio_invert)
-+				status = !status;
-+			sdhci_s3c_notify_change(sc->pdev, status);
-+		} else {
-+			dev_warn(dev, "cannot request irq for card detect\n");
-+			sc->ext_cd_irq = 0; 
-+		}
-+	} else {
-+		dev_err(dev, "cannot request gpio for card detect\n");
-+	}
-+}
-+
- static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- {
- 	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
-@@ -272,6 +330,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	sc->host = host;
- 	sc->pdev = pdev;
- 	sc->pdata = pdata;
-+	sc->ext_cd_gpio = -1; /* invalid gpio number */
- 
- 	platform_set_drvdata(pdev, host);
- 
-@@ -353,6 +412,13 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	 * SDHCI block, or a missing configuration that needs to be set. */
- 	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
- 
-+	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
-+	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
-+		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+
-+	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
-+		host->mmc->caps = MMC_CAP_NONREMOVABLE;
-+
- 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
- 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
- 
-@@ -365,6 +431,15 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		goto err_add_host;
- 	}
- 
-+	/* The following two methods of card detection might call
-+	   sdhci_s3c_notify_change() immediately, so they can be called
-+	   only after sdhci_add_host(). Setup errors are ignored. */
-+	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
-+		pdata->ext_cd_init(&sdhci_s3c_notify_change);
-+	if (pdata->cd_type == S3C_SDHCI_CD_GPIO &&
-+	    gpio_is_valid(pdata->ext_cd_gpio))
-+		sdhci_s3c_setup_card_detect_gpio(sc);
-+
- 	return 0;
- 
-  err_add_host:
-@@ -389,10 +464,20 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 
- static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- {
-+	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
- 	struct sdhci_host *host =  platform_get_drvdata(pdev);
- 	struct sdhci_s3c *sc = sdhci_priv(host);
- 	int ptr;
- 
-+	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
-+		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
-+
-+	if (sc->ext_cd_irq)
-+		free_irq(sc->ext_cd_irq, sc);
-+
-+	if (gpio_is_valid(sc->ext_cd_gpio))
-+		gpio_free(sc->ext_cd_gpio);
-+
- 	sdhci_remove_host(host, 1);
- 
- 	for (ptr = 0; ptr < 3; ptr++) {
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1c67f91..95f44ac 100644
+index 95f44ac..cdd974e 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1244,26 +1244,6 @@ static const struct mmc_host_ops sdhci_ops = {
-  *                                                                           *
- \*****************************************************************************/
+@@ -23,6 +23,7 @@
+ #include <linux/mutex.h>
+ #include <linux/scatterlist.h>
+ #include <linux/jiffies.h>
++#include <linux/regulator/consumer.h>
  
--static void sdhci_card_detect(struct sdhci_host *host)
--{
--	if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT)) {
--		if (host->mrq) {
--			printk(KERN_ERR "%s: Card removed during transfer!\n",
--				mmc_hostname(host->mmc));
--			printk(KERN_ERR "%s: Resetting controller.\n",
--				mmc_hostname(host->mmc));
--
--			sdhci_reset(host, SDHCI_RESET_CMD);
--			sdhci_reset(host, SDHCI_RESET_DATA);
--
--			host->mrq->cmd->error = -ENOMEDIUM;
--			schedule_work(&host->finish_work);
--		}
--	}
--
--	mmc_detect_change(host->mmc, msecs_to_jiffies(200));
--}
--
- static void sdhci_finish_work(struct work_struct *wk)
- {
- 	struct sdhci_host *host;
-@@ -1627,6 +1607,33 @@ EXPORT_SYMBOL_GPL(sdhci_resume_host);
+ #include <linux/leds.h>
  
- /*****************************************************************************\
-  *                                                                           *
-+ * Implementation dependent callbacks                                        *
-+ *                                                                           *
-+\*****************************************************************************/
+@@ -1573,7 +1574,10 @@ int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
+ 
+ 	free_irq(host->irq, host);
+ 
+-	return 0;
++	if (host->vmmc)
++		ret = regulator_disable(host->vmmc);
 +
-+void sdhci_card_detect(struct sdhci_host *host)
-+{
-+	if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT)) {
-+		if (host->mrq) {
-+			printk(KERN_ERR "%s: Card removed during transfer!\n",
-+				mmc_hostname(host->mmc));
-+			printk(KERN_ERR "%s: Resetting controller.\n",
-+				mmc_hostname(host->mmc));
-+
-+			sdhci_reset(host, SDHCI_RESET_CMD);
-+			sdhci_reset(host, SDHCI_RESET_DATA);
-+
-+			host->mrq->cmd->error = -ENOMEDIUM;
-+			schedule_work(&host->finish_work);
-+		}
-+	}
-+
-+	mmc_detect_change(host->mmc, msecs_to_jiffies(200));
-+}
-+EXPORT_SYMBOL_GPL(sdhci_card_detect);
-+
-+/*****************************************************************************\
-+ *                                                                           *
-  * Device allocation/registration                                            *
-  *                                                                           *
- \*****************************************************************************/
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 2be34b3..253773e 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -415,6 +415,7 @@ static inline void *sdhci_priv(struct sdhci_host *host)
- 	return (void *)host->private;
++	return ret;
  }
  
-+extern void sdhci_card_detect(struct sdhci_host *host);
- extern int sdhci_add_host(struct sdhci_host *host);
- extern void sdhci_remove_host(struct sdhci_host *host, int dead);
+ EXPORT_SYMBOL_GPL(sdhci_suspend_host);
+@@ -1582,6 +1586,13 @@ int sdhci_resume_host(struct sdhci_host *host)
+ {
+ 	int ret;
  
++	if (host->vmmc) {
++		int ret = regulator_enable(host->vmmc);
++		if (ret)
++			return ret;
++	}
++
++
+ 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+ 		if (host->ops->enable_dma)
+ 			host->ops->enable_dma(host);
+@@ -1878,6 +1889,14 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (ret)
+ 		return ret;
+ 
++	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
++	if (IS_ERR(host->vmmc)) {
++		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
++		host->vmmc = NULL;
++	} else {
++		regulator_enable(host->vmmc);
++	}
++
+ 	sdhci_init(host, 0);
+ 
+ #ifdef CONFIG_MMC_DEBUG
+@@ -1955,6 +1974,11 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 
+ 	flush_work(&host->finish_work);
+ 
++	if (host->vmmc) {
++		regulator_disable(host->vmmc);
++		regulator_put(host->vmmc);
++	}
++
+ 	kfree(host->adma_desc);
+ 	kfree(host->align_buffer);
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 253773e..4d03e24 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -253,6 +253,8 @@ struct sdhci_host {
+ 
+ 	const struct sdhci_ops	*ops;		/* Low level hw interface */
+ 
++	struct regulator	*vmmc;		/* Power regulator */
++
+ 	/* Internal data */
+ 	struct mmc_host		*mmc;		/* MMC structure */
+ 	u64			dma_mask;	/* custom DMA mask */
 -- 
 1.7.1.569.g6f426
