@@ -1,22 +1,19 @@
 From: akpm@linux-foundation.org
-Subject: + sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch added to -mm tree
-Date: Thu, 29 Jul 2010 13:52:24 -0700
-Message-ID: <201007292052.o6TKqOZ7000614@imap1.linux-foundation.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:59045 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755034Ab0G2Uwa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2010 16:52:30 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: + sdhci-s3c-enable-sdhci_quirk_no_hispd_bit-quirk.patch added to -mm tree
+Date: Thu, 29 Jul 2010 13:52:27 -0700
+Message-ID: <201007292052.o6TKqRlB000617@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
 To: mm-commits@vger.kernel.org
 Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
 
 The patch titled
-     sdhci-s3c: add support for the non standard minimal clock value
+     sdhci-s3c: enable SDHCI_QUIRK_NO_HISPD_BIT quirk
 has been added to the -mm tree.  Its filename is
-     sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch
+     sdhci-s3c-enable-sdhci_quirk_no_hispd_bit-quirk.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -32,83 +29,33 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: sdhci-s3c: add support for the non standard minimal clock value
+Subject: sdhci-s3c: enable SDHCI_QUIRK_NO_HISPD_BIT quirk
 From: Marek Szyprowski <m.szyprowski@samsung.com>
 
-S3C SDHCI host controller can change the source for generating mmc clock. 
-By default host bus clock is used, what causes some problems on machines
-with 133MHz bus, because the SDHCI divider cannot be as high get proper
-clock value for identification mode.  This is not a problem for the
-controller, because it can generate lower frequencies from other clock
-sources.  This patch changes sdhci driver to use get_min_clock() call if
-it has been provided.
+This patch enables SDHCI_QUIRK_NO_HISPD_BIT on Samsung SDHCI driver.  This
+solves detection problems with some external SD cards.  This change has
+been tested on S5PC100 and S5PC110.  It has no inpact on driver speed.
 
-This fixes the flood of the following warnings on Samsung S5PV210 SoCs:
-mmc0: Minimum clock frequency too high for identification mode
-
-Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci-s3c.c |   27 +++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c     |    3 +--
- 2 files changed, 28 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c |    1 +
+ 1 file changed, 1 insertion(+)
 
-diff -puN drivers/mmc/host/sdhci-s3c.c~sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value drivers/mmc/host/sdhci-s3c.c
---- a/drivers/mmc/host/sdhci-s3c.c~sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value
+diff -puN drivers/mmc/host/sdhci-s3c.c~sdhci-s3c-enable-sdhci_quirk_no_hispd_bit-quirk drivers/mmc/host/sdhci-s3c.c
+--- a/drivers/mmc/host/sdhci-s3c.c~sdhci-s3c-enable-sdhci_quirk_no_hispd_bit-quirk
 +++ a/drivers/mmc/host/sdhci-s3c.c
-@@ -203,9 +203,36 @@ static void sdhci_s3c_set_clock(struct s
- 	}
- }
+@@ -338,6 +338,7 @@ static int __devinit sdhci_s3c_probe(str
  
-+/**
-+ * sdhci_s3c_get_min_clock - callback to get minimal supported clock value
-+ * @host: The SDHCI host being queried
-+ *
-+ * To init mmc host properly a minimal clock value is needed. For high system
-+ * bus clock's values the standard formula gives values out of allowed range.
-+ * The clock still can be set to lower values, if clock source other then
-+ * system bus is selected.
-+*/
-+static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_s3c *ourhost = to_s3c(host);
-+	unsigned int delta, min = UINT_MAX;
-+	int src;
-+
-+	for (src = 0; src < MAX_BUS_CLK; src++) {
-+		delta = sdhci_s3c_consider_clock(ourhost, src, 0);
-+		if (delta == UINT_MAX)
-+			continue;
-+		/* delta is a negative value in this case */
-+		if (-delta < min)
-+			min = -delta;
-+	}
-+	return min;
-+}
-+
- static struct sdhci_ops sdhci_s3c_ops = {
- 	.get_max_clock		= sdhci_s3c_get_max_clk,
- 	.set_clock		= sdhci_s3c_set_clock,
-+	.get_min_clock		= sdhci_s3c_get_min_clock,
- };
+ 	/* Setup quirks for the controller */
+ 	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
++	host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
  
- static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
-diff -puN drivers/mmc/host/sdhci.c~sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value drivers/mmc/host/sdhci.c
---- a/drivers/mmc/host/sdhci.c~sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value
-+++ a/drivers/mmc/host/sdhci.c
-@@ -1776,8 +1776,7 @@ int sdhci_add_host(struct sdhci_host *ho
- 	 * Set host parameters.
- 	 */
- 	mmc->ops = &sdhci_ops;
--	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK &&
--			host->ops->get_min_clock)
-+	if (host->ops->get_min_clock)
- 		mmc->f_min = host->ops->get_min_clock(host);
- 	else
- 		mmc->f_min = host->max_clk / 256;
+ #ifndef CONFIG_MMC_SDHCI_S3C_DMA
+ 
 _
 
 Patches currently in -mm which might be from m.szyprowski@samsung.com are
