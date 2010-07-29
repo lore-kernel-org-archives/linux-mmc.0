@@ -1,37 +1,53 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 02/12] mmci: fix multi block transfers
-Date: Thu, 29 Jul 2010 14:18:58 +0100
-Message-ID: <20100729131858.GB18923@n2100.arm.linux.org.uk>
-References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com> <1277198267-10860-2-git-send-email-rabin.vincent@stericsson.com>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH 04/12] mmci: allow the card detect status not to be
+	inverted
+Date: Thu, 29 Jul 2010 15:53:19 +0200
+Message-ID: <AANLkTikQi+SPpx8Wpvb0siSSsw0ZhusWaaKmqRnfHrnz@mail.gmail.com>
+References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com>
+	<1277198267-10860-4-git-send-email-rabin.vincent@stericsson.com>
+	<20100729123443.GA18923@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:52146 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752083Ab0G2NTO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2010 09:19:14 -0400
-Content-Disposition: inline
-In-Reply-To: <1277198267-10860-2-git-send-email-rabin.vincent@stericsson.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:51753 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754344Ab0G2NxU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2010 09:53:20 -0400
+Received: by bwz1 with SMTP id 1so209081bwz.19
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Jul 2010 06:53:19 -0700 (PDT)
+In-Reply-To: <20100729123443.GA18923@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rabin Vincent <rabin.vincent@stericsson.com>
-Cc: linux-arm-kernel@lists.infradead.org, STEricsson_nomadik_linux@list.st.com, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Rabin Vincent <rabin.vincent@stericsson.com>, Colin Tuckley <colin.tuckley@arm.com>, linux-arm-kernel@lists.infradead.org, STEricsson_nomadik_linux@list.st.com, linux-mmc@vger.kernel.org
 
-On Tue, Jun 22, 2010 at 02:47:37PM +0530, Rabin Vincent wrote:
-> Fix the data transfer size to allow multi block transfers to work.
-> 
-> Acked-by: Linus Walleij <linus.walleij@stericsson.com>
-> Signed-off-by: Rabin Vincent <rabin.vincent@stericsson.com>
+2010/7/29 Russell King - ARM Linux <linux@arm.linux.org.uk>:
 
-The first two patches improve performance on Versatile, from 20.5s to
-read 1MB down to 18.5s - a 10% improvement.
+> What now needs to happen is the sense of the GPIOLIB support on platforms
+> needs to be checked - eg, I suspect the card detect via the GPIO primecell
+> is inverted on Realview - in which case we need a 'cd_invert' rather
+> than the negative 'cd_noinvert'.
 
-I was worried that the first patch would add too much overhead, and
-cause the hardware to overrun - as the ARM version of these primecells
-does not have the capability to stop the clock when the FIFO fills
-up, any increase in IRQ latency to read the FIFO will result in an
-overrun.
+Doesn't seem so. I applied this patch and it works like a charm just
+like before on PB1176. (PL061 is compiled in, so it's not that other
+weird stuff being used.)
 
-So this is good news.  I've applied the first three patches in this
-series, but we do need to sort out the card detect situation properly
-before continuing.
+I hope I'm doing the right thing, boot with card inserted, this appears
+in the bootlog:
+
+mmc0: new SD card at address 80ca
+mmcblk0: mmc0:80ca SU512 483 MiB
+ mmcblk0: p1
+
+Remove card:
+mmc0: card 80ca removed
+
+Insert card:
+mmc0: new SD card at address 80ca
+mmcblk0: mmc0:80ca SU512 483 MiB
+ mmcblk0: p1
+
+And so on.
+
+Yours,
+Linus Walleij
