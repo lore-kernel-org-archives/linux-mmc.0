@@ -1,149 +1,336 @@
 From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: RE: [PATCHv2 1/4] sdhci-s3c: add support for the non standard minimal
- clock value
-Date: Thu, 29 Jul 2010 07:30:36 +0200
-Message-ID: <00b001cb2edf$33d6a200$9b83e600$%szyprowski@samsung.com>
+Subject: RE: [PATCHv5 3/4] sdhci-s3c: add support for new card detection
+ methods (driver part)
+Date: Thu, 29 Jul 2010 07:40:03 +0200
+Message-ID: <00b101cb2ee0$8167b300$84371900$%szyprowski@samsung.com>
 References: <1280326797-15792-1-git-send-email-m.szyprowski@samsung.com>
- <1280326797-15792-2-git-send-email-m.szyprowski@samsung.com>
- <4C505F44.20100@simtec.co.uk>
+ <1280326797-15792-4-git-send-email-m.szyprowski@samsung.com>
+ <4C5062CE.2000105@simtec.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:30641 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752168Ab0G2Fc7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2010 01:32:59 -0400
-In-reply-to: <4C505F44.20100@simtec.co.uk>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <4C5062CE.2000105@simtec.co.uk>
 Content-language: pl
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: 'Ben Dooks' <ben@simtec.co.uk>
 Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kgene.kim@samsung.com, broonie@opensource.wolfsonmicro.com, kyungmin.park@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org
+List-Id: linux-mmc@vger.kernel.org
 
 Hello,
 
-On Wednesday, July 28, 2010 6:48 PM Ben Dooks wrote:
+On Wednesday, July 28, 2010 7:03 PM Ben Dooks wrote:
 
 > On 28/07/10 15:19, Marek Szyprowski wrote:
-> > S3C SDHCI host controller can change the source for generating mmc clock.
-> > By default host bus clock is used, what causes some problems on machines
-> > with 133MHz bus, because the SDHCI divider cannot be as high get proper
-> > clock value for identification mode. This is not a problem for the
-> > controller, because it can generate lower frequencies from other clock
-> > sources. This patch adds a new quirk to SDHCI driver to calculate the
-> > minimal supported clock frequency.
+> > On some Samsung SoCs not all SDHCI controllers have card detect (CD)
+> > line. For some embedded designs it is not even needed, because ususally
+> > the device (like SDIO flash memory or wifi controller) is permanently
+> > wired to the controller. There are also systems which have a card detect
+> > line connected to some of the external interrupt lines or the presence
+> > of the card depends on some other actions (like enabling a power
+> > regulator).
 > >
-> > This fixes the flood of the following warnings on Samsung S5PV210 SoCs:
-> > mmc0: Minimum clock frequency too high for identification mode
+> > This patch adds support for all these cases. The following card
+> > detection methods are possible:
+> >
+> > 1. internal sdhci host card detect line
+> > 2. external event
+> > 3. external gpio interrupt
+> > 4. no card detect line, controller will poll for the card
+> > 5. no card detect line, card is permanently wired to the controller
+> > (once detected host won't poll it any more)
+> >
+> > By default, all existing code would use method #1, what is compatible
+> > with the previous version of the driver.
+> >
+> > In case of external event, two callbacks must be provided in platdata:
+> > ext_cd_init and ext_cd_cleanup. Both of them get a callback to a
+> > function that notifies the s3c-sdhci host contoller as their argument.
+> > That callback function should be called from the even dispatcher to let
+> > host notice the card insertion/removal.
+> >
+> > In case of external gpio interrupt, a gpio pin number must be provided
+> > in platdata (ext_cd_gpio parameter), as well as the information about
+> > the polarity of that gpio pin (ext_cd_gpio_invert). By default
+> > (ext_cd_gpio_invert == 0) gpio value 0 means 'card has been removed',
+> > but this can be changed to 'card has been removed' when
+> > ext_cd_gpio_invert == 1.
+> >
+> > This patch adds all required changes to sdhci-s3c driver.
 > >
 > > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 > > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > > ---
 > >
-> > Changes since V1:
+> > Changes since V4:
+> > - adapted to threaded irq approach in sdhci driver
 > > - rebased onto latest -mm kernel tree
+> > - fixed problem when gpio-base card detection was not called on driver
+> > init
+> >
+> > Changes since V3:
+> > - renamed patch to avoid confusion with the patch for the s3c-sdhci
+> > platform changes - added "(driver part)" in subject
+> >
+> > Changes since V2:
+> > According to Andrew Morton's suggestion local_irq_save() call in the
+> > sdhci_s3c_notify_change function has been replaced by spin_lock_irqsave
+> > (host driver already has a spinlock that is used for protecting internal
+> > state of the driver).
+> >
+> > Changes since V1:
+> > - added support for gpio external interrupt card based detect method
+> >   directly to sdhci-s3c driver
 > >
 > > ---
-> >  drivers/mmc/host/sdhci-of-esdhc.c |    1 +
-> >  drivers/mmc/host/sdhci-s3c.c      |   29 +++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci.c          |    2 +-
-> >  drivers/mmc/host/sdhci.h          |    2 ++
-> >  4 files changed, 33 insertions(+), 1 deletions(-)
+> >  drivers/mmc/host/sdhci-s3c.c |   78
+> ++++++++++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/sdhci.c     |   47 ++++++++++++++-----------
+> >  drivers/mmc/host/sdhci.h     |    1 +
+> >  3 files changed, 106 insertions(+), 20 deletions(-)
 > >
-> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-
-> of-esdhc.c
-> > index e9f99fe..763b364 100644
-> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> > @@ -124,6 +124,7 @@ struct sdhci_of_data sdhci_esdhc = {
-> >  		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
-> >  		  SDHCI_QUIRK_NO_BUSY_IRQ |
-> >  		  SDHCI_QUIRK_NONSTANDARD_CLOCK |
-> > +		  SDHCI_QUIRK_NONSTANDARD_MINCLOCK |
-> >  		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> >  		  SDHCI_QUIRK_PIO_NEEDS_DELAY |
-> >  		  SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET |
 > > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> > index d7058ee..5218f2b 100644
+> > index 9938ded..606e695 100644
 > > --- a/drivers/mmc/host/sdhci-s3c.c
 > > +++ b/drivers/mmc/host/sdhci-s3c.c
-> > @@ -203,9 +203,36 @@ static void sdhci_s3c_set_clock(struct sdhci_host
-> *host, unsigned int clock)
-> >  	}
-> >  }
+> > @@ -18,6 +18,7 @@
+> >  #include <linux/slab.h>
+> >  #include <linux/clk.h>
+> >  #include <linux/io.h>
+> > +#include <linux/gpio.h>
 > >
-> > +/**
-> > + * sdhci_s3c_get_min_clock - callback to get minimal supported clock
-> value
-> > + * @host: The SDHCI host being queried
-> > + *
-> > + * To init mmc host properly a minimal clock value is needed. For high
-> system
-> > + * bus clock's values the standard formula gives values out of allowed
-> range.
-> > + * The clock still can be set to lower values, if clock source other
-> then
-> > + * system bus is selected.
-> > +*/
-> > +static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
-> > +{
-> > +	struct sdhci_s3c *ourhost = to_s3c(host);
-> > +	unsigned int delta, min = UINT_MAX;
-> > +	int src;
-> > +
-> > +	for (src = 0; src < MAX_BUS_CLK; src++) {
-> > +		delta = sdhci_s3c_consider_clock(ourhost, src, 0);
-> > +		if (delta == UINT_MAX)
-> > +			continue;
-> > +		/* delta is a negative value in this case */
-> > +		if (-delta < min)
-> > +			min = -delta;
-> > +	}
-> > +	return min;
-> > +}
-> > +
-> >  static struct sdhci_ops sdhci_s3c_ops = {
-> >  	.get_max_clock		= sdhci_s3c_get_max_clk,
-> >  	.set_clock		= sdhci_s3c_set_clock,
-> > +	.get_min_clock		= sdhci_s3c_get_min_clock,
+> >  #include <linux/mmc/host.h>
+> >
+> > @@ -44,6 +45,8 @@ struct sdhci_s3c {
+> >  	struct resource		*ioarea;
+> >  	struct s3c_sdhci_platdata *pdata;
+> >  	unsigned int		cur_clk;
+> > +	int			ext_cd_irq;
+> > +	int			ext_cd_gpio;
+> >
+> >  	struct clk		*clk_io;
+> >  	struct clk		*clk_bus[MAX_BUS_CLK];
+> > @@ -235,6 +238,36 @@ static struct sdhci_ops sdhci_s3c_ops = {
+> >  	.get_min_clock		= sdhci_s3c_get_min_clock,
 > >  };
 > >
-> >  static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
-> > @@ -309,6 +336,8 @@ static int __devinit sdhci_s3c_probe(struct
-> platform_device *pdev)
-> >  	host->quirks = 0;
-> >  	host->irq = irq;
-> >
-> > +	host->quirks |= SDHCI_QUIRK_NONSTANDARD_MINCLOCK;
+> > +static void sdhci_s3c_notify_change(struct platform_device *dev, int
+> state)
+> > +{
+> > +	struct sdhci_host *host = platform_get_drvdata(dev);
+> > +	if (host) {
+> > +		mutex_lock(&host->lock);
+> > +		if (state) {
+> > +			dev_dbg(&dev->dev, "card inserted.\n");
+> > +			host->flags &= ~SDHCI_DEVICE_DEAD;
+> > +			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> > +			sdhci_card_detect(host);
+> > +		} else {
+> > +			dev_dbg(&dev->dev, "card removed.\n");
+> > +			host->flags |= SDHCI_DEVICE_DEAD;
+> > +			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> > +			sdhci_card_detect(host);
+> > +		}
+> > +		mutex_unlock(&host->lock);
+> > +	}
+> > +}
 > > +
-> >  	/* Setup quirks for the controller */
-> >  	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
+> > +static irqreturn_t sdhci_s3c_gpio_card_detect_thread(int irq, void
+> *dev_id)
+> > +{
+> > +	struct sdhci_s3c *sc = dev_id;
+> > +	int status = gpio_get_value(sc->ext_cd_gpio);
+> > +	if (sc->pdata->ext_cd_gpio_invert)
+> > +		status = !status;
+> 
+> maybe move the invert into sdhci_s3c_notify_change()
+
+IMHO this is not a good idea. pdata->ext_cd_gpio_invert is used only for
+GPIO-type card detection. External callback-based card detection can perform
+similar inversion by itself, no need to duplicate it in sdhci-s3c driver.
+
+> 
+> > +	sdhci_s3c_notify_change(sc->pdev, status);
+> > +	return IRQ_HANDLED;
+> > +}
+> > +
+> >  static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+> >  {
+> >  	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
+> > @@ -272,6 +305,7 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	sc->host = host;
+> >  	sc->pdev = pdev;
+> >  	sc->pdata = pdata;
+> > +	sc->ext_cd_gpio = -1;
 > >
+> >  	platform_set_drvdata(pdev, host);
+> >
+> > @@ -355,6 +389,13 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	 * SDHCI block, or a missing configuration that needs to be set. */
+> >  	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
+> >
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
+> > +	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+> > +		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> > +
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+> > +		host->mmc->caps = MMC_CAP_NONREMOVABLE;
+> > +
+> >  	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
+> >  			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+> >
+> > @@ -367,6 +408,33 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  		goto err_add_host;
+> >  	}
+> >
+> > +	/* pdata->ext_cd_init might call sdhci_s3c_notify_change immediately,
+> > +	   so it can be called only after sdhci_add_host() */
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
+> > +		pdata->ext_cd_init(&sdhci_s3c_notify_change);
+> 
+> do we really need a callback for this?
+
+Yes, there are cases that will use it. An example is a wifi sdio card,
+permanently wired to sdhci controller, enabled/disabled by some rfkill glue.
+This glue enables power regulators and notifies sdhci driver that the card
+has been 'inserted' or 'removed'. This saves some power as otherwise sdhci
+driver would need to pool for the card presence.
+
+> > +
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_GPIO &&
+> > +	    gpio_is_valid(pdata->ext_cd_gpio)) {
+> > +		int status;
+> > +
+> > +		gpio_request(pdata->ext_cd_gpio, "SDHCI EXT CD");
+> > +		sc->ext_cd_gpio = pdata->ext_cd_gpio;
+> > +
+> > +		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
+> > +		if (sc->ext_cd_irq &&
+> > +		    request_threaded_irq(sc->ext_cd_irq, NULL,
+> sdhci_s3c_gpio_card_detect_thread,
+> > +				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+> > +				dev_name(&pdev->dev), sc)) {
+> > +			dev_err(&pdev->dev, "cannot request irq for card
+> detect\n");
+> > +			sc->ext_cd_irq = 0;
+> > +		}
+> > +
+> > +		status = gpio_get_value(sc->ext_cd_gpio);
+> > +		if (sc->pdata->ext_cd_gpio_invert)
+> > +			status = !status;
+> > +		sdhci_s3c_notify_change(sc->pdev, status);
+> > +	}
+> > +
+> >  	return 0;
+> >
+> >   err_add_host:
+> > @@ -391,10 +459,20 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >
+> >  static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+> >  {
+> > +	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
+> >  	struct sdhci_host *host =  platform_get_drvdata(pdev);
+> >  	struct sdhci_s3c *sc = sdhci_priv(host);
+> >  	int ptr;
+> >
+> > +	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
+> > +		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
+> > +
+> > +	if (sc->ext_cd_irq)
+> > +		free_irq(sc->ext_cd_irq, sc);
+> > +
+> > +	if (sc->ext_cd_gpio != -1)
+> > +		gpio_free(sc->ext_cd_gpio);
+> > +
+> >  	sdhci_remove_host(host, 1);
+> >
+> >  	for (ptr = 0; ptr < 3; ptr++) {
 > > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index 07b2695..682b285 100644
+> > index 682b285..aa82344 100644
 > > --- a/drivers/mmc/host/sdhci.c
 > > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -1776,7 +1776,7 @@ int sdhci_add_host(struct sdhci_host *host)
-> >  	 * Set host parameters.
-> >  	 */
-> >  	mmc->ops = &sdhci_ops;
-> > -	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK &&
-> > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_MINCLOCK &&
-> >  			host->ops->get_min_clock)
-> >  		mmc->f_min = host->ops->get_min_clock(host);
+> > @@ -1244,26 +1244,6 @@ static const struct mmc_host_ops sdhci_ops = {
+> >   *
+> *
+> >
+> \**************************************************************************
+> ***/
+> >
+> > -static void sdhci_card_detect(struct sdhci_host *host)
+> > -{
+> > -	if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT)) {
+> > -		if (host->mrq) {
+> > -			printk(KERN_ERR "%s: Card removed during transfer!\n",
+> > -				mmc_hostname(host->mmc));
+> > -			printk(KERN_ERR "%s: Resetting controller.\n",
+> > -				mmc_hostname(host->mmc));
+> > -
+> > -			sdhci_reset(host, SDHCI_RESET_CMD);
+> > -			sdhci_reset(host, SDHCI_RESET_DATA);
+> > -
+> > -			host->mrq->cmd->error = -ENOMEDIUM;
+> > -			schedule_work(&host->finish_work);
+> > -		}
+> > -	}
+> > -
+> > -	mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+> > -}
+> > -
+> >  static void sdhci_finish_work(struct work_struct *wk)
+> >  {
+> >  	struct sdhci_host *host;
+> > @@ -1627,6 +1607,33 @@ EXPORT_SYMBOL_GPL(sdhci_resume_host);
+> >
+> >
+> /**************************************************************************
+> ***\
+> >   *
+> *
+> > + * Implementation dependent callbacks
+> *
+> > + *
+> *
+> >
+> +\*************************************************************************
+> ****/
+> > +
+> > +void sdhci_card_detect(struct sdhci_host *host)
+> > +{
+> > +	if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT)) {
+> > +		if (host->mrq) {
+> > +			printk(KERN_ERR "%s: Card removed during transfer!\n",
+> > +				mmc_hostname(host->mmc));
+> > +			printk(KERN_ERR "%s: Resetting controller.\n",
+> > +				mmc_hostname(host->mmc));
+> > +
+> > +			sdhci_reset(host, SDHCI_RESET_CMD);
+> > +			sdhci_reset(host, SDHCI_RESET_DATA);
+> > +
+> > +			host->mrq->cmd->error = -ENOMEDIUM;
+> > +			schedule_work(&host->finish_work);
+> > +		}
+> > +	}
+> > +
+> > +	mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+> > +}
+> > +EXPORT_SYMBOL_GPL(sdhci_card_detect);
 > 
-> We're begining to run out of quirk space, given these fields will
-> be initialised to NULL if not used, then why not just check for
-> the op being present?
+> somehow this function seems to have been changed without a lot of
+> obvious changes?
 
-Ok, I can remove the quirk and just check if the op is present. However
-having a separate quirk makes the code easier to understand (quirk shows 
-that the particular implementation differs from the standard).
+I've just moved this function out of 'workers section' to the new 
+'implementation dependent callbacks' section to make it easier to read the code.
+The function itself has been modified when sdhci driver has been converted to
+use threaded irqs rather than tasklets.
+
+I you think that it would be better to leave the function in the place where it
+was, just let me know.
 
 Best regards
 --
 Marek Szyprowski
 Samsung Poland R&D Center
-
-
