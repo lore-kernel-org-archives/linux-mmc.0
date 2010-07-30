@@ -1,16 +1,16 @@
 From: Greg KH <gregkh@suse.de>
-Subject: [117/140] libertas/sdio: 8686: set ECSI bit for 1-bit transfers
-Date: Fri, 30 Jul 2010 10:31:22 -0700
-Message-ID: <20100730173113.259977401@clark.site>
-References: <20100730173205.GA22581@kroah.com>
+Subject: [168/205] libertas/sdio: 8686: set ECSI bit for 1-bit transfers
+Date: Fri, 30 Jul 2010 10:53:05 -0700
+Message-ID: <20100730175149.193511268@clark.site>
+References: <20100730175238.GA3924@kroah.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100730173205.GA22581@kroah.com>
+In-Reply-To: <20100730175238.GA3924@kroah.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@kernel.org
 Cc: stable-review@kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, alan@lxorguk.ukuu.org.uk, Daniel Mack <daniel@caiaq.de>, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Dan Williams <dcbw@redhat.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-2.6.33-stable review patch.  If anyone has any objections, please let us know.
+2.6.34-stable review patch.  If anyone has any objections, please let us know.
 
 ------------------
 
@@ -45,7 +45,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
 
 --- a/drivers/net/wireless/libertas/if_sdio.c
 +++ b/drivers/net/wireless/libertas/if_sdio.c
-@@ -34,6 +34,8 @@
+@@ -35,6 +35,8 @@
  #include <linux/mmc/card.h>
  #include <linux/mmc/sdio_func.h>
  #include <linux/mmc/sdio_ids.h>
@@ -54,7 +54,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
  
  #include "host.h"
  #include "decl.h"
-@@ -942,6 +944,7 @@ static int if_sdio_probe(struct sdio_fun
+@@ -943,6 +945,7 @@ static int if_sdio_probe(struct sdio_fun
  	int ret, i;
  	unsigned int model;
  	struct if_sdio_packet *packet;
@@ -62,7 +62,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
  
  	lbs_deb_enter(LBS_DEB_SDIO);
  
-@@ -1022,6 +1025,25 @@ static int if_sdio_probe(struct sdio_fun
+@@ -1023,6 +1026,25 @@ static int if_sdio_probe(struct sdio_fun
  	if (ret)
  		goto disable;
  
@@ -97,5 +97,5 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
 +#define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
 +#define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
  
- #define  SDIO_BUS_CD_DISABLE     0x80	/* disable pull-up on DAT3 (pin 1) */
+ #define  SDIO_BUS_ASYNC_INT	0x20
  
