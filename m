@@ -1,159 +1,90 @@
-From: akpm@linux-foundation.org
-Subject: + sdhci-add-regulator-support.patch added to -mm tree
-Date: Thu, 29 Jul 2010 13:52:32 -0700
-Message-ID: <201007292052.o6TKqWoh000627@imap1.linux-foundation.org>
+From: Roy Zang <tie-fei.zang@freescale.com>
+Subject: [PATCH 3/3 v2] mmc: Add ESDHC weird voltage bits workaround
+Date: Fri, 30 Jul 2010 11:52:57 +0800
+Message-ID: <1280461977-2023-1-git-send-email-tie-fei.zang@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:54011 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757208Ab0G2Uwk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2010 16:52:40 -0400
+Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:6801 "EHLO
+	VA3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750784Ab0G3EHe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jul 2010 00:07:34 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: m.szyprowski@samsung.com, broonie@opensource.wolfsonmicro.com, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linuxppc-dev@ozlabs.org, akpm@linux-foundation.org
 
+P4080 ESDHC controller does not support 1.8V and 3.0V voltage. but the
+host controller capabilities register wrongly set the bits.
+This patch adds the workaround to correct the weird voltage setting bits.
 
-The patch titled
-     sdhci: add regulator support
-has been added to the -mm tree.  Its filename is
-     sdhci-add-regulator-support.patch
-
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: sdhci: add regulator support
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-
-This patch adds support for regulator API to sdhci core driver. 
-Regulators can be used to disable power in suspended state to reduce
-dissipated energy.
-
-Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-Acked-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
 ---
+This is the second version of patch 
+http://patchwork.ozlabs.org/patch/60106/
+According to the comment, remove some un-necessary setting.
 
- drivers/mmc/host/sdhci.c |   26 +++++++++++++++++++++++++-
- drivers/mmc/host/sdhci.h |    2 ++
- 2 files changed, 27 insertions(+), 1 deletion(-)
+Together with patch
+http://patchwork.ozlabs.org/patch/60111/
+http://patchwork.ozlabs.org/patch/60116/
 
-diff -puN drivers/mmc/host/sdhci.c~sdhci-add-regulator-support drivers/mmc/host/sdhci.c
---- a/drivers/mmc/host/sdhci.c~sdhci-add-regulator-support
-+++ a/drivers/mmc/host/sdhci.c
-@@ -23,6 +23,7 @@
- #include <linux/mutex.h>
- #include <linux/scatterlist.h>
- #include <linux/jiffies.h>
-+#include <linux/regulator/consumer.h>
- 
- #include <linux/leds.h>
- 
-@@ -1573,7 +1574,10 @@ int sdhci_suspend_host(struct sdhci_host
- 
- 	free_irq(host->irq, host);
- 
--	return 0;
-+	if (host->vmmc)
-+		ret = regulator_disable(host->vmmc);
-+
-+	return ret;
- }
- 
- EXPORT_SYMBOL_GPL(sdhci_suspend_host);
-@@ -1582,6 +1586,13 @@ int sdhci_resume_host(struct sdhci_host 
- {
- 	int ret;
- 
-+	if (host->vmmc) {
-+		int ret = regulator_enable(host->vmmc);
-+		if (ret)
-+			return ret;
-+	}
-+
-+
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 		if (host->ops->enable_dma)
- 			host->ops->enable_dma(host);
-@@ -1878,6 +1889,14 @@ int sdhci_add_host(struct sdhci_host *ho
- 	if (ret)
- 		return ret;
- 
-+	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
-+	if (IS_ERR(host->vmmc)) {
-+		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
-+		host->vmmc = NULL;
-+	} else {
-+		regulator_enable(host->vmmc);
-+	}
-+
- 	sdhci_init(host, 0);
- 
- #ifdef CONFIG_MMC_DEBUG
-@@ -1955,6 +1974,11 @@ void sdhci_remove_host(struct sdhci_host
- 
- 	flush_work(&host->finish_work);
- 
-+	if (host->vmmc) {
-+		regulator_disable(host->vmmc);
-+		regulator_put(host->vmmc);
-+	}
-+
- 	kfree(host->adma_desc);
- 	kfree(host->align_buffer);
- 
-diff -puN drivers/mmc/host/sdhci.h~sdhci-add-regulator-support drivers/mmc/host/sdhci.h
---- a/drivers/mmc/host/sdhci.h~sdhci-add-regulator-support
-+++ a/drivers/mmc/host/sdhci.h
-@@ -253,6 +253,8 @@ struct sdhci_host {
- 
- 	const struct sdhci_ops	*ops;		/* Low level hw interface */
- 
-+	struct regulator	*vmmc;		/* Power regulator */
-+
- 	/* Internal data */
- 	struct mmc_host		*mmc;		/* MMC structure */
- 	u64			dma_mask;	/* custom DMA mask */
-_
+This serial patches add mmc support for p4080 silicon
 
-Patches currently in -mm which might be from m.szyprowski@samsung.com are
+ drivers/mmc/host/sdhci-of-core.c |    4 ++++
+ drivers/mmc/host/sdhci.c         |    8 ++++++++
+ drivers/mmc/host/sdhci.h         |    4 ++++
+ 3 files changed, 16 insertions(+), 0 deletions(-)
 
-linux-next.patch
-sdhci-s3c-add-support-for-the-non-standard-minimal-clock-value.patch
-sdhci-s3c-enable-sdhci_quirk_no_hispd_bit-quirk.patch
-sdhci-s3c-add-support-for-new-card-detection-methods.patch
-sdhci-add-regulator-support.patch
-s3c-fb-change-to-depending-on-config_s3c_fb_dev.patch
-s3c-fb-add-default-window-feature.patch
-s3c-fb-fix-distortedness-situation-for-the-mode-more-then-24bpp.patch
-s3c-fb-only-init-window-colour-key-controls-for-windows-with-blending.patch
-s3c-fb-initial-move-to-unifying-the-header-files.patch
-s3c-fb-udpate-to-support-s3c2416-s3c2443-style-hardware.patch
-s3c-fb-integrate-palette-setup-code-into-main-driver.patch
-s3c-fb-fix-various-null-references-on-framebuffer-memory-alloc-failure.patch
-s3c-fb-correct-framesel1-bitfield-defines-for-vidintcon0-register.patch
-s3c-fb-separate-s5pc100-and-s5pv210-framebuffer-driver-data-structures.patch
-s3c-fb-add-device-name-initialization.patch
-s3c-fb-add-support-for-display-panning.patch
-s3c-fb-add-wait-for-vsync-ioctl.patch
-s3c-fb-window-3-of-64xx-does-not-have-an-osd_d-register.patch
-s3c-fb-add-shadowcon-shadow-register-locking-support-for-s5pv210.patch
-s3c-fb-correct-window-osd-size-and-alpha-register-handling.patch
-s3c-fb-protect-window-specific-registers-during-updates.patch
-s3c-fb-fix-section-mismatch.patch
-s3c-fb-add-support-for-dma-channel-control-on-s5pv210.patch
-s3c-fb-automatically-calculate-pixel-clock-when-none-is-given.patch
-arm-samsung-remove-pixclock-from-several-boards.patch
+diff --git a/drivers/mmc/host/sdhci-of-core.c b/drivers/mmc/host/sdhci-of-core.c
+index 0c30242..1f3913d 100644
+--- a/drivers/mmc/host/sdhci-of-core.c
++++ b/drivers/mmc/host/sdhci-of-core.c
+@@ -164,6 +164,10 @@ static int __devinit sdhci_of_probe(struct of_device *ofdev,
+ 	if (sdhci_of_wp_inverted(np))
+ 		host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
+ 
++	if (of_device_is_compatible(np, "fsl,p4080-esdhc"))
++		host->quirks |= (SDHCI_QUIRK_QORIQ_NO_VDD_180
++				|SDHCI_QUIRK_QORIQ_NO_VDD_300);
++
+ 	clk = of_get_property(np, "clock-frequency", &size);
+ 	if (clk && size == sizeof(*clk) && *clk)
+ 		of_host->clock = *clk;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1424d08..a667790 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1699,6 +1699,14 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+ 
++	 /* Workaround for P4080 host controller capabilities
++	  * 1.8V and 3.0V do not supported*/
++	if (host->quirks & SDHCI_QUIRK_QORIQ_NO_VDD_180)
++		caps &= ~SDHCI_CAN_VDD_180;
++
++	if (host->quirks & SDHCI_QUIRK_QORIQ_NO_VDD_300)
++		caps &= ~SDHCI_CAN_VDD_300;
++
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+ 	else if (!(caps & SDHCI_CAN_DO_SDMA))
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index aa112aa..389b58c 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -243,6 +243,10 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
+ /* Controller uses Auto CMD12 command to stop the transfer */
+ #define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12		(1<<27)
++/* Controller cannot support 1.8V */
++#define SDHCI_QUIRK_QORIQ_NO_VDD_180			(1<<28)
++/* Controller cannot support 3.0V */
++#define SDHCI_QUIRK_QORIQ_NO_VDD_300			(1<<29)
+ 
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
+-- 
+1.5.6.5
+
 
