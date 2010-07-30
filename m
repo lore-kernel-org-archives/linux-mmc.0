@@ -1,101 +1,60 @@
-From: Greg KH <gregkh@suse.de>
-Subject: [168/205] libertas/sdio: 8686: set ECSI bit for 1-bit transfers
-Date: Fri, 30 Jul 2010 10:53:05 -0700
-Message-ID: <20100730175149.193511268@clark.site>
-References: <20100730175238.GA3924@kroah.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100730175238.GA3924@kroah.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@kernel.org
-Cc: stable-review@kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, alan@lxorguk.ukuu.org.uk, Daniel Mack <daniel@caiaq.de>, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Dan Williams <dcbw@redhat.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
+From: "Gabay, Benzy" <benzyg@ti.com>
+Subject: RE: MX27 libertas_sdio SDIO Interrupts vs available bitrate
+Date: Fri, 30 Jul 2010 15:08:06 -0500
+Message-ID: <676FD6AA0F002F49B89E70F0C5EFD22C1311499C43@dlee04.ent.ti.com>
+References: <20100729124604.79f88553@speedy>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from devils.ext.ti.com ([198.47.26.153]:48579 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754246Ab0G3UIR convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jul 2010 16:08:17 -0400
+In-Reply-To: <20100729124604.79f88553@speedy>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andreas Feuersinger <andreas.feuersinger@spintower.eu>
+Cc: "libertas-dev@lists.infradead.org" <libertas-dev@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
 
-2.6.34-stable review patch.  If anyone has any objections, please let us know.
+Hi Andreas
 
-------------------
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Andreas Feuersinger
+> Sent: Thursday, July 29, 2010 5:46 AM
+> To: libertas-dev@lists.infradead.org; linux-mmc@vger.kernel.org; linux-
+> wireless@vger.kernel.org
+> Subject: MX27 libertas_sdio SDIO Interrupts vs available bitrate
+> 
+> 
+> Hi,
+> 
+> I'm trying to improve throughput of the Marvell 8686 sdio wlan module.
+> Unfortunately I have to stick with kernel 2.6.22.
+> 
+> Everything works except for very bad datarate. So far the mxc_mmc
+> driver does not handle any SDIO interrupts. Could that be the reason
+> for the bad performance?
+> 
+> 
+> I figured, it does not make any difference wheter I use DMA for data
+> transfer or not (odd?)
+If interrupts are not handled in MMC level and you are disabling DMA operation how then will the transfer completion is handled in that case?
 
-From: Daniel Mack <daniel@caiaq.de>
 
-commit 8a64c0f6b7ec7f758c4ef445e49f479e27fa2236 upstream.
+> 
+> I get only up to 90K/s.
+> 
+> 
+> thanks!
+> 
+> Andreas
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-When operating in 1-bit mode, SDAT1 is used as dedicated interrupt line.
-However, the 8686 will only drive this line when the ECSI bit is set in
-the CCCR_IF register.
-
-Thanks to Alagu Sankar for pointing me in the right direction.
-
-Signed-off-by: Daniel Mack <daniel@caiaq.de>
-Cc: Alagu Sankar <alagusankar@embwise.com>
-Cc: Volker Ernst <volker.ernst@txtr.com>
-Cc: Dan Williams <dcbw@redhat.com>
-Cc: John W. Linville <linville@tuxdriver.com>
-Cc: Holger Schurig <hs4233@mail.mn-solutions.de>
-Cc: Bing Zhao <bzhao@marvell.com>
-Cc: libertas-dev@lists.infradead.org
-Cc: linux-wireless@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-Acked-by: Dan Williams <dcbw@redhat.com>
-Signed-off-by: John W. Linville <linville@tuxdriver.com>
-Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
-
----
- drivers/net/wireless/libertas/if_sdio.c |   22 ++++++++++++++++++++++
- include/linux/mmc/sdio.h                |    2 ++
- 2 files changed, 24 insertions(+)
-
---- a/drivers/net/wireless/libertas/if_sdio.c
-+++ b/drivers/net/wireless/libertas/if_sdio.c
-@@ -35,6 +35,8 @@
- #include <linux/mmc/card.h>
- #include <linux/mmc/sdio_func.h>
- #include <linux/mmc/sdio_ids.h>
-+#include <linux/mmc/sdio.h>
-+#include <linux/mmc/host.h>
- 
- #include "host.h"
- #include "decl.h"
-@@ -943,6 +945,7 @@ static int if_sdio_probe(struct sdio_fun
- 	int ret, i;
- 	unsigned int model;
- 	struct if_sdio_packet *packet;
-+	struct mmc_host *host = func->card->host;
- 
- 	lbs_deb_enter(LBS_DEB_SDIO);
- 
-@@ -1023,6 +1026,25 @@ static int if_sdio_probe(struct sdio_fun
- 	if (ret)
- 		goto disable;
- 
-+	/* For 1-bit transfers to the 8686 model, we need to enable the
-+	 * interrupt flag in the CCCR register. Set the MMC_QUIRK_LENIENT_FN0
-+	 * bit to allow access to non-vendor registers. */
-+	if ((card->model == IF_SDIO_MODEL_8686) &&
-+	    (host->caps & MMC_CAP_SDIO_IRQ) &&
-+	    (host->ios.bus_width == MMC_BUS_WIDTH_1)) {
-+		u8 reg;
-+
-+		func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
-+		reg = sdio_f0_readb(func, SDIO_CCCR_IF, &ret);
-+		if (ret)
-+			goto release_int;
-+
-+		reg |= SDIO_BUS_ECSI;
-+		sdio_f0_writeb(func, reg, SDIO_CCCR_IF, &ret);
-+		if (ret)
-+			goto release_int;
-+	}
-+
- 	card->ioport = sdio_readb(func, IF_SDIO_IOPORT, &ret);
- 	if (ret)
- 		goto release_int;
---- a/include/linux/mmc/sdio.h
-+++ b/include/linux/mmc/sdio.h
-@@ -94,6 +94,8 @@
- 
- #define  SDIO_BUS_WIDTH_1BIT	0x00
- #define  SDIO_BUS_WIDTH_4BIT	0x02
-+#define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
-+#define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
- 
- #define  SDIO_BUS_ASYNC_INT	0x20
- 
+Cheers
+      Benzy Gabay
