@@ -1,226 +1,333 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: [PATCH 2/2] MMC: fix all hangs related to mmc/sd card insert/removal during suspend/resume.
-Date: Fri, 30 Jul 2010 16:57:29 +0300
-Message-ID: <1280498249-6845-3-git-send-email-maximlevitsky@gmail.com>
-References: <1280498249-6845-1-git-send-email-maximlevitsky@gmail.com>
+From: Peppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: RE: [PATCH] mmc: add SDHCI driver for STM platforms.
+Date: Fri, 30 Jul 2010 16:04:16 +0200
+Message-ID: <107012446AC13D4C90B85672EAF5FB0E9C2E08E16C@SAFEX1MAIL3.st.com>
+References: <1280392279-17406-1-git-send-email-peppe.cavallaro@st.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:42007 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756427Ab0G3N5q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jul 2010 09:57:46 -0400
-Received: by mail-fx0-f46.google.com with SMTP id 14so862762fxm.19
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Jul 2010 06:57:45 -0700 (PDT)
-In-Reply-To: <1280498249-6845-1-git-send-email-maximlevitsky@gmail.com>
+Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:60345 "EHLO
+	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758604Ab0G3OEv convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 30 Jul 2010 10:04:51 -0400
+Received: from zeta.dmz-us.st.com (zeta.dmz-us.st.com [167.4.80.115])
+	by beta.dmz-us.st.com (STMicroelectronics) with ESMTP id 0C7DBD6
+	for <linux-mmc@vger.kernel.org>; Fri, 30 Jul 2010 14:01:37 +0000 (GMT)
+Received: from Webmail-eu.st.com (safex1hubcas5.st.com [10.75.90.71])
+	by zeta.dmz-us.st.com (STMicroelectronics) with ESMTP id C9D183A3
+	for <linux-mmc@vger.kernel.org>; Fri, 30 Jul 2010 14:04:43 +0000 (GMT)
+In-Reply-To: <1280392279-17406-1-git-send-email-peppe.cavallaro@st.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@canonical.com>, Adrian Hunter <adrian.hunter@nokia.com>, Maxim Levitsky <maximlevitsky@gmail.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
-suspend, the card will be removed, therefore this patch doesn't change
-the behavior of this option.
+Hello!
+I wonder if somebody's had some spare moment to review this patch.
+Welcome advice and feedback as usual
 
-However the removal will be done by pm notifier, which runs while
-userspace is still not frozen and thus can freely use del_gendisk,
-without the risk of deadlock which would happen otherwise.
+Many thanks in advance.
 
+Best Regards,
+Giuseppe
 
-Card detect workqueue is now disabled while userspace is frozen,
-Therefore if you do use CONFIG_MMC_UNSAFE_RESUME,
-and remove the card during suspend, the removal will be
-detected as soon as userspace is unfrozen, again at the moment
-it is safe to call del_gendisk.
-
-Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
-
-Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
----
- drivers/mmc/core/core.c  |   82 ++++++++++++++++++++++++++++++++--------------
- drivers/mmc/core/host.c  |    5 +++
- include/linux/mmc/host.h |    4 ++
- 3 files changed, 66 insertions(+), 25 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 569e94d..0366fe8 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1057,6 +1057,17 @@ void mmc_rescan(struct work_struct *work)
- 		container_of(work, struct mmc_host, detect.work);
- 	u32 ocr;
- 	int err;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (host->rescan_disable) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		return;
-+	}
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
- 
- 	mmc_bus_get(host);
- 
-@@ -1266,19 +1277,6 @@ int mmc_suspend_host(struct mmc_host *host)
- 	if (host->bus_ops && !host->bus_dead) {
- 		if (host->bus_ops->suspend)
- 			err = host->bus_ops->suspend(host);
--		if (err == -ENOSYS || !host->bus_ops->resume) {
--			/*
--			 * We simply "remove" the card in this case.
--			 * It will be redetected on resume.
--			 */
--			if (host->bus_ops->remove)
--				host->bus_ops->remove(host);
--			mmc_claim_host(host);
--			mmc_detach_bus(host);
--			mmc_release_host(host);
--			host->pm_flags = 0;
--			err = 0;
--		}
- 	}
- 	mmc_bus_put(host);
- 
-@@ -1310,26 +1308,60 @@ int mmc_resume_host(struct mmc_host *host)
- 			printk(KERN_WARNING "%s: error %d during resume "
- 					    "(card was removed?)\n",
- 					    mmc_hostname(host), err);
--			if (host->bus_ops->remove)
--				host->bus_ops->remove(host);
--			mmc_claim_host(host);
--			mmc_detach_bus(host);
--			mmc_release_host(host);
--			/* no need to bother upper layers */
- 			err = 0;
- 		}
- 	}
- 	mmc_bus_put(host);
- 
--	/*
--	 * We add a slight delay here so that resume can progress
--	 * in parallel.
--	 */
--	mmc_detect_change(host, 1);
--
- 	return err;
- }
- 
-+/* Do the card removal on suspend if card is assumed removeable
-+ * Do that in pm notifier while userspace isn't yet frozen, so we will be able
-+   to sync the card.
-+*/
-+int mmc_pm_notify(struct notifier_block *notify_block,
-+					unsigned long mode, void *unused)
-+{
-+	struct mmc_host *host = container_of(
-+		notify_block, struct mmc_host, pm_notify);
-+	unsigned long flags;
-+
-+
-+	switch (mode) {
-+	case PM_HIBERNATION_PREPARE:
-+	case PM_SUSPEND_PREPARE:
-+
-+		spin_lock_irqsave(&host->lock, flags);
-+		host->rescan_disable = 1;
-+		spin_unlock_irqrestore(&host->lock, flags);
-+
-+		if (!host->bus_ops || host->bus_ops->suspend)
-+			break;
-+
-+		mmc_claim_host(host);
-+
-+		if (host->bus_ops->remove)
-+			host->bus_ops->remove(host);
-+
-+		mmc_detach_bus(host);
-+		mmc_release_host(host);
-+		host->pm_flags = 0;
-+		break;
-+
-+	case PM_POST_SUSPEND:
-+	case PM_POST_HIBERNATION:
-+
-+		spin_lock_irqsave(&host->lock, flags);
-+		host->rescan_disable = 0;
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		mmc_detect_change(host, 0);
-+
-+	}
-+
-+	return 0;
-+}
-+
- EXPORT_SYMBOL(mmc_resume_host);
- 
- #endif
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 4735390..01646a1 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -17,6 +17,7 @@
- #include <linux/pagemap.h>
- #include <linux/leds.h>
- #include <linux/slab.h>
-+#include <linux/suspend.h>
- 
- #include <linux/mmc/host.h>
- 
-@@ -85,6 +86,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	init_waitqueue_head(&host->wq);
- 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
- 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
-+	host->pm_notify.notifier_call = mmc_pm_notify;
-+
- 
- 	/*
- 	 * By default, hosts do not support SGIO or large requests.
-@@ -133,6 +136,7 @@ int mmc_add_host(struct mmc_host *host)
- #endif
- 
- 	mmc_start_host(host);
-+	register_pm_notifier(&host->pm_notify);
- 
- 	return 0;
- }
-@@ -149,6 +153,7 @@ EXPORT_SYMBOL(mmc_add_host);
-  */
- void mmc_remove_host(struct mmc_host *host)
- {
-+	unregister_pm_notifier(&host->pm_notify);
- 	mmc_stop_host(host);
- 
- #ifdef CONFIG_DEBUG_FS
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index f65913c..9063df5 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -124,6 +124,7 @@ struct mmc_host {
- 	unsigned int		f_min;
- 	unsigned int		f_max;
- 	u32			ocr_avail;
-+	struct notifier_block	pm_notify;
- 
- #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
- #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
-@@ -183,6 +184,7 @@ struct mmc_host {
- 
- 	/* Only used with MMC_CAP_DISABLE */
- 	int			enabled;	/* host is enabled */
-+	int			rescan_disable;	/* disable card detection */
- 	int			nesting_cnt;	/* "enable" nesting count */
- 	int			en_dis_recurs;	/* detect recursion */
- 	unsigned int		disable_delay;	/* disable delay in msecs */
-@@ -257,6 +259,8 @@ int mmc_card_can_sleep(struct mmc_host *host);
- int mmc_host_enable(struct mmc_host *host);
- int mmc_host_disable(struct mmc_host *host);
- int mmc_host_lazy_disable(struct mmc_host *host);
-+int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
-+
- 
- static inline void mmc_set_disable_delay(struct mmc_host *host,
- 					 unsigned int disable_delay)
--- 
-1.7.0.4
+> -----Original Message-----
+> From: Giuseppe CAVALLARO [mailto:peppe.cavallaro@st.com]
+> Sent: Thursday, July 29, 2010 10:31 AM
+> To: linux-mmc@vger.kernel.org
+> Cc: Peppe CAVALLARO
+> Subject: [PATCH] mmc: add SDHCI driver for STM platforms.
+> 
+> This patch adds the Arasan MMC/SD/SDIO driver
+> for the STM ST40 platforms. It is based on the
+> SDHCI driver.
+> It has been tested on the STx7106/STx7108/STx5289
+> platforms.
+> 
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> ---
+>  drivers/mmc/host/Kconfig      |   12 +++
+>  drivers/mmc/host/Makefile     |    1 +
+>  drivers/mmc/host/sdhci-stm.c  |  184
+> +++++++++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/sdhci-stm.h |   40 +++++++++
+>  4 files changed, 237 insertions(+), 0 deletions(-)
+>  create mode 100644 drivers/mmc/host/sdhci-stm.c
+>  create mode 100644 include/linux/mmc/sdhci-stm.h
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index f06d06e..a5a3313 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -148,6 +148,18 @@ config MMC_SDHCI_SPEAR
+> 
+>  	  If unsure, say N.
+> 
+> +config MMC_SDHCI_STM
+> +	tristate "SDHCI support on STM platforms"
+> +	depends on MMC_SDHCI && CPU_SUBTYPE_ST40
+> +	help
+> +	  This selects the Secure Digital Host Controller Interface (SDHCI)
+> +	  often referrered to as the HSMMC block in some of the STM range
+> +	  of SoC (e.g. STx7106/STx7108/STx5289).
+> +
+> +	  If you have a controller with this interface, say Y or M here.
+> +
+> +	  If unsure, say N.
+> +
+>  config MMC_SDHCI_S3C_DMA
+>  	bool "DMA support on S3C SDHCI"
+>  	depends on MMC_SDHCI_S3C && EXPERIMENTAL
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index e30c2ee..7b47e8d 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -15,6 +15,7 @@ obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+>  obj-$(CONFIG_MMC_SDHCI_PLTFM)	+= sdhci-pltfm.o
+>  obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
+>  obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
+> +obj-$(CONFIG_MMC_SDHCI_STM)	+= sdhci-stm.o
+>  obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
+>  obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
+>  obj-$(CONFIG_MMC_OMAP)		+= omap.o
+> diff --git a/drivers/mmc/host/sdhci-stm.c b/drivers/mmc/host/sdhci-stm.c
+> new file mode 100644
+> index 0000000..397ecf7
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-stm.c
+> @@ -0,0 +1,184 @@
+> +/* linux/drivers/mmc/host/sdhci-stm.c
+> + *
+> + * Copyright (C) 2010 STMicroelectronics Ltd
+> + * Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> + *
+> + * SDHCI support for STM platforms
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + */
+> +
+> +#include <linux/platform_device.h>
+> +#include <linux/slab.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/io.h>
+> +
+> +#include <linux/mmc/sdhci-stm.h>
+> +
+> +#include "sdhci.h"
+> +
+> +static struct sdhci_ops sdhci_pltfm_ops = {
+> +	/* Nothing to do for now. */
+> +};
+> +
+> +struct sdhci_stm {
+> +	struct sdhci_host *host;
+> +	struct platform_device *pdev;
+> +	struct resource *ioarea;
+> +	struct sdhci_platform_data *pdata;
+> +};
+> +
+> +static int __devinit sdhci_probe(struct platform_device *pdev)
+> +{
+> +	struct sdhci_platform_data *pdata;
+> +	struct device *dev = &pdev->dev;
+> +	struct sdhci_host *host;
+> +	struct sdhci_stm *sc;
+> +	struct resource *res;
+> +	int ret, irq;
+> +
+> +	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	if (!res) {
+> +		dev_err(dev, "no memory specified\n");
+> +		return -ENOENT;
+> +	}
+> +
+> +	irq = platform_get_irq_byname(pdev, "mmcirq");
+> +	if (irq < 0) {
+> +		dev_err(dev, "no irq specified\n");
+> +		return irq;
+> +	}
+> +
+> +	pdata = pdev->dev.platform_data;
+> +	if (!pdata) {
+> +		dev_err(dev, "no device data specified\n");
+> +		return -ENOENT;
+> +	}
+> +
+> +	host = sdhci_alloc_host(&pdev->dev, 0);
+> +	if (IS_ERR(host)) {
+> +		ret = PTR_ERR(host);
+> +		dev_dbg(&pdev->dev, "error allocating host\n");
+> +		return PTR_ERR(host);
+> +	}
+> +
+> +	sc = sdhci_priv(host);
+> +	sc->host = host;
+> +	sc->pdev = pdev;
+> +	sc->pdata = pdata;
+> +
+> +	platform_set_drvdata(pdev, host);
+> +
+> +	sc->ioarea = request_mem_region(res->start, resource_size(res),
+> +					pdev->name);
+> +	if (!sc->ioarea) {
+> +		dev_err(dev, "failed to reserve register area\n");
+> +		ret = -ENXIO;
+> +		goto out;
+> +	}
+> +
+> +	ret = sdhci_claim_resource(pdev);
+> +	if (ret < 0)
+> +		goto out;
+> +
+> +	host->hw_name = "sdhci-stm";
+> +	host->ops = &sdhci_pltfm_ops;
+> +	host->irq = irq;
+> +	host->quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
+> +
+> +	host->ioaddr = ioremap(res->start, resource_size(res));
+> +	if (!host->ioaddr) {
+> +		dev_err(dev, "failed to map registers\n");
+> +		ret = -ENOMEM;
+> +		goto out;
+> +	}
+> +
+> +	ret = sdhci_add_host(host);
+> +	if (ret) {
+> +		dev_dbg(&pdev->dev, "error adding host\n");
+> +		goto out;
+> +	}
+> +
+> +	return 0;
+> +
+> +out:
+> +	if (host->ioaddr)
+> +		iounmap(host->ioaddr);
+> +
+> +	if (sc->ioarea) {
+> +		release_resource(sc->ioarea);
+> +		kfree(sc->ioarea);
+> +	}
+> +
+> +	sdhci_free_host(host);
+> +
+> +	return ret;
+> +}
+> +
+> +static int __devexit sdhci_remove(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct sdhci_stm *sc = sdhci_priv(host);
+> +
+> +	sdhci_remove_host(host, 1);
+> +
+> +	iounmap(host->ioaddr);
+> +	release_resource(sc->ioarea);
+> +	kfree(sc->ioarea);
+> +
+> +	sdhci_free_host(host);
+> +	platform_set_drvdata(pdev, NULL);
+> +
+> +	return 0;
+> +}
+> +
+> +#ifdef CONFIG_PM
+> +static int sdhci_stm_suspend(struct platform_device *dev, pm_message_t pm)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(dev);
+> +
+> +	sdhci_suspend_host(host, pm);
+> +	return 0;
+> +}
+> +
+> +static int sdhci_stm_resume(struct platform_device *dev)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(dev);
+> +
+> +	sdhci_resume_host(host);
+> +	return 0;
+> +}
+> +#endif
+> +
+> +static struct platform_driver sdhci_driver = {
+> +	.driver = {
+> +		   .name = "sdhci-stm",
+> +		   .owner = THIS_MODULE,
+> +		   },
+> +	.probe = sdhci_probe,
+> +	.remove = __devexit_p(sdhci_remove),
+> +#ifdef CONFIG_PM
+> +	.suspend = sdhci_stm_suspend,
+> +	.resume = sdhci_stm_resume,
+> +#endif
+> +};
+> +
+> +static int __init sdhci_stm_init(void)
+> +{
+> +	return platform_driver_register(&sdhci_driver);
+> +}
+> +
+> +module_init(sdhci_stm_init);
+> +
+> +static void __exit sdhci_stm_exit(void)
+> +{
+> +	platform_driver_unregister(&sdhci_driver);
+> +}
+> +
+> +module_exit(sdhci_stm_exit);
+> +
+> +MODULE_DESCRIPTION("STM Secure Digital Host Controller Interface driver");
+> +MODULE_AUTHOR("Giuseppe Cavallaro <peppe.cavallaro@st.com>");
+> +MODULE_LICENSE("GPL v2");
+> diff --git a/include/linux/mmc/sdhci-stm.h b/include/linux/mmc/sdhci-stm.h
+> new file mode 100644
+> index 0000000..4e6ad14
+> --- /dev/null
+> +++ b/include/linux/mmc/sdhci-stm.h
+> @@ -0,0 +1,40 @@
+> +/*
+> + * Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> + *
+> + * include/linux/mmc/sdhci-stm.h
+> + *
+> + * platform data for the sdhci stm driver.
+> + *
+> + * Copyright (C) 2010  STMicroelectronics Ltd
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License.
+> + *
+> + */
+> +
+> +#ifndef __SDHCI_STM_PLAT_H__
+> +#define __SDHCI_STM_PLAT_H__
+> +
+> +#include <linux/stm/platform.h>
+> +#include <linux/stm/pad.h>
+> +
+> +struct sdhci_platform_data {
+> +	struct stm_pad_config *pad_config;
+> +};
+> +
+> +/* SDHCI_STM Resource configuration */
+> +static inline int sdhci_claim_resource(struct platform_device *pdev)
+> +{
+> +	int ret = 0;
+> +	struct sdhci_platform_data *plat_dat = pdev->dev.platform_data;
+> +
+> +	/* Pad routing setup required on STM platforms */
+> +	if (!devm_stm_pad_claim(&pdev->dev, plat_dat->pad_config,
+> +				dev_name(&pdev->dev))) {
+> +		pr_err("%s: Failed to request pads!\n", __func__);
+> +		ret = -ENODEV;
+> +	}
+> +	return ret;
+> +}
+> +#endif /* __SDHCI_STM_PLAT_H__ */
+> --
+> 1.5.5.6
 
