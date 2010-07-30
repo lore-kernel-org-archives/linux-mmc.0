@@ -1,333 +1,100 @@
-From: Peppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: RE: [PATCH] mmc: add SDHCI driver for STM platforms.
-Date: Fri, 30 Jul 2010 16:04:16 +0200
-Message-ID: <107012446AC13D4C90B85672EAF5FB0E9C2E08E16C@SAFEX1MAIL3.st.com>
-References: <1280392279-17406-1-git-send-email-peppe.cavallaro@st.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:60345 "EHLO
-	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758604Ab0G3OEv convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 30 Jul 2010 10:04:51 -0400
-Received: from zeta.dmz-us.st.com (zeta.dmz-us.st.com [167.4.80.115])
-	by beta.dmz-us.st.com (STMicroelectronics) with ESMTP id 0C7DBD6
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Jul 2010 14:01:37 +0000 (GMT)
-Received: from Webmail-eu.st.com (safex1hubcas5.st.com [10.75.90.71])
-	by zeta.dmz-us.st.com (STMicroelectronics) with ESMTP id C9D183A3
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Jul 2010 14:04:43 +0000 (GMT)
-In-Reply-To: <1280392279-17406-1-git-send-email-peppe.cavallaro@st.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+From: Greg KH <gregkh@suse.de>
+Subject: [142/165] libertas/sdio: 8686: set ECSI bit for 1-bit transfers
+Date: Fri, 30 Jul 2010 10:16:10 -0700
+Message-ID: <20100730171512.517341960@clark.site>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100730171550.GA1299@kroah.com
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@kernel.org
+Cc: stable-review@kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, alan@lxorguk.ukuu.org.uk, Daniel Mack <daniel@caiaq.de>, Alagu Sankar <alagusankar@embwise.com>, Volker Ernst <volker.ernst@txtr.com>, Dan Williams <dcbw@redhat.com>, "John W. Linville" <linville@tuxdriver.com>, Holger Schurig <hs4233@mail.mn-solutions.de>, Bing Zhao <bzhao@marvell.com>, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hello!
-I wonder if somebody's had some spare moment to review this patch.
-Welcome advice and feedback as usual
+2.6.32-stable review patch.  If anyone has any objections, please let us know.
 
-Many thanks in advance.
+------------------
 
-Best Regards,
-Giuseppe
+From: Daniel Mack <daniel@caiaq.de>
 
-> -----Original Message-----
-> From: Giuseppe CAVALLARO [mailto:peppe.cavallaro@st.com]
-> Sent: Thursday, July 29, 2010 10:31 AM
-> To: linux-mmc@vger.kernel.org
-> Cc: Peppe CAVALLARO
-> Subject: [PATCH] mmc: add SDHCI driver for STM platforms.
-> 
-> This patch adds the Arasan MMC/SD/SDIO driver
-> for the STM ST40 platforms. It is based on the
-> SDHCI driver.
-> It has been tested on the STx7106/STx7108/STx5289
-> platforms.
-> 
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> ---
->  drivers/mmc/host/Kconfig      |   12 +++
->  drivers/mmc/host/Makefile     |    1 +
->  drivers/mmc/host/sdhci-stm.c  |  184
-> +++++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/sdhci-stm.h |   40 +++++++++
->  4 files changed, 237 insertions(+), 0 deletions(-)
->  create mode 100644 drivers/mmc/host/sdhci-stm.c
->  create mode 100644 include/linux/mmc/sdhci-stm.h
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index f06d06e..a5a3313 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -148,6 +148,18 @@ config MMC_SDHCI_SPEAR
-> 
->  	  If unsure, say N.
-> 
-> +config MMC_SDHCI_STM
-> +	tristate "SDHCI support on STM platforms"
-> +	depends on MMC_SDHCI && CPU_SUBTYPE_ST40
-> +	help
-> +	  This selects the Secure Digital Host Controller Interface (SDHCI)
-> +	  often referrered to as the HSMMC block in some of the STM range
-> +	  of SoC (e.g. STx7106/STx7108/STx5289).
-> +
-> +	  If you have a controller with this interface, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
->  config MMC_SDHCI_S3C_DMA
->  	bool "DMA support on S3C SDHCI"
->  	depends on MMC_SDHCI_S3C && EXPERIMENTAL
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index e30c2ee..7b47e8d 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -15,6 +15,7 @@ obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
->  obj-$(CONFIG_MMC_SDHCI_PLTFM)	+= sdhci-pltfm.o
->  obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
->  obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
-> +obj-$(CONFIG_MMC_SDHCI_STM)	+= sdhci-stm.o
->  obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
->  obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
->  obj-$(CONFIG_MMC_OMAP)		+= omap.o
-> diff --git a/drivers/mmc/host/sdhci-stm.c b/drivers/mmc/host/sdhci-stm.c
-> new file mode 100644
-> index 0000000..397ecf7
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-stm.c
-> @@ -0,0 +1,184 @@
-> +/* linux/drivers/mmc/host/sdhci-stm.c
-> + *
-> + * Copyright (C) 2010 STMicroelectronics Ltd
-> + * Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> + *
-> + * SDHCI support for STM platforms
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + */
-> +
-> +#include <linux/platform_device.h>
-> +#include <linux/slab.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/io.h>
-> +
-> +#include <linux/mmc/sdhci-stm.h>
-> +
-> +#include "sdhci.h"
-> +
-> +static struct sdhci_ops sdhci_pltfm_ops = {
-> +	/* Nothing to do for now. */
-> +};
-> +
-> +struct sdhci_stm {
-> +	struct sdhci_host *host;
-> +	struct platform_device *pdev;
-> +	struct resource *ioarea;
-> +	struct sdhci_platform_data *pdata;
-> +};
-> +
-> +static int __devinit sdhci_probe(struct platform_device *pdev)
-> +{
-> +	struct sdhci_platform_data *pdata;
-> +	struct device *dev = &pdev->dev;
-> +	struct sdhci_host *host;
-> +	struct sdhci_stm *sc;
-> +	struct resource *res;
-> +	int ret, irq;
-> +
-> +	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +	if (!res) {
-> +		dev_err(dev, "no memory specified\n");
-> +		return -ENOENT;
-> +	}
-> +
-> +	irq = platform_get_irq_byname(pdev, "mmcirq");
-> +	if (irq < 0) {
-> +		dev_err(dev, "no irq specified\n");
-> +		return irq;
-> +	}
-> +
-> +	pdata = pdev->dev.platform_data;
-> +	if (!pdata) {
-> +		dev_err(dev, "no device data specified\n");
-> +		return -ENOENT;
-> +	}
-> +
-> +	host = sdhci_alloc_host(&pdev->dev, 0);
-> +	if (IS_ERR(host)) {
-> +		ret = PTR_ERR(host);
-> +		dev_dbg(&pdev->dev, "error allocating host\n");
-> +		return PTR_ERR(host);
-> +	}
-> +
-> +	sc = sdhci_priv(host);
-> +	sc->host = host;
-> +	sc->pdev = pdev;
-> +	sc->pdata = pdata;
-> +
-> +	platform_set_drvdata(pdev, host);
-> +
-> +	sc->ioarea = request_mem_region(res->start, resource_size(res),
-> +					pdev->name);
-> +	if (!sc->ioarea) {
-> +		dev_err(dev, "failed to reserve register area\n");
-> +		ret = -ENXIO;
-> +		goto out;
-> +	}
-> +
-> +	ret = sdhci_claim_resource(pdev);
-> +	if (ret < 0)
-> +		goto out;
-> +
-> +	host->hw_name = "sdhci-stm";
-> +	host->ops = &sdhci_pltfm_ops;
-> +	host->irq = irq;
-> +	host->quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
-> +
-> +	host->ioaddr = ioremap(res->start, resource_size(res));
-> +	if (!host->ioaddr) {
-> +		dev_err(dev, "failed to map registers\n");
-> +		ret = -ENOMEM;
-> +		goto out;
-> +	}
-> +
-> +	ret = sdhci_add_host(host);
-> +	if (ret) {
-> +		dev_dbg(&pdev->dev, "error adding host\n");
-> +		goto out;
-> +	}
-> +
-> +	return 0;
-> +
-> +out:
-> +	if (host->ioaddr)
-> +		iounmap(host->ioaddr);
-> +
-> +	if (sc->ioarea) {
-> +		release_resource(sc->ioarea);
-> +		kfree(sc->ioarea);
-> +	}
-> +
-> +	sdhci_free_host(host);
-> +
-> +	return ret;
-> +}
-> +
-> +static int __devexit sdhci_remove(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> +	struct sdhci_stm *sc = sdhci_priv(host);
-> +
-> +	sdhci_remove_host(host, 1);
-> +
-> +	iounmap(host->ioaddr);
-> +	release_resource(sc->ioarea);
-> +	kfree(sc->ioarea);
-> +
-> +	sdhci_free_host(host);
-> +	platform_set_drvdata(pdev, NULL);
-> +
-> +	return 0;
-> +}
-> +
-> +#ifdef CONFIG_PM
-> +static int sdhci_stm_suspend(struct platform_device *dev, pm_message_t pm)
-> +{
-> +	struct sdhci_host *host = platform_get_drvdata(dev);
-> +
-> +	sdhci_suspend_host(host, pm);
-> +	return 0;
-> +}
-> +
-> +static int sdhci_stm_resume(struct platform_device *dev)
-> +{
-> +	struct sdhci_host *host = platform_get_drvdata(dev);
-> +
-> +	sdhci_resume_host(host);
-> +	return 0;
-> +}
-> +#endif
-> +
-> +static struct platform_driver sdhci_driver = {
-> +	.driver = {
-> +		   .name = "sdhci-stm",
-> +		   .owner = THIS_MODULE,
-> +		   },
-> +	.probe = sdhci_probe,
-> +	.remove = __devexit_p(sdhci_remove),
-> +#ifdef CONFIG_PM
-> +	.suspend = sdhci_stm_suspend,
-> +	.resume = sdhci_stm_resume,
-> +#endif
-> +};
-> +
-> +static int __init sdhci_stm_init(void)
-> +{
-> +	return platform_driver_register(&sdhci_driver);
-> +}
-> +
-> +module_init(sdhci_stm_init);
-> +
-> +static void __exit sdhci_stm_exit(void)
-> +{
-> +	platform_driver_unregister(&sdhci_driver);
-> +}
-> +
-> +module_exit(sdhci_stm_exit);
-> +
-> +MODULE_DESCRIPTION("STM Secure Digital Host Controller Interface driver");
-> +MODULE_AUTHOR("Giuseppe Cavallaro <peppe.cavallaro@st.com>");
-> +MODULE_LICENSE("GPL v2");
-> diff --git a/include/linux/mmc/sdhci-stm.h b/include/linux/mmc/sdhci-stm.h
-> new file mode 100644
-> index 0000000..4e6ad14
-> --- /dev/null
-> +++ b/include/linux/mmc/sdhci-stm.h
-> @@ -0,0 +1,40 @@
-> +/*
-> + * Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> + *
-> + * include/linux/mmc/sdhci-stm.h
-> + *
-> + * platform data for the sdhci stm driver.
-> + *
-> + * Copyright (C) 2010  STMicroelectronics Ltd
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License.
-> + *
-> + */
-> +
-> +#ifndef __SDHCI_STM_PLAT_H__
-> +#define __SDHCI_STM_PLAT_H__
-> +
-> +#include <linux/stm/platform.h>
-> +#include <linux/stm/pad.h>
-> +
-> +struct sdhci_platform_data {
-> +	struct stm_pad_config *pad_config;
-> +};
-> +
-> +/* SDHCI_STM Resource configuration */
-> +static inline int sdhci_claim_resource(struct platform_device *pdev)
-> +{
-> +	int ret = 0;
-> +	struct sdhci_platform_data *plat_dat = pdev->dev.platform_data;
-> +
-> +	/* Pad routing setup required on STM platforms */
-> +	if (!devm_stm_pad_claim(&pdev->dev, plat_dat->pad_config,
-> +				dev_name(&pdev->dev))) {
-> +		pr_err("%s: Failed to request pads!\n", __func__);
-> +		ret = -ENODEV;
-> +	}
-> +	return ret;
-> +}
-> +#endif /* __SDHCI_STM_PLAT_H__ */
-> --
-> 1.5.5.6
+commit 8a64c0f6b7ec7f758c4ef445e49f479e27fa2236 upstream.
 
+When operating in 1-bit mode, SDAT1 is used as dedicated interrupt line.
+However, the 8686 will only drive this line when the ECSI bit is set in
+the CCCR_IF register.
+
+Thanks to Alagu Sankar for pointing me in the right direction.
+
+Signed-off-by: Daniel Mack <daniel@caiaq.de>
+Cc: Alagu Sankar <alagusankar@embwise.com>
+Cc: Volker Ernst <volker.ernst@txtr.com>
+Cc: Dan Williams <dcbw@redhat.com>
+Cc: John W. Linville <linville@tuxdriver.com>
+Cc: Holger Schurig <hs4233@mail.mn-solutions.de>
+Cc: Bing Zhao <bzhao@marvell.com>
+Cc: libertas-dev@lists.infradead.org
+Cc: linux-wireless@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+Acked-by: Dan Williams <dcbw@redhat.com>
+Signed-off-by: John W. Linville <linville@tuxdriver.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+---
+ drivers/net/wireless/libertas/if_sdio.c |   22 ++++++++++++++++++++++
+ include/linux/mmc/sdio.h                |    2 ++
+ 2 files changed, 24 insertions(+)
+
+--- a/drivers/net/wireless/libertas/if_sdio.c
++++ b/drivers/net/wireless/libertas/if_sdio.c
+@@ -34,6 +34,8 @@
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/sdio_func.h>
+ #include <linux/mmc/sdio_ids.h>
++#include <linux/mmc/sdio.h>
++#include <linux/mmc/host.h>
+ 
+ #include "host.h"
+ #include "decl.h"
+@@ -883,6 +885,7 @@ static int if_sdio_probe(struct sdio_fun
+ 	int ret, i;
+ 	unsigned int model;
+ 	struct if_sdio_packet *packet;
++	struct mmc_host *host = func->card->host;
+ 
+ 	lbs_deb_enter(LBS_DEB_SDIO);
+ 
+@@ -963,6 +966,25 @@ static int if_sdio_probe(struct sdio_fun
+ 	if (ret)
+ 		goto disable;
+ 
++	/* For 1-bit transfers to the 8686 model, we need to enable the
++	 * interrupt flag in the CCCR register. Set the MMC_QUIRK_LENIENT_FN0
++	 * bit to allow access to non-vendor registers. */
++	if ((card->model == IF_SDIO_MODEL_8686) &&
++	    (host->caps & MMC_CAP_SDIO_IRQ) &&
++	    (host->ios.bus_width == MMC_BUS_WIDTH_1)) {
++		u8 reg;
++
++		func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
++		reg = sdio_f0_readb(func, SDIO_CCCR_IF, &ret);
++		if (ret)
++			goto release_int;
++
++		reg |= SDIO_BUS_ECSI;
++		sdio_f0_writeb(func, reg, SDIO_CCCR_IF, &ret);
++		if (ret)
++			goto release_int;
++	}
++
+ 	card->ioport = sdio_readb(func, IF_SDIO_IOPORT, &ret);
+ 	if (ret)
+ 		goto release_int;
+--- a/include/linux/mmc/sdio.h
++++ b/include/linux/mmc/sdio.h
+@@ -94,6 +94,8 @@
+ 
+ #define  SDIO_BUS_WIDTH_1BIT	0x00
+ #define  SDIO_BUS_WIDTH_4BIT	0x02
++#define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
++#define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
+ 
+ #define  SDIO_BUS_CD_DISABLE     0x80	/* disable pull-up on DAT3 (pin 1) */
+ 
