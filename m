@@ -1,31 +1,226 @@
 From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: MMC: [PATCH 0/2] Two fixes for mmc system
-Date: Fri, 30 Jul 2010 16:57:27 +0300
-Message-ID: <1280498249-6845-1-git-send-email-maximlevitsky@gmail.com>
+Subject: [PATCH 2/2] MMC: fix all hangs related to mmc/sd card insert/removal during suspend/resume.
+Date: Fri, 30 Jul 2010 16:57:29 +0300
+Message-ID: <1280498249-6845-3-git-send-email-maximlevitsky@gmail.com>
+References: <1280498249-6845-1-git-send-email-maximlevitsky@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-fx0-f46.google.com ([209.85.161.46]:42007 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758555Ab0G3N5k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jul 2010 09:57:40 -0400
-Received: by fxm14 with SMTP id 14so862762fxm.19
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Jul 2010 06:57:39 -0700 (PDT)
+	with ESMTP id S1756427Ab0G3N5q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jul 2010 09:57:46 -0400
+Received: by mail-fx0-f46.google.com with SMTP id 14so862762fxm.19
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Jul 2010 06:57:45 -0700 (PDT)
+In-Reply-To: <1280498249-6845-1-git-send-email-maximlevitsky@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@canonical.com>, Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@canonical.com>, Adrian Hunter <adrian.hunter@nokia.com>, Maxim Levitsky <maximlevitsky@gmail.com>
 
-Hi,
+If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
+suspend, the card will be removed, therefore this patch doesn't change
+the behavior of this option.
 
-Here is updated version of fixes I created for mmc subsystem.
+However the removal will be done by pm notifier, which runs while
+userspace is still not frozen and thus can freely use del_gendisk,
+without the risk of deadlock which would happen otherwise.
 
-First patch is unchanged, and I can say is very well tested.
-The second patch that fixes nasty hang that happens if you have MMC card in reader
-during suspend.
-I updated it to address corner issues that I was told about.
 
-Consider patch #1 for 2.6.36, and patch #2 for 2.6.36 and stable trees
+Card detect workqueue is now disabled while userspace is frozen,
+Therefore if you do use CONFIG_MMC_UNSAFE_RESUME,
+and remove the card during suspend, the removal will be
+detected as soon as userspace is unfrozen, again at the moment
+it is safe to call del_gendisk.
 
-Best regards,
-	Maxim Levitsky
+Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
 
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+---
+ drivers/mmc/core/core.c  |   82 ++++++++++++++++++++++++++++++++--------------
+ drivers/mmc/core/host.c  |    5 +++
+ include/linux/mmc/host.h |    4 ++
+ 3 files changed, 66 insertions(+), 25 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 569e94d..0366fe8 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1057,6 +1057,17 @@ void mmc_rescan(struct work_struct *work)
+ 		container_of(work, struct mmc_host, detect.work);
+ 	u32 ocr;
+ 	int err;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->rescan_disable) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 
+ 	mmc_bus_get(host);
+ 
+@@ -1266,19 +1277,6 @@ int mmc_suspend_host(struct mmc_host *host)
+ 	if (host->bus_ops && !host->bus_dead) {
+ 		if (host->bus_ops->suspend)
+ 			err = host->bus_ops->suspend(host);
+-		if (err == -ENOSYS || !host->bus_ops->resume) {
+-			/*
+-			 * We simply "remove" the card in this case.
+-			 * It will be redetected on resume.
+-			 */
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_release_host(host);
+-			host->pm_flags = 0;
+-			err = 0;
+-		}
+ 	}
+ 	mmc_bus_put(host);
+ 
+@@ -1310,26 +1308,60 @@ int mmc_resume_host(struct mmc_host *host)
+ 			printk(KERN_WARNING "%s: error %d during resume "
+ 					    "(card was removed?)\n",
+ 					    mmc_hostname(host), err);
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_release_host(host);
+-			/* no need to bother upper layers */
+ 			err = 0;
+ 		}
+ 	}
+ 	mmc_bus_put(host);
+ 
+-	/*
+-	 * We add a slight delay here so that resume can progress
+-	 * in parallel.
+-	 */
+-	mmc_detect_change(host, 1);
+-
+ 	return err;
+ }
+ 
++/* Do the card removal on suspend if card is assumed removeable
++ * Do that in pm notifier while userspace isn't yet frozen, so we will be able
++   to sync the card.
++*/
++int mmc_pm_notify(struct notifier_block *notify_block,
++					unsigned long mode, void *unused)
++{
++	struct mmc_host *host = container_of(
++		notify_block, struct mmc_host, pm_notify);
++	unsigned long flags;
++
++
++	switch (mode) {
++	case PM_HIBERNATION_PREPARE:
++	case PM_SUSPEND_PREPARE:
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 1;
++		spin_unlock_irqrestore(&host->lock, flags);
++
++		if (!host->bus_ops || host->bus_ops->suspend)
++			break;
++
++		mmc_claim_host(host);
++
++		if (host->bus_ops->remove)
++			host->bus_ops->remove(host);
++
++		mmc_detach_bus(host);
++		mmc_release_host(host);
++		host->pm_flags = 0;
++		break;
++
++	case PM_POST_SUSPEND:
++	case PM_POST_HIBERNATION:
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 0;
++		spin_unlock_irqrestore(&host->lock, flags);
++		mmc_detect_change(host, 0);
++
++	}
++
++	return 0;
++}
++
+ EXPORT_SYMBOL(mmc_resume_host);
+ 
+ #endif
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 4735390..01646a1 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -17,6 +17,7 @@
+ #include <linux/pagemap.h>
+ #include <linux/leds.h>
+ #include <linux/slab.h>
++#include <linux/suspend.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -85,6 +86,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	init_waitqueue_head(&host->wq);
+ 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+ 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
++	host->pm_notify.notifier_call = mmc_pm_notify;
++
+ 
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+@@ -133,6 +136,7 @@ int mmc_add_host(struct mmc_host *host)
+ #endif
+ 
+ 	mmc_start_host(host);
++	register_pm_notifier(&host->pm_notify);
+ 
+ 	return 0;
+ }
+@@ -149,6 +153,7 @@ EXPORT_SYMBOL(mmc_add_host);
+  */
+ void mmc_remove_host(struct mmc_host *host)
+ {
++	unregister_pm_notifier(&host->pm_notify);
+ 	mmc_stop_host(host);
+ 
+ #ifdef CONFIG_DEBUG_FS
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index f65913c..9063df5 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -124,6 +124,7 @@ struct mmc_host {
+ 	unsigned int		f_min;
+ 	unsigned int		f_max;
+ 	u32			ocr_avail;
++	struct notifier_block	pm_notify;
+ 
+ #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
+ #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
+@@ -183,6 +184,7 @@ struct mmc_host {
+ 
+ 	/* Only used with MMC_CAP_DISABLE */
+ 	int			enabled;	/* host is enabled */
++	int			rescan_disable;	/* disable card detection */
+ 	int			nesting_cnt;	/* "enable" nesting count */
+ 	int			en_dis_recurs;	/* detect recursion */
+ 	unsigned int		disable_delay;	/* disable delay in msecs */
+@@ -257,6 +259,8 @@ int mmc_card_can_sleep(struct mmc_host *host);
+ int mmc_host_enable(struct mmc_host *host);
+ int mmc_host_disable(struct mmc_host *host);
+ int mmc_host_lazy_disable(struct mmc_host *host);
++int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
++
+ 
+ static inline void mmc_set_disable_delay(struct mmc_host *host,
+ 					 unsigned int disable_delay)
+-- 
+1.7.0.4
 
