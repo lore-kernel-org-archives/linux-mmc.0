@@ -1,151 +1,226 @@
 From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: [PATCH 1/2] MMC: make sdhci work with ricoh mmc controller
-Date: Sat, 31 Jul 2010 15:37:04 +0300
-Message-ID: <1280579825-6174-2-git-send-email-maximlevitsky@gmail.com>
+Subject: [PATCH 2/2] MMC: fix all hangs related to mmc/sd card insert/removal during suspend/resume.
+Date: Sat, 31 Jul 2010 15:37:05 +0300
+Message-ID: <1280579825-6174-3-git-send-email-maximlevitsky@gmail.com>
 References: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-bw0-f46.google.com ([209.85.214.46]:59927 "EHLO
 	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751411Ab0GaMhR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 31 Jul 2010 08:37:17 -0400
+	with ESMTP id S1751198Ab0GaMhT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 31 Jul 2010 08:37:19 -0400
 Received: by mail-bw0-f46.google.com with SMTP id 1so840291bwz.19
-        for <linux-mmc@vger.kernel.org>; Sat, 31 Jul 2010 05:37:16 -0700 (PDT)
+        for <linux-mmc@vger.kernel.org>; Sat, 31 Jul 2010 05:37:18 -0700 (PDT)
 In-Reply-To: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@canonical.com>, Adrian Hunter <adrian.hunter@nokia.com>, Maxim Levitsky <maximlevitsky@gmail.com>, Andrew de Quincey <adq_dvb@lidskialf.net>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@canonical.com>, Adrian Hunter <adrian.hunter@nokia.com>, Maxim Levitsky <maximlevitsky@gmail.com>
 
-The current way of disabling it is not well tested by vendor
-and has all kinds of bugs that show up on resume from ram/disk.
-A very good example is a dead SDHCI controller.
+If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
+suspend, the card will be removed, therefore this patch doesn't change
+the behavior of this option.
 
-Old way of disabling is still supported by
-continuing to use CONFIG_MMC_RICOH_MMC.
+However the removal will be done by pm notifier, which runs while
+userspace is still not frozen and thus can freely use del_gendisk,
+without the risk of deadlock which would happen otherwise.
 
-Based on 'http://list.drzeus.cx/pipermail/sdhci-devel/2007-December/002085.html'
-Therefore most of the credit for this goes to Andrew de Quincey
 
-CC: Andrew de Quincey <adq_dvb@lidskialf.net>
+Card detect workqueue is now disabled while userspace is frozen,
+Therefore if you do use CONFIG_MMC_UNSAFE_RESUME,
+and remove the card during suspend, the removal will be
+detected as soon as userspace is unfrozen, again at the moment
+it is safe to call del_gendisk.
+
+Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
 
 Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-Acked-by: Philip Langdale <philipl@overt.org>
 ---
- drivers/mmc/host/sdhci-pci.c |   41 +++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c     |    3 ++-
- drivers/mmc/host/sdhci.h     |    4 ++++
- 3 files changed, 47 insertions(+), 1 deletions(-)
+ drivers/mmc/core/core.c  |   83 +++++++++++++++++++++++++++++++--------------
+ drivers/mmc/core/host.c  |    4 ++
+ include/linux/mmc/host.h |    3 ++
+ 3 files changed, 64 insertions(+), 26 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 65483fd..e021431 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 569e94d..83e7543 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1057,6 +1057,17 @@ void mmc_rescan(struct work_struct *work)
+ 		container_of(work, struct mmc_host, detect.work);
+ 	u32 ocr;
+ 	int err;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->rescan_disable) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 
+ 	mmc_bus_get(host);
+ 
+@@ -1266,19 +1277,6 @@ int mmc_suspend_host(struct mmc_host *host)
+ 	if (host->bus_ops && !host->bus_dead) {
+ 		if (host->bus_ops->suspend)
+ 			err = host->bus_ops->suspend(host);
+-		if (err == -ENOSYS || !host->bus_ops->resume) {
+-			/*
+-			 * We simply "remove" the card in this case.
+-			 * It will be redetected on resume.
+-			 */
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_release_host(host);
+-			host->pm_flags = 0;
+-			err = 0;
+-		}
+ 	}
+ 	mmc_bus_put(host);
+ 
+@@ -1310,28 +1308,61 @@ int mmc_resume_host(struct mmc_host *host)
+ 			printk(KERN_WARNING "%s: error %d during resume "
+ 					    "(card was removed?)\n",
+ 					    mmc_hostname(host), err);
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_release_host(host);
+-			/* no need to bother upper layers */
+ 			err = 0;
+ 		}
+ 	}
+ 	mmc_bus_put(host);
+ 
+-	/*
+-	 * We add a slight delay here so that resume can progress
+-	 * in parallel.
+-	 */
+-	mmc_detect_change(host, 1);
+-
+ 	return err;
+ }
+-
+ EXPORT_SYMBOL(mmc_resume_host);
+ 
++/* Do the card removal on suspend if card is assumed removeable
++ * Do that in pm notifier while userspace isn't yet frozen, so we will be able
++   to sync the card.
++*/
++int mmc_pm_notify(struct notifier_block *notify_block,
++					unsigned long mode, void *unused)
++{
++	struct mmc_host *host = container_of(
++		notify_block, struct mmc_host, pm_notify);
++	unsigned long flags;
++
++
++	switch (mode) {
++	case PM_HIBERNATION_PREPARE:
++	case PM_SUSPEND_PREPARE:
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 1;
++		spin_unlock_irqrestore(&host->lock, flags);
++		cancel_delayed_work_sync(&host->detect);
++
++		if (!host->bus_ops || host->bus_ops->suspend)
++			break;
++
++		mmc_claim_host(host);
++
++		if (host->bus_ops->remove)
++			host->bus_ops->remove(host);
++
++		mmc_detach_bus(host);
++		mmc_release_host(host);
++		host->pm_flags = 0;
++		break;
++
++	case PM_POST_SUSPEND:
++	case PM_POST_HIBERNATION:
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 0;
++		spin_unlock_irqrestore(&host->lock, flags);
++		mmc_detect_change(host, 0);
++
++	}
++
++	return 0;
++}
+ #endif
+ 
+ static int __init mmc_init(void)
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 4735390..0efe631 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
 @@ -17,6 +17,7 @@
- #include <linux/pci.h>
- #include <linux/dma-mapping.h>
+ #include <linux/pagemap.h>
+ #include <linux/leds.h>
  #include <linux/slab.h>
-+#include <linux/device.h>
++#include <linux/suspend.h>
  
  #include <linux/mmc/host.h>
  
-@@ -84,7 +85,30 @@ static int ricoh_probe(struct sdhci_pci_chip *chip)
- 	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG ||
- 	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
- 		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
-+	return 0;
-+}
-+
-+static int ricoh_mmc_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	slot->host->caps =
-+		((0x21 << SDHCI_TIMEOUT_CLK_SHIFT)
-+			& SDHCI_TIMEOUT_CLK_MASK) |
-+
-+		((0x21 << SDHCI_CLOCK_BASE_SHIFT)
-+			& SDHCI_CLOCK_BASE_MASK) |
+@@ -85,6 +86,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	init_waitqueue_head(&host->wq);
+ 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+ 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
++	host->pm_notify.notifier_call = mmc_pm_notify;
  
-+		SDHCI_TIMEOUT_CLK_UNIT |
-+		SDHCI_CAN_VDD_330 |
-+		SDHCI_CAN_DO_SDMA;
-+	return 0;
-+}
-+
-+static int ricoh_mmc_resume(struct sdhci_pci_chip *chip)
-+{
-+	/* Apply a delay to allow controller to settle */
-+	/* Otherwise it becomes confused if card state changed
-+		during suspend */
-+	msleep(500);
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+@@ -133,6 +135,7 @@ int mmc_add_host(struct mmc_host *host)
+ #endif
+ 
+ 	mmc_start_host(host);
++	register_pm_notifier(&host->pm_notify);
+ 
  	return 0;
  }
+@@ -149,6 +152,7 @@ EXPORT_SYMBOL(mmc_add_host);
+  */
+ void mmc_remove_host(struct mmc_host *host)
+ {
++	unregister_pm_notifier(&host->pm_notify);
+ 	mmc_stop_host(host);
  
-@@ -95,6 +119,15 @@ static const struct sdhci_pci_fixes sdhci_ricoh = {
- 			  SDHCI_QUIRK_CLOCK_BEFORE_RESET,
- };
+ #ifdef CONFIG_DEBUG_FS
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index f65913c..513ff03 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -124,6 +124,7 @@ struct mmc_host {
+ 	unsigned int		f_min;
+ 	unsigned int		f_max;
+ 	u32			ocr_avail;
++	struct notifier_block	pm_notify;
  
-+static const struct sdhci_pci_fixes sdhci_ricoh_mmc = {
-+	.probe_slot	= ricoh_mmc_probe_slot,
-+	.resume		= ricoh_mmc_resume,
-+	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
-+			  SDHCI_QUIRK_CLOCK_BEFORE_RESET |
-+			  SDHCI_QUIRK_NO_CARD_NO_RESET |
-+			  SDHCI_QUIRK_MISSING_CAPS
-+};
-+
- static const struct sdhci_pci_fixes sdhci_ene_712 = {
- 	.quirks		= SDHCI_QUIRK_SINGLE_POWER_WRITE |
- 			  SDHCI_QUIRK_BROKEN_DMA,
-@@ -374,6 +407,14 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
- 	},
+ #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
+ #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
+@@ -183,6 +184,7 @@ struct mmc_host {
  
- 	{
-+		.vendor         = PCI_VENDOR_ID_RICOH,
-+		.device         = 0x843,
-+		.subvendor      = PCI_ANY_ID,
-+		.subdevice      = PCI_ANY_ID,
-+		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
-+	},
-+
-+	{
- 		.vendor		= PCI_VENDOR_ID_ENE,
- 		.device		= PCI_DEVICE_ID_ENE_CB712_SD,
- 		.subvendor	= PCI_ANY_ID,
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c6d1bd8..483b78e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1687,7 +1687,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 			host->version);
- 	}
+ 	/* Only used with MMC_CAP_DISABLE */
+ 	int			enabled;	/* host is enabled */
++	int			rescan_disable;	/* disable card detection */
+ 	int			nesting_cnt;	/* "enable" nesting count */
+ 	int			en_dis_recurs;	/* detect recursion */
+ 	unsigned int		disable_delay;	/* disable delay in msecs */
+@@ -257,6 +259,7 @@ int mmc_card_can_sleep(struct mmc_host *host);
+ int mmc_host_enable(struct mmc_host *host);
+ int mmc_host_disable(struct mmc_host *host);
+ int mmc_host_lazy_disable(struct mmc_host *host);
++int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
  
--	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
-+		sdhci_readl(host, SDHCI_CAPABILITIES);
- 
- 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
- 		host->flags |= SDHCI_USE_SDMA;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c846813..b1839a3 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -240,6 +240,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
- /* Controller cannot support End Attribute in NOP ADMA descriptor */
- #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
-+/* Controller is missing device caps. Use caps provided by host */
-+#define SDHCI_QUIRK_MISSING_CAPS			(1<<27)
- 
- 	int			irq;		/* Device IRQ */
- 	void __iomem *		ioaddr;		/* Mapped address */
-@@ -292,6 +294,8 @@ struct sdhci_host {
- 
- 	struct timer_list	timer;		/* Timer for timeouts */
- 
-+	unsigned int		caps;		/* Alternative capabilities */
-+
- 	unsigned long		private[0] ____cacheline_aligned;
- };
- 
+ static inline void mmc_set_disable_delay(struct mmc_host *host,
+ 					 unsigned int disable_delay)
 -- 
 1.7.0.4
 
