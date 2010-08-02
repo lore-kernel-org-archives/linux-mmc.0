@@ -1,53 +1,113 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v2 00/20] native support for wl1271 on ZOOM
-Date: Mon, 2 Aug 2010 19:40:12 +0300
-Message-ID: <AANLkTi=2T_fdQh3KVJffkRw3k7ETAzC65xFE7wp+8Orn@mail.gmail.com>
+Subject: Re: [PATCH v2 03/20] mmc: support embedded data field in mmc_host
+Date: Tue, 3 Aug 2010 00:35:56 +0300
+Message-ID: <AANLkTi=vhWV1RNyemtfppfjvLYAbzd3aRjFOVgLLpG3Z@mail.gmail.com>
 References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-	<20100726193028.GG3903@tuxdriver.com> <1280736987.17809.18.camel@chilepepper>
-	<20100802114256.GE12293@atomide.com> <AANLkTikvtMbqUdwHtCtdL2xXbQh64pxjApo6ZH6hAXnP@mail.gmail.com>
-	<AANLkTimaSeLqowRHSCivGXTiSE7NatNTR=jLWQYsSo-6@mail.gmail.com>
-	<AANLkTikPSp0_S8kSFmeZJ0qLR3DHKBN=iW_As5891a6v@mail.gmail.com>
+	<1279733634-21974-4-git-send-email-ohad@wizery.com> <AANLkTimzA_JJ-byTDWznbL3YzeJ8LAP4M50onf2_3fBF@mail.gmail.com>
+	<AANLkTi=Oy8X1xMOwWL_cKBB1LWULT6=p+adUgB+AuSJS@mail.gmail.com>
+	<AANLkTi=BUX59heXAW2Uf4wZo2dSS19Je54dkQ5u2YGAW@mail.gmail.com>
+	<AANLkTimZQKj7H_GeE=+O9cwxEMTR+LhfFbt=AyXGzN3d@mail.gmail.com>
+	<AANLkTikfRja-h9mz7uyRXCZNZjKdU_yB8e58XQucUzrn@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:38548 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751776Ab0HBQke convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Aug 2010 12:40:34 -0400
-In-Reply-To: <AANLkTikPSp0_S8kSFmeZJ0qLR3DHKBN=iW_As5891a6v@mail.gmail.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:44644 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755523Ab0HBVgR convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Aug 2010 17:36:17 -0400
+In-Reply-To: <AANLkTikfRja-h9mz7uyRXCZNZjKdU_yB8e58XQucUzrn@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vitaly Wool <vitalywool@gmail.com>, Luciano Coelho <luciano.coelho@nokia.com>
-Cc: Tony Lindgren <tony@atomide.com>, Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros@nokia.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, Nicolas Pitre <nico@fluxnic.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ext John W. Linville" <linville@tuxdriver.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Vitaly Wool <vitalywool@gmail.com>
+Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, linux@arm.linux.org.uk, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, Roger Quadros <roger.quadros@nokia.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 
 Hi Vitaly,
 
-On Mon, Aug 2, 2010 at 7:19 PM, Vitaly Wool <vitalywool@gmail.com> wrot=
+On Mon, Aug 2, 2010 at 7:25 PM, Vitaly Wool <vitalywool@gmail.com> wrot=
 e:
-> On Mon, Aug 2, 2010 at 5:59 PM, Ohad Ben-Cohen <ohad@wizery.com> wrot=
+> On Mon, Aug 2, 2010 at 5:54 PM, Ohad Ben-Cohen <ohad@wizery.com> wrot=
 e:
->>
->> Check out patch no. 9:
->
-> sorry for the confusion. However, I guess if the platform doesn't
-> supply this value, we'll just consider it 0? Without any warning,
-> right?
->
-> The problem is, we can't really distinguish between this field not se=
-t
-> and value zero, and that means something is wrong with the design. Th=
+>> SPI is using these spi_board_info tables to populate the SPI device
+>> trees. These tables are registered early at the board-specific init
+>> code, and are later used by SPI core to populate the devices when th=
 e
-> easiest way is probably changing the clock ids to start with 1.
+>> SPI master controller is registered.
+>>
+>> SDIO doesn't normally needs any kind of hard coded data: most device=
+s
+>> are dynamically probed and populated.
+>>
+>> On rare cases like the wl1271, we have some platform-specific data w=
+e
+>> need to deliver the SDIO function driver (i.e. the irq info in this
+>> case). Since the device is hardwired to a specific controller, it do=
+es
+>> make some sense to pass this private data from the controller's info
+>> in the board files, through the host driver, and make it accessible
+>> through the specific host instance that drives this controller.
+>>
+>> Btw, if our problem was be broader (e.g., needs to supply private da=
+ta
+>> for non-hardwired devices), then I agree that a more complex
+>> mechanism, such as the one you suggest, would be needed. But current=
+ly
+>> the problem is very simple and the solution is even simpler: just ad=
+d
+>> 1 private pointer to the host.
+>>
+>> Hope you find this reasonable,
+>
+> no, actually I don't. I think this is a hack that intrudes into the
+> area it completely doesn't belong to.
+>
+> In fact, one can have 2 views on this problem: either this is a fairl=
+y
+> generic problem we need to address, or this is a very specific corner
+> case.
+> Your solution will be treated as a hack in both cases.
+>
+> If we consider it a generic problem, then we need to find a generic
+> solution, which is the board_info solution, for instance. FWIW, I2C
+> also uses this approach now.
+>
+> If we consider it to be a corner case, let's just add a dummy
+> platform_device like it's done in WL1251 implementation and keep the
+> MMC subsystem clean.
 
-I don't think it's a huge deal as adding new devices on board files is
-anyway something that is done carefully and not so often. Btw, we have
-this kind of mechanism in other locations of the kernel as well and it
-doesn't seem to be problematic (e.g. spi->chip_select, spi->mode,
-spi->irq, ...).
+Let's start by defining the problem exactly:
 
-Having said that I don't mind applying your proposal either and
-pushing those defines by 1 in the driver. Luca what do you think ?
+SDIO devices that are hardwired to a specific controller and have some
+platform data that needs to be available to the SDIO function driver.
+
+It doesn't get more generic than that - it's not needed with common
+fully-enumerable SDIO devices (at least I'm not aware of such need),
+hence a generic mechanism of maintaining a global pile of platform
+data pointers, which can be queried with the device and vendor ID,
+really sounds like an overkill.
+
+But it's not specific to the wl1271 device - I prefer to support this
+at the MMC level, so we wouldn't have to add an extra platform device
+for every SDIO function driver that needs to cope with such issue (we
+already have two drivers - wl1271_sdio.c and wl1251_sdio.c); Adding an
+extra platform device for every driver is just too much dummy code
+(that btw adds a well-hidden race condition between the two probe
+calls), which can be nicely eliminated if we just introduce this new
+per-host private data pointer.
+
+So we have a SDIO device hardwired to a specific controller, that is
+driven by a specific host controller driver instance. This patch
+allows this specific host instance to carry platform data for the
+device that is hardwired to it. The platform data would be available
+only to SDIO function driver instances of that specific host
+controller. The solution is generic enough to support all SDIO
+function drivers with similar needs, and it's extremely simple.
+
+I'm honestly trying to understand your concerns, but I'm afraid that
+just saying "it's a hack" is not too informative. Can you please
+explain what do you think is technically wrong with the proposed
+solution ? is it not general enough for other use cases ? will it
+break something ?
 
 Thanks,
 Ohad.
