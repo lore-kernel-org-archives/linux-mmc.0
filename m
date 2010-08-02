@@ -1,226 +1,87 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: [PATCH 2/2] MMC: fix all hangs related to mmc/sd card insert/removal during suspend/resume.
-Date: Sat, 31 Jul 2010 15:37:05 +0300
-Message-ID: <1280579825-6174-3-git-send-email-maximlevitsky@gmail.com>
-References: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>
+From: Zang Roy-R61911 <r61911@freescale.com>
+Subject: RE: [PATCH 3/3 v2] mmc: Add ESDHC weird voltage bits workaround
+Date: Mon, 2 Aug 2010 14:19:58 +0800
+Message-ID: <83024545B35D6445A690EFD603E7869A07ED05@zch01exm23.fsl.freescale.net>
+References: <1280461977-2023-1-git-send-email-tie-fei.zang@freescale.com> <20100730070624.GB20351@oksana.dev.rtsoft.ru>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:59927 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751198Ab0GaMhT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 31 Jul 2010 08:37:19 -0400
-Received: by mail-bw0-f46.google.com with SMTP id 1so840291bwz.19
-        for <linux-mmc@vger.kernel.org>; Sat, 31 Jul 2010 05:37:18 -0700 (PDT)
-In-Reply-To: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>
+Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:30359
+	"EHLO DB3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752493Ab0HBGUL convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 2 Aug 2010 02:20:11 -0400
+Received: from mail56-db3 (localhost.localdomain [127.0.0.1])	by
+ mail56-db3-R.bigfish.com (Postfix) with ESMTP id 9777F1A80505	for
+ <linux-mmc@vger.kernel.org>; Mon,  2 Aug 2010 06:20:09 +0000 (UTC)
+Received: from DB3EHSMHS004.bigfish.com (unknown [10.3.81.246])	by
+ mail56-db3.bigfish.com (Postfix) with ESMTP id 4DEEF13005F	for
+ <linux-mmc@vger.kernel.org>; Mon,  2 Aug 2010 06:20:09 +0000 (UTC)
+Received: from az33smr02.freescale.net (az33smr02.freescale.net
+ [10.64.34.200])	by az33egw02.freescale.net (8.14.3/8.14.3) with ESMTP id
+ o726K2sv026305	for <linux-mmc@vger.kernel.org>; Sun, 1 Aug 2010 23:20:07
+ -0700 (MST)
+Received: from zch01exm23.fsl.freescale.net (zch01exm23.ap.freescale.net
+ [10.192.129.207])	by az33smr02.freescale.net (8.13.1/8.13.0) with ESMTP id
+ o726K7qA019786	for <linux-mmc@vger.kernel.org>; Mon, 2 Aug 2010 01:20:08
+ -0500 (CDT)
+Content-Class: urn:content-classes:message
+In-Reply-To: <20100730070624.GB20351@oksana.dev.rtsoft.ru>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@canonical.com>, Adrian Hunter <adrian.hunter@nokia.com>, Maxim Levitsky <maximlevitsky@gmail.com>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@ozlabs.org, akpm@linux-foundation.org
 
-If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
-suspend, the card will be removed, therefore this patch doesn't change
-the behavior of this option.
+ 
 
-However the removal will be done by pm notifier, which runs while
-userspace is still not frozen and thus can freely use del_gendisk,
-without the risk of deadlock which would happen otherwise.
-
-
-Card detect workqueue is now disabled while userspace is frozen,
-Therefore if you do use CONFIG_MMC_UNSAFE_RESUME,
-and remove the card during suspend, the removal will be
-detected as soon as userspace is unfrozen, again at the moment
-it is safe to call del_gendisk.
-
-Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
-
-Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
----
- drivers/mmc/core/core.c  |   83 +++++++++++++++++++++++++++++++--------------
- drivers/mmc/core/host.c  |    4 ++
- include/linux/mmc/host.h |    3 ++
- 3 files changed, 64 insertions(+), 26 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 569e94d..83e7543 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1057,6 +1057,17 @@ void mmc_rescan(struct work_struct *work)
- 		container_of(work, struct mmc_host, detect.work);
- 	u32 ocr;
- 	int err;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (host->rescan_disable) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		return;
-+	}
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
- 
- 	mmc_bus_get(host);
- 
-@@ -1266,19 +1277,6 @@ int mmc_suspend_host(struct mmc_host *host)
- 	if (host->bus_ops && !host->bus_dead) {
- 		if (host->bus_ops->suspend)
- 			err = host->bus_ops->suspend(host);
--		if (err == -ENOSYS || !host->bus_ops->resume) {
--			/*
--			 * We simply "remove" the card in this case.
--			 * It will be redetected on resume.
--			 */
--			if (host->bus_ops->remove)
--				host->bus_ops->remove(host);
--			mmc_claim_host(host);
--			mmc_detach_bus(host);
--			mmc_release_host(host);
--			host->pm_flags = 0;
--			err = 0;
--		}
- 	}
- 	mmc_bus_put(host);
- 
-@@ -1310,28 +1308,61 @@ int mmc_resume_host(struct mmc_host *host)
- 			printk(KERN_WARNING "%s: error %d during resume "
- 					    "(card was removed?)\n",
- 					    mmc_hostname(host), err);
--			if (host->bus_ops->remove)
--				host->bus_ops->remove(host);
--			mmc_claim_host(host);
--			mmc_detach_bus(host);
--			mmc_release_host(host);
--			/* no need to bother upper layers */
- 			err = 0;
- 		}
- 	}
- 	mmc_bus_put(host);
- 
--	/*
--	 * We add a slight delay here so that resume can progress
--	 * in parallel.
--	 */
--	mmc_detect_change(host, 1);
--
- 	return err;
- }
--
- EXPORT_SYMBOL(mmc_resume_host);
- 
-+/* Do the card removal on suspend if card is assumed removeable
-+ * Do that in pm notifier while userspace isn't yet frozen, so we will be able
-+   to sync the card.
-+*/
-+int mmc_pm_notify(struct notifier_block *notify_block,
-+					unsigned long mode, void *unused)
-+{
-+	struct mmc_host *host = container_of(
-+		notify_block, struct mmc_host, pm_notify);
-+	unsigned long flags;
-+
-+
-+	switch (mode) {
-+	case PM_HIBERNATION_PREPARE:
-+	case PM_SUSPEND_PREPARE:
-+
-+		spin_lock_irqsave(&host->lock, flags);
-+		host->rescan_disable = 1;
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		cancel_delayed_work_sync(&host->detect);
-+
-+		if (!host->bus_ops || host->bus_ops->suspend)
-+			break;
-+
-+		mmc_claim_host(host);
-+
-+		if (host->bus_ops->remove)
-+			host->bus_ops->remove(host);
-+
-+		mmc_detach_bus(host);
-+		mmc_release_host(host);
-+		host->pm_flags = 0;
-+		break;
-+
-+	case PM_POST_SUSPEND:
-+	case PM_POST_HIBERNATION:
-+
-+		spin_lock_irqsave(&host->lock, flags);
-+		host->rescan_disable = 0;
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		mmc_detect_change(host, 0);
-+
-+	}
-+
-+	return 0;
-+}
- #endif
- 
- static int __init mmc_init(void)
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 4735390..0efe631 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -17,6 +17,7 @@
- #include <linux/pagemap.h>
- #include <linux/leds.h>
- #include <linux/slab.h>
-+#include <linux/suspend.h>
- 
- #include <linux/mmc/host.h>
- 
-@@ -85,6 +86,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	init_waitqueue_head(&host->wq);
- 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
- 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
-+	host->pm_notify.notifier_call = mmc_pm_notify;
- 
- 	/*
- 	 * By default, hosts do not support SGIO or large requests.
-@@ -133,6 +135,7 @@ int mmc_add_host(struct mmc_host *host)
- #endif
- 
- 	mmc_start_host(host);
-+	register_pm_notifier(&host->pm_notify);
- 
- 	return 0;
- }
-@@ -149,6 +152,7 @@ EXPORT_SYMBOL(mmc_add_host);
-  */
- void mmc_remove_host(struct mmc_host *host)
- {
-+	unregister_pm_notifier(&host->pm_notify);
- 	mmc_stop_host(host);
- 
- #ifdef CONFIG_DEBUG_FS
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index f65913c..513ff03 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -124,6 +124,7 @@ struct mmc_host {
- 	unsigned int		f_min;
- 	unsigned int		f_max;
- 	u32			ocr_avail;
-+	struct notifier_block	pm_notify;
- 
- #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
- #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
-@@ -183,6 +184,7 @@ struct mmc_host {
- 
- 	/* Only used with MMC_CAP_DISABLE */
- 	int			enabled;	/* host is enabled */
-+	int			rescan_disable;	/* disable card detection */
- 	int			nesting_cnt;	/* "enable" nesting count */
- 	int			en_dis_recurs;	/* detect recursion */
- 	unsigned int		disable_delay;	/* disable delay in msecs */
-@@ -257,6 +259,7 @@ int mmc_card_can_sleep(struct mmc_host *host);
- int mmc_host_enable(struct mmc_host *host);
- int mmc_host_disable(struct mmc_host *host);
- int mmc_host_lazy_disable(struct mmc_host *host);
-+int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
- 
- static inline void mmc_set_disable_delay(struct mmc_host *host,
- 					 unsigned int disable_delay)
--- 
-1.7.0.4
+> -----Original Message-----
+> From: Anton Vorontsov [mailto:cbouatmailru@gmail.com] 
+> Sent: Friday, July 30, 2010 15:06 PM
+> To: Zang Roy-R61911
+> Cc: linux-mmc@vger.kernel.org; linuxppc-dev@ozlabs.org; 
+> akpm@linux-foundation.org
+> Subject: Re: [PATCH 3/3 v2] mmc: Add ESDHC weird voltage bits 
+> workaround
+> 
+> On Fri, Jul 30, 2010 at 11:52:57AM +0800, Roy Zang wrote:
+> > P4080 ESDHC controller does not support 1.8V and 3.0V 
+> voltage. but the
+> > host controller capabilities register wrongly set the bits.
+> > This patch adds the workaround to correct the weird voltage 
+> setting bits.
+> > 
+> > Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
+> > ---
+> [...]
+> > diff --git a/drivers/mmc/host/sdhci-of-core.c 
+> b/drivers/mmc/host/sdhci-of-core.c
+> > index 0c30242..1f3913d 100644
+> > --- a/drivers/mmc/host/sdhci-of-core.c
+> > +++ b/drivers/mmc/host/sdhci-of-core.c
+> > @@ -164,6 +164,10 @@ static int __devinit 
+> sdhci_of_probe(struct of_device *ofdev,
+> >  	if (sdhci_of_wp_inverted(np))
+> >  		host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
+> >  
+> > +	if (of_device_is_compatible(np, "fsl,p4080-esdhc"))
+> > +		host->quirks |= (SDHCI_QUIRK_QORIQ_NO_VDD_180
+> > +				|SDHCI_QUIRK_QORIQ_NO_VDD_300);
+> > +
+> 
+> It should be two properties, something like sdhci,no-vdd-180
+> and sdhci,no-vdd-300. But it might be even better: we have
+> voltage-ranges for mmc-spi case, see
+> Documentation/powerpc/dts-bindings/mmc-spi-slot.txt.
+> 
+> If voltage-ranges specified, then we use it, not capabilities
+> register.
+> 
+> For p4080 it will be 'voltage-ranges = <3200 3400>;'. So, with
+> voltage-ranges we can do fine grained VDD control without
+> introducing anything new.
+why not
+               voltage-ranges = <3300 3300>;
+?
+Roy
 
