@@ -1,118 +1,107 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v2 03/20] mmc: support embedded data field in mmc_host
-Date: Tue, 3 Aug 2010 00:35:56 +0300
-Message-ID: <AANLkTi=vhWV1RNyemtfppfjvLYAbzd3aRjFOVgLLpG3Z@mail.gmail.com>
-References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-	<1279733634-21974-4-git-send-email-ohad@wizery.com> <AANLkTimzA_JJ-byTDWznbL3YzeJ8LAP4M50onf2_3fBF@mail.gmail.com>
-	<AANLkTi=Oy8X1xMOwWL_cKBB1LWULT6=p+adUgB+AuSJS@mail.gmail.com>
-	<AANLkTi=BUX59heXAW2Uf4wZo2dSS19Je54dkQ5u2YGAW@mail.gmail.com>
-	<AANLkTimZQKj7H_GeE=+O9cwxEMTR+LhfFbt=AyXGzN3d@mail.gmail.com>
-	<AANLkTikfRja-h9mz7uyRXCZNZjKdU_yB8e58XQucUzrn@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:44644 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755523Ab0HBVgR convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Aug 2010 17:36:17 -0400
-In-Reply-To: <AANLkTikfRja-h9mz7uyRXCZNZjKdU_yB8e58XQucUzrn@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2.patch added to -mm tree
+Date: Mon, 02 Aug 2010 15:56:35 -0700
+Message-ID: <201008022256.o72MuZJh016384@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: maximlevitsky@gmail.com, david-b@pacbell.net, linux-mmc@vger.kernel.org, stern@rowland.harvard.edu
 List-Id: linux-mmc@vger.kernel.org
-To: Vitaly Wool <vitalywool@gmail.com>
-Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, linux@arm.linux.org.uk, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, Roger Quadros <roger.quadros@nokia.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 
-Hi Vitaly,
 
-On Mon, Aug 2, 2010 at 7:25 PM, Vitaly Wool <vitalywool@gmail.com> wrot=
-e:
-> On Mon, Aug 2, 2010 at 5:54 PM, Ohad Ben-Cohen <ohad@wizery.com> wrot=
-e:
->> SPI is using these spi_board_info tables to populate the SPI device
->> trees. These tables are registered early at the board-specific init
->> code, and are later used by SPI core to populate the devices when th=
-e
->> SPI master controller is registered.
->>
->> SDIO doesn't normally needs any kind of hard coded data: most device=
-s
->> are dynamically probed and populated.
->>
->> On rare cases like the wl1271, we have some platform-specific data w=
-e
->> need to deliver the SDIO function driver (i.e. the irq info in this
->> case). Since the device is hardwired to a specific controller, it do=
-es
->> make some sense to pass this private data from the controller's info
->> in the board files, through the host driver, and make it accessible
->> through the specific host instance that drives this controller.
->>
->> Btw, if our problem was be broader (e.g., needs to supply private da=
-ta
->> for non-hardwired devices), then I agree that a more complex
->> mechanism, such as the one you suggest, would be needed. But current=
-ly
->> the problem is very simple and the solution is even simpler: just ad=
-d
->> 1 private pointer to the host.
->>
->> Hope you find this reasonable,
->
-> no, actually I don't. I think this is a hack that intrudes into the
-> area it completely doesn't belong to.
->
-> In fact, one can have 2 views on this problem: either this is a fairl=
-y
-> generic problem we need to address, or this is a very specific corner
-> case.
-> Your solution will be treated as a hack in both cases.
->
-> If we consider it a generic problem, then we need to find a generic
-> solution, which is the board_info solution, for instance. FWIW, I2C
-> also uses this approach now.
->
-> If we consider it to be a corner case, let's just add a dummy
-> platform_device like it's done in WL1251 implementation and keep the
-> MMC subsystem clean.
+The patch titled
+     mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
+has been added to the -mm tree.  Its filename is
+     mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2.patch
 
-Let's start by defining the problem exactly:
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-SDIO devices that are hardwired to a specific controller and have some
-platform data that needs to be available to the SDIO function driver.
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-It doesn't get more generic than that - it's not needed with common
-fully-enumerable SDIO devices (at least I'm not aware of such need),
-hence a generic mechanism of maintaining a global pile of platform
-data pointers, which can be queried with the device and vendor ID,
-really sounds like an overkill.
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
-But it's not specific to the wl1271 device - I prefer to support this
-at the MMC level, so we wouldn't have to add an extra platform device
-for every SDIO function driver that needs to cope with such issue (we
-already have two drivers - wl1271_sdio.c and wl1251_sdio.c); Adding an
-extra platform device for every driver is just too much dummy code
-(that btw adds a well-hidden race condition between the two probe
-calls), which can be nicely eliminated if we just introduce this new
-per-host private data pointer.
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-So we have a SDIO device hardwired to a specific controller, that is
-driven by a specific host controller driver instance. This patch
-allows this specific host instance to carry platform data for the
-device that is hardwired to it. The platform data would be available
-only to SDIO function driver instances of that specific host
-controller. The solution is generic enough to support all SDIO
-function drivers with similar needs, and it's extremely simple.
+------------------------------------------------------
+Subject: mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
+From: Maxim Levitsky <maximlevitsky@gmail.com>
 
-I'm honestly trying to understand your concerns, but I'm afraid that
-just saying "it's a hack" is not too informative. Can you please
-explain what do you think is technically wrong with the proposed
-solution ? is it not general enough for other use cases ? will it
-break something ?
+If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
+suspend, the card will be removed, therefore this patch doesn't change the
+behavior of this option.
 
-Thanks,
-Ohad.
+However the removal will be done by pm notifier, which runs while
+userspace is still not frozen and thus can freely use del_gendisk, without
+the risk of deadlock which would happen otherwise.
 
->
-> Thanks,
-> =A0 Vitaly
->
+Card detect workqueue is now disabled while userspace is frozen, Therefore
+if you do use CONFIG_MMC_UNSAFE_RESUME, and remove the card during
+suspend, the removal will be detected as soon as userspace is unfrozen,
+again at the moment it is safe to call del_gendisk.
+
+Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
+
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: David Brownell <david-b@pacbell.net>
+Cc: Alan Stern <stern@rowland.harvard.edu>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/core/core.c  |    4 ++--
+ drivers/mmc/core/host.c  |    1 -
+ include/linux/mmc/host.h |    1 -
+ 3 files changed, 2 insertions(+), 4 deletions(-)
+
+diff -puN drivers/mmc/core/core.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2 drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
++++ a/drivers/mmc/core/core.c
+@@ -1323,6 +1323,7 @@ int mmc_resume_host(struct mmc_host *hos
+ 
+ 	return err;
+ }
++EXPORT_SYMBOL(mmc_resume_host);
+ 
+ /* Do the card removal on suspend if card is assumed removeable
+  * Do that in pm notifier while userspace isn't yet frozen, so we will be able
+@@ -1343,6 +1344,7 @@ int mmc_pm_notify(struct notifier_block 
+ 		spin_lock_irqsave(&host->lock, flags);
+ 		host->rescan_disable = 1;
+ 		spin_unlock_irqrestore(&host->lock, flags);
++		cancel_delayed_work_sync(&host->detect);
+ 
+ 		if (!host->bus_ops || host->bus_ops->suspend)
+ 			break;
+@@ -1369,8 +1371,6 @@ int mmc_pm_notify(struct notifier_block 
+ 
+ 	return 0;
+ }
+-EXPORT_SYMBOL(mmc_resume_host);
+-
+ #endif
+ 
+ static int __init mmc_init(void)
+diff -puN drivers/mmc/core/host.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2 drivers/mmc/core/host.c
+--- a/drivers/mmc/core/host.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
++++ a/drivers/mmc/core/host.c
+@@ -88,7 +88,6 @@ struct mmc_host *mmc_alloc_host(int extr
+ 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
+ 	host->pm_notify.notifier_call = mmc_pm_notify;
+ 
+-
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+ 	 * They have to set these according to their abilities.
+diff -puN include/linux/mmc/host.h~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2 include/linux/mmc/host.h
+--- a/include/linux/mmc/host.h~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
++++ a/include/linux/mmc/host.h
+@@ -261,7 +261,6 @@ int mmc_host_disable(struct mmc_host *ho
+ int mmc_host_lazy_disable(struct mmc_host *host);
+ int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
+ 
