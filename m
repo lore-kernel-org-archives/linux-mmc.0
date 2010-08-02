@@ -1,91 +1,331 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v2 03/20] mmc: support embedded data field in mmc_host
-Date: Mon, 2 Aug 2010 18:54:36 +0300
-Message-ID: <AANLkTimZQKj7H_GeE=+O9cwxEMTR+LhfFbt=AyXGzN3d@mail.gmail.com>
-References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
-	<1279733634-21974-4-git-send-email-ohad@wizery.com>
-	<AANLkTimzA_JJ-byTDWznbL3YzeJ8LAP4M50onf2_3fBF@mail.gmail.com>
-	<AANLkTi=Oy8X1xMOwWL_cKBB1LWULT6=p+adUgB+AuSJS@mail.gmail.com>
-	<AANLkTi=BUX59heXAW2Uf4wZo2dSS19Je54dkQ5u2YGAW@mail.gmail.com>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH v6] OMAP4 HSMMC: Adding Card detect support for MMC1 on OMAP4
+Date: Mon, 2 Aug 2010 10:56:05 -0500
+Message-ID: <966519786A214EA4BC770E7EC4D50628@am.dhcp.ti.com>
+References: <20809.10.24.255.18.1278511944.squirrel@dbdmail.itg.ti.com> <AANLkTimNbzSMeOW4m201D=uV1WyYqkwpE1KqdTb8Qudy@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <AANLkTi=BUX59heXAW2Uf4wZo2dSS19Je54dkQ5u2YGAW@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Vitaly Wool <vitalywool@gmail.com>
-Cc: Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, linux@arm.linux.org.uk, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, linux-wireless@vger.kernel.org, Roger Quadros <roger.quadros@nokia.com>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, linux-omap@vger.kernel.org, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <AANLkTimNbzSMeOW4m201D=uV1WyYqkwpE1KqdTb8Qudy@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: 'kishore kadiyala' <kishorek.kadiyala@gmail.com>, 'Andrew Morton' <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, adrian.hunter@nokia.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Vitaly,
 
-On Thu, Jul 29, 2010 at 7:16 PM, Vitaly Wool <vitalywool@gmail.com> wrote:
-> On Thu, Jul 29, 2010 at 8:00 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
->>> To my understanding, this data doesn't belong to mmc_host. It's not a
->>> host data at all. E. g. imagine a GPIO IRQ for some SDIO chip -- it's
->>> totally unrelated to host.
->>>
->>> I think a cleaner way would be to introduce something similar to what
->>> we have for SPI, e. g. struct sdio_board_info. This board info will
->>> contain platform-specific stuff and vendor id/chip id for each onboard
->>> SDIO device. Then the SDIO core will pick up the appropriate data
->>> basing on vendor id/chip id.
->>
->> Can you please elaborate some more about your proposal (specifically
->> where does this sdio_board_info get set and how do function drivers
->> access it) ?
->>
->> If I understand you correctly, you suggest to have a global,
->> board-specific table of sdio_board_info structures, which would be
->> accessible to the SDIO core (through the host driver ?). When a new
->> SDIO device is found the core would search this table for the
->> appropriate sdio_board_info struct and make it accessible to the SDIO
->> function driver ?
->
-> Well, let's look at how it's implemented for SPI. There is the
-> function spi_register_board_info in the SPI core which copies the
-> board info into the local data structure (a linked list, actually).
-> Whenever needed, the core walks through the list to find the
-> appropriate board_info basing on some search key.
->
-> I think this may be the way to go for SDIO as well.
 
-IMHO this is a bit overkill solution for our problem.
+> -----Original Message-----
+> From: kishore kadiyala [mailto:kishorek.kadiyala@gmail.com]
+> Sent: Monday, August 02, 2010 9:33 AM
+> To: Andrew Morton
+> Cc: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org;
+> tony@atomide.com; madhu.cr@ti.com; adrian.hunter@nokia.com
+> Subject: Re: [PATCH v6] OMAP4 HSMMC: Adding Card detect support for M=
+MC1
+> on OMAP4
+>=20
+> Andrew,
+>=20
+> Can this patch be taken now as there are no comments.
+>=20
+> Regards,
+> Kishore
+>=20
 
-SPI is using these spi_board_info tables to populate the SPI device
-trees. These tables are registered early at the board-specific init
-code, and are later used by SPI core to populate the devices when the
-SPI master controller is registered.
+Kishore,
 
-SDIO doesn't normally needs any kind of hard coded data: most devices
-are dynamically probed and populated.
+As Andrew mentioned some time back this series has to go through Linux-=
+omap.
+Tony had a comment on the below first patch in the series.
 
-On rare cases like the wl1271, we have some platform-specific data we
-need to deliver the SDIO function driver (i.e. the irq info in this
-case). Since the device is hardwired to a specific controller, it does
-make some sense to pass this private data from the controller's info
-in the board files, through the host driver, and make it accessible
-through the specific host instance that drives this controller.
+[PATCH v5 1/2] OMAP HSMMC: Adding a Flag to determine the type of Card
+detect
 
-Btw, if our problem was be broader (e.g., needs to supply private data
-for non-hardwired devices), then I agree that a more complex
-mechanism, such as the one you suggest, would be needed. But currently
-the problem is very simple and the solution is even simpler: just add
-1 private pointer to the host.
+How is the NON-GPIO card detect handled now? Is the above patch not nee=
+ded
+anymore?
 
-Hope you find this reasonable,
+Regards,
+Madhu
 
-Thanks,
-Ohad.
+> On Wed, Jul 7, 2010 at 7:42 PM, kishore kadiyala
+> <kishore.kadiyala@ti.com> wrote:
+> > Adding card detect callback function and card detect configuration
+> > function for MMC1 Controller.
+> >
+> > Card detect configuration function does initial configuration of th=
+e
+> > MMC Control & PullUp-PullDown registers of Phoenix.
+> >
+> > For MMC1 Controller, Card detect interrupt source is
+> > twl6030 and the card detect call back function provides card
+> present/absent
+> > status by reading MMC Control register.
+> >
+> > Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+> > Cc: Tony Lindgren <tony@atomide.com>
+> > Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
+> > Cc: Adrian Hunter <adrian.hunter@nokia.com>
+> > ---
+> > V5:
+> > =A0 =A0 =A0 =A0https://patchwork.kernel.org/patch/106697/
+> > =A0 =A0 =A0 =A0https://patchwork.kernel.org/patch/106698/
+> > V4:
+> > =A0 =A0 =A0 =A0http://www.mail-archive.com/linux-
+> mmc@vger.kernel.org/msg01958.html
+> > =A0 =A0 =A0 =A0http://www.mail-archive.com/linux-
+> mmc@vger.kernel.org/msg01949.html
+> >
+> >
+> > =A0arch/arm/mach-omap2/board-4430sdp.c | =A0 =A07 +++-
+> > =A0drivers/mfd/twl6030-irq.c =A0 =A0 =A0 =A0 =A0 | =A0 76
+> +++++++++++++++++++++++++++++++++++
+> > =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 | =A0 =A04 +-
+> > =A0include/linux/i2c/twl.h =A0 =A0 =A0 =A0 =A0 =A0 | =A0 16 +++++++
+> > =A04 files changed, 100 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-
+> omap2/board-4430sdp.c
+> > index f287461..388b96d 100644
+> > --- a/arch/arm/mach-omap2/board-4430sdp.c
+> > +++ b/arch/arm/mach-omap2/board-4430sdp.c
+> > @@ -227,9 +227,14 @@ static int omap4_twl6030_hsmmc_late_init(struc=
+t
+> device *dev)
+> > =A0 =A0 =A0 =A0struct omap_mmc_platform_data *pdata =3D dev->platfo=
+rm_data;
+> >
+> > =A0 =A0 =A0 =A0/* Setting MMC1 Card detect Irq */
+> > - =A0 =A0 =A0 if (pdev->id =3D=3D 0)
+> > + =A0 =A0 =A0 if (pdev->id =3D=3D 0) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D twl6030_mmc_card_detect_confi=
+g();
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Failed config=
+uring MMC1 card detect\n");
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].card_detect_irq =3D =
+TWL6030_IRQ_BASE +
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0MMCDETECT_INTR_OFFSET;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->slots[0].card_detect =3D twl60=
+30_mmc_card_detect;
+> > + =A0 =A0 =A0 }
+> > =A0 =A0 =A0 =A0return ret;
+> > =A0}
+> >
+> > diff --git a/drivers/mfd/twl6030-irq.c b/drivers/mfd/twl6030-irq.c
+> > index 10bf228..c027692 100644
+> > --- a/drivers/mfd/twl6030-irq.c
+> > +++ b/drivers/mfd/twl6030-irq.c
+> > @@ -36,6 +36,7 @@
+> > =A0#include <linux/irq.h>
+> > =A0#include <linux/kthread.h>
+> > =A0#include <linux/i2c/twl.h>
+> > +#include <linux/platform_device.h>
+> >
+> > =A0/*
+> > =A0* TWL6030 (unlike its predecessors, which had two level interrup=
+t
+> handling)
+> > @@ -223,6 +224,81 @@ int twl6030_interrupt_mask(u8 bit_mask, u8 off=
+set)
+> > =A0}
+> > =A0EXPORT_SYMBOL(twl6030_interrupt_mask);
+> >
+> > +int twl6030_mmc_card_detect_config(void)
+> > +{
+> > + =A0 =A0 =A0 int ret;
+> > + =A0 =A0 =A0 u8 reg_val =3D 0;
+> > +
+> > + =A0 =A0 =A0 /* Unmasking the Card detect Interrupt line for MMC1 =
+from
+> Phoenix */
+> > + =A0 =A0 =A0 if (twl_class_is_6030()) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCD=
+ETECT_INT_MASK,
+> > +
+> REG_INT_MSK_LINE_B);
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCD=
+ETECT_INT_MASK,
+> > +
+> REG_INT_MSK_STS_B);
+> > + =A0 =A0 =A0 }
+> > +
+> > + =A0 =A0 =A0 /*
+> > + =A0 =A0 =A0 =A0* Intially Configuring MMC_CTRL for receving inter=
+rupts &
+> > + =A0 =A0 =A0 =A0* Card status on TWL6030 for MMC1
+> > + =A0 =A0 =A0 =A0*/
+> > + =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
+> TWL6030_MMCCTRL);
+> > + =A0 =A0 =A0 if (ret < 0) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to read MMCCT=
+RL, error %d\n",
+> ret);
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+> > + =A0 =A0 =A0 }
+> > + =A0 =A0 =A0 reg_val &=3D ~VMMC_AUTO_OFF;
+> > + =A0 =A0 =A0 reg_val |=3D SW_FC;
+> > + =A0 =A0 =A0 ret =3D twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
+> TWL6030_MMCCTRL);
+> > + =A0 =A0 =A0 if (ret < 0) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to write MMCC=
+TRL, error %d\n",
+> ret);
+> > + =A0 =A0 =A0 }
+> > +
+> > + =A0 =A0 =A0 /* Configuring PullUp-PullDown register */
+> > + =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
+> > +
+> TWL6030_CFG_INPUT_PUPD3);
+> > + =A0 =A0 =A0 if (ret < 0) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to read CFG_I=
+NPUT_PUPD3, error
+> %d\n",
+> > +
+> ret);
+> > + =A0 =A0 =A0 }
+> > + =A0 =A0 =A0 reg_val &=3D ~(MMC_PU | MMC_PD);
+> > + =A0 =A0 =A0 ret =3D twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
+> > +
+> TWL6030_CFG_INPUT_PUPD3);
+> > + =A0 =A0 =A0 if (ret < 0) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to write CFG_=
+INPUT_PUPD3, error
+> %d\n",
+> > +
+> ret);
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+> > + =A0 =A0 =A0 }
+> > + =A0 =A0 =A0 return 0;
+> > +}
+> > +EXPORT_SYMBOL(twl6030_mmc_card_detect_config);
+> > +
+> > +int twl6030_mmc_card_detect(struct device *dev, int slot)
+> > +{
+> > + =A0 =A0 =A0 int ret =3D -EIO;
+> > + =A0 =A0 =A0 u8 read_reg;
+> > + =A0 =A0 =A0 struct platform_device *pdev =3D container_of(dev,
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 struct platform_device, dev);
+> > +
+> > + =A0 =A0 =A0 switch (pdev->id) {
+> > + =A0 =A0 =A0 case 0:
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* BIT0 of REG_MMC_CTRL
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* 0 - Card not present ,1 - Card p=
+resent
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODUL=
+E_ID0, &read_reg,
+> > +
+> TWL6030_MMCCTRL);
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret >=3D 0)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D read_reg & ST=
+S_MMC;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> > + =A0 =A0 =A0 default:
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Unkown MMC controller %d in %=
+s\n", pdev->id,
+> __func__);
+> > + =A0 =A0 =A0 }
+> > + =A0 =A0 =A0 return ret;
+> > +}
+> > +EXPORT_SYMBOL(twl6030_mmc_card_detect);
+> > +
+> > =A0int twl6030_init_irq(int irq_num, unsigned irq_base, unsigned ir=
+q_end)
+> > =A0{
+> >
+> > diff --git a/drivers/mmc/host/omap_hsmmc.c
+> b/drivers/mmc/host/omap_hsmmc.c
+> > index b032828..c047b13 100644
+> > --- a/drivers/mmc/host/omap_hsmmc.c
+> > +++ b/drivers/mmc/host/omap_hsmmc.c
+> > @@ -464,8 +464,6 @@ static int omap_hsmmc_gpio_init(struct
+> omap_mmc_platform_data *pdata)
+> > =A0 =A0 =A0 =A0int ret;
+> >
+> > =A0 =A0 =A0 =A0if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->suspend =3D omap_hsmmc_suspend=
+_cdirq;
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->resume =3D omap_hsmmc_resume_c=
+dirq;
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (pdata->slots[0].cover)
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].get_=
+cover_state =3D
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0omap_hsmmc_get_cover_state;
+> > @@ -2170,6 +2168,8 @@ static int __init omap_hsmmc_probe(struct
+> platform_device *pdev)
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"Una=
+ble to grab MMC CD IRQ\n");
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto err_irq_cd;
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->suspend =3D omap_hsmmc_suspend=
+_cdirq;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->resume =3D omap_hsmmc_resume_c=
+dirq;
+> > =A0 =A0 =A0 =A0}
+> >
+> > =A0 =A0 =A0 =A0omap_hsmmc_disable_irq(host);
+> > diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
+> > index 6de90bf..9493292 100644
+> > --- a/include/linux/i2c/twl.h
+> > +++ b/include/linux/i2c/twl.h
+> > @@ -141,6 +141,16 @@
+> > =A0#define TWL6030_CHARGER_CTRL_INT_MASK =A00x10
+> > =A0#define TWL6030_CHARGER_FAULT_INT_MASK =A0 =A0 =A0 =A0 0x60
+> >
+> > +#define TWL6030_MMCCTRL =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00xEE
+> > +#define VMMC_AUTO_OFF =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x1 << 3=
+)
+> > +#define SW_FC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(=
+0x1 << 2)
+> > +#define STS_MMC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x1
+> > +
+> > +#define TWL6030_CFG_INPUT_PUPD3 =A0 =A0 =A0 =A00xF2
+> > +#define MMC_PU =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x=
+1 << 3)
+> > +#define MMC_PD =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x=
+1 << 2)
+> > +
+> > +
+> >
+> > =A0#define TWL4030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 =A0 0x4030
+> > =A0#define TWL6030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 =A0 0x6030
+> > @@ -173,6 +183,12 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg,
+> unsigned num_bytes);
+> > =A0int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
+> > =A0int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
+> >
+> > +/* Card detect Configuration for MMC1 Controller on OMAP4 */
+> > +int twl6030_mmc_card_detect_config(void);
+> > +
+> > +/* MMC1 Controller on OMAP4 uses Phoenix irq for Card detect */
+> > +int twl6030_mmc_card_detect(struct device *dev, int slot);
+> > +
+> > =A0/*--------------------------------------------------------------=
+-------
+> -*/
+> >
+> > =A0/*
+> > --
+> > 1.6.3.3
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
+> >
 
->
-> ~Vitaly
->
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
