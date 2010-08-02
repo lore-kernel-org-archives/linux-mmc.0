@@ -1,39 +1,31 @@
-From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+From: Ohad Ben-Cohen <ohad@wizery.com>
 Subject: Re: [PATCH v2 00/20] native support for wl1271 on ZOOM
-Date: Mon, 2 Aug 2010 14:42:58 +0300
-Message-ID: <20100802114256.GE12293@atomide.com>
+Date: Mon, 2 Aug 2010 15:08:44 +0300
+Message-ID: <AANLkTi=GmrCR8=NPLDE=e4nS7yM0Un95MDo25QdEt-XX@mail.gmail.com>
 References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
- <20100726193028.GG3903@tuxdriver.com>
- <1280736987.17809.18.camel@chilepepper>
+	<20100726193028.GG3903@tuxdriver.com> <1280736987.17809.18.camel@chilepepper>
+	<20100802114256.GE12293@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1280736987.17809.18.camel@chilepepper>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
-Cc: "ext John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Pandita Vikram <vikram.pandita-l0cyMroinI0@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20100802114256.GE12293@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Luciano Coelho <luciano.coelho@nokia.com>, "ext John W. Linville" <linville@tuxdriver.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
 List-Id: linux-mmc@vger.kernel.org
 
-* Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org> [100802 11:10]:
-> On Mon, 2010-07-26 at 21:30 +0200, ext John W. Linville wrote:
-> > On Wed, Jul 21, 2010 at 08:33:34PM +0300, Ohad Ben-Cohen wrote:
-> > > This patch series adds native support for wl1271 on ZOOM.
-> > 
-> > Just for the record, I'm fine with the wl1271 bits here going through
-> > the omap tree with the rest of the series.
-> 
-> Yeah, I agree.  This is probably the best way to keep things in sync.
+On Mon, Aug 2, 2010 at 2:42 PM, Tony Lindgren <tony@atomide.com> wrote:
+> Nicolas Pitre made a comment saying he wants to look at these patches
+> more, are there other pending comments?
 
-OK, let's do that then. 
+I plan to post a v3 series this week with some of the comments that
+were already discussed after v2.
 
-Nicolas Pitre made a comment saying he wants to look at these patches
-more, are there other pending comments?
+Thanks everyone for the attention,
+Ohad.
 
-Regards,
-
-Tony
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> Regards,
+>
+> Tony
+>
