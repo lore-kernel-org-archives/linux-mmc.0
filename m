@@ -1,107 +1,95 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2.patch added to -mm tree
-Date: Mon, 02 Aug 2010 15:56:35 -0700
-Message-ID: <201008022256.o72MuZJh016384@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: maximlevitsky@gmail.com, david-b@pacbell.net, linux-mmc@vger.kernel.org, stern@rowland.harvard.edu
+From: Roy Zang <tie-fei.zang@freescale.com>
+Subject: [PATCH 1/3 v2] sdhci: Add auto CMD12 support for eSDHC driver
+Date: Tue, 3 Aug 2010 11:11:10 +0800
+Message-ID: <1280805072-26112-1-git-send-email-tie-fei.zang@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:50958
+	"EHLO DB3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753533Ab0HCDln (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Aug 2010 23:41:43 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linuxppc-dev@ozlabs.org, akpm@linux-foundation.org
 
+From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-The patch titled
-     mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
-has been added to the -mm tree.  Its filename is
-     mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2.patch
+Add auto CMD12 command support for eSDHC driver.
+This is needed by P4080 and P1022 for block read/write.
+Manual asynchronous CMD12 abort operation causes protocol violations on
+these silicons.
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-
-If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
-suspend, the card will be removed, therefore this patch doesn't change the
-behavior of this option.
-
-However the removal will be done by pm notifier, which runs while
-userspace is still not frozen and thus can freely use del_gendisk, without
-the risk of deadlock which would happen otherwise.
-
-Card detect workqueue is now disabled while userspace is frozen, Therefore
-if you do use CONFIG_MMC_UNSAFE_RESUME, and remove the card during
-suspend, the removal will be detected as soon as userspace is unfrozen,
-again at the moment it is safe to call del_gendisk.
-
-Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
-
-Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: David Brownell <david-b@pacbell.net>
-Cc: Alan Stern <stern@rowland.harvard.edu>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
 ---
+ drivers/mmc/host/sdhci-of-core.c |    4 ++++
+ drivers/mmc/host/sdhci.c         |   14 ++++++++++++--
+ drivers/mmc/host/sdhci.h         |    2 ++
+ 3 files changed, 18 insertions(+), 2 deletions(-)
 
- drivers/mmc/core/core.c  |    4 ++--
- drivers/mmc/core/host.c  |    1 -
- include/linux/mmc/host.h |    1 -
- 3 files changed, 2 insertions(+), 4 deletions(-)
-
-diff -puN drivers/mmc/core/core.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2 drivers/mmc/core/core.c
---- a/drivers/mmc/core/core.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
-+++ a/drivers/mmc/core/core.c
-@@ -1323,6 +1323,7 @@ int mmc_resume_host(struct mmc_host *hos
+diff --git a/drivers/mmc/host/sdhci-of-core.c b/drivers/mmc/host/sdhci-of-core.c
+index a2e9820..dd1bdd1 100644
+--- a/drivers/mmc/host/sdhci-of-core.c
++++ b/drivers/mmc/host/sdhci-of-core.c
+@@ -154,6 +154,10 @@ static int __devinit sdhci_of_probe(struct of_device *ofdev,
+ 		host->ops = &sdhci_of_data->ops;
+ 	}
  
- 	return err;
- }
-+EXPORT_SYMBOL(mmc_resume_host);
++	if (of_get_property(np, "sdhci,auto-cmd12", NULL))
++		host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
++
++
+ 	if (of_get_property(np, "sdhci,1-bit-only", NULL))
+ 		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
  
- /* Do the card removal on suspend if card is assumed removeable
-  * Do that in pm notifier while userspace isn't yet frozen, so we will be able
-@@ -1343,6 +1344,7 @@ int mmc_pm_notify(struct notifier_block 
- 		spin_lock_irqsave(&host->lock, flags);
- 		host->rescan_disable = 1;
- 		spin_unlock_irqrestore(&host->lock, flags);
-+		cancel_delayed_work_sync(&host->detect);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c6d1bd8..a92566e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -817,8 +817,12 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+ 	WARN_ON(!host->data);
  
- 		if (!host->bus_ops || host->bus_ops->suspend)
- 			break;
-@@ -1369,8 +1371,6 @@ int mmc_pm_notify(struct notifier_block 
- 
- 	return 0;
- }
--EXPORT_SYMBOL(mmc_resume_host);
--
+ 	mode = SDHCI_TRNS_BLK_CNT_EN;
+-	if (data->blocks > 1)
+-		mode |= SDHCI_TRNS_MULTI;
++	if (data->blocks > 1) {
++		if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
++			mode |= SDHCI_TRNS_MULTI | SDHCI_TRNS_ACMD12;
++		else
++			mode |= SDHCI_TRNS_MULTI;
++	}
+ 	if (data->flags & MMC_DATA_READ)
+ 		mode |= SDHCI_TRNS_READ;
+ 	if (host->flags & SDHCI_REQ_USE_DMA)
+@@ -1108,6 +1112,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ #ifndef SDHCI_USE_LEDS_CLASS
+ 	sdhci_activate_led(host);
  #endif
++	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12) {
++		if (mrq->stop) {
++			mrq->data->stop = NULL;
++			mrq->stop = NULL;
++		}
++	}
  
- static int __init mmc_init(void)
-diff -puN drivers/mmc/core/host.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2 drivers/mmc/core/host.c
---- a/drivers/mmc/core/host.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
-+++ a/drivers/mmc/core/host.c
-@@ -88,7 +88,6 @@ struct mmc_host *mmc_alloc_host(int extr
- 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
- 	host->pm_notify.notifier_call = mmc_pm_notify;
+ 	host->mrq = mrq;
  
--
- 	/*
- 	 * By default, hosts do not support SGIO or large requests.
- 	 * They have to set these according to their abilities.
-diff -puN include/linux/mmc/host.h~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2 include/linux/mmc/host.h
---- a/include/linux/mmc/host.h~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume-update-2
-+++ a/include/linux/mmc/host.h
-@@ -261,7 +261,6 @@ int mmc_host_disable(struct mmc_host *ho
- int mmc_host_lazy_disable(struct mmc_host *host);
- int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c846813..8fb088c 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -240,6 +240,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
+ /* Controller cannot support End Attribute in NOP ADMA descriptor */
+ #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
++/* Controller uses Auto CMD12 command to stop the transfer */
++#define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12		(1<<27)
  
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
+-- 
+1.5.6.5
+
+
