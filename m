@@ -1,12 +1,12 @@
 From: akpm@linux-foundation.org
-Subject: + dts-add-sdhciauto-cmd12-field-for-p4080-device-tree.patch added to -mm tree
-Date: Tue, 03 Aug 2010 16:45:34 -0700
-Message-ID: <201008032345.o73NjYjn018136@imap1.linux-foundation.org>
+Subject: + dts-add-esdhc-weird-voltage-bits-workaround.patch added to -mm tree
+Date: Tue, 03 Aug 2010 16:45:36 -0700
+Message-ID: <201008032345.o73NjaO1018139@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:50257 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:36802 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756841Ab0HCXpj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Aug 2010 19:45:39 -0400
+	by vger.kernel.org with ESMTP id S1756841Ab0HCXpm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Aug 2010 19:45:42 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: mm-commits@vger.kernel.org
@@ -14,9 +14,9 @@ Cc: tie-fei.zang@freescale.com, Chang-Ming.Huang@freescale.com, benh@kernel.cras
 
 
 The patch titled
-     dts: add sdhci,auto-cmd12 field for p4080 device tree
+     dts: add ESDHC weird voltage bits workaround
 has been added to the -mm tree.  Its filename is
-     dts-add-sdhciauto-cmd12-field-for-p4080-device-tree.patch
+     dts-add-esdhc-weird-voltage-bits-workaround.patch
 
 Before you just go and hit "reply", please:
    a) Consider who else should be cc'ed
@@ -32,8 +32,13 @@ out what to do about this
 The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
 ------------------------------------------------------
-Subject: dts: add sdhci,auto-cmd12 field for p4080 device tree
+Subject: dts: add ESDHC weird voltage bits workaround
 From: Roy Zang <tie-fei.zang@freescale.com>
+
+P4080 ESDHC controller does not support 1.8V and 3.0V voltage.  but the
+host controller capabilities register wrongly set the bits.  This patch
+adds the workaround to correct the weird voltage setting bits.  Only 3.3V
+voltage is supported for P4080 ESDHC controller.
 
 Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
 Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>
@@ -44,33 +49,20 @@ Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- Documentation/powerpc/dts-bindings/fsl/esdhc.txt |    2 ++
- arch/powerpc/boot/dts/p4080ds.dts                |    1 +
- 2 files changed, 3 insertions(+)
+ arch/powerpc/boot/dts/p4080ds.dts |    1 +
+ 1 file changed, 1 insertion(+)
 
-diff -puN Documentation/powerpc/dts-bindings/fsl/esdhc.txt~dts-add-sdhciauto-cmd12-field-for-p4080-device-tree Documentation/powerpc/dts-bindings/fsl/esdhc.txt
---- a/Documentation/powerpc/dts-bindings/fsl/esdhc.txt~dts-add-sdhciauto-cmd12-field-for-p4080-device-tree
-+++ a/Documentation/powerpc/dts-bindings/fsl/esdhc.txt
-@@ -14,6 +14,8 @@ Required properties:
-     reports inverted write-protect state;
-   - sdhci,1-bit-only : (optional) specifies that a controller can
-     only handle 1-bit data transfers.
-+  - sdhci,auto-cmd12: (optional) specifies that a controller can
-+    only handle auto CMD12.
- 
- Example:
- 
-diff -puN arch/powerpc/boot/dts/p4080ds.dts~dts-add-sdhciauto-cmd12-field-for-p4080-device-tree arch/powerpc/boot/dts/p4080ds.dts
---- a/arch/powerpc/boot/dts/p4080ds.dts~dts-add-sdhciauto-cmd12-field-for-p4080-device-tree
+diff -puN arch/powerpc/boot/dts/p4080ds.dts~dts-add-esdhc-weird-voltage-bits-workaround arch/powerpc/boot/dts/p4080ds.dts
+--- a/arch/powerpc/boot/dts/p4080ds.dts~dts-add-esdhc-weird-voltage-bits-workaround
 +++ a/arch/powerpc/boot/dts/p4080ds.dts
 @@ -280,6 +280,7 @@
  			reg = <0x114000 0x1000>;
  			interrupts = <48 2>;
  			interrupt-parent = <&mpic>;
-+			sdhci,auto-cmd12;
++			voltage-ranges = <3300 3300>;
+ 			sdhci,auto-cmd12;
  		};
  
- 		i2c@118000 {
 _
 
 Patches currently in -mm which might be from tie-fei.zang@freescale.com are
