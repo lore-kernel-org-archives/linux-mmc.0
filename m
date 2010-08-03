@@ -1,94 +1,52 @@
 From: Roy Zang <tie-fei.zang@freescale.com>
-Subject: [PATCH 1/3 v2] sdhci: Add auto CMD12 support for eSDHC driver
-Date: Tue, 3 Aug 2010 11:11:10 +0800
-Message-ID: <1280805072-26112-1-git-send-email-tie-fei.zang@freescale.com>
+Subject: [PATCH 2/3 v2] dts: Add sdhci,auto-cmd12 field for p4080 device tree
+Date: Tue, 3 Aug 2010 11:11:11 +0800
+Message-ID: <1280805072-26112-2-git-send-email-tie-fei.zang@freescale.com>
+References: <1280805072-26112-1-git-send-email-tie-fei.zang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:50958
-	"EHLO DB3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753533Ab0HCDln (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Aug 2010 23:41:43 -0400
+Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:18466
+	"EHLO DB3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753533Ab0HCDlr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Aug 2010 23:41:47 -0400
+In-Reply-To: <1280805072-26112-1-git-send-email-tie-fei.zang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linuxppc-dev@ozlabs.org, akpm@linux-foundation.org
 
-From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-
-Add auto CMD12 command support for eSDHC driver.
-This is needed by P4080 and P1022 for block read/write.
-Manual asynchronous CMD12 abort operation causes protocol violations on
-these silicons.
-
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
 Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
 ---
- drivers/mmc/host/sdhci-of-core.c |    4 ++++
- drivers/mmc/host/sdhci.c         |   14 ++++++++++++--
- drivers/mmc/host/sdhci.h         |    2 ++
- 3 files changed, 18 insertions(+), 2 deletions(-)
+ Documentation/powerpc/dts-bindings/fsl/esdhc.txt |    2 ++
+ arch/powerpc/boot/dts/p4080ds.dts                |    1 +
+ 2 files changed, 3 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-core.c b/drivers/mmc/host/sdhci-of-core.c
-index a2e9820..dd1bdd1 100644
---- a/drivers/mmc/host/sdhci-of-core.c
-+++ b/drivers/mmc/host/sdhci-of-core.c
-@@ -154,6 +154,10 @@ static int __devinit sdhci_of_probe(struct of_device *ofdev,
- 		host->ops = &sdhci_of_data->ops;
- 	}
+diff --git a/Documentation/powerpc/dts-bindings/fsl/esdhc.txt b/Documentation/powerpc/dts-bindings/fsl/esdhc.txt
+index 8a00407..64bcb8b 100644
+--- a/Documentation/powerpc/dts-bindings/fsl/esdhc.txt
++++ b/Documentation/powerpc/dts-bindings/fsl/esdhc.txt
+@@ -14,6 +14,8 @@ Required properties:
+     reports inverted write-protect state;
+   - sdhci,1-bit-only : (optional) specifies that a controller can
+     only handle 1-bit data transfers.
++  - sdhci,auto-cmd12: (optional) specifies that a controller can
++    only handle auto CMD12.
  
-+	if (of_get_property(np, "sdhci,auto-cmd12", NULL))
-+		host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
-+
-+
- 	if (of_get_property(np, "sdhci,1-bit-only", NULL))
- 		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
+ Example:
  
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c6d1bd8..a92566e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -817,8 +817,12 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	WARN_ON(!host->data);
+diff --git a/arch/powerpc/boot/dts/p4080ds.dts b/arch/powerpc/boot/dts/p4080ds.dts
+index 6b29eab..efa0091 100644
+--- a/arch/powerpc/boot/dts/p4080ds.dts
++++ b/arch/powerpc/boot/dts/p4080ds.dts
+@@ -280,6 +280,7 @@
+ 			reg = <0x114000 0x1000>;
+ 			interrupts = <48 2>;
+ 			interrupt-parent = <&mpic>;
++			sdhci,auto-cmd12;
+ 		};
  
- 	mode = SDHCI_TRNS_BLK_CNT_EN;
--	if (data->blocks > 1)
--		mode |= SDHCI_TRNS_MULTI;
-+	if (data->blocks > 1) {
-+		if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
-+			mode |= SDHCI_TRNS_MULTI | SDHCI_TRNS_ACMD12;
-+		else
-+			mode |= SDHCI_TRNS_MULTI;
-+	}
- 	if (data->flags & MMC_DATA_READ)
- 		mode |= SDHCI_TRNS_READ;
- 	if (host->flags & SDHCI_REQ_USE_DMA)
-@@ -1108,6 +1112,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- #ifndef SDHCI_USE_LEDS_CLASS
- 	sdhci_activate_led(host);
- #endif
-+	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12) {
-+		if (mrq->stop) {
-+			mrq->data->stop = NULL;
-+			mrq->stop = NULL;
-+		}
-+	}
- 
- 	host->mrq = mrq;
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c846813..8fb088c 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -240,6 +240,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
- /* Controller cannot support End Attribute in NOP ADMA descriptor */
- #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
-+/* Controller uses Auto CMD12 command to stop the transfer */
-+#define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12		(1<<27)
- 
- 	int			irq;		/* Device IRQ */
- 	void __iomem *		ioaddr;		/* Mapped address */
+ 		i2c@118000 {
 -- 
 1.5.6.5
 
