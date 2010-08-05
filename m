@@ -1,36 +1,123 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: MMC: [PATCH 0/2 v2] Two fixes for mmc system
-Date: Thu, 05 Aug 2010 16:36:03 +0300
-Message-ID: <1281015363.9324.35.camel@maxim-laptop>
-References: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>
+From: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Subject: Re: [PATCH v6] OMAP4 HSMMC: Adding Card detect support for MMC1 on
+	OMAP4
+Date: Thu, 5 Aug 2010 21:33:59 +0530
+Message-ID: <AANLkTi=5mvAN5iK1aV1yWPxSmrd6OKwg_HW6mgqqQro4@mail.gmail.com>
+References: <20809.10.24.255.18.1278511944.squirrel@dbdmail.itg.ti.com>
+	<AANLkTimNbzSMeOW4m201D=uV1WyYqkwpE1KqdTb8Qudy@mail.gmail.com>
+	<966519786A214EA4BC770E7EC4D50628@am.dhcp.ti.com>
+	<AANLkTinZDt-ApCSPRxXQnFx6=M4-_EZhYBrtetoRhcn8@mail.gmail.com>
+	<AC97C00B2EE8468DAA78B37136C89721@am.dhcp.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:39836 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756867Ab0HENgJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 09:36:09 -0400
-Received: by fxm14 with SMTP id 14so2869919fxm.19
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Aug 2010 06:36:07 -0700 (PDT)
-In-Reply-To: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:39641 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750881Ab0HEQEA convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 12:04:00 -0400
+In-Reply-To: <AC97C00B2EE8468DAA78B37136C89721@am.dhcp.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@canonical.com>, Adrian Hunter <adrian.hunter@nokia.com>
+To: Madhusudhan <madhu.cr@ti.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, adrian.hunter@nokia.com
 
-On Sat, 2010-07-31 at 15:37 +0300, Maxim Levitsky wrote: 
-> Hi,
-> 
-> This is resend of these patches.
-> Tell me if I don't need to resent the first patch, it doesn't much matter to me.
-> 
-> The second patch is slightly updated to plug last oportunety for a race.
-> Also fixed accident move of EXPORT_SYMBOL.
+Madhu,
 
-Any update? Comments?
-Will I see that upstream?
+On Thu, Aug 5, 2010 at 4:26 AM, Madhusudhan <madhu.cr@ti.com> wrote:
+> <snip>
+>
+>> >> > =A0arch/arm/mach-omap2/board-4430sdp.c | =A0 =A07 +++-
+>> >> > =A0drivers/mfd/twl6030-irq.c =A0 =A0 =A0 =A0 =A0 | =A0 76
+>> >> +++++++++++++++++++++++++++++++++++
+>> >> > =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 | =A0 =A04 +-
+>> >> > =A0include/linux/i2c/twl.h =A0 =A0 =A0 =A0 =A0 =A0 | =A0 16 +++=
+++++
+>> >> > =A04 files changed, 100 insertions(+), 3 deletions(-)
+>> >> >
+>> >> > diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mac=
+h-
+>> >> omap2/board-4430sdp.c
+>> >> > index f287461..388b96d 100644
+>> >> > --- a/arch/arm/mach-omap2/board-4430sdp.c
+>> >> > +++ b/arch/arm/mach-omap2/board-4430sdp.c
+>> >> > @@ -227,9 +227,14 @@ static int omap4_twl6030_hsmmc_late_init(s=
+truct
+>> >> device *dev)
+>> >> > =A0 =A0 =A0 =A0struct omap_mmc_platform_data *pdata =3D dev->pl=
+atform_data;
+>> >> >
+>> >> > =A0 =A0 =A0 =A0/* Setting MMC1 Card detect Irq */
+>> >> > - =A0 =A0 =A0 if (pdev->id =3D=3D 0)
+>> >> > + =A0 =A0 =A0 if (pdev->id =3D=3D 0) {
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D twl6030_mmc_card_detect_c=
+onfig();
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Failed co=
+nfiguring MMC1 card
+>> detect\n");
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].card_detect_irq =
+=3D TWL6030_IRQ_BASE +
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0MMCDETECT_INTR_OFFSET;
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->slots[0].card_detect =3D
+>> twl6030_mmc_card_detect;
+>
+> You are assigning an exported fn here.
+>
+> What if somebody disables CONFIG_TWL4030_CORE in the omap_4430sdp_def=
+config
+> file? Does the driver behave nicely with only loosing the hotplug
+> capability?
 
-Best regards,
-Maxim Levitsky
+On mainline 2.6.35 omap3_defconfig works for OMAP4 but without hotplug
+functionality
+Disabling CONFIG_TWL4030_CORE in defconfig  means disabling
+regulator's  and eventually
+on bootup mmc host drivers probe fails as omap_hsmmc_reg_get( )
+fails. Seems like
+MMC and TWL are tightly coupled because of LDO dependency.
 
+With this V6 patch and omap3_defconfig , disabling CONFIG_TWL4030_CORE
+[also need to disable USB & comment board-devkit8000.c in
+mach-omap2/Makefile as they have dependency on
+twl_i2c_write_u8/twl_i2c_read_u8 defined in twl-core.c] doesn't
+compile due to undefined reference to those exported functions
+twl6030_mmc_card_detect_config & twl6030_mmc_card_detect .
+
+Having below one[in twl.h] in addition to V6 :
+
+ /* Card detect Configuration for MMC1 Controller on OMAP4 */
++#if defined(CONFIG_TWL4030_CORE)
+ int twl6030_mmc_card_detect_config(void);
++#else
++static inline int twl6030_mmc_card_detect_config(void)
++{
++	pr_err("twl6030_mmc_card_detect_config not supported\n");
++	return 0;
++}
++#endif
+
+ /* MMC1 Controller on OMAP4 uses Phoenix irq for Card detect */
++#if defined(CONFIG_TWL4030_CORE)
+ int twl6030_mmc_card_detect(struct device *dev, int slot);
+-
++#else
++static inline int twl6030_mmc_card_detect(struct device *dev, int slot=
+)
++{
++	pr_err("Call back twl6030_mmc_card_detect not supported\n");
++	return -EIO;
++}
++#endif
+
+With the above change compilation as well as booting goes well but mmc =
+probe
+fails.
+
+Shall I go with above changes and post V7 ?
+
+<snip>
+
+Thanks ,
+Kishore
