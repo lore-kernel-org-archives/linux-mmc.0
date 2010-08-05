@@ -1,66 +1,49 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH] omap_hsmmc: remove 'UGLY HACK:  workaround regulator
- framework bugs'
-Date: Thu, 05 Aug 2010 11:15:12 +0300
-Message-ID: <4C5A7310.3020006@nokia.com>
-References: <4C5A7212.6070207@nokia.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 04/12] mmci: allow the card detect status not to be
+	inverted
+Date: Thu, 5 Aug 2010 10:25:31 +0100
+Message-ID: <20100805092531.GA23473@n2100.arm.linux.org.uk>
+References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com> <1277198267-10860-4-git-send-email-rabin.vincent@stericsson.com> <20100729123443.GA18923@n2100.arm.linux.org.uk> <AANLkTikQi+SPpx8Wpvb0siSSsw0ZhusWaaKmqRnfHrnz@mail.gmail.com> <20100729142011.GG18923@n2100.arm.linux.org.uk> <20100805061453.GA7524@bnru02.bnr.st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.230]:37496 "EHLO
-	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758810Ab0HEIPx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 04:15:53 -0400
-In-Reply-To: <4C5A7212.6070207@nokia.com>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:50511 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754179Ab0HEJ0C (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 05:26:02 -0400
+Content-Disposition: inline
+In-Reply-To: <20100805061453.GA7524@bnru02.bnr.st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Hunter Adrian (Nokia-MS/Helsinki)" <adrian.hunter@nokia.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, madhusudhan Chikkature <madhu.cr@ti.com>
+To: Rabin VINCENT <rabin.vincent@stericsson.com>
+Cc: Linus Walleij <linus.ml.walleij@gmail.com>, Colin Tuckley <colin.tuckley@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Adding Madhu to cc
+On Thu, Aug 05, 2010 at 11:44:54AM +0530, Rabin VINCENT wrote:
+> On Thu, Jul 29, 2010 at 16:20:11 +0200, Russell King - ARM Linux wrote:
+> > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> > index 4917af9..8ca38d9 100644
+> > --- a/drivers/mmc/host/mmci.c
+> > +++ b/drivers/mmc/host/mmci.c
+> > @@ -541,7 +541,11 @@ static int mmci_get_cd(struct mmc_host *mmc)
+> >  	else
+> >  		status = gpio_get_value(host->gpio_cd);
+> >  
+> > -	return !status;
+> > +	/*
+> > +	 * Use positive logic throughout - status is zero for no card,
+> > +	 * non-zero for card inserted.
+> > +	 */
+> > +	return status;
+> >  }
+> 
+> Your patch in -next has a !gpio_get_value,
 
-Hunter Adrian (Nokia-MS/Helsinki) wrote:
->>From 4e0d37a810e92395390640f699feac5de42a9b02 Mon Sep 17 00:00:00 2001
-> From: Adrian Hunter <adrian.hunter@nokia.com>
-> Date: Thu, 5 Aug 2010 10:49:34 +0300
-> Subject: [PATCH] omap_hsmmc: remove 'UGLY HACK:  workaround regulator framework bugs'
-> 
-> The framework is fixed.  The hack can be removed.
-> 
-> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |   19 -------------------
->  1 files changed, 0 insertions(+), 19 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 4a8776f..6bdae60 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -401,25 +401,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
->  		/* Allow an aux regulator */
->  		reg = regulator_get(host->dev, "vmmc_aux");
->  		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
-> -
-> -		/*
-> -		* UGLY HACK:  workaround regulator framework bugs.
-> -		* When the bootloader leaves a supply active, it's
-> -		* initialized with zero usecount ... and we can't
-> -		* disable it without first enabling it.  Until the
-> -		* framework is fixed, we need a workaround like this
-> -		* (which is safe for MMC, but not in general).
-> -		*/
-> -		if (regulator_is_enabled(host->vcc) > 0) {
-> -			regulator_enable(host->vcc);
-> -			regulator_disable(host->vcc);
-> -		}
-> -		if (host->vcc_aux) {
-> -			if (regulator_is_enabled(reg) > 0) {
-> -				regulator_enable(reg);
-> -				regulator_disable(reg);
-> -			}
-> -		}
->  	}
->  
->  	return 0;
+Yes, because I at least need it for it to work on my Realview platform.
+As no one else seemed interested in replying to my questions about it,
+I decided that I'd fix it so at least what I had continued to work.
 
+> so are you OK with the cd_noinvert addition (for the GPIO case)?
+> Or a cd_invert and a patch to existing platforms?
+
+I'd much prefer positive logic.  Double negatives (eg, not noinverted)
+are always bad news.
