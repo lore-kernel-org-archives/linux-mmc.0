@@ -1,40 +1,36 @@
-From: "Hans J. Koch" <hjk@linutronix.de>
-Subject: Re: Is anyone working on SD/MMC driver for i.MX35 ?
-Date: Thu, 5 Aug 2010 11:44:43 +0200
-Message-ID: <20100805094443.GA2197@silverbox.local>
-References: <20100401125739.GE2045@bluebox.local>
- <20100401132017.GA30804@buzzloop.caiaq.de>
- <20100401132234.GG2045@bluebox.local>
- <20100402012932.GE13989@pengutronix.de>
- <20100405182103.GB3316@oksana.dev.rtsoft.ru>
- <20100406091220.GA2036@bluebox.local>
- <20100427110439.GB1775@pengutronix.de>
- <20100428131519.GA1992@bluebox.local>
- <20100803143126.GB9384@pengutronix.de>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: Re: MMC: [PATCH 0/2 v2] Two fixes for mmc system
+Date: Thu, 05 Aug 2010 16:36:03 +0300
+Message-ID: <1281015363.9324.35.camel@maxim-laptop>
+References: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.tglx.de ([62.245.132.106]:54370 "EHLO www.tglx.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751301Ab0HEJoe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 Aug 2010 05:44:34 -0400
-Content-Disposition: inline
-In-Reply-To: <20100803143126.GB9384@pengutronix.de>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:39836 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756867Ab0HENgJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 09:36:09 -0400
+Received: by fxm14 with SMTP id 14so2869919fxm.19
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Aug 2010 06:36:07 -0700 (PDT)
+In-Reply-To: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "Hans J. Koch" <hjk@linutronix.de>, Anton Vorontsov <cbouatmailru@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Daniel Mack <daniel@caiaq.de>, John Ogness <jogness@linutronix.de>
+To: linux-mmc@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@canonical.com>, Adrian Hunter <adrian.hunter@nokia.com>
 
-On Tue, Aug 03, 2010 at 04:31:26PM +0200, Wolfram Sang wrote:
-> > > > Thanks a lot for all your hints! Will have a deeper look at that.
-> > > 
-> > > Any success?
-> > 
-> > I was delayed by some other project, don't know when I'll have something.
+On Sat, 2010-07-31 at 15:37 +0300, Maxim Levitsky wrote: 
+> Hi,
 > 
-> Meanwhile? I might need to touch it in the future again...
+> This is resend of these patches.
+> Tell me if I don't need to resent the first patch, it doesn't much matter to me.
+> 
+> The second patch is slightly updated to plug last oportunety for a race.
+> Also fixed accident move of EXPORT_SYMBOL.
 
-No, sorry. I probably won't work on that anymore.
+Any update? Comments?
+Will I see that upstream?
 
-Thanks,
-Hans
+Best regards,
+Maxim Levitsky
+
