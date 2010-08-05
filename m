@@ -1,77 +1,51 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: MMC card removal in suspend state
-Date: Fri, 06 Aug 2010 01:43:18 +0300
-Message-ID: <1281048198.7148.6.camel@maxim-laptop>
-References: <621C9491683D48E5992B340E62198CD6@am.dhcp.ti.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: MMC: [PATCH 0/2 v2] Two fixes for mmc system
+Date: Thu, 5 Aug 2010 15:45:03 -0700
+Message-ID: <20100805154503.42599438.akpm@linux-foundation.org>
+References: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>
+	<1281015363.9324.35.camel@maxim-laptop>
+	<20100805152219.ae41a175.akpm@linux-foundation.org>
+	<1281047979.7148.2.camel@maxim-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:34450 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932865Ab0HEWnW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 18:43:22 -0400
-Received: by fxm14 with SMTP id 14so3352294fxm.19
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Aug 2010 15:43:21 -0700 (PDT)
-In-Reply-To: <621C9491683D48E5992B340E62198CD6@am.dhcp.ti.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:57723 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932934Ab0HEWpk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 18:45:40 -0400
+In-Reply-To: <1281047979.7148.2.camel@maxim-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: linux-mmc@vger.kernel.org, 'Pierre Ossman' <pierre@ossman.eu>
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Lee Jones <lee.jones@canonical.com>, Adrian Hunter <adrian.hunter@nokia.com>
 
-On Thu, 2010-08-05 at 16:45 -0500, Madhusudhan wrote: 
-> Hi,
-> 
-> Recently, while looking at some stuff I saw the below patch done by Pierre
-> which is part of the drivers/mmc/card/queue.c file. I wonder if someone can
-> through more light on this to understand where could be a potential deadlock
-> without calling mmc_queue_resume.
-> 
-> Is there a need for the mmc queue to be resumed before calling
-> del_gendisk(md->disk) in the card removal path??
+On Fri, 06 Aug 2010 01:39:39 +0300
+Maxim Levitsky <maximlevitsky@gmail.com> wrote:
 
-Very recently I have seen that memstick core hangs if queue is
-suspended, and del_gendisk is called, so that hang is real.
-It probably so happens that disk queue is already running at that point
-so that users don't hit that hang.
+> On Thu, 2010-08-05 at 15:22 -0700, Andrew Morton wrote: 
+> > On Thu, 05 Aug 2010 16:36:03 +0300
+> > Maxim Levitsky <maximlevitsky@gmail.com> wrote:
+> > 
+> > > On Sat, 2010-07-31 at 15:37 +0300, Maxim Levitsky wrote: 
+> > > > Hi,
+> > > > 
+> > > > This is resend of these patches.
+> > > > Tell me if I don't need to resent the first patch, it doesn't much matter to me.
+> > > > 
+> > > > The second patch is slightly updated to plug last oportunety for a race.
+> > > > Also fixed accident move of EXPORT_SYMBOL.
+> > > 
+> > > Any update? Comments?
+> > > Will I see that upstream?
+> > > 
+> > 
+> > I merged the update to [patch 2/2] two days ago - you should have
+> > received the commit email?
+> 
+> I have seen message about merge to -mm, but I am asking about mainline.
+> 
 
-Best regards,
-Maxim Levitsky
-
-
-> 
-> Regards,
-> Madhu
-> 
-> commit d2b46f66b4b342be07a4194bd5e82384d07e470d
-> Author: Pierre Ossman <drzeus@drzeus.cx>
-> Date:   Sat Apr 28 16:52:12 2007 +0200
-> 
->     mmc: allow suspended block driver to be removed
-> 
->     Make sure we don't deadlock when removing a suspended block
->     queue, something that might happen if the card is removed during
->     suspend.
-> 
->     Signed-off-by: Pierre Ossman <drzeus@drzeus.cx>
-> 
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index aa75ac1..2e77963 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -191,6 +191,9 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
->         q->queuedata = NULL;
->         spin_unlock_irqrestore(q->queue_lock, flags);
-> 
-> +       /* Make sure the queue isn't suspended, as that will deadlock */
-> +       mmc_queue_resume(mq);
-> +
->         /* Then terminate our worker thread */
->         kthread_stop(mq->thread);
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+I merge in the second week of the -rc1 merge window.  I'm not presently
+aware of any reason why these patches shouldn't be included.
 
