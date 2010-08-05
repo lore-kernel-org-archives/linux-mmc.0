@@ -1,61 +1,62 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH] mmc: Use regulator framework correctly
-Date: Thu, 05 Aug 2010 11:10:06 +0300
-Message-ID: <4C5A71DE.5020904@nokia.com>
+Subject: [PATCH] omap_hsmmc: remove 'UGLY HACK:  workaround regulator framework
+ bugs'
+Date: Thu, 05 Aug 2010 11:10:58 +0300
+Message-ID: <4C5A7212.6070207@nokia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.230]:36683 "EHLO
+Received: from smtp.nokia.com ([192.100.122.230]:36803 "EHLO
 	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759851Ab0HEIKV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 04:10:21 -0400
+	with ESMTP id S1759929Ab0HEILK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 04:11:10 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
->From 3f382fcf80afc4f28f471138ceb7b69b4055c9c3 Mon Sep 17 00:00:00 2001
+>From 4e0d37a810e92395390640f699feac5de42a9b02 Mon Sep 17 00:00:00 2001
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Date: Thu, 5 Aug 2010 10:45:24 +0300
-Subject: [PATCH] mmc: Use regulator framework correctly
+Date: Thu, 5 Aug 2010 10:49:34 +0300
+Subject: [PATCH] omap_hsmmc: remove 'UGLY HACK:  workaround regulator framework bugs'
 
-Issues with the regulator framework no longer exist, so
-regulator_enable() / regulator_disable() should be used
-correctly.
+The framework is fixed.  The hack can be removed.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 ---
- drivers/mmc/core/core.c |    9 ++-------
- 1 files changed, 2 insertions(+), 7 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   19 -------------------
+ 1 files changed, 0 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 2cfefa6..da73899 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -784,11 +784,6 @@ int mmc_regulator_set_ocr(struct regulator *supply, unsigned short vdd_bit)
- {
- 	int			result = 0;
- 	int			min_uV, max_uV;
--	int			enabled;
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 4a8776f..6bdae60 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -401,25 +401,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 		/* Allow an aux regulator */
+ 		reg = regulator_get(host->dev, "vmmc_aux");
+ 		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
 -
--	enabled = regulator_is_enabled(supply);
--	if (enabled < 0)
--		return enabled;
- 
- 	if (vdd_bit) {
- 		int		tmp;
-@@ -819,9 +814,9 @@ int mmc_regulator_set_ocr(struct regulator *supply, unsigned short vdd_bit)
- 		else
- 			result = 0;
- 
--		if (result == 0 && !enabled)
-+		if (result == 0)
- 			result = regulator_enable(supply);
--	} else if (enabled) {
-+	} else {
- 		result = regulator_disable(supply);
+-		/*
+-		* UGLY HACK:  workaround regulator framework bugs.
+-		* When the bootloader leaves a supply active, it's
+-		* initialized with zero usecount ... and we can't
+-		* disable it without first enabling it.  Until the
+-		* framework is fixed, we need a workaround like this
+-		* (which is safe for MMC, but not in general).
+-		*/
+-		if (regulator_is_enabled(host->vcc) > 0) {
+-			regulator_enable(host->vcc);
+-			regulator_disable(host->vcc);
+-		}
+-		if (host->vcc_aux) {
+-			if (regulator_is_enabled(reg) > 0) {
+-				regulator_enable(reg);
+-				regulator_disable(reg);
+-			}
+-		}
  	}
  
+ 	return 0;
 -- 
 1.6.3.3
