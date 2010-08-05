@@ -1,67 +1,101 @@
-From: Pavel Pisa <ppisa4lists@pikron.com>
-Subject: Re: [PATCH 10/42] drivers/mmc/host: Adjust confusing if indentation
-Date: Thu, 5 Aug 2010 22:57:53 +0200
-Message-ID: <201008052257.54039.ppisa4lists@pikron.com>
-References: <Pine.LNX.4.64.1008052219360.31692@ask.diku.dk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <Pine.LNX.4.64.1008052219360.31692@ask.diku.dk>
-Content-Disposition: inline
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org, Julia Lawall <julia@diku.dk>, linux-kernel@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + mmc-use-regulator-framework-correctly.patch added to -mm tree
+Date: Thu, 05 Aug 2010 14:32:47 -0700
+Message-ID: <201008052132.o75LWlge006062@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:35255 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754603Ab0HEVdc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Aug 2010 17:33:32 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: adrian.hunter@nokia.com, broonie@opensource.wolfsonmicro.com, linux-mmc@vger.kernel.org, lrg@slimlogic.co.uk, sameo@linux.intel.com
 
-On Thursday 05 August 2010 22:19:52 Julia Lawall wrote:
-> From: Julia Lawall <julia@diku.dk>
-...
-> Signed-off-by: Julia Lawall <julia@diku.dk>
-Acked-by: Pavel Pisa <pisa@cmp.felk.cvut.cz>
 
-Good catch.
+The patch titled
+     mmc: use regulator framework correctly
+has been added to the -mm tree.  Its filename is
+     mmc-use-regulator-framework-correctly.patch
 
-> ---
->  drivers/mmc/host/imxmmc.c |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/imxmmc.c b/drivers/mmc/host/imxmmc.c
-> index 9a68ff4..5a950b1 100644
-> --- a/drivers/mmc/host/imxmmc.c
-> +++ b/drivers/mmc/host/imxmmc.c
-> @@ -148,11 +148,12 @@ static int imxmci_start_clock(struct imxmci_host
-> *host)
->
->  		while (delay--) {
->  			reg = readw(host->base + MMC_REG_STATUS);
-> -			if (reg & STATUS_CARD_BUS_CLK_RUN)
-> +			if (reg & STATUS_CARD_BUS_CLK_RUN) {
->  				/* Check twice before cut */
->  				reg = readw(host->base + MMC_REG_STATUS);
->  				if (reg & STATUS_CARD_BUS_CLK_RUN)
->  					return 0;
-> +			}
->
->  			if (test_bit(IMXMCI_PEND_STARTED_b, &host->pending_events))
->  				return 0;
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
---
-                Pavel Pisa
-    e-mail:     pisa@cmp.felk.cvut.cz
-    www:        http://cmp.felk.cvut.cz/~pisa
-    university: http://dce.fel.cvut.cz/
-    company:    http://www.pikron.com/
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc: use regulator framework correctly
+From: Adrian Hunter <adrian.hunter@nokia.com>
+
+Issues with the regulator framework no longer exist, so regulator_enable()
+/ regulator_disable() should be used correctly.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Liam Girdwood <lrg@slimlogic.co.uk>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Samuel Ortiz <sameo@linux.intel.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/core/core.c |    9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
+
+diff -puN drivers/mmc/core/core.c~mmc-use-regulator-framework-correctly drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~mmc-use-regulator-framework-correctly
++++ a/drivers/mmc/core/core.c
+@@ -784,11 +784,6 @@ int mmc_regulator_set_ocr(struct regulat
+ {
+ 	int			result = 0;
+ 	int			min_uV, max_uV;
+-	int			enabled;
+-
+-	enabled = regulator_is_enabled(supply);
+-	if (enabled < 0)
+-		return enabled;
+ 
+ 	if (vdd_bit) {
+ 		int		tmp;
+@@ -819,9 +814,9 @@ int mmc_regulator_set_ocr(struct regulat
+ 		else
+ 			result = 0;
+ 
+-		if (result == 0 && !enabled)
++		if (result == 0)
+ 			result = regulator_enable(supply);
+-	} else if (enabled) {
++	} else {
+ 		result = regulator_disable(supply);
+ 	}
+ 
+_
+
+Patches currently in -mm which might be from adrian.hunter@nokia.com are
+
+origin.patch
+linux-next.patch
+mmc-recognize-csd-structure.patch
+mmc-recognize-csd-structure-fix.patch
+mmc-split-mmc_sd_init_card.patch
+mmc-implement-sd-combo-iomem-support.patch
+mmc-omap-fix-for-bus-width-which-improves-sd-cards-peformance.patch
+sdio-allow-non-standard-sdio-cards.patch
+omap_hsmmc-add-init_card-pass-through-callback.patch
+omap-pandora-pass-wl1251-information-to-sdio-core.patch
+mmc-add-erase-secure-erase-trim-and-secure-trim-operations.patch
+mmc_block-add-discard-support.patch
+omap_hsmmc-add-erase-capability.patch
+block-add-secure-discard.patch
+mmc_block-add-support-for-secure-discard.patch
+mmc_test-add-performance-tests.patch
+mmc_test-fix-large-memory-allocation.patch
+mmc-use-regulator-framework-correctly.patch
+
