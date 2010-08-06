@@ -1,82 +1,59 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: MMC card removal in suspend state
-Date: Thu, 5 Aug 2010 18:32:55 -0500
-Message-ID: <61142068C0884F3F94BEC17BB99DCE14@am.dhcp.ti.com>
-References: <621C9491683D48E5992B340E62198CD6@am.dhcp.ti.com> <1281048198.7148.6.camel@maxim-laptop> <A266C3A14F5641A3A138034913176B7D@am.dhcp.ti.com> <1281050449.7148.14.camel@maxim-laptop>
+From: Lee Jones <lee.jones@canonical.com>
+Subject: Re: MMC: [PATCH 0/2 v2] Two fixes for mmc system
+Date: Fri, 06 Aug 2010 07:39:21 +0100
+Message-ID: <4C5BAE19.7040607@canonical.com>
+References: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>	<1281015363.9324.35.camel@maxim-laptop>	<20100805152219.ae41a175.akpm@linux-foundation.org>	<1281047979.7148.2.camel@maxim-laptop> <20100805154503.42599438.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="US-ASCII"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:50305 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754007Ab0HEXdB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 Aug 2010 19:33:01 -0400
-In-Reply-To: <1281050449.7148.14.camel@maxim-laptop>
+Received: from adelie.canonical.com ([91.189.90.139]:39418 "EHLO
+	adelie.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759224Ab0HFGjY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Aug 2010 02:39:24 -0400
+In-Reply-To: <20100805154503.42599438.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Maxim Levitsky' <maximlevitsky@gmail.com>
-Cc: linux-mmc@vger.kernel.org, 'Pierre Ossman' <pierre@ossman.eu>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@nokia.com>
 
+Well done Maxim.
 
+Thank you Andrew.
 
-> -----Original Message-----
-> From: Maxim Levitsky [mailto:maximlevitsky@gmail.com]
-> Sent: Thursday, August 05, 2010 6:21 PM
-> To: Madhusudhan
-> Cc: linux-mmc@vger.kernel.org; 'Pierre Ossman'
-> Subject: RE: MMC card removal in suspend state
+Once this is released in mainline I will have 100's of happy users.
+
+Kind regards,
+Lee
+
+On 05/08/10 23:45, Andrew Morton wrote:
+> On Fri, 06 Aug 2010 01:39:39 +0300
+> Maxim Levitsky <maximlevitsky@gmail.com> wrote:
 > 
-> On Thu, 2010-08-05 at 17:54 -0500, Madhusudhan wrote:
-> >
-> > > -----Original Message-----
-> > > From: Maxim Levitsky [mailto:maximlevitsky@gmail.com]
-> > > Sent: Thursday, August 05, 2010 5:43 PM
-> > > To: Madhusudhan
-> > > Cc: linux-mmc@vger.kernel.org; 'Pierre Ossman'
-> > > Subject: Re: MMC card removal in suspend state
-> > >
-> > > On Thu, 2010-08-05 at 16:45 -0500, Madhusudhan wrote:
-> > > > Hi,
-> > > >
-> > > > Recently, while looking at some stuff I saw the below patch done by
-> > > Pierre
-> > > > which is part of the drivers/mmc/card/queue.c file. I wonder if
-> someone
-> > > can
-> > > > through more light on this to understand where could be a potential
-> > > deadlock
-> > > > without calling mmc_queue_resume.
-> > > >
-> > > > Is there a need for the mmc queue to be resumed before calling
-> > > > del_gendisk(md->disk) in the card removal path??
-> > >
-> > > Very recently I have seen that memstick core hangs if queue is
-> > > suspended, and del_gendisk is called, so that hang is real.
-> >
-> > Sorry, I have no clue what is memstick core. Do mean that calling
-> > del_gendisk when the queue is suspended could potentially hang?
-> I think so.
+>> On Thu, 2010-08-05 at 15:22 -0700, Andrew Morton wrote: 
+>>> On Thu, 05 Aug 2010 16:36:03 +0300
+>>> Maxim Levitsky <maximlevitsky@gmail.com> wrote:
+>>>
+>>>> On Sat, 2010-07-31 at 15:37 +0300, Maxim Levitsky wrote: 
+>>>>> Hi,
+>>>>>
+>>>>> This is resend of these patches.
+>>>>> Tell me if I don't need to resent the first patch, it doesn't much matter to me.
+>>>>>
+>>>>> The second patch is slightly updated to plug last oportunety for a race.
+>>>>> Also fixed accident move of EXPORT_SYMBOL.
+>>>>
+>>>> Any update? Comments?
+>>>> Will I see that upstream?
+>>>>
+>>>
+>>> I merged the update to [patch 2/2] two days ago - you should have
+>>> received the commit email?
+>>
+>> I have seen message about merge to -mm, but I am asking about mainline.
+>>
 > 
-Hmm... 
-
-Currently, in mmc that is the sequence.
-
-                /* Stop new requests from getting into the queue */
-                del_gendisk(md->disk);
-
-                /* Then flush out any already in there */
-                mmc_cleanup_queue(&md->queue);
-
-The queue is resumed only in mmc_cleanup_queue. Did your recent patch alter
-this sequence in any way?
-
-Regards,
-Madhu
-
+> I merge in the second week of the -rc1 merge window.  I'm not presently
+> aware of any reason why these patches shouldn't be included.
 > 
-> Best regards,
-> Maxim Levitsky
-> 
-
 
