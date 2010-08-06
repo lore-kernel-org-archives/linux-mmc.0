@@ -1,59 +1,55 @@
-From: Lee Jones <lee.jones@canonical.com>
-Subject: Re: MMC: [PATCH 0/2 v2] Two fixes for mmc system
-Date: Fri, 06 Aug 2010 07:39:21 +0100
-Message-ID: <4C5BAE19.7040607@canonical.com>
-References: <1280579825-6174-1-git-send-email-maximlevitsky@gmail.com>	<1281015363.9324.35.camel@maxim-laptop>	<20100805152219.ae41a175.akpm@linux-foundation.org>	<1281047979.7148.2.camel@maxim-laptop> <20100805154503.42599438.akpm@linux-foundation.org>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH v2 03/20] mmc: support embedded data field in mmc_host
+Date: Fri, 6 Aug 2010 09:07:47 +0200
+Message-ID: <AANLkTimrb5P9cVo30y_udoi4+vu3cM4YzfpDaYCfwGEA@mail.gmail.com>
+References: <1279733634-21974-1-git-send-email-ohad@wizery.com>
+	<1279733634-21974-4-git-send-email-ohad@wizery.com>
+	<AANLkTimzA_JJ-byTDWznbL3YzeJ8LAP4M50onf2_3fBF@mail.gmail.com>
+	<AANLkTi=Oy8X1xMOwWL_cKBB1LWULT6=p+adUgB+AuSJS@mail.gmail.com>
+	<AANLkTi=BUX59heXAW2Uf4wZo2dSS19Je54dkQ5u2YGAW@mail.gmail.com>
+	<AANLkTimZQKj7H_GeE=+O9cwxEMTR+LhfFbt=AyXGzN3d@mail.gmail.com>
+	<AANLkTikfRja-h9mz7uyRXCZNZjKdU_yB8e58XQucUzrn@mail.gmail.com>
+	<AANLkTi=vhWV1RNyemtfppfjvLYAbzd3aRjFOVgLLpG3Z@mail.gmail.com>
+	<AANLkTin4m8gJR50zwMB2b0jRMHdNA6CQToKBTAhOL9wF@mail.gmail.com>
+	<AANLkTinu2S19r8fueM-jVkc35XL2G0Z16BddE92Ci9KB@mail.gmail.com>
+	<20100804114147.GB6852@n2100.arm.linux.org.uk>
+	<AANLkTi=Dqs_qg=BsoNBTjvJbG+ub+zMv8ctbrJSGPJJJ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from adelie.canonical.com ([91.189.90.139]:39418 "EHLO
-	adelie.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759224Ab0HFGjY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Aug 2010 02:39:24 -0400
-In-Reply-To: <20100805154503.42599438.akpm@linux-foundation.org>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:63312 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758123Ab0HFHHt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Aug 2010 03:07:49 -0400
+In-Reply-To: <AANLkTi=Dqs_qg=BsoNBTjvJbG+ub+zMv8ctbrJSGPJJJ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@nokia.com>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Vitaly Wool <vitalywool@gmail.com>, Kalle Valo <kalle.valo@iki.fi>, Pandita Vikram <vikram.pandita@ti.com>, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, linux-wireless@vger.kernel.org, Roger Quadros <roger.quadros@nokia.com>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, linux-omap@vger.kernel.org, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 
-Well done Maxim.
-
-Thank you Andrew.
-
-Once this is released in mainline I will have 100's of happy users.
-
-Kind regards,
-Lee
-
-On 05/08/10 23:45, Andrew Morton wrote:
-> On Fri, 06 Aug 2010 01:39:39 +0300
-> Maxim Levitsky <maximlevitsky@gmail.com> wrote:
-> 
->> On Thu, 2010-08-05 at 15:22 -0700, Andrew Morton wrote: 
->>> On Thu, 05 Aug 2010 16:36:03 +0300
->>> Maxim Levitsky <maximlevitsky@gmail.com> wrote:
->>>
->>>> On Sat, 2010-07-31 at 15:37 +0300, Maxim Levitsky wrote: 
->>>>> Hi,
->>>>>
->>>>> This is resend of these patches.
->>>>> Tell me if I don't need to resent the first patch, it doesn't much matter to me.
->>>>>
->>>>> The second patch is slightly updated to plug last oportunety for a race.
->>>>> Also fixed accident move of EXPORT_SYMBOL.
->>>>
->>>> Any update? Comments?
->>>> Will I see that upstream?
->>>>
->>>
->>> I merged the update to [patch 2/2] two days ago - you should have
->>> received the commit email?
+2010/8/4 Ohad Ben-Cohen <ohad@wizery.com>:
+> On Wed, Aug 4, 2010 at 2:41 PM, Russell King - ARM Linux
 >>
->> I have seen message about merge to -mm, but I am asking about mainline.
->>
-> 
-> I merge in the second week of the -rc1 merge window.  I'm not presently
-> aware of any reason why these patches shouldn't be included.
-> 
+>> Why not arrange for a small piece of code to be built into the kernel
+>> when this driver is selected as a module or built-in, which handles
+>> the passing of platform data to the driver?
+>
+> It's interesting.
+>
+> The only drawback I can see is that it has an inherent limitation of
+> having only a single wl1271 device on board,
 
+...which is exactly what the *_board_info scheme in the spi
+and i2c subsystems is designed to solve.
+
+This is an established design pattern in the kernel with two
+precedents, what makes it so hard to implement this idea?
+There are plenty of examples all over the place.
+
+What mainly matters to me is that the stuff can be separated
+cleanly and in a nicely structured manner into board-xxx.c files
+in the mach-xxx dirs, which is possible also with the simpler
+approach so whatever...
+
+Yours,
+Linus Walleij
