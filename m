@@ -1,61 +1,56 @@
-From: Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>
-Subject: Re: [PATCH v2 03/20] mmc: support embedded data field in mmc_host
-Date: Fri, 06 Aug 2010 12:53:47 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1008061251040.28809@xanadu.home>
-References: <AANLkTi=BUX59heXAW2Uf4wZo2dSS19Je54dkQ5u2YGAW@mail.gmail.com>
- <AANLkTimZQKj7H_GeE=+O9cwxEMTR+LhfFbt=AyXGzN3d@mail.gmail.com>
- <AANLkTikfRja-h9mz7uyRXCZNZjKdU_yB8e58XQucUzrn@mail.gmail.com>
- <AANLkTi=vhWV1RNyemtfppfjvLYAbzd3aRjFOVgLLpG3Z@mail.gmail.com>
- <AANLkTin4m8gJR50zwMB2b0jRMHdNA6CQToKBTAhOL9wF@mail.gmail.com>
- <AANLkTinu2S19r8fueM-jVkc35XL2G0Z16BddE92Ci9KB@mail.gmail.com>
- <20100804114147.GB6852@n2100.arm.linux.org.uk>
- <AANLkTi=Dqs_qg=BsoNBTjvJbG+ub+zMv8ctbrJSGPJJJ@mail.gmail.com>
- <AANLkTimrb5P9cVo30y_udoi4+vu3cM4YzfpDaYCfwGEA@mail.gmail.com>
- <AANLkTim6Yuor4CAEmQPs3zPVz1svEbckzO0HHeFWGmjy@mail.gmail.com>
- <20100806144605.GA21015@n2100.arm.linux.org.uk>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: + mmc-use-regulator-framework-correctly.patch added to -mm tree
+Date: Sun, 08 Aug 2010 14:41:40 +0300
+Message-ID: <4C5E97F4.8050501@nokia.com>
+References: <201008052132.o75LWlge006062@imap1.linux-foundation.org> (sfid-20100805_223331_781659_8428289E) <D7F4B8A4-C756-44EC-AD90-0460DCEC80FC@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <20100806144605.GA21015-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, Linus Walleij <linus.ml.walleij-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Vitaly Wool <vitalywool-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, Pandita Vikram <vikram.pandita-l0cyMroinI0@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.nokia.com ([192.100.105.134]:21678 "EHLO
+	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753505Ab0HHLmB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Aug 2010 07:42:01 -0400
+In-Reply-To: <D7F4B8A4-C756-44EC-AD90-0460DCEC80FC@opensource.wolfsonmicro.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "mm-commits@vger.kernel.org" <mm-commits@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "lrg@slimlogic.co.uk" <lrg@slimlogic.co.uk>, "sameo@linux.intel.com" <sameo@linux.intel.com>
 
-On Fri, 6 Aug 2010, Russell King - ARM Linux wrote:
+Mark Brown wrote:
+> On 5 Aug 2010, at 22:32, akpm@linux-foundation.org wrote:
+> 
+>> Subject: mmc: use regulator framework correctly
+>> From: Adrian Hunter <adrian.hunter@nokia.com>
+> 
+>> Issues with the regulator framework no longer exist, so regulator_enable()
+>> / regulator_disable() should be used correctly.
+> 
+> There have been no changes in the regulator framework here. David had some strong ideas about what he wanted the regulator API to do which caused him to make a number of forceful statements but that's not the same thing.
+> 
+>> -	int			enabled;
+>> -
+>> -	enabled = regulator_is_enabled(supply);
+>> -	if (enabled < 0)
+>> -		return enabled;
+>>
+>> 	if (vdd_bit) {
+>> 		int		tmp;
+>> @@ -819,9 +814,9 @@ int mmc_regulator_set_ocr(struct regulat
+>> 		else
+>> 			result = 0;
+>>
+>> -		if (result == 0 && !enabled)
+>> +		if (result == 0)
+>> 			result = regulator_enable(supply);
+>> -	} else if (enabled) {
+>> +	} else {
+>> 		result = regulator_disable(supply);
+>> 	}
+> 
+> This is only going to do the right thing if we can rely on the MMC framework matching the number of enables it does with the number of disables, including handling of startup with an already enabled regulator causing the refcount to start at one if regulator_get_exclusive() is used (which the current code does rely on). I'd rather see the analysis in the changelog explaining why the new code is safe.
 
-> On Fri, Aug 06, 2010 at 01:02:24PM +0300, Ohad Ben-Cohen wrote:
-> > We have Russell's suggestion which is nice and simple, but it has the
-> > 1 device limitation.
-> 
-> You could make it generic by doing something like this:
-> 
-> #define set_device_data(name, type, index, data)			\
->  ({									\
->     extern void __set_device_data(const char *, int, void *, size_t);	\
->     BUILD_BUG_ON(!__same_type(type, *data));				\
->     __set_device_data(name ":" #type, index, data, sizeof(type));	\
->  })
-> 
-> #define get_device_data(name, type, index) ({				\
->   extern void *__get_device_data(const char *, int);			\
->   type *__ptr = __get_device_data(name ":" #type, index);		\
->   __ptr; })
-> 
-> And now we have something that takes a string and index to use as a lookup
-> key in some kind of list - and it's typesafe (because the lookup key is
-> dependent on the stringified type.)
-> 
-> But... at this point I feel that we're getting too complicated, and will
-> get shouted at to use something like DT which already solves this problem.
+Yes, the patch is no good.  If I had tried to make a decent commit message,
+as you pointed out, I would not have sent the patch.  Sorry all.
 
-DT is not generally available yet.  A simple interim solution would 
-still be worth it.
-
-
-Nicolas
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Andrew please remove this patch.
