@@ -1,102 +1,118 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [patch 1/1]sdhci: sdhc spec 3.0 add some modification
-Date: Mon, 9 Aug 2010 11:10:42 +0100
-Message-ID: <20100809101042.GA8293@console-pimps.org>
-References: <AANLkTin=8qej=hh3sJQkyjHcp17Wh4j8wngqyuRz=+1C@mail.gmail.com>
- <AANLkTimx_-+wvrnoe22ZDtrhfc0Ds873KSzW04zuppBH@mail.gmail.com>
- <AANLkTinn+Af7kE34kjLEf3XLe2YTbpkJ4MtePFK0vMS8@mail.gmail.com>
+From: Rabin VINCENT <rabin.vincent@stericsson.com>
+Subject: Re: [PATCH 04/12] mmci: allow the card detect status not to be
+ inverted
+Date: Mon, 9 Aug 2010 16:07:05 +0530
+Message-ID: <20100809103704.GB5826@bnru01.bnr.st.com>
+References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com>
+ <1277198267-10860-4-git-send-email-rabin.vincent@stericsson.com>
+ <20100729123443.GA18923@n2100.arm.linux.org.uk>
+ <AANLkTikQi+SPpx8Wpvb0siSSsw0ZhusWaaKmqRnfHrnz@mail.gmail.com>
+ <20100729142011.GG18923@n2100.arm.linux.org.uk>
+ <20100805061453.GA7524@bnru02.bnr.st.com>
+ <20100805092531.GA23473@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arkanian.console-pimps.org ([212.110.184.194]:46997 "EHLO
-	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755836Ab0HIKKp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Aug 2010 06:10:45 -0400
+Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:50812 "EHLO
+	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756049Ab0HIKiB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Aug 2010 06:38:01 -0400
 Content-Disposition: inline
-In-Reply-To: <AANLkTinn+Af7kE34kjLEf3XLe2YTbpkJ4MtePFK0vMS8@mail.gmail.com>
+In-Reply-To: <20100805092531.GA23473@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Kyungmin Park <kmpark@infradead.org>, linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Wolfram Sang <w.sang@pengutronix.de>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Linus Walleij <linus.ml.walleij@gmail.com>, Colin Tuckley <colin.tuckley@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, Aug 05, 2010 at 03:09:14PM +0800, zhangfei gao wrote:
-> >>
-> >> =A0 =A0 =A0 =A01. support 8 bit data transfer width
-> > 8 bit buswidth patch is already merged to mm tree.
-> >
-> > http://marc.info/?l=3Dlinux-mmc&m=3D127783663526810&w=3D3
-> >
-> > Thank you,
-> > Kyungmin Park
-> >
->=20
-> Thanks Kyungmin, updated without 8 bit support.
->=20
-> From 2b717444443acdac90c5f31522a1515a2000749a Mon Sep 17 00:00:00 200=
-1
-> From: Zhangfei Gao <zgao6@marvell.com>
-> Date: Fri, 6 Aug 2010 07:10:01 +0800
-> Subject: [PATCH] sdhc: support 10-bit divided clock Mode
->=20
->=20
-> Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
-> ---
->  drivers/mmc/host/sdhci.c |    5 +++--
->  drivers/mmc/host/sdhci.h |    4 ++++
->  2 files changed, 7 insertions(+), 2 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c6d1bd8..212dc9e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1002,7 +1002,8 @@ static void sdhci_set_clock(struct sdhci_host
-> *host, unsigned int clock)
->  	}
->  	div >>=3D 1;
->=20
-> -	clk =3D div << SDHCI_DIVIDER_SHIFT;
-> +	clk =3D (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
-> +	clk |=3D ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIVIDER_SHIFT) <<
-> SDHCI_DIVIDER_SHIFT_HI;
->  	clk |=3D SDHCI_CLOCK_INT_EN;
->  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->=20
+On Thu, Aug 05, 2010 at 11:25:31 +0200, Russell King - ARM Linux wrote:
+> On Thu, Aug 05, 2010 at 11:44:54AM +0530, Rabin VINCENT wrote:
+> > so are you OK with the cd_noinvert addition (for the GPIO case)?
+> > Or a cd_invert and a patch to existing platforms?
+> 
+> I'd much prefer positive logic.  Double negatives (eg, not noinverted)
+> are always bad news.
 
-This patch is missing a change to the way we calculate 'div'. While you=
-r
-patch is correct, I think it would be better to fit some more things
-into it.
+Here's the new patch.  I'll rebase the rest of the unapplied patches in
+the series on top of this.
 
-This is the current code for calculating the clock divider,
+>From 8a8be58873c571703ee03296744a3719ff16a026 Mon Sep 17 00:00:00 2001
+From: Rabin Vincent <rabin.vincent@stericsson.com>
+Date: Wed, 16 Jun 2010 15:58:59 +0530
+Subject: [PATCH] mmci: allow the card detect GPIO value not to be inverted
 
+On some platforms, the GPIO value from the gpio_cd pin doesn't need to
+be inverted to get it active high.  Add a cd_invert platform data
+parameter and change existing platforms using GPIO for CD (only
+Realview) to enable it.
 
-	for (div =3D 1;div < 256;div *=3D 2) {
-		if ((host->max_clk / div) <=3D clock)
-			break;
-	}
-	div >>=3D 1;
+Acked-by: Linus Walleij <linus.walleij@stericsson.com>
+Signed-off-by: Rabin Vincent <rabin.vincent@stericsson.com>
+---
+ arch/arm/mach-realview/core.c |    2 ++
+ drivers/mmc/host/mmci.c       |    5 +++--
+ include/linux/amba/mmci.h     |    2 ++
+ 3 files changed, 7 insertions(+), 2 deletions(-)
 
-	clk =3D div << SDHCI_DIVIDER_SHIFT;
+diff --git a/arch/arm/mach-realview/core.c b/arch/arm/mach-realview/core.c
+index 2fa38df..07c0815 100644
+--- a/arch/arm/mach-realview/core.c
++++ b/arch/arm/mach-realview/core.c
+@@ -259,6 +259,7 @@ struct mmci_platform_data realview_mmc0_plat_data = {
+ 	.status		= realview_mmc_status,
+ 	.gpio_wp	= 17,
+ 	.gpio_cd	= 16,
++	.cd_invert	= true,
+ };
+ 
+ struct mmci_platform_data realview_mmc1_plat_data = {
+@@ -266,6 +267,7 @@ struct mmci_platform_data realview_mmc1_plat_data = {
+ 	.status		= realview_mmc_status,
+ 	.gpio_wp	= 19,
+ 	.gpio_cd	= 18,
++	.cd_invert	= true,
+ };
+ 
+ /*
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 840b301..9a9aeac 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -570,12 +570,13 @@ static int mmci_get_ro(struct mmc_host *mmc)
+ static int mmci_get_cd(struct mmc_host *mmc)
+ {
+ 	struct mmci_host *host = mmc_priv(mmc);
++	struct mmci_platform_data *plat = host->plat;
+ 	unsigned int status;
+ 
+ 	if (host->gpio_cd == -ENOSYS)
+-		status = host->plat->status(mmc_dev(host->mmc));
++		status = plat->status(mmc_dev(host->mmc));
+ 	else
+-		status = !gpio_get_value(host->gpio_cd);
++		status = !!gpio_get_value(host->gpio_cd) ^ plat->cd_invert;
+ 
+ 	/*
+ 	 * Use positive logic throughout - status is zero for no card,
+diff --git a/include/linux/amba/mmci.h b/include/linux/amba/mmci.h
+index ca84ce7..f4ee9ac 100644
+--- a/include/linux/amba/mmci.h
++++ b/include/linux/amba/mmci.h
+@@ -24,6 +24,7 @@
+  * whether a card is present in the MMC slot or not
+  * @gpio_wp: read this GPIO pin to see if the card is write protected
+  * @gpio_cd: read this GPIO pin to detect card insertion
++ * @cd_invert: true if the gpio_cd pin value is active low
+  * @capabilities: the capabilities of the block as implemented in
+  * this platform, signify anything MMC_CAP_* from mmc/host.h
+  */
+@@ -35,6 +36,7 @@ struct mmci_platform_data {
+ 	unsigned int (*status)(struct device *);
+ 	int	gpio_wp;
+ 	int	gpio_cd;
++	bool	cd_invert;
+ 	unsigned long capabilities;
+ };
+ 
+-- 
+1.7.2.dirty
 
-
-even with your patch applied 'div' will never be greater 256 and we
-won't be executing your changes. So I think this patch also needs to
-bump the upper limit of 'div' to 2046.
-
-We should probably introduce some safety at this point and check that
-the divider value is legal for the version of the host controller, to
-stop people shooting themselves in the foot if they mess up their clock
-settings. I was thinking of something like,
-
-	if (host->version >=3D SDHCI_SPEC_300)
-		max_div =3D 2046;
-	else
-		max_div =3D 256;
-
-	for (div =3D 1;div < max_div;div *=3D 2) {
-		if ((host->max_clk / div) <=3D clock)
-			break;
-	}
-
-What do you think?
