@@ -1,33 +1,250 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 04/12] mmci: allow the card detect status not to be
-	inverted
-Date: Mon, 9 Aug 2010 12:25:40 +0100
-Message-ID: <20100809112540.GC10793@n2100.arm.linux.org.uk>
-References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com> <1277198267-10860-4-git-send-email-rabin.vincent@stericsson.com> <20100729123443.GA18923@n2100.arm.linux.org.uk> <AANLkTikQi+SPpx8Wpvb0siSSsw0ZhusWaaKmqRnfHrnz@mail.gmail.com> <20100729142011.GG18923@n2100.arm.linux.org.uk> <20100805061453.GA7524@bnru02.bnr.st.com> <20100805092531.GA23473@n2100.arm.linux.org.uk> <20100809103704.GB5826@bnru01.bnr.st.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [patch 1/1]sdhci: sdhc spec 3.0 add some modification
+Date: Mon, 9 Aug 2010 20:33:16 +0800
+Message-ID: <AANLkTinqToYc6bizV7AcKuk-4XiNA08qhqfCPN1WLo8S@mail.gmail.com>
+References: <AANLkTin=8qej=hh3sJQkyjHcp17Wh4j8wngqyuRz=+1C@mail.gmail.com>
+	<AANLkTimx_-+wvrnoe22ZDtrhfc0Ds873KSzW04zuppBH@mail.gmail.com>
+	<AANLkTinn+Af7kE34kjLEf3XLe2YTbpkJ4MtePFK0vMS8@mail.gmail.com>
+	<20100809101042.GA8293@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/mixed; boundary=0016e645ba5e83b3f9048d6338e7
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:46088 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756101Ab0HIL0G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Aug 2010 07:26:06 -0400
-Content-Disposition: inline
-In-Reply-To: <20100809103704.GB5826@bnru01.bnr.st.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:36606 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754140Ab0HIMdR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Aug 2010 08:33:17 -0400
+Received: by yxg6 with SMTP id 6so3368811yxg.19
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Aug 2010 05:33:16 -0700 (PDT)
+In-Reply-To: <20100809101042.GA8293@console-pimps.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rabin VINCENT <rabin.vincent@stericsson.com>
-Cc: Linus Walleij <linus.ml.walleij@gmail.com>, Colin Tuckley <colin.tuckley@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Kyungmin Park <kmpark@infradead.org>, linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Wolfram Sang <w.sang@pengutronix.de>
 
-On Mon, Aug 09, 2010 at 04:07:05PM +0530, Rabin VINCENT wrote:
-> On Thu, Aug 05, 2010 at 11:25:31 +0200, Russell King - ARM Linux wrote:
-> > On Thu, Aug 05, 2010 at 11:44:54AM +0530, Rabin VINCENT wrote:
-> > > so are you OK with the cd_noinvert addition (for the GPIO case)?
-> > > Or a cd_invert and a patch to existing platforms?
-> > 
-> > I'd much prefer positive logic.  Double negatives (eg, not noinverted)
-> > are always bad news.
-> 
-> Here's the new patch.  I'll rebase the rest of the unapplied patches in
-> the series on top of this.
+--0016e645ba5e83b3f9048d6338e7
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-This looks much better, thanks.
+On Mon, Aug 9, 2010 at 6:10 PM, Matt Fleming <matt@console-pimps.org> wrote=
+:
+> On Thu, Aug 05, 2010 at 03:09:14PM +0800, zhangfei gao wrote:
+>> >>
+>> >> =A0 =A0 =A0 =A01. support 8 bit data transfer width
+>> > 8 bit buswidth patch is already merged to mm tree.
+>> >
+>> > http://marc.info/?l=3Dlinux-mmc&m=3D127783663526810&w=3D3
+>> >
+>> > Thank you,
+>> > Kyungmin Park
+>> >
+>>
+>> Thanks Kyungmin, updated without 8 bit support.
+>>
+>> From 2b717444443acdac90c5f31522a1515a2000749a Mon Sep 17 00:00:00 2001
+>> From: Zhangfei Gao <zgao6@marvell.com>
+>> Date: Fri, 6 Aug 2010 07:10:01 +0800
+>> Subject: [PATCH] sdhc: support 10-bit divided clock Mode
+>>
+>>
+>> Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
+>> ---
+>> =A0drivers/mmc/host/sdhci.c | =A0 =A05 +++--
+>> =A0drivers/mmc/host/sdhci.h | =A0 =A04 ++++
+>> =A02 files changed, 7 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index c6d1bd8..212dc9e 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1002,7 +1002,8 @@ static void sdhci_set_clock(struct sdhci_host
+>> *host, unsigned int clock)
+>> =A0 =A0 =A0 }
+>> =A0 =A0 =A0 div >>=3D 1;
+>>
+>> - =A0 =A0 clk =3D div << SDHCI_DIVIDER_SHIFT;
+>> + =A0 =A0 clk =3D (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+>> + =A0 =A0 clk |=3D ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIVIDER_SHIFT) <<
+>> SDHCI_DIVIDER_SHIFT_HI;
+>> =A0 =A0 =A0 clk |=3D SDHCI_CLOCK_INT_EN;
+>> =A0 =A0 =A0 sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>
+>
+> This patch is missing a change to the way we calculate 'div'. While your
+> patch is correct, I think it would be better to fit some more things
+> into it.
+>
+> This is the current code for calculating the clock divider,
+>
+>
+> =A0 =A0 =A0 =A0for (div =3D 1;div < 256;div *=3D 2) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if ((host->max_clk / div) <=3D clock)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
+> =A0 =A0 =A0 =A0}
+> =A0 =A0 =A0 =A0div >>=3D 1;
+>
+> =A0 =A0 =A0 =A0clk =3D div << SDHCI_DIVIDER_SHIFT;
+>
+>
+> even with your patch applied 'div' will never be greater 256 and we
+> won't be executing your changes. So I think this patch also needs to
+> bump the upper limit of 'div' to 2046.
+>
+> We should probably introduce some safety at this point and check that
+> the divider value is legal for the version of the host controller, to
+> stop people shooting themselves in the foot if they mess up their clock
+> settings. I was thinking of something like,
+>
+> =A0 =A0 =A0 =A0if (host->version >=3D SDHCI_SPEC_300)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0max_div =3D 2046;
+> =A0 =A0 =A0 =A0else
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0max_div =3D 256;
+>
+> =A0 =A0 =A0 =A0for (div =3D 1;div < max_div;div *=3D 2) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if ((host->max_clk / div) <=3D clock)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
+> =A0 =A0 =A0 =A0}
+>
+> What do you think?
+>
+
+Thanks for your careful review, in our platform, we use max/min for
+the max_div, so miss this modification :(
+Update the patch, help review again.
+
+>From 4b0a4d60fb39437a7fde7e52fb769fa0110c052f Mon Sep 17 00:00:00 2001
+From: Zhangfei Gao <zgao6@marvell.com>
+Date: Fri, 6 Aug 2010 07:10:01 +0800
+Subject: [PATCH] sdhc: support 10-bit divided clock Mode
+
+Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
+Reviewed-by: Matt Fleming <matt@console-pimps.org>
+---
+ drivers/mmc/host/sdhci.c |   14 ++++++++++----
+ drivers/mmc/host/sdhci.h |    4 ++++
+ 2 files changed, 14 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c6d1bd8..c4b3d6f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -978,7 +978,7 @@ static void sdhci_finish_command(struct sdhci_host *hos=
+t)
+
+ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+-	int div;
++	int div, max_div;
+ 	u16 clk;
+ 	unsigned long timeout;
+
+@@ -996,13 +996,19 @@ static void sdhci_set_clock(struct sdhci_host
+*host, unsigned int clock)
+ 	if (clock =3D=3D 0)
+ 		goto out;
+
+-	for (div =3D 1;div < 256;div *=3D 2) {
++	if (host->version >=3D SDHCI_SPEC_300)
++		max_div =3D 2046;
++	else
++		max_div =3D 256;
++
++	for (div =3D 1;div < max_div;div *=3D 2) {
+ 		if ((host->max_clk / div) <=3D clock)
+ 			break;
+ 	}
+ 	div >>=3D 1;
+
+-	clk =3D div << SDHCI_DIVIDER_SHIFT;
++	clk =3D (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
++	clk |=3D ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIVIDER_SHIFT) <<
+SDHCI_DIVIDER_SHIFT_HI;
+ 	clk |=3D SDHCI_CLOCK_INT_EN;
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+
+@@ -1681,7 +1687,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	host->version =3D sdhci_readw(host, SDHCI_HOST_VERSION);
+ 	host->version =3D (host->version & SDHCI_SPEC_VER_MASK)
+ 				>> SDHCI_SPEC_VER_SHIFT;
+-	if (host->version > SDHCI_SPEC_200) {
++	if (host->version > SDHCI_SPEC_300) {
+ 		printk(KERN_ERR "%s: Unknown controller version (%d). "
+ 			"You may experience problems.\n", mmc_hostname(mmc),
+ 			host->version);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c846813..7c09b4f 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -85,6 +85,9 @@
+
+ #define SDHCI_CLOCK_CONTROL	0x2C
+ #define  SDHCI_DIVIDER_SHIFT	8
++#define  SDHCI_DIVIDER_SHIFT_HI	6
++#define  SDHCI_DIV_MASK	0xFF
++#define  SDHCI_DIV_HI_MASK	0x300
+ #define  SDHCI_CLOCK_CARD_EN	0x0004
+ #define  SDHCI_CLOCK_INT_STABLE	0x0002
+ #define  SDHCI_CLOCK_INT_EN	0x0001
+@@ -177,6 +180,7 @@
+ #define  SDHCI_SPEC_VER_SHIFT	0
+ #define   SDHCI_SPEC_100	0
+ #define   SDHCI_SPEC_200	1
++#define   SDHCI_SPEC_300	2
+
+ struct sdhci_ops;
+
+--=20
+1.6.0.4
+
+--0016e645ba5e83b3f9048d6338e7
+Content-Type: application/octet-stream;
+	name="0001-sdhc-support-10-bit-divided-clock-Mode.patch"
+Content-Disposition: attachment;
+	filename="0001-sdhc-support-10-bit-divided-clock-Mode.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gcnao7750
+
+RnJvbSA0YjBhNGQ2MGZiMzk0MzdhN2ZkZTdlNTJmYjc2OWZhMDExMGMwNTJmIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBaaGFuZ2ZlaSBHYW8gPHpnYW82QG1hcnZlbGwuY29tPgpEYXRl
+OiBGcmksIDYgQXVnIDIwMTAgMDc6MTA6MDEgKzA4MDAKU3ViamVjdDogW1BBVENIXSBzZGhjOiBz
+dXBwb3J0IDEwLWJpdCBkaXZpZGVkIGNsb2NrIE1vZGUKClNpZ25lZC1vZmYtYnk6IFpoYW5nZmVp
+IEdhbyA8emdhbzZAbWFydmVsbC5jb20+ClJldmlld2VkLWJ5OiBNYXR0IEZsZW1pbmcgPG1hdHRA
+Y29uc29sZS1waW1wcy5vcmc+Ci0tLQogZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jIHwgICAxNCAr
+KysrKysrKysrLS0tLQogZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5oIHwgICAgNCArKysrCiAyIGZp
+bGVzIGNoYW5nZWQsIDE0IGluc2VydGlvbnMoKyksIDQgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0
+IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCmlu
+ZGV4IGM2ZDFiZDguLmM0YjNkNmYgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ku
+YworKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmMKQEAgLTk3OCw3ICs5NzgsNyBAQCBzdGF0
+aWMgdm9pZCBzZGhjaV9maW5pc2hfY29tbWFuZChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCkKIAog
+c3RhdGljIHZvaWQgc2RoY2lfc2V0X2Nsb2NrKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1bnNp
+Z25lZCBpbnQgY2xvY2spCiB7Ci0JaW50IGRpdjsKKwlpbnQgZGl2LCBtYXhfZGl2OwogCXUxNiBj
+bGs7CiAJdW5zaWduZWQgbG9uZyB0aW1lb3V0OwogCkBAIC05OTYsMTMgKzk5NiwxOSBAQCBzdGF0
+aWMgdm9pZCBzZGhjaV9zZXRfY2xvY2soc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHVuc2lnbmVk
+IGludCBjbG9jaykKIAlpZiAoY2xvY2sgPT0gMCkKIAkJZ290byBvdXQ7CiAKLQlmb3IgKGRpdiA9
+IDE7ZGl2IDwgMjU2O2RpdiAqPSAyKSB7CisJaWYgKGhvc3QtPnZlcnNpb24gPj0gU0RIQ0lfU1BF
+Q18zMDApCisJCW1heF9kaXYgPSAyMDQ2OworCWVsc2UKKwkJbWF4X2RpdiA9IDI1NjsKKworCWZv
+ciAoZGl2ID0gMTtkaXYgPCBtYXhfZGl2O2RpdiAqPSAyKSB7CiAJCWlmICgoaG9zdC0+bWF4X2Ns
+ayAvIGRpdikgPD0gY2xvY2spCiAJCQlicmVhazsKIAl9CiAJZGl2ID4+PSAxOwogCi0JY2xrID0g
+ZGl2IDw8IFNESENJX0RJVklERVJfU0hJRlQ7CisJY2xrID0gKGRpdiAmIFNESENJX0RJVl9NQVNL
+KSA8PCBTREhDSV9ESVZJREVSX1NISUZUOworCWNsayB8PSAoKGRpdiAmIFNESENJX0RJVl9ISV9N
+QVNLKSA+PiBTREhDSV9ESVZJREVSX1NISUZUKSA8PCBTREhDSV9ESVZJREVSX1NISUZUX0hJOwog
+CWNsayB8PSBTREhDSV9DTE9DS19JTlRfRU47CiAJc2RoY2lfd3JpdGV3KGhvc3QsIGNsaywgU0RI
+Q0lfQ0xPQ0tfQ09OVFJPTCk7CiAKQEAgLTE2ODEsNyArMTY4Nyw3IEBAIGludCBzZGhjaV9hZGRf
+aG9zdChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCkKIAlob3N0LT52ZXJzaW9uID0gc2RoY2lfcmVh
+ZHcoaG9zdCwgU0RIQ0lfSE9TVF9WRVJTSU9OKTsKIAlob3N0LT52ZXJzaW9uID0gKGhvc3QtPnZl
+cnNpb24gJiBTREhDSV9TUEVDX1ZFUl9NQVNLKQogCQkJCT4+IFNESENJX1NQRUNfVkVSX1NISUZU
+OwotCWlmIChob3N0LT52ZXJzaW9uID4gU0RIQ0lfU1BFQ18yMDApIHsKKwlpZiAoaG9zdC0+dmVy
+c2lvbiA+IFNESENJX1NQRUNfMzAwKSB7CiAJCXByaW50ayhLRVJOX0VSUiAiJXM6IFVua25vd24g
+Y29udHJvbGxlciB2ZXJzaW9uICglZCkuICIKIAkJCSJZb3UgbWF5IGV4cGVyaWVuY2UgcHJvYmxl
+bXMuXG4iLCBtbWNfaG9zdG5hbWUobW1jKSwKIAkJCWhvc3QtPnZlcnNpb24pOwpkaWZmIC0tZ2l0
+IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5oIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5oCmlu
+ZGV4IGM4NDY4MTMuLjdjMDliNGYgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ku
+aAorKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmgKQEAgLTg1LDYgKzg1LDkgQEAKIAogI2Rl
+ZmluZSBTREhDSV9DTE9DS19DT05UUk9MCTB4MkMKICNkZWZpbmUgIFNESENJX0RJVklERVJfU0hJ
+RlQJOAorI2RlZmluZSAgU0RIQ0lfRElWSURFUl9TSElGVF9ISQk2CisjZGVmaW5lICBTREhDSV9E
+SVZfTUFTSwkweEZGCisjZGVmaW5lICBTREhDSV9ESVZfSElfTUFTSwkweDMwMAogI2RlZmluZSAg
+U0RIQ0lfQ0xPQ0tfQ0FSRF9FTgkweDAwMDQKICNkZWZpbmUgIFNESENJX0NMT0NLX0lOVF9TVEFC
+TEUJMHgwMDAyCiAjZGVmaW5lICBTREhDSV9DTE9DS19JTlRfRU4JMHgwMDAxCkBAIC0xNzcsNiAr
+MTgwLDcgQEAKICNkZWZpbmUgIFNESENJX1NQRUNfVkVSX1NISUZUCTAKICNkZWZpbmUgICBTREhD
+SV9TUEVDXzEwMAkwCiAjZGVmaW5lICAgU0RIQ0lfU1BFQ18yMDAJMQorI2RlZmluZSAgIFNESENJ
+X1NQRUNfMzAwCTIKIAogc3RydWN0IHNkaGNpX29wczsKIAotLSAKMS42LjAuNAoK
+--0016e645ba5e83b3f9048d6338e7--
