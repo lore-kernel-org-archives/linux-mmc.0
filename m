@@ -1,72 +1,59 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: + sdhci-add-no-hi-speed-bit-quirk-support.patch added to -mm
- tree
-Date: Tue, 10 Aug 2010 14:34:34 -0700
-Message-ID: <20100810143434.01bea685.akpm@linux-foundation.org>
-References: <201006102043.o5AKhJjl022731@imap1.linux-foundation.org>
-	<20100611004229.GD3498@trinity.fluff.org>
-	<AANLkTik5ANblTvTGh-4f9IL7VW8iPmQtRiN0BIDWjFGc@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:37753 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755874Ab0HJVfZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 17:35:25 -0400
-In-Reply-To: <AANLkTik5ANblTvTGh-4f9IL7VW8iPmQtRiN0BIDWjFGc@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v3 0/9] native support for wl1271 on ZOOM
+Date: Wed, 11 Aug 2010 01:12:19 +0300
+Message-ID: <1281478348-24833-1-git-send-email-ohad@wizery.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Pandita Vikram <vikram.pandita-l0cyMroinI0@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org
 
-On Fri, 11 Jun 2010 12:25:32 +0900
-Kyungmin Park <kmpark@infradead.org> wrote:
+This patch series adds native support for wl1271 on ZOOM.
 
-> On Fri, Jun 11, 2010 at 9:42 AM, Ben Dooks <ben-linux@fluff.org> wrote:
-> > On Thu, Jun 10, 2010 at 01:43:19PM -0700, akpm@linux-foundation.org wrote:
-> >>
-> >> The patch titled
-> >> __ __ __SDHCI: add no hi-speed bit quirk support
-> >> has been added to the -mm tree. __Its filename is
-> >> __ __ __sdhci-add-no-hi-speed-bit-quirk-support.patch
-> >>
-> >> Before you just go and hit "reply", please:
-> >> __ __a) Consider who else should be cc'ed
-> >> __ __b) Prefer to cc a suitable mailing list as well
-> >> __ __c) Ideally: find the original patch on the mailing list and do a
-> >> __ __ __ reply-to-all to that, adding suitable additional cc's
-> >>
-> >> *** Remember to use Documentation/SubmitChecklist when testing your code ***
-> >>
-> >> See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-> >> out what to do about this
-> >>
-> >> The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-> >>
-> >> ------------------------------------------------------
-> >> Subject: SDHCI: add no hi-speed bit quirk support
-> >> From: Kyungmin Park <kmpark@infradead.org>
-> >>
-> >> Some SDHCI controllers like s5pc110 don't have an HISPD bit in the HOSTCTL
-> >> register.
-> >
-> > It would be nice for someone at Samsung to (a) explain the differences
-> > from the base SDHCI spec for all their hardware (the databooks are often
-> > vague in this area) and (b) for the information for the extra registers
-> > this IP block has to be explained in more detail (and the platform code
-> > checked for this too).
-> 
-> I hope also.
+Changes since v2:
+- mmc/sdio power manipulation is removed, and will be
+  posted separately in the shape of mmc/sdio runtime pm.
+- the platform device is back, used to deliver board-specific
+  platform data (i.e. irq and ref clock)
 
-Going back over this dicussion, I get the impression that nothing
-really got resolved or finished.  So it is far from clear that I should
-send these:
+Patches are based on linux-next (as of Aug 7th), and tested
+on ZOOM2.
 
-s5pc110-sdhci-s3c-can-override-host-capabilities.patch
-s5pc110-sdhci-s3c-support-on-s5pc110.patch
-sdhci-add-no-hi-speed-bit-quirk-support.patch
+Please note that I am going to have a very limited email access
+in the next three weeks, so I might not respond right away.
 
-upstream.  Could we please revisit all of this ASAP?
+Thanks,
 
-Thanks.
+Ohad Ben-Cohen (9):
+  wireless: wl1271: make wl12xx.h common to both spi and sdio
+  wireless: wl1271: support return value for the set power func
+  wireless: wl1271: add platform driver to get board data
+  wireless: wl1271: take irq info from private board data
+  wireless: wl1271: make ref_clock configurable by board
+  omap: hsmmc: remove unused variable
+  omap: zoom: add fixed regulator device for wlan
+  omap: hsmmc: support mmc3 regulator power control
+  omap: zoom: add mmc3/wl1271 device support
+
+ arch/arm/mach-omap2/board-zoom-peripherals.c |   69 +++++++++++++++
+ arch/arm/mach-omap2/hsmmc.c                  |   10 ++-
+ drivers/mmc/host/omap_hsmmc.c                |   68 +++++++++++++--
+ drivers/net/wireless/wl12xx/wl1251_sdio.c    |    2 +-
+ drivers/net/wireless/wl12xx/wl1251_spi.c     |    2 +-
+ drivers/net/wireless/wl12xx/wl1271.h         |   15 +++-
+ drivers/net/wireless/wl12xx/wl1271_boot.c    |    9 +-
+ drivers/net/wireless/wl12xx/wl1271_boot.h    |    1 -
+ drivers/net/wireless/wl12xx/wl1271_io.h      |    8 +-
+ drivers/net/wireless/wl12xx/wl1271_main.c    |    4 +-
+ drivers/net/wireless/wl12xx/wl1271_sdio.c    |  120 +++++++++++++++++++++++---
+ drivers/net/wireless/wl12xx/wl1271_spi.c     |    8 ++-
+ include/linux/spi/wl12xx.h                   |   34 -------
+ include/linux/wl12xx.h                       |   35 ++++++++
+ 14 files changed, 311 insertions(+), 74 deletions(-)
+ delete mode 100644 include/linux/spi/wl12xx.h
+ create mode 100644 include/linux/wl12xx.h
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
