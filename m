@@ -1,75 +1,33 @@
-From: Zang Roy-R61911 <r61911@freescale.com>
-Subject: RE: [PATCH 1/3 v2] sdhci: Add auto CMD12 support for eSDHC driver
-Date: Tue, 10 Aug 2010 18:07:20 +0800
-Message-ID: <3850A844E6A3854C827AC5C0BEC7B60A0562B0@zch01exm23.fsl.freescale.net>
-References: <AANLkTikUypKobPAHsE+tz-Py-XvvJhbcj7Syj3rX_ej0@mail.gmail.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [patch 1/1]sdhci: sdhc spec 3.0 add some modification
+Date: Tue, 10 Aug 2010 17:32:44 +0100
+Message-ID: <20100810163244.GA12837@console-pimps.org>
+References: <AANLkTin=8qej=hh3sJQkyjHcp17Wh4j8wngqyuRz=+1C@mail.gmail.com> <AANLkTimx_-+wvrnoe22ZDtrhfc0Ds873KSzW04zuppBH@mail.gmail.com> <AANLkTinn+Af7kE34kjLEf3XLe2YTbpkJ4MtePFK0vMS8@mail.gmail.com> <20100809101042.GA8293@console-pimps.org> <AANLkTinqToYc6bizV7AcKuk-4XiNA08qhqfCPN1WLo8S@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:32688
-	"EHLO VA3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1750866Ab0HJKHq convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Aug 2010 06:07:46 -0400
-Received: from mail129-va3 (localhost.localdomain [127.0.0.1])	by
- mail129-va3-R.bigfish.com (Postfix) with ESMTP id A3F5D1A4028D	for
- <linux-mmc@vger.kernel.org>; Tue, 10 Aug 2010 10:07:45 +0000 (UTC)
-Received: from VA3EHSMHS009.bigfish.com (unknown [10.7.14.249])	by
- mail129-va3.bigfish.com (Postfix) with ESMTP id 103DB1BB80CF	for
- <linux-mmc@vger.kernel.org>; Tue, 10 Aug 2010 10:07:27 +0000 (UTC)
-Received: from az33smr01.freescale.net (az33smr01.freescale.net
- [10.64.34.199])	by az33egw02.freescale.net (8.14.3/8.14.3) with ESMTP id
- o7AA7PKr010002	for <linux-mmc@vger.kernel.org>; Tue, 10 Aug 2010 03:07:25
- -0700 (MST)
-Received: from zch01exm23.fsl.freescale.net (zch01exm23.ap.freescale.net
- [10.192.129.207])	by az33smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
- o7AAIsGX010087	for <linux-mmc@vger.kernel.org>; Tue, 10 Aug 2010 05:18:55
- -0500 (CDT)
-Content-Class: urn:content-classes:message
-In-Reply-To: <AANLkTikUypKobPAHsE+tz-Py-XvvJhbcj7Syj3rX_ej0@mail.gmail.com>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:40151 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932212Ab0HJQcp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 12:32:45 -0400
+Content-Disposition: inline
+In-Reply-To: <AANLkTinqToYc6bizV7AcKuk-4XiNA08qhqfCPN1WLo8S@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linuxppc-dev@ozlabs.org, akpm@linux-foundation.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Kyungmin Park <kmpark@infradead.org>, linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Wolfram Sang <w.sang@pengutronix.de>
 
-=20
+On Mon, Aug 09, 2010 at 08:33:16PM +0800, zhangfei gao wrote:
+> 
+> Thanks for your careful review, in our platform, we use max/min for
+> the max_div, so miss this modification :(
+> Update the patch, help review again.
 
-> -----Original Message-----
-> From: Micha=B3 Miros=B3aw [mailto:mirqus@gmail.com]=20
-> Sent: Tuesday, August 10, 2010 2:25 AM
-> To: Zang Roy-R61911
-> Cc: linux-mmc@vger.kernel.org; linuxppc-dev@ozlabs.org;=20
-> akpm@linux-foundation.org
-> Subject: Re: [PATCH 1/3 v2] sdhci: Add auto CMD12 support for=20
-> eSDHC driver
->=20
-> 2010/8/3 Roy Zang <tie-fei.zang@freescale.com>:
-> [...]
-> > @@ -240,6 +240,8 @@ struct sdhci_host {
-> > =A0#define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN =A0 =A0 =A0 =A0 =A0 =A0=
- =A0(1<<25)
-> > =A0/* Controller cannot support End Attribute in NOP ADMA=20
-> descriptor */
-> > =A0#define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC =A0 =A0 =A0 =A0 =A0 =A0=
- =A0(1<<26)
-> > +/* Controller uses Auto CMD12 command to stop the transfer */
-> > +#define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 =A0 =A0 =A0 =A0 =A0 =A0=
- (1<<27)
-> >
-> > =A0 =A0 =A0 =A0int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 irq; =A0=
- =A0 =A0 =A0 =A0 =A0/* Device IRQ */
-> > =A0 =A0 =A0 =A0void __iomem * =A0 =A0 =A0 =A0 =A0ioaddr; =A0 =A0 =A0=
- =A0 /* Mapped address */
->=20
-> Just a cosmetic hint: I suggest SDHCI_QUIRK_MULTIBLOCK_READ_AUTO_CMD1=
-2
-> or something for the quirk name, because ACMD12 part might be confuse=
-d
-> with MMC/SD App CMD 12 (CMD55+CMD12 combo) if/whenever that gets used=
-=2E
-Thanks for the suggestion.
-There are several ACMD12 needed to be updated.
-Send a new patch to update it.
-Roy
+What do you mean? Where does max/min come from? It would definitely
+be best if everybody uses the same code to calculate max_div. Have
+you tested the max_div changes? Are you now using this patch on
+your platform or are you still maintaining a patch to do it a
+different way?
 
+If you've got a separate patch and it does this things better
+than the way we currently do them, get it upstream! :-)
