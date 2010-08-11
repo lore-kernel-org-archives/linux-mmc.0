@@ -1,329 +1,76 @@
 From: akpm@linux-foundation.org
-Subject: [patch 033/177] mmc: implement SD-combo (IO+mem) support
-Date: Tue, 10 Aug 2010 18:01:40 -0700
-Message-ID: <201008110101.o7B11eCI027043@imap1.linux-foundation.org>
+Subject: [patch 049/177] sdhci-s3c: add SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK quirk
+Date: Tue, 10 Aug 2010 18:01:55 -0700
+Message-ID: <201008110101.o7B11tDC027093@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:45474 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:36941 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932208Ab0HKBWX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:22:23 -0400
+	by vger.kernel.org with ESMTP id S932453Ab0HKBWg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:22:36 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, mirq-linux@rere.qmqm.pl, adrian.hunter@nokia.com, cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: akpm@linux-foundation.org, hyuk1.lee@samsung.com, ben-linux@fluff.org, kgene.kim@samsung.com, linux-mmc@vger.kernel.org
 
-From: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
+From: Hyuk Lee <hyuk1.lee@samsung.com>
 
-Signed-off-by: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Chris Ball <cjb@laptop.org>
+On Samsung's SDMMC hosts the timeout clock is derivied from the SD Clock
+which is set dynamically.  So checked SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+quirk and removed 'sdhci_s3c_get_timeout_clk' callback which doesn't need
+any more.
+
+Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+Cc: Ben Dooks <ben-linux@fluff.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/bus.c   |    9 ++
- drivers/mmc/core/core.c  |   12 ++-
- drivers/mmc/core/sdio.c  |  135 +++++++++++++++++++++++++++++++------
- include/linux/mmc/card.h |    1 
- 4 files changed, 134 insertions(+), 23 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c |   10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
 
-diff -puN drivers/mmc/core/bus.c~mmc-implement-sd-combo-iomem-support drivers/mmc/core/bus.c
---- a/drivers/mmc/core/bus.c~mmc-implement-sd-combo-iomem-support
-+++ a/drivers/mmc/core/bus.c
-@@ -37,6 +37,8 @@ static ssize_t mmc_type_show(struct devi
- 		return sprintf(buf, "SD\n");
- 	case MMC_TYPE_SDIO:
- 		return sprintf(buf, "SDIO\n");
-+	case MMC_TYPE_SD_COMBO:
-+		return sprintf(buf, "SDcombo\n");
- 	default:
- 		return -EFAULT;
- 	}
-@@ -74,6 +76,9 @@ mmc_bus_uevent(struct device *dev, struc
- 	case MMC_TYPE_SDIO:
- 		type = "SDIO";
- 		break;
-+	case MMC_TYPE_SD_COMBO:
-+		type = "SDcombo";
-+		break;
- 	default:
- 		type = NULL;
- 	}
-@@ -239,6 +244,10 @@ int mmc_add_card(struct mmc_card *card)
- 	case MMC_TYPE_SDIO:
- 		type = "SDIO";
- 		break;
-+	case MMC_TYPE_SD_COMBO:
-+		type = "SD-combo";
-+		if (mmc_card_blockaddr(card))
-+			type = "SDHC-combo";
- 	default:
- 		type = "?";
- 		break;
-diff -puN drivers/mmc/core/core.c~mmc-implement-sd-combo-iomem-support drivers/mmc/core/core.c
---- a/drivers/mmc/core/core.c~mmc-implement-sd-combo-iomem-support
-+++ a/drivers/mmc/core/core.c
-@@ -1099,8 +1099,15 @@ void mmc_rescan(struct work_struct *work
- 	 */
- 	err = mmc_send_io_op_cond(host, 0, &ocr);
- 	if (!err) {
--		if (mmc_attach_sdio(host, ocr))
--			mmc_power_off(host);
-+		if (mmc_attach_sdio(host, ocr)) {
-+			mmc_claim_host(host);
-+			/* try SDMEM (but not MMC) even if SDIO is broken */
-+			if (mmc_send_app_op_cond(host, 0, &ocr))
-+				goto out_fail;
-+
-+			if (mmc_attach_sd(host, ocr))
-+				mmc_power_off(host);
-+		}
- 		goto out;
- 	}
+diff -puN drivers/mmc/host/sdhci-s3c.c~sdhci-s3c-add-sdhci_quirk_data_timeout_uses_sdclk-quirk drivers/mmc/host/sdhci-s3c.c
+--- a/drivers/mmc/host/sdhci-s3c.c~sdhci-s3c-add-sdhci_quirk_data_timeout_uses_sdclk-quirk
++++ a/drivers/mmc/host/sdhci-s3c.c
+@@ -110,11 +110,6 @@ static unsigned int sdhci_s3c_get_max_cl
+ 	return max;
+ }
  
-@@ -1124,6 +1131,7 @@ void mmc_rescan(struct work_struct *work
- 		goto out;
- 	}
- 
-+out_fail:
- 	mmc_release_host(host);
- 	mmc_power_off(host);
- 
-diff -puN drivers/mmc/core/sdio.c~mmc-implement-sd-combo-iomem-support drivers/mmc/core/sdio.c
---- a/drivers/mmc/core/sdio.c~mmc-implement-sd-combo-iomem-support
-+++ a/drivers/mmc/core/sdio.c
-@@ -160,9 +160,7 @@ static int sdio_enable_wide(struct mmc_c
- 	if (ret)
- 		return ret;
- 
--	mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+-static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *host)
+-{
+-	return sdhci_s3c_get_max_clk(host) / 1000000;
+-}
 -
--	return 0;
-+	return 1;
- }
+ /**
+  * sdhci_s3c_consider_clock - consider one the bus clocks for current setting
+  * @ourhost: Our SDHCI instance.
+@@ -188,7 +183,6 @@ static void sdhci_s3c_set_clock(struct s
  
- /*
-@@ -222,10 +220,34 @@ static int sdio_disable_wide(struct mmc_
- 	return 0;
- }
+ 		ourhost->cur_clk = best_src;
+ 		host->max_clk = clk_get_rate(clk);
+-		host->timeout_clk = sdhci_s3c_get_timeout_clk(host);
  
-+
-+static int sdio_enable_4bit_bus(struct mmc_card *card)
-+{
-+	int err;
-+
-+	if (card->type == MMC_TYPE_SDIO)
-+		return sdio_enable_wide(card);
-+
-+	if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
-+		(card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
-+		err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
-+		if (err)
-+			return err;
-+	} else
-+		return 0;
-+
-+	err = sdio_enable_wide(card);
-+	if (err <= 0)
-+		mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
-+
-+	return err;
-+}
-+
-+
- /*
-  * Test if the card supports high-speed mode and, if so, switch to it.
-  */
--static int sdio_enable_hs(struct mmc_card *card)
-+static int mmc_sdio_switch_hs(struct mmc_card *card, int enable)
- {
- 	int ret;
- 	u8 speed;
-@@ -240,7 +262,10 @@ static int sdio_enable_hs(struct mmc_car
- 	if (ret)
- 		return ret;
+ 		ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
+ 		ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;
+@@ -211,7 +205,6 @@ static void sdhci_s3c_set_clock(struct s
  
--	speed |= SDIO_SPEED_EHS;
-+	if (enable)
-+		speed |= SDIO_SPEED_EHS;
-+	else
-+		speed &= ~SDIO_SPEED_EHS;
+ static struct sdhci_ops sdhci_s3c_ops = {
+ 	.get_max_clock		= sdhci_s3c_get_max_clk,
+-	.get_timeout_clock	= sdhci_s3c_get_timeout_clk,
+ 	.set_clock		= sdhci_s3c_set_clock,
+ };
  
- 	ret = mmc_io_rw_direct(card, 1, 0, SDIO_CCCR_SPEED, speed, NULL);
- 	if (ret)
-@@ -249,6 +274,24 @@ static int sdio_enable_hs(struct mmc_car
- 	return 1;
- }
+@@ -335,6 +328,9 @@ static int __devinit sdhci_s3c_probe(str
+ 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
+ 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
  
-+/*
-+ * Enable SDIO/combo card's high-speed mode. Return 0/1 if [not]supported.
-+ */
-+static int sdio_enable_hs(struct mmc_card *card)
-+{
-+	int ret;
++	/* HSMMC on Samsung SoCs uses SDCLK as timeout clock */
++	host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
 +
-+	ret = mmc_sdio_switch_hs(card, true);
-+	if (ret <= 0 || card->type == MMC_TYPE_SDIO)
-+		return ret;
-+
-+	ret = mmc_sd_switch_hs(card);
-+	if (ret <= 0)
-+		mmc_sdio_switch_hs(card, false);
-+
-+	return ret;
-+}
-+
- static unsigned mmc_sdio_get_max_clock(struct mmc_card *card)
- {
- 	unsigned max_dtr;
-@@ -265,6 +308,9 @@ static unsigned mmc_sdio_get_max_clock(s
- 		max_dtr = card->cis.max_dtr;
- 	}
- 
-+	if (card->type == MMC_TYPE_SD_COMBO)
-+		max_dtr = min(max_dtr, mmc_sd_get_max_clock(card));
-+
- 	return max_dtr;
- }
- 
-@@ -310,7 +356,24 @@ static int mmc_sdio_init_card(struct mmc
- 		goto err;
- 	}
- 
--	card->type = MMC_TYPE_SDIO;
-+	err = mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid);
-+
-+	if (!err) {
-+		card->type = MMC_TYPE_SD_COMBO;
-+
-+		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
-+		    memcmp(card->raw_cid, oldcard->raw_cid, sizeof(card->raw_cid)) != 0)) {
-+			mmc_remove_card(card);
-+			return -ENOENT;
-+		}
-+	} else {
-+		card->type = MMC_TYPE_SDIO;
-+
-+		if (oldcard && oldcard->type != MMC_TYPE_SDIO) {
-+			mmc_remove_card(card);
-+			return -ENOENT;
-+		}
-+	}
- 
- 	/*
- 	 * Call the optional HC's init_card function to handle quirks.
-@@ -330,6 +393,17 @@ static int mmc_sdio_init_card(struct mmc
- 	}
- 
- 	/*
-+	 * Read CSD, before selecting the card
-+	 */
-+	if (!oldcard && card->type == MMC_TYPE_SD_COMBO) {
-+		err = mmc_sd_get_csd(host, card);
-+		if (err)
-+			return err;
-+
-+		mmc_decode_cid(card);
-+	}
-+
-+	/*
- 	 * Select card, as all following commands rely on that.
- 	 */
- 	if (!powered_resume && !mmc_host_is_spi(host)) {
-@@ -356,14 +430,33 @@ static int mmc_sdio_init_card(struct mmc
- 		int same = (card->cis.vendor == oldcard->cis.vendor &&
- 			    card->cis.device == oldcard->cis.device);
- 		mmc_remove_card(card);
--		if (!same) {
--			err = -ENOENT;
--			goto err;
--		}
-+		if (!same)
-+			return -ENOENT;
-+
- 		card = oldcard;
- 		return 0;
- 	}
- 
-+	if (card->type == MMC_TYPE_SD_COMBO) {
-+		err = mmc_sd_setup_card(host, card, oldcard != NULL);
-+		/* handle as SDIO-only card if memory init failed */
-+		if (err) {
-+			mmc_go_idle(host);
-+			if (mmc_host_is_spi(host))
-+				/* should not fail, as it worked previously */
-+				mmc_spi_set_crc(host, use_spi_crc);
-+			card->type = MMC_TYPE_SDIO;
-+		} else
-+			card->dev.type = &sd_type;
-+	}
-+
-+	/*
-+	 * If needed, disconnect card detection pull-up resistor.
-+	 */
-+	err = sdio_disable_cd(card);
-+	if (err)
-+		goto remove;
-+
- 	/*
- 	 * Switch to high-speed (if supported).
- 	 */
-@@ -381,8 +474,10 @@ static int mmc_sdio_init_card(struct mmc
- 	/*
- 	 * Switch to wider bus (if supported).
- 	 */
--	err = sdio_enable_wide(card);
--	if (err)
-+	err = sdio_enable_4bit_bus(card);
-+	if (err > 0)
-+		mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
-+	else if (err)
- 		goto remove;
- 
- 	if (!oldcard)
-@@ -496,9 +591,14 @@ static int mmc_sdio_resume(struct mmc_ho
- 	mmc_claim_host(host);
- 	err = mmc_sdio_init_card(host, host->ocr, host->card,
- 				 (host->pm_flags & MMC_PM_KEEP_POWER));
--	if (!err)
-+	if (!err) {
- 		/* We may have switched to 1-bit mode during suspend. */
--		err = sdio_enable_wide(host->card);
-+		err = sdio_enable_4bit_bus(host->card);
-+		if (err > 0) {
-+			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
-+			err = 0;
-+		}
-+	}
- 	if (!err && host->sdio_irqs)
- 		mmc_signal_sdio_irq(host);
- 	mmc_release_host(host);
-@@ -583,13 +683,6 @@ int mmc_attach_sdio(struct mmc_host *hos
- 	card->sdio_funcs = 0;
- 
- 	/*
--	 * If needed, disconnect card detection pull-up resistor.
--	 */
--	err = sdio_disable_cd(card);
--	if (err)
--		goto remove;
--
--	/*
- 	 * Initialize (but don't add) all present functions.
- 	 */
- 	for (i = 0; i < funcs; i++, card->sdio_funcs++) {
-diff -puN include/linux/mmc/card.h~mmc-implement-sd-combo-iomem-support include/linux/mmc/card.h
---- a/include/linux/mmc/card.h~mmc-implement-sd-combo-iomem-support
-+++ a/include/linux/mmc/card.h
-@@ -93,6 +93,7 @@ struct mmc_card {
- #define MMC_TYPE_MMC		0		/* MMC card */
- #define MMC_TYPE_SD		1		/* SD card */
- #define MMC_TYPE_SDIO		2		/* SDIO card */
-+#define MMC_TYPE_SD_COMBO	3		/* SD combo (IO+mem) card */
- 	unsigned int		state;		/* (our) card state */
- #define MMC_STATE_PRESENT	(1<<0)		/* present in sysfs */
- #define MMC_STATE_READONLY	(1<<1)		/* card is read-only */
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(dev, "sdhci_add_host() failed\n");
 _
