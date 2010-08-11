@@ -1,113 +1,150 @@
 From: akpm@linux-foundation.org
-Subject: [patch 031/177] mmc: recognize CSD structure
-Date: Tue, 10 Aug 2010 18:01:36 -0700
-Message-ID: <201008110101.o7B11adR027035@imap1.linux-foundation.org>
+Subject: [patch 035/177] mmc: make sdhci work with ricoh mmc controller
+Date: Tue, 10 Aug 2010 18:01:42 -0700
+Message-ID: <201008110101.o7B11g4Z027049@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:43540 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42859 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758276Ab0HKB1O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:27:14 -0400
+	by vger.kernel.org with ESMTP id S1753282Ab0HKB2P (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:28:15 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, kmpark@infradead.org, adrian.hunter@nokia.com, cjb@laptop.org, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
+Cc: akpm@linux-foundation.org, maximlevitsky@gmail.com, adq_dvb@lidskialf.net, linux-mmc@vger.kernel.org, philipl@overt.org, rjw@sisk.pl
 
-From: Kyungmin Park <kmpark@infradead.org>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
 
-The eMMC spec 4.4 and 4.3 + additional feature chips has CSD structure
-version 3 and version 3 have to check the CSD_STRUCTURE byte in the
-EXT_CSD register.
+The current way of disabling it is not well tested by vendor and has all
+kinds of bugs that show up on resume from ram/disk.  A very good example
+is a dead SDHCI controller.
 
-Also fix EXT_CSD revision message.
+Old way of disabling is still supported by continuing to use
+CONFIG_MMC_RICOH_MMC.
 
-[akpm@linux-foundation.org: fix comment, per Chris Ball]
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Chris Ball <cjb@laptop.org>
+Based on 'http://list.drzeus.cx/pipermail/sdhci-devel/2007-December/002085.html'
+Therefore most of the credit for this goes to Andrew de Quincey
+
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: Andrew de Quincey <adq_dvb@lidskialf.net>
+Acked-by: Philip Langdale <philipl@overt.org>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/mmc.c   |   26 +++++++++++++++++++-------
- include/linux/mmc/card.h |    1 +
- include/linux/mmc/mmc.h  |    1 +
- 3 files changed, 21 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sdhci-pci.c |   41 +++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c     |    3 +-
+ drivers/mmc/host/sdhci.h     |    4 +++
+ 3 files changed, 47 insertions(+), 1 deletion(-)
 
-diff -puN drivers/mmc/core/mmc.c~mmc-recognize-csd-structure drivers/mmc/core/mmc.c
---- a/drivers/mmc/core/mmc.c~mmc-recognize-csd-structure
-+++ a/drivers/mmc/core/mmc.c
-@@ -114,17 +114,18 @@ static int mmc_decode_cid(struct mmc_car
- static int mmc_decode_csd(struct mmc_card *card)
- {
- 	struct mmc_csd *csd = &card->csd;
--	unsigned int e, m, csd_struct;
-+	unsigned int e, m;
- 	u32 *resp = card->raw_csd;
+diff -puN drivers/mmc/host/sdhci-pci.c~mmc-make-sdhci-work-with-ricoh-mmc-controller drivers/mmc/host/sdhci-pci.c
+--- a/drivers/mmc/host/sdhci-pci.c~mmc-make-sdhci-work-with-ricoh-mmc-controller
++++ a/drivers/mmc/host/sdhci-pci.c
+@@ -17,6 +17,7 @@
+ #include <linux/pci.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/slab.h>
++#include <linux/device.h>
  
- 	/*
- 	 * We only understand CSD structure v1.1 and v1.2.
- 	 * v1.2 has extra information in bits 15, 11 and 10.
-+	 * We also support eMMC v4.4 & v4.41.
- 	 */
--	csd_struct = UNSTUFF_BITS(resp, 126, 2);
--	if (csd_struct != 1 && csd_struct != 2) {
-+	csd->structure = UNSTUFF_BITS(resp, 126, 2);
-+	if (csd->structure == 0) {
- 		printk(KERN_ERR "%s: unrecognised CSD structure version %d\n",
--			mmc_hostname(card->host), csd_struct);
-+			mmc_hostname(card->host), csd->structure);
- 		return -EINVAL;
- 	}
+ #include <linux/mmc/host.h>
  
-@@ -207,11 +208,22 @@ static int mmc_read_ext_csd(struct mmc_c
- 		goto out;
- 	}
- 
-+	/* Version is coded in the CSD_STRUCTURE byte in the EXT_CSD register */
-+	if (card->csd.structure == 3) {
-+		int ext_csd_struct = ext_csd[EXT_CSD_STRUCTURE];
-+		if (ext_csd_struct > 2) {
-+			printk(KERN_ERR "%s: unrecognised EXT_CSD structure "
-+				"version %d\n", mmc_hostname(card->host),
-+					ext_csd_struct);
-+			err = -EINVAL;
-+			goto out;
-+		}
-+	}
+@@ -84,7 +85,30 @@ static int ricoh_probe(struct sdhci_pci_
+ 	if (chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SAMSUNG ||
+ 	    chip->pdev->subsystem_vendor == PCI_VENDOR_ID_SONY)
+ 		chip->quirks |= SDHCI_QUIRK_NO_CARD_NO_RESET;
++	return 0;
++}
 +
- 	card->ext_csd.rev = ext_csd[EXT_CSD_REV];
- 	if (card->ext_csd.rev > 5) {
--		printk(KERN_ERR "%s: unrecognised EXT_CSD structure "
--			"version %d\n", mmc_hostname(card->host),
--			card->ext_csd.rev);
-+		printk(KERN_ERR "%s: unrecognised EXT_CSD revision %d\n",
-+			mmc_hostname(card->host), card->ext_csd.rev);
- 		err = -EINVAL;
- 		goto out;
- 	}
-diff -puN include/linux/mmc/card.h~mmc-recognize-csd-structure include/linux/mmc/card.h
---- a/include/linux/mmc/card.h~mmc-recognize-csd-structure
-+++ a/include/linux/mmc/card.h
-@@ -24,6 +24,7 @@ struct mmc_cid {
++static int ricoh_mmc_probe_slot(struct sdhci_pci_slot *slot)
++{
++	slot->host->caps =
++		((0x21 << SDHCI_TIMEOUT_CLK_SHIFT)
++			& SDHCI_TIMEOUT_CLK_MASK) |
++
++		((0x21 << SDHCI_CLOCK_BASE_SHIFT)
++			& SDHCI_CLOCK_BASE_MASK) |
+ 
++		SDHCI_TIMEOUT_CLK_UNIT |
++		SDHCI_CAN_VDD_330 |
++		SDHCI_CAN_DO_SDMA;
++	return 0;
++}
++
++static int ricoh_mmc_resume(struct sdhci_pci_chip *chip)
++{
++	/* Apply a delay to allow controller to settle */
++	/* Otherwise it becomes confused if card state changed
++		during suspend */
++	msleep(500);
+ 	return 0;
+ }
+ 
+@@ -95,6 +119,15 @@ static const struct sdhci_pci_fixes sdhc
+ 			  SDHCI_QUIRK_CLOCK_BEFORE_RESET,
  };
  
- struct mmc_csd {
-+	unsigned char		structure;
- 	unsigned char		mmca_vsn;
- 	unsigned short		cmdclass;
- 	unsigned short		tacc_clks;
-diff -puN include/linux/mmc/mmc.h~mmc-recognize-csd-structure include/linux/mmc/mmc.h
---- a/include/linux/mmc/mmc.h~mmc-recognize-csd-structure
-+++ a/include/linux/mmc/mmc.h
-@@ -254,6 +254,7 @@ struct _mmc_csd {
- #define EXT_CSD_BUS_WIDTH	183	/* R/W */
- #define EXT_CSD_HS_TIMING	185	/* R/W */
- #define EXT_CSD_CARD_TYPE	196	/* RO */
-+#define EXT_CSD_STRUCTURE	194	/* RO */
- #define EXT_CSD_REV		192	/* RO */
- #define EXT_CSD_SEC_CNT		212	/* RO, 4 bytes */
- #define EXT_CSD_S_A_TIMEOUT	217
++static const struct sdhci_pci_fixes sdhci_ricoh_mmc = {
++	.probe_slot	= ricoh_mmc_probe_slot,
++	.resume		= ricoh_mmc_resume,
++	.quirks		= SDHCI_QUIRK_32BIT_DMA_ADDR |
++			  SDHCI_QUIRK_CLOCK_BEFORE_RESET |
++			  SDHCI_QUIRK_NO_CARD_NO_RESET |
++			  SDHCI_QUIRK_MISSING_CAPS
++};
++
+ static const struct sdhci_pci_fixes sdhci_ene_712 = {
+ 	.quirks		= SDHCI_QUIRK_SINGLE_POWER_WRITE |
+ 			  SDHCI_QUIRK_BROKEN_DMA,
+@@ -374,6 +407,14 @@ static const struct pci_device_id pci_id
+ 	},
+ 
+ 	{
++		.vendor         = PCI_VENDOR_ID_RICOH,
++		.device         = 0x843,
++		.subvendor      = PCI_ANY_ID,
++		.subdevice      = PCI_ANY_ID,
++		.driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
++	},
++
++	{
+ 		.vendor		= PCI_VENDOR_ID_ENE,
+ 		.device		= PCI_DEVICE_ID_ENE_CB712_SD,
+ 		.subvendor	= PCI_ANY_ID,
+diff -puN drivers/mmc/host/sdhci.c~mmc-make-sdhci-work-with-ricoh-mmc-controller drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~mmc-make-sdhci-work-with-ricoh-mmc-controller
++++ a/drivers/mmc/host/sdhci.c
+@@ -1687,7 +1687,8 @@ int sdhci_add_host(struct sdhci_host *ho
+ 			host->version);
+ 	}
+ 
+-	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
++	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
++		sdhci_readl(host, SDHCI_CAPABILITIES);
+ 
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+diff -puN drivers/mmc/host/sdhci.h~mmc-make-sdhci-work-with-ricoh-mmc-controller drivers/mmc/host/sdhci.h
+--- a/drivers/mmc/host/sdhci.h~mmc-make-sdhci-work-with-ricoh-mmc-controller
++++ a/drivers/mmc/host/sdhci.h
+@@ -240,6 +240,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
+ /* Controller cannot support End Attribute in NOP ADMA descriptor */
+ #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
++/* Controller is missing device caps. Use caps provided by host */
++#define SDHCI_QUIRK_MISSING_CAPS			(1<<27)
+ 
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
+@@ -292,6 +294,8 @@ struct sdhci_host {
+ 
+ 	struct timer_list	timer;		/* Timer for timeouts */
+ 
++	unsigned int		caps;		/* Alternative capabilities */
++
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
 _
