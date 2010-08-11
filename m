@@ -1,228 +1,329 @@
 From: akpm@linux-foundation.org
-Subject: [patch 034/177] mmc: fix all hangs related to mmc/sd card insert/removal during suspend/resume
-Date: Tue, 10 Aug 2010 18:01:41 -0700
-Message-ID: <201008110101.o7B11fwJ027046@imap1.linux-foundation.org>
+Subject: [patch 033/177] mmc: implement SD-combo (IO+mem) support
+Date: Tue, 10 Aug 2010 18:01:40 -0700
+Message-ID: <201008110101.o7B11eCI027043@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:41493 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:45474 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932208Ab0HKBWV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:22:21 -0400
+	by vger.kernel.org with ESMTP id S932208Ab0HKBWX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:22:23 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, maximlevitsky@gmail.com, david-b@pacbell.net, linux-mmc@vger.kernel.org, stern@rowland.harvard.edu
+Cc: akpm@linux-foundation.org, mirq-linux@rere.qmqm.pl, adrian.hunter@nokia.com, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-From: Maxim Levitsky <maximlevitsky@gmail.com>
+From: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
 
-If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
-suspend, the card will be removed, therefore this patch doesn't change the
-behavior of this option.
-
-However the removal will be done by pm notifier, which runs while
-userspace is still not frozen and thus can freely use del_gendisk, without
-the risk of deadlock which would happen otherwise.
-
-Card detect workqueue is now disabled while userspace is frozen, Therefore
-if you do use CONFIG_MMC_UNSAFE_RESUME, and remove the card during
-suspend, the removal will be detected as soon as userspace is unfrozen,
-again at the moment it is safe to call del_gendisk.
-
-Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
-
-[akpm@linux-foundation.org: clean up function prototype]
-[akpm@linux-foundation.org: fix CONFIG_PM-n linkage, small cleanups]
-[akpm@linux-foundation.org: coding-style fixes]
-Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: David Brownell <david-b@pacbell.net>
-Cc: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Chris Ball <cjb@laptop.org>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/core/core.c  |   83 +++++++++++++++++++++++++------------
- drivers/mmc/core/host.c  |    4 +
- include/linux/mmc/host.h |    3 +
- 3 files changed, 64 insertions(+), 26 deletions(-)
+ drivers/mmc/core/bus.c   |    9 ++
+ drivers/mmc/core/core.c  |   12 ++-
+ drivers/mmc/core/sdio.c  |  135 +++++++++++++++++++++++++++++++------
+ include/linux/mmc/card.h |    1 
+ 4 files changed, 134 insertions(+), 23 deletions(-)
 
-diff -puN drivers/mmc/core/core.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume drivers/mmc/core/core.c
---- a/drivers/mmc/core/core.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume
-+++ a/drivers/mmc/core/core.c
-@@ -1057,6 +1057,17 @@ void mmc_rescan(struct work_struct *work
- 		container_of(work, struct mmc_host, detect.work);
- 	u32 ocr;
- 	int err;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (host->rescan_disable) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		return;
-+	}
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
- 
- 	mmc_bus_get(host);
- 
-@@ -1274,19 +1285,6 @@ int mmc_suspend_host(struct mmc_host *ho
- 	if (host->bus_ops && !host->bus_dead) {
- 		if (host->bus_ops->suspend)
- 			err = host->bus_ops->suspend(host);
--		if (err == -ENOSYS || !host->bus_ops->resume) {
--			/*
--			 * We simply "remove" the card in this case.
--			 * It will be redetected on resume.
--			 */
--			if (host->bus_ops->remove)
--				host->bus_ops->remove(host);
--			mmc_claim_host(host);
--			mmc_detach_bus(host);
--			mmc_release_host(host);
--			host->pm_flags = 0;
--			err = 0;
--		}
+diff -puN drivers/mmc/core/bus.c~mmc-implement-sd-combo-iomem-support drivers/mmc/core/bus.c
+--- a/drivers/mmc/core/bus.c~mmc-implement-sd-combo-iomem-support
++++ a/drivers/mmc/core/bus.c
+@@ -37,6 +37,8 @@ static ssize_t mmc_type_show(struct devi
+ 		return sprintf(buf, "SD\n");
+ 	case MMC_TYPE_SDIO:
+ 		return sprintf(buf, "SDIO\n");
++	case MMC_TYPE_SD_COMBO:
++		return sprintf(buf, "SDcombo\n");
+ 	default:
+ 		return -EFAULT;
  	}
- 	mmc_bus_put(host);
- 
-@@ -1318,28 +1316,61 @@ int mmc_resume_host(struct mmc_host *hos
- 			printk(KERN_WARNING "%s: error %d during resume "
- 					    "(card was removed?)\n",
- 					    mmc_hostname(host), err);
--			if (host->bus_ops->remove)
--				host->bus_ops->remove(host);
--			mmc_claim_host(host);
--			mmc_detach_bus(host);
--			mmc_release_host(host);
--			/* no need to bother upper layers */
- 			err = 0;
- 		}
- 	}
- 	mmc_bus_put(host);
- 
--	/*
--	 * We add a slight delay here so that resume can progress
--	 * in parallel.
--	 */
--	mmc_detect_change(host, 1);
--
- 	return err;
- }
--
- EXPORT_SYMBOL(mmc_resume_host);
- 
-+/* Do the card removal on suspend if card is assumed removeable
-+ * Do that in pm notifier while userspace isn't yet frozen, so we will be able
-+   to sync the card.
-+*/
-+int mmc_pm_notify(struct notifier_block *notify_block,
-+					unsigned long mode, void *unused)
-+{
-+	struct mmc_host *host = container_of(
-+		notify_block, struct mmc_host, pm_notify);
-+	unsigned long flags;
-+
-+
-+	switch (mode) {
-+	case PM_HIBERNATION_PREPARE:
-+	case PM_SUSPEND_PREPARE:
-+
-+		spin_lock_irqsave(&host->lock, flags);
-+		host->rescan_disable = 1;
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		cancel_delayed_work_sync(&host->detect);
-+
-+		if (!host->bus_ops || host->bus_ops->suspend)
-+			break;
-+
-+		mmc_claim_host(host);
-+
-+		if (host->bus_ops->remove)
-+			host->bus_ops->remove(host);
-+
-+		mmc_detach_bus(host);
-+		mmc_release_host(host);
-+		host->pm_flags = 0;
+@@ -74,6 +76,9 @@ mmc_bus_uevent(struct device *dev, struc
+ 	case MMC_TYPE_SDIO:
+ 		type = "SDIO";
+ 		break;
++	case MMC_TYPE_SD_COMBO:
++		type = "SDcombo";
 +		break;
+ 	default:
+ 		type = NULL;
+ 	}
+@@ -239,6 +244,10 @@ int mmc_add_card(struct mmc_card *card)
+ 	case MMC_TYPE_SDIO:
+ 		type = "SDIO";
+ 		break;
++	case MMC_TYPE_SD_COMBO:
++		type = "SD-combo";
++		if (mmc_card_blockaddr(card))
++			type = "SDHC-combo";
+ 	default:
+ 		type = "?";
+ 		break;
+diff -puN drivers/mmc/core/core.c~mmc-implement-sd-combo-iomem-support drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~mmc-implement-sd-combo-iomem-support
++++ a/drivers/mmc/core/core.c
+@@ -1099,8 +1099,15 @@ void mmc_rescan(struct work_struct *work
+ 	 */
+ 	err = mmc_send_io_op_cond(host, 0, &ocr);
+ 	if (!err) {
+-		if (mmc_attach_sdio(host, ocr))
+-			mmc_power_off(host);
++		if (mmc_attach_sdio(host, ocr)) {
++			mmc_claim_host(host);
++			/* try SDMEM (but not MMC) even if SDIO is broken */
++			if (mmc_send_app_op_cond(host, 0, &ocr))
++				goto out_fail;
 +
-+	case PM_POST_SUSPEND:
-+	case PM_POST_HIBERNATION:
-+
-+		spin_lock_irqsave(&host->lock, flags);
-+		host->rescan_disable = 0;
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		mmc_detect_change(host, 0);
-+
-+	}
-+
-+	return 0;
-+}
- #endif
++			if (mmc_attach_sd(host, ocr))
++				mmc_power_off(host);
++		}
+ 		goto out;
+ 	}
  
- static int __init mmc_init(void)
-diff -puN drivers/mmc/core/host.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume drivers/mmc/core/host.c
---- a/drivers/mmc/core/host.c~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume
-+++ a/drivers/mmc/core/host.c
-@@ -17,6 +17,7 @@
- #include <linux/pagemap.h>
- #include <linux/leds.h>
- #include <linux/slab.h>
-+#include <linux/suspend.h>
+@@ -1124,6 +1131,7 @@ void mmc_rescan(struct work_struct *work
+ 		goto out;
+ 	}
  
- #include <linux/mmc/host.h>
++out_fail:
+ 	mmc_release_host(host);
+ 	mmc_power_off(host);
  
-@@ -85,6 +86,7 @@ struct mmc_host *mmc_alloc_host(int extr
- 	init_waitqueue_head(&host->wq);
- 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
- 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
-+	host->pm_notify.notifier_call = mmc_pm_notify;
+diff -puN drivers/mmc/core/sdio.c~mmc-implement-sd-combo-iomem-support drivers/mmc/core/sdio.c
+--- a/drivers/mmc/core/sdio.c~mmc-implement-sd-combo-iomem-support
++++ a/drivers/mmc/core/sdio.c
+@@ -160,9 +160,7 @@ static int sdio_enable_wide(struct mmc_c
+ 	if (ret)
+ 		return ret;
  
- 	/*
- 	 * By default, hosts do not support SGIO or large requests.
-@@ -133,6 +135,7 @@ int mmc_add_host(struct mmc_host *host)
- #endif
+-	mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+-
+-	return 0;
++	return 1;
+ }
  
- 	mmc_start_host(host);
-+	register_pm_notifier(&host->pm_notify);
- 
+ /*
+@@ -222,10 +220,34 @@ static int sdio_disable_wide(struct mmc_
  	return 0;
  }
-@@ -149,6 +152,7 @@ EXPORT_SYMBOL(mmc_add_host);
+ 
++
++static int sdio_enable_4bit_bus(struct mmc_card *card)
++{
++	int err;
++
++	if (card->type == MMC_TYPE_SDIO)
++		return sdio_enable_wide(card);
++
++	if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
++		(card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
++		err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
++		if (err)
++			return err;
++	} else
++		return 0;
++
++	err = sdio_enable_wide(card);
++	if (err <= 0)
++		mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
++
++	return err;
++}
++
++
+ /*
+  * Test if the card supports high-speed mode and, if so, switch to it.
   */
- void mmc_remove_host(struct mmc_host *host)
+-static int sdio_enable_hs(struct mmc_card *card)
++static int mmc_sdio_switch_hs(struct mmc_card *card, int enable)
  {
-+	unregister_pm_notifier(&host->pm_notify);
- 	mmc_stop_host(host);
+ 	int ret;
+ 	u8 speed;
+@@ -240,7 +262,10 @@ static int sdio_enable_hs(struct mmc_car
+ 	if (ret)
+ 		return ret;
  
- #ifdef CONFIG_DEBUG_FS
-diff -puN include/linux/mmc/host.h~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume include/linux/mmc/host.h
---- a/include/linux/mmc/host.h~mmc-fix-all-hangs-related-to-mmc-sd-card-insert-removal-during-suspend-resume
-+++ a/include/linux/mmc/host.h
-@@ -124,6 +124,7 @@ struct mmc_host {
- 	unsigned int		f_min;
- 	unsigned int		f_max;
- 	u32			ocr_avail;
-+	struct notifier_block	pm_notify;
+-	speed |= SDIO_SPEED_EHS;
++	if (enable)
++		speed |= SDIO_SPEED_EHS;
++	else
++		speed &= ~SDIO_SPEED_EHS;
  
- #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
- #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
-@@ -183,6 +184,7 @@ struct mmc_host {
+ 	ret = mmc_io_rw_direct(card, 1, 0, SDIO_CCCR_SPEED, speed, NULL);
+ 	if (ret)
+@@ -249,6 +274,24 @@ static int sdio_enable_hs(struct mmc_car
+ 	return 1;
+ }
  
- 	/* Only used with MMC_CAP_DISABLE */
- 	int			enabled;	/* host is enabled */
-+	int			rescan_disable;	/* disable card detection */
- 	int			nesting_cnt;	/* "enable" nesting count */
- 	int			en_dis_recurs;	/* detect recursion */
- 	unsigned int		disable_delay;	/* disable delay in msecs */
-@@ -257,6 +259,7 @@ int mmc_card_can_sleep(struct mmc_host *
- int mmc_host_enable(struct mmc_host *host);
- int mmc_host_disable(struct mmc_host *host);
- int mmc_host_lazy_disable(struct mmc_host *host);
-+int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
++/*
++ * Enable SDIO/combo card's high-speed mode. Return 0/1 if [not]supported.
++ */
++static int sdio_enable_hs(struct mmc_card *card)
++{
++	int ret;
++
++	ret = mmc_sdio_switch_hs(card, true);
++	if (ret <= 0 || card->type == MMC_TYPE_SDIO)
++		return ret;
++
++	ret = mmc_sd_switch_hs(card);
++	if (ret <= 0)
++		mmc_sdio_switch_hs(card, false);
++
++	return ret;
++}
++
+ static unsigned mmc_sdio_get_max_clock(struct mmc_card *card)
+ {
+ 	unsigned max_dtr;
+@@ -265,6 +308,9 @@ static unsigned mmc_sdio_get_max_clock(s
+ 		max_dtr = card->cis.max_dtr;
+ 	}
  
- static inline void mmc_set_disable_delay(struct mmc_host *host,
- 					 unsigned int disable_delay)
++	if (card->type == MMC_TYPE_SD_COMBO)
++		max_dtr = min(max_dtr, mmc_sd_get_max_clock(card));
++
+ 	return max_dtr;
+ }
+ 
+@@ -310,7 +356,24 @@ static int mmc_sdio_init_card(struct mmc
+ 		goto err;
+ 	}
+ 
+-	card->type = MMC_TYPE_SDIO;
++	err = mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid);
++
++	if (!err) {
++		card->type = MMC_TYPE_SD_COMBO;
++
++		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
++		    memcmp(card->raw_cid, oldcard->raw_cid, sizeof(card->raw_cid)) != 0)) {
++			mmc_remove_card(card);
++			return -ENOENT;
++		}
++	} else {
++		card->type = MMC_TYPE_SDIO;
++
++		if (oldcard && oldcard->type != MMC_TYPE_SDIO) {
++			mmc_remove_card(card);
++			return -ENOENT;
++		}
++	}
+ 
+ 	/*
+ 	 * Call the optional HC's init_card function to handle quirks.
+@@ -330,6 +393,17 @@ static int mmc_sdio_init_card(struct mmc
+ 	}
+ 
+ 	/*
++	 * Read CSD, before selecting the card
++	 */
++	if (!oldcard && card->type == MMC_TYPE_SD_COMBO) {
++		err = mmc_sd_get_csd(host, card);
++		if (err)
++			return err;
++
++		mmc_decode_cid(card);
++	}
++
++	/*
+ 	 * Select card, as all following commands rely on that.
+ 	 */
+ 	if (!powered_resume && !mmc_host_is_spi(host)) {
+@@ -356,14 +430,33 @@ static int mmc_sdio_init_card(struct mmc
+ 		int same = (card->cis.vendor == oldcard->cis.vendor &&
+ 			    card->cis.device == oldcard->cis.device);
+ 		mmc_remove_card(card);
+-		if (!same) {
+-			err = -ENOENT;
+-			goto err;
+-		}
++		if (!same)
++			return -ENOENT;
++
+ 		card = oldcard;
+ 		return 0;
+ 	}
+ 
++	if (card->type == MMC_TYPE_SD_COMBO) {
++		err = mmc_sd_setup_card(host, card, oldcard != NULL);
++		/* handle as SDIO-only card if memory init failed */
++		if (err) {
++			mmc_go_idle(host);
++			if (mmc_host_is_spi(host))
++				/* should not fail, as it worked previously */
++				mmc_spi_set_crc(host, use_spi_crc);
++			card->type = MMC_TYPE_SDIO;
++		} else
++			card->dev.type = &sd_type;
++	}
++
++	/*
++	 * If needed, disconnect card detection pull-up resistor.
++	 */
++	err = sdio_disable_cd(card);
++	if (err)
++		goto remove;
++
+ 	/*
+ 	 * Switch to high-speed (if supported).
+ 	 */
+@@ -381,8 +474,10 @@ static int mmc_sdio_init_card(struct mmc
+ 	/*
+ 	 * Switch to wider bus (if supported).
+ 	 */
+-	err = sdio_enable_wide(card);
+-	if (err)
++	err = sdio_enable_4bit_bus(card);
++	if (err > 0)
++		mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
++	else if (err)
+ 		goto remove;
+ 
+ 	if (!oldcard)
+@@ -496,9 +591,14 @@ static int mmc_sdio_resume(struct mmc_ho
+ 	mmc_claim_host(host);
+ 	err = mmc_sdio_init_card(host, host->ocr, host->card,
+ 				 (host->pm_flags & MMC_PM_KEEP_POWER));
+-	if (!err)
++	if (!err) {
+ 		/* We may have switched to 1-bit mode during suspend. */
+-		err = sdio_enable_wide(host->card);
++		err = sdio_enable_4bit_bus(host->card);
++		if (err > 0) {
++			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
++			err = 0;
++		}
++	}
+ 	if (!err && host->sdio_irqs)
+ 		mmc_signal_sdio_irq(host);
+ 	mmc_release_host(host);
+@@ -583,13 +683,6 @@ int mmc_attach_sdio(struct mmc_host *hos
+ 	card->sdio_funcs = 0;
+ 
+ 	/*
+-	 * If needed, disconnect card detection pull-up resistor.
+-	 */
+-	err = sdio_disable_cd(card);
+-	if (err)
+-		goto remove;
+-
+-	/*
+ 	 * Initialize (but don't add) all present functions.
+ 	 */
+ 	for (i = 0; i < funcs; i++, card->sdio_funcs++) {
+diff -puN include/linux/mmc/card.h~mmc-implement-sd-combo-iomem-support include/linux/mmc/card.h
+--- a/include/linux/mmc/card.h~mmc-implement-sd-combo-iomem-support
++++ a/include/linux/mmc/card.h
+@@ -93,6 +93,7 @@ struct mmc_card {
+ #define MMC_TYPE_MMC		0		/* MMC card */
+ #define MMC_TYPE_SD		1		/* SD card */
+ #define MMC_TYPE_SDIO		2		/* SDIO card */
++#define MMC_TYPE_SD_COMBO	3		/* SD combo (IO+mem) card */
+ 	unsigned int		state;		/* (our) card state */
+ #define MMC_STATE_PRESENT	(1<<0)		/* present in sysfs */
+ #define MMC_STATE_READONLY	(1<<1)		/* card is read-only */
 _
