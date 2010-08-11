@@ -1,152 +1,117 @@
-From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v4 1/8] wireless: wl1271: make wl12xx.h common to both spi and sdio
-Date: Wed, 11 Aug 2010 21:21:46 +0300
-Message-ID: <1281550913-17633-2-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: [PATCH v4 2/8] wireless: wl1271: support return value for the set power func
+Date: Wed, 11 Aug 2010 21:21:47 +0300
+Message-ID: <1281550913-17633-3-git-send-email-ohad@wizery.com>
 References: <1281550913-17633-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1281550913-17633-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Pandita Vikram <vikram.pandita-l0cyMroinI0@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1281550913-17633-1-git-send-email-ohad@wizery.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: Ido Yariv <ido@wizery.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-arm-kernel@lists.infradead.org, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>, Ohad Ben-Cohen <ohad@wizery.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Move wl12xx.h outside of the spi-specific location,
-so it can be shared with both spi and sdio solutions.
+Make it possible for the set power method to indicate a
+success/failure return value. This is needed to support
+more complex power on/off operations such as bringing up
+(and down) sdio functions.
 
-Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/net/wireless/wl12xx/wl1251_sdio.c |    2 +-
- drivers/net/wireless/wl12xx/wl1251_spi.c  |    2 +-
- drivers/net/wireless/wl12xx/wl1271_spi.c  |    2 +-
- include/linux/spi/wl12xx.h                |   34 -----------------------------
- include/linux/wl12xx.h                    |   34 +++++++++++++++++++++++++++++
- 5 files changed, 37 insertions(+), 37 deletions(-)
- delete mode 100644 include/linux/spi/wl12xx.h
- create mode 100644 include/linux/wl12xx.h
+ drivers/net/wireless/wl12xx/wl1271.h      |    2 +-
+ drivers/net/wireless/wl12xx/wl1271_io.h   |    8 +++++---
+ drivers/net/wireless/wl12xx/wl1271_main.c |    4 +++-
+ drivers/net/wireless/wl12xx/wl1271_sdio.c |    4 +++-
+ drivers/net/wireless/wl12xx/wl1271_spi.c  |    4 +++-
+ 5 files changed, 15 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/net/wireless/wl12xx/wl1251_sdio.c b/drivers/net/wireless/wl12xx/wl1251_sdio.c
-index b901b61..a319df1 100644
---- a/drivers/net/wireless/wl12xx/wl1251_sdio.c
-+++ b/drivers/net/wireless/wl12xx/wl1251_sdio.c
-@@ -24,7 +24,7 @@
- #include <linux/mmc/sdio_func.h>
- #include <linux/mmc/sdio_ids.h>
- #include <linux/platform_device.h>
--#include <linux/spi/wl12xx.h>
-+#include <linux/wl12xx.h>
- #include <linux/irq.h>
+diff --git a/drivers/net/wireless/wl12xx/wl1271.h b/drivers/net/wireless/wl12xx/wl1271.h
+index dd3cee6..faa5925 100644
+--- a/drivers/net/wireless/wl12xx/wl1271.h
++++ b/drivers/net/wireless/wl12xx/wl1271.h
+@@ -313,7 +313,7 @@ struct wl1271_if_operations {
+ 		     bool fixed);
+ 	void (*reset)(struct wl1271 *wl);
+ 	void (*init)(struct wl1271 *wl);
+-	void (*power)(struct wl1271 *wl, bool enable);
++	int (*power)(struct wl1271 *wl, bool enable);
+ 	struct device* (*dev)(struct wl1271 *wl);
+ 	void (*enable_irq)(struct wl1271 *wl);
+ 	void (*disable_irq)(struct wl1271 *wl);
+diff --git a/drivers/net/wireless/wl12xx/wl1271_io.h b/drivers/net/wireless/wl12xx/wl1271_io.h
+index bc806c7..4a5b92c 100644
+--- a/drivers/net/wireless/wl12xx/wl1271_io.h
++++ b/drivers/net/wireless/wl12xx/wl1271_io.h
+@@ -144,10 +144,12 @@ static inline void wl1271_power_off(struct wl1271 *wl)
+ 	clear_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
+ }
  
- #include "wl1251.h"
-diff --git a/drivers/net/wireless/wl12xx/wl1251_spi.c b/drivers/net/wireless/wl12xx/wl1251_spi.c
-index 27fdfaa..a6faf3e 100644
---- a/drivers/net/wireless/wl12xx/wl1251_spi.c
-+++ b/drivers/net/wireless/wl12xx/wl1251_spi.c
-@@ -26,7 +26,7 @@
- #include <linux/slab.h>
- #include <linux/crc7.h>
- #include <linux/spi/spi.h>
--#include <linux/spi/wl12xx.h>
-+#include <linux/wl12xx.h>
+-static inline void wl1271_power_on(struct wl1271 *wl)
++static inline int wl1271_power_on(struct wl1271 *wl)
+ {
+-	wl->if_ops->power(wl, true);
+-	set_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
++	int ret = wl->if_ops->power(wl, true);
++	if (ret == 0)
++		set_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
++	return ret;
+ }
  
- #include "wl1251.h"
- #include "wl1251_reg.h"
+ 
+diff --git a/drivers/net/wireless/wl12xx/wl1271_main.c b/drivers/net/wireless/wl12xx/wl1271_main.c
+index 9d68f00..e6e0852 100644
+--- a/drivers/net/wireless/wl12xx/wl1271_main.c
++++ b/drivers/net/wireless/wl12xx/wl1271_main.c
+@@ -621,7 +621,9 @@ static int wl1271_chip_wakeup(struct wl1271 *wl)
+ 	int ret = 0;
+ 
+ 	msleep(WL1271_PRE_POWER_ON_SLEEP);
+-	wl1271_power_on(wl);
++	ret = wl1271_power_on(wl);
++	if (ret < 0)
++		goto out;
+ 	msleep(WL1271_POWER_ON_SLEEP);
+ 	wl1271_io_reset(wl);
+ 	wl1271_io_init(wl);
+diff --git a/drivers/net/wireless/wl12xx/wl1271_sdio.c b/drivers/net/wireless/wl12xx/wl1271_sdio.c
+index 7059b5c..c41293a 100644
+--- a/drivers/net/wireless/wl12xx/wl1271_sdio.c
++++ b/drivers/net/wireless/wl12xx/wl1271_sdio.c
+@@ -152,7 +152,7 @@ static void wl1271_sdio_raw_write(struct wl1271 *wl, int addr, void *buf,
+ 
+ }
+ 
+-static void wl1271_sdio_set_power(struct wl1271 *wl, bool enable)
++static int wl1271_sdio_set_power(struct wl1271 *wl, bool enable)
+ {
+ 	struct sdio_func *func = wl_to_func(wl);
+ 
+@@ -167,6 +167,8 @@ static void wl1271_sdio_set_power(struct wl1271 *wl, bool enable)
+ 		sdio_disable_func(func);
+ 		sdio_release_host(func);
+ 	}
++
++	return 0;
+ }
+ 
+ static struct wl1271_if_operations sdio_ops = {
 diff --git a/drivers/net/wireless/wl12xx/wl1271_spi.c b/drivers/net/wireless/wl12xx/wl1271_spi.c
-index 4cb99c5..c3fdab7 100644
+index c3fdab7..de56d8d 100644
 --- a/drivers/net/wireless/wl12xx/wl1271_spi.c
 +++ b/drivers/net/wireless/wl12xx/wl1271_spi.c
-@@ -25,7 +25,7 @@
- #include <linux/module.h>
- #include <linux/crc7.h>
- #include <linux/spi/spi.h>
--#include <linux/spi/wl12xx.h>
-+#include <linux/wl12xx.h>
- #include <linux/slab.h>
+@@ -312,10 +312,12 @@ static irqreturn_t wl1271_irq(int irq, void *cookie)
+ 	return IRQ_HANDLED;
+ }
  
- #include "wl1271.h"
-diff --git a/include/linux/spi/wl12xx.h b/include/linux/spi/wl12xx.h
-deleted file mode 100644
-index a223ecb..0000000
---- a/include/linux/spi/wl12xx.h
-+++ /dev/null
-@@ -1,34 +0,0 @@
--/*
-- * This file is part of wl12xx
-- *
-- * Copyright (C) 2009 Nokia Corporation
-- *
-- * Contact: Kalle Valo <kalle.valo-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
-- *
-- * This program is free software; you can redistribute it and/or
-- * modify it under the terms of the GNU General Public License
-- * version 2 as published by the Free Software Foundation.
-- *
-- * This program is distributed in the hope that it will be useful, but
-- * WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-- * General Public License for more details.
-- *
-- * You should have received a copy of the GNU General Public License
-- * along with this program; if not, write to the Free Software
-- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-- * 02110-1301 USA
-- *
-- */
--
--#ifndef _LINUX_SPI_WL12XX_H
--#define _LINUX_SPI_WL12XX_H
--
--struct wl12xx_platform_data {
--	void (*set_power)(bool enable);
--	/* SDIO only: IRQ number if WLAN_IRQ line is used, 0 for SDIO IRQs */
--	int irq;
--	bool use_eeprom;
--};
--
--#endif
-diff --git a/include/linux/wl12xx.h b/include/linux/wl12xx.h
-new file mode 100644
-index 0000000..137ac89
---- /dev/null
-+++ b/include/linux/wl12xx.h
-@@ -0,0 +1,34 @@
-+/*
-+ * This file is part of wl12xx
-+ *
-+ * Copyright (C) 2009 Nokia Corporation
-+ *
-+ * Contact: Kalle Valo <kalle.valo-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License
-+ * version 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful, but
-+ * WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-+ * General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-+ * 02110-1301 USA
-+ *
-+ */
+-static void wl1271_spi_set_power(struct wl1271 *wl, bool enable)
++static int wl1271_spi_set_power(struct wl1271 *wl, bool enable)
+ {
+ 	if (wl->set_power)
+ 		wl->set_power(enable);
 +
-+#ifndef _LINUX_WL12XX_H
-+#define _LINUX_WL12XX_H
-+
-+struct wl12xx_platform_data {
-+	void (*set_power)(bool enable);
-+	/* SDIO only: IRQ number if WLAN_IRQ line is used, 0 for SDIO IRQs */
-+	int irq;
-+	bool use_eeprom;
-+};
-+
-+#endif
++	return 0;
+ }
+ 
+ static struct wl1271_if_operations spi_ops = {
 -- 
 1.7.0.4
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
