@@ -1,55 +1,91 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [RFC/PATCH 1/6] mmc: sdio: fully reconfigure oldcard on resume
-Date: Wed, 11 Aug 2010 16:19:25 +0300
-Message-ID: <1281532770-27545-2-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [RFC/PATCH 3/6] mmc: add general runtime PM support
+Date: Wed, 11 Aug 2010 16:19:27 +0300
+Message-ID: <1281532770-27545-4-git-send-email-ohad@wizery.com>
 References: <1281532770-27545-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:44704 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752412Ab0HKNTa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Aug 2010 09:19:30 -0400
-In-Reply-To: <1281532770-27545-1-git-send-email-ohad@wizery.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1281532770-27545-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, Ido Yariv <ido@wizery.com>, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-On resume, let mmc_sdio_init_card go all the way, instead
-of skipping the reconfiguration of the card's speed and width.
+Add Runtime PM handlers to mmc, which calls mmc_power_save_host
+and mmc_power_restore_host in respond to runtime_suspend and
+runtime_resume events.
 
-This is needed to ensure cards wake up with their clock
-reconfigured (otherwise it's kept low).
+Runtime PM is still disabled by default, so this patch alone
+has no immediate effect.
 
-This patch also removes the explicit bus width reconfiguration
-on resume, since now this is part of mmc_sdio_init_card.
-
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 ---
- drivers/mmc/core/sdio.c |    4 ----
- 1 files changed, 0 insertions(+), 4 deletions(-)
+ drivers/mmc/core/bus.c |   35 +++++++++++++++++++++++++++++++++++
+ 1 files changed, 35 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index b9dee28..645f173 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -344,7 +344,6 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
- 			goto err;
- 		}
- 		card = oldcard;
--		return 0;
- 	}
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 49d9dca..27902b4 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -14,6 +14,7 @@
+ #include <linux/device.h>
+ #include <linux/err.h>
+ #include <linux/slab.h>
++#include <linux/pm_runtime.h>
  
- 	/*
-@@ -487,9 +486,6 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	mmc_claim_host(host);
- 	err = mmc_sdio_init_card(host, host->ocr, host->card,
- 				 (host->pm_flags & MMC_PM_KEEP_POWER));
--	if (!err)
--		/* We may have switched to 1-bit mode during suspend. */
--		err = sdio_enable_wide(host->card);
- 	if (!err && host->sdio_irqs)
- 		mmc_signal_sdio_irq(host);
- 	mmc_release_host(host);
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -137,6 +138,39 @@ static int mmc_bus_resume(struct device *dev)
+ 	return ret;
+ }
+ 
++static int mmc_runtime_suspend(struct device *dev)
++{
++	int status = 0;
++	struct mmc_card *card = dev_to_mmc_card(dev);
++
++	mmc_power_save_host(card->host);
++
++	return status;
++}
++
++static int mmc_runtime_resume(struct device *dev)
++{
++	int status = 0;
++	struct mmc_card *card = dev_to_mmc_card(dev);
++
++	mmc_power_restore_host(card->host);
++
++	return status;
++}
++
++static int mmc_runtime_idle(struct device *dev)
++{
++	struct mmc_card *card = dev_to_mmc_card(dev);
++
++	return pm_runtime_suspend(dev);
++}
++
++static const struct dev_pm_ops mmc_bus_pm_ops = {
++	.runtime_suspend	= mmc_runtime_suspend,
++	.runtime_resume		= mmc_runtime_resume,
++	.runtime_idle		= mmc_runtime_idle,
++};
++
+ static struct bus_type mmc_bus_type = {
+ 	.name		= "mmc",
+ 	.dev_attrs	= mmc_dev_attrs,
+@@ -146,6 +180,7 @@ static struct bus_type mmc_bus_type = {
+ 	.remove		= mmc_bus_remove,
+ 	.suspend	= mmc_bus_suspend,
+ 	.resume		= mmc_bus_resume,
++	.pm		= &mmc_bus_pm_ops,
+ };
+ 
+ int mmc_register_bus(void)
 -- 
 1.7.0.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
