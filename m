@@ -1,24 +1,20 @@
 From: "DebBarma, Tarun Kanti" <tarun.kanti@ti.com>
-Subject: RE: [PATCH v4 2/8] wireless: wl1271: support return value for the
- set power func
-Date: Thu, 12 Aug 2010 00:05:04 +0530
-Message-ID: <5A47E75E594F054BAF48C5E4FC4B92AB0324110ABB@dbde02.ent.ti.com>
+Subject: RE: [PATCH v4 3/8] wireless: wl1271: add platform driver to get
+ board data
+Date: Thu, 12 Aug 2010 00:12:18 +0530
+Message-ID: <5A47E75E594F054BAF48C5E4FC4B92AB0324110ABD@dbde02.ent.ti.com>
 References: <1281550913-17633-1-git-send-email-ohad@wizery.com>
- <1281550913-17633-3-git-send-email-ohad@wizery.com>
+ <1281550913-17633-4-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:57444 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754562Ab0HKSgF convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Aug 2010 14:36:05 -0400
-In-Reply-To: <1281550913-17633-3-git-send-email-ohad@wizery.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1281550913-17633-4-git-send-email-ohad@wizery.com>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 To: Ohad Ben-Cohen <ohad@wizery.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap@vger.kernel.o
 Cc: Ido Yariv <ido@wizery.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, "Pandita, Vikram" <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
+List-Id: linux-mmc@vger.kernel.org
 
 Ohad,
 
@@ -32,120 +28,223 @@ Ohad,
 > Chikkature Rajashekar, Madhusudhan; Luciano Coelho; akpm@linux-
 > foundation.org; San Mehat; Roger Quadros; Tony Lindgren; Nicolas Pitre;
 > Pandita, Vikram; Kalle Valo; Ohad Ben-Cohen
-> Subject: [PATCH v4 2/8] wireless: wl1271: support return value for the set
-> power func
+> Subject: [PATCH v4 3/8] wireless: wl1271: add platform driver to get board
+> data
 > 
-> Make it possible for the set power method to indicate a
-> success/failure return value. This is needed to support
-> more complex power on/off operations such as bringing up
-> (and down) sdio functions.
+> Dynamically create and register a platform driver, that will
+> be used to to receive board-specific information like irq and
+> reference clock numbers.
+> 
+> The driver is created dynamically in order to avoid the 1-device
+> limitation of a fixed platform driver name.
 > 
 > Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 > ---
->  drivers/net/wireless/wl12xx/wl1271.h      |    2 +-
->  drivers/net/wireless/wl12xx/wl1271_io.h   |    8 +++++---
->  drivers/net/wireless/wl12xx/wl1271_main.c |    4 +++-
->  drivers/net/wireless/wl12xx/wl1271_sdio.c |    4 +++-
->  drivers/net/wireless/wl12xx/wl1271_spi.c  |    4 +++-
->  5 files changed, 15 insertions(+), 7 deletions(-)
+>  drivers/net/wireless/wl12xx/wl1271.h      |   12 ++++
+>  drivers/net/wireless/wl12xx/wl1271_sdio.c |  103
+> +++++++++++++++++++++++++++--
+>  2 files changed, 108 insertions(+), 7 deletions(-)
 > 
 > diff --git a/drivers/net/wireless/wl12xx/wl1271.h
 > b/drivers/net/wireless/wl12xx/wl1271.h
-> index dd3cee6..faa5925 100644
+> index faa5925..013eabb 100644
 > --- a/drivers/net/wireless/wl12xx/wl1271.h
 > +++ b/drivers/net/wireless/wl12xx/wl1271.h
-> @@ -313,7 +313,7 @@ struct wl1271_if_operations {
->  		     bool fixed);
->  	void (*reset)(struct wl1271 *wl);
->  	void (*init)(struct wl1271 *wl);
-> -	void (*power)(struct wl1271 *wl, bool enable);
-> +	int (*power)(struct wl1271 *wl, bool enable);
->  	struct device* (*dev)(struct wl1271 *wl);
->  	void (*enable_irq)(struct wl1271 *wl);
+> @@ -31,6 +31,7 @@
+>  #include <linux/list.h>
+>  #include <linux/bitops.h>
+>  #include <net/mac80211.h>
+> +#include <linux/platform_device.h>
+> 
+>  #include "wl1271_conf.h"
+>  #include "wl1271_ini.h"
+> @@ -319,8 +320,19 @@ struct wl1271_if_operations {
 >  	void (*disable_irq)(struct wl1271 *wl);
-> diff --git a/drivers/net/wireless/wl12xx/wl1271_io.h
-> b/drivers/net/wireless/wl12xx/wl1271_io.h
-> index bc806c7..4a5b92c 100644
-> --- a/drivers/net/wireless/wl12xx/wl1271_io.h
-> +++ b/drivers/net/wireless/wl12xx/wl1271_io.h
-> @@ -144,10 +144,12 @@ static inline void wl1271_power_off(struct wl1271
-> *wl)
->  	clear_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
->  }
+>  };
 > 
-> -static inline void wl1271_power_on(struct wl1271 *wl)
-> +static inline int wl1271_power_on(struct wl1271 *wl)
->  {
-> -	wl->if_ops->power(wl, true);
-> -	set_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
-> +	int ret = wl->if_ops->power(wl, true);
-Just a minor comment, need a blank line here?
-> +	if (ret == 0)
-> +		set_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
-> +	return ret;
->  }
+> +/* exact size needed for "wl1271_plat.x" */
+> +#define WL12XX_PLAT_NAME_LEN 14
+> +
+> +struct wl12xx_plat_instance {
+> +	struct platform_driver pdriver;
+> +	char name[WL12XX_PLAT_NAME_LEN];
+> +	struct wl12xx_platform_data *pdata;
+> +	struct completion data_ready;
+> +};
+> +
+>  struct wl1271 {
+>  	struct platform_device *plat_dev;
+> +	struct wl12xx_plat_instance *pinstance;
+>  	struct ieee80211_hw *hw;
+>  	bool mac80211_registered;
 > 
-> 
-> diff --git a/drivers/net/wireless/wl12xx/wl1271_main.c
-> b/drivers/net/wireless/wl12xx/wl1271_main.c
-> index 9d68f00..e6e0852 100644
-> --- a/drivers/net/wireless/wl12xx/wl1271_main.c
-> +++ b/drivers/net/wireless/wl12xx/wl1271_main.c
-> @@ -621,7 +621,9 @@ static int wl1271_chip_wakeup(struct wl1271 *wl)
->  	int ret = 0;
-> 
->  	msleep(WL1271_PRE_POWER_ON_SLEEP);
-> -	wl1271_power_on(wl);
-> +	ret = wl1271_power_on(wl);
-> +	if (ret < 0)
-> +		goto out;
->  	msleep(WL1271_POWER_ON_SLEEP);
->  	wl1271_io_reset(wl);
->  	wl1271_io_init(wl);
 > diff --git a/drivers/net/wireless/wl12xx/wl1271_sdio.c
 > b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-> index 7059b5c..c41293a 100644
+> index c41293a..68b512b 100644
 > --- a/drivers/net/wireless/wl12xx/wl1271_sdio.c
 > +++ b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-> @@ -152,7 +152,7 @@ static void wl1271_sdio_raw_write(struct wl1271 *wl,
-> int addr, void *buf,
+> @@ -28,7 +28,11 @@
+>  #include <linux/mmc/sdio_func.h>
+>  #include <linux/mmc/sdio_ids.h>
+>  #include <linux/mmc/card.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/wl12xx.h>
+>  #include <linux/gpio.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/completion.h>
 > 
->  }
+>  #include "wl1271.h"
+>  #include "wl12xx_80211.h"
+> @@ -182,10 +186,84 @@ static struct wl1271_if_operations sdio_ops = {
+>  	.disable_irq	= wl1271_sdio_disable_interrupts
+>  };
 > 
-> -static void wl1271_sdio_set_power(struct wl1271 *wl, bool enable)
-> +static int wl1271_sdio_set_power(struct wl1271 *wl, bool enable)
+> +static int wl1271_plat_probe(struct platform_device *pdev)
+> +{
+> +	struct wl12xx_platform_data *pdata;
+> +	struct platform_driver *pdriver;
+> +	struct wl12xx_plat_instance *pinstance;
+> +
+What about checking for pdev here before extracting pdata?
+
+> +	pdata = pdev->dev.platform_data;
+> +	if (!pdata) {
+> +		wl1271_error("no platform data");
+> +		return -ENODEV;
+> +	}
+> +
+> +	pdriver = container_of(pdev->dev.driver, struct platform_driver,
+> +								driver);
+> +	pinstance = container_of(pdriver, struct wl12xx_plat_instance,
+> pdriver);
+> +
+> +	pinstance->pdata = pdata;
+> +
+> +	complete(&pinstance->data_ready);
+> +
+> +	return 0;
+> +}
+> +
+> +static struct wl12xx_platform_data *wl1271_get_data(struct wl1271 *wl,
+> int id)
+> +{
+> +	int ret;
+> +	struct wl12xx_plat_instance *pinstance;
+> +
+> +	#define WL1271_PLAT_NAME "wl1271_plat.%d"
+> +
+> +	pinstance = kzalloc(sizeof(*pinstance), GFP_KERNEL);
+> +	if (!pinstance)
+> +		return ERR_PTR(-ENOMEM);
+> +
+> +	init_completion(&pinstance->data_ready);
+> +
+> +	pinstance->pdriver.probe = wl1271_plat_probe;
+> +
+> +	ret = snprintf(pinstance->name, sizeof(pinstance->name),
+> +						WL1271_PLAT_NAME, id);
+> +	if (ret >= WL12XX_PLAT_NAME_LEN) {
+> +		wl1271_error("truncated plat drv name\n");
+> +		goto out_free;
+> +	}
+> +
+> +	pinstance->pdriver.driver.name = pinstance->name;
+> +	pinstance->pdriver.driver.owner = THIS_MODULE;
+> +
+> +	ret = platform_driver_register(&pinstance->pdriver);
+> +	if (ret < 0) {
+> +		wl1271_error("failed to register plat driver: %d", ret);
+> +		goto out_free;
+> +	}
+> +
+> +	ret = wait_for_completion_interruptible_timeout(&pinstance-
+> >data_ready,
+> +						msecs_to_jiffies(15000));
+> +	if (ret <= 0) {
+> +		wl1271_error("can't get platform device (%d)", ret);
+> +		ret = (ret == 0 ? -EAGAIN : ret);
+> +		goto unreg;
+> +	}
+> +
+> +	wl->pinstance = pinstance;
+> +
+> +	return pinstance->pdata;
+> +
+> +unreg:
+> +	platform_driver_unregister(&pinstance->pdriver);
+> +out_free:
+> +	kfree(pinstance);
+> +	return ERR_PTR(ret);
+> +}
+> +
+>  static int __devinit wl1271_probe(struct sdio_func *func,
+>  				  const struct sdio_device_id *id)
 >  {
->  	struct sdio_func *func = wl_to_func(wl);
+>  	struct ieee80211_hw *hw;
+> +	struct wl12xx_platform_data *wlan_data;
+>  	struct wl1271 *wl;
+>  	int ret;
 > 
-> @@ -167,6 +167,8 @@ static void wl1271_sdio_set_power(struct wl1271 *wl,
-> bool enable)
->  		sdio_disable_func(func);
->  		sdio_release_host(func);
+> @@ -205,17 +283,24 @@ static int __devinit wl1271_probe(struct sdio_func
+> *func,
+>  	/* Grab access to FN0 for ELP reg. */
+>  	func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
+> 
+> +	wlan_data = wl1271_get_data(wl, func->card->host->index);
+> +	if (IS_ERR(wlan_data)) {
+> +		ret = PTR_ERR(wlan_data);
+> +		wl1271_error("missing wlan data (needed for irq/ref_clk)!");
+> +		goto out_free;
+> +	}
+> +
+>  	wl->irq = gpio_to_irq(RX71_WL1271_IRQ_GPIO);
+>  	if (wl->irq < 0) {
+>  		ret = wl->irq;
+>  		wl1271_error("could not get irq!");
+> -		goto out_free;
+> +		goto put_data;
 >  	}
+> 
+>  	ret = request_irq(wl->irq, wl1271_irq, 0, DRIVER_NAME, wl);
+>  	if (ret < 0) {
+>  		wl1271_error("request_irq() failed: %d", ret);
+> -		goto out_free;
+> +		goto put_data;
+>  	}
+> 
+>  	set_irq_type(wl->irq, IRQ_TYPE_EDGE_RISING);
+> @@ -236,13 +321,13 @@ static int __devinit wl1271_probe(struct sdio_func
+> *func,
+> 
+>  	return 0;
+> 
+> - out_irq:
+> +out_irq:
+>  	free_irq(wl->irq, wl);
+> -
+> -
+> - out_free:
+> +put_data:
+> +	platform_driver_unregister(&wl->pinstance->pdriver);
+> +	kfree(wl->pinstance);
+> +out_free:
+>  	wl1271_free_hw(wl);
+> -
+>  	return ret;
+>  }
+> 
+> @@ -253,6 +338,10 @@ static void __devexit wl1271_remove(struct sdio_func
+> *func)
+>  	free_irq(wl->irq, wl);
+> 
+>  	wl1271_unregister_hw(wl);
 > +
-> +	return 0;
->  }
-> 
->  static struct wl1271_if_operations sdio_ops = {
-> diff --git a/drivers/net/wireless/wl12xx/wl1271_spi.c
-> b/drivers/net/wireless/wl12xx/wl1271_spi.c
-> index c3fdab7..de56d8d 100644
-> --- a/drivers/net/wireless/wl12xx/wl1271_spi.c
-> +++ b/drivers/net/wireless/wl12xx/wl1271_spi.c
-> @@ -312,10 +312,12 @@ static irqreturn_t wl1271_irq(int irq, void *cookie)
->  	return IRQ_HANDLED;
->  }
-> 
-> -static void wl1271_spi_set_power(struct wl1271 *wl, bool enable)
-> +static int wl1271_spi_set_power(struct wl1271 *wl, bool enable)
->  {
->  	if (wl->set_power)
->  		wl->set_power(enable);
+> +	platform_driver_unregister(&wl->pinstance->pdriver);
+> +	kfree(wl->pinstance);
 > +
-> +	return 0;
+>  	wl1271_free_hw(wl);
 >  }
 > 
->  static struct wl1271_if_operations spi_ops = {
 > --
 > 1.7.0.4
 > 
