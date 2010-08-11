@@ -1,58 +1,55 @@
-From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Subject: [RFC 0/6] adding SDIO Runtime PM support
-Date: Wed, 11 Aug 2010 16:19:24 +0300
-Message-ID: <1281532770-27545-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: [RFC/PATCH 1/6] mmc: sdio: fully reconfigure oldcard on resume
+Date: Wed, 11 Aug 2010 16:19:25 +0300
+Message-ID: <1281532770-27545-2-git-send-email-ohad@wizery.com>
+References: <1281532770-27545-1-git-send-email-ohad@wizery.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:44704 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752412Ab0HKNTa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Aug 2010 09:19:30 -0400
+In-Reply-To: <1281532770-27545-1-git-send-email-ohad@wizery.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, Ido Yariv <ido@wizery.com>, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-SDIO function drivers should be able to power down/up
-their cards (e.g. a WLAN SDIO driver might want to
-power down its card whenever wlan0 is down).
+On resume, let mmc_sdio_init_card go all the way, instead
+of skipping the reconfiguration of the card's speed and width.
 
-In the past few weeks we've been discussing how this
-could be achieved, and I'd like to present a new approach,
-which is based on runtime pm API.
+This is needed to ensure cards wake up with their clock
+reconfigured (otherwise it's kept low).
 
-The following few patches add runtime pm support for SDIO
-devices, and demonstrate it with the wl1271_sdio driver.
-Basic functionality is provided: The power state of the
-device is now coupled with the state of the wlan0 interface.
+This patch also removes the explicit bus width reconfiguration
+on resume, since now this is part of mmc_sdio_init_card.
 
-The nice thing about this approach is how small it is,
-as the runtime PM core is already taking care of everything
-needed (usage counts, device hierarchy, established set of API,
-synchronization, ...).
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+---
+ drivers/mmc/core/sdio.c |    4 ----
+ 1 files changed, 0 insertions(+), 4 deletions(-)
 
-Having said that, I'd like to stress that these patches
-are early submitted for RFC purposes only, as they
-are still in a preliminary state and only lightly tested.
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index b9dee28..645f173 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -344,7 +344,6 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 			goto err;
+ 		}
+ 		card = oldcard;
+-		return 0;
+ 	}
+ 
+ 	/*
+@@ -487,9 +486,6 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	mmc_claim_host(host);
+ 	err = mmc_sdio_init_card(host, host->ocr, host->card,
+ 				 (host->pm_flags & MMC_PM_KEEP_POWER));
+-	if (!err)
+-		/* We may have switched to 1-bit mode during suspend. */
+-		err = sdio_enable_wide(host->card);
+ 	if (!err && host->sdio_irqs)
+ 		mmc_signal_sdio_irq(host);
+ 	mmc_release_host(host);
+-- 
+1.7.0.4
 
-Please note that I will soon be leaving for the rest of August and
-am going to have a very limited email access, so it might
-take me some time to respond.
-
-Appreciate your feedback,
-
-Thank you,
-
-Ohad Ben-Cohen (6):
-  mmc: sdio: fully reconfigure oldcard on resume
-  sdio: add power_restore support
-  mmc: add general runtime PM support
-  sdio: add general runtime PM support
-  sdio: enable Runtime PM for SDIO cards
-  wireless: wl1271_sdio: enable Runtime PM
-
- drivers/mmc/core/bus.c                    |   35 +++++++++++++++++++++++++++
- drivers/mmc/core/sdio.c                   |   24 +++++++++++++++---
- drivers/mmc/core/sdio_bus.c               |   10 ++++++++
- drivers/net/wireless/wl12xx/wl1271_sdio.c |   37 ++++++++++++++++++++++++++++-
- 4 files changed, 101 insertions(+), 5 deletions(-)
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
