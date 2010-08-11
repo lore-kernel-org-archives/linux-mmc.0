@@ -1,67 +1,52 @@
-From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Subject: [RFC/PATCH 4/6] sdio: add general runtime PM support
-Date: Wed, 11 Aug 2010 16:19:28 +0300
-Message-ID: <1281532770-27545-5-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: [RFC/PATCH 5/6] sdio: enable Runtime PM for SDIO cards
+Date: Wed, 11 Aug 2010 16:19:29 +0300
+Message-ID: <1281532770-27545-6-git-send-email-ohad@wizery.com>
 References: <1281532770-27545-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1281532770-27545-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:44704 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752678Ab0HKNTm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Aug 2010 09:19:42 -0400
+In-Reply-To: <1281532770-27545-1-git-send-email-ohad@wizery.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, Ido Yariv <ido@wizery.com>, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Add generic Runtime PM handlers to sdio.
+Before adding SDIO functions, indicate to the runtime pm core
+the card is active, and enable runtime pm.
 
-When a runtime pm event kicks in, those handlers call the
-runtime pm handlers of the relevant SDIO function drivers.
+The power will be released automatically if the card
+will be idle.
 
-Runtime PM is still disabled by default, so this patch alone
-has no immediate effect.
-
-Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/mmc/core/sdio_bus.c |   10 ++++++++++
- 1 files changed, 10 insertions(+), 0 deletions(-)
+ drivers/mmc/core/sdio.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 4a890dc..2e417f9 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -14,6 +14,7 @@
- #include <linux/device.h>
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index ddbb9d3..498fdfb 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -10,6 +10,7 @@
+  */
+ 
  #include <linux/err.h>
- #include <linux/slab.h>
 +#include <linux/pm_runtime.h>
  
+ #include <linux/mmc/host.h>
  #include <linux/mmc/card.h>
- #include <linux/mmc/sdio_func.h>
-@@ -154,6 +155,14 @@ static int sdio_bus_remove(struct device *dev)
- 	return 0;
- }
+@@ -610,6 +611,9 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
+ 	if (err)
+ 		goto remove_added;
  
-+static const struct dev_pm_ops sdio_bus_pm_ops = {
-+	SET_RUNTIME_PM_OPS(
-+		pm_generic_runtime_suspend,
-+		pm_generic_runtime_resume,
-+		pm_generic_runtime_idle
-+	)
-+};
++	pm_runtime_set_active(&host->card->dev);
++	pm_runtime_enable(&host->card->dev);
 +
- static struct bus_type sdio_bus_type = {
- 	.name		= "sdio",
- 	.dev_attrs	= sdio_dev_attrs,
-@@ -161,6 +170,7 @@ static struct bus_type sdio_bus_type = {
- 	.uevent		= sdio_bus_uevent,
- 	.probe		= sdio_bus_probe,
- 	.remove		= sdio_bus_remove,
-+	.pm		= &sdio_bus_pm_ops,
- };
- 
- int sdio_register_bus(void)
+ 	/*
+ 	 * ...then the SDIO functions.
+ 	 */
 -- 
 1.7.0.4
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
