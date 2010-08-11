@@ -1,112 +1,58 @@
-From: akpm@linux-foundation.org
-Subject: [patch 046/177] omap: pandora: pass wl1251 information to SDIO core
-Date: Tue, 10 Aug 2010 18:01:52 -0700
-Message-ID: <201008110101.o7B11q0b027084@imap1.linux-foundation.org>
+From: Zang Roy-R61911 <r61911@freescale.com>
+Subject: RE: [PATCH 1/2] mmc: change ACMD12 to AUTO_CMD12 for more clear
+Date: Wed, 11 Aug 2010 12:47:10 +0800
+Message-ID: <3850A844E6A3854C827AC5C0BEC7B60A056400@zch01exm23.fsl.freescale.net>
+References: <1281433632-18758-1-git-send-email-tie-fei.zang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:38545 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755894Ab0HKBaZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:30:25 -0400
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:38308 "EHLO
+	TX2EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751019Ab0HKErV convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Aug 2010 00:47:21 -0400
+Received: from mail4-tx2 (localhost.localdomain [127.0.0.1])	by
+ mail4-tx2-R.bigfish.com (Postfix) with ESMTP id A4B95DB87CC	for
+ <linux-mmc@vger.kernel.org>; Wed, 11 Aug 2010 04:47:20 +0000 (UTC)
+Received: from TX2EHSMHS029.bigfish.com (unknown [10.9.14.236])	by
+ mail4-tx2.bigfish.com (Postfix) with ESMTP id 64FD849004E	for
+ <linux-mmc@vger.kernel.org>; Wed, 11 Aug 2010 04:47:20 +0000 (UTC)
+Received: from az33smr01.freescale.net (az33smr01.freescale.net
+ [10.64.34.199])	by az33egw02.freescale.net (8.14.3/8.14.3) with ESMTP id
+ o7B4lFN2015190	for <linux-mmc@vger.kernel.org>; Tue, 10 Aug 2010 21:47:19
+ -0700 (MST)
+Received: from zch01exm23.fsl.freescale.net (zch01exm23.ap.freescale.net
+ [10.192.129.207])	by az33smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
+ o7B4wkgO019290	for <linux-mmc@vger.kernel.org>; Tue, 10 Aug 2010 23:58:46
+ -0500 (CDT)
+Content-Class: urn:content-classes:message
+In-Reply-To: <1281433632-18758-1-git-send-email-tie-fei.zang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, notasas@gmail.com, adrian.hunter@nokia.com, kishore.kadiyala@ti.com, kvalo@adurom.com, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk, madhu.cr@ti.com, me@bobcopeland.com, tony@atomide.com
+To: Zang Roy-R61911 <R61911@freescale.com>, akpm@linux-foundation.org, linux-mmc@vger.kernel.org
+Cc: linuxppc-dev@ozlabs.org, mirqus@gmail.com, cbouatmailru@gmail.com, grant.likely@secretlab.ca
 
-From: Grazvydas Ignotas <notasas@gmail.com>
+ 
 
-Pandora has TI WL1251 attached on MMC3, which is non-standard SDIO chip.
-Make use MMC_QUIRK_NONSTD_SDIO to tell SDIO core about it.
+> -----Original Message-----
+> From: Zang Roy-R61911 
+> Sent: Tuesday, August 10, 2010 17:47 PM
+> To: akpm@linux-foundation.org; linux-mmc@vger.kernel.org
+> Cc: linuxppc-dev@ozlabs.org; mirqus@gmail.com; 
+> cbouatmailru@gmail.com; grant.likely@secretlab.ca
+> Subject: [PATCH 1/2] mmc: change ACMD12 to AUTO_CMD12 for more clear
+> 
+> Change ACMD12 to AUTO_CMD12 to reduce the confusion.
+> ACMD12 might be confused with MMC/SD App CMD 12 (CMD55+CMD12 combo).
+> 
+> Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-of-core.c |    2 +-
+>  drivers/mmc/host/sdhci.c         |    8 ++++----
+>  drivers/mmc/host/sdhci.h         |   10 +++++-----
+>  3 files changed, 10 insertions(+), 10 deletions(-)
+Andrew, 
+Could you help to pick up this minor fix?
+Thanks.
+Roy
 
-Signed-off-by: Grazvydas Ignotas <notasas@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Tony Lindgren <tony@atomide.com>
-Cc: Bob Copeland <me@bobcopeland.com>
-Cc: Kalle Valo <kvalo@adurom.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
-Cc: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Cc: Russell King <linux@arm.linux.org.uk>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- arch/arm/mach-omap2/board-omap3pandora.c |   16 ++++++++++++++++
- arch/arm/mach-omap2/hsmmc.c              |    1 +
- arch/arm/mach-omap2/hsmmc.h              |    4 ++++
- 3 files changed, 21 insertions(+)
-
-diff -puN arch/arm/mach-omap2/board-omap3pandora.c~omap-pandora-pass-wl1251-information-to-sdio-core arch/arm/mach-omap2/board-omap3pandora.c
---- a/arch/arm/mach-omap2/board-omap3pandora.c~omap-pandora-pass-wl1251-information-to-sdio-core
-+++ a/arch/arm/mach-omap2/board-omap3pandora.c
-@@ -32,6 +32,7 @@
- #include <linux/input.h>
- #include <linux/input/matrix_keypad.h>
- #include <linux/gpio_keys.h>
-+#include <linux/mmc/card.h>
- 
- #include <asm/mach-types.h>
- #include <asm/mach/arch.h>
-@@ -258,6 +259,20 @@ static struct platform_device pandora_ds
- 	},
- };
- 
-+static void pandora_wl1251_init_card(struct mmc_card *card)
-+{
-+	/*
-+	 * We have TI wl1251 attached to MMC3. Pass this information to
-+	 * SDIO core because it can't be probed by normal methods.
-+	 */
-+	card->quirks |= MMC_QUIRK_NONSTD_SDIO;
-+	card->cccr.wide_bus = 1;
-+	card->cis.vendor = 0x104c;
-+	card->cis.device = 0x9066;
-+	card->cis.blksize = 512;
-+	card->cis.max_dtr = 20000000;
-+}
-+
- static struct omap2_hsmmc_info omap3pandora_mmc[] = {
- 	{
- 		.mmc		= 1,
-@@ -279,6 +294,7 @@ static struct omap2_hsmmc_info omap3pand
- 		.wires		= 4,
- 		.gpio_cd	= -EINVAL,
- 		.gpio_wp	= -EINVAL,
-+		.init_card	= pandora_wl1251_init_card,
- 	},
- 	{}	/* Terminator */
- };
-diff -puN arch/arm/mach-omap2/hsmmc.c~omap-pandora-pass-wl1251-information-to-sdio-core arch/arm/mach-omap2/hsmmc.c
---- a/arch/arm/mach-omap2/hsmmc.c~omap-pandora-pass-wl1251-information-to-sdio-core
-+++ a/arch/arm/mach-omap2/hsmmc.c
-@@ -268,6 +268,7 @@ void __init omap2_hsmmc_init(struct omap
- 		mmc->slots[0].gpio_wp = c->gpio_wp;
- 
- 		mmc->slots[0].remux = c->remux;
-+		mmc->slots[0].init_card = c->init_card;
- 
- 		if (c->cover_only)
- 			mmc->slots[0].cover = 1;
-diff -puN arch/arm/mach-omap2/hsmmc.h~omap-pandora-pass-wl1251-information-to-sdio-core arch/arm/mach-omap2/hsmmc.h
---- a/arch/arm/mach-omap2/hsmmc.h~omap-pandora-pass-wl1251-information-to-sdio-core
-+++ a/arch/arm/mach-omap2/hsmmc.h
-@@ -6,6 +6,8 @@
-  * published by the Free Software Foundation.
-  */
- 
-+struct mmc_card;
-+
- struct omap2_hsmmc_info {
- 	u8	mmc;		/* controller 1/2/3 */
- 	u8	wires;		/* 1/4/8 wires */
-@@ -23,6 +25,8 @@ struct omap2_hsmmc_info {
- 	int	ocr_mask;	/* temporary HACK */
- 	/* Remux (pad configuation) when powering on/off */
- 	void (*remux)(struct device *dev, int slot, int power_on);
-+	/* init some special card */
-+	void (*init_card)(struct mmc_card *card);
- };
- 
- #if defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
-_
