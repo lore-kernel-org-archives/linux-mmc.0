@@ -1,179 +1,85 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH v3 8/9] omap: hsmmc: split mmc23 power control
-Date: Wed, 11 Aug 2010 13:05:39 +0300
-Message-ID: <4C6275F3.6030108@nokia.com>
-References: <1281478348-24833-1-git-send-email-ohad@wizery.com> <1281478348-24833-9-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH v3 6/9] omap: hsmmc: remove unused variable
+Date: Wed, 11 Aug 2010 13:08:28 +0300
+Message-ID: <AANLkTi=bB++-VU88JQTicJeYf==9qccx0HMDiz5-geyg@mail.gmail.com>
+References: <1281478348-24833-1-git-send-email-ohad@wizery.com>
+	<1281478348-24833-7-git-send-email-ohad@wizery.com> <4C627378.2090304@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1281478348-24833-9-git-send-email-ohad@wizery.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-px0-f174.google.com ([209.85.212.174]:57949 "EHLO
+	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932827Ab0HKKIt convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Aug 2010 06:08:49 -0400
+In-Reply-To: <4C627378.2090304@nokia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
 
-Ohad Ben-Cohen wrote:
-> Prepare for mmc3 regulator power control by splitting the power
-> control functions of mmc2 and mmc3, and expecting mmc3 to have
-> a single, dedicated, regulator support.
+On Wed, Aug 11, 2010 at 12:55 PM, Adrian Hunter <adrian.hunter@nokia.co=
+m> wrote:
+> Ohad Ben-Cohen wrote:
+>>
+>> Make this go away:
+>>
+>> drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_suspend':
+>> drivers/mmc/host/omap_hsmmc.c:2328: warning: unused variable 'state'
+>
+> Was done a while ago.
 
-Why?  Can't the controller be connected to an eMMC with 2 power
-supplies?  At a glance, it is not obvious why this patch is needed.
+Are you sure ?
 
-> 
-> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
-> ---
->  arch/arm/mach-omap2/hsmmc.c   |   10 ++++--
->  drivers/mmc/host/omap_hsmmc.c |   67 ++++++++++++++++++++++++++++++++++++----
->  2 files changed, 66 insertions(+), 11 deletions(-)
-> 
-> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-> index 1ef54b0..5d3d789 100644
-> --- a/arch/arm/mach-omap2/hsmmc.c
-> +++ b/arch/arm/mach-omap2/hsmmc.c
-> @@ -174,7 +174,7 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
->  	}
->  }
->  
-> -static void hsmmc23_before_set_reg(struct device *dev, int slot,
-> +static void hsmmc2_before_set_reg(struct device *dev, int slot,
->  				   int power_on, int vdd)
->  {
->  	struct omap_mmc_platform_data *mmc = dev->platform_data;
-> @@ -325,14 +325,16 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
->  				c->transceiver = 1;
->  			if (c->transceiver && c->wires > 4)
->  				c->wires = 4;
-> -			/* FALLTHROUGH */
-> -		case 3:
->  			if (mmc->slots[0].features & HSMMC_HAS_PBIAS) {
->  				/* off-chip level shifting, or none */
-> -				mmc->slots[0].before_set_reg = hsmmc23_before_set_reg;
-> +				mmc->slots[0].before_set_reg = hsmmc2_before_set_reg;
->  				mmc->slots[0].after_set_reg = NULL;
->  			}
->  			break;
-> +		case 3:
-> +			mmc->slots[0].before_set_reg = NULL;
-> +			mmc->slots[0].after_set_reg = NULL;
-> +			break;
->  		default:
->  			pr_err("MMC%d configuration not supported!\n", c->mmc);
->  			kfree(mmc);
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index d50e917..6f5cea0 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -258,7 +258,7 @@ static int omap_hsmmc_1_set_power(struct device *dev, int slot, int power_on,
->  	return ret;
->  }
->  
-> -static int omap_hsmmc_23_set_power(struct device *dev, int slot, int power_on,
-> +static int omap_hsmmc_2_set_power(struct device *dev, int slot, int power_on,
->  				   int vdd)
->  {
->  	struct omap_hsmmc_host *host =
-> @@ -309,6 +309,31 @@ static int omap_hsmmc_23_set_power(struct device *dev, int slot, int power_on,
->  	return ret;
->  }
->  
-> +static int omap_hsmmc_3_set_power(struct device *dev, int slot, int power_on,
-> +				   int vdd)
-> +{
-> +	struct omap_hsmmc_host *host =
-> +		platform_get_drvdata(to_platform_device(dev));
-> +	int ret = 0;
-> +
-> +	if (power_on) {
-> +		ret = mmc_regulator_set_ocr(host->vcc, vdd);
-> +		/* Enable interface voltage rail, if needed */
-> +		if (ret == 0 && host->vcc) {
-> +			ret = regulator_enable(host->vcc);
-> +			if (ret < 0)
-> +				ret = mmc_regulator_set_ocr(host->vcc, 0);
-> +		}
-> +	} else {
-> +		if (host->vcc)
-> +			ret = regulator_disable(host->vcc);
-> +		if (ret == 0)
-> +			ret = mmc_regulator_set_ocr(host->vcc, 0);
-> +	}
-> +
-> +	return ret;
-> +}
-> +
->  static int omap_hsmmc_1_set_sleep(struct device *dev, int slot, int sleep,
->  				  int vdd, int cardsleep)
->  {
-> @@ -319,7 +344,7 @@ static int omap_hsmmc_1_set_sleep(struct device *dev, int slot, int sleep,
->  	return regulator_set_mode(host->vcc, mode);
->  }
->  
-> -static int omap_hsmmc_23_set_sleep(struct device *dev, int slot, int sleep,
-> +static int omap_hsmmc_2_set_sleep(struct device *dev, int slot, int sleep,
->  				   int vdd, int cardsleep)
->  {
->  	struct omap_hsmmc_host *host =
-> @@ -358,6 +383,31 @@ static int omap_hsmmc_23_set_sleep(struct device *dev, int slot, int sleep,
->  		return regulator_enable(host->vcc_aux);
->  }
->  
-> +static int omap_hsmmc_3_set_sleep(struct device *dev, int slot, int sleep,
-> +				   int vdd, int cardsleep)
-> +{
-> +	struct omap_hsmmc_host *host =
-> +		platform_get_drvdata(to_platform_device(dev));
-> +	int err = 0;
-> +
-> +	/*
-> +	 * If we don't see a Vcc regulator, assume it's a fixed
-> +	 * voltage always-on regulator.
-> +	 */
-> +	if (!host->vcc)
-> +		return 0;
-> +
-> +	if (cardsleep) {
-> +		/* VCC can be turned off if card is asleep */
-> +		if (sleep)
-> +			err = mmc_regulator_set_ocr(host->vcc, 0);
-> +		else
-> +			err = mmc_regulator_set_ocr(host->vcc, vdd);
-> +	}
-> +
-> +	return err;
-> +}
-> +
->  static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
->  {
->  	struct regulator *reg;
-> @@ -370,10 +420,13 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
->  		mmc_slot(host).set_sleep = omap_hsmmc_1_set_sleep;
->  		break;
->  	case OMAP_MMC2_DEVID:
-> -	case OMAP_MMC3_DEVID:
->  		/* Off-chip level shifting, or none */
-> -		mmc_slot(host).set_power = omap_hsmmc_23_set_power;
-> -		mmc_slot(host).set_sleep = omap_hsmmc_23_set_sleep;
-> +		mmc_slot(host).set_power = omap_hsmmc_2_set_power;
-> +		mmc_slot(host).set_sleep = omap_hsmmc_2_set_sleep;
-> +		break;
-> +	case OMAP_MMC3_DEVID:
-> +		mmc_slot(host).set_power = omap_hsmmc_3_set_power;
-> +		mmc_slot(host).set_sleep = omap_hsmmc_3_set_sleep;
->  		break;
->  	default:
->  		pr_err("MMC%d configuration not supported!\n", host->id);
-> @@ -386,9 +439,9 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
->  		/*
->  		* HACK: until fixed.c regulator is usable,
->  		* we don't require a main regulator
-> -		* for MMC2 or MMC3
-> +		* for MMC2
->  		*/
-> -		if (host->id == OMAP_MMC1_DEVID) {
-> +		if (host->id != OMAP_MMC2_DEVID) {
->  			ret = PTR_ERR(reg);
->  			goto err;
->  		}
+I can still see the unused state variable in Linus' tree:
 
+http://git.kernel.org/?p=3Dlinux/kernel/git/torvalds/linux-2.6.git;a=3D=
+blob;f=3Ddrivers/mmc/host/omap_hsmmc.c;h=3Db032828c61263028963bd412a745=
+5546d5e86ce7;hb=3DHEAD#l2275
+
+
+> See 1a13f8fa76c880be41d6b1e6a2b44404bcbfdf9e in linus' tree.
+
+This commit only seem to adapt to the API change (the state variable
+is not removed):
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
+c.c
+index d25b19b..b032828 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2292,7 +2292,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+                }
+                cancel_work_sync(&host->mmc_carddetect_work);
+                mmc_host_enable(host->mmc);
+-               ret =3D mmc_suspend_host(host->mmc, state);
++               ret =3D mmc_suspend_host(host->mmc);
+                if (ret =3D=3D 0) {
+                        omap_hsmmc_disable_irq(host);
+                        OMAP_HSMMC_WRITE(host->base, HCTL,
+
+>
+>>
+>> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+>> ---
+>> =A0drivers/mmc/host/omap_hsmmc.c | =A0 =A01 -
+>> =A01 files changed, 0 insertions(+), 1 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_h=
+smmc.c
+>> index b032828..d50e917 100644
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>> @@ -2272,7 +2272,6 @@ static int omap_hsmmc_suspend(struct device *d=
+ev)
+>> =A0 =A0 =A0 =A0int ret =3D 0;
+>> =A0 =A0 =A0 =A0struct platform_device *pdev =3D to_platform_device(d=
+ev);
+>> =A0 =A0 =A0 =A0struct omap_hsmmc_host *host =3D platform_get_drvdata=
+(pdev);
+>> - =A0 =A0 =A0 pm_message_t state =3D PMSG_SUSPEND; /* unused by MMC =
+core */
+>> =A0 =A0 =A0 =A0if (host && host->suspended)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return 0;
+>
+>
