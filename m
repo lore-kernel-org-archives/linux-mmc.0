@@ -1,95 +1,112 @@
 From: akpm@linux-foundation.org
-Subject: [patch 054/177] sdhci: add auto CMD12 support for eSDHC driver
-Date: Tue, 10 Aug 2010 18:01:59 -0700
-Message-ID: <201008110102.o7B11xUH027109@imap1.linux-foundation.org>
+Subject: [patch 046/177] omap: pandora: pass wl1251 information to SDIO core
+Date: Tue, 10 Aug 2010 18:01:52 -0700
+Message-ID: <201008110101.o7B11q0b027084@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:44332 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:38545 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757308Ab0HKB3B (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:29:01 -0400
+	by vger.kernel.org with ESMTP id S1755894Ab0HKBaZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:30:25 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, Chang-Ming.Huang@freescale.com, benh@kernel.crashing.org, galak@gate.crashing.org, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org, tie-fei.zang@freescale.com
+Cc: akpm@linux-foundation.org, notasas@gmail.com, adrian.hunter@nokia.com, kishore.kadiyala@ti.com, kvalo@adurom.com, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk, madhu.cr@ti.com, me@bobcopeland.com, tony@atomide.com
 
-From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+From: Grazvydas Ignotas <notasas@gmail.com>
 
-Add auto CMD12 command support for eSDHC driver.  This is needed by P4080
-and P1022 for block read/write.  Manual asynchronous CMD12 abort operation
-causes protocol violations on these silicons.
+Pandora has TI WL1251 attached on MMC3, which is non-standard SDIO chip.
+Make use MMC_QUIRK_NONSTD_SDIO to tell SDIO core about it.
 
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
-Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
-Cc: Kumar Gala <galak@gate.crashing.org>
-Cc: Grant Likely <grant.likely@secretlab.ca>
+Signed-off-by: Grazvydas Ignotas <notasas@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: Bob Copeland <me@bobcopeland.com>
+Cc: Kalle Valo <kvalo@adurom.com>
+Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
+Cc: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: Russell King <linux@arm.linux.org.uk>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci-of-core.c |    4 ++++
- drivers/mmc/host/sdhci.c         |   14 ++++++++++++--
- drivers/mmc/host/sdhci.h         |    2 ++
- 3 files changed, 18 insertions(+), 2 deletions(-)
+ arch/arm/mach-omap2/board-omap3pandora.c |   16 ++++++++++++++++
+ arch/arm/mach-omap2/hsmmc.c              |    1 +
+ arch/arm/mach-omap2/hsmmc.h              |    4 ++++
+ 3 files changed, 21 insertions(+)
 
-diff -puN drivers/mmc/host/sdhci-of-core.c~sdhci-add-auto-cmd12-support-for-esdhc-driver drivers/mmc/host/sdhci-of-core.c
---- a/drivers/mmc/host/sdhci-of-core.c~sdhci-add-auto-cmd12-support-for-esdhc-driver
-+++ a/drivers/mmc/host/sdhci-of-core.c
-@@ -154,6 +154,10 @@ static int __devinit sdhci_of_probe(stru
- 		host->ops = &sdhci_of_data->ops;
- 	}
+diff -puN arch/arm/mach-omap2/board-omap3pandora.c~omap-pandora-pass-wl1251-information-to-sdio-core arch/arm/mach-omap2/board-omap3pandora.c
+--- a/arch/arm/mach-omap2/board-omap3pandora.c~omap-pandora-pass-wl1251-information-to-sdio-core
++++ a/arch/arm/mach-omap2/board-omap3pandora.c
+@@ -32,6 +32,7 @@
+ #include <linux/input.h>
+ #include <linux/input/matrix_keypad.h>
+ #include <linux/gpio_keys.h>
++#include <linux/mmc/card.h>
  
-+	if (of_get_property(np, "sdhci,auto-cmd12", NULL))
-+		host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+ #include <asm/mach-types.h>
+ #include <asm/mach/arch.h>
+@@ -258,6 +259,20 @@ static struct platform_device pandora_ds
+ 	},
+ };
+ 
++static void pandora_wl1251_init_card(struct mmc_card *card)
++{
++	/*
++	 * We have TI wl1251 attached to MMC3. Pass this information to
++	 * SDIO core because it can't be probed by normal methods.
++	 */
++	card->quirks |= MMC_QUIRK_NONSTD_SDIO;
++	card->cccr.wide_bus = 1;
++	card->cis.vendor = 0x104c;
++	card->cis.device = 0x9066;
++	card->cis.blksize = 512;
++	card->cis.max_dtr = 20000000;
++}
 +
+ static struct omap2_hsmmc_info omap3pandora_mmc[] = {
+ 	{
+ 		.mmc		= 1,
+@@ -279,6 +294,7 @@ static struct omap2_hsmmc_info omap3pand
+ 		.wires		= 4,
+ 		.gpio_cd	= -EINVAL,
+ 		.gpio_wp	= -EINVAL,
++		.init_card	= pandora_wl1251_init_card,
+ 	},
+ 	{}	/* Terminator */
+ };
+diff -puN arch/arm/mach-omap2/hsmmc.c~omap-pandora-pass-wl1251-information-to-sdio-core arch/arm/mach-omap2/hsmmc.c
+--- a/arch/arm/mach-omap2/hsmmc.c~omap-pandora-pass-wl1251-information-to-sdio-core
++++ a/arch/arm/mach-omap2/hsmmc.c
+@@ -268,6 +268,7 @@ void __init omap2_hsmmc_init(struct omap
+ 		mmc->slots[0].gpio_wp = c->gpio_wp;
+ 
+ 		mmc->slots[0].remux = c->remux;
++		mmc->slots[0].init_card = c->init_card;
+ 
+ 		if (c->cover_only)
+ 			mmc->slots[0].cover = 1;
+diff -puN arch/arm/mach-omap2/hsmmc.h~omap-pandora-pass-wl1251-information-to-sdio-core arch/arm/mach-omap2/hsmmc.h
+--- a/arch/arm/mach-omap2/hsmmc.h~omap-pandora-pass-wl1251-information-to-sdio-core
++++ a/arch/arm/mach-omap2/hsmmc.h
+@@ -6,6 +6,8 @@
+  * published by the Free Software Foundation.
+  */
+ 
++struct mmc_card;
 +
- 	if (of_get_property(np, "sdhci,1-bit-only", NULL))
- 		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
+ struct omap2_hsmmc_info {
+ 	u8	mmc;		/* controller 1/2/3 */
+ 	u8	wires;		/* 1/4/8 wires */
+@@ -23,6 +25,8 @@ struct omap2_hsmmc_info {
+ 	int	ocr_mask;	/* temporary HACK */
+ 	/* Remux (pad configuation) when powering on/off */
+ 	void (*remux)(struct device *dev, int slot, int power_on);
++	/* init some special card */
++	void (*init_card)(struct mmc_card *card);
+ };
  
-diff -puN drivers/mmc/host/sdhci.c~sdhci-add-auto-cmd12-support-for-esdhc-driver drivers/mmc/host/sdhci.c
---- a/drivers/mmc/host/sdhci.c~sdhci-add-auto-cmd12-support-for-esdhc-driver
-+++ a/drivers/mmc/host/sdhci.c
-@@ -818,8 +818,12 @@ static void sdhci_set_transfer_mode(stru
- 	WARN_ON(!host->data);
- 
- 	mode = SDHCI_TRNS_BLK_CNT_EN;
--	if (data->blocks > 1)
--		mode |= SDHCI_TRNS_MULTI;
-+	if (data->blocks > 1) {
-+		if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
-+			mode |= SDHCI_TRNS_MULTI | SDHCI_TRNS_ACMD12;
-+		else
-+			mode |= SDHCI_TRNS_MULTI;
-+	}
- 	if (data->flags & MMC_DATA_READ)
- 		mode |= SDHCI_TRNS_READ;
- 	if (host->flags & SDHCI_REQ_USE_DMA)
-@@ -1109,6 +1113,12 @@ static void sdhci_request(struct mmc_hos
- #ifndef SDHCI_USE_LEDS_CLASS
- 	sdhci_activate_led(host);
- #endif
-+	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12) {
-+		if (mrq->stop) {
-+			mrq->data->stop = NULL;
-+			mrq->stop = NULL;
-+		}
-+	}
- 
- 	host->mrq = mrq;
- 
-diff -puN drivers/mmc/host/sdhci.h~sdhci-add-auto-cmd12-support-for-esdhc-driver drivers/mmc/host/sdhci.h
---- a/drivers/mmc/host/sdhci.h~sdhci-add-auto-cmd12-support-for-esdhc-driver
-+++ a/drivers/mmc/host/sdhci.h
-@@ -243,6 +243,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
- /* Controller is missing device caps. Use caps provided by host */
- #define SDHCI_QUIRK_MISSING_CAPS			(1<<27)
-+/* Controller uses Auto CMD12 command to stop the transfer */
-+#define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12		(1<<28)
- 
- 	int			irq;		/* Device IRQ */
- 	void __iomem *		ioaddr;		/* Mapped address */
+ #if defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
 _
