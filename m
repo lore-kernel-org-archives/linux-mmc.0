@@ -1,45 +1,48 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: Will the mmc driver stack implement runtime PM support?
-Date: Wed, 11 Aug 2010 02:04:12 +0300
-Message-ID: <AANLkTinVBp9tjpXLzmB1nky9APW_3tsMn5rC2h+pCGya@mail.gmail.com>
-References: <CE761E84DADF2947A4AF22FB8D97A47328E2DD34@shsmsx501.ccr.corp.intel.com>
+From: akpm@linux-foundation.org
+Subject: [patch 039/177] mmc: only set blockaddressed for > 2GiB cards
+Date: Tue, 10 Aug 2010 18:01:45 -0700
+Message-ID: <201008110101.o7B11jUT027061@imap1.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:42552 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934000Ab0HJXEe convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 19:04:34 -0400
-Received: by eya25 with SMTP id 25so4136186eya.19
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Aug 2010 16:04:32 -0700 (PDT)
-In-Reply-To: <CE761E84DADF2947A4AF22FB8D97A47328E2DD34@shsmsx501.ccr.corp.intel.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42950 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756236Ab0HKBCV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Aug 2010 21:02:21 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: torvalds@linux-foundation.org
+Cc: akpm@linux-foundation.org, hanumath.prasad@stericsson.com, linus.walleij@stericsson.com, linux-mmc@vger.kernel.org, rabin.vincent@stericsson.com
 
-Hi Yunpeng,
+From: Hanumath Prasad <hanumath.prasad@stericsson.com>
 
-On Mon, Aug 9, 2010 at 1:56 PM, Gao, Yunpeng <yunpeng.gao@intel.com> wr=
-ote:
-> So, I just curious that is there any works/plan on supporting the run=
-time PM APIs for the mmc driver in community? Thanks
+A non-zero value of SEC_COUNT does not indicate that the card is sector
+addressed.  According to the MMC specification, cards with a density
+greater than 2GiB are sector addressed.
 
-Heh. I was just playing with this a bit (in the context of the wl1271
-WLAN SDIO device) and am about to post some preliminary patches for
-review.
+Acked-by: Linus Walleij <linus.walleij@stericsson.com>
+Signed-off-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
+Signed-off-by: Rabin Vincent <rabin.vincent@stericsson.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
-Regards,
-Ohad.
+ drivers/mmc/core/mmc.c |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
->
-> Regards,
-> Yunpeng
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+diff -puN drivers/mmc/core/mmc.c~mmc-only-set-blockaddressed-for-2gib-cards drivers/mmc/core/mmc.c
+--- a/drivers/mmc/core/mmc.c~mmc-only-set-blockaddressed-for-2gib-cards
++++ a/drivers/mmc/core/mmc.c
+@@ -234,7 +234,9 @@ static int mmc_read_ext_csd(struct mmc_c
+ 			ext_csd[EXT_CSD_SEC_CNT + 1] << 8 |
+ 			ext_csd[EXT_CSD_SEC_CNT + 2] << 16 |
+ 			ext_csd[EXT_CSD_SEC_CNT + 3] << 24;
+-		if (card->ext_csd.sectors)
++
++		/* Cards with density > 2GiB are sector addressed */
++		if (card->ext_csd.sectors > (2u * 1024 * 1024 * 1024) / 512)
+ 			mmc_card_set_blockaddr(card);
+ 	}
+ 
+_
