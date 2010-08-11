@@ -1,65 +1,50 @@
-From: "DebBarma, Tarun Kanti" <tarun.kanti@ti.com>
-Subject: RE: [PATCH v4 3/8] wireless: wl1271: add platform driver to get
- board data
-Date: Thu, 12 Aug 2010 00:57:18 +0530
-Message-ID: <5A47E75E594F054BAF48C5E4FC4B92AB0324110AC7@dbde02.ent.ti.com>
-References: <1281550913-17633-1-git-send-email-ohad@wizery.com>
- <1281550913-17633-4-git-send-email-ohad@wizery.com>
- <5A47E75E594F054BAF48C5E4FC4B92AB0324110ABD@dbde02.ent.ti.com>
- <20100811184742.GA21778@nokia.com>
- <5A47E75E594F054BAF48C5E4FC4B92AB0324110AC1@dbde02.ent.ti.com>
- <20100811185724.GD21778@nokia.com>
+From: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Subject: Re: [PATCH v3 9/9] omap: zoom: add mmc3/wl1271 device support
+Date: Thu, 12 Aug 2010 01:39:38 +0530
+Message-ID: <AANLkTi=n=uH5ePRf8KzXWTtSdyRabpOCOgLBSD1GfwkJ@mail.gmail.com>
+References: <1281478348-24833-1-git-send-email-ohad@wizery.com>
+	<1281478348-24833-10-git-send-email-ohad@wizery.com>
+	<4C626140.3080107@nokia.com>
+	<AANLkTik8yftwy9Toq473134vcdoFN1Z29oTc9MGEUzue@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20100811185724.GD21778@nokia.com>
-Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
-To: "felipe.balbi@nokia.com" <felipe.balbi@nokia.com>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Ido Yariv <ido@wizery.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, "Pandita, Vikram" <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:62537 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755823Ab0HKUJj convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Aug 2010 16:09:39 -0400
+In-Reply-To: <AANLkTik8yftwy9Toq473134vcdoFN1Z29oTc9MGEUzue@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Roger Quadros <roger.quadros@nokia.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Pandita Vikram <vikram.pandita@ti.com>, Kalle Valo <kalle.valo@iki.fi>
 
+Ohad,
 
-> -----Original Message-----
-> From: Felipe Balbi [mailto:felipe.balbi@nokia.com]
-> Sent: Thursday, August 12, 2010 12:27 AM
-> To: DebBarma, Tarun Kanti
-> Cc: Balbi Felipe (Nokia-MS/Helsinki); Ohad Ben-Cohen; linux-
-> wireless@vger.kernel.org; linux-mmc@vger.kernel.org; linux-
-> omap@vger.kernel.org; Ido Yariv; Mark Brown; linux-arm-
-> kernel@lists.infradead.org; Chikkature Rajashekar, Madhusudhan; Coelho
-> Luciano (Nokia-MS/Helsinki); akpm@linux-foundation.org; San Mehat; Quadros
-> Roger (Nokia-MS/Helsinki); Tony Lindgren; Nicolas Pitre; Pandita, Vikram;
-> Kalle Valo
-> Subject: Re: [PATCH v4 3/8] wireless: wl1271: add platform driver to get
-> board data
-> 
-> Hi,
-> 
-> On Wed, Aug 11, 2010 at 08:52:54PM +0200, ext DebBarma, Tarun Kanti wrote:
-> >True; however if we go by that argument than we can also assume pdata
-> >is valid, so that we would not need the below check.
-> 
-> of course not. You can have devices that just play well with default
-> values or devices where you don't need the flexibility of platform data.
-> That's why we check.
-> 
-> platform_device pointers on the other hand, are guaranteed to be always
-> true, if it isn't then you should oops, you deserve to oops because
-> something is really really wrong.
+On Wed, Aug 11, 2010 at 9:08 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote=
+:
+> On Wed, Aug 11, 2010 at 11:37 AM, Roger Quadros <roger.quadros@nokia.=
+com> wrote:
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .ocr_mask =A0 =A0 =A0 =3D MMC_VDD_165=
+_195,
+>>
+>> Do we really need to specify ocr_mask here?
+
+Since you specified the voltage source is fixed, and if MMC3 has any
+dedicated regulator as MMC1 & MMC2 you can go with
+Roger's comments.
+If the LDO is fixed voltage source from TWL then since regulator
+framework supports only adjustable LDO's, I think you can
+have ocr_mask defined as above in board file.
+
+Regards,
+Kishore
 >
-Sounds perfect!
-What that means is _probe() function makes sense only for cases where we have valid platform data because we are returning right at the top if pdata is not valid. If this is the case I was curious to know why not framework make another check for valid pdata before calling _probe() instead of coming all the way to _probe() and then returning! 
- 
-> >Still, I would go ahead and find out if there is any scenario where
-> >pdev can go wrong during device registration. Thanks.
-> 
-> if that scenario ever happens, it's either a bug on your implementation
-> or driver-core. In both cases you deserve to oops so we catch such
-> problems at early stages.
-> 
+> Removed, thanks!
 > --
-> balbi
-> 
-> DefectiveByDesign.org
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
