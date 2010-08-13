@@ -1,44 +1,60 @@
-From: Randy Dunlap <randy.dunlap@oracle.com>
-Subject: [PATCH] mmc: fix for CONFIG_PM disabled
-Date: Thu, 12 Aug 2010 09:36:43 -0700
-Message-ID: <20100812093643.852adc98.randy.dunlap@oracle.com>
-References: <201008112340.o7BNenDe021017@imap1.linux-foundation.org>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v4 3/8] wireless: wl1271: add platform driver to get board data
+Date: Fri, 13 Aug 2010 03:01:17 +0300
+Message-ID: <AANLkTi=f_vghwQZn3HHs_CJKYiMf_pp85JHujsyvRg3J@mail.gmail.com>
+References: <1281550913-17633-1-git-send-email-ohad@wizery.com>
+	<1281550913-17633-4-git-send-email-ohad@wizery.com>
+	<5A47E75E594F054BAF48C5E4FC4B92AB0324110ABD@dbde02.ent.ti.com>
+	<20100811184742.GA21778@nokia.com>
+	<5A47E75E594F054BAF48C5E4FC4B92AB0324110AC1@dbde02.ent.ti.com>
+	<20100811185724.GD21778@nokia.com>
+	<5A47E75E594F054BAF48C5E4FC4B92AB0324110AC7@dbde02.ent.ti.com>
+	<20100811212513.GC827@n2100.arm.linux.org.uk>
+	<AANLkTikDhzGVFZhNJZic9xYX9bL_NhOW=4LS-cTFSG0i@mail.gmail.com>
+	<20100812095546.GA3354@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rcsinet10.oracle.com ([148.87.113.121]:16494 "EHLO
-	rcsinet10.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760080Ab0HLQhP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Aug 2010 12:37:15 -0400
-In-Reply-To: <201008112340.o7BNenDe021017@imap1.linux-foundation.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20100812095546.GA3354-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Cc: "DebBarma, Tarun Kanti" <tarun.kanti-l0cyMroinI0@public.gmane.org>, "felipe.balbi-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org" <felipe.balbi-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, "Pandita, Vikram" <vikram.pandita-l0cyMroinI0@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr-l0cyMroinI0@public.gmane.org>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
 
-From: Randy Dunlap <randy.dunlap@oracle.com>
+On Thursday, August 12, 2010, Russell King - ARM Linux
+<linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wrote:
+> On Thu, Aug 12, 2010 at 09:40:19AM +0300, Ohad Ben-Cohen wrote:
+>> On Thu, Aug 12, 2010 at 12:25 AM, Russell King - ARM Linux
+>> <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wrote:
+>> >I've outlined a far simpler and easiler solution
+>> > which avoids this kind of abuse, and given suggestions on how to extend
+>> > it to support multiple instances.
+>> >
+>>
+>> Do you mean:
+>> http://www.spinics.net/lists/arm-kernel/msg95338.html
+>> ?
+>>
+>> I was under the impression you eventually discarded that approach in
+>> that post.
+>
+> Indeed.
+>
+> I'm talking about my first suggestion:
+>
+> http://lists.arm.linux.org.uk/lurker/message/20100804.114148.bf961e83.en.html
+>
+> which was later expanded by Vitaly:
+>
+> http://lists.arm.linux.org.uk/lurker/message/20100804.140119.f476c29c.en.html
+>
+> I don't think anyone had any negative comments against that proposal.
 
-Minimal patch to fix mmc to build when CONFIG_PM is not enabled:
+Thanks, I see what you mean now.
 
-(.text+0x128fcd): undefined reference to `mmc_pm_notify'
-
-Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
----
- drivers/mmc/core/host.c |    2 ++
- 1 file changed, 2 insertions(+)
-
-Seems to be needed in mainline also.
-
---- mmotm-2010-0811-1610.orig/drivers/mmc/core/host.c
-+++ mmotm-2010-0811-1610/drivers/mmc/core/host.c
-@@ -86,7 +86,9 @@ struct mmc_host *mmc_alloc_host(int extr
- 	init_waitqueue_head(&host->wq);
- 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
- 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
-+#ifdef CONFIG_PM
- 	host->pm_notify.notifier_call = mmc_pm_notify;
-+#endif
- 
- 	/*
- 	 * By default, hosts do not support SGIO or large requests.
+I'll give this a spin when I'm back (I'm away until e/o August)
+>
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
