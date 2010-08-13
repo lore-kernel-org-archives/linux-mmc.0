@@ -1,127 +1,86 @@
-From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Subject: Re: [patch 1/1]sdhci: sdhc spec 3.0 add some modification
-Date: Fri, 13 Aug 2010 16:25:35 +0000
-Message-ID: <AANLkTimXNGLC9u+EVoOUurUY08icZpYycECsPf0RGYVh@mail.gmail.com>
-References: <AANLkTin=8qej=hh3sJQkyjHcp17Wh4j8wngqyuRz=+1C@mail.gmail.com>
-	<AANLkTimx_-+wvrnoe22ZDtrhfc0Ds873KSzW04zuppBH@mail.gmail.com>
-	<AANLkTinn+Af7kE34kjLEf3XLe2YTbpkJ4MtePFK0vMS8@mail.gmail.com>
-	<20100809101042.GA8293@console-pimps.org>
-	<AANLkTinqToYc6bizV7AcKuk-4XiNA08qhqfCPN1WLo8S@mail.gmail.com>
-	<20100810163244.GA12837@console-pimps.org>
-	<AANLkTinJ0hJcas5h18PGD5f8w6Jn6f6jG8D2WZHK1Amp@mail.gmail.com>
-	<AANLkTi=zvsWHmLqWMnssgZTXd6XDSCzuJ3j8ZiQfdp9z@mail.gmail.com>
+From: Arnd Hannemann <arnd@arndnet.de>
+Subject: Bug in mmc_test or host driver?
+Date: Fri, 13 Aug 2010 19:23:45 +0200
+Message-ID: <4C657FA1.9090705@arndnet.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:37659 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761774Ab0HMQZh convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Aug 2010 12:25:37 -0400
-Received: by qwh6 with SMTP id 6so3007244qwh.19
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Aug 2010 09:25:37 -0700 (PDT)
-In-Reply-To: <AANLkTi=zvsWHmLqWMnssgZTXd6XDSCzuJ3j8ZiQfdp9z@mail.gmail.com>
+Received: from slowhand.arndnet.de ([88.198.19.76]:56994 "EHLO mail.unitix.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1761906Ab0HMRyr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 13 Aug 2010 13:54:47 -0400
+Received: from [192.168.1.62] (80-230.eduroam.RWTH-Aachen.DE [134.61.80.230])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by mail.unitix.de (Postfix) with ESMTP id 0347213E8D
+	for <linux-mmc@vger.kernel.org>; Fri, 13 Aug 2010 19:23:46 +0200 (CEST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Matt Fleming <matt@console-pimps.org>, Kyungmin Park <kmpark@infradead.org>, linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Wolfram Sang <w.sang@pengutronix.de>
+To: linux-mmc@vger.kernel.org
 
-2010/8/12 zhangfei gao <zhangfei.gao@gmail.com>:
-[...]
-> updated patch:
-> From b17eb3ca9dd23af63ada240e8f77bdd873e853a7 Mon Sep 17 00:00:00 200=
-1
-> From: Zhangfei Gao <zgao6@marvell.com>
-> Date: Fri, 6 Aug 2010 07:10:01 +0800
-> Subject: [PATCH] sdhc: support 10-bit divided clock Mode
->
-> Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
-> Reviewed-by: Matt Fleming <matt@console-pimps.org>
-> ---
-> =A0drivers/mmc/host/sdhci.c | =A0 16 ++++++++++++----
-> =A0drivers/mmc/host/sdhci.h | =A0 =A04 ++++
-> =A02 files changed, 16 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7855121..ccfbc40 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -983,7 +983,7 @@ static void sdhci_finish_command(struct sdhci_hos=
-t *host)
->
-> =A0static void sdhci_set_clock(struct sdhci_host *host, unsigned int =
-clock)
-> =A0{
-> - =A0 =A0 =A0 int div;
-> + =A0 =A0 =A0 int div, max_div;
-> =A0 =A0 =A0 =A0u16 clk;
-> =A0 =A0 =A0 =A0unsigned long timeout;
->
-> @@ -1001,13 +1001,21 @@ static void sdhci_set_clock(struct sdhci_host
-> *host, unsigned int clock)
-> =A0 =A0 =A0 =A0if (clock =3D=3D 0)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto out;
->
-> - =A0 =A0 =A0 for (div =3D 1;div < 256;div *=3D 2) {
-> + =A0 =A0 =A0 if (host->version >=3D SDHCI_SPEC_300)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 max_div =3D 2046;
-> + =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 max_div =3D 256;
-> +
-> + =A0 =A0 =A0 if(host->max_clk <=3D clock)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 div =3D 1;
-> + =A0 =A0 =A0 for (div =3D 2; div < max_div; div +=3D 2) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if ((host->max_clk / div) <=3D clock)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
-> =A0 =A0 =A0 =A0}
-> =A0 =A0 =A0 =A0div >>=3D 1;
->
-> - =A0 =A0 =A0 clk =3D div << SDHCI_DIVIDER_SHIFT;
-> + =A0 =A0 =A0 clk =3D (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+Hi,
 
-> + =A0 =A0 =A0 clk |=3D ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIVIDER_SH=
-IFT) << SDHCI_DIVIDER_SHIFT_HI;
+if I peform the test 23 mmc_test_best_read_performance() with tmio_mmc
+on Linus tree, I hit the following BUG:
 
-I think the right shift is using wrong #define, SDHCI_DIVIDER_SHIFT
-(position of the bitfield in the register). It has a correct value of
-8, though. This could be something like the following to reduce
-confusion.
+ [  152.625000] mmc0: Starting tests of card mmc0:2daf...
+ [  152.625000] mmc0: Test case 23. Best-case read performance...
+ [  152.632812] mmc0: starting CMD16 arg 00000200 flags 00000015
+ [  152.632812] MMC IRQ begin
+ [  152.632812] status: 208007a1 =
+SIGSTATEWRPROTECTCARD_REMOVE_ACARD_INSERT_ASIGSTATE_AILL_FUNCCMDRESPEND
+ [  152.632812] status: 00000001 = CMDRESPEND
+ [  152.632812] mmc0: req done (CMD16): 0: 00000900 00000900 00000b00
+00000900
+ [  152.632812] Status at end of loop: 208007a0
+ [  152.632812] status: 208007a0 =
+SIGSTATEWRPROTECTCARD_REMOVE_ACARD_INSERT_ASIGSTATE_AILL_FUNC
+ [  152.632812] MMC IRQ end
+ [  152.632812] mmc0: starting CMD25 arg 003b0000 flags 00000035
+ [  152.632812] mmc0:     blksz 512 blocks 8192 flags 00000100 tsac 300
+ms nsac 0
+ [  152.632812] mmc0:     CMD12 arg 00000000 flags 0000001d
+ [  152.632812] kernel BUG at drivers/mmc/core/core.c:172!
 
-clk |=3D ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN) <<
-SDHCI_DIVIDER_SHIFT_HI;
-=2E..
-#define SDHCI_DIV_MASK 0xFF
-#define SDHCI_DIV_MASK_LEN 8
-#define  SDHCI_DIV_HI_MASK 0x300
 
-or maybe:
+core.c:  172         BUG_ON(mrq->data->blocks > host->max_blk_count);
 
-clk |=3D ((div >> SDHCI_DIV_MASK_LEN) & SDHCI_DIV_HI_MASK) <<
-SDHCI_DIVIDER_SHIFT_HI;
-=2E..
-#define SDHCI_DIV_MASK 0xFF
-#define SDHCI_DIV_MASK_LEN 8
-#define  SDHCI_DIV_HI_MASK 0x03
+The host's max_blk_count is 512, but mmc_test does not check and issues
+a request with 8192 blocks.
+So I believe the test is wrong here?
 
-> =A0 =A0 =A0 =A0clk |=3D SDHCI_CLOCK_INT_EN;
-> =A0 =A0 =A0 =A0sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->
-[...]
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -86,6 +86,9 @@
->
-> =A0#define SDHCI_CLOCK_CONTROL =A0 =A00x2C
-> =A0#define =A0SDHCI_DIVIDER_SHIFT =A0 8
-> +#define =A0SDHCI_DIVIDER_SHIFT_HI =A0 =A0 =A0 =A06
-> +#define =A0SDHCI_DIV_MASK =A0 =A0 =A0 =A00xFF
-> +#define =A0SDHCI_DIV_HI_MASK =A0 =A0 0x300
-> =A0#define =A0SDHCI_CLOCK_CARD_EN =A0 0x0004
-> =A0#define =A0SDHCI_CLOCK_INT_STABLE =A0 =A0 =A0 =A00x0002
-> =A0#define =A0SDHCI_CLOCK_INT_EN =A0 =A00x0001
-[...]
+ [  152.656250] Backtrace:
+ [  152.656250] [<c0028e38>] (__bug+0x0/0x30) from [<c0181f88>]
+(mmc_wait_for_req+0x14c/0x228)
+ [  152.656250] [<c0181e3c>] (mmc_wait_for_req+0x0/0x228) from
+[<bf01840c>] (mmc_test_simple_transfer+0xb0/0x140 [mmc_test])
+ [  152.656250]  r7:cf1e3d28 r6:cf1ec000 r5:cf1e3db4 r4:cf318000
+ [  152.656250] [<bf01835c>] (mmc_test_simple_transfer+0x0/0x140
+[mmc_test]) from [<bf01993c>] (mmc_test_area_io+0x2fc/0x350 [mmc_test])
+ [  152.656250] [<bf019640>] (mmc_test_area_io+0x0/0x350 [mmc_test])
+from [<bf0199c4>] (mmc_test_area_fill+0x34/0x3c [mmc_test])
+ [  152.656250] [<bf019990>] (mmc_test_area_fill+0x0/0x3c [mmc_test])
+from [<bf019d10>] (mmc_test_area_init+0x238/0x264 [mmc_test])
+ [  152.656250] [<bf019ad8>] (mmc_test_area_init+0x0/0x264 [mmc_test])
+from [<bf019d8c>] (mmc_test_area_prepare_fill+0x18/0x1c [mmc_test])
+ [  152.656250] [<bf019d74>] (mmc_test_area_prepare_fill+0x0/0x1c
+[mmc_test]) from [<bf018a1c>] (mmc_test_store+0xf8/0x290 [mmc_test])
+ [  152.656250] [<bf018924>] (mmc_test_store+0x0/0x290 [mmc_test]) from
+[<c015541c>] (dev_attr_store+0x24/0x28)
+ [  152.656250]  r8:cf0f3010 r7:cf24fd60 r6:00000003 r5:cf1e3f70 r4:cf41bd88
+ [  152.656250] r3:00000003
+ [  152.656250] [<c01553f8>] (dev_attr_store+0x0/0x28) from [<c00ccad0>]
+(sysfs_write_file+0x110/0x144)
+ [  152.656250] [<c00cc9c0>] (sysfs_write_file+0x0/0x144) from
+[<c008a5c4>] (vfs_write+0xbc/0x138)
+ [  152.656250] [<c008a508>] (vfs_write+0x0/0x138) from [<c008a708>]
+(sys_write+0x44/0x70)
+ [  152.656250]  r8:00000000 r7:00000004 r6:00000003 r5:000d9408 r4:cf0f4420
+ [  152.656250] [<c008a6c4>] (sys_write+0x0/0x70) from [<c0025e60>]
+(ret_fast_syscall+0x0/0x30)
+ [  152.656250]  r9:cf1e2000 r8:c0025fe4 r6:00000003 r5:403305c8 r4:00000003
+ [  152.656250] Code: e59f0010 e1a01003 eb077a1d e3a03000 (e5833000)
 
-SDHCI_DIVIDER_SHIFT_HI -> SDHCI_DIVIDER_HI_SHIFT
-
-Best Regards,
-Micha=B3 Miros=B3aw
+Best regards,
+Arnd
