@@ -1,44 +1,43 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: undefined reference to `mmc_pm_notify' when selected MMC without
+From: Sergei Shtylyov <sshtylyov@mvista.com>
+Subject: Re: undefined reference to `mmc_pm_notify' when selected MMC without
  PM.
-Date: Fri, 13 Aug 2010 20:33:40 +0900
-Message-ID: <009801cb3adb$6550e400$2ff2ac00$%kim@samsung.com>
+Date: Fri, 13 Aug 2010 17:14:44 +0400
+Message-ID: <4C654544.5010002@ru.mvista.com>
+References: <009301cb3ad3$77c8a620$6759f260$%kim@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:31031 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755042Ab0HMLdg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Aug 2010 07:33:36 -0400
-References: 
-In-reply-to: 
-Content-language: ko
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:47039 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934270Ab0HMNPf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Aug 2010 09:15:35 -0400
+In-Reply-To: <009301cb3ad3$77c8a620$6759f260$%kim@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Kukjin Kim' <kgene.kim@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: ben-linux@fluff.org, 'Andrew Morton' <akpm@linux-foundation.org>, 'Maxim Levitsky' <maximlevitsky@gmail.com>
+To: Kukjin Kim <kgene.kim@samsung.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'Andrew Morton' <akpm@linux-foundation.org>, 'Maxim Levitsky' <maximlevitsky@gmail.com>, ben-linux@fluff.org
+
+Hello.
 
 Kukjin Kim wrote:
-> 
-> Hi,
-> 
+
 > Following is build error when selected MMC without PM.
-> 
+
 > drivers/built-in.o: In function `mmc_alloc_host':
 > drivers/mmc/core/host.c:108: undefined reference to `mmc_pm_notify'
 > make[1]: *** [.tmp_vmlinux1] Error 1
 > make: *** [sub-make] Error 2
-> 
+
 > That is added from Maxim's ' mmc: fix all hangs related to mmc/sd card
 > insert/removal during suspend/resume '
 > (commit ID: 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e)
-> 
+
 > Below is temporary patch for avoiding build error.
 > But I'm not sure about this... :-(
-> 
+
 > ---
-> 
+
 > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
 > index 0efe631..d80cfdc 100644
 > --- a/drivers/mmc/core/host.c
@@ -49,23 +48,12 @@ Kukjin Kim wrote:
 >         INIT_DELAYED_WORK(&host->detect, mmc_rescan);
 >         INIT_DELAYED_WORK_DEFERRABLE(&host->disable,
 > mmc_host_deeper_disable);
+
+    Looks like your patch is line-wrapped...
+
 > +#ifdef CONFIG_PM
 >         host->pm_notify.notifier_call = mmc_pm_notify;
 > +#endif
-> 
->         /*
->          * By default, hosts do not support SGIO or large requests.
-> 
-> ---
 
-Kindly ignore this stuff because I found Uwe's same patch just now ;-)
-Sorry for bothering.
-
-Thanks.
-
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+WBR, Sergei
 
