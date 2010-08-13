@@ -1,60 +1,73 @@
-From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v4 3/8] wireless: wl1271: add platform driver to get board data
-Date: Fri, 13 Aug 2010 03:01:17 +0300
-Message-ID: <AANLkTi=f_vghwQZn3HHs_CJKYiMf_pp85JHujsyvRg3J@mail.gmail.com>
-References: <1281550913-17633-1-git-send-email-ohad@wizery.com>
-	<1281550913-17633-4-git-send-email-ohad@wizery.com>
-	<5A47E75E594F054BAF48C5E4FC4B92AB0324110ABD@dbde02.ent.ti.com>
-	<20100811184742.GA21778@nokia.com>
-	<5A47E75E594F054BAF48C5E4FC4B92AB0324110AC1@dbde02.ent.ti.com>
-	<20100811185724.GD21778@nokia.com>
-	<5A47E75E594F054BAF48C5E4FC4B92AB0324110AC7@dbde02.ent.ti.com>
-	<20100811212513.GC827@n2100.arm.linux.org.uk>
-	<AANLkTikDhzGVFZhNJZic9xYX9bL_NhOW=4LS-cTFSG0i@mail.gmail.com>
-	<20100812095546.GA3354@n2100.arm.linux.org.uk>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: 'error: 'SDHCI_QUIRK_NO_HISPD_BIT' undeclared' and 'undefined
+ reference to `sdhci_card_detect''
+Date: Fri, 13 Aug 2010 16:32:07 +0900
+Message-ID: <008d01cb3ab9$ae73da60$0b5b8f20$%kim@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20100812095546.GA3354-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: "DebBarma, Tarun Kanti" <tarun.kanti-l0cyMroinI0@public.gmane.org>, "felipe.balbi-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org" <felipe.balbi-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, "Pandita, Vikram" <vikram.pandita-l0cyMroinI0@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr-l0cyMroinI0@public.gmane.org>, "Coelho Luciano (Nokia-MS/Helsinki)" <Luciano.Coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ben-linux@fluff.org, 'Marek Szyprowski' <m.szyprowski@samsung.com>, 'Andrew Morton' <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thursday, August 12, 2010, Russell King - ARM Linux
-<linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wrote:
-> On Thu, Aug 12, 2010 at 09:40:19AM +0300, Ohad Ben-Cohen wrote:
->> On Thu, Aug 12, 2010 at 12:25 AM, Russell King - ARM Linux
->> <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wrote:
->> >I've outlined a far simpler and easiler solution
->> > which avoids this kind of abuse, and given suggestions on how to extend
->> > it to support multiple instances.
->> >
->>
->> Do you mean:
->> http://www.spinics.net/lists/arm-kernel/msg95338.html
->> ?
->>
->> I was under the impression you eventually discarded that approach in
->> that post.
->
-> Indeed.
->
-> I'm talking about my first suggestion:
->
-> http://lists.arm.linux.org.uk/lurker/message/20100804.114148.bf961e83.en.html
->
-> which was later expanded by Vitaly:
->
-> http://lists.arm.linux.org.uk/lurker/message/20100804.140119.f476c29c.en.html
->
-> I don't think anyone had any negative comments against that proposal.
+Hi, 
 
-Thanks, I see what you mean now.
+This is just information about Samsung sdmmc stuff building error now.
 
-I'll give this a spin when I'm back (I'm away until e/o August)
->
+I found Marek's 'sdhci-s3c: enable SDHCI_QUIRK_NO_HISPD_BIT quirk' in the
+Linus' tree.
+(commit ID: a1d5646005af1247d6ae78434bb4db15b07a07b2)
+
+But not defined the quirk yet...so following build error happened with
+s3c6400_defconfig in Linus' latest.
+
+drivers/mmc/host/sdhci-s3c.c: In function 'sdhci_s3c_probe':
+drivers/mmc/host/sdhci-s3c.c:400: error: 'SDHCI_QUIRK_NO_HISPD_BIT'
+undeclared (first use in this function)
+drivers/mmc/host/sdhci-s3c.c:400: error: (Each undeclared identifier is
+reported only once
+drivers/mmc/host/sdhci-s3c.c:400: error: for each function it appears in.)
+make[4]: *** [drivers/mmc/host/sdhci-s3c.o] Error 1
+make[3]: *** [drivers/mmc/host] Error 2
+make[2]: *** [drivers/mmc] Error 2
+make[1]: *** [drivers] Error 2
+
+Kyungmin Park's below patch can solve this and it is in mmotm now.
+(commit ID: 2935b9e7fcc4bea3751b8d039b383b2036a7d36d)
+
+But I think, to update quirk definition should being in Marek's patch for
+avoiding build error.
+Of course, I'm not sure whether the commit order changed.
+Anyway, in this case, will be solved after merging mm tree.
+
+
+And second case is same.
+
+Marek's 'sdhci-s3c: add support for new card detection methods' cause
+following build error.
+(commit ID:17866e14f3a4f219e94f1374ece7226479418ff8)
+
+drivers/built-in.o: In function `sdhci_s3c_notify_change':
+/home/kgene/linux/linux-2.6-mainline-dev/drivers/mmc/host/sdhci-s3c.c:255:
+undefined reference to `sdhci_card_detect'
+make[1]: *** [.tmp_vmlinux1] Error 1
+make: *** [sub-make] Error 2
+
+And Andrew's patch(b567e5dd5a34c184e5642100e752cb87e064bb97) can solve this.
+(of course this needs another patches...)
+
+Anyway...
+Marek, in future please make sure your patch has no building problem before
+submitting.
+(or it can help to add some kind of dependency note in your patch)
+
+Thanks.
+
+Best regards,
+Kgene.
 --
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
