@@ -1,23 +1,23 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
+From: Arnd Hannemann <arnd@arndnet.de>
 Subject: Re: Bug in mmc_test or host driver?
-Date: Sun, 15 Aug 2010 19:07:16 +0300
-Message-ID: <4C6810B4.8080604@nokia.com>
+Date: Sun, 15 Aug 2010 21:12:46 +0200
+Message-ID: <4C683C2E.7020206@arndnet.de>
 References: <4C657FA1.9090705@arndnet.de> <4C67FC00.8080207@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.105.134]:57268 "EHLO
-	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932204Ab0HOQHX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Aug 2010 12:07:23 -0400
+Received: from slowhand.arndnet.de ([88.198.19.76]:36860 "EHLO mail.unitix.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751187Ab0HOTMu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 15 Aug 2010 15:12:50 -0400
 In-Reply-To: <4C67FC00.8080207@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Hunter Adrian (Nokia-MS/Helsinki)" <adrian.hunter@nokia.com>
-Cc: Arnd Hannemann <arnd@arndnet.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hunter Adrian (Nokia-MS/Helsinki) wrote:
+Am 15.08.2010 16:38, schrieb Adrian Hunter:
 > Arnd Hannemann wrote:
 >> Hi,
 >>
@@ -49,74 +49,31 @@ Hunter Adrian (Nokia-MS/Helsinki) wrote:
 >> The host's max_blk_count is 512, but mmc_test does not check and issues
 >> a request with 8192 blocks.
 >> So I believe the test is wrong here?
-> 
+>
 > Yes.  Try this:
-> 
+>
 > diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
 > index 5dd8576..4fb8b10 100644
 > --- a/drivers/mmc/card/mmc_test.c
 > +++ b/drivers/mmc/card/mmc_test.c
-> @@ -1328,6 +1328,10 @@ static int mmc_test_area_init(struct mmc_test_card *test, int erase, int fill)
->  		t->max_sz = TEST_AREA_MAX_SIZE;
->  	else
->  		t->max_sz = (unsigned long)test->card->pref_erase << 9;
-> +	if (t->max_sz >> 9 > test->card->host->max_blk_count)
-> +		t->max_sz = test->card->host->max_blk_count << 9;
-> +	if (min_sz > t->max_sz)
-> +		min_sz = t->max_sz;
->  	/*
->  	 * Try to allocate enough memory for the whole area.  Less is OK
->  	 * because the same memory can be mapped into the scatterlist more than
-> 
-> 
+> @@ -1328,6 +1328,10 @@ static int mmc_test_area_init(struct
+> mmc_test_card *test, int erase, int fill)
+>         t->max_sz = TEST_AREA_MAX_SIZE;
+>     else
+>         t->max_sz = (unsigned long)test->card->pref_erase << 9;
+> +    if (t->max_sz >> 9 > test->card->host->max_blk_count)
+> +        t->max_sz = test->card->host->max_blk_count << 9;
+> +    if (min_sz > t->max_sz)
+> +        min_sz = t->max_sz;
+>     /*
+>      * Try to allocate enough memory for the whole area.  Less is OK
+>      * because the same memory can be mapped into the scatterlist more
+> than
+>
+>
 > and if it works send a patch.
 
-On second thoughts, that is not so good.  I will send a patch.
+Thanks, it works.
 
-> 
->>  [  152.656250] Backtrace:
->>  [  152.656250] [<c0028e38>] (__bug+0x0/0x30) from [<c0181f88>]
->> (mmc_wait_for_req+0x14c/0x228)
->>  [  152.656250] [<c0181e3c>] (mmc_wait_for_req+0x0/0x228) from
->> [<bf01840c>] (mmc_test_simple_transfer+0xb0/0x140 [mmc_test])
->>  [  152.656250]  r7:cf1e3d28 r6:cf1ec000 r5:cf1e3db4 r4:cf318000
->>  [  152.656250] [<bf01835c>] (mmc_test_simple_transfer+0x0/0x140
->> [mmc_test]) from [<bf01993c>] (mmc_test_area_io+0x2fc/0x350 [mmc_test])
->>  [  152.656250] [<bf019640>] (mmc_test_area_io+0x0/0x350 [mmc_test])
->> from [<bf0199c4>] (mmc_test_area_fill+0x34/0x3c [mmc_test])
->>  [  152.656250] [<bf019990>] (mmc_test_area_fill+0x0/0x3c [mmc_test])
->> from [<bf019d10>] (mmc_test_area_init+0x238/0x264 [mmc_test])
->>  [  152.656250] [<bf019ad8>] (mmc_test_area_init+0x0/0x264 [mmc_test])
->> from [<bf019d8c>] (mmc_test_area_prepare_fill+0x18/0x1c [mmc_test])
->>  [  152.656250] [<bf019d74>] (mmc_test_area_prepare_fill+0x0/0x1c
->> [mmc_test]) from [<bf018a1c>] (mmc_test_store+0xf8/0x290 [mmc_test])
->>  [  152.656250] [<bf018924>] (mmc_test_store+0x0/0x290 [mmc_test]) from
->> [<c015541c>] (dev_attr_store+0x24/0x28)
->>  [  152.656250]  r8:cf0f3010 r7:cf24fd60 r6:00000003 r5:cf1e3f70 r4:cf41bd88
->>  [  152.656250] r3:00000003
->>  [  152.656250] [<c01553f8>] (dev_attr_store+0x0/0x28) from [<c00ccad0>]
->> (sysfs_write_file+0x110/0x144)
->>  [  152.656250] [<c00cc9c0>] (sysfs_write_file+0x0/0x144) from
->> [<c008a5c4>] (vfs_write+0xbc/0x138)
->>  [  152.656250] [<c008a508>] (vfs_write+0x0/0x138) from [<c008a708>]
->> (sys_write+0x44/0x70)
->>  [  152.656250]  r8:00000000 r7:00000004 r6:00000003 r5:000d9408 r4:cf0f4420
->>  [  152.656250] [<c008a6c4>] (sys_write+0x0/0x70) from [<c0025e60>]
->> (ret_fast_syscall+0x0/0x30)
->>  [  152.656250]  r9:cf1e2000 r8:c0025fe4 r6:00000003 r5:403305c8 r4:00000003
->>  [  152.656250] Code: e59f0010 e1a01003 eb077a1d e3a03000 (e5833000)
->>
->> Best regards,
->> Arnd
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+Best regards,
+Arnd
