@@ -1,99 +1,65 @@
-From: Randy Dunlap <randy.dunlap@oracle.com>
-Subject: Re: undefined reference to `mmc_pm_notify' when selected MMC
-	without PM.
-Date: Mon, 16 Aug 2010 08:12:39 -0700
-Message-ID: <20100816081239.c5ae02ef.randy.dunlap@oracle.com>
-References: <009801cb3adb$6550e400$2ff2ac00$%kim@samsung.com>
-	<20100816051721.GA17903@pengutronix.de>
+From: David Vrabel <david.vrabel@csr.com>
+Subject: Re: [patch v2 1/1]sdhci support 10 bit divided clock Mode for spec
+ 3.0
+Date: Mon, 16 Aug 2010 17:07:15 +0100
+Message-ID: <4C696233.6000408@csr.com>
+References: <AANLkTimBQA+-RLAv-DRb3cv10LH84B=7Rzo92igwyo4A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20100816051721.GA17903@pengutronix.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>
-Cc: Kukjin Kim <kgene.kim@samsung.com>, 'Maxim Levitsky' <maximlevitsky@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, 'Andrew Morton' <akpm@linux-foundation.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cluster-d.mailcontrol.com ([85.115.60.190]:59953 "EHLO
+	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751390Ab0HPQIH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2010 12:08:07 -0400
+Received: from rly21d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
+	by rly21d.srv.mailcontrol.com (MailControl) with ESMTP id o7GG7nUW020983
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2010 17:08:05 +0100
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+	by rly21d.srv.mailcontrol.com (MailControl) id o7GG7I5G015027
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2010 17:07:18 +0100
+In-Reply-To: <AANLkTimBQA+-RLAv-DRb3cv10LH84B=7Rzo92igwyo4A@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Wolfram Sang <w.sang@pengutronix.de>, Matt Fleming <matt@console-pimps.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Eric Miao <eric.y.miao@gmail.com>
 
-On Mon, 16 Aug 2010 07:17:21 +0200 Uwe Kleine-K=F6nig wrote:
+zhangfei gao wrote:
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 913555e..32dcac9 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+[...]
+> @@ -1001,13 +1001,23 @@ static void sdhci_set_clock(struct sdhci_host
+> *host, unsigned int clock)
+>  	if (clock == 0)
+>  		goto out;
+> 
+> -	for (div = 1;div < 256;div *= 2) {
+> -		if ((host->max_clk / div) <= clock)
+> -			break;
+> +	if (host->version >= SDHCI_SPEC_300)
+> +		max_div = 2046;
+> +	else
+> +		max_div = 256;
+> +
+> +	if(host->max_clk <= clock)
+> +		div = 1;
+> +	else {
+> +		for (div = 2; div < max_div; div += 2) {
+> +			if ((host->max_clk / div) <= clock)
+> +				break;
+> +		}
 
-> Hello,
-> =
+This isn't correct.  The divisor must be a power of two for 2.00
+controllers.
 
-> On Fri, Aug 13, 2010 at 08:33:40PM +0900, Kukjin Kim wrote:
-> > Kukjin Kim wrote:
-> > > =
+David
+-- 
+David Vrabel, Senior Software Engineer, Drivers
+CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
+Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
 
-> > > Hi,
-> > > =
 
-> > > Following is build error when selected MMC without PM.
-> > > =
-
-> > > drivers/built-in.o: In function `mmc_alloc_host':
-> > > drivers/mmc/core/host.c:108: undefined reference to `mmc_pm_notify'
-> > > make[1]: *** [.tmp_vmlinux1] Error 1
-> > > make: *** [sub-make] Error 2
-> > > =
-
-> > > That is added from Maxim's ' mmc: fix all hangs related to mmc/sd card
-> > > insert/removal during suspend/resume '
-> > > (commit ID: 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e)
-> > > =
-
-> > > Below is temporary patch for avoiding build error.
-> > > But I'm not sure about this... :-(
-> > > =
-
-> > > ---
-> > > =
-
-> > > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> > > index 0efe631..d80cfdc 100644
-> > > --- a/drivers/mmc/core/host.c
-> > > +++ b/drivers/mmc/core/host.c
-> > > @@ -86,7 +86,9 @@ struct mmc_host *mmc_alloc_host(int extra, struct d=
-evice
-> > > *dev)
-> > >         init_waitqueue_head(&host->wq);
-> > >         INIT_DELAYED_WORK(&host->detect, mmc_rescan);
-> > >         INIT_DELAYED_WORK_DEFERRABLE(&host->disable,
-> > > mmc_host_deeper_disable);
-> > > +#ifdef CONFIG_PM
-> > >         host->pm_notify.notifier_call =3D mmc_pm_notify;
-> > > +#endif
-> > > =
-
-> > >         /*
-> > >          * By default, hosts do not support SGIO or large requests.
-> > > =
-
-> > > ---
-> > =
-
-> > Kindly ignore this stuff because I found Uwe's same patch just now ;-)
-> > Sorry for bothering.
-> For those who care:
-> =
-
-> 	http://mid.gmane.org/1281691473-15481-1-git-send-email-u.kleine-koenig@p=
-engutronix.de
-> =
-
-> Kgene, do you care to ack this change as it may prod akpm in taking the
-> fix a bit earlier?
-
-or this one from earlier:
-http://lkml.org/lkml/2010/8/12/207
-
----
-~Randy
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
