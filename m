@@ -1,125 +1,100 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: 'error: 'SDHCI_QUIRK_NO_HISPD_BIT' undeclared' and 'undefined
- reference to `sdhci_card_detect''
-Date: Tue, 17 Aug 2010 13:26:41 +0900
-Message-ID: <00a101cb3dc4$675e51b0$361af510$%kim@samsung.com>
-References: <008d01cb3ab9$ae73da60$0b5b8f20$%kim@samsung.com>
- <000901cb3abf$5ef59b30$1ce0d190$%szyprowski@samsung.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: + sdhci-add-no-hi-speed-bit-quirk-support.patch added to -mm tree
+Date: Tue, 17 Aug 2010 14:15:51 +0900
+Message-ID: <AANLkTikXzMU723M=-ZM-DFnV_MUVCxBiQJ3ZiUA5Dpth@mail.gmail.com>
+References: <201006102043.o5AKhJjl022731@imap1.linux-foundation.org>
+	<20100611004229.GD3498@trinity.fluff.org>
+	<AANLkTik5ANblTvTGh-4f9IL7VW8iPmQtRiN0BIDWjFGc@mail.gmail.com>
+	<20100810143434.01bea685.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:31319 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751598Ab0HQE0d (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2010 00:26:33 -0400
-In-reply-to: <000901cb3abf$5ef59b30$1ce0d190$%szyprowski@samsung.com>
-Content-language: ko
+Received: from mail-ww0-f42.google.com ([74.125.82.42]:39020 "EHLO
+	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751396Ab0HQFPw convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2010 01:15:52 -0400
+Received: by wwf26 with SMTP id 26so484554wwf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2010 22:15:51 -0700 (PDT)
+In-Reply-To: <20100810143434.01bea685.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Marek Szyprowski' <m.szyprowski@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ben-linux@fluff.org, 'Andrew Morton' <akpm@linux-foundation.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org
 
-Marek Szyprowski wrote:
-> 
-> Hello,
-> 
-Hi Marek :-)
+On Wed, Aug 11, 2010 at 6:34 AM, Andrew Morton
+<akpm@linux-foundation.org> wrote:
+> On Fri, 11 Jun 2010 12:25:32 +0900
+> Kyungmin Park <kmpark@infradead.org> wrote:
+>
+>> On Fri, Jun 11, 2010 at 9:42 AM, Ben Dooks <ben-linux@fluff.org> wro=
+te:
+>> > On Thu, Jun 10, 2010 at 01:43:19PM -0700, akpm@linux-foundation.or=
+g wrote:
+>> >>
+>> >> The patch titled
+>> >> __ __ __SDHCI: add no hi-speed bit quirk support
+>> >> has been added to the -mm tree. __Its filename is
+>> >> __ __ __sdhci-add-no-hi-speed-bit-quirk-support.patch
+>> >>
+>> >> Before you just go and hit "reply", please:
+>> >> __ __a) Consider who else should be cc'ed
+>> >> __ __b) Prefer to cc a suitable mailing list as well
+>> >> __ __c) Ideally: find the original patch on the mailing list and =
+do a
+>> >> __ __ __ reply-to-all to that, adding suitable additional cc's
+>> >>
+>> >> *** Remember to use Documentation/SubmitChecklist when testing yo=
+ur code ***
+>> >>
+>> >> See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+>> >> out what to do about this
+>> >>
+>> >> The current -mm tree may be found at http://userweb.kernel.org/~a=
+kpm/mmotm/
+>> >>
+>> >> ------------------------------------------------------
+>> >> Subject: SDHCI: add no hi-speed bit quirk support
+>> >> From: Kyungmin Park <kmpark@infradead.org>
+>> >>
+>> >> Some SDHCI controllers like s5pc110 don't have an HISPD bit in th=
+e HOSTCTL
+>> >> register.
+>> >
+>> > It would be nice for someone at Samsung to (a) explain the differe=
+nces
+>> > from the base SDHCI spec for all their hardware (the databooks are=
+ often
+>> > vague in this area) and (b) for the information for the extra regi=
+sters
+>> > this IP block has to be explained in more detail (and the platform=
+ code
+>> > checked for this too).
+>>
+>> I hope also.
+>
+> Going back over this dicussion, I get the impression that nothing
+> really got resolved or finished. =A0So it is far from clear that I sh=
+ould
+> send these:
+>
+> s5pc110-sdhci-s3c-can-override-host-capabilities.patch
+Needed. since current sdhci only support 4-bit. but some board uses
+the 8-bit buswidth.
 
-> On Friday, August 13, 2010 9:32 AM Kukjin Kim wrote:
-> 
-> > This is just information about Samsung sdmmc stuff building error now.
-> >
-> > I found Marek's 'sdhci-s3c: enable SDHCI_QUIRK_NO_HISPD_BIT quirk' in
-the
-> > Linus' tree.
-> > (commit ID: a1d5646005af1247d6ae78434bb4db15b07a07b2)
-> >
-> > But not defined the quirk yet...so following build error happened with
-> > s3c6400_defconfig in Linus' latest.
-> >
-> > drivers/mmc/host/sdhci-s3c.c: In function 'sdhci_s3c_probe':
-> > drivers/mmc/host/sdhci-s3c.c:400: error: 'SDHCI_QUIRK_NO_HISPD_BIT'
-> > undeclared (first use in this function)
-> > drivers/mmc/host/sdhci-s3c.c:400: error: (Each undeclared identifier is
-> > reported only once
-> > drivers/mmc/host/sdhci-s3c.c:400: error: for each function it appears
-in.)
-> > make[4]: *** [drivers/mmc/host/sdhci-s3c.o] Error 1
-> > make[3]: *** [drivers/mmc/host] Error 2
-> > make[2]: *** [drivers/mmc] Error 2
-> > make[1]: *** [drivers] Error 2
-> >
-> > Kyungmin Park's below patch can solve this and it is in mmotm now.
-> > (commit ID: 2935b9e7fcc4bea3751b8d039b383b2036a7d36d)
-> >
-> > But I think, to update quirk definition should being in Marek's patch
-for
-> > avoiding build error.
-> > Of course, I'm not sure whether the commit order changed.
-> > Anyway, in this case, will be solved after merging mm tree.
-> >
-Hmm...not merged yet :-( so happened build error at 36-rc1.
+> s5pc110-sdhci-s3c-support-on-s5pc110.patch
+Needed. for s5pc110 & s5pc210.
 
-> >
-> > And second case is same.
-> >
-> > Marek's 'sdhci-s3c: add support for new card detection methods' cause
-> > following build error.
-> > (commit ID:17866e14f3a4f219e94f1374ece7226479418ff8)
-> >
-> > drivers/built-in.o: In function `sdhci_s3c_notify_change':
-> >
-/home/kgene/linux/linux-2.6-mainline-dev/drivers/mmc/host/sdhci-s3c.c:255:
-> > undefined reference to `sdhci_card_detect'
-> > make[1]: *** [.tmp_vmlinux1] Error 1
-> > make: *** [sub-make] Error 2
-> >
-> > And Andrew's patch(b567e5dd5a34c184e5642100e752cb87e064bb97) can solve
-> this.
-> > (of course this needs another patches...)
-> >
-Same...
+> sdhci-add-no-hi-speed-bit-quirk-support.patch
+>
+> upstream. =A0Could we please revisit all of this ASAP?
 
+As System LSI don't explain it. we don't have a choice. but to fix the
+current 2.6.36-rc1 issue. it should apply the
+"sdhci-add-no-hi-speed-bit-quirk-support.patch"
+I re-submit the against the latest kernel.
 
-This is just information...
+I check it's working on my goni & aquila board.
 
-The build error of drivers/mmc/host/sdhci-s3c.c can be disappeared with the
-Kyungmin's commit 2935b9e7fcc4bea3751b8d039b383b2036a7d36d and Andrew's
-commit b567e5dd5a34c184e5642100e752cb87e064bb97 which are in mm tree now.
-
-And will be merged soon...Andrew, right?
-
-> > Anyway...
-> > Marek, in future please make sure your patch has no building problem
-before
-> > submitting.
-> > (or it can help to add some kind of dependency note in your patch)
-> 
-> My patches submited to Andrew Morton had the description and a note that
-they
-> have been prepared especially for his tree, taking into account all
-patches
-> that are already there (mainly a tasklets to threaded irq conversion). For
-me
-> it was quite obvious that they will be merged after all other sdhci
-changes
-> from that tree. I have no idea why the order of the patches has been
-reversed
-> and my sdhci patches has been submitted to Linus before the other sdhci
-> changes.
-> 
-> Best regards
-> --
-> Marek Szyprowski
-> Samsung Poland R&D Center
-
-
-Thanks.
-
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
-
+Thank you,
+Kyungmin Park
