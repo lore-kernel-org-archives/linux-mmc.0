@@ -1,60 +1,125 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: [PATCH v2] SDHCI: add no hi-speed bit quirk support
-Date: Tue, 17 Aug 2010 13:24:53 +0900
-Message-ID: <20100817042453.GA21321@july>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: 'error: 'SDHCI_QUIRK_NO_HISPD_BIT' undeclared' and 'undefined
+ reference to `sdhci_card_detect''
+Date: Tue, 17 Aug 2010 13:26:41 +0900
+Message-ID: <00a101cb3dc4$675e51b0$361af510$%kim@samsung.com>
+References: <008d01cb3ab9$ae73da60$0b5b8f20$%kim@samsung.com>
+ <000901cb3abf$5ef59b30$1ce0d190$%szyprowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:13839 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750938Ab0HQEZA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2010 00:25:00 -0400
-Received: from epmmp2 (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
- with ESMTP id <0L7A002DE49NL010@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 17 Aug 2010 13:24:59 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0L7A00JU849NNO@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 17 Aug 2010 13:24:59 +0900 (KST)
-Content-disposition: inline
+Received: from mailout4.samsung.com ([203.254.224.34]:31319 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751598Ab0HQE0d (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2010 00:26:33 -0400
+In-reply-to: <000901cb3abf$5ef59b30$1ce0d190$%szyprowski@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, akpm@linux-foundation.org
+To: 'Marek Szyprowski' <m.szyprowski@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ben-linux@fluff.org, 'Andrew Morton' <akpm@linux-foundation.org>
 
-From: Kyungmin Park <kyungmin.park@samsung.com>
+Marek Szyprowski wrote:
+> 
+> Hello,
+> 
+Hi Marek :-)
 
-Some SDHCI controller like s5pc110 doesn't have HISPD bit at HOSTCTL register.
-Also fix the sdhci-s3c build since SDHCI_QUIRK_NO_HISPD_BIT defined at there.
+> On Friday, August 13, 2010 9:32 AM Kukjin Kim wrote:
+> 
+> > This is just information about Samsung sdmmc stuff building error now.
+> >
+> > I found Marek's 'sdhci-s3c: enable SDHCI_QUIRK_NO_HISPD_BIT quirk' in
+the
+> > Linus' tree.
+> > (commit ID: a1d5646005af1247d6ae78434bb4db15b07a07b2)
+> >
+> > But not defined the quirk yet...so following build error happened with
+> > s3c6400_defconfig in Linus' latest.
+> >
+> > drivers/mmc/host/sdhci-s3c.c: In function 'sdhci_s3c_probe':
+> > drivers/mmc/host/sdhci-s3c.c:400: error: 'SDHCI_QUIRK_NO_HISPD_BIT'
+> > undeclared (first use in this function)
+> > drivers/mmc/host/sdhci-s3c.c:400: error: (Each undeclared identifier is
+> > reported only once
+> > drivers/mmc/host/sdhci-s3c.c:400: error: for each function it appears
+in.)
+> > make[4]: *** [drivers/mmc/host/sdhci-s3c.o] Error 1
+> > make[3]: *** [drivers/mmc/host] Error 2
+> > make[2]: *** [drivers/mmc] Error 2
+> > make[1]: *** [drivers] Error 2
+> >
+> > Kyungmin Park's below patch can solve this and it is in mmotm now.
+> > (commit ID: 2935b9e7fcc4bea3751b8d039b383b2036a7d36d)
+> >
+> > But I think, to update quirk definition should being in Marek's patch
+for
+> > avoiding build error.
+> > Of course, I'm not sure whether the commit order changed.
+> > Anyway, in this case, will be solved after merging mm tree.
+> >
+Hmm...not merged yet :-( so happened build error at 36-rc1.
 
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7855121..87ab234 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1180,7 +1180,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	else
- 		ctrl &= ~SDHCI_CTRL_4BITBUS;
- 
--	if (ios->timing == MMC_TIMING_SD_HS)
-+	if (ios->timing == MMC_TIMING_SD_HS &&
-+	    !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
- 		ctrl |= SDHCI_CTRL_HISPD;
- 	else
- 		ctrl &= ~SDHCI_CTRL_HISPD;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 036cfae..d316bc7 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -245,6 +245,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_MISSING_CAPS			(1<<27)
- /* Controller uses Auto CMD12 command to stop the transfer */
- #define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12		(1<<28)
-+/* Controller doesn't have HISPD bit field in HI-SPEED SD card */
-+#define SDHCI_QUIRK_NO_HISPD_BIT			(1<<29)
- 
- 	int			irq;		/* Device IRQ */
- 	void __iomem *		ioaddr;		/* Mapped address */
+> >
+> > And second case is same.
+> >
+> > Marek's 'sdhci-s3c: add support for new card detection methods' cause
+> > following build error.
+> > (commit ID:17866e14f3a4f219e94f1374ece7226479418ff8)
+> >
+> > drivers/built-in.o: In function `sdhci_s3c_notify_change':
+> >
+/home/kgene/linux/linux-2.6-mainline-dev/drivers/mmc/host/sdhci-s3c.c:255:
+> > undefined reference to `sdhci_card_detect'
+> > make[1]: *** [.tmp_vmlinux1] Error 1
+> > make: *** [sub-make] Error 2
+> >
+> > And Andrew's patch(b567e5dd5a34c184e5642100e752cb87e064bb97) can solve
+> this.
+> > (of course this needs another patches...)
+> >
+Same...
+
+
+This is just information...
+
+The build error of drivers/mmc/host/sdhci-s3c.c can be disappeared with the
+Kyungmin's commit 2935b9e7fcc4bea3751b8d039b383b2036a7d36d and Andrew's
+commit b567e5dd5a34c184e5642100e752cb87e064bb97 which are in mm tree now.
+
+And will be merged soon...Andrew, right?
+
+> > Anyway...
+> > Marek, in future please make sure your patch has no building problem
+before
+> > submitting.
+> > (or it can help to add some kind of dependency note in your patch)
+> 
+> My patches submited to Andrew Morton had the description and a note that
+they
+> have been prepared especially for his tree, taking into account all
+patches
+> that are already there (mainly a tasklets to threaded irq conversion). For
+me
+> it was quite obvious that they will be merged after all other sdhci
+changes
+> from that tree. I have no idea why the order of the patches has been
+reversed
+> and my sdhci patches has been submitted to Linus before the other sdhci
+> changes.
+> 
+> Best regards
+> --
+> Marek Szyprowski
+> Samsung Poland R&D Center
+
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
+
