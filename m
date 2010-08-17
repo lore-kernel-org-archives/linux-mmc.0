@@ -1,72 +1,47 @@
-From: Zang Roy-R61911 <r61911@freescale.com>
-Subject: RE: [PATCH 1/2] mmc: change ACMD12 to AUTO_CMD12 for more clear
-Date: Tue, 17 Aug 2010 14:48:28 +0800
-Message-ID: <3850A844E6A3854C827AC5C0BEC7B60A07C66F@zch01exm23.fsl.freescale.net>
-References: <3850A844E6A3854C827AC5C0BEC7B60A056400@zch01exm23.fsl.freescale.net>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [patch 1/1] sdhci: support MMC_CAP_MMC_HIGHSPEED
+Date: Tue, 17 Aug 2010 08:57:59 +0100
+Message-ID: <20100817075759.GA1733@console-pimps.org>
+References: <AANLkTim8q285b==R7Q+QdqgJG5Q5D9yXpft7wZNA6Suw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:37691 "EHLO
-	TX2EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755996Ab0HQGsy convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2010 02:48:54 -0400
-Received: from mail154-tx2 (localhost.localdomain [127.0.0.1])	by
- mail154-tx2-R.bigfish.com (Postfix) with ESMTP id 9DABDDC81A9	for
- <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2010 06:48:53 +0000 (UTC)
-Received: from TX2EHSMHS013.bigfish.com (unknown [10.9.14.246])	by
- mail154-tx2.bigfish.com (Postfix) with ESMTP id 6F4AA1070050	for
- <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2010 06:48:53 +0000 (UTC)
-Received: from de01smr02.am.mot.com (de01smr02.freescale.net [10.208.0.151])
-	by az33egw02.freescale.net (8.14.3/8.14.3) with ESMTP id o7H6mX9j004516	for
- <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2010 23:48:43 -0700 (MST)
-Received: from zch01exm23.fsl.freescale.net (zch01exm23.ap.freescale.net
- [10.192.129.207])	by de01smr02.am.mot.com (8.13.1/8.13.0) with ESMTP id
- o7H72eaS018498	for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2010 02:02:41
- -0500 (CDT)
-Content-Class: urn:content-classes:message
-In-Reply-To: <3850A844E6A3854C827AC5C0BEC7B60A056400@zch01exm23.fsl.freescale.net>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:48928 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752692Ab0HQH6A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2010 03:58:00 -0400
+Content-Disposition: inline
+In-Reply-To: <AANLkTim8q285b==R7Q+QdqgJG5Q5D9yXpft7wZNA6Suw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zang Roy-R61911 <R61911@freescale.com>, akpm@linux-foundation.org, linux-mmc@vger.kernel.org
-Cc: linuxppc-dev@ozlabs.org, mirqus@gmail.com, cbouatmailru@gmail.com, grant.likely@secretlab.ca
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>, Eric Miao <eric.y.miao@gmail.com>
 
- 
-
-> -----Original Message-----
-> From: Zang Roy-R61911 
-> Sent: Wednesday, August 11, 2010 12:47 PM
-> To: Zang Roy-R61911; akpm@linux-foundation.org; 
-> linux-mmc@vger.kernel.org
-> Cc: linuxppc-dev@ozlabs.org; mirqus@gmail.com; 
-> cbouatmailru@gmail.com; grant.likely@secretlab.ca
-> Subject: RE: [PATCH 1/2] mmc: change ACMD12 to AUTO_CMD12 for 
-> more clear
+On Mon, Aug 16, 2010 at 09:22:30AM -0400, zhangfei gao wrote:
+>
+> From 165986b1ce3da7de57089ceb4547e84a5b530e64 Mon Sep 17 00:00:00 2001
+> From: Zhangfei Gao <zgao6@marvell.com>
+> Date: Mon, 16 Aug 2010 21:15:32 -0400
+> Subject: [PATCH] sdhci: support MMC_CAP_MMC_HIGHSPEED
 > 
+> 
+> Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 7855121..913555e 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1823,7 +1823,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>  		mmc->caps |= MMC_CAP_4_BIT_DATA;
 >  
-> 
-> > -----Original Message-----
-> > From: Zang Roy-R61911 
-> > Sent: Tuesday, August 10, 2010 17:47 PM
-> > To: akpm@linux-foundation.org; linux-mmc@vger.kernel.org
-> > Cc: linuxppc-dev@ozlabs.org; mirqus@gmail.com; 
-> > cbouatmailru@gmail.com; grant.likely@secretlab.ca
-> > Subject: [PATCH 1/2] mmc: change ACMD12 to AUTO_CMD12 for more clear
-> > 
-> > Change ACMD12 to AUTO_CMD12 to reduce the confusion.
-> > ACMD12 might be confused with MMC/SD App CMD 12 (CMD55+CMD12 combo).
-> > 
-> > Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
-> > ---
-> >  drivers/mmc/host/sdhci-of-core.c |    2 +-
-> >  drivers/mmc/host/sdhci.c         |    8 ++++----
-> >  drivers/mmc/host/sdhci.h         |   10 +++++-----
-> >  3 files changed, 10 insertions(+), 10 deletions(-)
-> Andrew, 
-> Could you help to pick up this minor fix?
-> Thanks.
-> Roy
-Any update on these two patches?
-Thanks.
-Roy
+>  	if (caps & SDHCI_CAN_DO_HISPD)
+> -		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+> +		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+>  
+>  	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+>  		mmc->caps |= MMC_CAP_NEEDS_POLL;
 
+Acked-by: Matt Fleming <matt@console-pimps.org>
