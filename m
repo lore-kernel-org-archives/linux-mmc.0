@@ -1,112 +1,99 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: [PATCH] mmc: make number of mmcblk minors configurable
-Date: Tue, 17 Aug 2010 23:13:33 -0500
-Message-ID: <20100818041333.GA14149@lixom.net>
+From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
+	<u.kleine-koenig@pengutronix.de>
+Subject: Re: undefined reference to `mmc_pm_notify' when selected MMC
+	without PM.
+Date: Wed, 18 Aug 2010 08:38:12 +0200
+Message-ID: <20100818063812.GC16956@pengutronix.de>
+References: <009801cb3adb$6550e400$2ff2ac00$%kim@samsung.com> <20100816051721.GA17903@pengutronix.de> <20100816081239.c5ae02ef.randy.dunlap@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:40364 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750889Ab0HRGiU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2010 02:38:20 -0400
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: akpm@linux-foundation.org, linux-kernel@vger.kernel.org
+In-Reply-To: <20100816081239.c5ae02ef.randy.dunlap@oracle.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Randy Dunlap <randy.dunlap@oracle.com>
+Cc: Kukjin Kim <kgene.kim@samsung.com>, 'Maxim Levitsky' <maximlevitsky@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ben-linux@fluff.org, 'Andrew Morton' <akpm@linux-foundation.org>, linux-arm-kernel@lists.infradead.org
 
-The old limit of number of minor numbers per mmcblk device was hardcoded
-at 8. This isn't enough for some of the more elaborate partitioning
-schemes, for example those used by Chrome OS.
+Hello Randy,
 
-Since there might be a bunch of systems out there with static /dev
-contents that relies on the old numbering scheme, let's make it a
-build-time option with the default set to the previous 8.
+On Mon, Aug 16, 2010 at 08:12:39AM -0700, Randy Dunlap wrote:
+> On Mon, 16 Aug 2010 07:17:21 +0200 Uwe Kleine-K=F6nig wrote:
+>=20
+> > Hello,
+> >=20
+> > On Fri, Aug 13, 2010 at 08:33:40PM +0900, Kukjin Kim wrote:
+> > > Kukjin Kim wrote:
+> > > >=20
+> > > > Hi,
+> > > >=20
+> > > > Following is build error when selected MMC without PM.
+> > > >=20
+> > > > drivers/built-in.o: In function `mmc_alloc_host':
+> > > > drivers/mmc/core/host.c:108: undefined reference to `mmc_pm_not=
+ify'
+> > > > make[1]: *** [.tmp_vmlinux1] Error 1
+> > > > make: *** [sub-make] Error 2
+> > > >=20
+> > > > That is added from Maxim's ' mmc: fix all hangs related to mmc/=
+sd card
+> > > > insert/removal during suspend/resume '
+> > > > (commit ID: 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e)
+> > > >=20
+> > > > Below is temporary patch for avoiding build error.
+> > > > But I'm not sure about this... :-(
+> > > >=20
+> > > > ---
+> > > >=20
+> > > > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > > > index 0efe631..d80cfdc 100644
+> > > > --- a/drivers/mmc/core/host.c
+> > > > +++ b/drivers/mmc/core/host.c
+> > > > @@ -86,7 +86,9 @@ struct mmc_host *mmc_alloc_host(int extra, st=
+ruct device
+> > > > *dev)
+> > > >         init_waitqueue_head(&host->wq);
+> > > >         INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+> > > >         INIT_DELAYED_WORK_DEFERRABLE(&host->disable,
+> > > > mmc_host_deeper_disable);
+> > > > +#ifdef CONFIG_PM
+> > > >         host->pm_notify.notifier_call =3D mmc_pm_notify;
+> > > > +#endif
+> > > >=20
+> > > >         /*
+> > > >          * By default, hosts do not support SGIO or large reque=
+sts.
+> > > >=20
+> > > > ---
+> > >=20
+> > > Kindly ignore this stuff because I found Uwe's same patch just no=
+w ;-)
+> > > Sorry for bothering.
+> > For those who care:
+> >=20
+> > 	http://mid.gmane.org/1281691473-15481-1-git-send-email-u.kleine-ko=
+enig@pengutronix.de
+> >=20
+> > Kgene, do you care to ack this change as it may prod akpm in taking=
+ the
+> > fix a bit earlier?
+>=20
+> or this one from earlier:
+> http://lkml.org/lkml/2010/8/12/207
 
-Signed-off-by: Olof Johansson <olof@lixom.net>
----
- drivers/mmc/card/Kconfig |   10 ++++++++++
- drivers/mmc/card/block.c |   20 ++++++++------------
- 2 files changed, 18 insertions(+), 12 deletions(-)
+If I found your patch on gmane I could answer it with an Ack, on lkml
+and kerneltrap (where I found it) I don't get the Message-Id header.
 
-diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
-index 3f2a912..e939dcf 100644
---- a/drivers/mmc/card/Kconfig
-+++ b/drivers/mmc/card/Kconfig
-@@ -14,6 +14,16 @@ config MMC_BLOCK
- 	  mount the filesystem. Almost everyone wishing MMC support
- 	  should say Y or M here.
- 
-+config MMC_BLOCK_MINORS
-+	int "Number of minors per block device"
-+	range 4 32
-+	default 8
-+	help
-+	  Number of minors per block device. One is needed for every
-+	  partition (plus one for the whole device).
-+	  Default is 8 to be backwards compatible with previous
-+	  hardcoded device numbering.
-+
- config MMC_BLOCK_BOUNCE
- 	bool "Use bounce buffer for simple hosts"
- 	depends on MMC_BLOCK
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index d545f79..524e232 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -45,13 +45,9 @@
- 
- MODULE_ALIAS("mmc:block");
- 
--/*
-- * max 8 partitions per card
-- */
--#define MMC_SHIFT	3
--#define MMC_NUM_MINORS	(256 >> MMC_SHIFT)
-+#define MMC_MAX_DEVICES	((255 + CONFIG_MMC_BLOCK_MINORS) / CONFIG_MMC_BLOCK_MINORS)
- 
--static DECLARE_BITMAP(dev_use, MMC_NUM_MINORS);
-+static DECLARE_BITMAP(dev_use, MMC_MAX_DEVICES);
- 
- /*
-  * There is one mmc_blk_data per slot.
-@@ -88,10 +84,10 @@ static void mmc_blk_put(struct mmc_blk_data *md)
- 	md->usage--;
- 	if (md->usage == 0) {
- 		int devmaj = MAJOR(disk_devt(md->disk));
--		int devidx = MINOR(disk_devt(md->disk)) >> MMC_SHIFT;
-+		int devidx = MINOR(disk_devt(md->disk)) / CONFIG_MMC_BLOCK_MINORS;
- 
- 		if (!devmaj)
--			devidx = md->disk->first_minor >> MMC_SHIFT;
-+			devidx = md->disk->first_minor / CONFIG_MMC_BLOCK_MINORS;
- 
- 		blk_cleanup_queue(md->queue.queue);
- 
-@@ -567,8 +563,8 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
- 	struct mmc_blk_data *md;
- 	int devidx, ret;
- 
--	devidx = find_first_zero_bit(dev_use, MMC_NUM_MINORS);
--	if (devidx >= MMC_NUM_MINORS)
-+	devidx = find_first_zero_bit(dev_use, MMC_MAX_DEVICES);
-+	if (devidx >= MMC_MAX_DEVICES)
- 		return ERR_PTR(-ENOSPC);
- 	__set_bit(devidx, dev_use);
- 
-@@ -585,7 +581,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
- 	 */
- 	md->read_only = mmc_blk_readonly(card);
- 
--	md->disk = alloc_disk(1 << MMC_SHIFT);
-+	md->disk = alloc_disk(CONFIG_MMC_BLOCK_MINORS);
- 	if (md->disk == NULL) {
- 		ret = -ENOMEM;
- 		goto err_kfree;
-@@ -602,7 +598,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
- 	md->queue.data = md;
- 
- 	md->disk->major	= MMC_BLOCK_MAJOR;
--	md->disk->first_minor = devidx << MMC_SHIFT;
-+	md->disk->first_minor = devidx * CONFIG_MMC_BLOCK_MINORS;
- 	md->disk->fops = &mmc_bdops;
- 	md->disk->private_data = md;
- 	md->disk->queue = md->queue.queue;
--- 
-1.5.6.5
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig        =
+    |
+Industrial Linux Solutions                 | http://www.pengutronix.de/=
+  |
