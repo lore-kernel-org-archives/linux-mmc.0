@@ -1,86 +1,62 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: [PATCH] mmc: make dev_to_mmc_card() macro public
-Date: Wed, 18 Aug 2010 16:31:18 +0300
-Message-ID: <1282138278-22304-1-git-send-email-ext-andriy.shevchenko@nokia.com>
+From: Randy Dunlap <randy.dunlap@oracle.com>
+Subject: [PATCH] mmc: build fix: mmc_pm_notify is only available with
+ CONFIG_PM=y
+Date: Wed, 18 Aug 2010 09:25:38 -0700
+Message-ID: <20100818092538.f36a2246.randy.dunlap@oracle.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:59454 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751231Ab0HRNbD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2010 09:31:03 -0400
+Received: from rcsinet10.oracle.com ([148.87.113.121]:45730 "EHLO
+	rcsinet10.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751051Ab0HRQ1b convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2010 12:27:31 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org
+To: lkml <linux-kernel@vger.kernel.org>, torvalds <torvalds@linux-foundation.org>, Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, David Brownell <david-b@pacbell.net>, Alan Stern <stern@rowland.harvard.edu>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 
-Conversion from struct device to struct mmc_card is used more than in one
-place. Due to this it's better to have public macro for such thing.
+=46rom: Uwe Kleine-K=F6nig  <u.kleine-koenig@pengutronix.de>
 
-Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
+This fixes a build breakage introduced by
+
+	4c2ef25 (mmc: fix all hangs related to mmc/sd card insert/removal duri=
+ng suspend/resume)
+
+Cc: David Brownell <david-b@pacbell.net>
+Cc: Alan Stern <stern@rowland.harvard.edu>
 Cc: linux-mmc@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
+Acked-by: Kukjin Kim <kgene.kim@samsung.com>
+Acked-by: Maxim Levitsky <maximlevitsky@gmail.com>
+Acked-by: Randy Dunlap <randy.dunlap@oracle.com>
+
 ---
- drivers/mmc/card/mmc_test.c |    4 +---
- drivers/mmc/core/bus.c      |    1 -
- drivers/mmc/core/bus.h      |    2 +-
- include/linux/mmc/card.h    |    2 ++
- 4 files changed, 4 insertions(+), 5 deletions(-)
+ drivers/mmc/core/host.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 5dd8576..82d39bd 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -1935,12 +1935,10 @@ static ssize_t mmc_test_show(struct device *dev,
- static ssize_t mmc_test_store(struct device *dev,
- 	struct device_attribute *attr, const char *buf, size_t count)
- {
--	struct mmc_card *card;
-+	struct mmc_card *card = dev_to_mmc_card(dev);
- 	struct mmc_test_card *test;
- 	int testcase;
- 
--	card = container_of(dev, struct mmc_card, dev);
--
- 	testcase = simple_strtol(buf, NULL, 10);
- 
- 	test = kzalloc(sizeof(struct mmc_test_card), GFP_KERNEL);
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 7cd9749..27326c4 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -22,7 +22,6 @@
- #include "sdio_cis.h"
- #include "bus.h"
- 
--#define dev_to_mmc_card(d)	container_of(d, struct mmc_card, dev)
- #define to_mmc_driver(d)	container_of(d, struct mmc_driver, drv)
- 
- static ssize_t mmc_type_show(struct device *dev,
-diff --git a/drivers/mmc/core/bus.h b/drivers/mmc/core/bus.h
-index 1817876..7813954 100644
---- a/drivers/mmc/core/bus.h
-+++ b/drivers/mmc/core/bus.h
-@@ -14,7 +14,7 @@
- #define MMC_DEV_ATTR(name, fmt, args...)					\
- static ssize_t mmc_##name##_show (struct device *dev, struct device_attribute *attr, char *buf)	\
- {										\
--	struct mmc_card *card = container_of(dev, struct mmc_card, dev);	\
-+	struct mmc_card *card = dev_to_mmc_card(dev);				\
- 	return sprintf(buf, fmt, args);						\
- }										\
- static DEVICE_ATTR(name, S_IRUGO, mmc_##name##_show, NULL)
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 6b75250..71acf19 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -173,6 +173,8 @@ static inline int mmc_blksz_for_byte_mode(const struct mmc_card *c)
- #define mmc_card_name(c)	((c)->cid.prod_name)
- #define mmc_card_id(c)		(dev_name(&(c)->dev))
- 
-+#define dev_to_mmc_card(d)	container_of(d, struct mmc_card, dev)
-+
- #define mmc_list_to_card(l)	container_of(l, struct mmc_card, node)
- #define mmc_get_drvdata(c)	dev_get_drvdata(&(c)->dev)
- #define mmc_set_drvdata(c,d)	dev_set_drvdata(&(c)->dev, d)
--- 
-1.6.3.3
+There have been 3 patches like this posted, but no one is pushing it
+for merging...
 
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 0efe631..d80cfdc 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -86,7 +86,9 @@ struct mmc_host *mmc_alloc_host(int extra, struct dev=
+ice *dev)
+ 	init_waitqueue_head(&host->wq);
+ 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+ 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable)=
+;
++#ifdef CONFIG_PM
+ 	host->pm_notify.notifier_call =3D mmc_pm_notify;
++#endif
+=20
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+--=20
+1.7.1
+
+--
