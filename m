@@ -1,97 +1,94 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: 'error: 'SDHCI_QUIRK_NO_HISPD_BIT' undeclared' and 'undefined
- reference to `sdhci_card_detect''
-Date: Wed, 18 Aug 2010 11:33:14 -0700
-Message-ID: <20100818113314.20c174f1.akpm@linux-foundation.org>
-References: <008d01cb3ab9$ae73da60$0b5b8f20$%kim@samsung.com>
-	<000901cb3abf$5ef59b30$1ce0d190$%szyprowski@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <000901cb3abf$5ef59b30$1ce0d190$%szyprowski@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: 'Kukjin Kim' <kgene.kim@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org
+From: akpm@linux-foundation.org
+Subject: + mmc-avoid-getting-cid-on-sdio-only-cards.patch added to -mm tree
+Date: Wed, 18 Aug 2010 13:36:09 -0700
+Message-ID: <201008182036.o7IKa9R8010886@imap1.linux-foundation.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:44276 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753277Ab0HRUgX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2010 16:36:23 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: david.vrabel@csr.com, linux-mmc@vger.kernel.org, mirq-linux@rere.qmqm.pl
 
-On Fri, 13 Aug 2010 10:13:04 +0200
-Marek Szyprowski <m.szyprowski@samsung.com> wrote:
 
-> Hello,
-> 
-> On Friday, August 13, 2010 9:32 AM Kukjin Kim wrote:
-> 
-> > This is just information about Samsung sdmmc stuff building error now.
-> > 
-> > I found Marek's 'sdhci-s3c: enable SDHCI_QUIRK_NO_HISPD_BIT quirk' in the
-> > Linus' tree.
-> > (commit ID: a1d5646005af1247d6ae78434bb4db15b07a07b2)
-> > 
-> > But not defined the quirk yet...so following build error happened with
-> > s3c6400_defconfig in Linus' latest.
-> > 
-> > drivers/mmc/host/sdhci-s3c.c: In function 'sdhci_s3c_probe':
-> > drivers/mmc/host/sdhci-s3c.c:400: error: 'SDHCI_QUIRK_NO_HISPD_BIT'
-> > undeclared (first use in this function)
-> > drivers/mmc/host/sdhci-s3c.c:400: error: (Each undeclared identifier is
-> > reported only once
-> > drivers/mmc/host/sdhci-s3c.c:400: error: for each function it appears in.)
-> > make[4]: *** [drivers/mmc/host/sdhci-s3c.o] Error 1
-> > make[3]: *** [drivers/mmc/host] Error 2
-> > make[2]: *** [drivers/mmc] Error 2
-> > make[1]: *** [drivers] Error 2
-> > 
-> > Kyungmin Park's below patch can solve this and it is in mmotm now.
-> > (commit ID: 2935b9e7fcc4bea3751b8d039b383b2036a7d36d)
-> > 
-> > But I think, to update quirk definition should being in Marek's patch for
-> > avoiding build error.
-> > Of course, I'm not sure whether the commit order changed.
-> > Anyway, in this case, will be solved after merging mm tree.
-> > 
-> > 
-> > And second case is same.
-> > 
-> > Marek's 'sdhci-s3c: add support for new card detection methods' cause
-> > following build error.
-> > (commit ID:17866e14f3a4f219e94f1374ece7226479418ff8)
-> > 
-> > drivers/built-in.o: In function `sdhci_s3c_notify_change':
-> > /home/kgene/linux/linux-2.6-mainline-dev/drivers/mmc/host/sdhci-s3c.c:255:
-> > undefined reference to `sdhci_card_detect'
-> > make[1]: *** [.tmp_vmlinux1] Error 1
-> > make: *** [sub-make] Error 2
-> > 
-> > And Andrew's patch(b567e5dd5a34c184e5642100e752cb87e064bb97) can solve this.
-> > (of course this needs another patches...)
-> > 
-> > Anyway...
-> > Marek, in future please make sure your patch has no building problem before
-> > submitting.
-> > (or it can help to add some kind of dependency note in your patch)
-> 
-> My patches submited to Andrew Morton had the description and a note that they
-> have been prepared especially for his tree, taking into account all patches
-> that are already there (mainly a tasklets to threaded irq conversion). For me
-> it was quite obvious that they will be merged after all other sdhci changes
-> from that tree. I have no idea why the order of the patches has been reversed
-> and my sdhci patches has been submitted to Linus before the other sdhci
-> changes.
+The patch titled
+     mmc: avoid getting CID on SDIO-only cards
+has been added to the -mm tree.  Its filename is
+     mmc-avoid-getting-cid-on-sdio-only-cards.patch
 
-We're talking about these:
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-s5pc110-sdhci-s3c-can-override-host-capabilities.patch
-s5pc110-sdhci-s3c-support-on-s5pc110.patch
-sdhci-add-no-hi-speed-bit-quirk-support.patch
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-I have a note that these await an ack from Ben Dooks so I held them
-back for a closer look after -rc1.  I was unaware of this dependency.
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
-Ben, are you OK with those patches?
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-http://userweb.kernel.org/~akpm/mmotm/broken-out/s5pc110-sdhci-s3c-can-override-host-capabilities.patch
-http://userweb.kernel.org/~akpm/mmotm/broken-out/s5pc110-sdhci-s3c-support-on-s5pc110.patch
-http://userweb.kernel.org/~akpm/mmotm/broken-out/sdhci-add-no-hi-speed-bit-quirk-support.patch
+------------------------------------------------------
+Subject: mmc: avoid getting CID on SDIO-only cards
+From: David Vrabel <david.vrabel@csr.com>
 
-Thanks.
+The introduction of support for SD combo cards breaks the initialization
+of all CSR SDIO chips.  The GO_IDLE (CMD0) in mmc_sd_get_cid() causes CSR
+chips to be reset (this is non-standard behavior).
+
+When initializing an SDIO card check for a combo card by using the memory
+present bit in the R4 response to IO_SEND_OP_COND (CMD5).  This avoids the
+call to mmc_sd_get_cid() on an SDIO-only card.
+
+Signed-off-by: David Vrabel <david.vrabel@csr.com>
+Cc: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/core/sdio.c  |    8 +++++---
+ include/linux/mmc/sdio.h |    2 ++
+ 2 files changed, 7 insertions(+), 3 deletions(-)
+
+diff -puN drivers/mmc/core/sdio.c~mmc-avoid-getting-cid-on-sdio-only-cards drivers/mmc/core/sdio.c
+--- a/drivers/mmc/core/sdio.c~mmc-avoid-getting-cid-on-sdio-only-cards
++++ a/drivers/mmc/core/sdio.c
+@@ -362,11 +362,13 @@ static int mmc_sdio_init_card(struct mmc
+ 		goto err;
+ 	}
+ 
+-	err = mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid);
+-
+-	if (!err) {
++	if (ocr & R4_MEMORY_PRESENT) {
+ 		card->type = MMC_TYPE_SD_COMBO;
+ 
++		err = mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid);
++		if (err)
++			goto remove;
++
+ 		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
+ 		    memcmp(card->raw_cid, oldcard->raw_cid, sizeof(card->raw_cid)) != 0)) {
+ 			mmc_remove_card(card);
+diff -puN include/linux/mmc/sdio.h~mmc-avoid-getting-cid-on-sdio-only-cards include/linux/mmc/sdio.h
+--- a/include/linux/mmc/sdio.h~mmc-avoid-getting-cid-on-sdio-only-cards
++++ a/include/linux/mmc/sdio.h
+@@ -38,6 +38,8 @@
+  *      [8:0] Byte/block count
+  */
+ 
++#define R4_MEMORY_PRESENT (1 << 27)
++
+ /*
+   SDIO status in R5
+   Type
+_
+
+Patches currently in -mm which might be from david.vrabel@csr.com are
+
+mmc-avoid-getting-cid-on-sdio-only-cards.patch
+linux-next.patch
+
