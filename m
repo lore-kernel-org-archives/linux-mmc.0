@@ -1,70 +1,30 @@
-From: akpm@linux-foundation.org
-Subject: [patch 13/20] mmc: avoid getting CID on SDIO-only cards
-Date: Thu, 19 Aug 2010 14:13:36 -0700
-Message-ID: <201008192113.o7JLDaGh008701@imap1.linux-foundation.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] mmc: make dev_to_mmc_card() macro public
+Date: Thu, 19 Aug 2010 14:49:21 -0700
+Message-ID: <20100819144921.40d6765f.akpm@linux-foundation.org>
+References: <1282138278-22304-1-git-send-email-ext-andriy.shevchenko@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:52852 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:39213 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753122Ab0HSVNw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2010 17:13:52 -0400
+	by vger.kernel.org with ESMTP id S1750970Ab0HSVt3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2010 17:49:29 -0400
+In-Reply-To: <1282138278-22304-1-git-send-email-ext-andriy.shevchenko@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, david.vrabel@csr.com, linux-mmc@vger.kernel.org, mirq-linux@rere.qmqm.pl
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: linux-kernel@vger.kernel.org, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org
 
-From: David Vrabel <david.vrabel@csr.com>
+On Wed, 18 Aug 2010 16:31:18 +0300
+Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
 
-The introduction of support for SD combo cards breaks the initialization
-of all CSR SDIO chips.  The GO_IDLE (CMD0) in mmc_sd_get_cid() causes CSR
-chips to be reset (this is non-standard behavior).
+> Conversion from struct device to struct mmc_card is used more than in one
+> place. Due to this it's better to have public macro for such thing.
+> 
 
-When initializing an SDIO card check for a combo card by using the memory
-present bit in the R4 response to IO_SEND_OP_COND (CMD5).  This avoids the
-call to mmc_sd_get_cid() on an SDIO-only card.
+nit: generally, subsystem-specific identifiers should use their
+subsystem's identifier as a prefix.  So a better name for
+dev_to_mmc_card() would be mmc_dev_to_card().  
 
-Signed-off-by: David Vrabel <david.vrabel@csr.com>
-Cc: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/core/sdio.c  |    8 +++++---
- include/linux/mmc/sdio.h |    2 ++
- 2 files changed, 7 insertions(+), 3 deletions(-)
-
-diff -puN drivers/mmc/core/sdio.c~mmc-avoid-getting-cid-on-sdio-only-cards drivers/mmc/core/sdio.c
---- a/drivers/mmc/core/sdio.c~mmc-avoid-getting-cid-on-sdio-only-cards
-+++ a/drivers/mmc/core/sdio.c
-@@ -362,11 +362,13 @@ static int mmc_sdio_init_card(struct mmc
- 		goto err;
- 	}
- 
--	err = mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid);
--
--	if (!err) {
-+	if (ocr & R4_MEMORY_PRESENT) {
- 		card->type = MMC_TYPE_SD_COMBO;
- 
-+		err = mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid);
-+		if (err)
-+			goto remove;
-+
- 		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
- 		    memcmp(card->raw_cid, oldcard->raw_cid, sizeof(card->raw_cid)) != 0)) {
- 			mmc_remove_card(card);
-diff -puN include/linux/mmc/sdio.h~mmc-avoid-getting-cid-on-sdio-only-cards include/linux/mmc/sdio.h
---- a/include/linux/mmc/sdio.h~mmc-avoid-getting-cid-on-sdio-only-cards
-+++ a/include/linux/mmc/sdio.h
-@@ -38,6 +38,8 @@
-  *      [8:0] Byte/block count
-  */
- 
-+#define R4_MEMORY_PRESENT (1 << 27)
-+
- /*
-   SDIO status in R5
-   Type
-_
