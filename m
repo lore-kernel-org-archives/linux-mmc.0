@@ -1,98 +1,33 @@
 From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [Bugme-new] [Bug 16627] New: sdhci shows backtrace while
- resuming after s2disk
-Date: Thu, 19 Aug 2010 15:45:39 -0700
-Message-ID: <20100819154539.31c4e6b9.akpm@linux-foundation.org>
-References: <bug-16627-10286@https.bugzilla.kernel.org/>
+Subject: Re: [patch 13/20] mmc: avoid getting CID on SDIO-only cards
+Date: Thu, 19 Aug 2010 15:57:05 -0700
+Message-ID: <20100819155705.0d8f91c0.akpm@linux-foundation.org>
+References: <201008192113.o7JLDaGh008701@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:49934 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:59855 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751864Ab0HSWqX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2010 18:46:23 -0400
-In-Reply-To: <bug-16627-10286@https.bugzilla.kernel.org/>
+	by vger.kernel.org with ESMTP id S1751283Ab0HSW5M (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2010 18:57:12 -0400
+In-Reply-To: <201008192113.o7JLDaGh008701@imap1.linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, pfactum@gmail.com, Maxim Levitsky <maximlevitsky@gmail.com>, David Woodhouse <dwmw2@infradead.org>
+To: torvalds@linux-foundation.org, david.vrabel@csr.com, linux-mmc@vger.kernel.org, mirq-linux@rere.qmqm.pl
 
+On Thu, 19 Aug 2010 14:13:36 -0700
+akpm@linux-foundation.org wrote:
 
-(switched to email.  Please respond via emailed reply-to-all, not via the
-bugzilla web interface).
-
-On Thu, 19 Aug 2010 10:01:14 GMT
-bugzilla-daemon@bugzilla.kernel.org wrote:
-
-> https://bugzilla.kernel.org/show_bug.cgi?id=16627
+> From: David Vrabel <david.vrabel@csr.com>
 > 
->            Summary: sdhci shows backtrace while resuming after s2disk
->            Product: Drivers
->            Version: 2.5
->     Kernel Version: 2.6.35.2
->           Platform: All
->         OS/Version: Linux
->               Tree: Mainline
->             Status: NEW
->           Severity: normal
->           Priority: P1
->          Component: MMC/SD
->         AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
->         ReportedBy: pfactum@gmail.com
->         Regression: No
+> The introduction of support for SD combo cards breaks the initialization
+> of all CSR SDIO chips.  The GO_IDLE (CMD0) in mmc_sd_get_cid() causes CSR
+> chips to be reset (this is non-standard behavior).
 > 
+> When initializing an SDIO card check for a combo card by using the memory
+> present bit in the R4 response to IO_SEND_OP_COND (CMD5).  This avoids the
+> call to mmc_sd_get_cid() on an SDIO-only card.
 > 
-> Created an attachment (id=27506)
->  --> (https://bugzilla.kernel.org/attachment.cgi?id=27506)
-> config, lspci and dmesg
-> 
-> The following strings appear in dmesg after resuming:
-> 
-> ===
-> [  199.151739] Call Trace:
-> [  199.151749]  [<c1073734>] ? __report_bad_irq+0x24/0x90
-> [  199.151753]  [<c10738f0>] ? note_interrupt+0x150/0x190
-> [  199.151757]  [<c10751f1>] ? move_native_irq+0x11/0x50
-> [  199.151762]  [<c107413b>] ? handle_fasteoi_irq+0xab/0xd0
-> [  199.151765]  [<c1074090>] ? handle_fasteoi_irq+0x0/0xd0
-> [  199.151768]  <IRQ>  [<c1004657>] ? do_IRQ+0x47/0xc0
-> [  199.151775]  [<c10030e9>] ? common_interrupt+0x29/0x30
-> [  199.151780]  [<c103007b>] ? __sched_setscheduler+0x26b/0x400
-> [  199.151786]  [<c122f581>] ? acpi_idle_enter_c1+0x9d/0xb2
-> [  199.151792]  [<c135e586>] ? cpuidle_idle_call+0x76/0xe0
-> [  199.151795]  [<c1001bef>] ? cpu_idle+0x3f/0x90
-> [  199.151800]  [<c15ee8d7>] ? start_kernel+0x2e9/0x2ee
-> [  199.151804]  [<c15ee42c>] ? unknown_bootoption+0x0/0x190
-> [  199.151806] handlers:
-> [  199.151808] [<f8bfac50>] (r852_irq+0x0/0x250 [r852])
-> [  199.151820] [<c136a080>] (sdhci_irq+0x0/0x570)
 
-Both r852_irq() and sdhci_irq() are on that IRQ so the interrupt could
-have been for either one.
-
-
-> ===
-> ...
-> ===
-> [  208.256014] mmc0: Timeout waiting for hardware interrupt.
-> [  208.256019] sdhci: ============== REGISTER DUMP ==============
-> [  208.256025] sdhci: Sys addr: 0x00000000 | Version:  0x00000400
-> [  208.256030] sdhci: Blk size: 0x00000000 | Blk cnt:  0x00000000
-> [  208.256035] sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-> [  208.256040] sdhci: Present:  0x01f70000 | Host ctl: 0x00000001
-> [  208.256044] sdhci: Power:    0x0000000f | Blk gap:  0x00000000
-> [  208.256049] sdhci: Wake-up:  0x00000000 | Clock:    0x00004007
-> [  208.256054] sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
-> [  208.256058] sdhci: Int enab: 0x00ff00c3 | Sig enab: 0x00ff00c3
-> [  208.256063] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000001
-> [  208.256068] sdhci: Caps:     0x00c02120 | Max curr: 0x00000040
-> [  208.256070] sdhci: ===========================================
-> ===
-
-Although it does look more MMCish.  It may be a platform issue too, in
-which case we'd need to talk with the ACPI guys.
-
-> lspci, dmesg and config are enclosed as attach.
-
-Thanks.
+argh, crap, sorry, please drop this one - Michal found a bug in it.
