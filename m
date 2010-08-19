@@ -1,33 +1,86 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [patch 13/20] mmc: avoid getting CID on SDIO-only cards
-Date: Thu, 19 Aug 2010 15:57:05 -0700
-Message-ID: <20100819155705.0d8f91c0.akpm@linux-foundation.org>
-References: <201008192113.o7JLDaGh008701@imap1.linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:59855 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751283Ab0HSW5M (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2010 18:57:12 -0400
-In-Reply-To: <201008192113.o7JLDaGh008701@imap1.linux-foundation.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + mmc-avoid-getting-cid-on-sdio-only-cards.patch added to -mm tree
+Date: Thu, 19 Aug 2010 15:59:08 -0700
+Message-ID: <201008192259.o7JMx8xn013449@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: david.vrabel@csr.com, linux-mmc@vger.kernel.org, mirq-linux@rere.qmqm.pl
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org, david.vrabel@csr.com, linux-mmc@vger.kernel.org, mirq-linux@rere.qmqm.pl
 
-On Thu, 19 Aug 2010 14:13:36 -0700
-akpm@linux-foundation.org wrote:
 
-> From: David Vrabel <david.vrabel@csr.com>
-> 
-> The introduction of support for SD combo cards breaks the initialization
-> of all CSR SDIO chips.  The GO_IDLE (CMD0) in mmc_sd_get_cid() causes CSR
-> chips to be reset (this is non-standard behavior).
-> 
-> When initializing an SDIO card check for a combo card by using the memory
-> present bit in the R4 response to IO_SEND_OP_COND (CMD5).  This avoids the
-> call to mmc_sd_get_cid() on an SDIO-only card.
-> 
+The patch titled
+     mmc: avoid getting CID on SDIO-only cards
+has been added to the -mm tree.  Its filename is
+     mmc-avoid-getting-cid-on-sdio-only-cards.patch
 
-argh, crap, sorry, please drop this one - Michal found a bug in it.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc: avoid getting CID on SDIO-only cards
+From: David Vrabel <david.vrabel@csr.com>
+
+The introduction of support for SD combo cards breaks the initialization
+of all CSR SDIO chips.  The GO_IDLE (CMD0) in mmc_sd_get_cid() causes CSR
+chips to be reset (this is non-standard behavior).
+
+When initializing an SDIO card check for a combo card by using the memory
+present bit in the R4 response to IO_SEND_OP_COND (CMD5).  This avoids the
+call to mmc_sd_get_cid() on an SDIO-only card.
+
+Signed-off-by: David Vrabel <david.vrabel@csr.com>
+Acked-by: Michal Mirolaw <mirq-linux@rere.qmqm.pl>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/core/sdio.c  |    5 ++---
+ include/linux/mmc/sdio.h |    2 ++
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff -puN drivers/mmc/core/sdio.c~mmc-avoid-getting-cid-on-sdio-only-cards drivers/mmc/core/sdio.c
+--- a/drivers/mmc/core/sdio.c~mmc-avoid-getting-cid-on-sdio-only-cards
++++ a/drivers/mmc/core/sdio.c
+@@ -362,9 +362,8 @@ static int mmc_sdio_init_card(struct mmc
+ 		goto err;
+ 	}
+ 
+-	err = mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid);
+-
+-	if (!err) {
++	if (ocr & R4_MEMORY_PRESENT
++	    && mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid) == 0) {
+ 		card->type = MMC_TYPE_SD_COMBO;
+ 
+ 		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
+diff -puN include/linux/mmc/sdio.h~mmc-avoid-getting-cid-on-sdio-only-cards include/linux/mmc/sdio.h
+--- a/include/linux/mmc/sdio.h~mmc-avoid-getting-cid-on-sdio-only-cards
++++ a/include/linux/mmc/sdio.h
+@@ -38,6 +38,8 @@
+  *      [8:0] Byte/block count
+  */
+ 
++#define R4_MEMORY_PRESENT (1 << 27)
++
+ /*
+   SDIO status in R5
+   Type
+_
+
+Patches currently in -mm which might be from david.vrabel@csr.com are
+
+mmc-avoid-getting-cid-on-sdio-only-cards.patch
+linux-next.patch
+
