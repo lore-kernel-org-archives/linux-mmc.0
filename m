@@ -1,80 +1,113 @@
-From: akpm@linux-foundation.org
-Subject: + drivers-mmc-host-sdhci-s3cc-use-the-correct-mutex-and-card-detect-function.patch added to -mm tree
-Date: Wed, 18 Aug 2010 19:45:18 -0700
-Message-ID: <201008190242.o7J2ga0c025961@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH] mmc: make number of mmcblk minors configurable
+Date: Wed, 18 Aug 2010 22:22:30 -0500
+Message-ID: <20100819032230.GA21980@lixom.net>
+References: <20100818041333.GA14149@lixom.net> <20100818171636.0625b668.akpm@linux-foundation.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.lixom.net ([70.86.134.90]:58610 "EHLO mail.lixom.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750970Ab0HSDWa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 18 Aug 2010 23:22:30 -0400
+Content-Disposition: inline
+In-Reply-To: <20100818171636.0625b668.akpm@linux-foundation.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+
+Hi,
+
+On Wed, Aug 18, 2010 at 05:16:36PM -0700, Andrew Morton wrote:
+> On Tue, 17 Aug 2010 23:13:33 -0500
+> Olof Johansson <olof@lixom.net> wrote:
+> 
+> > The old limit of number of minor numbers per mmcblk device was hardcoded
+> > at 8. This isn't enough for some of the more elaborate partitioning
+> > schemes, for example those used by Chrome OS.
+> > 
+> > Since there might be a bunch of systems out there with static /dev
+> > contents that relies on the old numbering scheme, let's make it a
+> > build-time option with the default set to the previous 8.
+> > 
+> 
+> How does the numbering scheme change?  What's the user-visible effect
+> of setting CONFIG_MMC_BLOCK_MINORS to, say, 16?
+
+mmcblk0 will be 0, mmcblk0p1 1, etc. mmcblk1 (second device) will be
+bumped up to start at minor 16 instead of 8 before, which is why I didn't
+just bump up the static default and went with a config option instead.
+
+FWIW, udev will happily keep creating device nodes for higher partitions,
+so without this patch you end up with overlapping device entries where
+mmcblk1p1 and mmcblk0p9 will be the same major/minor.
+
+> > ---
+> >  drivers/mmc/card/Kconfig |   10 ++++++++++
+> >  drivers/mmc/card/block.c |   20 ++++++++------------
+> >  2 files changed, 18 insertions(+), 12 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
+> > index 3f2a912..e939dcf 100644
+> > --- a/drivers/mmc/card/Kconfig
+> > +++ b/drivers/mmc/card/Kconfig
+> > @@ -14,6 +14,16 @@ config MMC_BLOCK
+> >  	  mount the filesystem. Almost everyone wishing MMC support
+> >  	  should say Y or M here.
+> >  
+> > +config MMC_BLOCK_MINORS
+> > +	int "Number of minors per block device"
+> > +	range 4 32
+> > +	default 8
+> > +	help
+> > +	  Number of minors per block device. One is needed for every
+> > +	  partition (plus one for the whole device).
+> > +	  Default is 8 to be backwards compatible with previous
+> > +	  hardcoded device numbering.
+> 
+> If possible it would be better to do this with a kernel boot (or
+> modprobe) parameter.  That permits vendors to ship packaged kernels
+> with full functionality, etc.  Possible?  The default value of the
+> runtime-settable parameter could be Kconfigurable is there's a real
+> need for that.
+
+I considered just doing a runtime option, but it would be suboptimal in
+our case (Chrome OS) since it would mean that we had yet another kernel
+arg we always have to include on all platforms that boot from mmc devices.
+Modprobe args won't work there because the driver is statically linked in
+(and no ramdisk).
+
+I can definitely change it to take the default from the Kconfig and make
+it possible to override with boot/modprobe parameters though. Revised
+patch to follow.
+
+> >  config MMC_BLOCK_BOUNCE
+> >  	bool "Use bounce buffer for simple hosts"
+> >  	depends on MMC_BLOCK
+> > diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> > index d545f79..524e232 100644
+> > --- a/drivers/mmc/card/block.c
+> > +++ b/drivers/mmc/card/block.c
+> > @@ -45,13 +45,9 @@
+> >  
+> >  MODULE_ALIAS("mmc:block");
+> >  
+> > -/*
+> > - * max 8 partitions per card
+> > - */
+> > -#define MMC_SHIFT	3
+> > -#define MMC_NUM_MINORS	(256 >> MMC_SHIFT)
+> > +#define MMC_MAX_DEVICES	((255 + CONFIG_MMC_BLOCK_MINORS) / CONFIG_MMC_BLOCK_MINORS)
+> 
+> So if I increase CONFIG_MMC_BLOCK_MINORS, I can no longer support as
+> many devices?  That'd be worth mentioning somewhere?
+
+Yep, I'll add a comment and clarify it in the Kconfig help.
+
+> fwiw, the above could use DIV_ROUND_UP().
+
+Good point, will do.
 
 
-The patch titled
-     drivers/mmc/host/sdhci-s3c.c: use the correct mutex and card detect function
-has been added to the -mm tree.  Its filename is
-     drivers-mmc-host-sdhci-s3cc-use-the-correct-mutex-and-card-detect-function.patch
-
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: drivers/mmc/host/sdhci-s3c.c: use the correct mutex and card detect function
-From: Kyungmin Park <kyungmin.park@samsung.com>
-
-There's some merge problem between sdhic core and sdhci-s3c host.  After
-mutex is changed to spinlock.  It needs to use use spin lock functions and
-use the correct card detection function.
-
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/sdhci-s3c.c |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff -puN drivers/mmc/host/sdhci-s3c.c~drivers-mmc-host-sdhci-s3cc-use-the-correct-mutex-and-card-detect-function drivers/mmc/host/sdhci-s3c.c
---- a/drivers/mmc/host/sdhci-s3c.c~drivers-mmc-host-sdhci-s3cc-use-the-correct-mutex-and-card-detect-function
-+++ a/drivers/mmc/host/sdhci-s3c.c
-@@ -242,7 +242,7 @@ static void sdhci_s3c_notify_change(stru
- {
- 	struct sdhci_host *host = platform_get_drvdata(dev);
- 	if (host) {
--		mutex_lock(&host->lock);
-+		spin_lock(&host->lock);
- 		if (state) {
- 			dev_dbg(&dev->dev, "card inserted.\n");
- 			host->flags &= ~SDHCI_DEVICE_DEAD;
-@@ -252,8 +252,8 @@ static void sdhci_s3c_notify_change(stru
- 			host->flags |= SDHCI_DEVICE_DEAD;
- 			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 		}
--		sdhci_card_detect(host);
--		mutex_unlock(&host->lock);
-+		tasklet_schedule(&host->card_tasklet);
-+		spin_unlock(&host->lock);
- 	}
- }
- 
-_
-
-Patches currently in -mm which might be from kyungmin.park@samsung.com are
-
-drivers-mmc-host-sdhci-s3cc-use-the-correct-mutex-and-card-detect-function.patch
-linux-next.patch
-s5pc110-sdhci-s3c-can-override-host-capabilities.patch
-s5pc110-sdhci-s3c-support-on-s5pc110.patch
-sdhci-add-no-hi-speed-bit-quirk-support.patch
-ramoops-use-the-platform-data-structure-instead-of-module-params.patch
-
+-Olof
