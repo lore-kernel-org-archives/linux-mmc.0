@@ -1,108 +1,98 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-make-dev_to_mmc_card-macro-public.patch added to -mm tree
-Date: Thu, 19 Aug 2010 14:49:47 -0700
-Message-ID: <201008192149.o7JLnl8Y010340@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: andy.shevchenko@gmail.com, adrian.hunter@nokia.com, ext-andriy.shevchenko@nokia.com, linux-mmc@vger.kernel.org
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [Bugme-new] [Bug 16627] New: sdhci shows backtrace while
+ resuming after s2disk
+Date: Thu, 19 Aug 2010 15:45:39 -0700
+Message-ID: <20100819154539.31c4e6b9.akpm@linux-foundation.org>
+References: <bug-16627-10286@https.bugzilla.kernel.org/>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:49934 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751864Ab0HSWqX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2010 18:46:23 -0400
+In-Reply-To: <bug-16627-10286@https.bugzilla.kernel.org/>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, pfactum@gmail.com, Maxim Levitsky <maximlevitsky@gmail.com>, David Woodhouse <dwmw2@infradead.org>
 
 
-The patch titled
-     mmc: make dev_to_mmc_card() macro public
-has been added to the -mm tree.  Its filename is
-     mmc-make-dev_to_mmc_card-macro-public.patch
+(switched to email.  Please respond via emailed reply-to-all, not via the
+bugzilla web interface).
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+On Thu, 19 Aug 2010 10:01:14 GMT
+bugzilla-daemon@bugzilla.kernel.org wrote:
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+> https://bugzilla.kernel.org/show_bug.cgi?id=16627
+> 
+>            Summary: sdhci shows backtrace while resuming after s2disk
+>            Product: Drivers
+>            Version: 2.5
+>     Kernel Version: 2.6.35.2
+>           Platform: All
+>         OS/Version: Linux
+>               Tree: Mainline
+>             Status: NEW
+>           Severity: normal
+>           Priority: P1
+>          Component: MMC/SD
+>         AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
+>         ReportedBy: pfactum@gmail.com
+>         Regression: No
+> 
+> 
+> Created an attachment (id=27506)
+>  --> (https://bugzilla.kernel.org/attachment.cgi?id=27506)
+> config, lspci and dmesg
+> 
+> The following strings appear in dmesg after resuming:
+> 
+> ===
+> [  199.151739] Call Trace:
+> [  199.151749]  [<c1073734>] ? __report_bad_irq+0x24/0x90
+> [  199.151753]  [<c10738f0>] ? note_interrupt+0x150/0x190
+> [  199.151757]  [<c10751f1>] ? move_native_irq+0x11/0x50
+> [  199.151762]  [<c107413b>] ? handle_fasteoi_irq+0xab/0xd0
+> [  199.151765]  [<c1074090>] ? handle_fasteoi_irq+0x0/0xd0
+> [  199.151768]  <IRQ>  [<c1004657>] ? do_IRQ+0x47/0xc0
+> [  199.151775]  [<c10030e9>] ? common_interrupt+0x29/0x30
+> [  199.151780]  [<c103007b>] ? __sched_setscheduler+0x26b/0x400
+> [  199.151786]  [<c122f581>] ? acpi_idle_enter_c1+0x9d/0xb2
+> [  199.151792]  [<c135e586>] ? cpuidle_idle_call+0x76/0xe0
+> [  199.151795]  [<c1001bef>] ? cpu_idle+0x3f/0x90
+> [  199.151800]  [<c15ee8d7>] ? start_kernel+0x2e9/0x2ee
+> [  199.151804]  [<c15ee42c>] ? unknown_bootoption+0x0/0x190
+> [  199.151806] handlers:
+> [  199.151808] [<f8bfac50>] (r852_irq+0x0/0x250 [r852])
+> [  199.151820] [<c136a080>] (sdhci_irq+0x0/0x570)
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+Both r852_irq() and sdhci_irq() are on that IRQ so the interrupt could
+have been for either one.
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-------------------------------------------------------
-Subject: mmc: make dev_to_mmc_card() macro public
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
+> ===
+> ...
+> ===
+> [  208.256014] mmc0: Timeout waiting for hardware interrupt.
+> [  208.256019] sdhci: ============== REGISTER DUMP ==============
+> [  208.256025] sdhci: Sys addr: 0x00000000 | Version:  0x00000400
+> [  208.256030] sdhci: Blk size: 0x00000000 | Blk cnt:  0x00000000
+> [  208.256035] sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+> [  208.256040] sdhci: Present:  0x01f70000 | Host ctl: 0x00000001
+> [  208.256044] sdhci: Power:    0x0000000f | Blk gap:  0x00000000
+> [  208.256049] sdhci: Wake-up:  0x00000000 | Clock:    0x00004007
+> [  208.256054] sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
+> [  208.256058] sdhci: Int enab: 0x00ff00c3 | Sig enab: 0x00ff00c3
+> [  208.256063] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000001
+> [  208.256068] sdhci: Caps:     0x00c02120 | Max curr: 0x00000040
+> [  208.256070] sdhci: ===========================================
+> ===
 
-Conversion from struct device to struct mmc_card is used more than in one
-place.  Due to this it's better to have public macro for such thing.
+Although it does look more MMCish.  It may be a platform issue too, in
+which case we'd need to talk with the ACPI guys.
 
-Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
+> lspci, dmesg and config are enclosed as attach.
 
- drivers/mmc/card/mmc_test.c |    4 +---
- drivers/mmc/core/bus.c      |    1 -
- drivers/mmc/core/bus.h      |    2 +-
- include/linux/mmc/card.h    |    2 ++
- 4 files changed, 4 insertions(+), 5 deletions(-)
-
-diff -puN drivers/mmc/card/mmc_test.c~mmc-make-dev_to_mmc_card-macro-public drivers/mmc/card/mmc_test.c
---- a/drivers/mmc/card/mmc_test.c~mmc-make-dev_to_mmc_card-macro-public
-+++ a/drivers/mmc/card/mmc_test.c
-@@ -1935,12 +1935,10 @@ static ssize_t mmc_test_show(struct devi
- static ssize_t mmc_test_store(struct device *dev,
- 	struct device_attribute *attr, const char *buf, size_t count)
- {
--	struct mmc_card *card;
-+	struct mmc_card *card = dev_to_mmc_card(dev);
- 	struct mmc_test_card *test;
- 	int testcase;
- 
--	card = container_of(dev, struct mmc_card, dev);
--
- 	testcase = simple_strtol(buf, NULL, 10);
- 
- 	test = kzalloc(sizeof(struct mmc_test_card), GFP_KERNEL);
-diff -puN drivers/mmc/core/bus.c~mmc-make-dev_to_mmc_card-macro-public drivers/mmc/core/bus.c
---- a/drivers/mmc/core/bus.c~mmc-make-dev_to_mmc_card-macro-public
-+++ a/drivers/mmc/core/bus.c
-@@ -22,7 +22,6 @@
- #include "sdio_cis.h"
- #include "bus.h"
- 
--#define dev_to_mmc_card(d)	container_of(d, struct mmc_card, dev)
- #define to_mmc_driver(d)	container_of(d, struct mmc_driver, drv)
- 
- static ssize_t mmc_type_show(struct device *dev,
-diff -puN drivers/mmc/core/bus.h~mmc-make-dev_to_mmc_card-macro-public drivers/mmc/core/bus.h
---- a/drivers/mmc/core/bus.h~mmc-make-dev_to_mmc_card-macro-public
-+++ a/drivers/mmc/core/bus.h
-@@ -14,7 +14,7 @@
- #define MMC_DEV_ATTR(name, fmt, args...)					\
- static ssize_t mmc_##name##_show (struct device *dev, struct device_attribute *attr, char *buf)	\
- {										\
--	struct mmc_card *card = container_of(dev, struct mmc_card, dev);	\
-+	struct mmc_card *card = dev_to_mmc_card(dev);				\
- 	return sprintf(buf, fmt, args);						\
- }										\
- static DEVICE_ATTR(name, S_IRUGO, mmc_##name##_show, NULL)
-diff -puN include/linux/mmc/card.h~mmc-make-dev_to_mmc_card-macro-public include/linux/mmc/card.h
---- a/include/linux/mmc/card.h~mmc-make-dev_to_mmc_card-macro-public
-+++ a/include/linux/mmc/card.h
-@@ -173,6 +173,8 @@ static inline int mmc_blksz_for_byte_mod
- #define mmc_card_name(c)	((c)->cid.prod_name)
- #define mmc_card_id(c)		(dev_name(&(c)->dev))
- 
-+#define dev_to_mmc_card(d)	container_of(d, struct mmc_card, dev)
-+
- #define mmc_list_to_card(l)	container_of(l, struct mmc_card, node)
- #define mmc_get_drvdata(c)	dev_get_drvdata(&(c)->dev)
- #define mmc_set_drvdata(c,d)	dev_set_drvdata(&(c)->dev, d)
-_
-
-Patches currently in -mm which might be from andy.shevchenko@gmail.com are
-
-linux-next.patch
-mmc-make-dev_to_mmc_card-macro-public.patch
-
+Thanks.
