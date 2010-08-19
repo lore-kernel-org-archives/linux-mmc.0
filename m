@@ -1,12 +1,12 @@
 From: David Vrabel <david.vrabel@csr.com>
 Subject: [PATCH 1/2] mmc: USB SD Host Controller (USHC) driver
-Date: Thu, 19 Aug 2010 14:08:07 +0000
-Message-ID: <1282226887-1557-1-git-send-email-david.vrabel@csr.com>
+Date: Thu, 19 Aug 2010 14:08:56 +0000
+Message-ID: <1282226936-3159-1-git-send-email-david.vrabel@csr.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hera.kernel.org ([140.211.167.34]:53687 "EHLO hera.kernel.org"
+Received: from hera.kernel.org ([140.211.167.34]:51913 "EHLO hera.kernel.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752318Ab0HSOId (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 Aug 2010 10:08:33 -0400
+	id S1752187Ab0HSOJI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 19 Aug 2010 10:09:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrew Morton <akpm@linux-foundation.org>
