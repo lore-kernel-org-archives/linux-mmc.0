@@ -1,55 +1,70 @@
 From: akpm@linux-foundation.org
-Subject: [patch 14/20] drivers/mmc/host/sdhci-s3c.c: use the correct mutex and card detect function
-Date: Thu, 19 Aug 2010 14:13:37 -0700
-Message-ID: <201008192113.o7JLDbpa008704@imap1.linux-foundation.org>
+Subject: [patch 13/20] mmc: avoid getting CID on SDIO-only cards
+Date: Thu, 19 Aug 2010 14:13:36 -0700
+Message-ID: <201008192113.o7JLDaGh008701@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ANSI_X3.4-1968
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:59239 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:52852 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753138Ab0HSVNl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2010 17:13:41 -0400
+	by vger.kernel.org with ESMTP id S1753122Ab0HSVNw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2010 17:13:52 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: torvalds@linux-foundation.org
-Cc: akpm@linux-foundation.org, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
+Cc: akpm@linux-foundation.org, david.vrabel@csr.com, linux-mmc@vger.kernel.org, mirq-linux@rere.qmqm.pl
 
-From: Kyungmin Park <kyungmin.park@samsung.com>
+From: David Vrabel <david.vrabel@csr.com>
 
-There's some merge problem between sdhic core and sdhci-s3c host.  After
-mutex is changed to spinlock.  It needs to use use spin lock functions and
-use the correct card detection function.
+The introduction of support for SD combo cards breaks the initialization
+of all CSR SDIO chips.  The GO_IDLE (CMD0) in mmc_sd_get_cid() causes CSR
+chips to be reset (this is non-standard behavior).
 
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+When initializing an SDIO card check for a combo card by using the memory
+present bit in the R4 response to IO_SEND_OP_COND (CMD5).  This avoids the
+call to mmc_sd_get_cid() on an SDIO-only card.
+
+Signed-off-by: David Vrabel <david.vrabel@csr.com>
+Cc: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
 Cc: <linux-mmc@vger.kernel.org>
 Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
- drivers/mmc/host/sdhci-s3c.c |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/core/sdio.c  |    8 +++++---
+ include/linux/mmc/sdio.h |    2 ++
+ 2 files changed, 7 insertions(+), 3 deletions(-)
 
-diff -puN drivers/mmc/host/sdhci-s3c.c~drivers-mmc-host-sdhci-s3cc-use-the-correct-mutex-and-card-detect-function drivers/mmc/host/sdhci-s3c.c
---- a/drivers/mmc/host/sdhci-s3c.c~drivers-mmc-host-sdhci-s3cc-use-the-correct-mutex-and-card-detect-function
-+++ a/drivers/mmc/host/sdhci-s3c.c
-@@ -242,7 +242,7 @@ static void sdhci_s3c_notify_change(stru
- {
- 	struct sdhci_host *host = platform_get_drvdata(dev);
- 	if (host) {
--		mutex_lock(&host->lock);
-+		spin_lock(&host->lock);
- 		if (state) {
- 			dev_dbg(&dev->dev, "card inserted.\n");
- 			host->flags &= ~SDHCI_DEVICE_DEAD;
-@@ -252,8 +252,8 @@ static void sdhci_s3c_notify_change(stru
- 			host->flags |= SDHCI_DEVICE_DEAD;
- 			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 		}
--		sdhci_card_detect(host);
--		mutex_unlock(&host->lock);
-+		tasklet_schedule(&host->card_tasklet);
-+		spin_unlock(&host->lock);
+diff -puN drivers/mmc/core/sdio.c~mmc-avoid-getting-cid-on-sdio-only-cards drivers/mmc/core/sdio.c
+--- a/drivers/mmc/core/sdio.c~mmc-avoid-getting-cid-on-sdio-only-cards
++++ a/drivers/mmc/core/sdio.c
+@@ -362,11 +362,13 @@ static int mmc_sdio_init_card(struct mmc
+ 		goto err;
  	}
- }
  
+-	err = mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid);
+-
+-	if (!err) {
++	if (ocr & R4_MEMORY_PRESENT) {
+ 		card->type = MMC_TYPE_SD_COMBO;
+ 
++		err = mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid);
++		if (err)
++			goto remove;
++
+ 		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
+ 		    memcmp(card->raw_cid, oldcard->raw_cid, sizeof(card->raw_cid)) != 0)) {
+ 			mmc_remove_card(card);
+diff -puN include/linux/mmc/sdio.h~mmc-avoid-getting-cid-on-sdio-only-cards include/linux/mmc/sdio.h
+--- a/include/linux/mmc/sdio.h~mmc-avoid-getting-cid-on-sdio-only-cards
++++ a/include/linux/mmc/sdio.h
+@@ -38,6 +38,8 @@
+  *      [8:0] Byte/block count
+  */
+ 
++#define R4_MEMORY_PRESENT (1 << 27)
++
+ /*
+   SDIO status in R5
+   Type
 _
