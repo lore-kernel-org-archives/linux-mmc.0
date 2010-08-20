@@ -1,197 +1,108 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors.patch added to -mm tree
-Date: Thu, 19 Aug 2010 18:15:05 -0700
-Message-ID: <201008200112.o7K1CHWw019281@imap1.linux-foundation.org>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: [patch 1/1] sdhci-base-clock-freqency-change-in-spec-3.0
+Date: Fri, 20 Aug 2010 02:22:56 -0400
+Message-ID: <AANLkTims_z+X_bOK2v3AekBZWg1LsSecRCUeAi5HGseW@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary=001485e98b2263fc88048e3b54cc
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:60069 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751467Ab0HTBMU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2010 21:12:20 -0400
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:47162 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751184Ab0HTGW5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2010 02:22:57 -0400
+Received: by iwn5 with SMTP id 5so470701iwn.19
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2010 23:22:57 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: olof@lixom.net, linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org
+Cc: Anton Vorontsov <cbouatmailru@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Wolfram Sang <w.sang@pengutronix.de>, Matt Fleming <matt@console-pimps.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Eric Miao <eric.y.miao@gmail.com>
 
+--001485e98b2263fc88048e3b54cc
+Content-Type: text/plain; charset=ISO-8859-1
 
-The patch titled
-     mmc: add config and runtime option for number of mmcblk minors
-has been added to the -mm tree.  Its filename is
-     mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors.patch
+>From 6b82bd3c0fe55b7060b8d96801e5e2c4fecc79b7 Mon Sep 17 00:00:00 2001
+From: Zhangfei Gao <zgao6@marvell.com>
+Date: Fri, 20 Aug 2010 14:02:36 -0400
+Subject: [PATCH] sdhci: base clock freqency change in spec 3.0
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+	sdhc spec 3.0:       Capabilities Register bits[15-08] is Base Clock Freqency
+	sdhc spec 1.0 & 2.0: Capabilities Register bits[13-08] is Base Clock Freqency
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: add config and runtime option for number of mmcblk minors
-From: Olof Johansson <olof@lixom.net>
-
-The old limit of number of minor numbers per mmcblk device was hardcoded
-at 8.  This isn't enough for some of the more elaborate partitioning
-schemes, for example those used by Chrome OS.
-
-Since there might be a bunch of systems out there with static /dev
-contents that relies on the old numbering scheme, let's make it a
-build-time option with the default set to the previous 8.
-
-Also provide a boot/modprobe-time parameter to override the config
-default: mmcblk.perdev_minors.
-
-Signed-off-by: Olof Johansson <olof@lixom.net>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
 ---
+ drivers/mmc/host/sdhci.c |    8 ++++++--
+ drivers/mmc/host/sdhci.h |    1 +
+ 2 files changed, 7 insertions(+), 2 deletions(-)
 
- drivers/mmc/card/Kconfig |   17 +++++++++++++++
- drivers/mmc/card/block.c |   41 +++++++++++++++++++++++++++----------
- 2 files changed, 47 insertions(+), 11 deletions(-)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7855121..458e5d4 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1778,8 +1778,12 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		mmc_dev(host->mmc)->dma_mask = &host->dma_mask;
+ 	}
 
-diff -puN drivers/mmc/card/Kconfig~mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors drivers/mmc/card/Kconfig
---- a/drivers/mmc/card/Kconfig~mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors
-+++ a/drivers/mmc/card/Kconfig
-@@ -14,6 +14,23 @@ config MMC_BLOCK
- 	  mount the filesystem. Almost everyone wishing MMC support
- 	  should say Y or M here.
- 
-+config MMC_BLOCK_MINORS
-+	int "Number of minors per block device"
-+	range 4 256
-+	default 8
-+	help
-+	  Number of minors per block device. One is needed for every
-+	  partition on the disk (plus one for the whole disk).
-+
-+	  Number of total MMC minors available is 256, so your number
-+	  of supported block devices will be limited to 256 divided
-+	  by this number.
-+
-+	  Default is 8 to be backwards compatible with previous
-+	  hardwired device numbering.
-+
-+	  If unsure, say 8 here.
-+
- config MMC_BLOCK_BOUNCE
- 	bool "Use bounce buffer for simple hosts"
- 	depends on MMC_BLOCK
-diff -puN drivers/mmc/card/block.c~mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors drivers/mmc/card/block.c
---- a/drivers/mmc/card/block.c~mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors
-+++ a/drivers/mmc/card/block.c
-@@ -44,14 +44,26 @@
- #include "queue.h"
- 
- MODULE_ALIAS("mmc:block");
-+#ifdef MODULE_PARAM_PREFIX
-+#undef MODULE_PARAM_PREFIX
-+#endif
-+#define MODULE_PARAM_PREFIX "mmcblk."
-+
-+
-+/*
-+ * The defaults come from config options but can be overriden by module
-+ * or bootarg options.
-+ */
-+static int perdev_minors = CONFIG_MMC_BLOCK_MINORS;
- 
- /*
-- * max 8 partitions per card
-+ * We've only got one major, so number of mmcblk devices is
-+ * limited to 256 / number of minors per device.
-  */
--#define MMC_SHIFT	3
--#define MMC_NUM_MINORS	(256 >> MMC_SHIFT)
-+static int max_devices = DIV_ROUND_UP(256, CONFIG_MMC_BLOCK_MINORS);
- 
--static DECLARE_BITMAP(dev_use, MMC_NUM_MINORS);
-+/* 256 minors, so at most 256 separate devices */
-+static DECLARE_BITMAP(dev_use, 256);
- 
- /*
-  * There is one mmc_blk_data per slot.
-@@ -67,6 +79,9 @@ struct mmc_blk_data {
- 
- static DEFINE_MUTEX(open_lock);
- 
-+module_param(perdev_minors, int, 0644);
-+MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
-+
- static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
- {
- 	struct mmc_blk_data *md;
-@@ -88,10 +103,10 @@ static void mmc_blk_put(struct mmc_blk_d
- 	md->usage--;
- 	if (md->usage == 0) {
- 		int devmaj = MAJOR(disk_devt(md->disk));
--		int devidx = MINOR(disk_devt(md->disk)) >> MMC_SHIFT;
-+		int devidx = MINOR(disk_devt(md->disk)) / perdev_minors;
- 
- 		if (!devmaj)
--			devidx = md->disk->first_minor >> MMC_SHIFT;
-+			devidx = md->disk->first_minor / perdev_minors;
- 
- 		blk_cleanup_queue(md->queue.queue);
- 
-@@ -567,8 +582,8 @@ static struct mmc_blk_data *mmc_blk_allo
- 	struct mmc_blk_data *md;
- 	int devidx, ret;
- 
--	devidx = find_first_zero_bit(dev_use, MMC_NUM_MINORS);
--	if (devidx >= MMC_NUM_MINORS)
-+	devidx = find_first_zero_bit(dev_use, max_devices);
-+	if (devidx >= max_devices)
- 		return ERR_PTR(-ENOSPC);
- 	__set_bit(devidx, dev_use);
- 
-@@ -585,7 +600,7 @@ static struct mmc_blk_data *mmc_blk_allo
- 	 */
- 	md->read_only = mmc_blk_readonly(card);
- 
--	md->disk = alloc_disk(1 << MMC_SHIFT);
-+	md->disk = alloc_disk(perdev_minors);
- 	if (md->disk == NULL) {
- 		ret = -ENOMEM;
- 		goto err_kfree;
-@@ -602,7 +617,7 @@ static struct mmc_blk_data *mmc_blk_allo
- 	md->queue.data = md;
- 
- 	md->disk->major	= MMC_BLOCK_MAJOR;
--	md->disk->first_minor = devidx << MMC_SHIFT;
-+	md->disk->first_minor = devidx * perdev_minors;
- 	md->disk->fops = &mmc_bdops;
- 	md->disk->private_data = md;
- 	md->disk->queue = md->queue.queue;
-@@ -678,7 +693,6 @@ static int mmc_blk_probe(struct mmc_card
- {
- 	struct mmc_blk_data *md;
- 	int err;
--
- 	char cap_str[10];
- 
- 	/*
-@@ -768,6 +782,11 @@ static int __init mmc_blk_init(void)
- {
- 	int res;
- 
-+	if (perdev_minors != CONFIG_MMC_BLOCK_MINORS) {
-+		pr_info("mmcblk: using %d minors per device\n", perdev_minors);
-+		max_devices = DIV_ROUND_UP(256, perdev_minors);
-+	}
-+
- 	res = register_blkdev(MMC_BLOCK_MAJOR, "mmc");
- 	if (res)
- 		goto out;
-_
+-	host->max_clk =
+-		(caps & SDHCI_CLOCK_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
++	if (host->version >= SDHCI_SPEC_300)
++		host->max_clk =
++			(caps & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
++	else
++		host->max_clk =
++			(caps & SDHCI_CLOCK_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
+ 	host->max_clk *= 1000000;
+ 	if (host->max_clk == 0 || host->quirks &
+ 			SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN) {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 036cfae..8f71f56 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -140,6 +140,7 @@
+ #define  SDHCI_TIMEOUT_CLK_SHIFT 0
+ #define  SDHCI_TIMEOUT_CLK_UNIT	0x00000080
+ #define  SDHCI_CLOCK_BASE_MASK	0x00003F00
++#define  SDHCI_CLOCK_V3_BASE_MASK	0x0000FF00
+ #define  SDHCI_CLOCK_BASE_SHIFT	8
+ #define  SDHCI_MAX_BLOCK_MASK	0x00030000
+ #define  SDHCI_MAX_BLOCK_SHIFT  16
+-- 
+1.7.0.4
 
-Patches currently in -mm which might be from olof@lixom.net are
+--001485e98b2263fc88048e3b54cc
+Content-Type: text/x-patch; charset=US-ASCII;
+	name="0001-sdhci-base-clock-freqency-change-in-spec-3.0.patch"
+Content-Disposition: attachment;
+	filename="0001-sdhci-base-clock-freqency-change-in-spec-3.0.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gd3d7gmo0
 
-linux-next.patch
-mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors.patch
-
+RnJvbSA2YjgyYmQzYzBmZTU1YjcwNjBiOGQ5NjgwMWU1ZTJjNGZlY2M3OWI3IE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBaaGFuZ2ZlaSBHYW8gPHpnYW82QG1hcnZlbGwuY29tPgpEYXRl
+OiBGcmksIDIwIEF1ZyAyMDEwIDE0OjAyOjM2IC0wNDAwClN1YmplY3Q6IFtQQVRDSF0gc2RoY2k6
+IGJhc2UgY2xvY2sgZnJlcWVuY3kgY2hhbmdlIGluIHNwZWMgMy4wCgoJc2RoYyBzcGVjIDMuMDog
+ICAgICAgQ2FwYWJpbGl0aWVzIFJlZ2lzdGVyIGJpdHNbMTUtMDhdIGlzIEJhc2UgQ2xvY2sgRnJl
+cWVuY3kKCXNkaGMgc3BlYyAxLjAgJiAyLjA6IENhcGFiaWxpdGllcyBSZWdpc3RlciBiaXRzWzEz
+LTA4XSBpcyBCYXNlIENsb2NrIEZyZXFlbmN5CgpTaWduZWQtb2ZmLWJ5OiBaaGFuZ2ZlaSBHYW8g
+PHpnYW82QG1hcnZlbGwuY29tPgotLS0KIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyB8ICAgIDgg
+KysrKysrLS0KIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaCB8ICAgIDEgKwogMiBmaWxlcyBjaGFu
+Z2VkLCA3IGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVy
+cy9tbWMvaG9zdC9zZGhjaS5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCmluZGV4IDc4NTUx
+MjEuLjQ1OGU1ZDQgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYworKysgYi9k
+cml2ZXJzL21tYy9ob3N0L3NkaGNpLmMKQEAgLTE3NzgsOCArMTc3OCwxMiBAQCBpbnQgc2RoY2lf
+YWRkX2hvc3Qoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QpCiAJCW1tY19kZXYoaG9zdC0+bW1jKS0+
+ZG1hX21hc2sgPSAmaG9zdC0+ZG1hX21hc2s7CiAJfQogCi0JaG9zdC0+bWF4X2NsayA9Ci0JCShj
+YXBzICYgU0RIQ0lfQ0xPQ0tfQkFTRV9NQVNLKSA+PiBTREhDSV9DTE9DS19CQVNFX1NISUZUOwor
+CWlmIChob3N0LT52ZXJzaW9uID49IFNESENJX1NQRUNfMzAwKQorCQlob3N0LT5tYXhfY2xrID0K
+KwkJCShjYXBzICYgU0RIQ0lfQ0xPQ0tfVjNfQkFTRV9NQVNLKSA+PiBTREhDSV9DTE9DS19CQVNF
+X1NISUZUOworCWVsc2UKKwkJaG9zdC0+bWF4X2NsayA9CisJCQkoY2FwcyAmIFNESENJX0NMT0NL
+X0JBU0VfTUFTSykgPj4gU0RIQ0lfQ0xPQ0tfQkFTRV9TSElGVDsKIAlob3N0LT5tYXhfY2xrICo9
+IDEwMDAwMDA7CiAJaWYgKGhvc3QtPm1heF9jbGsgPT0gMCB8fCBob3N0LT5xdWlya3MgJgogCQkJ
+U0RIQ0lfUVVJUktfQ0FQX0NMT0NLX0JBU0VfQlJPS0VOKSB7CmRpZmYgLS1naXQgYS9kcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLmggYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmgKaW5kZXggMDM2Y2Zh
+ZS4uOGY3MWY1NiAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5oCisrKyBiL2Ry
+aXZlcnMvbW1jL2hvc3Qvc2RoY2kuaApAQCAtMTQwLDYgKzE0MCw3IEBACiAjZGVmaW5lICBTREhD
+SV9USU1FT1VUX0NMS19TSElGVCAwCiAjZGVmaW5lICBTREhDSV9USU1FT1VUX0NMS19VTklUCTB4
+MDAwMDAwODAKICNkZWZpbmUgIFNESENJX0NMT0NLX0JBU0VfTUFTSwkweDAwMDAzRjAwCisjZGVm
+aW5lICBTREhDSV9DTE9DS19WM19CQVNFX01BU0sJMHgwMDAwRkYwMAogI2RlZmluZSAgU0RIQ0lf
+Q0xPQ0tfQkFTRV9TSElGVAk4CiAjZGVmaW5lICBTREhDSV9NQVhfQkxPQ0tfTUFTSwkweDAwMDMw
+MDAwCiAjZGVmaW5lICBTREhDSV9NQVhfQkxPQ0tfU0hJRlQgIDE2Ci0tIAoxLjcuMC40Cgo=
+--001485e98b2263fc88048e3b54cc--
