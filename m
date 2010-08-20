@@ -1,116 +1,150 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: [Bugme-new] [Bug 16627] New: sdhci shows backtrace while
- resuming after s2disk
-Date: Fri, 20 Aug 2010 10:27:26 +0300
-Message-ID: <1282289246.4600.9.camel@maxim-laptop>
-References: <bug-16627-10286@https.bugzilla.kernel.org/>
-	 <20100819154539.31c4e6b9.akpm@linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: [PATCHv2] mmc: make mmc_dev_to_card() macro public
+Date: Fri, 20 Aug 2010 10:46:46 +0300
+Message-ID: <1282290406-13198-1-git-send-email-ext-andriy.shevchenko@nokia.com>
+References: <20100820002332.93b0c44d.akpm@linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:65448 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751121Ab0HTH1c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2010 03:27:32 -0400
-Received: by bwz11 with SMTP id 11so1869784bwz.19
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2010 00:27:31 -0700 (PDT)
-In-Reply-To: <20100819154539.31c4e6b9.akpm@linux-foundation.org>
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:34672 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751028Ab0HTHqD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2010 03:46:03 -0400
+In-Reply-To: <20100820002332.93b0c44d.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, pfactum@gmail.com, David Woodhouse <dwmw2@infradead.org>
+To: linux-kernel@vger.kernel.org
+Cc: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 
-On Thu, 2010-08-19 at 15:45 -0700, Andrew Morton wrote: 
-> (switched to email.  Please respond via emailed reply-to-all, not via the
-> bugzilla web interface).
-> 
-> On Thu, 19 Aug 2010 10:01:14 GMT
-> bugzilla-daemon@bugzilla.kernel.org wrote:
-> 
-> > https://bugzilla.kernel.org/show_bug.cgi?id=16627
-> > 
-> >            Summary: sdhci shows backtrace while resuming after s2disk
-> >            Product: Drivers
-> >            Version: 2.5
-> >     Kernel Version: 2.6.35.2
-> >           Platform: All
-> >         OS/Version: Linux
-> >               Tree: Mainline
-> >             Status: NEW
-> >           Severity: normal
-> >           Priority: P1
-> >          Component: MMC/SD
-> >         AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
-> >         ReportedBy: pfactum@gmail.com
-> >         Regression: No
-> > 
-> > 
-> > Created an attachment (id=27506)
-> >  --> (https://bugzilla.kernel.org/attachment.cgi?id=27506)
-> > config, lspci and dmesg
-> > 
-> > The following strings appear in dmesg after resuming:
-> > 
-> > ===
-> > [  199.151739] Call Trace:
-> > [  199.151749]  [<c1073734>] ? __report_bad_irq+0x24/0x90
-> > [  199.151753]  [<c10738f0>] ? note_interrupt+0x150/0x190
-> > [  199.151757]  [<c10751f1>] ? move_native_irq+0x11/0x50
-> > [  199.151762]  [<c107413b>] ? handle_fasteoi_irq+0xab/0xd0
-> > [  199.151765]  [<c1074090>] ? handle_fasteoi_irq+0x0/0xd0
-> > [  199.151768]  <IRQ>  [<c1004657>] ? do_IRQ+0x47/0xc0
-> > [  199.151775]  [<c10030e9>] ? common_interrupt+0x29/0x30
-> > [  199.151780]  [<c103007b>] ? __sched_setscheduler+0x26b/0x400
-> > [  199.151786]  [<c122f581>] ? acpi_idle_enter_c1+0x9d/0xb2
-> > [  199.151792]  [<c135e586>] ? cpuidle_idle_call+0x76/0xe0
-> > [  199.151795]  [<c1001bef>] ? cpu_idle+0x3f/0x90
-> > [  199.151800]  [<c15ee8d7>] ? start_kernel+0x2e9/0x2ee
-> > [  199.151804]  [<c15ee42c>] ? unknown_bootoption+0x0/0x190
-> > [  199.151806] handlers:
-> > [  199.151808] [<f8bfac50>] (r852_irq+0x0/0x250 [r852])
-> > [  199.151820] [<c136a080>] (sdhci_irq+0x0/0x570)
-> 
-> Both r852_irq() and sdhci_irq() are on that IRQ so the interrupt could
-> have been for either one.
-> 
-> 
-> > ===
-> > ...
-> > ===
-> > [  208.256014] mmc0: Timeout waiting for hardware interrupt.
-> > [  208.256019] sdhci: ============== REGISTER DUMP ==============
-> > [  208.256025] sdhci: Sys addr: 0x00000000 | Version:  0x00000400
-> > [  208.256030] sdhci: Blk size: 0x00000000 | Blk cnt:  0x00000000
-> > [  208.256035] sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-> > [  208.256040] sdhci: Present:  0x01f70000 | Host ctl: 0x00000001
-> > [  208.256044] sdhci: Power:    0x0000000f | Blk gap:  0x00000000
-> > [  208.256049] sdhci: Wake-up:  0x00000000 | Clock:    0x00004007
-> > [  208.256054] sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
-> > [  208.256058] sdhci: Int enab: 0x00ff00c3 | Sig enab: 0x00ff00c3
-> > [  208.256063] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000001
-> > [  208.256068] sdhci: Caps:     0x00c02120 | Max curr: 0x00000040
-> > [  208.256070] sdhci: ===========================================
-> > ===
+Conversion from struct device to struct mmc_card is used more than in one
+place. Due to this it's better to have public macro for such thing.
 
-This sounds a lot like what I had with CONFIG_MMC_RICOH_MMC enabled.
+Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: linux-mmc@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>
+---
+ drivers/mmc/card/mmc_test.c |    4 +---
+ drivers/mmc/core/bus.c      |   15 +++++++--------
+ drivers/mmc/core/bus.h      |    2 +-
+ include/linux/mmc/card.h    |    2 ++
+ 4 files changed, 11 insertions(+), 12 deletions(-)
 
-This doesn't happen very often I guess, right?
-Also I guess that you loose SDHCI completely and if you reload it
-(sudo modprobe -r sdhci-pci && sudo modprobe sdhci-pci), it won't load
-telling you in kernel log that 'Hardware doesn't support any voltages'
-
-If you can recompile kernel, try to disable CONFIG_MMC_RICOH_MMC
-(This will make you loose the mmc support, but if you get 2.6.36-rc1,
-you will get mmc support anyway via the non standard mmc controller,
-which turned out to be almost standard SDHCI controller.)
-
-Btw, I have written full support for memstick portion as well,
-I have just posted patches on LKML, and I have a bit outdated version on
-launchpad.
-Therefore this is the first fully supported by Linux card reader.
-
-
-Best regards,
-Maxim Levitsky
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index 5dd8576..b992725 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -1935,12 +1935,10 @@ static ssize_t mmc_test_show(struct device *dev,
+ static ssize_t mmc_test_store(struct device *dev,
+ 	struct device_attribute *attr, const char *buf, size_t count)
+ {
+-	struct mmc_card *card;
++	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	struct mmc_test_card *test;
+ 	int testcase;
+ 
+-	card = container_of(dev, struct mmc_card, dev);
+-
+ 	testcase = simple_strtol(buf, NULL, 10);
+ 
+ 	test = kzalloc(sizeof(struct mmc_test_card), GFP_KERNEL);
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 7cd9749..e70bd66 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -22,13 +22,12 @@
+ #include "sdio_cis.h"
+ #include "bus.h"
+ 
+-#define dev_to_mmc_card(d)	container_of(d, struct mmc_card, dev)
+ #define to_mmc_driver(d)	container_of(d, struct mmc_driver, drv)
+ 
+ static ssize_t mmc_type_show(struct device *dev,
+ 	struct device_attribute *attr, char *buf)
+ {
+-	struct mmc_card *card = dev_to_mmc_card(dev);
++	struct mmc_card *card = mmc_dev_to_card(dev);
+ 
+ 	switch (card->type) {
+ 	case MMC_TYPE_MMC:
+@@ -62,7 +61,7 @@ static int mmc_bus_match(struct device *dev, struct device_driver *drv)
+ static int
+ mmc_bus_uevent(struct device *dev, struct kobj_uevent_env *env)
+ {
+-	struct mmc_card *card = dev_to_mmc_card(dev);
++	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	const char *type;
+ 	int retval = 0;
+ 
+@@ -105,7 +104,7 @@ mmc_bus_uevent(struct device *dev, struct kobj_uevent_env *env)
+ static int mmc_bus_probe(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+-	struct mmc_card *card = dev_to_mmc_card(dev);
++	struct mmc_card *card = mmc_dev_to_card(dev);
+ 
+ 	return drv->probe(card);
+ }
+@@ -113,7 +112,7 @@ static int mmc_bus_probe(struct device *dev)
+ static int mmc_bus_remove(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+-	struct mmc_card *card = dev_to_mmc_card(dev);
++	struct mmc_card *card = mmc_dev_to_card(dev);
+ 
+ 	drv->remove(card);
+ 
+@@ -123,7 +122,7 @@ static int mmc_bus_remove(struct device *dev)
+ static int mmc_bus_suspend(struct device *dev, pm_message_t state)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+-	struct mmc_card *card = dev_to_mmc_card(dev);
++	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	int ret = 0;
+ 
+ 	if (dev->driver && drv->suspend)
+@@ -134,7 +133,7 @@ static int mmc_bus_suspend(struct device *dev, pm_message_t state)
+ static int mmc_bus_resume(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+-	struct mmc_card *card = dev_to_mmc_card(dev);
++	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	int ret = 0;
+ 
+ 	if (dev->driver && drv->resume)
+@@ -189,7 +188,7 @@ EXPORT_SYMBOL(mmc_unregister_driver);
+ 
+ static void mmc_release_card(struct device *dev)
+ {
+-	struct mmc_card *card = dev_to_mmc_card(dev);
++	struct mmc_card *card = mmc_dev_to_card(dev);
+ 
+ 	sdio_free_common_cis(card);
+ 
+diff --git a/drivers/mmc/core/bus.h b/drivers/mmc/core/bus.h
+index 1817876..00a1971 100644
+--- a/drivers/mmc/core/bus.h
++++ b/drivers/mmc/core/bus.h
+@@ -14,7 +14,7 @@
+ #define MMC_DEV_ATTR(name, fmt, args...)					\
+ static ssize_t mmc_##name##_show (struct device *dev, struct device_attribute *attr, char *buf)	\
+ {										\
+-	struct mmc_card *card = container_of(dev, struct mmc_card, dev);	\
++	struct mmc_card *card = mmc_dev_to_card(dev);				\
+ 	return sprintf(buf, fmt, args);						\
+ }										\
+ static DEVICE_ATTR(name, S_IRUGO, mmc_##name##_show, NULL)
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 6b75250..7bd4923 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -173,6 +173,8 @@ static inline int mmc_blksz_for_byte_mode(const struct mmc_card *c)
+ #define mmc_card_name(c)	((c)->cid.prod_name)
+ #define mmc_card_id(c)		(dev_name(&(c)->dev))
+ 
++#define mmc_dev_to_card(d)	container_of(d, struct mmc_card, dev)
++
+ #define mmc_list_to_card(l)	container_of(l, struct mmc_card, node)
+ #define mmc_get_drvdata(c)	dev_get_drvdata(&(c)->dev)
+ #define mmc_set_drvdata(c,d)	dev_set_drvdata(&(c)->dev, d)
+-- 
+1.6.3.3
 
