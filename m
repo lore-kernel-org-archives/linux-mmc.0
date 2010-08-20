@@ -1,207 +1,71 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: [PATCH v3] mmc: add config and runtime option for number of mmcblk
-	minors
-Date: Fri, 20 Aug 2010 17:13:23 -0500
-Message-ID: <20100820221323.GC8535@lixom.net>
-References: <20100818041333.GA14149@lixom.net> <20100818171636.0625b668.akpm@linux-foundation.org> <20100819032230.GA21980@lixom.net> <20100820010242.GA29588@lixom.net>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH] tmio_mmc: Make ack_mmc_irqs() write-only
+Date: Sat, 21 Aug 2010 07:55:38 +0900
+Message-ID: <AANLkTik9nnHiOL61ioT-1Eti9-DfKnDYY=qKespaOKje@mail.gmail.com>
+References: <4C455597.2020200@renesas.com>
+	<4C6E9B75.8030004@arndnet.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20100820010242.GA29588@lixom.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mandeep Baines <msb@chromium.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:52659 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751167Ab0HTWzj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2010 18:55:39 -0400
+In-Reply-To: <4C6E9B75.8030004@arndnet.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Hannemann <arnd@arndnet.de>, Andrew Morton <akpm@linux-foundation.org>
+Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>, ian@mnementh.co.uk, damm@opensource.se, sameo@linux.intel.com, Paul Mundt <lethal@linux-sh.org>, g.liakhovetski@gmx.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-The old limit of number of minor numbers per mmcblk device was hardcoded
-at 8. This isn't enough for some of the more elaborate partitioning
-schemes, for example those used by Chrome OS.
+On Sat, Aug 21, 2010 at 12:12 AM, Arnd Hannemann <arnd@arndnet.de> wrote:
+> Am 20.07.2010 09:51, schrieb Yusuke Goda:
+>> This patch updates ack_mmc_irqs() to acknowledge using write instead
+>> of read-modify-write. Without this fix the old read-modify-write
+>> implementation may acknowledge interrupt sources by mistake. The
+>> driver may if so lock-up waiting forever for an interrupt that will
+>> never come. Observed with the TMIO_STAT_RXRDY bit together with
+>> CMD53 on AR6002 and BCM4318 SDIO cards in polled mode.
+>>
+>> Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
+>
+> Tested on AP4EVB (sh7372) with SDHC and MMC cards - no regression.
+>
+> Tested-by: Arnd Hannemann <arnd@arndnet.de>
 
-Since there might be a bunch of systems out there with static /dev
-contents that relies on the old numbering scheme, let's make it a
-build-time option with the default set to the previous 8.
+Thanks, Arnd!
 
-Also provide a boot/modprobe-time parameter to override the config
-default: mmcblk.perdev_minors.
+Andrew, is there anything you need to (re)pick-up this patch?
 
-Signed-off-by: Olof Johansson <olof@lixom.net>
-Cc: Mandeep Baines <msb@chromium.org>
+At the current point this patch has:
+Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
+Acked-by: Magnus Damm <damm@opensource.se>
+Tested-by: Arnd Hannemann <arnd@arndnet.de>
 
----
+Ian Molton also gave his "Acked-by" in a different email thread,
+please see below:
+On Tue, Jul 27, 2010 at 5:11 PM, Ian Molton <ian@mnementh.co.uk> wrote:
+> Right now, the docs in question are on my dead fileserver.
+>
+> Given that, I'll say two things:
+>
+> 1) Its safe to assume anywhere that does a RMW does it because my
+> original docs said so. I dont recall having ever "just done it because
+> I had to" when I wrote this.
+> 2) The code as is is clearly broken.
+>
+> I'm not really sure what to do about this. It got made 'doubly broken'
+> when we added asic3 support because it was the first platform added
+> where you couldnt just do a 32 bit RMW on the pair of registers.
+>
+> I'm inclined to say "Go Go Go" and see if anything breaks on this one.
+> I cant see why the docs want it to be RMW as theres nothing stopping
+> the hardware asserting an IRQ even if the CPU disables IRQs / did the
+> RMW as an atomic op.
+>
+> This one therefore,
+>
+> Acked-by: Ian Molton <ian@mnementh.co.uk>
 
-Andrew, sorry for the churn but Mandeep had a couple of good points that
-needed addressing.
+Thanks for the help everyone and sorry about the confused state of things.
 
-Changes since v1:
-	* Runtime override of config default
-	* Better help text
-	* DIV_ROUND_UP for max_devices calculation
-	* Clarify mmcblk device count limitations
-
-Changes since v2 based on feedback from Mandeep Baines:
-	* DIV_ROUND_UP is doing the wrong thing, we'll end up using
-	  the last fractional range of minors which we shouldn't.
-	* Documentation/devices.txt update
-	* No need to compute max_devices twice, just do it at runtime.
-	* Permission fix for the module_param -- it's readonly.
-
- Documentation/devices.txt |    6 ++++++
- drivers/mmc/card/Kconfig  |   17 +++++++++++++++++
- drivers/mmc/card/block.c  |   41 ++++++++++++++++++++++++++++++-----------
- 3 files changed, 53 insertions(+), 11 deletions(-)
-
-diff --git a/Documentation/devices.txt b/Documentation/devices.txt
-index 1d83d12..fdf3821 100644
---- a/Documentation/devices.txt
-+++ b/Documentation/devices.txt
-@@ -2518,6 +2518,12 @@ Your cooperation is appreciated.
- 		  8 = /dev/mmcblk1      Second SD/MMC card
- 		    ...
- 
-+		The start of next SD/MMC card can be configured with
-+		CONFIG_MMC_BLOCK_MINORS, or overridden at boot/modprobe
-+		time using the mmcblk.perdev_minors option. That would
-+		bump the offset between each card to be the configured
-+		value instead of the default 8.
-+
- 179 char	CCube DVXChip-based PCI products
- 		  0 = /dev/dvxirq0	First DVX device
- 		  1 = /dev/dvxirq1	Second DVX device
-diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
-index 3f2a912..57e4416 100644
---- a/drivers/mmc/card/Kconfig
-+++ b/drivers/mmc/card/Kconfig
-@@ -14,6 +14,23 @@ config MMC_BLOCK
- 	  mount the filesystem. Almost everyone wishing MMC support
- 	  should say Y or M here.
- 
-+config MMC_BLOCK_MINORS
-+	int "Number of minors per block device"
-+	range 4 256
-+	default 8
-+	help
-+	  Number of minors per block device. One is needed for every
-+	  partition on the disk (plus one for the whole disk).
-+
-+	  Number of total MMC minors available is 256, so your number
-+	  of supported block devices will be limited to 256 divided
-+	  by this number.
-+
-+	  Default is 8 to be backwards compatible with previous
-+	  hardwired device numbering.
-+
-+	  If unsure, say 8 here.
-+
- config MMC_BLOCK_BOUNCE
- 	bool "Use bounce buffer for simple hosts"
- 	depends on MMC_BLOCK
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index cb9fbc8..ec94f56 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -43,14 +43,26 @@
- #include "queue.h"
- 
- MODULE_ALIAS("mmc:block");
-+#ifdef MODULE_PARAM_PREFIX
-+#undef MODULE_PARAM_PREFIX
-+#endif
-+#define MODULE_PARAM_PREFIX "mmcblk."
-+
-+
-+/*
-+ * The defaults come from config options but can be overriden by module
-+ * or bootarg options.
-+ */
-+static int perdev_minors = CONFIG_MMC_BLOCK_MINORS;
- 
- /*
-- * max 8 partitions per card
-+ * We've only got one major, so number of mmcblk devices is
-+ * limited to 256 / number of minors per device.
-  */
--#define MMC_SHIFT	3
--#define MMC_NUM_MINORS	(256 >> MMC_SHIFT)
-+static int max_devices;
- 
--static DECLARE_BITMAP(dev_use, MMC_NUM_MINORS);
-+/* 256 minors, so at most 256 separate devices */
-+static DECLARE_BITMAP(dev_use, 256);
- 
- /*
-  * There is one mmc_blk_data per slot.
-@@ -66,6 +78,9 @@ struct mmc_blk_data {
- 
- static DEFINE_MUTEX(open_lock);
- 
-+module_param(perdev_minors, int, 0444);
-+MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
-+
- static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
- {
- 	struct mmc_blk_data *md;
-@@ -87,10 +102,10 @@ static void mmc_blk_put(struct mmc_blk_data *md)
- 	md->usage--;
- 	if (md->usage == 0) {
- 		int devmaj = MAJOR(disk_devt(md->disk));
--		int devidx = MINOR(disk_devt(md->disk)) >> MMC_SHIFT;
-+		int devidx = MINOR(disk_devt(md->disk)) / perdev_minors;
- 
- 		if (!devmaj)
--			devidx = md->disk->first_minor >> MMC_SHIFT;
-+			devidx = md->disk->first_minor / perdev_minors;
- 
- 		blk_cleanup_queue(md->queue.queue);
- 
-@@ -482,8 +497,8 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
- 	struct mmc_blk_data *md;
- 	int devidx, ret;
- 
--	devidx = find_first_zero_bit(dev_use, MMC_NUM_MINORS);
--	if (devidx >= MMC_NUM_MINORS)
-+	devidx = find_first_zero_bit(dev_use, max_devices);
-+	if (devidx >= max_devices)
- 		return ERR_PTR(-ENOSPC);
- 	__set_bit(devidx, dev_use);
- 
-@@ -500,7 +515,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
- 	 */
- 	md->read_only = mmc_blk_readonly(card);
- 
--	md->disk = alloc_disk(1 << MMC_SHIFT);
-+	md->disk = alloc_disk(perdev_minors);
- 	if (md->disk == NULL) {
- 		ret = -ENOMEM;
- 		goto err_kfree;
-@@ -517,7 +532,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
- 	md->queue.data = md;
- 
- 	md->disk->major	= MMC_BLOCK_MAJOR;
--	md->disk->first_minor = devidx << MMC_SHIFT;
-+	md->disk->first_minor = devidx * perdev_minors;
- 	md->disk->fops = &mmc_bdops;
- 	md->disk->private_data = md;
- 	md->disk->queue = md->queue.queue;
-@@ -593,7 +608,6 @@ static int mmc_blk_probe(struct mmc_card *card)
- {
- 	struct mmc_blk_data *md;
- 	int err;
--
- 	char cap_str[10];
- 
- 	/*
-@@ -683,6 +697,11 @@ static int __init mmc_blk_init(void)
- {
- 	int res;
- 
-+	if (perdev_minors != CONFIG_MMC_BLOCK_MINORS)
-+		pr_info("mmcblk: using %d minors per device\n", perdev_minors);
-+
-+	max_devices = 256 / perdev_minors;
-+
- 	res = register_blkdev(MMC_BLOCK_MAJOR, "mmc");
- 	if (res)
- 		goto out;
--- 
-1.5.6.5
+/ magnus
