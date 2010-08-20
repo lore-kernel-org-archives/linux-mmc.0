@@ -1,93 +1,60 @@
-From: Oleksandr Natalenko <pfactum@gmail.com>
-Subject: Re: [Bugme-new] [Bug 16627] New: sdhci shows backtrace while resuming
- after s2disk
-Date: Fri, 20 Aug 2010 15:18:41 +0300
-Message-ID: <AANLkTim2PvSwpmbUQP74XP9v87o6W39OdGXBsKWp=3Y1@mail.gmail.com>
-References: <bug-16627-10286@https.bugzilla.kernel.org/>
-	<20100819154539.31c4e6b9.akpm@linux-foundation.org>
-	<1282289246.4600.9.camel@maxim-laptop>
-	<AANLkTikRJ1ypra6Rhet5w1GPAUGGdYFku5qpJU6hdMAp@mail.gmail.com>
-	<AANLkTimbpQ6K8k0GjT-2M5C=icgbE-kSkBTXrm+1A85S@mail.gmail.com>
-	<AANLkTimyq9zqqvCbBkxg01Pys_7Cs6_qK10O+L1TYJFo@mail.gmail.com>
+From: David Vrabel <david.vrabel@csr.com>
+Subject: Re: [PATCH 1/2] mmc: USB SD Host Controller (USHC) driver
+Date: Fri, 20 Aug 2010 14:10:04 +0100
+Message-ID: <4C6E7EAC.8040706@csr.com>
+References: <1282226936-3159-1-git-send-email-david.vrabel@csr.com> <alpine.LFD.2.00.1008191338270.622@xanadu.home>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=0016e6dbe90ba62210048e404c11
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:41851 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751065Ab0HTMSn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2010 08:18:43 -0400
-Received: by mail-bw0-f46.google.com with SMTP id 11so2025021bwz.19
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2010 05:18:42 -0700 (PDT)
-In-Reply-To: <AANLkTimyq9zqqvCbBkxg01Pys_7Cs6_qK10O+L1TYJFo@mail.gmail.com>
+Received: from cluster-d.mailcontrol.com ([85.115.60.190]:34937 "EHLO
+	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751724Ab0HTNKz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2010 09:10:55 -0400
+Received: from rly11d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
+	by rly11d.srv.mailcontrol.com (MailControl) with ESMTP id o7KDAoci019995
+	for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2010 14:10:52 +0100
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+	by rly11d.srv.mailcontrol.com (MailControl) id o7KDA6Om015424
+	for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2010 14:10:06 +0100
+In-Reply-To: <alpine.LFD.2.00.1008191338270.622@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, David Woodhouse <dwmw2@infradead.org>
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org
 
---0016e6dbe90ba62210048e404c11
-Content-Type: text/plain; charset=UTF-8
+Nicolas Pitre wrote:
+> On Thu, 19 Aug 2010, David Vrabel wrote:
+> 
+>> +	  Note: Version 2 devices only support SDIO cards/devices.
+> 
+> Do you mean that only the devices with version 2 do support SDIO, or 
+> that devices with version 2 support SDIO only?
 
-Attach is here.
+I've revised the wording to:
 
---0016e6dbe90ba62210048e404c11
-Content-Type: application/x-bzip2; name="lspci.tar.bz2"
-Content-Disposition: attachment; filename="lspci.tar.bz2"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gd30awcn0
+  Note: These controllers only support SDIO cards and do not
+  support MMC or SD memory cards.
 
-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
---0016e6dbe90ba62210048e404c11--
+This is because the protocol doesn't support the long R2 response format.
+
+>> +	mmc->f_min = 0;
+>> +	mmc->f_max = 50000000;
+> 
+> Why are you setting mmc->f_min to zero?  I understand that the 6000000 
+> limit is only for commands with data, but a limit of 0 is rather ... 
+> unusual.
+
+f_min should be 400 kHz.
+
+I'll wait and see if there are any other review comments before posted
+an updated patch.
+
+David
+-- 
+David Vrabel, Senior Software Engineer, Drivers
+CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
+Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
+
+
+Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
