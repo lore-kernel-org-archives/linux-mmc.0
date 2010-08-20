@@ -1,35 +1,93 @@
 From: Oleksandr Natalenko <pfactum@gmail.com>
 Subject: Re: [Bugme-new] [Bug 16627] New: sdhci shows backtrace while resuming
  after s2disk
-Date: Fri, 20 Aug 2010 15:18:21 +0300
-Message-ID: <AANLkTimyq9zqqvCbBkxg01Pys_7Cs6_qK10O+L1TYJFo@mail.gmail.com>
+Date: Fri, 20 Aug 2010 15:18:41 +0300
+Message-ID: <AANLkTim2PvSwpmbUQP74XP9v87o6W39OdGXBsKWp=3Y1@mail.gmail.com>
 References: <bug-16627-10286@https.bugzilla.kernel.org/>
 	<20100819154539.31c4e6b9.akpm@linux-foundation.org>
 	<1282289246.4600.9.camel@maxim-laptop>
 	<AANLkTikRJ1ypra6Rhet5w1GPAUGGdYFku5qpJU6hdMAp@mail.gmail.com>
 	<AANLkTimbpQ6K8k0GjT-2M5C=icgbE-kSkBTXrm+1A85S@mail.gmail.com>
+	<AANLkTimyq9zqqvCbBkxg01Pys_7Cs6_qK10O+L1TYJFo@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/mixed; boundary=0016e6dbe90ba62210048e404c11
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-bw0-f46.google.com ([209.85.214.46]:41851 "EHLO
 	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751377Ab0HTMSW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2010 08:18:22 -0400
-Received: by bwz11 with SMTP id 11so2025021bwz.19
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2010 05:18:21 -0700 (PDT)
-In-Reply-To: <AANLkTimbpQ6K8k0GjT-2M5C=icgbE-kSkBTXrm+1A85S@mail.gmail.com>
+	with ESMTP id S1751065Ab0HTMSn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2010 08:18:43 -0400
+Received: by mail-bw0-f46.google.com with SMTP id 11so2025021bwz.19
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2010 05:18:42 -0700 (PDT)
+In-Reply-To: <AANLkTimyq9zqqvCbBkxg01Pys_7Cs6_qK10O+L1TYJFo@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Maxim Levitsky <maximlevitsky@gmail.com>
 Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org, David Woodhouse <dwmw2@infradead.org>
 
-> You can try, but it should give the same problem sooner or later.
-> Nothing significant changed, so probably timing helps you.
+--0016e6dbe90ba62210048e404c11
+Content-Type: text/plain; charset=UTF-8
 
-If I disable CONFIG_MMC_RICOH_MMC in 2.6.36-rc1, shall I get the same
-functionality of my card reader?
+Attach is here.
 
-> Anyway, can you show me lspci from 2.6.36-rc1-git2 ater you did a cold boot and
-> few suspend/resume cycles (one is enough)
+--0016e6dbe90ba62210048e404c11
+Content-Type: application/x-bzip2; name="lspci.tar.bz2"
+Content-Disposition: attachment; filename="lspci.tar.bz2"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gd30awcn0
 
-Sure, you may grab it from attach, but there's no difference between outputs.
+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
+--0016e6dbe90ba62210048e404c11--
