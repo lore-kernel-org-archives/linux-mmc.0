@@ -1,79 +1,67 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: SDHC ADMA Problem
-Date: Mon, 23 Aug 2010 10:19:19 +0200
-Message-ID: <20100823081919.GA6034@pengutronix.de>
-References: <loom.20100823T075246-842@post.gmane.org>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="PEIAKu/WMn1b1Hv9"
+From: akpm@linux-foundation.org
+Subject: + sdhci-support-mmc_cap_mmc_highspeed.patch added to -mm tree
+Date: Mon, 23 Aug 2010 13:09:21 -0700
+Message-ID: <201008232009.o7NK9LIf012151@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:47218 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753457Ab0HWITV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Aug 2010 04:19:21 -0400
-Content-Disposition: inline
-In-Reply-To: <loom.20100823T075246-842@post.gmane.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:38942 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753630Ab0HWUJ0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Aug 2010 16:09:26 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ricoh <yadav.rajesh@nts.ricoh.co.jp>
-Cc: linux-mmc@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: zhangfei.gao@gmail.com, linux-mmc@vger.kernel.org, matt@console-pimps.org, zgao6@marvell.com
 
 
---PEIAKu/WMn1b1Hv9
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+The patch titled
+     sdhci: support MMC_CAP_MMC_HIGHSPEED
+has been added to the -mm tree.  Its filename is
+     sdhci-support-mmc_cap_mmc_highspeed.patch
 
-On Mon, Aug 23, 2010 at 06:05:24AM +0000, Ricoh wrote:
-> For the ADMA enabled SD Host Controller, SDHCI driver is not working fine.
-> sdhci device gets an error "mmc0: unexpected interrupt" when an sdhc card=
- is=20
-> inserted.
->=20
-> This unexpected interrupt is the result of ADMA error.=20
-> Refer the following dmesg informaion for more details.=20
->=20
-> mmc0: Unexpected interrupt 0x02000000.
-> sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D REGISTER DUMP =3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> sdhci: Sys addr: 0x00000000 | Version:  0x00000401
-> sdhci: Blk size: 0x00007008 | Blk cnt:  0x00000001
-> sdhci: Argument: 0x00000000 | Trn mode: 0x00000013
-> sdhci: Present:  0x01f70202 | Host ctl: 0x00000011
-> sdhci: Power:    0x0000000f | Blk gap:  0x00000000
-> sdhci: Wake-up:  0x00000000 | Clock:    0x00004007
-> sdhci: Timeout:  0x0000000a | Int stat: 0x02008008
-> sdhci: Int enab: 0x02ff00cb | Sig enab: 0x02ff00cb
-> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000001
-> sdhci: Caps:     0x21e832b2 | Max curr: 0x00000040
-> sdhci: ADMA Err: 0x00000001 | ADMA Ptr: 0x020003b4
-> sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->=20
-> Is there any updated information regarding to this issue??
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-We would need to know which kernel version you are using (it should be
-as new as possible) and which SDHC controller.
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-Kind regards,
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
-   Wolfram
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+------------------------------------------------------
+Subject: sdhci: support MMC_CAP_MMC_HIGHSPEED
+From: zhangfei gao <zhangfei.gao@gmail.com>
 
---PEIAKu/WMn1b1Hv9
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
+With MMC_CAP_MMC_HIGHSPEED, mmc & emmc could negotiate up to 50M,
+otherwise only 25M could be reached.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
+Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
+Acked-by: Matt Fleming <matt@console-pimps.org> 
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
 
-iEYEARECAAYFAkxyLwcACgkQD27XaX1/VRsrMwCgjDH9dQFl/ELceQ9wUXOPLVug
-u0MAnRZ5r7f3euaNUn0O4NO1SggGZKWY
-=71sx
------END PGP SIGNATURE-----
+ drivers/mmc/host/sdhci.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---PEIAKu/WMn1b1Hv9--
+diff -puN drivers/mmc/host/sdhci.c~sdhci-support-mmc_cap_mmc_highspeed drivers/mmc/host/sdhci.c
+--- a/drivers/mmc/host/sdhci.c~sdhci-support-mmc_cap_mmc_highspeed
++++ a/drivers/mmc/host/sdhci.c
+@@ -1824,7 +1824,7 @@ int sdhci_add_host(struct sdhci_host *ho
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 
+ 	if (caps & SDHCI_CAN_DO_HISPD)
+-		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
++		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+ 
+ 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+_
+
+Patches currently in -mm which might be from zhangfei.gao@gmail.com are
+
+sdhci-support-mmc_cap_mmc_highspeed.patch
+
