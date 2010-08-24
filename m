@@ -1,116 +1,86 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors-update.patch added to -mm tree
-Date: Mon, 23 Aug 2010 15:58:49 -0700
-Message-ID: <201008232258.o7NMwnKE019659@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: olof@lixom.net, linux-mmc@vger.kernel.org, msb@chromium.org
+From: Ricoh <yadav.rajesh@nts.ricoh.co.jp>
+Subject: Re: SDHC ADMA Problem
+Date: Tue, 24 Aug 2010 00:15:46 +0000 (UTC)
+Message-ID: <loom.20100824T015208-700@post.gmane.org>
+References: <loom.20100823T075246-842@post.gmane.org> <20100823081919.GA6034@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lo.gmane.org ([80.91.229.12]:47380 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751423Ab0HXAP5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 23 Aug 2010 20:15:57 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1OnhBD-00053m-G6
+	for linux-mmc@vger.kernel.org; Tue, 24 Aug 2010 02:15:56 +0200
+Received: from proxy.ricoh.co.jp ([202.248.73.112])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Aug 2010 02:15:55 +0200
+Received: from yadav.rajesh by proxy.ricoh.co.jp with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Aug 2010 02:15:55 +0200
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+
+Wolfram Sang <w.sang <at> pengutronix.de> writes:
+
+> 
+> On Mon, Aug 23, 2010 at 06:05:24AM +0000, Ricoh wrote:
+> > For the ADMA enabled SD Host Controller, SDHCI driver is not working fine.
+> > sdhci device gets an error "mmc0: unexpected interrupt" when an sdhc card 
+is 
+> > inserted.
+> > 
+> > This unexpected interrupt is the result of ADMA error. 
+> > Refer the following dmesg informaion for more details. 
+> > 
+> > mmc0: Unexpected interrupt 0x02000000.
+> > sdhci: ============== REGISTER DUMP ==============
+> > sdhci: Sys addr: 0x00000000 | Version:  0x00000401
+> > sdhci: Blk size: 0x00007008 | Blk cnt:  0x00000001
+> > sdhci: Argument: 0x00000000 | Trn mode: 0x00000013
+> > sdhci: Present:  0x01f70202 | Host ctl: 0x00000011
+> > sdhci: Power:    0x0000000f | Blk gap:  0x00000000
+> > sdhci: Wake-up:  0x00000000 | Clock:    0x00004007
+> > sdhci: Timeout:  0x0000000a | Int stat: 0x02008008
+> > sdhci: Int enab: 0x02ff00cb | Sig enab: 0x02ff00cb
+> > sdhci: AC12 err: 0x00000000 | Slot int: 0x00000001
+> > sdhci: Caps:     0x21e832b2 | Max curr: 0x00000040
+> > sdhci: ADMA Err: 0x00000001 | ADMA Ptr: 0x020003b4
+> > sdhci: ===========================================
+> > 
+> > Is there any updated information regarding to this issue??
+> 
+> We would need to know which kernel version you are using (it should be
+> as new as possible) and which SDHC controller.
+> 
+> Kind regards,
+> 
+>    Wolfram
+> 
+Hi Wolfram
+
+Thanks for considering it.
+
+The Kernel version 2.6.32
+Controller is: Ricoh's SD host controller e822
+
+To reproduce this issue, You need to make sure that the device is using ADMA 
+for data transfer. You can confirm this by looking at the dmesg when the driver 
+is loaded.
+If ADMA is used, dmesg should have a message like the following one   
+"SDHCI controller on ..... using ADMA"
+
+Actually the driver looks at the PCI configuration space of the device that is 
+set by the BIOS and if it do not find the proper settings for the ADMA, then it 
+use simple DMA or PIO method which are going well.
+
+Rajesh
 
 
-The patch titled
-     mmc: add config and runtime option for number of mmcblk minors
-has been added to the -mm tree.  Its filename is
-     mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors-update.patch
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: add config and runtime option for number of mmcblk minors
-From: Olof Johansson <olof@lixom.net>
-
-Changes since v1:
-	* Runtime override of config default
-	* Better help text
-	* DIV_ROUND_UP for max_devices calculation
-	* Clarify mmcblk device count limitations
-
-Changes since v2 based on feedback from Mandeep Baines:
-	* DIV_ROUND_UP is doing the wrong thing, we'll end up using
-	  the last fractional range of minors which we shouldn't.
-	* Documentation/devices.txt update
-	* No need to compute max_devices twice, just do it at runtime.
-	* Permission fix for the module_param -- it's readonly.
-									
-Signed-off-by: Olof Johansson <olof@lixom.net>
-Cc: Mandeep Baines <msb@chromium.org>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- Documentation/devices.txt |    6 ++++++
- drivers/mmc/card/block.c  |   10 +++++-----
- 2 files changed, 11 insertions(+), 5 deletions(-)
-
-diff -puN Documentation/devices.txt~mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors-update Documentation/devices.txt
---- a/Documentation/devices.txt~mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors-update
-+++ a/Documentation/devices.txt
-@@ -2519,6 +2519,12 @@ Your cooperation is appreciated.
- 		  8 = /dev/mmcblk1      Second SD/MMC card
- 		    ...
- 
-+		The start of next SD/MMC card can be configured with
-+		CONFIG_MMC_BLOCK_MINORS, or overridden at boot/modprobe
-+		time using the mmcblk.perdev_minors option. That would
-+		bump the offset between each card to be the configured
-+		value instead of the default 8.
-+
- 179 char	CCube DVXChip-based PCI products
- 		  0 = /dev/dvxirq0	First DVX device
- 		  1 = /dev/dvxirq1	Second DVX device
-diff -puN drivers/mmc/card/block.c~mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors-update drivers/mmc/card/block.c
---- a/drivers/mmc/card/block.c~mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors-update
-+++ a/drivers/mmc/card/block.c
-@@ -60,7 +60,7 @@ static int perdev_minors = CONFIG_MMC_BL
-  * We've only got one major, so number of mmcblk devices is
-  * limited to 256 / number of minors per device.
-  */
--static int max_devices = DIV_ROUND_UP(256, CONFIG_MMC_BLOCK_MINORS);
-+static int max_devices;
- 
- /* 256 minors, so at most 256 separate devices */
- static DECLARE_BITMAP(dev_use, 256);
-@@ -79,7 +79,7 @@ struct mmc_blk_data {
- 
- static DEFINE_MUTEX(open_lock);
- 
--module_param(perdev_minors, int, 0644);
-+module_param(perdev_minors, int, 0444);
- MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
- 
- static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
-@@ -782,10 +782,10 @@ static int __init mmc_blk_init(void)
- {
- 	int res;
- 
--	if (perdev_minors != CONFIG_MMC_BLOCK_MINORS) {
-+	if (perdev_minors != CONFIG_MMC_BLOCK_MINORS)
- 		pr_info("mmcblk: using %d minors per device\n", perdev_minors);
--		max_devices = DIV_ROUND_UP(256, perdev_minors);
--	}
-+
-+	max_devices = 256 / perdev_minors;
- 
- 	res = register_blkdev(MMC_BLOCK_MAJOR, "mmc");
- 	if (res)
-_
-
-Patches currently in -mm which might be from olof@lixom.net are
-
-linux-next.patch
-mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors.patch
-mmc-add-config-and-runtime-option-for-number-of-mmcblk-minors-update.patch
 
