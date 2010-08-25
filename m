@@ -1,122 +1,85 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH] tmio_mmc: Prevents unexpected status clear
-Date: Wed, 25 Aug 2010 16:07:22 -0700
-Message-ID: <20100825160722.9c9c38c8.akpm@linux-foundation.org>
-References: <4C33DF98.10409@renesas.com>
-	<20100708144626.2091f6c1.akpm@linux-foundation.org>
-	<4C3BBE77.8080000@renesas.com>
-	<20100715132552.fcb5791b.akpm@linux-foundation.org>
-	<20100825231107.45227d6a@linux-g6p1.site>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: akpm@linux-foundation.org
+Subject: + tmio_mmc-dont-clear-unhandled-pending-interrupts.patch added to -mm tree
+Date: Wed, 25 Aug 2010 16:07:30 -0700
+Message-ID: <201008252307.o7PN7Uqd021164@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:35932 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:42828 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752907Ab0HYXHf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2010 19:07:35 -0400
-In-Reply-To: <20100825231107.45227d6a@linux-g6p1.site>
+	by vger.kernel.org with ESMTP id S1752907Ab0HYXHm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2010 19:07:42 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Ian Molton <ian@mnementh.co.uk>, Paul Mundt <lethal@linux-sh.org>
-
-On Wed, 25 Aug 2010 23:11:07 +0100
-Matt Fleming <matt@console-pimps.org> wrote:
-
-> On Thu, 15 Jul 2010 13:25:52 -0700
-> Andrew Morton <akpm@linux-foundation.org> wrote:
-> 
-> > On Tue, 13 Jul 2010 10:16:39 +0900
-> > Yusuke Goda <yusuke.goda.sx@renesas.com> wrote:
-> > 
-> > > Hi Andrew
-> > > 
-> > > Thank you for your comment.
-> > > 
-> > > >>  #define ack_mmc_irqs(host, i) \
-> > > >>  	do { \
-> > > >> -		u32 mask;\
-> > > >> -		mask  = sd_ctrl_read32((host), CTL_STATUS); \
-> > > >> -		mask &= ~((i) & TMIO_MASK_IRQ); \
-> > > >> -		sd_ctrl_write32((host), CTL_STATUS, mask); \
-> > > >> +		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
-> > > >>  	} while (0)
-> > > > 
-> > > > Can we have a better changelog please?
-> > > > 
-> > > > What was wrong with the old code?
-> > > > 
-> > > > How does the patch fix it?
-> > > > 
-> > > > What are the user-visible runtime effects of the bug?
-> > > > 
-> > > > (It looks like that was a pretty gross bug - how did it pass testing??)
-> > > Example
-> > >  - CMD53(Single block read / Received data size : 64Byte)
-> > > 
-> > >  1) Send CMD53
-> > >  2) Receive "CMD53 response"
-> > >  3) Call tmio_mmc_cmd_irq(host, status);
-> > > -- original code ----------------------------------------------------
-> > >  #define ack_mmc_irqs(host, i) \
-> > > 	do { \
-> > > 		u32 mask;\
-> > > 		mask  = sd_ctrl_read32((host), CTL_STATUS); \
-> > > 	< case 1 >
-> > > 		mask &= ~((i) & TMIO_MASK_IRQ); \
-> > > 	< case 2 >
-> > > 		sd_ctrl_write32((host), CTL_STATUS, mask); \
-> > > 	} while (0)
-> > > ---------------------------------------------------------------------
-> > > 
-> > > TMIO_STAT_RXRDY status will be cleared by "sd_ctrl_write32((host), CTL_STATUS, mask);"
-> > > if TMIO_STAT_RXRDY becomes effective between "< case 1 >" and "< case 2 >".
-> > > 
-> > > This causes the phenomenon that a TMIO_STAT_RXRDY interrupt does not occur.
-> > > When received data are small, it rarely occurs.
-> > > 
-> > 
-> > OK..
-> > 
-> > But with both this patch and "tmio_mmc-revise-limit-on-data-size.patch"
-> > the changelogs fail to describe the impact of the bug upon our users. 
-> > So when I sit here trying to work out whether the patches should be
-> > applied to 2.6.35 and whether they should be backported into -stable, I
-> > don't have enough information.
-> > 
-> > What are your thoughts on this?
-> 
-> Goda, do you have any more ideas on updating the changelog for this
-> patch? It looks to me like this patch is a candidate for stable
-> (whereas the "tmio_mmc-revise-limit-on-data-size.patch" is not, sorry
-> about replying to that one first, I'm reading my mail backwards)
-> because, without this patch, it's possible to miss interrupts because
-> the ack_mmc_irqs() macro clears bit in the CTL_STATUS register that it
-> should not do? Is that correct?
-> 
-> If that is the case then would this be a more appropriate changelog,
-> 
-> "tmio_mmc: Don't clear unhandled pending interrupts
-> 
-> Previously, it was possible for ack_mmc_irqs() to clear pending
-> interrupt bits in the CTL_STATUS register, even though the interrupt
-> handler had not been called. This was because of a race that existed
-> when doing a read-modify-write sequence on CTL_STATUS. After the
-> read step in this sequence, if an interrupt occurred (causing one of the
-> bits in CTL_STATUS to be set) the write step would inadvertently clear
-> it.
-> 
-> This patch eliminates this race by only writing to CTL_STATUS and
-> clearing the interrupts that were passed as an argument to
-> ack_mmc_irqs()."
-
-hm, I seem to have secretly dropped this patch as well.
-
-Oh well.  I restored it as
-tmio_mmc-dont-clear-unhandled-pending-interrupts.patch and tagged it
-for a -stable backport.  Unless I hear otherwise I'll send it in to
-Linus when we return from Brazil a couple of weeks from now.
+To: mm-commits@vger.kernel.org
+Cc: yusuke.goda.sx@renesas.com, ian@mnementh.co.uk, lethal@linux-sh.org, linux-mmc@vger.kernel.org, magnus.damm@gmail.com, matt@console-pimps.org, sameo@linux.intel.com, stable@kernel.org
 
 
+The patch titled
+     tmio_mmc: don't clear unhandled pending interrupts
+has been added to the -mm tree.  Its filename is
+     tmio_mmc-dont-clear-unhandled-pending-interrupts.patch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: tmio_mmc: don't clear unhandled pending interrupts
+From: Yusuke Goda <yusuke.goda.sx@renesas.com>
+
+Previously, it was possible for ack_mmc_irqs() to clear pending interrupt
+bits in the CTL_STATUS register, even though the interrupt handler had not
+been called.  This was because of a race that existed when doing a
+read-modify-write sequence on CTL_STATUS.  After the read step in this
+sequence, if an interrupt occurred (causing one of the bits in CTL_STATUS
+to be set) the write step would inadvertently clear it.
+
+This patch eliminates this race by only writing to CTL_STATUS and clearing
+the interrupts that were passed as an argument to ack_mmc_irqs()."
+
+[matt@console-pimps.org: rewrote changelog]
+Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
+Cc: Magnus Damm <magnus.damm@gmail.com>
+Cc: Matt Fleming <matt@console-pimps.org>
+Cc: Ian Molton <ian@mnementh.co.uk>
+Cc: Samuel Ortiz <sameo@linux.intel.com>
+Cc: Paul Mundt <lethal@linux-sh.org>
+Cc: <linux-mmc@vger.kernel.org>
+Cc: <stable@kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/host/tmio_mmc.h |    5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff -puN drivers/mmc/host/tmio_mmc.h~tmio_mmc-dont-clear-unhandled-pending-interrupts drivers/mmc/host/tmio_mmc.h
+--- a/drivers/mmc/host/tmio_mmc.h~tmio_mmc-dont-clear-unhandled-pending-interrupts
++++ a/drivers/mmc/host/tmio_mmc.h
+@@ -82,10 +82,7 @@
+ 
+ #define ack_mmc_irqs(host, i) \
+ 	do { \
+-		u32 mask;\
+-		mask  = sd_ctrl_read32((host), CTL_STATUS); \
+-		mask &= ~((i) & TMIO_MASK_IRQ); \
+-		sd_ctrl_write32((host), CTL_STATUS, mask); \
++		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
+ 	} while (0)
+ 
+ 
+_
+
+Patches currently in -mm which might be from yusuke.goda.sx@renesas.com are
+
+tmio_mmc-dont-clear-unhandled-pending-interrupts.patch
+tmio_mmc-revise-a-limit-of-the-data-size.patch
+tmio_mmc-revise-a-limit-of-the-data-size-fix.patch
 
