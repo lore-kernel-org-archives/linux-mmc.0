@@ -1,96 +1,108 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH] tmio_mmc: Revise a limit of the data size
-Date: Wed, 25 Aug 2010 15:05:02 -0700
-Message-ID: <20100825150502.33649ff0.akpm@linux-foundation.org>
-References: <4C33DFF0.3040804@renesas.com>
-	<20100708144647.1e77364b.akpm@linux-foundation.org>
-	<4C3BD041.3020705@renesas.com>
-	<20100825225208.02a906f7@linux-g6p1.site>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] tmio_mmc: Prevents unexpected status clear
+Date: Wed, 25 Aug 2010 23:11:07 +0100
+Message-ID: <20100825231107.45227d6a@linux-g6p1.site>
+References: <4C33DF98.10409@renesas.com>
+	<20100708144626.2091f6c1.akpm@linux-foundation.org>
+	<4C3BBE77.8080000@renesas.com>
+	<20100715132552.fcb5791b.akpm@linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:42807 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752400Ab0HYWFM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2010 18:05:12 -0400
-In-Reply-To: <20100825225208.02a906f7@linux-g6p1.site>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:36157 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753416Ab0HYWLJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2010 18:11:09 -0400
+In-Reply-To: <20100715132552.fcb5791b.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>, Ian Molton <ian@mnementh.co.uk>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-On Wed, 25 Aug 2010 22:52:08 +0100
-Matt Fleming <matt@console-pimps.org> wrote:
+On Thu, 15 Jul 2010 13:25:52 -0700
+Andrew Morton <akpm@linux-foundation.org> wrote:
 
-> On Tue, 13 Jul 2010 11:32:33 +0900
+> On Tue, 13 Jul 2010 10:16:39 +0900
 > Yusuke Goda <yusuke.goda.sx@renesas.com> wrote:
 > 
 > > Hi Andrew
 > > 
-> > Andrew Morton wrote:
-> > > On Wed, 07 Jul 2010 11:01:20 +0900
-> > > Yusuke Goda <yusuke.goda.sx@renesas.com> wrote:
+> > Thank you for your comment.
+> > 
+> > >>  #define ack_mmc_irqs(host, i) \
+> > >>  	do { \
+> > >> -		u32 mask;\
+> > >> -		mask  = sd_ctrl_read32((host), CTL_STATUS); \
+> > >> -		mask &= ~((i) & TMIO_MASK_IRQ); \
+> > >> -		sd_ctrl_write32((host), CTL_STATUS, mask); \
+> > >> +		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
+> > >>  	} while (0)
 > > > 
-> > >> Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
-> > >> ---
-> > >>  drivers/mmc/host/tmio_mmc.c |    2 +-
-> > >>  1 files changed, 1 insertions(+), 1 deletions(-)
-> > >>
-> > >> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-> > >> index ee7d0a5..cac1c97 100644
-> > >> --- a/drivers/mmc/host/tmio_mmc.c
-> > >> +++ b/drivers/mmc/host/tmio_mmc.c
-> > >> @@ -661,7 +661,7 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
-> > >>  		 data->blksz, data->blocks);
-> > >>
-> > >>  	/* Hardware cannot perform 1 and 2 byte requests in 4 bit mode */
-> > >> -	if (data->blksz < 4 && host->mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
-> > >> +	if (data->blksz < 2 && host->mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
-> > >>  		pr_err("%s: %d byte block unsupported in 4 bit mode\n",
-> > >>  		       mmc_hostname(host->mmc), data->blksz);
-> > >>  		return -EINVAL;
+> > > Can we have a better changelog please?
 > > > 
-> > > Again, please provide a suitable description for this change.
-> > I think the data size is not limited by MMC_BUS_WIDTH_x.
-> > I confirmed that data transmission of 2Byte was performed without a problem.
+> > > What was wrong with the old code?
+> > > 
+> > > How does the patch fix it?
+> > > 
+> > > What are the user-visible runtime effects of the bug?
+> > > 
+> > > (It looks like that was a pretty gross bug - how did it pass testing??)
+> > Example
+> >  - CMD53(Single block read / Received data size : 64Byte)
+> > 
+> >  1) Send CMD53
+> >  2) Receive "CMD53 response"
+> >  3) Call tmio_mmc_cmd_irq(host, status);
+> > -- original code ----------------------------------------------------
+> >  #define ack_mmc_irqs(host, i) \
+> > 	do { \
+> > 		u32 mask;\
+> > 		mask  = sd_ctrl_read32((host), CTL_STATUS); \
+> > 	< case 1 >
+> > 		mask &= ~((i) & TMIO_MASK_IRQ); \
+> > 	< case 2 >
+> > 		sd_ctrl_write32((host), CTL_STATUS, mask); \
+> > 	} while (0)
+> > ---------------------------------------------------------------------
+> > 
+> > TMIO_STAT_RXRDY status will be cleared by "sd_ctrl_write32((host), CTL_STATUS, mask);"
+> > if TMIO_STAT_RXRDY becomes effective between "< case 1 >" and "< case 2 >".
+> > 
+> > This causes the phenomenon that a TMIO_STAT_RXRDY interrupt does not occur.
+> > When received data are small, it rarely occurs.
+> > 
 > 
-> This patch hasn't been picked up. I'm assuming that's because Andrew is
-> still unhappy with the changelog.
-
-Actually I don't know what happened with this.  I merged it on July 8
-and appear to have dropped it on July 27, but I can't find its
-removed-from-mm email so I don't know why I dropped it.  Weird.
-
-Oh well, I merged it again.  Is 2.6.37 an appropriate merge schedule?
-
-Also, I tend not to handle tmio_mmc patches - usually Paul patches that
-driver.
-
-> Andrew, how about something like,
+> OK..
 > 
-> "When running in 4-bit bus width mode, it is entirely possible to
-> transfer data in block sizes of 2 bytes and larger. Relax the
-> conditional check to allow 2-byte data block transfers which were
-> previously disallowed."
+> But with both this patch and "tmio_mmc-revise-limit-on-data-size.patch"
+> the changelogs fail to describe the impact of the bug upon our users. 
+> So when I sit here trying to work out whether the patches should be
+> applied to 2.6.35 and whether they should be backported into -stable, I
+> don't have enough information.
+> 
+> What are your thoughts on this?
 
-thanks.
+Goda, do you have any more ideas on updating the changelog for this
+patch? It looks to me like this patch is a candidate for stable
+(whereas the "tmio_mmc-revise-limit-on-data-size.patch" is not, sorry
+about replying to that one first, I'm reading my mail backwards)
+because, without this patch, it's possible to miss interrupts because
+the ack_mmc_irqs() macro clears bit in the CTL_STATUS register that it
+should not do? Is that correct?
 
-> Yusuke, have I interpreted your changelog correctly? Also note that
-> your patch should remove the comment above the conditional that says,
-> "Hardware cannot perform 1 and 2 byte requests in 4 bit mode".
+If that is the case then would this be a more appropriate changelog,
 
-this?
+"tmio_mmc: Don't clear unhandled pending interrupts
 
---- a/drivers/mmc/host/tmio_mmc.c~tmio_mmc-revise-a-limit-of-the-data-size-fix
-+++ a/drivers/mmc/host/tmio_mmc.c
-@@ -660,7 +660,6 @@ static int tmio_mmc_start_data(struct tm
- 	pr_debug("setup data transfer: blocksize %08x  nr_blocks %d\n",
- 		 data->blksz, data->blocks);
- 
--	/* Hardware cannot perform 1 and 2 byte requests in 4 bit mode */
- 	if (data->blksz < 2 && host->mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
- 		pr_err("%s: %d byte block unsupported in 4 bit mode\n",
- 		       mmc_hostname(host->mmc), data->blksz);
-_
+Previously, it was possible for ack_mmc_irqs() to clear pending
+interrupt bits in the CTL_STATUS register, even though the interrupt
+handler had not been called. This was because of a race that existed
+when doing a read-modify-write sequence on CTL_STATUS. After the
+read step in this sequence, if an interrupt occurred (causing one of the
+bits in CTL_STATUS to be set) the write step would inadvertently clear
+it.
 
+This patch eliminates this race by only writing to CTL_STATUS and
+clearing the interrupts that were passed as an argument to
+ack_mmc_irqs()."
