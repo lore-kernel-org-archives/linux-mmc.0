@@ -1,34 +1,56 @@
-From: Yusuke Goda <yusuke.goda.sx@renesas.com>
-Subject: Re: [PATCH 4/4] ARM: mach-shmobile: ap4evb: Fix hotplug for SDHI1
-Date: Thu, 26 Aug 2010 14:00:13 +0900
-Message-ID: <4C75F4DD.5020804@renesas.com>
-References: <1282663622-20564-1-git-send-email-arnd@arndnet.de>
- <1282663622-20564-5-git-send-email-arnd@arndnet.de>
+From: "Mark F. Brown" <mark.brown314@gmail.com>
+Subject: Re: example for using mmc_test.c
+Date: Thu, 26 Aug 2010 01:32:19 -0400
+Message-ID: <AANLkTin7UGt1e=xLmYgRHxnwSzOgXvt=56mb=4mWaPqt@mail.gmail.com>
+References: <442037.35057.qm@web114216.mail.gq1.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-reply-to: <1282663622-20564-5-git-send-email-arnd@arndnet.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Arnd Hannemann <arnd@arndnet.de>
-Cc: ian@mnementh.co.uk, sameo@linux.intel.com, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:62538 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750906Ab0HZFcU convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Aug 2010 01:32:20 -0400
+Received: by wwb28 with SMTP id 28so1068994wwb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Aug 2010 22:32:19 -0700 (PDT)
+In-Reply-To: <442037.35057.qm@web114216.mail.gq1.yahoo.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Primus Mutasingwa <pmutasingwa@yahoo.com>
+Cc: linux-mmc@vger.kernel.org
 
+On Wed, Aug 25, 2010 at 9:01 PM, Primus Mutasingwa
+<pmutasingwa@yahoo.com> wrote:
+> Hello,
+>
+> I am looking for an example that shows how to use the driver in:
+> driver/mmc/card/mmc_test.c.
+>
+> Anyone with sample user space code or instructions on how to use plea=
+se forward
+> to me.
+> kernel version used is 2.6.33.7
+>
+> thanks.
+>
+> P. Mutasingwa
+> pmutasingwa@yahoo.com
+>
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
 
-Arnd Hannemann wrote:
-> On AP4EVB the card detect pin of the top SD/MMC slot is not directly connected
-> to the tmio/mmcif controller but to a GPIO pin, so polling needs to be done for
-> SDHI1 and MMCIF in order to support hotplug for that slot. SHDI1 and MMCIF
-> share that slot, and the used controller is selected by a DIP switch.
-> This patch adds a helper function to check if a card is present in that
-> particular slot, registers this function with SDHI1 and MMCIF and enables
-> polling for SDHI1.
-> 
-> Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+Hi Primus,
 
-I confirmed normal operation in the following environment.
- - AP4EVB board
- - CN7 (MMCIF)
+ The details are located in Kconfig
 
-Tested-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
+http://lxr.linux.no/#linux+v2.6.35/drivers/mmc/card/Kconfig#L41
 
+Regards,
+-- Mark
