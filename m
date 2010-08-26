@@ -1,47 +1,43 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH] tmio_mmc: Revise a limit of the data size
-Date: Thu, 26 Aug 2010 16:26:42 +0900
-Message-ID: <AANLkTin+LnxRzN9yV6+iE5+zEeP9WitbW0qgf3KHDUu6@mail.gmail.com>
-References: <4C33DFF0.3040804@renesas.com>
-	<20100708144647.1e77364b.akpm@linux-foundation.org>
-	<4C3BD041.3020705@renesas.com>
-	<20100825225208.02a906f7@linux-g6p1.site>
-	<20100825150502.33649ff0.akpm@linux-foundation.org>
-	<AANLkTiko3vN5APNcKbFegOn_XEySyDgBnAoGzyOKSsiZ@mail.gmail.com>
-	<20100826072446.GA19339@console-pimps.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] tmio_mmc: Prevents unexpected status clear
+Date: Thu, 26 Aug 2010 08:26:42 +0100
+Message-ID: <20100826072642.GB19339@console-pimps.org>
+References: <4C33DF98.10409@renesas.com>
+ <20100708144626.2091f6c1.akpm@linux-foundation.org>
+ <4C3BBE77.8080000@renesas.com>
+ <20100715132552.fcb5791b.akpm@linux-foundation.org>
+ <20100825231107.45227d6a@linux-g6p1.site>
+ <20100825160722.9c9c38c8.akpm@linux-foundation.org>
+ <4C75BB0D.2030202@renesas.com>
+ <20100826075320.0538043b@linux-g6p1.site>
+ <AANLkTim2_8UU62hnvSrPK94MgaM35K0PbppGe8yeW-bC@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:60776 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752239Ab0HZH0n (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Aug 2010 03:26:43 -0400
-Received: by qwh6 with SMTP id 6so1314787qwh.19
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Aug 2010 00:26:42 -0700 (PDT)
-In-Reply-To: <20100826072446.GA19339@console-pimps.org>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:43882 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752239Ab0HZH0o (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Aug 2010 03:26:44 -0400
+Content-Disposition: inline
+In-Reply-To: <AANLkTim2_8UU62hnvSrPK94MgaM35K0PbppGe8yeW-bC@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Ian Molton <ian@mnementh.co.uk>, Andrew Morton <akpm@linux-foundation.org>, Yusuke Goda <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Paul Mundt <lethal@linux-sh.org>
 
-On Thu, Aug 26, 2010 at 4:24 PM, Matt Fleming <matt@console-pimps.org> wrote:
-> On Thu, Aug 26, 2010 at 02:50:09AM +0100, Ian Molton wrote:
->> Probably dropped because I complained about two things,
->>
->> 1) The patch doesnt check what the hardware is underneath before
->> arbitrarily changing the parameters relied on by some hardware
+On Thu, Aug 26, 2010 at 03:58:38PM +0900, Magnus Damm wrote:
 >
-> Has anyone thought about adding a caps or flags field to the
-> tmio_mmc_host structure so that platform code set a bit if it can't do
-> 2-byte data block transfers?
+> Hi Matt,
+> 
+> Just FYI, the newer version of these patches also have a whole bunch
+> of acked-by and tested-by tags, see this email:
+> 
+> http://lkml.org/lkml/2010/8/20/429
+> 
+> Thanks for your help!
 
-Good idea! There is already a good place available:
+Argh, right. Claws-mail searching has completely failed me. I didn't
+even see that thread when searching to "tmio_mmc". Back to mutt..
 
->From include/linux/mfd/tmio.h:
-...
-/* tmio MMC platform flags */
-#define TMIO_MMC_WRPROTECT_DISABLE      (1 << 0)
-
-Cheers,
-
-/ magnus
+Andrew, can you drop the patch with my changelog and pick up the one in
+that thread seeing as it's got all the tags and a new changelog? Thanks.
