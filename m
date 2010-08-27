@@ -1,13 +1,13 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] SDHCI: Modify checks to determine the presense of card.
-Date: Fri, 27 Aug 2010 20:35:34 +0100
-Message-ID: <20100827193534.GD23079@void.printf.net>
-References: <1267772377-14723-1-git-send-email-thomas.ab@samsung.com>
+Subject: Re: [PATCH] S3C: SDHCI: Modify timeout clock calculation.
+Date: Fri, 27 Aug 2010 20:36:03 +0100
+Message-ID: <20100827193603.GE23079@void.printf.net>
+References: <1267772563-14846-1-git-send-email-thomas.ab@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1267772377-14723-1-git-send-email-thomas.ab@samsung.com>
+In-Reply-To: <1267772563-14846-1-git-send-email-thomas.ab@samsung.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: Thomas Abraham <thomas.ab@samsung.com>
 Cc: linux-mmc@vger.kernel.org, ben-linux@fluff.org, linux-samsung-soc@vger.kernel.org
@@ -17,33 +17,42 @@ Hi,
 
 This wasn't picked up -- any comments from the list?
 
-On Fri, Mar 05, 2010 at 12:29:37PM +0530, Thomas Abraham wrote:
-> In the sdhci_request function, the card is determined to be present based
-> on the SDCD pin status. SDHCI host controllers that do not use SDCD pin
-> but rely on other mechanism such as external pin interrupts, update the
-> host flags with SDHCI_DEVICE_DEAD flag based on the card insertion status.
-> This patch modifies the sdhci_request function such that the it uses
-> both the SDCD status and SDHCI_DEVICE_DEAD host flag to determine if the
-> card is inserted or not.
+On Fri, Mar 05, 2010 at 12:32:43PM +0530, Thomas Abraham wrote:
+> In sdhci_s3c_set_clock function of S3C SDHCI controller driver, when a new
+> clock source is selected, the timeout clock is recalculated. This patch 
+> modifies the calculation of the timeout clock based on the 
+> SDHCI_TIMEOUT_CLK_UNIT capability which is determined from the 
+> SDHCI_CAPABILITIES register.
 > 
 > Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
 > ---
->  drivers/mmc/host/sdhci.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+>  drivers/mmc/host/sdhci-s3c.c |    6 +++++-
+>  1 files changed, 5 insertions(+), 1 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c279fbc..f1a6ebe 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1106,7 +1106,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  		present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
->  				SDHCI_CARD_PRESENT;
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 50997d2..ab4641c 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -181,6 +181,7 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
 >  
-> -	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
-> +	if (!present && host->flags & SDHCI_DEVICE_DEAD) {
->  		host->mrq->cmd->error = -ENOMEDIUM;
->  		tasklet_schedule(&host->finish_tasklet);
->  	} else
+>  	if (ourhost->cur_clk != best_src) {
+>  		struct clk *clk = ourhost->clk_bus[best_src];
+> +		unsigned int caps;
+>  
+>  		/* turn clock off to card before changing clock source */
+>  		writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
+> @@ -188,7 +189,10 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
+>  		ourhost->cur_clk = best_src;
+>  		host->max_clk = clk_get_rate(clk);
+>  		host->timeout_clk = sdhci_s3c_get_timeout_clk(host);
+> -
+> +		caps = readl(host->ioaddr + SDHCI_CAPABILITIES);
+> +		if (caps & SDHCI_TIMEOUT_CLK_UNIT)
+> +			host->timeout_clk *= 1000;
+> +
+>  		ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
+>  		ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;
+>  		ctrl |= best_src << S3C_SDHCI_CTRL2_SELBASECLK_SHIFT;
 > -- 
 > 1.6.6.rc2
 
