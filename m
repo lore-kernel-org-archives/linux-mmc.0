@@ -1,49 +1,44 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH RESEND] au1xmmc.c: use resource_size()
-Date: Fri, 27 Aug 2010 20:11:34 +0100
-Message-ID: <20100827191134.GF20407@void.printf.net>
-References: <BD79186B4FD85F4B8E60E381CAEE19090200E9FB@mi8nycmail19.Mi8.com>
+Subject: Re: [PATCH V7] mxc : Add i.MX21 support to mxcmmc driver
+Date: Fri, 27 Aug 2010 20:14:22 +0100
+Message-ID: <20100827191421.GG20407@void.printf.net>
+References: <20100213153617.21144.68460.stgit@srv002.fuzzey.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53276 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:53306 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752040Ab0H0TLn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 15:11:43 -0400
+	id S1752773Ab0H0TOY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 15:14:24 -0400
 Content-Disposition: inline
-In-Reply-To: <BD79186B4FD85F4B8E60E381CAEE19090200E9FB@mi8nycmail19.Mi8.com>
+In-Reply-To: <20100213153617.21144.68460.stgit@srv002.fuzzey.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: H Hartley Sweeten <hartleys@visionengravers.com>
-Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
+To: Martin Fuzzey <mfuzzey@gmail.com>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>
 
-From: H Hartley Sweeten <hsweeten@visionengravers.com>
-Date: Mon, 14 Dec 2009 14:28:06 -0500
+Hi Martin,
 
-Use resource_size().
+On Sat, Feb 13, 2010 at 04:36:32PM +0100, Martin Fuzzey wrote:
+> Even though the i.MX21 SDHC module has the same revision number as the i.MX27
+> one there are a few differences!!
+>         Some interrupt enables are inverted.
+>         FIFO is only 16 bits wide.
+>         The argument is written to 2x16bit registers (vs 1x32).
+>         Interrupts must be acknowledged via the INT_CNTR register.
+>         Card clock must be enabled for each request.
+> 	For writes DMA must be enabled on command response not before.
+> 
+> Signed-off-by: Martin Fuzzey <mfuzzey@gmail.com>
+> 
+> ---
+> Changes from V6 (April 2009):
+> Minor stylistic changes suggested by Robby Cai:
+>         factorize enables in mxcmci_set_int_cntr()
+>         remove redundant local variable in mxcmci_push() and mxcmci_pull()
+> Rebased to 2.6.33-rc8
 
-Signed-off-by: H Hartley Sweeten <hsweeten@visionengravers.com>
-[cjb: rebased patch against Linus]
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/au1xmmc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
-index c8da5d3..e14b866 100644
---- a/drivers/mmc/host/au1xmmc.c
-+++ b/drivers/mmc/host/au1xmmc.c
-@@ -964,7 +964,7 @@ static int __devinit au1xmmc_probe(struct platform_device *pdev)
- 		goto out1;
- 	}
- 
--	host->ioarea = request_mem_region(r->start, r->end - r->start + 1,
-+	host->ioarea = request_mem_region(r->start, resource_size(r),
- 					   pdev->name);
- 	if (!host->ioarea) {
- 		dev_err(&pdev->dev, "mmio already in use\n");
--- 
-1.7.0.1
+Looks like this wasn't merged.  Are you interested in resubmitting it?
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
