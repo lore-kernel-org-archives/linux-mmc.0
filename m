@@ -1,60 +1,81 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] S3C: SDHCI: Modify timeout clock calculation.
-Date: Fri, 27 Aug 2010 20:36:03 +0100
-Message-ID: <20100827193603.GE23079@void.printf.net>
-References: <1267772563-14846-1-git-send-email-thomas.ab@samsung.com>
+Subject: Re: [PATCH 01/03] omap hsmmc: prevent race between dma and hsmmc
+	callback
+Date: Fri, 27 Aug 2010 20:37:27 +0100
+Message-ID: <20100827193727.GF23079@void.printf.net>
+References: <618f0c911003100611q42e7f23cuc3c8d3f116ca7eb3@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:37398 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751389Ab0H0Th3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 15:37:29 -0400
 Content-Disposition: inline
-In-Reply-To: <1267772563-14846-1-git-send-email-thomas.ab@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Thomas Abraham <thomas.ab@samsung.com>
-Cc: linux-mmc@vger.kernel.org, ben-linux@fluff.org, linux-samsung-soc@vger.kernel.org
+In-Reply-To: <618f0c911003100611q42e7f23cuc3c8d3f116ca7eb3@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Venkatraman S <svenkatr@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>
 
 Hi,
 
-This wasn't picked up -- any comments from the list?
+Looks like the discussion on this patch stopped: do we think there's a
+race worth fixing here?
 
-On Fri, Mar 05, 2010 at 12:32:43PM +0530, Thomas Abraham wrote:
-> In sdhci_s3c_set_clock function of S3C SDHCI controller driver, when a new
-> clock source is selected, the timeout clock is recalculated. This patch 
-> modifies the calculation of the timeout clock based on the 
-> SDHCI_TIMEOUT_CLK_UNIT capability which is determined from the 
-> SDHCI_CAPABILITIES register.
+On Wed, Mar 10, 2010 at 07:41:38PM +0530, Venkatraman S wrote:
+> See previous post http://patchwork.kernel.org/patch/82907/
+> Rebased to 2.6.34-rc1 and fixed comment alignment.
 > 
-> Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
+> CC: Adrian Hunter <adrian.hunter@nokia.com>
+> CC: Madhusudhan C <madhu.cr@ti.com>
+> CC: Tony Lindgren <tony@atomide.com>
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
 > ---
->  drivers/mmc/host/sdhci-s3c.c |    6 +++++-
->  1 files changed, 5 insertions(+), 1 deletions(-)
+>  drivers/mmc/host/omap_hsmmc.c |   19 +++++++++++--------
+>  1 files changed, 11 insertions(+), 8 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 50997d2..ab4641c 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -181,6 +181,7 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
->  
->  	if (ourhost->cur_clk != best_src) {
->  		struct clk *clk = ourhost->clk_bus[best_src];
-> +		unsigned int caps;
->  
->  		/* turn clock off to card before changing clock source */
->  		writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
-> @@ -188,7 +189,10 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
->  		ourhost->cur_clk = best_src;
->  		host->max_clk = clk_get_rate(clk);
->  		host->timeout_clk = sdhci_s3c_get_timeout_clk(host);
-> -
-> +		caps = readl(host->ioaddr + SDHCI_CAPABILITIES);
-> +		if (caps & SDHCI_TIMEOUT_CLK_UNIT)
-> +			host->timeout_clk *= 1000;
-> +
->  		ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
->  		ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;
->  		ctrl |= best_src << S3C_SDHCI_CTRL2_SELBASECLK_SHIFT;
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 83f0aff..ea2a082 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1046,8 +1046,18 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+> 
+>  	if (end_cmd || ((status & CC) && host->cmd))
+>  		omap_hsmmc_cmd_done(host, host->cmd);
+> -	if ((end_trans || (status & TC)) && host->mrq)
+> +	if ((end_trans || (status & TC)) && host->mrq) {
+>  		omap_hsmmc_xfer_done(host, data);
+> +		if (host->dma_ch != -1) {
+> +			omap_free_dma(host->dma_ch);
+> +			host->dma_ch = -1;
+> +			/*
+> +			 * Callback: run in interrupt context.
+> +			 * mutex_unlock will throw a kernel warning if used.
+> +			 */
+> +			up(&host->sem);
+> +		}
+> +	}
+> 
+>  	spin_unlock(&host->irq_lock);
+> 
+> @@ -1267,13 +1277,6 @@ static void omap_hsmmc_dma_cb(int lch, u16
+> ch_status, void *data)
+>  		return;
+>  	}
+> 
+> -	omap_free_dma(host->dma_ch);
+> -	host->dma_ch = -1;
+> -	/*
+> -	 * DMA Callback: run in interrupt context.
+> -	 * mutex_unlock will throw a kernel warning if used.
+> -	 */
+> -	up(&host->sem);
+>  }
+> 
+>  /*
 > -- 
-> 1.6.6.rc2
+> 1.6.3.3
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
