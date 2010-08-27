@@ -1,90 +1,169 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH RESEND] MMC:mmc_spi: Recover from CRC error for SD
-	read/write operation over SPI.
-Date: Fri, 27 Aug 2010 21:36:39 +0100
-Message-ID: <20100827203639.GT23079@void.printf.net>
-References: <1278921056.22437.1.camel@eight.analog.com>
+Subject: Re: [PATCH v3] mmc: Make ID freq configurable
+Date: Fri, 27 Aug 2010 21:44:15 +0100
+Message-ID: <20100827204415.GU23079@void.printf.net>
+References: <20090702135849.21370282@hskinnemoen-d830> <1246537056.2980.60.camel@linux-51e8.site> <4B3E570C.2060602@yahoo.es> <63809451-ED1D-487A-AE63-F72B23D136D8@niasdigital.com> <4B3F019F.6010306@yahoo.es> <49985427-DCB9-40E1-815B-43C812B41DE3@niasdigital.com> <20100102130809.121b7e10@mjolnir.ossman.eu> <AD8E15FA-A476-4275-A750-5EB587A93CEC@niasdigital.com> <20100103003804.66021fe9@mjolnir.ossman.eu> <4B42648A.2040305@yahoo.es>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51085 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:49591 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752327Ab0H0Ugn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 16:36:43 -0400
+	id S1751128Ab0H0Uob (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 16:44:31 -0400
 Content-Disposition: inline
-In-Reply-To: <1278921056.22437.1.camel@eight.analog.com>
+In-Reply-To: <4B42648A.2040305@yahoo.es>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: sonic zhang <sonic.adi@gmail.com>
-Cc: David Brownell <dbrownell@users.sourceforge.net>, Grant Likely <grant.likely@secretlab.ca>, Anton Vorontsov <avorontsov@mvista.com>, Ernst Schwab <eschwab@online.de>, linux-mmc@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>, uclinux-dist-devel <uclinux-dist-devel@blackfin.uclinux.org>
+To: Hein_Tibosch <hein_tibosch@yahoo.es>
+Cc: Pierre Ossman <pierre@ossman.eu>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, akpm@linux-foundation.org
 
 Hi,
 
-There were no comments about this patch -- Andrew, please take it if
-there are no objections.
+This looks like the best of the min_freq patches I've seen, and is
+implementing a suggestion of Pierre's.  Should we take it?
 
-From: Sonic Zhang <sonic.zhang@analog.com>
-Date: Mon, 12 Jul 2010 15:50:56 +0800
-Subject: [PATCH] mmc_spi: Recover from CRC error for SD read/write operation over SPI.
+- Chris.
 
-SPI bus is not reliable on all platforms when doing large data transfer.
-Current mmc spi driver fails SD read/write command immediately, if
-occasional CRC error is reported by SD device. This patch makes the
-operation recover from the CRC error by doing last SD command again.
-The retry count is set to 5 to ensure the driver pass any stress test.
-
-Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
-[cjb: fixed merge conflict against current Linus]
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/mmc_spi.c |   21 +++++++++++++++++++++
- 1 files changed, 21 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 62a3582..3d48e21 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -1055,6 +1055,8 @@ static void mmc_spi_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct mmc_spi_host	*host = mmc_priv(mmc);
- 	int			status = -EINVAL;
-+	int			crc_retry = 5;
-+	struct mmc_command	stop;
- 
- #ifdef DEBUG
- 	/* MMC core and layered drivers *MUST* issue SPI-aware commands */
-@@ -1087,10 +1089,29 @@ static void mmc_spi_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	/* request exclusive bus access */
- 	spi_bus_lock(host->spi->master);
- 
-+crc_recover:
- 	/* issue command; then optionally data and stop */
- 	status = mmc_spi_command_send(host, mrq, mrq->cmd, mrq->data != NULL);
- 	if (status == 0 && mrq->data) {
- 		mmc_spi_data_do(host, mrq->cmd, mrq->data, mrq->data->blksz);
-+
-+		/*
-+		 * SPI bus is not reliable when doing large data transfer.
-+		 * If occasional crc error is reported by SD device when do
-+		 * data read/write over SPI, it can be recovered by doing
-+		 * last SD command again. The retry count is set to 5 to
-+		 * ensure the driver pass any stress test.
-+		 */
-+		if (mrq->data->error == -EILSEQ && crc_retry) {
-+			stop.opcode = MMC_STOP_TRANSMISSION;
-+			stop.arg = 0;
-+			stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+			status = mmc_spi_command_send(host, mrq, &stop, 0);
-+			crc_retry--;
-+			mrq->data->error = 0;
-+			goto crc_recover;
-+		}
-+
- 		if (mrq->stop)
- 			status = mmc_spi_command_send(host, mrq, mrq->stop, 0);
- 		else
--- 
-1.7.0.1
+On Tue, Jan 05, 2010 at 05:58:34AM +0800, Hein_Tibosch wrote:
+> 
+> In my last mail the spaces in the patch were mistreated, sorry for that.
+> 
+> Below a patch which tries mmc-initialization using several frequencies
+> from an array 400, 300, 200 and 100.
+> 
+> 
+> Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
+> 
+> ---
+> diff -Nurp a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -891,12 +891,7 @@ static void mmc_power_up(struct mmc_host
+>  	 */
+>  	mmc_delay(10);
+> 
+> -	if (host->f_min > 400000) {
+> -		pr_warning("%s: Minimum clock frequency too high for "
+> -				"identification mode\n", mmc_hostname(host));
+> -		host->ios.clock = host->f_min;
+> -	} else
+> -		host->ios.clock = 400000;
+> +	host->ios.clock = host->f_init;
+> 
+>  	host->ios.power_mode = MMC_POWER_ON;
+>  	mmc_set_ios(host);
+> @@ -1041,6 +1036,8 @@ void mmc_rescan(struct work_struct *work
+>  		container_of(work, struct mmc_host, detect.work);
+>  	u32 ocr;
+>  	int err;
+> +	int i;
+> +	unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+> 
+>  	mmc_bus_get(host);
+> 
+> @@ -1070,46 +1067,55 @@ void mmc_rescan(struct work_struct *work
+>  	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
+>  		goto out;
+> 
+> -	mmc_claim_host(host);
+> +	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+> +		mmc_claim_host(host);
+> 
+> -	mmc_power_up(host);
+> -	mmc_go_idle(host);
+> +		if (freqs[i] >= host->f_min)
+> +			host->f_init = freqs[i];
+> +		else if (i && freqs[i-1] <= host->f_min)
+> +			goto out;
+> +		else
+> +			host->f_init = host->f_min;
+> 
+> -	mmc_send_if_cond(host, host->ocr_avail);
+> +		printk ("mmc_rescan: trying %u Hz\n", host->f_init);
+> +		mmc_power_up(host);
+> +		mmc_go_idle(host);
+> 
+> -	/*
+> -	 * First we search for SDIO...
+> -	 */
+> -	err = mmc_send_io_op_cond(host, 0, &ocr);
+> -	if (!err) {
+> -		if (mmc_attach_sdio(host, ocr))
+> -			mmc_power_off(host);
+> -		goto out;
+> -	}
+> +		mmc_send_if_cond(host, host->ocr_avail);
+> 
+> -	/*
+> -	 * ...then normal SD...
+> -	 */
+> -	err = mmc_send_app_op_cond(host, 0, &ocr);
+> -	if (!err) {
+> -		if (mmc_attach_sd(host, ocr))
+> -			mmc_power_off(host);
+> -		goto out;
+> -	}
+> +		/*
+> +		 * First we search for SDIO...
+> +		 */
+> +		err = mmc_send_io_op_cond(host, 0, &ocr);
+> +		if (!err) {
+> +			if (mmc_attach_sdio(host, ocr))
+> +				mmc_power_off(host);
+> +			goto out;
+> +		}
+> 
+> -	/*
+> -	 * ...and finally MMC.
+> -	 */
+> -	err = mmc_send_op_cond(host, 0, &ocr);
+> -	if (!err) {
+> -		if (mmc_attach_mmc(host, ocr))
+> -			mmc_power_off(host);
+> -		goto out;
+> -	}
+> +		/*
+> +		 * ...then normal SD...
+> +		 */
+> +		err = mmc_send_app_op_cond(host, 0, &ocr);
+> +		if (!err) {
+> +			if (mmc_attach_sd(host, ocr))
+> +				mmc_power_off(host);
+> +			goto out;
+> +		}
+> 
+> -	mmc_release_host(host);
+> -	mmc_power_off(host);
+> +		/*
+> +		 * ...and finally MMC.
+> +		 */
+> +		err = mmc_send_op_cond(host, 0, &ocr);
+> +		if (!err) {
+> +			if (mmc_attach_mmc(host, ocr))
+> +				mmc_power_off(host);
+> +			goto out;
+> +		}
+> 
+> +		mmc_release_host(host);
+> +		mmc_power_off(host);
+> +	}
+>  out:
+>  	if (host->caps & MMC_CAP_NEEDS_POLL)
+>  		mmc_schedule_delayed_work(&host->detect, HZ);
+> diff -Nurp a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -119,6 +119,7 @@ struct mmc_host {
+>  	const struct mmc_host_ops *ops;
+>  	unsigned int		f_min;
+>  	unsigned int		f_max;
+> +	unsigned int		f_init;
+>  	u32			ocr_avail;
+> 
+>  #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
+> 
+> 
+> --
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
