@@ -1,26 +1,36 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH RESEND] drivers/mmc/host: Adjust confusing if indentation
-Date: Fri, 27 Aug 2010 22:08:26 +0100
-Message-ID: <20100827210826.GB27804@void.printf.net>
-References: <Pine.LNX.4.64.1008052219360.31692@ask.diku.dk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49565 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752685Ab0H0VIk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 17:08:40 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1008052219360.31692@ask.diku.dk>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation.patch added to -mm tree
+Date: Fri, 27 Aug 2010 14:16:42 -0700
+Message-ID: <201008272116.o7RLGgtt016617@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: julia@diku.dk, cjb@laptop.org, linux-mmc@vger.kernel.org, ppisa@pikron.com
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org
-Cc: Julia Lawall <julia@diku.dk>, Pavel Pisa <ppisa@pikron.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
 
-Hi Andrew, doesn't look like anyone else has taken this yet.
 
+The patch titled
+     drivers/mmc/host/imxmmc.c: adjust confusing if indentation
+has been added to the -mm tree.  Its filename is
+     drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation.patch
+
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: drivers/mmc/host/imxmmc.c: adjust confusing if indentation
 From: Julia Lawall <julia@diku.dk>
-Date: Thu, 5 Aug 2010 22:19:52 +0200 (CEST)
 
 Move the second if (reg & ...) test into the branch indicated by its
 indentation.  The test was previously always executed after the if
@@ -54,15 +64,18 @@ if (p1[0].column == p2[0].column):
 
 Signed-off-by: Julia Lawall <julia@diku.dk>
 Signed-off-by: Chris Ball <cjb@laptop.org>
+Cc: Pavel Pisa <ppisa@pikron.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
+
  drivers/mmc/host/imxmmc.c |    3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/imxmmc.c b/drivers/mmc/host/imxmmc.c
-index 9a68ff4..5a950b1 100644
---- a/drivers/mmc/host/imxmmc.c
-+++ b/drivers/mmc/host/imxmmc.c
-@@ -148,11 +148,12 @@ static int imxmci_start_clock(struct imxmci_host *host)
+diff -puN drivers/mmc/host/imxmmc.c~drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation drivers/mmc/host/imxmmc.c
+--- a/drivers/mmc/host/imxmmc.c~drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation
++++ a/drivers/mmc/host/imxmmc.c
+@@ -148,11 +148,12 @@ static int imxmci_start_clock(struct imx
  
  		while (delay--) {
  			reg = readw(host->base + MMC_REG_STATUS);
@@ -76,8 +89,13 @@ index 9a68ff4..5a950b1 100644
  
  			if (test_bit(IMXMCI_PEND_STARTED_b, &host->pending_events))
  				return 0;
+_
 
+Patches currently in -mm which might be from julia@diku.dk are
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+origin.patch
+linux-next.patch
+drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation.patch
+fs-btrfs-use-memdup_user.patch
+fs-btrfs-use-err_cast.patch
+
