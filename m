@@ -1,30 +1,51 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/7] mmc: at91_mci: fix pointer errors
-Date: Fri, 27 Aug 2010 20:34:57 +0100
-Message-ID: <20100827193457.GC23079@void.printf.net>
-References: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com> <20100827193303.GB23079@void.printf.net>
+Subject: Re: [PATCH] SDHCI: Modify checks to determine the presense of card.
+Date: Fri, 27 Aug 2010 20:35:34 +0100
+Message-ID: <20100827193534.GD23079@void.printf.net>
+References: <1267772377-14723-1-git-send-email-thomas.ab@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49150 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752164Ab0H0TfD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 15:35:03 -0400
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20100827193303.GB23079@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1267772377-14723-1-git-send-email-thomas.ab@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Thomas Abraham <thomas.ab@samsung.com>
+Cc: linux-mmc@vger.kernel.org, ben-linux@fluff.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>, akpm@linux-foundation.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, wolfgang.mues@auerswald.de, avictor.za@gmail.com
 
-On Fri, Aug 27, 2010 at 08:33:03PM +0100, Chris Ball wrote:
-> Looks like only the first half of this patch was applied?  The
-> kunmap_atomic() line is still present as before in Linus' tree. 
+Hi,
 
-Might be related to Dan Carpenter's suggestion that the spacing for that
-line should change to:
+This wasn't picked up -- any comments from the list?
 
-	kunmap_atomic(((void *)sgbuffer) - sg->offset, KM_BIO_SRC_IRQ);
+On Fri, Mar 05, 2010 at 12:29:37PM +0530, Thomas Abraham wrote:
+> In the sdhci_request function, the card is determined to be present based
+> on the SDCD pin status. SDHCI host controllers that do not use SDCD pin
+> but rely on other mechanism such as external pin interrupts, update the
+> host flags with SDHCI_DEVICE_DEAD flag based on the card insertion status.
+> This patch modifies the sdhci_request function such that the it uses
+> both the SDCD status and SDHCI_DEVICE_DEAD host flag to determine if the
+> card is inserted or not.
+> 
+> Signed-off-by: Thomas Abraham <thomas.ab@samsung.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index c279fbc..f1a6ebe 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1106,7 +1106,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  		present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+>  				SDHCI_CARD_PRESENT;
+>  
+> -	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
+> +	if (!present && host->flags & SDHCI_DEVICE_DEAD) {
+>  		host->mrq->cmd->error = -ENOMEDIUM;
+>  		tasklet_schedule(&host->finish_tasklet);
+>  	} else
+> -- 
+> 1.6.6.rc2
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
