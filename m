@@ -1,52 +1,58 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v8 0/2] sDMA descriptor autoloading feature
-Date: Fri, 27 Aug 2010 20:39:10 +0100
-Message-ID: <20100827193910.GG23079@void.printf.net>
-References: <i2x618f0c911004291034g7f5b377ds5efaf74c901bc036@mail.gmail.com>
+Subject: Re: [PATCH] mmci-omap: Use resource_size
+Date: Fri, 27 Aug 2010 20:42:22 +0100
+Message-ID: <20100827194221.GH23079@void.printf.net>
+References: <1273133059-6335-1-git-send-email-tklauser@distanz.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37416 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752338Ab0H0TjL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 15:39:11 -0400
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <i2x618f0c911004291034g7f5b377ds5efaf74c901bc036@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1273133059-6335-1-git-send-email-tklauser@distanz.ch>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tobias Klauser <tklauser@distanz.ch>
+Cc: jarkko.lavinen@nokia.com, tony@atomide.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org, akpm@linux-foundation.org
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Madhusudhan Chikkature <madhu.cr@ti.com>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@nokia.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
 
-Hi Venkatraman,
+Hi,
 
-On Thu, Apr 29, 2010 at 11:04:34PM +0530, Venkatraman S wrote:
->     This patch series is the introduction of new sDMA feature: descriptor
-> autoloading (v8) and it's adoption by the OMAP HSMMC driver.
+On Thu, May 06, 2010 at 10:04:19AM +0200, Tobias Klauser wrote:
+> Use the resource_size function instead of manually calculating the
+> resource size.  This reduces the chance of introducing off-by-one
+> errors.
 > 
->    The previous version (v7) was blocked on achieving proper interrupt
-> syncronisation
-> between the MMC and DMA callback in the HSMMC driver.
->   Thanks to Adrian Hunter's patch, https://patchwork.kernel.org/patch/94670/
-> this has been cleaned up.
+> Signed-off-by: Tobias Klauser <tklauser@distanz.ch>
+> ---
+>  drivers/mmc/host/omap.c |    4 ++--
+>  1 files changed, 2 insertions(+), 2 deletions(-)
 > 
-> Current version is based on for-next branch + Adrian Hunter's
-> interrupt syncronisation patch
-> (https://patchwork.kernel.org/patch/94670)
-> 
-> Changes since v7:
->   * Removed the 'fix race condition between DMA and HSMMC callback'
-> part of the series
->   * Added memory barries in start and resume sglist transfer for cpu
-> buffer syncronization
->   * Cleanup and comments
-> 
-> This has been tested on OMAP3430, OMAP3630 and OMAP4430 SDP
-> for MMC file transfer and as boot file system.
+> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+> index 84d2804..a2c8545 100644
+> --- a/drivers/mmc/host/omap.c
+> +++ b/drivers/mmc/host/omap.c
+> @@ -1415,7 +1415,7 @@ static int __init mmc_omap_probe(struct platform_device *pdev)
+>  	if (res == NULL || irq < 0)
+>  		return -ENXIO;
+>  
+> -	res = request_mem_region(res->start, res->end - res->start + 1,
+> +	res = request_mem_region(res->start, resource_size(res),
+>  				 pdev->name);
+>  	if (res == NULL)
+>  		return -EBUSY;
+> @@ -1537,7 +1537,7 @@ static int mmc_omap_remove(struct platform_device *pdev)
+>  
+>  	iounmap(host->virt_base);
+>  	release_mem_region(pdev->resource[0].start,
+> -			   pdev->resource[0].end - pdev->resource[0].start + 1);
+> +			   resource_size(&pdev->resource[0]));
+>  
+>  	kfree(host);
+>  
+> -- 
+> 1.6.3.3
 
-The comments on this patchset were positive apart from some stylistic
-changes -- would you like to resubmit a new patch?
-
-Thanks,
+This wasn't picked up, and in the meantime the request_mem_region() call
+has been converted over to use resource_size() but release_mem_region()
+hasn't.  Could someone pick up the second hunk?
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
