@@ -1,30 +1,59 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH] MMC: fix the use of kunmap_atomic() in tmio_mmc.h
-Date: Thu, 26 Aug 2010 16:04:58 -0700
-Message-ID: <20100826160458.17c45371.akpm@linux-foundation.org>
-References: <Pine.LNX.4.64.1008142225120.16329@axis700.grange>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] sdhci: disable MMC_CAP_NEEDS_POLL in nonremovable case
+Date: Fri, 27 Aug 2010 15:34:54 +0900
+Message-ID: <4C775C8E.7040903@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=EUC-KR
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:59593 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751887Ab0HZXFO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Aug 2010 19:05:14 -0400
-In-Reply-To: <Pine.LNX.4.64.1008142225120.16329@axis700.grange>
+Received: from mailout3.samsung.com ([203.254.224.33]:17001 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751034Ab0H0Ge4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2010 02:34:56 -0400
+Received: from epmmp2 (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
+ with ESMTP id <0L7S00B2DSY6N9A0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 27 Aug 2010 15:34:54 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0L7S00BTYSY6PS@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 27 Aug 2010 15:34:54 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Ian Molton <spyro@f2s.com>, Magnus Damm <damm@opensource.se>, Eric Miao <eric.y.miao@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: Kyungmin Park <kyungmin.park@samsung.com>, matt@console-pimps.org, Marek Szyprowski <m.szyprowski@samsung.com>
 
-On Sat, 14 Aug 2010 22:29:40 +0200 (CEST)
-Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
+If controller use SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk, 
+controller need always polling detect
 
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+In this case, always generated interrupt.Because controller checked card status.
+I think that is not efficiently.
 
-No changelog :(
+But if card is nonremovable, we need not always polling.
+So i added the check-point which is nonremovable or not
 
-- what was wrong with the old code?
+ Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-- how did the patch fix it?
+---
+ drivers/mmc/host/sdhci.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 401527d..4bc5d3c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1826,8 +1826,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (caps & SDHCI_CAN_DO_HISPD)
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+ 
+-	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+-		mmc->caps |= MMC_CAP_NEEDS_POLL;
++	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
++		!(host->mmc->caps & MMC_CAP_NONREMOVABLE))
++			mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 
+ 	mmc->ocr_avail = 0;
+ 	if (caps & SDHCI_CAN_VDD_330)
+-- 
+1.6.0.4
