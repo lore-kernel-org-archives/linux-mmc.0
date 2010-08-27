@@ -1,54 +1,59 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH RESEND] mmc: use snprintf not sprintf
-Date: Fri, 27 Aug 2010 20:59:04 +0100
-Message-ID: <20100827195904.GO23079@void.printf.net>
-References: <20100617145807.15099.65843.stgit@localhost.localdomain>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH RESEND] initialise DMA engine before MMC
+Date: Fri, 27 Aug 2010 13:02:33 -0700
+Message-ID: <20100827130233.893e7151.akpm@linux-foundation.org>
+References: <Pine.LNX.4.64.1006071312060.12965@axis700.grange>
+	<20100827194939.GJ23079@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46731 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752838Ab0H0T7G (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 15:59:06 -0400
-Content-Disposition: inline
-In-Reply-To: <20100617145807.15099.65843.stgit@localhost.localdomain>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20100827194939.GJ23079@void.printf.net>
+Sender: linux-sh-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-kernel@vger.kernel.org, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Cox <alan@linux.intel.com>
-Cc: pierre@ossman.eu, linux-mmc@vger.kernel.org, akpm@linux-foundation.org
 
-Hi Alan,
+On Fri, 27 Aug 2010 20:49:39 +0100
+Chris Ball <cjb@laptop.org> wrote:
 
-This wasn't merged, because it went to Pierre rather than Andrew.
-Andrew, could you take it?
+> Hi,
+> 
+> Andrew, mind taking this one?
+> 
+> From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Date: Mon, 7 Jun 2010 13:16:36 +0200 (CEST)
+> 
+> To use DMA engine based DMA with MMC in a non-modular build, the DMA 
+> engine has to initialise before MMC.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Acked-by: Dan Williams <dan.j.williams@intel.com>
+> ---
+> diff --git a/drivers/Makefile b/drivers/Makefile
+> index 91874e0..b713e75 100644
+> --- a/drivers/Makefile
+> +++ b/drivers/Makefile
+> @@ -92,6 +92,7 @@ obj-$(CONFIG_EISA)		+= eisa/
+>  obj-y				+= lguest/
+>  obj-$(CONFIG_CPU_FREQ)		+= cpufreq/
+>  obj-$(CONFIG_CPU_IDLE)		+= cpuidle/
+> +obj-$(CONFIG_DMA_ENGINE)	+= dma/
+>  obj-$(CONFIG_MMC)		+= mmc/
+>  obj-$(CONFIG_MEMSTICK)		+= memstick/
+>  obj-$(CONFIG_NEW_LEDS)		+= leds/
+> @@ -102,7 +103,6 @@ obj-$(CONFIG_CRYPTO)		+= crypto/
+>  obj-$(CONFIG_SUPERH)		+= sh/
+>  obj-$(CONFIG_ARCH_SHMOBILE)	+= sh/
+>  obj-$(CONFIG_GENERIC_TIME)	+= clocksource/
+> -obj-$(CONFIG_DMA_ENGINE)	+= dma/
+>  obj-$(CONFIG_DCA)		+= dca/
+>  obj-$(CONFIG_HID)		+= hid/
+>  obj-$(CONFIG_PPC_PS3)		+= ps3/
 
-From: JiebingLi <jiebing.li@intel.com>
-Date: Thu, 17 Jun 2010 15:58:46 +0100
+erk, doing this via link ordering isn't nice.
 
-This patch fixes an issue found by klockwork. Just paranoia.
+It would be better to express this dependency via initcall levels -
+core_initcall() or something.
 
-Signed-off-by: JiebingLi <jiebing.li@intel.com>
-Signed-off-by: Alan Cox <alan@linux.intel.com>
----
 
- drivers/mmc/card/block.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index cb9fbc8..9793f4c 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -535,7 +535,8 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
- 	 * messages to tell when the card is present.
- 	 */
- 
--	sprintf(md->disk->disk_name, "mmcblk%d", devidx);
-+	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
-+		"mmcblk%d", devidx);
- 
- 	blk_queue_logical_block_size(md->queue.queue, 512);
- 
-
---
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
