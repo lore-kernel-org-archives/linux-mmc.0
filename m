@@ -1,74 +1,76 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 3/3] MMC/SD: add callback function to detect card
-Date: Fri, 27 Aug 2010 20:05:13 +0100
-Message-ID: <20100827190513.GC20407@void.printf.net>
-References: <1259913309-27146-1-git-send-email-r66093@freescale.com>
+Subject: [PATCH RESEND] at91_mci.c: use resource_size()
+Date: Fri, 27 Aug 2010 20:08:13 +0100
+Message-ID: <20100827190812.GD20407@void.printf.net>
+References: <BD79186B4FD85F4B8E60E381CAEE19090200E9E8@mi8nycmail19.Mi8.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57213 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:51208 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755307Ab0H0TFR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 15:05:17 -0400
+	id S1752040Ab0H0TIW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 15:08:22 -0400
 Content-Disposition: inline
-In-Reply-To: <1259913309-27146-1-git-send-email-r66093@freescale.com>
+In-Reply-To: <BD79186B4FD85F4B8E60E381CAEE19090200E9E8@mi8nycmail19.Mi8.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
+To: H Hartley Sweeten <hartleys@visionengravers.com>
+Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
 
-Hi,
+From: H Hartley Sweeten <hsweeten@visionengravers.com>
+Date: Mon, 14 Dec 2009 14:10:26 -0500
 
-On Fri, Dec 04, 2009 at 03:55:09PM +0800, r66093@freescale.com wrote:
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> 
-> Add callback function to check if the card has been removed.
-> 
-> in order to check if the card has been removed, the function mmc_send_status will send commad CMD13 to card and ask the card to send its status register to driver, which will generate interrupt repeatly and make the system bad.
-> Therefore, get_cd callback is used to detect the card if the driver has.
-> 
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> ---
->  drivers/mmc/core/mmc.c |    5 ++++-
->  drivers/mmc/core/sd.c  |    5 ++++-
->  2 files changed, 8 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 06084db..c5c676d 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -494,7 +494,10 @@ static void mmc_detect(struct mmc_host *host)
->  	/*
->  	 * Just check if our card has been removed.
->  	 */
-> -	err = mmc_send_status(host->card, NULL);
-> +	if (host->ops->get_cd)
-> +		err = !host->ops->get_cd(host);
-> +	else
-> +		err = mmc_send_status(host->card, NULL);
->  
->  	mmc_release_host(host);
->  
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index cd81c39..3cf1f38 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -548,7 +548,10 @@ static void mmc_sd_detect(struct mmc_host *host)
->  	/*
->  	 * Just check if our card has been removed.
->  	 */
-> -	err = mmc_send_status(host->card, NULL);
-> +	if (host->ops->get_cd)
-> +		err = !host->ops->get_cd(host);
-> +	else
-> +		err = mmc_send_status(host->card, NULL);
->  
->  	mmc_release_host(host);
->  
-> -- 
-> 1.6.4
+Use resource_size().
 
-This patchset wasn't replied to -- any comments on it from the list?
+Signed-off-by: H Hartley Sweeten <hsweeten@visionengravers.com>
+[cjb: rebased patch against Linus]
+Signed-off-by: Chris Ball <cjb@laptop.org>
+---
+ drivers/mmc/host/at91_mci.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
+index 5f3a599..3995db3 100644
+--- a/drivers/mmc/host/at91_mci.c
++++ b/drivers/mmc/host/at91_mci.c
+@@ -927,7 +927,7 @@ static int __init at91_mci_probe(struct platform_device *pdev)
+ 	if (!res)
+ 		return -ENXIO;
+ 
+-	if (!request_mem_region(res->start, res->end - res->start + 1, DRIVER_NAME))
++	if (!request_mem_region(res->start, resource_size(res), DRIVER_NAME))
+ 		return -EBUSY;
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct at91mci_host), &pdev->dev);
+@@ -1016,7 +1016,7 @@ static int __init at91_mci_probe(struct platform_device *pdev)
+ 	/*
+ 	 * Map I/O region
+ 	 */
+-	host->baseaddr = ioremap(res->start, res->end - res->start + 1);
++	host->baseaddr = ioremap(res->start, resource_size(res));
+ 	if (!host->baseaddr) {
+ 		ret = -ENOMEM;
+ 		goto fail1;
+@@ -1092,7 +1092,7 @@ fail4b:
+ fail5:
+ 	mmc_free_host(mmc);
+ fail6:
+-	release_mem_region(res->start, res->end - res->start + 1);
++	release_mem_region(res->start, resource_size(res));
+ 	dev_err(&pdev->dev, "probe failed, err %d\n", ret);
+ 	return ret;
+ }
+@@ -1137,7 +1137,7 @@ static int __exit at91_mci_remove(struct platform_device *pdev)
+ 
+ 	iounmap(host->baseaddr);
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	release_mem_region(res->start, res->end - res->start + 1);
++	release_mem_region(res->start, resource_size(res));
+ 
+ 	mmc_free_host(mmc);
+ 	platform_set_drvdata(pdev, NULL);
+-- 
+1.7.0.1
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
