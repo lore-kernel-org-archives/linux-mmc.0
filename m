@@ -1,105 +1,74 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH] sdio: add MMC_PM_SKIP_RESUME_PROBE to workaround powered resume
-Date: Fri, 27 Aug 2010 16:56:37 -0400
-Message-ID: <m339tz6agq.fsf@pullcord.laptop.org>
-References: <1279763215-17574-1-git-send-email-bzhao@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48665 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751792Ab0H0U45 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 16:56:57 -0400
-In-Reply-To: <1279763215-17574-1-git-send-email-bzhao@marvell.com> (Bing
-	Zhao's message of "Wed, 21 Jul 2010 18:46:55 -0700")
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend.patch added to -mm tree
+Date: Fri, 27 Aug 2010 13:58:40 -0700
+Message-ID: <201008272058.o7RKweAH015685@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: ethan.too@gmail.com, adrian.hunter@nokia.com, cjb@laptop.org, linux-mmc@vger.kernel.org, madhu.cr@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Bing Zhao <bzhao@marvell.com>
-Cc: linux-mmc@vger.kernel.org, Nicolas Pitre <nico@fluxnic.net>, Andrew Morton <akpm@linux-foundation.org>
 
-Hi,
 
-Any comments on this patch from the list?
+The patch titled
+     omap hsmmc: fix a racing case between kmmcd and omap_hsmmc_suspend
+has been added to the -mm tree.  Its filename is
+     omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend.patch
 
-From: Bing Zhao <bzhao@marvell.com>
-Date: Wed, 21 Jul 2010 18:46:55 -0700
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-Marvell 8686/8688 device will not respond to re-probe attemps
-in powered resume, if the card is in sleep mode.
-The added MMC_PM_SKIP_RESUME_PROBE flag is checked so that
-call to mmc_sdio_init_card() can be skipped.
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
-Signed-off-by: Bing Zhao <bzhao@marvell.com>
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: omap hsmmc: fix a racing case between kmmcd and omap_hsmmc_suspend
+From: Ethan Du <ethan.too@gmail.com>
+
+If suspend called when kmmcd is doing host->ops->disable, as kmmcd already
+increased host->en_dis_recurs to 1, the mmc_host_enable in suspend
+function will return directly without increase the nesting_cnt, which will
+cause the followed register access carried out to the disabled host.
+
+mmc_suspend_host will enable host itself.  No need to enable host before
+it.  Also works on kmmcd will get flushed in mmc_suspend_host, enable host
+after it will be safe.  So make the mmc_host_enable after it.
+
+[cjb: rebase against current Linus]
+Signed-off-by: Ethan <ethan.too@gmail.com>
+Signed-off-by: Chris Ball <cjb@laptop.org>
+Acked-by: Adrian Hunter <adrian.hunter@nokia.com>
+Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
- drivers/mmc/core/sdio.c      |   18 +++++++++++++++---
- drivers/mmc/host/sdhci-pci.c |    3 ++-
- include/linux/mmc/pm.h       |    1 +
- 3 files changed, 18 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index bd2755e..dc03939 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -606,15 +606,27 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 
- static int mmc_sdio_resume(struct mmc_host *host)
- {
--	int i, err;
-+	int i, err = 0;
- 
- 	BUG_ON(!host);
- 	BUG_ON(!host->card);
- 
- 	/* Basic card reinitialization. */
- 	mmc_claim_host(host);
--	err = mmc_sdio_init_card(host, host->ocr, host->card,
--				 (host->pm_flags & MMC_PM_KEEP_POWER));
-+
-+	/*
-+	 * For a powered resume, Marvell 8686/8688 device will not respond
-+	 * to re-initialization attemps if the card is in sleep mode.
-+	 * The MMC_PM_SKIP_RESUME_PROBE flag is added as a workaround here.
-+	 * This is a temporary measure until a fully thought-through
-+	 * solution is elaborated.
-+	 */
-+	if (!(host->pm_flags & MMC_PM_KEEP_POWER) ||
-+		!(host->pm_flags & MMC_PM_SKIP_RESUME_PROBE)) {
-+			err = mmc_sdio_init_card(host, host->ocr, host->card,
-+					host->pm_flags & MMC_PM_KEEP_POWER);
-+	}
-+
- 	if (!err) {
- 		/* We may have switched to 1-bit mode during suspend. */
- 		err = sdio_enable_4bit_bus(host->card);
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index e021431..4f793f8 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -703,7 +703,8 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
- 			goto unmap;
- 	}
- 
--	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
-+	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ
-+				| MMC_PM_SKIP_RESUME_PROBE;
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
-diff --git a/include/linux/mmc/pm.h b/include/linux/mmc/pm.h
-index d37aac4..7dbb630 100644
---- a/include/linux/mmc/pm.h
-+++ b/include/linux/mmc/pm.h
-@@ -26,5 +26,6 @@ typedef unsigned int mmc_pm_flag_t;
- 
- #define MMC_PM_KEEP_POWER	(1 << 0)	/* preserve card power during suspend */
- #define MMC_PM_WAKE_SDIO_IRQ	(1 << 1)	/* wake up host system on SDIO IRQ assertion */
-+#define MMC_PM_SKIP_RESUME_PROBE	(1 << 2)	/* skip the attempt to reidentify the card in powered resume */
- 
- #endif
--- 
-1.5.3.6
+ drivers/mmc/host/omap_hsmmc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+diff -puN drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend drivers/mmc/host/omap_hsmmc.c
+--- a/drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend
++++ a/drivers/mmc/host/omap_hsmmc.c
+@@ -2323,8 +2323,8 @@ static int omap_hsmmc_suspend(struct dev
+ 			}
+ 		}
+ 		cancel_work_sync(&host->mmc_carddetect_work);
+-		mmc_host_enable(host->mmc);
+ 		ret = mmc_suspend_host(host->mmc);
++		mmc_host_enable(host->mmc);
+ 		if (ret == 0) {
+ 			omap_hsmmc_disable_irq(host);
+ 			OMAP_HSMMC_WRITE(host->base, HCTL,
+_
+
+Patches currently in -mm which might be from ethan.too@gmail.com are
+
+omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend.patch
+
