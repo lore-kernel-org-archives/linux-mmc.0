@@ -1,46 +1,85 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
-Date: Fri, 27 Aug 2010 20:22:48 +0100
-Message-ID: <20100827192248.GJ20407@void.printf.net>
-References: <cover.1266847842.git.david.vrabel@csr.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH RESEND] at91_mci.c: use resource_size()
+Date: Fri, 27 Aug 2010 20:24:17 +0100
+Message-ID: <20100827192417.GB7258@console-pimps.org>
+References: <BD79186B4FD85F4B8E60E381CAEE19090200E9E8@mi8nycmail19.Mi8.com>
+ <20100827190812.GD20407@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49673 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752849Ab0H0TWu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 15:22:50 -0400
+Received: from arkanian.console-pimps.org ([212.110.184.194]:45888 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750781Ab0H0TYT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2010 15:24:19 -0400
 Content-Disposition: inline
-In-Reply-To: <cover.1266847842.git.david.vrabel@csr.com>
+In-Reply-To: <20100827190812.GD20407@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Vrabel <david.vrabel@csr.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com, Mike Rapoport <mike@compulab.co.il>
+To: Chris Ball <cjb@laptop.org>
+Cc: H Hartley Sweeten <hartleys@visionengravers.com>, akpm@linux-foundation.org, linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-arm-kernel@lists.infradead.org
 
-Hi David,
+[Adding maintainer to CC]
 
-On Mon, Feb 22, 2010 at 02:24:17PM +0000, David Vrabel wrote:
-> These patches add support for SDIO cards to the omap_hsmmc driver.
-> Power management changes to prevent SDIO cards from being turned off
-> and losing all state, and card interrupts.
+On Fri, Aug 27, 2010 at 08:08:13PM +0100, Chris Ball wrote:
+> From: H Hartley Sweeten <hsweeten@visionengravers.com>
+> Date: Mon, 14 Dec 2009 14:10:26 -0500
 > 
-> I've been unable to test these exact patches as I only have an N900 for 
-> testing and the N900 support in mainline is incomplete.
+> Use resource_size().
 > 
-> Changes since v1:
-> - (hopefully) get all cards working again by removing a second call to
->   read MMCi_STAT in the interrupt handler.
-> - flush posted writes after enabling/disabling SDIO interrupts.
-> - tweak the FIXME commit on disabling FCLK to better match what really
->   going on (at least I think so anyway).
+> Signed-off-by: H Hartley Sweeten <hsweeten@visionengravers.com>
+> [cjb: rebased patch against Linus]
+> Signed-off-by: Chris Ball <cjb@laptop.org>
+> ---
+>  drivers/mmc/host/at91_mci.c |    8 ++++----
+>  1 files changed, 4 insertions(+), 4 deletions(-)
 > 
-> David Vrabel (2):
->   mmc: omap_hsmmc: don't turn SDIO cards off when idle
->   mmc: omap_hsmmc: enable SDIO card interrupts
-
-Looks like this patchset wasn't merged.  Mike Rapoport replied with a 
-fix for libertas.  Would you like to resubmit it?
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
+> index 5f3a599..3995db3 100644
+> --- a/drivers/mmc/host/at91_mci.c
+> +++ b/drivers/mmc/host/at91_mci.c
+> @@ -927,7 +927,7 @@ static int __init at91_mci_probe(struct platform_device *pdev)
+>  	if (!res)
+>  		return -ENXIO;
+>  
+> -	if (!request_mem_region(res->start, res->end - res->start + 1, DRIVER_NAME))
+> +	if (!request_mem_region(res->start, resource_size(res), DRIVER_NAME))
+>  		return -EBUSY;
+>  
+>  	mmc = mmc_alloc_host(sizeof(struct at91mci_host), &pdev->dev);
+> @@ -1016,7 +1016,7 @@ static int __init at91_mci_probe(struct platform_device *pdev)
+>  	/*
+>  	 * Map I/O region
+>  	 */
+> -	host->baseaddr = ioremap(res->start, res->end - res->start + 1);
+> +	host->baseaddr = ioremap(res->start, resource_size(res));
+>  	if (!host->baseaddr) {
+>  		ret = -ENOMEM;
+>  		goto fail1;
+> @@ -1092,7 +1092,7 @@ fail4b:
+>  fail5:
+>  	mmc_free_host(mmc);
+>  fail6:
+> -	release_mem_region(res->start, res->end - res->start + 1);
+> +	release_mem_region(res->start, resource_size(res));
+>  	dev_err(&pdev->dev, "probe failed, err %d\n", ret);
+>  	return ret;
+>  }
+> @@ -1137,7 +1137,7 @@ static int __exit at91_mci_remove(struct platform_device *pdev)
+>  
+>  	iounmap(host->baseaddr);
+>  	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> -	release_mem_region(res->start, res->end - res->start + 1);
+> +	release_mem_region(res->start, resource_size(res));
+>  
+>  	mmc_free_host(mmc);
+>  	platform_set_drvdata(pdev, NULL);
+> -- 
+> 1.7.0.1
+> 
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
