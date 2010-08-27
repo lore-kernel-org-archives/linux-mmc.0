@@ -1,48 +1,51 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH RESEND] ARM: SAMSUNG: MMC: Fix build error when both DMA
-	and PIO mode selected
-Date: Fri, 27 Aug 2010 20:46:01 +0100
-Message-ID: <20100827194601.GI23079@void.printf.net>
-References: <4BFB80EA.4040807@vscht.cz>
+Subject: [PATCH RESEND] initialise DMA engine before MMC
+Date: Fri, 27 Aug 2010 20:49:39 +0100
+Message-ID: <20100827194939.GJ23079@void.printf.net>
+References: <Pine.LNX.4.64.1006071312060.12965@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33124 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752596Ab0H0TqD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 15:46:03 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4BFB80EA.4040807@vscht.cz>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <Pine.LNX.4.64.1006071312060.12965@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: akpm@linux-foundation.org, linux-kernel@vger.kernel.org, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Pinkava J." <Jiri.Pinkava@vscht.cz>
-Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
 
-From: Jiri Pinkava <jiri.pinkava@vscht.cz>
-Date: Tue, 25 May 2010 09:48:58 +0200
+Hi,
 
-Signed-off-by: Jiri Pinkava <jiri.pinkava@vscht.cz>
-[cjb: fix line-wrapped patch]
+Andrew, mind taking this one?
+
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Date: Mon, 7 Jun 2010 13:16:36 +0200 (CEST)
+
+To use DMA engine based DMA with MMC in a non-modular build, the DMA 
+engine has to initialise before MMC.
+
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Acked-by: Dan Williams <dan.j.williams@intel.com>
 ---
- drivers/mmc/host/s3cmci.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index 2fdf768..4426a4b 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -1600,7 +1600,7 @@ static int __devinit s3cmci_probe(struct platform_device *pdev)
- 	host->pio_active 	= XFER_NONE;
-
- #ifdef CONFIG_MMC_S3C_PIODMA
--	host->dodma		= host->pdata->dma;
-+	host->dodma		= host->pdata->use_dma;
- #endif
-
- 	host->mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--- 
-1.7.1
-
--- 
+diff --git a/drivers/Makefile b/drivers/Makefile
+index 91874e0..b713e75 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -92,6 +92,7 @@ obj-$(CONFIG_EISA)		+= eisa/
+ obj-y				+= lguest/
+ obj-$(CONFIG_CPU_FREQ)		+= cpufreq/
+ obj-$(CONFIG_CPU_IDLE)		+= cpuidle/
++obj-$(CONFIG_DMA_ENGINE)	+= dma/
+ obj-$(CONFIG_MMC)		+= mmc/
+ obj-$(CONFIG_MEMSTICK)		+= memstick/
+ obj-$(CONFIG_NEW_LEDS)		+= leds/
+@@ -102,7 +103,6 @@ obj-$(CONFIG_CRYPTO)		+= crypto/
+ obj-$(CONFIG_SUPERH)		+= sh/
+ obj-$(CONFIG_ARCH_SHMOBILE)	+= sh/
+ obj-$(CONFIG_GENERIC_TIME)	+= clocksource/
+-obj-$(CONFIG_DMA_ENGINE)	+= dma/
+ obj-$(CONFIG_DCA)		+= dca/
+ obj-$(CONFIG_HID)		+= hid/
+ obj-$(CONFIG_PPC_PS3)		+= ps3/
+--
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
