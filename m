@@ -1,56 +1,67 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH RESEND] mmc: sdhci: Make consistent use of CONFIG_MMC_DEBUG
-	for "DEBUG"ging
-Date: Fri, 27 Aug 2010 20:16:30 +0100
-Message-ID: <20100827191630.GH20407@void.printf.net>
+Subject: [RFC/PATCH RESEND] mmc: sdhci: Enable high speed support for MMC
+	cards
+Date: Fri, 27 Aug 2010 20:19:45 +0100
+Message-ID: <20100827191945.GI20407@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46446 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:46466 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752807Ab0H0TQc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 15:16:32 -0400
+	id S1752750Ab0H0TTq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 15:19:46 -0400
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: "George G. Davis" <gdavis@mvista.com>, Ben Dooks <ben-linux@fluff.org>, akpm@linux-foundation.org
+Cc: "George G. Davis" <gdavis@mvista.com>
 
 Hi,
 
-This patch wasn't merged, but still applies -- Andrew, mind taking it?
+This patch wasn't responded to -- any feedback from the list?
 
-- Chris.
+From: George G. Davis <gdavis@mvista.com>
+Date: Thu, 18 Feb 2010 15:27:53 -0500
 
-Date: Thu, 18 Feb 2010 12:32:12 -0500
-From: "George G. Davis" <gdavis@mvista.com>
+Allow high speed mode for high speed capable ver 4.x MMC cards.
 
-The "6882a8c sdhci: Add better ADMA error reporting" commit added
-sdhci_show_adma_error() which is built when DEBUG is defined.
-Since we already have CONFIG_MMC_DEBUG used elsewhere in this driver,
-may as well make consistent use of that config knob instead.
+Comments and/or feedback appreciated.
 
 Signed-off-by: George G. Davis <gdavis@mvista.com>
-Cc: Ben Dooks <ben-linux@fluff.org>
+[cjb: rebase patch against Linus]
+Signed-off-by: Chris Ball <cjb@laptop.org>
 ---
- drivers/mmc/host/sdhci.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c279fbc..6c2978c 100644
+index fdc9233..8e360e1 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1398,7 +1398,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
- 		sdhci_finish_command(host);
- }
+@@ -1180,7 +1180,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		ctrl &= ~SDHCI_CTRL_4BITBUS;
  
--#ifdef DEBUG
-+#ifdef CONFIG_MMC_DEBUG
- static void sdhci_show_adma_error(struct sdhci_host *host)
- {
- 	const char *name = mmc_hostname(host->mmc);
+-	if (ios->timing == MMC_TIMING_SD_HS &&
++	if ((ios->timing == MMC_TIMING_SD_HS ||
++	     ios->timing == MMC_TIMING_MMC_HS) &&
+ 	    !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+ 		ctrl |= SDHCI_CTRL_HISPD;
+ 	else
+@@ -1823,8 +1824,10 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 
+-	if (caps & SDHCI_CAN_DO_HISPD)
++	if (caps & SDHCI_CAN_DO_HISPD) {
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
++		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
++    }
+ 
+ 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
 -- 
-1.6.3.3.311.g43dd
+1.7.0.1
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
