@@ -1,67 +1,45 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: [RFC/PATCH RESEND] mmc: sdhci: Enable high speed support for MMC
-	cards
-Date: Fri, 27 Aug 2010 20:19:45 +0100
-Message-ID: <20100827191945.GI20407@void.printf.net>
+Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
+Date: Fri, 27 Aug 2010 20:22:48 +0100
+Message-ID: <20100827192248.GJ20407@void.printf.net>
+References: <cover.1266847842.git.david.vrabel@csr.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46466 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:49673 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752750Ab0H0TTq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 15:19:46 -0400
+	id S1752849Ab0H0TWu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 15:22:50 -0400
 Content-Disposition: inline
+In-Reply-To: <cover.1266847842.git.david.vrabel@csr.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: "George G. Davis" <gdavis@mvista.com>
+To: David Vrabel <david.vrabel@csr.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com, Mike Rapoport <mike@compulab.co.il>
 
-Hi,
+Hi David,
 
-This patch wasn't responded to -- any feedback from the list?
+On Mon, Feb 22, 2010 at 02:24:17PM +0000, David Vrabel wrote:
+> These patches add support for SDIO cards to the omap_hsmmc driver.
+> Power management changes to prevent SDIO cards from being turned off
+> and losing all state, and card interrupts.
+> 
+> I've been unable to test these exact patches as I only have an N900 for 
+> testing and the N900 support in mainline is incomplete.
+> 
+> Changes since v1:
+> - (hopefully) get all cards working again by removing a second call to
+>   read MMCi_STAT in the interrupt handler.
+> - flush posted writes after enabling/disabling SDIO interrupts.
+> - tweak the FIXME commit on disabling FCLK to better match what really
+>   going on (at least I think so anyway).
+> 
+> David Vrabel (2):
+>   mmc: omap_hsmmc: don't turn SDIO cards off when idle
+>   mmc: omap_hsmmc: enable SDIO card interrupts
 
-From: George G. Davis <gdavis@mvista.com>
-Date: Thu, 18 Feb 2010 15:27:53 -0500
-
-Allow high speed mode for high speed capable ver 4.x MMC cards.
-
-Comments and/or feedback appreciated.
-
-Signed-off-by: George G. Davis <gdavis@mvista.com>
-[cjb: rebase patch against Linus]
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/sdhci.c |    7 +++++--
- 1 files changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index fdc9233..8e360e1 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1180,7 +1180,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	else
- 		ctrl &= ~SDHCI_CTRL_4BITBUS;
- 
--	if (ios->timing == MMC_TIMING_SD_HS &&
-+	if ((ios->timing == MMC_TIMING_SD_HS ||
-+	     ios->timing == MMC_TIMING_MMC_HS) &&
- 	    !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
- 		ctrl |= SDHCI_CTRL_HISPD;
- 	else
-@@ -1823,8 +1824,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
- 		mmc->caps |= MMC_CAP_4_BIT_DATA;
- 
--	if (caps & SDHCI_CAN_DO_HISPD)
-+	if (caps & SDHCI_CAN_DO_HISPD) {
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
-+		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
-+    }
- 
- 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
--- 
-1.7.0.1
+Looks like this patchset wasn't merged.  Mike Rapoport replied with a 
+fix for libertas.  Would you like to resubmit it?
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
