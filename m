@@ -1,70 +1,63 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-sdhci-make-consistent-use-of-config_mmc_debug-for-debugging.patch added to -mm tree
-Date: Fri, 27 Aug 2010 12:29:59 -0700
-Message-ID: <201008271929.o7RJTxFF011390@imap1.linux-foundation.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/7] mmc: at91_mci: fix pointer errors
+Date: Fri, 27 Aug 2010 20:33:03 +0100
+Message-ID: <20100827193303.GB23079@void.printf.net>
+References: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:40908 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752338Ab0H0TaZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2010 15:30:25 -0400
+Received: from void.printf.net ([89.145.121.20]:49133 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751389Ab0H0TdJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 15:33:09 -0400
+Content-Disposition: inline
+In-Reply-To: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: gdavis@mvista.com, ben-linux@fluff.org, cjb@laptop.org, linux-mmc@vger.kernel.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, wolfgang.mues@auerswald.de, avictor.za@gmail.com
 
+Hi Andrew, Nicolas,
 
-The patch titled
-     mmc: sdhci: make consistent use of CONFIG_MMC_DEBUG for "DEBUG"ging
-has been added to the -mm tree.  Its filename is
-     mmc-sdhci-make-consistent-use-of-config_mmc_debug-for-debugging.patch
+On Fri, Feb 26, 2010 at 07:39:29PM +0100, Nicolas Ferre wrote:
+> From: Wolfgang Muees <wolfgang.mues@auerswald.de>
+> 
+> Fixes two pointer errors, one which leads to memory overwrites if used with
+> large chunks of data.
+> 
+> Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
+> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+> ---
+>  drivers/mmc/host/at91_mci.c |    8 +++++---
+>  1 files changed, 5 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
+> index 63924e0..6835104 100644
+> --- a/drivers/mmc/host/at91_mci.c
+> +++ b/drivers/mmc/host/at91_mci.c
+> @@ -227,11 +227,13 @@ static inline void at91_mci_sg_to_dma(struct at91mci_host *host, struct mmc_data
+>  			for (index = 0; index < (amount / 4); index++)
+>  				*dmabuf++ = swab32(sgbuffer[index]);
+>  		} else {
+> -			memcpy(dmabuf, sgbuffer, amount);
+> -			dmabuf += amount;
+> +			char *tmpv = (char *)dmabuf;
+> +			memcpy(tmpv, sgbuffer, amount);
+> +			tmpv += amount;
+> +			dmabuf = (unsigned *)tmpv;
+>  		}
+>  
+> -		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
+> +		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
+>  
+>  		if (size == 0)
+>  			break;
+> -- 
+> 1.5.6.5
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+Looks like only the first half of this patch was applied?  The
+kunmap_atomic() line is still present as before in Linus' tree. 
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc: sdhci: make consistent use of CONFIG_MMC_DEBUG for "DEBUG"ging
-From: "George G. Davis" <gdavis@mvista.com>
-
-The "6882a8c sdhci: Add better ADMA error reporting" commit added
-sdhci_show_adma_error() which is built when DEBUG is defined.  Since we
-already have CONFIG_MMC_DEBUG used elsewhere in this driver, may as well
-make consistent use of that config knob instead.
-
-Signed-off-by: George G. Davis <gdavis@mvista.com>
-Signed-off-by: Chris Ball <cjb@laptop.org>
-Cc: Ben Dooks <ben-linux@fluff.org>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/sdhci.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff -puN drivers/mmc/host/sdhci.c~mmc-sdhci-make-consistent-use-of-config_mmc_debug-for-debugging drivers/mmc/host/sdhci.c
---- a/drivers/mmc/host/sdhci.c~mmc-sdhci-make-consistent-use-of-config_mmc_debug-for-debugging
-+++ a/drivers/mmc/host/sdhci.c
-@@ -1440,7 +1440,7 @@ static void sdhci_cmd_irq(struct sdhci_h
- 		sdhci_finish_command(host);
- }
- 
--#ifdef DEBUG
-+#ifdef CONFIG_MMC_DEBUG
- static void sdhci_show_adma_error(struct sdhci_host *host)
- {
- 	const char *name = mmc_hostname(host->mmc);
-_
-
-Patches currently in -mm which might be from gdavis@mvista.com are
-
-mmc-sdhci-make-consistent-use-of-config_mmc_debug-for-debugging.patch
-
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
