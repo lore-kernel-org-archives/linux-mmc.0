@@ -1,65 +1,79 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH RESEND] OMAP HSMMC: fix a racing case between kmmcd and
-	omap_hsmmc_suspend
-Date: Fri, 27 Aug 2010 21:18:06 +0100
-Message-ID: <20100827201806.GR23079@void.printf.net>
-References: <AANLkTilPeWe7ygUv0npuAhn-MnJhoPdnAu9C7S85OQUQ@mail.gmail.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: +
+ arm-samsung-mmc-fix-build-error-when-both-dma-and-pio-mode-selected.patch
+ added to -mm tree
+Date: Fri, 27 Aug 2010 21:23:47 +0100
+Message-ID: <20100827202347.GC18829@console-pimps.org>
+References: <201008272003.o7RK3d33013124@imap1.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:55181 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751141Ab0H0USP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 16:18:15 -0400
+Received: from arkanian.console-pimps.org ([212.110.184.194]:37386 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752057Ab0H0UXt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2010 16:23:49 -0400
 Content-Disposition: inline
-In-Reply-To: <AANLkTilPeWe7ygUv0npuAhn-MnJhoPdnAu9C7S85OQUQ@mail.gmail.com>
+In-Reply-To: <201008272003.o7RK3d33013124@imap1.linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ethan Du <ethan.too@gmail.com>
-Cc: akpm@linux-foundation.org, Adrian Hunter <adrian.hunter@nokia.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: akpm@linux-foundation.org
+Cc: mm-commits@vger.kernel.org, jiri.pinkava@vscht.cz, cjb@laptop.org, linux-mmc@vger.kernel.org, rmk@arm.linux.org.uk, Ben Dooks <ben-linux@fluff.org>
 
-Hi,
+Best get Ben's opinion on this (now Cc'd).
 
-This doesn't seem to have been merged -- Andrew, could you take it?
-
-From: Ethan Du <ethan.too@gmail.com>
-Date: Mon, 21 Jun 2010 19:20:41 +0800
-
-If suspend called when kmmcd is doing host->ops->disable,
-as kmmcd already increased host->en_dis_recurs to 1, the mmc_host_enable
-in suspend function will return directly without increase the nesting_cnt,
-which will cause the followed register access carried out to the disabled host.
-
-mmc_suspend_host will enable host itself. No need to enable host before it.
-Also works on kmmcd will get flushed in mmc_suspend_host, enable host after
-it will be safe. So make the mmc_host_enable after it.
-
-Signed-off-by: Ethan <ethan.too@gmail.com>
-Acked-by: Adrian Hunter <adrian.hunter@nokia.com>
-Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-[cjb: rebase against current Linus]
----
- drivers/mmc/host/omap_hsmmc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index ba623d6..1f7d01a 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2323,8 +2323,8 @@ static int omap_hsmmc_suspend(struct device *dev)
- 			}
- 		}
- 		cancel_work_sync(&host->mmc_carddetect_work);
--		mmc_host_enable(host->mmc);
- 		ret = mmc_suspend_host(host->mmc);
-+		mmc_host_enable(host->mmc);
- 		if (ret == 0) {
- 			omap_hsmmc_disable_irq(host);
- 			OMAP_HSMMC_WRITE(host->base, HCTL,
---
-1.7.0.1
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+On Fri, Aug 27, 2010 at 01:03:39PM -0700, Andrew Morton wrote:
+> 
+> The patch titled
+>      ARM: SAMSUNG: MMC: fix build error when both DMA and PIO mode selected
+> has been added to the -mm tree.  Its filename is
+>      arm-samsung-mmc-fix-build-error-when-both-dma-and-pio-mode-selected.patch
+> 
+> Before you just go and hit "reply", please:
+>    a) Consider who else should be cc'ed
+>    b) Prefer to cc a suitable mailing list as well
+>    c) Ideally: find the original patch on the mailing list and do a
+>       reply-to-all to that, adding suitable additional cc's
+> 
+> *** Remember to use Documentation/SubmitChecklist when testing your code ***
+> 
+> See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+> out what to do about this
+> 
+> The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+> 
+> ------------------------------------------------------
+> Subject: ARM: SAMSUNG: MMC: fix build error when both DMA and PIO mode selected
+> From: Jiri Pinkava <jiri.pinkava@vscht.cz>
+> 
+> Date: Tue, 25 May 2010 09:48:58 +0200
+> 
+> [cjb: fix line-wrapped patch]
+> Signed-off-by: Jiri Pinkava <jiri.pinkava@vscht.cz>
+> Signed-off-by: Chris Ball <cjb@laptop.org>
+> Cc: Matt Fleming <matt@console-pimps.org>
+> Cc: Russell King <rmk@arm.linux.org.uk>
+> Cc: <linux-mmc@vger.kernel.org>
+> Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+> ---
+> 
+>  drivers/mmc/host/s3cmci.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff -puN drivers/mmc/host/s3cmci.c~arm-samsung-mmc-fix-build-error-when-both-dma-and-pio-mode-selected drivers/mmc/host/s3cmci.c
+> --- a/drivers/mmc/host/s3cmci.c~arm-samsung-mmc-fix-build-error-when-both-dma-and-pio-mode-selected
+> +++ a/drivers/mmc/host/s3cmci.c
+> @@ -1600,7 +1600,7 @@ static int __devinit s3cmci_probe(struct
+>  	host->pio_active 	= XFER_NONE;
+>  
+>  #ifdef CONFIG_MMC_S3C_PIODMA
+> -	host->dodma		= host->pdata->dma;
+> +	host->dodma		= host->pdata->use_dma;
+>  #endif
+>  
+>  	host->mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> _
+> 
+> Patches currently in -mm which might be from jiri.pinkava@vscht.cz are
+> 
+> arm-samsung-mmc-fix-build-error-when-both-dma-and-pio-mode-selected.patch
+> 
