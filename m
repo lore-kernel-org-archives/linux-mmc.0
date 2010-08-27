@@ -1,101 +1,120 @@
-From: akpm@linux-foundation.org
-Subject: + drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation.patch added to -mm tree
-Date: Fri, 27 Aug 2010 14:16:42 -0700
-Message-ID: <201008272116.o7RLGgtt016617@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: julia@diku.dk, cjb@laptop.org, linux-mmc@vger.kernel.org, ppisa@pikron.com
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH] sdio: add MMC_PM_SKIP_RESUME_PROBE to workaround powered
+ resume
+Date: Fri, 27 Aug 2010 18:16:19 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1008271812490.8130@xanadu.home>
+References: <1279763215-17574-1-git-send-email-bzhao@marvell.com>
+ <m339tz6agq.fsf@pullcord.laptop.org>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relais.videotron.ca ([24.201.245.36]:37277 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752580Ab0H0WQV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2010 18:16:21 -0400
+Received: from xanadu.home ([66.130.28.92]) by VL-MH-MR002.ip.videotron.ca
+ (Sun Java(tm) System Messaging Server 6.3-4.01 (built Aug  3 2007; 32bit))
+ with ESMTP id <0L7U00B1E0J7CL70@VL-MH-MR002.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Fri, 27 Aug 2010 18:16:19 -0400 (EDT)
+In-reply-to: <m339tz6agq.fsf@pullcord.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Bing Zhao <bzhao@marvell.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+
+On Fri, 27 Aug 2010, Chris Ball wrote:
+
+> Hi,
+> 
+> Any comments on this patch from the list?
+
+Looks rather hackish to me.  There should be a more elegant way to 
+achieve the same result.  I have no time to look at it and propose an 
+alternative solution though.
 
 
-The patch titled
-     drivers/mmc/host/imxmmc.c: adjust confusing if indentation
-has been added to the -mm tree.  Its filename is
-     drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation.patch
-
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: drivers/mmc/host/imxmmc.c: adjust confusing if indentation
-From: Julia Lawall <julia@diku.dk>
-
-Move the second if (reg & ...) test into the branch indicated by its
-indentation.  The test was previously always executed after the if
-containing that branch, but it was always false unless the if branch was
-taken.
-
-The semantic match that finds this problem is as follows:
-(http://coccinelle.lip6.fr/)
-
-// <smpl>
-@r disable braces4@
-position p1,p2;
-statement S1,S2;
-@@
-
-(
-if (...) { ... }
-|
-if (...) S1@p1 S2@p2
-)
-
-@script:python@
-p1 << r.p1;
-p2 << r.p2;
-@@
-
-if (p1[0].column == p2[0].column):
-  cocci.print_main("branch",p1)
-  cocci.print_secs("after",p2)
-// </smpl>
-
-Signed-off-by: Julia Lawall <julia@diku.dk>
-Signed-off-by: Chris Ball <cjb@laptop.org>
-Cc: Pavel Pisa <ppisa@pikron.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/imxmmc.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff -puN drivers/mmc/host/imxmmc.c~drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation drivers/mmc/host/imxmmc.c
---- a/drivers/mmc/host/imxmmc.c~drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation
-+++ a/drivers/mmc/host/imxmmc.c
-@@ -148,11 +148,12 @@ static int imxmci_start_clock(struct imx
- 
- 		while (delay--) {
- 			reg = readw(host->base + MMC_REG_STATUS);
--			if (reg & STATUS_CARD_BUS_CLK_RUN)
-+			if (reg & STATUS_CARD_BUS_CLK_RUN) {
- 				/* Check twice before cut */
- 				reg = readw(host->base + MMC_REG_STATUS);
- 				if (reg & STATUS_CARD_BUS_CLK_RUN)
- 					return 0;
-+			}
- 
- 			if (test_bit(IMXMCI_PEND_STARTED_b, &host->pending_events))
- 				return 0;
-_
-
-Patches currently in -mm which might be from julia@diku.dk are
-
-origin.patch
-linux-next.patch
-drivers-mmc-host-imxmmcc-adjust-confusing-if-indentation.patch
-fs-btrfs-use-memdup_user.patch
-fs-btrfs-use-err_cast.patch
-
+> 
+> From: Bing Zhao <bzhao@marvell.com>
+> Date: Wed, 21 Jul 2010 18:46:55 -0700
+> 
+> Marvell 8686/8688 device will not respond to re-probe attemps
+> in powered resume, if the card is in sleep mode.
+> The added MMC_PM_SKIP_RESUME_PROBE flag is checked so that
+> call to mmc_sdio_init_card() can be skipped.
+> 
+> Signed-off-by: Bing Zhao <bzhao@marvell.com>
+> ---
+>  drivers/mmc/core/sdio.c      |   18 +++++++++++++++---
+>  drivers/mmc/host/sdhci-pci.c |    3 ++-
+>  include/linux/mmc/pm.h       |    1 +
+>  3 files changed, 18 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index bd2755e..dc03939 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -606,15 +606,27 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+>  
+>  static int mmc_sdio_resume(struct mmc_host *host)
+>  {
+> -	int i, err;
+> +	int i, err = 0;
+>  
+>  	BUG_ON(!host);
+>  	BUG_ON(!host->card);
+>  
+>  	/* Basic card reinitialization. */
+>  	mmc_claim_host(host);
+> -	err = mmc_sdio_init_card(host, host->ocr, host->card,
+> -				 (host->pm_flags & MMC_PM_KEEP_POWER));
+> +
+> +	/*
+> +	 * For a powered resume, Marvell 8686/8688 device will not respond
+> +	 * to re-initialization attemps if the card is in sleep mode.
+> +	 * The MMC_PM_SKIP_RESUME_PROBE flag is added as a workaround here.
+> +	 * This is a temporary measure until a fully thought-through
+> +	 * solution is elaborated.
+> +	 */
+> +	if (!(host->pm_flags & MMC_PM_KEEP_POWER) ||
+> +		!(host->pm_flags & MMC_PM_SKIP_RESUME_PROBE)) {
+> +			err = mmc_sdio_init_card(host, host->ocr, host->card,
+> +					host->pm_flags & MMC_PM_KEEP_POWER);
+> +	}
+> +
+>  	if (!err) {
+>  		/* We may have switched to 1-bit mode during suspend. */
+>  		err = sdio_enable_4bit_bus(host->card);
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index e021431..4f793f8 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -703,7 +703,8 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
+>  			goto unmap;
+>  	}
+>  
+> -	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
+> +	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ
+> +				| MMC_PM_SKIP_RESUME_PROBE;
+>  
+>  	ret = sdhci_add_host(host);
+>  	if (ret)
+> diff --git a/include/linux/mmc/pm.h b/include/linux/mmc/pm.h
+> index d37aac4..7dbb630 100644
+> --- a/include/linux/mmc/pm.h
+> +++ b/include/linux/mmc/pm.h
+> @@ -26,5 +26,6 @@ typedef unsigned int mmc_pm_flag_t;
+>  
+>  #define MMC_PM_KEEP_POWER	(1 << 0)	/* preserve card power during suspend */
+>  #define MMC_PM_WAKE_SDIO_IRQ	(1 << 1)	/* wake up host system on SDIO IRQ assertion */
+> +#define MMC_PM_SKIP_RESUME_PROBE	(1 << 2)	/* skip the attempt to reidentify the card in powered resume */
+>  
+>  #endif
+> -- 
+> 1.5.3.6
+> 
+> - Chris.
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> 
