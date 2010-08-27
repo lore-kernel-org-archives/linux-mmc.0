@@ -1,74 +1,53 @@
-From: akpm@linux-foundation.org
-Subject: + omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend.patch added to -mm tree
-Date: Fri, 27 Aug 2010 13:58:40 -0700
-Message-ID: <201008272058.o7RKweAH015685@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: ethan.too@gmail.com, adrian.hunter@nokia.com, cjb@laptop.org, linux-mmc@vger.kernel.org, madhu.cr@ti.com
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: failure of block read wait for long time
+Date: Fri, 27 Aug 2010 21:59:54 +0100
+Message-ID: <20100827205954.GA27804@void.printf.net>
+References: <1280230066-27612-1-git-send-email-s-ghorai@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:48690 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751034Ab0H0U7z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 16:59:55 -0400
+Content-Disposition: inline
+In-Reply-To: <1280230066-27612-1-git-send-email-s-ghorai@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sukumar Ghorai <s-ghorai@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Adrian Hunter <adrian.hunter@nokia.com>
 
+Hi,
 
-The patch titled
-     omap hsmmc: fix a racing case between kmmcd and omap_hsmmc_suspend
-has been added to the -mm tree.  Its filename is
-     omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend.patch
+On Tue, Jul 27, 2010 at 04:57:46PM +0530, Sukumar Ghorai wrote:
+>  multi-block read failure retries in single block read one by one. It continues
+>  retry of subsequent blocks, even after failure. Application will not be able
+>  to decode the interleave data (even if few single block read success).
+>  This patch fixes this problem by returning at the first failure instead of
+>  waiting for long duration.
+> 
+> Signed-off-by: Sukumar Ghorai <s-ghorai@ti.com>
+> ---
+>  drivers/mmc/card/block.c |    1 -
+>  1 files changed, 0 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index cb9fbc8..cfb0827 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -419,7 +419,6 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>  				spin_lock_irq(&md->lock);
+>  				ret = __blk_end_request(req, -EIO, brq.data.blksz);
+>  				spin_unlock_irq(&md->lock);
+> -				continue;
+>  			}
+>  			goto cmd_err;
+>  		}
+> --
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+Sukumar/Adrian, any thoughts on a new version of this patch containing
+Adrian's retry-segments idea?
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: omap hsmmc: fix a racing case between kmmcd and omap_hsmmc_suspend
-From: Ethan Du <ethan.too@gmail.com>
-
-If suspend called when kmmcd is doing host->ops->disable, as kmmcd already
-increased host->en_dis_recurs to 1, the mmc_host_enable in suspend
-function will return directly without increase the nesting_cnt, which will
-cause the followed register access carried out to the disabled host.
-
-mmc_suspend_host will enable host itself.  No need to enable host before
-it.  Also works on kmmcd will get flushed in mmc_suspend_host, enable host
-after it will be safe.  So make the mmc_host_enable after it.
-
-[cjb: rebase against current Linus]
-Signed-off-by: Ethan <ethan.too@gmail.com>
-Signed-off-by: Chris Ball <cjb@laptop.org>
-Acked-by: Adrian Hunter <adrian.hunter@nokia.com>
-Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/omap_hsmmc.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff -puN drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend drivers/mmc/host/omap_hsmmc.c
---- a/drivers/mmc/host/omap_hsmmc.c~omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend
-+++ a/drivers/mmc/host/omap_hsmmc.c
-@@ -2323,8 +2323,8 @@ static int omap_hsmmc_suspend(struct dev
- 			}
- 		}
- 		cancel_work_sync(&host->mmc_carddetect_work);
--		mmc_host_enable(host->mmc);
- 		ret = mmc_suspend_host(host->mmc);
-+		mmc_host_enable(host->mmc);
- 		if (ret == 0) {
- 			omap_hsmmc_disable_irq(host);
- 			OMAP_HSMMC_WRITE(host->base, HCTL,
-_
-
-Patches currently in -mm which might be from ethan.too@gmail.com are
-
-omap-hsmmc-fix-a-racing-case-between-kmmcd-and-omap_hsmmc_suspend.patch
-
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
