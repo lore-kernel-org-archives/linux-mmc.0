@@ -1,65 +1,66 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-use-snprintf-not-sprintf.patch added to -mm tree
-Date: Fri, 27 Aug 2010 13:06:34 -0700
-Message-ID: <201008272006.o7RK6YPN013308@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: jiebing.li@intel.com, alan@linux.intel.com, cjb@laptop.org, linux-mmc@vger.kernel.org
+From: Chris Ball <cjb@laptop.org>
+Subject: [PATCH RESEND] mmc: at91_mci: add missing linux/highmem.h include
+Date: Fri, 27 Aug 2010 21:10:24 +0100
+Message-ID: <20100827201023.GQ23079@void.printf.net>
+References: <1276968257-21016-1-git-send-email-mkl@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:55423 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751141Ab0H0UKd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 16:10:33 -0400
+Content-Disposition: inline
+In-Reply-To: <1276968257-21016-1-git-send-email-mkl@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Marc Kleine-Budde <mkl@pengutronix.de>
+Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org, Andrew Victor <avictor.za@gmail.com>, Wolfgang Muees <wolfgang.mues@auerswald.de>
 
+Hi Andrew,
 
-The patch titled
-     drivers/mmc/card/block.c: use snprintf not sprintf
-has been added to the -mm tree.  Its filename is
-     mmc-use-snprintf-not-sprintf.patch
+This patch wasn't merged, and Marc adds that he think his kernel config
+could have been to blame.  Looks harmless, though; want to take it?
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+From: Marc Kleine-Budde <mkl@pengutronix.de>
+Date: Sat, 19 Jun 2010 19:24:17 +0200
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+This patch fixes the following error:
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+at91_mci.c: In function 'at91_mci_sg_to_dma':
+at91_mci.c:236: error: implicit declaration of function 'kmap_atomic'
+at91_mci.c:236: error: 'KM_BIO_SRC_IRQ' undeclared (first use in this function)
+at91_mci.c:236: error: (Each undeclared identifier is reported only once
+at91_mci.c:236: error: for each function it appears in.)
+at91_mci.c:236: warning: assignment makes pointer from integer without a cast
+at91_mci.c:252: error: implicit declaration of function 'kunmap_atomic'
+at91_mci.c: In function 'at91_mci_post_dma_read':
+at91_mci.c:302: error: 'KM_BIO_SRC_IRQ' undeclared (first use in this function)
+at91_mci.c:302: warning: assignment makes pointer from integer without a cast
+at91_mci.c:317: error: implicit declaration of function 'flush_kernel_dcache_page'
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: drivers/mmc/card/block.c: use snprintf not sprintf
-From: JiebingLi <jiebing.li@intel.com>
-
-Fix an issue found by klockwork. Just paranoia.
-
-Signed-off-by: JiebingLi <jiebing.li@intel.com>
-Signed-off-by: Alan Cox <alan@linux.intel.com>
-Signed-off-by: Chris Ball <cjb@laptop.org>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+Cc: Andrew Victor <avictor.za@gmail.com>
+Cc: Wolfgang Muees <wolfgang.mues@auerswald.de>
 ---
+ drivers/mmc/host/at91_mci.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
- drivers/mmc/card/block.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff -puN drivers/mmc/card/block.c~mmc-use-snprintf-not-sprintf drivers/mmc/card/block.c
---- a/drivers/mmc/card/block.c~mmc-use-snprintf-not-sprintf
-+++ a/drivers/mmc/card/block.c
-@@ -620,7 +620,8 @@ static struct mmc_blk_data *mmc_blk_allo
- 	 * messages to tell when the card is present.
- 	 */
+diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
+index 5f3a599..87226cd 100644
+--- a/drivers/mmc/host/at91_mci.c
++++ b/drivers/mmc/host/at91_mci.c
+@@ -66,6 +66,7 @@
+ #include <linux/clk.h>
+ #include <linux/atmel_pdc.h>
+ #include <linux/gfp.h>
++#include <linux/highmem.h>
  
--	sprintf(md->disk->disk_name, "mmcblk%d", devidx);
-+	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
-+		"mmcblk%d", devidx);
+ #include <linux/mmc/host.h>
  
- 	blk_queue_logical_block_size(md->queue.queue, 512);
- 
-_
+-- 
+1.7.1
 
-Patches currently in -mm which might be from jiebing.li@intel.com are
-
-mmc-use-snprintf-not-sprintf.patch
-
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
