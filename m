@@ -1,52 +1,73 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] MMC: fix the use of kunmap_atomic() in tmio_mmc.h
-Date: Fri, 27 Aug 2010 09:01:35 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1008270854520.28043@axis700.grange>
-References: <Pine.LNX.4.64.1008142225120.16329@axis700.grange>
- <20100826160458.17c45371.akpm@linux-foundation.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] sdhci: disable MMC_CAP_NEEDS_POLL in nonremovable case
+Date: Fri, 27 Aug 2010 08:09:55 +0100
+Message-ID: <20100827070955.GA2418@console-pimps.org>
+References: <4C775C8E.7040903@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.23]:58793 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with SMTP
-	id S1751392Ab0H0HB2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Aug 2010 03:01:28 -0400
-In-Reply-To: <20100826160458.17c45371.akpm@linux-foundation.org>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:33858 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752331Ab0H0HJ5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2010 03:09:57 -0400
+Content-Disposition: inline
+In-Reply-To: <4C775C8E.7040903@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, Ian Molton <spyro@f2s.com>, Magnus Damm <damm@opensource.se>, Eric Miao <eric.y.miao@gmail.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, matt@console-pimps.org, Marek Szyprowski <m.szyprowski@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, Ben Dooks <ben-linux@fluff.org>
 
-Hi Andrew
-
-On Thu, 26 Aug 2010, Andrew Morton wrote:
-
-> On Sat, 14 Aug 2010 22:29:40 +0200 (CEST)
-> Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
+On Fri, Aug 27, 2010 at 03:34:54PM +0900, Jaehoon Chung wrote:
+> If controller use SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk, 
+> controller need always polling detect
 > 
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> In this case, always generated interrupt.Because controller checked card status.
+> I think that is not efficiently.
 > 
-> No changelog :(
-
-Sorry, I thought this was one of the cases, where the subject says it all.
-
-> - what was wrong with the old code?
+> But if card is nonremovable, we need not always polling.
+> So i added the check-point which is nonremovable or not
 > 
-> - how did the patch fix it?
+>  Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    5 +++--
+>  1 files changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 401527d..4bc5d3c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1826,8 +1826,9 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	if (caps & SDHCI_CAN_DO_HISPD)
+>  		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+>  
+> -	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> -		mmc->caps |= MMC_CAP_NEEDS_POLL;
+> +	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> +		!(host->mmc->caps & MMC_CAP_NONREMOVABLE))
+> +			mmc->caps |= MMC_CAP_NEEDS_POLL;
+>  
+>  	mmc->ocr_avail = 0;
+>  	if (caps & SDHCI_CAN_VDD_330)
+> -- 
+> 1.6.0.4
+> --
 
-How about:
+I don't have any non-removable hardware so I can't test this patch but I
+think it makes sense. The indentation looks a bit weird, but Andrew may
+fix that up if he thinks it's a problem.
 
-kunmap_atomic() takes the cookie, returned by the kmap_atomic() as its 
-argument and not the page address, used as an argument to kmap_atomic(). 
-This patch fixes the compile error:
+I'm assuming that you're testing this change with the sdhci-s3c.c
+driver? Is it a good idea that the driver is using
+SDHCI_QUIRK_BROKEN_CARD_DETECTION when it has a nonremovable card?
+Currently we seem to be using SDHCI_QUIRK_BROKEN_CARD_DETECTION and
+MMC_CAP_NONREMOVABLE to mean that same thing in some places which is
+really confusing.
 
-In file included from /opt/src/linux-2.6/drivers/mmc/host/tmio_mmc.c:37:
-/opt/src/linux-2.6/drivers/mmc/host/tmio_mmc.h: In function 'tmio_mmc_kunmap_atomic':
-/opt/src/linux-2.6/drivers/mmc/host/tmio_mmc.h:192: error: negative width in bit-field '<anonymous>'
+Like in drivers/mmc/host/sdhci.c we can enable card detection irqs for
+cards that are nonremovable which is a bit pointless (though obviously
+not harmful).
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+But your patch seems fine unless anyone else has an issue with it, I'm
+just trying to see if we could clean this up ontop of your patch.
+
+Adding Andrew Morton to the CC list.
