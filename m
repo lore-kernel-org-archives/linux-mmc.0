@@ -1,81 +1,79 @@
 From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH] sdhci: disable MMC_CAP_NEEDS_POLL in nonremovable case
-Date: Sat, 28 Aug 2010 14:37:37 +0100
-Message-ID: <20100828133737.GH18829@console-pimps.org>
-References: <4C775C8E.7040903@samsung.com>
- <20100827070955.GA2418@console-pimps.org>
- <AANLkTikLq_04+KQzyKmOh2K7U4wME=bXTzfq0M1KH8V3@mail.gmail.com>
- <CE761E84DADF2947A4AF22FB8D97A4732A58275D@shsmsx501.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Subject: [PATCH 1/2] mmc: Add helper function to check if a card is removable
+Date: Sat, 28 Aug 2010 14:53:47 +0100
+Message-ID: <4d1a88f196fa7e7eaf4c4a4af13d91ec81fb084e.1283003070.git.matt@console-pimps.org>
+References: <20100828133737.GH18829@console-pimps.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arkanian.console-pimps.org ([212.110.184.194]:57551 "EHLO
+Received: from arkanian.console-pimps.org ([212.110.184.194]:39278 "EHLO
 	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752653Ab0H1Nhj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 28 Aug 2010 09:37:39 -0400
-Content-Disposition: inline
-In-Reply-To: <CE761E84DADF2947A4AF22FB8D97A4732A58275D@shsmsx501.ccr.corp.intel.com>
+	by vger.kernel.org with ESMTP id S1751429Ab0H1Nxs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 28 Aug 2010 09:53:48 -0400
+In-Reply-To: <20100828133737.GH18829@console-pimps.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Cc: Kyungmin Park <kyungmin.park@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, Ben Dooks <ben-linux@fluff.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, Ben Dooks <ben-linux@fluff.org>, Ben Hutchings <ben@decadent.org.uk>, Yunpeng Gao <yunpeng.gao@intel.com>
 
-On Fri, Aug 27, 2010 at 07:55:44PM +0800, Gao, Yunpeng wrote:
-> >-----Original Message-----
-> >From: linux-mmc-owner@vger.kernel.org
-> >[mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Kyungmin Park
-> >Sent: Friday, August 27, 2010 3:15 PM
-> >To: Matt Fleming
-> >Cc: Jaehoon Chung; linux-mmc@vger.kernel.org; Marek Szyprowski; Andr=
-ew Morton;
-> >Ben Dooks
-> >Subject: Re: [PATCH] sdhci: disable MMC_CAP_NEEDS_POLL in nonremovab=
-le case
-> >
-> >On Fri, Aug 27, 2010 at 4:09 PM, Matt Fleming <matt@console-pimps.or=
-g> wrote:
-> >> On Fri, Aug 27, 2010 at 03:34:54PM +0900, Jaehoon Chung wrote:
-> >>> If controller use SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk,
-> >>> controller need always polling detect
-> >>>
-> >>> In this case, always generated interrupt.Because controller check=
-ed card
-> >status.
-> >>> I think that is not efficiently.
-> >>>
-> >>> But if card is nonremovable, we need not always polling.
-> >>> So i added the check-point which is nonremovable or not
-> >>>
-> >>> =A0Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> >>> ---
-> >>> =A0drivers/mmc/host/sdhci.c | =A0 =A05 +++--
-> >>> =A01 files changed, 3 insertions(+), 2 deletions(-)
-> >>>
-> >>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> >>> index 401527d..4bc5d3c 100644
-> >>> --- a/drivers/mmc/host/sdhci.c
-> >>> +++ b/drivers/mmc/host/sdhci.c
-> >>> @@ -1826,8 +1826,9 @@ int sdhci_add_host(struct sdhci_host *host)
-> >>> =A0 =A0 =A0 if (caps & SDHCI_CAN_DO_HISPD)
-> >>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_SD_HIGHSPEED;
-> >>>
-> >>> - =A0 =A0 if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-> >>> - =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_NEEDS_POLL;
-> >>> + =A0 =A0 if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) =
-&&
-> >>> + =A0 =A0 =A0 =A0 =A0 =A0 !(host->mmc->caps & MMC_CAP_NONREMOVABL=
-E))
-> >>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_=
-NEEDS_POLL;
->=20
-> Since module parameter 'mmc_assume_removable' (defined in core.c) als=
-o
-> controls the nonremovable attribute of the mmc/eMMC device, will it b=
-e
-> better to also check value of 'mmc_assume_removable' here? Thanks.
+There are two checks that need to be made when determining whether a
+card is removable. A host controller may set MMC_CAP_NONREMOVABLE if the
+controller does not support removing cards (e.g. eMMC), in which case
+the card is physically non-removable. Also the 'mmc_assume_removable'
+module parameter can be configured at module load time, in which case
+the card may be logically non-removable.
 
-Yeah, I think that check is also needed. I've got a couple of patches
-that I'll reply to this thread with. There should really be a helper
-function for determining when a card is either physially non-removable
-(eMMC) or logically non-removable (mmc_assume_removable =3D=3D 0).
+A helper function keeps the logic in one place so that code always
+checks both conditions.
+
+Signed-off-by: Matt Fleming <matt@console-pimps.org>
+---
+ drivers/mmc/core/mmc.c   |    2 +-
+ drivers/mmc/core/sd.c    |    2 +-
+ include/linux/mmc/host.h |    7 +++++++
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index dcfc921..66c4a59 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -718,7 +718,7 @@ static void mmc_attach_bus_ops(struct mmc_host *host)
+ {
+ 	const struct mmc_bus_ops *bus_ops;
+ 
+-	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
++	if (!mmc_card_is_removable(host))
+ 		bus_ops = &mmc_ops_unsafe;
+ 	else
+ 		bus_ops = &mmc_ops;
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 0f52410..bc745e1 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -750,7 +750,7 @@ static void mmc_sd_attach_bus_ops(struct mmc_host *host)
+ {
+ 	const struct mmc_bus_ops *bus_ops;
+ 
+-	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
++	if (!mmc_card_is_removable(host))
+ 		bus_ops = &mmc_sd_ops_unsafe;
+ 	else
+ 		bus_ops = &mmc_sd_ops;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 09dbb90..cf4b71f 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -272,5 +272,12 @@ static inline void mmc_set_disable_delay(struct mmc_host *host,
+ 	host->disable_delay = disable_delay;
+ }
+ 
++extern int mmc_assume_removable;
++
++static inline int mmc_card_is_removable(struct mmc_host *host)
++{
++	return (!(host->caps & MMC_CAP_NONREMOVABLE) || mmc_assume_removable);
++}
++
+ #endif
+ 
+-- 
+1.7.1
+
