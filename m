@@ -1,172 +1,52 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH 4/5] sdhci-s3c: add support for the non standard	minimal
- clock value
-Date: Sat, 28 Aug 2010 09:54:03 +0900
-Message-ID: <009d01cb464b$851ef080$8f5cd180$%kim@samsung.com>
-References: <1276076383-24825-1-git-send-email-m.szyprowski@samsung.com>
- <1276076383-24825-5-git-send-email-m.szyprowski@samsung.com>
- <20100827195452.GM23079@void.printf.net>
+From: Hein_Tibosch <hein_tibosch@yahoo.es>
+Subject: Re: [PATCH v3] mmc: Make ID freq configurable
+Date: Sat, 28 Aug 2010 08:44:20 +0800
+Message-ID: <4C785BE4.6010906@yahoo.es>
+References: <20090702135849.21370282@hskinnemoen-d830> <1246537056.2980.60.camel@linux-51e8.site> <4B3E570C.2060602@yahoo.es> <63809451-ED1D-487A-AE63-F72B23D136D8@niasdigital.com> <4B3F019F.6010306@yahoo.es> <49985427-DCB9-40E1-815B-43C812B41DE3@niasdigital.com> <20100102130809.121b7e10@mjolnir.ossman.eu> <AD8E15FA-A476-4275-A750-5EB587A93CEC@niasdigital.com> <20100103003804.66021fe9@mjolnir.ossman.eu> <4B42648A.2040305@yahoo.es> <20100827204415.GU23079@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:15507 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751819Ab0H1Axx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2010 20:53:53 -0400
-In-reply-to: <20100827195452.GM23079@void.printf.net>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20100827204415.GU23079@void.printf.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Pierre Ossman <pierre@ossman.eu>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, akpm@linux-foundation.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>, 'Marek Szyprowski' <m.szyprowski@samsung.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, kyungmin.park@samsung.com, ben-linux@fluff.org
 
-Chris Ball wrote:
-> 
+ On 28-8-2010 04:44, Chris Ball wrote:
 > Hi,
-> 
-Hi again ;-)
+>
+> This looks like the best of the min_freq patches I've seen, and is
+> implementing a suggestion of Pierre's.  Should we take it?
+>
+> - Chris.
+>
+> On Tue, Jan 05, 2010 at 05:58:34AM +0800, Hein_Tibosch wrote:
+>> Below a patch which tries mmc-initialization using several frequencies
+>> from an array 400, 300, 200 and 100.
+>>
+>>
+>> Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
+>> <cut>
+Hi Chris,
 
-> Looks like this wasn't merged.  Any thoughts on doing so?
-> 
-Updated patch(v3) of this was merged.
+Thanks. I can confirm that the above patch has been working properly for
+7 months now, using various SD-cards.
 
-http://marc.info/?l=linux-arm-kernel&m=128040710023029&w=2
+Here it tries 3 frequencies, which takes 290 ms:
 
-(commit ID: ce5f036bbbfc6c21d7b55b8fdaa2e2bd56392d94)
+   000 mmc_rescan: trying 400000 Hz
+       Waiting 1sec before mounting root device...
+   061 mci: F now 400000 (actual 397727)
+       usb 1-2: configuration #1 chosen from 1 choice
+   126 mmc_rescan: trying 300000 Hz
+       input: eGalax Inc. USB TouchController as /class/input/input1
+   193 mci: F now 300000 (actual 299145)
+   227 mmc_rescan: trying 200000 Hz
+   255 mci: F now 200000 (actual 200000)
+   290 mmc0: new SD card at address e624
 
-Thanks.
+In a meanwhile it is doing other things, so not much time is wasted.
+But most importantly: it never failed to initialize a card.
 
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
-
-> On Wed, Jun 09, 2010 at 11:39:42AM +0200, Marek Szyprowski wrote:
-> > S3C SDHCI host controller can change the source for generating mmc
-clock.
-> > By default host bus clock is used, what causes some problems on machines
-> > with 133MHz bus, because the SDHCI divider cannot be as high get proper
-> > clock value for identification mode. This is not a problem for the
-> > controller, because it can generate lower frequencies from other clock
-> > sources. This patch adds a new quirk to SDHCI driver to calculate the
-> > minimal supported clock frequency.
-> >
-> > This fixes the flood of the following warnings on Samsung S5PV210 SoCs:
-> > mmc0: Minimum clock frequency too high for identification mode
-> >
-> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> > ---
-> >  drivers/mmc/host/sdhci-of-esdhc.c |    1 +
-> >  drivers/mmc/host/sdhci-s3c.c      |   29
-> +++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci.c          |    2 +-
-> >  drivers/mmc/host/sdhci.h          |    2 ++
-> >  4 files changed, 33 insertions(+), 1 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
-b/drivers/mmc/host/sdhci-of-
-> esdhc.c
-> > index c8623de..64b3f79 100644
-> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> > @@ -124,6 +124,7 @@ struct sdhci_of_data sdhci_esdhc = {
-> >  		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
-> >  		  SDHCI_QUIRK_NO_BUSY_IRQ |
-> >  		  SDHCI_QUIRK_NONSTANDARD_CLOCK |
-> > +		  SDHCI_QUIRK_NONSTANDARD_MINCLOCK |
-> >  		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> >  		  SDHCI_QUIRK_PIO_NEEDS_DELAY |
-> >  		  SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET |
-> > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> > index 2b6cb44..615008d 100644
-> > --- a/drivers/mmc/host/sdhci-s3c.c
-> > +++ b/drivers/mmc/host/sdhci-s3c.c
-> > @@ -209,10 +209,37 @@ static void sdhci_s3c_set_clock(struct sdhci_host
-> *host, unsigned int clock)
-> >  	}
-> >  }
-> >
-> > +/**
-> > + * sdhci_s3c_get_min_clock - callback to get minimal supported clock
-value
-> > + * @host: The SDHCI host being queried
-> > + *
-> > + * To init mmc host properly a minimal clock value is needed. For high
-system
-> > + * bus clock's values the standard formula gives values out of allowed
-range.
-> > + * The clock still can be set to lower values, if clock source other
-then
-> > + * system bus is selected.
-> > +*/
-> > +static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
-> > +{
-> > +	struct sdhci_s3c *ourhost = to_s3c(host);
-> > +	unsigned int delta, min = UINT_MAX;
-> > +	int src;
-> > +
-> > +	for (src = 0; src < MAX_BUS_CLK; src++) {
-> > +		delta = sdhci_s3c_consider_clock(ourhost, src, 0);
-> > +		if (delta == UINT_MAX)
-> > +			continue;
-> > +		/* delta is a negative value in this case */
-> > +		if (-delta < min)
-> > +			min = -delta;
-> > +	}
-> > +	return min;
-> > +}
-> > +
-> >  static struct sdhci_ops sdhci_s3c_ops = {
-> >  	.get_max_clock		= sdhci_s3c_get_max_clk,
-> >  	.get_timeout_clock	= sdhci_s3c_get_timeout_clk,
-> >  	.set_clock		= sdhci_s3c_set_clock,
-> > +	.get_min_clock		= sdhci_s3c_get_min_clock,
-> >  };
-> >
-> >  static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
-> > @@ -316,6 +343,8 @@ static int __devinit sdhci_s3c_probe(struct
-> platform_device *pdev)
-> >  	host->quirks = 0;
-> >  	host->irq = irq;
-> >
-> > +	host->quirks |= SDHCI_QUIRK_NONSTANDARD_MINCLOCK;
-> > +
-> >  	/* Setup quirks for the controller */
-> >  	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
-> >
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index c6d1bd8..8b3ee53 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -1785,7 +1785,7 @@ int sdhci_add_host(struct sdhci_host *host)
-> >  	 * Set host parameters.
-> >  	 */
-> >  	mmc->ops = &sdhci_ops;
-> > -	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK &&
-> > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_MINCLOCK &&
-> >  			host->ops->set_clock && host->ops->get_min_clock)
-> >  		mmc->f_min = host->ops->get_min_clock(host);
-> >  	else
-> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > index c846813..3fd87c2 100644
-> > --- a/drivers/mmc/host/sdhci.h
-> > +++ b/drivers/mmc/host/sdhci.h
-> > @@ -240,6 +240,8 @@ struct sdhci_host {
-> >  #define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
-> >  /* Controller cannot support End Attribute in NOP ADMA descriptor */
-> >  #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
-> > +/* Controller has nonstandard clock management */
-> > +#define SDHCI_QUIRK_NONSTANDARD_MINCLOCK		(1<<27)
-> >
-> >  	int			irq;		/* Device IRQ */
-> >  	void __iomem *		ioaddr;		/* Mapped address */
-> > --
-> > 1.7.1.240.g225c
-> 
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-
+Hein Tibosch
