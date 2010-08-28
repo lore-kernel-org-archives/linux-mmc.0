@@ -1,29 +1,109 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH RESEND] au1xmmc.c: use resource_size()
-Date: Fri, 27 Aug 2010 23:43:29 +0100
-Message-ID: <20100827224329.GG18829@console-pimps.org>
-References: <BD79186B4FD85F4B8E60E381CAEE19090200E9FB@mi8nycmail19.Mi8.com>
- <20100827191134.GF20407@void.printf.net>
- <20100827192626.GD7258@console-pimps.org>
- <AANLkTinDgFa2YMZ7-tL6OTtotnXXCALxaipWKncdqkJQ@mail.gmail.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH] sdhci-s3c: Add SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK	quirk
+ for Samsung SoC
+Date: Sat, 28 Aug 2010 09:47:51 +0900
+Message-ID: <009c01cb464a$a6ffb050$f4ff10f0$%kim@samsung.com>
+References: <1276169991-16396-1-git-send-email-kgene.kim@samsung.com>
+ <20100827195622.GN23079@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arkanian.console-pimps.org ([212.110.184.194]:40274 "EHLO
-	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753586Ab0H0Wna (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2010 18:43:30 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTinDgFa2YMZ7-tL6OTtotnXXCALxaipWKncdqkJQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <20100827195622.GN23079@void.printf.net>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, 'Lee Hyuk' <hyuk1.lee@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Manuel Lauss <manuel.lauss@googlemail.com>
-Cc: Chris Ball <cjb@laptop.org>, H Hartley Sweeten <hartleys@visionengravers.com>, akpm@linux-foundation.org, linux-mmc@vger.kernel.org, Manuel Lauss <manuel.lauss@gmail.com>
 
-On Sat, Aug 28, 2010 at 12:38:56AM +0200, Manuel Lauss wrote:
->
-> Wasn't that posted ages ago?  I'm fine with it.
+Chris Ball wrote:
+> 
+> Hi,
+> 
+Hi :-)
 
-Yep, but it never got merged.
+> This wasn't merged, after some questions from Kyungmin Park -- is
+> the patch still desirable?
+> 
 
-Thanks for the ACK.
+This patch is being in mainline now.
+(Commit ID: 3fe42e077f65351503f5004031549db330bb105e)
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
+
+> On Thu, Jun 10, 2010 at 08:39:51PM +0900, Kukjin Kim wrote:
+> > From: Lee Hyuk <hyuk1.lee@samsung.com>
+> >
+> > On Samsung's SDMMC hosts the timeout clock is derivied from the SD
+> > Clock, which is set dynamically.
+> > So, checked 'SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK' quirk and
+> removed
+> > 'sdhci_s3c_get_timeout_clk' callback which doesn't need any more.
+> >
+> > Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+> > Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+> > ---
+> >  drivers/mmc/host/sdhci-s3c.c |   10 +++-------
+> >  1 files changed, 3 insertions(+), 7 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> > index af21792..ca09382 100644
+> > --- a/drivers/mmc/host/sdhci-s3c.c
+> > +++ b/drivers/mmc/host/sdhci-s3c.c
+> > @@ -110,11 +110,6 @@ static unsigned int sdhci_s3c_get_max_clk(struct
+> sdhci_host *host)
+> >  	return max;
+> >  }
+> >
+> > -static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *host)
+> > -{
+> > -	return sdhci_s3c_get_max_clk(host) / 1000000;
+> > -}
+> > -
+> >  /**
+> >   * sdhci_s3c_consider_clock - consider one the bus clocks for current
+setting
+> >   * @ourhost: Our SDHCI instance.
+> > @@ -188,7 +183,6 @@ static void sdhci_s3c_set_clock(struct sdhci_host
+*host,
+> unsigned int clock)
+> >
+> >  		ourhost->cur_clk = best_src;
+> >  		host->max_clk = clk_get_rate(clk);
+> > -		host->timeout_clk = sdhci_s3c_get_timeout_clk(host);
+> >
+> >  		ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
+> >  		ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;
+> > @@ -211,7 +205,6 @@ static void sdhci_s3c_set_clock(struct sdhci_host
+*host,
+> unsigned int clock)
+> >
+> >  static struct sdhci_ops sdhci_s3c_ops = {
+> >  	.get_max_clock		= sdhci_s3c_get_max_clk,
+> > -	.get_timeout_clock	= sdhci_s3c_get_timeout_clk,
+> >  	.set_clock		= sdhci_s3c_set_clock,
+> >  };
+> >
+> > @@ -335,6 +328,9 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
+> >  			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+> >
+> > +	/* HSMMC on Samsung SoCs uses SDCLK as timeout clock. */
+> > +	host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
+> > +
+> >  	ret = sdhci_add_host(host);
+> >  	if (ret) {
+> >  		dev_err(dev, "sdhci_add_host() failed\n");
+> > --
+> > 1.6.2.5
+> 
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
