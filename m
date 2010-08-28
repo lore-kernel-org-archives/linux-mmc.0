@@ -1,52 +1,128 @@
-From: Hein_Tibosch <hein_tibosch@yahoo.es>
-Subject: Re: [PATCH v3] mmc: Make ID freq configurable
-Date: Sat, 28 Aug 2010 08:44:20 +0800
-Message-ID: <4C785BE4.6010906@yahoo.es>
-References: <20090702135849.21370282@hskinnemoen-d830> <1246537056.2980.60.camel@linux-51e8.site> <4B3E570C.2060602@yahoo.es> <63809451-ED1D-487A-AE63-F72B23D136D8@niasdigital.com> <4B3F019F.6010306@yahoo.es> <49985427-DCB9-40E1-815B-43C812B41DE3@niasdigital.com> <20100102130809.121b7e10@mjolnir.ossman.eu> <AD8E15FA-A476-4275-A750-5EB587A93CEC@niasdigital.com> <20100103003804.66021fe9@mjolnir.ossman.eu> <4B42648A.2040305@yahoo.es> <20100827204415.GU23079@void.printf.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: [PATCH RESEND 2.6.32-rc8 1/3] mmc: Unify and generalize
+	UNSTUFF_BITS macro
+Date: Sat, 28 Aug 2010 02:21:37 +0100
+Message-ID: <20100828012136.GA5770@void.printf.net>
+References: <873a3wsncj.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20100827204415.GU23079@void.printf.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Pierre Ossman <pierre@ossman.eu>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, akpm@linux-foundation.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:58355 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751922Ab0H1BVj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Aug 2010 21:21:39 -0400
+Content-Disposition: inline
+In-Reply-To: <873a3wsncj.fsf@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: don.mullis@gmail.com
+Cc: linux-mmc@vger.kernel.org
 
- On 28-8-2010 04:44, Chris Ball wrote:
-> Hi,
->
-> This looks like the best of the min_freq patches I've seen, and is
-> implementing a suggestion of Pierre's.  Should we take it?
->
-> - Chris.
->
-> On Tue, Jan 05, 2010 at 05:58:34AM +0800, Hein_Tibosch wrote:
->> Below a patch which tries mmc-initialization using several frequencies
->> from an array 400, 300, 200 and 100.
->>
->>
->> Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
->> <cut>
-Hi Chris,
+Hi,
 
-Thanks. I can confirm that the above patch has been working properly for
-7 months now, using various SD-cards.
+No replies on the list, and not merged; any comments on these three 
+patches from Don?
 
-Here it tries 3 frequencies, which takes 290 ms:
+- Chris.
 
-   000 mmc_rescan: trying 400000 Hz
-       Waiting 1sec before mounting root device...
-   061 mci: F now 400000 (actual 397727)
-       usb 1-2: configuration #1 chosen from 1 choice
-   126 mmc_rescan: trying 300000 Hz
-       input: eGalax Inc. USB TouchController as /class/input/input1
-   193 mci: F now 300000 (actual 299145)
-   227 mmc_rescan: trying 200000 Hz
-   255 mci: F now 200000 (actual 200000)
-   290 mmc0: new SD card at address e624
+Date: Sun, 29 Nov 2009 19:28:12 -0800
+From: don.mullis@gmail.com
 
-In a meanwhile it is doing other things, so not much time is wasted.
-But most importantly: it never failed to initialize a card.
+Unify duplicated implementations of UNSTUFF_BITS() into a shared .h file.
+Recode UNSTUFF_BITS() as an invocation of a new more general macro
+UNSTUFF_BITS_ARRAY() that works on arrays of any multiple of 32 bits.
 
-Hein Tibosch
+Signed-off-by: don.mullis@gmail.com
+---
+ drivers/mmc/core/core.h |   21 +++++++++++++++++++++
+ drivers/mmc/core/mmc.c  |   14 --------------
+ drivers/mmc/core/sd.c   |   14 --------------
+ 3 files changed, 21 insertions(+), 28 deletions(-)
+
+Index: linux-2.6/drivers/mmc/core/sd.c
+===================================================================
+--- linux-2.6.orig/drivers/mmc/core/sd.c	2009-11-02 13:02:23.000000000 -0800
++++ linux-2.6/drivers/mmc/core/sd.c	2009-11-02 15:10:28.000000000 -0800
+@@ -41,20 +41,6 @@ static const unsigned int tacc_mant[] = 
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+ 
+-#define UNSTUFF_BITS(resp,start,size)					\
+-	({								\
+-		const int __size = size;				\
+-		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
+-		const int __off = 3 - ((start) / 32);			\
+-		const int __shft = (start) & 31;			\
+-		u32 __res;						\
+-									\
+-		__res = resp[__off] >> __shft;				\
+-		if (__size + __shft > 32)				\
+-			__res |= resp[__off-1] << ((32 - __shft) % 32);	\
+-		__res & __mask;						\
+-	})
+-
+ /*
+  * Given the decoded CSD structure, decode the raw CID to our CID structure.
+  */
+Index: linux-2.6/drivers/mmc/core/core.h
+===================================================================
+--- linux-2.6.orig/drivers/mmc/core/core.h	2009-11-02 13:02:23.000000000 -0800
++++ linux-2.6/drivers/mmc/core/core.h	2009-11-02 15:12:01.000000000 -0800
+@@ -13,6 +13,27 @@
+ 
+ #include <linux/delay.h>
+ 
++#define UNSTUFF_BITS_ARRAY(u32_array, start, size)			\
++	({								\
++		const int __size = size;				\
++		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
++		const int __off = (sizeof(u32_array)/4-1) - ((start) / 32); \
++		const int __shft = (start) & 31;			\
++		u32 __res;						\
++									\
++		__res = (u32_array)[__off] >> __shft;			\
++		if (__size + __shft > 32)				\
++			__res |= (u32_array)[__off-1]			\
++				<< ((32 - __shft) % 32); 		\
++		__res & __mask;						\
++	})
++
++/*
++ * Specific to 128-bit arrays, e.g. raw_cid[] and raw_csd[].
++ */
++#define UNSTUFF_BITS(resp, start, size)	\
++	UNSTUFF_BITS_ARRAY(*(u32(*)[4])resp, start, size)
++
+ #define MMC_CMD_RETRIES        3
+ 
+ struct mmc_bus_ops {
+Index: linux-2.6/drivers/mmc/core/mmc.c
+===================================================================
+--- linux-2.6.orig/drivers/mmc/core/mmc.c	2009-11-02 13:02:23.000000000 -0800
++++ linux-2.6/drivers/mmc/core/mmc.c	2009-11-02 13:02:23.000000000 -0800
+@@ -39,20 +39,6 @@ static const unsigned int tacc_mant[] = 
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+ 
+-#define UNSTUFF_BITS(resp,start,size)					\
+-	({								\
+-		const int __size = size;				\
+-		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
+-		const int __off = 3 - ((start) / 32);			\
+-		const int __shft = (start) & 31;			\
+-		u32 __res;						\
+-									\
+-		__res = resp[__off] >> __shft;				\
+-		if (__size + __shft > 32)				\
+-			__res |= resp[__off-1] << ((32 - __shft) % 32);	\
+-		__res & __mask;						\
+-	})
+-
+ /*
+  * Given the decoded CSD structure, decode the raw CID to our CID structure.
+  */
+--
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
