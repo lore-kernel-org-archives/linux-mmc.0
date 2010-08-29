@@ -1,78 +1,41 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [RFC/PATCH RESEND] mmc: sdhci: Enable high speed support for MMC cards
-Date: Sat, 28 Aug 2010 12:24:24 -0400
-Message-ID: <m362yu4sef.fsf@pullcord.laptop.org>
-References: <20100827191945.GI20407@void.printf.net>
-	<AANLkTinmaio2PAcnwP7+U8P4O1-T3HiLYz_ej3zGAV5Y@mail.gmail.com>
+From: dmitry pervushin <dpervushin@gmail.com>
+Subject: Re: [PATCH] sdhci - add public definition of quirks
+Date: Sun, 29 Aug 2010 11:26:58 +0400
+Message-ID: <1283066818.4477.2.camel@uxka.diimka.lan>
+References: <1266870828.8840.22.camel@uxka.diimka.lan>
+	 <20100827192823.GA23079@void.printf.net>
+	 <20100827193740.GA18829@console-pimps.org>
+Reply-To: dpervushin@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54978 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752755Ab0H1QYf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 28 Aug 2010 12:24:35 -0400
-In-Reply-To: <AANLkTinmaio2PAcnwP7+U8P4O1-T3HiLYz_ej3zGAV5Y@mail.gmail.com>
-	(Kyungmin Park's message of "Sat, 28 Aug 2010 14:39:59 +0900")
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:35924 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751976Ab0H2H1E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Aug 2010 03:27:04 -0400
+Received: by wyb35 with SMTP id 35so5504691wyb.19
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Aug 2010 00:27:02 -0700 (PDT)
+In-Reply-To: <20100827193740.GA18829@console-pimps.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: linux-mmc@vger.kernel.org, "George G. Davis" <gdavis@mvista.com>, Zhangfei Gao <zgao6@marvell.com>
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>, Richard =?ISO-8859-1?Q?R=F6jfors?= <richard.rojfors.ext@mocean-labs.com>
 
-Hi Kyungmin,
+On Fri, 2010-08-27 at 20:37 +0100, Matt Fleming wrote:
+> On Fri, Aug 27, 2010 at 08:28:23PM +0100, Chris Ball wrote:
+> > Hi,
+> > 
+> > Any comments on this patch from the list?
+> 
+> Are there no users of this patch? Who would want this? We generally
+> don't add infrastructure to the kernel without a user.
 
-   > It's already patched. you can find it easily at list.
+This patch is superseded by commit
+a7626b7a5de37bbd506b23633be95428ee81c2e4, Anton Vorontsov's patch
+"sdhci-pltfm: implement platform data passing"
 
-I think you're talking about this patch from Zhangfei:
-
-From: Zhangfei Gao <zgao6@marvell.com>
-Date: Mon, 16 Aug 2010 21:15:32 -0400
-Subject: [PATCH] sdhci: support MMC_CAP_MMC_HIGHSPEED
-
-Signed-off-by: Zhangfei Gao <zgao6@marvell.com>
-Acked-by: Matt Fleming <matt@console-pimps.org>
-Acked-by: Kyungmin Park <kmpark@infradead.org>
----
- drivers/mmc/host/sdhci.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7855121..913555e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1823,7 +1823,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc->caps |= MMC_CAP_4_BIT_DATA;
-
- 	if (caps & SDHCI_CAN_DO_HISPD)
--		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
-+		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-
- 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
 -- 
+dmitry pervushin <dpervushin@gmail.com>
+Home, sweet home...
 
-But this patch wasn't sent to Andrew either -- and so isn't in Linus'
-or Andrew's tree -- and it's also only one of the two hunks in George's
-earlier patch.  George also had:
-
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1180,7 +1180,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	else
- 		ctrl &= ~SDHCI_CTRL_4BITBUS;
- 
--	if (ios->timing == MMC_TIMING_SD_HS &&
-+	if ((ios->timing == MMC_TIMING_SD_HS ||
-+	     ios->timing == MMC_TIMING_MMC_HS) &&
- 	    !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
- 		ctrl |= SDHCI_CTRL_HISPD;
- 	else
-       
-So, we still have to send a patch to Andrew, and decide which patch it
-should be.  What do you think?
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
