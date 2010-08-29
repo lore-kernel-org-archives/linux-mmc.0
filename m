@@ -1,41 +1,68 @@
-From: dmitry pervushin <dpervushin@gmail.com>
-Subject: Re: [PATCH] sdhci - add public definition of quirks
-Date: Sun, 29 Aug 2010 11:26:58 +0400
-Message-ID: <1283066818.4477.2.camel@uxka.diimka.lan>
-References: <1266870828.8840.22.camel@uxka.diimka.lan>
-	 <20100827192823.GA23079@void.printf.net>
-	 <20100827193740.GA18829@console-pimps.org>
-Reply-To: dpervushin@gmail.com
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH] mmc: move regulator handling to core
+Date: Sun, 29 Aug 2010 14:27:12 +0100
+Message-ID: <20100829132711.GB10233@opensource.wolfsonmicro.com>
+References: <1259844390-10541-1-git-send-email-daniel@caiaq.de>
+ <20100827190306.GB20407@void.printf.net>
+ <AANLkTi=20KrUy334JRmMYwK7rbaVYrYCqW-BHZYGPrwT@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:35924 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751976Ab0H2H1E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Aug 2010 03:27:04 -0400
-Received: by wyb35 with SMTP id 35so5504691wyb.19
-        for <linux-mmc@vger.kernel.org>; Sun, 29 Aug 2010 00:27:02 -0700 (PDT)
-In-Reply-To: <20100827193740.GA18829@console-pimps.org>
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:56444 "EHLO
+	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752374Ab0H2N1B (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Aug 2010 09:27:01 -0400
+Content-Disposition: inline
+In-Reply-To: <AANLkTi=20KrUy334JRmMYwK7rbaVYrYCqW-BHZYGPrwT@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>, Richard =?ISO-8859-1?Q?R=F6jfors?= <richard.rojfors.ext@mocean-labs.com>
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Daniel Mack <daniel@caiaq.de>, linux-kernel@vger.kernel.org, Liam Girdwood <lrg@slimlogic.co.uk>, Pierre Ossman <pierre@ossman.eu>, Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, Adrian Hunter <adrian.hunter@nokia.com>, David Brownell <dbrownell@users.sourceforge.net>, Russell King <rmk+kernel@arm.linux.org.uk>, Eric Miao <eric.y.miao@gmail.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Cliff Brake <cbrake@bec-systems.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Madhusudhan <madhu.cr@ti.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Fri, 2010-08-27 at 20:37 +0100, Matt Fleming wrote:
-> On Fri, Aug 27, 2010 at 08:28:23PM +0100, Chris Ball wrote:
-> > Hi,
-> > 
-> > Any comments on this patch from the list?
-> 
-> Are there no users of this patch? Who would want this? We generally
-> don't add infrastructure to the kernel without a user.
+On Sat, Aug 28, 2010 at 04:48:58PM +0200, Linus Walleij wrote:
+> 2010/8/27 Chris Ball <cjb@laptop.org>:
 
-This patch is superseded by commit
-a7626b7a5de37bbd506b23633be95428ee81c2e4, Anton Vorontsov's patch
-"sdhci-pltfm: implement platform data passing"
+> > Looks like this patch got dropped because of the missing modificati=
+ons
+> > to arch/arm/mach-omap2/mmc-twl4030.c. =A0Are we still interested in=
+ the
+> > patch otherwise, and can anyone help with that?
 
--- 
-dmitry pervushin <dpervushin@gmail.com>
-Home, sweet home...
+> Actually just before the summer I submitted something not quite simil=
+ar:
+> I moved all regulator handling *out* of the MMC core because I didn't
+> trust the way reference counting was being handled.
 
+This seems like the wrong approach; if there's a problem it'd seem much
+better to fix the core code that everything is sharing rather than
+factor it out - the location of the code is orthogonal to its
+helpfulness.
+
+> There is something very disturbing about this code from
+> regulator/core/core.c mmc_regulator_set_ocr():
+
+The MMC code in the core was last time I looked explicitly reliant on
+the regulators not being shared - it wants the regulators to be grebbed
+with regulator_get_exclusive() which guarantees that.  When the code wa=
+s
+added there was a strong insistance that shared supplies could not be
+used with MMC so this was fine.
+
+> So it looks to me like it is possible for one slot to enable the
+> regulator and race with another slot which disables it at the
+> same time and end up with the regulator disabled :-(
+
+It's not really a race, it's just a simple inability to cope with
+something else sharing the same regulator - at the minute it'll do
+things like turn off the regulator when one port is done even if the
+other port still needs it.
+
+> My solution would still be to move the enable/disable out
+> of the core, so I need to follow up on that.
+
+The code needs to be changed so that the port remembers internally if
+it itself needs the regulator enabled or disabled rather than inspectin=
+g
+the current hardware state since that may differ as a result of being
+forced by the system or the activity of other ports.
