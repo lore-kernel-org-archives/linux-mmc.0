@@ -1,41 +1,76 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH] of_mmc_spi: add card detect irq support
-Date: Mon, 30 Aug 2010 11:49:08 -0600
-Message-ID: <AANLkTimXJ-hSz3O1xPgLsZLxwkwBeqrW+gAmR8+6jGoW@mail.gmail.com>
-References: <20100830161102.GA20413@oksana.dev.rtsoft.ru> <172136.90988.qm@web180315.mail.gq1.yahoo.com>
+From: "Ghorai, Sukumar" <s-ghorai@ti.com>
+Subject: RE: [PATCH] mmc: failure of block read wait for long time
+Date: Tue, 31 Aug 2010 00:39:57 +0530
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B031584E884@dbde02.ent.ti.com>
+References: <1280230066-27612-1-git-send-email-s-ghorai@ti.com>
+ <20100827205954.GA27804@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:54310 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756283Ab0H3Rta (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2010 13:49:30 -0400
-Received: by gwj17 with SMTP id 17so2058339gwj.19
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Aug 2010 10:49:29 -0700 (PDT)
-In-Reply-To: <172136.90988.qm@web180315.mail.gq1.yahoo.com>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:60304 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751854Ab0H3TKQ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2010 15:10:16 -0400
+In-Reply-To: <20100827205954.GA27804@void.printf.net>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Brownell <david-b@pacbell.net>
-Cc: Esben Haabendal <esbenhaabendal@gmail.com>, Anton Vorontsov <cbouatmailru@gmail.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, David Brownell <dbrownell@users.sourceforge.net>, linuxppc-dev@lists.ozlabs.org
-
-On Mon, Aug 30, 2010 at 10:38 AM, David Brownell <david-b@pacbell.net> wrote:
-> Since I don't do OpenFirmware, let's hear from
-> Grant on this one.
-
-Looks good to me.
-
-Acked-by: Grant Likely <grant.likely@secretlab.ca>
-
->
->
-> _______________________________________________
-> Linuxppc-dev mailing list
-> Linuxppc-dev@lists.ozlabs.org
-> https://lists.ozlabs.org/listinfo/linuxppc-dev
->
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Adrian Hunter <adrian.hunter@nokia.com>
 
 
 
--- 
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Saturday, August 28, 2010 2:30 AM
+> To: Ghorai, Sukumar
+> Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
+> Adrian Hunter
+> Subject: Re: [PATCH] mmc: failure of block read wait for long time
+> 
+> Hi,
+> 
+> On Tue, Jul 27, 2010 at 04:57:46PM +0530, Sukumar Ghorai wrote:
+> >  multi-block read failure retries in single block read one by one. It
+> continues
+> >  retry of subsequent blocks, even after failure. Application will not be
+> able
+> >  to decode the interleave data (even if few single block read success).
+> >  This patch fixes this problem by returning at the first failure instead
+> of
+> >  waiting for long duration.
+> >
+> > Signed-off-by: Sukumar Ghorai <s-ghorai@ti.com>
+> > ---
+> >  drivers/mmc/card/block.c |    1 -
+> >  1 files changed, 0 insertions(+), 1 deletions(-)
+> >
+> > diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> > index cb9fbc8..cfb0827 100644
+> > --- a/drivers/mmc/card/block.c
+> > +++ b/drivers/mmc/card/block.c
+> > @@ -419,7 +419,6 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
+> struct request *req)
+> >  				spin_lock_irq(&md->lock);
+> >  				ret = __blk_end_request(req, -EIO,
+> brq.data.blksz);
+> >  				spin_unlock_irq(&md->lock);
+> > -				continue;
+> >  			}
+> >  			goto cmd_err;
+> >  		}
+> > --
+> 
+> Sukumar/Adrian, any thoughts on a new version of this patch containing
+> Adrian's retry-segments idea?
+[Ghorai] I am checked and tested the suggestion from Adrian. But was thinking it's just reducing the retry by 1/4 time; mean -
+1. Each segment is size of 4K. and multi-block-write failed move to next segment(4k);
+2. i.e. original code it was retrying for each 512 bytes. Now it's retrying for 8*512 bytes. So retry reduce by 1/8 times.
+
+So I will post the 2nd version as suggested by Adrian; but let's see others input.
+
+> 
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
