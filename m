@@ -1,64 +1,228 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH] of_mmc_spi: add card detect irq support
-Date: Mon, 30 Aug 2010 11:46:17 -0600
-Message-ID: <AANLkTinhctfE_BTF3xtACMoqrtRiSNApQ3+qCaOJ=w7m@mail.gmail.com>
-References: <AANLkTikH+H6+sXN_hcfm_guvUwgM-NKQ83nCwgAk-23G@mail.gmail.com>
- <20100830132914.GA32266@oksana.dev.rtsoft.ru> <AANLkTik3rNpFCYDR7dxiFN_3dvxZmsSjt8PsoC415JM-@mail.gmail.com>
+From: "kishore kadiyala" <kishore.kadiyala@ti.com>
+Subject: [PATCH 1/3] omap4 hsmmc : Adding card detect support for MMC1
+Date: Mon, 30 Aug 2010 23:18:23 +0530 (IST)
+Message-ID: <23529.10.24.255.18.1283190503.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:45607 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753536Ab0H3Rqi convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2010 13:46:38 -0400
-Received: by ywh1 with SMTP id 1so1725831ywh.19
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Aug 2010 10:46:37 -0700 (PDT)
-In-Reply-To: <AANLkTik3rNpFCYDR7dxiFN_3dvxZmsSjt8PsoC415JM-@mail.gmail.com>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:54455 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754430Ab0H3Rsg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 30 Aug 2010 13:48:36 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Esben Haabendal <esbenhaabendal@gmail.com>
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, David Brownell <dbrownell@users.sourceforge.net>, linuxppc-dev@lists.ozlabs.org
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: tony@atomide.com, akpm@linux-foundation.org, madhu.cr@ti.com, adrian.hunter@nokia.com
 
-On Mon, Aug 30, 2010 at 10:04 AM, Esben Haabendal
-<esbenhaabendal@gmail.com> wrote:
-> On Mon, Aug 30, 2010 at 3:29 PM, Anton Vorontsov <cbouatmailru@gmail.=
-com> wrote:
->>> @@ -121,8 +136,14 @@ struct mmc_spi_platform_data
->>> *mmc_spi_get_pdata(struct spi_device *spi)
->>> =A0 =A0 =A0 =A0 if (gpio_is_valid(oms->gpios[WP_GPIO]))
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 oms->pdata.get_ro =3D of_mmc_spi_ge=
-t_ro;
->>>
->>> - =A0 =A0 =A0 /* We don't support interrupts yet, let's poll. */
->>> - =A0 =A0 =A0 oms->pdata.caps |=3D MMC_CAP_NEEDS_POLL;
->>> + =A0 =A0 =A0 oms->detect_irq =3D irq_of_parse_and_map(np, 0);
->>> + =A0 =A0 =A0 if (oms->detect_irq !=3D NO_IRQ) {
->>
->> I'd write "if (oms->detect_irq)", which is a bit more natural
->> (and still correct, 0 is the only invalid VIRQ number).
->
-> Most other architectures has NO_IRQ defined to -1, so I will stick
-> with the NO_IRQ comparsion.
+Adding card detect callback function and card detect configuration
+function for MMC1 Controller.
 
-Not true.  NO_IRQ is only defined as -1 on ARM, microblaze, mn10300
-and parisc, and I've got a patch pending to remove microblaze from
-that list.  ARM just happens to be a really big user.
+Card detect configuration function does initial configuration of the
+MMC Control & PullUp-PullDown registers of Phoenix.
 
-$ git grep NO_IRQ arch/*/include  (I've trimmed the irrelevant matches)
-arch/arm/include/asm/irq.h:#ifndef NO_IRQ
-arch/arm/include/asm/irq.h:#define NO_IRQ       ((unsigned int)(-1))
-arch/microblaze/include/asm/irq.h:#define NO_IRQ (-1)
-arch/mn10300/include/asm/irq.h:#define NO_IRQ           INT_MAX
-arch/parisc/include/asm/irq.h:#define NO_IRQ            (-1)
-arch/powerpc/include/asm/irq.h:#define NO_IRQ                   (0)
+For MMC1 Controller, Card detect interrupt source is
+twl6030 and the card detect call back function provides card present/absent
+status by reading MMC Control register.
 
-> Hopefully, arm users will soon enjoy this driver/wrapper soon also.
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
 
-My hope is that even on ARM when the device tree is used I'll be able
-eliminate IRQs mapped to 0 (but I need to do a lot more research on
-how best to do that though).  Are you actually using this on ARM?
+---
+ arch/arm/mach-omap2/board-4430sdp.c |    7 +++-
+ drivers/mfd/twl6030-irq.c           |   76 +++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/omap_hsmmc.c       |    4 +-
+ include/linux/i2c/twl.h             |   31 ++++++++++++++
+ 4 files changed, 115 insertions(+), 3 deletions(-)
 
-I'm okay with you keeping the NO_IRQ test for the short term though.
+diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
+index 9447644..a49f285 100644
+--- a/arch/arm/mach-omap2/board-4430sdp.c
++++ b/arch/arm/mach-omap2/board-4430sdp.c
+@@ -227,9 +227,14 @@ static int omap4_twl6030_hsmmc_late_init(struct device *dev)
+ 	struct omap_mmc_platform_data *pdata = dev->platform_data;
 
-g.
+ 	/* Setting MMC1 Card detect Irq */
+-	if (pdev->id == 0)
++	if (pdev->id == 0) {
++		ret = twl6030_mmc_card_detect_config();
++		if (ret)
++			pr_err("Failed configuring MMC1 card detect\n");
+ 		pdata->slots[0].card_detect_irq = TWL6030_IRQ_BASE +
+ 						MMCDETECT_INTR_OFFSET;
++		pdata->slots[0].card_detect = twl6030_mmc_card_detect;
++	}
+ 	return ret;
+ }
+
+diff --git a/drivers/mfd/twl6030-irq.c b/drivers/mfd/twl6030-irq.c
+index 10bf228..91a6a45 100644
+--- a/drivers/mfd/twl6030-irq.c
++++ b/drivers/mfd/twl6030-irq.c
+@@ -36,6 +36,7 @@
+ #include <linux/irq.h>
+ #include <linux/kthread.h>
+ #include <linux/i2c/twl.h>
++#include <linux/platform_device.h>
+
+ /*
+  * TWL6030 (unlike its predecessors, which had two level interrupt handling)
+@@ -223,6 +224,81 @@ int twl6030_interrupt_mask(u8 bit_mask, u8 offset)
+ }
+ EXPORT_SYMBOL(twl6030_interrupt_mask);
+
++int twl6030_mmc_card_detect_config(void)
++{
++	int ret;
++	u8 reg_val = 0;
++
++	/* Unmasking the Card detect Interrupt line for MMC1 from Phoenix */
++	if (twl_class_is_6030()) {
++		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
++							REG_INT_MSK_LINE_B);
++		twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
++							REG_INT_MSK_STS_B);
++	}
++
++	/*
++	 * Intially Configuring MMC_CTRL for receving interrupts &
++	 * Card status on TWL6030 for MMC1
++	 */
++	ret = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val, TWL6030_MMCCTRL);
++	if (ret < 0) {
++		pr_err("twl6030: Failed to read MMCCTRL, error %d\n", ret);
++		return ret;
++	}
++	reg_val &= ~VMMC_AUTO_OFF;
++	reg_val |= SW_FC;
++	ret = twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, TWL6030_MMCCTRL);
++	if (ret < 0) {
++		return ret;
++		pr_err("twl6030: Failed to write MMCCTRL, error %d\n", ret);
++	}
++
++	/* Configuring PullUp-PullDown register */
++	ret = twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
++						TWL6030_CFG_INPUT_PUPD3);
++	if (ret < 0) {
++		return ret;
++		pr_err("twl6030: Failed to read CFG_INPUT_PUPD3, error %d\n",
++									ret);
++	}
++	reg_val &= ~(MMC_PU | MMC_PD);
++	ret = twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
++						TWL6030_CFG_INPUT_PUPD3);
++	if (ret < 0) {
++		pr_err("twl6030: Failed to write CFG_INPUT_PUPD3, error %d\n",
++									ret);
++		return ret;
++	}
++	return 0;
++}
++EXPORT_SYMBOL(twl6030_mmc_card_detect_config);
++
++int twl6030_mmc_card_detect(struct device *dev, int slot)
++{
++	int ret = -EIO;
++	u8 read_reg = 0;
++	struct platform_device *pdev = container_of(dev,
++					struct platform_device, dev);
++
++	switch (pdev->id) {
++	case 0:
++		/*
++		 * BIT0 of REG_MMC_CTRL
++		 * 0 - Card not present ,1 - Card present
++		 */
++		ret = twl_i2c_read_u8(TWL6030_MODULE_ID0, &read_reg,
++							TWL6030_MMCCTRL);
++		if (ret >= 0)
++			ret = read_reg & STS_MMC;
++		break;
++	default:
++		pr_err("Unkown MMC controller %d in %s\n", pdev->id, __func__);
++	}
++	return ret;
++}
++EXPORT_SYMBOL(twl6030_mmc_card_detect);
++
+ int twl6030_init_irq(int irq_num, unsigned irq_base, unsigned irq_end)
+ {
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 4a8776f..caa0163 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -466,8 +466,6 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+ 	int ret;
+
+ 	if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+-		pdata->suspend = omap_hsmmc_suspend_cdirq;
+-		pdata->resume = omap_hsmmc_resume_cdirq;
+ 		if (pdata->slots[0].cover)
+ 			pdata->slots[0].get_cover_state =
+ 					omap_hsmmc_get_cover_state;
+@@ -2203,6 +2201,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 				"Unable to grab MMC CD IRQ\n");
+ 			goto err_irq_cd;
+ 		}
++		pdata->suspend = omap_hsmmc_suspend_cdirq;
++		pdata->resume = omap_hsmmc_resume_cdirq;
+ 	}
+
+ 	omap_hsmmc_disable_irq(host);
+diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
+index 6de90bf..4c97161 100644
+--- a/include/linux/i2c/twl.h
++++ b/include/linux/i2c/twl.h
+@@ -141,6 +141,16 @@
+ #define TWL6030_CHARGER_CTRL_INT_MASK 	0x10
+ #define TWL6030_CHARGER_FAULT_INT_MASK 	0x60
+
++#define TWL6030_MMCCTRL		0xEE
++#define VMMC_AUTO_OFF			(0x1 << 3)
++#define SW_FC				(0x1 << 2)
++#define STS_MMC			0x1
++
++#define TWL6030_CFG_INPUT_PUPD3	0xF2
++#define MMC_PU				(0x1 << 3)
++#define MMC_PD				(0x1 << 2)
++
++
+
+ #define TWL4030_CLASS_ID 		0x4030
+ #define TWL6030_CLASS_ID 		0x6030
+@@ -173,6 +183,27 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg, unsigned num_bytes);
+ int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
+ int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
+
++/* Card detect Configuration for MMC1 Controller on OMAP4 */
++#ifdef(CONFIG_TWL4030_CORE)
++int twl6030_mmc_card_detect_config(void);
++#else
++static inline int twl6030_mmc_card_detect_config(void)
++{
++	pr_err("twl6030_mmc_card_detect_config not supported\n");
++	return 0;
++}
++#endif
++
++/* MMC1 Controller on OMAP4 uses Phoenix irq for Card detect */
++#if defined(CONFIG_TWL4030_CORE)
++int twl6030_mmc_card_detect(struct device *dev, int slot);
++#else
++static inline int twl6030_mmc_card_detect(struct device *dev, int slot)
++{
++	pr_err("Call back twl6030_mmc_card_detect not supported\n");
++	return -EIO;
++}
++#endif
+ /*----------------------------------------------------------------------*/
+
+ /*
+-- 
+1.7.0.4
+
