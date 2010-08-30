@@ -1,98 +1,108 @@
 From: Matt Fleming <matt@console-pimps.org>
-Subject: [PATCH v2] mmc: Add helper function to check if a card is removable
-Date: Mon, 30 Aug 2010 10:59:54 +0100
-Message-ID: <47ab65a2e5b756b73fb78efa3a238f0c1c87fa24.1283158644.git.matt@console-pimps.org>
-References: <4d1a88f196fa7e7eaf4c4a4af13d91ec81fb084e.1283003070.git.matt@console-pimps.org>
+Subject: [PATCH v2] tmio_mmc: Allow 2 byte requests in 4-bit mode
+Date: Mon, 30 Aug 2010 11:50:19 +0100
+Message-ID: <6c0f551ff67fb9f67f4b565fbe4ffdc1f4c8bc49.1283164379.git.matt@console-pimps.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arkanian.console-pimps.org ([212.110.184.194]:41359 "EHLO
+Received: from arkanian.console-pimps.org ([212.110.184.194]:55597 "EHLO
 	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754795Ab0H3J75 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2010 05:59:57 -0400
-In-Reply-To: <4d1a88f196fa7e7eaf4c4a4af13d91ec81fb084e.1283003070.git.matt@console-pimps.org>
+	by vger.kernel.org with ESMTP id S1751447Ab0H3KuV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2010 06:50:21 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, Ben Dooks <ben-linux@fluff.org>, Ben Hutchings <ben@decadent.org.uk>, Yunpeng Gao <yunpeng.gao@intel.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, Arnd Hannemann <arnd@arndnet.de>, Samuel Ortiz <sameo@linux.intel.com>, Ian Molton <ian@mnementh.co.uk>
 
-There are two checks that need to be made when determining whether a
-card is removable. A host controller may set MMC_CAP_NONREMOVABLE if the
-controller does not support removing cards (e.g. eMMC), in which case
-the card is physically non-removable. Also the 'mmc_assume_removable'
-module parameter can be configured at module load time, in which case
-the card may be logically non-removable.
+From: Yusuke Goda <yusuke.goda.sx@renesas.com>
 
-A helper function keeps the logic in one place so that code always
-checks both conditions.
+Adjust the tmio_mmc block size check to accept 2-byte requests in 4-bit
+mode if the hardware supports it.
 
+Tested with the SDHI hardware block included in sh7724.
+
+Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
 Signed-off-by: Matt Fleming <matt@console-pimps.org>
 ---
 
-Guys, it'd be good if someone could give me a Tested-by: for this patch
-just to make sure that it works as intended. Jaehoon, Kyungmin, does
-this patch work for you?
+Andrew, I've added some code to Yusuke's original patch based on
+feedback from Ian Molton saying that the original change didn't work on
+his hardware. I'd really prefer some Tested-by's and Acked-by's before
+you take this patch just so we can make sure that everybody is happy and
+that everybody's hardware still works.
 
- drivers/mmc/core/core.h  |    1 -
- drivers/mmc/core/mmc.c   |    2 +-
- drivers/mmc/core/sd.c    |    2 +-
- include/linux/mmc/host.h |    8 ++++++++
- 4 files changed, 10 insertions(+), 3 deletions(-)
+Magnus was worried that this patch would conflict with the SDHI/MMCIF
+hotplug patches from Arnd (particularly "[PATCH 1/4] tmio_mmc: Allow the
+mfd driver to specify get_cd handler") but I seem to be able to shuffle
+the patches around without any conflicts.
 
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 9d9eef5..a2ca770 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -58,7 +58,6 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr);
+ drivers/mfd/sh_mobile_sdhi.c |    6 ++++++
+ drivers/mmc/host/tmio_mmc.c  |   17 ++++++++++++-----
+ include/linux/mfd/tmio.h     |    5 +++++
+ 3 files changed, 23 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mfd/sh_mobile_sdhi.c b/drivers/mfd/sh_mobile_sdhi.c
+index 7c23630..9d43316 100644
+--- a/drivers/mfd/sh_mobile_sdhi.c
++++ b/drivers/mfd/sh_mobile_sdhi.c
+@@ -125,6 +125,12 @@ static int __init sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		mmc_data->capabilities |= p->tmio_caps;
+ 	}
  
- /* Module parameters */
- extern int use_spi_crc;
--extern int mmc_assume_removable;
- 
- /* Debugfs information for hosts and cards */
- void mmc_add_host_debugfs(struct mmc_host *host);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index dcfc921..66c4a59 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -718,7 +718,7 @@ static void mmc_attach_bus_ops(struct mmc_host *host)
- {
- 	const struct mmc_bus_ops *bus_ops;
- 
--	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
-+	if (!mmc_card_is_removable(host))
- 		bus_ops = &mmc_ops_unsafe;
- 	else
- 		bus_ops = &mmc_ops;
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 0f52410..bc745e1 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -750,7 +750,7 @@ static void mmc_sd_attach_bus_ops(struct mmc_host *host)
- {
- 	const struct mmc_bus_ops *bus_ops;
- 
--	if (host->caps & MMC_CAP_NONREMOVABLE || !mmc_assume_removable)
-+	if (!mmc_card_is_removable(host))
- 		bus_ops = &mmc_sd_ops_unsafe;
- 	else
- 		bus_ops = &mmc_sd_ops;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 09dbb90..c920cfc 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -272,5 +272,13 @@ static inline void mmc_set_disable_delay(struct mmc_host *host,
- 	host->disable_delay = disable_delay;
- }
- 
-+/* Module parameter */
-+extern int mmc_assume_removable;
++	/*
++	 * All SDHI blocks support 2-byte and larger block sizes in 4-bit
++	 * bus width mode.
++	 */
++	mmc_data->flags |= TMIO_MMC_BLKSZ_2BYTES;
 +
-+static inline int mmc_card_is_removable(struct mmc_host *host)
-+{
-+	return (!(host->caps & MMC_CAP_NONREMOVABLE) && mmc_assume_removable);
-+}
+ 	if (p && p->dma_slave_tx >= 0 && p->dma_slave_rx >= 0) {
+ 		priv->param_tx.slave_id = p->dma_slave_tx;
+ 		priv->param_rx.slave_id = p->dma_slave_rx;
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 1a47221..e7765a8 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -658,14 +658,21 @@ static void tmio_mmc_release_dma(struct tmio_mmc_host *host)
+ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
+ 	struct mmc_data *data)
+ {
++	struct mfd_cell *cell = host->pdev->dev.platform_data;
++	struct tmio_mmc_data *pdata = cell->driver_data;
 +
- #endif
+ 	pr_debug("setup data transfer: blocksize %08x  nr_blocks %d\n",
+ 		 data->blksz, data->blocks);
  
+-	/* Hardware cannot perform 1 and 2 byte requests in 4 bit mode */
+-	if (data->blksz < 4 && host->mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
+-		pr_err("%s: %d byte block unsupported in 4 bit mode\n",
+-		       mmc_hostname(host->mmc), data->blksz);
+-		return -EINVAL;
++	/* Some hardware cannot perform 2 byte requests in 4 bit mode */
++	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
++		int blksz_2bytes = pdata->flags & TMIO_MMC_BLKSZ_2BYTES;
++
++		if (data->blksz < 2 || (data->blksz < 4 && !blksz_2bytes)) {
++			pr_err("%s: %d byte block unsupported in 4 bit mode\n",
++			       mmc_hostname(host->mmc), data->blksz);
++			return -EINVAL;
++		}
+ 	}
+ 
+ 	tmio_mmc_init_sg(host, data);
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 24c43bb..085f041 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -52,6 +52,11 @@
+ 
+ /* tmio MMC platform flags */
+ #define TMIO_MMC_WRPROTECT_DISABLE	(1 << 0)
++/*
++ * Some controllers can support a 2-byte block size when the bus width
++ * is configured in 4-bit mode.
++ */
++#define TMIO_MMC_BLKSZ_2BYTES		(1 << 1)
+ 
+ int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
+ int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
 -- 
 1.7.1
 
