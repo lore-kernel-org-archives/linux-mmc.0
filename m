@@ -1,45 +1,57 @@
-From: Ryan Mallon <ryan@bluewatersys.com>
+From: =?ISO-8859-1?Q?Wolfgang_M=FCes?= <wolfgang.mues@auerswald.de>
 Subject: Re: [PATCH 1/7] mmc: at91_mci: fix pointer errors
-Date: Mon, 30 Aug 2010 19:05:09 +1200
-Message-ID: <4C7B5825.6030302@bluewatersys.com>
-References: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com> <20100827193303.GB23079@void.printf.net> <4C7AD3A0.40607@bluewatersys.com> <4C7B5601.5060505@auerswald.de>
+Date: Mon, 30 Aug 2010 08:51:37 +0200
+Message-ID: <4C7B54F9.6090200@auerswald.de>
+References: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com> <20100827193303.GB23079@void.printf.net> <20100827193457.GC23079@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.bluewatersys.com ([202.124.120.130]:27114 "EHLO
-	hayes.bluewaternz.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751291Ab0H3HFO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2010 03:05:14 -0400
-In-Reply-To: <4C7B5601.5060505@auerswald.de>
+Received: from fw2.winet.de ([84.17.96.48]:59268 "EHLO fw2.winet.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751565Ab0H3HJs convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2010 03:09:48 -0400
+Received: from mr03.winet.de (localhost [127.0.0.1])
+	by fw2.winet.de (Postfix) with ESMTP id 55C64465EBC
+	for <linux-mmc@vger.kernel.org>; Mon, 30 Aug 2010 08:51:39 +0200 (CEST)
+Received: from smtp03.winet.de (mr03.winet.de [192.168.12.13])
+	by mr03.winet.de (Postfix) with ESMTP id 0790A465EF4
+	for <linux-mmc@vger.kernel.org>; Mon, 30 Aug 2010 08:51:38 +0200 (CEST)
+Received: from mail.auerswald.de (unknown [212.185.163.229])
+	by smtp03.winet.de (Postfix) with ESMTP id AE4CA465EBC
+	for <linux-mmc@vger.kernel.org>; Mon, 30 Aug 2010 08:51:38 +0200 (CEST)
+In-Reply-To: <20100827193457.GC23079@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Wolfgang_M=FCes?= <wolfgang.mues@auerswald.de>
-Cc: Chris Ball <cjb@laptop.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, avictor.za@gmail.com, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, akpm@linux-foundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, avictor.za@gmail.com
 
-Wolfgang M=FCes wrote:
-> Hi,
->=20
-> Am 29.08.2010 23:39, schrieb Ryan Mallon:
->> I see this is already applied, but why all the type trickery here? W=
-hy
->> not just:
->>
->>     memcpy(dmabuf, sgbuffer, amount);
->>     dmabuf +=3D amount / sizeof(dmabuf);
->=20
-> Because this is wrong?
->=20
-> Maybe you mean sizeof(*dmabuf)?
+Hi,
 
-Sorry, yes.
+Am 27.08.2010 21:34, schrieb Chris Ball:
+> On Fri, Aug 27, 2010 at 08:33:03PM +0100, Chris Ball wrote:
+>> Looks like only the first half of this patch was applied?  The
+>> kunmap_atomic() line is still present as before in Linus' tree.
 
-> The exact style of the bug fix is not important, it's important that
-> it's fixed.
+It was argued that the kunmap_atomic() will truncate the pointer to the=
+=20
+start of the page anyway, so the subtraction is not needed.
 
-I disagree, it's also important that it is fixed in a clear,
-understandable way. I found the fix confusing, especially since there
-are casts to both signed and unsigned char.
+best regards
 
-~Ryan
+i. A. Wolfgang Muees
 
+Hardware-Entwicklung
+Leiter Pruefen & Layout
+--=20
+Auerswald Gesellschaft fuer Datensysteme mbH
+
+Phone: +49 5306-9219-562
+=46ax:   +49 5306-9200-94
+--------------------------------------------------------------
+Auerswald Gesellschaft fuer Datensysteme mbH,
+Vor den Grashoefen 1, 38162 Cremlingen
+
+Registriert beim AG Braunschweig HRB 7499
+Gesch=E4ftsf=FChrer: Dipl-Ing. Gerhard Auerswald
