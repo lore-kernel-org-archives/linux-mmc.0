@@ -1,73 +1,71 @@
-From: Ryan Mallon <ryan@bluewatersys.com>
-Subject: Re: [PATCH 1/7] mmc: at91_mci: fix pointer errors
-Date: Mon, 30 Aug 2010 09:39:44 +1200
-Message-ID: <4C7AD3A0.40607@bluewatersys.com>
-References: <9535dc8dfe4476a0314b9513fb9d37862faa731d.1267209149.git.nicolas.ferre@atmel.com> <20100827193303.GB23079@void.printf.net>
+From: Kyungmin Park <kyungmin.park@samsung.com>
+Subject: Re: [PATCH 2/2] sdhci: disable MMC_CAP_NEEDS_POLL in nonremovable case
+Date: Mon, 30 Aug 2010 10:06:30 +0900
+Message-ID: <AANLkTi==jmKYt+X=mP+AfHbkR3_ZVy=Ha_46WURv3Q-Q@mail.gmail.com>
+References: <4d1a88f196fa7e7eaf4c4a4af13d91ec81fb084e.1283003070.git.matt@console-pimps.org>
+	<7e892c443f11d51a30029ddfeef27af09a9a970d.1283003070.git.matt@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.bluewatersys.com ([202.124.120.130]:11161 "EHLO
-	hayes.bluewaternz.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753335Ab0H2Vjl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Aug 2010 17:39:41 -0400
-In-Reply-To: <20100827193303.GB23079@void.printf.net>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:34115 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753127Ab0H3BHA convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Aug 2010 21:07:00 -0400
+Received: by wyb35 with SMTP id 35so6181379wyb.19
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Aug 2010 18:06:59 -0700 (PDT)
+In-Reply-To: <7e892c443f11d51a30029ddfeef27af09a9a970d.1283003070.git.matt@console-pimps.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, avictor.za@gmail.com, wolfgang.mues@auerswald.de, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, Marek Szyprowski <m.szyprowski@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, Ben Dooks <ben-linux@fluff.org>, Ben Hutchings <ben@decadent.org.uk>, Yunpeng Gao <yunpeng.gao@intel.com>
 
-On 08/28/2010 07:33 AM, Chris Ball wrote:
-> Hi Andrew, Nicolas,
-> 
-> On Fri, Feb 26, 2010 at 07:39:29PM +0100, Nicolas Ferre wrote:
->> From: Wolfgang Muees <wolfgang.mues@auerswald.de>
->>
->> Fixes two pointer errors, one which leads to memory overwrites if used with
->> large chunks of data.
->>
->> Signed-off-by: Wolfgang Muees <wolfgang.mues@auerswald.de>
->> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
->> ---
->>  drivers/mmc/host/at91_mci.c |    8 +++++---
->>  1 files changed, 5 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
->> index 63924e0..6835104 100644
->> --- a/drivers/mmc/host/at91_mci.c
->> +++ b/drivers/mmc/host/at91_mci.c
->> @@ -227,11 +227,13 @@ static inline void at91_mci_sg_to_dma(struct at91mci_host *host, struct mmc_data
->>  			for (index = 0; index < (amount / 4); index++)
->>  				*dmabuf++ = swab32(sgbuffer[index]);
->>  		} else {
->> -			memcpy(dmabuf, sgbuffer, amount);
->> -			dmabuf += amount;
->> +			char *tmpv = (char *)dmabuf;
->> +			memcpy(tmpv, sgbuffer, amount);
->> +			tmpv += amount;
->> +			dmabuf = (unsigned *)tmpv;
+Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-I see this is already applied, but why all the type trickery here? Why
-not just:
-
-	memcpy(dmabuf, sgbuffer, amount);
-	dmabuf += amount / sizeof(dmabuf);
-
->>  		}
->>  
->> -		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
->> +		kunmap_atomic(((void *)sgbuffer)-sg->offset, KM_BIO_SRC_IRQ);
-
-void * arithmetic is a gcc-ism. Isn't it better to cast to char *, since
-the meaning will be a bit more clear.
-
-~Ryan
-
--- 
-Bluewater Systems Ltd - ARM Technology Solution Centre
-
-Ryan Mallon         		5 Amuri Park, 404 Barbadoes St
-ryan@bluewatersys.com         	PO Box 13 889, Christchurch 8013
-http://www.bluewatersys.com	New Zealand
-Phone: +64 3 3779127		Freecall: Australia 1800 148 751
-Fax:   +64 3 3779135			  USA 1800 261 2934
+On Sat, Aug 28, 2010 at 10:53 PM, Matt Fleming <matt@console-pimps.org>=
+ wrote:
+> From: Jaehoon Chung <jh80.chung@samsung.com>
+>
+> If controller use SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk,
+> controller need always polling detect
+>
+> In this case, always generated interrupt.Because controller checked c=
+ard status.
+> I think that is not efficiently.
+>
+> But if card is nonremovable, we need not always polling.
+> So i added the check-point which is nonremovable or not
+>
+> =A0Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+> =A0drivers/mmc/host/sdhci.c | =A0 =A05 +++--
+> =A01 files changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index f6be963..3111859 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1827,8 +1827,9 @@ int sdhci_add_host(struct sdhci_host *host)
+> =A0 =A0 =A0 =A0if (caps & SDHCI_CAN_DO_HISPD)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_SD_HIGHSPEED | =
+MMC_CAP_MMC_HIGHSPEED;
+>
+> - =A0 =A0 =A0 if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_NEEDS_POLL;
+> + =A0 =A0 =A0 if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) =
+&&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 !mmc_card_is_removable(mmc))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_=
+NEEDS_POLL;
+>
+> =A0 =A0 =A0 =A0mmc->ocr_avail =3D 0;
+> =A0 =A0 =A0 =A0if (caps & SDHCI_CAN_VDD_330)
+> --
+> 1.7.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
