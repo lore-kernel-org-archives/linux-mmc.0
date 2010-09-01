@@ -1,50 +1,61 @@
-From: Richard Zhu <r65037@freescale.com>
-Subject: [PATCH 9/9] esdhc-5 mx51: enable fsl esdhc driver
-Date: Wed, 1 Sep 2010 17:49:04 +0800
-Message-ID: <1283334544-12830-1-git-send-email-r65037@freescale.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: A serial patchs that support FSL's eSDHC
+Date: Wed, 1 Sep 2010 12:15:00 +0200
+Message-ID: <20100901101500.GE11407@pengutronix.de>
+References: <1283334305-12453-1-git-send-email-r65037@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org
-Cc: Richard Zhu <r65037@freescale.com>, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="n+lFg1Zro7sl44OB"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:59722 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752379Ab0IAKPK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2010 06:15:10 -0400
+Content-Disposition: inline
+In-Reply-To: <1283334305-12453-1-git-send-email-r65037@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Richard Zhu <r65037@freescale.com>
+Cc: linux-mmc@vger.kernel.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
 
-Enable the fsl esdhc driver on mx51 platforms
 
-Signed-off-by: Richard Zhu <r65037@freescale.com>
----
- arch/arm/configs/mx51_defconfig |    9 +++++++--
- 1 files changed, 7 insertions(+), 2 deletions(-)
+--n+lFg1Zro7sl44OB
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/arch/arm/configs/mx51_defconfig b/arch/arm/configs/mx51_defconfig
-index a665ecb..30a0d59 100644
---- a/arch/arm/configs/mx51_defconfig
-+++ b/arch/arm/configs/mx51_defconfig
-@@ -106,8 +106,13 @@ CONFIG_USB=y
- CONFIG_USB_EHCI_HCD=y
- CONFIG_USB_EHCI_MXC=y
- CONFIG_MMC=y
--CONFIG_MMC_BLOCK=m
--CONFIG_MMC_SDHCI=m
-+CONFIG_MMC_BLOCK=y
-+CONFIG_MMC_SDHCI=y
-+CONFIG_MMC_SDHCI_IO_ACCESSORS=y
-+# CONFIG_MMC_SDHCI_PLTFM is not set
-+CONFIG_MMC_SDHCI_FSL=y
-+# CONFIG_MMC_MXC is not set
-+# CONFIG_MEMSTICK is not set
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=m
- CONFIG_RTC_CLASS=y
--- 
-1.7.0
+On Wed, Sep 01, 2010 at 05:45:04PM +0800, Richard Zhu wrote:
+
+> Can you help me to review the following serial patchs, that enable the sd=
+hci=20
+> driver to support FSL's eSDHC on i.MX family.
+
+I see two major problems: First, you often modify sdhci.c to work around
+the hardware-quirks. See sdhci-of-esdhc.c how it can be handled in a
+seperate source-file and keep sdhci.c clean. (While at it, what is
+common between the of-driver and the platform-driver should be shared).
+Second, your platform-driver is a complete one, but we have a platform
+core meanwhile (sdhci-pltfm.c). Please use that.
+
+Kind regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--n+lFg1Zro7sl44OB
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkx+J6QACgkQD27XaX1/VRs0yQCff4kEjRBM8QalIq1ItVdtbsny
+am8AoL+aJckY1jhITIbGX8CMInClFvGr
+=g7aL
+-----END PGP SIGNATURE-----
+
+--n+lFg1Zro7sl44OB--
