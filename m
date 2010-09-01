@@ -1,78 +1,49 @@
-From: Roger Quadros <roger.quadros@nokia.com>
+From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 Subject: Re: [PATCH 2/3] mmc_test: change simple_strtol() to strict_strtol()
-Date: Wed, 01 Sep 2010 11:25:30 +0300
-Message-ID: <4C7E0DFA.2090403@nokia.com>
-References: <cover.1283276161.git.ext-andriy.shevchenko@nokia.com> <e144c2087fbdfd718b5caeac4eb7d0a7ce4896e0.1283276161.git.ext-andriy.shevchenko@nokia.com>
+Date: Wed, 01 Sep 2010 11:43:25 +0300
+Message-ID: <1283330605.3117.12.camel@fs-test.research.nokia.com>
+References: <cover.1283276161.git.ext-andriy.shevchenko@nokia.com>
+	 <e144c2087fbdfd718b5caeac4eb7d0a7ce4896e0.1283276161.git.ext-andriy.shevchenko@nokia.com>
+	 <4C7E0DFA.2090403@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.105.134]:34759 "EHLO
-	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751269Ab0IAIZP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2010 04:25:15 -0400
-In-Reply-To: <e144c2087fbdfd718b5caeac4eb7d0a7ce4896e0.1283276161.git.ext-andriy.shevchenko@nokia.com>
+Received: from mgw-sa02.nokia.com ([147.243.1.48]:55927 "EHLO
+	mgw-sa02.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752706Ab0IAInm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2010 04:43:42 -0400
+In-Reply-To: <4C7E0DFA.2090403@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ext Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "Hunter Adrian (Nokia-MS/Helsinki)" <adrian.hunter@nokia.com>, "Shevchenko Andriy (EXT-Teleca/Helsinki)" <ext-andriy.shevchenko@nokia.com>
+To: "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros@nokia.com>
+Cc: ext Andy Shevchenko <andy.shevchenko@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "Hunter Adrian (Nokia-MS/Helsinki)" <adrian.hunter@nokia.com>
 
-Hi,
+On Wed, 2010-09-01 at 10:25 +0200, Quadros Roger (Nokia-MS/Helsinki)
+wrote:
 
-On 09/01/2010 09:26 AM, ext Andy Shevchenko wrote:
+> No patch summary?
+Will be in next version.
 
-No patch summary?
-> Signed-off-by: Andy Shevchenko<ext-andriy.shevchenko@nokia.com>
-> ---
->   drivers/mmc/card/mmc_test.c |   12 +++++++-----
->   1 files changed, 7 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-> index 359fae9..5423ac9 100644
-> --- a/drivers/mmc/card/mmc_test.c
-> +++ b/drivers/mmc/card/mmc_test.c
-> @@ -1836,9 +1836,10 @@ static const struct mmc_test_case mmc_test_cases[] = {
->
->   static DEFINE_MUTEX(mmc_test_lock);
->
-> -static void mmc_test_run(struct mmc_test_card *test, int testcase)
-> +static void mmc_test_run(struct mmc_test_card *test, long testcase)
->   {
-> -	int i, ret;
-> +	long i;
+> > -static void mmc_test_run(struct mmc_test_card *test, int testcase)
+> > +static void mmc_test_run(struct mmc_test_card *test, long testcase)
+> >   {
+> > -	int i, ret;
+> > +	long i;
+> 
+> Why this change? isn't unsigned int sufficient for the mmc test cases?
+You are right. This certain change is redundant. I'll skip it.
 
-Why this change? isn't unsigned int sufficient for the mmc test cases?
-
-> +	int ret;
->
->   	printk(KERN_INFO "%s: Starting tests of card %s...\n",
->   		mmc_hostname(test->card->host), mmc_card_id(test->card));
-> @@ -1849,7 +1850,7 @@ static void mmc_test_run(struct mmc_test_card *test, int testcase)
->   		if (testcase&&  ((i + 1) != testcase))
->   			continue;
->
-> -		printk(KERN_INFO "%s: Test case %d. %s...\n",
-> +		printk(KERN_INFO "%s: Test case %ld. %s...\n",
->   			mmc_hostname(test->card->host), i + 1,
->   			mmc_test_cases[i].name);
->
-> @@ -1920,9 +1921,10 @@ static ssize_t mmc_test_store(struct device *dev,
->   {
->   	struct mmc_card *card = mmc_dev_to_card(dev);
->   	struct mmc_test_card *test;
-> -	int testcase;
-> +	long testcase;
->
-> -	testcase = simple_strtol(buf, NULL, 10);
-> +	if (strict_strtol(buf, 10,&testcase))
-space required                    ^ here
-
-> +		return -EINVAL;
->
->   	test = kzalloc(sizeof(struct mmc_test_card), GFP_KERNEL);
->   	if (!test)
+> > -	testcase = simple_strtol(buf, NULL, 10);
+> > +	if (strict_strtol(buf, 10,&testcase))
+> space required                    ^ here
+It's odd. I have space in my patch.
 
 
 -- 
-regards,
--roger
+With Best Regards,
+Andy Shevchenko
+
+
+
+
