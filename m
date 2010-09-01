@@ -1,32 +1,61 @@
-From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Subject: Re: [PATCH 5/9] sdhci-5:add the 32BIT_CMD_TRANS_COMBINATION quirk to
- support FSl eSDHC
-Date: Wed, 1 Sep 2010 19:52:41 +0200
-Message-ID: <AANLkTimHF4uS+ACLOKPmo86sd5Cvb77XdNB2jZNUDeU=@mail.gmail.com>
-References: <1283334494-12678-1-git-send-email-r65037@freescale.com>
+From: mike@compulab.co.il
+Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
+Date: Wed, 1 Sep 2010 21:07:38 +0300
+Message-ID: <20100901180727.GA1236@gentoodev.compulab.local>
+References: <cover.1266847842.git.david.vrabel@csr.com>
+ <20100827192248.GJ20407@void.printf.net>
+ <4C7CC480.2040903@csr.com>
+Reply-To: mike@compulab.co.il
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:37324 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751204Ab0IARwo convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2010 13:52:44 -0400
-Received: by vws3 with SMTP id 3so6681304vws.19
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Sep 2010 10:52:43 -0700 (PDT)
-In-Reply-To: <1283334494-12678-1-git-send-email-r65037@freescale.com>
+Received: from compulab.co.il ([67.18.134.219]:48131 "EHLO compulab.co.il"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754734Ab0IASHu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Sep 2010 14:07:50 -0400
+Content-Disposition: inline
+In-Reply-To: <4C7CC480.2040903@csr.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de
+To: David Vrabel <david.vrabel@csr.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com
 
-2010/9/1 Richard Zhu <r65037@freescale.com>:
-> The FSL's eSDHC have one 32bit register that combine the two
-> 16bit Transfer Mode and Command registers.
-> Add this quirk to let SW driver to support FSL's eSDHC.
+On Tue, Aug 31, 2010 at 09:59:44AM +0100, David Vrabel wrote:
+> On 27/08/2010 20:22, Chris Ball wrote:
+> > Hi David,
+> > 
+> > On Mon, Feb 22, 2010 at 02:24:17PM +0000, David Vrabel wrote:
+> >> These patches add support for SDIO cards to the omap_hsmmc driver.
+> >> Power management changes to prevent SDIO cards from being turned off
+> >> and losing all state, and card interrupts.
+> >>
+> >> I've been unable to test these exact patches as I only have an N900 for 
+> >> testing and the N900 support in mainline is incomplete.
+> >>
+> >> Changes since v1:
+> >> - (hopefully) get all cards working again by removing a second call to
+> >>   read MMCi_STAT in the interrupt handler.
+> >> - flush posted writes after enabling/disabling SDIO interrupts.
+> >> - tweak the FIXME commit on disabling FCLK to better match what really
+> >>   going on (at least I think so anyway).
+> >>
+> >> David Vrabel (2):
+> >>   mmc: omap_hsmmc: don't turn SDIO cards off when idle
+> >>   mmc: omap_hsmmc: enable SDIO card interrupts
+> > 
+> > Looks like this patchset wasn't merged.  Mike Rapoport replied with a 
+> > fix for libertas.  Would you like to resubmit it?
+> 
+> I thought Madhu had picked this up and was going to submit it.
+> 
+> Regardless of whether that is the case, I think it needs to be submitted
+> by someone who can run mainline kernels (I can't) and ideally someone
+> who can test it with SDIO cards.
 
-What happens if you do this for every SDHCI host? Is there one that
-breaks if changing the two registers are combined into single 32-bit
-write?
+I'll try to update it to the recent kernel in the next few days.
 
-Best Regards,
-Micha=B3 Miros=B3aw
+> David
+
+--
+Sincerely yours,
+Mike
