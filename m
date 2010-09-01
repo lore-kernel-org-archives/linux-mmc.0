@@ -1,49 +1,63 @@
-From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
-Subject: Re: [PATCH 2/3] mmc_test: change simple_strtol() to strict_strtol()
-Date: Wed, 01 Sep 2010 11:43:25 +0300
-Message-ID: <1283330605.3117.12.camel@fs-test.research.nokia.com>
-References: <cover.1283276161.git.ext-andriy.shevchenko@nokia.com>
-	 <e144c2087fbdfd718b5caeac4eb7d0a7ce4896e0.1283276161.git.ext-andriy.shevchenko@nokia.com>
-	 <4C7E0DFA.2090403@nokia.com>
+From: Richard Zhu <r65037@freescale.com>
+Subject: [PATCH 1/9] sdhci-1: add host's own set_power func to support the
+	controller that used it's own power mechanism
+Date: Wed, 1 Sep 2010 17:45:05 +0800
+Message-ID: <1283334305-12453-2-git-send-email-r65037@freescale.com>
+References: <1283334305-12453-1-git-send-email-r65037@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mgw-sa02.nokia.com ([147.243.1.48]:55927 "EHLO
-	mgw-sa02.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752706Ab0IAInm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2010 04:43:42 -0400
-In-Reply-To: <4C7E0DFA.2090403@nokia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1283334305-12453-1-git-send-email-r65037@freescale.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: Richard Zhu <r65037@freescale.com>, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de
 List-Id: linux-mmc@vger.kernel.org
-To: "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros@nokia.com>
-Cc: ext Andy Shevchenko <andy.shevchenko@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "Hunter Adrian (Nokia-MS/Helsinki)" <adrian.hunter@nokia.com>
 
-On Wed, 2010-09-01 at 10:25 +0200, Quadros Roger (Nokia-MS/Helsinki)
-wrote:
+FSL's eSDHC controllers don't have the STANDARD POWER register in
+the IC design, add the set_power api to support the FSL's eSDHC.
 
-> No patch summary?
-Will be in next version.
+Signed-off-by: Richard Zhu <r65037@freescale.com>
+---
+ drivers/mmc/host/sdhci.c |    5 +++++
+ drivers/mmc/host/sdhci.h |    1 +
+ 2 files changed, 6 insertions(+), 0 deletions(-)
 
-> > -static void mmc_test_run(struct mmc_test_card *test, int testcase)
-> > +static void mmc_test_run(struct mmc_test_card *test, long testcase)
-> >   {
-> > -	int i, ret;
-> > +	long i;
-> 
-> Why this change? isn't unsigned int sufficient for the mmc test cases?
-You are right. This certain change is redundant. I'll skip it.
-
-> > -	testcase = simple_strtol(buf, NULL, 10);
-> > +	if (strict_strtol(buf, 10,&testcase))
-> space required                    ^ here
-It's odd. I have space in my patch.
-
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7855121..2a93c27 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1036,6 +1036,11 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ {
+ 	u8 pwr;
+ 
++	if (host->ops->set_power) {
++		host->ops->set_power(host, power);
++		return;
++	}
++
+ 	if (power == (unsigned short)-1)
+ 		pwr = 0;
+ 	else {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 036cfae..d420b4e 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -316,6 +316,7 @@ struct sdhci_ops {
+ #endif
+ 
+ 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
++	void	(*set_power)(struct sdhci_host *host, unsigned int power);
+ 
+ 	int		(*enable_dma)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
 -- 
-With Best Regards,
-Andy Shevchenko
-
-
-
-
+1.7.0
