@@ -1,56 +1,50 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [RFC/PATCH 3/6] mmc: add general runtime PM support
-Date: Wed, 1 Sep 2010 23:08:14 +0300
-Message-ID: <AANLkTi=4U0AwLeXg=fSUViGvaCnJeXGYvJ=7pkGK+fFX@mail.gmail.com>
-References: <1281532770-27545-1-git-send-email-ohad@wizery.com>
- <1281532770-27545-4-git-send-email-ohad@wizery.com> <CE761E84DADF2947A4AF22FB8D97A4732A516CE8@shsmsx501.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:63024 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752744Ab0IAUIj convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2010 16:08:39 -0400
-In-Reply-To: <CE761E84DADF2947A4AF22FB8D97A4732A516CE8@shsmsx501.ccr.corp.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [PATCH v5 0/7] native wl1271 support on ZOOM
+Date: Thu,  2 Sep 2010 00:26:43 +0300
+Message-ID: <1283376410-9999-1-git-send-email-ohad@wizery.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-arm-kernel@lists.infradead.org, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Ido Yariv <ido@wizery.com>, Kalle Valo <kalle.valo@iki.fi>, Russell King <linux@arm.linux.org.uk>, Ohad Ben-Cohen <ohad@wizery.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Luciano Coelho <luciano.coelho@nokia.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Ido Yariv <ido@wizery.com>, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>
 
-Hi Yunpeng,
+This patchset adds wl1271 support on ZOOM2/3 boards.
 
-Sorry for the late reply (vacation..).
+Only basic support is included; MMC power manipulation part is submitted separately as Runtime PM migration.
 
-On Thu, Aug 26, 2010 at 12:42 PM, Gao, Yunpeng <yunpeng.gao@intel.com> wrote:
-> It seems the power_save callback is not implemented (Null pointer) yet for both mmc and sdio. Does it mean that the power_save callback will be implemented in future or just don't need at all? Thanks.
+Changes since v4:
+- Introduce a simple (yet safe) mechanism to pass platform-specific data to the driver, as suggested by Russell King. Currently only a single device is supported; multi-device support will be introduced only when/if required
 
-Yes, currently seems it is not needed.
-
-> But seems it doesn't provide a runtime PM example on host controller driver side. To my understanding, once the functions (mmc card or sdio devices) and mmc/sdio bus enter into rumtime suspend, it should then make the host controller enter into runtime suspend, too. Any ideas on how to achieve this? Thanks.
-
-This should already be taken care of by the PM core:
-
-When a device is suspended (e.g. our sdio/mmc card), an idle request
-is sent by the PM core to its parent device (in our case, that would
-be the host controller).
-Now, if the host controller driver has enabled runtime PM, its idle
-handler would be called so it could act upon it.
-Similarly, when the card is resumed, the PM core will first invoke its
-host controller parent's resume handler.
-
-For an (initial) reference example of enabling runtime PM in a host
-controller driver (omap_hsmmc), you can take a look at Kevin Hilman's
-pm-wip/mmc branch of:
-git://git.kernel.org/pub/scm/linux/kernel/git/khilman/linux-omap-pm.git
-
-Btw I have an updated version of this patchset - I am about to start
-testing it (will make sure your scenario works too) and then soon
-after post it here for review.
+Patches are based on 2.6.36-rc3 and tested on ZOOM3.
 
 Thanks,
-Ohad.
 
->
-> Best Regards,
-> Yunpeng Gao
+Ohad Ben-Cohen (7):
+  wireless: wl1271: make wl12xx.h common to both spi and sdio
+  wireless: wl1271: support return value for the set power func
+  wireless: wl12xx: add platform data passing support
+  wireless: wl1271: take irq info from private board data
+  wireless: wl1271: make ref_clock configurable by board
+  omap: zoom: add fixed regulator device for wlan
+  omap: zoom: add mmc3/wl1271 device support
+
+ arch/arm/mach-omap2/board-zoom-peripherals.c       |   54 ++++++++++++++++++++
+ drivers/net/wireless/Makefile                      |    2 +
+ drivers/net/wireless/wl12xx/Kconfig                |    5 ++-
+ drivers/net/wireless/wl12xx/wl1251_sdio.c          |    2 +-
+ drivers/net/wireless/wl12xx/wl1251_spi.c           |    2 +-
+ drivers/net/wireless/wl12xx/wl1271.h               |    3 +-
+ drivers/net/wireless/wl12xx/wl1271_boot.c          |    9 ++--
+ drivers/net/wireless/wl12xx/wl1271_boot.h          |    1 -
+ drivers/net/wireless/wl12xx/wl1271_io.h            |    9 ++-
+ drivers/net/wireless/wl12xx/wl1271_main.c          |    4 +-
+ drivers/net/wireless/wl12xx/wl1271_sdio.c          |   19 ++++---
+ drivers/net/wireless/wl12xx/wl1271_spi.c           |    8 ++-
+ drivers/net/wireless/wl12xx/wl12xx_platform_data.c |   31 +++++++++++
+ include/linux/spi/wl12xx.h                         |   34 ------------
+ include/linux/wl12xx.h                             |   38 ++++++++++++++
+ 15 files changed, 164 insertions(+), 57 deletions(-)
+ create mode 100644 drivers/net/wireless/wl12xx/wl12xx_platform_data.c
+ delete mode 100644 include/linux/spi/wl12xx.h
+ create mode 100644 include/linux/wl12xx.h
+
