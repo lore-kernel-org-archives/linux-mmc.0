@@ -1,122 +1,111 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v5 2/7] wireless: wl1271: support return value for the set power func
-Date: Thu,  2 Sep 2010 00:26:45 +0300
-Message-ID: <1283376410-9999-3-git-send-email-ohad@wizery.com>
+Subject: [PATCH v5 3/7] wireless: wl12xx: add platform data passing support
+Date: Thu,  2 Sep 2010 00:26:46 +0300
+Message-ID: <1283376410-9999-4-git-send-email-ohad@wizery.com>
 References: <1283376410-9999-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-bw0-f46.google.com ([209.85.214.46]:34781 "EHLO
 	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755982Ab0IAV1a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2010 17:27:30 -0400
+	with ESMTP id S1755982Ab0IAV1x (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2010 17:27:53 -0400
 In-Reply-To: <1283376410-9999-1-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-arm-kernel@lists.infradead.org, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Tony Lindgren <tony@atomide.com>, Nicolas Pitre <nico@fluxnic.net>, Ido Yariv <ido@wizery.com>, Kalle Valo <kalle.valo@iki.fi>, Russell King <linux@arm.linux.org.uk>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Make it possible for the set power method to indicate a
-success/failure return value. This is needed to support
-more complex power on/off operations such as bringing up
-(and down) sdio functions.
+Add a simple mechanism to pass platform data to the
+SDIO instances of wl12xx.
+
+This way there is no confusion over who owns the 'embedded data',
+typechecking is preserved, and no possibility for the wrong driver to
+pick up the data.
+
+Originally proposed by Russell King.
 
 Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/net/wireless/wl12xx/wl1271.h      |    2 +-
- drivers/net/wireless/wl12xx/wl1271_io.h   |    9 ++++++---
- drivers/net/wireless/wl12xx/wl1271_main.c |    4 +++-
- drivers/net/wireless/wl12xx/wl1271_sdio.c |    4 +++-
- drivers/net/wireless/wl12xx/wl1271_spi.c  |    4 +++-
- 5 files changed, 16 insertions(+), 7 deletions(-)
+ drivers/net/wireless/Makefile                      |    2 +
+ drivers/net/wireless/wl12xx/Kconfig                |    5 ++-
+ drivers/net/wireless/wl12xx/wl12xx_platform_data.c |   31 ++++++++++++++++++++
+ include/linux/wl12xx.h                             |    3 ++
+ 4 files changed, 40 insertions(+), 1 deletions(-)
+ create mode 100644 drivers/net/wireless/wl12xx/wl12xx_platform_data.c
 
-diff --git a/drivers/net/wireless/wl12xx/wl1271.h b/drivers/net/wireless/wl12xx/wl1271.h
-index dd3cee6..faa5925 100644
---- a/drivers/net/wireless/wl12xx/wl1271.h
-+++ b/drivers/net/wireless/wl12xx/wl1271.h
-@@ -313,7 +313,7 @@ struct wl1271_if_operations {
- 		     bool fixed);
- 	void (*reset)(struct wl1271 *wl);
- 	void (*init)(struct wl1271 *wl);
--	void (*power)(struct wl1271 *wl, bool enable);
-+	int (*power)(struct wl1271 *wl, bool enable);
- 	struct device* (*dev)(struct wl1271 *wl);
- 	void (*enable_irq)(struct wl1271 *wl);
- 	void (*disable_irq)(struct wl1271 *wl);
-diff --git a/drivers/net/wireless/wl12xx/wl1271_io.h b/drivers/net/wireless/wl12xx/wl1271_io.h
-index bc806c7..c1f92e6 100644
---- a/drivers/net/wireless/wl12xx/wl1271_io.h
-+++ b/drivers/net/wireless/wl12xx/wl1271_io.h
-@@ -144,10 +144,13 @@ static inline void wl1271_power_off(struct wl1271 *wl)
- 	clear_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
- }
+diff --git a/drivers/net/wireless/Makefile b/drivers/net/wireless/Makefile
+index 5d4ce4d..85af697 100644
+--- a/drivers/net/wireless/Makefile
++++ b/drivers/net/wireless/Makefile
+@@ -50,5 +50,7 @@ obj-$(CONFIG_ATH_COMMON)	+= ath/
+ obj-$(CONFIG_MAC80211_HWSIM)	+= mac80211_hwsim.o
  
--static inline void wl1271_power_on(struct wl1271 *wl)
-+static inline int wl1271_power_on(struct wl1271 *wl)
- {
--	wl->if_ops->power(wl, true);
--	set_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
-+	int ret = wl->if_ops->power(wl, true);
-+	if (ret == 0)
-+		set_bit(WL1271_FLAG_GPIO_POWER, &wl->flags);
+ obj-$(CONFIG_WL12XX)	+= wl12xx/
++# small builtin driver bit
++obj-$(CONFIG_WL12XX_PLATFORM_DATA)	+= wl12xx/wl12xx_platform_data.o
+ 
+ obj-$(CONFIG_IWM)	+= iwmc3200wifi/
+diff --git a/drivers/net/wireless/wl12xx/Kconfig b/drivers/net/wireless/wl12xx/Kconfig
+index 2f98058..4a8bb25 100644
+--- a/drivers/net/wireless/wl12xx/Kconfig
++++ b/drivers/net/wireless/wl12xx/Kconfig
+@@ -74,4 +74,7 @@ config WL1271_SDIO
+ 	  If you choose to build a module, it'll be called
+ 	  wl1271_sdio. Say N if unsure.
+ 
+-
++config WL12XX_PLATFORM_DATA
++	bool
++	depends on WL1271_SDIO != n
++	default y
+diff --git a/drivers/net/wireless/wl12xx/wl12xx_platform_data.c b/drivers/net/wireless/wl12xx/wl12xx_platform_data.c
+new file mode 100644
+index 0000000..e00973b
+--- /dev/null
++++ b/drivers/net/wireless/wl12xx/wl12xx_platform_data.c
+@@ -0,0 +1,31 @@
++#include <linux/module.h>
++#include <linux/wl12xx.h>
 +
-+	return ret;
- }
- 
- 
-diff --git a/drivers/net/wireless/wl12xx/wl1271_main.c b/drivers/net/wireless/wl12xx/wl1271_main.c
-index 9d68f00..e6e0852 100644
---- a/drivers/net/wireless/wl12xx/wl1271_main.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_main.c
-@@ -621,7 +621,9 @@ static int wl1271_chip_wakeup(struct wl1271 *wl)
- 	int ret = 0;
- 
- 	msleep(WL1271_PRE_POWER_ON_SLEEP);
--	wl1271_power_on(wl);
-+	ret = wl1271_power_on(wl);
-+	if (ret < 0)
-+		goto out;
- 	msleep(WL1271_POWER_ON_SLEEP);
- 	wl1271_io_reset(wl);
- 	wl1271_io_init(wl);
-diff --git a/drivers/net/wireless/wl12xx/wl1271_sdio.c b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-index 7059b5c..c41293a 100644
---- a/drivers/net/wireless/wl12xx/wl1271_sdio.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-@@ -152,7 +152,7 @@ static void wl1271_sdio_raw_write(struct wl1271 *wl, int addr, void *buf,
- 
- }
- 
--static void wl1271_sdio_set_power(struct wl1271 *wl, bool enable)
-+static int wl1271_sdio_set_power(struct wl1271 *wl, bool enable)
- {
- 	struct sdio_func *func = wl_to_func(wl);
- 
-@@ -167,6 +167,8 @@ static void wl1271_sdio_set_power(struct wl1271 *wl, bool enable)
- 		sdio_disable_func(func);
- 		sdio_release_host(func);
- 	}
++static struct wl12xx_platform_data *platform_data;
++
++int __init wl12xx_set_platform_data(const struct wl12xx_platform_data *data)
++{
++	if (platform_data)
++		return -EBUSY;
++	if (!data)
++		return -EINVAL;
++
++	platform_data = kmemdup(data, sizeof(*data), GFP_KERNEL);
++	if (!platform_data)
++		return -ENOMEM;
 +
 +	return 0;
- }
- 
- static struct wl1271_if_operations sdio_ops = {
-diff --git a/drivers/net/wireless/wl12xx/wl1271_spi.c b/drivers/net/wireless/wl12xx/wl1271_spi.c
-index c3fdab7..de56d8d 100644
---- a/drivers/net/wireless/wl12xx/wl1271_spi.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_spi.c
-@@ -312,10 +312,12 @@ static irqreturn_t wl1271_irq(int irq, void *cookie)
- 	return IRQ_HANDLED;
- }
- 
--static void wl1271_spi_set_power(struct wl1271 *wl, bool enable)
-+static int wl1271_spi_set_power(struct wl1271 *wl, bool enable)
- {
- 	if (wl->set_power)
- 		wl->set_power(enable);
++}
++
++int wl12xx_get_platform_data(struct wl12xx_platform_data *data)
++{
++	if (!platform_data)
++		return -ENODEV;
++	if (!data)
++		return -EINVAL;
++
++	memcpy(data, platform_data, sizeof(*data));
 +
 +	return 0;
- }
++}
++EXPORT_SYMBOL(wl12xx_get_platform_data);
+diff --git a/include/linux/wl12xx.h b/include/linux/wl12xx.h
+index 137ac89..3e33ae1 100644
+--- a/include/linux/wl12xx.h
++++ b/include/linux/wl12xx.h
+@@ -31,4 +31,7 @@ struct wl12xx_platform_data {
+ 	bool use_eeprom;
+ };
  
- static struct wl1271_if_operations spi_ops = {
++int wl12xx_set_platform_data(const struct wl12xx_platform_data *data);
++int wl12xx_get_platform_data(struct wl12xx_platform_data *data);
++
+ #endif
 -- 
 1.7.0.4
 
