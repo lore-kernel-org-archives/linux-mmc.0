@@ -1,39 +1,54 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: MMC patches in-flight.
-Date: Thu, 2 Sep 2010 06:50:23 +0100
-Message-ID: <20100902055023.GA6733@console-pimps.org>
-References: <m3tym9xbwx.fsf@pullcord.laptop.org>
+From: Mike Rapoport <mike@compulab.co.il>
+Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
+Date: Thu, 02 Sep 2010 09:02:55 +0300
+Message-ID: <4C7F3E0F.2080402@compulab.co.il>
+References: <cover.1266847842.git.david.vrabel@csr.com> <20100827192248.GJ20407@void.printf.net> <4C7CC480.2040903@csr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arkanian.console-pimps.org ([212.110.184.194]:38983 "EHLO
-	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753026Ab0IBFu0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Sep 2010 01:50:26 -0400
-Content-Disposition: inline
-In-Reply-To: <m3tym9xbwx.fsf@pullcord.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <4C7CC480.2040903@csr.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: David Vrabel <david.vrabel@csr.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com, Mike Rapoport <mike@compulab.co.il>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 
-On Wed, Sep 01, 2010 at 07:49:02PM -0400, Chris Ball wrote:
-> Hi,
+David Vrabel wrote:
+> On 27/08/2010 20:22, Chris Ball wrote:
+>> Hi David,
+>>
+>> On Mon, Feb 22, 2010 at 02:24:17PM +0000, David Vrabel wrote:
+>>> These patches add support for SDIO cards to the omap_hsmmc driver.
+>>> Power management changes to prevent SDIO cards from being turned off
+>>> and losing all state, and card interrupts.
+>>>
+>>> I've been unable to test these exact patches as I only have an N900 for 
+>>> testing and the N900 support in mainline is incomplete.
+>>>
+>>> Changes since v1:
+>>> - (hopefully) get all cards working again by removing a second call to
+>>>   read MMCi_STAT in the interrupt handler.
+>>> - flush posted writes after enabling/disabling SDIO interrupts.
+>>> - tweak the FIXME commit on disabling FCLK to better match what really
+>>>   going on (at least I think so anyway).
+>>>
+>>> David Vrabel (2):
+>>>   mmc: omap_hsmmc: don't turn SDIO cards off when idle
+>>>   mmc: omap_hsmmc: enable SDIO card interrupts
+>> Looks like this patchset wasn't merged.  Mike Rapoport replied with a 
+>> fix for libertas.  Would you like to resubmit it?
 > 
-> Here's an attempt to summarize the state of MMC patches submitted to
-> linux-mmc@ that haven't been merged.  Feel free to correct anything,
-> especially if you have a patch that you think is waiting to be merged
-> that I've listed without "->", or that I haven't listed at all.
-> Please also consider reviewing any patches in the "review" state.
-> Thanks!
+> I thought Madhu had picked this up and was going to submit it.
 > 
-> Patch author   | Patch subject                                | Next step
+> Regardless of whether that is the case, I think it needs to be submitted
+> by someone who can run mainline kernels (I can't) and ideally someone
+> who can test it with SDIO cards.
 
-[...]
+I'll try to update the patches in the next few days.
 
-> Yusuke Goda    | tmio_mmc: Revise a limit of the data size    | resubmit
+> David
 
-This patch is actually now called,
 
-"[PATCH v2] tmio_mmc: Allow 2 byte requests in 4-bit mode" and it's in
-the testing phase.
+-- 
+Sincerely yours,
+Mike.
