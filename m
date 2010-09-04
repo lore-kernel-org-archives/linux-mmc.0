@@ -1,39 +1,40 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: my custom SDIO card can be detected in 2.6.30 but not in 2.6.18
-Date: Sat, 04 Sep 2010 01:51:44 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1009040144450.19366@xanadu.home>
-References: <570932.54015.qm@web57905.mail.re3.yahoo.com>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] MMC: move regulator handling closer to core v2
+Date: Sat, 04 Sep 2010 09:10:23 +0300
+Message-ID: <4C81E2CF.8070406@nokia.com>
+References: <1283268367-3525-1-git-send-email-linus.walleij@stericsson.com> <AANLkTik-uLMUz2g2znaF0K43D8CONsGdjrRqxTCqpS_X@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:45859 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751868Ab0IDFvp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Sep 2010 01:51:45 -0400
-Received: from xanadu.home ([66.130.28.92]) by VL-MR-MRZ20.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0L8700ID6KA4EKO1@VL-MR-MRZ20.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Sat, 04 Sep 2010 01:51:40 -0400 (EDT)
-In-reply-to: <570932.54015.qm@web57905.mail.re3.yahoo.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <AANLkTik-uLMUz2g2znaF0K43D8CONsGdjrRqxTCqpS_X@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Liam Girdwood <lrg@slimlogic.co.uk>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Tony Lindgren <tony@atomide.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Sundar Iyer <sundar.iyer@stericsson.com>, Daniel Mack <daniel@caiaq.de>, Pierre Ossman <pierre@ossman.eu>, Matt Fleming <matt@console-pimps.org>, David Brownell <dbrownell@users.sourceforge.net>, Russell King <rmk+kernel@arm.linux.org.uk>, Eric Miao <eric.y.miao@gmail.com>, Cliff Brake <cbrake@bec-systems.com>, "Lavinen Jarkko (Nokia-MS/Helsinki)" <jarkko.lavinen@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: hong zhang <henryzhang62@yahoo.com>
-Cc: linux-mmc@vger.kernel.org
 
-On Fri, 3 Sep 2010, hong zhang wrote:
-
-> List,
+Linus Walleij wrote:
+> 2010/8/31 Linus Walleij <linus.walleij@stericsson.com>:
 > 
-> My redpine wifi chip based custom SDIO card be detected in 2.6.30 but not in 2.6.18.
+>> After discovering a problem in regulator reference counting I
+>> took Mark Brown's advice to move the reference count into the
+>> MMC core by making the regulator status a member of
+>> struct mmc_host.
+> 
+> This has an Reveiwed-by from the regulator maintainer and
+> seems to address all comments, noone is objection so Andrew
+> can you pick it up?
 
-Just use 2.6.30 then.
+One of our contractors had a look at the patch and had this comment:
 
-If you want free help from people here, you should at least consider 
-using a kernel version that isn't absurdly old.
+One comment/question:
+/host/mmci.c in function
+"static int __devexit mmci_remove(struct amba_device *dev)" there is code:
+         if (regulator_is_enabled(host->vcc))
+             regulator_disable(host->vcc);
+should "ret = mmc_regulator_set_ocr(mmc, host->vcc, 0);" be added here?
 
-If you're stuck with 2.6.18 because that's what your vendor provided to 
-you, then please go to them for support.
-
-
-Nicolas
+> 
+> Yours,
+> Linus Walleij
+> 
