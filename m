@@ -1,131 +1,174 @@
-From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v5 3/7] wireless: wl12xx: add platform data passing support
-Date: Sat, 4 Sep 2010 14:23:19 +0200
-Message-ID: <AANLkTi=goLEUqM1XQ__PrGu4=Erw2utaNP4qFmSgRta2@mail.gmail.com>
-References: <1283376410-9999-1-git-send-email-ohad@wizery.com>
-	<1283376410-9999-4-git-send-email-ohad@wizery.com>
+From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
+	<u.kleine-koenig@pengutronix.de>
+Subject: Re: [PATCH 6/9] esdhc-2 mxc: Modify the MSL codes when upstreaming
+	fsl esdhc driver
+Date: Sat, 4 Sep 2010 21:02:30 +0200
+Message-ID: <20100904190230.GA30544@pengutronix.de>
+References: <1283334506-12721-1-git-send-email-r65037@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1283376410-9999-4-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:58395 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751960Ab0IDTCh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Sep 2010 15:02:37 -0400
+Content-Disposition: inline
+In-Reply-To: <1283334506-12721-1-git-send-email-r65037@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Richard Zhu <r65037@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de
 
-2010/9/1 Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>:
-> Add a simple mechanism to pass platform data to the
-> SDIO instances of wl12xx.
->
-> This way there is no confusion over who owns the 'embedded data',
-> typechecking is preserved, and no possibility for the wrong driver to
-> pick up the data.
->
-> Originally proposed by Russell King.
->
-> Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Hello Richard,
+
+On Wed, Sep 01, 2010 at 05:48:26PM +0800, Richard Zhu wrote:
+> Modify the plat-mxc related MSL codes.
+The question might be stupid, but what is MSL?
+
+Note I havn't looked deeper into the mx51 iomuxer, but still I'd like t=
+o
+understand your commit without reading the reference manual.  And it
+looks wrong to me that you add/change iomux stuff and extend struct
+imxmmc_platform_data in one commit.
+
+> Signed-off-by: Richard Zhu <r65037@freescale.com>
 > ---
-> =A0drivers/net/wireless/Makefile =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0| =A0 =A02 +
-> =A0drivers/net/wireless/wl12xx/Kconfig =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-| =A0 =A05 ++-
-> =A0drivers/net/wireless/wl12xx/wl12xx_platform_data.c | =A0 31 ++++++=
-++++++++++++++
-> =A0include/linux/wl12xx.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 | =A0 =A03 ++
-> =A04 files changed, 40 insertions(+), 1 deletions(-)
-> =A0create mode 100644 drivers/net/wireless/wl12xx/wl12xx_platform_dat=
-a.c
->
-> diff --git a/drivers/net/wireless/Makefile b/drivers/net/wireless/Mak=
-efile
-> index 5d4ce4d..85af697 100644
-> --- a/drivers/net/wireless/Makefile
-> +++ b/drivers/net/wireless/Makefile
-> @@ -50,5 +50,7 @@ obj-$(CONFIG_ATH_COMMON) =A0 =A0 =A0+=3D ath/
-> =A0obj-$(CONFIG_MAC80211_HWSIM) =A0 +=3D mac80211_hwsim.o
->
-> =A0obj-$(CONFIG_WL12XX) =A0 +=3D wl12xx/
-> +# small builtin driver bit
-> +obj-$(CONFIG_WL12XX_PLATFORM_DATA) =A0 =A0 +=3D wl12xx/wl12xx_platfo=
-rm_data.o
->
-> =A0obj-$(CONFIG_IWM) =A0 =A0 =A0+=3D iwmc3200wifi/
-> diff --git a/drivers/net/wireless/wl12xx/Kconfig b/drivers/net/wirele=
-ss/wl12xx/Kconfig
-> index 2f98058..4a8bb25 100644
-> --- a/drivers/net/wireless/wl12xx/Kconfig
-> +++ b/drivers/net/wireless/wl12xx/Kconfig
-> @@ -74,4 +74,7 @@ config WL1271_SDIO
-> =A0 =A0 =A0 =A0 =A0If you choose to build a module, it'll be called
-> =A0 =A0 =A0 =A0 =A0wl1271_sdio. Say N if unsure.
->
-> -
-> +config WL12XX_PLATFORM_DATA
-> + =A0 =A0 =A0 bool
-> + =A0 =A0 =A0 depends on WL1271_SDIO !=3D n
-> + =A0 =A0 =A0 default y
-> diff --git a/drivers/net/wireless/wl12xx/wl12xx_platform_data.c b/dri=
-vers/net/wireless/wl12xx/wl12xx_platform_data.c
-> new file mode 100644
-> index 0000000..e00973b
-> --- /dev/null
-> +++ b/drivers/net/wireless/wl12xx/wl12xx_platform_data.c
-> @@ -0,0 +1,31 @@
-> +#include <linux/module.h>
-> +#include <linux/wl12xx.h>
-> +
-> +static struct wl12xx_platform_data *platform_data;
-> +
-> +int __init wl12xx_set_platform_data(const struct wl12xx_platform_dat=
-a *data)
-> +{
-> + =A0 =A0 =A0 if (platform_data)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EBUSY;
-> + =A0 =A0 =A0 if (!data)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EINVAL;
-> +
-> + =A0 =A0 =A0 platform_data =3D kmemdup(data, sizeof(*data), GFP_KERN=
-EL);
-> + =A0 =A0 =A0 if (!platform_data)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENOMEM;
-> +
-> + =A0 =A0 =A0 return 0;
-> +}
-> +
-> +int wl12xx_get_platform_data(struct wl12xx_platform_data *data)
-> +{
-> + =A0 =A0 =A0 if (!platform_data)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENODEV;
-> + =A0 =A0 =A0 if (!data)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EINVAL;
-> +
-> + =A0 =A0 =A0 memcpy(data, platform_data, sizeof(*data));
-> +
-> + =A0 =A0 =A0 return 0;
-> +}
-> +EXPORT_SYMBOL(wl12xx_get_platform_data);
-> diff --git a/include/linux/wl12xx.h b/include/linux/wl12xx.h
-> index 137ac89..3e33ae1 100644
-> --- a/include/linux/wl12xx.h
-> +++ b/include/linux/wl12xx.h
-> @@ -31,4 +31,7 @@ struct wl12xx_platform_data {
-> =A0 =A0 =A0 =A0bool use_eeprom;
-> =A0};
->
-> +int wl12xx_set_platform_data(const struct wl12xx_platform_data *data=
-);
-> +int wl12xx_get_platform_data(struct wl12xx_platform_data *data);
-> +
-> =A0#endif
+>  arch/arm/plat-mxc/include/mach/iomux-mx51.h |   31 ++++++++++++++---=
+---------
+>  arch/arm/plat-mxc/include/mach/mmc.h        |    9 +++++++
+>  2 files changed, 26 insertions(+), 14 deletions(-)
+>=20
+> diff --git a/arch/arm/plat-mxc/include/mach/iomux-mx51.h b/arch/arm/p=
+lat-mxc/include/mach/iomux-mx51.h
+> index 21bfa46..325b78b 100644
+> --- a/arch/arm/plat-mxc/include/mach/iomux-mx51.h
+> +++ b/arch/arm/plat-mxc/include/mach/iomux-mx51.h
+> @@ -45,6 +45,9 @@ typedef enum iomux_config {
+>  				PAD_CTL_PKE | PAD_CTL_HYS)
+>  #define MX51_GPIO_PAD_CTRL		(PAD_CTL_DSE_HIGH | PAD_CTL_PKE | \
+>  				PAD_CTL_SRE_FAST)
+> +#define MX51_SDHCI_PAD_CTRL 	PAD_CTL_DSE_HIGH | PAD_CTL_PUS_47K_UP |=
+ \
+> +				PAD_CTL_PKE | PAD_CTL_PUE | PAD_CTL_SRE_FAST | \
+> +				PAD_CTL_DVS
+missing parenthesis
+> =20
+>  /*
+>   * The naming convention for the pad modes is MX51_PAD_<padname>__<p=
+admode>
+> @@ -294,20 +297,20 @@ typedef enum iomux_config {
+>  #define MX51_PAD_DISP2_DAT13__DISP2_DAT13       IOMUX_PAD(0x790, 0x3=
+88, 0, 0x0,   0, NO_PAD_CTRL)
+>  #define MX51_PAD_DISP2_DAT14__DISP2_DAT14       IOMUX_PAD(0x794, 0x3=
+8C, 0, 0x0,   0, NO_PAD_CTRL)
+>  #define MX51_PAD_DISP2_DAT15__DISP2_DAT15       IOMUX_PAD(0x798, 0x3=
+90, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD1_CMD__SD1_CMD               IOMUX_PAD(0x79C, 0x3=
+94, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD1_CLK__SD1_CLK               IOMUX_PAD(0x7A0, 0x3=
+98, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD1_DATA0__SD1_DATA0           IOMUX_PAD(0x7A4, 0x3=
+9C, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD1_DATA1__SD1_DATA1           IOMUX_PAD(0x7A8, 0x3=
+A0, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD1_DATA2__SD1_DATA2           IOMUX_PAD(0x7AC, 0x3=
+A4, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD1_DATA3__SD1_DATA3           IOMUX_PAD(0x7B0, 0x3=
+A8, 0, 0x0,   0, NO_PAD_CTRL)
+> +#define MX51_PAD_SD1_CMD__SD1_CMD	IOMUX_PAD(0x79C, 0x394, IOMUX_CONF=
+IG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+> +#define MX51_PAD_SD1_CLK__SD1_CLK	IOMUX_PAD(0x7A0, 0x398, IOMUX_CONF=
+IG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS)
+wrong indention.  Changing space to tab is OK, but the values should
+still be aligned.
 
-Why do you need all that copying? Isn't the data constant?
+> +#define MX51_PAD_SD1_DATA0__SD1_DATA0	IOMUX_PAD(0x7A4, 0x39C, IOMUX_=
+CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+> +#define MX51_PAD_SD1_DATA1__SD1_DATA1	IOMUX_PAD(0x7A8, 0x3A0, IOMUX_=
+CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+> +#define MX51_PAD_SD1_DATA2__SD1_DATA2	IOMUX_PAD(0x7AC, 0x3A4, IOMUX_=
+CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+> +#define MX51_PAD_SD1_DATA3__SD1_DATA3	IOMUX_PAD(0x7B0, 0x3A8, IOMUX_=
+CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+>  #define MX51_PAD_GPIO_1_0__GPIO_1_0		IOMUX_PAD(0x7B4, 0x3AC, 1, 0x0,=
+   0, NO_PAD_CTRL)
+> -#define MX51_PAD_GPIO_1_1__GPIO_1_1		IOMUX_PAD(0x7B8, 0x3B0, 1, 0x0,=
+   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD2_CMD__SD2_CMD               IOMUX_PAD(0x7BC, 0x3=
+B4, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD2_CLK__SD2_CLK               IOMUX_PAD(0x7C0, 0x3=
+B8, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD2_DATA0__SD2_DATA0           IOMUX_PAD(0x7C4, 0x3=
+BC, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD2_DATA1__SD2_DATA1           IOMUX_PAD(0x7C8, 0x3=
+C0, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD2_DATA2__SD2_DATA2           IOMUX_PAD(0x7CC, 0x3=
+C4, 0, 0x0,   0, NO_PAD_CTRL)
+> -#define MX51_PAD_SD2_DATA3__SD2_DATA3           IOMUX_PAD(0x7D0, 0x3=
+C8, 0, 0x0,   0, NO_PAD_CTRL)
+> +#define MX51_PAD_GPIO_1_1__GPIO_1_1	IOMUX_PAD(0x7B8, 0x3B0, IOMUX_CO=
+NFIG_GPIO, 0x0, 0, MX51_GPIO_PAD_CTRL)
+> +#define MX51_PAD_SD2_CMD__SD2_CMD	IOMUX_PAD(0x7BC, 0x3B4, IOMUX_CONF=
+IG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+> +#define MX51_PAD_SD2_CLK__SD2_CLK	IOMUX_PAD(0x7C0, 0x3B8, IOMUX_CONF=
+IG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS)
+> +#define MX51_PAD_SD2_DATA0__SD2_DATA0	IOMUX_PAD(0x7C4, 0x3BC, IOMUX_=
+CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+> +#define MX51_PAD_SD2_DATA1__SD2_DATA1	IOMUX_PAD(0x7C8, 0x3C0, IOMUX_=
+CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+> +#define MX51_PAD_SD2_DATA2__SD2_DATA2	IOMUX_PAD(0x7CC, 0x3C4, IOMUX_=
+CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+> +#define MX51_PAD_SD2_DATA3__SD2_DATA3	IOMUX_PAD(0x7D0, 0x3C8, IOMUX_=
+CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+>  #define MX51_PAD_GPIO_1_2__GPIO_1_2		IOMUX_PAD(0x7D4, 0x3CC, 0, 0x0,=
+   0, NO_PAD_CTRL)
+>  #define MX51_PAD_GPIO_1_2__I2C2_SCL		IOMUX_PAD(0x7D4, 0x3CC, (2 | IO=
+MUX_CONFIG_SION), \
+>  							0x9b8,   3, MX51_I2C_PAD_CTRL)
+> @@ -316,7 +319,7 @@ typedef enum iomux_config {
+>  							0x9bc,   3, MX51_I2C_PAD_CTRL)
+>  #define MX51_PAD_PMIC_INT_REQ__PMIC_INT_REQ	IOMUX_PAD(0x7FC, 0x3D4, =
+0, 0x0,   0, NO_PAD_CTRL)
+>  #define MX51_PAD_GPIO_1_4__GPIO_1_4		IOMUX_PAD(0x804, 0x3D8, 0, 0x0,=
+   0, NO_PAD_CTRL)
+> -#define MX51_PAD_GPIO_1_5__GPIO_1_5		IOMUX_PAD(0x808, 0x3DC, 0, 0x0,=
+   0, NO_PAD_CTRL)
+> +#define MX51_PAD_GPIO_1_5__GPIO_1_5		IOMUX_PAD(0x808, 0x3DC, IOMUX_C=
+ONFIG_GPIO, 0x0, 0, MX51_GPIO_PAD_CTRL)
+>  #define MX51_PAD_GPIO_1_6__GPIO_1_6		IOMUX_PAD(0x80C, 0x3E0, 0, 0x0,=
+   0, MX51_GPIO_PAD_CTRL)
+>  #define MX51_PAD_GPIO_1_7__GPIO_1_7		IOMUX_PAD(0x810, 0x3E4, 0, 0x0,=
+   0, MX51_GPIO_PAD_CTRL)
+>  #define MX51_PAD_GPIO_1_8__GPIO_1_8		IOMUX_PAD(0x814, 0x3E8, 0, 0x0,=
+   1, MX51_GPIO_PAD_CTRL)
+> diff --git a/arch/arm/plat-mxc/include/mach/mmc.h b/arch/arm/plat-mxc=
+/include/mach/mmc.h
+> index 29115f4..19badbe 100644
+> --- a/arch/arm/plat-mxc/include/mach/mmc.h
+> +++ b/arch/arm/plat-mxc/include/mach/mmc.h
+> @@ -34,6 +34,15 @@ struct imxmmc_platform_data {
+> =20
+>  	/* enable card detect using DAT3 */
+>  	int dat3_card_detect;
+> +
+> +	/* Bus width capabilities, DDR mode and so on*/
+> +	unsigned int caps;
+> +	/* Min clk frequency the eSDHC can be supported */
+> +	unsigned int min_clk;
+> +	/* Max clk frequency the eSDHC can be supported */
+> +	unsigned int max_clk;
+> +	/* Write protected or not, 1:protected.*/
+> +	int (*wp_status) (struct device *);
+>  };
+> =20
+>  #endif
 
-Best Regards,
-Micha=B3 Miros=B3aw
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireles=
-s" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig        =
+    |
+Industrial Linux Solutions                 | http://www.pengutronix.de/=
+  |
