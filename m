@@ -1,38 +1,28 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH] MMC: move regulator handling closer to core v2
-Date: Sun, 5 Sep 2010 11:05:33 +0200
-Message-ID: <AANLkTi=n=h=00QM-Tgy_3E425f+ZeTEkF=mfnUpt1+vS@mail.gmail.com>
-References: <1283268367-3525-1-git-send-email-linus.walleij@stericsson.com>
-	<AANLkTik-uLMUz2g2znaF0K43D8CONsGdjrRqxTCqpS_X@mail.gmail.com>
-	<4C81E2CF.8070406@nokia.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH v2] tmio_mmc: Allow 2 byte requests in 4-bit mode
+Date: Sun, 5 Sep 2010 21:08:02 +0100
+Message-ID: <20100905200802.GA15420@console-pimps.org>
+References: <6c0f551ff67fb9f67f4b565fbe4ffdc1f4c8bc49.1283164379.git.matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4C81E2CF.8070406@nokia.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Liam Girdwood <lrg@slimlogic.co.uk>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Tony Lindgren <tony@atomide.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Sundar Iyer <sundar.iyer@stericsson.com>, Daniel Mack <daniel@caiaq.de>, Pierre Ossman <pierre@ossman.eu>, Matt Fleming <matt@console-pimps.org>, David Brownell <dbrownell@users.sourceforge.net>, Russell King <rmk+kernel@arm.linux.org.uk>, Eric Miao <eric.y.miao@gmail.com>, Cliff Brake <cbrake@bec-systems.com>, "Lavinen Jarkko (Nokia-MS/Helsinki)" <jarkko.lavinen@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:35800 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754344Ab0IEUIF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Sep 2010 16:08:05 -0400
+Content-Disposition: inline
+In-Reply-To: <6c0f551ff67fb9f67f4b565fbe4ffdc1f4c8bc49.1283164379.git.matt@console-pimps.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ian Molton <ian@mnementh.co.uk>
+Cc: linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, Arnd Hannemann <arnd@arndnet.de>, Samuel Ortiz <sameo@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>
 
-2010/9/4 Adrian Hunter <adrian.hunter@nokia.com>:
+On Mon, Aug 30, 2010 at 11:50:19AM +0100, Matt Fleming wrote:
+> From: Yusuke Goda <yusuke.goda.sx@renesas.com>
+> 
+> Adjust the tmio_mmc block size check to accept 2-byte requests in 4-bit
+> mode if the hardware supports it.
+> 
+> Tested with the SDHI hardware block included in sh7724.
 
-> One of our contractors had a look at the patch and had this comment:
->
-> One comment/question:
-> /host/mmci.c in function
-> "static int __devexit mmci_remove(struct amba_device *dev)" there is =
-code:
-> =A0 =A0 =A0 =A0if (regulator_is_enabled(host->vcc))
-> =A0 =A0 =A0 =A0 =A0 =A0regulator_disable(host->vcc);
-> should "ret =3D mmc_regulator_set_ocr(mmc, host->vcc, 0);" be added h=
-ere?
-
-Good catch!
-
-Since it's in the remove() we can't do much about the return value from=
- that
-call but we should sure use the _set_ocr() so fixed it and pushed v3.
-
-Yours,
-Linus Walleij
+Ian, have you had a chance to test this yet?
