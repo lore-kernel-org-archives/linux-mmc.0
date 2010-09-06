@@ -1,108 +1,144 @@
-From: Kyungmin Park <kyungmin.park@samsung.com>
-Subject: Re: [RFC] thoughts about recent Samsung related patches
-Date: Mon, 6 Sep 2010 20:16:49 +0900
-Message-ID: <AANLkTikoC35Rg52jJ5NMwvtMh9PfxgS7RqtfvfBeD6LV@mail.gmail.com>
-References: <20100906110059.GC2617@pengutronix.de>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH v5 3/7] wireless: wl12xx: add platform data passing support
+Date: Mon, 6 Sep 2010 14:55:55 +0300
+Message-ID: <AANLkTim91620+bmHWewucX5tP8Z-NUkrW2cJYJ+jpMoD@mail.gmail.com>
+References: <1283376410-9999-1-git-send-email-ohad@wizery.com>
+ <1283376410-9999-4-git-send-email-ohad@wizery.com> <AANLkTi=goLEUqM1XQ__PrGu4=Erw2utaNP4qFmSgRta2@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-2
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:34018 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753010Ab0IFLQu convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2010 07:16:50 -0400
-Received: by wwj40 with SMTP id 40so6382991wwj.1
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2010 04:16:49 -0700 (PDT)
-In-Reply-To: <20100906110059.GC2617@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <AANLkTi=goLEUqM1XQ__PrGu4=Erw2utaNP4qFmSgRta2@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Kalle Valo <kalle.valo@iki.fi>, Russell King <linux@arm.linux.org.uk>, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Roger Quadros <roger.quadros@nokia.com>, Ido Yariv <ido@wizery.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, pierre-list@ossman.eu, gdavis@mvista.com, cbouatmailru@gmail.com, m.szyprowski@samsung.com, akpm@linux-foundation.org, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
 
-Hi
+2010/9/4 Micha=B3 Miros=B3aw <mirqus@gmail.com>:
+> 2010/9/1 Ohad Ben-Cohen <ohad@wizery.com>:
+>> Add a simple mechanism to pass platform data to the
+>> SDIO instances of wl12xx.
+>>
+>> This way there is no confusion over who owns the 'embedded data',
+>> typechecking is preserved, and no possibility for the wrong driver t=
+o
+>> pick up the data.
+>>
+>> Originally proposed by Russell King.
+>>
+>> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+>> ---
+>> =A0drivers/net/wireless/Makefile =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0| =A0 =A02 +
+>> =A0drivers/net/wireless/wl12xx/Kconfig =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+| =A0 =A05 ++-
+>> =A0drivers/net/wireless/wl12xx/wl12xx_platform_data.c | =A0 31 +++++=
++++++++++++++++
+>> =A0include/linux/wl12xx.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 | =A0 =A03 ++
+>> =A04 files changed, 40 insertions(+), 1 deletions(-)
+>> =A0create mode 100644 drivers/net/wireless/wl12xx/wl12xx_platform_da=
+ta.c
+>>
+>> diff --git a/drivers/net/wireless/Makefile b/drivers/net/wireless/Ma=
+kefile
+>> index 5d4ce4d..85af697 100644
+>> --- a/drivers/net/wireless/Makefile
+>> +++ b/drivers/net/wireless/Makefile
+>> @@ -50,5 +50,7 @@ obj-$(CONFIG_ATH_COMMON) =A0 =A0 =A0+=3D ath/
+>> =A0obj-$(CONFIG_MAC80211_HWSIM) =A0 +=3D mac80211_hwsim.o
+>>
+>> =A0obj-$(CONFIG_WL12XX) =A0 +=3D wl12xx/
+>> +# small builtin driver bit
+>> +obj-$(CONFIG_WL12XX_PLATFORM_DATA) =A0 =A0 +=3D wl12xx/wl12xx_platf=
+orm_data.o
+>>
+>> =A0obj-$(CONFIG_IWM) =A0 =A0 =A0+=3D iwmc3200wifi/
+>> diff --git a/drivers/net/wireless/wl12xx/Kconfig b/drivers/net/wirel=
+ess/wl12xx/Kconfig
+>> index 2f98058..4a8bb25 100644
+>> --- a/drivers/net/wireless/wl12xx/Kconfig
+>> +++ b/drivers/net/wireless/wl12xx/Kconfig
+>> @@ -74,4 +74,7 @@ config WL1271_SDIO
+>> =A0 =A0 =A0 =A0 =A0If you choose to build a module, it'll be called
+>> =A0 =A0 =A0 =A0 =A0wl1271_sdio. Say N if unsure.
+>>
+>> -
+>> +config WL12XX_PLATFORM_DATA
+>> + =A0 =A0 =A0 bool
+>> + =A0 =A0 =A0 depends on WL1271_SDIO !=3D n
+>> + =A0 =A0 =A0 default y
+>> diff --git a/drivers/net/wireless/wl12xx/wl12xx_platform_data.c b/dr=
+ivers/net/wireless/wl12xx/wl12xx_platform_data.c
+>> new file mode 100644
+>> index 0000000..e00973b
+>> --- /dev/null
+>> +++ b/drivers/net/wireless/wl12xx/wl12xx_platform_data.c
+>> @@ -0,0 +1,31 @@
+>> +#include <linux/module.h>
+>> +#include <linux/wl12xx.h>
+>> +
+>> +static struct wl12xx_platform_data *platform_data;
+>> +
+>> +int __init wl12xx_set_platform_data(const struct wl12xx_platform_da=
+ta *data)
+>> +{
+>> + =A0 =A0 =A0 if (platform_data)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EBUSY;
+>> + =A0 =A0 =A0 if (!data)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EINVAL;
+>> +
+>> + =A0 =A0 =A0 platform_data =3D kmemdup(data, sizeof(*data), GFP_KER=
+NEL);
+>> + =A0 =A0 =A0 if (!platform_data)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENOMEM;
+>> +
+>> + =A0 =A0 =A0 return 0;
+>> +}
+>> +
+>> +int wl12xx_get_platform_data(struct wl12xx_platform_data *data)
+>> +{
+>> + =A0 =A0 =A0 if (!platform_data)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENODEV;
+>> + =A0 =A0 =A0 if (!data)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -EINVAL;
+>> +
+>> + =A0 =A0 =A0 memcpy(data, platform_data, sizeof(*data));
+>> +
+>> + =A0 =A0 =A0 return 0;
+>> +}
+>> +EXPORT_SYMBOL(wl12xx_get_platform_data);
+>> diff --git a/include/linux/wl12xx.h b/include/linux/wl12xx.h
+>> index 137ac89..3e33ae1 100644
+>> --- a/include/linux/wl12xx.h
+>> +++ b/include/linux/wl12xx.h
+>> @@ -31,4 +31,7 @@ struct wl12xx_platform_data {
+>> =A0 =A0 =A0 =A0bool use_eeprom;
+>> =A0};
+>>
+>> +int wl12xx_set_platform_data(const struct wl12xx_platform_data *dat=
+a);
+>> +int wl12xx_get_platform_data(struct wl12xx_platform_data *data);
+>> +
+>> =A0#endif
+>
+> Why do you need all that copying? Isn't the data constant?
 
-On Mon, Sep 6, 2010 at 8:00 PM, Wolfram Sang <w.sang@pengutronix.de> wr=
-ote:
-> Hi,
->
-> while working on the esdhc-controller for the imx-platform, I noticed
-> the recently comitted changes for Samsung controllers and have some
-> remarks (sorry for being late):
->
-> 1) Checking conditions for of host->ops->get_min_clock
->
-> The original commit e9510176ff728135383f0cdfc9c90cfe57f9e162 (sdhci: =
-be
-> more strict with get_min_clock() usage) states why the additional che=
-cks
-> were added. Under this light, it could be argued that commit
-> cfd1f82f20e0c557a061189f7d8c30d623fbe313 (sdhci: remove useless
-> set_clock() check) could be reverted and this commit
-> ce5f036bbbfc6c21d7b55b8fdaa2e2bd56392d94 (sdhci-s3c: add support for =
-the
-> non standard minimal clock value) could also be reverted if the samsu=
-ng
-> platform driver just uses SDHCI_QUIRK_NONSTANDARD_CLOCK without setti=
-ng
-> ops->set_clock?
-In our case we only want to use the min_clock at probe time without
-NONSTANDARD_CLOCK. and no need to NONSTANDARD_CLOCK at set_clock since
-we need other parts also at sdhci.c
->
-> 2) 8-Bit data transfer support
->
-> The comitted version ae6d6c92212e94b12ab9365c23fb73acc2c3c2e7 (sdhci:
-> 8-bit data transfer width support) looks different from another RFC
-> posted in February:
-> http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg01250.html
->
-> As those two already differ, I think it might be wiser to move
-> 8-bit-mode-handling to the platform-specific code? Even the documente=
-d
-> features of a SDHC differ across implementations, I fear side-effects
-> when using this kind of undocumented feature (official spec says
-> "reserved" when describing this bit).
+That was the original proposal from Russell;
 
-Okay it looks different from Samsung Spec.
-WIDE8[5]: Extended Data Transfer Width (It is for MMC 8-bit card).
-1: 8-bit operatoin
-0: Bit width is designated by the bit 1(Data Transfer Width)
-So no need to set the BIT 1 and BIT5 simultaneously.
-I also wonder other Specs how described it.
+AFAICT it's very similar to how platform device resources are handled
+- it allows marking the original definition of the data as __initdata
+(need to add that) thus freeing up its space after the initialization
+phase completes. Later, in some scenarios, it might also allow to free
+up the copied data (not done now, but the copying happen only once in
+the lifetime of the driver so I'm fine with it).
 
 >
-> 3) NO_HI_SPD
+> Best Regards,
+> Micha=B3 Miros=B3aw
 >
-> Commit 5193250168ccdf87364e35a11965336dc088578c (sdhci: add no hi-spe=
-ed
-> bit quirk support) adds a quirk which can be avoided by using
-> io-accessors like in sdhci-of-esdhc.c. Maybe we can even get rid of
-> more, older quirks this way to save precious quirk flags. Have to che=
-ck
-> that later.
->
-> I hope my comments are applicable; because there is no freely availab=
-le
-> datasheet, I can't verify all of my assumptions. Looking forward to
-> comments.
-Good, I think it's possible. I'll try and send a patch.
->
-> Kind regards,
->
-> =A0 Wolfram
->
-> --
-> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-| Wolfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
-> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://w=
-ww.pengutronix.de/ =A0|
->
-> -----BEGIN PGP SIGNATURE-----
-> Version: GnuPG v1.4.10 (GNU/Linux)
->
-> iEYEARECAAYFAkyEyesACgkQD27XaX1/VRsm/QCePflpNSE0iQQWSUjf/PY723qK
-> ZbEAoLxAIS7jIJY/lUQpQvbkJMN6ve19
-> =3D98xD
-> -----END PGP SIGNATURE-----
->
->
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
