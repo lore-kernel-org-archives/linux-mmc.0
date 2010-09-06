@@ -1,64 +1,31 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v5 3/7] wireless: wl12xx: add platform data passing support
-Date: Mon, 6 Sep 2010 16:46:24 +0300
-Message-ID: <AANLkTi=z-cqdwrbXo9pv9WhZkrnb7X+zpVNbJ_-VTJ16@mail.gmail.com>
-References: <1283376410-9999-1-git-send-email-ohad@wizery.com>
- <1283376410-9999-4-git-send-email-ohad@wizery.com> <AANLkTi=goLEUqM1XQ__PrGu4=Erw2utaNP4qFmSgRta2@mail.gmail.com>
- <20100906120716.GE20903@n2100.arm.linux.org.uk>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: my custom SDIO card can be detected in 2.6.30 but not in 2.6.18
+Date: Mon, 06 Sep 2010 10:17:59 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1009061015170.19366@xanadu.home>
+References: <748842.20579.qm@web57904.mail.re3.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20100906120716.GE20903@n2100.arm.linux.org.uk>
-Sender: linux-omap-owner@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Kalle Valo <kalle.valo@iki.fi>, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Roger Quadros <roger.quadros@nokia.com>, Ido Yariv <ido@wizery.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relais.videotron.ca ([24.201.245.36]:38700 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751146Ab0IFOSA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2010 10:18:00 -0400
+Received: from xanadu.home ([66.130.28.92]) by VL-MO-MR005.ip.videotron.ca
+ (Sun Java(tm) System Messaging Server 6.3-4.01 (built Aug  3 2007; 32bit))
+ with ESMTP id <0L8B00I33X1Z2V80@VL-MO-MR005.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Mon, 06 Sep 2010 10:17:59 -0400 (EDT)
+In-reply-to: <748842.20579.qm@web57904.mail.re3.yahoo.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: hong zhang <henryzhang62@yahoo.com>
+Cc: mirqus@gmail.com, linux-mmc@vger.kernel.org
 
-2010/9/6 Russell King - ARM Linux <linux@arm.linux.org.uk>:
-> We could instead make wl12xx_get_platform_data() return a const pointer
-> to its own internal storage instead, or ERR pointers for the various
-> failure cases.
+On Sun, 5 Sep 2010, hong zhang wrote:
 
-Sounds good:
+> Because 2.6.14 is the latest in PXA320 package.
 
-diff --git a/drivers/net/wireless/wl12xx/wl12xx_platform_data.c
-b/drivers/net/wireless/wl12xx/wl12xx_platform_data.c
-new file mode 100644
-index 0000000..973b110
---- /dev/null
-+++ b/drivers/net/wireless/wl12xx/wl12xx_platform_data.c
-@@ -0,0 +1,28 @@
-+#include <linux/module.h>
-+#include <linux/err.h>
-+#include <linux/wl12xx.h>
-+
-+static const struct wl12xx_platform_data *platform_data;
-+
-+int __init wl12xx_set_platform_data(const struct wl12xx_platform_data *data)
-+{
-+	if (platform_data)
-+		return -EBUSY;
-+	if (!data)
-+		return -EINVAL;
-+
-+	platform_data = kmemdup(data, sizeof(*data), GFP_KERNEL);
-+	if (!platform_data)
-+		return -ENOMEM;
-+
-+	return 0;
-+}
-+
-+const struct wl12xx_platform_data *wl12xx_get_platform_data(void)
-+{
-+	if (!platform_data)
-+		return ERR_PTR(-ENODEV);
-+
-+	return platform_data;
-+}
-+EXPORT_SYMBOL(wl12xx_get_platform_data);
+Please ask Marvell for help then.  We do not support their package here.
 
 
-I'll wait a few days to see if there's any other comment, and then
-post v6 with this change.
-
->
+Nicolas
