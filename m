@@ -1,34 +1,206 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH 3/3] MMC/SD: add callback function to detect card
-Date: Sun, 5 Sep 2010 22:46:21 +0100
-Message-ID: <20100905214621.GA24748@console-pimps.org>
-References: <1259913309-27146-1-git-send-email-r66093@freescale.com>
- <20100827190513.GC20407@void.printf.net>
- <20100831191040.GB7847@console-pimps.org>
- <4C7D56AB.1060307@nokia.com>
- <4C7D5AB1.3020306@nokia.com>
- <4C7D5EA5.2060701@nokia.com>
+From: Hein_Tibosch <hein_tibosch@yahoo.es>
+Subject: [PATCH v5] mmc: Make ID freq configurable
+Date: Mon, 06 Sep 2010 09:37:19 +0800
+Message-ID: <4C8445CF.8020406@yahoo.es>
+References: <4C80187D.9000304@yahoo.es> <20100905201448.GA22819@console-pimps.org> <20100905204336.GA23574@void.printf.net> <20100905212218.GA23622@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arkanian.console-pimps.org ([212.110.184.194]:54530 "EHLO
-	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754264Ab0IEVqX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Sep 2010 17:46:23 -0400
-Content-Disposition: inline
-In-Reply-To: <4C7D5EA5.2060701@nokia.com>
+Received: from bosmailout20.eigbox.net ([66.96.187.20]:43487 "EHLO
+	bosmailout20.eigbox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754958Ab0IFCRY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Sep 2010 22:17:24 -0400
+In-Reply-To: <20100905212218.GA23622@console-pimps.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Chris Ball <cjb@laptop.org>, "r66093@freescale.com" <r66093@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jerry Huang <Chang-Ming.Huang@freescale.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Chris Ball <cjb@laptop.org>, Matt Fleming <matt@console-pimps.org>, Pierre Ossman <pierre@ossman.eu>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Tue, Aug 31, 2010 at 10:57:25PM +0300, Adrian Hunter wrote:
-> 
-> But now I think it should be in the mmc_rescan() function
-> because that is where the main other use of .get_cd()
-> is, and also the only call of .detect().
+Matt, Chris,
 
-That's a very good point. Aren't we duplicating the code in mmc_rescan()
-with this patch? If there's something that mmc_rescan() isn't doing,
-wouldn't it be better to modify that function instead of pushing it down
-into the bus_ops detect functions?
+Thanks both for reviewing.
+
+I never noticed that the host wasn't released because my f_min was low enough
+so that all frequencies would be tried. But yes, you're both right.
+
+Before somebody else makes the remark: "unsigned freqs[]" can be declared as
+const.
+
+Below, I changed the order of the if/else/else, and whenever no more frequencies
+can be tried, it will release the host before branching out.
+
+Hein Tibosch
+
+---
+
+mmc-make-id-freq-configurable.patch (v5)
+
+In the latest releases of the mmc driver, the freq during initialization
+is set to a fixed 400 Khz. This was reportedly too fast for several
+users. As there doesn't seem to be an ideal frequency which-works-for-all,
+Pierre suggested to let the driver try several frequencies.
+
+This patch implements that idea. It will try mmc-initialization using
+several frequencies from an array 400, 300, 200 and 100.
+I submitted it earlier but it's now adapted to and tested with kernel
+2.6.36-rc3.
+
+In case SDIO is detected but turns out broken, it'll still try to detect
+SDMEM, also at different freqs.
+
+
+Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
+Reviewed-and-Tested-by: Chris Ball <cjb@laptop.org>
+
+---
+diff -Nurp a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c	2010-08-29 23:36:04.000000000 +0800
++++ b/drivers/mmc/core/core.c	2010-09-06 09:16:35.000000000 +0800
+@@ -907,12 +907,7 @@ static void mmc_power_up(struct mmc_host
+ 	 */
+ 	mmc_delay(10);
+
+-	if (host->f_min > 400000) {
+-		pr_warning("%s: Minimum clock frequency too high for "
+-				"identification mode\n", mmc_hostname(host));
+-		host->ios.clock = host->f_min;
+-	} else
+-		host->ios.clock = 400000;
++	host->ios.clock = host->f_init;
+
+ 	host->ios.power_mode = MMC_POWER_ON;
+ 	mmc_set_ios(host);
+@@ -1404,6 +1399,8 @@ void mmc_rescan(struct work_struct *work
+ 	u32 ocr;
+ 	int err;
+ 	unsigned long flags;
++	int i;
++	const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+
+ 	spin_lock_irqsave(&host->lock, flags);
+
+@@ -1443,55 +1440,70 @@ void mmc_rescan(struct work_struct *work
+ 	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
+ 		goto out;
+
+-	mmc_claim_host(host);
++	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
++		mmc_claim_host(host);
+
+-	mmc_power_up(host);
+-	sdio_reset(host);
+-	mmc_go_idle(host);
++		if (freqs[i] >= host->f_min)
++			host->f_init = freqs[i];
++		else if (!i || freqs[i-1] > host->f_min)
++			host->f_init = host->f_min;
++		else {
++			mmc_release_host(host);
++			goto out;
++		}
++		pr_info("%s: %s: trying to init card at %u Hz\n",
++			mmc_hostname(host), __func__, host->f_init);
+
+-	mmc_send_if_cond(host, host->ocr_avail);
++		mmc_power_up(host);
++		sdio_reset(host);
++		mmc_go_idle(host);
+
+-	/*
+-	 * First we search for SDIO...
+-	 */
+-	err = mmc_send_io_op_cond(host, 0, &ocr);
+-	if (!err) {
+-		if (mmc_attach_sdio(host, ocr)) {
+-			mmc_claim_host(host);
+-			/* try SDMEM (but not MMC) even if SDIO is broken */
+-			if (mmc_send_app_op_cond(host, 0, &ocr))
+-				goto out_fail;
++		mmc_send_if_cond(host, host->ocr_avail);
++
++		/*
++		 * First we search for SDIO...
++		 */
++		err = mmc_send_io_op_cond(host, 0, &ocr);
++		if (!err) {
++			if (mmc_attach_sdio(host, ocr)) {
++				mmc_claim_host(host);
++				/*
++				 * Try SDMEM (but not MMC) even if SDIO
++				 * is broken.
++				*/
++				if (mmc_send_app_op_cond(host, 0, &ocr))
++					goto out_fail;
++
++				if (mmc_attach_sd(host, ocr))
++					mmc_power_off(host);
++			}
++			goto out;
++		}
+
++		/*
++		 * ...then normal SD...
++		 */
++		err = mmc_send_app_op_cond(host, 0, &ocr);
++		if (!err) {
+ 			if (mmc_attach_sd(host, ocr))
+ 				mmc_power_off(host);
++			goto out;
+ 		}
+-		goto out;
+-	}
+-
+-	/*
+-	 * ...then normal SD...
+-	 */
+-	err = mmc_send_app_op_cond(host, 0, &ocr);
+-	if (!err) {
+-		if (mmc_attach_sd(host, ocr))
+-			mmc_power_off(host);
+-		goto out;
+-	}
+
+-	/*
+-	 * ...and finally MMC.
+-	 */
+-	err = mmc_send_op_cond(host, 0, &ocr);
+-	if (!err) {
+-		if (mmc_attach_mmc(host, ocr))
+-			mmc_power_off(host);
+-		goto out;
+-	}
++		/*
++		 * ...and finally MMC.
++		 */
++		err = mmc_send_op_cond(host, 0, &ocr);
++		if (!err) {
++			if (mmc_attach_mmc(host, ocr))
++				mmc_power_off(host);
++			goto out;
++		}
+
+ out_fail:
+-	mmc_release_host(host);
+-	mmc_power_off(host);
+-
++		mmc_release_host(host);
++		mmc_power_off(host);
++	}
+ out:
+ 	if (host->caps & MMC_CAP_NEEDS_POLL)
+ 		mmc_schedule_delayed_work(&host->detect, HZ);
+diff -Nurp a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+--- a/include/linux/mmc/host.h	2010-08-29 23:36:04.000000000 +0800
++++ b/include/linux/mmc/host.h	2010-09-03 05:16:21.000000000 +0800
+@@ -123,6 +123,7 @@ struct mmc_host {
+ 	const struct mmc_host_ops *ops;
+ 	unsigned int		f_min;
+ 	unsigned int		f_max;
++	unsigned int		f_init;
+ 	u32			ocr_avail;
+ 	struct notifier_block	pm_notify;
+
+--
+
+
