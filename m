@@ -1,75 +1,45 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: A serial patchs that support FSL's eSDHC
-Date: Mon, 6 Sep 2010 12:30:26 +0200
-Message-ID: <20100906103026.GA2617@pengutronix.de>
-References: <1283334305-12453-1-git-send-email-r65037@freescale.com>
- <20100901101500.GE11407@pengutronix.de>
- <A88EF4D64D8447468743DC1503C0B6CA078545@zch01exm22.fsl.freescale.net>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="Dxnq1zWXvFF0Q93v"
+Subject: Support for platform-esdhc-controller
+Date: Mon,  6 Sep 2010 12:34:22 +0200
+Message-ID: <1283769265-14147-1-git-send-email-w.sang@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:43347 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:51022 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751725Ab0IFKab (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2010 06:30:31 -0400
-Content-Disposition: inline
-In-Reply-To: <A88EF4D64D8447468743DC1503C0B6CA078545@zch01exm22.fsl.freescale.net>
+	with ESMTP id S1752666Ab0IFKe4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2010 06:34:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhu Richard-R65037 <r65037@freescale.com>
-Cc: linux-mmc@vger.kernel.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Zhu Richard-R65037 <r65037@freescale.com>
 
+This is a patch series adding support for the esdhc-controller as a platform
+device which can be found on e.g. mx35/51. It was tested using a mx35-based
+Phytec pcm043. This is still a WIP! ADMA2 is not supported so far (mx35 just
+has ADMA1 which is not supported by the core?) I will see if I can grab a
+mx51-board later.
 
---Dxnq1zWXvFF0Q93v
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+The following changes since commit 2bfc96a127bc1cc94d26bfaa40159966064f9c8c:
 
-Hi Richard,
+  Linux 2.6.36-rc3 (2010-08-29 08:36:04 -0700)
 
-(going back to the list. A few more eyes during the process will surely
-help :))
+are available in the git repository at:
+  git://git.pengutronix.de/git/wsa/linux-2.6.git pcm043-mmc
 
-On Fri, Sep 03, 2010 at 06:26:05PM +0800, Zhu Richard-R65037 wrote:
+Wolfram Sang (3):
+      sdhci-pltfm: Add structure for host-specific data
+      mmc: add driver for imx35/51
+      pcm043: add resources for mmc
 
-> I encounter some problems when I merge my eSDHC driver into
-> sdhci-pltfm.c driver.
-> In the eSDHC solution there is a little complex in the driver
-> implementation refer to the HW/IC design.
-> One private struct such as sdhci_fsl_host in my original codes is
-> needed, and the board specified platform data (such
->  as imxmmc_platform_data struct) is mandatory required too.
->=20
-> sdhci-pltfm.c driver can't provide such kinds of APIs.
-> Do you have any suggestions?
-
-Well, I think we can do without. In a few minutes, I will post an RFC
-which I just hacked. Please have a look at it, and say if you have
-comments or suggestions. Hopefully you'll agree that this approach is a
-lot less intrusive. I will mainly concentrate on the driver. For the
-platform part, Uwe already gave a few comments. I will also reply to
-some of your patches to clarify some issues.
+ arch/arm/mach-mx3/mach-pcm043.c |   29 ++++++
+ drivers/mmc/host/Kconfig        |    9 ++
+ drivers/mmc/host/Makefile       |    1 +
+ drivers/mmc/host/sdhci-esdhc.c  |  194 +++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pltfm.c  |   10 ++-
+ drivers/mmc/host/sdhci-pltfm.h  |    6 +
+ 6 files changed, 247 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-esdhc.c
 
 Regards,
 
    Wolfram
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---Dxnq1zWXvFF0Q93v
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAkyEwsIACgkQD27XaX1/VRveDQCfTzYBw8Y3qLAfzSCNNmZzpFDh
-8cUAnRDwgd2XEEI9gy97ZIHeDW/Fa9Se
-=M1Yz
------END PGP SIGNATURE-----
-
---Dxnq1zWXvFF0Q93v--
