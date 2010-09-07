@@ -1,48 +1,78 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
-Date: Tue, 7 Sep 2010 15:38:13 -0700
-Message-ID: <20100907153813.936db0c6.akpm@linux-foundation.org>
-References: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCHv6 3/3] mmc_test: collect data and show it via sysfs by
+	demand
+Date: Tue, 7 Sep 2010 23:58:43 +0100
+Message-ID: <20100907225843.GA26240@void.printf.net>
+References: <09f59cd98b59bf521a5866ab58c216e0a0347a6c.1283862780.git.ext-andriy.shevchenko@nokia.com> <ba5173c9b420d9554c83965f47d0b5cba642743a.1283862780.git.ext-andriy.shevchenko@nokia.com> <d7cf4d98c6e0396da903c2e49b028f240853bfc2.1283862780.git.ext-andriy.shevchenko@nokia.com> <20100907152753.4726c076.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
-	<mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Sender: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-To: Anton Vorontsov <avorontsov@mvista.com>
-Cc: Matt Fleming <matt@console-pimps.org>, Albert Herranz <albert_herranz@yahoo.es>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@ozlabs.org, Ben Dooks <ben-linux@fluff.org>, Pierre Ossman <pierre@ossman.eu>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:49184 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752726Ab0IGW6r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Sep 2010 18:58:47 -0400
+Content-Disposition: inline
+In-Reply-To: <20100907152753.4726c076.akpm@linux-foundation.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Andy Shevchenko <andy.shevchenko@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hunter Adrian <adrian.hunter@nokia.com>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-On Wed, 14 Jul 2010 17:07:28 +0400
-Anton Vorontsov <avorontsov@mvista.com> wrote:
+On Tue, Sep 07, 2010 at 03:27:53PM -0700, Andrew Morton wrote:
+> So what we end up with is extremely thin.  Something about adding
+> something to sysfs.
+> 
+> This is not enough!  You're proposing an addition to the kernel->user
+> ABI.  Please fully describe this interface so that we can understand
+> and review it.  What are the names of these sysfs files?  What do they
+> do?  Provide us with example output in the changelog so we can see for
+> ourselves.
 
-> Hi all,
-> 
-> Currently the sdhci driver does everything in the atomic context.
-> And what is worse, PIO transfers are made from the IRQ handler.
-> 
-> This causes huge latencies (up to 120 ms). On some P2020 SOCs,
-> DMA and card detection is broken, which means that kernel polls
-> for the card via PIO transfers every second. Needless to say
-> that this is quite bad.
-> 
-> So, this patch set reworks sdhci code to avoid atomic context,
-> almost completely. We only do two device memory operations
-> in the atomic context, and all the rest is threaded.
-> 
-> I noticed no throughput drop neither with PIO transfers nor
-> with DMA (tested on MPC8569E CPU), while latencies should be
-> greatly improved.
-> 
+Hoping Andy doesn't mind me jumping in, here's an attempt at a better
+changelog:
 
-This patchset isn't causing any problems yet, but may do so in the
-future and will impact the validity of any testing.  It seems to be
-kind of stuck.  Should I drop it all?
+---
+
+Prior to this patch, the "test" file under each card's sysfs node was
+write-only, and results were obtained by looking at dmesg.  This patch
+improves programmatic access to the test results, making them available
+by reading back from the same "test" file:
+
+[root@host mmc0:e624]# echo 6 > test
+[root@host mmc0:e624]# cat test
+Test 6: 2
+
+
+> Please consider documenting the thing in a permanent documentation
+> file.  (I don't believe that Documentation/ABI/ is appropriate, given
+> mmc_test's scope).
+
+I think we should do this by modifying the Kconfig text as well:
+
+diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
+index 3f2a912..ddd7e42 100644
+--- a/drivers/mmc/card/Kconfig
++++ b/drivers/mmc/card/Kconfig
+@@ -45,8 +45,9 @@ config MMC_TEST
+ 	  Development driver that performs a series of reads and writes
+ 	  to a memory card in order to expose certain well known bugs
+ 	  in host controllers. The tests are executed by writing to the
+-	  "test" file in sysfs under each card. Note that whatever is
+-	  on your card will be overwritten by these tests.
++	  "test" file in sysfs under each card, and results can be read
++	  back from the same file. Note that whatever is on your card
++	  will be overwritten by these tests.
+ 
+ 	  This driver is only of interest to those developing or
+ 	  testing a host driver. Most people should say N here.
+
+Separately, Andy, I think we should translate the general result return
+code for the user, i.e. print OK/FAIL/UNSUP_HOST/UNSUP_CARD for return
+values 0-3.  Would you mind adding that?  (Unfortunately, it invalidates
+the usage example I just gave above, so that should change too..)
+
+Thanks,
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
