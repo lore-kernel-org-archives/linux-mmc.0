@@ -1,77 +1,57 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v1 5/8] sdio: add general runtime PM support
-Date: Tue,  7 Sep 2010 14:29:06 +0300
-Message-ID: <1283858949-11073-6-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v1 6/8] sdio: enable Runtime PM for SDIO cards
+Date: Tue,  7 Sep 2010 14:29:07 +0300
+Message-ID: <1283858949-11073-7-git-send-email-ohad@wizery.com>
 References: <1283858949-11073-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:49491 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756521Ab0IGL3r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Sep 2010 07:29:47 -0400
-In-Reply-To: <1283858949-11073-1-git-send-email-ohad@wizery.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1283858949-11073-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Add generic runtime PM handlers to sdio.
+Enable runtime PM for new SDIO cards.
 
-Those handlers invoke the relevant SDIO function drivers' handlers, if
-such exist. If not they just return success.
+As soon as the card will be added to the device tree, runtime PM core
+will release its power, since it doesn't have any users yet.
 
-Runtime PM is still disabled by default, so this patch alone
-has no immediate effect.
-
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 ---
- drivers/mmc/core/sdio_bus.c |   20 ++++++++++++++++++++
- 1 files changed, 20 insertions(+), 0 deletions(-)
+ drivers/mmc/core/sdio.c |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 4a890dc..256a968 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -14,6 +14,7 @@
- #include <linux/device.h>
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index c118cc2..a5a76a8 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -10,6 +10,7 @@
+  */
+ 
  #include <linux/err.h>
- #include <linux/slab.h>
 +#include <linux/pm_runtime.h>
  
+ #include <linux/mmc/host.h>
  #include <linux/mmc/card.h>
- #include <linux/mmc/sdio_func.h>
-@@ -154,6 +155,24 @@ static int sdio_bus_remove(struct device *dev)
- 	return 0;
- }
+@@ -709,6 +710,15 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
+ 	card = host->card;
  
-+#ifdef CONFIG_PM_RUNTIME
+ 	/*
++	 * Enable Runtime PM for this card
++	 */
++	err = pm_runtime_set_active(&card->dev);
++	if (err)
++		goto remove;
 +
-+static const struct dev_pm_ops sdio_bus_pm_ops = {
-+	SET_RUNTIME_PM_OPS(
-+		pm_generic_runtime_suspend,
-+		pm_generic_runtime_resume,
-+		pm_generic_runtime_idle
-+	)
-+};
++	pm_runtime_enable(&card->dev);
 +
-+#define SDIO_PM_OPS_PTR	(&sdio_bus_pm_ops)
-+
-+#else /* !CONFIG_PM_RUNTIME */
-+
-+#define SDIO_PM_OPS_PTR	NULL
-+
-+#endif /* !CONFIG_PM_RUNTIME */
-+
- static struct bus_type sdio_bus_type = {
- 	.name		= "sdio",
- 	.dev_attrs	= sdio_dev_attrs,
-@@ -161,6 +180,7 @@ static struct bus_type sdio_bus_type = {
- 	.uevent		= sdio_bus_uevent,
- 	.probe		= sdio_bus_probe,
- 	.remove		= sdio_bus_remove,
-+	.pm		= SDIO_PM_OPS_PTR,
- };
- 
- int sdio_register_bus(void)
++	/*
+ 	 * The number of functions on the card is encoded inside
+ 	 * the ocr.
+ 	 */
 -- 
 1.7.0.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
