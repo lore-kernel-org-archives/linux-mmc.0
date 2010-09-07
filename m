@@ -1,62 +1,93 @@
-From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v1 3/8] sdio: add power_restore support
-Date: Tue,  7 Sep 2010 14:29:04 +0300
-Message-ID: <1283858949-11073-4-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: [PATCH v1 4/8] mmc: add general Runtime PM support
+Date: Tue,  7 Sep 2010 14:29:05 +0300
+Message-ID: <1283858949-11073-5-git-send-email-ohad@wizery.com>
 References: <1283858949-11073-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1283858949-11073-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:49491 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756511Ab0IGL3o (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Sep 2010 07:29:44 -0400
+In-Reply-To: <1283858949-11073-1-git-send-email-ohad@wizery.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Add a power_restore handler to the SDIO bus ops,
-in order to support waking up SDIO cards that
-were powered off by runtime pm.
+Add runtime PM handlers to mmc, which call mmc_power_save_host
+and mmc_power_restore_host in response to runtime_suspend and
+runtime_resume events.
 
-Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Runtime PM is still disabled by default, so this patch alone
+has no immediate effect.
+
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/mmc/core/sdio.c |   18 ++++++++++++++++++
- 1 files changed, 18 insertions(+), 0 deletions(-)
+ drivers/mmc/core/bus.c |   37 +++++++++++++++++++++++++++++++++++++
+ 1 files changed, 37 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 8a34945..c118cc2 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -639,11 +639,29 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	return err;
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 7cd9749..a302e57 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -14,6 +14,7 @@
+ #include <linux/device.h>
+ #include <linux/err.h>
+ #include <linux/slab.h>
++#include <linux/pm_runtime.h>
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -142,6 +143,41 @@ static int mmc_bus_resume(struct device *dev)
+ 	return ret;
  }
  
-+static int mmc_sdio_power_restore(struct mmc_host *host)
++#ifdef CONFIG_PM_RUNTIME
++
++static int mmc_runtime_suspend(struct device *dev)
 +{
-+	int ret;
++	struct mmc_card *card = dev_to_mmc_card(dev);
 +
-+	BUG_ON(!host);
-+	BUG_ON(!host->card);
-+
-+	mmc_claim_host(host);
-+	ret = mmc_sdio_init_card(host, host->ocr, host->card,
-+			(host->pm_flags & MMC_PM_KEEP_POWER));
-+	if (!ret && host->sdio_irqs)
-+		mmc_signal_sdio_irq(host);
-+	mmc_release_host(host);
-+
-+	return ret;
++	return mmc_power_save_host(card->host);
 +}
 +
- static const struct mmc_bus_ops mmc_sdio_ops = {
- 	.remove = mmc_sdio_remove,
- 	.detect = mmc_sdio_detect,
- 	.suspend = mmc_sdio_suspend,
- 	.resume = mmc_sdio_resume,
-+	.power_restore = mmc_sdio_power_restore,
++static int mmc_runtime_resume(struct device *dev)
++{
++	struct mmc_card *card = dev_to_mmc_card(dev);
++
++	return mmc_power_restore_host(card->host);
++}
++
++static int mmc_runtime_idle(struct device *dev)
++{
++	return pm_runtime_suspend(dev);
++}
++
++static const struct dev_pm_ops mmc_bus_pm_ops = {
++	.runtime_suspend	= mmc_runtime_suspend,
++	.runtime_resume		= mmc_runtime_resume,
++	.runtime_idle		= mmc_runtime_idle,
++};
++
++#define MMC_PM_OPS_PTR	(&mmc_bus_pm_ops)
++
++#else /* !CONFIG_PM_RUNTIME */
++
++#define MMC_PM_OPS_PTR	NULL
++
++#endif /* !CONFIG_PM_RUNTIME */
++
+ static struct bus_type mmc_bus_type = {
+ 	.name		= "mmc",
+ 	.dev_attrs	= mmc_dev_attrs,
+@@ -151,6 +187,7 @@ static struct bus_type mmc_bus_type = {
+ 	.remove		= mmc_bus_remove,
+ 	.suspend	= mmc_bus_suspend,
+ 	.resume		= mmc_bus_resume,
++	.pm		= MMC_PM_OPS_PTR,
  };
  
- 
+ int mmc_register_bus(void)
 -- 
 1.7.0.4
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
