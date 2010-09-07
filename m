@@ -1,107 +1,69 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCHv6 3/3] mmc_test: collect data and show it via sysfs by
- demand
-Date: Tue, 7 Sep 2010 15:27:53 -0700
-Message-ID: <20100907152753.4726c076.akpm@linux-foundation.org>
-References: <09f59cd98b59bf521a5866ab58c216e0a0347a6c.1283862780.git.ext-andriy.shevchenko@nokia.com>
-	<ba5173c9b420d9554c83965f47d0b5cba642743a.1283862780.git.ext-andriy.shevchenko@nokia.com>
-	<d7cf4d98c6e0396da903c2e49b028f240853bfc2.1283862780.git.ext-andriy.shevchenko@nokia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:41236 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756521Ab0IGW2A (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Sep 2010 18:28:00 -0400
-In-Reply-To: <d7cf4d98c6e0396da903c2e49b028f240853bfc2.1283862780.git.ext-andriy.shevchenko@nokia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: akpm@linux-foundation.org
+Subject: + mmc_test-use-api-to-check-card-type.patch added to -mm tree
+Date: Tue, 07 Sep 2010 15:30:01 -0700
+Message-ID: <201009072230.o87MU1lp010207@imap1.linux-foundation.org>
+Reply-To: linux-kernel@vger.kernel.org
+Return-path: <mm-commits-owner@vger.kernel.org>
+Sender: mm-commits-owner@vger.kernel.org
+To: mm-commits@vger.kernel.org
+Cc: andy.shevchenko@gmail.com, ext-andriy.shevchenko@nokia.com, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hunter Adrian <adrian.hunter@nokia.com>, Chris Ball <cjb@laptop.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
-
-On Tue,  7 Sep 2010 15:35:26 +0300
-Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
-
-> TODO:
->  - implement show() method based on seq_file API
-> 
-> Changes since v5:
->  - we can't use BUG_ON at exit() method because it quite normal case when the
->    module is going to be removed with card plugged in, that's why we just free
->    memory there
->  - rebase against recent linux-next tree
-> 
-> Changes since v4:
->  - BUG_ON at exit if the list of the results isn't empty
-> 
-> Changes since v3:
->  - fix multi-line commentary style
->  - protect mmc_test_free_result() by mutex
->  - apply known values to newly created mmc_test_general_result structure before
->    attaching it to the list
->  - call list_del() before free mmc_test_transfer_result structure
->  - check truncated output in show() method, return -ENOBUFS if so
->  - avoid deadlock in show() method if snprintf() fails
-> 
-> Changes since v2:
->  - move card memeber to mmc_test_general_result structrure and thus throw away
->    mmc_test_overall_result which was overkill
->  - check result of kmalloc and kzalloc
->  - keep pointer to the actual mmc_test_general_result structure in the
->    mmc_test_card
-> 
-> Changes since v1:
->  - structrure members are described
->  - save transfer results code is split to separate function
->  - in mmc_test_print_rate() use count = 1 instead of 0
->  - mmc_test_result keeps overall results (across all tested cards), however
->    it's still global variable
->  - list_head variables inside structures have a suffix _lst now
-
-While useful and important, none of the above is relevant for a
-mainline commit (IMP) so I always remove it.
-
-> Here is a patch which brings possibility to get test results via sysfs. It
-> helps to do tests non-interactively.
->
-> We have the file created under sysfs already and we could use it to out test
-> results.
-
-That's the patch changelog.
-
-> This patch applied on top of patches published here [1]
-> 
-> [1] http://lkml.org/lkml/2010/8/18/164
-
-And that's irrelevant for a mainline commit.
 
 
-So what we end up with is extremely thin.  Something about adding
-something to sysfs.
+The patch titled
+     mmc_test: use API to check card type
+has been added to the -mm tree.  Its filename is
+     mmc_test-use-api-to-check-card-type.patch
 
-This is not enough!  You're proposing an addition to the kernel->user
-ABI.  Please fully describe this interface so that we can understand
-and review it.  What are the names of these sysfs files?  What do they
-do?  Provide us with example output in the changelog so we can see for
-ourselves.
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
 
-Please consider documenting the thing in a permanent documentation
-file.  (I don't believe that Documentation/ABI/ is appropriate, given
-mmc_test's scope).
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
 
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
 
-afacit the only useful info we have about mmc_test is
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
 
-        help
-          Development driver that performs a series of reads and writes
-          to a memory card in order to expose certain well known bugs
-          in host controllers. The tests are executed by writing to the
-          "test" file in sysfs under each card. Note that whatever is
-          on your card will be overwritten by these tests.
+------------------------------------------------------
+Subject: mmc_test: use API to check card type
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
 
-          This driver is only of interest to those developing or
-          testing a host driver. Most people should say N here.
+There are methods to check card type. Let's use them instead of direct checking
+type bits.
 
-which I guess is good enough, given the smallness and sophistication of
-its users.  It could be improved on though!
+Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+---
+
+ drivers/mmc/card/mmc_test.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff -puN drivers/mmc/card/mmc_test.c~mmc_test-use-api-to-check-card-type drivers/mmc/card/mmc_test.c
+--- a/drivers/mmc/card/mmc_test.c~mmc_test-use-api-to-check-card-type
++++ a/drivers/mmc/card/mmc_test.c
+@@ -1977,7 +1977,7 @@ static int mmc_test_probe(struct mmc_car
+ {
+ 	int ret;
+ 
+-	if ((card->type != MMC_TYPE_MMC) && (card->type != MMC_TYPE_SD))
++	if (!mmc_card_mmc(card) && !mmc_card_sd(card))
+ 		return -ENODEV;
+ 
+ 	ret = device_create_file(&card->dev, &dev_attr_test);
+_
+
+Patches currently in -mm which might be from andy.shevchenko@gmail.com are
+
+linux-next.patch
+lib-bitmapc-use-hex_to_bin.patch
+mmc-make-dev_to_mmc_card-macro-public.patch
+mmc-rename-dev_to_mmc_card-to-mmc_dev_to_card.patch
+mmc_test-use-api-to-check-card-type.patch
+mmc_test-change-simple_strtol-to-strict_strtol.patch
+mmc_test-collect-data-and-show-it-via-sysfs-by-demand.patch
+
