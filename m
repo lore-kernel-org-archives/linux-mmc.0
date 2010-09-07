@@ -1,72 +1,60 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v1 0/8] SDIO Runtime PM Support
-Date: Tue,  7 Sep 2010 14:29:01 +0300
-Message-ID: <1283858949-11073-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:49491 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751795Ab0IGL3e (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Sep 2010 07:29:34 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v1 1/8] mmc: sdio: fully reconfigure oldcard on resume
+Date: Tue,  7 Sep 2010 14:29:02 +0300
+Message-ID: <1283858949-11073-2-git-send-email-ohad@wizery.com>
+References: <1283858949-11073-1-git-send-email-ohad@wizery.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1283858949-11073-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-This patchset introduces runtime PM support to SDIO cards.
+On resume, let mmc_sdio_init_card go all the way, instead
+of skipping the reconfiguration of the card's speed and width.
 
-What have been achieved:
+This is needed to ensure cards wake up with their clock
+reconfigured (otherwise it's kept low).
 
-1. Power to SDIO cards is kept low until one of its functions is bound
-   (i.e. a matching driver is successfully probed)
+This patch also removes the explicit bus width reconfiguration
+on resume, since now this is part of mmc_sdio_init_card.
 
-2. If the matching driver supports runtime PM, power to the card is
-   dropped soon after probe() returns. It is then up to the driver
-   to request power to its function, using runtime PM API (the get/put
-   variants). Last patch in this series demonstrates this with the
-   wl1271 driver which couples the card power with the state of the wlan
-   interface (interface up -> power is up, interface down -> power is down)
+Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+---
+ drivers/mmc/core/sdio.c |    9 ---------
+ 1 files changed, 0 insertions(+), 9 deletions(-)
 
-4. If a matching driver does not support Runtime PM, power to the card
-   is kept high during the whole lifetime of the driver
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index bd2755e..8a34945 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -457,7 +457,6 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 			return -ENOENT;
+ 
+ 		card = oldcard;
+-		return 0;
+ 	}
+ 
+ 	if (card->type == MMC_TYPE_SD_COMBO) {
+@@ -615,14 +614,6 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	mmc_claim_host(host);
+ 	err = mmc_sdio_init_card(host, host->ocr, host->card,
+ 				 (host->pm_flags & MMC_PM_KEEP_POWER));
+-	if (!err) {
+-		/* We may have switched to 1-bit mode during suspend. */
+-		err = sdio_enable_4bit_bus(host->card);
+-		if (err > 0) {
+-			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+-			err = 0;
+-		}
+-	}
+ 	if (!err && host->sdio_irqs)
+ 		mmc_signal_sdio_irq(host);
+ 	mmc_release_host(host);
+-- 
+1.7.0.4
 
-5. When the driver is removed, power to the card is immediately dropped
-
-6. If there are multiple drivers for the same card (several SDIO functions),
-   power will be pulled high before the first driver probes, and dropped
-   down after the last driver is removed. In between, power will be
-   maintained accrording to the accumulated usage count of the complete
-   drivers group
-
-Patches were tested on ZOOM3, 2.6.36-rc3.
-
-Dependencies (in case you want to test this):
-- The SDIO/MMC part depends on http://www.spinics.net/lists/linux-pm/msg21663.html (patch was already accepted by PM maintainer)
-- The WLAN part depends on http://www.mail-archive.com/linux-omap@vger.kernel.org/msg34148.html
-
-Maturity level is much better than the previous RFC patches, and also testing that have been conducted are more intense. We still plan to stress this even further, but it's certainly ready for wide review.
-
-Next thing I plan on doing is testing this with SDIO suspend/resume (with and without MMC_PM_KEEP_POWER). I'll update as soon as I have results (setup issues and a business trip will keep me away for several days).
-
-Thanks,
-
-Ohad Ben-Cohen (8):
-  mmc: sdio: fully reconfigure oldcard on resume
-  mmc: let power save/restore ops return a value
-  sdio: add power_restore support
-  mmc: add general Runtime PM support
-  sdio: add general runtime PM support
-  sdio: enable Runtime PM for SDIO cards
-  sdio: enable Runtime PM for SDIO functions
-  wireless: wl1271_sdio: enable Runtime PM
-
- drivers/mmc/core/bus.c                    |   37 +++++++++++++++++++++
- drivers/mmc/core/core.c                   |   20 ++++++++---
- drivers/mmc/core/core.h                   |    4 +-
- drivers/mmc/core/mmc.c                    |    8 +++-
- drivers/mmc/core/sd.c                     |    8 +++-
- drivers/mmc/core/sdio.c                   |   42 +++++++++++++++++++-----
- drivers/mmc/core/sdio_bus.c               |   50 +++++++++++++++++++++++++++-
- drivers/net/wireless/wl12xx/wl1271_sdio.c |   14 +++++++-
- include/linux/mmc/host.h                  |    4 +-
- 9 files changed, 161 insertions(+), 26 deletions(-)
-
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
