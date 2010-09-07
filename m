@@ -1,117 +1,92 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v1 7/8] sdio: enable Runtime PM for SDIO functions
-Date: Tue,  7 Sep 2010 14:29:08 +0300
-Message-ID: <1283858949-11073-8-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v1 8/8] wireless: wl1271_sdio: enable Runtime PM
+Date: Tue,  7 Sep 2010 14:29:09 +0300
+Message-ID: <1283858949-11073-9-git-send-email-ohad@wizery.com>
 References: <1283858949-11073-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:49491 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756534Ab0IGL3y (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Sep 2010 07:29:54 -0400
-In-Reply-To: <1283858949-11073-1-git-send-email-ohad@wizery.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1283858949-11073-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Enable runtime PM for SDIO functions.
+Enable runtime pm for the wl1271 SDIO device.
 
-SDIO functions are initialized with a disabled runtime PM status,
-and are set active (and their usage count is incremented)
-only before potential drivers are probed.
+We request power whenever the WLAN interface is brought up,
+and release it after the WLAN interface is taken down.
 
-SDIO function drivers that support runtime PM should call
-pm_runtime_put_noidle() in their probe routine, and
-pm_runtime_get_noresume() in their remove routine (very
-similarly to PCI drivers).
+As a result, power is released immediately after probe returns,
+since at that point power has not been explicitly requested yet
+(i.e. the WLAN interface is still down).
 
-In case a matching driver does not support runtime PM, power will
-always be on (since the usage count is positive).
-
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 ---
- drivers/mmc/core/sdio.c     |    5 +++++
- drivers/mmc/core/sdio_bus.c |   30 ++++++++++++++++++++++++++++--
- 2 files changed, 33 insertions(+), 2 deletions(-)
+ drivers/net/wireless/wl12xx/wl1271_sdio.c |   14 +++++++++++++-
+ 1 files changed, 13 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index a5a76a8..c4022da 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -732,6 +732,11 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
- 		err = sdio_init_func(host->card, i + 1);
- 		if (err)
- 			goto remove;
+diff --git a/drivers/net/wireless/wl12xx/wl1271_sdio.c b/drivers/net/wireless/wl12xx/wl1271_sdio.c
+index 824b9e8..235191e 100644
+--- a/drivers/net/wireless/wl12xx/wl1271_sdio.c
++++ b/drivers/net/wireless/wl12xx/wl1271_sdio.c
+@@ -30,6 +30,7 @@
+ #include <linux/mmc/card.h>
+ #include <linux/gpio.h>
+ #include <linux/wl12xx.h>
++#include <linux/pm_runtime.h>
+ 
+ #include "wl1271.h"
+ #include "wl12xx_80211.h"
+@@ -153,20 +154,27 @@ static void wl1271_sdio_raw_write(struct wl1271 *wl, int addr, void *buf,
+ static int wl1271_sdio_set_power(struct wl1271 *wl, bool enable)
+ {
+ 	struct sdio_func *func = wl_to_func(wl);
++	int err;
+ 
+ 	/* Let the SDIO stack handle wlan_enable control, so we
+ 	 * keep host claimed while wlan is in use to keep wl1271
+ 	 * alive.
+ 	 */
+ 	if (enable) {
++		err = pm_runtime_get_sync(&func->dev);
++		if (err)
++			goto out;
 +
-+		/*
-+		 * Enable Runtime PM for this func
-+		 */
-+		pm_runtime_enable(&card->sdio_func[i]->dev);
- 	}
- 
- 	mmc_release_host(host);
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 256a968..d55a592 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -126,15 +126,34 @@ static int sdio_bus_probe(struct device *dev)
- 	if (!id)
- 		return -ENODEV;
- 
-+	/* Unbound SDIO functions are always suspended.
-+	 * During probe, the function is set active and the usage count
-+	 * is incremented.  If the driver supports runtime PM,
-+	 * it should call pm_runtime_put_noidle() in its probe routine and
-+	 * pm_runtime_get_noresume() in its remove routine.
-+	 */
-+	ret = pm_runtime_get_sync(dev);
-+	if (ret)
-+		goto out;
-+
- 	/* Set the default block size so the driver is sure it's something
- 	 * sensible. */
- 	sdio_claim_host(func);
- 	ret = sdio_set_block_size(func, 0);
- 	sdio_release_host(func);
- 	if (ret)
--		return ret;
-+		goto disable_runtimepm;
-+
-+	ret = drv->probe(func, id);
-+	if (ret)
-+		goto disable_runtimepm;
-+
-+	return 0;
- 
--	return drv->probe(func, id);
-+disable_runtimepm:
-+	pm_runtime_put_noidle(dev);
-+out:
-+	return ret;
- }
- 
- static int sdio_bus_remove(struct device *dev)
-@@ -142,6 +161,8 @@ static int sdio_bus_remove(struct device *dev)
- 	struct sdio_driver *drv = to_sdio_driver(dev->driver);
- 	struct sdio_func *func = dev_to_sdio_func(dev);
- 
-+	pm_runtime_get_sync(dev);
-+
- 	drv->remove(func);
- 
- 	if (func->irq_handler) {
-@@ -152,6 +173,11 @@ static int sdio_bus_remove(struct device *dev)
+ 		sdio_claim_host(func);
+ 		sdio_enable_func(func);
+ 	} else {
+ 		sdio_disable_func(func);
  		sdio_release_host(func);
++		err = pm_runtime_put_sync(&func->dev);
  	}
  
-+	pm_runtime_put_noidle(dev);
-+
-+	/* Undo the runtime PM settings in sdio_bus_probe() */
-+	pm_runtime_put_noidle(dev);
-+
- 	return 0;
+-	return 0;
++out:
++	return err;
  }
  
+ static struct wl1271_if_operations sdio_ops = {
+@@ -233,6 +241,8 @@ static int __devinit wl1271_probe(struct sdio_func *func,
+ 
+ 	sdio_set_drvdata(func, wl);
+ 
++	pm_runtime_put_noidle(&func->dev);
++
+ 	wl1271_notice("initialized");
+ 
+ 	return 0;
+@@ -255,6 +265,8 @@ static void __devexit wl1271_remove(struct sdio_func *func)
+ 
+ 	wl1271_unregister_hw(wl);
+ 	wl1271_free_hw(wl);
++
++	pm_runtime_get_noresume(&func->dev);
+ }
+ 
+ static struct sdio_driver wl1271_sdio_driver = {
 -- 
 1.7.0.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
