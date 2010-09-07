@@ -1,38 +1,65 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: [PATCHv6 1/3] mmc_test: use API to check card type
-Date: Tue,  7 Sep 2010 15:35:24 +0300
-Message-ID: <09f59cd98b59bf521a5866ab58c216e0a0347a6c.1283862780.git.ext-andriy.shevchenko@nokia.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:58126 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755736Ab0IGMpJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Sep 2010 08:45:09 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: David Vrabel <david.vrabel-kQvG35nSl+M@public.gmane.org>
+Subject: Re: [PATCH v1 8/8] wireless: wl1271_sdio: enable Runtime PM
+Date: Tue, 07 Sep 2010 14:02:10 +0100
+Message-ID: <4C8637D2.5070703@csr.com>
+References: <1283858949-11073-1-git-send-email-ohad@wizery.com> <1283858949-11073-9-git-send-email-ohad@wizery.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1283858949-11073-9-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Hunter Adrian <adrian.hunter@nokia.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-There are methods to check card type. Let's use them instead of direct checking
-type bits.
+Ohad Ben-Cohen wrote:
+> Enable runtime pm for the wl1271 SDIO device.
+> 
+> We request power whenever the WLAN interface is brought up,
+> and release it after the WLAN interface is taken down.
+> 
+> As a result, power is released immediately after probe returns,
+> since at that point power has not been explicitly requested yet
+> (i.e. the WLAN interface is still down).
+[...]
+> @@ -233,6 +241,8 @@ static int __devinit wl1271_probe(struct sdio_func *func,
+>  
+>  	sdio_set_drvdata(func, wl);
+>  
+> +	pm_runtime_put_noidle(&func->dev);
 
-Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
----
- drivers/mmc/card/mmc_test.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+I find this a little odd and confusing as this is releasing the
+reference taken by mmc core from inside the function driver.
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index b992725..cd8edf4 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -1977,7 +1977,7 @@ static int mmc_test_probe(struct mmc_card *card)
- {
- 	int ret;
- 
--	if ((card->type != MMC_TYPE_MMC) && (card->type != MMC_TYPE_SD))
-+	if (!mmc_card_mmc(card) && !mmc_card_sd(card))
- 		return -ENODEV;
- 
- 	ret = device_create_file(&card->dev, &dev_attr_test);
+Instead, I would suggest changing all existing SDIO function drivers to
+call pm_runtime_get() in probe() and pm_runtime_put() in remove().  I
+think this makes the runtime PM usage more obvious from a function
+driver point of view.
+
+> +
+>  	wl1271_notice("initialized");
+>  
+>  	return 0;
+> @@ -255,6 +265,8 @@ static void __devexit wl1271_remove(struct sdio_func *func)
+>  
+>  	wl1271_unregister_hw(wl);
+>  	wl1271_free_hw(wl);
+> +
+> +	pm_runtime_get_noresume(&func->dev);
+>  }
+>  
+>  static struct sdio_driver wl1271_sdio_driver = {
+
+David
 -- 
-1.6.3.3
+David Vrabel, Senior Software Engineer, Drivers
+CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
+Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
 
+
+Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
