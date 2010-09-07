@@ -1,78 +1,113 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCHv6 3/3] mmc_test: collect data and show it via sysfs by
-	demand
-Date: Tue, 7 Sep 2010 23:58:43 +0100
-Message-ID: <20100907225843.GA26240@void.printf.net>
-References: <09f59cd98b59bf521a5866ab58c216e0a0347a6c.1283862780.git.ext-andriy.shevchenko@nokia.com> <ba5173c9b420d9554c83965f47d0b5cba642743a.1283862780.git.ext-andriy.shevchenko@nokia.com> <d7cf4d98c6e0396da903c2e49b028f240853bfc2.1283862780.git.ext-andriy.shevchenko@nokia.com> <20100907152753.4726c076.akpm@linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: akpm@linux-foundation.org
+Subject: + mmc-make-id-freq-configurable-v5.patch added to -mm tree
+Date: Tue, 07 Sep 2010 16:38:49 -0700
+Message-ID: <201009072338.o87Ncnk7013457@imap1.linux-foundation.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49184 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752726Ab0IGW6r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Sep 2010 18:58:47 -0400
-Content-Disposition: inline
-In-Reply-To: <20100907152753.4726c076.akpm@linux-foundation.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:52878 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758235Ab0IGXjX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Sep 2010 19:39:23 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Andy Shevchenko <andy.shevchenko@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hunter Adrian <adrian.hunter@nokia.com>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+To: mm-commits@vger.kernel.org
+Cc: hein_tibosch@yahoo.es, cjb@laptop.org, linux-mmc@vger.kernel.org, matt@console-pimps.org
 
-On Tue, Sep 07, 2010 at 03:27:53PM -0700, Andrew Morton wrote:
-> So what we end up with is extremely thin.  Something about adding
-> something to sysfs.
-> 
-> This is not enough!  You're proposing an addition to the kernel->user
-> ABI.  Please fully describe this interface so that we can understand
-> and review it.  What are the names of these sysfs files?  What do they
-> do?  Provide us with example output in the changelog so we can see for
-> ourselves.
 
-Hoping Andy doesn't mind me jumping in, here's an attempt at a better
-changelog:
+The patch titled
+     mmc-make-id-freq-configurable-v5
+has been added to the -mm tree.  Its filename is
+     mmc-make-id-freq-configurable-v5.patch
 
+Before you just go and hit "reply", please:
+   a) Consider who else should be cc'ed
+   b) Prefer to cc a suitable mailing list as well
+   c) Ideally: find the original patch on the mailing list and do a
+      reply-to-all to that, adding suitable additional cc's
+
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
+
+See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
+out what to do about this
+
+The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+
+------------------------------------------------------
+Subject: mmc-make-id-freq-configurable-v5
+From: Hein_Tibosch <hein_tibosch@yahoo.es>
+
+Matt, Chris,
+
+Thanks both for reviewing.
+
+I never noticed that the host wasn't released because my f_min was low
+enough so that all frequencies would be tried.  But yes, you're both
+right.
+
+Before somebody else makes the remark: "unsigned freqs[]" can be declared as
+const.
+
+Below, I changed the order of the if/else/else, and whenever no more
+frequencies can be tried, it will release the host before branching out.
+
+Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
+Reviewed-and-Tested-by: Chris Ball <cjb@laptop.org>
+Cc: Matt Fleming <matt@console-pimps.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
 
-Prior to this patch, the "test" file under each card's sysfs node was
-write-only, and results were obtained by looking at dmesg.  This patch
-improves programmatic access to the test results, making them available
-by reading back from the same "test" file:
+ drivers/mmc/core/core.c |   18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
 
-[root@host mmc0:e624]# echo 6 > test
-[root@host mmc0:e624]# cat test
-Test 6: 2
-
-
-> Please consider documenting the thing in a permanent documentation
-> file.  (I don't believe that Documentation/ABI/ is appropriate, given
-> mmc_test's scope).
-
-I think we should do this by modifying the Kconfig text as well:
-
-diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
-index 3f2a912..ddd7e42 100644
---- a/drivers/mmc/card/Kconfig
-+++ b/drivers/mmc/card/Kconfig
-@@ -45,8 +45,9 @@ config MMC_TEST
- 	  Development driver that performs a series of reads and writes
- 	  to a memory card in order to expose certain well known bugs
- 	  in host controllers. The tests are executed by writing to the
--	  "test" file in sysfs under each card. Note that whatever is
--	  on your card will be overwritten by these tests.
-+	  "test" file in sysfs under each card, and results can be read
-+	  back from the same file. Note that whatever is on your card
-+	  will be overwritten by these tests.
+diff -puN drivers/mmc/core/core.c~mmc-make-id-freq-configurable-v5 drivers/mmc/core/core.c
+--- a/drivers/mmc/core/core.c~mmc-make-id-freq-configurable-v5
++++ a/drivers/mmc/core/core.c
+@@ -1400,7 +1400,7 @@ void mmc_rescan(struct work_struct *work
+ 	int err;
+ 	unsigned long flags;
+ 	int i;
+-	unsigned freqs[] = { 400000, 300000, 200000, 100000 };
++	const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
  
- 	  This driver is only of interest to those developing or
- 	  testing a host driver. Most people should say N here.
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+@@ -1445,12 +1445,15 @@ void mmc_rescan(struct work_struct *work
+ 
+ 		if (freqs[i] >= host->f_min)
+ 			host->f_init = freqs[i];
+-		else if (i && freqs[i-1] <= host->f_min)
+-			goto out;
+-		else
++		else if (!i || freqs[i-1] > host->f_min)
+ 			host->f_init = host->f_min;
++		else {
++			mmc_release_host(host);
++			goto out;
++		}
++		pr_info("%s: %s: trying to init card at %u Hz\n",
++			mmc_hostname(host), __func__, host->f_init);
+ 
+-		printk ("mmc_rescan: trying %u Hz\n", host->f_init);
+ 		mmc_power_up(host);
+ 		sdio_reset(host);
+ 		mmc_go_idle(host);
+@@ -1464,7 +1467,10 @@ void mmc_rescan(struct work_struct *work
+ 		if (!err) {
+ 			if (mmc_attach_sdio(host, ocr)) {
+ 				mmc_claim_host(host);
+-				/* try SDMEM (but not MMC) even if SDIO is broken */
++				/*
++				 * Try SDMEM (but not MMC) even if SDIO
++				 * is broken.
++				*/
+ 				if (mmc_send_app_op_cond(host, 0, &ocr))
+ 					goto out_fail;
+ 
+_
 
-Separately, Andy, I think we should translate the general result return
-code for the user, i.e. print OK/FAIL/UNSUP_HOST/UNSUP_CARD for return
-values 0-3.  Would you mind adding that?  (Unfortunately, it invalidates
-the usage example I just gave above, so that should change too..)
+Patches currently in -mm which might be from hein_tibosch@yahoo.es are
 
-Thanks,
+mmc-make-id-freq-configurable.patch
+mmc-make-id-freq-configurable-v5.patch
+mmc-make-id-freq-configurable-checkpatch-fixes.patch
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
