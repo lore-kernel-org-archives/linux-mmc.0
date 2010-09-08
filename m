@@ -1,55 +1,90 @@
-From: Bing Zhao <bzhao@marvell.com>
-Subject: RE: [PATCH v2] sdio: skip initialization on powered resume
-Date: Tue, 7 Sep 2010 19:10:08 -0700
-Message-ID: <477F20668A386D41ADCC57781B1F704307D2FE4A52@SC-VEXCH1.marvell.com>
-References: <1283391692-14150-1-git-send-email-bzhao@marvell.com>
- <alpine.LFD.2.00.1009021344430.19366@xanadu.home>
- <477F20668A386D41ADCC57781B1F704307D2F41B27@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009021923171.19366@xanadu.home>
- <477F20668A386D41ADCC57781B1F704307D2FE4A0F@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009072119210.19366@xanadu.home>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCHv6 3/3] mmc_test: collect data and show it via sysfs by demand
+Date: Wed, 8 Sep 2010 12:08:58 +0300
+Message-ID: <AANLkTikV4TvwtwQHnb_p9HBsJTV4hVmbpvjKs6MvbYo=@mail.gmail.com>
+References: <09f59cd98b59bf521a5866ab58c216e0a0347a6c.1283862780.git.ext-andriy.shevchenko@nokia.com>
+	<ba5173c9b420d9554c83965f47d0b5cba642743a.1283862780.git.ext-andriy.shevchenko@nokia.com>
+	<d7cf4d98c6e0396da903c2e49b028f240853bfc2.1283862780.git.ext-andriy.shevchenko@nokia.com>
+	<20100907152753.4726c076.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dakia3.marvell.com ([65.219.4.28]:35982 "EHLO
-	dakia3.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751436Ab0IHCKO convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Sep 2010 22:10:14 -0400
-In-Reply-To: <alpine.LFD.2.00.1009072119210.19366@xanadu.home>
-Content-Language: en-US
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:35318 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751151Ab0IHJI7 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Sep 2010 05:08:59 -0400
+In-Reply-To: <20100907152753.4726c076.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nico@fluxnic.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michal Miroslaw <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hunter Adrian <adrian.hunter@nokia.com>, Chris Ball <cjb@laptop.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-Hi Nicolas,
+On Wed, Sep 8, 2010 at 1:27 AM, Andrew Morton <akpm@linux-foundation.or=
+g> wrote:
+>> Here is a patch which brings possibility to get test results via sys=
+fs. It
+>> helps to do tests non-interactively.
+>>
+>> We have the file created under sysfs already and we could use it to =
+out test
+>> results.
+>
+> So what we end up with is extremely thin. =C2=A0Something about addin=
+g
+> something to sysfs.
+Yeah, agree with you. How to proceed with commit messages?
+Should I make newer version of this certain patch with updated commit m=
+essage?
 
-> -----Original Message-----
-> From: Nicolas Pitre [mailto:nico@fluxnic.net]
-> Sent: Tuesday, September 07, 2010 6:29 PM
-> To: Bing Zhao
-> Cc: linux-mmc@vger.kernel.org; Michal Miroslaw; Chris Ball; Andrew Morton
-> Subject: RE: [PATCH v2] sdio: skip initialization on powered resume
-> 
-> On Tue, 7 Sep 2010, Bing Zhao wrote:
-> 
-> > Thanks for the hint.
-> >
-> > The new patch skips reading CCCR, common CIS, and validation of
-> > vendor/device IDs inside mmc_sdio_init_card() when powered_resume is
-> > not zero.
-> 
-> Why do you skip the reading of the CIS and IDs validation?  That's
-> basically the main reason for still calling mmc_sdio_init_card().  And
-> that only requires CMD 52 so that should be fine.
+> This is not enough! =C2=A0You're proposing an addition to the kernel-=
+>user
+> ABI. =C2=A0Please fully describe this interface so that we can unders=
+tand
+> and review it. =C2=A0What are the names of these sysfs files? =C2=A0W=
+hat do they
+> do?
+The sysfs file already exists for me as for feature contributor. I
+think I could issue separate
+patch to update documentation  part.
 
-While the system is suspended, the SDIO card could be in sleep mode (deep sleep or IEEE Power Save) as well. Reading CIS or any other CMD52 will fail if the card happens to be in sleep at this moment. If we skip re-initialization (including CCCR/CIS and IDs validation), mmc_sdio_init_card() returns success. Then the client driver's resume() handler will be called and the card can be woken up by client driver.
+> Provide us with example output in the changelog so we can see for
+> ourselves.
+Will do.
 
-Regards,
+> Please consider documenting the thing in a permanent documentation
+> file. =C2=A0(I don't believe that Documentation/ABI/ is appropriate, =
+given
+> mmc_test's scope).
+Adrian pointed me once to some standalone documentation about this stuf=
+f.
+I will talk to him how we could use this and apply to kernel.
 
-Bing
+> afacit the only useful info we have about mmc_test is
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0help
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0Development driver that performs a =
+series of reads and writes
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0to a memory card in order to expose=
+ certain well known bugs
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0in host controllers. The tests are =
+executed by writing to the
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0"test" file in sysfs under each car=
+d. Note that whatever is
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0on your card will be overwritten by=
+ these tests.
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0This driver is only of interest to =
+those developing or
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0testing a host driver. Most people =
+should say N here.
+>
+> which I guess is good enough, given the smallness and sophistication =
+of
+> its users. =C2=A0It could be improved on though!
+Ok.
+Thanks.
 
-> 
-> 
-> Nicolas
+--=20
+With Best Regards,
+Andy Shevchenko
