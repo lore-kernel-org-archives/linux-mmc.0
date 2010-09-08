@@ -1,284 +1,510 @@
-From: Lei Wen <adrian.wenl@gmail.com>
-Subject: Re: [PATCH v3] mmc: add config and runtime option for number of
- mmcblk minors
-Date: Wed, 8 Sep 2010 22:25:58 +0800
-Message-ID: <AANLkTikLLwfSXbnjPByXTktEFFVueeAd7HZS5ft-rj-m@mail.gmail.com>
-References: <20100818041333.GA14149@lixom.net>
-	<20100818171636.0625b668.akpm@linux-foundation.org>
-	<20100819032230.GA21980@lixom.net>
-	<20100820010242.GA29588@lixom.net>
-	<20100820221323.GC8535@lixom.net>
+From: hong zhang <henryzhang62@yahoo.com>
+Subject: Re: [PATCHv6 3/3] mmc_test: collect data and show it via sysfs by demand
+Date: Wed, 8 Sep 2010 07:44:44 -0700 (PDT)
+Message-ID: <877713.29364.qm@web57908.mail.re3.yahoo.com>
+References: <d7cf4d98c6e0396da903c2e49b028f240853bfc2.1283862780.git.ext-andriy.shevchenko@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:58741 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753259Ab0IHOZ7 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Sep 2010 10:25:59 -0400
-In-Reply-To: <20100820221323.GC8535@lixom.net>
+Received: from web57908.mail.re3.yahoo.com ([68.142.236.101]:41519 "HELO
+	web57908.mail.re3.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751639Ab0IHOoq convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Sep 2010 10:44:46 -0400
+In-Reply-To: <d7cf4d98c6e0396da903c2e49b028f240853bfc2.1283862780.git.ext-andriy.shevchenko@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mandeep Baines <msb@chromium.org>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Hunter Adrian <adrian.hunter@nokia.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-Hi,
+Andy,
 
-On Sat, Aug 21, 2010 at 6:13 AM, Olof Johansson <olof@lixom.net> wrote:
-> The old limit of number of minor numbers per mmcblk device was hardco=
-ded
-> at 8. This isn't enough for some of the more elaborate partitioning
-> schemes, for example those used by Chrome OS.
->
-> Since there might be a bunch of systems out there with static /dev
-> contents that relies on the old numbering scheme, let's make it a
-> build-time option with the default set to the previous 8.
->
-> Also provide a boot/modprobe-time parameter to override the config
-> default: mmcblk.perdev_minors.
->
-> Signed-off-by: Olof Johansson <olof@lixom.net>
-> Cc: Mandeep Baines <msb@chromium.org>
->
-> ---
->
-> Andrew, sorry for the churn but Mandeep had a couple of good points t=
-hat
-> needed addressing.
->
+Would you please give any command to check card type?
+
+---henry
+
+--- On Tue, 9/7/10, Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
+
+> From: Andy Shevchenko <andy.shevchenko@gmail.com>
+> Subject: [PATCHv6 3/3] mmc_test: collect data and show it via sysfs b=
+y demand
+> To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+> Cc: "Hunter Adrian" <adrian.hunter@nokia.com>, "Chris Ball" <cjb@lapt=
+op.org>, "Andrew Morton" <akpm@linux-foundation.org>, "Andy Shevchenko"=
+ <ext-andriy.shevchenko@nokia.com>
+> Date: Tuesday, September 7, 2010, 7:35 AM
+> TODO:
+>  - implement show() method based on seq_file API
+>=20
+> Changes since v5:
+>  - we can't use BUG_ON at exit() method because it quite
+> normal case when the
+> =A0=A0=A0module is going to be removed with card
+> plugged in, that's why we just free
+> =A0=A0=A0memory there
+>  - rebase against recent linux-next tree
+>=20
+> Changes since v4:
+>  - BUG_ON at exit if the list of the results isn't empty
+>=20
+> Changes since v3:
+>  - fix multi-line commentary style
+>  - protect mmc_test_free_result() by mutex
+>  - apply known values to newly created
+> mmc_test_general_result structure before
+> =A0=A0=A0attaching it to the list
+>  - call list_del() before free mmc_test_transfer_result
+> structure
+>  - check truncated output in show() method, return -ENOBUFS
+> if so
+>  - avoid deadlock in show() method if snprintf() fails
+>=20
+> Changes since v2:
+>  - move card memeber to mmc_test_general_result structrure
+> and thus throw away
+> =A0=A0=A0mmc_test_overall_result which was
+> overkill
+>  - check result of kmalloc and kzalloc
+>  - keep pointer to the actual mmc_test_general_result
+> structure in the
+> =A0=A0=A0mmc_test_card
+>=20
 > Changes since v1:
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0* Runtime override of config default
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0* Better help text
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0* DIV_ROUND_UP for max_devices calculation
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0* Clarify mmcblk device count limitations
->
-> Changes since v2 based on feedback from Mandeep Baines:
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0* DIV_ROUND_UP is doing the wrong thing, w=
-e'll end up using
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0the last fractional range of minors=
- which we shouldn't.
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0* Documentation/devices.txt update
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0* No need to compute max_devices twice, ju=
-st do it at runtime.
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0* Permission fix for the module_param -- i=
-t's readonly.
->
-> =C2=A0Documentation/devices.txt | =C2=A0 =C2=A06 ++++++
-> =C2=A0drivers/mmc/card/Kconfig =C2=A0| =C2=A0 17 +++++++++++++++++
-> =C2=A0drivers/mmc/card/block.c =C2=A0| =C2=A0 41 ++++++++++++++++++++=
-++++++++++-----------
-> =C2=A03 files changed, 53 insertions(+), 11 deletions(-)
->
-> diff --git a/Documentation/devices.txt b/Documentation/devices.txt
-> index 1d83d12..fdf3821 100644
-> --- a/Documentation/devices.txt
-> +++ b/Documentation/devices.txt
-> @@ -2518,6 +2518,12 @@ Your cooperation is appreciated.
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A08 =3D /=
-dev/mmcblk1 =C2=A0 =C2=A0 =C2=A0Second SD/MMC card
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
-=2E..
->
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 The start of next =
-SD/MMC card can be configured with
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 CONFIG_MMC_BLOCK_M=
-INORS, or overridden at boot/modprobe
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 time using the mmc=
-blk.perdev_minors option. That would
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 bump the offset be=
-tween each card to be the configured
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 value instead of t=
-he default 8.
+>  - structrure members are described
+>  - save transfer results code is split to separate
+> function
+>  - in mmc_test_print_rate() use count =3D 1 instead of 0
+>  - mmc_test_result keeps overall results (across all tested
+> cards), however
+> =A0=A0=A0it's still global variable
+>  - list_head variables inside structures have a suffix _lst
+> now
+>=20
+> Here is a patch which brings possibility to get test
+> results via sysfs. It
+> helps to do tests non-interactively.
+>=20
+> We have the file created under sysfs already and we could
+> use it to out test
+> results.
+>=20
+> This patch applied on top of patches published here [1]
+>=20
+> [1] http://lkml.org/lkml/2010/8/18/164
+>=20
+> Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+> ---
+>  drivers/mmc/card/mmc_test.c |=A0 171
+> ++++++++++++++++++++++++++++++++++++++++++-
+>  1 files changed, 169 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/drivers/mmc/card/mmc_test.c
+> b/drivers/mmc/card/mmc_test.c
+> index 6bffb33..58d746b 100644
+> --- a/drivers/mmc/card/mmc_test.c
+> +++ b/drivers/mmc/card/mmc_test.c
+> @@ -17,6 +17,7 @@
+> =20
+>  #include <linux/scatterlist.h>
+>  #include <linux/swap.h>=A0=A0=A0
+> =A0=A0=A0 /* For nr_free_buffer_pages() */
+> +#include <linux/list.h>
+> =20
+>  #define RESULT_OK=A0=A0=A0 =A0=A0=A0 0
+>  #define RESULT_FAIL=A0=A0=A0 =A0=A0=A0
+> 1
+> @@ -73,12 +74,45 @@ struct mmc_test_area {
+>  };
+> =20
+>  /**
+> + * struct mmc_test_transfer_result - transfer results for
+> performance tests.
+> + * @link: double-linked list
+> + * @count: amount of group of sectors to check
+> + * @sectors: amount of sectors to check in one group
+> + * @ts: time values of transfer
+> + * @rate: calculated transfer rate
+> + */
+> +struct mmc_test_transfer_result {
+> +=A0=A0=A0 struct list_head link;
+> +=A0=A0=A0 unsigned int count;
+> +=A0=A0=A0 unsigned int sectors;
+> +=A0=A0=A0 struct timespec ts;
+> +=A0=A0=A0 unsigned int rate;
+> +};
 > +
-> =C2=A0179 char =C2=A0 =C2=A0 =C2=A0 CCube DVXChip-based PCI products
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A00 =3D /=
-dev/dvxirq0 =C2=A0 =C2=A0 =C2=A0First DVX device
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A01 =3D /=
-dev/dvxirq1 =C2=A0 =C2=A0 =C2=A0Second DVX device
-> diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
-> index 3f2a912..57e4416 100644
-> --- a/drivers/mmc/card/Kconfig
-> +++ b/drivers/mmc/card/Kconfig
-> @@ -14,6 +14,23 @@ config MMC_BLOCK
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0mount the filesystem. Almost everyo=
-ne wishing MMC support
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0should say Y or M here.
->
-> +config MMC_BLOCK_MINORS
-> + =C2=A0 =C2=A0 =C2=A0 int "Number of minors per block device"
-> + =C2=A0 =C2=A0 =C2=A0 range 4 256
-> + =C2=A0 =C2=A0 =C2=A0 default 8
-> + =C2=A0 =C2=A0 =C2=A0 help
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 Number of minors per block device. One =
-is needed for every
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 partition on the disk (plus one for the=
- whole disk).
+> +/**
+> + * struct mmc_test_general_result - results for tests.
+> + * @link: double-linked list
+> + * @card: card under test
+> + * @testcase: number of test case
+> + * @result: result of test run
+> + * @tr_lst: transfer measurements if any as
+> mmc_test_transfer_result
+> + */
+> +struct mmc_test_general_result {
+> +=A0=A0=A0 struct list_head link;
+> +=A0=A0=A0 struct mmc_card *card;
+> +=A0=A0=A0 int testcase;
+> +=A0=A0=A0 int result;
+> +=A0=A0=A0 struct list_head tr_lst;
+> +};
 > +
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 Number of total MMC minors available is=
- 256, so your number
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 of supported block devices will be limi=
-ted to 256 divided
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 by this number.
+> +/**
+> =A0 * struct mmc_test_card - test information.
+> =A0 * @card: card under test
+> =A0 * @scratch: transfer buffer
+> =A0 * @buffer: transfer buffer
+> =A0 * @highmem: buffer for highmem tests
+> =A0 * @area: information for performance tests
+> + * @gr: pointer to results of current testcase
+> =A0 */
+>  struct mmc_test_card {
+>  =A0=A0=A0 struct mmc_card=A0=A0=A0
+> *card;
+> @@ -88,7 +122,8 @@ struct mmc_test_card {
+>  #ifdef CONFIG_HIGHMEM
+>  =A0=A0=A0 struct page=A0=A0=A0
+> *highmem;
+>  #endif
+> -=A0=A0=A0 struct mmc_test_area area;
+> +=A0=A0=A0 struct mmc_test_area=A0=A0=A0
+> =A0=A0=A0 area;
+> +=A0=A0=A0 struct
+> mmc_test_general_result=A0=A0=A0 *gr;
+>  };
+> =20
+>=20
+> /*******************************************************************/
+> @@ -421,6 +456,30 @@ static unsigned int
+> mmc_test_rate(uint64_t bytes, struct timespec *ts)
+>  }
+> =20
+>  /*
+> + * Save transfer results for future usage
+> + */
+> +static void mmc_test_save_transfer_result(struct
+> mmc_test_card *test,
+> +=A0=A0=A0 unsigned int count, unsigned int
+> sectors, struct timespec ts,
+> +=A0=A0=A0 unsigned int rate)
+> +{
+> +=A0=A0=A0 struct mmc_test_transfer_result *tr;
 > +
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 Default is 8 to be backwards compatible=
- with previous
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 hardwired device numbering.
+> +=A0=A0=A0 if (!test->gr)
+> +=A0=A0=A0 =A0=A0=A0 return;
 > +
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 If unsure, say 8 here.
+> +=A0=A0=A0 tr =3D kmalloc(sizeof(struct
+> mmc_test_transfer_result), GFP_KERNEL);
+> +=A0=A0=A0 if (!tr)
+> +=A0=A0=A0 =A0=A0=A0 return;
 > +
-> =C2=A0config MMC_BLOCK_BOUNCE
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0bool "Use bounce buffer for simple hosts"
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0depends on MMC_BLOCK
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index cb9fbc8..ec94f56 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -43,14 +43,26 @@
-> =C2=A0#include "queue.h"
->
-> =C2=A0MODULE_ALIAS("mmc:block");
-> +#ifdef MODULE_PARAM_PREFIX
-> +#undef MODULE_PARAM_PREFIX
-> +#endif
-> +#define MODULE_PARAM_PREFIX "mmcblk."
+> +=A0=A0=A0 tr->count =3D count;
+> +=A0=A0=A0 tr->sectors =3D sectors;
+> +=A0=A0=A0 tr->ts =3D ts;
+> +=A0=A0=A0 tr->rate =3D rate;
 > +
+> +=A0=A0=A0 list_add_tail(&tr->link,
+> &test->gr->tr_lst);
+> +}
 > +
 > +/*
-> + * The defaults come from config options but can be overriden by mod=
-ule
-> + * or bootarg options.
-> + */
-> +static int perdev_minors =3D CONFIG_MMC_BLOCK_MINORS;
->
-> =C2=A0/*
-> - * max 8 partitions per card
-> + * We've only got one major, so number of mmcblk devices is
-> + * limited to 256 / number of minors per device.
-> =C2=A0*/
-> -#define MMC_SHIFT =C2=A0 =C2=A0 =C2=A03
-> -#define MMC_NUM_MINORS (256 >> MMC_SHIFT)
-> +static int max_devices;
->
-> -static DECLARE_BITMAP(dev_use, MMC_NUM_MINORS);
-> +/* 256 minors, so at most 256 separate devices */
-> +static DECLARE_BITMAP(dev_use, 256);
->
-> =C2=A0/*
-> =C2=A0* There is one mmc_blk_data per slot.
-> @@ -66,6 +78,9 @@ struct mmc_blk_data {
->
-> =C2=A0static DEFINE_MUTEX(open_lock);
->
-> +module_param(perdev_minors, int, 0444);
-> +MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per devi=
-ce");
+> =A0 * Print the transfer rate.
+> =A0 */
+>  static void mmc_test_print_rate(struct mmc_test_card
+> *test, uint64_t bytes,
+> @@ -438,6 +497,8 @@ static void mmc_test_print_rate(struct
+> mmc_test_card *test, uint64_t bytes,
+>  =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0=A0=A0mmc_hostname(test->card->host),
+> sectors, sectors >> 1,
+>  =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0=A0=A0(sectors =3D=3D 1 ? ".5" : ""),
+> (unsigned long)ts.tv_sec,
+>  =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0=A0=A0(unsigned long)ts.tv_nsec,
+> rate / 1000, rate / 1024);
 > +
-> =C2=A0static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
-> =C2=A0{
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_blk_data *md;
-> @@ -87,10 +102,10 @@ static void mmc_blk_put(struct mmc_blk_data *md)
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->usage--;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (md->usage =3D=3D 0) {
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0int devmaj =3D=
- MAJOR(disk_devt(md->disk));
-> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 int devidx =3D MIN=
-OR(disk_devt(md->disk)) >> MMC_SHIFT;
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 int devidx =3D MIN=
-OR(disk_devt(md->disk)) / perdev_minors;
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0if (!devmaj)
-> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 devidx =3D md->disk->first_minor >> MMC_SHIFT;
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 devidx =3D md->disk->first_minor / perdev_minors;
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0blk_cleanup_qu=
-eue(md->queue.queue);
->
-> @@ -482,8 +497,8 @@ static struct mmc_blk_data *mmc_blk_alloc(struct =
-mmc_card *card)
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_blk_data *md;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0int devidx, ret;
->
-> - =C2=A0 =C2=A0 =C2=A0 devidx =3D find_first_zero_bit(dev_use, MMC_NU=
-M_MINORS);
-> - =C2=A0 =C2=A0 =C2=A0 if (devidx >=3D MMC_NUM_MINORS)
-> + =C2=A0 =C2=A0 =C2=A0 devidx =3D find_first_zero_bit(dev_use, max_de=
-vices);
-> + =C2=A0 =C2=A0 =C2=A0 if (devidx >=3D max_devices)
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0return ERR_PTR=
-(-ENOSPC);
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0__set_bit(devidx, dev_use);
->
-> @@ -500,7 +515,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct =
-mmc_card *card)
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 */
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->read_only =3D mmc_blk_readonly(card);
->
-> - =C2=A0 =C2=A0 =C2=A0 md->disk =3D alloc_disk(1 << MMC_SHIFT);
-> + =C2=A0 =C2=A0 =C2=A0 md->disk =3D alloc_disk(perdev_minors);
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (md->disk =3D=3D NULL) {
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0ret =3D -ENOME=
-M;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0goto err_kfree=
-;
-> @@ -517,7 +532,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct =
-mmc_card *card)
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->queue.data =3D md;
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->disk->major =3D MMC_BLOCK_MAJOR;
-> - =C2=A0 =C2=A0 =C2=A0 md->disk->first_minor =3D devidx << MMC_SHIFT;
-> + =C2=A0 =C2=A0 =C2=A0 md->disk->first_minor =3D devidx * perdev_mino=
-rs;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->disk->fops =3D &mmc_bdops;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->disk->private_data =3D md;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->disk->queue =3D md->queue.queue;
-> @@ -593,7 +608,6 @@ static int mmc_blk_probe(struct mmc_card *card)
-> =C2=A0{
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_blk_data *md;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0int err;
-> -
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0char cap_str[10];
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0/*
-> @@ -683,6 +697,11 @@ static int __init mmc_blk_init(void)
-> =C2=A0{
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0int res;
->
-> + =C2=A0 =C2=A0 =C2=A0 if (perdev_minors !=3D CONFIG_MMC_BLOCK_MINORS=
-)
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 pr_info("mmcblk: u=
-sing %d minors per device\n", perdev_minors);
+> +=A0=A0=A0 mmc_test_save_transfer_result(test, 1,
+> sectors, ts, rate);
+>  }
+> =20
+>  /*
+> @@ -461,6 +522,8 @@ static void
+> mmc_test_print_avg_rate(struct mmc_test_card *test, uint64_t
+> bytes,
+>  =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0=A0=A0sectors >> 1, (sectors
+> =3D=3D 1 ? ".5" : ""),
+>  =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0=A0=A0(unsigned long)ts.tv_sec,
+> (unsigned long)ts.tv_nsec,
+>  =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0=A0=A0rate / 1000, rate / 1024);
 > +
-> + =C2=A0 =C2=A0 =C2=A0 max_devices =3D 256 / perdev_minors;
+> +=A0=A0=A0 mmc_test_save_transfer_result(test,
+> count, sectors, ts, rate);
+>  }
+> =20
+>  /*
+> @@ -1853,6 +1916,8 @@ static const struct mmc_test_case
+> mmc_test_cases[] =3D {
+> =20
+>  static DEFINE_MUTEX(mmc_test_lock);
+> =20
+> +static LIST_HEAD(mmc_test_result);
 > +
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0res =3D register_blkdev(MMC_BLOCK_MAJOR, "=
-mmc");
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (res)
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0goto out;
+>  static void mmc_test_run(struct mmc_test_card *test, int
+> testcase)
+>  {
+>  =A0=A0=A0 int i, ret;
+> @@ -1863,6 +1928,8 @@ static void mmc_test_run(struct
+> mmc_test_card *test, int testcase)
+>  =A0=A0=A0
+> mmc_claim_host(test->card->host);
+> =20
+>  =A0=A0=A0 for (i =3D 0;i <
+> ARRAY_SIZE(mmc_test_cases);i++) {
+> +=A0=A0=A0 =A0=A0=A0 struct
+> mmc_test_general_result *gr;
+> +
+>  =A0=A0=A0 =A0=A0=A0 if (testcase
+> && ((i + 1) !=3D testcase))
+>  =A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> continue;
+> =20
+> @@ -1881,6 +1948,25 @@ static void mmc_test_run(struct
+> mmc_test_card *test, int testcase)
+>  =A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> }
+>  =A0=A0=A0 =A0=A0=A0 }
+> =20
+> +=A0=A0=A0 =A0=A0=A0 gr =3D
+> kzalloc(sizeof(struct mmc_test_general_result),
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> GFP_KERNEL);
+> +=A0=A0=A0 =A0=A0=A0 if (gr) {
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> INIT_LIST_HEAD(&gr->tr_lst);
+> +
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> /* Assign data what we know already */
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> gr->card =3D test->card;
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> gr->testcase =3D i;
+> +
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> /* Append container to global one */
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> list_add_tail(&gr->link, &mmc_test_result);
+> +
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> /*
+> +=A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0=A0=A0* Save the pointer to created
+> container in our private
+> +=A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0=A0=A0* structure.
+> +=A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0=A0=A0*/
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> test->gr =3D gr;
+> +=A0=A0=A0 =A0=A0=A0 }
+> +
+>  =A0=A0=A0 =A0=A0=A0 ret =3D
+> mmc_test_cases[i].run(test);
+>  =A0=A0=A0 =A0=A0=A0 switch (ret) {
+>  =A0=A0=A0 =A0=A0=A0 case RESULT_OK:
+> @@ -1906,6 +1992,10 @@ static void mmc_test_run(struct
+> mmc_test_card *test, int testcase)
+>  =A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0 mmc_hostname(test->card->host),
+> ret);
+>  =A0=A0=A0 =A0=A0=A0 }
+> =20
+> +=A0=A0=A0 =A0=A0=A0 /* Save the result
+> */
+> +=A0=A0=A0 =A0=A0=A0 if (gr)
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> gr->result =3D ret;
+> +
+>  =A0=A0=A0 =A0=A0=A0 if
+> (mmc_test_cases[i].cleanup) {
+>  =A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> ret =3D mmc_test_cases[i].cleanup(test);
+>  =A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> if (ret) {
+> @@ -1923,13 +2013,80 @@ static void mmc_test_run(struct
+> mmc_test_card *test, int testcase)
+>  =A0=A0=A0 =A0=A0=A0
+> mmc_hostname(test->card->host));
+>  }
+> =20
+> +static void mmc_test_free_result(struct mmc_card *card)
+> +{
+> +=A0=A0=A0 struct mmc_test_general_result *gr,
+> *grs;
+> +
+> +=A0=A0=A0 mutex_lock(&mmc_test_lock);
+> +
+> +=A0=A0=A0 list_for_each_entry_safe(gr, grs,
+> &mmc_test_result, link) {
+> +=A0=A0=A0 =A0=A0=A0 struct
+> mmc_test_transfer_result *tr, *trs;
+> +
+> +=A0=A0=A0 =A0=A0=A0 if (card &&
+> gr->card !=3D card)
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> continue;
+> +
+> +=A0=A0=A0 =A0=A0=A0
+> list_for_each_entry_safe(tr, trs, &gr->tr_lst, link)
+> {
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> list_del(&tr->link);
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> kfree(tr);
+> +=A0=A0=A0 =A0=A0=A0 }
+> +
+> +=A0=A0=A0 =A0=A0=A0
+> list_del(&gr->link);
+> +=A0=A0=A0 =A0=A0=A0 kfree(gr);
+> +=A0=A0=A0 }
+> +
+> +=A0=A0=A0 mutex_unlock(&mmc_test_lock);
+> +}
+> +
+>  static ssize_t mmc_test_show(struct device *dev,
+>  =A0=A0=A0 struct device_attribute *attr, char
+> *buf)
+>  {
+> +=A0=A0=A0 struct mmc_card *card =3D
+> mmc_dev_to_card(dev);
+> +=A0=A0=A0 struct mmc_test_general_result *gr;
+> +=A0=A0=A0 char *p =3D buf;
+> +=A0=A0=A0 size_t len =3D PAGE_SIZE;
+> +=A0=A0=A0 int ret;
+> +
+>  =A0=A0=A0 mutex_lock(&mmc_test_lock);
+> +
+> +=A0=A0=A0 list_for_each_entry(gr,
+> &mmc_test_result, link) {
+> +=A0=A0=A0 =A0=A0=A0 struct
+> mmc_test_transfer_result *tr;
+> +
+> +=A0=A0=A0 =A0=A0=A0 if (gr->card !=3D
+> card)
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> continue;
+> +
+> +=A0=A0=A0 =A0=A0=A0 ret =3D snprintf(p,
+> len, "Test %d: %d\n", gr->testcase + 1,
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> gr->result);
+> +=A0=A0=A0 =A0=A0=A0 if (ret < 0)
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> goto err;
+> +=A0=A0=A0 =A0=A0=A0 if (ret >=3D len)
+> {
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> ret =3D -ENOBUFS;
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> goto err;
+> +=A0=A0=A0 =A0=A0=A0 }
+> +=A0=A0=A0 =A0=A0=A0 p +=3D ret;
+> +=A0=A0=A0 =A0=A0=A0 len -=3D ret;
+> +
+> +=A0=A0=A0 =A0=A0=A0
+> list_for_each_entry(tr, &gr->tr_lst, link) {
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> ret =3D snprintf(p, len, "%u %d %lu.%09lu %u\n",
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0 tr->count, tr->sectors,
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0 (unsigned long)tr->ts.tv_sec,
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0 (unsigned long)tr->ts.tv_nsec,
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0 tr->rate);
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> if (ret < 0)
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0 goto err;
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> if (ret >=3D len) {
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0 ret =3D -ENOBUFS;
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> =A0=A0=A0 goto err;
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> }
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0 p
+> +=3D ret;
+> +=A0=A0=A0 =A0=A0=A0 =A0=A0=A0
+> len -=3D ret;
+> +=A0=A0=A0 =A0=A0=A0 }
+> +=A0=A0=A0 }
+> +
+> +=A0=A0=A0 ret =3D PAGE_SIZE - len;
+> +err:
+>  =A0=A0=A0 mutex_unlock(&mmc_test_lock);
+> =20
+> -=A0=A0=A0 return 0;
+> +=A0=A0=A0 return ret;
+>  }
+> =20
+>  static ssize_t mmc_test_store(struct device *dev,
+> @@ -1946,6 +2103,12 @@ static ssize_t mmc_test_store(struct
+> device *dev,
+>  =A0=A0=A0 if (!test)
+>  =A0=A0=A0 =A0=A0=A0 return -ENOMEM;
+> =20
+> +=A0=A0=A0 /*
+> +=A0=A0=A0=A0=A0* Remove all test cases
+> associated with given card. Thus we have only
+> +=A0=A0=A0=A0=A0* actual data of the last
+> run.
+> +=A0=A0=A0=A0=A0*/
+> +=A0=A0=A0 mmc_test_free_result(card);
+> +
+>  =A0=A0=A0 test->card =3D card;
+> =20
+>  =A0=A0=A0 test->buffer =3D kzalloc(BUFFER_SIZE,
+> GFP_KERNEL);
+> @@ -1992,6 +2155,7 @@ static int mmc_test_probe(struct
+> mmc_card *card)
+> =20
+>  static void mmc_test_remove(struct mmc_card *card)
+>  {
+> +=A0=A0=A0 mmc_test_free_result(card);
+>  =A0=A0=A0 device_remove_file(&card->dev,
+> &dev_attr_test);
+>  }
+> =20
+> @@ -2010,6 +2174,9 @@ static int __init
+> mmc_test_init(void)
+> =20
+>  static void __exit mmc_test_exit(void)
+>  {
+> +=A0=A0=A0 /* Clear stalled data if card is still
+> plugged */
+> +=A0=A0=A0 mmc_test_free_result(NULL);
+> +
+>  =A0=A0=A0
+> mmc_unregister_driver(&mmc_driver);
+>  }
+> =20
+> --=20
+> 1.6.3.3
+>=20
 > --
-> 1.5.6.5
->
+> To unsubscribe from this list: send the line "unsubscribe
+> linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at=A0 http://vger.kernel.org/majordomo-info.html
+>=20
 
-The patch's purpose is good. As modern sd&mmc is used to host the file
-system, the 8 partition limitation is becoming a kind of bottleneck...
-But why not just add GENHD_FL_EXT_DEVT flag to allow mmc use extended
-partition numbers?
 
-Like this modification?
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 8d2bd24..2e3eeb1 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -557,6 +557,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct
-mmc_card *card)
-        md->disk->private_data =3D md;
-        md->disk->queue =3D md->queue.queue;
-        md->disk->driverfs_dev =3D &card->dev;
-+       md->disk->flags |=3D GENHD_FL_EXT_DEVT;
-
-        /*
-         * As discussed on lkml, GENHD_FL_REMOVABLE should:
-
-Best regards,
-Lei
+     =20
