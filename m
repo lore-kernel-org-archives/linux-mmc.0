@@ -1,67 +1,38 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCHv6 3/3] mmc_test: collect data and show it via sysfs by
- demand
-Date: Wed, 8 Sep 2010 12:50:17 -0700
-Message-ID: <20100908125017.686ebebd.akpm@linux-foundation.org>
-References: <09f59cd98b59bf521a5866ab58c216e0a0347a6c.1283862780.git.ext-andriy.shevchenko@nokia.com>
-	<ba5173c9b420d9554c83965f47d0b5cba642743a.1283862780.git.ext-andriy.shevchenko@nokia.com>
-	<d7cf4d98c6e0396da903c2e49b028f240853bfc2.1283862780.git.ext-andriy.shevchenko@nokia.com>
-	<20100907152753.4726c076.akpm@linux-foundation.org>
-	<AANLkTikV4TvwtwQHnb_p9HBsJTV4hVmbpvjKs6MvbYo=@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
+Date: Wed, 8 Sep 2010 22:37:41 +0100
+Message-ID: <20100908213740.GA7550@void.printf.net>
+References: <20100714130728.GA27339@oksana.dev.rtsoft.ru> <20100907153813.936db0c6.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:60695 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753497Ab0IHTuz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Sep 2010 15:50:55 -0400
-In-Reply-To: <AANLkTikV4TvwtwQHnb_p9HBsJTV4hVmbpvjKs6MvbYo=@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:56914 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755468Ab0IHViT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Sep 2010 17:38:19 -0400
+Content-Disposition: inline
+In-Reply-To: <20100907153813.936db0c6.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hunter Adrian <adrian.hunter@nokia.com>, Chris Ball <cjb@laptop.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Anton Vorontsov <avorontsov@mvista.com>, Wolfram Sang <w.sang@pengutronix.de>, Albert Herranz <albert_herranz@yahoo.es>, Matt Fleming <matt@console-pimps.org>, Ben Dooks <ben-linux@fluff.org>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@ozlabs.org
 
-On Wed, 8 Sep 2010 12:08:58 +0300
-Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
+Hi Andrew,
 
-> On Wed, Sep 8, 2010 at 1:27 AM, Andrew Morton <akpm@linux-foundation.org> wrote:
-> >> Here is a patch which brings possibility to get test results via sysfs. It
-> >> helps to do tests non-interactively.
-> >>
-> >> We have the file created under sysfs already and we could use it to out test
-> >> results.
-> >
-> > So what we end up with is extremely thin. __Something about adding
-> > something to sysfs.
-> Yeah, agree with you. How to proceed with commit messages?
-> Should I make newer version of this certain patch with updated commit message?
+On Tue, Sep 07, 2010 at 03:38:13PM -0700, Andrew Morton wrote:
+> > I noticed no throughput drop neither with PIO transfers nor
+> > with DMA (tested on MPC8569E CPU), while latencies should be
+> > greatly improved.
 > 
+> This patchset isn't causing any problems yet, but may do so in the
+> future and will impact the validity of any testing.  It seems to be
+> kind of stuck.  Should I drop it all?
 
-I used the words which Chris sent:
+I suggest keeping it -- I'll find time to test it out here soon, and
+will keep it in mind as a possible regression cause.
 
+Thanks,
 
-: Make it possibile to get test results via sysfs.  It helps to do tests
-: non-interactively.
-: 
-: We have the file created under sysfs already and we could use it to out test
-: results.
-: 
-: Prior to this patch, the "test" file under each card's sysfs node was
-: write-only, and results were obtained by looking at dmesg.  This patch
-: improves programmatic access to the test results, making them available by
-: reading back from the same "test" file:
-: 
-: [root@host mmc0:e624]# echo 6 > test
-: [root@host mmc0:e624]# cat test
-: Test 6: 2
-: 
-: [cjb@laptop.org: changelog improvements]
-: Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
-: Cc: Chris Ball <cjb@laptop.org>
-: Cc: <linux-mmc@vger.kernel.org>
-
-which is good enough.  You can send me replacement changelog text any
-old time - it's not problem.  I'm forever editing changelogs, mainly
-adding acked-by's etc.  
-
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
