@@ -1,32 +1,67 @@
-From: Luciano Coelho <luciano.coelho@nokia.com>
-Subject: Re: [PATCH v1 0/8] SDIO Runtime PM Support
-Date: Wed, 08 Sep 2010 10:52:24 -0700
-Message-ID: <1283968344.9120.22.camel@capsicum>
-References: <1283858949-11073-1-git-send-email-ohad@wizery.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCHv6 3/3] mmc_test: collect data and show it via sysfs by
+ demand
+Date: Wed, 8 Sep 2010 12:50:17 -0700
+Message-ID: <20100908125017.686ebebd.akpm@linux-foundation.org>
+References: <09f59cd98b59bf521a5866ab58c216e0a0347a6c.1283862780.git.ext-andriy.shevchenko@nokia.com>
+	<ba5173c9b420d9554c83965f47d0b5cba642743a.1283862780.git.ext-andriy.shevchenko@nokia.com>
+	<d7cf4d98c6e0396da903c2e49b028f240853bfc2.1283862780.git.ext-andriy.shevchenko@nokia.com>
+	<20100907152753.4726c076.akpm@linux-foundation.org>
+	<AANLkTikV4TvwtwQHnb_p9HBsJTV4hVmbpvjKs6MvbYo=@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([147.243.1.47]:43218 "EHLO mgw-sa01.nokia.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751098Ab0IHRxD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Sep 2010 13:53:03 -0400
-In-Reply-To: <1283858949-11073-1-git-send-email-ohad@wizery.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:60695 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753497Ab0IHTuz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Sep 2010 15:50:55 -0400
+In-Reply-To: <AANLkTikV4TvwtwQHnb_p9HBsJTV4hVmbpvjKs6MvbYo=@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ext Ohad Ben-Cohen <ohad@wizery.com>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, San Mehat <san@google.com>, "Quadros Roger (Nokia-MS/Helsinki)" <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hunter Adrian <adrian.hunter@nokia.com>, Chris Ball <cjb@laptop.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-On Tue, 2010-09-07 at 13:29 +0200, ext Ohad Ben-Cohen wrote:
-> This patchset introduces runtime PM support to SDIO cards.
+On Wed, 8 Sep 2010 12:08:58 +0300
+Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
 
-I guess this whole patchset should be pulled via the mmc tree, since
-there are more mmc patches, if that's fine with Andrew.
+> On Wed, Sep 8, 2010 at 1:27 AM, Andrew Morton <akpm@linux-foundation.org> wrote:
+> >> Here is a patch which brings possibility to get test results via sysfs. It
+> >> helps to do tests non-interactively.
+> >>
+> >> We have the file created under sysfs already and we could use it to out test
+> >> results.
+> >
+> > So what we end up with is extremely thin. __Something about adding
+> > something to sysfs.
+> Yeah, agree with you. How to proceed with commit messages?
+> Should I make newer version of this certain patch with updated commit message?
+> 
 
-I haven't checked the mmc patches, since I'm not very familiar with that
-area, but the wl1271 driver change is ack from me.
+I used the words which Chris sent:
 
--- 
-Cheers,
-Luca.
+
+: Make it possibile to get test results via sysfs.  It helps to do tests
+: non-interactively.
+: 
+: We have the file created under sysfs already and we could use it to out test
+: results.
+: 
+: Prior to this patch, the "test" file under each card's sysfs node was
+: write-only, and results were obtained by looking at dmesg.  This patch
+: improves programmatic access to the test results, making them available by
+: reading back from the same "test" file:
+: 
+: [root@host mmc0:e624]# echo 6 > test
+: [root@host mmc0:e624]# cat test
+: Test 6: 2
+: 
+: [cjb@laptop.org: changelog improvements]
+: Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+: Cc: Chris Ball <cjb@laptop.org>
+: Cc: <linux-mmc@vger.kernel.org>
+
+which is good enough.  You can send me replacement changelog text any
+old time - it's not problem.  I'm forever editing changelogs, mainly
+adding acked-by's etc.  
 
