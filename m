@@ -1,139 +1,67 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
-Date: Thu, 9 Sep 2010 02:27:51 +0400
-Message-ID: <20100908222751.GA23068@oksana.dev.rtsoft.ru>
-References: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
- <20100907153813.936db0c6.akpm@linux-foundation.org>
- <20100908213740.GA7550@void.printf.net>
- <20100908215750.GA17232@oksana.dev.rtsoft.ru>
- <20100908220548.GA7967@void.printf.net>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] MMC: move regulator handling closer to core v3
+Date: Wed, 8 Sep 2010 15:51:14 -0700
+Message-ID: <20100908155114.880463fc.akpm@linux-foundation.org>
+References: <1283677538-31121-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:61491 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756267Ab0IHW14 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Sep 2010 18:27:56 -0400
-Content-Disposition: inline
-In-Reply-To: <20100908220548.GA7967@void.printf.net>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:40037 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755835Ab0IHWwx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Sep 2010 18:52:53 -0400
+In-Reply-To: <1283677538-31121-1-git-send-email-linus.walleij@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Wolfram Sang <w.sang@pengutronix.de>, Albert Herranz <albert_herranz@yahoo.es>, Matt Fleming <matt@console-pimps.org>, Ben Dooks <ben-linux@fluff.org>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@ozlabs.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: linux-kernel@vger.kernel.org, Liam Girdwood <lrg@slimlogic.co.uk>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@nokia.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Sundar Iyer <sundar.iyer@stericsson.com>, Daniel Mack <daniel@caiaq.de>, Pierre Ossman <pierre@ossman.eu>, Matt Fleming <matt@console-pimps.org>, David Brownell <dbrownell@users.sourceforge.net>, Russell King <rmk+kernel@arm.linux.org.uk>, Eric Miao <eric.y.miao@gmail.com>, Cliff Brake <cbrake@bec-systems.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, Sep 08, 2010 at 11:05:48PM +0100, Chris Ball wrote:
-> Hi Anton,
+On Sun,  5 Sep 2010 11:05:38 +0200
+Linus Walleij <linus.walleij@stericsson.com> wrote:
+
+> After discovering a problem in regulator reference counting I
+> took Mark Brown's advice to move the reference count into the
+> MMC core by making the regulator status a member of
+> struct mmc_host.
 > 
-> On Thu, Sep 09, 2010 at 01:57:50AM +0400, Anton Vorontsov wrote:
-> > Thanks!
-> > 
-> > Would be also great if you could point out which patch causes
-> > most of the performance drop (if any)?
-> > 
-> > Albert, if you could find time, can you also "bisect" the
-> > patchset? I wouldn't want to buy Nintendo WII just to debug the
-> > perf regression. ;-) FWIW, I tried to disable multiblock
-> > read/writes and test with SD cards, and still didn't notice
-> > any performance drops.
-> > 
-> > Maybe it's SDIO IRQs that cause the performance drop for the
-> > WII case, as we delay them a little bit? Or it could be the
-> > patch that introduces threaded IRQ handler in whole causes
-> > it. If so, I guess we'd need to move some of the processing to
-> > the real IRQ context, keeping the handler lockless (if
-> > possible) or introducing a very fine grained locking.
-> 
-> I didn't know anything about a reported performance drop, and I don't
-> think Andrew did either -- Albert's test results don't seem to have
-> made it to this list, or anywhere else that I can see.  Could you 
-> link to/repost his comments?
-> 
-> (I'll be testing with libertas, so that will stress-test SDIO IRQs.)
+>
+> ...
+>
+> -static inline void pxamci_set_power(struct pxamci_host *host, unsigned int vdd)
+> +static inline void pxamci_set_power(struct pxamci_host *host,
+> +				    unsigned char power_mode,
+> +				    unsigned int vdd)
+>  {
+>  	int on;
+>  
+> -#ifdef CONFIG_REGULATOR
+> -	if (host->vcc)
+> -		mmc_regulator_set_ocr(host->vcc, vdd);
+> -#endif
+> +	if (host->vcc) {
+> +		int ret;
+> +
+> +		if (power_mode == MMC_POWER_UP)
+> +			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
+> +		else if (power_mode == MMC_POWER_OFF)
+> +			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, 0);
+> +	}
 
-Sure thing, here are Albert's results.
+There's no point in copying the return value into a local then ignoring
+it.  mmc_regulator_set_ocr() can return a negative errno so we should
+test for that, clean up and propagate the error.
 
------ Forwarded message from Albert Herranz <albert_herranz@yahoo.es> -----
+If we really do deliberately ignore the error then there should be a
+code comment which excuses this behaviour and perhaps a warning printk.
 
-Date: Mon, 02 Aug 2010 21:23:51 +0200
-From: Albert Herranz <albert_herranz@yahoo.es>
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-CC: akpm@linux-foundation.org, mm-commits@vger.kernel.org,
-	ben-linux@fluff.org, matt@console-pimps.org, pierre@ossman.eu,
-	w.sang@pengutronix.de, mb@bu3sch.de
-Subject: Re: + sdhci-use-work-structs-instead-of-tasklets.patch added to -mm
-	tree
+The same comments apply to mmci_set_ios().
 
-Hi,
+omap_hsmmc_1_set_power() gets it right.
 
-Some initial numbers regarding performance. The patchset seems to cause a noticeable performance drop.
-I've run two iperf client tests (see the two invocations of iperf -c) and two iperf server tests (see iperf -s invocation).
+Why doesn't omap_hsmmc_23_set_sleep() run .before_set_reg() and
+.after_set_reg()?
 
-== 2.6.33 ==
-
-$ iperf -c 192.168.1.130 
-------------------------------------------------------------
-Client connecting to 192.168.1.130, TCP port 5001
-TCP window size: 16.0 KByte (default)
-------------------------------------------------------------
-[  3] local 192.168.1.127 port 40119 connected with 192.168.1.130 port 5001
-[ ID] Interval       Transfer     Bandwidth
-[  3]  0.0-10.1 sec  1.05 MBytes    872 Kbits/sec
-
-$ iperf -c 192.168.1.130 
-------------------------------------------------------------
-Client connecting to 192.168.1.130, TCP port 5001
-TCP window size: 16.0 KByte (default)
-------------------------------------------------------------
-[  3] local 192.168.1.127 port 40120 connected with 192.168.1.130 port 5001
-[ ID] Interval       Transfer     Bandwidth
-[  3]  0.0-10.0 sec  1.04 MBytes    870 Kbits/sec
-
-$ iperf -s
-------------------------------------------------------------
-Server listening on TCP port 5001
-TCP window size: 85.3 KByte (default)
-------------------------------------------------------------
-[  4] local 192.168.1.127 port 5001 connected with 192.168.1.130 port 36691
-[ ID] Interval       Transfer     Bandwidth
-[  4]  0.0-10.2 sec  3.61 MBytes  2.98 Mbits/sec
-[  5] local 192.168.1.127 port 5001 connected with 192.168.1.130 port 36692
-[  5]  0.0-10.1 sec  4.94 MBytes  4.09 Mbits/sec
-
-
-== 2.6.33 + "sdhci: Move real work out of an atomic context" patchset ==
-
-$ iperf -c 192.168.1.130 
-------------------------------------------------------------
-Client connecting to 192.168.1.130, TCP port 5001
-TCP window size: 16.0 KByte (default)
-------------------------------------------------------------
-[  3] local 192.168.1.127 port 39210 connected with 192.168.1.130 port 5001
-[ ID] Interval       Transfer     Bandwidth
-[  3]  0.0-10.0 sec    368 KBytes    301 Kbits/sec
-
-$ iperf -c 192.168.1.130 
-------------------------------------------------------------
-Client connecting to 192.168.1.130, TCP port 5001
-TCP window size: 16.0 KByte (default)
-------------------------------------------------------------
-[  3] local 192.168.1.127 port 39211 connected with 192.168.1.130 port 5001
-[ ID] Interval       Transfer     Bandwidth
-[  3]  0.0-10.2 sec    440 KBytes    354 Kbits/sec
-
-$ iperf -s
-------------------------------------------------------------
-Server listening on TCP port 5001
-TCP window size: 85.3 KByte (default)
-------------------------------------------------------------
-[  4] local 192.168.1.127 port 5001 connected with 192.168.1.130 port 57833
-[ ID] Interval       Transfer     Bandwidth
-[  4]  0.0-10.2 sec  2.37 MBytes  1.95 Mbits/sec
-[  5] local 192.168.1.127 port 5001 connected with 192.168.1.130 port 57834
-[  5]  0.0-10.2 sec  2.30 MBytes  1.90 Mbits/sec
-
-The subjective feeling is too that the system is slower.
-
-Cheers,
-Albert
-
------ End forwarded message -----
+>
+> ...
+>
