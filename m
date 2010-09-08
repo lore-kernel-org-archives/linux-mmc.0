@@ -1,73 +1,51 @@
-From: Colin Cross <ccross@google.com>
-Subject: Re: [PATCH v3] mmc: add config and runtime option for number of
- mmcblk minors
-Date: Wed, 8 Sep 2010 09:48:46 -0700
-Message-ID: <AANLkTinUNpWsu=AY+1EeG8xznPaESL8XnjGo7613yoMt@mail.gmail.com>
-References: <20100818041333.GA14149@lixom.net>
-	<20100818171636.0625b668.akpm@linux-foundation.org>
-	<20100819032230.GA21980@lixom.net>
-	<20100820010242.GA29588@lixom.net>
-	<20100820221323.GC8535@lixom.net>
-	<AANLkTikLLwfSXbnjPByXTktEFFVueeAd7HZS5ft-rj-m@mail.gmail.com>
-	<20100908145705.GC23745@lixom.net>
-	<AANLkTi=jft-j+2Y_dez_gJSrHEkuKSwKq8PbPZxvuHqk@mail.gmail.com>
-	<20100908155721.GD23745@lixom.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-out.google.com ([216.239.44.51]:34340 "EHLO
-	smtp-out.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751287Ab0IHQsv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Sep 2010 12:48:51 -0400
-In-Reply-To: <20100908155721.GD23745@lixom.net>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+From: Colin Cross <ccross@android.com>
+Subject: [PATCH] mmc_block: Allow more than 8 partitions per card
+Date: Wed,  8 Sep 2010 09:50:37 -0700
+Message-ID: <1283964637-28246-1-git-send-email-ccross@android.com>
+References: <AANLkTinUNpWsu=AY+1EeG8xznPaESL8XnjGo7613yoMt@mail.gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <AANLkTinUNpWsu=AY+1EeG8xznPaESL8XnjGo7613yoMt@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Olof Johansson <olof@lixom.net>
-Cc: Kay Sievers <kay.sievers@vrfy.org>, Lei Wen <adrian.wenl@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mandeep Baines <msb@chromium.org>
+Cc: Kay Sievers <kay.sievers@vrfy.org>, Lei Wen <adrian.wenl@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mandeep Baines <msb@chromium.org>, Colin Cross <ccross@android.com>
+List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Sep 8, 2010 at 8:57 AM, Olof Johansson <olof@lixom.net> wrote:
-> On Wed, Sep 08, 2010 at 05:19:25PM +0200, Kay Sievers wrote:
->> On Wed, Sep 8, 2010 at 16:57, Olof Johansson <olof@lixom.net> wrote:
->> > On Wed, Sep 08, 2010 at 10:25:58PM +0800, Lei Wen wrote:
->> >
->> >> The patch's purpose is good. As modern sd&mmc is used to host the file
->> >> system, the 8 partition limitation is becoming a kind of bottleneck...
->> >> But why not just add GENHD_FL_EXT_DEVT flag to allow mmc use extended
->> >> partition numbers?
->> >
->> > No need to quote the whole patch next time. :)
->> >
->> > Given that MMC is sometimes used in deeply embedded environments where
->> > udev might not be running to take care of dynamic device numbering,
->> > I chose to stay with a static layout.
->> >
->> > I could be convinced otherwise though. It would cause some additional
->> > hassles for me since we start udev lateish during boot and have a
->> > prepopulated /dev before that, but that can be dealt with.
->>
->> I think the extended number are only used for stuff larger than the static 8?
->
-> Ah, yes, of course.
->
->> Apart from that, you can not reliably or securely use a static /dev
->> these days, you never know which device you talk to, because the
->> kernel has far too many dynamically assigned numbers. For that reason,
->> most embedded setups use the busybox hack to populate /dev. Recent
->> kernels have a devfs again, and there is no reason today to continue
->> any static /dev experiments -- unless someone is going over the entire
->> tree and fixes all the dynamic assignments, which is unlikely to
->> happen ever.
->
-> Yeah, it's a weak argument but I wanted to go for the least surprising
-> one for anyone who still relies on static numbering of mmc, since it's
-> used as root device, etc.
->
-> But with the first 8 minors being the same as before, there's little
-> reason to care about that -- the EXT_DEVT approach will actually be
-> the smaller change, since it won't renumber anything, just extend in a
-> different part of the address space.
->
-> Lei, want to submit a proper patch for it to replace mine?
+Set the GENHD_FL_EXT_DEVT flag, which will allocate minor numbers
+in major 259 for partitions past disk->minors.
 
-I have a tested patch for this.  It also cleans up the connection
-between devidx and minor numbers.  I'll send it shortly.
+Also remove the use of disk_devt to determine devidx from md->disk.
+md->disk->first_minor is always initialized from devidx and can
+always be used to recover it.
+
+Signed-off-by: Colin Cross <ccross@android.com>
+---
+ drivers/mmc/card/block.c |    7 ++-----
+ 1 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index d545f79..07d8eb0 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -87,11 +87,7 @@ static void mmc_blk_put(struct mmc_blk_data *md)
+ 	mutex_lock(&open_lock);
+ 	md->usage--;
+ 	if (md->usage == 0) {
+-		int devmaj = MAJOR(disk_devt(md->disk));
+-		int devidx = MINOR(disk_devt(md->disk)) >> MMC_SHIFT;
+-
+-		if (!devmaj)
+-			devidx = md->disk->first_minor >> MMC_SHIFT;
++		int devidx = md->disk->first_minor >> MMC_SHIFT;
+ 
+ 		blk_cleanup_queue(md->queue.queue);
+ 
+@@ -607,6 +603,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
+ 	md->disk->private_data = md;
+ 	md->disk->queue = md->queue.queue;
+ 	md->disk->driverfs_dev = &card->dev;
++	md->disk->flags = GENHD_FL_EXT_DEVT;
+ 
+ 	/*
+ 	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
+-- 
+1.7.1
