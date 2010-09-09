@@ -1,76 +1,72 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
-Date: Thu, 9 Sep 2010 03:28:34 +0100
-Message-ID: <20100909022834.GA10542@void.printf.net>
-References: <20100714130728.GA27339@oksana.dev.rtsoft.ru> <20100907153813.936db0c6.akpm@linux-foundation.org> <20100908213740.GA7550@void.printf.net>
+From: Lei Wen <adrian.wenl@gmail.com>
+Subject: Re: [PATCH] mmc_block: Allow more than 8 partitions per card
+Date: Thu, 9 Sep 2010 10:49:40 +0800
+Message-ID: <AANLkTi=qyKCYuZ4esATV1ArBb_GrpqRW7bwdJnZnonVe@mail.gmail.com>
+References: <AANLkTinUNpWsu=AY+1EeG8xznPaESL8XnjGo7613yoMt@mail.gmail.com>
+	<1283964637-28246-1-git-send-email-ccross@android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34704 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750780Ab0IIC2y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Sep 2010 22:28:54 -0400
-Content-Disposition: inline
-In-Reply-To: <20100908213740.GA7550@void.printf.net>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:46470 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751339Ab0IICtl convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Sep 2010 22:49:41 -0400
+In-Reply-To: <1283964637-28246-1-git-send-email-ccross@android.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Anton Vorontsov <avorontsov@mvista.com>, Wolfram Sang <w.sang@pengutronix.de>, Albert Herranz <albert_herranz@yahoo.es>, Matt Fleming <matt@console-pimps.org>, Ben Dooks <ben-linux@fluff.org>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@ozlabs.org
+To: Colin Cross <ccross@android.com>
+Cc: Olof Johansson <olof@lixom.net>, Kay Sievers <kay.sievers@vrfy.org>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mandeep Baines <msb@chromium.org>
 
-Hi,
+On Thu, Sep 9, 2010 at 12:50 AM, Colin Cross <ccross@android.com> wrote=
+:
+> Set the GENHD_FL_EXT_DEVT flag, which will allocate minor numbers
+> in major 259 for partitions past disk->minors.
+>
+> Also remove the use of disk_devt to determine devidx from md->disk.
+> md->disk->first_minor is always initialized from devidx and can
+> always be used to recover it.
+>
+> Signed-off-by: Colin Cross <ccross@android.com>
+> ---
+> =C2=A0drivers/mmc/card/block.c | =C2=A0 =C2=A07 ++-----
+> =C2=A01 files changed, 2 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index d545f79..07d8eb0 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -87,11 +87,7 @@ static void mmc_blk_put(struct mmc_blk_data *md)
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0mutex_lock(&open_lock);
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->usage--;
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (md->usage =3D=3D 0) {
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 int devmaj =3D MAJ=
+OR(disk_devt(md->disk));
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 int devidx =3D MIN=
+OR(disk_devt(md->disk)) >> MMC_SHIFT;
+> -
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (!devmaj)
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 devidx =3D md->disk->first_minor >> MMC_SHIFT;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 int devidx =3D md-=
+>disk->first_minor >> MMC_SHIFT;
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0blk_cleanup_qu=
+eue(md->queue.queue);
+>
+> @@ -607,6 +603,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct =
+mmc_card *card)
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->disk->private_data =3D md;
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->disk->queue =3D md->queue.queue;
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0md->disk->driverfs_dev =3D &card->dev;
+> + =C2=A0 =C2=A0 =C2=A0 md->disk->flags =3D GENHD_FL_EXT_DEVT;
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0/*
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 * As discussed on lkml, GENHD_FL_REMOVABL=
+E should:
+> --
+> 1.7.1
+>
 
-On Wed, Sep 08, 2010 at 10:37:41PM +0100, Chris Ball wrote:
-> Hi Andrew,
-> 
-> On Tue, Sep 07, 2010 at 03:38:13PM -0700, Andrew Morton wrote:
-> > > I noticed no throughput drop neither with PIO transfers nor
-> > > with DMA (tested on MPC8569E CPU), while latencies should be
-> > > greatly improved.
-> > 
-> > This patchset isn't causing any problems yet, but may do so in the
-> > future and will impact the validity of any testing.  It seems to be
-> > kind of stuck.  Should I drop it all?
-> 
-> I suggest keeping it -- I'll find time to test it out here soon, and
-> will keep it in mind as a possible regression cause.
-
-Am running this now.  The first thing I'm noticing is a repeated BUG():
-
-[    7.288186] Write protecting the kernel read-only data: 1072k
-[    7.306446] BUG: sleeping function called from invalid context at kernel/mutex.c:94
-[    7.324375] in_atomic(): 1, irqs_disabled(): 0, pid: 532, name: mmc2/0
-[    7.340989] Pid: 532, comm: mmc2/0 Not tainted 2.6.35.4_xo1.5-20100908.2141.olpc.44f3b38_DIRTY #1
-[    7.360129] Call Trace:
-[    7.372843]  [<b04193ce>] __might_sleep+0xd9/0xe0
-[    7.387864]  [<b07260cc>] mutex_lock+0x1c/0x2a
-[    7.402576]  [<b06396e8>] sdhci_led_control+0x1a/0x41
-[    7.417727]  [<b063bece>] led_trigger_event+0x42/0x5c
-[    7.432807]  [<b06326f8>] mmc_request_done+0x56/0x6f
-[    7.447597]  [<b063a2d1>] sdhci_finish_work+0xc8/0xcd
-[    7.462643]  [<b063a209>] ? sdhci_finish_work+0x0/0xcd
-[    7.477941]  [<b0432776>] worker_thread+0x165/0x1ed
-[    7.492856]  [<b063a209>] ? sdhci_finish_work+0x0/0xcd
-[    7.508204]  [<b0435591>] ? autoremove_wake_function+0x0/0x34
-[    7.524178]  [<b0432611>] ? worker_thread+0x0/0x1ed
-[    7.538953]  [<b04352a0>] kthread+0x63/0x68
-[    7.552659]  [<b043523d>] ? kthread+0x0/0x68
-[    7.566349]  [<b0402cf6>] kernel_thread_helper+0x6/0x10
-[    7.709931] udev: starting version 141
-[    7.940374] mmc2: new high speed SDHC card at address e4da
-[    8.058165] mmcblk0: mmc2:e4da SU04G 3.69 GiB 
-[    8.135730]  mmcblk0: p1 p2
-
-Full dmesg is at http://chris.printf.net/anton-mutex-dmesg.txt. 
-Anton, the kernel is 2.6.35.4-olpc plus your patchset from -mm.
-I can think about how to test on an upstream kernel instead, but
-perhaps your own tests simply didn't hit sdhci_led_control(). 
-
-Andrew, if you want to drop this while the BUG() and potential
-performance regressions are worked out, I'd be happy to keep 
-testing patches from Anton until it's without regressions here.
-
-Thanks,
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Looks good to me.
+Acked-by: Lei Wen <leiwen@marvell.com>
