@@ -1,135 +1,76 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-move-regulator-handling-closer-to-core-v3-fix.patch added to -mm tree
-Date: Wed, 08 Sep 2010 16:03:19 -0700
-Message-ID: <201009082303.o88N3Jht015009@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: akpm@linux-foundation.org, adrian.hunter@nokia.com, broonie@opensource.wolfsonmicro.com, cbrake@bec-systems.com, daniel@caiaq.de, dbrownell@users.sourceforge.net, eric.y.miao@gmail.com, jarkko.lavinen@nokia.com, linus.walleij@stericsson.com, linux-mmc@vger.kernel.org, lrg@slimlogic.co.uk, matt@console-pimps.org, pierre@ossman.eu, rmk+kernel@arm.linux.org.uk, robert.jarzmik@free.fr, sundar.iyer@stericsson.com, tony@atomide.com
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
+Date: Thu, 9 Sep 2010 03:28:34 +0100
+Message-ID: <20100909022834.GA10542@void.printf.net>
+References: <20100714130728.GA27339@oksana.dev.rtsoft.ru> <20100907153813.936db0c6.akpm@linux-foundation.org> <20100908213740.GA7550@void.printf.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:34704 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750780Ab0IIC2y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Sep 2010 22:28:54 -0400
+Content-Disposition: inline
+In-Reply-To: <20100908213740.GA7550@void.printf.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Anton Vorontsov <avorontsov@mvista.com>, Wolfram Sang <w.sang@pengutronix.de>, Albert Herranz <albert_herranz@yahoo.es>, Matt Fleming <matt@console-pimps.org>, Ben Dooks <ben-linux@fluff.org>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@ozlabs.org
 
+Hi,
 
-The patch titled
-     mmc-move-regulator-handling-closer-to-core-v3-fix
-has been added to the -mm tree.  Its filename is
-     mmc-move-regulator-handling-closer-to-core-v3-fix.patch
+On Wed, Sep 08, 2010 at 10:37:41PM +0100, Chris Ball wrote:
+> Hi Andrew,
+> 
+> On Tue, Sep 07, 2010 at 03:38:13PM -0700, Andrew Morton wrote:
+> > > I noticed no throughput drop neither with PIO transfers nor
+> > > with DMA (tested on MPC8569E CPU), while latencies should be
+> > > greatly improved.
+> > 
+> > This patchset isn't causing any problems yet, but may do so in the
+> > future and will impact the validity of any testing.  It seems to be
+> > kind of stuck.  Should I drop it all?
+> 
+> I suggest keeping it -- I'll find time to test it out here soon, and
+> will keep it in mind as a possible regression cause.
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
+Am running this now.  The first thing I'm noticing is a repeated BUG():
 
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+[    7.288186] Write protecting the kernel read-only data: 1072k
+[    7.306446] BUG: sleeping function called from invalid context at kernel/mutex.c:94
+[    7.324375] in_atomic(): 1, irqs_disabled(): 0, pid: 532, name: mmc2/0
+[    7.340989] Pid: 532, comm: mmc2/0 Not tainted 2.6.35.4_xo1.5-20100908.2141.olpc.44f3b38_DIRTY #1
+[    7.360129] Call Trace:
+[    7.372843]  [<b04193ce>] __might_sleep+0xd9/0xe0
+[    7.387864]  [<b07260cc>] mutex_lock+0x1c/0x2a
+[    7.402576]  [<b06396e8>] sdhci_led_control+0x1a/0x41
+[    7.417727]  [<b063bece>] led_trigger_event+0x42/0x5c
+[    7.432807]  [<b06326f8>] mmc_request_done+0x56/0x6f
+[    7.447597]  [<b063a2d1>] sdhci_finish_work+0xc8/0xcd
+[    7.462643]  [<b063a209>] ? sdhci_finish_work+0x0/0xcd
+[    7.477941]  [<b0432776>] worker_thread+0x165/0x1ed
+[    7.492856]  [<b063a209>] ? sdhci_finish_work+0x0/0xcd
+[    7.508204]  [<b0435591>] ? autoremove_wake_function+0x0/0x34
+[    7.524178]  [<b0432611>] ? worker_thread+0x0/0x1ed
+[    7.538953]  [<b04352a0>] kthread+0x63/0x68
+[    7.552659]  [<b043523d>] ? kthread+0x0/0x68
+[    7.566349]  [<b0402cf6>] kernel_thread_helper+0x6/0x10
+[    7.709931] udev: starting version 141
+[    7.940374] mmc2: new high speed SDHC card at address e4da
+[    8.058165] mmcblk0: mmc2:e4da SU04G 3.69 GiB 
+[    8.135730]  mmcblk0: p1 p2
 
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
+Full dmesg is at http://chris.printf.net/anton-mutex-dmesg.txt. 
+Anton, the kernel is 2.6.35.4-olpc plus your patchset from -mm.
+I can think about how to test on an upstream kernel instead, but
+perhaps your own tests simply didn't hit sdhci_led_control(). 
 
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
+Andrew, if you want to drop this while the BUG() and potential
+performance regressions are worked out, I'd be happy to keep 
+testing patches from Anton until it's without regressions here.
 
-------------------------------------------------------
-Subject: mmc-move-regulator-handling-closer-to-core-v3-fix
-From: Andrew Morton <akpm@linux-foundation.org>
+Thanks,
 
-- regularise the inline definitions
-
-- make them static
-
-- fixes a checkpatch warning
-
-Cc: <linux-mmc@vger.kernel.org>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Cliff Brake <cbrake@bec-systems.com>
-Cc: Daniel Mack <daniel@caiaq.de>
-Cc: David Brownell <dbrownell@users.sourceforge.net>
-Cc: Eric Miao <eric.y.miao@gmail.com>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
-Cc: Liam Girdwood <lrg@slimlogic.co.uk>
-Cc: Linus Walleij <linus.walleij@stericsson.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Matt Fleming <matt@console-pimps.org>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Russell King <rmk+kernel@arm.linux.org.uk>
-Cc: Sundar Iyer <sundar.iyer@stericsson.com>
-Cc: Tony Lindgren <tony@atomide.com>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- include/linux/mmc/host.h |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff -puN include/linux/mmc/host.h~mmc-move-regulator-handling-closer-to-core-v3-fix include/linux/mmc/host.h
---- a/include/linux/mmc/host.h~mmc-move-regulator-handling-closer-to-core-v3-fix
-+++ a/include/linux/mmc/host.h
-@@ -265,12 +265,12 @@ int mmc_regulator_set_ocr(struct mmc_hos
- 			struct regulator *supply,
- 			unsigned short vdd_bit);
- #else
--int inline mmc_regulator_get_ocrmask(struct regulator *supply)
-+static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
- {
- 	return 0;
- }
- 
--int inline mmc_regulator_set_ocr(struct mmc_host *mmc,
-+static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
- 				 struct regulator *supply,
- 				 unsigned short vdd_bit)
- {
-_
-
-Patches currently in -mm which might be from akpm@linux-foundation.org are
-
-origin.patch
-linux-next.patch
-next-remove-localversion.patch
-fs-inodec-work-around-bug.patch
-i-need-old-gcc.patch
-cgroups-fix-api-thinko-fix.patch
-vmstat-update-zone-stat-threshold-when-onlining-a-cpu.patch
-mm-page-allocator-update-free-page-counters-after-pages-are-placed-on-the-free-list-fix.patch
-mm-vmap-area-cache.patch
-parport-prevent-arm-boards-frmo-crashing-when-cups-is-loaded-fix.patch
-gcc-46-btrfs-clean-up-unused-variables-bugs.patch
-hpet-factor-timer-allocate-from-open.patch
-leds-route-kbd-leds-through-the-generic-leds-layer.patch
-security-add-const-to-security_task_setscheduler.patch
-sched-make-sched_param-argument-static-variables-in-some-sched_setscheduler-caller.patch
-usb-storage-add-new-no_read_disc_info-quirk-fix.patch
-mm.patch
-oom-kill-all-threads-sharing-oom-killed-tasks-mm-fix.patch
-oom-kill-all-threads-sharing-oom-killed-tasks-mm-fix-fix.patch
-oom-rewrite-error-handling-for-oom_adj-and-oom_score_adj-tunables.patch
-oom-fix-locking-for-oom_adj-and-oom_score_adj.patch
-mm-only-build-per-node-scan_unevictable-functions-when-numa-is-enabled-cleanup.patch
-memory-hotplug-unify-is_removable-and-offline-detection-code-checkpatch-fixes.patch
-frv-duplicate-output_buffer-of-e03-checkpatch-fixes.patch
-kernelh-add-minmax3-macros-fix.patch
-include-linux-kernelh-add-__must_check-to-strict_strto.patch
-sdhci-support-10-bit-divided-clock-mode-for-spec-30-checkpatch-fixes.patch
-mmc-move-regulator-handling-closer-to-core-v3-fix.patch
-sdhci-get-rid-of-card-detect-work-fix.patch
-checkpatch-returning-errno-typically-should-be-negative.patch
-select-rename-estimate_accuracy-to-select_estimate_accuracy.patch
-cgroup_freezer-update_freezer_state-does-incorrect-state-transitions-checkpatch-fixes.patch
-core_pattern-fix-long-parameters-was-truncated-by-core_pattern-handler-update.patch
-core_pattern-fix-long-parameters-was-truncated-by-core_pattern-handler-update-2.patch
-core_pattern-fix-long-parameters-was-truncated-by-core_pattern-handler-update-2-checkpatch-fixes.patch
-delay-accounting-re-implement-c-for-getdelaysc-to-report-information-on-a-target-command-checkpatch-fixes.patch
-pps-add-async-pps-event-handler-fix.patch
-memstick-add-driver-for-ricoh-r5c592-card-reader-cleanups.patch
-kernel-resourcec-handle-reinsertion-of-an-already-inserted-resource.patch
-vfs-add-super-operation-writeback_inodes-fix.patch
-reiser4-export-remove_from_page_cache-fix.patch
-reiser4-export-find_get_pages.patch
-reiser4.patch
-reiser4-writeback_inodes-implementation-fix.patch
-reiser4-fixups.patch
-reiser4-broke.patch
-journal_add_journal_head-debug.patch
-slab-leaks3-default-y.patch
-put_bh-debug.patch
-getblk-handle-2tb-devices.patch
-
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
