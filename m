@@ -1,173 +1,328 @@
-From: akpm@linux-foundation.org
-Subject: + mmc-move-regulator-handling-closer-to-core-v4.patch added to -mm tree
-Date: Thu, 09 Sep 2010 14:21:41 -0700
-Message-ID: <201009092121.o89LLfWJ007170@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: mm-commits@vger.kernel.org
-Cc: linus.walleij@stericsson.com, adrian.hunter@nokia.com, broonie@opensource.wolfsonmicro.com, cbrake@bec-systems.com, daniel@caiaq.de, dbrownell@users.sourceforge.net, eric.y.miao@gmail.com, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, lrg@slimlogic.co.uk, matt@console-pimps.org, pierre@ossman.eu, rmk+kernel@arm.linux.org.uk, robert.jarzmik@free.fr, sundar.iyer@stericsson.com, tony@atomide.com
+From: Martin Fuzzey <mfuzzey@gmail.com>
+Subject: [PATCH V8] mmc : Add i.MX21 support to mxcmmc driver
+Date: Fri, 10 Sep 2010 00:02:44 +0200
+Message-ID: <20100909220110.12456.14417.stgit@srv002.fuzzey.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:59660 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756234Ab0IIWCs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Sep 2010 18:02:48 -0400
+Received: by wyf22 with SMTP id 22so1933855wyf.19
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Sep 2010 15:02:47 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org
 
+Even though the i.MX21 SDHC module has the same revision number as the i.MX27
+one there are a few differences!!
+        Some interrupt enables are inverted.
+        FIFO is only 16 bits wide.
+        The argument is written to 2x16bit registers (vs 1x32).
+        Interrupts must be acknowledged via the INT_CNTR register.
+        Card clock must be enabled for each request.
+	For writes DMA must be enabled on command response not before.
 
-The patch titled
-     mmc-move-regulator-handling-closer-to-core-v4
-has been added to the -mm tree.  Its filename is
-     mmc-move-regulator-handling-closer-to-core-v4.patch
+Signed-off-by: Martin Fuzzey <mfuzzey@gmail.com>
 
-Before you just go and hit "reply", please:
-   a) Consider who else should be cc'ed
-   b) Prefer to cc a suitable mailing list as well
-   c) Ideally: find the original patch on the mailing list and do a
-      reply-to-all to that, adding suitable additional cc's
-
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
-
-See http://userweb.kernel.org/~akpm/stuff/added-to-mm.txt to find
-out what to do about this
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: mmc-move-regulator-handling-closer-to-core-v4
-From: Linus Walleij <linus.walleij@stericsson.com>
-
-Propagate errors from regulator_set_ocr() properly in the
-pxamci and mmci drivers, as far as is possible until we hit the
-fact that mmc_set_ios() returns void and cannot handle error
-codes.
-
-Switched a pr_debug() in the PXA driver to a dev_dbg() as well
-because it was disturbing to see it.
-
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Liam Girdwood <lrg@slimlogic.co.uk>
-Cc: Tony Lindgren <tony@atomide.com>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Sundar Iyer <sundar.iyer@stericsson.com>
-Cc: Daniel Mack <daniel@caiaq.de>
-Cc: Pierre Ossman <pierre@ossman.eu>
-Cc: Matt Fleming <matt@console-pimps.org>
-Cc: David Brownell <dbrownell@users.sourceforge.net>
-Cc: Russell King <rmk+kernel@arm.linux.org.uk>
-Cc: Eric Miao <eric.y.miao@gmail.com>
-Cc: Cliff Brake <cbrake@bec-systems.com>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 ---
+Changes from V7 (February 2010):
+Rebased to 2.6.36-rc3
 
- drivers/mmc/host/mmci.c   |   13 ++++++++++++-
- drivers/mmc/host/pxamci.c |   31 +++++++++++++++++++++++++------
- 2 files changed, 37 insertions(+), 7 deletions(-)
+ arch/arm/mach-imx/clock-imx21.c |    4 +
+ drivers/mmc/host/mxcmmc.c       |  153 ++++++++++++++++++++++++++++++---------
+ 2 files changed, 120 insertions(+), 37 deletions(-)
 
-diff -puN drivers/mmc/host/mmci.c~mmc-move-regulator-handling-closer-to-core-v4 drivers/mmc/host/mmci.c
---- a/drivers/mmc/host/mmci.c~mmc-move-regulator-handling-closer-to-core-v4
-+++ a/drivers/mmc/host/mmci.c
-@@ -531,8 +531,19 @@ static void mmci_set_ios(struct mmc_host
- 			ret = mmc_regulator_set_ocr(mmc, host->vcc, 0);
- 		break;
- 	case MMC_POWER_UP:
--		if (host->vcc)
-+		if (host->vcc) {
- 			ret = mmc_regulator_set_ocr(mmc, host->vcc, ios->vdd);
-+			if (ret) {
-+				dev_err(mmc_dev(mmc), "unable to set OCR\n");
-+				/*
-+				 * The .set_ios() function in the mmc_host_ops
-+				 * struct return void, and failing to set the
-+				 * power should be rare so we print an error
-+				 * and return here.
-+				 */
-+				return;
-+			}
-+		}
- 		if (host->plat->vdd_handler)
- 			pwr |= host->plat->vdd_handler(mmc_dev(mmc), ios->vdd,
- 						       ios->power_mode);
-diff -puN drivers/mmc/host/pxamci.c~mmc-move-regulator-handling-closer-to-core-v4 drivers/mmc/host/pxamci.c
---- a/drivers/mmc/host/pxamci.c~mmc-move-regulator-handling-closer-to-core-v4
-+++ a/drivers/mmc/host/pxamci.c
-@@ -99,7 +99,7 @@ static inline void pxamci_init_ocr(struc
- 	}
- }
+diff --git a/arch/arm/mach-imx/clock-imx21.c b/arch/arm/mach-imx/clock-imx21.c
+index dafc271..076cd43 100644
+--- a/arch/arm/mach-imx/clock-imx21.c
++++ b/arch/arm/mach-imx/clock-imx21.c
+@@ -1170,8 +1170,8 @@ static struct clk_lookup lookups[] = {
+ 	_REGISTER_CLOCK(NULL, "gpt1", gpt_clk[1])
+ 	_REGISTER_CLOCK(NULL, "gpt1", gpt_clk[2])
+ 	_REGISTER_CLOCK(NULL, "pwm", pwm_clk[0])
+-	_REGISTER_CLOCK(NULL, "sdhc1", sdhc_clk[0])
+-	_REGISTER_CLOCK(NULL, "sdhc2", sdhc_clk[1])
++	_REGISTER_CLOCK("mxc-mmc.0", NULL, sdhc_clk[0])
++	_REGISTER_CLOCK("mxc-mmc.1", NULL, sdhc_clk[1])
+ 	_REGISTER_CLOCK(NULL, "cspi1", cspi_clk[0])
+ 	_REGISTER_CLOCK(NULL, "cspi2", cspi_clk[1])
+ 	_REGISTER_CLOCK(NULL, "cspi3", cspi_clk[2])
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 350f78e..88dd31f 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -56,6 +56,8 @@
+ #define MMC_REG_INT_CNTR		0x24
+ #define MMC_REG_CMD			0x28
+ #define MMC_REG_ARG			0x2C
++#define MMC_REG_ARGH			0x2C
++#define MMC_REG_ARGL			0x30
+ #define MMC_REG_RES_FIFO		0x34
+ #define MMC_REG_BUFFER_ACCESS		0x38
  
--static inline void pxamci_set_power(struct pxamci_host *host,
-+static inline int pxamci_set_power(struct pxamci_host *host,
- 				    unsigned char power_mode,
- 				    unsigned int vdd)
+@@ -145,6 +147,49 @@ struct mxcmci_host {
+ 
+ static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
+ 
++static void mxcmci_write_arg(struct mxcmci_host *host, u32 arg)
++{
++	if (cpu_is_mx21()) {
++		writel(arg >> 16, host->base + MMC_REG_ARGH);
++		writel(arg & 0xFFFF, host->base + MMC_REG_ARGL);
++	} else {
++		writel(arg, host->base + MMC_REG_ARG);
++	}
++}
++
++static void mxcmci_ack_int(struct mxcmci_host *host, u32 stat)
++{
++	if (cpu_is_mx21()) {
++		u32 intclr = readl(host->base + MMC_REG_INT_CNTR);
++
++		if (stat & STATUS_DATA_TRANS_DONE)
++			intclr |= INT_READ_OP_EN;
++		if (stat & STATUS_WRITE_OP_DONE)
++			intclr |= INT_WRITE_OP_DONE_EN;
++		if (stat & STATUS_END_CMD_RESP)
++			intclr |= INT_END_CMD_RES_EN;
++
++		writel(intclr, host->base + MMC_REG_INT_CNTR);
++	}
++}
++
++static inline void mxcmci_set_int_cntr(struct mxcmci_host *host, u32 enables)
++{
++	if (cpu_is_mx21()) /* some interrupt enables have reverse polarity */
++		enables ^=  0x1F;
++	writel(enables, host->base + MMC_REG_INT_CNTR);
++}
++
++static inline void mxcmci_start_clock(struct mxcmci_host *host)
++{
++	writew(STR_STP_CLK_START_CLK, host->base + MMC_REG_STR_STP_CLK);
++}
++
++static inline void mxcmci_stop_clock(struct mxcmci_host *host)
++{
++	writew(STR_STP_CLK_STOP_CLK, host->base + MMC_REG_STR_STP_CLK);
++}
++
+ static inline int mxcmci_use_dma(struct mxcmci_host *host)
  {
-@@ -108,10 +108,15 @@ static inline void pxamci_set_power(stru
- 	if (host->vcc) {
- 		int ret;
+ 	return host->do_dma;
+@@ -221,7 +266,10 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+ 	}
+ 	wmb();
  
--		if (power_mode == MMC_POWER_UP)
-+		if (power_mode == MMC_POWER_UP) {
- 			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
--		else if (power_mode == MMC_POWER_OFF)
-+			if (ret)
-+				return ret;
-+		} else if (power_mode == MMC_POWER_OFF) {
- 			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, 0);
-+			if (ret)
-+				return ret;
-+		}
- 	}
- 	if (!host->vcc && host->pdata &&
- 	    gpio_is_valid(host->pdata->gpio_power)) {
-@@ -121,6 +126,8 @@ static inline void pxamci_set_power(stru
- 	}
- 	if (!host->vcc && host->pdata && host->pdata->setpower)
- 		host->pdata->setpower(mmc_dev(host->mmc), vdd);
+-	imx_dma_enable(host->dma);
++	/* MX21: unreliable writes if dma enabled here - do on command done */
++	if (mxcmci_use_dma(host) &&
++			(!cpu_is_mx21() || host->dma_dir == DMA_FROM_DEVICE))
++		imx_dma_enable(host->dma);
+ #endif /* HAS_DMA */
+ 	return 0;
+ }
+@@ -263,12 +311,16 @@ static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	if (host->use_sdio)
+ 		int_cntr |= INT_SDIO_IRQ_EN;
+-	writel(int_cntr, host->base + MMC_REG_INT_CNTR);
++	mxcmci_set_int_cntr(host, int_cntr);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	writew(cmd->opcode, host->base + MMC_REG_CMD);
+-	writel(cmd->arg, host->base + MMC_REG_ARG);
++	mxcmci_write_arg(host, cmd->arg);
+ 	writew(cmdat, host->base + MMC_REG_CMD_DAT_CONT);
++	if (cpu_is_mx21()) {
++		/* i.MX21 requires clock start after submitting command */
++		mxcmci_start_clock(host);
++	}
+ 
+ 	return 0;
+ }
+@@ -282,7 +334,7 @@ static void mxcmci_finish_request(struct mxcmci_host *host,
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	if (host->use_sdio)
+ 		int_cntr |= INT_SDIO_IRQ_EN;
+-	writel(int_cntr, host->base + MMC_REG_INT_CNTR);
++	mxcmci_set_int_cntr(host, int_cntr);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	host->req = NULL;
+@@ -397,19 +449,29 @@ static int mxcmci_poll_status(struct mxcmci_host *host, u32 mask)
+ static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
+ {
+ 	unsigned int stat;
+-	u32 *buf = _buf;
+-
+-	while (bytes > 3) {
+-		stat = mxcmci_poll_status(host,
++	u16 *buf16 = _buf;
++	u32 *buf32 = _buf;
++	int count = 0;
++	int fifo_size = host->cmdat & CMD_DAT_CONT_BUS_WIDTH_4 ? 64 : 16;
++	int buffer_width = cpu_is_mx21() ? 2 : 4;
 +
-+	return 0;
++	while (bytes >= buffer_width) {
++		if (count % fifo_size == 0) {
++			stat = mxcmci_poll_status(host,
+ 				STATUS_BUF_READ_RDY | STATUS_READ_OP_DONE);
+-		if (stat)
+-			return stat;
+-		*buf++ = readl(host->base + MMC_REG_BUFFER_ACCESS);
+-		bytes -= 4;
++			if (stat)
++				return stat;
++		}
++		if (buffer_width == 2)
++			*buf16++ = (u16)readl(
++				host->base + MMC_REG_BUFFER_ACCESS);
++		else
++			*buf32++ = readl(host->base + MMC_REG_BUFFER_ACCESS);
++		bytes -= buffer_width;
++		count += buffer_width;
+ 	}
+ 
+ 	if (bytes) {
+-		u8 *b = (u8 *)buf;
+ 		u32 tmp;
+ 
+ 		stat = mxcmci_poll_status(host,
+@@ -417,7 +479,10 @@ static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
+ 		if (stat)
+ 			return stat;
+ 		tmp = readl(host->base + MMC_REG_BUFFER_ACCESS);
+-		memcpy(b, &tmp, bytes);
++		if (buffer_width == 2)
++			memcpy((u8 *)buf16, &tmp, bytes);
++		else
++			memcpy((u8 *)buf32, &tmp, bytes);
+ 	}
+ 
+ 	return 0;
+@@ -426,33 +491,41 @@ static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
+ static int mxcmci_push(struct mxcmci_host *host, void *_buf, int bytes)
+ {
+ 	unsigned int stat;
+-	u32 *buf = _buf;
+-
+-	while (bytes > 3) {
+-		stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+-		if (stat)
+-			return stat;
+-		writel(*buf++, host->base + MMC_REG_BUFFER_ACCESS);
+-		bytes -= 4;
++	u16 *buf16 = _buf;
++	u32 *buf32 = _buf;
++	int count = 0;
++	int fifo_size = host->cmdat & CMD_DAT_CONT_BUS_WIDTH_4 ? 64 : 16;
++	int buffer_width = cpu_is_mx21() ? 2 : 4;
++
++	while (bytes >= buffer_width) {
++		if (count % fifo_size == 0) {
++			stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
++			if (stat)
++				return stat;
++		}
++		if (buffer_width == 2)
++			writel(*buf16++, host->base + MMC_REG_BUFFER_ACCESS);
++		else
++			writel(*buf32++, host->base + MMC_REG_BUFFER_ACCESS);
++		bytes -= buffer_width;
++		count += buffer_width;
+ 	}
+ 
+ 	if (bytes) {
+-		u8 *b = (u8 *)buf;
+ 		u32 tmp;
+ 
+ 		stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+ 		if (stat)
+ 			return stat;
+ 
+-		memcpy(&tmp, b, bytes);
++		if (buffer_width == 2)
++			memcpy(&tmp, (u8 *)buf16, bytes);
++		else
++			memcpy(&tmp, (u8 *)buf32, bytes);
+ 		writel(tmp, host->base + MMC_REG_BUFFER_ACCESS);
+ 	}
+ 
+-	stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+-	if (stat)
+-		return stat;
+-
+-	return 0;
++	return mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
  }
  
- static void pxamci_stop_clock(struct pxamci_host *host)
-@@ -496,9 +503,21 @@ static void pxamci_set_ios(struct mmc_ho
+ static int mxcmci_transfer_data(struct mxcmci_host *host)
+@@ -540,13 +613,20 @@ static void mxcmci_cmd_done(struct mxcmci_host *host, unsigned int stat)
+ 		return;
  	}
  
- 	if (host->power_mode != ios->power_mode) {
-+		int ret;
++	if (!host->data)
++		return;
 +
- 		host->power_mode = ios->power_mode;
- 
--		pxamci_set_power(host, ios->power_mode, ios->vdd);
-+		ret = pxamci_set_power(host, ios->power_mode, ios->vdd);
-+		if (ret) {
-+			dev_err(mmc_dev(mmc), "unable to set power\n");
-+			/*
-+			 * The .set_ios() function in the mmc_host_ops
-+			 * struct return void, and failing to set the
-+			 * power should be rare so we print an error and
-+			 * return here.
-+			 */
-+			return;
-+		}
- 
- 		if (ios->power_mode == MMC_POWER_ON)
- 			host->cmdat |= CMDAT_INIT;
-@@ -509,8 +528,8 @@ static void pxamci_set_ios(struct mmc_ho
- 	else
- 		host->cmdat &= ~CMDAT_SD_4DAT;
- 
--	pr_debug("PXAMCI: clkrt = %x cmdat = %x\n",
--		 host->clkrt, host->cmdat);
-+	dev_dbg(mmc_dev(mmc), "PXAMCI: clkrt = %x cmdat = %x\n",
-+		host->clkrt, host->cmdat);
++#ifdef HAS_DMA
+ 	/* For the DMA case the DMA engine handles the data transfer
+ 	 * automatically. For non DMA we have to do it ourselves.
+ 	 * Don't do it in interrupt context though.
+ 	 */
+-	if (!mxcmci_use_dma(host) && host->data)
++	if (mxcmci_use_dma(host)) {
++		if (cpu_is_mx21() && host->dma_dir == DMA_TO_DEVICE)
++			imx_dma_enable(host->dma);
++	} else
++#endif
+ 		schedule_work(&host->datawork);
+-
  }
  
- static void pxamci_enable_sdio_irq(struct mmc_host *host, int enable)
-_
-
-Patches currently in -mm which might be from linus.walleij@stericsson.com are
-
-linux-next.patch
-rtc-do-not-mark-pl031-irq-as-shared.patch
-mmc-mmc-44-ddr-support.patch
-mmc-move-regulator-handling-closer-to-core-v3.patch
-mmc-move-regulator-handling-closer-to-core-v4.patch
-mmc-move-regulator-handling-closer-to-core-v3-fix.patch
-checkpatch-check-for-incorrect-permissions.patch
+ static irqreturn_t mxcmci_irq(int irq, void *devid)
+@@ -559,6 +639,7 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
+ 	stat = readl(host->base + MMC_REG_STATUS);
+ 	writel(stat & ~(STATUS_SDIO_INT_ACTIVE | STATUS_DATA_TRANS_DONE |
+ 			STATUS_WRITE_OP_DONE), host->base + MMC_REG_STATUS);
++	mxcmci_ack_int(host, stat);
+ 
+ 	dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
+ 
+@@ -689,9 +770,9 @@ static void mxcmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	if (ios->clock) {
+ 		mxcmci_set_clk_rate(host, ios->clock);
+-		writew(STR_STP_CLK_START_CLK, host->base + MMC_REG_STR_STP_CLK);
++		mxcmci_start_clock(host);
+ 	} else {
+-		writew(STR_STP_CLK_STOP_CLK, host->base + MMC_REG_STR_STP_CLK);
++		mxcmci_stop_clock(host);
+ 	}
+ 
+ 	host->clock = ios->clock;
+@@ -845,7 +926,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 	/* recommended in data sheet */
+ 	writew(0x2db4, host->base + MMC_REG_READ_TO);
+ 
+-	writel(host->default_irq_mask, host->base + MMC_REG_INT_CNTR);
++	mxcmci_set_int_cntr(host, host->default_irq_mask);
+ 
+ #ifdef HAS_DMA
+ 	host->dma = imx_dma_request_by_prio(DRIVER_NAME, DMA_PRIO_LOW);
+@@ -862,7 +943,9 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	ret = imx_dma_config_channel(host->dma,
+-				     IMX_DMA_MEMSIZE_32 | IMX_DMA_TYPE_FIFO,
++				    (cpu_is_mx21() ?
++					IMX_DMA_MEMSIZE_16 : IMX_DMA_MEMSIZE_32)
++					| IMX_DMA_TYPE_FIFO,
+ 				     IMX_DMA_MEMSIZE_32 | IMX_DMA_TYPE_LINEAR,
+ 				     r->start, 0);
+ 	if (ret) {
 
