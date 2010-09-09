@@ -1,66 +1,65 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
-Date: Thu, 9 Sep 2010 11:15:07 +0400
-Message-ID: <20100909071507.GA14308@oksana.dev.rtsoft.ru>
-References: <20100714130728.GA27339@oksana.dev.rtsoft.ru>
- <20100907153813.936db0c6.akpm@linux-foundation.org>
- <20100908213740.GA7550@void.printf.net>
- <20100909022834.GA10542@void.printf.net>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] mmc_block: Allow more than 8 partitions per card
+Date: Thu, 09 Sep 2010 10:54:56 +0300
+Message-ID: <4C8892D0.4070303@nokia.com>
+References: <AANLkTinUNpWsu=AY+1EeG8xznPaESL8XnjGo7613yoMt@mail.gmail.com> <1283964637-28246-1-git-send-email-ccross@android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:43290 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751269Ab0IIHPN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Sep 2010 03:15:13 -0400
-Content-Disposition: inline
-In-Reply-To: <20100909022834.GA10542@void.printf.net>
+Received: from smtp.nokia.com ([192.100.122.230]:40869 "EHLO
+	mgw-mx03.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753712Ab0IIHzV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Sep 2010 03:55:21 -0400
+In-Reply-To: <1283964637-28246-1-git-send-email-ccross@android.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Wolfram Sang <w.sang@pengutronix.de>, Albert Herranz <albert_herranz@yahoo.es>, Matt Fleming <matt@console-pimps.org>, Ben Dooks <ben-linux@fluff.org>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@ozlabs.org
+To: Colin Cross <ccross@android.com>
+Cc: Olof Johansson <olof@lixom.net>, Kay Sievers <kay.sievers@vrfy.org>, Lei Wen <adrian.wenl@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mandeep Baines <msb@chromium.org>
 
-On Thu, Sep 09, 2010 at 03:28:34AM +0100, Chris Ball wrote:
-[...]
-> [    7.372843]  [<b04193ce>] __might_sleep+0xd9/0xe0
-> [    7.387864]  [<b07260cc>] mutex_lock+0x1c/0x2a
-> [    7.402576]  [<b06396e8>] sdhci_led_control+0x1a/0x41
-> [    7.417727]  [<b063bece>] led_trigger_event+0x42/0x5c
-
-led_trigger_even grabs a readlock. :-(
-
-> [    7.432807]  [<b06326f8>] mmc_request_done+0x56/0x6f
-> [    7.447597]  [<b063a2d1>] sdhci_finish_work+0xc8/0xcd
-> [    7.462643]  [<b063a209>] ? sdhci_finish_work+0x0/0xcd
-> [    7.477941]  [<b0432776>] worker_thread+0x165/0x1ed
-> [    7.492856]  [<b063a209>] ? sdhci_finish_work+0x0/0xcd
-> [    7.508204]  [<b0435591>] ? autoremove_wake_function+0x0/0x34
-> [    7.524178]  [<b0432611>] ? worker_thread+0x0/0x1ed
-> [    7.538953]  [<b04352a0>] kthread+0x63/0x68
-> [    7.552659]  [<b043523d>] ? kthread+0x0/0x68
-> [    7.566349]  [<b0402cf6>] kernel_thread_helper+0x6/0x10
-> [    7.709931] udev: starting version 141
-> [    7.940374] mmc2: new high speed SDHC card at address e4da
-> [    8.058165] mmcblk0: mmc2:e4da SU04G 3.69 GiB 
-> [    8.135730]  mmcblk0: p1 p2
+ext Colin Cross wrote:
+> Set the GENHD_FL_EXT_DEVT flag, which will allocate minor numbers
+> in major 259 for partitions past disk->minors.
 > 
-> Full dmesg is at http://chris.printf.net/anton-mutex-dmesg.txt. 
-> Anton, the kernel is 2.6.35.4-olpc plus your patchset from -mm.
-> I can think about how to test on an upstream kernel instead, but
-> perhaps your own tests simply didn't hit sdhci_led_control(). 
+> Also remove the use of disk_devt to determine devidx from md->disk.
+> md->disk->first_minor is always initialized from devidx and can
+> always be used to recover it.
 
-Yep, LEDS support was turned off.
+Yeah, but it is a bit weird.  It seems to me that devidx should just
+be a member of struct mmc_blk_data.
 
-> Andrew, if you want to drop this while the BUG() and potential
-> performance regressions are worked out, I'd be happy to keep 
-> testing patches from Anton until it's without regressions here.
+Doesn't look like devidx is cleared in all the error paths out of
+mmc_blk_alloc() either, if you want something else to do ;-)
 
-Thanks Chris.
+> 
+> Signed-off-by: Colin Cross <ccross@android.com>
+> ---
+>  drivers/mmc/card/block.c |    7 ++-----
+>  1 files changed, 2 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index d545f79..07d8eb0 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -87,11 +87,7 @@ static void mmc_blk_put(struct mmc_blk_data *md)
+>  	mutex_lock(&open_lock);
+>  	md->usage--;
+>  	if (md->usage == 0) {
+> -		int devmaj = MAJOR(disk_devt(md->disk));
+> -		int devidx = MINOR(disk_devt(md->disk)) >> MMC_SHIFT;
+> -
+> -		if (!devmaj)
+> -			devidx = md->disk->first_minor >> MMC_SHIFT;
+> +		int devidx = md->disk->first_minor >> MMC_SHIFT;
+>  
+>  		blk_cleanup_queue(md->queue.queue);
+>  
+> @@ -607,6 +603,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
+>  	md->disk->private_data = md;
+>  	md->disk->queue = md->queue.queue;
+>  	md->disk->driverfs_dev = &card->dev;
+> +	md->disk->flags = GENHD_FL_EXT_DEVT;
+>  
+>  	/*
+>  	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
 
-I also think that it's better to drop these series now,
-and meanwhile I'll try to prepare another patchset.
-
--- 
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
