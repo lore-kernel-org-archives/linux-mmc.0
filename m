@@ -1,244 +1,265 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH] mmc: failure of block read wait for long time
-Date: Fri, 10 Sep 2010 17:18:17 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com>
-References: <1280230066-27612-1-git-send-email-s-ghorai@ti.com>
- <4C4EDD85.5060606@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E417D80@dbde02.ent.ti.com>
- <4C4FED36.3010607@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026ED@dbde02.ent.ti.com>
- <4C8A19E7.30706@nokia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: [PATCHv2] mmc_test: move files from sysfs to debugfs
+Date: Fri, 10 Sep 2010 15:47:17 +0300
+Message-ID: <1284122837-9195-1-git-send-email-ext-andriy.shevchenko@nokia.com>
+References: <4C89DC01.6000601@nokia.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:33278 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753292Ab0IJLs3 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Sep 2010 07:48:29 -0400
-In-Reply-To: <4C8A19E7.30706@nokia.com>
-Content-Language: en-US
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:36894 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753596Ab0IJMrX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Sep 2010 08:47:23 -0400
+In-Reply-To: <4C89DC01.6000601@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>, Greg KH <greg@kroah.com>, Hunter Adrian <adrian.hunter@nokia.com>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
+As proposed by Greg the more logically is to keep files for mmc_test driver
+under debugfs.
 
+Additionally this patch brings seq_file API for show() method. It allows to
+write unlimited data to the file.
 
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> Sent: Friday, September 10, 2010 5:14 PM
-> To: Ghorai, Sukumar
-> Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org
-> Subject: Re: [PATCH] mmc: failure of block read wait for long time
-> 
-> ext Ghorai, Sukumar wrote:
-> >
-> >> -----Original Message-----
-> >> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> >> Sent: Wednesday, July 28, 2010 2:11 PM
-> >> To: Ghorai, Sukumar
-> >> Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org
-> >> Subject: Re: [PATCH] mmc: failure of block read wait for long time
-> >>
-> >> ext Ghorai, Sukumar wrote:
-> >>>> -----Original Message-----
-> >>>> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> >>>> Sent: Tuesday, July 27, 2010 6:52 PM
-> >>>> To: Ghorai, Sukumar
-> >>>> Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org
-> >>>> Subject: Re: [PATCH] mmc: failure of block read wait for long time
-> >>>>
-> >>>> Sukumar Ghorai wrote:
-> >>>>>  multi-block read failure retries in single block read one by one.
-> It
-> >>>> continues
-> >>>>>  retry of subsequent blocks, even after failure. Application will
-> not
-> >> be
-> >>>> able
-> >>>>>  to decode the interleave data (even if few single block read
-> success).
-> >>>>>  This patch fixes this problem by returning at the first failure
-> >> instead
-> >>>> of
-> >>>>>  waiting for long duration.
-> >>>> How can you know what sectors are important to the upper layers?
-> >>> [Ghorai]
-> >>> 1. This is obvious either give the complete data to above layer or not.
-> >> And every protocol follows that.
-> >>> 2. And other scenario, say apps request for to read the 128MB data and
-> >> it will take quite long time before returning in failure case.
-> >>> 3. it is quite obvious if the read fail for sector(x) it will fail for
-> >> sector(x+1)
-> >> None of that is exactly true.  However you could change the retry
-> >> from sectors to segments e.g.
-> >>
-> >>
-> >> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> >> index d545f79..5ed15f6 100644
-> >> --- a/drivers/mmc/card/block.c
-> >> +++ b/drivers/mmc/card/block.c
-> >> @@ -321,13 +321,14 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> *mq,
-> >> struct request *req)
-> >>  	struct mmc_blk_data *md = mq->data;
-> >>  	struct mmc_card *card = md->queue.card;
-> >>  	struct mmc_blk_request brq;
-> >> -	int ret = 1, disable_multi = 0;
-> >> +	int ret = 1, retrying = 0;
-> >>
-> >>  	mmc_claim_host(card->host);
-> >>
-> >>  	do {
-> >>  		struct mmc_command cmd;
-> >>  		u32 readcmd, writecmd, status = 0;
-> >> +		unsigned int blocks;
-> >>
-> >>  		memset(&brq, 0, sizeof(struct mmc_blk_request));
-> >>  		brq.mrq.cmd = &brq.cmd;
-> >> @@ -341,23 +342,26 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> *mq,
-> >> struct request *req)
-> >>  		brq.stop.opcode = MMC_STOP_TRANSMISSION;
-> >>  		brq.stop.arg = 0;
-> >>  		brq.stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-> >> -		brq.data.blocks = blk_rq_sectors(req);
-> >> +
-> >> +		/*
-> >> +		 * After a read error, we redo the request one segment at a
-> >> time
-> >> +		 * in order to accurately determine which segments can be read
-> >> +		 * successfully.
-> >> +		 */
-> >> +		if (retrying)
-> >> +			blocks = blk_rq_cur_sectors(req);
-> >> +		else
-> >> +			blocks = blk_rq_sectors(req);
-> >>
-> >>  		/*
-> >>  		 * The block layer doesn't support all sector count
-> >>  		 * restrictions, so we need to be prepared for too big
-> >>  		 * requests.
-> >>  		 */
-> >> -		if (brq.data.blocks > card->host->max_blk_count)
-> >> -			brq.data.blocks = card->host->max_blk_count;
-> >> +		if (blocks > card->host->max_blk_count)
-> >> +			blocks = card->host->max_blk_count;
-> >>
-> >> -		/*
-> >> -		 * After a read error, we redo the request one sector at a
-> >> time
-> >> -		 * in order to accurately determine which sectors can be read
-> >> -		 * successfully.
-> >> -		 */
-> >> -		if (disable_multi && brq.data.blocks > 1)
-> >> -			brq.data.blocks = 1;
-> >> +		brq.data.blocks = blocks;
-> >>
-> >>  		if (brq.data.blocks > 1) {
-> >>  			/* SPI multiblock writes terminate using a special
-> >> @@ -418,11 +422,14 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> *mq,
-> >> struct request *req)
-> >>  		 * programming mode even when things go wrong.
-> >>  		 */
-> >>  		if (brq.cmd.error || brq.data.error || brq.stop.error) {
-> >> -			if (brq.data.blocks > 1 && rq_data_dir(req) == READ) {
-> >> -				/* Redo read one sector at a time */
-> >> -				printk(KERN_WARNING "%s: retrying using single "
-> >> -				       "block read\n", req->rq_disk->disk_name);
-> >> -				disable_multi = 1;
-> >> +			if (!retrying && rq_data_dir(req) == READ &&
-> >> +			    blk_rq_cur_sectors(req) &&
-> >> +			    blk_rq_cur_sectors(req) < blocks) {
-> >> +				/* Redo read one segment at a time */
-> >> +				printk(KERN_WARNING "%s: retrying read one "
-> >> +						    "segment at a time\n",
-> >> +						    req->rq_disk->disk_name);
-> >> +				retrying = 1;
-> >>  				continue;
-> >>  			}
-> >>  			status = get_card_status(card, req);
-> >> @@ -486,12 +493,13 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> *mq,
-> >> struct request *req)
-> >>  		if (brq.cmd.error || brq.stop.error || brq.data.error) {
-> >>  			if (rq_data_dir(req) == READ) {
-> >>  				/*
-> >> -				 * After an error, we redo I/O one sector at a
-> >> +				 * After an error, we redo I/O one segment at a
-> >>  				 * time, so we only reach here after trying to
-> >> -				 * read a single sector.
-> >> +				 * read a single segment.  Error out the whole
-> >> +				 * segment and continue to the next.
-> >>  				 */
-> >>  				spin_lock_irq(&md->lock);
-> >> -				ret = __blk_end_request(req, -EIO,
-> >> brq.data.blksz);
-> >> +				ret = __blk_end_request(req, -EIO,
-> >> blk_rq_cur_sectors(req) << 9);
-> >>  				spin_unlock_irq(&md->lock);
-> >>  				continue;
-> >>  			}
-> >>
-> >>
-> >>>>> Signed-off-by: Sukumar Ghorai <s-ghorai@ti.com>
-> >>>>> ---
-> >>>>>  drivers/mmc/card/block.c |    1 -
-> >>>>>  1 files changed, 0 insertions(+), 1 deletions(-)
-> >>>>>
-> >>>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> >>>>> index cb9fbc8..cfb0827 100644
-> >>>>> --- a/drivers/mmc/card/block.c
-> >>>>> +++ b/drivers/mmc/card/block.c
-> >>>>> @@ -419,7 +419,6 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
-> >>>> struct request *req)
-> >>>>>  				spin_lock_irq(&md->lock);
-> >>>>>  				ret = __blk_end_request(req, -EIO,
-> >>>> brq.data.blksz);
-> >>>>>  				spin_unlock_irq(&md->lock);
-> >>>>> -				continue;
-> >>>>>  			}
-> >>>>>  			goto cmd_err;
-> >>>>>  		}
-> >>>>> --
-> > [Ghorai] Adrian,
-> > Yes this works and reduced the retry by 1/4 (2048 to 512 times for 1MB
-> data read) form the original code;
-> >
-> > Initially it was retrying for each page(512 bytes) after multi-block
-> read fail; but this solution is retying for each segment(2048 bytes);
-> >
-> > 1. Now say block layrer reading 1MB and failed for the 1st segment. So
-> it will still retry for 1MB/2048-bytes, i.e. 512 times.
-> > 2. So do you think any good reason to retry again and again?
-> 
-> If you have 1MB that is not readable, it sounds like the card is broken.
-> Why are so many reads failing?  Has the card been removed?
-> 
-> You might very rarely see ECC errors in a small number of sectors,
-> but more than that sounds like something else is broken.
+Example of usage:
+  # mount -t debugfs none /sys/kernel/debug
+  # modprobe mmc_test
+    [  581.395843] mmc_test mmc0:0001: Card claimed for testing.
+  # echo 25 > /sys/kernel/debug/mmc0/mmc0\:0001/test
+    [  604.568542] mmc0: Starting tests of card mmc0:0001...
+    [  604.582733] mmc0: Test case 25. Best-case read performance into scattered pages...
+    [  604.923553] mmc0: Transfer of 8192 sectors (4096 KiB) took 0.124664314 seconds (33644 kB/s, 32856 KiB/s)
+    [  604.933227] mmc0: Result: OK
+    [  604.936248] mmc0: Tests completed.
+  # cat /sys/kernel/debug/mmc0/mmc0\:0001/test
+    Test 25: 0
+    1 8192 0.124664314 33644784
 
-[Ghorai] yes, one example is we remove the card when reading data, 
-And moreover we should not give the interleave data to apps, as we don't have option to tell application for the valid data.
+Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+---
+ drivers/mmc/card/mmc_test.c |  142 ++++++++++++++++++++++++++++++++-----------
+ 1 files changed, 107 insertions(+), 35 deletions(-)
 
-> 
-> > 3. And again I mentioned how to inform the blok-layer that which segment
-> having the valid data?
-> >
-> > And I was suggesting for not to retry again if 1st retry (single block)
-> failed.
-> > http://comments.gmane.org/gmane.linux.kernel.mmc/2714
-> >
-> >>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> >> in
-> >>>>> the body of a message to majordomo@vger.kernel.org
-> >>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>>
-> >>> Regards,
-> >>> Ghorai
-> >>>
-> >
-> >
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index 58d746b..4ea6aab 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -19,6 +19,10 @@
+ #include <linux/swap.h>		/* For nr_free_buffer_pages() */
+ #include <linux/list.h>
+ 
++#include <linux/debugfs.h>
++#include <asm/uaccess.h>
++#include <linux/seq_file.h>
++
+ #define RESULT_OK		0
+ #define RESULT_FAIL		1
+ #define RESULT_UNSUP_HOST	2
+@@ -106,6 +110,18 @@ struct mmc_test_general_result {
+ };
+ 
+ /**
++ * struct mmc_test_dbgfs_file - debugfs related file.
++ * @link: double-linked list
++ * @card: card under test
++ * @file: file created under debugfs
++ */
++struct mmc_test_dbgfs_file {
++	struct list_head link;
++	struct mmc_card *card;
++	struct dentry *file;
++};
++
++/**
+  * struct mmc_test_card - test information.
+  * @card: card under test
+  * @scratch: transfer buffer
+@@ -2037,14 +2053,12 @@ static void mmc_test_free_result(struct mmc_card *card)
+ 	mutex_unlock(&mmc_test_lock);
+ }
+ 
+-static ssize_t mmc_test_show(struct device *dev,
+-	struct device_attribute *attr, char *buf)
++static LIST_HEAD(mmc_test_file_test);
++
++static int mtf_test_show(struct seq_file *sf, void *data)
+ {
+-	struct mmc_card *card = mmc_dev_to_card(dev);
++	struct mmc_card *card = (struct mmc_card *)sf->private;
+ 	struct mmc_test_general_result *gr;
+-	char *p = buf;
+-	size_t len = PAGE_SIZE;
+-	int ret;
+ 
+ 	mutex_lock(&mmc_test_lock);
+ 
+@@ -2054,49 +2068,44 @@ static ssize_t mmc_test_show(struct device *dev,
+ 		if (gr->card != card)
+ 			continue;
+ 
+-		ret = snprintf(p, len, "Test %d: %d\n", gr->testcase + 1,
+-			gr->result);
+-		if (ret < 0)
+-			goto err;
+-		if (ret >= len) {
+-			ret = -ENOBUFS;
+-			goto err;
+-		}
+-		p += ret;
+-		len -= ret;
++		seq_printf(sf, "Test %d: %d\n", gr->testcase + 1, gr->result);
+ 
+ 		list_for_each_entry(tr, &gr->tr_lst, link) {
+-			ret = snprintf(p, len, "%u %d %lu.%09lu %u\n",
++			seq_printf(sf, "%u %d %lu.%09lu %u\n",
+ 				tr->count, tr->sectors,
+ 				(unsigned long)tr->ts.tv_sec,
+ 				(unsigned long)tr->ts.tv_nsec,
+ 				tr->rate);
+-			if (ret < 0)
+-				goto err;
+-			if (ret >= len) {
+-				ret = -ENOBUFS;
+-				goto err;
+-			}
+-			p += ret;
+-			len -= ret;
+ 		}
+ 	}
+ 
+-	ret = PAGE_SIZE - len;
+-err:
+ 	mutex_unlock(&mmc_test_lock);
+ 
+-	return ret;
++	return 0;
+ }
+ 
+-static ssize_t mmc_test_store(struct device *dev,
+-	struct device_attribute *attr, const char *buf, size_t count)
++static int mtf_test_open(struct inode *inode, struct file *file)
+ {
+-	struct mmc_card *card = mmc_dev_to_card(dev);
++	return single_open(file, mtf_test_show, inode->i_private);
++}
++
++static ssize_t mtf_test_write(struct file *file, const char __user *buf,
++	size_t count, loff_t *pos)
++{
++	struct seq_file *sf = (struct seq_file *)file->private_data;
++	struct mmc_card *card = (struct mmc_card *)sf->private;
+ 	struct mmc_test_card *test;
++	char lbuf[12];
+ 	long testcase;
+ 
+-	if (strict_strtol(buf, 10, &testcase))
++	if (count >= sizeof(lbuf))
++		return -EINVAL;
++
++	if (copy_from_user(lbuf, buf, count))
++		return -EFAULT;
++	lbuf[count] = '\0';
++
++	if (strict_strtol(lbuf, 10, &testcase))
+ 		return -EINVAL;
+ 
+ 	test = kzalloc(sizeof(struct mmc_test_card), GFP_KERNEL);
+@@ -2135,7 +2144,69 @@ static ssize_t mmc_test_store(struct device *dev,
+ 	return count;
+ }
+ 
+-static DEVICE_ATTR(test, S_IWUSR | S_IRUGO, mmc_test_show, mmc_test_store);
++static const struct file_operations mmc_test_fops_test = {
++	.open		= mtf_test_open,
++	.read		= seq_read,
++	.write		= mtf_test_write,
++	.llseek		= seq_lseek,
++	.release	= single_release,
++};
++
++static void mmc_test_free_file_test(struct mmc_card *card)
++{
++	struct mmc_test_dbgfs_file *df, *dfs;
++
++	mutex_lock(&mmc_test_lock);
++
++	list_for_each_entry_safe(df, dfs, &mmc_test_file_test, link) {
++		if (card && df->card != card)
++			continue;
++		debugfs_remove(df->file);
++		list_del(&df->link);
++		kfree(df);
++	}
++
++	mutex_unlock(&mmc_test_lock);
++}
++
++static int mmc_test_register_file_test(struct mmc_card *card)
++{
++	struct dentry *file = NULL;
++	struct mmc_test_dbgfs_file *df;
++	int ret = 0;
++
++	mutex_lock(&mmc_test_lock);
++
++	if (card->debugfs_root)
++		file = debugfs_create_file("test", S_IWUSR | S_IRUGO,
++			card->debugfs_root, card, &mmc_test_fops_test);
++
++	if (IS_ERR_OR_NULL(file)) {
++		dev_err(&card->dev,
++			"Can't create file. Perhaps debugfs is disabled.\n");
++		ret = -ENODEV;
++		goto err;
++	}
++
++	df = kmalloc(sizeof(struct mmc_test_dbgfs_file), GFP_KERNEL);
++	if (!df) {
++		debugfs_remove(file);
++		dev_err(&card->dev,
++			"Can't allocate memory for internal usage.\n");
++		ret = -ENOMEM;
++		goto err;
++	}
++
++	df->card = card;
++	df->file = file;
++
++	list_add(&df->link, &mmc_test_file_test);
++
++err:
++	mutex_unlock(&mmc_test_lock);
++
++	return ret;
++}
+ 
+ static int mmc_test_probe(struct mmc_card *card)
+ {
+@@ -2144,7 +2215,7 @@ static int mmc_test_probe(struct mmc_card *card)
+ 	if (!mmc_card_mmc(card) && !mmc_card_sd(card))
+ 		return -ENODEV;
+ 
+-	ret = device_create_file(&card->dev, &dev_attr_test);
++	ret = mmc_test_register_file_test(card);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -2156,7 +2227,7 @@ static int mmc_test_probe(struct mmc_card *card)
+ static void mmc_test_remove(struct mmc_card *card)
+ {
+ 	mmc_test_free_result(card);
+-	device_remove_file(&card->dev, &dev_attr_test);
++	mmc_test_free_file_test(card);
+ }
+ 
+ static struct mmc_driver mmc_driver = {
+@@ -2176,6 +2247,7 @@ static void __exit mmc_test_exit(void)
+ {
+ 	/* Clear stalled data if card is still plugged */
+ 	mmc_test_free_result(NULL);
++	mmc_test_free_file_test(NULL);
+ 
+ 	mmc_unregister_driver(&mmc_driver);
+ }
+-- 
+1.6.3.3
 
