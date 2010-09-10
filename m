@@ -1,30 +1,32 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] MMC: add support for the Marvell platform SDHCI
-	controller
-Date: Fri, 10 Sep 2010 21:16:27 +0100
-Message-ID: <20100910201627.GB2623@void.printf.net>
-References: <1277215742-25994-1-git-send-email-saeed@marvell.com>
+Subject: Re: [PATCH] mmc: Remove distinction between hw and phys segments
+Date: Fri, 10 Sep 2010 21:25:02 +0100
+Message-ID: <20100910202502.GA2874@void.printf.net>
+References: <yq1occ6qi0o.fsf@sermon.lab.mkp.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43406 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:53228 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752938Ab0IJUQ3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 Sep 2010 16:16:29 -0400
+	id S1754597Ab0IJUZD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Sep 2010 16:25:03 -0400
 Content-Disposition: inline
-In-Reply-To: <1277215742-25994-1-git-send-email-saeed@marvell.com>
+In-Reply-To: <yq1occ6qi0o.fsf@sermon.lab.mkp.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Saeed Bishara <saeed@marvell.com>
-Cc: linux-mmc@vger.kernel.org, saeed.bishara@gmail.com
+To: "Martin K. Petersen" <martin.petersen@oracle.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Saeed,
+Hi Martin,
 
-On Tue, Jun 22, 2010 at 05:09:02PM +0300, Saeed Bishara wrote:
-> This patch implements the driver for the platfrom SDHCI controllers
-> that found on some of Marvell's SoC's.
+On Fri, Sep 10, 2010 at 01:33:59AM -0400, Martin K. Petersen wrote:
+> We have deprecated the distinction between hardware and physical
+> segments in the block layer.  Consolidate the two limits into one in
+> drivers/mmc/.
+> 
+> Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
 
-Applied to mmc-next with some minor language fixes, thanks.
+Thanks, applied to mmc-next.
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
