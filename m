@@ -1,35 +1,51 @@
-From: Greg KH <greg@kroah.com>
-Subject: Re: [PATCH] mmc_test: move files from sysfs to debugfs
-Date: Fri, 10 Sep 2010 13:29:43 -0700
-Message-ID: <20100910202943.GB9862@kroah.com>
-References: <1284102650-15044-1-git-send-email-ext-andriy.shevchenko@nokia.com>
- <4C89DC01.6000601@nokia.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: mmc_test: fix performance tests that go over max_blk_count
+Date: Fri, 10 Sep 2010 21:39:57 +0100
+Message-ID: <20100910203957.GA2966@void.printf.net>
+References: <4C89ED69.8000301@nokia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kroah.org ([198.145.64.141]:50600 "EHLO coco.kroah.org"
+Received: from void.printf.net ([89.145.121.20]:57483 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751453Ab0IJU3y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 Sep 2010 16:29:54 -0400
+	id S1750891Ab0IJUkC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Sep 2010 16:40:02 -0400
 Content-Disposition: inline
-In-Reply-To: <4C89DC01.6000601@nokia.com>
+In-Reply-To: <4C89ED69.8000301@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Andy Shevchenko <andy.shevchenko@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "Shevchenko Andriy (EXT-Teleca/Helsinki)" <ext-andriy.shevchenko@nokia.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Fri, Sep 10, 2010 at 10:19:29AM +0300, Adrian Hunter wrote:
-> Andy Shevchenko wrote:
-> >As proposed by Greg the more logically is to keep files for mmc_test driver
-> >under debugfs.
-> 
-> What happens if debugfs is not enabled in config?  Should there be
-> some kind of dependency there?  At least an error message would be
-> good - see below.
+Hi Adrian,
 
-That would be good, but note that all major distros now enable it, so
-it's less and less of an issue these days.
+On Fri, Sep 10, 2010 at 11:33:45AM +0300, Adrian Hunter wrote:
+> From: Adrian Hunter <adrian.hunter@nokia.com>
+> Date: Mon, 6 Sep 2010 12:54:06 +0300
+> Subject: [PATCH] mmc_test: fix performance tests that go over max_blk_count
+>
+> The host controller driver limits I/O transfers to maximum
+> transfer size, maximum block count, maximum segment size
+> and maximum segment count.  The performance tests were
+> not obeying these limits which meant they would not work
+> with some drivers.  This patch fixes that.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 
-thanks,
+Thanks, applied to mmc-next.
 
-greg k-h
+My test machine (Dell m6300, Sandisk Extreme III 4GB) no longer BUG()s,
+but it's still failing all of the transfer tests:
+
+mmc0: Test case 22. Multi-block highmem read...
+mmc0: Result: OK
+mmc0: Test case 23. Best-case read performance...
+mmc0: Result: Prepare stage failed! (-12)
+mmc0: Test case 24. Best-case write performance...
+mmc0: Result: Prepare stage failed! (-12)
+mmc0: Test case 25. Best-case read performance into scattered pages...
+mmc0: Result: Prepare stage failed! (-12)
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
