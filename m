@@ -1,36 +1,73 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: mmc_test: fix performance tests that go over max_blk_count
-Date: Fri, 10 Sep 2010 21:06:40 +0100
-Message-ID: <20100910200640.GA2298@void.printf.net>
-References: <4C89ED69.8000301@nokia.com> <20100910152904.GA31914@void.printf.net> <4C8A7FEA.2090407@nokia.com>
+Subject: Re: MMC maintainer
+Date: Fri, 10 Sep 2010 21:14:19 +0100
+Message-ID: <20100910201419.GA2623@void.printf.net>
+References: <m3lj7avpk4.fsf@pullcord.laptop.org> <20100909114750.09214854.akpm@linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33339 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:55546 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755002Ab0IJUGo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 Sep 2010 16:06:44 -0400
+	id S1752938Ab0IJUOU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Sep 2010 16:14:20 -0400
 Content-Disposition: inline
-In-Reply-To: <4C8A7FEA.2090407@nokia.com>
+In-Reply-To: <20100909114750.09214854.akpm@linux-foundation.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Adrian,
+Hi Andrew,
 
-On Fri, Sep 10, 2010 at 09:58:50PM +0300, Adrian Hunter wrote:
-> > This patch is corrupt, I think due to missing leading spaces on context
-> > lines; it's suspicious that the first hunk doesn't line up properly.
-> > Could you check and resend?
-> 
-> I took a copy from gmane via nntp and applied with git am just fine,
-> so I think it was sent OK.  Again below.
+On Thu, Sep 09, 2010 at 11:47:50AM -0700, Andrew Morton wrote:
+> These things can happen in parallel - get the tree set up, get it into
+> linux-next, start putting patches in it.  If I see patches turn up in
+> linux-next which I already have, I just drop them.  If I find I'm
+> holding patches which should be in the mmc tree but which aren't, I
+> send them to you.
 
-Thanks, got it now.  My MUA was corrupting the patches due to the
-"format=flowed" in your Content-Type: header, but the bytes themselves
-are fine.  Could you remove that?  It's instructed against by the
-Documentation/email-clients.txt file.
+Thanks -- have created the tree, added its mmc-next branch to -next, and
+started pushing to it (location below).  Here's a MAINTAINERS update:
+
+Subject: mmc: add MAINTAINERS entry
+
+Add myself as maintainer.
+
+Signed-off-by: Chris Ball <cjb@laptop.org>
+---
+ MAINTAINERS |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 9800de5..42f86da 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -3906,8 +3906,10 @@ S:	Supported
+ F:	drivers/mfd/
+ 
+ MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
+-S:	Orphan
++M:	Chris Ball <cjb@laptop.org>
+ L:	linux-mmc@vger.kernel.org
++T:	git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
++S:	Maintained
+ F:	drivers/mmc/
+ F:	include/linux/mmc/
+ 
+@@ -5078,8 +5080,10 @@ S:	Maintained
+ F:	drivers/mmc/host/sdricoh_cs.c
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
+-S:	Orphan
++M:	Chris Ball <cjb@laptop.org>
+ L:	linux-mmc@vger.kernel.org
++T:	git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
++S:	Maintained
+ F:	drivers/mmc/host/sdhci.*
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE, OPEN FIRMWARE BINDINGS (SDHCI-OF)
+-- 
+1.7.0.1
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
