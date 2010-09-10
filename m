@@ -1,25 +1,37 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH v2] tmio_mmc: Allow 2 byte requests in 4-bit mode
-Date: Fri, 10 Sep 2010 20:53:59 +0100
-Message-ID: <20100910195359.GA20821@console-pimps.org>
-References: <6c0f551ff67fb9f67f4b565fbe4ffdc1f4c8bc49.1283164379.git.matt@console-pimps.org> <20100910165821.GO2561@sortiz-mobl>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: mmc_test: fix performance tests that go over max_blk_count
+Date: Fri, 10 Sep 2010 21:06:40 +0100
+Message-ID: <20100910200640.GA2298@void.printf.net>
+References: <4C89ED69.8000301@nokia.com> <20100910152904.GA31914@void.printf.net> <4C8A7FEA.2090407@nokia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arkanian.console-pimps.org ([212.110.184.194]:32984 "EHLO
-	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751832Ab0IJTyB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Sep 2010 15:54:01 -0400
+Received: from void.printf.net ([89.145.121.20]:33339 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755002Ab0IJUGo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Sep 2010 16:06:44 -0400
 Content-Disposition: inline
-In-Reply-To: <20100910165821.GO2561@sortiz-mobl>
+In-Reply-To: <4C8A7FEA.2090407@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Samuel Ortiz <sameo@linux.intel.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, Arnd Hannemann <arnd@arndnet.de>, Ian Molton <ian@mnementh.co.uk>
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Fri, Sep 10, 2010 at 06:58:23PM +0200, Samuel Ortiz wrote:
->
-> As I'm carrying Arnd patches through my MFD tree, I'm also taking this one.
-> I applied it while we're waiting for Ian to comment on it.
+Hi Adrian,
 
-Sounds good, thanks!
+On Fri, Sep 10, 2010 at 09:58:50PM +0300, Adrian Hunter wrote:
+> > This patch is corrupt, I think due to missing leading spaces on context
+> > lines; it's suspicious that the first hunk doesn't line up properly.
+> > Could you check and resend?
+> 
+> I took a copy from gmane via nntp and applied with git am just fine,
+> so I think it was sent OK.  Again below.
+
+Thanks, got it now.  My MUA was corrupting the patches due to the
+"format=flowed" in your Content-Type: header, but the bytes themselves
+are fine.  Could you remove that?  It's instructed against by the
+Documentation/email-clients.txt file.
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
