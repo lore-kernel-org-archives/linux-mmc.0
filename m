@@ -1,135 +1,92 @@
-From: Zhu Richard-R65037 <r65037@freescale.com>
-Subject: RE: [PATCH 8/9] esdhc-4 esdhc: fsl esdhc driver based on platform sdhci api
-Date: Fri, 10 Sep 2010 16:45:28 +0800
-Message-ID: <A88EF4D64D8447468743DC1503C0B6CA078AA4@zch01exm22.fsl.freescale.net>
-References: <1283334533-12793-1-git-send-email-r65037@freescale.com> <20100906104729.GB2617@pengutronix.de> <A88EF4D64D8447468743DC1503C0B6CA0787D4@zch01exm22.fsl.freescale.net> <20100907102817.GA7534@pengutronix.de> <A88EF4D64D8447468743DC1503C0B6CA0789F0@zch01exm22.fsl.freescale.net> <20100909163952.GI3773@pengutronix.de>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] MMC: move regulator handling closer to core v3
+Date: Fri, 10 Sep 2010 13:05:26 +0300
+Message-ID: <4C8A02E6.4080906@nokia.com>
+References: <1283677538-31121-1-git-send-email-linus.walleij@stericsson.com> <20100908155114.880463fc.akpm@linux-foundation.org> <4C887837.6060508@nokia.com> <20100909093810.GA1988@rakim.wolfsonmicro.main> <4C88D97F.2080804@nokia.com> <20100909131251.GE25855@rakim.wolfsonmicro.main>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe005.messaging.microsoft.com ([65.55.88.15]:43594 "EHLO
-	TX2EHSOBE010.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754007Ab0IJIpm convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Sep 2010 04:45:42 -0400
-Received: from mail137-tx2 (localhost.localdomain [127.0.0.1])	by
- mail137-tx2-R.bigfish.com (Postfix) with ESMTP id CDA10AE8607	for
- <linux-mmc@vger.kernel.org>; Fri, 10 Sep 2010 08:45:38 +0000 (UTC)
-Received: from TX2EHSMHS043.bigfish.com (unknown [10.9.14.236])	by
- mail137-tx2.bigfish.com (Postfix) with ESMTP id 314A41A70058	for
- <linux-mmc@vger.kernel.org>; Fri, 10 Sep 2010 08:45:38 +0000 (UTC)
-Received: from de01smr01.freescale.net (de01smr01.freescale.net [10.208.0.31])
-	by az33egw02.freescale.net (8.14.3/8.14.3) with ESMTP id o8A8jVqd003090	for
- <linux-mmc@vger.kernel.org>; Fri, 10 Sep 2010 01:45:32 -0700 (MST)
-Received: from zch01exm22.fsl.freescale.net (zch01exm22.ap.freescale.net
- [10.192.129.206])	by de01smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
- o8A8xX12018065	for <linux-mmc@vger.kernel.org>; Fri, 10 Sep 2010 03:59:33
- -0500 (CDT)
-Content-Class: urn:content-classes:message
-In-Reply-To: <20100909163952.GI3773@pengutronix.de>
+Received: from smtp.nokia.com ([192.100.105.134]:65200 "EHLO
+	mgw-mx09.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751542Ab0IJKG6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Sep 2010 06:06:58 -0400
+In-Reply-To: <20100909131251.GE25855@rakim.wolfsonmicro.main>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Linus Walleij <linus.walleij@stericsson.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Liam Girdwood <lrg@slimlogic.co.uk>, Tony Lindgren <tony@atomide.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Sundar Iyer <sundar.iyer@stericsson.com>, Daniel Mack <daniel@caiaq.de>, Pierre Ossman <pierre@ossman.eu>, Matt Fleming <matt@console-pimps.org>, David Brownell <dbrownell@users.sourceforge.net>, Russell King <rmk+kernel@arm.linux.org.uk>, Eric Miao <eric.y.miao@gmail.com>, Cliff Brake <cbrake@bec-systems.com>, "Lavinen Jarkko (Nokia-MS/Helsinki)" <jarkko.lavinen@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Wolfram:
-
-
-Best Regards,
-Richard Zhu
-Freescale Semiconductor
-Tel: +86-021-28937189
-Email:Hong-Xing.Zhu@freescale.com 
-
-
------Original Message-----
-From: Wolfram Sang [mailto:w.sang@pengutronix.de] 
-Sent: Friday, 10 September, 2010 0:40
-To: Zhu Richard-R65037
-Cc: linux-mmc@vger.kernel.org; kernel@pengutronix.de;
-linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH 8/9] esdhc-4 esdhc: fsl esdhc driver based on
-platform sdhci api
-
-Hi Richard,
-
-> BTW, Do you know that how to define and pass the kinds of 
-> platform_data-struct special to the board to the sdhci_pltfm.c layer 
-> platform-data struct?
-
-I think we should extend the pdata->init call to also have the
-platform_data as an argument. Then, the platform-specific init routine
-should have all it needs. Will update that tomorrow.
-[<Zhu Richard-r65037>] Thanks. :)
-
-> [<Zhu Richard-r65037>] The one used in sdhci-of-esdhc.c is better than
-
-> the one listed abov; it's more logical and clear. :)
-
-Good, it seems to be complete, too :)
-
-> > I find that the sdhci.c had been support the 8bits bus_width.
+Mark Brown wrote:
+> On Thu, Sep 09, 2010 at 03:56:31PM +0300, Adrian Hunter wrote:
+>> Mark Brown wrote:
 > 
-> Yes, it was added recently, but it might have issues. See here:
+>>> What do you mean when you say that you would like boards to "hook
+>>> directly into the regulator" - what do you want to be able to do?
+>>> Is this the notifiers?  Do you need more of them?
 > 
-> http://thread.gmane.org/gmane.linux.kernel.mmc/3370
-> [<Zhu Richard-r65037>] Different IC design may have the different 
-> definitions of the bus width configuration in the HOST_CONTROL
-register.
-> This is not a big issue; we can handle these differences in the SW.
+>> There would need to be notifiers before and after any change to the
+>> voltage.  However the notifiers would have to be set up before or
+>> during regulator initialisation because initialisation already can
+>> change the voltage e.g. in set_machine_constraints.
+> 
+> Why do you believe these notifiers are needed?
 
-Yes, my point is that we don't handle this at the generic sdhci-core,
-but at the parts which deal with the platform-specific faul^H^H^H^H...
-differences ;)
+As I mentioned below, they would be needed to do PBIAS configuration
+automatically using notifiers (notifiers would have been overkill
+anyway).  However as you don't think that is a good idea, it is no
+matter.
 
-> About the 8bits supports, I had been verified this feature on i.MX 
-> platforms for a while.
-> The MMC cards 8bits mode can work well on some i.MX eSDHC platforms.
+>                                                 I would expect that
+> anything that needs pre and post change notifications like this is
+> actually changing the configuration itself (since if it's that sensitive
+> to changes it seems likely that it wouldn't be enthused about having the
+> configuration changed while it's trying to do stuff).
 
-Why only some? Are the others not working or not tested?
-[<Zhu Richard-r65037>] They are not tested in Linux BSP, because some
-boards don't have the 8bit caps in the HW design.
- They should be ok in 8bits mode, since the 8bits modes are all verified
-in the IC validation.
+Yes, except when it is the regulator core trying to set the initial power
+state on or off.
 
-> One more suggestion, the caps should be handled carefully, because not
+> 
+>>> I can't parse this at all I'm afraid.  Could you be more specific about
+>>> what you mean by using enable and disable independantly of the board -
+>>> clearly the consumer drivers are already able to be board independant?
+> 
+>> For OMAP3 (and OMAP2 in some cases) the 1st SD/SDIO/MMC controller
+>> can operate at either 1.8V or 3V, however at 3V the board must apply
+>> voltage level shifting (PBIAS configuation).  Currently the
+>> level-shifting is done by board code that must be called before and
+>> after the voltage changes.  The omap_hsmmc driver calls the board
+>> code via callbacks in platform data (.before_set_reg and
+>> .after_set_reg).
+> 
+> This really sounds like something that's internal to the MMC controller
+> driver - based on your description I'm very surprised that boards even
+> get visibility of this.  Surely the MMC controller driver should be
+> taking care of configuring PBIAS itself, assuming it's something
+> internal to the chip?
 
-> only the caps of the IC design, but also the caps of the board HW 
-> design should be taken care,
+It is considered that the driver should know only about hsmmc ip not
+all of OMAP.  Additionally the OMAP community does not allow the use
+of the necessary system control registers outside of the board level
+i.e. arch/arm/mach-omap2 etc.  Hence the driver calls down to the
+board level.  That is ugly but not a problem.
 
-Could you give an example when it is board-dependent?
-[<Zhu Richard-r65037>] In some cases, the SD slots maybe only have
-populated 4bits data pins out in HW design, although the caps of IC can
-support up to 8bits bus width.
+>                        Adding code to the regulator API so that the OMAP
+> MMC driver can be notified of the configuration it has applied to itself
+> (and any failures that ensue) feels baroque.
 
-> [<Zhu Richard-r65037>] I'm checking it, and still trying finding a way
+As you wish.  That rules out using the core to turn off the regulator at
+boot up, but that is OK, the driver can do it.  At present the driver
+makes the mistake of just doing regulator_enable() / disable() to ensure the
+regulator is off, without calling down to the board level for the PBIAS
+configuration.  It also comments the code as an "ugly hack" whereas
+it is really the only way to do it, if the regulator can't do the
+PBIAS configuration automatically.  I will just fix the driver and add
+better comments.
 
-> to pass the board related info (such as the WP pins, and bus width to 
-> sdhci-platfm.c layer)
-
-See above. And here is my current WIP. I factored out the common stuff
-from of and pltfm. Furthermore, I addressed Uwe's comments about adding
-MX35-devices. Expect a few updates (platform-data) tomorrow.
-
-http://git.pengutronix.de/?p=wsa/linux-2.6.git;a=shortlog;h=refs/heads/p
-cm043-wip
-
-(The old branch is still there, just in case you are working with it)
-
-> The host->ops->get_ro should be added into the sdhci.c file although 
-> following the method provided in the RFC patches. How do you think 
-> about that?
-
-I agree, that one seems needed. Shall I integrate this into my series or
-do you want to place this patch ontop of my series?
-[<Zhu Richard-r65037>] You can merge these codes into your patches.
-
-Kind regards,
-
-   Wolfram
-
--- 
-Pengutronix e.K.                           | Wolfram Sang
-|
-Industrial Linux Solutions                 | http://www.pengutronix.de/
-|
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
