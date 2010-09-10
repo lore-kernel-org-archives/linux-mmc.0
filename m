@@ -1,51 +1,39 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: mmc_test: fix performance tests that go over max_blk_count
-Date: Fri, 10 Sep 2010 21:39:57 +0100
-Message-ID: <20100910203957.GA2966@void.printf.net>
-References: <4C89ED69.8000301@nokia.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: MMC maintainer
+Date: Fri, 10 Sep 2010 13:58:24 -0700
+Message-ID: <20100910135824.a4cb1f44.akpm@linux-foundation.org>
+References: <m3lj7avpk4.fsf@pullcord.laptop.org>
+	<20100909114750.09214854.akpm@linux-foundation.org>
+	<20100910201419.GA2623@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57483 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750891Ab0IJUkC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 Sep 2010 16:40:02 -0400
-Content-Disposition: inline
-In-Reply-To: <4C89ED69.8000301@nokia.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:52994 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753835Ab0IJU65 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Sep 2010 16:58:57 -0400
+In-Reply-To: <20100910201419.GA2623@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Adrian,
+On Fri, 10 Sep 2010 21:14:19 +0100
+Chris Ball <cjb@laptop.org> wrote:
 
-On Fri, Sep 10, 2010 at 11:33:45AM +0300, Adrian Hunter wrote:
-> From: Adrian Hunter <adrian.hunter@nokia.com>
-> Date: Mon, 6 Sep 2010 12:54:06 +0300
-> Subject: [PATCH] mmc_test: fix performance tests that go over max_blk_count
->
-> The host controller driver limits I/O transfers to maximum
-> transfer size, maximum block count, maximum segment size
-> and maximum segment count.  The performance tests were
-> not obeying these limits which meant they would not work
-> with some drivers.  This patch fixes that.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+> On Thu, Sep 09, 2010 at 11:47:50AM -0700, Andrew Morton wrote:
+> > These things can happen in parallel - get the tree set up, get it into
+> > linux-next, start putting patches in it.  If I see patches turn up in
+> > linux-next which I already have, I just drop them.  If I find I'm
+> > holding patches which should be in the mmc tree but which aren't, I
+> > send them to you.
+> 
+> Thanks -- have created the tree, added its mmc-next branch to -next, and
+> started pushing to it (location below).  Here's a MAINTAINERS update:
+> 
+> Subject: mmc: add MAINTAINERS entry
+> 
+> Add myself as maintainer.
 
-Thanks, applied to mmc-next.
-
-My test machine (Dell m6300, Sandisk Extreme III 4GB) no longer BUG()s,
-but it's still failing all of the transfer tests:
-
-mmc0: Test case 22. Multi-block highmem read...
-mmc0: Result: OK
-mmc0: Test case 23. Best-case read performance...
-mmc0: Result: Prepare stage failed! (-12)
-mmc0: Test case 24. Best-case write performance...
-mmc0: Result: Prepare stage failed! (-12)
-mmc0: Test case 25. Best-case read performance into scattered pages...
-mmc0: Result: Prepare stage failed! (-12)
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Kewl.  Please work with Stephen on getting that into linux-next.
