@@ -1,55 +1,86 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: mmc_test: fix performance tests that go over max_blk_count
-Date: Fri, 10 Sep 2010 16:29:04 +0100
-Message-ID: <20100910152904.GA31914@void.printf.net>
-References: <4C89ED69.8000301@nokia.com>
+From: Samuel Ortiz <sameo@linux.intel.com>
+Subject: Re: [PATCH 1/4] tmio_mmc: Allow the mfd driver to specify get_cd
+ handler
+Date: Fri, 10 Sep 2010 18:10:20 +0200
+Message-ID: <20100910161019.GM2561@sortiz-mobl>
+References: <1282663622-20564-1-git-send-email-arnd@arndnet.de>
+ <1282663622-20564-2-git-send-email-arnd@arndnet.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56049 "EHLO void.printf.net"
+Received: from mga03.intel.com ([143.182.124.21]:53200 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751282Ab0IJP3Q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 Sep 2010 11:29:16 -0400
+	id S1754943Ab0IJQKA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Sep 2010 12:10:00 -0400
 Content-Disposition: inline
-In-Reply-To: <4C89ED69.8000301@nokia.com>
+In-Reply-To: <1282663622-20564-2-git-send-email-arnd@arndnet.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Arnd Hannemann <arnd@arndnet.de>
+Cc: ian@mnementh.co.uk, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, yusuke.goda.sx@renesas.com
 
-Hi Adrian,
+On Tue, Aug 24, 2010 at 05:26:59PM +0200, Arnd Hannemann wrote:
+> Some controllers, supported by the tmio_mmc driver do not have the card detect
+> pin of a slot connected, so that polling needs to be used and card detection is
+> handled by other means.
+> This patch exposes a get_cd hook for that purpose.
+The patchset looks fine to me. I guess it makes sense to push it through the
+MFD tree. Are you ok with that ?
 
-On Fri, Sep 10, 2010 at 11:33:45AM +0300, Adrian Hunter wrote:
-> --- a/drivers/mmc/card/mmc_test.c
-> +++ b/drivers/mmc/card/mmc_test.c
-> @@ -56,7 +56,9 @@ struct mmc_test_mem {
->  * struct mmc_test_area - information for performance tests.
->  * @max_sz: test area size (in bytes)
->  * @dev_addr: address on card at which to do performance tests
-> - * @max_segs: maximum segments in scatterlist @sg
-> + * @max_tfr: maximum transfer size allowed by driver (in bytes)
-> + * @max_segs: maximum segments allowed by driver in scatterlist @sg
-> + * @max_seg_sz: maximum segment size allowed by driver
->  * @blocks: number of (512 byte) blocks currently mapped by @sg
->  * @sg_len: length of currently mapped scatterlist @sg
->  * @mem: allocated memory
-> @@ -65,7 +67,9 @@ struct mmc_test_mem {
-> struct mmc_test_area {
-> 	unsigned long max_sz;
-> 	unsigned int dev_addr;
-> +	unsigned int max_tfr;
-> 	unsigned int max_segs;
-> +	unsigned int max_seg_sz;
-> 	unsigned int blocks;
-> 	unsigned int sg_len;
-> 	struct mmc_test_mem *mem;
+Cheers,
+Samuel.
 
-This patch is corrupt, I think due to missing leading spaces on context
-lines; it's suspicious that the first hunk doesn't line up properly.
-Could you check and resend?
-
-Thanks,
+ 
+> Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+> ---
+>  drivers/mmc/host/tmio_mmc.c |   13 +++++++++++++
+>  include/linux/mfd/tmio.h    |    1 +
+>  2 files changed, 14 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+> index ee7d0a5..fe2ebf6 100644
+> --- a/drivers/mmc/host/tmio_mmc.c
+> +++ b/drivers/mmc/host/tmio_mmc.c
+> @@ -755,10 +755,23 @@ static int tmio_mmc_get_ro(struct mmc_host *mmc)
+>  		(sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT)) ? 0 : 1;
+>  }
+>  
+> +static int tmio_mmc_get_cd(struct mmc_host *mmc)
+> +{
+> +	struct tmio_mmc_host *host = mmc_priv(mmc);
+> +	struct mfd_cell	*cell = host->pdev->dev.platform_data;
+> +	struct tmio_mmc_data *pdata = cell->driver_data;
+> +
+> +	if (!pdata->get_cd)
+> +		return -ENOSYS;
+> +	else
+> +		return pdata->get_cd(host->pdev);
+> +}
+> +
+>  static const struct mmc_host_ops tmio_mmc_ops = {
+>  	.request	= tmio_mmc_request,
+>  	.set_ios	= tmio_mmc_set_ios,
+>  	.get_ro         = tmio_mmc_get_ro,
+> +	.get_cd		= tmio_mmc_get_cd,
+>  };
+>  
+>  #ifdef CONFIG_PM
+> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> index f07425b..24c43bb 100644
+> --- a/include/linux/mfd/tmio.h
+> +++ b/include/linux/mfd/tmio.h
+> @@ -74,6 +74,7 @@ struct tmio_mmc_data {
+>  	struct tmio_mmc_dma		*dma;
+>  	void (*set_pwr)(struct platform_device *host, int state);
+>  	void (*set_clk_div)(struct platform_device *host, int state);
+> +	int (*get_cd)(struct platform_device *host);
+>  };
+>  
+>  /*
+> -- 
+> 1.7.0.4
+> 
 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Intel Open Source Technology Centre
+http://oss.intel.com/
