@@ -1,38 +1,56 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] mmc: Add architecture dependency for Marvell SoC
- controller
-Date: Mon, 13 Sep 2010 13:02:48 +0100
-Message-ID: <20100913120247.GJ16606@rakim.wolfsonmicro.main>
-References: <1284366279-17140-1-git-send-email-broonie@opensource.wolfsonmicro.com>
- <201009131248.38501.arnd@arndb.de>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [RFC] thoughts about recent Samsung related patches
+Date: Mon, 13 Sep 2010 14:31:08 +0200
+Message-ID: <20100913123108.GA5497@pengutronix.de>
+References: <20100906110059.GC2617@pengutronix.de>
+ <AANLkTikoC35Rg52jJ5NMwvtMh9PfxgS7RqtfvfBeD6LV@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="cNdxnHkX5QqsyA0e"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:37799 "EHLO
-	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754534Ab0IMMCu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Sep 2010 08:02:50 -0400
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:59588 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754999Ab0IMMbR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Sep 2010 08:31:17 -0400
 Content-Disposition: inline
-In-Reply-To: <201009131248.38501.arnd@arndb.de>
+In-Reply-To: <AANLkTikoC35Rg52jJ5NMwvtMh9PfxgS7RqtfvfBeD6LV@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Kyungmin Park <kyungmin.park@samsung.com>
+Cc: linux-mmc@vger.kernel.org, pierre-list@ossman.eu, gdavis@mvista.com, cbouatmailru@gmail.com, m.szyprowski@samsung.com, akpm@linux-foundation.org, =?utf-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
 
-On Mon, Sep 13, 2010 at 12:48:38PM +0200, Arnd Bergmann wrote:
 
-> I think we normally try to do the the other way round: in order to increase
-> build coverage, try to enable all drivers on as many platforms as possible,
-> just don't have them in the defconfig.
+--cNdxnHkX5QqsyA0e
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This is not the general pattern for on-CPU devices on the embedded SoCs,
-for those we normally only offer the config option when building for a
-system which could physically have the device.  Looking at the existing
-MMC host drivers you'll see this pattern is already heavily used there -
-all the existing embedded controllers have similar dependencies.
+> > I hope my comments are applicable; because there is no freely available
+> > datasheet, I can't verify all of my assumptions. Looking forward to
+> > comments.
+> Good, I think it's possible. I'll try and send a patch.
 
-> Do you get build errors on other platforms? If yes, there is probably
-> a bug in the driver that should be fixed instead.
+Any news on this ?
 
-No, I didn't even try to build it - I saw that I was being offered a
-device for a Marvell CPU when building for a non-Marvell CPU.
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--cNdxnHkX5QqsyA0e
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkyOGYwACgkQD27XaX1/VRt27wCgkDJcNU61qyoor1Wzkrce5R/A
+44YAnRvNMzJ1WbB5IbCgmV+kLuP1+h2C
+=mOsI
+-----END PGP SIGNATURE-----
+
+--cNdxnHkX5QqsyA0e--
