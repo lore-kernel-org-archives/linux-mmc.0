@@ -1,115 +1,83 @@
 From: Alan Cox <alan@linux.intel.com>
-Subject: [PATCH 3/7] sdhci: Intel Medfield support
-Date: Mon, 13 Sep 2010 18:39:13 +0100
-Message-ID: <20100913173909.20345.12606.stgit@localhost.localdomain>
+Subject: [PATCH 5/7] sdhci: Tidy up spaces in sdhci_intel_mid
+Date: Mon, 13 Sep 2010 18:39:41 +0100
+Message-ID: <20100913173940.20345.66285.stgit@localhost.localdomain>
 References: <20100913172738.20345.61119.stgit@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:21097 "EHLO mga09.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:61250 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752515Ab0IMSXp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Sep 2010 14:23:45 -0400
+	id S1752515Ab0IMSYN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Sep 2010 14:24:13 -0400
 In-Reply-To: <20100913172738.20345.61119.stgit@localhost.localdomain>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org
 
-From: Xiaochen Shen <xiaochen.shen@intel.com>
+Coding style fixes
 
-Basic support for the Intel Medfield devices
-
-Signed-off-by: Xiaochen Shen <xiaochen.shen@intel.com>
 Signed-off-by: Alan Cox <alan@linux.intel.com>
 ---
 
- drivers/mmc/host/sdhci-pci.c |   49 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/pci_ids.h      |    5 ++++
- 2 files changed, 54 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-intel-mid.c |   18 +++++++++---------
+ 1 files changed, 9 insertions(+), 9 deletions(-)
 
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 9b0a348..1324369 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -426,6 +426,15 @@ static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1 = {
- 	.host_ops	= &sdhci_intel_mrst_hc,
- };
+diff --git a/drivers/mmc/host/sdhci-intel-mid.c b/drivers/mmc/host/sdhci-intel-mid.c
+index 436ee46..5057133 100644
+--- a/drivers/mmc/host/sdhci-intel-mid.c
++++ b/drivers/mmc/host/sdhci-intel-mid.c
+@@ -14,7 +14,7 @@
  
-+static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
-+	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+};
-+
-+static const struct sdhci_pci_fixes sdhci_intel_mfd_emmc_sdio = {
-+	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+};
-+
-+
- #endif
+ /*
+  *	Support code for SDHCI on Intel MID platforms. We have lots
+- * 	of quirks specific to these platforms so wrap them up in one place
++ *	of quirks specific to these platforms so wrap them up in one place
+  *	that keeps them out of the main flow. We can't just make it a new
+  *	driver as the shdci core code isn't really a library.
+  */
+@@ -26,16 +26,16 @@
+ static DEFINE_MUTEX(port_mutex);
  
- static const struct pci_device_id pci_ids[] __devinitdata = {
-@@ -541,6 +550,46 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
- 		.subdevice	= PCI_ANY_ID,
- 		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrst_hc1,
- 	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_SD,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_sd,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_SDIO1,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_SDIO2,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_EMMC0,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_EMMC1,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
-+	},
- #endif
- 	{	/* Generic SD host controller */
- 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
-diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
-index 674316e..fd619e8 100644
---- a/include/linux/pci_ids.h
-+++ b/include/linux/pci_ids.h
-@@ -2412,6 +2412,11 @@
- #define PCI_DEVICE_ID_INTEL_82378	0x0484
- #define PCI_DEVICE_ID_INTEL_MRST_SD0	0x0807
- #define PCI_DEVICE_ID_INTEL_MRST_SD1	0x0808
-+#define PCI_DEVICE_ID_INTEL_MFD_SD	0x0820
-+#define PCI_DEVICE_ID_INTEL_MFD_SDIO1	0x0821
-+#define PCI_DEVICE_ID_INTEL_MFD_SDIO2	0x0822
-+#define PCI_DEVICE_ID_INTEL_MFD_EMMC0	0x0823
-+#define PCI_DEVICE_ID_INTEL_MFD_EMMC1	0x0824
- #define PCI_DEVICE_ID_INTEL_I960	0x0960
- #define PCI_DEVICE_ID_INTEL_I960RM	0x0962
- #define PCI_DEVICE_ID_INTEL_8257X_SOL	0x1062
+ static void sdhci_intel_wait_req(struct sdhci_host *host,
+-                                                struct mmc_request *mrq)
++						struct mmc_request *mrq)
+ {
+-        mutex_lock(&port_mutex);
+-        mmc_do_wait_for_req(host->mmc, mrq);
+-        mutex_unlock(&port_mutex);
++	mutex_lock(&port_mutex);
++	mmc_do_wait_for_req(host->mmc, mrq);
++	mutex_unlock(&port_mutex);
+ }
+ 
+ /*
+  *	Handle the Moorestown reset
+- */ 
++ */
+ static void sdhci_broken_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	unsigned long timeout;
+@@ -75,8 +75,8 @@ static void sdhci_mid_init_no_reset(struct sdhci_host *host, int soft)
+ 		intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE),
+ 		SDHCI_INT_STATUS);
+ 
+-        /* Ensure any IRQ left over from pre boot time (eg from Kboot) does
+-           not turn up and cause chaos */
++	/* Ensure any IRQ left over from pre boot time (eg from Kboot) does
++	   not turn up and cause chaos */
+ 	sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+ 
+@@ -130,7 +130,7 @@ static void sdhci_clockreset_wcmd(struct sdhci_host *host,
+ 				struct mmc_command *cmd, int flags)
+ {
+ 	sdhci_clock_reset(host);
+- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
++	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
+ }
+ 
+ static void sdhci_lnw_a3_set_ios(struct sdhci_host *host,
 
