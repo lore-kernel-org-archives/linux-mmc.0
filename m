@@ -1,248 +1,196 @@
 From: Alan Cox <alan@linux.intel.com>
-Subject: [PATCH 4/7] mmc: serialization support
-Date: Mon, 13 Sep 2010 18:39:32 +0100
-Message-ID: <20100913173920.20345.36169.stgit@localhost.localdomain>
+Subject: [PATCH 6/7] sdhci_pci: Tidy this as well
+Date: Mon, 13 Sep 2010 18:39:51 +0100
+Message-ID: <20100913173948.20345.65227.stgit@localhost.localdomain>
 References: <20100913172738.20345.61119.stgit@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:25134 "EHLO mga14.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:56992 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752892Ab0IMSYH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Sep 2010 14:24:07 -0400
+	id S1754785Ab0IMSYX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Sep 2010 14:24:23 -0400
 In-Reply-To: <20100913172738.20345.61119.stgit@localhost.localdomain>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org
 
-Some hardware has restrictions that require only one command is outstanding
-per controller or some other similar restriction.
-
-Provide optional serialization support and enable it for the Intel MID
-platform devices with this restriction. Split up from some existing patches
-by JiebingLi.
-
-Signed-off-by: JiebingLi <jiebing.li@intel.com>
-Signed-off-by: Alan Cox <alan@linux.intel.com>
+While doing the tidy up of the new stuff might as well tidy the old
 ---
 
- drivers/mmc/core/core.c            |   30 ++++++++++++++++++++++++++----
- drivers/mmc/host/sdhci-intel-mid.c |   33 ++++++++++++++++++++-------------
- drivers/mmc/host/sdhci-pci.c       |    2 ++
- drivers/mmc/host/sdhci.c           |   18 ++++++++++++++++++
- drivers/mmc/host/sdhci.h           |    1 +
- include/linux/mmc/core.h           |    1 +
- include/linux/mmc/host.h           |    3 +++
- 7 files changed, 71 insertions(+), 17 deletions(-)
+ drivers/mmc/host/sdhci-pci.c |   48 ++++++++++++++++++++++--------------------
+ 1 files changed, 25 insertions(+), 23 deletions(-)
 
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 5db49b1..b2abb68 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -202,11 +202,14 @@ static void mmc_wait_done(struct mmc_request *mrq)
-  *	@host: MMC host to start command
-  *	@mrq: MMC request to start
-  *
-- *	Start a new MMC custom command request for a host, and wait
-- *	for the command to complete. Does not attempt to parse the
-- *	response.
-+ *	Implementation hander for starting a new MMC custom command request
-+ *	for a host, and wait for the command to complete. Does not attempt to
-+ *	parse the response.
-+ *
-+ *	We provide this separately and export it so that it can be wrapped
-+ *	by callers who need serialization or have other issue constraints
-  */
--void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
-+void mmc_do_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
- {
- 	DECLARE_COMPLETION_ONSTACK(complete);
- 
-@@ -218,6 +221,25 @@ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
- 	wait_for_completion(&complete);
- }
- 
-+EXPORT_SYMBOL(mmc_do_wait_for_req);
-+
-+/**
-+ *	mmc_wait_for_req - start a request and wait for completion
-+ *	@host: MMC host to start command
-+ *	@mrq: MMC request to start
-+ *
-+ *	Start a new MMC custom command request for a host, and wait
-+ *	for the command to complete. Does not attempt to parse the
-+ *	response.
-+ */
-+void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
-+{
-+	if (host->ops->wait_for_req)
-+		host->ops->wait_for_req(host, mrq);
-+	else
-+		return mmc_do_wait_for_req(host, mrq);
-+}
-+
- EXPORT_SYMBOL(mmc_wait_for_req);
- 
- /**
-diff --git a/drivers/mmc/host/sdhci-intel-mid.c b/drivers/mmc/host/sdhci-intel-mid.c
-index 2828831..436ee46 100644
---- a/drivers/mmc/host/sdhci-intel-mid.c
-+++ b/drivers/mmc/host/sdhci-intel-mid.c
-@@ -18,20 +18,27 @@
-  *	that keeps them out of the main flow. We can't just make it a new
-  *	driver as the shdci core code isn't really a library.
-  */
-- 
-+
-+/*
-+ *	Support serialization
-+ */
-+
-+static DEFINE_MUTEX(port_mutex);
-+
-+static void sdhci_intel_wait_req(struct sdhci_host *host,
-+                                                struct mmc_request *mrq)
-+{
-+        mutex_lock(&port_mutex);
-+        mmc_do_wait_for_req(host->mmc, mrq);
-+        mutex_unlock(&port_mutex);
-+}
-+
-+/*
-+ *	Handle the Moorestown reset
-+ */ 
- static void sdhci_broken_reset(struct sdhci_host *host, u8 mask)
- {
- 	unsigned long timeout;
--	u32 uninitialized_var(ier);
--
--	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
--		if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) &
--			SDHCI_CARD_PRESENT))
--			return;
--	}
--
--	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
--		ier = sdhci_readl(host, SDHCI_INT_ENABLE);
- 
- 	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
- 
-@@ -46,12 +53,11 @@ static void sdhci_broken_reset(struct sdhci_host *host, u8 mask)
- 		if (timeout == 0) {
- 			printk(KERN_ERR "%s: Reset 0x%x never completed.\n",
- 				mmc_hostname(host->mmc), (int)mask);
-+			return;
- 		}
- 		timeout--;
- 		mdelay(1);
- 	}
--	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
--		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
- }
- 
- static void sdhci_mid_broken_resetall(struct sdhci_host *host, int down)
-@@ -156,6 +162,7 @@ struct sdhci_ops sdhci_intel_mrst_hc = {
- 	.set_ios = sdhci_lnw_a3_set_ios,
- 	.reset_all = sdhci_mid_broken_resetall,
- 	.write_command = sdhci_clockreset_wcmd,
-+	.wait_for_req = sdhci_intel_wait_req,
- 	.unexpected_cmd_irq = sdhci_lnw_a3_unexpected_cmd,
- };
- EXPORT_SYMBOL_GPL(sdhci_intel_mrst_hc);
 diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 1324369..bb14047 100644
+index bb14047..9692eab 100644
 --- a/drivers/mmc/host/sdhci-pci.c
 +++ b/drivers/mmc/host/sdhci-pci.c
-@@ -55,6 +55,8 @@ struct sdhci_pci_fixes {
- 					pm_message_t);
- 	int			(*resume)(struct sdhci_pci_chip*);
+@@ -21,8 +21,8 @@
  
-+	/* Allow the driver to override some operations for particularly
-+	   quirky chips */
- 	struct sdhci_ops	*host_ops;
+ #include <linux/mmc/host.h>
+ 
+-#include <asm/scatterlist.h>
+-#include <asm/io.h>
++#include <linux/scatterlist.h>
++#include <linux/io.h>
+ 
+ #include "sdhci.h"
+ 
+@@ -46,14 +46,14 @@ struct sdhci_pci_slot;
+ struct sdhci_pci_fixes {
+ 	unsigned int		quirks;
+ 
+-	int			(*probe)(struct sdhci_pci_chip*);
++	int			(*probe)(struct sdhci_pci_chip *);
+ 
+-	int			(*probe_slot)(struct sdhci_pci_slot*);
+-	void			(*remove_slot)(struct sdhci_pci_slot*, int);
++	int			(*probe_slot)(struct sdhci_pci_slot *);
++	void			(*remove_slot)(struct sdhci_pci_slot *, int);
+ 
+-	int			(*suspend)(struct sdhci_pci_chip*,
++	int			(*suspend)(struct sdhci_pci_chip *,
+ 					pm_message_t);
+-	int			(*resume)(struct sdhci_pci_chip*);
++	int			(*resume)(struct sdhci_pci_chip *);
+ 
+ 	/* Allow the driver to override some operations for particularly
+ 	   quirky chips */
+@@ -287,7 +287,7 @@ static int jmicron_suspend(struct sdhci_pci_chip *chip, pm_message_t state)
+ 	int i;
+ 
+ 	if (chip->pdev->device == PCI_DEVICE_ID_JMICRON_JMB38X_MMC) {
+-		for (i = 0;i < chip->num_slots;i++)
++		for (i = 0; i < chip->num_slots; i++)
+ 			jmicron_enable_mmc(chip->slots[i]->host, 0);
+ 	}
+ 
+@@ -299,7 +299,7 @@ static int jmicron_resume(struct sdhci_pci_chip *chip)
+ 	int ret, i;
+ 
+ 	if (chip->pdev->device == PCI_DEVICE_ID_JMICRON_JMB38X_MMC) {
+-		for (i = 0;i < chip->num_slots;i++)
++		for (i = 0; i < chip->num_slots; i++)
+ 			jmicron_enable_mmc(chip->slots[i]->host, 1);
+ 	}
+ 
+@@ -401,7 +401,8 @@ static const struct sdhci_pci_fixes sdhci_via = {
+ 	.probe		= via_probe,
  };
  
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9d8091a..9d8047c 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1268,6 +1268,12 @@ out:
- 	spin_unlock_irqrestore(&host->lock, flags);
+-#if defined(CONFIG_MMC_SDHCI_INTEL_MID) || defined(CONFIG_MMC_SDHCI_INTEL_MID_MODULE)
++#if defined(CONFIG_MMC_SDHCI_INTEL_MID) || \
++		defined(CONFIG_MMC_SDHCI_INTEL_MID_MODULE)
+ 
+ /*
+  * ADMA operation is disabled for Moorestown platform due to
+@@ -536,7 +537,8 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
+ 		.driver_data	= (kernel_ulong_t)&sdhci_via,
+ 	},
+ 
+-#if defined(CONFIG_MMC_SDHCI_INTEL_MID) || defined(CONFIG_MMC_SDHCI_INTEL_MID_MODULE)
++#if defined(CONFIG_MMC_SDHCI_INTEL_MID) || \
++			defined(CONFIG_MMC_SDHCI_INTEL_MID_MODULE)
+ 	{
+ 		.vendor		= PCI_VENDOR_ID_INTEL,
+ 		.device		= PCI_DEVICE_ID_INTEL_MRST_SD0,
+@@ -646,7 +648,7 @@ static struct sdhci_ops sdhci_pci_ops = {
+ 
+ #ifdef CONFIG_PM
+ 
+-static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
++static int sdhci_pci_suspend(struct pci_dev *pdev, pm_message_t state)
+ {
+ 	struct sdhci_pci_chip *chip;
+ 	struct sdhci_pci_slot *slot;
+@@ -657,7 +659,7 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
+ 	if (!chip)
+ 		return 0;
+ 
+-	for (i = 0;i < chip->num_slots;i++) {
++	for (i = 0; i < chip->num_slots; i++) {
+ 		slot = chip->slots[i];
+ 		if (!slot)
+ 			continue;
+@@ -665,7 +667,7 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
+ 		ret = sdhci_suspend_host(slot->host, state);
+ 
+ 		if (ret) {
+-			for (i--;i >= 0;i--)
++			for (i--; i >= 0; i--)
+ 				sdhci_resume_host(chip->slots[i]->host);
+ 			return ret;
+ 		}
+@@ -676,7 +678,7 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
+ 	if (chip->fixes && chip->fixes->suspend) {
+ 		ret = chip->fixes->suspend(chip, state);
+ 		if (ret) {
+-			for (i = chip->num_slots - 1;i >= 0;i--)
++			for (i = chip->num_slots - 1; i >= 0; i--)
+ 				sdhci_resume_host(chip->slots[i]->host);
+ 			return ret;
+ 		}
+@@ -696,7 +698,7 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
+ 	return 0;
  }
  
-+static void sdhci_wait_for_req(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	host->ops->wait_for_req(host, mrq);
-+}
-+
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.set_ios	= sdhci_set_ios,
-@@ -1275,6 +1281,16 @@ static const struct mmc_host_ops sdhci_ops = {
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
- };
+-static int sdhci_pci_resume (struct pci_dev *pdev)
++static int sdhci_pci_resume(struct pci_dev *pdev)
+ {
+ 	struct sdhci_pci_chip *chip;
+ 	struct sdhci_pci_slot *slot;
+@@ -718,7 +720,7 @@ static int sdhci_pci_resume (struct pci_dev *pdev)
+ 			return ret;
+ 	}
  
-+/* Operations struct we use if the controller has an sdhci level
-+   ops->wait_for_req */
-+static const struct mmc_host_ops sdhci_ops_wait = {
-+	.request	= sdhci_request,
-+	.set_ios	= sdhci_set_ios,
-+	.get_ro		= sdhci_get_ro,
-+	.enable_sdio_irq = sdhci_enable_sdio_irq,
-+	.wait_for_req	= sdhci_wait_for_req,
-+};
-+
- /*****************************************************************************\
-  *                                                                           *
-  * Tasklets                                                                  *
-@@ -1839,6 +1855,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 * Set host parameters.
- 	 */
- 	mmc->ops = &sdhci_ops;
-+	if (host->ops->wait_for_req)
-+		mmc->ops = &sdhci_ops_wait;
- 	if (host->ops->get_min_clock)
- 		mmc->f_min = host->ops->get_min_clock(host);
- 	else
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 182fcc3..7c934bd 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -334,6 +334,7 @@ struct sdhci_ops {
- 				struct mmc_ios *ios, u8 ctrl);
- 	void	(*set_caps)(struct sdhci_host *host);
- 	void	(*unexpected_cmd_irq)(struct sdhci_host *host, u32 intmask);
-+	void	(*wait_for_req)(struct sdhci_host *host, struct mmc_request *mrq);
- };
+-	for (i = 0;i < chip->num_slots;i++) {
++	for (i = 0; i < chip->num_slots; i++) {
+ 		slot = chip->slots[i];
+ 		if (!slot)
+ 			continue;
+@@ -908,7 +910,7 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
+ 	}
  
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 7429033..6eaf5dd 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -132,6 +132,7 @@ struct mmc_host;
- struct mmc_card;
+ 	chip->pdev = pdev;
+-	chip->fixes = (const struct sdhci_pci_fixes*)ent->driver_data;
++	chip->fixes = (const struct sdhci_pci_fixes *)ent->driver_data;
+ 	if (chip->fixes)
+ 		chip->quirks = chip->fixes->quirks;
+ 	chip->num_slots = slots;
+@@ -923,10 +925,10 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
  
- extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
-+extern void mmc_do_wait_for_req(struct mmc_host *, struct mmc_request *);
- extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
- extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
- 	struct mmc_command *, int);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ded4017..1b0e162 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -111,6 +111,9 @@ struct mmc_host_ops {
+ 	slots = chip->num_slots;	/* Quirk may have changed this */
  
- 	/* optional callback for HC quirks */
- 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
-+	/* optional callback for serialization */
-+	void	(*wait_for_req)(struct mmc_host *host,
-+						struct mmc_request *mrq);
- };
+-	for (i = 0;i < slots;i++) {
++	for (i = 0; i < slots; i++) {
+ 		slot = sdhci_pci_probe_slot(pdev, chip, first_bar + i);
+ 		if (IS_ERR(slot)) {
+-			for (i--;i >= 0;i--)
++			for (i--; i >= 0; i--)
+ 				sdhci_pci_remove_slot(chip->slots[i]);
+ 			ret = PTR_ERR(slot);
+ 			goto free;
+@@ -954,7 +956,7 @@ static void __devexit sdhci_pci_remove(struct pci_dev *pdev)
+ 	chip = pci_get_drvdata(pdev);
  
- struct mmc_card;
+ 	if (chip) {
+-		for (i = 0;i < chip->num_slots; i++)
++		for (i = 0; i < chip->num_slots; i++)
+ 			sdhci_pci_remove_slot(chip->slots[i]);
+ 
+ 		pci_set_drvdata(pdev, NULL);
+@@ -965,9 +967,9 @@ static void __devexit sdhci_pci_remove(struct pci_dev *pdev)
+ }
+ 
+ static struct pci_driver sdhci_driver = {
+-	.name = 	"sdhci-pci",
++	.name =		"sdhci-pci",
+ 	.id_table =	pci_ids,
+-	.probe = 	sdhci_pci_probe,
++	.probe =	sdhci_pci_probe,
+ 	.remove =	__devexit_p(sdhci_pci_remove),
+ 	.suspend =	sdhci_pci_suspend,
+ 	.resume	=	sdhci_pci_resume,
 
