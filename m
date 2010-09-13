@@ -1,207 +1,248 @@
 From: Alan Cox <alan@linux.intel.com>
-Subject: [PATCH 7/7] sdhci: Tidy up sdhci.c
-Date: Mon, 13 Sep 2010 18:39:59 +0100
-Message-ID: <20100913173958.20345.58843.stgit@localhost.localdomain>
+Subject: [PATCH 4/7] mmc: serialization support
+Date: Mon, 13 Sep 2010 18:39:32 +0100
+Message-ID: <20100913173920.20345.36169.stgit@localhost.localdomain>
 References: <20100913172738.20345.61119.stgit@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:28933 "EHLO mga02.intel.com"
+Received: from mga14.intel.com ([143.182.124.37]:25134 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752515Ab0IMSYq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Sep 2010 14:24:46 -0400
+	id S1752892Ab0IMSYH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Sep 2010 14:24:07 -0400
 In-Reply-To: <20100913172738.20345.61119.stgit@localhost.localdomain>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org
 
-While we are passing through..
+Some hardware has restrictions that require only one command is outstanding
+per controller or some other similar restriction.
 
+Provide optional serialization support and enable it for the Intel MID
+platform devices with this restriction. Split up from some existing patches
+by JiebingLi.
+
+Signed-off-by: JiebingLi <jiebing.li@intel.com>
 Signed-off-by: Alan Cox <alan@linux.intel.com>
 ---
 
- drivers/mmc/host/sdhci.c |   39 +++++++++++++++++++--------------------
- 1 files changed, 19 insertions(+), 20 deletions(-)
+ drivers/mmc/core/core.c            |   30 ++++++++++++++++++++++++++----
+ drivers/mmc/host/sdhci-intel-mid.c |   33 ++++++++++++++++++++-------------
+ drivers/mmc/host/sdhci-pci.c       |    2 ++
+ drivers/mmc/host/sdhci.c           |   18 ++++++++++++++++++
+ drivers/mmc/host/sdhci.h           |    1 +
+ include/linux/mmc/core.h           |    1 +
+ include/linux/mmc/host.h           |    3 +++
+ 7 files changed, 71 insertions(+), 17 deletions(-)
 
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 5db49b1..b2abb68 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -202,11 +202,14 @@ static void mmc_wait_done(struct mmc_request *mrq)
+  *	@host: MMC host to start command
+  *	@mrq: MMC request to start
+  *
+- *	Start a new MMC custom command request for a host, and wait
+- *	for the command to complete. Does not attempt to parse the
+- *	response.
++ *	Implementation hander for starting a new MMC custom command request
++ *	for a host, and wait for the command to complete. Does not attempt to
++ *	parse the response.
++ *
++ *	We provide this separately and export it so that it can be wrapped
++ *	by callers who need serialization or have other issue constraints
+  */
+-void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
++void mmc_do_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	DECLARE_COMPLETION_ONSTACK(complete);
+ 
+@@ -218,6 +221,25 @@ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
+ 	wait_for_completion(&complete);
+ }
+ 
++EXPORT_SYMBOL(mmc_do_wait_for_req);
++
++/**
++ *	mmc_wait_for_req - start a request and wait for completion
++ *	@host: MMC host to start command
++ *	@mrq: MMC request to start
++ *
++ *	Start a new MMC custom command request for a host, and wait
++ *	for the command to complete. Does not attempt to parse the
++ *	response.
++ */
++void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
++{
++	if (host->ops->wait_for_req)
++		host->ops->wait_for_req(host, mrq);
++	else
++		return mmc_do_wait_for_req(host, mrq);
++}
++
+ EXPORT_SYMBOL(mmc_wait_for_req);
+ 
+ /**
+diff --git a/drivers/mmc/host/sdhci-intel-mid.c b/drivers/mmc/host/sdhci-intel-mid.c
+index 2828831..436ee46 100644
+--- a/drivers/mmc/host/sdhci-intel-mid.c
++++ b/drivers/mmc/host/sdhci-intel-mid.c
+@@ -18,20 +18,27 @@
+  *	that keeps them out of the main flow. We can't just make it a new
+  *	driver as the shdci core code isn't really a library.
+  */
+- 
++
++/*
++ *	Support serialization
++ */
++
++static DEFINE_MUTEX(port_mutex);
++
++static void sdhci_intel_wait_req(struct sdhci_host *host,
++                                                struct mmc_request *mrq)
++{
++        mutex_lock(&port_mutex);
++        mmc_do_wait_for_req(host->mmc, mrq);
++        mutex_unlock(&port_mutex);
++}
++
++/*
++ *	Handle the Moorestown reset
++ */ 
+ static void sdhci_broken_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	unsigned long timeout;
+-	u32 uninitialized_var(ier);
+-
+-	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
+-		if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) &
+-			SDHCI_CARD_PRESENT))
+-			return;
+-	}
+-
+-	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
+-		ier = sdhci_readl(host, SDHCI_INT_ENABLE);
+ 
+ 	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
+ 
+@@ -46,12 +53,11 @@ static void sdhci_broken_reset(struct sdhci_host *host, u8 mask)
+ 		if (timeout == 0) {
+ 			printk(KERN_ERR "%s: Reset 0x%x never completed.\n",
+ 				mmc_hostname(host->mmc), (int)mask);
++			return;
+ 		}
+ 		timeout--;
+ 		mdelay(1);
+ 	}
+-	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
+-		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
+ }
+ 
+ static void sdhci_mid_broken_resetall(struct sdhci_host *host, int down)
+@@ -156,6 +162,7 @@ struct sdhci_ops sdhci_intel_mrst_hc = {
+ 	.set_ios = sdhci_lnw_a3_set_ios,
+ 	.reset_all = sdhci_mid_broken_resetall,
+ 	.write_command = sdhci_clockreset_wcmd,
++	.wait_for_req = sdhci_intel_wait_req,
+ 	.unexpected_cmd_irq = sdhci_lnw_a3_unexpected_cmd,
+ };
+ EXPORT_SYMBOL_GPL(sdhci_intel_mrst_hc);
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 1324369..bb14047 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -55,6 +55,8 @@ struct sdhci_pci_fixes {
+ 					pm_message_t);
+ 	int			(*resume)(struct sdhci_pci_chip*);
+ 
++	/* Allow the driver to override some operations for particularly
++	   quirky chips */
+ 	struct sdhci_ops	*host_ops;
+ };
+ 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9d8047c..dcafe13 100644
+index 9d8091a..9d8047c 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1,5 +1,6 @@
- /*
-- *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller Interface driver
-+ *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller Interface
-+ *				     driver
-  *
-  *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
-  *
-@@ -30,14 +31,14 @@
- #define DRIVER_NAME "sdhci"
- 
- #define DBG(f, x...) \
--	pr_debug(DRIVER_NAME " [%s()]: " f, __func__,## x)
-+	pr_debug(DRIVER_NAME " [%s()]: " f, __func__, ## x)
- 
- #if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
- 	defined(CONFIG_MMC_SDHCI_MODULE))
- #define SDHCI_USE_LEDS_CLASS
- #endif
- 
--static unsigned int debug_quirks = 0;
-+static unsigned int debug_quirks;
- 
- static void sdhci_prepare_data(struct sdhci_host *, struct mmc_data *);
- static void sdhci_finish_data(struct sdhci_host *);
-@@ -479,7 +480,8 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		if (offset) {
- 			if (data->flags & MMC_DATA_WRITE) {
- 				buffer = sdhci_kmap_atomic(sg, &flags);
--				WARN_ON(((long)buffer & PAGE_MASK) > (PAGE_SIZE - 3));
-+				WARN_ON(((long)buffer & PAGE_MASK)
-+							> (PAGE_SIZE - 3));
- 				memcpy(align, buffer, offset);
- 				sdhci_kunmap_atomic(buffer, &flags);
- 			}
-@@ -587,7 +589,8 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 				size = 4 - (sg_dma_address(sg) & 0x3);
- 
- 				buffer = sdhci_kmap_atomic(sg, &flags);
--				WARN_ON(((long)buffer & PAGE_MASK) > (PAGE_SIZE - 3));
-+				WARN_ON(((long)buffer & PAGE_MASK)
-+							> (PAGE_SIZE - 3));
- 				memcpy(buffer, align, size);
- 				sdhci_kunmap_atomic(buffer, &flags);
- 
-@@ -975,7 +978,7 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 	if (host->cmd->flags & MMC_RSP_PRESENT) {
- 		if (host->cmd->flags & MMC_RSP_136) {
- 			/* CRC is stripped so we need to do some shifting. */
--			for (i = 0;i < 4;i++) {
-+			for (i = 0; i < 4; i++) {
- 				host->cmd->resp[i] = sdhci_readl(host,
- 					SDHCI_RESPONSE + (3-i)*4) << 8;
- 				if (i != 3)
-@@ -1019,7 +1022,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 	if (clock == 0)
- 		goto out;
- 
--	for (div = 1;div < 256;div *= 2) {
-+	for (div = 1; div < 256; div *= 2) {
- 		if ((host->max_clk / div) <= clock)
- 			break;
- 	}
-@@ -1215,7 +1218,7 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	 * signalling timeout and CRC errors even on CMD0. Resetting
- 	 * it on each ios seems to solve the problem.
- 	 */
--	if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
-+	if (host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
- 		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
- 
- out:
-@@ -1302,7 +1305,7 @@ static void sdhci_tasklet_card(unsigned long param)
- 	struct sdhci_host *host;
- 	unsigned long flags;
- 
--	host = (struct sdhci_host*)param;
-+	host = (struct sdhci_host *)param;
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -1332,7 +1335,7 @@ static void sdhci_tasklet_finish(unsigned long param)
- 	unsigned long flags;
- 	struct mmc_request *mrq;
- 
--	host = (struct sdhci_host*)param;
-+	host = (struct sdhci_host *)param;
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -1385,7 +1388,7 @@ static void sdhci_timeout_timer(unsigned long data)
- 	struct sdhci_host *host;
- 	unsigned long flags;
- 
--	host = (struct sdhci_host*)data;
-+	host = (struct sdhci_host *)data;
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -1566,7 +1569,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- static irqreturn_t sdhci_irq(int irq, void *dev_id)
- {
- 	irqreturn_t result;
--	struct sdhci_host* host = dev_id;
-+	struct sdhci_host *host = dev_id;
- 	u32 intmask;
- 	int cardint = 0;
- 
-@@ -1667,7 +1670,6 @@ int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
- 
- 	return ret;
+@@ -1268,6 +1268,12 @@ out:
+ 	spin_unlock_irqrestore(&host->lock, flags);
  }
--
- EXPORT_SYMBOL_GPL(sdhci_suspend_host);
  
- int sdhci_resume_host(struct sdhci_host *host)
-@@ -1699,7 +1701,6 @@ int sdhci_resume_host(struct sdhci_host *host)
++static void sdhci_wait_for_req(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	host->ops->wait_for_req(host, mrq);
++}
++
+ static const struct mmc_host_ops sdhci_ops = {
+ 	.request	= sdhci_request,
+ 	.set_ios	= sdhci_set_ios,
+@@ -1275,6 +1281,16 @@ static const struct mmc_host_ops sdhci_ops = {
+ 	.enable_sdio_irq = sdhci_enable_sdio_irq,
+ };
  
- 	return ret;
- }
--
- EXPORT_SYMBOL_GPL(sdhci_resume_host);
- 
- #endif /* CONFIG_PM */
-@@ -1727,7 +1728,6 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 
- 	return host;
- }
--
- EXPORT_SYMBOL_GPL(sdhci_alloc_host);
- 
- int sdhci_add_host(struct sdhci_host *host)
-@@ -1940,7 +1940,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	/*
- 	 * Maximum block count.
- 	 */
--	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
-+	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK)
-+								? 1 : 65535;
- 
- 	/*
- 	 * Init tasklets.
-@@ -1959,7 +1960,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 
- 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
- 	if (IS_ERR(host->vmmc)) {
--		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
-+		printk(KERN_INFO "%s: no vmmc regulator found\n",
-+							mmc_hostname(mmc));
- 		host->vmmc = NULL;
- 	} else {
- 		regulator_enable(host->vmmc);
-@@ -2008,7 +2010,6 @@ untasklet:
- 
- 	return ret;
- }
--
- EXPORT_SYMBOL_GPL(sdhci_add_host);
- 
- void sdhci_remove_host(struct sdhci_host *host, int dead)
-@@ -2060,14 +2061,12 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	host->adma_desc = NULL;
- 	host->align_buffer = NULL;
- }
--
- EXPORT_SYMBOL_GPL(sdhci_remove_host);
- 
- void sdhci_free_host(struct sdhci_host *host)
- {
- 	mmc_free_host(host->mmc);
- }
--
- EXPORT_SYMBOL_GPL(sdhci_free_host);
- 
++/* Operations struct we use if the controller has an sdhci level
++   ops->wait_for_req */
++static const struct mmc_host_ops sdhci_ops_wait = {
++	.request	= sdhci_request,
++	.set_ios	= sdhci_set_ios,
++	.get_ro		= sdhci_get_ro,
++	.enable_sdio_irq = sdhci_enable_sdio_irq,
++	.wait_for_req	= sdhci_wait_for_req,
++};
++
  /*****************************************************************************\
+  *                                                                           *
+  * Tasklets                                                                  *
+@@ -1839,6 +1855,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	 * Set host parameters.
+ 	 */
+ 	mmc->ops = &sdhci_ops;
++	if (host->ops->wait_for_req)
++		mmc->ops = &sdhci_ops_wait;
+ 	if (host->ops->get_min_clock)
+ 		mmc->f_min = host->ops->get_min_clock(host);
+ 	else
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 182fcc3..7c934bd 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -334,6 +334,7 @@ struct sdhci_ops {
+ 				struct mmc_ios *ios, u8 ctrl);
+ 	void	(*set_caps)(struct sdhci_host *host);
+ 	void	(*unexpected_cmd_irq)(struct sdhci_host *host, u32 intmask);
++	void	(*wait_for_req)(struct sdhci_host *host, struct mmc_request *mrq);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 7429033..6eaf5dd 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -132,6 +132,7 @@ struct mmc_host;
+ struct mmc_card;
+ 
+ extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
++extern void mmc_do_wait_for_req(struct mmc_host *, struct mmc_request *);
+ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+ extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+ 	struct mmc_command *, int);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index ded4017..1b0e162 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -111,6 +111,9 @@ struct mmc_host_ops {
+ 
+ 	/* optional callback for HC quirks */
+ 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
++	/* optional callback for serialization */
++	void	(*wait_for_req)(struct mmc_host *host,
++						struct mmc_request *mrq);
+ };
+ 
+ struct mmc_card;
 
