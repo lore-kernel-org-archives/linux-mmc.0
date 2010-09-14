@@ -1,33 +1,47 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: MMC workflow (was Re: [PATCH] mmc: MMC 4.4 DDR support)
-Date: Tue, 14 Sep 2010 01:33:22 +0100
-Message-ID: <20100914003321.GA9859@void.printf.net>
-References: <1278658780-26397-1-git-send-email-hanumath.prasad@stericsson.com> <AANLkTikBdBhJeQ-t2+0echJfAxz529QZEYPJtyHUsROd@mail.gmail.com> <m3pqxbsibq.fsf@pullcord.laptop.org> <20100823204829.GB6510@console-pimps.org> <m34oelq9zb.fsf_-_@pullcord.laptop.org>
+Subject: Re: [PATCH V8] mmc : Add i.MX21 support to mxcmmc driver
+Date: Tue, 14 Sep 2010 04:03:20 +0100
+Message-ID: <20100914030318.GA10782@void.printf.net>
+References: <20100909220110.12456.14417.stgit@srv002.fuzzey.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:55793 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:36246 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752003Ab0INAd3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Sep 2010 20:33:29 -0400
+	id S1752177Ab0INDD1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Sep 2010 23:03:27 -0400
 Content-Disposition: inline
-In-Reply-To: <m34oelq9zb.fsf_-_@pullcord.laptop.org>
+In-Reply-To: <20100909220110.12456.14417.stgit@srv002.fuzzey.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Linus Walleij <linus.ml.walleij@gmail.com>, linux-mmc@vger.kernel.org
+To: Martin Fuzzey <mfuzzey@gmail.com>
+Cc: Pavel Pisa <ppisa@pikron.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>, linux-arm-kernel@lists.infradead.org
 
-Hi,
+Hi Pavel, Sascha, 
 
-On Mon, Aug 23, 2010 at 05:45:28PM -0400, Chris Ball wrote:
-> Sounds good -- if no-one objects, I'll send e-mail to ftpadmin@k.o
-> tomorrow asking for linux-mmc@ to be added to patchwork.k.o.
+On Fri, Sep 10, 2010 at 12:02:44AM +0200, Martin Fuzzey wrote:
+> Even though the i.MX21 SDHC module has the same revision number as the i.MX27
+> one there are a few differences!!
+>         Some interrupt enables are inverted.
+>         FIFO is only 16 bits wide.
+>         The argument is written to 2x16bit registers (vs 1x32).
+>         Interrupts must be acknowledged via the INT_CNTR register.
+>         Card clock must be enabled for each request.
+> 	For writes DMA must be enabled on command response not before.
+> 
+> Signed-off-by: Martin Fuzzey <mfuzzey@gmail.com>
+> 
+> ---
+> Changes from V7 (February 2010):
+> Rebased to 2.6.36-rc3
+> 
+> arch/arm/mach-imx/clock-imx21.c |    4 +
+> drivers/mmc/host/mxcmmc.c       |  153 ++++++++++++++++++++++++++++++---------
+> 2 files changed, 120 insertions(+), 37 deletions(-)
 
-This is up now:  https://patchwork.kernel.org/project/linux-mmc/list/
+Any feedback on this patch from Martin?  
 
-J.H. kindly piped in the last 60 days of list traffic to seed the list
-with.  I'll start going through them; if anyone would like permissions
-to help with triage, feel free to ask.
+https://patchwork.kernel.org/patch/178242/
 
 Thanks,
 
