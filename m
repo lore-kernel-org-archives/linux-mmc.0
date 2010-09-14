@@ -1,50 +1,90 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V8] mmc : Add i.MX21 support to mxcmmc driver
-Date: Tue, 14 Sep 2010 04:03:20 +0100
-Message-ID: <20100914030318.GA10782@void.printf.net>
-References: <20100909220110.12456.14417.stgit@srv002.fuzzey.net>
+From: "Ghorai, Sukumar" <s-ghorai@ti.com>
+Subject: RE: [PATCH] mmc: failure of block read wait for long time
+Date: Tue, 14 Sep 2010 10:45:22 +0530
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com>
+References: <1280230066-27612-1-git-send-email-s-ghorai@ti.com>
+ <4C4EDD85.5060606@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B030E417D80@dbde02.ent.ti.com>
+ <4C4FED36.3010607@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026ED@dbde02.ent.ti.com>
+ <4C8A19E7.30706@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com>
+ <4C8A2C5D.2050408@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36246 "EHLO void.printf.net"
+Received: from arroyo.ext.ti.com ([192.94.94.40]:38553 "EHLO arroyo.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752177Ab0INDD1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Sep 2010 23:03:27 -0400
-Content-Disposition: inline
-In-Reply-To: <20100909220110.12456.14417.stgit@srv002.fuzzey.net>
+	id S1751286Ab0INFPi convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Sep 2010 01:15:38 -0400
+In-Reply-To: <4C8A2C5D.2050408@nokia.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Martin Fuzzey <mfuzzey@gmail.com>
-Cc: Pavel Pisa <ppisa@pikron.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>, linux-arm-kernel@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Pavel, Sascha, 
+Adrian,
 
-On Fri, Sep 10, 2010 at 12:02:44AM +0200, Martin Fuzzey wrote:
-> Even though the i.MX21 SDHC module has the same revision number as the i.MX27
-> one there are a few differences!!
->         Some interrupt enables are inverted.
->         FIFO is only 16 bits wide.
->         The argument is written to 2x16bit registers (vs 1x32).
->         Interrupts must be acknowledged via the INT_CNTR register.
->         Card clock must be enabled for each request.
-> 	For writes DMA must be enabled on command response not before.
+[..snip..]
+> >>> [Ghorai] Adrian,
+> >>> Yes this works and reduced the retry by 1/4 (2048 to 512 times for 1MB
+> >> data read) form the original code;
+> >>> Initially it was retrying for each page(512 bytes) after multi-block
+> >> read fail; but this solution is retying for each segment(2048 bytes);
+> >>> 1. Now say block layrer reading 1MB and failed for the 1st segment. So
+> >> it will still retry for 1MB/2048-bytes, i.e. 512 times.
+> >>> 2. So do you think any good reason to retry again and again?
+> >> If you have 1MB that is not readable, it sounds like the card is broken.
+> >> Why are so many reads failing?  Has the card been removed?
+> >>
+> >> You might very rarely see ECC errors in a small number of sectors,
+> >> but more than that sounds like something else is broken.
+> >
+> > [Ghorai] yes, one example is we remove the card when reading data,
 > 
-> Signed-off-by: Martin Fuzzey <mfuzzey@gmail.com>
+> Well, that is a different case.  Once the card has gone, the block driver
+> can (and will once the remove method is called) error out all I/O
+> requests without sending them to MMC.  That doesn't happen until there
+> is a card detect interrupt and a resulting rescan.
+
+[Ghorai] here we are discussing two problem, 
+1. If IO failed how to stop retry; because of -
+	a. internal card error
+	b. issue in Filesystem, driver, or host controller issue
+	c. or cards removed.
+
+2. And 2nd how to sync block-layer IO, if card removed,
+	a. case 1: when card removed interrupt support by the platform 
+	b. case 2: when card removed interrupt does not support by the platform?
+
 > 
-> ---
-> Changes from V7 (February 2010):
-> Rebased to 2.6.36-rc3
+> A possible solution is to put a flag on mmc_card to indicate card_gone
+> that gets set as soon as the drivers card detect interrupt shows there
+> is no card (hoping that we are not getting any bouncing on card detect)
+> and then have mmc_wait_for_req() simple return -ENODEV immediately if
+> the card_gone flag is set.  Finally, if the mmc block driver sees
+> a -ENODEV error, it should also check the card_gone flag (via a new
+> core function) and if the card is gone, do not retry - and perhaps
+> even error out the rest of the I/O request queue as well.
+
+[Ghorai] your idea address the 2.a case, but not 2.b, 1.a, 1.b
+
+And the solution I was proposing to return the status of IO failure as soon as possible to above layer; and handle the card removed interrupt separately or any other issue in h/w or s/w or combination of both. Or just think again when platform don't have the card remove interrupt.
+
+So my patch addresses the 1st part
+And for the 2nd part we can submit the patch anytime.
+
 > 
-> arch/arm/mach-imx/clock-imx21.c |    4 +
-> drivers/mmc/host/mxcmmc.c       |  153 ++++++++++++++++++++++++++++++---------
-> 2 files changed, 120 insertions(+), 37 deletions(-)
+> I can suggest a patch if you want but I am on vacation next week so
+> it will have to wait a couple of weeks.
+> 
+> > And moreover we should not give the interleave data to apps, as we don't
+> have option to tell application for the valid data.
+> >
+[..snip..]
+http://comments.gmane.org/gmane.linux.kernel.mmc/2714
+ 
+> >
 
-Any feedback on this patch from Martin?  
-
-https://patchwork.kernel.org/patch/178242/
-
-Thanks,
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
