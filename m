@@ -1,66 +1,36 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [RFC] thoughts about recent Samsung related patches
-Date: Tue, 14 Sep 2010 09:05:30 +0900
-Message-ID: <AANLkTi=zpAz+0VT0GGGrMP3KOJiWqvypWVfxuDZDpoSx@mail.gmail.com>
-References: <20100906110059.GC2617@pengutronix.de>
-	<AANLkTikoC35Rg52jJ5NMwvtMh9PfxgS7RqtfvfBeD6LV@mail.gmail.com>
-	<20100913123108.GA5497@pengutronix.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: MMC workflow (was Re: [PATCH] mmc: MMC 4.4 DDR support)
+Date: Tue, 14 Sep 2010 01:33:22 +0100
+Message-ID: <20100914003321.GA9859@void.printf.net>
+References: <1278658780-26397-1-git-send-email-hanumath.prasad@stericsson.com> <AANLkTikBdBhJeQ-t2+0echJfAxz529QZEYPJtyHUsROd@mail.gmail.com> <m3pqxbsibq.fsf@pullcord.laptop.org> <20100823204829.GB6510@console-pimps.org> <m34oelq9zb.fsf_-_@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:55441 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751848Ab0INAFb convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Sep 2010 20:05:31 -0400
-Received: by wyf22 with SMTP id 22so6836309wyf.19
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Sep 2010 17:05:30 -0700 (PDT)
-In-Reply-To: <20100913123108.GA5497@pengutronix.de>
+Received: from void.printf.net ([89.145.121.20]:55793 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752003Ab0INAd3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Sep 2010 20:33:29 -0400
+Content-Disposition: inline
+In-Reply-To: <m34oelq9zb.fsf_-_@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, pierre-list@ossman.eu, gdavis@mvista.com, cbouatmailru@gmail.com, m.szyprowski@samsung.com, akpm@linux-foundation.org, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Linus Walleij <linus.ml.walleij@gmail.com>, linux-mmc@vger.kernel.org
 
-On Mon, Sep 13, 2010 at 9:31 PM, Wolfram Sang <w.sang@pengutronix.de> w=
-rote:
->> > I hope my comments are applicable; because there is no freely avai=
-lable
->> > datasheet, I can't verify all of my assumptions. Looking forward t=
-o
->> > comments.
->> Good, I think it's possible. I'll try and send a patch.
->
-> Any news on this ?
+Hi,
 
-I tried and no problem to work, but I'm thinking does it really
-required for reducing one quirk?
-With this change sdhci-s3c should use the
-CONFIG_MMC_SDHCI_IO_ACCESSORS and it introduces the io functions for
-every io access.
+On Mon, Aug 23, 2010 at 05:45:28PM -0400, Chris Ball wrote:
+> Sounds good -- if no-one objects, I'll send e-mail to ftpadmin@k.o
+> tomorrow asking for linux-mmc@ to be added to patchwork.k.o.
 
-So I'm not sure these change is required for s3c sdhci.
+This is up now:  https://patchwork.kernel.org/project/linux-mmc/list/
 
-Give you opinions.
+J.H. kindly piped in the last 60 days of list traffic to seed the list
+with.  I'll start going through them; if anyone would like permissions
+to help with triage, feel free to ask.
 
-Thank you,
-Kyungmin Park
->
-> Regards,
->
-> =A0 Wolfram
->
-> --
-> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-| Wolfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
-> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://w=
-ww.pengutronix.de/ =A0|
->
-> -----BEGIN PGP SIGNATURE-----
-> Version: GnuPG v1.4.10 (GNU/Linux)
->
-> iEYEARECAAYFAkyOGYwACgkQD27XaX1/VRt27wCgkDJcNU61qyoor1Wzkrce5R/A
-> 44YAnRvNMzJ1WbB5IbCgmV+kLuP1+h2C
-> =3DmOsI
-> -----END PGP SIGNATURE-----
->
->
+Thanks,
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
