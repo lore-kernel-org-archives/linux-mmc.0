@@ -1,90 +1,169 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH] mmc: failure of block read wait for long time
-Date: Tue, 14 Sep 2010 10:45:22 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com>
-References: <1280230066-27612-1-git-send-email-s-ghorai@ti.com>
- <4C4EDD85.5060606@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B030E417D80@dbde02.ent.ti.com>
- <4C4FED36.3010607@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026ED@dbde02.ent.ti.com>
- <4C8A19E7.30706@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com>
- <4C8A2C5D.2050408@nokia.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [RFC] sdhci-s3c: support clock enable/disable (clock-gating)
+Date: Tue, 14 Sep 2010 15:12:07 +0900
+Message-ID: <4C8F1237.2000308@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=EUC-KR
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:38553 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751286Ab0INFPi convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Sep 2010 01:15:38 -0400
-In-Reply-To: <4C8A2C5D.2050408@nokia.com>
-Content-Language: en-US
+Received: from mailout1.samsung.com ([203.254.224.24]:35600 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752948Ab0INGMJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Sep 2010 02:12:09 -0400
+Received: from epmmp1 (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
+ with ESMTP id <0L8Q0030K3W7SIA0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 14 Sep 2010 15:12:07 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0L8Q00D263W7U6@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 14 Sep 2010 15:12:07 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org
+Cc: Kyungmin Park <kyungmin.park@samsung.com>, matt@console-pimps.org, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>
 
-Adrian,
+Hi all,
+  This is a RFC patch that support clock-gating for saving power consumption.
+  I found mmc_host_enable/mmc_host_disable function in core.c
+  (using MMC_CAP_DSIABLE. i think that use when host enable/disable)
+  So, i used that functions and implemented some functions in sdhci-s3c.c & sdhci.c
 
-[..snip..]
-> >>> [Ghorai] Adrian,
-> >>> Yes this works and reduced the retry by 1/4 (2048 to 512 times for 1MB
-> >> data read) form the original code;
-> >>> Initially it was retrying for each page(512 bytes) after multi-block
-> >> read fail; but this solution is retying for each segment(2048 bytes);
-> >>> 1. Now say block layrer reading 1MB and failed for the 1st segment. So
-> >> it will still retry for 1MB/2048-bytes, i.e. 512 times.
-> >>> 2. So do you think any good reason to retry again and again?
-> >> If you have 1MB that is not readable, it sounds like the card is broken.
-> >> Why are so many reads failing?  Has the card been removed?
-> >>
-> >> You might very rarely see ECC errors in a small number of sectors,
-> >> but more than that sounds like something else is broken.
-> >
-> > [Ghorai] yes, one example is we remove the card when reading data,
-> 
-> Well, that is a different case.  Once the card has gone, the block driver
-> can (and will once the remove method is called) error out all I/O
-> requests without sending them to MMC.  That doesn't happen until there
-> is a card detect interrupt and a resulting rescan.
+Expect any feedback.
+Thank you all
 
-[Ghorai] here we are discussing two problem, 
-1. If IO failed how to stop retry; because of -
-	a. internal card error
-	b. issue in Filesystem, driver, or host controller issue
-	c. or cards removed.
+ Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+ Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-2. And 2nd how to sync block-layer IO, if card removed,
-	a. case 1: when card removed interrupt support by the platform 
-	b. case 2: when card removed interrupt does not support by the platform?
+---
+ drivers/mmc/host/sdhci-s3c.c |   36 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c     |   30 ++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.h     |    4 ++++
+ 3 files changed, 70 insertions(+), 0 deletions(-)
 
-> 
-> A possible solution is to put a flag on mmc_card to indicate card_gone
-> that gets set as soon as the drivers card detect interrupt shows there
-> is no card (hoping that we are not getting any bouncing on card detect)
-> and then have mmc_wait_for_req() simple return -ENODEV immediately if
-> the card_gone flag is set.  Finally, if the mmc block driver sees
-> a -ENODEV error, it should also check the card_gone flag (via a new
-> core function) and if the card is gone, do not retry - and perhaps
-> even error out the rest of the I/O request queue as well.
-
-[Ghorai] your idea address the 2.a case, but not 2.b, 1.a, 1.b
-
-And the solution I was proposing to return the status of IO failure as soon as possible to above layer; and handle the card removed interrupt separately or any other issue in h/w or s/w or combination of both. Or just think again when platform don't have the card remove interrupt.
-
-So my patch addresses the 1st part
-And for the 2nd part we can submit the patch anytime.
-
-> 
-> I can suggest a patch if you want but I am on vacation next week so
-> it will have to wait a couple of weeks.
-> 
-> > And moreover we should not give the interleave data to apps, as we don't
-> have option to tell application for the valid data.
-> >
-[..snip..]
-http://comments.gmane.org/gmane.linux.kernel.mmc/2714
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 71ad416..9b430fb 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -47,6 +47,7 @@ struct sdhci_s3c {
+ 	unsigned int		cur_clk;
+ 	int			ext_cd_irq;
+ 	int			ext_cd_gpio;
++	int			flag;
  
-> >
+ 	struct clk		*clk_io;
+ 	struct clk		*clk_bus[MAX_BUS_CLK];
+@@ -232,10 +233,45 @@ static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
+ 	return min;
+ }
+ 
++static int sdhci_s3c_enable_clk(struct sdhci_host *host)
++{
++	struct sdhci_s3c *sc = to_s3c(host);
++
++	if (sc->flag != 1) {
++		clk_disable(sc->clk_io);
++		clk_disable(sc->clk_bus[sc->cur_clk]);
++	}
++
++	if (sc->host->clk_cnt == 0) {
++		clk_enable(sc->clk_io);
++		clk_enable(sc->clk_bus[sc->cur_clk]);
++		sc->host->clk_cnt++;
++		sc->flag = 1;
++	}
++
++	return 0;
++}
++
++static int sdhci_s3c_disable_clk(struct sdhci_host *host, int lazy)
++{
++	struct sdhci_s3c *sc = to_s3c(host);
++
++	if (sc->host->clk_cnt) {
++		clk_disable(sc->clk_io);
++		clk_disable(sc->clk_bus[sc->cur_clk]);
++		if (sc->host->clk_cnt)
++			sc->host->clk_cnt--;
++	}
++
++	return 0;
++}
++
+ static struct sdhci_ops sdhci_s3c_ops = {
+ 	.get_max_clock		= sdhci_s3c_get_max_clk,
+ 	.set_clock		= sdhci_s3c_set_clock,
+ 	.get_min_clock		= sdhci_s3c_get_min_clock,
++	.enable			= sdhci_s3c_enable_clk,
++	.disable		= sdhci_s3c_disable_clk,
+ };
+ 
+ static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 401527d..fa2e55d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1245,7 +1245,37 @@ out:
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
++static int sdhci_enable_clk(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	int ret = 0;
++
++	if (host->old_clock != 0 && host->clock == 0) {
++		if (host->ops->enable)
++			ret = host->ops->enable(host);
++		sdhci_set_clock(host, host->old_clock);
++	}
++
++	return ret;
++}
++
++static int sdhci_disable_clk(struct mmc_host *mmc, int lazy)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	int ret = 0;
++
++	if (host->clock != 0) {
++		host->old_clock = host->clock;
++		sdhci_set_clock(host, 0);
++		if (host->ops->disable)
++			ret = host->ops->disable(host, lazy);
++	}
++	return ret;
++}
++
+ static const struct mmc_host_ops sdhci_ops = {
++	.enable		= sdhci_enable_clk,
++	.disable	= sdhci_disable_clk,
+ 	.request	= sdhci_request,
+ 	.set_ios	= sdhci_set_ios,
+ 	.get_ro		= sdhci_get_ro,
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index d316bc7..0c6f143 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -278,6 +278,8 @@ struct sdhci_host {
+ 	unsigned int		timeout_clk;	/* Timeout freq (KHz) */
+ 
+ 	unsigned int		clock;		/* Current clock (MHz) */
++	unsigned int		old_clock;	/* Old clock (MHz) */
++	unsigned int		clk_cnt;	/* Clock user count */
+ 	u8			pwr;		/* Current voltage */
+ 
+ 	struct mmc_request	*mrq;		/* Current request */
+@@ -323,6 +325,8 @@ struct sdhci_ops {
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
++	int		(*enable)(struct sdhci_host *host);
++	int		(*disable)(struct sdhci_host *host, int lazy);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+-- 
+1.6.0.4
 
