@@ -1,73 +1,49 @@
-From: Alan Cox <alan@linux.intel.com>
-Subject: Re: [PATCH 1/7] sdhci: Rework some of the quirk behaviour
-Date: Tue, 14 Sep 2010 15:20:40 +0100
-Message-ID: <20100914152040.3d129706@linux.intel.com>
-References: <20100913172738.20345.61119.stgit@localhost.localdomain>
-	<20100913173839.20345.27249.stgit@localhost.localdomain>
-	<20100914143437.GG2629@pengutronix.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 5/7] sdhci: Tidy up spaces in sdhci_intel_mid
+Date: Tue, 14 Sep 2010 17:57:43 +0100
+Message-ID: <20100914165743.GA19431@void.printf.net>
+References: <20100913172738.20345.61119.stgit@localhost.localdomain> <20100913173940.20345.66285.stgit@localhost.localdomain> <20100914142129.GF2629@pengutronix.de> <20100914144057.0d13f843@linux.intel.com> <20100914144512.GH2629@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:7447 "EHLO mga11.intel.com"
+Received: from void.printf.net ([89.145.121.20]:56635 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752099Ab0INPF1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Sep 2010 11:05:27 -0400
-In-Reply-To: <20100914143437.GG2629@pengutronix.de>
+	id S1751752Ab0INQ5s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Sep 2010 12:57:48 -0400
+Content-Disposition: inline
+In-Reply-To: <20100914144512.GH2629@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: Alan Cox <alan@linux.intel.com>, linux-mmc@vger.kernel.org
 
-> >  drivers/mmc/host/Kconfig           |   11 ++
-> >  drivers/mmc/host/Makefile          |    1 
-> >  drivers/mmc/host/sdhci-intel-mid.c |  163
-> > ++++++++++++++++++++++++++++++++++++
+Hi,
+
+On Tue, Sep 14, 2010 at 04:45:12PM +0200, Wolfram Sang wrote:
+> I would indeed prefer to first have minimal changes to the
+> mmc/sdhci-core and then have the final version of sdhci-intel-mid.c put
+> on top of that (also applies to patch 4/7). Less error prone and easier
+> to review. Yet, I am not the one who is picking up the patches.
 > 
-> Why are those added here and not in patch 3/7?
+> (BTW can't you just combine SoB if you fold patches?)
 
-I thought it would be useful to add the hooks and show how they are
-used in one - I can split that easily enough.
+I'm willing to help split up/fold patches if it'll help, especially
+if it would make a difference to whether or not we get MID support
+into 2.6.37, which is worth trying for.  I like Wolfram's suggested 
+patchset format.  Alan, do you feel comfortable re-doing this in time
+for some testing before the merge window opens, or should I help?
 
+I think we should postpone style cleanups outside of sdhci-intel-mid.c
+until .38, when there'll be less of an outstanding patch backlog.
 
-> > + * ADMA operation is disabled for Moorestown platform due to
-> > + * hardware bugs.
-> > + */
-> > +static int mrst_hc0_probe(struct sdhci_pci_chip *chip)
-> > +{
-> > +	/*
-> > +	 * slots number is fixed here for MRST as SDIO3 is never
-> > used and has
-> > +	 * hardware bugs.
-> > +	 */
-> > +	chip->num_slots = 1;
-> > +	return 0;
-> > +}
-> 
-> Why is this function here and not in sdhci-intel-mid.c?
+The big question seems to be whether the approach the patchset takes
+-- moving from quirks to hooks, extending sdhci.c without creating a 
+full driver, and the initial choice of overridable hooks -- makes
+sense.  I'd be happy to hear everyone's thoughts on that.
 
-So it follows the pattern of the other drivers, so it doesn't need an
-extra exported symbol (at about ten times the size of the function).
+Thanks for the review so far, Wolfram!
 
-We could move probe into host_ops I guess but that means tweaking all
-the other drivers which I cannot test.
-
-I guess the other way to do it would be not to have a separate file but
-to stick it all in sdhci-pci ?
-
-
-
-> >  		mmc->max_blk_size = (caps & SDHCI_MAX_BLOCK_MASK)
-> > >> SDHCI_MAX_BLOCK_SHIFT;
-> > -		if (mmc->max_blk_size >= 3) {
-> > +		if (mmc->max_blk_size > 3) {
-> 
-> Why this change? Not mentioned in the changelog. And wrong according
-> to the simplified standard v2. Is it V3 material?
-
-That's got in by mistake. I thought I'd got all the spec related bits
-stripped out.
-
-I actually suspect for the more general case of cleaning up some of the
-other driver quirks we need a couple more callbacks but its hard to
-sure.
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
