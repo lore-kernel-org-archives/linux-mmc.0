@@ -1,69 +1,92 @@
-From: Sahitya Tummala <stummala@codeaurora.org>
-Subject: RE: [PATCH v2] sdio: skip initialization on powered resume
-Date: Tue, 14 Sep 2010 15:45:51 +0530
-Message-ID: <1284459351.2359.17.camel@stummala-linux.in.qualcomm.com>
-References: <1283391692-14150-1-git-send-email-bzhao@marvell.com>
-	 <alpine.LFD.2.00.1009021344430.19366@xanadu.home>
-	 <477F20668A386D41ADCC57781B1F704307D2F41B27@SC-VEXCH1.marvell.com>
-	 <alpine.LFD.2.00.1009021923171.19366@xanadu.home>
-	 <477F20668A386D41ADCC57781B1F704307D2FE4A0F@SC-VEXCH1.marvell.com>
-	 <alpine.LFD.2.00.1009072119210.19366@xanadu.home>
-	 <477F20668A386D41ADCC57781B1F704307D2FE4A52@SC-VEXCH1.marvell.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: cleaning up sdhci? (was Re: [RFC] thoughts about recent Samsung
+ related patches)
+Date: Tue, 14 Sep 2010 12:28:59 +0200
+Message-ID: <20100914102858.GB2629@pengutronix.de>
+References: <20100906110059.GC2617@pengutronix.de>
+ <AANLkTikoC35Rg52jJ5NMwvtMh9PfxgS7RqtfvfBeD6LV@mail.gmail.com>
+ <20100913123108.GA5497@pengutronix.de>
+ <AANLkTi=zpAz+0VT0GGGrMP3KOJiWqvypWVfxuDZDpoSx@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="+pHx0qQiF2pBVqBT"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:49165 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752733Ab0INKQE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Sep 2010 06:16:04 -0400
-In-Reply-To: <477F20668A386D41ADCC57781B1F704307D2FE4A52@SC-VEXCH1.marvell.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:37250 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752113Ab0INK3E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Sep 2010 06:29:04 -0400
+Content-Disposition: inline
+In-Reply-To: <AANLkTi=zpAz+0VT0GGGrMP3KOJiWqvypWVfxuDZDpoSx@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bing Zhao <bzhao@marvell.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michal Miroslaw <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>
-
-Hi Bing, Chris,
-
-On Tue, 2010-09-07 at 19:10 -0700, Bing Zhao wrote:
-> Hi Nicolas,
-> 
-> > -----Original Message-----
-> > From: Nicolas Pitre [mailto:nico@fluxnic.net]
-> > Sent: Tuesday, September 07, 2010 6:29 PM
-> > To: Bing Zhao
-> > Cc: linux-mmc@vger.kernel.org; Michal Miroslaw; Chris Ball; Andrew Morton
-> > Subject: RE: [PATCH v2] sdio: skip initialization on powered resume
-> > 
-> > On Tue, 7 Sep 2010, Bing Zhao wrote:
-> > 
-> > > Thanks for the hint.
-> > >
-> > > The new patch skips reading CCCR, common CIS, and validation of
-> > > vendor/device IDs inside mmc_sdio_init_card() when powered_resume is
-> > > not zero.
-> > 
-> > Why do you skip the reading of the CIS and IDs validation?  That's
-> > basically the main reason for still calling mmc_sdio_init_card().  And
-> > that only requires CMD 52 so that should be fine.
-> 
-> While the system is suspended, the SDIO card could be in sleep mode (deep sleep or IEEE Power Save) as well. Reading CIS or any other CMD52 will fail if the card happens to be in sleep at this moment. If we skip re-initialization (including CCCR/CIS and IDs validation), mmc_sdio_init_card() returns success. Then the client driver's resume() handler will be called and the card can be woken up by client driver.
-
-In one of your previous patches, "sdio: don't use CMD[357] as part of a
-powered SDIO resume", its mentioned that there is an issue with CMD7 in
-mmc_sdio_init_card() that is called during SDIO resume on Marvell 8686.
-
-But in mmc_resume_host(), there is still a call to mmc_detect_change()
-which in turn calls mmc_sdio_detect(), thus sending CMD7 to the card.
-Does CMD7 to your card succeed after your client driver resume is
-called?
-
-Thanks,
-Sahitya.
-
---
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
-Forum.
+To: Kyungmin Park <kmpark@infradead.org>
+Cc: linux-mmc@vger.kernel.org, pierre-list@ossman.eu, gdavis@mvista.com, cbouatmailru@gmail.com, m.szyprowski@samsung.com, akpm@linux-foundation.org, =?utf-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>, Alan Cox <alan@linux.intel.com>
 
 
+--+pHx0qQiF2pBVqBT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Sep 14, 2010 at 09:05:30AM +0900, Kyungmin Park wrote:
+> On Mon, Sep 13, 2010 at 9:31 PM, Wolfram Sang <w.sang@pengutronix.de> wro=
+te:
+> >> > I hope my comments are applicable; because there is no freely availa=
+ble
+> >> > datasheet, I can't verify all of my assumptions. Looking forward to
+> >> > comments.
+> >> Good, I think it's possible. I'll try and send a patch.
+> >
+> > Any news on this ?
+>=20
+> I tried and no problem to work, but I'm thinking does it really
+> required for reducing one quirk?
+> With this change sdhci-s3c should use the
+> CONFIG_MMC_SDHCI_IO_ACCESSORS and it introduces the io functions for
+> every io access.
+>=20
+> So I'm not sure these change is required for s3c sdhci.
+>=20
+> Give you opinions.
+
+I know what you mean. Still, I'd prefer to see that sdhci.c implements
+stuff as generic as possible and trying to follow the standard closely.
+Exceptions to that should be handled elsewhere if possible. That is, if
+some implementations of a controller do not adhere to that standard and
+change some bits in the register layout, well, then they have to live
+with the quirks and their performance issues IMHO.
+
+BTW it is not only the HI_SPD issue, which is a candidate for the io-
+accessors. I am also interested to get the 8BITBUS patch reverted. It
+breaks some SD cards on some boards using the esdhc controller :(
+Support for a 8bit-bus needs a bit more thought, it seems...
+
+Seeing Alan's patchset, it seems to be a good time to do some
+sdhci-cleanup. My impression is that we could get generalize a few
+quirks by using io-accessors and overriding capabilties-flags. I am open
+for other opinions, though. All in all, it would be great if we all
+could combine our efforts and get some kind of master-plan :)
+Will take a look at Alan's patches now...
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--+pHx0qQiF2pBVqBT
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkyPTmoACgkQD27XaX1/VRuFiQCgqGY/t0It90WKf221n1OIjeVQ
+rRUAn3Bv/izjSwXsgyKW/V5Bu6b+z3wV
+=zAHh
+-----END PGP SIGNATURE-----
+
+--+pHx0qQiF2pBVqBT--
