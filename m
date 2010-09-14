@@ -1,44 +1,54 @@
-From: Alan Cox <alan@linux.intel.com>
-Subject: Re: [PATCH 5/7] sdhci: Tidy up spaces in sdhci_intel_mid
-Date: Tue, 14 Sep 2010 17:41:25 +0100
-Message-ID: <20100914174125.387f4b29@linux.intel.com>
-References: <20100913172738.20345.61119.stgit@localhost.localdomain>
-	<20100913173940.20345.66285.stgit@localhost.localdomain>
-	<20100914142129.GF2629@pengutronix.de>
-	<20100914144057.0d13f843@linux.intel.com>
-	<20100914144512.GH2629@pengutronix.de>
-	<20100914165743.GA19431@void.printf.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: Add architecture dependency for Marvell SoC
+	controller
+Date: Tue, 14 Sep 2010 20:05:49 +0100
+Message-ID: <20100914190549.GA21918@void.printf.net>
+References: <1284366279-17140-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:39261 "EHLO mga01.intel.com"
+Received: from void.printf.net ([89.145.121.20]:41450 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751929Ab0INR0m (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Sep 2010 13:26:42 -0400
-In-Reply-To: <20100914165743.GA19431@void.printf.net>
+	id S1752560Ab0INTF4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Sep 2010 15:05:56 -0400
+Content-Disposition: inline
+In-Reply-To: <1284366279-17140-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>, Saeed Bishara <saeed@marvell.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-> into 2.6.37, which is worth trying for.  I like Wolfram's suggested 
-> patchset format.  Alan, do you feel comfortable re-doing this in time
-> for some testing before the merge window opens, or should I help?
+Hi,
 
-Redoing it shouldn't be a problem, getting testing of the MID bits
-will slow it down a fair bit. I'm not in a huge rush - I need to get
-the SFI device patches merged before an upstream kernel will actually
-be useful on a MID device.
+On Mon, Sep 13, 2010 at 09:24:39AM +0100, Mark Brown wrote:
+> Since the driver is for controllers integrated into Marvells SoCs only
+> offer MMC_SDHCI_MV if we're building for one.
+> 
+> Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+> ---
+>  drivers/mmc/host/Kconfig |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index ce099c4..5fa4e2b 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -133,6 +133,7 @@ config MMC_SDHCI_CNS3XXX
+>  config MMC_SDHCI_MV
+>  	tristate "SDHCI support on Marvell's SoC"
+>  	depends on MMC_SDHCI
+> +	depends on (PLAT_PXA || PLAT_ORION)
+>  	select MMC_SDHCI_IO_ACCESSORS
+>  	help
+>  	  This selects the Secure Digital Host Controller Interface in
+> -- 
+> 1.7.1
 
-> The big question seems to be whether the approach the patchset takes
-> -- moving from quirks to hooks, extending sdhci.c without creating a 
-> full driver, and the initial choice of overridable hooks -- makes
-> sense.  I'd be happy to hear everyone's thoughts on that.
+This is fine with me.  Saeed, please can you ACK the choice of
+platforms if you agree?
 
-I'd rather see that discussion happen and then redo the MID patches to
-match whatever turns out to suit a more generalised set of driver
-tidyups this way than push it in ASAP.
+Thanks,
 
-That also fits my timetable better as I've got an exam coming up early
-October and other stuff to push before I run off and hide revising.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
