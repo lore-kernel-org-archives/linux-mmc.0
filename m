@@ -1,37 +1,64 @@
-From: Vitaly Wool <vitalywool-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v5 3/7] wireless: wl12xx: add platform data passing support
-Date: Wed, 15 Sep 2010 10:27:00 +0200
-Message-ID: <AANLkTikSP874gnsPrc_M1LJYNpjX+Lz3-5=Bk5_HtgP+@mail.gmail.com>
-References: <1283376410-9999-1-git-send-email-ohad@wizery.com>
-	<1283376410-9999-4-git-send-email-ohad@wizery.com>
-	<AANLkTi=goLEUqM1XQ__PrGu4=Erw2utaNP4qFmSgRta2@mail.gmail.com>
-	<20100906120716.GE20903@n2100.arm.linux.org.uk>
-	<AANLkTikAFCd+3ggZKhQXY=+bG==KgLkv3qNVdEGa=GBX@mail.gmail.com>
-	<AANLkTinM8vY7CygEN6DBR35WLkU-QOBwuiaRrpfwF6Mz@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <AANLkTinM8vY7CygEN6DBR35WLkU-QOBwuiaRrpfwF6Mz-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Cc: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Kalle Valo <kalle.valo-X3B1VOXEql0@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Chikkature Rajashekar Madhusudhan <madhu.cr-l0cyMroinI0@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Subject: [PATCH] mmc: Reduce fOD to 200 kHz if possible
+Date: Wed, 15 Sep 2010 10:59:00 +0200
+Message-ID: <1284541140-7328-1-git-send-email-haavard.skinnemoen@atmel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relay.atmel.no ([194.19.124.36]:60791 "EHLO relay.atmel.no"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751284Ab0IOJHk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 15 Sep 2010 05:07:40 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Sascha Hauer <s.hauer@pengutronix.de>, linux-kernel@vger.kernel.org, Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
 
-2010/9/15 Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>:
->> Sorry for pushing at this, but why would you mark data that's meant to
->> be used after init phase as __initdata?
->
-> I can remove the first copying as well if Russell is ok with it.
+Since the identification frequency was increased to 400 kHz, my
+ATSTK1000 board has not been able to initialize any MMC or SD cards.
+Reducing the identification mode frequency to 200 kHz fixes the problem.
 
-I personally think it's not worth it. This copying basically happens
-only once and this point is soooo irrelevant. My position therefore
-is: let's get the current implementation in, and if Michal is
-uncomfortable with that, he can come up with the patch. Let's
-concentrate on the real problems.
+This is definitely a board-specific issue, probably due to weak pull-up
+resistor values, but this is the simplest fix I could come up with.
+Alternatively, we could try to pass some "maximum fOD" parameter from
+the board code somehow.
 
-Thanks,
-   Vitaly
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Different boards using the same controller (AVR32 AP7000) and the same
+cards have no problems at 400 kHz, but I believe reducing fOD a bit
+allows a bit more tolerance for poor board designs, which can only be a
+good thing. Also, using too strong pull-ups might cause problems at high
+speeds, which is IMO worse.
+
+Signed-off-by: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+---
+Sorry about bringing this up again, but it's been a pretty longstanding
+issue on at least one board, and selecting correct pull-ups requires
+careful reading of several specification documents, so selecting a
+minimum frequency which is the maximum that the spec allows seems like
+asking for trouble.
+
+Both the MMC and SD specs allow frequencies from 100 kHz to 400 kHz. 200
+kHz seems like a good compromise to me.
+
+ drivers/mmc/core/core.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 5db49b1..b4d9e8b 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -911,8 +911,11 @@ static void mmc_power_up(struct mmc_host *host)
+ 		pr_warning("%s: Minimum clock frequency too high for "
+ 				"identification mode\n", mmc_hostname(host));
+ 		host->ios.clock = host->f_min;
+-	} else
+-		host->ios.clock = 400000;
++	} else if (host->f_min > 200000) {
++		host->ios.clock = host->f_min;
++	} else {
++		host->ios.clock = 200000;
++	}
+ 
+ 	host->ios.power_mode = MMC_POWER_ON;
+ 	mmc_set_ios(host);
+-- 
+1.7.0.4
+
