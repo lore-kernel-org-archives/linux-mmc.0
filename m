@@ -1,58 +1,76 @@
-From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
-Subject: Re: [PATCH] mmc: Reduce fOD to 200 kHz if possible
-Date: Wed, 15 Sep 2010 17:10:45 +0200
-Message-ID: <20100915171045.53397db0@hskinnemoen-d830>
-References: <1284541140-7328-1-git-send-email-haavard.skinnemoen@atmel.com>
-	<9348108E-1108-46FE-8437-6F1271025C61@niasdigital.com>
-	<20100915125138.1f25e4b1@hskinnemoen-d830>
-	<4C90D8AB.9030606@yahoo.es>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH 2/2] sdhci: disable MMC_CAP_NEEDS_POLL in nonremovable
+	case
+Date: Wed, 15 Sep 2010 16:11:42 +0100
+Message-ID: <20100915151142.GB21538@console-pimps.org>
+References: <4d1a88f196fa7e7eaf4c4a4af13d91ec81fb084e.1283003070.git.matt@console-pimps.org> <7e892c443f11d51a30029ddfeef27af09a9a970d.1283003070.git.matt@console-pimps.org> <4C7F65A1.60105@samsung.com> <20100902091424.GA12456@console-pimps.org> <4C86E672.1030807@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay.atmel.no ([194.19.124.36]:1332 "EHLO relay.atmel.no"
-	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753940Ab0IOPLU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 15 Sep 2010 11:11:20 -0400
-In-Reply-To: <4C90D8AB.9030606@yahoo.es>
+Received: from arkanian.console-pimps.org ([212.110.184.194]:54644 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754042Ab0IOPLn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2010 11:11:43 -0400
+Content-Disposition: inline
+In-Reply-To: <4C86E672.1030807@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hein_Tibosch <hein_tibosch@yahoo.es>
-Cc: Ben Nizette <bn@niasdigital.com>, linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, Ben Dooks <ben-linux@fluff.org>, Ben Hutchings <ben@decadent.org.uk>, Yunpeng Gao <yunpeng.gao@intel.com>
 
-Hein_Tibosch <hein_tibosch@yahoo.es> wrote:
-> >> We've now submitted one fix each, mine was similar to yours [1] but there's been movement on Hein's more comprehensive patch recently [2].  I don't know who's supposed to be merging MMC patches atm, Chris Ball added on CC on a hunch.
-> > Thanks for the references. IMO Hein's patch is overkill. There is
-> > absolutely no reason why 200 kHz should be a problem on any setup, and
-> > I haven't found any indication in any discussions that it is.
-> >
-> 
-> I have also seen situations in which the SD will only start up at 180 Khz
-> or lower.
+On Wed, Sep 08, 2010 at 10:27:14AM +0900, Jaehoon Chung wrote:
+> Matt Fleming wrote:
+> > On Thu, Sep 02, 2010 at 05:51:45PM +0900, Jaehoon Chung wrote:
+> >> Matt Fleming wrote:
+> >>> From: Jaehoon Chung <jh80.chung@samsung.com>
+> >>>
+> >>> If controller use SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk,
+> >>> controller need always polling detect
+> >>>
+> >>> In this case, always generated interrupt.Because controller checked card status.
+> >>> I think that is not efficiently.
+> >>>
+> >>> But if card is nonremovable, we need not always polling.
+> >>> So i added the check-point which is nonremovable or not
+> >>>
+> >>>  Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> >>> ---
+> >>>  drivers/mmc/host/sdhci.c |    5 +++--
+> >>>  1 files changed, 3 insertions(+), 2 deletions(-)
+> >>>
+> >>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> >>> index f6be963..3111859 100644
+> >>> --- a/drivers/mmc/host/sdhci.c
+> >>> +++ b/drivers/mmc/host/sdhci.c
+> >>> @@ -1827,8 +1827,9 @@ int sdhci_add_host(struct sdhci_host *host)
+> >>>  	if (caps & SDHCI_CAN_DO_HISPD)
+> >>>  		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+> >>>  
+> >>> -	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> >>> -		mmc->caps |= MMC_CAP_NEEDS_POLL;
+> >>> +	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> >>> +		!mmc_card_is_removable(mmc))
+> >>> +			mmc->caps |= MMC_CAP_NEEDS_POLL;
+> >>>  
+> >>>  	mmc->ocr_avail = 0;
+> >>>  	if (caps & SDHCI_CAN_VDD_330)
+> >>>   
+> >> !mmc_card_is_removable(mmc)  is right?
+> >> i think that is mmc_card_is_removable..
+> >> because when card is removable, host controller needs polling.
+> >>
+> >> +	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> >> +		*mmc_card_is_removable(mmc))*
+> >> +			mmc->caps |= MMC_CAP_NEEDS_POLL;
+> >>
+> > 
+> > Sorry, I messed up the logic here. You're completely correct.
+> > 
+> > With this change and patch 2/2 does your controller function
+> > correctly?
+> > 
+> yes. i changed and applied this patch, then i tested in my controller.
+> it's working well.
 
-Ok, so my patch would obviously not fix those. Could you tell me more
-about those situations? What kind of board are you running at, etc?
-
-> IMO my patch is indeed a bit of an overkill (the amount of code changed),
-> I'd rather see a patch like yours or Ben's, but settings fOD at 100 or 50 Khz.
-
-I guess 100 kHz would make sense. 50 kHz is not allowed according to
-the SD card spec.
-
-Another solution might be to introduce a new field, f_max_od, which the
-host controller driver could use to limit the bus frequency in open
-drain mode.
-
-> It was Pierre who suggested to try several frequencies[1]: most systems will start
-> using 400 Khz (so they won't suffer any loss of performance) and in some rare
-> cases, the SD will only be identified at 100 Khz (which does happen, sometimes)
-
-I think any performance hit in open drain mode is not likely to be
-noticeable, as it is only used for a couple of commands. The only thing
-that really matters for performance is push-pull mode, where too strong
-pull-ups might cause problems at high speed.
-
-But if there really are cards that have problems at 100 kHz, I guess
-your patch might be the best bet.
-
-Haavard
+Chris, are you OK to pick this up (including Jaehoon's change)? Or
+would you prefer me to resubmit?
