@@ -1,27 +1,31 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] mmc: Add architecture dependency for Marvell SoC
-	controller
-Date: Wed, 15 Sep 2010 10:40:06 +0100
-Message-ID: <20100915094006.GA21620@sirena.org.uk>
-References: <1284366279-17140-1-git-send-email-broonie@opensource.wolfsonmicro.com> <20100914190549.GA21918@void.printf.net>
-Mime-Version: 1.0
+From: Ben Nizette <bn@niasdigital.com>
+Subject: Re: [PATCH] mmc: Reduce fOD to 200 kHz if possible
+Date: Wed, 15 Sep 2010 19:50:08 +1000
+Message-ID: <9348108E-1108-46FE-8437-6F1271025C61@niasdigital.com>
+References: <1284541140-7328-1-git-send-email-haavard.skinnemoen@atmel.com>
+Mime-Version: 1.0 (Apple Message framework v1081)
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassiel.sirena.org.uk ([80.68.93.111]:43220 "EHLO
-	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750907Ab0IOJkM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2010 05:40:12 -0400
-Content-Disposition: inline
-In-Reply-To: <20100914190549.GA21918@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1284541140-7328-1-git-send-email-haavard.skinnemoen@atmel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+Cc: linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Saeed Bishara <saeed@marvell.com>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Tue, Sep 14, 2010 at 08:05:49PM +0100, Chris Ball wrote:
 
-> This is fine with me.  Saeed, please can you ACK the choice of
-> platforms if you agree?
+On 15/09/2010, at 6:59 PM, Haavard Skinnemoen wrote:
 
-If the list of platforms is wrong we should probably also improve the
-help text :)
+> Since the identification frequency was increased to 400 kHz, my
+> ATSTK1000 board has not been able to initialize any MMC or SD cards.
+> Reducing the identification mode frequency to 200 kHz fixes the problem.
+> 
+> This is definitely a board-specific issue, probably due to weak pull-up
+> resistor values, but this is the simplest fix I could come up with.
+
+I wonder whether there's an Atmel reference schematic around with an incorrect resistor value on it, the only three people I know affected by this are myself, Hein Tibosch and you, all on AVR32.  We've now submitted one fix each, mine was similar to yours [1] but there's been movement on Hein's more comprehensive patch recently [2].  I don't know who's supposed to be merging MMC patches atm, Chris Ball added on CC on a hunch.
+
+	--Ben.
+
+[1] http://lkml.org/lkml/2010/1/1/85
+[2] http://lkml.org/lkml/2010/9/2/494
