@@ -1,57 +1,47 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 5/7] sdhci: Tidy up spaces in sdhci_intel_mid
-Date: Tue, 14 Sep 2010 22:00:49 +0200
-Message-ID: <20100914200049.GA6238@pengutronix.de>
-References: <20100913172738.20345.61119.stgit@localhost.localdomain> <20100913173940.20345.66285.stgit@localhost.localdomain> <20100914142129.GF2629@pengutronix.de> <20100914144057.0d13f843@linux.intel.com> <20100914144512.GH2629@pengutronix.de> <20100914165743.GA19431@void.printf.net> <20100914174125.387f4b29@linux.intel.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH v5 3/7] wireless: wl12xx: add platform data passing support
+Date: Wed, 15 Sep 2010 10:00:22 +0200
+Message-ID: <AANLkTinM8vY7CygEN6DBR35WLkU-QOBwuiaRrpfwF6Mz@mail.gmail.com>
+References: <1283376410-9999-1-git-send-email-ohad@wizery.com>
+ <1283376410-9999-4-git-send-email-ohad@wizery.com> <AANLkTi=goLEUqM1XQ__PrGu4=Erw2utaNP4qFmSgRta2@mail.gmail.com>
+ <20100906120716.GE20903@n2100.arm.linux.org.uk> <AANLkTikAFCd+3ggZKhQXY=+bG==KgLkv3qNVdEGa=GBX@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="pf9I7BMVVzbSWLtt"
+Content-Type: text/plain; charset=ISO-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:39160 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755156Ab0INUAw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Sep 2010 16:00:52 -0400
-Content-Disposition: inline
-In-Reply-To: <20100914174125.387f4b29@linux.intel.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:61012 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751666Ab0IOIAp convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2010 04:00:45 -0400
+In-Reply-To: <AANLkTikAFCd+3ggZKhQXY=+bG==KgLkv3qNVdEGa=GBX@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Cox <alan@linux.intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Kalle Valo <kalle.valo@iki.fi>, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Roger Quadros <roger.quadros@nokia.com>, Ido Yariv <ido@wizery.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 
+2010/9/6 Micha=B3 Miros=B3aw <mirqus@gmail.com>:
+> W dniu 6 wrze=B6nia 2010 14:07 u=BFytkownik Russell King - ARM Linux
+> <linux@arm.linux.org.uk> napisa=B3:
+>> On Sat, Sep 04, 2010 at 02:23:19PM +0200, Micha=B3 Miros=B3aw wrote:
+>>> 2010/9/1 Ohad Ben-Cohen <ohad@wizery.com>:
+>>> > Add a simple mechanism to pass platform data to the
+>>> > SDIO instances of wl12xx.
+> [cut patch]
+>>> Why do you need all that copying? Isn't the data constant?
+>>
+>> The first copy is to allow platforms to have their data marked with
+>> __initdata. =A0The second copy probably isn't necessary, but avoids
+>> problems where the driver may decide to modify the platform data.
+>
+> Sorry for pushing at this, but why would you mark data that's meant t=
+o
+> be used after init phase as __initdata?
 
---pf9I7BMVVzbSWLtt
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+I can remove the first copying as well if Russell is ok with it.
 
+Both ways work for us.
 
-> > The big question seems to be whether the approach the patchset takes
-> > -- moving from quirks to hooks, extending sdhci.c without creating a=20
-> > full driver, and the initial choice of overridable hooks -- makes
-> > sense.  I'd be happy to hear everyone's thoughts on that.
->=20
-> I'd rather see that discussion happen and then redo the MID patches to
-> match whatever turns out to suit a more generalised set of driver
-> tidyups this way than push it in ASAP.
-
-+1 The cleanup may force the drivers to adapt, but not the other way around=
- ;)
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---pf9I7BMVVzbSWLtt
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAkyP1HEACgkQD27XaX1/VRvPIQCeMrZQaT54H8VS/jhKRaIWSFIQ
-ohwAoMgkhSbopiv2qTHbTeSfrSEXrZJx
-=mEaA
------END PGP SIGNATURE-----
-
---pf9I7BMVVzbSWLtt--
+>
+> Best Regards,
+> Micha=B3 Miros=B3aw
+>
