@@ -1,79 +1,52 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH 2/2] sdhci: disable MMC_CAP_NEEDS_POLL in nonremovable
-	case
-Date: Wed, 15 Sep 2010 16:14:21 +0100
-Message-ID: <20100915151421.GC21538@console-pimps.org>
-References: <4d1a88f196fa7e7eaf4c4a4af13d91ec81fb084e.1283003070.git.matt@console-pimps.org> <7e892c443f11d51a30029ddfeef27af09a9a970d.1283003070.git.matt@console-pimps.org> <4C7F65A1.60105@samsung.com> <20100902091424.GA12456@console-pimps.org> <4C86E672.1030807@samsung.com> <20100915151142.GB21538@console-pimps.org>
+From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Subject: Re: [PATCH v5 3/7] wireless: wl12xx: add platform data passing support
+Date: Wed, 15 Sep 2010 18:10:22 +0200
+Message-ID: <AANLkTinFs_o83az1+g1dbi6YD7RsrXYOUd=kkm0qi3wc@mail.gmail.com>
+References: <1283376410-9999-1-git-send-email-ohad@wizery.com>
+	<1283376410-9999-4-git-send-email-ohad@wizery.com>
+	<AANLkTi=goLEUqM1XQ__PrGu4=Erw2utaNP4qFmSgRta2@mail.gmail.com>
+	<20100906120716.GE20903@n2100.arm.linux.org.uk>
+	<AANLkTikAFCd+3ggZKhQXY=+bG==KgLkv3qNVdEGa=GBX@mail.gmail.com>
+	<20100915082544.GA4625@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arkanian.console-pimps.org ([212.110.184.194]:54631 "EHLO
-	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753925Ab0IOPOW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2010 11:14:22 -0400
-Content-Disposition: inline
-In-Reply-To: <20100915151142.GB21538@console-pimps.org>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:48861 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754525Ab0IOQKY convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2010 12:10:24 -0400
+In-Reply-To: <20100915082544.GA4625@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, Ben Dooks <ben-linux@fluff.org>, Ben Hutchings <ben@decadent.org.uk>, Yunpeng Gao <yunpeng.gao@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Kalle Valo <kalle.valo@iki.fi>, Nicolas Pitre <nico@fluxnic.net>, Tony Lindgren <tony@atomide.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Roger Quadros <roger.quadros@nokia.com>, Ido Yariv <ido@wizery.com>, San Mehat <san@google.com>, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, Sep 15, 2010 at 04:11:42PM +0100, Matt Fleming wrote:
-> On Wed, Sep 08, 2010 at 10:27:14AM +0900, Jaehoon Chung wrote:
-> > Matt Fleming wrote:
-> > > On Thu, Sep 02, 2010 at 05:51:45PM +0900, Jaehoon Chung wrote:
-> > >> Matt Fleming wrote:
-> > >>> From: Jaehoon Chung <jh80.chung@samsung.com>
-> > >>>
-> > >>> If controller use SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk,
-> > >>> controller need always polling detect
-> > >>>
-> > >>> In this case, always generated interrupt.Because controller checked card status.
-> > >>> I think that is not efficiently.
-> > >>>
-> > >>> But if card is nonremovable, we need not always polling.
-> > >>> So i added the check-point which is nonremovable or not
-> > >>>
-> > >>>  Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> > >>> ---
-> > >>>  drivers/mmc/host/sdhci.c |    5 +++--
-> > >>>  1 files changed, 3 insertions(+), 2 deletions(-)
-> > >>>
-> > >>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > >>> index f6be963..3111859 100644
-> > >>> --- a/drivers/mmc/host/sdhci.c
-> > >>> +++ b/drivers/mmc/host/sdhci.c
-> > >>> @@ -1827,8 +1827,9 @@ int sdhci_add_host(struct sdhci_host *host)
-> > >>>  	if (caps & SDHCI_CAN_DO_HISPD)
-> > >>>  		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-> > >>>  
-> > >>> -	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-> > >>> -		mmc->caps |= MMC_CAP_NEEDS_POLL;
-> > >>> +	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
-> > >>> +		!mmc_card_is_removable(mmc))
-> > >>> +			mmc->caps |= MMC_CAP_NEEDS_POLL;
-> > >>>  
-> > >>>  	mmc->ocr_avail = 0;
-> > >>>  	if (caps & SDHCI_CAN_VDD_330)
-> > >>>   
-> > >> !mmc_card_is_removable(mmc)  is right?
-> > >> i think that is mmc_card_is_removable..
-> > >> because when card is removable, host controller needs polling.
-> > >>
-> > >> +	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
-> > >> +		*mmc_card_is_removable(mmc))*
-> > >> +			mmc->caps |= MMC_CAP_NEEDS_POLL;
-> > >>
-> > > 
-> > > Sorry, I messed up the logic here. You're completely correct.
-> > > 
-> > > With this change and patch 2/2 does your controller function
-> > > correctly?
-> > > 
-> > yes. i changed and applied this patch, then i tested in my controller.
-> > it's working well.
-> 
-> Chris, are you OK to pick this up (including Jaehoon's change)? Or
-> would you prefer me to resubmit?
+W dniu 15 wrze=B6nia 2010 10:25 u=BFytkownik Russell King - ARM Linux
+<linux@arm.linux.org.uk> napisa=B3:
+> On Mon, Sep 06, 2010 at 09:42:41PM +0200, Micha=B3 Miros=B3aw wrote:
+>> W dniu 6 wrze=B6nia 2010 14:07 u=BFytkownik Russell King - ARM Linux
+>> <linux@arm.linux.org.uk> napisa=B3:
+>> > On Sat, Sep 04, 2010 at 02:23:19PM +0200, Micha=B3 Miros=B3aw wrot=
+e:
+>> >> 2010/9/1 Ohad Ben-Cohen <ohad@wizery.com>:
+>> >> > Add a simple mechanism to pass platform data to the
+>> >> > SDIO instances of wl12xx.
+>> [cut patch]
+>> >> Why do you need all that copying? Isn't the data constant?
+>> > The first copy is to allow platforms to have their data marked wit=
+h
+>> > __initdata. =A0The second copy probably isn't necessary, but avoid=
+s
+>> > problems where the driver may decide to modify the platform data.
+>> Sorry for pushing at this, but why would you mark data that's meant =
+to
+>> be used after init phase as __initdata?
+> Because you may have many instances of the data (due to multiple plat=
+form
+> support), and only need one of them at run-time.
 
-Argh, sorry! I hit send before changing the "To:" field.
+Ah. That makes sense.
+
+Thanks,
+Micha=B3 Miros=B3aw
