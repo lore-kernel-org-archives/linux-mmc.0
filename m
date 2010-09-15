@@ -1,94 +1,67 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v5 0/7] native wl1271 support on ZOOM
-Date: Wed, 15 Sep 2010 11:21:19 +0200
-Message-ID: <AANLkTikedoL3HjohQfq2qa0TU5yMJR5p1GqyQJtQGrdb@mail.gmail.com>
-References: <1283376410-9999-1-git-send-email-ohad@wizery.com>
+From: "Ghorai, Sukumar" <s-ghorai@ti.com>
+Subject: RE: [PATCH] mmc: MMC 4.4 DDR support
+Date: Wed, 15 Sep 2010 15:02:05 +0530
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B0315FAFD01@dbde02.ent.ti.com>
+References: <1278658780-26397-1-git-send-email-hanumath.prasad@stericsson.com>
+ <AANLkTikBdBhJeQ-t2+0echJfAxz529QZEYPJtyHUsROd@mail.gmail.com>
+ <m3pqxbsibq.fsf@pullcord.laptop.org>
+ <20100823204829.GB6510@console-pimps.org>
+ <20100823142816.59b12253.akpm@linux-foundation.org>
+ <4C739F55.8030301@nokia.com> <20100914112143.GA16039@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:34867 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750701Ab0IOJVn convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2010 05:21:43 -0400
-In-Reply-To: <1283376410-9999-1-git-send-email-ohad@wizery.com>
+Received: from comal.ext.ti.com ([198.47.26.152]:34690 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752393Ab0IOJdE convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2010 05:33:04 -0400
+In-Reply-To: <20100914112143.GA16039@void.printf.net>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, "John W. Linville" <linville@tuxdriver.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-arm-kernel@lists.infradead.org, Chikkature Rajashekar Madhusudhan <madhu.cr@ti.com>, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Ido Yariv <ido@wizery.com>, Kalle Valo <kalle.valo@iki.fi>, Russell King <linux@arm.linux.org.uk>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, "Wool, Vitaly" <Vitaly.Wool@sonyericsson.com>
+To: Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, Linus Walleij <linus.ml.walleij@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "STEricsson_nomadik_linux@list.st.com" <STEricsson_nomadik_linux@list.st.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Kyungmin Park <kmpark@infradead.org>
 
-On Wed, Sep 1, 2010 at 11:26 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote=
-:
-> This patchset adds wl1271 support on ZOOM2/3 boards.
 
-Tony, John, let me please suggest merging this through the wireless tre=
-e.
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Chris Ball
+> Sent: Tuesday, September 14, 2010 4:52 PM
+> To: Adrian Hunter
+> Cc: Andrew Morton; Matt Fleming; Linus Walleij; linux-mmc@vger.kernel.org;
+> linux-kernel@vger.kernel.org; STEricsson_nomadik_linux@list.st.com;
+> Hanumath Prasad; Kyungmin Park
+> Subject: Re: [PATCH] mmc: MMC 4.4 DDR support
+> 
+> Hi Hanumath, Linus,
+> 
+> On Tue, Aug 24, 2010 at 01:30:45PM +0300, Adrian Hunter wrote:
+> > I am not able to test DDR mode but it look to me that the patch
+> > should be changed.  Here is a fix:
+> >
+> > From: Adrian Hunter <adrian.hunter@nokia.com>
+> > Date: Tue, 24 Aug 2010 13:20:26 +0300
+> > Subject: [PATCH] mmc: Fix Dual Data Rate (DDR) support
+> 
+> Could someone please test Adrian's patch and report back?  I'd like
+> to merge this, but not without testing.
+> 
+> https://patchwork.kernel.org/patch/177332/
 
-wl1271 is a moving target - it keeps changing in the wireless tree and
-merging this patchset there will allow wl1271 developers to have
-everything in a single tree (and prevent merge conflicts in
-linux-next).
+[Ghorai] I was testing this patch (Adrian's) and top of patch[1] from Hanumath; Looks working fine as functionality. Checking throughput in my omap platform.
+[1] http://lkml.org/lkml/2010/7/9/35
+But there are few comments on this patch from others, I think. And is not applying cleanly in latest codebase. Also following #define is conflicting with Hanumath's patch.
+File: include/linux/mmc/host.h
+#define MMC_CAP_ERASE           (1 << 10)
 
-If that's ok with you, I will rebase this on top of wireless-testing
-and resubmit.
-
->
-> Only basic support is included; MMC power manipulation part is submit=
-ted separately as Runtime PM migration.
->
-> Changes since v4:
-> - Introduce a simple (yet safe) mechanism to pass platform-specific d=
-ata to the driver, as suggested by Russell King. Currently only a singl=
-e device is supported; multi-device support will be introduced only whe=
-n/if required
->
-> Patches are based on 2.6.36-rc3 and tested on ZOOM3.
->
+> 
 > Thanks,
->
-> Ohad Ben-Cohen (7):
-> =A0wireless: wl1271: make wl12xx.h common to both spi and sdio
-> =A0wireless: wl1271: support return value for the set power func
-> =A0wireless: wl12xx: add platform data passing support
-> =A0wireless: wl1271: take irq info from private board data
-> =A0wireless: wl1271: make ref_clock configurable by board
-> =A0omap: zoom: add fixed regulator device for wlan
-> =A0omap: zoom: add mmc3/wl1271 device support
->
-> =A0arch/arm/mach-omap2/board-zoom-peripherals.c =A0 =A0 =A0 | =A0 54 =
-++++++++++++++++++++
-> =A0drivers/net/wireless/Makefile =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0| =A0 =A02 +
-> =A0drivers/net/wireless/wl12xx/Kconfig =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-| =A0 =A05 ++-
-> =A0drivers/net/wireless/wl12xx/wl1251_sdio.c =A0 =A0 =A0 =A0 =A0| =A0=
- =A02 +-
-> =A0drivers/net/wireless/wl12xx/wl1251_spi.c =A0 =A0 =A0 =A0 =A0 | =A0=
- =A02 +-
-> =A0drivers/net/wireless/wl12xx/wl1271.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 |=
- =A0 =A03 +-
-> =A0drivers/net/wireless/wl12xx/wl1271_boot.c =A0 =A0 =A0 =A0 =A0| =A0=
- =A09 ++--
-> =A0drivers/net/wireless/wl12xx/wl1271_boot.h =A0 =A0 =A0 =A0 =A0| =A0=
- =A01 -
-> =A0drivers/net/wireless/wl12xx/wl1271_io.h =A0 =A0 =A0 =A0 =A0 =A0| =A0=
- =A09 ++-
-> =A0drivers/net/wireless/wl12xx/wl1271_main.c =A0 =A0 =A0 =A0 =A0| =A0=
- =A04 +-
-> =A0drivers/net/wireless/wl12xx/wl1271_sdio.c =A0 =A0 =A0 =A0 =A0| =A0=
- 19 ++++---
-> =A0drivers/net/wireless/wl12xx/wl1271_spi.c =A0 =A0 =A0 =A0 =A0 | =A0=
- =A08 ++-
-> =A0drivers/net/wireless/wl12xx/wl12xx_platform_data.c | =A0 31 ++++++=
-+++++
-> =A0include/linux/spi/wl12xx.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 | =A0 34 ------------
-> =A0include/linux/wl12xx.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 | =A0 38 ++++++++++++++
-> =A015 files changed, 164 insertions(+), 57 deletions(-)
-> =A0create mode 100644 drivers/net/wireless/wl12xx/wl12xx_platform_dat=
-a.c
-> =A0delete mode 100644 include/linux/spi/wl12xx.h
-> =A0create mode 100644 include/linux/wl12xx.h
->
->
+> 
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
