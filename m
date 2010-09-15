@@ -1,83 +1,58 @@
-From: Hein_Tibosch <hein_tibosch@yahoo.es>
+From: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
 Subject: Re: [PATCH] mmc: Reduce fOD to 200 kHz if possible
-Date: Wed, 15 Sep 2010 22:31:07 +0800
-Message-ID: <4C90D8AB.9030606@yahoo.es>
-References: <1284541140-7328-1-git-send-email-haavard.skinnemoen@atmel.com>	<9348108E-1108-46FE-8437-6F1271025C61@niasdigital.com> <20100915125138.1f25e4b1@hskinnemoen-d830>
+Date: Wed, 15 Sep 2010 17:10:45 +0200
+Message-ID: <20100915171045.53397db0@hskinnemoen-d830>
+References: <1284541140-7328-1-git-send-email-haavard.skinnemoen@atmel.com>
+	<9348108E-1108-46FE-8437-6F1271025C61@niasdigital.com>
+	<20100915125138.1f25e4b1@hskinnemoen-d830>
+	<4C90D8AB.9030606@yahoo.es>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bosmailout09.eigbox.net ([66.96.188.9]:39288 "EHLO
-	bosmailout09.eigbox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753657Ab0IOPGv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2010 11:06:51 -0400
-In-Reply-To: <20100915125138.1f25e4b1@hskinnemoen-d830>
+Received: from relay.atmel.no ([194.19.124.36]:1332 "EHLO relay.atmel.no"
+	rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753940Ab0IOPLU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 15 Sep 2010 11:11:20 -0400
+In-Reply-To: <4C90D8AB.9030606@yahoo.es>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haavard Skinnemoen <haavard.skinnemoen@atmel.com>
+To: Hein_Tibosch <hein_tibosch@yahoo.es>
 Cc: Ben Nizette <bn@niasdigital.com>, linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
- On 15-9-2010 18:51, Haavard Skinnemoen wrote:
-> Ben Nizette <bn@niasdigital.com> wrote:
->> On 15/09/2010, at 6:59 PM, Haavard Skinnemoen wrote:
->>
->>> Since the identification frequency was increased to 400 kHz, my
->>> ATSTK1000 board has not been able to initialize any MMC or SD cards.
->>> Reducing the identification mode frequency to 200 kHz fixes the problem.
->>>
->>> This is definitely a board-specific issue, probably due to weak pull-up
->>> resistor values, but this is the simplest fix I could come up with.  
->> I wonder whether there's an Atmel reference schematic around with an
->> incorrect resistor value on it, the only three people I know affected
->> by this are myself, Hein Tibosch and you, all on AVR32.
+Hein_Tibosch <hein_tibosch@yahoo.es> wrote:
+> >> We've now submitted one fix each, mine was similar to yours [1] but there's been movement on Hein's more comprehensive patch recently [2].  I don't know who's supposed to be merging MMC patches atm, Chris Ball added on CC on a hunch.
+> > Thanks for the references. IMO Hein's patch is overkill. There is
+> > absolutely no reason why 200 kHz should be a problem on any setup, and
+> > I haven't found any indication in any discussions that it is.
+> >
+> 
+> I have also seen situations in which the SD will only start up at 180 Khz
+> or lower.
 
-It was reported by a few more, who wrote me "off-list", but all of them were
-using AVR32
+Ok, so my patch would obviously not fix those. Could you tell me more
+about those situations? What kind of board are you running at, etc?
 
-> Yes, if you've used the STK1000 schematics as a reference, the resistor
-> values are probably a bit on the high side. I can't really suggest any
-> better values, as I don't remember what they should be, and the various
-> specs are quite inconsistent so it's not straightforward to find the
-> best values.
->
-> On the other hand, you could argue that the resistor values are fine as
-> they are, and that the Linux MMC subsystem is broken because it runs
-> the bus faster than what the hardware allows. Replacing the resistors
-> with stronger ones might reduce the maximum speed in push-pull mode, so
-> I wouldn't necessarily recommend it, especially when it's trivial to fix
-> the issue in software.
->
+> IMO my patch is indeed a bit of an overkill (the amount of code changed),
+> I'd rather see a patch like yours or Ben's, but settings fOD at 100 or 50 Khz.
 
-I did find it strange to put the freq at the memory's maximum of 400 Khz
+I guess 100 kHz would make sense. 50 kHz is not allowed according to
+the SD card spec.
 
->> We've now submitted one fix each, mine was similar to yours [1] but there's been movement on Hein's more comprehensive patch recently [2].  I don't know who's supposed to be merging MMC patches atm, Chris Ball added on CC on a hunch.
-> Thanks for the references. IMO Hein's patch is overkill. There is
-> absolutely no reason why 200 kHz should be a problem on any setup, and
-> I haven't found any indication in any discussions that it is.
->
+Another solution might be to introduce a new field, f_max_od, which the
+host controller driver could use to limit the bus frequency in open
+drain mode.
 
-I have also seen situations in which the SD will only start up at 180 Khz
-or lower.
-IMO my patch is indeed a bit of an overkill (the amount of code changed),
-I'd rather see a patch like yours or Ben's, but settings fOD at 100 or 50 Khz.
+> It was Pierre who suggested to try several frequencies[1]: most systems will start
+> using 400 Khz (so they won't suffer any loss of performance) and in some rare
+> cases, the SD will only be identified at 100 Khz (which does happen, sometimes)
 
-It was Pierre who suggested to try several frequencies[1]: most systems will start
-using 400 Khz (so they won't suffer any loss of performance) and in some rare
-cases, the SD will only be identified at 100 Khz (which does happen, sometimes)
+I think any performance hit in open drain mode is not likely to be
+noticeable, as it is only used for a couple of commands. The only thing
+that really matters for performance is push-pull mode, where too strong
+pull-ups might cause problems at high speed.
 
-[1] http://article.gmane.org/gmane.linux.kernel.mmc/994
+But if there really are cards that have problems at 100 kHz, I guess
+your patch might be the best bet.
 
-> The reason why fOD was set to 400 kHz in the first place is that some
-> controllers have a very low f_min so running the initialization at that
-> frequency causes problems. Which makes sense because the SD standard
-> clearly says that the clock can't be slower than 100 kHz.
->
-> But I have never seen any reasons why we absolutely _have_ to run the
-> clock at the maximum frequency allowed by the spec. In fact, Sascha
-> Hauer, who was the one who changed the minimum clock frequency to 400
-> kHz, said he would be fine with any frequency between 50 kHz and 400
-> kHz
-
-That's right
-
-Hein
+Haavard
