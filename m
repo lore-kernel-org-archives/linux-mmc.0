@@ -1,49 +1,43 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: RE: [PATCH v2] sdio: skip initialization on powered resume
-Date: Wed, 15 Sep 2010 22:26:05 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1009152222400.19366@xanadu.home>
-References: <1283391692-14150-1-git-send-email-bzhao@marvell.com>
- <alpine.LFD.2.00.1009021344430.19366@xanadu.home>
- <477F20668A386D41ADCC57781B1F704307D2F41B27@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009021923171.19366@xanadu.home>
- <477F20668A386D41ADCC57781B1F704307D2FE4A0F@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009072119210.19366@xanadu.home>
- <477F20668A386D41ADCC57781B1F704307D2FE4A52@SC-VEXCH1.marvell.com>
- <1284459351.2359.17.camel@stummala-linux.in.qualcomm.com>
- <477F20668A386D41ADCC57781B1F704307D30738F5@SC-VEXCH1.marvell.com>
+From: Mitch Bradley <wmb@laptop.org>
+Subject: SD cards die when power is removed
+Date: Wed, 15 Sep 2010 19:25:57 -1000
+Message-ID: <4C91AA65.5080802@laptop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:42749 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751620Ab0IPC0G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2010 22:26:06 -0400
-Received: from xanadu.home ([66.130.28.92]) by VL-MR-MRZ20.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0L8T00LVLIRDXL60@VL-MR-MRZ20.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Wed, 15 Sep 2010 22:26:01 -0400 (EDT)
-In-reply-to: <477F20668A386D41ADCC57781B1F704307D30738F5@SC-VEXCH1.marvell.com>
+Received: from solarsail.media.mit.edu ([18.85.2.155]:52378 "EHLO
+	solarsail.media.mit.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752269Ab0IPFcC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Sep 2010 01:32:02 -0400
+Received: from [10.20.0.14] (user-118btu4.cable.mindspring.com [66.133.247.196])
+	(using TLSv1 with cipher AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by solarsail.media.mit.edu (Postfix) with ESMTPSA id 48D567BC57D
+	for <linux-mmc@vger.kernel.org>; Thu, 16 Sep 2010 01:26:00 -0400 (EDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bing Zhao <bzhao@marvell.com>
-Cc: Sahitya Tummala <stummala@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michal Miroslaw <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>
+To: linux-mmc@vger.kernel.org
 
-On Wed, 15 Sep 2010, Bing Zhao wrote:
+  At One Laptop Per Child we recently ran afoul of an ugly problem with some 8GB SD cards.  It turns out that the cards 
+can die if you turn off power sooner than 1.6 seconds after a write.  That 1.6 seconds is measured from after the SD bus 
+has already said "that programming step is done".
 
-> If CMD7 is sent _before_ client driver's resume handler is called, 
-> while 8686 card is in sleep mode, it will fail. If CMD7 is sent 
-> _after_ client driver's resume handler is called, it should succeed.
+After some discussion with the vendor, we learned that this is an artifact of the way they are handling the TLC (three 
+level cell) array.  The write first goes into a cache that is written in SLC (single level cell) mode, then is moved 
+into the TLC "backing store".  If you turn off power during the write-back, the device can fail so badly that you have 
+to use a special machine to recover it.
 
-Maybe that's what we should do in the powered suspend case then.
+The 1.6 seconds is not documented anywhere, and is not discoverable by reading card configuration or status information.
 
-> By the way, a patch "mmc: fix all hangs related to mmc/sd card 
-> insert/removal during suspend/resume" 
-> (4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e by Maxim Levitsky) has 
-> removed the call to mmc_detect_change() in mmc_resume_host().
+OLPC can suspend so quickly that we can easily run afoul of this problem.
 
-If a card is removed while the host is suspended, then this should be 
-detected.
+Clearly, this is bad firmware in the controller, but it does bring up an interesting point.  As FLASH devices get more 
+and more complex, the necessity of doing background housekeeping increases.  Ideally, the algorithms should be safe 
+against power loss, but on the other hand, it would also be a good idea to give controllers a chance to shut down 
+gracefully when the OS knows it is about to turn off power.
 
+Does anybody know of any standardization efforts to address the "clean shutdown" issue for SD or other FLASH interfaces?
 
-Nicolas
+Mitch Bradley
+
