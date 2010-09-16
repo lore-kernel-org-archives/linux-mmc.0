@@ -1,169 +1,32 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [RFC RESEND] sdhci-s3c: support clock enable/disable (clock-gating)
-Date: Thu, 16 Sep 2010 15:46:50 +0900
-Message-ID: <4C91BD5A.1040804@samsung.com>
+From: Lee Jones <lee.jones@canonical.com>
+Subject: Re: Patch "mmc: fix all hangs related to mmc/sd card insert/removal
+ during suspend/resume" has been added to the 2.6.35-stable tree
+Date: Thu, 16 Sep 2010 08:21:25 +0100
+Message-ID: <4C91C575.5070500@canonical.com>
+References: <12845889002548@site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:49323 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752400Ab0IPGqw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Sep 2010 02:46:52 -0400
-Received: from epmmp1 (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
- with ESMTP id <0L8T00IIMUU2J5D0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 16 Sep 2010 15:46:50 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0L8T00KDXUU2LX@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 16 Sep 2010 15:46:50 +0900 (KST)
+Received: from adelie.canonical.com ([91.189.90.139]:58035 "EHLO
+	adelie.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750727Ab0IPHVd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Sep 2010 03:21:33 -0400
+In-Reply-To: <12845889002548@site>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Kyungmin Park <kyungmin.park@samsung.com>, matt@console-pimps.org, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Chris Ball <cjb@laptop.org>
+To: gregkh@suse.de
+Cc: maximlevitsky@gmail.com, akpm@linux-foundation.org, david-b@pacbell.net, linux-mmc@vger.kernel.org, stern@rowland.harvard.edu, torvalds@linux-foundation.org, stable@kernel.org, stable-commits@vger.kernel.org
 
-Hi all,
-  This is a RFC patch that support clock-gating for saving power consumption.
-  I found mmc_host_enable/mmc_host_disable function in core.c
-  (using MMC_CAP_DSIABLE. i think that use when host enable/disable)
-  So, i used that functions and implemented some functions in sdhci-s3c.c & sdhci.c
+> If you, or anyone else, feels it should not be added to the stable tree,
+> please let <stable@kernel.org> know about it.
 
-i want any feedback. how do you think about this patch?
-Plz let me know...
+I actually intended this patch go on into .32-stable, but I see no solid
+reason why it can't go into .35-stable too. There is one issue though. If 
+you add this patch and leave out the one below you will break stable when
+CONFIG_PM == !y.
 
-Thank you all
+mmc: build fix: mmc_pm_notify is only available with CONFIG_PM=y
+  81ca03a0e2ea0207b2df80e0edcf4c775c07a505
 
- Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
- Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-
----
- drivers/mmc/host/sdhci-s3c.c |   36 ++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c     |   30 ++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.h     |    4 ++++
- 3 files changed, 70 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 71ad416..9b430fb 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -47,6 +47,7 @@ struct sdhci_s3c {
- 	unsigned int		cur_clk;
- 	int			ext_cd_irq;
- 	int			ext_cd_gpio;
-+	int			flag;
- 
- 	struct clk		*clk_io;
- 	struct clk		*clk_bus[MAX_BUS_CLK];
-@@ -232,10 +233,45 @@ static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
- 	return min;
- }
- 
-+static int sdhci_s3c_enable_clk(struct sdhci_host *host)
-+{
-+	struct sdhci_s3c *sc = to_s3c(host);
-+
-+	if (sc->flag != 1) {
-+		clk_disable(sc->clk_io);
-+		clk_disable(sc->clk_bus[sc->cur_clk]);
-+	}
-+
-+	if (sc->host->clk_cnt == 0) {
-+		clk_enable(sc->clk_io);
-+		clk_enable(sc->clk_bus[sc->cur_clk]);
-+		sc->host->clk_cnt++;
-+		sc->flag = 1;
-+	}
-+
-+	return 0;
-+}
-+
-+static int sdhci_s3c_disable_clk(struct sdhci_host *host, int lazy)
-+{
-+	struct sdhci_s3c *sc = to_s3c(host);
-+
-+	if (sc->host->clk_cnt) {
-+		clk_disable(sc->clk_io);
-+		clk_disable(sc->clk_bus[sc->cur_clk]);
-+		if (sc->host->clk_cnt)
-+			sc->host->clk_cnt--;
-+	}
-+
-+	return 0;
-+}
-+
- static struct sdhci_ops sdhci_s3c_ops = {
- 	.get_max_clock		= sdhci_s3c_get_max_clk,
- 	.set_clock		= sdhci_s3c_set_clock,
- 	.get_min_clock		= sdhci_s3c_get_min_clock,
-+	.enable			= sdhci_s3c_enable_clk,
-+	.disable		= sdhci_s3c_disable_clk,
- };
- 
- static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 401527d..fa2e55d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1245,7 +1245,37 @@ out:
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
-+static int sdhci_enable_clk(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	int ret = 0;
-+
-+	if (host->old_clock != 0 && host->clock == 0) {
-+		if (host->ops->enable)
-+			ret = host->ops->enable(host);
-+		sdhci_set_clock(host, host->old_clock);
-+	}
-+
-+	return ret;
-+}
-+
-+static int sdhci_disable_clk(struct mmc_host *mmc, int lazy)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	int ret = 0;
-+
-+	if (host->clock != 0) {
-+		host->old_clock = host->clock;
-+		sdhci_set_clock(host, 0);
-+		if (host->ops->disable)
-+			ret = host->ops->disable(host, lazy);
-+	}
-+	return ret;
-+}
-+
- static const struct mmc_host_ops sdhci_ops = {
-+	.enable		= sdhci_enable_clk,
-+	.disable	= sdhci_disable_clk,
- 	.request	= sdhci_request,
- 	.set_ios	= sdhci_set_ios,
- 	.get_ro		= sdhci_get_ro,
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index d316bc7..0c6f143 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -278,6 +278,8 @@ struct sdhci_host {
- 	unsigned int		timeout_clk;	/* Timeout freq (KHz) */
- 
- 	unsigned int		clock;		/* Current clock (MHz) */
-+	unsigned int		old_clock;	/* Old clock (MHz) */
-+	unsigned int		clk_cnt;	/* Clock user count */
- 	u8			pwr;		/* Current voltage */
- 
- 	struct mmc_request	*mrq;		/* Current request */
-@@ -323,6 +325,8 @@ struct sdhci_ops {
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
-+	int		(*enable)(struct sdhci_host *host);
-+	int		(*disable)(struct sdhci_host *host, int lazy);
- };
- 
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
--- 1.6.0.4 
+http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=81ca03a0e2ea0207b2df80e0edcf4c775c07a505
