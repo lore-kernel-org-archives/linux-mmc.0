@@ -1,43 +1,169 @@
-From: Mitch Bradley <wmb@laptop.org>
-Subject: SD cards die when power is removed
-Date: Wed, 15 Sep 2010 19:25:57 -1000
-Message-ID: <4C91AA65.5080802@laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [RFC RESEND] sdhci-s3c: support clock enable/disable (clock-gating)
+Date: Thu, 16 Sep 2010 15:46:50 +0900
+Message-ID: <4C91BD5A.1040804@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=EUC-KR
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from solarsail.media.mit.edu ([18.85.2.155]:52378 "EHLO
-	solarsail.media.mit.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752269Ab0IPFcC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Sep 2010 01:32:02 -0400
-Received: from [10.20.0.14] (user-118btu4.cable.mindspring.com [66.133.247.196])
-	(using TLSv1 with cipher AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by solarsail.media.mit.edu (Postfix) with ESMTPSA id 48D567BC57D
-	for <linux-mmc@vger.kernel.org>; Thu, 16 Sep 2010 01:26:00 -0400 (EDT)
+Received: from mailout4.samsung.com ([203.254.224.34]:49323 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752400Ab0IPGqw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Sep 2010 02:46:52 -0400
+Received: from epmmp1 (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
+ with ESMTP id <0L8T00IIMUU2J5D0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 16 Sep 2010 15:46:50 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0L8T00KDXUU2LX@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 16 Sep 2010 15:46:50 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
+Cc: Kyungmin Park <kyungmin.park@samsung.com>, matt@console-pimps.org, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Chris Ball <cjb@laptop.org>
 
-  At One Laptop Per Child we recently ran afoul of an ugly problem with some 8GB SD cards.  It turns out that the cards 
-can die if you turn off power sooner than 1.6 seconds after a write.  That 1.6 seconds is measured from after the SD bus 
-has already said "that programming step is done".
+Hi all,
+  This is a RFC patch that support clock-gating for saving power consumption.
+  I found mmc_host_enable/mmc_host_disable function in core.c
+  (using MMC_CAP_DSIABLE. i think that use when host enable/disable)
+  So, i used that functions and implemented some functions in sdhci-s3c.c & sdhci.c
 
-After some discussion with the vendor, we learned that this is an artifact of the way they are handling the TLC (three 
-level cell) array.  The write first goes into a cache that is written in SLC (single level cell) mode, then is moved 
-into the TLC "backing store".  If you turn off power during the write-back, the device can fail so badly that you have 
-to use a special machine to recover it.
+i want any feedback. how do you think about this patch?
+Plz let me know...
 
-The 1.6 seconds is not documented anywhere, and is not discoverable by reading card configuration or status information.
+Thank you all
 
-OLPC can suspend so quickly that we can easily run afoul of this problem.
+ Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+ Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-Clearly, this is bad firmware in the controller, but it does bring up an interesting point.  As FLASH devices get more 
-and more complex, the necessity of doing background housekeeping increases.  Ideally, the algorithms should be safe 
-against power loss, but on the other hand, it would also be a good idea to give controllers a chance to shut down 
-gracefully when the OS knows it is about to turn off power.
+---
+ drivers/mmc/host/sdhci-s3c.c |   36 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c     |   30 ++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.h     |    4 ++++
+ 3 files changed, 70 insertions(+), 0 deletions(-)
 
-Does anybody know of any standardization efforts to address the "clean shutdown" issue for SD or other FLASH interfaces?
-
-Mitch Bradley
-
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 71ad416..9b430fb 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -47,6 +47,7 @@ struct sdhci_s3c {
+ 	unsigned int		cur_clk;
+ 	int			ext_cd_irq;
+ 	int			ext_cd_gpio;
++	int			flag;
+ 
+ 	struct clk		*clk_io;
+ 	struct clk		*clk_bus[MAX_BUS_CLK];
+@@ -232,10 +233,45 @@ static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
+ 	return min;
+ }
+ 
++static int sdhci_s3c_enable_clk(struct sdhci_host *host)
++{
++	struct sdhci_s3c *sc = to_s3c(host);
++
++	if (sc->flag != 1) {
++		clk_disable(sc->clk_io);
++		clk_disable(sc->clk_bus[sc->cur_clk]);
++	}
++
++	if (sc->host->clk_cnt == 0) {
++		clk_enable(sc->clk_io);
++		clk_enable(sc->clk_bus[sc->cur_clk]);
++		sc->host->clk_cnt++;
++		sc->flag = 1;
++	}
++
++	return 0;
++}
++
++static int sdhci_s3c_disable_clk(struct sdhci_host *host, int lazy)
++{
++	struct sdhci_s3c *sc = to_s3c(host);
++
++	if (sc->host->clk_cnt) {
++		clk_disable(sc->clk_io);
++		clk_disable(sc->clk_bus[sc->cur_clk]);
++		if (sc->host->clk_cnt)
++			sc->host->clk_cnt--;
++	}
++
++	return 0;
++}
++
+ static struct sdhci_ops sdhci_s3c_ops = {
+ 	.get_max_clock		= sdhci_s3c_get_max_clk,
+ 	.set_clock		= sdhci_s3c_set_clock,
+ 	.get_min_clock		= sdhci_s3c_get_min_clock,
++	.enable			= sdhci_s3c_enable_clk,
++	.disable		= sdhci_s3c_disable_clk,
+ };
+ 
+ static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 401527d..fa2e55d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1245,7 +1245,37 @@ out:
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
++static int sdhci_enable_clk(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	int ret = 0;
++
++	if (host->old_clock != 0 && host->clock == 0) {
++		if (host->ops->enable)
++			ret = host->ops->enable(host);
++		sdhci_set_clock(host, host->old_clock);
++	}
++
++	return ret;
++}
++
++static int sdhci_disable_clk(struct mmc_host *mmc, int lazy)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	int ret = 0;
++
++	if (host->clock != 0) {
++		host->old_clock = host->clock;
++		sdhci_set_clock(host, 0);
++		if (host->ops->disable)
++			ret = host->ops->disable(host, lazy);
++	}
++	return ret;
++}
++
+ static const struct mmc_host_ops sdhci_ops = {
++	.enable		= sdhci_enable_clk,
++	.disable	= sdhci_disable_clk,
+ 	.request	= sdhci_request,
+ 	.set_ios	= sdhci_set_ios,
+ 	.get_ro		= sdhci_get_ro,
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index d316bc7..0c6f143 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -278,6 +278,8 @@ struct sdhci_host {
+ 	unsigned int		timeout_clk;	/* Timeout freq (KHz) */
+ 
+ 	unsigned int		clock;		/* Current clock (MHz) */
++	unsigned int		old_clock;	/* Old clock (MHz) */
++	unsigned int		clk_cnt;	/* Clock user count */
+ 	u8			pwr;		/* Current voltage */
+ 
+ 	struct mmc_request	*mrq;		/* Current request */
+@@ -323,6 +325,8 @@ struct sdhci_ops {
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
++	int		(*enable)(struct sdhci_host *host);
++	int		(*disable)(struct sdhci_host *host, int lazy);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+-- 1.6.0.4 
