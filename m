@@ -1,453 +1,345 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH 1/5] ARM: S5PV310: Add HSMMC support and SDHCI configuration
-Date: Thu, 16 Sep 2010 18:13:02 +0900
-Message-ID: <AANLkTi=Vx42siGBno7sLrirCRSiMvEr=2-toHHYU7405@mail.gmail.com>
-References: <1284626223-18944-1-git-send-email-jeongbae.seo@samsung.com>
-	<1284626223-18944-2-git-send-email-jeongbae.seo@samsung.com>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH V8] mmc : Add i.MX21 support to mxcmmc driver
+Date: Thu, 16 Sep 2010 13:07:29 +0200
+Message-ID: <20100916110729.GU1473@pengutronix.de>
+References: <20100909220110.12456.14417.stgit@srv002.fuzzey.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1284626223-18944-2-git-send-email-jeongbae.seo@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jeongbae Seo <jeongbae.seo@samsung.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, kgene.kim@samsung.com, akpm@linux-foundation.org, Hyuk Lee <hyuk1.lee@samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:57640 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752531Ab0IPLHb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Sep 2010 07:07:31 -0400
+Content-Disposition: inline
+In-Reply-To: <20100909220110.12456.14417.stgit@srv002.fuzzey.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Martin Fuzzey <mfuzzey@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>, linux-arm-kernel@lists.infradead.org, cjb@laptop.org
 
-On Thu, Sep 16, 2010 at 5:36 PM, Jeongbae Seo <jeongbae.seo@samsung.com=
-> wrote:
-> From: Hyuk Lee <hyuk1.lee@samsung.com>
->
-> This patch adds to support HSMMC for S5PV310 and S5PC210 and setup fo=
-r
-> HSMMC host controller and also related GPIO.
-> At most 4 channel can be used at the same time.
-> A user can configure SDHCI data bus as 8bit or 4bit.
->
-> Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
-> Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
+On Fri, Sep 10, 2010 at 12:02:44AM +0200, Martin Fuzzey wrote:
+> Even though the i.MX21 SDHC module has the same revision number as the i.MX27
+> one there are a few differences!!
+>         Some interrupt enables are inverted.
+>         FIFO is only 16 bits wide.
+>         The argument is written to 2x16bit registers (vs 1x32).
+>         Interrupts must be acknowledged via the INT_CNTR register.
+>         Card clock must be enabled for each request.
+> 	For writes DMA must be enabled on command response not before.
+> 
+> Signed-off-by: Martin Fuzzey <mfuzzey@gmail.com>
+> 
 > ---
-> =A0arch/arm/mach-s5pv310/Kconfig =A0 =A0 =A0 =A0 =A0 =A0| =A0 39 ++++=
-++++
-> =A0arch/arm/mach-s5pv310/Makefile =A0 =A0 =A0 =A0 =A0 | =A0 =A02 +
-> =A0arch/arm/mach-s5pv310/setup-sdhci-gpio.c | =A0156 ++++++++++++++++=
-++++++++++++++
-> =A0arch/arm/mach-s5pv310/setup-sdhci.c =A0 =A0 =A0| =A0 69 ++++++++++=
-+++
-> =A04 files changed, 266 insertions(+), 0 deletions(-)
-> =A0create mode 100644 arch/arm/mach-s5pv310/setup-sdhci-gpio.c
-> =A0create mode 100644 arch/arm/mach-s5pv310/setup-sdhci.c
->
-> diff --git a/arch/arm/mach-s5pv310/Kconfig b/arch/arm/mach-s5pv310/Kc=
-onfig
-> index 9ac29fe..6a07968 100644
-> --- a/arch/arm/mach-s5pv310/Kconfig
-> +++ b/arch/arm/mach-s5pv310/Kconfig
-> @@ -25,6 +25,17 @@ config S5PV310_SETUP_I2C2
-> =A0 =A0 =A0 =A0help
-> =A0 =A0 =A0 =A0 =A0Common setup code for i2c bus 2.
->
-> +config S5PV310_SETUP_SDHCI
-> + =A0 =A0 =A0 bool
-> + =A0 =A0 =A0 select S5PV310_SETUP_SDHCI_GPIO
-> + =A0 =A0 =A0 help
-> + =A0 =A0 =A0 =A0 Internal helper functions for S5PV310 based SDHCI s=
-ystems.
-> +
-> +config S5PV310_SETUP_SDHCI_GPIO
-> + =A0 =A0 =A0 bool
-> + =A0 =A0 =A0 help
-> + =A0 =A0 =A0 =A0 Common setup code for SDHCI gpio.
-> +
-> =A0# machine support
->
-> =A0menu "S5PC210 Machines"
-> @@ -33,6 +44,11 @@ config MACH_SMDKC210
-> =A0 =A0 =A0 =A0bool "SMDKC210"
-> =A0 =A0 =A0 =A0select CPU_S5PV310
-> =A0 =A0 =A0 =A0select ARCH_SPARSEMEM_ENABLE
-> + =A0 =A0 =A0 select S3C_DEV_HSMMC
-> + =A0 =A0 =A0 select S3C_DEV_HSMMC1
-> + =A0 =A0 =A0 select S3C_DEV_HSMMC2
-> + =A0 =A0 =A0 select S3C_DEV_HSMMC3
-> + =A0 =A0 =A0 select S5PV310_SETUP_SDHCI
-> =A0 =A0 =A0 =A0help
-> =A0 =A0 =A0 =A0 =A0Machine support for Samsung SMDKC210
-> =A0 =A0 =A0 =A0 =A0S5PC210(MCP) is one of package option of S5PV310
-> @@ -53,9 +69,32 @@ config MACH_SMDKV310
-> =A0 =A0 =A0 =A0bool "SMDKV310"
-> =A0 =A0 =A0 =A0select CPU_S5PV310
-> =A0 =A0 =A0 =A0select ARCH_SPARSEMEM_ENABLE
-> + =A0 =A0 =A0 select S3C_DEV_HSMMC
-> + =A0 =A0 =A0 select S3C_DEV_HSMMC1
-> + =A0 =A0 =A0 select S3C_DEV_HSMMC2
-> + =A0 =A0 =A0 select S3C_DEV_HSMMC3
-> + =A0 =A0 =A0 select S5PV310_SETUP_SDHCI
-> =A0 =A0 =A0 =A0help
-> =A0 =A0 =A0 =A0 =A0Machine support for Samsung SMDKV310
->
-> =A0endmenu
->
-> +comment "Configuration for HSMMC bus width"
-> +
-> +menu "Use 8-bit bus width"
-> +
-> +config S5PV310_SDHCI_CH0_8BIT
-> + =A0 =A0 =A0 bool "Channel 0 with 8-bit bus"
-> + =A0 =A0 =A0 help
-> + =A0 =A0 =A0 =A0 Support HSMMC Channel 0 8-bit bus.
-> + =A0 =A0 =A0 =A0 If selected, Channel 1 is disabled.
-> +
-> +config S5PV310_SDHCI_CH2_8BIT
-> + =A0 =A0 =A0 bool "Channel 2 with 8-bit bus"
-> + =A0 =A0 =A0 help
-> + =A0 =A0 =A0 =A0 Support HSMMC Channel 2 8-bit bus.
-> + =A0 =A0 =A0 =A0 If selected, Channel 3 is disabled.
+> Changes from V7 (February 2010):
+> Rebased to 2.6.36-rc3
+> 
+>  arch/arm/mach-imx/clock-imx21.c |    4 +
+>  drivers/mmc/host/mxcmmc.c       |  153 ++++++++++++++++++++++++++++++---------
+>  2 files changed, 120 insertions(+), 37 deletions(-)
+> 
+> diff --git a/arch/arm/mach-imx/clock-imx21.c b/arch/arm/mach-imx/clock-imx21.c
+> index dafc271..076cd43 100644
+> --- a/arch/arm/mach-imx/clock-imx21.c
+> +++ b/arch/arm/mach-imx/clock-imx21.c
+> @@ -1170,8 +1170,8 @@ static struct clk_lookup lookups[] = {
+>  	_REGISTER_CLOCK(NULL, "gpt1", gpt_clk[1])
+>  	_REGISTER_CLOCK(NULL, "gpt1", gpt_clk[2])
+>  	_REGISTER_CLOCK(NULL, "pwm", pwm_clk[0])
+> -	_REGISTER_CLOCK(NULL, "sdhc1", sdhc_clk[0])
+> -	_REGISTER_CLOCK(NULL, "sdhc2", sdhc_clk[1])
+> +	_REGISTER_CLOCK("mxc-mmc.0", NULL, sdhc_clk[0])
+> +	_REGISTER_CLOCK("mxc-mmc.1", NULL, sdhc_clk[1])
+>  	_REGISTER_CLOCK(NULL, "cspi1", cspi_clk[0])
+>  	_REGISTER_CLOCK(NULL, "cspi2", cspi_clk[1])
+>  	_REGISTER_CLOCK(NULL, "cspi3", cspi_clk[2])
 
-I think it's not needed since most boards have fixed bandwith and
-cfg_gpio handle it regardless these configuration.
-Also we use the select state if needed, e.g., when MMC0 uses
-8-buswidth then don't select MMC1.
-I saw the SMDK board use this configuration. but just choose bandwidth =
-4 or 8.
+Please make a seperate patch from this hunk. This should go via the i.MX
+tree.
 
-Others good.
+I will give this a runtime test on !i.MX21 tomorrow. Otherwise the patch
+looks fine to me.
 
-Thank you,
-Kyungmin Park
-> +
-> +endmenu
-> +
-> =A0endif
-> diff --git a/arch/arm/mach-s5pv310/Makefile b/arch/arm/mach-s5pv310/M=
-akefile
-> index aefb14f..c89b6b0 100644
-> --- a/arch/arm/mach-s5pv310/Makefile
-> +++ b/arch/arm/mach-s5pv310/Makefile
-> @@ -29,3 +29,5 @@ obj-$(CONFIG_MACH_UNIVERSAL_C210) =A0 =A0 +=3D mach=
--universal_c210.o
->
-> =A0obj-$(CONFIG_S5PV310_SETUP_I2C1) =A0 =A0 =A0 +=3D setup-i2c1.o
-> =A0obj-$(CONFIG_S5PV310_SETUP_I2C2) =A0 =A0 =A0 +=3D setup-i2c2.o
-> +obj-$(CONFIG_S5PV310_SETUP_SDHCI) =A0 =A0 =A0+=3D setup-sdhci.o
-> +obj-$(CONFIG_S5PV310_SETUP_SDHCI_GPIO) +=3D setup-sdhci-gpio.o
-> diff --git a/arch/arm/mach-s5pv310/setup-sdhci-gpio.c b/arch/arm/mach=
--s5pv310/setup-sdhci-gpio.c
-> new file mode 100644
-> index 0000000..8db8c81
-> --- /dev/null
-> +++ b/arch/arm/mach-s5pv310/setup-sdhci-gpio.c
-> @@ -0,0 +1,156 @@
-> +/* linux/arch/arm/mach-s5pv310/setup-sdhci-gpio.c
-> + *
-> + * Copyright (c) 2010 Samsung Electronics Co., Ltd.
-> + * =A0 =A0 =A0 =A0 =A0 =A0 http://www.samsung.com/
-> + *
-> + * S5PV310 - Helper functions for setting up SDHCI device(s) GPIO (H=
-SMMC)
-> + *
-> + * This program is free software; you can redistribute it and/or mod=
-ify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> +*/
-> +
-> +#include <linux/kernel.h>
-> +#include <linux/types.h>
-> +#include <linux/interrupt.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/io.h>
-> +#include <linux/gpio.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/card.h>
-> +
-> +#include <plat/gpio-cfg.h>
-> +#include <plat/regs-sdhci.h>
-> +#include <plat/sdhci.h>
-> +
-> +void s5pv310_setup_sdhci0_cfg_gpio(struct platform_device *dev, int =
-width)
+Sascha
+
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index 350f78e..88dd31f 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -56,6 +56,8 @@
+>  #define MMC_REG_INT_CNTR		0x24
+>  #define MMC_REG_CMD			0x28
+>  #define MMC_REG_ARG			0x2C
+> +#define MMC_REG_ARGH			0x2C
+> +#define MMC_REG_ARGL			0x30
+>  #define MMC_REG_RES_FIFO		0x34
+>  #define MMC_REG_BUFFER_ACCESS		0x38
+>  
+> @@ -145,6 +147,49 @@ struct mxcmci_host {
+>  
+>  static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
+>  
+> +static void mxcmci_write_arg(struct mxcmci_host *host, u32 arg)
 > +{
-> + =A0 =A0 =A0 struct s3c_sdhci_platdata *pdata =3D dev->dev.platform_=
-data;
-> + =A0 =A0 =A0 unsigned int gpio;
-> +
-> + =A0 =A0 =A0 /* Set all the necessary GPK0[0:1] pins to special-func=
-tion 2 */
-> + =A0 =A0 =A0 for (gpio =3D S5PV310_GPK0(0); gpio < S5PV310_GPK0(2); =
-gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NO=
-NE);
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 switch (width) {
-> + =A0 =A0 =A0 case 8:
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 for (gpio =3D S5PV310_GPK1(3); gpio <=3D=
- S5PV310_GPK1(6); gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Data pin GPK1[3:6] t=
-o special-funtion 3 */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S=
-3C_GPIO_SFN(3));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, =
-S3C_GPIO_PULL_UP);
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Setup Drive Strength=
- */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s5p_gpio_set_drvstr(gpi=
-o, S5P_GPIO_DRVSTR_LV4);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> + =A0 =A0 =A0 case 4:
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 for (gpio =3D S5PV310_GPK0(3); gpio <=3D=
- S5PV310_GPK0(6); gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Data pin GPK0[3:6] t=
-o special-funtion 2 */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S=
-3C_GPIO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, =
-S3C_GPIO_PULL_UP);
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Setup Drive Strength=
- */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s5p_gpio_set_drvstr(gpi=
-o, S5P_GPIO_DRVSTR_LV4);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> + =A0 =A0 =A0 default:
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 if (pdata->cd_type =3D=3D S3C_SDHCI_CD_INTERNAL) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(S5PV310_GPK0(2), S3C_GP=
-IO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(S5PV310_GPK0(2), S3C_G=
-PIO_PULL_UP);
-> + =A0 =A0 =A0 }
+> +	if (cpu_is_mx21()) {
+> +		writel(arg >> 16, host->base + MMC_REG_ARGH);
+> +		writel(arg & 0xFFFF, host->base + MMC_REG_ARGL);
+> +	} else {
+> +		writel(arg, host->base + MMC_REG_ARG);
+> +	}
 > +}
 > +
-> +void s5pv310_setup_sdhci1_cfg_gpio(struct platform_device *dev, int =
-width)
+> +static void mxcmci_ack_int(struct mxcmci_host *host, u32 stat)
 > +{
-> + =A0 =A0 =A0 struct s3c_sdhci_platdata *pdata =3D dev->dev.platform_=
-data;
-> + =A0 =A0 =A0 unsigned int gpio;
+> +	if (cpu_is_mx21()) {
+> +		u32 intclr = readl(host->base + MMC_REG_INT_CNTR);
 > +
-> + =A0 =A0 =A0 /* Set all the necessary GPK1[0:1] pins to special-func=
-tion 2 */
-> + =A0 =A0 =A0 for (gpio =3D S5PV310_GPK1(0); gpio < S5PV310_GPK1(2); =
-gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NO=
-NE);
-> + =A0 =A0 =A0 }
+> +		if (stat & STATUS_DATA_TRANS_DONE)
+> +			intclr |= INT_READ_OP_EN;
+> +		if (stat & STATUS_WRITE_OP_DONE)
+> +			intclr |= INT_WRITE_OP_DONE_EN;
+> +		if (stat & STATUS_END_CMD_RESP)
+> +			intclr |= INT_END_CMD_RES_EN;
 > +
-> + =A0 =A0 =A0 for (gpio =3D S5PV310_GPK1(3); gpio <=3D S5PV310_GPK1(6=
-); gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Data pin GPK1[3:6] to special-functi=
-on 2 */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, S3C_GPIO_PULL_UP=
-);
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Setup Drive Strength */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s5p_gpio_set_drvstr(gpio, S5P_GPIO_DRVS=
-TR_LV4);
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 if (pdata->cd_type =3D=3D S3C_SDHCI_CD_INTERNAL) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(S5PV310_GPK1(2), S3C_GP=
-IO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(S5PV310_GPK1(2), S3C_G=
-PIO_PULL_UP);
-> + =A0 =A0 =A0 }
+> +		writel(intclr, host->base + MMC_REG_INT_CNTR);
+> +	}
 > +}
 > +
-> +void s5pv310_setup_sdhci2_cfg_gpio(struct platform_device *dev, int =
-width)
+> +static inline void mxcmci_set_int_cntr(struct mxcmci_host *host, u32 enables)
 > +{
-> + =A0 =A0 =A0 struct s3c_sdhci_platdata *pdata =3D dev->dev.platform_=
-data;
-> + =A0 =A0 =A0 unsigned int gpio;
-> +
-> + =A0 =A0 =A0 /* Set all the necessary GPK2[0:1] pins to special-func=
-tion 2 */
-> + =A0 =A0 =A0 for (gpio =3D S5PV310_GPK2(0); gpio < S5PV310_GPK2(2); =
-gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NO=
-NE);
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 switch (width) {
-> + =A0 =A0 =A0 case 8:
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 for (gpio =3D S5PV310_GPK3(3); gpio <=3D=
- S5PV310_GPK3(6); gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Data pin GPK3[3:6] t=
-o special-function 3 */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S=
-3C_GPIO_SFN(3));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, =
-S3C_GPIO_PULL_UP);
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Setup Drive Strength=
- */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s5p_gpio_set_drvstr(gpi=
-o, S5P_GPIO_DRVSTR_LV4);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> + =A0 =A0 =A0 case 4:
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 for (gpio =3D S5PV310_GPK2(3); gpio <=3D=
- S5PV310_GPK2(6); gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Data pin GPK2[3:6] t=
-o special-function 2 */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S=
-3C_GPIO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, =
-S3C_GPIO_PULL_UP);
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Setup Drive Strength=
- */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 s5p_gpio_set_drvstr(gpi=
-o, S5P_GPIO_DRVSTR_LV4);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> + =A0 =A0 =A0 default:
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 if (pdata->cd_type =3D=3D S3C_SDHCI_CD_INTERNAL) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(S5PV310_GPK2(2), S3C_GP=
-IO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(S5PV310_GPK2(2), S3C_G=
-PIO_PULL_UP);
-> + =A0 =A0 =A0 }
+> +	if (cpu_is_mx21()) /* some interrupt enables have reverse polarity */
+> +		enables ^=  0x1F;
+> +	writel(enables, host->base + MMC_REG_INT_CNTR);
 > +}
 > +
-> +void s5pv310_setup_sdhci3_cfg_gpio(struct platform_device *dev, int =
-width)
+> +static inline void mxcmci_start_clock(struct mxcmci_host *host)
 > +{
-> + =A0 =A0 =A0 struct s3c_sdhci_platdata *pdata =3D dev->dev.platform_=
-data;
-> + =A0 =A0 =A0 unsigned int gpio;
-> +
-> + =A0 =A0 =A0 /* Set all the necessary GPK3[0:1] pins to special-func=
-tion 2 */
-> + =A0 =A0 =A0 for (gpio =3D S5PV310_GPK3(0); gpio < S5PV310_GPK3(2); =
-gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NO=
-NE);
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 for (gpio =3D S5PV310_GPK3(3); gpio <=3D S5PV310_GPK3(6=
-); gpio++) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Data pin GPK3[3:6] to special-functi=
-on 2 */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(gpio, S3C_GPIO_PULL_UP=
-);
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Setup Drive Strength */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s5p_gpio_set_drvstr(gpio, S5P_GPIO_DRVS=
-TR_LV4);
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 if (pdata->cd_type =3D=3D S3C_SDHCI_CD_INTERNAL) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_cfgpin(S5PV310_GPK3(2), S3C_GP=
-IO_SFN(2));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 s3c_gpio_setpull(S5PV310_GPK3(2), S3C_G=
-PIO_PULL_UP);
-> + =A0 =A0 =A0 }
+> +	writew(STR_STP_CLK_START_CLK, host->base + MMC_REG_STR_STP_CLK);
 > +}
-> diff --git a/arch/arm/mach-s5pv310/setup-sdhci.c b/arch/arm/mach-s5pv=
-310/setup-sdhci.c
-> new file mode 100644
-> index 0000000..db8358f
-> --- /dev/null
-> +++ b/arch/arm/mach-s5pv310/setup-sdhci.c
-> @@ -0,0 +1,69 @@
-> +/* linux/arch/arm/mach-s5pv310/setup-sdhci.c
-> + *
-> + * Copyright (c) 2010 Samsung Electronics Co., Ltd.
-> + * =A0 =A0 =A0 =A0 =A0 =A0 http://www.samsung.com/
-> + *
-> + * S5PV310 - Helper functions for settign up SDHCI device(s) (HSMMC)
-> + *
-> + * This program is free software; you can redistribute it and/or mod=
-ify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> +*/
 > +
-> +#include <linux/kernel.h>
-> +#include <linux/types.h>
-> +#include <linux/interrupt.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/io.h>
-> +
-> +#include <linux/mmc/card.h>
-> +#include <linux/mmc/host.h>
-> +
-> +#include <plat/regs-sdhci.h>
-> +
-> +/* clock sources for the mmc bus clock, order as for the ctrl2[5..4]=
- */
-> +
-> +char *s5pv310_hsmmc_clksrcs[4] =3D {
-> + =A0 =A0 =A0 [0] =3D NULL,
-> + =A0 =A0 =A0 [1] =3D NULL,
-> + =A0 =A0 =A0 [2] =3D "sclk_mmc", =A0 =A0 =A0 /* mmc_bus */
-> + =A0 =A0 =A0 [3] =3D NULL,
-> +};
-> +
-> +void s5pv310_setup_sdhci_cfg_card(struct platform_device *dev, void =
-__iomem *r,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 str=
-uct mmc_ios *ios, struct mmc_card *card)
+> +static inline void mxcmci_stop_clock(struct mxcmci_host *host)
 > +{
-> + =A0 =A0 =A0 u32 ctrl2, ctrl3;
-> +
-> + =A0 =A0 =A0 /* don't need to alter anything acording to card-type *=
-/
-> +
-> + =A0 =A0 =A0 ctrl2 =3D readl(r + S3C_SDHCI_CONTROL2);
-> +
-> + =A0 =A0 =A0 /* select base clock source to HCLK */
-> +
-> + =A0 =A0 =A0 ctrl2 &=3D S3C_SDHCI_CTRL2_SELBASECLK_MASK;
-> +
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* clear async mode, enable conflict mask, rx feedbac=
-k ctrl, SD
-> + =A0 =A0 =A0 =A0* clk hold and no use debounce count
-> + =A0 =A0 =A0 =A0*/
-> +
-> + =A0 =A0 =A0 ctrl2 |=3D (S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 S3C_SDHCI_CTRL2_ENFBCLKRX |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 S3C_SDHCI_CTRL2_DFCNT_NONE |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 S3C_SDHCI_CTRL2_ENCLKOUTHOLD);
-> +
-> + =A0 =A0 =A0 /* Tx and Rx feedback clock delay control */
-> +
-> + =A0 =A0 =A0 if (ios->clock < 25 * 1000000)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl3 =3D (S3C_SDHCI_CTRL3_FCSEL3 |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0S3C_SDHCI_CTRL3_FCSE=
-L2 |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0S3C_SDHCI_CTRL3_FCSE=
-L1 |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0S3C_SDHCI_CTRL3_FCSE=
-L0);
-> + =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl3 =3D (S3C_SDHCI_CTRL3_FCSEL1 | S3C=
-_SDHCI_CTRL3_FCSEL0);
-> +
-> + =A0 =A0 =A0 writel(ctrl2, r + S3C_SDHCI_CONTROL2);
-> + =A0 =A0 =A0 writel(ctrl3, r + S3C_SDHCI_CONTROL3);
+> +	writew(STR_STP_CLK_STOP_CLK, host->base + MMC_REG_STR_STP_CLK);
 > +}
-> --
-> 1.6.2.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
-ng-soc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+> +
+>  static inline int mxcmci_use_dma(struct mxcmci_host *host)
+>  {
+>  	return host->do_dma;
+> @@ -221,7 +266,10 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+>  	}
+>  	wmb();
+>  
+> -	imx_dma_enable(host->dma);
+> +	/* MX21: unreliable writes if dma enabled here - do on command done */
+> +	if (mxcmci_use_dma(host) &&
+> +			(!cpu_is_mx21() || host->dma_dir == DMA_FROM_DEVICE))
+> +		imx_dma_enable(host->dma);
+>  #endif /* HAS_DMA */
+>  	return 0;
+>  }
+> @@ -263,12 +311,16 @@ static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
+>  	spin_lock_irqsave(&host->lock, flags);
+>  	if (host->use_sdio)
+>  		int_cntr |= INT_SDIO_IRQ_EN;
+> -	writel(int_cntr, host->base + MMC_REG_INT_CNTR);
+> +	mxcmci_set_int_cntr(host, int_cntr);
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  
+>  	writew(cmd->opcode, host->base + MMC_REG_CMD);
+> -	writel(cmd->arg, host->base + MMC_REG_ARG);
+> +	mxcmci_write_arg(host, cmd->arg);
+>  	writew(cmdat, host->base + MMC_REG_CMD_DAT_CONT);
+> +	if (cpu_is_mx21()) {
+> +		/* i.MX21 requires clock start after submitting command */
+> +		mxcmci_start_clock(host);
+> +	}
+>  
+>  	return 0;
+>  }
+> @@ -282,7 +334,7 @@ static void mxcmci_finish_request(struct mxcmci_host *host,
+>  	spin_lock_irqsave(&host->lock, flags);
+>  	if (host->use_sdio)
+>  		int_cntr |= INT_SDIO_IRQ_EN;
+> -	writel(int_cntr, host->base + MMC_REG_INT_CNTR);
+> +	mxcmci_set_int_cntr(host, int_cntr);
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  
+>  	host->req = NULL;
+> @@ -397,19 +449,29 @@ static int mxcmci_poll_status(struct mxcmci_host *host, u32 mask)
+>  static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
+>  {
+>  	unsigned int stat;
+> -	u32 *buf = _buf;
+> -
+> -	while (bytes > 3) {
+> -		stat = mxcmci_poll_status(host,
+> +	u16 *buf16 = _buf;
+> +	u32 *buf32 = _buf;
+> +	int count = 0;
+> +	int fifo_size = host->cmdat & CMD_DAT_CONT_BUS_WIDTH_4 ? 64 : 16;
+> +	int buffer_width = cpu_is_mx21() ? 2 : 4;
+> +
+> +	while (bytes >= buffer_width) {
+> +		if (count % fifo_size == 0) {
+> +			stat = mxcmci_poll_status(host,
+>  				STATUS_BUF_READ_RDY | STATUS_READ_OP_DONE);
+> -		if (stat)
+> -			return stat;
+> -		*buf++ = readl(host->base + MMC_REG_BUFFER_ACCESS);
+> -		bytes -= 4;
+> +			if (stat)
+> +				return stat;
+> +		}
+> +		if (buffer_width == 2)
+> +			*buf16++ = (u16)readl(
+> +				host->base + MMC_REG_BUFFER_ACCESS);
+> +		else
+> +			*buf32++ = readl(host->base + MMC_REG_BUFFER_ACCESS);
+> +		bytes -= buffer_width;
+> +		count += buffer_width;
+>  	}
+>  
+>  	if (bytes) {
+> -		u8 *b = (u8 *)buf;
+>  		u32 tmp;
+>  
+>  		stat = mxcmci_poll_status(host,
+> @@ -417,7 +479,10 @@ static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
+>  		if (stat)
+>  			return stat;
+>  		tmp = readl(host->base + MMC_REG_BUFFER_ACCESS);
+> -		memcpy(b, &tmp, bytes);
+> +		if (buffer_width == 2)
+> +			memcpy((u8 *)buf16, &tmp, bytes);
+> +		else
+> +			memcpy((u8 *)buf32, &tmp, bytes);
+>  	}
+>  
+>  	return 0;
+> @@ -426,33 +491,41 @@ static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
+>  static int mxcmci_push(struct mxcmci_host *host, void *_buf, int bytes)
+>  {
+>  	unsigned int stat;
+> -	u32 *buf = _buf;
+> -
+> -	while (bytes > 3) {
+> -		stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+> -		if (stat)
+> -			return stat;
+> -		writel(*buf++, host->base + MMC_REG_BUFFER_ACCESS);
+> -		bytes -= 4;
+> +	u16 *buf16 = _buf;
+> +	u32 *buf32 = _buf;
+> +	int count = 0;
+> +	int fifo_size = host->cmdat & CMD_DAT_CONT_BUS_WIDTH_4 ? 64 : 16;
+> +	int buffer_width = cpu_is_mx21() ? 2 : 4;
+> +
+> +	while (bytes >= buffer_width) {
+> +		if (count % fifo_size == 0) {
+> +			stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+> +			if (stat)
+> +				return stat;
+> +		}
+> +		if (buffer_width == 2)
+> +			writel(*buf16++, host->base + MMC_REG_BUFFER_ACCESS);
+> +		else
+> +			writel(*buf32++, host->base + MMC_REG_BUFFER_ACCESS);
+> +		bytes -= buffer_width;
+> +		count += buffer_width;
+>  	}
+>  
+>  	if (bytes) {
+> -		u8 *b = (u8 *)buf;
+>  		u32 tmp;
+>  
+>  		stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+>  		if (stat)
+>  			return stat;
+>  
+> -		memcpy(&tmp, b, bytes);
+> +		if (buffer_width == 2)
+> +			memcpy(&tmp, (u8 *)buf16, bytes);
+> +		else
+> +			memcpy(&tmp, (u8 *)buf32, bytes);
+>  		writel(tmp, host->base + MMC_REG_BUFFER_ACCESS);
+>  	}
+>  
+> -	stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+> -	if (stat)
+> -		return stat;
+> -
+> -	return 0;
+> +	return mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
+>  }
+>  
+>  static int mxcmci_transfer_data(struct mxcmci_host *host)
+> @@ -540,13 +613,20 @@ static void mxcmci_cmd_done(struct mxcmci_host *host, unsigned int stat)
+>  		return;
+>  	}
+>  
+> +	if (!host->data)
+> +		return;
+> +
+> +#ifdef HAS_DMA
+>  	/* For the DMA case the DMA engine handles the data transfer
+>  	 * automatically. For non DMA we have to do it ourselves.
+>  	 * Don't do it in interrupt context though.
+>  	 */
+> -	if (!mxcmci_use_dma(host) && host->data)
+> +	if (mxcmci_use_dma(host)) {
+> +		if (cpu_is_mx21() && host->dma_dir == DMA_TO_DEVICE)
+> +			imx_dma_enable(host->dma);
+> +	} else
+> +#endif
+>  		schedule_work(&host->datawork);
+> -
+>  }
+>  
+>  static irqreturn_t mxcmci_irq(int irq, void *devid)
+> @@ -559,6 +639,7 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
+>  	stat = readl(host->base + MMC_REG_STATUS);
+>  	writel(stat & ~(STATUS_SDIO_INT_ACTIVE | STATUS_DATA_TRANS_DONE |
+>  			STATUS_WRITE_OP_DONE), host->base + MMC_REG_STATUS);
+> +	mxcmci_ack_int(host, stat);
+>  
+>  	dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
+>  
+> @@ -689,9 +770,9 @@ static void mxcmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  
+>  	if (ios->clock) {
+>  		mxcmci_set_clk_rate(host, ios->clock);
+> -		writew(STR_STP_CLK_START_CLK, host->base + MMC_REG_STR_STP_CLK);
+> +		mxcmci_start_clock(host);
+>  	} else {
+> -		writew(STR_STP_CLK_STOP_CLK, host->base + MMC_REG_STR_STP_CLK);
+> +		mxcmci_stop_clock(host);
+>  	}
+>  
+>  	host->clock = ios->clock;
+> @@ -845,7 +926,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+>  	/* recommended in data sheet */
+>  	writew(0x2db4, host->base + MMC_REG_READ_TO);
+>  
+> -	writel(host->default_irq_mask, host->base + MMC_REG_INT_CNTR);
+> +	mxcmci_set_int_cntr(host, host->default_irq_mask);
+>  
+>  #ifdef HAS_DMA
+>  	host->dma = imx_dma_request_by_prio(DRIVER_NAME, DMA_PRIO_LOW);
+> @@ -862,7 +943,9 @@ static int mxcmci_probe(struct platform_device *pdev)
+>  	}
+>  
+>  	ret = imx_dma_config_channel(host->dma,
+> -				     IMX_DMA_MEMSIZE_32 | IMX_DMA_TYPE_FIFO,
+> +				    (cpu_is_mx21() ?
+> +					IMX_DMA_MEMSIZE_16 : IMX_DMA_MEMSIZE_32)
+> +					| IMX_DMA_TYPE_FIFO,
+>  				     IMX_DMA_MEMSIZE_32 | IMX_DMA_TYPE_LINEAR,
+>  				     r->start, 0);
+>  	if (ret) {
+> 
+> 
+
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
