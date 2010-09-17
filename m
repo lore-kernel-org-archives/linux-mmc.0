@@ -1,47 +1,133 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: [RFC] Mobile Storage Host support
-Date: Fri, 17 Sep 2010 13:45:36 +0900
-Message-ID: <AANLkTim-8G00qO=PkHVn3ytH-Akc0x1zuO_4iUYQXWPS@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:59255 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750818Ab0IQEph (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2010 00:45:37 -0400
-Received: by wwb39 with SMTP id 39so338643wwb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Sep 2010 21:45:36 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: [PATCH v2 2/2] sdhci-s3c: Add support no internal clock divider in host controller
+Date: Fri, 17 Sep 2010 18:45:01 +0900
+Message-ID: <1284716701-5140-3-git-send-email-kgene.kim@samsung.com>
+References: <1284716701-5140-1-git-send-email-kgene.kim@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1284716701-5140-1-git-send-email-kgene.kim@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ben-linux@fluff.org, akpm@linux-foundation.org, cjb@laptop.org, Hyuk Lee <hyuk1.lee@samsung.com>, Jeongbae Seo <jeongbae.seo@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
 
-Hi,
+From: Hyuk Lee <hyuk1.lee@samsung.com>
 
-Now we implemented the mobile storage and want to posting it to mmc.
-But during code review I know that it's almost similar with sdhci core
-except register offset and fifo support.
+This patch adds to support no internal clock divider in SDHCI.
+The external clock divider can be used to make a proper clock
+because SDHCI doesn't support internal clock divider by itself.
 
-So I wonder what's the better way to implement it.
-1) create the mstorage.[ch]
-2) override the existing sdhci using io accessors function.
+Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
+Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |   60 ++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 60 insertions(+), 0 deletions(-)
 
-Basic Mobile Storage Host controller register is following.
-
-CTRL: 0x0000
-PWREN: 0x0004
-CLKDIV: 0x0008
-CLKSRC: 0x000C
-CLKENA: 0x0010
-TMOUT: 0x0014
-CTYPE: 0x0018
-BLKSIZ: 0x001C
-BYTCNT: 0x0020
-INTMASK: 0x0024
-CMDARG: 0x0028
-CMD: 0x002C
-...
-
-Any comments are welcome.
-
-Thank you,
-Kyungmin Park
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index e6e0438..5ad5ed7 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -96,6 +96,13 @@ static unsigned int sdhci_s3c_get_max_clk(struct sdhci_host *host)
+ 	unsigned int rate, max;
+ 	int clk;
+ 
++	/*
++	 * There is only one clock source(sclk) if there is no clock divider
++	 * in the host controller
++	 */
++	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
++		return clk_round_rate(ourhost->clk_bus[2], UINT_MAX);
++
+ 	/* note, a reset will reset the clock source */
+ 
+ 	sdhci_s3c_check_sclk(host);
+@@ -130,6 +137,15 @@ static unsigned int sdhci_s3c_consider_clock(struct sdhci_s3c *ourhost,
+ 	if (!clksrc)
+ 		return UINT_MAX;
+ 
++	/*
++	 * There is only one clock source(sclk) if there is no clock divider
++	 * in the host controller
++	 */
++	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
++		rate = clk_round_rate(clksrc, wanted);
++		return wanted - rate;
++	}
++
+ 	rate = clk_get_rate(clksrc);
+ 
+ 	for (div = 1; div < 256; div *= 2) {
+@@ -159,6 +175,7 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	int best_src = 0;
+ 	int src;
+ 	u32 ctrl;
++	unsigned int timeout;
+ 
+ 	/* don't bother if the clock is going off. */
+ 	if (clock == 0)
+@@ -204,6 +221,35 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			(ourhost->pdata->cfg_card)(ourhost->pdev, host->ioaddr,
+ 						   &ios, NULL);
+ 	}
++
++	/*
++	 * There is only one clock source(sclk) if there is no clock divider
++	 * in the host controller
++	 */
++	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
++		writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
++		clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
++
++		writew(SDHCI_CLOCK_INT_EN, host->ioaddr + SDHCI_CLOCK_CONTROL);
++
++		/* Wait max 20 ms */
++		timeout = 20;
++		while (!((sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++			& SDHCI_CLOCK_INT_STABLE)) {
++			if (timeout == 0) {
++				printk(KERN_ERR "%s: clock never stabilised.\n"
++						, mmc_hostname(host->mmc));
++				return;
++			}
++			timeout--;
++			mdelay(1);
++		}
++
++		writew(SDHCI_CLOCK_INT_EN | SDHCI_CLOCK_CARD_EN,
++				host->ioaddr + SDHCI_CLOCK_CONTROL);
++
++		host->clock = clock;
++	}
+ }
+ 
+ /**
+@@ -221,6 +267,13 @@ static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
+ 	unsigned int delta, min = UINT_MAX;
+ 	int src;
+ 
++	/*
++	 * There is only one clock source(sclk) if there is no clock divider
++	 * in the host controller
++	 */
++	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
++		return clk_round_rate(ourhost->clk_bus[2], 400000);
++
+ 	for (src = 0; src < MAX_BUS_CLK; src++) {
+ 		delta = sdhci_s3c_consider_clock(ourhost, src, 0);
+ 		if (delta == UINT_MAX)
+@@ -425,6 +478,13 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	/* HSMMC on Samsung SoCs uses SDCLK as timeout clock */
+ 	host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
+ 
++	/*
++	 * If controller does not have internal clock divider,
++	 * we need to use another method with setup a quirk.
++	 */
++	if (pdata->clk_type)
++		host->quirks |= SDHCI_QUIRK_NONSTANDARD_CLOCK;
++
+ 	/* It supports additional host capabilities if needed */
+ 	if (pdata->host_caps)
+ 		host->mmc->caps |= pdata->host_caps;
+-- 
+1.6.2.5
