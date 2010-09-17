@@ -1,204 +1,163 @@
-From: ??? <jeongbae.seo@samsung.com>
-Subject: RE: [PATCH 5/5] sdhci-s3c: Add support no internal clock divider in
- host controller
-Date: Fri, 17 Sep 2010 11:39:18 +0900
-Message-ID: <005f01cb5611$918534d0$b48f9e70$%seo@samsung.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH 1/5] ARM: S5PV310: Add HSMMC support and SDHCI configuration
+Date: Fri, 17 Sep 2010 13:15:19 +0900
+Message-ID: <AANLkTikjVbUA40YQ1SbkaeYf1oYYFNZj_A6bqvj8S93H@mail.gmail.com>
 References: <1284626223-18944-1-git-send-email-jeongbae.seo@samsung.com>
- <1284626223-18944-6-git-send-email-jeongbae.seo@samsung.com>
- <03a401cb5606$c9780670$5c681350$%kim@samsung.com>
+	<1284626223-18944-2-git-send-email-jeongbae.seo@samsung.com>
+	<AANLkTi=Vx42siGBno7sLrirCRSiMvEr=2-toHHYU7405@mail.gmail.com>
+	<039f01cb5603$49205f20$db611d60$%kim@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <03a401cb5606$c9780670$5c681350$%kim@samsung.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Kukjin Kim' <kgene.kim@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ben-linux@fluff.org, akpm@linux-foundation.org, 'Hyuk Lee' <hyuk1.lee@samsung.com>, 'Chris Ball' <cjb@laptop.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:36423 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750716Ab0IQEPV convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2010 00:15:21 -0400
+In-Reply-To: <039f01cb5603$49205f20$db611d60$%kim@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kukjin Kim <kgene.kim@samsung.com>
+Cc: Jeongbae Seo <jeongbae.seo@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, akpm@linux-foundation.org, Hyuk Lee <hyuk1.lee@samsung.com>
 
-Kukjin Kim wrote:
+On Fri, Sep 17, 2010 at 9:57 AM, Kukjin Kim <kgene.kim@samsung.com> wro=
+te:
+> Kyungmin Park wrote:
+>>
+>> On Thu, Sep 16, 2010 at 5:36 PM, Jeongbae Seo <jeongbae.seo@samsung.=
+com>
+>> wrote:
+>> > From: Hyuk Lee <hyuk1.lee@samsung.com>
+>> >
+>> > This patch adds to support HSMMC for S5PV310 and S5PC210 and setup=
+ for
+>> > HSMMC host controller and also related GPIO.
+>> > At most 4 channel can be used at the same time.
+>> > A user can configure SDHCI data bus as 8bit or 4bit.
+>> >
+>> > Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+>> > Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
+>> > ---
+>> > =A0arch/arm/mach-s5pv310/Kconfig =A0 =A0 =A0 =A0 =A0 =A0| =A0 39 +=
++++++++
+>> > =A0arch/arm/mach-s5pv310/Makefile =A0 =A0 =A0 =A0 =A0 | =A0 =A02 +
+>> > =A0arch/arm/mach-s5pv310/setup-sdhci-gpio.c | =A0156
+>> ++++++++++++++++++++++++++++++
+>> > =A0arch/arm/mach-s5pv310/setup-sdhci.c =A0 =A0 =A0| =A0 69 +++++++=
+++++++
+>> > =A04 files changed, 266 insertions(+), 0 deletions(-)
+>> > =A0create mode 100644 arch/arm/mach-s5pv310/setup-sdhci-gpio.c
+>> > =A0create mode 100644 arch/arm/mach-s5pv310/setup-sdhci.c
+>> >
+>> > diff --git a/arch/arm/mach-s5pv310/Kconfig
+> b/arch/arm/mach-s5pv310/Kconfig
+>> > index 9ac29fe..6a07968 100644
+>> > --- a/arch/arm/mach-s5pv310/Kconfig
+>> > +++ b/arch/arm/mach-s5pv310/Kconfig
+>> > @@ -25,6 +25,17 @@ config S5PV310_SETUP_I2C2
+>> > =A0 =A0 =A0 =A0help
+>> > =A0 =A0 =A0 =A0 =A0Common setup code for i2c bus 2.
+>> >
+>> > +config S5PV310_SETUP_SDHCI
+>> > + =A0 =A0 =A0 bool
+>> > + =A0 =A0 =A0 select S5PV310_SETUP_SDHCI_GPIO
+>> > + =A0 =A0 =A0 help
+>> > + =A0 =A0 =A0 =A0 Internal helper functions for S5PV310 based SDHC=
+I systems.
+>> > +
+>> > +config S5PV310_SETUP_SDHCI_GPIO
+>> > + =A0 =A0 =A0 bool
+>> > + =A0 =A0 =A0 help
+>> > + =A0 =A0 =A0 =A0 Common setup code for SDHCI gpio.
+>> > +
+>> > =A0# machine support
+>> >
+>> > =A0menu "S5PC210 Machines"
+>> > @@ -33,6 +44,11 @@ config MACH_SMDKC210
+>> > =A0 =A0 =A0 =A0bool "SMDKC210"
+>> > =A0 =A0 =A0 =A0select CPU_S5PV310
+>> > =A0 =A0 =A0 =A0select ARCH_SPARSEMEM_ENABLE
+>> > + =A0 =A0 =A0 select S3C_DEV_HSMMC
+>> > + =A0 =A0 =A0 select S3C_DEV_HSMMC1
+>> > + =A0 =A0 =A0 select S3C_DEV_HSMMC2
+>> > + =A0 =A0 =A0 select S3C_DEV_HSMMC3
+>> > + =A0 =A0 =A0 select S5PV310_SETUP_SDHCI
+>> > =A0 =A0 =A0 =A0help
+>> > =A0 =A0 =A0 =A0 =A0Machine support for Samsung SMDKC210
+>> > =A0 =A0 =A0 =A0 =A0S5PC210(MCP) is one of package option of S5PV31=
+0
+>> > @@ -53,9 +69,32 @@ config MACH_SMDKV310
+>> > =A0 =A0 =A0 =A0bool "SMDKV310"
+>> > =A0 =A0 =A0 =A0select CPU_S5PV310
+>> > =A0 =A0 =A0 =A0select ARCH_SPARSEMEM_ENABLE
+>> > + =A0 =A0 =A0 select S3C_DEV_HSMMC
+>> > + =A0 =A0 =A0 select S3C_DEV_HSMMC1
+>> > + =A0 =A0 =A0 select S3C_DEV_HSMMC2
+>> > + =A0 =A0 =A0 select S3C_DEV_HSMMC3
+>> > + =A0 =A0 =A0 select S5PV310_SETUP_SDHCI
+>> > =A0 =A0 =A0 =A0help
+>> > =A0 =A0 =A0 =A0 =A0Machine support for Samsung SMDKV310
+>> >
+>> > =A0endmenu
+>> >
+>> > +comment "Configuration for HSMMC bus width"
+>> > +
+>> > +menu "Use 8-bit bus width"
+>> > +
+>> > +config S5PV310_SDHCI_CH0_8BIT
+>> > + =A0 =A0 =A0 bool "Channel 0 with 8-bit bus"
+>> > + =A0 =A0 =A0 help
+>> > + =A0 =A0 =A0 =A0 Support HSMMC Channel 0 8-bit bus.
+>> > + =A0 =A0 =A0 =A0 If selected, Channel 1 is disabled.
+>> > +
+>> > +config S5PV310_SDHCI_CH2_8BIT
+>> > + =A0 =A0 =A0 bool "Channel 2 with 8-bit bus"
+>> > + =A0 =A0 =A0 help
+>> > + =A0 =A0 =A0 =A0 Support HSMMC Channel 2 8-bit bus.
+>> > + =A0 =A0 =A0 =A0 If selected, Channel 3 is disabled.
+>>
+>> I think it's not needed since most boards have fixed bandwith and
+>> cfg_gpio handle it regardless these configuration.
+>> Also we use the select state if needed, e.g., when MMC0 uses
+>> 8-buswidth then don't select MMC1.
+>> I saw the SMDK board use this configuration. but just choose bandwid=
+th 4
+> or 8.
+>>
+> Hmm...
+>
+> If it can be supported 4bit or 8bit option on each board, should be a=
+dded
+> above configuration for selecting it.
+why? each sdhci_cfg_gpio can configure the pins properly. each board
+has each own SD/MMC. In your test board maybe can switch 4 or 8 but
+most board has fixed one.
 
-> > +	/*
-> > +	 * If controller does not have internal clock divider,
-> > +	 * we need to use another method with setup a quirk.
-> > +	 */
-> > +	if (pdata->clk_type)
-> > +		host->quirks |= SDHCI_QUIRK_NONSTANDARD_CLOCK;
-> > +
-> > +	if (pdata->host_caps)
-> > +		host->mmc->caps |= pdata->host_caps;
-> > +
-> 
-> If you want to add above feature, please separate it...
+If SMDK has 8-bit just assign 8 and unselect MMC1 or 3. that's all. No
+configurations.
 
-Okay, I'll make this patch to two things.
-
-Thanks,
-Jeongbae Seo
-
-> -----Original Message-----
-> From: Kukjin Kim [mailto:kgene.kim@samsung.com]
-> Sent: Friday, September 17, 2010 10:22 AM
-> To: 'Jeongbae Seo'; linux-arm-kernel@lists.infradead.org; linux-samsung-
-> soc@vger.kernel.org; linux-mmc@vger.kernel.org
-> Cc: ben-linux@fluff.org; akpm@linux-foundation.org; 'Hyuk Lee'; 'Chris
-> Ball'
-> Subject: RE: [PATCH 5/5] sdhci-s3c: Add support no internal clock divider
-> in host controller
-> 
-> Jeongbae Seo wrote:
-> >
-> > From: Hyuk Lee <hyuk1.lee@samsung.com>
-> >
-> > This patch adds to support no internal clock divider in SDHCI.
-> > The external clock divider can be used to make a proper clock
-> > because SDHCI doesn't support internal clock divider by itself.
-> >
-> Hi,
-> 
-> Please add Chris Ball <cjb@laptop.org> who is a maintainer of MMC
-> subsystem
-> in Cc later.
-> 
-> > Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
-> > Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
-> > ---
-> >  drivers/mmc/host/sdhci-s3c.c |   63
-> > ++++++++++++++++++++++++++++++++++++++++++
-> >  1 files changed, 63 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> > index 71ad416..6160960 100644
-> > --- a/drivers/mmc/host/sdhci-s3c.c
-> > +++ b/drivers/mmc/host/sdhci-s3c.c
-> > @@ -96,6 +96,13 @@ static unsigned int sdhci_s3c_get_max_clk(struct
-> > sdhci_host *host)
-> >  	unsigned int rate, max;
-> >  	int clk;
-> >
-> > +	/*
-> > +	 * There is only one clock source(sclk) if there is no clock
-> divider
-> > +	 * in the host controller
-> > +	 */
-> > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
-> > +		return clk_round_rate(ourhost->clk_bus[2], UINT_MAX);
-> > +
-> >  	/* note, a reset will reset the clock source */
-> >
-> >  	sdhci_s3c_check_sclk(host);
-> > @@ -130,6 +137,15 @@ static unsigned int sdhci_s3c_consider_clock(struct
-> > sdhci_s3c *ourhost,
-> >  	if (!clksrc)
-> >  		return UINT_MAX;
-> >
-> > +	/*
-> > +	 * There is only one clock source(sclk) if there is no clock
-> divider
-> > +	 * in the host controller
-> > +	 */
-> > +	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
-> > +		rate = clk_round_rate(clksrc, wanted);
-> > +		return wanted - rate;
-> > +	}
-> > +
-> >  	rate = clk_get_rate(clksrc);
-> >
-> >  	for (div = 1; div < 256; div *= 2) {
-> > @@ -159,6 +175,7 @@ static void sdhci_s3c_set_clock(struct sdhci_host
-> *host,
-> > unsigned int clock)
-> >  	int best_src = 0;
-> >  	int src;
-> >  	u32 ctrl;
-> > +	unsigned int timeout;
-> >
-> >  	/* don't bother if the clock is going off. */
-> >  	if (clock == 0)
-> > @@ -204,6 +221,35 @@ static void sdhci_s3c_set_clock(struct sdhci_host
-> *host,
-> > unsigned int clock)
-> >  			(ourhost->pdata->cfg_card)(ourhost->pdev, host-
-> > >ioaddr,
-> >  						   &ios, NULL);
-> >  	}
-> > +
-> > +	/*
-> > +	 * There is only one clock source(sclk) if there is no clock
-> divider
-> > +	 * in the host controller
-> > +	 */
-> > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
-> > +		writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
-> > +		clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
-> > +
-> > +		writew(SDHCI_CLOCK_INT_EN, host->ioaddr +
-> > SDHCI_CLOCK_CONTROL);
-> > +
-> > +		/* Wait max 20 ms */
-> > +		timeout = 20;
-> > +		while (!((sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-> > +			& SDHCI_CLOCK_INT_STABLE)) {
-> > +			if (timeout == 0) {
-> > +				printk(KERN_ERR "%s: clock never
-> > stabilised.\n"
-> > +						, mmc_hostname(host-
-> > >mmc));
-> > +				return;
-> > +			}
-> > +			timeout--;
-> > +			mdelay(1);
-> > +		}
-> > +
-> > +		writew(SDHCI_CLOCK_INT_EN | SDHCI_CLOCK_CARD_EN,
-> > +				host->ioaddr + SDHCI_CLOCK_CONTROL);
-> > +
-> > +		host->clock = clock;
-> > +	}
-> >  }
-> >
-> >  /**
-> > @@ -221,6 +267,13 @@ static unsigned int sdhci_s3c_get_min_clock(struct
-> > sdhci_host *host)
-> >  	unsigned int delta, min = UINT_MAX;
-> >  	int src;
-> >
-> > +	/*
-> > +	 * There is only one clock source(sclk) if there is no clock
-> divider
-> > +	 * in the host controller
-> > +	 */
-> > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
-> > +		return clk_round_rate(ourhost->clk_bus[2], 400000);
-> > +
-> >  	for (src = 0; src < MAX_BUS_CLK; src++) {
-> >  		delta = sdhci_s3c_consider_clock(ourhost, src, 0);
-> >  		if (delta == UINT_MAX)
-> > @@ -425,6 +478,16 @@ static int __devinit sdhci_s3c_probe(struct
-> > platform_device *pdev)
-> >  	/* HSMMC on Samsung SoCs uses SDCLK as timeout clock */
-> >  	host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
-> >
-> > +	/*
-> > +	 * If controller does not have internal clock divider,
-> > +	 * we need to use another method with setup a quirk.
-> > +	 */
-> > +	if (pdata->clk_type)
-> > +		host->quirks |= SDHCI_QUIRK_NONSTANDARD_CLOCK;
-> > +
-> > +	if (pdata->host_caps)
-> > +		host->mmc->caps |= pdata->host_caps;
-> > +
-> 
-> If you want to add above feature, please separate it...
-> 
+>
+> Mr. Seo, it would be nice if you could add un-selection CH1 or CH3 wh=
+en
+> selecting 8bit support later.
+>
+> Anyway, looks ok to me now..will apply.
+>
+>> Others good.
+>>
 > (snip)
-> 
+>
 > Thanks.
-> 
+>
 > Best regards,
 > Kgene.
 > --
 > Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
 > SW Solution Development Team, Samsung Electronics Co., Ltd.
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
