@@ -1,51 +1,108 @@
 From: "kishore kadiyala" <kishore.kadiyala@ti.com>
-Subject: [PATCH v2 2/4] omap4 hsmmc: Fix the init if CONFIG_MMC_OMAP_HS is
-     not set
-Date: Sat, 18 Sep 2010 22:04:05 +0530 (IST)
-Message-ID: <33912.10.24.255.17.1284827645.squirrel@dbdmail.itg.ti.com>
+Subject: [PATCH v2 3/4] omap4 hsmmc: Register offset handling
+Date: Sat, 18 Sep 2010 22:04:14 +0530 (IST)
+Message-ID: <33958.10.24.255.17.1284827654.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:59426 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752600Ab0IRQeJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 18 Sep 2010 12:34:09 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: b-cousson@ti.com
+Cc: khilman@deeprootsystems.com, b-cousson@ti.com
+List-Id: linux-mmc@vger.kernel.org
 
-From: Benoit Cousson <b-cousson@ti.com>
+The offset handling implementation of omap4 mmc registers which
+was already present can't be reused once hwmod modifications are done
+for mmc driver.
+Since hwmod data file for OMAP4 is an auto generated the base
+address for MMC will remain same as OMAP3 and thus the offset deviation
+of registers should be updated in the hsmmc driver.
+The omap-mmc platform data is updated with a register offset which
+will be updated and used in the driver accordingly.
 
-Avoid possible crash if CONFIG_MMC_OMAP_HS is not set
-
-Signed-off-by: Benoit Cousson <b-cousson@ti.com>
 Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
 ---
- arch/arm/mach-omap2/board-4430sdp.c |    8 +++++++-
- 1 files changed, 7 insertions(+), 1 deletions(-)
+ arch/arm/mach-omap2/devices.c         |    8 +++-----
+ arch/arm/mach-omap2/hsmmc.c           |    4 ++++
+ arch/arm/plat-omap/include/plat/mmc.h |    3 +++
+ drivers/mmc/host/omap_hsmmc.c         |    2 +-
+ 4 files changed, 11 insertions(+), 6 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
-index a49f285..ac8541c 100644
---- a/arch/arm/mach-omap2/board-4430sdp.c
-+++ b/arch/arm/mach-omap2/board-4430sdp.c
-@@ -240,8 +240,14 @@ static int omap4_twl6030_hsmmc_late_init(struct device *dev)
+diff --git a/arch/arm/mach-omap2/devices.c b/arch/arm/mach-omap2/devices.c
+index 2dbb265..bb7ec13 100644
+--- a/arch/arm/mach-omap2/devices.c
++++ b/arch/arm/mach-omap2/devices.c
+@@ -745,13 +745,13 @@ void __init omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 		case 3:
+ 			if (!cpu_is_omap44xx())
+ 				return;
+-			base = OMAP4_MMC4_BASE + OMAP4_MMC_REG_OFFSET;
++			base = OMAP4_MMC4_BASE;
+ 			irq = OMAP44XX_IRQ_MMC4;
+ 			break;
+ 		case 4:
+ 			if (!cpu_is_omap44xx())
+ 				return;
+-			base = OMAP4_MMC5_BASE + OMAP4_MMC_REG_OFFSET;
++			base = OMAP4_MMC5_BASE;
+ 			irq = OMAP44XX_IRQ_MMC5;
+ 			break;
+ 		default:
+@@ -762,10 +762,8 @@ void __init omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 			size = OMAP2420_MMC_SIZE;
+ 			name = "mmci-omap";
+ 		} else if (cpu_is_omap44xx()) {
+-			if (i < 3) {
+-				base += OMAP4_MMC_REG_OFFSET;
++			if (i < 3)
+ 				irq += OMAP44XX_IRQ_GIC_START;
+-			}
+ 			size = OMAP4_HSMMC_SIZE;
+ 			name = "mmci-omap-hs";
+ 		} else {
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index c8f647b..49d76a7 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -261,6 +261,10 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+ 		mmc->slots[0].wires = c->wires;
+ 		mmc->slots[0].internal_clock = !c->ext_clock;
+ 		mmc->dma_mask = 0xffffffff;
++		if (cpu_is_omap44xx())
++			mmc->reg_offset = OMAP4_MMC_REG_OFFSET;
++		else
++			mmc->reg_offset = 0;
 
- static __init void omap4_twl6030_hsmmc_set_late_init(struct device *dev)
- {
--	struct omap_mmc_platform_data *pdata = dev->platform_data;
-+	struct omap_mmc_platform_data *pdata;
+ 		mmc->get_context_loss_count = hsmmc_get_context_loss;
 
-+	/* dev can be null if CONFIG_MMC_OMAP_HS is not set */
-+	if (!dev) {
-+		pr_err("Failed omap4_twl6030_hsmmc_set_late_init\n");
-+		return;
-+	}
-+	pdata = dev->platform_data;
- 	pdata->init =	omap4_twl6030_hsmmc_late_init;
- }
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index 9b89ec6..4e6ef07 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -71,6 +71,9 @@ struct omap_mmc_platform_data {
+
+ 	u64 dma_mask;
+
++	/* Register offset deviation */
++	u16 reg_offset;
++
+ 	struct omap_mmc_slot_data {
+
+ 		/* 4 wire signaling is optional, and is used for SD/SDIO/HSMMC;
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index a51894d..bfca9ca 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2034,7 +2034,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->irq	= irq;
+ 	host->id	= pdev->id;
+ 	host->slot_id	= 0;
+-	host->mapbase	= res->start;
++	host->mapbase	= res->start + pdata->reg_offset;
+ 	host->base	= ioremap(host->mapbase, SZ_4K);
+ 	host->power_mode = MMC_POWER_OFF;
 
 -- 
 1.7.0.4
+
 
