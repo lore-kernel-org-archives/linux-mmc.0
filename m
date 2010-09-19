@@ -1,61 +1,62 @@
-From: Greg KH <gregkh@suse.de>
-Subject: [049/123] tmio_mmc: dont clear unhandled pending interrupts
-Date: Sat, 18 Sep 2010 11:58:13 -0700
-Message-ID: <20100918185957.010472560@clark.site>
-References: <20100918185724.290702750@clark.site>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline; filename=tmio_mmc-don-t-clear-unhandled-pending-interrupts.patch
-In-Reply-To: <20100918190024.GA14388@kroah.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@kernel.org
-Cc: stable-review@kernel.org, torvalds@linux-foundation.org, akpm@linux-foundation.org, alan@lxorguk.ukuu.org.uk, Yusuke Goda <yusuke.goda.sx@renesas.com>, Magnus Damm <damm@opensource.se>, Ian Molton <ian@mnementh.co.uk>, Matt Fleming <matt@console-pimps.org>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>, linux-mmc@vger.kernel.org
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [patch 1/1] sdhci-base-clock-freqency-change-in-spec-3.0
+Date: Sun, 19 Sep 2010 09:56:05 +0800
+Message-ID: <AANLkTikYT_G8u0PwR=YSpEnU1WPc8E4sZiKGvNF3rsxk@mail.gmail.com>
+References: <AANLkTims_z+X_bOK2v3AekBZWg1LsSecRCUeAi5HGseW@mail.gmail.com>
+	<20100914131853.GC17079@void.printf.net>
+	<20100914134539.GE2629@pengutronix.de>
+	<AANLkTi=7gXkF+JpOfM+KaWxHPDzT=0SL5oSXDw0hTmJm@mail.gmail.com>
+	<20100915101019.GC5985@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:58192 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754794Ab0ISB4G convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Sep 2010 21:56:06 -0400
+Received: by iwn5 with SMTP id 5so3138780iwn.19
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Sep 2010 18:56:05 -0700 (PDT)
+In-Reply-To: <20100915101019.GC5985@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Matt Fleming <matt@console-pimps.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Eric Miao <eric.y.miao@gmail.com>
 
-From: Yusuke Goda <yusuke.goda.sx@renesas.com>
+On Wed, Sep 15, 2010 at 6:10 PM, Wolfram Sang <w.sang@pengutronix.de> w=
+rote:
+> On Wed, Sep 15, 2010 at 11:35:18AM +0800, zhangfei gao wrote:
+>
+>> > Is the 8-bit support really according to the standard? I wonder be=
+cause
+>> > the bit currently used by sdhci.c is marked as "reserved/new assig=
+nment
+>> > now allowed" in the simplified v2.0 spec.
+>>
+>> Attached capacity in sdh 3.0.
+>> 6-bit base clock frequece is support in 1.0 and 2.0, support 10M to =
+63M.
+>> 8-bit is supported in 3.0, and support 10M to 255M.
+>
+> I meant 8-bit bus width. Which bit in which register selects this?
 
-commit b78d6c5f51935ba89df8db33a57bacb547aa7325 upstream.
+The 8-bit bus width usually used in embeded mmc, like Micron emmc and
+sandisk emmc, bit[5] of host controller (0x28h) is added in sdh spec
+3.0, and the patch is already in the latest kernel.
 
-Previously, it was possible for ack_mmc_irqs() to clear pending interrupt
-bits in the CTL_STATUS register, even though the interrupt handler had not
-been called.  This was because of a race that existed when doing a
-read-modify-write sequence on CTL_STATUS.  After the read step in this
-sequence, if an interrupt occurred (causing one of the bits in CTL_STATUS
-to be set) the write step would inadvertently clear it.
-
-Observed with the TMIO_STAT_RXRDY bit together with CMD53 on AR6002 and
-BCM4318 SDIO cards in polled mode.
-
-This patch eliminates this race by only writing to CTL_STATUS and clearing
-the interrupts that were passed as an argument to ack_mmc_irqs()."
-
-[matt@console-pimps.org: rewrote changelog]
-Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
-Acked-by: Magnus Damm <damm@opensource.se>
-Tested-by: Arnd Hannemann <arnd@arndnet.de>
-Acked-by: Ian Molton <ian@mnementh.co.uk>
-Cc: Matt Fleming <matt@console-pimps.org>
-Cc: Samuel Ortiz <sameo@linux.intel.com>
-Cc: Paul Mundt <lethal@linux-sh.org>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
-
----
- drivers/mmc/host/tmio_mmc.h |    5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
-
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -102,10 +102,7 @@
- 
- #define ack_mmc_irqs(host, i) \
- 	do { \
--		u32 mask;\
--		mask  = sd_ctrl_read32((host), CTL_STATUS); \
--		mask &= ~((i) & TMIO_MASK_IRQ); \
--		sd_ctrl_write32((host), CTL_STATUS, mask); \
-+		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
- 	} while (0)
- 
- 
+>
+> --
+> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+| Wolfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
+> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://w=
+ww.pengutronix.de/ =A0|
+>
+> -----BEGIN PGP SIGNATURE-----
+> Version: GnuPG v1.4.10 (GNU/Linux)
+>
+> iEYEARECAAYFAkyQm4sACgkQD27XaX1/VRuafACgxxhhat+eHjTEFspi+Nwn3/K8
+> gVsAnRuhxy2C452n57jxhDDYdNdtZrP6
+> =3DH7hA
+> -----END PGP SIGNATURE-----
+>
+>
