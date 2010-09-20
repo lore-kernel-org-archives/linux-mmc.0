@@ -1,47 +1,55 @@
-From: Peppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: Re: [PATCH] mmc: add SDHCI driver for STM platforms.
-Date: Mon, 20 Sep 2010 10:21:12 +0200
-Message-ID: <4C971978.5020800@st.com>
-References: <1280392279-17406-1-git-send-email-peppe.cavallaro@st.com>
- <107012446AC13D4C90B85672EAF5FB0E9C2E08E16C@SAFEX1MAIL3.st.com>
- <20100802134050.GA7944@console-pimps.org>
- <107012446AC13D4C90B85672EAF5FB0E9C2E08E20E@SAFEX1MAIL3.st.com>
- <20100802143631.GB7944@console-pimps.org>
- <20100803152119.0df3d55c.akpm@linux-foundation.org>
- <107012446AC13D4C90B85672EAF5FB0E9C2E08E340@SAFEX1MAIL3.st.com>
- <20100803224425.bf7c4c43.akpm@linux-foundation.org>
- <107012446AC13D4C90B85672EAF5FB0E9C2E08E343@SAFEX1MAIL3.st.com>
- <20100804080302.GA25587@console-pimps.org>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] mmc: add SDHCI driver for STM platforms (V2)
+Date: Mon, 20 Sep 2010 10:38:42 +0200
+Message-ID: <20100920083842.GA4058@pengutronix.de>
+References: <1284970817-11293-1-git-send-email-peppe.cavallaro@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="MGYHOYXEY6WxJCY8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:36312 "EHLO
-	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752719Ab0ITIWI convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 20 Sep 2010 04:22:08 -0400
-In-Reply-To: <20100804080302.GA25587@console-pimps.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:39728 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755623Ab0ITIiw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2010 04:38:52 -0400
+Content-Disposition: inline
+In-Reply-To: <1284970817-11293-1-git-send-email-peppe.cavallaro@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Cc: linux-mmc@vger.kernel.org, akpm@linux-foundation.org, matt@console-pimps.org
 
-On 08/04/2010 10:03 AM, Matt Fleming wrote:
-> On Wed, Aug 04, 2010 at 07:47:21AM +0200, Peppe CAVALLARO wrote:
->  >
->  > Yes, we can do it. The driver will be merged next. It is not a problem
->  > for me ;-).
-> 
-> Fantastic!
-> 
 
-Hello Matt, Andrew,
-I've just reworked the driver removing the invocation to the own
-devm_stm_pad_claim function (because it's not yet included in Linus Kernel).
-In the new patch, (v2) the claim of the resources is through the platform.
+--MGYHOYXEY6WxJCY8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Please let me know if it's ok for you.
+On Mon, Sep 20, 2010 at 10:20:17AM +0200, Giuseppe CAVALLARO wrote:
+> This patch adds the Arasan MMC/SD/SDIO driver
+> for the STM ST40 platforms. It is based on the
+> SDHCI driver.
+> It has been tested on the STx7106/STx7108/STx5289
+> platforms.
+>=20
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
-Regards,
-Giuseppe
+Looks to me that you could just use the sdhci-pltfm driver?
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--MGYHOYXEY6WxJCY8
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkyXHZIACgkQD27XaX1/VRseMwCeMi79gx43pq6LAZFoYRwQTQzI
+LHsAoMJ6GXTIGnZ/7nleUYhU9NpRN4gV
+=NHqw
+-----END PGP SIGNATURE-----
+
+--MGYHOYXEY6WxJCY8--
