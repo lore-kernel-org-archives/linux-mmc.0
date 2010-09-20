@@ -1,89 +1,59 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH] mmc: MMC 4.4 DDR support
-Date: Mon, 20 Sep 2010 10:04:39 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B031606223F@dbde02.ent.ti.com>
-References: <1278658780-26397-1-git-send-email-hanumath.prasad@stericsson.com>
- <AANLkTikBdBhJeQ-t2+0echJfAxz529QZEYPJtyHUsROd@mail.gmail.com>
- <m3pqxbsibq.fsf@pullcord.laptop.org>
- <20100823204829.GB6510@console-pimps.org>
- <20100823142816.59b12253.akpm@linux-foundation.org>
- <4C739F55.8030301@nokia.com> <20100914112143.GA16039@void.printf.net>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] sdhci: add quirk for controllers that don't support
+	write only detect
+Date: Mon, 20 Sep 2010 08:14:59 +0200
+Message-ID: <20100920061459.GA9353@pengutronix.de>
+References: <43E4817426ED174AA81263BCECB4351D131745CF98@sc-vexch3.marvell.com> <53E1B390-48DD-4E33-B51F-1B039AFD13A2@marvell.com> <4B9DEAE2.3030707@nokia.com> <3A9599CE-49EE-4A18-89E0-22B17090CA43@marvell.com> <4BA72971.1070804@nokia.com> <639D1595-D908-473C-9A41-71B493DCD0C0@marvell.com> <4BB052F6.5080808@nokia.com> <A9891FF4-9D4D-4F5C-ACE9-B272B53CCC08@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="M9NhX3UHpAaciwkO"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:45427 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750771Ab0ITEfT convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2010 00:35:19 -0400
-Content-Language: en-US
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:55606 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751714Ab0ITGPC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2010 02:15:02 -0400
+Content-Disposition: inline
+In-Reply-To: <A9891FF4-9D4D-4F5C-ACE9-B272B53CCC08@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, Linus Walleij <linus.ml.walleij@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "STEricsson_nomadik_linux@list.st.com" <STEricsson_nomadik_linux@list.st.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Kyungmin Park <kmpark@infradead.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
 
 
-> -----Original Message-----
-> From: Ghorai, Sukumar
-> Sent: Wednesday, September 15, 2010 3:02 PM
-> To: 'Chris Ball'; Adrian Hunter
-> Cc: Andrew Morton; Matt Fleming; Linus Walleij; linux-mmc@vger.kernel.org;
-> linux-kernel@vger.kernel.org; STEricsson_nomadik_linux@list.st.com;
-> Hanumath Prasad; Kyungmin Park
-> Subject: RE: [PATCH] mmc: MMC 4.4 DDR support
-> 
-> 
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > owner@vger.kernel.org] On Behalf Of Chris Ball
-> > Sent: Tuesday, September 14, 2010 4:52 PM
-> > To: Adrian Hunter
-> > Cc: Andrew Morton; Matt Fleming; Linus Walleij; linux-
-> mmc@vger.kernel.org;
-> > linux-kernel@vger.kernel.org; STEricsson_nomadik_linux@list.st.com;
-> > Hanumath Prasad; Kyungmin Park
-> > Subject: Re: [PATCH] mmc: MMC 4.4 DDR support
-> >
-> > Hi Hanumath, Linus,
-> >
-> > On Tue, Aug 24, 2010 at 01:30:45PM +0300, Adrian Hunter wrote:
-> > > I am not able to test DDR mode but it look to me that the patch
-> > > should be changed.  Here is a fix:
-> > >
-> > > From: Adrian Hunter <adrian.hunter@nokia.com>
-> > > Date: Tue, 24 Aug 2010 13:20:26 +0300
-> > > Subject: [PATCH] mmc: Fix Dual Data Rate (DDR) support
-> >
-> > Could someone please test Adrian's patch and report back?  I'd like
-> > to merge this, but not without testing.
-> >
-> > https://patchwork.kernel.org/patch/177332/
-> 
-> [Ghorai] I was testing this patch (Adrian's) and top of patch[1] from
-> Hanumath; Looks working fine as functionality. Checking throughput in my
-> omap platform.
-> [1] http://lkml.org/lkml/2010/7/9/35
-> But there are few comments on this patch from others, I think. And is not
-> applying cleanly in latest codebase. Also following #define is conflicting
-> with Hanumath's patch.
-> File: include/linux/mmc/host.h
-> #define MMC_CAP_ERASE           (1 << 10)
+--M9NhX3UHpAaciwkO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-[Ghorai] 
-Chris and all,
-Can we plan these patches for 2.6.37 release? 
-Also let me know if I can do anything!
+On Sun, Sep 19, 2010 at 02:46:40PM -0700, Philip Rakity wrote:
+>=20
+>=20
+> Some board designs for embedded systems  do not always bring up the SD Ho=
+st Write Protect Signal. =20
+> This patch defines a new quirk that when enabled enables write access.
 
-Thanks,
-Ghorai
-> 
-> >
-> > Thanks,
-> >
-> > --
-> > Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> > One Laptop Per Child
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I am preparing a patch series which will also make get_ro an overloadable
+function. Then, board specific things could be handled there.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--M9NhX3UHpAaciwkO
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkyW++MACgkQD27XaX1/VRsOtgCfSSf4WvjQhib2+OIqyZK7PHYp
+2LgAoIGg6WvESsjDRgZw9DZa/6lb33Kf
+=+YFZ
+-----END PGP SIGNATURE-----
+
+--M9NhX3UHpAaciwkO--
