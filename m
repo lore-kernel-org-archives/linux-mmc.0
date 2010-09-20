@@ -1,91 +1,52 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: [PATCH] OMAP4: HSMMC cmd line reset change
-Date: Mon, 20 Sep 2010 11:14:49 -0500
-Message-ID: <738912BD0A0F48FC9E3159F923571E9E@am.dhcp.ti.com>
-References: <51627.192.168.10.89.1284595091.squirrel@dbdmail.itg.ti.com> <20100917154803.GB29610@atomide.com>
+From: hong zhang <henryzhang62@yahoo.com>
+Subject: Re: install SDIO stack patch to 2.6.14
+Date: Mon, 20 Sep 2010 11:50:17 -0700 (PDT)
+Message-ID: <530861.69815.qm@web57907.mail.re3.yahoo.com>
+References: <AANLkTi=cvT0VOTe6edHizU1Siwrc_cbg-Dz3VzsiWXMA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20100917154803.GB29610@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: 'Tony Lindgren' <tony@atomide.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, santosh.shilimkar@ti.com
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from web57907.mail.re3.yahoo.com ([68.142.236.100]:31060 "HELO
+	web57907.mail.re3.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1752371Ab0ITSuS convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 20 Sep 2010 14:50:18 -0400
+In-Reply-To: <AANLkTi=cvT0VOTe6edHizU1Siwrc_cbg-Dz3VzsiWXMA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirqus@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
+Michael,
 
+Do you know where to see SDIO interrupt bit in CCCR or where can I find=
+ CCCR in kernel?
 
-> -----Original Message-----
-> From: Tony Lindgren [mailto:tony@atomide.com]
-> Sent: Friday, September 17, 2010 10:48 AM
-> To: Madhusudhan Chikkature
-> Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org;
-> santosh.shilimkar@ti.com
-> Subject: Re: [PATCH] OMAP4: HSMMC cmd line reset change
-> 
-> * Madhusudhan Chikkature <madhu.cr@ti.com> [100915 16:50]:
-> > OMAP4: HSMMC cmd line reset change
+---henry
+
+--- On Sat, 9/4/10, Micha=C5=82 Miros=C5=82aw <mirqus@gmail.com> wrote:
+
+> From: Micha=C5=82 Miros=C5=82aw <mirqus@gmail.com>
+> Subject: Re: install SDIO stack patch to 2.6.14
+> To: "hong zhang" <henryzhang62@yahoo.com>
+> Cc: linux-mmc@vger.kernel.org
+> Date: Saturday, September 4, 2010, 7:18 AM
+> 2010/9/3 hong zhang <henryzhang62@yahoo.com>:
+> > I donwload linux sdio stack patch from http://sourceforge.net/proje=
+cts/sdio-linux/ and want to
+> install it to 2.6.14 kernel.
 > >
-> > The cmd line reset logic is changed in OMAP4 ES2. The new procedure
-> > is to monitor a 0->1 transition and then 1->0 transition.The earlier
-> > logic would fail on ES2 chips because the loop could exit even before
-> > the reset is actually complete.
-> >
-> > Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-> > ---
-> >  drivers/mmc/host/omap_hsmmc.c |    7 +++++++
-> >  1 files changed, 7 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/omap_hsmmc.c
-> b/drivers/mmc/host/omap_hsmmc.c
-> > index 4526d27..750ba7d 100644
-> > --- a/drivers/mmc/host/omap_hsmmc.c
-> > +++ b/drivers/mmc/host/omap_hsmmc.c
-> > @@ -976,12 +976,19 @@ static inline void
-> omap_hsmmc_reset_controller_fsm(struct
-> > omap_hsmmc_host *host,
-> >  						   unsigned long bit)
-> >  {
-> >  	unsigned long i = 0;
-> > +	unsigned long j = 0;
-> >  	unsigned long limit = (loops_per_jiffy *
-> >  				msecs_to_jiffies(MMC_TIMEOUT_MS));
-> >
-> >  	OMAP_HSMMC_WRITE(host->base, SYSCTL,
-> >  			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
-> >
-> > +	if (cpu_is_omap44xx() && bit == SRC) {
-> > +		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
-> > +				&& (j++ < limit))
-> > +			cpu_relax();
-> > +	}
-> > +
-> >  	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
-> >  		(i++ < limit))
-> >  		cpu_relax();
-> 
-> Please don't use cpu_is_omapxxxx tests in the drivers, drivers
-> should be generic.
-> 
-> Instead, just pass a feature flag in the platform_data for this
-> feature like HSMMC_REVERSE_RESET_LOGIC or similar.
-> 
+> > What else should I do beside installing the patches to
+> 2.6.14 for ARM?
+>=20
+> Consider moving to latest kernel (2.6.35, 2.6.36 coming
+> soon) - it's
+> all there already.
+>=20
+> Best Regards,
+> Micha=C5=82 Miros=C5=82aw
+>=20
 
-This is not a feature. It is like an ERRATA fix. I am yet to receive an
-errata number though. How about dealing with this like an errata fix similar
-to the way in arch/mach-omap2/serial.c done for the uart case? 
 
-The mmc ip revision will not help because it really does not change to
-distinguish such issues.
-
-Regards,
-Madhu
-
-> Even better, look at the mmc silicon revision number and set this
-> flag automatically during the driver init if possible.
-> 
-> Regards,
-> 
-> Tony
-
+     =20
