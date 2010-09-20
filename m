@@ -1,95 +1,91 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] sdhci: add quirk for controllers that don't support
-	write only detect
-Date: Mon, 20 Sep 2010 09:00:30 -0700
-Message-ID: <5F58EC42-069D-4469-BF13-F741674BE763@marvell.com>
-References: <43E4817426ED174AA81263BCECB4351D131745CF98@sc-vexch3.marvell.com>
- <53E1B390-48DD-4E33-B51F-1B039AFD13A2@marvell.com>
- <4B9DEAE2.3030707@nokia.com>
- <3A9599CE-49EE-4A18-89E0-22B17090CA43@marvell.com>
- <4BA72971.1070804@nokia.com>
- <639D1595-D908-473C-9A41-71B493DCD0C0@marvell.com>
- <4BB052F6.5080808@nokia.com>
- <A9891FF4-9D4D-4F5C-ACE9-B272B53CCC08@marvell.com>
- <20100920061459.GA9353@pengutronix.de>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH] OMAP4: HSMMC cmd line reset change
+Date: Mon, 20 Sep 2010 11:14:49 -0500
+Message-ID: <738912BD0A0F48FC9E3159F923571E9E@am.dhcp.ti.com>
+References: <51627.192.168.10.89.1284595091.squirrel@dbdmail.itg.ti.com> <20100917154803.GB29610@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dakia3.marvell.com ([65.219.4.28]:44383 "EHLO
-	dakia3.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752275Ab0ITQAd convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2010 12:00:33 -0400
-In-Reply-To: <20100920061459.GA9353@pengutronix.de>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20100917154803.GB29610@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: 'Tony Lindgren' <tony@atomide.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, santosh.shilimkar@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
 
 
-There are a couple of other items that I wanted to fix which I can submit patches for separately or can incorporate into your structure or we can work together.  Advise.
 
-a) There needs to be a distinction between PRESENT STATE broken and a SD card that IS present (as in mounted on the board).  There is no need to poll for the later case.  The current quirk makes no distinction between these two cases.
-
-b) Some eMMC chips require 74 clocks to start working.  The current code assumes turning on the clock (in the core/ directory) does this.  This is not always the case.  I modified the set_ios function to fix this.
-
-snippet below (WILL not patch into 2.6.36 tree since I have other code) -- just so you get the idea --
-
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -383,7 +383,7 @@ struct sdhci_ops {
- 	void		(*platform_set_8_bit)(struct sdhci_host *host);
- 	void		(*platform_clear_8_bit)(struct sdhci_host *host);
- 	void		(*platform_specific_sdhci_enable_dummy_cmd) (struct sdhci_host *host, int dummycmd);
--	void		(*platform_specific_init_clocks)(struct sdhci_host *host);
-+	void		(*platform_generate_initial_74_clocks)(struct sdhci_host *host, u8 power_mode);
- };
-
-
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1279,8 +1279,11 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	if (ios->power_mode == MMC_POWER_OFF)
- 		sdhci_set_power(host, -1);
--	else
-+	else {
- 		sdhci_set_power(host, ios->vdd);
-+		if (host->ops->platform_generate_initial_74_clocks)
-+			host->ops->platform_generate_initial_74_clocks(host, ios->power_mode);
-+	}
-
-In my adaption layer 
-+void generate_init_clocks(struct sdhci_host *host, u8 power_mode)
-+{
-+	if (slot->power_mode == MMC_POWER_UP 
-+	&& power_mode == MMC_POWER_ON) {
-		/* slot has old state */
-+		/* now do chip/board specific activity */
-+	}
-+	slot->power_mode = power_mode;
-+}
-
-
-Philip
-
-On Sep 19, 2010, at 11:14 PM, Wolfram Sang wrote:
-
-> On Sun, Sep 19, 2010 at 02:46:40PM -0700, Philip Rakity wrote:
->> 
->> 
->> Some board designs for embedded systems  do not always bring up the SD Host Write Protect Signal.  
->> This patch defines a new quirk that when enabled enables write access.
+> -----Original Message-----
+> From: Tony Lindgren [mailto:tony@atomide.com]
+> Sent: Friday, September 17, 2010 10:48 AM
+> To: Madhusudhan Chikkature
+> Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org;
+> santosh.shilimkar@ti.com
+> Subject: Re: [PATCH] OMAP4: HSMMC cmd line reset change
 > 
-> I am preparing a patch series which will also make get_ro an overloadable
-> function. Then, board specific things could be handled there.
+> * Madhusudhan Chikkature <madhu.cr@ti.com> [100915 16:50]:
+> > OMAP4: HSMMC cmd line reset change
+> >
+> > The cmd line reset logic is changed in OMAP4 ES2. The new procedure
+> > is to monitor a 0->1 transition and then 1->0 transition.The earlier
+> > logic would fail on ES2 chips because the loop could exit even before
+> > the reset is actually complete.
+> >
+> > Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+> > ---
+> >  drivers/mmc/host/omap_hsmmc.c |    7 +++++++
+> >  1 files changed, 7 insertions(+), 0 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/omap_hsmmc.c
+> b/drivers/mmc/host/omap_hsmmc.c
+> > index 4526d27..750ba7d 100644
+> > --- a/drivers/mmc/host/omap_hsmmc.c
+> > +++ b/drivers/mmc/host/omap_hsmmc.c
+> > @@ -976,12 +976,19 @@ static inline void
+> omap_hsmmc_reset_controller_fsm(struct
+> > omap_hsmmc_host *host,
+> >  						   unsigned long bit)
+> >  {
+> >  	unsigned long i = 0;
+> > +	unsigned long j = 0;
+> >  	unsigned long limit = (loops_per_jiffy *
+> >  				msecs_to_jiffies(MMC_TIMEOUT_MS));
+> >
+> >  	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+> >  			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
+> >
+> > +	if (cpu_is_omap44xx() && bit == SRC) {
+> > +		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+> > +				&& (j++ < limit))
+> > +			cpu_relax();
+> > +	}
+> > +
+> >  	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
+> >  		(i++ < limit))
+> >  		cpu_relax();
+> 
+> Please don't use cpu_is_omapxxxx tests in the drivers, drivers
+> should be generic.
+> 
+> Instead, just pass a feature flag in the platform_data for this
+> feature like HSMMC_REVERSE_RESET_LOGIC or similar.
+> 
+
+This is not a feature. It is like an ERRATA fix. I am yet to receive an
+errata number though. How about dealing with this like an errata fix similar
+to the way in arch/mach-omap2/serial.c done for the uart case? 
+
+The mmc ip revision will not help because it really does not change to
+distinguish such issues.
+
+Regards,
+Madhu
+
+> Even better, look at the mmc silicon revision number and set this
+> flag automatically during the driver init if possible.
 > 
 > Regards,
 > 
->   Wolfram
-> 
-> -- 
-> Pengutronix e.K.                           | Wolfram Sang                |
-> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+> Tony
 
