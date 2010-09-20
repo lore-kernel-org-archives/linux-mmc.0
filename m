@@ -1,74 +1,115 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: [patch] sdhci: correct f_min in sd 3.0
-Date: Mon, 20 Sep 2010 03:32:58 -0400
-Message-ID: <AANLkTimp+4V9zvQtOqHoVmpH-+Vmb+0Sr1MzM-cNHAiC@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] mmc: failure of block read wait for long time
+Date: Mon, 20 Sep 2010 10:54:08 +0300
+Message-ID: <4C971320.7050906@nokia.com>
+References: <1280230066-27612-1-git-send-email-s-ghorai@ti.com> <4C4EDD85.5060606@nokia.com> <2A3DCF3DA181AD40BDE86A3150B27B6B030E417D80@dbde02.ent.ti.com> <4C4FED36.3010607@nokia.com> <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026ED@dbde02.ent.ti.com> <4C8A19E7.30706@nokia.com> <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com> <4C8A2C5D.2050408@nokia.com> <2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001485e76e62ef9af80490abeb57
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:48794 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751833Ab0ITHc7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2010 03:32:59 -0400
-Received: by iwn5 with SMTP id 5so4049148iwn.19
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Sep 2010 00:32:59 -0700 (PDT)
+Received: from smtp.nokia.com ([192.100.122.233]:22886 "EHLO
+	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755150Ab0ITHyd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2010 03:54:33 -0400
+In-Reply-To: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Kyungmin Park <kmpark@infradead.org>
+To: "ext Ghorai, Sukumar" <s-ghorai@ti.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Adrian Hunter <adrian.hunter@nokia.com>
 
---001485e76e62ef9af80490abeb57
-Content-Type: text/plain; charset=ISO-8859-1
+On 14/09/10 08:15, ext Ghorai, Sukumar wrote:
+> Adrian,
+>
+> [..snip..]
+>>>>> [Ghorai] Adrian,
+>>>>> Yes this works and reduced the retry by 1/4 (2048 to 512 times for 1MB
+>>>> data read) form the original code;
+>>>>> Initially it was retrying for each page(512 bytes) after multi-block
+>>>> read fail; but this solution is retying for each segment(2048 bytes);
+>>>>> 1. Now say block layrer reading 1MB and failed for the 1st segment. So
+>>>> it will still retry for 1MB/2048-bytes, i.e. 512 times.
+>>>>> 2. So do you think any good reason to retry again and again?
+>>>> If you have 1MB that is not readable, it sounds like the card is broken.
+>>>> Why are so many reads failing?  Has the card been removed?
+>>>>
+>>>> You might very rarely see ECC errors in a small number of sectors,
+>>>> but more than that sounds like something else is broken.
+>>>
+>>> [Ghorai] yes, one example is we remove the card when reading data,
+>>
+>> Well, that is a different case.  Once the card has gone, the block driver
+>> can (and will once the remove method is called) error out all I/O
+>> requests without sending them to MMC.  That doesn't happen until there
+>> is a card detect interrupt and a resulting rescan.
+>
+> [Ghorai] here we are discussing two problem,
+> 1. If IO failed how to stop retry; because of -
+> 	a. internal card error
+> 	b. issue in Filesystem, driver, or host controller issue
+> 	c. or cards removed.
+>
+> 2. And 2nd how to sync block-layer IO, if card removed,
+> 	a. case 1: when card removed interrupt support by the platform
+> 	b. case 2: when card removed interrupt does not support by the platform?
+>
+>>
+>> A possible solution is to put a flag on mmc_card to indicate card_gone
+>> that gets set as soon as the drivers card detect interrupt shows there
+>> is no card (hoping that we are not getting any bouncing on card detect)
+>> and then have mmc_wait_for_req() simple return -ENODEV immediately if
+>> the card_gone flag is set.  Finally, if the mmc block driver sees
+>> a -ENODEV error, it should also check the card_gone flag (via a new
+>> core function) and if the card is gone, do not retry - and perhaps
+>> even error out the rest of the I/O request queue as well.
+>
+> [Ghorai] your idea address the 2.a case, but not 2.b, 1.a, 1.b
 
->From 83140093bbcd325605135c23740b30b6eeec778f Mon Sep 17 00:00:00 2001
-From: Zhangfei Gao <zhangfei.gao@marvell.com>
-Date: Mon, 20 Sep 2010 15:15:18 -0400
-Subject: [PATCH 4/4] sdhci: correct f_min in sd 3.0
+The card removal case can be extended to use the bus ops detect method
+when there is no card detect irq.  I will send a RFC patch.
 
-Change-Id: Ie8604dbb5296b15da67071164564f21c60652b60
+With respect to 1.a:
+  - If the card has an internal error, then it is broken.  The user
+  should remove the card and use a better one.  I do not see how reducing
+  retry delays really helps the user very much.  Arguably if the card
+  becomes unresponsive, the MMC core could provide a facility to
+  reinitialise the card, but that is yet another issue.
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
----
- drivers/mmc/host/sdhci.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+With respect to 1.b:
+  - The file system cannot cause the block driver to have I/O errors.
+  - If there are errors in the driver they should be fixed.
+  - If there are hardware problems with the host controller, then
+  it is up to the host controller driver to deal with them e.g.
+  by resetting the controller.  I don't see what this has to do with
+  the block driver.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index f980fb7..5346803 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1835,6 +1835,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	mmc->ops = &sdhci_ops;
- 	if (host->ops->get_min_clock)
- 		mmc->f_min = host->ops->get_min_clock(host);
-+	else if (host->version >= SDHCI_SPEC_300)
-+		mmc->f_min = host->max_clk / 2046;
- 	else
- 		mmc->f_min = host->max_clk / 256;
- 	mmc->f_max = host->max_clk;
--- 
-1.7.0.4
+You leave out the important case of ECC errors.  I am concerned about
+this because of the possibility that it happens inside a file system
+journal e.g. EXT4 journal.  Perhaps the journal may be recovered if the
+error only affects the last transaction, but perhaps not if it destroys
+other transactions - which could happen if the approach you suggest
+is taken.
 
---001485e76e62ef9af80490abeb57
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0004-sdhci-correct-f_min-in-sd-3.0.patch"
-Content-Disposition: attachment;
-	filename="0004-sdhci-correct-f_min-in-sd-3.0.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gebqdywq0
+>
+> And the solution I was proposing to return the status of IO failure as soon as possible to above layer; and handle the card removed interrupt separately or any other issue in h/w or s/w or combination of both. Or just think again when platform don't have the card remove interrupt.
+>
+> So my patch addresses the 1st part
 
-RnJvbSA4MzE0MDA5M2JiY2QzMjU2MDUxMzVjMjM3NDBiMzBiNmVlZWM3NzhmIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBaaGFuZ2ZlaSBHYW8gPHpoYW5nZmVpLmdhb0BtYXJ2ZWxsLmNv
-bT4KRGF0ZTogTW9uLCAyMCBTZXAgMjAxMCAxNToxNToxOCAtMDQwMApTdWJqZWN0OiBbUEFUQ0gg
-NC80XSBzZGhjaTogY29ycmVjdCBmX21pbiBpbiBzZCAzLjAKCkNoYW5nZS1JZDogSWU4NjA0ZGJi
-NTI5NmIxNWRhNjcwNzExNjQ1NjRmMjFjNjA2NTJiNjAKClNpZ25lZC1vZmYtYnk6IFpoYW5nZmVp
-IEdhbyA8emhhbmdmZWkuZ2FvQG1hcnZlbGwuY29tPgotLS0KIGRyaXZlcnMvbW1jL2hvc3Qvc2Ro
-Y2kuYyB8ICAgIDIgKysKIDEgZmlsZXMgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAwIGRlbGV0
-aW9ucygtKQoKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMv
-bW1jL2hvc3Qvc2RoY2kuYwppbmRleCBmOTgwZmI3Li41MzQ2ODAzIDEwMDY0NAotLS0gYS9kcml2
-ZXJzL21tYy9ob3N0L3NkaGNpLmMKKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCkBAIC0x
-ODM1LDYgKzE4MzUsOCBAQCBpbnQgc2RoY2lfYWRkX2hvc3Qoc3RydWN0IHNkaGNpX2hvc3QgKmhv
-c3QpCiAJbW1jLT5vcHMgPSAmc2RoY2lfb3BzOwogCWlmIChob3N0LT5vcHMtPmdldF9taW5fY2xv
-Y2spCiAJCW1tYy0+Zl9taW4gPSBob3N0LT5vcHMtPmdldF9taW5fY2xvY2soaG9zdCk7CisJZWxz
-ZSBpZiAoaG9zdC0+dmVyc2lvbiA+PSBTREhDSV9TUEVDXzMwMCkKKwkJbW1jLT5mX21pbiA9IGhv
-c3QtPm1heF9jbGsgLyAyMDQ2OwogCWVsc2UKIAkJbW1jLT5mX21pbiA9IGhvc3QtPm1heF9jbGsg
-LyAyNTY7CiAJbW1jLT5mX21heCA9IGhvc3QtPm1heF9jbGs7Ci0tIAoxLjcuMC40Cgo=
---001485e76e62ef9af80490abeb57--
+It is absolutely unacceptable to return I/O errors to the upper layers
+for segments that do not have errors.
+
+> And for the 2nd part we can submit the patch anytime.
+>
+>>
+>> I can suggest a patch if you want but I am on vacation next week so
+>> it will have to wait a couple of weeks.
+>>
+>>> And moreover we should not give the interleave data to apps, as we don't
+>> have option to tell application for the valid data.
+>>>
+> [..snip..]
+> http://comments.gmane.org/gmane.linux.kernel.mmc/2714
+>
+>>>
+>
+>
+
