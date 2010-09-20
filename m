@@ -1,66 +1,51 @@
-From: Brice Goglin <Brice.Goglin@ens-lyon.org>
-Subject: Dell Latitude E6410 Ricoh e822 not working with 2.6.36-rc
-Date: Mon, 20 Sep 2010 14:40:21 +0200
-Message-ID: <4C975635.5090108@ens-lyon.org>
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: [PATCH] sdhci-s3c: fix incorrect spinlock usage after merge
+Date: Mon, 20 Sep 2010 15:03:42 +0200
+Message-ID: <1284987822-17955-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from iona.labri.fr ([147.210.8.143]:53697 "EHLO iona.labri.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753728Ab0ITNCj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 20 Sep 2010 09:02:39 -0400
-Received: from localhost (localhost.localdomain [127.0.0.1])
-	by iona.labri.fr (Postfix) with ESMTP id E715536B99
-	for <linux-mmc@vger.kernel.org>; Mon, 20 Sep 2010 14:40:25 +0200 (CEST)
-Received: from iona.labri.fr ([127.0.0.1])
-	by localhost (iona.labri.fr [127.0.0.1]) (amavisd-new, port 10027)
-	with LMTP id XmKxdeMjOKFb for <linux-mmc@vger.kernel.org>;
-	Mon, 20 Sep 2010 14:40:25 +0200 (CEST)
-Received: from [193.50.110.244] (unknown [193.50.110.244])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(Client did not present a certificate)
-	by iona.labri.fr (Postfix) with ESMTP id CECEA36B93
-	for <linux-mmc@vger.kernel.org>; Mon, 20 Sep 2010 14:40:25 +0200 (CEST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org, w.sang@pengutronix.de
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-Hello,
+In the commit f522886e202a34a2191dd5d471b3c4d46410a9a0 a merge conflict
+in the sdhci-s3c driver been fixed. However the fix used incorrect
+spinlock operation - it cause a race with sdhci interrupt service. The
+correct way to solve it is to use spin_lock_irqsave/irqrestore() calls.
 
-I have a Dell Latitude E6410 laptop with the following Ricoh reader:
+Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
 
-03:00.0 SD Host controller: Ricoh Co Ltd Device e822 (rev 03) (prog-if 01)
-	Subsystem: Dell Device 040a
-	Flags: bus master, fast devsel, latency 0, IRQ 19
-	Memory at f2c40000 (32-bit, non-prefetchable) [size=256]
-	Capabilities: <access denied>
-	Kernel driver in use: sdhci-pci
-
-
-
-The driver has been failing with ugly errors for a long time and I was
-following [1] (pointed out from [2]) to get proper support. According to
-[2], 2.6.36 is supposed to contain what's needed to support my reader,
-but 2.6.36-rc3 still fails to read my SD card. It just says
-
-  mmc0: new high speed SD card at address b368
-
-And nothing else happens. dmesg with mmc debug enabled is available at
-
-  https://bugzilla.redhat.com/attachment.cgi?id=447442
-
-
-For the record, the same SD card works fine on a Dell Latitude E6500
-(older model) with Ubuntu 10.4
-
-  03:01.2 SD Host controller: Ricoh Co Ltd R5C822 SD/SDIO/MMC/MS/MSPro Host Adapter (rev 21)
-
-
-I was told to report the upstream here, so here I am.
-
-Brice
-
-[1] https://bugzilla.redhat.com/show_bug.cgi?id=596475
-[2] https://bugzilla.kernel.org/show_bug.cgi?id=16390
-
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 71ad416..735d431 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -241,8 +241,10 @@ static struct sdhci_ops sdhci_s3c_ops = {
+ static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+ {
+ 	struct sdhci_host *host = platform_get_drvdata(dev);
++	unsigned long flags;
++
+ 	if (host) {
+-		spin_lock(&host->lock);
++		spin_lock_irqsave(&host->lock, flags);
+ 		if (state) {
+ 			dev_dbg(&dev->dev, "card inserted.\n");
+ 			host->flags &= ~SDHCI_DEVICE_DEAD;
+@@ -253,7 +255,7 @@ static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+ 			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+ 		}
+ 		tasklet_schedule(&host->card_tasklet);
+-		spin_unlock(&host->lock);
++		spin_unlock_irqrestore(&host->lock, flags);
+ 	}
+ }
+ 
+-- 
+1.7.1.569.g6f426
