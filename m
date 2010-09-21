@@ -1,66 +1,67 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] sdhci: allow for eMMC 74 clock generation by controller
-Date: Tue, 21 Sep 2010 08:48:15 +0200
-Message-ID: <20100921064815.GB3168@pengutronix.de>
-References: <53E1B390-48DD-4E33-B51F-1B039AFD13A2@marvell.com>
- <4B9DEAE2.3030707@nokia.com>
- <3A9599CE-49EE-4A18-89E0-22B17090CA43@marvell.com>
- <4BA72971.1070804@nokia.com>
- <639D1595-D908-473C-9A41-71B493DCD0C0@marvell.com>
- <4BB052F6.5080808@nokia.com>
- <A9891FF4-9D4D-4F5C-ACE9-B272B53CCC08@marvell.com>
- <20100920061459.GA9353@pengutronix.de>
- <5F58EC42-069D-4469-BF13-F741674BE763@marvell.com>
- <57E26860-E2EC-4510-B928-62BCC7DC1AF8@marvell.com>
+From: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Subject: Re: [PATCH v2 3/4] omap4 hsmmc: Register offset handling
+Date: Tue, 21 Sep 2010 12:51:07 +0530
+Message-ID: <AANLkTi=v0qF6+T2CjeAOiwJRBv8ripPvuRXVgttqmYPK@mail.gmail.com>
+References: <33958.10.24.255.17.1284827654.squirrel@dbdmail.itg.ti.com>
+	<4C97CA90.9030706@ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="WYTEVAkct0FjGQmd"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:59508 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754118Ab0IUGsQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 02:48:16 -0400
-Content-Disposition: inline
-In-Reply-To: <57E26860-E2EC-4510-B928-62BCC7DC1AF8@marvell.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:40503 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755589Ab0IUHVI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 03:21:08 -0400
+In-Reply-To: <4C97CA90.9030706@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@nokia.com>, Mark Brown <markb@marvell.com>
+To: "Cousson, Benoit" <b-cousson@ti.com>
+Cc: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "khilman@deeprootsystems.com" <khilman@deeprootsystems.com>
 
+Hi Benoit,
 
---WYTEVAkct0FjGQmd
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Tue, Sep 21, 2010 at 2:26 AM, Cousson, Benoit <b-cousson@ti.com> wrote:
+> Hi Kishore
+>
+> On 9/18/2010 6:34 PM, Kadiyala, Kishore wrote:
+>>
+>> The offset handling implementation of omap4 mmc registers which
+>> was already present can't be reused once hwmod modifications are done
+>> for mmc driver.
+>> Since hwmod data file for OMAP4 is an auto generated the base
+>> address for MMC will remain same as OMAP3 and thus the offset deviation
+>> of registers should be updated in the hsmmc driver.
+>
+> That explanation does not sound very accurate to me.
+> The fact that the hwmods are auto-generated has nothing to do with your
+> offset problem.
 
-Hi Philip,
+Agree the change log needs to be updated  as said  but when
+coming to implementation this how it is:
 
-> I generated the patch for eMMC 74 clocks.  I do not know if you want
-> to incorporate into your submission or let it stand on its own.
+With current mainline kernel, offset appending is already implemented in
+mach-omap2/devices.c and works fine [here bases are updated with 0x100
+and then passed to driver which has same register offset's as OMAP3].
 
-I won't pick it up as I am missing the technical details for this issue.
-I only jumped in because adding quirk bits should be handled very
-carefully at the moment IMHO.
+When hwmod modifications are done to the MMC driver, the base address are
+picked from omap_hwmod_44xx_data.c and omap_device is build.
+Coming to the driver it still has the same old register offset's as OMAP3 and
+there should be a way to add 0x100 some where.
+
+The current patch moves the offset appending to the driver file which is updated
+in mach-omap2/hsmmc.c which will fit for current implementation and even
+hwmod adaptation.
+
+>The real cause is due to the update of the IP to support the
+> new PM programming model.
+> Because of that, and to keep a certain level of compatibility, the legacy
+> registers were all shifted by 0x100 and the new one were added from offset 0
+> to 0x10.
+>
+> Regards,
+> Benoit
+>
+
+<snip>
 
 Regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---WYTEVAkct0FjGQmd
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAkyYVS8ACgkQD27XaX1/VRvWtACbBgjIjD5ppMARRJWQ9jwAMdC/
-ydYAniivw0TYzLM6yisVd3TQEV0lnN/s
-=kNTw
------END PGP SIGNATURE-----
-
---WYTEVAkct0FjGQmd--
+Kishore
