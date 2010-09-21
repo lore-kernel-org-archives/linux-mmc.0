@@ -1,67 +1,100 @@
-From: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH v2 3/4] omap4 hsmmc: Register offset handling
-Date: Tue, 21 Sep 2010 12:51:07 +0530
-Message-ID: <AANLkTi=v0qF6+T2CjeAOiwJRBv8ripPvuRXVgttqmYPK@mail.gmail.com>
-References: <33958.10.24.255.17.1284827654.squirrel@dbdmail.itg.ti.com>
-	<4C97CA90.9030706@ti.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH] add support PXA168/PXA910/MMP2 SD Host Controller
+Date: Tue, 21 Sep 2010 04:24:39 -0400
+Message-ID: <AANLkTin0ZDmTJ5gea65BiU+dWy+nD=wjp_xDOgYzxZF8@mail.gmail.com>
+References: <AANLkTi=jeL0J1kfT+toB3BEAGJ5Cc5jZsHstD1hutNQB@mail.gmail.com>
+	<20100920095042.GC4058@pengutronix.de>
+	<AANLkTin28uj+L+AyUYVwoAyaUOmpfw3tc6JFEcVgtXBy@mail.gmail.com>
+	<20100920131055.GE4058@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:40503 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755589Ab0IUHVI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 03:21:08 -0400
-In-Reply-To: <4C97CA90.9030706@ti.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:62262 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756436Ab0IUI3R convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 04:29:17 -0400
+Received: by iwn5 with SMTP id 5so4969268iwn.19
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Sep 2010 01:29:16 -0700 (PDT)
+In-Reply-To: <20100920131055.GE4058@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Cousson, Benoit" <b-cousson@ti.com>
-Cc: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "khilman@deeprootsystems.com" <khilman@deeprootsystems.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Kyungmin Park <kmpark@infradead.org>, eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-Hi Benoit,
-
-On Tue, Sep 21, 2010 at 2:26 AM, Cousson, Benoit <b-cousson@ti.com> wrote:
-> Hi Kishore
->
-> On 9/18/2010 6:34 PM, Kadiyala, Kishore wrote:
+On Mon, Sep 20, 2010 at 9:10 AM, Wolfram Sang <w.sang@pengutronix.de> w=
+rote:
+> On Mon, Sep 20, 2010 at 08:09:26AM -0400, zhangfei gao wrote:
+>> On Mon, Sep 20, 2010 at 5:50 AM, Wolfram Sang <w.sang@pengutronix.de=
+> wrote:
+>> > On Mon, Sep 20, 2010 at 05:46:02PM +0800, zhangfei gao wrote:
+>> >
+>> >> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhc=
+i-pxa.c
+>> >> new file mode 100644
+>> >> index 0000000..3e091c1
+>> >> --- /dev/null
+>> >> +++ b/drivers/mmc/host/sdhci-pxa.c
+>> >> @@ -0,0 +1,253 @@
+>> >> +/* linux/drivers/mmc/host/sdhci-pxa.c
+>> >> + *
+>> >> + * Copyright 2010 Marvell
+>> >> + * =A0 =A0 =A0Zhangfei Gao <zhangfei.gao@marvell.com>
+>> >> + *
+>> >> + * This program is free software; you can redistribute it and/or=
+ modify
+>> >> + * it under the terms of the GNU General Public License version =
+2 as
+>> >> + * published by the Free Software Foundation.
+>> >> + */
+>> >> +
+>> >> +/* Supports:
+>> >> + * SDHCI support for MMP2/PXA910/PXA168
+>> >> + *
+>> >> + * Based on sdhci-platfm.c
+>> >> + */
+>> >
+>> > Why is it only "based on" and not directly using it?
 >>
->> The offset handling implementation of omap4 mmc registers which
->> was already present can't be reused once hwmod modifications are done
->> for mmc driver.
->> Since hwmod data file for OMAP4 is an auto generated the base
->> address for MMC will remain same as OMAP3 and thus the offset deviation
->> of registers should be updated in the hsmmc driver.
+>> Thanks for your suggestion.
+>> This is the first stage, already implement sd card function, we will
+>> have some patches later to enhance the driver.
+>> We have to access many private registers to enable specific control.
+>> Besides some sdio device need some specific control, like marvell 87=
+87
+>> host sleep, it is much reasonable to implement inside the driver.
 >
-> That explanation does not sound very accurate to me.
-> The fact that the hwmods are auto-generated has nothing to do with your
-> offset problem.
+> Hmm, which hooks are missing for you to implement this as an extensio=
+n
+> of the pltfm-driver? Maybe it makes sense to simply add this hook?
 
-Agree the change log needs to be updated  as said  but when
-coming to implementation this how it is:
+We refered several mmc host drivers, such as sdhci-s3c.c,
+sdhci-spear.c, and we want to align with others, which also meet pxa
+requirement and low risk to transfer from the existing driver.
 
-With current mainline kernel, offset appending is already implemented in
-mach-omap2/devices.c and works fine [here bases are updated with 0x100
-and then passed to driver which has same register offset's as OMAP3].
+We have three or four device in one soc with the same driver, for
+example one for sd, one for wifi, one for emmc, etc.
+Each device have specific clock provider, which should be opened at
+start, and closed when no operation to same power.
+Specific quirk is needed for different device, which should be
+transfered from platform data, for example on-chip wifi alwayes stay
+on chip and emmc may require sd_clk free running to init.
+The max_speed also may be different for board issue though controller
+support max is 50M, which could get from capability.
 
-When hwmod modifications are done to the MMC driver, the base address are
-picked from omap_hwmod_44xx_data.c and omap_device is build.
-Coming to the driver it still has the same old register offset's as OMAP3 and
-there should be a way to add 0x100 some where.
-
-The current patch moves the offset appending to the driver file which is updated
-in mach-omap2/hsmmc.c which will fit for current implementation and even
-hwmod adaptation.
-
->The real cause is due to the update of the IP to support the
-> new PM programming model.
-> Because of that, and to keep a certain level of compatibility, the legacy
-> registers were all shifted by 0x100 and the new one were added from offset 0
-> to 0x10.
 >
-> Regards,
-> Benoit
+> --
+> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+| Wolfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
+> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://w=
+ww.pengutronix.de/ =A0|
 >
-
-<snip>
-
-Regards,
-Kishore
+> -----BEGIN PGP SIGNATURE-----
+> Version: GnuPG v1.4.10 (GNU/Linux)
+>
+> iEYEARECAAYFAkyXXV8ACgkQD27XaX1/VRtAxQCfafH+k4+HhWiDxM+cRqDn8KYC
+> Mq0AnRrh3v5192K7LdpIlLIxVBQI4ljW
+> =3DRPet
+> -----END PGP SIGNATURE-----
+>
+>
