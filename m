@@ -1,70 +1,44 @@
-From: Ben Dooks <ben@simtec.co.uk>
-Subject: Re: [PATCH v2 2/2] sdhci-s3c: Add support no internal clock divider
- in	host controller
-Date: Tue, 21 Sep 2010 01:24:20 +0100
-Message-ID: <4C97FB34.1000802@simtec.co.uk>
-References: <1284716701-5140-1-git-send-email-kgene.kim@samsung.com> <1284716701-5140-3-git-send-email-kgene.kim@samsung.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] add support PXA168/PXA910/MMP2 SD Host Controller
+Date: Tue, 21 Sep 2010 02:03:25 +0100
+Message-ID: <20100921010324.GA5873@void.printf.net>
+References: <AANLkTi=jeL0J1kfT+toB3BEAGJ5Cc5jZsHstD1hutNQB@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1284716701-5140-3-git-send-email-kgene.kim@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Jeongbae Seo <jeongbae.seo@samsung.com>, Hyuk Lee <hyuk1.lee@samsung.com>, ben-linux@fluff.org, akpm@linux-foundation.org, cjb@laptop.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:36421 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754358Ab0IUBDb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 20 Sep 2010 21:03:31 -0400
+Content-Disposition: inline
+In-Reply-To: <AANLkTi=jeL0J1kfT+toB3BEAGJ5Cc5jZsHstD1hutNQB@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Saeed Bishara <saeed@marvell.com>, Kyungmin Park <kmpark@infradead.org>, eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-On 17/09/10 10:45, Kukjin Kim wrote:
-> From: Hyuk Lee <hyuk1.lee@samsung.com>
+Hi Zhangfei/Saeed,
+
+On Mon, Sep 20, 2010 at 05:46:02PM +0800, zhangfei gao wrote:
+> Hi, Chris,
 > 
-> This patch adds to support no internal clock divider in SDHCI.
-> The external clock divider can be used to make a proper clock
-> because SDHCI doesn't support internal clock divider by itself.
-> 
-> Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
-> Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
-> Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-s3c.c |   60 ++++++++++++++++++++++++++++++++++++++++++
->  1 files changed, 60 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index e6e0438..5ad5ed7 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -96,6 +96,13 @@ static unsigned int sdhci_s3c_get_max_clk(struct sdhci_host *host)
->  	unsigned int rate, max;
->  	int clk;
->  
-> +	/*
-> +	 * There is only one clock source(sclk) if there is no clock divider
-> +	 * in the host controller
-> +	 */
-> +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
-> +		return clk_round_rate(ourhost->clk_bus[2], UINT_MAX);
+> Here is patch to support pxa168(aspen)/pxa910(ttc)/mmp2, the
+> controller follow sdh 3.0.
+> Currently verified sd, Micron 16G emmc need some workaround, 8G is OK,
+> marvell 8787 would be verified later.
+> Help review.
 
-interesting, <linux/clk.h> doesn't have a second parameter to
-clk_round_rate().
+Could you help me understand how this new driver relates to the Marvell
+SoC driver that I merged last week (CONFIG_MMC_SDHCI_MV)?  Are the SD
+IPs in Dove and MMP2 different enough to warrant a separate driver, or
+could support for both be included in sdhci-mv.c?
 
+If we're going to have multiple drivers for the SD blocks in Armada/PXA,
+it at least seems that MMC_SDHCI_MV has been mis-named.  Any thoughts?
 
->  	/* note, a reset will reset the clock source */
->  
->  	sdhci_s3c_check_sclk(host);
-> @@ -130,6 +137,15 @@ static unsigned int sdhci_s3c_consider_clock(struct sdhci_s3c *ourhost,
->  	if (!clksrc)
->  		return UINT_MAX;
->  
-> +	/*
-> +	 * There is only one clock source(sclk) if there is no clock divider
-> +	 * in the host controller
-> +	 */
-> +	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
-> +		rate = clk_round_rate(clksrc, wanted);
-> +		return wanted - rate;
-> +	}
+Thanks,
 
-Why does this need a quirk, instead of just having one clock available
-in the list of usable clocks?
-
+- Chris.
 -- 
-Ben
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
