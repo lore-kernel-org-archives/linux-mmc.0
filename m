@@ -1,153 +1,100 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: [PATCH 2/4] mmc: sdhci-pltfm: move .h-file into apropriate subdir
-Date: Tue, 21 Sep 2010 14:30:08 +0200
-Message-ID: <1285072210-10207-3-git-send-email-w.sang@pengutronix.de>
-References: <1285072210-10207-1-git-send-email-w.sang@pengutronix.de>
+Subject: [RFC] sdhci_pltfm: pass platform_data on custom init-call
+Date: Tue, 21 Sep 2010 14:56:07 +0200
+Message-ID: <1285073767-19900-1-git-send-email-w.sang@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:54290 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:44738 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753425Ab0IUMaX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 08:30:23 -0400
-In-Reply-To: <1285072210-10207-1-git-send-email-w.sang@pengutronix.de>
+	with ESMTP id S1754777Ab0IUM4R (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 08:56:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Anton Vorontsov <cbouatmailru@gmail.com>, Richard Zhu <r65037@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>
+Cc: Richard Zhu <r65037@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>
 
-Make use of the mmc-directory.
+The custom init call may need more data to perform its job, so we pass it a
+pointer to the platform_data, too. Now, for drivers extending sdhci-pltfm (like
+sdhci-cns3xxx), a fixed platform_data is used according to the platform device
+id. Because that one does not contain board specific information, we simply
+name the board specific information information priv_pdata and pass it to the
+init routine as well. (Note: the old behaviour was that you could override the
+platform id specific data with your own. However, one can still do this by
+using the "sdhci" id instead of "sdhci-<something>".)
 
 Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
 ---
- drivers/mmc/host/sdhci-cns3xxx.c |    2 +-
- drivers/mmc/host/sdhci-pltfm.c   |    2 +-
- drivers/mmc/host/sdhci-pltfm.h   |    2 +-
- include/linux/mmc/sdhci-pltfm.h  |   35 +++++++++++++++++++++++++++++++++++
- include/linux/sdhci-pltfm.h      |   35 -----------------------------------
- 5 files changed, 38 insertions(+), 38 deletions(-)
- create mode 100644 include/linux/mmc/sdhci-pltfm.h
- delete mode 100644 include/linux/sdhci-pltfm.h
 
-diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
-index b7050b3..9ebd1d7 100644
---- a/drivers/mmc/host/sdhci-cns3xxx.c
-+++ b/drivers/mmc/host/sdhci-cns3xxx.c
-@@ -15,7 +15,7 @@
- #include <linux/delay.h>
- #include <linux/device.h>
- #include <linux/mmc/host.h>
--#include <linux/sdhci-pltfm.h>
-+#include <linux/mmc/sdhci-pltfm.h>
- #include <mach/cns3xxx.h>
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
+This approach has its issues, but all I tried had some. So, let's start arguing
+over code ;)
+
+ drivers/mmc/host/sdhci-esdhc.c  |    3 ++-
+ drivers/mmc/host/sdhci-pltfm.c  |   11 ++++++++---
+ include/linux/mmc/sdhci-pltfm.h |    2 +-
+ 3 files changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc.c b/drivers/mmc/host/sdhci-esdhc.c
+index 132e9c9..ccdafd9 100644
+--- a/drivers/mmc/host/sdhci-esdhc.c
++++ b/drivers/mmc/host/sdhci-esdhc.c
+@@ -97,7 +97,8 @@ static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
+ 	return clk_get_rate(pltfm_host->clk) / 256 / 16;
+ }
+ 
+-static int esdhc_pltfm_init(struct sdhci_host *host)
++static int esdhc_pltfm_init(struct sdhci_host *host,
++		struct sdhci_pltfm_data *pdata, void *priv_pdata)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct clk *clk;
 diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index bf522a1..ff0271c 100644
+index 6ba3f3d..04f3117 100644
 --- a/drivers/mmc/host/sdhci-pltfm.c
 +++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -30,7 +30,7 @@
- #include <linux/mmc/host.h>
+@@ -52,15 +52,20 @@ static struct sdhci_ops sdhci_pltfm_ops = {
  
- #include <linux/io.h>
--#include <linux/sdhci-pltfm.h>
-+#include <linux/mmc/sdhci-pltfm.h>
+ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
+ {
+-	struct sdhci_pltfm_data *pdata = pdev->dev.platform_data;
+ 	const struct platform_device_id *platid = platform_get_device_id(pdev);
++	struct sdhci_pltfm_data *pdata;
++	void *priv_pdata = NULL;
+ 	struct sdhci_host *host;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct resource *iomem;
+ 	int ret;
  
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index c393289..2b43ed5 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -11,7 +11,7 @@
- #ifndef _DRIVERS_MMC_SDHCI_PLTFM_H
- #define _DRIVERS_MMC_SDHCI_PLTFM_H
+-	if (!pdata && platid && platid->driver_data)
++	if (platid && platid->driver_data) {
+ 		pdata = (void *)platid->driver_data;
++		priv_pdata = pdev->dev.platform_data;
++	} else {
++		pdata = pdev->dev.platform_data;
++	}
  
--#include <linux/sdhci-pltfm.h>
-+#include <linux/mmc/sdhci-pltfm.h>
+ 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!iomem) {
+@@ -108,7 +113,7 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
+ 	}
  
- struct sdhci_pltfm_host {
- 	struct clk *clk;
+ 	if (pdata && pdata->init) {
+-		ret = pdata->init(host);
++		ret = pdata->init(host, pdata, priv_pdata);
+ 		if (ret)
+ 			goto err_plat_init;
+ 	}
 diff --git a/include/linux/mmc/sdhci-pltfm.h b/include/linux/mmc/sdhci-pltfm.h
-new file mode 100644
-index 0000000..0239bd7
---- /dev/null
+index 0239bd7..e14fce3 100644
+--- a/include/linux/mmc/sdhci-pltfm.h
 +++ b/include/linux/mmc/sdhci-pltfm.h
-@@ -0,0 +1,35 @@
-+/*
-+ * Platform data declarations for the sdhci-pltfm driver.
-+ *
-+ * Copyright (c) 2010 MontaVista Software, LLC.
-+ *
-+ * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or (at
-+ * your option) any later version.
-+ */
-+
-+#ifndef _SDHCI_PLTFM_H
-+#define _SDHCI_PLTFM_H
-+
-+struct sdhci_ops;
-+struct sdhci_host;
-+
-+/**
-+ * struct sdhci_pltfm_data - SDHCI platform-specific information & hooks
-+ * @ops: optional pointer to the platform-provided SDHCI ops
-+ * @quirks: optional SDHCI quirks
-+ * @init: optional hook that is called during device probe, before the
-+ *        driver tries to access any SDHCI registers
-+ * @exit: optional hook that is called during device removal
-+ */
-+struct sdhci_pltfm_data {
-+	struct sdhci_ops *ops;
-+	unsigned int quirks;
-+	int (*init)(struct sdhci_host *host);
-+	void (*exit)(struct sdhci_host *host);
-+};
-+
-+#endif /* _SDHCI_PLTFM_H */
-diff --git a/include/linux/sdhci-pltfm.h b/include/linux/sdhci-pltfm.h
-deleted file mode 100644
-index 0239bd7..0000000
---- a/include/linux/sdhci-pltfm.h
-+++ /dev/null
-@@ -1,35 +0,0 @@
--/*
-- * Platform data declarations for the sdhci-pltfm driver.
-- *
-- * Copyright (c) 2010 MontaVista Software, LLC.
-- *
-- * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
-- *
-- * This program is free software; you can redistribute it and/or modify
-- * it under the terms of the GNU General Public License as published by
-- * the Free Software Foundation; either version 2 of the License, or (at
-- * your option) any later version.
-- */
--
--#ifndef _SDHCI_PLTFM_H
--#define _SDHCI_PLTFM_H
--
--struct sdhci_ops;
--struct sdhci_host;
--
--/**
-- * struct sdhci_pltfm_data - SDHCI platform-specific information & hooks
-- * @ops: optional pointer to the platform-provided SDHCI ops
-- * @quirks: optional SDHCI quirks
-- * @init: optional hook that is called during device probe, before the
-- *        driver tries to access any SDHCI registers
-- * @exit: optional hook that is called during device removal
-- */
--struct sdhci_pltfm_data {
--	struct sdhci_ops *ops;
--	unsigned int quirks;
+@@ -28,7 +28,7 @@ struct sdhci_host;
+ struct sdhci_pltfm_data {
+ 	struct sdhci_ops *ops;
+ 	unsigned int quirks;
 -	int (*init)(struct sdhci_host *host);
--	void (*exit)(struct sdhci_host *host);
--};
--
--#endif /* _SDHCI_PLTFM_H */
++	int (*init)(struct sdhci_host *host, struct sdhci_pltfm_data *pdata, void* priv_pdata);
+ 	void (*exit)(struct sdhci_host *host);
+ };
+ 
 -- 
 1.7.1
 
