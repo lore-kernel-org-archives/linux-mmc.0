@@ -1,77 +1,62 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH] add support PXA168/PXA910/MMP2 SD Host Controller
-Date: Mon, 20 Sep 2010 23:16:18 -0400
-Message-ID: <AANLkTi=Rwj7hDfDxKqLNwyparxWv3RvQ2HJvo1qbJVe2@mail.gmail.com>
-References: <AANLkTi=jeL0J1kfT+toB3BEAGJ5Cc5jZsHstD1hutNQB@mail.gmail.com>
-	<20100921010324.GA5873@void.printf.net>
+From: Mike Kelly <pioto@pioto.org>
+Subject: Re: [Bugme-new] [Bug 18602] New: mmc_block / tifm_sd not completely
+ registering when a new sd card is inserted
+Date: Mon, 20 Sep 2010 23:25:17 -0400
+Message-ID: <20100920232517.4299f662@aether.home.pioto.org>
+References: <20100919105632.6fb34fa5@aether.home.pioto.org>
+	<513651.95215.qm@web37608.mail.mud.yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=PGP-SHA1;
+ boundary="Sig_/F_CORi=GDGv+VEv4PTsRUlm"; protocol="application/pgp-signature"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:40790 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752348Ab0IUDQU convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2010 23:16:20 -0400
-Received: by wwj40 with SMTP id 40so93271wwj.1
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Sep 2010 20:16:19 -0700 (PDT)
-In-Reply-To: <20100921010324.GA5873@void.printf.net>
+Received: from mail.pioto.org ([207.192.71.235]:57766 "EHLO
+	everglades.pioto.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753866Ab0IUDZ1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2010 23:25:27 -0400
+In-Reply-To: <513651.95215.qm@web37608.mail.mud.yahoo.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Saeed Bishara <saeed@marvell.com>, Kyungmin Park <kmpark@infradead.org>, eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>
+To: Alex Dubov <oakad@yahoo.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org, bugzilla-daemon@bugzilla.kernel.org, bugme-daemon@bugzilla.kernel.org
 
-On Mon, Sep 20, 2010 at 9:03 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi Zhangfei/Saeed,
->
-> On Mon, Sep 20, 2010 at 05:46:02PM +0800, zhangfei gao wrote:
->> Hi, Chris,
->>
->> Here is patch to support pxa168(aspen)/pxa910(ttc)/mmp2, the
->> controller follow sdh 3.0.
->> Currently verified sd, Micron 16G emmc need some workaround, 8G is O=
-K,
->> marvell 8787 would be verified later.
->> Help review.
->
-> Could you help me understand how this new driver relates to the Marve=
-ll
-> SoC driver that I merged last week (CONFIG_MMC_SDHCI_MV)? =A0Are the =
-SD
-> IPs in Dove and MMP2 different enough to warrant a separate driver, o=
-r
-> could support for both be included in sdhci-mv.c?
->
-> If we're going to have multiple drivers for the SD blocks in Armada/P=
-XA,
-> it at least seems that MMC_SDHCI_MV has been mis-named. =A0Any though=
-ts?
->
-> Thanks,
->
-> - Chris.
-> --
-> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
-> One Laptop Per Child
->
+--Sig_/F_CORi=GDGv+VEv4PTsRUlm
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-Hi, Chris
+On Sun, 19 Sep 2010 17:50:30 -0700 (PDT)
+Alex Dubov <oakad@yahoo.com> wrote:
 
-We have considered using the same driver with dove once saeed push the
-driver, but at last we decide to use seperate driver to easy
-maintaince and further extension.
+> It's not created, because media times out. Why it happens is a
+> different question. It may be that clock parameters or something
+> similar are not properly configured (I don't have any datasheets for
+> these devices). There can also be a mechanical failure of the SD
+> socket (these things do happen).
+>=20
+> Can you confirm that the socket and media are good, by trying them out
+> under windows or something?
 
-There are different IP developed by different group between Dove and
-pxa168/pxa910/mmp2, and would be more and more different.
-The pxa serious ip is follow sdh spec 3.0, and support sd 3.0 and emmc
-4.4, which need ddr50 and 1.8v requirement, the limitation is adma
-still has some issue and in fixing.
-Still some private register with differnt address, such as power
-control, clock timming tunning and etc.
+The same SD card and reader work fine under Windows Vista on this same
+machine. Ditto other SD cards in this reader. The fact that I am
+occasionally able to get this reader to work under Linux, though does
+make it seem like some timing or race issue that I'm hitting, though.
 
-The dove ip is follow sdh spec 2.0, and it has own limitation, such as
-1.8v may not be supported.
+I may give SDHCI a go at some point, but I'll have to read up on it
+more.
 
-In a word, they are differnt ip, and it is reasonable to use seprate dr=
-iver.
+--=20
+Mike Kelly
 
-Thanks
+
+--Sig_/F_CORi=GDGv+VEv4PTsRUlm
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Disposition: attachment; filename=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.16 (GNU/Linux)
+
+iEYEARECAAYFAkyYJZ0ACgkQokMzJ47YCzohHwCeJhYio3uM1WA3W1fzRz0ODHGb
+K+wAn3Nciiu9FMqandsjeIfXPyoQQIaq
+=panb
+-----END PGP SIGNATURE-----
+
+--Sig_/F_CORi=GDGv+VEv4PTsRUlm--
