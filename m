@@ -1,100 +1,73 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: [RFC] sdhci_pltfm: pass platform_data on custom init-call
-Date: Tue, 21 Sep 2010 14:56:07 +0200
-Message-ID: <1285073767-19900-1-git-send-email-w.sang@pengutronix.de>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH 3/4] mmc: sdhci-of-esdhc: factor out common stuff
+Date: Tue, 21 Sep 2010 16:58:23 +0400
+Message-ID: <20100921125823.GA31408@oksana.dev.rtsoft.ru>
+References: <1285072210-10207-1-git-send-email-w.sang@pengutronix.de>
+ <1285072210-10207-4-git-send-email-w.sang@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:44738 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754777Ab0IUM4R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 08:56:17 -0400
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:43846 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754703Ab0IUM63 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 08:58:29 -0400
+Received: by ewy23 with SMTP id 23so1889346ewy.19
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Sep 2010 05:58:27 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1285072210-10207-4-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Richard Zhu <r65037@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Richard Zhu <r65037@freescale.com>
 
-The custom init call may need more data to perform its job, so we pass it a
-pointer to the platform_data, too. Now, for drivers extending sdhci-pltfm (like
-sdhci-cns3xxx), a fixed platform_data is used according to the platform device
-id. Because that one does not contain board specific information, we simply
-name the board specific information information priv_pdata and pass it to the
-init routine as well. (Note: the old behaviour was that you could override the
-platform id specific data with your own. However, one can still do this by
-using the "sdhci" id instead of "sdhci-<something>".)
+On Tue, Sep 21, 2010 at 02:30:09PM +0200, Wolfram Sang wrote:
+> Put everything which can be shared between the OF and platform version
+> of this driver into a local .h-file.
+> 
+> Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
+> ---
+[...]
+> +
+> +static void esdhc_set_clock(struct sdhci_host *host, unsigned int clock)
+> +{
+> +	int pre_div = 2;
+> +	int div = 1;
+> +	u32 temp;
+> +
+> +	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+> +	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
+> +	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+> +
+> +	if (clock == 0)
+> +		goto out;
+> +
+> +	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
+> +		pre_div *= 2;
+> +
+> +	while (host->max_clk / pre_div / div > clock && div < 16)
+> +		div++;
+> +
+> +	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
+> +		clock, host->max_clk / pre_div / div);
+> +
+> +	pre_div >>= 1;
+> +	div--;
+> +
+> +	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+> +	temp |= (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN |
+> +		  (div << ESDHC_DIVIDER_SHIFT) | (pre_div << ESDHC_PREDIV_SHIFT));
+> +	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+> +	mdelay(100);
+> +out:
+> +	host->clock = clock;
+> +}
 
-Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
----
+This function is too big for a header. How about moving it
+to sdhci-esdhc.c, which would hold common bits for eSDHC?
 
-This approach has its issues, but all I tried had some. So, let's start arguing
-over code ;)
+Thanks,
 
- drivers/mmc/host/sdhci-esdhc.c  |    3 ++-
- drivers/mmc/host/sdhci-pltfm.c  |   11 ++++++++---
- include/linux/mmc/sdhci-pltfm.h |    2 +-
- 3 files changed, 11 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc.c b/drivers/mmc/host/sdhci-esdhc.c
-index 132e9c9..ccdafd9 100644
---- a/drivers/mmc/host/sdhci-esdhc.c
-+++ b/drivers/mmc/host/sdhci-esdhc.c
-@@ -97,7 +97,8 @@ static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
- 	return clk_get_rate(pltfm_host->clk) / 256 / 16;
- }
- 
--static int esdhc_pltfm_init(struct sdhci_host *host)
-+static int esdhc_pltfm_init(struct sdhci_host *host,
-+		struct sdhci_pltfm_data *pdata, void *priv_pdata)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct clk *clk;
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 6ba3f3d..04f3117 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -52,15 +52,20 @@ static struct sdhci_ops sdhci_pltfm_ops = {
- 
- static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- {
--	struct sdhci_pltfm_data *pdata = pdev->dev.platform_data;
- 	const struct platform_device_id *platid = platform_get_device_id(pdev);
-+	struct sdhci_pltfm_data *pdata;
-+	void *priv_pdata = NULL;
- 	struct sdhci_host *host;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct resource *iomem;
- 	int ret;
- 
--	if (!pdata && platid && platid->driver_data)
-+	if (platid && platid->driver_data) {
- 		pdata = (void *)platid->driver_data;
-+		priv_pdata = pdev->dev.platform_data;
-+	} else {
-+		pdata = pdev->dev.platform_data;
-+	}
- 
- 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!iomem) {
-@@ -108,7 +113,7 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- 	}
- 
- 	if (pdata && pdata->init) {
--		ret = pdata->init(host);
-+		ret = pdata->init(host, pdata, priv_pdata);
- 		if (ret)
- 			goto err_plat_init;
- 	}
-diff --git a/include/linux/mmc/sdhci-pltfm.h b/include/linux/mmc/sdhci-pltfm.h
-index 0239bd7..e14fce3 100644
---- a/include/linux/mmc/sdhci-pltfm.h
-+++ b/include/linux/mmc/sdhci-pltfm.h
-@@ -28,7 +28,7 @@ struct sdhci_host;
- struct sdhci_pltfm_data {
- 	struct sdhci_ops *ops;
- 	unsigned int quirks;
--	int (*init)(struct sdhci_host *host);
-+	int (*init)(struct sdhci_host *host, struct sdhci_pltfm_data *pdata, void* priv_pdata);
- 	void (*exit)(struct sdhci_host *host);
- };
- 
 -- 
-1.7.1
-
+Anton Vorontsov
+email: cbouatmailru@gmail.com
+irc://irc.freenode.net/bd2
