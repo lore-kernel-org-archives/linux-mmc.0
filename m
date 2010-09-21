@@ -1,53 +1,41 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 1/4] mmc: sdhci-pltfm: Add structure for host-specific
- data
-Date: Tue, 21 Sep 2010 17:01:55 +0400
-Message-ID: <20100921130155.GA30150@oksana.dev.rtsoft.ru>
-References: <1285072210-10207-1-git-send-email-w.sang@pengutronix.de>
- <1285072210-10207-2-git-send-email-w.sang@pengutronix.de>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] OMAP4: HSMMC cmd line reset change
+Date: Tue, 21 Sep 2010 07:47:05 -0700
+Message-ID: <20100921144705.GP4611@atomide.com>
+References: <51627.192.168.10.89.1284595091.squirrel@dbdmail.itg.ti.com>
+ <20100917154803.GB29610@atomide.com>
+ <738912BD0A0F48FC9E3159F923571E9E@am.dhcp.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:59854 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754532Ab0IUNCB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 09:02:01 -0400
-Received: by ewy23 with SMTP id 23so1890207ewy.19
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Sep 2010 06:02:00 -0700 (PDT)
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1285072210-10207-2-git-send-email-w.sang@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <738912BD0A0F48FC9E3159F923571E9E@am.dhcp.ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Madhusudhan <madhu.cr@ti.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, santosh.shilimkar@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Richard Zhu <r65037@freescale.com>
 
-On Tue, Sep 21, 2010 at 02:30:07PM +0200, Wolfram Sang wrote:
-> We need to carry some information per host, e.g. the clock. Add a
-> structure for it and initialize it in the generic part.
+* Madhusudhan <madhu.cr@ti.com> [100920 09:06]:
+> > 
+> > Please don't use cpu_is_omapxxxx tests in the drivers, drivers
+> > should be generic.
+> > 
+> > Instead, just pass a feature flag in the platform_data for this
+> > feature like HSMMC_REVERSE_RESET_LOGIC or similar.
+> > 
 > 
-> Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
-> ---
-[...]
-> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-> index 900f329..c393289 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.h
-> +++ b/drivers/mmc/host/sdhci-pltfm.h
-> @@ -13,6 +13,11 @@
->  
->  #include <linux/sdhci-pltfm.h>
->  
-> +struct sdhci_pltfm_host {
-> +	struct clk *clk;
+> This is not a feature. It is like an ERRATA fix. I am yet to receive an
+> errata number though. How about dealing with this like an errata fix similar
+> to the way in arch/mach-omap2/serial.c done for the uart case? 
 
-Forward decl for struct clk is needed.
+Yes setting some HSMMC_ERRATA_XYZ flag works too.
+ 
+> The mmc ip revision will not help because it really does not change to
+> distinguish such issues.
 
-> +	u32 scratchpad; /* to handle quirks across io-accessor calls */
+OK. Then I guess your only option is to pass the errata flag in
+the platform_data.
 
-#include <linux/types.h> is needed for u32.
+Regards,
 
-Thanks,
-
--- 
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
+Tony
