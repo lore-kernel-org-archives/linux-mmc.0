@@ -1,38 +1,70 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: failure of block read wait for long time
-Date: Wed, 22 Sep 2010 13:43:09 +0100
-Message-ID: <20100922124309.GA15699@void.printf.net>
-References: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com> <4C8A2C5D.2050408@nokia.com> <2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com> <4C971320.7050906@nokia.com> <2A3DCF3DA181AD40BDE86A3150B27B6B03160624F6@dbde02.ent.ti.com> <4C974A5D.5050608@nokia.com> <2A3DCF3DA181AD40BDE86A3150B27B6B03160626B5@dbde02.ent.ti.com> <4C975CFB.6070907@nokia.com> <20100920133703.GC30793@n2100.arm.linux.org.uk> <2A3DCF3DA181AD40BDE86A3150B27B6B031610E332@dbde02.ent.ti.com>
+From: "Ghorai, Sukumar" <s-ghorai@ti.com>
+Subject: RE: [PATCH] mmc: failure of block read wait for long time
+Date: Wed, 22 Sep 2010 18:21:51 +0530
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B031610E736@dbde02.ent.ti.com>
+References: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com>
+ <4C8A2C5D.2050408@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com>
+ <4C971320.7050906@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B03160624F6@dbde02.ent.ti.com>
+ <4C974A5D.5050608@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B03160626B5@dbde02.ent.ti.com>
+ <4C975CFB.6070907@nokia.com> <20100920133703.GC30793@n2100.arm.linux.org.uk>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B031610E332@dbde02.ent.ti.com>
+ <20100922124309.GA15699@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34692 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752437Ab0IVMnP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Sep 2010 08:43:15 -0400
-Content-Disposition: inline
-In-Reply-To: <2A3DCF3DA181AD40BDE86A3150B27B6B031610E332@dbde02.ent.ti.com>
+Received: from devils.ext.ti.com ([198.47.26.153]:48045 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753431Ab0IVMwJ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Sep 2010 08:52:09 -0400
+In-Reply-To: <20100922124309.GA15699@void.printf.net>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Ghorai, Sukumar" <s-ghorai@ti.com>
+To: Chris Ball <cjb@laptop.org>
 Cc: Adrian Hunter <adrian.hunter@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-On Wed, Sep 22, 2010 at 11:02:08AM +0530, Ghorai, Sukumar wrote:
-> Would you please review and merge this patch [1] (attached too)?
-> [1] http://comments.gmane.org/gmane.linux.kernel.mmc/2714
+Chris,
 
-I've been following the thread.  I believe Adrian has NACKed this patch,
-by saying "It is absolutely unacceptable to return I/O errors to the
-upper layers for segments that do not have errors."
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Wednesday, September 22, 2010 6:13 PM
+> To: Ghorai, Sukumar
+> Cc: Adrian Hunter; linux-mmc@vger.kernel.org; linux-arm-
+> kernel@lists.infradead.org; Russell King - ARM Linux
+> Subject: Re: [PATCH] mmc: failure of block read wait for long time
+> 
+> On Wed, Sep 22, 2010 at 11:02:08AM +0530, Ghorai, Sukumar wrote:
+> > Would you please review and merge this patch [1] (attached too)?
+> > [1] http://comments.gmane.org/gmane.linux.kernel.mmc/2714
+> 
+> I've been following the thread.  I believe Adrian has NACKed this patch,
+> by saying "It is absolutely unacceptable to return I/O errors to the
+> upper layers for segments that do not have errors."
 
-I think it's possible to merge patches to improve the situation (such
-as the idea of noticing a card disappearing earlier), but your initial
-patch is not the patch to do that.  You should continue to work with
-Adrian -- when he's happy that a patch does not break the semantics
-above, we can consider merging it.
+[Ghorai] 
+I think Russell also mentioned his opinion. Would you please add your idea too?
 
-Thanks,
+1. I would prefer Adrian to explain again what this statement means, in the context - data read fail and how we make it success? 
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+2. if data read fail for sector(x) why we have to try for sector(x+1, ..x+n)?
+
+3. how to inform reader function which sector having the valid data out of (1...n) sectors.
+
+4. do we have any driver/code in Linux or any other os, which give inter-leave data and return as success?  
+
+> 
+> I think it's possible to merge patches to improve the situation (such
+> as the idea of noticing a card disappearing earlier), but your initial
+> patch is not the patch to do that.  You should continue to work with
+> Adrian -- when he's happy that a patch does not break the semantics
+> above, we can consider merging it.
+> 
+> Thanks,
+> 
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
