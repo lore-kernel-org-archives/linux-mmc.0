@@ -1,30 +1,48 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] OMAP4: HSMMC cmd line reset change
-Date: Wed, 22 Sep 2010 18:25:19 +0100
-Message-ID: <20100922172519.GA3150@void.printf.net>
-References: <51627.192.168.10.89.1284595091.squirrel@dbdmail.itg.ti.com> <20100917154803.GB29610@atomide.com> <738912BD0A0F48FC9E3159F923571E9E@am.dhcp.ti.com> <20100921144705.GP4611@atomide.com> <16904B7F1B384B42B8D5F85D0414A47D@am.dhcp.ti.com>
+From: Sergei Shtylyov <sshtylyov@mvista.com>
+Subject: Re: [PATCH v3 2/4] omap4 hsmmc: Fix the init if CONFIG_MMC_OMAP_HS
+ is 	not set
+Date: Wed, 22 Sep 2010 22:05:47 +0400
+Message-ID: <4C9A457B.4060500@ru.mvista.com>
+References: <14880.10.24.255.18.1285173821.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <16904B7F1B384B42B8D5F85D0414A47D@am.dhcp.ti.com>
+In-Reply-To: <14880.10.24.255.18.1285173821.squirrel@dbdmail.itg.ti.com>
 Sender: linux-omap-owner@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: 'Tony Lindgren' <tony@atomide.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, santosh.shilimkar@ti.com
+To: kishore kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Madhu,
+Hello.
 
-On Wed, Sep 22, 2010 at 12:13:51PM -0500, Madhusudhan wrote:
-> Can you please drop this patch? Sorry, I spoke bit too early on this patch.
-> I need to sort out some stuff internally (seems like it will not be released
-> as an errata). I will post a revised version a bit later.
+kishore kadiyala wrote:
 
-No problem, I dropped this after seeing Tony's comments.  I'll keep
-an eye out for a new patch with his ACK.
+> From: Benoit Cousson <b-cousson@ti.com>
 
-Thanks,
+> Avoid possible crash if CONFIG_MMC_OMAP_HS is not set
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> Signed-off-by: Benoit Cousson <b-cousson@ti.com>
+> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+> ---
+>  arch/arm/mach-omap2/board-4430sdp.c |    8 +++++++-
+>  1 files changed, 7 insertions(+), 1 deletions(-)
+> 
+> diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
+> index a49f285..ac8541c 100644
+> --- a/arch/arm/mach-omap2/board-4430sdp.c
+> +++ b/arch/arm/mach-omap2/board-4430sdp.c
+> @@ -240,8 +240,14 @@ static int omap4_twl6030_hsmmc_late_init(struct device *dev)
+> 
+>  static __init void omap4_twl6030_hsmmc_set_late_init(struct device *dev)
+>  {
+> -	struct omap_mmc_platform_data *pdata = dev->platform_data;
+> +	struct omap_mmc_platform_data *pdata;
+> 
+> +	/* dev can be null if CONFIG_MMC_OMAP_HS is not set */
+> +	if (!dev) {
+> +		pr_err("Failed omap4_twl6030_hsmmc_set_late_init\n");
+
+    pr_err("Failed %s\n", __func__);
+
+WBR, Sergei
