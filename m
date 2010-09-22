@@ -1,173 +1,41 @@
-From: Ben Dooks <ben@trinity.fluff.org>
-Subject: Re: [PATCH 2/4] mmc: sdhci-pltfm: move .h-file into apropriate
-	subdir
-Date: Wed, 22 Sep 2010 02:20:11 +0100
-Message-ID: <20100922012011.GE27885@trinity.fluff.org>
-References: <1285072210-10207-1-git-send-email-w.sang@pengutronix.de> <1285072210-10207-3-git-send-email-w.sang@pengutronix.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: MMC 4.4 DDR support
+Date: Wed, 22 Sep 2010 03:20:47 +0100
+Message-ID: <20100922022047.GA3821@void.printf.net>
+References: <1278658780-26397-1-git-send-email-hanumath.prasad@stericsson.com> <AANLkTikBdBhJeQ-t2+0echJfAxz529QZEYPJtyHUsROd@mail.gmail.com> <m3pqxbsibq.fsf@pullcord.laptop.org> <20100823204829.GB6510@console-pimps.org> <20100823142816.59b12253.akpm@linux-foundation.org> <4C739F55.8030301@nokia.com> <20100914112143.GA16039@void.printf.net> <2A3DCF3DA181AD40BDE86A3150B27B6B031606223F@dbde02.ent.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from trinity.fluff.org ([89.16.178.74]:53870 "EHLO trinity.fluff.org"
+Received: from void.printf.net ([89.145.121.20]:59680 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755547Ab0IVBUN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Sep 2010 21:20:13 -0400
+	id S1752923Ab0IVCVD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 21 Sep 2010 22:21:03 -0400
 Content-Disposition: inline
-In-Reply-To: <1285072210-10207-3-git-send-email-w.sang@pengutronix.de>
+In-Reply-To: <2A3DCF3DA181AD40BDE86A3150B27B6B031606223F@dbde02.ent.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Anton Vorontsov <cbouatmailru@gmail.com>, Richard Zhu <r65037@freescale.com>
+To: "Ghorai, Sukumar" <s-ghorai@ti.com>
+Cc: Adrian Hunter <adrian.hunter@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, Linus Walleij <linus.ml.walleij@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "STEricsson_nomadik_linux@list.st.com" <STEricsson_nomadik_linux@list.st.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Kyungmin Park <kmpark@infradead.org>
 
-On Tue, Sep 21, 2010 at 02:30:08PM +0200, Wolfram Sang wrote:
-> Make use of the mmc-directory.
-> 
-> Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
-> ---
->  drivers/mmc/host/sdhci-cns3xxx.c |    2 +-
->  drivers/mmc/host/sdhci-pltfm.c   |    2 +-
->  drivers/mmc/host/sdhci-pltfm.h   |    2 +-
->  include/linux/mmc/sdhci-pltfm.h  |   35 +++++++++++++++++++++++++++++++++++
->  include/linux/sdhci-pltfm.h      |   35 -----------------------------------
+Hi,
 
-hmm, you lost rename detection... best enable it to make these diffs clearer.
+On Mon, Sep 20, 2010 at 10:04:39AM +0530, Ghorai, Sukumar wrote:
+> Chris and all,
+> Can we plan these patches for 2.6.37 release? 
+> Also let me know if I can do anything!
 
->  5 files changed, 38 insertions(+), 38 deletions(-)
->  create mode 100644 include/linux/mmc/sdhci-pltfm.h
->  delete mode 100644 include/linux/sdhci-pltfm.h
-> 
-> diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
-> index b7050b3..9ebd1d7 100644
-> --- a/drivers/mmc/host/sdhci-cns3xxx.c
-> +++ b/drivers/mmc/host/sdhci-cns3xxx.c
-> @@ -15,7 +15,7 @@
->  #include <linux/delay.h>
->  #include <linux/device.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/sdhci-pltfm.h>
-> +#include <linux/mmc/sdhci-pltfm.h>
->  #include <mach/cns3xxx.h>
->  #include "sdhci.h"
->  #include "sdhci-pltfm.h"
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index bf522a1..ff0271c 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -30,7 +30,7 @@
->  #include <linux/mmc/host.h>
->  
->  #include <linux/io.h>
-> -#include <linux/sdhci-pltfm.h>
-> +#include <linux/mmc/sdhci-pltfm.h>
->  
->  #include "sdhci.h"
->  #include "sdhci-pltfm.h"
-> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-> index c393289..2b43ed5 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.h
-> +++ b/drivers/mmc/host/sdhci-pltfm.h
-> @@ -11,7 +11,7 @@
->  #ifndef _DRIVERS_MMC_SDHCI_PLTFM_H
->  #define _DRIVERS_MMC_SDHCI_PLTFM_H
->  
-> -#include <linux/sdhci-pltfm.h>
-> +#include <linux/mmc/sdhci-pltfm.h>
->  
->  struct sdhci_pltfm_host {
->  	struct clk *clk;
-> diff --git a/include/linux/mmc/sdhci-pltfm.h b/include/linux/mmc/sdhci-pltfm.h
-> new file mode 100644
-> index 0000000..0239bd7
-> --- /dev/null
-> +++ b/include/linux/mmc/sdhci-pltfm.h
-> @@ -0,0 +1,35 @@
-> +/*
-> + * Platform data declarations for the sdhci-pltfm driver.
-> + *
-> + * Copyright (c) 2010 MontaVista Software, LLC.
-> + *
-> + * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or (at
-> + * your option) any later version.
-> + */
-> +
-> +#ifndef _SDHCI_PLTFM_H
-> +#define _SDHCI_PLTFM_H
-> +
-> +struct sdhci_ops;
-> +struct sdhci_host;
-> +
-> +/**
-> + * struct sdhci_pltfm_data - SDHCI platform-specific information & hooks
-> + * @ops: optional pointer to the platform-provided SDHCI ops
-> + * @quirks: optional SDHCI quirks
-> + * @init: optional hook that is called during device probe, before the
-> + *        driver tries to access any SDHCI registers
-> + * @exit: optional hook that is called during device removal
-> + */
-> +struct sdhci_pltfm_data {
-> +	struct sdhci_ops *ops;
-> +	unsigned int quirks;
-> +	int (*init)(struct sdhci_host *host);
-> +	void (*exit)(struct sdhci_host *host);
-> +};
-> +
-> +#endif /* _SDHCI_PLTFM_H */
-> diff --git a/include/linux/sdhci-pltfm.h b/include/linux/sdhci-pltfm.h
-> deleted file mode 100644
-> index 0239bd7..0000000
-> --- a/include/linux/sdhci-pltfm.h
-> +++ /dev/null
-> @@ -1,35 +0,0 @@
-> -/*
-> - * Platform data declarations for the sdhci-pltfm driver.
-> - *
-> - * Copyright (c) 2010 MontaVista Software, LLC.
-> - *
-> - * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
-> - *
-> - * This program is free software; you can redistribute it and/or modify
-> - * it under the terms of the GNU General Public License as published by
-> - * the Free Software Foundation; either version 2 of the License, or (at
-> - * your option) any later version.
-> - */
-> -
-> -#ifndef _SDHCI_PLTFM_H
-> -#define _SDHCI_PLTFM_H
-> -
-> -struct sdhci_ops;
-> -struct sdhci_host;
-> -
-> -/**
-> - * struct sdhci_pltfm_data - SDHCI platform-specific information & hooks
-> - * @ops: optional pointer to the platform-provided SDHCI ops
-> - * @quirks: optional SDHCI quirks
-> - * @init: optional hook that is called during device probe, before the
-> - *        driver tries to access any SDHCI registers
-> - * @exit: optional hook that is called during device removal
-> - */
-> -struct sdhci_pltfm_data {
-> -	struct sdhci_ops *ops;
-> -	unsigned int quirks;
-> -	int (*init)(struct sdhci_host *host);
-> -	void (*exit)(struct sdhci_host *host);
-> -};
-> -
-> -#endif /* _SDHCI_PLTFM_H */
-> -- 
-> 1.7.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I would like to merge this for .37, and the quirk and merge conflicts
+are not a big deal.  First, though, I'd like to see at least some of:
 
+* a reply from Hanumath to Kyungmin on the use of MMC_DDR_MODE,
+  and which host controller the submitted patch was tested on.
+* an acknowledgement/comment on Adrian's fixup patch
+* an ACK on the original+fixup patch as mergeable from Adrian
+* some explicit Tested-by: lines for the commit.
+
+Thanks!
+
+- Chris.
 -- 
--- 
-Ben
-
-Q:      What's a light-year?
-A:      One-third less calories than a regular year.
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
