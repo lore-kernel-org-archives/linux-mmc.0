@@ -1,88 +1,101 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: mmotm 2010-09-15 - BUG in mmc driver calling
- led_trigger_event()
-Date: Tue, 21 Sep 2010 20:17:58 -0700
-Message-ID: <20100921201758.66841897.akpm@linux-foundation.org>
-References: <201009152352.o8FNqXGr022752@imap1.linux-foundation.org>
-	<8581.1285124507@localhost>
+From: "Ghorai, Sukumar" <s-ghorai@ti.com>
+Subject: RE: [PATCH] mmc: failure of block read wait for long time
+Date: Wed, 22 Sep 2010 11:02:08 +0530
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B031610E332@dbde02.ent.ti.com>
+References: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026ED@dbde02.ent.ti.com>
+ <4C8A19E7.30706@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com>
+ <4C8A2C5D.2050408@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com>
+ <4C971320.7050906@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B03160624F6@dbde02.ent.ti.com>
+ <4C974A5D.5050608@nokia.com>
+ <2A3DCF3DA181AD40BDE86A3150B27B6B03160626B5@dbde02.ent.ti.com>
+ <4C975CFB.6070907@nokia.com> <20100920133703.GC30793@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="_002_2A3DCF3DA181AD40BDE86A3150B27B6B031610E332dbde02enttico_"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:43263 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750933Ab0IVDSe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2010 23:18:34 -0400
-In-Reply-To: <8581.1285124507@localhost>
+Received: from devils.ext.ti.com ([198.47.26.153]:43564 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751316Ab0IVFce (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Sep 2010 01:32:34 -0400
+In-Reply-To: <20100920133703.GC30793@n2100.arm.linux.org.uk>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Valdis.Kletnieks@vt.edu
-Cc: Richard Purdie <rpurdie@rpsys.net>, Chris Ball <cjb@laptop.org>, Hein_Tibosch <hein_tibosch@yahoo.es>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Anton Vorontsov <avorontsov@ru.mvista.com>
+To: Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-On Tue, 21 Sep 2010 23:01:47 -0400 Valdis.Kletnieks@vt.edu wrote:
+--_002_2A3DCF3DA181AD40BDE86A3150B27B6B031610E332dbde02enttico_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
-> On Wed, 15 Sep 2010 16:21:43 PDT, akpm@linux-foundation.org said:
-> > The mm-of-the-moment snapshot 2010-09-15-16-21 has been uploaded to
-> > 
-> >    http://userweb.kernel.org/~akpm/mmotm/
-> 
-> Dell Latitude E6500. lspci -v says:
+Chris,
 
-Thanks again for testing this lot.
+> -----Original Message-----
+> From: Russell King - ARM Linux [mailto:linux@arm.linux.org.uk]
+> Sent: Monday, September 20, 2010 7:07 PM
+> To: Adrian Hunter
+> Cc: Ghorai, Sukumar; linux-mmc@vger.kernel.org; linux-arm-
+> kernel@lists.infradead.org
+> Subject: Re: [PATCH] mmc: failure of block read wait for long time
+>=20
+> On Mon, Sep 20, 2010 at 04:09:15PM +0300, Adrian Hunter wrote:
+> > The SD/MMC protocol does not indicate which sector has the error.
+> > There is no possibility of trying the ith+1-segment because i is
+> > unknown.
+>=20
+> Not entirely true.
+>=20
+> I seem to remember that the MMC protocol (and probably SD protocol)
+> provides an ack at the end of each data block to say whether the data
+> block was correct or not.
+>=20
+> Some hosts tell you when they receive this ack, and you can track how
+> many blocks have been successfully read without error.  The ARM MMCI
+> primecell does this.
+>=20
+> However, some hosts don't give you this information, in which case you
+> don't know where the error occurred in the read - so when a read fails,
+> you can only safely report that no bytes were read successfully.  This
+> means that even if the error was on the last block, there's no way to
+> know this.
+[Ghorai]
+Would you please review and merge this patch [1] (attached too)?
+[1] http://comments.gmane.org/gmane.linux.kernel.mmc/2714
 
-> 03:01.2 SD Host controller: Ricoh Co Ltd R5C822 SD/SDIO/MMC/MS/MSPro Host Adapter (rev 21) (prog-if 01)
->         Subsystem: Dell Device 024f
->         Flags: bus master, medium devsel, latency 64, IRQ 18
->         Memory at f1bff600 (32-bit, non-prefetchable) [size=256]
->         Capabilities: [80] Power Management version 2
->         Kernel driver in use: sdhci-pci
-> 
-> Not consistently repeatable - I had 3 clean boots of this kernel, hit this the 4th time.
-> 
-> [    2.928661] Freeing unused kernel memory: 892k freed
-> [    2.934051] BUG: sleeping function called from invalid context at kernel/mutex.c:278
-> [    2.934440] in_atomic(): 1, irqs_disabled(): 0, pid: 11, name: kworker/0:1
-> [    2.934777] 3 locks held by kworker/0:1/11:
-> [    2.934780]  #0:  (((dev_name(&(mmc)->class_dev)))){+.+...}, at: [<ffffffff81052388>] process_one_work+0x1b5/0x49d
-> [    2.934796]  #1:  ((&host->finish_work)){+.+...}, at: [<ffffffff81052388>] process_one_work+0x1b5/0x49d
-> [    2.934806]  #2:  (&trigger->leddev_list_lock){.+.+..}, at: [<ffffffff813d464e>] led_trigger_event+0x22/0x75
-> [    2.934821] Pid: 11, comm: kworker/0:1 Not tainted 2.6.36-rc4-mmotm0915 #2
-> [    2.934825] Call Trace:
-> [    2.934833]  [<ffffffff8102e456>] __might_sleep+0x124/0x129
-> [    2.934840]  [<ffffffff8156559e>] mutex_lock_nested+0x20/0x39
-> [    2.934846]  [<ffffffff813d1412>] sdhci_led_control+0x24/0x52
-> [    2.934852]  [<ffffffff813d464e>] ? led_trigger_event+0x22/0x75
-> [    2.934858]  [<ffffffff813d4682>] led_trigger_event+0x56/0x75
-> [    2.934865]  [<ffffffff813c74c8>] mmc_request_done+0x5c/0x7a
-> [    2.934871]  [<ffffffff813d1aba>] sdhci_finish_work+0xe6/0xef
-> [    2.934877]  [<ffffffff81052472>] process_one_work+0x29f/0x49d
-> [    2.934882]  [<ffffffff81052388>] ? process_one_work+0x1b5/0x49d
-> [    2.934888]  [<ffffffff813d19d4>] ? sdhci_finish_work+0x0/0xef
-> [    2.934895]  [<ffffffff81052d10>] worker_thread+0x17e/0x251
-> [    2.934901]  [<ffffffff81052b92>] ? worker_thread+0x0/0x251
-> [    2.934908]  [<ffffffff81056882>] kthread+0x7d/0x85
-> [    2.934915]  [<ffffffff81003554>] kernel_thread_helper+0x4/0x10
-> [    2.934922]  [<ffffffff815676c0>] ? restore_args+0x0/0x30
-> [    2.934928]  [<ffffffff81056805>] ? kthread+0x0/0x85
-> [    2.934934]  [<ffffffff81003550>] ? kernel_thread_helper+0x0/0x10
-> [    2.941048] mmc0: mmc_rescan: trying to init card at 200000 Hz
-> 
 
-led_trigger_event() does read_lock() then calls led_set_brightness()
-which indirectly calls sdhci_led_control() which does mutex_lock().  
 
-That mutex_lock() was added by sdhci-turn-host-lock-into-a-mutex.patch.
+--_002_2A3DCF3DA181AD40BDE86A3150B27B6B031610E332dbde02enttico_
+Content-Type: application/octet-stream;
+	name="0001-mmc-failure-of-block-read-wait-for-long-time.patch"
+Content-Description: 0001-mmc-failure-of-block-read-wait-for-long-time.patch
+Content-Disposition: attachment;
+	filename="0001-mmc-failure-of-block-read-wait-for-long-time.patch";
+	size=1114; creation-date="Wed, 22 Sep 2010 11:00:02 GMT";
+	modification-date="Wed, 22 Sep 2010 11:01:54 GMT"
+Content-Transfer-Encoding: base64
 
-Anton, those patches aren't going very well - I think I'll drop
+RnJvbSA1MDZjMGM0M2M4OGRhMzFmZTU2NDU1Yzg5ZjkyOTRjYzIzMWZjNGVkIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBTdWt1bWFyIEdob3JhaSA8cy1naG9yYWlAdGkuY29tPgpEYXRl
+OiBXZWQsIDIyIFNlcCAyMDEwIDEwOjU4OjUzICswNTMwClN1YmplY3Q6IFtQQVRDSF0gbW1jOiBm
+YWlsdXJlIG9mIGJsb2NrIHJlYWQgd2FpdCBmb3IgbG9uZyB0aW1lCgogbXVsdGktYmxvY2sgcmVh
+ZCBmYWlsdXJlIHJldHJpZXMgaW4gc2luZ2xlIGJsb2NrIHJlYWQgb25lIGJ5IG9uZS4gSXQgY29u
+dGludWVzCiByZXRyeSBvZiBzdWJzZXF1ZW50IGJsb2NrcywgZXZlbiBhZnRlciBmYWlsdXJlLiBB
+cHBsaWNhdGlvbiB3aWxsIG5vdCBiZSBhYmxlCiB0byBkZWNvZGUgdGhlIGludGVybGVhdmUgZGF0
+YSAoZXZlbiBpZiBmZXcgc2luZ2xlIGJsb2NrIHJlYWQgc3VjY2VzcykuCiBUaGlzIHBhdGNoIGZp
+eGVzIHRoaXMgcHJvYmxlbSBieSByZXR1cm5pbmcgYXQgdGhlIGZpcnN0IGZhaWx1cmUgaW5zdGVh
+ZCBvZgogd2FpdGluZyBmb3IgbG9uZyBkdXJhdGlvbi4KClNpZ25lZC1vZmYtYnk6IFN1a3VtYXIg
+R2hvcmFpIDxzLWdob3JhaUB0aS5jb20+Ci0tLQogZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jIHwg
+ICAgMSAtCiAxIGZpbGVzIGNoYW5nZWQsIDAgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbnMoLSkK
+CmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMgYi9kcml2ZXJzL21tYy9jYXJk
+L2Jsb2NrLmMKaW5kZXggZDU0NWY3OS4uMGVjMzRhZiAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMv
+Y2FyZC9ibG9jay5jCisrKyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYwpAQCAtNDkzLDcgKzQ5
+Myw2IEBAIHN0YXRpYyBpbnQgbW1jX2Jsa19pc3N1ZV9yd19ycShzdHJ1Y3QgbW1jX3F1ZXVlICpt
+cSwgc3RydWN0IHJlcXVlc3QgKnJlcSkKIAkJCQlzcGluX2xvY2tfaXJxKCZtZC0+bG9jayk7CiAJ
+CQkJcmV0ID0gX19ibGtfZW5kX3JlcXVlc3QocmVxLCAtRUlPLCBicnEuZGF0YS5ibGtzeik7CiAJ
+CQkJc3Bpbl91bmxvY2tfaXJxKCZtZC0+bG9jayk7Ci0JCQkJY29udGludWU7CiAJCQl9CiAJCQln
+b3RvIGNtZF9lcnI7CiAJCX0KLS0gCjEuNy4wLjQKCg==
 
-sdhci-turn-timeout-timer-into-delayed-work.patch
-sdhci-use-work-structs-instead-of-tasklets.patch
-sdhci-use-work-structs-instead-of-tasklets-fix.patch
-sdhci-clear-interrupt-status-register-just-once.patch
-sdhci-use-threaded-irq-handler.patch
-sdhci-turn-host-lock-into-a-mutex.patch
-sdhci-get-rid-of-card-detect-work.patch
-sdhci-get-rid-of-card-detect-work-fix.patch
-sdhci-get-rid-of-mdelays-where-it-is-safe-and-makes-sense.patch
-sdhci-use-jiffies-instead-of-a-timeout-counter.patch
-
+--_002_2A3DCF3DA181AD40BDE86A3150B27B6B031610E332dbde02enttico_--
