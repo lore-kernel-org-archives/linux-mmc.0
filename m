@@ -1,53 +1,34 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] sdhci-s3c: fix NULL ptr access in sdhci_s3c_remove
-Date: Thu, 23 Sep 2010 20:12:57 +0100
-Message-ID: <20100923191257.GA2739@void.printf.net>
-References: <1285251725-6210-1-git-send-email-m.szyprowski@samsung.com>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH 12/12] mmci: support variants with only one irq
+Date: Thu, 23 Sep 2010 22:04:38 +0200
+Message-ID: <AANLkTikuf7Br7oTfynrRQ2DW0Tiw3QvJL58sKZGBsF=3@mail.gmail.com>
+References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com>
+	<1277198267-10860-12-git-send-email-rabin.vincent@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1285251725-6210-1-git-send-email-m.szyprowski@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: ben-linux@fluff.org
-Cc: Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, kgene.kim@samsung.com, akpm@linux-foundation.org, w.sang@pengutronix.de
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:45564 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754016Ab0IWUEj convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 16:04:39 -0400
+Received: by qwh6 with SMTP id 6so1336944qwh.19
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 13:04:38 -0700 (PDT)
+In-Reply-To: <1277198267-10860-12-git-send-email-rabin.vincent@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Rabin Vincent <rabin.vincent@stericsson.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-Hi Ben,
+2010/6/22 Rabin Vincent <rabin.vincent@stericsson.com>:
 
-On Thu, Sep 23, 2010 at 04:22:05PM +0200, Marek Szyprowski wrote:
-> If not all clocks has been defined in platform data, driver will cause
-> a null pointer dereference when it is being removed. This patch fixes
-> this issue.
-> 
-> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-s3c.c |    6 ++++--
->  1 files changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 71ad416..757d92c 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -481,8 +481,10 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
->  	sdhci_remove_host(host, 1);
->  
->  	for (ptr = 0; ptr < 3; ptr++) {
-> -		clk_disable(sc->clk_bus[ptr]);
-> -		clk_put(sc->clk_bus[ptr]);
-> +		if (sc->clk_bus[ptr]) {
-> +			clk_disable(sc->clk_bus[ptr]);
-> +			clk_put(sc->clk_bus[ptr]);
-> +		}
->  	}
->  	clk_disable(sc->clk_io);
->  	clk_put(sc->clk_io);
+> The Ux500 variants have only one IRQ line hooked up. =A0Allow these t=
+o
+> work by directing the PIO interrupts also to the first IRQ line.
 
-I'll send this to Linus for .36 after you reply with an ACK.
+I see this one is dangling in the patch tracker, FYI I have regression
+tested this on the PB1176MPcore with its unmodified ARM PL180
+MMCI block - read/write files copy mount/unmount - no problems.
 
-Thanks,
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Yours,
+Linus Walleij
