@@ -1,34 +1,31 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH 12/12] mmci: support variants with only one irq
-Date: Thu, 23 Sep 2010 22:04:38 +0200
-Message-ID: <AANLkTikuf7Br7oTfynrRQ2DW0Tiw3QvJL58sKZGBsF=3@mail.gmail.com>
-References: <1277198267-10860-1-git-send-email-rabin.vincent@stericsson.com>
-	<1277198267-10860-12-git-send-email-rabin.vincent@stericsson.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] omap mmc: extended to pass host capabilities from
+ board file
+Date: Thu, 23 Sep 2010 16:08:20 -0700
+Message-ID: <20100923230819.GS4211@atomide.com>
+References: <1284562163-2828-1-git-send-email-s-ghorai@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:45564 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754016Ab0IWUEj convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 16:04:39 -0400
-Received: by qwh6 with SMTP id 6so1336944qwh.19
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 13:04:38 -0700 (PDT)
-In-Reply-To: <1277198267-10860-12-git-send-email-rabin.vincent@stericsson.com>
+Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:50970 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752016Ab0IWXIV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 19:08:21 -0400
+Content-Disposition: inline
+In-Reply-To: <1284562163-2828-1-git-send-email-s-ghorai@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rabin Vincent <rabin.vincent@stericsson.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: Sukumar Ghorai <s-ghorai@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-2010/6/22 Rabin Vincent <rabin.vincent@stericsson.com>:
+* Sukumar Ghorai <s-ghorai@ti.com> [100915 07:41]:
+>   wires variable is renamed, extended and this single variable to be used to
+>   pass the platform capabilities, e.g DDR mode. Also removed the hardcoded
+>   value was using as bus-width.
 
-> The Ux500 variants have only one IRQ line hooked up. =A0Allow these t=
-o
-> work by directing the PIO interrupts also to the first IRQ line.
+This looks like a nice clean-up, I'll queue this via the omap
+patches.
 
-I see this one is dangling in the patch tracker, FYI I have regression
-tested this on the PB1176MPcore with its unmodified ARM PL180
-MMCI block - read/write files copy mount/unmount - no problems.
+Regards,
 
-Yours,
-Linus Walleij
+Tony
