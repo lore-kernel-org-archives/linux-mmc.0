@@ -1,62 +1,45 @@
-From: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH v3 1/4] omap4 hsmmc: Adding card detect support for MMC1
-Date: Thu, 23 Sep 2010 11:22:20 +0530
-Message-ID: <AANLkTikLqi4=OOJ_ciMqTt7HKJzDo-WsZJ8D2CpP712c@mail.gmail.com>
-References: <14833.10.24.255.18.1285173812.squirrel@dbdmail.itg.ti.com>
-	<8F7AF80515AF0D4D93307E594F3CB40E5F57C548@dlee03.ent.ti.com>
+From: Peppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: Re: [PATCH] mmc: add SDHCI driver for STM platforms (V2)
+Date: Thu, 23 Sep 2010 08:48:42 +0200
+Message-ID: <4C9AF84A.9010402@st.com>
+References: <1284970817-11293-1-git-send-email-peppe.cavallaro@st.com>
+ <20100920083842.GA4058@pengutronix.de> <4C98792C.5000900@st.com>
+ <20100921094457.GD3168@pengutronix.de> <4C9A0518.3090904@st.com>
+ <20100922141223.GF2693@pengutronix.de> <4C9A1427.7030806@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <8F7AF80515AF0D4D93307E594F3CB40E5F57C548@dlee03.ent.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "Kanigeri, Hari" <h-kanigeri2@ti.com>
-Cc: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:52374 "EHLO
+	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752855Ab0IWGth convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Sep 2010 02:49:37 -0400
+In-Reply-To: <4C9A1427.7030806@st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "matt@console-pimps.org" <matt@console-pimps.org>
 
-Hi Hari,
+On 09/22/2010 04:35 PM, Peppe CAVALLARO wrote:
+> No it's not late but I need the dev structure from the platform_device.
+> We could add the "struct device dev;" in the sdhci_host structure
+> instead of.
+> In this case the sdhci_host should be moved within the new
+> include/linux/mmc/sdhci.h file.
+> Indeed, this could make sense because the drivers/mmc/host/sdhci.h will
+> only have the HW register configuration. Shared macros (quirks) and
+> structures among sdhci driver based could be moved in
+> include/linux/mmc/sdhci.h header.
+> 
+> What do you think?
 
-On Thu, Sep 23, 2010 at 1:19 AM, Kanigeri, Hari <h-kanigeri2@ti.com> wr=
-ote:
-> Kishore,
->
->> +int twl6030_mmc_card_detect(struct device *dev, int slot)
->> +{
->> + =A0 =A0 int ret =3D -EIO;
->> + =A0 =A0 u8 read_reg =3D 0;
->> + =A0 =A0 struct platform_device *pdev =3D to_platform_device(dev);
->> +
->> + =A0 =A0 switch (pdev->id) {
->> + =A0 =A0 case 0:
->> + =A0 =A0 =A0 =A0 =A0 =A0 /*
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* BIT0 of REG_MMC_CTRL
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* 0 - Card not present ,1 - Card presen=
-t
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0=
-, &read_reg,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 TWL6030_MMCCTRL);
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (ret >=3D 0)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D read_reg & STS_MMC=
-;
->> + =A0 =A0 =A0 =A0 =A0 =A0 break;
->
-> nitpick: may be you don't need a switch statement for only one case.
 
-=46rom future perspective,since there are 5 MMC controllers on OMAP4
-and current patch supports card detect feature only for one controller =
-i.e MMC1
-as of now. Once the interfaces connected on the remaining 4 MMC control=
-lers
-are defined further additions will be required for respective cases.
+Hello!
+I've just something working on my ST Linux box (ST40 CPU).
+I mean that I'm using the sdhci-pltfm driver with some of the
+modifications discussed in this thread.
 
-<snip>
+I'll post some patches asap.
 
-Regards,
-Kishore
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Pepep
