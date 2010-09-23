@@ -1,47 +1,61 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: [PATCH] sdhci-s3c: fix NULL ptr access in sdhci_s3c_remove
-Date: Thu, 23 Sep 2010 16:22:05 +0200
-Message-ID: <1285251725-6210-1-git-send-email-m.szyprowski@samsung.com>
+From: sunil <usdutt@gmail.com>
+Subject: mmc-spi block driver
+Date: Thu, 23 Sep 2010 14:48:16 +0000 (UTC)
+Message-ID: <loom.20100923T163849-19@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.w1.samsung.com ([210.118.77.11]:43406 "EHLO
-	mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754034Ab0IWOWK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 10:22:10 -0400
+Received: from lo.gmane.org ([80.91.229.12]:60038 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753814Ab0IWOzK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Sep 2010 10:55:10 -0400
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1OynCT-0004Cc-AJ
+	for linux-mmc@vger.kernel.org; Thu, 23 Sep 2010 16:55:05 +0200
+Received: from 59.96.101.123 ([59.96.101.123])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 16:55:05 +0200
+Received: from usdutt by 59.96.101.123 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 16:55:05 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: m.szyprowski@samsung.com, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, akpm@linux-foundation.org, w.sang@pengutronix.de
+To: linux-mmc@vger.kernel.org
 
-If not all clocks has been defined in platform data, driver will cause
-a null pointer dereference when it is being removed. This patch fixes
-this issue.
+Hi All,
+I am working on integrating the mmc driver on Linux and when I try to mount the
+device I always get the error "mounting /dev/mmc on m failed: Invalid argument" .
+I also see that when ever I try to mount,the drivers request function is invoked
+to read the first sector(MBR).Thus the driver always reads the MBR and returns
+to the filesystem.The moment I load the driver the drivers request function is
+invoked to read the first 8 sectors.The data for the block0 is as follows .The
+rest blocks are all 0.
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000004bc1f59e00
+033d061cfcd9f90007531e000000000000000000000000000000000000000000000000055aa.
+Interpreting the above data I could see that the volumeID is present at the
+sector location 0x000000f9.
+After giving this information I feel the file system should interpret the MBR's
+partition table and issue request with the calculated sector address.
 
-Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/sdhci-s3c.c |    6 ++++--
- 1 files changed, 4 insertions(+), 2 deletions(-)
+he following are the instructions I have followed to mount the module.
+mknode /dev/mmc b 254 0.
+mount -t vfat /dev/mmc /mmc.(invalid argument)
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 71ad416..757d92c 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -481,8 +481,10 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- 	sdhci_remove_host(host, 1);
- 
- 	for (ptr = 0; ptr < 3; ptr++) {
--		clk_disable(sc->clk_bus[ptr]);
--		clk_put(sc->clk_bus[ptr]);
-+		if (sc->clk_bus[ptr]) {
-+			clk_disable(sc->clk_bus[ptr]);
-+			clk_put(sc->clk_bus[ptr]);
-+		}
- 	}
- 	clk_disable(sc->clk_io);
- 	clk_put(sc->clk_io);
--- 
-1.7.1.569.g6f426
+When ever I do the mount I could see the drivers request function is invoked to
+read the first sector(sector 0).What should I do to make the file system read
+the volume ID (0x00000f9) sector.
+Can any one help me in debugging this issue.
+Regards,
+Sunil
 
