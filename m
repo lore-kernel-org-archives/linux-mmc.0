@@ -1,68 +1,80 @@
-From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: [PATCH (mmc-next) 3/3] mmc: fix a warning when compile the sdhci d.d.
-Date: Thu, 23 Sep 2010 11:14:26 +0200
-Message-ID: <1285233266-5039-3-git-send-email-peppe.cavallaro@st.com>
-References: <1285233266-5039-1-git-send-email-peppe.cavallaro@st.com>
- <1285233266-5039-2-git-send-email-peppe.cavallaro@st.com>
+From: Peppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: Re: [PATCH] mmc: add SDHCI driver for STM platforms (V2)
+Date: Thu, 23 Sep 2010 11:30:26 +0200
+Message-ID: <4C9B1E32.4070700@st.com>
+References: <1284970817-11293-1-git-send-email-peppe.cavallaro@st.com>
+ <20100920083842.GA4058@pengutronix.de> <4C98792C.5000900@st.com>
+ <20100921094457.GD3168@pengutronix.de> <4C9A0518.3090904@st.com>
+ <20100922141223.GF2693@pengutronix.de> <4C9A1427.7030806@st.com>
+ <20100923084716.GB2994@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog109.obsmtp.com ([207.126.144.127]:39267 "EHLO
-	eu1sys200aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752255Ab0IWJOp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 05:14:45 -0400
-Received: from zeta.dmz-eu.st.com (ns2.st.com [164.129.230.9])
-	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 57CE9128
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 09:14:43 +0000 (GMT)
-Received: from mail3.ctn.st.com (mail3.ctn.st.com [164.130.116.150])
-	by zeta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 2135F1EFE
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 09:14:43 +0000 (GMT)
-In-Reply-To: <1285233266-5039-2-git-send-email-peppe.cavallaro@st.com>
+Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:39112 "EHLO
+	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752489Ab0IWJbH convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Sep 2010 05:31:07 -0400
+In-Reply-To: <20100923084716.GB2994@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "matt@console-pimps.org" <matt@console-pimps.org>
 
-This patch fixes a warning when compile the sdhci:
-  pwr may be used uninitialized in sdhci_set_power
-Also removes some include files that live in sdhci.h
-header file.
+On 09/23/2010 10:48 AM, Wolfram Sang wrote:
+> I think it will be better to give init() access to all information
+> needed than to implement another hook. I tried with this patch
+> 
+> https://patchwork.kernel.org/patch/196992/
+> 
+> I am still not sure what kind of information you need from the pdev. Can
+> you create a branch somewhere with your current work?
 
-Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
----
- drivers/mmc/host/sdhci.c |   11 ++---------
- 1 files changed, 2 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 5928b0a..058dacd 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -18,13 +18,8 @@
- #include <linux/io.h>
- #include <linux/dma-mapping.h>
- #include <linux/slab.h>
--#include <linux/scatterlist.h>
- #include <linux/regulator/consumer.h>
- 
--#include <linux/leds.h>
--
--#include <linux/mmc/host.h>
--
- #include "sdhci.h"
- 
- #define DRIVER_NAME "sdhci"
-@@ -1050,11 +1045,9 @@ out:
- 
- static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
- {
--	u8 pwr;
-+	u8 pwr = 0;
- 
--	if (power == (unsigned short)-1)
--		pwr = 0;
--	else {
-+	if (power != (unsigned short)-1) {
- 		switch (1 << power) {
- 		case MMC_VDD_165_195:
- 			pwr = SDHCI_POWER_180;
--- 
-1.5.5.6
+Hi Wolfram,
+I've just sent some patches and I used the .init as you wanted.
 
+Fortunately the problem can be resolved without modifying .init within
+the sdhci_pltfm_data structure.
+
+The sdhci_host structure has the mmc field that also has the pointer to
+the device parent.
+This can be used for getting the device structure pointer in my platform.
+For example, below there is the piece of code added, in my platform, to
+use the sdhci-pltfm driver.
+
+It works fine without modifying other files.
+
+What do you think?
+
+Regards,
+Peppe
+
+[snip]
+
+static int mmc_pad_resources(struct sdhci_host *sdhci)
+{
+        if (!devm_stm_pad_claim(sdhci->mmc->parent,
+                                &stx7108_mmc_pad_config,
+                                dev_name(sdhci->mmc->parent)))
+                return -ENODEV;
+
+        return 0;
+}
+
+static struct sdhci_pltfm_data stx7108_mmc_platform_data = {
+                .init = &mmc_pad_resources,
+                .quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+};
+
+static struct platform_device stx7108_mmc_device = {
+                .name = "sdhci",
+
+[snip]
+
+> 
+> Regards,
+> 
+>    Wolfram
+> 
