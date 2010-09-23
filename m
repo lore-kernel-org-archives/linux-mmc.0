@@ -1,53 +1,57 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] sdhci: print out controller name for register debug
-Date: Thu, 23 Sep 2010 19:11:49 +0200
-Message-ID: <20100923171149.GC1343@pengutronix.de>
-References: <A9891FF4-9D4D-4F5C-ACE9-B272B53CCC08@marvell.com> <20100920061459.GA9353@pengutronix.de> <5F58EC42-069D-4469-BF13-F741674BE763@marvell.com> <57E26860-E2EC-4510-B928-62BCC7DC1AF8@marvell.com> <4C984B01.2000005@nokia.com> <F0EF1C13-8902-4839-9D76-C3045018660E@marvell.com> <1CE3965A-95E9-41A7-8333-432778AAC336@marvell.com> <20100922230805.GA6659@void.printf.net> <20100923083946.GA2994@pengutronix.de> <20100923161215.GA27023@void.printf.net>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] sdhci-s3c: fix NULL ptr access in sdhci_s3c_remove
+Date: Thu, 23 Sep 2010 12:08:03 -0700
+Message-ID: <20100923120803.832975f6.akpm@linux-foundation.org>
+References: <1285251725-6210-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="wxDdMuZNg1r63Hyj"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:59671 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754503Ab0IWRLw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 13:11:52 -0400
-Content-Disposition: inline
-In-Reply-To: <20100923161215.GA27023@void.printf.net>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:47105 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755813Ab0IWTJJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 15:09:09 -0400
+In-Reply-To: <1285251725-6210-1-git-send-email-m.szyprowski@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Philip Rakity <prakity@marvell.com>, Adrian Hunter <adrian.hunter@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, w.sang@pengutronix.de
 
+On Thu, 23 Sep 2010 16:22:05 +0200
+Marek Szyprowski <m.szyprowski@samsung.com> wrote:
 
---wxDdMuZNg1r63Hyj
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> If not all clocks has been defined in platform data, driver will cause
+> a null pointer dereference when it is being removed. This patch fixes
+> this issue.
+> 
+> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |    6 ++++--
+>  1 files changed, 4 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 71ad416..757d92c 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -481,8 +481,10 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+>  	sdhci_remove_host(host, 1);
+>  
+>  	for (ptr = 0; ptr < 3; ptr++) {
+> -		clk_disable(sc->clk_bus[ptr]);
+> -		clk_put(sc->clk_bus[ptr]);
+> +		if (sc->clk_bus[ptr]) {
+> +			clk_disable(sc->clk_bus[ptr]);
+> +			clk_put(sc->clk_bus[ptr]);
+> +		}
+>  	}
+>  	clk_disable(sc->clk_io);
+>  	clk_put(sc->clk_io);
 
+The patch applies OK to 2.6.35.  Is the bug present there as well?  If
+so, should we fix it in earlier kernels?  If so then the way in which
+we indicate this is by adding
 
-> That's a much bigger change, though -- you'd be making sdhci_dumpregs()
-> a no-op unless CONFIG_MMC_DEBUG is defined, right?  That's a change in
-> semantics, since it's intentionally called from many non-debug error
-> paths right now.
+	Cc: <stable@kernel.org>
 
-Hmm, true. dev_info would keep the semantics then, but change the loglevel.
-Well, not worth the fuss right now...
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---wxDdMuZNg1r63Hyj
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAkybilUACgkQD27XaX1/VRtYLwCgvrWsXTxphim3Hayatv4ohFuk
-eoQAoLNy4iluCR/y6h9ikwVMVKnvobqP
-=wfSQ
------END PGP SIGNATURE-----
-
---wxDdMuZNg1r63Hyj--
+to the changelog.
