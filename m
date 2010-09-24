@@ -1,70 +1,44 @@
-From: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Subject: Re: [PATCH] sdhci: allow controller private registers to be
- changaed on reset
-Date: Fri, 24 Sep 2010 18:26:52 +0100
-Message-ID: <20100924182652.59f38462@lxorguk.ukuu.org.uk>
-References: <3622567C-B5F4-40D4-A525-0AAE641E2B28@marvell.com>
-	<73FAA3FF-6415-4A67-94FE-F93C3DA4A05C@marvell.com>
-	<772C1381-0CF0-41CD-B580-CBD090BBA1AB@marvell.com>
+From: "kishore kadiyala" <kishore.kadiyala@ti.com>
+Subject: [PATCH v4 0/4] omap4 hsmmc: Card detect and Register offset
+     handling
+Date: Fri, 24 Sep 2010 22:42:06 +0530 (IST)
+Message-ID: <7100.10.24.255.18.1285348326.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from earthlight.etchedpixels.co.uk ([81.2.110.250]:53180 "EHLO
-	www.etchedpixels.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1757143Ab0IXRDk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Sep 2010 13:03:40 -0400
-In-Reply-To: <772C1381-0CF0-41CD-B580-CBD090BBA1AB@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
 
-On Fri, 24 Sep 2010 09:42:15 -0700
-Philip Rakity <prakity@marvell.com> wrote:
+The patch series is based on mainline 2.6.36-rc5.
+The series is tested on OMAP3430SDP and OMAP4430SDP and has dependency on
+http://www.mail-archive.com/linux-omap@vger.kernel.org/msg34718.html
 
-> >From 9d64df0fa6874371446147f67c071e78c587c0d6 Mon Sep 17 00:00:00 2001
-> From: Philip Rakity <prakity@marvell.com>
-> Date: Fri, 24 Sep 2010 05:27:11 -0700
-> Subject: [PATCH] sdhci: allow controller private registers to be changaed on reset
-> 
-> allow controllers that have private registers that are reset when
-> the controller is reset. They need to be reprogrammed back to their
-> values when the reset happens.  Provide a hook to allow this to happen.
-> 
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> ---
->  drivers/mmc/host/sdhci.c |    3 +++
->  drivers/mmc/host/sdhci.h |    1 +
->  2 files changed, 4 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 401527d..0774dad 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -174,6 +174,9 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
->  
->  	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
->  		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
-> +
-> +	if (host->ops->platform_specific_reset)
-> +		host->ops->platform_specific_reset(host, mask);
->  }
->  
->  static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index d316bc7..f68af47 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -323,6 +323,7 @@ struct sdhci_ops {
->  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
->  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
->  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
-> +	void	(*platform_specific_reset)(struct sdhci_host *host, u8 mask);
+V3:
+http://www.mail-archive.com/linux-omap@vger.kernel.org/msg35423.html
 
-See the patches I posted earlier about reset. All of sdhci_reset could be
-cleaned up further by replacing sdhci_reset as a whole with a hookable
-interface, and the hook you propose isn't sufficient for the Intel
-devices, nor can it eliminate some of the other quirk flags.
+V2:
+http://www.mail-archive.com/linux-omap@vger.kernel.org/msg35135.html
 
-Alan
+V1:
+http://www.mail-archive.com/linux-omap@vger.kernel.org/msg34040.html
+
+Kishore Kadiyala (3):
+  omap4 hsmmc : Adding card detect support for MMC1
+  omap4 hsmmc: Register offset handling
+  omap4 hsmmc: Update ocr mask for MMC2 for regulator to use
+
+Benoit Cousson (1);
+  omap4 hsmmc: Fix the init if CONFIG_MMC_OMAP_HS is not set
+
+ arch/arm/mach-omap2/board-4430sdp.c   |   16 ++++++-
+ arch/arm/mach-omap2/devices.c         |    8 +--
+ arch/arm/mach-omap2/hsmmc.c           |    4 ++
+ arch/arm/plat-omap/include/plat/mmc.h |    3 +
+ drivers/mfd/twl6030-irq.c             |   73 +++++++++++++++++++++++++++++++++
+ drivers/mmc/host/omap_hsmmc.c         |   18 +++++++-
+ include/linux/i2c/twl.h               |   31 ++++++++++++++
+ 7 files changed, 144 insertions(+), 9 deletions(-)
+
+
