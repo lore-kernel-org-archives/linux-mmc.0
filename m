@@ -1,484 +1,482 @@
 From: Richard Zhu <r65037@freescale.com>
-Subject: [PATCH 3/4] esdhc-3 esdhc: fsl esdhc driver based on sdhci driver
-Date: Fri, 24 Sep 2010 11:54:26 +0800
-Message-ID: <1285300467-5158-4-git-send-email-r65037@freescale.com>
+Subject: [PATCH 2/4] esdhc-2 mx51: Modify the MSL codes when upstreaming fsl esdhc driver
+Date: Fri, 24 Sep 2010 11:54:25 +0800
+Message-ID: <1285300467-5158-3-git-send-email-r65037@freescale.com>
 References: <1285300467-5158-1-git-send-email-r65037@freescale.com>
  <1285300467-5158-2-git-send-email-r65037@freescale.com>
- <1285300467-5158-3-git-send-email-r65037@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:47813
-	"EHLO DB3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755458Ab0IXDuy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 23:50:54 -0400
-Received: from mail27-db3 (localhost.localdomain [127.0.0.1])	by
- mail27-db3-R.bigfish.com (Postfix) with ESMTP id DE565AA81CC	for
- <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2010 04:01:31 +0000 (UTC)
-Received: from DB3EHSMHS012.bigfish.com (unknown [10.3.81.243])	by
- mail27-db3.bigfish.com (Postfix) with ESMTP id 426281138050	for
- <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2010 04:01:30 +0000 (UTC)
-Received: from az33smr01.freescale.net (az33smr01.freescale.net
- [10.64.34.199])	by de01egw01.freescale.net (8.14.3/8.14.3) with ESMTP id
- o8O3olLS001490	for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 20:50:47
- -0700 (MST)
+Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:58186
+	"EHLO VA3EHSOBE009.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755458Ab0IXDu4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 23:50:56 -0400
+Received: from mail136-va3 (localhost.localdomain [127.0.0.1])	by
+ mail136-va3-R.bigfish.com (Postfix) with ESMTP id 261A218701D5	for
+ <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2010 03:50:55 +0000 (UTC)
+Received: from VA3EHSMHS031.bigfish.com (unknown [10.7.14.238])	by
+ mail136-va3.bigfish.com (Postfix) with ESMTP id BE50131004D	for
+ <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2010 03:50:51 +0000 (UTC)
+Received: from de01smr02.am.mot.com (de01smr02.freescale.net [10.208.0.151])
+	by az33egw01.freescale.net (8.14.3/8.14.3) with ESMTP id o8O3olAe026932	for
+ <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 20:50:48 -0700 (MST)
 Received: from shlinux1.ap.freescale.net ([10.192.225.216])	by
- az33smr01.freescale.net (8.13.1/8.13.0) with ESMTP id o8O3oj9L008271	for
- <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 22:50:46 -0500 (CDT)
-In-Reply-To: <1285300467-5158-3-git-send-email-r65037@freescale.com>
+ de01smr02.am.mot.com (8.13.1/8.13.0) with ESMTP id o8O46Gmi024353	for
+ <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 23:06:16 -0500 (CDT)
+In-Reply-To: <1285300467-5158-2-git-send-email-r65037@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: w.sang@pengutronix.de, u.kleine-koenig@pengutronix.de, linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Richard Zhu <r65037@freescale.com>
 
-Based on SDHCI API, esdhc driver supports PIO and simple internal
-DMA modes.
+Modify the machine specific codes and add the eSDHC1 and eSDHC2 support
+on MX51 BBG platform.
+IOMUX, CLOCK, register the device.
 
 Signed-off-by: Richard Zhu <r65037@freescale.com>
 ---
- drivers/mmc/host/Kconfig     |   13 ++
- drivers/mmc/host/Makefile    |    1 +
- drivers/mmc/host/sdhci-imx.c |  395 ++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 409 insertions(+), 0 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-imx.c
+ arch/arm/mach-mx5/board-mx51_babbage.c      |   38 ++++++
+ arch/arm/mach-mx5/clock-mx51.c              |  193 +++++++++++++++++++++++++++
+ arch/arm/mach-mx5/devices.c                 |   46 +++++++
+ arch/arm/mach-mx5/devices.h                 |    2 +
+ arch/arm/plat-mxc/include/mach/iomux-mx51.h |   33 +++--
+ 5 files changed, 298 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 283190b..ce2840c 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -130,6 +130,19 @@ config MMC_SDHCI_CNS3XXX
- 
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_IMX
-+	tristate "Freescale i.MX platform eSDHCI support"
-+	depends on ARCH_MX5 && MMC_SDHCI
-+	depends on MMC_SDHCI_PLTFM
-+	select MMC_SDHCI_IO_ACCESSORS
-+	help
-+	  This selects the Freescale i.MX Enhanced Secure Card Host
-+	  Controller Interface.
-+	  If you have a i.MX platform with a Multimedia Card slot,
-+	  say Y or M here.
-+
-+	  If unsure, say N.
-+
- config MMC_SDHCI_S3C
- 	tristate "SDHCI support on Samsung S3C SoC"
- 	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 840bcb5..ae7c3e7 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -40,6 +40,7 @@ obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
- obj-$(CONFIG_MMC_SDHCI_PLTFM)			+= sdhci-platform.o
- sdhci-platform-y				:= sdhci-pltfm.o
- sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX)	+= sdhci-cns3xxx.o
-+sdhci-platform-$(CONFIG_MMC_SDHCI_IMX)		+= sdhci-imx.o
- 
- obj-$(CONFIG_MMC_SDHCI_OF)	+= sdhci-of.o
- sdhci-of-y				:= sdhci-of-core.o
-diff --git a/drivers/mmc/host/sdhci-imx.c b/drivers/mmc/host/sdhci-imx.c
-new file mode 100644
-index 0000000..6e34bcd
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-imx.c
-@@ -0,0 +1,395 @@
-+/*
-+ * Copyright (C) 2010 Freescale Semiconductor, Inc. All Rights Reserved.
-+ */
-+
-+/*
-+ * sdhci-imx.c Support for SDHCI platform devices
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-+ */
-+
-+/* Supports:
-+ * SDHCI imx devices
-+ *
-+ * Inspired by sdhci-pci.c, by Pierre Ossman
-+ */
-+
-+#include <linux/delay.h>
-+#include <linux/highmem.h>
-+#include <linux/platform_device.h>
-+#include <linux/clk.h>
-+#include <linux/regulator/consumer.h>
-+#include <linux/gpio.h>
-+#include <linux/io.h>
-+#include <linux/irq.h>
-+#include <linux/mmc/host.h>
+diff --git a/arch/arm/mach-mx5/board-mx51_babbage.c b/arch/arm/mach-mx5/board-mx51_babbage.c
+index 6e384d9..e79f8a1 100644
+--- a/arch/arm/mach-mx5/board-mx51_babbage.c
++++ b/arch/arm/mach-mx5/board-mx51_babbage.c
+@@ -17,6 +17,7 @@
+ #include <linux/delay.h>
+ #include <linux/io.h>
+ #include <linux/fsl_devices.h>
 +#include <linux/sdhci-pltfm.h>
-+
+ 
+ #include <mach/common.h>
+ #include <mach/hardware.h>
+@@ -24,6 +25,7 @@
+ #include <mach/iomux-mx51.h>
+ #include <mach/i2c.h>
+ #include <mach/mxc_ehci.h>
 +#include <mach/mmc.h>
+ 
+ #include <asm/irq.h>
+ #include <asm/setup.h>
+@@ -33,6 +35,8 @@
+ 
+ #include "devices.h"
+ 
++#define BABBAGE_SDHCI1_WP	(0*32 + 1)	/* GPIO_1_1 */
++#define BABBAGE_SDHCI2_WP	(0*32 + 5)	/* GPIO_1_5 */
+ #define BABBAGE_USB_HUB_RESET	(0*32 + 7)	/* GPIO_1_7 */
+ #define BABBAGE_USBH1_STP	(0*32 + 27)	/* GPIO_1_27 */
+ #define BABBAGE_PHY_RESET (1*32 +5)	/* GPIO_2_5 */
+@@ -93,6 +97,24 @@ static struct pad_desc mx51babbage_pads[] = {
+ 
+ 	/* USB HUB reset line*/
+ 	MX51_PAD_GPIO_1_7__GPIO_1_7,
 +
-+#include "sdhci.h"
-+#include "sdhci-pltfm.h"
++	/* SDHCI1 IOMUX */
++	MX51_PAD_SD1_CMD__SD1_CMD,
++	MX51_PAD_SD1_CLK__SD1_CLK,
++	MX51_PAD_SD1_DATA0__SD1_DATA0,
++	MX51_PAD_SD1_DATA1__SD1_DATA1,
++	MX51_PAD_SD1_DATA2__SD1_DATA2,
++	MX51_PAD_SD1_DATA3__SD1_DATA3,
++	MX51_PAD_GPIO_1_1__GPIO_1_1,
 +
-+/* Vendor specified registors */
-+#define	FSL_SDHCI_WML 		0x44
-+#define	FSL_SDHCI_WML_16_WORDS 	0x08100810
-+#define	FSL_SDHCI_WML_32_WORDS 	0x08200820
-+#define	FSL_SDHCI_WML_64_WORDS 	0x08400840
-+#define	FSL_SDHCI_WML_128_WORDS 0x08800880
++	/* SDHCI2 IOMUX */
++	MX51_PAD_SD2_CMD__SD2_CMD,
++	MX51_PAD_SD2_CLK__SD2_CLK,
++	MX51_PAD_SD2_DATA0__SD2_DATA0,
++	MX51_PAD_SD2_DATA1__SD2_DATA1,
++	MX51_PAD_SD2_DATA2__SD2_DATA2,
++	MX51_PAD_SD2_DATA3__SD2_DATA3,
++	MX51_PAD_GPIO_1_5__GPIO_1_5,
+ };
+ 
+ /* Serial ports */
+@@ -240,6 +262,20 @@ static int __init babbage_otg_mode(char *options)
+ }
+ __setup("otg_mode=", babbage_otg_mode);
+ 
++struct sdhci_pltfm_data mmc1_data = {
++	/* Board specified max bus width */
++	.caps = MMC_CAP_4_BIT_DATA,
++	/* GPIO pin number that used as the Write Protect */
++	.wp_gpio = BABBAGE_SDHCI1_WP,
++};
 +
-+/* Non-standard clock control registor */
-+#define ESDHC_SYSTEM_CONTROL	0x2C
-+#define ESDHC_CLOCK_MASK	0x0000FFF0
-+#define ESDHC_PREDIV_SHIFT	8
-+#define ESDHC_DIVIDER_SHIFT	4
-+#define ESDHC_CLOCK_PEREN	0x00000004
-+#define ESDHC_CLOCK_HCKEN	0x00000002
-+#define ESDHC_CLOCK_IPGEN	0x00000001
++struct sdhci_pltfm_data mmc2_data = {
++	/* Board specified max bus width */
++	.caps = MMC_CAP_4_BIT_DATA,
++	/* GPIO pin number that used as the Write Protect */
++	.wp_gpio = BABBAGE_SDHCI2_WP,
++};
 +
-+/* Non-standard host control registor */
-+#define	ESDHC_SDHCI_CTRL_8BITBUS 	0x00000004
-+#define	FSL_ESDHC_HOST_CONTROL_RES 	0x33E
-+#define ESDHC_HOST_CONTROL_LE 		0x20
-+
-+/*****************************************************************************\
-+ *                                                                           *
-+ * SDHCI core callbacks                                                      *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+static u32 sdhci_imx_readl(struct sdhci_host *host, int reg)
+ /*
+  * Board specific initialization.
+  */
+@@ -255,6 +291,8 @@ static void __init mxc_board_init(void)
+ 	mxc_register_device(&mxc_i2c_device0, &babbage_i2c_data);
+ 	mxc_register_device(&mxc_i2c_device1, &babbage_i2c_data);
+ 	mxc_register_device(&mxc_hsi2c_device, &babbage_hsi2c_data);
++	mxc_register_device(&mxcsdhc1_device, &mmc1_data);
++	mxc_register_device(&mxcsdhc2_device, &mmc2_data);
+ 
+ 	if (otg_mode_host)
+ 		mxc_register_device(&mxc_usbdr_host_device, &dr_utmi_config);
+diff --git a/arch/arm/mach-mx5/clock-mx51.c b/arch/arm/mach-mx5/clock-mx51.c
+index 6af69de..3526fd3 100644
+--- a/arch/arm/mach-mx5/clock-mx51.c
++++ b/arch/arm/mach-mx5/clock-mx51.c
+@@ -41,6 +41,35 @@ static struct clk usboh3_clk;
+ 
+ #define MAX_DPLL_WAIT_TRIES	1000 /* 1000 * udelay(1) = 1ms */
+ 
++static void __calc_pre_post_dividers(u32 div, u32 *pre, u32 *post)
 +{
-+	return readl(host->ioaddr + reg);
-+}
++	u32 min_pre, temp_pre, old_err, err;
 +
-+static u16 sdhci_imx_readw(struct sdhci_host *host, int reg)
-+{
-+	u32 val;
-+	u16 rc;
-+
-+	if (reg % 4 == 3) {
-+		printk(KERN_ERR "Invalid reg address!\n");
-+		return 0;
-+	}
-+
-+	val = readl(host->ioaddr + (reg / 4) * 4);
-+	rc = (val >> (reg % 4) * 8) & 0xFFFF;
-+
-+	return rc;
-+}
-+
-+static u8 sdhci_imx_readb(struct sdhci_host *host, int reg)
-+{
-+	u32 val;
-+	u8 rc;
-+
-+	val = readl(host->ioaddr + (reg / 4) * 4);
-+	rc = (val >> (reg % 4) * 8) & 0xFF;
-+	if (reg == SDHCI_HOST_CONTROL) {
-+		/* Bus width */
-+		if (val & ESDHC_SDHCI_CTRL_8BITBUS) {
-+			rc |= SDHCI_CTRL_8BITBUS;
-+			rc &= ~SDHCI_CTRL_4BITBUS;
-+		} else if (val & SDHCI_CTRL_4BITBUS) {
-+			rc &= ~SDHCI_CTRL_8BITBUS;
-+			rc |= SDHCI_CTRL_4BITBUS;
-+		} else {
-+			rc &= ~SDHCI_CTRL_8BITBUS;
-+			rc &= ~SDHCI_CTRL_4BITBUS;
-+		}
-+		/* DMA */
-+		if (val & (SDHCI_CTRL_DMA_MASK << 5))
-+			rc |= ((val >> 5) & SDHCI_CTRL_DMA_MASK);
-+		/* FIXME D3CD */
-+	}
-+
-+	return rc;
-+}
-+
-+static void sdhci_imx_writel(struct sdhci_host *host, u32 val, int reg)
-+{
-+	writel(val, host->ioaddr + reg);
-+}
-+
-+static void sdhci_imx_writew(struct sdhci_host *host, u16 val, int reg)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	u32 io_val;
-+
-+	if (reg % 4 == 3) {
-+		printk(KERN_ERR "Invalid reg address!\n");
-+		return;
-+	}
-+
-+	if (reg == SDHCI_BLOCK_SIZE) {
-+		/*
-+		 * Two last DMA bits are reserved, and first one is used for
-+		 * non-standard blksz of 4096 bytes that we don't support
-+		 * yet. So clear the DMA boundary bits.
-+		 */
-+		val &= ~SDHCI_MAKE_BLKSZ(0x7, 0);
-+	}
-+
-+	io_val = readl(host->ioaddr + (reg / 4) * 4);
-+	io_val &= ~(0xFFFF << ((reg % 4) * 8));
-+	io_val |= val << ((reg % 4) * 8);
-+
-+	switch (reg) {
-+	case SDHCI_TRANSFER_MODE:
-+		/*
-+		 * Postpone this write, we must do it together with a
-+		 * command write that is down below.
-+		 */
-+		pltfm_host->scratchpad = val;
-+		return;
-+	case SDHCI_COMMAND:
-+		writel(io_val | pltfm_host->scratchpad,
-+				    host->ioaddr +  SDHCI_TRANSFER_MODE);
-+		/*
-+		 * Make a double check that the warte mark level register is
-+		 * configured properly. default value is FSL_SDHCI_WML_16_WORDS
-+		 */
-+		if (readl(host->ioaddr + FSL_SDHCI_WML)
-+				== FSL_SDHCI_WML_16_WORDS) {
-+			if (host->flags & SDHCI_REQ_USE_DMA)
-+				writel(FSL_SDHCI_WML_64_WORDS,
-+						host->ioaddr + FSL_SDHCI_WML);
-+			else
-+				writel(FSL_SDHCI_WML_128_WORDS,
-+						host->ioaddr + FSL_SDHCI_WML);
-+		}
-+		return;
-+	}
-+
-+	writel(io_val, host->ioaddr + (reg / 4) * 4);
-+}
-+
-+static void sdhci_imx_set_power(struct sdhci_host *host, u8 power)
-+{
-+	int voltage = 0;
-+
-+	/* There is no sdhci standard PWR CTL REG in imx sdhci */
-+	if (host->pwr == power)
-+		return;
-+
-+	if (host->vmmc) {
-+		if (power == (unsigned short)-1) {
-+			regulator_disable(host->vmmc);
-+			dev_dbg(mmc_dev(host->mmc), "mmc power off\n");
-+		} else {
-+			if (power == 7)
-+				voltage = 1800000;
-+			else if (power >= 8)
-+				voltage = 2000000 + (power - 8) * 100000;
-+			regulator_set_voltage(host->vmmc, voltage, voltage);
-+
-+			if (regulator_enable(host->vmmc) == 0) {
-+				dev_dbg(mmc_dev(host->mmc), "mmc power on\n");
-+				msleep(1);
++	if (div >= 512) {
++		*pre = 8;
++		*post = 64;
++	} else if (div >= 8) {
++		min_pre = (div - 1) / 64 + 1;
++		old_err = 8;
++		for (temp_pre = 8; temp_pre >= min_pre; temp_pre--) {
++			err = div % temp_pre;
++			if (err == 0) {
++				*pre = temp_pre;
++				break;
++			}
++			err = temp_pre - err;
++			if (err < old_err) {
++				old_err = err;
++				*pre = temp_pre;
 +			}
 +		}
++		*post = (div + *pre - 1) / *pre;
++	} else if (div < 8) {
++		*pre = div;
++		*post = 1;
 +	}
-+
-+	host->pwr = power;
 +}
 +
-+static void sdhci_imx_writeb(struct sdhci_host *host, u8 val, int reg)
+ static int _clk_ccgr_enable(struct clk *clk)
+ {
+ 	u32 reg;
+@@ -762,6 +791,160 @@ static struct clk kpp_clk = {
+ 	.id = 0,
+ };
+ 
++static int _clk_esdhc1_set_parent(struct clk *clk, struct clk *parent)
 +{
-+	u32 io_val;
-+
-+	/* Since there is no power register in FSL eSDHC, handle it in SW */
-+	if (reg == SDHCI_POWER_CONTROL) {
-+		sdhci_imx_set_power(host, val);
-+		return;
-+	}
-+
-+	if (reg == SDHCI_HOST_CONTROL) {
-+		io_val = readl(host->ioaddr + SDHCI_HOST_CONTROL);
-+		/* Bit7~6, andi bit0 */
-+		io_val |= (val & ~FSL_ESDHC_HOST_CONTROL_RES);
-+		/* Ensure the LE mode */
-+		io_val |= ESDHC_HOST_CONTROL_LE;
-+		/* Configure the bus_width 8bits, 4bits, or 1bit*/
-+		if (val & SDHCI_CTRL_8BITBUS) {
-+			io_val |= ESDHC_SDHCI_CTRL_8BITBUS;
-+			io_val &= ~SDHCI_CTRL_4BITBUS;
-+		} else if (val & SDHCI_CTRL_4BITBUS) {
-+			io_val &= ~ESDHC_SDHCI_CTRL_8BITBUS;
-+			io_val |= SDHCI_CTRL_4BITBUS;
-+		} else {
-+			io_val &= ~ESDHC_SDHCI_CTRL_8BITBUS;
-+			io_val &= ~SDHCI_CTRL_4BITBUS;
-+		}
-+
-+		/* Configure the DMA */
-+		if (val & SDHCI_CTRL_DMA_MASK)
-+			io_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
-+		writel(io_val, host->ioaddr + SDHCI_HOST_CONTROL);
-+
-+		return;
-+	}
-+
-+	io_val = readl(host->ioaddr + (reg / 4) * 4);
-+	io_val &= ~(0xFF << ((reg % 4) * 8));
-+	io_val |= val << ((reg % 4) * 8);
-+
-+	writel(io_val, host->ioaddr + (reg / 4) * 4);
-+}
-+
-+static unsigned int sdhci_imx_get_max_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return clk_get_rate(pltfm_host->clk);
-+}
-+
-+static unsigned int sdhci_imx_get_min_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return clk_get_rate(pltfm_host->clk) / 256 / 16;
-+}
-+
-+static unsigned int sdhci_imx_get_timeout_clock(struct sdhci_host *host)
-+{
-+	return sdhci_imx_get_max_clock(host) / 1000000;
-+}
-+
-+static unsigned int sdhci_imx_get_ro(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return gpio_get_value(pltfm_host->wp_gpio);
-+}
-+
-+static void sdhci_imx_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+	int pre_div = 2;
-+	int div = 1;
-+	u32 temp;
-+
-+	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-+	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
-+			| ESDHC_CLOCK_MASK);
-+	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-+
-+	if (clock == 0)
-+		goto out;
-+
-+	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
-+		pre_div *= 2;
-+
-+	while (host->max_clk / pre_div / div > clock && div < 16)
-+		div++;
-+
-+	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
-+		clock, host->max_clk / pre_div / div);
-+
-+	pre_div >>= 1;
-+	div--;
-+
-+	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-+	temp |= (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
-+			| (div << ESDHC_DIVIDER_SHIFT)
-+			| (pre_div << ESDHC_PREDIV_SHIFT));
-+	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-+	mdelay(10);
-+out:
-+	host->clock = clock;
-+}
-+
-+static int sdhci_imx_enable_dma(struct sdhci_host *host)
-+{
-+	u32 ctrl;
-+
-+	ctrl = readl(host->ioaddr + SDHCI_HOST_CONTROL);
-+	ctrl &= ~(SDHCI_CTRL_DMA_MASK << 5);
-+	if ((host->flags & SDHCI_REQ_USE_DMA) &&
-+		(host->flags & SDHCI_USE_ADMA))
-+		ctrl |= (SDHCI_CTRL_ADMA32 << 8);
-+	else if (host->flags & SDHCI_REQ_USE_DMA)
-+		ctrl |= (SDHCI_CTRL_SDMA << 8);
-+
-+	writel(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
-+
-+	if (host->flags & SDHCI_REQ_USE_DMA)
-+		writel(FSL_SDHCI_WML_64_WORDS,
-+				host->ioaddr + FSL_SDHCI_WML);
-+	else
-+		writel(FSL_SDHCI_WML_128_WORDS,
-+				host->ioaddr + FSL_SDHCI_WML);
-+	return 0;
-+}
-+
-+static int __match_sdhci_imx(struct device *dev, void *data)
-+{
-+	return !strncmp(dev_name(dev), "imx-sdhci", 9);
-+}
-+static int sdhci_imx_init(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct clk *clk;
-+	struct device *dev;
-+
-+	dev = device_find_child(mmc_dev(host->mmc), NULL, __match_sdhci_imx);
-+	clk = clk_get(dev, "imx_sdhc_clk");
-+	if (IS_ERR(clk)) {
-+		dev_err(mmc_dev(host->mmc), "clk err\n");
-+		return -ENODEV;
-+	}
-+	clk_enable(clk);
-+	pltfm_host->clk = clk;
-+	dev_dbg(dev, "SDHC clock:%lu\n", clk_get_rate(clk));
++	u32 reg, mux;
++	mux = _get_mux(parent, &pll1_sw_clk, &pll2_sw_clk,
++			&pll3_sw_clk, &lp_apm_clk);
++	reg = __raw_readl(MXC_CCM_CSCMR1) &
++		~MXC_CCM_CSCMR1_ESDHC1_MSHC1_CLK_SEL_MASK;
++	reg |= mux << MXC_CCM_CSCMR1_ESDHC1_MSHC1_CLK_SEL_OFFSET;
++	__raw_writel(reg, MXC_CCM_CSCMR1);
 +
 +	return 0;
 +}
 +
-+static void sdhci_imx_exit(struct sdhci_host *host)
++static unsigned long _clk_esdhc1_get_rate(struct clk *clk)
 +{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	u32 reg, prediv, podf;
++	unsigned long parent_rate;
 +
-+	clk_disable(pltfm_host->clk);
-+	clk_put(pltfm_host->clk);
++	parent_rate = clk_get_rate(clk->parent);
++
++	reg = __raw_readl(MXC_CCM_CSCDR1);
++	prediv = ((reg & MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PRED_MASK) >>
++		  MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PRED_OFFSET) + 1;
++	podf = ((reg & MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PODF_MASK) >>
++		MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PODF_OFFSET) + 1;
++
++	return parent_rate / (prediv * podf);
 +}
 +
++static int _clk_esdhc1_set_rate(struct clk *clk, unsigned long rate)
++{
++	u32 reg, div, parent_rate;
++	u32 pre = 0, post = 0;
 +
-+static struct sdhci_ops sdhci_imx_ops = {
-+	.read_l 		= sdhci_imx_readl,
-+	.read_w 		= sdhci_imx_readw,
-+	.read_b 		= sdhci_imx_readb,
-+	.write_l 		= sdhci_imx_writel,
-+	.write_w 		= sdhci_imx_writew,
-+	.write_b 		= sdhci_imx_writeb,
-+	.set_clock 		= sdhci_imx_set_clock,
-+	.enable_dma 		= sdhci_imx_enable_dma,
-+	.get_max_clock 		= sdhci_imx_get_max_clock,
-+	.get_min_clock 		= sdhci_imx_get_min_clock,
-+	.get_timeout_clock 	= sdhci_imx_get_timeout_clock,
-+	.get_ro 		= sdhci_imx_get_ro,
++	parent_rate = clk_get_rate(clk->parent);
++	div = parent_rate / rate;
++
++	if ((parent_rate / div) != rate)
++		return -EINVAL;
++
++	__calc_pre_post_dividers(div, &pre, &post);
++
++	/* Set sdhc1 clock divider */
++	reg = __raw_readl(MXC_CCM_CSCDR1) &
++		~(MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PRED_MASK
++				| MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PODF_MASK);
++	reg |= (post - 1) << MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PODF_OFFSET;
++	reg |= (pre - 1) << MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PRED_OFFSET;
++	__raw_writel(reg, MXC_CCM_CSCDR1);
++
++	return 0;
++}
++
++static struct clk esdhc1_clk[] = {
++	{
++		.id = 0,
++		.parent = &pll2_sw_clk,
++		.secondary = &esdhc1_clk[1],
++		.enable_shift = MXC_CCM_CCGRx_CG1_OFFSET,
++		.enable_reg = MXC_CCM_CCGR3,
++		.get_rate = _clk_esdhc1_get_rate,
++		.set_rate = _clk_esdhc1_set_rate,
++		.enable = _clk_max_enable,
++		.disable = _clk_max_disable,
++		.set_parent = _clk_esdhc1_set_parent,
++	},
++	{
++		.id = 0,
++		.parent = &ipg_clk,
++		.secondary = NULL,
++		.enable = _clk_max_enable,
++		.enable_reg = MXC_CCM_CCGR3,
++		.enable_shift = MXC_CCM_CCGRx_CG0_OFFSET,
++		.disable = _clk_max_disable,
++	}
 +};
 +
-+struct sdhci_pltfm_data sdhci_imx_pdata = {
-+	.ops = &sdhci_imx_ops,
-+	.quirks = SDHCI_QUIRK_BROKEN_ADMA
-+		| SDHCI_QUIRK_32BIT_DMA_ADDR
-+		| SDHCI_QUIRK_32BIT_ADMA_SIZE
-+		| SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
-+		| SDHCI_QUIRK_NO_BUSY_IRQ
-+		| SDHCI_QUIRK_BROKEN_CARD_DETECTION
-+		| SDHCI_QUIRK_NONSTANDARD_CLOCK
-+		| SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET,
-+	.init = sdhci_imx_init,
-+	.exit = sdhci_imx_exit,
++static int _clk_esdhc2_set_parent(struct clk *clk, struct clk *parent)
++{
++	u32 reg, mux;
++
++	mux = _get_mux(parent, &pll1_sw_clk, &pll2_sw_clk,
++			&pll3_sw_clk, &lp_apm_clk);
++	reg = __raw_readl(MXC_CCM_CSCMR1) &
++		~MXC_CCM_CSCMR1_ESDHC2_MSHC2_CLK_SEL_MASK;
++	reg |= mux << MXC_CCM_CSCMR1_ESDHC2_MSHC2_CLK_SEL_OFFSET;
++
++	__raw_writel(reg, MXC_CCM_CSCMR1);
++	return 0;
++}
++
++static unsigned long _clk_esdhc2_get_rate(struct clk *clk)
++{
++	u32 reg, prediv, podf;
++	unsigned long parent_rate;
++
++	parent_rate = clk_get_rate(clk->parent);
++
++	reg = __raw_readl(MXC_CCM_CSCDR1);
++	prediv = ((reg & MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PRED_MASK) >>
++		  MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PRED_OFFSET) + 1;
++	podf = ((reg & MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PODF_MASK) >>
++		MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PODF_OFFSET) + 1;
++
++	return parent_rate / (prediv * podf);
++}
++
++static int _clk_esdhc2_set_rate(struct clk *clk, unsigned long rate)
++{
++	u32 reg, div, parent_rate;
++	u32 pre = 0, post = 0;
++
++	parent_rate = clk_get_rate(clk->parent);
++	div = parent_rate / rate;
++	if ((parent_rate / div) != rate)
++		return -EINVAL;
++
++	__calc_pre_post_dividers(div, &pre, &post);
++
++	/* Set sdhc1 clock divider */
++	reg = __raw_readl(MXC_CCM_CSCDR1) &
++		~(MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PRED_MASK
++				| MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PODF_MASK);
++	reg |= (post - 1) << MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PODF_OFFSET;
++	reg |= (pre - 1) << MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PRED_OFFSET;
++	__raw_writel(reg, MXC_CCM_CSCDR1);
++
++	return 0;
++}
++
++static struct clk esdhc2_clk[] = {
++	{
++		.id = 1,
++		.parent = &pll2_sw_clk,
++		.secondary = &esdhc2_clk[1],
++		.enable_shift = MXC_CCM_CCGRx_CG3_OFFSET,
++		.enable_reg = MXC_CCM_CCGR3,
++		.get_rate = _clk_esdhc2_get_rate,
++		.set_rate = _clk_esdhc2_set_rate,
++		.enable = _clk_max_enable,
++		.disable = _clk_max_disable,
++		.set_parent = _clk_esdhc2_set_parent,
++	},
++	{
++		.id = 1,
++		.parent = &ipg_clk,
++		.secondary = NULL,
++		.enable_shift = MXC_CCM_CCGRx_CG2_OFFSET,
++		.enable_reg = MXC_CCM_CCGR3,
++		.enable = _clk_max_enable,
++		.disable = _clk_max_disable,
++	}
 +};
++
+ #define DEFINE_CLOCK(name, i, er, es, gr, sr, p, s)	\
+ 	static struct clk name = {			\
+ 		.id		= i,			\
+@@ -837,6 +1020,8 @@ static struct clk_lookup lookups[] = {
+ 	_REGISTER_CLOCK("fsl-usb2-udc", "usb", usboh3_clk)
+ 	_REGISTER_CLOCK("fsl-usb2-udc", "usb_ahb", ahb_clk)
+ 	_REGISTER_CLOCK("imx-keypad.0", NULL, kpp_clk)
++	_REGISTER_CLOCK("imx-sdhci.0", "imx_sdhc_clk", esdhc1_clk[0])
++	_REGISTER_CLOCK("imx-sdhci.1", "imx_sdhc_clk", esdhc2_clk[0])
+ };
+ 
+ static void clk_tree_init(void)
+@@ -880,6 +1065,14 @@ int __init mx51_clocks_init(unsigned long ckil, unsigned long osc,
+ 	/* set the usboh3_clk parent to pll2_sw_clk */
+ 	clk_set_parent(&usboh3_clk, &pll2_sw_clk);
+ 
++	/* Set SDHC parents to be PLL2 */
++	clk_set_parent(&esdhc1_clk[0], &pll2_sw_clk);
++	clk_set_parent(&esdhc2_clk[0], &pll2_sw_clk);
++
++	/* set SDHC root clock as 166.25MHZ*/
++	clk_set_rate(&esdhc1_clk[0], 166250000);
++	clk_set_rate(&esdhc2_clk[0], 166250000);
++
+ 	/* System timer */
+ 	mxc_timer_init(&gpt_clk, MX51_IO_ADDRESS(MX51_GPT1_BASE_ADDR),
+ 		MX51_MXC_INT_GPT);
+diff --git a/arch/arm/mach-mx5/devices.c b/arch/arm/mach-mx5/devices.c
+index 1920ff4..c137b36 100644
+--- a/arch/arm/mach-mx5/devices.c
++++ b/arch/arm/mach-mx5/devices.c
+@@ -245,6 +245,52 @@ struct platform_device mxc_keypad_device = {
+ 	.resource = mxc_kpp_resources,
+ };
+ 
++static struct resource mxcsdhc1_resources[] = {
++	{
++		.start = MX51_MMC_SDHC1_BASE_ADDR,
++		.end = MX51_MMC_SDHC1_BASE_ADDR + SZ_4K - 1,
++		.flags = IORESOURCE_MEM,
++	},
++	{
++		.start = MX51_MXC_INT_MMC_SDHC1,
++		.end = MX51_MXC_INT_MMC_SDHC1,
++		.flags = IORESOURCE_IRQ,
++	},
++};
++
++static struct resource mxcsdhc2_resources[] = {
++	{
++		.start = MX51_MMC_SDHC2_BASE_ADDR,
++		.end = MX51_MMC_SDHC2_BASE_ADDR + SZ_4K - 1,
++		.flags = IORESOURCE_MEM,
++	},
++	{
++		.start = MX51_MXC_INT_MMC_SDHC2,
++		.end = MX51_MXC_INT_MMC_SDHC2,
++		.flags = IORESOURCE_IRQ,
++	},
++};
++
++ struct platform_device mxcsdhc1_device = {
++	.name = "imx-sdhci",
++	.id = 0,
++	.num_resources = ARRAY_SIZE(mxcsdhc1_resources),
++	.resource = mxcsdhc1_resources,
++	.dev = {
++		.coherent_dma_mask = DMA_BIT_MASK(32),
++	},
++};
++
++ struct platform_device mxcsdhc2_device = {
++	.name = "imx-sdhci",
++	.id = 1,
++	.num_resources = ARRAY_SIZE(mxcsdhc2_resources),
++	.resource = mxcsdhc2_resources,
++	.dev = {
++		.coherent_dma_mask = DMA_BIT_MASK(32),
++	},
++};
++
+ static struct mxc_gpio_port mxc_gpio_ports[] = {
+ 	{
+ 		.chip.label = "gpio-0",
+diff --git a/arch/arm/mach-mx5/devices.h b/arch/arm/mach-mx5/devices.h
+index e509cfa..21b9a6f 100644
+--- a/arch/arm/mach-mx5/devices.h
++++ b/arch/arm/mach-mx5/devices.h
+@@ -10,3 +10,5 @@ extern struct platform_device mxc_i2c_device0;
+ extern struct platform_device mxc_i2c_device1;
+ extern struct platform_device mxc_hsi2c_device;
+ extern struct platform_device mxc_keypad_device;
++extern struct platform_device mxcsdhc1_device;
++extern struct platform_device mxcsdhc2_device;
+diff --git a/arch/arm/plat-mxc/include/mach/iomux-mx51.h b/arch/arm/plat-mxc/include/mach/iomux-mx51.h
+index 21bfa46..8963852 100644
+--- a/arch/arm/plat-mxc/include/mach/iomux-mx51.h
++++ b/arch/arm/plat-mxc/include/mach/iomux-mx51.h
+@@ -45,6 +45,9 @@ typedef enum iomux_config {
+ 				PAD_CTL_PKE | PAD_CTL_HYS)
+ #define MX51_GPIO_PAD_CTRL		(PAD_CTL_DSE_HIGH | PAD_CTL_PKE | \
+ 				PAD_CTL_SRE_FAST)
++#define MX51_SDHCI_PAD_CTRL 	(PAD_CTL_DSE_HIGH | PAD_CTL_PUS_47K_UP | \
++				PAD_CTL_PKE | PAD_CTL_PUE | PAD_CTL_SRE_FAST | \
++				PAD_CTL_DVS)
+ 
+ /*
+  * The naming convention for the pad modes is MX51_PAD_<padname>__<padmode>
+@@ -294,20 +297,22 @@ typedef enum iomux_config {
+ #define MX51_PAD_DISP2_DAT13__DISP2_DAT13       IOMUX_PAD(0x790, 0x388, 0, 0x0,   0, NO_PAD_CTRL)
+ #define MX51_PAD_DISP2_DAT14__DISP2_DAT14       IOMUX_PAD(0x794, 0x38C, 0, 0x0,   0, NO_PAD_CTRL)
+ #define MX51_PAD_DISP2_DAT15__DISP2_DAT15       IOMUX_PAD(0x798, 0x390, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD1_CMD__SD1_CMD               IOMUX_PAD(0x79C, 0x394, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD1_CLK__SD1_CLK               IOMUX_PAD(0x7A0, 0x398, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD1_DATA0__SD1_DATA0           IOMUX_PAD(0x7A4, 0x39C, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD1_DATA1__SD1_DATA1           IOMUX_PAD(0x7A8, 0x3A0, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD1_DATA2__SD1_DATA2           IOMUX_PAD(0x7AC, 0x3A4, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD1_DATA3__SD1_DATA3           IOMUX_PAD(0x7B0, 0x3A8, 0, 0x0,   0, NO_PAD_CTRL)
++#define MX51_PAD_SD1_CMD__SD1_CMD	IOMUX_PAD(0x79C, 0x394, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
++#define MX51_PAD_SD1_CLK__SD1_CLK 	IOMUX_PAD(0x7A0, 0x398, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL \
++		| PAD_CTL_HYS)
++#define MX51_PAD_SD1_DATA0__SD1_DATA0	IOMUX_PAD(0x7A4, 0x39C, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
++#define MX51_PAD_SD1_DATA1__SD1_DATA1	IOMUX_PAD(0x7A8, 0x3A0, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
++#define MX51_PAD_SD1_DATA2__SD1_DATA2	IOMUX_PAD(0x7AC, 0x3A4, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
++#define MX51_PAD_SD1_DATA3__SD1_DATA3	IOMUX_PAD(0x7B0, 0x3A8, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+ #define MX51_PAD_GPIO_1_0__GPIO_1_0		IOMUX_PAD(0x7B4, 0x3AC, 1, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_GPIO_1_1__GPIO_1_1		IOMUX_PAD(0x7B8, 0x3B0, 1, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD2_CMD__SD2_CMD               IOMUX_PAD(0x7BC, 0x3B4, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD2_CLK__SD2_CLK               IOMUX_PAD(0x7C0, 0x3B8, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD2_DATA0__SD2_DATA0           IOMUX_PAD(0x7C4, 0x3BC, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD2_DATA1__SD2_DATA1           IOMUX_PAD(0x7C8, 0x3C0, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD2_DATA2__SD2_DATA2           IOMUX_PAD(0x7CC, 0x3C4, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_SD2_DATA3__SD2_DATA3           IOMUX_PAD(0x7D0, 0x3C8, 0, 0x0,   0, NO_PAD_CTRL)
++#define MX51_PAD_GPIO_1_1__GPIO_1_1	IOMUX_PAD(0x7B8, 0x3B0, IOMUX_CONFIG_GPIO, 0x0, 0, MX51_SDHCI_PAD_CTRL)
++#define MX51_PAD_SD2_CMD__SD2_CMD	IOMUX_PAD(0x7BC, 0x3B4, IOMUX_CONFIG_SION, 0x0, 1, MX51_SDHCI_PAD_CTRL)
++#define MX51_PAD_SD2_CLK__SD2_CLK	IOMUX_PAD(0x7C0, 0x3B8, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL \
++		| PAD_CTL_HYS)
++#define MX51_PAD_SD2_DATA0__SD2_DATA0	IOMUX_PAD(0x7C4, 0x3BC, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
++#define MX51_PAD_SD2_DATA1__SD2_DATA1	IOMUX_PAD(0x7C8, 0x3C0, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
++#define MX51_PAD_SD2_DATA2__SD2_DATA2	IOMUX_PAD(0x7CC, 0x3C4, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
++#define MX51_PAD_SD2_DATA3__SD2_DATA3	IOMUX_PAD(0x7D0, 0x3C8, IOMUX_CONFIG_SION, 0x0, 0, MX51_SDHCI_PAD_CTRL)
+ #define MX51_PAD_GPIO_1_2__GPIO_1_2		IOMUX_PAD(0x7D4, 0x3CC, 0, 0x0,   0, NO_PAD_CTRL)
+ #define MX51_PAD_GPIO_1_2__I2C2_SCL		IOMUX_PAD(0x7D4, 0x3CC, (2 | IOMUX_CONFIG_SION), \
+ 							0x9b8,   3, MX51_I2C_PAD_CTRL)
+@@ -316,7 +321,7 @@ typedef enum iomux_config {
+ 							0x9bc,   3, MX51_I2C_PAD_CTRL)
+ #define MX51_PAD_PMIC_INT_REQ__PMIC_INT_REQ	IOMUX_PAD(0x7FC, 0x3D4, 0, 0x0,   0, NO_PAD_CTRL)
+ #define MX51_PAD_GPIO_1_4__GPIO_1_4		IOMUX_PAD(0x804, 0x3D8, 0, 0x0,   0, NO_PAD_CTRL)
+-#define MX51_PAD_GPIO_1_5__GPIO_1_5		IOMUX_PAD(0x808, 0x3DC, 0, 0x0,   0, NO_PAD_CTRL)
++#define MX51_PAD_GPIO_1_5__GPIO_1_5	IOMUX_PAD(0x808, 0x3DC, IOMUX_CONFIG_GPIO, 0x0, 1, MX51_SDHCI_PAD_CTRL)
+ #define MX51_PAD_GPIO_1_6__GPIO_1_6		IOMUX_PAD(0x80C, 0x3E0, 0, 0x0,   0, MX51_GPIO_PAD_CTRL)
+ #define MX51_PAD_GPIO_1_7__GPIO_1_7		IOMUX_PAD(0x810, 0x3E4, 0, 0x0,   0, MX51_GPIO_PAD_CTRL)
+ #define MX51_PAD_GPIO_1_8__GPIO_1_8		IOMUX_PAD(0x814, 0x3E8, 0, 0x0,   1, MX51_GPIO_PAD_CTRL)
 -- 
 1.7.0
 
