@@ -1,91 +1,96 @@
-From: Peppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: Re: [PATCH (mmc-next) 1/3] mmc: add suspend/resume in the
- sdhci-pltfm driver
-Date: Fri, 24 Sep 2010 07:54:53 +0200
-Message-ID: <4C9C3D2D.1090302@st.com>
-References: <1285233266-5039-1-git-send-email-peppe.cavallaro@st.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 0/4] Adding support for esdhc on mx35/51
+Date: Fri, 24 Sep 2010 08:43:10 +0200
+Message-ID: <20100924064310.GA30543@pengutronix.de>
+References: <1285072210-10207-1-git-send-email-w.sang@pengutronix.de> <A88EF4D64D8447468743DC1503C0B6CA0D4BC5@zch01exm22.fsl.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="PNTmBPCT7hxwcZjr"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:53028 "EHLO
-	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750880Ab0IXFzy convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 24 Sep 2010 01:55:54 -0400
-In-Reply-To: <1285233266-5039-1-git-send-email-peppe.cavallaro@st.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:54441 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752829Ab0IXGnM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Sep 2010 02:43:12 -0400
+Content-Disposition: inline
+In-Reply-To: <A88EF4D64D8447468743DC1503C0B6CA0D4BC5@zch01exm22.fsl.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>
+To: Zhu Richard-R65037 <r65037@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Anton Vorontsov <cbouatmailru@gmail.com>
 
-Hello
-I wonder if you could review the three patches I sent the mailing list:
-especially the following ones:
 
-mmc: add suspend/resume in the sdhci-pltfm driver
-mmc: split the sdhci.h to help platforms that uses shdci-pltfm d.d.
+--PNTmBPCT7hxwcZjr
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-These follow the advice discussed with Wolfram in the thread named:
-  "[PATCH] mmc: add SDHCI driver for STM platforms (V2)."
+Hi Richard,
 
-I just noticed to have forgotten to put in cc Andrew and Matt (sorry).
+> * About the share between i.MX and PPC eSDHC.
+> Why configure a few parts be shared between the i.MX eSDHC and PPC
+> eSDHC? Can they be separated into two independent systems?
 
-In fact, I want to remove the stm driver and use the pltfm driver
-instead of. To do that on my platforms, I need have the support provided
-in these patches. This support could actually be useful for others.
+The rule of thumb is to avoid code-duplication. Assume the PPC driver gets
+fixed an off-by-one error in the freq-calculation, you surely want to have =
+that
+fix on imx, too.
 
-Let me know.
+> It would bring the conveniences to maintain stuff in the future if we
+> separate them.
 
-Best Regards,
-Peppe
+If you can name these conveniences and they are convincing, we can keep them
+seperate. At the moment, I don't see them (what doesn't mean they don't exi=
+st)
 
-On 09/23/2010 11:14 AM, Giuseppe CAVALLARO wrote:
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> ---
-> drivers/mmc/host/sdhci-pltfm.c | 22 ++++++++++++++++++++++
-> 1 files changed, 22 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index e045e3c..89ea64b 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -165,6 +165,24 @@ static const struct platform_device_id sdhci_pltfm_ids[] = {
-> };
-> MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
-> 
-> +#ifdef CONFIG_PM
-> +static int sdhci_pltfm_suspend(struct platform_device *dev, pm_message_t pm)
-> +{
-> + struct sdhci_host *host = platform_get_drvdata(dev);
-> +
-> + sdhci_suspend_host(host, pm);
-> + return 0;
-> +}
-> +
-> +static int sdhci_pltfm_resume(struct platform_device *dev)
-> +{
-> + struct sdhci_host *host = platform_get_drvdata(dev);
-> +
-> + sdhci_resume_host(host);
-> + return 0;
-> +}
-> +#endif
-> +
-> static struct platform_driver sdhci_pltfm_driver = {
-> .driver = {
-> .name = "sdhci",
-> @@ -173,6 +191,10 @@ static struct platform_driver sdhci_pltfm_driver = {
-> .probe = sdhci_pltfm_probe,
-> .remove = __devexit_p(sdhci_pltfm_remove),
-> .id_table = sdhci_pltfm_ids,
-> +#ifdef CONFIG_PM
-> + .suspend = sdhci_pltfm_suspend,
-> + .resume = sdhci_pltfm_resume,
-> +#endif
-> };
-> 
-> /*****************************************************************************\
-> --
-> 1.5.5.6
-> 
+> And there is already one set of eSDHC driver for all the i.MX SOCs.
+
+I am confused: which set do you mean?
+
+> As we know that i.MX and PPC are the disparate SOC families.
+
+Well, if the eSDHC-core itself is the same or very similar, that doesn't re=
+ally
+matter IMO. Especially as the of-platform-bus might disappear somewhen in t=
+he
+future, the PPC and imx-drivers could become more similar.
+
+> * About the driver name of i.MX eSDHC driver, I think that use the imx
+> to identify it is better than esdhc.
+
+I picked up Anton's suggestion 'sdhci-esdhc-imx.c' so far. Although I am st=
+ill
+not sure if 'sdhci-esdhc-pltfm.c' would be more precise.
+
+> As I know that the eSDHC name wouldn't be used anymore in next
+> generation SOCs of i.MX family.
+> So the name of imx would be much clear and exact.
+
+Not really, because all _existing_ implementations are called eSDHC, no? :)=
+ If
+some future incarnations have a different name, but behave the same or very
+similar, this is usually no problem. Check for example the I2C eeprom driver
+which is named 'at24' but support basically all EEPROMs and not only Atmel
+ones. Same goes for a couple of RTC-drivers, etc...
+
+Kind regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--PNTmBPCT7hxwcZjr
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkycSH4ACgkQD27XaX1/VRsRMwCaAjqftkq90VVuOvWRIhQRMx2K
+8qoAn2KhsafocqrR8b628zoFdm9vLMwv
+=evNw
+-----END PGP SIGNATURE-----
+
+--PNTmBPCT7hxwcZjr--
