@@ -1,10 +1,9 @@
 From: Zhu Richard-R65037 <r65037@freescale.com>
-Subject: Recall: [PATCH 1/4] sdhci-1: sdhci driver modifications when support
-	FSL eSDHC
-Date: Fri, 24 Sep 2010 11:51:22 +0800
-Message-ID: <A88EF4D64D8447468743DC1503C0B6CA0D4BD5@zch01exm22.fsl.freescale.net>
+Subject: Recall: [PATCH 4/4] esdhc-4 mx51: enable fsl esdhc driver
+Date: Fri, 24 Sep 2010 11:51:14 +0800
+Message-ID: <A88EF4D64D8447468743DC1503C0B6CA0D4BD4@zch01exm22.fsl.freescale.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0055246993=="
+Content-Type: multipart/mixed; boundary="===============0233263267=="
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Class: urn:content-classes:recallmessage
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
@@ -20,41 +19,40 @@ To: w.sang@pengutronix.de, u.kleine-koenig@pengutronix.de, linux-mmc@vger.kernel
 Cc: Zhu Richard-R65037 <R65037@freescale.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
---===============0055246993==
+--===============0233263267==
 Content-Class: urn:content-classes:recallmessage
 Content-Type: multipart/alternative;
-	boundary="----_=_NextPart_001_01CB5B9B.C18334D1"
+	boundary="----_=_NextPart_001_01CB5B9B.BCF2F48D"
 
-------_=_NextPart_001_01CB5B9B.C18334D1
+------_=_NextPart_001_01CB5B9B.BCF2F48D
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 
-Zhu Richard-R65037 would like to recall the message, "[PATCH 1/4] =
-sdhci-1: sdhci driver modifications when support FSL eSDHC".
+Zhu Richard-R65037 would like to recall the message, "[PATCH 4/4] =
+esdhc-4 mx51: enable fsl esdhc driver".
 
-------_=_NextPart_001_01CB5B9B.C18334D1
+------_=_NextPart_001_01CB5B9B.BCF2F48D
 Content-Type: text/html; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <HTML>
 <HEAD>
-<TITLE>Recall: [PATCH 1/4] sdhci-1: sdhci driver modifications when =
-support FSL eSDHC</TITLE>
+<TITLE>Recall: [PATCH 4/4] esdhc-4 mx51: enable fsl esdhc driver</TITLE>
 </HEAD>
 <BODY>
 <!-- Converted from text/plain format -->
 
 <P><FONT SIZE=3D2>Zhu Richard-R65037 would like to recall the message, =
-&quot;[PATCH 1/4] sdhci-1: sdhci driver modifications when support FSL =
-eSDHC&quot;.</FONT></P>
+&quot;[PATCH 4/4] esdhc-4 mx51: enable fsl esdhc driver&quot;.</FONT>
+</P>
 
 </BODY>
 </HTML>
-------_=_NextPart_001_01CB5B9B.C18334D1--
+------_=_NextPart_001_01CB5B9B.BCF2F48D--
 
 
---===============0055246993==
+--===============0233263267==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -65,4 +63,4 @@ linux-arm-kernel mailing list
 linux-arm-kernel@lists.infradead.org
 http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
---===============0055246993==--
+--===============0233263267==--
