@@ -1,74 +1,67 @@
-From: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH v3 1/4] omap4 hsmmc: Adding card detect support for MMC1
-Date: Fri, 24 Sep 2010 22:01:48 +0530
-Message-ID: <AANLkTim0Qm=x3vVuT26oSNzTg+BZV+KCAJj5oVs3etWD@mail.gmail.com>
-References: <14833.10.24.255.18.1285173812.squirrel@dbdmail.itg.ti.com>
-	<8F7AF80515AF0D4D93307E594F3CB40E5F57C548@dlee03.ent.ti.com>
-	<AANLkTikLqi4=OOJ_ciMqTt7HKJzDo-WsZJ8D2CpP712c@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH] sdhci: allow controller private registers to be changaed on
+ reset
+Date: Fri, 24 Sep 2010 09:42:15 -0700
+Message-ID: <772C1381-0CF0-41CD-B580-CBD090BBA1AB@marvell.com>
+References: <3622567C-B5F4-40D4-A525-0AAE641E2B28@marvell.com>
+ <73FAA3FF-6415-4A67-94FE-F93C3DA4A05C@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <AANLkTikLqi4=OOJ_ciMqTt7HKJzDo-WsZJ8D2CpP712c@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "Kanigeri, Hari" <h-kanigeri2@ti.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:44420 "HELO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S933015Ab0IXQmV convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 24 Sep 2010 12:42:21 -0400
+In-Reply-To: <73FAA3FF-6415-4A67-94FE-F93C3DA4A05C@marvell.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Mark Brown <markb@marvell.com>
 
-Hi Hari,
+>From 9d64df0fa6874371446147f67c071e78c587c0d6 Mon Sep 17 00:00:00 2001
+From: Philip Rakity <prakity@marvell.com>
+Date: Fri, 24 Sep 2010 05:27:11 -0700
+Subject: [PATCH] sdhci: allow controller private registers to be changaed on reset
 
+allow controllers that have private registers that are reset when
+the controller is reset. They need to be reprogrammed back to their
+values when the reset happens.  Provide a hook to allow this to happen.
 
-On Thu, Sep 23, 2010 at 11:22 AM, kishore kadiyala
-<kishorek.kadiyala@gmail.com> wrote:
-> Hi Hari,
->
-> On Thu, Sep 23, 2010 at 1:19 AM, Kanigeri, Hari <h-kanigeri2@ti.com> wrot=
-e:
->> Kishore,
->>
->>> +int twl6030_mmc_card_detect(struct device *dev, int slot)
->>> +{
->>> + =A0 =A0 int ret =3D -EIO;
->>> + =A0 =A0 u8 read_reg =3D 0;
->>> + =A0 =A0 struct platform_device *pdev =3D to_platform_device(dev);
->>> +
->>> + =A0 =A0 switch (pdev->id) {
->>> + =A0 =A0 case 0:
->>> + =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* BIT0 of REG_MMC_CTRL
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* 0 - Card not present ,1 - Card present
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &=
-read_reg,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 TWL6030_MMCCTRL);
->>> + =A0 =A0 =A0 =A0 =A0 =A0 if (ret >=3D 0)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D read_reg & STS_MMC;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 break;
->>
->> nitpick: may be you don't need a switch statement for only one case.
->
-> From future perspective,since there are 5 MMC controllers on OMAP4
-> and current patch supports card detect feature only for one controller i.=
-e MMC1
-> as of now. Once the interfaces connected on the remaining 4 MMC controlle=
-rs
-> are defined further additions will be required for respective cases.
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |    3 +++
+ drivers/mmc/host/sdhci.h |    1 +
+ 2 files changed, 4 insertions(+), 0 deletions(-)
 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 401527d..0774dad 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -174,6 +174,9 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 
+ 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
+ 		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
++
++	if (host->ops->platform_specific_reset)
++		host->ops->platform_specific_reset(host, mask);
+ }
+ 
+ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index d316bc7..f68af47 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -323,6 +323,7 @@ struct sdhci_ops {
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
++	void	(*platform_specific_reset)(struct sdhci_host *host, u8 mask);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+-- 
+1.6.0.4
 
-Correcting my previous comment, I've just verified twl6030 current
-version spec on OMAP4
-which can provide card detect interrupt only for one MMC controller i.e MMC=
-1.
-I will replace switch with if.
-
-Regards,
-Kishore
