@@ -1,46 +1,166 @@
 From: Richard Zhu <r65037@freescale.com>
-Subject: [4-0] Serial patchs that upstream fsl i.MX MX51 sdhci driver
-Date: Fri, 24 Sep 2010 11:43:04 +0800
-Message-ID: <1285299788-32209-1-git-send-email-r65037@freescale.com>
+Subject: [PATCH 1/4] sdhci-1: sdhci driver modifications when support FSL eSDHC
+Date: Fri, 24 Sep 2010 11:43:05 +0800
+Message-ID: <1285299788-32209-2-git-send-email-r65037@freescale.com>
+References: <1285299788-32209-1-git-send-email-r65037@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe004.messaging.microsoft.com ([216.32.180.14]:6578 "EHLO
-	VA3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753491Ab0IXDjc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 23:39:32 -0400
-Received: from mail164-va3 (localhost.localdomain [127.0.0.1])	by
- mail164-va3-R.bigfish.com (Postfix) with ESMTP id 9E4341A003A1	for
- <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2010 03:39:30 +0000 (UTC)
-Received: from VA3EHSMHS024.bigfish.com (unknown [10.7.14.247])	by
- mail164-va3.bigfish.com (Postfix) with ESMTP id 2EE151B8050	for
- <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2010 03:39:29 +0000 (UTC)
+Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:4274
+	"EHLO DB3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753741Ab0IXDje (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2010 23:39:34 -0400
+Received: from mail39-db3 (localhost.localdomain [127.0.0.1])	by
+ mail39-db3-R.bigfish.com (Postfix) with ESMTP id B2E43E83C6	for
+ <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2010 03:39:31 +0000 (UTC)
+Received: from DB3EHSMHS006.bigfish.com (unknown [10.3.81.249])	by
+ mail39-db3.bigfish.com (Postfix) with ESMTP id 094FB1C70053	for
+ <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2010 03:39:31 +0000 (UTC)
 Received: from de01smr01.freescale.net (de01smr01.freescale.net [10.208.0.31])
-	by de01egw02.freescale.net (8.14.3/8.14.3) with ESMTP id o8O3dRlM002056	for
+	by az33egw02.freescale.net (8.14.3/8.14.3) with ESMTP id o8O3dSeW012702	for
  <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 20:39:28 -0700 (MST)
 Received: from shlinux1.ap.freescale.net ([10.192.225.216])	by
- de01smr01.freescale.net (8.13.1/8.13.0) with ESMTP id o8O3ruHd001157	for
+ de01smr01.freescale.net (8.13.1/8.13.0) with ESMTP id o8O3ruxu001158	for
  <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2010 22:53:57 -0500 (CDT)
+In-Reply-To: <1285299788-32209-1-git-send-email-r65037@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: w.sang@pengutronix.de, u.kleine-koenig@pengutronix.de, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-arm-kernel@lists.infradead.org, Richard Zhu <r65037@freescale.com>
 
-Hi Wolfram:
-Here are the patches that I changed the codes refer to your previous comments.
-The data IO and WP func are verified on the i.MX51 BBG board.
+Add host's own get_ro func to support the controller that used it's own WP mechanism
+Some controllers maybe have their exceptional WP mechanism in the different HW design
+when implement the get_ro, add one get_ro api to supported them.
 
-The missing bits of the HOST_CONTROL and so on had been complemented in 4-3 patch.
+Signed-off-by: Richard Zhu <r65037@freescale.com>
+---
+ drivers/mmc/host/sdhci-pltfm.c |   24 ++++++++++++++++++++++--
+ drivers/mmc/host/sdhci-pltfm.h |    7 +++++++
+ drivers/mmc/host/sdhci.c       |    3 +++
+ drivers/mmc/host/sdhci.h       |    1 +
+ include/linux/sdhci-pltfm.h    |    2 ++
+ 5 files changed, 35 insertions(+), 2 deletions(-)
 
-Hi Uwe:
-The MSL specifed part code is still on-going.
-I would change them to the "dynamically allocated method" later.
-
-Any review/comments and suggestions are appreciated.
-Thanks in advanced.
-[4-1] sdhci/sdhci-pltfm common codes modifications when support FSL eSDHC driver.
-[4-2] MX51 MSL codes modification.
-[4-3] i.MX sdhci driver seperated from MPC esdhc driver.
-[4-4] board config
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index e045e3c..202a6bf 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -54,12 +54,24 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_pltfm_data *pdata = pdev->dev.platform_data;
+ 	const struct platform_device_id *platid = platform_get_device_id(pdev);
++	struct sdhci_pltfm_data *dpdata = (void *)platid->driver_data;
+ 	struct sdhci_host *host;
++	struct sdhci_pltfm_host *pltfm_host;
+ 	struct resource *iomem;
+ 	int ret;
+ 
+ 	if (!pdata && platid && platid->driver_data)
+ 		pdata = (void *)platid->driver_data;
++	else {
++		if (!pdata->ops)
++			pdata->ops = dpdata->ops;
++		if (pdata->quirks == 0)
++			pdata->quirks = dpdata->quirks;
++		if (!pdata->init)
++			pdata->init = dpdata->init;
++		if (!pdata->exit)
++			pdata->exit= dpdata->exit;
++	}
+ 
+ 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!iomem) {
+@@ -72,15 +84,20 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
+ 			"experience problems.\n");
+ 
+ 	if (pdev->dev.parent)
+-		host = sdhci_alloc_host(pdev->dev.parent, 0);
++		host = sdhci_alloc_host(pdev->dev.parent,
++				sizeof(struct sdhci_pltfm_host));
+ 	else
+-		host = sdhci_alloc_host(&pdev->dev, 0);
++		host = sdhci_alloc_host(&pdev->dev,
++				sizeof(struct sdhci_pltfm_host));
+ 
+ 	if (IS_ERR(host)) {
+ 		ret = PTR_ERR(host);
+ 		goto err;
+ 	}
+ 
++	pltfm_host = sdhci_priv(host);
++	pltfm_host->wp_gpio = pdata->wp_gpio;
++
+ 	host->hw_name = "platform";
+ 	if (pdata && pdata->ops)
+ 		host->ops = pdata->ops;
+@@ -161,6 +178,9 @@ static const struct platform_device_id sdhci_pltfm_ids[] = {
+ #ifdef CONFIG_MMC_SDHCI_CNS3XXX
+ 	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
+ #endif
++#ifdef CONFIG_MMC_SDHCI_IMX
++	{ "imx-sdhci", (kernel_ulong_t)&sdhci_imx_pdata },
++#endif
+ 	{ },
+ };
+ MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index 900f329..2df8cac 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -13,6 +13,13 @@
+ 
+ #include <linux/sdhci-pltfm.h>
+ 
++struct sdhci_pltfm_host {
++	struct clk *clk;
++	u32 scratchpad; /* to handle quirks across io-accessor calls */
++	u32 wp_gpio; /* GPIO pin number that used as the Write Protect */
++};
++
+ extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
++extern struct sdhci_pltfm_data sdhci_imx_pdata;
+ 
+ #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7855121..10e5931 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1208,6 +1208,9 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+ 
+ 	host = mmc_priv(mmc);
+ 
++	if (host->ops->get_ro)
++		return host->ops->get_ro(host);
++
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (host->flags & SDHCI_DEVICE_DEAD)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 036cfae..e765cc6 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -321,6 +321,7 @@ struct sdhci_ops {
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
++	unsigned int	(*get_ro)(struct sdhci_host *host);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+diff --git a/include/linux/sdhci-pltfm.h b/include/linux/sdhci-pltfm.h
+index 0239bd7..da83e76 100644
+--- a/include/linux/sdhci-pltfm.h
++++ b/include/linux/sdhci-pltfm.h
+@@ -30,6 +30,8 @@ struct sdhci_pltfm_data {
+ 	unsigned int quirks;
+ 	int (*init)(struct sdhci_host *host);
+ 	void (*exit)(struct sdhci_host *host);
++	unsigned int wp_gpio; /* GPIO pin num that used as the Write Protect */
++	unsigned int caps; /* Board specified max bus width */
+ };
+ 
+ #endif /* _SDHCI_PLTFM_H */
+-- 
+1.7.0
 
 
