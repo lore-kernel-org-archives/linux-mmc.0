@@ -1,77 +1,116 @@
 From: "kishore kadiyala" <kishore.kadiyala@ti.com>
-Subject: [PATCH v4 4/4] omap4 hsmmc: Update ocr mask for MMC2 for regulator
-     to use
-Date: Fri, 24 Sep 2010 22:43:40 +0530 (IST)
-Message-ID: <9673.10.24.255.18.1285348420.squirrel@dbdmail.itg.ti.com>
+Subject: [PATCH v4 3/4] omap4 hsmmc: Register offset handling
+Date: Fri, 24 Sep 2010 22:43:35 +0530 (IST)
+Message-ID: <9496.10.24.255.18.1285348415.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: tony@atomide.com, akpm@linux-foundation.org, madhu.cr@ti.com, adrian.hunter@nokia.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:41398 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753142Ab0IXROW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 24 Sep 2010 13:14:22 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: tony@atomide.com, akpm@linux-foundation.org, madhu.cr@ti.com, b-cousson@ti.com, adrian.hunter@nokia.com
 
-On OMAP4, MMC2 controller has eMMC which draws power from VAUX regulator
-on TWL. Though the eMMC supports dual voltage[1.8v/3v] as per ocr register,
-its VCC is fixed at 3V for operation. With this once the mmc core selects
-the minimum voltage[1.8] supported based on the ocr value read from OCR register,
-eMMC will not get detected. Thus the platform data for MMC2 is updated with ocr
-mask and same will be communicated to core which will set the regulator to
-always operate at 3V when ever turned ON.
+
+In OMAP4, as per new PM programming model, the legacy registers
+which were there in OMAP3 are all shifted by 0x100 while new one's
+are added from offset 0 to 0x10.
+For OMAP4, the register offset appending of 0x100 done in devices.c
+currently, is moved to driver file.This change fits in for current
+implementation as well as once the driver undergoes hwmod adaptation.
 
 Cc: Tony Lindgren <tony@atomide.com>
 Cc: Andrew Morton <akpm@linux-foundation.org>
 Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
 Cc: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Benoit Cousson <b-cousson@ti.com>
 Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
 ---
- arch/arm/mach-omap2/board-4430sdp.c |    1 +
- drivers/mmc/host/omap_hsmmc.c       |   12 ++++++++++++
- 2 files changed, 13 insertions(+), 0 deletions(-)
+ arch/arm/mach-omap2/devices.c         |    8 +++-----
+ arch/arm/mach-omap2/hsmmc.c           |    4 ++++
+ arch/arm/plat-omap/include/plat/mmc.h |    3 +++
+ drivers/mmc/host/omap_hsmmc.c         |    2 ++
+ 4 files changed, 12 insertions(+), 5 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
-index 7978a79..8b0e71a 100644
---- a/arch/arm/mach-omap2/board-4430sdp.c
-+++ b/arch/arm/mach-omap2/board-4430sdp.c
-@@ -202,6 +202,7 @@ static struct omap2_hsmmc_info mmc[] = {
- 		.gpio_cd	= -EINVAL,
- 		.gpio_wp	= -EINVAL,
- 		.nonremovable   = true,
-+		.ocr_mask	= MMC_VDD_29_30,
- 	},
- 	{}	/* Terminator */
- };
+diff --git a/arch/arm/mach-omap2/devices.c b/arch/arm/mach-omap2/devices.c
+index 2dbb265..bb7ec13 100644
+--- a/arch/arm/mach-omap2/devices.c
++++ b/arch/arm/mach-omap2/devices.c
+@@ -745,13 +745,13 @@ void __init omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 		case 3:
+ 			if (!cpu_is_omap44xx())
+ 				return;
+-			base = OMAP4_MMC4_BASE + OMAP4_MMC_REG_OFFSET;
++			base = OMAP4_MMC4_BASE;
+ 			irq = OMAP44XX_IRQ_MMC4;
+ 			break;
+ 		case 4:
+ 			if (!cpu_is_omap44xx())
+ 				return;
+-			base = OMAP4_MMC5_BASE + OMAP4_MMC_REG_OFFSET;
++			base = OMAP4_MMC5_BASE;
+ 			irq = OMAP44XX_IRQ_MMC5;
+ 			break;
+ 		default:
+@@ -762,10 +762,8 @@ void __init omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 			size = OMAP2420_MMC_SIZE;
+ 			name = "mmci-omap";
+ 		} else if (cpu_is_omap44xx()) {
+-			if (i < 3) {
+-				base += OMAP4_MMC_REG_OFFSET;
++			if (i < 3)
+ 				irq += OMAP44XX_IRQ_GIC_START;
+-			}
+ 			size = OMAP4_HSMMC_SIZE;
+ 			name = "mmci-omap-hs";
+ 		} else {
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index c8f647b..49d76a7 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -261,6 +261,10 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+ 		mmc->slots[0].wires = c->wires;
+ 		mmc->slots[0].internal_clock = !c->ext_clock;
+ 		mmc->dma_mask = 0xffffffff;
++		if (cpu_is_omap44xx())
++			mmc->reg_offset = OMAP4_MMC_REG_OFFSET;
++		else
++			mmc->reg_offset = 0;
+
+ 		mmc->get_context_loss_count = hsmmc_get_context_loss;
+
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index 9b89ec6..4e6ef07 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -71,6 +71,9 @@ struct omap_mmc_platform_data {
+
+ 	u64 dma_mask;
+
++	/* Register offset deviation */
++	u16 reg_offset;
++
+ 	struct omap_mmc_slot_data {
+
+ 		/* 4 wire signaling is optional, and is used for SD/SDIO/HSMMC;
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8cb007c..f629acf 100644
+index a51894d..8cb007c 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -364,6 +364,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- {
- 	struct regulator *reg;
- 	int ret = 0;
-+	int ocr_value = 0;
+@@ -2009,6 +2009,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (res == NULL || irq < 0)
+ 		return -ENXIO;
 
- 	switch (host->id) {
- 	case OMAP_MMC1_DEVID:
-@@ -396,6 +397,17 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 		}
- 	} else {
- 		host->vcc = reg;
-+		ocr_value = mmc_regulator_get_ocrmask(reg);
-+		if (!mmc_slot(host).ocr_mask) {
-+			mmc_slot(host).ocr_mask = ocr_value;
-+		} else {
-+			if (!(mmc_slot(host).ocr_mask & ocr_value)) {
-+				pr_err("MMC%d ocrmask %x is not supported\n",
-+					host->id, mmc_slot(host).ocr_mask);
-+				mmc_slot(host).ocr_mask = 0;
-+				return -EINVAL;
-+			}
-+		}
- 		mmc_slot(host).ocr_mask = mmc_regulator_get_ocrmask(reg);
-
- 		/* Allow an aux regulator */
++	res->start += pdata->reg_offset;
++	res->end += pdata->reg_offset;
+ 	res = request_mem_region(res->start, res->end - res->start + 1,
+ 							pdev->name);
+ 	if (res == NULL)
 -- 
 1.7.0.4
+
 
