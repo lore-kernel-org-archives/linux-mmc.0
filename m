@@ -1,78 +1,66 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH] mmc: failure of block read wait for long time
-Date: Fri, 24 Sep 2010 20:05:26 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B031619EEB8@dbde02.ent.ti.com>
-References: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com>
- <4C8A2C5D.2050408@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com>
- <4C971320.7050906@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B03160624F6@dbde02.ent.ti.com>
- <4C974A5D.5050608@nokia.com>
- <2A3DCF3DA181AD40BDE86A3150B27B6B03160626B5@dbde02.ent.ti.com>
- <4C975CFB.6070907@nokia.com> <20100920133703.GC30793@n2100.arm.linux.org.uk>
- <2A3DCF3DA181AD40BDE86A3150B27B6B031610E332@dbde02.ent.ti.com>
- <20100922124309.GA15699@void.printf.net>
+From: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Subject: Re: [PATCH v3 2/4] omap4 hsmmc: Fix the init if CONFIG_MMC_OMAP_HS is
+ not set
+Date: Fri, 24 Sep 2010 21:54:36 +0530
+Message-ID: <AANLkTikADtXK=+vi_r9c7XHbwt1UjZoJv2VndmbJEqau@mail.gmail.com>
+References: <14880.10.24.255.18.1285173821.squirrel@dbdmail.itg.ti.com>
+	<4C9A457B.4060500@ru.mvista.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:60295 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756753Ab0IXOfx convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Sep 2010 10:35:53 -0400
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <4C9A457B.4060500@ru.mvista.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Sergei Shtylyov <sshtylyov@mvista.com>
+Cc: kishore kadiyala <kishore.kadiyala@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-Chris and Adrian,
+On Wed, Sep 22, 2010 at 11:35 PM, Sergei Shtylyov <sshtylyov@mvista.com=
+> wrote:
+> Hello.
+>
+> kishore kadiyala wrote:
+>
+>> From: Benoit Cousson <b-cousson@ti.com>
+>
+>> Avoid possible crash if CONFIG_MMC_OMAP_HS is not set
+>
+>> Signed-off-by: Benoit Cousson <b-cousson@ti.com>
+>> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+>> ---
+>> =A0arch/arm/mach-omap2/board-4430sdp.c | =A0 =A08 +++++++-
+>> =A01 files changed, 7 insertions(+), 1 deletions(-)
+>>
+>> diff --git a/arch/arm/mach-omap2/board-4430sdp.c
+>> b/arch/arm/mach-omap2/board-4430sdp.c
+>> index a49f285..ac8541c 100644
+>> --- a/arch/arm/mach-omap2/board-4430sdp.c
+>> +++ b/arch/arm/mach-omap2/board-4430sdp.c
+>> @@ -240,8 +240,14 @@ static int omap4_twl6030_hsmmc_late_init(struct
+>> device *dev)
+>>
+>> =A0static __init void omap4_twl6030_hsmmc_set_late_init(struct devic=
+e *dev)
+>> =A0{
+>> - =A0 =A0 =A0 struct omap_mmc_platform_data *pdata =3D dev->platform=
+_data;
+>> + =A0 =A0 =A0 struct omap_mmc_platform_data *pdata;
+>>
+>> + =A0 =A0 =A0 /* dev can be null if CONFIG_MMC_OMAP_HS is not set */
+>> + =A0 =A0 =A0 if (!dev) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Failed omap4_twl6030_hsmmc_set=
+_late_init\n");
+>
+> =A0 pr_err("Failed %s\n", __func__);
 
-[..snip..]
-> 
-> > -----Original Message-----
-> > From: Chris Ball [mailto:cjb@laptop.org]
-> > Sent: Wednesday, September 22, 2010 6:13 PM
-> > To: Ghorai, Sukumar
-> > Cc: Adrian Hunter; linux-mmc@vger.kernel.org; linux-arm-
-> > kernel@lists.infradead.org; Russell King - ARM Linux
-> > Subject: Re: [PATCH] mmc: failure of block read wait for long time
-> >
-> > On Wed, Sep 22, 2010 at 11:02:08AM +0530, Ghorai, Sukumar wrote:
-> > > Would you please review and merge this patch [1] (attached too)?
-> > > [1] http://comments.gmane.org/gmane.linux.kernel.mmc/2714
-> >
-> > I've been following the thread.  I believe Adrian has NACKed this patch,
-> > by saying "It is absolutely unacceptable to return I/O errors to the
-> > upper layers for segments that do not have errors."
-> 
-> [Ghorai]
-> I think Russell also mentioned his opinion. Would you please add your idea
-> too?
-> 
-> 1. I would prefer Adrian to explain again what this statement means, in
-> the context - data read fail and how we make it success?
-> 
-> 2. if data read fail for sector(x) why we have to try for
-> sector(x+1, ..x+n)?
-> 
-> 3. how to inform reader function which sector having the valid data out of
-> (1...n) sectors.
-> 
-> 4. do we have any driver/code in Linux or any other os, which give inter-
-> leave data and return as success?
-> 
-[Ghorai] please reply with your input on my/ Russell's suggestion?
+OK , will have as mentioned
+>
+> WBR, Sergei
 
-> >
-> > I think it's possible to merge patches to improve the situation (such
-> > as the idea of noticing a card disappearing earlier), but your initial
-> > patch is not the patch to do that.  You should continue to work with
-> > Adrian -- when he's happy that a patch does not break the semantics
-> > above, we can consider merging it.
-> >
-> > Thanks,
-> >
-> > --
-> > Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> > One Laptop Per Child
+Regards,
+Kishore
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
