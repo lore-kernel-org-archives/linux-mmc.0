@@ -1,67 +1,68 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: [PATCH 3/6] mmc: sdhci: introduce private get_ro
-Date: Tue, 28 Sep 2010 14:36:43 +0200
-Message-ID: <1285677406-3359-4-git-send-email-w.sang@pengutronix.de>
-References: <1285677406-3359-1-git-send-email-w.sang@pengutronix.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:54512 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753489Ab0I1MhP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 08:37:15 -0400
-In-Reply-To: <1285677406-3359-1-git-send-email-w.sang@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Zhu Richard-R65037 <r65037@freescale.com>
+Subject: Recall: [PATCH 3/4] esdhc-3 esdhc: fsl esdhc driver based on sdhci
+	driver
+Date: Fri, 24 Sep 2010 11:51:34 +0800
+Message-ID: <A88EF4D64D8447468743DC1503C0B6CA0D4BD6@zch01exm22.fsl.freescale.net>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1316799734=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Class: urn:content-classes:recallmessage
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: w.sang@pengutronix.de, u.kleine-koenig@pengutronix.de, linux-mmc@vger.kernel.org
+Cc: Zhu Richard-R65037 <R65037@freescale.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>, zhangfei gao <zhangfei.gao@gmail.com>, Zhu Richard-R65037 <r65037@freescale.com>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>
 
-Some controllers handle their write-protection differently. Introduce a
-callback to be able to handle it, ensuring the same locking takes place
-for it.
+--===============1316799734==
+Content-Class: urn:content-classes:recallmessage
+Content-Type: multipart/alternative;
+	boundary="----_=_NextPart_001_01CB5B9B.C856D083"
 
-Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
----
- drivers/mmc/host/sdhci.c |   11 +++++++----
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 8 insertions(+), 4 deletions(-)
+------_=_NextPart_001_01CB5B9B.C856D083
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 96c7f60..129958e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1229,14 +1229,17 @@ static int sdhci_get_ro(struct mmc_host *mmc)
- 
- 	if (host->flags & SDHCI_DEVICE_DEAD)
- 		present = 0;
-+	else if (host->ops->get_ro)
-+		present = host->ops->get_ro(host);
- 	else
--		present = sdhci_readl(host, SDHCI_PRESENT_STATE);
-+		present = !(sdhci_readl(host, SDHCI_PRESENT_STATE)
-+				& SDHCI_WRITE_PROTECT);
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	if (host->quirks & SDHCI_QUIRK_INVERTED_WRITE_PROTECT)
--		return !!(present & SDHCI_WRITE_PROTECT);
--	return !(present & SDHCI_WRITE_PROTECT);
-+	/* This quirk needs to be replaced by a callback-function later */
-+	return host->quirks & SDHCI_QUIRK_INVERTED_WRITE_PROTECT ?
-+		!present : present;
- }
- 
- static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 112543a..66f83f4 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -336,6 +336,7 @@ struct sdhci_ops {
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
-+	unsigned int    (*get_ro)(struct sdhci_host *host);
- };
- 
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
--- 
-1.7.1
+Zhu Richard-R65037 would like to recall the message, "[PATCH 3/4] =
+esdhc-3 esdhc: fsl esdhc driver based on sdhci driver".
 
+------_=_NextPart_001_01CB5B9B.C856D083
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+<TITLE>Recall: [PATCH 3/4] esdhc-3 esdhc: fsl esdhc driver based on =
+sdhci driver</TITLE>
+</HEAD>
+<BODY>
+<!-- Converted from text/plain format -->
+
+<P><FONT SIZE=3D2>Zhu Richard-R65037 would like to recall the message, =
+&quot;[PATCH 3/4] esdhc-3 esdhc: fsl esdhc driver based on sdhci =
+driver&quot;.</FONT></P>
+
+</BODY>
+</HTML>
+------_=_NextPart_001_01CB5B9B.C856D083--
+
+
+--===============1316799734==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============1316799734==--
