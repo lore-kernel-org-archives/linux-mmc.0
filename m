@@ -1,116 +1,102 @@
-From: "kishore kadiyala" <kishore.kadiyala@ti.com>
-Subject: [PATCH v4 3/4] omap4 hsmmc: Register offset handling
-Date: Fri, 24 Sep 2010 22:43:35 +0530 (IST)
-Message-ID: <9496.10.24.255.18.1285348415.squirrel@dbdmail.itg.ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:41398 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753142Ab0IXROW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 24 Sep 2010 13:14:22 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: matt mooney <mfm@muteddisk.com>
+Subject: [PATCH 14/24] mmc: change to new flag variable
+Date: Fri, 24 Sep 2010 12:17:24 -0700
+Message-ID: <efe88633e146de3e173afea14f777c41c37e5db2.1285355033.git.mfm@muteddisk.com>
+References: <e0bdab5d2e8c52041c003de68ba774c3e706716c.1285355033.git.mfm@muteddisk.com>
+ <9968d4260be8850200cc9c7dfe08addf611468b4.1285355033.git.mfm@muteddisk.com>
+ <036514b5dd23c5af14303519d79d60d79adccbee.1285355033.git.mfm@muteddisk.com>
+ <ffbd189ef2d414ea7c87ffe2b40fce87877dc014.1285355033.git.mfm@muteddisk.com>
+ <b3e2061e1e6703f7b84c0484030e07de6000546a.1285355033.git.mfm@muteddisk.com>
+ <70fe6b462b3ee22922698a12d62d650cf029033a.1285355033.git.mfm@muteddisk.com>
+ <40a2d76d013ad025d08a411992af10f6bbef0a13.1285355033.git.mfm@muteddisk.com>
+ <b484ccf548e1700e09ac7f731289503bf3e7b3bf.1285355033.git.mfm@muteddisk.com>
+ <2c0fbcaafb18007c5c83823cb33e35120fe15091.1285355033.git.mfm@muteddisk.com>
+ <ec9520aca140f253d8bad33cf35b8e668e7e9c9c.1285355033.git.mfm@muteddisk.com>
+ <8cea68a58c5ddba79fc96e93fa0b23681e6a7ffe.1285355033.git.mfm@muteddisk.com>
+ <e93a3f1af26d2b0fc798b4c15401b3422ae6e2bd.1285355033.git.mfm@muteddisk.com>
+ <c2f1ef5590660ae574e9bdaf7136213741081404.1285355033.git.mfm@muteddisk.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <c2f1ef5590660ae574e9bdaf7136213741081404.1285355033.git.mfm@muteddisk.com>
+In-Reply-To: <e0bdab5d2e8c52041c003de68ba774c3e706716c.1285355033.git.mfm@muteddisk.com>
+References: <e0bdab5d2e8c52041c003de68ba774c3e706716c.1285355033.git.mfm@muteddisk.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: kernel-janitors@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: tony@atomide.com, akpm@linux-foundation.org, madhu.cr@ti.com, b-cousson@ti.com, adrian.hunter@nokia.com
 
+The EXTRA_CFLAGS assignment in mmc/Makefile was not accomplishing
+anything because this flag only has effect on sources at the same level
+as the makefile (i.e., per directory). Since card/, core/, and host/
+rely on MMC_DEBUG, the subdir-ccflags-y variant seems to be the
+appropriate choice.
 
-In OMAP4, as per new PM programming model, the legacy registers
-which were there in OMAP3 are all shifted by 0x100 while new one's
-are added from offset 0 to 0x10.
-For OMAP4, the register offset appending of 0x100 done in devices.c
-currently, is moved to driver file.This change fits in for current
-implementation as well as once the driver undergoes hwmod adaptation.
-
-Cc: Tony Lindgren <tony@atomide.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Benoit Cousson <b-cousson@ti.com>
-Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Signed-off-by: matt mooney <mfm@muteddisk.com>
 ---
- arch/arm/mach-omap2/devices.c         |    8 +++-----
- arch/arm/mach-omap2/hsmmc.c           |    4 ++++
- arch/arm/plat-omap/include/plat/mmc.h |    3 +++
- drivers/mmc/host/omap_hsmmc.c         |    2 ++
- 4 files changed, 12 insertions(+), 5 deletions(-)
+ drivers/mmc/Makefile      |    4 +---
+ drivers/mmc/card/Makefile |    4 ----
+ drivers/mmc/core/Makefile |    4 ----
+ drivers/mmc/host/Makefile |    4 ----
+ 4 files changed, 1 insertions(+), 15 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/devices.c b/arch/arm/mach-omap2/devices.c
-index 2dbb265..bb7ec13 100644
---- a/arch/arm/mach-omap2/devices.c
-+++ b/arch/arm/mach-omap2/devices.c
-@@ -745,13 +745,13 @@ void __init omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
- 		case 3:
- 			if (!cpu_is_omap44xx())
- 				return;
--			base = OMAP4_MMC4_BASE + OMAP4_MMC_REG_OFFSET;
-+			base = OMAP4_MMC4_BASE;
- 			irq = OMAP44XX_IRQ_MMC4;
- 			break;
- 		case 4:
- 			if (!cpu_is_omap44xx())
- 				return;
--			base = OMAP4_MMC5_BASE + OMAP4_MMC_REG_OFFSET;
-+			base = OMAP4_MMC5_BASE;
- 			irq = OMAP44XX_IRQ_MMC5;
- 			break;
- 		default:
-@@ -762,10 +762,8 @@ void __init omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
- 			size = OMAP2420_MMC_SIZE;
- 			name = "mmci-omap";
- 		} else if (cpu_is_omap44xx()) {
--			if (i < 3) {
--				base += OMAP4_MMC_REG_OFFSET;
-+			if (i < 3)
- 				irq += OMAP44XX_IRQ_GIC_START;
--			}
- 			size = OMAP4_HSMMC_SIZE;
- 			name = "mmci-omap-hs";
- 		} else {
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index c8f647b..49d76a7 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -261,6 +261,10 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
- 		mmc->slots[0].wires = c->wires;
- 		mmc->slots[0].internal_clock = !c->ext_clock;
- 		mmc->dma_mask = 0xffffffff;
-+		if (cpu_is_omap44xx())
-+			mmc->reg_offset = OMAP4_MMC_REG_OFFSET;
-+		else
-+			mmc->reg_offset = 0;
-
- 		mmc->get_context_loss_count = hsmmc_get_context_loss;
-
-diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
-index 9b89ec6..4e6ef07 100644
---- a/arch/arm/plat-omap/include/plat/mmc.h
-+++ b/arch/arm/plat-omap/include/plat/mmc.h
-@@ -71,6 +71,9 @@ struct omap_mmc_platform_data {
-
- 	u64 dma_mask;
-
-+	/* Register offset deviation */
-+	u16 reg_offset;
-+
- 	struct omap_mmc_slot_data {
-
- 		/* 4 wire signaling is optional, and is used for SD/SDIO/HSMMC;
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index a51894d..8cb007c 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2009,6 +2009,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
- 	if (res == NULL || irq < 0)
- 		return -ENXIO;
-
-+	res->start += pdata->reg_offset;
-+	res->end += pdata->reg_offset;
- 	res = request_mem_region(res->start, res->end - res->start + 1,
- 							pdev->name);
- 	if (res == NULL)
+diff --git a/drivers/mmc/Makefile b/drivers/mmc/Makefile
+index 9979f5e..12eef39 100644
+--- a/drivers/mmc/Makefile
++++ b/drivers/mmc/Makefile
+@@ -2,9 +2,7 @@
+ # Makefile for the kernel mmc device drivers.
+ #
+ 
+-ifeq ($(CONFIG_MMC_DEBUG),y)
+-	EXTRA_CFLAGS		+= -DDEBUG
+-endif
++subdir-ccflags-$(CONFIG_MMC_DEBUG) := -DDEBUG
+ 
+ obj-$(CONFIG_MMC)		+= core/
+ obj-$(CONFIG_MMC)		+= card/
+diff --git a/drivers/mmc/card/Makefile b/drivers/mmc/card/Makefile
+index 0d40751..c73b406 100644
+--- a/drivers/mmc/card/Makefile
++++ b/drivers/mmc/card/Makefile
+@@ -2,10 +2,6 @@
+ # Makefile for MMC/SD card drivers
+ #
+ 
+-ifeq ($(CONFIG_MMC_DEBUG),y)
+-	EXTRA_CFLAGS		+= -DDEBUG
+-endif
+-
+ obj-$(CONFIG_MMC_BLOCK)		+= mmc_block.o
+ mmc_block-objs			:= block.o queue.o
+ obj-$(CONFIG_MMC_TEST)		+= mmc_test.o
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index 889e5f8..86b4791 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -2,10 +2,6 @@
+ # Makefile for the kernel mmc core.
+ #
+ 
+-ifeq ($(CONFIG_MMC_DEBUG),y)
+-	EXTRA_CFLAGS		+= -DDEBUG
+-endif
+-
+ obj-$(CONFIG_MMC)		+= mmc_core.o
+ mmc_core-y			:= core.o bus.o host.o \
+ 				   mmc.o mmc_ops.o sd.o sd_ops.o \
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 840bcb5..e35e778 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -2,10 +2,6 @@
+ # Makefile for MMC/SD host controller drivers
+ #
+ 
+-ifeq ($(CONFIG_MMC_DEBUG),y)
+-	EXTRA_CFLAGS		+= -DDEBUG
+-endif
+-
+ obj-$(CONFIG_MMC_ARMMMCI)	+= mmci.o
+ obj-$(CONFIG_MMC_PXA)		+= pxamci.o
+ obj-$(CONFIG_MMC_IMX)		+= imxmmc.o
 -- 
-1.7.0.4
-
-
+1.7.2.1
