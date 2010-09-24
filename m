@@ -1,60 +1,91 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] sdhci: add quirk for controllers that don't support
-	write only detect
-Date: Fri, 24 Sep 2010 06:49:28 +0200
-Message-ID: <20100924044928.GA21645@pengutronix.de>
-References: <43E4817426ED174AA81263BCECB4351D131745CF98@sc-vexch3.marvell.com> <53E1B390-48DD-4E33-B51F-1B039AFD13A2@marvell.com> <4B9DEAE2.3030707@nokia.com> <3A9599CE-49EE-4A18-89E0-22B17090CA43@marvell.com> <4BA72971.1070804@nokia.com> <639D1595-D908-473C-9A41-71B493DCD0C0@marvell.com> <4BB052F6.5080808@nokia.com> <A9891FF4-9D4D-4F5C-ACE9-B272B53CCC08@marvell.com> <20100920061459.GA9353@pengutronix.de> <763CD352-8557-46F1-89D6-5596C40C435E@marvell.com>
+From: Peppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: Re: [PATCH (mmc-next) 1/3] mmc: add suspend/resume in the
+ sdhci-pltfm driver
+Date: Fri, 24 Sep 2010 07:54:53 +0200
+Message-ID: <4C9C3D2D.1090302@st.com>
+References: <1285233266-5039-1-git-send-email-peppe.cavallaro@st.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="u3/rZRmxL6MmkK24"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:38640 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750963Ab0IXEta (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Sep 2010 00:49:30 -0400
-Content-Disposition: inline
-In-Reply-To: <763CD352-8557-46F1-89D6-5596C40C435E@marvell.com>
+Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:53028 "EHLO
+	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750880Ab0IXFzy convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 24 Sep 2010 01:55:54 -0400
+In-Reply-To: <1285233266-5039-1-git-send-email-peppe.cavallaro@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>
 
+Hello
+I wonder if you could review the three patches I sent the mailing list:
+especially the following ones:
 
---u3/rZRmxL6MmkK24
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+mmc: add suspend/resume in the sdhci-pltfm driver
+mmc: split the sdhci.h to help platforms that uses shdci-pltfm d.d.
 
-On Thu, Sep 23, 2010 at 04:18:02PM -0700, Philip Rakity wrote:
->    Since your patches are not available yet -- I think it makes more sens=
-e if
->    this patch is considered for inclusion and you can add then include its
->    functionality in your code.
+These follow the advice discussed with Wolfram in the thread named:
+  "[PATCH] mmc: add SDHCI driver for STM platforms (V2)."
 
-Hmm, I don't think so. As I mentioned elsewhere, Richard Zhu has posted such
-patches you could base your work on. And if his approach works for you and =
-you
-like it, you could ack them, or say Tested-by or so...
+I just noticed to have forgotten to put in cc Andrew and Matt (sorry).
 
-Regards,
+In fact, I want to remove the stm driver and use the pltfm driver
+instead of. To do that on my platforms, I need have the support provided
+in these patches. This support could actually be useful for others.
 
-   Wolfram
+Let me know.
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Best Regards,
+Peppe
 
---u3/rZRmxL6MmkK24
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAkycLdgACgkQD27XaX1/VRsZbQCgr25IppZ0VIMih0vHUmnzoxAr
-28MAoLZaqG8T7xLqZtFSlp7RATyIySPH
-=gsc2
------END PGP SIGNATURE-----
-
---u3/rZRmxL6MmkK24--
+On 09/23/2010 11:14 AM, Giuseppe CAVALLARO wrote:
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> ---
+> drivers/mmc/host/sdhci-pltfm.c | 22 ++++++++++++++++++++++
+> 1 files changed, 22 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index e045e3c..89ea64b 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -165,6 +165,24 @@ static const struct platform_device_id sdhci_pltfm_ids[] = {
+> };
+> MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
+> 
+> +#ifdef CONFIG_PM
+> +static int sdhci_pltfm_suspend(struct platform_device *dev, pm_message_t pm)
+> +{
+> + struct sdhci_host *host = platform_get_drvdata(dev);
+> +
+> + sdhci_suspend_host(host, pm);
+> + return 0;
+> +}
+> +
+> +static int sdhci_pltfm_resume(struct platform_device *dev)
+> +{
+> + struct sdhci_host *host = platform_get_drvdata(dev);
+> +
+> + sdhci_resume_host(host);
+> + return 0;
+> +}
+> +#endif
+> +
+> static struct platform_driver sdhci_pltfm_driver = {
+> .driver = {
+> .name = "sdhci",
+> @@ -173,6 +191,10 @@ static struct platform_driver sdhci_pltfm_driver = {
+> .probe = sdhci_pltfm_probe,
+> .remove = __devexit_p(sdhci_pltfm_remove),
+> .id_table = sdhci_pltfm_ids,
+> +#ifdef CONFIG_PM
+> + .suspend = sdhci_pltfm_suspend,
+> + .resume = sdhci_pltfm_resume,
+> +#endif
+> };
+> 
+> /*****************************************************************************\
+> --
+> 1.5.5.6
+> 
