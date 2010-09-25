@@ -1,86 +1,37 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: sdhci: Best Practice Question
-Date: Sat, 25 Sep 2010 13:08:20 -0700
-Message-ID: <E6553F30-7D88-476A-A8AF-3F7793FA4DE0@marvell.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] sdhci-s3c: fix NULL ptr access in sdhci_s3c_remove
+Date: Sat, 25 Sep 2010 23:53:24 +0100
+Message-ID: <20100925225324.GA30732@void.printf.net>
+References: <1285251725-6210-1-git-send-email-m.szyprowski@samsung.com> <20100923120803.832975f6.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog106.obsmtp.com ([74.125.149.77]:55761 "HELO
-	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1755237Ab0IYUIX convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 25 Sep 2010 16:08:23 -0400
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20100923120803.832975f6.akpm@linux-foundation.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, kgene.kim@samsung.com, ben-linux@fluff.org, w.sang@pengutronix.de
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-and a 
-host->ops-> get_max_clock()
-function that is used to set the max clock.  The code snippet is below
-
-
-	host->max_clk =
-		(caps & SDHCI_CLOCK_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
-	host->max_clk *= 1000000;
-	if (host->max_clk == 0 || host->quirks &
-			SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN) {
-		if (!host->ops->get_max_clock) {
-			printk(KERN_ERR
-			       "%s: Hardware doesn't specify base clock "
-			       "frequency.\n", mmc_hostname(mmc));
-			return -ENODEV;
-		}
-		host->max_clk = host->ops->get_max_clock(host);
-	}
-
-
-The quirk seems redundant since this could be coded as follows to remove the need for the quirk
-
-> +	if (host->ops->get_max_clock)
-> 		host->max_clk = host->ops->get_max_clock(host);
-> +	else {
-> +		host->max_clk =
-> +			(caps & SDHCI_CLOCK_BASE_MASK) 
-> +				>> SDHCI_CLOCK_BASE_SHIFT;
-> +		host->max_clk *= 1000000;
-> +	}
-> +
-> +	if (host->max_clk == 0) {
-> +		printk(KERN_ERR
-> +		       "%s: Hardware doesn't specify base clock "
-> +		       "frequency.\n", mmc_hostname(mmc));
-> +		return -ENODEV;
-> 	}
+On Thu, Sep 23, 2010 at 12:08:03PM -0700, Andrew Morton wrote:
+> The patch applies OK to 2.6.35.  Is the bug present there as well?  If
+> so, should we fix it in earlier kernels?  If so then the way in which
+> we indicate this is by adding
 > 
+> 	Cc: <stable@kernel.org>
+> 
+> to the changelog.
 
+Marek, Kyungmin, what do you think?
 
-This approach was not used since it was felt a quirk was needed.
+Andrew, I've been waiting for an ACK from Ben Dooks, since he's listed
+in MAINTAINERS for this driver, but he hasn't replied yet (I've tried 
+pinging privately).  I'll plan on sending Marek's two s3c fixes to
+Linus tomorrow regardless (this one with Cc: <stable@kernel.org>)
+along with my MAINTAINERS update for MMC unless anyone objects.
 
-http://kerneltrap.org/mailarchive/linux-kernel/2010/2/19/4540115
+Thanks,
 
-but the quirk redundant and it requires two items be set; the quirk and the callback.
-Defining the quirk and not the callback is meaningless.  
-
-The change proposed by Richard Zhu for handling write protect uses only a callback.
-
-<snip>
-static int sdhci_get_ro(struct mmc_host *mmc)
-{
-	struct sdhci_host *host;
-	unsigned long flags;
-	int present;
-
-	host = mmc_priv(mmc);
-
-	if (host->ops->get_ro)
-		return host->ops->get_ro(host);
-
-	spin_lock_irqsave(&host->lock, flags);
-
-<end snip>
-
-What is the correct practice?  
-
-Philip
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
