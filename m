@@ -1,204 +1,586 @@
 From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: [patch] sdhci-pltfm: add call back function
-Date: Sun, 26 Sep 2010 04:52:06 -0400
-Message-ID: <AANLkTi=tkP2O+EaY5xSQ8EZAR0rP9gTz34cipC-WTHjf@mail.gmail.com>
+Subject: Re: [PATCH 3/4] esdhc-3 esdhc: fsl esdhc driver based on sdhci driver
+Date: Sun, 26 Sep 2010 04:56:16 -0400
+Message-ID: <AANLkTimLX-+Jyc-_Csqz09yPH1SKCwArV=NC0rEEqtrf@mail.gmail.com>
+References: <1285299788-32209-1-git-send-email-r65037@freescale.com>
+	<1285299788-32209-2-git-send-email-r65037@freescale.com>
+	<1285299788-32209-3-git-send-email-r65037@freescale.com>
+	<1285299788-32209-4-git-send-email-r65037@freescale.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=005045017239fb2de5049125b9ed
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:34402 "EHLO
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:38570 "EHLO
 	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751610Ab0IZIwH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2010 04:52:07 -0400
-Received: by iwn5 with SMTP id 5so3753906iwn.19
-        for <linux-mmc@vger.kernel.org>; Sun, 26 Sep 2010 01:52:07 -0700 (PDT)
+	with ESMTP id S1751610Ab0IZI4R convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2010 04:56:17 -0400
+Received: by iwn5 with SMTP id 5so3755657iwn.19
+        for <linux-mmc@vger.kernel.org>; Sun, 26 Sep 2010 01:56:16 -0700 (PDT)
+In-Reply-To: <1285299788-32209-4-git-send-email-r65037@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>, Richard Zhu <r65037@freescale.com>
+To: Richard Zhu <r65037@freescale.com>
+Cc: w.sang@pengutronix.de, u.kleine-koenig@pengutronix.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
---005045017239fb2de5049125b9ed
-Content-Type: text/plain; charset=ISO-8859-1
+On Thu, Sep 23, 2010 at 11:43 PM, Richard Zhu <r65037@freescale.com> wr=
+ote:
+> Based on SDHCI API, esdhc driver supports PIO and simple internal
+> DMA modes.
+>
+> Signed-off-by: Richard Zhu <r65037@freescale.com>
+> ---
+> =A0drivers/mmc/host/Kconfig =A0 =A0 | =A0 13 ++
+> =A0drivers/mmc/host/Makefile =A0 =A0| =A0 =A01 +
+> =A0drivers/mmc/host/sdhci-imx.c | =A0395 ++++++++++++++++++++++++++++=
+++++++++++++++
+> =A03 files changed, 409 insertions(+), 0 deletions(-)
+> =A0create mode 100644 drivers/mmc/host/sdhci-imx.c
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 283190b..ce2840c 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -130,6 +130,19 @@ config MMC_SDHCI_CNS3XXX
+>
+> =A0 =A0 =A0 =A0 =A0If unsure, say N.
+>
+> +config MMC_SDHCI_IMX
+> + =A0 =A0 =A0 tristate "Freescale i.MX platform eSDHCI support"
+> + =A0 =A0 =A0 depends on ARCH_MX5 && MMC_SDHCI
+> + =A0 =A0 =A0 depends on MMC_SDHCI_PLTFM
+> + =A0 =A0 =A0 select MMC_SDHCI_IO_ACCESSORS
+> + =A0 =A0 =A0 help
+> + =A0 =A0 =A0 =A0 This selects the Freescale i.MX Enhanced Secure Car=
+d Host
+> + =A0 =A0 =A0 =A0 Controller Interface.
+> + =A0 =A0 =A0 =A0 If you have a i.MX platform with a Multimedia Card =
+slot,
+> + =A0 =A0 =A0 =A0 say Y or M here.
+> +
+> + =A0 =A0 =A0 =A0 If unsure, say N.
+> +
+> =A0config MMC_SDHCI_S3C
+> =A0 =A0 =A0 =A0tristate "SDHCI support on Samsung S3C SoC"
+> =A0 =A0 =A0 =A0depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 840bcb5..ae7c3e7 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -40,6 +40,7 @@ obj-$(CONFIG_MMC_JZ4740) =A0 =A0 =A0+=3D jz4740_mmc=
+=2Eo
+> =A0obj-$(CONFIG_MMC_SDHCI_PLTFM) =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0+=
+=3D sdhci-platform.o
+> =A0sdhci-platform-y =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 :=3D sdhci-pltfm.o
+> =A0sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX) =A0 =A0 +=3D sdhci-cns3=
+xxx.o
+> +sdhci-platform-$(CONFIG_MMC_SDHCI_IMX) =A0 =A0 =A0 =A0 +=3D sdhci-im=
+x.o
+>
+> =A0obj-$(CONFIG_MMC_SDHCI_OF) =A0 =A0 +=3D sdhci-of.o
+> =A0sdhci-of-y =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ :=3D sdhci-of-core.o
+> diff --git a/drivers/mmc/host/sdhci-imx.c b/drivers/mmc/host/sdhci-im=
+x.c
+> new file mode 100644
+> index 0000000..6e34bcd
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-imx.c
+> @@ -0,0 +1,395 @@
+> +/*
+> + * Copyright (C) 2010 Freescale Semiconductor, Inc. All Rights Reser=
+ved.
+> + */
+> +
+> +/*
+> + * sdhci-imx.c Support for SDHCI platform devices
+> + *
+> + * This program is free software; you can redistribute it and/or mod=
+ify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + *
+> + * This program is distributed in the hope that it will be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. =A0See the
+> + * GNU General Public License for more details.
+> + *
+> + * You should have received a copy of the GNU General Public License
+> + * along with this program; if not, write to the Free Software
+> + * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+> + */
+> +
+> +/* Supports:
+> + * SDHCI imx devices
+> + *
+> + * Inspired by sdhci-pci.c, by Pierre Ossman
+> + */
+> +
+> +#include <linux/delay.h>
+> +#include <linux/highmem.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/clk.h>
+> +#include <linux/regulator/consumer.h>
+> +#include <linux/gpio.h>
+> +#include <linux/io.h>
+> +#include <linux/irq.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/sdhci-pltfm.h>
+> +
+> +#include <mach/mmc.h>
+> +
+> +#include "sdhci.h"
+> +#include "sdhci-pltfm.h"
+> +
+> +/* Vendor specified registors */
+> +#define =A0 =A0 =A0 =A0FSL_SDHCI_WML =A0 =A0 =A0 =A0 =A0 0x44
+> +#define =A0 =A0 =A0 =A0FSL_SDHCI_WML_16_WORDS =A00x08100810
+> +#define =A0 =A0 =A0 =A0FSL_SDHCI_WML_32_WORDS =A00x08200820
+> +#define =A0 =A0 =A0 =A0FSL_SDHCI_WML_64_WORDS =A00x08400840
+> +#define =A0 =A0 =A0 =A0FSL_SDHCI_WML_128_WORDS 0x08800880
+> +
+> +/* Non-standard clock control registor */
+> +#define ESDHC_SYSTEM_CONTROL =A0 0x2C
+> +#define ESDHC_CLOCK_MASK =A0 =A0 =A0 0x0000FFF0
+> +#define ESDHC_PREDIV_SHIFT =A0 =A0 8
+> +#define ESDHC_DIVIDER_SHIFT =A0 =A04
+> +#define ESDHC_CLOCK_PEREN =A0 =A0 =A00x00000004
+> +#define ESDHC_CLOCK_HCKEN =A0 =A0 =A00x00000002
+> +#define ESDHC_CLOCK_IPGEN =A0 =A0 =A00x00000001
+> +
+> +/* Non-standard host control registor */
+> +#define =A0 =A0 =A0 =A0ESDHC_SDHCI_CTRL_8BITBUS =A0 =A0 =A0 =A00x000=
+00004
+> +#define =A0 =A0 =A0 =A0FSL_ESDHC_HOST_CONTROL_RES =A0 =A0 =A00x33E
+> +#define ESDHC_HOST_CONTROL_LE =A0 =A0 =A0 =A0 =A00x20
+> +
+> +/*******************************************************************=
+**********\
+> + * =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 *
+> + * SDHCI core callbacks =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*
+> + * =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 *
+> +\*******************************************************************=
+**********/
+> +
+> +static u32 sdhci_imx_readl(struct sdhci_host *host, int reg)
+> +{
+> + =A0 =A0 =A0 return readl(host->ioaddr + reg);
+> +}
+> +
+> +static u16 sdhci_imx_readw(struct sdhci_host *host, int reg)
+> +{
+> + =A0 =A0 =A0 u32 val;
+> + =A0 =A0 =A0 u16 rc;
+> +
+> + =A0 =A0 =A0 if (reg % 4 =3D=3D 3) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_ERR "Invalid reg address!\n=
+");
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 0;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 val =3D readl(host->ioaddr + (reg / 4) * 4);
+> + =A0 =A0 =A0 rc =3D (val >> (reg % 4) * 8) & 0xFFFF;
+> +
+> + =A0 =A0 =A0 return rc;
+> +}
+> +
+> +static u8 sdhci_imx_readb(struct sdhci_host *host, int reg)
+> +{
+> + =A0 =A0 =A0 u32 val;
+> + =A0 =A0 =A0 u8 rc;
+> +
+> + =A0 =A0 =A0 val =3D readl(host->ioaddr + (reg / 4) * 4);
+> + =A0 =A0 =A0 rc =3D (val >> (reg % 4) * 8) & 0xFF;
+> + =A0 =A0 =A0 if (reg =3D=3D SDHCI_HOST_CONTROL) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Bus width */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (val & ESDHC_SDHCI_CTRL_8BITBUS) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rc |=3D SDHCI_CTRL_8BIT=
+BUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rc &=3D ~SDHCI_CTRL_4BI=
+TBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else if (val & SDHCI_CTRL_4BITBUS) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rc &=3D ~SDHCI_CTRL_8BI=
+TBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rc |=3D SDHCI_CTRL_4BIT=
+BUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rc &=3D ~SDHCI_CTRL_8BI=
+TBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rc &=3D ~SDHCI_CTRL_4BI=
+TBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* DMA */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (val & (SDHCI_CTRL_DMA_MASK << 5))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 rc |=3D ((val >> 5) & S=
+DHCI_CTRL_DMA_MASK);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* FIXME D3CD */
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 return rc;
+> +}
+> +
+> +static void sdhci_imx_writel(struct sdhci_host *host, u32 val, int r=
+eg)
+> +{
+> + =A0 =A0 =A0 writel(val, host->ioaddr + reg);
+> +}
+> +
+> +static void sdhci_imx_writew(struct sdhci_host *host, u16 val, int r=
+eg)
+> +{
+> + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host=
+);
+> +
+> + =A0 =A0 =A0 u32 io_val;
+> +
+> + =A0 =A0 =A0 if (reg % 4 =3D=3D 3) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_ERR "Invalid reg address!\n=
+");
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 if (reg =3D=3D SDHCI_BLOCK_SIZE) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Two last DMA bits are reserved, an=
+d first one is used for
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* non-standard blksz of 4096 bytes t=
+hat we don't support
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* yet. So clear the DMA boundary bit=
+s.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 val &=3D ~SDHCI_MAKE_BLKSZ(0x7, 0);
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 io_val =3D readl(host->ioaddr + (reg / 4) * 4);
+> + =A0 =A0 =A0 io_val &=3D ~(0xFFFF << ((reg % 4) * 8));
+> + =A0 =A0 =A0 io_val |=3D val << ((reg % 4) * 8);
+> +
+> + =A0 =A0 =A0 switch (reg) {
+> + =A0 =A0 =A0 case SDHCI_TRANSFER_MODE:
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Postpone this write, we must do it=
+ together with a
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* command write that is down below.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pltfm_host->scratchpad =3D val;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+> + =A0 =A0 =A0 case SDHCI_COMMAND:
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 writel(io_val | pltfm_host->scratchpad,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ host->ioaddr + =A0SDHCI_TRANSFER_MODE);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Make a double check that the warte=
+ mark level register is
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* configured properly. default value=
+ is FSL_SDHCI_WML_16_WORDS
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (readl(host->ioaddr + FSL_SDHCI_WML)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =3D=3D =
+=46SL_SDHCI_WML_16_WORDS) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->flags & SDHCI=
+_REQ_USE_DMA)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 writel(=
+=46SL_SDHCI_WML_64_WORDS,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 host->ioaddr + FSL_SDHCI_WML);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 writel(=
+=46SL_SDHCI_WML_128_WORDS,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 host->ioaddr + FSL_SDHCI_WML);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 writel(io_val, host->ioaddr + (reg / 4) * 4);
+> +}
+> +
+> +static void sdhci_imx_set_power(struct sdhci_host *host, u8 power)
+> +{
+> + =A0 =A0 =A0 int voltage =3D 0;
+> +
+> + =A0 =A0 =A0 /* There is no sdhci standard PWR CTL REG in imx sdhci =
+*/
+> + =A0 =A0 =A0 if (host->pwr =3D=3D power)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+> +
+> + =A0 =A0 =A0 if (host->vmmc) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (power =3D=3D (unsigned short)-1) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 regulator_disable(host-=
+>vmmc);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_dbg(mmc_dev(host->m=
+mc), "mmc power off\n");
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (power =3D=3D 7)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 voltage=
+ =3D 1800000;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (power >=3D 8)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 voltage=
+ =3D 2000000 + (power - 8) * 100000;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 regulator_set_voltage(h=
+ost->vmmc, voltage, voltage);
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (regulator_enable(ho=
+st->vmmc) =3D=3D 0) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_dbg=
+(mmc_dev(host->mmc), "mmc power on\n");
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 msleep(=
+1);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 host->pwr =3D power;
+> +}
+> +
+> +static void sdhci_imx_writeb(struct sdhci_host *host, u8 val, int re=
+g)
+> +{
+> + =A0 =A0 =A0 u32 io_val;
+> +
+> + =A0 =A0 =A0 /* Since there is no power register in FSL eSDHC, handl=
+e it in SW */
+> + =A0 =A0 =A0 if (reg =3D=3D SDHCI_POWER_CONTROL) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_imx_set_power(host, val);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 if (reg =3D=3D SDHCI_HOST_CONTROL) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val =3D readl(host->ioaddr + SDHCI_H=
+OST_CONTROL);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Bit7~6, andi bit0 */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val |=3D (val & ~FSL_ESDHC_HOST_CONT=
+ROL_RES);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Ensure the LE mode */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val |=3D ESDHC_HOST_CONTROL_LE;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Configure the bus_width 8bits, 4bits=
+, or 1bit*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (val & SDHCI_CTRL_8BITBUS) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val |=3D ESDHC_SDHCI=
+_CTRL_8BITBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val &=3D ~SDHCI_CTRL=
+_4BITBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else if (val & SDHCI_CTRL_4BITBUS) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val &=3D ~ESDHC_SDHC=
+I_CTRL_8BITBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val |=3D SDHCI_CTRL_=
+4BITBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val &=3D ~ESDHC_SDHC=
+I_CTRL_8BITBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val &=3D ~SDHCI_CTRL=
+_4BITBUS;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Configure the DMA */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (val & SDHCI_CTRL_DMA_MASK)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 io_val |=3D (val & SDHC=
+I_CTRL_DMA_MASK) << 5;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 writel(io_val, host->ioaddr + SDHCI_HOS=
+T_CONTROL);
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 io_val =3D readl(host->ioaddr + (reg / 4) * 4);
+> + =A0 =A0 =A0 io_val &=3D ~(0xFF << ((reg % 4) * 8));
+> + =A0 =A0 =A0 io_val |=3D val << ((reg % 4) * 8);
+> +
+> + =A0 =A0 =A0 writel(io_val, host->ioaddr + (reg / 4) * 4);
+> +}
+> +
+> +static unsigned int sdhci_imx_get_max_clock(struct sdhci_host *host)
+> +{
+> + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host=
+);
+> +
+> + =A0 =A0 =A0 return clk_get_rate(pltfm_host->clk);
+> +}
+> +
+> +static unsigned int sdhci_imx_get_min_clock(struct sdhci_host *host)
+> +{
+> + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host=
+);
+> +
+> + =A0 =A0 =A0 return clk_get_rate(pltfm_host->clk) / 256 / 16;
+> +}
+> +
+> +static unsigned int sdhci_imx_get_timeout_clock(struct sdhci_host *h=
+ost)
+> +{
+> + =A0 =A0 =A0 return sdhci_imx_get_max_clock(host) / 1000000;
+> +}
+> +
+> +static unsigned int sdhci_imx_get_ro(struct sdhci_host *host)
+> +{
+> + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host=
+);
+> +
+> + =A0 =A0 =A0 return gpio_get_value(pltfm_host->wp_gpio);
+> +}
+> +
+> +static void sdhci_imx_set_clock(struct sdhci_host *host, unsigned in=
+t clock)
+> +{
+> + =A0 =A0 =A0 int pre_div =3D 2;
+> + =A0 =A0 =A0 int div =3D 1;
+> + =A0 =A0 =A0 u32 temp;
+> +
+> + =A0 =A0 =A0 temp =3D sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+> + =A0 =A0 =A0 temp &=3D ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESD=
+HC_CLOCK_PEREN
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | ESDHC_CLOCK_MASK);
+> + =A0 =A0 =A0 sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+> +
+> + =A0 =A0 =A0 if (clock =3D=3D 0)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+> +
+> + =A0 =A0 =A0 while (host->max_clk / pre_div / 16 > clock && pre_div =
+< 256)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pre_div *=3D 2;
+> +
+> + =A0 =A0 =A0 while (host->max_clk / pre_div / div > clock && div < 1=
+6)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 div++;
+> +
+> + =A0 =A0 =A0 dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actu=
+al: %d\n",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 clock, host->max_clk / pre_div / div);
+> +
+> + =A0 =A0 =A0 pre_div >>=3D 1;
+> + =A0 =A0 =A0 div--;
+> +
+> + =A0 =A0 =A0 temp =3D sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+> + =A0 =A0 =A0 temp |=3D (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDH=
+C_CLOCK_PEREN
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | (div << ESDHC_DIVIDER=
+_SHIFT)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | (pre_div << ESDHC_PRE=
+DIV_SHIFT));
+> + =A0 =A0 =A0 sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+> + =A0 =A0 =A0 mdelay(10);
+> +out:
+> + =A0 =A0 =A0 host->clock =3D clock;
+> +}
+> +
+> +static int sdhci_imx_enable_dma(struct sdhci_host *host)
+> +{
+> + =A0 =A0 =A0 u32 ctrl;
+> +
+> + =A0 =A0 =A0 ctrl =3D readl(host->ioaddr + SDHCI_HOST_CONTROL);
+> + =A0 =A0 =A0 ctrl &=3D ~(SDHCI_CTRL_DMA_MASK << 5);
+> + =A0 =A0 =A0 if ((host->flags & SDHCI_REQ_USE_DMA) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host->flags & SDHCI_USE_ADMA))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D (SDHCI_CTRL_ADMA32 << 8);
+> + =A0 =A0 =A0 else if (host->flags & SDHCI_REQ_USE_DMA)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D (SDHCI_CTRL_SDMA << 8);
+> +
+> + =A0 =A0 =A0 writel(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+> +
+> + =A0 =A0 =A0 if (host->flags & SDHCI_REQ_USE_DMA)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 writel(FSL_SDHCI_WML_64_WORDS,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->i=
+oaddr + FSL_SDHCI_WML);
+> + =A0 =A0 =A0 else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 writel(FSL_SDHCI_WML_128_WORDS,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->i=
+oaddr + FSL_SDHCI_WML);
+> + =A0 =A0 =A0 return 0;
+> +}
+> +
+> +static int __match_sdhci_imx(struct device *dev, void *data)
+> +{
+> + =A0 =A0 =A0 return !strncmp(dev_name(dev), "imx-sdhci", 9);
+> +}
+> +static int sdhci_imx_init(struct sdhci_host *host)
+> +{
+> + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host=
+);
+> + =A0 =A0 =A0 struct clk *clk;
+> + =A0 =A0 =A0 struct device *dev;
+> +
 
-Add several call back to sdhci-pltfm.c, help give suggestion
-1. struct sdhci_host *(*alloc_host)(struct device *dev), since
-specific driver need some private variable to allocate and free,
-including clk.
-2. unsigned int  (*get_quirk)(struct sdhci_host *host); add this
-because one driver may serve several device, each one may require
-different quirk, and specific driver is right one to know.
-3. void (*set_max_speed)(struct sdhci_host *host); this should be done
-after add_host, which impact f_max.
-4. int (*init)(struct sdhci_host *host, struct sdhci_pltfm_data
-*pdata, void* priv_pdata); copy from Wolfram Sang's patch to transfer
-platform data, copy here for test.
+Not sure how many device is served, what driver get here is only
+imx-sdhci.0, but  imx-sdhci.1,  imx-sdhci.2 will never come up.
+So this method only right for one device.
 
->From 8c59d0b917f434d7c424ce1e0896af45c3e5fbba Mon Sep 17 00:00:00 2001
-From: Zhangfei Gao <zhangfei.gao@marvell.com>
-Date: Sun, 26 Sep 2010 16:37:11 -0400
-Subject: [PATCH 2/2] sdhci-pltfm: add call back function
-
-
-Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
----
- drivers/mmc/host/sdhci-pltfm.c |   24 ++++++++++++++++++------
- include/linux/sdhci-pltfm.h    |    5 ++++-
- 2 files changed, 22 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index e045e3c..e06f047 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -54,12 +54,17 @@ static int __devinit sdhci_pltfm_probe(struct
-platform_device *pdev)
- {
- 	struct sdhci_pltfm_data *pdata = pdev->dev.platform_data;
- 	const struct platform_device_id *platid = platform_get_device_id(pdev);
-+	void *priv_pdata = NULL;
- 	struct sdhci_host *host;
- 	struct resource *iomem;
- 	int ret;
-
--	if (!pdata && platid && platid->driver_data)
-+	if (platid && platid->driver_data) {
- 		pdata = (void *)platid->driver_data;
-+		priv_pdata = pdev->dev.platform_data;
-+	} else {
-+		pdata = pdev->dev.platform_data;
-+	}
-
- 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!iomem) {
-@@ -71,8 +76,8 @@ static int __devinit sdhci_pltfm_probe(struct
-platform_device *pdev)
- 		dev_err(&pdev->dev, "Invalid iomem size. You may "
- 			"experience problems.\n");
-
--	if (pdev->dev.parent)
--		host = sdhci_alloc_host(pdev->dev.parent, 0);
-+	if (pdata && pdata->alloc_host)
-+		host = pdata->alloc_host(&pdev->dev);
- 	else
- 		host = sdhci_alloc_host(&pdev->dev, 0);
-
-@@ -86,8 +91,7 @@ static int __devinit sdhci_pltfm_probe(struct
-platform_device *pdev)
- 		host->ops = pdata->ops;
- 	else
- 		host->ops = &sdhci_pltfm_ops;
--	if (pdata)
--		host->quirks = pdata->quirks;
-+
- 	host->irq = platform_get_irq(pdev, 0);
-
- 	if (!request_mem_region(iomem->start, resource_size(iomem),
-@@ -105,15 +109,23 @@ static int __devinit sdhci_pltfm_probe(struct
-platform_device *pdev)
- 	}
-
- 	if (pdata && pdata->init) {
--		ret = pdata->init(host);
-+		ret = pdata->init(host, pdata, priv_pdata);
- 		if (ret)
- 			goto err_plat_init;
- 	}
-
-+	if (pdata && pdata->get_quirk)
-+		host->quirks = pdata->get_quirk(host);
-+	else if (pdata)
-+		host->quirks = pdata->quirks;
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err_add_host;
-
-+	if (pdata && pdata->set_max_speed)
-+		pdata->set_max_speed(host);
-+
- 	platform_set_drvdata(pdev, host);
-
- 	return 0;
-diff --git a/include/linux/sdhci-pltfm.h b/include/linux/sdhci-pltfm.h
-index 0239bd7..0d8e8f6 100644
---- a/include/linux/sdhci-pltfm.h
-+++ b/include/linux/sdhci-pltfm.h
-@@ -28,8 +28,11 @@ struct sdhci_host;
- struct sdhci_pltfm_data {
- 	struct sdhci_ops *ops;
- 	unsigned int quirks;
--	int (*init)(struct sdhci_host *host);
-+	int (*init)(struct sdhci_host *host, struct sdhci_pltfm_data *pdata,
-void* priv_pdata);
- 	void (*exit)(struct sdhci_host *host);
-+	void (*set_max_speed)(struct sdhci_host *host);
-+	unsigned int  (*get_quirk)(struct sdhci_host *host);
-+	struct sdhci_host *(*alloc_host)(struct device *dev);
- };
-
- #endif /* _SDHCI_PLTFM_H */
--- 
-1.7.0.4
-
---005045017239fb2de5049125b9ed
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0002-sdhci-pltfm-add-call-back-function.patch"
-Content-Disposition: attachment;
-	filename="0002-sdhci-pltfm-add-call-back-function.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gekdloba0
-
-RnJvbSA4YzU5ZDBiOTE3ZjQzNGQ3YzQyNGNlMWUwODk2YWY0NWMzZTVmYmJhIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBaaGFuZ2ZlaSBHYW8gPHpoYW5nZmVpLmdhb0BtYXJ2ZWxsLmNv
-bT4KRGF0ZTogU3VuLCAyNiBTZXAgMjAxMCAxNjozNzoxMSAtMDQwMApTdWJqZWN0OiBbUEFUQ0gg
-Mi8yXSBzZGhjaS1wbHRmbTogYWRkIGNhbGwgYmFjayBmdW5jdGlvbgoKClNpZ25lZC1vZmYtYnk6
-IFpoYW5nZmVpIEdhbyA8emhhbmdmZWkuZ2FvQG1hcnZlbGwuY29tPgotLS0KIGRyaXZlcnMvbW1j
-L2hvc3Qvc2RoY2ktcGx0Zm0uYyB8ICAgMjQgKysrKysrKysrKysrKysrKysrLS0tLS0tCiBpbmNs
-dWRlL2xpbnV4L3NkaGNpLXBsdGZtLmggICAgfCAgICA1ICsrKystCiAyIGZpbGVzIGNoYW5nZWQs
-IDIyIGluc2VydGlvbnMoKyksIDcgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9t
-bWMvaG9zdC9zZGhjaS1wbHRmbS5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wbHRmbS5jCmlu
-ZGV4IGUwNDVlM2MuLmUwNmYwNDcgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kt
-cGx0Zm0uYworKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBsdGZtLmMKQEAgLTU0LDEyICs1
-NCwxNyBAQCBzdGF0aWMgaW50IF9fZGV2aW5pdCBzZGhjaV9wbHRmbV9wcm9iZShzdHJ1Y3QgcGxh
-dGZvcm1fZGV2aWNlICpwZGV2KQogewogCXN0cnVjdCBzZGhjaV9wbHRmbV9kYXRhICpwZGF0YSA9
-IHBkZXYtPmRldi5wbGF0Zm9ybV9kYXRhOwogCWNvbnN0IHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Vf
-aWQgKnBsYXRpZCA9IHBsYXRmb3JtX2dldF9kZXZpY2VfaWQocGRldik7CisJdm9pZCAqcHJpdl9w
-ZGF0YSA9IE5VTEw7CiAJc3RydWN0IHNkaGNpX2hvc3QgKmhvc3Q7CiAJc3RydWN0IHJlc291cmNl
-ICppb21lbTsKIAlpbnQgcmV0OwogCi0JaWYgKCFwZGF0YSAmJiBwbGF0aWQgJiYgcGxhdGlkLT5k
-cml2ZXJfZGF0YSkKKwlpZiAocGxhdGlkICYmIHBsYXRpZC0+ZHJpdmVyX2RhdGEpIHsKIAkJcGRh
-dGEgPSAodm9pZCAqKXBsYXRpZC0+ZHJpdmVyX2RhdGE7CisJCXByaXZfcGRhdGEgPSBwZGV2LT5k
-ZXYucGxhdGZvcm1fZGF0YTsKKwl9IGVsc2UgeworCQlwZGF0YSA9IHBkZXYtPmRldi5wbGF0Zm9y
-bV9kYXRhOworCX0KIAogCWlvbWVtID0gcGxhdGZvcm1fZ2V0X3Jlc291cmNlKHBkZXYsIElPUkVT
-T1VSQ0VfTUVNLCAwKTsKIAlpZiAoIWlvbWVtKSB7CkBAIC03MSw4ICs3Niw4IEBAIHN0YXRpYyBp
-bnQgX19kZXZpbml0IHNkaGNpX3BsdGZtX3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBk
-ZXYpCiAJCWRldl9lcnIoJnBkZXYtPmRldiwgIkludmFsaWQgaW9tZW0gc2l6ZS4gWW91IG1heSAi
-CiAJCQkiZXhwZXJpZW5jZSBwcm9ibGVtcy5cbiIpOwogCi0JaWYgKHBkZXYtPmRldi5wYXJlbnQp
-Ci0JCWhvc3QgPSBzZGhjaV9hbGxvY19ob3N0KHBkZXYtPmRldi5wYXJlbnQsIDApOworCWlmIChw
-ZGF0YSAmJiBwZGF0YS0+YWxsb2NfaG9zdCkKKwkJaG9zdCA9IHBkYXRhLT5hbGxvY19ob3N0KCZw
-ZGV2LT5kZXYpOwogCWVsc2UKIAkJaG9zdCA9IHNkaGNpX2FsbG9jX2hvc3QoJnBkZXYtPmRldiwg
-MCk7CiAKQEAgLTg2LDggKzkxLDcgQEAgc3RhdGljIGludCBfX2RldmluaXQgc2RoY2lfcGx0Zm1f
-cHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKIAkJaG9zdC0+b3BzID0gcGRhdGEt
-Pm9wczsKIAllbHNlCiAJCWhvc3QtPm9wcyA9ICZzZGhjaV9wbHRmbV9vcHM7Ci0JaWYgKHBkYXRh
-KQotCQlob3N0LT5xdWlya3MgPSBwZGF0YS0+cXVpcmtzOworCiAJaG9zdC0+aXJxID0gcGxhdGZv
-cm1fZ2V0X2lycShwZGV2LCAwKTsKIAogCWlmICghcmVxdWVzdF9tZW1fcmVnaW9uKGlvbWVtLT5z
-dGFydCwgcmVzb3VyY2Vfc2l6ZShpb21lbSksCkBAIC0xMDUsMTUgKzEwOSwyMyBAQCBzdGF0aWMg
-aW50IF9fZGV2aW5pdCBzZGhjaV9wbHRmbV9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpw
-ZGV2KQogCX0KIAogCWlmIChwZGF0YSAmJiBwZGF0YS0+aW5pdCkgewotCQlyZXQgPSBwZGF0YS0+
-aW5pdChob3N0KTsKKwkJcmV0ID0gcGRhdGEtPmluaXQoaG9zdCwgcGRhdGEsIHByaXZfcGRhdGEp
-OwogCQlpZiAocmV0KQogCQkJZ290byBlcnJfcGxhdF9pbml0OwogCX0KIAorCWlmIChwZGF0YSAm
-JiBwZGF0YS0+Z2V0X3F1aXJrKQorCQlob3N0LT5xdWlya3MgPSBwZGF0YS0+Z2V0X3F1aXJrKGhv
-c3QpOworCWVsc2UgaWYgKHBkYXRhKQorCQlob3N0LT5xdWlya3MgPSBwZGF0YS0+cXVpcmtzOwor
-CiAJcmV0ID0gc2RoY2lfYWRkX2hvc3QoaG9zdCk7CiAJaWYgKHJldCkKIAkJZ290byBlcnJfYWRk
-X2hvc3Q7CiAKKwlpZiAocGRhdGEgJiYgcGRhdGEtPnNldF9tYXhfc3BlZWQpCisJCXBkYXRhLT5z
-ZXRfbWF4X3NwZWVkKGhvc3QpOworCiAJcGxhdGZvcm1fc2V0X2RydmRhdGEocGRldiwgaG9zdCk7
-CiAKIAlyZXR1cm4gMDsKZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvc2RoY2ktcGx0Zm0uaCBi
-L2luY2x1ZGUvbGludXgvc2RoY2ktcGx0Zm0uaAppbmRleCAwMjM5YmQ3Li4wZDhlOGY2IDEwMDY0
-NAotLS0gYS9pbmNsdWRlL2xpbnV4L3NkaGNpLXBsdGZtLmgKKysrIGIvaW5jbHVkZS9saW51eC9z
-ZGhjaS1wbHRmbS5oCkBAIC0yOCw4ICsyOCwxMSBAQCBzdHJ1Y3Qgc2RoY2lfaG9zdDsKIHN0cnVj
-dCBzZGhjaV9wbHRmbV9kYXRhIHsKIAlzdHJ1Y3Qgc2RoY2lfb3BzICpvcHM7CiAJdW5zaWduZWQg
-aW50IHF1aXJrczsKLQlpbnQgKCppbml0KShzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCk7CisJaW50
-ICgqaW5pdCkoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHN0cnVjdCBzZGhjaV9wbHRmbV9kYXRh
-ICpwZGF0YSwgdm9pZCogcHJpdl9wZGF0YSk7CiAJdm9pZCAoKmV4aXQpKHN0cnVjdCBzZGhjaV9o
-b3N0ICpob3N0KTsKKwl2b2lkICgqc2V0X21heF9zcGVlZCkoc3RydWN0IHNkaGNpX2hvc3QgKmhv
-c3QpOworCXVuc2lnbmVkIGludCAgKCpnZXRfcXVpcmspKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0
-KTsKKwlzdHJ1Y3Qgc2RoY2lfaG9zdCAqKCphbGxvY19ob3N0KShzdHJ1Y3QgZGV2aWNlICpkZXYp
-OwogfTsKIAogI2VuZGlmIC8qIF9TREhDSV9QTFRGTV9IICovCi0tIAoxLjcuMC40Cgo=
---005045017239fb2de5049125b9ed--
+> + =A0 =A0 =A0 dev =3D device_find_child(mmc_dev(host->mmc), NULL, __m=
+atch_sdhci_imx);
+> + =A0 =A0 =A0 clk =3D clk_get(dev, "imx_sdhc_clk");
+> + =A0 =A0 =A0 if (IS_ERR(clk)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_err(mmc_dev(host->mmc), "clk err\n"=
+);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENODEV;
+> + =A0 =A0 =A0 }
+> + =A0 =A0 =A0 clk_enable(clk);
+> + =A0 =A0 =A0 pltfm_host->clk =3D clk;
+> + =A0 =A0 =A0 dev_dbg(dev, "SDHC clock:%lu\n", clk_get_rate(clk));
+> +
+> + =A0 =A0 =A0 return 0;
+> +}
+> +
+> +static void sdhci_imx_exit(struct sdhci_host *host)
+> +{
+> + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host=
+);
+> +
+> + =A0 =A0 =A0 clk_disable(pltfm_host->clk);
+> + =A0 =A0 =A0 clk_put(pltfm_host->clk);
+> +}
+> +
+> +
+> +static struct sdhci_ops sdhci_imx_ops =3D {
+> + =A0 =A0 =A0 .read_l =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =3D sdhci_imx_r=
+eadl,
+> + =A0 =A0 =A0 .read_w =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =3D sdhci_imx_r=
+eadw,
+> + =A0 =A0 =A0 .read_b =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =3D sdhci_imx_r=
+eadb,
+> + =A0 =A0 =A0 .write_l =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D sdhci_imx_w=
+ritel,
+> + =A0 =A0 =A0 .write_w =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D sdhci_imx_w=
+ritew,
+> + =A0 =A0 =A0 .write_b =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D sdhci_imx_w=
+riteb,
+> + =A0 =A0 =A0 .set_clock =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D sdhci_imx_set=
+_clock,
+> + =A0 =A0 =A0 .enable_dma =A0 =A0 =A0 =A0 =A0 =A0 =3D sdhci_imx_enabl=
+e_dma,
+> + =A0 =A0 =A0 .get_max_clock =A0 =A0 =A0 =A0 =A0=3D sdhci_imx_get_max=
+_clock,
+> + =A0 =A0 =A0 .get_min_clock =A0 =A0 =A0 =A0 =A0=3D sdhci_imx_get_min=
+_clock,
+> + =A0 =A0 =A0 .get_timeout_clock =A0 =A0 =A0=3D sdhci_imx_get_timeout=
+_clock,
+> + =A0 =A0 =A0 .get_ro =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =3D sdhci_imx_g=
+et_ro,
+> +};
+> +
+> +struct sdhci_pltfm_data sdhci_imx_pdata =3D {
+> + =A0 =A0 =A0 .ops =3D &sdhci_imx_ops,
+> + =A0 =A0 =A0 .quirks =3D SDHCI_QUIRK_BROKEN_ADMA
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 | SDHCI_QUIRK_32BIT_DMA_ADDR
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 | SDHCI_QUIRK_32BIT_ADMA_SIZE
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 | SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 | SDHCI_QUIRK_NO_BUSY_IRQ
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 | SDHCI_QUIRK_BROKEN_CARD_DETECTION
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 | SDHCI_QUIRK_NONSTANDARD_CLOCK
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 | SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET,
+> + =A0 =A0 =A0 .init =3D sdhci_imx_init,
+> + =A0 =A0 =A0 .exit =3D sdhci_imx_exit,
+> +};
+> --
+> 1.7.0
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
