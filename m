@@ -1,33 +1,47 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [patch 2/2] mmc: add support of sdhci-pxa driver
-Date: Sun, 26 Sep 2010 18:48:37 +0100
-Message-ID: <20100926174837.GA21788@void.printf.net>
-References: <AANLkTi=XBbW=R4HQYp5fLVE5eUXHNtzGh1Qf+XyBUSCH@mail.gmail.com> <AANLkTim4aJok6=HcopkObi3WrUatiZgK-KZTfhoHwgF7@mail.gmail.com> <AANLkTimk2_KcmSAV-UZ3JY1JFD657SnfyPFgP_zE5bbP@mail.gmail.com> <20100926155905.GB19772@void.printf.net> <AANLkTimwsk5SXQRt45vUhzhHabrG4wvw5JcBZAZ1Aq4j@mail.gmail.com>
+Subject: [GIT PULL] MMC fixes for .36-rc6
+Date: Sun, 26 Sep 2010 17:22:11 -0400
+Message-ID: <m362xs42v0.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56860 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:50256 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753532Ab0IZRsj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 26 Sep 2010 13:48:39 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTimwsk5SXQRt45vUhzhHabrG4wvw5JcBZAZ1Aq4j@mail.gmail.com>
+	id S1756654Ab0IZVT2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 26 Sep 2010 17:19:28 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haojian Zhuang <haojian.zhuang@gmail.com>
-Cc: Eric Miao <eric.y.miao@gmail.com>, zhangfei gao <zhangfei.gao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, Saeed Bishara <saeed@marvell.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Marek Szyprowski <m.szyprowski@samsung.com>, Andrew Morton <akpm@linux-foundation.org>
 
-Hi Haojian,
+Linus,
 
-On Mon, Sep 27, 2010 at 12:09:17AM +0800, Haojian Zhuang wrote:
-> If the name is sdhci-mmp2, it's a big confusion that people will think
-> mmp(ttc/aspen) is using another IP.
-> 
-> sdhci-pxa is the best name.
+Please pull from:
 
-Okay.  What should Saeed's driver be called?
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
-Thanks,
+to fix a regression from -rc2 and a NULL dereference against 2.6.35, both
+with Samsung S3C controllers.  There's also a MAINTAINERS update -- I've
+volunteered to take over MMC, and am running a tree in -next.  Thanks.
+
+The following changes since commit 32163f4b2cef28a5aab8b226ffecfc6379a53786:
+  Al Viro (1):
+        alpha: fix usp value in multithreaded coredumps
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+Chris Ball (1):
+      mmc: MAINTAINERS: add myself as MMC maintainer
+
+Marek Szyprowski (2):
+      mmc: sdhci-s3c: fix incorrect spinlock usage after merge
+      mmc: sdhci-s3c: fix NULL ptr access in sdhci_s3c_remove
+
+ MAINTAINERS                  |    8 ++++++--
+ drivers/mmc/host/sdhci-s3c.c |   12 ++++++++----
+ 2 files changed, 14 insertions(+), 6 deletions(-)
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
