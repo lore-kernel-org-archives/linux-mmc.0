@@ -1,57 +1,91 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH] sdhci-s3c: fix NULL ptr access in sdhci_s3c_remove
-Date: Sun, 26 Sep 2010 19:53:48 +0900
-Message-ID: <AANLkTikXX4eUEKmBMOH1PuioGgztGN4jKPnPBDqf=4zf@mail.gmail.com>
-References: <1285251725-6210-1-git-send-email-m.szyprowski@samsung.com>
-	<20100923120803.832975f6.akpm@linux-foundation.org>
-	<20100925225324.GA30732@void.printf.net>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: [PATCH 1/2]sdhci-pltfm add sdhci-pxa
+Date: Sun, 26 Sep 2010 06:53:59 -0400
+Message-ID: <AANLkTin357VumrfSTaYPJD0fodOvz+YdXSqFYuCu_XxJ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <20100925225324.GA30732@void.printf.net>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kgene.kim@samsung.com, ben-linux@fluff.org, w.sang@pengutronix.de
+Content-Type: multipart/mixed; boundary=0022152d5d65db74f70491276d5a
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:54031 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757466Ab0IZKyB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2010 06:54:01 -0400
+Received: by iwn5 with SMTP id 5so3807641iwn.19
+        for <linux-mmc@vger.kernel.org>; Sun, 26 Sep 2010 03:54:00 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-On Sun, Sep 26, 2010 at 7:53 AM, Chris Ball <cjb@laptop.org> wrote:
-> On Thu, Sep 23, 2010 at 12:08:03PM -0700, Andrew Morton wrote:
->> The patch applies OK to 2.6.35. =A0Is the bug present there as well?=
- =A0If
->> so, should we fix it in earlier kernels? =A0If so then the way in wh=
-ich
->> we indicate this is by adding
->>
->> =A0 =A0 =A0 Cc: <stable@kernel.org>
->>
->> to the changelog.
->
-> Marek, Kyungmin, what do you think?
+--0022152d5d65db74f70491276d5a
+Content-Type: text/plain; charset=ISO-8859-1
 
-Of course my opinion is should be merged at this time.
-In normal case it's built as static module. so there's no complains.
-but it should be fixed.
-My SOB is already included at patch. so no need to ACK from me.
+>From 29b0255431e3d635ae32214b223daef823433885 Mon Sep 17 00:00:00 2001
+From: Zhangfei Gao <zhangfei.gao@marvell.com>
+Date: Sun, 26 Sep 2010 18:32:27 -0400
+Subject: [PATCH 1/2] sdhci-pltfm: add sdhci-pxa
 
-Thank you,
-Kyungmin Park
->
-> Andrew, I've been waiting for an ACK from Ben Dooks, since he's liste=
-d
-> in MAINTAINERS for this driver, but he hasn't replied yet (I've tried
-> pinging privately). =A0I'll plan on sending Marek's two s3c fixes to
-> Linus tomorrow regardless (this one with Cc: <stable@kernel.org>)
-> along with my MAINTAINERS update for MMC unless anyone objects.
->
-> Thanks,
->
-> --
-> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
-ng-soc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+---
+ drivers/mmc/host/sdhci-pltfm.c |    3 +++
+ drivers/mmc/host/sdhci-pltfm.h |    1 +
+ 2 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index e06f047..7511fb7 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -173,6 +173,9 @@ static const struct platform_device_id sdhci_pltfm_ids[] = {
+ #ifdef CONFIG_MMC_SDHCI_CNS3XXX
+ 	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
+ #endif
++#ifdef CONFIG_MMC_SDHCI_PXA
++	{ "sdhci-pxa", (kernel_ulong_t)&sdhci_pxa_pdata },
++#endif
+ 	{ },
+ };
+ MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index 900f329..0747f42 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -14,5 +14,6 @@
+ #include <linux/sdhci-pltfm.h>
+
+ extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
++extern struct sdhci_pltfm_data sdhci_pxa_pdata;
+
+ #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
+-- 
+1.7.0.4
+
+--0022152d5d65db74f70491276d5a
+Content-Type: text/x-patch; charset=US-ASCII; name="0001-sdhci-pltfm-add-sdhci-pxa.patch"
+Content-Disposition: attachment;
+	filename="0001-sdhci-pltfm-add-sdhci-pxa.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_geki7ffa0
+
+RnJvbSAyOWIwMjU1NDMxZTNkNjM1YWUzMjIxNGIyMjNkYWVmODIzNDMzODg1IE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBaaGFuZ2ZlaSBHYW8gPHpoYW5nZmVpLmdhb0BtYXJ2ZWxsLmNv
+bT4KRGF0ZTogU3VuLCAyNiBTZXAgMjAxMCAxODozMjoyNyAtMDQwMApTdWJqZWN0OiBbUEFUQ0gg
+MS8yXSBzZGhjaS1wbHRmbTogYWRkIHNkaGNpLXB4YQoKU2lnbmVkLW9mZi1ieTogWmhhbmdmZWkg
+R2FvIDx6aGFuZ2ZlaS5nYW9AbWFydmVsbC5jb20+Ci0tLQogZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1wbHRmbS5jIHwgICAgMyArKysKIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uaCB8ICAg
+IDEgKwogMiBmaWxlcyBjaGFuZ2VkLCA0IGluc2VydGlvbnMoKyksIDAgZGVsZXRpb25zKC0pCgpk
+aWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wbHRmbS5jIGIvZHJpdmVycy9tbWMv
+aG9zdC9zZGhjaS1wbHRmbS5jCmluZGV4IGUwNmYwNDcuLjc1MTFmYjcgMTAwNjQ0Ci0tLSBhL2Ry
+aXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uYworKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNp
+LXBsdGZtLmMKQEAgLTE3Myw2ICsxNzMsOSBAQCBzdGF0aWMgY29uc3Qgc3RydWN0IHBsYXRmb3Jt
+X2RldmljZV9pZCBzZGhjaV9wbHRmbV9pZHNbXSA9IHsKICNpZmRlZiBDT05GSUdfTU1DX1NESENJ
+X0NOUzNYWFgKIAl7ICJzZGhjaS1jbnMzeHh4IiwgKGtlcm5lbF91bG9uZ190KSZzZGhjaV9jbnMz
+eHh4X3BkYXRhIH0sCiAjZW5kaWYKKyNpZmRlZiBDT05GSUdfTU1DX1NESENJX1BYQQorCXsgInNk
+aGNpLXB4YSIsIChrZXJuZWxfdWxvbmdfdCkmc2RoY2lfcHhhX3BkYXRhIH0sCisjZW5kaWYKIAl7
+IH0sCiB9OwogTU9EVUxFX0RFVklDRV9UQUJMRShwbGF0Zm9ybSwgc2RoY2lfcGx0Zm1faWRzKTsK
+ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uaCBiL2RyaXZlcnMvbW1j
+L2hvc3Qvc2RoY2ktcGx0Zm0uaAppbmRleCA5MDBmMzI5Li4wNzQ3ZjQyIDEwMDY0NAotLS0gYS9k
+cml2ZXJzL21tYy9ob3N0L3NkaGNpLXBsdGZtLmgKKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1wbHRmbS5oCkBAIC0xNCw1ICsxNCw2IEBACiAjaW5jbHVkZSA8bGludXgvc2RoY2ktcGx0Zm0u
+aD4KIAogZXh0ZXJuIHN0cnVjdCBzZGhjaV9wbHRmbV9kYXRhIHNkaGNpX2NuczN4eHhfcGRhdGE7
+CitleHRlcm4gc3RydWN0IHNkaGNpX3BsdGZtX2RhdGEgc2RoY2lfcHhhX3BkYXRhOwogCiAjZW5k
+aWYgLyogX0RSSVZFUlNfTU1DX1NESENJX1BMVEZNX0ggKi8KLS0gCjEuNy4wLjQKCg==
+--0022152d5d65db74f70491276d5a--
