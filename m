@@ -1,51 +1,57 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 1/4] mmc: sdhci-pltfm: Add structure for host-specific
- data
-Date: Sun, 26 Sep 2010 13:37:37 +0400
-Message-ID: <20100926093737.GA24005@oksana.dev.rtsoft.ru>
-References: <1285072210-10207-1-git-send-email-w.sang@pengutronix.de>
- <1285072210-10207-2-git-send-email-w.sang@pengutronix.de>
- <AANLkTimcscR56u=-iT9v5V+Tsg2KNOqiuQ2DKojJ++6c@mail.gmail.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH] sdhci-s3c: fix NULL ptr access in sdhci_s3c_remove
+Date: Sun, 26 Sep 2010 19:53:48 +0900
+Message-ID: <AANLkTikXX4eUEKmBMOH1PuioGgztGN4jKPnPBDqf=4zf@mail.gmail.com>
+References: <1285251725-6210-1-git-send-email-m.szyprowski@samsung.com>
+	<20100923120803.832975f6.akpm@linux-foundation.org>
+	<20100925225324.GA30732@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:46848 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754863Ab0IZJho (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2010 05:37:44 -0400
-Received: by ewy23 with SMTP id 23so1060182ewy.19
-        for <linux-mmc@vger.kernel.org>; Sun, 26 Sep 2010 02:37:43 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <AANLkTimcscR56u=-iT9v5V+Tsg2KNOqiuQ2DKojJ++6c@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <20100925225324.GA30732@void.printf.net>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kgene.kim@samsung.com, ben-linux@fluff.org, w.sang@pengutronix.de
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Richard Zhu <r65037@freescale.com>
 
-Hello,
+On Sun, Sep 26, 2010 at 7:53 AM, Chris Ball <cjb@laptop.org> wrote:
+> On Thu, Sep 23, 2010 at 12:08:03PM -0700, Andrew Morton wrote:
+>> The patch applies OK to 2.6.35. =A0Is the bug present there as well?=
+ =A0If
+>> so, should we fix it in earlier kernels? =A0If so then the way in wh=
+ich
+>> we indicate this is by adding
+>>
+>> =A0 =A0 =A0 Cc: <stable@kernel.org>
+>>
+>> to the changelog.
+>
+> Marek, Kyungmin, what do you think?
 
-On Sun, Sep 26, 2010 at 05:02:29AM -0400, zhangfei gao wrote:
-> On Tue, Sep 21, 2010 at 8:30 AM, Wolfram Sang <w.sang@pengutronix.de>=
- wrote:
-> > +++ b/drivers/mmc/host/sdhci-pltfm.h
-> > @@ -13,6 +13,11 @@
-> >
-> > =C2=A0#include <linux/sdhci-pltfm.h>
-> >
-> > +struct sdhci_pltfm_host {
-> > + =C2=A0 =C2=A0 =C2=A0 struct clk *clk;
-> > + =C2=A0 =C2=A0 =C2=A0 u32 scratchpad; /* to handle quirks across i=
-o-accessor calls */
-> > +};
-> > +
-> How about move private data to child driver, and one call back
-> function alloc_host, then child driver could alloc private data,
-> including clk.
+Of course my opinion is should be merged at this time.
+In normal case it's built as static module. so there's no complains.
+but it should be fixed.
+My SOB is already included at patch. so no need to ACK from me.
 
-IMHO, this sounds like a bit of overdesign/overcomplication.
-
---=20
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
+Thank you,
+Kyungmin Park
+>
+> Andrew, I've been waiting for an ACK from Ben Dooks, since he's liste=
+d
+> in MAINTAINERS for this driver, but he hasn't replied yet (I've tried
+> pinging privately). =A0I'll plan on sending Marek's two s3c fixes to
+> Linus tomorrow regardless (this one with Cc: <stable@kernel.org>)
+> along with my MAINTAINERS update for MMC unless anyone objects.
+>
+> Thanks,
+>
+> --
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
+ng-soc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
