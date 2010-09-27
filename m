@@ -1,85 +1,94 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [patch] sdhci-pltfm: add call back function
-Date: Mon, 27 Sep 2010 14:41:32 +0200
-Message-ID: <20100927124132.GG2664@pengutronix.de>
-References: <AANLkTi=tkP2O+EaY5xSQ8EZAR0rP9gTz34cipC-WTHjf@mail.gmail.com>
- <20100926160933.GA23180@pengutronix.de>
- <AANLkTimhN4+RvF8cj3KTDSLLuUfQ1dR+jmEV4-Gv9qhz@mail.gmail.com>
+From: Peppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: Re: [PATCH (mmc-next) 3/3] mmc: fix a warning when compile the
+ sdhci d.d.
+Date: Mon, 27 Sep 2010 14:57:47 +0200
+Message-ID: <4CA094CB.1060209@st.com>
+References: <1285233266-5039-1-git-send-email-peppe.cavallaro@st.com>
+ <1285233266-5039-2-git-send-email-peppe.cavallaro@st.com>
+ <1285233266-5039-3-git-send-email-peppe.cavallaro@st.com>
+ <20100927105413.GE2664@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="vSsTm1kUtxIHoa7M"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:57439 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755550Ab0I0Mlg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Sep 2010 08:41:36 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTimhN4+RvF8cj3KTDSLLuUfQ1dR+jmEV4-Gv9qhz@mail.gmail.com>
+Received: from eu1sys200aog111.obsmtp.com ([207.126.144.131]:55396 "EHLO
+	eu1sys200aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752639Ab0I0M6Q convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 27 Sep 2010 08:58:16 -0400
+In-Reply-To: <20100927105413.GE2664@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Eric Miao <eric.y.miao@gmail.com>
-Cc: zhangfei gao <zhangfei.gao@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Richard Zhu <r65037@freescale.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+Hi Wolfram,
 
---vSsTm1kUtxIHoa7M
-Content-Type: text/plain; charset=iso-8859-15
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On 09/27/2010 12:54 PM, Wolfram Sang wrote:
+> On Thu, Sep 23, 2010 at 11:14:26AM +0200, Giuseppe CAVALLARO wrote:
+>> This patch fixes a warning when compile the sdhci:
+>>   pwr may be used uninitialized in sdhci_set_power
+>> Also removes some include files that live in sdhci.h
+>> header file.
+>>
+>> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> 
+> Okay for the set_power-part (what compiler are you using? Newer one
 
-On Mon, Sep 27, 2010 at 09:06:57AM +0800, Eric Miao wrote:
-> On Mon, Sep 27, 2010 at 12:09 AM, Wolfram Sang <w.sang@pengutronix.de> wr=
-ote:
-> > On Sun, Sep 26, 2010 at 04:52:06AM -0400, zhangfei gao wrote:
-> >> Add several call back to sdhci-pltfm.c, help give suggestion
-> >
-> > Just formal things, without looking at the code yet.
-> >
-> > Make seperate patches out of these, everyone with a proper description.
-> >
-> >> 1. struct sdhci_host *(*alloc_host)(struct device *dev), since
-> >> specific driver need some private variable to allocate and free,
-> >> including clk.
-> >> 2. unsigned int =A0(*get_quirk)(struct sdhci_host *host); add this
-> >> because one driver may serve several device, each one may require
-> >> different quirk, and specific driver is right one to know.
-> >> 3. void (*set_max_speed)(struct sdhci_host *host); this should be done
-> >> after add_host, which impact f_max.
-> >> 4. int (*init)(struct sdhci_host *host, struct sdhci_pltfm_data
-> >> *pdata, void* priv_pdata); copy from Wolfram Sang's patch to transfer
-> >> platform data, copy here for test.
-> >
->=20
-> Just a rough idea, considering the potential differences (I believe
-> there will be
-> more in the future) between the SDHCI of different SoCs, would it make mo=
-re
-> sense to make sdhci-pltfm.c as a common function library for sdhci-<soc>.=
-c?
+I tried with both 4.2.4 and 4.4.4 without any problems.
 
-Yeah, I think Alan Cox mentioned this idea, too. My guess is that it
-will be well received, if somebody actually does it ;) Up to that point,
-it probably makes sense to keep redundancy low by the means we have
-today, i.e. pltfm. That should help a later migration process.
+> should detect that BUG never returns). The include-removal could be in a
+> seperate patch, not sure if it is worth, though.
+
+It can include in a separate patch.
+It makes sense if apply the previous patch to split the header file
+because we remove duplicated include files.
 
 Regards,
+Peppe
 
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---vSsTm1kUtxIHoa7M
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAkygkPwACgkQD27XaX1/VRvzDgCfTdN86Ow+3cbTOBppAyvkvKOR
-ok4AoLVZE4QAfPWjiC/VkiS1cNnQmF2b
-=VJJ/
------END PGP SIGNATURE-----
-
---vSsTm1kUtxIHoa7M--
+> 
+>> ---
+>>  drivers/mmc/host/sdhci.c |   11 ++---------
+>>  1 files changed, 2 insertions(+), 9 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 5928b0a..058dacd 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -18,13 +18,8 @@
+>>  #include <linux/io.h>
+>>  #include <linux/dma-mapping.h>
+>>  #include <linux/slab.h>
+>> -#include <linux/scatterlist.h>
+>>  #include <linux/regulator/consumer.h>
+>>  
+>> -#include <linux/leds.h>
+>> -
+>> -#include <linux/mmc/host.h>
+>> -
+>>  #include "sdhci.h"
+>>  
+>>  #define DRIVER_NAME "sdhci"
+>> @@ -1050,11 +1045,9 @@ out:
+>>  
+>>  static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
+>>  {
+>> -	u8 pwr;
+>> +	u8 pwr = 0;
+>>  
+>> -	if (power == (unsigned short)-1)
+>> -		pwr = 0;
+>> -	else {
+>> +	if (power != (unsigned short)-1) {
+>>  		switch (1 << power) {
+>>  		case MMC_VDD_165_195:
+>>  			pwr = SDHCI_POWER_180;
+>> -- 
+>> 1.5.5.6
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
