@@ -1,310 +1,103 @@
 From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [patch] sdhci-pltfm: add call back function
-Date: Mon, 27 Sep 2010 10:50:34 +0800
-Message-ID: <AANLkTikrWFvgqjr6gdzJGGG-uS9zNs6NPvq1oW1FyS7f@mail.gmail.com>
-References: <AANLkTi=tkP2O+EaY5xSQ8EZAR0rP9gTz34cipC-WTHjf@mail.gmail.com>
-	<20100926160933.GA23180@pengutronix.de>
+Subject: [patch 1/3] sdhci-pltfm: add call back alloc_host
+Date: Sun, 26 Sep 2010 22:55:46 -0400
+Message-ID: <AANLkTin_BEE+LgZuJHeewvFDUQCipG98ZbkhMJGbnprC@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=0016363b85746c6959049134dd7f
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:65195 "EHLO
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:61216 "EHLO
 	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932305Ab0I0Cue convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2010 22:50:34 -0400
-Received: by iwn5 with SMTP id 5so4366730iwn.19
-        for <linux-mmc@vger.kernel.org>; Sun, 26 Sep 2010 19:50:34 -0700 (PDT)
-In-Reply-To: <20100926160933.GA23180@pengutronix.de>
+	with ESMTP id S932305Ab0I0Czq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2010 22:55:46 -0400
+Received: by iwn5 with SMTP id 5so4370335iwn.19
+        for <linux-mmc@vger.kernel.org>; Sun, 26 Sep 2010 19:55:46 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>, Richard Zhu <r65037@freescale.com>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-On Mon, Sep 27, 2010 at 12:09 AM, Wolfram Sang <w.sang@pengutronix.de> =
-wrote:
-> On Sun, Sep 26, 2010 at 04:52:06AM -0400, zhangfei gao wrote:
->> Add several call back to sdhci-pltfm.c, help give suggestion
->
-> Just formal things, without looking at the code yet.
->
-> Make seperate patches out of these, everyone with a proper descriptio=
-n.
+--0016363b85746c6959049134dd7f
+Content-Type: text/plain; charset=ISO-8859-1
 
->
->> 1. struct sdhci_host *(*alloc_host)(struct device *dev), since
->> specific driver need some private variable to allocate and free,
->> including clk.
->> 2. unsigned int =A0(*get_quirk)(struct sdhci_host *host); add this
->> because one driver may serve several device, each one may require
->> different quirk, and specific driver is right one to know.
->> 3. void (*set_max_speed)(struct sdhci_host *host); this should be do=
-ne
->> after add_host, which impact f_max.
->> 4. int (*init)(struct sdhci_host *host, struct sdhci_pltfm_data
->> *pdata, void* priv_pdata); copy from Wolfram Sang's patch to transfe=
-r
->> platform data, copy here for test.
->
-> No copying. If you think my patch is useful, add an Acked-by and say =
-your
-> patches depend on mine.
+>From 7a870a620fa868ed4ce0cffcbd6b0683a00ae2e5 Mon Sep 17 00:00:00 2001
+From: Zhangfei Gao <zhangfei.gao@marvell.com>
+Date: Mon, 27 Sep 2010 10:30:01 -0400
+Subject: [PATCH 1/3] sdhci-pltfm: add call back alloc_host
 
-No problem, here is just draft for discussion, will submit another
-three call back functions.
+	alloc_host could alloc specific structure of device to meet different
+requirement
 
->
->>
->> From 8c59d0b917f434d7c424ce1e0896af45c3e5fbba Mon Sep 17 00:00:00 20=
-01
->> From: Zhangfei Gao <zhangfei.gao@marvell.com>
->> Date: Sun, 26 Sep 2010 16:37:11 -0400
->> Subject: [PATCH 2/2] sdhci-pltfm: add call back function
->>
->>
->> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
->> ---
->> =A0drivers/mmc/host/sdhci-pltfm.c | =A0 24 ++++++++++++++++++------
->> =A0include/linux/sdhci-pltfm.h =A0 =A0| =A0 =A05 ++++-
->> =A02 files changed, 22 insertions(+), 7 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci=
--pltfm.c
->> index e045e3c..e06f047 100644
->> --- a/drivers/mmc/host/sdhci-pltfm.c
->> +++ b/drivers/mmc/host/sdhci-pltfm.c
->> @@ -54,12 +54,17 @@ static int __devinit sdhci_pltfm_probe(struct
->> platform_device *pdev)
->> =A0{
->> =A0 =A0 =A0 struct sdhci_pltfm_data *pdata =3D pdev->dev.platform_da=
-ta;
->> =A0 =A0 =A0 const struct platform_device_id *platid =3D platform_get=
-_device_id(pdev);
->> + =A0 =A0 void *priv_pdata =3D NULL;
->> =A0 =A0 =A0 struct sdhci_host *host;
->> =A0 =A0 =A0 struct resource *iomem;
->> =A0 =A0 =A0 int ret;
->>
->> - =A0 =A0 if (!pdata && platid && platid->driver_data)
->> + =A0 =A0 if (platid && platid->driver_data) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata =3D (void *)platid->driver_data;
->> + =A0 =A0 =A0 =A0 =A0 =A0 priv_pdata =3D pdev->dev.platform_data;
->> + =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 pdata =3D pdev->dev.platform_data;
->> + =A0 =A0 }
->>
->> =A0 =A0 =A0 iomem =3D platform_get_resource(pdev, IORESOURCE_MEM, 0)=
-;
->> =A0 =A0 =A0 if (!iomem) {
->> @@ -71,8 +76,8 @@ static int __devinit sdhci_pltfm_probe(struct
->> platform_device *pdev)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_err(&pdev->dev, "Invalid iomem size.=
- You may "
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "experience problems.\n"=
-);
->>
->> - =A0 =A0 if (pdev->dev.parent)
->> - =A0 =A0 =A0 =A0 =A0 =A0 host =3D sdhci_alloc_host(pdev->dev.parent=
-, 0);
->> + =A0 =A0 if (pdata && pdata->alloc_host)
->> + =A0 =A0 =A0 =A0 =A0 =A0 host =3D pdata->alloc_host(&pdev->dev);
->> =A0 =A0 =A0 else
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 host =3D sdhci_alloc_host(&pdev->dev, 0)=
-;
->>
->> @@ -86,8 +91,7 @@ static int __devinit sdhci_pltfm_probe(struct
->> platform_device *pdev)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops =3D pdata->ops;
->> =A0 =A0 =A0 else
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops =3D &sdhci_pltfm_ops;
->> - =A0 =A0 if (pdata)
->> - =A0 =A0 =A0 =A0 =A0 =A0 host->quirks =3D pdata->quirks;
->> +
->> =A0 =A0 =A0 host->irq =3D platform_get_irq(pdev, 0);
->>
->> =A0 =A0 =A0 if (!request_mem_region(iomem->start, resource_size(iome=
-m),
->> @@ -105,15 +109,23 @@ static int __devinit sdhci_pltfm_probe(struct
->> platform_device *pdev)
->> =A0 =A0 =A0 }
->>
->> =A0 =A0 =A0 if (pdata && pdata->init) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 ret =3D pdata->init(host);
->> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D pdata->init(host, pdata, priv_pdat=
-a);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_plat_init;
->> =A0 =A0 =A0 }
->>
->> + =A0 =A0 if (pdata && pdata->get_quirk)
->> + =A0 =A0 =A0 =A0 =A0 =A0 host->quirks =3D pdata->get_quirk(host);
->> + =A0 =A0 else if (pdata)
->> + =A0 =A0 =A0 =A0 =A0 =A0 host->quirks =3D pdata->quirks;
->> +
->> =A0 =A0 =A0 ret =3D sdhci_add_host(host);
->> =A0 =A0 =A0 if (ret)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_add_host;
->>
->> + =A0 =A0 if (pdata && pdata->set_max_speed)
->> + =A0 =A0 =A0 =A0 =A0 =A0 pdata->set_max_speed(host);
->> +
->> =A0 =A0 =A0 platform_set_drvdata(pdev, host);
->>
->> =A0 =A0 =A0 return 0;
->> diff --git a/include/linux/sdhci-pltfm.h b/include/linux/sdhci-pltfm=
-=2Eh
->> index 0239bd7..0d8e8f6 100644
->> --- a/include/linux/sdhci-pltfm.h
->> +++ b/include/linux/sdhci-pltfm.h
->> @@ -28,8 +28,11 @@ struct sdhci_host;
->> =A0struct sdhci_pltfm_data {
->> =A0 =A0 =A0 struct sdhci_ops *ops;
->> =A0 =A0 =A0 unsigned int quirks;
->> - =A0 =A0 int (*init)(struct sdhci_host *host);
->> + =A0 =A0 int (*init)(struct sdhci_host *host, struct sdhci_pltfm_da=
-ta *pdata,
->> void* priv_pdata);
->> =A0 =A0 =A0 void (*exit)(struct sdhci_host *host);
->> + =A0 =A0 void (*set_max_speed)(struct sdhci_host *host);
->> + =A0 =A0 unsigned int =A0(*get_quirk)(struct sdhci_host *host);
->> + =A0 =A0 struct sdhci_host *(*alloc_host)(struct device *dev);
->> =A0};
->>
->> =A0#endif /* _SDHCI_PLTFM_H */
->> --
->> 1.7.0.4
->
->> From 8c59d0b917f434d7c424ce1e0896af45c3e5fbba Mon Sep 17 00:00:00 20=
-01
->> From: Zhangfei Gao <zhangfei.gao@marvell.com>
->> Date: Sun, 26 Sep 2010 16:37:11 -0400
->> Subject: [PATCH 2/2] sdhci-pltfm: add call back function
->>
->>
->> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
->> ---
->> =A0drivers/mmc/host/sdhci-pltfm.c | =A0 24 ++++++++++++++++++------
->> =A0include/linux/sdhci-pltfm.h =A0 =A0| =A0 =A05 ++++-
->> =A02 files changed, 22 insertions(+), 7 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci=
--pltfm.c
->> index e045e3c..e06f047 100644
->> --- a/drivers/mmc/host/sdhci-pltfm.c
->> +++ b/drivers/mmc/host/sdhci-pltfm.c
->> @@ -54,12 +54,17 @@ static int __devinit sdhci_pltfm_probe(struct pl=
-atform_device *pdev)
->> =A0{
->> =A0 =A0 =A0 struct sdhci_pltfm_data *pdata =3D pdev->dev.platform_da=
-ta;
->> =A0 =A0 =A0 const struct platform_device_id *platid =3D platform_get=
-_device_id(pdev);
->> + =A0 =A0 void *priv_pdata =3D NULL;
->> =A0 =A0 =A0 struct sdhci_host *host;
->> =A0 =A0 =A0 struct resource *iomem;
->> =A0 =A0 =A0 int ret;
->>
->> - =A0 =A0 if (!pdata && platid && platid->driver_data)
->> + =A0 =A0 if (platid && platid->driver_data) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata =3D (void *)platid->driver_data;
->> + =A0 =A0 =A0 =A0 =A0 =A0 priv_pdata =3D pdev->dev.platform_data;
->> + =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 pdata =3D pdev->dev.platform_data;
->> + =A0 =A0 }
->>
->> =A0 =A0 =A0 iomem =3D platform_get_resource(pdev, IORESOURCE_MEM, 0)=
-;
->> =A0 =A0 =A0 if (!iomem) {
->> @@ -71,8 +76,8 @@ static int __devinit sdhci_pltfm_probe(struct plat=
-form_device *pdev)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_err(&pdev->dev, "Invalid iomem size.=
- You may "
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "experience problems.\n"=
-);
->>
->> - =A0 =A0 if (pdev->dev.parent)
->> - =A0 =A0 =A0 =A0 =A0 =A0 host =3D sdhci_alloc_host(pdev->dev.parent=
-, 0);
->> + =A0 =A0 if (pdata && pdata->alloc_host)
->> + =A0 =A0 =A0 =A0 =A0 =A0 host =3D pdata->alloc_host(&pdev->dev);
->> =A0 =A0 =A0 else
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 host =3D sdhci_alloc_host(&pdev->dev, 0)=
-;
->>
->> @@ -86,8 +91,7 @@ static int __devinit sdhci_pltfm_probe(struct plat=
-form_device *pdev)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops =3D pdata->ops;
->> =A0 =A0 =A0 else
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops =3D &sdhci_pltfm_ops;
->> - =A0 =A0 if (pdata)
->> - =A0 =A0 =A0 =A0 =A0 =A0 host->quirks =3D pdata->quirks;
->> +
->> =A0 =A0 =A0 host->irq =3D platform_get_irq(pdev, 0);
->>
->> =A0 =A0 =A0 if (!request_mem_region(iomem->start, resource_size(iome=
-m),
->> @@ -105,15 +109,23 @@ static int __devinit sdhci_pltfm_probe(struct =
+Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+---
+ drivers/mmc/host/sdhci-pltfm.c |    4 ++--
+ include/linux/sdhci-pltfm.h    |    1 +
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index 9669f21..82d3d05 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -76,8 +76,8 @@ static int __devinit sdhci_pltfm_probe(struct
 platform_device *pdev)
->> =A0 =A0 =A0 }
->>
->> =A0 =A0 =A0 if (pdata && pdata->init) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 ret =3D pdata->init(host);
->> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D pdata->init(host, pdata, priv_pdat=
-a);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_plat_init;
->> =A0 =A0 =A0 }
->>
->> + =A0 =A0 if (pdata && pdata->get_quirk)
->> + =A0 =A0 =A0 =A0 =A0 =A0 host->quirks =3D pdata->get_quirk(host);
->> + =A0 =A0 else if (pdata)
->> + =A0 =A0 =A0 =A0 =A0 =A0 host->quirks =3D pdata->quirks;
->> +
->> =A0 =A0 =A0 ret =3D sdhci_add_host(host);
->> =A0 =A0 =A0 if (ret)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_add_host;
->>
->> + =A0 =A0 if (pdata && pdata->set_max_speed)
->> + =A0 =A0 =A0 =A0 =A0 =A0 pdata->set_max_speed(host);
->> +
->> =A0 =A0 =A0 platform_set_drvdata(pdev, host);
->>
->> =A0 =A0 =A0 return 0;
->> diff --git a/include/linux/sdhci-pltfm.h b/include/linux/sdhci-pltfm=
-=2Eh
->> index 0239bd7..0d8e8f6 100644
->> --- a/include/linux/sdhci-pltfm.h
->> +++ b/include/linux/sdhci-pltfm.h
->> @@ -28,8 +28,11 @@ struct sdhci_host;
->> =A0struct sdhci_pltfm_data {
->> =A0 =A0 =A0 struct sdhci_ops *ops;
->> =A0 =A0 =A0 unsigned int quirks;
->> - =A0 =A0 int (*init)(struct sdhci_host *host);
->> + =A0 =A0 int (*init)(struct sdhci_host *host, struct sdhci_pltfm_da=
-ta *pdata, void* priv_pdata);
->> =A0 =A0 =A0 void (*exit)(struct sdhci_host *host);
->> + =A0 =A0 void (*set_max_speed)(struct sdhci_host *host);
->> + =A0 =A0 unsigned int =A0(*get_quirk)(struct sdhci_host *host);
->> + =A0 =A0 struct sdhci_host *(*alloc_host)(struct device *dev);
->> =A0};
->>
->> =A0#endif /* _SDHCI_PLTFM_H */
->> --
->> 1.7.0.4
->>
->
->
-> --
-> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-| Wolfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
-> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://w=
-ww.pengutronix.de/ =A0|
->
-> -----BEGIN PGP SIGNATURE-----
-> Version: GnuPG v1.4.9 (GNU/Linux)
->
-> iEYEARECAAYFAkyfcD0ACgkQD27XaX1/VRt1rgCdHfpBgfsUinbhf4wXCvIMreul
-> tCwAoIvA7nFDgH4jBIZgLX6xRstcENaG
-> =3D3A6W
-> -----END PGP SIGNATURE-----
->
->
+ 		dev_err(&pdev->dev, "Invalid iomem size. You may "
+ 			"experience problems.\n");
+
+-	if (pdev->dev.parent)
+-		host = sdhci_alloc_host(pdev->dev.parent, 0);
++	if (pdata && pdata->alloc_host)
++		host = pdata->alloc_host(&pdev->dev);
+ 	else
+ 		host = sdhci_alloc_host(&pdev->dev, 0);
+
+diff --git a/include/linux/sdhci-pltfm.h b/include/linux/sdhci-pltfm.h
+index e14fce3..80c415e 100644
+--- a/include/linux/sdhci-pltfm.h
++++ b/include/linux/sdhci-pltfm.h
+@@ -30,6 +30,7 @@ struct sdhci_pltfm_data {
+ 	unsigned int quirks;
+ 	int (*init)(struct sdhci_host *host, struct sdhci_pltfm_data *pdata,
+void* priv_pdata);
+ 	void (*exit)(struct sdhci_host *host);
++	struct sdhci_host *(*alloc_host)(struct device *dev);
+ };
+
+ #endif /* _SDHCI_PLTFM_H */
+-- 
+1.7.0.4
+
+--0016363b85746c6959049134dd7f
+Content-Type: text/x-patch; charset=US-ASCII;
+	name="0001-sdhci-pltfm-add-call-back-alloc_host.patch"
+Content-Disposition: attachment;
+	filename="0001-sdhci-pltfm-add-call-back-alloc_host.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gelgke0i0
+
+RnJvbSA3YTg3MGE2MjBmYTg2OGVkNGNlMGNmZmNiZDZiMDY4M2EwMGFlMmU1IE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBaaGFuZ2ZlaSBHYW8gPHpoYW5nZmVpLmdhb0BtYXJ2ZWxsLmNv
+bT4KRGF0ZTogTW9uLCAyNyBTZXAgMjAxMCAxMDozMDowMSAtMDQwMApTdWJqZWN0OiBbUEFUQ0gg
+MS8zXSBzZGhjaS1wbHRmbTogYWRkIGNhbGwgYmFjayBhbGxvY19ob3N0CgoJYWxsb2NfaG9zdCBj
+b3VsZCBhbGxvYyBzcGVjaWZpYyBzdHJ1Y3R1cmUgb2YgZGV2aWNlIHRvIG1lZXQgZGlmZmVyZW50
+IHJlcXVpcmVtZW50CgpTaWduZWQtb2ZmLWJ5OiBaaGFuZ2ZlaSBHYW8gPHpoYW5nZmVpLmdhb0Bt
+YXJ2ZWxsLmNvbT4KLS0tCiBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBsdGZtLmMgfCAgICA0ICsr
+LS0KIGluY2x1ZGUvbGludXgvc2RoY2ktcGx0Zm0uaCAgICB8ICAgIDEgKwogMiBmaWxlcyBjaGFu
+Z2VkLCAzIGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVy
+cy9tbWMvaG9zdC9zZGhjaS1wbHRmbS5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wbHRmbS5j
+CmluZGV4IDk2NjlmMjEuLjgyZDNkMDUgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2Ro
+Y2ktcGx0Zm0uYworKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBsdGZtLmMKQEAgLTc2LDgg
+Kzc2LDggQEAgc3RhdGljIGludCBfX2RldmluaXQgc2RoY2lfcGx0Zm1fcHJvYmUoc3RydWN0IHBs
+YXRmb3JtX2RldmljZSAqcGRldikKIAkJZGV2X2VycigmcGRldi0+ZGV2LCAiSW52YWxpZCBpb21l
+bSBzaXplLiBZb3UgbWF5ICIKIAkJCSJleHBlcmllbmNlIHByb2JsZW1zLlxuIik7CiAKLQlpZiAo
+cGRldi0+ZGV2LnBhcmVudCkKLQkJaG9zdCA9IHNkaGNpX2FsbG9jX2hvc3QocGRldi0+ZGV2LnBh
+cmVudCwgMCk7CisJaWYgKHBkYXRhICYmIHBkYXRhLT5hbGxvY19ob3N0KQorCQlob3N0ID0gcGRh
+dGEtPmFsbG9jX2hvc3QoJnBkZXYtPmRldik7CiAJZWxzZQogCQlob3N0ID0gc2RoY2lfYWxsb2Nf
+aG9zdCgmcGRldi0+ZGV2LCAwKTsKIApkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9zZGhjaS1w
+bHRmbS5oIGIvaW5jbHVkZS9saW51eC9zZGhjaS1wbHRmbS5oCmluZGV4IGUxNGZjZTMuLjgwYzQx
+NWUgMTAwNjQ0Ci0tLSBhL2luY2x1ZGUvbGludXgvc2RoY2ktcGx0Zm0uaAorKysgYi9pbmNsdWRl
+L2xpbnV4L3NkaGNpLXBsdGZtLmgKQEAgLTMwLDYgKzMwLDcgQEAgc3RydWN0IHNkaGNpX3BsdGZt
+X2RhdGEgewogCXVuc2lnbmVkIGludCBxdWlya3M7CiAJaW50ICgqaW5pdCkoc3RydWN0IHNkaGNp
+X2hvc3QgKmhvc3QsIHN0cnVjdCBzZGhjaV9wbHRmbV9kYXRhICpwZGF0YSwgdm9pZCogcHJpdl9w
+ZGF0YSk7CiAJdm9pZCAoKmV4aXQpKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0KTsKKwlzdHJ1Y3Qg
+c2RoY2lfaG9zdCAqKCphbGxvY19ob3N0KShzdHJ1Y3QgZGV2aWNlICpkZXYpOwogfTsKIAogI2Vu
+ZGlmIC8qIF9TREhDSV9QTFRGTV9IICovCi0tIAoxLjcuMC40Cgo=
+--0016363b85746c6959049134dd7f--
