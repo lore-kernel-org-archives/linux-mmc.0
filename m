@@ -1,118 +1,335 @@
-From: dylan cristiani <d.cristiani@idem-tech.it>
-Subject: linux-2.6.36-rc4 problems booting rootfs from SD card
-Date: Tue, 28 Sep 2010 13:00:43 +0200
-Message-ID: <20100928130043.000074b1@unknown>
+From: Ethan Du <ethan.too@gmail.com>
+Subject: Re: [PATCH] MMC: Refine block layer waiting for card state
+Date: Tue, 28 Sep 2010 19:03:50 +0800
+Message-ID: <AANLkTi=UGy-Q=LZRPUnGqojTCcMOVDGHFJW5hhAWr50a@mail.gmail.com>
+References: <AANLkTi=E9imw9GQFU2_eMMPULKuWXMWeXdzCgjUFycD0@mail.gmail.com>
+	<4CA1905D.5010701@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Cc: dylan cristiani <d.cristiani@idem-tech.it>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:61724 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750787Ab0I1LDv convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 07:03:51 -0400
+Received: by gxk9 with SMTP id 9so1861718gxk.19
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2010 04:03:50 -0700 (PDT)
+In-Reply-To: <4CA1905D.5010701@nokia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-SGkgc2lycywgaGVyZSBpcyBteSBzY2VuYXJpbzoga2VybmVsIDIuNi4zNi1yYzQ7IGNwdSBweGEy
-NzA7IHBsYXRmb3JtCmlzIGFuIGVuaGFuY2VtZW50IChpIGxpa2UgdG8gc2VlIHRoaW5ncyB0aGF0
-IHdheS4uLikgYW5kIGN1c3RvbWlzYXRpb24Kb2YgdGhlIG1haW5zdG9uZSBJSUkgYm9hcmQ7IGhl
-cmUgY29tZXMgdGhlIChteSkgcHJvYmxlbTogaWYgaSBib290IHdpdGgKbXkgc3RhbmRhcmQga2Vy
-bmVsIGJvb3QgY29tbWFuZCBsaW5lICh0byBib290IGZyb20gc3lzdGVtIGZsYXNoKToKJ3Jvb3Q9
-L2Rldi9tdGRibG9jazIgcm9vdGZzdHlwZT1qZmZzMiBtZW09NjRNIGNvbnNvbGU9dHR5UzAsMTE1
-MjAwbjgnCgppIGNhbiBnZXQgdGhlIHJvb3RmcyB1cCwgYW5kIHRoZSBTRCBjYXJkIGlzIHVwIHRv
-bywgYW5kIGNvcnJlY3RseQp3b3JraW5nOyBoZXJlJ3MgdGhlIHJlbGV2YW50IGtlcm5lbCBsb2c6
-CgouLi4uClhTY2FsZSBpV01NWHQgY29wcm9jZXNzb3IgZGV0ZWN0ZWQuCiBydGMtZHMxMzA3IDAt
-MDA2ODogc2V0dGluZyBzeXN0ZW0gY2xvY2sgdG8gMjAxMC0wOS0yOCAwMzowMzowOCBVVEMKKDEy
-ODU2NDI5ODgpCiBweGEyN3gtdWRjIHB4YTI3eC11ZGM6IFVTQiByZXNldAogbW1jMDogbmV3IFNE
-IGNhcmQgYXQgYWRkcmVzcyBhYWFhCiBtbWNibGswOiBtbWMwOmFhYWEgU0QwMkcgMS44NCBHaUIK
-ICBtbWNibGswOiBwMQogcHhhMjd4LXVkYyBweGEyN3gtdWRjOiBVU0IgcmVzZXQKLi4uLi4KCnRo
-ZW4gdGhlIHJvb3RmcyBjb2VtcyB1cCBwcm9wZXJseS4KCkVsc2UsIGlmIGkgdHJ5IHRvIGJvb3Qg
-dGhlIHJvb3RmcyBkaXJlY3RseSBmb3JtIHRoZSBTRCBjYXJkLCB3aXRoCmtlcm5lbCBib290IGNv
-bW1hbmQgbGluZToKJ3Jvb3Q9L2Rldi9tbWNibGswcDEgcm9vdGZzdHlwZT1leHQyIG1lbT02NE0g
-Y29uc29sZT10dHlTMCwxMTUyMDBuOCcKCnRoZSByb290ZnMgZG9lbid0IHdvcmssIGFuZCBpIGNh
-biBzZWUgc29tZSBwcm9ibGVtcyBhcm91bmQgd2l0aCB1c2IKY2xpZW50IGdhZGdldDsgaGVyZSdz
-IHRoZSByZWxldmFudCBrZXJuZWwgbG9nOgoKLi4uLgpYU2NhbGUgaVdNTVh0IGNvcHJvY2Vzc29y
-IGRldGVjdGVkLgogcnRjLWRzMTMwNyAwLTAwNjg6IHNldHRpbmcgc3lzdGVtIGNsb2NrIHRvIDIw
-MTAtMDktMjggMDM6MDM6NDMgVVRDCigxMjg1NjQzMDIzKQogVkZTOiBDYW5ub3Qgb3BlbiByb290
-IGRldmljZSAibW1jYmxrMHAxIiBvciB1bmtub3duLWJsb2NrKDAsMCkKIFBsZWFzZSBhcHBlbmQg
-YSBjb3JyZWN0ICJyb290PSIgYm9vdCBvcHRpb247IGhlcmUgYXJlIHRoZSBhdmFpbGFibGUKcGFy
-dGl0aW9uczoKIDFmMDAgICAgICAgICAgICAgMjU2IG10ZGJsb2NrMCAoZHJpdmVyPykKIDFmMDEg
-ICAgICAgICAgICAyMDQ4IG10ZGJsb2NrMSAoZHJpdmVyPykKIDFmMDIgICAgICAgICAgIDYzMjMy
-IG10ZGJsb2NrMiAoZHJpdmVyPykKIEtlcm5lbCBwYW5pYyAtIG5vdCBzeW5jaW5nOiBWRlM6IFVu
-YWJsZSB0byBtb3VudCByb290IGZzIG9uCnVua25vd24tYmxvY2soMCwwKQogQmFja3RyYWNlOgog
-W10gKGR1bXBfYmFja3RyYWNlKzB4MC8weDExOCkgZnJvbSBbXSAoZHVtcF9zdGFjaysweDE4LzB4
-MWMpCnI2OjAwMDA4MDAwIHI1OmMzODEzMDAwIHI0OmMwNDE3YjcwIHIzOmMwM2Y1NzE0CiBbXSAo
-ZHVtcF9zdGFjaysweDAvMHgxYykgZnJvbSBbXSAocGFuaWMrMHg2MC8weDE4YykKIFtdIChwYW5p
-YysweDAvMHgxOGMpIGZyb20gW10gKG1vdW50X2Jsb2NrX3Jvb3QrMHgyNWMvMHgyYWMpCiBweGEy
-N3gtdWRjIHB4YTI3eC11ZGM6IGVwMDpoYW5kbGVfZXAwOiBzdGF0ZT1XQUlUX0ZPUl9TRVRVUCwK
-cmVxPShudWxsKSwgdWRjY3NyMD0weDJjMSwgdWRjYmNyPTgsIGlycV9tc2s9MQogcHhhMjd4LXVk
-YyBweGEyN3gtdWRjOiBlcDA6c2V0X2VwMHN0YXRlOgpzdGF0ZT1XQUlUX0ZPUl9TRVRVUC0+U0VU
-VVBfU1RBR0UsIHVkY2NzcjA9MHgyYzEsIHVkY2Jjcj04CiBweGEyN3gtdWRjIHB4YTI3eC11ZGM6
-IGVwMDpoYW5kbGVfZXAwX2N0cmxfcmVxOiBTRVRVUCA4MC4wNiB2MDEwMAppMDAwMCBsMDA0MAog
-cHhhMjd4LXVkYyBweGEyN3gtdWRjOiBlcDA6c2V0X2VwMHN0YXRlOgpzdGF0ZT1TRVRVUF9TVEFH
-RS0+SU5fREFUQV9TVEFHRSwgdWRjY3NyMD0weDI4MSwgdWRjYmNyPTAKIHB4YTI3eC11ZGMgcHhh
-Mjd4LXVkYzogZXAwOnB4YV9lcF9xdWV1ZTogcXVldWUgcmVxCmMzOTNkYmMwKGZpcnN0PXllcyks
-IGxlbiAxOCBidWYgYzM4NmQwMDAKIHB4YTI3eC11ZGMgcHhhMjd4LXVkYzogZXAwOndyaXRlX2Vw
-MF9maWZvOiBpbiAxNiBieXRlcywgMiBsZWZ0LApyZXE9YzM5M2RiYzAsIHVkY2NzcjA9MHgyMDIK
-IHB4YTI3eC11ZGMgcHhhMjd4LXVkYzogVVNCIHJlc2V0CiBweGEyN3gtdWRjIHB4YTI3eC11ZGM6
-IFVTQiByZXNldCBzdGFydAogcHhhMjd4LXVkYyBweGEyN3gtdWRjOiBlcDA6cmVxX2RvbmU6IGNv
-bXBsZXRlIHJlcSBjMzkzZGJjMCBzdGF0IC03MQpsZW4gMTYvMTgKIGdfZXRoZXIgZ2FkZ2V0OiBz
-ZXR1cCBjb21wbGV0ZSAtLT4gLTcxLCAxNi8xOAogcHhhMjd4LXVkYyBweGEyN3gtdWRjOiBlcDA6
-c2V0X2VwMHN0YXRlOgpzdGF0ZT1JTl9EQVRBX1NUQUdFLT5XQUlUX0ZPUl9TRVRVUCwgdWRjY3Ny
-MD0weDIwMCwgdWRjYmNyPTAKIHB4YTI3eC11ZGMgcHhhMjd4LXVkYzogZXAwOmhhbmRsZV9lcDA6
-IHN0YXRlPVdBSVRfRk9SX1NFVFVQLApyZXE9KG51bGwpLCB1ZGNjc3IwPTB4MjAwLCB1ZGNiY3I9
-MCwgaXJxX21zaz0xCiAgcjM6MDAwMDAwMDEgcjI6MjAwMDAwMTMgcjE6YzM4MjVmNjAgcjA6YzAz
-OTYwMWIKIFtdIChtb3VudF9ibG9ja19yb290KzB4MC8weDJhYykgZnJvbSBbXSAobW91bnRfcm9v
-dCsweDU0LzB4NmMpCiAgcjg6MDAwMDAwMDAgcjc6MDAwMDAwMTMgcjY6YzAwNTFlNDggcjU6MDAw
-MDAwMDAgcjQ6YzAzOTYwN2YKIFtdIChtb3VudF9yb290KzB4MC8weDZjKSBmcm9tIFtdIChwcmVw
-YXJlX25hbWVzcGFjZSsweDEyYy8weDE4NCkKICByNTpjMDAyMDNjMSByNDpjMDAyMDNhYwogW10g
-KHByZXBhcmVfbmFtZXNwYWNlKzB4MC8weDE4NCkgZnJvbSBbXSAoa2VybmVsX2luaXQrMHgxMTQv
-MHgxNTQpCiAgcjU6YzAwMDgzZDQgcjQ6YzA0MTZlNjAKIFtdIChrZXJuZWxfaW5pdCsweDAvMHgx
-NTQpIGZyb20gW10gKGRvX2V4aXQrMHgwLzB4NWRjKQogIHI0OjAwMDAwMDAwIHIzOjAwMDAwMDAw
-Ci4uLi4KCmxhc3QgbW9udGhzIGkgcG9ydGVkIG15IHN5c3RlbSBmb3JtIGFuY2llbnQgMi42LjE4
-IGtlcm5lbCB0byBteSBjdXJyZW50Cmtlcm5lbCAoMi42LjM2LXJjNCksIGJ1dCBpIHJlbWVtYmVy
-IHRoYXQgd2l0aCAyLjYuMTggdGhlIHJvb3RmcydzCmJvb3RpbmcgZnJvbSBTRCBkaWQgd29yazsg
-c28gaSByZS1sb2FkZWQgMi42LjE4IHpJbWFnZSwgYW5kIGluIGZhY3QgdGhlClNEIHJvb3RzIGJv
-b3Rpbmcgd29ya2VkIHByb3Blcmx5OyB0aGVuIGkgaW52ZXN0aWdhdGVkIGEgYml0IGFuZCBpIGhh
-dmUKZm91bmQgdGhhdCBhbHNvIHdpdGggMi42LjE5IGl0IHdvcmtlZCwgd2hpbGUgd2l0aCAyLjYu
-MjAgaXQgc3RvcHBlZAp3b3JraW5nIChpIGRpZG4ndCB0cnkgYmV0d2VlbiAyLjYuMjAgYW5kIDIu
-Ni4zNi1yYzQgYnV0IGlmIGl0J3MgaGVscGZ1bAppIGNhbiBkbyBpdCkuClRoZSBvbmx5IHdheSB0
-byBzb2x2ZSBteSBwcm9ibGVtIHdhcyB0byAncGF0Y2gnIHRoZSBmaWxlCmRyaXZlcnMvTWFrZWZp
-bGUsIG1vdmluZyB0aGUgbW1jLm8gb2JqZWN0IGZpbGUgdXB3YXJkOyBoZXJlIGlzIGEgc29ydCBv
-ZgoncGF0Y2gnLCBidXQgaSByZWdyZXQgaW4gYWR2YW5jZSBmb3Igc29tZSAncG9zc2libGUnIChp
-IGhhZCB0byB3cml0ZQonc3VyZScsIGJ1dCBpIGxpa2UgdG8gYmUgbW9kZXN0IHBlcnNvbi4uLi4p
-IHN5bnRheCBtaXN0YWtlLCBidXQgaSdtIG5vdAppbiBoYWJiaXQgd2l0aCBwYXRjaGVzLi4uOgoK
-IC0tLSBhL2RyaXZlcnMvTWFrZWZpbGUKICsrKyBiL2RyaXZlcnMvTWFrZWZpbGUKIEBAIC00NCw3
-ICs0NCw4IEBACiAgb2JqLXkgICAgICAgICAgICAgICAgKz0gbWFjaW50b3NoLwogIG9iai0kKENP
-TkZJR19JREUpICAgICAgICArPSBpZGUvCiAgb2JqLSQoQ09ORklHX1NDU0kpICAgICAgICArPSBz
-Y3NpLwogIG9iai0kKENPTkZJR19BVEEpICAgICAgICArPSBhdGEvCiAgb2JqLSQoQ09ORklHX01U
-RCkgICAgICAgICs9IG10ZC8KICBvYmotJChDT05GSUdfU1BJKSAgICAgICAgKz0gc3BpLwogK29i
-ai0kKENPTkZJR19NTUMpICAgICAgICArPSBtbWMvCiAgb2JqLXkgICAgICAgICAgICAgICAgKz0g
-bmV0LwogQEAgLTkyLDkgKzkzLDggQEAKICBvYmoteSAgICAgICAgICAgICAgICArPSBsZ3Vlc3Qv
-CiAgb2JqLSQoQ09ORklHX0NQVV9GUkVRKSAgICAgICAgKz0gY3B1ZnJlcS8KICBvYmotJChDT05G
-SUdfQ1BVX0lETEUpICAgICAgICArPSBjcHVpZGxlLwogLW9iai0kKENPTkZJR19NTUMpICAgICAg
-ICArPSBtbWMvCiAgb2JqLSQoQ09ORklHX01FTVNUSUNLKSAgICAgICAgKz0gbWVtc3RpY2svCiAg
-b2JqLSQoQ09ORklHX05FV19MRURTKSAgICAgICAgKz0gbGVkcy8KICBvYmotJChDT05GSUdfSU5G
-SU5JQkFORCkgICAgKz0gaW5maW5pYmFuZC8KICBvYmotJChDT05GSUdfU0dJX1NOKSAgICAgICAg
-Kz0gc24vCiAgb2JqLXkgICAgICAgICAgICAgICAgKz0gZmlybXdhcmUvCgpzdGF0ZWQgdGhhdCBp
-dCdzIG5vdCBjbGVhciB0byBtZSB3aHkgd2hlbiBpIGRvbid0IHRyeSB0byBib290IHRoZQpyb290
-ZnMgZGlyZWN0bHkgZnJvbSB0aGUgU0QsIGl0cyBkcml2ZXIgY29tZXMgdXAgaW4gdGhlIHJpZ2h0
-IHdheSwgYW5kCnRoZSBTRCB3b3Jrcywgd2hpbGUgd2hlbiBpIHRyeSB0byBib290IHRoZSByb290
-ZnMgZnJvbSB0aGUgU0QgaSBjYW5ub3QKZ2V0IHRoaW5ncyB0byB3b3JrIChtYXliZSB0aGUgZGV2
-aWNlIGlzIG5vdCB1cCB5ZXQgd2hlbiB0aGUgVkZTCnRyeWllcyB0byBjb21lIHVwIGluIGZhY3Qg
-aW4gc3VjaCBhIHNpdHVhdGlvbiBpIGNhbm5vdCByZWFkIGFueSBsb2cKYWJvdXQgbW1jMCBkZXZp
-Y2UhKSwgaSB3YXMgd29uZGVyaW5nIGlmIHRoaXMgcGF0Y2ggY291bGQgYmUgZmFpciBvcgptYXli
-ZSAocHJvYmFibHkpIGknbSBtaXNzaW5nIHNvbWUgcG90ZW50aWFsIHNpZGUgZWZmZWN0cz8/Pwph
-bnkgaGludCB3aWxsIGJlIGFwcHJlY2lhdGVkISEhCnRoYW5rcyBhbmQgYnllCgotCgpkeWxhbiBj
-cmlzdGlhbmkKCi0tCkZvcnR1bmF0ZWx5IEnigJl2ZSBiZWVuIGFkaGVyaW5nIHRvIGEgcHJldHR5
-IHN0cmljdCwgdWgsIGRydWcgcmVnaW1lbiB0bwprZWVwIG15IG1pbmQsIHlvdSBrbm93LCB1aCwg
-bGltYmVyLi4uCi0tLQoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0
-cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGlu
-Zm8vbGludXgtYXJtLWtlcm5lbAo=
+Hi
+
+On Tue, Sep 28, 2010 at 2:51 PM, Adrian Hunter <adrian.hunter@nokia.com=
+> wrote:
+> On 27/09/10 06:32, Ethan Du wrote:
+>>
+>> =A0 =A0 The while loop when handling rw request may become deadloop =
+in
+>> case of bad card
+>> =A0 =A0 I've seen mmcqd gets blocked forever after a single error me=
+ssage:
+>>
+>> mmcblk0: error -110 sending read/write command, response 0x900, card
+>> status 0x80e00
+>>
+>> =A0 =A0 Also there was case of card reports status without error
+>>
+>> mmcblk0: error -110 sending read/write command, response 0x900, card
+>> status 0xe00
+>>
+>> =A0 =A0 After this error, the card can stay in prg state, and never =
+comes
+>> back,
+>> =A0 =A0 and may not report any error further. So a break out conditi=
+on
+>> =A0 =A0 should be set in mmc block layer:
+>> * should not enter the waiting loop in case of error
+>
+> How do you know there are not any errors where you do need to wait?
+
+Would you enumerate an example?
+I am not sure all hosts, seem most host controllers already wait
+enough time before return to block layer when cmd->flags has
+MMC_RSP_BUSY
+
+>
+>> * should break out from the waiting loop, if card response with erro=
+r
+>> * should break out from the waiting loop when timeout
+>>
+>> =A0 =A0 These will not help with the card, one more thing to do:
+>> * re-init the card in case of too many errors
+>
+> Using mmc_detect_change() will give you a new block device.
+> That is probably a bad idea for a non-removable card. =A0Also
+
+Yes, figured it is better to do something like host resume.
+I made a function mmc_reinit_host(), will send out the patch
+
+> if the reinitialization is going to help, then why wait for
+> lots of errors before doing it.
+
+With the hope that, card can still work after this error
+
+>
+>>
+>> Signed-off-by: Ethan Du<ethan.too@gmail.com>
+>> ---
+>> =A0drivers/mmc/card/block.c | =A0 35 +++++++++++++++++++++++++++----=
+----
+>> =A0drivers/mmc/core/mmc.c =A0 | =A0 =A09 +++++++--
+>> =A0drivers/mmc/core/sd.c =A0 =A0| =A0 =A08 ++++++--
+>> =A0include/linux/mmc/card.h | =A0 =A03 +++
+>> =A0include/linux/mmc/mmc.h =A0| =A0 =A01 +
+>> =A05 files changed, 44 insertions(+), 12 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index d545f79..1d304a2 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -316,12 +316,14 @@ out:
+>> =A0 =A0 =A0 =A0return err ? 0 : 1;
+>> =A0}
+>>
+>> +#define BUSY_TIMEOUT_MS (16 * 1024)
+>> =A0static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct reque=
+st *req)
+>> =A0{
+>> =A0 =A0 =A0 =A0struct mmc_blk_data *md =3D mq->data;
+>> =A0 =A0 =A0 =A0struct mmc_card *card =3D md->queue.card;
+>> =A0 =A0 =A0 =A0struct mmc_blk_request brq;
+>> =A0 =A0 =A0 =A0int ret =3D 1, disable_multi =3D 0;
+>> + =A0 =A0 =A0 unsigned long timeout =3D 0;
+>>
+>> =A0 =A0 =A0 =A0mmc_claim_host(card->host);
+>>
+>> @@ -453,7 +455,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+>> *mq, struct request *req)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq.stop=
+=2Eresp[0], status);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+>>
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!mmc_host_is_spi(card->host)&& =A0=
+rq_data_dir(req) !=3D
+>> READ) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!mmc_host_is_spi(card->host)&& =A0=
+rq_data_dir(req) !=3D
+>> READ&&
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 !brq.cmd.error&& =A0!brq.data.=
+error&& =A0!brq.stop.error)
+>> {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timeout =3D jiffies +
+>> msecs_to_jiffies(BUSY_TIMEOUT_MS);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0do {
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int e=
+rr;
+>>
+>> @@ -466,13 +470,22 @@ static int mmc_blk_issue_rw_rq(struct mmc_queu=
+e
+>> *mq, struct request *req)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 =A0 =A0 =A0 req->rq_disk->disk_name,
+>> err);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0goto cmd_err;
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (cm=
+d.resp[0]& =A0R1_ERROR_MASK) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 printk(KERN_ERR "%s: card err
+>> %#x\n",
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 req->rq_disk->disk_name,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 cmd.resp[0]);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 goto cmd_err;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/*
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * So=
+me cards mishandle the status bits,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * so=
+ make sure to check both the busy
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * in=
+dication and the card state.
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 } while (!(cmd.resp[0]=
+& =A0R1_READY_FOR_DATA) ||
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (R1_CU=
+RRENT_STATE(cmd.resp[0]) =3D=3D 7));
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((c=
+md.resp[0]& =A0R1_READY_FOR_DATA)&&
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ (R1_CURRENT_STATE(cmd.resp[0]) !=3D 7))
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 break;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 } while (time_before(j=
+iffies, timeout));
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Ignore timeout out =
+*/
+>>
+>> =A0#if 0
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (cmd.resp[0]& =A0~=
+0x00000900)
+>> @@ -510,11 +523,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queu=
+e
+>> *mq, struct request *req)
+>>
+>> =A0 =A0 =A0 =A0return 1;
+>>
+>> - cmd_err:
+>> - =A0 =A0 =A0 /*
+>> - =A0 =A0 =A0 =A0* If this is an SD card and we're writing, we can f=
+irst
+>> - =A0 =A0 =A0 =A0* mark the known good sectors as ok.
+>> - =A0 =A0 =A0 =A0*
+>> +cmd_err:
+>> + =A0 =A0 =A0 /*
+>> + =A0 =A0 =A0 =A0* If this is an SD card and we're writing, we can f=
+irst
+>> + =A0 =A0 =A0 =A0* mark the known good sectors as ok.
+>> + =A0 =A0 =A0 =A0*
+>> =A0 =A0 =A0 =A0 * If the card is not SD, we can still ok written sec=
+tors
+>> =A0 =A0 =A0 =A0 * as reported by the controller (which might be less=
+ than
+>> =A0 =A0 =A0 =A0 * the real number of written sectors, but never more=
+).
+>> @@ -541,6 +554,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+>> *mq, struct request *req)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D __blk_end_request(req, -EIO, =
+blk_rq_cur_bytes(req));
+>> =A0 =A0 =A0 =A0spin_unlock_irq(&md->lock);
+>>
+>> + =A0 =A0 =A0 card->err_count++;
+>> + =A0 =A0 =A0 if (card->err_count>=3D ERR_TRIGGER_REINIT) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_WARNING "%s: re-init the c=
+ard due to error\n",
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 req->rq_disk->disk_nam=
+e);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_detect_change(card->host, 0);
+>> + =A0 =A0 =A0 }
+>> =A0 =A0 =A0 =A0return 0;
+>> =A0}
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 6909a54..79c4759 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -535,6 +535,8 @@ static int mmc_init_card(struct mmc_host *host, =
+u32
+>> ocr,
+>>
+>> =A0 =A0 =A0 =A0if (!oldcard)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->card =3D card;
+>> + =A0 =A0 =A0 else
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 oldcard->err_count =3D 0;
+>>
+>> =A0 =A0 =A0 =A0return 0;
+>>
+>> @@ -563,17 +565,20 @@ static void mmc_remove(struct mmc_host *host)
+>> =A0 */
+>> =A0static void mmc_detect(struct mmc_host *host)
+>> =A0{
+>> - =A0 =A0 =A0 int err;
+>> + =A0 =A0 =A0 int err =3D 0;
+>>
+>> =A0 =A0 =A0 =A0BUG_ON(!host);
+>> =A0 =A0 =A0 =A0BUG_ON(!host->card);
+>>
+>> =A0 =A0 =A0 =A0mmc_claim_host(host);
+>>
+>> + =A0 =A0 =A0 if (host->card->err_count>=3D ERR_TRIGGER_REINIT)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_init_card(host, host->ocr,=
+ host->card);
+>> =A0 =A0 =A0 =A0/*
+>> =A0 =A0 =A0 =A0 * Just check if our card has been removed.
+>> =A0 =A0 =A0 =A0 */
+>> - =A0 =A0 =A0 err =3D mmc_send_status(host->card, NULL);
+>> + =A0 =A0 =A0 if (!err)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_status(host->card, NU=
+LL);
+>>
+>> =A0 =A0 =A0 =A0mmc_release_host(host);
+>>
+>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> index 0f52410..820b0d1 100644
+>> --- a/drivers/mmc/core/sd.c
+>> +++ b/drivers/mmc/core/sd.c
+>> @@ -635,6 +635,7 @@ static int mmc_sd_init_card(struct mmc_host *hos=
+t, u32
+>> ocr,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_set_bus_width(host, MMC_BUS_WIDTH=
+_4);
+>> =A0 =A0 =A0 =A0}
+>>
+>> + =A0 =A0 =A0 card->err_count =3D 0;
+>> =A0 =A0 =A0 =A0host->card =3D card;
+>> =A0 =A0 =A0 =A0return 0;
+>>
+>> @@ -662,17 +663,20 @@ static void mmc_sd_remove(struct mmc_host *hos=
+t)
+>> =A0 */
+>> =A0static void mmc_sd_detect(struct mmc_host *host)
+>> =A0{
+>> - =A0 =A0 =A0 int err;
+>> + =A0 =A0 =A0 int err =3D 0;
+>>
+>> =A0 =A0 =A0 =A0BUG_ON(!host);
+>> =A0 =A0 =A0 =A0BUG_ON(!host->card);
+>>
+>> =A0 =A0 =A0 =A0mmc_claim_host(host);
+>>
+>> + =A0 =A0 =A0 if (host->card->err_count>=3D ERR_TRIGGER_REINIT)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_sd_init_card(host, host->o=
+cr, host->card);
+>> =A0 =A0 =A0 =A0/*
+>> =A0 =A0 =A0 =A0 * Just check if our card has been removed.
+>> =A0 =A0 =A0 =A0 */
+>> - =A0 =A0 =A0 err =3D mmc_send_status(host->card, NULL);
+>> + =A0 =A0 =A0 if (!err)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_status(host->card, NU=
+LL);
+>>
+>> =A0 =A0 =A0 =A0mmc_release_host(host);
+>>
+>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>> index 6b75250..178de17 100644
+>> --- a/include/linux/mmc/card.h
+>> +++ b/include/linux/mmc/card.h
+>> @@ -143,6 +143,9 @@ struct mmc_card {
+>> =A0 =A0 =A0 =A0const char =A0 =A0 =A0 =A0 =A0 =A0 =A0**info; =A0 =A0=
+ =A0 =A0 /* info strings */
+>> =A0 =A0 =A0 =A0struct sdio_func_tuple =A0*tuples; =A0 =A0 =A0 =A0/* =
+unknown common tuples */
+>>
+>> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0err_count;
+>> +#define ERR_TRIGGER_REINIT 1024
+>> +
+>> =A0 =A0 =A0 =A0struct dentry =A0 =A0 =A0 =A0 =A0 *debugfs_root;
+>> =A0};
+>>
+>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+>> index dd11ae5..3b979a1 100644
+>> --- a/include/linux/mmc/mmc.h
+>> +++ b/include/linux/mmc/mmc.h
+>> @@ -122,6 +122,7 @@
+>> =A0#define R1_UNDERRUN =A0 =A0 =A0 =A0 =A0 (1<< =A018) =A0 =A0 =A0 /=
+* ex, c */
+>> =A0#define R1_OVERRUN =A0 =A0 =A0 =A0 =A0 =A0(1<< =A017) =A0 =A0 =A0=
+ /* ex, c */
+>> =A0#define R1_CID_CSD_OVERWRITE =A0(1<< =A016) =A0 =A0 =A0 /* erx, c=
+, CID/CSD
+>> overwrite */
+>> +#define R1_ERROR_MASK =A0 =A0 =A0 =A0 =A00xffff0000
+>> =A0#define R1_WP_ERASE_SKIP =A0 =A0 =A0(1<< =A015) =A0 =A0 =A0 /* sx=
+, c */
+>> =A0#define R1_CARD_ECC_DISABLED =A0(1<< =A014) =A0 =A0 =A0 /* sx, a =
+*/
+>> =A0#define R1_ERASE_RESET =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(1<< =A013)=
+ =A0 =A0 =A0 /* sr, c */
+>
+>
