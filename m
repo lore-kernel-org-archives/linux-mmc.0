@@ -1,60 +1,46 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 6/6] mmc: sdhci-pltfm: add pltfm-driver for imx35/51
-Date: Tue, 28 Sep 2010 16:58:30 +0400
-Message-ID: <20100928125830.GA421@oksana.dev.rtsoft.ru>
-References: <1285677406-3359-1-git-send-email-w.sang@pengutronix.de>
- <1285677406-3359-7-git-send-email-w.sang@pengutronix.de>
+From: =?iso-8859-15?Q?Lothar_Wa=DFmann?= <LW@KARO-electronics.de>
+Subject: Re: Recall: [PATCH 4/4] esdhc-4 mx51: enable fsl esdhc driver
+Date: Tue, 28 Sep 2010 15:03:57 +0200
+Message-ID: <19617.59325.889947.562800@ipc1.ka-ro>
+References: <A88EF4D64D8447468743DC1503C0B6CA0D4BD4@zch01exm22.fsl.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:44567 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753800Ab0I1M6g (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 08:58:36 -0400
-Received: by mail-ey0-f174.google.com with SMTP id 6so1733089eyb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2010 05:58:35 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1285677406-3359-7-git-send-email-w.sang@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <A88EF4D64D8447468743DC1503C0B6CA0D4BD4@zch01exm22.fsl.freescale.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Zhu Richard-R65037 <r65037@freescale.com>
+Cc: linux-mmc@vger.kernel.org, w.sang@pengutronix.de, linux-arm-kernel@lists.infradead.org, u.kleine-koenig@pengutronix.de
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, zhangfei gao <zhangfei.gao@gmail.com>, Zhu Richard-R65037 <r65037@freescale.com>, Philip Rakity <prakity@marvell.com>
 
-On Tue, Sep 28, 2010 at 02:36:46PM +0200, Wolfram Sang wrote:
-> This driver adds basic support for the esdhc-core found on e.g.
-> imx35/51. It adds up to the pltfm-core.
-> 
-> Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
-> ---
+Hi,
 
-Just a few more nits:
+> Zhu Richard-R65037 would like to recall the message, "[PATCH 4/4] esdhc-4=
+ mx51: enable fsl esdhc driver".
+The mailing list archive is just one mouse click away from the URL
+listed at the bottom of each message posted on this list:
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -143,6 +143,16 @@ config MMC_SDHCI_MV
->  
->  	  If unsure, say N.
->  
-> +config MMC_SDHCI_ESDHC
 
-MMC_SDHCI_ESDHC_IMX
+Lothar Wa=DFmann
+-- =
 
-> +	bool "SDHCI platform support for the Freescale eSDHC controller"
+___________________________________________________________
 
-SDHCI platform support for the Freescale eSDHC i.MX controller
+Ka-Ro electronics GmbH | Pascalstra=DFe 22 | D - 52076 Aachen
+Phone: +49 2408 1402-0 | Fax: +49 2408 1402-10
+Gesch=E4ftsf=FChrer: Matthias Kaussen
+Handelsregistereintrag: Amtsgericht Aachen, HRB 4996
 
-[...]
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -0,0 +1,144 @@
-> +/*
-> + * Freescale eSDHC controller driver for the platform bus.
-
-eSDHC i.MX
-
-Other than that, looks good.
-
-Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
-
--- 
-Anton Vorontsov
-email: cbouatmailru@gmail.com
-irc://irc.freenode.net/bd2
+www.karo-electronics.de | info@karo-electronics.de
+___________________________________________________________
