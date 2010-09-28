@@ -1,248 +1,311 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH] MMC: Refine block layer waiting for card state
-Date: Tue, 28 Sep 2010 09:51:09 +0300
-Message-ID: <4CA1905D.5010701@nokia.com>
-References: <AANLkTi=E9imw9GQFU2_eMMPULKuWXMWeXdzCgjUFycD0@mail.gmail.com>
+From: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Subject: Re: [PATCH v4 1/4] omap4 hsmmc: Adding card detect support for MMC1
+Date: Tue, 28 Sep 2010 12:22:38 +0530
+Message-ID: <AANLkTim5d6XP0nuJLF2DxDGP2DuBK5VUajd=YhXQnT2C@mail.gmail.com>
+References: <9408.10.24.255.18.1285348400.squirrel@dbdmail.itg.ti.com>
+	<AANLkTi=YvtrfmUTc-YBAUjEXn1v3pPLmhb92J60AhU28@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:55183 "EHLO
-	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754734Ab0I1GvW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 02:51:22 -0400
-In-Reply-To: <AANLkTi=E9imw9GQFU2_eMMPULKuWXMWeXdzCgjUFycD0@mail.gmail.com>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:52390 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752712Ab0I1Gwk convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 02:52:40 -0400
+In-Reply-To: <AANLkTi=YvtrfmUTc-YBAUjEXn1v3pPLmhb92J60AhU28@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ethan Du <ethan.too@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: sameo@linux.intel.com
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, tony@atomide.com, akpm@linux-foundation.org, madhu.cr@ti.com, adrian.hunter@nokia.com
 
-On 27/09/10 06:32, Ethan Du wrote:
->
->      The while loop when handling rw request may become deadloop in
-> case of bad card
->      I've seen mmcqd gets blocked forever after a single error message:
->
-> mmcblk0: error -110 sending read/write command, response 0x900, card
-> status 0x80e00
->
->      Also there was case of card reports status without error
->
-> mmcblk0: error -110 sending read/write command, response 0x900, card
-> status 0xe00
->
->      After this error, the card can stay in prg state, and never comes back,
->      and may not report any error further. So a break out condition
->      should be set in mmc block layer:
-> * should not enter the waiting loop in case of error
+Hi Samuel,
 
-How do you know there are not any errors where you do need to wait?
+Could you please review this patch which touches mfd/twl6030-irq.c for
+card detect support
+of MMC1 controller on OMAP4.
 
-> * should break out from the waiting loop, if card response with error
-> * should break out from the waiting loop when timeout
->
->      These will not help with the card, one more thing to do:
-> * re-init the card in case of too many errors
+Regards,
+Kishore
 
-Using mmc_detect_change() will give you a new block device.
-That is probably a bad idea for a non-removable card.  Also
-if the reinitialization is going to help, then why wait for
-lots of errors before doing it.
-
+On Mon, Sep 27, 2010 at 1:25 PM, kishore kadiyala
+<kishorek.kadiyala@gmail.com> wrote:
+> Cc: Samuel Ortiz <sameo@linux.intel.com>
 >
-> Signed-off-by: Ethan Du<ethan.too@gmail.com>
-> ---
->   drivers/mmc/card/block.c |   35 +++++++++++++++++++++++++++--------
->   drivers/mmc/core/mmc.c   |    9 +++++++--
->   drivers/mmc/core/sd.c    |    8 ++++++--
->   include/linux/mmc/card.h |    3 +++
->   include/linux/mmc/mmc.h  |    1 +
->   5 files changed, 44 insertions(+), 12 deletions(-)
+> On Fri, Sep 24, 2010 at 10:43 PM, kishore kadiyala
+> <kishore.kadiyala@ti.com> wrote:
+>> Adding card detect callback function and card detect configuration
+>> function for MMC1 Controller on OMAP4.
+>>
+>> Card detect configuration function does initial configuration of the
+>> MMC Control & PullUp-PullDown registers of Phoenix.
+>>
+>> For MMC1 Controller, card detect interrupt source is
+>> twl6030 which is non-gpio. The card detect call back function provid=
+es
+>> card present/absent status by reading MMC Control register present
+>> on twl6030.
+>>
+>> Since OMAP4 doesn't use any GPIO line as used in OMAP3 for card dete=
+ct,
+>> the suspend/resume initialization which was done in omap_hsmmc_gpio_=
+init
+>> previously is moved to the probe thus making it generic for both OMA=
+P3 & OMAP4.
+>>
+>> Cc: Tony Lindgren <tony@atomide.com>
+>> Cc: Andrew Morton <akpm@linux-foundation.org>
+>> Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
+>> Cc: Adrian Hunter <adrian.hunter@nokia.com>
+>> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+>> ---
+>> =A0arch/arm/mach-omap2/board-4430sdp.c | =A0 =A07 +++-
+>> =A0drivers/mfd/twl6030-irq.c =A0 =A0 =A0 =A0 =A0 | =A0 73 ++++++++++=
++++++++++++++++++++++++++
+>> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 | =A0 =A04 +-
+>> =A0include/linux/i2c/twl.h =A0 =A0 =A0 =A0 =A0 =A0 | =A0 31 ++++++++=
++++++++
+>> =A04 files changed, 112 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-oma=
+p2/board-4430sdp.c
+>> index 9447644..a49f285 100644
+>> --- a/arch/arm/mach-omap2/board-4430sdp.c
+>> +++ b/arch/arm/mach-omap2/board-4430sdp.c
+>> @@ -227,9 +227,14 @@ static int omap4_twl6030_hsmmc_late_init(struct=
+ device *dev)
+>> =A0 =A0 =A0 =A0struct omap_mmc_platform_data *pdata =3D dev->platfor=
+m_data;
+>>
+>> =A0 =A0 =A0 =A0/* Setting MMC1 Card detect Irq */
+>> - =A0 =A0 =A0 if (pdev->id =3D=3D 0)
+>> + =A0 =A0 =A0 if (pdev->id =3D=3D 0) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D twl6030_mmc_card_detect_config=
+();
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Failed configu=
+ring MMC1 card detect\n");
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].card_detect_irq =3D T=
+WL6030_IRQ_BASE +
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 =A0 =A0 =A0 =A0MMCDETECT_INTR_OFFSET;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->slots[0].card_detect =3D twl603=
+0_mmc_card_detect;
+>> + =A0 =A0 =A0 }
+>> =A0 =A0 =A0 =A0return ret;
+>> =A0}
+>>
+>> diff --git a/drivers/mfd/twl6030-irq.c b/drivers/mfd/twl6030-irq.c
+>> index 10bf228..2d3bb82 100644
+>> --- a/drivers/mfd/twl6030-irq.c
+>> +++ b/drivers/mfd/twl6030-irq.c
+>> @@ -36,6 +36,7 @@
+>> =A0#include <linux/irq.h>
+>> =A0#include <linux/kthread.h>
+>> =A0#include <linux/i2c/twl.h>
+>> +#include <linux/platform_device.h>
+>>
+>> =A0/*
+>> =A0* TWL6030 (unlike its predecessors, which had two level interrupt=
+ handling)
+>> @@ -223,6 +224,78 @@ int twl6030_interrupt_mask(u8 bit_mask, u8 offs=
+et)
+>> =A0}
+>> =A0EXPORT_SYMBOL(twl6030_interrupt_mask);
+>>
+>> +int twl6030_mmc_card_detect_config(void)
+>> +{
+>> + =A0 =A0 =A0 int ret;
+>> + =A0 =A0 =A0 u8 reg_val =3D 0;
+>> +
+>> + =A0 =A0 =A0 /* Unmasking the Card detect Interrupt line for MMC1 f=
+rom Phoenix */
+>> + =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 REG_INT_MSK_LINE_B);
+>> + =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 REG_INT_MSK_STS_B);
+>> + =A0 =A0 =A0 /*
+>> + =A0 =A0 =A0 =A0* Intially Configuring MMC_CTRL for receving interr=
+upts &
+>> + =A0 =A0 =A0 =A0* Card status on TWL6030 for MMC1
+>> + =A0 =A0 =A0 =A0*/
+>> + =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val, =
+TWL6030_MMCCTRL);
+>> + =A0 =A0 =A0 if (ret < 0) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to read MMCCTR=
+L, error %d\n", ret);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>> + =A0 =A0 =A0 }
+>> + =A0 =A0 =A0 reg_val &=3D ~VMMC_AUTO_OFF;
+>> + =A0 =A0 =A0 reg_val |=3D SW_FC;
+>> + =A0 =A0 =A0 ret =3D twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val, =
+TWL6030_MMCCTRL);
+>> + =A0 =A0 =A0 if (ret < 0) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to write MMCCT=
+RL, error %d\n", ret);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>> + =A0 =A0 =A0 }
+>> +
+>> + =A0 =A0 =A0 /* Configuring PullUp-PullDown register */
+>> + =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 TWL6030_CFG_INPUT_PUPD3);
+>> + =A0 =A0 =A0 if (ret < 0) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to read CFG_IN=
+PUT_PUPD3, error %d\n",
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ ret);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>> + =A0 =A0 =A0 }
+>> + =A0 =A0 =A0 reg_val &=3D ~(MMC_PU | MMC_PD);
+>> + =A0 =A0 =A0 ret =3D twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 TWL6030_CFG_INPUT_PUPD3);
+>> + =A0 =A0 =A0 if (ret < 0) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to write CFG_I=
+NPUT_PUPD3, error %d\n",
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ ret);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>> + =A0 =A0 =A0 }
+>> + =A0 =A0 =A0 return 0;
+>> +}
+>> +EXPORT_SYMBOL(twl6030_mmc_card_detect_config);
+>> +
+>> +int twl6030_mmc_card_detect(struct device *dev, int slot)
+>> +{
+>> + =A0 =A0 =A0 int ret =3D -EIO;
+>> + =A0 =A0 =A0 u8 read_reg =3D 0;
+>> + =A0 =A0 =A0 struct platform_device *pdev =3D to_platform_device(de=
+v);
+>> +
+>> + =A0 =A0 =A0 if (pdev->id) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* TWL6030 provide's Card detect suppo=
+rt for
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* only MMC1 controller.
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Unkown MMC controller %d in %s=
+\n", pdev->id, __func__);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>> + =A0 =A0 =A0 }
+>> + =A0 =A0 =A0 /*
+>> + =A0 =A0 =A0 =A0* BIT0 of MMC_CTRL on TWL6030 provides card status =
+for MMC1
+>> + =A0 =A0 =A0 =A0* 0 - Card not present ,1 - Card present
+>> + =A0 =A0 =A0 =A0*/
+>> + =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &read_reg,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 TWL6030_MMCCTRL);
+>> + =A0 =A0 =A0 if (ret >=3D 0)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D read_reg & STS_MMC;
+>> + =A0 =A0 =A0 return ret;
+>> +}
+>> +EXPORT_SYMBOL(twl6030_mmc_card_detect);
+>> +
+>> =A0int twl6030_init_irq(int irq_num, unsigned irq_base, unsigned irq=
+_end)
+>> =A0{
+>>
+>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_h=
+smmc.c
+>> index 562dbbb..a51894d 100644
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>> @@ -466,8 +466,6 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_=
+platform_data *pdata)
+>> =A0 =A0 =A0 =A0int ret;
+>>
+>> =A0 =A0 =A0 =A0if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->suspend =3D omap_hsmmc_suspend_=
+cdirq;
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->resume =3D omap_hsmmc_resume_cd=
+irq;
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (pdata->slots[0].cover)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].get_c=
+over_state =3D
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0omap_hsmmc_get_cover_state;
+>> @@ -2211,6 +2209,8 @@ static int __init omap_hsmmc_probe(struct plat=
+form_device *pdev)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"Unab=
+le to grab MMC CD IRQ\n");
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto err_irq_cd;
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->suspend =3D omap_hsmmc_suspend_=
+cdirq;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->resume =3D omap_hsmmc_resume_cd=
+irq;
+>> =A0 =A0 =A0 =A0}
+>>
+>> =A0 =A0 =A0 =A0omap_hsmmc_disable_irq(host);
+>> diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
+>> index 6de90bf..e64894c 100644
+>> --- a/include/linux/i2c/twl.h
+>> +++ b/include/linux/i2c/twl.h
+>> @@ -141,6 +141,16 @@
+>> =A0#define TWL6030_CHARGER_CTRL_INT_MASK =A00x10
+>> =A0#define TWL6030_CHARGER_FAULT_INT_MASK =A0 =A0 =A0 =A0 0x60
+>>
+>> +#define TWL6030_MMCCTRL =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00xEE
+>> +#define VMMC_AUTO_OFF =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x1 << 3)
+>> +#define SW_FC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(0=
+x1 << 2)
+>> +#define STS_MMC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x1
+>> +
+>> +#define TWL6030_CFG_INPUT_PUPD3 =A0 =A0 =A0 =A00xF2
+>> +#define MMC_PU =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x1=
+ << 3)
+>> +#define MMC_PD =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x1=
+ << 2)
+>> +
+>> +
+>>
+>> =A0#define TWL4030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 =A0 0x4030
+>> =A0#define TWL6030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 =A0 0x6030
+>> @@ -173,6 +183,27 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg, =
+unsigned num_bytes);
+>> =A0int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
+>> =A0int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
+>>
+>> +/* Card detect Configuration for MMC1 Controller on OMAP4 */
+>> +#ifdef CONFIG_TWL4030_CORE
+>> +int twl6030_mmc_card_detect_config(void);
+>> +#else
+>> +static inline int twl6030_mmc_card_detect_config(void)
+>> +{
+>> + =A0 =A0 =A0 pr_debug("twl6030_mmc_card_detect_config not supported=
+\n");
+>> + =A0 =A0 =A0 return 0;
+>> +}
+>> +#endif
+>> +
+>> +/* MMC1 Controller on OMAP4 uses Phoenix irq for Card detect */
+>> +#ifdef CONFIG_TWL4030_CORE
+>> +int twl6030_mmc_card_detect(struct device *dev, int slot);
+>> +#else
+>> +static inline int twl6030_mmc_card_detect(struct device *dev, int s=
+lot)
+>> +{
+>> + =A0 =A0 =A0 pr_debug("Call back twl6030_mmc_card_detect not suppor=
+ted\n");
+>> + =A0 =A0 =A0 return -EIO;
+>> +}
+>> +#endif
+>> =A0/*---------------------------------------------------------------=
+-------*/
+>>
+>> =A0/*
+>> --
+>> 1.7.0.4
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>>
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index d545f79..1d304a2 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -316,12 +316,14 @@ out:
->   	return err ? 0 : 1;
->   }
->
-> +#define BUSY_TIMEOUT_MS (16 * 1024)
->   static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
->   {
->   	struct mmc_blk_data *md = mq->data;
->   	struct mmc_card *card = md->queue.card;
->   	struct mmc_blk_request brq;
->   	int ret = 1, disable_multi = 0;
-> +	unsigned long timeout = 0;
->
->   	mmc_claim_host(card->host);
->
-> @@ -453,7 +455,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> *mq, struct request *req)
->   			       brq.stop.resp[0], status);
->   		}
->
-> -		if (!mmc_host_is_spi(card->host)&&  rq_data_dir(req) != READ) {
-> +		if (!mmc_host_is_spi(card->host)&&  rq_data_dir(req) != READ&&
-> +		    !brq.cmd.error&&  !brq.data.error&&  !brq.stop.error) {
-> +			timeout = jiffies + msecs_to_jiffies(BUSY_TIMEOUT_MS);
->   			do {
->   				int err;
->
-> @@ -466,13 +470,22 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> *mq, struct request *req)
->   					       req->rq_disk->disk_name, err);
->   					goto cmd_err;
->   				}
-> +				if (cmd.resp[0]&  R1_ERROR_MASK) {
-> +					printk(KERN_ERR "%s: card err %#x\n",
-> +						req->rq_disk->disk_name,
-> +						cmd.resp[0]);
-> +					goto cmd_err;
-> +				}
->   				/*
->   				 * Some cards mishandle the status bits,
->   				 * so make sure to check both the busy
->   				 * indication and the card state.
->   				 */
-> -			} while (!(cmd.resp[0]&  R1_READY_FOR_DATA) ||
-> -				(R1_CURRENT_STATE(cmd.resp[0]) == 7));
-> +				if ((cmd.resp[0]&  R1_READY_FOR_DATA)&&
-> +				    (R1_CURRENT_STATE(cmd.resp[0]) != 7))
-> +					break;
-> +			} while (time_before(jiffies, timeout));
-> +			/* Ignore timeout out */
->
->   #if 0
->   			if (cmd.resp[0]&  ~0x00000900)
-> @@ -510,11 +523,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> *mq, struct request *req)
->
->   	return 1;
->
-> - cmd_err:
-> - 	/*
-> - 	 * If this is an SD card and we're writing, we can first
-> - 	 * mark the known good sectors as ok.
-> - 	 *
-> +cmd_err:
-> +	/*
-> +	 * If this is an SD card and we're writing, we can first
-> +	 * mark the known good sectors as ok.
-> +	 *
->   	 * If the card is not SD, we can still ok written sectors
->   	 * as reported by the controller (which might be less than
->   	 * the real number of written sectors, but never more).
-> @@ -541,6 +554,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> *mq, struct request *req)
->   		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
->   	spin_unlock_irq(&md->lock);
->
-> +	card->err_count++;
-> +	if (card->err_count>= ERR_TRIGGER_REINIT) {
-> +		printk(KERN_WARNING "%s: re-init the card due to error\n",
-> +			req->rq_disk->disk_name);
-> +		mmc_detect_change(card->host, 0);
-> +	}
->   	return 0;
->   }
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 6909a54..79c4759 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -535,6 +535,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->
->   	if (!oldcard)
->   		host->card = card;
-> +	else
-> +		oldcard->err_count = 0;
->
->   	return 0;
->
-> @@ -563,17 +565,20 @@ static void mmc_remove(struct mmc_host *host)
->    */
->   static void mmc_detect(struct mmc_host *host)
->   {
-> -	int err;
-> +	int err = 0;
->
->   	BUG_ON(!host);
->   	BUG_ON(!host->card);
->
->   	mmc_claim_host(host);
->
-> +	if (host->card->err_count>= ERR_TRIGGER_REINIT)
-> +		err = mmc_init_card(host, host->ocr, host->card);
->   	/*
->   	 * Just check if our card has been removed.
->   	 */
-> -	err = mmc_send_status(host->card, NULL);
-> +	if (!err)
-> +		err = mmc_send_status(host->card, NULL);
->
->   	mmc_release_host(host);
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 0f52410..820b0d1 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -635,6 +635,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->   		mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
->   	}
->
-> +	card->err_count = 0;
->   	host->card = card;
->   	return 0;
->
-> @@ -662,17 +663,20 @@ static void mmc_sd_remove(struct mmc_host *host)
->    */
->   static void mmc_sd_detect(struct mmc_host *host)
->   {
-> -	int err;
-> +	int err = 0;
->
->   	BUG_ON(!host);
->   	BUG_ON(!host->card);
->
->   	mmc_claim_host(host);
->
-> +	if (host->card->err_count>= ERR_TRIGGER_REINIT)
-> +		err = mmc_sd_init_card(host, host->ocr, host->card);
->   	/*
->   	 * Just check if our card has been removed.
->   	 */
-> -	err = mmc_send_status(host->card, NULL);
-> +	if (!err)
-> +		err = mmc_send_status(host->card, NULL);
->
->   	mmc_release_host(host);
->
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 6b75250..178de17 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -143,6 +143,9 @@ struct mmc_card {
->   	const char		**info;		/* info strings */
->   	struct sdio_func_tuple	*tuples;	/* unknown common tuples */
->
-> +	unsigned int		err_count;
-> +#define ERR_TRIGGER_REINIT 1024
-> +
->   	struct dentry		*debugfs_root;
->   };
->
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index dd11ae5..3b979a1 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -122,6 +122,7 @@
->   #define R1_UNDERRUN		(1<<  18)	/* ex, c */
->   #define R1_OVERRUN		(1<<  17)	/* ex, c */
->   #define R1_CID_CSD_OVERWRITE	(1<<  16)	/* erx, c, CID/CSD overwrite */
-> +#define R1_ERROR_MASK		0xffff0000
->   #define R1_WP_ERASE_SKIP	(1<<  15)	/* sx, c */
->   #define R1_CARD_ECC_DISABLED	(1<<  14)	/* sx, a */
->   #define R1_ERASE_RESET		(1<<  13)	/* sr, c */
-
