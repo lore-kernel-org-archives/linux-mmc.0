@@ -1,216 +1,248 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH] sdhci-s3c: support non-standard clock setting for c210
-Date: Tue, 28 Sep 2010 14:31:37 +0900
-Message-ID: <AANLkTi=McbCvo3cLNHk=upKWO4RM+4fM=_qX1b3Ya12c@mail.gmail.com>
-References: <4C7CDA39.1020907@samsung.com>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: [PATCH] MMC: Refine block layer waiting for card state
+Date: Tue, 28 Sep 2010 09:51:09 +0300
+Message-ID: <4CA1905D.5010701@nokia.com>
+References: <AANLkTi=E9imw9GQFU2_eMMPULKuWXMWeXdzCgjUFycD0@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:41694 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755555Ab0I1Fbj convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 01:31:39 -0400
-Received: by wyb28 with SMTP id 28so4620223wyb.19
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2010 22:31:38 -0700 (PDT)
-In-Reply-To: <4C7CDA39.1020907@samsung.com>
+Received: from smtp.nokia.com ([192.100.122.233]:55183 "EHLO
+	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754734Ab0I1GvW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 02:51:22 -0400
+In-Reply-To: <AANLkTi=E9imw9GQFU2_eMMPULKuWXMWeXdzCgjUFycD0@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, matt@console-pimps.org, Marek Szyprowski <m.szyprowski@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, Ben Dooks <ben-linux@fluff.org>
+To: Ethan Du <ethan.too@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-To Ben,
+On 27/09/10 06:32, Ethan Du wrote:
+>
+>      The while loop when handling rw request may become deadloop in
+> case of bad card
+>      I've seen mmcqd gets blocked forever after a single error message:
+>
+> mmcblk0: error -110 sending read/write command, response 0x900, card
+> status 0x80e00
+>
+>      Also there was case of card reports status without error
+>
+> mmcblk0: error -110 sending read/write command, response 0x900, card
+> status 0xe00
+>
+>      After this error, the card can stay in prg state, and never comes back,
+>      and may not report any error further. So a break out condition
+>      should be set in mmc block layer:
+> * should not enter the waiting loop in case of error
 
-Maybe you missing this patch. It's the jaehoon's approach.
+How do you know there are not any errors where you do need to wait?
 
-Thank you,
-Kyungmin Park
+> * should break out from the waiting loop, if card response with error
+> * should break out from the waiting loop when timeout
+>
+>      These will not help with the card, one more thing to do:
+> * re-init the card in case of too many errors
 
-2010/8/31 Jaehoon Chung <jh80.chung@samsung.com>:
-> This is sdhci-s3c patch for c210.
-> c210 didn't use divider of host controller.
+Using mmc_detect_change() will give you a new block device.
+That is probably a bad idea for a non-removable card.  Also
+if the reinitialization is going to help, then why wait for
+lots of errors before doing it.
+
 >
-> Host Controller need other clock setting methods.
->
-> So I add the callback functions for s5pc210.
-> also I set 400KHz for initial clock.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> =A0Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->
+> Signed-off-by: Ethan Du<ethan.too@gmail.com>
 > ---
-> =A0arch/arm/plat-samsung/include/plat/sdhci.h | =A0 19 ++++++++
-> =A0drivers/mmc/host/sdhci-s3c.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0 68 =
-++++++++++++++++++++++++++++
-> =A02 files changed, 87 insertions(+), 0 deletions(-)
+>   drivers/mmc/card/block.c |   35 +++++++++++++++++++++++++++--------
+>   drivers/mmc/core/mmc.c   |    9 +++++++--
+>   drivers/mmc/core/sd.c    |    8 ++++++--
+>   include/linux/mmc/card.h |    3 +++
+>   include/linux/mmc/mmc.h  |    1 +
+>   5 files changed, 44 insertions(+), 12 deletions(-)
 >
-> diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/pl=
-at-samsung/include/plat/sdhci.h
-> index 30844c2..7c75ee3 100644
-> --- a/arch/arm/plat-samsung/include/plat/sdhci.h
-> +++ b/arch/arm/plat-samsung/include/plat/sdhci.h
-> @@ -15,6 +15,8 @@
-> =A0#ifndef __PLAT_S3C_SDHCI_H
-> =A0#define __PLAT_S3C_SDHCI_H __FILE__
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index d545f79..1d304a2 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -316,12 +316,14 @@ out:
+>   	return err ? 0 : 1;
+>   }
 >
-> +#include <plat/devs.h>
-> +
-> =A0struct platform_device;
-> =A0struct mmc_host;
-> =A0struct mmc_card;
-> @@ -288,4 +290,21 @@ static inline void s5pv210_default_sdhci3(void) =
-{ }
+> +#define BUSY_TIMEOUT_MS (16 * 1024)
+>   static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+>   {
+>   	struct mmc_blk_data *md = mq->data;
+>   	struct mmc_card *card = md->queue.card;
+>   	struct mmc_blk_request brq;
+>   	int ret = 1, disable_multi = 0;
+> +	unsigned long timeout = 0;
 >
-> =A0#endif /* CONFIG_S5PV210_SETUP_SDHCI */
+>   	mmc_claim_host(card->host);
 >
-> +/* re-define device name depending on support. */
-> +static inline void s3c_hsmmc_setname(char *name)
-> +{
-> +#ifdef CONFIG_S3C_DEV_HSMMC
-> + =A0 =A0 =A0 s3c_device_hsmmc0.name =3D name;
-> +#endif
-> +#ifdef CONFIG_S3C_DEV_HSMMC1
-> + =A0 =A0 =A0 s3c_device_hsmmc1.name =3D name;
-> +#endif
-> +#ifdef CONFIG_S3C_DEV_HSMMC2
-> + =A0 =A0 =A0 s3c_device_hsmmc2.name =3D name;
-> +#endif
-> +#ifdef CONFIG_S3C_DEV_HSMMC3
-> + =A0 =A0 =A0 s3c_device_hsmmc3.name =3D name;
-> +#endif
-> +}
-> +
-> =A0#endif /* __PLAT_S3C_SDHCI_H */
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3=
-c.c
-> index 71ad416..3927793 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -52,6 +52,11 @@ struct sdhci_s3c {
-> =A0 =A0 =A0 =A0struct clk =A0 =A0 =A0 =A0 =A0 =A0 =A0*clk_bus[MAX_BUS=
-_CLK];
-> =A0};
+> @@ -453,7 +455,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> *mq, struct request *req)
+>   			       brq.stop.resp[0], status);
+>   		}
 >
-> +enum soc_type {
-> + =A0 =A0 =A0 TYPE_SAMSUNG, =A0 /* S5PC1XX, S3C... */
-> + =A0 =A0 =A0 TYPE_S5PC210, =A0 /* S5PC210 */
-> +};
-> +
-> =A0static inline struct sdhci_s3c *to_s3c(struct sdhci_host *host)
-> =A0{
-> =A0 =A0 =A0 =A0return sdhci_priv(host);
-> @@ -232,6 +237,52 @@ static unsigned int sdhci_s3c_get_min_clock(stru=
-ct sdhci_host *host)
-> =A0 =A0 =A0 =A0return min;
-> =A0}
+> -		if (!mmc_host_is_spi(card->host)&&  rq_data_dir(req) != READ) {
+> +		if (!mmc_host_is_spi(card->host)&&  rq_data_dir(req) != READ&&
+> +		    !brq.cmd.error&&  !brq.data.error&&  !brq.stop.error) {
+> +			timeout = jiffies + msecs_to_jiffies(BUSY_TIMEOUT_MS);
+>   			do {
+>   				int err;
 >
-> +/**
-> +* sdhci_s3c_get_max_clk - callback to get maximum clock frequency.
-> +*/
-> +static unsigned int sdhci_s5pc210_get_max_clock(struct sdhci_host *h=
-ost)
-> +{
-> + =A0 =A0 =A0 struct sdhci_s3c *ourhost =3D to_s3c(host);
-> + =A0 =A0 =A0 unsigned int rate;
-> + =A0 =A0 =A0 int ptr =3D ourhost->cur_clk;
-> +
-> + =A0 =A0 =A0 rate =3D clk_round_rate(ourhost->clk_bus[ptr], UINT_MAX=
-);
-> +
-> + =A0 =A0 =A0 return rate;
-> +}
-> +
-> +/**
-> + * sdhci_s3c_get_min_clock - callback to get minimal supported clock=
- value
-> +*/
-> +static unsigned int sdhci_s5pc210_get_min_clock(struct sdhci_host *h=
-ost)
-> +{
-> + =A0 =A0 =A0 struct sdhci_s3c *ourhost =3D to_s3c(host);
-> + =A0 =A0 =A0 unsigned int rate;
-> + =A0 =A0 =A0 int ptr =3D ourhost->cur_clk;
-> +
-> + =A0 =A0 =A0 rate =3D clk_round_rate(ourhost->clk_bus[ptr], 400000);
-> +
-> + =A0 =A0 =A0 return rate;
-> +}
-> +
-> +/**
-> + * sdhci_s5pc210_set_clock - callback on clock change
-> +*/
-> +static void sdhci_s5pc210_set_clock(struct sdhci_host *host,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int clock)
-> +{
-> + =A0 =A0 =A0 struct sdhci_s3c *ourhost =3D to_s3c(host);
-> +
-> + =A0 =A0 =A0 if (clock =3D=3D 0)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> +
-> + =A0 =A0 =A0 sdhci_s3c_set_clock(host, clock);
-> +
-> + =A0 =A0 =A0 clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock)=
-;
-> +
-> + =A0 =A0 =A0 host->clock =3D clock;
-> +}
-> +
-> =A0static struct sdhci_ops sdhci_s3c_ops =3D {
-> =A0 =A0 =A0 =A0.get_max_clock =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_get_ma=
-x_clk,
-> =A0 =A0 =A0 =A0.set_clock =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_se=
-t_clock,
-> @@ -395,6 +446,12 @@ static int __devinit sdhci_s3c_probe(struct plat=
-form_device *pdev)
-> =A0 =A0 =A0 =A0host->quirks =3D 0;
-> =A0 =A0 =A0 =A0host->irq =3D irq;
+> @@ -466,13 +470,22 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> *mq, struct request *req)
+>   					       req->rq_disk->disk_name, err);
+>   					goto cmd_err;
+>   				}
+> +				if (cmd.resp[0]&  R1_ERROR_MASK) {
+> +					printk(KERN_ERR "%s: card err %#x\n",
+> +						req->rq_disk->disk_name,
+> +						cmd.resp[0]);
+> +					goto cmd_err;
+> +				}
+>   				/*
+>   				 * Some cards mishandle the status bits,
+>   				 * so make sure to check both the busy
+>   				 * indication and the card state.
+>   				 */
+> -			} while (!(cmd.resp[0]&  R1_READY_FOR_DATA) ||
+> -				(R1_CURRENT_STATE(cmd.resp[0]) == 7));
+> +				if ((cmd.resp[0]&  R1_READY_FOR_DATA)&&
+> +				    (R1_CURRENT_STATE(cmd.resp[0]) != 7))
+> +					break;
+> +			} while (time_before(jiffies, timeout));
+> +			/* Ignore timeout out */
 >
-> + =A0 =A0 =A0 if (pdev->id_entry->driver_data =3D=3D TYPE_S5PC210) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_s3c_ops.set_clock =3D sdhci_s5pc2=
-10_set_clock;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_s3c_ops.get_min_clock =3D sdhci_s=
-5pc210_get_min_clock;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_s3c_ops.get_max_clock =3D sdhci_s=
-5pc210_get_max_clock;
-> + =A0 =A0 =A0 }
+>   #if 0
+>   			if (cmd.resp[0]&  ~0x00000900)
+> @@ -510,11 +523,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> *mq, struct request *req)
+>
+>   	return 1;
+>
+> - cmd_err:
+> - 	/*
+> - 	 * If this is an SD card and we're writing, we can first
+> - 	 * mark the known good sectors as ok.
+> - 	 *
+> +cmd_err:
+> +	/*
+> +	 * If this is an SD card and we're writing, we can first
+> +	 * mark the known good sectors as ok.
+> +	 *
+>   	 * If the card is not SD, we can still ok written sectors
+>   	 * as reported by the controller (which might be less than
+>   	 * the real number of written sectors, but never more).
+> @@ -541,6 +554,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> *mq, struct request *req)
+>   		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
+>   	spin_unlock_irq(&md->lock);
+>
+> +	card->err_count++;
+> +	if (card->err_count>= ERR_TRIGGER_REINIT) {
+> +		printk(KERN_WARNING "%s: re-init the card due to error\n",
+> +			req->rq_disk->disk_name);
+> +		mmc_detect_change(card->host, 0);
+> +	}
+>   	return 0;
+>   }
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 6909a54..79c4759 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -535,6 +535,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>
+>   	if (!oldcard)
+>   		host->card = card;
+> +	else
+> +		oldcard->err_count = 0;
+>
+>   	return 0;
+>
+> @@ -563,17 +565,20 @@ static void mmc_remove(struct mmc_host *host)
+>    */
+>   static void mmc_detect(struct mmc_host *host)
+>   {
+> -	int err;
+> +	int err = 0;
+>
+>   	BUG_ON(!host);
+>   	BUG_ON(!host->card);
+>
+>   	mmc_claim_host(host);
+>
+> +	if (host->card->err_count>= ERR_TRIGGER_REINIT)
+> +		err = mmc_init_card(host, host->ocr, host->card);
+>   	/*
+>   	 * Just check if our card has been removed.
+>   	 */
+> -	err = mmc_send_status(host->card, NULL);
+> +	if (!err)
+> +		err = mmc_send_status(host->card, NULL);
+>
+>   	mmc_release_host(host);
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 0f52410..820b0d1 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -635,6 +635,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>   		mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+>   	}
+>
+> +	card->err_count = 0;
+>   	host->card = card;
+>   	return 0;
+>
+> @@ -662,17 +663,20 @@ static void mmc_sd_remove(struct mmc_host *host)
+>    */
+>   static void mmc_sd_detect(struct mmc_host *host)
+>   {
+> -	int err;
+> +	int err = 0;
+>
+>   	BUG_ON(!host);
+>   	BUG_ON(!host->card);
+>
+>   	mmc_claim_host(host);
+>
+> +	if (host->card->err_count>= ERR_TRIGGER_REINIT)
+> +		err = mmc_sd_init_card(host, host->ocr, host->card);
+>   	/*
+>   	 * Just check if our card has been removed.
+>   	 */
+> -	err = mmc_send_status(host->card, NULL);
+> +	if (!err)
+> +		err = mmc_send_status(host->card, NULL);
+>
+>   	mmc_release_host(host);
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 6b75250..178de17 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -143,6 +143,9 @@ struct mmc_card {
+>   	const char		**info;		/* info strings */
+>   	struct sdio_func_tuple	*tuples;	/* unknown common tuples */
+>
+> +	unsigned int		err_count;
+> +#define ERR_TRIGGER_REINIT 1024
 > +
-> =A0 =A0 =A0 =A0/* Setup quirks for the controller */
-> =A0 =A0 =A0 =A0host->quirks |=3D SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
-> =A0 =A0 =A0 =A0host->quirks |=3D SDHCI_QUIRK_NO_HISPD_BIT;
-> @@ -520,6 +577,16 @@ static int sdhci_s3c_resume(struct platform_devi=
-ce *dev)
-> =A0#define sdhci_s3c_resume NULL
-> =A0#endif
+>   	struct dentry		*debugfs_root;
+>   };
 >
-> +static struct platform_device_id sdhci_driver_ids[] =3D {
-> + =A0 =A0 =A0 {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .name =A0 =A0 =A0 =A0 =A0 =3D "s3c-sdhc=
-i",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .driver_data =A0 =A0=3D TYPE_SAMSUNG,
-> + =A0 =A0 =A0 }, {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .name =A0 =A0 =A0 =A0 =A0 =3D "s5pc210-=
-sdhci",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .driver_data =A0 =A0=3D TYPE_S5PC210,
-> + =A0 =A0 =A0 }, { },
-> +};
-> +
-> =A0static struct platform_driver sdhci_s3c_driver =3D {
-> =A0 =A0 =A0 =A0.probe =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_probe,
-> =A0 =A0 =A0 =A0.remove =A0 =A0 =A0 =A0 =3D __devexit_p(sdhci_s3c_remo=
-ve),
-> @@ -529,6 +596,7 @@ static struct platform_driver sdhci_s3c_driver =3D=
- {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.owner =A0=3D THIS_MODULE,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.name =A0 =3D "s3c-sdhci",
-> =A0 =A0 =A0 =A0},
-> + =A0 =A0 =A0 .id_table =A0 =A0 =A0 =3D sdhci_driver_ids,
-> =A0};
->
-> =A0static int __init sdhci_s3c_init(void)
-> -- 1.6.0.4
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index dd11ae5..3b979a1 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -122,6 +122,7 @@
+>   #define R1_UNDERRUN		(1<<  18)	/* ex, c */
+>   #define R1_OVERRUN		(1<<  17)	/* ex, c */
+>   #define R1_CID_CSD_OVERWRITE	(1<<  16)	/* erx, c, CID/CSD overwrite */
+> +#define R1_ERROR_MASK		0xffff0000
+>   #define R1_WP_ERASE_SKIP	(1<<  15)	/* sx, c */
+>   #define R1_CARD_ECC_DISABLED	(1<<  14)	/* sx, a */
+>   #define R1_ERASE_RESET		(1<<  13)	/* sr, c */
+
