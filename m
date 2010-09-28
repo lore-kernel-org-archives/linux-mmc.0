@@ -1,12 +1,12 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: [PATCH 4/6] mmc: sdhci_pltfm: pass platform_data on custom init-call
-Date: Tue, 28 Sep 2010 14:36:44 +0200
-Message-ID: <1285677406-3359-5-git-send-email-w.sang@pengutronix.de>
+Subject: [PATCH 3/6] mmc: sdhci: introduce private get_ro
+Date: Tue, 28 Sep 2010 14:36:43 +0200
+Message-ID: <1285677406-3359-4-git-send-email-w.sang@pengutronix.de>
 References: <1285677406-3359-1-git-send-email-w.sang@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:54513 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:54512 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753800Ab0I1MhP (ORCPT
+	with ESMTP id S1753489Ab0I1MhP (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 08:37:15 -0400
 In-Reply-To: <1285677406-3359-1-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -14,80 +14,54 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Anton Vorontsov <cbouatmailru@gmail.com>, zhangfei gao <zhangfei.gao@gmail.com>, Zhu Richard-R65037 <r65037@freescale.com>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>
 
-The custom init call may need more data to perform its job, so we pass
-it a pointer to the platform_data, too. Now, for drivers extending
-sdhci-pltfm (like sdhci-cns3xxx), a fixed platform_data is used
-according to the platform device id. Because that one does not contain
-board specific information, we simply name the board specific
-information information priv_pdata and pass it to the init routine as
-well. (Note: the old behaviour was that you could override the platform
-id specific data with your own. However, one can still do this by using
-the "sdhci" id instead of "sdhci-<something>".)
+Some controllers handle their write-protection differently. Introduce a
+callback to be able to handle it, ensuring the same locking takes place
+for it.
 
 Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
 ---
+ drivers/mmc/host/sdhci.c |   11 +++++++----
+ drivers/mmc/host/sdhci.h |    1 +
+ 2 files changed, 8 insertions(+), 4 deletions(-)
 
-Changes since previous version:
-
-Rebased and dropped imx-specific stuff as mentioned by zhangfei gao.
-
-priv_pdata might not be needed as Giuseppe pointed out. Will update with
-the next revision of this series, if needed.
-
- drivers/mmc/host/sdhci-pltfm.c  |   11 ++++++++---
- include/linux/mmc/sdhci-pltfm.h |    3 ++-
- 2 files changed, 10 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index ff0271c..4076222 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -52,15 +52,20 @@ static struct sdhci_ops sdhci_pltfm_ops = {
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 96c7f60..129958e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1229,14 +1229,17 @@ static int sdhci_get_ro(struct mmc_host *mmc)
  
- static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- {
--	struct sdhci_pltfm_data *pdata = pdev->dev.platform_data;
- 	const struct platform_device_id *platid = platform_get_device_id(pdev);
-+	struct sdhci_pltfm_data *pdata;
-+	void *priv_pdata = NULL;
- 	struct sdhci_host *host;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct resource *iomem;
- 	int ret;
+ 	if (host->flags & SDHCI_DEVICE_DEAD)
+ 		present = 0;
++	else if (host->ops->get_ro)
++		present = host->ops->get_ro(host);
+ 	else
+-		present = sdhci_readl(host, SDHCI_PRESENT_STATE);
++		present = !(sdhci_readl(host, SDHCI_PRESENT_STATE)
++				& SDHCI_WRITE_PROTECT);
  
--	if (!pdata && platid && platid->driver_data)
-+	if (platid && platid->driver_data) {
- 		pdata = (void *)platid->driver_data;
-+		priv_pdata = pdev->dev.platform_data;
-+	} else {
-+		pdata = pdev->dev.platform_data;
-+	}
+ 	spin_unlock_irqrestore(&host->lock, flags);
  
- 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!iomem) {
-@@ -108,7 +113,7 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- 	}
+-	if (host->quirks & SDHCI_QUIRK_INVERTED_WRITE_PROTECT)
+-		return !!(present & SDHCI_WRITE_PROTECT);
+-	return !(present & SDHCI_WRITE_PROTECT);
++	/* This quirk needs to be replaced by a callback-function later */
++	return host->quirks & SDHCI_QUIRK_INVERTED_WRITE_PROTECT ?
++		!present : present;
+ }
  
- 	if (pdata && pdata->init) {
--		ret = pdata->init(host);
-+		ret = pdata->init(host, pdata, priv_pdata);
- 		if (ret)
- 			goto err_plat_init;
- 	}
-diff --git a/include/linux/mmc/sdhci-pltfm.h b/include/linux/mmc/sdhci-pltfm.h
-index 0239bd7..cafb96b 100644
---- a/include/linux/mmc/sdhci-pltfm.h
-+++ b/include/linux/mmc/sdhci-pltfm.h
-@@ -28,7 +28,8 @@ struct sdhci_host;
- struct sdhci_pltfm_data {
- 	struct sdhci_ops *ops;
- 	unsigned int quirks;
--	int (*init)(struct sdhci_host *host);
-+	int (*init)(struct sdhci_host *host, struct sdhci_pltfm_data *pdata,
-+			void *priv_pdata);
- 	void (*exit)(struct sdhci_host *host);
+ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 112543a..66f83f4 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -336,6 +336,7 @@ struct sdhci_ops {
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
++	unsigned int    (*get_ro)(struct sdhci_host *host);
  };
  
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
 1.7.1
 
