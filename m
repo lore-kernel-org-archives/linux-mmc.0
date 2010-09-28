@@ -1,105 +1,106 @@
-From: Jeongbae Seo <jeongbae.seo@samsung.com>
-Subject: RE: [PATCH v2 2/2] sdhci-s3c: Add support no internal clock divider in
-	host controller
-Date: Tue, 28 Sep 2010 13:02:34 +0900
-Message-ID: <006e01cb5ec1$fe00b770$fa022650$%seo@samsung.com>
-References: <1284716701-5140-1-git-send-email-kgene.kim@samsung.com>
- <1284716701-5140-3-git-send-email-kgene.kim@samsung.com>
- <4C97FB34.1000802@simtec.co.uk>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [patch] sdhci: correct f_min in sd 3.0
+Date: Mon, 27 Sep 2010 21:05:26 -0700
+Message-ID: <8C0FC31B-681F-4541-AD64-43578FC926F6@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:12626 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751036Ab0I1ECU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 00:02:20 -0400
-In-reply-to: <4C97FB34.1000802@simtec.co.uk>
-Content-language: ko
+Received: from na3sys009aog106.obsmtp.com ([74.125.149.77]:39765 "HELO
+	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1750891Ab0I1EPQ convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 28 Sep 2010 00:15:16 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ben Dooks' <ben@simtec.co.uk>, 'Kukjin Kim' <kgene.kim@samsung.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, 'Hyuk Lee' <hyuk1.lee@samsung.com>, ben-linux@fluff.org, akpm@linux-foundation.org, cjb@laptop.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Zhangfei Gao <zgao6@marvell.com>
 
-Ben Dooks worte:
-> On 17/09/10 10:45, Kukjin Kim wrote:
-> > From: Hyuk Lee <hyuk1.lee@samsung.com>
-> >
-> > This patch adds to support no internal clock divider in SDHCI.
-> > The external clock divider can be used to make a proper clock
-> > because SDHCI doesn't support internal clock divider by itself.
-> >
-> > Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
-> > Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
-> > Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
-> > ---
-> >  drivers/mmc/host/sdhci-s3c.c |   60
-> ++++++++++++++++++++++++++++++++++++++++++
-> >  1 files changed, 60 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> > index e6e0438..5ad5ed7 100644
-> > --- a/drivers/mmc/host/sdhci-s3c.c
-> > +++ b/drivers/mmc/host/sdhci-s3c.c
-> > @@ -96,6 +96,13 @@ static unsigned int sdhci_s3c_get_max_clk(struct
-> sdhci_host *host)
-> >  	unsigned int rate, max;
-> >  	int clk;
-> >
-> > +	/*
-> > +	 * There is only one clock source(sclk) if there is no clock
-> divider
-> > +	 * in the host controller
-> > +	 */
-> > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
-> > +		return clk_round_rate(ourhost->clk_bus[2], UINT_MAX);
+
+The code snippet
+> +			for (div = 2; div < SDHCI_MAX_DIV_SPEC_300; div += 2) {
+>  				if ((host->max_clk / div) <= clock)
+>  					break;
+
+is not correct.  In sdio 3.0 the value is not a power of 2 for the divider but the value to be divided down-- all the bits count
+2) 10-bit Divided Clock
+Host Controller Version 3.00 supports this mandatory mode instead of the
+8-bit Divided Clock Mode.  The length of the divider is extended to 10 bits and all
+divider values shall be supported.
+3FFh    1/2046  Divided Clock
+
+Philip
+
+Hi Zhangfei,
+
+On Sat, Sep 25, 2010 at 12:23:33AM -0400, zhangfei gao wrote:
+> From: Zhangfei Gao <zhangfei.gao@marvell.com>
+> Date: Mon, 20 Sep 2010 15:15:18 -0400
+> Subject: [PATCH] sdhci: correct f_min in sd 3.0
 > 
-> interesting, <linux/clk.h> doesn't have a second parameter to
-> clk_round_rate().
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    8 +++++---
+>  drivers/mmc/host/sdhci.h |    3 +++
+>  2 files changed, 8 insertions(+), 3 deletions(-)
 > 
-Hi Ben,
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 5928b0a..829e78a 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1007,14 +1007,14 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  		if (host->max_clk <= clock)
+>  			div = 1;
+>  		else {
+> -			for (div = 2; div < 2046; div += 2) {
+> +			for (div = 2; div < SDHCI_MAX_DIV_SPEC_300; div += 2) {
+>  				if ((host->max_clk / div) <= clock)
+>  					break;
+>  			}
+>  		}
+>  	} else {
+>  		/* Version 2.00 divisors must be a power of 2. */
+> -		for (div = 1; div < 256; div *= 2) {
+> +		for (div = 1; div < SDHCI_MAX_DIV_SPEC_200; div *= 2) {
+>  			if ((host->max_clk / div) <= clock)
+>  				break;
+>  		}
+> @@ -1836,8 +1836,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	mmc->ops = &sdhci_ops;
+>  	if (host->ops->get_min_clock)
+>  		mmc->f_min = host->ops->get_min_clock(host);
+> +	else if (host->version >= SDHCI_SPEC_300)
+> +		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
+>  	else
+> -		mmc->f_min = host->max_clk / 256;
+> +		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
+>  	mmc->f_max = host->max_clk;
+>  	mmc->caps |= MMC_CAP_SDIO_IRQ;
+>  
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index ae28a31..d35fb3d 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -185,6 +185,9 @@
+>  #define   SDHCI_SPEC_200	1
+>  #define   SDHCI_SPEC_300	2
+>  
+> +#define	SDHCI_MAX_DIV_SPEC_200	256
+> +#define	SDHCI_MAX_DIV_SPEC_300	2046
+> +
+>  struct sdhci_ops;
+>  
+>  struct sdhci_host {
 
-Thanks for your comments.
+Thanks very much, I've applied this to mmc-next now.
 
-When I see clk_round_rate in <linux/clk.h>, which function is defined 
-as "long clk_round_rate(struct clk *clk, unsigned long rate)" that has two
-parameters.
-Please let me know if you have another meaning for this.
-
-> 
-> >  	/* note, a reset will reset the clock source */
-> >
-> >  	sdhci_s3c_check_sclk(host);
-> > @@ -130,6 +137,15 @@ static unsigned int sdhci_s3c_consider_clock(struct
-> sdhci_s3c *ourhost,
-> >  	if (!clksrc)
-> >  		return UINT_MAX;
-> >
-> > +	/*
-> > +	 * There is only one clock source(sclk) if there is no clock
-> divider
-> > +	 * in the host controller
-> > +	 */
-> > +	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
-> > +		rate = clk_round_rate(clksrc, wanted);
-> > +		return wanted - rate;
-> > +	}
-> 
-> Why does this need a quirk, instead of just having one clock available
-> in the list of usable clocks?
-> 
-
-The available clock is made by dividing a clock source with a certain
-divider value.
-Most of the host controller has this capability that can divide a clock what
-we want.
-However, the host controller of both S5PC210 and S5PV310 don't have this so
-we have to
-Add additional routine to make a proper clock with outland clock divider
-instead of
-Internal clock divider in host controller.
-
-Best Regards,
-Jeongbae Seo
-
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
