@@ -1,29 +1,35 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v4 2/4] omap4 hsmmc: Fix the init if CONFIG_MMC_OMAP_HS
- is not set
-Date: Tue, 28 Sep 2010 14:41:05 -0700
-Message-ID: <20100928214105.GQ3117@atomide.com>
-References: <9493.10.24.255.18.1285348410.squirrel@dbdmail.itg.ti.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [patch 2/2] mmc: add support of sdhci-pxa driver
+Date: Wed, 29 Sep 2010 00:36:30 +0100
+Message-ID: <20100928233630.GA31525@void.printf.net>
+References: <AANLkTi=XBbW=R4HQYp5fLVE5eUXHNtzGh1Qf+XyBUSCH@mail.gmail.com> <AANLkTim4aJok6=HcopkObi3WrUatiZgK-KZTfhoHwgF7@mail.gmail.com> <AANLkTimk2_KcmSAV-UZ3JY1JFD657SnfyPFgP_zE5bbP@mail.gmail.com> <20100926155905.GB19772@void.printf.net> <AANLkTimwsk5SXQRt45vUhzhHabrG4wvw5JcBZAZ1Aq4j@mail.gmail.com> <20100926174837.GA21788@void.printf.net> <AANLkTino3YoTfRXii5kGdyX7jtkAtvd1jbsGtWanMn3F@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:62118 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753379Ab0I1VlN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 17:41:13 -0400
+Received: from void.printf.net ([89.145.121.20]:36021 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750890Ab0I1Xgc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 28 Sep 2010 19:36:32 -0400
 Content-Disposition: inline
-In-Reply-To: <9493.10.24.255.18.1285348410.squirrel@dbdmail.itg.ti.com>
+In-Reply-To: <AANLkTino3YoTfRXii5kGdyX7jtkAtvd1jbsGtWanMn3F@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: kishore kadiyala <kishore.kadiyala@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, akpm@linux-foundation.org, b-cousson@ti.com, madhu.cr@ti.com, adrian.hunter@nokia.com
+To: Saeed Bishara <saeed@marvell.com>
+Cc: Haojian Zhuang <haojian.zhuang@gmail.com>, Eric Miao <eric.y.miao@gmail.com>, zhangfei gao <zhangfei.gao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>
 
-* kishore kadiyala <kishore.kadiyala@ti.com> [100924 10:05]:
-> From: Benoit Cousson <b-cousson@ti.com>
-> 
-> Avoid possible crash if CONFIG_MMC_OMAP_HS is not set
+On Mon, Sep 27, 2010 at 09:36:01AM +0800, Haojian Zhuang wrote:
+> > Okay. =A0What should Saeed's driver be called?
+>
+> sdhci-dove / sdhci-mv or any other is acceptable. What's your opinion=
+, saeed?
 
-Will queue this and patches 3/4 and 4/4 of this series
-for the upcoming merge window.
+sdhci-dove sounds good to me.  Saeed, if you agree, please could you
+resend the patch?  (With an "ARCH_DOVE || ARCH_MMP" dependency and a
+list of supported SoCs in the Kconfig help text.)
 
-Tony
+Thanks,
+
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
