@@ -1,74 +1,53 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 1/6] mmc: sdhci-pltfm: Add structure for host-specific
- data
-Date: Tue, 28 Sep 2010 16:49:58 +0200
-Message-ID: <20100928144958.GI4441@pengutronix.de>
+Subject: Re: [PATCH 6/6] mmc: sdhci-pltfm: add pltfm-driver for imx35/51
+Date: Tue, 28 Sep 2010 16:51:02 +0200
+Message-ID: <20100928145102.GJ4441@pengutronix.de>
 References: <1285677406-3359-1-git-send-email-w.sang@pengutronix.de>
- <1285677406-3359-2-git-send-email-w.sang@pengutronix.de>
- <48641052-49AF-4A24-9C8C-42E59791D6A7@marvell.com>
+ <1285677406-3359-7-git-send-email-w.sang@pengutronix.de>
+ <AANLkTikHMXV+Bkg=fQEhw-2WszT3PeKwWvswrE-7h1EM@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="WHz+neNWvhIGAO8A"
+	protocol="application/pgp-signature"; boundary="Re2uCLPLNzqOLVJA"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:37366 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:37384 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756608Ab0I1Ot7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 10:49:59 -0400
+	with ESMTP id S1753780Ab0I1OvE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 10:51:04 -0400
 Content-Disposition: inline
-In-Reply-To: <48641052-49AF-4A24-9C8C-42E59791D6A7@marvell.com>
+In-Reply-To: <AANLkTikHMXV+Bkg=fQEhw-2WszT3PeKwWvswrE-7h1EM@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: linux-mmc@vger.kernel.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Zhu Richard-R65037 <r65037@freescale.com>, Philip Rakity <prakity@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Saeed Bishara <saeed@marvell.com>
 
 
---WHz+neNWvhIGAO8A
-Content-Type: text/plain; charset=us-ascii
+--Re2uCLPLNzqOLVJA
+Content-Type: text/plain; charset=iso-8859-15
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Sep 28, 2010 at 06:54:47AM -0700, Philip Rakity wrote:
+> > +static int esdhc_pltfm_init(struct sdhci_host *host,
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct sdhci_pltfm_data *pdata, void *pri=
+v_pdata)
+> > +{
+> > + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> > + =A0 =A0 =A0 struct clk *clk;
+> > +
+> > + =A0 =A0 =A0 clk =3D clk_get(NULL, "sdhc");
+>=20
+> Here only could support one device, how about several device, for
+> example sdhc.0, sdhc.1 sdhc.2, if using this method, they will get the
+> first clock.
+> Then sdhc.1 sdhc.2 can not work.
+>=20
 
-> taking this off line for a bit (if you don't mind)
-
-Actually, I do. Going back to the list.
-
-> I really like what you are doing but it does not go far enough.  The
-> controller I work on is somewhat funny and broken.  It needs to do
-> either pre or post processing for some of the calls.
-
-I never claimed that my current patchset should solve all issues. It
-deals with some issues I encountered (and then some more, because there
-were similar issues on the list), and tries to push things in the right
-direction. Most of us are just working on one specific driver, so we
-have to live with a slow, step-by-step procedure. I tried to get some
-funding for general, large scale cleanup work, but did not get any
-response, so far.
-
-> For reset for example --- I need to check if the reset is RESET_DAT
-> and handle that differently then RESET_CMD.  If RESET_ALL I need to do
-> post processing to restore the controller private registers.
-
-I know the reset-routine probably needs another hook. I think it was
-Alan who also mentioned some requirements for it. But besides this, I am
-not going to dive deeply into that topic (at least for now). It is too
-specific for me at the moment.
-
-Quite frankly, I am a bit overwhelmed by the massive request of guidance
-for pltfm-specific drivers and I cannot provide this anymore at this
-level as long as I have other work to do (which allows me to buy the
-bread). As a result, I will continue reviewing and such but it will take
-longer.
-
-Regards,
-
-   Wolfram
+Ouch, totally overlooked this one. Thanks for spotting it!
 
 --=20
 Pengutronix e.K.                           | Wolfram Sang                |
 Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
---WHz+neNWvhIGAO8A
+--Re2uCLPLNzqOLVJA
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 Content-Disposition: inline
@@ -76,9 +55,9 @@ Content-Disposition: inline
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAkyiAJYACgkQD27XaX1/VRueOQCgtrtL8bjxuOFkyi2WgsQJ4ODG
-KFcAninHr+59yXSWb/9fJUrX6druMTEi
-=a043
+iEYEARECAAYFAkyiANYACgkQD27XaX1/VRvebQCgoiGGjVWbVN+oSIZJsI4yL/LY
+kqkAnj4F8Ct+Fl70XU44lK0Xb2naE+Xi
+=l78v
 -----END PGP SIGNATURE-----
 
---WHz+neNWvhIGAO8A--
+--Re2uCLPLNzqOLVJA--
