@@ -1,98 +1,105 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [patch] mmc: fix init f_min
-Date: Tue, 28 Sep 2010 11:34:02 +0800
-Message-ID: <AANLkTimOHbSTVStnDLUJ+ka62NzmQrAAksrNR1LP_yLo@mail.gmail.com>
-References: <AANLkTi=8ScP4Lm-an7bjXhj8doUVu+nM0KnVTa3WK4p3@mail.gmail.com>
-	<4C9770E4.7000801@csr.com>
-	<AANLkTi=toSZuEUBYBeGi=sq4QNnqZ=c-Ai1L32Bnpi=V@mail.gmail.com>
-	<4CA064DD.6040705@csr.com>
+From: Jeongbae Seo <jeongbae.seo@samsung.com>
+Subject: RE: [PATCH v2 2/2] sdhci-s3c: Add support no internal clock divider in
+	host controller
+Date: Tue, 28 Sep 2010 13:02:34 +0900
+Message-ID: <006e01cb5ec1$fe00b770$fa022650$%seo@samsung.com>
+References: <1284716701-5140-1-git-send-email-kgene.kim@samsung.com>
+ <1284716701-5140-3-git-send-email-kgene.kim@samsung.com>
+ <4C97FB34.1000802@simtec.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:44118 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757987Ab0I1DeD convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Sep 2010 23:34:03 -0400
-Received: by iwn5 with SMTP id 5so5427272iwn.19
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2010 20:34:03 -0700 (PDT)
-In-Reply-To: <4CA064DD.6040705@csr.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:12626 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751036Ab0I1ECU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 00:02:20 -0400
+In-reply-to: <4C97FB34.1000802@simtec.co.uk>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Vrabel <david.vrabel@csr.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Kyungmin Park <kmpark@infradead.org>
+To: 'Ben Dooks' <ben@simtec.co.uk>, 'Kukjin Kim' <kgene.kim@samsung.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, 'Hyuk Lee' <hyuk1.lee@samsung.com>, ben-linux@fluff.org, akpm@linux-foundation.org, cjb@laptop.org
 
-On Mon, Sep 27, 2010 at 5:33 PM, David Vrabel <david.vrabel@csr.com> wr=
-ote:
-> zhangfei gao wrote:
->> On Mon, Sep 20, 2010 at 10:34 AM, David Vrabel <david.vrabel@csr.com=
-> wrote:
->>> zhangfei gao wrote:
->>>> index 5db49b1..9114c87 100644
->>>> --- a/drivers/mmc/core/core.c
->>>> +++ b/drivers/mmc/core/core.c
->>>> @@ -910,9 +910,9 @@ static void mmc_power_up(struct mmc_host *host=
-)
->>>> =A0 =A0 =A0 if (host->f_min > 400000) {
->>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: Minimum clock frequenc=
-y too high for "
->>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "ident=
-ification mode\n", mmc_hostname(host));
->>>> - =A0 =A0 =A0 =A0 =A0 =A0 host->ios.clock =3D host->f_min;
->>>> - =A0 =A0 } else
->>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ios.clock =3D 400000;
->>>> + =A0 =A0 } else
->>>> + =A0 =A0 =A0 =A0 =A0 =A0 host->ios.clock =3D host->f_min;
->>> NAK.
->>>
->>> The code is already correctly requesting 400 kHz (unless the contro=
-ller
->>> can't go that slow).
->>
->> Original code
->> if (host->f_min > 400000) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: Minimum clock freque=
-ncy too high for "
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "ide=
-ntification mode\n", mmc_hostname(host));
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ios.clock =3D host->f_min;
->> =A0 =A0 =A0 =A0 } else
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ios.clock =3D 400000;
->>
->> With this code, the init clock is would be at lease 400 kHz, and no
->> matter how bigger the host->f_min it is, is this really correct?
->
-> It's not clear what you're saying or why you think the original code =
-is
-> wrong. =A0Consider a host controller that reports a minimum frequency=
- of 1
-> Hz. =A0Obviously we wouldn't want to do the card identification at th=
-is
-> clock rate, yes?
+Ben Dooks worte:
+> On 17/09/10 10:45, Kukjin Kim wrote:
+> > From: Hyuk Lee <hyuk1.lee@samsung.com>
+> >
+> > This patch adds to support no internal clock divider in SDHCI.
+> > The external clock divider can be used to make a proper clock
+> > because SDHCI doesn't support internal clock divider by itself.
+> >
+> > Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+> > Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
+> > Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+> > ---
+> >  drivers/mmc/host/sdhci-s3c.c |   60
+> ++++++++++++++++++++++++++++++++++++++++++
+> >  1 files changed, 60 insertions(+), 0 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> > index e6e0438..5ad5ed7 100644
+> > --- a/drivers/mmc/host/sdhci-s3c.c
+> > +++ b/drivers/mmc/host/sdhci-s3c.c
+> > @@ -96,6 +96,13 @@ static unsigned int sdhci_s3c_get_max_clk(struct
+> sdhci_host *host)
+> >  	unsigned int rate, max;
+> >  	int clk;
+> >
+> > +	/*
+> > +	 * There is only one clock source(sclk) if there is no clock
+> divider
+> > +	 * in the host controller
+> > +	 */
+> > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
+> > +		return clk_round_rate(ourhost->clk_bus[2], UINT_MAX);
+> 
+> interesting, <linux/clk.h> doesn't have a second parameter to
+> clk_round_rate().
+> 
+Hi Ben,
 
-Thanks for your explanation.
+Thanks for your comments.
 
-The issue you met is f_min is too slow.
-The issue we met is f_min is too high which also cause init fail,
-But it is OK, we could prevent in other place, duringinit set
-mmc->f_min =3D host->max_clk/256 in sdc 2.0 and mmc->f_min =3D
-host->max_clk/2046 in sdc 3.0
+When I see clk_round_rate in <linux/clk.h>, which function is defined 
+as "long clk_round_rate(struct clk *clk, unsigned long rate)" that has two
+parameters.
+Please let me know if you have another meaning for this.
 
-Just curious how to get 400000, which is slowest speed for
-initializaion, is this OK for all card?
+> 
+> >  	/* note, a reset will reset the clock source */
+> >
+> >  	sdhci_s3c_check_sclk(host);
+> > @@ -130,6 +137,15 @@ static unsigned int sdhci_s3c_consider_clock(struct
+> sdhci_s3c *ourhost,
+> >  	if (!clksrc)
+> >  		return UINT_MAX;
+> >
+> > +	/*
+> > +	 * There is only one clock source(sclk) if there is no clock
+> divider
+> > +	 * in the host controller
+> > +	 */
+> > +	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
+> > +		rate = clk_round_rate(clksrc, wanted);
+> > +		return wanted - rate;
+> > +	}
+> 
+> Why does this need a quirk, instead of just having one clock available
+> in the list of usable clocks?
+> 
 
->
-> David
-> --
-> David Vrabel, Senior Software Engineer, Drivers
-> CSR, Churchill House, Cambridge Business Park, =A0Tel: +44 (0)1223 69=
-2562
-> Cowley Road, Cambridge, CB4 0WZ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 http:=
-//www.csr.com/
->
->
-> Member of the CSR plc group of companies. CSR plc registered in Engla=
-nd and Wales, registered number 4187346, registered office Churchill Ho=
-use, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United K=
-ingdom
->
+The available clock is made by dividing a clock source with a certain
+divider value.
+Most of the host controller has this capability that can divide a clock what
+we want.
+However, the host controller of both S5PC210 and S5PV310 don't have this so
+we have to
+Add additional routine to make a proper clock with outland clock divider
+instead of
+Internal clock divider in host controller.
+
+Best Regards,
+Jeongbae Seo
+
+
