@@ -1,105 +1,64 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [RFC] remove quirk for broken clock - redundant since
- ops->max_clock defined
-Date: Tue, 28 Sep 2010 00:39:47 -0700
-Message-ID: <23CB1625-7451-41BD-AD43-73C588A1593F@marvell.com>
-References: <8C0FC31B-681F-4541-AD64-43578FC926F6@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: [PATCH (mmc-next) 1/3] mmc: add suspend/resume in the sdhci-pltfm driver (V3)
+Date: Tue, 28 Sep 2010 10:41:27 +0200
+Message-ID: <1285663289-20283-1-git-send-email-peppe.cavallaro@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:48966 "HELO
-	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1754173Ab0I1HlS convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Sep 2010 03:41:18 -0400
-In-Reply-To: <8C0FC31B-681F-4541-AD64-43578FC926F6@marvell.com>
-Content-Language: en-US
+Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:32852 "EHLO
+	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757267Ab0I1Ilp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 04:41:45 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: w.sang@pengutronix.de, Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
+This patch adds the suspend and resume functions
+in the sdhci-pltfm device driver.
 
->From 2b436be109ad004e94a2b63f71f6bb8e00f9d3da Mon Sep 17 00:00:00 2001
-From: Philip Rakity <prakity@marvell.com>
-Date: Tue, 28 Sep 2010 00:34:17 -0700
-Subject: [RFC] remove quirk for broken clock - redundant since ops->max_clock defined
-
-Are we okay moving in this direction?  Patch is NOT tested since RFC -- does compile.
-
-If we are moving away from using both quirks and host->ops to define
-platform specific actions -- just use the host->ops operation to
-get max_clock.
-
-Signed-off-by: Philip Rakity <prakity@marvell.com>
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 ---
- drivers/mmc/host/sdhci-cns3xxx.c |    1 -
- drivers/mmc/host/sdhci.c         |   24 +++++++++++++-----------
- drivers/mmc/host/sdhci.h         |    2 --
- 3 files changed, 13 insertions(+), 14 deletions(-)
+ drivers/mmc/host/sdhci-pltfm.c |   21 +++++++++++++++++++++
+ 1 files changed, 21 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
-index b7050b3..27c896d 100644
---- a/drivers/mmc/host/sdhci-cns3xxx.c
-+++ b/drivers/mmc/host/sdhci-cns3xxx.c
-@@ -91,7 +91,6 @@ struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_DMA |
- 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
--		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
- 		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
- 		  SDHCI_QUIRK_NONSTANDARD_CLOCK,
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index e045e3c..4f126de 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -165,6 +165,25 @@ static const struct platform_device_id sdhci_pltfm_ids[] = {
  };
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 451fad3..64af676 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1799,18 +1799,20 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc_dev(host->mmc)->dma_mask = &host->dma_mask;
- 	}
+ MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
  
--	host->max_clk =
--		(caps & SDHCI_CLOCK_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
--	host->max_clk *= 1000000;
--	if (host->max_clk == 0 || host->quirks &
--			SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN) {
--		if (!host->ops->get_max_clock) {
--			printk(KERN_ERR
--			       "%s: Hardware doesn't specify base clock "
--			       "frequency.\n", mmc_hostname(mmc));
--			return -ENODEV;
--		}
-+	if (host->ops->get_max_clock) {
- 		host->max_clk = host->ops->get_max_clock(host);
-+	} else {
-+		host->max_clk =
-+			(caps & SDHCI_CLOCK_BASE_MASK)
-+				>> SDHCI_CLOCK_BASE_SHIFT;
-+		host->max_clk *= 1000000;
-+	}
++#ifdef CONFIG_PM
++static int sdhci_pltfm_suspend(struct platform_device *dev, pm_message_t state)
++{
++	struct sdhci_host *host = platform_get_drvdata(dev);
 +
-+	if (host->max_clk == 0 ) {
-+		printk(KERN_ERR
-+		       "%s: Hardware doesn't specify base clock "
-+		       "frequency.\n", mmc_hostname(mmc));
-+		return -ENODEV;
- 	}
++	return sdhci_suspend_host(host, state);
++}
++
++static int sdhci_pltfm_resume(struct platform_device *dev)
++{
++	struct sdhci_host *host = platform_get_drvdata(dev);
++
++	return sdhci_resume_host(host);
++}
++#else
++#define sdhci_pltfm_suspend	NULL
++#define sdhci_pltfm_resume	NULL
++#endif	/* CONFIG_PM */
++
+ static struct platform_driver sdhci_pltfm_driver = {
+ 	.driver = {
+ 		.name	= "sdhci",
+@@ -173,6 +192,8 @@ static struct platform_driver sdhci_pltfm_driver = {
+ 	.probe		= sdhci_pltfm_probe,
+ 	.remove		= __devexit_p(sdhci_pltfm_remove),
+ 	.id_table	= sdhci_pltfm_ids,
++	.suspend	= sdhci_pltfm_suspend,
++	.resume		= sdhci_pltfm_resume,
+ };
  
- 	host->timeout_clk =
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index f8c18cd..7c15bc5 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -237,8 +237,6 @@ struct sdhci_host {
- #define SDHCI_QUIRK_DELAY_AFTER_POWER			(1<<23)
- /* Controller uses SDCLK instead of TMCLK for data timeouts */
- #define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
--/* Controller reports wrong base clock capability */
--#define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
- /* Controller cannot support End Attribute in NOP ADMA descriptor */
- #define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
- /* Controller is missing device caps. Use caps provided by host */
+ /*****************************************************************************\
 -- 
-1.6.0.4
+1.5.5.6
 
