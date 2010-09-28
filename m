@@ -1,86 +1,80 @@
-From: dylan cristiani <d.cristiani@idem-tech.it>
-Subject: Re: linux-2.6.36-rc4 problems booting rootfs from SD card
-Date: Tue, 28 Sep 2010 16:04:34 +0200
-Message-ID: <20100928160434.000044c1@unknown>
-References: <20100928130043.000074b1@unknown>
-	<4CA1F195.4080601@yahoo.es>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [patch 1/3] sdhci-pltfm: add call back alloc_host
+Date: Tue, 28 Sep 2010 10:08:27 -0400
+Message-ID: <AANLkTikmEGpRdbdfCxgY2Qy9c--TeTh+ywVc-Qkevssf@mail.gmail.com>
+References: <AANLkTin_BEE+LgZuJHeewvFDUQCipG98ZbkhMJGbnprC@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from authsmtp04.register.it ([81.88.48.54]:32840 "EHLO
-	authsmtp.register.it" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755505Ab0I1OEl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 10:04:41 -0400
-In-Reply-To: <4CA1F195.4080601@yahoo.es>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:36507 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755244Ab0I1OIk convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 10:08:40 -0400
+Received: by iwn5 with SMTP id 5so6015745iwn.19
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2010 07:08:39 -0700 (PDT)
+In-Reply-To: <AANLkTin_BEE+LgZuJHeewvFDUQCipG98ZbkhMJGbnprC@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hein_Tibosch <hein_tibosch@yahoo.es>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>
+Cc: eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-On Tue, 28 Sep 2010 21:45:57 +0800
-Hein_Tibosch <hein_tibosch@yahoo.es> wrote:
+On Sun, Sep 26, 2010 at 10:55 PM, zhangfei gao <zhangfei.gao@gmail.com>=
+ wrote:
+> From 7a870a620fa868ed4ce0cffcbd6b0683a00ae2e5 Mon Sep 17 00:00:00 200=
+1
+> From: Zhangfei Gao <zhangfei.gao@marvell.com>
+> Date: Mon, 27 Sep 2010 10:30:01 -0400
+> Subject: [PATCH 1/3] sdhci-pltfm: add call back alloc_host
+>
+> =A0 =A0 =A0 =A0alloc_host could alloc specific structure of device to=
+ meet different
+> requirement
+>
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+> ---
+> =A0drivers/mmc/host/sdhci-pltfm.c | =A0 =A04 ++--
+> =A0include/linux/sdhci-pltfm.h =A0 =A0| =A0 =A01 +
+> =A02 files changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-=
+pltfm.c
+> index 9669f21..82d3d05 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -76,8 +76,8 @@ static int __devinit sdhci_pltfm_probe(struct
+> platform_device *pdev)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_err(&pdev->dev, "Invalid iomem siz=
+e. You may "
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"experience problems.\=
+n");
+>
+> - =A0 =A0 =A0 if (pdev->dev.parent)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 host =3D sdhci_alloc_host(pdev->dev.par=
+ent, 0);
+> + =A0 =A0 =A0 if (pdata && pdata->alloc_host)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host =3D pdata->alloc_host(&pdev->dev);
+> =A0 =A0 =A0 =A0else
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host =3D sdhci_alloc_host(&pdev->dev, =
+0);
+>
+> diff --git a/include/linux/sdhci-pltfm.h b/include/linux/sdhci-pltfm.=
+h
+> index e14fce3..80c415e 100644
+> --- a/include/linux/sdhci-pltfm.h
+> +++ b/include/linux/sdhci-pltfm.h
+> @@ -30,6 +30,7 @@ struct sdhci_pltfm_data {
+> =A0 =A0 =A0 =A0unsigned int quirks;
+> =A0 =A0 =A0 =A0int (*init)(struct sdhci_host *host, struct sdhci_pltf=
+m_data *pdata,
+> void* priv_pdata);
+> =A0 =A0 =A0 =A0void (*exit)(struct sdhci_host *host);
+> + =A0 =A0 =A0 struct sdhci_host *(*alloc_host)(struct device *dev);
+> =A0};
+>
+> =A0#endif /* _SDHCI_PLTFM_H */
+> --
+> 1.7.0.4
+>
 
->  On 28-9-2010 19:00, dylan cristiani wrote:
-> > Hi sirs, here is my scenario: kernel 2.6.36-rc4; cpu pxa270;
-> > platform is an enhancement (i like to see things that way...) and
-> > customisation of the mainstone III board; here comes the (my)
-> > problem: if i boot with my standard kernel boot command line (to
-> > boot from system flash): 'root=/dev/mtdblock2 rootfstype=jffs2
-> > mem=64M console=ttyS0,115200n8'
-> >
-> > i can get the rootfs up, and the SD card is up too, and correctly
-> > working; here's the relevant kernel log:
-> >
-> > ....
-> > XScale iWMMXt coprocessor detected.
-> >  rtc-ds1307 0-0068: setting system clock to 2010-09-28 03:03:08 UTC
-> > (1285642988)
-> >  pxa27x-udc pxa27x-udc: USB reset
-> >  mmc0: new SD card at address aaaa
-> >  mmcblk0: mmc0:aaaa SD02G 1.84 GiB
-> >   mmcblk0: p1
-> >  pxa27x-udc pxa27x-udc: USB reset
-> > .....
-> >
-> > then the rootfs coems up properly.
-> >
-> > Else, if i try to boot the rootfs directly form the SD card, with
-> > kernel boot command line:
-> > 'root=/dev/mmcblk0p1 rootfstype=ext2 mem=64M console=ttyS0,115200n8'
-> >
-> > the rootfs doen't work, and i can see some problems around with usb
-> > client gadget; here's the relevant kernel log:
-> >
-> Hi Dylan
-> 
-> A reason could be that you linked the ext2 driver as a module,
-> which is normally loaded after your jffs2 fs has booted?
-> The solution would be to link it into the kernel, thus using
-> "CONFIG_EXT2_FS=y" in stead of "=m"
-Hi Hein, foa thanks for your answer, but the ext2 driver in compiled
-into kernel not as a module but buil-into the kernel so i've already:
-"CONFIG_EXT2_FS=y"
-setted in my .config file
-as i told you the booting form SD worked till 2.6.19 kernel and first
-trouble i've seen is into 2.6.20
-
-> 
-> Note that ext3 is again more stable than ext2 and also supported by
-> u-boot.
-> 
-> I hacked init/do_mounts.c
-> 
-> -        printk("VFS: Cannot open root device \"%s\" or %s\n",
-> -                root_device_name, b);
-> +        printk("VFS: Cannot open root device \"%s\" or %s (fstype %s
-> err %d)\n",
-> +                root_device_name, b, fs_names, err);
-> 
-> so at least I get some more error information.
-i'll try this and if i'll get more info i'll post them
-
-> 
-> Good luck!
-tks
-dylan
+Any feed back, much thanks.
