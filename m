@@ -1,137 +1,120 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [patch] sdhci: correct f_min in sd 3.0
-Date: Tue, 28 Sep 2010 00:58:51 -0400
-Message-ID: <AANLkTikwUawcFJpRVqQoNqUEDv4a-uLDt2qYnSqf5end@mail.gmail.com>
-References: <8C0FC31B-681F-4541-AD64-43578FC926F6@marvell.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH v2 2/2] sdhci-s3c: Add support no internal clock divider in
+	host controller
+Date: Tue, 28 Sep 2010 14:21:57 +0900
+Message-ID: <004601cb5ecd$14b64fb0$3e22ef10$%kim@samsung.com>
+References: <1284716701-5140-1-git-send-email-kgene.kim@samsung.com>
+ <1284716701-5140-3-git-send-email-kgene.kim@samsung.com>
+ <4C97FB34.1000802@simtec.co.uk>
+ <006e01cb5ec1$fe00b770$fa022650$%seo@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:60384 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754192Ab0I1E6w convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 00:58:52 -0400
-Received: by iwn5 with SMTP id 5so5495236iwn.19
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2010 21:58:51 -0700 (PDT)
-In-Reply-To: <8C0FC31B-681F-4541-AD64-43578FC926F6@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <006e01cb5ec1$fe00b770$fa022650$%seo@samsung.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Jeongbae Seo' <jeongbae.seo@samsung.com>, 'Ben Dooks' <ben@simtec.co.uk>
+Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, 'Hyuk Lee' <hyuk1.lee@samsung.com>, ben-linux@fluff.org, akpm@linux-foundation.org, cjb@laptop.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Zhangfei Gao <zgao6@marvell.com>
 
-On Tue, Sep 28, 2010 at 12:05 AM, Philip Rakity <prakity@marvell.com> w=
-rote:
->
-> The code snippet
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 for (div =3D 2; div < SDHC=
-I_MAX_DIV_SPEC_300; div +=3D 2) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((hos=
-t->max_clk / div) <=3D clock)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 break;
->
-> is not correct. =A0In sdio 3.0 the value is not a power of 2 for the =
-divider but the value to be divided down-- all the bits count
+Jeongbae Seo wrote:
+> 
+> Ben Dooks worte:
+> > On 17/09/10 10:45, Kukjin Kim wrote:
+> > > From: Hyuk Lee <hyuk1.lee@samsung.com>
+> > >
+> > > This patch adds to support no internal clock divider in SDHCI.
+> > > The external clock divider can be used to make a proper clock
+> > > because SDHCI doesn't support internal clock divider by itself.
+> > >
+> > > Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+> > > Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
+> > > Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+> > > ---
+> > >  drivers/mmc/host/sdhci-s3c.c |   60
+> > ++++++++++++++++++++++++++++++++++++++++++
+> > >  1 files changed, 60 insertions(+), 0 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/host/sdhci-s3c.c
+b/drivers/mmc/host/sdhci-s3c.c
+> > > index e6e0438..5ad5ed7 100644
+> > > --- a/drivers/mmc/host/sdhci-s3c.c
+> > > +++ b/drivers/mmc/host/sdhci-s3c.c
+> > > @@ -96,6 +96,13 @@ static unsigned int sdhci_s3c_get_max_clk(struct
+> > sdhci_host *host)
+> > >  	unsigned int rate, max;
+> > >  	int clk;
+> > >
+> > > +	/*
+> > > +	 * There is only one clock source(sclk) if there is no clock
+> > divider
+> > > +	 * in the host controller
+> > > +	 */
+> > > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
+> > > +		return clk_round_rate(ourhost->clk_bus[2], UINT_MAX);
+> >
+> > interesting, <linux/clk.h> doesn't have a second parameter to
+> > clk_round_rate().
+> >
+> Hi Ben,
+> 
+> Thanks for your comments.
+> 
+> When I see clk_round_rate in <linux/clk.h>, which function is defined
+> as "long clk_round_rate(struct clk *clk, unsigned long rate)" that has two
+> parameters.
+> Please let me know if you have another meaning for this.
+> 
+> >
+> > >  	/* note, a reset will reset the clock source */
+> > >
+> > >  	sdhci_s3c_check_sclk(host);
+> > > @@ -130,6 +137,15 @@ static unsigned int
+sdhci_s3c_consider_clock(struct
+> > sdhci_s3c *ourhost,
+> > >  	if (!clksrc)
+> > >  		return UINT_MAX;
+> > >
+> > > +	/*
+> > > +	 * There is only one clock source(sclk) if there is no clock
+> > divider
+> > > +	 * in the host controller
+> > > +	 */
+> > > +	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
+> > > +		rate = clk_round_rate(clksrc, wanted);
+> > > +		return wanted - rate;
+> > > +	}
+> >
+> > Why does this need a quirk, instead of just having one clock available
+> > in the list of usable clocks?
+> >
+> 
+> The available clock is made by dividing a clock source with a certain
+> divider value.
+> Most of the host controller has this capability that can divide a clock
+what
+> we want.
+> However, the host controller of both S5PC210 and S5PV310 don't have this
+so
+> we have to
+> Add additional routine to make a proper clock with outland clock divider
+> instead of
+> Internal clock divider in host controller.
+> 
+Hi Ben,
 
-That's the reason using div +=3D 2 instead of div *=3D 2
+If any your suggestion in this case, S5PV310/S5PC210 has no clock divider in
+the HSMMC IP block, please kindly let me know. Will address comments from
+you.
 
-> 2) 10-bit Divided Clock
-> Host Controller Version 3.00 supports this mandatory mode instead of =
-the
-> 8-bit Divided Clock Mode. =A0The length of the divider is extended to=
- 10 bits and all
-> divider values shall be supported.
-> 3FFh =A0 =A01/2046 =A0Divided Clock
->
-> Philip
->
-> Hi Zhangfei,
->
-> On Sat, Sep 25, 2010 at 12:23:33AM -0400, zhangfei gao wrote:
->> From: Zhangfei Gao <zhangfei.gao@marvell.com>
->> Date: Mon, 20 Sep 2010 15:15:18 -0400
->> Subject: [PATCH] sdhci: correct f_min in sd 3.0
->>
->> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
->> ---
->> =A0drivers/mmc/host/sdhci.c | =A0 =A08 +++++---
->> =A0drivers/mmc/host/sdhci.h | =A0 =A03 +++
->> =A02 files changed, 8 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 5928b0a..829e78a 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1007,14 +1007,14 @@ static void sdhci_set_clock(struct sdhci_hos=
-t *host, unsigned int clock)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->max_clk <=3D clock)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 div =3D 1;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 else {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 for (div =3D 2; div < 2046=
-; div +=3D 2) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 for (div =3D 2; div < SDHC=
-I_MAX_DIV_SPEC_300; div +=3D 2) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((hos=
-t->max_clk / div) <=3D clock)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 break;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> =A0 =A0 =A0 } else {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Version 2.00 divisors must be a power=
- of 2. */
->> - =A0 =A0 =A0 =A0 =A0 =A0 for (div =3D 1; div < 256; div *=3D 2) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 for (div =3D 1; div < SDHCI_MAX_DIV_SPEC_2=
-00; div *=3D 2) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((host->max_clk / div=
-) <=3D clock)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> @@ -1836,8 +1836,10 @@ int sdhci_add_host(struct sdhci_host *host)
->> =A0 =A0 =A0 mmc->ops =3D &sdhci_ops;
->> =A0 =A0 =A0 if (host->ops->get_min_clock)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->f_min =3D host->ops->get_min_clock(=
-host);
->> + =A0 =A0 else if (host->version >=3D SDHCI_SPEC_300)
->> + =A0 =A0 =A0 =A0 =A0 =A0 mmc->f_min =3D host->max_clk / SDHCI_MAX_D=
-IV_SPEC_300;
->> =A0 =A0 =A0 else
->> - =A0 =A0 =A0 =A0 =A0 =A0 mmc->f_min =3D host->max_clk / 256;
->> + =A0 =A0 =A0 =A0 =A0 =A0 mmc->f_min =3D host->max_clk / SDHCI_MAX_D=
-IV_SPEC_200;
->> =A0 =A0 =A0 mmc->f_max =3D host->max_clk;
->> =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_SDIO_IRQ;
->>
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index ae28a31..d35fb3d 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -185,6 +185,9 @@
->> =A0#define =A0 SDHCI_SPEC_200 =A0 =A0 1
->> =A0#define =A0 SDHCI_SPEC_300 =A0 =A0 2
->>
->> +#define =A0 =A0 =A0SDHCI_MAX_DIV_SPEC_200 =A0256
->> +#define =A0 =A0 =A0SDHCI_MAX_DIV_SPEC_300 =A02046
->> +
->> =A0struct sdhci_ops;
->>
->> =A0struct sdhci_host {
->
-> Thanks very much, I've applied this to mmc-next now.
->
-> - Chris.
-> --
-> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+As you know, there are many solution for this...But I'd like to use your
+preference in here.
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
