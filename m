@@ -1,49 +1,44 @@
 From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 4/6] mmc: sdhci_pltfm: pass platform_data on custom
- init-call
-Date: Tue, 28 Sep 2010 16:58:11 +0400
-Message-ID: <20100928125811.GA32279@oksana.dev.rtsoft.ru>
+Subject: Re: [PATCH 5/6] mmc: sdhci-of-esdhc: factor out common stuff
+Date: Tue, 28 Sep 2010 16:58:21 +0400
+Message-ID: <20100928125821.GA32626@oksana.dev.rtsoft.ru>
 References: <1285677406-3359-1-git-send-email-w.sang@pengutronix.de>
- <1285677406-3359-5-git-send-email-w.sang@pengutronix.de>
+ <1285677406-3359-6-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:44855 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753274Ab0I1M6V (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 08:58:21 -0400
-Received: by mail-ew0-f46.google.com with SMTP id 23so1735966ewy.19
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2010 05:58:21 -0700 (PDT)
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:44567 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753886Ab0I1M62 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 08:58:28 -0400
+Received: by eyb6 with SMTP id 6so1733089eyb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2010 05:58:27 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <1285677406-3359-5-git-send-email-w.sang@pengutronix.de>
+In-Reply-To: <1285677406-3359-6-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Wolfram Sang <w.sang@pengutronix.de>
 Cc: linux-mmc@vger.kernel.org, zhangfei gao <zhangfei.gao@gmail.com>, Zhu Richard-R65037 <r65037@freescale.com>, Philip Rakity <prakity@marvell.com>
 
-On Tue, Sep 28, 2010 at 02:36:44PM +0200, Wolfram Sang wrote:
-> The custom init call may need more data to perform its job, so we pass
-> it a pointer to the platform_data, too. Now, for drivers extending
-> sdhci-pltfm (like sdhci-cns3xxx), a fixed platform_data is used
-> according to the platform device id. Because that one does not contain
-> board specific information, we simply name the board specific
-> information information priv_pdata and pass it to the init routine as
-> well. (Note: the old behaviour was that you could override the platform
-> id specific data with your own. However, one can still do this by using
-> the "sdhci" id instead of "sdhci-<something>".)
+On Tue, Sep 28, 2010 at 02:36:45PM +0200, Wolfram Sang wrote:
+> Put everything which can be shared between the OF and platform version
+> of this driver into a local .h-file.
 > 
 > Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
 > ---
 > 
-> Changes since previous version:
-> 
-> Rebased and dropped imx-specific stuff as mentioned by zhangfei gao.
-> 
-> priv_pdata might not be needed as Giuseppe pointed out. Will update with
-> the next revision of this series, if needed.
+> Note: Anton suggested to move the function out of the .h-file into a seperate 
+> .c-file. I tried this and it looked overly complicated to me; we ended up with
+> a tiny .c _and_ .h file with no gain but a lot of complication added IMHO.
+> So, while not being perfect, I hope we can live with this version.
 
-Yeah, priv_pdata becomes just pdata. Please remove it
-from the callback.
+I'd still like to see it as a C file.
+
+[...]
+> +static void esdhc_set_clock(struct sdhci_host *host, unsigned int clock)
+
+But if you do this in the .h file, you have to make it 'inline',
+otherwise gcc might emit 'defined but not used' warning.
 
 Thanks,
 
