@@ -1,120 +1,136 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH v2 2/2] sdhci-s3c: Add support no internal clock divider in
-	host controller
-Date: Tue, 28 Sep 2010 14:21:57 +0900
-Message-ID: <004601cb5ecd$14b64fb0$3e22ef10$%kim@samsung.com>
-References: <1284716701-5140-1-git-send-email-kgene.kim@samsung.com>
- <1284716701-5140-3-git-send-email-kgene.kim@samsung.com>
- <4C97FB34.1000802@simtec.co.uk>
- <006e01cb5ec1$fe00b770$fa022650$%seo@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC RESEND] sdhci-s3c: support clock enable/disable (clock-gating)
+Date: Tue, 28 Sep 2010 14:29:39 +0900
+Message-ID: <4CA17D43.1030004@samsung.com>
+References: <4C91BD5A.1040804@samsung.com>
+ <20100917134031.GA11462@console-pimps.org>
+ <AANLkTi=HWUy7Fm7mKPGWT4m0kzKJhEUE8C=Yw2NN1Z5J@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <006e01cb5ec1$fe00b770$fa022650$%seo@samsung.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Jeongbae Seo' <jeongbae.seo@samsung.com>, 'Ben Dooks' <ben@simtec.co.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, 'Hyuk Lee' <hyuk1.lee@samsung.com>, ben-linux@fluff.org, akpm@linux-foundation.org, cjb@laptop.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:14418 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751425Ab0I1F3X (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 01:29:23 -0400
+Received: from epmmp2 (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Sun Java(tm) System Messaging Server 7u3-15.01 64bit (built Feb 12 2010))
+ with ESMTP id <0L9F003C2Z8X7510@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 28 Sep 2010 14:29:21 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0L9F00CWQZ8X7Q@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 28 Sep 2010 14:29:21 +0900 (KST)
+In-reply-to: <AANLkTi=HWUy7Fm7mKPGWT4m0kzKJhEUE8C=Yw2NN1Z5J@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Matt Fleming <matt@console-pimps.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>
 
-Jeongbae Seo wrote:
+Jae hoon Chung wrote:
+> 2010/9/17 Matt Fleming <matt@console-pimps.org>:
+>> On Thu, Sep 16, 2010 at 03:46:50PM +0900, Jaehoon Chung wrote:
+>>> Hi all,
+>>>   This is a RFC patch that support clock-gating for saving power consumption.
+>>>   I found mmc_host_enable/mmc_host_disable function in core.c
+>>>   (using MMC_CAP_DSIABLE. i think that use when host enable/disable)
+>>>   So, i used that functions and implemented some functions in sdhci-s3c.c & sdhci.c
+>>>
+>>> i want any feedback. how do you think about this patch?
+>>> Plz let me know...
+>>>
+>>> Thank you all
+>>>
+>>>  Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>>  Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>>>
+>>> ---
+>>>  drivers/mmc/host/sdhci-s3c.c |   36 ++++++++++++++++++++++++++++++++++++
+>>>  drivers/mmc/host/sdhci.c     |   30 ++++++++++++++++++++++++++++++
+>>>  drivers/mmc/host/sdhci.h     |    4 ++++
+>>>  3 files changed, 70 insertions(+), 0 deletions(-)
+>> [...]
+>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 401527d..fa2e55d 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -1245,7 +1245,37 @@ out:
+>>>       spin_unlock_irqrestore(&host->lock, flags);
+>>>  }
+>>>
+>>> +static int sdhci_enable_clk(struct mmc_host *mmc)
+>>> +{
+>>> +     struct sdhci_host *host = mmc_priv(mmc);
+>>> +     int ret = 0;
+>>> +
+>>> +     if (host->old_clock != 0 && host->clock == 0) {
+>>> +             if (host->ops->enable)
+>>> +                     ret = host->ops->enable(host);
+>>> +             sdhci_set_clock(host, host->old_clock);
+>>> +     }
+>>> +
+>>> +     return ret;
+>>> +}
+>>> +
+>>> +static int sdhci_disable_clk(struct mmc_host *mmc, int lazy)
+>>> +{
+>>> +     struct sdhci_host *host = mmc_priv(mmc);
+>>> +     int ret = 0;
+>>> +
+>>> +     if (host->clock != 0) {
+>>> +             host->old_clock = host->clock;
+>>> +             sdhci_set_clock(host, 0);
+>>> +             if (host->ops->disable)
+>>> +                     ret = host->ops->disable(host, lazy);
+>>> +     }
+>>> +     return ret;
+>>> +}
+>>> +
+>>>  static const struct mmc_host_ops sdhci_ops = {
+>>> +     .enable         = sdhci_enable_clk,
+>>> +     .disable        = sdhci_disable_clk,
+>>>       .request        = sdhci_request,
+>>>       .set_ios        = sdhci_set_ios,
+>>>       .get_ro         = sdhci_get_ro,
+>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>> index d316bc7..0c6f143 100644
+>>> --- a/drivers/mmc/host/sdhci.h
+>>> +++ b/drivers/mmc/host/sdhci.h
+>>> @@ -278,6 +278,8 @@ struct sdhci_host {
+>>>       unsigned int            timeout_clk;    /* Timeout freq (KHz) */
+>>>
+>>>       unsigned int            clock;          /* Current clock (MHz) */
+>>> +     unsigned int            old_clock;      /* Old clock (MHz) */
+>>> +     unsigned int            clk_cnt;        /* Clock user count */
+>>>       u8                      pwr;            /* Current voltage */
+>>>
+>>>       struct mmc_request      *mrq;           /* Current request */
+>>> @@ -323,6 +325,8 @@ struct sdhci_ops {
+>>>       unsigned int    (*get_max_clock)(struct sdhci_host *host);
+>>>       unsigned int    (*get_min_clock)(struct sdhci_host *host);
+>>>       unsigned int    (*get_timeout_clock)(struct sdhci_host *host);
+>>> +     int             (*enable)(struct sdhci_host *host);
+>>> +     int             (*disable)(struct sdhci_host *host, int lazy);
+>>>  };
+>>>
+>>>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+>> I could have misunderstood something, but do you really need this new
+>> 'old_clock' member? Is the previous clock value not stored in
+>> host->ios.clock?
 > 
-> Ben Dooks worte:
-> > On 17/09/10 10:45, Kukjin Kim wrote:
-> > > From: Hyuk Lee <hyuk1.lee@samsung.com>
-> > >
-> > > This patch adds to support no internal clock divider in SDHCI.
-> > > The external clock divider can be used to make a proper clock
-> > > because SDHCI doesn't support internal clock divider by itself.
-> > >
-> > > Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
-> > > Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
-> > > Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
-> > > ---
-> > >  drivers/mmc/host/sdhci-s3c.c |   60
-> > ++++++++++++++++++++++++++++++++++++++++++
-> > >  1 files changed, 60 insertions(+), 0 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/host/sdhci-s3c.c
-b/drivers/mmc/host/sdhci-s3c.c
-> > > index e6e0438..5ad5ed7 100644
-> > > --- a/drivers/mmc/host/sdhci-s3c.c
-> > > +++ b/drivers/mmc/host/sdhci-s3c.c
-> > > @@ -96,6 +96,13 @@ static unsigned int sdhci_s3c_get_max_clk(struct
-> > sdhci_host *host)
-> > >  	unsigned int rate, max;
-> > >  	int clk;
-> > >
-> > > +	/*
-> > > +	 * There is only one clock source(sclk) if there is no clock
-> > divider
-> > > +	 * in the host controller
-> > > +	 */
-> > > +	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
-> > > +		return clk_round_rate(ourhost->clk_bus[2], UINT_MAX);
-> >
-> > interesting, <linux/clk.h> doesn't have a second parameter to
-> > clk_round_rate().
-> >
-> Hi Ben,
+> Thanks Matt for your comment.
+> if host->ios.clock set zero, i think that need previous value (for
+> example 52MHz..)
+> So i add 'old_clock' member...i will test, after removed 'old_clock'
 > 
-> Thanks for your comments.
+> anyother doubt? and problem?
+> Thanks
 > 
-> When I see clk_round_rate in <linux/clk.h>, which function is defined
-> as "long clk_round_rate(struct clk *clk, unsigned long rate)" that has two
-> parameters.
-> Please let me know if you have another meaning for this.
-> 
-> >
-> > >  	/* note, a reset will reset the clock source */
-> > >
-> > >  	sdhci_s3c_check_sclk(host);
-> > > @@ -130,6 +137,15 @@ static unsigned int
-sdhci_s3c_consider_clock(struct
-> > sdhci_s3c *ourhost,
-> > >  	if (!clksrc)
-> > >  		return UINT_MAX;
-> > >
-> > > +	/*
-> > > +	 * There is only one clock source(sclk) if there is no clock
-> > divider
-> > > +	 * in the host controller
-> > > +	 */
-> > > +	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
-> > > +		rate = clk_round_rate(clksrc, wanted);
-> > > +		return wanted - rate;
-> > > +	}
-> >
-> > Why does this need a quirk, instead of just having one clock available
-> > in the list of usable clocks?
-> >
-> 
-> The available clock is made by dividing a clock source with a certain
-> divider value.
-> Most of the host controller has this capability that can divide a clock
-what
-> we want.
-> However, the host controller of both S5PC210 and S5PV310 don't have this
-so
-> we have to
-> Add additional routine to make a proper clock with outland clock divider
-> instead of
-> Internal clock divider in host controller.
-> 
-Hi Ben,
+Hi Chris.
+I want to know how do you think about this patch.
+If you have any doubt in this patch, let me know plz.
 
-If any your suggestion in this case, S5PV310/S5PC210 has no clock divider in
-the HSMMC IP block, please kindly let me know. Will address comments from
-you.
-
-As you know, there are many solution for this...But I'd like to use your
-preference in here.
-
-Thanks.
-
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+Thanks
+Jaehoon Chung
