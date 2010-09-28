@@ -1,138 +1,84 @@
-From: dylan cristiani <d.cristiani@idem-tech.it>
-Subject: Re: linux-2.6.36-rc4 problems booting rootfs from SD card
-Date: Tue, 28 Sep 2010 16:51:26 +0200
-Message-ID: <20100928165126.0000721a@unknown>
-References: <20100928130043.000074b1@unknown>
-	<201009281716.42122.anarsoul@gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 1/6] mmc: sdhci-pltfm: Add structure for host-specific
+ data
+Date: Tue, 28 Sep 2010 16:49:58 +0200
+Message-ID: <20100928144958.GI4441@pengutronix.de>
+References: <1285677406-3359-1-git-send-email-w.sang@pengutronix.de>
+ <1285677406-3359-2-git-send-email-w.sang@pengutronix.de>
+ <48641052-49AF-4A24-9C8C-42E59791D6A7@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <201009281716.42122.anarsoul@gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Vasily Khoruzhick <anarsoul@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="WHz+neNWvhIGAO8A"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:37366 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756608Ab0I1Ot7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2010 10:49:59 -0400
+Content-Disposition: inline
+In-Reply-To: <48641052-49AF-4A24-9C8C-42E59791D6A7@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: linux-mmc@vger.kernel.org
 
-T24gVHVlLCAyOCBTZXAgMjAxMCAxNzoxNjo0MSArMDMwMApWYXNpbHkgS2hvcnV6aGljayA8YW5h
-cnNvdWxAZ21haWwuY29tPiB3cm90ZToKCj4gT24gMjggb2YgU2VwdGVtYmVyIDIwMTAgMTQ6MDA6
-NDMgZHlsYW4gY3Jpc3RpYW5pIHdyb3RlOgo+ID4gSGkgc2lycywgaGVyZSBpcyBteSBzY2VuYXJp
-bzoga2VybmVsIDIuNi4zNi1yYzQ7IGNwdSBweGEyNzA7Cj4gPiBwbGF0Zm9ybSBpcyBhbiBlbmhh
-bmNlbWVudCAoaSBsaWtlIHRvIHNlZSB0aGluZ3MgdGhhdCB3YXkuLi4pIGFuZAo+ID4gY3VzdG9t
-aXNhdGlvbiBvZiB0aGUgbWFpbnN0b25lIElJSSBib2FyZDsgaGVyZSBjb21lcyB0aGUgKG15KQo+
-ID4gcHJvYmxlbTogaWYgaSBib290IHdpdGggbXkgc3RhbmRhcmQga2VybmVsIGJvb3QgY29tbWFu
-ZCBsaW5lICh0bwo+ID4gYm9vdCBmcm9tIHN5c3RlbSBmbGFzaCk6ICdyb290PS9kZXYvbXRkYmxv
-Y2syIHJvb3Rmc3R5cGU9amZmczIKPiA+IG1lbT02NE0gY29uc29sZT10dHlTMCwxMTUyMDBuOCcK
-PiA+IAo+ID4gaSBjYW4gZ2V0IHRoZSByb290ZnMgdXAsIGFuZCB0aGUgU0QgY2FyZCBpcyB1cCB0
-b28sIGFuZCBjb3JyZWN0bHkKPiA+IHdvcmtpbmc7IGhlcmUncyB0aGUgcmVsZXZhbnQga2VybmVs
-IGxvZzoKPiA+IAo+ID4gLi4uLgo+ID4gWFNjYWxlIGlXTU1YdCBjb3Byb2Nlc3NvciBkZXRlY3Rl
-ZC4KPiA+ICBydGMtZHMxMzA3IDAtMDA2ODogc2V0dGluZyBzeXN0ZW0gY2xvY2sgdG8gMjAxMC0w
-OS0yOCAwMzowMzowOCBVVEMKPiA+ICgxMjg1NjQyOTg4KQo+ID4gIHB4YTI3eC11ZGMgcHhhMjd4
-LXVkYzogVVNCIHJlc2V0Cj4gPiAgbW1jMDogbmV3IFNEIGNhcmQgYXQgYWRkcmVzcyBhYWFhCj4g
-PiAgbW1jYmxrMDogbW1jMDphYWFhIFNEMDJHIDEuODQgR2lCCj4gPiAgIG1tY2JsazA6IHAxCj4g
-PiAgcHhhMjd4LXVkYyBweGEyN3gtdWRjOiBVU0IgcmVzZXQKPiA+IC4uLi4uCj4gPiAKPiA+IHRo
-ZW4gdGhlIHJvb3RmcyBjb2VtcyB1cCBwcm9wZXJseS4KPiA+IAo+ID4gRWxzZSwgaWYgaSB0cnkg
-dG8gYm9vdCB0aGUgcm9vdGZzIGRpcmVjdGx5IGZvcm0gdGhlIFNEIGNhcmQsIHdpdGgKPiA+IGtl
-cm5lbCBib290IGNvbW1hbmQgbGluZToKPiA+ICdyb290PS9kZXYvbW1jYmxrMHAxIHJvb3Rmc3R5
-cGU9ZXh0MiBtZW09NjRNIGNvbnNvbGU9dHR5UzAsMTE1MjAwbjgnCj4gPiAKPiA+IHRoZSByb290
-ZnMgZG9lbid0IHdvcmssIGFuZCBpIGNhbiBzZWUgc29tZSBwcm9ibGVtcyBhcm91bmQgd2l0aCB1
-c2IKPiA+IGNsaWVudCBnYWRnZXQ7IGhlcmUncyB0aGUgcmVsZXZhbnQga2VybmVsIGxvZzoKPiA+
-IAo+ID4gLi4uLgo+ID4gWFNjYWxlIGlXTU1YdCBjb3Byb2Nlc3NvciBkZXRlY3RlZC4KPiA+ICBy
-dGMtZHMxMzA3IDAtMDA2ODogc2V0dGluZyBzeXN0ZW0gY2xvY2sgdG8gMjAxMC0wOS0yOCAwMzow
-Mzo0MyBVVEMKPiA+ICgxMjg1NjQzMDIzKQo+ID4gIFZGUzogQ2Fubm90IG9wZW4gcm9vdCBkZXZp
-Y2UgIm1tY2JsazBwMSIgb3IgdW5rbm93bi1ibG9jaygwLDApCj4gPiAgUGxlYXNlIGFwcGVuZCBh
-IGNvcnJlY3QgInJvb3Q9IiBib290IG9wdGlvbjsgaGVyZSBhcmUgdGhlIGF2YWlsYWJsZQo+ID4g
-cGFydGl0aW9uczoKPiA+ICAxZjAwICAgICAgICAgICAgIDI1NiBtdGRibG9jazAgKGRyaXZlcj8p
-Cj4gPiAgMWYwMSAgICAgICAgICAgIDIwNDggbXRkYmxvY2sxIChkcml2ZXI/KQo+ID4gIDFmMDIg
-ICAgICAgICAgIDYzMjMyIG10ZGJsb2NrMiAoZHJpdmVyPykKPiA+ICBLZXJuZWwgcGFuaWMgLSBu
-b3Qgc3luY2luZzogVkZTOiBVbmFibGUgdG8gbW91bnQgcm9vdCBmcyBvbgo+ID4gdW5rbm93bi1i
-bG9jaygwLDApCj4gPiAgQmFja3RyYWNlOgo+ID4gIFtdIChkdW1wX2JhY2t0cmFjZSsweDAvMHgx
-MTgpIGZyb20gW10gKGR1bXBfc3RhY2srMHgxOC8weDFjKQo+ID4gcjY6MDAwMDgwMDAgcjU6YzM4
-MTMwMDAgcjQ6YzA0MTdiNzAgcjM6YzAzZjU3MTQKPiA+ICBbXSAoZHVtcF9zdGFjaysweDAvMHgx
-YykgZnJvbSBbXSAocGFuaWMrMHg2MC8weDE4YykKPiA+ICBbXSAocGFuaWMrMHgwLzB4MThjKSBm
-cm9tIFtdIChtb3VudF9ibG9ja19yb290KzB4MjVjLzB4MmFjKQo+ID4gIHB4YTI3eC11ZGMgcHhh
-Mjd4LXVkYzogZXAwOmhhbmRsZV9lcDA6IHN0YXRlPVdBSVRfRk9SX1NFVFVQLAo+ID4gcmVxPShu
-dWxsKSwgdWRjY3NyMD0weDJjMSwgdWRjYmNyPTgsIGlycV9tc2s9MQo+ID4gIHB4YTI3eC11ZGMg
-cHhhMjd4LXVkYzogZXAwOnNldF9lcDBzdGF0ZToKPiA+IHN0YXRlPVdBSVRfRk9SX1NFVFVQLT5T
-RVRVUF9TVEFHRSwgdWRjY3NyMD0weDJjMSwgdWRjYmNyPTgKPiA+ICBweGEyN3gtdWRjIHB4YTI3
-eC11ZGM6IGVwMDpoYW5kbGVfZXAwX2N0cmxfcmVxOiBTRVRVUCA4MC4wNiB2MDEwMAo+ID4gaTAw
-MDAgbDAwNDAKPiA+ICBweGEyN3gtdWRjIHB4YTI3eC11ZGM6IGVwMDpzZXRfZXAwc3RhdGU6Cj4g
-PiBzdGF0ZT1TRVRVUF9TVEFHRS0+SU5fREFUQV9TVEFHRSwgdWRjY3NyMD0weDI4MSwgdWRjYmNy
-PTAKPiA+ICBweGEyN3gtdWRjIHB4YTI3eC11ZGM6IGVwMDpweGFfZXBfcXVldWU6IHF1ZXVlIHJl
-cQo+ID4gYzM5M2RiYzAoZmlyc3Q9eWVzKSwgbGVuIDE4IGJ1ZiBjMzg2ZDAwMAo+ID4gIHB4YTI3
-eC11ZGMgcHhhMjd4LXVkYzogZXAwOndyaXRlX2VwMF9maWZvOiBpbiAxNiBieXRlcywgMiBsZWZ0
-LAo+ID4gcmVxPWMzOTNkYmMwLCB1ZGNjc3IwPTB4MjAyCj4gPiAgcHhhMjd4LXVkYyBweGEyN3gt
-dWRjOiBVU0IgcmVzZXQKPiA+ICBweGEyN3gtdWRjIHB4YTI3eC11ZGM6IFVTQiByZXNldCBzdGFy
-dAo+ID4gIHB4YTI3eC11ZGMgcHhhMjd4LXVkYzogZXAwOnJlcV9kb25lOiBjb21wbGV0ZSByZXEg
-YzM5M2RiYzAgc3RhdCAtNzEKPiA+IGxlbiAxNi8xOAo+ID4gIGdfZXRoZXIgZ2FkZ2V0OiBzZXR1
-cCBjb21wbGV0ZSAtLT4gLTcxLCAxNi8xOAo+ID4gIHB4YTI3eC11ZGMgcHhhMjd4LXVkYzogZXAw
-OnNldF9lcDBzdGF0ZToKPiA+IHN0YXRlPUlOX0RBVEFfU1RBR0UtPldBSVRfRk9SX1NFVFVQLCB1
-ZGNjc3IwPTB4MjAwLCB1ZGNiY3I9MAo+ID4gIHB4YTI3eC11ZGMgcHhhMjd4LXVkYzogZXAwOmhh
-bmRsZV9lcDA6IHN0YXRlPVdBSVRfRk9SX1NFVFVQLAo+ID4gcmVxPShudWxsKSwgdWRjY3NyMD0w
-eDIwMCwgdWRjYmNyPTAsIGlycV9tc2s9MQo+ID4gICByMzowMDAwMDAwMSByMjoyMDAwMDAxMyBy
-MTpjMzgyNWY2MCByMDpjMDM5NjAxYgo+ID4gIFtdIChtb3VudF9ibG9ja19yb290KzB4MC8weDJh
-YykgZnJvbSBbXSAobW91bnRfcm9vdCsweDU0LzB4NmMpCj4gPiAgIHI4OjAwMDAwMDAwIHI3OjAw
-MDAwMDEzIHI2OmMwMDUxZTQ4IHI1OjAwMDAwMDAwIHI0OmMwMzk2MDdmCj4gPiAgW10gKG1vdW50
-X3Jvb3QrMHgwLzB4NmMpIGZyb20gW10gKHByZXBhcmVfbmFtZXNwYWNlKzB4MTJjLzB4MTg0KQo+
-ID4gICByNTpjMDAyMDNjMSByNDpjMDAyMDNhYwo+ID4gIFtdIChwcmVwYXJlX25hbWVzcGFjZSsw
-eDAvMHgxODQpIGZyb20gW10gKGtlcm5lbF9pbml0KzB4MTE0LzB4MTU0KQo+ID4gICByNTpjMDAw
-ODNkNCByNDpjMDQxNmU2MAo+ID4gIFtdIChrZXJuZWxfaW5pdCsweDAvMHgxNTQpIGZyb20gW10g
-KGRvX2V4aXQrMHgwLzB4NWRjKQo+ID4gICByNDowMDAwMDAwMCByMzowMDAwMDAwMAo+ID4gLi4u
-Lgo+ID4gCj4gPiBsYXN0IG1vbnRocyBpIHBvcnRlZCBteSBzeXN0ZW0gZm9ybSBhbmNpZW50IDIu
-Ni4xOCBrZXJuZWwgdG8gbXkKPiA+IGN1cnJlbnQga2VybmVsICgyLjYuMzYtcmM0KSwgYnV0IGkg
-cmVtZW1iZXIgdGhhdCB3aXRoIDIuNi4xOCB0aGUKPiA+IHJvb3RmcydzIGJvb3RpbmcgZnJvbSBT
-RCBkaWQgd29yazsgc28gaSByZS1sb2FkZWQgMi42LjE4IHpJbWFnZSwKPiA+IGFuZCBpbiBmYWN0
-IHRoZSBTRCByb290cyBib290aW5nIHdvcmtlZCBwcm9wZXJseTsgdGhlbiBpCj4gPiBpbnZlc3Rp
-Z2F0ZWQgYSBiaXQgYW5kIGkgaGF2ZSBmb3VuZCB0aGF0IGFsc28gd2l0aCAyLjYuMTkgaXQKPiA+
-IHdvcmtlZCwgd2hpbGUgd2l0aCAyLjYuMjAgaXQgc3RvcHBlZCB3b3JraW5nIChpIGRpZG4ndCB0
-cnkgYmV0d2Vlbgo+ID4gMi42LjIwIGFuZCAyLjYuMzYtcmM0IGJ1dCBpZiBpdCdzIGhlbHBmdWwg
-aSBjYW4gZG8gaXQpLgo+ID4gVGhlIG9ubHkgd2F5IHRvIHNvbHZlIG15IHByb2JsZW0gd2FzIHRv
-ICdwYXRjaCcgdGhlIGZpbGUKPiA+IGRyaXZlcnMvTWFrZWZpbGUsIG1vdmluZyB0aGUgbW1jLm8g
-b2JqZWN0IGZpbGUgdXB3YXJkOyBoZXJlIGlzIGEKPiA+IHNvcnQgb2YgJ3BhdGNoJywgYnV0IGkg
-cmVncmV0IGluIGFkdmFuY2UgZm9yIHNvbWUgJ3Bvc3NpYmxlJyAoaSBoYWQKPiA+IHRvIHdyaXRl
-ICdzdXJlJywgYnV0IGkgbGlrZSB0byBiZSBtb2Rlc3QgcGVyc29uLi4uLikgc3ludGF4Cj4gPiBt
-aXN0YWtlLCBidXQgaSdtIG5vdCBpbiBoYWJiaXQgd2l0aCBwYXRjaGVzLi4uOgo+ID4gCj4gPiAg
-LS0tIGEvZHJpdmVycy9NYWtlZmlsZQo+ID4gICsrKyBiL2RyaXZlcnMvTWFrZWZpbGUKPiA+ICBA
-QCAtNDQsNyArNDQsOCBAQAo+ID4gICBvYmoteSAgICAgICAgICAgICAgICArPSBtYWNpbnRvc2gv
-Cj4gPiAgIG9iai0kKENPTkZJR19JREUpICAgICAgICArPSBpZGUvCj4gPiAgIG9iai0kKENPTkZJ
-R19TQ1NJKSAgICAgICAgKz0gc2NzaS8KPiA+ICAgb2JqLSQoQ09ORklHX0FUQSkgICAgICAgICs9
-IGF0YS8KPiA+ICAgb2JqLSQoQ09ORklHX01URCkgICAgICAgICs9IG10ZC8KPiA+ICAgb2JqLSQo
-Q09ORklHX1NQSSkgICAgICAgICs9IHNwaS8KPiA+ICArb2JqLSQoQ09ORklHX01NQykgICAgICAg
-ICs9IG1tYy8KPiA+ICAgb2JqLXkgICAgICAgICAgICAgICAgKz0gbmV0Lwo+ID4gIEBAIC05Miw5
-ICs5Myw4IEBACj4gPiAgIG9iai15ICAgICAgICAgICAgICAgICs9IGxndWVzdC8KPiA+ICAgb2Jq
-LSQoQ09ORklHX0NQVV9GUkVRKSAgICAgICAgKz0gY3B1ZnJlcS8KPiA+ICAgb2JqLSQoQ09ORklH
-X0NQVV9JRExFKSAgICAgICAgKz0gY3B1aWRsZS8KPiA+ICAtb2JqLSQoQ09ORklHX01NQykgICAg
-ICAgICs9IG1tYy8KPiA+ICAgb2JqLSQoQ09ORklHX01FTVNUSUNLKSAgICAgICAgKz0gbWVtc3Rp
-Y2svCj4gPiAgIG9iai0kKENPTkZJR19ORVdfTEVEUykgICAgICAgICs9IGxlZHMvCj4gPiAgIG9i
-ai0kKENPTkZJR19JTkZJTklCQU5EKSAgICArPSBpbmZpbmliYW5kLwo+ID4gICBvYmotJChDT05G
-SUdfU0dJX1NOKSAgICAgICAgKz0gc24vCj4gPiAgIG9iai15ICAgICAgICAgICAgICAgICs9IGZp
-cm13YXJlLwo+ID4gCj4gPiBzdGF0ZWQgdGhhdCBpdCdzIG5vdCBjbGVhciB0byBtZSB3aHkgd2hl
-biBpIGRvbid0IHRyeSB0byBib290IHRoZQo+ID4gcm9vdGZzIGRpcmVjdGx5IGZyb20gdGhlIFNE
-LCBpdHMgZHJpdmVyIGNvbWVzIHVwIGluIHRoZSByaWdodCB3YXksCj4gPiBhbmQgdGhlIFNEIHdv
-cmtzLCB3aGlsZSB3aGVuIGkgdHJ5IHRvIGJvb3QgdGhlIHJvb3RmcyBmcm9tIHRoZSBTRCBpCj4g
-PiBjYW5ub3QgZ2V0IHRoaW5ncyB0byB3b3JrIChtYXliZSB0aGUgZGV2aWNlIGlzIG5vdCB1cCB5
-ZXQgd2hlbiB0aGUKPiA+IFZGUyB0cnlpZXMgdG8gY29tZSB1cCBpbiBmYWN0IGluIHN1Y2ggYSBz
-aXR1YXRpb24gaSBjYW5ub3QgcmVhZCBhbnkKPiA+IGxvZyBhYm91dCBtbWMwIGRldmljZSEpLCBp
-IHdhcyB3b25kZXJpbmcgaWYgdGhpcyBwYXRjaCBjb3VsZCBiZQo+ID4gZmFpciBvciBtYXliZSAo
-cHJvYmFibHkpIGknbSBtaXNzaW5nIHNvbWUgcG90ZW50aWFsIHNpZGUgZWZmZWN0cz8/Pwo+ID4g
-YW55IGhpbnQgd2lsbCBiZSBhcHByZWNpYXRlZCEhIQo+ID4gdGhhbmtzIGFuZCBieWUKPiA+IAo+
-ID4gLQo+ID4gCj4gPiBkeWxhbiBjcmlzdGlhbmkKPiA+IAo+ID4gLS0KPiA+IEZvcnR1bmF0ZWx5
-IEnigJl2ZSBiZWVuIGFkaGVyaW5nIHRvIGEgcHJldHR5IHN0cmljdCwgdWgsIGRydWcgcmVnaW1l
-bgo+ID4gdG8ga2VlcCBteSBtaW5kLCB5b3Uga25vdywgdWgsIGxpbWJlci4uLgo+ID4gLS0tCj4g
-Cj4gSXQgc2VlbXMgeW91J3JlIG1pc3Npbmcgcm9vdGRlbGF5PVswLTldKyBhcmd1bWVudCB0byBr
-ZXJuZWwKeW91IHNjb3JlZCBhIGdyZWF0IGdvbCBWYXNpbHksIHNpbXBseSBhZGRpbmcKcm9vdGRl
-YWx5PTEKdG8gbXkgYm9vdCBjb21tYW5kIGxpbmUgc29sdmVkIHRoZSBpc3N1ZSEhIQoKdGhhbmtz
-IGEgbWlsbGlvbiBhbmQgdWhtLi4uLmkgd2Fzbid0IG1pc3NpbmcgaXQsIGl0IHdhcyBqdXN0IGEg
-cXVlc3Rpb24Kb2YgaW5maW5pdGUgaWdub3JhbmNlIG9mIG1pbmUuLi4uc29ycnkgZm9yIG5vaXNl
-ISEhCgpkeWxhbgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5p
-bmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8v
-bGludXgtYXJtLWtlcm5lbAo=
+
+--WHz+neNWvhIGAO8A
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Sep 28, 2010 at 06:54:47AM -0700, Philip Rakity wrote:
+
+> taking this off line for a bit (if you don't mind)
+
+Actually, I do. Going back to the list.
+
+> I really like what you are doing but it does not go far enough.  The
+> controller I work on is somewhat funny and broken.  It needs to do
+> either pre or post processing for some of the calls.
+
+I never claimed that my current patchset should solve all issues. It
+deals with some issues I encountered (and then some more, because there
+were similar issues on the list), and tries to push things in the right
+direction. Most of us are just working on one specific driver, so we
+have to live with a slow, step-by-step procedure. I tried to get some
+funding for general, large scale cleanup work, but did not get any
+response, so far.
+
+> For reset for example --- I need to check if the reset is RESET_DAT
+> and handle that differently then RESET_CMD.  If RESET_ALL I need to do
+> post processing to restore the controller private registers.
+
+I know the reset-routine probably needs another hook. I think it was
+Alan who also mentioned some requirements for it. But besides this, I am
+not going to dive deeply into that topic (at least for now). It is too
+specific for me at the moment.
+
+Quite frankly, I am a bit overwhelmed by the massive request of guidance
+for pltfm-specific drivers and I cannot provide this anymore at this
+level as long as I have other work to do (which allows me to buy the
+bread). As a result, I will continue reviewing and such but it will take
+longer.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--WHz+neNWvhIGAO8A
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkyiAJYACgkQD27XaX1/VRueOQCgtrtL8bjxuOFkyi2WgsQJ4ODG
+KFcAninHr+59yXSWb/9fJUrX6druMTEi
+=a043
+-----END PGP SIGNATURE-----
+
+--WHz+neNWvhIGAO8A--
