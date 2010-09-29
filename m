@@ -1,201 +1,79 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 6/6] mmc: sdhci-pltfm: add pltfm-driver for imx35/51
-Date: Wed, 29 Sep 2010 21:14:19 +0100
-Message-ID: <20100929201419.GA27009@void.printf.net>
-References: <1285790884-3516-1-git-send-email-w.sang@pengutronix.de> <1285790884-3516-7-git-send-email-w.sang@pengutronix.de>
+From: =?UTF-8?B?UmljaGFyZCBSw7ZqZm9ycw==?=
+ <richard.rojfors@pelagicore.com>
+Subject: Re: [PATCH 1/6] mmc: sdhci-pltfm: Add structure for host-specific data
+Date: Wed, 29 Sep 2010 23:24:25 +0200
+Message-ID: <4CA3AE89.2030107@pelagicore.com>
+References: <1285790884-3516-1-git-send-email-w.sang@pengutronix.de>
+	<1285790884-3516-2-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54452 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752758Ab0I2UOX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Sep 2010 16:14:23 -0400
-Content-Disposition: inline
-In-Reply-To: <1285790884-3516-7-git-send-email-w.sang@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1285790884-3516-2-git-send-email-w.sang@pengutronix.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Anton Vorontsov <cbouatmailru@gmail.com>, Zhu Richard-R65037 <r65037@freescale.com>, zhangfei gao <zhangfei.gao@gmail.com>, Philip Rakity <prakity@marvell.com>
+Cc: Zhu Richard-R65037 <r65037@freescale.com>, linux-mmc@vger.kernel.org, =?UTF-8?B?UmljaGFyZCBSw7ZqZm9ycw==?= <richard.rojfors.ext@mocean-labs.com>, zhangfei gao <zhangfei.gao@gmail.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Philip Rakity <prakity@marvell.com>, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
-
-On Wed, Sep 29, 2010 at 10:08:04PM +0200, Wolfram Sang wrote:
-> This driver adds basic support for the esdhc-core found on e.g.
-> imx35/51. It adds up to the pltfm-core.
-> 
-> Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
-> Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
-> ---
-> 
-> Changes since last version:
-> 
-> * some more -imx suffixes added
-> * reworked the clock-matching. Now matching the pdev
-> 
->  drivers/mmc/host/Kconfig           |   10 +++
->  drivers/mmc/host/Makefile          |    1 +
->  drivers/mmc/host/sdhci-esdhc-imx.c |  143 ++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-pltfm.c     |    3 +
->  drivers/mmc/host/sdhci-pltfm.h     |    1 +
->  5 files changed, 158 insertions(+), 0 deletions(-)
->  create mode 100644 drivers/mmc/host/sdhci-esdhc-imx.c
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 6f12d5d..3c8c286 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -143,6 +143,16 @@ config MMC_SDHCI_MV
->  
->  	  If unsure, say N.
->  
-> +config MMC_SDHCI_ESDHC_IMX
-> +	bool "SDHCI platform support for the Freescale eSDHC i.MX controller"
-> +	depends on MMC_SDHCI_PLTFM
-> +	select MMC_SDHCI_IO_ACCESSORS
-> +	help
-> +	  This selects the Freescale eSDHC controller support on the platform
-> +	  bus, found on platforms like mx35/51.
-> +
-> +	  If unsure, say N.
-> +
->  config MMC_SDHCI_S3C
->  	tristate "SDHCI support on Samsung S3C SoC"
->  	depends on MMC_SDHCI && PLAT_SAMSUNG
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index ef32c32..5f283b5 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -38,6 +38,7 @@ obj-$(CONFIG_MMC_USHC)		+= ushc.o
->  obj-$(CONFIG_MMC_SDHCI_PLTFM)			+= sdhci-platform.o
->  sdhci-platform-y				:= sdhci-pltfm.o
->  sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX)	+= sdhci-cns3xxx.o
-> +sdhci-platform-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
->  
->  obj-$(CONFIG_MMC_SDHCI_OF)	+= sdhci-of.o
->  sdhci-of-y				:= sdhci-of-core.o
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> new file mode 100644
-> index 0000000..68cf78c
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -0,0 +1,143 @@
-> +/*
-> + * Freescale eSDHC i.MX controller driver for the platform bus.
-> + *
-> + * derived from the OF-version.
-> + *
-> + * Copyright (c) 2010 Pengutronix e.K.
-> + *   Author: Wolfram Sang <w.sang@pengutronix.de>
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License.
-> + */
-> +
-> +#include <linux/io.h>
-> +#include <linux/delay.h>
-> +#include <linux/err.h>
-> +#include <linux/clk.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/sdhci-pltfm.h>
-> +#include "sdhci.h"
-> +#include "sdhci-pltfm.h"
-> +#include "sdhci-esdhc.h"
-> +
-> +static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, int reg)
-> +{
-> +	void __iomem *base = host->ioaddr + (reg & ~0x3);
-> +	u32 shift = (reg & 0x3) * 8;
-> +
-> +	writel(((readl(base) & ~(mask << shift)) | (val << shift)), base);
-> +}
-> +
-> +static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
-> +{
-> +	if (unlikely(reg == SDHCI_HOST_VERSION))
-> +		reg ^= 2;
-> +
-> +	return readw(host->ioaddr + reg);
-> +}
-> +
-> +static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +
-> +	switch (reg) {
-> +	case SDHCI_TRANSFER_MODE:
-> +		/*
-> +		 * Postpone this write, we must do it together with a
-> +		 * command write that is down below.
-> +		 */
-> +		pltfm_host->scratchpad = val;
-> +		return;
-> +	case SDHCI_COMMAND:
-> +		writel(val << 16 | pltfm_host->scratchpad,
-> +			host->ioaddr + SDHCI_TRANSFER_MODE);
-> +		return;
-> +	case SDHCI_BLOCK_SIZE:
-> +		val &= ~SDHCI_MAKE_BLKSZ(0x7, 0);
-> +		break;
-> +	}
-> +	esdhc_clrset_le(host, 0xffff, val, reg);
-> +}
-> +
-> +static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
-> +{
-> +	u32 new_val;
-> +
-> +	switch (reg) {
-> +	case SDHCI_POWER_CONTROL:
-> +		/*
-> +		 * FSL put some DMA bits here
-> +		 * If your board has a regulator, code should be here
-> +		 */
-> +		return;
-> +	case SDHCI_HOST_CONTROL:
-> +		/* FSL messed up here, so we can just keep those two */
-> +		new_val = val & (SDHCI_CTRL_LED | SDHCI_CTRL_4BITBUS);
-> +		/* ensure the endianess */
-> +		new_val |= ESDHC_HOST_CONTROL_LE;
-> +		/* DMA mode bits are shifted */
-> +		new_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
-> +
-> +		esdhc_clrset_le(host, 0xffff, new_val, reg);
-> +		return;
-> +	}
-> +	esdhc_clrset_le(host, 0xff, val, reg);
-> +}
-> +
-> +static unsigned int esdhc_pltfm_get_max_clock(struct sdhci_host *host)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +
-> +	return clk_get_rate(pltfm_host->clk);
-> +}
-> +
-> +static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +
-> +	return clk_get_rate(pltfm_host->clk) / 256 / 16;
-> +}
-> +
-> +static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pdata)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct clk *clk;
-> +
-> +	clk = clk_get(mmc_dev(host->mmc), NULL);
-> +	if (IS_ERR(clk)) {
-> +		dev_err(mmc_dev(host->mmc), "clk err\n");
-> +		return -ENODEV;
-> +	}
-
-Is there a reason to return -ENODEV instead of PTR_ERR(clk)?
-
-Patchset is looking good, thanks very much for keeping work going
-on -pltfm,
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+T24gMDkvMjkvMjAxMCAxMDowNyBQTSwgV29sZnJhbSBTYW5nIHdyb3RlOgo+IFdlIG5lZWQgdG8g
+Y2Fycnkgc29tZSBpbmZvcm1hdGlvbiBwZXIgaG9zdCwgZS5nLiB0aGUgY2xvY2suIEFkZCBhCj4g
+c3RydWN0dXJlIGZvciBpdCBhbmQgaW5pdGlhbGl6ZSBpdCBpbiB0aGUgZ2VuZXJpYyBwYXJ0LiBB
+bHNvIGRvIG5vdCB1c2UKPiB0aGUgcGFyZW50IG9mIHRoZSBwbGF0Zm9ybV9kZXZpY2UgKGlmIGl0
+IGlzIGF2YWlsYWJsZSksIHRoaXMgYnJlYWtzIHRoZQo+IGNsb2NrLW1hdGNoaW5nIG9uIEFSTS4K
+ClRoZSByZWFzb24gaXQncyB0aGVyZSBpcyBmb3IgaW5zdGFuY2UgYSBjYXNlIHdoZW4gdGhlIHNo
+ZGNpIGRldmljZSBpcyBleHBvc2VkCmZyb20gYSBNRkQgZGV2aWNlIHdoaWNoIHNpdHMgb24gdG9w
+IG9mIFBDSS4gVGhlbiB0aGUgcGFyZW50IChQQ0kgZGV2aWNlKQppcyB0aGUgZGV2aWNlIHRoYXQg
+aXMgRE1BIGNhcGFibGUuIFRoaXMgcGF0Y2ggd2lsbCBicmVhayBzdWNoIHVzYWdlLgoKV2hhdCBp
+cyB0aGUgcHVycG9zZSBvZiB0aGlzIHBhdGNoPyBZb3UgYWxsb2NhdGUgc3BhY2UgZm9yIGFuIGV4
+dHJhIHN0cnVjdCwKd2hpY2ggeW91IGhhdmUgYSBwb2ludGVyIHBvaW50aW5nIHRvLCBidXQgeW91
+IG5ldmVyIHVzZSB0aGUgcG9pbnRlcj8KCj4KPiBTaWduZWQtb2ZmLWJ5OiBXb2xmcmFtIFNhbmc8
+dy5zYW5nQHBlbmd1dHJvbml4LmRlPgo+IENjOiBSaWNoYXJkIFLDtmpmb3JzPHJpY2hhcmQucm9q
+Zm9ycy5leHRAbW9jZWFuLWxhYnMuY29tPgo+IC0tLQo+Cj4gQ2hhbmdlcyBzaW5jZSBsYXN0IHZl
+cnNpb246Cj4KPiAqIGFkZGVkIHR5cGVzLmgKCkkgc2F3IG5vIHR5cGVzLmg/Cgo+ICogcmVtb3Zl
+ZCB1c2FnZSBvZiBwZGV2LT5kZXYucGFyZW50IHRvIGVuc3VyZSBjbGstbWF0Y2hpbmcKPiAgICBQ
+bGVhc2Ugc3BlYWsgdXAgaWYgdGhpcyBoYXMgYSB1c2UgY2FzZSBJIGZhaWxlZCB0byBzZWUhCj4K
+PiAgIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uYyB8ICAgIDggKysrKy0tLS0KPiAgIGRy
+aXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uaCB8ICAgIDcgKysrKysrKwo+ICAgMiBmaWxlcyBj
+aGFuZ2VkLCAxMSBpbnNlcnRpb25zKCspLCA0IGRlbGV0aW9ucygtKQo+Cj4gZGlmZiAtLWdpdCBh
+L2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kt
+cGx0Zm0uYwo+IGluZGV4IGUwNDVlM2MuLjA5NWNhOWQgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9t
+bWMvaG9zdC9zZGhjaS1wbHRmbS5jCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wbHRm
+bS5jCj4gQEAgLTU1LDYgKzU1LDcgQEAgc3RhdGljIGludCBfX2RldmluaXQgc2RoY2lfcGx0Zm1f
+cHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKPiAgIAlzdHJ1Y3Qgc2RoY2lfcGx0
+Zm1fZGF0YSAqcGRhdGEgPSBwZGV2LT5kZXYucGxhdGZvcm1fZGF0YTsKPiAgIAljb25zdCBzdHJ1
+Y3QgcGxhdGZvcm1fZGV2aWNlX2lkICpwbGF0aWQgPSBwbGF0Zm9ybV9nZXRfZGV2aWNlX2lkKHBk
+ZXYpOwo+ICAgCXN0cnVjdCBzZGhjaV9ob3N0ICpob3N0Owo+ICsJc3RydWN0IHNkaGNpX3BsdGZt
+X2hvc3QgKnBsdGZtX2hvc3Q7Cj4gICAJc3RydWN0IHJlc291cmNlICppb21lbTsKPiAgIAlpbnQg
+cmV0Owo+Cj4gQEAgLTcxLDE2ICs3MiwxNSBAQCBzdGF0aWMgaW50IF9fZGV2aW5pdCBzZGhjaV9w
+bHRmbV9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQo+ICAgCQlkZXZfZXJyKCZw
+ZGV2LT5kZXYsICJJbnZhbGlkIGlvbWVtIHNpemUuIFlvdSBtYXkgIgo+ICAgCQkJImV4cGVyaWVu
+Y2UgcHJvYmxlbXMuXG4iKTsKPgo+IC0JaWYgKHBkZXYtPmRldi5wYXJlbnQpCj4gLQkJaG9zdCA9
+IHNkaGNpX2FsbG9jX2hvc3QocGRldi0+ZGV2LnBhcmVudCwgMCk7Cj4gLQllbHNlCj4gLQkJaG9z
+dCA9IHNkaGNpX2FsbG9jX2hvc3QoJnBkZXYtPmRldiwgMCk7Cj4gKwlob3N0ID0gc2RoY2lfYWxs
+b2NfaG9zdCgmcGRldi0+ZGV2LCBzaXplb2YoKnBsdGZtX2hvc3QpKTsKPgo+ICAgCWlmIChJU19F
+UlIoaG9zdCkpIHsKPiAgIAkJcmV0ID0gUFRSX0VSUihob3N0KTsKPiAgIAkJZ290byBlcnI7Cj4g
+ICAJfQo+Cj4gKwlwbHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsKPiArCj4gICAJaG9zdC0+
+aHdfbmFtZSA9ICJwbGF0Zm9ybSI7Cj4gICAJaWYgKHBkYXRhJiYgIHBkYXRhLT5vcHMpCj4gICAJ
+CWhvc3QtPm9wcyA9IHBkYXRhLT5vcHM7Cj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qv
+c2RoY2ktcGx0Zm0uaCBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uaAo+IGluZGV4IDkw
+MGYzMjkuLjkzYTAzMTkgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wbHRm
+bS5oCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wbHRmbS5oCj4gQEAgLTExLDggKzEx
+LDE1IEBACj4gICAjaWZuZGVmIF9EUklWRVJTX01NQ19TREhDSV9QTFRGTV9ICj4gICAjZGVmaW5l
+IF9EUklWRVJTX01NQ19TREhDSV9QTFRGTV9ICj4KPiArI2luY2x1ZGU8bGludXgvY2xrLmg+Cj4g
+KyNpbmNsdWRlPGxpbnV4L3R5cGVzLmg+Cj4gICAjaW5jbHVkZTxsaW51eC9zZGhjaS1wbHRmbS5o
+Pgo+Cj4gK3N0cnVjdCBzZGhjaV9wbHRmbV9ob3N0IHsKPiArCXN0cnVjdCBjbGsgKmNsazsKPiAr
+CXUzMiBzY3JhdGNocGFkOyAvKiB0byBoYW5kbGUgcXVpcmtzIGFjcm9zcyBpby1hY2Nlc3NvciBj
+YWxscyAqLwo+ICt9Owo+ICsKPiAgIGV4dGVybiBzdHJ1Y3Qgc2RoY2lfcGx0Zm1fZGF0YSBzZGhj
+aV9jbnMzeHh4X3BkYXRhOwo+Cj4gICAjZW5kaWYgLyogX0RSSVZFUlNfTU1DX1NESENJX1BMVEZN
+X0ggKi8KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxp
+bnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFk
+ZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4
+LWFybS1rZXJuZWwK
