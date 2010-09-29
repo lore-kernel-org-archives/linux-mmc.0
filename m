@@ -1,386 +1,213 @@
-From: Zhu Richard-R65037 <r65037@freescale.com>
-Subject: RE: [PATCH 6/6] mmc: sdhci-pltfm: add pltfm-driver for imx35/51
-Date: Wed, 29 Sep 2010 11:41:29 +0800
-Message-ID: <A88EF4D64D8447468743DC1503C0B6CA0D4E8D@zch01exm22.fsl.freescale.net>
-References: <1285677406-3359-1-git-send-email-w.sang@pengutronix.de><1285677406-3359-7-git-send-email-w.sang@pengutronix.de><AANLkTikHMXV+Bkg=fQEhw-2WszT3PeKwWvswrE-7h1EM@mail.gmail.com><20100928205701.GK27885@trinity.fluff.org><AANLkTik6kNgm4vhJVyMq+HOA_QAXJtzs3BFpY3-91fkW@mail.gmail.com><A88EF4D64D8447468743DC1503C0B6CA0D4E69@zch01exm22.fsl.freescale.net> <AANLkTik62D8hsNyLsivTKX=jyVKih7kcJsGdrB0yFrxh@mail.gmail.com>
+From: "Ghorai, Sukumar" <s-ghorai@ti.com>
+Subject: RE: [PATCH] mmc: failure of block read wait for long time
+Date: Wed, 29 Sep 2010 11:29:18 +0530
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B03564763C8@dbde02.ent.ti.com>
+References: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com>
+	<4C8A2C5D.2050408@nokia.com>
+	<2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com>
+	<4C971320.7050906@nokia.com>
+	<2A3DCF3DA181AD40BDE86A3150B27B6B03160624F6@dbde02.ent.ti.com>
+	<4C974A5D.5050608@nokia.com>
+	<2A3DCF3DA181AD40BDE86A3150B27B6B03160626B5@dbde02.ent.ti.com>
+	<4C975CFB.6070907@nokia.com>
+	<20100920133703.GC30793@n2100.arm.linux.org.uk>
+	<2A3DCF3DA181AD40BDE86A3150B27B6B031610E332@dbde02.ent.ti.com>
+	<20100922124309.GA15699@void.printf.net>
+	<2A3DCF3DA181AD40BDE86A3150B27B6B03560991F7@dbde02.ent.ti.com>
+	<4CA234C4.8070907@nokia.com>
+	<2A3DCF3DA181AD40BDE86A3150B27B6B0356476230@dbde02.ent.ti.com>
+	<4CA24A7B.2070005@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:47763
-	"EHLO VA3EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751462Ab0I2Dlk convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Sep 2010 23:41:40 -0400
-Received: from mail105-va3 (localhost.localdomain [127.0.0.1])	by
- mail105-va3-R.bigfish.com (Postfix) with ESMTP id 9961D12C0294	for
- <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2010 03:41:36 +0000 (UTC)
-Received: from VA3EHSMHS030.bigfish.com (unknown [10.7.14.236])	by
- mail105-va3.bigfish.com (Postfix) with ESMTP id 8C503CC8055	for
- <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2010 03:41:35 +0000 (UTC)
-Received: from de01smr01.freescale.net (de01smr01.freescale.net [10.208.0.31])
-	by de01egw01.freescale.net (8.14.3/8.14.3) with ESMTP id o8T3fWS9008674	for
- <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2010 20:41:32 -0700 (MST)
-Received: from zch01exm22.fsl.freescale.net (zch01exm22.ap.freescale.net
- [10.192.129.206])	by de01smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
- o8T3uAYw003471	for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2010 22:56:11
- -0500 (CDT)
-Content-Class: urn:content-classes:message
-In-Reply-To: <AANLkTik62D8hsNyLsivTKX=jyVKih7kcJsGdrB0yFrxh@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <4CA24A7B.2070005@nokia.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Ben Dooks <ben@trinity.fluff.org>, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Philip Rakity <prakity@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Saeed Bishara <saeed@marvell.com>
 
 
 
 > -----Original Message-----
-> From: zhangfei gao [mailto:zhangfei.gao@gmail.com]
-> Sent: Wednesday, September 29, 2010 11:22 AM
-> To: Zhu Richard-R65037
-> Cc: Ben Dooks; Wolfram Sang; linux-mmc@vger.kernel.org; Anton Voronts=
-ov;
-> Philip Rakity; Eric Miao; Haojian Zhuang; Saeed Bishara
-> Subject: Re: [PATCH 6/6] mmc: sdhci-pltfm: add pltfm-driver for imx35=
-/51
->=20
-> On Wed, Sep 29, 2010 at 10:27 AM, Zhu Richard-R65037
-> <r65037@freescale.com> wrote:
-> >
+> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
+> Sent: Wednesday, September 29, 2010 1:35 AM
+> To: Ghorai, Sukumar
+> Cc: Chris Ball; linux-mmc@vger.kernel.org; linux-arm-
+> kernel@lists.infradead.org; Russell King - ARM Linux
+> Subject: Re: [PATCH] mmc: failure of block read wait for long time
+> 
+> On 28/09/10 21:59, ext Ghorai, Sukumar wrote:
+> > Adrian,
 > >
 > >> -----Original Message-----
-> >> From: zhangfei gao [mailto:zhangfei.gao@gmail.com]
-> >> Sent: Wednesday, September 29, 2010 10:00 AM
-> >> To: Ben Dooks
-> >> Cc: Wolfram Sang; linux-mmc@vger.kernel.org; Anton Vorontsov; Zhu
-> >> Richard-R65037; Philip Rakity; Eric Miao; Haojian Zhuang; Saeed
-> >> Bishara
-> >> Subject: Re: [PATCH 6/6] mmc: sdhci-pltfm: add pltfm-driver for
-> >> imx35/51
+> >> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
+> >> Sent: Wednesday, September 29, 2010 12:03 AM
+> >> To: Ghorai, Sukumar
+> >> Cc: Chris Ball; linux-mmc@vger.kernel.org; linux-arm-
+> >> kernel@lists.infradead.org; Russell King - ARM Linux
+> >> Subject: Re: [PATCH] mmc: failure of block read wait for long time
 > >>
-> >> On Wed, Sep 29, 2010 at 4:57 AM, Ben Dooks <ben@trinity.fluff.org>
-> wrote:
-> >> > On Tue, Sep 28, 2010 at 10:04:14AM -0400, zhangfei gao wrote:
-> >> >> On Tue, Sep 28, 2010 at 8:36 AM, Wolfram Sang
-> >> >> <w.sang@pengutronix.de>
-> >> wrote:
-> >> >> > This driver adds basic support for the esdhc-core found on e.=
-g.
-> >> >> > imx35/51. It adds up to the pltfm-core.
-> >> >> >
-> >> >> > Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
-> >> >> > ---
-> >> >> >
-> >> >> > Changes since last version:
-> >> >> >
-> >> >> > * some "-imx" suffixes added
-> >> >> > * some cosmetic improvements
-> >> >> >
-> >> >> > Thanks to Anton for those.
-> >> >> >
-> >> >> > =A0drivers/mmc/host/Kconfig =A0 =A0 =A0 =A0 =A0 | =A0 10 +++
-> >> >> > =A0drivers/mmc/host/Makefile =A0 =A0 =A0 =A0 =A0| =A0 =A01 +
-> >> >> > =A0drivers/mmc/host/sdhci-esdhc-imx.c | =A0144
-> >> >> > ++++++++++++++++++++++++++++++++++++
-> >> >> > =A0drivers/mmc/host/sdhci-pltfm.c =A0 =A0 | =A0 =A03 +
-> >> >> > =A0drivers/mmc/host/sdhci-pltfm.h =A0 =A0 | =A0 =A01 +
-> >> >> > =A05 files changed, 159 insertions(+), 0 deletions(-)
-> >> >> > =A0create mode 100644 drivers/mmc/host/sdhci-esdhc-imx.c
-> >> >> >
-> >> >> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kcon=
-fig
-> >> >> > index 6f12d5d..815bf0f 100644
-> >> >> > --- a/drivers/mmc/host/Kconfig
-> >> >> > +++ b/drivers/mmc/host/Kconfig
-> >> >> > @@ -143,6 +143,16 @@ config MMC_SDHCI_MV
-> >> >> >
-> >> >> > =A0 =A0 =A0 =A0 =A0If unsure, say N.
-> >> >> >
-> >> >> > +config MMC_SDHCI_ESDHC
-> >> >> > + =A0 =A0 =A0 bool "SDHCI platform support for the Freescale =
-eSDHC
-> >> controller"
-> >> >> > + =A0 =A0 =A0 depends on MMC_SDHCI_PLTFM
-> >> >> > + =A0 =A0 =A0 select MMC_SDHCI_IO_ACCESSORS
-> >> >> > + =A0 =A0 =A0 help
-> >> >> > + =A0 =A0 =A0 =A0 This selects the Freescale eSDHC controller=
- support on
-> >> >> > +the platform
-> >> >> > + =A0 =A0 =A0 =A0 bus, found on platforms like mx35/51.
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 =A0 If unsure, say N.
-> >> >> > +
-> >> >> > =A0config MMC_SDHCI_S3C
-> >> >> > =A0 =A0 =A0 =A0tristate "SDHCI support on Samsung S3C SoC"
-> >> >> > =A0 =A0 =A0 =A0depends on MMC_SDHCI && PLAT_SAMSUNG diff --gi=
-t
-> >> >> > a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile index
-> >> >> > ef32c32..5294425 100644
-> >> >> > --- a/drivers/mmc/host/Makefile
-> >> >> > +++ b/drivers/mmc/host/Makefile
-> >> >> > @@ -38,6 +38,7 @@ obj-$(CONFIG_MMC_USHC) =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0+=3D
-> >> >> > ushc.o
-> >> >> > =A0obj-$(CONFIG_MMC_SDHCI_PLTFM) =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0+=3D
-> >> >> > sdhci-platform.o
-> >> >> > =A0sdhci-platform-y =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 :=3D sdhci-pltfm.o
-> >> >> > =A0sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX) =A0 =A0 +=3D
-> >> >> > sdhci-cns3xxx.o
-> >> >> > +sdhci-platform-$(CONFIG_MMC_SDHCI_ESDHC) =A0 =A0 =A0 +=3D
-> >> >> > +sdhci-esdhc-imx.o
-> >> >> >
-> >> >> > =A0obj-$(CONFIG_MMC_SDHCI_OF) =A0 =A0 +=3D sdhci-of.o
-> >> >> > =A0sdhci-of-y =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 :=3D sdhci-of-core.o diff
-> >> >> > --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-> >> >> > b/drivers/mmc/host/sdhci-esdhc-imx.c
-> >> >> > new file mode 100644
-> >> >> > index 0000000..c43d448
-> >> >> > --- /dev/null
-> >> >> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> >> >> > @@ -0,0 +1,144 @@
-> >> >> > +/*
-> >> >> > + * Freescale eSDHC controller driver for the platform bus.
-> >> >> > + *
-> >> >> > + * derived from the OF-version.
-> >> >> > + *
-> >> >> > + * Copyright (c) 2010 Pengutronix e.K.
-> >> >> > + * =A0 Author: Wolfram Sang <w.sang@pengutronix.de>
-> >> >> > + *
-> >> >> > + * This program is free software; you can redistribute it
-> >> >> > +and/or modify
-> >> >> > + * it under the terms of the GNU General Public License as
-> >> >> > +published by
-> >> >> > + * the Free Software Foundation; either version 2 of the Lic=
-ense.
-> >> >> > + */
-> >> >> > +
-> >> >> > +#include <linux/io.h>
-> >> >> > +#include <linux/delay.h>
-> >> >> > +#include <linux/err.h>
-> >> >> > +#include <linux/clk.h>
-> >> >> > +#include <linux/mmc/host.h>
-> >> >> > +#include <linux/mmc/sdhci-pltfm.h> #include "sdhci.h"
-> >> >> > +#include "sdhci-pltfm.h"
-> >> >> > +#include "sdhci-esdhc.h"
-> >> >> > +
-> >> >> > +static inline void esdhc_clrset_le(struct sdhci_host *host, =
-u32
-> >> >> > +mask, u32 val, int reg) {
-> >> >> > + =A0 =A0 =A0 void __iomem *base =3D host->ioaddr + (reg & ~0=
-x3);
-> >> >> > + =A0 =A0 =A0 u32 shift =3D (reg & 0x3) * 8;
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 writel(((readl(base) & ~(mask << shift)) | (val=
- <<
-> >> >> > +shift)), base); }
-> >> >> > +
-> >> >> > +static u16 esdhc_readw_le(struct sdhci_host *host, int reg) =
-{
-> >> >> > + =A0 =A0 =A0 if (unlikely(reg =3D=3D SDHCI_HOST_VERSION))
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg ^=3D 2;
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 return readw(host->ioaddr + reg); }
-> >> >> > +
-> >> >> > +static void esdhc_writew_le(struct sdhci_host *host, u16 val=
-,
-> >> >> > +int
-> >> >> > +reg) {
-> >> >> > + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_p=
-riv(host);
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 switch (reg) {
-> >> >> > + =A0 =A0 =A0 case SDHCI_TRANSFER_MODE:
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Postpone this write, we mu=
-st do it together
-> >> >> > +with a
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* command write that is down=
- below.
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pltfm_host->scratchpad =3D val;
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> >> >> > + =A0 =A0 =A0 case SDHCI_COMMAND:
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 writel(val << 16 | pltfm_host->=
-scratchpad,
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ioaddr + =
-SDHCI_TRANSFER_MODE);
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> >> >> > + =A0 =A0 =A0 case SDHCI_BLOCK_SIZE:
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 val &=3D ~SDHCI_MAKE_BLKSZ(0x7,=
- 0);
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
-> >> >> > + =A0 =A0 =A0 }
-> >> >> > + =A0 =A0 =A0 esdhc_clrset_le(host, 0xffff, val, reg); }
-> >> >> > +
-> >> >> > +static void esdhc_writeb_le(struct sdhci_host *host, u8 val,
-> >> >> > +int
-> >> >> > +reg) {
-> >> >> > + =A0 =A0 =A0 u32 new_val;
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 switch (reg) {
-> >> >> > + =A0 =A0 =A0 case SDHCI_POWER_CONTROL:
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* FSL put some DMA bits here
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* If your board has a regula=
-tor, code should be
-> >> >> > + here
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> >> >> > + =A0 =A0 =A0 case SDHCI_HOST_CONTROL:
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* FSL messed up here, so we ca=
-n just keep those
-> >> >> > + two */
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 new_val =3D val & (SDHCI_CTRL_L=
-ED |
-> >> >> > + SDHCI_CTRL_4BITBUS);
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* ensure the endianess */
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 new_val |=3D ESDHC_HOST_CONTROL=
-_LE;
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* DMA mode bits are shifted */
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 new_val |=3D (val & SDHCI_CTRL_=
-DMA_MASK) << 5;
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 esdhc_clrset_le(host, 0xffff, n=
-ew_val, reg);
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> >> >> > + =A0 =A0 =A0 }
-> >> >> > + =A0 =A0 =A0 esdhc_clrset_le(host, 0xff, val, reg); }
-> >> >> > +
-> >> >> > +static unsigned int esdhc_pltfm_get_max_clock(struct sdhci_h=
-ost
-> >> >> > +*host) {
-> >> >> > + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_p=
-riv(host);
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 return clk_get_rate(pltfm_host->clk); }
-> >> >> > +
-> >> >> > +static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_h=
-ost
-> >> >> > +*host) {
-> >> >> > + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_p=
-riv(host);
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 return clk_get_rate(pltfm_host->clk) / 256 / 16=
-; }
-> >> >
-> >> > the above always confuses me, how about a / (b * c) or similar?
-> >> >
-> >> >> > +static int esdhc_pltfm_init(struct sdhci_host *host,
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct sdhci_pltfm_data *pdata,=
- void
-> >> >> > +*priv_pdata) {
-> >> >> > + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_p=
-riv(host);
-> >> >> > + =A0 =A0 =A0 struct clk *clk;
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 clk =3D clk_get(NULL, "sdhc");
-> >> >>
-> >> >> Here only could support one device, how about several device, f=
-or
-> >> >> example sdhc.0, sdhc.1 sdhc.2, if using this method, they will =
-get
-> >> >> the first clock.
-> >> >> Then sdhc.1 sdhc.2 can not work.
-> >> >
-> >> > No, clk_get() should be passed the device and a NULL for prefere=
-nce.
-> >> >
-> >> > The main match should be made on the device, and the name is an
-> >> > optional distinguisher for devices that have multiple clock sour=
-ces.
+> >> On 28/09/10 18:03, Ghorai, Sukumar wrote:
+> >>> Chris and Adrian,
+> >>>
+> >>> [..snip..]
+> >>>>
+> >>>> Chris and Adrian,
+> >>>>
+> >>>> [..snip..]
+> >>>>>
+> >>>>>> -----Original Message-----
+> >>> [..snip..]
+> >>>>>> Subject: Re: [PATCH] mmc: failure of block read wait for long time
+> >>>>>>
+> >>>>>> On Wed, Sep 22, 2010 at 11:02:08AM +0530, Ghorai, Sukumar wrote:
+> >>>>>>> Would you please review and merge this patch [1] (attached too)?
+> >>>>>>> [1] http://comments.gmane.org/gmane.linux.kernel.mmc/2714
+> >>>>>>
+> >>>>>> I've been following the thread.  I believe Adrian has NACKed this
+> >>>> patch,
+> >>>>>> by saying "It is absolutely unacceptable to return I/O errors to
+> the
+> >>>>>> upper layers for segments that do not have errors."
+> >>>>>
+> >>>>> [Ghorai]
+> >>>>> I think Russell also mentioned his opinion. Would you please add
+> your
+> >>>> idea
+> >>>>> too?
+> >>>>>
+> >>>>> 1. I would prefer Adrian to explain again what this statement means,
+> >> in
+> >>>>> the context - data read fail and how we make it success?
 > >>
-> >> Sorry, not understand,
-> >> If three devices, sdhci,0, sdhci.1, sdhci.2, each device have
-> >> different clock, with different register.
-> >> Pass NULL will not distinguish which device, so can not choose whi=
-ch
-> clk.
+> >> Because I/O requests are made up of segments and every segment can be a
+> >> success or failure.
+> > [Ghorai] don't you conflict your self for the comments you provide for
+> following patch -
+> > [PATCH] MMC: Refine block layer waiting for card state
+> > [Adrian].. then why wait for lots of errors before doing it.
+> 
+> That patch needs a lot more work.  Please do not base your
+> understanding on it.
+[Ghorai] it's the similar problem when read fails and you also suggest how to break early. 
+
+> 
+> >
 > >>
-> > Hi:
-> > How about to add such kind of device_find_child func codes that can
-> > indicated
-> > =A0which dev is requesting the clk.
-> > static int __match_sdhci_imx(struct device *dev, void *data) {
-> > =A0 =A0 =A0 =A0return !strncmp(dev_name(dev), "imx-sdhci", 9); }
->=20
-> They are same effect, what you get is only the first one, imx-sdhci.0
-
-The clk name string can be set and transferred from the private board s=
-pecified platform data.
-We can just use the device_find_child func to find the different dev by=
- dev_id.
-(BTW, the dev.parent would be used when allocate the host.)
-These example codes are used when I verify the functions on the i.MX51 =
-BBG board based on the platform
-Core sdhci-pltfm.c file.
-I found that device can't get the proper clk when the first parameter o=
-f the clk_get func is NULL.
-So I add these codes in my local branch to verify the basic functions o=
-n the i.MX51 board.
-
-One more complementary, the different clocks should have the unified in=
-terfaces although they have the different
-Registers or the configurations.
-
->=20
-> > static int sdhci_imx_init(struct sdhci_host *host) {
-> > =A0 =A0 =A0 =A0struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(h=
-ost);
-> > =A0 =A0 =A0 =A0struct clk *clk;
-> > =A0 =A0 =A0 =A0struct device *dev;
+> >>>>>
+> >>>>> 2. if data read fail for sector(x) why we have to try for
+> >>>>> sector(x+1, ..x+n)?
+> >>
+> >> See answer to q. 1
+> >>
+> >>>>>
+> >>>>> 3. how to inform reader function which sector having the valid data
+> >> out
+> >>>> of
+> >>>>> (1...n) sectors.
+> >>
+> >> __blk_end_request() does that
+> > [Ghorai] not true. Please check the code again.
+> 
+> Every time you call __blk_end_request() you specify success or
+> failure for the specified numbers of bytes starting from the
+> last position.
+> 
 > >
-> > =A0 =A0 =A0 =A0dev =3D device_find_child(mmc_dev(host->mmc), NULL,
-> > __match_sdhci_imx);
-> > =A0 =A0 =A0 =A0clk =3D clk_get(dev, "imx_sdhc_clk");
-> > =A0 =A0 =A0 =A0if (IS_ERR(clk)) {
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_err(mmc_dev(host->mmc), "clk err=
-\n");
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return -ENODEV;
-> > =A0 =A0 =A0 =A0}
-> > =A0 =A0 =A0 =A0clk_enable(clk);
-> > =A0 =A0 =A0 =A0pltfm_host->clk =3D clk;
-> > =A0 =A0 =A0 =A0dev_dbg(dev, "SDHC clock:%lu\n", clk_get_rate(clk));
+> >>
+> >>>>>
+> >>>>> 4. do we have any driver/code in Linux or any other os, which give
+> >>>> inter-
+> >>>>> leave data and return as success?
+> >>
+> >> Here is the problem with that question.  The *same* I/O request
+> >> can have data for *different*sources.
+> > [Ghorai] File system does not do that and can you test that once how
+> data comes from difference soure?
+> > Also conflicting your-self for the input you gave for the patch and as -
+> > [PATCH] MMC: Refine block layer waiting for card state
+> > [Adrian].. then why wait for lots of errors before doing it.
 > >
-> > =A0 =A0 =A0 =A0return 0;
-> > }
-> >> >
-> >> >> > --- a/drivers/mmc/host/sdhci-pltfm.c
-> >> >> > +++ b/drivers/mmc/host/sdhci-pltfm.c
-> >> >> > @@ -169,6 +169,9 @@ static const struct platform_device_id
-> >> >> > sdhci_pltfm_ids[] =3D {
-> >> >> > =A0#ifdef CONFIG_MMC_SDHCI_CNS3XXX
-> >> >> > =A0 =A0 =A0 =A0{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3=
-xxx_pdata
-> >> >> > },
-> >> >> > =A0#endif
-> >> >> > +#ifdef CONFIG_MMC_SDHCI_ESDHC
-> >> >> > + =A0 =A0 =A0 { "sdhci-esdhc-imx",
-> >> >> > +(kernel_ulong_t)&sdhci_esdhc_imx_pdata
-> >> >> > +}, #endif
-> >> >> > =A0 =A0 =A0 =A0{ },
-> >> >
-> >> > I'd much prefer to see these outside of the sdhci-pltfm.c, this
-> >> > sort of #ifdef went out of other drivers with the end of the cav=
-eman.
-> >> >
-> >> > My preference would be to rework the sdhci-pltfm.c to be the 'co=
-re'
-> >> > implementation called by each driver. I'll have a look at postin=
-g
-> >> > some patches to see what can be done to sort this out.
-> >> >
-> >> > --
-> >> > Ben
-> >> >
-> >> > Q: =A0 =A0 =A0What's a light-year?
-> >> > A: =A0 =A0 =A0One-third less calories than a regular year.
-> >> >
-> >> >
-> >
-> >
-> >
+> >>
+> >>>>>
+> >>>> [Ghorai] please reply with your input on my/ Russell's suggestion?
+> >>> [Ghorai] any input?
+> >>
+> >> I have a question for you.  What use cases do you want to address
+> >>    - other than card removal?
+> 
+> Please answer this question.
+[Ghorai] say data error (including timeout), ECC error ..
 
+> 
+> > [Ghorai]
+> > 1. can you reply to original input form Russell's on the same thread?
+> 
+> Russell did not make any suggestions.  He pointed out that some drivers,
+> but not all (and not omap_hsmmc), indicate how many bytes were transferred.
+> However it is difficult for me to explain how this will or will not help
+> if
+> you won't give more information about your use cases.
+[Ghorai] any driver give the interleave data to apps? Can you test if you give the interleave data to FS how it behave? Even it can cause the system fault. And will spend day and night to find out the issue in which module - memory, host, card?
 
+> 
+> For example, in the case of ECC errors, there are usually only a few
+> blocks
+> in error, so only a few of the retries timeout, so retrying is not slow.
+> That is very different in the case the card has been removed, or has
+> become
+> unresponsive - in which case every retry fails and has to timeout.
+> 
+> I still plan to address the card removal issue, but I am very busy, so
+> don't
+> hold your breath.
+[Ghorai] so I will wait for your patch forever.
+> 
+> > 2. can you check if you return the interleave data to FS how it can
+> behave?
+[Ghorai] any time?
+> > 3. still you don't have any reference driver which provide the
+> interleave data.
+> 
+> A single I/O request could have resulted from merging I/O requests from
+> two *different* file systems on two *different* partitions.  I provide as
+> reference every single linux file system.
+[Ghorai] Filesystem never marge two IO in a single request, and if say cache did not support (sync mode)?
+
+[Ghorai] thanks that you want to provide the solution in different way and in different patch. I will wait for your patch forever. In the mean time will take this fix locally for system integration.
+
+And in the mean time I will simulate a case when IO failed in between (say any request to sector number 100 to 200) will return the Data timeout. And will check how system behaves. 
+
+> 
+> >
+> >
+> >>
+> >>>>
+> >>>>>>
+> >>>>>> I think it's possible to merge patches to improve the situation
+> (such
+> >>>>>> as the idea of noticing a card disappearing earlier), but your
+> >> initial
+> >>>>>> patch is not the patch to do that.  You should continue to work
+> with
+> >>>>>> Adrian -- when he's happy that a patch does not break the semantics
+> >>>>>> above, we can consider merging it.
+> >>>>>>
+> >>>>>> Thanks,
+> >>>>>>
+> >>>>>> --
+> >>>>>> Chris Ball<cjb@laptop.org>     <http://printf.net/>
+> >>>>>> One Laptop Per Child
+> >>>
+> >
+> >
