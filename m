@@ -1,213 +1,325 @@
-From: "Ghorai, Sukumar" <s-ghorai@ti.com>
-Subject: RE: [PATCH] mmc: failure of block read wait for long time
-Date: Wed, 29 Sep 2010 11:29:18 +0530
-Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B03564763C8@dbde02.ent.ti.com>
-References: <2A3DCF3DA181AD40BDE86A3150B27B6B0315F026F6@dbde02.ent.ti.com>
-	<4C8A2C5D.2050408@nokia.com>
-	<2A3DCF3DA181AD40BDE86A3150B27B6B0315F0318B@dbde02.ent.ti.com>
-	<4C971320.7050906@nokia.com>
-	<2A3DCF3DA181AD40BDE86A3150B27B6B03160624F6@dbde02.ent.ti.com>
-	<4C974A5D.5050608@nokia.com>
-	<2A3DCF3DA181AD40BDE86A3150B27B6B03160626B5@dbde02.ent.ti.com>
-	<4C975CFB.6070907@nokia.com>
-	<20100920133703.GC30793@n2100.arm.linux.org.uk>
-	<2A3DCF3DA181AD40BDE86A3150B27B6B031610E332@dbde02.ent.ti.com>
-	<20100922124309.GA15699@void.printf.net>
-	<2A3DCF3DA181AD40BDE86A3150B27B6B03560991F7@dbde02.ent.ti.com>
-	<4CA234C4.8070907@nokia.com>
-	<2A3DCF3DA181AD40BDE86A3150B27B6B0356476230@dbde02.ent.ti.com>
-	<4CA24A7B.2070005@nokia.com>
+From: kishore kadiyala <kishorek.kadiyala@gmail.com>
+Subject: Re: [PATCH v4 1/4] omap4 hsmmc: Adding card detect support for MMC1
+Date: Wed, 29 Sep 2010 16:11:31 +0530
+Message-ID: <AANLkTi=oX7CT8RF39kT-7niutF3PEeSeC1A_L5TcWuO4@mail.gmail.com>
+References: <9408.10.24.255.18.1285348400.squirrel@dbdmail.itg.ti.com>
+	<AANLkTi=YvtrfmUTc-YBAUjEXn1v3pPLmhb92J60AhU28@mail.gmail.com>
+	<AANLkTim5d6XP0nuJLF2DxDGP2DuBK5VUajd=YhXQnT2C@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <4CA24A7B.2070005@nokia.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:51978 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751412Ab0I2Klc convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Sep 2010 06:41:32 -0400
+In-Reply-To: <AANLkTim5d6XP0nuJLF2DxDGP2DuBK5VUajd=YhXQnT2C@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: sameo@linux.intel.com
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, tony@atomide.com, akpm@linux-foundation.org, madhu.cr@ti.com, adrian.hunter@nokia.com
 
+Gentle Reminder !
 
+Regards,
+Kishore
 
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> Sent: Wednesday, September 29, 2010 1:35 AM
-> To: Ghorai, Sukumar
-> Cc: Chris Ball; linux-mmc@vger.kernel.org; linux-arm-
-> kernel@lists.infradead.org; Russell King - ARM Linux
-> Subject: Re: [PATCH] mmc: failure of block read wait for long time
-> 
-> On 28/09/10 21:59, ext Ghorai, Sukumar wrote:
-> > Adrian,
-> >
-> >> -----Original Message-----
-> >> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
-> >> Sent: Wednesday, September 29, 2010 12:03 AM
-> >> To: Ghorai, Sukumar
-> >> Cc: Chris Ball; linux-mmc@vger.kernel.org; linux-arm-
-> >> kernel@lists.infradead.org; Russell King - ARM Linux
-> >> Subject: Re: [PATCH] mmc: failure of block read wait for long time
-> >>
-> >> On 28/09/10 18:03, Ghorai, Sukumar wrote:
-> >>> Chris and Adrian,
-> >>>
-> >>> [..snip..]
-> >>>>
-> >>>> Chris and Adrian,
-> >>>>
-> >>>> [..snip..]
-> >>>>>
-> >>>>>> -----Original Message-----
-> >>> [..snip..]
-> >>>>>> Subject: Re: [PATCH] mmc: failure of block read wait for long time
-> >>>>>>
-> >>>>>> On Wed, Sep 22, 2010 at 11:02:08AM +0530, Ghorai, Sukumar wrote:
-> >>>>>>> Would you please review and merge this patch [1] (attached too)?
-> >>>>>>> [1] http://comments.gmane.org/gmane.linux.kernel.mmc/2714
-> >>>>>>
-> >>>>>> I've been following the thread.  I believe Adrian has NACKed this
-> >>>> patch,
-> >>>>>> by saying "It is absolutely unacceptable to return I/O errors to
-> the
-> >>>>>> upper layers for segments that do not have errors."
-> >>>>>
-> >>>>> [Ghorai]
-> >>>>> I think Russell also mentioned his opinion. Would you please add
-> your
-> >>>> idea
-> >>>>> too?
-> >>>>>
-> >>>>> 1. I would prefer Adrian to explain again what this statement means,
-> >> in
-> >>>>> the context - data read fail and how we make it success?
-> >>
-> >> Because I/O requests are made up of segments and every segment can be a
-> >> success or failure.
-> > [Ghorai] don't you conflict your self for the comments you provide for
-> following patch -
-> > [PATCH] MMC: Refine block layer waiting for card state
-> > [Adrian].. then why wait for lots of errors before doing it.
-> 
-> That patch needs a lot more work.  Please do not base your
-> understanding on it.
-[Ghorai] it's the similar problem when read fails and you also suggest how to break early. 
-
-> 
-> >
-> >>
-> >>>>>
-> >>>>> 2. if data read fail for sector(x) why we have to try for
-> >>>>> sector(x+1, ..x+n)?
-> >>
-> >> See answer to q. 1
-> >>
-> >>>>>
-> >>>>> 3. how to inform reader function which sector having the valid data
-> >> out
-> >>>> of
-> >>>>> (1...n) sectors.
-> >>
-> >> __blk_end_request() does that
-> > [Ghorai] not true. Please check the code again.
-> 
-> Every time you call __blk_end_request() you specify success or
-> failure for the specified numbers of bytes starting from the
-> last position.
-> 
-> >
-> >>
-> >>>>>
-> >>>>> 4. do we have any driver/code in Linux or any other os, which give
-> >>>> inter-
-> >>>>> leave data and return as success?
-> >>
-> >> Here is the problem with that question.  The *same* I/O request
-> >> can have data for *different*sources.
-> > [Ghorai] File system does not do that and can you test that once how
-> data comes from difference soure?
-> > Also conflicting your-self for the input you gave for the patch and as -
-> > [PATCH] MMC: Refine block layer waiting for card state
-> > [Adrian].. then why wait for lots of errors before doing it.
-> >
-> >>
-> >>>>>
-> >>>> [Ghorai] please reply with your input on my/ Russell's suggestion?
-> >>> [Ghorai] any input?
-> >>
-> >> I have a question for you.  What use cases do you want to address
-> >>    - other than card removal?
-> 
-> Please answer this question.
-[Ghorai] say data error (including timeout), ECC error ..
-
-> 
-> > [Ghorai]
-> > 1. can you reply to original input form Russell's on the same thread?
-> 
-> Russell did not make any suggestions.  He pointed out that some drivers,
-> but not all (and not omap_hsmmc), indicate how many bytes were transferred.
-> However it is difficult for me to explain how this will or will not help
-> if
-> you won't give more information about your use cases.
-[Ghorai] any driver give the interleave data to apps? Can you test if you give the interleave data to FS how it behave? Even it can cause the system fault. And will spend day and night to find out the issue in which module - memory, host, card?
-
-> 
-> For example, in the case of ECC errors, there are usually only a few
-> blocks
-> in error, so only a few of the retries timeout, so retrying is not slow.
-> That is very different in the case the card has been removed, or has
-> become
-> unresponsive - in which case every retry fails and has to timeout.
-> 
-> I still plan to address the card removal issue, but I am very busy, so
-> don't
-> hold your breath.
-[Ghorai] so I will wait for your patch forever.
-> 
-> > 2. can you check if you return the interleave data to FS how it can
-> behave?
-[Ghorai] any time?
-> > 3. still you don't have any reference driver which provide the
-> interleave data.
-> 
-> A single I/O request could have resulted from merging I/O requests from
-> two *different* file systems on two *different* partitions.  I provide as
-> reference every single linux file system.
-[Ghorai] Filesystem never marge two IO in a single request, and if say cache did not support (sync mode)?
-
-[Ghorai] thanks that you want to provide the solution in different way and in different patch. I will wait for your patch forever. In the mean time will take this fix locally for system integration.
-
-And in the mean time I will simulate a case when IO failed in between (say any request to sector number 100 to 200) will return the Data timeout. And will check how system behaves. 
-
-> 
-> >
-> >
-> >>
-> >>>>
-> >>>>>>
-> >>>>>> I think it's possible to merge patches to improve the situation
-> (such
-> >>>>>> as the idea of noticing a card disappearing earlier), but your
-> >> initial
-> >>>>>> patch is not the patch to do that.  You should continue to work
-> with
-> >>>>>> Adrian -- when he's happy that a patch does not break the semantics
-> >>>>>> above, we can consider merging it.
-> >>>>>>
-> >>>>>> Thanks,
-> >>>>>>
-> >>>>>> --
-> >>>>>> Chris Ball<cjb@laptop.org>     <http://printf.net/>
-> >>>>>> One Laptop Per Child
-> >>>
-> >
-> >
+On Tue, Sep 28, 2010 at 12:22 PM, kishore kadiyala
+<kishorek.kadiyala@gmail.com> wrote:
+> Hi Samuel,
+>
+> Could you please review this patch which touches mfd/twl6030-irq.c fo=
+r
+> card detect support
+> of MMC1 controller on OMAP4.
+>
+> Regards,
+> Kishore
+>
+> On Mon, Sep 27, 2010 at 1:25 PM, kishore kadiyala
+> <kishorek.kadiyala@gmail.com> wrote:
+>> Cc: Samuel Ortiz <sameo@linux.intel.com>
+>>
+>> On Fri, Sep 24, 2010 at 10:43 PM, kishore kadiyala
+>> <kishore.kadiyala@ti.com> wrote:
+>>> Adding card detect callback function and card detect configuration
+>>> function for MMC1 Controller on OMAP4.
+>>>
+>>> Card detect configuration function does initial configuration of th=
+e
+>>> MMC Control & PullUp-PullDown registers of Phoenix.
+>>>
+>>> For MMC1 Controller, card detect interrupt source is
+>>> twl6030 which is non-gpio. The card detect call back function provi=
+des
+>>> card present/absent status by reading MMC Control register present
+>>> on twl6030.
+>>>
+>>> Since OMAP4 doesn't use any GPIO line as used in OMAP3 for card det=
+ect,
+>>> the suspend/resume initialization which was done in omap_hsmmc_gpio=
+_init
+>>> previously is moved to the probe thus making it generic for both OM=
+AP3 & OMAP4.
+>>>
+>>> Cc: Tony Lindgren <tony@atomide.com>
+>>> Cc: Andrew Morton <akpm@linux-foundation.org>
+>>> Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
+>>> Cc: Adrian Hunter <adrian.hunter@nokia.com>
+>>> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+>>> ---
+>>> =A0arch/arm/mach-omap2/board-4430sdp.c | =A0 =A07 +++-
+>>> =A0drivers/mfd/twl6030-irq.c =A0 =A0 =A0 =A0 =A0 | =A0 73 +++++++++=
+++++++++++++++++++++++++++
+>>> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 | =A0 =A04 +-
+>>> =A0include/linux/i2c/twl.h =A0 =A0 =A0 =A0 =A0 =A0 | =A0 31 +++++++=
+++++++++
+>>> =A04 files changed, 112 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-om=
+ap2/board-4430sdp.c
+>>> index 9447644..a49f285 100644
+>>> --- a/arch/arm/mach-omap2/board-4430sdp.c
+>>> +++ b/arch/arm/mach-omap2/board-4430sdp.c
+>>> @@ -227,9 +227,14 @@ static int omap4_twl6030_hsmmc_late_init(struc=
+t device *dev)
+>>> =A0 =A0 =A0 =A0struct omap_mmc_platform_data *pdata =3D dev->platfo=
+rm_data;
+>>>
+>>> =A0 =A0 =A0 =A0/* Setting MMC1 Card detect Irq */
+>>> - =A0 =A0 =A0 if (pdev->id =3D=3D 0)
+>>> + =A0 =A0 =A0 if (pdev->id =3D=3D 0) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D twl6030_mmc_card_detect_confi=
+g();
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Failed config=
+uring MMC1 card detect\n");
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].card_detect_irq =3D =
+TWL6030_IRQ_BASE +
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0MMCDETECT_INTR_OFFSET;
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->slots[0].card_detect =3D twl60=
+30_mmc_card_detect;
+>>> + =A0 =A0 =A0 }
+>>> =A0 =A0 =A0 =A0return ret;
+>>> =A0}
+>>>
+>>> diff --git a/drivers/mfd/twl6030-irq.c b/drivers/mfd/twl6030-irq.c
+>>> index 10bf228..2d3bb82 100644
+>>> --- a/drivers/mfd/twl6030-irq.c
+>>> +++ b/drivers/mfd/twl6030-irq.c
+>>> @@ -36,6 +36,7 @@
+>>> =A0#include <linux/irq.h>
+>>> =A0#include <linux/kthread.h>
+>>> =A0#include <linux/i2c/twl.h>
+>>> +#include <linux/platform_device.h>
+>>>
+>>> =A0/*
+>>> =A0* TWL6030 (unlike its predecessors, which had two level interrup=
+t handling)
+>>> @@ -223,6 +224,78 @@ int twl6030_interrupt_mask(u8 bit_mask, u8 off=
+set)
+>>> =A0}
+>>> =A0EXPORT_SYMBOL(twl6030_interrupt_mask);
+>>>
+>>> +int twl6030_mmc_card_detect_config(void)
+>>> +{
+>>> + =A0 =A0 =A0 int ret;
+>>> + =A0 =A0 =A0 u8 reg_val =3D 0;
+>>> +
+>>> + =A0 =A0 =A0 /* Unmasking the Card detect Interrupt line for MMC1 =
+from Phoenix */
+>>> + =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 REG_INT_MSK_LINE_B);
+>>> + =A0 =A0 =A0 twl6030_interrupt_unmask(TWL6030_MMCDETECT_INT_MASK,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 REG_INT_MSK_STS_B);
+>>> + =A0 =A0 =A0 /*
+>>> + =A0 =A0 =A0 =A0* Intially Configuring MMC_CTRL for receving inter=
+rupts &
+>>> + =A0 =A0 =A0 =A0* Card status on TWL6030 for MMC1
+>>> + =A0 =A0 =A0 =A0*/
+>>> + =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,=
+ TWL6030_MMCCTRL);
+>>> + =A0 =A0 =A0 if (ret < 0) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to read MMCCT=
+RL, error %d\n", ret);
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>>> + =A0 =A0 =A0 }
+>>> + =A0 =A0 =A0 reg_val &=3D ~VMMC_AUTO_OFF;
+>>> + =A0 =A0 =A0 reg_val |=3D SW_FC;
+>>> + =A0 =A0 =A0 ret =3D twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,=
+ TWL6030_MMCCTRL);
+>>> + =A0 =A0 =A0 if (ret < 0) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to write MMCC=
+TRL, error %d\n", ret);
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>>> + =A0 =A0 =A0 }
+>>> +
+>>> + =A0 =A0 =A0 /* Configuring PullUp-PullDown register */
+>>> + =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &reg_val,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 TWL6030_CFG_INPUT_PUPD3);
+>>> + =A0 =A0 =A0 if (ret < 0) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to read CFG_I=
+NPUT_PUPD3, error %d\n",
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ ret);
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>>> + =A0 =A0 =A0 }
+>>> + =A0 =A0 =A0 reg_val &=3D ~(MMC_PU | MMC_PD);
+>>> + =A0 =A0 =A0 ret =3D twl_i2c_write_u8(TWL6030_MODULE_ID0, reg_val,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 TWL6030_CFG_INPUT_PUPD3);
+>>> + =A0 =A0 =A0 if (ret < 0) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to write CFG_=
+INPUT_PUPD3, error %d\n",
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ ret);
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>>> + =A0 =A0 =A0 }
+>>> + =A0 =A0 =A0 return 0;
+>>> +}
+>>> +EXPORT_SYMBOL(twl6030_mmc_card_detect_config);
+>>> +
+>>> +int twl6030_mmc_card_detect(struct device *dev, int slot)
+>>> +{
+>>> + =A0 =A0 =A0 int ret =3D -EIO;
+>>> + =A0 =A0 =A0 u8 read_reg =3D 0;
+>>> + =A0 =A0 =A0 struct platform_device *pdev =3D to_platform_device(d=
+ev);
+>>> +
+>>> + =A0 =A0 =A0 if (pdev->id) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* TWL6030 provide's Card detect supp=
+ort for
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* only MMC1 controller.
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Unkown MMC controller %d in %=
+s\n", pdev->id, __func__);
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>>> + =A0 =A0 =A0 }
+>>> + =A0 =A0 =A0 /*
+>>> + =A0 =A0 =A0 =A0* BIT0 of MMC_CTRL on TWL6030 provides card status=
+ for MMC1
+>>> + =A0 =A0 =A0 =A0* 0 - Card not present ,1 - Card present
+>>> + =A0 =A0 =A0 =A0*/
+>>> + =A0 =A0 =A0 ret =3D twl_i2c_read_u8(TWL6030_MODULE_ID0, &read_reg=
+,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 TWL6030_MMCCTRL);
+>>> + =A0 =A0 =A0 if (ret >=3D 0)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D read_reg & STS_MMC;
+>>> + =A0 =A0 =A0 return ret;
+>>> +}
+>>> +EXPORT_SYMBOL(twl6030_mmc_card_detect);
+>>> +
+>>> =A0int twl6030_init_irq(int irq_num, unsigned irq_base, unsigned ir=
+q_end)
+>>> =A0{
+>>>
+>>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_=
+hsmmc.c
+>>> index 562dbbb..a51894d 100644
+>>> --- a/drivers/mmc/host/omap_hsmmc.c
+>>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>>> @@ -466,8 +466,6 @@ static int omap_hsmmc_gpio_init(struct omap_mmc=
+_platform_data *pdata)
+>>> =A0 =A0 =A0 =A0int ret;
+>>>
+>>> =A0 =A0 =A0 =A0if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->suspend =3D omap_hsmmc_suspend=
+_cdirq;
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->resume =3D omap_hsmmc_resume_c=
+dirq;
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (pdata->slots[0].cover)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata->slots[0].get_=
+cover_state =3D
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0omap_hsmmc_get_cover_state;
+>>> @@ -2211,6 +2209,8 @@ static int __init omap_hsmmc_probe(struct pla=
+tform_device *pdev)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"Una=
+ble to grab MMC CD IRQ\n");
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto err_irq_cd;
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->suspend =3D omap_hsmmc_suspend=
+_cdirq;
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->resume =3D omap_hsmmc_resume_c=
+dirq;
+>>> =A0 =A0 =A0 =A0}
+>>>
+>>> =A0 =A0 =A0 =A0omap_hsmmc_disable_irq(host);
+>>> diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
+>>> index 6de90bf..e64894c 100644
+>>> --- a/include/linux/i2c/twl.h
+>>> +++ b/include/linux/i2c/twl.h
+>>> @@ -141,6 +141,16 @@
+>>> =A0#define TWL6030_CHARGER_CTRL_INT_MASK =A00x10
+>>> =A0#define TWL6030_CHARGER_FAULT_INT_MASK =A0 =A0 =A0 =A0 0x60
+>>>
+>>> +#define TWL6030_MMCCTRL =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00xEE
+>>> +#define VMMC_AUTO_OFF =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x1 << 3=
+)
+>>> +#define SW_FC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(=
+0x1 << 2)
+>>> +#define STS_MMC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x1
+>>> +
+>>> +#define TWL6030_CFG_INPUT_PUPD3 =A0 =A0 =A0 =A00xF2
+>>> +#define MMC_PU =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x=
+1 << 3)
+>>> +#define MMC_PD =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x=
+1 << 2)
+>>> +
+>>> +
+>>>
+>>> =A0#define TWL4030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 =A0 0x4030
+>>> =A0#define TWL6030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 =A0 0x6030
+>>> @@ -173,6 +183,27 @@ int twl_i2c_read(u8 mod_no, u8 *value, u8 reg,=
+ unsigned num_bytes);
+>>> =A0int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
+>>> =A0int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
+>>>
+>>> +/* Card detect Configuration for MMC1 Controller on OMAP4 */
+>>> +#ifdef CONFIG_TWL4030_CORE
+>>> +int twl6030_mmc_card_detect_config(void);
+>>> +#else
+>>> +static inline int twl6030_mmc_card_detect_config(void)
+>>> +{
+>>> + =A0 =A0 =A0 pr_debug("twl6030_mmc_card_detect_config not supporte=
+d\n");
+>>> + =A0 =A0 =A0 return 0;
+>>> +}
+>>> +#endif
+>>> +
+>>> +/* MMC1 Controller on OMAP4 uses Phoenix irq for Card detect */
+>>> +#ifdef CONFIG_TWL4030_CORE
+>>> +int twl6030_mmc_card_detect(struct device *dev, int slot);
+>>> +#else
+>>> +static inline int twl6030_mmc_card_detect(struct device *dev, int =
+slot)
+>>> +{
+>>> + =A0 =A0 =A0 pr_debug("Call back twl6030_mmc_card_detect not suppo=
+rted\n");
+>>> + =A0 =A0 =A0 return -EIO;
+>>> +}
+>>> +#endif
+>>> =A0/*--------------------------------------------------------------=
+--------*/
+>>>
+>>> =A0/*
+>>> --
+>>> 1.7.0.4
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
+>>>
+>>
+>
