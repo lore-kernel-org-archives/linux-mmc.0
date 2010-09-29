@@ -1,35 +1,82 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [patch 2/2] mmc: add support of sdhci-pxa driver
-Date: Wed, 29 Sep 2010 00:36:30 +0100
-Message-ID: <20100928233630.GA31525@void.printf.net>
-References: <AANLkTi=XBbW=R4HQYp5fLVE5eUXHNtzGh1Qf+XyBUSCH@mail.gmail.com> <AANLkTim4aJok6=HcopkObi3WrUatiZgK-KZTfhoHwgF7@mail.gmail.com> <AANLkTimk2_KcmSAV-UZ3JY1JFD657SnfyPFgP_zE5bbP@mail.gmail.com> <20100926155905.GB19772@void.printf.net> <AANLkTimwsk5SXQRt45vUhzhHabrG4wvw5JcBZAZ1Aq4j@mail.gmail.com> <20100926174837.GA21788@void.printf.net> <AANLkTino3YoTfRXii5kGdyX7jtkAtvd1jbsGtWanMn3F@mail.gmail.com>
+From: "Madhusudhan Chikkature" <madhu.cr@ti.com>
+Subject: [PATCH V2] OMAP4 ES2:  HSMMC soft reset change
+Date: Wed, 29 Sep 2010 06:16:18 +0530 (IST)
+Message-ID: <65452.192.168.10.88.1285721178.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36021 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750890Ab0I1Xgc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Sep 2010 19:36:32 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTino3YoTfRXii5kGdyX7jtkAtvd1jbsGtWanMn3F@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: tony@atomide.com
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org
 List-Id: linux-mmc@vger.kernel.org
-To: Saeed Bishara <saeed@marvell.com>
-Cc: Haojian Zhuang <haojian.zhuang@gmail.com>, Eric Miao <eric.y.miao@gmail.com>, zhangfei gao <zhangfei.gao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>
 
-On Mon, Sep 27, 2010 at 09:36:01AM +0800, Haojian Zhuang wrote:
-> > Okay. =A0What should Saeed's driver be called?
->
-> sdhci-dove / sdhci-mv or any other is acceptable. What's your opinion=
-, saeed?
+The omap4 es2 hsmmc has a updated soft reset logic.After the
+reset is issued monitor a 0->1 transition first. The reset of
+CMD or DATA lines is complete only after a 0->1->0 transition
+of SRC or SRD bits.
 
-sdhci-dove sounds good to me.  Saeed, if you agree, please could you
-resend the patch?  (With an "ARCH_DOVE || ARCH_MMP" dependency and a
-list of supported SoCs in the Kconfig help text.)
+Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+Tested-by: Anand Gadiyar <gadiyar@ti.com>
+---
+ arch/arm/mach-omap2/hsmmc.c           |    3 +++
+ arch/arm/plat-omap/include/plat/mmc.h |    1 +
+ drivers/mmc/host/omap_hsmmc.c         |   11 +++++++++++
+ 3 files changed, 15 insertions(+), 0 deletions(-)
 
-Thanks,
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 87ce6ff..37f9f56 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -298,6 +298,9 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info
+*controllers)
+ 		else
+ 			mmc->slots[0].features |= HSMMC_HAS_PBIAS;
 
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
++		if (cpu_is_omap44xx() && (omap_rev() > OMAP4430_REV_ES1_0))
++			mmc->slots[0].features |= HSMMC_HAS_UPDATED_RESET;
++
+ 		switch (c->mmc) {
+ 		case 1:
+ 			if (mmc->slots[0].features & HSMMC_HAS_PBIAS) {
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h
+b/arch/arm/plat-omap/include/plat/mmc.h
+index 4f819fc..2c4629a 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -103,6 +103,7 @@ struct omap_mmc_platform_data {
+
+ 		/* we can put the features above into this variable */
+ #define HSMMC_HAS_PBIAS		(1 << 0)
++#define HSMMC_HAS_UPDATED_RESET	(1 << 1)
+ 		unsigned features;
+
+ 		int switch_pin;			/* gpio (card detect) */
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 53f8fa5..69858e7 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -982,6 +982,17 @@ static inline void omap_hsmmc_reset_controller_fsm(struct
+omap_hsmmc_host *host,
+ 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+ 			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
+
++	/*
++	 * OMAP4 ES2 and greater has an updated reset logic.
++	 * Monitor a 0->1 transition first
++	 */
++	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
++		while ((!(OMAP_HSMMC_READ(host, SYSCTL) & bit))
++					&& (i++ < limit))
++			cpu_relax();
++	}
++	i = 0;
++
+ 	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
+ 		(i++ < limit))
+ 		cpu_relax();
+-- 
+1.7.0.4
+
+
+
