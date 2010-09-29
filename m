@@ -1,79 +1,183 @@
-From: =?UTF-8?B?UmljaGFyZCBSw7ZqZm9ycw==?=
- <richard.rojfors@pelagicore.com>
-Subject: Re: [PATCH 1/6] mmc: sdhci-pltfm: Add structure for host-specific data
-Date: Wed, 29 Sep 2010 23:24:25 +0200
-Message-ID: <4CA3AE89.2030107@pelagicore.com>
-References: <1285790884-3516-1-git-send-email-w.sang@pengutronix.de>
-	<1285790884-3516-2-git-send-email-w.sang@pengutronix.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [RFC RESEND] sdhci-s3c: support clock enable/disable
+	(clock-gating)
+Date: Thu, 30 Sep 2010 00:37:51 +0100
+Message-ID: <20100929233751.GA31473@void.printf.net>
+References: <4C91BD5A.1040804@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1285790884-3516-2-git-send-email-w.sang@pengutronix.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Zhu Richard-R65037 <r65037@freescale.com>, linux-mmc@vger.kernel.org, =?UTF-8?B?UmljaGFyZCBSw7ZqZm9ycw==?= <richard.rojfors.ext@mocean-labs.com>, zhangfei gao <zhangfei.gao@gmail.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Philip Rakity <prakity@marvell.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:58276 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751071Ab0I2Xhz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Sep 2010 19:37:55 -0400
+Content-Disposition: inline
+In-Reply-To: <4C91BD5A.1040804@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@nokia.com>
+Cc: linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, matt@console-pimps.org, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>
 
-T24gMDkvMjkvMjAxMCAxMDowNyBQTSwgV29sZnJhbSBTYW5nIHdyb3RlOgo+IFdlIG5lZWQgdG8g
-Y2Fycnkgc29tZSBpbmZvcm1hdGlvbiBwZXIgaG9zdCwgZS5nLiB0aGUgY2xvY2suIEFkZCBhCj4g
-c3RydWN0dXJlIGZvciBpdCBhbmQgaW5pdGlhbGl6ZSBpdCBpbiB0aGUgZ2VuZXJpYyBwYXJ0LiBB
-bHNvIGRvIG5vdCB1c2UKPiB0aGUgcGFyZW50IG9mIHRoZSBwbGF0Zm9ybV9kZXZpY2UgKGlmIGl0
-IGlzIGF2YWlsYWJsZSksIHRoaXMgYnJlYWtzIHRoZQo+IGNsb2NrLW1hdGNoaW5nIG9uIEFSTS4K
-ClRoZSByZWFzb24gaXQncyB0aGVyZSBpcyBmb3IgaW5zdGFuY2UgYSBjYXNlIHdoZW4gdGhlIHNo
-ZGNpIGRldmljZSBpcyBleHBvc2VkCmZyb20gYSBNRkQgZGV2aWNlIHdoaWNoIHNpdHMgb24gdG9w
-IG9mIFBDSS4gVGhlbiB0aGUgcGFyZW50IChQQ0kgZGV2aWNlKQppcyB0aGUgZGV2aWNlIHRoYXQg
-aXMgRE1BIGNhcGFibGUuIFRoaXMgcGF0Y2ggd2lsbCBicmVhayBzdWNoIHVzYWdlLgoKV2hhdCBp
-cyB0aGUgcHVycG9zZSBvZiB0aGlzIHBhdGNoPyBZb3UgYWxsb2NhdGUgc3BhY2UgZm9yIGFuIGV4
-dHJhIHN0cnVjdCwKd2hpY2ggeW91IGhhdmUgYSBwb2ludGVyIHBvaW50aW5nIHRvLCBidXQgeW91
-IG5ldmVyIHVzZSB0aGUgcG9pbnRlcj8KCj4KPiBTaWduZWQtb2ZmLWJ5OiBXb2xmcmFtIFNhbmc8
-dy5zYW5nQHBlbmd1dHJvbml4LmRlPgo+IENjOiBSaWNoYXJkIFLDtmpmb3JzPHJpY2hhcmQucm9q
-Zm9ycy5leHRAbW9jZWFuLWxhYnMuY29tPgo+IC0tLQo+Cj4gQ2hhbmdlcyBzaW5jZSBsYXN0IHZl
-cnNpb246Cj4KPiAqIGFkZGVkIHR5cGVzLmgKCkkgc2F3IG5vIHR5cGVzLmg/Cgo+ICogcmVtb3Zl
-ZCB1c2FnZSBvZiBwZGV2LT5kZXYucGFyZW50IHRvIGVuc3VyZSBjbGstbWF0Y2hpbmcKPiAgICBQ
-bGVhc2Ugc3BlYWsgdXAgaWYgdGhpcyBoYXMgYSB1c2UgY2FzZSBJIGZhaWxlZCB0byBzZWUhCj4K
-PiAgIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uYyB8ICAgIDggKysrKy0tLS0KPiAgIGRy
-aXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uaCB8ICAgIDcgKysrKysrKwo+ICAgMiBmaWxlcyBj
-aGFuZ2VkLCAxMSBpbnNlcnRpb25zKCspLCA0IGRlbGV0aW9ucygtKQo+Cj4gZGlmZiAtLWdpdCBh
-L2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kt
-cGx0Zm0uYwo+IGluZGV4IGUwNDVlM2MuLjA5NWNhOWQgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9t
-bWMvaG9zdC9zZGhjaS1wbHRmbS5jCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wbHRm
-bS5jCj4gQEAgLTU1LDYgKzU1LDcgQEAgc3RhdGljIGludCBfX2RldmluaXQgc2RoY2lfcGx0Zm1f
-cHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKPiAgIAlzdHJ1Y3Qgc2RoY2lfcGx0
-Zm1fZGF0YSAqcGRhdGEgPSBwZGV2LT5kZXYucGxhdGZvcm1fZGF0YTsKPiAgIAljb25zdCBzdHJ1
-Y3QgcGxhdGZvcm1fZGV2aWNlX2lkICpwbGF0aWQgPSBwbGF0Zm9ybV9nZXRfZGV2aWNlX2lkKHBk
-ZXYpOwo+ICAgCXN0cnVjdCBzZGhjaV9ob3N0ICpob3N0Owo+ICsJc3RydWN0IHNkaGNpX3BsdGZt
-X2hvc3QgKnBsdGZtX2hvc3Q7Cj4gICAJc3RydWN0IHJlc291cmNlICppb21lbTsKPiAgIAlpbnQg
-cmV0Owo+Cj4gQEAgLTcxLDE2ICs3MiwxNSBAQCBzdGF0aWMgaW50IF9fZGV2aW5pdCBzZGhjaV9w
-bHRmbV9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQo+ICAgCQlkZXZfZXJyKCZw
-ZGV2LT5kZXYsICJJbnZhbGlkIGlvbWVtIHNpemUuIFlvdSBtYXkgIgo+ICAgCQkJImV4cGVyaWVu
-Y2UgcHJvYmxlbXMuXG4iKTsKPgo+IC0JaWYgKHBkZXYtPmRldi5wYXJlbnQpCj4gLQkJaG9zdCA9
-IHNkaGNpX2FsbG9jX2hvc3QocGRldi0+ZGV2LnBhcmVudCwgMCk7Cj4gLQllbHNlCj4gLQkJaG9z
-dCA9IHNkaGNpX2FsbG9jX2hvc3QoJnBkZXYtPmRldiwgMCk7Cj4gKwlob3N0ID0gc2RoY2lfYWxs
-b2NfaG9zdCgmcGRldi0+ZGV2LCBzaXplb2YoKnBsdGZtX2hvc3QpKTsKPgo+ICAgCWlmIChJU19F
-UlIoaG9zdCkpIHsKPiAgIAkJcmV0ID0gUFRSX0VSUihob3N0KTsKPiAgIAkJZ290byBlcnI7Cj4g
-ICAJfQo+Cj4gKwlwbHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsKPiArCj4gICAJaG9zdC0+
-aHdfbmFtZSA9ICJwbGF0Zm9ybSI7Cj4gICAJaWYgKHBkYXRhJiYgIHBkYXRhLT5vcHMpCj4gICAJ
-CWhvc3QtPm9wcyA9IHBkYXRhLT5vcHM7Cj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qv
-c2RoY2ktcGx0Zm0uaCBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uaAo+IGluZGV4IDkw
-MGYzMjkuLjkzYTAzMTkgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wbHRm
-bS5oCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wbHRmbS5oCj4gQEAgLTExLDggKzEx
-LDE1IEBACj4gICAjaWZuZGVmIF9EUklWRVJTX01NQ19TREhDSV9QTFRGTV9ICj4gICAjZGVmaW5l
-IF9EUklWRVJTX01NQ19TREhDSV9QTFRGTV9ICj4KPiArI2luY2x1ZGU8bGludXgvY2xrLmg+Cj4g
-KyNpbmNsdWRlPGxpbnV4L3R5cGVzLmg+Cj4gICAjaW5jbHVkZTxsaW51eC9zZGhjaS1wbHRmbS5o
-Pgo+Cj4gK3N0cnVjdCBzZGhjaV9wbHRmbV9ob3N0IHsKPiArCXN0cnVjdCBjbGsgKmNsazsKPiAr
-CXUzMiBzY3JhdGNocGFkOyAvKiB0byBoYW5kbGUgcXVpcmtzIGFjcm9zcyBpby1hY2Nlc3NvciBj
-YWxscyAqLwo+ICt9Owo+ICsKPiAgIGV4dGVybiBzdHJ1Y3Qgc2RoY2lfcGx0Zm1fZGF0YSBzZGhj
-aV9jbnMzeHh4X3BkYXRhOwo+Cj4gICAjZW5kaWYgLyogX0RSSVZFUlNfTU1DX1NESENJX1BMVEZN
-X0ggKi8KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxp
-bnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFk
-ZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4
-LWFybS1rZXJuZWwK
+Hi Jaehoon/Adrian,
+
+On Thu, Sep 16, 2010 at 03:46:50PM +0900, Jaehoon Chung wrote:
+> Hi all,
+>   This is a RFC patch that support clock-gating for saving power consumption.
+>   I found mmc_host_enable/mmc_host_disable function in core.c
+>   (using MMC_CAP_DSIABLE. i think that use when host enable/disable)
+>   So, i used that functions and implemented some functions in sdhci-s3c.c & sdhci.c
+> 
+> i want any feedback. how do you think about this patch?
+> Plz let me know...
+
+A few points:
+  * Have you tested this patch?  Did you see a decrease in power
+    consumption?  How large was the decrease?
+  * I don't understand exactly how/when you're expecting to save power
+    with this approach of defining .{enable,disable}() without then
+    calling them from your driver code.  Under which circumstances do
+    you think this will power down the clock?
+  * CC'ing Adrian for help with review, since he wrote these callbacks.
+
+Thanks,
+
+- Chris.
+
+> Thank you all
+> 
+>  Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>  Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> 
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |   36 ++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.c     |   30 ++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.h     |    4 ++++
+>  3 files changed, 70 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 71ad416..9b430fb 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -47,6 +47,7 @@ struct sdhci_s3c {
+>  	unsigned int		cur_clk;
+>  	int			ext_cd_irq;
+>  	int			ext_cd_gpio;
+> +	int			flag;
+>  
+>  	struct clk		*clk_io;
+>  	struct clk		*clk_bus[MAX_BUS_CLK];
+> @@ -232,10 +233,45 @@ static unsigned int sdhci_s3c_get_min_clock(struct sdhci_host *host)
+>  	return min;
+>  }
+>  
+> +static int sdhci_s3c_enable_clk(struct sdhci_host *host)
+> +{
+> +	struct sdhci_s3c *sc = to_s3c(host);
+> +
+> +	if (sc->flag != 1) {
+> +		clk_disable(sc->clk_io);
+> +		clk_disable(sc->clk_bus[sc->cur_clk]);
+> +	}
+> +
+> +	if (sc->host->clk_cnt == 0) {
+> +		clk_enable(sc->clk_io);
+> +		clk_enable(sc->clk_bus[sc->cur_clk]);
+> +		sc->host->clk_cnt++;
+> +		sc->flag = 1;
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +static int sdhci_s3c_disable_clk(struct sdhci_host *host, int lazy)
+> +{
+> +	struct sdhci_s3c *sc = to_s3c(host);
+> +
+> +	if (sc->host->clk_cnt) {
+> +		clk_disable(sc->clk_io);
+> +		clk_disable(sc->clk_bus[sc->cur_clk]);
+> +		if (sc->host->clk_cnt)
+> +			sc->host->clk_cnt--;
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+>  static struct sdhci_ops sdhci_s3c_ops = {
+>  	.get_max_clock		= sdhci_s3c_get_max_clk,
+>  	.set_clock		= sdhci_s3c_set_clock,
+>  	.get_min_clock		= sdhci_s3c_get_min_clock,
+> +	.enable			= sdhci_s3c_enable_clk,
+> +	.disable		= sdhci_s3c_disable_clk,
+>  };
+>  
+>  static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 401527d..fa2e55d 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1245,7 +1245,37 @@ out:
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  }
+>  
+> +static int sdhci_enable_clk(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	int ret = 0;
+> +
+> +	if (host->old_clock != 0 && host->clock == 0) {
+> +		if (host->ops->enable)
+> +			ret = host->ops->enable(host);
+> +		sdhci_set_clock(host, host->old_clock);
+> +	}
+> +
+> +	return ret;
+> +}
+> +
+> +static int sdhci_disable_clk(struct mmc_host *mmc, int lazy)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	int ret = 0;
+> +
+> +	if (host->clock != 0) {
+> +		host->old_clock = host->clock;
+> +		sdhci_set_clock(host, 0);
+> +		if (host->ops->disable)
+> +			ret = host->ops->disable(host, lazy);
+> +	}
+> +	return ret;
+> +}
+> +
+>  static const struct mmc_host_ops sdhci_ops = {
+> +	.enable		= sdhci_enable_clk,
+> +	.disable	= sdhci_disable_clk,
+>  	.request	= sdhci_request,
+>  	.set_ios	= sdhci_set_ios,
+>  	.get_ro		= sdhci_get_ro,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index d316bc7..0c6f143 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -278,6 +278,8 @@ struct sdhci_host {
+>  	unsigned int		timeout_clk;	/* Timeout freq (KHz) */
+>  
+>  	unsigned int		clock;		/* Current clock (MHz) */
+> +	unsigned int		old_clock;	/* Old clock (MHz) */
+> +	unsigned int		clk_cnt;	/* Clock user count */
+>  	u8			pwr;		/* Current voltage */
+>  
+>  	struct mmc_request	*mrq;		/* Current request */
+> @@ -323,6 +325,8 @@ struct sdhci_ops {
+>  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
+> +	int		(*enable)(struct sdhci_host *host);
+> +	int		(*disable)(struct sdhci_host *host, int lazy);
+>  };
+>  
+>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+> -- 1.6.0.4 
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
