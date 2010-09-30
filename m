@@ -1,58 +1,58 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [RFC RESEND] sdhci-s3c: support clock enable/disable (clock-gating)
-Date: Wed, 29 Sep 2010 23:42:01 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1009292334050.1146@xanadu.home>
-References: <4C91BD5A.1040804@samsung.com>
- <20100929233751.GA31473@void.printf.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [RFC RESEND] sdhci-s3c: support clock enable/disable
+	(clock-gating)
+Date: Thu, 30 Sep 2010 05:09:58 +0100
+Message-ID: <20100930040958.GA3170@void.printf.net>
+References: <4C91BD5A.1040804@samsung.com> <20100929233751.GA31473@void.printf.net> <alpine.LFD.2.00.1009292334050.1146@xanadu.home>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:29184 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752978Ab0I3DmD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Sep 2010 23:42:03 -0400
-Received: from xanadu.home ([66.130.28.92]) by VL-MR-MRZ22.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0L9J00MZXJM1AFF0@VL-MR-MRZ22.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Wed, 29 Sep 2010 23:42:02 -0400 (EDT)
-In-reply-to: <20100929233751.GA31473@void.printf.net>
+Received: from void.printf.net ([89.145.121.20]:45123 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750894Ab0I3EKE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 30 Sep 2010 00:10:04 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.2.00.1009292334050.1146@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, matt@console-pimps.org, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, matt@console-pimps.org, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Linus WALLEIJ <linus.walleij@stericsson.com>, Pierre Ossman <pierre-list@ossman.eu>, Kukjin Kim <kgene.kim@samsung.com>
 
-On Thu, 30 Sep 2010, Chris Ball wrote:
+Hi,
 
-> Hi Jaehoon/Adrian,
+On Wed, Sep 29, 2010 at 11:42:01PM -0400, Nicolas Pitre wrote:
+> As I already said here: 
 > 
-> On Thu, Sep 16, 2010 at 03:46:50PM +0900, Jaehoon Chung wrote:
-> > Hi all,
-> >   This is a RFC patch that support clock-gating for saving power consumption.
-> >   I found mmc_host_enable/mmc_host_disable function in core.c
-> >   (using MMC_CAP_DSIABLE. i think that use when host enable/disable)
-> >   So, i used that functions and implemented some functions in sdhci-s3c.c & sdhci.c
-> > 
-> > i want any feedback. how do you think about this patch?
-> > Plz let me know...
+> 	http://article.gmane.org/gmane.linux.ports.arm.omap/39411
 > 
-> A few points:
->   * Have you tested this patch?  Did you see a decrease in power
->     consumption?  How large was the decrease?
->   * I don't understand exactly how/when you're expecting to save power
->     with this approach of defining .{enable,disable}() without then
->     calling them from your driver code.  Under which circumstances do
->     you think this will power down the clock?
->   * CC'ing Adrian for help with review, since he wrote these callbacks.
+> I find those callbacks rather problematic.  Currently, 
+> mmc_host_disable() is called by the host driver (currently OMAP) and 
+> that's wrong.  Such decision cannot be made in the controller driver -- 
+> it has to be made higher up the stack.
 
-As I already said here: 
+I strongly agree.  I hadn't noticed that aspect of this design until
+today.  It looked like Linus W had a nice core-integrated clocking
+framework almost ready to go a year ago, but it lost out.  (Something
+left to do was to give extra time after a request in case we're on a
+broken card which requires the card clock to be present during its
+writeback.)
 
-	http://article.gmane.org/gmane.linux.ports.arm.omap/39411
+I'm not sure where to go from here -- advice welcome.  It would
+perhaps be ideal if Linus W and Adrian could work together to make
+the current framework look more like Linus' original intent and then
+move omap_hsmmc to it as painlessly as possible.  Of course I wouldn't
+expect this to happen quickly.
 
-I find those callbacks rather problematic.  Currently, 
-mmc_host_disable() is called by the host driver (currently OMAP) and 
-that's wrong.  Such decision cannot be made in the controller driver -- 
-it has to be made higher up the stack.
+In the meantime, I would suggest that we should not accept any more
+users of this framework, which would be a NACK to Jaehoon's patch
+(which appears to my reading not to achieve any power-saving anyway).
 
+Adrian, I'm sorry that I'm suggesting reverting -- or at least strongly
+modifying -- a framework after it's already shipped in a release; if
+you think this is unreasonable, I'll consider your argument carefully.
 
-Nicolas
+Thanks,
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
