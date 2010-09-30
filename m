@@ -1,43 +1,96 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [RFC RESEND] sdhci-s3c: support clock enable/disable (clock-gating)
-Date: Thu, 30 Sep 2010 09:30:46 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1009300927490.1146@xanadu.home>
-References: <4C91BD5A.1040804@samsung.com>
- <20100929233751.GA31473@void.printf.net>
- <alpine.LFD.2.00.1009292334050.1146@xanadu.home>
- <20100930040958.GA3170@void.printf.net>
- <AANLkTin=9KwC0Paa8yAhG-OBXFrfJDKJSYokzLLa6jPN@mail.gmail.com>
- <AANLkTikywfU_C4QTQet64aQJgQyyDdTh4xRpaYu6q0di@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: [PATCH] omap: Keep nwires for omap1 and 2420 MMC controller (Re:
+ [PATCH] omap mmc: extended to pass host capabilities from board file)
+Date: Thu, 30 Sep 2010 11:38:19 -0700
+Message-ID: <20100930183818.GK3117@atomide.com>
+References: <1284562163-2828-1-git-send-email-s-ghorai@ti.com>
+ <20100923230819.GS4211@atomide.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:21864 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753264Ab0I3Nar (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Sep 2010 09:30:47 -0400
-Received: from xanadu.home ([66.130.28.92]) by VL-MH-MR002.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-4.01 (built Aug  3 2007; 32bit))
- with ESMTP id <0L9K000G8AVAB240@VL-MH-MR002.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Thu, 30 Sep 2010 09:30:46 -0400 (EDT)
-In-reply-to: <AANLkTikywfU_C4QTQet64aQJgQyyDdTh4xRpaYu6q0di@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20100923230819.GS4211@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Sukumar Ghorai <s-ghorai@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, matt@console-pimps.org, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Pierre Ossman <pierre-list@ossman.eu>, Kukjin Kim <kgene.kim@samsung.com>
 
-On Thu, 30 Sep 2010, Linus Walleij wrote:
-
-> 2010/9/30 Kyungmin Park <kyungmin.park@samsung.com>:
-> > So try to find another method and implemente it at SDHCI drivers.
+* Tony Lindgren <tony@atomide.com> [100923 16:00]:
+> * Sukumar Ghorai <s-ghorai@ti.com> [100915 07:41]:
+> >   wires variable is renamed, extended and this single variable to be used to
+> >   pass the platform capabilities, e.g DDR mode. Also removed the hardcoded
+> >   value was using as bus-width.
 > 
-> Why? The only difference between this solution and the one
-> that is inside the kernel now is that this will use set_ios() with
-> a zero argument to gate off the clock after a timeout instead
-> of special callbacks. (A features especially requested by Pierre.)
+> This looks like a nice clean-up, I'll queue this via the omap
+> patches.
 
-Good!  I didn't look at your solution before, but in my mind that always 
-been how it should be done.
+And of course this patch breaks all of mach-omap1 and omap2420.
 
+Sukumar, your patch modified also drivers/mmc/host/omap.c and board-n8x0.c
+to use caps instead of nwires. When you do things like that you absolutely
+_must_test_your_changes_ before sending out any patches.
 
-Nicolas
+Planning on merging the following fix.
+
+Tony
+
+From: Tony Lindgren <tony@atomide.com>
+Date: Thu, 30 Sep 2010 10:25:46 -0700
+Subject: [PATCH] Subject: [PATCH] omap: Keep nwires for omap1 and 2420 MMC controller
+
+A patch from Sukumar Ghorai <s-ghorai@ti.com> changed the
+nwires to use caps instead. However, nwires is still
+needed for the earlier controller.
+
+Signed-off-by: Tony Lindgren <tony@atomide.com>
+
+diff --git a/arch/arm/mach-omap2/board-n8x0.c b/arch/arm/mach-omap2/board-n8x0.c
+index abd7e77..6bd9d9a 100644
+--- a/arch/arm/mach-omap2/board-n8x0.c
++++ b/arch/arm/mach-omap2/board-n8x0.c
+@@ -488,7 +488,7 @@ static struct omap_mmc_platform_data mmc1_data = {
+ 	.max_freq			= 24000000,
+ 	.dma_mask			= 0xffffffff,
+ 	.slots[0] = {
+-		.caps			= MMC_CAP_4_BIT_DATA,
++		.wires			= 4,
+ 		.set_power		= n8x0_mmc_set_power,
+ 		.set_bus_mode		= n8x0_mmc_set_bus_mode,
+ 		.get_cover_state	= n8x0_mmc_get_cover_state,
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index 4f819fc..bc85010 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -73,9 +73,16 @@ struct omap_mmc_platform_data {
+ 
+ 	struct omap_mmc_slot_data {
+ 
+-		/* 4/8 wires and any additional host capabilities
+-		 * need to OR'd all capabilities (ref. linux/mmc/host.h) */
+-		u32 caps;
++		/*
++		 * 4/8 wires and any additional host capabilities
++		 * need to OR'd all capabilities (ref. linux/mmc/host.h)
++		 */
++#if defined(CONFIG_ARCH_OMAP1) || defined(CONFIG_ARCH_OMAP2420)
++		u8  wires;	/* Used for the MMC driver on omap1 and 2420 */
++#endif
++#ifdef CONFIG_ARCH_OMAP2PLUS
++		u32 caps;	/* Used for the MMC driver on 2430 and later */
++#endif
+ 
+ 		/*
+ 		 * nomux means "standard" muxing is wrong on this board, and
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index a9d62cf..d98ddcf 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -1317,7 +1317,7 @@ static int __init mmc_omap_new_slot(struct mmc_omap_host *host, int id)
+ 	host->slots[id] = slot;
+ 
+ 	mmc->caps = 0;
+-	if (host->pdata->slots[id].caps & MMC_CAP_8_BIT_DATA)
++	if (host->pdata->slots[id].wires >= 4)
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 
+ 	mmc->ops = &mmc_omap_ops;
