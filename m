@@ -1,45 +1,53 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: MMC 4.4 DDR support
-Date: Thu, 30 Sep 2010 23:30:11 +0100
-Message-ID: <20100930223011.GB29047@void.printf.net>
-References: <1278658780-26397-1-git-send-email-hanumath.prasad@stericsson.com> <AANLkTikBdBhJeQ-t2+0echJfAxz529QZEYPJtyHUsROd@mail.gmail.com> <m3pqxbsibq.fsf@pullcord.laptop.org> <20100823204829.GB6510@console-pimps.org> <20100823142816.59b12253.akpm@linux-foundation.org> <4C739F55.8030301@nokia.com>
+Subject: Re: [PATCH] mmc: name mmc queue thread by host index
+Date: Thu, 30 Sep 2010 23:40:36 +0100
+Message-ID: <20100930224036.GA29160@void.printf.net>
+References: <AANLkTikNzqe4ppJhGWapSwvXbpqABAjybOevwRds1Ou+@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49713 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:40130 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751911Ab0I3WaW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 30 Sep 2010 18:30:22 -0400
+	id S1756775Ab0I3Wkh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 30 Sep 2010 18:40:37 -0400
 Content-Disposition: inline
-In-Reply-To: <4C739F55.8030301@nokia.com>
+In-Reply-To: <AANLkTikNzqe4ppJhGWapSwvXbpqABAjybOevwRds1Ou+@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, Linus Walleij <linus.ml.walleij@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "STEricsson_nomadik_linux@list.st.com" <STEricsson_nomadik_linux@list.st.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Kyungmin Park <kmpark@infradead.org>
+To: Ethan Du <ethan.too@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi,
+Hi Ethan,
 
-On Tue, Aug 24, 2010 at 01:30:45PM +0300, Adrian Hunter wrote:
-> From: Adrian Hunter <adrian.hunter@nokia.com>
-> Date: Tue, 24 Aug 2010 13:20:26 +0300
-> Subject: [PATCH] mmc: Fix Dual Data Rate (DDR) support
->
-> The DDR support patch needs the following fixes:
->
-> - The block driver does not need to know about DDR, any more
-> than it needs to know about bus width.
-> - Not only the card must be switched to DDR mode.  The host
-> controller must also be configured, which is done through
-> the 'set_ios()' function.
-> - Do not set the DDR mode state until after the switch command
-> is successful.
-> - Setting block length is not supported in DDR mode.  Make that
-> a core function and change the other place it is used (mmc_test)
-> also.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+On Mon, Sep 27, 2010 at 10:22:20AM +0800, Ethan Du wrote:
+> Usually there are multiple mmc host controllers, rename mmc queue thread
+> by host index, so we can easily identify which controller it belongs to
+> 
+> Signed-off-by: Ethan Du <ethan.too@gmail.com>
+> ---
+>  drivers/mmc/card/queue.c |    3 ++-
+>  1 files changed, 2 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index e876678..673bbdb 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -211,7 +211,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct
+> mmc_card *card, spinlock_t *lock
+> 
+>  	init_MUTEX(&mq->thread_sem);
+> 
+> -	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd");
+> +	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d",
+> +		host->index);
+>  	if (IS_ERR(mq->thread)) {
+>  		ret = PTR_ERR(mq->thread);
+>  		goto free_bounce_sg;
+> -- 
+> 1.5.6.5
 
-Applied to mmc-next, thanks very much Adrian.
+Thanks, applied to mmc-next.  (This patch was line-wrapped; please
+fix that next time.)
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
