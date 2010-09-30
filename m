@@ -1,28 +1,33 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH V2] OMAP4 ES2:  HSMMC soft reset change
-Date: Thu, 30 Sep 2010 13:53:19 -0700
-Message-ID: <20100930205319.GN3117@atomide.com>
-References: <65452.192.168.10.88.1285721178.squirrel@dbdmail.itg.ti.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: MMC 4.4 DDR support
+Date: Thu, 30 Sep 2010 23:29:19 +0100
+Message-ID: <20100930222919.GA29047@void.printf.net>
+References: <1278658780-26397-1-git-send-email-hanumath.prasad@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:63389 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756780Ab0I3UxZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Sep 2010 16:53:25 -0400
+Received: from void.printf.net ([89.145.121.20]:49670 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754642Ab0I3W3W (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 30 Sep 2010 18:29:22 -0400
 Content-Disposition: inline
-In-Reply-To: <65452.192.168.10.88.1285721178.squirrel@dbdmail.itg.ti.com>
+In-Reply-To: <1278658780-26397-1-git-send-email-hanumath.prasad@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Madhusudhan Chikkature <madhu.cr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org
+To: Hanumath Prasad <hanumath.prasad@stericsson.com>
+Cc: linux-kernel@vger.kernel.org, STEricsson_nomadik_linux@list.st.com, linus.walleij@stericsson.com, linux-mmc@vger.kernel.org
 
-* Madhusudhan Chikkature <madhu.cr@ti.com> [100928 17:37]:
-> The omap4 es2 hsmmc has a updated soft reset logic.After the
-> reset is issued monitor a 0->1 transition first. The reset of
-> CMD or DATA lines is complete only after a 0->1->0 transition
-> of SRC or SRD bits.
+On Fri, Jul 09, 2010 at 12:29:40PM +0530, Hanumath Prasad wrote:
+> Add support for Dual Data Rate MMC cards as defined in the 4.4
+> specification.
+> 
+> Cc: linux-mmc@vger.kernel.org
+> Acked-by: Linus Walleij <linus.walleij@stericsson.com>
+> Signed-off-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
 
-Thanks for updating this. I'll queue it for the upcoming merge window.
+Thanks very much, pushed to mmc-next along with Zhangfei's Tested-By:
+and Adrian's fixup patch.
 
-Tony
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
