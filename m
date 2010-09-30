@@ -1,56 +1,54 @@
-From: Ethan Du <ethan.too@gmail.com>
-Subject: Re: [PATCH] MMC: name mmc queue thread by host index
-Date: Thu, 30 Sep 2010 08:22:55 +0800
-Message-ID: <AANLkTi=eXgZ8+HbKXH6wE0z9ksDuf+3GXWrbb+1=tBSk@mail.gmail.com>
-References: <AANLkTi=4mAFOZAMqg6oFs0ry9X8vxYh9ZU_Wz-Y+q9W6@mail.gmail.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH 5/5] sdhci-s3c: Add support no internal clock divider in
+ host controller
+Date: Thu, 30 Sep 2010 10:18:12 +0900
+Message-ID: <AANLkTimyvrSxQiF4A4pbmK8nME2ko9MRtqvcuMrY2rKR@mail.gmail.com>
+References: <1284626223-18944-1-git-send-email-jeongbae.seo@samsung.com>
+	<1284626223-18944-6-git-send-email-jeongbae.seo@samsung.com>
+	<AANLkTik23B23RW_kmjaL1PeXNiWtU01aNBwUOPrac6HF@mail.gmail.com>
+	<20100917155928.GA7561@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:42615 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750873Ab0I3AXA convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Sep 2010 20:23:00 -0400
-Received: by qyk36 with SMTP id 36so1766352qyk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2010 17:22:59 -0700 (PDT)
-In-Reply-To: <AANLkTi=4mAFOZAMqg6oFs0ry9X8vxYh9ZU_Wz-Y+q9W6@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <20100917155928.GA7561@void.printf.net>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jeongbae Seo <jeongbae.seo@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, kgene.kim@samsung.com, akpm@linux-foundation.org, Hyuk Lee <hyuk1.lee@samsung.com>, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
 
-Anyone interested?
-It always takes time to identify a problem with several processes all
-named mmcqd there
+On Sat, Sep 18, 2010 at 12:59 AM, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
+>
+> On Thu, Sep 16, 2010 at 06:08:28PM +0900, Kyungmin Park wrote:
+>> Well there are two implementations. and no conclusion yet.
+>> as s5pc210 don't support internal SDHCI clock, DMC overrides the
+>> function operation itself when s5pc210. System LSI use the quirks.
+>>
+>> Choose any one from MMC maintainer.
+>
+> Both approaches are generally acceptable for MMC, so I would want to
+> leave it up to the maintainer of the driver in question (which is Ben=
+,
+> in this case?) to choose between them.
 
-On Sun, Sep 26, 2010 at 4:34 PM, Ethan Du <ethan.too@gmail.com> wrote:
-> Usually there are multiple mmc host controllers, rename mmc queue thr=
-ead
-> =A0=A0=A0 by host index, so we can easily identify which controller i=
-t belongs to
+Hi Chris,
+
+Did you get the opinion from Ben?
+
+I hope this decision will be done before 2.6.37 merge windows start to
+support SDHCI support on s5pc210.
+
+Thank you,
+Kyungmin Park
+
 >
-> Signed-off-by: Ethan <ethan.too@gmail.com>
-> ---
-> =A0drivers/mmc/card/queue.c |=A0=A0=A0 3 ++-
-> =A01 files changed, 2 insertions(+), 1 deletions(-)
+> That said, I think my own mild preference is for Jaehoon's approach.
 >
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index e876678..673bbdb 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -211,7 +211,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct m=
-mc_card
-> *card, spinlock_t *lock
+> Thanks,
 >
-> =A0=A0=A0=A0 init_MUTEX(&mq->thread_sem);
->
-> -=A0=A0=A0 mq->thread =3D kthread_run(mmc_queue_thread, mq, "mmcqd");
-> +=A0=A0=A0 mq->thread =3D kthread_run(mmc_queue_thread, mq, "mmcqd/%d=
-",
-> +=A0=A0=A0 =A0=A0=A0 host->index);
-> =A0=A0=A0=A0 if (IS_ERR(mq->thread)) {
-> =A0=A0=A0=A0 =A0=A0=A0 ret =3D PTR_ERR(mq->thread);
-> =A0=A0=A0=A0 =A0=A0=A0 goto free_bounce_sg;
+> - Chris.
 > --
-> 1.5.6.5
->
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
 >
