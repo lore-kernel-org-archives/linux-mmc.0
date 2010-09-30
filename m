@@ -1,163 +1,101 @@
-From: =?ISO-8859-1?Q?Richard_R=F6jfors?= <richard.rojfors@pelagicore.com>
-Subject: Re: [PATCH 1/6] mmc: sdhci-pltfm: Add structure for host-specific data
-Date: Thu, 30 Sep 2010 11:54:53 +0200
-Message-ID: <4CA45E6D.4070308@pelagicore.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 1/6] mmc: sdhci-pltfm: Add structure for host-specific
+ data
+Date: Thu, 30 Sep 2010 12:19:38 +0200
+Message-ID: <20100930101938.GE2655@pengutronix.de>
 References: <1285790884-3516-1-git-send-email-w.sang@pengutronix.de>
-	<1285790884-3516-2-git-send-email-w.sang@pengutronix.de>
-	<4CA3AE89.2030107@pelagicore.com>
-	<20100930081605.GA2655@pengutronix.de>
+ <1285790884-3516-2-git-send-email-w.sang@pengutronix.de>
+ <4CA3AE89.2030107@pelagicore.com>
+ <20100930081605.GA2655@pengutronix.de>
+ <4CA45E6D.4070308@pelagicore.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; Format="flowed"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20100930081605.GA2655@pengutronix.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Zhu Richard-R65037 <r65037@freescale.com>, linux-mmc@vger.kernel.org, =?ISO-8859-1?Q?Richard_R=F6jfors?= <richard.rojfors.ext@mocean-labs.com>, zhangfei gao <zhangfei.gao@gmail.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Philip Rakity <prakity@marvell.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="HeFlAV5LIbMFYYuh"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:37128 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755061Ab0I3KTl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Sep 2010 06:19:41 -0400
+Content-Disposition: inline
+In-Reply-To: <4CA45E6D.4070308@pelagicore.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Richard =?iso-8859-15?Q?R=F6jfors?= <richard.rojfors@pelagicore.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Anton Vorontsov <cbouatmailru@gmail.com>, Zhu Richard-R65037 <r65037@freescale.com>, zhangfei gao <zhangfei.gao@gmail.com>, Philip Rakity <prakity@marvell.com>, Richard =?iso-8859-15?Q?R=F6jfors?= <richard.rojfors.ext@mocean-labs.com>
 
-On 09/30/2010 10:16 AM, Wolfram Sang wrote:
-> Hi Richard,
->
-> On Wed, Sep 29, 2010 at 11:24:25PM +0200, Richard R=F6jfors wrote:
->> On 09/29/2010 10:07 PM, Wolfram Sang wrote:
->>> We need to carry some information per host, e.g. the clock. Add a
->>> structure for it and initialize it in the generic part. Also do not use
->>> the parent of the platform_device (if it is available), this breaks the
->>> clock-matching on ARM.
->>
->> The reason it's there is for instance a case when the shdci device is ex=
-posed
->> from a MFD device which sits on top of PCI. Then the parent (PCI device)
->> is the device that is DMA capable. This patch will break such usage.
->
-> I feared that there is a reason. The problem I see is now, that the paren=
-t gets
-> always set (from drivers/base/platform.c):
 
-Then we obviously need to pass more information in the platform_data to be =
-able
-to chose which device to be used.
+--HeFlAV5LIbMFYYuh
+Content-Type: text/plain; charset=iso-8859-15
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->
-> So, sdhci-plftm cannot access the platform_data connected to the original
-> platform_device via host->mmc->parent.
+On Thu, Sep 30, 2010 at 11:54:53AM +0200, Richard R=F6jfors wrote:
+> On 09/30/2010 10:16 AM, Wolfram Sang wrote:
+> >Hi Richard,
+> >
+> >On Wed, Sep 29, 2010 at 11:24:25PM +0200, Richard R=F6jfors wrote:
+> >>On 09/29/2010 10:07 PM, Wolfram Sang wrote:
+> >>>We need to carry some information per host, e.g. the clock. Add a
+> >>>structure for it and initialize it in the generic part. Also do not use
+> >>>the parent of the platform_device (if it is available), this breaks the
+> >>>clock-matching on ARM.
+> >>
+> >>The reason it's there is for instance a case when the shdci device is e=
+xposed
+> >>from a MFD device which sits on top of PCI. Then the parent (PCI device)
+> >>is the device that is DMA capable. This patch will break such usage.
+> >
+> >I feared that there is a reason. The problem I see is now, that the pare=
+nt gets
+> >always set (from drivers/base/platform.c):
+>=20
+> Then we obviously need to pass more information in the platform_data to b=
+e able
+> to chose which device to be used.
 
-You're right it wouldn't. But isn't it a bit risky even if you could access=
- it,
-in the long the platform_data coild point to something that is in the __dev=
-init section
-or similar?
-What about extend the struct you defined with the pieces needed, and access=
- it via
-sdhci_priv?
+Yeah, that was my idea, too.
 
->> What is the purpose of this patch? You allocate space for an extra struc=
-t,
->> which you have a pointer pointing to, but you never use the pointer?
->
-> We want to extend sdhci-pltfm to support the various sdhci-cores on (for =
-now
-> mainly) ARM platforms. A number of those cores need board specific inform=
-ation
-> to be used in a custom init()-call, which shall be passed via platform_da=
-ta.
-> The pointer will be used in the platform specific extensions.
+> >So, sdhci-plftm cannot access the platform_data connected to the original
+> >platform_device via host->mmc->parent.
+>=20
+> You're right it wouldn't. But isn't it a bit risky even if you could acce=
+ss it,
+> in the long the platform_data coild point to something that is in the __d=
+evinit section
+> or similar?
 
-Sounds good.
+The use-case we see now is in the custom init() call, i.e. setting up
+GPIO, enabling clocks. That is in the same section. Accessing
+platform_data later is in deed always risky and should not be done,
+sdhci-pltfm is no special case here.
 
-Regards,
-Richard
+> What about extend the struct you defined with the pieces needed, and acce=
+ss it via
+> sdhci_priv?
 
->
->>>
->>> Signed-off-by: Wolfram Sang<w.sang@pengutronix.de>
->>> Cc: Richard R=F6jfors<richard.rojfors.ext@mocean-labs.com>
->>> ---
->>>
->>> Changes since last version:
->>>
->>> * added types.h
->>
->> I saw no types.h?
->
-> In the second chunk, the include file.
->
-> Thanks,
->
->     Wolfram
->
->>
->>> * removed usage of pdev->dev.parent to ensure clk-matching
->>>    Please speak up if this has a use case I failed to see!
->>>
->>>   drivers/mmc/host/sdhci-pltfm.c |    8 ++++----
->>>   drivers/mmc/host/sdhci-pltfm.h |    7 +++++++
->>>   2 files changed, 11 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pl=
-tfm.c
->>> index e045e3c..095ca9d 100644
->>> --- a/drivers/mmc/host/sdhci-pltfm.c
->>> +++ b/drivers/mmc/host/sdhci-pltfm.c
->>> @@ -55,6 +55,7 @@ static int __devinit sdhci_pltfm_probe(struct platfor=
-m_device *pdev)
->>>   	struct sdhci_pltfm_data *pdata =3D pdev->dev.platform_data;
->>>   	const struct platform_device_id *platid =3D platform_get_device_id(p=
-dev);
->>>   	struct sdhci_host *host;
->>> +	struct sdhci_pltfm_host *pltfm_host;
->>>   	struct resource *iomem;
->>>   	int ret;
->>>
->>> @@ -71,16 +72,15 @@ static int __devinit sdhci_pltfm_probe(struct platf=
-orm_device *pdev)
->>>   		dev_err(&pdev->dev, "Invalid iomem size. You may "
->>>   			"experience problems.\n");
->>>
->>> -	if (pdev->dev.parent)
->>> -		host =3D sdhci_alloc_host(pdev->dev.parent, 0);
->>> -	else
->>> -		host =3D sdhci_alloc_host(&pdev->dev, 0);
->>> +	host =3D sdhci_alloc_host(&pdev->dev, sizeof(*pltfm_host));
->>>
->>>   	if (IS_ERR(host)) {
->>>   		ret =3D PTR_ERR(host);
->>>   		goto err;
->>>   	}
->>>
->>> +	pltfm_host =3D sdhci_priv(host);
->>> +
->>>   	host->hw_name =3D "platform";
->>>   	if (pdata&&   pdata->ops)
->>>   		host->ops =3D pdata->ops;
->>> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pl=
-tfm.h
->>> index 900f329..93a0319 100644
->>> --- a/drivers/mmc/host/sdhci-pltfm.h
->>> +++ b/drivers/mmc/host/sdhci-pltfm.h
->>> @@ -11,8 +11,15 @@
->>>   #ifndef _DRIVERS_MMC_SDHCI_PLTFM_H
->>>   #define _DRIVERS_MMC_SDHCI_PLTFM_H
->>>
->>> +#include<linux/clk.h>
->>> +#include<linux/types.h>
->>>   #include<linux/sdhci-pltfm.h>
->>>
->>> +struct sdhci_pltfm_host {
->>> +	struct clk *clk;
->>> +	u32 scratchpad; /* to handle quirks across io-accessor calls */
->>> +};
->>> +
->>>   extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
->>>
->>>   #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
->
+At the moment, I don't think this is needed. Will think more about it
+(and the other comments) next week, already preparing for a long weekend
+\o/
+
+Thanks,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--HeFlAV5LIbMFYYuh
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkykZDoACgkQD27XaX1/VRvsLQCgvE69QxB7kdAiRo46/aGFf/Zi
+FoEAoIZUE5YVzNev7pzWCtRZCWkQoV+d
+=GsdV
+-----END PGP SIGNATURE-----
+
+--HeFlAV5LIbMFYYuh--
