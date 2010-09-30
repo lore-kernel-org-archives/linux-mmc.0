@@ -1,96 +1,88 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH 5/5] sdhci-s3c: Add support no internal clock divider in
- host controller
-Date: Thu, 30 Sep 2010 15:00:25 +0900
-Message-ID: <AANLkTi=r0x-ciYG7JVyidgan12JUKmVRhNjNCR_uSfFf@mail.gmail.com>
-References: <1284626223-18944-1-git-send-email-jeongbae.seo@samsung.com>
-	<1284626223-18944-6-git-send-email-jeongbae.seo@samsung.com>
-	<AANLkTik23B23RW_kmjaL1PeXNiWtU01aNBwUOPrac6HF@mail.gmail.com>
-	<20100917155928.GA7561@void.printf.net>
-	<AANLkTimyvrSxQiF4A4pbmK8nME2ko9MRtqvcuMrY2rKR@mail.gmail.com>
-	<20100930015154.GA1269@void.printf.net>
-	<000a01cb6061$f9fc3220$edf49660$%seo@samsung.com>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [RFC RESEND] sdhci-s3c: support clock enable/disable (clock-gating)
+Date: Thu, 30 Sep 2010 09:22:17 +0200
+Message-ID: <AANLkTikywfU_C4QTQet64aQJgQyyDdTh4xRpaYu6q0di@mail.gmail.com>
+References: <4C91BD5A.1040804@samsung.com>
+	<20100929233751.GA31473@void.printf.net>
+	<alpine.LFD.2.00.1009292334050.1146@xanadu.home>
+	<20100930040958.GA3170@void.printf.net>
+	<AANLkTin=9KwC0Paa8yAhG-OBXFrfJDKJSYokzLLa6jPN@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <000a01cb6061$f9fc3220$edf49660$%seo@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jeongbae Seo <jeongbae.seo@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, kgene.kim@samsung.com, akpm@linux-foundation.org, Hyuk Lee <hyuk1.lee@samsung.com>, ??? <jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:40179 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753927Ab0I3HWS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Sep 2010 03:22:18 -0400
+Received: by gwj17 with SMTP id 17so582295gwj.19
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Sep 2010 00:22:17 -0700 (PDT)
+In-Reply-To: <AANLkTin=9KwC0Paa8yAhG-OBXFrfJDKJSYokzLLa6jPN@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Nicolas Pitre <nico@fluxnic.net>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, matt@console-pimps.org, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Pierre Ossman <pierre-list@ossman.eu>, Kukjin Kim <kgene.kim@samsung.com>
 
-On Thu, Sep 30, 2010 at 2:40 PM, Jeongbae Seo <jeongbae.seo@samsung.com=
-> wrote:
-> Chris wrote:
->
->> Hi Kyungmin, Ben,
+2010/9/30 Kyungmin Park <kyungmin.park@samsung.com>:
+> On Thu, Sep 30, 2010 at 1:09 PM, Chris Ball <cjb@laptop.org> wrote:
+>> Hi,
 >>
->> On Thu, Sep 30, 2010 at 10:18:12AM +0900, Kyungmin Park wrote:
->> > On Sat, Sep 18, 2010 at 12:59 AM, Chris Ball <cjb@laptop.org> wrot=
-e:
->> > > Hi,
->> > >
->> > > On Thu, Sep 16, 2010 at 06:08:28PM +0900, Kyungmin Park wrote:
->> > >> Well there are two implementations. and no conclusion yet.
->> > >> as s5pc210 don't support internal SDHCI clock, DMC overrides th=
-e
->> > >> function operation itself when s5pc210. System LSI use the quir=
-ks.
->> > >>
->> > >> Choose any one from MMC maintainer.
->> > >
->> > > Both approaches are generally acceptable for MMC, so I would wan=
-t to
->> > > leave it up to the maintainer of the driver in question (which i=
-s Ben,
->> > > in this case?) to choose between them.
->> >
->> > Hi Chris,
->> >
->> > Did you get the opinion from Ben?
->> >
->> > I hope this decision will be done before 2.6.37 merge windows star=
-t to
->> > support SDHCI support on s5pc210.
+>> On Wed, Sep 29, 2010 at 11:42:01PM -0400, Nicolas Pitre wrote:
+>>> As I already said here:
+>>>
+>>> =A0 =A0 =A0 http://article.gmane.org/gmane.linux.ports.arm.omap/394=
+11
+>>>
+>>> I find those callbacks rather problematic. =A0Currently,
+>>> mmc_host_disable() is called by the host driver (currently OMAP) an=
+d
+>>> that's wrong. =A0Such decision cannot be made in the controller dri=
+ver --
+>>> it has to be made higher up the stack.
 >>
->> Hm, I didn't, and Ben's been silent about the urgent sdhci-s3c patch=
-es
->> too. =A0Ben, are you just dealing with a large backlog, or are you
->> interested in nominating someone else to take over sdhci-s3c?
+>> I strongly agree. =A0I hadn't noticed that aspect of this design unt=
+il
+>> today. =A0It looked like Linus W had a nice core-integrated clocking
+>> framework almost ready to go a year ago, but it lost out. =A0(Someth=
+ing
+>> left to do was to give extra time after a request in case we're on a
+>> broken card which requires the card clock to be present during its
+>> writeback.)
 >
-> Hi Chris, Kyungmin
->
-> I'd like to let you know that Ben had reviewed and commented for
-> "[PATCH v2 2/2] sdhci-s3c: Add support no internal clock divider" in =
-host
-> controller in 9/21. However, our response was late due to our holiday=
-s. I
-> made a response in 9/28 that why we use this quirk and now we're wait=
-ing for
-> his opinion.
->
-> Kyungmin, did you check Ben's review comments for this ? When I saw i=
-t, his
-> approach is just a bit different from you and me. Please let us know =
-if you
-> have any idea about his comments.
+> Do you mean this one?
+> http://www.mail-archive.com/linux-embedded@vger.kernel.org/msg01883.h=
+tml
 
-I think he just ask "why these quirk are needed" and you already
-explained it. I don't have any clue this approach.
-Anyway he suggest any ideas I will check it. but no comments then no wa=
-y.
+That's it. If there is interest I can surely pick it up and wrap the
+current enable/disable calls around it or even rewrite all drivers
+to use the set_ios() approach as in this patchset I think.
 
-Thank you,
-Kyungmin Park
->
-> Thanks,
-> Best Regards
-> Jeongbae Seo
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
-ng-soc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+What happened was that I had this iterated a few times as Pierre was
+getting increasingly overloaded and it was on the verge of merging
+when he resigned as MMC maintainer.
+
+The next week or so the big hammer callbacks from OMAP were
+merged as part of their mainline procedure.
+
+> In previous time it used for our kernel and find it's difficult to
+> handle and maintain and can't support the SD card.
+> So try to find another method and implemente it at SDHCI drivers.
+
+Why? The only difference between this solution and the one
+that is inside the kernel now is that this will use set_ios() with
+a zero argument to gate off the clock after a timeout instead
+of special callbacks. (A features especially requested by Pierre.)
+
+I can move the timeing code to wrap the current callbacks
+instead atleast that would make things more according to spec.
+
+=46or MMC cards that is.
+
+=46or SD cards IIRC the spec is the same, but in practice all
+SD cards (and especially all MicroSD and eMMCs we see these
+days) survive gating the clock off like these current callbacks do.
+That I believe is why people have so little trouble with the present
+code.
+
+Yours,
+Linus Walleij
