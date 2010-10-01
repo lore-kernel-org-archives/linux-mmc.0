@@ -1,55 +1,119 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH] sdhci: adjust sd 3.0 host controller spec clock divider
-Date: Thu, 30 Sep 2010 20:03:14 -0700
-Message-ID: <CDD4A6CE-487A-4740-87BA-96EEBF1E8217@marvell.com>
+From: "Ghorai, Sukumar" <s-ghorai@ti.com>
+Subject: RE: [PATCH] omap: Keep nwires for omap1 and 2420 MMC controller
+ (Re: [PATCH] omap mmc: extended to pass host capabilities from board file)
+Date: Fri, 1 Oct 2010 10:53:53 +0530
+Message-ID: <2A3DCF3DA181AD40BDE86A3150B27B6B0356476F50@dbde02.ent.ti.com>
+References: <1284562163-2828-1-git-send-email-s-ghorai@ti.com>
+ <20100923230819.GS4211@atomide.com> <20100930183818.GK3117@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog111.obsmtp.com ([74.125.149.205]:56970 "HELO
-	na3sys009aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751542Ab0JADKR convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 30 Sep 2010 23:10:17 -0400
+Received: from arroyo.ext.ti.com ([192.94.94.40]:48179 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750864Ab0JAFYA convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2010 01:24:00 -0400
+In-Reply-To: <20100930183818.GK3117@atomide.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Tony Lindgren <tony@atomide.com>
+Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
->From 8136dcbf78b5f9914caffbedf0ac2bc86426002c Mon Sep 17 00:00:00 2001
-From: Philip Rakity <prakity@marvell.com>
-Date: Thu, 30 Sep 2010 15:34:24 -0700
-Subject: [PATCH] sdhci: adjust sd 3.0 host controller spec clock divider
 
-The sd 3.0 host spec does not require the clock divider to be a power of 2.
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- drivers/mmc/host/sdhci.c |    8 +++-----
- 1 files changed, 3 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 96c7f60..73a94fe 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1003,14 +1003,12 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 		goto out;
- 
- 	if (host->version >= SDHCI_SPEC_300) {
--		/* Version 3.00 divisors must be a multiple of 2. */
- 		if (host->max_clk <= clock)
- 			div = 1;
- 		else {
--			for (div = 2; div < SDHCI_MAX_DIV_SPEC_300; div += 2) {
--				if ((host->max_clk / div) <= clock)
--					break;
--			}
-+			div = host->max_clk/clock;
-+			if (host->max_clk % clock)
-+				div++;
- 		}
- 	} else {
- 		/* Version 2.00 divisors must be a power of 2. */
--- 
-1.6.0.4
-
+> -----Original Message-----
+> From: Tony Lindgren [mailto:tony@atomide.com]
+> Sent: Friday, October 01, 2010 12:08 AM
+> To: Ghorai, Sukumar
+> Cc: linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org
+> Subject: [PATCH] omap: Keep nwires for omap1 and 2420 MMC controller (Re:
+> [PATCH] omap mmc: extended to pass host capabilities from board file)
+> 
+> * Tony Lindgren <tony@atomide.com> [100923 16:00]:
+> > * Sukumar Ghorai <s-ghorai@ti.com> [100915 07:41]:
+> > >   wires variable is renamed, extended and this single variable to be
+> used to
+> > >   pass the platform capabilities, e.g DDR mode. Also removed the
+> hardcoded
+> > >   value was using as bus-width.
+> >
+> > This looks like a nice clean-up, I'll queue this via the omap
+> > patches.
+> 
+> And of course this patch breaks all of mach-omap1 and omap2420.
+> 
+> Sukumar, your patch modified also drivers/mmc/host/omap.c and board-n8x0.c
+> to use caps instead of nwires. When you do things like that you absolutely
+> _must_test_your_changes_ before sending out any patches.
+> 
+> Planning on merging the following fix.
+> 
+> Tony
+> 
+> From: Tony Lindgren <tony@atomide.com>
+> Date: Thu, 30 Sep 2010 10:25:46 -0700
+> Subject: [PATCH] Subject: [PATCH] omap: Keep nwires for omap1 and 2420 MMC
+> controller
+> 
+> A patch from Sukumar Ghorai <s-ghorai@ti.com> changed the
+> nwires to use caps instead. However, nwires is still
+> needed for the earlier controller.
+> 
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
+> 
+> diff --git a/arch/arm/mach-omap2/board-n8x0.c b/arch/arm/mach-omap2/board-
+> n8x0.c
+> index abd7e77..6bd9d9a 100644
+> --- a/arch/arm/mach-omap2/board-n8x0.c
+> +++ b/arch/arm/mach-omap2/board-n8x0.c
+> @@ -488,7 +488,7 @@ static struct omap_mmc_platform_data mmc1_data = {
+>  	.max_freq			= 24000000,
+>  	.dma_mask			= 0xffffffff,
+>  	.slots[0] = {
+> -		.caps			= MMC_CAP_4_BIT_DATA,
+> +		.wires			= 4,
+>  		.set_power		= n8x0_mmc_set_power,
+>  		.set_bus_mode		= n8x0_mmc_set_bus_mode,
+>  		.get_cover_state	= n8x0_mmc_get_cover_state,
+> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-
+> omap/include/plat/mmc.h
+> index 4f819fc..bc85010 100644
+> --- a/arch/arm/plat-omap/include/plat/mmc.h
+> +++ b/arch/arm/plat-omap/include/plat/mmc.h
+> @@ -73,9 +73,16 @@ struct omap_mmc_platform_data {
+> 
+>  	struct omap_mmc_slot_data {
+> 
+> -		/* 4/8 wires and any additional host capabilities
+> -		 * need to OR'd all capabilities (ref. linux/mmc/host.h) */
+> -		u32 caps;
+> +		/*
+> +		 * 4/8 wires and any additional host capabilities
+> +		 * need to OR'd all capabilities (ref. linux/mmc/host.h)
+> +		 */
+> +#if defined(CONFIG_ARCH_OMAP1) || defined(CONFIG_ARCH_OMAP2420)
+> +		u8  wires;	/* Used for the MMC driver on omap1 and 2420 */
+> +#endif
+> +#ifdef CONFIG_ARCH_OMAP2PLUS
+> +		u32 caps;	/* Used for the MMC driver on 2430 and later */
+> +#endif
+> 
+>  		/*
+>  		 * nomux means "standard" muxing is wrong on this board, and
+> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+> index a9d62cf..d98ddcf 100644
+> --- a/drivers/mmc/host/omap.c
+> +++ b/drivers/mmc/host/omap.c
+> @@ -1317,7 +1317,7 @@ static int __init mmc_omap_new_slot(struct
+> mmc_omap_host *host, int id)
+>  	host->slots[id] = slot;
+> 
+>  	mmc->caps = 0;
+> -	if (host->pdata->slots[id].caps & MMC_CAP_8_BIT_DATA)
+> +	if (host->pdata->slots[id].wires >= 4)
+>  		mmc->caps |= MMC_CAP_4_BIT_DATA;
+> 
+>  	mmc->ops = &mmc_omap_ops;
+[Ghorai] thanks.. I am agreeing with you;
+Acked-by: Sukumar Ghorai <s-ghorai@ti.com>
