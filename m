@@ -1,38 +1,24 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH (mmc-next) 1/3] mmc: add suspend/resume in the
-	sdhci-pltfm driver (V3)
-Date: Fri, 1 Oct 2010 00:25:26 +0100
-Message-ID: <20100930232526.GA29636@void.printf.net>
-References: <1285663289-20283-1-git-send-email-peppe.cavallaro@st.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH] mmc: MMC 4.4 DDR support
+Date: Thu, 30 Sep 2010 20:01:28 -0700
+Message-ID: <DFA7B5FE-718A-484B-BA1D-D1B44E3A5A32@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36810 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753306Ab0I3XZ1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 30 Sep 2010 19:25:27 -0400
-Content-Disposition: inline
-In-Reply-To: <1285663289-20283-1-git-send-email-peppe.cavallaro@st.com>
+Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:54583 "HELO
+	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751032Ab0JADHH convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 30 Sep 2010 23:07:07 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
-Cc: linux-mmc@vger.kernel.org, w.sang@pengutronix.de
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Peppe,
 
-On Tue, Sep 28, 2010 at 10:41:27AM +0200, Giuseppe CAVALLARO wrote:
-> This patch adds the suspend and resume functions
-> in the sdhci-pltfm device driver.
-> 
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+I was wondering if we could remove one of the CAPS for DDR voltage (MMC_CAP_1_8V_DDR and MMC_CAP_1_2V_DDR). Both 1.2 and 1.8v are defined in the JEDEC Standard No. 84-A441.
 
-Thanks!  I've applied this patchset (1-3) to mmc-next with minor
-language changes.
+The sd 3.0 host controller only defines the option for 1.8v.  I cannot see a way to set 1.2v. 
 
-Looks like we're waiting for a version of your STM driver with final
-changes from Wolfram's review -- do you think you'll submit that soon?
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+If this makes sense I can prepare a patch.
