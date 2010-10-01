@@ -1,130 +1,108 @@
-From: "Varadarajan, Charulatha" <charu@ti.com>
-Subject: RE: [PATCH v4 1/4] omap4 hsmmc: Adding card detect support for MMC1
-Date: Fri, 1 Oct 2010 20:24:57 +0530
-Message-ID: <EAF47CD23C76F840A9E7FCE10091EFAB030CDFE0C9@dbde02.ent.ti.com>
-References: <9408.10.24.255.18.1285348400.squirrel@dbdmail.itg.ti.com>
-	<AANLkTi=YvtrfmUTc-YBAUjEXn1v3pPLmhb92J60AhU28@mail.gmail.com>
-	<AANLkTim5d6XP0nuJLF2DxDGP2DuBK5VUajd=YhXQnT2C@mail.gmail.com>
-	<AANLkTi=oX7CT8RF39kT-7niutF3PEeSeC1A_L5TcWuO4@mail.gmail.com>
-	<AANLkTim1H=qam8Sjbv_EUXGtf09TObTViYMiN17uMFQ1@mail.gmail.com>
-	<20101001112926.GC3064@sortiz-mobl>
-	<AANLkTims1qZ_X9F4rzkJE9Gat_pwWZxO2nPkRTpa6Cc5@mail.gmail.com>
-	<EAF47CD23C76F840A9E7FCE10091EFAB030CDFE0BB@dbde02.ent.ti.com>
- <AANLkTikBcUZjMEAa1AuAdVohLkbVXki0nW4NpBOC-hJJ@mail.gmail.com>
+From: "G, Manjunath Kondaiah" <manjugk@ti.com>
+Subject: RE: [PATCH v2 3/4] omap4 hsmmc: Register offset handling
+Date: Fri, 1 Oct 2010 20:32:39 +0530
+Message-ID: <E0D41E29EB0DAC4E9F3FF173962E9E9402DB90C50E@dbde02.ent.ti.com>
+References: <33958.10.24.255.17.1284827654.squirrel@dbdmail.itg.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <AANLkTikBcUZjMEAa1AuAdVohLkbVXki0nW4NpBOC-hJJ@mail.gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:34540 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756724Ab0JAPCs convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2010 11:02:48 -0400
+In-Reply-To: <33958.10.24.255.17.1284827654.squirrel@dbdmail.itg.ti.com>
 Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
-To: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "tony@atomide.com" <tony@atomide.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, linux-arm-kernel@li
+Cc: "khilman@deeprootsystems.com" <khilman@deeprootsystems.com>, "Cousson, Benoit" <b-cousson@ti.com>
+
 
 
 
 > -----Original Message-----
-> From: kishore kadiyala [mailto:kishorek.kadiyala@gmail.com]
-> Sent: Friday, October 01, 2010 8:15 PM
-> To: Varadarajan, Charulatha
-> Cc: Samuel Ortiz; linux-mmc@vger.kernel.org; linux-omap@vger.kernel.o=
-rg;
-> linux-arm-kernel@lists.infradead.org; tony@atomide.com; akpm@linux-
-> foundation.org; Chikkature Rajashekar, Madhusudhan;
-> adrian.hunter@nokia.com
-> Subject: Re: [PATCH v4 1/4] omap4 hsmmc: Adding card detect support f=
-or
-> MMC1
->=20
-> On Fri, Oct 1, 2010 at 8:11 PM, Varadarajan, Charulatha <charu@ti.com=
->
-> wrote:
-> >
-> > <<snip>>
-> >
-> >> >> >>>> diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/t=
-wl.h
-> >> >> >>>> index 6de90bf..e64894c 100644
-> >> >> >>>> --- a/include/linux/i2c/twl.h
-> >> >> >>>> +++ b/include/linux/i2c/twl.h
-> >> >> >>>> @@ -141,6 +141,16 @@
-> >> >> >>>> =A0#define TWL6030_CHARGER_CTRL_INT_MASK =A00x10
-> >> >> >>>> =A0#define TWL6030_CHARGER_FAULT_INT_MASK =A0 =A0 =A0 =A0 =
-0x60
-> >> >> >>>>
-> >> >> >>>> +#define TWL6030_MMCCTRL =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x=
-EE
-> >> >> >>>> +#define VMMC_AUTO_OFF =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-(0x1 << 3)
-> >> >> >>>> +#define SW_FC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0(0x1 << 2)
-> >> >> >>>> +#define STS_MMC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A00x1
-> >> >> >>>> +
-> >> >> >>>> +#define TWL6030_CFG_INPUT_PUPD3 =A0 =A0 =A0 =A00xF2
-> >> >> >>>> +#define MMC_PU =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 (0x1 << 3)
-> >> >> >>>> +#define MMC_PD =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 (0x1 << 2)
-> >> >> >>>> +
-> >> >> >>>> +
-> >> >> >>>>
-> >> >> >>>> =A0#define TWL4030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 =A0 0x=
-4030
-> >> >> >>>> =A0#define TWL6030_CLASS_ID =A0 =A0 =A0 =A0 =A0 =A0 =A0 0x=
-6030
-> >> >> >>>> @@ -173,6 +183,27 @@ int twl_i2c_read(u8 mod_no, u8
-> >> *value, u8 reg, unsigned num_bytes);
-> >> >> >>>> =A0int twl6030_interrupt_unmask(u8 bit_mask, u8 offset);
-> >> >> >>>> =A0int twl6030_interrupt_mask(u8 bit_mask, u8 offset);
-> >> >> >>>>
-> >> >> >>>> +/* Card detect Configuration for MMC1 Controller on OMAP4=
- */
-> >> >> >>>> +#ifdef CONFIG_TWL4030_CORE
-> >> >> >>>> +int twl6030_mmc_card_detect_config(void);
-> >> >> >>>> +#else
-> >> >> >>>> +static inline int twl6030_mmc_card_detect_config(void)
-> >> >> >>>> +{
-> >> >> >>>> + =A0 =A0 =A0 pr_debug("twl6030_mmc_card_detect_config not
-> >> supported\n");
-> >> >> >>>> + =A0 =A0 =A0 return 0;
-> >> >> >>>> +}
-> >> >> >>>> +#endif
-> >> >> >>>> +
-> >> >> >>>> +/* MMC1 Controller on OMAP4 uses Phoenix irq for
-> >> Card detect */
-> >> >> >>>> +#ifdef CONFIG_TWL4030_CORE
-> >> >> >>>> +int twl6030_mmc_card_detect(struct device *dev, int slot)=
-;
-> >> >> >>>> +#else
-> >> >> >>>> +static inline int twl6030_mmc_card_detect(struct
-> >> device *dev, int slot)
-> >> >> >>>> +{
-> >> >> >>>> + =A0 =A0 =A0 pr_debug("Call back twl6030_mmc_card_detect
-> >> not supported\n");
-> >
-> > Use dev_dbg() instead of pr_debug...
-> > Same comment applies across this patch series whereever pr_err/pr_d=
-ebug
-> > APIs are used.
->=20
-> Couldn't get it  how it makes a difference ? could you explain
->=20
+> From: linux-omap-owner@vger.kernel.org 
+> [mailto:linux-omap-owner@vger.kernel.org] On Behalf Of 
+> Kadiyala, Kishore
+> Sent: Saturday, September 18, 2010 10:04 PM
+> To: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org; 
+> linux-arm-kernel@lists.infradead.org
+> Cc: khilman@deeprootsystems.com; Cousson, Benoit
+> Subject: [PATCH v2 3/4] omap4 hsmmc: Register offset handling
+> 
+> The offset handling implementation of omap4 mmc registers 
+> which was already present can't be reused once hwmod 
+> modifications are done for mmc driver.
+> Since hwmod data file for OMAP4 is an auto generated the base 
+> address for MMC will remain same as OMAP3 and thus the offset 
+> deviation of registers should be updated in the hsmmc driver.
+> The omap-mmc platform data is updated with a register offset 
+> which will be updated and used in the driver accordingly.
+> 
+> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+> ---
+>  arch/arm/mach-omap2/devices.c         |    8 +++-----
+>  arch/arm/mach-omap2/hsmmc.c           |    4 ++++
+>  arch/arm/plat-omap/include/plat/mmc.h |    3 +++
+>  drivers/mmc/host/omap_hsmmc.c         |    2 +-
+>  4 files changed, 11 insertions(+), 6 deletions(-)
+> 
+> diff --git a/arch/arm/mach-omap2/devices.c 
+> b/arch/arm/mach-omap2/devices.c index 2dbb265..bb7ec13 100644
+> --- a/arch/arm/mach-omap2/devices.c
+> +++ b/arch/arm/mach-omap2/devices.c
+> @@ -745,13 +745,13 @@ void __init omap2_init_mmc(struct 
+> omap_mmc_platform_data **mmc_data,
+>  		case 3:
+>  			if (!cpu_is_omap44xx())
+>  				return;
+> -			base = OMAP4_MMC4_BASE + OMAP4_MMC_REG_OFFSET;
+> +			base = OMAP4_MMC4_BASE;
+>  			irq = OMAP44XX_IRQ_MMC4;
+>  			break;
+>  		case 4:
+>  			if (!cpu_is_omap44xx())
+>  				return;
+> -			base = OMAP4_MMC5_BASE + OMAP4_MMC_REG_OFFSET;
+> +			base = OMAP4_MMC5_BASE;
+>  			irq = OMAP44XX_IRQ_MMC5;
+>  			break;
+>  		default:
+> @@ -762,10 +762,8 @@ void __init omap2_init_mmc(struct 
+> omap_mmc_platform_data **mmc_data,
+>  			size = OMAP2420_MMC_SIZE;
+>  			name = "mmci-omap";
+>  		} else if (cpu_is_omap44xx()) {
+> -			if (i < 3) {
+> -				base += OMAP4_MMC_REG_OFFSET;
+> +			if (i < 3)
+>  				irq += OMAP44XX_IRQ_GIC_START;
+> -			}
+>  			size = OMAP4_HSMMC_SIZE;
+>  			name = "mmci-omap-hs";
+>  		} else {
+> diff --git a/arch/arm/mach-omap2/hsmmc.c 
+> b/arch/arm/mach-omap2/hsmmc.c index c8f647b..49d76a7 100644
+> --- a/arch/arm/mach-omap2/hsmmc.c
+> +++ b/arch/arm/mach-omap2/hsmmc.c
+> @@ -261,6 +261,10 @@ void __init omap2_hsmmc_init(struct 
+> omap2_hsmmc_info *controllers)
+>  		mmc->slots[0].wires = c->wires;
+>  		mmc->slots[0].internal_clock = !c->ext_clock;
+>  		mmc->dma_mask = 0xffffffff;
+> +		if (cpu_is_omap44xx())
+> +			mmc->reg_offset = OMAP4_MMC_REG_OFFSET;
+> +		else
+> +			mmc->reg_offset = 0;
 
-device information gets added for debug prints which is very useful
-while debugging
+1. Since you mentioned that, this is useful for hwmod, the 
+register offsets should use enum and static tables. You can
+refer to i2c-omap.c for more details and dma hwmod review 
+comments for more details.
+https://patchwork.kernel.org/patch/126251/
 
-> Regards,
-> Kishore
-> >
-> >> >> >>>> + =A0 =A0 =A0 return -EIO;
-> >> >> >>>> +}
-> >> >> >>>> +#endif
-> >
-> > <<snip>>
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+2. Replace macros with inline functions for low level read/write
+functions.
+
+ -Manjunath
