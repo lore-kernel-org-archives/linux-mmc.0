@@ -1,144 +1,156 @@
-From: kishore kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH v2 3/4] omap4 hsmmc: Register offset handling
-Date: Fri, 1 Oct 2010 20:44:11 +0530
-Message-ID: <AANLkTinoFUwMZxzkD-YxcW=L=0FD6XBHE3t-1VEv2heY@mail.gmail.com>
-References: <33958.10.24.255.17.1284827654.squirrel@dbdmail.itg.ti.com>
-	<E0D41E29EB0DAC4E9F3FF173962E9E9402DB90C50E@dbde02.ent.ti.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [RFC]  sdhci: 8 bit bus width changes
+Date: Fri, 1 Oct 2010 15:45:50 -0700
+Message-ID: <B76798A1-FA3F-4D7D-A22A-52289A4062FB@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <E0D41E29EB0DAC4E9F3FF173962E9E9402DB90C50E@dbde02.ent.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "G, Manjunath Kondaiah" <manjugk@ti.com>
-Cc: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "khilman@deeprootsystems.com" <khilman@deeprootsystems.com>, "Cousson, Benoit" <b-cousson@ti.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:42974 "HELO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751466Ab0JAWqt convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 1 Oct 2010 18:46:49 -0400
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Manju,
+>From 80c581d354df180a4c2d6aa50c21788e6c7593b9 Mon Sep 17 00:00:00 2001
+From: Philip Rakity <prakity@marvell.com>
+Date: Fri, 1 Oct 2010 13:42:58 -0700
+Subject: [RFC] sdhci: 8 bit bus width changes
 
-On Fri, Oct 1, 2010 at 8:32 PM, G, Manjunath Kondaiah <manjugk@ti.com> =
-wrote:
->
->
->
->> -----Original Message-----
->> From: linux-omap-owner@vger.kernel.org
->> [mailto:linux-omap-owner@vger.kernel.org] On Behalf Of
->> Kadiyala, Kishore
->> Sent: Saturday, September 18, 2010 10:04 PM
->> To: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org;
->> linux-arm-kernel@lists.infradead.org
->> Cc: khilman@deeprootsystems.com; Cousson, Benoit
->> Subject: [PATCH v2 3/4] omap4 hsmmc: Register offset handling
->>
->> The offset handling implementation of omap4 mmc registers
->> which was already present can't be reused once hwmod
->> modifications are done for mmc driver.
->> Since hwmod data file for OMAP4 is an auto generated the base
->> address for MMC will remain same as OMAP3 and thus the offset
->> deviation of registers should be updated in the hsmmc driver.
->> The omap-mmc platform data is updated with a register offset
->> which will be updated and used in the driver accordingly.
->>
->> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
->> ---
->> =A0arch/arm/mach-omap2/devices.c =A0 =A0 =A0 =A0 | =A0 =A08 +++-----
->> =A0arch/arm/mach-omap2/hsmmc.c =A0 =A0 =A0 =A0 =A0 | =A0 =A04 ++++
->> =A0arch/arm/plat-omap/include/plat/mmc.h | =A0 =A03 +++
->> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 | =A0 =A02 +-
->> =A04 files changed, 11 insertions(+), 6 deletions(-)
->>
->> diff --git a/arch/arm/mach-omap2/devices.c
->> b/arch/arm/mach-omap2/devices.c index 2dbb265..bb7ec13 100644
->> --- a/arch/arm/mach-omap2/devices.c
->> +++ b/arch/arm/mach-omap2/devices.c
->> @@ -745,13 +745,13 @@ void __init omap2_init_mmc(struct
->> omap_mmc_platform_data **mmc_data,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 case 3:
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!cpu_is_omap44xx())
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 base =3D OMAP4_MMC4_BASE +=
- OMAP4_MMC_REG_OFFSET;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 base =3D OMAP4_MMC4_BASE;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 irq =3D OMAP44XX_IRQ_MMC=
-4;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 case 4:
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!cpu_is_omap44xx())
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 base =3D OMAP4_MMC5_BASE +=
- OMAP4_MMC_REG_OFFSET;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 base =3D OMAP4_MMC5_BASE;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 irq =3D OMAP44XX_IRQ_MMC=
-5;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 default:
->> @@ -762,10 +762,8 @@ void __init omap2_init_mmc(struct
->> omap_mmc_platform_data **mmc_data,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 size =3D OMAP2420_MMC_SI=
-ZE;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 name =3D "mmci-omap";
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else if (cpu_is_omap44xx()) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (i < 3) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 base +=3D =
-OMAP4_MMC_REG_OFFSET;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (i < 3)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 irq +=3D=
- OMAP44XX_IRQ_GIC_START;
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 size =3D OMAP4_HSMMC_SIZ=
-E;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 name =3D "mmci-omap-hs";
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> diff --git a/arch/arm/mach-omap2/hsmmc.c
->> b/arch/arm/mach-omap2/hsmmc.c index c8f647b..49d76a7 100644
->> --- a/arch/arm/mach-omap2/hsmmc.c
->> +++ b/arch/arm/mach-omap2/hsmmc.c
->> @@ -261,6 +261,10 @@ void __init omap2_hsmmc_init(struct
->> omap2_hsmmc_info *controllers)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].wires =3D c->wires;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].internal_clock =3D !c->ext=
-_clock;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->dma_mask =3D 0xffffffff;
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (cpu_is_omap44xx())
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->reg_offset =3D OMAP4_=
-MMC_REG_OFFSET;
->> + =A0 =A0 =A0 =A0 =A0 =A0 else
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->reg_offset =3D 0;
->
-> 1. Since you mentioned that, this is useful for hwmod, the
-> register offsets should use enum and static tables. You can
-> refer to i2c-omap.c for more details and dma hwmod review
-> comments for more details.
-> https://patchwork.kernel.org/patch/126251/
+Check for v3 controller controller when doing 8 bit bus width
+add support for adaption layer to set 8 bit width.
+	controller may support 8 bit bus but NOT board design
+allow non v3 controllers to support 8 bit bus
 
-I've avoided using static tables for register offset handling as sugges=
-ted
-by Benoit for HSMMC driver.Instead had the offset updated in hsmmc.c
-and used in driver.
+non v3 controller (platform_8bit_width)
+=======================================
+platform_8bit_width is used to support 8 bit mode using our v2
+sd controller.  We have private registers that are used for 8 bit support
 
-Could you check the latest version V4
-http://www.spinics.net/lists/linux-omap/msg37226.html
+v2 - v3 controller and 8 bit support (SDHCI_QUIRK_SLOT_CAN_DO_8_BITS)
+=====================================================================
+The quirk is needed since we support multiple SD controllers and
+on the board sometimes 8 data lines are brought out and sometimes only 4. 
+The SD controller indicates it can support 8 bit (v3 controller) via the
+capability field but has no knowledge of how the pins were configured
+in the board design. There are only so many pins and the pins are multiplexed.
 
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |   44 +++++++++++++++++++++++++++++++++-----------
+ drivers/mmc/host/sdhci.h |    7 ++++++-
+ 2 files changed, 39 insertions(+), 12 deletions(-)
 
->
-> 2. Replace macros with inline functions for low level read/write
-> functions.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 73a94fe..ec103c3 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1182,17 +1182,31 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		sdhci_set_power(host, ios->vdd);
+ 
+-	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+ 
+-	if (ios->bus_width == MMC_BUS_WIDTH_8)
+-		ctrl |= SDHCI_CTRL_8BITBUS;
+-	else
+-		ctrl &= ~SDHCI_CTRL_8BITBUS;
++	/*
++	 * use platform_8_bit_width if not v3 controller
++	 * or if special hw/board specific processing is needed
++	 */
++	if (host->ops->platform_8bit_width)
++		host->ops->platform_8bit_width(host, ios->bus_width);
++	else {
++		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++		if (ios->bus_width == MMC_BUS_WIDTH_8) {
++			ctrl &= ~SDHCI_CTRL_4BITBUS;
++			if (host->version >= SDHCI_SPEC_300)
++				ctrl |= SDHCI_CTRL_8BITBUS;
++		} else {
++			if (host->version >= SDHCI_SPEC_300)
++				ctrl &= ~SDHCI_CTRL_8BITBUS;
++			if (ios->bus_width == MMC_BUS_WIDTH_4)
++				ctrl |= SDHCI_CTRL_4BITBUS;
++			else
++				ctrl &= ~SDHCI_CTRL_4BITBUS;
++		}
++		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++	}
+ 
+-	if (ios->bus_width == MMC_BUS_WIDTH_4)
+-		ctrl |= SDHCI_CTRL_4BITBUS;
+-	else
+-		ctrl &= ~SDHCI_CTRL_4BITBUS;
++	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+ 
+ 	if (ios->timing == MMC_TIMING_SD_HS &&
+ 	    !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+@@ -1838,11 +1852,19 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
+ 	else
+ 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
++
+ 	mmc->f_max = host->max_clk;
+ 	mmc->caps |= MMC_CAP_SDIO_IRQ;
+ 
+-	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+-		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
++	/* 8 bit width may be supported by v3 controller but not board
++	 * so the safest thing is to let the adaption layer decide
++	 * what to do by using the quirk
++	 */
++	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA)) {
++		mmc->caps |= MMC_CAP_4_BIT_DATA;
++		if (host->quirks & SDHCI_QUIRK_SLOT_CAN_DO_8_BITS)
++			mmc->caps |= MMC_CAP_8_BIT_DATA;
++	}
+ 
+ 	if (caps & SDHCI_CAN_DO_HISPD)
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 112543a..b3288fd 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -72,7 +72,7 @@
+ #define   SDHCI_CTRL_ADMA1	0x08
+ #define   SDHCI_CTRL_ADMA32	0x10
+ #define   SDHCI_CTRL_ADMA64	0x18
+-#define  SDHCI_CTRL_8BITBUS	0x20
++#define   SDHCI_CTRL_8BITBUS	0x20
+ 
+ #define SDHCI_POWER_CONTROL	0x29
+ #define  SDHCI_POWER_ON		0x01
+@@ -148,6 +148,7 @@
+ #define  SDHCI_CLOCK_BASE_SHIFT	8
+ #define  SDHCI_MAX_BLOCK_MASK	0x00030000
+ #define  SDHCI_MAX_BLOCK_SHIFT  16
++#define  SDHCI_CAN_DO_8BIT	0x00040000
+ #define  SDHCI_CAN_DO_ADMA2	0x00080000
+ #define  SDHCI_CAN_DO_ADMA1	0x00100000
+ #define  SDHCI_CAN_DO_HISPD	0x00200000
+@@ -260,6 +261,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12		(1<<28)
+ /* Controller doesn't have HISPD bit field in HI-SPEED SD card */
+ #define SDHCI_QUIRK_NO_HISPD_BIT			(1<<29)
++/* slot has 8 data pins going to eMMC/mmc card		*/
++#define SDHCI_QUIRK_SLOT_CAN_DO_8_BITS			(1<<30)
+ 
+ 	int			irq;		/* Device IRQ */
+ 	void __iomem *		ioaddr;		/* Mapped address */
+@@ -336,6 +339,8 @@ struct sdhci_ops {
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
++	int 		(*platform_8bit_width)(struct sdhci_host *host,
++				int width);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+-- 
+1.6.0.4
 
-Didn't touch this in the latest V4
-
-Regards,
-Kishore
->
-> =A0-Manjunath
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
