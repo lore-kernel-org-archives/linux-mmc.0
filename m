@@ -1,124 +1,88 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v2 07/11] sdio: enable runtime PM for SDIO functions
-Date: Sat,  2 Oct 2010 13:54:11 +0200
-Message-ID: <1286020455-28946-8-git-send-email-ohad@wizery.com>
+Subject: [PATCH v2 09/11] sdio: support suspend/resume while runtime suspended
+Date: Sat,  2 Oct 2010 13:54:13 +0200
+Message-ID: <1286020455-28946-10-git-send-email-ohad@wizery.com>
 References: <1286020455-28946-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-fx0-f46.google.com ([209.85.161.46]:48776 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754002Ab0JBL5c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2010 07:57:32 -0400
+	with ESMTP id S1754002Ab0JBL5g (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2010 07:57:36 -0400
 In-Reply-To: <1286020455-28946-1-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Luciano Coelho <luciano.coelho@nokia.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Enable runtime PM for SDIO functions.
+Bring SDIO devices back to full power before their suspend
+handler is invoked.
 
-SDIO functions are initialized with a disabled runtime PM state,
-and are set active (and their usage count is incremented)
-only before potential drivers are probed.
+Doing so ensures that SDIO suspend/resume semantics are
+maintained (drivers still get to decide whether their
+card should be removed or kept during system suspend,
+and at what power state), and that SDIO suspend/resume
+execution paths are unchanged.
 
-SDIO function drivers that support runtime PM should call
-pm_runtime_put_noidle() in their probe routine, and
-pm_runtime_get_noresume() in their remove routine (very
-similarly to PCI drivers).
+This is achieved by resuming a runtime-suspended SDIO device
+in its ->prepare() PM callback (similary to the PCI subsystem).
 
-In case a matching driver does not support runtime PM, power will
-always be kept high (since the usage count is positive).
+Since the PM core always increments the run-time usage
+counter before calling the ->prepare() callback and decrements
+it after calling the ->complete() callback, it is guaranteed
+that when the system will come out of suspend, our device's
+power state will reflect its runtime PM usage counter.
 
 Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/mmc/core/sdio.c     |    5 +++++
- drivers/mmc/core/sdio_bus.c |   38 +++++++++++++++++++++++++++++++++++---
- 2 files changed, 40 insertions(+), 3 deletions(-)
+ drivers/mmc/core/sdio_bus.c |   29 +++++++++++++++++++++++++++++
+ 1 files changed, 29 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 0dbd6fe..85561dd 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -734,6 +734,11 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
- 		err = sdio_init_func(host->card, i + 1);
- 		if (err)
- 			goto remove;
-+
-+		/*
-+		 * Enable Runtime PM for this func
-+		 */
-+		pm_runtime_enable(&card->sdio_func[i]->dev);
- 	}
- 
- 	mmc_release_host(host);
 diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 256a968..3637483 100644
+index 3637483..2716c7a 100644
 --- a/drivers/mmc/core/sdio_bus.c
 +++ b/drivers/mmc/core/sdio_bus.c
-@@ -126,21 +126,46 @@ static int sdio_bus_probe(struct device *dev)
- 	if (!id)
- 		return -ENODEV;
- 
-+	/* Unbound SDIO functions are always suspended.
-+	 * During probe, the function is set active and the usage count
-+	 * is incremented.  If the driver supports runtime PM,
-+	 * it should call pm_runtime_put_noidle() in its probe routine and
-+	 * pm_runtime_get_noresume() in its remove routine.
-+	 */
-+	ret = pm_runtime_get_sync(dev);
-+	if (ret < 0)
-+		goto out;
-+
- 	/* Set the default block size so the driver is sure it's something
- 	 * sensible. */
- 	sdio_claim_host(func);
- 	ret = sdio_set_block_size(func, 0);
- 	sdio_release_host(func);
- 	if (ret)
--		return ret;
-+		goto disable_runtimepm;
-+
-+	ret = drv->probe(func, id);
-+	if (ret)
-+		goto disable_runtimepm;
- 
--	return drv->probe(func, id);
-+	return 0;
-+
-+disable_runtimepm:
-+	pm_runtime_put_noidle(dev);
-+out:
-+	return ret;
- }
- 
- static int sdio_bus_remove(struct device *dev)
- {
- 	struct sdio_driver *drv = to_sdio_driver(dev->driver);
- 	struct sdio_func *func = dev_to_sdio_func(dev);
-+	int ret;
-+
-+	/* Make sure card is powered before invoking ->remove() */
-+	ret = pm_runtime_get_sync(dev);
-+	if (ret < 0)
-+		goto out;
- 
- 	drv->remove(func);
- 
-@@ -152,7 +177,14 @@ static int sdio_bus_remove(struct device *dev)
- 		sdio_release_host(func);
- 	}
- 
--	return 0;
-+	/* First, undo the increment made directly above */
-+	pm_runtime_put_noidle(dev);
-+
-+	/* Then undo the runtime PM settings in sdio_bus_probe() */
-+	pm_runtime_put_noidle(dev);
-+
-+out:
-+	return ret;
- }
+@@ -189,12 +189,41 @@ out:
  
  #ifdef CONFIG_PM_RUNTIME
+ 
++static int sdio_bus_pm_prepare(struct device *dev)
++{
++	/*
++	 * Resume an SDIO device which was suspended at run time at this
++	 * point, in order to allow standard SDIO suspend/resume paths
++	 * to keep working as usual.
++	 *
++	 * Ultimately, the SDIO driver itself will decide (in its
++	 * suspend handler, or lack thereof) whether the card should be
++	 * removed or kept, and if kept, at what power state.
++	 *
++	 * At this point, PM core have increased our use count, so it's
++	 * safe to directly resume the device. After system is resumed
++	 * again, PM core will drop back its runtime PM use count, and if
++	 * needed device will be suspended again.
++	 *
++	 * The end result is guaranteed to be a power state that is
++	 * coherent with the device's runtime PM use count.
++	 *
++	 * The return value of pm_runtime_resume is deliberately unchecked
++	 * since there is little point in failing system suspend if a
++	 * device can't be resumed.
++	 */
++	pm_runtime_resume(dev);
++
++	return 0;
++}
++
+ static const struct dev_pm_ops sdio_bus_pm_ops = {
+ 	SET_RUNTIME_PM_OPS(
+ 		pm_generic_runtime_suspend,
+ 		pm_generic_runtime_resume,
+ 		pm_generic_runtime_idle
+ 	)
++	.prepare = sdio_bus_pm_prepare,
+ };
+ 
+ #define SDIO_PM_OPS_PTR	(&sdio_bus_pm_ops)
 -- 
 1.7.0.4
 
