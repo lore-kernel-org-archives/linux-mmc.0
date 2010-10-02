@@ -1,63 +1,34 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v2 11/11] wl1271: sdio: add suspend/resume support
-Date: Sat,  2 Oct 2010 13:54:15 +0200
-Message-ID: <1286020455-28946-12-git-send-email-ohad@wizery.com>
-References: <1286020455-28946-1-git-send-email-ohad@wizery.com>
+From: =?ISO-8859-1?Q?Eric_B=E9nard?= <eric@eukrea.com>
+Subject: Re: [PATCH V3 0/6] SD/MMC-driver for MX35/51 (and improvements to
+ SDHCI)
+Date: Sat, 02 Oct 2010 17:17:10 +0200
+Message-ID: <4CA74CF6.8090706@eukrea.com>
+References: <1285790884-3516-1-git-send-email-w.sang@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:48776 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754002Ab0JBL5l (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2010 07:57:41 -0400
-In-Reply-To: <1286020455-28946-1-git-send-email-ohad@wizery.com>
+Received: from 63.mail-out.ovh.net ([91.121.185.56]:40793 "HELO
+	63.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1753300Ab0JBPRO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2010 11:17:14 -0400
+In-Reply-To: <1285790884-3516-1-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Luciano Coelho <luciano.coelho@nokia.com>, Ohad Ben-Cohen <ohad@wizery.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, Zhu Richard-R65037 <r65037@freescale.com>, zhangfei gao <zhangfei.gao@gmail.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Philip Rakity <prakity@marvell.com>, linux-arm-kernel@lists.infradead.org
 
-Add required suspend/resume support to prevent the SDIO
-core from removing our card completely during system suspend.
+Le 29/09/2010 22:07, Wolfram Sang a =E9crit :
+> Okay, here is the next version of my patch series. The first four are
+> updates/improvements for sdhci and sdhci-pltfm and are of generic int=
+erest,
+> too. I am still hoping for some Acked-by/Tested-by tags ;) Changes fr=
+om the
+> previous version are mentioned in the seperate files. I should have a=
+ddressed
+> all concerns raised. If not, please speak up.
+>
+Tested-by : Eric B=E9nard <eric@eukrea.com>
 
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
----
- drivers/net/wireless/wl12xx/wl1271_sdio.c |   20 ++++++++++++++++++++
- 1 files changed, 20 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/net/wireless/wl12xx/wl1271_sdio.c b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-index f7bef32..784ef34 100644
---- a/drivers/net/wireless/wl12xx/wl1271_sdio.c
-+++ b/drivers/net/wireless/wl12xx/wl1271_sdio.c
-@@ -290,11 +290,31 @@ static void __devexit wl1271_remove(struct sdio_func *func)
- 	wl1271_free_hw(wl);
- }
- 
-+static int wl1271_suspend(struct device *dev)
-+{
-+	/* Tell MMC/SDIO core it's OK to power down the card
-+	 * (if it isn't already), but not to remove it completely */
-+	return 0;
-+}
-+
-+static int wl1271_resume(struct device *dev)
-+{
-+	return 0;
-+}
-+
-+static const struct dev_pm_ops wl1271_sdio_pm_ops = {
-+	.suspend	= wl1271_suspend,
-+	.resume		= wl1271_resume,
-+};
-+
- static struct sdio_driver wl1271_sdio_driver = {
- 	.name		= "wl1271_sdio",
- 	.id_table	= wl1271_devices,
- 	.probe		= wl1271_probe,
- 	.remove		= __devexit_p(wl1271_remove),
-+	.drv = {
-+		.pm = &wl1271_sdio_pm_ops,
-+	},
- };
- 
- static int __init wl1271_init(void)
--- 
-1.7.0.4
-
+Eric
