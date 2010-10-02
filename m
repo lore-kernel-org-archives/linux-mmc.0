@@ -1,163 +1,62 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v2 02/11] mmc: propagate power save/restore ops return value
-Date: Sat,  2 Oct 2010 13:54:06 +0200
-Message-ID: <1286020455-28946-3-git-send-email-ohad@wizery.com>
+Subject: [PATCH v2 03/11] sdio: add power_restore support
+Date: Sat,  2 Oct 2010 13:54:07 +0200
+Message-ID: <1286020455-28946-4-git-send-email-ohad@wizery.com>
 References: <1286020455-28946-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:33923 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:48776 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755138Ab0JBL5W (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2010 07:57:22 -0400
+	with ESMTP id S1754002Ab0JBL5X (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2010 07:57:23 -0400
 In-Reply-To: <1286020455-28946-1-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Luciano Coelho <luciano.coelho@nokia.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Allow power save/restore and their relevant mmc_bus_ops handlers
-exit with a return value.
+Add a power_restore handler to the SDIO bus ops,
+in order to support waking up SDIO cards that
+were powered off by runtime pm.
 
 Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/mmc/core/core.c  |   20 ++++++++++++++------
- drivers/mmc/core/core.h  |    4 ++--
- drivers/mmc/core/mmc.c   |    8 ++++++--
- drivers/mmc/core/sd.c    |    8 ++++++--
- include/linux/mmc/host.h |    4 ++--
- 5 files changed, 30 insertions(+), 14 deletions(-)
+ drivers/mmc/core/sdio.c |   18 ++++++++++++++++++
+ 1 files changed, 18 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 5def192..c94565d 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1581,37 +1581,45 @@ void mmc_stop_host(struct mmc_host *host)
- 	mmc_power_off(host);
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 3be1571..f17e0e0 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -638,11 +638,29 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	return err;
  }
  
--void mmc_power_save_host(struct mmc_host *host)
-+int mmc_power_save_host(struct mmc_host *host)
- {
-+	int ret = 0;
-+
- 	mmc_bus_get(host);
- 
- 	if (!host->bus_ops || host->bus_dead || !host->bus_ops->power_restore) {
- 		mmc_bus_put(host);
--		return;
-+		return -EINVAL;
- 	}
- 
- 	if (host->bus_ops->power_save)
--		host->bus_ops->power_save(host);
-+		ret = host->bus_ops->power_save(host);
- 
- 	mmc_bus_put(host);
- 
- 	mmc_power_off(host);
-+
-+	return ret;
- }
- EXPORT_SYMBOL(mmc_power_save_host);
- 
--void mmc_power_restore_host(struct mmc_host *host)
-+int mmc_power_restore_host(struct mmc_host *host)
- {
++static int mmc_sdio_power_restore(struct mmc_host *host)
++{
 +	int ret;
 +
- 	mmc_bus_get(host);
- 
- 	if (!host->bus_ops || host->bus_dead || !host->bus_ops->power_restore) {
- 		mmc_bus_put(host);
--		return;
-+		return -EINVAL;
- 	}
- 
- 	mmc_power_up(host);
--	host->bus_ops->power_restore(host);
-+	ret = host->bus_ops->power_restore(host);
- 
- 	mmc_bus_put(host);
++	BUG_ON(!host);
++	BUG_ON(!host->card);
++
++	mmc_claim_host(host);
++	ret = mmc_sdio_init_card(host, host->ocr, host->card,
++			(host->pm_flags & MMC_PM_KEEP_POWER));
++	if (!ret && host->sdio_irqs)
++		mmc_signal_sdio_irq(host);
++	mmc_release_host(host);
 +
 +	return ret;
- }
- EXPORT_SYMBOL(mmc_power_restore_host);
- 
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 13240d1..90e0ac7 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -22,8 +22,8 @@ struct mmc_bus_ops {
- 	void (*detect)(struct mmc_host *);
- 	int (*suspend)(struct mmc_host *);
- 	int (*resume)(struct mmc_host *);
--	void (*power_save)(struct mmc_host *);
--	void (*power_restore)(struct mmc_host *);
-+	int (*power_save)(struct mmc_host *);
-+	int (*power_restore)(struct mmc_host *);
++}
++
+ static const struct mmc_bus_ops mmc_sdio_ops = {
+ 	.remove = mmc_sdio_remove,
+ 	.detect = mmc_sdio_detect,
+ 	.suspend = mmc_sdio_suspend,
+ 	.resume = mmc_sdio_resume,
++	.power_restore = mmc_sdio_power_restore,
  };
  
- void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 3ea58ce..31a8bbe 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -657,12 +657,16 @@ static int mmc_resume(struct mmc_host *host)
- 	return err;
- }
  
--static void mmc_power_restore(struct mmc_host *host)
-+static int mmc_power_restore(struct mmc_host *host)
- {
-+	int ret;
-+
- 	host->card->state &= ~MMC_STATE_HIGHSPEED;
- 	mmc_claim_host(host);
--	mmc_init_card(host, host->ocr, host->card);
-+	ret = mmc_init_card(host, host->ocr, host->card);
- 	mmc_release_host(host);
-+
-+	return ret;
- }
- 
- static int mmc_sleep(struct mmc_host *host)
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index bc745e1..49da4df 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -722,12 +722,16 @@ static int mmc_sd_resume(struct mmc_host *host)
- 	return err;
- }
- 
--static void mmc_sd_power_restore(struct mmc_host *host)
-+static int mmc_sd_power_restore(struct mmc_host *host)
- {
-+	int ret;
-+
- 	host->card->state &= ~MMC_STATE_HIGHSPEED;
- 	mmc_claim_host(host);
--	mmc_sd_init_card(host, host->ocr, host->card);
-+	ret = mmc_sd_init_card(host, host->ocr, host->card);
- 	mmc_release_host(host);
-+
-+	return ret;
- }
- 
- static const struct mmc_bus_ops mmc_sd_ops = {
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c4fb1c5..c3ffad8 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -249,8 +249,8 @@ static inline void *mmc_priv(struct mmc_host *host)
- extern int mmc_suspend_host(struct mmc_host *);
- extern int mmc_resume_host(struct mmc_host *);
- 
--extern void mmc_power_save_host(struct mmc_host *host);
--extern void mmc_power_restore_host(struct mmc_host *host);
-+extern int mmc_power_save_host(struct mmc_host *host);
-+extern int mmc_power_restore_host(struct mmc_host *host);
- 
- extern void mmc_detect_change(struct mmc_host *, unsigned long delay);
- extern void mmc_request_done(struct mmc_host *, struct mmc_request *);
 -- 
 1.7.0.4
 
