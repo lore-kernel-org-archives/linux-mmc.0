@@ -1,88 +1,65 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v2 09/11] sdio: support suspend/resume while runtime suspended
-Date: Sat,  2 Oct 2010 13:54:13 +0200
-Message-ID: <1286020455-28946-10-git-send-email-ohad@wizery.com>
+Subject: [PATCH v2 08/11] sdio: ensure mmc_sdio_detect is powered
+Date: Sat,  2 Oct 2010 13:54:12 +0200
+Message-ID: <1286020455-28946-9-git-send-email-ohad@wizery.com>
 References: <1286020455-28946-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:48776 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:33923 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754002Ab0JBL5g (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2010 07:57:36 -0400
+	with ESMTP id S1754002Ab0JBL5e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2010 07:57:34 -0400
 In-Reply-To: <1286020455-28946-1-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Luciano Coelho <luciano.coelho@nokia.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Bring SDIO devices back to full power before their suspend
-handler is invoked.
+To prevent an erroneous removal of the card, make sure
+the device is powered when it is mmc_sdio_detect()ed.
 
-Doing so ensures that SDIO suspend/resume semantics are
-maintained (drivers still get to decide whether their
-card should be removed or kept during system suspend,
-and at what power state), and that SDIO suspend/resume
-execution paths are unchanged.
-
-This is achieved by resuming a runtime-suspended SDIO device
-in its ->prepare() PM callback (similary to the PCI subsystem).
-
-Since the PM core always increments the run-time usage
-counter before calling the ->prepare() callback and decrements
-it after calling the ->complete() callback, it is guaranteed
-that when the system will come out of suspend, our device's
-power state will reflect its runtime PM usage counter.
+This is required since mmc_sdio_detect may be invoked
+while the device is runtime suspended (e.g., MMC core
+is rescanning when system comes out of suspend).
 
 Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/mmc/core/sdio_bus.c |   29 +++++++++++++++++++++++++++++
- 1 files changed, 29 insertions(+), 0 deletions(-)
+ drivers/mmc/core/sdio.c |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 3637483..2716c7a 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -189,12 +189,41 @@ out:
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 85561dd..c3ad105 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -546,6 +546,11 @@ static void mmc_sdio_detect(struct mmc_host *host)
+ 	BUG_ON(!host);
+ 	BUG_ON(!host->card);
  
- #ifdef CONFIG_PM_RUNTIME
- 
-+static int sdio_bus_pm_prepare(struct device *dev)
-+{
-+	/*
-+	 * Resume an SDIO device which was suspended at run time at this
-+	 * point, in order to allow standard SDIO suspend/resume paths
-+	 * to keep working as usual.
-+	 *
-+	 * Ultimately, the SDIO driver itself will decide (in its
-+	 * suspend handler, or lack thereof) whether the card should be
-+	 * removed or kept, and if kept, at what power state.
-+	 *
-+	 * At this point, PM core have increased our use count, so it's
-+	 * safe to directly resume the device. After system is resumed
-+	 * again, PM core will drop back its runtime PM use count, and if
-+	 * needed device will be suspended again.
-+	 *
-+	 * The end result is guaranteed to be a power state that is
-+	 * coherent with the device's runtime PM use count.
-+	 *
-+	 * The return value of pm_runtime_resume is deliberately unchecked
-+	 * since there is little point in failing system suspend if a
-+	 * device can't be resumed.
-+	 */
-+	pm_runtime_resume(dev);
++	/* Make sure card is powered before detecting it */
++	err = pm_runtime_get_sync(&host->card->dev);
++	if (err < 0)
++		goto out;
 +
-+	return 0;
-+}
-+
- static const struct dev_pm_ops sdio_bus_pm_ops = {
- 	SET_RUNTIME_PM_OPS(
- 		pm_generic_runtime_suspend,
- 		pm_generic_runtime_resume,
- 		pm_generic_runtime_idle
- 	)
-+	.prepare = sdio_bus_pm_prepare,
- };
+ 	mmc_claim_host(host);
  
- #define SDIO_PM_OPS_PTR	(&sdio_bus_pm_ops)
+ 	/*
+@@ -555,6 +560,7 @@ static void mmc_sdio_detect(struct mmc_host *host)
+ 
+ 	mmc_release_host(host);
+ 
++out:
+ 	if (err) {
+ 		mmc_sdio_remove(host);
+ 
+@@ -562,6 +568,9 @@ static void mmc_sdio_detect(struct mmc_host *host)
+ 		mmc_detach_bus(host);
+ 		mmc_release_host(host);
+ 	}
++
++	/* Tell PM core that we're done */
++	pm_runtime_put(&host->card->dev);
+ }
+ 
+ /*
 -- 
 1.7.0.4
 
