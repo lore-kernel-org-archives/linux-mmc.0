@@ -1,62 +1,93 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH v2 03/11] sdio: add power_restore support
-Date: Sat,  2 Oct 2010 13:54:07 +0200
-Message-ID: <1286020455-28946-4-git-send-email-ohad@wizery.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v2 04/11] mmc: add runtime PM handlers
+Date: Sat,  2 Oct 2010 13:54:08 +0200
+Message-ID: <1286020455-28946-5-git-send-email-ohad@wizery.com>
 References: <1286020455-28946-1-git-send-email-ohad@wizery.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:48776 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754002Ab0JBL5X (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2010 07:57:23 -0400
-In-Reply-To: <1286020455-28946-1-git-send-email-ohad@wizery.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1286020455-28946-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Luciano Coelho <luciano.coelho@nokia.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Add a power_restore handler to the SDIO bus ops,
-in order to support waking up SDIO cards that
-were powered off by runtime pm.
+Add MMC runtime PM handlers, which call mmc_power_save_host
+and mmc_power_restore_host in response to runtime_suspend and
+runtime_resume events.
 
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+Runtime PM is still disabled by default, so this patch alone
+has no immediate effect.
+
+Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 ---
- drivers/mmc/core/sdio.c |   18 ++++++++++++++++++
- 1 files changed, 18 insertions(+), 0 deletions(-)
+ drivers/mmc/core/bus.c |   37 +++++++++++++++++++++++++++++++++++++
+ 1 files changed, 37 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 3be1571..f17e0e0 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -638,11 +638,29 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	return err;
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index da3c01b..af8dc6a 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -14,6 +14,7 @@
+ #include <linux/device.h>
+ #include <linux/err.h>
+ #include <linux/slab.h>
++#include <linux/pm_runtime.h>
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -141,6 +142,41 @@ static int mmc_bus_resume(struct device *dev)
+ 	return ret;
  }
  
-+static int mmc_sdio_power_restore(struct mmc_host *host)
++#ifdef CONFIG_PM_RUNTIME
++
++static int mmc_runtime_suspend(struct device *dev)
 +{
-+	int ret;
++	struct mmc_card *card = mmc_dev_to_card(dev);
 +
-+	BUG_ON(!host);
-+	BUG_ON(!host->card);
-+
-+	mmc_claim_host(host);
-+	ret = mmc_sdio_init_card(host, host->ocr, host->card,
-+			(host->pm_flags & MMC_PM_KEEP_POWER));
-+	if (!ret && host->sdio_irqs)
-+		mmc_signal_sdio_irq(host);
-+	mmc_release_host(host);
-+
-+	return ret;
++	return mmc_power_save_host(card->host);
 +}
 +
- static const struct mmc_bus_ops mmc_sdio_ops = {
- 	.remove = mmc_sdio_remove,
- 	.detect = mmc_sdio_detect,
- 	.suspend = mmc_sdio_suspend,
- 	.resume = mmc_sdio_resume,
-+	.power_restore = mmc_sdio_power_restore,
++static int mmc_runtime_resume(struct device *dev)
++{
++	struct mmc_card *card = mmc_dev_to_card(dev);
++
++	return mmc_power_restore_host(card->host);
++}
++
++static int mmc_runtime_idle(struct device *dev)
++{
++	return pm_runtime_suspend(dev);
++}
++
++static const struct dev_pm_ops mmc_bus_pm_ops = {
++	.runtime_suspend	= mmc_runtime_suspend,
++	.runtime_resume		= mmc_runtime_resume,
++	.runtime_idle		= mmc_runtime_idle,
++};
++
++#define MMC_PM_OPS_PTR	(&mmc_bus_pm_ops)
++
++#else /* !CONFIG_PM_RUNTIME */
++
++#define MMC_PM_OPS_PTR	NULL
++
++#endif /* !CONFIG_PM_RUNTIME */
++
+ static struct bus_type mmc_bus_type = {
+ 	.name		= "mmc",
+ 	.dev_attrs	= mmc_dev_attrs,
+@@ -150,6 +186,7 @@ static struct bus_type mmc_bus_type = {
+ 	.remove		= mmc_bus_remove,
+ 	.suspend	= mmc_bus_suspend,
+ 	.resume		= mmc_bus_resume,
++	.pm		= MMC_PM_OPS_PTR,
  };
  
- 
+ int mmc_register_bus(void)
 -- 
 1.7.0.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
