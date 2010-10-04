@@ -1,59 +1,59 @@
-From: Eric Miao <eric.y.miao@gmail.com>
-Subject: Re: 2.6.35.6 fails to suspend (pxa2xx-mci.0)
-Date: Mon, 4 Oct 2010 15:48:48 +0800
-Message-ID: <AANLkTik581EC953iBtZ3w46AX0PsK=2H=Pg0XAoObSc2@mail.gmail.com>
-References: <1286177435.2140.5.camel@sven>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH (mmc-next) 1/3] mmc: add suspend/resume in the
+	sdhci-pltfm driver (V3)
+Date: Mon, 4 Oct 2010 10:57:31 +0200
+Message-ID: <20101004085731.GA10746@pengutronix.de>
+References: <1285663289-20283-1-git-send-email-peppe.cavallaro@st.com> <20100930232526.GA29636@void.printf.net> <4CA967F8.9030005@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="pf9I7BMVVzbSWLtt"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:59775 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752857Ab0JDHtL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2010 03:49:11 -0400
-In-Reply-To: <1286177435.2140.5.camel@sven>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:58511 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753689Ab0JDI5g (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2010 04:57:36 -0400
+Content-Disposition: inline
+In-Reply-To: <4CA967F8.9030005@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sven Neumann <s.neumann@raumfeld.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Daniel Mack <daniel@caiaq.de>
+To: Peppe CAVALLARO <peppe.cavallaro@st.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Mon, Oct 4, 2010 at 3:30 PM, Sven Neumann <s.neumann@raumfeld.com> wrote:
-> Hi,
->
-> we are running an embedded system here based on the PXA300 platform.
-> Suspend/resume used to work well so far. However after upgrading the
-> kernel from 2.6.34.7 to 2.6.35.6, we get the following error when trying
-> to suspend the system:
->
 
-I wonder if it's related to this issue:
+--pf9I7BMVVzbSWLtt
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-https://bugs.launchpad.net/ubuntu/+source/linux-mvl-dove/+bug/530432
+> In the near future I'll have to start using SDIO and eMMC devices.
+> I wonder if I'll be able to continue to use the platform driver or if
+> I'll need to actually have own driver (to solve specific limits/features
+> .... due to our Hw) or if we'll extend the sdhci-pltfm d.d.
+>=20
+> What do you think?
 
-The issue above is not dove specific.
-> # echo "mem" > "/sys/power/state"
-> [ 5647.295953] PM: Syncing filesystems ... done.
-> [ 5647.318792] Freezing user space processes ... (elapsed 0.01 seconds) done.
-> [ 5647.337048] Freezing remaining freezable tasks ... (elapsed 0.01 seconds) done.
-> [ 5647.356915] Suspending console(s) (use no_console_suspend to debug)
-> [ 5647.366651] pm_op(): platform_pm_suspend+0x0/0x5c returns -38
-> [ 5647.366671] PM: Device pxa2xx-mci.0 failed to suspend: error -38
-> [ 5647.367082] PM: Some devices failed to suspend
->
->
-> Regards,
-> Sven
->
->
-> --
-> Sven Neumann
-> Head of Software Development
->
-> RAUMFELD GmbH | Reichenberger Str. 124 | 10999 Berlin | Germany
-> Tel: +49.30.340.60.98.0 | Fax: +49.30.340.60.98.99 | s.neumann@raumfeld.com
->
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
->
+First rule should be trying to extend pltfm. If all of the drafts we come up
+with don't seem reasonable, the "own driver" solution is the fallback.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--pf9I7BMVVzbSWLtt
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkyplvsACgkQD27XaX1/VRvWzwCfQwxwrsxtk6D50uwr+1OSQIbQ
+05cAoLnEe3JJpUMlBZBjN7/8Gl78T8AI
+=nW+2
+-----END PGP SIGNATURE-----
+
+--pf9I7BMVVzbSWLtt--
