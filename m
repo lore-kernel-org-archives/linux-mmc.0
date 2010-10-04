@@ -1,7 +1,7 @@
 From: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Subject: [PATCH 1/3] sdhci: Allow the probe handler to override slots
-Date: Mon, 04 Oct 2010 15:24:21 +0100
-Message-ID: <20101004142406.901.44820.stgit@localhost.localdomain>
+Subject: [PATCH 2/3] sdhci: Intel Medfield support
+Date: Mon, 04 Oct 2010 15:24:52 +0100
+Message-ID: <20101004142432.901.87030.stgit@localhost.localdomain>
 References: <20101004142246.901.37491.stgit@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -9,40 +9,113 @@ Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from lxorguk.ukuu.org.uk ([81.2.110.251]:46815 "EHLO
 	lxorguk.ukuu.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756275Ab0JDPre (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2010 11:47:34 -0400
+	with ESMTP id S1756275Ab0JDPri (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2010 11:47:38 -0400
 Received: from localhost.localdomain (earthlight.etchedpixels.co.uk [81.2.110.250])
-	by lxorguk.ukuu.org.uk (8.14.4/8.14.1) with ESMTP id o94EgleM024702
-	for <linux-mmc@vger.kernel.org>; Mon, 4 Oct 2010 15:42:52 +0100
+	by lxorguk.ukuu.org.uk (8.14.4/8.14.1) with ESMTP id o94EhIFg024728
+	for <linux-mmc@vger.kernel.org>; Mon, 4 Oct 2010 15:43:23 +0100
 In-Reply-To: <20101004142246.901.37491.stgit@localhost.localdomain>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 
-From: Alan Cox <alan@linux.intel.com>
+From: Xiaochen Shen <xiaochen.shen@intel.com>
 
-Currently we write it to the chip data, but if the probe handler overrides
-it we ignore the new value and keep using our cached one. Fix this so that
-a probe handler can adjust the slot count
+Basic support for the Intel Medfield devices
 
+Give them their own quirks as we will need to update this later.
+
+Signed-off-by: Xiaochen Shen <xiaochen.shen@intel.com>
 Signed-off-by: Alan Cox <alan@linux.intel.com>
 ---
 
- drivers/mmc/host/sdhci-pci.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-pci.c |   48 ++++++++++++++++++++++++++++++++++++++++++
+ include/linux/pci_ids.h      |    7 ++++++
+ 2 files changed, 55 insertions(+), 0 deletions(-)
 
 
 diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index e8aa99d..4f5d6d0 100644
+index 4f5d6d0..ec4b81d 100644
 --- a/drivers/mmc/host/sdhci-pci.c
 +++ b/drivers/mmc/host/sdhci-pci.c
-@@ -818,6 +818,8 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
- 			goto free;
- 	}
+@@ -145,6 +145,14 @@ static const struct sdhci_pci_fixes sdhci_cafe = {
+ 			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+ };
  
-+	slots = chip->num_slots;	/* Quirk may have changed this */
++static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
++	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++};
 +
- 	for (i = 0;i < slots;i++) {
- 		slot = sdhci_pci_probe_slot(pdev, chip, first_bar + i);
- 		if (IS_ERR(slot)) {
++static const struct sdhci_pci_fixes sdhci_intel_mfd_emmc_sdio = {
++	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++};
++
+ static int jmicron_pmos(struct sdhci_pci_chip *chip, int on)
+ {
+ 	u8 scratch;
+@@ -494,6 +502,46 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
+ 		.driver_data	= (kernel_ulong_t)&sdhci_via,
+ 	},
+ 
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_MFD_SD,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_sd,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_MFD_SDIO1,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_MFD_SDIO2,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_MFD_EMMC0,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_MFD_EMMC1,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
++	},
++
+ 	{	/* Generic SD host controller */
+ 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
+ 	},
+diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
+index acd38ac..bd33a06 100644
+--- a/include/linux/pci_ids.h
++++ b/include/linux/pci_ids.h
+@@ -2424,6 +2424,13 @@
+ #define PCI_DEVICE_ID_INTEL_82375	0x0482
+ #define PCI_DEVICE_ID_INTEL_82424	0x0483
+ #define PCI_DEVICE_ID_INTEL_82378	0x0484
++#define PCI_DEVICE_ID_INTEL_MRST_SD0	0x0807
++#define PCI_DEVICE_ID_INTEL_MRST_SD1	0x0808
++#define PCI_DEVICE_ID_INTEL_MFD_SD	0x0820
++#define PCI_DEVICE_ID_INTEL_MFD_SDIO1	0x0821
++#define PCI_DEVICE_ID_INTEL_MFD_SDIO2	0x0822
++#define PCI_DEVICE_ID_INTEL_MFD_EMMC0	0x0823
++#define PCI_DEVICE_ID_INTEL_MFD_EMMC1	0x0824
+ #define PCI_DEVICE_ID_INTEL_I960	0x0960
+ #define PCI_DEVICE_ID_INTEL_I960RM	0x0962
+ #define PCI_DEVICE_ID_INTEL_8257X_SOL	0x1062
 
