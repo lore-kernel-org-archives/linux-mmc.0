@@ -1,121 +1,71 @@
-From: Alan Cox <alan@linux.intel.com>
-Subject: [PATCH 2/3] sdhci: Intel Medfield support
-Date: Mon, 04 Oct 2010 15:07:10 +0100
-Message-ID: <20101004140652.14608.63686.stgit@localhost.localdomain>
-References: <20101004140454.14608.70665.stgit@localhost.localdomain>
+From: Steve Sakoman <sakoman@gmail.com>
+Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
+Date: Mon, 4 Oct 2010 09:32:18 -0700
+Message-ID: <AANLkTi=RvWpuUC3FjwELkM0v57YXZbH_DBiA-4KuOwdN@mail.gmail.com>
+References: <cover.1266847842.git.david.vrabel@csr.com>
+	<20100827192248.GJ20407@void.printf.net>
+	<4C7CC480.2040903@csr.com>
+	<4C7F3E0F.2080402@compulab.co.il>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lxorguk.ukuu.org.uk ([81.2.110.251]:46815 "EHLO
-	lxorguk.ukuu.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756275Ab0JDPrj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2010 11:47:39 -0400
-Received: from localhost.localdomain (earthlight.etchedpixels.co.uk [81.2.110.250])
-	by lxorguk.ukuu.org.uk (8.14.4/8.14.1) with ESMTP id o94EPaID024131
-	for <linux-mmc@vger.kernel.org>; Mon, 4 Oct 2010 15:25:41 +0100
-In-Reply-To: <20101004140454.14608.70665.stgit@localhost.localdomain>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:42428 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752757Ab0JDQcU convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2010 12:32:20 -0400
+In-Reply-To: <4C7F3E0F.2080402@compulab.co.il>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Mike Rapoport <mike@compulab.co.il>
+Cc: David Vrabel <david.vrabel@csr.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, madhu.cr@ti.com
 
-From: Xiaochen Shen <xiaochen.shen@intel.com>
+On Wed, Sep 1, 2010 at 11:02 PM, Mike Rapoport <mike@compulab.co.il> wr=
+ote:
+> David Vrabel wrote:
+>>
+>> On 27/08/2010 20:22, Chris Ball wrote:
+>>>
+>>> Hi David,
+>>>
+>>> On Mon, Feb 22, 2010 at 02:24:17PM +0000, David Vrabel wrote:
+>>>>
+>>>> These patches add support for SDIO cards to the omap_hsmmc driver.
+>>>> Power management changes to prevent SDIO cards from being turned o=
+ff
+>>>> and losing all state, and card interrupts.
+>>>>
+>>>> I've been unable to test these exact patches as I only have an N90=
+0 for
+>>>> testing and the N900 support in mainline is incomplete.
+>>>>
+>>>> Changes since v1:
+>>>> - (hopefully) get all cards working again by removing a second cal=
+l to
+>>>> =A0read MMCi_STAT in the interrupt handler.
+>>>> - flush posted writes after enabling/disabling SDIO interrupts.
+>>>> - tweak the FIXME commit on disabling FCLK to better match what re=
+ally
+>>>> =A0going on (at least I think so anyway).
+>>>>
+>>>> David Vrabel (2):
+>>>> =A0mmc: omap_hsmmc: don't turn SDIO cards off when idle
+>>>> =A0mmc: omap_hsmmc: enable SDIO card interrupts
+>>>
+>>> Looks like this patchset wasn't merged. =A0Mike Rapoport replied wi=
+th a fix
+>>> for libertas. =A0Would you like to resubmit it?
+>>
+>> I thought Madhu had picked this up and was going to submit it.
+>>
+>> Regardless of whether that is the case, I think it needs to be submi=
+tted
+>> by someone who can run mainline kernels (I can't) and ideally someon=
+e
+>> who can test it with SDIO cards.
+>
+> I'll try to update the patches in the next few days.
 
-Basic support for the Intel Medfield devices
+Any update on the status of these patches?  I'm happy to help test!
 
-Give them their own quirks as we will need to update this later.
-
-Signed-off-by: Xiaochen Shen <xiaochen.shen@intel.com>
-Signed-off-by: Alan Cox <alan@linux.intel.com>
----
-
- drivers/mmc/host/sdhci-pci.c |   48 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/pci_ids.h      |    7 ++++++
- 2 files changed, 55 insertions(+), 0 deletions(-)
-
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 4f5d6d0..ec4b81d 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -145,6 +145,14 @@ static const struct sdhci_pci_fixes sdhci_cafe = {
- 			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
- };
- 
-+static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
-+	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+};
-+
-+static const struct sdhci_pci_fixes sdhci_intel_mfd_emmc_sdio = {
-+	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+};
-+
- static int jmicron_pmos(struct sdhci_pci_chip *chip, int on)
- {
- 	u8 scratch;
-@@ -494,6 +502,46 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
- 		.driver_data	= (kernel_ulong_t)&sdhci_via,
- 	},
- 
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_SD,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_sd,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_SDIO1,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_SDIO2,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_EMMC0,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_MFD_EMMC1,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_mfd_emmc_sdio,
-+	},
-+
- 	{	/* Generic SD host controller */
- 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
- 	},
-diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
-index acd38ac..bd33a06 100644
---- a/include/linux/pci_ids.h
-+++ b/include/linux/pci_ids.h
-@@ -2424,6 +2424,13 @@
- #define PCI_DEVICE_ID_INTEL_82375	0x0482
- #define PCI_DEVICE_ID_INTEL_82424	0x0483
- #define PCI_DEVICE_ID_INTEL_82378	0x0484
-+#define PCI_DEVICE_ID_INTEL_MRST_SD0	0x0807
-+#define PCI_DEVICE_ID_INTEL_MRST_SD1	0x0808
-+#define PCI_DEVICE_ID_INTEL_MFD_SD	0x0820
-+#define PCI_DEVICE_ID_INTEL_MFD_SDIO1	0x0821
-+#define PCI_DEVICE_ID_INTEL_MFD_SDIO2	0x0822
-+#define PCI_DEVICE_ID_INTEL_MFD_EMMC0	0x0823
-+#define PCI_DEVICE_ID_INTEL_MFD_EMMC1	0x0824
- #define PCI_DEVICE_ID_INTEL_I960	0x0960
- #define PCI_DEVICE_ID_INTEL_I960RM	0x0962
- #define PCI_DEVICE_ID_INTEL_8257X_SOL	0x1062
-
+Steve
