@@ -1,133 +1,58 @@
-From: Steve Sakoman <sakoman@gmail.com>
-Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
-Date: Mon, 4 Oct 2010 11:09:14 -0700
-Message-ID: <AANLkTin-r5Svg1+YrdYq95WA6=sh7+X0Bwogk=h0V6pP@mail.gmail.com>
-References: <cover.1266847842.git.david.vrabel@csr.com>
-	<20100827192248.GJ20407@void.printf.net>
-	<4C7CC480.2040903@csr.com>
-	<4C7F3E0F.2080402@compulab.co.il>
-	<AANLkTi=RvWpuUC3FjwELkM0v57YXZbH_DBiA-4KuOwdN@mail.gmail.com>
-	<C903F2608D694655921F553D0D3557E3@am.dhcp.ti.com>
-	<AANLkTikskMMFWS+qxD+J=o6OiOa+d5H02DiT1iZ95vkz@mail.gmail.com>
-	<CD6B4CE9F7FA427BBD19242F669AD014@am.dhcp.ti.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [RFC RESEND] sdhci-s3c: support clock enable/disable
+	(clock-gating)
+Date: Tue, 5 Oct 2010 03:08:50 +0100
+Message-ID: <20101005020848.GA9044@void.printf.net>
+References: <4C91BD5A.1040804@samsung.com> <20100929233751.GA31473@void.printf.net> <alpine.LFD.2.00.1009292334050.1146@xanadu.home> <20100930040958.GA3170@void.printf.net> <AANLkTin=9KwC0Paa8yAhG-OBXFrfJDKJSYokzLLa6jPN@mail.gmail.com> <AANLkTikywfU_C4QTQet64aQJgQyyDdTh4xRpaYu6q0di@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <CD6B4CE9F7FA427BBD19242F669AD014@am.dhcp.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: Mike Rapoport <mike@compulab.co.il>, David Vrabel <david.vrabel@csr.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:32894 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756162Ab0JECI5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 4 Oct 2010 22:08:57 -0400
+Content-Disposition: inline
+In-Reply-To: <AANLkTikywfU_C4QTQet64aQJgQyyDdTh4xRpaYu6q0di@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: Kyungmin Park <kyungmin.park@samsung.com>, Nicolas Pitre <nico@fluxnic.net>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, matt@console-pimps.org, Andrew Morton <akpm@linux-foundation.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Pierre Ossman <pierre-list@ossman.eu>, Kukjin Kim <kgene.kim@samsung.com>
 
-On Mon, Oct 4, 2010 at 10:33 AM, Madhusudhan <madhu.cr@ti.com> wrote:
->
->
->> -----Original Message-----
->> From: Steve Sakoman [mailto:sakoman@gmail.com]
->> Sent: Monday, October 04, 2010 11:57 AM
->> To: Madhusudhan
->> Cc: Mike Rapoport; David Vrabel; Chris Ball; linux-mmc@vger.kernel.o=
-rg;
->> linux-omap@vger.kernel.org
->> Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
->>
->> On Mon, Oct 4, 2010 at 9:45 AM, Madhusudhan <madhu.cr@ti.com> wrote:
->> >
->> >
->> >> -----Original Message-----
->> >> From: Steve Sakoman [mailto:sakoman@gmail.com]
->> >> Sent: Monday, October 04, 2010 11:32 AM
->> >> To: Mike Rapoport
->> >> Cc: David Vrabel; Chris Ball; linux-mmc@vger.kernel.org; linux-
->> >> omap@vger.kernel.org; madhu.cr@ti.com
->> >> Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
->> >>
->> >> On Wed, Sep 1, 2010 at 11:02 PM, Mike Rapoport <mike@compulab.co.=
-il>
->> >> wrote:
->> >> > David Vrabel wrote:
->> >> >>
->> >> >> On 27/08/2010 20:22, Chris Ball wrote:
->> >> >>>
->> >> >>> Hi David,
->> >> >>>
->> >> >>> On Mon, Feb 22, 2010 at 02:24:17PM +0000, David Vrabel wrote:
->> >> >>>>
->> >> >>>> These patches add support for SDIO cards to the omap_hsmmc d=
-river.
->> >> >>>> Power management changes to prevent SDIO cards from being tu=
-rned
->> off
->> >> >>>> and losing all state, and card interrupts.
->> >> >>>>
->> >> >>>> I've been unable to test these exact patches as I only have =
-an
->> N900
->> >> for
->> >> >>>> testing and the N900 support in mainline is incomplete.
->> >> >>>>
->> >> >>>> Changes since v1:
->> >> >>>> - (hopefully) get all cards working again by removing a seco=
-nd
->> call
->> >> to
->> >> >>>> =A0read MMCi_STAT in the interrupt handler.
->> >> >>>> - flush posted writes after enabling/disabling SDIO interrup=
-ts.
->> >> >>>> - tweak the FIXME commit on disabling FCLK to better match w=
-hat
->> >> really
->> >> >>>> =A0going on (at least I think so anyway).
->> >> >>>>
->> >> >>>> David Vrabel (2):
->> >> >>>> =A0mmc: omap_hsmmc: don't turn SDIO cards off when idle
->> >> >>>> =A0mmc: omap_hsmmc: enable SDIO card interrupts
->> >> >>>
->> >> >>> Looks like this patchset wasn't merged. =A0Mike Rapoport repl=
-ied with
->> a
->> >> fix
->> >> >>> for libertas. =A0Would you like to resubmit it?
->> >> >>
->> >> >> I thought Madhu had picked this up and was going to submit it.
->> >> >>
->> >> >> Regardless of whether that is the case, I think it needs to be
->> >> submitted
->> >> >> by someone who can run mainline kernels (I can't) and ideally
->> someone
->> >> >> who can test it with SDIO cards.
->> >> >
->> >> > I'll try to update the patches in the next few days.
->> >>
->> >> Any update on the status of these patches? =A0I'm happy to help t=
-est!
->> >>
->> > Steve,
->> >
->> > I have not been able to test SDIO card interrupts. If you could he=
-lp
->> test
->> > that it's great.
->>
->> Where can I grab the most recent patches? =A0The original set don't =
-apply
->> cleanly.
->>
->
-> Yes. They may not apply. I can rebase them and send it to you for tes=
-ting.
-> Are you using the two patches posted by David Vrabel?
+Hi Linus,
 
-Yes, I've been using the original patches on 2.6.33 and 2.6.34.  The
-SDIO interrupt patch doesn't apply on 2.6.35 or 36.
+On Thu, Sep 30, 2010 at 09:22:17AM +0200, Linus Walleij wrote:
+> That's it. If there is interest I can surely pick it up and wrap the
+> current enable/disable calls around it or even rewrite all drivers
+> to use the set_ios() approach as in this patchset I think.
+>=20
+> What happened was that I had this iterated a few times as Pierre was
+> getting increasingly overloaded and it was on the verge of merging
+> when he resigned as MMC maintainer.
+>=20
+> The next week or so the big hammer callbacks from OMAP were
+> merged as part of their mainline procedure.
+>=20
+> I can move the timeing code to wrap the current callbacks
+> instead atleast that would make things more according to spec.
 
-If you send a revised patch for either I would be happy to test as
-soon as I get it.
+Sounds excellent.  Thank you!
 
-Steve
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+There are a few groups to keep in touch with on this:
+
+* The omap_hsmmc folks, of course
+* Ohad Ben-Cohen has SDIO runtime PM patches=B9, which I think should
+  be merged
+* Kevin Hilman is working on converting omap_hsmmc over to runtime PM=B2
+* Matthew Garrett is working on a patch to power down unused SDHCI
+  devices using runtime PM
+
+- Chris.
+
+=B9:  http://thread.gmane.org/gmane.linux.kernel.mmc/3968
+=B2:  http://git.kernel.org/?p=3Dlinux/kernel/git/khilman/linux-omap-pm=
+=2Egit;a=3Dshortlog;h=3Drefs/heads/pm-wip/mmc
+
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
