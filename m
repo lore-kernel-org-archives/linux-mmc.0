@@ -1,65 +1,57 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] sdhci: adjust sd 3.0 host controller spec clock divider
-Date: Tue, 5 Oct 2010 03:34:01 +0100
-Message-ID: <20101005023401.GB9044@void.printf.net>
-References: <CDD4A6CE-487A-4740-87BA-96EEBF1E8217@marvell.com>
+From: Jeongbae Seo <jeongbae.seo@samsung.com>
+Subject: RE: [PATCH 2/5] ARM: S5PV310: Add HSMMC support into S5PV310 and
+ S5PC210
+Date: Tue, 05 Oct 2010 15:46:51 +0900
+Message-ID: <001201cb6459$1b3c1360$51b43a20$%seo@samsung.com>
+References: <1284626223-18944-1-git-send-email-jeongbae.seo@samsung.com>
+ <1284626223-18944-3-git-send-email-jeongbae.seo@samsung.com>
+ <012c01cb63b3$b7053a20$250fae60$%szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57221 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753193Ab0JECeF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 4 Oct 2010 22:34:05 -0400
-Content-Disposition: inline
-In-Reply-To: <CDD4A6CE-487A-4740-87BA-96EEBF1E8217@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <012c01cb63b3$b7053a20$250fae60$%szyprowski@samsung.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Marek Szyprowski' <m.szyprowski@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: akpm@linux-foundation.org, kgene.kim@samsung.com, 'Hyuk Lee' <hyuk1.lee@samsung.com>, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Vrabel <david.vrabel@csr.com>, Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi David,
-
-On Thu, Sep 30, 2010 at 08:03:14PM -0700, Philip Rakity wrote:
-> From: Philip Rakity <prakity@marvell.com>
-> Date: Thu, 30 Sep 2010 15:34:24 -0700
-> Subject: [PATCH] sdhci: adjust sd 3.0 host controller spec clock divider
+Marek Szyprowski wrote:
+> Hello,
 > 
-> The sd 3.0 host spec does not require the clock divider to be a power of 2.
+> I'm sorry for a late replay, I've just noticed this patch and have some
+> comments.
 > 
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> ---
->  drivers/mmc/host/sdhci.c |    8 +++-----
->  1 files changed, 3 insertions(+), 5 deletions(-)
+> On Thursday, September 16, 2010 10:37 AM Jeongbae Seo wrote:
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 96c7f60..73a94fe 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1003,14 +1003,12 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->  		goto out;
->  
->  	if (host->version >= SDHCI_SPEC_300) {
-> -		/* Version 3.00 divisors must be a multiple of 2. */
->  		if (host->max_clk <= clock)
->  			div = 1;
->  		else {
-> -			for (div = 2; div < SDHCI_MAX_DIV_SPEC_300; div += 2) {
-> -				if ((host->max_clk / div) <= clock)
-> -					break;
-> -			}
-> +			div = host->max_clk/clock;
-> +			if (host->max_clk % clock)
-> +				div++;
->  		}
->  	} else {
->  		/* Version 2.00 divisors must be a power of 2. */
-> -- 
+> > From: Hyuk Lee <hyuk1.lee@samsung.com>
+> >
+> > This patch adds to use of HSMMC on S5PV310 and S5PC210.
+> > The HSMMC platform data like card detect, data bus width
+> > and capability is configured.
+> >
+> > Signed-off-by: Hyuk Lee <hyuk1.lee@samsung.com>
+> > Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
+> > ---
+> >  arch/arm/mach-s5pv310/cpu.c                |    7 +++
+> >  arch/arm/mach-s5pv310/mach-smdkc210.c      |   50
+> ++++++++++++++++++++++++
+> >  arch/arm/mach-s5pv310/mach-smdkv310.c      |   50
+> ++++++++++++++++++++++++
+> >  arch/arm/plat-samsung/include/plat/sdhci.h |   57
+> ++++++++++++++++++++++++++++
+> >  4 files changed, 164 insertions(+), 0 deletions(-)
+> 
+> IMHO, changes to arch/arm/mach-s5pv310/{cpu.c, include/plat/sdhci.h}
+> should be separated from changes to board specific changes
+> (arch/arm/mach-s5pv310/mach-smdk*.c), so this patch should be split
+> into 2 separate patches.
 
-Would you mind reviewing this, please?  I don't have access to the 3.0
-spec.
+Hi, Marek
 
-Thanks very much,
+Okay, I'll make it as two patches.
+Thanks for your comments.
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Best Regards
+Jeongbae Seo
