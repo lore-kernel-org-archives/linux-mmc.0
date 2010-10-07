@@ -1,60 +1,130 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V2 1/1]MMC: add support of sdhci-pxa driver
-Date: Thu, 7 Oct 2010 20:45:26 +0100
-Message-ID: <20101007194526.GA16587@void.printf.net>
-References: <AANLkTikK0oEwLEXaf_Q5XWi3nxoq8WKCzKiF87E_Z3k+@mail.gmail.com>
+Subject: 2.6.37 planning, and cjb in Taipei Oct 19-Nov 2
+Date: Thu, 07 Oct 2010 16:11:23 -0400
+Message-ID: <m3hbgxoj9w.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34812 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:40338 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751150Ab0JGTp1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 Oct 2010 15:45:27 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTikK0oEwLEXaf_Q5XWi3nxoq8WKCzKiF87E_Z3k+@mail.gmail.com>
+	id S1751258Ab0JGUGu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 Oct 2010 16:06:50 -0400
+Received: from pullcord.laptop.org ([18.85.46.20])
+	by void.printf.net with esmtp (Exim 4.69)
+	(envelope-from <cjb@laptop.org>)
+	id 1P3wjp-0004ZC-Sn
+	for linux-mmc@vger.kernel.org; Thu, 07 Oct 2010 21:06:50 +0100
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, kmpark@infradead.org, eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>
+To: linux-mmc@vger.kernel.org
 
-Hi Zhangfei, all,
+Hi,
 
-On Tue, Sep 28, 2010 at 11:23:35PM -0400, zhangfei gao wrote:
-> We strongly prefer using standalone host driver currently, like
-> sdhci-s3c.c, the scheme is more mature, more similar as our
-> controller, and more flexiable for sharing one controller in different
-> platform with different requirement.
-> We would rather pay more effort to enable new feature of silicon,  to
-> enhance the sdhci.c, which benefit much more silicon vender, instead
-> of paying much effort in how to abstract probe and remove.
-> For the driver lever, we don't want too much dependence, the more
-> dependence, the less stability.
-> The sdhci-pltfm has good idea, however currently it does not meet our
-> requirement, not say in the future.
+Below is the current list of patches queued for 2.6.37.  If you'd like
+a patch to be considered for 2.6.37 that isn't listed, please let me
+know.
 
-Sorry for taking so long to reply to this -- it's been difficult to
-decide whether to take this as a non-pltfm driver.
+I'm going to be in Taipei for an OLPC board bringup from Oct 19th
+to Nov 2nd -- the start of the trip will probably be during the merge
+window.  I'll make time to ensure that the merge goes okay, but I'll
+be busier than usual, so I'm planning to have my tree ready for a pull
+request before I leave.  Also, if you happen to be in Taipei during
+that time (or in Cambridge, MA directly afterwards) I'd be happy to
+meet up in person.  Thanks!
 
-I've decided to take it since our encouragement of platform drivers is
-recent, and Eric is also in favor of keeping it separate, and you've
-both argued that -pltfm isn't easily able to handle the shared clock
-situation on your hardware.  (I'm sure it could be extended to be.)
-So, please update the patch in light of Matt Fleming's review comments
-and re-submit.
 
-I don't agree, however, with the argument that SDHCI drivers are more
-stable if they don't depend on a common core; the common core will
-receive more maintenance if more people are using it.  Going forward,
-I think that new SDHCI driver work should either use -pltfm or give
-strong technical reasons why -pltfm isn't appropriate, and give us a
-chance to improve -pltfm in response.  I think we should also consider
-converting existing drivers over to platform drivers, even though that's
-clearly difficult to accomplish after a driver's been merged. 
+Patches in mmc-next:
 
-Hope that helps to explain the situation as I see it, and I'd be happy
-to hear any more comments on the -pltfm approach in general.
+Adrian Hunter (4):
+      mmc_test: fix performance tests that go over max_blk_count
+      mmc_test: fix memory allocation segment limits
+      mmc_test: fix display of .5 KiB
+      mmc: Fixes for Dual Data Rate (DDR) support
 
-Thanks!
+Alan Cox (2):
+      mmc: sdhci: Allow the probe handler to override slots
+      mmc: sdhci: Add Moorestown device support
+
+Andy Shevchenko (6):
+      mmc: make mmc_dev_to_card() macro public
+      mmc: rename dev_to_mmc_card() to mmc_dev_to_card()
+      mmc_test: use API to check card type
+      mmc_test: change simple_strtol() to strict_strtol()
+      mmc_test: collect data and show it via sysfs by demand
+      mmc_test: move files from sysfs to debugfs
+
+David Vrabel (1):
+      mmc: USB SD Host Controller (USHC) driver
+
+Ethan Du (1):
+      mmc: name mmc queue thread by host index
+
+George G. Davis (1):
+      mmc: sdhci: Make consistent use of CONFIG_MMC_DEBUG for "DEBUG"ging
+
+Giuseppe Cavallaro (4):
+      mmc: sdhci: add MMC_CAP_8_BIT_DATA in the host capabilities
+      mmc: sdhci-pltfm: add suspend/resume functions
+      mmc: sdhci: fix "pwr may be used uninitialized" warning
+      mmc: sdhci: split up sdhci.h for sdhci-pltfm users
+
+H Hartley Sweeten (3):
+      mmc: at91_mci.c: use resource_size()
+      mmc: atmel-mci.c: use resource_size()
+      mmc: au1xmmc.c: use resource_size()
+
+Hanumath Prasad (1):
+      mmc: MMC 4.4 DDR support
+
+Hein Tibosch (1):
+      mmc: Make ID freq configurable
+
+Jaehoon Chung (1):
+      mmc: sdhci: disable MMC_CAP_NEEDS_POLL in nonremovable case
+
+JiebingLi (1):
+      mmc: Use snprintf, not sprintf.
+
+Linus Walleij (1):
+      mmc: Move regulator handling closer to core
+
+Martin K. Petersen (1):
+      mmc: Remove distinction between hw and phys segments
+
+Matt Fleming (1):
+      mmc: Add helper function to check if a card is removable
+
+Ohad Ben-Cohen (9):
+      mmc: sdio: fully reconfigure oldcard on resume
+      mmc: propagate power save/restore ops return value
+      mmc: sdio: add power_restore support
+      mmc: add runtime PM handlers
+      mmc: sdio: use the generic runtime PM handlers
+      mmc: sdio: enable runtime PM for SDIO cards
+      mmc: sdio: enable runtime PM for SDIO functions
+      mmc: sdio: ensure mmc_sdio_detect is powered
+      mmc: sdio: support suspend/resume while runtime suspended
+
+Olof Johansson (1):
+      mmc: make number of mmcblk minors configurable
+
+Philip Rakity (1):
+      mmc: sdhci: print out controller name for register debug
+
+Thomas Gleixner (1):
+      mmc: Convert "mutex" to semaphore
+
+Xiaochen Shen (1):
+      mmc: sdhci: Intel Medfield support
+
+Zhangfei Gao (4):
+      mmc: SDHC 3.0: support 10-bit divided clock mode
+      mmc: SDHC 3.0: Base clock frequency change in spec 3.0
+      mmc: sdhci: Enable high-speed support for MMC cards
+      mmc: sdhci: correct f_min calculation with SD 3.0 spec
+
+matt mooney (1):
+      mmc: Makefile: Fix EXTRA_CFLAGS assignment
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
