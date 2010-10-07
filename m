@@ -1,72 +1,55 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: 2.6.35.6 fails to suspend (pxa2xx-mci.0)
-Date: Thu, 7 Oct 2010 23:23:05 +0200
-Message-ID: <201010072323.05218.rjw@sisk.pl>
-References: <1286177435.2140.5.camel@sven> <201010070218.41944.rjw@sisk.pl> <1286463808.797.10.camel@bender>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH] sdhci: highspeed:  check for mmc as well as sd cards
+Date: Thu, 7 Oct 2010 16:27:44 -0700
+Message-ID: <C8183A61-C860-461A-88B7-706461040D48@marvell.com>
+References: <41A82D88-6200-469C-986D-EF46B0C6A773@marvell.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:54356 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753181Ab0JGVYP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 Oct 2010 17:24:15 -0400
-In-Reply-To: <1286463808.797.10.camel@bender>
+Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:59782 "HELO
+	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753057Ab0JGXa7 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 Oct 2010 19:30:59 -0400
+In-Reply-To: <41A82D88-6200-469C-986D-EF46B0C6A773@marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sven Neumann <s.neumann@raumfeld.com>
-Cc: Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thursday, October 07, 2010, Sven Neumann wrote:
-> Hi,
+
+validated code when testing eMMC dual data rate.
+
+On Oct 6, 2010, at 11:57 AM, Philip Rakity wrote:
+
 > 
-> On Thu, 2010-10-07 at 02:18 +0200, Rafael J. Wysocki wrote:
+> when examining the code in the mmc directory the SD and MMC code
+> set highspeed using a different constant.  Change the sd driver
+> to recognize this and switch to high speed.
 > 
-> > On Thursday, October 07, 2010, Daniel Mack wrote:
-> > > On Mon, Oct 04, 2010 at 09:30:35AM +0200, Sven Neumann wrote:
-> > > > we are running an embedded system here based on the PXA300 platform.
-> > > > Suspend/resume used to work well so far. However after upgrading the
-> > > > kernel from 2.6.34.7 to 2.6.35.6, we get the following error when trying
-> > > > to suspend the system:
-> > > > 
-> > > > # echo "mem" > "/sys/power/state"
-> > > > [ 5647.295953] PM: Syncing filesystems ... done.
-> > > > [ 5647.318792] Freezing user space processes ... (elapsed 0.01 seconds) done.
-> > > > [ 5647.337048] Freezing remaining freezable tasks ... (elapsed 0.01 seconds) done.
-> > > > [ 5647.356915] Suspending console(s) (use no_console_suspend to debug)
-> > > > [ 5647.366651] pm_op(): platform_pm_suspend+0x0/0x5c returns -38
-> > > > [ 5647.366671] PM: Device pxa2xx-mci.0 failed to suspend: error -38
-> > > > [ 5647.367082] PM: Some devices failed to suspend
-> > > 
-> > > We've bisected this effect down to commit 152e1d5920 ("PM: Prevent
-> > > waiting forever on asynchronous resume after failing suspend").
-> > > Suspending our PXA3xx based system breaks with this patch.
-> > > 
-> > > I tried to understand what's going wrong, but I didn't follow the
-> > > discussion about this logic, so I would rather like to pass it back to
-> > > the originating people.
-> > > 
-> > > I can only guess that the problem here is the somewhat tricky handling
-> > > around mmc_sdio_suspend(), which returns -ENODEV (-38) in case a
-> > > particular function of a card can not be suspended. The SDIO core would
-> > > have simply removed the card in this case normally, but the PM core
-> > > seems to interfere now, stopping the whole suspend procedure.
-> > > 
-> > > Can anyone shed some light on this?
-> > 
-> > I wonder what happens if you echo 0 to /sys/power/pm_async ?
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> ---
+> drivers/mmc/host/sdhci.c |    5 +++--
+> 1 files changed, 3 insertions(+), 2 deletions(-)
 > 
-> Nothing happens. The problem persists (tested with 2.6.36-rc7). What
-> would you expect to happen?
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index d3f924b..1d3f4d8 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1194,8 +1194,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> 	else
+> 		ctrl &= ~SDHCI_CTRL_4BITBUS;
+> 
+> -	if (ios->timing == MMC_TIMING_SD_HS &&
+> -	    !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+> +	if ((ios->timing == MMC_TIMING_SD_HS
+> +			|| ios->timing == MMC_TIMING_MMC_HS)
+> +		&& !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+> 		ctrl |= SDHCI_CTRL_HISPD;
+> 	else
+> 		ctrl &= ~SDHCI_CTRL_HISPD;
+> -- 
+> 1.6.0.4
+> 
 
-Exactly that. :-)
-
-Commit 152e1d5920 should not affect the non-async case (I'd be surprised if
-it did really) and things should work with /sys/power/pm_async = 0 anyway.
-
-Please try check if you can reproduce with commt 152e1d5920 reverted and
-/sys/power/pm_async = 0.  If you can, that's a driver bug.
-
-Thanks,
-Rafael
