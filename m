@@ -1,131 +1,72 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: 2.6.37 planning, and cjb in Taipei Oct 19-Nov 2
-Date: Thu, 07 Oct 2010 16:11:23 -0400
-Message-ID: <m3hbgxoj9w.fsf@pullcord.laptop.org>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: 2.6.35.6 fails to suspend (pxa2xx-mci.0)
+Date: Thu, 7 Oct 2010 23:23:05 +0200
+Message-ID: <201010072323.05218.rjw@sisk.pl>
+References: <1286177435.2140.5.camel@sven> <201010070218.41944.rjw@sisk.pl> <1286463808.797.10.camel@bender>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40338 "EHLO void.printf.net"
+Received: from ogre.sisk.pl ([217.79.144.158]:54356 "EHLO ogre.sisk.pl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751258Ab0JGUGu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 Oct 2010 16:06:50 -0400
-Received: from pullcord.laptop.org ([18.85.46.20])
-	by void.printf.net with esmtp (Exim 4.69)
-	(envelope-from <cjb@laptop.org>)
-	id 1P3wjp-0004ZC-Sn
-	for linux-mmc@vger.kernel.org; Thu, 07 Oct 2010 21:06:50 +0100
+	id S1753181Ab0JGVYP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 Oct 2010 17:24:15 -0400
+In-Reply-To: <1286463808.797.10.camel@bender>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Sven Neumann <s.neumann@raumfeld.com>
+Cc: Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi,
+On Thursday, October 07, 2010, Sven Neumann wrote:
+> Hi,
+> 
+> On Thu, 2010-10-07 at 02:18 +0200, Rafael J. Wysocki wrote:
+> 
+> > On Thursday, October 07, 2010, Daniel Mack wrote:
+> > > On Mon, Oct 04, 2010 at 09:30:35AM +0200, Sven Neumann wrote:
+> > > > we are running an embedded system here based on the PXA300 platform.
+> > > > Suspend/resume used to work well so far. However after upgrading the
+> > > > kernel from 2.6.34.7 to 2.6.35.6, we get the following error when trying
+> > > > to suspend the system:
+> > > > 
+> > > > # echo "mem" > "/sys/power/state"
+> > > > [ 5647.295953] PM: Syncing filesystems ... done.
+> > > > [ 5647.318792] Freezing user space processes ... (elapsed 0.01 seconds) done.
+> > > > [ 5647.337048] Freezing remaining freezable tasks ... (elapsed 0.01 seconds) done.
+> > > > [ 5647.356915] Suspending console(s) (use no_console_suspend to debug)
+> > > > [ 5647.366651] pm_op(): platform_pm_suspend+0x0/0x5c returns -38
+> > > > [ 5647.366671] PM: Device pxa2xx-mci.0 failed to suspend: error -38
+> > > > [ 5647.367082] PM: Some devices failed to suspend
+> > > 
+> > > We've bisected this effect down to commit 152e1d5920 ("PM: Prevent
+> > > waiting forever on asynchronous resume after failing suspend").
+> > > Suspending our PXA3xx based system breaks with this patch.
+> > > 
+> > > I tried to understand what's going wrong, but I didn't follow the
+> > > discussion about this logic, so I would rather like to pass it back to
+> > > the originating people.
+> > > 
+> > > I can only guess that the problem here is the somewhat tricky handling
+> > > around mmc_sdio_suspend(), which returns -ENODEV (-38) in case a
+> > > particular function of a card can not be suspended. The SDIO core would
+> > > have simply removed the card in this case normally, but the PM core
+> > > seems to interfere now, stopping the whole suspend procedure.
+> > > 
+> > > Can anyone shed some light on this?
+> > 
+> > I wonder what happens if you echo 0 to /sys/power/pm_async ?
+> 
+> Nothing happens. The problem persists (tested with 2.6.36-rc7). What
+> would you expect to happen?
 
-Below is the current list of patches queued for 2.6.37.  If you'd like
-a patch to be considered for 2.6.37 that isn't listed, please let me
-know.
+Exactly that. :-)
 
-I'm going to be in Taipei for an OLPC board bringup from Oct 19th
-to Nov 2nd -- the start of the trip will probably be during the merge
-window.  I'll make time to ensure that the merge goes okay, but I'll
-be busier than usual, so I'm planning to have my tree ready for a pull
-request before I leave.  Also, if you happen to be in Taipei during
-that time (or in Cambridge, MA directly afterwards) I'd be happy to
-meet up in person.  Thanks!
+Commit 152e1d5920 should not affect the non-async case (I'd be surprised if
+it did really) and things should work with /sys/power/pm_async = 0 anyway.
 
+Please try check if you can reproduce with commt 152e1d5920 reverted and
+/sys/power/pm_async = 0.  If you can, that's a driver bug.
 
-Patches in mmc-next:
-
-Adrian Hunter (4):
-      mmc_test: fix performance tests that go over max_blk_count
-      mmc_test: fix memory allocation segment limits
-      mmc_test: fix display of .5 KiB
-      mmc: Fixes for Dual Data Rate (DDR) support
-
-Alan Cox (2):
-      mmc: sdhci: Allow the probe handler to override slots
-      mmc: sdhci: Add Moorestown device support
-
-Andy Shevchenko (6):
-      mmc: make mmc_dev_to_card() macro public
-      mmc: rename dev_to_mmc_card() to mmc_dev_to_card()
-      mmc_test: use API to check card type
-      mmc_test: change simple_strtol() to strict_strtol()
-      mmc_test: collect data and show it via sysfs by demand
-      mmc_test: move files from sysfs to debugfs
-
-David Vrabel (1):
-      mmc: USB SD Host Controller (USHC) driver
-
-Ethan Du (1):
-      mmc: name mmc queue thread by host index
-
-George G. Davis (1):
-      mmc: sdhci: Make consistent use of CONFIG_MMC_DEBUG for "DEBUG"ging
-
-Giuseppe Cavallaro (4):
-      mmc: sdhci: add MMC_CAP_8_BIT_DATA in the host capabilities
-      mmc: sdhci-pltfm: add suspend/resume functions
-      mmc: sdhci: fix "pwr may be used uninitialized" warning
-      mmc: sdhci: split up sdhci.h for sdhci-pltfm users
-
-H Hartley Sweeten (3):
-      mmc: at91_mci.c: use resource_size()
-      mmc: atmel-mci.c: use resource_size()
-      mmc: au1xmmc.c: use resource_size()
-
-Hanumath Prasad (1):
-      mmc: MMC 4.4 DDR support
-
-Hein Tibosch (1):
-      mmc: Make ID freq configurable
-
-Jaehoon Chung (1):
-      mmc: sdhci: disable MMC_CAP_NEEDS_POLL in nonremovable case
-
-JiebingLi (1):
-      mmc: Use snprintf, not sprintf.
-
-Linus Walleij (1):
-      mmc: Move regulator handling closer to core
-
-Martin K. Petersen (1):
-      mmc: Remove distinction between hw and phys segments
-
-Matt Fleming (1):
-      mmc: Add helper function to check if a card is removable
-
-Ohad Ben-Cohen (9):
-      mmc: sdio: fully reconfigure oldcard on resume
-      mmc: propagate power save/restore ops return value
-      mmc: sdio: add power_restore support
-      mmc: add runtime PM handlers
-      mmc: sdio: use the generic runtime PM handlers
-      mmc: sdio: enable runtime PM for SDIO cards
-      mmc: sdio: enable runtime PM for SDIO functions
-      mmc: sdio: ensure mmc_sdio_detect is powered
-      mmc: sdio: support suspend/resume while runtime suspended
-
-Olof Johansson (1):
-      mmc: make number of mmcblk minors configurable
-
-Philip Rakity (1):
-      mmc: sdhci: print out controller name for register debug
-
-Thomas Gleixner (1):
-      mmc: Convert "mutex" to semaphore
-
-Xiaochen Shen (1):
-      mmc: sdhci: Intel Medfield support
-
-Zhangfei Gao (4):
-      mmc: SDHC 3.0: support 10-bit divided clock mode
-      mmc: SDHC 3.0: Base clock frequency change in spec 3.0
-      mmc: sdhci: Enable high-speed support for MMC cards
-      mmc: sdhci: correct f_min calculation with SD 3.0 spec
-
-matt mooney (1):
-      mmc: Makefile: Fix EXTRA_CFLAGS assignment
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks,
+Rafael
