@@ -1,35 +1,35 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/3] Enabling patches for Intel MID SDHCI
-Date: Thu, 7 Oct 2010 19:07:30 +0100
-Message-ID: <20101007180730.GB15745@void.printf.net>
-References: <20101004142246.901.37491.stgit@localhost.localdomain>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH v2 00/11] SDIO Runtime PM Support
+Date: Thu, 7 Oct 2010 20:33:59 +0200
+Message-ID: <AANLkTimKnCW0Cijj_MmMOQGsoYwwtqvUWQ81cMZ5dqJu@mail.gmail.com>
+References: <1286020455-28946-1-git-send-email-ohad@wizery.com>
+ <1286454736.27371.37.camel@chilepepper> <20101007180107.GA15745@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46231 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751124Ab0JGSHb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 Oct 2010 14:07:31 -0400
-Content-Disposition: inline
-In-Reply-To: <20101004142246.901.37491.stgit@localhost.localdomain>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:48944 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752953Ab0JGSeU convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Oct 2010 14:34:20 -0400
+In-Reply-To: <20101007180107.GA15745@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Luciano Coelho <luciano.coelho@nokia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, Nicolas Pitre <nico@fluxnic.net>
 
-Hi Alan,
+On Thu, Oct 7, 2010 at 8:01 PM, Chris Ball <cjb@laptop.org> wrote:
+> Yes, can do -- the patchset looks good, and I've just pushed patches
+> 1-9 (the MMC patches) to mmc-next.
 
-On Mon, Oct 04, 2010 at 03:23:55PM +0100, Alan Cox wrote:
-> Try again...
-> 
-> This adds basic support for the Intel MID platform devices. It doesn't include
-> the callback stuff to handle some of the errata but I'm trying to verify
-> which if any of those make sense outside of Intel before resubmitting that
-> bit.
+Thanks, Chris.
 
-Thanks, applied to mmc-next / queued for 2.6.37.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> =A0Please go ahead and submit the
+> two wl1271 patches through wireless-testing whenever you're ready.
+>
+> Thanks!
+>
+> --
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
+>
