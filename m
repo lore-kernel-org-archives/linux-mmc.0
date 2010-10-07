@@ -1,41 +1,35 @@
-From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 00/11] SDIO Runtime PM Support
-Date: Thu, 7 Oct 2010 19:01:07 +0100
-Message-ID: <20101007180107.GA15745@void.printf.net>
-References: <1286020455-28946-1-git-send-email-ohad@wizery.com> <1286454736.27371.37.camel@chilepepper>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/3] Enabling patches for Intel MID SDHCI
+Date: Thu, 7 Oct 2010 19:07:30 +0100
+Message-ID: <20101007180730.GB15745@void.printf.net>
+References: <20101004142246.901.37491.stgit@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:46231 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751124Ab0JGSHb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 Oct 2010 14:07:31 -0400
 Content-Disposition: inline
-In-Reply-To: <1286454736.27371.37.camel@chilepepper>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
-Cc: ext Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>
+In-Reply-To: <20101004142246.901.37491.stgit@localhost.localdomain>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Luciano, Ohad,
+Hi Alan,
 
-On Thu, Oct 07, 2010 at 03:32:16PM +0300, Luciano Coelho wrote:
-> I have tested this on my beagle board with the wl1271 patches that Ohad
-> provided and it seems to be working fine.  I've also created a small
-> script to stress test the implementation a little bit and didn't see any
-> problems.
+On Mon, Oct 04, 2010 at 03:23:55PM +0100, Alan Cox wrote:
+> Try again...
 > 
-> Tested-by: Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
-> 
-> This is quite an important fix in the wl1271 point-of-view.  Chris, do
-> you think there is any chance that this could make it to 2.6.37?
+> This adds basic support for the Intel MID platform devices. It doesn't include
+> the callback stuff to handle some of the errata but I'm trying to verify
+> which if any of those make sense outside of Intel before resubmitting that
+> bit.
 
-Yes, can do -- the patchset looks good, and I've just pushed patches
-1-9 (the MMC patches) to mmc-next.  Please go ahead and submit the
-two wl1271 patches through wireless-testing whenever you're ready.
+Thanks, applied to mmc-next / queued for 2.6.37.
 
-Thanks!
-
+- Chris.
 -- 
-Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
