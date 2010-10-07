@@ -1,65 +1,88 @@
-From: Sven Neumann <s.neumann@raumfeld.com>
-Subject: Re: 2.6.35.6 fails to suspend (pxa2xx-mci.0)
-Date: Thu, 07 Oct 2010 17:03:28 +0200
-Message-ID: <1286463808.797.10.camel@bender>
-References: <1286177435.2140.5.camel@sven>
-	 <20101006235513.GY7159@buzzloop.caiaq.de>  <201010070218.41944.rjw@sisk.pl>
+From: "Madhusudhan" <madhu.cr@ti.com>
+Subject: RE: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
+Date: Thu, 7 Oct 2010 11:52:38 -0500
+Message-ID: <B02FD62E0C9F4E70856C21355A0BAB59@am.dhcp.ti.com>
+References: <cover.1266847842.git.david.vrabel@csr.com><20100827192248.GJ20407@void.printf.net><4C7CC480.2040903@csr.com><4C7F3E0F.2080402@compulab.co.il><AANLkTi=RvWpuUC3FjwELkM0v57YXZbH_DBiA-4KuOwdN@mail.gmail.com><C903F2608D694655921F553D0D3557E3@am.dhcp.ti.com><AANLkTikskMMFWS+qxD+J=o6OiOa+d5H02DiT1iZ95vkz@mail.gmail.com><CD6B4CE9F7FA427BBD19242F669AD014@am.dhcp.ti.com><AANLkTin-r5Svg1+YrdYq95WA6=sh7+X0Bwogk=h0V6pP@mail.gmail.com><4CAC146D.3040001@compulab.co.il><AANLkTi=kmLuUyD-9k-Xa5vfgvjx2nNUGfyADhoY0HC1i@mail.gmail.com><4CAC7D65.8010705@compulab.co.il><AANLkTikvduxP+gQOs4HvZz2Yw6KCrqHAyim0Ads0Bvj_@mail.gmail.com><56009.192.168.10.88.1286389699.squirrel@dbdmail.itg.ti.com><4CAD739B.4090909@compulab.co.il> <AANLkTimvHnLAchE-Ed1Zve-PU6S98Euj=bFaAtkDWWji@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from vwp2514.webpack.hosteurope.de ([87.230.42.24]:33301 "EHLO
-	vwp2514.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751514Ab0JGPDN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Oct 2010 11:03:13 -0400
-In-Reply-To: <201010070218.41944.rjw@sisk.pl>
+Received: from bear.ext.ti.com ([192.94.94.41]:56476 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753371Ab0JGQxO convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Oct 2010 12:53:14 -0400
+In-Reply-To: <AANLkTimvHnLAchE-Ed1Zve-PU6S98Euj=bFaAtkDWWji@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-
-Hi,
-
-On Thu, 2010-10-07 at 02:18 +0200, Rafael J. Wysocki wrote:
-
-> On Thursday, October 07, 2010, Daniel Mack wrote:
-> > On Mon, Oct 04, 2010 at 09:30:35AM +0200, Sven Neumann wrote:
-> > > we are running an embedded system here based on the PXA300 platform.
-> > > Suspend/resume used to work well so far. However after upgrading the
-> > > kernel from 2.6.34.7 to 2.6.35.6, we get the following error when trying
-> > > to suspend the system:
-> > > 
-> > > # echo "mem" > "/sys/power/state"
-> > > [ 5647.295953] PM: Syncing filesystems ... done.
-> > > [ 5647.318792] Freezing user space processes ... (elapsed 0.01 seconds) done.
-> > > [ 5647.337048] Freezing remaining freezable tasks ... (elapsed 0.01 seconds) done.
-> > > [ 5647.356915] Suspending console(s) (use no_console_suspend to debug)
-> > > [ 5647.366651] pm_op(): platform_pm_suspend+0x0/0x5c returns -38
-> > > [ 5647.366671] PM: Device pxa2xx-mci.0 failed to suspend: error -38
-> > > [ 5647.367082] PM: Some devices failed to suspend
-> > 
-> > We've bisected this effect down to commit 152e1d5920 ("PM: Prevent
-> > waiting forever on asynchronous resume after failing suspend").
-> > Suspending our PXA3xx based system breaks with this patch.
-> > 
-> > I tried to understand what's going wrong, but I didn't follow the
-> > discussion about this logic, so I would rather like to pass it back to
-> > the originating people.
-> > 
-> > I can only guess that the problem here is the somewhat tricky handling
-> > around mmc_sdio_suspend(), which returns -ENODEV (-38) in case a
-> > particular function of a card can not be suspended. The SDIO core would
-> > have simply removed the card in this case normally, but the PM core
-> > seems to interfere now, stopping the whole suspend procedure.
-> > 
-> > Can anyone shed some light on this?
-> 
-> I wonder what happens if you echo 0 to /sys/power/pm_async ?
-
-Nothing happens. The problem persists (tested with 2.6.36-rc7). What
-would you expect to happen?
+To: 'Steve Sakoman' <sakoman@gmail.com>, 'Mike Rapoport' <mike@compulab.co.il>
+Cc: 'David Vrabel' <david.vrabel@csr.com>, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, 'Adrian Hunter' <adrian.hunter@nokia.com>
 
 
-Sven
 
+> -----Original Message-----
+> From: Steve Sakoman [mailto:sakoman@gmail.com]
+> Sent: Thursday, October 07, 2010 8:57 AM
+> To: Mike Rapoport
+> Cc: Madhusudhan Chikkature; David Vrabel; Chris Ball; linux-
+> mmc@vger.kernel.org; linux-omap@vger.kernel.org; Adrian Hunter
+> Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
+>=20
+> On Thu, Oct 7, 2010 at 12:15 AM, Mike Rapoport <mike@compulab.co.il>
+> wrote:
+> > Hi Madhu,
+> >
+> > Madhusudhan Chikkature wrote:
+> >>
+> >> <snip>
+> >>
+> >>> You are correct! =A0The version of the patch in the repo indeed h=
+as
+> >>> 'out' in the wrong place and generates a compile error.
+> >>>
+> >>> Could you post the patch you are using and I will try to reproduc=
+e
+> >>> what you are seeing on my hardware? =A0Best we all work from exac=
+tly the
+> >>> same patch!
+> >>>
+> >>> Steve
+> >>>
+> >>
+> >> Yes. I think that check breaking the compilation is not needed. Ho=
+w
+> about
+> >> the
+> >> below version? It just removes that check.
+> >>
+> >> This version should apply fine on the latest kernel. I did a sanit=
+y
+> test
+> >> of
+> >> MMC/SD cards on OMAP4 SDP.
+> >>
+> >> Steve or Mike can check if SDIO interrupts are working.
+> >
+> > With you patch I get the same:
+> >
+> > libertas_sdio: Libertas SDIO driver
+> > libertas_sdio: Copyright Pierre Ossman
+> > libertas: command 0x0003 timed out
+> > libertas: Timeout submitting command 0x0003
+> > libertas: PREP_CMD: command 0x0003 failed: -110
+> > libertas_sdio: probe of mmc1:0001:1 failed with error -110
+>=20
+> I can confirm exactly the same behavior on my hardware with this
+> version of the patch.
+>=20
+
+Steve,
+
+Okay. Did the version you had in your tree worked? I just want to check=
+ if I
+messed up something in my patch.
+
+Regards,
+Madhu
+
+> Steve
 
