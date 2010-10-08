@@ -1,54 +1,45 @@
-From: Sven Neumann <s.neumann@raumfeld.com>
-Subject: Re: 2.6.35.6 fails to suspend (pxa2xx-mci.0)
-Date: Fri, 08 Oct 2010 10:23:17 +0200
-Message-ID: <1286526197.4493.19.camel@sven>
-References: <1286177435.2140.5.camel@sven> <201010070218.41944.rjw@sisk.pl>
-	 <1286463808.797.10.camel@bender>  <201010072323.05218.rjw@sisk.pl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: [PATCH RESEND 1/2] sdhci-s3c: Add support additional host capabilities
+Date: Fri,  8 Oct 2010 17:46:20 +0900
+Message-ID: <1286527581-24903-2-git-send-email-kgene.kim@samsung.com>
+References: <1286527581-24903-1-git-send-email-kgene.kim@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from vwp2514.webpack.hosteurope.de ([87.230.42.24]:48156 "EHLO
-	vwp2514.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755640Ab0JHIXU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Oct 2010 04:23:20 -0400
-In-Reply-To: <201010072323.05218.rjw@sisk.pl>
+Received: from ganesha.gnumonks.org ([213.95.27.120]:34498 "EHLO
+	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754237Ab0JHIzC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Oct 2010 04:55:02 -0400
+In-Reply-To: <1286527581-24903-1-git-send-email-kgene.kim@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ben-linux@fluff.org, akpm@linux-foundation.org, cjb@laptop.org, Jeongbae Seo <jeongbae.seo@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>
 
-On Thu, 2010-10-07 at 23:23 +0200, Rafael J. Wysocki wrote:
+From: Jeongbae Seo <jeongbae.seo@samsung.com>
 
-> > > I wonder what happens if you echo 0 to /sys/power/pm_async ?
-> > 
-> > Nothing happens. The problem persists (tested with 2.6.36-rc7). What
-> > would you expect to happen?
-> 
-> Exactly that. :-)
-> 
-> Commit 152e1d5920 should not affect the non-async case (I'd be surprised if
-> it did really) and things should work with /sys/power/pm_async = 0 anyway.
-> 
-> Please try check if you can reproduce with commt 152e1d5920 reverted and
-> /sys/power/pm_async = 0.  If you can, that's a driver bug.
+This patch adds to support additional host capabilities like SD/MMC high speed, SDHCI bus width and
+etc.
 
-Ok, for the record, here's what I tried. I have rebooted between tests
-to make sure there's no state pulled in from the previous test:
+Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
+Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
 
- 2.6.36-rc7, no changes,      pm_async 1 :  suspend fails
- 2.6.36-rc7, no changes,      pm_async 0 :  suspend fails
-
- 2.6.36-rc7, 152e1d reverted, pm_async 1 :  suspend works
- 2.6.36-rc7, 152e1d reverted, pm_async 0 :  suspend fails
-
- 2.6.34.7, no changes,        pm_async 1 :  suspend works
- 2.6.34.7, no changes,        pm_async 0 :  suspend works
-
-I am not sure how this should be interpreted.
-
-
-Sven
-
-
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index aacb862..a7710f5 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -427,6 +427,10 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	/* HSMMC on Samsung SoCs uses SDCLK as timeout clock */
+ 	host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
+ 
++	/* It supports additional host capabilities if needed */
++	if (pdata->host_caps)
++		host->mmc->caps |= pdata->host_caps;
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(dev, "sdhci_add_host() failed\n");
+-- 
+1.6.2.5
 
