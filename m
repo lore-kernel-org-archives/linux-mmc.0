@@ -1,64 +1,49 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH] sdhci: on error print out SD CMD and CAPABILITY_1 Register
-Date: Thu, 7 Oct 2010 21:05:58 -0700
-Message-ID: <8D8E1470-A817-4A97-962E-DC94DA424953@marvell.com>
+From: Luciano Coelho <luciano.coelho@nokia.com>
+Subject: Re: [PATCH v2 00/11] SDIO Runtime PM Support
+Date: Fri, 08 Oct 2010 08:00:50 +0300
+Message-ID: <1286514050.1662.58.camel@powerslave>
+References: <1286020455-28946-1-git-send-email-ohad@wizery.com>
+	 <1286454736.27371.37.camel@chilepepper>
+	 <20101007180107.GA15745@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:53699 "HELO
-	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1750884Ab0JHEHH convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Oct 2010 00:07:07 -0400
-Content-Language: en-US
+Received: from smtp.nokia.com ([147.243.1.47]:59544 "EHLO mgw-sa01.nokia.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750960Ab0JHFA6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Oct 2010 01:00:58 -0400
+In-Reply-To: <20101007180107.GA15745@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: ext Chris Ball <cjb@laptop.org>
+Cc: ext Ohad Ben-Cohen <ohad@wizery.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, Nicolas Pitre <nico@fluxnic.net>
 
+On Thu, 2010-10-07 at 20:01 +0200, ext Chris Ball wrote:
+> Hi Luciano, Ohad,
+> 
+> On Thu, Oct 07, 2010 at 03:32:16PM +0300, Luciano Coelho wrote:
+> > I have tested this on my beagle board with the wl1271 patches that Ohad
+> > provided and it seems to be working fine.  I've also created a small
+> > script to stress test the implementation a little bit and didn't see any
+> > problems.
+> > 
+> > Tested-by: Luciano Coelho <luciano.coelho@nokia.com>
+> > 
+> > This is quite an important fix in the wl1271 point-of-view.  Chris, do
+> > you think there is any chance that this could make it to 2.6.37?
+> 
+> Yes, can do -- the patchset looks good, and I've just pushed patches
+> 1-9 (the MMC patches) to mmc-next.  Please go ahead and submit the
+> two wl1271 patches through wireless-testing whenever you're ready.
 
-More information should be shown when sdhci_dumpregs is called.
+Thanks a lot, Chris! This will easy our development work quite much,
+since we don't have to be applying separate patches to be able to enable
+and disable the chip at runtime.
 
+I'll apply the wl1271 patches via the wl12xx tree.
 
-Knowing the command is useful for debugging.
-Capability 1 is useful for sdio v3
-
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- drivers/mmc/host/sdhci.c |    5 ++++-
- drivers/mmc/host/sdhci.h |    2 +-
- 2 files changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9cb60ba..ea8472b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -77,8 +77,11 @@ static void sdhci_dumpregs(struct sdhci_host *host)
- 	printk(KERN_DEBUG DRIVER_NAME ": AC12 err: 0x%08x | Slot int: 0x%08x\n",
- 		sdhci_readw(host, SDHCI_ACMD12_ERR),
- 		sdhci_readw(host, SDHCI_SLOT_INT_STATUS));
--	printk(KERN_DEBUG DRIVER_NAME ": Caps:     0x%08x | Max curr: 0x%08x\n",
-+	printk(KERN_DEBUG DRIVER_NAME ": Caps:     0x%08x | Caps_1:   0x%08x\n",
- 		sdhci_readl(host, SDHCI_CAPABILITIES),
-+		sdhci_readl(host, SDHCI_CAPABILITIES_1));
-+	printk(KERN_DEBUG DRIVER_NAME ": Cmd:      0x%08x | Max curr: 0x%08x\n",
-+		sdhci_readw(host, SDHCI_COMMAND),
- 		sdhci_readl(host, SDHCI_MAX_CURRENT));
- 
- 	if (host->flags & SDHCI_USE_ADMA)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index bfcd611..38ae340 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -161,7 +161,7 @@
- #define  SDHCI_CAN_VDD_180	0x04000000
- #define  SDHCI_CAN_64BIT	0x10000000
- 
--/* 44-47 reserved for more caps */
-+#define SDHCI_CAPABILITIES_1	0x44
- 
- #define SDHCI_MAX_CURRENT	0x48
- 
 -- 
-1.6.0.4
+Cheers,
+Luca.
 
