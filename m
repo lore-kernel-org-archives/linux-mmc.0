@@ -1,7 +1,7 @@
 From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: [PATCH v4 2/2] sdhci-s3c: Add support no internal clock divider in host controller
-Date: Mon, 11 Oct 2010 14:47:56 +0900
-Message-ID: <1286776076-24970-1-git-send-email-kgene.kim@samsung.com>
+Subject: [PATCH v5 2/2] sdhci-s3c: Add support no internal clock divider in host controller
+Date: Mon, 11 Oct 2010 16:50:00 +0900
+Message-ID: <1286783400-7277-1-git-send-email-kgene.kim@samsung.com>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
@@ -29,6 +29,9 @@ Cc: Kyungmin Park <kyungmin.park@samsung.com>
 Cc: Ben Dooks <ben-linux@fluff.org>
 Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
 ---
+Changes since v4:
+- Added missing change
+
 Changes since v3:
 - Modified comparision condition as per Kyungmin Park's suggestion
 
@@ -131,7 +134,7 @@ index a7710f5..e7208f6 100644
 +	 * If controller does not have internal clock divider,
 +	 * we can use overriding functions instead of default.
 +	 */
-+	if (pdata->clk_type) {
++	if (pdata->clk_type == S3C_SDHCI_CLK_DIV_EXTERNAL) {
 +		sdhci_s3c_ops.set_clock = sdhci_cmu_set_clock;
 +		sdhci_s3c_ops.get_min_clock = sdhci_cmu_get_min_clock;
 +		sdhci_s3c_ops.get_max_clock = sdhci_cmu_get_max_clock;
