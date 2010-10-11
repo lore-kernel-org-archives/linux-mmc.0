@@ -1,55 +1,192 @@
-From: Mike Rapoport <mike@compulab.co.il>
-Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
-Date: Sun, 10 Oct 2010 08:50:33 +0200
-Message-ID: <4CB16239.1050203@compulab.co.il>
-References: <cover.1266847842.git.david.vrabel@csr.com><20100827192248.GJ20407@void.printf.net><4C7CC480.2040903@csr.com><4C7F3E0F.2080402@compulab.co.il><AANLkTi=RvWpuUC3FjwELkM0v57YXZbH_DBiA-4KuOwdN@mail.gmail.com><C903F2608D694655921F553D0D3557E3@am.dhcp.ti.com><AANLkTikskMMFWS+qxD+J=o6OiOa+d5H02DiT1iZ95vkz@mail.gmail.com><CD6B4CE9F7FA427BBD19242F669AD014@am.dhcp.ti.com><AANLkTin-r5Svg1+YrdYq95WA6=sh7+X0Bwogk=h0V6pP@mail.gmail.com><4CAC146D.3040001@compulab.co.il><AANLkTi=kmLuUyD-9k-Xa5vfgvjx2nNUGfyADhoY0HC1i@mail.gmail.com><4CAC7D65.8010705@compulab.co.il><AANLkTikvduxP+gQOs4HvZz2Yw6KCrqHAyim0Ads0Bvj_@mail.gmail.com><56009.192.168.10.88.1286389699.squirrel@dbdmail.itg.ti.com><4CAD739B.4090909@compulab.co.il> <AANLkTimvHnLAchE-Ed1Zve-PU6S98Euj=bFaAtkDWWji@mail.gmail.com> <B02FD62E0C9F4E
- 70856C21355A0BAB59@am.dhcp.ti.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH V3 2/2] sdhci-s3c: Add support no internal clock divider
+ in host controller
+Date: Mon, 11 Oct 2010 11:54:36 +0900
+Message-ID: <AANLkTim3_NsoFy3BDZcRjh+7VkBnw01Due_khVckdR+P@mail.gmail.com>
+References: <1286527581-24903-1-git-send-email-kgene.kim@samsung.com>
+	<1286527581-24903-3-git-send-email-kgene.kim@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from compulab.co.il ([67.18.134.219]:48322 "EHLO compulab.co.il"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751250Ab0JJGuz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 10 Oct 2010 02:50:55 -0400
-In-Reply-To: <B02FD62E0C9F4E70856C21355A0BAB59@am.dhcp.ti.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:45886 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752888Ab0JKCyh convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 10 Oct 2010 22:54:37 -0400
+In-Reply-To: <1286527581-24903-3-git-send-email-kgene.kim@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Madhusudhan <madhu.cr@ti.com>
-Cc: 'Steve Sakoman' <sakoman@gmail.com>, 'David Vrabel' <david.vrabel@csr.com>, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, 'Adrian Hunter' <adrian.hunter@nokia.com>, Mike Rapoport <mike@compulab.co.il>
+To: Kukjin Kim <kgene.kim@samsung.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, akpm@linux-foundation.org, cjb@laptop.org, Jeongbae Seo <jeongbae.seo@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi Madhu,
+On Fri, Oct 8, 2010 at 5:46 PM, Kukjin Kim <kgene.kim@samsung.com> wrot=
+e:
+> From: Jeongbae Seo <jeongbae.seo@samsung.com>
+>
+> This patch adds to support no internal clock divider in SDHCI.
+> The external clock divider can be used to make a proper clock
+> because SDHCI doesn't support internal clock divider by itself.
+>
+> If external clock divider type is selected, some functions related
+> with clock control will be overridened by other functions.
+>
+> The current clock control index is added to let you know which
+> clock bus is used for SDHCI when using overriding functions.
+>
+> The checking functions is added into sdhci_s3c_consider_clock,
+> because clock divider step is different from that of host controller.
+>
+> Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
+> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+> Cc: Ben Dooks <ben-linux@fluff.org>
+> Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
+> ---
+> Changes since v2:
+> - Changed clock control method to overriding from using quirk
+> - This patch is referred from that of Jaehoon Chung's support non-sta=
+ndard clock setting
 
-Madhusudhan wrote:
-> 
->> -----Original Message-----
->> From: Steve Sakoman [mailto:sakoman@gmail.com]
->> Sent: Thursday, October 07, 2010 8:57 AM
->> To: Mike Rapoport
->> Cc: Madhusudhan Chikkature; David Vrabel; Chris Ball; linux-
->> mmc@vger.kernel.org; linux-omap@vger.kernel.org; Adrian Hunter
->> Subject: Re: [PATCH 0/2] mmc: omap_hsmmc: support SDIO cards (#2)
->>
->> I can confirm exactly the same behavior on my hardware with this
->> version of the patch.
-> 
-> Steve,
-> 
-> Okay. Did the version you had in your tree worked? I just want to check if I
-> messed up something in my patch.
-
-The patch works if applied before commit 
-b417577d3b9bbb06a4ddc9aa955af9bd503f7242 (omap_hsmmc: improve interrupt 
-synchronisation). Apparently, changes in interrupt handling require major rework 
-  of the SDIO interrupt handling...
-
-> Regards,
-> Madhu
-> 
->> Steve
-> 
-
-
--- 
-Sincerely yours,
-Mike.
+I don't know how to handle this case. Just "CC" the Jaehoon is enough?
+>
+> Changes since v1:
+> - Separated to each topic
+>
+> NOTE :
+> - This patch depends on following.
+> =A0[PATCH 4/5] ARM: SAMSUNG : Add clock types into platform data
+>
+> =A0drivers/mmc/host/sdhci-s3c.c | =A0 62 ++++++++++++++++++++++++++++=
+++++++++++++++
+> =A01 files changed, 62 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3=
+c.c
+> index a7710f5..1720358 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -130,6 +130,15 @@ static unsigned int sdhci_s3c_consider_clock(str=
+uct sdhci_s3c *ourhost,
+> =A0 =A0 =A0 =A0if (!clksrc)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return UINT_MAX;
+>
+> + =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0* Clock divider's step is different as 1 from that o=
+f host controller
+> + =A0 =A0 =A0 =A0* when 'clk_type' is S3C_SDHCI_CLK_DIV_EXTERNAL.
+> + =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 if (ourhost->pdata->clk_type) {
+I'm still confusing the 'clk_type" word, if you assume it's just two
+values, 0, and 1 at this time. then compare it with CLK_DIV_EXTERNAL.
+or change it as clk_exteranl  it's more clear.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 rate =3D clk_round_rate(clksrc, wanted)=
+;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return wanted - rate;
+> + =A0 =A0 =A0 }
+> +
+> =A0 =A0 =A0 =A0rate =3D clk_get_rate(clksrc);
+>
+> =A0 =A0 =A0 =A0for (div =3D 1; div < 256; div *=3D 2) {
+> @@ -232,6 +241,42 @@ static unsigned int sdhci_s3c_get_min_clock(stru=
+ct sdhci_host *host)
+> =A0 =A0 =A0 =A0return min;
+> =A0}
+>
+> +/* sdhci_cmu_get_max_clk - callback to get maximum clock frequency.*=
+/
+> +static unsigned int sdhci_cmu_get_max_clock(struct sdhci_host *host)
+> +{
+> + =A0 =A0 =A0 struct sdhci_s3c *ourhost =3D to_s3c(host);
+> +
+> + =A0 =A0 =A0 return clk_round_rate(ourhost->clk_bus[ourhost->cur_clk=
+], UINT_MAX);
+> +}
+> +
+> +/* sdhci_cmu_get_min_clock - callback to get minimal supported clock=
+ value. */
+> +static unsigned int sdhci_cmu_get_min_clock(struct sdhci_host *host)
+> +{
+> + =A0 =A0 =A0 struct sdhci_s3c *ourhost =3D to_s3c(host);
+> +
+> + =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0* initial clock can be in the frequency range of
+> + =A0 =A0 =A0 =A0* 100KHz-400KHz, so we set it as max value.
+> + =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 return clk_round_rate(ourhost->clk_bus[ourhost->cur_clk=
+], 400000);
+> +}
+> +
+> +/* sdhci_cmu_set_clock - callback on clock change.*/
+> +static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned in=
+t clock)
+> +{
+> + =A0 =A0 =A0 struct sdhci_s3c *ourhost =3D to_s3c(host);
+> +
+> + =A0 =A0 =A0 /* don't bother if the clock is going off */
+> + =A0 =A0 =A0 if (clock =3D=3D 0)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+> +
+> + =A0 =A0 =A0 sdhci_s3c_set_clock(host, clock);
+> +
+> + =A0 =A0 =A0 clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock)=
+;
+> +
+> + =A0 =A0 =A0 host->clock =3D clock;
+> +}
+> +
+> =A0static struct sdhci_ops sdhci_s3c_ops =3D {
+> =A0 =A0 =A0 =A0.get_max_clock =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_get_ma=
+x_clk,
+> =A0 =A0 =A0 =A0.set_clock =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_se=
+t_clock,
+> @@ -361,6 +406,13 @@ static int __devinit sdhci_s3c_probe(struct plat=
+form_device *pdev)
+>
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clks++;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sc->clk_bus[ptr] =3D clk;
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* save current clock index to know w=
+hich clock bus
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* is used later in overriding functi=
+ons.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sc->cur_clk =3D ptr;
+> +
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_enable(clk);
+>
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_info(dev, "clock source %d: %s (%l=
+d Hz)\n",
+> @@ -427,6 +479,16 @@ static int __devinit sdhci_s3c_probe(struct plat=
+form_device *pdev)
+> =A0 =A0 =A0 =A0/* HSMMC on Samsung SoCs uses SDCLK as timeout clock *=
+/
+> =A0 =A0 =A0 =A0host->quirks |=3D SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
+>
+> + =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0* If controller does not have internal clock divider=
+,
+> + =A0 =A0 =A0 =A0* we can use overriding functions instead of default=
+=2E
+> + =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 if (pdata->clk_type) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_s3c_ops.set_clock =3D sdhci_cmu_s=
+et_clock;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_s3c_ops.get_min_clock =3D sdhci_c=
+mu_get_min_clock;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_s3c_ops.get_max_clock =3D sdhci_c=
+mu_get_max_clock;
+> + =A0 =A0 =A0 }
+> +
+> =A0 =A0 =A0 =A0/* It supports additional host capabilities if needed =
+*/
+> =A0 =A0 =A0 =A0if (pdata->host_caps)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->mmc->caps |=3D pdata->host_caps;
+> --
+> 1.6.2.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
+ng-soc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
