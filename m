@@ -1,59 +1,36 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH 0/6] SD/MMC driver for MX25/35/51
-Date: Mon, 11 Oct 2010 18:44:59 +0200
-Message-ID: <20101011164459.GB476@pengutronix.de>
-References: <1286806866-19258-1-git-send-email-w.sang@pengutronix.de> <20101011163255.GA21335@void.printf.net>
+Date: Mon, 11 Oct 2010 17:59:29 +0100
+Message-ID: <20101011165929.GB21335@void.printf.net>
+References: <1286806866-19258-1-git-send-email-w.sang@pengutronix.de> <20101011163255.GA21335@void.printf.net> <20101011164459.GB476@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="TakKZr9L6Hm6aLOc"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:34873 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755346Ab0JKQpA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Oct 2010 12:45:00 -0400
+Received: from void.printf.net ([89.145.121.20]:42409 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755486Ab0JKQ7a (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Oct 2010 12:59:30 -0400
 Content-Disposition: inline
-In-Reply-To: <20101011163255.GA21335@void.printf.net>
+In-Reply-To: <20101011164459.GB476@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
+To: Wolfram Sang <w.sang@pengutronix.de>
 Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Zhu Richard-R65037 <r65037@freescale.com>
 
+Hi Wolfram,
 
---TakKZr9L6Hm6aLOc
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Mon, Oct 11, 2010 at 06:44:59PM +0200, Wolfram Sang wrote:
+> > Mind fixing up the >80 char lines in the last two patches?  It's just:
+> 
+> Sigh, I don't think it will help the readability of the code, but if it can't
+> be helped...
 
+Okay.  Perhaps as a compromise, just reflow the two lines in 5/6 and
+leave the long prototypes in 6/6 as they are?  (For the second hunk
+in 5/6, you could just pull the start of the line back two cols.)
 
-> > Wolfram Sang (6):
-> >   mmc: sdhci-pltfm: Add structure for host-specific data
-> >   mmc: sdhci-pltfm: move .h-file into apropriate subdir
-> >   mmc: sdhci: introduce private get_ro
-> >   mmc: sdhci_pltfm: pass more data on custom init-call
-> >   mmc: sdhci-of-esdhc: factor out common stuff
-> >   mmc: sdhci-pltfm: add pltfm-driver for imx35/51
->=20
-> Mind fixing up the >80 char lines in the last two patches?  It's just:
+Thanks,
 
-Sigh, I don't think it will help the readability of the code, but if it can=
-'t
-be helped...
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---TakKZr9L6Hm6aLOc
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAkyzPwsACgkQD27XaX1/VRumWwCffTMS8NsgaUCUtIydoEbGGUSy
-oGQAnROkx1rg8UiKveX1BPokPkxQz6S1
-=vBTw
------END PGP SIGNATURE-----
-
---TakKZr9L6Hm6aLOc--
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
