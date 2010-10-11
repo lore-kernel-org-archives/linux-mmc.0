@@ -1,54 +1,59 @@
-From: Chris Ball <cjb@laptop.org>
+From: Wolfram Sang <w.sang@pengutronix.de>
 Subject: Re: [PATCH 0/6] SD/MMC driver for MX25/35/51
-Date: Mon, 11 Oct 2010 17:32:55 +0100
-Message-ID: <20101011163255.GA21335@void.printf.net>
-References: <1286806866-19258-1-git-send-email-w.sang@pengutronix.de>
+Date: Mon, 11 Oct 2010 18:44:59 +0200
+Message-ID: <20101011164459.GB476@pengutronix.de>
+References: <1286806866-19258-1-git-send-email-w.sang@pengutronix.de> <20101011163255.GA21335@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="TakKZr9L6Hm6aLOc"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:42250 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754712Ab0JKQc5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Oct 2010 12:32:57 -0400
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:34873 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755346Ab0JKQpA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Oct 2010 12:45:00 -0400
 Content-Disposition: inline
-In-Reply-To: <1286806866-19258-1-git-send-email-w.sang@pengutronix.de>
+In-Reply-To: <20101011163255.GA21335@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
+To: Chris Ball <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Zhu Richard-R65037 <r65037@freescale.com>
 
-Hi Wolfram,
 
-On Mon, Oct 11, 2010 at 04:21:00PM +0200, Wolfram Sang wrote:
-> Wolfram Sang (6):
->   mmc: sdhci-pltfm: Add structure for host-specific data
->   mmc: sdhci-pltfm: move .h-file into apropriate subdir
->   mmc: sdhci: introduce private get_ro
->   mmc: sdhci_pltfm: pass more data on custom init-call
->   mmc: sdhci-of-esdhc: factor out common stuff
->   mmc: sdhci-pltfm: add pltfm-driver for imx35/51
-
-Mind fixing up the >80 char lines in the last two patches?  It's just:
-
-WARNING: line over 80 characters
-#79: FILE: drivers/mmc/host/sdhci-esdhc.h:54:
-+	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
-
-WARNING: line over 80 characters
-#99: FILE: drivers/mmc/host/sdhci-esdhc.h:74:
-+		  (div << ESDHC_DIVIDER_SHIFT) | (pre_div << ESDHC_PREDIV_SHIFT));
+--TakKZr9L6Hm6aLOc
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
 
-WARNING: line over 80 characters
-#86: FILE: drivers/mmc/host/sdhci-esdhc-imx.c:24:
-+static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, int reg)
+> > Wolfram Sang (6):
+> >   mmc: sdhci-pltfm: Add structure for host-specific data
+> >   mmc: sdhci-pltfm: move .h-file into apropriate subdir
+> >   mmc: sdhci: introduce private get_ro
+> >   mmc: sdhci_pltfm: pass more data on custom init-call
+> >   mmc: sdhci-of-esdhc: factor out common stuff
+> >   mmc: sdhci-pltfm: add pltfm-driver for imx35/51
+>=20
+> Mind fixing up the >80 char lines in the last two patches?  It's just:
 
-WARNING: line over 80 characters
-#164: FILE: drivers/mmc/host/sdhci-esdhc-imx.c:102:
-+static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pdata)
+Sigh, I don't think it will help the readability of the code, but if it can=
+'t
+be helped...
 
-Thanks,
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+--TakKZr9L6Hm6aLOc
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkyzPwsACgkQD27XaX1/VRumWwCffTMS8NsgaUCUtIydoEbGGUSy
+oGQAnROkx1rg8UiKveX1BPokPkxQz6S1
+=vBTw
+-----END PGP SIGNATURE-----
+
+--TakKZr9L6Hm6aLOc--
