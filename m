@@ -1,124 +1,118 @@
-From: Sven Neumann <s.neumann@raumfeld.com>
-Subject: Re: 2.6.35.6 fails to suspend (pxa2xx-mci.0)
-Date: Mon, 11 Oct 2010 11:11:55 +0200
-Message-ID: <1286788315.3101.11.camel@sven>
-References: <1286177435.2140.5.camel@sven> <201010072323.05218.rjw@sisk.pl>
-	 <1286526197.4493.19.camel@sven> <201010082208.25767.rjw@sisk.pl>
-	 <AANLkTinSmPpswdHaZnP2rN688Wu1=-2Y2RBzC4+1qTpM@mail.gmail.com>
-	 <1286785900.3101.9.camel@sven>
-	 <AANLkTinf-8jeaV6GZ2+pQ2FztrXDv7QhEn3brPN3osBT@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: [PATCH 1/1] mmc: refine DDR support
+Date: Mon, 11 Oct 2010 12:43:50 +0300
+Message-ID: <20101011094350.27911.9006.sendpatchset@ahunter-work.research.nokia.com>
+References: <20101011094342.27911.94016.sendpatchset@ahunter-work.research.nokia.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from vwp2514.webpack.hosteurope.de ([87.230.42.24]:43476 "EHLO
-	vwp2514.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753409Ab0JKJMC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Oct 2010 05:12:02 -0400
-In-Reply-To: <AANLkTinf-8jeaV6GZ2+pQ2FztrXDv7QhEn3brPN3osBT@mail.gmail.com>
+Received: from mgw-sa02.ext.nokia.com ([147.243.1.48]:20198 "EHLO
+	mgw-sa02.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752494Ab0JKJn7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Oct 2010 05:43:59 -0400
+In-Reply-To: <20101011094342.27911.94016.sendpatchset@ahunter-work.research.nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>, libertas-dev@lists.infradead.org
-Cc: Chris Ball <cjb@laptop.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Maxim Levitsky <maximlevitsky@gmail.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@nokia.com>
 
-On Mon, 2010-10-11 at 10:45 +0200, Ohad Ben-Cohen wrote:
-> On Mon, Oct 11, 2010 at 10:31 AM, Sven Neumann <s.neumann@raumfeld.com> wrote:
-> > On Sat, 2010-10-09 at 03:07 +0200, Ohad Ben-Cohen wrote:
-> >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> >> index c94565d..515ff39 100644
-> >> --- a/drivers/mmc/core/core.c
-> >> +++ b/drivers/mmc/core/core.c
-> >> @@ -1682,6 +1682,19 @@ int mmc_suspend_host(struct mmc_host *host)
-> >>         if (host->bus_ops && !host->bus_dead) {
-> >>                 if (host->bus_ops->suspend)
-> >>                         err = host->bus_ops->suspend(host);
-> >> +               if (err == -ENOSYS || !host->bus_ops->resume) {
-> >> +                       /*
-> >> +                        * We simply "remove" the card in this case.
-> >> +                        * It will be redetected on resume.
-> >> +                        */
-> >> +                       if (host->bus_ops->remove)
-> >> +                               host->bus_ops->remove(host);
-> >> +                       mmc_claim_host(host);
-> >> +                       mmc_detach_bus(host);
-> >> +                       mmc_release_host(host);
-> >> +                       host->pm_flags = 0;
-> >> +                       err = 0;
-> >> +               }
-> >>         }
-> >>         mmc_bus_put(host);
-> >>
-> >> The reason I'm asking this is because it seems like commit
-> >> 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e "mmc: fix all hangs related
-> >> to mmc/sd card insert/removal during suspend/resume" has broken
-> >> suspending SDIO function drivers which don't have a suspend handler
-> >> (or do have one, but for some reason it returns -ENOSYS, like
-> >> libertas_sdio's does).
-> >
-> > Yes, this patch fixes the problem. Tested with v2.6.35-rc7. With above
-> > patch applied, suspend (and resume!) work again with and without
-> > pm_async=0.
-> >
-> > Thanks a lot to all of you for your help with this problem.
-> 
-> Thanks a lot for testing this Sven !
-> 
-> It is completely fixing the regression, but I must say the end result
-> is not very beautiful. We may eventually still use it, at least as an
-> interim solution, but I'd at least like to explain what's going on
-> here.
-> 
-> Patch 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e "mmc: fix all hangs
-> related to mmc/sd card insert/removal during suspend/resume" (which
-> was introduced in 2.6.36 and backported to stable kernels) moved the
-> card remove/insert mechanism out of the suspend/resume path and into
-> mmc_pm_notify (which uses pm notifiers; needed in order to let user
-> space sync the card upon removal).
-> 
-> It broke (part of) SDIO suspend because SDIO relied on
-> mmc_suspend_host() to remove the card, and squash the error, in case
-> -ENOSYS is returned from the bus suspend handler (mmc_sdio_suspend()
-> in this case).
-> 
-> mmc_sdio_suspend() is using this whenever one of the card's SDIO
-> function drivers does not have suspend/resume handlers - in that case
-> it is agreed to force removal of the entire card.
-> 
-> So the trivial thing to do here was to bring back that part of
-> mmc_suspend_host(), which was removed by
-> 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e.
-> 
-> The reason I said the end result is not too beautiful is because now
-> we have two places in the mmc suspend execution path that can remove
-> the card: mmc_pm_notify and mmc_suspend_host, where the second is
-> probably useful only for SDIO. The card re-insertion, btw, will only
-> take place in mmc_pm_notify, and be used by all scenarios (so it's
-> becoming asymmetric for SDIO).
-> 
-> To use mmc_pm_notify's card-removal code also for SDIO, we need to
-> check there if all the SDIO functions have suspend handlers. That
-> would probably make us add a new bus_ops handler (something like
-> host->bus_ops->remove_card_on_suspend ?).
-> 
-> It's starting to be a bit complicated though, and I'm not sure it
-> would make the code a lot more readable.
-> 
-> And, it would still not work for drivers like libertas sdio, which do
-> have a suspend hander, but sometimes let it return -ENOSYS, expecting
-> the MMC core to remove the card and squash the error. For those cases,
-> we still need the old card-removal logic in mmc_suspend_host().
-> 
-> Btw, it makes me wonder: does libertas_sdio really needs this
-> functionality ? When MMC_PM_KEEP_POWER is not needed, why can't
-> libertas_sdio just return 0 (and as a result the card will be powered
-> off, but not removed) ?
+>From f92528a3ebbff6e3f73fc2cb0d197ece9180324e Mon Sep 17 00:00:00 2001
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Date: Mon, 11 Oct 2010 12:30:25 +0300
+Subject: [PATCH] mmc: refine DDR support
 
-Perhaps we should bring up this question on the libertas-dev list. I am
-Cc'ing them in the hope that someone can answer this question.
+One flaw with DDR support is that MMC core does
+not inform the driver which DDR mode it has
+selected.  This patch expands the ios->ddr flag
+to do that.
 
+Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+---
+ drivers/mmc/core/core.c  |    7 ++++---
+ drivers/mmc/core/core.h  |    3 ++-
+ drivers/mmc/core/mmc.c   |    6 +++---
+ include/linux/mmc/host.h |    3 ++-
+ 4 files changed, 11 insertions(+), 8 deletions(-)
 
-Sven
-
-
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index c94565d..ce5f4a5 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -653,10 +653,11 @@ void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode)
+ /*
+  * Change data bus width and DDR mode of a host.
+  */
+-void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width, int ddr)
++void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
++			   unsigned int ddr)
+ {
+ 	host->ios.bus_width = width;
+-	host->ios.ddr = ddr ? MMC_DDR_MODE : MMC_SDR_MODE;
++	host->ios.ddr = ddr;
+ 	mmc_set_ios(host);
+ }
+ 
+@@ -665,7 +666,7 @@ void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width, int ddr)
+  */
+ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
+ {
+-	mmc_set_bus_width_ddr(host, width, 0);
++	mmc_set_bus_width_ddr(host, width, MMC_SDR_MODE);
+ }
+ 
+ /**
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 90e0ac7..77240cd 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -35,7 +35,8 @@ void mmc_set_chip_select(struct mmc_host *host, int mode);
+ void mmc_set_clock(struct mmc_host *host, unsigned int hz);
+ void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode);
+ void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
+-void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width, int ddr);
++void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
++			   unsigned int ddr);
+ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
+ void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+ 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 31a8bbe..995261f 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -375,7 +375,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	struct mmc_card *oldcard)
+ {
+ 	struct mmc_card *card;
+-	int err, ddr = 0;
++	int err, ddr = MMC_SDR_MODE;
+ 	u32 cid[4];
+ 	unsigned int max_dtr;
+ 
+@@ -523,10 +523,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	if (mmc_card_highspeed(card)) {
+ 		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_8V)
+ 			&& (host->caps & (MMC_CAP_1_8V_DDR)))
+-				ddr = 1;
++				ddr = MMC_1_8V_DDR_MODE;
+ 		else if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
+ 			&& (host->caps & (MMC_CAP_1_2V_DDR)))
+-				ddr = 1;
++				ddr = MMC_1_2V_DDR_MODE;
+ 	}
+ 
+ 	/*
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index c3ffad8..6d87f68 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -54,7 +54,8 @@ struct mmc_ios {
+ 	unsigned char	ddr;			/* dual data rate used */
+ 
+ #define MMC_SDR_MODE		0
+-#define MMC_DDR_MODE		1
++#define MMC_1_2V_DDR_MODE	1
++#define MMC_1_8V_DDR_MODE	2
+ };
+ 
+ struct mmc_host_ops {
+-- 
+1.7.0.4
 
