@@ -1,71 +1,46 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH] mmc: Add "ignore mmc pm notify" functionality
-Date: Tue, 12 Oct 2010 17:37:57 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1010121732370.2764@xanadu.home>
-References: <loom.20101011T202734-842@post.gmane.org>
- <alpine.LFD.2.00.1010112005300.2764@xanadu.home>
- <AANLkTi=QpZGrLutFBPRC29XuZ3oZATRPvD8+KaCFu0c7@mail.gmail.com>
- <alpine.LFD.2.00.1010112036540.2764@xanadu.home>
- <AANLkTimjgqMQdwWbJ0mZpsPO12k39Tbu4siCtT4JrECT@mail.gmail.com>
- <alpine.LFD.2.00.1010121341490.2764@xanadu.home>
- <AANLkTik016rDT1pu0U3RFRqj1XnhPK=U_t7WvzM=b+iP@mail.gmail.com>
- <alpine.LFD.2.00.1010121410150.2764@xanadu.home>
- <AANLkTi=K76xLSjMfYBn9VdhtaDjgP0DruPNhcAqZiq6D@mail.gmail.com>
- <alpine.LFD.2.00.1010121535460.2764@xanadu.home>
- <AANLkTi=ehRGN1QMD5pNFfChHUhp=oAbOueH9v+19GXcb@mail.gmail.com>
- <alpine.LFD.2.00.1010121630260.2764@xanadu.home>
- <AANLkTik1PPHgbvSEab6VQXUbCJrO91vgec6yb7+fWbBh@mail.gmail.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v5 2/2] sdhci-s3c: Add support no internal clock divider
+ in host controller
+Date: Tue, 12 Oct 2010 14:37:00 -0700
+Message-ID: <20101012143700.93ea1812.akpm@linux-foundation.org>
+References: <1286783400-7277-1-git-send-email-kgene.kim@samsung.com>
+	<AANLkTinC850pde5Diuz5U40RCDGR1DeQzTAfLUHWm0rB@mail.gmail.com>
+	<20101012025946.GA8534@void.printf.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="Boundary_(ID_mSRfEif4Y7+TxYfjqL5ycA)"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:9031 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751013Ab0JLVh7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Oct 2010 17:37:59 -0400
-Received: from xanadu.home ([66.130.28.92]) by VL-MO-MR004.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0LA700DTR5FAB110@VL-MO-MR004.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Tue, 12 Oct 2010 17:37:58 -0400 (EDT)
-In-reply-to: <AANLkTik1PPHgbvSEab6VQXUbCJrO91vgec6yb7+fWbBh@mail.gmail.com>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:50691 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751013Ab0JLViF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Oct 2010 17:38:05 -0400
+In-Reply-To: <20101012025946.GA8534@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dmitry Shmidt <dimitrysh@android.com>
-Cc: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Kyungmin Park <kmpark@infradead.org>, Kukjin Kim <kgene.kim@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, Jeongbae Seo <jeongbae.seo@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, 12 Oct 2010 03:59:46 +0100
+Chris Ball <cjb@laptop.org> wrote:
 
---Boundary_(ID_mSRfEif4Y7+TxYfjqL5ycA)
-Content-type: TEXT/PLAIN; charset=ISO-8859-1
-Content-transfer-encoding: 8BIT
-
-On Tue, 12 Oct 2010, Dmitry Shmidt wrote:
-
-> > Please tell us more about the problem you are trying to solve, and in
-> > what ways the current infrastructure is not achieving that goal.  Then
-> > we might be in a better position to propose suggestions.
-> >
-> > But selectively ignoring upper suspend requests certainly feels wrong to
-> > me.  If you need this, then the actual problem must be somewhere else.
-> >
-> > Nicolas
+> Hi Kyungmin,
 > 
-> Let's assume we are talking about device that is not a laptop - and it
-> is very power-consumption sensitive. Like smartphone...
-> So you want to go to suspend very aggressively.
-> And you want to keep connectivity. And you want to resume quickly -
-> else it is very easy to be in the situation where
-> you just suspending and resuming all the time.
-> So it doesn't make sense on every suspend/resume rescan for alive sdio
-> card. Makes sense ?
+> On Tue, Oct 12, 2010 at 11:53:35AM +0900, Kyungmin Park wrote:
+> > Hi Chris,
+> > 
+> > we make a conclusion use this patch. Can you merge it for 2.6.37?
+> > 
+> > Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
+> 
+> I don't feel that I can, because Ben Dooks is listed as the maintainer
+> for this driver and the patch does not have his ACK.
+> 
+> I don't know what to do about this; I've already tried asking Ben
+> whether he intends to continue maintaining sdhci-s3c, with no reply.
+> 
 
-Yes, but in this case the suspend methods are inappropriate when the 
-phone is in live usage.  They are meant to be used, say, when the phone 
-becomes unused and its flap is folded.  Otherwise, what is supposed to 
-happen when you actually want the SDIO card to be suspended if the 
-suspend method is cut out?
+People get busy and take vacations and change roles, etc.
 
+Sometimes, the best you can do is to make everyone aware of what's
+going on and then simply proceed on your own.
 
-Nicolas
-
---Boundary_(ID_mSRfEif4Y7+TxYfjqL5ycA)--
