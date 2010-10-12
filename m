@@ -1,61 +1,56 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH] mmc_rescan: reduce verbosity
-Date: Mon, 11 Oct 2010 23:00:30 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1010112257570.2764@xanadu.home>
-References: <1286833731-30567-1-git-send-email-eric@eukrea.com>
- <alpine.LFD.2.00.1010112007250.2764@xanadu.home>
- <20101012021236.GA8179@void.printf.net>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH v5 2/2] sdhci-s3c: Add support no internal clock	divider in
+ host controller
+Date: Tue, 12 Oct 2010 12:37:30 +0900
+Message-ID: <011101cb69be$ceda5930$6c8f0b90$%kim@samsung.com>
+References: <1286783400-7277-1-git-send-email-kgene.kim@samsung.com>
+ <AANLkTinC850pde5Diuz5U40RCDGR1DeQzTAfLUHWm0rB@mail.gmail.com>
+ <20101012025946.GA8534@void.printf.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="Boundary_(ID_HExJT2eOPDf/GGGczVp8Eg)"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:36192 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755470Ab0JLDAb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Oct 2010 23:00:31 -0400
-Received: from xanadu.home ([66.130.28.92]) by vl-mh-mrz21.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0LA500CI2PONPW80@vl-mh-mrz21.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Mon, 11 Oct 2010 23:00:23 -0400 (EDT)
-In-reply-to: <20101012021236.GA8179@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <20101012025946.GA8534@void.printf.net>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kmpark@infradead.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, akpm@linux-foundation.org, 'Jeongbae Seo' <jeongbae.seo@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: =?ISO-8859-15?Q?Eric_B=E9nard?= <eric@eukrea.com>, linux-mmc@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---Boundary_(ID_HExJT2eOPDf/GGGczVp8Eg)
-Content-type: TEXT/PLAIN; charset=iso-8859-1
-Content-transfer-encoding: 8BIT
-
-On Tue, 12 Oct 2010, Chris Ball wrote:
-
-> Hi,
+Chris Ball wrote:
 > 
-> On Mon, Oct 11, 2010 at 09:50:46PM -0400, Nicolas Pitre wrote:
-> > On Mon, 11 Oct 2010, Eric Bénard wrote:
-> > > since commit 820f2bcfdc32cd90061224c930cf670f961e12d1 mmc_rescan
-> > > includes a pr_info which prints 4 lines each second for hosts configured
-> > > with MMC_CAP_NEEDS_POLL. Tested on i.MX51's sdhci-esdhc.
-> > > This patch increase log level to debug (but maybe the right solution
-> > > would be to remove this log).
-> > 
-> > Indeed.  Flooding the log with debug messages is not much better.
+> Hi Kyungmin,
 > 
-> Other options include:
+> On Tue, Oct 12, 2010 at 11:53:35AM +0900, Kyungmin Park wrote:
+> > Hi Chris,
+> >
+> > we make a conclusion use this patch. Can you merge it for 2.6.37?
+> >
+> > Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
 > 
-> (a) Turn the message into a DBG().  (CONFIG_MMC_DEBUG=y)
-> (b) Turn the message into a DBG(), predicated on !MMC_CAP_NEEDS_POLL.
-> (c) Remove the message.
+> I don't feel that I can, because Ben Dooks is listed as the maintainer
+> for this driver and the patch does not have his ACK.
 > 
-> Any thoughts?  I'll go with (c) unless we agree on a better idea.
+> I don't know what to do about this; I've already tried asking Ben
+> whether he intends to continue maintaining sdhci-s3c, with no reply.
+> 
 
-My preference would be (a).  You don't lose the intended debugging aid 
-but it has to be turned on explicitly.  The people who might care 
-most probably have CONFIG_MMC_DEBUG=y already.
+Hi Chris,
 
+Yeah, you're right. The sdhci-s3c's maintainer is Ben Dooks. So if get a his
+ack, it's best. But if you're ok this, in my opinion, you can merge this.
+And as I'm a maintainer of Samsung stuff with Ben Dooks, I already merged
+regarding patches, such as sdhci-s3c platform handling into my tree for 37
+merge window.
+...
 
-Nicolas
+Ben, could you please check this patch?...this is ok to me for Samsung
+HSMMC...if any opinions, please kindly let us know.
 
---Boundary_(ID_HExJT2eOPDf/GGGczVp8Eg)--
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
