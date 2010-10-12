@@ -1,55 +1,61 @@
-From: Dmitry Shmidt <dimitrysh@android.com>
-Subject: Re: [PATCH] mmc: Add "ignore mmc pm notify" functionality
-Date: Tue, 12 Oct 2010 13:55:08 -0700
-Message-ID: <AANLkTik1PPHgbvSEab6VQXUbCJrO91vgec6yb7+fWbBh@mail.gmail.com>
-References: <loom.20101011T202734-842@post.gmane.org>
-	<alpine.LFD.2.00.1010112005300.2764@xanadu.home>
-	<AANLkTi=QpZGrLutFBPRC29XuZ3oZATRPvD8+KaCFu0c7@mail.gmail.com>
-	<alpine.LFD.2.00.1010112036540.2764@xanadu.home>
-	<AANLkTimjgqMQdwWbJ0mZpsPO12k39Tbu4siCtT4JrECT@mail.gmail.com>
-	<alpine.LFD.2.00.1010121341490.2764@xanadu.home>
-	<AANLkTik016rDT1pu0U3RFRqj1XnhPK=U_t7WvzM=b+iP@mail.gmail.com>
-	<alpine.LFD.2.00.1010121410150.2764@xanadu.home>
-	<AANLkTi=K76xLSjMfYBn9VdhtaDjgP0DruPNhcAqZiq6D@mail.gmail.com>
-	<alpine.LFD.2.00.1010121535460.2764@xanadu.home>
-	<AANLkTi=ehRGN1QMD5pNFfChHUhp=oAbOueH9v+19GXcb@mail.gmail.com>
-	<alpine.LFD.2.00.1010121630260.2764@xanadu.home>
+From: Hein_Tibosch <hein_tibosch@yahoo.es>
+Subject: Re: [PATCH v2] mmc_rescan: reduce verbosity
+Date: Wed, 13 Oct 2010 04:51:46 +0800
+Message-ID: <4CB4CA62.7040009@yahoo.es>
+References: <20101012060045.GA8252@pengutronix.de> <1286868577-7729-1-git-send-email-eric@eukrea.com> <20101012150850.GA18009@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:57730 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751555Ab0JLV6f convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Oct 2010 17:58:35 -0400
-Received: by gxk6 with SMTP id 6so694740gxk.19
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Oct 2010 14:58:34 -0700 (PDT)
-In-Reply-To: <alpine.LFD.2.00.1010121630260.2764@xanadu.home>
+Received: from bosmailout11.eigbox.net ([66.96.184.11]:53413 "EHLO
+	bosmailout11.eigbox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751574Ab0JLV7T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Oct 2010 17:59:19 -0400
+Received: from bosmailscan04.eigbox.net ([10.20.15.4])
+	by bosmailout11.eigbox.net with esmtp (Exim)
+	id 1P5lrM-00046C-4f
+	for linux-mmc@vger.kernel.org; Tue, 12 Oct 2010 16:54:08 -0400
+In-Reply-To: <20101012150850.GA18009@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nico@fluxnic.net>
-Cc: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: =?ISO-8859-1?Q?Eric_B=E9nard?= <eric@eukrea.com>, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>
 
-> Please tell us more about the problem you are trying to solve, and in
-> what ways the current infrastructure is not achieving that goal. =A0T=
-hen
-> we might be in a better position to propose suggestions.
+ On 12-10-2010 23:08, Chris Ball wrote:
+> Hi Eric,
 >
-> But selectively ignoring upper suspend requests certainly feels wrong=
- to
-> me. =A0If you need this, then the actual problem must be somewhere el=
-se.
->
-> Nicolas
+> On Tue, Oct 12, 2010 at 09:29:37AM +0200, Eric B=E9nard wrote:
+>> since commit 820f2bcfdc32cd90061224c930cf670f961e12d1 mmc_rescan
+>> includes a pr_info which prints 4 lines each second for hosts config=
+ured
+>> with MMC_CAP_NEEDS_POLL. Tested on i.MX51's sdhci-esdhc.
+>> This patch enable the log only if CONFIG_MMC_DEBUG is selected.
+>>
+>> Signed-off-by: Eric B=E9nard <eric@eukrea.com>
+>> ---
+>> v2 : enable log only if CONFIG_MMC_DEBUG is selected
+>> v1 : use pr_debug instead of pr_info
+>>  drivers/mmc/core/core.c |    3 ++-
+>>  1 files changed, 2 insertions(+), 1 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index c94565d..cda9d29 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1482,9 +1482,10 @@ void mmc_rescan(struct work_struct *work)
+>>  			mmc_release_host(host);
+>>  			goto out;
+>>  		}
+>> +#ifdef CONFIG_MMC_DEBUG
+>>  		pr_info("%s: %s: trying to init card at %u Hz\n",
+>>  			mmc_hostname(host), __func__, host->f_init);
+>> -
+>> +#endif
+I first wrote this line while testing the patch for "configurable ID fr=
+eq".
+I left it in thinking it would only trigger while booting or mounting a
+new card, not being aware of the MMC_CAP_NEEDS_POLL option.
+Sorry for that,
 
-Let's assume we are talking about device that is not a laptop - and it
-is very power-consumption sensitive. Like smartphone...
-So you want to go to suspend very aggressively.
-And you want to keep connectivity. And you want to resume quickly -
-else it is very easy to be in the situation where
-you just suspending and resuming all the time.
-So it doesn't make sense on every suspend/resume rescan for alive sdio
-card. Makes sense ?
-Thanks,
+Acked-by: Hein Tibosch <hein_tibosch@yahoo.es>
 
-Dmitry
