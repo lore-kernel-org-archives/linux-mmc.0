@@ -1,7 +1,7 @@
 From: Nicolas Pitre <nico@fluxnic.net>
 Subject: Re: [PATCH] mmc: Add "ignore mmc pm notify" functionality
-Date: Tue, 12 Oct 2010 16:33:24 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1010121630260.2764@xanadu.home>
+Date: Tue, 12 Oct 2010 17:37:57 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1010121732370.2764@xanadu.home>
 References: <loom.20101011T202734-842@post.gmane.org>
  <alpine.LFD.2.00.1010112005300.2764@xanadu.home>
  <AANLkTi=QpZGrLutFBPRC29XuZ3oZATRPvD8+KaCFu0c7@mail.gmail.com>
@@ -13,18 +13,20 @@ References: <loom.20101011T202734-842@post.gmane.org>
  <AANLkTi=K76xLSjMfYBn9VdhtaDjgP0DruPNhcAqZiq6D@mail.gmail.com>
  <alpine.LFD.2.00.1010121535460.2764@xanadu.home>
  <AANLkTi=ehRGN1QMD5pNFfChHUhp=oAbOueH9v+19GXcb@mail.gmail.com>
+ <alpine.LFD.2.00.1010121630260.2764@xanadu.home>
+ <AANLkTik1PPHgbvSEab6VQXUbCJrO91vgec6yb7+fWbBh@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="Boundary_(ID_6BA0mCKwby1q0b4Qr42pyA)"
+Content-Type: multipart/mixed; boundary="Boundary_(ID_mSRfEif4Y7+TxYfjqL5ycA)"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:44953 "EHLO
+Received: from relais.videotron.ca ([24.201.245.36]:9031 "EHLO
 	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754247Ab0JLUdZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Oct 2010 16:33:25 -0400
-Received: from xanadu.home ([66.130.28.92]) by vl-mh-mrz21.ip.videotron.ca
+	with ESMTP id S1751013Ab0JLVh7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Oct 2010 17:37:59 -0400
+Received: from xanadu.home ([66.130.28.92]) by VL-MO-MR004.ip.videotron.ca
  (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0LA7006NK2FHV6D0@vl-mh-mrz21.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Tue, 12 Oct 2010 16:33:17 -0400 (EDT)
-In-reply-to: <AANLkTi=ehRGN1QMD5pNFfChHUhp=oAbOueH9v+19GXcb@mail.gmail.com>
+ with ESMTP id <0LA700DTR5FAB110@VL-MO-MR004.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Tue, 12 Oct 2010 17:37:58 -0400 (EDT)
+In-reply-to: <AANLkTik1PPHgbvSEab6VQXUbCJrO91vgec6yb7+fWbBh@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Dmitry Shmidt <dimitrysh@android.com>
@@ -33,57 +35,37 @@ Cc: linux-mmc@vger.kernel.org
   This message is in MIME format.  The first part should be readable text,
   while the remaining parts are likely unreadable without MIME-aware tools.
 
---Boundary_(ID_6BA0mCKwby1q0b4Qr42pyA)
+--Boundary_(ID_mSRfEif4Y7+TxYfjqL5ycA)
 Content-type: TEXT/PLAIN; charset=ISO-8859-1
 Content-transfer-encoding: 8BIT
 
 On Tue, 12 Oct 2010, Dmitry Shmidt wrote:
 
-> On Tue, Oct 12, 2010 at 12:36 PM, Nicolas Pitre <nico@fluxnic.net> wrote:
-> > On Tue, 12 Oct 2010, Dmitry Shmidt wrote:
+> > Please tell us more about the problem you are trying to solve, and in
+> > what ways the current infrastructure is not achieving that goal.  Then
+> > we might be in a better position to propose suggestions.
 > >
-> >> On Tue, Oct 12, 2010 at 11:13 AM, Nicolas Pitre <nico@fluxnic.net> wrote:
-> >> > On Tue, 12 Oct 2010, Dmitry Shmidt wrote:
-> >> >
-> >> >> On Tue, Oct 12, 2010 at 10:50 AM, Nicolas Pitre <nico@fluxnic.net> wrote:
-> >> >> >> Imagine your device is keeping connection during suspend. You got packet -
-> >> >> >> wlan will wake application processor
-> >> >> >> through external irq line and linux starts resume. You can not find wlan
-> >> >> >> card again - it is too slow.
-> >> >> >
-> >> >> > What?  I'm not following you anymore.
-> >> >> >
-> >> >> > The Libertas firmware can be configured to filter incoming packets and
-> >> >> > only assert the IRQ signal only when a specific packet comes in, just
-> >> >> > like wake-on-LAN for Ethernet devices.
-> >> >>
-> >> >> This is not an issue of the ability to handle packets, but to handle
-> >> >> them quickly.
-> >> >> This is important for VoIP for example. If you need to recognize
-> >> >> device each time you are coming from suspend -
-> >> >> it is not a good idea sometimes.
-> >> >
-> >> > I simply don't see why you'd want to suspend while a VoIP session is
-> >> > active then.  Those methods you want to inhibit are meant for long term
-> >> > deep suspending, not for inter-packet power saving during a call.
-> >>
-> >> You are right - there are other ways to resolve some issues. I just
-> >> wanted to add another option
-> >> that will be kernel-related and not application-related.
+> > But selectively ignoring upper suspend requests certainly feels wrong to
+> > me.  If you need this, then the actual problem must be somewhere else.
 > >
-> > Even for a kernel related solution, I don't think what you propose is
-> > the right thing to do.
+> > Nicolas
 > 
-> I am open for suggestions.
+> Let's assume we are talking about device that is not a laptop - and it
+> is very power-consumption sensitive. Like smartphone...
+> So you want to go to suspend very aggressively.
+> And you want to keep connectivity. And you want to resume quickly -
+> else it is very easy to be in the situation where
+> you just suspending and resuming all the time.
+> So it doesn't make sense on every suspend/resume rescan for alive sdio
+> card. Makes sense ?
 
-Please tell us more about the problem you are trying to solve, and in 
-what ways the current infrastructure is not achieving that goal.  Then 
-we might be in a better position to propose suggestions.
-
-But selectively ignoring upper suspend requests certainly feels wrong to 
-me.  If you need this, then the actual problem must be somewhere else.
+Yes, but in this case the suspend methods are inappropriate when the 
+phone is in live usage.  They are meant to be used, say, when the phone 
+becomes unused and its flap is folded.  Otherwise, what is supposed to 
+happen when you actually want the SDIO card to be suspended if the 
+suspend method is cut out?
 
 
 Nicolas
 
---Boundary_(ID_6BA0mCKwby1q0b4Qr42pyA)--
+--Boundary_(ID_mSRfEif4Y7+TxYfjqL5ycA)--
