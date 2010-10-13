@@ -1,104 +1,48 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH] mmc: append a file to change host clock at run time
-Date: Wed, 13 Oct 2010 11:07:28 +0300
-Message-ID: <4CB568C0.9030906@nokia.com>
-References: <1286896642-27772-1-git-send-email-ext-andriy.shevchenko@nokia.com>
+From: =?ISO-8859-1?Q?Eric_B=E9nard?= <eric@eukrea.com>
+Subject: Re: [PATCH 0/6] SD/MMC driver for MX25/35/51
+Date: Wed, 13 Oct 2010 10:15:04 +0200
+Message-ID: <4CB56A88.2040101@eukrea.com>
+References: <1286806866-19258-1-git-send-email-w.sang@pengutronix.de> <87aamjxe00.fsf@lechat.rtp-net.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([192.100.122.233]:21798 "EHLO
-	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752901Ab0JMIJF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 04:09:05 -0400
-In-Reply-To: <1286896642-27772-1-git-send-email-ext-andriy.shevchenko@nokia.com>
+Received: from 68.mail-out.ovh.net ([91.121.185.69]:58481 "HELO
+	68.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1753078Ab0JMIPN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 04:15:13 -0400
+In-Reply-To: <87aamjxe00.fsf@lechat.rtp-net.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, "Shevchenko Andriy (EXT-Teleca/Helsinki)" <ext-andriy.shevchenko@nokia.com>
+To: "Arnaud Patard (Rtp)" <arnaud.patard@rtp-net.org>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, Zhu Richard-R65037 <r65037@freescale.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 12/10/10 18:17, Andy Shevchenko wrote:
-> For debugging power managment features there is quite convenient to have a
-> possibility to change MMC host controller clock at run time. This patch adds
-> 'clock' file under MMC host root of debugfs.
->
-> Usage as follows:
->
-> 	# cat /sys/kernel/debug/mmc0/clock
-> 	24000000
->
-> 	# echo "1000000000">  /sys/kernel/debug/mmc0/clock
-> 	# cat /sys/kernel/debug/mmc0/clock
-> 	52000000
->
-> 	# echo "48000000">  /sys/kernel/debug/mmc0/clock
-> 	# cat /sys/kernel/debug/mmc0/clock
-> 	48000000
->
-> The second piece of example shows limits which are applied accordingly to used
-> host driver.
->
-> Signed-off-by: Andy Shevchenko<ext-andriy.shevchenko@nokia.com>
-> ---
->   drivers/mmc/core/debugfs.c |   33 +++++++++++++++++++++++++++++++--
->   1 files changed, 31 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index 96d10f4..4ff109f 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -133,6 +133,31 @@ static const struct file_operations mmc_ios_fops = {
->   	.release	= single_release,
->   };
->
-> +static int mmc_clock_opt_get(void *data, u64 *val)
-> +{
-> +	struct mmc_host *host = data;
-> +
-> +	*val = host->ios.clock;
-> +
-> +	return 0;
-> +}
-> +
-> +static int mmc_clock_opt_set(void *data, u64 val)
-> +{
-> +	struct mmc_host *host = data;
-> +
-> +	/* We need this check due to input value is u64 */
-> +	if (val>  host->f_max)
-> +		return -EINVAL;
-> +
-> +	mmc_set_clock(host, (unsigned int) val);
+Hi,
 
-Probably need to claim the host here otherwise you might
-be changing the clock while a request is in progress
+Le 13/10/2010 00:06, Arnaud Patard (Rtp) a =E9crit :
+> Wolfram Sang<w.sang@pengutronix.de>  writes:
+>> Here is the hopefully final (famous last words) version of my patch =
+series. The
+>> first four are still updates/improvements for sdhci and sdhci-pltfm =
+and are of
+>> generic interest, too. Thanks to Eric for the tests on MX25/35. Look=
+ing forward
+>> to comments/applied-to-mmc-next-messages ;)
+>>
+>> The series is based on mmc-next as of today and also available at
+>>
+>> 	git://git.pengutronix.de/git/wsa/linux-2.6.git pcm043-mmc
+>
+> I've tried it on a efika mx (to2 version) and I've a problem with the
+> write-protect. It's on a GPIO and I don't see any way to configure th=
+e
+> esdhc-imx driver to use it. Any idea on how it should be done ?
+>
+it's actually not yet supported by the driver. There is a wp_gpio in
+struct esdhc_platform_data (arch/arm/plat-mxc/include/mach/esdhc.h)
+but it's not yet used by the driver.
+Also card detect using a GPIO is not implemented and card detect if=20
+actually done by polling.
 
-> +
-> +	return 0;
-> +}
-> +
-> +DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
-> +	"%llu\n");
-> +
->   void mmc_add_host_debugfs(struct mmc_host *host)
->   {
->   	struct dentry *root;
-> @@ -149,11 +174,15 @@ void mmc_add_host_debugfs(struct mmc_host *host)
->   	host->debugfs_root = root;
->
->   	if (!debugfs_create_file("ios", S_IRUSR, root, host,&mmc_ios_fops))
-> -		goto err_ios;
-> +		goto err_node;
-> +
-> +	if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
-> +			&mmc_clock_fops))
-> +		goto err_node;
->
->   	return;
->
-> -err_ios:
-> +err_node:
->   	debugfs_remove_recursive(root);
->   	host->debugfs_root = NULL;
->   err_root:
-
+Eric
