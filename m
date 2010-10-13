@@ -1,40 +1,100 @@
 From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH] mmc: append a file to change host clock at run time
-Date: Wed, 13 Oct 2010 11:15:20 +0300
-Message-ID: <AANLkTi=EKu8qLYtb-vAsM5WT+ppzhX0-hxrcv6cWeiDY@mail.gmail.com>
-References: <1286896642-27772-1-git-send-email-ext-andriy.shevchenko@nokia.com>
-	<4CB568C0.9030906@nokia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Subject: [PATCHv2] mmc: append a file to change host clock at run time
+Date: Wed, 13 Oct 2010 11:22:22 +0300
+Message-ID: <1286958142-22461-1-git-send-email-ext-andriy.shevchenko@nokia.com>
+References: <4CB568C0.9030906@nokia.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:52772 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753078Ab0JMIPV convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 04:15:21 -0400
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:64946 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753133Ab0JMIWf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 04:22:35 -0400
 In-Reply-To: <4CB568C0.9030906@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, "Shevchenko Andriy (EXT-Teleca/Helsinki)" <ext-andriy.shevchenko@nokia.com>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Adrian Hunter <adrian.hunter@nokia.com>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-On Wed, Oct 13, 2010 at 11:07 AM, Adrian Hunter <adrian.hunter@nokia.co=
-m> wrote:
->> +static int mmc_clock_opt_set(void *data, u64 val)
->> +{
->> + =C2=A0 =C2=A0 =C2=A0 struct mmc_host *host =3D data;
->> +
->> + =C2=A0 =C2=A0 =C2=A0 /* We need this check due to input value is u=
-64 */
->> + =C2=A0 =C2=A0 =C2=A0 if (val> =C2=A0host->f_max)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -EINVAL;
->> +
->> + =C2=A0 =C2=A0 =C2=A0 mmc_set_clock(host, (unsigned int) val);
->
-> Probably need to claim the host here otherwise you might
-> be changing the clock while a request is in progress
-Yeah, good catch. Will fix. Thanks.
+For debugging power managment features there is quite convenient to have a
+possibility to change MMC host controller clock at run time. This patch adds
+'clock' file under MMC host root of debugfs.
 
---=20
-With Best Regards,
-Andy Shevchenko
+Usage as follows:
+
+	# cat /sys/kernel/debug/mmc0/clock
+	52000000
+
+	# echo "1000000000" > /sys/kernel/debug/mmc0/clock
+	# cat /sys/kernel/debug/mmc0/clock
+	52000000
+
+	# echo "48000000" > /sys/kernel/debug/mmc0/clock
+	# cat /sys/kernel/debug/mmc0/clock
+	48000000
+
+The second piece of example shows limits which are applied accordingly to used
+host driver.
+
+Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+---
+ drivers/mmc/core/debugfs.c |   35 +++++++++++++++++++++++++++++++++--
+ 1 files changed, 33 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 96d10f4..9b6ec07 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -133,6 +133,33 @@ static const struct file_operations mmc_ios_fops = {
+ 	.release	= single_release,
+ };
+ 
++static int mmc_clock_opt_get(void *data, u64 *val)
++{
++	struct mmc_host *host = data;
++
++	*val = host->ios.clock;
++
++	return 0;
++}
++
++static int mmc_clock_opt_set(void *data, u64 val)
++{
++	struct mmc_host *host = data;
++
++	/* We need this check due to input value is u64 */
++	if (val > host->f_max)
++		return -EINVAL;
++
++	mmc_claim_host(host);
++	mmc_set_clock(host, (unsigned int) val);
++	mmc_release_host(host);
++
++	return 0;
++}
++
++DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
++	"%llu\n");
++
+ void mmc_add_host_debugfs(struct mmc_host *host)
+ {
+ 	struct dentry *root;
+@@ -149,11 +176,15 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+ 	host->debugfs_root = root;
+ 
+ 	if (!debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops))
+-		goto err_ios;
++		goto err_node;
++
++	if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
++			&mmc_clock_fops))
++		goto err_node;
+ 
+ 	return;
+ 
+-err_ios:
++err_node:
+ 	debugfs_remove_recursive(root);
+ 	host->debugfs_root = NULL;
+ err_root:
+-- 
+1.6.3.3
+
