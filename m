@@ -1,100 +1,58 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: [PATCHv2] mmc: append a file to change host clock at run time
-Date: Wed, 13 Oct 2010 11:22:22 +0300
-Message-ID: <1286958142-22461-1-git-send-email-ext-andriy.shevchenko@nokia.com>
-References: <4CB568C0.9030906@nokia.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 0/6] SD/MMC driver for MX25/35/51
+Date: Wed, 13 Oct 2010 10:29:30 +0200
+Message-ID: <20101013082930.GA11286@pengutronix.de>
+References: <1286806866-19258-1-git-send-email-w.sang@pengutronix.de>
+ <87aamjxe00.fsf@lechat.rtp-net.org>
+ <4CB56A88.2040101@eukrea.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="pf9I7BMVVzbSWLtt"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:64946 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753133Ab0JMIWf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 04:22:35 -0400
-In-Reply-To: <4CB568C0.9030906@nokia.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:54707 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753341Ab0JMI3g (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 04:29:36 -0400
+Content-Disposition: inline
+In-Reply-To: <4CB56A88.2040101@eukrea.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Adrian Hunter <adrian.hunter@nokia.com>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+To: Eric =?iso-8859-15?Q?B=E9nard?= <eric@eukrea.com>
+Cc: "Arnaud Patard (Rtp)" <arnaud.patard@rtp-net.org>, Zhu Richard-R65037 <r65037@freescale.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-For debugging power managment features there is quite convenient to have a
-possibility to change MMC host controller clock at run time. This patch adds
-'clock' file under MMC host root of debugfs.
 
-Usage as follows:
+--pf9I7BMVVzbSWLtt
+Content-Type: text/plain; charset=iso-8859-15
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-	# cat /sys/kernel/debug/mmc0/clock
-	52000000
+On Wed, Oct 13, 2010 at 10:15:04AM +0200, Eric B=E9nard wrote:
 
-	# echo "1000000000" > /sys/kernel/debug/mmc0/clock
-	# cat /sys/kernel/debug/mmc0/clock
-	52000000
+> >I've tried it on a efika mx (to2 version) and I've a problem with the
+> >write-protect. It's on a GPIO and I don't see any way to configure the
+> >esdhc-imx driver to use it. Any idea on how it should be done ?
+> >
+> it's actually not yet supported by the driver. There is a wp_gpio in
+> struct esdhc_platform_data (arch/arm/plat-mxc/include/mach/esdhc.h)
+> but it's not yet used by the driver.
 
-	# echo "48000000" > /sys/kernel/debug/mmc0/clock
-	# cat /sys/kernel/debug/mmc0/clock
-	48000000
+It's all prepared. I finally will have a look into it today.
 
-The second piece of example shows limits which are applied accordingly to used
-host driver.
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
-Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
----
- drivers/mmc/core/debugfs.c |   35 +++++++++++++++++++++++++++++++++--
- 1 files changed, 33 insertions(+), 2 deletions(-)
+--pf9I7BMVVzbSWLtt
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 96d10f4..9b6ec07 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -133,6 +133,33 @@ static const struct file_operations mmc_ios_fops = {
- 	.release	= single_release,
- };
- 
-+static int mmc_clock_opt_get(void *data, u64 *val)
-+{
-+	struct mmc_host *host = data;
-+
-+	*val = host->ios.clock;
-+
-+	return 0;
-+}
-+
-+static int mmc_clock_opt_set(void *data, u64 val)
-+{
-+	struct mmc_host *host = data;
-+
-+	/* We need this check due to input value is u64 */
-+	if (val > host->f_max)
-+		return -EINVAL;
-+
-+	mmc_claim_host(host);
-+	mmc_set_clock(host, (unsigned int) val);
-+	mmc_release_host(host);
-+
-+	return 0;
-+}
-+
-+DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
-+	"%llu\n");
-+
- void mmc_add_host_debugfs(struct mmc_host *host)
- {
- 	struct dentry *root;
-@@ -149,11 +176,15 @@ void mmc_add_host_debugfs(struct mmc_host *host)
- 	host->debugfs_root = root;
- 
- 	if (!debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops))
--		goto err_ios;
-+		goto err_node;
-+
-+	if (!debugfs_create_file("clock", S_IRUSR | S_IWUSR, root, host,
-+			&mmc_clock_fops))
-+		goto err_node;
- 
- 	return;
- 
--err_ios:
-+err_node:
- 	debugfs_remove_recursive(root);
- 	host->debugfs_root = NULL;
- err_root:
--- 
-1.6.3.3
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
 
+iEYEARECAAYFAky1beoACgkQD27XaX1/VRuOBgCfV/xC/XPqez+35/xAHNfo0V3X
+Sq4AnjOgzvCtGzAURHZ7R157Ktcmaz5H
+=eO4/
+-----END PGP SIGNATURE-----
+
+--pf9I7BMVVzbSWLtt--
