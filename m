@@ -1,83 +1,87 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH] sdio: fix suspend/resume regression
-Date: Wed, 13 Oct 2010 16:08:50 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1010131602590.2764@xanadu.home>
-References: <1286788315.3101.11.camel@sven>
- <1286955116-22793-1-git-send-email-ohad@wizery.com>
+From: Dmitry Shmidt <dimitrysh@android.com>
+Subject: Re: [PATCH] mmc: Add "ignore mmc pm notify" functionality
+Date: Wed, 13 Oct 2010 13:48:52 -0700
+Message-ID: <AANLkTik-9M3vW6CyscDQTAfxhyex4PEH_fkJEYXkv__B@mail.gmail.com>
+References: <loom.20101011T202734-842@post.gmane.org>
+	<alpine.LFD.2.00.1010112005300.2764@xanadu.home>
+	<AANLkTi=QpZGrLutFBPRC29XuZ3oZATRPvD8+KaCFu0c7@mail.gmail.com>
+	<alpine.LFD.2.00.1010112036540.2764@xanadu.home>
+	<AANLkTimjgqMQdwWbJ0mZpsPO12k39Tbu4siCtT4JrECT@mail.gmail.com>
+	<alpine.LFD.2.00.1010121341490.2764@xanadu.home>
+	<AANLkTik016rDT1pu0U3RFRqj1XnhPK=U_t7WvzM=b+iP@mail.gmail.com>
+	<alpine.LFD.2.00.1010121410150.2764@xanadu.home>
+	<AANLkTi=K76xLSjMfYBn9VdhtaDjgP0DruPNhcAqZiq6D@mail.gmail.com>
+	<alpine.LFD.2.00.1010121535460.2764@xanadu.home>
+	<AANLkTi=ehRGN1QMD5pNFfChHUhp=oAbOueH9v+19GXcb@mail.gmail.com>
+	<alpine.LFD.2.00.1010121630260.2764@xanadu.home>
+	<AANLkTik1PPHgbvSEab6VQXUbCJrO91vgec6yb7+fWbBh@mail.gmail.com>
+	<alpine.LFD.2.00.1010121732370.2764@xanadu.home>
+	<AANLkTi=-7ynxokzQjKJ+pOQuBoC5whGW2sg1FX3yrCLB@mail.gmail.com>
+	<alpine.LFD.2.00.1010122037040.2764@xanadu.home>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:30135 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751681Ab0JMUIv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 16:08:51 -0400
-In-reply-to: <1286955116-22793-1-git-send-email-ohad@wizery.com>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:44160 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752641Ab0JMUsx convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 16:48:53 -0400
+Received: by gxk6 with SMTP id 6so1168484gxk.19
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Oct 2010 13:48:52 -0700 (PDT)
+In-Reply-To: <alpine.LFD.2.00.1010122037040.2764@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org, Sven Neumann <s.neumann@raumfeld.com>, Chris Ball <cjb@laptop.org>, libertas-dev@lists.infradead.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Maxim Levitsky <maximlevitsky@gmail.com>, stable@kernel.org
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: linux-mmc@vger.kernel.org
 
-On Wed, 13 Oct 2010, Ohad Ben-Cohen wrote:
+On Tue, Oct 12, 2010 at 5:53 PM, Nicolas Pitre <nico@fluxnic.net> wrote=
+:
+>> > Yes, but in this case the suspend methods are inappropriate when t=
+he
+>> > phone is in live usage. =A0They are meant to be used, say, when th=
+e phone
+>> > becomes unused and its flap is folded. =A0Otherwise, what is suppo=
+sed to
+>> > happen when you actually want the SDIO card to be suspended if the
+>> > suspend method is cut out?
+>>
+>> "Flap is folded"... It is not the case for usual smartphones anymore=
+=2E :)
+>> Simple scenario - you are siting in chat, wait like 15 sec and your
+>> screen goes Off, after another 5 sec kernel gets suspend command and
+>> tries to suspend. And you are getting new message - you want to resu=
+me
+>> quickly and process this packet with no delay.
+>
+> OK... and how do you want to achieve that?
+>
+> Why isn't MMC_PM_KEEP_POWER suitable for this?
+It just allows to keep power for SDC controller. It doesn't change
+suspend/resume behavior from SDIO device
+perspective.
 
-> Fix SDIO suspend/resume regression introduced by
-> 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e "mmc: fix all hangs related to
-> mmc/sd card insert/removal during suspend/resume":
-> 
-> [ 5647.295953] PM: Syncing filesystems ... done.
-> [ 5647.318792] Freezing user space processes ... (elapsed 0.01 seconds) done.
-> [ 5647.337048] Freezing remaining freezable tasks ... (elapsed 0.01 seconds) done.
-> [ 5647.356915] Suspending console(s) (use no_console_suspend to debug)
-> [ 5647.366651] pm_op(): platform_pm_suspend+0x0/0x5c returns -38
-> [ 5647.366671] PM: Device pxa2xx-mci.0 failed to suspend: error -38
-> [ 5647.367082] PM: Some devices failed to suspend
-> 
-> 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e moved the card removal/insertion
-> mechanism out of MMC's suspend/resume path and into pm notifiers
-> (mmc_pm_notify), and that broke SDIO's expectation that mmc_suspend_host()
-> will remove the card, and squash the error, in case -ENOSYS is returned
-> from the bus suspend handler (mmc_sdio_suspend() in this case).
-> 
-> mmc_sdio_suspend() is using this whenever at least one of the card's SDIO
-> function drivers does not have suspend/resume handlers - in that case
-> it is agreed to force removal of the entire card.
-> 
-> This patch fixes this regression by trivially bringing back that part of
-> mmc_suspend_host(), which was removed by 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e.
-> 
-> Reported-and-tested-by: Sven Neumann <s.neumann@raumfeld.com>
-> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
-> Cc: Maxim Levitsky <maximlevitsky@gmail.com>
-> Cc: <stable@kernel.org>
+>
+>> Maybe what I am describing seems weird, but phone developers are
+>> fighting for every mA.
+>
+> How can you save power when the WIFI interface is not in use if you
+> disabled the suspend method with your patch?
+You see, we are not talking about wlan chip power. CPU is consuming in
+average more energy, so
+we are talking about overall savings or consumption and not
+specifically wlan. I mean, definitely
+turn off SDC controller and remove device will save power, BUT we will
+spend much more time on resume
+meaning - more power for CPU...
 
-Acked-by: Nicolas Pitre <nico@fluxnic.net>
+>
+>> And mmc card resume if usually deferred - to reduce tiem and save
+>> power, but this is a different issue.
+>
+> How much time are we talking about?
+The best thing is to defer resume till it will be needed.
 
-> --
-> 
-> It may still be desired to further clean this area up by using the card
-> removal mechanism in mmc_pm_notify() for SDIO as well.
-> 
-> To use mmc_pm_notify's card-removal code also for SDIO, we need it
-> to check if all the SDIO functions have suspend handlers. That
-> would probably make us add a new bus_ops handler (something like
-> host->bus_ops->remove_card_on_suspend ?).
-> 
-> It's starting to get a bit complicated though, and I'm not sure it
-> would make the code a lot more readable.
-> 
-> In addition, this would still not work for drivers like libertas sdio,
-> which do have a suspend handler, but sometimes let it return -ENOSYS,
-> expecting mmc_suspend_host() to remove the card and squash the error.
-> For those cases, we still need the old card-removal logic in mmc_suspend_host().
-> 
-> This brings up a question whether libertas_sdio really needs this
-> functionality; When MMC_PM_KEEP_POWER is not needed, can't it just return 0
-> (and as a result the card will be powered down, but not removed) ?
-
-It could, but then there has to be extra code in the resume handler to 
-cope with the fact that the card was powered off.  When the card is 
-simply removed, then redetecting and reinserting the card on resume is 
-trivial.
-
-
-Nicolas
+>
+> Nicolas
+>
+Dmitry
