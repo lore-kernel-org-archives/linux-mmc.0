@@ -1,38 +1,84 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH] sdio: fix suspend/resume regression
-Date: Wed, 13 Oct 2010 10:55:39 +0200
-Message-ID: <AANLkTimTSPU3pzDscG3TSaqs45Q=eGEaqiDmk9AYyuY_@mail.gmail.com>
-References: <1286788315.3101.11.camel@sven> <1286955116-22793-1-git-send-email-ohad@wizery.com>
- <AANLkTiki_Sky6pry+vWAoTtJ5ctVUpawAH6iRYV6L-+z@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@nokia.com>
+Subject: Re: mmc_core: question on mmc_do_erase function
+Date: Wed, 13 Oct 2010 11:57:46 +0300
+Message-ID: <4CB5748A.30004@nokia.com>
+References: <5D8008F58939784290FAB48F549751982DD7F00EDB@shsmsx502.ccr.corp.intel.com> <4CB5660A.7070808@nokia.com>  <5D8008F58939784290FAB48F549751982DD7F0139C@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:58024 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753050Ab0JMI4B (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 04:56:01 -0400
-In-Reply-To: <AANLkTiki_Sky6pry+vWAoTtJ5ctVUpawAH6iRYV6L-+z@mail.gmail.com>
+Received: from smtp.nokia.com ([192.100.122.233]:28211 "EHLO
+	mgw-mx06.nokia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753476Ab0JMI6D (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 04:58:03 -0400
+In-Reply-To: <5D8008F58939784290FAB48F549751982DD7F0139C@shsmsx502.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vitaly Wool <vitalywool@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, libertas-dev@lists.infradead.org, Nicolas Pitre <nico@fluxnic.net>, Sven Neumann <s.neumann@raumfeld.com>, linux-kernel@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Chris Ball <cjb@laptop.org>, stable@kernel.org, linux-arm-kernel@lists.infradead.org
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Gao, Yunpeng" <yunpeng.gao@intel.com>
 
-Hi Vitaly,
+On 13/10/10 11:35, Dong, Chuanxiao wrote:
+>> -----Original Message-----
+>> From: Adrian Hunter [mailto:adrian.hunter@nokia.com]
+>> Sent: Wednesday, October 13, 2010 3:56 PM
+>> To: Dong, Chuanxiao
+>> Cc: linux-mmc@vger.kernel.org; Gao, Yunpeng
+>> Subject: Re: mmc_core: question on mmc_do_erase function
+>>
+>> On 12/10/10 16:11, Dong, Chuanxiao wrote:
+>>> Hi adrian
+>>>
+>>> I got some questions about MMC driver erase function. Help you can
+>>> give me some suggestion. My host controller is a kind of SDHCI host
+>>> controller. And testing below code by using HD micro SD card.
+>>> +	memset(&cmd, 0, sizeof(struct mmc_command));
+>>> +	cmd.opcode = MMC_ERASE;
+>>> +	cmd.arg = arg;
+>>> +	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>>> +	mmc_set_erase_timeout(card,&cmd, arg, qty);
+>>> +	err = mmc_wait_for_cmd(card->host,&cmd, 0);
+>>> +	if (err) {
+>>> +		printk(KERN_ERR "mmc_erase: erase error %d, status %#x\n",
+>>> +		       err, cmd.resp[0]);
+>>> +		err = -EIO;
+>>> +		goto out;
+>>> +	}
+>>> As MMC 4.4 standard said, CMD38 need R1B response. So when SDHCI host
+>>> controller got a SDHCI_INT_RESPONSE interrupt, driver will ignore
+>>> this and keep on waiting for a SDHCI_INT_DATA_END interrupt to finish
+>>> MMC_ERASE command. Then I got problems....My host controller will got
+>>> a DATA_TIMEOUT interrupt if host controller cannot generate any
+>>> interrupt during its waiting time, unfortunately the max waiting time
+>>> for my SDHCI host controller is 5s.
+>>
+>> I don't know SDHCI.  Can you disable the timeout altogether and use a
+>> timer?
+>>
+> OK, thanks. If hardware can disable the timeout interrupt, I will try
+> use a timer. But if the host controllers cannot disable the their
+> timeout interrupt, what should they do?
 
-On Wed, Oct 13, 2010 at 9:54 AM, Vitaly Wool <vitalywool@gmail.com> wrote:
-> what about moving this logic to sdio bus_ops as this seems to be
-> completely specific to sdio right now?
+The block driver currently sets max_discard_sectors to UINT_MAX i.e.
+unlimited.  This could instead be based on a value from the driver
+in the same way that max_sectors is.  Refer to mmc_init_queue()
+in card/queue.c
 
-I actually prefer not to have any SDIO-specific logic of that kind at
-all, and instead, to use the logic we already have in mmc_pm_notify
-for all types of MMC buses.
+>
+>>> So if any ERASE operation need
+>>> more than 5s seconds to finish, my controller will not finish the
+>>> ERASE operation and only generate a DATA_TIMEOUT interrupt. The ERASE
+>>> will be failed. Another, MMC driver also has a 10s timer to keep
+>>> watch over the interrupt, if ERASE operation need more than 10s to
+>>> finish, this timer also can report a TIMEOUT error. I think
+>>> cmd->erase_timeout can help to set the timer expires, but how to deal
+>>> with this issue for SDHCI host controller? How about split ERASE
+>>> groups to be smaller ones?
+>>
+>> Where is the erase coming from?  A file system?  The discard ioctl?
+> Erase command comes from the discard ioctl.
+>
+>> It is possible to set a maximum size for the discard but it pays
+>> no attention to alignment, so you can get very sub-optimal erases.
+>
+>
 
-I resent this patch in the hope of stimulating this discussion, since
-it seemed to have stalled since the last message:
-
-http://lkml.org/lkml/2010/10/11/70
-
-It seems to work ;)
-
-Thanks,
-Ohad.
