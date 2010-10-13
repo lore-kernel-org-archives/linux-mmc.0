@@ -1,38 +1,47 @@
-From: Vitaly Wool <vitalywool@gmail.com>
-Subject: Re: [PATCH] sdio: fix suspend/resume regression
-Date: Wed, 13 Oct 2010 11:06:51 +0200
-Message-ID: <AANLkTi=oM6bzga1HffOxZ6_T7yjSNi5RTCZtTFd4r=7j@mail.gmail.com>
-References: <1286788315.3101.11.camel@sven>
-	<1286955116-22793-1-git-send-email-ohad@wizery.com>
-	<AANLkTiki_Sky6pry+vWAoTtJ5ctVUpawAH6iRYV6L-+z@mail.gmail.com>
-	<AANLkTimTSPU3pzDscG3TSaqs45Q=eGEaqiDmk9AYyuY_@mail.gmail.com>
+From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
+Subject: Re: [PATCH 0/6] SD/MMC driver for MX25/35/51
+Date: Wed, 13 Oct 2010 11:28:15 +0200
+Message-ID: <8762x6xx00.fsf@lechat.rtp-net.org>
+References: <1286806866-19258-1-git-send-email-w.sang@pengutronix.de>
+	<87aamjxe00.fsf@lechat.rtp-net.org> <4CB56A88.2040101@eukrea.com>
+	<20101013082930.GA11286@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:56711 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753203Ab0JMJGw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 05:06:52 -0400
-In-Reply-To: <AANLkTimTSPU3pzDscG3TSaqs45Q=eGEaqiDmk9AYyuY_@mail.gmail.com>
+Received: from lechat.rtp-net.org ([88.191.19.38]:40254 "EHLO
+	lechat.rtp-net.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753275Ab0JMJTD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 05:19:03 -0400
+In-Reply-To: <20101013082930.GA11286@pengutronix.de> (Wolfram Sang's message of "Wed\, 13 Oct 2010 10\:29\:30 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, libertas-dev@lists.infradead.org, Nicolas Pitre <nico@fluxnic.net>, Sven Neumann <s.neumann@raumfeld.com>, linux-kernel@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Chris Ball <cjb@laptop.org>, stable@kernel.org, linux-arm-kernel@lists.infradead.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Eric =?utf-8?Q?B=C3=A9nard?= <eric@eukrea.com>, Zhu Richard-R65037 <r65037@freescale.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, Oct 13, 2010 at 10:55 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> Hi Vitaly,
->
-> On Wed, Oct 13, 2010 at 9:54 AM, Vitaly Wool <vitalywool@gmail.com> wrote:
->> what about moving this logic to sdio bus_ops as this seems to be
->> completely specific to sdio right now?
->
-> I actually prefer not to have any SDIO-specific logic of that kind at
-> all, and instead, to use the logic we already have in mmc_pm_notify
-> for all types of MMC buses.
+Wolfram Sang <w.sang@pengutronix.de> writes:
 
-I don't really see the point. Instead of having SDIO-specific handling
-in the SDIO specific code, we're trying to address SDIO specific
-corner cases elsewhere. What's the rationale?
+Hi,
+
+> On Wed, Oct 13, 2010 at 10:15:04AM +0200, Eric B=C3=A9nard wrote:
+>
+>> >I've tried it on a efika mx (to2 version) and I've a problem with t=
+he
+>> >write-protect. It's on a GPIO and I don't see any way to configure =
+the
+>> >esdhc-imx driver to use it. Any idea on how it should be done ?
+>> >
+>> it's actually not yet supported by the driver. There is a wp_gpio in
+>> struct esdhc_platform_data (arch/arm/plat-mxc/include/mach/esdhc.h)
+>> but it's not yet used by the driver.
+>
+> It's all prepared. I finally will have a look into it today.
+
+oh, great. I was thinking about doing it but I'll wait for your patches
+then. I'm sure I need support for WP on GPIO but I may also need suppor=
+t
+for CD on GPIO so I'll be happy to test any patch you have.
+
 
 Thanks,
-   Vitaly
+Arnaud
