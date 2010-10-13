@@ -1,57 +1,67 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v2 5/6] mmc: sdhci-of-esdhc: factor out common stuff
-Date: Wed, 13 Oct 2010 12:31:43 +0200
-Message-ID: <20101013103143.GE11286@pengutronix.de>
-References: <1286806866-19258-6-git-send-email-w.sang@pengutronix.de>
- <1286817032-21219-1-git-send-email-w.sang@pengutronix.de>
- <20101011183300.GC21335@void.printf.net>
- <A88EF4D64D8447468743DC1503C0B6CA0D557E@zch01exm22.fsl.freescale.net>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH] sdio: fix suspend/resume regression
+Date: Wed, 13 Oct 2010 16:00:55 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1010131559580.2764@xanadu.home>
+References: <1286788315.3101.11.camel@sven>
+ <1286955116-22793-1-git-send-email-ohad@wizery.com>
+ <AANLkTiki_Sky6pry+vWAoTtJ5ctVUpawAH6iRYV6L-+z@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="FN+gV9K+162wdwwF"
+Content-Type: multipart/mixed; boundary="Boundary_(ID_kD9Z/OuJ5rQCTcIQggTcaQ)"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:34698 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750825Ab0JMKbp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 06:31:45 -0400
-Content-Disposition: inline
-In-Reply-To: <A88EF4D64D8447468743DC1503C0B6CA0D557E@zch01exm22.fsl.freescale.net>
+Received: from relais.videotron.ca ([24.201.245.36]:14614 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751788Ab0JMUA4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2010 16:00:56 -0400
+In-reply-to: <AANLkTiki_Sky6pry+vWAoTtJ5ctVUpawAH6iRYV6L-+z@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhu Richard-R65037 <r65037@freescale.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Vitaly Wool <vitalywool@gmail.com>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, libertas-dev@lists.infradead.org, Sven Neumann <s.neumann@raumfeld.com>, linux-kernel@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Chris Ball <cjb@laptop.org>, stable@kernel.org, linux-arm-kernel@lists.infradead.org
+
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--Boundary_(ID_kD9Z/OuJ5rQCTcIQggTcaQ)
+Content-type: TEXT/PLAIN; charset=ISO-8859-1
+Content-transfer-encoding: 8BIT
+
+On Wed, 13 Oct 2010, Vitaly Wool wrote:
+
+> Hi Ohad,
+> 
+> On Wed, Oct 13, 2010 at 9:31 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+> 
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index c94565d..515ff39 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -1682,6 +1682,19 @@ int mmc_suspend_host(struct mmc_host *host)
+> >        if (host->bus_ops && !host->bus_dead) {
+> >                if (host->bus_ops->suspend)
+> >                        err = host->bus_ops->suspend(host);
+> > +               if (err == -ENOSYS || !host->bus_ops->resume) {
+> > +                       /*
+> > +                        * We simply "remove" the card in this case.
+> > +                        * It will be redetected on resume.
+> > +                        */
+> > +                       if (host->bus_ops->remove)
+> > +                               host->bus_ops->remove(host);
+> > +                       mmc_claim_host(host);
+> > +                       mmc_detach_bus(host);
+> > +                       mmc_release_host(host);
+> > +                       host->pm_flags = 0;
+> > +                       err = 0;
+> > +               }
+> >        }
+> >        mmc_bus_put(host);
+> >
+> 
+> what about moving this logic to sdio bus_ops as this seems to be
+> completely specific to sdio right now?
+
+It doesn't have to.
 
 
---FN+gV9K+162wdwwF
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Nicolas
 
-On Wed, Oct 13, 2010 at 06:22:14PM +0800, Zhu Richard-R65037 wrote:
-
-> It's better that the mdelay(100) is replaced by some litter value such
-> as 10ms and so on,
->  since I encounter one bug ever when this values is set to 100. The
-> audio playback would
->  be noised by the sd/mmc insertion/extraction operations.
-
-Okay. Can you send a patch (as you seem to have a testcase)?
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---FN+gV9K+162wdwwF
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAky1io8ACgkQD27XaX1/VRv4RwCgkSVjLeTnyOsR/SGS28+hPBsX
-7i8AoK2HN5e56XW4sRzHjCIHLBO+rW3p
-=Rrex
------END PGP SIGNATURE-----
-
---FN+gV9K+162wdwwF--
+--Boundary_(ID_kD9Z/OuJ5rQCTcIQggTcaQ)--
