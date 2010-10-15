@@ -1,15 +1,15 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: [PATCH 5/6] mmc: sdhci-of-esdhc: factor out common stuff
-Date: Fri, 15 Oct 2010 12:21:03 +0200
-Message-ID: <1287138064-21385-6-git-send-email-w.sang@pengutronix.de>
+Subject: [PATCH 6/6] mmc: sdhci-pltfm: add pltfm-driver for imx35/51
+Date: Fri, 15 Oct 2010 12:21:04 +0200
+Message-ID: <1287138064-21385-7-git-send-email-w.sang@pengutronix.de>
 References: <1287138064-21385-1-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:58919 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:58922 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754937Ab0JOKVU (ORCPT
+	with ESMTP id S1755007Ab0JOKVU (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Oct 2010 06:21:20 -0400
 In-Reply-To: <1287138064-21385-1-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -17,34 +17,72 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Zhu Richard-R65037 <r65037@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>
 
-Put everything which can be shared between the OF and platform version
-of this driver into a local .h-file.
+This driver adds basic support for the esdhc-core found on e.g.
+imx35/51. It adds up to the pltfm-core.
 
 Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
+Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
 Tested-by : Eric B=C3=A9nard <eric@eukrea.com>
 ---
 
-No change since last version. 80-char/line changes confirmed.
+Change since last version:
 
- drivers/mmc/host/sdhci-esdhc.h    |   83 +++++++++++++++++++++++++++++=
+* Add Kconfig dependency for imx-archs
+
+ drivers/mmc/host/Kconfig           |   10 +++
+ drivers/mmc/host/Makefile          |    1 +
+ drivers/mmc/host/sdhci-esdhc-imx.c |  143 ++++++++++++++++++++++++++++=
 ++++++++
- drivers/mmc/host/sdhci-of-esdhc.c |   70 ++++-------------------------=
---
- 2 files changed, 91 insertions(+), 62 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-esdhc.h
+ drivers/mmc/host/sdhci-pltfm.c     |    3 +
+ drivers/mmc/host/sdhci-pltfm.h     |    1 +
+ 5 files changed, 158 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-esdhc-imx.c
 
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-es=
-dhc.h
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 0b7024a..c9c2520 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -130,6 +130,16 @@ config MMC_SDHCI_CNS3XXX
+=20
+ 	  If unsure, say N.
+=20
++config MMC_SDHCI_ESDHC_IMX
++	bool "SDHCI platform support for the Freescale eSDHC i.MX controller"
++	depends on MMC_SDHCI_PLTFM && (ARCH_MX25 || ARCH_MX35 || ARCH_MX5)
++	select MMC_SDHCI_IO_ACCESSORS
++	help
++	  This selects the Freescale eSDHC controller support on the platform
++	  bus, found on platforms like mx35/51.
++
++	  If unsure, say N.
++
+ config MMC_SDHCI_S3C
+ 	tristate "SDHCI support on Samsung S3C SoC"
+ 	depends on MMC_SDHCI && PLAT_SAMSUNG
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index eae5d62..6c4ac67 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -37,6 +37,7 @@ obj-$(CONFIG_MMC_USHC)		+=3D ushc.o
+ obj-$(CONFIG_MMC_SDHCI_PLTFM)			+=3D sdhci-platform.o
+ sdhci-platform-y				:=3D sdhci-pltfm.o
+ sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX)	+=3D sdhci-cns3xxx.o
++sdhci-platform-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+=3D sdhci-esdhc-imx.o
+=20
+ obj-$(CONFIG_MMC_SDHCI_OF)	+=3D sdhci-of.o
+ sdhci-of-y				:=3D sdhci-of-core.o
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhc=
+i-esdhc-imx.c
 new file mode 100644
-index 0000000..afaf1bc
+index 0000000..2e9cca1
 --- /dev/null
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -0,0 +1,83 @@
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -0,0 +1,143 @@
 +/*
-+ * Freescale eSDHC controller driver generics for OF and pltfm.
++ * Freescale eSDHC i.MX controller driver for the platform bus.
 + *
-+ * Copyright (c) 2007 Freescale Semiconductor, Inc.
-+ * Copyright (c) 2009 MontaVista Software, Inc.
++ * derived from the OF-version.
++ *
 + * Copyright (c) 2010 Pengutronix e.K.
 + *   Author: Wolfram Sang <w.sang@pengutronix.de>
 + *
@@ -55,193 +93,166 @@ y
 + * the Free Software Foundation; either version 2 of the License.
 + */
 +
-+#ifndef _DRIVERS_MMC_SDHCI_ESDHC_H
-+#define _DRIVERS_MMC_SDHCI_ESDHC_H
++#include <linux/io.h>
++#include <linux/delay.h>
++#include <linux/err.h>
++#include <linux/clk.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/sdhci-pltfm.h>
++#include "sdhci.h"
++#include "sdhci-pltfm.h"
++#include "sdhci-esdhc.h"
 +
-+/*
-+ * Ops and quirks for the Freescale eSDHC controller.
-+ */
-+
-+#define ESDHC_DEFAULT_QUIRKS	(SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
-+				SDHCI_QUIRK_BROKEN_CARD_DETECTION | \
-+				SDHCI_QUIRK_NO_BUSY_IRQ | \
-+				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
-+				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
-+				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
-+				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET | \
-+				SDHCI_QUIRK_NO_CARD_NO_RESET)
-+
-+#define ESDHC_SYSTEM_CONTROL	0x2c
-+#define ESDHC_CLOCK_MASK	0x0000fff0
-+#define ESDHC_PREDIV_SHIFT	8
-+#define ESDHC_DIVIDER_SHIFT	4
-+#define ESDHC_CLOCK_PEREN	0x00000004
-+#define ESDHC_CLOCK_HCKEN	0x00000002
-+#define ESDHC_CLOCK_IPGEN	0x00000001
-+
-+/* pltfm-specific */
-+#define ESDHC_HOST_CONTROL_LE	0x20
-+
-+/* OF-specific */
-+#define ESDHC_DMA_SYSCTL	0x40c
-+#define ESDHC_DMA_SNOOP		0x00000040
-+
-+#define ESDHC_HOST_CONTROL_RES	0x05
-+
-+static inline void esdhc_set_clock(struct sdhci_host *host, unsigned i=
-nt clock)
++static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, =
+u32 val, int reg)
 +{
-+	int pre_div =3D 2;
-+	int div =3D 1;
-+	u32 temp;
++	void __iomem *base =3D host->ioaddr + (reg & ~0x3);
++	u32 shift =3D (reg & 0x3) * 8;
 +
-+	temp =3D sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-+	temp &=3D ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
-+		| ESDHC_CLOCK_MASK);
-+	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-+
-+	if (clock =3D=3D 0)
-+		goto out;
-+
-+	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
-+		pre_div *=3D 2;
-+
-+	while (host->max_clk / pre_div / div > clock && div < 16)
-+		div++;
-+
-+	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
-+		clock, host->max_clk / pre_div / div);
-+
-+	pre_div >>=3D 1;
-+	div--;
-+
-+	temp =3D sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-+	temp |=3D (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
-+		| (div << ESDHC_DIVIDER_SHIFT)
-+		| (pre_div << ESDHC_PREDIV_SHIFT));
-+	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-+	mdelay(100);
-+out:
-+	host->clock =3D clock;
++	writel(((readl(base) & ~(mask << shift)) | (val << shift)), base);
 +}
 +
-+#endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci=
--of-esdhc.c
-index c8623de..277fcb9 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -18,23 +18,7 @@
- #include <linux/mmc/host.h>
- #include "sdhci-of.h"
- #include "sdhci.h"
--
--/*
-- * Ops and quirks for the Freescale eSDHC controller.
-- */
--
--#define ESDHC_DMA_SYSCTL	0x40c
--#define ESDHC_DMA_SNOOP		0x00000040
--
--#define ESDHC_SYSTEM_CONTROL	0x2c
--#define ESDHC_CLOCK_MASK	0x0000fff0
--#define ESDHC_PREDIV_SHIFT	8
--#define ESDHC_DIVIDER_SHIFT	4
--#define ESDHC_CLOCK_PEREN	0x00000004
--#define ESDHC_CLOCK_HCKEN	0x00000002
--#define ESDHC_CLOCK_IPGEN	0x00000001
--
--#define ESDHC_HOST_CONTROL_RES	0x05
-+#include "sdhci-esdhc.c"
-=20
- static u16 esdhc_readw(struct sdhci_host *host, int reg)
- {
-@@ -68,51 +52,20 @@ static void esdhc_writeb(struct sdhci_host *host, u=
-8 val, int reg)
- 	sdhci_be32bs_writeb(host, val, reg);
- }
-=20
--static void esdhc_set_clock(struct sdhci_host *host, unsigned int cloc=
-k)
--{
--	int pre_div =3D 2;
--	int div =3D 1;
--
--	clrbits32(host->ioaddr + ESDHC_SYSTEM_CONTROL, ESDHC_CLOCK_IPGEN |
--		  ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN | ESDHC_CLOCK_MASK);
--
--	if (clock =3D=3D 0)
--		goto out;
--
--	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
--		pre_div *=3D 2;
--
--	while (host->max_clk / pre_div / div > clock && div < 16)
--		div++;
--
--	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
--		clock, host->max_clk / pre_div / div);
--
--	pre_div >>=3D 1;
--	div--;
--
--	setbits32(host->ioaddr + ESDHC_SYSTEM_CONTROL, ESDHC_CLOCK_IPGEN |
--		  ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN |
--		  div << ESDHC_DIVIDER_SHIFT | pre_div << ESDHC_PREDIV_SHIFT);
--	mdelay(100);
--out:
--	host->clock =3D clock;
--}
--
--static int esdhc_enable_dma(struct sdhci_host *host)
-+static int esdhc_of_enable_dma(struct sdhci_host *host)
- {
- 	setbits32(host->ioaddr + ESDHC_DMA_SYSCTL, ESDHC_DMA_SNOOP);
- 	return 0;
- }
-=20
--static unsigned int esdhc_get_max_clock(struct sdhci_host *host)
-+static unsigned int esdhc_of_get_max_clock(struct sdhci_host *host)
- {
- 	struct sdhci_of_host *of_host =3D sdhci_priv(host);
-=20
- 	return of_host->clock;
- }
-=20
--static unsigned int esdhc_get_min_clock(struct sdhci_host *host)
-+static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
- {
- 	struct sdhci_of_host *of_host =3D sdhci_priv(host);
-=20
-@@ -120,14 +73,7 @@ static unsigned int esdhc_get_min_clock(struct sdhc=
-i_host *host)
- }
-=20
- struct sdhci_of_data sdhci_esdhc =3D {
--	.quirks =3D SDHCI_QUIRK_FORCE_BLK_SZ_2048 |
--		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
--		  SDHCI_QUIRK_NO_BUSY_IRQ |
--		  SDHCI_QUIRK_NONSTANDARD_CLOCK |
--		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
--		  SDHCI_QUIRK_PIO_NEEDS_DELAY |
--		  SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET |
--		  SDHCI_QUIRK_NO_CARD_NO_RESET,
-+	.quirks =3D ESDHC_DEFAULT_QUIRKS,
- 	.ops =3D {
- 		.read_l =3D sdhci_be32bs_readl,
- 		.read_w =3D esdhc_readw,
-@@ -136,8 +82,8 @@ struct sdhci_of_data sdhci_esdhc =3D {
- 		.write_w =3D esdhc_writew,
- 		.write_b =3D esdhc_writeb,
- 		.set_clock =3D esdhc_set_clock,
--		.enable_dma =3D esdhc_enable_dma,
--		.get_max_clock =3D esdhc_get_max_clock,
--		.get_min_clock =3D esdhc_get_min_clock,
-+		.enable_dma =3D esdhc_of_enable_dma,
-+		.get_max_clock =3D esdhc_of_get_max_clock,
-+		.get_min_clock =3D esdhc_of_get_min_clock,
- 	},
++static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
++{
++	if (unlikely(reg =3D=3D SDHCI_HOST_VERSION))
++		reg ^=3D 2;
++
++	return readw(host->ioaddr + reg);
++}
++
++static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
++{
++	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
++
++	switch (reg) {
++	case SDHCI_TRANSFER_MODE:
++		/*
++		 * Postpone this write, we must do it together with a
++		 * command write that is down below.
++		 */
++		pltfm_host->scratchpad =3D val;
++		return;
++	case SDHCI_COMMAND:
++		writel(val << 16 | pltfm_host->scratchpad,
++			host->ioaddr + SDHCI_TRANSFER_MODE);
++		return;
++	case SDHCI_BLOCK_SIZE:
++		val &=3D ~SDHCI_MAKE_BLKSZ(0x7, 0);
++		break;
++	}
++	esdhc_clrset_le(host, 0xffff, val, reg);
++}
++
++static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
++{
++	u32 new_val;
++
++	switch (reg) {
++	case SDHCI_POWER_CONTROL:
++		/*
++		 * FSL put some DMA bits here
++		 * If your board has a regulator, code should be here
++		 */
++		return;
++	case SDHCI_HOST_CONTROL:
++		/* FSL messed up here, so we can just keep those two */
++		new_val =3D val & (SDHCI_CTRL_LED | SDHCI_CTRL_4BITBUS);
++		/* ensure the endianess */
++		new_val |=3D ESDHC_HOST_CONTROL_LE;
++		/* DMA mode bits are shifted */
++		new_val |=3D (val & SDHCI_CTRL_DMA_MASK) << 5;
++
++		esdhc_clrset_le(host, 0xffff, new_val, reg);
++		return;
++	}
++	esdhc_clrset_le(host, 0xff, val, reg);
++}
++
++static unsigned int esdhc_pltfm_get_max_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
++
++	return clk_get_rate(pltfm_host->clk);
++}
++
++static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
++
++	return clk_get_rate(pltfm_host->clk) / 256 / 16;
++}
++
++static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltf=
+m_data *pdata)
++{
++	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
++	struct clk *clk;
++
++	clk =3D clk_get(mmc_dev(host->mmc), NULL);
++	if (IS_ERR(clk)) {
++		dev_err(mmc_dev(host->mmc), "clk err\n");
++		return PTR_ERR(clk);
++	}
++	clk_enable(clk);
++	pltfm_host->clk =3D clk;
++
++	return 0;
++}
++
++static void esdhc_pltfm_exit(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
++
++	clk_disable(pltfm_host->clk);
++	clk_put(pltfm_host->clk);
++}
++
++static struct sdhci_ops sdhci_esdhc_ops =3D {
++	.read_w =3D esdhc_readw_le,
++	.write_w =3D esdhc_writew_le,
++	.write_b =3D esdhc_writeb_le,
++	.set_clock =3D esdhc_set_clock,
++	.get_max_clock =3D esdhc_pltfm_get_max_clock,
++	.get_min_clock =3D esdhc_pltfm_get_min_clock,
++};
++
++struct sdhci_pltfm_data sdhci_esdhc_imx_pdata =3D {
++	.quirks =3D ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_NO_MULTIBLOCK
++			| SDHCI_QUIRK_BROKEN_ADMA,
++	/* ADMA has issues. Might be fixable */
++	/* NO_MULTIBLOCK might be MX35 only (Errata: ENGcm07207) */
++	.ops =3D &sdhci_esdhc_ops,
++	.init =3D esdhc_pltfm_init,
++	.exit =3D esdhc_pltfm_exit,
++};
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pl=
+tfm.c
+index 00e8a8a..0502f89 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -167,6 +167,9 @@ static const struct platform_device_id sdhci_pltfm_=
+ids[] =3D {
+ #ifdef CONFIG_MMC_SDHCI_CNS3XXX
+ 	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
+ #endif
++#ifdef CONFIG_MMC_SDHCI_ESDHC_IMX
++	{ "sdhci-esdhc-imx", (kernel_ulong_t)&sdhci_esdhc_imx_pdata },
++#endif
+ 	{ },
  };
+ MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pl=
+tfm.h
+index 562b929..c1bfe48 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -21,5 +21,6 @@ struct sdhci_pltfm_host {
+ };
+=20
+ extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
++extern struct sdhci_pltfm_data sdhci_esdhc_imx_pdata;
+=20
+ #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
 --=20
 1.7.1
 
