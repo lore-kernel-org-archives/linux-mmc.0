@@ -1,53 +1,58 @@
-From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-Subject: Re: [PATCH -next v2] mmc: fix cb710 kconfig dependency warning
-Date: Thu, 14 Oct 2010 21:50:14 +0200
-Message-ID: <20101014195014.GA28386@rere.qmqm.pl>
-References: <20101013181519.6ff00e10.randy.dunlap@oracle.com> <20101014090442.GA14454@rere.qmqm.pl> <4CB74C5F.4000905@oracle.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: [PATCH V5 0/6] SD/MMC driver for MX25/35/51
+Date: Fri, 15 Oct 2010 12:20:58 +0200
+Message-ID: <1287138064-21385-1-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rere.qmqm.pl ([89.167.52.164]:56279 "EHLO rere.qmqm.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755262Ab0JNTuQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 14 Oct 2010 15:50:16 -0400
-Content-Disposition: inline
-In-Reply-To: <4CB74C5F.4000905@oracle.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:58910 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754331Ab0JOKVT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Oct 2010 06:21:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Randy Dunlap <randy.dunlap@oracle.com>
-Cc: lkml <linux-kernel@vger.kernel.org>, akpm <akpm@linux-foundation.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Zhu Richard-R65037 <r65037@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>
 
-On Thu, Oct 14, 2010 at 11:30:55AM -0700, Randy Dunlap wrote:
-> Fix kconfig dependency warning to satisfy dependencies:
-> warning: (MMC_CB710 && MMC && PCI) selects CB710_CORE which has unmet=
- direct dependencies (MISC_DEVICES && PCI)
->=20
-> Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
-> Cc: <mirq-linux@rere.qmqm.pl>
-> ---
->  drivers/mmc/host/Kconfig |    1 +
->  1 file changed, 1 insertion(+)
->=20
-> --- linux-next-20101013.orig/drivers/mmc/host/Kconfig
-> +++ linux-next-20101013/drivers/mmc/host/Kconfig
-> @@ -395,6 +395,7 @@ config MMC_TMIO
->  config MMC_CB710
->  	tristate "ENE CB710 MMC/SD Interface support"
->  	depends on PCI
-> +	select MISC_DEVICES
->  	select CB710_CORE
->  	help
->  	  This option enables support for MMC/SD part of ENE CB710/720 Flas=
-h
+Another try. The driver seems to be known by now and used already :) Minor
+fixes only:
 
-Acked-by: Micha=B3 Miros=B3aw <mirq-linux@rere.qmqm.pl>
+3/6: Rename a variable (found while working on write-protect-pin support)
+5/6: Tested the checkpatch fixes
+6/6: Added Kconfig dependencies
 
-It would be better, thoughm if MISC_DEVICES was some kind of ghost conf=
-ig
-entry that needs no selecting or depending on as it is used only for us=
-ers
-convenience - config tree decoration maybe.
+The series is based on mmc-next as of today and also available at
 
-Best Regards,
-Micha=B3 Miros=B3aw
+	git://git.pengutronix.de/git/wsa/linux-2.6.git pcm043-mmc
+
+Thanks,
+
+   Wolfram
+
+Wolfram Sang (6):
+  mmc: sdhci-pltfm: Add structure for host-specific data
+  mmc: sdhci-pltfm: move .h-file into apropriate subdir
+  mmc: sdhci: introduce private get_ro
+  mmc: sdhci_pltfm: pass more data on custom init-call
+  mmc: sdhci-of-esdhc: factor out common stuff
+  mmc: sdhci-pltfm: add pltfm-driver for imx35/51
+
+ drivers/mmc/host/Kconfig           |   10 +++
+ drivers/mmc/host/Makefile          |    1 +
+ drivers/mmc/host/sdhci-cns3xxx.c   |    2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c |  143 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-esdhc.h     |   83 +++++++++++++++++++++
+ drivers/mmc/host/sdhci-of-esdhc.c  |   70 ++----------------
+ drivers/mmc/host/sdhci-pltfm.c     |   23 ++++--
+ drivers/mmc/host/sdhci-pltfm.h     |   10 ++-
+ drivers/mmc/host/sdhci.c           |   15 ++--
+ drivers/mmc/host/sdhci.h           |    1 +
+ include/linux/mmc/sdhci-pltfm.h    |   35 +++++++++
+ include/linux/sdhci-pltfm.h        |   35 ---------
+ 12 files changed, 316 insertions(+), 112 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-esdhc-imx.c
+ create mode 100644 drivers/mmc/host/sdhci-esdhc.h
+ create mode 100644 include/linux/mmc/sdhci-pltfm.h
+ delete mode 100644 include/linux/sdhci-pltfm.h
+
