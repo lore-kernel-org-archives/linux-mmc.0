@@ -1,29 +1,38 @@
-From: Mike Frysinger <vapier@gentoo.org>
-Subject: Re: [PATCH] MMC:mmc_spi: Recover from CRC error for SD read/write
- operation over SPI.
-Date: Sat, 16 Oct 2010 19:11:21 -0400
-Message-ID: <AANLkTikpjGaz9vuw8Sp+zGSiihmHHYyvxxS031xH3KMH@mail.gmail.com>
-References: <20100827203639.GT23079@void.printf.net> <1287263976-9578-1-git-send-email-vapier@gentoo.org>
- <20101016230129.GA21304@void.printf.net>
+From: John <john.maximus@gmail.com>
+Subject: cmd5 response
+Date: Sun, 17 Oct 2010 21:31:51 +0530
+Message-ID: <AANLkTim9d04B+gQRWDk93DKEJ62X5epLjchXOmv0WEo7@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:43862 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756769Ab0JPXLv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Oct 2010 19:11:51 -0400
-In-Reply-To: <20101016230129.GA21304@void.printf.net>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:35200 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757020Ab0JQQBw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Oct 2010 12:01:52 -0400
+Received: by qwa26 with SMTP id 26so21632qwa.19
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Oct 2010 09:01:51 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@nokia.com>, Andrew Morton <akpm@linux-foundation.org>, uclinux-dist-devel@blackfin.uclinux.org, linux-kernel@vger.kernel.org, David Brownell <dbrownell@users.sourceforge.net>, Grant Likely <grant.likely@secretlab.ca>, Anton Vorontsov <avorontsov@mvista.com>, Ernst Schwab <eschwab@online.de>, Sonic Zhang <sonic.zhang@analog.com>
+To: linux-mmc@vger.kernel.org
 
-On Sat, Oct 16, 2010 at 19:01, Chris Ball wrote:
-> On Sat, Oct 16, 2010 at 05:19:36PM -0400, Mike Frysinger wrote:
->> Andrew: we posted this months ago with no feedback ... could you pick it up ?
->
-> Sorry, my fault for missing this -- I've pushed it to mmc-next now,
-> with minor language changes.
+Hello,
+  I am trying to read Cis Data from u-boot.
 
-np.  thanks !
--mike
+  I find that the response to CMD5 is 0x90ff8000.
+  The Number of I/O functions is 1. I use a WLAN Card. Wlan cards
+usually have 2 functions. is something wrong?
+
+   How to de-code this response - Is OCR = 0x90FF? I read that the
+28,29,30 Bits are the I/O functions.
+
+   am i missing something?
+
+  I find that When i try to send CMD0 and CMD5 all over again. The
+card does not respond.
+
+  Are there any sample codes to read the vendor Info like Vendor ID?
+
+Thank you very much,
+
+Regards,
+John
