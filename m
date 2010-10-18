@@ -1,12 +1,14 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: [RFC 1/2] mmc: sdhci-esdhc-imx: add support for write protect on custom GPIO
-Date: Mon, 18 Oct 2010 13:57:56 +0200
-Message-ID: <1287403077-519-1-git-send-email-w.sang@pengutronix.de>
+Subject: [RFC 2/2] arm: mach-mx3: pcm043: add write-protect-pin for SDHC
+Date: Mon, 18 Oct 2010 13:57:57 +0200
+Message-ID: <1287403077-519-2-git-send-email-w.sang@pengutronix.de>
+References: <1287403077-519-1-git-send-email-w.sang@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:42659 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:42661 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750910Ab0JRL6H (ORCPT
+	with ESMTP id S1750985Ab0JRL6H (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Oct 2010 07:58:07 -0400
+In-Reply-To: <1287403077-519-1-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
@@ -14,75 +16,57 @@ Cc: linux-arm-kernel@lists.infradead.org, Wolfram Sang <w.sang@pengutronix.de>
 
 Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   23 +++++++++++++++++++++++
- 1 files changed, 23 insertions(+), 0 deletions(-)
+ arch/arm/mach-mx3/mach-pcm043.c |   10 +++++++++-
+ 1 files changed, 9 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 2e9cca1..afbac9a 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -15,8 +15,10 @@
- #include <linux/delay.h>
- #include <linux/err.h>
- #include <linux/clk.h>
-+#include <linux/gpio.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdhci-pltfm.h>
+diff --git a/arch/arm/mach-mx3/mach-pcm043.c b/arch/arm/mach-mx3/mach-pcm043.c
+index ddb0c5c..f5a9aa7 100644
+--- a/arch/arm/mach-mx3/mach-pcm043.c
++++ b/arch/arm/mach-mx3/mach-pcm043.c
+@@ -43,6 +43,7 @@
+ #include <mach/ulpi.h>
+ #include <mach/audmux.h>
+ #include <mach/ssi.h>
 +#include <mach/esdhc.h>
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-@@ -99,9 +101,21 @@ static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
- 	return clk_get_rate(pltfm_host->clk) / 256 / 16;
- }
  
-+static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
-+{
-+	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
-+
-+	if (boarddata)
-+		return gpio_get_value(boarddata->wp_gpio);
-+	else
-+		/* No GPIO -> always writable! */
-+		return 0;
-+}
-+
- static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pdata)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
- 	struct clk *clk;
- 
- 	clk = clk_get(mmc_dev(host->mmc), NULL);
-@@ -112,12 +126,20 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 	clk_enable(clk);
- 	pltfm_host->clk = clk;
- 
-+	if (boarddata) {
-+		gpio_request(boarddata->wp_gpio, "SD_WP");
-+		gpio_direction_input(boarddata->wp_gpio);
-+	}
- 	return 0;
- }
- 
- static void esdhc_pltfm_exit(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
-+
-+	if (boarddata)
-+		gpio_free(boarddata->wp_gpio);
- 
- 	clk_disable(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
-@@ -130,6 +152,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.set_clock = esdhc_set_clock,
- 	.get_max_clock = esdhc_pltfm_get_max_clock,
- 	.get_min_clock = esdhc_pltfm_get_min_clock,
-+	.get_ro = esdhc_pltfm_get_ro,
+ #include "devices-imx35.h"
+ #include "devices.h"
+@@ -224,12 +225,15 @@ static struct pad_desc pcm043_pads[] = {
+ 	MX35_PAD_SD1_DATA1__ESDHC1_DAT1,
+ 	MX35_PAD_SD1_DATA2__ESDHC1_DAT2,
+ 	MX35_PAD_SD1_DATA3__ESDHC1_DAT3,
++	MX35_PAD_ATA_DATA10__GPIO2_23, /* WriteProtect */
  };
  
- struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+ #define AC97_GPIO_TXFS	(1 * 32 + 31)
+ #define AC97_GPIO_TXD	(1 * 32 + 28)
+ #define AC97_GPIO_RESET	(1 * 32 + 0)
+ 
++#define SD1_GPIO_WP	(1 * 32 + 23)
++
+ static void pcm043_ac97_warm_reset(struct snd_ac97 *ac97)
+ {
+ 	struct pad_desc txfs_gpio = MX35_PAD_STXFS4__GPIO2_31;
+@@ -312,6 +316,10 @@ pcm037_nand_board_info __initconst = {
+ 	.hw_ecc = 1,
+ };
+ 
++static struct esdhc_platform_data sd1_pdata = {
++	.wp_gpio = SD1_GPIO_WP,
++};
++
+ #if defined(CONFIG_USB_ULPI)
+ static struct mxc_usbh_platform_data otg_pdata = {
+ 	.portsc	= MXC_EHCI_MODE_UTMI,
+@@ -396,7 +404,7 @@ static void __init mxc_board_init(void)
+ 		mxc_register_device(&mxc_otg_udc_device, &otg_device_pdata);
+ 
+ 	imx35_add_flexcan1(NULL);
+-	imx35_add_esdhc0(NULL);
++	imx35_add_esdhc0(&sd1_pdata);
+ }
+ 
+ static void __init pcm043_timer_init(void)
 -- 
 1.7.1
 
