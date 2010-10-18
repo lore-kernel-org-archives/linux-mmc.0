@@ -1,57 +1,38 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 5/6] mmc: sdhci-of-esdhc: factor out common stuff
-Date: Mon, 18 Oct 2010 17:13:55 +0100
-Message-ID: <20101018161355.GA21088@void.printf.net>
-References: <1287138064-21385-1-git-send-email-w.sang@pengutronix.de> <1287138064-21385-6-git-send-email-w.sang@pengutronix.de>
+Subject: Re: linux-next: build failure after merge of the final tree (mmc
+	tree related)
+Date: Mon, 18 Oct 2010 21:24:43 +0100
+Message-ID: <20101018202443.GA4503@void.printf.net>
+References: <20101018183540.2a7dfc8f.sfr@canb.auug.org.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:42658 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755237Ab0JRQN4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Oct 2010 12:13:56 -0400
+Return-path: <linux-next-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1287138064-21385-6-git-send-email-w.sang@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20101018183540.2a7dfc8f.sfr@canb.auug.org.au>
+Sender: linux-next-owner@vger.kernel.org
+To: Stephen Rothwell <sfr@canb.auug.org.au>
+Cc: linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Zhu Richard-R65037 <r65037@freescale.com>
 
-Hi Wolfram,
+Hi Stephen,
 
-On Fri, Oct 15, 2010 at 12:21:03PM +0200, Wolfram Sang wrote:
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index c8623de..277fcb9 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -18,23 +18,7 @@
->  #include <linux/mmc/host.h>
->  #include "sdhci-of.h"
->  #include "sdhci.h"
-> -
-> -/*
-> - * Ops and quirks for the Freescale eSDHC controller.
-> - */
-> -
-> -#define ESDHC_DMA_SYSCTL	0x40c
-> -#define ESDHC_DMA_SNOOP		0x00000040
-> -
-> -#define ESDHC_SYSTEM_CONTROL	0x2c
-> -#define ESDHC_CLOCK_MASK	0x0000fff0
-> -#define ESDHC_PREDIV_SHIFT	8
-> -#define ESDHC_DIVIDER_SHIFT	4
-> -#define ESDHC_CLOCK_PEREN	0x00000004
-> -#define ESDHC_CLOCK_HCKEN	0x00000002
-> -#define ESDHC_CLOCK_IPGEN	0x00000001
-> -
-> -#define ESDHC_HOST_CONTROL_RES	0x05
-> +#include "sdhci-esdhc.c"
+On Mon, Oct 18, 2010 at 06:35:40PM +1100, Stephen Rothwell wrote:
+> After merging the scsi-post-merge tree, today's linux-next build ()
+> failed like this:
+[...] 
+> Caused by commit a2fe088a5aaa51b54c018cf309cdc728d5f4e540 ("mmc:
+> sdhci-of-esdhc: factor out common stuff").
+> 
+> This was clearly never build tested ...
+> 
+> I have reverted that commit for today.
 
-Stephen reports a -next build failure after this patch.  Presumably this
-should be sdhci-esdhc.h?  It's confusing that no-one else hit this.
+Sorry about this -- you're right, my test compile missed this patch.
+I've pushed a tested fix now.
 
 Thanks,
 
+- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
