@@ -1,38 +1,51 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: linux-next: build failure after merge of the final tree (mmc
-	tree related)
-Date: Mon, 18 Oct 2010 21:24:43 +0100
-Message-ID: <20101018202443.GA4503@void.printf.net>
-References: <20101018183540.2a7dfc8f.sfr@canb.auug.org.au>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH V3 1/1]MMC: add support of sdhci-pxa driver
+Date: Tue, 19 Oct 2010 04:03:48 +0200
+Message-ID: <20101019020348.GB3485@pengutronix.de>
+References: <AANLkTikivxhU6Lzxe0Xn9r9hOSPLwuySRkTdGif4F_xo@mail.gmail.com> <20101018145833.GB22538@pengutronix.de> <AANLkTikNVu6UaCbm-335KNd4x2TX_SUz1FQHn6ODUX43@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-next-owner@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="hHWLQfXTYDoKhP50"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:45151 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755244Ab0JSCDv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Oct 2010 22:03:51 -0400
 Content-Disposition: inline
-In-Reply-To: <20101018183540.2a7dfc8f.sfr@canb.auug.org.au>
-Sender: linux-next-owner@vger.kernel.org
-To: Stephen Rothwell <sfr@canb.auug.org.au>
-Cc: linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org
+In-Reply-To: <AANLkTikNVu6UaCbm-335KNd4x2TX_SUz1FQHn6ODUX43@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, eric.y.miao@gmail.com, Matt Fleming <matt@console-pimps.org>, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-Hi Stephen,
 
-On Mon, Oct 18, 2010 at 06:35:40PM +1100, Stephen Rothwell wrote:
-> After merging the scsi-post-merge tree, today's linux-next build ()
-> failed like this:
-[...] 
-> Caused by commit a2fe088a5aaa51b54c018cf309cdc728d5f4e540 ("mmc:
-> sdhci-of-esdhc: factor out common stuff").
-> 
-> This was clearly never build tested ...
-> 
-> I have reverted that commit for today.
+--hHWLQfXTYDoKhP50
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Sorry about this -- you're right, my test compile missed this patch.
-I've pushed a tested fix now.
+> Currently platform driver can not support well of the requirement for
+> several device sharing one driver,  each one has different quirk,
+> different max_speed, and each device need some specific vectors.
+> We prefer using independent driver first.
 
-Thanks,
+What about a custom init-call reading out the platform_data?
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--hHWLQfXTYDoKhP50
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAky8/IQACgkQD27XaX1/VRuYkQCfaPUOLkDwZ+mCW9ztlGJnAy85
+S4oAn1MEL5UhA7bTi8+H5fcMSEEPmZwC
+=6MTu
+-----END PGP SIGNATURE-----
+
+--hHWLQfXTYDoKhP50--
