@@ -1,111 +1,82 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] MMC: fix compiler warnings in sh_mmcif.h
-Date: Wed, 20 Oct 2010 15:20:06 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1010201515500.29312@axis700.grange>
+From: kerstin jonsson <kerstin.jonsson@ericsson.com>
+Subject: mount rootfs over NFS problem
+Date: Wed, 20 Oct 2010 17:03:41 +0200
+Message-ID: <4CBF04CD.3090902@ericsson.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.22]:57912 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with SMTP
-	id S1751646Ab0JTNT5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Oct 2010 09:19:57 -0400
+Received: from mailgw9.se.ericsson.net ([193.180.251.57]:46129 "EHLO
+	mailgw9.se.ericsson.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753275Ab0JTPDn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Oct 2010 11:03:43 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Magnus Damm <damm@opensource.se>
 
-Replace meaningless in this context "extern inline" function types with "static
-inline", which also fixes compiler warnings like
+Hi,
 
-linux-2.6/include/linux/mmc/sh_mmcif.h: In function 'sh_mmcif_writel':
-linux-2.6/include/linux/mmc/sh_mmcif.h:68: warning: 'outer_sync' is static \
-but used in inline function 'sh_mmcif_writel' which is not static
+I have a powerpc based platform and would like to have access to all the 
+latest
+RapiodIO patches included in the mm-tree, but I fail to mount my rootfs 
+over nfs using the latest mm-kernel.
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- include/linux/mmc/sh_mmcif.h |   18 +++++++++---------
- 1 files changed, 9 insertions(+), 9 deletions(-)
+I can see that the code handling nfs mount in the mm-tree differs 
+significantly from the  code in the kernel I used earlier (where nfs 
+mount of rootfs works for me - linux-2.6 currently 2.6.36-rc8).
 
-diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/mmc/sh_mmcif.h
-index d4a2ebb..86b892e 100644
---- a/include/linux/mmc/sh_mmcif.h
-+++ b/include/linux/mmc/sh_mmcif.h
-@@ -58,19 +58,19 @@ struct sh_mmcif_plat_data {
- #define MMCIF_CE_HOST_STS2	0x0000004C
- #define MMCIF_CE_VERSION	0x0000007C
- 
--extern inline u32 sh_mmcif_readl(void __iomem *addr, int reg)
-+static inline u32 sh_mmcif_readl(void __iomem *addr, int reg)
- {
- 	return readl(addr + reg);
- }
- 
--extern inline void sh_mmcif_writel(void __iomem *addr, int reg, u32 val)
-+static inline void sh_mmcif_writel(void __iomem *addr, int reg, u32 val)
- {
- 	writel(val, addr + reg);
- }
- 
- #define SH_MMCIF_BBS 512 /* boot block size */
- 
--extern inline void sh_mmcif_boot_cmd_send(void __iomem *base,
-+static inline void sh_mmcif_boot_cmd_send(void __iomem *base,
- 					  unsigned long cmd, unsigned long arg)
- {
- 	sh_mmcif_writel(base, MMCIF_CE_INT, 0);
-@@ -78,7 +78,7 @@ extern inline void sh_mmcif_boot_cmd_send(void __iomem *base,
- 	sh_mmcif_writel(base, MMCIF_CE_CMD_SET, cmd);
- }
- 
--extern inline int sh_mmcif_boot_cmd_poll(void __iomem *base, unsigned long mask)
-+static inline int sh_mmcif_boot_cmd_poll(void __iomem *base, unsigned long mask)
- {
- 	unsigned long tmp;
- 	int cnt;
-@@ -94,14 +94,14 @@ extern inline int sh_mmcif_boot_cmd_poll(void __iomem *base, unsigned long mask)
- 	return -1;
- }
- 
--extern inline int sh_mmcif_boot_cmd(void __iomem *base,
-+static inline int sh_mmcif_boot_cmd(void __iomem *base,
- 				    unsigned long cmd, unsigned long arg)
- {
- 	sh_mmcif_boot_cmd_send(base, cmd, arg);
- 	return sh_mmcif_boot_cmd_poll(base, 0x00010000);
- }
- 
--extern inline int sh_mmcif_boot_do_read_single(void __iomem *base,
-+static inline int sh_mmcif_boot_do_read_single(void __iomem *base,
- 					       unsigned int block_nr,
- 					       unsigned long *buf)
- {
-@@ -124,7 +124,7 @@ extern inline int sh_mmcif_boot_do_read_single(void __iomem *base,
- 	return 0;
- }
- 
--extern inline int sh_mmcif_boot_do_read(void __iomem *base,
-+static inline int sh_mmcif_boot_do_read(void __iomem *base,
- 					unsigned long first_block,
- 					unsigned long nr_blocks,
- 					void *buf)
-@@ -142,7 +142,7 @@ extern inline int sh_mmcif_boot_do_read(void __iomem *base,
- 	return ret;
- }
- 
--extern inline void sh_mmcif_boot_init(void __iomem *base)
-+static inline void sh_mmcif_boot_init(void __iomem *base)
- {
- 	unsigned long tmp;
- 
-@@ -176,7 +176,7 @@ extern inline void sh_mmcif_boot_init(void __iomem *base)
- 	sh_mmcif_boot_cmd(base, 0x03400040, 0x00010000);
- }
- 
--extern inline void sh_mmcif_boot_slurp(void __iomem *base,
-+static inline void sh_mmcif_boot_slurp(void __iomem *base,
- 				       unsigned char *buf,
- 				       unsigned long no_bytes)
- {
--- 
-1.7.1
+I'm using the same default_config options as input to the mm-build as I 
+do for 2.6.36-rc8 and the same kernel cmdline options, the console log 
+from the boot show no significant deviation from the two kernels, not 
+until I reach the point init init/main.c:kernel_init() where 
+/dev/console is supposed to be opened. If it is helpfull in any way, the 
+nfs mount attempt fails at:
+
+line 2131 of fs/namespace.c:do_mount()
+
+I guess that there is something that I need to do different to make this 
+happen in the mm-tree - possibly something my platform init code should 
+have prepared or some extra kernel config option(s) that  is/are needed 
+when building the mm kernel.
+
+Please advice!
+Kerstin
+
+Kernel command line: root=/dev/nfs rw nfsroot=192.168.0.201:/srv/nfs 
+ip=192.168.0.142:192.168.0.201:192.168.0.1:255.255.255.0:unknown:eth0:off console=ttyS0,115200 
+riohdid=0 nfsrootdebug
+
+console printout from mm-kernel:
+...
+IP-Config: Complete:
+      device=eth0, addr=192.168.0.142, mask=255.255.255.0, gw=192.168.0.1,
+      host=unknown, domain=, nis-domain=(none),
+      bootserver=192.168.0.201, rootserver=192.168.0.201, rootpath=
+Warning: unable to open an initial console.
+Root-NFS: nfsroot=/srv/nfs
+VFS: Unable to mount root fs via NFS, trying floppy.
+...
+
+console printout from 2.6.36-rc8:
+
+...
+IP-Config: Complete:
+      device=eth0, addr=192.168.0.142, mask=255.255.255.0, gw=192.168.0.1,
+      host=unknown, domain=, nis-domain=(none),
+      bootserver=192.168.0.201, rootserver=192.168.0.201, rootpath=
+Root-NFS: Mounting /srv/nfs on server 192.168.0.201 as root
+Root-NFS:     rsize = 4096, wsize = 4096, timeo = 0, retrans = 0
+Root-NFS:     acreg (min,max) = (3,60), acdir (min,max) = (30,60)
+Root-NFS:     nfsd port = -1, mountd port = 0, flags = 00000200
+Looking up port of RPC 100003/2 on 192.168.0.201
+PHY: mdio@fa724520:09 - Link is Up - 100/Full
+Root-NFS: Portmapper on server returned 2049 as nfsd port
+Looking up port of RPC 100005/1 on 192.168.0.201
+Root-NFS: mountd port is 34144
+VFS: Mounted root (nfs filesystem) on device 0:12.
+...
+
+
+
+
 
