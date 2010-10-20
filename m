@@ -1,49 +1,56 @@
-From: Baruch Siach <baruch@tkos.co.il>
-Subject: Re: [PATCH 1/2] Add the GPIO Write Protection Solution on i.MX51
- BBG board
-Date: Wed, 20 Oct 2010 12:24:13 +0200
-Message-ID: <20101020102413.GE2691@jasper.tkos.co.il>
-References: <1287568828-22563-1-git-send-email-r65037@freescale.com>
- <1287568828-22563-2-git-send-email-r65037@freescale.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] sdhci: sdhci_dumpregs: allow private information to be
+	dumped on error
+Date: Wed, 20 Oct 2010 13:16:21 +0200
+Message-ID: <20101020111621.GA10261@pengutronix.de>
+References: <CF727CE6-DAE4-4B18-9BAE-BF373D6DF990@marvell.com> <20101019194724.GC31336@pengutronix.de> <20101019200445.GB28424@void.printf.net> <16B90FE9-6FB8-4FCA-867E-CE40EBF26223@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="tKW2IUtsqtDRztdT"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tango.tkos.co.il ([62.219.50.35]:43159 "EHLO tango.tkos.co.il"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752855Ab0JTKZL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Oct 2010 06:25:11 -0400
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:58956 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751169Ab0JTLQZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Oct 2010 07:16:25 -0400
 Content-Disposition: inline
-In-Reply-To: <1287568828-22563-2-git-send-email-r65037@freescale.com>
+In-Reply-To: <16B90FE9-6FB8-4FCA-867E-CE40EBF26223@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Richard Zhu <r65037@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, eric@eukrea.com, w.sang@pengutronix.de
+To: Philip Rakity <prakity@marvell.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Richard,
 
-On Wed, Oct 20, 2010 at 06:00:27PM +0800, Richard Zhu wrote:
-> ---
->  arch/arm/mach-mx5/board-mx51_babbage.c      |   16 ++++++++++++++--
->  arch/arm/plat-mxc/include/mach/iomux-mx51.h |    8 +++++---
->  2 files changed, 19 insertions(+), 5 deletions(-)
-> 
-> diff --git a/arch/arm/mach-mx5/board-mx51_babbage.c b/arch/arm/mach-mx5/board-mx51_babbage.c
-> index 476bfe4..5a69cda 100644
-> --- a/arch/arm/mach-mx5/board-mx51_babbage.c
-> +++ b/arch/arm/mach-mx5/board-mx51_babbage.c
-> @@ -34,6 +34,8 @@
->  #include "devices-imx51.h"
->  #include "devices.h"
->  
-> +#define BABBAGE_SDHCI1_WP	(0*32 + 1)	/* GPIO_1_1 */
-> +#define BABBAGE_SDHCI2_WP	(0*32 + 5)	/* GPIO_1_5 */
+--tKW2IUtsqtDRztdT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Please mention in the subject of this patch that this "write protection" is 
-related to the SDHCI device.
+Hi Philip,
 
-baruch
+> sdhci_dumpregs is used to debug the hardware/driver so I do not see an issue
+> here.  The register info is not useful to a normal linux user.   We can fine
+> tune the timing on the controller so knowing the settings is useful if there
+> are CRC errors.
 
--- 
-                                                     ~. .~   Tk Open Systems
-=}------------------------------------------------ooO--U--Ooo------------{=
-   - baruch@tkos.co.il - tel: +972.2.679.5364, http://www.tkos.co.il -
+I'd prefer to keep such changes local because they are not needed for a wider
+audience. (And adding something to dump_regs is trivial enough.)
+
+Nevertheless, thanks for the suggestion!
+
+Best regards,
+
+   Wolfram
+
+--tKW2IUtsqtDRztdT
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAky+z4UACgkQD27XaX1/VRuOmQCfSlY7dsd1T7YrKIeD/5aiaxI7
+rv4AnjMjymxEKR67408ytcmMAoOakRa3
+=lDsB
+-----END PGP SIGNATURE-----
+
+--tKW2IUtsqtDRztdT--
