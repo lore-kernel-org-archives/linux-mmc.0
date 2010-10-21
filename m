@@ -1,62 +1,88 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V3 1/1]MMC: add support of sdhci-pxa driver
-Date: Thu, 21 Oct 2010 15:52:49 +0100
-Message-ID: <20101021145249.GA13095@void.printf.net>
-References: <AANLkTikivxhU6Lzxe0Xn9r9hOSPLwuySRkTdGif4F_xo@mail.gmail.com>
-	<20101021141302.GA11912@void.printf.net>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: sdhci: mmc:  determining card type and dynamic clocks
+Date: Thu, 21 Oct 2010 08:17:27 -0700
+Message-ID: <1FC4EB0A-407F-4DDC-8E08-5B5FC71DC5C1@marvell.com>
+References: <AED80D39-301D-490D-8729-C2CAA765F192@marvell.com>
+ <4CC02D4D.8070600@nokia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20101021141302.GA11912@void.printf.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Matt Fleming <matt@console-pimps.org>, eric.y.miao@gmail.com, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>, linux-arm-kernel@lists.infradead.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:48149 "HELO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751092Ab0JUPSR convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Oct 2010 11:18:17 -0400
+In-Reply-To: <4CC02D4D.8070600@nokia.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-Hi,
 
-On Thu, Oct 21, 2010 at 03:13:02PM +0100, Chris Ball wrote:
-> On Mon, Oct 18, 2010 at 08:32:46AM -0400, zhangfei gao wrote:
-> > Update with comments from Matt and Eric.
-> > Test with sd and emmc.
-> > 
-> > >From e5dd554ed4d3488a83d9a4888d68d1d85482f747 Mon Sep 17 00:00:00 2001
-> > From: Zhangfei Gao <zhangfei.gao@marvell.com>
-> > Date: Mon, 20 Sep 2010 10:51:28 -0400
-> > Subject: [PATCH] mmc: add support of sdhci-pxa driver
-> > 
-> > 	Support Marvell PXA168/PXA910/MMP2 SD Host Controller
-> > 
-> > Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
-> > ---
-> >  arch/arm/plat-pxa/include/plat/sdhci.h |   32 ++++
-> >  drivers/mmc/host/Kconfig               |   12 ++
-> >  drivers/mmc/host/Makefile              |    1 +
-> >  drivers/mmc/host/sdhci-pxa.c           |  259 ++++++++++++++++++++++++++++++++
-> >  4 files changed, 304 insertions(+), 0 deletions(-)
-> >  create mode 100644 arch/arm/plat-pxa/include/plat/sdhci.h
-> >  create mode 100644 drivers/mmc/host/sdhci-pxa.c
+On Oct 21, 2010, at 5:08 AM, Adrian Hunter wrote:
+
+> On 21/10/10 14:12, ext Philip Rakity wrote:
+>> 
+>> Sometimes it is useful for the SD driver to know the type of card that is in use so that dynamic sd bus clocking can be enabled or disabled.
+>> Dynamic clocks are a feature of sd 3.0 and we can support this in our v2.0 controller.
+>> 
+>> The problem is that some SDIO cards are not happy when the clocks are dynamically stopped.  I have not seen any issues with SD/mmc/eMMC cards.  I suspect the reason for the SDIO problems is that the cards need the clock since SDIO cards can interrupt the CPU for service and the other card types cannot.
+>> 
+>> The information about the type of card being used is known by the mmc layer when
+>> 
+>> mmc_alloc_card(struct mmc_host *host, struct device_type *type) --- core/bus.c
+>> 
+>> is called but the sd driver cannot get to this information when set_ios() is called by the mmc layer since the host->card field is filled in too late.
+>> 
+>> I have added host->card = card to
+>> 
+>> struct mmc_card *mmc_alloc_card(struct mmc_host *host, struct device_type *type)
+>> {
+>> 	struct mmc_card *card;
+>> 
+>> 	card = kzalloc(sizeof(struct mmc_card), GFP_KERNEL);
+>> 	if (!card)
+>> 		return ERR_PTR(-ENOMEM);
+>> 
+>> 	card->host = host;
+>> 
+>> 	device_initialize(&card->dev);
+>> 
+>> 	card->dev.parent = mmc_classdev(host);
+>> 	card->dev.bus =&mmc_bus_type;
+>> 	card->dev.release = mmc_release_card;
+>> 	card->dev.type = type;
+>> +     host->card = card;
+>> 	return card;
+>> }
+>> 
+>> and this works for me provided the sd driver remembers to check for card being NULL  in the driver specific set_clock code.
+>> 
+>> My pseudo code is
+>> 
+>> if (host->mmc->card == NULL)
+>>      dynamic_clocks=FALSE;
+>> else if host->mmc->card == MMC_TYPE_SDIO)
+>>     	dynamic_clocks = TRUE;
+>> else
+>>     	dynamic_clocks = FALSE;
+>> 
+>> 
+>> My question is:  Is there a better way to pass the type of card to the sd driver?
+>> 
 > 
-> I'll take the drivers/mmc/ hunks, but you should send the plat-pxa/
-> patch through the ARM tree.
+> Have you considered passing the I/O state (dynamic clocks?) instead
+> of the card type?
+> 
 
-Oh.  If we do that then the driver won't compile until everything's
-together, because it #includes <plat/sdhci.h>.  Haojian/Eric, what do
-you prefer here?  Should I take the arch/arm/ hunk via the MMC tree?
-(If so, please provide ACKs.)
 
-Thanks,
+Not sure I understand.  The SD driver knows the clock state but does not know the type of card that is being used.  
+The pseudo code goes into the platform specific driver code in mmc/host.   I do not know how to make the clocks state 
+dynamic / vs continuous visible in the mmc/core layer.   I am not sure that providing a hook in the mmc/core layer for 
+core/ to switch the clock state is desirable.
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+One consideration is that the clocks at the sd driver layer should start as continuous and then switch to dynamic once
+the type of card is known.  The other way around is not safe.
+
