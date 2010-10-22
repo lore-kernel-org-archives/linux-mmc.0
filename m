@@ -1,43 +1,40 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: [PATCH] sdio: fix suspend/resume regression
-Date: Fri, 22 Oct 2010 02:25:11 +0200
-Message-ID: <1287707111.12734.30.camel@maxim-laptop>
-References: <1286788315.3101.11.camel@sven>
-	 <1286955116-22793-1-git-send-email-ohad@wizery.com>
-	 <1287704855.12734.14.camel@maxim-laptop>
-	 <alpine.LFD.2.00.1010211952110.2764@xanadu.home>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V3 1/1]MMC: add support of sdhci-pxa driver
+Date: Fri, 22 Oct 2010 01:27:38 +0100
+Message-ID: <20101022002738.GA688@void.printf.net>
+References: <AANLkTikivxhU6Lzxe0Xn9r9hOSPLwuySRkTdGif4F_xo@mail.gmail.com> <20101021141302.GA11912@void.printf.net> <20101021145249.GA13095@void.printf.net> <201010220220.10398.marek.vasut@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:50372 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752175Ab0JVAZO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Oct 2010 20:25:14 -0400
-In-Reply-To: <alpine.LFD.2.00.1010211952110.2764@xanadu.home>
+Received: from void.printf.net ([89.145.121.20]:56575 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752203Ab0JVA1j (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Oct 2010 20:27:39 -0400
+Content-Disposition: inline
+In-Reply-To: <201010220220.10398.marek.vasut@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nico@fluxnic.net>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Sven Neumann <s.neumann@raumfeld.com>, Chris Ball <cjb@laptop.org>, libertas-dev@lists.infradead.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, stable@kernel.org
+To: Marek Vasut <marek.vasut@gmail.com>
+Cc: linux-arm-kernel@lists.infradead.org, zhangfei gao <zhangfei.gao@gmail.com>, Matt Fleming <matt@console-pimps.org>, eric.y.miao@gmail.com, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-On Thu, 2010-10-21 at 19:55 -0400, Nicolas Pitre wrote:
-> On Fri, 22 Oct 2010, Maxim Levitsky wrote:
+Hi Marek,
+
+On Fri, Oct 22, 2010 at 02:20:10AM +0200, Marek Vasut wrote:
+> > > I'll take the drivers/mmc/ hunks, but you should send the plat-pxa/
+> > > patch through the ARM tree.
+> > 
+> > Oh.  If we do that then the driver won't compile until everything's
+> > together, because it #includes <plat/sdhci.h>.  Haojian/Eric, what do
+> > you prefer here?  Should I take the arch/arm/ hunk via the MMC tree?
+> > (If so, please provide ACKs.)
 > 
-> > So what happens if you set .suspend to NULL? instead of -ENOSYS return?
-> 
-> At run time, the driver may decide to handle the suspend request and 
-> return 0, or decide to simply return -ENOSYS if it doesn't want to 
-> bother with the suspend meaning that the card should be removed, or 
-> return another error code meaning that the suspend request must be 
-> aborted.
+> Hi, where can I find the whole driver so I can take a look? It didn't 
+> crash into linux-arm-kernel for some reason.
 
-I am afraid that this is very hard to support.
-If .suspend would be called from pm notifier, it would create problems
-last time I checked.
-Or maybe it won't?
-I will test that again, as it might be very nice solution.
-I could even just call the mmc_suspend_host from the pm notifier.
+Here it is:
 
-Best regards,
-	Maxim Levitsky
+http://thread.gmane.org/gmane.linux.kernel.mmc/4190
 
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
