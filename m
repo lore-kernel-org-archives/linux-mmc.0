@@ -1,69 +1,93 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH v5 2/2] sdhci-s3c: Add support no internal clock divider in
- host controller
-Date: Fri, 22 Oct 2010 14:44:11 +0900
-Message-ID: <002d01cb71ac$298fbab0$7caf3010$%kim@samsung.com>
-References: <1286783400-7277-1-git-send-email-kgene.kim@samsung.com>
- <AANLkTinC850pde5Diuz5U40RCDGR1DeQzTAfLUHWm0rB@mail.gmail.com>
- <20101012025946.GA8534@void.printf.net>
- <20101012143700.93ea1812.akpm@linux-foundation.org>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 1/2] sdhci-esdhc-imx: fix timeout on i.MX's sdhci
+Date: Fri, 22 Oct 2010 08:15:37 +0200
+Message-ID: <20101022061537.GA5572@pengutronix.de>
+References: <4CC0A281.1010202@eukrea.com> <1287696028-27854-1-git-send-email-eric@eukrea.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="VS++wcV0S1rZb1Fb"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:17557 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753500Ab0JVFnx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Oct 2010 01:43:53 -0400
-In-reply-to: <20101012143700.93ea1812.akpm@linux-foundation.org>
-Content-language: ko
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:56377 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752002Ab0JVGPk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Oct 2010 02:15:40 -0400
+Content-Disposition: inline
+In-Reply-To: <1287696028-27854-1-git-send-email-eric@eukrea.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Andrew Morton' <akpm@linux-foundation.org>, 'Chris Ball' <cjb@laptop.org>
-Cc: 'Kyungmin Park' <kmpark@infradead.org>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, 'Jeongbae Seo' <jeongbae.seo@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+To: Eric =?iso-8859-15?Q?B=E9nard?= <eric@eukrea.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, shawn.gsc@gmail.com, nicolas.pitre@linaro.org, r65037@freescale.com, amit.kucheria@linaro.org
 
-Andrew Morton wrote:
-> 
-> On Tue, 12 Oct 2010 03:59:46 +0100
-> Chris Ball <cjb@laptop.org> wrote:
-> 
-> > Hi Kyungmin,
-> >
-> > On Tue, Oct 12, 2010 at 11:53:35AM +0900, Kyungmin Park wrote:
-> > > Hi Chris,
-> > >
-> > > we make a conclusion use this patch. Can you merge it for 2.6.37?
-> > >
-> > > Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
-> >
-> > I don't feel that I can, because Ben Dooks is listed as the maintainer
-> > for this driver and the patch does not have his ACK.
-> >
-> > I don't know what to do about this; I've already tried asking Ben
-> > whether he intends to continue maintaining sdhci-s3c, with no reply.
-> >
-> 
-> People get busy and take vacations and change roles, etc.
-> 
-> Sometimes, the best you can do is to make everyone aware of what's
-> going on and then simply proceed on your own.
 
-Hi Chris,
+--VS++wcV0S1rZb1Fb
+Content-Type: text/plain; charset=iso-8859-15
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-How was going on?
-I couldn't find this in your tree yet :-(
-Please let me know about your merge plan of this.
-If any problems, please kindly let me know :-)
+On Thu, Oct 21, 2010 at 11:20:27PM +0200, Eric B=E9nard wrote:
+> this patch fix timeout problems on i.MX's sdhci as suggested by
+> Richard Zhu.
+>=20
+> Tested on :
+> - i.MX257 : not needed
+> - i.MX357 : needed
+> - i.MX515 : needed
+>=20
+> more details can be found here :
+> http://lists.infradead.org/pipermail/linux-arm-kernel/2010-October/029748=
+=2Ehtml
+>=20
+> Signed-off-by: Eric B=E9nard <eric@eukrea.com>
+> Tested-by: Shawn Guo <shawn.gsc@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c |    6 ++++++
+>  1 files changed, 6 insertions(+), 0 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-=
+esdhc-imx.c
+> index afbac9a..11e1ae1 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -130,6 +130,12 @@ static int esdhc_pltfm_init(struct sdhci_host *host,=
+ struct sdhci_pltfm_data *pd
+>  		gpio_request(boarddata->wp_gpio, "SD_WP");
+>  		gpio_direction_input(boarddata->wp_gpio);
+>  	}
+> +
+> +	if (cpu_is_mx35() || cpu_is_mx51()) {
+> +		dev_info(mmc_dev(host->mmc), "using broken timeout quirk\n");
 
-Ben,
-If you're ok this to you, please send your ack...
-it would be helpful to Chris to handle this ;-)
+Please drop this line. The boot log is full enough IMO :)
 
-Thanks.
+Other than that:
 
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+Acked-by: Wolfram Sang <w.sang@pengutronix.de>
 
+> +		host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> +	}
+> +
+>  	return 0;
+>  }
+> =20
+> --=20
+> 1.7.0.4
+>=20
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--VS++wcV0S1rZb1Fb
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkzBLAkACgkQD27XaX1/VRv/+ACglBMbAb8bJVxtoFrut1KOpkH5
+px0An1BqOD+eGELHdCrefB1Dpp6le4Yw
+=dEAC
+-----END PGP SIGNATURE-----
+
+--VS++wcV0S1rZb1Fb--
