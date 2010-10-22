@@ -1,68 +1,59 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/2] sdhci-esdhc-imx: fix timeout on i.MX's sdhci
-Date: Sat, 23 Oct 2010 00:12:03 +0100
-Message-ID: <20101022231203.GA6502@void.printf.net>
-References: <4CC0A281.1010202@eukrea.com> <1287696028-27854-1-git-send-email-eric@eukrea.com>
+From: =?UTF-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>
+Subject: [PATCH 2/2] sdhci-esdhc-imx: enable QUIRK_NO_MULTIBLOCK only for i.MX25 and i.MX35
+Date: Sat, 23 Oct 2010 01:57:22 +0200
+Message-ID: <1287791842-706-2-git-send-email-eric@eukrea.com>
+References: <20101022231203.GA6502@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60622 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752070Ab0JVXMF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Oct 2010 19:12:05 -0400
-Content-Disposition: inline
-In-Reply-To: <1287696028-27854-1-git-send-email-eric@eukrea.com>
+Received: from 63.mail-out.ovh.net ([91.121.185.56]:38265 "HELO
+	63.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1755923Ab0JVX52 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Oct 2010 19:57:28 -0400
+In-Reply-To: <20101022231203.GA6502@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Eric =?iso-8859-1?Q?B=E9nard?= <eric@eukrea.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, shawn.gsc@gmail.com, w.sang@pengutronix.de, nicolas.pitre@linaro.org, r65037@freescale.com, amit.kucheria@linaro.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, shawn.gsc@gmail.com, w.sang@pengutronix.de, nicolas.pitre@linaro.org, r65037@freescale.com, amit.kucheria@linaro.org, =?UTF-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>
 
-On Thu, Oct 21, 2010 at 11:20:27PM +0200, Eric B=E9nard wrote:
-> this patch fix timeout problems on i.MX's sdhci as suggested by
-> Richard Zhu.
->=20
-> Tested on :
-> - i.MX257 : not needed
-> - i.MX357 : needed
-> - i.MX515 : needed
->=20
-> more details can be found here :
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2010-October/02=
-9748.html
->=20
-> Signed-off-by: Eric B=E9nard <eric@eukrea.com>
-> Tested-by: Shawn Guo <shawn.gsc@gmail.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |    6 ++++++
->  1 files changed, 6 insertions(+), 0 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sd=
-hci-esdhc-imx.c
-> index afbac9a..11e1ae1 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -130,6 +130,12 @@ static int esdhc_pltfm_init(struct sdhci_host *h=
-ost, struct sdhci_pltfm_data *pd
->  		gpio_request(boarddata->wp_gpio, "SD_WP");
->  		gpio_direction_input(boarddata->wp_gpio);
->  	}
-> +
-> +	if (cpu_is_mx35() || cpu_is_mx51()) {
-> +		dev_info(mmc_dev(host->mmc), "using broken timeout quirk\n");
-> +		host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-> +	}
-> +
->  	return 0;
->  }
-> =20
+only these CPU's errata list this bug.
 
-This has Wolfram's RFC wp-on-gpio patch applied.  Want to repost these
-against mmc-next?
+Signed-off-by: Eric B=C3=A9nard <eric@eukrea.com>
+Acked-by: Wolfram Sang <w.sang@pengutronix.de>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
 
-I'll plan on leaving this until after -rc1, so that I can send out a
-pull request shortly.  Thanks,
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhc=
+i-esdhc-imx.c
+index 28e63ef..8308bcd 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -116,6 +116,10 @@ static int esdhc_pltfm_init(struct sdhci_host *hos=
+t, struct sdhci_pltfm_data *pd
+ 	if (cpu_is_mx35() || cpu_is_mx51())
+ 		host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+=20
++	/* fix errata ENGcm07207 which is present on i.MX25 and i.MX35 */
++	if (cpu_is_mx25() || cpu_is_mx35())
++		host->quirks |=3D SDHCI_QUIRK_NO_MULTIBLOCK;
++
+ 	return 0;
+ }
+=20
+@@ -137,10 +141,8 @@ static struct sdhci_ops sdhci_esdhc_ops =3D {
+ };
+=20
+ struct sdhci_pltfm_data sdhci_esdhc_imx_pdata =3D {
+-	.quirks =3D ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_NO_MULTIBLOCK
+-			| SDHCI_QUIRK_BROKEN_ADMA,
++	.quirks =3D ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_ADMA,
+ 	/* ADMA has issues. Might be fixable */
+-	/* NO_MULTIBLOCK might be MX35 only (Errata: ENGcm07207) */
+ 	.ops =3D &sdhci_esdhc_ops,
+ 	.init =3D esdhc_pltfm_init,
+ 	.exit =3D esdhc_pltfm_exit,
 --=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.0.4
+
