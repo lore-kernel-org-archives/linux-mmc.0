@@ -1,65 +1,59 @@
-From: =?UTF-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>
-Subject: [PATCH 1/2] sdhci-esdhc-imx: fix timeout on i.MX's sdhci
-Date: Sat, 23 Oct 2010 01:57:21 +0200
-Message-ID: <1287791842-706-1-git-send-email-eric@eukrea.com>
-References: <20101022231203.GA6502@void.printf.net>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH] sdio: fix suspend/resume regression
+Date: Sat, 23 Oct 2010 12:09:01 +0200
+Message-ID: <AANLkTi=iC1uKyToEXrroOj+JxQ2mW97WRVEXjv+9oQEa@mail.gmail.com>
+References: <1286788315.3101.11.camel@sven> <1286955116-22793-1-git-send-email-ohad@wizery.com>
+ <1287704855.12734.14.camel@maxim-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 63.mail-out.ovh.net ([91.121.185.56]:41529 "HELO
-	63.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1755537Ab0JVX51 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Oct 2010 19:57:27 -0400
-In-Reply-To: <20101022231203.GA6502@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1287704855.12734.14.camel@maxim-laptop>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Sven Neumann <s.neumann@raumfeld.com>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, libertas-dev@lists.infradead.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, stable@kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, shawn.gsc@gmail.com, w.sang@pengutronix.de, nicolas.pitre@linaro.org, r65037@freescale.com, amit.kucheria@linaro.org, =?UTF-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>
 
-this patch fix timeout problems on i.MX's sdhci as suggested by
-Richard Zhu.
+Hi Maxim,
 
-Tested on :
-- i.MX257 : not needed
-- i.MX357 : needed
-- i.MX515 : needed
+On Fri, Oct 22, 2010 at 1:47 AM, Maxim Levitsky <maximlevitsky@gmail.co=
+m> wrote:
+> On Wed, 2010-10-13 at 09:31 +0200, Ohad Ben-Cohen wrote:
+>> Fix SDIO suspend/resume regression introduced by
+>> 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e "mmc: fix all hangs related=
+ to
+>> mmc/sd card insert/removal during suspend/resume":
+=2E..
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index c94565d..515ff39 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1682,6 +1682,19 @@ int mmc_suspend_host(struct mmc_host *host)
+>> =A0 =A0 =A0 if (host->bus_ops && !host->bus_dead) {
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->bus_ops->suspend)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D host->bus_ops->s=
+uspend(host);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (err =3D=3D -ENOSYS || !host->bus_ops->=
+resume) {
+> This reintroduces the bug I fixed.
+>
+> if the CONFIG_MMC_UNSAFE_RESUME isn't set (and that is default
+> unfortunately), the host->bus_ops->resume will be NULL (see core/mmc.=
+c
+> mmc_ops), and therefore card will be removed, that will trigger a blo=
+ck
+> device removal, sync, and deadlock).
 
-more details can be found here :
-http://lists.infradead.org/pipermail/linux-arm-kernel/2010-October/0297=
-48.html
+Have you reproduced this or is it just a general concern ?
 
-Signed-off-by: Eric B=C3=A9nard <eric@eukrea.com>
-Tested-by: Shawn Guo <shawn.gsc@gmail.com>
-Acked-by: Wolfram Sang <w.sang@pengutronix.de>
----
- drivers/mmc/host/sdhci-esdhc-imx.c |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
+I'm asking this because if CONFIG_MMC_UNSAFE_RESUME isn't set, then
+mmc_pm_notify() will remove the card and detach the bus.
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhc=
-i-esdhc-imx.c
-index 2e9cca1..28e63ef 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -17,6 +17,7 @@
- #include <linux/clk.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdhci-pltfm.h>
-+#include <mach/hardware.h>
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-@@ -112,6 +113,9 @@ static int esdhc_pltfm_init(struct sdhci_host *host=
-, struct sdhci_pltfm_data *pd
- 	clk_enable(clk);
- 	pltfm_host->clk =3D clk;
-=20
-+	if (cpu_is_mx35() || cpu_is_mx51())
-+		host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-+
- 	return 0;
- }
-=20
---=20
-1.7.0.4
+As a result, host->bus_ops will be unset, and host->bus_dead will be se=
+t.
 
+In this case, mmc_suspend_host() should skip the code you are concerned=
+ about.
+
+Regards,
+Ohad.
