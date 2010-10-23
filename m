@@ -1,61 +1,162 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH] sdio: fix suspend/resume regression
-Date: Sat, 23 Oct 2010 16:44:00 +0200
-Message-ID: <AANLkTikgrsyeZVEnce1ouCD2ehrYg7=w54MYCSLi5Ekp@mail.gmail.com>
-References: <1286788315.3101.11.camel@sven> <1286955116-22793-1-git-send-email-ohad@wizery.com>
- <1287704855.12734.14.camel@maxim-laptop> <AANLkTi=iC1uKyToEXrroOj+JxQ2mW97WRVEXjv+9oQEa@mail.gmail.com>
- <1287843531.29752.10.camel@maxim-laptop>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH V3 1/1]MMC: add support of sdhci-pxa driver
+Date: Sun, 24 Oct 2010 00:47:10 +0800
+Message-ID: <AANLkTi=RNDf-A98LN3AH=JdegHXKRjHvtGCDYtkJ5ADg@mail.gmail.com>
+References: <AANLkTikivxhU6Lzxe0Xn9r9hOSPLwuySRkTdGif4F_xo@mail.gmail.com>
+	<20101022110457.GA14136@void.printf.net>
+	<AANLkTikg3-5whd65aZmK4sJSg+vvNke0fSkqSQJ1B5vf@mail.gmail.com>
+	<201010231624.03293.marek.vasut@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1287843531.29752.10.camel@maxim-laptop>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Sven Neumann <s.neumann@raumfeld.com>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, libertas-dev@lists.infradead.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Daniel Mack <daniel@caiaq.de>, Colin Cross <ccross@android.com>, Greg Kroah-Hartman <gregkh@suse.de>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, stable@kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:51363 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752053Ab0JWQrK convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Oct 2010 12:47:10 -0400
+Received: by iwn34 with SMTP id 34so2333512iwn.19
+        for <linux-mmc@vger.kernel.org>; Sat, 23 Oct 2010 09:47:10 -0700 (PDT)
+In-Reply-To: <201010231624.03293.marek.vasut@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Marek Vasut <marek.vasut@gmail.com>
+Cc: linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Matt Fleming <matt@console-pimps.org>, "eric.y.miao" <eric.y.miao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-On Sat, Oct 23, 2010 at 4:18 PM, Maxim Levitsky <maximlevitsky@gmail.co=
-m> wrote:
-> On Sat, 2010-10-23 at 12:09 +0200, Ohad Ben-Cohen wrote:
-=2E..
->> >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> >> index c94565d..515ff39 100644
->> >> --- a/drivers/mmc/core/core.c
->> >> +++ b/drivers/mmc/core/core.c
->> >> @@ -1682,6 +1682,19 @@ int mmc_suspend_host(struct mmc_host *host=
-)
->> >> =A0 =A0 =A0 if (host->bus_ops && !host->bus_dead) {
->> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->bus_ops->suspend)
->> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D host->bus_ops=
-->suspend(host);
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 if (err =3D=3D -ENOSYS || !host->bus_op=
-s->resume) {
+On Sat, Oct 23, 2010 at 10:24 PM, Marek Vasut <marek.vasut@gmail.com> w=
+rote:
 
->> > This reintroduces the bug I fixed.
-=2E..
->> In this case, mmc_suspend_host() should skip the code you are concer=
-ned about.
+>> +/******************************************************************=
+*******
+>> ****\ + *
+>> =A0 =A0 =A0 =A0 * + * Device probing/removal
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0* + *
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 *
+>> +\******************************************************************=
+******
+>> *****/ +
+>> +static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
+>> +{
+>> + =A0 =A0 struct sdhci_pxa_platdata *pdata =3D pdev->dev.platform_da=
+ta;
+>> + =A0 =A0 struct device *dev =3D &pdev->dev;
+>> + =A0 =A0 struct sdhci_host *host =3D NULL;
+>> + =A0 =A0 struct resource *iomem =3D NULL;
+>> + =A0 =A0 struct sdhci_pxa *pxa =3D NULL;
+>> + =A0 =A0 int ret, irq;
+>> +
+>> + =A0 =A0 irq =3D platform_get_irq(pdev, 0);
+>> + =A0 =A0 if (irq < 0) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 dev_err(dev, "no irq specified\n");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 return irq;
+>> + =A0 =A0 }
+>> +
+>> + =A0 =A0 iomem =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>> + =A0 =A0 if (!iomem) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 dev_err(dev, "no memory specified\n");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 return -ENOENT;
+>> + =A0 =A0 }
+>> +
+>> + =A0 =A0 host =3D sdhci_alloc_host(&pdev->dev, sizeof(struct sdhci_=
+pxa));
+>> + =A0 =A0 if (IS_ERR(host)) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 dev_err(dev, "failed to alloc host\n");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 return PTR_ERR(host);
+>> + =A0 =A0 }
+>> +
+>> + =A0 =A0 pxa =3D sdhci_priv(host);
+>> + =A0 =A0 pxa->host =3D host;
+>> + =A0 =A0 pxa->pdata =3D pdata;
+>> + =A0 =A0 pxa->clk_enable =3D 0;
+>> +
+>> + =A0 =A0 pxa->clk =3D clk_get(dev, "PXA-SDHCLK");
+>> + =A0 =A0 if (IS_ERR(pxa->clk)) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 dev_err(dev, "failed to get io clock\n");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D PTR_ERR(pxa->clk);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>> + =A0 =A0 }
+>> +
+>> + =A0 =A0 pxa->res =3D request_mem_region(iomem->start, resource_siz=
+e(iomem),
+>> + =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostname(host->mmc));
+>> + =A0 =A0 if (!pxa->res) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 dev_err(&pdev->dev, "cannot request region=
+\n");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -EBUSY;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>> + =A0 =A0 }
+>> +
+>> + =A0 =A0 host->ioaddr =3D ioremap(iomem->start, resource_size(iomem=
+));
+>> + =A0 =A0 if (!host->ioaddr) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 dev_err(&pdev->dev, "failed to remap regis=
+ters\n");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -ENOMEM;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>> + =A0 =A0 }
+>> +
+>> + =A0 =A0 host->hw_name =3D "MMC";
+>> + =A0 =A0 host->ops =3D &sdhci_pxa_ops;
+>> + =A0 =A0 host->irq =3D irq;
+>> + =A0 =A0 host->quirks =3D SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_BRO=
+KEN_TIMEOUT_VAL;
+>> +
+>
+> Maybe check if these aren't already set in pdata and warn user ?
+Here pdata->quirks only provide specific quirk like
+SDHCI_QUIRK_BROKEN_CARD_DETECTION for on-chip device, the common quirk
+is provided above.
+In sdhci-s3c, host->quirks is modified here via pdata->cd_type, which
+is also a good method.
+Here we transfer SDHCI_QUIRK_BROKEN_CARD_DETECTION directly from pdata
+since it already move to include folder.
 
-> You are right here.
-> There is a very unlikely case that suspend of sd/mmc card fails (with
-> CONFIG_MMC_UNSAFE_RESUME set, and that will trigger the hang, but tha=
-t
-> currently isn't possible because both mmc_sd_suspend and mmc_suspend
-> just return 0 unconditionally).
+>
+>> + =A0 =A0 if (pdata->quirks)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 host->quirks |=3D pdata->quirks;
+>> +
+>> + =A0 =A0 ret =3D sdhci_add_host(host);
+>> + =A0 =A0 if (ret) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 dev_err(&pdev->dev, "failed to add host\n"=
+);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>> + =A0 =A0 }
+>> +
+>> + =A0 =A0 if (pxa->pdata->max_speed)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 host->mmc->f_max =3D pxa->pdata->max_speed=
+;
+>
+> What happens otherwise ?
+Otherwise, host->mmc->f_max =3D host->max_clk set in sdhci_add_host,
+host->max_clk is 50M in 2.0 controller, and 200M in 3.0 controller, if
+controller does not need to provide get_max_clock.
+it's better add defalut value in else condition.
 
-Please note that the card is removed only on -ENOSYS, which is not a
-random error that can happen. In this context, it's a deliberate
-request (from the underlying bus) to remove the card.
+Thanks Marek for review.
 
-So even if mmc_{sd_}suspend will be changed to propagate an error code
-one day, it is unlikely that they will trigger this bug even if they
-fail.
+>
+>> +
+>> + =A0 =A0 platform_set_drvdata(pdev, host);
+>> +
+>> + =A0 =A0 return 0;
+>> +out:
+>> + =A0 =A0 if (host) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 clk_put(pxa->clk);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (host->ioaddr)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 iounmap(host->ioaddr);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (pxa->res)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 release_mem_region(pxa->re=
+s->start,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 resource_size(pxa->res));
+>> + =A0 =A0 =A0 =A0 =A0 =A0 sdhci_free_host(host);
+>> + =A0 =A0 }
+>> +
+>> + =A0 =A0 return ret;
+>> +}
+>> +
 
-> Btw, two above functions are identical, so some refactoring won't hur=
-t.
-
-=46eel free to send a patch ;)
-
-Regards,
-Ohad.
+>
+> Thanks!
+>
+> Cheers
+>
