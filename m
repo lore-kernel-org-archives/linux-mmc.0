@@ -1,135 +1,172 @@
-From: "Chuanxiao.Dong" <chuanxiao.dong@intel.com>
-Subject: [PATCH 1/1]mmc: implemented enhanced area feature for user data
-	area
-Date: Tue, 26 Oct 2010 18:26:17 +0800
-Message-ID: <20101026102617.GA27707@intel.com>
-Reply-To: "Chuanxiao.Dong" <chuanxiao.dong@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Mike Rapoport <mike@compulab.co.il>
+Subject: [PATCH] MMC: add support for the Marvell platform SDHCI controller
+Date: Wed, 27 Oct 2010 10:07:40 +0200
+Message-ID: <1288166860-28556-1-git-send-email-mike@compulab.co.il>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:11503 "EHLO mga02.intel.com"
+Received: from compulab.co.il ([67.18.134.219]:48253 "EHLO compulab.co.il"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755647Ab0JZK1H convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Oct 2010 06:27:07 -0400
-Content-Disposition: inline
+	id S1752305Ab0J0IIO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Oct 2010 04:08:14 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Mike Rapoport <mike@compulab.co.il>, Saeed Bishara <saeed@marvell.com>
 
-Hi,
-	This patch implemented enhanced area feature defined in eMMC4.4
-	standard.
-	I have two understandings about this feature, but not sure about
-	that.
-	1) the enhanced area relative registers are onetime programmable, so
-	driver supposes this feature will be enabled in eMMC manufacture line
-	and driver only need to read them out and caclulate the offset/
-	size and then export to user.
-	2) As eMMC4.4 standard said, "if the partition parameters are sent to
-	a device by CMD6 before setting ERASE_GROUP_DEF bit, the slave shows
-	SWITCH_ERROR".(Page 31) So once the enhanced area was enabled and
-	paremeters were already set, does driver still need to set the
-	ERASE_GROUP_DEF bit each time during init card?
-	If my understandings were wrong, correct me directly please.
-	Thanks.
-
->From cb53d1b8c8a13a2c3db202f861b632dc5a763f1c Mon Sep 17 00:00:00 2001
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Date: Tue, 26 Oct 2010 17:56:06 +0800
-Subject: [PATCH] mmc: implemented enhanced area feature for user data area
-
-MMC driver can read out the enhanced user data area offset and size
-from  ext_csd register, and exports out these values as sysfs interface
-for user to use.
-
-In this patch, driver will suppose that the enhanced user data area
-feature was enabled in eMMC manufacture line since the relative
-registers are onetime programmable.
-
-In this patch, driver didn't set ERASE_GROUP_DEF byte in ext_csd
-register.
-
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Signed-off-by: Mike Rapoport <mike@compulab.co.il>
+CC: Saeed Bishara <saeed@marvell.com>
 ---
- drivers/mmc/core/mmc.c   |   35 +++++++++++++++++++++++++++++++++++
- include/linux/mmc/card.h |    3 +++
- 2 files changed, 38 insertions(+), 0 deletions(-)
+ drivers/mmc/host/Kconfig       |   13 +++++++
+ drivers/mmc/host/Makefile      |    1 +
+ drivers/mmc/host/sdhci-mv.c    |   77 ++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pltfm.c |    3 ++
+ drivers/mmc/host/sdhci-pltfm.h |    1 +
+ 5 files changed, 95 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-mv.c
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 995261f..9bb9fac 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -302,6 +302,35 @@ static int mmc_read_ext_csd(struct mmc_card *card)
- 	}
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 68d1279..1952fa9 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -130,6 +130,19 @@ config MMC_SDHCI_CNS3XXX
  
- 	if (card->ext_csd.rev >= 4) {
-+		/* Enhanced area feature support
-+		 * check whether eMMC card is enabled enhanced area,
-+		 * if so, export enhanced area offset and size to
-+		 * user by adding sysfs interface
-+		 * */
-+		if ((ext_csd[160] & 0x2) && (ext_csd[156] & 0x1)) {
-+			u8 hc_erase_grp_sz = ext_csd[224];
-+			u8 hc_wp_grp_sz = ext_csd[221];
-+			/* set a flag to identify whether the enhanced
-+			 * user data are enabled
-+			 * */
-+			card->ext_csd.enh_data_area_en = 1;
-+			/* caculate the enhanced data area offset, unit B
-+			 * */
-+			card->ext_csd.enh_data_area_off =
-+				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
-+				(ext_csd[137] << 8) + ext_csd[136];
-+			if (mmc_card_blockaddr(card))
-+				card->ext_csd.enh_data_area_off <<= 9;
-+			/* caculate the enhanced data area size, unit KB
-+			 * */
-+			card->ext_csd.enh_data_area_sz =
-+				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
-+				ext_csd[140];
-+			card->ext_csd.enh_data_area_sz *=
-+				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-+			card->ext_csd.enh_data_area_sz <<= 9;
-+		}
+ 	  If unsure, say N.
+ 
++config MMC_SDHCI_MV
++	bool "SDHCI support on Marvell's SoC"
++	depends on MMC_SDHCI
++	depends on MMC_SDHCI_PLTFM
++	select MMC_SDHCI_IO_ACCESSORS
++	help
++	  This selects the Secure Digital Host Controller Interface in
++	  Marvell's SoC controllers.
 +
- 		card->ext_csd.sec_trim_mult =
- 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
- 		card->ext_csd.sec_erase_mult =
-@@ -336,6 +365,9 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
- MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
- MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
- MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
-+MMC_DEV_ATTR(enhen, "%d\n", card->ext_csd.enh_data_area_en);
-+MMC_DEV_ATTR(enhoff, "0x%llxB\n", card->ext_csd.enh_data_area_off);
-+MMC_DEV_ATTR(enhsz, "0x%xKB\n", card->ext_csd.enh_data_area_sz);
++	  If you have a controller with this interface, say Y or M here.
++
++	  If unsure, say N.
++
+ config MMC_SDHCI_S3C
+ 	tristate "SDHCI support on Samsung S3C SoC"
+ 	depends on MMC_SDHCI && PLAT_SAMSUNG
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 840bcb5..fdb3e96 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -40,6 +40,7 @@ obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+ obj-$(CONFIG_MMC_SDHCI_PLTFM)			+= sdhci-platform.o
+ sdhci-platform-y				:= sdhci-pltfm.o
+ sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX)	+= sdhci-cns3xxx.o
++sdhci-platform-$(CONFIG_MMC_SDHCI_MV)		+= sdhci-mv.o
  
- static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_cid.attr,
-@@ -349,6 +381,9 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_name.attr,
- 	&dev_attr_oemid.attr,
- 	&dev_attr_serial.attr,
-+	&dev_attr_enhen.attr,
-+	&dev_attr_enhoff.attr,
-+	&dev_attr_enhsz.attr,
- 	NULL,
+ obj-$(CONFIG_MMC_SDHCI_OF)	+= sdhci-of.o
+ sdhci-of-y				:= sdhci-of-core.o
+diff --git a/drivers/mmc/host/sdhci-mv.c b/drivers/mmc/host/sdhci-mv.c
+new file mode 100644
+index 0000000..b461205
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-mv.c
+@@ -0,0 +1,77 @@
++/*
++ * sdhci-mv.c Support for SDHCI platform devices
++ *
++ * Author: Saeed Bishara <saeed@marvell.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
++ */
++
++/*
++ * SDHCI platform devices found on Marvell SoC's
++ *
++ * Based on  sdhci-cns3xxx.c
++ */
++
++#include <linux/clk.h>
++#include <linux/delay.h>
++#include <linux/err.h>
++#include <linux/platform_device.h>
++#include <linux/io.h>
++#include <linux/mmc/host.h>
++#include "sdhci.h"
++#include "sdhci-pltfm.h"
++
++static u16 sdhci_mv_readw(struct sdhci_host *host, int reg)
++{
++	u16 ret;
++
++	switch (reg) {
++	case SDHCI_HOST_VERSION:
++	case SDHCI_SLOT_INT_STATUS:
++		/* those registers don't exist */
++		return 0;
++	default:
++		ret = readw(host->ioaddr + reg);
++	}
++	return ret;
++}
++
++static u32 sdhci_mv_readl(struct sdhci_host *host, int reg)
++{
++	u32 ret;
++
++	switch (reg) {
++	case SDHCI_CAPABILITIES:
++		ret = readl(host->ioaddr + reg);
++		/* Mask the support for 3.0V */
++		ret &= ~SDHCI_CAN_VDD_300;
++		break;
++	default:
++		ret = readl(host->ioaddr + reg);
++	}
++	return ret;
++}
++
++static struct sdhci_ops sdhci_mv_ops = {
++	.read_w	= sdhci_mv_readw,
++	.read_l	= sdhci_mv_readl,
++};
++
++struct sdhci_pltfm_data sdhci_mv_pdata = {
++	.ops	= &sdhci_mv_ops,
++	.quirks	= SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
++		  SDHCI_QUIRK_NO_BUSY_IRQ |
++		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
++		  SDHCI_QUIRK_FORCE_DMA,
++};
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index e045e3c..3a389c2 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -161,6 +161,9 @@ static const struct platform_device_id sdhci_pltfm_ids[] = {
+ #ifdef CONFIG_MMC_SDHCI_CNS3XXX
+ 	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
+ #endif
++#ifdef CONFIG_MMC_SDHCI_MV
++	{ "sdhci-mv", (kernel_ulong_t)&sdhci_mv_pdata },
++#endif
+ 	{ },
  };
+ MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index 900f329..17da875 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -14,5 +14,6 @@
+ #include <linux/sdhci-pltfm.h>
  
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 8ce0827..bf9e718 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -54,6 +54,9 @@ struct mmc_ext_csd {
- 	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
- 	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
- 	unsigned int		trim_timeout;		/* In milliseconds */
-+	unsigned int		enh_data_area_en;
-+	loff_t				enh_data_area_off;
-+	size_t				enh_data_area_sz;
- };
+ extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
++extern struct sdhci_pltfm_data sdhci_mv_pdata;
  
- struct sd_scr {
+ #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
 -- 
-1.6.6.1
+1.7.3.1
 
