@@ -1,85 +1,243 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 1/1]sdhci-pxa: add MMC_CAP_NONREMOVABLE for on-chip
- device
-Date: Wed, 27 Oct 2010 23:02:52 -0700
-Message-ID: <76E51CE5-5312-4D74-ACDB-E0F5A9B510B9@marvell.com>
-References: <AANLkTik+Kg+po=na4Vx6B+BmJMAN_-bq+cB3VrvDpB38@mail.gmail.com>
- <AANLkTim6_wuc+zSg7qKwGDAAiYfXTqjiMRJiffzNPvCY@mail.gmail.com>
- <AANLkTim2rF=MfmU81=bBwdFu3QV2qehYmXfQDO8PZrqu@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC updates for 2.6.37-rc1
+Date: Thu, 28 Oct 2010 06:28:28 -0400
+Message-ID: <m3vd4md31v.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:60302 "HELO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1752637Ab0J1GHH convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Oct 2010 02:07:07 -0400
-In-Reply-To: <AANLkTim2rF=MfmU81=bBwdFu3QV2qehYmXfQDO8PZrqu@mail.gmail.com>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:52147 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751355Ab0J1K1q convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2010 06:27:46 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Kyungmin Park <kmpark@infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Matt Fleming <matt@console-pimps.org>, "eric.y.miao@gmail.com" <eric.y.miao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+
+Hi Linus,
+
+Please pull from:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+to receive the MMC changes for v2.6.37-rc1.  There are currently no
+merge conflicts.  Thanks.
+
+Highlights are:
+* Support for SDHC spec 3.0 controllers
+* Support for MMC 4.4 DDR (Dual Data Rate) transfers
+* SDIO runtime PM support (opt-in per driver, no change by default)
+* New driver for CSR's USB SD Host Controller (USHC)
+* New platform driver for Freescale eSDHC i.MX controllers
+* New SDHCI driver for Marvell's PXA168/910/MMP2 ARM SoCs
+* Support for Intel Medfield/Moorestown devices
+* Support for STM ST40 platforms via the sdhci-pltfm driver
 
 
-ACK:
+The following changes since commit 81280572ca6f54009edfa4deee563e867878=
+4218:
 
-Philip
+  Merge branch 'upstream-merge' of git://git.kernel.org/pub/scm/linux/k=
+ernel/git/tytso/ext4 (2010-10-27 21:54:31 -0700)
 
-On Oct 27, 2010, at 11:00 PM, zhangfei gao wrote:
+are available in the git repository at:
 
-> Thanks for your suggestion, here is updated version.
-> 
-> From 470140b629e3f044a0951368db8e3dc98ebd8ab3 Mon Sep 17 00:00:00 2001
-> From: Zhangfei Gao <zhangfei.gao@marvell.com>
-> Date: Thu, 28 Oct 2010 10:44:15 -0400
-> Subject: [PATCH] sdhci-pxa: add MMC_CAP_NONREMOVABLE for on-chip device
-> 
->        To share SDHCI_QUIRK_BROKEN_CARD_DETECTION for on-chip device,
-> MMC_CAP_NONREMOVABLE also needed, otherwise polling mode used by
-> default
-> 
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
-> CC: Philip Rakity <prakity@marvell.com>
-> ---
-> arch/arm/plat-pxa/include/plat/sdhci.h |    2 ++
-> drivers/mmc/host/sdhci-pxa.c           |    6 ++++++
-> 2 files changed, 8 insertions(+), 0 deletions(-)
-> 
-> diff --git a/arch/arm/plat-pxa/include/plat/sdhci.h
-> b/arch/arm/plat-pxa/include/plat/sdhci.h
-> index e49c5b6..fc5ceab 100644
-> --- a/arch/arm/plat-pxa/include/plat/sdhci.h
-> +++ b/arch/arm/plat-pxa/include/plat/sdhci.h
-> @@ -16,6 +16,8 @@
-> /* pxa specific flag */
-> /* Require clock free running */
-> #define PXA_FLAG_DISABLE_CLOCK_GATING (1<<0)
-> +/* card alwayes wired to host, like on-chip emmc */
-> +#define PXA_FLAG_CARD_PERMANENT	(1<<1)
-> 
-> /*
->  * struct pxa_sdhci_platdata() - Platform device data for PXA SDHCI
-> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
-> index fc406ac..8455c46 100644
-> --- a/drivers/mmc/host/sdhci-pxa.c
-> +++ b/drivers/mmc/host/sdhci-pxa.c
-> @@ -138,6 +138,12 @@ static int __devinit sdhci_pxa_probe(struct
-> platform_device *pdev)
-> 	host->irq = irq;
-> 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-> 
-> +	if (pxa->pdata->flags & PXA_FLAG_CARD_PERMANENT) {
-> +		/* on-chip device */
-> +		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-> +		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-> +	}
-> +
-> 	if (pdata->quirks)
-> 		host->quirks |= pdata->quirks;
-> 
-> -- 
-> 1.7.0.4
-> <0001-sdhci-pxa-add-MMC_CAP_NONREMOVABLE-for-on-chip-devic.patch>
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
+Adrian Hunter (5):
+      mmc_test: fix performance tests that go over max_blk_count
+      mmc_test: fix memory allocation segment limits
+      mmc_test: fix display of .5 KiB
+      mmc: Fixes for Dual Data Rate (DDR) support
+      mmc: refine DDR support
+
+Alan Cox (2):
+      mmc: sdhci: Allow the probe handler to override slots
+      mmc: sdhci: Add Moorestown device support
+
+Andy Shevchenko (7):
+      mmc: make mmc_dev_to_card() macro public
+      mmc: rename dev_to_mmc_card() to mmc_dev_to_card()
+      mmc_test: use API to check card type
+      mmc_test: change simple_strtol() to strict_strtol()
+      mmc_test: collect data and show it via sysfs by demand
+      mmc_test: move files from sysfs to debugfs
+      mmc: add a file to debugfs for changing host clock at runtime
+
+David Vrabel (1):
+      mmc: USB SD Host Controller (USHC) driver
+
+Eric B=C3=A9nard (1):
+      mmc: sdhci: mmc_rescan: reduce verbosity
+
+Ethan Du (1):
+      mmc: name mmc queue thread by host index
+
+George G. Davis (1):
+      mmc: sdhci: Make consistent use of CONFIG_MMC_DEBUG for "DEBUG"gi=
+ng
+
+Giuseppe Cavallaro (4):
+      mmc: sdhci: add MMC_CAP_8_BIT_DATA in the host capabilities
+      mmc: sdhci-pltfm: add suspend/resume functions
+      mmc: sdhci: fix "pwr may be used uninitialized" warning
+      mmc: sdhci: split up sdhci.h for sdhci-pltfm users
+
+H Hartley Sweeten (3):
+      mmc: at91_mci.c: use resource_size()
+      mmc: atmel-mci.c: use resource_size()
+      mmc: au1xmmc.c: use resource_size()
+
+Hanumath Prasad (1):
+      mmc: MMC 4.4 DDR support
+
+Hein Tibosch (1):
+      mmc: Make ID freq configurable
+
+Jaehoon Chung (1):
+      mmc: sdhci: disable MMC_CAP_NEEDS_POLL in nonremovable case
+
+JiebingLi (1):
+      mmc: Use snprintf, not sprintf.
+
+Linus Walleij (1):
+      mmc: Move regulator handling closer to core
+
+Martin K. Petersen (1):
+      mmc: Remove distinction between hw and phys segments
+
+Matt Fleming (1):
+      mmc: Add helper function to check if a card is removable
+
+Micha=C5=82 Miros=C5=82aw (5):
+      mmc: cb710: partially demystify clock selection
+      mmc: cb710: implement get_cd() callback
+      mmc: cb710: remove unnecessary msleep()
+      mmc: cb710: clear irq handler on init() error path
+      mmc: cb710: remove debugging printk (info duplicated from mmc-cor=
+e)
+
+Ohad Ben-Cohen (9):
+      mmc: sdio: fully reconfigure oldcard on resume
+      mmc: propagate power save/restore ops return value
+      mmc: sdio: add power_restore support
+      mmc: add runtime PM handlers
+      mmc: sdio: use the generic runtime PM handlers
+      mmc: sdio: enable runtime PM for SDIO cards
+      mmc: sdio: enable runtime PM for SDIO functions
+      mmc: sdio: ensure mmc_sdio_detect is powered
+      mmc: sdio: support suspend/resume while runtime suspended
+
+Olof Johansson (1):
+      mmc: make number of mmcblk minors configurable
+
+Philip Rakity (3):
+      mmc: sdhci: print out controller name for register debug
+      mmc: sdhci: highspeed: check for mmc as well as sd cards
+      mmc: sdhci: allow for eMMC 74 clock generation by controller
+
+Randy Dunlap (1):
+      mmc: fix cb710 kconfig dependency warning
+
+Sonic Zhang (1):
+      mmc_spi: Recover from CRC errors for r/w operation over SPI.
+
+Thomas Gleixner (1):
+      mmc: Convert "mutex" to semaphore
+
+Wolfram Sang (6):
+      mmc: sdhci-pltfm: Add structure for host-specific data
+      mmc: sdhci-pltfm: move .h file into appropriate subdir
+      mmc: sdhci: introduce get_ro private write-protect hook
+      mmc: sdhci_pltfm: pass more data on custom init call
+      mmc: sdhci-of-esdhc: factor out common stuff
+      mmc: sdhci-pltfm: add -pltfm driver for imx35/51
+
+Xiaochen Shen (1):
+      mmc: sdhci: Intel Medfield support
+
+Zhangfei Gao (5):
+      mmc: SDHC 3.0: support 10-bit divided clock mode
+      mmc: SDHC 3.0: Base clock frequency change in spec 3.0
+      mmc: SDHC 3.0: correct f_min calculation for SD 3.0 spec
+      mmc: sdhci: Enable high-speed support for MMC cards
+      mmc: add new sdhci-pxa driver for Marvell SoCs
+
+matt mooney (1):
+      mmc: Makefile: Fix EXTRA_CFLAGS assignment
+
+ Documentation/devices.txt              |    6 +
+ arch/arm/plat-pxa/include/plat/sdhci.h |   32 ++
+ drivers/mmc/Makefile                   |    4 +-
+ drivers/mmc/card/Kconfig               |   17 +
+ drivers/mmc/card/Makefile              |    4 -
+ drivers/mmc/card/block.c               |   61 ++--
+ drivers/mmc/card/mmc_test.c            |  469 ++++++++++++++++++++++--=
+---
+ drivers/mmc/card/queue.c               |   14 +-
+ drivers/mmc/core/Makefile              |    4 -
+ drivers/mmc/core/bus.c                 |   58 +++-
+ drivers/mmc/core/bus.h                 |    2 +-
+ drivers/mmc/core/core.c                |  179 +++++++----
+ drivers/mmc/core/core.h                |    7 +-
+ drivers/mmc/core/debugfs.c             |   35 ++-
+ drivers/mmc/core/host.c                |    3 +-
+ drivers/mmc/core/mmc.c                 |   58 +++-
+ drivers/mmc/core/sd.c                  |   10 +-
+ drivers/mmc/core/sdio.c                |   54 +++-
+ drivers/mmc/core/sdio_bus.c            |   85 +++++-
+ drivers/mmc/host/Kconfig               |   37 ++
+ drivers/mmc/host/Makefile              |    7 +-
+ drivers/mmc/host/at91_mci.c            |   11 +-
+ drivers/mmc/host/atmel-mci.c           |    5 +-
+ drivers/mmc/host/au1xmmc.c             |    4 +-
+ drivers/mmc/host/bfin_sdh.c            |    2 +-
+ drivers/mmc/host/cb710-mmc.c           |   54 ++--
+ drivers/mmc/host/davinci_mmc.c         |    8 +-
+ drivers/mmc/host/imxmmc.c              |    3 +-
+ drivers/mmc/host/jz4740_mmc.c          |    3 +-
+ drivers/mmc/host/mmc_spi.c             |   24 ++-
+ drivers/mmc/host/mmci.c                |   31 +-
+ drivers/mmc/host/msm_sdcc.c            |    3 +-
+ drivers/mmc/host/mvsdio.c              |    3 +-
+ drivers/mmc/host/mxcmmc.c              |    3 +-
+ drivers/mmc/host/omap.c                |    3 +-
+ drivers/mmc/host/omap_hsmmc.c          |   24 +-
+ drivers/mmc/host/pxamci.c              |   43 ++-
+ drivers/mmc/host/s3cmci.c              |    3 +-
+ drivers/mmc/host/sdhci-cns3xxx.c       |    2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c     |  143 ++++++++
+ drivers/mmc/host/sdhci-esdhc.h         |   83 +++++
+ drivers/mmc/host/sdhci-of-esdhc.c      |   70 +----
+ drivers/mmc/host/sdhci-pci.c           |   89 +++++
+ drivers/mmc/host/sdhci-pltfm.c         |   44 ++-
+ drivers/mmc/host/sdhci-pltfm.h         |   10 +-
+ drivers/mmc/host/sdhci-pxa.c           |  253 ++++++++++++++
+ drivers/mmc/host/sdhci.c               |   86 ++++--
+ drivers/mmc/host/sdhci.h               |  150 ++--------
+ drivers/mmc/host/sh_mmcif.c            |    3 +-
+ drivers/mmc/host/tifm_sd.c             |    3 +-
+ drivers/mmc/host/ushc.c                |  566 ++++++++++++++++++++++++=
+++++++++
+ drivers/mmc/host/via-sdmmc.c           |    3 +-
+ drivers/mmc/host/wbsd.c                |    3 +-
+ include/linux/mmc/card.h               |    6 +
+ include/linux/mmc/core.h               |    2 +
+ include/linux/mmc/host.h               |   48 +++-
+ include/linux/mmc/mmc.h                |   10 +-
+ include/linux/{ =3D> mmc}/sdhci-pltfm.h  |    2 +-
+ include/linux/mmc/sdhci.h              |  144 ++++++++
+ include/linux/pci_ids.h                |    7 +
+ 60 files changed, 2535 insertions(+), 565 deletions(-)
+ create mode 100644 arch/arm/plat-pxa/include/plat/sdhci.h
+ create mode 100644 drivers/mmc/host/sdhci-esdhc-imx.c
+ create mode 100644 drivers/mmc/host/sdhci-esdhc.h
+ create mode 100644 drivers/mmc/host/sdhci-pxa.c
+ create mode 100644 drivers/mmc/host/ushc.c
+ rename include/linux/{ =3D> mmc}/sdhci-pltfm.h (93%)
+ create mode 100644 include/linux/mmc/sdhci.h
+
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
