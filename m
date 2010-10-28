@@ -1,38 +1,55 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: SDIO runtime crash on resume
-Date: Thu, 28 Oct 2010 15:55:41 +0100
-Message-ID: <20101028145541.GA27811@void.printf.net>
-References: <AANLkTikVuQx+hUX8onLVdHW1mhfbH7MZJqsHt0s-baiA@mail.gmail.com> <AANLkTi=0oL38cmbGJ3sfE876ZxJUfrKK+wTs5+JBTR_r@mail.gmail.com> <AANLkTinjXQy9Hcu68DmQ-Xq59P=PNq==m1FYKviz1Pe3@mail.gmail.com>
+From: Arnd Hannemann <arnd@arndnet.de>
+Subject: Re: b43 sdio: WARNING: at drivers/mmc/core/core.c:237 mmc_wait_for_cmd
+Date: Thu, 28 Oct 2010 17:08:54 +0200
+Message-ID: <4CC99206.5090105@arndnet.de>
+References: <4CC874F4.5050908@arndnet.de> <4CC8CAAE.3040100@lwfinger.net> <4CC98892.7080000@arndnet.de> <4CC98D85.20703@lwfinger.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:59573 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933088Ab0J1Ozn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Oct 2010 10:55:43 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTinjXQy9Hcu68DmQ-Xq59P=PNq==m1FYKviz1Pe3@mail.gmail.com>
+Received: from slowhand.arndnet.de ([88.198.19.76]:38827 "EHLO mail.unitix.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754253Ab0J1PIz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Oct 2010 11:08:55 -0400
+In-Reply-To: <4CC98D85.20703@lwfinger.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: Daniel Drake <dsd@laptop.org>, linux-mmc@vger.kernel.org
+To: Larry Finger <Larry.Finger@lwfinger.net>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
 
-Hi Ohad,
+Hi,
 
-On Thu, Oct 28, 2010 at 04:39:34PM +0200, Ohad Ben-Cohen wrote:
-> - What is your mmc host ? sdhci-pci presumably ? I might be able to
-> get such hardware.. But not before next week (LPC).. Hey any chance
-> you or Chris plan to attend LPC with this setup ? I'm going to be
-> there and if I had your setup with a reproducible bug that would make
-> this very easy to fix...
+Am 28.10.2010 16:49, schrieb Larry Finger:
+> On 10/28/2010 09:28 AM, Arnd Hannemann wrote:
+>> Hi,
+> \> [ 1364.620044] b43-phy1 debug: Removing Interface type 2
+>> [ 1364.621812] b43-phy1 debug: Wireless interface stopped
+>> [ 1372.440297] b43-sdio: before ssb_bus_unregister, claimed is 0
+>> [ 1372.440345] b43-sdio: before sdio_disable_func, claimed is 0
+>> [ 1372.440351] ------------[ cut here ]------------
+>> [ 1372.440367] WARNING: at drivers/mmc/core/core.c:237 mmc_wait_for_cmd+0x88/0x90()
+> 
+> Please try the patch below. It claims the device before the sdio_disable_func(()
+> call and releases it afterwords.
+ 
+> 
+> Index: wireless-testing/drivers/net/wireless/b43/sdio.c
+> ===================================================================
+> --- wireless-testing.orig/drivers/net/wireless/b43/sdio.c
+> +++ wireless-testing/drivers/net/wireless/b43/sdio.c
+> @@ -175,7 +175,9 @@ static void b43_sdio_remove(struct sdio_
+>  	struct b43_sdio *sdio = sdio_get_drvdata(func);
+> 
+>  	ssb_bus_unregister(&sdio->ssb);
+> +	sdio_claim_host(func);
+>  	sdio_disable_func(func);
+> +	sdio_release_host(func);
+>  	kfree(sdio);
+>  	sdio_set_drvdata(func, NULL);
+>  }
+> 
 
-I'll just give you an XO-1.5 at LPC -- that way you can work on it
-either during the conference or afterwards.  We should still get a
-.config from Daniel, though, and steps to reproduce.
+Thanks, that fixes the warning.
 
-Thanks!  Look forward to meeting you there,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Regards
+Arnd
