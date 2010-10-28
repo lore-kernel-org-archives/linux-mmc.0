@@ -1,83 +1,77 @@
-From: Arnd Hannemann <arnd-BCMAnToX5e2ELgA04lAiVw@public.gmane.org>
-Subject: Re: b43 sdio: WARNING: at drivers/mmc/core/core.c:237 mmc_wait_for_cmd
-Date: Thu, 28 Oct 2010 16:28:34 +0200
-Message-ID: <4CC98892.7080000@arndnet.de>
-References: <4CC874F4.5050908@arndnet.de> <4CC8CAAE.3040100@lwfinger.net>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: SDIO runtime crash on resume
+Date: Thu, 28 Oct 2010 16:39:34 +0200
+Message-ID: <AANLkTinjXQy9Hcu68DmQ-Xq59P=PNq==m1FYKviz1Pe3@mail.gmail.com>
+References: <AANLkTikVuQx+hUX8onLVdHW1mhfbH7MZJqsHt0s-baiA@mail.gmail.com> <AANLkTi=0oL38cmbGJ3sfE876ZxJUfrKK+wTs5+JBTR_r@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <4CC8CAAE.3040100-tQ5ms3gMjBLk1uMJSBkQmQ@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Larry Finger <Larry.Finger-tQ5ms3gMjBLk1uMJSBkQmQ@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:44644 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753333Ab0J1OkG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2010 10:40:06 -0400
+Received: by iwn10 with SMTP id 10so2435270iwn.19
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2010 07:40:06 -0700 (PDT)
+In-Reply-To: <AANLkTi=0oL38cmbGJ3sfE876ZxJUfrKK+wTs5+JBTR_r@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Daniel Drake <dsd@laptop.org>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Hi,
+Hi Daniel,
 
-Am 28.10.2010 02:58, schrieb Larry Finger:
-> On 10/27/2010 01:52 PM, Arnd Hannemann wrote:
->> first of all: great! b43 sdio card works with open firmware!
->>
->> However, on "rmmod b43" I get the following backtraces 
->> with current Linus git (v2.6.36-6794-g12ba8d1):
->>
->>
->> [  831.696189] b43-phy1 debug: Removing Interface type 2
->> [  831.698425] b43-phy1 debug: Wireless interface stopped
->> [  851.560519] ------------[ cut here ]------------
->> [  851.560531] WARNING: at drivers/mmc/core/core.c:237 mmc_wait_for_cmd+0x88/0x90()
->> [  851.560534] Hardware name: 20552PG
->> [  851.560536] Modules linked in: b43(-) ssb mmc_block binfmt_misc rfcomm sco bnep ppdev l2cap ipt_MASQUERADE iptable_nat nf_nat nf_conntrack_ipv4 nf_defrag_ipv4 xt_state nf_conntrack ipt_REJECT xt_tcpudp iptable_filter ip_tables x_tables bridge stp kvm_intel kvm arc4 iwlagn snd_hda_codec_conexant snd_hda_intel snd_hda_codec iwlcore snd_hwdep snd_pcm thinkpad_acpi mac80211 snd_seq_midi snd_rawmidi snd_seq_midi_event snd_seq r852 joydev snd_timer sm_common pcmcia nand snd_seq_device cfg80211 sdhci_pci btusb psmouse tpm_tis yenta_socket nand_ids lp snd pcmcia_rsrc nand_ecc bluetooth sdhci tpm pcmcia_core parport mtd snd_page_alloc serio_raw tpm_bios soundcore nvram led_class sha256_generic aes_i586 aes_generic dm_crypt i915 drm_kms_helper drm ahci intel_agp i2c_algo_bit intel_gtt e1000e l
- ibahci video agpgart output
->> [  851.560620] Pid: 2504, comm: rmmod Not tainted 2.6.36-titan0+ #1
->> [  851.560622] Call Trace:
->> [  851.560631]  [<c014a102>] warn_slowpath_common+0x72/0xa0
->> [  851.560636]  [<c04d94c8>] ? mmc_wait_for_cmd+0x88/0x90
->> [  851.560641]  [<c04d94c8>] ? mmc_wait_for_cmd+0x88/0x90
->> [  851.560645]  [<c014a152>] warn_slowpath_null+0x22/0x30
->> [  851.560649]  [<c04d94c8>] mmc_wait_for_cmd+0x88/0x90
->> [  851.560655]  [<c0401585>] ? device_release+0x25/0x80
->> [  851.560660]  [<c04df210>] mmc_io_rw_direct_host+0xa0/0x150
->> [  851.560665]  [<c04df370>] mmc_io_rw_direct+0x30/0x40
->> [  851.560669]  [<c04e06e7>] sdio_disable_func+0x37/0xa0
->> [  851.560683]  [<f8dfcb80>] b43_sdio_remove+0x30/0x50 [b43]
->> [  851.560687]  [<c04df8cc>] sdio_bus_remove+0x1c/0x60
->> [  851.560692]  [<c016d39f>] ? blocking_notifier_call_chain+0x1f/0x30
->> [  851.560697]  [<c0404991>] __device_release_driver+0x51/0xb0
->> [  851.560701]  [<c0404a7f>] driver_detach+0x8f/0xa0
->> [  851.560705]  [<c0403c83>] bus_remove_driver+0x63/0xa0
->> [  851.560709]  [<c0405039>] driver_unregister+0x49/0x80
->> [  851.560713]  [<c0405039>] ? driver_unregister+0x49/0x80
->> [  851.560718]  [<c04dfad7>] sdio_unregister_driver+0x17/0x20
->> [  851.560727]  [<f8dfcb42>] b43_sdio_exit+0x12/0x20 [b43]
->> [  851.560734]  [<f8dfe76f>] b43_exit+0x17/0x3c [b43]
->> [  851.560740]  [<c017fb8d>] sys_delete_module+0x13d/0x200
->> [  851.560747]  [<c01fd7d2>] ? do_munmap+0x212/0x300
->> [  851.560752]  [<c010311f>] sysenter_do_call+0x12/0x28
->> [  851.560757] ---[ end trace 31e14488072d2f7d ]---
->> [  851.560759] ------------[ cut here ]------------
-> 
-> I'm not an expert on the sdio interface, but I'll take a crack at this.
-> 
-> The first WARN_ON comes because the host has not been claimed. Please try the
-> following patch so that we know if it is claimed when b43_sdio_remove() is
-> entered and ssb_unregister_bus() clears it, or it has not been claimed when the
-> routine is entered. If the latter, we will likely need to surround the
-> sdio_disable_func() calls with sdio_claim_host()...sdio_remove_host() statements.
+On Wed, Oct 27, 2010 at 10:37 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+...
+> can you please tell me if you can reproduce this with mmc-next ?
+>
+> Can you please also send full logs (from boot to crash preferably) + .config ?
 
-I get the following output from your patch when unloading b43:
+Please 'echo 8 > /proc/sys/kernel/printk' before generating the logs.
 
-[ 1364.620044] b43-phy1 debug: Removing Interface type 2
-[ 1364.621812] b43-phy1 debug: Wireless interface stopped
-[ 1372.440297] b43-sdio: before ssb_bus_unregister, claimed is 0
-[ 1372.440345] b43-sdio: before sdio_disable_func, claimed is 0
-[ 1372.440351] ------------[ cut here ]------------
-[ 1372.440367] WARNING: at drivers/mmc/core/core.c:237 mmc_wait_for_cmd+0x88/0x90()
+Some additional questions (some of them will be answered by the
+logs+config you will send, but in case you're not in front of the
+setup you can just answer those directly):
 
-Regards
-Arnd
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+- What is your mmc host ? sdhci-pci presumably ? I might be able to
+get such hardware.. But not before next week (LPC).. Hey any chance
+you or Chris plan to attend LPC with this setup ? I'm going to be
+there and if I had your setup with a reproducible bug that would make
+this very easy to fix...
+
+- During boot, was you card identified and added (i assume yes) ?
+
+- After boot, was your card powered down (i assume yes) ?
+  check this out by:
+  mount -t debugfs none /sys/kernel/debug
+  cat /sys/kernel/debug/mmc1/ios
+
+- Just for general knowledge - as soon as you load your driver
+(libertas, right ?) - was your card powered up and correctly
+configured (sdio clock/voltage/bus width. again check with
+/sys/kernel/debug/mmc2/ios) ?
+
+> mmc1: error -110 during resume (card was removed?)
+
+I assume there are no failures before it ? the system was correctly suspended ?
+
+Anyway this timeout (-110) shouldn't happen. The device might still be
+powered off for some reason. I guess the timeout is coming from
+mmc_sdio_init_card(). I just wonder whether it's coming already from
+mmc_send_io_op_cond(), or whether it's a side effect of 9b966aae64 and
+thus it's coming from a later stage of mmc_sdio_init_card. If you can
+please put some pr_info("%s %d: ret %d\n", __func__, __LINE__, ret)
+lines throughout that function that could be great.
+
+>> mmc1: card 0001 removed
+
+care to put a dump_stack() in the beginning of mmc_remove_card() ?
+
+>> IP: [<b05e9d95>] __pm_runtime_idle+0x15/0x53
+
+That can be all sort of badness.
+
+I'll wait for the logs+more info (+chance to have this setup in LPC ;)
+and we'll continue from there.
+
+Thanks,
+Ohad.
