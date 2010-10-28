@@ -1,55 +1,46 @@
-From: Arnd Hannemann <arnd@arndnet.de>
-Subject: Re: b43 sdio: WARNING: at drivers/mmc/core/core.c:237 mmc_wait_for_cmd
-Date: Thu, 28 Oct 2010 17:08:54 +0200
-Message-ID: <4CC99206.5090105@arndnet.de>
-References: <4CC874F4.5050908@arndnet.de> <4CC8CAAE.3040100@lwfinger.net> <4CC98892.7080000@arndnet.de> <4CC98D85.20703@lwfinger.net>
+From: Michael =?ISO-8859-1?Q?B=FCsch?= <mb-fseUSCV1ubazQB+pC5nmwQ@public.gmane.org>
+Subject: Re: b43 sdio: WARNING: at drivers/mmc/core/core.c:237
+ mmc_wait_for_cmd
+Date: Thu, 28 Oct 2010 17:11:18 +0200
+Message-ID: <1288278678.29188.71.camel@maggie>
+References: <4CC874F4.5050908@arndnet.de> <4CC8CAAE.3040100@lwfinger.net>
+	 <4CC98892.7080000@arndnet.de> <4CC98D85.20703@lwfinger.net>
+	 <4CC99206.5090105@arndnet.de> (sfid-20101028_170910_533098_04D99458)
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from slowhand.arndnet.de ([88.198.19.76]:38827 "EHLO mail.unitix.de"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754253Ab0J1PIz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Oct 2010 11:08:55 -0400
-In-Reply-To: <4CC98D85.20703@lwfinger.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <4CC99206.5090105-BCMAnToX5e2ELgA04lAiVw@public.gmane.org> (sfid-20101028_170910_533098_04D99458)
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Arnd Hannemann <arnd-BCMAnToX5e2ELgA04lAiVw@public.gmane.org>
+Cc: Larry Finger <Larry.Finger-tQ5ms3gMjBLk1uMJSBkQmQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Larry Finger <Larry.Finger@lwfinger.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
 
-Hi,
+On Thu, 2010-10-28 at 17:08 +0200, Arnd Hannemann wrote: 
+> > Index: wireless-testing/drivers/net/wireless/b43/sdio.c
+> > ===================================================================
+> > --- wireless-testing.orig/drivers/net/wireless/b43/sdio.c
+> > +++ wireless-testing/drivers/net/wireless/b43/sdio.c
+> > @@ -175,7 +175,9 @@ static void b43_sdio_remove(struct sdio_
+> >  	struct b43_sdio *sdio = sdio_get_drvdata(func);
+> > 
+> >  	ssb_bus_unregister(&sdio->ssb);
+> > +	sdio_claim_host(func);
+> >  	sdio_disable_func(func);
+> > +	sdio_release_host(func);
+> >  	kfree(sdio);
+> >  	sdio_set_drvdata(func, NULL);
+> >  }
+> > 
+> 
+> Thanks, that fixes the warning.
 
-Am 28.10.2010 16:49, schrieb Larry Finger:
-> On 10/28/2010 09:28 AM, Arnd Hannemann wrote:
->> Hi,
-> \> [ 1364.620044] b43-phy1 debug: Removing Interface type 2
->> [ 1364.621812] b43-phy1 debug: Wireless interface stopped
->> [ 1372.440297] b43-sdio: before ssb_bus_unregister, claimed is 0
->> [ 1372.440345] b43-sdio: before sdio_disable_func, claimed is 0
->> [ 1372.440351] ------------[ cut here ]------------
->> [ 1372.440367] WARNING: at drivers/mmc/core/core.c:237 mmc_wait_for_cmd+0x88/0x90()
-> 
-> Please try the patch below. It claims the device before the sdio_disable_func(()
-> call and releases it afterwords.
- 
-> 
-> Index: wireless-testing/drivers/net/wireless/b43/sdio.c
-> ===================================================================
-> --- wireless-testing.orig/drivers/net/wireless/b43/sdio.c
-> +++ wireless-testing/drivers/net/wireless/b43/sdio.c
-> @@ -175,7 +175,9 @@ static void b43_sdio_remove(struct sdio_
->  	struct b43_sdio *sdio = sdio_get_drvdata(func);
-> 
->  	ssb_bus_unregister(&sdio->ssb);
-> +	sdio_claim_host(func);
->  	sdio_disable_func(func);
-> +	sdio_release_host(func);
->  	kfree(sdio);
->  	sdio_set_drvdata(func, NULL);
->  }
-> 
+I'm OK with that patch.
 
-Thanks, that fixes the warning.
+-- 
+Greetings Michael.
 
-Regards
-Arnd
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
