@@ -1,46 +1,36 @@
-From: Michael =?ISO-8859-1?Q?B=FCsch?= <mb-fseUSCV1ubazQB+pC5nmwQ@public.gmane.org>
-Subject: Re: b43 sdio: WARNING: at drivers/mmc/core/core.c:237
- mmc_wait_for_cmd
-Date: Thu, 28 Oct 2010 17:11:18 +0200
-Message-ID: <1288278678.29188.71.camel@maggie>
-References: <4CC874F4.5050908@arndnet.de> <4CC8CAAE.3040100@lwfinger.net>
-	 <4CC98892.7080000@arndnet.de> <4CC98D85.20703@lwfinger.net>
-	 <4CC99206.5090105@arndnet.de> (sfid-20101028_170910_533098_04D99458)
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: SDIO runtime crash on resume
+Date: Thu, 28 Oct 2010 17:15:37 +0200
+Message-ID: <AANLkTimjL4cKW6CGuxRoM9jGoiq-14Jo=Rs5JOLyHQr0@mail.gmail.com>
+References: <AANLkTikVuQx+hUX8onLVdHW1mhfbH7MZJqsHt0s-baiA@mail.gmail.com>
+ <AANLkTi=0oL38cmbGJ3sfE876ZxJUfrKK+wTs5+JBTR_r@mail.gmail.com>
+ <AANLkTinjXQy9Hcu68DmQ-Xq59P=PNq==m1FYKviz1Pe3@mail.gmail.com> <20101028145541.GA27811@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <4CC99206.5090105-BCMAnToX5e2ELgA04lAiVw@public.gmane.org> (sfid-20101028_170910_533098_04D99458)
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Hannemann <arnd-BCMAnToX5e2ELgA04lAiVw@public.gmane.org>
-Cc: Larry Finger <Larry.Finger-tQ5ms3gMjBLk1uMJSBkQmQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:62690 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752743Ab0J1PP6 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2010 11:15:58 -0400
+Received: by vws13 with SMTP id 13so324015vws.19
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2010 08:15:57 -0700 (PDT)
+In-Reply-To: <20101028145541.GA27811@void.printf.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Daniel Drake <dsd@laptop.org>, linux-mmc@vger.kernel.org
 
-On Thu, 2010-10-28 at 17:08 +0200, Arnd Hannemann wrote: 
-> > Index: wireless-testing/drivers/net/wireless/b43/sdio.c
-> > ===================================================================
-> > --- wireless-testing.orig/drivers/net/wireless/b43/sdio.c
-> > +++ wireless-testing/drivers/net/wireless/b43/sdio.c
-> > @@ -175,7 +175,9 @@ static void b43_sdio_remove(struct sdio_
-> >  	struct b43_sdio *sdio = sdio_get_drvdata(func);
-> > 
-> >  	ssb_bus_unregister(&sdio->ssb);
-> > +	sdio_claim_host(func);
-> >  	sdio_disable_func(func);
-> > +	sdio_release_host(func);
-> >  	kfree(sdio);
-> >  	sdio_set_drvdata(func, NULL);
-> >  }
-> > 
-> 
-> Thanks, that fixes the warning.
+Hi Chris,
 
-I'm OK with that patch.
+On Thu, Oct 28, 2010 at 4:55 PM, Chris Ball <cjb@laptop.org> wrote:
+> I'll just give you an XO-1.5 at LPC -- that way you can work on it
+> either during the conference or afterwards. =A0We should still get a
+> .config from Daniel, though, and steps to reproduce.
 
--- 
-Greetings Michael.
+That would be really good, thanks a lot !
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Thanks! =A0Look forward to meeting you there,
+
+I look forward to meeting you too, thanks again !
+Ohad.
