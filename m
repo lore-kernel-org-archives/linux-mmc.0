@@ -1,25 +1,48 @@
-From: saeed bishara <saeed.bishara@gmail.com>
-Subject: Re: [PATCH v3 2/2] [ARM] Dove: rename SDCHI devices to "sdhci-dove"
-Date: Thu, 28 Oct 2010 16:49:25 +0200
-Message-ID: <AANLkTimgAjiB3C36hmv5Ovz-P0Xt1yJi=TkH0yb470GO@mail.gmail.com>
-References: <cover.1288268453.git.mike@compulab.co.il>
-	<0fa1fabd6da74c84e98a44ecfad099f207154aa7.1288268453.git.mike@compulab.co.il>
-	<FCBE654890C0334289D0AD3AF4EF009FE14774394C@IL-MB01.marvell.com>
+From: Larry Finger <Larry.Finger@lwfinger.net>
+Subject: Re: b43 sdio: WARNING: at drivers/mmc/core/core.c:237 mmc_wait_for_cmd
+Date: Thu, 28 Oct 2010 09:49:41 -0500
+Message-ID: <4CC98D85.20703@lwfinger.net>
+References: <4CC874F4.5050908@arndnet.de> <4CC8CAAE.3040100@lwfinger.net> <4CC98892.7080000@arndnet.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:53296 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933376Ab0J1Ot0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2010 10:49:26 -0400
-Received: by qyk10 with SMTP id 10so2221794qyk.19
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2010 07:49:25 -0700 (PDT)
-In-Reply-To: <FCBE654890C0334289D0AD3AF4EF009FE14774394C@IL-MB01.marvell.com>
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:40525 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933376Ab0J1Ot2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2010 10:49:28 -0400
+In-Reply-To: <4CC98892.7080000@arndnet.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Saeed Bishara <saeed@marvell.com>
-Cc: Mike Rapoport <mike@compulab.co.il>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>
+To: Arnd Hannemann <arnd@arndnet.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
 
->>Subject: [PATCH v3 2/2] [ARM] Dove: rename SDCHI devices to
- please fix the typo in the subject SDHCI instead of SDCHI
-saeed
+On 10/28/2010 09:28 AM, Arnd Hannemann wrote:
+> Hi,
+\> [ 1364.620044] b43-phy1 debug: Removing Interface type 2
+> [ 1364.621812] b43-phy1 debug: Wireless interface stopped
+> [ 1372.440297] b43-sdio: before ssb_bus_unregister, claimed is 0
+> [ 1372.440345] b43-sdio: before sdio_disable_func, claimed is 0
+> [ 1372.440351] ------------[ cut here ]------------
+> [ 1372.440367] WARNING: at drivers/mmc/core/core.c:237 mmc_wait_for_cmd+0x88/0x90()
+
+Please try the patch below. It claims the device before the sdio_disable_func(()
+call and releases it afterwords.
+
+Larry
+
+
+Index: wireless-testing/drivers/net/wireless/b43/sdio.c
+===================================================================
+--- wireless-testing.orig/drivers/net/wireless/b43/sdio.c
++++ wireless-testing/drivers/net/wireless/b43/sdio.c
+@@ -175,7 +175,9 @@ static void b43_sdio_remove(struct sdio_
+ 	struct b43_sdio *sdio = sdio_get_drvdata(func);
+
+ 	ssb_bus_unregister(&sdio->ssb);
++	sdio_claim_host(func);
+ 	sdio_disable_func(func);
++	sdio_release_host(func);
+ 	kfree(sdio);
+ 	sdio_set_drvdata(func, NULL);
+ }
