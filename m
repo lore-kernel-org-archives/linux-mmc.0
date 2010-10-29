@@ -1,52 +1,52 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v4 0/2] add support for the Marvell Dove SDHCI
-	controller
-Date: Fri, 29 Oct 2010 01:20:42 +0200
-Message-ID: <20101028232042.GB4016@pengutronix.de>
-References: <cover.1288293593.git.mike@compulab.co.il>
+From: Philip Rakity <prakity@marvell.com>
+Subject: PATCH: mmc.c DDR print of card type not correct
+Date: Fri, 29 Oct 2010 01:13:38 -0700
+Message-ID: <24C0629C-F7E8-4D4A-A42A-2B6578B5AE2D@marvell.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="i9LlY+UWpKt15+FH"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:36224 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759342Ab0J1XUr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2010 19:20:47 -0400
-Content-Disposition: inline
-In-Reply-To: <cover.1288293593.git.mike@compulab.co.il>
+Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:52388 "HELO
+	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1755920Ab0J2IQQ convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Oct 2010 04:16:16 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mike Rapoport <mike@compulab.co.il>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Saeed Bishara <saeed@marvell.com>, linux-arm-kernel@lists.infradead.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@nokia.com>
+
+we should not call mmc_card_set_ddr_mode if we are in single data mode.  This sets DDR and causes 
+the print out in the log to say the card is DDR when it is not.
+
+Explicitly set ddr to 0 rather then rely on MMC_SDR_MODE being 0 when doing the checks.
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
 
 
---i9LlY+UWpKt15+FH
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 995261f..37ddb0d 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -375,7 +375,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+	struct mmc_card *oldcard)
+{
+	struct mmc_card *card;
+-	int err, ddr = MMC_SDR_MODE;
++	int err, ddr = 0 ;
+	u32 cid[4];
+	unsigned int max_dtr;
 
-On Thu, Oct 28, 2010 at 09:23:51PM +0200, Mike Rapoport wrote:
-> These patches add support for the Marvell Dove SDHCI controller.
-
-Yay! This approach looks much better IMHO. So, for the series:
-
-Acked-by: Wolfram Sang <w.sang@pengutronix.de>
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---i9LlY+UWpKt15+FH
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAkzKBUoACgkQD27XaX1/VRsBBgCeIXbpqTAiyPDXw01fBucYowfy
-Iq0AoIZ+oTAeq57iJw3UTtUFZeN6YCjF
-=P6vB
------END PGP SIGNATURE-----
-
---i9LlY+UWpKt15+FH--
+@@ -562,7 +562,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+			       1 << bus_width, ddr);
+			err = 0;
+		} else {
+-			mmc_card_set_ddr_mode(card);
++			if (ddr)
++				mmc_card_set_ddr_mode(card);
++			else
++				ddr = MMC_SDR_MODE;
+			mmc_set_bus_width_ddr(card->host, bus_width, ddr);
+		}
+	}
