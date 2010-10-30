@@ -1,432 +1,64 @@
-From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH] MMC Agressive clocking framework v6
-Date: Fri, 29 Oct 2010 22:18:07 +0200
-Message-ID: <1288383487-29860-1-git-send-email-linus.walleij@stericsson.com>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: commit 'mmc: sdhci: add MMC_CAP_8_BIT_DATA in the host
+ capabilities' breaks ricoh mmc device
+Date: Sat, 30 Oct 2010 05:53:46 +0200
+Message-ID: <1288410826.3119.5.camel@maxim-laptop>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:55402 "EHLO df.lth.se"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1757938Ab0J2U67 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 29 Oct 2010 16:58:59 -0400
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:33271 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751069Ab0J3Dxv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Oct 2010 23:53:51 -0400
+Received: by fxm16 with SMTP id 16so3681898fxm.19
+        for <linux-mmc@vger.kernel.org>; Fri, 29 Oct 2010 20:53:50 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ghorai Sukumar <s-ghorai@ti.com>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Adrian Hunter <adrian.hunter@nokia.com>, Linus Walleij <linus.walleij@stericsson.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
 
-This patch modifies the MMC core code to optionally call the
-set_ios() operation on the driver with the clock frequency set
-to 0 (gate) after a grace period of at least 8 MCLK cycles, then
-restore it (ungate) before any new request. This gives
-the driver the option to shut down the MCI clock to the MMC/SD
-card when the clock frequency is 0, i.e. the core has stated
-that the MCI clock does not need to be generated.
+Hi, 
 
-It is inspired by existing clock gating code found in the OMAP
-and Atmel drivers and brings this up to the host abstraction.
-Gating is performed before and after any MMC request.
+I just bisected and reverted this commit.
+With it I am unable to read MMC cards via Ricoh MMC function,
+support for which I added recently.
 
-It exemplifies by implementing this for the MMCI/PL180 MMC/SD
-host controller, but it should be simple to switch OMAP and
-Atmel over to using this instead.
+07:00.2 System peripheral: Ricoh Co Ltd R5C843 MMC Host Controller (rev
+12)
 
-Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
----
-It turned out to be easy to port this code forward to the
-current kernel. I'll be hacking some MMCI support code on my
-flight and test it when I get back to Sweden.
+The logs show lot of errors like this:
 
-In the meantime, Sukumar can you test if this can be made
-to work for you on the OMAP?
----
- drivers/mmc/core/Kconfig   |   11 +++
- drivers/mmc/core/core.c    |   39 +++++++++-
- drivers/mmc/core/core.h    |    2 +
- drivers/mmc/core/debugfs.c |    5 +
- drivers/mmc/core/host.c    |  187 +++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/core/host.h    |    4 +
- include/linux/mmc/host.h   |   10 +++
- 7 files changed, 256 insertions(+), 2 deletions(-)
+[  219.590748] mmc1: new MMC card at address 0001
+[  219.639449] mmcblk0: mmc1:0001 MMC    483 MiB 
+[  219.647008] mmcblk0: retrying using single block read
+[  219.649262] mmcblk0: error -84 transferring data, sector 0, nr 8, card status 0x900
+[  219.649271] end_request: I/O error, dev mmcblk0, sector 0
+[  219.651964] mmcblk0: error -84 transferring data, sector 1, nr 7, card status 0x900
+[  219.651969] end_request: I/O error, dev mmcblk0, sector 1
+[  219.654202] mmcblk0: error -84 transferring data, sector 2, nr 6, card status 0x900
+[  219.654206] end_request: I/O error, dev mmcblk0, sector 2
+[  219.657049] mmcblk0: error -84 transferring data, sector 3, nr 5, card status 0x900
+[  219.657054] end_request: I/O error, dev mmcblk0, sector 3
+[  219.661094] mmcblk0: error -84 transferring data, sector 4, nr 4, card status 0x900
+[  219.661100] end_request: I/O error, dev mmcblk0, sector 4
+[  219.663347] mmcblk0: error -84 transferring data, sector 5, nr 3, card status 0x900
+[  219.663352] end_request: I/O error, dev mmcblk0, sector 5
+[  219.665593] mmcblk0: error -84 transferring data, sector 6, nr 2, card status 0x900
+[  219.665598] end_request: I/O error, dev mmcblk0, sector 6
+[  219.667905] mmcblk0: error -84 transferring data, sector 7, nr 1, card status 0x900
+[  219.667910] end_request: I/O error, dev mmcblk0, sector 7
+[  219.667915] Buffer I/O error on device mmcblk0, logical block 0
+[  219.672258] mmcblk0: retrying using single block read
+....
 
-diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-index bb22ffd..1018ccc1 100644
---- a/drivers/mmc/core/Kconfig
-+++ b/drivers/mmc/core/Kconfig
-@@ -16,3 +16,14 @@ config MMC_UNSAFE_RESUME
- 
- 	  This option sets a default which can be overridden by the
- 	  module parameter "removable=0" or "removable=1".
-+
-+config MMC_CLKGATE
-+	bool "MMC host clock gating (EXPERIMENTAL)"
-+	depends on EXPERIMENTAL
-+	help
-+	  This will attempt to agressively gate the clock to the MMC card.
-+	  This is done to save power due to gating off the logic and bus
-+	  noise when the MMC card is not in use. Your host driver has to
-+	  support handling this in order for it to be of any use.
-+
-+	  If unsure, say N.
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8f86d70..e74e767 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -130,6 +130,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 
- 		if (mrq->done)
- 			mrq->done(mrq);
-+
-+		mmc_host_clk_gate(host);
- 	}
- }
- 
-@@ -190,6 +192,7 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 			mrq->stop->mrq = mrq;
- 		}
- 	}
-+	mmc_host_clk_ungate(host);
- 	host->ops->request(host, mrq);
- }
- 
-@@ -296,7 +299,7 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
- 
- 		timeout_us = data->timeout_ns / 1000;
- 		timeout_us += data->timeout_clks * 1000 /
--			(card->host->ios.clock / 1000);
-+			(mmc_host_clk_rate(card->host) / 1000);
- 
- 		if (data->flags & MMC_DATA_WRITE)
- 			/*
-@@ -641,6 +644,40 @@ void mmc_set_clock(struct mmc_host *host, unsigned int hz)
- 	mmc_set_ios(host);
- }
- 
-+#ifdef CONFIG_MMC_CLKGATE
-+/*
-+ * This gates the clock by setting it to 0 Hz.
-+ */
-+void mmc_gate_clock(struct mmc_host *host)
-+{
-+	host->clk_old = host->ios.clock;
-+	host->ios.clock = 0;
-+	host->clk_gated = true;
-+	mmc_set_ios(host);
-+}
-+
-+/*
-+ * This restores the clock from gating by using the cached
-+ * clock value.
-+ */
-+void mmc_ungate_clock(struct mmc_host *host)
-+{
-+	/*
-+	 * We should previously have gated the clock, so the clock
-+	 * shall be 0 here!
-+	 * The clock may however be 0 during intialization,
-+	 * when some request operations are performed before setting
-+	 * the frequency. When ungate is requested in that situation
-+	 * we just ignore the call.
-+	 */
-+	if (host->clk_old) {
-+		BUG_ON(host->ios.clock);
-+		mmc_set_clock(host, host->clk_old);
-+	}
-+	host->clk_gated = false;
-+}
-+#endif
-+
- /*
-  * Change the bus mode (open drain/push-pull) of a host.
-  */
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 77240cd..9972808 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -33,6 +33,8 @@ void mmc_init_erase(struct mmc_card *card);
- 
- void mmc_set_chip_select(struct mmc_host *host, int mode);
- void mmc_set_clock(struct mmc_host *host, unsigned int hz);
-+void mmc_gate_clock(struct mmc_host *host);
-+void mmc_ungate_clock(struct mmc_host *host);
- void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode);
- void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
- void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index eed1405..998797e 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -183,6 +183,11 @@ void mmc_add_host_debugfs(struct mmc_host *host)
- 			&mmc_clock_fops))
- 		goto err_node;
- 
-+#ifdef CONFIG_MMC_CLKGATE
-+	if (!debugfs_create_u32("clk_delay", (S_IRUSR | S_IWUSR),
-+				root, &host->clk_delay))
-+		goto err_node;
-+#endif
- 	return;
- 
- err_node:
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 10b8af2..dc39605 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -3,6 +3,7 @@
-  *
-  *  Copyright (C) 2003 Russell King, All Rights Reserved.
-  *  Copyright (C) 2007-2008 Pierre Ossman
-+ *  Copyright (C) 2010 Linus Walleij
-  *
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License version 2 as
-@@ -50,6 +51,187 @@ void mmc_unregister_host_class(void)
- static DEFINE_IDR(mmc_host_idr);
- static DEFINE_SPINLOCK(mmc_host_lock);
- 
-+#ifdef CONFIG_MMC_CLKGATE
-+
-+/*
-+ * Enabling clock gating will make the core call out to the host
-+ * once up and once down when it performs a request or card operation
-+ * intermingled in any fashion. The driver will see this through
-+ * set_ios() operations with ios.clock field set to 0 to gate
-+ * (disable) the block clock, and to the old frequency to enable
-+ * it again.
-+ */
-+static void mmc_host_clk_gate_delayed(struct mmc_host *host)
-+{
-+	unsigned long tick_ns;
-+	unsigned long freq = host->ios.clock;
-+	unsigned long flags;
-+	int users;
-+
-+	if (!freq) {
-+		pr_err("%s: frequency set to 0 in disable function, "
-+		       "this means the clock is already disabled.\n",
-+		       mmc_hostname(host));
-+		return;
-+	}
-+	/*
-+	 * New requests may have appeared while we were scheduling,
-+	 * then there is no reason to delay the check before
-+	 * clk_disable().
-+	 */
-+	spin_lock_irqsave(&host->clk_lock, flags);
-+	users = host->clk_requests;
-+	/*
-+	 * Delay 8 bus cycles (from MMC spec) before attempting
-+	 * to disable the MMCI block clock. The reference count
-+	 * may have gone up again after this delay due to
-+	 * rescheduling!
-+	 */
-+	if (!users) {
-+		spin_unlock_irqrestore(&host->clk_lock, flags);
-+		tick_ns = DIV_ROUND_UP(1000000000, freq);
-+		ndelay(host->clk_delay * tick_ns);
-+	} else {
-+		/* New users appeared while waiting for this work */
-+		host->clk_pending_gate = false;
-+		spin_unlock_irqrestore(&host->clk_lock, flags);
-+		return;
-+	}
-+	spin_lock_irqsave(&host->clk_lock, flags);
-+	if (!host->clk_requests) {
-+		spin_unlock_irqrestore(&host->clk_lock, flags);
-+		/* this will set host->ios.clock to 0 */
-+		mmc_gate_clock(host);
-+		spin_lock_irqsave(&host->clk_lock, flags);
-+		pr_debug("%s: disabled MCI clock\n",
-+			 mmc_hostname(host));
-+	}
-+	host->clk_pending_gate = false;
-+	spin_unlock_irqrestore(&host->clk_lock, flags);
-+}
-+
-+/*
-+ * Internal work. Work to disable the clock at some later point.
-+ */
-+static void mmc_host_clk_gate_work(struct work_struct *work)
-+{
-+	struct mmc_host *host = container_of(work, struct mmc_host,
-+					      clk_disable_work);
-+
-+	mmc_host_clk_gate_delayed(host);
-+}
-+
-+/*
-+ *	mmc_host_clk_ungate - make sure the host ios.clock is
-+ *	restored to some non-zero value past this call.
-+ *	@host: host to ungate.
-+ *
-+ *	Increase clock reference count and ungate clock if first user.
-+ */
-+void mmc_host_clk_ungate(struct mmc_host *host)
-+{
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->clk_lock, flags);
-+	if (host->clk_gated) {
-+		spin_unlock_irqrestore(&host->clk_lock, flags);
-+		mmc_ungate_clock(host);
-+		spin_lock_irqsave(&host->clk_lock, flags);
-+		pr_debug("%s: ungated MCI clock\n",
-+			 mmc_hostname(host));
-+	}
-+	host->clk_requests++;
-+	spin_unlock_irqrestore(&host->clk_lock, flags);
-+}
-+
-+/*
-+ *	mmc_host_clk_gate - call the host driver with ios.clock
-+ *	set to zero as often as possible so as to make it
-+ *	possible to gate off hardware MCI clocks.
-+ *	@host: host to gate.
-+ *
-+ *	Decrease clock reference count and schedule disablement of clock.
-+ */
-+void mmc_host_clk_gate(struct mmc_host *host)
-+{
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->clk_lock, flags);
-+	host->clk_requests--;
-+	if (!host->clk_requests) {
-+		host->clk_pending_gate = true;
-+		schedule_work(&host->clk_disable_work);
-+	}
-+	spin_unlock_irqrestore(&host->clk_lock, flags);
-+}
-+
-+/*
-+ *	mmc_host_clk_rate - get current clock frequency setting no matter
-+ *	whether it's gated or not.
-+ *	@host: host to get the clock frequency for.
-+ */
-+unsigned int mmc_host_clk_rate(struct mmc_host *host)
-+{
-+	unsigned long freq;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->clk_lock, flags);
-+	if (host->clk_gated)
-+		freq = host->clk_old;
-+	else
-+		freq = host->ios.clock;
-+	spin_unlock_irqrestore(&host->clk_lock, flags);
-+	return freq;
-+}
-+
-+/*
-+ *	mmc_host_clk_init - set up clock gating code
-+ *	@host: host with potential hardware clock to control
-+ */
-+static inline void mmc_host_clk_init(struct mmc_host *host)
-+{
-+	host->clk_requests = 0;
-+	host->clk_delay = 8; /* hold MCI clock in 8 cycles by default */
-+	host->clk_gated = false;
-+	host->clk_pending_gate = false;
-+	INIT_WORK(&host->clk_disable_work, mmc_host_clk_gate_work);
-+	spin_lock_init(&host->clk_lock);
-+}
-+
-+/*
-+ *	mmc_host_clk_exit - shut down clock gating code
-+ *	@host: host with potential hardware clock to control
-+ */
-+static inline void mmc_host_clk_exit(struct mmc_host *host)
-+{
-+	if (cancel_work_sync(&host->clk_disable_work))
-+		mmc_host_clk_gate_delayed(host);
-+	BUG_ON(host->clk_requests > 0);
-+}
-+
-+#else
-+inline void mmc_host_clk_ungate(struct mmc_host *host)
-+{
-+}
-+
-+inline void mmc_host_clk_gate(struct mmc_host *host)
-+{
-+}
-+
-+inline unsigned int mmc_host_clk_rate(struct mmc_host *host)
-+{
-+	return host->ios.clock;
-+}
-+
-+static inline void mmc_host_clk_init(struct mmc_host *host)
-+{
-+}
-+
-+static inline void mmc_host_clk_exit(struct mmc_host *host)
-+{
-+}
-+#endif
-+
- /**
-  *	mmc_alloc_host - initialise the per-host structure.
-  *	@extra: sizeof private data structure
-@@ -82,6 +264,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	host->class_dev.class = &mmc_host_class;
- 	device_initialize(&host->class_dev);
- 
-+	mmc_host_clk_init(host);
-+
- 	spin_lock_init(&host->lock);
- 	init_waitqueue_head(&host->wq);
- 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
-@@ -163,6 +347,8 @@ void mmc_remove_host(struct mmc_host *host)
- 	device_del(&host->class_dev);
- 
- 	led_trigger_unregister_simple(host->led);
-+
-+	mmc_host_clk_exit(host);
- }
- 
- EXPORT_SYMBOL(mmc_remove_host);
-@@ -183,4 +369,3 @@ void mmc_free_host(struct mmc_host *host)
- }
- 
- EXPORT_SYMBOL(mmc_free_host);
--
-diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index 8c87e11..0529b1f 100644
---- a/drivers/mmc/core/host.h
-+++ b/drivers/mmc/core/host.h
-@@ -10,9 +10,13 @@
-  */
- #ifndef _MMC_CORE_HOST_H
- #define _MMC_CORE_HOST_H
-+#include <linux/mmc/host.h>
- 
- int mmc_register_host_class(void);
- void mmc_unregister_host_class(void);
-+void mmc_host_clk_ungate(struct mmc_host *host);
-+void mmc_host_clk_gate(struct mmc_host *host);
-+unsigned int mmc_host_clk_rate(struct mmc_host *host);
- 
- void mmc_host_deeper_disable(struct work_struct *work);
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 6d87f68..c38c400 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -171,6 +171,16 @@ struct mmc_host {
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
-+#ifdef CONFIG_MMC_CLKGATE
-+	int			clk_requests;	/* internal reference counter */
-+	unsigned int		clk_delay;	/* number of MCI clk hold cycles */
-+	bool			clk_gated;	/* clock gated */
-+	bool			clk_pending_gate; /* pending clock gating */
-+	struct work_struct	clk_disable_work; /* delayed clock disablement */
-+	unsigned int		clk_old;	/* old clock value cache */
-+	spinlock_t		clk_lock;	/* lock for clk fields */
-+#endif
-+
- 	/* host specific block data */
- 	unsigned int		max_seg_size;	/* see blk_queue_max_segment_size */
- 	unsigned short		max_segs;	/* see blk_queue_max_segments */
--- 
-1.7.2.3
+
+Now that reader in not standard (it doesn't claim SDHCI, but work very similiar), 
+so it might be device specific bug or not.
+
+One thing for sure, it doesn't physicaly support 8-bit (although the MMC Plus card I tested
+probably does via extra connectors).
+
+Best regards,
+	Maxim Levitsky 
+
 
