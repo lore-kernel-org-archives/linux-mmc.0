@@ -1,22 +1,25 @@
-From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+From: Arnd Hannemann <arnd@arndnet.de>
 Subject: Re: regression: b43-sdio: probe of mmc0:0001:1 failed with error
-	-16
-Date: Sun, 31 Oct 2010 17:25:12 +0000
-Message-ID: <20101031172512.GA20710@void.printf.net>
+ -16
+Date: Sun, 31 Oct 2010 18:35:18 +0100
+Message-ID: <4CCDA8D6.7030905@arndnet.de>
 References: <4CCDA454.708@arndnet.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <4CCDA454.708-BCMAnToX5e2ELgA04lAiVw@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Hannemann <arnd-BCMAnToX5e2ELgA04lAiVw@public.gmane.org>
-Cc: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from slowhand.arndnet.de ([88.198.19.76]:51906 "EHLO mail.unitix.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1756219Ab0JaRfU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 31 Oct 2010 13:35:20 -0400
+In-Reply-To: <4CCDA454.708@arndnet.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, linux-kernel@vger.kernel.org
 
-Hi Arnd,
 
-On Sun, Oct 31, 2010 at 06:16:04PM +0100, Arnd Hannemann wrote:
+Am 31.10.2010 18:16, schrieb Arnd Hannemann:
+
 > on todays Linus' git (v2.6.36-9871-g3985c7c) b43 sdio stopped working.
 > It was working on (v2.6.36-6794-g12ba8d1).
 > 
@@ -31,7 +34,7 @@ On Sun, Oct 31, 2010 at 06:16:04PM +0100, Arnd Hannemann wrote:
 > so I suspect this has something to do with the following commit: 
 > 
 > commit 40bba0c1ca83a370f749c8bc9afda71cf79ebd91
-> Author: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+> Author: Ohad Ben-Cohen <ohad@wizery.com>
 > Date:   Sat Oct 2 13:54:11 2010 +0200
 > 
 >     mmc: sdio: enable runtime PM for SDIO functions
@@ -41,19 +44,9 @@ On Sun, Oct 31, 2010 at 06:16:04PM +0100, Arnd Hannemann wrote:
 > 
 > Tested on AP4EVB (arm) with tmio_mmc. Any ideas?
 
-We've been discussing this on the linux-mmc@ list:
+FYI:
 
-   http://thread.gmane.org/gmane.linux.kernel.mmc/4342
+disabling CONFIG_PM_RUNTIME in my config seems to fix the issue for me.
 
-Until we have a fix, you should be able to get SDIO working again by 
-reverting all nine commits between 1978fda85d..ed2a978594.
-
-Thanks,
-
--- 
-Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
-One Laptop Per Child
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best regards,
+Arnd
