@@ -1,43 +1,47 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: MMC runtime PM patches break libertas probe
-Date: Sun, 31 Oct 2010 16:24:33 +0000
-Message-ID: <AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com>
-References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
-	<AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
-	<AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
-	<AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
-	<AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
-	<AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
-	<AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
-	<AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
-	<AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
-	<AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
+From: Arnd Hannemann <arnd@arndnet.de>
+Subject: regression: b43-sdio: probe of mmc0:0001:1 failed with error -16
+Date: Sun, 31 Oct 2010 18:16:04 +0100
+Message-ID: <4CCDA454.708@arndnet.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:44962 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755767Ab0JaQYe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 31 Oct 2010 12:24:34 -0400
-Received: by wwe15 with SMTP id 15so5232965wwe.1
-        for <linux-mmc@vger.kernel.org>; Sun, 31 Oct 2010 09:24:33 -0700 (PDT)
-In-Reply-To: <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
+Received: from slowhand.arndnet.de ([88.198.19.76]:36465 "EHLO mail.unitix.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1756098Ab0JaRQI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 31 Oct 2010 13:16:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, linux-kernel@vger.kernel.org
 
-On 31 October 2010 16:16, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> Just to make sure - on an older kernel (that doesn't have SDIO runtime
-> pm), the card is powered on at this stage (this info will help me rule
-> out some corner cases) ?
+Hi,
 
-Looks that way. Same test, after reverting your patches:
+on todays Linus' git (v2.6.36-9871-g3985c7c) b43 sdio stopped working.
+It was working on (v2.6.36-6794-g12ba8d1).
 
-clock:          25000000 Hz
-vdd:            20 (3.2 ~ 3.3 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      2 (4 bits)
-timing spec:    0 (legacy)
+b43-sdio: probe of mmc0:0001:1 failed with error -16
+
+The error seems to originate from the following code in drivers/mmc/core/sdio_bus.c:sdio_bus_probe()
+
+135         ret = pm_runtime_get_sync(dev);
+136         if (ret < 0)
+137                 goto out;
+
+so I suspect this has something to do with the following commit: 
+
+commit 40bba0c1ca83a370f749c8bc9afda71cf79ebd91
+Author: Ohad Ben-Cohen <ohad@wizery.com>
+Date:   Sat Oct 2 13:54:11 2010 +0200
+
+    mmc: sdio: enable runtime PM for SDIO functions
+
+However, simply reverting 40bba0c1ca83a370f749c8bc9afda71cf79ebd91 does not work because then
+modprobe hangs.
+
+Tested on AP4EVB (arm) with tmio_mmc. Any ideas?
+
+Best regards,
+Arnd
+
+
+
