@@ -1,141 +1,45 @@
-From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH 2/2] Modify MMCI/PL180 to handle agressive clocking v7
-Date: Sun, 31 Oct 2010 17:06:26 +0100
-Message-ID: <1288541186-16321-1-git-send-email-linus.walleij@stericsson.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: MMC runtime PM patches break libertas probe
+Date: Sun, 31 Oct 2010 18:16:14 +0200
+Message-ID: <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
+References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
+ <AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
+ <AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
+ <AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
+ <AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
+ <AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
+ <AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
+ <AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com> <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:58929 "EHLO df.lth.se"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755915Ab0JaQGv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 31 Oct 2010 12:06:51 -0400
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:60343 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755767Ab0JaQQf convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 31 Oct 2010 12:16:35 -0400
+Received: by iwn10 with SMTP id 10so6009636iwn.19
+        for <linux-mmc@vger.kernel.org>; Sun, 31 Oct 2010 09:16:34 -0700 (PDT)
+In-Reply-To: <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ghorai Sukumar <s-ghorai@ti.com>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Adrian Hunter <adrian.hunter@nokia.com>, jh80.chung@samsung.com, Kyungmin Park <kmpark@infradead.org>, arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@stericsson.com>
+To: Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-This removes the default clocking for the MMCI controller so that
-the external MCI card clock does not activate until the first
-.set_ios() call is issued. It will further handle the transitions
-from a clock != 0 to 0 and vice versa by gating/ungating the
-clock with clk_disable()/clk_enable().
+On Sun, Oct 31, 2010 at 5:57 PM, Daniel Drake <dsd@laptop.org> wrote:
+>> cat /sys/kernel/debug/mmc1/ios
+>
+> clock: =A0 =A0 =A0 =A0 =A00 Hz
+> vdd: =A0 =A0 =A0 =A0 =A0 =A00 (invalid)
+> bus mode: =A0 =A0 =A0 1 (open drain)
+> chip select: =A0 =A00 (don't care)
+> power mode: =A0 =A0 0 (off)
+> bus width: =A0 =A0 =A00 (1 bits)
+> timing spec: =A0 =A00 (legacy)
 
-This assures that the MCI clock will not be active unless there
-is a card in the MMC slot.
+Good. Power is taken down after the mmc+sdio devices are added to the
+device tree.
 
-By default the MMC core will not gate off the clock to a card
-once it's enabled, but with the separate patch for aggressive
-clocking this can optionally be enabled for the system.
-
-Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
----
-This complements the agressive clocking patch. The patches are
-actually independent and this patch is good on its own since it
-removes the unnecessary clocking of the MCI clock to slots with
-no cards in them, but it also has the side effect of enabling
-aggressive clocking introduced with a separate patch.
----
- drivers/mmc/host/mmci.c |   35 +++++++++++++++++++++++------------
- drivers/mmc/host/mmci.h |    1 +
- 2 files changed, 24 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 743d497..3fa4c4f 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -924,7 +924,23 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
--	mmci_set_clkreg(host, ios->clock);
-+	/*
-+	 * Turn on clock whenever ios->clock transitions
-+	 * from 0 to !=0 and gate it off whenever ios->clock
-+	 * transitions from !=0 to 0.
-+	 */
-+	if (host->iosclock == 0 && ios->clock != 0) {
-+		dev_dbg(mmc_dev(mmc), "enable clock f=%d\n", ios->clock);
-+		clk_enable(host->clk);
-+		mmci_set_clkreg(host, ios->clock);
-+	} else if (host->iosclock != 0 && ios->clock == 0) {
-+		dev_dbg(mmc_dev(mmc), "disable clock\n");
-+		clk_disable(host->clk);
-+	} else if (ios->clock != 0) {
-+		mmci_set_clkreg(host, ios->clock);
-+		dev_dbg(mmc_dev(mmc), "set clock f=%d\n", ios->clock);
-+	}
-+	host->iosclock = ios->clock;
- 
- 	if (host->pwr != pwr) {
- 		host->pwr = pwr;
-@@ -1009,6 +1025,8 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
- 
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
-+	host->plat = plat;
-+	host->variant = variant;
- 
- 	host->gpio_wp = -ENOSYS;
- 	host->gpio_cd = -ENOSYS;
-@@ -1019,19 +1037,14 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
- 	dev_dbg(mmc_dev(mmc), "designer ID = 0x%02x\n", host->hw_designer);
- 	dev_dbg(mmc_dev(mmc), "revision = 0x%01x\n", host->hw_revision);
- 
-+	/* This clock will be enabled/disabled by set_ios() calls later */
- 	host->clk = clk_get(&dev->dev, NULL);
- 	if (IS_ERR(host->clk)) {
- 		ret = PTR_ERR(host->clk);
- 		host->clk = NULL;
- 		goto host_free;
- 	}
--
--	ret = clk_enable(host->clk);
--	if (ret)
--		goto clk_free;
--
--	host->plat = plat;
--	host->variant = variant;
-+	host->iosclock = 0;
- 	host->mclk = clk_get_rate(host->clk);
- 	/*
- 	 * According to the spec, mclk is max 100 MHz,
-@@ -1041,7 +1054,7 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
- 	if (host->mclk > 100000000) {
- 		ret = clk_set_rate(host->clk, 100000000);
- 		if (ret < 0)
--			goto clk_disable;
-+			goto clk_free;
- 		host->mclk = clk_get_rate(host->clk);
- 		dev_dbg(mmc_dev(mmc), "eventual mclk rate: %u Hz\n",
- 			host->mclk);
-@@ -1050,7 +1063,7 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
- 	host->base = ioremap(dev->res.start, resource_size(&dev->res));
- 	if (!host->base) {
- 		ret = -ENOMEM;
--		goto clk_disable;
-+		goto clk_free;
- 	}
- 
- 	mmc->ops = &mmci_ops;
-@@ -1203,8 +1216,6 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
- 		gpio_free(host->gpio_cd);
-  err_gpio_cd:
- 	iounmap(host->base);
-- clk_disable:
--	clk_disable(host->clk);
-  clk_free:
- 	clk_put(host->clk);
-  host_free:
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index bc3b71e..5701d33 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -170,6 +170,7 @@ struct mmci_host {
- 
- 	unsigned int		mclk;
- 	unsigned int		cclk;
-+	unsigned int		iosclock;
- 	u32			pwr;
- 	struct mmci_platform_data *plat;
- 	struct variant_data	*variant;
--- 
-1.7.2.3
-
+Just to make sure - on an older kernel (that doesn't have SDIO runtime
+pm), the card is powered on at this stage (this info will help me rule
+out some corner cases) ?
