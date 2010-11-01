@@ -1,51 +1,54 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: regression: b43-sdio: probe of mmc0:0001:1 failed with error -16
-Date: Mon, 1 Nov 2010 16:33:54 +0200
-Message-ID: <AANLkTim8bfNDacFLs-kmkmtQuxUb-1BEqTNVW1dGQZxd@mail.gmail.com>
-References: <4CCDA454.708@arndnet.de> <AANLkTin80pwnb1DX8OdZK3Wgsq0nj==G9VM3pahsmo0U@mail.gmail.com>
- <4CCDE4EB.7060001@arndnet.de> <AANLkTik52SVa0SC_RtNtgFu2U9Gye7BKtQ7jNgMPKe=W@mail.gmail.com>
- <4CCE74DB.8000206@arndnet.de> <AANLkTinhYqhcQor3PhTKoS3At3Tt2Qv5WAGSirfR8eNG@mail.gmail.com>
- <4CCECD09.2010505@arndnet.de>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH] MMC Agressive clocking framework v6
+Date: Mon, 1 Nov 2010 16:24:40 +0100
+Message-ID: <AANLkTiki-PGJHMcrRCwA46W+-xmj+AdpxLMFdd2mfdhM@mail.gmail.com>
+References: <1288383487-29860-1-git-send-email-linus.walleij@stericsson.com>
+	<4CCEA435.9030402@csr.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:43945 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756439Ab0KAOeQ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Nov 2010 10:34:16 -0400
-In-Reply-To: <4CCECD09.2010505@arndnet.de>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:41171 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757627Ab0KAPYz convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Nov 2010 11:24:55 -0400
+Received: by wwe15 with SMTP id 15so6154637wwe.1
+        for <linux-mmc@vger.kernel.org>; Mon, 01 Nov 2010 08:24:54 -0700 (PDT)
+In-Reply-To: <4CCEA435.9030402@csr.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Hannemann <arnd@arndnet.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, linux-kernel@vger.kernel.org
+To: David Vrabel <david.vrabel@csr.com>
+Cc: linux-mmc@vger.kernel.org, Ghorai Sukumar <s-ghorai@ti.com>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Adrian Hunter <adrian.hunter@nokia.com>
 
-On Mon, Nov 1, 2010 at 4:22 PM, Arnd Hannemann <arnd@arndnet.de> wrote:
-> It looks like this:
+2010/11/1 David Vrabel <david.vrabel@csr.com>:
+> On 29/10/2010 21:18, Linus Walleij wrote:
+>> This patch modifies the MMC core code to optionally call the
+>> set_ios() operation on the driver with the clock frequency set
+>> to 0 (gate) after a grace period of at least 8 MCLK cycles, then
+>> restore it (ungate) before any new request. This gives
+>> the driver the option to shut down the MCI clock to the MMC/SD
+>> card when the clock frequency is 0, i.e. the core has stated
+>> that the MCI clock does not need to be generated.
 >
-> root@ap4evb:~# modprobe b43
-> [ =A0 36.023437] cfg80211: Calling CRDA to update world regulatory do=
-main
-> [ =A0 36.460937] sdio_bus_probe()
-> [ =A0 36.468750] sdio_bus_probe() calling pm_runtime_get_sync()
-> [ =A0 36.468750] mmc_power_restore_host() begin
-> [ =A0 36.570312] mmc_sdio_power_restore() begin
-> [ =A0 36.570312] mmc_sdio_init_card()
-> [ =A0 36.578125] mmc_sdio_init_card() mmc_send_io_op_cond ret=3D-110
+> With SDIO cards, 1 bit mode needs to be set on the controller otherwi=
+se
+> many controllers cannot detect card interrupts.
 
-OK, thanks. CMD5 time outs. I suspect it's similar to what we have
-with the XO-1.5: despite software calling mmc_power_off/on, the
-hardware does not go through full power off/on cycle.
+Do you mean generally, or just when disabling the clock?
+I don't quite get this part...
 
->> The interesting part is actually what happens after sdio_bus_probe()=
-,
->> not before it.
->
-> Actually nothing special happens after sdio_bus_probe()
+> Also some v2.00 SDIO cards in 4-bit mode will not generate card
+> interrupts unless they are clocked (the spec v2.00 doesn't require th=
+em
+> to be able to but v3.00 does).
 
-The actual failure happens after it (in mmc_sdio_init_card).
+OK I think it is better to disable clocking off SDIO cards altogether
+for now.
 
-> With your patch the problem goes away, thanks.
+>=A0I would suggest a white list of v2.00
+> cards that can generate interrupts asynchronousy.
 
-Thank you for testing this,
-Ohad.
+Hm... does people maintain such lists? Sounds tricksy.
+Better avoid it for the time being.
+
+Linus Walleij
