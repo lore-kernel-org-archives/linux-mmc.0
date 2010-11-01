@@ -1,97 +1,64 @@
-From: Arnd Hannemann <arnd@arndnet.de>
-Subject: Re: regression: b43-sdio: probe of mmc0:0001:1 failed with error
- -16
-Date: Sun, 31 Oct 2010 22:51:39 +0100
-Message-ID: <4CCDE4EB.7060001@arndnet.de>
-References: <4CCDA454.708@arndnet.de> <AANLkTin80pwnb1DX8OdZK3Wgsq0nj==G9VM3pahsmo0U@mail.gmail.com>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: RE: commit mmc: sdhci: add MMC_CAP_8_BIT_DATA in the host
+Date: Mon, 01 Nov 2010 03:44:26 +0200
+Message-ID: <1288575866.25600.1.camel@maxim-laptop>
+References: <16C48D64-3B93-450C-8C92-EFE4D70BD5ED@marvell.com>
+	 <1288447317.4817.9.camel@maxim-laptop>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------090604000406090506030406"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from slowhand.arndnet.de ([88.198.19.76]:59162 "EHLO mail.unitix.de"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752823Ab0JaVvl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 31 Oct 2010 17:51:41 -0400
-In-Reply-To: <AANLkTin80pwnb1DX8OdZK3Wgsq0nj==G9VM3pahsmo0U@mail.gmail.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:38598 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754614Ab0KABog (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 31 Oct 2010 21:44:36 -0400
+Received: by fxm16 with SMTP id 16so4555828fxm.19
+        for <linux-mmc@vger.kernel.org>; Sun, 31 Oct 2010 18:44:35 -0700 (PDT)
+In-Reply-To: <1288447317.4817.9.camel@maxim-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, linux-kernel@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-This is a multi-part message in MIME format.
---------------090604000406090506030406
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-
-Hi Ohad,
-
-Am 31.10.2010 20:14, schrieb Ohad Ben-Cohen:
-
-> On Sun, Oct 31, 2010 at 7:16 PM, Arnd Hannemann <arnd@arndnet.de> wrote:
->> b43-sdio: probe of mmc0:0001:1 failed with error -16
+On Sat, 2010-10-30 at 16:01 +0200, Maxim Levitsky wrote:
+> On Sat, 2010-10-30 at 05:47 -0700, Philip Rakity wrote:
+> > eMMC unlike SD does not have a field to inside the card data to say the bit width of the card.  
+> > In addition some mmc cards (from Transcend) only support 1 bit mode.  The physical pins to support 4 bit data are not there as well as no card specific data saying the bus width of the card.
+> > 
+> > The only solution is to probe the bus by sending a CMD19 and CMD14 (BUSTEST_W/BUSTEST_R).  
+> > This procedure is defined in the JEDEC Standard No. 84-A441 spec -- Annex A.8.3 and this has been working in our linux 2.6.28/2.6.29 for quite a while.   I can submit a patch if this makes sense.
+> > However, it may not work all the time; some controllers do not send out the CMD19 sequence.  The  (BUSTEST_W/BUSTEST_R) procedure is used in BSD. Also, in SD v3.0 CMD19 is defined for tuning and its definition is slightly different then in the JEDEC standard.
+> > 
+> > One option for the problem you are seeing would be for my patch 
+> > http://permalink.gmane.org/gmane.linux.kernel.mmc/3966
+> > or something like it to be accepted.   As well as adding the bustest procedure. 
+> > 
+> > At least the board specific data can then say 8 bit data lines are supported on the physical slot.  The controller can say 8 bit works but normally does not have knowledge of the lower level board design.
 > 
-> It's exactly what Daniel is experiencing with the XO-1.5.
+> I see two solutions to this problem which you proposed above:
 > 
-> In Daniel's scenario, mmc_sdio_init_card() fails because
-> mmc_send_relative_addr() returns -110.
+> 1. Allow the controller to tell host that it doesn't support 8-bit.
+> However, what about generic sdhci controllers? These that don't have
+> quirks in sdhci.c. Are there any desktop sdhci controllers that support
+> 8-bit. Note that SDHCI controllers are primary for SD/SDHCI cards not
+> MMC. I don't know if extra pins have same locations on SD and MMC cards.
 > 
-> Can you please check out if that's the same thing you have too ?
+> 2. Test the card for being readable.
+> 
+> In memstick subsystem I recently had a lot of expirence with
+> (unfortunately its maintainer isn't easy to work with - probably
+> underestimation...)
+> 
+> It should be possible to set bus width and then just test the card for
+> being readable. While I don't yet know MMC spec and meaning of the
+> commands, I thing sending an ordinary command like reading card ID,
+> or something like that would suffiece to see if it accepts the bus
+> width. If such command fails, 4-bit bus width should be used.
+> 
+> I now assume that above commit broke all MMC cards in sdhci readers.
+> This has to be fixed somehow.
+Ping.
+> 
+> 
 
-No, it seems to be the pm_runtime_get_sync in sdio_bus.c::sdio_bus_probe().
 
-If I test with CONFIG_PM_RUNTIME=y and the attached modifications,
-then I get this as output:
-
-root@ap4evb:~# modprobe b43
-[   29.859375] cfg80211: Calling CRDA to update world regulatory domain
-[   30.226562] pm_runtime_get_sync: -16
-[   30.234375] b43-sdio: probe of mmc0:0001:1 failed with error -16
-[   30.242187] Broadcom 43xx driver loaded [ Features: LS, Firmware-ID: FW13 ]
-
-If CONFIG_PM_RUNTIME is not set in .config, the problem goes away.
-
-Regards,
-Arnd
-
-
---------------090604000406090506030406
-Content-Type: text/plain;
- name="diff"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
- filename="diff"
-
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 797cdb5..57b6dd4 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -237,8 +237,10 @@ int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca)
- 	cmd.flags = MMC_RSP_R6 | MMC_CMD_BCR;
- 
- 	err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
--	if (err)
-+	if (err) {
-+		printk(KERN_INFO "%s(): %d\n", __func__, err);
- 		return err;
-+	}
- 
- 	*rca = cmd.resp[0] >> 16;
- 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 2716c7a..102c163 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -133,8 +133,10 @@ static int sdio_bus_probe(struct device *dev)
- 	 * pm_runtime_get_noresume() in its remove routine.
- 	 */
- 	ret = pm_runtime_get_sync(dev);
--	if (ret < 0)
-+	if (ret < 0) {
-+		printk(KERN_INFO "pm_runtime_get_sync: %d\n", ret);
- 		goto out;
-+	}
- 
- 	/* Set the default block size so the driver is sure it's something
- 	 * sensible. */
-
---------------090604000406090506030406--
