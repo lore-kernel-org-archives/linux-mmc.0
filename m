@@ -1,275 +1,80 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: MMC runtime PM patches break libertas probe
-Date: Mon, 1 Nov 2010 10:27:24 +0200
-Message-ID: <AANLkTi=EaZbdnJzJWGH2fUadvNkUhdQgTU1rAoS5wMAs@mail.gmail.com>
-References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
- <AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
- <AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
- <AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
- <AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
- <AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
- <AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
- <AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
- <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
- <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
- <AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com> <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
+Subject: Re: regression: b43-sdio: probe of mmc0:0001:1 failed with error -16
+Date: Mon, 1 Nov 2010 11:02:00 +0200
+Message-ID: <AANLkTinhYqhcQor3PhTKoS3At3Tt2Qv5WAGSirfR8eNG@mail.gmail.com>
+References: <4CCDA454.708@arndnet.de> <AANLkTin80pwnb1DX8OdZK3Wgsq0nj==G9VM3pahsmo0U@mail.gmail.com>
+ <4CCDE4EB.7060001@arndnet.de> <AANLkTik52SVa0SC_RtNtgFu2U9Gye7BKtQ7jNgMPKe=W@mail.gmail.com>
+ <4CCE74DB.8000206@arndnet.de>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=20cf3054a165226ef10493f9954b
+Content-Type: multipart/mixed; boundary=000325574a52dc9bc50493fa10a7
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:40349 "EHLO
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:35790 "EHLO
 	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754388Ab0KAI1q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Nov 2010 04:27:46 -0400
-Received: by iwn10 with SMTP id 10so6774746iwn.19
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Nov 2010 01:27:45 -0700 (PDT)
-In-Reply-To: <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
+	with ESMTP id S1753649Ab0KAJCV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Nov 2010 05:02:21 -0400
+In-Reply-To: <4CCE74DB.8000206@arndnet.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Arnd Hannemann <arnd@arndnet.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, linux-kernel@vger.kernel.org
 
---20cf3054a165226ef10493f9954b
+--000325574a52dc9bc50493fa10a7
 Content-Type: text/plain; charset=ISO-8859-1
 
-Hi Daniel,
+On Mon, Nov 1, 2010 at 10:05 AM, Arnd Hannemann <arnd@arndnet.de> wrote:
+> No, actually mmc_sdio_init_card() is called _before_ sdio_bus_probe
 
-On Sun, Oct 31, 2010 at 9:06 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-...
-> we need to support boards with controllers/cards
-> which we can't power off in runtime.
->
-> On such boards, the right thing to do would be to disable runtime PM altogether.
+Yes, it is called once at boot while the card is mmc_rescan()ed.
 
-The patch below (/attached) should trivially fix the problem - can you
-please check it out ?
+But that's not interesting, because the card is then powered down, and
+will only be powered on again when it is probed with a driver.
 
-It's very simple: it just requires hosts to explicitly indicate they
-support runtime powering off/on their cards (by means of
-MMC_CAP_RUNTIME_PM).
+> Also mmd_sdio_resume is not called at all.
 
-There is no way around this I'm afraid: it is legitimate for a
-board/host/card configuration not to support powering off the card
-after boot, and we must allow it.
+Sorry, I meant mmc_sdio_restore_host.
 
-In addition having an explicit MMC_CAP_RUNTIME_PM will also allow us
-smoother transition to runtime PM behavior. Developers will have to
-explicitly turn it on, and will not be surprised if things won't
-immediately work.
+You should see something like this:
 
-Please note that this cap is not interchangeable, and can't be replace
-with CONFIG_PM_RUNTIME.
+sdio_bus_probe - >
+    ... (runtime PM function calls) ... ->
+           mmc_power_restore_host ->
+                 mmc_sdio_power_restore ->
+                        mmc_sdio_init_card -> ...
 
-Having said that, I still think we need to understand why CMD3 timed
-out on the XO-1.5.
+We have 1 report where the latter mmc_sdio_init_card fails at this
+point, and I'm interested to know whether it fails for you, too (and
+if yes, where). If it is not even called, I'd appreciate if you can
+check out where does this flow break in your case.
+
+> No mmc_send_relative_addr() does _not_ return -110, actually it
+> is not called at all.
+
+OK.
+
+> I inserted a WARN_ON() in sdio_bus_probe, and here is the backtrace I get:
+
+The interesting part is actually what happens after sdio_bus_probe(),
+not before it.
+
+Is mmc_power_restore_host being called ? mmc_sdio_power_restore ?
+mmc_sdio_init_card ? etc...
+
+I'm also attaching a patch that requires hosts to explicitly indicate
+whether they support powering off/on their cards after boot (which
+would prevent SDIO core from powering off you card after boot since
+your host doesn't indicate that capability).
+
+Can you please see if the problem goes away with it ?
 
 Thanks,
 Ohad.
 
->From 6b5691bdd8184cc0876d209c69d38844ea10f678 Mon Sep 17 00:00:00 2001
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Date: Mon, 1 Nov 2010 09:41:44 +0200
-Subject: [PATCH] mmc: add MMC_CAP_RUNTIME_PM
-
-Some board/card/host configurations are not capable of powering off/on
-on the card during runtime.
-
-To support such configurations, and to allow smoother transition to
-runtime PM behavior, MMC_CAP_RUNTIME_PM is added, so hosts need to
-explicitly indicate that it's OK to power off their cards after boot.
-
-This will prevent sdio_bus_probe() from failing to power on the card
-when the driver is loaded on such setups.
-
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
----
- drivers/mmc/core/sdio.c     |   37 +++++++++++++++++++++++--------------
- drivers/mmc/core/sdio_bus.c |   33 ++++++++++++++++++++++-----------
- include/linux/mmc/host.h    |    1 +
- 3 files changed, 46 insertions(+), 25 deletions(-)
-
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 6a9ad40..373d56d 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -547,9 +547,11 @@ static void mmc_sdio_detect(struct mmc_host *host)
- 	BUG_ON(!host->card);
-
- 	/* Make sure card is powered before detecting it */
--	err = pm_runtime_get_sync(&host->card->dev);
--	if (err < 0)
--		goto out;
-+	if (host->caps & MMC_CAP_RUNTIME_PM) {
-+		err = pm_runtime_get_sync(&host->card->dev);
-+		if (err < 0)
-+			goto out;
-+	}
-
- 	mmc_claim_host(host);
-
-@@ -570,7 +572,8 @@ out:
- 	}
-
- 	/* Tell PM core that we're done */
--	pm_runtime_put(&host->card->dev);
-+	if (host->caps & MMC_CAP_RUNTIME_PM)
-+		pm_runtime_put(&host->card->dev);
- }
-
- /*
-@@ -720,16 +723,21 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
- 	card = host->card;
-
- 	/*
--	 * Let runtime PM core know our card is active
-+	 * Enable runtime PM only if supported by host+card+board
- 	 */
--	err = pm_runtime_set_active(&card->dev);
--	if (err)
--		goto remove;
-+	if (host->caps & MMC_CAP_RUNTIME_PM) {
-+		/*
-+		 * Let runtime PM core know our card is active
-+		 */
-+		err = pm_runtime_set_active(&card->dev);
-+		if (err)
-+			goto remove;
-
--	/*
--	 * Enable runtime PM for this card
--	 */
--	pm_runtime_enable(&card->dev);
-+		/*
-+		 * Enable runtime PM for this card
-+		 */
-+		pm_runtime_enable(&card->dev);
-+	}
-
- 	/*
- 	 * The number of functions on the card is encoded inside
-@@ -747,9 +755,10 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
- 			goto remove;
-
- 		/*
--		 * Enable Runtime PM for this func
-+		 * Enable Runtime PM for this func (if supported)
- 		 */
--		pm_runtime_enable(&card->sdio_func[i]->dev);
-+		if (host->caps & MMC_CAP_RUNTIME_PM)
-+			pm_runtime_enable(&card->sdio_func[i]->dev);
- 	}
-
- 	mmc_release_host(host);
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 2716c7a..f3ce21b 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -17,6 +17,7 @@
- #include <linux/pm_runtime.h>
-
- #include <linux/mmc/card.h>
-+#include <linux/mmc/host.h>
- #include <linux/mmc/sdio_func.h>
-
- #include "sdio_cis.h"
-@@ -132,9 +133,11 @@ static int sdio_bus_probe(struct device *dev)
- 	 * it should call pm_runtime_put_noidle() in its probe routine and
- 	 * pm_runtime_get_noresume() in its remove routine.
- 	 */
--	ret = pm_runtime_get_sync(dev);
--	if (ret < 0)
--		goto out;
-+	if (func->card->host->caps & MMC_CAP_RUNTIME_PM) {
-+		ret = pm_runtime_get_sync(dev);
-+		if (ret < 0)
-+			goto out;
-+	}
-
- 	/* Set the default block size so the driver is sure it's something
- 	 * sensible. */
-@@ -151,7 +154,8 @@ static int sdio_bus_probe(struct device *dev)
- 	return 0;
-
- disable_runtimepm:
--	pm_runtime_put_noidle(dev);
-+	if (func->card->host->caps & MMC_CAP_RUNTIME_PM)
-+		pm_runtime_put_noidle(dev);
- out:
- 	return ret;
- }
-@@ -160,12 +164,14 @@ static int sdio_bus_remove(struct device *dev)
- {
- 	struct sdio_driver *drv = to_sdio_driver(dev->driver);
- 	struct sdio_func *func = dev_to_sdio_func(dev);
--	int ret;
-+	int ret = 0;
-
- 	/* Make sure card is powered before invoking ->remove() */
--	ret = pm_runtime_get_sync(dev);
--	if (ret < 0)
--		goto out;
-+	if (func->card->host->caps & MMC_CAP_RUNTIME_PM) {
-+		ret = pm_runtime_get_sync(dev);
-+		if (ret < 0)
-+			goto out;
-+	}
-
- 	drv->remove(func);
-
-@@ -178,10 +184,12 @@ static int sdio_bus_remove(struct device *dev)
- 	}
-
- 	/* First, undo the increment made directly above */
--	pm_runtime_put_noidle(dev);
-+	if (func->card->host->caps & MMC_CAP_RUNTIME_PM)
-+		pm_runtime_put_noidle(dev);
-
- 	/* Then undo the runtime PM settings in sdio_bus_probe() */
--	pm_runtime_put_noidle(dev);
-+	if (func->card->host->caps & MMC_CAP_RUNTIME_PM)
-+		pm_runtime_put_noidle(dev);
-
- out:
- 	return ret;
-@@ -191,6 +199,8 @@ out:
-
- static int sdio_bus_pm_prepare(struct device *dev)
- {
-+	struct sdio_func *func = dev_to_sdio_func(dev);
-+
- 	/*
- 	 * Resume an SDIO device which was suspended at run time at this
- 	 * point, in order to allow standard SDIO suspend/resume paths
-@@ -212,7 +222,8 @@ static int sdio_bus_pm_prepare(struct device *dev)
- 	 * since there is little point in failing system suspend if a
- 	 * device can't be resumed.
- 	 */
--	pm_runtime_resume(dev);
-+	if (func->card->host->caps & MMC_CAP_RUNTIME_PM)
-+		pm_runtime_resume(dev);
-
- 	return 0;
- }
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c3ffad8..e5eee0e 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -167,6 +167,7 @@ struct mmc_host {
- 						/* DDR mode at 1.8V */
- #define MMC_CAP_1_2V_DDR	(1 << 12)	/* can support */
- 						/* DDR mode at 1.2V */
-+#define MMC_CAP_RUNTIME_PM	(1 << 13)	/* Can power off/on in runtime */
-
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
-
--- 
-1.7.0.4
-
---20cf3054a165226ef10493f9954b
+--000325574a52dc9bc50493fa10a7
 Content-Type: text/x-patch; charset=US-ASCII; name="0001-mmc-add-MMC_CAP_RUNTIME_PM.patch"
 Content-Disposition: attachment;
 	filename="0001-mmc-add-MMC_CAP_RUNTIME_PM.patch"
 Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gfz2nne20
+X-Attachment-Id: f_gfz4dlia0
 
 RnJvbSA2YjU2OTFiZGQ4MTg0Y2MwODc2ZDIwOWM2OWQzODg0NGVhMTBmNjc4IE1vbiBTZXAgMTcg
 MDA6MDA6MDAgMjAwMQpGcm9tOiBPaGFkIEJlbi1Db2hlbiA8b2hhZEB3aXplcnkuY29tPgpEYXRl
@@ -371,4 +176,4 @@ c3VwcG9ydCAqLwogCQkJCQkJLyogRERSIG1vZGUgYXQgMS4yViAqLworI2RlZmluZSBNTUNfQ0FQ
 X1JVTlRJTUVfUE0JKDEgPDwgMTMpCS8qIENhbiBwb3dlciBvZmYvb24gaW4gcnVudGltZSAqLwog
 CiAJbW1jX3BtX2ZsYWdfdAkJcG1fY2FwczsJLyogc3VwcG9ydGVkIHBtIGZlYXR1cmVzICovCiAK
 LS0gCjEuNy4wLjQKCg==
---20cf3054a165226ef10493f9954b--
+--000325574a52dc9bc50493fa10a7--
