@@ -1,67 +1,38 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 0/2] Add GPIO WP and HW bus-width caps when support
- i.MX51 BBG board
-Date: Wed, 3 Nov 2010 15:06:04 +0100
-Message-ID: <20101103140604.GD4167@pengutronix.de>
-References: <1287568828-22563-1-git-send-email-r65037@freescale.com>
- <010C9052C42A00499CE76D637FA5EE90A516@039-SN1MPN1-002.039d.mgd.msft.net>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH 1/2] MMC Agressive clocking framework v7
+Date: Wed, 3 Nov 2010 15:30:16 +0100
+Message-ID: <AANLkTikoyqd0JEJYTpKNs+UGmu4t4L7n-9s4QRk7pFbu@mail.gmail.com>
+References: <1288541169-16054-1-git-send-email-linus.walleij@stericsson.com>
+	<AANLkTims3RhKmPxxxL_T32DN96kSrEE415FE1320fbNO@mail.gmail.com>
+	<4CD1612F.10507@stericsson.com>
+	<20101103134450.0c88e4ed@lxorguk.ukuu.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="6WlEvdN9Dv0WHSBl"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:47774 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752742Ab0KCOGG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Nov 2010 10:06:06 -0400
-Content-Disposition: inline
-In-Reply-To: <010C9052C42A00499CE76D637FA5EE90A516@039-SN1MPN1-002.039d.mgd.msft.net>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:40272 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755121Ab0KCOaR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Nov 2010 10:30:17 -0400
+Received: by gxk23 with SMTP id 23so509946gxk.19
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Nov 2010 07:30:16 -0700 (PDT)
+In-Reply-To: <20101103134450.0c88e4ed@lxorguk.ukuu.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhu Richard-R65037 <r65037@freescale.com>
-Cc: linux-mmc@vger.kernel.org
+To: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ghorai Sukumar <s-ghorai@ti.com>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Adrian Hunter <adrian.hunter@nokia.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, Kyungmin Park <kmpark@infradead.org>, "arm-kernel@lists.infradead.org" <arm-kernel@lists.infradead.org>
 
+2010/11/3 Alan Cox <alan@lxorguk.ukuu.org.uk>:
 
---6WlEvdN9Dv0WHSBl
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+>> Doesn't it require a struct device* to be used?
+>
+> Yes but the sdhci port can be a device even if its wired via a controller
+> which is its parent. The device layer is designed that way
 
-Hi Richard,
+Yeah wait I got it all backwards, of course I should be able to hook
+some dev_pm_ops to the struct device * in MMC's host->class_dev
+that mmc_add_host() creates, can't be too hard.
 
-> Do you have any comments about the following patches?
-> These patches add the GPIO write protection, and add the HW bus-width
-> caps limitation.
+I'll give it a spin, this will probably hook nicely into runtime PM.
 
-First patch: The sdhci-part is okay (it's trivial enough), did not check
-the iomux-stuff, but I assume it works for you :) If you are basing your
-patch on my RFC-patches, it would be better for the process if you'd a)
-note the dependency in your patch and b) add some Acked-by or Tested-by
-to my original series.
-
-Second patch: There is some discussion about the bus width currently
-going on. I'd suggest you join it.
-
-BTW did you try adding regulator support yet?
-
-Best regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---6WlEvdN9Dv0WHSBl
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEUEARECAAYFAkzRbEwACgkQD27XaX1/VRuuDgCYmUSsexX4WFsEt9GGhuCkxLLj
-CACgkG3a0OKPneappNAihTbXB/2JdDM=
-=1wQR
------END PGP SIGNATURE-----
-
---6WlEvdN9Dv0WHSBl--
+Yours,
+Linus Walleij
