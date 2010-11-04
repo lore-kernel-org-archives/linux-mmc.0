@@ -1,54 +1,101 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: PATCH: mmc.c DDR print of card type not correct
-Date: Thu, 4 Nov 2010 14:55:00 +0900
-Message-ID: <AANLkTikqccYDA8ZSFJ6LrjSfw9FKn-4ayOKhf21hX2MU@mail.gmail.com>
-References: <24C0629C-F7E8-4D4A-A42A-2B6578B5AE2D@marvell.com>
-	<AANLkTikDV86SXjkj_B4Mv=hfDeMU=QAywRgQROfcen7A@mail.gmail.com>
+From: Axel Lin <axel.lin@gmail.com>
+Subject: [PATCH] mmc: Return proper error code for ushc_probe()
+Date: Thu, 04 Nov 2010 13:59:11 +0800
+Message-ID: <1288850351.3429.2.camel@mola>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:34648 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754150Ab0KDFzA convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Nov 2010 01:55:00 -0400
-Received: by pvb32 with SMTP id 32so474320pvb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Nov 2010 22:55:00 -0700 (PDT)
-In-Reply-To: <AANLkTikDV86SXjkj_B4Mv=hfDeMU=QAywRgQROfcen7A@mail.gmail.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:47934 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754187Ab0KDFzx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Nov 2010 01:55:53 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@nokia.com>
+To: linux-kernel <linux-kernel@vger.kernel.org>
+Cc: David Vrabel <david.vrabel@csr.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
+Signed-off-by: Axel Lin <axel.lin@gmail.com>
+---
+ drivers/mmc/host/ushc.c |   30 ++++++++++++++++++++++--------
+ 1 files changed, 22 insertions(+), 8 deletions(-)
 
-It should be fixed.
+diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
+index b4ead4a..f8f65df 100644
+--- a/drivers/mmc/host/ushc.c
++++ b/drivers/mmc/host/ushc.c
+@@ -425,7 +425,7 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
+ 	struct usb_device *usb_dev = interface_to_usbdev(intf);
+ 	struct mmc_host *mmc;
+ 	struct ushc_data *ushc;
+-	int ret = -ENOMEM;
++	int ret;
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct ushc_data), &intf->dev);
+ 	if (mmc == NULL)
+@@ -462,11 +462,15 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
+ 	mmc->max_blk_count = 511;
+ 
+ 	ushc->int_urb = usb_alloc_urb(0, GFP_KERNEL);
+-	if (ushc->int_urb == NULL)
++	if (ushc->int_urb == NULL) {
++		ret = -ENOMEM;
+ 		goto err;
++	}
+ 	ushc->int_data = kzalloc(sizeof(struct ushc_int_data), GFP_KERNEL);
+-	if (ushc->int_data == NULL)
++	if (ushc->int_data == NULL) {
++		ret = -ENOMEM;
+ 		goto err;
++	}
+ 	usb_fill_int_urb(ushc->int_urb, ushc->usb_dev,
+ 			 usb_rcvintpipe(usb_dev,
+ 					intf->cur_altsetting->endpoint[0].desc.bEndpointAddress),
+@@ -475,11 +479,15 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
+ 			 intf->cur_altsetting->endpoint[0].desc.bInterval);
+ 
+ 	ushc->cbw_urb = usb_alloc_urb(0, GFP_KERNEL);
+-	if (ushc->cbw_urb == NULL)
++	if (ushc->cbw_urb == NULL) {
++		ret = -ENOMEM;
+ 		goto err;
++	}
+ 	ushc->cbw = kzalloc(sizeof(struct ushc_cbw), GFP_KERNEL);
+-	if (ushc->cbw == NULL)
++	if (ushc->cbw == NULL) {
++		ret = -ENOMEM;
+ 		goto err;
++	}
+ 	ushc->cbw->signature = USHC_CBW_SIGNATURE;
+ 
+ 	usb_fill_bulk_urb(ushc->cbw_urb, ushc->usb_dev, usb_sndbulkpipe(usb_dev, 2),
+@@ -487,15 +495,21 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
+ 			  cbw_callback, ushc);
+ 
+ 	ushc->data_urb = usb_alloc_urb(0, GFP_KERNEL);
+-	if (ushc->data_urb == NULL)
++	if (ushc->data_urb == NULL) {
++		ret = -ENOMEM;
+ 		goto err;
++	}
+ 
+ 	ushc->csw_urb = usb_alloc_urb(0, GFP_KERNEL);
+-	if (ushc->csw_urb == NULL)
++	if (ushc->csw_urb == NULL) {
++		ret = -ENOMEM;
+ 		goto err;
++	}
+ 	ushc->csw = kzalloc(sizeof(struct ushc_cbw), GFP_KERNEL);
+-	if (ushc->csw == NULL)
++	if (ushc->csw == NULL) {
++		ret = -ENOMEM;
+ 		goto err;
++	}
+ 	usb_fill_bulk_urb(ushc->csw_urb, ushc->usb_dev, usb_rcvbulkpipe(usb_dev, 6),
+ 			  ushc->csw, sizeof(struct ushc_csw),
+ 			  csw_callback, ushc);
+-- 
+1.7.2
 
-Thank you,
-Kyungmin Park
 
-On Tue, Nov 2, 2010 at 3:11 AM, Linus Walleij
-<linus.ml.walleij@gmail.com> wrote:
-> 2010/10/29 Philip Rakity <prakity@marvell.com>:
->
->> we should not call mmc_card_set_ddr_mode if we are in single data mo=
-de. =A0This sets DDR and causes
->> the print out in the log to say the card is DDR when it is not.
->>
->> Explicitly set ddr to 0 rather then rely on MMC_SDR_MODE being 0 whe=
-n doing the checks.
->>
->> Signed-off-by: Philip Rakity <prakity@marvell.com>
->
-> Acked-by: Linus Walleij <linus.walleij@stericsson.com>
->
-> This looks correct to me and my immediate colleagues.
->
-> Yours,
-> Linus Walleij
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+
