@@ -1,101 +1,103 @@
-From: Axel Lin <axel.lin@gmail.com>
-Subject: [PATCH] mmc: Return proper error code for ushc_probe()
-Date: Thu, 04 Nov 2010 13:59:11 +0800
-Message-ID: <1288850351.3429.2.camel@mola>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: commit 'mmc: sdhci: add MMC_CAP_8_BIT_DATA in the host
+ capabilities' breaks ricoh mmc device
+Date: Thu, 4 Nov 2010 16:23:00 +0900
+Message-ID: <AANLkTimvM1NrrjtT8X4yUj9y3pevqq5jebeO8QtncrOy@mail.gmail.com>
+References: <1288410826.3119.5.camel@maxim-laptop>
+	<20101103055735.GA21719@pengutronix.de>
+	<20101103062431.GB21719@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:47934 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754187Ab0KDFzx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Nov 2010 01:55:53 -0400
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:53374 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750977Ab0KDHXB convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Nov 2010 03:23:01 -0400
+Received: by pvb32 with SMTP id 32so482129pvb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Nov 2010 00:23:01 -0700 (PDT)
+In-Reply-To: <20101103062431.GB21719@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel <linux-kernel@vger.kernel.org>
-Cc: David Vrabel <david.vrabel@csr.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Giuseppe Cavallaro <peppe.cavallaro@st.com>, Chris Ball <cjb@laptop.org>, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
 
-Signed-off-by: Axel Lin <axel.lin@gmail.com>
----
- drivers/mmc/host/ushc.c |   30 ++++++++++++++++++++++--------
- 1 files changed, 22 insertions(+), 8 deletions(-)
+Hi,
 
-diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
-index b4ead4a..f8f65df 100644
---- a/drivers/mmc/host/ushc.c
-+++ b/drivers/mmc/host/ushc.c
-@@ -425,7 +425,7 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
- 	struct usb_device *usb_dev = interface_to_usbdev(intf);
- 	struct mmc_host *mmc;
- 	struct ushc_data *ushc;
--	int ret = -ENOMEM;
-+	int ret;
- 
- 	mmc = mmc_alloc_host(sizeof(struct ushc_data), &intf->dev);
- 	if (mmc == NULL)
-@@ -462,11 +462,15 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
- 	mmc->max_blk_count = 511;
- 
- 	ushc->int_urb = usb_alloc_urb(0, GFP_KERNEL);
--	if (ushc->int_urb == NULL)
-+	if (ushc->int_urb == NULL) {
-+		ret = -ENOMEM;
- 		goto err;
-+	}
- 	ushc->int_data = kzalloc(sizeof(struct ushc_int_data), GFP_KERNEL);
--	if (ushc->int_data == NULL)
-+	if (ushc->int_data == NULL) {
-+		ret = -ENOMEM;
- 		goto err;
-+	}
- 	usb_fill_int_urb(ushc->int_urb, ushc->usb_dev,
- 			 usb_rcvintpipe(usb_dev,
- 					intf->cur_altsetting->endpoint[0].desc.bEndpointAddress),
-@@ -475,11 +479,15 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
- 			 intf->cur_altsetting->endpoint[0].desc.bInterval);
- 
- 	ushc->cbw_urb = usb_alloc_urb(0, GFP_KERNEL);
--	if (ushc->cbw_urb == NULL)
-+	if (ushc->cbw_urb == NULL) {
-+		ret = -ENOMEM;
- 		goto err;
-+	}
- 	ushc->cbw = kzalloc(sizeof(struct ushc_cbw), GFP_KERNEL);
--	if (ushc->cbw == NULL)
-+	if (ushc->cbw == NULL) {
-+		ret = -ENOMEM;
- 		goto err;
-+	}
- 	ushc->cbw->signature = USHC_CBW_SIGNATURE;
- 
- 	usb_fill_bulk_urb(ushc->cbw_urb, ushc->usb_dev, usb_sndbulkpipe(usb_dev, 2),
-@@ -487,15 +495,21 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
- 			  cbw_callback, ushc);
- 
- 	ushc->data_urb = usb_alloc_urb(0, GFP_KERNEL);
--	if (ushc->data_urb == NULL)
-+	if (ushc->data_urb == NULL) {
-+		ret = -ENOMEM;
- 		goto err;
-+	}
- 
- 	ushc->csw_urb = usb_alloc_urb(0, GFP_KERNEL);
--	if (ushc->csw_urb == NULL)
-+	if (ushc->csw_urb == NULL) {
-+		ret = -ENOMEM;
- 		goto err;
-+	}
- 	ushc->csw = kzalloc(sizeof(struct ushc_cbw), GFP_KERNEL);
--	if (ushc->csw == NULL)
-+	if (ushc->csw == NULL) {
-+		ret = -ENOMEM;
- 		goto err;
-+	}
- 	usb_fill_bulk_urb(ushc->csw_urb, ushc->usb_dev, usb_rcvbulkpipe(usb_dev, 6),
- 			  ushc->csw, sizeof(struct ushc_csw),
- 			  csw_callback, ushc);
--- 
-1.7.2
+I got the same problem.
 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 782c0ee..a0991ad 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1849,7 +1849,7 @@ int sdhci_add_host(struct sdhci_host *host)
+        mmc->caps |=3D MMC_CAP_SDIO_IRQ;
 
+        if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+-               mmc->caps |=3D MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
++               mmc->caps |=3D MMC_CAP_4_BIT_DATA;
 
+        if (caps & SDHCI_CAN_DO_HISPD)
+                mmc->caps |=3D MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHS=
+PEED;
+
+In case of MMC, host->caps & MMC_CAP_8_BIT_DATA is always true. so
+can't use the MMC_CAP_4_BIT_DATA.
+
+       /*
+         * Activate wide bus and DDR (if supported).
+         */
+        if ((card->csd.mmca_vsn >=3D CSD_SPEC_VER_4) &&
+            (host->caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA))) {
+                unsigned ext_csd_bit, bus_width;
+
+                if (host->caps & MMC_CAP_8_BIT_DATA) {
+                        if (ddr)
+                                ext_csd_bit =3D EXT_CSD_DDR_BUS_WIDTH_8=
+;
+                        else
+                                ext_csd_bit =3D EXT_CSD_BUS_WIDTH_8;
+                        bus_width =3D MMC_BUS_WIDTH_8;
+                } else {
+                        if (ddr)
+                                ext_csd_bit =3D EXT_CSD_DDR_BUS_WIDTH_4=
+;
+                        else
+                                ext_csd_bit =3D EXT_CSD_BUS_WIDTH_4;
+                        bus_width =3D MMC_BUS_WIDTH_4;
+                }
+
+Thank you,
+Kyungmin Park
+
+On Wed, Nov 3, 2010 at 3:24 PM, Wolfram Sang <w.sang@pengutronix.de> wr=
+ote:
+> On Wed, Nov 03, 2010 at 06:57:35AM +0100, Wolfram Sang wrote:
+>> On Sat, Oct 30, 2010 at 05:53:46AM +0200, Maxim Levitsky wrote:
+>> > Hi,
+>> >
+>> > I just bisected and reverted this commit.
+>>
+>> Commit-ID would have been useful, too: b08caed8659ab27199db51c63a35c=
+5ee067fc7ef
+>> Also, adding the author to cc, done now.
+>
+> Sorry, just saw that the threading got somehow broken and the thread =
+was
+> continued. Sorry for the noise!
+>
+> --
+> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+| Wolfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
+> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://w=
+ww.pengutronix.de/ =A0|
+>
+> -----BEGIN PGP SIGNATURE-----
+> Version: GnuPG v1.4.9 (GNU/Linux)
+>
+> iEYEARECAAYFAkzRAB8ACgkQD27XaX1/VRtSHACgvSytzl8BXzNFuM31HDWryl/4
+> HPoAnRGReSnUgTbjOzGYOepJbcPhprGa
+> =3DoMKq
+> -----END PGP SIGNATURE-----
+>
+>
