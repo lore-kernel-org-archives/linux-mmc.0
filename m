@@ -1,154 +1,55 @@
-From: Alberto Panizzo <maramaopercheseimorto@gmail.com>
-Subject: Re: [PATCH] mxcmmc: Add the ability to bind a regulator to manage
- the MMC card voltage
-Date: Fri, 05 Nov 2010 10:27:55 +0100
-Message-ID: <1288949275.3072.3.camel@realization>
-References: <1288656337.29881.13.camel@realization>
-	 <20101102073932.GB6017@pengutronix.de>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH] mmci: reset voltage after power off.
+Date: Fri, 5 Nov 2010 10:35:41 +0100
+Message-ID: <1288949741-9712-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:49249 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752589Ab0KEJ2C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Nov 2010 05:28:02 -0400
-In-Reply-To: <20101102073932.GB6017@pengutronix.de>
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:44200 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752307Ab0KEJgD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Nov 2010 05:36:03 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Daniel Mack <daniel@caiaq.de>, Andrew Morton <akpm@linux-foundation.org>, Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>, Eric =?ISO-8859-1?Q?B=E9nard?= <eric@eukrea.com>, Fabio Estevam <fabioestevam@yahoo.com>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: akpm@linux-foundation.org, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@stericsson.com>
 
-On mar, 2010-11-02 at 08:39 +0100, Sascha Hauer wrote:
-> On Tue, Nov 02, 2010 at 01:05:37AM +0100, Alberto Panizzo wrote:
-> > This implementation is based on the pxamci.c driver and it will
-> > be used to support the mx31_3ds machine.
-> > 
-> > Signed-off-by: Alberto Panizzo <maramaopercheseimorto@gmail.com>
-> 
-> Looks good to me
-> 
-> Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
-> 
+From: Ulf Hansson <ulf.hansson@stericsson.com>
 
-Sascha, must this one go to the Chris Ball mmc tree? or can you pick it
-up directly?
-Is there any chance to have it on one of .37-rcN?
+At power off, reset OCR mask to be the highest possible voltage
+supported for the current mmc host.
 
-(Adding Chris to cc.)
+This solves the re-initialization during the power up sequence.
+The voltage may have been decreased due to the card accepts a lower
+voltage than the voltage used during the initialization sequence.
+We need to reset the voltage to by the host highest possible value
+since according to specification the initialization must always be
+done at high voltage.
 
-Thanks,
-Alberto!
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+---
+ drivers/mmc/core/core.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
 
-> > ---
-> > 
-> > This patch is based on the pengutronix for-rmk branch and apply to the
-> > linus tre, version:2.6.37-rc1
-> > 
-> > ..cc the lists, sorry for the double mail.
-> > 
-> >  drivers/mmc/host/mxcmmc.c |   48 +++++++++++++++++++++++++++++++++++++++-----
-> >  1 files changed, 42 insertions(+), 6 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> > index 350f78e..e4637fc 100644
-> > --- a/drivers/mmc/host/mxcmmc.c
-> > +++ b/drivers/mmc/host/mxcmmc.c
-> > @@ -31,6 +31,7 @@
-> >  #include <linux/clk.h>
-> >  #include <linux/io.h>
-> >  #include <linux/gpio.h>
-> > +#include <linux/regulator/consumer.h>
-> >  
-> >  #include <asm/dma.h>
-> >  #include <asm/irq.h>
-> > @@ -141,10 +142,45 @@ struct mxcmci_host {
-> >  
-> >  	struct work_struct	datawork;
-> >  	spinlock_t		lock;
-> > +
-> > +	struct regulator	*vcc;
-> >  };
-> >  
-> >  static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
-> >  
-> > +static inline void mxcmci_init_ocr(struct mxcmci_host *host)
-> > +{
-> > +#ifdef CONFIG_REGULATOR
-> > +	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
-> > +
-> > +	if (IS_ERR(host->vcc)) {
-> > +		host->vcc = NULL;
-> > +	} else {
-> > +		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
-> > +		if (host->pdata && host->pdata->ocr_avail)
-> > +			dev_warn(mmc_dev(host->mmc),
-> > +				"pdata->ocr_avail will not be used\n");
-> > +	}
-> > +#endif
-> > +	if (host->vcc == NULL) {
-> > +		/* fall-back to platform data */
-> > +		if (host->pdata && host->pdata->ocr_avail)
-> > +			host->mmc->ocr_avail = host->pdata->ocr_avail;
-> > +		else
-> > +			host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> > +	}
-> > +}
-> > +
-> > +static inline void mxcmci_set_power(struct mxcmci_host *host, unsigned int vdd)
-> > +{
-> > +#ifdef CONFIG_REGULATOR
-> > +	if (host->vcc)
-> > +		mmc_regulator_set_ocr(host->vcc, vdd);
-> > +#endif
-> > +	if (host->pdata && host->pdata->setpower)
-> > +		host->pdata->setpower(mmc_dev(host->mmc), vdd);
-> > +}
-> > +
-> >  static inline int mxcmci_use_dma(struct mxcmci_host *host)
-> >  {
-> >  	return host->do_dma;
-> > @@ -680,9 +716,9 @@ static void mxcmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  		host->cmdat &= ~CMD_DAT_CONT_BUS_WIDTH_4;
-> >  
-> >  	if (host->power_mode != ios->power_mode) {
-> > -		if (host->pdata && host->pdata->setpower)
-> > -			host->pdata->setpower(mmc_dev(mmc), ios->vdd);
-> > +		mxcmci_set_power(host, ios->vdd);
-> >  		host->power_mode = ios->power_mode;
-> > +
-> >  		if (ios->power_mode == MMC_POWER_ON)
-> >  			host->cmdat |= CMD_DAT_CONT_INIT;
-> >  	}
-> > @@ -808,10 +844,7 @@ static int mxcmci_probe(struct platform_device *pdev)
-> >  	host->pdata = pdev->dev.platform_data;
-> >  	spin_lock_init(&host->lock);
-> >  
-> > -	if (host->pdata && host->pdata->ocr_avail)
-> > -		mmc->ocr_avail = host->pdata->ocr_avail;
-> > -	else
-> > -		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> > +	mxcmci_init_ocr(host);
-> >  
-> >  	if (host->pdata && host->pdata->dat3_card_detect)
-> >  		host->default_irq_mask =
-> > @@ -916,6 +949,9 @@ static int mxcmci_remove(struct platform_device *pdev)
-> >  
-> >  	mmc_remove_host(mmc);
-> >  
-> > +	if (host->vcc)
-> > +		regulator_put(host->vcc);
-> > +
-> >  	if (host->pdata && host->pdata->exit)
-> >  		host->pdata->exit(&pdev->dev, mmc);
-> >  
-> > -- 
-> > 1.6.3.3
-> > 
-> > 
-> > 
-> > 
-> > 
-> 
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8f86d70..508ed2b 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -940,6 +940,13 @@ static void mmc_power_off(struct mmc_host *host)
+ {
+ 	host->ios.clock = 0;
+ 	host->ios.vdd = 0;
++
++	/*
++	 * Reset ocr mask to be the highest possible voltage supported for
++	 * this mmc host. This value will be used at next power up.
++	 */
++	host->ocr = 1 << (fls(host->ocr_avail) - 1);
++
+ 	if (!mmc_host_is_spi(host)) {
+ 		host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
+ 		host->ios.chip_select = MMC_CS_DONTCARE;
+-- 
+1.6.3.3
 
