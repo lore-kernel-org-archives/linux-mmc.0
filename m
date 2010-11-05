@@ -1,117 +1,180 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: [PATCH] SDHCI: Properly enable SDIO IRQ wakeups
-Date: Thu,  4 Nov 2010 22:20:39 +0000 (GMT)
-Message-ID: <20101104222039.93AA69D401B@zog.reactivated.net>
+From: Peppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: Re: [RFC]  sdhci: 8 bit bus width changes
+Date: Fri, 5 Nov 2010 08:13:46 +0100
+Message-ID: <4CD3AEAA.20805@st.com>
+References: <B76798A1-FA3F-4D7D-A22A-52289A4062FB@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from queueout04-winn.ispmail.ntl.com ([81.103.221.58]:4834 "EHLO
-	queueout04-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753376Ab0KDWwa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Nov 2010 18:52:30 -0400
-Received: from aamtaout01-winn.ispmail.ntl.com ([81.103.221.35])
-          by mtaout03-winn.ispmail.ntl.com
-          (InterMail vM.7.08.04.00 201-2186-134-20080326) with ESMTP
-          id <20101104222041.AZC29865.mtaout03-winn.ispmail.ntl.com@aamtaout01-winn.ispmail.ntl.com>
-          for <linux-mmc@vger.kernel.org>; Thu, 4 Nov 2010 22:20:41 +0000
-Received: from zog.reactivated.net ([86.14.215.141])
-          by aamtaout01-winn.ispmail.ntl.com
-          (InterMail vG.3.00.04.00 201-2196-133-20080908) with ESMTP
-          id <20101104222041.JDRH20122.aamtaout01-winn.ispmail.ntl.com@zog.reactivated.net>
-          for <linux-mmc@vger.kernel.org>; Thu, 4 Nov 2010 22:20:41 +0000
+Received: from eu1sys200aog111.obsmtp.com ([207.126.144.131]:59439 "EHLO
+	eu1sys200aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751773Ab0KEHOO convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 5 Nov 2010 03:14:14 -0400
+In-Reply-To: <B76798A1-FA3F-4D7D-A22A-52289A4062FB@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-A little more work was needed for SDIO IRQ wakeups to be functional.
+Hello Philip,
 
-Wake-on-WLAN on the SD WiFi adapter in the XO-1.5 laptop is now working.
+On 10/2/2010 12:45 AM, Philip Rakity wrote:
+>
+> From 80c581d354df180a4c2d6aa50c21788e6c7593b9 Mon Sep 17 00:00:00 2001
+> From: Philip Rakity <prakity@marvell.com>
+> Date: Fri, 1 Oct 2010 13:42:58 -0700
+> Subject: [RFC] sdhci: 8 bit bus width changes
+>
+> Check for v3 controller controller when doing 8 bit bus width
+> add support for adaption layer to set 8 bit width.
+>         controller may support 8 bit bus but NOT board design
+> allow non v3 controllers to support 8 bit bus
+>
+Patches ported and tested on our ST target and it works for me.
+Thanks!
+>
+>
+> non v3 controller (platform_8bit_width)
+> =======================================
+> platform_8bit_width is used to support 8 bit mode using our v2
+> sd controller.  We have private registers that are used for 8 bit support
+>
+> v2 - v3 controller and 8 bit support (SDHCI_QUIRK_SLOT_CAN_DO_8_BITS)
+> =====================================================================
+> The quirk is needed since we support multiple SD controllers and
+> on the board sometimes 8 data lines are brought out and sometimes only 4.
+> The SD controller indicates it can support 8 bit (v3 controller) via the
+> capability field but has no knowledge of how the pins were configured
+> in the board design. There are only so many pins and the pins are
+> multiplexed.
+>
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>
+Tested -by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
-Signed-off-by: Daniel Drake <dsd@laptop.org>
----
- drivers/mmc/host/sdhci-pci.c |   11 +++++++++--
- drivers/mmc/host/sdhci.c     |   10 ++++++++++
- drivers/mmc/host/sdhci.h     |    4 ++++
- 3 files changed, 23 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 55746ba..d196e77 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -637,6 +637,7 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
- {
- 	struct sdhci_pci_chip *chip;
- 	struct sdhci_pci_slot *slot;
-+	mmc_pm_flag_t slot_pm_flags;
- 	mmc_pm_flag_t pm_flags = 0;
- 	int i, ret;
- 
-@@ -657,7 +658,11 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
- 			return ret;
- 		}
- 
--		pm_flags |= slot->host->mmc->pm_flags;
-+		slot_pm_flags = slot->host->mmc->pm_flags;
-+		if (slot_pm_flags & MMC_PM_WAKE_SDIO_IRQ)
-+			sdhci_enable_irq_wakeups(slot->host);
-+
-+		pm_flags |= slot_pm_flags;
- 	}
- 
- 	if (chip->fixes && chip->fixes->suspend) {
-@@ -671,8 +676,10 @@ static int sdhci_pci_suspend (struct pci_dev *pdev, pm_message_t state)
- 
- 	pci_save_state(pdev);
- 	if (pm_flags & MMC_PM_KEEP_POWER) {
--		if (pm_flags & MMC_PM_WAKE_SDIO_IRQ)
-+		if (pm_flags & MMC_PM_WAKE_SDIO_IRQ) {
-+			pci_pme_active(pdev, true);
- 			pci_enable_wake(pdev, PCI_D3hot, 1);
-+		}
- 		pci_set_power_state(pdev, PCI_D3hot);
- 	} else {
- 		pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 782c0ee..154cbf8 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1681,6 +1681,16 @@ int sdhci_resume_host(struct sdhci_host *host)
- 
- EXPORT_SYMBOL_GPL(sdhci_resume_host);
- 
-+void sdhci_enable_irq_wakeups(struct sdhci_host *host)
-+{
-+	u8 val;
-+	val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
-+	val |= SDHCI_WAKE_ON_INT;
-+	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
-+}
-+
-+EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
-+
- #endif /* CONFIG_PM */
- 
- /*****************************************************************************\
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index b7b8a3b..d52a716 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -87,6 +87,9 @@
- #define SDHCI_BLOCK_GAP_CONTROL	0x2A
- 
- #define SDHCI_WAKE_UP_CONTROL	0x2B
-+#define  SDHCI_WAKE_ON_INT	0x01
-+#define  SDHCI_WAKE_ON_INSERT	0x02
-+#define  SDHCI_WAKE_ON_REMOVE	0x04
- 
- #define SDHCI_CLOCK_CONTROL	0x2C
- #define  SDHCI_DIVIDER_SHIFT	8
-@@ -317,6 +320,7 @@ extern void sdhci_remove_host(struct sdhci_host *host, int dead);
- #ifdef CONFIG_PM
- extern int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state);
- extern int sdhci_resume_host(struct sdhci_host *host);
-+extern void sdhci_enable_irq_wakeups(struct sdhci_host *host);
- #endif
- 
- #endif /* __SDHCI_HW_H */
--- 
-1.7.2.3
-
+Regards
+Peppe
+>
+> ---
+>  drivers/mmc/host/sdhci.c |   44
+> +++++++++++++++++++++++++++++++++-----------
+>  drivers/mmc/host/sdhci.h |    7 ++++++-
+>  2 files changed, 39 insertions(+), 12 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 73a94fe..ec103c3 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1182,17 +1182,31 @@ static void sdhci_set_ios(struct mmc_host
+> *mmc, struct mmc_ios *ios)
+>         else
+>                 sdhci_set_power(host, ios->vdd);
+>
+> -       ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>
+> -       if (ios->bus_width == MMC_BUS_WIDTH_8)
+> -               ctrl |= SDHCI_CTRL_8BITBUS;
+> -       else
+> -               ctrl &= ~SDHCI_CTRL_8BITBUS;
+> +       /*
+> +        * use platform_8_bit_width if not v3 controller
+> +        * or if special hw/board specific processing is needed
+> +        */
+> +       if (host->ops->platform_8bit_width)
+> +               host->ops->platform_8bit_width(host, ios->bus_width);
+> +       else {
+> +               ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> +               if (ios->bus_width == MMC_BUS_WIDTH_8) {
+> +                       ctrl &= ~SDHCI_CTRL_4BITBUS;
+> +                       if (host->version >= SDHCI_SPEC_300)
+> +                               ctrl |= SDHCI_CTRL_8BITBUS;
+> +               } else {
+> +                       if (host->version >= SDHCI_SPEC_300)
+> +                               ctrl &= ~SDHCI_CTRL_8BITBUS;
+> +                       if (ios->bus_width == MMC_BUS_WIDTH_4)
+> +                               ctrl |= SDHCI_CTRL_4BITBUS;
+> +                       else
+> +                               ctrl &= ~SDHCI_CTRL_4BITBUS;
+> +               }
+> +               sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +       }
+>
+> -       if (ios->bus_width == MMC_BUS_WIDTH_4)
+> -               ctrl |= SDHCI_CTRL_4BITBUS;
+> -       else
+> -               ctrl &= ~SDHCI_CTRL_4BITBUS;
+> +       ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>
+>         if (ios->timing == MMC_TIMING_SD_HS &&
+>             !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+> @@ -1838,11 +1852,19 @@ int sdhci_add_host(struct sdhci_host *host)
+>                 mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
+>         else
+>                 mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
+> +
+>         mmc->f_max = host->max_clk;
+>         mmc->caps |= MMC_CAP_SDIO_IRQ;
+>
+> -       if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+> -               mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+> +       /* 8 bit width may be supported by v3 controller but not board
+> +        * so the safest thing is to let the adaption layer decide
+> +        * what to do by using the quirk
+> +        */
+> +       if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA)) {
+> +               mmc->caps |= MMC_CAP_4_BIT_DATA;
+> +               if (host->quirks & SDHCI_QUIRK_SLOT_CAN_DO_8_BITS)
+> +                       mmc->caps |= MMC_CAP_8_BIT_DATA;
+> +       }
+>
+>         if (caps & SDHCI_CAN_DO_HISPD)
+>                 mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 112543a..b3288fd 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -72,7 +72,7 @@
+>  #define   SDHCI_CTRL_ADMA1     0x08
+>  #define   SDHCI_CTRL_ADMA32    0x10
+>  #define   SDHCI_CTRL_ADMA64    0x18
+> -#define  SDHCI_CTRL_8BITBUS    0x20
+> +#define   SDHCI_CTRL_8BITBUS   0x20
+>
+>  #define SDHCI_POWER_CONTROL    0x29
+>  #define  SDHCI_POWER_ON                0x01
+> @@ -148,6 +148,7 @@
+>  #define  SDHCI_CLOCK_BASE_SHIFT        8
+>  #define  SDHCI_MAX_BLOCK_MASK  0x00030000
+>  #define  SDHCI_MAX_BLOCK_SHIFT  16
+> +#define  SDHCI_CAN_DO_8BIT     0x00040000
+>  #define  SDHCI_CAN_DO_ADMA2    0x00080000
+>  #define  SDHCI_CAN_DO_ADMA1    0x00100000
+>  #define  SDHCI_CAN_DO_HISPD    0x00200000
+> @@ -260,6 +261,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12             (1<<28)
+>  /* Controller doesn't have HISPD bit field in HI-SPEED SD card */
+>  #define SDHCI_QUIRK_NO_HISPD_BIT                       (1<<29)
+> +/* slot has 8 data pins going to eMMC/mmc card         */
+> +#define SDHCI_QUIRK_SLOT_CAN_DO_8_BITS                 (1<<30)
+>
+>         int                     irq;            /* Device IRQ */
+>         void __iomem *          ioaddr;         /* Mapped address */
+> @@ -336,6 +339,8 @@ struct sdhci_ops {
+>         unsigned int    (*get_max_clock)(struct sdhci_host *host);
+>         unsigned int    (*get_min_clock)(struct sdhci_host *host);
+>         unsigned int    (*get_timeout_clock)(struct sdhci_host *host);
+> +       int             (*platform_8bit_width)(struct sdhci_host *host,
+> +                               int width);
+>  };
+>
+>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+> --
+> 1.6.0.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
