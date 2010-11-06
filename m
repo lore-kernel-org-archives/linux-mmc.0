@@ -1,42 +1,39 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH] mxcmmc: Add the ability to bind a regulator to manage
-	the MMC card voltage
-Date: Fri, 5 Nov 2010 14:12:30 +0100
-Message-ID: <20101105131230.GX6017@pengutronix.de>
-References: <1288656337.29881.13.camel@realization> <20101102073932.GB6017@pengutronix.de> <1288949275.3072.3.camel@realization>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH] mmc: agressive clocking framework v9
+Date: Fri, 5 Nov 2010 22:38:07 -0700
+Message-ID: <43E4817426ED174AA81263BCECB4351D131D9D41BC@sc-vexch3.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1288949275.3072.3.camel@realization>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alberto Panizzo <maramaopercheseimorto@gmail.com>
-Cc: Daniel Mack <daniel@caiaq.de>, Andrew Morton <akpm@linux-foundation.org>, Uwe =?iso-8859-15?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>, Eric =?iso-8859-15?Q?B=E9nard?= <eric@eukrea.com>, Fabio Estevam <fabioestevam@yahoo.com>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:57404 "HELO
+	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751485Ab0KFFlN convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 6 Nov 2010 01:41:13 -0400
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-
-On Fri, Nov 05, 2010 at 10:27:55AM +0100, Alberto Panizzo wrote:
-> On mar, 2010-11-02 at 08:39 +0100, Sascha Hauer wrote:
-> > On Tue, Nov 02, 2010 at 01:05:37AM +0100, Alberto Panizzo wrote:
-> > > This implementation is based on the pxamci.c driver and it will
-> > > be used to support the mx31_3ds machine.
-> > > 
-> > > Signed-off-by: Alberto Panizzo <maramaopercheseimorto@gmail.com>
-> > 
-> > Looks good to me
-> > 
-> > Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
-> > 
-> 
-> Sascha, must this one go to the Chris Ball mmc tree? or can you pick it
-> up directly?
-
-Better to pass this via the mmc tree.
-
-Sascha
+To: "linus.Walleij@stericsson.com" <linus.Walleij@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Linus,
+
+One case that I do not see handled is support of hardware clock gating.
+
+SD 3.0 has this as well as our v2.0 controller.
+
+What I think makes sense is (from discussion with Nico on the mailing list)
+
+a) add a quirk that the driver can set to indicate h/w support for clock gating is available
+b) add a new field to ios that indicates if hardware clock gating to be enabled / disabled
+c) clock gating is set to disabled until final speed negotiation during card detection after which it may be enabled.
+d) keep sdio clock gating OFF -- need this from our experience.
+
+I can try to add this to your patch if you like or perhaps you can do this in the next submission
+
+regards,
+
+Philip
+
