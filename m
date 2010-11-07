@@ -1,67 +1,33 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] sdhci: 8 bit widths - allow new QUIRK for 8 bit and v3
-	sd controller
-Date: Sun, 7 Nov 2010 23:04:11 +0100
-Message-ID: <20101107220411.GB5376@pengutronix.de>
-References: <74C0C915-257F-41CC-AEA8-C6F5B839586B@marvell.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v4 0/2] add support for the Marvell Dove SDHCI
+	controller
+Date: Sun, 7 Nov 2010 22:41:16 +0000
+Message-ID: <20101107224116.GD13608@void.printf.net>
+References: <cover.1288293593.git.mike@compulab.co.il>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="2B/JsCI69OhZNC5r"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:60491 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750759Ab0KGWEN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Nov 2010 17:04:13 -0500
+Received: from void.printf.net ([89.145.121.20]:52887 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751711Ab0KGWlR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 7 Nov 2010 17:41:17 -0500
 Content-Disposition: inline
-In-Reply-To: <74C0C915-257F-41CC-AEA8-C6F5B839586B@marvell.com>
+In-Reply-To: <cover.1288293593.git.mike@compulab.co.il>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Mike Rapoport <mike@compulab.co.il>
+Cc: linux-mmc@vger.kernel.org, Saeed Bishara <saeed@marvell.com>, linux-arm-kernel@lists.infradead.org
 
+Hi Mike,
 
---2B/JsCI69OhZNC5r
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Thu, Oct 28, 2010 at 09:23:51PM +0200, Mike Rapoport wrote:
+> These patches add support for the Marvell Dove SDHCI controller.
 
-On Fri, Oct 08, 2010 at 12:31:34PM -0700, Philip Rakity wrote:
->=20
-> 8 bit width is a new feature in the sd 3.0 spec.  Add checks to
-> ensure HOST_CONTROL register set 8 bit mode only if sd 3.0
->=20
-> add quirk to indicate that board design supports 8 data lines.
-> The controller can support 8 data bits but the board design may
-> only bring out 4 data bits.
+Thanks, I've pushed these to mmc-next for the 2.6.38 merge now.
 
-This isn't a quirk, this is platform_data, no?
+(Applied a minor correction: MMC_SDHCI_DOVE is a bool, not a tristate,
+so I removed the "say Y or M" line.)
 
-Without looking deeply into it, I think we need to use the callback you
-introduced in the other patch?
-
-Regards,
-
-   Wolfram
-
-PS: Sorry if there already was a discussion I might have missed. The bus wi=
-dth
-thingie became a bit scattered, so I lost track...
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---2B/JsCI69OhZNC5r
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAkzXIlsACgkQD27XaX1/VRs+kgCgl+7TLPq+IsiZcU+v2Z2AZLWc
-XOIAoKeOrJFkKzUU2X25YcgJZgpHKpRE
-=93Nt
------END PGP SIGNATURE-----
-
---2B/JsCI69OhZNC5r--
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
