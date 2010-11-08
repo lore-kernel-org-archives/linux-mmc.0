@@ -1,45 +1,56 @@
-From: Alberto Panizzo <maramaopercheseimorto@gmail.com>
-Subject: Re: [PATCH] mxcmmc: Add the ability to bind a regulator to manage
- the MMC card voltage
-Date: Mon, 08 Nov 2010 16:25:41 +0100
-Message-ID: <1289229941.7417.0.camel@realization>
-References: <1288656337.29881.13.camel@realization>
-	 <20101102073932.GB6017@pengutronix.de>
-	 <1288949275.3072.3.camel@realization>
-	 <1289213595.3425.23.camel@realization>
-	 <20101108143746.GA23201@void.printf.net>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH] mmc: agressive clocking framework v9
+Date: Mon, 08 Nov 2010 13:47:17 -0500 (EST)
+Message-ID: <alpine.LFD.2.00.1011081345070.18581@xanadu.home>
+References: <43E4817426ED174AA81263BCECB4351D131D9D41BC@sc-vexch3.marvell.com>
+ <AANLkTi=6FeuxhEL1ht4thc6PQ05wLFo7d2NA-XUYwHxy@mail.gmail.com>
+ <041757E8-9FCD-4FA8-8079-7A3FC07E4038@marvell.com>
+ <AANLkTimWg_EE+hg__b0NW792szvY+4Rc_4XsjbHN_tJv@mail.gmail.com>
+ <4CD7C4DB.7070105@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:46885 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751302Ab0KHPZu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 10:25:50 -0500
-In-Reply-To: <20101108143746.GA23201@void.printf.net>
+Received: from relais.videotron.ca ([24.201.245.36]:35115 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753791Ab0KHSrS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 13:47:18 -0500
+Received: from xanadu.home ([66.130.28.92]) by vl-mh-mrz25.ip.videotron.ca
+ (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
+ with ESMTP id <0LBK00MK4XIEY250@vl-mh-mrz25.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Mon, 08 Nov 2010 13:47:02 -0500 (EST)
+In-reply-to: <4CD7C4DB.7070105@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Daniel Mack <daniel@caiaq.de>, Andrew Morton <akpm@linux-foundation.org>, Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>, Eric =?ISO-8859-1?Q?B=E9nard?= <eric@eukrea.com>, Fabio Estevam <fabioestevam@yahoo.com>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, David Vrabel <david.vrabel@csr.com>
 
-On lun, 2010-11-08 at 14:37 +0000, Chris Ball wrote:
-> Hi Alberto,
+On Mon, 8 Nov 2010, Linus Walleij wrote:
+
+> Ohad Ben-Cohen wrote:
 > 
-> On Mon, Nov 08, 2010 at 11:53:15AM +0100, Alberto Panizzo wrote:
-> > > > Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
-> > 
-> > Chris,
-> > Please, any comment on this one?
+> > So the decision whether to enable clock gating for SDIO should not be
+> > static (eventually. I'm not saying this is something Linus should take
+> > care of in his patch, it's up to us to make this work). By default,
+> > SDIO clock gating should be disabled, but we need to allow drivers to
+> > explicitly enable it if supported.
 > 
-> This is pushed to mmc-next and queued for 2.6.38 now.  Thanks!
+> I currently (patch v8) disable gating for all SDIO cards,
+> but I guess there are two approaches to cases where you'd
+> like to enable it:
 > 
+> - Card (including SDIO device) whitelisting.
+> 
+> - Host whitelisting - for the case where as gateable SDIO
+>   device is soldered to the bus.
+> 
+> The first looks like big-ish so would be a separate patch, but a
+> host flag for the latter like MMC_CAP_GATE_SDIO can easily be
+> folded into a v10 of this patch.
 
-Ok,
-Thank you!
+No.  Please don't put such capability flag with the host.  This is still 
+a card specific issue, whether or not it is soldered on the board.  So 
+the first option would be the way to go.
 
--- 
-Alberto!
 
-        Be Persistent!
-                - Greg Kroah-Hartman (FOSDEM 2010)
-
+Nicolas
