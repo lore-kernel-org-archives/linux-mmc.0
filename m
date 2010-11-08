@@ -1,59 +1,81 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] sdhci: 8 bit widths - allow new QUIRK for 8 bit and v3
-	sd controller
-Date: Sun, 7 Nov 2010 23:21:08 -0800
-Message-ID: <BEF8AD05-D094-4607-8C4F-1908C4FF54B3@marvell.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH] sdhci: 8 bit widths - allow new QUIRK for 8 bit and v3 sd controller
+Date: Mon, 8 Nov 2010 17:24:22 +0900
+Message-ID: <AANLkTik8fQrBwx2fzbOP3PMcZafkPv0rkZ-3kvLu9-P0@mail.gmail.com>
 References: <74C0C915-257F-41CC-AEA8-C6F5B839586B@marvell.com>
- <20101107220411.GB5376@pengutronix.de>
+	<20101107220411.GB5376@pengutronix.de>
+	<BEF8AD05-D094-4607-8C4F-1908C4FF54B3@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:38968 "HELO
-	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751789Ab0KHHig convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 8 Nov 2010 02:38:36 -0500
-In-Reply-To: <20101107220411.GB5376@pengutronix.de>
-Content-Language: en-US
+Received: from mail-px0-f174.google.com ([209.85.212.174]:52521 "EHLO
+	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753453Ab0KHIYX convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 03:24:23 -0500
+Received: by pxi15 with SMTP id 15so789831pxi.19
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Nov 2010 00:24:23 -0800 (PST)
+In-Reply-To: <BEF8AD05-D094-4607-8C4F-1908C4FF54B3@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+On Mon, Nov 8, 2010 at 4:21 PM, Philip Rakity <prakity@marvell.com> wro=
+te:
+>
+> On Nov 7, 2010, at 2:04 PM, Wolfram Sang wrote:
+>
+>> On Fri, Oct 08, 2010 at 12:31:34PM -0700, Philip Rakity wrote:
+>>>
+>>> 8 bit width is a new feature in the sd 3.0 spec. =A0Add checks to
+>>> ensure HOST_CONTROL register set 8 bit mode only if sd 3.0
+>>>
+>>> add quirk to indicate that board design supports 8 data lines.
+>>> The controller can support 8 data bits but the board design may
+>>> only bring out 4 data bits.
+>>
+>> This isn't a quirk, this is platform_data, no?
+>
+> Never sure of the difference between a quirk and platform data.
+> example: =A0Broken card detect is a quirk but maybe some slots on the=
+ board work and some do not
 
-On Nov 7, 2010, at 2:04 PM, Wolfram Sang wrote:
+In my case, one slot uses the 8-bit but another is 4-bit so host quirk
+is not acceptable.
+I prefer the platform data also.
 
-> On Fri, Oct 08, 2010 at 12:31:34PM -0700, Philip Rakity wrote:
->> 
->> 8 bit width is a new feature in the sd 3.0 spec.  Add checks to
->> ensure HOST_CONTROL register set 8 bit mode only if sd 3.0
->> 
->> add quirk to indicate that board design supports 8 data lines.
->> The controller can support 8 data bits but the board design may
->> only bring out 4 data bits.
-> 
-> This isn't a quirk, this is platform_data, no?
+Thank you,
+Kyungmin Park
 
-Never sure of the difference between a quirk and platform data. 
-example:  Broken card detect is a quirk but maybe some slots on the board work and some do not
-
-> 
-> Without looking deeply into it, I think we need to use the callback you
-> introduced in the other patch?
-> 
-
-It is needed in my experience because of how board design is done.  The controller can support 8 bits
-but the board may not have DAT4-DAT7 connected.
-
-> Regards,
-> 
->   Wolfram
-> 
-> PS: Sorry if there already was a discussion I might have missed. The bus width
-> thingie became a bit scattered, so I lost track...
-> 
-> -- 
-> Pengutronix e.K.                           | Wolfram Sang                |
-> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
+>
+>>
+>> Without looking deeply into it, I think we need to use the callback =
+you
+>> introduced in the other patch?
+>>
+>
+> It is needed in my experience because of how board design is done. =A0=
+The controller can support 8 bits
+> but the board may not have DAT4-DAT7 connected.
+>
+>> Regards,
+>>
+>> =A0 Wolfram
+>>
+>> PS: Sorry if there already was a discussion I might have missed. The=
+ bus width
+>> thingie became a bit scattered, so I lost track...
+>>
+>> --
+>> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ | Wolfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
+>> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://=
+www.pengutronix.de/ =A0|
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
