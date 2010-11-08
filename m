@@ -1,50 +1,51 @@
-From: Philip Rakity <prakity@marvell.com>
+From: Linus Walleij <linus.walleij@stericsson.com>
 Subject: Re: [PATCH] mmc: agressive clocking framework v9
-Date: Mon, 8 Nov 2010 01:45:56 -0800
-Message-ID: <1E1A2021-E51B-40F8-B0D3-DB3B2D5562CC@marvell.com>
-References: <43E4817426ED174AA81263BCECB4351D131D9D41BC@sc-vexch3.marvell.com>
- <AANLkTi=6FeuxhEL1ht4thc6PQ05wLFo7d2NA-XUYwHxy@mail.gmail.com>
- <041757E8-9FCD-4FA8-8079-7A3FC07E4038@marvell.com>
- <alpine.LFD.2.00.1011062139370.18581@xanadu.home>
- <AD7183BC-A6C0-4283-BC89-0CC5111437D7@marvell.com>
- <4CD7C586.6020809@stericsson.com>
+Date: Mon, 8 Nov 2010 11:40:21 +0100
+Message-ID: <4CD7D395.8040804@stericsson.com>
+References: <43E4817426ED174AA81263BCECB4351D131D9D41BC@sc-vexch3.marvell.com> <AANLkTi=6FeuxhEL1ht4thc6PQ05wLFo7d2NA-XUYwHxy@mail.gmail.com> <041757E8-9FCD-4FA8-8079-7A3FC07E4038@marvell.com> <AANLkTimWg_EE+hg__b0NW792szvY+4Rc_4XsjbHN_tJv@mail.gmail.com> <4CD7C4DB.7070105@stericsson.com> <C771C677-E21B-41FC-ABEE-DBEFEFA8569D@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:43064 "HELO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1752702Ab0KHJv2 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 8 Nov 2010 04:51:28 -0500
-In-Reply-To: <4CD7C586.6020809@stericsson.com>
-Content-Language: en-US
+Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:34732 "EHLO
+	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754179Ab0KHKki (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 05:40:38 -0500
+In-Reply-To: <C771C677-E21B-41FC-ABEE-DBEFEFA8569D@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@stericsson.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>, Ohad Ben-Cohen <ohad@wizery.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, David Vrabel <david.vrabel@csr.com>
 
-
-On Nov 8, 2010, at 1:40 AM, Linus Walleij wrote:
-
-> Philip Rakity wrote:
+Philip Rakity wrote:
+> On Nov 8, 2010, at 1:37 AM, Linus Walleij wrote:
+>> - Card (including SDIO device) whitelisting.
 > 
->> I am concerned that having the core/ layer ask for clocks off and on is
->> 
->> a) not needed when h/w clock gating is enabled
->> b) may invoke bad behavior in the controller
->> c) is not optimal since the h/w is already handling this. 
-> 
-> So do not CONFIG_MMC_CLKGATE for this platform?
-> 
-> I don't quite get it I think...
+> do not understand the term whitelisting ..  please explain.
 
-I want h/w clock gating for SD/eMMC/MMC cards and NOT sdio.
+The idea would be to have a database with ID:s for cards
+that may be gated. Any SDIO card not it this list would
+not be gated.
 
-If h/w is doing clock gating do not know what why I can to turn off  clock since h/w is already doing this.  Need a way to distinguish.
-
+>> - Host whitelisting - for the case where as gateable SDIO
+>>  device is soldered to the bus.
+>>
+>> The first looks like big-ish so would be a separate patch, but a
+>> host flag for the latter like MMC_CAP_GATE_SDIO can easily be
+>> folded into a v10 of this patch.
 > 
-> Yours,
-> Linus Walleij
-> 
+> Nico was not in favor of this.  He thought it best to have
+> the core/ layer handle this.
 
+My patch is indeed to the core?
+
+This was to be a flag for explicitly letting the core
+gate some specific hosts on the MMC bus, in the case
+where you (when defining platform data) already know that
+a gateable SDIO card was soldered hardly onto a certain
+host.
+
+Anyway, if we have such needs they can be fixed later.
+
+Yours,
+Linus Walleij
