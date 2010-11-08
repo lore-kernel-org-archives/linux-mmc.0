@@ -1,86 +1,65 @@
-From: Philip Rakity <prakity@marvell.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
 Subject: Re: [PATCH] sdhci: 8 bit widths - allow new QUIRK for 8 bit and v3
  sd controller
-Date: Mon, 8 Nov 2010 00:31:05 -0800
-Message-ID: <66B2D668-F5FD-4D91-8B97-921638E23276@marvell.com>
+Date: Mon, 8 Nov 2010 10:17:54 +0100
+Message-ID: <20101108091754.GA8638@pengutronix.de>
 References: <74C0C915-257F-41CC-AEA8-C6F5B839586B@marvell.com>
  <20101107220411.GB5376@pengutronix.de>
  <BEF8AD05-D094-4607-8C4F-1908C4FF54B3@marvell.com>
- <AANLkTik8fQrBwx2fzbOP3PMcZafkPv0rkZ-3kvLu9-P0@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Kj7319i9nmIyA2yE"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:44286 "HELO
-	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1754215Ab0KHIou convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 8 Nov 2010 03:44:50 -0500
-In-Reply-To: <AANLkTik8fQrBwx2fzbOP3PMcZafkPv0rkZ-3kvLu9-P0@mail.gmail.com>
-Content-Language: en-US
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:47173 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754159Ab0KHJR4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 04:17:56 -0500
+Content-Disposition: inline
+In-Reply-To: <BEF8AD05-D094-4607-8C4F-1908C4FF54B3@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
-I have the same issue -- in my case 2 slots can support 8 bits and one cannot.
+--Kj7319i9nmIyA2yE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I set the QURK in the platform data and the platform specific driver sets the quirk on the specific slot that has 8 bit support.
+> > This isn't a quirk, this is platform_data, no?
+>=20
+> Never sure of the difference between a quirk and platform data.=20
+> example:  Broken card detect is a quirk but maybe some slots on the board=
+ work and some do not
 
-Philip
+A quirk is something which needs to be handled in a special case because
+some controllers do not adhere to the SDHC standard. An 8 bit bus seems
+to be in the 3.0 standard, so it is not a quirk :) Does the standard say
+anything about how the actual bus width should be handled?
 
+That said, you are right that quirks have been abused to cover board
+issues. Another reason to clean them up ;)
 
-On Nov 8, 2010, at 12:24 AM, Kyungmin Park wrote:
+Regards,
 
-> On Mon, Nov 8, 2010 at 4:21 PM, Philip Rakity <prakity@marvell.com> wrote:
->> 
->> On Nov 7, 2010, at 2:04 PM, Wolfram Sang wrote:
->> 
->>> On Fri, Oct 08, 2010 at 12:31:34PM -0700, Philip Rakity wrote:
->>>> 
->>>> 8 bit width is a new feature in the sd 3.0 spec.  Add checks to
->>>> ensure HOST_CONTROL register set 8 bit mode only if sd 3.0
->>>> 
->>>> add quirk to indicate that board design supports 8 data lines.
->>>> The controller can support 8 data bits but the board design may
->>>> only bring out 4 data bits.
->>> 
->>> This isn't a quirk, this is platform_data, no?
->> 
->> Never sure of the difference between a quirk and platform data.
->> example:  Broken card detect is a quirk but maybe some slots on the board work and some do not
-> 
-> In my case, one slot uses the 8-bit but another is 4-bit so host quirk
-> is not acceptable.
-> I prefer the platform data also.
-> 
-> Thank you,
-> Kyungmin Park
-> 
->> 
->>> 
->>> Without looking deeply into it, I think we need to use the callback you
->>> introduced in the other patch?
->>> 
->> 
->> It is needed in my experience because of how board design is done.  The controller can support 8 bits
->> but the board may not have DAT4-DAT7 connected.
->> 
->>> Regards,
->>> 
->>>   Wolfram
->>> 
->>> PS: Sorry if there already was a discussion I might have missed. The bus width
->>> thingie became a bit scattered, so I lost track...
->>> 
->>> --
->>> Pengutronix e.K.                           | Wolfram Sang                |
->>> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
->> 
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> 
+   Wolfram
 
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--Kj7319i9nmIyA2yE
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkzXwEIACgkQD27XaX1/VRuQ8QCeN1ueDODn5jbt9MS49MCJcQXS
+BccAn0VnBmmBbLRFvBf/wo4zStAXUGV0
+=VwO1
+-----END PGP SIGNATURE-----
+
+--Kj7319i9nmIyA2yE--
