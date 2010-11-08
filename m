@@ -1,154 +1,137 @@
-From: Alberto Panizzo <maramaopercheseimorto@gmail.com>
-Subject: Re: [PATCH] mxcmmc: Add the ability to bind a regulator to manage
- the MMC card voltage
-Date: Mon, 08 Nov 2010 11:53:15 +0100
-Message-ID: <1289213595.3425.23.camel@realization>
-References: <1288656337.29881.13.camel@realization>
-	 <20101102073932.GB6017@pengutronix.de>
-	 <1288949275.3072.3.camel@realization>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH] sdhci: 8 bit widths - allow new QUIRK for 8 bit and v3 sd controller
+Date: Mon, 8 Nov 2010 06:48:32 -0500
+Message-ID: <AANLkTi=9omu=yDXEk_=QhGsz6xy3VVxn39T4DF7UvHjR@mail.gmail.com>
+References: <74C0C915-257F-41CC-AEA8-C6F5B839586B@marvell.com>
+	<20101107220411.GB5376@pengutronix.de>
+	<BEF8AD05-D094-4607-8C4F-1908C4FF54B3@marvell.com>
+	<20101108091754.GA8638@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:41708 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:39423 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754365Ab0KHKxW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 05:53:22 -0500
-In-Reply-To: <1288949275.3072.3.camel@realization>
+	with ESMTP id S1754497Ab0KHLsd convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 06:48:33 -0500
+Received: by fxm16 with SMTP id 16so3908962fxm.19
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Nov 2010 03:48:32 -0800 (PST)
+In-Reply-To: <20101108091754.GA8638@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Daniel Mack <daniel@caiaq.de>, Andrew Morton <akpm@linux-foundation.org>, Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>, Eric =?ISO-8859-1?Q?B=E9nard?= <eric@eukrea.com>, Fabio Estevam <fabioestevam@yahoo.com>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>
+To: Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On ven, 2010-11-05 at 10:28 +0100, Alberto Panizzo wrote:
-> On mar, 2010-11-02 at 08:39 +0100, Sascha Hauer wrote:
-> > On Tue, Nov 02, 2010 at 01:05:37AM +0100, Alberto Panizzo wrote:
-> > > This implementation is based on the pxamci.c driver and it will
-> > > be used to support the mx31_3ds machine.
-> > > 
-> > > Signed-off-by: Alberto Panizzo <maramaopercheseimorto@gmail.com>
-> > 
-> > Looks good to me
-> > 
-> > Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
-> > 
+On Mon, Nov 8, 2010 at 4:17 AM, Wolfram Sang <w.sang@pengutronix.de> wr=
+ote:
+>> > This isn't a quirk, this is platform_data, no?
+>>
+>> Never sure of the difference between a quirk and platform data.
+>> example: =A0Broken card detect is a quirk but maybe some slots on th=
+e board work and some do not
+>
+> A quirk is something which needs to be handled in a special case beca=
+use
+> some controllers do not adhere to the SDHC standard. An 8 bit bus see=
+ms
+> to be in the 3.0 standard, so it is not a quirk :) Does the standard =
+say
+> anything about how the actual bus width should be handled?
+>
+> That said, you are right that quirks have been abused to cover board
+> issues. Another reason to clean them up ;)
+>
+> Regards,
+>
+> =A0 Wolfram
+>
+> --
+> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+| Wolfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
+> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://w=
+ww.pengutronix.de/ =A0|
+>
+> -----BEGIN PGP SIGNATURE-----
+> Version: GnuPG v1.4.10 (GNU/Linux)
+>
+> iEYEARECAAYFAkzXwEIACgkQD27XaX1/VRuQ8QCeN1ueDODn5jbt9MS49MCJcQXS
+> BccAn0VnBmmBbLRFvBf/wo4zStAXUGV0
+> =3DVwO1
+> -----END PGP SIGNATURE-----
+>
+>
 
-Chris,
-Please, any comment on this one?
-
-Thanks,
-Alberto!
-
-> 
-> > > ---
-> > > 
-> > > This patch is based on the pengutronix for-rmk branch and apply to the
-> > > linus tre, version:2.6.37-rc1
-> > > 
-> > > ..cc the lists, sorry for the double mail.
-> > > 
-> > >  drivers/mmc/host/mxcmmc.c |   48 +++++++++++++++++++++++++++++++++++++++-----
-> > >  1 files changed, 42 insertions(+), 6 deletions(-)
-> > > 
-> > > diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> > > index 350f78e..e4637fc 100644
-> > > --- a/drivers/mmc/host/mxcmmc.c
-> > > +++ b/drivers/mmc/host/mxcmmc.c
-> > > @@ -31,6 +31,7 @@
-> > >  #include <linux/clk.h>
-> > >  #include <linux/io.h>
-> > >  #include <linux/gpio.h>
-> > > +#include <linux/regulator/consumer.h>
-> > >  
-> > >  #include <asm/dma.h>
-> > >  #include <asm/irq.h>
-> > > @@ -141,10 +142,45 @@ struct mxcmci_host {
-> > >  
-> > >  	struct work_struct	datawork;
-> > >  	spinlock_t		lock;
-> > > +
-> > > +	struct regulator	*vcc;
-> > >  };
-> > >  
-> > >  static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
-> > >  
-> > > +static inline void mxcmci_init_ocr(struct mxcmci_host *host)
-> > > +{
-> > > +#ifdef CONFIG_REGULATOR
-> > > +	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
-> > > +
-> > > +	if (IS_ERR(host->vcc)) {
-> > > +		host->vcc = NULL;
-> > > +	} else {
-> > > +		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
-> > > +		if (host->pdata && host->pdata->ocr_avail)
-> > > +			dev_warn(mmc_dev(host->mmc),
-> > > +				"pdata->ocr_avail will not be used\n");
-> > > +	}
-> > > +#endif
-> > > +	if (host->vcc == NULL) {
-> > > +		/* fall-back to platform data */
-> > > +		if (host->pdata && host->pdata->ocr_avail)
-> > > +			host->mmc->ocr_avail = host->pdata->ocr_avail;
-> > > +		else
-> > > +			host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> > > +	}
-> > > +}
-> > > +
-> > > +static inline void mxcmci_set_power(struct mxcmci_host *host, unsigned int vdd)
-> > > +{
-> > > +#ifdef CONFIG_REGULATOR
-> > > +	if (host->vcc)
-> > > +		mmc_regulator_set_ocr(host->vcc, vdd);
-> > > +#endif
-> > > +	if (host->pdata && host->pdata->setpower)
-> > > +		host->pdata->setpower(mmc_dev(host->mmc), vdd);
-> > > +}
-> > > +
-> > >  static inline int mxcmci_use_dma(struct mxcmci_host *host)
-> > >  {
-> > >  	return host->do_dma;
-> > > @@ -680,9 +716,9 @@ static void mxcmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > >  		host->cmdat &= ~CMD_DAT_CONT_BUS_WIDTH_4;
-> > >  
-> > >  	if (host->power_mode != ios->power_mode) {
-> > > -		if (host->pdata && host->pdata->setpower)
-> > > -			host->pdata->setpower(mmc_dev(mmc), ios->vdd);
-> > > +		mxcmci_set_power(host, ios->vdd);
-> > >  		host->power_mode = ios->power_mode;
-> > > +
-> > >  		if (ios->power_mode == MMC_POWER_ON)
-> > >  			host->cmdat |= CMD_DAT_CONT_INIT;
-> > >  	}
-> > > @@ -808,10 +844,7 @@ static int mxcmci_probe(struct platform_device *pdev)
-> > >  	host->pdata = pdev->dev.platform_data;
-> > >  	spin_lock_init(&host->lock);
-> > >  
-> > > -	if (host->pdata && host->pdata->ocr_avail)
-> > > -		mmc->ocr_avail = host->pdata->ocr_avail;
-> > > -	else
-> > > -		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> > > +	mxcmci_init_ocr(host);
-> > >  
-> > >  	if (host->pdata && host->pdata->dat3_card_detect)
-> > >  		host->default_irq_mask =
-> > > @@ -916,6 +949,9 @@ static int mxcmci_remove(struct platform_device *pdev)
-> > >  
-> > >  	mmc_remove_host(mmc);
-> > >  
-> > > +	if (host->vcc)
-> > > +		regulator_put(host->vcc);
-> > > +
-> > >  	if (host->pdata && host->pdata->exit)
-> > >  		host->pdata->exit(&pdev->dev, mmc);
-> > >  
-> > > -- 
-> > > 1.6.3.3
-> > > 
-> > > 
-> > > 
-> > > 
-> > > 
-> > 
+Highly concern of abuse of QUIRK, currently the highest bit is
+(1<<29), while the quirks is u32.
+Could we remove some quirk, such as SDHCI_QUIRK_FORCE_1_BIT_DATA,
+which only used to transfer info to caps.
+We could simply update mmc->caps after sdhci_add_host.
 
 
+ arch/arm/plat-pxa/include/plat/sdhci.h |    2 ++
+ drivers/mmc/host/sdhci-pxa.c           |    5 +++++
+ drivers/mmc/host/sdhci.c               |    3 ---
+ include/linux/mmc/sdhci.h              |    2 --
+ 4 files changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/plat-pxa/include/plat/sdhci.h
+b/arch/arm/plat-pxa/include/plat/sdhci.h
+index e49c5b6..661dc48 100644
+--- a/arch/arm/plat-pxa/include/plat/sdhci.h
++++ b/arch/arm/plat-pxa/include/plat/sdhci.h
+@@ -16,6 +16,8 @@
+ /* pxa specific flag */
+ /* Require clock free running */
+ #define PXA_FLAG_DISABLE_CLOCK_GATING (1<<0)
++#define PXA_FLAG_FORCE_1_BIT_DATA (1<<2)
++#define PXA_FLAG_CAN_DO_8_BIT_DATA (1<<3)
+
+ /*
+  * struct pxa_sdhci_platdata() - Platform device data for PXA SDHCI
+diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.=
+c
+index fc406ac..3d63a37 100644
+--- a/drivers/mmc/host/sdhci-pxa.c
++++ b/drivers/mmc/host/sdhci-pxa.c
+@@ -147,6 +147,11 @@ static int __devinit sdhci_pxa_probe(struct
+platform_device *pdev)
+ 		goto out;
+ 	}
+
++	if (pxa->pdata->flags & PXA_FLAG_FORCE_1_BIT_DATA)
++		host->mmc->caps &=3D ~(MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA);
++	if (pxa->pdata->flags & PXA_FLAG_CAN_DO_8_BIT_DATA)
++		host->mmc->caps |=3D MMC_CAP_8_BIT_DATA;
++
+ 	if (pxa->pdata->max_speed)
+ 		host->mmc->f_max =3D pxa->pdata->max_speed;
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 154cbf8..2628ec2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1858,9 +1858,6 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	mmc->f_max =3D host->max_clk;
+ 	mmc->caps |=3D MMC_CAP_SDIO_IRQ;
+
+-	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+-		mmc->caps |=3D MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+-
+ 	if (caps & SDHCI_CAN_DO_HISPD)
+ 		mmc->caps |=3D MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 1fdc673..ede02a4 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -67,8 +67,6 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_FORCE_BLK_SZ_2048			(1<<20)
+ /* Controller cannot do multi-block transfers */
+ #define SDHCI_QUIRK_NO_MULTIBLOCK			(1<<21)
+-/* Controller can only handle 1-bit data transfers */
+-#define SDHCI_QUIRK_FORCE_1_BIT_DATA			(1<<22)
+ /* Controller needs 10ms delay between applying power and clock */
+ #define SDHCI_QUIRK_DELAY_AFTER_POWER			(1<<23)
+ /* Controller uses SDCLK instead of TMCLK for data timeouts */
+--=20
+1.7.0.4
