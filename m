@@ -1,56 +1,52 @@
-From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: Re: [PATCH] mmc: agressive clocking framework v9
-Date: Mon, 8 Nov 2010 10:23:33 +0100
-Message-ID: <4CD7C195.9000805@stericsson.com>
-References: <43E4817426ED174AA81263BCECB4351D131D9D41BC@sc-vexch3.marvell.com>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [PATCH 1/2] mmc: agressive clocking framework v8
+Date: Mon, 8 Nov 2010 10:26:14 +0100
+Message-ID: <AANLkTika=H3EOA=WSdyuP9Mexrrh0z6-KjjTiNCj=mLc@mail.gmail.com>
+References: <1288776170-10141-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:41863 "EHLO
-	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754271Ab0KHJX7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 04:23:59 -0500
-In-Reply-To: <43E4817426ED174AA81263BCECB4351D131D9D41BC@sc-vexch3.marvell.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:51886 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751946Ab0KHJ0P (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 04:26:15 -0500
+Received: by wyb36 with SMTP id 36so3243703wyb.19
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Nov 2010 01:26:14 -0800 (PST)
+In-Reply-To: <1288776170-10141-1-git-send-email-linus.walleij@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Cc: Ghorai Sukumar <s-ghorai@ti.com>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Adrian Hunter <adrian.hunter@nokia.com>, David Vrabel <david.vrabel@csr.com>, Kyungmin Park <kmpark@infradead.org>, jh80.chung@samsung.com, Linus Walleij <linus.walleij@stericsson.com>
 
-Philip Rakity wrote:
+2010/11/3 Linus Walleij <linus.walleij@stericsson.com>:
 
-> One case that I do not see handled is support of hardware clock gating.
-> SD 3.0 has this as well as our v2.0 controller.
+> This patch modifies the MMC core code to optionally call the
+> set_ios() operation on the driver with the clock frequency set
+> to 0 (gate) after a grace period of at least 8 MCLK cycles, then
+> restore it (ungate) before any new request. This gives
+> the driver the option to shut down the MCI clock to the MMC/SD
+> card when the clock frequency is 0, i.e. the core has stated
+> that the MCI clock does not need to be generated.
+>
+> It is inspired by existing clock gating code found in the OMAP
+> and Atmel drivers and brings this up to the host abstraction.
+> Gating is performed before and after any MMC request.
+>
+> It exemplifies by implementing this for the MMCI/PL180 MMC/SD
+> host controller, but it should be simple to switch OMAP and
+> Atmel over to using this instead.
+>
+> Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
 
-> a) add a quirk that the driver can set to indicate h/w support for clock gating is available
+I think we have some rough consesus that:
 
-Right now there is a Kconfig option, that compiles out all of the
-software clock gating. This sounds more like we shouldn't do
-it that way: instead always compile it in and then use a new
-host flag to indicate whether to activate it or not.
+* This patch adds the desired gating functionality to the MMC
+  subsystem.
+* It can be refactored to reuse parts of runtime PM in the
+  future if some eager contributor turns up.
 
-Is this what you mean?
-
-> b) add a new field to ios that indicates if hardware clock gating to be enabled / disabled
-> c) clock gating is set to disabled until final speed negotiation during card detection after which it may be enabled.
-
-This seems like orthogonal, but realated stuff that can be
-added on top.
-
-> d) keep sdio clock gating OFF -- need this from our experience.
-
-This was added already in the v8 variant of this patchset, for
-the SW-controlled gating.
-
-> I can try to add this to your patch if you like or perhaps you
-> can do this in the next submission
-
-OK, seems like a good idea.
-
-I can't test it with your hardware anyway.
-
-But base your work on the v8 patch, this v9 using runtime PM is
-not going to work. v10 will move back to the v8 approach.
+Andrew, can you add this v8 version (not the misguided v9!)
+version to your patch stack?
 
 Yours,
 Linus Walleij
