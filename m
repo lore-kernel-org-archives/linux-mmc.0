@@ -1,44 +1,72 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/2] sdhci-esdhc-imx: fix timeout on i.MX's sdhci
-Date: Sun, 7 Nov 2010 22:51:37 +0000
-Message-ID: <20101107225137.GE13608@void.printf.net>
-References: <20101022231203.GA6502@void.printf.net> <1287791842-706-1-git-send-email-eric@eukrea.com>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH] mmc: agressive clocking framework v9
+Date: Sun, 07 Nov 2010 23:33:45 -0500 (EST)
+Message-ID: <alpine.LFD.2.00.1011072328300.18581@xanadu.home>
+References: <43E4817426ED174AA81263BCECB4351D131D9D41BC@sc-vexch3.marvell.com>
+ <AANLkTi=6FeuxhEL1ht4thc6PQ05wLFo7d2NA-XUYwHxy@mail.gmail.com>
+ <041757E8-9FCD-4FA8-8079-7A3FC07E4038@marvell.com>
+ <alpine.LFD.2.00.1011062139370.18581@xanadu.home>
+ <AD7183BC-A6C0-4283-BC89-0CC5111437D7@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53452 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751439Ab0KGWvj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 7 Nov 2010 17:51:39 -0500
-Content-Disposition: inline
-In-Reply-To: <1287791842-706-1-git-send-email-eric@eukrea.com>
+Received: from relais.videotron.ca ([24.201.245.36]:58046 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754073Ab0KHEdq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Nov 2010 23:33:46 -0500
+Received: from xanadu.home ([66.130.28.92]) by vl-mh-mrz25.ip.videotron.ca
+ (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
+ with ESMTP id <0LBJ006BWTZV2X90@vl-mh-mrz25.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Sun, 07 Nov 2010 23:33:31 -0500 (EST)
+In-reply-to: <AD7183BC-A6C0-4283-BC89-0CC5111437D7@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Eric =?iso-8859-1?Q?B=E9nard?= <eric@eukrea.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, shawn.gsc@gmail.com, w.sang@pengutronix.de, nicolas.pitre@linaro.org, r65037@freescale.com, amit.kucheria@linaro.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, "linus.Walleij@stericsson.com" <linus.Walleij@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Eric,
+On Sun, 7 Nov 2010, Philip Rakity wrote:
 
-On Sat, Oct 23, 2010 at 01:57:21AM +0200, Eric B=E9nard wrote:
-> this patch fix timeout problems on i.MX's sdhci as suggested by
-> Richard Zhu.
->=20
-> Tested on :
-> - i.MX257 : not needed
-> - i.MX357 : needed
-> - i.MX515 : needed
->=20
-> more details can be found here :
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2010-October/02=
-9748.html
->=20
-> Signed-off-by: Eric B=E9nard <eric@eukrea.com>
-> Tested-by: Shawn Guo <shawn.gsc@gmail.com>
-> Acked-by: Wolfram Sang <w.sang@pengutronix.de>
+> 
+> On Nov 6, 2010, at 6:44 PM, Nicolas Pitre wrote:
+> 
+> > On Sat, 6 Nov 2010, Philip Rakity wrote:
+> > 
+> >> 
+> >> We need a way to specify
+> >> 
+> >> a) Hardware can support clock gating setting the clock to 0 in the 
+> >> call to set_ios (with hardware clock gating enabled) becomes a no-op 
+> >> so some care is needed which is why I suggested another field in the 
+> >> ios structure.
+> > 
+> > Why should the core code care?
+> > 
+> > What difference is there with the core telling the controller driver to 
+> > set the clock to a frequency of 0 ?
+> 
+> When h/w clock gating is enabled then sd clocks are disabled/enabled 
+> by the sd controller; there is nothing for the core/ layer to do.
 
-Thanks, I've pushed and queued these two patches for 2.6.37.
+OK, then that could be an optimization.
 
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> I am concerned that having the core/ layer ask for clocks off and on 
+> is
+> 
+> a) not needed when h/w clock gating is enabled
+
+Sure, but right now it shouldn't be enabled just yet.  Making sure that 
+the software version works well should be done first.
+
+> b) may invoke bad behavior in the controller
+
+That would be a really bad controller.
+
+> c) is not optimal since the h/w is already handling this. --
+
+Agreed.  But again let's make sure that the software version works 
+first.  Then adding support for hardware clock gating would be really 
+simple.
+
+
+Nicolas
