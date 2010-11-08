@@ -1,51 +1,154 @@
-From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: Re: [PATCH] mmc: agressive clocking framework v9
-Date: Mon, 8 Nov 2010 11:40:21 +0100
-Message-ID: <4CD7D395.8040804@stericsson.com>
-References: <43E4817426ED174AA81263BCECB4351D131D9D41BC@sc-vexch3.marvell.com> <AANLkTi=6FeuxhEL1ht4thc6PQ05wLFo7d2NA-XUYwHxy@mail.gmail.com> <041757E8-9FCD-4FA8-8079-7A3FC07E4038@marvell.com> <AANLkTimWg_EE+hg__b0NW792szvY+4Rc_4XsjbHN_tJv@mail.gmail.com> <4CD7C4DB.7070105@stericsson.com> <C771C677-E21B-41FC-ABEE-DBEFEFA8569D@marvell.com>
+From: Alberto Panizzo <maramaopercheseimorto@gmail.com>
+Subject: Re: [PATCH] mxcmmc: Add the ability to bind a regulator to manage
+ the MMC card voltage
+Date: Mon, 08 Nov 2010 11:53:15 +0100
+Message-ID: <1289213595.3425.23.camel@realization>
+References: <1288656337.29881.13.camel@realization>
+	 <20101102073932.GB6017@pengutronix.de>
+	 <1288949275.3072.3.camel@realization>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:34732 "EHLO
-	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754179Ab0KHKki (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 05:40:38 -0500
-In-Reply-To: <C771C677-E21B-41FC-ABEE-DBEFEFA8569D@marvell.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:41708 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754365Ab0KHKxW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2010 05:53:22 -0500
+In-Reply-To: <1288949275.3072.3.camel@realization>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, David Vrabel <david.vrabel@csr.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Daniel Mack <daniel@caiaq.de>, Andrew Morton <akpm@linux-foundation.org>, Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>, Eric =?ISO-8859-1?Q?B=E9nard?= <eric@eukrea.com>, Fabio Estevam <fabioestevam@yahoo.com>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>
 
-Philip Rakity wrote:
-> On Nov 8, 2010, at 1:37 AM, Linus Walleij wrote:
->> - Card (including SDIO device) whitelisting.
+On ven, 2010-11-05 at 10:28 +0100, Alberto Panizzo wrote:
+> On mar, 2010-11-02 at 08:39 +0100, Sascha Hauer wrote:
+> > On Tue, Nov 02, 2010 at 01:05:37AM +0100, Alberto Panizzo wrote:
+> > > This implementation is based on the pxamci.c driver and it will
+> > > be used to support the mx31_3ds machine.
+> > > 
+> > > Signed-off-by: Alberto Panizzo <maramaopercheseimorto@gmail.com>
+> > 
+> > Looks good to me
+> > 
+> > Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
+> > 
+
+Chris,
+Please, any comment on this one?
+
+Thanks,
+Alberto!
+
 > 
-> do not understand the term whitelisting ..  please explain.
+> > > ---
+> > > 
+> > > This patch is based on the pengutronix for-rmk branch and apply to the
+> > > linus tre, version:2.6.37-rc1
+> > > 
+> > > ..cc the lists, sorry for the double mail.
+> > > 
+> > >  drivers/mmc/host/mxcmmc.c |   48 +++++++++++++++++++++++++++++++++++++++-----
+> > >  1 files changed, 42 insertions(+), 6 deletions(-)
+> > > 
+> > > diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> > > index 350f78e..e4637fc 100644
+> > > --- a/drivers/mmc/host/mxcmmc.c
+> > > +++ b/drivers/mmc/host/mxcmmc.c
+> > > @@ -31,6 +31,7 @@
+> > >  #include <linux/clk.h>
+> > >  #include <linux/io.h>
+> > >  #include <linux/gpio.h>
+> > > +#include <linux/regulator/consumer.h>
+> > >  
+> > >  #include <asm/dma.h>
+> > >  #include <asm/irq.h>
+> > > @@ -141,10 +142,45 @@ struct mxcmci_host {
+> > >  
+> > >  	struct work_struct	datawork;
+> > >  	spinlock_t		lock;
+> > > +
+> > > +	struct regulator	*vcc;
+> > >  };
+> > >  
+> > >  static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
+> > >  
+> > > +static inline void mxcmci_init_ocr(struct mxcmci_host *host)
+> > > +{
+> > > +#ifdef CONFIG_REGULATOR
+> > > +	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
+> > > +
+> > > +	if (IS_ERR(host->vcc)) {
+> > > +		host->vcc = NULL;
+> > > +	} else {
+> > > +		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
+> > > +		if (host->pdata && host->pdata->ocr_avail)
+> > > +			dev_warn(mmc_dev(host->mmc),
+> > > +				"pdata->ocr_avail will not be used\n");
+> > > +	}
+> > > +#endif
+> > > +	if (host->vcc == NULL) {
+> > > +		/* fall-back to platform data */
+> > > +		if (host->pdata && host->pdata->ocr_avail)
+> > > +			host->mmc->ocr_avail = host->pdata->ocr_avail;
+> > > +		else
+> > > +			host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+> > > +	}
+> > > +}
+> > > +
+> > > +static inline void mxcmci_set_power(struct mxcmci_host *host, unsigned int vdd)
+> > > +{
+> > > +#ifdef CONFIG_REGULATOR
+> > > +	if (host->vcc)
+> > > +		mmc_regulator_set_ocr(host->vcc, vdd);
+> > > +#endif
+> > > +	if (host->pdata && host->pdata->setpower)
+> > > +		host->pdata->setpower(mmc_dev(host->mmc), vdd);
+> > > +}
+> > > +
+> > >  static inline int mxcmci_use_dma(struct mxcmci_host *host)
+> > >  {
+> > >  	return host->do_dma;
+> > > @@ -680,9 +716,9 @@ static void mxcmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > >  		host->cmdat &= ~CMD_DAT_CONT_BUS_WIDTH_4;
+> > >  
+> > >  	if (host->power_mode != ios->power_mode) {
+> > > -		if (host->pdata && host->pdata->setpower)
+> > > -			host->pdata->setpower(mmc_dev(mmc), ios->vdd);
+> > > +		mxcmci_set_power(host, ios->vdd);
+> > >  		host->power_mode = ios->power_mode;
+> > > +
+> > >  		if (ios->power_mode == MMC_POWER_ON)
+> > >  			host->cmdat |= CMD_DAT_CONT_INIT;
+> > >  	}
+> > > @@ -808,10 +844,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+> > >  	host->pdata = pdev->dev.platform_data;
+> > >  	spin_lock_init(&host->lock);
+> > >  
+> > > -	if (host->pdata && host->pdata->ocr_avail)
+> > > -		mmc->ocr_avail = host->pdata->ocr_avail;
+> > > -	else
+> > > -		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+> > > +	mxcmci_init_ocr(host);
+> > >  
+> > >  	if (host->pdata && host->pdata->dat3_card_detect)
+> > >  		host->default_irq_mask =
+> > > @@ -916,6 +949,9 @@ static int mxcmci_remove(struct platform_device *pdev)
+> > >  
+> > >  	mmc_remove_host(mmc);
+> > >  
+> > > +	if (host->vcc)
+> > > +		regulator_put(host->vcc);
+> > > +
+> > >  	if (host->pdata && host->pdata->exit)
+> > >  		host->pdata->exit(&pdev->dev, mmc);
+> > >  
+> > > -- 
+> > > 1.6.3.3
+> > > 
+> > > 
+> > > 
+> > > 
+> > > 
+> > 
 
-The idea would be to have a database with ID:s for cards
-that may be gated. Any SDIO card not it this list would
-not be gated.
 
->> - Host whitelisting - for the case where as gateable SDIO
->>  device is soldered to the bus.
->>
->> The first looks like big-ish so would be a separate patch, but a
->> host flag for the latter like MMC_CAP_GATE_SDIO can easily be
->> folded into a v10 of this patch.
-> 
-> Nico was not in favor of this.  He thought it best to have
-> the core/ layer handle this.
-
-My patch is indeed to the core?
-
-This was to be a flag for explicitly letting the core
-gate some specific hosts on the MMC bus, in the case
-where you (when defining platform data) already know that
-a gateable SDIO card was soldered hardly onto a certain
-host.
-
-Anyway, if we have such needs they can be fixed later.
-
-Yours,
-Linus Walleij
