@@ -1,14 +1,12 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH] mmc, sh: Move constants to sh_mmcif.h
-Date: Tue,  9 Nov 2010 18:05:50 +0900
-Message-ID: <1289293550-23265-1-git-send-email-horms@verge.net.au>
-References: <y>
+Subject: [PATCH v2] mmc, sh: Move constants to sh_mmcif.h
+Date: Tue, 9 Nov 2010 17:47:02 +0900
+Message-ID: <20101109092952.01349C223F@yukiko.kent.sydney.vergenet.net>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:40748 "EHLO
+Received: from kirsty.vergenet.net ([202.4.237.240]:41095 "EHLO
 	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751629Ab0KIJF6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 04:05:58 -0500
-In-Reply-To: <y>
+	with ESMTP id S1752938Ab0KIJ34 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 04:29:56 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
@@ -28,6 +26,10 @@ Signed-off-by: Simon Horman <horms@verge.net.au>
  drivers/mmc/host/sh_mmcif.c  |   23 -----------------------
  include/linux/mmc/sh_mmcif.h |   39 ++++++++++++++++++++++++++++++++++-----
  2 files changed, 34 insertions(+), 28 deletions(-)
+
+* v1 diff against 2.6.37-rc1
+
+* v2 rediff against Linus's current tree
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
 index ddd0984..3f49273 100644
@@ -101,7 +103,7 @@ index d19e211..b4eaebf 100644
 +#define SOFT_RST_ON		(1 << 31)
 +#define SOFT_RST_OFF		~SOFT_RST_ON
 +
- extern inline u32 sh_mmcif_readl(void __iomem *addr, int reg)
+ static inline u32 sh_mmcif_readl(void __iomem *addr, int reg)
  {
  	return readl(addr + reg);
 @@ -149,17 +172,23 @@ extern inline void sh_mmcif_boot_init(void __iomem *base)
