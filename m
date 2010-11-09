@@ -1,51 +1,30 @@
-From: Philip Rakity <prakity@marvell.com>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: can we remove the quirk  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN ?
-Date: Tue, 9 Nov 2010 04:02:37 -0800
-Message-ID: <23C594B6-1B72-4DE0-8BE7-04E1FD36B58E@marvell.com>
+Date: Tue, 9 Nov 2010 12:08:35 +0000
+Message-ID: <20101109120835.0fea3feb@lxorguk.ukuu.org.uk>
 References: <4D68A6A7-2D95-463F-875B-DB52ECCC53F1@marvell.com>
- <65EBF3EE-DE1E-46A4-BF41-A9D5A6096673@marvell.com>
- <20101109115517.GD3223@pengutronix.de>
+	<65EBF3EE-DE1E-46A4-BF41-A9D5A6096673@marvell.com>
+	<20101109115517.GD3223@pengutronix.de>
+	<23C594B6-1B72-4DE0-8BE7-04E1FD36B58E@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:59037 "HELO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1754265Ab0KIMDi convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 9 Nov 2010 07:03:38 -0500
-In-Reply-To: <20101109115517.GD3223@pengutronix.de>
-Content-Language: en-US
+Received: from earthlight.etchedpixels.co.uk ([81.2.110.250]:45652 "EHLO
+	www.etchedpixels.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754515Ab0KIMKC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 07:10:02 -0500
+In-Reply-To: <23C594B6-1B72-4DE0-8BE7-04E1FD36B58E@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Zhangfei Gao <zhangfei.gao@gmail.com>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Zhangfei Gao <zhangfei.gao@gmail.com>
 
+I think I agree with Wolfram. Perhaps a much better model would be
 
-Doesn't the platform data hold the specific board specific quirks ?
+"Anyone who adds a quirk will have to figure out how to remove one"
 
-Can you provide an example of how you see the platform data being used.  I think we are saying the same thing using different words but a code snippet would clarify this.
+Several are trivial to remove and generalise into a couple of function
+overrides.
 
-Philip
-
-On Nov 9, 2010, at 3:55 AM, Wolfram Sang wrote:
-
-> On Tue, Nov 09, 2010 at 03:45:15AM -0800, Philip Rakity wrote:
->> 
->> reposting since we are discussing removing quirks.   
->> 
->> We could partition the quirks into one set for controller quirks and one set for platform quirks.  That would give us another 32 quirks. 
-> 
-> IMHO we need less quirks, not more. Adding the number of potential
-> quirks just delays the underlying problem. Also, unless someone
-> enlightens me, I don't think there are platform quirks, only
-> platform_data?
-> 
-> Regards,
-> 
->   Wolfram
-> 
-> -- 
-> Pengutronix e.K.                           | Wolfram Sang                |
-> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
+Alan
