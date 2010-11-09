@@ -1,72 +1,30 @@
-From: Tomoya MORINAGA <tomoya-linux@dsn.okisemi.com>
-Subject: A MMC card transfer issue
-Date: Tue, 09 Nov 2010 14:39:40 +0900
-Message-ID: <4CD8DE9C.4040505@dsn.okisemi.com>
+From: <amandasaleeeby@centrum.sk>
+Subject: hello
+Date: Tue, 09 Nov 2010 06:51:04 +0100
+Message-ID: <201011090651.21481__41606.5380246893$1289281878$gmane$org@centrum.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sm-d311v.smileserver.ne.jp ([203.211.202.206]:9021 "EHLO
-	sm-d311v.smileserver.ne.jp" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751448Ab0KIFjp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 00:39:45 -0500
+Received: from farizej.centrum.cz ([90.183.38.130]:38662 "EHLO
+	farizej.centrum.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751074Ab0KIFvH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 00:51:07 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: "Andrew\"" <andrew.chih.howe.khor@intel.com>, kok.howg.ewe@intel.com
+To: amandasaleeby <amandasaleeby@centrum.sk>
 
-I am facing the issue about some MMC cards on Intel EG20T PCH (Platform Controller Hub).
-The linux version is 2.6.36.
-I can not transfer data the MMC cards (e.g. Transcned MMC card).
-The card is 1 bit bus width. And the card is according to MMC specification V3.x.
-And the EG20T has a 4 bit bus width capability 
-Linux MMC standard driver decides the card bus width as 4 bit,
-if the MMC specification version is larger than or equal to V4.0 like below.
+hello with love and trust
+my dearest friend compliment of the day to you.my name is Amanda saleeeby a
+girl of 23years old honest trusting kind caring loving and fun with
+compassionate and generous nature viewing your email address which really interest
+me to know more about you that is having communication friendship with you
+if you will have the desire with me.so that we can get to know each other
+better sharing feelings and thought together .i will like you to write me
+through my email for easiest communication.i will be waiting to read from
+you.I will be waiting for your mail;please make sure you replied to me with the email address below,it is very confidential and private,thanks and have a nice day.
+here is my email address
+Amandasaleeby@she.com
 
-linux/drivers/mmc/core/mmc.c
 
- 505        /*
- 506         * Activate wide bus (if supported).
- 507         */
- 508        if ((card->csd.mmca_vsn >= CSD_SPEC_VER_4) &&
- 509            (host->caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA))) {
- 510                unsigned ext_csd_bit, bus_width;
- 511
- 512                if (host->caps & MMC_CAP_8_BIT_DATA) {
- 513                        ext_csd_bit = EXT_CSD_BUS_WIDTH_8;
- 514                        bus_width = MMC_BUS_WIDTH_8;
- 515                } else {
- 516                        ext_csd_bit = EXT_CSD_BUS_WIDTH_4;
- 517                        bus_width = MMC_BUS_WIDTH_4;
- 518                }
- 519
- 520                err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 521                                 EXT_CSD_BUS_WIDTH, ext_csd_bit);
- 522
- 523                if (err && err != -EBADMSG)
- 524                        goto free_card;
- 525
- 526                if (err) {
- 527                        printk(KERN_WARNING "%s: switch to bus width %d "
- 528                               "failed\n", mmc_hostname(card->host),
- 529                               1 << bus_width);
- 530                        err = 0;
- 531                } else {
- 532                        mmc_set_bus_width(card->host, bus_width);
- 533                }
- 534        }
- 535
 
-However the MMC specification version id is the same as V3.x and V4.0.
-Therefore the driver uses the 4 bit bus width for the MMC card 
-even if the card has only 1 bit bus width.
-I modified the driver to use 1 bit bus width only tentatively and confirmed that
-we can mount the card and R/W correctly.
-
-I think we can not support MMC_CAP_4_BIT_DATA or MMC_CAP_8_BIT_DATA in MMC V4.0.
-
-How do you think ?
-
--- 
-Thanks,
-Tomoya MORINAGA(OKI SEMICONDUCTOR CO., LTD.)
