@@ -1,65 +1,45 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: can we remove the quirk  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN ?
-Date: Tue, 9 Nov 2010 13:27:29 +0100
-Message-ID: <20101109122729.GG3223@pengutronix.de>
-References: <4D68A6A7-2D95-463F-875B-DB52ECCC53F1@marvell.com>
- <65EBF3EE-DE1E-46A4-BF41-A9D5A6096673@marvell.com>
- <20101109115517.GD3223@pengutronix.de>
- <23C594B6-1B72-4DE0-8BE7-04E1FD36B58E@marvell.com>
- <20101109120835.0fea3feb@lxorguk.ukuu.org.uk>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [patch] sdhci: remove SDHCI_QUIRK_FORCE_1_BIT_DATA
+Date: Tue, 9 Nov 2010 15:27:39 +0300
+Message-ID: <20101109122739.GA6776@oksana.dev.rtsoft.ru>
+References: <AANLkTimBGorfWHVCnVtUWx6n-22anXmQnKFXVGzB6TUf@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="64j1qyTOoGvYcHb1"
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:58928 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755492Ab0KIM1e (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 07:27:34 -0500
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:45040 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755426Ab0KIM1p (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 07:27:45 -0500
+Received: by eye27 with SMTP id 27so3441286eye.19
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Nov 2010 04:27:44 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <20101109120835.0fea3feb@lxorguk.ukuu.org.uk>
+In-Reply-To: <AANLkTimBGorfWHVCnVtUWx6n-22anXmQnKFXVGzB6TUf@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Zhangfei Gao <zhangfei.gao@gmail.com>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Xiaobo Xie <X.Xie@freescale.com>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kmpark@infradead.org>, Philip Rakity <prakity@marvell.com>, Pierre Ossman <pierre@ossman.eu>
 
+Hi,
 
---64j1qyTOoGvYcHb1
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Tue, Nov 09, 2010 at 06:37:58AM -0500, zhangfei gao wrote:
+> Here is patch to remove SDHCI_QUIRK_FORCE_1_BIT_DATA, which only used
+> in drivers/mmc/host/sdhci-of-core.c.
+> The reason is quirk is too valuable resource, the type is u32, while
+> the highest is (1<<29) now.
 
-On Tue, Nov 09, 2010 at 12:08:35PM +0000, Alan Cox wrote:
-> I think I agree with Wolfram. Perhaps a much better model would be
->=20
-> "Anyone who adds a quirk will have to figure out how to remove one"
->=20
-> Several are trivial to remove and generalise into a couple of function
-> overrides.
+FYI, initially that wasn't a quirk. Here is Pierre's last opinion on that:
 
-My favourite would be one concentrated action to remove a couple of
-those quirks while adding well defined hooks to reduce the need of new
-ones. I have a few ideas and am currently trying a few options to get it
-funded :)
+http://lists.ozlabs.org/pipermail/devicetree-discuss/2009-June/000981.html
 
-Regards,
+Thanks,
 
-   Wolfram
+> 1. MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA  is opened by default in sdhci.c
+> 2. platform driver could close such flag after sdhci_add_host.
+> 
+> We have verified on our platform, would you mind check whether it
+> impact your driver behavior.
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---64j1qyTOoGvYcHb1
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAkzZPjEACgkQD27XaX1/VRukDQCfTBkxDK6DlWsH+V+SqAndlmVc
-gygAn2tDQEMEmLmNhBIsmlcW2I7f86SN
-=cM7d
------END PGP SIGNATURE-----
-
---64j1qyTOoGvYcHb1--
+-- 
+Anton Vorontsov
+email: cbouatmailru@gmail.com
+irc://irc.freenode.net/bd2
