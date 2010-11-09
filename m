@@ -1,45 +1,28 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
-	<u.kleine-koenig@pengutronix.de>
-Subject: Re: [PATCH] mxcmmc: update the regulator support code to the
-	latest API
-Date: Tue, 9 Nov 2010 11:14:06 +0100
-Message-ID: <20101109101406.GW16938@pengutronix.de>
-References: <1288656337.29881.13.camel@realization> <20101102073932.GB6017@pengutronix.de> <1288949275.3072.3.camel@realization> <1289213595.3425.23.camel@realization> <20101108143746.GA23201@void.printf.net> <1289297390.3020.27.camel@realization>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: Re: [PATCH 1/2] mmc: agressive clocking framework v8
+Date: Tue, 9 Nov 2010 11:18:25 +0100
+Message-ID: <4CD91FF1.9060609@stericsson.com>
+References: <1288776170-10141-1-git-send-email-linus.walleij@stericsson.com> <AANLkTika=H3EOA=WSdyuP9Mexrrh0z6-KjjTiNCj=mLc@mail.gmail.com> <AANLkTiniyy_rC4wUAhxN4i09d4GqhdnqPOqXMYNZyBXT@mail.gmail.com> <20101109035948.GA32119@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1289297390.3020.27.camel@realization>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alberto Panizzo <maramaopercheseimorto@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Daniel Mack <daniel@caiaq.de>, Andrew Morton <akpm@linux-foundation.org>, Eric =?iso-8859-1?Q?B=E9nard?= <eric@eukrea.com>, Fabio Estevam <fabioestevam@yahoo.com>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Linus Walleij <linus.ml.walleij@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:50268 "EHLO
+	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754494Ab0KIKSk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 05:18:40 -0500
+In-Reply-To: <20101109035948.GA32119@void.printf.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Tue, Nov 09, 2010 at 11:09:50AM +0100, Alberto Panizzo wrote:
->=20
-> This fix also the build problem introduced by my previous patch
-> due to unhanded API changes introduced by
-s/handed/handled/ ?
+Chris Ball wrote:
 
-> commit:99fc5131018cbdc3cf42ce09fb394a4e8b053c74
-Linus wants to have the commit shortlog for references to other commits=
-=2E
-After doing:
+> Done -- thanks very much for doing this!  I fixed up a compile error
+> when CONFIG_MMC_CLKGATE=n:
 
-	git config --global alias.one "show -s --pretty=3D'format:%h (%s)'"
+Thanks for the cleanup Chris, let's see if this one
+holds now then... :-)
 
-once you can simply use the output of
-
-	git one 99fc5131018cbdc3cf42ce09fb394a4e8b053c74
-
-for that.
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig        =
-    |
-Industrial Linux Solutions                 | http://www.pengutronix.de/=
-  |
+Linus Walleij
