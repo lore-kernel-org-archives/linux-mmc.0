@@ -1,140 +1,57 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH v2] mmc, sh: Move constants to sh_mmcif.h
-Date: Tue, 9 Nov 2010 17:47:02 +0900
-Message-ID: <20101109092952.01349C223F@yukiko.kent.sydney.vergenet.net>
+From: Alberto Panizzo <maramaopercheseimorto@gmail.com>
+Subject: Re: [PATCH] mxcmmc: Add the ability to bind a regulator to manage
+ the MMC card voltage
+Date: Tue, 09 Nov 2010 11:03:08 +0100
+Message-ID: <1289296988.3020.19.camel@realization>
+References: <1288656337.29881.13.camel@realization>
+	 <AANLkTi=oKHTmLS=xiNi9CJKttBGzMHjhZ3q_KWvi+xta@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:41095 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752938Ab0KIJ34 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 04:29:56 -0500
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:54237 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751966Ab0KIKDP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 05:03:15 -0500
+In-Reply-To: <AANLkTi=oKHTmLS=xiNi9CJKttBGzMHjhZ3q_KWvi+xta@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Simon Horman <horms@verge.net.au>
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>, Daniel Mack <daniel@caiaq.de>, Andrew Morton <akpm@linux-foundation.org>, Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>, Eric =?ISO-8859-1?Q?B=E9nard?= <eric@eukrea.com>, Fabio Estevam <fabioestevam@yahoo.com>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-This moves some constants from sh_mmcif.c to sh_mmcif.h
-so that they can be used in sh_mmcif_boot_init().
+On lun, 2010-11-08 at 23:12 +0100, Linus Walleij wrote:
+> 2010/11/2 Alberto Panizzo <maramaopercheseimorto@gmail.com>:
+> 
+> > +static inline void mxcmci_init_ocr(struct mxcmci_host *host)
+> > +{
+> > +#ifdef CONFIG_REGULATOR
+> > +       host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
+> > +
+> > +       if (IS_ERR(host->vcc)) {
+> > +               host->vcc = NULL;
+> > +       } else {
+> > +               host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
+> > +               if (host->pdata && host->pdata->ocr_avail)
+> > +                       dev_warn(mmc_dev(host->mmc),
+> > +                               "pdata->ocr_avail will not be used\n");
+> > +       }
+> > +#endif
+> 
+> You don't need these #ifdef CONFIG_REGULATOR guardposts
+> anymore. I implemented stub functions for the ocrmask functions
+> for 2.6.37.
 
-It also alters the definition of SOFT_RST_OFF from (0 << 31) to
-~SOFT_RST_ON (= ~(1 << 31)). The former seems bogus.  The latter is
-consistent with the code in sh_mmcif_boot_init().
+Ehm.. thank you really for pointing me this, because I've also used the
+old API breaking the build in the -next branch..
 
-Cc: Yusuke Goda <yusuke.goda.sx@renesas.com>
-Cc: Magnus Damm <magnus.damm@gmail.com>
-Signed-off-by: Simon Horman <horms@verge.net.au>
----
- drivers/mmc/host/sh_mmcif.c  |   23 -----------------------
- include/linux/mmc/sh_mmcif.h |   39 ++++++++++++++++++++++++++++++++++-----
- 2 files changed, 34 insertions(+), 28 deletions(-)
+A Fix will be posted as soon as possible!
 
-* v1 diff against 2.6.37-rc1
+Thanks Linus!
+Best regards,
 
-* v2 rediff against Linus's current tree
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index ddd0984..3f49273 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -62,25 +62,6 @@
- /* CE_BLOCK_SET */
- #define BLOCK_SIZE_MASK		0x0000ffff
- 
--/* CE_CLK_CTRL */
--#define CLK_ENABLE		(1 << 24) /* 1: output mmc clock */
--#define CLK_CLEAR		((1 << 19) | (1 << 18) | (1 << 17) | (1 << 16))
--#define CLK_SUP_PCLK		((1 << 19) | (1 << 18) | (1 << 17) | (1 << 16))
--#define SRSPTO_256		((1 << 13) | (0 << 12)) /* resp timeout */
--#define SRBSYTO_29		((1 << 11) | (1 << 10) |	\
--				 (1 << 9) | (1 << 8)) /* resp busy timeout */
--#define SRWDTO_29		((1 << 7) | (1 << 6) |		\
--				 (1 << 5) | (1 << 4)) /* read/write timeout */
--#define SCCSTO_29		((1 << 3) | (1 << 2) |		\
--				 (1 << 1) | (1 << 0)) /* ccs timeout */
--
--/* CE_BUF_ACC */
--#define BUF_ACC_DMAWEN		(1 << 25)
--#define BUF_ACC_DMAREN		(1 << 24)
--#define BUF_ACC_BUSW_32		(0 << 17)
--#define BUF_ACC_BUSW_16		(1 << 17)
--#define BUF_ACC_ATYP		(1 << 16)
--
- /* CE_INT */
- #define INT_CCSDE		(1 << 29)
- #define INT_CMD12DRE		(1 << 26)
-@@ -165,10 +146,6 @@
- 				 STS2_AC12BSYTO | STS2_RSPBSYTO |	\
- 				 STS2_AC12RSPTO | STS2_RSPTO)
- 
--/* CE_VERSION */
--#define SOFT_RST_ON		(1 << 31)
--#define SOFT_RST_OFF		(0 << 31)
--
- #define CLKDEV_EMMC_DATA	52000000 /* 52MHz */
- #define CLKDEV_MMC_DATA		20000000 /* 20MHz */
- #define CLKDEV_INIT		400000   /* 400 KHz */
-diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/mmc/sh_mmcif.h
-index d19e211..b4eaebf 100644
---- a/include/linux/mmc/sh_mmcif.h
-+++ b/include/linux/mmc/sh_mmcif.h
-@@ -59,6 +59,29 @@ struct sh_mmcif_plat_data {
- #define MMCIF_CE_HOST_STS2	0x0000004C
- #define MMCIF_CE_VERSION	0x0000007C
- 
-+/* CE_BUF_ACC */
-+#define BUF_ACC_DMAWEN		(1 << 25)
-+#define BUF_ACC_DMAREN		(1 << 24)
-+#define BUF_ACC_BUSW_32		(0 << 17)
-+#define BUF_ACC_BUSW_16		(1 << 17)
-+#define BUF_ACC_ATYP		(1 << 16)
-+
-+/* CE_CLK_CTRL */
-+#define CLK_ENABLE		(1 << 24) /* 1: output mmc clock */
-+#define CLK_CLEAR		((1 << 19) | (1 << 18) | (1 << 17) | (1 << 16))
-+#define CLK_SUP_PCLK		((1 << 19) | (1 << 18) | (1 << 17) | (1 << 16))
-+#define SRSPTO_256		((1 << 13) | (0 << 12)) /* resp timeout */
-+#define SRBSYTO_29		((1 << 11) | (1 << 10) |	\
-+				 (1 << 9) | (1 << 8)) /* resp busy timeout */
-+#define SRWDTO_29		((1 << 7) | (1 << 6) |		\
-+				 (1 << 5) | (1 << 4)) /* read/write timeout */
-+#define SCCSTO_29		((1 << 3) | (1 << 2) |		\
-+				 (1 << 1) | (1 << 0)) /* ccs timeout */
-+
-+/* CE_VERSION */
-+#define SOFT_RST_ON		(1 << 31)
-+#define SOFT_RST_OFF		~SOFT_RST_ON
-+
- static inline u32 sh_mmcif_readl(void __iomem *addr, int reg)
- {
- 	return readl(addr + reg);
-@@ -149,17 +172,23 @@ extern inline void sh_mmcif_boot_init(void __iomem *base)
- 
- 	/* reset */
- 	tmp = sh_mmcif_readl(base, MMCIF_CE_VERSION);
--	sh_mmcif_writel(base, MMCIF_CE_VERSION, tmp | 0x80000000);
--	sh_mmcif_writel(base, MMCIF_CE_VERSION, tmp & ~0x80000000);
-+	sh_mmcif_writel(base, MMCIF_CE_VERSION, tmp | SOFT_RST_ON);
-+	sh_mmcif_writel(base, MMCIF_CE_VERSION, tmp & SOFT_RST_OFF);
- 
- 	/* byte swap */
--	sh_mmcif_writel(base, MMCIF_CE_BUF_ACC, 0x00010000);
-+	sh_mmcif_writel(base, MMCIF_CE_BUF_ACC, BUF_ACC_ATYP);
- 
- 	/* Set block size in MMCIF hardware */
- 	sh_mmcif_writel(base, MMCIF_CE_BLOCK_SET, SH_MMCIF_BBS);
- 
--	/* Enable the clock, set it to Bus clock/256 (about 325Khz)*/
--	sh_mmcif_writel(base, MMCIF_CE_CLK_CTRL, 0x01072fff);
-+	/* Enable the clock, set it to Bus clock/256 (about 325Khz).
-+	 * It is unclear where 0x70000 comes from or if it is even needed.
-+	 * It is there for byte-compatibility with code that is known to
-+	 * work.
-+	 */
-+	sh_mmcif_writel(base, MMCIF_CE_CLK_CTRL,
-+			CLK_ENABLE | SRSPTO_256 | SRBSYTO_29 | SRWDTO_29 |
-+			SCCSTO_29 | 0x70000);
- 
- 	/* CMD0 */
- 	sh_mmcif_boot_cmd(base, 0x00000040, 0);
 -- 
-1.7.2.3
+Alberto!
+
+        Be Persistent!
+                - Greg Kroah-Hartman (FOSDEM 2010)
 
