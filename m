@@ -1,20 +1,18 @@
 From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
 Subject: [RFC] improve the SDHCI wakeup support.
-Date: Wed, 10 Nov 2010 16:28:04 +0100
-Message-ID: <1289402889-14160-2-git-send-email-peppe.cavallaro@st.com>
-References: <1289402889-14160-1-git-send-email-peppe.cavallaro@st.com>
+Date: Wed, 10 Nov 2010 16:28:03 +0100
+Message-ID: <1289402889-14160-1-git-send-email-peppe.cavallaro@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:33144 "EHLO
-	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756620Ab0KJP2W (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2010 10:28:22 -0500
+Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:48264 "EHLO
+	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756620Ab0KJP2S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2010 10:28:18 -0500
 Received: from zeta.dmz-eu.st.com (ns2.st.com [164.129.230.9])
-	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id EA1879A
-	for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2010 15:28:20 +0000 (GMT)
+	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 033C49A
+	for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2010 15:28:15 +0000 (GMT)
 Received: from mail1.ctn.st.com (mail1.ctn.st.com [164.130.116.128])
-	by zeta.dmz-eu.st.com (STMicroelectronics) with ESMTP id BAAAB5419
-	for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2010 15:28:20 +0000 (GMT)
-In-Reply-To: <1289402889-14160-1-git-send-email-peppe.cavallaro@st.com>
+	by zeta.dmz-eu.st.com (STMicroelectronics) with ESMTP id B343C5419
+	for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2010 15:28:15 +0000 (GMT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
@@ -56,8 +54,32 @@ a device driver (e.g. sdhci-pltfm) want to wakeup the system.
 In any case, the logic for programming the HC register is
 embedded in the suspend and it's self contained.
 
-To modify at run time the wakeup event we can do:
- $ echo X > /sys/module/sdhci/parameters/wakeup
+In the sdhci-pltfm, it has been also introduced another fix:
+see patch named:
+ "mmc: sdhci-pltfm calls the sdhci_alloc_host with pdev->dev"
+The driver calls the sdhci_alloc_host passing as device pointer
+the parent.
+Note: parent name is "platform" and dev name is "sdhci.0".
+IMO it makes sense to pass the pdev->dev pointer instead of the
+parent. This also helps when invoke the device_set_wakeup_capable etc.
+
+This is a piece of output on our ST platforms:
+
+ bash-3.00# echo 2 > /sys/module/sdhci/parameters/wakeup
+ bash-3.00# echo standby > /sys/power/state
+
+ PM: Syncing filesystems ... done.
+ Freezing user space processes ... (elapsed 0.00 seconds) done.
+ Freezing remaining freezable tasks ... (elapsed 0.00 seconds) done.
+ [STM][PM] Analyzing the wakeup devices
+ [STM][PM] -> device sdhci.0 can wakeup
+ [STM][PM] -> device stm-asc.0 can wakeup
+
+[snip]
+
+As shown above, to modify at run time the wakeup event we can do:
+ bash-3.00 echo X > /sys/module/sdhci/parameters/wakeup
+
 where X can be:
  0: no wakeup
  1: Card Interrupts
