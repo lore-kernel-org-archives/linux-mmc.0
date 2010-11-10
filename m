@@ -1,44 +1,29 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH] mmc: agressive clocking framework v9
-Date: Tue, 9 Nov 2010 17:52:21 +0100
-Message-ID: <AANLkTikkLQKX=2sz_b3bJ9as2oCHWjPj97rQ25e-=y5q@mail.gmail.com>
-References: <43E4817426ED174AA81263BCECB4351D131D9D41BC@sc-vexch3.marvell.com>
-	<AANLkTi=6FeuxhEL1ht4thc6PQ05wLFo7d2NA-XUYwHxy@mail.gmail.com>
-	<041757E8-9FCD-4FA8-8079-7A3FC07E4038@marvell.com>
-	<alpine.LFD.2.00.1011062139370.18581@xanadu.home>
-	<AD7183BC-A6C0-4283-BC89-0CC5111437D7@marvell.com>
-	<4CD7C586.6020809@stericsson.com>
-	<4CD9226D.2050307@samsung.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH 1/1]sdhci-pxa: support tune_timming for various cards
+Date: Wed, 10 Nov 2010 00:58:46 -0800
+Message-ID: <E8C182D3-90EE-4A2B-BE63-905E85F9AF54@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:34289 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751818Ab0KIQwX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2010 11:52:23 -0500
-Received: by wyb36 with SMTP id 36so5007378wyb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Nov 2010 08:52:22 -0800 (PST)
-In-Reply-To: <4CD9226D.2050307@samsung.com>
+Received: from na3sys009aog106.obsmtp.com ([74.125.149.77]:60853 "HELO
+	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753196Ab0KJJCj convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 10 Nov 2010 04:02:39 -0500
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Philip Rakity <prakity@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Ohad Ben-Cohen <ohad@wizery.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Zhangfei Gao <zhangfei.gao@gmail.com>, Eric Miao <eric.y.miao@gmail.com>
 
-2010/11/9 Jaehoon Chung <jh80.chung@samsung.com>:
 
-> i tested the clocking framework v8...at samsung SOC
-> just this patch worked S/W enable/disable..not H/W clock..
+<snip>
 
-Yes that is the intention. It only handles soft clock gating.
+> +#define SD_CLOCK_AND_BURST_SIZE_SETUP          0x10A
 
-> So i agreed the philip's opinion..
-> i also think that need some approach about H/W clock gating..
+This offset is only for MMP2.  On other pxa processors use a  different offset.  sdhci-pxa.c needs changing to support other pxa soc chips.
 
-Please create a patch on top of v8 adding the stuff
-you need so we can review it.
+The value only needs setting at initialization time or sdhci reset (RESET_ALL)
 
-As you understand I cannot do this since I don't
-have a system with HW clock gating.
 
-Yours,
-Linus Walleij
