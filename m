@@ -1,48 +1,72 @@
-From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: [PATCH 5/5] mmc: sdhci-pltfm can wake up.
-Date: Wed, 10 Nov 2010 16:28:09 +0100
-Message-ID: <1289402889-14160-7-git-send-email-peppe.cavallaro@st.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH (1/5)] mmc: sdhci-pltfm calls the sdhci_alloc_host with
+ pdev->dev
+Date: Wed, 10 Nov 2010 16:43:52 +0100
+Message-ID: <20101110154352.GC2691@pengutronix.de>
 References: <1289402889-14160-1-git-send-email-peppe.cavallaro@st.com>
  <1289402889-14160-2-git-send-email-peppe.cavallaro@st.com>
  <1289402889-14160-3-git-send-email-peppe.cavallaro@st.com>
- <1289402889-14160-4-git-send-email-peppe.cavallaro@st.com>
- <1289402889-14160-5-git-send-email-peppe.cavallaro@st.com>
- <1289402889-14160-6-git-send-email-peppe.cavallaro@st.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="xesSdrSSBC0PokLI"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:39641 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756604Ab0KJP2s (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2010 10:28:48 -0500
-Received: from zeta.dmz-eu.st.com (ns2.st.com [164.129.230.9])
-	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id C436199
-	for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2010 15:28:46 +0000 (GMT)
-Received: from mail1.ctn.st.com (mail1.ctn.st.com [164.130.116.128])
-	by zeta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 978565419
-	for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2010 15:28:46 +0000 (GMT)
-In-Reply-To: <1289402889-14160-6-git-send-email-peppe.cavallaro@st.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:49756 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756251Ab0KJPnz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2010 10:43:55 -0500
+Content-Disposition: inline
+In-Reply-To: <1289402889-14160-3-git-send-email-peppe.cavallaro@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Cc: linux-mmc@vger.kernel.org
 
-Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
----
- drivers/mmc/host/sdhci-pltfm.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 4e881a5..6ea32e1 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -100,6 +100,8 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- 			goto err_plat_init;
- 	}
- 
-+	host->mmc->pm_flags = MMC_PM_KEEP_POWER;
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err_add_host;
--- 
-1.5.5.6
+--xesSdrSSBC0PokLI
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+Hi,
+
+thanks for the work in general, just...
+
+> -	if (pdev->dev.parent)
+> -		host =3D sdhci_alloc_host(pdev->dev.parent, 0);
+> -	else
+> -		host =3D sdhci_alloc_host(&pdev->dev, 0);
+> -
+> +	host =3D sdhci_alloc_host(&pdev->dev, 0);
+>  	if (IS_ERR(host)) {
+>  		ret =3D PTR_ERR(host);
+>  		goto err;
+
+NACK. This part looks different in current mainline (and for a reason).
+Removing the dev.parent-branch will break some PCI-based solutions.
+
+I think you should first rebase the series to mmc-next and then ask for
+review. It is too confusing for reviewers otherwise. At least, I will
+stop here.
+
+Kind regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--xesSdrSSBC0PokLI
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkzavbgACgkQD27XaX1/VRusiwCgq6nAy1PRa1PyCmaRiZRNOT0o
+UlcAn2eSje1+tIfyFWyjHZ7hn3Jk1LnJ
+=DEKk
+-----END PGP SIGNATURE-----
+
+--xesSdrSSBC0PokLI--
