@@ -1,219 +1,82 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: tmio_mmc: fix PIO fallback on DMA descriptor allocation
- failure
-Date: Thu, 11 Nov 2010 12:19:47 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1011111215120.15747@axis700.grange>
+Subject: Re: [PATCH 4/6] dma: shdma: increase the number of DMA descriptors
+ and add a MODULE_ALIAS()
+Date: Thu, 11 Nov 2010 13:48:08 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1011110934360.15747@axis700.grange>
+References: <Pine.LNX.4.64.1011110815070.15747@axis700.grange>
+ <Pine.LNX.4.64.1011110834130.15747@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1011110834130.15747@axis700.grange>
 Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
+To: linux-sh@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Dan Williams <dan.j.williams@intel.com>, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The easiest way to fall back to PIO, when a DMA descriptor allocation fails is
-to disable DMA on the controller but continue with the current request in PIO
-mode. This way tmio_mmc_start_dma() can become void, since it cannot be failing
-any more. The current version is also broken: it is testing a wrong 
-pointer and thus failing to recognise, that a descriptor allocation wasn't 
-successful.
+On Thu, 11 Nov 2010, Guennadi Liakhovetski wrote:
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Currently shdma only works, if it manages to allocate DMA descriptors for all
+> sg elements during the prepare stage. Allocation is carried out from a
+> static pool of 32 DMA descriptors. This is not enough for, e.g., MMC, where up
+> to 61 sg elements can be sent at once. Ideally we should be able to reuse
+> descriptors, while processing one request, but for now increase their number
+> to 64.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+>  drivers/dma/shdma.c |    3 ++-
+>  1 files changed, 2 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/dma/shdma.c b/drivers/dma/shdma.c
+> index eb6b54d..85dd0ad 100644
+> --- a/drivers/dma/shdma.c
+> +++ b/drivers/dma/shdma.c
+> @@ -39,7 +39,7 @@ enum sh_dmae_desc_status {
+>  	DESC_WAITING,	/* callback called, waiting for ack / re-submit */
+>  };
+>  
+> -#define NR_DESCS_PER_CHANNEL 32
+> +#define NR_DESCS_PER_CHANNEL 64
+
+Hm, I think, there's also an alternative solution to this. In 
+sh_mmcif.c::sh_mmcif_probe() we find:
+
+	mmc->max_segs = 128;
+	mmc->max_blk_size = 512;
+	mmc->max_blk_count = 65535;
+	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+	mmc->max_seg_size = mmc->max_req_size;
+
+So, I think, it's the .max_segs value, that allows the block and mmc 
+layers to issue requests with 61 sg elements, and, possibly, even more. 
+So, maybe we can reduce this number to 32? Besides, I don't think 
+"->max_blk_count = 65535" makes much sense. From the header:
+
+	unsigned int		max_blk_count;	/* maximum number of blocks in one req */
+
+for which 65535 seems "a bit" too high. Shall we not set it the same way 
+as in my today's patch for tmio_mmc as
+
+	mmc->max_blk_count = PAGE_CACHE_SIZE / mmc->max_blk_size * mmc->max_segs;
+
+? Then we can leave the number of descriptors in shdma.c as is. Paul, what 
+would you prefer?
+
+>  /* Default MEMCPY transfer size = 2^2 = 4 bytes */
+>  #define LOG2_DEFAULT_XFER_SIZE	2
+>  
+> @@ -1213,3 +1213,4 @@ module_exit(sh_dmae_exit);
+>  MODULE_AUTHOR("Nobuhiro Iwamatsu <iwamatsu.nobuhiro@renesas.com>");
+>  MODULE_DESCRIPTION("Renesas SH DMA Engine driver");
+>  MODULE_LICENSE("GPL");
+> +MODULE_ALIAS("platform:sh-dma-engine");
+> -- 
+> 1.7.2.3
+
+Thanks
+Guennadi
 ---
-
-Since this is a bug-fix and it only touches the DMA case, only present on 
-sh-mobile platforms, this should be good for 2.6.37, Ian?
-
- drivers/mmc/host/tmio_mmc.c |   69 +++++++++++++++---------------------------
- drivers/mmc/host/tmio_mmc.h |    2 -
- 2 files changed, 25 insertions(+), 46 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index 9034414..10416c3 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -427,11 +427,12 @@ static void tmio_dma_complete(void *arg)
- 		enable_mmc_irqs(host, TMIO_STAT_DATAEND);
- }
- 
--static int tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
-+static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- {
- 	struct scatterlist *sg = host->sg_ptr;
- 	struct dma_async_tx_descriptor *desc = NULL;
- 	struct dma_chan *chan = host->chan_rx;
-+	dma_cookie_t cookie;
- 	int ret;
- 
- 	ret = dma_map_sg(&host->pdev->dev, sg, host->sg_len, DMA_FROM_DEVICE);
-@@ -442,21 +443,20 @@ static int tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- 	}
- 
- 	if (desc) {
--		host->desc = desc;
- 		desc->callback = tmio_dma_complete;
- 		desc->callback_param = host;
--		host->cookie = desc->tx_submit(desc);
--		if (host->cookie < 0) {
--			host->desc = NULL;
--			ret = host->cookie;
-+		cookie = desc->tx_submit(desc);
-+		if (cookie < 0) {
-+			desc = NULL;
-+			ret = cookie;
- 		} else {
- 			chan->device->device_issue_pending(chan);
- 		}
- 	}
- 	dev_dbg(&host->pdev->dev, "%s(): mapped %d -> %d, cookie %d, rq %p\n",
--		__func__, host->sg_len, ret, host->cookie, host->mrq);
-+		__func__, host->sg_len, ret, cookie, host->mrq);
- 
--	if (!host->desc) {
-+	if (!desc) {
- 		/* DMA failed, fall back to PIO */
- 		if (ret >= 0)
- 			ret = -EIO;
-@@ -471,23 +471,18 @@ static int tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- 		dev_warn(&host->pdev->dev,
- 			 "DMA failed: %d, falling back to PIO\n", ret);
- 		tmio_mmc_enable_dma(host, false);
--		reset(host);
--		/* Fail this request, let above layers recover */
--		host->mrq->cmd->error = ret;
--		tmio_mmc_finish_request(host);
- 	}
- 
- 	dev_dbg(&host->pdev->dev, "%s(): desc %p, cookie %d, sg[%d]\n", __func__,
--		desc, host->cookie, host->sg_len);
--
--	return ret > 0 ? 0 : ret;
-+		desc, cookie, host->sg_len);
- }
- 
--static int tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
-+static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- {
- 	struct scatterlist *sg = host->sg_ptr;
- 	struct dma_async_tx_descriptor *desc = NULL;
- 	struct dma_chan *chan = host->chan_tx;
-+	dma_cookie_t cookie;
- 	int ret;
- 
- 	ret = dma_map_sg(&host->pdev->dev, sg, host->sg_len, DMA_TO_DEVICE);
-@@ -498,19 +493,18 @@ static int tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- 	}
- 
- 	if (desc) {
--		host->desc = desc;
- 		desc->callback = tmio_dma_complete;
- 		desc->callback_param = host;
--		host->cookie = desc->tx_submit(desc);
--		if (host->cookie < 0) {
--			host->desc = NULL;
--			ret = host->cookie;
-+		cookie = desc->tx_submit(desc);
-+		if (cookie < 0) {
-+			desc = NULL;
-+			ret = cookie;
- 		}
- 	}
- 	dev_dbg(&host->pdev->dev, "%s(): mapped %d -> %d, cookie %d, rq %p\n",
--		__func__, host->sg_len, ret, host->cookie, host->mrq);
-+		__func__, host->sg_len, ret, cookie, host->mrq);
- 
--	if (!host->desc) {
-+	if (!desc) {
- 		/* DMA failed, fall back to PIO */
- 		if (ret >= 0)
- 			ret = -EIO;
-@@ -525,30 +519,22 @@ static int tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- 		dev_warn(&host->pdev->dev,
- 			 "DMA failed: %d, falling back to PIO\n", ret);
- 		tmio_mmc_enable_dma(host, false);
--		reset(host);
--		/* Fail this request, let above layers recover */
--		host->mrq->cmd->error = ret;
--		tmio_mmc_finish_request(host);
- 	}
- 
- 	dev_dbg(&host->pdev->dev, "%s(): desc %p, cookie %d\n", __func__,
--		desc, host->cookie);
--
--	return ret > 0 ? 0 : ret;
-+		desc, cookie);
- }
- 
--static int tmio_mmc_start_dma(struct tmio_mmc_host *host,
-+static void tmio_mmc_start_dma(struct tmio_mmc_host *host,
- 			       struct mmc_data *data)
- {
- 	if (data->flags & MMC_DATA_READ) {
- 		if (host->chan_rx)
--			return tmio_mmc_start_dma_rx(host);
-+			tmio_mmc_start_dma_rx(host);
- 	} else {
- 		if (host->chan_tx)
--			return tmio_mmc_start_dma_tx(host);
-+			tmio_mmc_start_dma_tx(host);
- 	}
--
--	return 0;
- }
- 
- static void tmio_issue_tasklet_fn(unsigned long priv)
-@@ -584,9 +570,6 @@ static bool tmio_mmc_filter(struct dma_chan *chan, void *arg)
- static void tmio_mmc_request_dma(struct tmio_mmc_host *host,
- 				 struct tmio_mmc_data *pdata)
- {
--	host->cookie = -EINVAL;
--	host->desc = NULL;
--
- 	/* We can only either use DMA for both Tx and Rx or not use it at all */
- 	if (pdata->dma) {
- 		dma_cap_mask_t mask;
-@@ -632,15 +615,11 @@ static void tmio_mmc_release_dma(struct tmio_mmc_host *host)
- 		host->chan_rx = NULL;
- 		dma_release_channel(chan);
- 	}
--
--	host->cookie = -EINVAL;
--	host->desc = NULL;
- }
- #else
--static int tmio_mmc_start_dma(struct tmio_mmc_host *host,
-+static void tmio_mmc_start_dma(struct tmio_mmc_host *host,
- 			       struct mmc_data *data)
- {
--	return 0;
- }
- 
- static void tmio_mmc_request_dma(struct tmio_mmc_host *host,
-@@ -682,7 +661,9 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
- 	sd_ctrl_write16(host, CTL_SD_XFER_LEN, data->blksz);
- 	sd_ctrl_write16(host, CTL_XFER_BLK_COUNT, data->blocks);
- 
--	return tmio_mmc_start_dma(host, data);
-+	tmio_mmc_start_dma(host, data);
-+
-+	return 0;
- }
- 
- /* Process requests from the MMC layer */
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 0fedc78..0b7d916 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -112,9 +112,7 @@ struct tmio_mmc_host {
- 	struct tasklet_struct	dma_complete;
- 	struct tasklet_struct	dma_issue;
- #ifdef CONFIG_TMIO_MMC_DMA
--	struct dma_async_tx_descriptor *desc;
- 	unsigned int            dma_sglen;
--	dma_cookie_t		cookie;
- #endif
- };
- 
--- 
-1.7.2.3
-
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
