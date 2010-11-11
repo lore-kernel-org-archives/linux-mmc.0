@@ -1,327 +1,255 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 1/6] mmc: sh_mmcif: switch to completion, fix flags
-Date: Thu, 11 Nov 2010 08:40:45 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1011110828330.15747@axis700.grange>
+Subject: [PATCH 3/6] mmc: sh_mmcif: cosmetic clean up
+Date: Thu, 11 Nov 2010 08:40:53 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1011110833150.15747@axis700.grange>
 References: <Pine.LNX.4.64.1011110815070.15747@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout-de.gmx.net ([213.165.64.23]:54770 "HELO mail.gmx.net"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with SMTP
+	id S1757788Ab0KKHkv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Nov 2010 02:40:51 -0500
 In-Reply-To: <Pine.LNX.4.64.1011110815070.15747@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>
-List-Id: linux-mmc@vger.kernel.org
 
-In sh_mmcif.c an event is used as a completion, switch over. When a
-wait_for_completion*_timeout() returns, it suffices to check the remaining
-time, setting an additional flag before waking up the waiting task only reduces
-the race window, but does not eliminate it. This patch switches the driver to
-use a completion to signal an interrupt, the only case, when an interrupt
-should not wake up the waiter, is when an automatic CMD12 completes. 
-MODULE_ALIAS is fixed to allow an automatic loading of the driver. The 
-clean up order is modified to first unregister the MMC host and only then 
-to shut down the hardware.
+Replace pr_* with respective dev_*, sort headers alphabetically, remove an
+unused struct member, superfluous variable initialisations and type-casts.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mmcif.c |  117 +++++++++++++++++--------------------------
- 1 files changed, 46 insertions(+), 71 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |   63 ++++++++++++++++++++----------------------
+ 1 files changed, 30 insertions(+), 33 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index ddd0984..c9eaab2 100644
+index c9eaab2..51a0160 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -16,6 +16,8 @@
-  *
-  */
+@@ -18,15 +18,15 @@
  
-+#include <linux/clk.h>
-+#include <linux/completion.h>
+ #include <linux/clk.h>
+ #include <linux/completion.h>
++#include <linux/delay.h>
  #include <linux/dma-mapping.h>
- #include <linux/mmc/host.h>
+-#include <linux/mmc/host.h>
  #include <linux/mmc/card.h>
-@@ -24,7 +26,6 @@
+ #include <linux/mmc/core.h>
++#include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
  #include <linux/mmc/sdio.h>
- #include <linux/delay.h>
- #include <linux/platform_device.h>
--#include <linux/clk.h>
+-#include <linux/delay.h>
+-#include <linux/platform_device.h>
  #include <linux/mmc/sh_mmcif.h>
++#include <linux/platform_device.h>
  
  #define DRIVER_NAME	"sh_mmcif"
-@@ -181,11 +182,10 @@ struct sh_mmcif_host {
+ #define DRIVER_VERSION	"2010-04-28"
+@@ -177,7 +177,6 @@
+ struct sh_mmcif_host {
+ 	struct mmc_host *mmc;
+ 	struct mmc_data *data;
+-	struct mmc_command *cmd;
+ 	struct platform_device *pd;
  	struct clk *hclk;
  	unsigned int clk;
- 	int bus_width;
--	u16 wait_int;
--	u16 sd_error;
-+	bool sd_error;
- 	long timeout;
- 	void __iomem *addr;
--	wait_queue_head_t intr_wait;
-+	struct completion intr_wait;
- };
- 
- 
-@@ -239,8 +239,7 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
- 	u32 state1, state2;
- 	int ret, timeout = 10000000;
- 
--	host->sd_error = 0;
--	host->wait_int = 0;
-+	host->sd_error = false;
+@@ -243,8 +242,8 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
  
  	state1 = sh_mmcif_readl(host->addr, MMCIF_CE_HOST_STS1);
  	state2 = sh_mmcif_readl(host->addr, MMCIF_CE_HOST_STS2);
-@@ -287,17 +286,13 @@ static int sh_mmcif_single_read(struct sh_mmcif_host *host,
- 	long time;
- 	u32 blocksize, i, *p = sg_virt(data->sg);
+-	pr_debug("%s: ERR HOST_STS1 = %08x\n", DRIVER_NAME, state1);
+-	pr_debug("%s: ERR HOST_STS2 = %08x\n", DRIVER_NAME, state2);
++	dev_dbg(&host->pd->dev, "ERR HOST_STS1 = %08x\n", state1);
++	dev_dbg(&host->pd->dev, "ERR HOST_STS2 = %08x\n", state2);
  
--	host->wait_int = 0;
--
- 	/* buf read enable */
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
--	time = wait_event_interruptible_timeout(host->intr_wait,
--			host->wait_int == 1 ||
--			host->sd_error == 1, host->timeout);
--	if (host->wait_int != 1 && (time == 0 || host->sd_error != 0))
-+	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
-+			host->timeout);
-+	if (time <= 0 || host->sd_error)
- 		return sh_mmcif_error_manage(host);
- 
--	host->wait_int = 0;
- 	blocksize = (BLOCK_SIZE_MASK &
- 			sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET)) + 3;
- 	for (i = 0; i < blocksize / 4; i++)
-@@ -305,13 +300,11 @@ static int sh_mmcif_single_read(struct sh_mmcif_host *host,
- 
- 	/* buffer read end */
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
--	time = wait_event_interruptible_timeout(host->intr_wait,
--			host->wait_int == 1 ||
--			host->sd_error == 1, host->timeout);
--	if (host->wait_int != 1 && (time == 0 || host->sd_error != 0))
-+	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
-+			host->timeout);
-+	if (time <= 0 || host->sd_error)
- 		return sh_mmcif_error_manage(host);
- 
--	host->wait_int = 0;
- 	return 0;
- }
- 
-@@ -326,19 +319,15 @@ static int sh_mmcif_multi_read(struct sh_mmcif_host *host,
- 						     MMCIF_CE_BLOCK_SET);
- 	for (j = 0; j < data->sg_len; j++) {
- 		p = sg_virt(data->sg);
--		host->wait_int = 0;
- 		for (sec = 0; sec < data->sg->length / blocksize; sec++) {
- 			sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
- 			/* buf read enable */
--			time = wait_event_interruptible_timeout(host->intr_wait,
--				host->wait_int == 1 ||
--				host->sd_error == 1, host->timeout);
-+			time = wait_for_completion_interruptible_timeout(&host->intr_wait,
-+				host->timeout);
- 
--			if (host->wait_int != 1 &&
--			    (time == 0 || host->sd_error != 0))
-+			if (time <= 0 || host->sd_error)
- 				return sh_mmcif_error_manage(host);
- 
--			host->wait_int = 0;
- 			for (i = 0; i < blocksize / 4; i++)
- 				*p++ = sh_mmcif_readl(host->addr,
- 						      MMCIF_CE_DATA);
-@@ -356,17 +345,14 @@ static int sh_mmcif_single_write(struct sh_mmcif_host *host,
- 	long time;
- 	u32 blocksize, i, *p = sg_virt(data->sg);
- 
--	host->wait_int = 0;
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
- 
- 	/* buf write enable */
--	time = wait_event_interruptible_timeout(host->intr_wait,
--			host->wait_int == 1 ||
--			host->sd_error == 1, host->timeout);
--	if (host->wait_int != 1 && (time == 0 || host->sd_error != 0))
-+	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
-+			host->timeout);
-+	if (time <= 0 || host->sd_error)
- 		return sh_mmcif_error_manage(host);
- 
--	host->wait_int = 0;
- 	blocksize = (BLOCK_SIZE_MASK &
- 			sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET)) + 3;
- 	for (i = 0; i < blocksize / 4; i++)
-@@ -375,13 +361,11 @@ static int sh_mmcif_single_write(struct sh_mmcif_host *host,
- 	/* buffer write end */
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
- 
--	time = wait_event_interruptible_timeout(host->intr_wait,
--			host->wait_int == 1 ||
--			host->sd_error == 1, host->timeout);
--	if (host->wait_int != 1 && (time == 0 || host->sd_error != 0))
-+	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
-+			host->timeout);
-+	if (time <= 0 || host->sd_error)
- 		return sh_mmcif_error_manage(host);
- 
--	host->wait_int = 0;
- 	return 0;
- }
- 
-@@ -397,19 +381,15 @@ static int sh_mmcif_multi_write(struct sh_mmcif_host *host,
- 
- 	for (j = 0; j < data->sg_len; j++) {
- 		p = sg_virt(data->sg);
--		host->wait_int = 0;
- 		for (sec = 0; sec < data->sg->length / blocksize; sec++) {
- 			sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
- 			/* buf write enable*/
--			time = wait_event_interruptible_timeout(host->intr_wait,
--				host->wait_int == 1 ||
--				host->sd_error == 1, host->timeout);
-+			time = wait_for_completion_interruptible_timeout(&host->intr_wait,
-+				host->timeout);
- 
--			if (host->wait_int != 1 &&
--			    (time == 0 || host->sd_error != 0))
-+			if (time <= 0 || host->sd_error)
- 				return sh_mmcif_error_manage(host);
- 
--			host->wait_int = 0;
- 			for (i = 0; i < blocksize / 4; i++)
- 				sh_mmcif_writel(host->addr,
- 						MMCIF_CE_DATA, *p++);
-@@ -579,13 +559,12 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
- 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, mask);
- 	/* set arg */
- 	sh_mmcif_writel(host->addr, MMCIF_CE_ARG, cmd->arg);
--	host->wait_int = 0;
- 	/* set cmd */
- 	sh_mmcif_writel(host->addr, MMCIF_CE_CMD_SET, opc);
- 
--	time = wait_event_interruptible_timeout(host->intr_wait,
--		host->wait_int == 1 || host->sd_error == 1, host->timeout);
--	if (host->wait_int != 1 && time == 0) {
-+	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
-+		host->timeout);
-+	if (time <= 0) {
- 		cmd->error = sh_mmcif_error_manage(host);
- 		return;
+ 	if (state1 & STS1_CMDSEQ) {
+ 		sh_mmcif_bitset(host, MMCIF_CE_CMD_CTRL, CMD_CTRL_BREAK);
+@@ -252,8 +251,8 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
+ 		while (1) {
+ 			timeout--;
+ 			if (timeout < 0) {
+-				pr_err(DRIVER_NAME": Forceed end of " \
+-					"command sequence timeout err\n");
++				dev_err(&host->pd->dev,
++					"Forceed end of command sequence timeout err\n");
+ 				return -EIO;
+ 			}
+ 			if (!(sh_mmcif_readl(host->addr, MMCIF_CE_HOST_STS1)
+@@ -262,18 +261,18 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
+ 			mdelay(1);
+ 		}
+ 		sh_mmcif_sync_reset(host);
+-		pr_debug(DRIVER_NAME": Forced end of command sequence\n");
++		dev_dbg(&host->pd->dev, "Forced end of command sequence\n");
+ 		return -EIO;
  	}
-@@ -602,19 +581,14 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
+ 
+ 	if (state2 & STS2_CRC_ERR) {
+-		pr_debug(DRIVER_NAME": Happened CRC error\n");
++		dev_dbg(&host->pd->dev, ": Happened CRC error\n");
+ 		ret = -EIO;
+ 	} else if (state2 & STS2_TIMEOUT_ERR) {
+-		pr_debug(DRIVER_NAME": Happened Timeout error\n");
++		dev_dbg(&host->pd->dev, ": Happened Timeout error\n");
+ 		ret = -ETIMEDOUT;
+ 	} else {
+-		pr_debug(DRIVER_NAME": Happened End/Index error\n");
++		dev_dbg(&host->pd->dev, ": Happened End/Index error\n");
+ 		ret = -EIO;
+ 	}
+ 	return ret;
+@@ -437,7 +436,7 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 		tmp |= CMD_SET_RTYP_17B;
+ 		break;
+ 	default:
+-		pr_err(DRIVER_NAME": Not support type response.\n");
++		dev_err(&host->pd->dev, "Unsupported response type.\n");
+ 		break;
+ 	}
+ 	switch (opc) {
+@@ -465,7 +464,7 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 			tmp |= CMD_SET_DATW_8;
+ 			break;
+ 		default:
+-			pr_err(DRIVER_NAME": Not support bus width.\n");
++			dev_err(&host->pd->dev, "Unsupported bus width.\n");
+ 			break;
+ 		}
+ 	}
+@@ -493,10 +492,10 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 	return opc = ((opc << 24) | tmp);
+ }
+ 
+-static u32 sh_mmcif_data_trans(struct sh_mmcif_host *host,
++static int sh_mmcif_data_trans(struct sh_mmcif_host *host,
+ 				struct mmc_request *mrq, u32 opc)
+ {
+-	u32 ret;
++	int ret;
+ 
+ 	switch (opc) {
+ 	case MMC_READ_MULTIPLE_BLOCK:
+@@ -513,7 +512,7 @@ static u32 sh_mmcif_data_trans(struct sh_mmcif_host *host,
+ 		ret = sh_mmcif_single_read(host, mrq);
+ 		break;
+ 	default:
+-		pr_err(DRIVER_NAME": NOT SUPPORT CMD = d'%08d\n", opc);
++		dev_err(&host->pd->dev, "UNSUPPORTED CMD = d'%08d\n", opc);
+ 		ret = -EINVAL;
+ 		break;
+ 	}
+@@ -527,8 +526,6 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
+ 	int ret = 0, mask = 0;
+ 	u32 opc = cmd->opcode;
+ 
+-	host->cmd = cmd;
+-
+ 	switch (opc) {
+ 	/* respons busy check */
+ 	case MMC_SWITCH:
+@@ -576,8 +573,8 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
+ 			cmd->error = -ETIMEDOUT;
+ 			break;
+ 		default:
+-			pr_debug("%s: Cmd(d'%d) err\n",
+-					DRIVER_NAME, cmd->opcode);
++			dev_dbg(&host->pd->dev, "Cmd(d'%d) err\n",
++					cmd->opcode);
  			cmd->error = sh_mmcif_error_manage(host);
  			break;
  		}
--		host->sd_error = 0;
--		host->wait_int = 0;
-+		host->sd_error = false;
+@@ -585,7 +582,7 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
  		return;
  	}
  	if (!(cmd->flags & MMC_RSP_PRESENT)) {
- 		cmd->error = ret;
--		host->wait_int = 0;
+-		cmd->error = ret;
++		cmd->error = 0;
  		return;
  	}
--	if (host->wait_int == 1) {
--		sh_mmcif_get_response(host, cmd);
--		host->wait_int = 0;
--	}
-+	sh_mmcif_get_response(host, cmd);
- 	if (host->data) {
- 		ret = sh_mmcif_data_trans(host, mrq, cmd->opcode);
- 		if (ret < 0)
-@@ -641,15 +615,13 @@ static void sh_mmcif_stop_cmd(struct sh_mmcif_host *host,
- 		return;
- 	}
- 
--	time = wait_event_interruptible_timeout(host->intr_wait,
--			host->wait_int == 1 ||
--			host->sd_error == 1, host->timeout);
--	if (host->wait_int != 1 && (time == 0 || host->sd_error != 0)) {
-+	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
-+			host->timeout);
-+	if (time <= 0 || host->sd_error) {
+ 	sh_mmcif_get_response(host, cmd);
+@@ -610,7 +607,7 @@ static void sh_mmcif_stop_cmd(struct sh_mmcif_host *host,
+ 	else if (mrq->cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK)
+ 		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MCMD12RBE);
+ 	else {
+-		pr_err(DRIVER_NAME": not support stop cmd\n");
++		dev_err(&host->pd->dev, "unsupported stop cmd\n");
  		cmd->error = sh_mmcif_error_manage(host);
  		return;
  	}
- 	sh_mmcif_get_cmd12response(host, cmd);
--	host->wait_int = 0;
- 	cmd->error = 0;
- }
- 
-@@ -735,7 +707,7 @@ static void sh_mmcif_detect(struct mmc_host *mmc)
- static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
- {
- 	struct sh_mmcif_host *host = dev_id;
--	u32 state = 0;
-+	u32 state;
- 	int err = 0;
- 
- 	state = sh_mmcif_readl(host->addr, MMCIF_CE_INT);
-@@ -780,11 +752,13 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
+@@ -746,14 +743,14 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
+ 		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, state);
+ 		err = 1;
+ 	} else {
+-		pr_debug("%s: Not support int\n", DRIVER_NAME);
++		dev_dbg(&host->pd->dev, "Not support int\n");
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~state);
+ 		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, state);
  		err = 1;
  	}
  	if (err) {
--		host->sd_error = 1;
-+		host->sd_error = true;
- 		pr_debug("%s: int err state = %08x\n", DRIVER_NAME, state);
+ 		host->sd_error = true;
+-		pr_debug("%s: int err state = %08x\n", DRIVER_NAME, state);
++		dev_dbg(&host->pd->dev, "int err state = %08x\n", state);
  	}
--	host->wait_int = 1;
--	wake_up(&host->intr_wait);
-+	if (state & ~(INT_CMD12RBE | INT_CMD12CRE))
-+		complete(&host->intr_wait);
-+	else
-+		dev_dbg(&host->pd->dev, "Unexpected IRQ 0x%x\n", state);
+ 	if (state & ~(INT_CMD12RBE | INT_CMD12CRE))
+ 		complete(&host->intr_wait);
+@@ -767,8 +764,8 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ {
+ 	int ret = 0, irq[2];
+ 	struct mmc_host *mmc;
+-	struct sh_mmcif_host *host = NULL;
+-	struct sh_mmcif_plat_data *pd = NULL;
++	struct sh_mmcif_host *host;
++	struct sh_mmcif_plat_data *pd;
+ 	struct resource *res;
+ 	void __iomem *reg;
+ 	char clk_name[8];
+@@ -776,7 +773,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 	irq[0] = platform_get_irq(pdev, 0);
+ 	irq[1] = platform_get_irq(pdev, 1);
+ 	if (irq[0] < 0 || irq[1] < 0) {
+-		pr_err(DRIVER_NAME": Get irq error\n");
++		dev_err(&pdev->dev, "Get irq error\n");
+ 		return -ENXIO;
+ 	}
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+@@ -789,7 +786,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 		dev_err(&pdev->dev, "ioremap error.\n");
+ 		return -ENOMEM;
+ 	}
+-	pd = (struct sh_mmcif_plat_data *)(pdev->dev.platform_data);
++	pd = pdev->dev.platform_data;
+ 	if (!pd) {
+ 		dev_err(&pdev->dev, "sh_mmcif plat data error.\n");
+ 		ret = -ENXIO;
+@@ -844,21 +841,21 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
  
- 	return IRQ_HANDLED;
- }
-@@ -842,7 +816,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	host->clk = clk_get_rate(host->hclk);
- 	host->pd = pdev;
+ 	ret = request_irq(irq[0], sh_mmcif_intr, 0, "sh_mmc:error", host);
+ 	if (ret) {
+-		pr_err(DRIVER_NAME": request_irq error (sh_mmc:error)\n");
++		dev_err(&pdev->dev, "request_irq error (sh_mmc:error)\n");
+ 		goto clean_up2;
+ 	}
+ 	ret = request_irq(irq[1], sh_mmcif_intr, 0, "sh_mmc:int", host);
+ 	if (ret) {
+ 		free_irq(irq[0], host);
+-		pr_err(DRIVER_NAME": request_irq error (sh_mmc:int)\n");
++		dev_err(&pdev->dev, "request_irq error (sh_mmc:int)\n");
+ 		goto clean_up2;
+ 	}
  
--	init_waitqueue_head(&host->intr_wait);
-+	init_completion(&host->intr_wait);
+ 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
+ 	sh_mmcif_detect(host->mmc);
  
- 	mmc->ops = &sh_mmcif_ops;
- 	mmc->f_max = host->clk;
-@@ -903,20 +877,21 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
- 	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
- 	int irq[2];
+-	pr_info("%s: driver version %s\n", DRIVER_NAME, DRIVER_VERSION);
+-	pr_debug("%s: chip ver H'%04x\n", DRIVER_NAME,
++	dev_info(&pdev->dev, "driver version %s\n", DRIVER_VERSION);
++	dev_dbg(&pdev->dev, "chip ver H'%04x\n",
+ 		sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0x0000ffff);
+ 	return ret;
  
--	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
--
--	irq[0] = platform_get_irq(pdev, 0);
--	irq[1] = platform_get_irq(pdev, 1);
-+	mmc_remove_host(host->mmc);
- 
- 	if (host->addr)
- 		iounmap(host->addr);
- 
--	platform_set_drvdata(pdev, NULL);
--	mmc_remove_host(host->mmc);
-+	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
-+
-+	irq[0] = platform_get_irq(pdev, 0);
-+	irq[1] = platform_get_irq(pdev, 1);
- 
- 	free_irq(irq[0], host);
- 	free_irq(irq[1], host);
- 
-+	platform_set_drvdata(pdev, NULL);
-+
- 	clk_disable(host->hclk);
- 	mmc_free_host(host->mmc);
- 
-@@ -947,5 +922,5 @@ module_exit(sh_mmcif_exit);
- 
- MODULE_DESCRIPTION("SuperH on-chip MMC/eMMC interface driver");
- MODULE_LICENSE("GPL");
--MODULE_ALIAS(DRIVER_NAME);
-+MODULE_ALIAS("platform:" DRIVER_NAME);
- MODULE_AUTHOR("Yusuke Goda <yusuke.goda.sx@renesas.com>");
 -- 
 1.7.2.3
 
