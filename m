@@ -1,76 +1,42 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc, sh: use a consistent pr_ prefix
-Date: Thu, 11 Nov 2010 08:57:23 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1011110856220.15747@axis700.grange>
-References: <1289384864-6531-1-git-send-email-horms@verge.net.au>
- <20101110110049.GA1475@linux-sh.org> <20101110133807.GB21836@verge.net.au>
+From: "Chuanxiao.Dong" <chuanxiao.dong@intel.com>
+Subject: [PATCH v1 0/3]mmc: set a suitable max discard sectors value for
+	host controller
+Date: Thu, 11 Nov 2010 17:05:02 +0800
+Message-ID: <20101111090502.GA18170@intel.com>
+Reply-To: "Chuanxiao.Dong" <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20101110133807.GB21836@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <simon@horms.net>
-Cc: Paul Mundt <lethal@linux-sh.org>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:32325 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1749667Ab0KKJGw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Nov 2010 04:06:52 -0500
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org
+Cc: adrian.hunter@nokia.com, linux-mmc@vger.kernel.org
 
-On Wed, 10 Nov 2010, Simon Horman wrote:
+Hi Chris,
+   These 3 patches set a suitable max_discard_sectors value for mmc
+   queue which will be used for ERASE/TRIM. Add Adrian in Cc loop since
+   he implemented the ERASE/TRIM feature for MMC driver.
 
-> On Wed, Nov 10, 2010 at 08:00:49PM +0900, Paul Mundt wrote:
-> > On Wed, Nov 10, 2010 at 07:27:44PM +0900, Simon Horman wrote:
-> > > Use pr_fmt to set the prefix for pr_ messages.
-> > > I believe this method is common in other
-> > > source files in the kernel tree.
-> > > 
-> > pr_fmt() is ok when you have no better options, but in this case you have
-> > the struct device working for you, so you really should be using it.
-> > 
-> > Consider the case where you have multiple MMCIF blocks, the debug
-> > messages here won't really give you much helpful information if you have
-> > no idea which block you're on.
-> > 
-> > For example..
-> > 
-> > > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > > index 3f49273..9f37f74 100644
-> > > --- a/drivers/mmc/host/sh_mmcif.c
-> > > +++ b/drivers/mmc/host/sh_mmcif.c
-> > > @@ -221,8 +222,8 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
-> > >  
-> > >  	state1 = sh_mmcif_readl(host->addr, MMCIF_CE_HOST_STS1);
-> > >  	state2 = sh_mmcif_readl(host->addr, MMCIF_CE_HOST_STS2);
-> > > -	pr_debug("%s: ERR HOST_STS1 = %08x\n", DRIVER_NAME, state1);
-> > > -	pr_debug("%s: ERR HOST_STS2 = %08x\n", DRIVER_NAME, state2);
-> > > +	pr_debug("ERR HOST_STS1 = %08x\n", state1);
-> > > +	pr_debug("ERR HOST_STS2 = %08x\n", state2);
-> > >  
-> > >  	if (state1 & STS1_CMDSEQ) {
-> > >  		sh_mmcif_bitset(host, MMCIF_CE_CMD_CTRL, CMD_CTRL_BREAK);
-> > 
-> > You can just convert these to:
-> > 
-> > 	dev_dbg(&host->pd->dev, ...);
-> > 
-> > > @@ -230,7 +231,7 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
-> > >  		while (1) {
-> > >  			timeout--;
-> > >  			if (timeout < 0) {
-> > > -				pr_err(DRIVER_NAME": Forceed end of " \
-> > > +				pr_err("Forceed end of " \
-> > >  					"command sequence timeout err\n");
-> > >  				return -EIO;
-> > >  			}
-> > 
-> > dev_err(), and so on.
-> > 
-> 
-> Thanks, will do.
+   patch1: calculated a suitable timeout time for SDHCI host controller.
+   Each erase cmd should be finished within the timeout time.
 
-Unfortunately I haven't seen this earlier, but one of my just submitted 
-patches already does this. Sorry.
+   patch2: calculated a suitable max_discard_sectors value for mmc
+   queue. Since some SDHCI host controller cannot process the whole
+   sectors at one time. In this patch, a new callback get_tmclk in
+   mmc_host_ops was added to help core layer to calculate the max value.
+   If this callback was implemented, core layer will calculted a suitable
+   value. If not, the max_discard_sectors value will be the same as
+   before.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+   patch3: implemented get_tmclk callback for SDHCI host controller.
+
+   Adrian, hope I can get your comment about these patches as well.
+   Thanks for your time to review these patches.
+
+Regards
+Chuanxiao
