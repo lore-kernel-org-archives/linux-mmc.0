@@ -1,26 +1,59 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 0/6] MMC: DMA for SH MMCIF
-Date: Thu, 11 Nov 2010 08:40:42 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1011110815070.15747@axis700.grange>
+Subject: [PATCH 2/6] ARM: mach-shmobile: add DMA defines for MMCIF on sh7372
+Date: Thu, 11 Nov 2010 08:40:48 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1011110832140.15747@axis700.grange>
+References: <Pine.LNX.4.64.1011110815070.15747@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.23]:40148 "HELO mail.gmx.net"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with SMTP
-	id S1757736Ab0KKHkl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Nov 2010 02:40:41 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1011110815070.15747@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>
+List-Id: linux-mmc@vger.kernel.org
 
-This patch series slightly cleans up the sh_mmcif MMC driver and adds a 
-DMA capability to it. One of the patches is not directly related, but is 
-required for a proper DMA functionality.
+Add DMA slave IDs and slave definitions for MMCIF on sh7372.
 
-Thanks
-Guennadi
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ arch/arm/mach-shmobile/include/mach/sh7372.h |    2 ++
+ arch/arm/mach-shmobile/setup-sh7372.c        |   10 ++++++++++
+ 2 files changed, 12 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-shmobile/include/mach/sh7372.h b/arch/arm/mach-shmobile/include/mach/sh7372.h
+index 147775a..35e06e6 100644
+--- a/arch/arm/mach-shmobile/include/mach/sh7372.h
++++ b/arch/arm/mach-shmobile/include/mach/sh7372.h
+@@ -455,6 +455,8 @@ enum {
+ 	SHDMA_SLAVE_SDHI1_TX,
+ 	SHDMA_SLAVE_SDHI2_RX,
+ 	SHDMA_SLAVE_SDHI2_TX,
++	SHDMA_SLAVE_MMCIF_RX,
++	SHDMA_SLAVE_MMCIF_TX,
+ };
+ 
+ extern struct clk sh7372_extal1_clk;
+diff --git a/arch/arm/mach-shmobile/setup-sh7372.c b/arch/arm/mach-shmobile/setup-sh7372.c
+index 564a6d0..2e3e11e 100644
+--- a/arch/arm/mach-shmobile/setup-sh7372.c
++++ b/arch/arm/mach-shmobile/setup-sh7372.c
+@@ -416,6 +416,16 @@ static const struct sh_dmae_slave_config sh7372_dmae_slaves[] = {
+ 		.addr		= 0xe6870030,
+ 		.chcr		= DM_INC | SM_FIX | 0x800 | TS_INDEX2VAL(XMIT_SZ_16BIT),
+ 		.mid_rid	= 0xce,
++	}, {
++		.slave_id	= SHDMA_SLAVE_MMCIF_TX,
++		.addr		= 0xe6bd0034,
++		.chcr		= DM_FIX | SM_INC | 0x800 | TS_INDEX2VAL(XMIT_SZ_32BIT),
++		.mid_rid	= 0xd1,
++	}, {
++		.slave_id	= SHDMA_SLAVE_MMCIF_RX,
++		.addr		= 0xe6bd0034,
++		.chcr		= DM_INC | SM_FIX | 0x800 | TS_INDEX2VAL(XMIT_SZ_32BIT),
++		.mid_rid	= 0xd2,
+ 	},
+ };
+ 
+-- 
+1.7.2.3
+
