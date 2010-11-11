@@ -1,68 +1,82 @@
-From: "Chuanxiao.Dong" <chuanxiao.dong@intel.com>
-Subject: [PATCH v1 3/3]implemented get_tmclk callback for SDHCI host
-Date: Thu, 11 Nov 2010 17:05:53 +0800
-Message-ID: <20101111090553.GD18170@intel.com>
-Reply-To: "Chuanxiao.Dong" <chuanxiao.dong@intel.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH v1 1/3]Add erase timeout calculation routine for sdhci
+ host
+Date: Thu, 11 Nov 2010 10:33:42 +0100
+Message-ID: <20101111093341.GA3131@pengutronix.de>
+References: <20101111090519.GB18170@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="/04w6evG8XlLl3ft"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:8354 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751042Ab0KKJHn convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Nov 2010 04:07:43 -0500
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:42201 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751997Ab0KKJdr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Nov 2010 04:33:47 -0500
 Content-Disposition: inline
+In-Reply-To: <20101111090519.GB18170@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: adrian.hunter@nokia.com, linux-mmc@vger.kernel.org
+To: "Chuanxiao.Dong" <chuanxiao.dong@intel.com>
+Cc: cjb@laptop.org, adrian.hunter@nokia.com, linux-mmc@vger.kernel.org
 
->From 30b712a99e25cb4e90807d20d2524fb74963e25e Mon Sep 17 00:00:00 2001
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Date: Thu, 11 Nov 2010 15:49:11 +0800
-Subject: [PATCH 3/3] mmc: implemented get_tmclk callback for sdhci host
 
-get_tmclk callback will be used for calculating a suitable
-max_discard_sectors value
+--/04w6evG8XlLl3ft
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- drivers/mmc/host/sdhci.c |   17 +++++++++++++++++
- 1 files changed, 17 insertions(+), 0 deletions(-)
+On Thu, Nov 11, 2010 at 05:05:19PM +0800, Chuanxiao.Dong wrote:
+> From 04704a1c769dc4d15b5fb54d65d8ad46f6c5f57a Mon Sep 17 00:00:00 2001
+> From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> Date: Thu, 11 Nov 2010 13:42:32 +0800
+> Subject: [PATCH 1/3] mmc: add erase timeout calculation routine for sdhci=
+ host
+>=20
+> Erase command needs R1b response which means after HD handle
+> a CMD_RESPONSE interrupt, driver also need to wait for a while.
+> For SDHCI host controller, HD also need to handle a DATA_END
+> interrupt.
+> During device handle erase cmd, if the blocks need to be erased
+> are too many, some SDHCI host controller maybe launch a TIMEOUT
+> interrupt before the erase cmd finishing. To avoid this kind of
+> situation, SDHCI HD need to calculate a correct timeout value
+> before issuing erase cmd. Patch added a routine to implement
+> this.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 79fcca2..1575bfa 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1311,11 +1311,28 @@ out:
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
-+/*
-+ * get the host controller timeout clock which will
-+ * be used to calculate a suitable max_discard_sectors
-+ * value for mmc queue
-+ * */
-+static unsigned int sdhci_get_tmclk(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host;
-+	host = mmc_priv(mmc);
-+
-+	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
-+		host->timeout_clk = host->clock / 1000;
-+
-+	return host->timeout_clk;
-+}
-+
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.set_ios	= sdhci_set_ios,
- 	.get_ro		= sdhci_get_ro,
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
-+	.get_tmclk	= sdhci_get_tmclk,
- };
- 
- /*****************************************************************************\
--- 
-1.6.6.1
+Just a formal thing I noticed on a glimpse...
 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 154cbf8..79fcca2 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -879,6 +879,48 @@ static void sdhci_finish_data(struct sdhci_host *hos=
+t)
+>  		tasklet_schedule(&host->finish_tasklet);
+>  }
+> =20
+> +static void sdhci_set_erasetimeout(struct sdhci_host *host,
+> +		unsigned int erase_timeout)
+> +{
+> +	u64 current_timeout;
+> +	int count =3D 0xe;
+
+I'd suggest a define with a speaking name instead of all the hardcoded 0xe.
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--/04w6evG8XlLl3ft
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkzbuHUACgkQD27XaX1/VRsoLwCgtBgaUrh+9K3jOsKyZeWi/RIv
+fMMAoMrDcTnzzJUN4BHJvT4MuuRKsezQ
+=imB0
+-----END PGP SIGNATURE-----
+
+--/04w6evG8XlLl3ft--
