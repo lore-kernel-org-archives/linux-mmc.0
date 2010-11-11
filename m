@@ -1,137 +1,259 @@
 From: "Chuanxiao.Dong" <chuanxiao.dong@intel.com>
-Subject: [PATCH v1 1/3]Add erase timeout calculation routine for sdhci host
-Date: Thu, 11 Nov 2010 17:05:19 +0800
-Message-ID: <20101111090519.GB18170@intel.com>
+Subject: [PATCH v1 2/3]set a suitable max_discard_sectors value for mmc
+	queue
+Date: Thu, 11 Nov 2010 17:05:35 +0800
+Message-ID: <20101111090535.GC18170@intel.com>
 Reply-To: "Chuanxiao.Dong" <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:13608 "EHLO mga09.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:8448 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1749667Ab0KKJHI convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Nov 2010 04:07:08 -0500
+	id S1751042Ab0KKJHY convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Nov 2010 04:07:24 -0500
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
 Cc: adrian.hunter@nokia.com, linux-mmc@vger.kernel.org
 
->From 04704a1c769dc4d15b5fb54d65d8ad46f6c5f57a Mon Sep 17 00:00:00 2001
+>From 40c55714de6b4c9eb2c7105c8b01e70d645c1089 Mon Sep 17 00:00:00 2001
 From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Date: Thu, 11 Nov 2010 13:42:32 +0800
-Subject: [PATCH 1/3] mmc: add erase timeout calculation routine for sdhci host
+Date: Thu, 11 Nov 2010 15:42:18 +0800
+Subject: [PATCH 2/3] mmc: set a suitable max_discard_sectors value for mmc queue
 
-Erase command needs R1b response which means after HD handle
-a CMD_RESPONSE interrupt, driver also need to wait for a while.
-For SDHCI host controller, HD also need to handle a DATA_END
-interrupt.
-During device handle erase cmd, if the blocks need to be erased
-are too many, some SDHCI host controller maybe launch a TIMEOUT
-interrupt before the erase cmd finishing. To avoid this kind of
-situation, SDHCI HD need to calculate a correct timeout value
-before issuing erase cmd. Patch added a routine to implement
-this.
+For some SDHCI host controller, eraseing unlimited sectors one
+time may caused a data timeout interrupt since the erasing time
+is larger than the host timeout time.
+
+If host driver implemented get_tmclk callback for mmc_host_ops,
+mmc_set_discard_limit() will calculated a suitable max_discard_sectors
+value for mmc queue. Otherwise, use the unlimited value.
 
 Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
- drivers/mmc/core/core.c  |    4 ++++
- drivers/mmc/host/sdhci.c |   46 ++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 50 insertions(+), 0 deletions(-)
+ drivers/mmc/card/queue.c |    8 ++-
+ drivers/mmc/core/core.c  |  145 ++++++++++++++++++++++++++++++++++++---------
+ include/linux/mmc/core.h |    1 +
+ include/linux/mmc/host.h |    3 +
+ 4 files changed, 127 insertions(+), 30 deletions(-)
 
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 4e42d03..f665c62 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -131,7 +131,13 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock
+ 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
+ 	if (mmc_can_erase(card)) {
+ 		queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, mq->queue);
+-		mq->queue->limits.max_discard_sectors = UINT_MAX;
++		/* get a suitable max_discard_sectors limitation */
++		ret = mmc_set_discard_limit(card);
++		if (ret > 0)
++			mq->queue->limits.max_discard_sectors = ret;
++		else
++			mq->queue->limits.max_discard_sectors = UINT_MAX;
++
+ 		if (card->erased_byte == 0)
+ 			mq->queue->limits.discard_zeroes_data = 1;
+ 		if (!mmc_can_trim(card) && is_power_of_2(card->erase_size)) {
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8bf542c..d48bb26 100644
+index d48bb26..46b66f8 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -170,6 +170,9 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 
- 	mrq->cmd->error = 0;
- 	mrq->cmd->mrq = mrq;
-+	if (mrq->cmd->opcode != MMC_ERASE)
-+		mrq->cmd->erase_timeout = 0;
-+
- 	if (mrq->data) {
- 		BUG_ON(mrq->data->blksz > host->max_blk_size);
- 		BUG_ON(mrq->data->blocks > host->max_blk_count);
-@@ -190,6 +193,7 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 			mrq->data->stop = mrq->stop;
- 			mrq->stop->error = 0;
- 			mrq->stop->mrq = mrq;
-+			mrq->stop->erase_timeout = 0;
- 		}
+@@ -1160,6 +1160,41 @@ void mmc_init_erase(struct mmc_card *card)
  	}
- 	mmc_host_clk_ungate(host);
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 154cbf8..79fcca2 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -879,6 +879,48 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 		tasklet_schedule(&host->finish_tasklet);
  }
  
-+static void sdhci_set_erasetimeout(struct sdhci_host *host,
-+		unsigned int erase_timeout)
++static unsigned int mmc_calc_mmc_erase_timeout(struct mmc_card *card)
 +{
-+	u64 current_timeout;
-+	int count = 0xe;
++	unsigned int erase_timeout = 0;
++
++	/* CSD Erase Group Size uses write timeout */
++	unsigned int mult = (10 << card->csd.r2w_factor);
++	unsigned int timeout_clks = card->csd.tacc_clks * mult;
++	unsigned int timeout_us;
++
++	/* Avoid overflow: e.g. tacc_ns=80000000 mult=1280 */
++	if (card->csd.tacc_ns < 1000000)
++		timeout_us = (card->csd.tacc_ns * mult) / 1000;
++	else
++		timeout_us = (card->csd.tacc_ns / 1000) * mult;
++
 +	/*
-+	 * If the host controller provides us with an incorrect timeout
-+	 * value, just skip the check and use 0xE.  The hardware may take
-+	 * longer to time out, but that's much better than having a too-short
-+	 * timeout value.
++	 * ios.clock is only a target.  The real clock rate might be
++	 * less but not that much less, so fudge it by multiplying by 2.
 +	 */
-+	if (host->quirks & SDHCI_QUIRK_BROKEN_TIMEOUT_VAL)
-+		goto out;
++	timeout_clks <<= 1;
++	timeout_us += (timeout_clks * 1000) /
++			  (card->host->ios.clock / 1000);
 +
-+	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
-+		host->timeout_clk = host->clock / 1000;
++	erase_timeout = timeout_us / 1000;
 +
-+	/* Caculate the MAX timeout time for host controller */
++	/*
++	 * Theoretically, the calculation could underflow so round up
++	 * to 1ms in that case.
++	 */
++	if (!erase_timeout)
++		erase_timeout = 1;
 +
-+	/* Timeout in ms */
-+	count = 0xe;
-+	current_timeout = (1 << 27) / host->timeout_clk;
-+	while (current_timeout > erase_timeout) {
-+		current_timeout >>= 1;
-+		count--;
-+		if (count == 0)
-+			break;
-+	}
-+
-+	if (count == 0xe) {
-+		/* host controller should disable timeout interrupt
-+		 * here. But right now some host controller timeout
-+		 * interrupt cannot be disabled
-+		 * */
-+		pr_warn("warning: device may have not enough time "
-+				"to wait for erase cmd finishing\n");
-+	} else
-+		count += 1;
-+out:
-+	sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
++	return erase_timeout;
 +}
 +
- static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- {
- 	int flags;
-@@ -946,6 +988,9 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	if (cmd->data)
- 		flags |= SDHCI_CMD_DATA;
+ static void mmc_set_mmc_erase_timeout(struct mmc_card *card,
+ 				      struct mmc_command *cmd,
+ 				      unsigned int arg, unsigned int qty)
+@@ -1172,35 +1207,8 @@ static void mmc_set_mmc_erase_timeout(struct mmc_card *card,
+ 			erase_timeout = card->ext_csd.trim_timeout;
+ 		else
+ 			erase_timeout = card->ext_csd.hc_erase_timeout;
+-	} else {
+-		/* CSD Erase Group Size uses write timeout */
+-		unsigned int mult = (10 << card->csd.r2w_factor);
+-		unsigned int timeout_clks = card->csd.tacc_clks * mult;
+-		unsigned int timeout_us;
+-
+-		/* Avoid overflow: e.g. tacc_ns=80000000 mult=1280 */
+-		if (card->csd.tacc_ns < 1000000)
+-			timeout_us = (card->csd.tacc_ns * mult) / 1000;
+-		else
+-			timeout_us = (card->csd.tacc_ns / 1000) * mult;
+-
+-		/*
+-		 * ios.clock is only a target.  The real clock rate might be
+-		 * less but not that much less, so fudge it by multiplying by 2.
+-		 */
+-		timeout_clks <<= 1;
+-		timeout_us += (timeout_clks * 1000) /
+-			      (card->host->ios.clock / 1000);
+-
+-		erase_timeout = timeout_us / 1000;
+-
+-		/*
+-		 * Theoretically, the calculation could underflow so round up
+-		 * to 1ms in that case.
+-		 */
+-		if (!erase_timeout)
+-			erase_timeout = 1;
+-	}
++	} else
++		erase_timeout = mmc_calc_mmc_erase_timeout(card);
  
-+	if (cmd->erase_timeout)
-+		sdhci_set_erasetimeout(host, cmd->erase_timeout);
-+
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
+ 	/* Multiplier for secure operations */
+ 	if (arg & MMC_SECURE_ARGS) {
+@@ -1458,6 +1466,85 @@ int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
  }
+ EXPORT_SYMBOL(mmc_erase_group_aligned);
  
-@@ -1857,6 +1902,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
- 	mmc->f_max = host->max_clk;
- 	mmc->caps |= MMC_CAP_SDIO_IRQ;
-+	mmc->caps |= MMC_CAP_ERASE;
++/*
++ * mmc_set_discard_limit: set the max_discard_sectors according
++ * to host controller timeout capability.
++ * */
++int mmc_set_discard_limit(struct mmc_card *card)
++{
++	struct mmc_host *host;
++	unsigned int max, nr = 0;
++	unsigned int host_timeout;
++	host = card->host;
++	/* get host controller timeout clks to caculate
++	 * the suitable erase timeout value.
++	 * */
++	if (host->ops && host->ops->get_tmclk)
++		host_timeout = host->ops->get_tmclk(host);
++	else
++		return nr;
++	/* max timeout in ms */
++	max = (1 << 27) / host_timeout;
++	if (max == 0)
++		goto out;
++
++	if (mmc_card_sd(card)) {
++		/* time in ms */
++		max -= card->ssr.erase_offset;
++		if (card->ssr.erase_timeout && max > 0) {
++			nr = (max / card->ssr.erase_timeout);
++			if (card->erase_shift)
++				nr <<= card->erase_shift;
++		}
++	}
++
++	if (mmc_card_mmc(card)) {
++		unsigned int erase_timeout, mult;
++		if (card->ext_csd.erase_group_def & 1) {
++			/* Use High Capacity erase timeout
++			 * so here to choose the maximum timeout value
++			 * */
++			erase_timeout = (card->ext_csd.trim_timeout >
++				card->ext_csd.hc_erase_timeout) ?
++				card->ext_csd.trim_timeout :
++				card->ext_csd.hc_erase_timeout;
++		} else
++			erase_timeout = mmc_calc_mmc_erase_timeout(card);
++
++		/* If driver send sec trim/erase command, timeout value
++		 * should be more larger
++		 * */
++		mult = (card->ext_csd.sec_trim_mult >
++			card->ext_csd.sec_erase_mult) ?
++			card->ext_csd.sec_trim_mult :
++			card->ext_csd.sec_erase_mult;
++		erase_timeout *= mult;
++		if (erase_timeout) {
++				nr = (max / erase_timeout);
++			if (card->erase_shift)
++				nr <<= card->erase_shift;
++			else
++				nr *= card->erase_size;
++		}
++	}
++out:
++	if (nr == 0) {
++		/* Have to set a small limitation for request queue
++		 * to ensure that host controller won't generate a
++		 * timeout interrupt during waiting, here let limitation
++		 * to be 1 erase block. And this will let TRIM/ERASE
++		 * performance much lower.
++		 * */
++		nr = 1;
++		if (card->erase_shift)
++			nr <<= card->erase_shift;
++		else
++			nr *= card->erase_size;
++	}
++	return nr;
++}
++EXPORT_SYMBOL(mmc_set_discard_limit);
++
+ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
+ {
+ 	struct mmc_command cmd;
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 64e013f..ffddd1f 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -152,6 +152,7 @@ extern int mmc_can_trim(struct mmc_card *card);
+ extern int mmc_can_secure_erase_trim(struct mmc_card *card);
+ extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
+ 				   unsigned int nr);
++extern int mmc_set_discard_limit(struct mmc_card *card);
  
- 	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
- 		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+ extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index f108cee..63f1c9e 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -117,6 +117,9 @@ struct mmc_host_ops {
+ 
+ 	/* optional callback for HC quirks */
+ 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
++
++	/* Get host controller timeout clk */
++	unsigned int (*get_tmclk)(struct mmc_host *host);
+ };
+ 
+ struct mmc_card;
 -- 
 1.6.6.1
 
