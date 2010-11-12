@@ -1,76 +1,58 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] mmc, sh: use a consistent pr_ prefix
-Date: Fri, 12 Nov 2010 08:48:59 +0900
-Message-ID: <20101111234859.GG3673@verge.net.au>
-References: <1289384864-6531-1-git-send-email-horms@verge.net.au>
- <20101110110049.GA1475@linux-sh.org>
- <20101110133807.GB21836@verge.net.au>
- <Pine.LNX.4.64.1011110856220.15747@axis700.grange>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH 2/5] mmc: do not clear the host->pm_flags when suspend
+Date: Thu, 11 Nov 2010 23:37:05 -0500 (EST)
+Message-ID: <alpine.LFD.2.00.1011112330420.13911@xanadu.home>
+References: <1289402889-14160-1-git-send-email-peppe.cavallaro@st.com>
+ <1289402889-14160-2-git-send-email-peppe.cavallaro@st.com>
+ <1289402889-14160-3-git-send-email-peppe.cavallaro@st.com>
+ <1289402889-14160-4-git-send-email-peppe.cavallaro@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1011110856220.15747@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Paul Mundt <lethal@linux-sh.org>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Chris Ball <cjb@laptop.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relais.videotron.ca ([24.201.245.36]:50424 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755265Ab0KLEhG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Nov 2010 23:37:06 -0500
+Received: from xanadu.home ([66.130.28.92]) by vl-mh-mrz21.ip.videotron.ca
+ (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
+ with ESMTP id <0LBR004YW8TIYLA0@vl-mh-mrz21.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Thu, 11 Nov 2010 23:36:54 -0500 (EST)
+In-reply-to: <1289402889-14160-4-git-send-email-peppe.cavallaro@st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Cc: linux-mmc@vger.kernel.org
 
-On Thu, Nov 11, 2010 at 08:57:23AM +0100, Guennadi Liakhovetski wrote:
-> On Wed, 10 Nov 2010, Simon Horman wrote:
+On Wed, 10 Nov 2010, Giuseppe CAVALLARO wrote:
+
+> HC driver will be able to use the pm_flags to
+> undestand if the system can be woken-up by the driver.
+> So the mmc_suspend_host hasn't to reset this field
+> in the host structure.
 > 
-> > On Wed, Nov 10, 2010 at 08:00:49PM +0900, Paul Mundt wrote:
-> > > On Wed, Nov 10, 2010 at 07:27:44PM +0900, Simon Horman wrote:
-> > > > Use pr_fmt to set the prefix for pr_ messages.
-> > > > I believe this method is common in other
-> > > > source files in the kernel tree.
-> > > > 
-> > > pr_fmt() is ok when you have no better options, but in this case you have
-> > > the struct device working for you, so you really should be using it.
-> > > 
-> > > Consider the case where you have multiple MMCIF blocks, the debug
-> > > messages here won't really give you much helpful information if you have
-> > > no idea which block you're on.
-> > > 
-> > > For example..
-> > > 
-> > > > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > > > index 3f49273..9f37f74 100644
-> > > > --- a/drivers/mmc/host/sh_mmcif.c
-> > > > +++ b/drivers/mmc/host/sh_mmcif.c
-> > > > @@ -221,8 +222,8 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
-> > > >  
-> > > >  	state1 = sh_mmcif_readl(host->addr, MMCIF_CE_HOST_STS1);
-> > > >  	state2 = sh_mmcif_readl(host->addr, MMCIF_CE_HOST_STS2);
-> > > > -	pr_debug("%s: ERR HOST_STS1 = %08x\n", DRIVER_NAME, state1);
-> > > > -	pr_debug("%s: ERR HOST_STS2 = %08x\n", DRIVER_NAME, state2);
-> > > > +	pr_debug("ERR HOST_STS1 = %08x\n", state1);
-> > > > +	pr_debug("ERR HOST_STS2 = %08x\n", state2);
-> > > >  
-> > > >  	if (state1 & STS1_CMDSEQ) {
-> > > >  		sh_mmcif_bitset(host, MMCIF_CE_CMD_CTRL, CMD_CTRL_BREAK);
-> > > 
-> > > You can just convert these to:
-> > > 
-> > > 	dev_dbg(&host->pd->dev, ...);
-> > > 
-> > > > @@ -230,7 +231,7 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
-> > > >  		while (1) {
-> > > >  			timeout--;
-> > > >  			if (timeout < 0) {
-> > > > -				pr_err(DRIVER_NAME": Forceed end of " \
-> > > > +				pr_err("Forceed end of " \
-> > > >  					"command sequence timeout err\n");
-> > > >  				return -EIO;
-> > > >  			}
-> > > 
-> > > dev_err(), and so on.
-> > > 
-> > 
-> > Thanks, will do.
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> ---
+>  drivers/mmc/core/core.c |    1 -
+>  1 files changed, 0 insertions(+), 1 deletions(-)
 > 
-> Unfortunately I haven't seen this earlier, but one of my just submitted 
-> patches already does this. Sorry.
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 569e94d..6d2d6e4 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1276,7 +1276,6 @@ int mmc_suspend_host(struct mmc_host *host)
+>  			mmc_claim_host(host);
+>  			mmc_detach_bus(host);
+>  			mmc_release_host(host);
+> -			host->pm_flags = 0;
+>  			err = 0;
+>  		}
+>  	}
 
-Thanks, my patch is well and truly withdrawn now.
+This is wrong.  The host->pm_flags are set by SDIO function drivers to 
+indicate they want the host controller to keep card power on when the 
+host system is going to sleep.  In this case, the card has been removed, 
+and therefore any flag is invalid and should be cleared.
 
+
+Nicolas
