@@ -1,70 +1,30 @@
-From: "Madhusudhan" <madhu.cr@ti.com>
-Subject: RE: omap4: hsmmc: Fix improper card detection while booting
-Date: Mon, 15 Nov 2010 09:39:26 -0600
-Message-ID: <5D9810182C5840BAB43B3184B3ECBC60@am.dhcp.ti.com>
-References: <6576.10.24.255.17.1289812139.squirrel@dbdmail.itg.ti.com>
+From: <amandasaleeby1@centrum.sk>
+Subject: hello
+Date: Mon, 15 Nov 2010 18:33:04 +0100
+Message-ID: <201011151833.25978__10757.3297028013$1289842468$gmane$org@centrum.cz>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <6576.10.24.255.17.1289812139.squirrel@dbdmail.itg.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: 'kishore kadiyala' <kishore.kadiyala@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from farizej.centrum.cz ([90.183.38.130]:48993 "EHLO
+	farizej.centrum.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933013Ab0KOReI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2010 12:34:08 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: amandasaleeby1 <amandasaleeby1@centrum.sk>
+
+hello with love and trust
+my dearest friend compliment of the day to you.my name is Amanda favour a
+girl of 23years old honest trusting kind caring loving and fun with
+compassionate and generous nature viewing your email address which really interest
+me to know more about you that is having communication friendship with you
+if you will have the desire with me.so that we can get to know each other
+better sharing feelings and thought together .i will like you to write me
+through my email for easiest communication.i will be waiting to read from
+you.I will be waiting for your mail;please make sure you replied to me with the email address below,it is very confidential and private,thanks and have a nice day.
+here is my email address
+Amandasaleeby@she.com
 
 
-
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of kishore kadiyala
-> Sent: Monday, November 15, 2010 3:09 AM
-> To: linux-mmc@vger.kernel.org; linux-omap@vger.kernel.org
-> Subject: omap4: hsmmc: Fix improper card detection while booting
-> 
-> While booting OMAP4 ES2.0 boards, cards on MMC1 and MMC2 controllers
-> are not getting detected some times.
-> 
-> During reset of command/data line, wrong pointer to base address
-> was passed while read operation to SYSCTL register, thus impacting
-> the updated reset logic.
-> Passing correct base address fixes the issue.
-> 
-> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-> Acked-by: Felipie Balbi <balbi@ti.com>
-> Cc: Tony Lindgren <tony@atomide.com>
-> Cc: Chris Ball   <cjb@laptop.org>
-> Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 82a1079..5d46021 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1002,7 +1002,7 @@ static inline void
-> omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host
-> *host,
->  	 * Monitor a 0->1 transition first
->  	 */
->  	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
-> -		while ((!(OMAP_HSMMC_READ(host, SYSCTL) & bit))
-> +		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
->  					&& (i++ < limit))
->  			cpu_relax();
->  	}
-> --
-> 1.7.1
-> 
-Ack.
-
-Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
