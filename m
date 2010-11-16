@@ -1,63 +1,100 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: MMC runtime PM patches break libertas probe
-Date: Tue, 16 Nov 2010 16:49:00 +0200
-Message-ID: <AANLkTinAP0J3RncxJZciKVD9TKdfZLLvDsGn3NpnF0Dz@mail.gmail.com>
-References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
- <AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
- <AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
- <AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
- <AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
- <AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
- <AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
- <AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
- <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
- <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
- <AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com>
- <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
- <AANLkTi=EaZbdnJzJWGH2fUadvNkUhdQgTU1rAoS5wMAs@mail.gmail.com>
- <AANLkTinzvte389GNHtD2N0wO9mYsysCG9+Z1AFVZRn0E@mail.gmail.com> <AANLkTimRFC81ZiLuiUmhvXOpUddBjhVBezJEB8_BDyuu@mail.gmail.com>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH 2/3] mmc: protect against clockgate races
+Date: Tue, 16 Nov 2010 17:56:52 +0100
+Message-ID: <1289926612-14049-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:53820 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755918Ab0KPOtW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Nov 2010 09:49:22 -0500
-Received: by iwn35 with SMTP id 35so888494iwn.19
-        for <linux-mmc@vger.kernel.org>; Tue, 16 Nov 2010 06:49:22 -0800 (PST)
-In-Reply-To: <AANLkTimRFC81ZiLuiUmhvXOpUddBjhVBezJEB8_BDyuu@mail.gmail.com>
+Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:52546 "EHLO
+	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754394Ab0KPQ5N (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Nov 2010 11:57:13 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Arnd Hannemann <arnd@arndnet.de>, libertas-dev@lists.infradead.org, Nicolas Pitre <nico@fluxnic.net>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Linus Walleij <linus.walleij@stericsson.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-On Tue, Nov 16, 2010 at 4:29 PM, Daniel Drake <dsd@laptop.org> wrote:
-> On 16 November 2010 13:22, Ohad Ben-Cohen <ohad@wizery.com> wrote:
->> Just to update the list, the problem with the XO-1.5 was because the
->> sd8686 has an external reset gpio line which is currently being
->> manipulated manually by an out-of-tree kernel patch:
->>
->> http://dev.laptop.org/git/olpc-2.6/commit/?h=olpc-2.6.35&id=e9bee721fb0cc303286d1fe5df4930ce79b0b1e0
->>
->> ... which makes me wonder whether we really want to take that
->> MMC_CAP_RUNTIME_PM road. I'm not sure anymore.
->
-> OLPC is not the only user of the sd8686.
-> Every other user will face the same problem.
->
-> Other users may not have the luxury of having a GPIO hooked up to the
-> reset line.
+This adds a mutex to protect from races between gate and ungate
+calls colliding.
 
-Agree; those users will need a MMC_CAP_RUNTIME_PM (or maybe call it
-with the capability it really stands for which is something like
-MMC_CAP_POWER_OFF_CARD).
+Cc: Ohad Ben-Cohen <ohad@wizery.com>
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+---
+This should fix the race observed by Ohad earlier.
+---
+ drivers/mmc/core/host.c  |   11 ++++++++---
+ include/linux/mmc/host.h |    1 +
+ 2 files changed, 9 insertions(+), 3 deletions(-)
 
-But I want to be positively sure we have such users (or is it that obvious?).
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index f74b386..92e3370 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -68,9 +68,9 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
+ 	unsigned long flags;
+ 
+ 	if (!freq) {
+-		pr_err("%s: frequency set to 0 in disable function, "
+-		       "this means the clock is already disabled.\n",
+-		       mmc_hostname(host));
++		pr_debug("%s: frequency set to 0 in disable function, "
++			 "this means the clock is already disabled.\n",
++			 mmc_hostname(host));
+ 		return;
+ 	}
+ 	/*
+@@ -94,6 +94,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
+ 		spin_unlock_irqrestore(&host->clk_lock, flags);
+ 		return;
+ 	}
++	mutex_lock(&host->clk_gate_mutex);
+ 	spin_lock_irqsave(&host->clk_lock, flags);
+ 	if (!host->clk_requests) {
+ 		spin_unlock_irqrestore(&host->clk_lock, flags);
+@@ -103,6 +104,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
+ 		pr_debug("%s: gated MCI clock\n", mmc_hostname(host));
+ 	}
+ 	spin_unlock_irqrestore(&host->clk_lock, flags);
++	mutex_unlock(&host->clk_gate_mutex);
+ }
+ 
+ /*
+@@ -128,6 +130,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
+ {
+ 	unsigned long flags;
+ 
++	mutex_lock(&host->clk_gate_mutex);
+ 	spin_lock_irqsave(&host->clk_lock, flags);
+ 	if (host->clk_gated) {
+ 		spin_unlock_irqrestore(&host->clk_lock, flags);
+@@ -137,6 +140,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
+ 	}
+ 	host->clk_requests++;
+ 	spin_unlock_irqrestore(&host->clk_lock, flags);
++	mutex_unlock(&host->clk_gate_mutex);
+ }
+ 
+ /**
+@@ -214,6 +218,7 @@ static inline void mmc_host_clk_init(struct mmc_host *host)
+ 	host->clk_gated = false;
+ 	INIT_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
+ 	spin_lock_init(&host->clk_lock);
++	mutex_init(&host->clk_gate_mutex);
+ }
+ 
+ /**
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 955bc10..53496bb 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -178,6 +178,7 @@ struct mmc_host {
+ 	struct work_struct	clk_gate_work; /* delayed clock gate */
+ 	unsigned int		clk_old;	/* old clock value cache */
+ 	spinlock_t		clk_lock;	/* lock for clk fields */
++	struct mutex		clk_gate_mutex;	/* mutex for clock gating */
+ #endif
+ 
+ 	/* host specific block data */
+-- 
+1.6.3.3
 
-How is the sd8686's reset line manipulated on other platforms ? Or is
-the sd8686 usually just kept powered on after boot ?
-
-I'm looping in libertas-dev.
-
-Thanks,
-Ohad.
