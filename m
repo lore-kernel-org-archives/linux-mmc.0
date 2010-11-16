@@ -1,100 +1,106 @@
 From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH 2/3] mmc: protect against clockgate races
-Date: Tue, 16 Nov 2010 17:56:52 +0100
-Message-ID: <1289926612-14049-1-git-send-email-linus.walleij@stericsson.com>
+Subject: [PATCH 3/3] mmc: protect some gating variables
+Date: Tue, 16 Nov 2010 17:57:00 +0100
+Message-ID: <1289926620-14085-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:52546 "EHLO
-	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754394Ab0KPQ5N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Nov 2010 11:57:13 -0500
+Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:40620 "EHLO
+	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754277Ab0KPQ5M (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Nov 2010 11:57:12 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Linus Walleij <linus.walleij@stericsson.com>, Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Linus Walleij <linus.walleij@stericsson.com>
 
-This adds a mutex to protect from races between gate and ungate
-calls colliding.
+This adds some more picky variable protection to the state holders
+for the clock gating code. This is particularly important when
+ordinary .set_ios() calls would race with the .set_ios() call
+resulting from a delayed gate operation.
 
-Cc: Ohad Ben-Cohen <ohad@wizery.com>
 Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
 ---
-This should fix the race observed by Ohad earlier.
----
- drivers/mmc/core/host.c  |   11 ++++++++---
- include/linux/mmc/host.h |    1 +
- 2 files changed, 9 insertions(+), 3 deletions(-)
+ drivers/mmc/core/core.c |   33 ++++++++++++++++++++++++---------
+ drivers/mmc/core/core.h |    1 +
+ 2 files changed, 25 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index f74b386..92e3370 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -68,9 +68,9 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
- 	unsigned long flags;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8afc620..c5ae489 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -617,15 +617,8 @@ static inline void mmc_set_ios(struct mmc_host *host)
+ 		 ios->power_mode, ios->chip_select, ios->vdd,
+ 		 ios->bus_width, ios->timing);
  
- 	if (!freq) {
--		pr_err("%s: frequency set to 0 in disable function, "
--		       "this means the clock is already disabled.\n",
--		       mmc_hostname(host));
-+		pr_debug("%s: frequency set to 0 in disable function, "
-+			 "this means the clock is already disabled.\n",
-+			 mmc_hostname(host));
- 		return;
- 	}
- 	/*
-@@ -94,6 +94,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
- 		spin_unlock_irqrestore(&host->clk_lock, flags);
- 		return;
- 	}
-+	mutex_lock(&host->clk_gate_mutex);
- 	spin_lock_irqsave(&host->clk_lock, flags);
- 	if (!host->clk_requests) {
- 		spin_unlock_irqrestore(&host->clk_lock, flags);
-@@ -103,6 +104,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
- 		pr_debug("%s: gated MCI clock\n", mmc_hostname(host));
- 	}
- 	spin_unlock_irqrestore(&host->clk_lock, flags);
-+	mutex_unlock(&host->clk_gate_mutex);
+-#ifdef CONFIG_MMC_CLKGATE
+-	/*
+-	 * We've been given a new frequency while the clock is gated,
+-	 * so make sure we regard this as ungating it.
+-	 */
+-	if (ios->clock > 0 && host->clk_gated)
+-		host->clk_gated = false;
+-#endif
+-
++	if (ios->clock > 0)
++		mmc_set_ungated(host);
+ 	host->ops->set_ios(host, ios);
  }
  
- /*
-@@ -128,6 +130,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
+@@ -659,9 +652,13 @@ void mmc_set_clock(struct mmc_host *host, unsigned int hz)
+  */
+ void mmc_gate_clock(struct mmc_host *host)
  {
- 	unsigned long flags;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->clk_lock, flags);
+ 	host->clk_old = host->ios.clock;
+ 	host->ios.clock = 0;
+ 	host->clk_gated = true;
++	spin_unlock_irqrestore(&host->clk_lock, flags);
+ 	mmc_set_ios(host);
+ }
  
-+	mutex_lock(&host->clk_gate_mutex);
- 	spin_lock_irqsave(&host->clk_lock, flags);
- 	if (host->clk_gated) {
- 		spin_unlock_irqrestore(&host->clk_lock, flags);
-@@ -137,6 +140,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
+@@ -680,9 +677,27 @@ void mmc_ungate_clock(struct mmc_host *host)
+ 	 */
+ 	if (host->clk_old) {
+ 		BUG_ON(host->ios.clock);
++		/* This call will also set host->clk_gated to false */
+ 		mmc_set_clock(host, host->clk_old);
  	}
- 	host->clk_requests++;
- 	spin_unlock_irqrestore(&host->clk_lock, flags);
-+	mutex_unlock(&host->clk_gate_mutex);
- }
- 
- /**
-@@ -214,6 +218,7 @@ static inline void mmc_host_clk_init(struct mmc_host *host)
++}
++
++void mmc_set_ungated(struct mmc_host *host)
++{
++	unsigned long flags;
++
++	/*
++	 * We've been given a new frequency while the clock is gated,
++	 * so make sure we regard this as ungating it.
++	 */
++	spin_lock_irqsave(&host->clk_lock, flags);
  	host->clk_gated = false;
- 	INIT_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
- 	spin_lock_init(&host->clk_lock);
-+	mutex_init(&host->clk_gate_mutex);
++	spin_unlock_irqrestore(&host->clk_lock, flags);
++}
++
++#else
++void mmc_set_ungated(struct mmc_host *host)
++{
  }
- 
- /**
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 955bc10..53496bb 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -178,6 +178,7 @@ struct mmc_host {
- 	struct work_struct	clk_gate_work; /* delayed clock gate */
- 	unsigned int		clk_old;	/* old clock value cache */
- 	spinlock_t		clk_lock;	/* lock for clk fields */
-+	struct mutex		clk_gate_mutex;	/* mutex for clock gating */
  #endif
  
- 	/* host specific block data */
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 9972808..026c975 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -35,6 +35,7 @@ void mmc_set_chip_select(struct mmc_host *host, int mode);
+ void mmc_set_clock(struct mmc_host *host, unsigned int hz);
+ void mmc_gate_clock(struct mmc_host *host);
+ void mmc_ungate_clock(struct mmc_host *host);
++void mmc_set_ungated(struct mmc_host *host);
+ void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode);
+ void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
+ void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
 -- 
 1.6.3.3
 
