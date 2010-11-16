@@ -1,413 +1,333 @@
-From: "Jennifer Li (TP)" <Jennifer.Li@o2micro.com>
-Subject: [PATCH 2.6.32]: Add new device IDs and registers forMULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) cards.
-Date: Tue, 16 Nov 2010 14:05:16 +0800
-Message-ID: <FC57104DF444434A9D1D8A7B4EBB292307D13E8A@HC-EXCHANGE.nt-fsrvr.o2micro.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: MMC runtime PM patches break libertas probe
+Date: Tue, 16 Nov 2010 15:22:16 +0200
+Message-ID: <AANLkTinzvte389GNHtD2N0wO9mYsysCG9+Z1AFVZRn0E@mail.gmail.com>
+References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
+ <AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
+ <AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
+ <AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
+ <AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
+ <AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
+ <AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
+ <AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
+ <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
+ <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
+ <AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com>
+ <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com> <AANLkTi=EaZbdnJzJWGH2fUadvNkUhdQgTU1rAoS5wMAs@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;boundary="----_=_NextPart_001_01CB8554.3F345FA6"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [203.127.153.66] ([203.127.153.66]:19235 "EHLO
-	sg-mxserver-01.nt-fsrvr.o2micro.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755529Ab0KPGVO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Nov 2010 01:21:14 -0500
-Content-class: urn:content-classes:message
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:38269 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755946Ab0KPNWh convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Nov 2010 08:22:37 -0500
+Received: by gwj17 with SMTP id 17so272993gwj.19
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Nov 2010 05:22:36 -0800 (PST)
+In-Reply-To: <AANLkTi=EaZbdnJzJWGH2fUadvNkUhdQgTU1rAoS5wMAs@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Mario_Limonciello@Dell.com, Joseph_Yeh@Dell.com, Chris Van Hoof <vanhoof@canonical.com>, Rezwanul_Kabir@Dell.com, "Shirley Her (SC)" <shirley.her@o2micro.com>, "Rich Lin (TP)" <RichLin@o2micro.com>, "Samuel Guan(WH)" <samuel.guan@o2micro.com>, "Hardys Lv(WH)" <hardys.lv@o2micro.com>, "William Lian (TP)" <William.Lian@o2micro.com>
+To: Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Arnd Hannemann <arnd@arndnet.de>
 
-This is a multi-part message in MIME format.
+On Mon, Nov 1, 2010 at 10:27 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote=
+:
+> On Sun, Oct 31, 2010 at 9:06 PM, Ohad Ben-Cohen <ohad@wizery.com> wro=
+te:
+> ...
+>> we need to support boards with controllers/cards
+>> which we can't power off in runtime.
+>>
+>> On such boards, the right thing to do would be to disable runtime PM=
+ altogether.
+>
+> The patch below (/attached) should trivially fix the problem - can yo=
+u
+> please check it out ?
+>
+> It's very simple: it just requires hosts to explicitly indicate they
+> support runtime powering off/on their cards (by means of
+> MMC_CAP_RUNTIME_PM).
+>
+> There is no way around this I'm afraid: it is legitimate for a
+> board/host/card configuration not to support powering off the card
+> after boot, and we must allow it.
+>
+> In addition having an explicit MMC_CAP_RUNTIME_PM will also allow us
+> smoother transition to runtime PM behavior. Developers will have to
+> explicitly turn it on, and will not be surprised if things won't
+> immediately work.
+>
+> Please note that this cap is not interchangeable, and can't be replac=
+e
+> with CONFIG_PM_RUNTIME.
+>
+> Having said that, I still think we need to understand why CMD3 timed
+> out on the XO-1.5.
 
-------_=_NextPart_001_01CB8554.3F345FA6
-Content-Type: text/plain;charset="US-ASCII"
-Content-Transfer-Encoding: quoted-printable
+Just to update the list, the problem with the XO-1.5 was because the
+sd8686 has an external reset gpio line which is currently being
+manipulated manually by an out-of-tree kernel patch:
 
-Hi,
+http://dev.laptop.org/git/olpc-2.6/commit/?h=3Dolpc-2.6.35&id=3De9bee72=
+1fb0cc303286d1fe5df4930ce79b0b1e0
 
-Issue Description:
-SD/MMC card can't be recognized by O2 chip.
+=2E.. which makes me wonder whether we really want to take that
+MMC_CAP_RUNTIME_PM road. I'm not sure anymore.
 
-Root cause:
-O2Micro's ADMA and related functions can't work by default Linux SD
-driver. We need mark those related registers.
-        
-Patch description: 
-  - SET MULTI 3 to VCC3V# 
-  - Disable CLK_REQ# support after media DET.
-  - Choose programmable settings 
-  - Enable SDMA
-  - Disable ADMA1
-  - Disable ADMA2
-  - Disable the infinite transfer mode
- 
-Supplement:
-We are trying to add the enable ADMA patch later.
+We need a demonstrated hardware limitation before we take that
+approach (or a setup which worked using vanilla kernels and now
+doesn't), because frankly this MMC_CAP_RUNTIME_PM approach is
+cumbersome and involving. I would not like to introduce it just to fix
+out-of-tree software issues, and it seems that at least the XO-1.5
+case can be cleanly solved by software (e.g. by letting the regulator
+handle that sd8686 quirk).
 
-PATCH content:
+I'm looping in Arnd, who reported similar problems with b43-sdio on
+AP4EVB (arm) with tmio_mmc.
 
-Pci_ids.h
+Arnd,
 
---- ../untitled folder/linux-2.6.32/include/linux/pci_ids.h
-2009-12-03 11:51:21.000000000 +0800
-+++ ./pci_ids.h	2010-11-15 17:56:26.103132569 +0800
-@@ -2694,3 +2694,14 @@
- #define PCI_DEVICE_ID_RME_DIGI32	0x9896
- #define PCI_DEVICE_ID_RME_DIGI32_PRO	0x9897
- #define PCI_DEVICE_ID_RME_DIGI32_8	0x9898
-+
-+#define PCI_VENDOR_ID_O2		0x1217
-+#define PCI_DEVICE_ID_O2_6729		0x6729
-+#define PCI_DEVICE_ID_O2_6730		0x673a
-+#define PCI_DEVICE_ID_O2_6832		0x6832
-+#define PCI_DEVICE_ID_O2_6836		0x6836
-+#define PCI_DEVICE_ID_O2_8120		0x8120
-+#define PCI_DEVICE_ID_O2_8220		0x8220
-+#define PCI_DEVICE_ID_O2_8320		0x8320
-+#define PCI_DEVICE_ID_O2_8321		0x8321
-+#define PCI_DEVICE_ID_O2_8221		0x8221
+We're trying to exactly understand the reasons behind the reported
+SDIO runtime pm failures (we had two, yours, and OLPC). So far it
+seems that the OLPC had a software issue, and I'm wondering about
+yours.
 
+Can you please supply additional information about your board ? where
+does your wifi card gets its power from ? is there an external gpio
+involved ? Were you able to work with vanilla kernels (prior to
+2.6.37) or do you carry some out-of-tree patches ?
 
-Sdhci-pci.c
+Thanks,
+Ohad.
 
---- ../linux-2.6.32/drivers/mmc/host/sdhci-pci.c	2009-12-03
-11:51:21.000000000 +0800
-+++ sdhci-pci.c	2010-11-16 11:42:00.000000000 +0800
-@@ -38,6 +38,13 @@
- 
- #define MAX_SLOTS			8
- 
-+#define O2_SDMMC_LOCK_WP 0xD3
-+#define O2_SDMMC_MULTI_VCC3V 0xEE
-+#define O2_SDMMC_CLKREQ 0xEC
-+#define O2_SDMMC_CAPABILITIES 0xE0
-+#define O2_SDMMC_ADMA1 0xE2
-+#define O2_SDMMC_ADMA2 0xE7
-+#define O2_SDMMC_INFINITE_MODE 0xF1
- struct sdhci_pci_chip;
- struct sdhci_pci_slot;
- 
-@@ -112,6 +119,94 @@ static const struct sdhci_pci_fixes sdhc
- 			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
- };
- 
-+static int o2_probe(struct sdhci_pci_chip *chip)
-+{
-+	int ret;
-+	u8 scratch;
-+
-+	if ((chip->pdev->device =3D=3D PCI_DEVICE_ID_O2_8220) ||
-+	    (chip->pdev->device =3D=3D PCI_DEVICE_ID_O2_8320) ||
-+	    (chip->pdev->device =3D=3D PCI_DEVICE_ID_O2_8321) ||
-+	    (chip->pdev->device =3D=3D PCI_DEVICE_ID_O2_8221))
-+	    {
-+		/* O2Micro's ADMA and releated function can't work on
-default Linux SD driver.
-+         * We need mark those related registers.
-+         * - SET MULTI 3 to VCC3V# 
-+         * - Disable CLK_REQ# support after media DET.
-+         * - Choose programmable settings 
-+         * - Enable SDMA
-+         * - Disable ADMA1
-+         * - Disable ADMA2
-+         * - Disable the infinite transfer mode
-+         */
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SDMMC_LOCK_WP,
-&scratch);
-+		if (ret)
-+			return ret;
-+	
-+		scratch &=3D 0x7f;
-+		ret =3D pci_write_config_byte(chip->pdev,
-O2_SDMMC_LOCK_WP, scratch);
-+
-+		ret =3D pci_read_config_byte(chip->pdev,
-O2_SDMMC_MULTI_VCC3V, &scratch);
-+		if (ret)
-+			return ret;
-+	
-+		scratch =3D 0x08;	
-+		ret =3D pci_write_config_byte(chip->pdev,
-O2_SDMMC_MULTI_VCC3V, scratch);
-+
-+
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SDMMC_CLKREQ,
-&scratch);
-+		if (ret)
-+			return ret;
-+	
-+		scratch |=3D 0x20;	
-+		ret =3D pci_write_config_byte(chip->pdev, O2_SDMMC_CLKREQ,
-scratch);
-+
-+		ret =3D pci_read_config_byte(chip->pdev,
-O2_SDMMC_CAPABILITIES, &scratch);
-+		if (ret)
-+			return ret;
-+	
-+		scratch |=3D 0x01;
-+		ret =3D pci_write_config_byte(chip->pdev,
-O2_SDMMC_CAPABILITIES, scratch);
-+
-+		ret =3D pci_read_config_byte(chip->pdev,
-O2_SDMMC_CAPABILITIES, &scratch);
-+		if (ret)
-+			return ret;
-+	
-+		scratch =3D 0x73;
-+		ret =3D pci_write_config_byte(chip->pdev,
-O2_SDMMC_CAPABILITIES, scratch);
-+
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SDMMC_ADMA1,
-&scratch);
-+		if (ret)
-+			return ret;
-+	
-+		scratch =3D 0x39;	
-+		ret =3D pci_write_config_byte(chip->pdev, O2_SDMMC_ADMA1,
-scratch);
-+
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SDMMC_ADMA2,
-&scratch);
-+		if (ret)
-+			return ret;
-+	
-+		scratch =3D 0x08;	
-+		ret =3D pci_write_config_byte(chip->pdev, O2_SDMMC_ADMA2,
-scratch);
-+
-+		ret =3D pci_read_config_byte(chip->pdev,
-O2_SDMMC_INFINITE_MODE, &scratch);
-+		if (ret)
-+			return ret;
-+	
-+		scratch |=3D 0x08;
-+		ret =3D pci_write_config_byte(chip->pdev,
-O2_SDMMC_INFINITE_MODE, scratch);
-+
-+		ret =3D pci_read_config_byte(chip->pdev, O2_SDMMC_LOCK_WP,
-&scratch);
-+		if (ret)
-+			return ret;
-+
-+		scratch |=3D 0x80;	
-+		ret =3D pci_write_config_byte(chip->pdev,
-O2_SDMMC_LOCK_WP, scratch);
-+
-+		}
-+	return 0;
-+}
-+
- static int jmicron_pmos(struct sdhci_pci_chip *chip, int on)
- {
- 	u8 scratch;
-@@ -275,6 +370,10 @@ static int jmicron_resume(struct sdhci_p
- 	return 0;
- }
- 
-+static const struct sdhci_pci_fixes sdhci_o2 =3D {
-+	.probe		=3D o2_probe,
-+};
-+
- static const struct sdhci_pci_fixes sdhci_jmicron =3D {
- 	.probe		=3D jmicron_probe,
- 
-@@ -370,6 +469,46 @@ static const struct pci_device_id pci_id
- 		.driver_data	=3D (kernel_ulong_t)&sdhci_via,
- 	},
- 
-+	{
-+		.vendor		=3D PCI_VENDOR_ID_O2,
-+		.device		=3D PCI_DEVICE_ID_O2_8120,
-+		.subvendor	=3D PCI_ANY_ID,
-+		.subdevice	=3D PCI_ANY_ID,
-+		.driver_data	=3D (kernel_ulong_t)&sdhci_o2,
-+	},
-+
-+	{
-+		.vendor		=3D PCI_VENDOR_ID_O2,
-+		.device		=3D PCI_DEVICE_ID_O2_8220,
-+		.subvendor	=3D PCI_ANY_ID,
-+		.subdevice	=3D PCI_ANY_ID,
-+		.driver_data	=3D (kernel_ulong_t)&sdhci_o2,
-+	},
-+
-+	{
-+		.vendor		=3D PCI_VENDOR_ID_O2,
-+		.device		=3D PCI_DEVICE_ID_O2_8320,
-+		.subvendor	=3D PCI_ANY_ID,
-+		.subdevice	=3D PCI_ANY_ID,
-+		.driver_data	=3D (kernel_ulong_t)&sdhci_o2,
-+	},
-+
-+	{
-+		.vendor		=3D PCI_VENDOR_ID_O2,
-+		.device		=3D PCI_DEVICE_ID_O2_8221,
-+		.subvendor	=3D PCI_ANY_ID,
-+		.subdevice	=3D PCI_ANY_ID,
-+		.driver_data	=3D (kernel_ulong_t)&sdhci_o2,
-+	},
-+
-+	{
-+		.vendor		=3D PCI_VENDOR_ID_O2,
-+		.device		=3D PCI_DEVICE_ID_O2_8321,
-+		.subvendor	=3D PCI_ANY_ID,
-+		.subdevice	=3D PCI_ANY_ID,
-+		.driver_data	=3D (kernel_ulong_t)&sdhci_o2,
-+	},
-+
- 	{	/* Generic SD host controller */
- 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8),
-0xFFFF00)
- 	},
-
-
-
-Signed-off-by: Jennifer Li Developer <Jennifer.li@o2micro.com>
-
-
-Best regards,
-Jennifer
-
-
-
-
-Unless otherwise stated, this e-mail message does not constitute a solicitat=
-ion to buy or sell any products or services, or to participate in any partic=
-ular trading strategy. This e-mail message and any attachments are intended =
-solely for the use of the individual or entity to which it is addressed and =
-may contain information that is confidential or legally privileged. If you a=
-re not the intended recipient, you are hereby notified that any disseminatio=
-n, distribution, copying or other use of this message or its attachments is =
-strictly prohibited. If you have received this message in error, please noti=
-fy the sender immediately and permanently delete this message and any attach=
-ments. O2Micro International Ltd., and its subsidiaries and affiliates, are =
-neither liable for the proper and complete transmission of the information c=
-ontained in this communication, the accuracy of the information contained th=
-erein, nor for any delay in its receipt.  
-
-
-
-
-
-
-Unless otherwise stated, this e-mail message does not constitute a solicitat=
-ion to buy or sell any products or services, or to participate in any partic=
-ular trading strategy. This e-mail message and any attachments are intended =
-solely for the use of the individual or entity to which it is addressed and =
-may contain information that is confidential or legally privileged. If you a=
-re not the intended recipient, you are hereby notified that any disseminatio=
-n, distribution, copying or other use of this message or its attachments is =
-strictly prohibited. If you have received this message in error, please noti=
-fy the sender immediately and permanently delete this message and any attach=
-ments. O2Micro International Ltd., and its subsidiaries and affiliates, are =
-neither liable for the proper and complete transmission of the information c=
-ontained in this communication, the accuracy of the information contained th=
-erein, nor for any delay in its receipt.  
-
-
-
-------_=_NextPart_001_01CB8554.3F345FA6
-Content-Type: application/octet-stream;name="sdhci-pci_patch"
-Content-Transfer-Encoding: base64
-Content-Description: sdhci-pci_patch
-Content-Disposition: attachment;filename="sdhci-pci_patch"
-
-LS0tIC4uL2xpbnV4LTIuNi4zMi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS5jCTIwMDktMTIt
-MDMgMTE6NTE6MjEuMDAwMDAwMDAwICswODAwCisrKyBzZGhjaS1wY2kuYwkyMDEwLTExLTE2IDEx
-OjQyOjAwLjAwMDAwMDAwMCArMDgwMApAQCAtMzgsNiArMzgsMTMgQEAKIAogI2RlZmluZSBNQVhf
-U0xPVFMJCQk4CiAKKyNkZWZpbmUgTzJfU0RNTUNfTE9DS19XUCAweEQzCisjZGVmaW5lIE8yX1NE
-TU1DX01VTFRJX1ZDQzNWIDB4RUUKKyNkZWZpbmUgTzJfU0RNTUNfQ0xLUkVRIDB4RUMKKyNkZWZp
-bmUgTzJfU0RNTUNfQ0FQQUJJTElUSUVTIDB4RTAKKyNkZWZpbmUgTzJfU0RNTUNfQURNQTEgMHhF
-MgorI2RlZmluZSBPMl9TRE1NQ19BRE1BMiAweEU3CisjZGVmaW5lIE8yX1NETU1DX0lORklOSVRF
-X01PREUgMHhGMQogc3RydWN0IHNkaGNpX3BjaV9jaGlwOwogc3RydWN0IHNkaGNpX3BjaV9zbG90
-OwogCkBAIC0xMTIsNiArMTE5LDk0IEBAIHN0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfcGNpX2Zp
-eGVzIHNkaGMKIAkJCSAgU0RIQ0lfUVVJUktfQlJPS0VOX1RJTUVPVVRfVkFMLAogfTsKIAorc3Rh
-dGljIGludCBvMl9wcm9iZShzdHJ1Y3Qgc2RoY2lfcGNpX2NoaXAgKmNoaXApCit7CisJaW50IHJl
-dDsKKwl1OCBzY3JhdGNoOworCisJaWYgKChjaGlwLT5wZGV2LT5kZXZpY2UgPT0gUENJX0RFVklD
-RV9JRF9PMl84MjIwKSB8fAorCSAgICAoY2hpcC0+cGRldi0+ZGV2aWNlID09IFBDSV9ERVZJQ0Vf
-SURfTzJfODMyMCkgfHwKKwkgICAgKGNoaXAtPnBkZXYtPmRldmljZSA9PSBQQ0lfREVWSUNFX0lE
-X08yXzgzMjEpIHx8CisJICAgIChjaGlwLT5wZGV2LT5kZXZpY2UgPT0gUENJX0RFVklDRV9JRF9P
-Ml84MjIxKSkKKwkgICAgeworCQkvKiBPMk1pY3JvJ3MgQURNQSBhbmQgcmVsZWF0ZWQgZnVuY3Rp
-b24gY2FuJ3Qgd29yayBvbiBkZWZhdWx0IExpbnV4IFNEIGRyaXZlci4KKyAgICAgICAgICogV2Ug
-bmVlZCBtYXJrIHRob3NlIHJlbGF0ZWQgcmVnaXN0ZXJzLgorICAgICAgICAgKiAtIFNFVCBNVUxU
-SSAzIHRvIFZDQzNWIyAKKyAgICAgICAgICogLSBEaXNhYmxlIENMS19SRVEjIHN1cHBvcnQgYWZ0
-ZXIgbWVkaWEgREVULgorICAgICAgICAgKiAtIENob29zZSBwcm9ncmFtbWFibGUgc2V0dGluZ3Mg
-CisgICAgICAgICAqIC0gRW5hYmxlIFNETUEKKyAgICAgICAgICogLSBEaXNhYmxlIEFETUExCisg
-ICAgICAgICAqIC0gRGlzYWJsZSBBRE1BMgorICAgICAgICAgKiAtIERpc2FibGUgdGhlIGluZmlu
-aXRlIHRyYW5zZmVyIG1vZGUKKyAgICAgICAgICovCisJCXJldCA9IHBjaV9yZWFkX2NvbmZpZ19i
-eXRlKGNoaXAtPnBkZXYsIE8yX1NETU1DX0xPQ0tfV1AsICZzY3JhdGNoKTsKKwkJaWYgKHJldCkK
-KwkJCXJldHVybiByZXQ7CisJCisJCXNjcmF0Y2ggJj0gMHg3ZjsKKwkJcmV0ID0gcGNpX3dyaXRl
-X2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsIE8yX1NETU1DX0xPQ0tfV1AsIHNjcmF0Y2gpOworCisJ
-CXJldCA9IHBjaV9yZWFkX2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsIE8yX1NETU1DX01VTFRJX1ZD
-QzNWLCAmc2NyYXRjaCk7CisJCWlmIChyZXQpCisJCQlyZXR1cm4gcmV0OworCQorCQlzY3JhdGNo
-ID0gMHgwODsJCisJCXJldCA9IHBjaV93cml0ZV9jb25maWdfYnl0ZShjaGlwLT5wZGV2LCBPMl9T
-RE1NQ19NVUxUSV9WQ0MzViwgc2NyYXRjaCk7CisKKworCQlyZXQgPSBwY2lfcmVhZF9jb25maWdf
-Ynl0ZShjaGlwLT5wZGV2LCBPMl9TRE1NQ19DTEtSRVEsICZzY3JhdGNoKTsKKwkJaWYgKHJldCkK
-KwkJCXJldHVybiByZXQ7CisJCisJCXNjcmF0Y2ggfD0gMHgyMDsJCisJCXJldCA9IHBjaV93cml0
-ZV9jb25maWdfYnl0ZShjaGlwLT5wZGV2LCBPMl9TRE1NQ19DTEtSRVEsIHNjcmF0Y2gpOworCisJ
-CXJldCA9IHBjaV9yZWFkX2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsIE8yX1NETU1DX0NBUEFCSUxJ
-VElFUywgJnNjcmF0Y2gpOworCQlpZiAocmV0KQorCQkJcmV0dXJuIHJldDsKKwkKKwkJc2NyYXRj
-aCB8PSAweDAxOworCQlyZXQgPSBwY2lfd3JpdGVfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwgTzJf
-U0RNTUNfQ0FQQUJJTElUSUVTLCBzY3JhdGNoKTsKKworCQlyZXQgPSBwY2lfcmVhZF9jb25maWdf
-Ynl0ZShjaGlwLT5wZGV2LCBPMl9TRE1NQ19DQVBBQklMSVRJRVMsICZzY3JhdGNoKTsKKwkJaWYg
-KHJldCkKKwkJCXJldHVybiByZXQ7CisJCisJCXNjcmF0Y2ggPSAweDczOworCQlyZXQgPSBwY2lf
-d3JpdGVfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwgTzJfU0RNTUNfQ0FQQUJJTElUSUVTLCBzY3Jh
-dGNoKTsKKworCQlyZXQgPSBwY2lfcmVhZF9jb25maWdfYnl0ZShjaGlwLT5wZGV2LCBPMl9TRE1N
-Q19BRE1BMSwgJnNjcmF0Y2gpOworCQlpZiAocmV0KQorCQkJcmV0dXJuIHJldDsKKwkKKwkJc2Ny
-YXRjaCA9IDB4Mzk7CQorCQlyZXQgPSBwY2lfd3JpdGVfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwg
-TzJfU0RNTUNfQURNQTEsIHNjcmF0Y2gpOworCisJCXJldCA9IHBjaV9yZWFkX2NvbmZpZ19ieXRl
-KGNoaXAtPnBkZXYsIE8yX1NETU1DX0FETUEyLCAmc2NyYXRjaCk7CisJCWlmIChyZXQpCisJCQly
-ZXR1cm4gcmV0OworCQorCQlzY3JhdGNoID0gMHgwODsJCisJCXJldCA9IHBjaV93cml0ZV9jb25m
-aWdfYnl0ZShjaGlwLT5wZGV2LCBPMl9TRE1NQ19BRE1BMiwgc2NyYXRjaCk7CisKKwkJcmV0ID0g
-cGNpX3JlYWRfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwgTzJfU0RNTUNfSU5GSU5JVEVfTU9ERSwg
-JnNjcmF0Y2gpOworCQlpZiAocmV0KQorCQkJcmV0dXJuIHJldDsKKwkKKwkJc2NyYXRjaCB8PSAw
-eDA4OworCQlyZXQgPSBwY2lfd3JpdGVfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwgTzJfU0RNTUNf
-SU5GSU5JVEVfTU9ERSwgc2NyYXRjaCk7CisKKwkJcmV0ID0gcGNpX3JlYWRfY29uZmlnX2J5dGUo
-Y2hpcC0+cGRldiwgTzJfU0RNTUNfTE9DS19XUCwgJnNjcmF0Y2gpOworCQlpZiAocmV0KQorCQkJ
-cmV0dXJuIHJldDsKKworCQlzY3JhdGNoIHw9IDB4ODA7CQorCQlyZXQgPSBwY2lfd3JpdGVfY29u
-ZmlnX2J5dGUoY2hpcC0+cGRldiwgTzJfU0RNTUNfTE9DS19XUCwgc2NyYXRjaCk7CisKKwkJfQor
-CXJldHVybiAwOworfQorCiBzdGF0aWMgaW50IGptaWNyb25fcG1vcyhzdHJ1Y3Qgc2RoY2lfcGNp
-X2NoaXAgKmNoaXAsIGludCBvbikKIHsKIAl1OCBzY3JhdGNoOwpAQCAtMjc1LDYgKzM3MCwxMCBA
-QCBzdGF0aWMgaW50IGptaWNyb25fcmVzdW1lKHN0cnVjdCBzZGhjaV9wCiAJcmV0dXJuIDA7CiB9
-CiAKK3N0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfcGNpX2ZpeGVzIHNkaGNpX28yID0geworCS5w
-cm9iZQkJPSBvMl9wcm9iZSwKK307CisKIHN0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfcGNpX2Zp
-eGVzIHNkaGNpX2ptaWNyb24gPSB7CiAJLnByb2JlCQk9IGptaWNyb25fcHJvYmUsCiAKQEAgLTM3
-MCw2ICs0NjksNDYgQEAgc3RhdGljIGNvbnN0IHN0cnVjdCBwY2lfZGV2aWNlX2lkIHBjaV9pZAog
-CQkuZHJpdmVyX2RhdGEJPSAoa2VybmVsX3Vsb25nX3QpJnNkaGNpX3ZpYSwKIAl9LAogCisJewor
-CQkudmVuZG9yCQk9IFBDSV9WRU5ET1JfSURfTzIsCisJCS5kZXZpY2UJCT0gUENJX0RFVklDRV9J
-RF9PMl84MTIwLAorCQkuc3VidmVuZG9yCT0gUENJX0FOWV9JRCwKKwkJLnN1YmRldmljZQk9IFBD
-SV9BTllfSUQsCisJCS5kcml2ZXJfZGF0YQk9IChrZXJuZWxfdWxvbmdfdCkmc2RoY2lfbzIsCisJ
-fSwKKworCXsKKwkJLnZlbmRvcgkJPSBQQ0lfVkVORE9SX0lEX08yLAorCQkuZGV2aWNlCQk9IFBD
-SV9ERVZJQ0VfSURfTzJfODIyMCwKKwkJLnN1YnZlbmRvcgk9IFBDSV9BTllfSUQsCisJCS5zdWJk
-ZXZpY2UJPSBQQ0lfQU5ZX0lELAorCQkuZHJpdmVyX2RhdGEJPSAoa2VybmVsX3Vsb25nX3QpJnNk
-aGNpX28yLAorCX0sCisKKwl7CisJCS52ZW5kb3IJCT0gUENJX1ZFTkRPUl9JRF9PMiwKKwkJLmRl
-dmljZQkJPSBQQ0lfREVWSUNFX0lEX08yXzgzMjAsCisJCS5zdWJ2ZW5kb3IJPSBQQ0lfQU5ZX0lE
-LAorCQkuc3ViZGV2aWNlCT0gUENJX0FOWV9JRCwKKwkJLmRyaXZlcl9kYXRhCT0gKGtlcm5lbF91
-bG9uZ190KSZzZGhjaV9vMiwKKwl9LAorCisJeworCQkudmVuZG9yCQk9IFBDSV9WRU5ET1JfSURf
-TzIsCisJCS5kZXZpY2UJCT0gUENJX0RFVklDRV9JRF9PMl84MjIxLAorCQkuc3VidmVuZG9yCT0g
-UENJX0FOWV9JRCwKKwkJLnN1YmRldmljZQk9IFBDSV9BTllfSUQsCisJCS5kcml2ZXJfZGF0YQk9
-IChrZXJuZWxfdWxvbmdfdCkmc2RoY2lfbzIsCisJfSwKKworCXsKKwkJLnZlbmRvcgkJPSBQQ0lf
-VkVORE9SX0lEX08yLAorCQkuZGV2aWNlCQk9IFBDSV9ERVZJQ0VfSURfTzJfODMyMSwKKwkJLnN1
-YnZlbmRvcgk9IFBDSV9BTllfSUQsCisJCS5zdWJkZXZpY2UJPSBQQ0lfQU5ZX0lELAorCQkuZHJp
-dmVyX2RhdGEJPSAoa2VybmVsX3Vsb25nX3QpJnNkaGNpX28yLAorCX0sCisKIAl7CS8qIEdlbmVy
-aWMgU0QgaG9zdCBjb250cm9sbGVyICovCiAJCVBDSV9ERVZJQ0VfQ0xBU1MoKFBDSV9DTEFTU19T
-WVNURU1fU0RIQ0kgPDwgOCksIDB4RkZGRjAwKQogCX0sCg==
-------_=_NextPart_001_01CB8554.3F345FA6
-Content-Type: application/octet-stream;name="pci_ids_patch"
-Content-Transfer-Encoding: base64
-Content-Description: pci_ids_patch
-Content-Disposition: attachment;filename="pci_ids_patch"
-
-LS0tIC4uL3VudGl0bGVkIGZvbGRlci9saW51eC0yLjYuMzIvaW5jbHVkZS9saW51eC9wY2lfaWRz
-LmgJMjAwOS0xMi0wMyAxMTo1MToyMS4wMDAwMDAwMDAgKzA4MDAKKysrIC4vcGNpX2lkcy5oCTIw
-MTAtMTEtMTUgMTc6NTY6MjYuMTAzMTMyNTY5ICswODAwCkBAIC0yNjk0LDMgKzI2OTQsMTQgQEAK
-ICNkZWZpbmUgUENJX0RFVklDRV9JRF9STUVfRElHSTMyCTB4OTg5NgogI2RlZmluZSBQQ0lfREVW
-SUNFX0lEX1JNRV9ESUdJMzJfUFJPCTB4OTg5NwogI2RlZmluZSBQQ0lfREVWSUNFX0lEX1JNRV9E
-SUdJMzJfOAkweDk4OTgKKworI2RlZmluZSBQQ0lfVkVORE9SX0lEX08yCQkweDEyMTcNCisjZGVm
-aW5lIFBDSV9ERVZJQ0VfSURfTzJfNjcyOQkJMHg2NzI5DQorI2RlZmluZSBQQ0lfREVWSUNFX0lE
-X08yXzY3MzAJCTB4NjczYQ0KKyNkZWZpbmUgUENJX0RFVklDRV9JRF9PMl82ODMyCQkweDY4MzIN
-CisjZGVmaW5lIFBDSV9ERVZJQ0VfSURfTzJfNjgzNgkJMHg2ODM2DQorI2RlZmluZSBQQ0lfREVW
-SUNFX0lEX08yXzgxMjAJCTB4ODEyMA0KKyNkZWZpbmUgUENJX0RFVklDRV9JRF9PMl84MjIwCQkw
-eDgyMjANCisjZGVmaW5lIFBDSV9ERVZJQ0VfSURfTzJfODMyMAkJMHg4MzIwDQorI2RlZmluZSBQ
-Q0lfREVWSUNFX0lEX08yXzgzMjEJCTB4ODMyMQ0KKyNkZWZpbmUgUENJX0RFVklDRV9JRF9PMl84
-MjIxCQkweDgyMjEK
-------_=_NextPart_001_01CB8554.3F345FA6--
+>
+> From 6b5691bdd8184cc0876d209c69d38844ea10f678 Mon Sep 17 00:00:00 200=
+1
+> From: Ohad Ben-Cohen <ohad@wizery.com>
+> Date: Mon, 1 Nov 2010 09:41:44 +0200
+> Subject: [PATCH] mmc: add MMC_CAP_RUNTIME_PM
+>
+> Some board/card/host configurations are not capable of powering off/o=
+n
+> on the card during runtime.
+>
+> To support such configurations, and to allow smoother transition to
+> runtime PM behavior, MMC_CAP_RUNTIME_PM is added, so hosts need to
+> explicitly indicate that it's OK to power off their cards after boot.
+>
+> This will prevent sdio_bus_probe() from failing to power on the card
+> when the driver is loaded on such setups.
+>
+> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+> ---
+> =A0drivers/mmc/core/sdio.c =A0 =A0 | =A0 37 +++++++++++++++++++++++--=
+------------
+> =A0drivers/mmc/core/sdio_bus.c | =A0 33 ++++++++++++++++++++++-------=
+----
+> =A0include/linux/mmc/host.h =A0 =A0| =A0 =A01 +
+> =A03 files changed, 46 insertions(+), 25 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 6a9ad40..373d56d 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -547,9 +547,11 @@ static void mmc_sdio_detect(struct mmc_host *hos=
+t)
+> =A0 =A0 =A0 =A0BUG_ON(!host->card);
+>
+> =A0 =A0 =A0 =A0/* Make sure card is powered before detecting it */
+> - =A0 =A0 =A0 err =3D pm_runtime_get_sync(&host->card->dev);
+> - =A0 =A0 =A0 if (err < 0)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+> + =A0 =A0 =A0 if (host->caps & MMC_CAP_RUNTIME_PM) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D pm_runtime_get_sync(&host->card=
+->dev);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err < 0)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+> + =A0 =A0 =A0 }
+>
+> =A0 =A0 =A0 =A0mmc_claim_host(host);
+>
+> @@ -570,7 +572,8 @@ out:
+> =A0 =A0 =A0 =A0}
+>
+> =A0 =A0 =A0 =A0/* Tell PM core that we're done */
+> - =A0 =A0 =A0 pm_runtime_put(&host->card->dev);
+> + =A0 =A0 =A0 if (host->caps & MMC_CAP_RUNTIME_PM)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_put(&host->card->dev);
+> =A0}
+>
+> =A0/*
+> @@ -720,16 +723,21 @@ int mmc_attach_sdio(struct mmc_host *host, u32 =
+ocr)
+> =A0 =A0 =A0 =A0card =3D host->card;
+>
+> =A0 =A0 =A0 =A0/*
+> - =A0 =A0 =A0 =A0* Let runtime PM core know our card is active
+> + =A0 =A0 =A0 =A0* Enable runtime PM only if supported by host+card+b=
+oard
+> =A0 =A0 =A0 =A0 */
+> - =A0 =A0 =A0 err =3D pm_runtime_set_active(&card->dev);
+> - =A0 =A0 =A0 if (err)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto remove;
+> + =A0 =A0 =A0 if (host->caps & MMC_CAP_RUNTIME_PM) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Let runtime PM core know our card =
+is active
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D pm_runtime_set_active(&card->de=
+v);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto remove;
+>
+> - =A0 =A0 =A0 /*
+> - =A0 =A0 =A0 =A0* Enable runtime PM for this card
+> - =A0 =A0 =A0 =A0*/
+> - =A0 =A0 =A0 pm_runtime_enable(&card->dev);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Enable runtime PM for this card
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_enable(&card->dev);
+> + =A0 =A0 =A0 }
+>
+> =A0 =A0 =A0 =A0/*
+> =A0 =A0 =A0 =A0 * The number of functions on the card is encoded insi=
+de
+> @@ -747,9 +755,10 @@ int mmc_attach_sdio(struct mmc_host *host, u32 o=
+cr)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto remove;
+>
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/*
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Enable Runtime PM for this func
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Enable Runtime PM for this func (i=
+f supported)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_enable(&card->sdio_func[i]->=
+dev);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->caps & MMC_CAP_RUNTIME_PM)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_enable(&card=
+->sdio_func[i]->dev);
+> =A0 =A0 =A0 =A0}
+>
+> =A0 =A0 =A0 =A0mmc_release_host(host);
+> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.=
+c
+> index 2716c7a..f3ce21b 100644
+> --- a/drivers/mmc/core/sdio_bus.c
+> +++ b/drivers/mmc/core/sdio_bus.c
+> @@ -17,6 +17,7 @@
+> =A0#include <linux/pm_runtime.h>
+>
+> =A0#include <linux/mmc/card.h>
+> +#include <linux/mmc/host.h>
+> =A0#include <linux/mmc/sdio_func.h>
+>
+> =A0#include "sdio_cis.h"
+> @@ -132,9 +133,11 @@ static int sdio_bus_probe(struct device *dev)
+> =A0 =A0 =A0 =A0 * it should call pm_runtime_put_noidle() in its probe=
+ routine and
+> =A0 =A0 =A0 =A0 * pm_runtime_get_noresume() in its remove routine.
+> =A0 =A0 =A0 =A0 */
+> - =A0 =A0 =A0 ret =3D pm_runtime_get_sync(dev);
+> - =A0 =A0 =A0 if (ret < 0)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+> + =A0 =A0 =A0 if (func->card->host->caps & MMC_CAP_RUNTIME_PM) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D pm_runtime_get_sync(dev);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret < 0)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+> + =A0 =A0 =A0 }
+>
+> =A0 =A0 =A0 =A0/* Set the default block size so the driver is sure it=
+'s something
+> =A0 =A0 =A0 =A0 * sensible. */
+> @@ -151,7 +154,8 @@ static int sdio_bus_probe(struct device *dev)
+> =A0 =A0 =A0 =A0return 0;
+>
+> =A0disable_runtimepm:
+> - =A0 =A0 =A0 pm_runtime_put_noidle(dev);
+> + =A0 =A0 =A0 if (func->card->host->caps & MMC_CAP_RUNTIME_PM)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_put_noidle(dev);
+> =A0out:
+> =A0 =A0 =A0 =A0return ret;
+> =A0}
+> @@ -160,12 +164,14 @@ static int sdio_bus_remove(struct device *dev)
+> =A0{
+> =A0 =A0 =A0 =A0struct sdio_driver *drv =3D to_sdio_driver(dev->driver=
+);
+> =A0 =A0 =A0 =A0struct sdio_func *func =3D dev_to_sdio_func(dev);
+> - =A0 =A0 =A0 int ret;
+> + =A0 =A0 =A0 int ret =3D 0;
+>
+> =A0 =A0 =A0 =A0/* Make sure card is powered before invoking ->remove(=
+) */
+> - =A0 =A0 =A0 ret =3D pm_runtime_get_sync(dev);
+> - =A0 =A0 =A0 if (ret < 0)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+> + =A0 =A0 =A0 if (func->card->host->caps & MMC_CAP_RUNTIME_PM) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D pm_runtime_get_sync(dev);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret < 0)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+> + =A0 =A0 =A0 }
+>
+> =A0 =A0 =A0 =A0drv->remove(func);
+>
+> @@ -178,10 +184,12 @@ static int sdio_bus_remove(struct device *dev)
+> =A0 =A0 =A0 =A0}
+>
+> =A0 =A0 =A0 =A0/* First, undo the increment made directly above */
+> - =A0 =A0 =A0 pm_runtime_put_noidle(dev);
+> + =A0 =A0 =A0 if (func->card->host->caps & MMC_CAP_RUNTIME_PM)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_put_noidle(dev);
+>
+> =A0 =A0 =A0 =A0/* Then undo the runtime PM settings in sdio_bus_probe=
+() */
+> - =A0 =A0 =A0 pm_runtime_put_noidle(dev);
+> + =A0 =A0 =A0 if (func->card->host->caps & MMC_CAP_RUNTIME_PM)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_put_noidle(dev);
+>
+> =A0out:
+> =A0 =A0 =A0 =A0return ret;
+> @@ -191,6 +199,8 @@ out:
+>
+> =A0static int sdio_bus_pm_prepare(struct device *dev)
+> =A0{
+> + =A0 =A0 =A0 struct sdio_func *func =3D dev_to_sdio_func(dev);
+> +
+> =A0 =A0 =A0 =A0/*
+> =A0 =A0 =A0 =A0 * Resume an SDIO device which was suspended at run ti=
+me at this
+> =A0 =A0 =A0 =A0 * point, in order to allow standard SDIO suspend/resu=
+me paths
+> @@ -212,7 +222,8 @@ static int sdio_bus_pm_prepare(struct device *dev=
+)
+> =A0 =A0 =A0 =A0 * since there is little point in failing system suspe=
+nd if a
+> =A0 =A0 =A0 =A0 * device can't be resumed.
+> =A0 =A0 =A0 =A0 */
+> - =A0 =A0 =A0 pm_runtime_resume(dev);
+> + =A0 =A0 =A0 if (func->card->host->caps & MMC_CAP_RUNTIME_PM)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_resume(dev);
+>
+> =A0 =A0 =A0 =A0return 0;
+> =A0}
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index c3ffad8..e5eee0e 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -167,6 +167,7 @@ struct mmc_host {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0/* DDR mode at 1.8V */
+> =A0#define MMC_CAP_1_2V_DDR =A0 =A0 =A0 (1 << 12) =A0 =A0 =A0 /* can =
+support */
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0/* DDR mode at 1.2V */
+> +#define MMC_CAP_RUNTIME_PM =A0 =A0 (1 << 13) =A0 =A0 =A0 /* Can powe=
+r off/on in runtime */
+>
+> =A0 =A0 =A0 =A0mmc_pm_flag_t =A0 =A0 =A0 =A0 =A0 pm_caps; =A0 =A0 =A0=
+ =A0/* supported pm features */
+>
+> --
+> 1.7.0.4
+>
