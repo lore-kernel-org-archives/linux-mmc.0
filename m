@@ -1,73 +1,84 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 5/7] mmc: sdhci-of: support generic OF controllers
-Date: Tue, 16 Nov 2010 22:32:18 +0100
-Message-ID: <20101116213218.GB19893@pengutronix.de>
-References: <1289939635-30742-1-git-send-email-robherring2@gmail.com> <1289939635-30742-6-git-send-email-robherring2@gmail.com>
+Subject: Re: [PATCH 4/7] mmc: sdhci-of: fix build on non-powerpc platforms
+Date: Tue, 16 Nov 2010 22:44:09 +0100
+Message-ID: <20101116214409.GC19893@pengutronix.de>
+References: <1289939635-30742-1-git-send-email-robherring2@gmail.com> <1289939635-30742-5-git-send-email-robherring2@gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="1LKvkjL3sHcu1TtY"
+	protocol="application/pgp-signature"; boundary="tqI+Z3u+9OQ7kwn0"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:40192 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:58417 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932173Ab0KPVcY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Nov 2010 16:32:24 -0500
+	with ESMTP id S1756670Ab0KPVoQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Nov 2010 16:44:16 -0500
 Content-Disposition: inline
-In-Reply-To: <1289939635-30742-6-git-send-email-robherring2@gmail.com>
+In-Reply-To: <1289939635-30742-5-git-send-email-robherring2@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Rob Herring <robherring2@gmail.com>
 Cc: devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, linux-mmc@vger.kernel.org
 
 
---1LKvkjL3sHcu1TtY
+--tqI+Z3u+9OQ7kwn0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Nov 16, 2010 at 02:33:53PM -0600, Rob Herring wrote:
+On Tue, Nov 16, 2010 at 02:33:52PM -0600, Rob Herring wrote:
 > From: Rob Herring <rob.herring@calxeda.com>
 >=20
-> The base sdhci driver requires a valid ops struct. Add empty struct to
-> sdhci-of to allow generic controllers which don't need custom ops functio=
-ns.
+> Explicitly include err.h, of_address.h and of_irq.h.
+> Make use of machine_is() conditional on PPC.
 >=20
 > Signed-off-by: Rob Herring <rob.herring@calxeda.com>
 
-Acked-by: Wolfram Sang <w.sang@pengutronix.de>
-
-For the sdhci-patches, you should add linux-mmc@vger.kernel.org to the CC-l=
-ist.
-Done now...
+Hmm, sins of the past :/ I wonder if we can get away with less #ifdeffery, =
+will
+think about it...
 
 > ---
->  drivers/mmc/host/sdhci-of-core.c |    5 +++++
->  1 files changed, 5 insertions(+), 0 deletions(-)
+>  drivers/mmc/host/sdhci-of-core.c |    9 +++++++++
+>  1 files changed, 9 insertions(+), 0 deletions(-)
 >=20
 > diff --git a/drivers/mmc/host/sdhci-of-core.c b/drivers/mmc/host/sdhci-of=
 -core.c
-> index dd84124..de292fe 100644
+> index fa19d84..dd84124 100644
 > --- a/drivers/mmc/host/sdhci-of-core.c
 > +++ b/drivers/mmc/host/sdhci-of-core.c
-> @@ -30,6 +30,9 @@
+> @@ -13,6 +13,7 @@
+>   * your option) any later version.
+>   */
+> =20
+> +#include <linux/err.h>
+>  #include <linux/module.h>
+>  #include <linux/init.h>
+>  #include <linux/io.h>
+> @@ -20,8 +21,12 @@
+>  #include <linux/delay.h>
+>  #include <linux/of.h>
+>  #include <linux/of_platform.h>
+> +#include <linux/of_address.h>
+> +#include <linux/of_irq.h>
+>  #include <linux/mmc/host.h>
+> +#ifdef CONFIG_PPC
+>  #include <asm/machdep.h>
+> +#endif
 >  #include "sdhci-of.h"
 >  #include "sdhci.h"
 > =20
-> +static struct sdhci_ops sdhci_of_ops =3D {
-> +};
-> +
->  #ifdef CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+> @@ -112,7 +117,11 @@ static bool __devinit sdhci_of_wp_inverted(struct de=
+vice_node *np)
+>  		return true;
 > =20
->  /*
-> @@ -161,6 +164,8 @@ static int __devinit sdhci_of_probe(struct platform_d=
-evice *ofdev,
->  	if (sdhci_of_data) {
->  		host->quirks =3D sdhci_of_data->quirks;
->  		host->ops =3D &sdhci_of_data->ops;
-> +	} else {
-> +		host->ops =3D &sdhci_of_ops;
->  	}
+>  	/* Old device trees don't have the wp-inverted property. */
+> +#ifdef CONFIG_PPC
+>  	return machine_is(mpc837x_rdb) || machine_is(mpc837x_mds);
+> +#else
+> +	return false;
+> +#endif
+>  }
 > =20
->  	if (of_get_property(np, "sdhci,auto-cmd12", NULL))
+>  static int __devinit sdhci_of_probe(struct platform_device *ofdev,
 > --=20
 > 1.7.1
 >=20
@@ -80,7 +91,7 @@ evice *ofdev,
 Pengutronix e.K.                           | Wolfram Sang                |
 Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
---1LKvkjL3sHcu1TtY
+--tqI+Z3u+9OQ7kwn0
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 Content-Disposition: inline
@@ -88,9 +99,9 @@ Content-Disposition: inline
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (GNU/Linux)
 
-iEYEARECAAYFAkzi+GIACgkQD27XaX1/VRu7ggCfYvfI+N81ACxkbarIcE8lCeuC
-v+UAnj4Apq9i4Zl1XIoR9rP7rqEBKeOa
-=LNwq
+iEYEARECAAYFAkzi+ykACgkQD27XaX1/VRu9pgCgyn4Ot2V5Rz78y7F35oX3BcFP
+20gAoMVTlD6OMnWGIHkE/22GZ7KTgQpm
+=KQrA
 -----END PGP SIGNATURE-----
 
---1LKvkjL3sHcu1TtY--
+--tqI+Z3u+9OQ7kwn0--
