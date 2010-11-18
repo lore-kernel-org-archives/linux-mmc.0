@@ -1,75 +1,50 @@
 From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v2 2/3]mmc: set erase control register for SDHCI HC
-Date: Thu, 18 Nov 2010 17:00:53 +0800
-Message-ID: <20101118090053.GC18161@intel.com>
+Subject: [PATCH v2 3/3]mmc: Add the new quirk to MFLD SDHCI HC
+Date: Thu, 18 Nov 2010 17:01:07 +0800
+Message-ID: <20101118090107.GD18161@intel.com>
 Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:52104 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755760Ab0KRJDJ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Nov 2010 04:03:09 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: cjb@laptop.org
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, alan@linux.intel.com, arjan@linux.intel.com
+List-Id: linux-mmc@vger.kernel.org
 
->From 6ddad5c28d1f2d57081df051b79912dde922e322 Mon Sep 17 00:00:00 2001
+>From 26a27fbbb8c28f7b2e9079b7e600625af5718b8c Mon Sep 17 00:00:00 2001
 From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Date: Thu, 18 Nov 2010 16:20:39 +0800
-Subject: [PATCH 2/3] mmc: set erase control reg value for sdhci HC
+Date: Thu, 18 Nov 2010 16:25:03 +0800
+Subject: [PATCH 3/3] mmc: Add SDHCI_QUIRK_FORCE_ERASE_SINGLE to MFLD sdhci HC
 
-For those sdhci host controller which cannot erase the unlimited sectors,
-set their timeout value to be the maximum one which is safe for erasing.
+This will be going to let MFLD SDHCI host controller to erase single block
+each time.
 
 Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
- drivers/mmc/core/core.c  |    4 ++++
- drivers/mmc/host/sdhci.c |    6 ++++++
- 2 files changed, 10 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-pci.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 947d963..0b77739 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -170,6 +170,9 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 3d9c246..6eea1ba 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -169,11 +169,13 @@ static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1_hc2 = {
+ };
  
- 	mrq->cmd->error = 0;
- 	mrq->cmd->mrq = mrq;
-+	if (mrq->cmd->opcode != MMC_ERASE)
-+		mrq->cmd->erase_timeout = 0;
-+
- 	if (mrq->data) {
- 		BUG_ON(mrq->data->blksz > host->max_blk_size);
- 		BUG_ON(mrq->data->blocks > host->max_blk_count);
-@@ -190,6 +193,7 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 			mrq->data->stop = mrq->stop;
- 			mrq->stop->error = 0;
- 			mrq->stop->mrq = mrq;
-+			mrq->stop->erase_timeout = 0;
- 		}
- 	}
- 	mmc_host_clk_ungate(host);
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index fa66988..a466635 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -946,6 +946,12 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	if (cmd->data)
- 		flags |= SDHCI_CMD_DATA;
+ static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
+-	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
++				SDHCI_QUIRK_FORCE_ERASE_SINGLE,
+ };
  
-+	if (host->quirks & SDHCI_QUIRK_FORCE_ERASE_SINGLE) {
-+		/* Set the timeout to be the maximum value */
-+		if (cmd->erase_timeout)
-+			sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
-+	}
-+
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
- }
+ static const struct sdhci_pci_fixes sdhci_intel_mfd_emmc_sdio = {
+-	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
++				SDHCI_QUIRK_FORCE_ERASE_SINGLE,
+ };
  
+ static int jmicron_pmos(struct sdhci_pci_chip *chip, int on)
 -- 
 1.6.6.1
-
