@@ -1,219 +1,269 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH] sdio: fix runtime PM anomalies by introducing MMC_CAP_POWER_OFF_CARD
-Date: Fri, 19 Nov 2010 09:29:09 +0200
-Message-ID: <1290151749-21308-1-git-send-email-ohad@wizery.com>
+From: Peppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: Re: [PATCH (mmc-next)] mmc: improve the SDHCI wake-up support [RFC:
+ V2]
+Date: Fri, 19 Nov 2010 08:28:23 +0100
+Message-ID: <4CE62717.1010502@st.com>
+References: <1289832780-9467-1-git-send-email-peppe.cavallaro@st.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:44758 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751198Ab0KSH22 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Nov 2010 02:28:28 -0500
-Received: by fxm13 with SMTP id 13so416486fxm.19
-        for <linux-mmc@vger.kernel.org>; Thu, 18 Nov 2010 23:28:27 -0800 (PST)
+Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:59643 "EHLO
+	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751839Ab0KSH2w convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Nov 2010 02:28:52 -0500
+Received: from zeta.dmz-us.st.com (ns4.st.com [167.4.80.115])
+	by beta.dmz-us.st.com (STMicroelectronics) with ESMTP id B876DD2
+	for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2010 07:28:46 +0000 (GMT)
+Received: from Webmail-eu.st.com (safex1hubcas3.st.com [10.75.90.18])
+	by zeta.dmz-us.st.com (STMicroelectronics) with ESMTP id 0925C127
+	for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2010 07:28:46 +0000 (GMT)
+In-Reply-To: <1289832780-9467-1-git-send-email-peppe.cavallaro@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Daniel Drake <dsd@laptop.org>, Arnd Hannemann <arnd@arndnet.de>, Ohad Ben-Cohen <ohad@wizery.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Some board/card/host configurations are not capable of powering off the
-card after boot.
+Hello
 
-To support such configurations, and to allow smoother transition to
-runtime PM behavior, MMC_CAP_POWER_OFF_CARD is added, so hosts need to
-explicitly indicate whether it's OK to power off their cards after boot.
+On 11/15/2010 3:53 PM, Giuseppe CAVALLARO wrote:
+>
+> This patch allows the SDHCI to wake up the system
+> on the following events:
+>  1) Card Interrupts.
+>  2) Card Insertion.
+>  3) Card Removal.
+>
+Any comments and advice for this patch?
 
-SDIO core will enable runtime PM for a card only if that cap is set.
-As a result, the card will be powered down after boot, and will only
-be powered up again when a driver is loaded (and then it's up to the
-driver to decide whether power will be kept or not).
+Regards
+Peppe
 
-This will prevent sdio_bus_probe() failures with setups that do not
-support powering off the card.
-
-Reported-and-tested-by: Daniel Drake <dsd@laptop.org>
-Reported-and-tested-by: Arnd Hannemann <arnd@arndnet.de>
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
----
-This is a second fix intended to 2.6.37 (first one is at https://patchwork.kernel.org/patch/323182/). It depends on the first one and cannot be applied independently.
-
- drivers/mmc/core/sdio.c     |   37 +++++++++++++++++++++++--------------
- drivers/mmc/core/sdio_bus.c |   33 ++++++++++++++++++++++-----------
- include/linux/mmc/host.h    |    1 +
- 3 files changed, 46 insertions(+), 25 deletions(-)
-
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 42a949b..efef5f9 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -547,9 +547,11 @@ static void mmc_sdio_detect(struct mmc_host *host)
- 	BUG_ON(!host->card);
- 
- 	/* Make sure card is powered before detecting it */
--	err = pm_runtime_get_sync(&host->card->dev);
--	if (err < 0)
--		goto out;
-+	if (host->caps & MMC_CAP_POWER_OFF_CARD) {
-+		err = pm_runtime_get_sync(&host->card->dev);
-+		if (err < 0)
-+			goto out;
-+	}
- 
- 	mmc_claim_host(host);
- 
-@@ -571,7 +573,8 @@ static void mmc_sdio_detect(struct mmc_host *host)
- 	 * is about to show up at this point, the _sync variant is
- 	 * desirable anyway.
- 	 */
--	pm_runtime_put_sync(&host->card->dev);
-+	if (host->caps & MMC_CAP_POWER_OFF_CARD)
-+		pm_runtime_put_sync(&host->card->dev);
- 
- out:
- 	if (err) {
-@@ -728,16 +731,21 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
- 	card = host->card;
- 
- 	/*
--	 * Let runtime PM core know our card is active
-+	 * Enable runtime PM only if supported by host+card+board
- 	 */
--	err = pm_runtime_set_active(&card->dev);
--	if (err)
--		goto remove;
-+	if (host->caps & MMC_CAP_POWER_OFF_CARD) {
-+		/*
-+		 * Let runtime PM core know our card is active
-+		 */
-+		err = pm_runtime_set_active(&card->dev);
-+		if (err)
-+			goto remove;
- 
--	/*
--	 * Enable runtime PM for this card
--	 */
--	pm_runtime_enable(&card->dev);
-+		/*
-+		 * Enable runtime PM for this card
-+		 */
-+		pm_runtime_enable(&card->dev);
-+	}
- 
- 	/*
- 	 * The number of functions on the card is encoded inside
-@@ -755,9 +763,10 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
- 			goto remove;
- 
- 		/*
--		 * Enable Runtime PM for this func
-+		 * Enable Runtime PM for this func (if supported)
- 		 */
--		pm_runtime_enable(&card->sdio_func[i]->dev);
-+		if (host->caps & MMC_CAP_POWER_OFF_CARD)
-+			pm_runtime_enable(&card->sdio_func[i]->dev);
- 	}
- 
- 	mmc_release_host(host);
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 2716c7a..203da44 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -17,6 +17,7 @@
- #include <linux/pm_runtime.h>
- 
- #include <linux/mmc/card.h>
-+#include <linux/mmc/host.h>
- #include <linux/mmc/sdio_func.h>
- 
- #include "sdio_cis.h"
-@@ -132,9 +133,11 @@ static int sdio_bus_probe(struct device *dev)
- 	 * it should call pm_runtime_put_noidle() in its probe routine and
- 	 * pm_runtime_get_noresume() in its remove routine.
- 	 */
--	ret = pm_runtime_get_sync(dev);
--	if (ret < 0)
--		goto out;
-+	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD) {
-+		ret = pm_runtime_get_sync(dev);
-+		if (ret < 0)
-+			goto out;
-+	}
- 
- 	/* Set the default block size so the driver is sure it's something
- 	 * sensible. */
-@@ -151,7 +154,8 @@ static int sdio_bus_probe(struct device *dev)
- 	return 0;
- 
- disable_runtimepm:
--	pm_runtime_put_noidle(dev);
-+	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
-+		pm_runtime_put_noidle(dev);
- out:
- 	return ret;
- }
-@@ -160,12 +164,14 @@ static int sdio_bus_remove(struct device *dev)
- {
- 	struct sdio_driver *drv = to_sdio_driver(dev->driver);
- 	struct sdio_func *func = dev_to_sdio_func(dev);
--	int ret;
-+	int ret = 0;
- 
- 	/* Make sure card is powered before invoking ->remove() */
--	ret = pm_runtime_get_sync(dev);
--	if (ret < 0)
--		goto out;
-+	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD) {
-+		ret = pm_runtime_get_sync(dev);
-+		if (ret < 0)
-+			goto out;
-+	}
- 
- 	drv->remove(func);
- 
-@@ -178,10 +184,12 @@ static int sdio_bus_remove(struct device *dev)
- 	}
- 
- 	/* First, undo the increment made directly above */
--	pm_runtime_put_noidle(dev);
-+	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
-+		pm_runtime_put_noidle(dev);
- 
- 	/* Then undo the runtime PM settings in sdio_bus_probe() */
--	pm_runtime_put_noidle(dev);
-+	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
-+		pm_runtime_put_noidle(dev);
- 
- out:
- 	return ret;
-@@ -191,6 +199,8 @@ out:
- 
- static int sdio_bus_pm_prepare(struct device *dev)
- {
-+	struct sdio_func *func = dev_to_sdio_func(dev);
-+
- 	/*
- 	 * Resume an SDIO device which was suspended at run time at this
- 	 * point, in order to allow standard SDIO suspend/resume paths
-@@ -212,7 +222,8 @@ static int sdio_bus_pm_prepare(struct device *dev)
- 	 * since there is little point in failing system suspend if a
- 	 * device can't be resumed.
- 	 */
--	pm_runtime_resume(dev);
-+	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
-+		pm_runtime_resume(dev);
- 
- 	return 0;
- }
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 53496bb..381c77f 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -168,6 +168,7 @@ struct mmc_host {
- 						/* DDR mode at 1.8V */
- #define MMC_CAP_1_2V_DDR	(1 << 12)	/* can support */
- 						/* DDR mode at 1.2V */
-+#define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
--- 
-1.7.0.4
-
+>
+> Indeed, on a set-top-box, it can be nice to have the
+> capability to wake-up the system when a card is inserted.
+>
+> These new module parameters have been added to select
+> which events have to wake-up the system:
+>  o wake_on_card_int
+>  o wake_on_card_ins
+>  o wake_on_card_rem
+>
+> Ex:
+> $ echo 1 > /sys/module/sdhci/parameters/wakeup_card_ins
+>
+> A new quirk has been also added to allow hosts, based
+> on sdhci d.d., to set the device as wake-up capable.
+>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> ---
+>  drivers/mmc/host/sdhci-pci.c |    2 +-
+>  drivers/mmc/host/sdhci.c     |  104
+> ++++++++++++++++++++++++++++++++++++++----
+>  drivers/mmc/host/sdhci.h     |    2 +-
+>  include/linux/mmc/sdhci.h    |    2 +
+>  4 files changed, 99 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index 3d9c246..de610f1 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -668,7 +668,7 @@ static int sdhci_pci_suspend (struct pci_dev
+> *pdev, pm_message_t state)
+>
+>                 slot_pm_flags = slot->host->mmc->pm_flags;
+>                 if (slot_pm_flags & MMC_PM_WAKE_SDIO_IRQ)
+> -                       sdhci_enable_irq_wakeups(slot->host);
+> +                       sdhci_enable_irq_wakeups(slot->host,
+> SDHCI_WAKE_ON_INT);
+>
+>                 pm_flags |= slot_pm_flags;
+>         }
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 154cbf8..531033e 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -37,7 +37,20 @@
+>  #define SDHCI_USE_LEDS_CLASS
+>  #endif
+>
+> -static unsigned int debug_quirks = 0;
+> +static unsigned int debug_quirks;
+> +#ifdef CONFIG_PM
+> +static unsigned int wakeup_card_int;
+> +module_param(wakeup_card_int, uint, S_IRUGO | S_IWUSR);
+> +MODULE_PARM_DESC(wakeup_card_int, "Wake Up on Card interrupt event");
+> +
+> +static unsigned int wakeup_card_ins;
+> +module_param(wakeup_card_ins, uint, S_IRUGO | S_IWUSR);
+> +MODULE_PARM_DESC(wakeup_card_ins, "Wake UP on Card insertion event");
+> +
+> +static unsigned int wakeup_card_rem;
+> +module_param(wakeup_card_rem, uint, S_IRUGO | S_IWUSR);
+> +MODULE_PARM_DESC(wakeup_card_rem, "Wake UP on Card removal event");
+> +#endif /* CONFIG_PM */
+>
+>  static void sdhci_prepare_data(struct sdhci_host *, struct mmc_data *);
+>  static void sdhci_finish_data(struct sdhci_host *);
+> @@ -1629,6 +1642,71 @@ out:
+>
+>  #ifdef CONFIG_PM
+>
+> +static void sdhci_can_wakeup(struct sdhci_host *host)
+> +{
+> +       struct device *dev = host->mmc->parent;
+> +
+> +       /* SDHCI is capable to wakeup the system */
+> +       device_set_wakeup_capable(dev, 1);
+> +
+> +       /* Enable wakeup */
+> +       device_set_wakeup_enable(dev, 1);
+> +       enable_irq_wake(host->irq);
+> +}
+> +
+> +/*
+> + * According to the SD SPEC to wake up the system
+> + * the HC has to be programmed as below:
+> + * - SD Bus power: ON
+> + * - SD clock: Stop
+> + * - Internal clock: Oscillate
+> + * - Data transfer witdh: 0
+> + *
+> + * While suspending we have to:
+> + * 1) Set BUS width to 1
+> + * 2) Mask the Signal Interrupt register
+> + * 3) Clean the Signal Interrupt register
+> + * 4) Set the enable bits of each factor to 1 in the Wakeup
+> + *    control register
+> + * 5) Set the bits of Normal Interrupt Status Enable register
+> + *    to use wakeup.
+> + */
+> +static void sdhci_set_wakeup(struct sdhci_host *host)
+> +{
+> +       u16 clk;
+> +       u8 pwr;
+> +       mmc_pm_flag_t wakeflag = 0;
+> +
+> +       clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +       clk &= ~SDHCI_CLOCK_CARD_EN;
+> +       clk |= SDHCI_CLOCK_INT_EN;
+> +       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +
+> +       pwr = sdhci_readb(host, SDHCI_POWER_CONTROL);
+> +       pwr |= SDHCI_POWER_ON;
+> +       sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+> +
+> +       sdhci_mask_irqs(host, SDHCI_INT_NORMAL_MASK |
+> +                       SDHCI_INT_ERROR_MASK);
+> +       sdhci_writel(host, 0, SDHCI_INT_STATUS);
+> +       sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+> +       sdhci_writel(host, SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT |
+> +                    SDHCI_INT_CARD_INT, SDHCI_INT_ENABLE);
+> +       /*
+> +        * Program the Wakeup Control register according to the event
+> selected.
+> +        * If there is no event (SDHCI_WAKE_UP_CONTROL = 0x0) so the
+> device
+> +        * won't be able to wake up the system.
+> +        */
+> +       if (wakeup_card_int)
+> +               wakeflag |= SDHCI_WAKE_ON_INT;
+> +       if (wakeup_card_ins)
+> +               wakeflag |= SDHCI_WAKE_ON_INSERT;
+> +       if (wakeup_card_rem)
+> +               wakeflag |= SDHCI_WAKE_ON_REMOVE;
+> +
+> +       sdhci_enable_irq_wakeups(host, wakeflag);
+> +}
+> +
+>  int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
+>  {
+>         int ret;
+> @@ -1639,7 +1717,10 @@ int sdhci_suspend_host(struct sdhci_host *host,
+> pm_message_t state)
+>         if (ret)
+>                 return ret;
+>
+> -       free_irq(host->irq, host);
+> +       if (device_may_wakeup(host->mmc->parent))
+> +               sdhci_set_wakeup(host);
+> +       else
+> +               free_irq(host->irq, host);
+>
+>         if (host->vmmc)
+>                 ret = regulator_disable(host->vmmc);
+> @@ -1665,11 +1746,12 @@ int sdhci_resume_host(struct sdhci_host *host)
+>                         host->ops->enable_dma(host);
+>         }
+>
+> -       ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+> -                         mmc_hostname(host->mmc), host);
+> -       if (ret)
+> -               return ret;
+> -
+> +       if (!(device_may_wakeup(host->mmc->parent))) {
+> +               ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+> +                                 mmc_hostname(host->mmc), host);
+> +               if (ret)
+> +                       return ret;
+> +       }
+>         sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
+>         mmiowb();
+>
+> @@ -1681,11 +1763,11 @@ int sdhci_resume_host(struct sdhci_host *host)
+>
+>  EXPORT_SYMBOL_GPL(sdhci_resume_host);
+>
+> -void sdhci_enable_irq_wakeups(struct sdhci_host *host)
+> +void sdhci_enable_irq_wakeups(struct sdhci_host *host, int mode)
+>  {
+>         u8 val;
+>         val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
+> -       val |= SDHCI_WAKE_ON_INT;
+> +       val |= mode;
+>         sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
+>  }
+>
+> @@ -1987,6 +2069,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>
+>         sdhci_enable_card_detection(host);
+>
+> +#ifdef CONFIG_PM
+> +       if (host->quirks & SDHCI_QUIRK_WANT_WAKEUP_ON_CARD)
+> +               sdhci_can_wakeup(host);
+> +#endif
+>         return 0;
+>
+>  #ifdef SDHCI_USE_LEDS_CLASS
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index d52a716..1682542 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -320,7 +320,7 @@ extern void sdhci_remove_host(struct sdhci_host
+> *host, int dead);
+>  #ifdef CONFIG_PM
+>  extern int sdhci_suspend_host(struct sdhci_host *host, pm_message_t
+> state);
+>  extern int sdhci_resume_host(struct sdhci_host *host);
+> -extern void sdhci_enable_irq_wakeups(struct sdhci_host *host);
+> +extern void sdhci_enable_irq_wakeups(struct sdhci_host *host, int mode);
+>  #endif
+>
+>  #endif /* __SDHCI_HW_H */
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 1fdc673..8aa3c2e 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -83,6 +83,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12             (1<<28)
+>  /* Controller doesn't have HISPD bit field in HI-SPEED SD card */
+>  #define SDHCI_QUIRK_NO_HISPD_BIT                       (1<<29)
+> +/* Controller wants to wakeup on card events, i.e. card ins, rem or
+> int */
+> +#define SDHCI_QUIRK_WANT_WAKEUP_ON_CARD                        (1<<30)
+>
+>         int irq;                /* Device IRQ */
+>         void __iomem *ioaddr;   /* Mapped address */
+> --
+> 1.5.5.6
+>
