@@ -1,213 +1,250 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [RFC]  sdhci: 8 bit bus width changes
-Date: Sun, 21 Nov 2010 11:17:09 -0800
-Message-ID: <06A44983-1A70-4715-86AF-66C08DD381C0@marvell.com>
-References: <B76798A1-FA3F-4D7D-A22A-52289A4062FB@marvell.com>
- <20101119214002.GA19272@void.printf.net>
- <20101119215333.GB19272@void.printf.net>
- <20101120123553.GA11936@pengutronix.de>
- <20101120182423.GA31030@void.printf.net>
+From: Haojian Zhuang <haojian.zhuang@gmail.com>
+Subject: Re: [PATCH v1 1/1]sdhci-pxa: init_sdh for different platform
+Date: Mon, 22 Nov 2010 11:38:48 +0800
+Message-ID: <AANLkTi=1dft241TUb-tYfPnQFri=CoP+Bhfztoes_A6C@mail.gmail.com>
+References: <AANLkTinccZKV0trj602o=yQ-W12097dfTP30GWeXwVB3@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:49535 "HELO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1752790Ab0KUTR1 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 21 Nov 2010 14:17:27 -0500
-In-Reply-To: <20101120182423.GA31030@void.printf.net>
-Content-Language: en-US
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:47115 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756501Ab0KVDiv convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Nov 2010 22:38:51 -0500
+Received: by wwa36 with SMTP id 36so6861802wwa.1
+        for <linux-mmc@vger.kernel.org>; Sun, 21 Nov 2010 19:38:50 -0800 (PST)
+In-Reply-To: <AANLkTinccZKV0trj602o=yQ-W12097dfTP30GWeXwVB3@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Eric Miao <eric.y.miao@gmail.com>
 
->From d52213a33a71142134555793583b726501827827 Mon Sep 17 00:00:00 2001
-From: Philip Rakity <prakity@marvell.com>
-Date: Sun, 21 Nov 2010 11:08:21 -0800
-Subject: [PATCH] [PATCH] sdhci: resubmit 8 bit support based on feedback from list
+On Thu, Nov 18, 2010 at 3:42 PM, zhangfei gao <zhangfei.gao@gmail.com> =
+wrote:
+> Different platform will provide different init_sdh to handle private
+> register is not same in various platform.
+> Put init_sdh in set_clock is we don't want to add more call back
+> function to sdhci.c to keep sdhci.c as simple as possible.
+> Currently init_sdh will be called several times when clk is changed:
+> insert, 2 times; remove: 4 times.
+> After clk_gating in MMC stack is enabled, set_clock will send clock=3D=
+0,
+> and then init_sdh will only called only once as well as enable_clk.
+>
+> From c1abef994120536f9f0498293afeebf5412f22f6 Mon Sep 17 00:00:00 200=
+1
+> From: Zhangfei Gao <zhangfei.gao@marvell.com>
+> Date: Thu, 18 Nov 2010 01:22:23 -0500
+> Subject: [PATCH] sdhci-pxa: init_sdh for different platform
+>
+> =A0 =A0 =A0 =A0The sdhci-pxa ip is same, but may be different version=
+ among
+> different platforms, as a result private register have different
+> address.
+> =A0 =A0 =A0 =A0Provide init_sdh in arch/arm/mach to move the differen=
+ce to platform code.
+>
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+> ---
+> =A0arch/arm/mach-mmp/include/mach/mmp2_sdh.h | =A0 58 +++++++++++++++=
+++++++++++++++
+> =A0arch/arm/plat-pxa/include/plat/sdhci.h =A0 =A0| =A0 =A06 +++
+> =A0drivers/mmc/host/sdhci-pxa.c =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 34 +=
+----------------
+> =A03 files changed, 66 insertions(+), 32 deletions(-)
+> =A0create mode 100644 arch/arm/mach-mmp/include/mach/mmp2_sdh.h
+>
+> diff --git a/arch/arm/mach-mmp/include/mach/mmp2_sdh.h
+> b/arch/arm/mach-mmp/include/mach/mmp2_sdh.h
+> new file mode 100644
+> index 0000000..c1d4a80
+> --- /dev/null
+> +++ b/arch/arm/mach-mmp/include/mach/mmp2_sdh.h
+> @@ -0,0 +1,58 @@
+> +/* linux/arch/arm/mach-mmp/include/mach/mmp2_sdh.h
+> + *
+> + * Copyright 2010 Marvell
+> + * =A0 =A0 Zhangfei Gao <zhangfei.gao@marvell.com>
+> + *
+> + * MMP2 Platform - sepcific sdh function
+> + *
+> + * This program is free software; you can redistribute it and/or mod=
+ify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + */
+> +
+> +#ifndef __MMP2_SDH_H
+> +#define __MMP2_SDH_H
+> +
+> +#include <linux/mmc/sdhci.h>
+> +#include <plat/sdhci.h>
+> +#include <linux/io.h>
+> +
+> +#define SD_FIFO_PARAM =A0 =A0 =A0 =A0 =A00x104
+> +#define DIS_PAD_SD_CLK_GATE =A0 =A00x400
+> +
+> +#define SD_CLOCK_AND_BURST_SIZE_SETUP =A0 =A0 =A0 =A0 =A00x10A
+> +#define SDCLK_SEL =A0 =A0 =A00x100
+> +#define SDCLK_DELAY_SHIFT =A0 =A0 =A09
+> +#define SDCLK_DELAY_MASK =A0 =A0 =A0 0x1f
+> +
+> +inline void mmp2_init_sdh(struct sdhci_host *host,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct sdhci_pxa_platda=
+ta *pdata)
+> +{
+> + =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0* tune timing of read data/command when crc error ha=
+ppen
+> + =A0 =A0 =A0 =A0* no performance impact
+> + =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 if (pdata && 0 !=3D pdata->clk_delay_cycles) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 u16 tmp;
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp =3D readw(host->ioaddr + SD_CLOCK_A=
+ND_BURST_SIZE_SETUP);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D (pdata->clk_delay_cycles & SDC=
+LK_DELAY_MASK)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 << SDCLK_DELAY_SHIFT;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D SDCLK_SEL;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 writew(tmp, host->ioaddr + SD_CLOCK_AND=
+_BURST_SIZE_SETUP);
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0* disable clock gating per some cards requirement
+> + =A0 =A0 =A0 =A0*/
+> +
+> + =A0 =A0 =A0 if (pdata && pdata->flags & PXA_FLAG_DISABLE_CLOCK_GATI=
+NG) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 u32 tmp =3D 0;
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp =3D readl(host->ioaddr + SD_FIFO_PA=
+RAM);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D DIS_PAD_SD_CLK_GATE;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 writel(tmp, host->ioaddr + SD_FIFO_PARA=
+M);
+> + =A0 =A0 =A0 }
+> +}
+> +
+> +#endif /* __MMP2_SDH_H */
+> diff --git a/arch/arm/plat-pxa/include/plat/sdhci.h
+> b/arch/arm/plat-pxa/include/plat/sdhci.h
+> index f6f46db..a3a08db 100644
+> --- a/arch/arm/plat-pxa/include/plat/sdhci.h
+> +++ b/arch/arm/plat-pxa/include/plat/sdhci.h
+> @@ -13,6 +13,8 @@
+> =A0#ifndef __PLAT_PXA_SDHCI_H
+> =A0#define __PLAT_PXA_SDHCI_H
+>
+> +#include <linux/mmc/sdhci.h>
+> +
+> =A0/* pxa specific flag */
+> =A0/* Require clock free running */
+> =A0#define PXA_FLAG_DISABLE_CLOCK_GATING (1<<0)
+> @@ -25,12 +27,16 @@
+> =A0* @quirks: quirks of specific device
+> =A0* @flags: flags for platform requirement
+> =A0* @clk_delay_cycles: 1 ~ 0x1f, each step is roughly 100ps, for tun=
+ing timing
+> + * @init_sdh: init function for specific card
+> =A0*/
+> =A0struct sdhci_pxa_platdata {
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0max_speed;
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0quirks;
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0flags;
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0clk_delay_cycles;
+> +
+> + =A0 =A0 =A0 void (*init_sdh)(struct sdhci_host *host,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct sdhci_pxa_platda=
+ta *pdata);
+> =A0};
+>
+> =A0#endif /* __PLAT_PXA_SDHCI_H */
+> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-px=
+a.c
+> index 2b665e4..d628dcc 100644
+> --- a/drivers/mmc/host/sdhci-pxa.c
+> +++ b/drivers/mmc/host/sdhci-pxa.c
+> @@ -29,14 +29,6 @@
+>
+> =A0#define DRIVER_NAME =A0 =A0"sdhci-pxa"
+>
+> -#define SD_FIFO_PARAM =A0 =A0 =A0 =A0 =A00x104
+> -#define DIS_PAD_SD_CLK_GATE =A0 =A00x400
+> -
+> -#define SD_CLOCK_AND_BURST_SIZE_SETUP =A0 =A0 =A0 =A0 =A00x10A
+> -#define SDCLK_SEL =A0 =A0 =A00x100
+> -#define SDCLK_DELAY_SHIFT =A0 =A0 =A09
+> -#define SDCLK_DELAY_MASK =A0 =A0 =A0 0x1f
+> -
+> =A0struct sdhci_pxa {
+> =A0 =A0 =A0 =A0struct sdhci_host =A0 =A0 =A0 =A0 =A0 =A0 =A0 *host;
+> =A0 =A0 =A0 =A0struct sdhci_pxa_platdata =A0 =A0 =A0 *pdata;
+> @@ -51,29 +43,11 @@ struct sdhci_pxa {
+> =A0* SDHCI core callbacks =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*
+> =A0* =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 *
+> =A0\*****************************************************************=
+************/
+> -static inline void tune_timing(struct sdhci_host *host,
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct =
+sdhci_pxa_platdata *pdata)
+> -{
+> - =A0 =A0 =A0 /*
+> - =A0 =A0 =A0 =A0* tune timing of read data/command when crc error ha=
+ppen
+> - =A0 =A0 =A0 =A0* no performance impact
+> - =A0 =A0 =A0 =A0*/
+> - =A0 =A0 =A0 if (pdata && 0 !=3D pdata->clk_delay_cycles) {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 u16 tmp;
+> -
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp =3D readw(host->ioaddr + SD_CLOCK_A=
+ND_BURST_SIZE_SETUP);
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D (pdata->clk_delay_cycles & SDC=
+LK_DELAY_MASK)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 << SDCLK_DELAY_SHIFT;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D SDCLK_SEL;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 writew(tmp, host->ioaddr + SD_CLOCK_AND=
+_BURST_SIZE_SETUP);
+> - =A0 =A0 =A0 }
+> -}
+>
+> =A0static void set_clock(struct sdhci_host *host, unsigned int clock)
+> =A0{
+> =A0 =A0 =A0 =A0struct sdhci_pxa *pxa =3D sdhci_priv(host);
+> =A0 =A0 =A0 =A0struct sdhci_pxa_platdata *pdata =3D pxa->pdata;
+> - =A0 =A0 =A0 u32 tmp =3D 0;
+>
+> =A0 =A0 =A0 =A0if (clock =3D=3D 0) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (pxa->clk_enable) {
+> @@ -81,12 +55,8 @@ static void set_clock(struct sdhci_host *host,
+> unsigned int clock)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pxa->clk_enable =3D 0;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+> =A0 =A0 =A0 =A0} else {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 tune_timing(host, pdata);
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (pdata && pdata->flags & PXA_FLAG_DI=
+SABLE_CLOCK_GATING) {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp =3D readl(host->ioa=
+ddr + SD_FIFO_PARAM);
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D DIS_PAD_SD_CLK=
+_GATE;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 writel(tmp, host->ioadd=
+r + SD_FIFO_PARAM);
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (pdata && pdata->init_sdh)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->init_sdh(host, p=
+data);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_enable(pxa->clk);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pxa->clk_enable =3D 1;
+> =A0 =A0 =A0 =A0}
+> --
+> 1.7.0.4
+>
 
-a) QUIRK removed for 8 bit support since platform issue - not quirk
-b) platform Flag defined for sdhci-pxa.c and plat-pxa
-c) comments added to sdhci.c on usage
-
-Signed-off-by: Philip Rakity <prakity@marvell.com>
-
-comments from previous submission
-
-We now:
-* check for a v3 controller before setting 8-bit bus width
-* offer a callback for platform code to switch to 8-bit mode, which
-  allows non-v3 controllers to support it
-* introduce a quirk to specify that the board designers have indeed
-  brought out all the pins for 8-bit to the slot.
-
-We were previously relying only on whether the controller supported
-8-bit, which doesn't tell us anything about the pin configuration in
-the board design.
-
-Signed-off-by: Philip Rakity <prakity@marvell.com>
-Tested-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- arch/arm/plat-pxa/include/plat/sdhci.h |    3 ++
- drivers/mmc/host/sdhci-pxa.c           |    4 ++
- drivers/mmc/host/sdhci.c               |   49 ++++++++++++++++++++++++--------
- drivers/mmc/host/sdhci.h               |    4 ++-
- 4 files changed, 47 insertions(+), 13 deletions(-)
-
-diff --git a/arch/arm/plat-pxa/include/plat/sdhci.h b/arch/arm/plat-pxa/include/plat/sdhci.h
-index e49c5b6..e85b58f 100644
---- a/arch/arm/plat-pxa/include/plat/sdhci.h
-+++ b/arch/arm/plat-pxa/include/plat/sdhci.h
-@@ -17,6 +17,9 @@
- /* Require clock free running */
- #define PXA_FLAG_DISABLE_CLOCK_GATING (1<<0)
- 
-+/* board design supports 8 bit data on SD/SDIO BUS */
-+#define PXA_FLAG_SD_8_BIT_CAPABLE_SLOT	(1<<2)
-+
- /*
-  * struct pxa_sdhci_platdata() - Platform device data for PXA SDHCI
-  * @max_speed: the maximum speed supported
-diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
-index fc406ac..f609f4a 100644
---- a/drivers/mmc/host/sdhci-pxa.c
-+++ b/drivers/mmc/host/sdhci-pxa.c
-@@ -141,6 +141,10 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
- 	if (pdata->quirks)
- 		host->quirks |= pdata->quirks;
- 
-+	/* if slot design supports 8 bit data - indicate this */
-+	if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
-+		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-+
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "failed to add host\n");
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 154cbf8..03c801b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1185,17 +1185,31 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (host->ops->platform_send_init_74_clocks)
- 		host->ops->platform_send_init_74_clocks(host, ios->power_mode);
- 
--	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
--
--	if (ios->bus_width == MMC_BUS_WIDTH_8)
--		ctrl |= SDHCI_CTRL_8BITBUS;
--	else
--		ctrl &= ~SDHCI_CTRL_8BITBUS;
-+	/*
-+	 * If your platform has 8-bit width support but is not a v3 controller,
-+	 * or if it requires special setup code, you should implement that in
-+	 * platform_8bit_width().
-+	 */
-+	if (host->ops->platform_8bit_width)
-+		host->ops->platform_8bit_width(host, ios->bus_width);
-+	else {
-+		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+		if (ios->bus_width == MMC_BUS_WIDTH_8) {
-+			ctrl &= ~SDHCI_CTRL_4BITBUS;
-+			if (host->version >= SDHCI_SPEC_300)
-+				ctrl |= SDHCI_CTRL_8BITBUS;
-+		} else {
-+			if (host->version >= SDHCI_SPEC_300)
-+				ctrl &= ~SDHCI_CTRL_8BITBUS;
-+			if (ios->bus_width == MMC_BUS_WIDTH_4)
-+				ctrl |= SDHCI_CTRL_4BITBUS;
-+			else
-+				ctrl &= ~SDHCI_CTRL_4BITBUS;
-+		}
-+		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+	}
- 
--	if (ios->bus_width == MMC_BUS_WIDTH_4)
--		ctrl |= SDHCI_CTRL_4BITBUS;
--	else
--		ctrl &= ~SDHCI_CTRL_4BITBUS;
-+	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
- 
- 	if ((ios->timing == MMC_TIMING_SD_HS ||
- 	     ios->timing == MMC_TIMING_MMC_HS)
-@@ -1855,11 +1869,22 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
- 	else
- 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
-+
- 	mmc->f_max = host->max_clk;
- 	mmc->caps |= MMC_CAP_SDIO_IRQ;
- 
--	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
--		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
-+	/*
-+	 * A controller may support 8-bit width, but the board itself
-+	 * might not have the pins brought out.  So, boards that support
-+	 * 8-bit width should set the MMC_CAP_8_BIT_DATA and we won't assume
-+	 * that devices without the quirk can use 8-bit width.
-+	 *
-+	 * set mmc->caps |= MMC_CAP_8_BIT_DATA in platfrom code
-+	 * before call for_add_host to enable 8 bit support
-+	 */
-+	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA)) {
-+		mmc->caps |= MMC_CAP_4_BIT_DATA;
-+	}
- 
- 	if (caps & SDHCI_CAN_DO_HISPD)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index d52a716..ff18eaa 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -76,7 +76,7 @@
- #define   SDHCI_CTRL_ADMA1	0x08
- #define   SDHCI_CTRL_ADMA32	0x10
- #define   SDHCI_CTRL_ADMA64	0x18
--#define  SDHCI_CTRL_8BITBUS	0x20
-+#define   SDHCI_CTRL_8BITBUS	0x20
- 
- #define SDHCI_POWER_CONTROL	0x29
- #define  SDHCI_POWER_ON		0x01
-@@ -215,6 +215,8 @@ struct sdhci_ops {
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
-+	int	(*platform_8bit_width)(struct sdhci_host *host,
-+				int width);
- 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
- 					     u8 power_mode);
- 	unsigned int    (*get_ro)(struct sdhci_host *host);
--- 
-1.6.0.4
-
-On Nov 20, 2010, at 10:24 AM, Chris Ball wrote:
-
-> Hi,
-> 
-> On Sat, Nov 20, 2010 at 01:35:53PM +0100, Wolfram Sang wrote:
->> I know it's too late, but...
-> 
-> It's late, but it's not too late.  I'd like to send a fix for MMC cards
-> to Linus within the next week.  If we decide to make some small changes
-> here and can do it quickly, that should be fine.
-> 
->> What does the platform_-prefix of the callback indicate?
-> 
-> That it's a hook for code (whether that's a -pltfm driver or an SDHCI
-> driver) that knows more about the board-level setup to implement.
-> 
->>> * introduce a quirk to specify that the board designers have indeed
->>>   brought out all the pins for 8-bit to the slot.
->> 
->> This is not a quirk, this is platform_data, no?
-> 
-> Yes, I agree that platform code would be more correct than the quirk.
-> 
-> Thanks,
-> 
-> -- 
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-
+Acked
