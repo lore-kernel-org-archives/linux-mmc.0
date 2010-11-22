@@ -1,7 +1,7 @@
 From: zhangfei gao <zhangfei.gao@gmail.com>
 Subject: Re: [RFC] sdhci: 8 bit bus width changes
-Date: Mon, 22 Nov 2010 18:16:37 +0800
-Message-ID: <AANLkTimop+T2ae7p3DEW-e9ENiyh6E3iexoFeHH6zoWw@mail.gmail.com>
+Date: Mon, 22 Nov 2010 18:36:54 +0800
+Message-ID: <AANLkTimP8oRK_ALTbEXzL7Pp2VtJFef7eKGEA00Ers-7@mail.gmail.com>
 References: <B76798A1-FA3F-4D7D-A22A-52289A4062FB@marvell.com>
 	<20101119214002.GA19272@void.printf.net>
 	<20101119215333.GB19272@void.printf.net>
@@ -12,12 +12,12 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:49360 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:65341 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753020Ab0KVKQi convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2010 05:16:38 -0500
-Received: by fxm13 with SMTP id 13so2448579fxm.19
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2010 02:16:37 -0800 (PST)
+	with ESMTP id S1753623Ab0KVKgz convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2010 05:36:55 -0500
+Received: by fxm13 with SMTP id 13so2464051fxm.19
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2010 02:36:54 -0800 (PST)
 In-Reply-To: <06A44983-1A70-4715-86AF-66C08DD381C0@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -96,6 +96,13 @@ form_device *pdev)
 ;
 > +
 > =A0 =A0 =A0 =A0ret =3D sdhci_add_host(host);
+
+how about
+      /* if BOARD NOT support 8 BIT */
+       if (pdata->flags & PXA_FLAG_SD_CANT_8_BIT)
+               host->mmc->caps &=3D ~MMC_CAP_8_BIT_DATA;
+
+
 > =A0 =A0 =A0 =A0if (ret) {
 > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_err(&pdev->dev, "failed to add hos=
 t\n");
@@ -191,6 +198,12 @@ code
 > + =A0 =A0 =A0 if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA)) {
 > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_4_BIT_DATA;
 > + =A0 =A0 =A0 }
+
+i am afraid this will impact all platform supporting 8 bit emmc, if
+this logic is correct, why assume board could support 4-bit width.
+i think sdhci.c should describe controller behavior, instead of board
+specific behavior.
+
 >
 > =A0 =A0 =A0 =A0if (caps & SDHCI_CAN_DO_HISPD)
 > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_SD_HIGHSPEED | =
@@ -268,12 +281,3 @@ in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >
-
-Hi, Chris
-
-Philip has update a new patch without new quirk.
-I think the patch applied mmc-next should be reverted, since
-SDHCI_QUIRK_SLOT_CAN_DO_8_BITS is not needed at all.
-
-Thanks
-Thanks
