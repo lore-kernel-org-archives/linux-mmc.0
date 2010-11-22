@@ -1,45 +1,33 @@
-From: Axel Lin <axel.lin@gmail.com>
-Subject: [PATCH 4/4] [ARM] mxcmmc: remove a unnecessary release_resource()
-	call
-Date: Mon, 22 Nov 2010 16:47:51 +0800
-Message-ID: <1290415671.5471.13.camel@mola>
-References: <1290415359.5471.4.camel@mola>  <1290415467.5471.7.camel@mola>
-	 <1290415534.5471.8.camel@mola>  <1290415596.5471.10.camel@mola>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH v4 1/2] MMC: add support for the Marvell Dove SDHCI controller
+Date: Mon, 22 Nov 2010 12:10:17 +0200
+Message-ID: <AANLkTin66iEqCgUKUFXGLZg4pu-mv=zb-E+x04BrC-=h@mail.gmail.com>
+References: <cover.1288293593.git.mike@compulab.co.il> <ea487c43c1aff1d07355e0e0699e739c8617b96f.1288293593.git.mike@compulab.co.il>
+ <AANLkTimhzUe+qODZYCvvrH6Hi06gV1yHVpS1LRHhXu7o@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:51501 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751554Ab0KVImw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2010 03:42:52 -0500
-In-Reply-To: <1290415596.5471.10.camel@mola>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:41227 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752911Ab0KVKKi convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2010 05:10:38 -0500
+Received: by iwn34 with SMTP id 34so2698845iwn.19
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2010 02:10:38 -0800 (PST)
+In-Reply-To: <AANLkTimhzUe+qODZYCvvrH6Hi06gV1yHVpS1LRHhXu7o@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel <linux-kernel@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org
+To: saeed bishara <saeed.bishara@gmail.com>
+Cc: Mike Rapoport <mike@compulab.co.il>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Saeed Bishara <saeed@marvell.com>, linux-arm-kernel@lists.infradead.org
 
-Remove release_resource() after release_mem_region().
+On Mon, Nov 22, 2010 at 9:42 AM, saeed bishara <saeed.bishara@gmail.com=
+> wrote:
+> On Thu, Oct 28, 2010 at 9:23 PM, Mike Rapoport <mike@compulab.co.il> =
+wrote:
+=2E..
+>> + =A0 =A0 =A0 bool "SDHCI support on Marvell's Dove SoC"
+=2E..
+>> + =A0 =A0 =A0 =A0 If you have a controller with this interface, say =
+Y or M here.
 
-Signed-off-by: Axel Lin <axel.lin@gmail.com>
----
- drivers/mmc/host/mxcmmc.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 2b9f7c8..4428594 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -967,7 +967,6 @@ static int mxcmci_remove(struct platform_device *pdev)
- 	clk_put(host->clk);
- 
- 	release_mem_region(host->res->start, resource_size(host->res));
--	release_resource(host->res);
- 
- 	mmc_free_host(mmc);
- 
--- 
-1.7.2
-
-
-
+Just a nitpick:  I guess that the "or M" in "say Y or M" is a typo
