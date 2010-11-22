@@ -1,24 +1,200 @@
 From: "Jennifer Li (TP)" <Jennifer.Li@o2micro.com>
-Subject: FW: [PATCH 2.6.32]: Add new device IDs and registers forMULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) cards.
-Date: Mon, 22 Nov 2010 15:46:09 +0800
-Message-ID: <FC57104DF444434A9D1D8A7B4EBB292307ED4F5B@HC-EXCHANGE.nt-fsrvr.o2micro.com>
+Subject: RE: [PATCH 2.6.32]: Add new device IDs and registers forMULTIMEDIACARD (MMC), SECURE DIGITAL (SD) cards.
+Date: Mon, 22 Nov 2010 15:58:50 +0800
+Message-ID: <FC57104DF444434A9D1D8A7B4EBB292307ED4F8B@HC-EXCHANGE.nt-fsrvr.o2micro.com>
+References: <20101118041559.GE23555@void.printf.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;boundary="----_=_NextPart_001_01CB8A19.54B9D70F"
+Content-Type: multipart/mixed;boundary="----_=_NextPart_001_01CB8A1B.1AC433A7"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [203.127.153.66] ([203.127.153.66]:4336 "EHLO
+Received: from [203.127.153.66] ([203.127.153.66]:5253 "EHLO
 	sg-mxserver-01.nt-fsrvr.o2micro.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751038Ab0KVHq3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2010 02:46:29 -0500
+	by vger.kernel.org with ESMTP id S1752038Ab0KVH7S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2010 02:59:18 -0500
 Content-class: urn:content-classes:message
+In-Reply-To: <20101118041559.GE23555@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Mario_Limonciello@Dell.com, Joseph_Yeh@Dell.com, Chris Van Hoof <vanhoof@canonical.com>, Rezwanul_Kabir@Dell.com, "Shirley Her (SC)" <shirley.her@o2micro.com>, "Rich Lin (TP)" <RichLin@o2micro.com>, "Samuel Guan(WH)" <samuel.guan@o2micro.com>, "Hardys Lv(WH)" <hardys.lv@o2micro.com>, "William Lian (TP)" <William.Lian@o2micro.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Mario_Limonciello@Dell.com, Joseph_Yeh@Dell.com, Chris Van Hoof <vanhoof@canonical.com>, Rezwanul_Kabir@Dell.com, "Shirley Her (SC)" <shirley.her@o2micro.com>, "Rich Lin (TP)" <RichLin@o2micro.com>, "Samuel Guan(WH)" <samuel.guan@o2micro.com>, "Hardys Lv(WH)" <hardys.lv@o2micro.com>, "William Lian (TP)" <William.Lian@o2micro.com>
 
 This is a multi-part message in MIME format.
 
-------_=_NextPart_001_01CB8A19.54B9D70F
+------_=_NextPart_001_01CB8A1B.1AC433A7
 Content-Type: text/plain;charset="US-ASCII"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Chris,
+
+I have modified the PATCH file as your suggestions. It has been sent
+today.
+
+1. I didn't add " SDHCI_QUIRK_BROKEN_ADMA ".
+=3D Because of O2 SD function has ADMA, ADMA2 and the other related
+registers. It can't be controlled by the normal ADMA flag. So, the "
+SDHCI_QUIRK_BROKEN_ADMA " flag isn't suitable for O2 chip.
+
+2. I have removed the redundancy " pci_read_config_byte" routines as
+your suggestions.
+=3D For safety, we has suggested that we need those " pci_read_config_byte
+" routines. If the chip was broken, the " pci_read_config_byte " can
+protect the Linux OS crash. But we still remove the "
+pci_read_config_byte " routines as your suggestions.
+
+Best regards,
+Jennifer
+-----Original Message-----
+From: Chris Ball [mailto:cjb@laptop.org] 
+Sent: Thursday, November 18, 2010 12:16 PM
+To: Jennifer Li (TP)
+Cc: linux-mmc@vger.kernel.org; Mario_Limonciello@Dell.com;
+Joseph_Yeh@Dell.com; Chris Van Hoof; Rezwanul_Kabir@Dell.com; Shirley
+Her (SC); Rich Lin (TP); Samuel Guan(WH); Hardys Lv(WH); William Lian
+(TP)
+Subject: Re: [PATCH 2.6.32]: Add new device IDs and registers
+forMULTIMEDIACARD (MMC), SECURE DIGITAL (SD) cards.
+
+Hi Jennifer,
+
+This is looking better, thanks -- just a few more questions:
+
+On Tue, Nov 16, 2010 at 02:05:16PM +0800, Jennifer Li (TP) wrote:
+> Root cause:
+> O2Micro's ADMA and related functions can't work by default Linux SD
+> driver. We need mark those related registers.
+
+If the goal is to disable ADMA, have you tried using the BROKEN_ADMA
+quirk?  Like this:
+
+static const struct sdhci_pci_fixes sdhci_o2 =3D {
+        .probe          =3D o2_probe,
+        .quirks         =3D SDHCI_QUIRK_BROKEN_ADMA,
+};
+
+If you do this, do you still need to perform the PCI writes?
+
+> +		ret =3D pci_read_config_byte(chip->pdev,
+O2_SDMMC_MULTI_VCC3V, &scratch);
+> +		if (ret)
+> +			return ret;
+> +
+> +		scratch =3D 0x08;
+> +		ret =3D pci_write_config_byte(chip->pdev,
+O2_SDMMC_MULTI_VCC3V, scratch);
+
+Here you read in a value to scratch, but then you go ahead and write
+0x08 to the register regardless.  We can skip the read here, right?
+
+> +		ret =3D pci_read_config_byte(chip->pdev,
+O2_SDMMC_CAPABILITIES, &scratch);
+> +		if (ret)
+> +			return ret;
+> +
+> +		scratch |=3D 0x01;
+> +		ret =3D pci_write_config_byte(chip->pdev,
+O2_SDMMC_CAPABILITIES, scratch);
+> +
+> +		ret =3D pci_read_config_byte(chip->pdev,
+O2_SDMMC_CAPABILITIES, &scratch);
+> +		if (ret)
+> +			return ret;
+> +
+> +		scratch =3D 0x73;
+> +		ret =3D pci_write_config_byte(chip->pdev,
+O2_SDMMC_CAPABILITIES, scratch);
+
+Here you write a value to O2_SDMMC_CAPABILITIES that's dependent on the
+read value, but then after that you immediately overwrite the register
+with 0x73 regardless of what was in it before.  Why perform the first
+read-and-write cycle and the second read, if you're just going to write
+0x73 in the end?
+
+> +
+> +		ret =3D pci_read_config_byte(chip->pdev, O2_SDMMC_ADMA1,
+&scratch);
+> +		if (ret)
+> +			return ret;
+> +
+> +		scratch =3D 0x39;
+> +		ret =3D pci_write_config_byte(chip->pdev, O2_SDMMC_ADMA1,
+scratch);
+> +
+> +		ret =3D pci_read_config_byte(chip->pdev, O2_SDMMC_ADMA2,
+&scratch);
+> +		if (ret)
+> +			return ret;
+> +
+> +		scratch =3D 0x08;
+> +		ret =3D pci_write_config_byte(chip->pdev, O2_SDMMC_ADMA2,
+scratch);
+
+Same as above -- if the write isn't dependent on the read, I don't see
+why to bother with the read.  Also, you can avoid assigning the return
+value of pci_write_config_byte() to "ret" now that we aren't testing
+that.
+
+> Signed-off-by: Jennifer Li Developer <Jennifer.li@o2micro.com>
+
+I don't think "Developer" should be here, since the text should just be
+your name.
+
+Thanks,
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
+
+
+
+
+Unless otherwise stated, this e-mail message does not constitute a solicitat=
+ion to buy or sell any products or services, or to participate in any partic=
+ular trading strategy. This e-mail message and any attachments are intended =
+solely for the use of the individual or entity to which it is addressed and =
+may contain information that is confidential or legally privileged. If you a=
+re not the intended recipient, you are hereby notified that any disseminatio=
+n, distribution, copying or other use of this message or its attachments is =
+strictly prohibited. If you have received this message in error, please noti=
+fy the sender immediately and permanently delete this message and any attach=
+ments. O2Micro International Ltd., and its subsidiaries and affiliates, are =
+neither liable for the proper and complete transmission of the information c=
+ontained in this communication, the accuracy of the information contained th=
+erein, nor for any delay in its receipt.  
+
+
+
+------_=_NextPart_001_01CB8A1B.1AC433A7
+Content-Type: message/rfc822
+Content-Transfer-Encoding: 7bit
+
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+	boundary="----_=_NextPart_002_01CB8A19.4E242C00"
+X-MimeOLE: Produced By Microsoft Exchange V6.5
+Subject: FW: [PATCH 2.6.32]: Add new device IDs and registers forMULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) cards.
+Date: Mon, 22 Nov 2010 15:46:09 +0800
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator: 
+Thread-Topic: [PATCH 2.6.32]: Add new device IDs and registers forMULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) cards.
+Thread-Index: AcuFVD1SLDzxNxjNS8umloTistT4fgExAzeA
+From: "Jennifer Li (TP)" <Jennifer.Li@o2micro.com>
+To: <linux-mmc@vger.kernel.org>
+Cc: "Chris Ball" <cjb@laptop.org>,
+	<Mario_Limonciello@Dell.com>,
+	<Joseph_Yeh@Dell.com>,
+	"Chris Van Hoof" <vanhoof@canonical.com>,
+	<Rezwanul_Kabir@Dell.com>,
+	"Shirley Her (SC)" <shirley.her@o2micro.com>,
+	"Rich Lin (TP)" <RichLin@o2micro.com>,
+	"Samuel Guan(WH)" <samuel.guan@o2micro.com>,
+	"Hardys Lv(WH)" <hardys.lv@o2micro.com>,
+	"William Lian (TP)" <William.Lian@o2micro.com>
+
+This is a multi-part message in MIME format.
+
+------_=_NextPart_002_01CB8A19.4E242C00
+Content-Type: text/plain;
+	charset="US-ASCII"
 Content-Transfer-Encoding: quoted-printable
 
 Hi,
@@ -29,16 +205,16 @@ SD/MMC card can't be recognized by O2 chip.
 Root cause:
 O2Micro's ADMA and related functions can't work by default Linux SD
 driver. We need mark those related registers.
-        
-Patch description: 
-  - SET MULTI 3 to VCC3V# 
+       =20
+Patch description:=20
+  - SET MULTI 3 to VCC3V#=20
   - Disable CLK_REQ# support after media DET.
-  - Choose programmable settings 
+  - Choose programmable settings=20
   - Enable SDMA
   - Disable ADMA1
   - Disable ADMA2
   - Disable the infinite transfer mode
- 
+=20
 Linux Kernel version:
 This patch was based on Linux Kernel version 2.6.32. It should be added
 from Linux kernel 2.6.32 and the newer kernel versions.
@@ -77,9 +253,9 @@ Sdhci-pci.c
 +++ Q20101122sdhci-pci/sdhci-pci.c	2010-11-18 07:59:38.119873198
 +0800
 @@ -38,6 +38,14 @@
- 
+=20
  #define MAX_SLOTS			8
- 
+=20
 +#define O2_SDMMC_LOCK_WP 0xD3
 +#define O2_SDMMC_MULTI_VCC3V 0xEE
 +#define O2_SDMMC_CLKREQ 0xEC
@@ -90,11 +266,11 @@ Sdhci-pci.c
 +
  struct sdhci_pci_chip;
  struct sdhci_pci_slot;
- 
+=20
 @@ -112,6 +120,78 @@ static const struct sdhci_pci_fixes sdhc
  			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
  };
- 
+=20
 +static int o2_probe(struct sdhci_pci_chip *chip)
 +{
 +	int ret;
@@ -108,9 +284,9 @@ Sdhci-pci.c
 +		/* O2Micro's ADMA and releated function can't work on
 default Linux SD driver.
 +         * We need mark those related registers.
-+         * - SET MULTI 3 to VCC3V# 
++         * - SET MULTI 3 to VCC3V#=20
 +         * - Disable CLK_REQ# support after media DET.
-+         * - Choose programmable settings 
++         * - Choose programmable settings=20
 +         * - Enable SDMA
 +         * - Disable ADMA1
 +         * - Disable ADMA2
@@ -120,12 +296,12 @@ default Linux SD driver.
 &scratch);
 +		if (ret)
 +			return ret;
-+	
++=09
 +		scratch &=3D 0x7f;
 +		ret =3D pci_write_config_byte(chip->pdev,
 O2_SDMMC_LOCK_WP, scratch);
-+	
-+		scratch =3D 0x08;	
++=09
++		scratch =3D 0x08;=09
 +		ret =3D pci_write_config_byte(chip->pdev,
 O2_SDMMC_MULTI_VCC3V, scratch);
 +
@@ -134,8 +310,8 @@ O2_SDMMC_MULTI_VCC3V, scratch);
 &scratch);
 +		if (ret)
 +			return ret;
-+	
-+		scratch |=3D 0x20;	
++=09
++		scratch |=3D 0x20;=09
 +		ret =3D pci_write_config_byte(chip->pdev, O2_SDMMC_CLKREQ,
 scratch);
 +
@@ -143,20 +319,20 @@ scratch);
 O2_SDMMC_CAPABILITIES, &scratch);
 +		if (ret)
 +			return ret;
-+	
++=09
 +		scratch |=3D 0x01;
 +		ret =3D pci_write_config_byte(chip->pdev,
 O2_SDMMC_CAPABILITIES, scratch);
-+	
++=09
 +		scratch =3D 0x73;
 +		ret =3D pci_write_config_byte(chip->pdev,
 O2_SDMMC_CAPABILITIES, scratch);
-+	
-+		scratch =3D 0x39;	
++=09
++		scratch =3D 0x39;=09
 +		ret =3D pci_write_config_byte(chip->pdev, O2_SDMMC_ADMA1,
 scratch);
 +
-+		scratch =3D 0x08;	
++		scratch =3D 0x08;=09
 +		ret =3D pci_write_config_byte(chip->pdev, O2_SDMMC_ADMA2,
 scratch);
 +
@@ -164,7 +340,7 @@ scratch);
 O2_SDMMC_INFINIT_MODE, &scratch);
 +		if (ret)
 +			return ret;
-+	
++=09
 +		scratch |=3D 0x08;
 +		ret =3D pci_write_config_byte(chip->pdev,
 O2_SDMMC_INFINIT_MODE, scratch);
@@ -174,7 +350,7 @@ O2_SDMMC_INFINIT_MODE, scratch);
 +		if (ret)
 +			return ret;
 +
-+		scratch |=3D 0x80;	
++		scratch |=3D 0x80;=09
 +		ret =3D pci_write_config_byte(chip->pdev,
 O2_SDMMC_LOCK_WP, scratch);
 +
@@ -188,18 +364,18 @@ O2_SDMMC_LOCK_WP, scratch);
 @@ -275,6 +355,10 @@ static int jmicron_resume(struct sdhci_p
  	return 0;
  }
- 
+=20
 +static const struct sdhci_pci_fixes sdhci_o2 =3D {
 +	.probe		=3D o2_probe,
 +};
 +
  static const struct sdhci_pci_fixes sdhci_jmicron =3D {
  	.probe		=3D jmicron_probe,
- 
+=20
 @@ -370,6 +454,46 @@ static const struct pci_device_id pci_id
  		.driver_data	=3D (kernel_ulong_t)&sdhci_via,
  	},
- 
+=20
 +        {
 +		.vendor		=3D PCI_VENDOR_ID_O2,
 +		.device		=3D PCI_DEVICE_ID_O2_8120,
@@ -251,30 +427,13 @@ Signed-off-by: Jennifer Li <Jennifer.li@o2micro.com>
 Best regards,
 Jennifer
 
-
-
-
-Unless otherwise stated, this e-mail message does not constitute a solicitat=
-ion to buy or sell any products or services, or to participate in any partic=
-ular trading strategy. This e-mail message and any attachments are intended =
-solely for the use of the individual or entity to which it is addressed and =
-may contain information that is confidential or legally privileged. If you a=
-re not the intended recipient, you are hereby notified that any disseminatio=
-n, distribution, copying or other use of this message or its attachments is =
-strictly prohibited. If you have received this message in error, please noti=
-fy the sender immediately and permanently delete this message and any attach=
-ments. O2Micro International Ltd., and its subsidiaries and affiliates, are =
-neither liable for the proper and complete transmission of the information c=
-ontained in this communication, the accuracy of the information contained th=
-erein, nor for any delay in its receipt.  
-
-
-
-------_=_NextPart_001_01CB8A19.54B9D70F
-Content-Type: application/octet-stream;name="pci_ids_patch"
+------_=_NextPart_002_01CB8A19.4E242C00
+Content-Type: application/octet-stream;
+	name="pci_ids_patch"
 Content-Transfer-Encoding: base64
 Content-Description: pci_ids_patch
-Content-Disposition: attachment;filename="pci_ids_patch"
+Content-Disposition: attachment;
+	filename="pci_ids_patch"
 
 LS0tIC4uL3VudGl0bGVkIGZvbGRlci9saW51eC0yLjYuMzIvaW5jbHVkZS9saW51eC9wY2lfaWRz
 LmgJMjAwOS0xMi0wMyAxMTo1MToyMS4wMDAwMDAwMDAgKzA4MDAKKysrIC4vcGNpX2lkcy5oCTIw
@@ -289,11 +448,14 @@ SUNFX0lEX08yXzgxMjAJCTB4ODEyMA0KKyNkZWZpbmUgUENJX0RFVklDRV9JRF9PMl84MjIwCQkw
 eDgyMjANCisjZGVmaW5lIFBDSV9ERVZJQ0VfSURfTzJfODMyMAkJMHg4MzIwDQorI2RlZmluZSBQ
 Q0lfREVWSUNFX0lEX08yXzgzMjEJCTB4ODMyMQ0KKyNkZWZpbmUgUENJX0RFVklDRV9JRF9PMl84
 MjIxCQkweDgyMjEK
-------_=_NextPart_001_01CB8A19.54B9D70F
-Content-Type: application/octet-stream;name="sdhci-pci_patch"
+
+------_=_NextPart_002_01CB8A19.4E242C00
+Content-Type: application/octet-stream;
+	name="sdhci-pci_patch"
 Content-Transfer-Encoding: base64
 Content-Description: sdhci-pci_patch
-Content-Disposition: attachment;filename="sdhci-pci_patch"
+Content-Disposition: attachment;
+	filename="sdhci-pci_patch"
 
 LS0tIGxpbnV4LTIuNi4zMi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS5jCTIwMDktMTItMDMg
 MTE6NTE6MjEuMDAwMDAwMDAwICswODAwCisrKyBRMjAxMDExMjJzZGhjaS1wY2kvc2RoY2ktcGNp
@@ -368,4 +530,7 @@ MjEsCisJCS5zdWJ2ZW5kb3IJPSBQQ0lfQU5ZX0lELAorCQkuc3ViZGV2aWNlCT0gUENJX0FOWV9J
 RCwKKwkJLmRyaXZlcl9kYXRhCT0gKGtlcm5lbF91bG9uZ190KSZzZGhjaV9vMiwKKwl9LAorCiAJ
 ewkvKiBHZW5lcmljIFNEIGhvc3QgY29udHJvbGxlciAqLwogCQlQQ0lfREVWSUNFX0NMQVNTKChQ
 Q0lfQ0xBU1NfU1lTVEVNX1NESENJIDw8IDgpLCAweEZGRkYwMCkKIAl9LAo=
-------_=_NextPart_001_01CB8A19.54B9D70F--
+
+------_=_NextPart_002_01CB8A19.4E242C00--
+
+------_=_NextPart_001_01CB8A1B.1AC433A7--
