@@ -1,227 +1,454 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH v1 1/1]sdhci-pxa: init_sdh for different platform
-Date: Tue, 23 Nov 2010 07:34:48 -0800
-Message-ID: <461C4723-EEFE-419B-9964-BA3306585E61@marvell.com>
-References: <AANLkTinccZKV0trj602o=yQ-W12097dfTP30GWeXwVB3@mail.gmail.com>
- <AANLkTi=1dft241TUb-tYfPnQFri=CoP+Bhfztoes_A6C@mail.gmail.com>
+Subject: [RFC]: mmc bus width testing
+Date: Tue, 23 Nov 2010 07:56:26 -0800
+Message-ID: <798674B4-E7B8-4437-A689-18536D1B6180@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:46811 "HELO
-	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1754611Ab0KWPfM convert rfc822-to-8bit
+Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:47787 "HELO
+	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753098Ab0KWP5g convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 23 Nov 2010 10:35:12 -0500
-In-Reply-To: <AANLkTi=1dft241TUb-tYfPnQFri=CoP+Bhfztoes_A6C@mail.gmail.com>
+	Tue, 23 Nov 2010 10:57:36 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haojian Zhuang <haojian.zhuang@gmail.com>
-Cc: zhangfei gao <zhangfei.gao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Eric Miao <eric.y.miao@gmail.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>
 
 
-On Nov 21, 2010, at 7:38 PM, Haojian Zhuang wrote:
+A long time (2.6.2x days) I tried to submit a patch to do bus width testing on mmc and would appreciate some feedback before I do a formal submission.
 
-> On Thu, Nov 18, 2010 at 3:42 PM, zhangfei gao <zhangfei.gao@gmail.com> wrote:
->> Different platform will provide different init_sdh to handle private
->> register is not same in various platform.
->> Put init_sdh in set_clock is we don't want to add more call back
->> function to sdhci.c to keep sdhci.c as simple as possible.
->> Currently init_sdh will be called several times when clk is changed:
->> insert, 2 times; remove: 4 times.
->> After clk_gating in MMC stack is enabled, set_clock will send clock=0,
->> and then init_sdh will only called only once as well as enable_clk.
->> 
->> From c1abef994120536f9f0498293afeebf5412f22f6 Mon Sep 17 00:00:00 2001
->> From: Zhangfei Gao <zhangfei.gao@marvell.com>
->> Date: Thu, 18 Nov 2010 01:22:23 -0500
->> Subject: [PATCH] sdhci-pxa: init_sdh for different platform
->> 
->>        The sdhci-pxa ip is same, but may be different version among
->> different platforms, as a result private register have different
->> address.
->>        Provide init_sdh in arch/arm/mach to move the difference to platform code.
->> 
->> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
->> ---
->>  arch/arm/mach-mmp/include/mach/mmp2_sdh.h |   58 +++++++++++++++++++++++++++++
->>  arch/arm/plat-pxa/include/plat/sdhci.h    |    6 +++
->>  drivers/mmc/host/sdhci-pxa.c              |   34 +----------------
->>  3 files changed, 66 insertions(+), 32 deletions(-)
->>  create mode 100644 arch/arm/mach-mmp/include/mach/mmp2_sdh.h
->> 
->> diff --git a/arch/arm/mach-mmp/include/mach/mmp2_sdh.h
->> b/arch/arm/mach-mmp/include/mach/mmp2_sdh.h
->> new file mode 100644
->> index 0000000..c1d4a80
->> --- /dev/null
->> +++ b/arch/arm/mach-mmp/include/mach/mmp2_sdh.h
->> @@ -0,0 +1,58 @@
->> +/* linux/arch/arm/mach-mmp/include/mach/mmp2_sdh.h
->> + *
->> + * Copyright 2010 Marvell
->> + *     Zhangfei Gao <zhangfei.gao@marvell.com>
->> + *
->> + * MMP2 Platform - sepcific sdh function
->> + *
->> + * This program is free software; you can redistribute it and/or modify
->> + * it under the terms of the GNU General Public License version 2 as
->> + * published by the Free Software Foundation.
->> + */
->> +
->> +#ifndef __MMP2_SDH_H
->> +#define __MMP2_SDH_H
->> +
->> +#include <linux/mmc/sdhci.h>
->> +#include <plat/sdhci.h>
->> +#include <linux/io.h>
->> +
->> +#define SD_FIFO_PARAM          0x104
->> +#define DIS_PAD_SD_CLK_GATE    0x400
->> +
->> +#define SD_CLOCK_AND_BURST_SIZE_SETUP          0x10A
->> +#define SDCLK_SEL      0x100
->> +#define SDCLK_DELAY_SHIFT      9
->> +#define SDCLK_DELAY_MASK       0x1f
->> +
->> +inline void mmp2_init_sdh(struct sdhci_host *host,
->> +                       struct sdhci_pxa_platdata *pdata)
->> +{
->> +       /*
->> +        * tune timing of read data/command when crc error happen
->> +        * no performance impact
->> +        */
->> +       if (pdata && 0 != pdata->clk_delay_cycles) {
->> +               u16 tmp;
->> +
->> +               tmp = readw(host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
->> +               tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
->> +                                       << SDCLK_DELAY_SHIFT;
->> +               tmp |= SDCLK_SEL;
->> +               writew(tmp, host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
->> +       }
->> +
->> +       /*
->> +        * disable clock gating per some cards requirement
->> +        */
->> +
->> +       if (pdata && pdata->flags & PXA_FLAG_DISABLE_CLOCK_GATING) {
->> +               u32 tmp = 0;
->> +
->> +               tmp = readl(host->ioaddr + SD_FIFO_PARAM);
->> +               tmp |= DIS_PAD_SD_CLK_GATE;
->> +               writel(tmp, host->ioaddr + SD_FIFO_PARAM);
->> +       }
->> +}
->> +
->> +#endif /* __MMP2_SDH_H */
+Bus width testing is defined in JEDEC Standard No. 84-A441: section A.8.3 Changing the data bus width
 
-why is this an inline ?  no performance impact if regular function and easier to follow.
+The problem is that it does NOT work in all cases.  Some controllers do not handle the CMD19/CMD14 exchange.
+(BUSTEST_W/BUSTEST_R)
 
->> diff --git a/arch/arm/plat-pxa/include/plat/sdhci.h
->> b/arch/arm/plat-pxa/include/plat/sdhci.h
->> index f6f46db..a3a08db 100644
->> --- a/arch/arm/plat-pxa/include/plat/sdhci.h
->> +++ b/arch/arm/plat-pxa/include/plat/sdhci.h
->> @@ -13,6 +13,8 @@
->>  #ifndef __PLAT_PXA_SDHCI_H
->>  #define __PLAT_PXA_SDHCI_H
->> 
->> +#include <linux/mmc/sdhci.h>
->> +
->>  /* pxa specific flag */
->>  /* Require clock free running */
->>  #define PXA_FLAG_DISABLE_CLOCK_GATING (1<<0)
->> @@ -25,12 +27,16 @@
->>  * @quirks: quirks of specific device
->>  * @flags: flags for platform requirement
->>  * @clk_delay_cycles: 1 ~ 0x1f, each step is roughly 100ps, for tuning timing
->> + * @init_sdh: init function for specific card
->>  */
->>  struct sdhci_pxa_platdata {
->>        unsigned int    max_speed;
->>        unsigned int    quirks;
->>        unsigned int    flags;
->>        unsigned int    clk_delay_cycles;
->> +
->> +       void (*init_sdh)(struct sdhci_host *host,
->> +                       struct sdhci_pxa_platdata *pdata);
->>  };
->> 
->>  #endif /* __PLAT_PXA_SDHCI_H */
->> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
->> index 2b665e4..d628dcc 100644
->> --- a/drivers/mmc/host/sdhci-pxa.c
->> +++ b/drivers/mmc/host/sdhci-pxa.c
->> @@ -29,14 +29,6 @@
->> 
->>  #define DRIVER_NAME    "sdhci-pxa"
->> 
->> -#define SD_FIFO_PARAM          0x104
->> -#define DIS_PAD_SD_CLK_GATE    0x400
->> -
->> -#define SD_CLOCK_AND_BURST_SIZE_SETUP          0x10A
->> -#define SDCLK_SEL      0x100
->> -#define SDCLK_DELAY_SHIFT      9
->> -#define SDCLK_DELAY_MASK       0x1f
->> -
->>  struct sdhci_pxa {
->>        struct sdhci_host               *host;
->>        struct sdhci_pxa_platdata       *pdata;
->> @@ -51,29 +43,11 @@ struct sdhci_pxa {
->>  * SDHCI core callbacks                                                      *
->>  *                                                                           *
->>  \*****************************************************************************/
->> -static inline void tune_timing(struct sdhci_host *host,
->> -                               struct sdhci_pxa_platdata *pdata)
->> -{
->> -       /*
->> -        * tune timing of read data/command when crc error happen
->> -        * no performance impact
->> -        */
->> -       if (pdata && 0 != pdata->clk_delay_cycles) {
->> -               u16 tmp;
->> -
->> -               tmp = readw(host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
->> -               tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
->> -                                       << SDCLK_DELAY_SHIFT;
->> -               tmp |= SDCLK_SEL;
->> -               writew(tmp, host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
->> -       }
->> -}
->> 
->>  static void set_clock(struct sdhci_host *host, unsigned int clock)
->>  {
->>        struct sdhci_pxa *pxa = sdhci_priv(host);
->>        struct sdhci_pxa_platdata *pdata = pxa->pdata;
->> -       u32 tmp = 0;
->> 
->>        if (clock == 0) {
->>                if (pxa->clk_enable) {
->> @@ -81,12 +55,8 @@ static void set_clock(struct sdhci_host *host,
->> unsigned int clock)
->>                        pxa->clk_enable = 0;
->>                }
->>        } else {
->> -               tune_timing(host, pdata);
->> -               if (pdata && pdata->flags & PXA_FLAG_DISABLE_CLOCK_GATING) {
->> -                       tmp = readl(host->ioaddr + SD_FIFO_PARAM);
->> -                       tmp |= DIS_PAD_SD_CLK_GATE;
->> -                       writel(tmp, host->ioaddr + SD_FIFO_PARAM);
->> -               }
->> +               if (pdata && pdata->init_sdh)
->> +                       pdata->init_sdh(host, pdata);
->>                clk_enable(pxa->clk);
->>                pxa->clk_enable = 1;
->>        }
->> --
->> 1.7.0.4
->> 
-> 
-> Acked
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+When this failure happens it is not at all clear what to do....   
+
+We could default to 1 bit mode and just do what we do today and take 4 bit bus width -- assuming CAPS are appropriately enabled.
+
+I was thinking of adding a new MMC_CAP saying controller supports bus width testing.      Any thoughts ?
+
+<snippet of code from today implementation == based on 2.6.32 but with DDR support back ported>
+
+look for mmc_test_bus_width()
+
+My thought was to replace
+
+			if (err) {
+				printk(KERN_WARNING "%s: switch to bus width %d ddr %d "
+					   "failed\n", mmc_hostname(card->host),
+					   1 << bus_width, ddr);
+				err = 0;
+			} else {
+				mmc_set_bus_width_ddr(card->host, bus_width, MMC_SDR_MODE);
+				if (mmc_test_bus_width (card, 1<<bus_width))
+					break;
+			}
+
+with
+
+			if (err) {
+				printk(KERN_WARNING "%s: switch to bus width %d ddr %d "
+					   "failed\n", mmc_hostname(card->host),
+					   1 << bus_width, ddr);
+				err = 0;
+			} else {
+				mmc_set_bus_width_ddr(card->host, bus_width, MMC_SDR_MODE);
+				if ((mmc->caps & MMC_CAPS_CONTROLLER_SUPPORTS_BUSTEST) == 0)
+					break;
+				if (mmc_test_bus_width (card, 1<<bus_width))
+					break;
+			}
+
+and let the platform code set MMC_CAPS_CONTROLLER_SUPPORTS_BUSTEST
+
+
+
+from mmc.c
+==========
+
+static int mmc_init_card(struct mmc_host *host, u32 ocr,
+	struct mmc_card *oldcard)
+{
+	struct mmc_card *card;
+	int err, ddr = 0;
+	u32 cid[4];
+	unsigned int max_dtr;
+	u32 rocr;
+
+	BUG_ON(!host);
+	WARN_ON(!host->claimed);
+
+	/*
+	 * Since we're changing the OCR value, we seem to
+	 * need to tell some cards to go back to the idle
+	 * state.  We wait 1ms to give cards time to
+	 * respond.
+	 */
+	mmc_go_idle(host);
+
+	/* The extra bit indicates that we support high capacity */
+	err = mmc_send_op_cond(host, ocr | MMC_CARD_SECTOR_ADDR, &rocr);
+	if (err)
+		goto err;
+
+	/*
+	 * For SPI, enable CRC as appropriate.
+	 */
+	if (mmc_host_is_spi(host)) {
+		err = mmc_spi_set_crc(host, use_spi_crc);
+		if (err)
+			goto err;
+	}
+
+	/*
+	 * Fetch CID from card.
+	 */
+	if (mmc_host_is_spi(host))
+		err = mmc_send_cid(host, cid);
+	else
+		err = mmc_all_send_cid(host, cid);
+	if (err)
+		goto err;
+
+	if (oldcard) {
+		if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0) {
+			err = -ENOENT;
+			goto err;
+		}
+
+		card = oldcard;
+	} else {
+		/*
+		 * Allocate card structure.
+		 */
+		card = mmc_alloc_card(host, &mmc_type);
+		if (IS_ERR(card)) {
+			err = PTR_ERR(card);
+			goto err;
+		}
+
+		card->type = MMC_TYPE_MMC;
+		card->rca = 1;
+		memcpy(card->raw_cid, cid, sizeof(card->raw_cid));
+	}
+
+	/*
+	 * For native busses:  set card RCA and quit open drain mode.
+	 */
+	if (!mmc_host_is_spi(host)) {
+		err = mmc_set_relative_addr(card);
+		if (err)
+			goto free_card;
+
+		mmc_set_bus_mode(host, MMC_BUSMODE_PUSHPULL);
+	}
+
+	if (!oldcard) {
+		/*
+		 * Fetch CSD from card.
+		 */
+		err = mmc_send_csd(card, card->raw_csd);
+		if (err)
+			goto free_card;
+
+		err = mmc_decode_csd(card);
+		if (err)
+			goto free_card;
+		err = mmc_decode_cid(card);
+		if (err)
+			goto free_card;
+	}
+
+	/*
+	 * Select card, as all following commands rely on that.
+	 */
+	if (!mmc_host_is_spi(host)) {
+		err = mmc_select_card(card);
+		if (err)
+			goto free_card;
+	}
+
+#if 0
+	if (mmc_card_mmc(card)) {
+		/* work around of Micorn 16G emmc */
+		/* set bus_width to 1 bit as init state */
+		mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+				EXT_CSD_BUS_WIDTH, EXT_CSD_BUS_WIDTH_1);
+
+	}
+#endif
+
+	if (!oldcard) {
+		/*
+		 * Fetch and process extended CSD.
+		 */
+		err = mmc_read_ext_csd(card);
+		if (err)
+			goto free_card;
+
+		if (rocr & MMC_CARD_SECTOR_ADDR)
+			mmc_card_set_blockaddr(card);
+	}
+
+
+	/* switch to user partition, emmc may stay in boot partition after boot */
+	mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+			EXT_CSD_PART_CONF, 0);
+
+	/*
+	 * Activate high speed (if supported)
+	 */
+	if ((card->ext_csd.hs_max_dtr != 0) &&
+		(host->caps & MMC_CAP_MMC_HIGHSPEED)) {
+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+			EXT_CSD_HS_TIMING, 1);
+		if (err && err != -EBADMSG)
+			goto free_card;
+
+		if (err) {
+			printk(KERN_WARNING "%s: switch to highspeed failed\n",
+			       mmc_hostname(card->host));
+			err = 0;
+		} else {
+			mmc_card_set_highspeed(card);
+			mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+		}
+	}
+
+	/*
+	 * Compute bus speed.
+	 */
+	max_dtr = (unsigned int)-1;
+
+	if (mmc_card_highspeed(card)) {
+		if (max_dtr > card->ext_csd.hs_max_dtr)
+			max_dtr = card->ext_csd.hs_max_dtr;
+	} else if (max_dtr > card->csd.max_dtr) {
+		max_dtr = card->csd.max_dtr;
+	}
+
+	mmc_set_clock(host, max_dtr);
+
+	/*
+	 * Indicate DDR mode (if supported).
+	 */
+	if (mmc_card_highspeed(card)) {
+		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_8V)
+			&& (host->caps & (MMC_CAP_1_8V_DDR)))
+				ddr = MMC_1_8V_DDR_MODE;
+		else if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
+			&& (host->caps & (MMC_CAP_1_2V_DDR)))
+				ddr = MMC_1_2V_DDR_MODE;
+	}
+
+	/*
+	 * Activate wide bus and DDR (if supported).
+	 */
+	if ((card->csd.mmca_vsn >= CSD_SPEC_VER_4) &&
+	    (host->caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA))) {
+		unsigned ext_csd_bit, bus_width;
+		int temp_caps = host->caps & (MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA);
+
+		do {
+			if (temp_caps & MMC_CAP_8_BIT_DATA) {
+				ext_csd_bit = EXT_CSD_BUS_WIDTH_8;
+				bus_width = MMC_BUS_WIDTH_8;
+			} else {
+				ext_csd_bit = EXT_CSD_BUS_WIDTH_4;
+				bus_width = MMC_BUS_WIDTH_4;
+			}
+
+			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+					 EXT_CSD_BUS_WIDTH, ext_csd_bit);
+			if (err) {
+				printk(KERN_WARNING "%s: switch to bus width %d ddr %d "
+					   "failed\n", mmc_hostname(card->host),
+					   1 << bus_width, ddr);
+				err = 0;
+			} else {
+				mmc_set_bus_width_ddr(card->host, bus_width, MMC_SDR_MODE);
+				if (mmc_test_bus_width (card, 1<<bus_width))
+					break;
+			}
+			
+			if (bus_width == MMC_BUS_WIDTH_8)
+				temp_caps &= ~MMC_CAP_8_BIT_DATA;
+			else
+				temp_caps &= ~MMC_CAP_4_BIT_DATA;
+
+			if (temp_caps == 0) {
+				ext_csd_bit = EXT_CSD_BUS_WIDTH_1;
+				bus_width = MMC_BUS_WIDTH_1;
+			}
+		} while (temp_caps);
+
+		if (temp_caps == 0) {
+			ext_csd_bit = EXT_CSD_BUS_WIDTH_1;
+			bus_width = MMC_BUS_WIDTH_1;
+		}
+		else if (temp_caps & MMC_CAP_8_BIT_DATA) {
+			if (ddr)
+				ext_csd_bit = EXT_CSD_DDR_BUS_WIDTH_8;
+			else
+				ext_csd_bit = EXT_CSD_BUS_WIDTH_8;
+			bus_width = MMC_BUS_WIDTH_8;
+		} else {
+			if (ddr)
+				ext_csd_bit = EXT_CSD_DDR_BUS_WIDTH_4;
+			else
+				ext_csd_bit = EXT_CSD_BUS_WIDTH_4;
+			bus_width = MMC_BUS_WIDTH_4;
+		}
+
+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+				 EXT_CSD_BUS_WIDTH, ext_csd_bit);
+
+		if (ddr) {
+			mmc_card_set_ddr_mode(card);
+			mmc_set_bus_width_ddr(card->host, bus_width, ddr);
+		} else
+			mmc_set_bus_width_ddr(card->host, bus_width, MMC_SDR_MODE);
+
+		if (err && err != -EBADMSG)
+			goto free_card;
+	}
+
+	if (!oldcard)
+		host->card = card;
+
+	return 0;
+
+free_card:
+	if (!oldcard)
+		mmc_remove_card(card);
+err:
+
+	return err;
+}
+
+
+from mmc_ops.c
+=============
+int mmc_test_bus_width(struct mmc_card *card, int bits)
+{
+	struct mmc_request mrq;
+	struct mmc_command cmd;
+	struct mmc_data data;
+	struct scatterlist sg;
+	int len;
+	u8 test_data_write[8];
+	u8 test_data_read[64];
+
+	switch (bits) {
+	case 8:
+		test_data_write[0] = 0x55;
+		test_data_write[1] = 0xaa;
+		test_data_write[2] = 0x00;
+		test_data_write[3] = 0x00;
+		test_data_write[4] = 0x00;
+		test_data_write[5] = 0x00;
+		test_data_write[6] = 0x00;
+		test_data_write[7] = 0x00;
+		len = 8;
+		break;
+	case 4:
+		test_data_write[0] = 0x5a;
+		test_data_write[1] = 0x00;
+		test_data_write[2] = 0x00;
+		test_data_write[3] = 0x00;
+		len = 4;
+		break;
+	default:
+		return 0;
+	}
+
+	memset(&mrq, 0, sizeof(struct mmc_request));
+	memset(&cmd, 0, sizeof(struct mmc_command));
+	memset(&data, 0, sizeof(struct mmc_data));
+
+	cmd.opcode = MMC_BUSTEST_W;
+	cmd.arg = 0;
+	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+
+	data.flags = MMC_DATA_WRITE;
+	data.blksz = 64;
+	data.blocks = 1;
+	data.sg = &sg;
+	data.sg_len = 1;
+
+	mrq.cmd = &cmd;
+	mrq.data = &data;
+
+	sg_init_one(&sg, &test_data_write, 64);
+
+	/*
+	 * The spec states that MMC_BUSTEST_W and BUSTEST_R accesses have a timeout
+	 * of 64 clock cycles.
+	 */
+	data.timeout_ns = 0;
+	data.timeout_clks = 64;
+
+	mmc_wait_for_req(card->host, &mrq);
+
+	if (cmd.error || data.error ) {
+		printk(KERN_INFO "Failed to send CMD19: %d %d\n", cmd.error, data.error);
+		return 0;
+	}
+
+	/* Now read back */
+	memset(&mrq, 0, sizeof(struct mmc_request));
+	memset(&cmd, 0, sizeof(struct mmc_command));
+	memset(&data, 0, sizeof(struct mmc_data));
+	memset (&test_data_read, 0, sizeof(test_data_read));
+
+	cmd.opcode = MMC_BUSTEST_R;
+	cmd.arg = 0;
+	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+
+	data.flags = MMC_DATA_READ;
+	data.blksz = sizeof(test_data_read);
+	data.blocks = 1;
+	data.sg = &sg;
+	data.sg_len = 1;
+
+	mrq.cmd = &cmd;
+	mrq.data = &data;
+
+	sg_init_one(&sg, &test_data_read, sizeof(test_data_read));
+
+	/*
+	 * The spec states that MMC_BUSTEST_W and BUSTEST_R accesses have a timeout
+	 * of 64 clock cycles.
+	 */
+	data.timeout_ns = 0;
+	data.timeout_clks = 64;
+
+	mmc_wait_for_req(card->host, &mrq);
+
+	if (cmd.error) {
+		printk(KERN_INFO "Failed to send CMD14: %d %d\n", cmd.error, data.error);
+		return 0;
+	}
+
+#if 0
+#warning PRINT RESULTS FROM CMD14
+	printk (KERN_INFO "%s: Got %02X %02X %02X %02X\n", __FUNCTION__,
+		test_data_read[0],
+		test_data_read[1],
+		test_data_read[2],
+		test_data_read[3]);
+#endif
+
+	switch (bits) {
+	case 8:
+		return (test_data_read[0] == 0xaa && test_data_read[1] == 0x55);
+	case 4:
+		return (test_data_read[0] == 0xa5);
+	}
+	return 0;
+}
 
