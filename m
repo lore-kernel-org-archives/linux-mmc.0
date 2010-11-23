@@ -1,494 +1,209 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 1/3] mmc: tmio: merge the private header into the driver
-Date: Tue, 23 Nov 2010 17:24:11 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1011231718500.25676@axis700.grange>
+Subject: [PATCH 2/3] mmc: tmio: implement a bounce buffer for unaligned DMA
+Date: Tue, 23 Nov 2010 17:24:15 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1011231723090.25676@axis700.grange>
 References: <Pine.LNX.4.64.1011231711240.25676@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.23]:57144 "HELO mail.gmx.net"
+Received: from mailout-de.gmx.net ([213.165.64.22]:60083 "HELO mail.gmx.net"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with SMTP
-	id S1755123Ab0KWQYF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 23 Nov 2010 11:24:05 -0500
+	id S1753630Ab0KWQYJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 23 Nov 2010 11:24:09 -0500
 In-Reply-To: <Pine.LNX.4.64.1011231711240.25676@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>
 
-drivers/mmc/host/tmio_mmc.h is only used by drivers/mmc/host/tmio_mmc.c, this
-needlessly complicates source-code handling.
+For example, with SDIO WLAN cards, some transfers happen with buffers at odd
+addresses, whereas the SH-Mobile DMA engine requires even addresses for SDHI.
+This patch extends the tmio driver with a bounce buffer, that is used for
+single entry scatter-gather lists both for sending and receiving. If we ever
+encounter unaligned transfers with multi-element sg lists, this patch will have
+to be extended. For now it just falls back to PIO in this and other unsupported
+cases.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc.c |  215 ++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/tmio_mmc.h |  226 -------------------------------------------
- 2 files changed, 210 insertions(+), 231 deletions(-)
- delete mode 100644 drivers/mmc/host/tmio_mmc.h
+ drivers/mmc/host/tmio_mmc.c |   81 +++++++++++++++++++++++++++++++++++++++----
+ include/linux/mfd/tmio.h    |    1 +
+ 2 files changed, 75 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index 10416c3..118ad86 100644
+index 118ad86..57ece9d 100644
 --- a/drivers/mmc/host/tmio_mmc.c
 +++ b/drivers/mmc/host/tmio_mmc.c
-@@ -25,16 +25,221 @@
-  *   double buffer support
-  *
-  */
--#include <linux/module.h>
--#include <linux/irq.h>
--#include <linux/device.h>
-+
- #include <linux/delay.h>
-+#include <linux/device.h>
- #include <linux/dmaengine.h>
--#include <linux/mmc/host.h>
-+#include <linux/highmem.h>
-+#include <linux/interrupt.h>
-+#include <linux/io.h>
-+#include <linux/irq.h>
- #include <linux/mfd/core.h>
- #include <linux/mfd/tmio.h>
-+#include <linux/mmc/host.h>
-+#include <linux/module.h>
-+#include <linux/pagemap.h>
-+#include <linux/scatterlist.h>
-+
-+#define CTL_SD_CMD 0x00
-+#define CTL_ARG_REG 0x04
-+#define CTL_STOP_INTERNAL_ACTION 0x08
-+#define CTL_XFER_BLK_COUNT 0xa
-+#define CTL_RESPONSE 0x0c
-+#define CTL_STATUS 0x1c
-+#define CTL_IRQ_MASK 0x20
-+#define CTL_SD_CARD_CLK_CTL 0x24
-+#define CTL_SD_XFER_LEN 0x26
-+#define CTL_SD_MEM_CARD_OPT 0x28
-+#define CTL_SD_ERROR_DETAIL_STATUS 0x2c
-+#define CTL_SD_DATA_PORT 0x30
-+#define CTL_TRANSACTION_CTL 0x34
-+#define CTL_RESET_SD 0xe0
-+#define CTL_SDIO_REGS 0x100
-+#define CTL_CLK_AND_WAIT_CTL 0x138
-+#define CTL_RESET_SDIO 0x1e0
-+
-+/* Definitions for values the CTRL_STATUS register can take. */
-+#define TMIO_STAT_CMDRESPEND    0x00000001
-+#define TMIO_STAT_DATAEND       0x00000004
-+#define TMIO_STAT_CARD_REMOVE   0x00000008
-+#define TMIO_STAT_CARD_INSERT   0x00000010
-+#define TMIO_STAT_SIGSTATE      0x00000020
-+#define TMIO_STAT_WRPROTECT     0x00000080
-+#define TMIO_STAT_CARD_REMOVE_A 0x00000100
-+#define TMIO_STAT_CARD_INSERT_A 0x00000200
-+#define TMIO_STAT_SIGSTATE_A    0x00000400
-+#define TMIO_STAT_CMD_IDX_ERR   0x00010000
-+#define TMIO_STAT_CRCFAIL       0x00020000
-+#define TMIO_STAT_STOPBIT_ERR   0x00040000
-+#define TMIO_STAT_DATATIMEOUT   0x00080000
-+#define TMIO_STAT_RXOVERFLOW    0x00100000
-+#define TMIO_STAT_TXUNDERRUN    0x00200000
-+#define TMIO_STAT_CMDTIMEOUT    0x00400000
-+#define TMIO_STAT_RXRDY         0x01000000
-+#define TMIO_STAT_TXRQ          0x02000000
-+#define TMIO_STAT_ILL_FUNC      0x20000000
-+#define TMIO_STAT_CMD_BUSY      0x40000000
-+#define TMIO_STAT_ILL_ACCESS    0x80000000
-+
-+/* Define some IRQ masks */
-+/* This is the mask used at reset by the chip */
-+#define TMIO_MASK_ALL           0x837f031d
-+#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND)
-+#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND)
-+#define TMIO_MASK_CMD     (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT | \
-+		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
-+#define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
-+
-+#define enable_mmc_irqs(host, i) \
-+	do { \
-+		u32 mask;\
-+		mask  = sd_ctrl_read32((host), CTL_IRQ_MASK); \
-+		mask &= ~((i) & TMIO_MASK_IRQ); \
-+		sd_ctrl_write32((host), CTL_IRQ_MASK, mask); \
-+	} while (0)
-+
-+#define disable_mmc_irqs(host, i) \
-+	do { \
-+		u32 mask;\
-+		mask  = sd_ctrl_read32((host), CTL_IRQ_MASK); \
-+		mask |= ((i) & TMIO_MASK_IRQ); \
-+		sd_ctrl_write32((host), CTL_IRQ_MASK, mask); \
-+	} while (0)
-+
-+#define ack_mmc_irqs(host, i) \
-+	do { \
-+		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
-+	} while (0)
-+
-+
-+struct tmio_mmc_host {
-+	void __iomem *ctl;
-+	unsigned long bus_shift;
-+	struct mmc_command      *cmd;
-+	struct mmc_request      *mrq;
-+	struct mmc_data         *data;
-+	struct mmc_host         *mmc;
-+	int                     irq;
-+
-+	/* Callbacks for clock / power control */
-+	void (*set_pwr)(struct platform_device *host, int state);
-+	void (*set_clk_div)(struct platform_device *host, int state);
-+
-+	/* pio related stuff */
-+	struct scatterlist      *sg_ptr;
-+	unsigned int            sg_len;
-+	unsigned int            sg_off;
-+
-+	struct platform_device *pdev;
-+
-+	/* DMA support */
-+	struct dma_chan		*chan_rx;
-+	struct dma_chan		*chan_tx;
-+	struct tasklet_struct	dma_complete;
-+	struct tasklet_struct	dma_issue;
-+#ifdef CONFIG_TMIO_MMC_DMA
-+	unsigned int            dma_sglen;
-+#endif
-+};
+@@ -111,6 +111,8 @@
+ 		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
+ 	} while (0)
  
--#include "tmio_mmc.h"
-+static u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
-+{
-+	return readw(host->ctl + (addr << host->bus_shift));
-+}
-+
-+static void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
-+		u16 *buf, int count)
-+{
-+	readsw(host->ctl + (addr << host->bus_shift), buf, count);
-+}
-+
-+static u32 sd_ctrl_read32(struct tmio_mmc_host *host, int addr)
-+{
-+	return readw(host->ctl + (addr << host->bus_shift)) |
-+	       readw(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
-+}
-+
-+static void sd_ctrl_write16(struct tmio_mmc_host *host, int addr, u16 val)
-+{
-+	writew(val, host->ctl + (addr << host->bus_shift));
-+}
-+
-+static void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
-+		u16 *buf, int count)
-+{
-+	writesw(host->ctl + (addr << host->bus_shift), buf, count);
-+}
-+
-+static void sd_ctrl_write32(struct tmio_mmc_host *host, int addr, u32 val)
-+{
-+	writew(val, host->ctl + (addr << host->bus_shift));
-+	writew(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
-+}
-+
-+static void tmio_mmc_init_sg(struct tmio_mmc_host *host, struct mmc_data *data)
-+{
-+	host->sg_len = data->sg_len;
-+	host->sg_ptr = data->sg;
-+	host->sg_off = 0;
-+}
-+
-+static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
-+{
-+	host->sg_ptr = sg_next(host->sg_ptr);
-+	host->sg_off = 0;
-+	return --host->sg_len;
-+}
-+
-+static char *tmio_mmc_kmap_atomic(struct scatterlist *sg, unsigned long *flags)
-+{
-+	local_irq_save(*flags);
-+	return kmap_atomic(sg_page(sg), KM_BIO_SRC_IRQ) + sg->offset;
-+}
-+
-+static void tmio_mmc_kunmap_atomic(void *virt, unsigned long *flags)
-+{
-+	kunmap_atomic(virt, KM_BIO_SRC_IRQ);
-+	local_irq_restore(*flags);
-+}
-+
-+#ifdef CONFIG_MMC_DEBUG
-+
-+#define STATUS_TO_TEXT(a) \
-+	do { \
-+		if (status & TMIO_STAT_##a) \
-+			printk(#a); \
-+	} while (0)
-+
-+void pr_debug_status(u32 status)
-+{
-+	printk(KERN_DEBUG "status: %08x = ", status);
-+	STATUS_TO_TEXT(CARD_REMOVE);
-+	STATUS_TO_TEXT(CARD_INSERT);
-+	STATUS_TO_TEXT(SIGSTATE);
-+	STATUS_TO_TEXT(WRPROTECT);
-+	STATUS_TO_TEXT(CARD_REMOVE_A);
-+	STATUS_TO_TEXT(CARD_INSERT_A);
-+	STATUS_TO_TEXT(SIGSTATE_A);
-+	STATUS_TO_TEXT(CMD_IDX_ERR);
-+	STATUS_TO_TEXT(STOPBIT_ERR);
-+	STATUS_TO_TEXT(ILL_FUNC);
-+	STATUS_TO_TEXT(CMD_BUSY);
-+	STATUS_TO_TEXT(CMDRESPEND);
-+	STATUS_TO_TEXT(DATAEND);
-+	STATUS_TO_TEXT(CRCFAIL);
-+	STATUS_TO_TEXT(DATATIMEOUT);
-+	STATUS_TO_TEXT(CMDTIMEOUT);
-+	STATUS_TO_TEXT(RXOVERFLOW);
-+	STATUS_TO_TEXT(TXUNDERRUN);
-+	STATUS_TO_TEXT(RXRDY);
-+	STATUS_TO_TEXT(TXRQ);
-+	STATUS_TO_TEXT(ILL_ACCESS);
-+	printk("\n");
-+}
-+
-+#else
-+#define pr_debug_status(s)  do { } while (0)
-+#endif
++/* This is arbitrary, just noone needed any higher alignment yet */
++#define MAX_ALIGN 4
  
- static void tmio_mmc_set_clock(struct tmio_mmc_host *host, int new_clock)
+ struct tmio_mmc_host {
+ 	void __iomem *ctl;
+@@ -127,6 +129,7 @@ struct tmio_mmc_host {
+ 
+ 	/* pio related stuff */
+ 	struct scatterlist      *sg_ptr;
++	struct scatterlist      *sg_orig;
+ 	unsigned int            sg_len;
+ 	unsigned int            sg_off;
+ 
+@@ -139,6 +142,8 @@ struct tmio_mmc_host {
+ 	struct tasklet_struct	dma_issue;
+ #ifdef CONFIG_TMIO_MMC_DMA
+ 	unsigned int            dma_sglen;
++	u8			bounce_buf[PAGE_CACHE_SIZE] __attribute__((aligned(MAX_ALIGN)));
++	struct scatterlist	bounce_sg;
+ #endif
+ };
+ 
+@@ -180,6 +185,7 @@ static void tmio_mmc_init_sg(struct tmio_mmc_host *host, struct mmc_data *data)
  {
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-deleted file mode 100644
-index 0b7d916..0000000
---- a/drivers/mmc/host/tmio_mmc.h
-+++ /dev/null
-@@ -1,226 +0,0 @@
--/* Definitons for use with the tmio_mmc.c
-- *
-- * (c) 2004 Ian Molton <spyro@f2s.com>
-- * (c) 2007 Ian Molton <spyro@f2s.com>
-- *
-- * This program is free software; you can redistribute it and/or modify
-- * it under the terms of the GNU General Public License version 2 as
-- * published by the Free Software Foundation.
-- *
-- */
--
--#include <linux/highmem.h>
--#include <linux/interrupt.h>
--#include <linux/dmaengine.h>
--
--#define CTL_SD_CMD 0x00
--#define CTL_ARG_REG 0x04
--#define CTL_STOP_INTERNAL_ACTION 0x08
--#define CTL_XFER_BLK_COUNT 0xa
--#define CTL_RESPONSE 0x0c
--#define CTL_STATUS 0x1c
--#define CTL_IRQ_MASK 0x20
--#define CTL_SD_CARD_CLK_CTL 0x24
--#define CTL_SD_XFER_LEN 0x26
--#define CTL_SD_MEM_CARD_OPT 0x28
--#define CTL_SD_ERROR_DETAIL_STATUS 0x2c
--#define CTL_SD_DATA_PORT 0x30
--#define CTL_TRANSACTION_CTL 0x34
--#define CTL_RESET_SD 0xe0
--#define CTL_SDIO_REGS 0x100
--#define CTL_CLK_AND_WAIT_CTL 0x138
--#define CTL_RESET_SDIO 0x1e0
--
--/* Definitions for values the CTRL_STATUS register can take. */
--#define TMIO_STAT_CMDRESPEND    0x00000001
--#define TMIO_STAT_DATAEND       0x00000004
--#define TMIO_STAT_CARD_REMOVE   0x00000008
--#define TMIO_STAT_CARD_INSERT   0x00000010
--#define TMIO_STAT_SIGSTATE      0x00000020
--#define TMIO_STAT_WRPROTECT     0x00000080
--#define TMIO_STAT_CARD_REMOVE_A 0x00000100
--#define TMIO_STAT_CARD_INSERT_A 0x00000200
--#define TMIO_STAT_SIGSTATE_A    0x00000400
--#define TMIO_STAT_CMD_IDX_ERR   0x00010000
--#define TMIO_STAT_CRCFAIL       0x00020000
--#define TMIO_STAT_STOPBIT_ERR   0x00040000
--#define TMIO_STAT_DATATIMEOUT   0x00080000
--#define TMIO_STAT_RXOVERFLOW    0x00100000
--#define TMIO_STAT_TXUNDERRUN    0x00200000
--#define TMIO_STAT_CMDTIMEOUT    0x00400000
--#define TMIO_STAT_RXRDY         0x01000000
--#define TMIO_STAT_TXRQ          0x02000000
--#define TMIO_STAT_ILL_FUNC      0x20000000
--#define TMIO_STAT_CMD_BUSY      0x40000000
--#define TMIO_STAT_ILL_ACCESS    0x80000000
--
--/* Define some IRQ masks */
--/* This is the mask used at reset by the chip */
--#define TMIO_MASK_ALL           0x837f031d
--#define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND)
--#define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND)
--#define TMIO_MASK_CMD     (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT | \
--		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
--#define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
--
--
--#define enable_mmc_irqs(host, i) \
--	do { \
--		u32 mask;\
--		mask  = sd_ctrl_read32((host), CTL_IRQ_MASK); \
--		mask &= ~((i) & TMIO_MASK_IRQ); \
--		sd_ctrl_write32((host), CTL_IRQ_MASK, mask); \
--	} while (0)
--
--#define disable_mmc_irqs(host, i) \
--	do { \
--		u32 mask;\
--		mask  = sd_ctrl_read32((host), CTL_IRQ_MASK); \
--		mask |= ((i) & TMIO_MASK_IRQ); \
--		sd_ctrl_write32((host), CTL_IRQ_MASK, mask); \
--	} while (0)
--
--#define ack_mmc_irqs(host, i) \
--	do { \
--		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
--	} while (0)
--
--
--struct tmio_mmc_host {
--	void __iomem *ctl;
--	unsigned long bus_shift;
--	struct mmc_command      *cmd;
--	struct mmc_request      *mrq;
--	struct mmc_data         *data;
--	struct mmc_host         *mmc;
--	int                     irq;
--
--	/* Callbacks for clock / power control */
--	void (*set_pwr)(struct platform_device *host, int state);
--	void (*set_clk_div)(struct platform_device *host, int state);
--
--	/* pio related stuff */
--	struct scatterlist      *sg_ptr;
--	unsigned int            sg_len;
--	unsigned int            sg_off;
--
--	struct platform_device *pdev;
--
--	/* DMA support */
--	struct dma_chan		*chan_rx;
--	struct dma_chan		*chan_tx;
--	struct tasklet_struct	dma_complete;
--	struct tasklet_struct	dma_issue;
--#ifdef CONFIG_TMIO_MMC_DMA
--	unsigned int            dma_sglen;
--#endif
--};
--
--#include <linux/io.h>
--
--static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
--{
--	return readw(host->ctl + (addr << host->bus_shift));
--}
--
--static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
--		u16 *buf, int count)
--{
--	readsw(host->ctl + (addr << host->bus_shift), buf, count);
--}
--
--static inline u32 sd_ctrl_read32(struct tmio_mmc_host *host, int addr)
--{
--	return readw(host->ctl + (addr << host->bus_shift)) |
--	       readw(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
--}
--
--static inline void sd_ctrl_write16(struct tmio_mmc_host *host, int addr,
--		u16 val)
--{
--	writew(val, host->ctl + (addr << host->bus_shift));
--}
--
--static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
--		u16 *buf, int count)
--{
--	writesw(host->ctl + (addr << host->bus_shift), buf, count);
--}
--
--static inline void sd_ctrl_write32(struct tmio_mmc_host *host, int addr,
--		u32 val)
--{
--	writew(val, host->ctl + (addr << host->bus_shift));
--	writew(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
--}
--
--#include <linux/scatterlist.h>
--#include <linux/blkdev.h>
--
--static inline void tmio_mmc_init_sg(struct tmio_mmc_host *host,
--	struct mmc_data *data)
--{
--	host->sg_len = data->sg_len;
--	host->sg_ptr = data->sg;
--	host->sg_off = 0;
--}
--
--static inline int tmio_mmc_next_sg(struct tmio_mmc_host *host)
--{
--	host->sg_ptr = sg_next(host->sg_ptr);
--	host->sg_off = 0;
--	return --host->sg_len;
--}
--
--static inline char *tmio_mmc_kmap_atomic(struct scatterlist *sg,
--	unsigned long *flags)
--{
--	local_irq_save(*flags);
--	return kmap_atomic(sg_page(sg), KM_BIO_SRC_IRQ) + sg->offset;
--}
--
--static inline void tmio_mmc_kunmap_atomic(void *virt,
--	unsigned long *flags)
--{
--	kunmap_atomic(virt, KM_BIO_SRC_IRQ);
--	local_irq_restore(*flags);
--}
--
--#ifdef CONFIG_MMC_DEBUG
--
--#define STATUS_TO_TEXT(a) \
--	do { \
--		if (status & TMIO_STAT_##a) \
--			printk(#a); \
--	} while (0)
--
--void pr_debug_status(u32 status)
--{
--	printk(KERN_DEBUG "status: %08x = ", status);
--	STATUS_TO_TEXT(CARD_REMOVE);
--	STATUS_TO_TEXT(CARD_INSERT);
--	STATUS_TO_TEXT(SIGSTATE);
--	STATUS_TO_TEXT(WRPROTECT);
--	STATUS_TO_TEXT(CARD_REMOVE_A);
--	STATUS_TO_TEXT(CARD_INSERT_A);
--	STATUS_TO_TEXT(SIGSTATE_A);
--	STATUS_TO_TEXT(CMD_IDX_ERR);
--	STATUS_TO_TEXT(STOPBIT_ERR);
--	STATUS_TO_TEXT(ILL_FUNC);
--	STATUS_TO_TEXT(CMD_BUSY);
--	STATUS_TO_TEXT(CMDRESPEND);
--	STATUS_TO_TEXT(DATAEND);
--	STATUS_TO_TEXT(CRCFAIL);
--	STATUS_TO_TEXT(DATATIMEOUT);
--	STATUS_TO_TEXT(CMDTIMEOUT);
--	STATUS_TO_TEXT(RXOVERFLOW);
--	STATUS_TO_TEXT(TXUNDERRUN);
--	STATUS_TO_TEXT(RXRDY);
--	STATUS_TO_TEXT(TXRQ);
--	STATUS_TO_TEXT(ILL_ACCESS);
--	printk("\n");
--}
--
--#else
--#define pr_debug_status(s)  do { } while (0)
--#endif
+ 	host->sg_len = data->sg_len;
+ 	host->sg_ptr = data->sg;
++	host->sg_orig = data->sg;
+ 	host->sg_off = 0;
+ }
+ 
+@@ -436,8 +442,14 @@ static void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
+ 	 */
+ 
+ 	if (data->flags & MMC_DATA_READ) {
+-		if (!host->chan_rx)
++		if (!host->chan_rx) {
+ 			disable_mmc_irqs(host, TMIO_MASK_READOP);
++		} else if (host->sg_ptr == &host->bounce_sg) {
++			unsigned long flags;
++			void *sg_vaddr = tmio_mmc_kmap_atomic(host->sg_orig, &flags);
++			memcpy(sg_vaddr, host->bounce_buf, host->bounce_sg.length);
++			tmio_mmc_kunmap_atomic(sg_vaddr, &flags);
++		}
+ 		dev_dbg(&host->pdev->dev, "Complete Rx request %p\n",
+ 			host->mrq);
+ 	} else {
+@@ -529,8 +541,7 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
+ 			if (!host->chan_rx)
+ 				enable_mmc_irqs(host, TMIO_MASK_READOP);
+ 		} else {
+-			struct dma_chan *chan = host->chan_tx;
+-			if (!chan)
++			if (!host->chan_tx)
+ 				enable_mmc_irqs(host, TMIO_MASK_WRITEOP);
+ 			else
+ 				tasklet_schedule(&host->dma_issue);
+@@ -634,11 +645,36 @@ static void tmio_dma_complete(void *arg)
+ 
+ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
+ {
+-	struct scatterlist *sg = host->sg_ptr;
++	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
+ 	struct dma_async_tx_descriptor *desc = NULL;
+ 	struct dma_chan *chan = host->chan_rx;
++	struct mfd_cell	*cell = host->pdev->dev.platform_data;
++	struct tmio_mmc_data *pdata = cell->driver_data;
+ 	dma_cookie_t cookie;
+-	int ret;
++	int ret, i;
++	bool aligned = true, multiple = true;
++	unsigned int align = (1 << pdata->dma->alignment_shift) - 1;
++
++	for_each_sg(sg, sg_tmp, host->sg_len, i) {
++		if (sg_tmp->offset & align)
++			aligned = false;
++		if (sg_tmp->length & align) {
++			multiple = false;
++			break;
++		}
++	}
++
++	if ((!aligned && (host->sg_len > 1 || sg->length > PAGE_CACHE_SIZE ||
++			  align >= MAX_ALIGN)) || !multiple)
++		goto pio;
++
++	/* The only sg element can be unaligned, use our bounce buffer then */
++	if (!aligned) {
++		/* The first sg element unaligned, use our bounce-buffer */
++		sg_init_one(&host->bounce_sg, host->bounce_buf, sg->length);
++		host->sg_ptr = &host->bounce_sg;
++		sg = host->sg_ptr;
++	}
+ 
+ 	ret = dma_map_sg(&host->pdev->dev, sg, host->sg_len, DMA_FROM_DEVICE);
+ 	if (ret > 0) {
+@@ -661,6 +697,7 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
+ 	dev_dbg(&host->pdev->dev, "%s(): mapped %d -> %d, cookie %d, rq %p\n",
+ 		__func__, host->sg_len, ret, cookie, host->mrq);
+ 
++pio:
+ 	if (!desc) {
+ 		/* DMA failed, fall back to PIO */
+ 		if (ret >= 0)
+@@ -684,11 +721,40 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
+ 
+ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
+ {
+-	struct scatterlist *sg = host->sg_ptr;
++	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
+ 	struct dma_async_tx_descriptor *desc = NULL;
+ 	struct dma_chan *chan = host->chan_tx;
++	struct mfd_cell	*cell = host->pdev->dev.platform_data;
++	struct tmio_mmc_data *pdata = cell->driver_data;
+ 	dma_cookie_t cookie;
+-	int ret;
++	int ret, i;
++	bool aligned = true, multiple = true;
++	unsigned int align = (1 << pdata->dma->alignment_shift) - 1;
++
++	for_each_sg(sg, sg_tmp, host->sg_len, i) {
++		if (sg_tmp->offset & align)
++			aligned = false;
++		if (sg_tmp->length & align) {
++			multiple = false;
++			break;
++		}
++	}
++
++	if ((!aligned && (host->sg_len > 1 || sg->length > PAGE_CACHE_SIZE ||
++			  align >= MAX_ALIGN)) || !multiple)
++		goto pio;
++
++	/* The only sg element can be unaligned, use our bounce buffer then */
++	if (!aligned) {
++		unsigned long flags;
++		void *sg_vaddr = tmio_mmc_kmap_atomic(sg, &flags);
++		/* The first sg element unaligned, use our bounce-buffer */
++		sg_init_one(&host->bounce_sg, host->bounce_buf, sg->length);
++		memcpy(host->bounce_buf, sg_vaddr, host->bounce_sg.length);
++		tmio_mmc_kunmap_atomic(sg_vaddr, &flags);
++		host->sg_ptr = &host->bounce_sg;
++		sg = host->sg_ptr;
++	}
+ 
+ 	ret = dma_map_sg(&host->pdev->dev, sg, host->sg_len, DMA_TO_DEVICE);
+ 	if (ret > 0) {
+@@ -709,6 +775,7 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
+ 	dev_dbg(&host->pdev->dev, "%s(): mapped %d -> %d, cookie %d, rq %p\n",
+ 		__func__, host->sg_len, ret, cookie, host->mrq);
+ 
++pio:
+ 	if (!desc) {
+ 		/* DMA failed, fall back to PIO */
+ 		if (ret >= 0)
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 085f041..dbfc053 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -66,6 +66,7 @@ void tmio_core_mmc_clk_div(void __iomem *cnf, int shift, int state);
+ struct tmio_mmc_dma {
+ 	void *chan_priv_tx;
+ 	void *chan_priv_rx;
++	int alignment_shift;
+ };
+ 
+ /*
 -- 
 1.7.2.3
 
