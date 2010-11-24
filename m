@@ -1,53 +1,64 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH] sdhci: Kconfig: MMC_SDHCI_PXA: CPU_MMP2 no need IO_ACCESSORS
-Date: Wed, 24 Nov 2010 13:30:24 -0800
-Message-ID: <6AF03C74-B11E-44E6-B085-35B2D2E8D8D3@marvell.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 1/2] mmc: Add support for JMicron 388 SD/MMC controller
+Date: Wed, 24 Nov 2010 23:04:25 +0100
+Message-ID: <20101124220425.GA18464@pengutronix.de>
+References: <1290579674-4616-1-git-send-email-tiwai@suse.de> <1290579674-4616-2-git-send-email-tiwai@suse.de> <20101124095935.GA6812@pengutronix.de> <s5hy68jq7re.wl%tiwai@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="AqsLC8rIMeq19msA"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:41579 "HELO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753374Ab0KXVdl convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 24 Nov 2010 16:33:41 -0500
-Content-Language: en-US
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:40268 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752190Ab0KXWEa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Nov 2010 17:04:30 -0500
+Content-Disposition: inline
+In-Reply-To: <s5hy68jq7re.wl%tiwai@suse.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Mark Brown <markb@marvell.com>, Zhangfei Gao <zhangfei.gao@gmail.com>
+To: Takashi Iwai <tiwai@suse.de>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Aries Lee <arieslee@jmicron.com>
 
-Resend as plain text
 
->From 5ffe0546fb3d70dd97af178e474fbcdfa64ea4e8 Mon Sep 17 00:00:00 2001
-From: Philip Rakity <prakity@marvell.com>
-Date: Wed, 24 Nov 2010 13:25:47 -0800
-Subject: [PATCH] sdhci: Kconfig: MMC_SDHCI_PXA: CPU_MMP2 no need IO_ACCESSORS
+--AqsLC8rIMeq19msA
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-read and write to MMP2 controller in sdhci-pxa does not use
-IO_ACCESSORS.  MMP2 hardware does not require special handling
-for read and write.
+On Wed, Nov 24, 2010 at 12:29:57PM +0100, Takashi Iwai wrote:
+> At Wed, 24 Nov 2010 10:59:35 +0100,
+> Wolfram Sang wrote:
+> >=20
+> > On Wed, Nov 24, 2010 at 07:21:13AM +0100, Takashi Iwai wrote:
+> >=20
+> > > +/* Controller doesn't support VDD 180 for MMC (for SD/MMC combo chip=
+s) */
+> > > +#define SDHCI_QUIRK_MMC_VDD_180				(1<<30)
+> >=20
+> > Can't we handle this more generic? Like setting ocr_avail_* from
+> > sdhci-pci.c somehow (just brainstorming, didn't have a deeper look)? I'd
+> > like to avoid new quirks as much as possible.
+>=20
+> OK, what about the one below?
 
-change Kconfig to not set this option.  Speed Improvement.
+Looks better to me. (sadly, still from a glimpse, no thorough review)
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- drivers/mmc/host/Kconfig |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+Thanks!
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index f8fa9ef..f48532f 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -170,7 +170,7 @@ config MMC_SDHCI_PXA
- 	tristate "Marvell PXA168/PXA910/MMP2 SD Host Controller support"
- 	depends on ARCH_PXA || ARCH_MMP
- 	select MMC_SDHCI
--	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_SDHCI_IO_ACCESSORS if !CPU_MMP2
- 	help
- 	  This selects the Marvell(R) PXA168/PXA910/MMP2 SD Host Controller.
- 	  If you have a PXA168/PXA910/MMP2 platform with SD Host Controller
--- 
-1.6.0.4
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
+--AqsLC8rIMeq19msA
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkzti+kACgkQD27XaX1/VRt8NACcDMJYtu1DKmsWK1hcBLwEd1Bx
+SIAAnjEb77jsmgjemoYhMlKIu+1sFzEM
+=F0Vq
+-----END PGP SIGNATURE-----
+
+--AqsLC8rIMeq19msA--
