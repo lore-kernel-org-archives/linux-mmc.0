@@ -1,21 +1,23 @@
 From: Philip Rakity <prakity@marvell.com>
 Subject: [PATCH] sdhci: Kconfig: MMC_SDHCI_PXA: CPU_MMP2 no need IO_ACCESSORS
-Date: Wed, 24 Nov 2010 13:29:41 -0800
-Message-ID: <2F707D04-7E09-4425-BCDF-8530BE01DB9C@marvell.com>
+Date: Wed, 24 Nov 2010 13:30:24 -0800
+Message-ID: <6AF03C74-B11E-44E6-B085-35B2D2E8D8D3@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:41149 "HELO
+Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:41579 "HELO
 	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1754040Ab0KXVd0 convert rfc822-to-8bit
+	by vger.kernel.org with SMTP id S1753374Ab0KXVdl convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 24 Nov 2010 16:33:26 -0500
+	Wed, 24 Nov 2010 16:33:41 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc <linux-mmc@vger.kernel.org>
 Cc: Mark Brown <markb@marvell.com>, Zhangfei Gao <zhangfei.gao@gmail.com>
+
+Resend as plain text
 
 >From 5ffe0546fb3d70dd97af178e474fbcdfa64ea4e8 Mon Sep 17 00:00:00 2001
 From: Philip Rakity <prakity@marvell.com>
