@@ -1,35 +1,51 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [RFC]  sdhci: 8 bit bus width changes
-Date: Wed, 24 Nov 2010 17:35:16 +0000
-Message-ID: <20101124173516.GA24487@void.printf.net>
-References: <B76798A1-FA3F-4D7D-A22A-52289A4062FB@marvell.com> <20101119214002.GA19272@void.printf.net> <20101119215333.GB19272@void.printf.net> <20101120123553.GA11936@pengutronix.de> <20101120182423.GA31030@void.printf.net> <06A44983-1A70-4715-86AF-66C08DD381C0@marvell.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH] sdhci: Kconfig: MMC_SDHCI_PXA: CPU_MMP2 no need IO_ACCESSORS
+Date: Wed, 24 Nov 2010 13:29:41 -0800
+Message-ID: <2F707D04-7E09-4425-BCDF-8530BE01DB9C@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40624 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754083Ab0KXRfU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 24 Nov 2010 12:35:20 -0500
-Content-Disposition: inline
-In-Reply-To: <06A44983-1A70-4715-86AF-66C08DD381C0@marvell.com>
+Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:41149 "HELO
+	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1754040Ab0KXVd0 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 24 Nov 2010 16:33:26 -0500
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Mark Brown <markb@marvell.com>, Zhangfei Gao <zhangfei.gao@gmail.com>
 
-Hi Philip,
+>From 5ffe0546fb3d70dd97af178e474fbcdfa64ea4e8 Mon Sep 17 00:00:00 2001
+From: Philip Rakity <prakity@marvell.com>
+Date: Wed, 24 Nov 2010 13:25:47 -0800
+Subject: [PATCH] sdhci: Kconfig: MMC_SDHCI_PXA: CPU_MMP2 no need IO_ACCESSORS
 
-On Sun, Nov 21, 2010 at 11:17:09AM -0800, Philip Rakity wrote:
-> a) QUIRK removed for 8 bit support since platform issue - not quirk
-> b) platform Flag defined for sdhci-pxa.c and plat-pxa
-> c) comments added to sdhci.c on usage
+read and write to MMP2 controller in sdhci-pxa does not use
+IO_ACCESSORS.  MMP2 hardware does not require special handling
+for read and write.
 
-Thanks very much, I'll plan on sending this to Linus tomorrow, along
-with the rest of my .37 queue, unless there are any more review
-comments from anyone.
+change Kconfig to not set this option.  Speed Improvement.
 
-http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=15ec44611904be0dcc97b84c29fbf964e5e2b36f
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+---
+ drivers/mmc/host/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index f8fa9ef..f48532f 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -170,7 +170,7 @@ config MMC_SDHCI_PXA
+ 	tristate "Marvell PXA168/PXA910/MMP2 SD Host Controller support"
+ 	depends on ARCH_PXA || ARCH_MMP
+ 	select MMC_SDHCI
+-	select MMC_SDHCI_IO_ACCESSORS
++	select MMC_SDHCI_IO_ACCESSORS if !CPU_MMP2
+ 	help
+ 	  This selects the Marvell(R) PXA168/PXA910/MMP2 SD Host Controller.
+ 	  If you have a PXA168/PXA910/MMP2 platform with SD Host Controller
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.6.0.4
+
