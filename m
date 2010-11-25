@@ -1,66 +1,87 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH] sdhci: Kconfig: MMC_SDHCI_PXA: CPU_MMP2 no need IO_ACCESSORS
-Date: Thu, 25 Nov 2010 00:31:25 -0500
-Message-ID: <AANLkTikPhD4DOOU9iC4zEiZqsy+k+mZa2x6i7faxd8SE@mail.gmail.com>
-References: <6AF03C74-B11E-44E6-B085-35B2D2E8D8D3@marvell.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 2.6.37-rc4
+Date: Thu, 25 Nov 2010 01:26:47 -0500
+Message-ID: <m34ob5ex5k.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:35841 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750903Ab0KYFb0 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Nov 2010 00:31:26 -0500
-Received: by fxm13 with SMTP id 13so449295fxm.19
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Nov 2010 21:31:25 -0800 (PST)
-In-Reply-To: <6AF03C74-B11E-44E6-B085-35B2D2E8D8D3@marvell.com>
+Received: from void.printf.net ([89.145.121.20]:38495 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750971Ab0KYGWb convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Nov 2010 01:22:31 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Wed, Nov 24, 2010 at 4:30 PM, Philip Rakity <prakity@marvell.com> wr=
-ote:
-> Resend as plain text
->
-> From 5ffe0546fb3d70dd97af178e474fbcdfa64ea4e8 Mon Sep 17 00:00:00 200=
-1
-> From: Philip Rakity <prakity@marvell.com>
-> Date: Wed, 24 Nov 2010 13:25:47 -0800
-> Subject: [PATCH] sdhci: Kconfig: MMC_SDHCI_PXA: CPU_MMP2 no need IO_A=
-CCESSORS
->
-> read and write to MMP2 controller in sdhci-pxa does not use
-> IO_ACCESSORS. =A0MMP2 hardware does not require special handling
-> for read and write.
->
-> change Kconfig to not set this option. =A0Speed Improvement.
->
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> ---
-> =A0drivers/mmc/host/Kconfig | =A0 =A02 +-
-> =A01 files changed, 1 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index f8fa9ef..f48532f 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -170,7 +170,7 @@ config MMC_SDHCI_PXA
-> =A0 =A0 =A0 =A0tristate "Marvell PXA168/PXA910/MMP2 SD Host Controlle=
-r support"
-> =A0 =A0 =A0 =A0depends on ARCH_PXA || ARCH_MMP
-> =A0 =A0 =A0 =A0select MMC_SDHCI
-> - =A0 =A0 =A0 select MMC_SDHCI_IO_ACCESSORS
-> + =A0 =A0 =A0 select MMC_SDHCI_IO_ACCESSORS if !CPU_MMP2
-> =A0 =A0 =A0 =A0help
-> =A0 =A0 =A0 =A0 =A0This selects the Marvell(R) PXA168/PXA910/MMP2 SD =
-Host Controller.
-> =A0 =A0 =A0 =A0 =A0If you have a PXA168/PXA910/MMP2 platform with SD =
-Host Controller
-> --
-> 1.6.0.4
->
->
-Thanks,
-Could pxa168 can read HOST_VERSION from SDHCI_HOST_VERSION (BIT 0:7),
-if so,  MMC_SDHCI_IO_ACCESSORS can be removed at all.
+Linus,
+
+Please pull from:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+to fix two regressions in -rc1 (SDIO devices and <8-bit MMC cards), two
+longstanding bugs (rmmod race, enable SDIO IRQ wakeups), and some small
+device support bugs.  These have been tested in linux-next.  Thanks.
+
+The following changes since commit 151f52f09c5728ecfdd0c289da1a4b30bb41=
+6f2c:
+  Linus Torvalds (1):
+        ipw2x00: remove the right /proc/net entry
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+Axel Lin (1):
+      mmc: ushc: Return proper error code for ushc_probe()
+
+Daniel Drake (1):
+      mmc: sdhci: Properly enable SDIO IRQ wakeups
+
+Eric B=C3=A9nard (2):
+      mmc: sdhci-esdhc-imx: fix timeout on i.MX's sdhci
+      mmc: sdhci-esdhc-imx: enable QUIRK_NO_MULTIBLOCK only for i.MX25 =
+and i.MX35
+
+Guennadi Liakhovetski (1):
+      mmc: fix rmmod race for hosts using card-detection polling
+
+Jacob Pan (1):
+      mmc: sdhci: Fix crash on boot with C0 stepping Moorestown platfor=
+ms
+
+Ohad Ben-Cohen (2):
+      mmc: sdio: fix nasty oops in mmc_sdio_detect
+      mmc: sdio: fix runtime PM anomalies by introducing MMC_CAP_POWER_=
+OFF_CARD
+
+Philip Rakity (2):
+      mmc: Fix printing of card DDR type
+      mmc: sdhci: 8-bit bus width changes
+
+kishore kadiyala (1):
+      mmc: omap4: hsmmc: Fix improper card detection while booting
+
+ arch/arm/plat-pxa/include/plat/sdhci.h |    3 ++
+ drivers/mmc/core/core.c                |    2 +-
+ drivers/mmc/core/mmc.c                 |    8 +++-
+ drivers/mmc/core/sdio.c                |   51 ++++++++++++++++++++----=
+-----
+ drivers/mmc/core/sdio_bus.c            |   33 +++++++++++++------
+ drivers/mmc/host/omap_hsmmc.c          |    2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c     |   12 +++++--
+ drivers/mmc/host/sdhci-pci.c           |   31 +++++++++++++-----
+ drivers/mmc/host/sdhci-pxa.c           |    4 ++
+ drivers/mmc/host/sdhci.c               |   54 ++++++++++++++++++++++++=
++------
+ drivers/mmc/host/sdhci.h               |    9 +++++-
+ drivers/mmc/host/ushc.c                |   30 +++++++++++++-----
+ include/linux/mmc/host.h               |    1 +
+ include/linux/pci_ids.h                |    1 +
+ 14 files changed, 179 insertions(+), 62 deletions(-)
+
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
