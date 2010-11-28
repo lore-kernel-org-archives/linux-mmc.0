@@ -1,162 +1,115 @@
-From: Yunpeng Gao <yunpeng.gao@intel.com>
-Subject: [PATCH v1 3/3]mmc: changes to enable runtime PM of mmc core layer
-Date: Sun, 28 Nov 2010 13:53:15 +0800
-Message-ID: <20101128055315.GD3318@intel.com>
+From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Subject: Re: [PATCH 2/3] mmc: sdio: don't reinitialize nonremovable
+ powered-resumed cards
+Date: Sun, 28 Nov 2010 09:42:04 +0100
+Message-ID: <AANLkTiko9brvK33=GjzJgzGdmoufyNn=_mCNfUFAP-dT@mail.gmail.com>
+References: <1290921690-6133-1-git-send-email-ohad@wizery.com>
+	<1290921690-6133-3-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:64660 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751366Ab0K1GUM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 28 Nov 2010 01:20:12 -0500
-Content-Disposition: inline
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:64495 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750791Ab0K1ImF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Nov 2010 03:42:05 -0500
+Received: by qyk12 with SMTP id 12so5086385qyk.19
+        for <linux-mmc@vger.kernel.org>; Sun, 28 Nov 2010 00:42:04 -0800 (PST)
+In-Reply-To: <1290921690-6133-3-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
+2010/11/28 Ohad Ben-Cohen <ohad@wizery.com>:
+> Upon system resume, SDIO core must reinitialize cards that were
+> powered off during suspend.
+>
+> If the card had its power kept during suspend (and thus it
+> is 'powered-resumed'), SDIO core performs only a limited reinitializi=
+ng,
+> mainly needed to make sure that the card wasn't removed/replaced.
+>
+> If a __nonremovable__ card is powered-resumed, we can safely skip the
+> reinitializing phase.
+>
+> Note: 9b966aa removed the bus width reconfiguration since
+> mmc_sdio_init_card already does it. It is brought back now in case
+> mmc_sdio_init_card is skipped.
+>
+> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+> ---
+>
+> I have not switched all existing code to mmc_card_is_powered_resumed(=
+),
+> I can do that as a subsequent clean up patch.
+>
+> =A0drivers/mmc/core/sdio.c =A0| =A0 16 ++++++++++++++--
+> =A0include/linux/mmc/host.h | =A0 =A05 +++++
+> =A02 files changed, 19 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index efef5f9..b424fbe 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -627,15 +627,27 @@ static int mmc_sdio_suspend(struct mmc_host *ho=
+st)
+>
+> =A0static int mmc_sdio_resume(struct mmc_host *host)
+> =A0{
+> - =A0 =A0 =A0 int i, err;
+> + =A0 =A0 =A0 int i, err =3D 0;
+>
+> =A0 =A0 =A0 =A0BUG_ON(!host);
+> =A0 =A0 =A0 =A0BUG_ON(!host->card);
+>
+> =A0 =A0 =A0 =A0/* Basic card reinitialization. */
+> =A0 =A0 =A0 =A0mmc_claim_host(host);
+> - =A0 =A0 =A0 err =3D mmc_sdio_init_card(host, host->ocr, host->card,
+> +
+> + =A0 =A0 =A0 /* No need to reinitialize powered-resumed nonremovable=
+ cards */
+> + =A0 =A0 =A0 if (mmc_card_is_removable(host) || !mmc_card_is_powered=
+_resumed(host))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_sdio_init_card(host, host->=
+ocr, host->card,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host=
+->pm_flags & MMC_PM_KEEP_POWER));
 
->From cac07f43de68615cca9f01f619870fdce05df2a2 Mon Sep 17 00:00:00 2001
-From: Yunpeng Gao <yunpeng.gao@intel.com>
-Date: Sun, 28 Nov 2010 13:00:42 +0800
-Subject: [PATCH] Do some changes in mmc core layer to enable mmc card runtime pm.
+You can use mmc_card_is_powered_resumed() here, too.
 
-Seems current runtime PM support in mmc core layer has some problems:
+> + =A0 =A0 =A0 else if (mmc_card_is_powered_resumed(host)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* We may have switched to 1-bit mode d=
+uring suspend */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D sdio_enable_4bit_bus(host->card=
+);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err > 0) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_set_bus_width(host,=
+ MMC_BUS_WIDTH_4);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D 0;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 }
+> +
+> =A0 =A0 =A0 =A0if (!err && host->sdio_irqs)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_signal_sdio_irq(host);
+> =A0 =A0 =A0 =A0mmc_release_host(host);
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 381c77f..30b6fb9 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -317,5 +317,10 @@ static inline int mmc_card_is_removable(struct m=
+mc_host *host)
+> =A0 =A0 =A0 =A0return !(host->caps & MMC_CAP_NONREMOVABLE) && mmc_ass=
+ume_removable;
+> =A0}
+>
+> +static inline int mmc_card_is_powered_resumed(struct mmc_host *host)
+> +{
+> + =A0 =A0 =A0 return host->pm_flags & MMC_PM_KEEP_POWER;
+> +}
+> +
+> =A0#endif
+>
 
-1. If host controller is PCI device, then it's possibly that the PCI
-host controller will be runtime suspended immediately after its PCI
-probe. Then it will have trouble when do the following mmc_rescan
-since at that time the function driver (mmc block driver or sdio
-function driver) has not been called and there's no chance to execute
-pm_runtime_get().
-
-2. Currently mmc_host_class (defined in drivers/mmc/core/host.c) is
-parent of mmc_card and child of host controller. But mmc_host_class
-has not implemented the runtime pm APIs of itself. So seems it'll
-cause the mmc runtime PM chain disconnect here.
-
-This patch tries to fix above 2 problems.
-For 1, it adds pm_runtime_get/put at the begging/end of function
-mmc_rescan().
-For2, it implements a set of dummy runtime PM API for the
-mmc_host_class.
-
-Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
----
- drivers/mmc/core/bus.c  |    2 +-
- drivers/mmc/core/core.c |    4 ++++
- drivers/mmc/core/host.c |   35 +++++++++++++++++++++++++++++++++++
- 3 files changed, 40 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index af8dc6a..96b6cff 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -160,7 +160,7 @@ static int mmc_runtime_resume(struct device *dev)
- 
- static int mmc_runtime_idle(struct device *dev)
- {
--	return pm_runtime_suspend(dev);
-+	return pm_schedule_suspend(dev, 100);
- }
- 
- static const struct dev_pm_ops mmc_bus_pm_ops = {
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6286898..2905dac 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -22,6 +22,7 @@
- #include <linux/scatterlist.h>
- #include <linux/log2.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/pm_runtime.h>
- 
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-@@ -1503,6 +1504,7 @@ void mmc_rescan(struct work_struct *work)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
-+	pm_runtime_get_sync(host->parent);
- 
- 	mmc_bus_get(host);
- 
-@@ -1598,6 +1600,8 @@ out_fail:
- 		mmc_power_off(host);
- 	}
- out:
-+	pm_runtime_put_sync(host->parent);
-+
- 	if (host->caps & MMC_CAP_NEEDS_POLL)
- 		mmc_schedule_delayed_work(&host->detect, HZ);
- }
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 92e3370..8268b8e 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -19,6 +19,7 @@
- #include <linux/leds.h>
- #include <linux/slab.h>
- #include <linux/suspend.h>
-+#include <linux/pm_runtime.h>
- 
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-@@ -28,6 +29,33 @@
- 
- #define cls_dev_to_mmc_host(d)	container_of(d, struct mmc_host, class_dev)
- 
-+#ifdef CONFIG_PM_RUNTIME
-+static int mmc_host_runtime_suspend(struct device *dev)
-+{
-+	return 0;
-+}
-+
-+static int mmc_host_runtime_resume(struct device *dev)
-+{
-+	return 0;
-+}
-+
-+static int mmc_host_runtime_idle(struct device *dev)
-+{
-+	return pm_runtime_suspend(dev);
-+}
-+#else
-+#define mmc_host_runtime_suspend	NULL
-+#define mmc_host_runtime_resume		NULL
-+#define mmc_host_runtime_idle		NULL
-+#endif
-+
-+const static struct dev_pm_ops host_pm = {
-+	.runtime_suspend = mmc_host_runtime_suspend,
-+	.runtime_resume = mmc_host_runtime_resume,
-+	.runtime_idle = mmc_host_runtime_idle,
-+};
-+
- static void mmc_host_classdev_release(struct device *dev)
- {
- 	struct mmc_host *host = cls_dev_to_mmc_host(dev);
-@@ -37,6 +65,7 @@ static void mmc_host_classdev_release(struct device *dev)
- static struct class mmc_host_class = {
- 	.name		= "mmc_host",
- 	.dev_release	= mmc_host_classdev_release,
-+	.pm		= &host_pm,
- };
- 
- int mmc_register_host_class(void)
-@@ -333,6 +362,12 @@ int mmc_add_host(struct mmc_host *host)
- 	if (err)
- 		return err;
- 
-+	/* Enable runtime PM */
-+	pm_runtime_get_noresume(&host->class_dev);
-+	pm_runtime_set_active(&host->class_dev);
-+	pm_runtime_enable(&host->class_dev);
-+	pm_runtime_put_sync(&host->class_dev);
-+
- #ifdef CONFIG_DEBUG_FS
- 	mmc_add_host_debugfs(host);
- #endif
--- 
-1.6.6.1
-
+Best Regards,
+Micha=B3 Miros=B3aw
