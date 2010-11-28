@@ -1,94 +1,124 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH 2/3] mmc: sdio: don't reinitialize nonremovable powered-resumed cards
-Date: Sun, 28 Nov 2010 07:21:29 +0200
-Message-ID: <1290921690-6133-3-git-send-email-ohad@wizery.com>
+Subject: [PATCH 3/3] mmc: sdio: don't power up cards on system suspend
+Date: Sun, 28 Nov 2010 07:21:30 +0200
+Message-ID: <1290921690-6133-4-git-send-email-ohad@wizery.com>
 References: <1290921690-6133-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-fx0-f46.google.com ([209.85.161.46]:57371 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751427Ab0K1FTq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Nov 2010 00:19:46 -0500
+	with ESMTP id S1751427Ab0K1FTs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Nov 2010 00:19:48 -0500
 Received: by mail-fx0-f46.google.com with SMTP id 15so1617040fxm.19
-        for <linux-mmc@vger.kernel.org>; Sat, 27 Nov 2010 21:19:45 -0800 (PST)
+        for <linux-mmc@vger.kernel.org>; Sat, 27 Nov 2010 21:19:47 -0800 (PST)
 In-Reply-To: <1290921690-6133-1-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Upon system resume, SDIO core must reinitialize cards that were
-powered off during suspend.
+Initial SDIO runtime PM implementation took a conservative approach
+of powering up cards (and fully reinitializing them) on system suspend,
+just before the suspend handlers of the relevant drivers were executed.
 
-If the card had its power kept during suspend (and thus it
-is 'powered-resumed'), SDIO core performs only a limited reinitializing,
-mainly needed to make sure that the card wasn't removed/replaced.
+To avoid redundant power and reinitialization cycles, this patch removes
+this behavior: if a card is already powered off when system suspend kicks
+in, it is left at that state.
 
-If a __nonremovable__ card is powered-resumed, we can safely skip the
-reinitializing phase.
+If a card is active when a system sleep starts, everything is
+straightforward and works exactly like before. But if the card was
+already suspended before the sleep began, then when MMC core power it up
+back on resume, its run-time PM status has to be updated to reflect the
+actual post-system sleep status.
 
-Note: 9b966aa removed the bus width reconfiguration since
-mmc_sdio_init_card already does it. It is brought back now in case
-mmc_sdio_init_card is skipped.
+The technique to do that is borrowed from the I2C runtime PM
+implementation (for more info also see Documentation/power/runtime_pm.txt).
 
 Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
+ drivers/mmc/core/core.c     |   13 +++++++++++++
+ drivers/mmc/core/sdio_bus.c |   32 --------------------------------
+ 2 files changed, 13 insertions(+), 32 deletions(-)
 
-I have not switched all existing code to mmc_card_is_powered_resumed(),
-I can do that as a subsequent clean up patch.
-
- drivers/mmc/core/sdio.c  |   16 ++++++++++++++--
- include/linux/mmc/host.h |    5 +++++
- 2 files changed, 19 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index efef5f9..b424fbe 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -627,15 +627,27 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index e8332d7..2e29faf 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -22,6 +22,7 @@
+ #include <linux/scatterlist.h>
+ #include <linux/log2.h>
+ #include <linux/regulator/consumer.h>
++#include <linux/pm_runtime.h>
  
- static int mmc_sdio_resume(struct mmc_host *host)
- {
--	int i, err;
-+	int i, err = 0;
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -1785,6 +1786,18 @@ int mmc_resume_host(struct mmc_host *host)
+ 		if (!(host->pm_flags & MMC_PM_KEEP_POWER)) {
+ 			mmc_power_up(host);
+ 			mmc_select_voltage(host, host->ocr);
++			/*
++			 * Tell runtime PM core we just powered up the card,
++			 * since it still believes the card is powered off.
++			 * Note that currently runtime PM is only enabled
++			 * for SDIO cards that are MMC_CAP_POWER_OFF_CARD
++			 */
++			if (mmc_card_sdio(host->card) &&
++				(host->caps & MMC_CAP_POWER_OFF_CARD)) {
++				pm_runtime_disable(&host->card->dev);
++				pm_runtime_set_active(&host->card->dev);
++				pm_runtime_enable(&host->card->dev);
++			}
+ 		}
+ 		BUG_ON(!host->bus_ops->resume);
+ 		err = host->bus_ops->resume(host);
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 203da44..d29b9c3 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -197,44 +197,12 @@ out:
  
- 	BUG_ON(!host);
- 	BUG_ON(!host->card);
+ #ifdef CONFIG_PM_RUNTIME
  
- 	/* Basic card reinitialization. */
- 	mmc_claim_host(host);
--	err = mmc_sdio_init_card(host, host->ocr, host->card,
-+
-+	/* No need to reinitialize powered-resumed nonremovable cards */
-+	if (mmc_card_is_removable(host) || !mmc_card_is_powered_resumed(host))
-+		err = mmc_sdio_init_card(host, host->ocr, host->card,
- 				 (host->pm_flags & MMC_PM_KEEP_POWER));
-+	else if (mmc_card_is_powered_resumed(host)) {
-+		/* We may have switched to 1-bit mode during suspend */
-+		err = sdio_enable_4bit_bus(host->card);
-+		if (err > 0) {
-+			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
-+			err = 0;
-+		}
-+	}
-+
- 	if (!err && host->sdio_irqs)
- 		mmc_signal_sdio_irq(host);
- 	mmc_release_host(host);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 381c77f..30b6fb9 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -317,5 +317,10 @@ static inline int mmc_card_is_removable(struct mmc_host *host)
- 	return !(host->caps & MMC_CAP_NONREMOVABLE) && mmc_assume_removable;
- }
+-static int sdio_bus_pm_prepare(struct device *dev)
+-{
+-	struct sdio_func *func = dev_to_sdio_func(dev);
+-
+-	/*
+-	 * Resume an SDIO device which was suspended at run time at this
+-	 * point, in order to allow standard SDIO suspend/resume paths
+-	 * to keep working as usual.
+-	 *
+-	 * Ultimately, the SDIO driver itself will decide (in its
+-	 * suspend handler, or lack thereof) whether the card should be
+-	 * removed or kept, and if kept, at what power state.
+-	 *
+-	 * At this point, PM core have increased our use count, so it's
+-	 * safe to directly resume the device. After system is resumed
+-	 * again, PM core will drop back its runtime PM use count, and if
+-	 * needed device will be suspended again.
+-	 *
+-	 * The end result is guaranteed to be a power state that is
+-	 * coherent with the device's runtime PM use count.
+-	 *
+-	 * The return value of pm_runtime_resume is deliberately unchecked
+-	 * since there is little point in failing system suspend if a
+-	 * device can't be resumed.
+-	 */
+-	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
+-		pm_runtime_resume(dev);
+-
+-	return 0;
+-}
+-
+ static const struct dev_pm_ops sdio_bus_pm_ops = {
+ 	SET_RUNTIME_PM_OPS(
+ 		pm_generic_runtime_suspend,
+ 		pm_generic_runtime_resume,
+ 		pm_generic_runtime_idle
+ 	)
+-	.prepare = sdio_bus_pm_prepare,
+ };
  
-+static inline int mmc_card_is_powered_resumed(struct mmc_host *host)
-+{
-+	return host->pm_flags & MMC_PM_KEEP_POWER;
-+}
-+
- #endif
- 
+ #define SDIO_PM_OPS_PTR	(&sdio_bus_pm_ops)
 -- 
 1.7.0.4
 
