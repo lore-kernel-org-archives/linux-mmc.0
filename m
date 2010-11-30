@@ -1,97 +1,123 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH v1 1/3]mmc: enable runtime PM support for block driver
-Date: Tue, 30 Nov 2010 20:08:11 +0200
-Message-ID: <4CF53D8B.7060907@nokia.com>
-References: <20101128054818.GB3318@intel.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [RFC] mmcoops with panic/oops
+Date: Tue, 30 Nov 2010 14:51:41 -0800
+Message-ID: <20101130145141.d01f277f.akpm@linux-foundation.org>
+References: <4CF4B8E5.9070604@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20101128054818.GB3318@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yunpeng Gao <yunpeng.gao@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:48314 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751727Ab0K3WwW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 17:52:22 -0500
+In-Reply-To: <4CF4B8E5.9070604@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@marvell.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>
 
-On 28/11/10 07:48, ext Yunpeng Gao wrote:
->
->> From 51e4d34f19b48552a10a9f6b69f51c5aeed18d03 Mon Sep 17 00:00:00 2001
-> From: Yunpeng Gao<yunpeng.gao@intel.com>
-> Date: Sun, 28 Nov 2010 08:01:01 +0800
-> Subject: [PATCH] Enable runtime pm support for block driver of mmc stack.
->
-> Follow the kernel runtime pm framework, this patch enable
-> runtime pm support for block driver of mmc stack.
-> To validate it, it needs runtime pm support for mmc bus
-> and host controller to be enabled also.
->
-> Signed-off-by: Yunpeng Gao<yunpeng.gao@intel.com>
-> ---
->   drivers/mmc/card/block.c |   24 +++++++++++++++++++++---
->   1 files changed, 21 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 217f820..8a35814 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -31,6 +31,7 @@
->   #include<linux/mutex.h>
->   #include<linux/scatterlist.h>
->   #include<linux/string_helpers.h>
-> +#include<linux/pm_runtime.h>
->
->   #include<linux/mmc/card.h>
->   #include<linux/mmc/host.h>
-> @@ -560,14 +561,24 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
->
->   static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->   {
-> +	struct mmc_blk_data *md = mq->data;
-> +	struct mmc_card *card = md->queue.card;
-> +	int ret;
-> +
-> +	pm_runtime_get_sync(&card->dev);
+On Tue, 30 Nov 2010 17:42:13 +0900
+Jaehoon Chung <jh80.chung@samsung.com> wrote:
 
-Wouldn't it be better to "get" when the queue thread wakes up
-and "put" before it goes to sleep?
+> This patch is mmcoops.
+> 
+> When Kernel panic or oops, write panic log to circular buffer in eMMC.
+> then after reset, we can see the log in MMC.
+> 
+> So we need change mmc_wait_for_req().
+> because if we used schedule(), we can find atomic schedule warning.
+> That is not our needs log. so i used delay.
+> i want to know how about __mmc_wait_for_req()
+> 
+> If any question, let me know.
+> 
+> ...
+>  
+>  /**
+> - *	mmc_wait_for_req - start a request and wait for completion
+> + *	__mmc_wait_for_req - start a request and wait for completion
+>   *	@host: MMC host to start command
+>   *	@mrq: MMC request to start
+> + *	@panic: kernel panic/oops or not
+>   *
+>   *	Start a new MMC custom command request for a host, and wait
+>   *	for the command to complete. Does not attempt to parse the
+>   *	response.
+>   */
+> -void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
+> +void __mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq,
+> +		int panic)
+>  {
+> -	DECLARE_COMPLETION_ONSTACK(complete);
+> +	if (panic) {
+> +		DECLARE_WAITQUEUE(wait, current);
+> +
+> +		mmc_start_request(host, mrq);
+> +
+> +		spin_lock_irq(&host->wq.lock);
+> +		init_waitqueue_head(&host->wq);
+> +
+> +		add_wait_queue_exclusive(&host->wq, &wait);
+> +		set_current_state(TASK_UNINTERRUPTIBLE);
+>  
+> -	mrq->done_data = &complete;
+> -	mrq->done = mmc_wait_done;
+> +		mdelay(10);
+> +		spin_unlock_irq(&host->wq.lock);
+> +	} else {
+> +		DECLARE_COMPLETION_ONSTACK(complete);
+> +
+> +		mrq->done_data = &complete;
+> +		mrq->done = mmc_wait_done;
+> +
+> +		mmc_start_request(host, mrq);
+> +
+> +		wait_for_completion(&complete);
+> +	}
+> +}
 
-> +
->   	if (req->cmd_flags&  REQ_DISCARD) {
->   		if (req->cmd_flags&  REQ_SECURE)
-> -			return mmc_blk_issue_secdiscard_rq(mq, req);
-> +			ret = mmc_blk_issue_secdiscard_rq(mq, req);
->   		else
-> -			return mmc_blk_issue_discard_rq(mq, req);
-> +			ret = mmc_blk_issue_discard_rq(mq, req);
->   	} else {
-> -		return mmc_blk_issue_rw_rq(mq, req);
-> +		ret = mmc_blk_issue_rw_rq(mq, req);
->   	}
-> +
-> +	pm_runtime_put(&card->dev);
-> +
-> +	return ret;
->   }
->
->   static inline int mmc_blk_readonly(struct mmc_card *card)
-> @@ -709,6 +720,11 @@ static int mmc_blk_probe(struct mmc_card *card)
->
->   	mmc_set_drvdata(card, md);
->   	add_disk(md->disk);
-> +
-> +	/* Indicate to runtime PM core that our device is active */
-> +	pm_runtime_set_active(&card->dev);
-> +	pm_runtime_enable(&card->dev);
-> +
->   	return 0;
->
->    out:
-> @@ -732,6 +748,8 @@ static void mmc_blk_remove(struct mmc_card *card)
->   		mmc_blk_put(md);
->   	}
->   	mmc_set_drvdata(card, NULL);
-> +
-> +	pm_runtime_disable(&card->dev);
->   }
->
->   #ifdef CONFIG_PM
+This approach seems somewhat OK - it will only do the busy-wait in the
+"panic=1" case, so existing callers shouldn't be affected.  (`panic'
+could have had type `bool', btw).
+
+That being said, the code is odd/wrong.
+
+void __mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq,
+		int panic)
+{
+	if (panic) {
+		DECLARE_WAITQUEUE(wait, current);
+
+		mmc_start_request(host, mrq);
+
+		spin_lock_irq(&host->wq.lock);
+		init_waitqueue_head(&host->wq);
+
+		add_wait_queue_exclusive(&host->wq, &wait);
+		set_current_state(TASK_UNINTERRUPTIBLE);
+
+		mdelay(10);
+		spin_unlock_irq(&host->wq.lock);
+	} else {
+
+Surely the waitqueue is unneeded and the missing remove_wait_queue() is a
+bug and the set_current_state() is a bug and the spin_lock_irq()
+appears to be unneeded.  afaict you want this:
+
+void __mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq,
+		int panic)
+{
+	if (panic) {
+		mmc_start_request(host, mrq);
+		mdelay(10);
+	} else {
+
+
+However it is pretty bad to just delay 10 milliseconds and then assume
+that the request has completed.  Would it not be better to poll for the
+IRQ completion, or to poll some hardware flag?
+
+(We can't poll for IRQ completion if the caller has disabled IRQs, but
+if the caller has disabled IRQs then the use of spin_lock_irq() instead
+of spin_lock_irqsave() is yet another bug!)
