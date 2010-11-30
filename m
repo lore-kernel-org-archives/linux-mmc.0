@@ -1,61 +1,49 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
-Date: Tue, 30 Nov 2010 19:13:28 +0900
-Message-ID: <4CF4CE48.7040102@samsung.com>
-References: <4CF4961C.5020606@samsung.com>
- <20101130095618.GA6408@pengutronix.de>
+From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Subject: RE: [PATCH v1 3/3]mmc: changes to enable runtime PM of mmc core
+ layer
+Date: Tue, 30 Nov 2010 18:36:50 +0800
+Message-ID: <CE761E84DADF2947A4AF22FB8D97A4733073B826@shsmsx501.ccr.corp.intel.com>
+References: <20101128055315.GD3318@intel.com>
+ <AANLkTiknO0BEBetKmFT5W0qwW+q1pS59qcwiqSMUHa_u@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:34138 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755233Ab0K3KNb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 05:13:31 -0500
-Received: from epmmp1 (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LCP00KYW0EHRUE0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Nov 2010 19:13:29 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LCP00A8P0EHTR@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Nov 2010 19:13:29 +0900 (KST)
-In-reply-to: <20101130095618.GA6408@pengutronix.de>
+Received: from mga03.intel.com ([143.182.124.21]:24986 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755249Ab0K3Kgw convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 05:36:52 -0500
+In-Reply-To: <AANLkTiknO0BEBetKmFT5W0qwW+q1pS59qcwiqSMUHa_u@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, matt@console-pimps.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Wolfram.
+>You shouldn't do this here.
+>
+>You didn't comment about or mentioned this change, but I guess you did
+>it because you (quite reasonably) didn't want the card to be powered
+>off as soon as mmc_blk_issue_rq() completes, and instead, you
+>preferred to wait until some period of inactivity time passes.
+>
+>But that's not true for all mmc buses: e.g., when an SDIO function
+>driver decides it's time to power off the card (e.g. user disables the
+>wlan interface), there is no reason to have this delay.
+>
+>In addition, putting an inherent delay here will completely prevent
+>anyone from achieving a synchronous idle notification on an mmc card
+>(so even pm_runtime_put_sync() will now set a timer to submit a
+>suspend request instead of carrying out a synchronous suspend).
+>
+>It looks like you can drop this change, and instead just use the
+>autosuspend API from the mmc block driver (mainly use
+>pm_runtime_put_autosuspend() instead of pm_runtime_put()).
+>
+>Another nice benefit of autosuspend is that now user space will be
+>able to tweak the amount of delay by using
+>/sys/devices/.../power/autosuspend_delay_ms attribute.
 
-Maybe, happen for all sdhci-controllers...
-
-Card is configurable with eMMC spec..But sdhci-controller didn't support that card.
-So SDHCI controller need to use quriks..
-
-Thanks,
-Jaehoon Chung
-
-Wolfram Sang wrote:
-> Hi,
-> 
-> On Tue, Nov 30, 2010 at 03:13:48PM +0900, Jaehoon Chung wrote:
->> This patch is added quirks for data timeout value.
->>
->> Some card have problem when suspend/resume.
->> CMD6(switch command) to switch the bus to high speed mode 
->> and to set the bus width.
->>
->> After resuming, the card was initialized...in that time, some
->> card need set a correct timeout value.
->> so we add SDHCI_QUIRK_SET_DATA_TIMEOUT_VAL.
-> 
-> If this is a flaw of the _card_, why do we need a controller quirk here?
-> Shouldn't this happen for all sdhci-controllers?
-> 
-> Kind regards,
-> 
->    Wolfram
-> 
+Thanks a lot for the nice review and comments. They're very valuable to me. I'll read it carefully and resubmit these patches later.
+Thank you again :-)
 
