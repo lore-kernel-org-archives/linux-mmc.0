@@ -1,49 +1,62 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: RE: [PATCH v1 3/3]mmc: changes to enable runtime PM of mmc core
- layer
-Date: Tue, 30 Nov 2010 18:36:50 +0800
-Message-ID: <CE761E84DADF2947A4AF22FB8D97A4733073B826@shsmsx501.ccr.corp.intel.com>
-References: <20101128055315.GD3318@intel.com>
- <AANLkTiknO0BEBetKmFT5W0qwW+q1pS59qcwiqSMUHa_u@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card
+ busy.
+Date: Tue, 30 Nov 2010 11:54:35 +0100
+Message-ID: <20101130105435.GB6408@pengutronix.de>
+References: <4CF4961C.5020606@samsung.com>
+ <20101130095618.GA6408@pengutronix.de>
+ <4CF4CE48.7040102@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="/WwmFnJnmDyWGHa4"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:24986 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755249Ab0K3Kgw convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 05:36:52 -0500
-In-Reply-To: <AANLkTiknO0BEBetKmFT5W0qwW+q1pS59qcwiqSMUHa_u@mail.gmail.com>
-Content-Language: en-US
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:52253 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755295Ab0K3Kyi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 05:54:38 -0500
+Content-Disposition: inline
+In-Reply-To: <4CF4CE48.7040102@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, matt@console-pimps.org
 
->You shouldn't do this here.
->
->You didn't comment about or mentioned this change, but I guess you did
->it because you (quite reasonably) didn't want the card to be powered
->off as soon as mmc_blk_issue_rq() completes, and instead, you
->preferred to wait until some period of inactivity time passes.
->
->But that's not true for all mmc buses: e.g., when an SDIO function
->driver decides it's time to power off the card (e.g. user disables the
->wlan interface), there is no reason to have this delay.
->
->In addition, putting an inherent delay here will completely prevent
->anyone from achieving a synchronous idle notification on an mmc card
->(so even pm_runtime_put_sync() will now set a timer to submit a
->suspend request instead of carrying out a synchronous suspend).
->
->It looks like you can drop this change, and instead just use the
->autosuspend API from the mmc block driver (mainly use
->pm_runtime_put_autosuspend() instead of pm_runtime_put()).
->
->Another nice benefit of autosuspend is that now user space will be
->able to tweak the amount of delay by using
->/sys/devices/.../power/autosuspend_delay_ms attribute.
 
-Thanks a lot for the nice review and comments. They're very valuable to me. I'll read it carefully and resubmit these patches later.
-Thank you again :-)
+--/WwmFnJnmDyWGHa4
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+
+> Maybe, happen for all sdhci-controllers...
+
+My point is: If it is needed for all SDHCI-controllers, we don't need a
+quirk and can apply your code unconditionally.
+
+> Card is configurable with eMMC spec..But sdhci-controller didn't
+> support that card. So SDHCI controller need to use quriks..
+
+Can we find out if this is a general issue?
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--/WwmFnJnmDyWGHa4
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkz01+sACgkQD27XaX1/VRt5WgCgrZXLhFBNPVFq8Xm902sD86la
+Z98AnigU+FFpTQe6G8KH/lcscBfuWhWz
+=z44l
+-----END PGP SIGNATURE-----
+
+--/WwmFnJnmDyWGHa4--
