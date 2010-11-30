@@ -1,126 +1,197 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
-Date: Tue, 30 Nov 2010 16:15:06 +0900
-Message-ID: <4CF4A47A.6060009@samsung.com>
-References: <4CF4961C.5020606@samsung.com>
- <43E4817426ED174AA81263BCECB4351D13200C545A@sc-vexch3.marvell.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 1/2] [rfc] mmc, sh: Read MMCIF during zboot
+Date: Tue, 30 Nov 2010 16:18:20 +0900
+Message-ID: <20101130071818.GD1529@verge.net.au>
+References: <1290812757-20571-1-git-send-email-horms@verge.net.au>
+ <1290812757-20571-2-git-send-email-horms@verge.net.au>
+ <AANLkTi=f-o6Bskb_ZAgco2+Hwm-ra+A_oOvtkogycQup@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:24404 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753716Ab0K3HPI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 02:15:08 -0500
-Received: from epmmp2 (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LCO00GY5S56N5D0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Nov 2010 16:15:06 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LCO00GR1S57XH@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Nov 2010 16:15:07 +0900 (KST)
-In-reply-to: <43E4817426ED174AA81263BCECB4351D13200C545A@sc-vexch3.marvell.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:45112 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753879Ab0K3HSY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 02:18:24 -0500
+Content-Disposition: inline
+In-Reply-To: <AANLkTi=f-o6Bskb_ZAgco2+Hwm-ra+A_oOvtkogycQup@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, "matt@console-pimps.org" <matt@console-pimps.org>
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>
 
-Hi Philip.
+On Tue, Nov 30, 2010 at 02:11:43PM +0900, Magnus Damm wrote:
+> Hi Simon,
+>=20
+> Thanks for your work on this! It's nice to see that you can actually
+> load some data early on.
+>=20
+> On Sat, Nov 27, 2010 at 8:05 AM, Simon Horman <horms@verge.net.au> wr=
+ote:
+> > This is a prototype of code to read the MMCIF during
+> > zboot initialisation. The intention is that it will form
+> > part of enabling booting from MMC. Very roughly the plan is
+> >
+> > 1) The Mask Rom will load a small boot program from MMC.
+> > =C2=A0 Essentially this will be the first portion of
+> > =C2=A0 the kernel to be booted.
+> > 2) That program will load the remainder of the kernel
+> > =C2=A0 from MMC and boot from it.
+> >
+> > This patch demonstrates code to perform the read portion of 2).
+> > It uses a dummy buffer and only reads in one 512 byte sector.
+> > A full implementation of 2) would of course read much more.
+> >
+> > The patch currently hooks into head-shmobile.S as it
+> > depends on initialisation that occurs in that file.
+> > However, it is likely that the final implementation
+> > will need to be located in head.S where relocation is
+> > currently handled.
+> >
+> > I used a multi-voltage MMC mobile card to test this code.
+> > I observed that a single-voltage MMC and MMCplus card caused
+> > the code to time-out in sh_mmcif_boot_init() which causes
+> > the boot to stop.
+> >
+> > This patch depends on "ARM: mach-shmobile: Add zboot support for Su=
+perH
+> > Mobile ARM" and "mmc, sh: Correct value for reset".
+> >
+> > Signed-off-by: Simon Horman <horms@verge.net.au>
+> > ---
+> > =C2=A0arch/arm/boot/compressed/Makefile =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+| =C2=A0 =C2=A04 +
+> > =C2=A0arch/arm/boot/compressed/head-shmobile.S | =C2=A0 16 +++++
+> > =C2=A0arch/arm/boot/compressed/mmcif-sh7372.c =C2=A0| =C2=A0100 +++=
++++++++++++++++++++++++++++
+> > =C2=A03 files changed, 120 insertions(+), 0 deletions(-)
+> > =C2=A0create mode 100644 arch/arm/boot/compressed/mmcif-sh7372.c
+> >
+> > diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/comp=
+ressed/Makefile
+> > index 0a8f748..f730c10 100644
+> > --- a/arch/arm/boot/compressed/Makefile
+> > +++ b/arch/arm/boot/compressed/Makefile
+> > @@ -49,6 +49,10 @@ ifeq ($(CONFIG_ARCH_SHMOBILE),y)
+> > =C2=A0OBJS =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 +=3D head-shmobile.o
+> > =C2=A0endif
+> >
+> > +ifeq ($(CONFIG_ARCH_SH7372),y)
+> > +OBJS =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 +=3D mmcif-sh7372.o
+> > +endif
+> > +
+> > =C2=A0#
+> > =C2=A0# We now have a PIC decompressor implementation. =C2=A0Decomp=
+ressors running
+> > =C2=A0# from RAM should not define ZTEXTADDR. =C2=A0Decompressors r=
+unning directly
+> > diff --git a/arch/arm/boot/compressed/head-shmobile.S b/arch/arm/bo=
+ot/compressed/head-shmobile.S
+> > index 30973b7..700d622 100644
+> > --- a/arch/arm/boot/compressed/head-shmobile.S
+> > +++ b/arch/arm/boot/compressed/head-shmobile.S
+> > @@ -26,6 +26,22 @@
+> > =C2=A0#include <mach/zboot.h>
+> >
+> > =C2=A0 =C2=A0 =C2=A0 =C2=A0b =C2=A0 =C2=A0 =C2=A0 1f
+> > + =C2=A0 =C2=A0 =C2=A0 .align
+> > +__tmp_stack:
+> > + =C2=A0 =C2=A0 =C2=A0 .space =C2=A0128
+> > +__dummy_buf:
+> > + =C2=A0 =C2=A0 =C2=A0 .space =C2=A0512
+> > +__dummy_buf_size:
+> > + =C2=A0 =C2=A0 =C2=A0 .long =C2=A0 512
+> > +1:
+> > + =C2=A0 =C2=A0 =C2=A0 adr =C2=A0 =C2=A0 sp, __tmp_stack
+> > + =C2=A0 =C2=A0 =C2=A0 add =C2=A0 =C2=A0 sp, sp, #128
+> > + =C2=A0 =C2=A0 =C2=A0 adr =C2=A0 =C2=A0 r0, __dummy_buf
+> > + =C2=A0 =C2=A0 =C2=A0 ldr =C2=A0 =C2=A0 r1, __dummy_buf_size
+>=20
+> Regarding the destination address, look into using CONFIG_MEMORY_STAR=
+T
+> or perhaps something more advanced like the actual destination addres=
+s
+> for the kernel - see arch/arm/boot/compressed/head.S and TEXT_OFFSET
+> or zreladdr.
 
-I know defined that quirk to force the timeout to 0xe.
-But..i found some card occured data timeout error when suspend/resume.
+Thanks, I'll take a look at that
 
-actually you can confuse quirk's name..because i use temporary that.
-(if need change quirk name, i can)
+> As for the number of bytes to load, please have a look at the sh7724
+> implementation.
 
-The problem is below.
+Thanks, will do.
 
-1. card probe is done
-2. card suspend entered
-3. when card resuming, appeared data timeout error. then card removed.
+>=20
+> > + =C2=A0 =C2=A0 =C2=A0 mov =C2=A0 =C2=A0 lr, pc
+> > + =C2=A0 =C2=A0 =C2=A0 b =C2=A0 =C2=A0 =C2=A0 mmcif_loader
+> > +
+> > + =C2=A0 =C2=A0 =C2=A0 b =C2=A0 =C2=A0 =C2=A0 1f
+> > =C2=A0__atags:@ tag #1
+> > =C2=A0 =C2=A0 =C2=A0 =C2=A0.long =C2=A0 12 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0@ tag->hdr.size =3D=
+ tag_size(tag_core);
+> > =C2=A0 =C2=A0 =C2=A0 =C2=A0.long =C2=A0 0x54410001 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0@ tag->hdr.tag =3D ATAG_CORE;
+> > diff --git a/arch/arm/boot/compressed/mmcif-sh7372.c b/arch/arm/boo=
+t/compressed/mmcif-sh7372.c
+> > new file mode 100644
+> > index 0000000..7ffaf27
+> > --- /dev/null
+> > +++ b/arch/arm/boot/compressed/mmcif-sh7372.c
+> > @@ -0,0 +1,100 @@
+> > +/*
+> > + * sh7372 MMCIF loader
+> > + *
+> > + * Copyright (C) 2010 Magnus Damm
+> > + * Copyright (C) 2010 Simon Horman
+> > + *
+> > + * This file is subject to the terms and conditions of the GNU Gen=
+eral Public
+> > + * License. =C2=A0See the file "COPYING" in the main directory of =
+this archive
+> > + * for more details.
+> > + */
+> > +
+> > +#include <linux/mmc/sh_mmcif.h>
+> > +
+> > +#define MMCIF_BASE =C2=A0 =C2=A0 =C2=A0(void __iomem *)0xe6bd0000
+> > +
+> > +#define PORT84CR =C2=A0 =C2=A0 =C2=A0 0xe6050054
+> > +#define PORT85CR =C2=A0 =C2=A0 =C2=A0 0xe6050055
+> > +#define PORT86CR =C2=A0 =C2=A0 =C2=A0 0xe6050056
+> > +#define PORT87CR =C2=A0 =C2=A0 =C2=A0 0xe6050057
+> > +#define PORT88CR =C2=A0 =C2=A0 =C2=A0 0xe6050058
+> > +#define PORT89CR =C2=A0 =C2=A0 =C2=A0 0xe6050059
+> > +#define PORT90CR =C2=A0 =C2=A0 =C2=A0 0xe605005a
+> > +#define PORT91CR =C2=A0 =C2=A0 =C2=A0 0xe605005b
+> > +#define PORT92CR =C2=A0 =C2=A0 =C2=A0 0xe605005c
+> > +#define PORT99CR =C2=A0 =C2=A0 =C2=A0 0xe6050063
+> > +#define PORT185CR =C2=A0 =C2=A0 =C2=A00xe60520b9
+> > +#define PORT186CR =C2=A0 =C2=A0 =C2=A00xe60520ba
+> > +#define PORT187CR =C2=A0 =C2=A0 =C2=A00xe60520bb
+> > +#define PORT188CR =C2=A0 =C2=A0 =C2=A00xe60520bc
+> > +#define PORTR191_160DR =C2=A00xe6056014
+> > +
+> > +#define SMSTPCR3 =C2=A0 =C2=A0 =C2=A0 0xe615013c
+> > +
+> > +enum { MMCIF_PROGRESS_ENTER, MMCIF_PROGRESS_INIT,
+> > + =C2=A0 =C2=A0 =C2=A0 MMCIF_PROGRESS_LOAD, MMCIF_PROGRESS_DONE };
+> > +
+> > +static void mmcif_update_progress(int n)
+> > +{
+> > + =C2=A0 =C2=A0 =C2=A0 __raw_writel((__raw_readl(PORTR191_160DR) & =
+~(0xf << 25)) |
+> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0(1 << (25 + n)), PORTR191_160DR);
+> > +}
+>=20
+> This seems like a board specific property to me. So please break it
+> out in to a per-board header or similar.
 
-I understood this problem that occured interrupt at incorret time.
-(during send cmd6, occured fire busy)
-So need set timeout value at Timeout register, in order to not occur interrupt.
+Sure.
 
-And this problem appeared from specific card, so i think good that used quirk
+> I guess next step is to extend the prototype code so it loads the
+> entire kernel from MMC and then jumps to it. =3D)
 
-
-Philip Rakity wrote:
-> The problem is a little more complicated then this.  During out testing of multiple sd/mmc cards we found some cards that gave incorrect timeout values.   The solution was to define the existing quirk to force the timeout to 0xe.
-> 
-> The timeout problems had nothing to do with the controller being broken nor with suspend/resume.
-> 
-> ________________________________________
-> From: linux-mmc-owner@vger.kernel.org [linux-mmc-owner@vger.kernel.org] On Behalf Of Jaehoon Chung [jh80.chung@samsung.com]
-> Sent: Monday, November 29, 2010 10:13 PM
-> To: linux-mmc@vger.kernel.org
-> Cc: Chris Ball; kyungmin Park; Andrew Morton; matt@console-pimps.org
-> Subject: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
-> 
-> This patch is added quirks for data timeout value.
-> 
-> Some card have problem when suspend/resume.
-> CMD6(switch command) to switch the bus to high speed mode
-> and to set the bus width.
-> 
-> After resuming, the card was initialized...in that time, some
-> card need set a correct timeout value.
-> so we add SDHCI_QUIRK_SET_DATA_TIMEOUT_VAL.
-> 
-> Let me know any comment, plz.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->  Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> 
-> ---
->  drivers/mmc/host/sdhci.c  |    6 +++++-
->  include/linux/mmc/sdhci.h |    3 ++-
->  2 files changed, 7 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 782c0ee..3b93d97 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -655,8 +655,12 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_data *data)
-> 
->         WARN_ON(host->data);
-> 
-> -       if (data == NULL)
-> +       if (data == NULL) {
-> +               if ((host->quirks & SDHCI_QUIRK_SET_DATA_TIMEOUT_VAL) &&
-> +                               (host->cmd->flags & MMC_RSP_BUSY))
-> +                       sdhci_writel(host, 0xE, SDHCI_TIMEOUT_CONTROL);
->                 return;
-> +       }
-> 
->         /* Sanity checks */
->         BUG_ON(data->blksz * data->blocks > 524288);
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index 1fdc673..315ff49 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -83,7 +83,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12             (1<<28)
->  /* Controller doesn't have HISPD bit field in HI-SPEED SD card */
->  #define SDHCI_QUIRK_NO_HISPD_BIT                       (1<<29)
-> -
-> +/* Controller need set data timeout value when card is busy */
-> +#define SDHCI_QUIRK_SET_DATA_TIMEOUT_VAL               (1<<30)
->         int irq;                /* Device IRQ */
->         void __iomem *ioaddr;   /* Mapped address */
-> 
-> --
-> 1.6.0.4
-> 
-> Thanks
-> Jaehoon Chung
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Yes :-)
 
