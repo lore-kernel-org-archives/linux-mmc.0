@@ -1,62 +1,60 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card
- busy.
-Date: Tue, 30 Nov 2010 11:54:35 +0100
-Message-ID: <20101130105435.GB6408@pengutronix.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
+Date: Tue, 30 Nov 2010 20:37:03 +0900
+Message-ID: <4CF4E1DF.5000000@samsung.com>
 References: <4CF4961C.5020606@samsung.com>
- <20101130095618.GA6408@pengutronix.de>
- <4CF4CE48.7040102@samsung.com>
+ <20101130095618.GA6408@pengutronix.de> <4CF4CE48.7040102@samsung.com>
+ <20101130105435.GB6408@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="/WwmFnJnmDyWGHa4"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:52253 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755295Ab0K3Kyi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 05:54:38 -0500
-Content-Disposition: inline
-In-Reply-To: <4CF4CE48.7040102@samsung.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:50667 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755679Ab0K3LhW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 06:37:22 -0500
+Received: from epmmp2 (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LCP00KQJ49PPNC0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 30 Nov 2010 20:37:06 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LCP008U249PD5@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 30 Nov 2010 20:37:01 +0900 (KST)
+In-reply-to: <20101130105435.GB6408@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
 Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, matt@console-pimps.org
 
+>> Maybe, happen for all sdhci-controllers...
+> 
+> My point is: If it is needed for all SDHCI-controllers, we don't need a
+> quirk and can apply your code unconditionally.
+> 
 
---/WwmFnJnmDyWGHa4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+You're right. But i'm not sure, happen for all sdhci-controller. 
+so i send to RFC patch..
+I also hope apply my code unconditionally.
+
+the reason using quirk...every card didn't happen this issue..
+if not happen this issue, we need not set timeout value..at that time..
+
+when needs, entered and set timeout value..(conditionally)
 
 
-> Maybe, happen for all sdhci-controllers...
+>> Card is configurable with eMMC spec..But sdhci-controller didn't
+>> support that card. So SDHCI controller need to use quriks..
+> 
+> Can we find out if this is a general issue?
+> 
 
-My point is: If it is needed for all SDHCI-controllers, we don't need a
-quirk and can apply your code unconditionally.
+Hmm..i'm sure you can find out this issue..
+Have ever find out this issue(similar case)..anybody?
 
-> Card is configurable with eMMC spec..But sdhci-controller didn't
-> support that card. So SDHCI controller need to use quriks..
+> Regards,
+> 
+>    Wolfram
+> 
 
-Can we find out if this is a general issue?
-
-Regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---/WwmFnJnmDyWGHa4
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAkz01+sACgkQD27XaX1/VRt5WgCgrZXLhFBNPVFq8Xm902sD86la
-Z98AnigU+FFpTQe6G8KH/lcscBfuWhWz
-=z44l
------END PGP SIGNATURE-----
-
---/WwmFnJnmDyWGHa4--
