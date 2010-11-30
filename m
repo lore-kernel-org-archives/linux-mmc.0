@@ -1,60 +1,46 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
-Date: Tue, 30 Nov 2010 20:37:03 +0900
-Message-ID: <4CF4E1DF.5000000@samsung.com>
-References: <4CF4961C.5020606@samsung.com>
- <20101130095618.GA6408@pengutronix.de> <4CF4CE48.7040102@samsung.com>
- <20101130105435.GB6408@pengutronix.de>
+From: David Vrabel <david.vrabel@csr.com>
+Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
+Date: Tue, 30 Nov 2010 12:23:06 +0000
+Message-ID: <4CF4ECAA.70806@csr.com>
+References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536> <20101116150022.GA27726@void.printf.net> <27884BED0E3C489C8849EE12A803F536@AN00536> <m3oc9pnt6g.fsf@pullcord.laptop.org> <4CE41BE3.1060806@elandigitalsystems.com> <m3oc9n241c.fsf@pullcord.laptop.org> <4CEA86D4.9050109@elandigitalsystems.com> <20101130061532.GA4331@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:50667 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755679Ab0K3LhW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 06:37:22 -0500
-Received: from epmmp2 (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LCP00KQJ49PPNC0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Nov 2010 20:37:06 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LCP008U249PD5@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Nov 2010 20:37:01 +0900 (KST)
-In-reply-to: <20101130105435.GB6408@pengutronix.de>
+Received: from cluster-g.mailcontrol.com ([208.87.233.190]:35987 "EHLO
+	cluster-g.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751059Ab0K3NDo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 08:03:44 -0500
+Received: from rly23g.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
+	by rly23g.srv.mailcontrol.com (MailControl) with ESMTP id oAUCQaML013413
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Nov 2010 12:26:37 GMT
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+	by rly23g.srv.mailcontrol.com (MailControl) id oAUCQ0mH002420
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Nov 2010 12:26:00 GMT
+In-Reply-To: <20101130061532.GA4331@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, matt@console-pimps.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Olech <tony.olech@elandigitalsystems.com>, linux-mmc@vger.kernel.org
 
->> Maybe, happen for all sdhci-controllers...
+Chris Ball wrote:
+> Hi David,
 > 
-> My point is: If it is needed for all SDHCI-controllers, we don't need a
-> quirk and can apply your code unconditionally.
-> 
+> Any interest in reviewing this USB-SD driver?  I'm especially curious
+> about whether you think there are worthwhile possibilities to share 
+> code with USHC.
 
-You're right. But i'm not sure, happen for all sdhci-controller. 
-so i send to RFC patch..
-I also hope apply my code unconditionally.
+A quick look suggests that there is unlikely to be any commonality
+between the two drivers.
 
-the reason using quirk...every card didn't happen this issue..
-if not happen this issue, we need not set timeout value..at that time..
+Tony, where can I find the datasheet or developer's manual describing
+the protocol/operation of this chip?
 
-when needs, entered and set timeout value..(conditionally)
+David
+-- 
+David Vrabel, Senior Software Engineer, Drivers
+CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
+Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
 
 
->> Card is configurable with eMMC spec..But sdhci-controller didn't
->> support that card. So SDHCI controller need to use quriks..
-> 
-> Can we find out if this is a general issue?
-> 
-
-Hmm..i'm sure you can find out this issue..
-Have ever find out this issue(similar case)..anybody?
-
-> Regards,
-> 
->    Wolfram
-> 
-
+Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
