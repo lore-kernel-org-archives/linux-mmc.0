@@ -1,97 +1,44 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
-Date: Wed, 01 Dec 2010 21:29:29 +0900
-Message-ID: <4CF63FA9.1010304@samsung.com>
-References: <4CF4961C.5020606@samsung.com>
- <20101130095618.GA6408@pengutronix.de> <4CF4CE48.7040102@samsung.com>
- <20101130105435.GB6408@pengutronix.de> <4CF4E1DF.5000000@samsung.com>
- <43E4817426ED174AA81263BCECB4351D13200C545E@sc-vexch3.marvell.com>
- <4CF5E0DA.3060300@samsung.com>
- <A1CDFC9E-BD6B-43DF-BFAA-CAA5E41D7E9F@marvell.com>
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Subject: [PATCH v4 0/4]implement eMMC4.4 standard HW reset feature
+Date: Wed, 1 Dec 2010 20:48:42 +0800
+Message-ID: <20101201124842.GA5421@intel.com>
+Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:60649 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751900Ab0LAM30 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Dec 2010 07:29:26 -0500
-Received: from epmmp2 (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LCR00FXE1CS7S70@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Dec 2010 21:29:16 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LCR00JNJ1CSDP@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Dec 2010 21:29:16 +0900 (KST)
-In-reply-to: <A1CDFC9E-BD6B-43DF-BFAA-CAA5E41D7E9F@marvell.com>
+Received: from mga03.intel.com ([143.182.124.21]:54579 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751417Ab0LAMvr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Dec 2010 07:51:47 -0500
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, "matt@console-pimps.org" <matt@console-pimps.org>
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, arjan@linux.intel.com, alan@linux.intel.com, akpm@linux-foundation.org
 
-Philip Rakity wrote:
-> On Nov 30, 2010, at 9:44 PM, Jaehoon Chung wrote:
-> 
->> Philip Rakity wrote:
->>> Can we just remove the quirk for broken timeout and just set the timeout to 0xe in sdhci.c?
->> you means that set the timeout to 0xe without broken timeout in sdhci.c?
-> 
-> yes
-> 
-> but I also think we should remove the quirk and change sdhci.c to use 0xe ALL THE TIME.  
-> I do not see a downside to doing this other than a longer timeout period.  Considering the broken cards
-> that are out there in practice one needs to set it to this value anyway for cards to work.
-> 
+Hi,
+	These are the version 4 patches to implement eMMC4.4 HW reset
+	feature. Host controller can use this feature by trigger RST_n signal.
+	To enable this, byte 162 of EXT_CSD register should be set.
+	HW reset is implemented in mmc core layer and sdhci host layer, and it
+	will be used after each reading/writing/erasing timeout error occures.
 
-If we set the fixed timeout value to 0xe, we should remove the broken timeout value. right.
-But in my patch, nevertheless i used the broken timeout value quirk, need to reset timeout value at that time.
-Because if didn't set timeout value, broken card fire busy state..so happen the data timeout error.
+	change-log:
+	This version change the way to detect timeout error conditions. Added a
+	new routine mmc_handle_timeout_error to do this instead to do this in
+	mmc_wait_for_req. Each timeout read/write/erase command can use this
+	routine to do HW reset.
 
-Anyway, your opinion seem good..
+	patch1: enable HW reset capability if card support.
+
+	patch2: add two new callback to implement HW reset in mmc core layer. In
+	this patch, routine mmc_handle_timeout_error was added.
+
+	patch3: implement hardware_reset callback for sdhci host. A new callback
+	reset_emmc was defined which will be each sdhci host controller to
+	implement separately.
+
+	patch4: did a HW reset after each read/write/erase command.
+
 Thanks
-
->>> The problem with the quirk is you need to know when to set it and the problem with the existing quirk is that one has to set it to work with bad cards.
->> I know when use quirk...and what use one...
->>
->>> ________________________________________
->>> From: linux-mmc-owner@vger.kernel.org [linux-mmc-owner@vger.kernel.org] On Behalf Of Jaehoon Chung [jh80.chung@samsung.com]
->>> Sent: Tuesday, November 30, 2010 3:37 AM
->>> To: Wolfram Sang
->>> Cc: linux-mmc@vger.kernel.org; Chris Ball; kyungmin Park; Andrew Morton; matt@console-pimps.org
->>> Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
->>>
->>>>> Maybe, happen for all sdhci-controllers...
->>>> My point is: If it is needed for all SDHCI-controllers, we don't need a
->>>> quirk and can apply your code unconditionally.
->>>>
->>> You're right. But i'm not sure, happen for all sdhci-controller.
->>> so i send to RFC patch..
->>> I also hope apply my code unconditionally.
->>>
->>> the reason using quirk...every card didn't happen this issue..
->>> if not happen this issue, we need not set timeout value..at that time..
->>>
->>> when needs, entered and set timeout value..(conditionally)
->>>
->>>
->>>>> Card is configurable with eMMC spec..But sdhci-controller didn't
->>>>> support that card. So SDHCI controller need to use quriks..
->>>> Can we find out if this is a general issue?
->>>>
->>> Hmm..i'm sure you can find out this issue..
->>> Have ever find out this issue(similar case)..anybody?
->>>
->>>> Regards,
->>>>
->>>>   Wolfram
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
-> 
-> 
-
+Chuanxiao
