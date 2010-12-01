@@ -1,162 +1,82 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC] mmcoops with panic/oops
-Date: Wed, 01 Dec 2010 13:42:09 +0900
-Message-ID: <4CF5D221.7040500@samsung.com>
-References: <4CF4B8E5.9070604@samsung.com>
- <20101130145141.d01f277f.akpm@linux-foundation.org>
+Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
+Date: Wed, 01 Dec 2010 14:44:58 +0900
+Message-ID: <4CF5E0DA.3060300@samsung.com>
+References: <4CF4961C.5020606@samsung.com>
+ <20101130095618.GA6408@pengutronix.de> <4CF4CE48.7040102@samsung.com>
+ <20101130105435.GB6408@pengutronix.de> <4CF4E1DF.5000000@samsung.com>
+ <43E4817426ED174AA81263BCECB4351D13200C545E@sc-vexch3.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:50290 "EHLO
+Received: from mailout1.samsung.com ([203.254.224.24]:27891 "EHLO
 	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752389Ab0LAEmW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2010 23:42:22 -0500
-Received: from epmmp2 (mailout1.samsung.com [203.254.224.24])
+	with ESMTP id S1751469Ab0LAFov (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Dec 2010 00:44:51 -0500
+Received: from epmmp1 (mailout1.samsung.com [203.254.224.24])
  by mailout1.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LCQ005EPFQ0O010@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Dec 2010 13:42:00 +0900 (KST)
+ 2010)) with ESMTP id <0LCQ006HQIMPL740@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 01 Dec 2010 14:44:49 +0900 (KST)
 Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LCQ00DSXFQ027@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Dec 2010 13:42:00 +0900 (KST)
-In-reply-to: <20101130145141.d01f277f.akpm@linux-foundation.org>
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LCQ002SNIMOFT@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 01 Dec 2010 14:44:48 +0900 (KST)
+In-reply-to: <43E4817426ED174AA81263BCECB4351D13200C545E@sc-vexch3.marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@marvell.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, "matt@console-pimps.org" <matt@console-pimps.org>
 
-Hi Andrew.
+Philip Rakity wrote:
+> Can we just remove the quirk for broken timeout and just set the timeout to 0xe in sdhci.c?
 
-Andrew Morton wrote:
-> On Tue, 30 Nov 2010 17:42:13 +0900
-> Jaehoon Chung <jh80.chung@samsung.com> wrote:
+you means that set the timeout to 0xe without broken timeout in sdhci.c?
+
 > 
->> This patch is mmcoops.
+> The problem with the quirk is you need to know when to set it and the problem with the existing quirk is that one has to set it to work with bad cards.
+
+I know when use quirk...and what use one...
+
+> ________________________________________
+> From: linux-mmc-owner@vger.kernel.org [linux-mmc-owner@vger.kernel.org] On Behalf Of Jaehoon Chung [jh80.chung@samsung.com]
+> Sent: Tuesday, November 30, 2010 3:37 AM
+> To: Wolfram Sang
+> Cc: linux-mmc@vger.kernel.org; Chris Ball; kyungmin Park; Andrew Morton; matt@console-pimps.org
+> Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
+> 
+>>> Maybe, happen for all sdhci-controllers...
+>> My point is: If it is needed for all SDHCI-controllers, we don't need a
+>> quirk and can apply your code unconditionally.
 >>
->> When Kernel panic or oops, write panic log to circular buffer in eMMC.
->> then after reset, we can see the log in MMC.
+> 
+> You're right. But i'm not sure, happen for all sdhci-controller.
+> so i send to RFC patch..
+> I also hope apply my code unconditionally.
+> 
+> the reason using quirk...every card didn't happen this issue..
+> if not happen this issue, we need not set timeout value..at that time..
+> 
+> when needs, entered and set timeout value..(conditionally)
+> 
+> 
+>>> Card is configurable with eMMC spec..But sdhci-controller didn't
+>>> support that card. So SDHCI controller need to use quriks..
+>> Can we find out if this is a general issue?
 >>
->> So we need change mmc_wait_for_req().
->> because if we used schedule(), we can find atomic schedule warning.
->> That is not our needs log. so i used delay.
->> i want to know how about __mmc_wait_for_req()
+> 
+> Hmm..i'm sure you can find out this issue..
+> Have ever find out this issue(similar case)..anybody?
+> 
+>> Regards,
 >>
->> If any question, let me know.
+>>    Wolfram
 >>
->> ...
->>  
->>  /**
->> - *	mmc_wait_for_req - start a request and wait for completion
->> + *	__mmc_wait_for_req - start a request and wait for completion
->>   *	@host: MMC host to start command
->>   *	@mrq: MMC request to start
->> + *	@panic: kernel panic/oops or not
->>   *
->>   *	Start a new MMC custom command request for a host, and wait
->>   *	for the command to complete. Does not attempt to parse the
->>   *	response.
->>   */
->> -void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
->> +void __mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq,
->> +		int panic)
->>  {
->> -	DECLARE_COMPLETION_ONSTACK(complete);
->> +	if (panic) {
->> +		DECLARE_WAITQUEUE(wait, current);
->> +
->> +		mmc_start_request(host, mrq);
->> +
->> +		spin_lock_irq(&host->wq.lock);
->> +		init_waitqueue_head(&host->wq);
->> +
->> +		add_wait_queue_exclusive(&host->wq, &wait);
->> +		set_current_state(TASK_UNINTERRUPTIBLE);
->>  
->> -	mrq->done_data = &complete;
->> -	mrq->done = mmc_wait_done;
->> +		mdelay(10);
->> +		spin_unlock_irq(&host->wq.lock);
->> +	} else {
->> +		DECLARE_COMPLETION_ONSTACK(complete);
->> +
->> +		mrq->done_data = &complete;
->> +		mrq->done = mmc_wait_done;
->> +
->> +		mmc_start_request(host, mrq);
->> +
->> +		wait_for_completion(&complete);
->> +	}
->> +}
 > 
-> This approach seems somewhat OK - it will only do the busy-wait in the
-> "panic=1" case, so existing callers shouldn't be affected.  (`panic'
-> could have had type `bool', btw).
-> 
-> That being said, the code is odd/wrong.
-> 
-> void __mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq,
-> 		int panic)
-> {
-> 	if (panic) {
-> 		DECLARE_WAITQUEUE(wait, current);
-> 
-> 		mmc_start_request(host, mrq);
-> 
-> 		spin_lock_irq(&host->wq.lock);
-> 		init_waitqueue_head(&host->wq);
-> 
-> 		add_wait_queue_exclusive(&host->wq, &wait);
-> 		set_current_state(TASK_UNINTERRUPTIBLE);
-> 
-> 		mdelay(10);
-> 		spin_unlock_irq(&host->wq.lock);
-> 	} else {
-> 
-> Surely the waitqueue is unneeded and the missing remove_wait_queue() is a
-> bug and the set_current_state() is a bug and the spin_lock_irq()
-> appears to be unneeded.  afaict you want this:
-> 
-
-Sorry, Missing remove_wait_queue()...
-Yes, actually i want below code. but that is not working well..
-You said we need to know request completed.
-But it is difficult to know correct delay time..
-
-And when we try to write log, if happen other panic/oops log..
-maybe that try to write that log..then happen write crash..
-So i used waitqueue.
-
-i changed spin_lock_irqsave() instead of spin_lock_irq()
-
-> void __mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq,
-> 		int panic)
-> {
-> 	if (panic) {
-> 		mmc_start_request(host, mrq);
-> 		mdelay(10);
-> 	} else {
-> 
-> 
-> However it is pretty bad to just delay 10 milliseconds and then assume
-> that the request has completed.  Would it not be better to poll for the
-> IRQ completion, or to poll some hardware flag?
-
-right, 10 milliseconds is assumed..i'm also testing how much delay need..
-If need, i will change that time. 
-
-> 
-> (We can't poll for IRQ completion if the caller has disabled IRQs, but
-> if the caller has disabled IRQs then the use of spin_lock_irq() instead
-> of spin_lock_irqsave() is yet another bug!)
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 
-Thank you...
-
-Regards,
-Jaehoon Chung
