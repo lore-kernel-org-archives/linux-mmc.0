@@ -1,65 +1,104 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v4 4/4]do HW reset after each reading/writing/erasing
-Date: Wed, 1 Dec 2010 20:49:52 +0800
-Message-ID: <20101201124952.GE5421@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card
+ busy.
+Date: Wed, 1 Dec 2010 08:21:20 -0800
+Message-ID: <D5B06981-6CBA-46D1-B209-1FF10244ED27@marvell.com>
+References: <4CF4961C.5020606@samsung.com>
+ <20101130095618.GA6408@pengutronix.de> <4CF4CE48.7040102@samsung.com>
+ <20101130105435.GB6408@pengutronix.de> <4CF4E1DF.5000000@samsung.com>
+ <43E4817426ED174AA81263BCECB4351D13200C545E@sc-vexch3.marvell.com>
+ <4CF5E0DA.3060300@samsung.com>
+ <A1CDFC9E-BD6B-43DF-BFAA-CAA5E41D7E9F@marvell.com>
+ <4CF63FA9.1010304@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, arjan@linux.intel.com, alan@linux.intel.com, akpm@linux-foundation.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:49696 "HELO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1752603Ab0LAQVg convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Dec 2010 11:21:36 -0500
+In-Reply-To: <4CF63FA9.1010304@samsung.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, "matt@console-pimps.org" <matt@console-pimps.org>
 
->From 0d704091ba1797eaba34230ac920866e68d1b21d Mon Sep 17 00:00:00 2001
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Date: Wed, 1 Dec 2010 20:24:00 +0800
-Subject: [PATCH 4/4] add HW reset after each read/write/erase
 
-Driver can do a HW reset for eMMC card if read/write/erase
-occures timeout error.
+On Dec 1, 2010, at 4:29 AM, Jaehoon Chung wrote:
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- drivers/mmc/card/block.c |   10 ++++++++++
- drivers/mmc/core/core.c  |    2 ++
- 2 files changed, 12 insertions(+), 0 deletions(-)
+> Philip Rakity wrote:
+>> On Nov 30, 2010, at 9:44 PM, Jaehoon Chung wrote:
+>> 
+>>> Philip Rakity wrote:
+>>>> Can we just remove the quirk for broken timeout and just set the timeout to 0xe in sdhci.c?
+>>> you means that set the timeout to 0xe without broken timeout in sdhci.c?
+>> 
+>> yes
+>> 
+>> but I also think we should remove the quirk and change sdhci.c to use 0xe ALL THE TIME.  
+>> I do not see a downside to doing this other than a longer timeout period.  Considering the broken cards
+>> that are out there in practice one needs to set it to this value anyway for cards to work.
+>> 
+> 
+> If we set the fixed timeout value to 0xe, we should remove the broken timeout value. right.
+> But in my patch, nevertheless i used the broken timeout value quirk, need to reset timeout value at that time.
+> Because if didn't set timeout value, broken card fire busy state..so happen the data timeout error.
+> 
+> Anyway, your opinion seem good..
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 217f820..c50f94b 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -424,6 +424,16 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 
- 		mmc_wait_for_req(card->host, &brq.mrq);
- 
-+		/*
-+		 * Check if need to do HW reset.
-+		 */
-+		if (brq.cmd.error)
-+			mmc_handle_timeout_error(card->host, brq.cmd.error);
-+		else if (brq.data.error)
-+			mmc_handle_timeout_error(card->host, brq.data.error);
-+		else if (brq.stop.error)
-+			mmc_handle_timeout_error(card->host, brq.stop.error);
-+
- 		mmc_queue_bounce_post(mq);
- 
- 		/*
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 530fc35..559ff1c 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1382,6 +1382,8 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
- 	mmc_set_erase_timeout(card, &cmd, arg, qty);
- 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
-+	/* Before return, check whether can do a HW reset */
-+	mmc_handle_timeout_error(card->host, cmd.error);
- 	if (err) {
- 		printk(KERN_ERR "mmc_erase: erase error %d, status %#x\n",
- 		       err, cmd.resp[0]);
--- 
-1.6.6.1
+
+The timeout value in the host controller should not change once it is set.  It s not supposed to 
+change value on reset (for example).
+
+Curious -- if you read the value when you are in the busy state before you set it -- what value is there.
+BTW-- are you using sdhci.c as the SD Controller ?
+
+> Thanks
+> 
+>>>> The problem with the quirk is you need to know when to set it and the problem with the existing quirk is that one has to set it to work with bad cards.
+>>> I know when use quirk...and what use one...
+>>> 
+>>>> ________________________________________
+>>>> From: linux-mmc-owner@vger.kernel.org [linux-mmc-owner@vger.kernel.org] On Behalf Of Jaehoon Chung [jh80.chung@samsung.com]
+>>>> Sent: Tuesday, November 30, 2010 3:37 AM
+>>>> To: Wolfram Sang
+>>>> Cc: linux-mmc@vger.kernel.org; Chris Ball; kyungmin Park; Andrew Morton; matt@console-pimps.org
+>>>> Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card busy.
+>>>> 
+>>>>>> Maybe, happen for all sdhci-controllers...
+>>>>> My point is: If it is needed for all SDHCI-controllers, we don't need a
+>>>>> quirk and can apply your code unconditionally.
+>>>>> 
+>>>> You're right. But i'm not sure, happen for all sdhci-controller.
+>>>> so i send to RFC patch..
+>>>> I also hope apply my code unconditionally.
+>>>> 
+>>>> the reason using quirk...every card didn't happen this issue..
+>>>> if not happen this issue, we need not set timeout value..at that time..
+>>>> 
+>>>> when needs, entered and set timeout value..(conditionally)
+>>>> 
+>>>> 
+>>>>>> Card is configurable with eMMC spec..But sdhci-controller didn't
+>>>>>> support that card. So SDHCI controller need to use quriks..
+>>>>> Can we find out if this is a general issue?
+>>>>> 
+>>>> Hmm..i'm sure you can find out this issue..
+>>>> Have ever find out this issue(similar case)..anybody?
+>>>> 
+>>>>> Regards,
+>>>>> 
+>>>>>  Wolfram
+>>>>> 
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>> 
+>> 
+>> 
+> 
+
