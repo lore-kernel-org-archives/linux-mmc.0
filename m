@@ -1,68 +1,50 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [RFC Patch] SDHCI: add quirk for data timeout value when card
- busy.
-Date: Thu, 2 Dec 2010 10:09:33 +0100
-Message-ID: <20101202090932.GA3345@pengutronix.de>
-References: <20101130095618.GA6408@pengutronix.de>
- <4CF4CE48.7040102@samsung.com>
- <20101130105435.GB6408@pengutronix.de>
- <4CF4E1DF.5000000@samsung.com>
- <43E4817426ED174AA81263BCECB4351D13200C545E@sc-vexch3.marvell.com>
- <4CF5E0DA.3060300@samsung.com>
- <A1CDFC9E-BD6B-43DF-BFAA-CAA5E41D7E9F@marvell.com>
- <4CF63FA9.1010304@samsung.com>
- <D5B06981-6CBA-46D1-B209-1FF10244ED27@marvell.com>
- <4CF74D5E.1080707@samsung.com>
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Subject: [PATVH v3 0/3]mmc: set a suitable max_discard_sectors value for HC
+Date: Thu, 2 Dec 2010 19:25:26 +0800
+Message-ID: <20101202112526.GA10358@intel.com>
+Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="FL5UXtIhxfXey3p5"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:55388 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751223Ab0LBJJm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2010 04:09:42 -0500
+Received: from mga02.intel.com ([134.134.136.20]:39272 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755394Ab0LBL2r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 2 Dec 2010 06:28:47 -0500
 Content-Disposition: inline
-In-Reply-To: <4CF74D5E.1080707@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, kyungmin Park <kyungmin.park@samsung.com>, Andrew Morton <akpm@linux-foundation.org>, "matt@console-pimps.org" <matt@console-pimps.org>
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, arjan@linux.intel.com, alan@linux.intel.com, akpm@linux-foundation.org, adrian.hunter@nokia.com
 
+Hi,
+	This is the version 3 patch which set a suitable max_discard_sectors
+	value for SDHCI host controller. In this patch, a new quirk is added for
+	such controller.
 
---FL5UXtIhxfXey3p5
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+	max_discard_sectors is a parameter of MMC driver request queue. This
+	value can limit how many sectors will be passed down to host for
+	erasing. The original value for this parameter is UINT_MAX which means
+	there is no limitation for the count of sectors to pass down for
+	erasing.
 
-> > The timeout value in the host controller should not change once it is s=
-et.  It s not supposed to=20
-> > change value on reset (for example).
-> >=20
-> > Curious -- if you read the value when you are in the busy state before =
-you set it -- what value is there.
->=20
-> I checked the timeout value to 0xa (i didn't use broken timeout value. if=
- i used that quirk, set to 0xe)
-> When suspend/resume..timeout value set to 0x0...so i set them...
+	But some SDHCI host controller cannot erase too many sectors at one
+	time. It may generate a timeout interrupt since the time erasing used is
+	longer than the timeout time host can wait.
 
-What I don't see at the moment is why this issue happens after resume but
-not after initial boot. Do you have an idea?
+	So these patches add a new quirk for such SDHCI host controller and let
+	it erase only signle eraseblock each time. This will be safe for such
+	SDHCI host to use.
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+	patch1: add a new quirk for SDHCI host controller. Also add a new
+	routine mmc_set_discard_limit which is used to set max_discard_sectors
+	value for such SDHCI host controller.
+	patch2: set timeout control register for such SDHCI host controller.
+	patch3: add this quirk for MFLD SDHCI host controller.
 
---FL5UXtIhxfXey3p5
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
+	Change-log:
+	patch1: let mmc_set_discard_limit can return value UINT_MAX.
+	patch2: no change.
+	patch3: no change.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAkz3YkwACgkQD27XaX1/VRvvCQCcDQIVST4jKdo5yGFr/jXbYEHi
-LH8AnjkQGM2+yZDLjGk4CoEYFjMRsbvI
-=PW+N
------END PGP SIGNATURE-----
-
---FL5UXtIhxfXey3p5--
+Thanks
+Chuanxiao
