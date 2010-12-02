@@ -1,57 +1,38 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v3 2/3]set timeout control reg for such SDHCI host
-Date: Thu, 2 Dec 2010 12:53:30 +0100
-Message-ID: <20101202115329.GE3345@pengutronix.de>
-References: <20101202112613.GC10358@intel.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH] mmci: supply per-instance regulator name
+Date: Thu, 2 Dec 2010 11:57:00 +0000
+Message-ID: <20101202115700.GF29347@n2100.arm.linux.org.uk>
+References: <1291289707-5529-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="h56sxpGKRmy85csR"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:48078 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757402Ab0LBLxd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2010 06:53:33 -0500
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:43278 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751633Ab0LBL5K (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2010 06:57:10 -0500
 Content-Disposition: inline
-In-Reply-To: <20101202112613.GC10358@intel.com>
+In-Reply-To: <1291289707-5529-1-git-send-email-linus.walleij@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, cjb@laptop.org, arjan@linux.intel.com, alan@linux.intel.com, akpm@linux-foundation.org, adrian.hunter@nokia.com
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
+On Thu, Dec 02, 2010 at 12:35:07PM +0100, Linus Walleij wrote:
+> On the Ux500 we have different regulators to different card slots
+> and eMMCs, and some have no regulator. Move the hardcoded "vmmc"
+> regulator name to platform data and supply it that way for the
+> platforms that use it. Remove the ugly and unneeded #ifdef around
+> the regulator fetch code at the same time.
 
---h56sxpGKRmy85csR
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+It seems that the regulator code is making all the same mistakes that
+historically were made with the clk API code.
 
-On Thu, Dec 02, 2010 at 07:26:13PM +0800, Chuanxiao Dong wrote:
+Rather than using the struct device, it's trying to use the regulator
+name to distinguish individual sources of supply.  This can only lead
+to lots of regulator names being passed around from layer to layer,
+rather than the now proven cleaner method that the clk API always set
+out to do.
 
-> +	if (host->quirks & SDHCI_QUIRK_FORCE_ERASE_SINGLE) {
-> +		/* Set the timeout to be the maximum value */
-> +		if (cmd->erase_timeout)
-> +			sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
-> +	}
-> +
->  	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
-
-Hmm, this looks like another argument for Philip's idea to always use
-the maximum timeout value and skip the quirks related to it?
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---h56sxpGKRmy85csR
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAkz3iLkACgkQD27XaX1/VRsRFACgtNpV4S15ULJxkDjUn9Ck7VEJ
-AI8AoMVFkVEN1newoLQgPcbEUZrfTTIk
-=Uy3r
------END PGP SIGNATURE-----
-
---h56sxpGKRmy85csR--
+I'd like regulator people to think long and hard about the sanity of
+passing names all the way from platform code into drivers and back
+into the regulator code before I consider this patch any further.
