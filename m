@@ -1,129 +1,140 @@
-From: Sahitya Tummala <stummala@codeaurora.org>
-Subject: Re: [PATCH v4] mmc: Make ID freq configurable
-Date: Thu, 02 Dec 2010 16:46:22 +0530
-Message-ID: <1291288582.15187.91.camel@stummala-linux.in.qualcomm.com>
-References: <4C80187D.9000304@yahoo.es>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH] mmci: supply per-instance regulator name
+Date: Thu, 2 Dec 2010 12:35:07 +0100
+Message-ID: <1291289707-5529-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:11714 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757488Ab0LBLcA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2010 06:32:00 -0500
-In-Reply-To: <4C80187D.9000304@yahoo.es>
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:59037 "EHLO
+	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756515Ab0LBLfu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2010 06:35:50 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hein_Tibosch <hein_tibosch@yahoo.es>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Pierre Ossman <pierre@ossman.eu>, Chris Ball <cjb@laptop.org>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Linus Walleij <linus.walleij@stericsson.com>
 
-Hi Hein Tibosch,
+On the Ux500 we have different regulators to different card slots
+and eMMCs, and some have no regulator. Move the hardcoded "vmmc"
+regulator name to platform data and supply it that way for the
+platforms that use it. Remove the ugly and unneeded #ifdef around
+the regulator fetch code at the same time.
 
-On Fri, 2010-09-03 at 05:34 +0800, Hein_Tibosch wrote:
-> In the latest releases of the mmc driver, the freq during initialization
-> is set to a fixed 400 Khz. This was reportedly too fast for several
-> users. As there doesn't seem to be an ideal frequency which-works-for-all,
-> Pierre suggested to let the driver try several frequencies.
-> 
-> This patch implements that idea. It will try mmc-initialization using
-> several frequencies from an array 400, 300, 200 and 100.
-> I submitted it earlier but it's now adapted to and tested with kernel
-> 2.6.36-rc3.
-> 
-> In case SDIO is broken, it'll still try to detect SDMEM, also at different
-> freqs.
-> 
-> Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
-> 
-> ---
-> diff -Nurp a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> --- a/drivers/mmc/core/core.c	2010-08-29 23:36:04.000000000 +0800
-> +++ b/drivers/mmc/core/core.c	2010-09-03 04:28:52.000000000 +0800
-> @@ -907,12 +907,7 @@ static void mmc_power_up(struct mmc_host
->  	 */
->  	mmc_delay(10);
-> 
-> -	if (host->f_min > 400000) {
-> -		pr_warning("%s: Minimum clock frequency too high for "
-> -				"identification mode\n", mmc_hostname(host));
-> -		host->ios.clock = host->f_min;
-> -	} else
-> -		host->ios.clock = 400000;
-> +	host->ios.clock = host->f_init;
-> 
->  	host->ios.power_mode = MMC_POWER_ON;
->  	mmc_set_ios(host);
-> @@ -1404,6 +1399,8 @@ void mmc_rescan(struct work_struct *work
->  	u32 ocr;
->  	int err;
->  	unsigned long flags;
-> +	int i;
-> +	unsigned freqs[] = { 400000, 300000, 200000, 100000 };
-> 
->  	spin_lock_irqsave(&host->lock, flags);
-> 
-> @@ -1443,55 +1440,64 @@ void mmc_rescan(struct work_struct *work
->  	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
->  		goto out;
-> 
-> -	mmc_claim_host(host);
-> +	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
-> +		mmc_claim_host(host);
-> 
-> -	mmc_power_up(host);
-> -	sdio_reset(host);
-> -	mmc_go_idle(host);
-> +		if (freqs[i] >= host->f_min)
-> +			host->f_init = freqs[i];
-> +		else if (i && freqs[i-1] <= host->f_min)
-> +			goto out;
-> +		else
-> +			host->f_init = host->f_min;
-> 
-> -	mmc_send_if_cond(host, host->ocr_avail);
-> +		printk ("mmc_rescan: trying %u Hz\n", host->f_init);
-> +		mmc_power_up(host);
-> +		sdio_reset(host);
-> +		mmc_go_idle(host);
-> 
-> -	/*
-> -	 * First we search for SDIO...
-> -	 */
-> -	err = mmc_send_io_op_cond(host, 0, &ocr);
-> -	if (!err) {
-> -		if (mmc_attach_sdio(host, ocr)) {
-> -			mmc_claim_host(host);
-> -			/* try SDMEM (but not MMC) even if SDIO is broken */
-> -			if (mmc_send_app_op_cond(host, 0, &ocr))
-> -				goto out_fail;
-> +		mmc_send_if_cond(host, host->ocr_avail);
-> +
-> +		/*
-> +		 * First we search for SDIO...
-> +		 */
-> +		err = mmc_send_io_op_cond(host, 0, &ocr);
-> +		if (!err) {
-> +			if (mmc_attach_sdio(host, ocr)) {
-> +				mmc_claim_host(host);
-> +				/* try SDMEM (but not MMC) even if SDIO is broken */
-> +				if (mmc_send_app_op_cond(host, 0, &ocr))
+Regression tested on Ux500, U300 and the ARM RealView PB1176.
 
-In case of SDIO error, mmc_power_off() is getting called as part of
-mmc_detach_bus().  Shouldn't we power up the host before checking for
-SDMEM? Any comments?
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+---
+ arch/arm/mach-u300/mmc.c               |    1 +
+ arch/arm/mach-ux500/board-mop500-sdi.c |    3 +++
+ drivers/mmc/host/mmci.c                |   25 +++++++++++++++++--------
+ include/linux/amba/mmci.h              |    2 ++
+ 4 files changed, 23 insertions(+), 8 deletions(-)
 
-> +					goto out_fail;
-> +
-> +				if (mmc_attach_sd(host, ocr))
-> +					mmc_power_off(host);
-> +			}
-> +			goto out;
-> +		}
-
-Thanks,
-Sahitya.
---
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
-Forum.
+diff --git a/arch/arm/mach-u300/mmc.c b/arch/arm/mach-u300/mmc.c
+index de1ac9a..82e4843 100644
+--- a/arch/arm/mach-u300/mmc.c
++++ b/arch/arm/mach-u300/mmc.c
+@@ -102,6 +102,7 @@ int __devinit mmc_init(struct amba_device *adev)
+ 	 * we have a regulator we can control instead.
+ 	 */
+ 	/* Nominally 2.85V on our platform */
++	mmci_card->mmc0_plat_data.vcard = "vmmc";
+ 	mmci_card->mmc0_plat_data.f_max = 24000000;
+ 	mmci_card->mmc0_plat_data.status = mmc_status;
+ 	mmci_card->mmc0_plat_data.gpio_wp = -1;
+diff --git a/arch/arm/mach-ux500/board-mop500-sdi.c b/arch/arm/mach-ux500/board-mop500-sdi.c
+index be5e8cc..6f8d828 100644
+--- a/arch/arm/mach-ux500/board-mop500-sdi.c
++++ b/arch/arm/mach-ux500/board-mop500-sdi.c
+@@ -87,6 +87,7 @@ static u32 mop500_sdi0_vdd_handler(struct device *dev, unsigned int vdd,
+ }
+ 
+ static struct mmci_platform_data mop500_sdi0_data = {
++	.vcard		= "V-MMC-SD",
+ 	.vdd_handler	= mop500_sdi0_vdd_handler,
+ 	.ocr_mask	= MMC_VDD_29_30,
+ 	.f_max		= 100000000,
+@@ -117,6 +118,7 @@ void mop500_sdi_tc35892_init(void)
+  */
+ 
+ static struct mmci_platform_data mop500_sdi2_data = {
++	/* This is always on so needs no vcard regulator */
+ 	.ocr_mask	= MMC_VDD_165_195,
+ 	.f_max		= 100000000,
+ 	.capabilities	= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA,
+@@ -129,6 +131,7 @@ static struct mmci_platform_data mop500_sdi2_data = {
+  */
+ 
+ static struct mmci_platform_data mop500_sdi4_data = {
++	.vcard		= "V-eMMC1",
+ 	.ocr_mask	= MMC_VDD_29_30,
+ 	.f_max		= 100000000,
+ 	.capabilities	= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA |
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 3709ab3..23e6ebd 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -844,14 +844,22 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
+ 		mmc->f_max = min(host->mclk, fmax);
+ 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
+ 
+-#ifdef CONFIG_REGULATOR
+-	/* If we're using the regulator framework, try to fetch a regulator */
+-	host->vcc = regulator_get(&dev->dev, "vmmc");
+-	if (IS_ERR(host->vcc))
+-		host->vcc = NULL;
+-	else {
+-		int mask = mmc_regulator_get_ocrmask(host->vcc);
++	/* Use a host regulator for card power if one is supplied */
++	if (plat->vcard) {
++		int mask;
++
++		/*
++		 * If getting the regulators fails, or if the
++		 * regulator framework is disabled (yields a NULL
++		 * regulator) we leave this.
++		 */
++		host->vcc = regulator_get(&dev->dev, plat->vcard);
++		if (IS_ERR(host->vcc))
++			host->vcc = NULL;
++		if (host->vcc == NULL)
++			goto no_regulator;
+ 
++		mask = mmc_regulator_get_ocrmask(host->vcc);
+ 		if (mask < 0)
+ 			dev_err(&dev->dev, "error getting OCR mask (%d)\n",
+ 				mask);
+@@ -863,8 +871,9 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
+ 				 "(using regulator instead)\n");
+ 		}
+ 	}
+-#endif
++
+ 	/* Fall back to platform data if no regulator is found */
++no_regulator:
+ 	if (host->vcc == NULL)
+ 		mmc->ocr_avail = plat->ocr_mask;
+ 	mmc->caps = plat->capabilities;
+diff --git a/include/linux/amba/mmci.h b/include/linux/amba/mmci.h
+index f4ee9ac..614c2b6 100644
+--- a/include/linux/amba/mmci.h
++++ b/include/linux/amba/mmci.h
+@@ -9,6 +9,7 @@
+ /**
+  * struct mmci_platform_data - platform configuration for the MMCI
+  * (also known as PL180) block.
++ * @vcard: name of regulator for card
+  * @f_max: the maximum operational frequency for this host in this
+  * platform configuration. When this is specified it takes precedence
+  * over the module parameter for the same frequency.
+@@ -29,6 +30,7 @@
+  * this platform, signify anything MMC_CAP_* from mmc/host.h
+  */
+ struct mmci_platform_data {
++	char *vcard;
+ 	unsigned int f_max;
+ 	unsigned int ocr_mask;
+ 	u32 (*vdd_handler)(struct device *, unsigned int vdd,
+-- 
+1.7.3.2
 
