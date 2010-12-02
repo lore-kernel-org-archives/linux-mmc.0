@@ -1,49 +1,48 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH] mmci: supply per-instance regulator name
-Date: Thu, 2 Dec 2010 14:23:48 +0100
-Message-ID: <AANLkTikXAvjDOYETutyY7+3aRmWbv9roMHONscNZM-E-@mail.gmail.com>
-References: <1291289707-5529-1-git-send-email-linus.walleij@stericsson.com>
-	<20101202120318.GB3182@sirena.org.uk>
-	<20101202122827.GG29347@n2100.arm.linux.org.uk>
-	<20101202130809.GD859@rakim.wolfsonmicro.main>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH] mmci: drop superfluous regulator #ifdef
+Date: Thu, 2 Dec 2010 14:36:58 +0100
+Message-ID: <1291297018-3074-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:38889 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756773Ab0LBNXu convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2010 08:23:50 -0500
-Received: by wwa36 with SMTP id 36so8720690wwa.1
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Dec 2010 05:23:48 -0800 (PST)
-In-Reply-To: <20101202130809.GD859@rakim.wolfsonmicro.main>
+Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:33735 "EHLO
+	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757358Ab0LBNhr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2010 08:37:47 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Linus Walleij <linus.walleij@stericsson.com>
 
-2010/12/2 Mark Brown <broonie@opensource.wolfsonmicro.com>:
-> On Thu, Dec 02, 2010 at 12:28:27PM +0000, Russell King - ARM Linux wr=
-ote:
->
->> The way the MMCI code is, it only requests one regulator per AMBA
->> device, and therefore only one regulator per struct device. =A0So I
->> don't think the current code needs changing in any way provided the
->> struct device is used to find the corresponding regulator.
->
-> Hrm. =A0In that case I'm not sure what the problem Linus' patch fixes=
- is -
-> the driver is already requesting using the struct device, I was assum=
-ing
-> that the supplies weren't being requested in a fine grained enough
-> fashion.
+The regulator and MMC frameworks provide the proper stub functions
+for the regulator functions anyway, get rid of this.
 
-Probably it's the platform board regulator config that needs fixing
-instead, so as to bind to the correct device.
-I'll check...
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+---
+ drivers/mmc/host/mmci.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
 
-I'll do another patch that simply gets rid of the #ifdef for now
-instead.
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 3709ab3..7567872 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -844,7 +844,6 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
+ 		mmc->f_max = min(host->mclk, fmax);
+ 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
+ 
+-#ifdef CONFIG_REGULATOR
+ 	/* If we're using the regulator framework, try to fetch a regulator */
+ 	host->vcc = regulator_get(&dev->dev, "vmmc");
+ 	if (IS_ERR(host->vcc))
+@@ -863,7 +862,7 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
+ 				 "(using regulator instead)\n");
+ 		}
+ 	}
+-#endif
++
+ 	/* Fall back to platform data if no regulator is found */
+ 	if (host->vcc == NULL)
+ 		mmc->ocr_avail = plat->ocr_mask;
+-- 
+1.7.3.2
 
-Thanks,
-Linus Walleij
