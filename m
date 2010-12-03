@@ -1,54 +1,96 @@
-From: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
-Subject: Re: [PATCH v4] mmc: Make ID freq configurable
-Date: Fri, 3 Dec 2010 07:56:12 +0100
-Message-ID: <20101203065612.GA9779@rere.qmqm.pl>
-References: <4C80187D.9000304@yahoo.es> <1291288582.15187.91.camel@stummala-linux.in.qualcomm.com> <4CF80DC6.1020801@yahoo.es> <20101202223812.GA2685@rere.qmqm.pl> <1c6eadd860e1a9085336bf75a2a96eb3.squirrel@www.codeaurora.org>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH] mmci: corrected calculation of clock div for ux500 v2
+Date: Fri, 3 Dec 2010 09:46:27 +0100
+Message-ID: <1291365987-17882-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rere.qmqm.pl ([89.167.52.164]:39256 "EHLO rere.qmqm.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754475Ab0LCG4P (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 3 Dec 2010 01:56:15 -0500
-Content-Disposition: inline
-In-Reply-To: <1c6eadd860e1a9085336bf75a2a96eb3.squirrel@www.codeaurora.org>
+Received: from eu1sys200aog115.obsmtp.com ([207.126.144.139]:53590 "EHLO
+	eu1sys200aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751777Ab0LCIqj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Dec 2010 03:46:39 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: stummala@codeaurora.org
-Cc: Hein_Tibosch <hein_tibosch@yahoo.es>, Andrew Morton <akpm@linux-foundation.org>, Pierre Ossman <pierre@ossman.eu>, Chris Ball <cjb@laptop.org>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@stericsson.com>
 
-On Thu, Dec 02, 2010 at 09:05:54PM -0800, stummala@codeaurora.org wrote=
-:
-> Hi Michal,
-[...]
-> >> > In case of SDIO error, mmc_power_off() is getting called as part=
- of
-> >> > mmc_detach_bus().  Shouldn't we power up the host before checkin=
-g for
-> >> > SDMEM? Any comments?
-> >> I think you should ask Michal Miroslaw, as he wrote the patch for =
-the
-> >> SD-combo (IO + mem)*
-> >>
-> >> But yes, in case of a failure, mmc_attach_sdio() will call
-> >> mmc_detach_bus()
-> >> which in turn will call mmc_power_off()
-> >>
-> >> And so it should be mmc_power_up() again before trying to detect S=
-D
-> >> memory.
-> > Yes, you are right!  This explains some things...
-> >
-> > Please try attached patch. (Not tested, but obvious enough.)
-> I was looking at the code and figured out this issue. I don't have an=
-y
-> SD-combo card to verify your patch.
+From: Ulf Hansson <ulf.hansson@stericsson.com>
 
-You shouldn't be able to use this code path with normal SD-combo cards.
-This is relevant if you have a card that responds to CMD5 but then fail=
-s
-SDIO part initialization in some circumstances (i.e. time-outs).
+The Ux500 variant of this block has a different divider.
+The value used right now is too big and which means a loss
+in performance. This fix corrects it. Also expand the math
+comments a bit so it's clear what's happening. Further
+the Ux500 variant does not like if we use the BYPASS bit,
+instead we are supposed to set the clock divider to zero.
 
-Best Regards,
-Micha=B3 Miros=B3aw
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+---
+ drivers/mmc/host/mmci.c |   27 ++++++++++++++++++++++++++-
+ 1 files changed, 26 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 7567872..9bd3a18 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -51,6 +51,7 @@ static unsigned int fmax = 515633;
+  * @broken_blockend_dma: the MCI_DATABLOCKEND is broken on the hardware when
+  *		using DMA.
+  * @sdio: variant supports SDIO
++ * @st_clkdiv: true if using a ST-specific clock divider algorithm
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -61,6 +62,7 @@ struct variant_data {
+ 	bool			broken_blockend;
+ 	bool			broken_blockend_dma;
+ 	bool			sdio;
++	bool			st_clkdiv;
+ };
+ 
+ static struct variant_data variant_arm = {
+@@ -86,7 +88,9 @@ static struct variant_data variant_ux500 = {
+ 	.datalength_bits	= 24,
+ 	.broken_blockend	= true,
+ 	.sdio			= true,
++	.st_clkdiv		= true,
+ };
++
+ /*
+  * This must be called with host->lock held
+  */
+@@ -97,9 +101,30 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+ 
+ 	if (desired) {
+ 		if (desired >= host->mclk) {
+-			clk = MCI_CLK_BYPASS;
++			/*
++			 * The ST clock divider does not like the bypass bit,
++			 * even though it's available. Instead the datasheet
++			 * recommends setting the divider to zero.
++			 */
++			if (!variant->st_clkdiv)
++				clk = MCI_CLK_BYPASS;
+ 			host->cclk = host->mclk;
++		} else if (variant->st_clkdiv) {
++			/*
++			 * DB8500 TRM says f = mclk / (clkdiv + 2)
++			 * => clkdiv = (mclk / f) - 2
++			 * Round the divider up so we don't exceed the max
++			 * frequency
++			 */
++			clk = DIV_ROUND_UP(host->mclk, desired) - 2;
++			if (clk >= 256)
++				clk = 255;
++			host->cclk = host->mclk / (clk + 2);
+ 		} else {
++			/*
++			 * PL180 TRM says f = mclk / (2 * (clkdiv + 1))
++			 * => clkdiv = mclk / (2 * f) - 1
++			 */
+ 			clk = host->mclk / (2 * desired) - 1;
+ 			if (clk >= 256)
+ 				clk = 255;
+-- 
+1.7.3.2
+
