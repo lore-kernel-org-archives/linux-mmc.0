@@ -1,41 +1,108 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v3 2/3]set timeout control reg for such SDHCI host
-Date: Fri, 3 Dec 2010 10:38:59 +0800
-Message-ID: <5D8008F58939784290FAB48F54975198320B3E41F7@shsmsx502.ccr.corp.intel.com>
-References: <20101202112613.GC10358@intel.com>
- <20101202115329.GE3345@pengutronix.de>
+From: stummala@codeaurora.org
+Subject: Re: [PATCH v4] mmc: Make ID freq configurable
+Date: Thu, 2 Dec 2010 21:05:54 -0800 (PST)
+Message-ID: <1c6eadd860e1a9085336bf75a2a96eb3.squirrel@www.codeaurora.org>
+References: <4C80187D.9000304@yahoo.es>
+    <1291288582.15187.91.camel@stummala-linux.in.qualcomm.com>
+    <4CF80DC6.1020801@yahoo.es> <20101202223812.GA2685@rere.qmqm.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:4318 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757726Ab0LCCjF convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2010 21:39:05 -0500
-In-Reply-To: <20101202115329.GE3345@pengutronix.de>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20101202223812.GA2685@rere.qmqm.pl>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
+Cc: Hein_Tibosch <hein_tibosch@yahoo.es>, Sahitya Tummala <stummala@codeaurora.org>, Andrew Morton <akpm@linux-foundation.org>, Pierre Ossman <pierre@ossman.eu>, Chris Ball <cjb@laptop.org>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arjan@linux.intel.com" <arjan@linux.intel.com>, "alan@linux.intel.com" <alan@linux.intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>, "prakity@marvell.com" <prakity@marvell.com>
 
- > 
-> On Thu, Dec 02, 2010 at 07:26:13PM +0800, Chuanxiao Dong wrote:
-> 
-> > +	if (host->quirks & SDHCI_QUIRK_FORCE_ERASE_SINGLE) {
-> > +		/* Set the timeout to be the maximum value */
-> > +		if (cmd->erase_timeout)
-> > +			sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
-> > +	}
-> > +
-> >  	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags),
-> > SDHCI_COMMAND);
-> 
-> Hmm, this looks like another argument for Philip's idea to always use the maximum
-> timeout value and skip the quirks related to it?
+Hi Michal,
 
-Yes, if always using the maximum timeout value is OK for other command, the patch2 can be removed I think.
-The new added quirk in the serials patches is used to set the limitation of request queue, not only just to set the timeout control reg.
-Even the timeout value was set to be 0xE (the maximum value), erasing too many sectors can still be failed since the timeout time was still not longer enough.
-So the count of erased sectors passed down by request queue should be reduced by using this quirk.
+> On Fri, Dec 03, 2010 at 05:21:10AM +0800, Hein_Tibosch wrote:
+>> Hi Sahitya,
+>> On 2-12-2010 19:16, Sahitya Tummala wrote:
+>> > Hi Hein Tibosch,
+>> >
+>> > On Fri, 2010-09-03 at 05:34 +0800, Hein_Tibosch wrote:
+>> >> In the latest releases of the mmc driver, the freq during
+>> initialization
+>> >> is set to a fixed 400 Khz. This was reportedly too fast for sever=
+al
+>> >> users. As there doesn't seem to be an ideal frequency
+>> which-works-for-all,
+>> >> Pierre suggested to let the driver try several frequencies.
+>> >> <cut>
+>> >> +		/*
+>> >> +		 * First we search for SDIO...
+>> >> +		 */
+>> >> +		err =3D mmc_send_io_op_cond(host, 0, &ocr);
+>> >> +		if (!err) {
+>> >> +			if (mmc_attach_sdio(host, ocr)) {
+>> >> +				mmc_claim_host(host);
+>> >> +				/* try SDMEM (but not MMC) even if SDIO is broken */
+>> >> +				if (mmc_send_app_op_cond(host, 0, &ocr))
+>> > In case of SDIO error, mmc_power_off() is getting called as part o=
+f
+>> > mmc_detach_bus().  Shouldn't we power up the host before checking =
+for
+>> > SDMEM? Any comments?
+>> I think you should ask Michal Miroslaw, as he wrote the patch for th=
+e
+>> SD-combo (IO + mem)*
+>>
+>> But yes, in case of a failure, mmc_attach_sdio() will call
+>> mmc_detach_bus()
+>> which in turn will call mmc_power_off()
+>>
+>> And so it should be mmc_power_up() again before trying to detect SD
+>> memory.
+>
+> Yes, you are right!  This explains some things...
+>
+> Please try attached patch. (Not tested, but obvious enough.)
 
+I was looking at the code and figured out this issue. I don't have any
+SD-combo card to verify your patch.
+
+Thanks
+Sahitya.
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
+=46orum.
+
+> Best Regards,
+> Micha=B3 Miros=B3aw
+>
+> ---
+>
+> mmc: fix detection of memory part of SD-combo card with broken SDIO
+>
+> In case of failure, mmc_attach_sdio() will power off the SD bus.
+> Power it up and reinitialize before trying SD memory detection.
+>
+> Reported-by: Sahitya Tummala <stummala@codeaurora.org>
+> Signed-off-by: Micha=B3 Miros=B3aw <mirq-linux@rere.qmqm.pl>
+> ---
+>  drivers/mmc/core/core.c |    5 +++++
+>  1 files changed, 5 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 6286898..32a4798 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1564,6 +1564,11 @@ void mmc_rescan(struct work_struct *work)
+>  				 * Try SDMEM (but not MMC) even if SDIO
+>  				 * is broken.
+>  				 */
+> +				mmc_power_up(host);
+> +				sdio_reset(host);
+> +				mmc_go_idle(host);
+> +				mmc_send_if_cond(host, host->ocr_avail);
+> +
+>  				if (mmc_send_app_op_cond(host, 0, &ocr))
+>  					goto out_fail;
+>
+> --
+> 1.7.2.3
+>
+>
