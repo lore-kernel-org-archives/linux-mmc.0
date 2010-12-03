@@ -1,110 +1,211 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v2 4/4]use HPI to interrupt BKOPS
-Date: Fri, 3 Dec 2010 20:14:43 +0800
-Message-ID: <20101203121443.GE18655@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH 1/3 ] mmc: add support for h/w clock gating of sd controller
+Date: Fri, 3 Dec 2010 11:26:50 -0800
+Message-ID: <3C50EC54-F380-4AE8-A417-4D3557FEB588@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:3119 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932419Ab0LCMSL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Dec 2010 07:18:11 -0500
-Content-Disposition: inline
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:40504 "HELO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1752996Ab0LCTbM convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 3 Dec 2010 14:31:12 -0500
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, akpm@linux-foundation.org, arjan@linux.intel.com, alan@linux.intel.com, kmpark@infradead.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Nicolas Pitre <nico@fluxnic.net>, Linus Walleij <linus.Walleij@stericsson.com>
 
->From d759e4606c498c63cbeae2ed00adf6c289acac6f Mon Sep 17 00:00:00 2001
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Date: Fri, 3 Dec 2010 19:34:15 +0800
-Subject: [PATCH 4/4] mmc: Add HPI operation to interrupt BKOPS
+This code extends software clock gating in the mmc layer
+by adding the ability to indicate that controller support
+hardware clock gating.
 
-Before start a new user request, driver need to wait until the
-BKOPS finished, or use HPI to interrupt the BKOPS since user request
-has a higher priority than BKOPS.
+hardware clock gating is enabled by setting the mmc quirk
+MMC_CAP_CLOCK_GATING_HW
+in the sd driver.
+eg: host->mmc->caps |= MMC_CAP_CLOCK_GATING_HW
 
-This patch can let driver use HPI command to interrupt BKOPS.
+The approach follows the suggestion of Nico Pitre.
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+sd/mmc/eMMC cards use dynmamic clocks
+sdio uses continuous clocks
+
+The code has been test using marvell linux for mmp2.  The marvell
+controller support h/w clock gating.
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
 ---
- drivers/mmc/core/core.c |   52 ++++++++++++++++++++++++++++++++++++++++++++++-
- 1 files changed, 51 insertions(+), 1 deletions(-)
+ drivers/mmc/core/core.c  |   18 +++++++++++++++---
+ drivers/mmc/core/core.h  |   19 +++++++++++++++++++
+ drivers/mmc/core/host.c  |   10 ++++++++--
+ drivers/mmc/core/mmc.c   |    5 +++++
+ drivers/mmc/core/sd.c    |    4 ++++
+ drivers/mmc/core/sdio.c  |    5 +++++
+ include/linux/mmc/host.h |    1 +
+ 7 files changed, 57 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 4190424..4ac6c56 100644
+index 6286898..c8bba7d 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -202,6 +202,51 @@ static void mmc_wait_done(struct mmc_request *mrq)
+@@ -131,7 +131,10 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+ 		if (mrq->done)
+ 			mrq->done(mrq);
+ 
+-		mmc_host_clk_gate(host);
++#ifdef CONFIG_MMC_CLKGATE
++		if ((host->caps & MMC_CAP_CLOCK_GATING_HW) == 0)
++			mmc_host_clk_gate(host);
++#endif
+ 	}
  }
  
- /**
-+ *	mmc_issue_hpi_cmd - start a hpi to interrupt background
-+ *	operations
-+ *	@card: MMC card need to interrupt
-+ *
-+ *  start MMC_SEND_STATUS/MMC_STOP_TRANSMISSION to stop the
-+ *  background operations.
-+ *
-+ *  return value:
-+ *  0: successfully interrupt BKOPS
-+ *  -EINVAL: HPI command invalid
-+ *  -EIO: failed when interrupt BKOPS
+@@ -192,7 +195,10 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 			mrq->stop->mrq = mrq;
+ 		}
+ 	}
+-	mmc_host_clk_ungate(host);
++#ifdef CONFIG_MMC_CLKGATE
++	if ((host->caps & MMC_CAP_CLOCK_GATING_HW) == 0)
++		mmc_host_clk_ungate(host);
++#endif
+ 	host->ops->request(host, mrq);
+ }
+ 
+@@ -1547,8 +1553,14 @@ void mmc_rescan(struct work_struct *work)
+ 		pr_info("%s: %s: trying to init card at %u Hz\n",
+ 			mmc_hostname(host), __func__, host->f_init);
+ #endif
+-		mmc_power_up(host);
++
++#ifdef CONFIG_MMC_CLKGATE
++		if (host->caps & MMC_CAP_CLOCK_GATING_HW)
++			mmc_hwungate_clock(host);
++#endif
+ 		sdio_reset(host);
++		mmc_power_up(host);
++
+ 		mmc_go_idle(host);
+ 
+ 		mmc_send_if_cond(host, host->ocr_avail);
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 026c975..184d56b 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -35,6 +35,25 @@ void mmc_set_chip_select(struct mmc_host *host, int mode);
+ void mmc_set_clock(struct mmc_host *host, unsigned int hz);
+ void mmc_gate_clock(struct mmc_host *host);
+ void mmc_ungate_clock(struct mmc_host *host);
++
++#ifdef CONFIG_MMC_CLKGATE
++/*
++ * This gates the clock by enabling driver h/w gating
 + */
-+static int mmc_issue_hpi_cmd(struct mmc_card *card)
++static inline void mmc_hwgate_clock(struct mmc_host *host)
 +{
-+	struct mmc_command cmd;
-+	unsigned int opcode;
-+	unsigned int flags;
-+	int err;
-+
-+	opcode = card->ext_csd.hpi_cmd;
-+	if (opcode == MMC_STOP_TRANSMISSION)
-+		flags = MMC_RSP_R1B | MMC_CMD_AC;
-+	else if (opcode == MMC_SEND_STATUS)
-+		flags = MMC_RSP_R1 | MMC_CMD_AC;
-+	else
-+		return -EINVAL;
-+
-+	memset(&cmd, 0, sizeof(struct mmc_command));
-+	cmd.opcode = opcode;
-+	cmd.arg = card->rca << 16 | 1;
-+	cmd.flags = flags;
-+	err = mmc_wait_for_cmd(card->host, &cmd, 0);
-+	if (err || (cmd.resp[0] & R1_ERROR_RESPONSE)) {
-+		printk(KERN_ERR "error %d requesting status %#x\n",
-+			err, cmd.resp[0]);
-+		/*
-+		 * abandon this BKOPS, let block layer handle
-+		 * this
-+		 */
-+		return -EIO;
-+	}
-+	return 0;
++	host->clk_gated = true;
 +}
 +
-+/**
-  *	mmc_wait_for_bkops- start a bkops check and wait for
-  *	completion
-  *	@card: MMC card need to check
-@@ -224,9 +269,14 @@ retry:
++/*
++ * This ungates the clock by turning off h/w gating
++ */
++static inline void mmc_hwungate_clock(struct mmc_host *host)
++{
++	host->clk_gated = false;
++}
++#endif
++
+ void mmc_set_ungated(struct mmc_host *host);
+ void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode);
+ void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 92e3370..ace748e 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -282,7 +282,10 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	host->class_dev.class = &mmc_host_class;
+ 	device_initialize(&host->class_dev);
  
- 	if (card->ext_csd.hpi_en) {
- 		/*
--		 * TODO
- 		 * HPI to interrupt BKOPS if supported
- 		 */
-+		err = mmc_issue_hpi_cmd(card);
-+		if (err == -EINVAL) {
-+			/* disable HPI feature */
-+			card->ext_csd.hpi_en = 0;
-+			goto retry;
-+		}
- 	} else {
- 		memset(&cmd, 0, sizeof(struct mmc_command));
+-	mmc_host_clk_init(host);
++#ifdef CONFIG_MMC_CLKGATE
++	if ((host->caps & MMC_CAP_CLOCK_GATING_HW) == 0)
++		mmc_host_clk_init(host);
++#endif
  
+ 	spin_lock_init(&host->lock);
+ 	init_waitqueue_head(&host->wq);
+@@ -366,7 +369,10 @@ void mmc_remove_host(struct mmc_host *host)
+ 
+ 	led_trigger_unregister_simple(host->led);
+ 
+-	mmc_host_clk_exit(host);
++#ifdef CONFIG_MMC_CLKGATE
++	if ((host->caps & MMC_CAP_CLOCK_GATING_HW) == 0)
++		mmc_host_clk_exit(host);
++#endif
+ }
+ 
+ EXPORT_SYMBOL(mmc_remove_host);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 0eccd96..195e557 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -517,6 +517,11 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 
+ 	mmc_set_clock(host, max_dtr);
+ 
++#ifdef CONFIG_MMC_CLKGATE
++	if (host->caps & MMC_CAP_CLOCK_GATING_HW)
++		mmc_hwgate_clock(host);
++#endif
++
+ 	/*
+ 	 * Indicate DDR mode (if supported).
+ 	 */
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 49da4df..04e0d6f 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -618,6 +618,10 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+ 	else if (err)
+ 		goto free_card;
+ 
++#ifdef CONFIG_MMC_CLKGATE
++	if (host->caps & MMC_CAP_CLOCK_GATING_HW)
++		mmc_hwgate_clock(host);
++#endif
+ 	/*
+ 	 * Set bus speed.
+ 	 */
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index efef5f9..52fbbb7 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -488,6 +488,11 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 	else if (err)
+ 		goto remove;
+ 
++#ifdef CONFIG_MMC_CLKGATE
++	if (host->caps & MMC_CAP_CLOCK_GATING_HW)
++		mmc_hwungate_clock(host);
++#endif
++
+ 	/*
+ 	 * Change to the card's maximum speed.
+ 	 */
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 078cff7..30ce755 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -171,6 +171,7 @@ struct mmc_host {
+ #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
+ 
+ #define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus width ok */
++#define MMC_CAP_CLOCK_GATING_HW	(1 << 15)	/* h/w supports clock gating */
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
+ #ifdef CONFIG_MMC_CLKGATE
 -- 
-1.6.6.1
+1.6.0.4
 
