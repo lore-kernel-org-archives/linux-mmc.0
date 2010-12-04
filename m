@@ -1,85 +1,63 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: working around a Marvell wifi SDIO bug
-Date: Sat, 4 Dec 2010 16:22:02 +0000
-Message-ID: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 1/3 ] mmc: add support for h/w clock gating of sd
+	controller
+Date: Sat, 4 Dec 2010 22:02:13 +0100
+Message-ID: <20101204210213.GA671@pengutronix.de>
+References: <3C50EC54-F380-4AE8-A417-4D3557FEB588@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="PEIAKu/WMn1b1Hv9"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:38465 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755380Ab0LDQWE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2010 11:22:04 -0500
-Received: by ywl5 with SMTP id 5so5300865ywl.19
-        for <linux-mmc@vger.kernel.org>; Sat, 04 Dec 2010 08:22:02 -0800 (PST)
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:36979 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755945Ab0LDVCP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2010 16:02:15 -0500
+Content-Disposition: inline
+In-Reply-To: <3C50EC54-F380-4AE8-A417-4D3557FEB588@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Nicolas Pitre <nico@fluxnic.net>, Linus Walleij <linus.Walleij@stericsson.com>
+
+
+--PEIAKu/WMn1b1Hv9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
 Hi,
 
-The XO-1.5 laptop ships with an internal wifi adapter connected to the
-SDIO bus (on a sdhci-pci host).
+minor comments in addition to Nicolas:
 
-We were experiencing a problem where initialization of this card
-sometimes failed (on low-level SD stuff, like setting voltage or
-reading CCCR). Also, when runtime PM was enabled, the card
-consistently fails to come back after it has been powered down.
+On Fri, Dec 03, 2010 at 11:26:50AM -0800, Philip Rakity wrote:
 
-We believe this is due to a hardware bug with the wifi card. After SD
-power has been cut and restored, the card is left in inconsistent
-state. http://dev.laptop.org/ticket/10270#comment:4
+> hardware clock gating is enabled by setting the mmc quirk
 
-"According to a confidential Marvell AN, we should be asserting RESET
-externally after powering up the WLAN card. The Linux driver should
-assert WLAN_RESETn low for between 1 and 20 uS, about 1 mS after
-turning on power to the card"
+It's not a quirk, it's a capability :)
 
-While other users of this wifi card have WLAN_RESETn permanently wired
-low, OLPC has it wired to a GPIO. So we *can* do the above from the
-kernel, but its specific to this particular laptop.
+> MMC_CAP_CLOCK_GATING_HW
 
-The question is: how?
-The actual code to do this is trivial, but where would we fit it into
-the kernel?
+Why not MMC_CAP_HW_CLOCK_GATING? Might be a mileage, though...
 
+Regards,
 
-Ohad suggested that we look at the regulator subsystem.  After having
-a look I think this would be a hack at best. The docs say:
+   Wolfram
 
-"The intention is to allow systems to dynamically control regulator power output
-in order to save power and prolong battery life. This applies to both voltage
-regulators (where voltage output is controllable) and current sinks (where
-current limit is controllable)."
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
-And indeed, the requirement that you're regulating current or voltage
-comes all the way into the implementation.
+--PEIAKu/WMn1b1Hv9
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
 
-In this case we are not changing current or voltage, we are just
-asserting a specific signal to the card. So its messy from the start
-(I'd have to invent a list of supported voltages or something).
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
 
+iEYEARECAAYFAkz6rFUACgkQD27XaX1/VRt9JgCgjqYjUhnSZhGnz8piT5vv4FO/
+nawAnjyjypMYLEYEJeKoZTf8fMjdBdq7
+=yMUt
+-----END PGP SIGNATURE-----
 
-
-Another option would be just to hack this into the kernel. Inside
-mmc_power_up we'd add something like the following:
-
-#ifdef CONFIG_OLPC
-if (machine_is_olpc())
-   olpc_reset_gpio_fixup(host);
-#endif
-
-And olpc_reset_gpio_fixup() would check that we're running on XO-1.5,
-check that the host in question is the one where the wifi card is, and
-do the GPIO twiddle.
-
-
-Another cleaner option (but perhaps OTT for just 1 user?) would be to
-add a notifier chain that is called at this point.
-Then we'd add a whole new "driver" in drivers/mmc somewhere that
-registers the appropriate notifier and handles this case.
-
-
-Thoughts? Other ideas?
-
-Thanks,
-Daniel
+--PEIAKu/WMn1b1Hv9--
