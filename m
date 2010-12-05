@@ -1,45 +1,76 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 4/4] [ARM] mxcmmc: remove a unnecessary
-	release_resource() call
-Date: Sun, 5 Dec 2010 02:51:51 +0000
-Message-ID: <20101205025150.GA24000@void.printf.net>
-References: <1290415359.5471.4.camel@mola> <1290415467.5471.7.camel@mola> <1290415534.5471.8.camel@mola> <1290415596.5471.10.camel@mola> <1290415671.5471.13.camel@mola> <20101125090311.GP6017@pengutronix.de>
+Subject: Re: [PATCH 1/1]sdhci-pxa: add MMC_CAP_NONREMOVABLE for on-chip
+	device
+Date: Sun, 5 Dec 2010 03:05:34 +0000
+Message-ID: <20101205030534.GB24000@void.printf.net>
+References: <AANLkTik+Kg+po=na4Vx6B+BmJMAN_-bq+cB3VrvDpB38@mail.gmail.com> <AANLkTim6_wuc+zSg7qKwGDAAiYfXTqjiMRJiffzNPvCY@mail.gmail.com> <AANLkTim2rF=MfmU81=bBwdFu3QV2qehYmXfQDO8PZrqu@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:58459 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751221Ab0LEDFi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 4 Dec 2010 22:05:38 -0500
 Content-Disposition: inline
-In-Reply-To: <20101125090311.GP6017@pengutronix.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Axel Lin <axel.lin@gmail.com>, linux-kernel <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org
+In-Reply-To: <AANLkTim2rF=MfmU81=bBwdFu3QV2qehYmXfQDO8PZrqu@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Kyungmin Park <kmpark@infradead.org>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Matt Fleming <matt@console-pimps.org>, eric.y.miao@gmail.com, Haojian Zhuang <haojian.zhuang@gmail.com>
 
 Hi,
 
-On Thu, Nov 25, 2010 at 10:03:11AM +0100, Sascha Hauer wrote:
-> On Mon, Nov 22, 2010 at 04:47:51PM +0800, Axel Lin wrote:
-> > Remove release_resource() after release_mem_region().
-> > 
-> > Signed-off-by: Axel Lin <axel.lin@gmail.com>
+On Thu, Oct 28, 2010 at 02:00:10AM -0400, zhangfei gao wrote:
+> Thanks for your suggestion, here is updated version.
 > 
-> Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
+> >From 470140b629e3f044a0951368db8e3dc98ebd8ab3 Mon Sep 17 00:00:00 2001
+> From: Zhangfei Gao <zhangfei.gao@marvell.com>
+> Date: Thu, 28 Oct 2010 10:44:15 -0400
+> Subject: [PATCH] sdhci-pxa: add MMC_CAP_NONREMOVABLE for on-chip device
 > 
-> > ---
-> >  drivers/mmc/host/mxcmmc.c |    1 -
-> >  1 files changed, 0 insertions(+), 1 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> > index 2b9f7c8..4428594 100644
-> > --- a/drivers/mmc/host/mxcmmc.c
-> > +++ b/drivers/mmc/host/mxcmmc.c
-> > @@ -967,7 +967,6 @@ static int mxcmci_remove(struct platform_device *pdev)
-> >  	clk_put(host->clk);
-> >  
-> >  	release_mem_region(host->res->start, resource_size(host->res));
-> > -	release_resource(host->res);
-> >  
-> >  	mmc_free_host(mmc);
-> >  
+>         To share SDHCI_QUIRK_BROKEN_CARD_DETECTION for on-chip device,
+> MMC_CAP_NONREMOVABLE also needed, otherwise polling mode used by
+> default
+> 
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+> CC: Philip Rakity <prakity@marvell.com>
+> ---
+>  arch/arm/plat-pxa/include/plat/sdhci.h |    2 ++
+>  drivers/mmc/host/sdhci-pxa.c           |    6 ++++++
+>  2 files changed, 8 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm/plat-pxa/include/plat/sdhci.h
+> b/arch/arm/plat-pxa/include/plat/sdhci.h
+> index e49c5b6..fc5ceab 100644
+> --- a/arch/arm/plat-pxa/include/plat/sdhci.h
+> +++ b/arch/arm/plat-pxa/include/plat/sdhci.h
+> @@ -16,6 +16,8 @@
+>  /* pxa specific flag */
+>  /* Require clock free running */
+>  #define PXA_FLAG_DISABLE_CLOCK_GATING (1<<0)
+> +/* card alwayes wired to host, like on-chip emmc */
+> +#define PXA_FLAG_CARD_PERMANENT	(1<<1)
+> 
+>  /*
+>   * struct pxa_sdhci_platdata() - Platform device data for PXA SDHCI
+> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
+> index fc406ac..8455c46 100644
+> --- a/drivers/mmc/host/sdhci-pxa.c
+> +++ b/drivers/mmc/host/sdhci-pxa.c
+> @@ -138,6 +138,12 @@ static int __devinit sdhci_pxa_probe(struct
+> platform_device *pdev)
+>  	host->irq = irq;
+>  	host->quirks = SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> 
+> +	if (pxa->pdata->flags & PXA_FLAG_CARD_PERMANENT) {
+> +		/* on-chip device */
+> +		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> +		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+> +	}
+> +
+>  	if (pdata->quirks)
+>  		host->quirks |= pdata->quirks;
+> 
 
 Pushed to mmc-next for .38, thanks.
 
