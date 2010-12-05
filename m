@@ -1,68 +1,54 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v3 2/3]set timeout control reg for such SDHCI host
-Date: Sun, 5 Dec 2010 19:48:51 +0800
-Message-ID: <5D8008F58939784290FAB48F54975198320B3E4508@shsmsx502.ccr.corp.intel.com>
-References: <20101202112613.GC10358@intel.com>
- <20101202115329.GE3345@pengutronix.de>
- <5D8008F58939784290FAB48F54975198320B3E41F7@shsmsx502.ccr.corp.intel.com>
- <20101204213348.GE671@pengutronix.de>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: working around a Marvell wifi SDIO bug
+Date: Sun, 5 Dec 2010 16:15:19 +0200
+Message-ID: <AANLkTinPbGcxOU8w_Wy3YVe-QOYpmQm+K7sgRHd-K2vp@mail.gmail.com>
+References: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:25401 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753323Ab0LELtK convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Dec 2010 06:49:10 -0500
-In-Reply-To: <20101204213348.GE671@pengutronix.de>
-Content-Language: en-US
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:33020 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755285Ab0LEOPl convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Dec 2010 09:15:41 -0500
+Received: by iwn6 with SMTP id 6so2163082iwn.19
+        for <linux-mmc@vger.kernel.org>; Sun, 05 Dec 2010 06:15:40 -0800 (PST)
+In-Reply-To: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arjan@linux.intel.com" <arjan@linux.intel.com>, "alan@linux.intel.com" <alan@linux.intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>, "prakity@marvell.com" <prakity@marvell.com>
+To: Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org
-> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Wolfram Sang
-> Sent: Sunday, December 05, 2010 5:34 AM
-> To: Dong, Chuanxiao
-> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; cjb@laptop.org;
-> arjan@linux.intel.com; alan@linux.intel.com; akpm@linux-foundation.org;
-> adrian.hunter@nokia.com; prakity@marvell.com
-> Subject: Re: [PATCH v3 2/3]set timeout control reg for such SDHCI host
-> 
-> On Fri, Dec 03, 2010 at 10:38:59AM +0800, Dong, Chuanxiao wrote:
-> >  >
-> > > On Thu, Dec 02, 2010 at 07:26:13PM +0800, Chuanxiao Dong wrote:
-> > >
-> > > > +	if (host->quirks & SDHCI_QUIRK_FORCE_ERASE_SINGLE) {
-> > > > +		/* Set the timeout to be the maximum value */
-> > > > +		if (cmd->erase_timeout)
-> > > > +			sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
-> > > > +	}
-> > > > +
-> > > >  	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags),
-> > > > SDHCI_COMMAND);
-> > >
-> > > Hmm, this looks like another argument for Philip's idea to always
-> > > use the maximum timeout value and skip the quirks related to it?
-> >
-> > Yes, if always using the maximum timeout value is OK for other command, the
-> patch2 can be removed I think.
-> > The new added quirk in the serials patches is used to set the limitation of request
-> queue, not only just to set the timeout control reg.
-> > Even the timeout value was set to be 0xE (the maximum value), erasing too many
-> sectors can still be failed since the timeout time was still not longer enough.
-> > So the count of erased sectors passed down by request queue should be reduced
-> by using this quirk.
-> 
-> Yes, I think I understand the issue. Have you tried adding a callback, so we don't
-> have the options between MAX_UINT and '1' but rather MAX_UINT and return
-> value of the callback?
+On Sat, Dec 4, 2010 at 6:22 PM, Daniel Drake <dsd@laptop.org> wrote:
+> In this case we are not changing current or voltage, we are just
+> asserting a specific signal to the card. So its messy from the start
+> (I'd have to invent a list of supported voltages or something).
 
-I added a function to calculate a more suitable max_discard_sectors value for SDHCI host controller in version 1 patches. This value was calculated by the timeout time host controller can wait and the erase timeout. Is that the callback you mean?
-In this version, I added a function called mmc_set_discard_limit to detect whether the host has a new cap called MMC_CAP_ERASE_SINGLE. They can be found in patch1. If host has been set MMC_CAP_ERASE_SINGLE cap, just returns '1'. And if not, return MAX_UINT.
-I used this way in version 3 patches instead of the calculated way since I thought using an easier way to work around a hardware issue was better. Any suggestion about solving this kind of problem?
+This is exactly what we do today with the 12xx - we just need to
+assert a digital signal, which by no means power the device (the
+voltage value we provide isn't really fed from the gpio signal).
 
-Thanks
-Chuanxiao
+Your case might be slightly different, but still I think it's worth
+looking into this approach first.
+
+> Another option would be just to hack this into the kernel. Inside
+> mmc_power_up we'd add something like the following:
+>
+> #ifdef CONFIG_OLPC
+> if (machine_is_olpc())
+> =A0 olpc_reset_gpio_fixup(host);
+> #endif
+
+Please don't.
+
+Core code should not contain such machine-specific details (imagine
+how it would look when other boards will start adding this 8686
+tweak...).
+
+> Another cleaner option (but perhaps OTT for just 1 user?) would be to
+> add a notifier chain that is called at this point.
+
+That would obviously work but as you and Nicolas mentioned it's an
+overkill: we don't really need random users to plug into this hook,
+and using notifiers will just make the code less readable and harder
+to debug, so it's better to try to find a solution that fits.
