@@ -1,84 +1,48 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: working around a Marvell wifi SDIO bug
-Date: Sat, 04 Dec 2010 21:24:43 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.1012042111570.10437@xanadu.home>
-References: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 4/4] [ARM] mxcmmc: remove a unnecessary
+	release_resource() call
+Date: Sun, 5 Dec 2010 02:51:51 +0000
+Message-ID: <20101205025150.GA24000@void.printf.net>
+References: <1290415359.5471.4.camel@mola> <1290415467.5471.7.camel@mola> <1290415534.5471.8.camel@mola> <1290415596.5471.10.camel@mola> <1290415671.5471.13.camel@mola> <20101125090311.GP6017@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:11668 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755341Ab0LECYo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2010 21:24:44 -0500
-Received: from xanadu.home ([66.130.28.92]) by vl-mh-mrz21.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0LCX00ESQO0SOD50@vl-mh-mrz21.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Sat, 04 Dec 2010 21:24:28 -0500 (EST)
-In-reply-to: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20101125090311.GP6017@pengutronix.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Axel Lin <axel.lin@gmail.com>, linux-kernel <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: linux-mmc@vger.kernel.org
 
-On Sat, 4 Dec 2010, Daniel Drake wrote:
+Hi,
 
-> "According to a confidential Marvell AN, we should be asserting RESET
-> externally after powering up the WLAN card. The Linux driver should
-> assert WLAN_RESETn low for between 1 and 20 uS, about 1 mS after
-> turning on power to the card"
+On Thu, Nov 25, 2010 at 10:03:11AM +0100, Sascha Hauer wrote:
+> On Mon, Nov 22, 2010 at 04:47:51PM +0800, Axel Lin wrote:
+> > Remove release_resource() after release_mem_region().
+> > 
+> > Signed-off-by: Axel Lin <axel.lin@gmail.com>
 > 
-> While other users of this wifi card have WLAN_RESETn permanently wired
-> low, OLPC has it wired to a GPIO. So we *can* do the above from the
-> kernel, but its specific to this particular laptop.
+> Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
 > 
-> The question is: how?
-> The actual code to do this is trivial, but where would we fit it into
-> the kernel?
+> > ---
+> >  drivers/mmc/host/mxcmmc.c |    1 -
+> >  1 files changed, 0 insertions(+), 1 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> > index 2b9f7c8..4428594 100644
+> > --- a/drivers/mmc/host/mxcmmc.c
+> > +++ b/drivers/mmc/host/mxcmmc.c
+> > @@ -967,7 +967,6 @@ static int mxcmci_remove(struct platform_device *pdev)
+> >  	clk_put(host->clk);
+> >  
+> >  	release_mem_region(host->res->start, resource_size(host->res));
+> > -	release_resource(host->res);
+> >  
+> >  	mmc_free_host(mmc);
+> >  
 
-That is the question indeed.
+Pushed to mmc-next for .38, thanks.
 
-> Ohad suggested that we look at the regulator subsystem.  After having
-> a look I think this would be a hack at best.
-
-Whatever you do, that will be a hack.  And since this is trivial to hack 
-the code to do what you want, the goal here is therefore to find a way 
-to make that hack as elegant as possible.  And the regulator subsystem 
-certainly allows you to make this hack look elegant, even if the 
-intended purpose wasn't exactly that.
-
-> In this case we are not changing current or voltage, we are just
-> asserting a specific signal to the card. So its messy from the start
-> (I'd have to invent a list of supported voltages or something).
-
-You can pretend that you are changing voltage from null to a single 
-fixed value.  And for that to happen properly you also need to assert a 
-reset signal.  So in some twisted sense you do regulate proper power 
-usage with that reset signal.
-
-> Another option would be just to hack this into the kernel. Inside
-> mmc_power_up we'd add something like the following:
-> 
-> #ifdef CONFIG_OLPC
-> if (machine_is_olpc())
->    olpc_reset_gpio_fixup(host);
-> #endif
-> 
-> And olpc_reset_gpio_fixup() would check that we're running on XO-1.5,
-> check that the host in question is the one where the wifi card is, and
-> do the GPIO twiddle.
-
-No way.  That's the total opposite of elegance.  At least the regulator 
-subsystem does provide a level of abstraction allowing you not to 
-pollute the core driver code.
-
-> Another cleaner option (but perhaps OTT for just 1 user?) would be to
-> add a notifier chain that is called at this point.
-> Then we'd add a whole new "driver" in drivers/mmc somewhere that
-> registers the appropriate notifier and handles this case.
-
-For only one user that's rather overkill.  Especially if an alternative 
-already exists.
-
-
-Nicolas
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
