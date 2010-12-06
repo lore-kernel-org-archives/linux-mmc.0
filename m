@@ -1,102 +1,61 @@
-From: Yunpeng Gao <yunpeng.gao@intel.com>
-Subject: [PATCH v2 3/3]mmc: changes to enable runtime PM of mmc core layer
-Date: Mon, 6 Dec 2010 20:24:32 +0800
-Message-ID: <20101206122432.GD30654@intel.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH v2 1/4]enable background operations for supported eMMC
+ card
+Date: Mon, 6 Dec 2010 14:44:20 +0100
+Message-ID: <20101206134420.GC7320@pengutronix.de>
+References: <20101203121338.GB18655@intel.com>
+ <201012061328.49738.arnd@arndb.de>
+ <5D8008F58939784290FAB48F54975198320B3E49F6@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="uh9ZiVrAOUUm9fzH"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:49951 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750732Ab0LFMwA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 6 Dec 2010 07:52:00 -0500
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:35419 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752399Ab0LFNoZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2010 08:44:25 -0500
 Content-Disposition: inline
+In-Reply-To: <5D8008F58939784290FAB48F54975198320B3E49F6@shsmsx502.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "arjan@linux.intel.com" <arjan@linux.intel.com>, "alan@linux.intel.com" <alan@linux.intel.com>, "kmpark@infradead.org" <kmpark@infradead.org>
 
 
->From ab869336b1924e9f1d8bdc22aee5c5364941d286 Mon Sep 17 00:00:00 2001
-From: Yunpeng Gao <yunpeng.gao@intel.com>
-Date: Mon, 6 Dec 2010 20:03:00 +0800
-Subject: [PATCH] Do some changes in mmc core layer to enable mmc card runtime pm.
+--uh9ZiVrAOUUm9fzH
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Seems current runtime PM support in mmc core layer has some problems:
 
-1. If host controller is PCI device, then it's possibly that the PCI
-host controller will be runtime suspended immediately after its PCI
-probe. Then it will have trouble when do the following mmc_rescan
-since at that time the function driver (mmc block driver or sdio
-function driver) has not been called and there's no chance to execute
-pm_runtime_get().
+> > These headers don't belong into a submission. If you use git-send-email,
+> > they get cut off automatically, otherwise just remove them as you paste
+> > the patch into your mail client.
+> >
+> OK. I will remove them when the next submission.
 
-2. Currently mmc_host_class (defined in drivers/mmc/core/host.c) is
-parent of mmc_card and child of host controller. But mmc_host_class
-has not implemented the runtime pm APIs of itself. So seems it'll
-cause the mmc runtime PM chain disconnect here.
+'git send-email' takes care of a lot of other things, too (e.g. chaining
+all following messages to the first one) - strong recommendation :)
 
-This patch tries to fix above 2 problems.
-For 1, it adds pm_runtime_get/put at the begging/end of function
-mmc_rescan().
-For2, it calling the pm_runtime_no_callbacks() API to bypass the
-mmc_host_class device.
+Regards,
 
-Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
----
- drivers/mmc/core/core.c |    4 ++++
- drivers/mmc/core/host.c |    3 +++
- 2 files changed, 7 insertions(+), 0 deletions(-)
+   Wolfram
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6286898..2905dac 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -22,6 +22,7 @@
- #include <linux/scatterlist.h>
- #include <linux/log2.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/pm_runtime.h>
- 
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-@@ -1503,6 +1504,7 @@ void mmc_rescan(struct work_struct *work)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
-+	pm_runtime_get_sync(host->parent);
- 
- 	mmc_bus_get(host);
- 
-@@ -1598,6 +1600,8 @@ out_fail:
- 		mmc_power_off(host);
- 	}
- out:
-+	pm_runtime_put_sync(host->parent);
-+
- 	if (host->caps & MMC_CAP_NEEDS_POLL)
- 		mmc_schedule_delayed_work(&host->detect, HZ);
- }
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 92e3370..caa9e85 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -19,6 +19,7 @@
- #include <linux/leds.h>
- #include <linux/slab.h>
- #include <linux/suspend.h>
-+#include <linux/pm_runtime.h>
- 
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-@@ -303,6 +304,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	host->max_blk_size = 512;
- 	host->max_blk_count = PAGE_CACHE_SIZE / 512;
- 
-+	pm_runtime_no_callbacks(&host->class_dev);
-+
- 	return host;
- 
- free:
--- 
-1.6.6.1
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
+--uh9ZiVrAOUUm9fzH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAkz86LQACgkQD27XaX1/VRt0zgCeM76IzwAq40/++nl75euxP/TN
+MWEAn2Rj3VduImZt0SwWUUb8nPhEzAOm
+=hiYb
+-----END PGP SIGNATURE-----
+
+--uh9ZiVrAOUUm9fzH--
