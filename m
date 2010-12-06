@@ -1,50 +1,20 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: Test bus-width for old MMC devices
-Date: Sun, 5 Dec 2010 18:40:31 +0000
-Message-ID: <20101205184031.GA30957@void.printf.net>
-References: <1290579674-4616-1-git-send-email-tiwai@suse.de> <1290579674-4616-3-git-send-email-tiwai@suse.de> <20101205040221.GA24547@void.printf.net> <s5h1v5wv6gv.wl%tiwai@suse.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Simon Horman <horms@verge.net.au>
+Subject: [patch 0/3] mmc, ARM: Add zboot from MMC support for SuperH Mobile ARM
+Date: Mon, 06 Dec 2010 09:12:43 +0900
+Message-ID: <20101206001243.949375995@vergenet.net>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49568 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754194Ab0LESki (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 5 Dec 2010 13:40:38 -0500
-Content-Disposition: inline
-In-Reply-To: <s5h1v5wv6gv.wl%tiwai@suse.de>
+Received: from kirsty.vergenet.net ([202.4.237.240]:59005 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751621Ab0LFAO3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Dec 2010 19:14:29 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Takashi Iwai <tiwai@suse.de>
-Cc: Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Aries Lee <arieslee@jmicron.com>
+To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Yusuke Goda <yusuke.goda.sx@renesas.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>
 
-Hi Takashi, Philip,
+This short series allows a ROM-able zImage to be written to MMC and for
+SuperH Mobile ARM to boot directly from the MMCIF hardware block.
 
-On Sun, Dec 05, 2010 at 11:50:40AM +0100, Takashi Iwai wrote:
-> > I'm planning on taking Takashi's since it looks a little cleaner; Philip,
-> > please could you take a look at Takashi's patch and add anything you
-> > think should be present from your own patch as a new incremental patch?
-> 
-> One missing thing in my (originally Aries') patch is the quirk bit to
-> enable/disable the bus-width test.  In Philip's latest patch, the
-> default is off.
-> 
-> I'm also not sure whether this bus-width test should be enabled as
-> default.  I guess it's better for performance, so I'd vote for turning
-> on as default.  But, having a quirk for turning off would be safer for
-> working around old hardware problems, of course.
+The first two patches make minor preparatory changes to the MMCIF code.
+The last patch contains the code to load from the MMCIF hardware block.
 
-Sounds good, although we're trying hard not to add new quirk bits.
-I don't see a way around doing that here, though.
-
-We've got plenty of time until the .38 release -- let's turn it on by
-default and test during .38-rc, and we can revisit whether to leave it
-on closer to the release.  It's not as simple as "turning it on could
-cause problems so let's not do that", because we're *already* seeing
-problems from things like enabling 8-bit width on setups that don't
-support it.
-
-Thanks!
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
