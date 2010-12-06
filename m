@@ -1,50 +1,97 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: [patch 1/3] mmc, sh: Move MMCIF_PROGRESS_* into sh_mmcif.h
-Date: Mon, 06 Dec 2010 09:12:44 +0900
-Message-ID: <20101206001310.658304531@vergenet.net>
+Subject: [patch 2/3] mmc, sh: Remove sh_mmcif_boot_slurp()
+Date: Mon, 06 Dec 2010 09:12:45 +0900
+Message-ID: <20101206001310.744889412@vergenet.net>
 References: <20101206001243.949375995@vergenet.net>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:59017 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751621Ab0LFAP1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Dec 2010 19:15:27 -0500
-Content-Disposition: inline; filename=MMCIF_PROGRESS-header.patch
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline; filename=no-slurp.patch
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Yusuke Goda <yusuke.goda.sx@renesas.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Allow MMCIF_PROGRESS_* to be shared.
+As the only caller of sh_mmcif_boot_do_read() is
+sh_mmcif_boot_slurp() the configuration portion of
+sh_mmcif_boot_slurp() can be merged into sh_mmcif_boot_do_read().
+
+Once this is done sh_mmcif_boot_slurp() is only a call
+to sh_mmcif_boot_do_read() with platform specific information -
+the offset that images are stored on MMC. So make the
+sh_mmcif_boot_do_read() call directly from platform code
+and remove sh_mmcif_boot_slurp() altogether.
 
 Cc: Magnus Damm <magnus.damm@gmail.com>
 Signed-off-by: Simon Horman <horms@verge.net.au>
 
+--- 
+
+This patch applies on top of
+"sh, mmc: Use defines when setting CE_CLK_CTR"
+which has been merged into the common/mmcif
+branch of Paul Mundt's sh-2.6 tree.
 Index: linux-2.6-ap4/arch/sh/boot/romimage/mmcif-sh7724.c
 ===================================================================
---- linux-2.6-ap4.orig/arch/sh/boot/romimage/mmcif-sh7724.c	2010-12-06 08:59:11.000000000 +0900
-+++ linux-2.6-ap4/arch/sh/boot/romimage/mmcif-sh7724.c	2010-12-06 08:59:16.000000000 +0900
-@@ -21,9 +21,6 @@
- #define HIZCRC		0xa405015c
- #define DRVCRA		0xa405018a
+--- linux-2.6-ap4.orig/arch/sh/boot/romimage/mmcif-sh7724.c	2010-12-06 09:08:13.000000000 +0900
++++ linux-2.6-ap4/arch/sh/boot/romimage/mmcif-sh7724.c	2010-12-06 09:08:14.000000000 +0900
+@@ -60,7 +60,9 @@ asmlinkage void mmcif_loader(unsigned ch
+ 	mmcif_update_progress(MMCIF_PROGRESS_LOAD);
  
--enum { MMCIF_PROGRESS_ENTER, MMCIF_PROGRESS_INIT,
--       MMCIF_PROGRESS_LOAD, MMCIF_PROGRESS_DONE };
--
- /* SH7724 specific MMCIF loader
-  *
-  * loads the romImage from an MMC card starting from block 512
+ 	/* load kernel via MMCIF interface */
+-	sh_mmcif_boot_slurp(MMCIF_BASE, buf, no_bytes);
++	sh_mmcif_boot_do_read(MMCIF_BASE, 512,
++	                      (no_bytes + SH_MMCIF_BBS - 1) / SH_MMCIF_BBS,
++			      buf);
+ 
+ 	/* disable clock to the MMCIF hardware block */
+ 	__raw_writel(__raw_readl(MSTPCR2) | 0x20000000, MSTPCR2);
 Index: linux-2.6-ap4/include/linux/mmc/sh_mmcif.h
 ===================================================================
---- linux-2.6-ap4.orig/include/linux/mmc/sh_mmcif.h	2010-12-06 08:59:11.000000000 +0900
-+++ linux-2.6-ap4/include/linux/mmc/sh_mmcif.h	2010-12-06 08:59:16.000000000 +0900
-@@ -97,6 +97,9 @@ static inline void sh_mmcif_writel(void
+--- linux-2.6-ap4.orig/include/linux/mmc/sh_mmcif.h	2010-12-06 09:08:13.000000000 +0900
++++ linux-2.6-ap4/include/linux/mmc/sh_mmcif.h	2010-12-06 09:08:14.000000000 +0900
+@@ -162,6 +162,17 @@ static inline int sh_mmcif_boot_do_read(
+ 	unsigned long k;
+ 	int ret = 0;
  
- #define SH_MMCIF_BBS 512 /* boot block size */
- 
-+enum { MMCIF_PROGRESS_ENTER, MMCIF_PROGRESS_INIT,
-+       MMCIF_PROGRESS_LOAD, MMCIF_PROGRESS_DONE };
++	/* In data transfer mode: Set clock to Bus clock/4 (about 20Mhz) */
++	sh_mmcif_writel(base, MMCIF_CE_CLK_CTRL,
++			CLK_ENABLE | CLKDIV_4 | SRSPTO_256 |
++			SRBSYTO_29 | SRWDTO_29 | SCCSTO_29);
 +
- static inline void sh_mmcif_boot_cmd_send(void __iomem *base,
- 					  unsigned long cmd, unsigned long arg)
- {
++	/* CMD9 - Get CSD */
++	sh_mmcif_boot_cmd(base, 0x09806000, 0x00010000);
++
++	/* CMD7 - Select the card */
++	sh_mmcif_boot_cmd(base, 0x07400000, 0x00010000);
++
+ 	/* CMD16 - Set the block size */
+ 	sh_mmcif_boot_cmd(base, 0x10400000, SH_MMCIF_BBS);
+ 
+@@ -205,27 +216,4 @@ static inline void sh_mmcif_boot_init(vo
+ 	sh_mmcif_boot_cmd(base, 0x03400040, 0x00010000);
+ }
+ 
+-static inline void sh_mmcif_boot_slurp(void __iomem *base,
+-				       unsigned char *buf,
+-				       unsigned long no_bytes)
+-{
+-	unsigned long tmp;
+-
+-	/* In data transfer mode: Set clock to Bus clock/4 (about 20Mhz) */
+-	sh_mmcif_writel(base, MMCIF_CE_CLK_CTRL,
+-			CLK_ENABLE | CLKDIV_4 | SRSPTO_256 |
+-			SRBSYTO_29 | SRWDTO_29 | SCCSTO_29);
+-
+-	/* CMD9 - Get CSD */
+-	sh_mmcif_boot_cmd(base, 0x09806000, 0x00010000);
+-
+-	/* CMD7 - Select the card */
+-	sh_mmcif_boot_cmd(base, 0x07400000, 0x00010000);
+-
+-	tmp = no_bytes / SH_MMCIF_BBS;
+-	tmp += (no_bytes % SH_MMCIF_BBS) ? 1 : 0;
+-
+-	sh_mmcif_boot_do_read(base, 512, tmp, buf);
+-}
+-
+ #endif /* __SH_MMCIF_H__ */
 
