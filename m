@@ -1,61 +1,34 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v2 1/4]enable background operations for supported eMMC
- card
-Date: Mon, 6 Dec 2010 20:34:29 +0800
-Message-ID: <5D8008F58939784290FAB48F54975198320B3E49F6@shsmsx502.ccr.corp.intel.com>
-References: <20101203121338.GB18655@intel.com>
- <201012061328.49738.arnd@arndb.de>
+From: Yunpeng Gao <yunpeng.gao@intel.com>
+Subject: [PATCH v2 0/3]mmc: enable runtime PM support for mmc storage card
+Date: Mon, 6 Dec 2010 20:15:48 +0800
+Message-ID: <20101206121548.GA30654@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:13691 "EHLO mga14.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:6782 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750804Ab0LFMe4 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2010 07:34:56 -0500
-In-Reply-To: <201012061328.49738.arnd@arndb.de>
-Content-Language: en-US
+	id S1751695Ab0LFMnP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Dec 2010 07:43:15 -0500
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "arjan@linux.intel.com" <arjan@linux.intel.com>, "alan@linux.intel.com" <alan@linux.intel.com>, "kmpark@infradead.org" <kmpark@infradead.org>
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
 
-> -----Original Message-----
-> From: Arnd Bergmann [mailto:arnd@arndb.de]
-> Sent: Monday, December 06, 2010 8:29 PM
-> To: Dong, Chuanxiao
-> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; cjb@laptop.org;
-> akpm@linux-foundation.org; arjan@linux.intel.com; alan@linux.intel.com;
-> kmpark@infradead.org
-> Subject: Re: [PATCH v2 1/4]enable background operations for supported eMMC
-> card
-> 
-> On Friday 03 December 2010, Chuanxiao Dong wrote:
-> > From 984adc755cf2f7966a89e510a50f085e314fe347 Mon Sep 17 00:00:00 2001
-> > From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> > Date: Mon, 22 Nov 2010 16:31:12 +0800
-> > Subject: [PATCH 1/4] mmc: Enabled background operations feature if eMMC card
-> supports
-> 
-> These headers don't belong into a submission. If you use git-send-email,
-> they get cut off automatically, otherwise just remove them as you paste
-> the patch into your mail client.
->
-OK. I will remove them when the next submission.
+Hi,
+    These are the version 2 patches to enable the runtime PM support for mmc
+    storage cards.
 
-> > Background operations is a new feature defined in eMMC4.41 standard.
-> > Since this feature is opertional for eMMC card, so driver only enable
-> 
-> s/opertional/optional/
-> > @@ -54,6 +54,8 @@ struct mmc_ext_csd {
-> >  	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
-> >  	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
-> >  	unsigned int		trim_timeout;		/* In milliseconds */
-> > +	unsigned int		bkops:1; /* background support bit */
-> > +	unsigned int		bkops_en:1; /* background enable bit */
-> >  };
-> 
-> Bit fields are not encouraged for kernel internal data structures,
-> just use "bool" variables here.
+    Ohad Ben-Cohen has gave very good comments on the version 1 patches. And
+    now the version 2 patches tries to fix the problems identified by Ohad.
 
-Thanks Arnd. I will fix this.
+    Currently, there's already runtime PM support in the mmc core layer. But
+    for the mmc storage card (SD card, mmc card, eMMC device and so on) to
+    work with runtime PM, it also needs both block driver and host controller
+    driver to implement the runtime PM support, which are not presented in
+    current kernel.
+
+    These patches implemented the runtime PM for both block driver and PCI
+    interface SDHCI host controller driver. It also tried to fix some issues
+    of current runtime PM implementation of mmc core layer.
+
