@@ -1,67 +1,505 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: RE: working around a Marvell wifi SDIO bug
-Date: Sun, 5 Dec 2010 20:37:07 -0800
-Message-ID: <43E4817426ED174AA81263BCECB4351D13200C556E@sc-vexch3.marvell.com>
-References: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>,<AANLkTinPbGcxOU8w_Wy3YVe-QOYpmQm+K7sgRHd-K2vp@mail.gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [patch 3/3 v2] mmc, ARM: Add zboot from MMC support for SuperH
+ Mobile ARM
+Date: Mon, 6 Dec 2010 16:56:58 +0900
+Message-ID: <20101206075657.GB15365@verge.net.au>
+References: <20101206001243.949375995@vergenet.net>
+ <20101206001310.825497890@vergenet.net>
+ <AANLkTin91C9XJKaKTNgvN9b=ExCYbt0ujPFe-qEx57hm@mail.gmail.com>
+ <20101206011138.GA623@verge.net.au>
+ <AANLkTi=HkKP9rUW7F=AmhDf+pXgMUqTZ2+8UwsMfX-fb@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog104.obsmtp.com ([74.125.149.73]:40700 "HELO
-	na3sys009aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753105Ab0LFEiX convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 5 Dec 2010 23:38:23 -0500
-In-Reply-To: <AANLkTinPbGcxOU8w_Wy3YVe-QOYpmQm+K7sgRHd-K2vp@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <AANLkTi=HkKP9rUW7F=AmhDf+pXgMUqTZ2+8UwsMfX-fb@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Yusuke Goda <yusuke.goda.sx@renesas.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>, Daniel Drake <dsd@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+This allows a ROM-able zImage to be written to MMC and
+for SuperH Mobile ARM to boot directly from the MMCIF
+hardware block.
 
-I have seen this solved using rfkill.  Is that acceptable?
-________________________________________
-From: linux-mmc-owner@vger.kernel.org [linux-mmc-owner@vger.kernel.org] On Behalf Of Ohad Ben-Cohen [ohad@wizery.com]
-Sent: Sunday, December 05, 2010 6:15 AM
-To: Daniel Drake
-Cc: linux-mmc@vger.kernel.org
-Subject: Re: working around a Marvell wifi SDIO bug
+This is achieved by the MaskROM loading the first portion
+of the image into MERAM and then jumping to it. This portion
+contains loader code which copies the entire image to SDRAM
+and jumps to it. From there the zImage boot code proceeds
+as normal, uncompressing the image into its final location
+and then jumping to it.
 
-On Sat, Dec 4, 2010 at 6:22 PM, Daniel Drake <dsd@laptop.org> wrote:
-> In this case we are not changing current or voltage, we are just
-> asserting a specific signal to the card. So its messy from the start
-> (I'd have to invent a list of supported voltages or something).
+Cc: Magnus Damm <magnus.damm@gmail.com>
+Signed-off-by: Simon Horman <horms@verge.net.au>
 
-This is exactly what we do today with the 12xx - we just need to
-assert a digital signal, which by no means power the device (the
-voltage value we provide isn't really fed from the gpio signal).
+--- 
 
-Your case might be slightly different, but still I think it's worth
-looking into this approach first.
+ Documentation/arm/SH-Mobile/Makefile                |    8
+ Documentation/arm/SH-Mobile/vrl4.c                  |  167 +++++++++++++
+ Documentation/arm/SH-Mobile/zboot-rom-mmcif.txt     |   29 ++
+ arch/arm/Kconfig                                    |   12
+ arch/arm/boot/compressed/Makefile                   |    6
+ arch/arm/boot/compressed/head-shmobile.S            |   31 ++
+ arch/arm/boot/compressed/mmcif-sh7372.c             |   86 ++++++
+ arch/arm/mach-shmobile/include/mach/head-ap4evb.txt |    6
+ arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h   |   12
+ arch/arm/mach-shmobile/include/mach/mmcif.h         |   16 +
+ 10 files changed, 373 insertions(+)
 
-> Another option would be just to hack this into the kernel. Inside
-> mmc_power_up we'd add something like the following:
->
-> #ifdef CONFIG_OLPC
-> if (machine_is_olpc())
->   olpc_reset_gpio_fixup(host);
-> #endif
+This patch depends on:
+* "ARM: 6514/1: mach-shmobile: Add zboot support for SuperH Mobile ARM"
+  which has been merged into the devel branch of Russell King's
+  linux-2.6-arm tree.
+* "mmc, sh: Move MMCIF_PROGRESS_* into sh_mmcif.h"
+* "mmc, sh: Remove sh_mmcif_boot_slurp()"
 
-Please don't.
+v2 Addressed comments by Magnus Damm:
+* Fix copyright in vrl4.c
+* Fix use of #define CONFIG_ZBOOT_ROM_MMCIF in mmcif-sh7372.c
+* Initialise LED GPIO lines in head-ap4evb.txt instead of mmcif-sh7372.c
+  as this is considered board-specific.
 
-Core code should not contain such machine-specific details (imagine
-how it would look when other boards will start adding this 8686
-tweak...).
-
-> Another cleaner option (but perhaps OTT for just 1 user?) would be to
-> add a notifier chain that is called at this point.
-
-That would obviously work but as you and Nicolas mentioned it's an
-overkill: we don't really need random users to plug into this hook,
-and using notifiers will just make the code less readable and harder
-to debug, so it's better to try to find a solution that fits.
---
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Index: linux-2.6-ap4/arch/arm/boot/compressed/mmcif-sh7372.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-2.6-ap4/arch/arm/boot/compressed/mmcif-sh7372.c	2010-12-06 16:40:43.000000000 +0900
+@@ -0,0 +1,86 @@
++/*
++ * sh7372 MMCIF loader
++ *
++ * Copyright (C) 2010 Magnus Damm
++ * Copyright (C) 2010 Simon Horman
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ */
++
++#include <linux/mmc/sh_mmcif.h>
++#include <mach/mmcif.h>
++
++#define MMCIF_BASE      (void __iomem *)0xe6bd0000
++
++#define PORT84CR	0xe6050054
++#define PORT85CR	0xe6050055
++#define PORT86CR	0xe6050056
++#define PORT87CR	0xe6050057
++#define PORT88CR	0xe6050058
++#define PORT89CR	0xe6050059
++#define PORT90CR	0xe605005a
++#define PORT91CR	0xe605005b
++#define PORT92CR	0xe605005c
++#define PORT99CR	0xe6050063
++
++#define SMSTPCR3	0xe615013c
++
++/* SH7372 specific MMCIF loader
++ *
++ * loads the zImage from an MMC card starting from block 1.
++ *
++ * The image must be start with a vrl4 header and
++ * the zImage must start at offset 512 of the image. That is,
++ * at block 2 (=byte 1024) on the media
++ *
++ * Use the following line to write the vrl4 formated zImage
++ * to an MMC card
++ * # dd if=vrl4.out of=/dev/sdx bs=512 seek=1
++ */
++asmlinkage void mmcif_loader(unsigned char *buf, unsigned long len)
++{
++	mmcif_update_progress(MMCIF_PROGRESS_ENTER);
++
++	/* Initialise MMC
++	 * registers: PORT84CR-PORT92CR
++	 *            (MMCD0_0-MMCD0_7,MMCCMD0 Control)
++	 * value: 0x04 - select function 4
++	 */
++	 __raw_writeb(0x04, PORT84CR);
++	 __raw_writeb(0x04, PORT85CR);
++	 __raw_writeb(0x04, PORT86CR);
++	 __raw_writeb(0x04, PORT87CR);
++	 __raw_writeb(0x04, PORT88CR);
++	 __raw_writeb(0x04, PORT89CR);
++	 __raw_writeb(0x04, PORT90CR);
++	 __raw_writeb(0x04, PORT91CR);
++	 __raw_writeb(0x04, PORT92CR);
++
++	/* Initialise MMC
++	 * registers: PORT99CR (MMCCLK0 Control)
++	 * value: 0x10 | 0x04 - enable output | select function 4
++	 */
++	__raw_writeb(0x14, PORT99CR);
++
++	/* Enable clock to MMC hardware block */
++	__raw_writel(__raw_readl(SMSTPCR3) & ~(1 << 12), SMSTPCR3);
++
++	mmcif_update_progress(MMCIF_PROGRESS_INIT);
++
++	/* setup MMCIF hardware */
++	sh_mmcif_boot_init(MMCIF_BASE);
++
++	mmcif_update_progress(MMCIF_PROGRESS_LOAD);
++
++	/* load kernel via MMCIF interface */
++	sh_mmcif_boot_do_read(MMCIF_BASE, 2, /* Kernel is at block 2 */
++			      (len + SH_MMCIF_BBS - 1) / SH_MMCIF_BBS, buf);
++
++
++	/* Disable clock to MMC hardware block */
++	__raw_writel(__raw_readl(SMSTPCR3) & (1 << 12), SMSTPCR3);
++
++	mmcif_update_progress(MMCIF_PROGRESS_DONE);
++}
+Index: linux-2.6-ap4/arch/arm/boot/compressed/Makefile
+===================================================================
+--- linux-2.6-ap4.orig/arch/arm/boot/compressed/Makefile	2010-12-06 09:12:16.000000000 +0900
++++ linux-2.6-ap4/arch/arm/boot/compressed/Makefile	2010-12-06 10:11:54.000000000 +0900
+@@ -49,6 +49,12 @@ ifeq ($(CONFIG_ARCH_SHMOBILE),y)
+ OBJS		+= head-shmobile.o
+ endif
+ 
++ifeq ($(CONFIG_ZBOOT_ROM_MMCIF),y)
++ifeq ($(CONFIG_ARCH_SH7372),y)
++OBJS		+= mmcif-sh7372.o
++endif
++endif
++
+ #
+ # We now have a PIC decompressor implementation.  Decompressors running
+ # from RAM should not define ZTEXTADDR.  Decompressors running directly
+Index: linux-2.6-ap4/arch/arm/boot/compressed/head-shmobile.S
+===================================================================
+--- linux-2.6-ap4.orig/arch/arm/boot/compressed/head-shmobile.S	2010-12-06 09:12:16.000000000 +0900
++++ linux-2.6-ap4/arch/arm/boot/compressed/head-shmobile.S	2010-12-06 16:43:49.000000000 +0900
+@@ -25,6 +25,37 @@
+ 	/* load board-specific initialization code */
+ #include <mach/zboot.h>
+ 
++#ifdef CONFIG_ZBOOT_ROM_MMCIF
++	/* Load image from MMC */
++	adr	sp, __tmp_stack
++	add	sp, sp, #128
++	ldr	r0, __image_start
++	ldr	r1, __image_end
++	subs	r1, r1, r0
++	ldr	r0, __load_base
++	mov	lr, pc
++	b	mmcif_loader
++
++	/* Jump to loaded code */
++	ldr	r0, __loaded
++	ldr	r1, __image_start
++	sub	r0, r0, r1
++	ldr	r1, __load_base
++	add	pc, r0, r1
++
++__image_start:
++	.long	_start
++__image_end:
++	.long	_got_end
++__load_base:
++	.long	CONFIG_MEMORY_START + 0x02000000 @ Load at 32Mb into SDRAM
++__loaded:
++	.long	__loaded
++	.align
++__tmp_stack:
++	.space	128
++#endif /* CONFIG_ZBOOT_ROM_MMCIF */
++
+ 	b	1f
+ __atags:@ tag #1
+ 	.long	12			@ tag->hdr.size = tag_size(tag_core);
+Index: linux-2.6-ap4/arch/arm/Kconfig
+===================================================================
+--- linux-2.6-ap4.orig/arch/arm/Kconfig	2010-12-06 09:12:16.000000000 +0900
++++ linux-2.6-ap4/arch/arm/Kconfig	2010-12-06 16:40:34.000000000 +0900
+@@ -1587,6 +1587,18 @@ config ZBOOT_ROM
+ 	  Say Y here if you intend to execute your compressed kernel image
+ 	  (zImage) directly from ROM or flash.  If unsure, say N.
+ 
++config ZBOOT_ROM_MMCIF
++	bool "Include MMCIF loader in zImage (EXPERIMENTAL)"
++	depends on ZBOOT_ROM && ARCH_SH7372 && EXPERIMENTAL
++	help
++	  Say Y here to include experimental MMCIF loading code in the
++	  ROM-able zImage. With this enabled it is possible to write the
++	  the ROM-able zImage kernel image to an MMC card and boot the
++	  kernel straight from the reset vector. At reset the processor
++	  Mask ROM will load the first part of the the ROM-able zImage
++	  which in turn loads the rest the kernel image to RAM using the
++	  MMCIF hardware block.
++
+ config CMDLINE
+ 	string "Default kernel command string"
+ 	default ""
+Index: linux-2.6-ap4/arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-2.6-ap4/arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h	2010-12-06 10:11:54.000000000 +0900
+@@ -0,0 +1,12 @@
++#ifndef MMCIF_AP4EB_H
++#define MMCIF_AP4EB_H
++
++#define PORTR191_160DR 0xe6056014
++
++static void mmcif_update_progress(int n)
++{
++	__raw_writel((__raw_readl(PORTR191_160DR) & ~(0xf << 25)) |
++		     (1 << (25 + n)), PORTR191_160DR);
++}
++
++#endif /* MMCIF_AP4EB_H */
+Index: linux-2.6-ap4/arch/arm/mach-shmobile/include/mach/mmcif.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-2.6-ap4/arch/arm/mach-shmobile/include/mach/mmcif.h	2010-12-06 10:11:54.000000000 +0900
+@@ -0,0 +1,16 @@
++#ifndef MMCIF_H
++#define MMCIF_H
++
++/**************************************************
++ *
++ *		board specific settings
++ *
++ **************************************************/
++
++#ifdef CONFIG_MACH_AP4EVB
++#include "mach/mmcif-ap4eb.h"
++#else
++#error "unsupported board."
++#endif
++
++#endif /* MMCIF_H */
+Index: linux-2.6-ap4/Documentation/arm/SH-Mobile/Makefile
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-2.6-ap4/Documentation/arm/SH-Mobile/Makefile	2010-12-06 10:11:54.000000000 +0900
+@@ -0,0 +1,8 @@
++BIN := vrl4
++
++.PHONY: all
++all: $(BIN)
++
++.PHONY: clean
++clean:
++	rm -f *.o $(BIN)
+Index: linux-2.6-ap4/Documentation/arm/SH-Mobile/vrl4.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-2.6-ap4/Documentation/arm/SH-Mobile/vrl4.c	2010-12-06 10:12:05.000000000 +0900
+@@ -0,0 +1,167 @@
++/*
++ * vrl4 format generator
++ *
++ * Copyright (C) 2010 Simon Horman
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ */
++
++/*
++ * usage: vrl4 < zImage > out
++ *	  dd if=out of=/dev/sdx bs=512 seek=1 # Write the image to sector 1
++ *
++ * Reads a zImage from stdin and writes a vrl4 image to stdout.
++ * In practice this means writing a padded vrl4 header to stdout followed
++ * by the zImage.
++ *
++ * The padding places the zImage at ALIGN bytes into the output.
++ * The vrl4 uses ALIGN + START_BASE as the start_address.
++ * This is where the mask ROM will jump to after verifying the header.
++ *
++ * The header sets copy_size to min(sizeof(zImage), MAX_BOOT_PROG_LEN) + ALIGN.
++ * That is, the mask ROM will load the padded header (ALIGN bytes)
++ * And then MAX_BOOT_PROG_LEN bytes of the image, or the entire image,
++ * whichever is smaller.
++ *
++ * The zImage is not modified in any way.
++ */
++
++#include <unistd.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <errno.h>
++
++struct hdr {
++	uint32_t magic1;
++	uint32_t reserved1;
++	uint32_t magic2;
++	uint32_t reserved2;
++	uint16_t copy_size;
++	uint16_t boot_options;
++	uint32_t reserved3;
++	uint32_t start_address;
++	uint32_t reserved4;
++	uint32_t reserved5;
++	char     reserved6[308];
++};
++
++#define DECLARE_HDR(h)					\
++	struct hdr (h) = {				\
++		.magic1 =	0xea000000,		\
++		.reserved1 =	0x56,			\
++		.magic2 =	0xe59ff008,		\
++		.reserved3 =	0x1 }
++
++/* Align to 512 bytes, the MMCIF sector size */
++#define ALIGN_BITS	9
++#define ALIGN		(1 << ALIGN_BITS)
++
++#define START_BASE	0xe55b0000
++
++/*
++ * With an alignment of 512 the header uses the first sector.
++ * There is a 128 sector (64kbyte) limit on the data loaded by the mask ROM.
++ * So there are 127 sectors left for the boot programme. But in practice
++ * Only a small portion of a zImage is needed, 40 sectors should be more
++ * than enough.
++ *
++ * Note that this sets how much of the zImage is copied by the mask ROM.
++ * The entire zImage is present after the header and is loaded
++ * by the code in the boot program (which is the first portion of the zImage).
++ */
++#define	MAX_BOOT_PROG_LEN (40 * 512)
++
++#define ROUND_UP(x)	((x + ALIGN - 1) & ~(ALIGN - 1))
++
++ssize_t do_read(int fd, void *buf, size_t count)
++{
++	size_t offset = 0;
++	ssize_t l;
++
++	while (offset < count) {
++		l = read(fd, buf + offset, count - offset);
++		if (!l)
++			break;
++		if (l < 0) {
++			if (errno == EAGAIN || errno == EWOULDBLOCK)
++				continue;
++			perror("read");
++			return -1;
++		}
++		offset += l;
++	}
++
++	return offset;
++}
++
++ssize_t do_write(int fd, const void *buf, size_t count)
++{
++	size_t offset = 0;
++	ssize_t l;
++
++	while (offset < count) {
++		l = write(fd, buf + offset, count - offset);
++		if (l < 0) {
++			if (errno == EAGAIN || errno == EWOULDBLOCK)
++				continue;
++			perror("write");
++			return -1;
++		}
++		offset += l;
++	}
++
++	return offset;
++}
++
++ssize_t write_zero(int fd, size_t len)
++{
++	size_t i = len;
++
++	while (i--) {
++		const char x = 0;
++		if (do_write(fd, &x, 1) < 0)
++			return -1;
++	}
++
++	return len;
++}
++
++int main(void)
++{
++	DECLARE_HDR(hdr);
++	char boot_program[MAX_BOOT_PROG_LEN];
++	size_t aligned_hdr_len, alligned_prog_len;
++	ssize_t prog_len;
++
++	prog_len = do_read(0, boot_program, sizeof(boot_program));
++	if (prog_len <= 0)
++		return -1;
++
++	aligned_hdr_len = ROUND_UP(sizeof(hdr));
++	hdr.start_address = START_BASE + aligned_hdr_len;
++	alligned_prog_len = ROUND_UP(prog_len);
++	hdr.copy_size = aligned_hdr_len + alligned_prog_len;
++
++	if (do_write(1, &hdr, sizeof(hdr)) < 0)
++		return -1;
++	if (write_zero(1, aligned_hdr_len - sizeof(hdr)) < 0)
++		return -1;
++
++	if (do_write(1, boot_program, prog_len) < 0)
++		return 1;
++
++	/* Write out the rest of the kernel */
++	while (1) {
++		prog_len = do_read(0, boot_program, sizeof(boot_program));
++		if (prog_len < 0)
++			return 1;
++		if (prog_len == 0)
++			break;
++		if (do_write(1, boot_program, prog_len) < 0)
++			return 1;
++	}
++
++	return 0;
++}
+Index: linux-2.6-ap4/Documentation/arm/SH-Mobile/zboot-rom-mmcif.txt
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-2.6-ap4/Documentation/arm/SH-Mobile/zboot-rom-mmcif.txt	2010-12-06 10:11:54.000000000 +0900
+@@ -0,0 +1,29 @@
++ROM-able zImage boot from MMC
++-----------------------------
++
++An ROM-able zImage compiled with ZBOOT_ROM_MMCIF may be written to MMC and
++SuperH Mobile ARM will to boot directly from the MMCIF hardware block.
++
++This is achieved by the mask ROM loading the first portion of the image into
++MERAM and then jumping to it. This portion contains loader code which
++copies the entire image to SDRAM and jumps to it. From there the zImage
++boot code proceeds as normal, uncompressing the image into its final
++location and then jumping to it.
++
++This code has been tested on an AP4EB board using the developer 1A eMMC
++boot mode which is configured using the following jumper settings.
++The board used for testing required a patched mask ROM in order for
++this mode to function.
++
++   8 7 6 5 4 3 2 1
++   x|x|x|x|x| |x|
++S4 -+-+-+-+-+-+-+-
++    | | | | |x| |x on
++
++The zImage must be written to the MMC card at sector 1 (512 bytes) in
++vrl4 format. A utility vrl4 is supplied to accomplish this.
++
++e.g.
++	vrl4 < zImage | dd of=/dev/sdX bs=512 seek=1
++
++A dual-voltage MMC 4.0 card was used for testing.
+Index: linux-2.6-ap4/arch/arm/mach-shmobile/include/mach/head-ap4evb.txt
+===================================================================
+--- linux-2.6-ap4.orig/arch/arm/mach-shmobile/include/mach/head-ap4evb.txt	2010-12-06 16:40:34.000000000 +0900
++++ linux-2.6-ap4/arch/arm/mach-shmobile/include/mach/head-ap4evb.txt	2010-12-06 16:40:43.000000000 +0900
+@@ -85,3 +85,9 @@ ED 0xE6150004, 0x80331050
+ WAIT 1, 0xFE40009C
+ 
+ ED 0xE6150354, 0x00000002
++
++LIST "LED1-4"
++EB 0xE60520B9, 0x10
++EB 0xE60520BA, 0x10
++EB 0xE60520BB, 0x10
++EB 0xE60520BC, 0x10
