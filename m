@@ -1,52 +1,73 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 1/3 ] mmc: add support for h/w clock gating of sd
-	controller
-Date: Sun, 5 Dec 2010 17:48:36 -0800
-Message-ID: <8C107ACA-5CFA-4678-B3B2-42028B4DF587@marvell.com>
-References: <3C50EC54-F380-4AE8-A417-4D3557FEB588@marvell.com>
- <20101204210213.GA671@pengutronix.de>
+Subject: Re: [PATCH 2/2] mmc: Test bus-width for old MMC devices
+Date: Sun, 5 Dec 2010 17:53:49 -0800
+Message-ID: <D8F224E6-5973-4CCB-97BC-0CE6102B4F6F@marvell.com>
+References: <1290579674-4616-1-git-send-email-tiwai@suse.de>
+ <1290579674-4616-3-git-send-email-tiwai@suse.de>
+ <20101205040221.GA24547@void.printf.net> <s5h1v5wv6gv.wl%tiwai@suse.de>
+ <20101205184031.GA30957@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:36510 "HELO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751735Ab0LFBsq convert rfc822-to-8bit
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:47971 "HELO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751732Ab0LFBx6 convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 5 Dec 2010 20:48:46 -0500
-In-Reply-To: <20101204210213.GA671@pengutronix.de>
+	Sun, 5 Dec 2010 20:53:58 -0500
+In-Reply-To: <20101205184031.GA30957@void.printf.net>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Nicolas Pitre <nico@fluxnic.net>, Linus Walleij <linus.Walleij@stericsson.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Takashi Iwai <tiwai@suse.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Aries Lee <arieslee@jmicron.com>
 
 
-will change tomorrow with other changes Nico Suggested.
+Chris,
 
-Philip
+One other difference I have been told between the patches but NOT verified is
 
-On Dec 4, 2010, at 1:02 PM, Wolfram Sang wrote:
+a) Takasi code was not tested with Dual Data Rate
 
-> Hi,
+b) Performance is not an issue since we are dealing with uSeconds and the code is called once
+when mmc is detected.  
+
+c)  I will adapt my code to what Takahi did over the next few days and post changes to the CAP
+
+d) The work was independent and done at the same time !! (amazing)
+
+
+On Dec 5, 2010, at 10:40 AM, Chris Ball wrote:
+
+> Hi Takashi, Philip,
 > 
-> minor comments in addition to Nicolas:
+> On Sun, Dec 05, 2010 at 11:50:40AM +0100, Takashi Iwai wrote:
+>>> I'm planning on taking Takashi's since it looks a little cleaner; Philip,
+>>> please could you take a look at Takashi's patch and add anything you
+>>> think should be present from your own patch as a new incremental patch?
+>> 
+>> One missing thing in my (originally Aries') patch is the quirk bit to
+>> enable/disable the bus-width test.  In Philip's latest patch, the
+>> default is off.
+>> 
+>> I'm also not sure whether this bus-width test should be enabled as
+>> default.  I guess it's better for performance, so I'd vote for turning
+>> on as default.  But, having a quirk for turning off would be safer for
+>> working around old hardware problems, of course.
 > 
-> On Fri, Dec 03, 2010 at 11:26:50AM -0800, Philip Rakity wrote:
+> Sounds good, although we're trying hard not to add new quirk bits.
+> I don't see a way around doing that here, though.
 > 
->> hardware clock gating is enabled by setting the mmc quirk
+> We've got plenty of time until the .38 release -- let's turn it on by
+> default and test during .38-rc, and we can revisit whether to leave it
+> on closer to the release.  It's not as simple as "turning it on could
+> cause problems so let's not do that", because we're *already* seeing
+> problems from things like enabling 8-bit width on setups that don't
+> support it.
 > 
-> It's not a quirk, it's a capability :)
-> 
->> MMC_CAP_CLOCK_GATING_HW
-> 
-> Why not MMC_CAP_HW_CLOCK_GATING? Might be a mileage, though...
-> 
-> Regards,
-> 
->   Wolfram
+> Thanks!
 > 
 > -- 
-> Pengutronix e.K.                           | Wolfram Sang                |
-> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 
