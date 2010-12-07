@@ -1,69 +1,65 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH V2 1/3] mmc: add support for H/W clock gating of SD
- controller
-Date: Tue, 07 Dec 2010 13:23:44 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.1012071319530.10437@xanadu.home>
-References: <4DB58728-19A4-4ECC-979B-A3EF1F880382@marvell.com>
+From: Daniel Walker <dwalker@codeaurora.org>
+Subject: Re: [PATCH 2/5] mmc: msm_sdcc: Add prog done interrupt support
+Date: Tue, 07 Dec 2010 10:27:17 -0800
+Message-ID: <1291746437.8000.11.camel@c-dwalke-linux.qualcomm.com>
+References: <1291719316-23948-1-git-send-email-stummala@codeaurora.org>
+	 <1291719316-23948-2-git-send-email-stummala@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:20437 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753456Ab0LGSXp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2010 13:23:45 -0500
-Received: from xanadu.home ([66.130.28.92]) by vl-mh-mrz25.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0LD2009CKLQQCKB0@vl-mh-mrz25.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Tue, 07 Dec 2010 13:23:14 -0500 (EST)
-In-reply-to: <4DB58728-19A4-4ECC-979B-A3EF1F880382@marvell.com>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:23258 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753443Ab0LGS1a (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2010 13:27:30 -0500
+In-Reply-To: <1291719316-23948-2-git-send-email-stummala@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>
+To: Sahitya Tummala <stummala@codeaurora.org>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, san@google.com, linux-arm-msm@vger.kernel.org
 
-On Tue, 7 Dec 2010, Philip Rakity wrote:
+On Tue, 2010-12-07 at 16:25 +0530, Sahitya Tummala wrote:
+> Enable prog done interrupt for stop command(CMD12) that is sent
+> after a multi-block write(CMD25). The PROG_DONE bit is set when
+> the card has finished its programming and is ready for next data.
 
-> 
-> This code extends software clock gating in the MMC layer by adding the ability
-> to indicate that the SD controller supports hardware clock gating.
-> 
-> Hardware clock gating is enabled by setting the MMC capability
-> MMC_CAP_HW_CLOCK_GATING in the SD driver.
-> 
-> eg: host->mmc->caps |= MMC_CAP_HW_CLOCK_GATING
-> 
-> The approach follows the suggestion of Nico Pitre.
-> 
-> SD/MMC/eMMC cards use dynamic clocks
-> SDIO uses continuous clocks to properly detect SDIO card interrupts
-> 
-> The code has been tested using marvell linux for MMP2.  The Marvell
-> controller support H/W clock gating.
-> 
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> Signed-off-by: Mark F. Brown <markb@marvell.com>
+What's the benefit ? It looks like there is one, but please describe it.
 
-There is one needless change in your patch:
+>  	if (status & (MCI_CMDSENT | MCI_CMDRESPEND | MCI_CMDCRCFAIL |
+> -	              MCI_CMDTIMEOUT) && host->curr.cmd) {
+> +		MCI_CMDTIMEOUT | MCI_PROGDONE) && host->curr.cmd) {
 
-> @@ -178,10 +181,13 @@ void mmc_host_clk_gate(struct mmc_host *host)
->  {
->  	unsigned long flags;
+Add a line break here instead of weird spacing.
+
+>  		msmsdcc_do_cmdirq(host, status);
+>  	}
 >  
-> +	if (host->caps & MMC_CAP_HW_CLOCK_GATING)
-> +		return;
-> +
->  	spin_lock_irqsave(&host->clk_lock, flags);
->  	host->clk_requests--;
->  	if (mmc_host_may_gate_card(host->card) &&
-> -	    !host->clk_requests)
-> +		!host->clk_requests)
+> diff --git a/drivers/mmc/host/msm_sdcc.h b/drivers/mmc/host/msm_sdcc.h
+> index 996990d..ac79ed9 100644
+> --- a/drivers/mmc/host/msm_sdcc.h
+> +++ b/drivers/mmc/host/msm_sdcc.h
+> @@ -138,7 +138,7 @@
+>  #define MCI_IRQENABLE	\
+>  	(MCI_CMDCRCFAILMASK|MCI_DATACRCFAILMASK|MCI_CMDTIMEOUTMASK|	\
+>  	MCI_DATATIMEOUTMASK|MCI_TXUNDERRUNMASK|MCI_RXOVERRUNMASK|	\
+> -	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_DATAENDMASK)
+> +	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_DATAENDMASK|MCI_PROGDONEMASK)
+>  
+>  /*
+>   * The size of the FIFO in bytes.
+> @@ -245,6 +245,8 @@ struct msmsdcc_host {
+>  	struct mmc_command	*cmd_cmd;
+>  	u32			cmd_c;
+>  
+> +	unsigned int prog_scan;
+> +	unsigned int prog_enable;
 
-The second line of the if() was properly aligned before.
+These need to be bool, and you need to use true and false instead of 1
+and 0.
 
-Other than that...
+Daniel
+-- 
 
-Acked-by: Nicolas Pitre <nicolas.pitre@linaro.org>
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
 
-
-Nicolas
