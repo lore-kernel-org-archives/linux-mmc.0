@@ -1,54 +1,46 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v4 0/4]implement eMMC4.4 standard HW reset feature
-Date: Tue, 7 Dec 2010 10:26:00 +0800
-Message-ID: <5D8008F58939784290FAB48F54975198320B3E4B5A@shsmsx502.ccr.corp.intel.com>
-References: <20101201124842.GA5421@intel.com>
-	<5D8008F58939784290FAB48F54975198320B3E4A2D@shsmsx502.ccr.corp.intel.com>
- <AANLkTinrPd9p4ocmE+Krj7t4yV8SMPsDeDFuTByy2=Q4@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: working around a Marvell wifi SDIO bug
+Date: Mon, 6 Dec 2010 18:31:23 -0800
+Message-ID: <B757D685-D236-4C17-AE67-CC2EC03E153D@marvell.com>
+References: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>
+ <AANLkTinPbGcxOU8w_Wy3YVe-QOYpmQm+K7sgRHd-K2vp@mail.gmail.com>
+ <43E4817426ED174AA81263BCECB4351D13200C556E@sc-vexch3.marvell.com>
+ <AANLkTin=H653apPnritr4j0XEunt-_To5OwKDD-G_zHH@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:8337 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750888Ab0LGC1a convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2010 21:27:30 -0500
-In-Reply-To: <AANLkTinrPd9p4ocmE+Krj7t4yV8SMPsDeDFuTByy2=Q4@mail.gmail.com>
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:37549 "HELO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1754321Ab0LGCho convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Dec 2010 21:37:44 -0500
+In-Reply-To: <AANLkTin=H653apPnritr4j0XEunt-_To5OwKDD-G_zHH@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arjan@linux.intel.com" <arjan@linux.intel.com>, "alan@linux.intel.com" <alan@linux.intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "Mai, Leonard" <leonard.mai@intel.com>, Arnd Bergmann <arnd@arndb.de>, Wolfram Sang <w.sang@pengutronix.de>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Daniel Drake <dsd@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-> -----Original Message-----
-> From: kyungmin78@gmail.com [mailto:kyungmin78@gmail.com] On Behalf Of
-> Kyungmin Park
-> Sent: Tuesday, December 07, 2010 9:34 AM
-> To: Dong, Chuanxiao
-> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; cjb@laptop.org;
-> arjan@linux.intel.com; alan@linux.intel.com; akpm@linux-foundation.org; Mai,
-> Leonard; Arnd Bergmann; Wolfram Sang
-> Subject: Re: [PATCH v4 0/4]implement eMMC4.4 standard HW reset feature
+
+Requires a script to set RFKill at startup or whenever reset is required.  
+The implementation toggles the power/reset gpio signals thus resetting the wifi card. 
+
+The implementation consists of
+
+a) code for rfkill
+b) code in the arch directory for mach-mmp/
+c) code in the platform sdio driver.
+
+Philip
+
+On Dec 6, 2010, at 2:31 PM, Ohad Ben-Cohen wrote:
+
+> On Mon, Dec 6, 2010 at 6:37 AM, Philip Rakity <prakity@marvell.com> wrote:
+>> 
+>> I have seen this solved using rfkill.  Is that acceptable?
 > 
-> On Tue, Dec 7, 2010 at 1:03 AM, Dong, Chuanxiao
-> <chuanxiao.dong@intel.com> wrote:
-> > Hello all,
-> > How about these patches? It implemented HW reset feature. When card
-> occurred a timeout error during reading/writing/erasing, these patches will allow
-> driver to reset eMMC card by trigger a HW reset signal.
-> > Does anyone have any comments about the implementation of these patches?
-> Wolfram and Arnd already pointed out the unsuitable patch headers. Thanks! :)
-> 
-> Hi,
-> I'm not yet find a reason to use this feature. Now it uses the samsung
-> and sandisk v4.41 but still no problem.
-> I wonder what's the purpose and effect if it uses or not?
+> It doesn't make a lot of sense.. rfkill is a few layers above.. and if
+> any, then an rfkill implementation will eventually end up triggering
+> this code and not the other way around.
 
-This feature will only be used when card occurs a timeout error during reading/writing/erasing.
-When host send a command to card, for some reason, if card didn't have any response to host, then host controller will generate a timeout interrupt to indicate this command is timeout.
-At this time, card maybe cannot response any command unless be reset. If driver did nothing at such scenario, RFC may be crashed. So I think when timeout error occurs, reset card is needed.
-Host sends CMD0 also can reset the card, but card may be dead and cannot response any command. So this patch will pull up a GPIO line to trigger a reset signal and let eMMC card reset itself, not send a command to do that.
-That is my understanding of this feature.
-
-Thanks
-Chuanxiao
