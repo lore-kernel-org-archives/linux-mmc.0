@@ -1,129 +1,183 @@
-From: Arnd Hannemann <arnd@arndnet.de>
-Subject: Re: [PATCH 1/4] mmc: tmio: Implement SDIO IRQ
-Date: Tue, 07 Dec 2010 10:08:03 -0500
-Message-ID: <4CFE4DD3.8050302@arndnet.de>
-References: <1291656942-18100-1-git-send-email-arnd@arndnet.de>	<AANLkTimHqoHzO8-5mdTiB03sp_mB0Ose6enOXsTvT5R+@mail.gmail.com>	<4CFE26FE.2070206@arndnet.de> <AANLkTinzGuZjyqLqKJEz6t_CShBUfusobAs-8Md=ix4E@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH 2/2] sdhci-pxa add call back interface to share sdhci-pxa
+Date: Tue, 7 Dec 2010 07:26:05 -0800
+Message-ID: <38097AE9-4447-484D-B370-272AB6084A11@marvell.com>
+References: <AANLkTi=ECyTAPntMfp_F4Kp2A3UCntLxyWJcbpS3WFP3@mail.gmail.com>
+ <83185AA24C678642A07282B8BB1340B613509C65CA@sc-vexch3.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from slowhand.arndnet.de ([88.198.19.76]:40769 "EHLO mail.unitix.de"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752863Ab0LGPIO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Dec 2010 10:08:14 -0500
-In-Reply-To: <AANLkTinzGuZjyqLqKJEz6t_CShBUfusobAs-8Md=ix4E@mail.gmail.com>
+Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:50541 "HELO
+	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753076Ab0LGP2k (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2010 10:28:40 -0500
+In-Reply-To: <83185AA24C678642A07282B8BB1340B613509C65CA@sc-vexch3.marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, g.liakhovetski@gmx.de, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>
+To: Zhangfei Gao <zhangfei.gao@gmail.com>, Zhangfei Gao <zgao6@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Raymond Wu <xywu@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, "niej0001@gmail.com" <niej0001@gmail.com>, Mark Brown <markb@marvell.com>, Jun Nie <njun@marvell.com>
 
-Hi Magnus,
-
-Am 07.12.2010 09:37, schrieb Magnus Damm:
-> On Tue, Dec 7, 2010 at 9:22 PM, Arnd Hannemann <arnd@arndnet.de> wrote:
->> Am 07.12.2010 00:39, schrieb Magnus Damm:
->>> On Tue, Dec 7, 2010 at 2:35 AM, Arnd Hannemann <arnd@arndnet.de> wrote:
->>>> This patch implements SDIO IRQ support for mfds which
->>>> announce the MMC_CAP_SDIO_IRQ capability for tmio_mmc.
->>>> Tested with a b43-based wireless SDIO card and sh_mobile_sdhi.
->>>>
->>>> This patch applies on top of:
->>>> mmc: tmio_mmc: allow multi-element scatter-gather lists
->>>> mmc: tmio_mmc: fix PIO fallback on DMA descriptor allocation failure
->>>> mmc: tmio: merge the private header into the driver
->>>> mmc: tmio: implement a bounce buffer for unaligned DMA
->>>>
->>>> Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
->>>> CC: Ian Molton <ian@mnementh.co.uk>
->>>> CC: Samuel Ortiz <sameo@linux.intel.com>
->>>> CC: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->>>> ---
->>>>  drivers/mmc/host/tmio_mmc.c |   54 ++++++++++++++++++++++++++++++++++++++++++-
->>>>  1 files changed, 53 insertions(+), 1 deletions(-)
->>>
->>> Thanks for your work on this!
->>>
->>> Just curious, did you test this change in 4-bit mode and/or 1-bit
->>> mode? I believe that 1-bit mode support is rather simple, but 4-bit
->>> mode requires toggling between the IRQ and DATA function which happen
->>> to be using the same pin. It looks like the current code only deals
->>> with 1-bit mode - perhaps 4-bit mode isn't supported by the b43
->>> driver?
->>
->> Yes, I tested this in 1-bit and 4-bit mode. At least the card claims it is using it,
->> it says "width=2". I also read about the toggling, and expected to do
->> something fancy, but when tests where successful I came to the conclusion
->> that the controller does the toggling for us. Do you believe otherwise?
-> 
-> Yes, I believe something more advanced is needed for 4-bit mode. But I
-> don't really have any proof. I just know that I spent quite some time
-> trying to get it to work and ended up staying in polling mode because
-> enabling real IRQs seemed to require too much time. This was before
-> some interrupt ack fixes so things may have improved since then. I
-> also remember both testing on b43 hardware and AR6002.
-
-There was also this nasty DMA issue Guennadi fixed recently...
-
-> 
-> There are a couple of things against us at this point:
-> 
-> a) b43 hardware may not be enough to test this
-
-Ok, do you still have that AR6002 and could test with that by any chance?
-
-> are you really sure 4-bit mode is enabled? =)
-> is the b43 driver doing multi-block data transfers? i believe IRQs
-> work differently for multi-block data transfers and single-block.
-
-I'm pretty sure its using 4-bit mode, from the probe of the card:
-
-mmc1: clock 0Hz busmode 1 powermode 1 cs 0 Vdd 21 width 0 timing 0
-mmc1: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 21 width 0 timing 0
-mmc1: clock 400000Hz busmode 1 powermode 2 cs 1 Vdd 21 width 0 timing 0
-mmc1: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 21 width 0 timing 0
-mmc1: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 21 width 0 timing 0
-mmc1: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 0 timing 0
-mmc1: clock 25000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 0 timing 0
-mmc1: clock 25000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 2 timing 0
-
-Its doing probably not doing any multi-block data transfers, but I'll
-recheck. Actually most data transfers are very small.
- 
-> b) we don't have any public data sheet for the SDHI hardware block
-> 
-> how good is that?
-> 
-> c) the simplified SDIO spec is not exactly full of details:
-> 
-> 8.1.3
-> Interrupt Period Definition
-> This section is not included in the Simplified Specification.
-> 8.1.4
-> Interrupt Period at the Data Block Gap in 4-bit SD Mode (Optional)
-> This section is not included in the Simplified Specification.
-> 8.1.5
-> Inhibited Interrupts (Removed Section)
-> This section is not included in the Simplified Specification.
-> 8.1.6
-> End of Interrupt Cycles
-> This section is not included in the Simplified Specification.
-
-Yes I read this too, but this is of course only interface
-between host and card, so we may be just lucky that the controller
-hides these details from us.
-
->>> Not sure how the Linux MMC stack supports 4-bit IRQs, but the S4MI bit
->>> in the CCCR should specify if it's allowed to enable interrupts in
->>> between data transfers or not. Perhaps that is something we need to
->>> deal with in the driver? Or maybe the framework needs to be extended?
->>
->> I quick grep shows that nobody seems to care about this bit until now...
-> 
-> Yeah, that seems to be the case. I guess it's a non-issue then. =)
-> 
-> I'll try to find my AR6002 card, maybe that will shed some light...
-
-Yeah, that would be really cool.
-
-Thanks,
-Arnd
+DQpXaGVyZSBpcyB0aGUgY29kZSB0aGF0IGltcGxlbWVudHMgIA0KDQo+ICsJdW5zaWduZWQgaW50
+CWNsa19kZWxheV9jeWNsZXM7DQo+ICsJdW5zaWduZWQgaW50CWNsa19kZWxheV9zZWw7DQoNCg0K
+DQoNCk9uIERlYyA2LCAyMDEwLCBhdCA5OjU2IFBNLCBSYXltb25kIFd1IHdyb3RlOg0KDQo+IEhp
+LA0KPiANCj4gVGhpcyBwYXRjaCBpcyB2ZXJpZmllZCBieTogUmF5bW9uZCBXdSh4eXd1QG1hcnZl
+bGwuY29tKSBvbiBweGE5NTUgU0FBUkIgcGxhdGZvcm0uDQo+IA0KPiBUaGFua3MsDQo+IFJheW1v
+bmQNCj4gDQo+IA0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiB6aGFuZ2Zl
+aSBnYW8gW21haWx0bzp6aGFuZ2ZlaS5nYW9AZ21haWwuY29tXSANCj4gU2VudDogMjAxMMTqMTLU
+wjPI1SAxNDozMQ0KPiBUbzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiBDYzogQ2hyaXMg
+QmFsbDsgRXJpYyBNaWFvOyBIYW9qaWFuIFpodWFuZzsgbmllajAwMDFAZ21haWwuY29tOyBQaGls
+aXAgUmFraXR5OyBNYXJrIEJyb3duOyBSYXltb25kIFd1OyBKdW4gTmllDQo+IFN1YmplY3Q6IFtQ
+QVRDSCAyLzJdIHNkaGNpLXB4YSBhZGQgY2FsbCBiYWNrIGludGVyZmFjZSB0byBzaGFyZSBzZGhj
+aS1weGENCj4gDQo+IEZyb20gZmI1OTI3YWZhYzdjYmI0NDgwNTA5MzgxNmJlYTUxZGRlMzNkYTFl
+NSBNb24gU2VwIDE3IDAwOjAwOjAwIDIwMDENCj4gRnJvbTogWmhhbmdmZWkgR2FvIDx6aGFuZ2Zl
+aS5nYW9AbWFydmVsbC5jb20+DQo+IERhdGU6IFR1ZSwgMzAgTm92IDIwMTAgMDU6NDM6MjkgLTA1
+MDANCj4gU3ViamVjdDogW1BBVENIIDIvMl0gc2RoY2ktcHhhOiBhZGQgY2FsbCBiYWNrIGludGVy
+ZmFjZSB0byBzaGFyZSBzZGhjaS1weGENCj4gDQo+IAlDYWxsIGJhY2sgZnVuY3Rpb25zIGlzIGFk
+ZGVkIHRvIHN1cHBvcnQgbW1wMiwgcHhhOTEwLCBweGExNjggYW5kIHB4YTk1NQ0KPiANCj4gU2ln
+bmVkLW9mZi1ieTogWmhhbmdmZWkgR2FvIDx6aGFuZ2ZlaS5nYW9AbWFydmVsbC5jb20+DQo+IEND
+OiBSYXltb25kV3UgPHh5d3VAbWFydmVsbC5jb20+DQo+IENDOiBKdW4gTmllIDxuanVuQG1hcnZl
+bGwuY29tPg0KPiBDQzogUGhpbGlwIFJha2l0eSA8cHJha2l0eUBtYXJ2ZWxsLmNvbT4NCj4gLS0t
+DQo+IGFyY2gvYXJtL3BsYXQtcHhhL2luY2x1ZGUvcGxhdC9zZGhjaS5oIHwgICA0NCArKysrKysr
+KysrKysrKysrKw0KPiBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXB4YS5jICAgICAgICAgICB8ICAg
+ODMgKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0NCj4gMiBmaWxlcyBjaGFuZ2VkLCA5
+OCBpbnNlcnRpb25zKCspLCAyOSBkZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9hcmNo
+L2FybS9wbGF0LXB4YS9pbmNsdWRlL3BsYXQvc2RoY2kuaA0KPiBiL2FyY2gvYXJtL3BsYXQtcHhh
+L2luY2x1ZGUvcGxhdC9zZGhjaS5oDQo+IGluZGV4IDFhYjMzMmUuLjRjZTNiMDUgMTAwNjQ0DQo+
+IC0tLSBhL2FyY2gvYXJtL3BsYXQtcHhhL2luY2x1ZGUvcGxhdC9zZGhjaS5oDQo+ICsrKyBiL2Fy
+Y2gvYXJtL3BsYXQtcHhhL2luY2x1ZGUvcGxhdC9zZGhjaS5oDQo+IEBAIC0xMyw5ICsxMywxNCBA
+QA0KPiAjaWZuZGVmIF9fUExBVF9QWEFfU0RIQ0lfSA0KPiAjZGVmaW5lIF9fUExBVF9QWEFfU0RI
+Q0lfSA0KPiANCj4gKyNpbmNsdWRlIDxsaW51eC9tbWMvc2RoY2kuaD4NCj4gKyNpbmNsdWRlIDxs
+aW51eC9wbGF0Zm9ybV9kZXZpY2UuaD4NCj4gKw0KPiAvKiBweGEgc3BlY2lmaWMgZmxhZyAqLw0K
+PiAvKiBSZXF1aXJlIGNsb2NrIGZyZWUgcnVubmluZyAqLw0KPiAjZGVmaW5lIFBYQV9GTEFHX0RJ
+U0FCTEVfQ0xPQ0tfR0FUSU5HICgxPDwwKQ0KPiArLyogY2FyZCBhbHdheWVzIHdpcmVkIHRvIGhv
+c3QsIGxpa2Ugb24tY2hpcCBlbW1jICovDQo+ICsjZGVmaW5lIFBYQV9GTEFHX0NBUkRfUEVSTUFO
+RU5UCSgxPDwxKQ0KPiANCj4gLyogQm9hcmQgZGVzaWduIHN1cHBvcnRzIDgtYml0IGRhdGEgb24g
+U0QvU0RJTyBCVVMgKi8gICNkZWZpbmUgUFhBX0ZMQUdfU0RfOF9CSVRfQ0FQQUJMRV9TTE9UICgx
+PDwyKSBAQCAtMjUsMTEgKzMwLDUwIEBADQo+ICAqIEBtYXhfc3BlZWQ6IHRoZSBtYXhpbXVtIHNw
+ZWVkIHN1cHBvcnRlZA0KPiAgKiBAcXVpcmtzOiBxdWlya3Mgb2Ygc3BlY2lmaWMgZGV2aWNlDQo+
+ICAqIEBmbGFnczogZmxhZ3MgZm9yIHBsYXRmb3JtIHJlcXVpcmVtZW50DQo+ICsgKiBAY2xrX2Rl
+bGF5X2N5Y2xlczoNCj4gKyAqCW1tcDI6IGVhY2ggc3RlcCBpcyByb3VnaGx5IDEwMHBzLCA1Yml0
+cyB3aWR0aA0KPiArICoJcHhhOTEwICYgcHhhMTY4OiBlYWNoIHN0ZXAgaXMgMW5zLCA0Yml0cyB3
+aWR0aA0KPiArICogQGNsa19kZWxheV9lbmFibGU6IGVuYWJsZSBjbGtfZGVsYXkgb3Igbm90LCB1
+c2VkIG9uIHB4YTkxMCAmIHB4YTE2OA0KPiArICogQGNsa19kZWxheV9zZWw6IHNlbGVjdCBjbGtf
+ZGVsYXksIHVzZWQgb24gcHhhOTEwICYgcHhhMTY4DQo+ICsgKgkwOiBjaG9vc2UgZmVlZGJhY2sg
+Y2xrDQo+ICsgKgkxOiBjaG9vc2UgZmVlZGJhY2sgY2xrICsgZGVsYXkgdmFsdWUNCj4gKyAqCTI6
+IGNob29zZSBpbnRlcm5hbCBjbGsNCj4gKyAqIEBleHRfY2RfZ3BpbzogZ3BpbyBwaW4gdXNlZCBm
+b3IgZXh0ZXJuYWwgQ0QgbGluZQ0KPiArICogQGV4dF9jZF9ncGlvX2ludmVydDogaW52ZXJ0IHZh
+bHVlcyBmb3IgZXh0ZXJuYWwgQ0QgZ3BpbyBsaW5lDQo+ICsgKiBAc29jX3NldF90aW1pbmc6IHNl
+dCB0aW1pbmcgZm9yIHNwZWNpZmljIHNvYw0KPiArICogQGV4dF9jZF9pbml0OiBJbml0aWFsaXpl
+IGV4dGVybmFsIGNhcmQgZGV0ZWN0IHN1YnN5c3RlbQ0KPiArICogQGV4dF9jZF9jbGVhbnVwOiBD
+bGVhbnVwIGV4dGVybmFsIGNhcmQgZGV0ZWN0IHN1YnN5c3RlbQ0KPiArICogQHNvY19zZXRfb3Bz
+OiBvdmVyd3JpdGUgaG9zdCBvcHMgd2l0aCBzb2Mgc3BlY2lmaWMgb3BzDQo+ICAqLw0KPiArc3Ry
+dWN0IHNkaGNpX3B4YTsNCj4gc3RydWN0IHNkaGNpX3B4YV9wbGF0ZGF0YSB7DQo+IAl1bnNpZ25l
+ZCBpbnQJbWF4X3NwZWVkOw0KPiAJdW5zaWduZWQgaW50CXF1aXJrczsNCj4gCXVuc2lnbmVkIGlu
+dAlmbGFnczsNCj4gKwl1bnNpZ25lZCBpbnQJY2xrX2RlbGF5X2N5Y2xlczsNCj4gKwl1bnNpZ25l
+ZCBpbnQJY2xrX2RlbGF5X3NlbDsNCj4gKwl1bnNpZ25lZCBpbnQJZXh0X2NkX2dwaW87DQo+ICsJ
+Ym9vbAkJZXh0X2NkX2dwaW9faW52ZXJ0Ow0KPiArCWJvb2wJCWNsa19kZWxheV9lbmFibGU7DQo+
+ICsNCj4gKwl2b2lkICgqc29jX3NldF90aW1pbmcpKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LA0K
+PiArCQkJc3RydWN0IHNkaGNpX3B4YV9wbGF0ZGF0YSAqcGRhdGEpOw0KPiArCWludCAoKmV4dF9j
+ZF9pbml0KSh2b2lkICgqbm90aWZ5X2Z1bmMpKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKmRldiwN
+Cj4gKwkJCQkJCSAgIGludCBzdGF0ZSksIHZvaWQgKmRhdGEpOw0KPiArCWludCAoKmV4dF9jZF9j
+bGVhbnVwKSh2b2lkICgqbm90aWZ5X2Z1bmMpKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKmRldiwN
+Cj4gKwkJCQkJCSAgICAgIGludCBzdGF0ZSksIHZvaWQgKmRhdGEpOw0KPiArCXZvaWQgKCpzb2Nf
+c2V0X29wcykoc3RydWN0IHNkaGNpX3B4YSAqcHhhKTsgfTsNCj4gKw0KPiArc3RydWN0IHNkaGNp
+X3B4YSB7DQo+ICsJc3RydWN0IHNkaGNpX2hvc3QJCSpob3N0Ow0KPiArCXN0cnVjdCBzZGhjaV9w
+eGFfcGxhdGRhdGEJKnBkYXRhOw0KPiArCXN0cnVjdCBjbGsJCQkqY2xrOw0KPiArCXN0cnVjdCBy
+ZXNvdXJjZQkJCSpyZXM7DQo+ICsJc3RydWN0IHNkaGNpX29wcwkJKm9wczsNCj4gKw0KPiArCXU4
+CWNsa19lbmFibGU7DQo+ICsJdTgJcG93ZXJfbW9kZTsNCj4gfTsNCj4gDQo+ICNlbmRpZiAvKiBf
+X1BMQVRfUFhBX1NESENJX0ggKi8NCj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2Ro
+Y2ktcHhhLmMgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXB4YS5jIGluZGV4IDVhNjEyMDguLmY3
+OWRjY2YgMTAwNjQ0DQo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcHhhLmMNCj4gKysr
+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1weGEuYw0KPiBAQCAtMjQsMzIgKzI0LDIyIEBADQo+
+ICNpbmNsdWRlIDxsaW51eC9jbGsuaD4NCj4gI2luY2x1ZGUgPGxpbnV4L2lvLmg+DQo+ICNpbmNs
+dWRlIDxsaW51eC9lcnIuaD4NCj4gKyNpbmNsdWRlIDxsaW51eC9zbGFiLmg+DQo+ICNpbmNsdWRl
+IDxwbGF0L3NkaGNpLmg+DQo+ICNpbmNsdWRlICJzZGhjaS5oIg0KPiANCj4gI2RlZmluZSBEUklW
+RVJfTkFNRQkic2RoY2ktcHhhIg0KPiANCj4gLSNkZWZpbmUgU0RfRklGT19QQVJBTQkJMHgxMDQN
+Cj4gLSNkZWZpbmUgRElTX1BBRF9TRF9DTEtfR0FURQkweDQwMA0KPiAtDQo+IC1zdHJ1Y3Qgc2Ro
+Y2lfcHhhIHsNCj4gLQlzdHJ1Y3Qgc2RoY2lfaG9zdAkJKmhvc3Q7DQo+IC0Jc3RydWN0IHNkaGNp
+X3B4YV9wbGF0ZGF0YQkqcGRhdGE7DQo+IC0Jc3RydWN0IGNsawkJCSpjbGs7DQo+IC0Jc3RydWN0
+IHJlc291cmNlCQkJKnJlczsNCj4gLQ0KPiAtCXU4IGNsa19lbmFibGU7DQo+IC19Ow0KPiAtDQo+
+IC8qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKlwNCj4gICogICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAqDQo+ICAqIFNE
+SENJIGNvcmUgY2FsbGJhY2tzICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgKg0KPiAgKiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICoNCj4gXCoqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqLw0KPiArDQo+IHN0YXRpYyB2b2lkIHNldF9jbG9jayhzdHJ1Y3Qgc2RoY2lfaG9z
+dCAqaG9zdCwgdW5zaWduZWQgaW50IGNsb2NrKSAgew0KPiAJc3RydWN0IHNkaGNpX3B4YSAqcHhh
+ID0gc2RoY2lfcHJpdihob3N0KTsNCj4gLQl1MzIgdG1wID0gMDsNCj4gKwlzdHJ1Y3Qgc2RoY2lf
+cHhhX3BsYXRkYXRhICpwZGF0YSA9IHB4YS0+cGRhdGE7DQo+IA0KPiAJaWYgKGNsb2NrID09IDAp
+IHsNCj4gCQlpZiAocHhhLT5jbGtfZW5hYmxlKSB7DQo+IEBAIC01NywyMSArNDcsMzEgQEAgc3Rh
+dGljIHZvaWQgc2V0X2Nsb2NrKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1bnNpZ25lZCBpbnQg
+Y2xvY2spDQo+IAkJCXB4YS0+Y2xrX2VuYWJsZSA9IDA7DQo+IAkJfQ0KPiAJfSBlbHNlIHsNCj4g
+LQkJaWYgKDAgPT0gcHhhLT5jbGtfZW5hYmxlKSB7DQo+IC0JCQlpZiAocHhhLT5wZGF0YS0+Zmxh
+Z3MgJiBQWEFfRkxBR19ESVNBQkxFX0NMT0NLX0dBVElORykgew0KPiAtCQkJCXRtcCA9IHJlYWRs
+KGhvc3QtPmlvYWRkciArIFNEX0ZJRk9fUEFSQU0pOw0KPiAtCQkJCXRtcCB8PSBESVNfUEFEX1NE
+X0NMS19HQVRFOw0KPiAtCQkJCXdyaXRlbCh0bXAsIGhvc3QtPmlvYWRkciArIFNEX0ZJRk9fUEFS
+QU0pOw0KPiAtCQkJfQ0KPiAtCQkJY2xrX2VuYWJsZShweGEtPmNsayk7DQo+IC0JCQlweGEtPmNs
+a19lbmFibGUgPSAxOw0KPiAtCQl9DQo+ICsJCWlmIChwZGF0YSAmJiBwZGF0YS0+c29jX3NldF90
+aW1pbmcpDQo+ICsJCQlwZGF0YS0+c29jX3NldF90aW1pbmcoaG9zdCwgcGRhdGEpOw0KPiArCQlj
+bGtfZW5hYmxlKHB4YS0+Y2xrKTsNCj4gKwkJcHhhLT5jbGtfZW5hYmxlID0gMTsNCj4gCX0NCj4g
+fQ0KPiANCj4gLXN0YXRpYyBzdHJ1Y3Qgc2RoY2lfb3BzIHNkaGNpX3B4YV9vcHMgPSB7DQo+IC0J
+LnNldF9jbG9jayA9IHNldF9jbG9jaywNCj4gLX07DQo+ICtzdGF0aWMgdm9pZCBzZGhjaV9weGFf
+bm90aWZ5X2NoYW5nZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpkZXYsIGludCANCj4gK3N0YXRl
+KSB7DQo+ICsJc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShk
+ZXYpOw0KPiArCXVuc2lnbmVkIGxvbmcgZmxhZ3M7DQo+ICsNCj4gKwlpZiAoaG9zdCkgew0KPiAr
+CQlzcGluX2xvY2tfaXJxc2F2ZSgmaG9zdC0+bG9jaywgZmxhZ3MpOw0KPiArCQlpZiAoc3RhdGUp
+IHsNCj4gKwkJCWRldl9kYmcoJmRldi0+ZGV2LCAiY2FyZCBpbnNlcnRlZC5cbiIpOw0KPiArCQkJ
+aG9zdC0+ZmxhZ3MgJj0gflNESENJX0RFVklDRV9ERUFEOw0KPiArCQl9IGVsc2Ugew0KPiArCQkJ
+ZGV2X2RiZygmZGV2LT5kZXYsICJjYXJkIHJlbW92ZWQuXG4iKTsNCj4gKwkJCWhvc3QtPmZsYWdz
+IHw9IFNESENJX0RFVklDRV9ERUFEOw0KPiArCQl9DQo+ICsJCXRhc2tsZXRfc2NoZWR1bGUoJmhv
+c3QtPmNhcmRfdGFza2xldCk7DQo+ICsJCXNwaW5fdW5sb2NrX2lycXJlc3RvcmUoJmhvc3QtPmxv
+Y2ssIGZsYWdzKTsNCj4gKwl9DQo+ICt9DQo+IA0KPiAvKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKipcDQo+
+ICAqICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgKg0KPiBAQCAtMTExLDYgKzExMSwxMiBAQCBzdGF0aWMgaW50
+IF9fZGV2aW5pdCBzZGhjaV9weGFfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikN
+Cj4gCXB4YS0+cGRhdGEgPSBwZGF0YTsNCj4gCXB4YS0+Y2xrX2VuYWJsZSA9IDA7DQo+IA0KPiAr
+CXB4YS0+b3BzID0ga3phbGxvYyhzaXplb2Yoc3RydWN0IHNkaGNpX29wcyksIEdGUF9LRVJORUwp
+Ow0KPiArCWlmICghcHhhLT5vcHMpIHsNCj4gKwkJcmV0ID0gLUVOT01FTTsNCj4gKwkJZ290byBv
+dXQ7DQo+ICsJfQ0KPiArDQo+IAlweGEtPmNsayA9IGNsa19nZXQoZGV2LCAiUFhBLVNESENMSyIp
+Ow0KPiAJaWYgKElTX0VSUihweGEtPmNsaykpIHsNCj4gCQlkZXZfZXJyKGRldiwgImZhaWxlZCB0
+byBnZXQgaW8gY2xvY2tcbiIpOyBAQCAtMTM0LDMyICsxNDAsNDYgQEAgc3RhdGljIGludCBfX2Rl
+dmluaXQgc2RoY2lfcHhhX3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpDQo+IAl9
+DQo+IA0KPiAJaG9zdC0+aHdfbmFtZSA9ICJNTUMiOw0KPiAtCWhvc3QtPm9wcyA9ICZzZGhjaV9w
+eGFfb3BzOw0KPiAJaG9zdC0+aXJxID0gaXJxOw0KPiAJaG9zdC0+cXVpcmtzID0gU0RIQ0lfUVVJ
+UktfQlJPS0VOX0FETUEgfCBTREhDSV9RVUlSS19CUk9LRU5fVElNRU9VVF9WQUw7DQo+IA0KPiAt
+CWlmIChwZGF0YS0+cXVpcmtzKQ0KPiArCWlmIChwZGF0YSAmJiBwZGF0YS0+ZmxhZ3MgJiBQWEFf
+RkxBR19DQVJEX1BFUk1BTkVOVCkgew0KPiArCQkvKiBvbi1jaGlwIGRldmljZSAqLw0KPiArCQlo
+b3N0LT5xdWlya3MgfD0gU0RIQ0lfUVVJUktfQlJPS0VOX0NBUkRfREVURUNUSU9OOw0KPiArCQlo
+b3N0LT5tbWMtPmNhcHMgfD0gTU1DX0NBUF9OT05SRU1PVkFCTEU7DQo+ICsJfQ0KPiArDQo+ICsJ
+aWYgKHBkYXRhICYmIHBkYXRhLT5xdWlya3MpDQo+IAkJaG9zdC0+cXVpcmtzIHw9IHBkYXRhLT5x
+dWlya3M7DQo+IA0KPiAJLyogSWYgc2xvdCBkZXNpZ24gc3VwcG9ydHMgOCBiaXQgZGF0YSwgaW5k
+aWNhdGUgdGhpcyB0byBNTUMuICovDQo+IAlpZiAocGRhdGEtPmZsYWdzICYgUFhBX0ZMQUdfU0Rf
+OF9CSVRfQ0FQQUJMRV9TTE9UKQ0KPiAJCWhvc3QtPm1tYy0+Y2FwcyB8PSBNTUNfQ0FQXzhfQklU
+X0RBVEE7DQo+IA0KPiArCWlmIChwZGF0YSAmJiBwZGF0YS0+c29jX3NldF9vcHMpDQo+ICsJCXBk
+YXRhLT5zb2Nfc2V0X29wcyhweGEpOw0KPiArDQo+ICsJcHhhLT5vcHMtPnNldF9jbG9jayA9IHNl
+dF9jbG9jazsNCj4gKwlob3N0LT5vcHMgPSBweGEtPm9wczsNCj4gKw0KPiAJcmV0ID0gc2RoY2lf
+YWRkX2hvc3QoaG9zdCk7DQo+IAlpZiAocmV0KSB7DQo+IAkJZGV2X2VycigmcGRldi0+ZGV2LCAi
+ZmFpbGVkIHRvIGFkZCBob3N0XG4iKTsNCj4gCQlnb3RvIG91dDsNCj4gCX0NCj4gDQo+IC0JaWYg
+KHB4YS0+cGRhdGEtPm1heF9zcGVlZCkNCj4gLQkJaG9zdC0+bW1jLT5mX21heCA9IHB4YS0+cGRh
+dGEtPm1heF9zcGVlZDsNCj4gKwlpZiAocGRhdGEgJiYgcGRhdGEtPm1heF9zcGVlZCkNCj4gKwkJ
+aG9zdC0+bW1jLT5mX21heCA9IHBkYXRhLT5tYXhfc3BlZWQ7DQo+IA0KPiArCWlmIChwZGF0YSAm
+JiBwZGF0YS0+ZXh0X2NkX2luaXQpDQo+ICsJCXBkYXRhLT5leHRfY2RfaW5pdCgmc2RoY2lfcHhh
+X25vdGlmeV9jaGFuZ2UsIHBkYXRhKTsNCj4gCXBsYXRmb3JtX3NldF9kcnZkYXRhKHBkZXYsIGhv
+c3QpOw0KPiANCj4gCXJldHVybiAwOw0KPiBvdXQ6DQo+IAlpZiAoaG9zdCkgew0KPiAJCWNsa19w
+dXQocHhhLT5jbGspOw0KPiArCQlrZnJlZShweGEtPm9wcyk7DQo+IAkJaWYgKGhvc3QtPmlvYWRk
+cikNCj4gCQkJaW91bm1hcChob3N0LT5pb2FkZHIpOw0KPiAJCWlmIChweGEtPnJlcykNCj4gQEAg
+LTE3MywxOCArMTkzLDIzIEBAIG91dDoNCj4gDQo+IHN0YXRpYyBpbnQgX19kZXZleGl0IHNkaGNp
+X3B4YV9yZW1vdmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikgIHsNCj4gKwlzdHJ1Y3Qg
+c2RoY2lfcHhhX3BsYXRkYXRhICpwZGF0YSA9IHBkZXYtPmRldi5wbGF0Zm9ybV9kYXRhOw0KPiAJ
+c3RydWN0IHNkaGNpX2hvc3QgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShwZGV2KTsNCj4g
+CXN0cnVjdCBzZGhjaV9weGEgKnB4YSA9IHNkaGNpX3ByaXYoaG9zdCk7DQo+IAlpbnQgZGVhZCA9
+IDA7DQo+IAl1MzIgc2NyYXRjaDsNCj4gDQo+IAlpZiAoaG9zdCkgew0KPiArCQlpZiAocGRhdGEg
+JiYgcGRhdGEtPmV4dF9jZF9jbGVhbnVwKQ0KPiArCQkJcGRhdGEtPmV4dF9jZF9jbGVhbnVwKCZz
+ZGhjaV9weGFfbm90aWZ5X2NoYW5nZSwgcGRhdGEpOw0KPiArDQo+IAkJc2NyYXRjaCA9IHJlYWRs
+KGhvc3QtPmlvYWRkciArIFNESENJX0lOVF9TVEFUVVMpOw0KPiAJCWlmIChzY3JhdGNoID09ICh1
+MzIpLTEpDQo+IAkJCWRlYWQgPSAxOw0KPiANCj4gCQlzZGhjaV9yZW1vdmVfaG9zdChob3N0LCBk
+ZWFkKTsNCj4gDQo+ICsJCWtmcmVlKHB4YS0+b3BzKTsNCj4gCQlpZiAoaG9zdC0+aW9hZGRyKQ0K
+PiAJCQlpb3VubWFwKGhvc3QtPmlvYWRkcik7DQo+IAkJaWYgKHB4YS0+cmVzKQ0KPiAtLQ0KPiAx
+LjcuMC40DQoNCg==
