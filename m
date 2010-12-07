@@ -1,171 +1,148 @@
-From: Raymond Wu <xywu@marvell.com>
-Subject: RE: [PATCH 2/2] sdhci-pxa add call back interface to share sdhci-pxa
-Date: Mon, 6 Dec 2010 21:56:34 -0800
-Message-ID: <83185AA24C678642A07282B8BB1340B613509C65CA@sc-vexch3.marvell.com>
-References: <AANLkTi=ECyTAPntMfp_F4Kp2A3UCntLxyWJcbpS3WFP3@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+From: Sahitya Tummala <stummala@codeaurora.org>
+Subject: [PATCH 1/5] mmc: msm_sdcc: Fix possible circular locking dependency warning
+Date: Tue,  7 Dec 2010 16:25:12 +0530
+Message-ID: <1291719316-23948-1-git-send-email-stummala@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:42262 "HELO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1750754Ab0LGGL7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2010 01:11:59 -0500
-In-Reply-To: <AANLkTi=ECyTAPntMfp_F4Kp2A3UCntLxyWJcbpS3WFP3@mail.gmail.com>
-Content-Language: en-US
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:37145 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751856Ab0LGKzs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2010 05:55:48 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Eric Miao <eric.y.miao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, "niej0001@gmail.com" <niej0001@gmail.com>, Philip Rakity <prakity@marvell.com>, Mark Brown <markb@marvell.com>, Jun Nie <njun@marvell.com>
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: san@google.com, linux-arm-msm@vger.kernel.org, Sahitya Tummala <stummala@codeaurora.org>
 
-SGksDQoNClRoaXMgcGF0Y2ggaXMgdmVyaWZpZWQgYnk6IFJheW1vbmQgV3UoeHl3dUBtYXJ2ZWxs
-LmNvbSkgb24gcHhhOTU1IFNBQVJCIHBsYXRmb3JtLg0KDQpUaGFua3MsDQpSYXltb25kDQoNCg0K
-LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IHpoYW5nZmVpIGdhbyBbbWFpbHRvOnpo
-YW5nZmVpLmdhb0BnbWFpbC5jb21dIA0KU2VudDogMjAxMMTqMTLUwjPI1SAxNDozMQ0KVG86IGxp
-bnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcNCkNjOiBDaHJpcyBCYWxsOyBFcmljIE1pYW87IEhhb2pp
-YW4gWmh1YW5nOyBuaWVqMDAwMUBnbWFpbC5jb207IFBoaWxpcCBSYWtpdHk7IE1hcmsgQnJvd247
-IFJheW1vbmQgV3U7IEp1biBOaWUNClN1YmplY3Q6IFtQQVRDSCAyLzJdIHNkaGNpLXB4YSBhZGQg
-Y2FsbCBiYWNrIGludGVyZmFjZSB0byBzaGFyZSBzZGhjaS1weGENCg0KRnJvbSBmYjU5MjdhZmFj
-N2NiYjQ0ODA1MDkzODE2YmVhNTFkZGUzM2RhMWU1IE1vbiBTZXAgMTcgMDA6MDA6MDAgMjAwMQ0K
-RnJvbTogWmhhbmdmZWkgR2FvIDx6aGFuZ2ZlaS5nYW9AbWFydmVsbC5jb20+DQpEYXRlOiBUdWUs
-IDMwIE5vdiAyMDEwIDA1OjQzOjI5IC0wNTAwDQpTdWJqZWN0OiBbUEFUQ0ggMi8yXSBzZGhjaS1w
-eGE6IGFkZCBjYWxsIGJhY2sgaW50ZXJmYWNlIHRvIHNoYXJlIHNkaGNpLXB4YQ0KDQoJQ2FsbCBi
-YWNrIGZ1bmN0aW9ucyBpcyBhZGRlZCB0byBzdXBwb3J0IG1tcDIsIHB4YTkxMCwgcHhhMTY4IGFu
-ZCBweGE5NTUNCg0KU2lnbmVkLW9mZi1ieTogWmhhbmdmZWkgR2FvIDx6aGFuZ2ZlaS5nYW9AbWFy
-dmVsbC5jb20+DQpDQzogUmF5bW9uZFd1IDx4eXd1QG1hcnZlbGwuY29tPg0KQ0M6IEp1biBOaWUg
-PG5qdW5AbWFydmVsbC5jb20+DQpDQzogUGhpbGlwIFJha2l0eSA8cHJha2l0eUBtYXJ2ZWxsLmNv
-bT4NCi0tLQ0KIGFyY2gvYXJtL3BsYXQtcHhhL2luY2x1ZGUvcGxhdC9zZGhjaS5oIHwgICA0NCAr
-KysrKysrKysrKysrKysrKw0KIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcHhhLmMgICAgICAgICAg
-IHwgICA4MyArKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLQ0KIDIgZmlsZXMgY2hhbmdl
-ZCwgOTggaW5zZXJ0aW9ucygrKSwgMjkgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9hcmNo
-L2FybS9wbGF0LXB4YS9pbmNsdWRlL3BsYXQvc2RoY2kuaA0KYi9hcmNoL2FybS9wbGF0LXB4YS9p
-bmNsdWRlL3BsYXQvc2RoY2kuaA0KaW5kZXggMWFiMzMyZS4uNGNlM2IwNSAxMDA2NDQNCi0tLSBh
-L2FyY2gvYXJtL3BsYXQtcHhhL2luY2x1ZGUvcGxhdC9zZGhjaS5oDQorKysgYi9hcmNoL2FybS9w
-bGF0LXB4YS9pbmNsdWRlL3BsYXQvc2RoY2kuaA0KQEAgLTEzLDkgKzEzLDE0IEBADQogI2lmbmRl
-ZiBfX1BMQVRfUFhBX1NESENJX0gNCiAjZGVmaW5lIF9fUExBVF9QWEFfU0RIQ0lfSA0KDQorI2lu
-Y2x1ZGUgPGxpbnV4L21tYy9zZGhjaS5oPg0KKyNpbmNsdWRlIDxsaW51eC9wbGF0Zm9ybV9kZXZp
-Y2UuaD4NCisNCiAvKiBweGEgc3BlY2lmaWMgZmxhZyAqLw0KIC8qIFJlcXVpcmUgY2xvY2sgZnJl
-ZSBydW5uaW5nICovDQogI2RlZmluZSBQWEFfRkxBR19ESVNBQkxFX0NMT0NLX0dBVElORyAoMTw8
-MCkNCisvKiBjYXJkIGFsd2F5ZXMgd2lyZWQgdG8gaG9zdCwgbGlrZSBvbi1jaGlwIGVtbWMgKi8N
-CisjZGVmaW5lIFBYQV9GTEFHX0NBUkRfUEVSTUFORU5UCSgxPDwxKQ0KDQogLyogQm9hcmQgZGVz
-aWduIHN1cHBvcnRzIDgtYml0IGRhdGEgb24gU0QvU0RJTyBCVVMgKi8gICNkZWZpbmUgUFhBX0ZM
-QUdfU0RfOF9CSVRfQ0FQQUJMRV9TTE9UICgxPDwyKSBAQCAtMjUsMTEgKzMwLDUwIEBADQogICog
-QG1heF9zcGVlZDogdGhlIG1heGltdW0gc3BlZWQgc3VwcG9ydGVkDQogICogQHF1aXJrczogcXVp
-cmtzIG9mIHNwZWNpZmljIGRldmljZQ0KICAqIEBmbGFnczogZmxhZ3MgZm9yIHBsYXRmb3JtIHJl
-cXVpcmVtZW50DQorICogQGNsa19kZWxheV9jeWNsZXM6DQorICoJbW1wMjogZWFjaCBzdGVwIGlz
-IHJvdWdobHkgMTAwcHMsIDViaXRzIHdpZHRoDQorICoJcHhhOTEwICYgcHhhMTY4OiBlYWNoIHN0
-ZXAgaXMgMW5zLCA0Yml0cyB3aWR0aA0KKyAqIEBjbGtfZGVsYXlfZW5hYmxlOiBlbmFibGUgY2xr
-X2RlbGF5IG9yIG5vdCwgdXNlZCBvbiBweGE5MTAgJiBweGExNjgNCisgKiBAY2xrX2RlbGF5X3Nl
-bDogc2VsZWN0IGNsa19kZWxheSwgdXNlZCBvbiBweGE5MTAgJiBweGExNjgNCisgKgkwOiBjaG9v
-c2UgZmVlZGJhY2sgY2xrDQorICoJMTogY2hvb3NlIGZlZWRiYWNrIGNsayArIGRlbGF5IHZhbHVl
-DQorICoJMjogY2hvb3NlIGludGVybmFsIGNsaw0KKyAqIEBleHRfY2RfZ3BpbzogZ3BpbyBwaW4g
-dXNlZCBmb3IgZXh0ZXJuYWwgQ0QgbGluZQ0KKyAqIEBleHRfY2RfZ3Bpb19pbnZlcnQ6IGludmVy
-dCB2YWx1ZXMgZm9yIGV4dGVybmFsIENEIGdwaW8gbGluZQ0KKyAqIEBzb2Nfc2V0X3RpbWluZzog
-c2V0IHRpbWluZyBmb3Igc3BlY2lmaWMgc29jDQorICogQGV4dF9jZF9pbml0OiBJbml0aWFsaXpl
-IGV4dGVybmFsIGNhcmQgZGV0ZWN0IHN1YnN5c3RlbQ0KKyAqIEBleHRfY2RfY2xlYW51cDogQ2xl
-YW51cCBleHRlcm5hbCBjYXJkIGRldGVjdCBzdWJzeXN0ZW0NCisgKiBAc29jX3NldF9vcHM6IG92
-ZXJ3cml0ZSBob3N0IG9wcyB3aXRoIHNvYyBzcGVjaWZpYyBvcHMNCiAgKi8NCitzdHJ1Y3Qgc2Ro
-Y2lfcHhhOw0KIHN0cnVjdCBzZGhjaV9weGFfcGxhdGRhdGEgew0KIAl1bnNpZ25lZCBpbnQJbWF4
-X3NwZWVkOw0KIAl1bnNpZ25lZCBpbnQJcXVpcmtzOw0KIAl1bnNpZ25lZCBpbnQJZmxhZ3M7DQor
-CXVuc2lnbmVkIGludAljbGtfZGVsYXlfY3ljbGVzOw0KKwl1bnNpZ25lZCBpbnQJY2xrX2RlbGF5
-X3NlbDsNCisJdW5zaWduZWQgaW50CWV4dF9jZF9ncGlvOw0KKwlib29sCQlleHRfY2RfZ3Bpb19p
-bnZlcnQ7DQorCWJvb2wJCWNsa19kZWxheV9lbmFibGU7DQorDQorCXZvaWQgKCpzb2Nfc2V0X3Rp
-bWluZykoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsDQorCQkJc3RydWN0IHNkaGNpX3B4YV9wbGF0
-ZGF0YSAqcGRhdGEpOw0KKwlpbnQgKCpleHRfY2RfaW5pdCkodm9pZCAoKm5vdGlmeV9mdW5jKShz
-dHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpkZXYsDQorCQkJCQkJICAgaW50IHN0YXRlKSwgdm9pZCAq
-ZGF0YSk7DQorCWludCAoKmV4dF9jZF9jbGVhbnVwKSh2b2lkICgqbm90aWZ5X2Z1bmMpKHN0cnVj
-dCBwbGF0Zm9ybV9kZXZpY2UgKmRldiwNCisJCQkJCQkgICAgICBpbnQgc3RhdGUpLCB2b2lkICpk
-YXRhKTsNCisJdm9pZCAoKnNvY19zZXRfb3BzKShzdHJ1Y3Qgc2RoY2lfcHhhICpweGEpOyB9Ow0K
-Kw0KK3N0cnVjdCBzZGhjaV9weGEgew0KKwlzdHJ1Y3Qgc2RoY2lfaG9zdAkJKmhvc3Q7DQorCXN0
-cnVjdCBzZGhjaV9weGFfcGxhdGRhdGEJKnBkYXRhOw0KKwlzdHJ1Y3QgY2xrCQkJKmNsazsNCisJ
-c3RydWN0IHJlc291cmNlCQkJKnJlczsNCisJc3RydWN0IHNkaGNpX29wcwkJKm9wczsNCisNCisJ
-dTgJY2xrX2VuYWJsZTsNCisJdTgJcG93ZXJfbW9kZTsNCiB9Ow0KDQogI2VuZGlmIC8qIF9fUExB
-VF9QWEFfU0RIQ0lfSCAqLw0KZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcHhh
-LmMgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXB4YS5jIGluZGV4IDVhNjEyMDguLmY3OWRjY2Yg
-MTAwNjQ0DQotLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXB4YS5jDQorKysgYi9kcml2ZXJz
-L21tYy9ob3N0L3NkaGNpLXB4YS5jDQpAQCAtMjQsMzIgKzI0LDIyIEBADQogI2luY2x1ZGUgPGxp
-bnV4L2Nsay5oPg0KICNpbmNsdWRlIDxsaW51eC9pby5oPg0KICNpbmNsdWRlIDxsaW51eC9lcnIu
-aD4NCisjaW5jbHVkZSA8bGludXgvc2xhYi5oPg0KICNpbmNsdWRlIDxwbGF0L3NkaGNpLmg+DQog
-I2luY2x1ZGUgInNkaGNpLmgiDQoNCiAjZGVmaW5lIERSSVZFUl9OQU1FCSJzZGhjaS1weGEiDQoN
-Ci0jZGVmaW5lIFNEX0ZJRk9fUEFSQU0JCTB4MTA0DQotI2RlZmluZSBESVNfUEFEX1NEX0NMS19H
-QVRFCTB4NDAwDQotDQotc3RydWN0IHNkaGNpX3B4YSB7DQotCXN0cnVjdCBzZGhjaV9ob3N0CQkq
-aG9zdDsNCi0Jc3RydWN0IHNkaGNpX3B4YV9wbGF0ZGF0YQkqcGRhdGE7DQotCXN0cnVjdCBjbGsJ
-CQkqY2xrOw0KLQlzdHJ1Y3QgcmVzb3VyY2UJCQkqcmVzOw0KLQ0KLQl1OCBjbGtfZW5hYmxlOw0K
-LX07DQotDQogLyoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqXA0KICAqICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKg0K
-ICAqIFNESENJIGNvcmUgY2FsbGJhY2tzICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgKg0KICAqICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKg0KIFwqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKi8NCisNCiBzdGF0aWMgdm9pZCBzZXRfY2xvY2soc3RydWN0IHNkaGNpX2hv
-c3QgKmhvc3QsIHVuc2lnbmVkIGludCBjbG9jaykgIHsNCiAJc3RydWN0IHNkaGNpX3B4YSAqcHhh
-ID0gc2RoY2lfcHJpdihob3N0KTsNCi0JdTMyIHRtcCA9IDA7DQorCXN0cnVjdCBzZGhjaV9weGFf
-cGxhdGRhdGEgKnBkYXRhID0gcHhhLT5wZGF0YTsNCg0KIAlpZiAoY2xvY2sgPT0gMCkgew0KIAkJ
-aWYgKHB4YS0+Y2xrX2VuYWJsZSkgew0KQEAgLTU3LDIxICs0NywzMSBAQCBzdGF0aWMgdm9pZCBz
-ZXRfY2xvY2soc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHVuc2lnbmVkIGludCBjbG9jaykNCiAJ
-CQlweGEtPmNsa19lbmFibGUgPSAwOw0KIAkJfQ0KIAl9IGVsc2Ugew0KLQkJaWYgKDAgPT0gcHhh
-LT5jbGtfZW5hYmxlKSB7DQotCQkJaWYgKHB4YS0+cGRhdGEtPmZsYWdzICYgUFhBX0ZMQUdfRElT
-QUJMRV9DTE9DS19HQVRJTkcpIHsNCi0JCQkJdG1wID0gcmVhZGwoaG9zdC0+aW9hZGRyICsgU0Rf
-RklGT19QQVJBTSk7DQotCQkJCXRtcCB8PSBESVNfUEFEX1NEX0NMS19HQVRFOw0KLQkJCQl3cml0
-ZWwodG1wLCBob3N0LT5pb2FkZHIgKyBTRF9GSUZPX1BBUkFNKTsNCi0JCQl9DQotCQkJY2xrX2Vu
-YWJsZShweGEtPmNsayk7DQotCQkJcHhhLT5jbGtfZW5hYmxlID0gMTsNCi0JCX0NCisJCWlmIChw
-ZGF0YSAmJiBwZGF0YS0+c29jX3NldF90aW1pbmcpDQorCQkJcGRhdGEtPnNvY19zZXRfdGltaW5n
-KGhvc3QsIHBkYXRhKTsNCisJCWNsa19lbmFibGUocHhhLT5jbGspOw0KKwkJcHhhLT5jbGtfZW5h
-YmxlID0gMTsNCiAJfQ0KIH0NCg0KLXN0YXRpYyBzdHJ1Y3Qgc2RoY2lfb3BzIHNkaGNpX3B4YV9v
-cHMgPSB7DQotCS5zZXRfY2xvY2sgPSBzZXRfY2xvY2ssDQotfTsNCitzdGF0aWMgdm9pZCBzZGhj
-aV9weGFfbm90aWZ5X2NoYW5nZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpkZXYsIGludCANCitz
-dGF0ZSkgew0KKwlzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCA9IHBsYXRmb3JtX2dldF9kcnZkYXRh
-KGRldik7DQorCXVuc2lnbmVkIGxvbmcgZmxhZ3M7DQorDQorCWlmIChob3N0KSB7DQorCQlzcGlu
-X2xvY2tfaXJxc2F2ZSgmaG9zdC0+bG9jaywgZmxhZ3MpOw0KKwkJaWYgKHN0YXRlKSB7DQorCQkJ
-ZGV2X2RiZygmZGV2LT5kZXYsICJjYXJkIGluc2VydGVkLlxuIik7DQorCQkJaG9zdC0+ZmxhZ3Mg
-Jj0gflNESENJX0RFVklDRV9ERUFEOw0KKwkJfSBlbHNlIHsNCisJCQlkZXZfZGJnKCZkZXYtPmRl
-diwgImNhcmQgcmVtb3ZlZC5cbiIpOw0KKwkJCWhvc3QtPmZsYWdzIHw9IFNESENJX0RFVklDRV9E
-RUFEOw0KKwkJfQ0KKwkJdGFza2xldF9zY2hlZHVsZSgmaG9zdC0+Y2FyZF90YXNrbGV0KTsNCisJ
-CXNwaW5fdW5sb2NrX2lycXJlc3RvcmUoJmhvc3QtPmxvY2ssIGZsYWdzKTsNCisJfQ0KK30NCg0K
-IC8qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioqKlwNCiAgKiAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICoNCkBAIC0xMTEs
-NiArMTExLDEyIEBAIHN0YXRpYyBpbnQgX19kZXZpbml0IHNkaGNpX3B4YV9wcm9iZShzdHJ1Y3Qg
-cGxhdGZvcm1fZGV2aWNlICpwZGV2KQ0KIAlweGEtPnBkYXRhID0gcGRhdGE7DQogCXB4YS0+Y2xr
-X2VuYWJsZSA9IDA7DQoNCisJcHhhLT5vcHMgPSBremFsbG9jKHNpemVvZihzdHJ1Y3Qgc2RoY2lf
-b3BzKSwgR0ZQX0tFUk5FTCk7DQorCWlmICghcHhhLT5vcHMpIHsNCisJCXJldCA9IC1FTk9NRU07
-DQorCQlnb3RvIG91dDsNCisJfQ0KKw0KIAlweGEtPmNsayA9IGNsa19nZXQoZGV2LCAiUFhBLVNE
-SENMSyIpOw0KIAlpZiAoSVNfRVJSKHB4YS0+Y2xrKSkgew0KIAkJZGV2X2VycihkZXYsICJmYWls
-ZWQgdG8gZ2V0IGlvIGNsb2NrXG4iKTsgQEAgLTEzNCwzMiArMTQwLDQ2IEBAIHN0YXRpYyBpbnQg
-X19kZXZpbml0IHNkaGNpX3B4YV9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQ0K
-IAl9DQoNCiAJaG9zdC0+aHdfbmFtZSA9ICJNTUMiOw0KLQlob3N0LT5vcHMgPSAmc2RoY2lfcHhh
-X29wczsNCiAJaG9zdC0+aXJxID0gaXJxOw0KIAlob3N0LT5xdWlya3MgPSBTREhDSV9RVUlSS19C
-Uk9LRU5fQURNQSB8IFNESENJX1FVSVJLX0JST0tFTl9USU1FT1VUX1ZBTDsNCg0KLQlpZiAocGRh
-dGEtPnF1aXJrcykNCisJaWYgKHBkYXRhICYmIHBkYXRhLT5mbGFncyAmIFBYQV9GTEFHX0NBUkRf
-UEVSTUFORU5UKSB7DQorCQkvKiBvbi1jaGlwIGRldmljZSAqLw0KKwkJaG9zdC0+cXVpcmtzIHw9
-IFNESENJX1FVSVJLX0JST0tFTl9DQVJEX0RFVEVDVElPTjsNCisJCWhvc3QtPm1tYy0+Y2FwcyB8
-PSBNTUNfQ0FQX05PTlJFTU9WQUJMRTsNCisJfQ0KKw0KKwlpZiAocGRhdGEgJiYgcGRhdGEtPnF1
-aXJrcykNCiAJCWhvc3QtPnF1aXJrcyB8PSBwZGF0YS0+cXVpcmtzOw0KDQogCS8qIElmIHNsb3Qg
-ZGVzaWduIHN1cHBvcnRzIDggYml0IGRhdGEsIGluZGljYXRlIHRoaXMgdG8gTU1DLiAqLw0KIAlp
-ZiAocGRhdGEtPmZsYWdzICYgUFhBX0ZMQUdfU0RfOF9CSVRfQ0FQQUJMRV9TTE9UKQ0KIAkJaG9z
-dC0+bW1jLT5jYXBzIHw9IE1NQ19DQVBfOF9CSVRfREFUQTsNCg0KKwlpZiAocGRhdGEgJiYgcGRh
-dGEtPnNvY19zZXRfb3BzKQ0KKwkJcGRhdGEtPnNvY19zZXRfb3BzKHB4YSk7DQorDQorCXB4YS0+
-b3BzLT5zZXRfY2xvY2sgPSBzZXRfY2xvY2s7DQorCWhvc3QtPm9wcyA9IHB4YS0+b3BzOw0KKw0K
-IAlyZXQgPSBzZGhjaV9hZGRfaG9zdChob3N0KTsNCiAJaWYgKHJldCkgew0KIAkJZGV2X2Vycigm
-cGRldi0+ZGV2LCAiZmFpbGVkIHRvIGFkZCBob3N0XG4iKTsNCiAJCWdvdG8gb3V0Ow0KIAl9DQoN
-Ci0JaWYgKHB4YS0+cGRhdGEtPm1heF9zcGVlZCkNCi0JCWhvc3QtPm1tYy0+Zl9tYXggPSBweGEt
-PnBkYXRhLT5tYXhfc3BlZWQ7DQorCWlmIChwZGF0YSAmJiBwZGF0YS0+bWF4X3NwZWVkKQ0KKwkJ
-aG9zdC0+bW1jLT5mX21heCA9IHBkYXRhLT5tYXhfc3BlZWQ7DQoNCisJaWYgKHBkYXRhICYmIHBk
-YXRhLT5leHRfY2RfaW5pdCkNCisJCXBkYXRhLT5leHRfY2RfaW5pdCgmc2RoY2lfcHhhX25vdGlm
-eV9jaGFuZ2UsIHBkYXRhKTsNCiAJcGxhdGZvcm1fc2V0X2RydmRhdGEocGRldiwgaG9zdCk7DQoN
-CiAJcmV0dXJuIDA7DQogb3V0Og0KIAlpZiAoaG9zdCkgew0KIAkJY2xrX3B1dChweGEtPmNsayk7
-DQorCQlrZnJlZShweGEtPm9wcyk7DQogCQlpZiAoaG9zdC0+aW9hZGRyKQ0KIAkJCWlvdW5tYXAo
-aG9zdC0+aW9hZGRyKTsNCiAJCWlmIChweGEtPnJlcykNCkBAIC0xNzMsMTggKzE5MywyMyBAQCBv
-dXQ6DQoNCiBzdGF0aWMgaW50IF9fZGV2ZXhpdCBzZGhjaV9weGFfcmVtb3ZlKHN0cnVjdCBwbGF0
-Zm9ybV9kZXZpY2UgKnBkZXYpICB7DQorCXN0cnVjdCBzZGhjaV9weGFfcGxhdGRhdGEgKnBkYXRh
-ID0gcGRldi0+ZGV2LnBsYXRmb3JtX2RhdGE7DQogCXN0cnVjdCBzZGhjaV9ob3N0ICpob3N0ID0g
-cGxhdGZvcm1fZ2V0X2RydmRhdGEocGRldik7DQogCXN0cnVjdCBzZGhjaV9weGEgKnB4YSA9IHNk
-aGNpX3ByaXYoaG9zdCk7DQogCWludCBkZWFkID0gMDsNCiAJdTMyIHNjcmF0Y2g7DQoNCiAJaWYg
-KGhvc3QpIHsNCisJCWlmIChwZGF0YSAmJiBwZGF0YS0+ZXh0X2NkX2NsZWFudXApDQorCQkJcGRh
-dGEtPmV4dF9jZF9jbGVhbnVwKCZzZGhjaV9weGFfbm90aWZ5X2NoYW5nZSwgcGRhdGEpOw0KKw0K
-IAkJc2NyYXRjaCA9IHJlYWRsKGhvc3QtPmlvYWRkciArIFNESENJX0lOVF9TVEFUVVMpOw0KIAkJ
-aWYgKHNjcmF0Y2ggPT0gKHUzMiktMSkNCiAJCQlkZWFkID0gMTsNCg0KIAkJc2RoY2lfcmVtb3Zl
-X2hvc3QoaG9zdCwgZGVhZCk7DQoNCisJCWtmcmVlKHB4YS0+b3BzKTsNCiAJCWlmIChob3N0LT5p
-b2FkZHIpDQogCQkJaW91bm1hcChob3N0LT5pb2FkZHIpOw0KIAkJaWYgKHB4YS0+cmVzKQ0KLS0N
-CjEuNy4wLjQNCg==
+In the context of request processing thread, data mover lock is
+acquired after the host lock.  In another context, in the completion
+handler of data mover the locks are acquired in the reverse order,
+resulting in possible circular lock dependency warning. Hence,
+schedule a tasklet to process the dma completion so as to avoid
+nested locks.
+
+Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+---
+ drivers/mmc/host/msm_sdcc.c |   49 +++++++++++++++++++++++++++++--------------
+ drivers/mmc/host/msm_sdcc.h |    3 ++
+ 2 files changed, 36 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
+index 1290d14..b147971 100644
+--- a/drivers/mmc/host/msm_sdcc.c
++++ b/drivers/mmc/host/msm_sdcc.c
+@@ -189,42 +189,40 @@ msmsdcc_dma_exec_func(struct msm_dmov_cmd *cmd)
+ }
+ 
+ static void
+-msmsdcc_dma_complete_func(struct msm_dmov_cmd *cmd,
+-			  unsigned int result,
+-			  struct msm_dmov_errdata *err)
++msmsdcc_dma_complete_tlet(unsigned long data)
+ {
+-	struct msmsdcc_dma_data	*dma_data =
+-		container_of(cmd, struct msmsdcc_dma_data, hdr);
+-	struct msmsdcc_host	*host = dma_data->host;
++	struct msmsdcc_host *host = (struct msmsdcc_host *)data;
+ 	unsigned long		flags;
+ 	struct mmc_request	*mrq;
++	struct msm_dmov_errdata err;
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	host->dma.active = 0;
+ 
++	err = host->dma.err;
+ 	mrq = host->curr.mrq;
+ 	BUG_ON(!mrq);
+ 	WARN_ON(!mrq->data);
+ 
+-	if (!(result & DMOV_RSLT_VALID)) {
++	if (!(host->dma.result & DMOV_RSLT_VALID)) {
+ 		pr_err("msmsdcc: Invalid DataMover result\n");
+ 		goto out;
+ 	}
+ 
+-	if (result & DMOV_RSLT_DONE) {
++	if (host->dma.result & DMOV_RSLT_DONE) {
+ 		host->curr.data_xfered = host->curr.xfer_size;
+ 	} else {
+ 		/* Error or flush  */
+-		if (result & DMOV_RSLT_ERROR)
++		if (host->dma.result & DMOV_RSLT_ERROR)
+ 			pr_err("%s: DMA error (0x%.8x)\n",
+-			       mmc_hostname(host->mmc), result);
+-		if (result & DMOV_RSLT_FLUSH)
++			       mmc_hostname(host->mmc), host->dma.result);
++		if (host->dma.result & DMOV_RSLT_FLUSH)
+ 			pr_err("%s: DMA channel flushed (0x%.8x)\n",
+-			       mmc_hostname(host->mmc), result);
+-		if (err)
+-			pr_err("Flush data: %.8x %.8x %.8x %.8x %.8x %.8x\n",
+-			       err->flush[0], err->flush[1], err->flush[2],
+-			       err->flush[3], err->flush[4], err->flush[5]);
++			       mmc_hostname(host->mmc), host->dma.result);
++
++		pr_err("Flush data: %.8x %.8x %.8x %.8x %.8x %.8x\n",
++		       err.flush[0], err.flush[1], err.flush[2],
++		       err.flush[3], err.flush[4], err.flush[5]);
+ 		if (!mrq->data->error)
+ 			mrq->data->error = -EIO;
+ 	}
+@@ -273,6 +271,22 @@ out:
+ 	return;
+ }
+ 
++static void
++msmsdcc_dma_complete_func(struct msm_dmov_cmd *cmd,
++			  unsigned int result,
++			  struct msm_dmov_errdata *err)
++{
++	struct msmsdcc_dma_data	*dma_data =
++		container_of(cmd, struct msmsdcc_dma_data, hdr);
++	struct msmsdcc_host *host = dma_data->host;
++
++	dma_data->result = result;
++	if (err)
++		memcpy(&dma_data->err, err, sizeof(struct msm_dmov_errdata));
++
++	tasklet_schedule(&host->dma_tlet);
++}
++
+ static int validate_dma(struct msmsdcc_host *host, struct mmc_data *data)
+ {
+ 	if (host->dma.channel == -1)
+@@ -1118,6 +1132,9 @@ msmsdcc_probe(struct platform_device *pdev)
+ 	host->dmares = dmares;
+ 	spin_lock_init(&host->lock);
+ 
++	tasklet_init(&host->dma_tlet, msmsdcc_dma_complete_tlet,
++			(unsigned long)host);
++
+ 	/*
+ 	 * Setup DMA
+ 	 */
+diff --git a/drivers/mmc/host/msm_sdcc.h b/drivers/mmc/host/msm_sdcc.h
+index ff2b0f7..996990d 100644
+--- a/drivers/mmc/host/msm_sdcc.h
++++ b/drivers/mmc/host/msm_sdcc.h
+@@ -172,6 +172,8 @@ struct msmsdcc_dma_data {
+ 	struct msmsdcc_host		*host;
+ 	int				busy; /* Set if DM is busy */
+ 	int				active;
++	unsigned int			result;
++	struct msm_dmov_errdata		err;
+ };
+ 
+ struct msmsdcc_pio_data {
+@@ -235,6 +237,7 @@ struct msmsdcc_host {
+ 	int			cmdpoll;
+ 	struct msmsdcc_stats	stats;
+ 
++	struct tasklet_struct	dma_tlet;
+ 	/* Command parameters */
+ 	unsigned int		cmd_timeout;
+ 	unsigned int		cmd_pio_irqmask;
+-- 
+1.7.1
+
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
