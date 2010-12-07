@@ -1,21 +1,22 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH V2 2/3] sdhci: support hardware clock gating in the SD layer
-Date: Tue, 7 Dec 2010 09:56:46 -0800
-Message-ID: <8EC2F44E-E11C-4553-AC5F-E8BAE49B3A59@marvell.com>
+Subject: [PATCH V2 3/3] sdhci: support H/W clock gating in Marvell PXA driver
+Date: Tue, 7 Dec 2010 09:56:49 -0800
+Message-ID: <192979DE-DB3E-467B-BD5B-B52049248CC6@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:57550 "HELO
+Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:57598 "HELO
 	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751727Ab0LGSAi convert rfc822-to-8bit
+	by vger.kernel.org with SMTP id S1751808Ab0LGSAo convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Dec 2010 13:00:38 -0500
+	Tue, 7 Dec 2010 13:00:44 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Cc: Nicolas Pitre <nico@fluxnic.net>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>
+
 
 Define callback (platform_hw_clk_gate) that is called when H/W clock gating
 is defined. The adaptation layer is responsible for enabling hw clock
