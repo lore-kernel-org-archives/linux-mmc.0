@@ -1,63 +1,70 @@
-From: Sahitya Tummala <stummala@codeaurora.org>
-Subject: [PATCH 4/5] mmc: msm_sdcc: Fix bug in PIO mode when data size is not word aligned
-Date: Tue,  7 Dec 2010 16:25:15 +0530
-Message-ID: <1291719316-23948-4-git-send-email-stummala@codeaurora.org>
-References: <1291719316-23948-1-git-send-email-stummala@codeaurora.org>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATVH v3 0/3]mmc: set a suitable max_discard_sectors value for
+ HC
+Date: Tue, 7 Dec 2010 20:06:15 +0800
+Message-ID: <5D8008F58939784290FAB48F54975198320B3E4E71@shsmsx502.ccr.corp.intel.com>
+References: <20101202112526.GA10358@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:3776 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751856Ab0LGK4L (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2010 05:56:11 -0500
-In-Reply-To: <1291719316-23948-1-git-send-email-stummala@codeaurora.org>
+Received: from mga01.intel.com ([192.55.52.88]:62204 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751142Ab0LGMGk convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2010 07:06:40 -0500
+In-Reply-To: <20101202112526.GA10358@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: san@google.com, linux-arm-msm@vger.kernel.org, Sahitya Tummala <stummala@codeaurora.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arjan@linux.intel.com" <arjan@linux.intel.com>, "alan@linux.intel.com" <alan@linux.intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>, "Mai, Leonard" <leonard.mai@intel.com>, Wolfram Sang <w.sang@pengutronix.de>
 
-The current code for PIO doesn't transfer whole data when data size
-is not in multiple of 4 bytes. The last few bytes are not written to
-the card resulting in no DATAEND interrupt from SDCC. This patch
-allows data transfer for non-aligned data size in PIO mode.
+Hi all,
+Can these patches be accepted? My SDHCI host controller really needs these patches to use Trim/Erase feature.
+If anyone has concern about these patches, do please let me know and I would like to fix them. Thanks.
 
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
----
- drivers/mmc/host/msm_sdcc.c |    8 ++++++--
- 1 files changed, 6 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
-index b5cca8c..355d799 100644
---- a/drivers/mmc/host/msm_sdcc.c
-+++ b/drivers/mmc/host/msm_sdcc.c
-@@ -613,6 +613,9 @@ msmsdcc_pio_read(struct msmsdcc_host *host, char *buffer, unsigned int remain)
- 	uint32_t	*ptr = (uint32_t *) buffer;
- 	int		count = 0;
- 
-+	if (remain % 4)
-+		remain = ((remain >> 2) + 1) << 2;
-+
- 	while (msmsdcc_readl(host, MMCISTATUS) & MCI_RXDATAAVLBL) {
- 		*ptr = msmsdcc_readl(host, MMCIFIFO + (count % MCI_FIFOSIZE));
- 		ptr++;
-@@ -633,13 +636,14 @@ msmsdcc_pio_write(struct msmsdcc_host *host, char *buffer,
- 	char *ptr = buffer;
- 
- 	do {
--		unsigned int count, maxcnt;
-+		unsigned int count, maxcnt, sz;
- 
- 		maxcnt = status & MCI_TXFIFOEMPTY ? MCI_FIFOSIZE :
- 						    MCI_FIFOHALFSIZE;
- 		count = min(remain, maxcnt);
- 
--		writesl(base + MMCIFIFO, ptr, count >> 2);
-+		sz = count % 4 ? (count >> 2) + 1 : (count >> 2);
-+		writesl(base + MMCIFIFO, ptr, sz);
- 		ptr += count;
- 		remain -= count;
- 
--- 
-1.7.1
-
---
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org
+> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
+> Sent: Thursday, December 02, 2010 7:25 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: linux-kernel@vger.kernel.org; cjb@laptop.org; arjan@linux.intel.com;
+> alan@linux.intel.com; akpm@linux-foundation.org; adrian.hunter@nokia.com
+> Subject: [PATVH v3 0/3]mmc: set a suitable max_discard_sectors value for HC
+> 
+> Hi,
+> 	This is the version 3 patch which set a suitable max_discard_sectors
+> 	value for SDHCI host controller. In this patch, a new quirk is added for
+> 	such controller.
+> 
+> 	max_discard_sectors is a parameter of MMC driver request queue. This
+> 	value can limit how many sectors will be passed down to host for
+> 	erasing. The original value for this parameter is UINT_MAX which means
+> 	there is no limitation for the count of sectors to pass down for
+> 	erasing.
+> 
+> 	But some SDHCI host controller cannot erase too many sectors at one
+> 	time. It may generate a timeout interrupt since the time erasing used is
+> 	longer than the timeout time host can wait.
+> 
+> 	So these patches add a new quirk for such SDHCI host controller and let
+> 	it erase only signle eraseblock each time. This will be safe for such
+> 	SDHCI host to use.
+> 
+> 	patch1: add a new quirk for SDHCI host controller. Also add a new
+> 	routine mmc_set_discard_limit which is used to set max_discard_sectors
+> 	value for such SDHCI host controller.
+> 	patch2: set timeout control register for such SDHCI host controller.
+> 	patch3: add this quirk for MFLD SDHCI host controller.
+> 
+> 	Change-log:
+> 	patch1: let mmc_set_discard_limit can return value UINT_MAX.
+> 	patch2: no change.
+> 	patch3: no change.
+> 
+> Thanks
+> Chuanxiao
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
