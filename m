@@ -1,185 +1,68 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH V3 3/3 ] mmc: add support for H/W clock gating of SD
- controller (resend)
-Date: Tue, 7 Dec 2010 18:50:50 -0800
-Message-ID: <A48DB098-1757-456E-A506-6E935144D645@marvell.com>
-References: <5017B261-76AC-428D-BAC2-8E1BBEB09A49@marvell.com>
- <20101208001618.GA3338@void.printf.net>
- <4024F858-A92E-4DCC-8615-528BF48939D2@marvell.com>
- <AANLkTimqaiHg6xYOquftumB=ciK+YpVkbfP877HimyHP@mail.gmail.com>
+Subject: Re: working around a Marvell wifi SDIO bug
+Date: Tue, 7 Dec 2010 19:07:44 -0800
+Message-ID: <D5829CF2-04F6-4FDD-A909-B18D41845FCA@marvell.com>
+References: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>
+ <AANLkTinPbGcxOU8w_Wy3YVe-QOYpmQm+K7sgRHd-K2vp@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:43821 "HELO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1752288Ab0LHCzf convert rfc822-to-8bit
+Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:56241 "HELO
+	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753177Ab0LHDKT convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Dec 2010 21:55:35 -0500
-In-Reply-To: <AANLkTimqaiHg6xYOquftumB=ciK+YpVkbfP877HimyHP@mail.gmail.com>
+	Tue, 7 Dec 2010 22:10:19 -0500
+In-Reply-To: <AANLkTinPbGcxOU8w_Wy3YVe-QOYpmQm+K7sgRHd-K2vp@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Nicolas Pitre <nico@fluxnic.net>, Mark Brown <markb@marvell.com>, Zhangfei Gao <zgao6@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Daniel Drake <dsd@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
-On Dec 7, 2010, at 5:49 PM, zhangfei gao wrote:
+On Dec 5, 2010, at 6:15 AM, Ohad Ben-Cohen wrote:
 
-> On Tue, Dec 7, 2010 at 7:20 PM, Philip Rakity <prakity@marvell.com> wrote:
+> On Sat, Dec 4, 2010 at 6:22 PM, Daniel Drake <dsd@laptop.org> wrote:
+>> In this case we are not changing current or voltage, we are just
+>> asserting a specific signal to the card. So its messy from the start
+>> (I'd have to invent a list of supported voltages or something).
+> 
+> This is exactly what we do today with the 12xx - we just need to
+> assert a digital signal, which by no means power the device (the
+> voltage value we provide isn't really fed from the gpio signal).
+> 
+> Your case might be slightly different, but still I think it's worth
+> looking into this approach first.
+> 
+>> Another option would be just to hack this into the kernel. Inside
+>> mmc_power_up we'd add something like the following:
 >> 
->> From 4f521dd851066e6f65cbf3b866502a2a308eb980 Mon Sep 17 00:00:00 2001
->> From: Philip Rakity <prakity@marvell.com>
->> Date: Tue, 7 Dec 2010 09:05:39 -0800
->> Subject: [PATCH V2] sdhci: support H/W clock gating in Marvell PXA driver
->> 
->> This code is based on sdhci-pxa in mmc-next on Dec 2, 2010.
->> 
->> If cpu_is_mmp2() then enable MMC capability MMC_CAP_HW_CLOCK_GATING
->> 
->> Code may need changing based on the ongoing work on sdhci-pxa but since that
->> code is NOT in mmc-next better to have something that can work.
->> 
->> This code tested on Marvell Linux
->> 
->> Signed-off-by: Philip Rakity <prakity@marvell.com>
->> Signed-off-by: Mark F. Brown <markb@marvell.com>
->> ---
->>  drivers/mmc/host/sdhci-pxa.c |   33 +++++++++++++++++++++++++++------
->>  1 files changed, 27 insertions(+), 6 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
->> index 5a61208..5cf47fd 100644
->> --- a/drivers/mmc/host/sdhci-pxa.c
->> +++ b/drivers/mmc/host/sdhci-pxa.c
->> @@ -25,6 +25,7 @@
->>  #include <linux/io.h>
->>  #include <linux/err.h>
->>  #include <plat/sdhci.h>
->> +#include <mach/cputype.h>
->>  #include "sdhci.h"
->> 
->>  #define DRIVER_NAME    "sdhci-pxa"
->> @@ -46,10 +47,27 @@ struct sdhci_pxa {
->>  * SDHCI core callbacks                                                      *
->>  *                                                                           *
->>  \*****************************************************************************/
->> +#ifdef CONFIG_MMC_CLKGATE
->> +static void hardware_clk_gating(struct sdhci_host *host)
->> +{
->> +       unsigned short tmp;
->> +       int enable;
->> +
->> +       enable = host->mmc->clk_gated;
->> +       tmp = readw(host->ioaddr + SD_FIFO_PARAM);
->> +
->> +       if (enable)
->> +               tmp &= ~DIS_PAD_SD_CLK_GATE;
->> +       else
->> +               tmp |= DIS_PAD_SD_CLK_GATE;
->> +
->> +       writew(tmp, host->ioaddr + SD_FIFO_PARAM);
->> +}
->> +#endif
->> +
->>  static void set_clock(struct sdhci_host *host, unsigned int clock)
->>  {
->>        struct sdhci_pxa *pxa = sdhci_priv(host);
->> -       u32 tmp = 0;
->> 
->>        if (clock == 0) {
->>                if (pxa->clk_enable) {
->> @@ -58,11 +76,6 @@ static void set_clock(struct sdhci_host *host, unsigned int clock)
->>                }
->>        } else {
->>                if (0 == pxa->clk_enable) {
->> -                       if (pxa->pdata->flags & PXA_FLAG_DISABLE_CLOCK_GATING) {
->> -                               tmp = readl(host->ioaddr + SD_FIFO_PARAM);
->> -                               tmp |= DIS_PAD_SD_CLK_GATE;
->> -                               writel(tmp, host->ioaddr + SD_FIFO_PARAM);
->> -                       }
->>                        clk_enable(pxa->clk);
->>                        pxa->clk_enable = 1;
->>                }
->> @@ -71,6 +84,9 @@ static void set_clock(struct sdhci_host *host, unsigned int clock)
->> 
->>  static struct sdhci_ops sdhci_pxa_ops = {
->>        .set_clock = set_clock,
->> +#ifdef CONFIG_MMC_CLKGATE
->> +       .platform_hw_clk_gate =  hardware_clk_gating,
->> +#endif
->>  };
->> 
->>  /*****************************************************************************\
->> @@ -145,6 +161,11 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
->>        if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
->>                host->mmc->caps |= MMC_CAP_8_BIT_DATA;
->> 
->> +#ifdef CONFIG_MMC_CLKGATE
->> +       if (cpu_is_mmp2())
->> +               host->mmc->caps |= MMC_CAP_HW_CLOCK_GATING;
->> +#endif
->> +
->>        ret = sdhci_add_host(host);
->>        if (ret) {
->>                dev_err(&pdev->dev, "failed to add host\n");
->> --
->> 1.6.0.4
->> 
-> 1. could you pls follow the interface we discussed before in order to
-> prevent the register's difference,  .platform_hw_clk_gate could be
-> overwrited and transfered from platform, example send before, like
-> get_ro.
-
-We are not in agreement with your proposed  implementation.   The callbacks in the 
-driver specific code calling callbacks in the arch code makes the code
-difficult to follow.
-
-It would be much simpler to create 3 entries in kConfig
-one for mmp2
-one for pxa910
-one for pxa168
-then factor out the common code.  The could then be reused and put it into
-a separate file and linked  with the SOC specific code to provide the functionality needed.
-Rather than the approach of moving
-everything into the arch directory.  
-
-It is not clear to us that the approach that you are following can handle the differences
-in silicon between the pxa168 and pxa910/mmp2.
+>> #ifdef CONFIG_OLPC
+>> if (machine_is_olpc())
+>>   olpc_reset_gpio_fixup(host);
+>> #endif
+> 
+> Please don't.
+> 
+> Core code should not contain such machine-specific details (imagine
+> how it would look when other boards will start adding this 8686
+> tweak...).
+> 
+>> Another cleaner option (but perhaps OTT for just 1 user?) would be to
+>> add a notifier chain that is called at this point.
+> 
+> That would obviously work but as you and Nicolas mentioned it's an
+> overkill: we don't really need random users to plug into this hook,
+> and using notifiers will just make the code less readable and harder
+> to debug, so it's better to try to find a solution that fits.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
-> 2. we have to fully verify the hardware clk gating internally before
-> sending the code.
-
-code tested under marvell 2.6.32 linux.
-
->> 
->> 
->> 
->> On Dec 7, 2010, at 4:16 PM, Chris Ball wrote:
->> 
->>> Hi Philip,
->>> 
->>> On Tue, Dec 07, 2010 at 02:46:25PM -0800, Philip Rakity wrote:
->>>> 8 bit width support dependency removed.  Code applies directly to mmc-next
->>>> Patches 2/3 and 3/3 unchanged
->>> 
->>> The submitted patches 2/3 and 3/3 are identical -- is there a separate
->>> third patch that's unsent so far, or did you mean to send only two?
->>> 
->>> Thanks,
->>> 
->>> --
->>> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
->>> One Laptop Per Child
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> 
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> 
+Would a solution toggling the  gpio line for power/reset work when doing a RESET_ALL or
+when power moves to off ?  This code could then be in the driver specific section where
+this might make more sense.
 
