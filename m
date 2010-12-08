@@ -1,68 +1,48 @@
-From: Philip Rakity <prakity@marvell.com>
+From: Nicolas Pitre <nico@fluxnic.net>
 Subject: Re: working around a Marvell wifi SDIO bug
-Date: Tue, 7 Dec 2010 19:07:44 -0800
-Message-ID: <D5829CF2-04F6-4FDD-A909-B18D41845FCA@marvell.com>
+Date: Tue, 07 Dec 2010 23:11:03 -0500 (EST)
+Message-ID: <alpine.LFD.2.00.1012072305370.10437@xanadu.home>
 References: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>
  <AANLkTinPbGcxOU8w_Wy3YVe-QOYpmQm+K7sgRHd-K2vp@mail.gmail.com>
+ <D5829CF2-04F6-4FDD-A909-B18D41845FCA@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:56241 "HELO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753177Ab0LHDKT convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Dec 2010 22:10:19 -0500
-In-Reply-To: <AANLkTinPbGcxOU8w_Wy3YVe-QOYpmQm+K7sgRHd-K2vp@mail.gmail.com>
-Content-Language: en-US
+Received: from relais.videotron.ca ([24.201.245.36]:42511 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750916Ab0LHELF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2010 23:11:05 -0500
+Received: from xanadu.home ([66.130.28.92]) by vl-mo-mrz24.ip.videotron.ca
+ (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
+ with ESMTP id <0LD300AH1CY2JP60@vl-mo-mrz24.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Tue, 07 Dec 2010 23:10:50 -0500 (EST)
+In-reply-to: <D5829CF2-04F6-4FDD-A909-B18D41845FCA@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: Daniel Drake <dsd@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, Daniel Drake <dsd@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+
+On Tue, 7 Dec 2010, Philip Rakity wrote:
+
+> 
+> On Dec 5, 2010, at 6:15 AM, Ohad Ben-Cohen wrote:
+> 
+> > That would obviously work but as you and Nicolas mentioned it's an
+> > overkill: we don't really need random users to plug into this hook,
+> > and using notifiers will just make the code less readable and harder
+> > to debug, so it's better to try to find a solution that fits.
+> 
+> Would a solution toggling the  gpio line for power/reset work when doing a RESET_ALL or
+> when power moves to off ?  This code could then be in the driver specific section where
+> this might make more sense.
+
+The problem is to find a good enough abstraction to keep the driver 
+generic without cluttering it with platform specific implementation 
+details such as which GPIO (if at all) should be flipped to reset the 
+card.  Hence the idea to (ab)use the already existing regulator 
+framework which can accommodate and abstract such details away quite 
+nicely.
 
 
-On Dec 5, 2010, at 6:15 AM, Ohad Ben-Cohen wrote:
-
-> On Sat, Dec 4, 2010 at 6:22 PM, Daniel Drake <dsd@laptop.org> wrote:
->> In this case we are not changing current or voltage, we are just
->> asserting a specific signal to the card. So its messy from the start
->> (I'd have to invent a list of supported voltages or something).
-> 
-> This is exactly what we do today with the 12xx - we just need to
-> assert a digital signal, which by no means power the device (the
-> voltage value we provide isn't really fed from the gpio signal).
-> 
-> Your case might be slightly different, but still I think it's worth
-> looking into this approach first.
-> 
->> Another option would be just to hack this into the kernel. Inside
->> mmc_power_up we'd add something like the following:
->> 
->> #ifdef CONFIG_OLPC
->> if (machine_is_olpc())
->>   olpc_reset_gpio_fixup(host);
->> #endif
-> 
-> Please don't.
-> 
-> Core code should not contain such machine-specific details (imagine
-> how it would look when other boards will start adding this 8686
-> tweak...).
-> 
->> Another cleaner option (but perhaps OTT for just 1 user?) would be to
->> add a notifier chain that is called at this point.
-> 
-> That would obviously work but as you and Nicolas mentioned it's an
-> overkill: we don't really need random users to plug into this hook,
-> and using notifiers will just make the code less readable and harder
-> to debug, so it's better to try to find a solution that fits.
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-Would a solution toggling the  gpio line for power/reset work when doing a RESET_ALL or
-when power moves to off ?  This code could then be in the driver specific section where
-this might make more sense.
-
+Nicolas
