@@ -1,66 +1,57 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: working around a Marvell wifi SDIO bug
-Date: Wed, 8 Dec 2010 22:17:29 +0200
-Message-ID: <AANLkTinSLx6Zk-5orwxb_=f_pinLzc83-i8NmJ7u8KiR@mail.gmail.com>
-References: <AANLkTik2F_-g2beZT5mLe4+XSBL-HUKnceeKqtKQZC=g@mail.gmail.com>
- <AANLkTi=2gcr_5uSQtu+5_35xG4ZhsLRCwWCW+Me-QSLb@mail.gmail.com>
- <AANLkTim3mt=Xcqw1d15bFJ78FM1kRHYAmvNp-=CoYLAW@mail.gmail.com> <AANLkTikht-+K5GkAGeuO0xWB=k9hTX=FUvzA5apsDA6h@mail.gmail.com>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: Re: [PATCH] mmc: Fix re-probing after hibernation
+Date: Thu, 09 Dec 2010 00:04:52 +0200
+Message-ID: <1291845892.5421.2.camel@maxim-laptop>
+References: <1291821839-15088-1-git-send-email-tiwai@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f172.google.com ([209.85.214.172]:47341 "EHLO
-	mail-iw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754037Ab0LHURv convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2010 15:17:51 -0500
-Received: by iwn40 with SMTP id 40so2151407iwn.3
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Dec 2010 12:17:50 -0800 (PST)
-In-Reply-To: <AANLkTikht-+K5GkAGeuO0xWB=k9hTX=FUvzA5apsDA6h@mail.gmail.com>
+Received: from mail-bw0-f45.google.com ([209.85.214.45]:65230 "EHLO
+	mail-bw0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751289Ab0LHWE6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2010 17:04:58 -0500
+In-Reply-To: <1291821839-15088-1-git-send-email-tiwai@suse.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Daniel Drake <dsd@laptop.org>, linux-mmc@vger.kernel.org, njun@marvell.com, binw@marvell.com, Haojian Zhuang <haojian.zhuang@gmail.com>, Philip Rakity <prakity@marvell.com>
+To: Takashi Iwai <tiwai@suse.de>
+Cc: Chris Ball <cjb@laptop.org>, Oliver Neukum <oneukum@suse.de>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, Dec 8, 2010 at 1:13 PM, zhangfei gao <zhangfei.gao@gmail.com> w=
-rote:
-> Thanks for suggestion, do you mean
-> Not use rfkill totally
+On Wed, 2010-12-08 at 16:23 +0100, Takashi Iwai wrote:
+> The commit 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e
+>   mmc: fix all hangs related to mmc/sd card insert/removal during
+>   suspend/resume
+> introduced a bug where the device probing no longer works after
+> hibernation.  This was because the pm notifier expects
+> PM_POST_HIBERNATION call while the system sends PM_POST_RESTORE
+> instead, thus disable_rescan is kept as 1.
+> 
+> Cc: <stable@kernel.org>
+> Signed-off-by: Takashi Iwai <tiwai@suse.de>
+> ---
+>  drivers/mmc/core/core.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 31ae07a..30094f6 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1772,7 +1772,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+>  		break;
+>  
+>  	case PM_POST_SUSPEND:
+> -	case PM_POST_HIBERNATION:
+> +	case PM_POST_RESTORE:
+>  
+>  		spin_lock_irqsave(&host->lock, flags);
+>  		host->rescan_disable = 0;
 
-If you want rfkill functionality, you can still provide it of course,
-but don't give it direct access to the hardware.
+So that was the case....
+Takasi, thank you very much.
 
-You should provide rfkill functionality from within your wlan driver,
-and then when ->set_block() is called, you probably want to take down
-the wlan interface. Essentially pm_runtime_put_sync should be called,
-which will tell SDIO core to power down the chip.
+I always use the 'unsafe resume' thing so I wasn't affected.
 
->, which already integrated into bluetooth,
-> /net/bluetooth/hci_core.c
+Best regards,
+	Maxim Levitsky
 
-Yes, and take a look what it does there - it closes the device - and
-doesn't fiddle with gpios directly.
 
-> Instead, SDIO core introduce new regulator domain "gpio" for example
-> corresponding to gpio handling, =A0like "vmcc" corresponding to real
-> voltage control.
-> SDIO core call regulator_get/regulator_enable/regulator_disalbe("gpio=
-"),
-> to pull up and pull down gpio?
-
-You should make sure that mmc_power_off/mmc_power_up will do whatever
-needed to power off/on your card.
-
-These functions will call into your host controller (via mmc_set_ios)
-and eventually that should trigger your regulator appropriately.
-
->
-> For how to open/close wifi, we used to use rfkill block/unblock wifi,
-> which in fact to pull up/down the reset and power pin.
-> Then how to open/close wifi in this method, using suspend & resume?
-
-To power on/off your card, your driver will just need to call the
-pm_runtime_get/put_* API (see wl1271_sdio_set_power() for reference).
-
->
-> Thanks
->
