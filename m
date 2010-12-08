@@ -1,44 +1,38 @@
-From: Takashi Iwai <tiwai@suse.de>
-Subject: [PATCH] mmc: Fix re-probing after hibernation
-Date: Wed,  8 Dec 2010 16:23:59 +0100
-Message-ID: <1291821839-15088-1-git-send-email-tiwai@suse.de>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] dw_mmc: Add Synopsys DesignWare mmc host driver.
+Date: Wed, 8 Dec 2010 16:07:27 +0000
+Message-ID: <20101208160727.GF10998@console-pimps.org>
+References: <AANLkTi=0RtvsGX+Q3goL3mdG6oKeNidYtiudTZ8ZTpRP@mail.gmail.com> <20101208115510.GD10998@console-pimps.org> <AANLkTi=KqOa-MRQiptCtZGvoafRCgULfE3QFs=hmGpdi@mail.gmail.com> <AANLkTi=PpTi1_JO9Q=ph7w9Jim8iXMf9LbCfmEkWuo-h@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:47594 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755680Ab0LHPYA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Dec 2010 10:24:00 -0500
+Received: from arkanian.console-pimps.org ([212.110.184.194]:37272 "EHLO
+	arkanian.console-pimps.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753496Ab0LHQH2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2010 11:07:28 -0500
+Content-Disposition: inline
+In-Reply-To: <AANLkTi=PpTi1_JO9Q=ph7w9Jim8iXMf9LbCfmEkWuo-h@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Oliver Neukum <oneukum@suse.de>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>
+Cc: Linux Kernel list <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-The commit 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e
-  mmc: fix all hangs related to mmc/sd card insert/removal during
-  suspend/resume
-introduced a bug where the device probing no longer works after
-hibernation.  This was because the pm notifier expects
-PM_POST_HIBERNATION call while the system sends PM_POST_RESTORE
-instead, thus disable_rescan is kept as 1.
+On Wed, Dec 08, 2010 at 02:21:05PM +0000, Will Newton wrote:
+> This adds the mmc host driver for the Synopsys DesignWare mmc
+> host controller, found in a number of embedded SoC designs.
+> 
+> Signed-off-by: Will Newton <will.newton@imgtec.com>
+> ---
+>  drivers/mmc/host/Kconfig   |   15 +
+>  drivers/mmc/host/Makefile  |    1 +
+>  drivers/mmc/host/dw_mmc.c  | 1806 ++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/dw_mmc.h  |  153 ++++
+>  include/linux/mmc/dw_mmc.h |  149 ++++
+>  5 files changed, 2124 insertions(+), 0 deletions(-)
+>  create mode 100644 drivers/mmc/host/dw_mmc.c
+>  create mode 100644 drivers/mmc/host/dw_mmc.h
+>  create mode 100644 include/linux/mmc/dw_mmc.h
+> 
+>  - patch v2: make changes based on review by Matt Fleming.
 
-Cc: <stable@kernel.org>
-Signed-off-by: Takashi Iwai <tiwai@suse.de>
----
- drivers/mmc/core/core.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 31ae07a..30094f6 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1772,7 +1772,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 		break;
- 
- 	case PM_POST_SUSPEND:
--	case PM_POST_HIBERNATION:
-+	case PM_POST_RESTORE:
- 
- 		spin_lock_irqsave(&host->lock, flags);
- 		host->rescan_disable = 0;
--- 
-1.7.3.1
-
+Reviewed-by: Matt Fleming <matt@console-pimps.org>
