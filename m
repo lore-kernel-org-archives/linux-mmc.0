@@ -1,78 +1,49 @@
-From: "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>
-Subject: Re: [PATCH] MMC: omap_hsmmc: enable interface clock before calling mmc_host_enable()
-Date: Wed, 8 Dec 2010 10:29:34 -0600
-Message-ID: <AANLkTikMerO+FFsCJkiX7xa5m51zmKhQbikHDxT8GPK8@mail.gmail.com>
-References: <alpine.DEB.2.00.1012071624270.13430@utopia.booyaka.com>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH V3 3/3 ] mmc: add support for H/W clock gating of SD
+ controller (resend)
+Date: Wed, 08 Dec 2010 12:02:13 -0500 (EST)
+Message-ID: <alpine.LFD.2.00.1012081158490.10437@xanadu.home>
+References: <5017B261-76AC-428D-BAC2-8E1BBEB09A49@marvell.com>
+ <20101208001618.GA3338@void.printf.net>
+ <4024F858-A92E-4DCC-8615-528BF48939D2@marvell.com>
+ <AANLkTimqaiHg6xYOquftumB=ciK+YpVkbfP877HimyHP@mail.gmail.com>
+ <A48DB098-1757-456E-A506-6E935144D645@marvell.com>
+ <AANLkTinAR=shkVRuku+E1spF64J0hLVkwWX+EUp78AMw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:34426 "EHLO
-	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750972Ab0LHQ3f convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Dec 2010 11:29:35 -0500
-In-Reply-To: <alpine.DEB.2.00.1012071624270.13430@utopia.booyaka.com>
+Received: from relais.videotron.ca ([24.201.245.36]:43603 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752241Ab0LHRCO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2010 12:02:14 -0500
+Received: from xanadu.home ([66.130.28.92]) by vl-mo-mrz24.ip.videotron.ca
+ (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
+ with ESMTP id <0LD400JG7CNAON00@vl-mo-mrz24.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Wed, 08 Dec 2010 12:01:59 -0500 (EST)
+In-reply-to: <AANLkTinAR=shkVRuku+E1spF64J0hLVkwWX+EUp78AMw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Walmsley <paul@pwsan.com>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, Kishore Kadiyala <kishore.kadiyala@ti.com>, Tero Kristo <Tero.Kristo@nokia.com>, linux-omap@vger.kernel.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Philip Rakity <prakity@marvell.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Zhangfei Gao <zgao6@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-On Tue, Dec 7, 2010 at 5:27 PM, Paul Walmsley <paul@pwsan.com> wrote:
->
-> In the OMAP HSMMC driver, the code path entered via mmc_host_enable()=
- can
-> include register accesses to the HSMMC IP block. =A0For this to work,=
- both
-> the device interface clock and functional clock need to be enabled be=
-fore
-> mmc_host_enable() is called. =A0However, omap_hsmmc_probe() calls
-> mmc_host_enable() before enabling the device interface clock. =A0This=
- can
-> crash the kernel with:
->
-> Unhandled fault: external abort on non-linefetch (0x1028) at 0xfa09c0=
-14
->
-> Fix by calling mmc_host_enable() after the device interface clock is
-> enabled.
->
-> Signed-off-by: Paul Walmsley <paul@pwsan.com>
-> Cc: Madhusudhan Chikkature Rajashekar <madhu.cr@ti.com>
-> Cc: Adrian Hunter <adrian.hunter@nokia.com>
-> Cc: Kishore Kadiyala <kishore.kadiyala@ti.com>
-> Cc: Tero Kristo <Tero.Kristo@nokia.com>
-> ---
-Acked-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+On Wed, 8 Dec 2010, zhangfei gao wrote:
 
-> =A0drivers/mmc/host/omap_hsmmc.c | =A0 =A06 +++---
-> =A01 files changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
-mmc.c
-> index 5d46021..58a2c5e 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2101,14 +2101,14 @@ static int __init omap_hsmmc_probe(struct pla=
-tform_device *pdev)
-> =A0 =A0 =A0 =A0/* we start off in DISABLED state */
-> =A0 =A0 =A0 =A0host->dpm_state =3D DISABLED;
->
-> - =A0 =A0 =A0 if (mmc_host_enable(host->mmc) !=3D 0) {
-> + =A0 =A0 =A0 if (clk_enable(host->iclk) !=3D 0) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_put(host->iclk);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_put(host->fclk);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto err1;
-> =A0 =A0 =A0 =A0}
->
-> - =A0 =A0 =A0 if (clk_enable(host->iclk) !=3D 0) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_host_disable(host->mmc);
-> + =A0 =A0 =A0 if (mmc_host_enable(host->mmc) !=3D 0) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 clk_disable(host->iclk);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_put(host->iclk);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_put(host->fclk);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto err1;
-> --
-> 1.7.2.3
->
->
+> On Tue, Dec 7, 2010 at 9:50 PM, Philip Rakity <prakity@marvell.com> wrote:
+> >
+> > On Dec 7, 2010, at 5:49 PM, zhangfei gao wrote:
+> >> 2. we have to fully verify the hardware clk gating internally before
+> >> sending the code.
+> >
+> > code tested under marvell 2.6.32 linux.
+> 
+> Thanks a lot, just wander could sdio be supported, since marvell8787
+> requires around 10 clock cycles after cmd53 finished.
+
+SDIO is currently left out as this is not clear if all SDIO cards still 
+can send interrupts if their clock is disabled, or even function 
+properly.  This might have to be a property that the SDIO function 
+drivers could provide to the core.
+
+
+Nicolas
