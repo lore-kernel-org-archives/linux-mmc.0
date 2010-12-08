@@ -1,200 +1,158 @@
 From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v2 1/1]mmc: export enhanced area info to user
-Date: Wed, 8 Dec 2010 19:21:01 +0800
-Message-ID: <20101208112101.GA14565@intel.com>
+Subject: [PATCH v1 1/2]move erase timeout calculation part to mmc.c and sd.c
+Date: Wed, 8 Dec 2010 19:44:52 +0800
+Message-ID: <20101208114452.GA18249@intel.com>
 Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:64562 "EHLO mga09.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:38091 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753232Ab0LHLYc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Dec 2010 06:24:32 -0500
+	id S1751014Ab0LHLsW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Dec 2010 06:48:22 -0500
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, leonard.mai@intel.com
+To: linux-mmc@vger.kernel.org, adrian.hunter@nokia.com
+Cc: linux-kernel@vger.kernel.org
 
-enhanced area is a new feature of eMMC4.41 card. Since the offsize and size
-of enhaneced area is one time programmable register, driver will not set
-them and just read these values out.
+Hi adrian,
+   this 2 patches modify the erase timeout calculation part which added by
+   you. Can you help to review that? Thanks.
 
-So this patch just let host driver read out the enhanced area offsize and
-size if the eMMC card is enabled this feature. And expose these values to
-user space through sys fs for use. The feature enabling should be done in
-manufactory.
 
-Before read out these values, host driver also need set the ERASE_GROUP_DEF
-byte. If this setting this byte failed, driver will set the offsize and size
-to be 0. But not sure whether need to do this.
+Since mmc and sd erase timeout calculation only depends on
+card registers and host clock, it can be done during card
+initialization. No need to calculated the erase timeout value
+for erase/trim command before each time sending.
 
 Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
- drivers/mmc/core/mmc.c   |   92 ++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/card.h |    3 +
- include/linux/mmc/mmc.h  |    3 +
- 3 files changed, 98 insertions(+), 0 deletions(-)
+ drivers/mmc/core/mmc.c   |   50 ++++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sd.c    |   19 +++++++++++++++++
+ include/linux/mmc/card.h |    4 +++
+ 3 files changed, 73 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 77f93c3..1f49778 100644
+index 77f93c3..ee2f196 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -302,6 +302,64 @@ static int mmc_read_ext_csd(struct mmc_card *card)
- 	}
+@@ -118,6 +118,54 @@ static void mmc_set_erase_size(struct mmc_card *card)
+ 	mmc_init_erase(card);
+ }
  
- 	if (card->ext_csd.rev >= 4) {
++static void mmc_set_mmc_erase_timeout(struct mmc_card *card)
++{
++	unsigned int erase_timeout;
++
++	if (card->ext_csd.erase_group_def & 1) {
++		/* High Capacity Erase Group Size uses HC timeouts */
++		card->trim_timeout = card->ext_csd.trim_timeout;
++		card->erase_timeout = card->ext_csd.hc_erase_timeout;
++	} else {
++		/* CSD Erase Group Size uses write timeout */
++		unsigned int mult = (10 << card->csd.r2w_factor);
++		unsigned int timeout_clks = card->csd.tacc_clks * mult;
++		unsigned int timeout_us;
++
++		/* Avoid overflow: e.g. tacc_ns=80000000 mult=1280 */
++		if (card->csd.tacc_ns < 1000000)
++			timeout_us = (card->csd.tacc_ns * mult) / 1000;
++		else
++			timeout_us = (card->csd.tacc_ns / 1000) * mult;
++
 +		/*
-+		 * Enhanced area feature support
-+		 * check whether eMMC card is enabled enhanced area,
-+		 * if so, export enhanced area offset and size to
-+		 * user by adding sysfs interface
++		 * ios.clock is only a target.  The real clock rate might be
++		 * less but not that much less, so fudge it by multiplying by 2.
 +		 */
-+		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
-+				(ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
-+			u8 hc_erase_grp_sz =
-+				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-+			u8 hc_wp_grp_sz =
-+				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-+			 /*
-+			  * FIXME
-+			  * Not sure whether need to enable the
-+			  * ERASE_GROUP_DEF bit
-+			  */
-+			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					EXT_CSD_ERASE_GROUP_DEF, 1);
++		timeout_clks <<= 1;
++		timeout_us += (timeout_clks * 1000) /
++			      (card->host->ios.clock / 1000);
 +
-+			if (err && err != -EBADMSG)
-+				goto out;
++		erase_timeout = timeout_us / 1000;
 +
-+			if (err) {
-+				/*
-+				 * ignore this err, just disable enhanced area
-+				 */
-+				err = 0;
-+				goto next;
-+			}
-+			/* update ext_csd ERASE_GRP_DEF bit */
-+			ext_csd[EXT_CSD_ERASE_GROUP_DEF] = 1;
-+			card->ext_csd.erase_group_def =
-+				ext_csd[EXT_CSD_ERASE_GROUP_DEF];
-+			/*
-+			 * set a flag to identify whether the enhanced
-+			 * user data are enabled
-+			 */
-+			card->ext_csd.enh_data_area_en = 1;
-+			/*
-+			 * caculate the enhanced data area offset, unit B
-+			 */
-+			card->ext_csd.enh_data_area_off =
-+				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
-+				(ext_csd[137] << 8) + ext_csd[136];
-+			if (mmc_card_blockaddr(card))
-+				card->ext_csd.enh_data_area_off <<= 9;
-+			/*
-+			 * caculate the enhanced data area size, unit KB
-+			 */
-+			card->ext_csd.enh_data_area_sz =
-+				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
-+				ext_csd[140];
-+			card->ext_csd.enh_data_area_sz *=
-+				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-+			card->ext_csd.enh_data_area_sz <<= 9;
-+		}
-+next:
- 		card->ext_csd.sec_trim_mult =
- 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
- 		card->ext_csd.sec_erase_mult =
-@@ -336,6 +394,9 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
- MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
- MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
- MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
-+MMC_DEV_ATTR(enhen, "%d\n", card->ext_csd.enh_data_area_en);
-+MMC_DEV_ATTR(enhoff, "0x%llxB\n", card->ext_csd.enh_data_area_off);
-+MMC_DEV_ATTR(enhsz, "0x%xKB\n", card->ext_csd.enh_data_area_sz);
- 
- static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_cid.attr,
-@@ -349,6 +410,9 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_name.attr,
- 	&dev_attr_oemid.attr,
- 	&dev_attr_serial.attr,
-+	&dev_attr_enhen.attr,
-+	&dev_attr_enhoff.attr,
-+	&dev_attr_enhsz.attr,
- 	NULL,
- };
- 
-@@ -472,6 +536,34 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			goto free_card;
- 	}
- 
-+	/*
-+	 * If enh_data_are_en is TRUE, means this init card
-+	 * operation is used to reinit card after a reset
-+	 * ERASE_GRP_DEF register value will be lost everytime
-+	 * after a reset or power off.
-+	 *
-+	 * FIXME
-+	 * Not sure whether need to enable ERASE_GRP_DEF bit.
-+	 */
-+	if (card->ext_csd.enh_data_area_en) {
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				EXT_CSD_ERASE_GROUP_DEF, 1);
++		/*
++		 * Theoretically, the calculation could underflow so round up
++		 * to 1ms in that case.
++		 */
++		if (!erase_timeout)
++			erase_timeout = 1;
 +
-+		if (err && err != -EBADMSG)
-+			goto free_card;
-+
-+		if (err) {
-+			err = 0;
-+			/*
-+			 * Just disable enhanced area off & sz
-+			 * will try to enable ERASE_GROUP_DEF
-+			 * during next time reinit
-+			 */
-+			card->ext_csd.enh_data_area_off = 0;
-+			card->ext_csd.enh_data_area_sz = 0;
-+		}
++		card->trim_timeout = erase_timeout;
++		card->erase_timeout = erase_timeout;
 +	}
 +
- 	if (!oldcard) {
- 		/*
- 		 * Fetch and process extended CSD.
++	/* Multiplier for secure operations */
++	card->sec_trim_timeout = card->erase_timeout *
++		card->ext_csd.sec_trim_mult;
++	card->sec_erase_timeout = card->erase_timeout *
++		card->ext_csd.sec_erase_mult;
++}
++
+ /*
+  * Given a 128-bit response, decode to our card CSD structure.
+  */
+@@ -528,6 +576,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			&& (host->caps & (MMC_CAP_1_2V_DDR)))
+ 				ddr = MMC_1_2V_DDR_MODE;
+ 	}
++	/* Erase/trim timeout depends on CSD, EXT_CSD and host clock */
++	mmc_set_mmc_erase_timeout(card);
+ 
+ 	/*
+ 	 * Activate wide bus and DDR (if supported).
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 49da4df..f9afff7 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -250,6 +250,20 @@ out:
+ 	return err;
+ }
+ 
++static void mmc_set_sd_erase_timeout(struct mmc_card *card)
++{
++	if (card->ssr.erase_timeout)
++		/* Erase timeout specified in SD Status Register (SSR) */
++		card->erase_timeout = card->ssr.erase_timeout;
++	else
++		/*
++		 * Erase timeout not specified in SD Status Register (SSR) so
++		 * use 250ms per write block.
++		 */
++		card->erase_timeout = 250;
++}
++
++
+ /*
+  * Fetches and decodes switch information
+  */
+@@ -624,6 +638,11 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+ 	mmc_set_clock(host, mmc_sd_get_max_clock(card));
+ 
+ 	/*
++	 * Set erase timeout
++	 * */
++	mmc_set_sd_erase_timeout(card);
++
++	/*
+ 	 * Switch to wider bus (if supported).
+ 	 */
+ 	if ((host->caps & MMC_CAP_4_BIT_DATA) &&
 diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 8ce0827..e850a39 100644
+index 8ce0827..e95c770 100644
 --- a/include/linux/mmc/card.h
 +++ b/include/linux/mmc/card.h
-@@ -54,6 +54,9 @@ struct mmc_ext_csd {
- 	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
- 	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
- 	unsigned int		trim_timeout;		/* In milliseconds */
-+	unsigned int		enh_data_area_en; /* enh area enable bit */
-+	loff_t				enh_data_area_off; /* enh area offset */
-+	size_t				enh_data_area_sz; /* enh area size */
- };
+@@ -126,6 +126,10 @@ struct mmc_card {
+  	unsigned int		erase_shift;	/* if erase unit is power 2 */
+  	unsigned int		pref_erase;	/* in sectors */
+  	u8			erased_byte;	/* value of erased bytes */
++	unsigned int	erase_timeout; /* erase timeout value in ms per blk */
++	unsigned int	trim_timeout; /* trim timeout value in ms per blk */
++	unsigned int	sec_erase_timeout; /* sec erase timeout in ms per blk */
++	unsigned int	sec_trim_timeout; /* sec trim timeout in ms per blk */
  
- struct sd_scr {
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 956fbd8..97ca016 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -251,6 +251,8 @@ struct _mmc_csd {
-  * EXT_CSD fields
-  */
- 
-+#define EXT_CSD_PARTITION_ATTRIBUTE 156	/* R/W */
-+#define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
- #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
- #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
- #define EXT_CSD_BUS_WIDTH		183	/* R/W */
-@@ -260,6 +262,7 @@ struct _mmc_csd {
- #define EXT_CSD_CARD_TYPE		196	/* RO */
- #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
- #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
-+#define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
- #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
- #define EXT_CSD_HC_ERASE_GRP_SIZE	224	/* RO */
- #define EXT_CSD_SEC_TRIM_MULT		229	/* RO */
+ 	u32			raw_cid[4];	/* raw card CID */
+ 	u32			raw_csd[4];	/* raw card CSD */
 -- 
 1.6.6.1
 
