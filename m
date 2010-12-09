@@ -1,123 +1,84 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH] mmc: Fix re-probing after hibernation
-Date: Thu, 9 Dec 2010 21:37:24 +0100
-Message-ID: <201012092137.24603.rjw@sisk.pl>
-References: <1291821839-15088-1-git-send-email-tiwai@suse.de> <20101209015303.GB19741@void.printf.net> <s5hlj3z1ksb.wl%tiwai@suse.de>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: subtle pm_runtime_put_sync race and sdio functions
+Date: Fri, 10 Dec 2010 01:37:02 +0200
+Message-ID: <AANLkTi=6fUeDAJut5tZmB+h9qmEt7gZ13UaOqhAW3XE1@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:41816 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754026Ab0LIUiW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Dec 2010 15:38:22 -0500
-In-Reply-To: <s5hlj3z1ksb.wl%tiwai@suse.de>
+Received: from mail-iw0-f172.google.com ([209.85.214.172]:64097 "EHLO
+	mail-iw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756524Ab0LIXhX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2010 18:37:23 -0500
+Received: by iwn40 with SMTP id 40so4257575iwn.3
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Dec 2010 15:37:22 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Takashi Iwai <tiwai@suse.de>
-Cc: Chris Ball <cjb@laptop.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Oliver Neukum <oneukum@suse.de>, Andrew Morton <akpm@linux-foundation.org>, Pavel Machek <pavel@ucw.cz>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-pm@lists.linux-foundation.org
+Cc: linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>
 
-On Thursday, December 09, 2010, Takashi Iwai wrote:
-> At Thu, 9 Dec 2010 01:53:03 +0000,
-> Chris Ball wrote:
-> > 
-> > Hi Takashi,
-> > 
-> > On Wed, Dec 08, 2010 at 04:23:59PM +0100, Takashi Iwai wrote:
-> > > The commit 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e
-> > >   mmc: fix all hangs related to mmc/sd card insert/removal during
-> > >   suspend/resume
-> > > introduced a bug where the device probing no longer works after
-> > > hibernation.  This was because the pm notifier expects
-> > > PM_POST_HIBERNATION call while the system sends PM_POST_RESTORE
-> > > instead, thus disable_rescan is kept as 1.
-> > > 
-> > > Cc: <stable@kernel.org>
-> > > Signed-off-by: Takashi Iwai <tiwai@suse.de>
-> > > ---
-> > >  drivers/mmc/core/core.c |    2 +-
-> > >  1 files changed, 1 insertions(+), 1 deletions(-)
-> > > 
-> > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > > index 31ae07a..30094f6 100644
-> > > --- a/drivers/mmc/core/core.c
-> > > +++ b/drivers/mmc/core/core.c
-> > > @@ -1772,7 +1772,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
-> > >  		break;
-> > >  
-> > >  	case PM_POST_SUSPEND:
-> > > -	case PM_POST_HIBERNATION:
-> > > +	case PM_POST_RESTORE:
-> > >  
-> > >  		spin_lock_irqsave(&host->lock, flags);
-> > >  		host->rescan_disable = 0;
-> > 
-> > Thanks very much for tracking this down!  The code suggests that
-> > POST_RESTORE is only emitted on a *failed* hibernation restore --
-> > from include/linux/notifier.h:
-> > 
-> > /* Hibernation and suspend events */
-> > #define PM_POST_HIBERNATION     0x0002 /* Hibernation finished */
-> > #define PM_POST_SUSPEND         0x0004 /* Suspend finished */
-> > #define PM_POST_RESTORE         0x0006 /* Restore failed */
-> > 
-> > So, this all suggests that we want to add the POST_RESTORE case but
-> > also want to keep the POST_HIBERNATION case.  Do you agree?  Was the 
-> > case you saw of failed probe after hibernation a failed restore from
-> > hibernation image?
-> 
-> Right, I took a look at Documentation/pm/notifiers.txt, and it's
-> clearly written that PM_POST_RESTORE is only for the error case.  But
-> S4 resume succeeded actually on my machine, so it took time to spot
-> out the culprit.
-> 
-> Looking at the code in kernel/power/, this might be the case of
-> user-space suspend.  hibernate.c seems returning PM_POST_HIBERNATION
-> while user.c returns PM_POST_RESTORE after image restoration, and I
-> guess it's a bug of user.c. 
-> 
-> The untested patch is below (sorry I have no corresponding machine
-> at my home.)  Rafael, Pavel, could you check this?
-> 
-> 
-> thanks,
-> 
-> Takashi
-> 
-> ===
-> From 915fda609e02b02e4fc6b944e4432ea1d964adc5 Mon Sep 17 00:00:00 2001
-> From: Takashi Iwai <tiwai@suse.de>
-> Date: Thu, 9 Dec 2010 08:09:21 +0100
-> Subject: [PATCH] PM: Fix PM_POST_* notification with user-space suspend
-> 
-> The user-space hibernation sends a wrong notification after the image
-> restoration because of thinko for the file flag check.  RDONLY
-> corresponds to hibernation and WRONLY to restoration, confusingly.
+When pm_runtime_put_sync() returns, the _put operation is completed,
+and if needed (zero usage_count, children are ignored or their count
+is zero, ->runtime_idle() called pm_runtime_suspend(), no
+runtime_error, no disable_depth, etc...) the device is powered down.
 
-The patch is correct.  I'm taking it to my tree.
+This behavior is sometimes desirable and even required: drivers may
+call pm_runtime_put_sync() and rely on PM core to synchronously power
+down the device.
 
-Thanks,
-Rafael
+This is usually all good, but when we combine this requirement with
+logical sub-devices that cannot be power-managed on their own (e.g.
+SDIO functions), things get a bit racy, since their parent is not
+suspended synchronously (the sub-device is rpm_suspend()'ed
+synchronously, but its parent is pm_request_idle()ed, which is
+asynchronous in nature).
 
+Since drivers might rely on pm_runtime_put_sync() to synchronously
+power down the device, if that doesn't happen, a rapid subsequent
+pm_runtime_get{_sync} might cancel the suspend. This can lead the
+driver, e.g., to reinitialize a device that wasn't powered down, and
+the results can be fatal.
 
-> Signed-off-by: Takashi Iwai <tiwai@suse.de>
-> ---
->  kernel/power/user.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/kernel/power/user.c b/kernel/power/user.c
-> index e819e17..11d92b2 100644
-> --- a/kernel/power/user.c
-> +++ b/kernel/power/user.c
-> @@ -137,7 +137,7 @@ static int snapshot_release(struct inode *inode, struct file *filp)
->  	free_all_swap_pages(data->swap);
->  	if (data->frozen)
->  		thaw_processes();
-> -	pm_notifier_call_chain(data->mode == O_WRONLY ?
-> +	pm_notifier_call_chain(data->mode == O_RDONLY ?
->  			PM_POST_HIBERNATION : PM_POST_RESTORE);
->  	atomic_inc(&snapshot_device_available);
->  
-> 
+One possible solution is to call pm_runtime_idle(parent), instead of
+pm_request_idle(parent), when a no_callbacks device is suspended:
 
+diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
+index 02c652b..d7659d3 100644
+--- a/drivers/base/power/runtime.c
++++ b/drivers/base/power/runtime.c
+@@ -407,7 +407,10 @@ static int rpm_suspend(struct device *dev, int rpmflags)
+        if (parent && !parent->power.ignore_children) {
+                spin_unlock_irq(&dev->power.lock);
+
+-               pm_request_idle(parent);
++               if (dev->power.no_callbacks)
++                       pm_runtime_idle(parent);
++               else
++                       pm_request_idle(parent);
+
+                spin_lock_irq(&dev->power.lock);
+        }
+
+This solution assumes that such sub-devices don't really need to have
+callbacks of their own. It would work for SDIO, since we are
+effectively no_callbacks devices anyway, and it only seems reasonable
+to set SDIO functions as no_callbacks devices.
+
+A different, bolder solution, will always call pm_runtime_idle instead
+of pm_request_idle (see below): when a device is runtime suspended, it
+can't be too bad to immediately send idle notification to its parent,
+too. I'm aware this might not always be desirable, but I'm bringing
+this up even just for the sake of discussion:
+
+diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
+index 02c652b..9719811 100644
+--- a/drivers/base/power/runtime.c
++++ b/drivers/base/power/runtime.c
+@@ -407,7 +407,7 @@ static int rpm_suspend(struct device *dev, int rpmflags)
+        if (parent && !parent->power.ignore_children) {
+                spin_unlock_irq(&dev->power.lock);
+
+-               pm_request_idle(parent);
++               pm_runtime_idle(parent);
+
+                spin_lock_irq(&dev->power.lock);
+        }
