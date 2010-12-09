@@ -1,95 +1,58 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v5 3/4]implemented hardware_reset callback in SDHCI host
-Date: Thu, 9 Dec 2010 20:24:52 +0800
-Message-ID: <20101209122452.GD13236@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Sahitya Tummala <stummala@codeaurora.org>
+Subject: Re: [PATCH V2 1/5] mmc: msm_sdcc: Fix possible circular locking
+ dependency warning
+Date: Thu, 09 Dec 2010 20:51:58 +0530
+Message-ID: <1291908118.21924.69.camel@stummala-linux.in.qualcomm.com>
+References: <1291800787-24757-1-git-send-email-stummala@codeaurora.org>
+	 <1291832726.12568.5.camel@c-dwalke-linux.qualcomm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, akpm@linux-foundation.org, cjb@laptop.org, kmpark@infradead.org, leonard.mai@intel.com
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:29155 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751782Ab0LIPWR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2010 10:22:17 -0500
+In-Reply-To: <1291832726.12568.5.camel@c-dwalke-linux.qualcomm.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Daniel Walker <dwalker@codeaurora.org>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, san@google.com, linux-arm-msm@vger.kernel.org
 
-hardware_reset callback will be used for host to trigger RST_n signal. The
-signal should be triggered by pull some GPIO or use some hardware else. Only
-SDHCI host controller driver can touch such specific hardware. So a new
-callback reset_emmc was added to trigger the reset signal. This patch
-implement hardware_reset callback for sdhci host controller.
+Hi Daniel,
 
-reset_emmc: new callback. sdhci host controller can use GPIO lines or
-something else to trigger reset signal by this callback. Different sdhci
-host controller should implement this separately. So this patch only add
-definition in head file for this callback.
+On Wed, 2010-12-08 at 10:25 -0800, Daniel Walker wrote:
+> On Wed, 2010-12-08 at 15:03 +0530, Sahitya Tummala wrote:
+> > In the context of request processing thread, data mover lock is
+> > acquired after the host lock.  In another context, in the completion
+> > handler of data mover the locks are acquired in the reverse order,
+> > resulting in possible circular lock dependency warning. Hence,
+> > schedule a tasklet to process the dma completion so as to avoid
+> > nested locks.
+> > 
+> 
+> Can you just alter the location where the locks are taken ?
+> 
+> This lock,
+> 
+> spin_lock_irqsave(&host->lock, flags);
+> 
+> seems not fine grained at all .. That lock is just being held over very
+> large sections of code which it doesn't seems like it needs to be. It
+> doesn't appear to be protecting just the data structures.
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- drivers/mmc/host/sdhci.c |   23 +++++++++++++++++++++++
- drivers/mmc/host/sdhci.h |   12 ++++++++++++
- 2 files changed, 35 insertions(+), 0 deletions(-)
+Yes, it seems we are using the lock in this function not just for
+required host data.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 508ea5a..3a0c9b4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1283,11 +1283,34 @@ out:
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
-+/*
-+ *  HW reset callback for eMMC4.4 card
-+ *  In this function, HC will use reset_emmc callback to reset
-+ *  for eMMC4.4 card
-+ *
-+ *  RETURN VALUE:
-+ *  0: reset emmc successfully
-+ *  -ENODEV: no valid hardware to do so
-+ */
-+static int sdhci_hardware_reset(struct mmc_host *mmc)
-+{
-+	int err = 1;
-+	struct sdhci_host *host;
-+
-+	host = mmc_priv(mmc);
-+
-+	if (host->ops && host->ops->reset_emmc)
-+		err = host->ops->reset_emmc(host);
-+
-+	return err;
-+}
-+
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.set_ios	= sdhci_set_ios,
- 	.get_ro		= sdhci_get_ro,
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
-+	.hardware_reset = sdhci_hardware_reset,
- };
- 
- /*****************************************************************************\
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 1efe7dc..2a9b20c 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -221,6 +221,18 @@ struct sdhci_ops {
- 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
- 					     u8 power_mode);
- 	unsigned int    (*get_ro)(struct sdhci_host *host);
-+
-+	/*
-+	 * eMMC card reset callback.
-+	 * This callback can be used by sdhci layer to support eMMC4.4
-+	 * hardware reset feature. In this function, should trigger a
-+	 * RST_n signal to reset eMMC card.
-+	 *
-+	 * return value:
-+	 * 0: successfully reset eMMC card.
-+	 * -ENODEV: no valid hardware to reset eMMC card.
-+	 */
-+	int		(*reset_emmc)(struct sdhci_host *host);
- };
- 
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+But to solve this circular locking issue, it looks like we don't need
+host lock before enqueing the data mover request. I will analyze more
+and confirm.
+
 -- 
-1.6.6.1
+Thanks,
+Sahitya.
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
+Forum.
+
