@@ -1,40 +1,78 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: Add support for JMicron 388 SD/MMC controller
-Date: Thu, 9 Dec 2010 01:38:43 +0000
-Message-ID: <20101209013843.GA19741@void.printf.net>
-References: <s5h7hfk3aap.wl%tiwai@suse.de>
+Subject: Re: [PATCH] mmc: Fix re-probing after hibernation
+Date: Thu, 9 Dec 2010 01:53:03 +0000
+Message-ID: <20101209015303.GB19741@void.printf.net>
+References: <1291821839-15088-1-git-send-email-tiwai@suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:34883 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756452Ab0LIBxG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Dec 2010 20:53:06 -0500
 Content-Disposition: inline
-In-Reply-To: <s5h7hfk3aap.wl%tiwai@suse.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Takashi Iwai <tiwai@suse.de>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Aries Lee <arieslee@jmicron.com>, Wolfram Sang <w.sang@pengutronix.de>
+In-Reply-To: <1291821839-15088-1-git-send-email-tiwai@suse.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Takashi Iwai <tiwai@suse.de>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Oliver Neukum <oneukum@suse.de>, Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
 Hi Takashi,
 
-On Wed, Dec 08, 2010 at 10:04:30AM +0100, Takashi Iwai wrote:
-> JMicron 388 SD/MMC combo controller supports the 1.8V low-voltage for
-> SD, but MMC doesn't work with the low-voltage, resulting in an error
-> at probing.
+On Wed, Dec 08, 2010 at 04:23:59PM +0100, Takashi Iwai wrote:
+> The commit 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e
+>   mmc: fix all hangs related to mmc/sd card insert/removal during
+>   suspend/resume
+> introduced a bug where the device probing no longer works after
+> hibernation.  This was because the pm notifier expects
+> PM_POST_HIBERNATION call while the system sends PM_POST_RESTORE
+> instead, thus disable_rescan is kept as 1.
 > 
-> This patch adds the support for multiple voltage mask per device type,
-> so that SD works with 1.8V while MMC forces 3.3V.  Here new ocr_avail_*
-> fields for each device are introduced, so that the actual OCR mask is
-> switched dynamically.
-> 
-> Also, the restriction of low-voltage in core/sd.c is removed when the
-> bit is allowed explicitly via ocr_avail_sd mask.
-> 
-> This patch was rewritten from scratch based on Aries' original code.
-> 
-> Signed-off-by: Aries Lee <arieslee@jmicron.com>
+> Cc: <stable@kernel.org>
 > Signed-off-by: Takashi Iwai <tiwai@suse.de>
+> ---
+>  drivers/mmc/core/core.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 31ae07a..30094f6 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1772,7 +1772,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+>  		break;
+>  
+>  	case PM_POST_SUSPEND:
+> -	case PM_POST_HIBERNATION:
+> +	case PM_POST_RESTORE:
+>  
+>  		spin_lock_irqsave(&host->lock, flags);
+>  		host->rescan_disable = 0;
 
-Looks good, pushed to mmc-next for .38.  Thanks!
+Thanks very much for tracking this down!  The code suggests that
+POST_RESTORE is only emitted on a *failed* hibernation restore --
+from include/linux/notifier.h:
 
+/* Hibernation and suspend events */
+#define PM_POST_HIBERNATION     0x0002 /* Hibernation finished */
+#define PM_POST_SUSPEND         0x0004 /* Suspend finished */
+#define PM_POST_RESTORE         0x0006 /* Restore failed */
+
+So, this all suggests that we want to add the POST_RESTORE case but
+also want to keep the POST_HIBERNATION case.  Do you agree?  Was the 
+case you saw of failed probe after hibernation a failed restore from
+hibernation image?
+
+By the way, it looks like there are some other drivers which also
+test for POST_HIBERNATION but not POST_RESTORE:
+
+  drivers/media/video/tlg2300/pd-main.c
+  drivers/s390/char/vmwatchdog.c
+  drivers/s390/cio/css.c
+  drivers/staging/brcm80211/brcmfmac/dhd_linux.c
+
+Thanks,
+
+- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
