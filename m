@@ -1,78 +1,123 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] dw_mmc: Add Synopsys DesignWare mmc host driver.
-Date: Thu, 9 Dec 2010 17:46:20 +0000
-Message-ID: <AANLkTi=BXxfNcnhNb6Bd_N3gVpDUMWBCQtZ0d=m9p_sa@mail.gmail.com>
-References: <AANLkTi=0RtvsGX+Q3goL3mdG6oKeNidYtiudTZ8ZTpRP@mail.gmail.com>
-	<20101208115510.GD10998@console-pimps.org>
-	<AANLkTi=KqOa-MRQiptCtZGvoafRCgULfE3QFs=hmGpdi@mail.gmail.com>
-	<AANLkTi=PpTi1_JO9Q=ph7w9Jim8iXMf9LbCfmEkWuo-h@mail.gmail.com>
-	<20101209064751.GA21128@void.printf.net>
-	<AANLkTimMgrawcndvUTYYjq9BGFqs-sbRsZkwVQ0Uvhvb@mail.gmail.com>
-	<20101209160157.GA28586@void.printf.net>
-	<20101209173525.GA29879@void.printf.net>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [PATCH] mmc: Fix re-probing after hibernation
+Date: Thu, 9 Dec 2010 21:37:24 +0100
+Message-ID: <201012092137.24603.rjw@sisk.pl>
+References: <1291821839-15088-1-git-send-email-tiwai@suse.de> <20101209015303.GB19741@void.printf.net> <s5hlj3z1ksb.wl%tiwai@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f45.google.com ([209.85.215.45]:47219 "EHLO
-	mail-ew0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753944Ab0LIRq7 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2010 12:46:59 -0500
-In-Reply-To: <20101209173525.GA29879@void.printf.net>
+Received: from ogre.sisk.pl ([217.79.144.158]:41816 "EHLO ogre.sisk.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754026Ab0LIUiW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Dec 2010 15:38:22 -0500
+In-Reply-To: <s5hlj3z1ksb.wl%tiwai@suse.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Matt Fleming <matt@console-pimps.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Takashi Iwai <tiwai@suse.de>
+Cc: Chris Ball <cjb@laptop.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Oliver Neukum <oneukum@suse.de>, Andrew Morton <akpm@linux-foundation.org>, Pavel Machek <pavel@ucw.cz>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, Dec 9, 2010 at 5:35 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi Andrew,
->
-> On Thu, Dec 09, 2010 at 04:01:57PM +0000, Chris Ball wrote:
->> > > Is there something we could depend on that would stop this drive=
-r being
->> > > presented to everyone, without being far too specific? =A0At the=
- moment
->> > > we'd be making x86 desktop users say whether they have this IP, =
-which
->> > > isn't good. =A0Are the architectures that use this IP already up=
-stream?
->> > > Are they all ARM architectures, for instance?
->> >
->> > I don't know of any architectures upstream that use this IP block.=
- There is an
->> > SoC from NXP that uses this it but it is not upstream:
->> >
->> > http://ics.nxp.com/support/software/lpc313x.bsp.linux/
->> >
->> > The architecture we tested and debugged this driver on is not upst=
-ream either
->> > unfortunately. :-/
->>
->> Okay. =A0I think "depends on ARM" is appropriate for now, and we cou=
-ld
->> expand that later if the block appears in a MIPS SoC or something.
->> Does that work for you?
->
-> Oh, hey, rmk says that he seems to recall that akpm says that if the
-> driver builds on x86 (it does), we should just allow it to be built
-> there too so that it gets build coverage. =A0Andrew, does this still
-> represent your stance?
->
-> I've heard the distro maintainers complain about having to investigat=
-e
-> Kconfig entries for drivers that their users would never possibly use=
-,
-> though, and this certainly falls into that case. =A0Is there somethin=
-g
-> better we can do here, to correctly hide this driver from non-ARM use=
-rs
-> but also make it clear that it can be built if somebody wants to do a
-> mass driver build?
+On Thursday, December 09, 2010, Takashi Iwai wrote:
+> At Thu, 9 Dec 2010 01:53:03 +0000,
+> Chris Ball wrote:
+> > 
+> > Hi Takashi,
+> > 
+> > On Wed, Dec 08, 2010 at 04:23:59PM +0100, Takashi Iwai wrote:
+> > > The commit 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e
+> > >   mmc: fix all hangs related to mmc/sd card insert/removal during
+> > >   suspend/resume
+> > > introduced a bug where the device probing no longer works after
+> > > hibernation.  This was because the pm notifier expects
+> > > PM_POST_HIBERNATION call while the system sends PM_POST_RESTORE
+> > > instead, thus disable_rescan is kept as 1.
+> > > 
+> > > Cc: <stable@kernel.org>
+> > > Signed-off-by: Takashi Iwai <tiwai@suse.de>
+> > > ---
+> > >  drivers/mmc/core/core.c |    2 +-
+> > >  1 files changed, 1 insertions(+), 1 deletions(-)
+> > > 
+> > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > > index 31ae07a..30094f6 100644
+> > > --- a/drivers/mmc/core/core.c
+> > > +++ b/drivers/mmc/core/core.c
+> > > @@ -1772,7 +1772,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+> > >  		break;
+> > >  
+> > >  	case PM_POST_SUSPEND:
+> > > -	case PM_POST_HIBERNATION:
+> > > +	case PM_POST_RESTORE:
+> > >  
+> > >  		spin_lock_irqsave(&host->lock, flags);
+> > >  		host->rescan_disable = 0;
+> > 
+> > Thanks very much for tracking this down!  The code suggests that
+> > POST_RESTORE is only emitted on a *failed* hibernation restore --
+> > from include/linux/notifier.h:
+> > 
+> > /* Hibernation and suspend events */
+> > #define PM_POST_HIBERNATION     0x0002 /* Hibernation finished */
+> > #define PM_POST_SUSPEND         0x0004 /* Suspend finished */
+> > #define PM_POST_RESTORE         0x0006 /* Restore failed */
+> > 
+> > So, this all suggests that we want to add the POST_RESTORE case but
+> > also want to keep the POST_HIBERNATION case.  Do you agree?  Was the 
+> > case you saw of failed probe after hibernation a failed restore from
+> > hibernation image?
+> 
+> Right, I took a look at Documentation/pm/notifiers.txt, and it's
+> clearly written that PM_POST_RESTORE is only for the error case.  But
+> S4 resume succeeded actually on my machine, so it took time to spot
+> out the culprit.
+> 
+> Looking at the code in kernel/power/, this might be the case of
+> user-space suspend.  hibernate.c seems returning PM_POST_HIBERNATION
+> while user.c returns PM_POST_RESTORE after image restoration, and I
+> guess it's a bug of user.c. 
+> 
+> The untested patch is below (sorry I have no corresponding machine
+> at my home.)  Rafael, Pavel, could you check this?
+> 
+> 
+> thanks,
+> 
+> Takashi
+> 
+> ===
+> From 915fda609e02b02e4fc6b944e4432ea1d964adc5 Mon Sep 17 00:00:00 2001
+> From: Takashi Iwai <tiwai@suse.de>
+> Date: Thu, 9 Dec 2010 08:09:21 +0100
+> Subject: [PATCH] PM: Fix PM_POST_* notification with user-space suspend
+> 
+> The user-space hibernation sends a wrong notification after the image
+> restoration because of thinko for the file flag check.  RDONLY
+> corresponds to hibernation and WRONLY to restoration, confusingly.
 
-The driver does build on x86{_64} and it has been useful for me to do
-that in the past to test cosmetic changes. It might also be good to
-have it building on x86 to get more compile testing, as I suspect a
-lot more people doing randconfig builds are doing it on x86 rather
-than arm.
+The patch is correct.  I'm taking it to my tree.
 
-But I'm fine with it either way.
+Thanks,
+Rafael
+
+
+> Signed-off-by: Takashi Iwai <tiwai@suse.de>
+> ---
+>  kernel/power/user.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/kernel/power/user.c b/kernel/power/user.c
+> index e819e17..11d92b2 100644
+> --- a/kernel/power/user.c
+> +++ b/kernel/power/user.c
+> @@ -137,7 +137,7 @@ static int snapshot_release(struct inode *inode, struct file *filp)
+>  	free_all_swap_pages(data->swap);
+>  	if (data->frozen)
+>  		thaw_processes();
+> -	pm_notifier_call_chain(data->mode == O_WRONLY ?
+> +	pm_notifier_call_chain(data->mode == O_RDONLY ?
+>  			PM_POST_HIBERNATION : PM_POST_RESTORE);
+>  	atomic_inc(&snapshot_device_available);
+>  
+> 
+
