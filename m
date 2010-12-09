@@ -1,207 +1,72 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH V4  1/4] mmc: add support for H/W clock gating of SD
- controller (Resend)
-Date: Wed, 8 Dec 2010 16:18:11 -0800
-Message-ID: <7E74820F-9F5F-402A-9223-140C84CF53A8@marvell.com>
+Subject: [PATCH V4  3/4] mmc: add support for H/W clock gating of SD
+ controller
+Date: Wed, 8 Dec 2010 16:18:28 -0800
+Message-ID: <A5CE2481-538A-4691-9753-215E27AF9FC1@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:40130 "HELO
+Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:40432 "HELO
 	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751872Ab0LIASO convert rfc822-to-8bit
+	by vger.kernel.org with SMTP id S1753905Ab0LIASc convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Dec 2010 19:18:14 -0500
+	Wed, 8 Dec 2010 19:18:32 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Cc: Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>
 
-This patch has not changed but is being resent to keep the set of patches for h/w clock gating together.
+Define Register values for host controller 2.  All register values defined
+but  SDCTRL_2_ASYNC_INT_EN is used in patch 4/4
 
-tested under marvell linux.
-
->From fd6b01ae41eaf3d26755bb263f7af59a029c5d83 Mon Sep 17 00:00:00 2001
+>From 1bfe8b89642cecc8fa5e22f135e4a92f7f3b83ff Mon Sep 17 00:00:00 2001
 From: Philip Rakity <prakity@marvell.com>
-Date: Tue, 7 Dec 2010 08:58:56 -0800
-Subject: [PATCH] mmc: add support for H/W clock gating of SD controller
-
-This code extends software clock gating in the MMC layer by adding the ability
-to indicate that the SD controller supports hardware clock gating.
-
-Hardware clock gating is enabled by setting the MMC capability
-MMC_CAP_HW_CLOCK_GATING in the SD driver.
-
-eg: host->mmc->caps |= MMC_CAP_HW_CLOCK_GATING
-
-The approach follows the suggestion of Nico Pitre.
-
-SD/MMC/eMMC cards use dynamic clocks
-SDIO uses continuous clocks to properly detect SDIO card interrupts
-
-The code has been tested using marvell linux for MMP2.  The Marvell
-controller support H/W clock gating.
+Date: Wed, 8 Dec 2010 15:20:19 -0800
+Subject: [PATCH] sdhci: added register defintions for sd host 3.0 HOST CONTROL 2
 
 Signed-off-by: Philip Rakity <prakity@marvell.com>
 Signed-off-by: Mark F. Brown <markb@marvell.com>
 ---
- drivers/mmc/core/core.c  |   32 ++++++++++++++++++++++++++++++++
- drivers/mmc/core/core.h  |   13 +++++++++++++
- drivers/mmc/core/host.c  |   12 ++++++++++++
- include/linux/mmc/host.h |    1 +
- 4 files changed, 58 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci.h |   18 +++++++++++++++++-
+ 1 files changed, 17 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6286898..de867d1 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -682,6 +682,28 @@ void mmc_ungate_clock(struct mmc_host *host)
- 	}
- }
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 26a8c09..d8526ae 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -144,7 +144,22 @@
  
-+/*
-+ * Let hardware automatically gate the clock when the card becomes idle
-+ */
-+void mmc_hwgate_clock(struct mmc_host *host)
-+{
-+	if (host->caps & MMC_CAP_HW_CLOCK_GATING) {
-+		host->clk_gated = true;
-+		mmc_set_ios(host);
-+	}
-+}
-+
-+/*
-+ * This ungates the clock by turning off h/w gating
-+ */
-+void mmc_hwungate_clock(struct mmc_host *host)
-+{
-+	if (host->caps & MMC_CAP_HW_CLOCK_GATING) {
-+		host->clk_gated = false;
-+		mmc_set_ios(host);
-+	}
-+}
-+
- void mmc_set_ungated(struct mmc_host *host)
- {
- 	unsigned long flags;
-@@ -1548,6 +1570,8 @@ void mmc_rescan(struct work_struct *work)
- 			mmc_hostname(host), __func__, host->f_init);
- #endif
- 		mmc_power_up(host);
-+
-+		mmc_hwungate_clock(host);
- 		sdio_reset(host);
- 		mmc_go_idle(host);
+ #define SDHCI_ACMD12_ERR	0x3C
  
-@@ -1569,6 +1593,10 @@ void mmc_rescan(struct work_struct *work)
+-/* 3E-3F reserved */
++#define HOST_CTRL_2             0x3E
++#define SDCTRL_2_UHS_MODE_SEL_SDR12		0x0000
++#define SDCTRL_2_UHS_MODE_SEL_SDR25		0x0001
++#define SDCTRL_2_UHS_MODE_SEL_SDR50		0x0002
++#define SDCTRL_2_UHS_MODE_SEL_SDR104		0x0003
++#define SDCTRL_2_UHS_MODE_SEL_DDR50		0x0004
++#define SDCTRL_2_UHS_MODE_MASK			7
++#define SDCTRL_2_SDH_V18_EN			0x0008
++#define SDCTRL_2_DRV_STRENGTH_SEL_B		0x0000
++#define SDCTRL_2_DRV_STRENGTH_SEL_A		0x0010
++#define SDCTRL_2_DRV_STRENGTH_SEL_C		0x0020
++#define SDCTRL_2_DRV_STRENGTH_SEL_D		0x0030
++#define SDCTRL_2_EXE_TUNING			0x0040
++#define SDCTRL_2_SAMPLING_CLK_SEL		0x0080
++#define SDCTRL_2_ASYNC_INT_EN			0x4000
++#define SDCTRL_2_PRESET_VAL_EN			0x8000
  
- 				if (mmc_attach_sd(host, ocr))
- 					mmc_power_off(host);
-+
-+				/* hw clock gating is off when we get here */
-+				/* do not enable clock gating for sdio cards */
-+				/* sdio cards can miss interrupts */
- 			}
- 			goto out;
- 		}
-@@ -1580,6 +1608,8 @@ void mmc_rescan(struct work_struct *work)
- 		if (!err) {
- 			if (mmc_attach_sd(host, ocr))
- 				mmc_power_off(host);
-+			else
-+				mmc_hwgate_clock(host);
- 			goto out;
- 		}
+ #define SDHCI_CAPABILITIES	0x40
+ #define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
+@@ -164,6 +179,7 @@
+ #define  SDHCI_CAN_VDD_300	0x02000000
+ #define  SDHCI_CAN_VDD_180	0x04000000
+ #define  SDHCI_CAN_64BIT	0x10000000
++#define  SDHCI_CAN_ASYNC_INT	0x20000000
  
-@@ -1590,6 +1620,8 @@ void mmc_rescan(struct work_struct *work)
- 		if (!err) {
- 			if (mmc_attach_mmc(host, ocr))
- 				mmc_power_off(host);
-+			else
-+				mmc_hwgate_clock(host);
- 			goto out;
- 		}
- 
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 026c975..3810e28 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -35,6 +35,19 @@ void mmc_set_chip_select(struct mmc_host *host, int mode);
- void mmc_set_clock(struct mmc_host *host, unsigned int hz);
- void mmc_gate_clock(struct mmc_host *host);
- void mmc_ungate_clock(struct mmc_host *host);
-+
-+#ifdef CONFIG_MMC_CLKGATE
-+void mmc_hwgate_clock(struct mmc_host *host);
-+void mmc_hwungate_clock(struct mmc_host *host);
-+#else
-+static inline void mmc_hwgate_clock(struct mmc_host *host)
-+{
-+}
-+
-+static inline void mmc_hwungate_clock(struct mmc_host *host)
-+{
-+}
-+#endif
- void mmc_set_ungated(struct mmc_host *host);
- void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode);
- void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 92e3370..f4b4c2f 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -130,6 +130,9 @@ void mmc_host_clk_ungate(struct mmc_host *host)
- {
- 	unsigned long flags;
- 
-+	if (host->caps & MMC_CAP_HW_CLOCK_GATING)
-+		return;
-+
- 	mutex_lock(&host->clk_gate_mutex);
- 	spin_lock_irqsave(&host->clk_lock, flags);
- 	if (host->clk_gated) {
-@@ -178,6 +181,9 @@ void mmc_host_clk_gate(struct mmc_host *host)
- {
- 	unsigned long flags;
- 
-+	if (host->caps & MMC_CAP_HW_CLOCK_GATING)
-+		return;
-+
- 	spin_lock_irqsave(&host->clk_lock, flags);
- 	host->clk_requests--;
- 	if (mmc_host_may_gate_card(host->card) &&
-@@ -212,6 +218,9 @@ unsigned int mmc_host_clk_rate(struct mmc_host *host)
-  */
- static inline void mmc_host_clk_init(struct mmc_host *host)
- {
-+	if (host->caps & MMC_CAP_HW_CLOCK_GATING)
-+		return;
-+
- 	host->clk_requests = 0;
- 	/* Hold MCI clock for 8 cycles by default */
- 	host->clk_delay = 8;
-@@ -231,6 +240,9 @@ static inline void mmc_host_clk_exit(struct mmc_host *host)
- 	 * Wait for any outstanding gate and then make sure we're
- 	 * ungated before exiting.
- 	 */
-+	if (host->caps & MMC_CAP_HW_CLOCK_GATING)
-+		return;
-+
- 	if (cancel_work_sync(&host->clk_gate_work))
- 		mmc_host_clk_gate_delayed(host);
- 	if (host->clk_gated)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 381c77f..b9b3a2b 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -169,6 +169,7 @@ struct mmc_host {
- #define MMC_CAP_1_2V_DDR	(1 << 12)	/* can support */
- 						/* DDR mode at 1.2V */
- #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
-+#define MMC_CAP_HW_CLOCK_GATING	(1 << 14)	/* h/w supports clock gating */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ #define SDHCI_CAPABILITIES_1	0x44
  
 -- 
 1.6.0.4
