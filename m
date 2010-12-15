@@ -1,80 +1,40 @@
-From: Olof Johansson <olof@lixom.net>
+From: Pavan Kondeti <pkondeti@codeaurora.org>
 Subject: Re: [PATCH 4/4] mmc: add sdhci-tegra driver for Tegra SoCs
-Date: Wed, 15 Dec 2010 05:31:15 -0600
-Message-ID: <20101215113115.GB2086@lixom.net>
-References: <1292388576-25600-1-git-send-email-olof@lixom.net> <1292388576-25600-5-git-send-email-olof@lixom.net> <4D08A54E.9070103@compulab.co.il>
+Date: Wed, 15 Dec 2010 17:03:44 +0530
+Message-ID: <4D08A798.1070709@codeaurora.org>
+References: <1292388576-25600-1-git-send-email-olof@lixom.net> <1292388576-25600-5-git-send-email-olof@lixom.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.lixom.net ([70.86.134.90]:43639 "EHLO mail.lixom.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753368Ab0LOLbP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 15 Dec 2010 06:31:15 -0500
-Content-Disposition: inline
-In-Reply-To: <4D08A54E.9070103@compulab.co.il>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:32640 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752649Ab0LOLdu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Dec 2010 06:33:50 -0500
+In-Reply-To: <1292388576-25600-5-git-send-email-olof@lixom.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mike Rapoport <mike@compulab.co.il>
+To: Olof Johansson <olof@lixom.net>
 Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, Yvonne Yip <y@palm.com>, Gary King <gking@nvidia.com>, Todd Poynor <toddpoynor@google.com>, Dmitry Shmidt <dimitrysh@google.com>, Rhyland Klein <rklein@nvidia.com>
 
-Hi,
+On 12/15/2010 10:19 AM, Olof Johansson wrote:
+> +
+> +	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	if (res == NULL)
+> +		return -ENODEV;
+> +
+> +	ioaddr = ioremap(res->start, res->end - res->start);
+> +
 
-On Wed, Dec 15, 2010 at 01:23:58PM +0200, Mike Rapoport wrote:
-> Hi Olof,
-> 
-> Overall looks good, just some nitpicking comments.
-> 
-[...]
+Return value is not checked.
 
-> > +struct tegra_sdhci_platform_data {
-> > +	int cd_gpio;
-> > +	int wp_gpio;
-> > +	int power_gpio;
-> 
-> The power_gpio seems to be unused...
-
-Yep, will remove.
-
-> > +static unsigned int tegra_sdhci_get_ro(struct sdhci_host *sdhci)
-> > +{
-> > +	struct tegra_sdhci_host *host = sdhci_priv(sdhci);
-> > +
-> > +	if (host->wp_gpio != -1)
-> 
-> if (gpio_is_valid(host->wp_gpio)) whould be better IMO.
-[...]
-> > +	if (plat->cd_gpio != -1) {
-> 
-> if (gpio_is_valid(host->wp_gpio)) whould be better IMO.
-> 
-
-Fair enough (x2).
-
-> > +		rc = request_irq(gpio_to_irq(plat->cd_gpio), carddetect_irq,
-> > +			IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
-> > +			mmc_hostname(sdhci->mmc), sdhci);
-> > +
-> > +		if (rc)
-> > +			goto err_remove_host;
-> > +	}
-> 
-> It seems to me that the tegra_sdhci_probe should handle gpio initialization,
-> rather then keep gpio_request etc calls in the board files.
-
-Yeah, I had been planning on moving that over but not at this pass. I can do that
-though.
-
-> > +	printk(KERN_INFO "sdhci%d: initialized irq %d ioaddr %p\n", pdev->id,
-> > +			sdhci->irq, sdhci->ioaddr);
-> > +
-> 
-> dev_info?
-
-Yep, will change.
+> +	sdhci = sdhci_alloc_host(&pdev->dev, sizeof(struct tegra_sdhci_host));
+> +	if (IS_ERR(sdhci)) {
+> +		rc = PTR_ERR(sdhci);
+> +		goto err_unmap;
+> +	}
 
 
-
-Thanks!
-
-
--Olof
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
