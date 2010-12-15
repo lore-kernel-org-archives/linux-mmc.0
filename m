@@ -1,86 +1,80 @@
-From: Olof Johansson <olof@lixom.net>
+From: Wolfram Sang <w.sang@pengutronix.de>
 Subject: Re: [PATCH 2/4] sdhci: add quirk for broken sdio irq
-Date: Wed, 15 Dec 2010 04:54:43 -0600
-Message-ID: <20101215105443.GA32297@lixom.net>
-References: <1292388576-25600-1-git-send-email-olof@lixom.net> <1292388576-25600-3-git-send-email-olof@lixom.net> <AANLkTint+ObCy3Mak4E1Cj+2TS_4vbpZm57tXK_-CJ+K@mail.gmail.com>
+Date: Wed, 15 Dec 2010 11:57:01 +0100
+Message-ID: <20101215105701.GC3515@pengutronix.de>
+References: <1292388576-25600-1-git-send-email-olof@lixom.net>
+ <1292388576-25600-3-git-send-email-olof@lixom.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="OBd5C1Lgu00Gd/Tn"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.lixom.net ([70.86.134.90]:42139 "EHLO mail.lixom.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752944Ab0LOKyn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 15 Dec 2010 05:54:43 -0500
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:58358 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752819Ab0LOK5E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Dec 2010 05:57:04 -0500
 Content-Disposition: inline
-In-Reply-To: <AANLkTint+ObCy3Mak4E1Cj+2TS_4vbpZm57tXK_-CJ+K@mail.gmail.com>
+In-Reply-To: <1292388576-25600-3-git-send-email-olof@lixom.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
+To: Olof Johansson <olof@lixom.net>
 Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
 
-On Wed, Dec 15, 2010 at 05:42:14AM -0500, zhangfei gao wrote:
-> On Tue, Dec 14, 2010 at 11:49 PM, Olof Johansson <olof@lixom.net> wro=
-te:
-> > Some controllers can't handle SDIO IRQ properly. Give a way to
-> > disable it.
-> >
-> > Signed-off-by: Olof Johansson <olof@lixom.net>
-> > ---
-> > =A0drivers/mmc/host/sdhci.c =A0| =A0 =A06 +++++-
-> > =A0include/linux/mmc/sdhci.h | =A0 =A02 ++
-> > =A02 files changed, 7 insertions(+), 1 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index c0094c1..98f3d3d 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -1871,7 +1871,10 @@ int sdhci_add_host(struct sdhci_host *host)
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->f_min =3D host->max_clk / SDHCI=
-_MAX_DIV_SPEC_200;
-> >
-> > =A0 =A0 =A0 =A0mmc->f_max =3D host->max_clk;
-> > - =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_SDIO_IRQ;
-> > + =A0 =A0 =A0 mmc->caps =3D 0;
-> > +
-> > + =A0 =A0 =A0 if (!(host->quirks & SDHCI_QUIRK_NO_SDIO_IRQ))
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_SDIO_IRQ;
-> >
-> > =A0 =A0 =A0 =A0/*
-> > =A0 =A0 =A0 =A0 * A controller may support 8-bit width, but the boa=
-rd itself
-> > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> > index dfb2106..97d547e 100644
-> > --- a/include/linux/mmc/sdhci.h
-> > +++ b/include/linux/mmc/sdhci.h
-> > @@ -85,6 +85,8 @@ struct sdhci_host {
-> > =A0#define SDHCI_QUIRK_NO_HISPD_BIT =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 (1<<29)
-> > =A0/* Controller treats ADMA descriptors with length 0000h incorrec=
-tly */
-> > =A0#define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC =A0 =A0 =A0 =A0 =A0=
- (1<<30)
-> > +/* Controller should not use SDIO IRQ */
-> > +#define SDHCI_QUIRK_NO_SDIO_IRQ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0(1<<31)
+
+--OBd5C1Lgu00Gd/Tn
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Dec 14, 2010 at 10:49:34PM -0600, Olof Johansson wrote:
+> Some controllers can't handle SDIO IRQ properly. Give a way to
+> disable it.
 >=20
-> Just wander can we use another way instead of using the last two
-> quirk, otherwise, no quirk can be used any more.
-> If this is only tegra specific issue, any possibility to modify vecto=
-r
-> after add_host in sdhci-tegra.c.
-> for example
-> sdhci_add_host(host);
-> host->mmc->max_seg_size =3D 65535;
-> host->mmc->caps |=3D MMC_CAP_SDIO_IRQ;
+> Signed-off-by: Olof Johansson <olof@lixom.net>
+> ---
+>  drivers/mmc/host/sdhci.c  |    6 +++++-
+>  include/linux/mmc/sdhci.h |    2 ++
+>  2 files changed, 7 insertions(+), 1 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index c0094c1..98f3d3d 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1871,7 +1871,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>  		mmc->f_min =3D host->max_clk / SDHCI_MAX_DIV_SPEC_200;
+> =20
+>  	mmc->f_max =3D host->max_clk;
+> -	mmc->caps |=3D MMC_CAP_SDIO_IRQ;
+> +	mmc->caps =3D 0;
 
-Yuck. That completely breaks any kind of abstraction and layering.
+That would clear flags already set in custom probe functions (check
+sdhci-pxa) for example.
 
-> Really appreciate if not using the valuable quirk resource, which is =
-u32.
+> +
+> +	if (!(host->quirks & SDHCI_QUIRK_NO_SDIO_IRQ))
+> +		mmc->caps |=3D MMC_CAP_SDIO_IRQ;
 
-No big deal. Next person that needs a quirk bit gets to bump the data
-type to u64.
+As we are running out of quirk-bits, can you imagine a solution without
+a quirk (same for the other patch)?
 
+Kind regards,
 
--Olof
+   Wolfram
 
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--OBd5C1Lgu00Gd/Tn
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk0Inv0ACgkQD27XaX1/VRsFUACeJkigYG9apBTS3LwsZpoCxmkF
+8poAmwU9bq6EPt/PoI//yl9vM6+c4kWi
+=4w9J
+-----END PGP SIGNATURE-----
+
+--OBd5C1Lgu00Gd/Tn--
