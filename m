@@ -1,60 +1,42 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
 Subject: Re: [PATCH 2/4] sdhci: add quirk for broken sdio irq
-Date: Wed, 15 Dec 2010 11:57:01 +0100
-Message-ID: <20101215105701.GC3515@pengutronix.de>
+Date: Wed, 15 Dec 2010 12:03:12 +0100
+Message-ID: <20101215110312.GE3515@pengutronix.de>
 References: <1292388576-25600-1-git-send-email-olof@lixom.net>
  <1292388576-25600-3-git-send-email-olof@lixom.net>
+ <AANLkTint+ObCy3Mak4E1Cj+2TS_4vbpZm57tXK_-CJ+K@mail.gmail.com>
+ <20101215105443.GA32297@lixom.net>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="OBd5C1Lgu00Gd/Tn"
+	protocol="application/pgp-signature"; boundary="cPi+lWm09sJ+d57q"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:58358 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:51695 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752819Ab0LOK5E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Dec 2010 05:57:04 -0500
+	with ESMTP id S1752643Ab0LOLDQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Dec 2010 06:03:16 -0500
 Content-Disposition: inline
-In-Reply-To: <1292388576-25600-3-git-send-email-olof@lixom.net>
+In-Reply-To: <20101215105443.GA32297@lixom.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Olof Johansson <olof@lixom.net>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
+Cc: zhangfei gao <zhangfei.gao@gmail.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
 
 
---OBd5C1Lgu00Gd/Tn
+--cPi+lWm09sJ+d57q
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Dec 14, 2010 at 10:49:34PM -0600, Olof Johansson wrote:
-> Some controllers can't handle SDIO IRQ properly. Give a way to
-> disable it.
+
+> > Really appreciate if not using the valuable quirk resource, which is u3=
+2.
 >=20
-> Signed-off-by: Olof Johansson <olof@lixom.net>
-> ---
->  drivers/mmc/host/sdhci.c  |    6 +++++-
->  include/linux/mmc/sdhci.h |    2 ++
->  2 files changed, 7 insertions(+), 1 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c0094c1..98f3d3d 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1871,7 +1871,10 @@ int sdhci_add_host(struct sdhci_host *host)
->  		mmc->f_min =3D host->max_clk / SDHCI_MAX_DIV_SPEC_200;
-> =20
->  	mmc->f_max =3D host->max_clk;
-> -	mmc->caps |=3D MMC_CAP_SDIO_IRQ;
-> +	mmc->caps =3D 0;
+> No big deal. Next person that needs a quirk bit gets to bump the data
+> type to u64.
 
-That would clear flags already set in custom probe functions (check
-sdhci-pxa) for example.
-
-> +
-> +	if (!(host->quirks & SDHCI_QUIRK_NO_SDIO_IRQ))
-> +		mmc->caps |=3D MMC_CAP_SDIO_IRQ;
-
-As we are running out of quirk-bits, can you imagine a solution without
-a quirk (same for the other patch)?
+That won't scale for long, I fear (and will make sdhci.c an unreadable
+mess). We need less quirks and more flexible means to handle flawed
+controllers, I'd think.
 
 Kind regards,
 
@@ -64,7 +46,7 @@ Kind regards,
 Pengutronix e.K.                           | Wolfram Sang                |
 Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
---OBd5C1Lgu00Gd/Tn
+--cPi+lWm09sJ+d57q
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 Content-Disposition: inline
@@ -72,9 +54,9 @@ Content-Disposition: inline
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk0Inv0ACgkQD27XaX1/VRsFUACeJkigYG9apBTS3LwsZpoCxmkF
-8poAmwU9bq6EPt/PoI//yl9vM6+c4kWi
-=4w9J
+iEYEARECAAYFAk0IoHAACgkQD27XaX1/VRtfDwCgn1TF+f5/kN3n6NQpGL0Euvug
+UnUAn3m4Rci6jztNa+d/yW9/IO2qdfHV
+=mKQb
 -----END PGP SIGNATURE-----
 
---OBd5C1Lgu00Gd/Tn--
+--cPi+lWm09sJ+d57q--
