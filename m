@@ -1,49 +1,36 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: Fix a typo in ocr_avail mask check for MMC
-Date: Thu, 16 Dec 2010 23:45:11 +0000
-Message-ID: <20101216234511.GB17239@void.printf.net>
-References: <s5h62uvnpgk.wl%tiwai@suse.de>
+Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
+Date: Fri, 17 Dec 2010 00:43:14 +0000
+Message-ID: <20101217004314.GC17239@void.printf.net>
+References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536> <20101116150022.GA27726@void.printf.net> <27884BED0E3C489C8849EE12A803F536@AN00536> <m3oc9pnt6g.fsf@pullcord.laptop.org> <4CE41BE3.1060806@elandigitalsystems.com> <m3oc9n241c.fsf@pullcord.laptop.org> <4CEA86D4.9050109@elandigitalsystems.com> <20101130061532.GA4331@void.printf.net> <4CF4ECAA.70806@csr.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60015 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:51066 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752282Ab0LPXpN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 16 Dec 2010 18:45:13 -0500
+	id S1754322Ab0LQAnQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 16 Dec 2010 19:43:16 -0500
 Content-Disposition: inline
-In-Reply-To: <s5h62uvnpgk.wl%tiwai@suse.de>
+In-Reply-To: <4CF4ECAA.70806@csr.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Takashi Iwai <tiwai@suse.de>
-Cc: Aries Lee <arieslee@jmicron.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Tony Olech <tony.olech@elandigitalsystems.com>
+Cc: David Vrabel <david.vrabel@csr.com>, linux-mmc@vger.kernel.org
 
-Hi Takashi,
+Hi Tony,
 
-On Wed, Dec 15, 2010 at 02:19:22PM +0100, Takashi Iwai wrote:
-> In the patch "mmc: Add support for JMicron 388 SD/MMC controller",
-> I changed a wrong field for MMC during rewrite.  Fixed now.
+On Tue, Nov 30, 2010 at 12:23:06PM +0000, David Vrabel wrote:
+> > Any interest in reviewing this USB-SD driver?  I'm especially curious
+> > about whether you think there are worthwhile possibilities to share 
+> > code with USHC.
 > 
-> Signed-off-by: Takashi Iwai <tiwai@suse.de>
-> ---
->  drivers/mmc/host/sdhci.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+> A quick look suggests that there is unlikely to be any commonality
+> between the two drivers.
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 51f5209..be0ff14 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1919,7 +1919,7 @@ int sdhci_add_host(struct sdhci_host *host)
->  		mmc->ocr_avail_sd &= ~MMC_VDD_165_195;
->  	mmc->ocr_avail_mmc = ocr_avail;
->  	if (host->ocr_avail_mmc)
-> -		mmc->ocr_avail_sd &= host->ocr_avail_mmc;
-> +		mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
->  
->  	if (mmc->ocr_avail == 0) {
->  		printk(KERN_ERR "%s: Hardware doesn't report any "
+> Tony, where can I find the datasheet or developer's manual describing
+> the protocol/operation of this chip?
 
-Thanks, I've rebased this change into the original patch on my mmc-next
-branch.
+Ping -- any answer for David here?  Thanks,
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
