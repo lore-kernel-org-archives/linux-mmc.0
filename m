@@ -1,37 +1,81 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
-Date: Fri, 17 Dec 2010 00:43:14 +0000
-Message-ID: <20101217004314.GC17239@void.printf.net>
-References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536> <20101116150022.GA27726@void.printf.net> <27884BED0E3C489C8849EE12A803F536@AN00536> <m3oc9pnt6g.fsf@pullcord.laptop.org> <4CE41BE3.1060806@elandigitalsystems.com> <m3oc9n241c.fsf@pullcord.laptop.org> <4CEA86D4.9050109@elandigitalsystems.com> <20101130061532.GA4331@void.printf.net> <4CF4ECAA.70806@csr.com>
+Subject: Re: [PATCH 1/3] mmc: skip detection of nonremovable cards on rescan
+Date: Fri, 17 Dec 2010 00:51:23 +0000
+Message-ID: <20101217005123.GD17239@void.printf.net>
+References: <1290921690-6133-1-git-send-email-ohad@wizery.com> <1290921690-6133-2-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51066 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:44030 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754322Ab0LQAnQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 16 Dec 2010 19:43:16 -0500
+	id S1754493Ab0LQAvY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 16 Dec 2010 19:51:24 -0500
 Content-Disposition: inline
-In-Reply-To: <4CF4ECAA.70806@csr.com>
+In-Reply-To: <1290921690-6133-2-git-send-email-ohad@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Olech <tony.olech@elandigitalsystems.com>
-Cc: David Vrabel <david.vrabel@csr.com>, linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Tony,
+Hi Ohad,
 
-On Tue, Nov 30, 2010 at 12:23:06PM +0000, David Vrabel wrote:
-> > Any interest in reviewing this USB-SD driver?  I'm especially curious
-> > about whether you think there are worthwhile possibilities to share 
-> > code with USHC.
+On Sun, Nov 28, 2010 at 07:21:28AM +0200, Ohad Ben-Cohen wrote:
+> mmc_rescan checks whether registered cards are still present before
+> skipping them, by calling the bus-specific ->detect() handler.
 > 
-> A quick look suggests that there is unlikely to be any commonality
-> between the two drivers.
+> With buses that support runtime PM, the card may be powered off at
+> this point, so they need to be powered on and fully reinitialized before
+> ->detect() executes.
 > 
-> Tony, where can I find the datasheet or developer's manual describing
-> the protocol/operation of this chip?
+> This whole process is redundant with nonremovable cards; in those cases,
+> we can safely skip calling ->detect() and implicitly assume its success.
+> 
+> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+> ---
+>  drivers/mmc/core/core.c |    8 ++++++--
+>  1 files changed, 6 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 6286898..e8332d7 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1506,8 +1506,12 @@ void mmc_rescan(struct work_struct *work)
+>  
+>  	mmc_bus_get(host);
+>  
+> -	/* if there is a card registered, check whether it is still present */
+> -	if ((host->bus_ops != NULL) && host->bus_ops->detect && !host->bus_dead)
+> +	/*
+> +	 * if there is a _removable_ card registered, check whether it is
+> +	 * still present
+> +	 */
+> +	if ((host->bus_ops != NULL) && host->bus_ops->detect && !host->bus_dead
+> +					&& mmc_card_is_removable(host))
+>  		host->bus_ops->detect(host);
+>  
+>  	mmc_bus_put(host);
 
-Ping -- any answer for David here?  Thanks,
+Thanks, pushed to mmc-next with trivial cleanup as below:
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index e7c0c78..d9c98ee 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1506,8 +1506,12 @@ void mmc_rescan(struct work_struct *work)
+ 
+ 	mmc_bus_get(host);
+ 
+-	/* if there is a card registered, check whether it is still present */
+-	if ((host->bus_ops != NULL) && host->bus_ops->detect && !host->bus_dead)
++	/*
++	 * if there is a _removable_ card registered, check whether it is
++	 * still present
++	 */
++	if (host->bus_ops && host->bus_ops->detect && !host->bus_dead
++	    && mmc_card_is_removable(host))
+ 		host->bus_ops->detect(host);
+ 
+ 	mmc_bus_put(host);
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
