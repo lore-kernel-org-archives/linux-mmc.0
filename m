@@ -1,46 +1,37 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 3/3] mmc: sdio: don't power up cards on system suspend
-Date: Fri, 17 Dec 2010 01:00:27 +0000
-Message-ID: <20101217010026.GF17239@void.printf.net>
-References: <1290921690-6133-1-git-send-email-ohad@wizery.com> <1290921690-6133-4-git-send-email-ohad@wizery.com>
+Subject: Re: [PATCH v4] mmc: Make ID freq configurable
+Date: Fri, 17 Dec 2010 01:09:32 +0000
+Message-ID: <20101217010930.GG17239@void.printf.net>
+References: <4C80187D.9000304@yahoo.es> <1291288582.15187.91.camel@stummala-linux.in.qualcomm.com> <4CF80DC6.1020801@yahoo.es> <20101202223812.GA2685@rere.qmqm.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46084 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:50106 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753542Ab0LQBA2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 16 Dec 2010 20:00:28 -0500
+	id S1751364Ab0LQBKL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 16 Dec 2010 20:10:11 -0500
 Content-Disposition: inline
-In-Reply-To: <1290921690-6133-4-git-send-email-ohad@wizery.com>
+In-Reply-To: <20101202223812.GA2685@rere.qmqm.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Michal Miroslaw <mirq-linux@rere.qmqm.pl>
+Cc: Hein_Tibosch <hein_tibosch@yahoo.es>, Sahitya Tummala <stummala@codeaurora.org>, Andrew Morton <akpm@linux-foundation.org>, Pierre Ossman <pierre@ossman.eu>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt@console-pimps.org>
 
-Hi Ohad,
+Hi Micha=C5=82, Sahitya,
 
-On Sun, Nov 28, 2010 at 07:21:30AM +0200, Ohad Ben-Cohen wrote:
-> Initial SDIO runtime PM implementation took a conservative approach
-> of powering up cards (and fully reinitializing them) on system suspend,
-> just before the suspend handlers of the relevant drivers were executed.
-> 
-> To avoid redundant power and reinitialization cycles, this patch removes
-> this behavior: if a card is already powered off when system suspend kicks
-> in, it is left at that state.
-> 
-> If a card is active when a system sleep starts, everything is
-> straightforward and works exactly like before. But if the card was
-> already suspended before the sleep began, then when MMC core power it up
-> back on resume, its run-time PM status has to be updated to reflect the
-> actual post-system sleep status.
-> 
-> The technique to do that is borrowed from the I2C runtime PM
-> implementation (for more info also see Documentation/power/runtime_pm.txt).
-> 
-> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+On Thu, Dec 02, 2010 at 11:38:12PM +0100, Michal Miroslaw wrote:
+> mmc: fix detection of memory part of SD-combo card with broken SDIO
+>=20
+> In case of failure, mmc_attach_sdio() will power off the SD bus.
+> Power it up and reinitialize before trying SD memory detection.
+>=20
+> Reported-by: Sahitya Tummala <stummala@codeaurora.org>
+> Signed-off-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
 
-Thanks, pushed to mmc-next.
+Thanks, this looks correct to me too; I've pushed it to mmc-next for .3=
+8.
 
--- 
+--=20
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
