@@ -1,48 +1,62 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] mmci: drop superfluous regulator #ifdef
-Date: Sun, 19 Dec 2010 16:00:59 +0000
-Message-ID: <20101219160059.GP9937@n2100.arm.linux.org.uk>
-References: <1291297018-3074-1-git-send-email-linus.walleij@stericsson.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:43026 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751275Ab0LSQBM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Dec 2010 11:01:12 -0500
-Content-Disposition: inline
-In-Reply-To: <1291297018-3074-1-git-send-email-linus.walleij@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Arnd Hannemann <arnd@arndnet.de>
+Subject: [PATCH] mmc: tmio_mmc: silence compiler warnings
+Date: Sun, 19 Dec 2010 21:16:07 +0000
+Message-ID: <1292793367-5638-1-git-send-email-arnd@arndnet.de>
+References: <Pine.LNX.4.64.1011231723090.25676@axis700.grange>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1011231723090.25676@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: g.liakhovetski@gmx.de, linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Hannemann <arnd@arndnet.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Thu, Dec 02, 2010 at 02:36:58PM +0100, Linus Walleij wrote:
-> The regulator and MMC frameworks provide the proper stub functions
-> for the regulator functions anyway, get rid of this.
+with "mmc: tmio: implement a bounce buffer for unaligned DMA"
+gcc generates the following warnings:
 
-I'm dropping this patch - it's wrong, because on platforms without
-regulator support, it stamps over the provided platform values:
+drivers/mmc/host/tmio_mmc.c:654:6: warning: 'ret' may be used uninitialized in this function
+drivers/mmc/host/tmio_mmc.c:730:6: warning: 'ret' may be used uninitialized in this function
 
-mmci-pl18x mb:mmci: Provided ocr_mask/setpower will not be used (using regulator instead)
+This patch fixes these by setting ret to -EINVAL in the affected code paths.
 
-# CONFIG_REGULATOR is not set
+This patch applies on top of -rc6 plus the following patches:
+  mmc: tmio_mmc: allow multi-element scatter-gather lists
+  mmc: tmio_mmc: fix PIO fallback on DMA descriptor allocation failure
+  mmc: tmio: merge the private header into the driver
+  mmc: tmio: implement a bounce buffer for unaligned DMA
 
-So the ifdefs have to stay until some other solution for this is found.
-Maybe the:
+Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+---
+ drivers/mmc/host/tmio_mmc.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
 
-        if (IS_ERR(host->vcc))
-                host->vcc = NULL;
-        else {
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 57ece9d..61e97d1 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -665,8 +665,10 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
+ 	}
+ 
+ 	if ((!aligned && (host->sg_len > 1 || sg->length > PAGE_CACHE_SIZE ||
+-			  align >= MAX_ALIGN)) || !multiple)
++			  align >= MAX_ALIGN)) || !multiple) {
++		ret = -EINVAL;
+ 		goto pio;
++	}
+ 
+ 	/* The only sg element can be unaligned, use our bounce buffer then */
+ 	if (!aligned) {
+@@ -741,8 +743,10 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
+ 	}
+ 
+ 	if ((!aligned && (host->sg_len > 1 || sg->length > PAGE_CACHE_SIZE ||
+-			  align >= MAX_ALIGN)) || !multiple)
++			  align >= MAX_ALIGN)) || !multiple) {
++		ret = -EINVAL;
+ 		goto pio;
++	}
+ 
+ 	/* The only sg element can be unaligned, use our bounce buffer then */
+ 	if (!aligned) {
+-- 
+1.7.2.3
 
-should be:
-
-        if (IS_ERR(host->vcc) || host->vcc == NULL)
-                host->vcc = NULL;
-        else {
-
-or maybe:
-
-        if (IS_ERR(host->vcc))
-                host->vcc = NULL;
-        else if (host->vcc) {
