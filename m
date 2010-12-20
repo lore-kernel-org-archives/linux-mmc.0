@@ -1,125 +1,109 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [patch] workaround of 1-bit mmc card in case cmd19 & cmd 14 not
- supported
-Date: Mon, 20 Dec 2010 07:43:48 -0800
-Message-ID: <E676418B-B975-4D88-B0B7-963653D9BB74@marvell.com>
-References: <AANLkTim8BAxZE9SFigp3WD68qgMAWUpOABo4-dwsfv7N@mail.gmail.com>
- <989F0D94-CD2D-4AA5-8F7A-68488E0DB01D@marvell.com>
- <AANLkTimxigW=W_vgP1yFiendwqHHP+Ru+EJgkY_No3cR@mail.gmail.com>
+From: Arnd Hannemann <arnd@arndnet.de>
+Subject: Re: [PATCH 1/4] mmc: tmio: Implement SDIO IRQ
+Date: Mon, 20 Dec 2010 16:51:45 +0100
+Message-ID: <4D0F7B91.10604@arndnet.de>
+References: <1291656942-18100-1-git-send-email-arnd@arndnet.de>	<AANLkTimHqoHzO8-5mdTiB03sp_mB0Ose6enOXsTvT5R+@mail.gmail.com>	<4CFE26FE.2070206@arndnet.de>	<AANLkTinzGuZjyqLqKJEz6t_CShBUfusobAs-8Md=ix4E@mail.gmail.com>	<4CFE4DD3.8050302@arndnet.de>	<AANLkTikukY6t-4tLTtYhG1=zEfegD4WpictkxBryhHaK@mail.gmail.com> <AANLkTi=HuQKRuTLLKt3Y4r9Boo71dq4qGtHLNy2=RD-V@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:49796 "HELO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1757833Ab0LTPn4 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 20 Dec 2010 10:43:56 -0500
-In-Reply-To: <AANLkTimxigW=W_vgP1yFiendwqHHP+Ru+EJgkY_No3cR@mail.gmail.com>
-Content-Language: en-US
+Received: from slowhand.arndnet.de ([88.198.19.76]:59581 "EHLO mail.unitix.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1757931Ab0LTPvv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 20 Dec 2010 10:51:51 -0500
+In-Reply-To: <AANLkTi=HuQKRuTLLKt3Y4r9Boo71dq4qGtHLNy2=RD-V@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, g.liakhovetski@gmx.de, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>
 
+Hi Magnus,
 
-On Dec 20, 2010, at 12:24 AM, zhangfei gao wrote:
-
-> On Sun, Dec 19, 2010 at 11:52 PM, Philip Rakity <prakity@marvell.com> wrote:
->> 
->> On Dec 16, 2010, at 7:21 PM, zhangfei gao wrote:
->> 
->>> If controller does not support cmd19 & cmd14, here is workaround we using.
->>> Send just in case somebody require.
->>> 
->>> From b95c5e8d1c5b42a149a521c4992dfd8fc8d61143 Mon Sep 17 00:00:00 2001
->>> From: Zhangfei Gao <zhangfei.gao@marvell.com>
->>> Date: Thu, 16 Dec 2010 22:28:40 -0500
->>> Subject: [PATCH] mmc: workaround of 1-bit mmc card
->>> 
->>>       In case controller does not support cmd19 & cmd14.
->>>       Use workaround to decrease bus width when error happen via reading
->>> partition table
->>> 
->>> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
->>> ---
->>> drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++++
->>> include/linux/mmc/host.h |    2 ++
->>> 2 files changed, 30 insertions(+), 0 deletions(-)
->>> 
->>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>> index 217f820..c0d2b73 100644
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -432,6 +432,34 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
->>> *mq, struct request *req)
->>>                * programming mode even when things go wrong.
->>>                */
->>>               if (brq.cmd.error || brq.data.error || brq.stop.error) {
->>> +                     if (mmc_card_mmc(card)) {
->>> +                             u8 width = card->host->ios.bus_width;
->>> +
->>> +                             if (width == MMC_BUS_WIDTH_4) {
->>> +                                     printk(KERN_WARNING "%s: "
->>> +                                             "retrying using 1 BIT WIDTH \n",
->>> +                                             req->rq_disk->disk_name);
->>> +                                     mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>> +                                                     EXT_CSD_BUS_WIDTH,
->>> +                                                     EXT_CSD_BUS_WIDTH_1);
->>> +
->>> +                                     mmc_set_bus_width(card->host,
->>> +                                                     MMC_BUS_WIDTH_1);
->>> +                                     continue;
->>> +                             }
->>> +                             if (width == MMC_BUS_WIDTH_8) {
->>> +                                     printk(KERN_WARNING "%s: "
->>> +                                             "retrying using 4 BIT WIDTH \n",
->>> +                                             req->rq_disk->disk_name);
->>> +                                     mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>> +                                             EXT_CSD_BUS_WIDTH,
->>> +                                             EXT_CSD_BUS_WIDTH_4);
->>> +
->>> +                                     mmc_set_bus_width(card->host,
->>> +                                             MMC_BUS_WIDTH_4);
->>> +                                     continue;
->>> +                             }
->>> +                     }
->>>                       if (brq.data.blocks > 1 && rq_data_dir(req) == READ) {
->>>                               /* Redo read one sector at a time */
->>>                               printk(KERN_WARNING "%s: retrying using single "
->>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->>> index 4a9d9d2..2a2c1ab 100644
->>> --- a/include/linux/mmc/host.h
->>> +++ b/include/linux/mmc/host.h
->>> @@ -249,6 +249,8 @@ extern struct mmc_host *mmc_alloc_host(int extra,
->>> struct device *);
->>> extern int mmc_add_host(struct mmc_host *);
->>> extern void mmc_remove_host(struct mmc_host *);
->>> extern void mmc_free_host(struct mmc_host *);
->>> +extern int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value);
->>> +extern void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
->>> 
->>> static inline void *mmc_priv(struct mmc_host *host)
->>> {
->>> --
->>> 1.7.0.4
->> 
->> Curious,
->> What cards fail without this patch ?  and on what system ?
->> PXA168/PXA910 and MMP2 all support bus width testing for mmc cards.
->> 
-> We found some controller can not support cmd19 & cmd14 well, such as
-> pxa955, also mmp2 will support these two cmd after A2.
-
-mmp2 supports cmd19 and cmd14 today. My testing shows bit width testing
-works.  The time taken for the cmd19/cmd14 exchange will improve in future.
-
-> Here just send as reference in case still other controller has the same issue.
+Am 20.12.2010 04:58, schrieb Magnus Damm:
+> Hi again Arnd,
 > 
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> 
->> 
+> On Wed, Dec 15, 2010 at 12:44 AM, Magnus Damm <magnus.damm@gmail.com> wrote:
+>> On Wed, Dec 8, 2010 at 12:08 AM, Arnd Hannemann <arnd@arndnet.de> wrote:
+>>> Am 07.12.2010 09:37, schrieb Magnus Damm:
+>>>> On Tue, Dec 7, 2010 at 9:22 PM, Arnd Hannemann <arnd@arndnet.de> wrote:
+>>>>> Am 07.12.2010 00:39, schrieb Magnus Damm:
+>>>>>> On Tue, Dec 7, 2010 at 2:35 AM, Arnd Hannemann <arnd@arndnet.de> wrote:
+>>>>>>> This patch implements SDIO IRQ support for mfds which
+>>>>>>> announce the MMC_CAP_SDIO_IRQ capability for tmio_mmc.
+>>>>>>> Tested with a b43-based wireless SDIO card and sh_mobile_sdhi.
+>>>>>>>
+>>>>>>> This patch applies on top of:
+>>>>>>> mmc: tmio_mmc: allow multi-element scatter-gather lists
+>>>>>>> mmc: tmio_mmc: fix PIO fallback on DMA descriptor allocation failure
+>>>>>>> mmc: tmio: merge the private header into the driver
+>>>>>>> mmc: tmio: implement a bounce buffer for unaligned DMA
+>>>>>>>
+>>>>>>> Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+>>>>>>> CC: Ian Molton <ian@mnementh.co.uk>
+>>>>>>> CC: Samuel Ortiz <sameo@linux.intel.com>
+>>>>>>> CC: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>>>>>>> ---
+>>>>>>>  drivers/mmc/host/tmio_mmc.c |   54 ++++++++++++++++++++++++++++++++++++++++++-
+>>>>>>>  1 files changed, 53 insertions(+), 1 deletions(-)
+>>>>>>
+> 
+>>>> I'll try to find my AR6002 card, maybe that will shed some light...
+>>>
+>>> Yeah, that would be really cool.
+>>
+>> I'll try again next time I have a bit of time to spare. =)
+> 
+> Alright, now my AR6002-based card is working with your patches. At
+> least it seems to be working - my antenna cable is broken so I can
+> unfortunately not do any more proper than a simple "iwlist wlan0
+> scan". Good thing is that the SDIO IRQ mode and polling mode seem to
+> behave about the same.
+> 
+> Please note that I did not test using the upstream driver. I couldn't
+> get that one working last week, so today I reverted to using my last
+> known working configuration - the out-of-tree "ar69_sdk" driver
+> pointed out by the following instructions:
+> http://armin762.wordpress.com/2010/05/24/nvidia-tegra2-getting-wifiatheros-6002-working/
 
+Thanks for testing!
+
+> 
+> Anyway, I'm all for including your SDIO IRQ patches, but I think that
+> they should be reworked a bit.
+> 
+> I propose using two flags:
+> 
+> 1) A hardware-has-sdio-irq-support flag for include/linux/mfd/tmio.h,
+> perhaps TMIO_MMC_SDIO_IRQre
+> 
+> The SDIO IRQ hardware registers are only touched when tmio-mmc is
+> provided the TMIO_MMC_SDIO_IRQ flag. The default behavior would be to
+> mask the SDIO IRQ interrupt source regardless of the MMC_CAP_SDIO_IRQ
+> flag. This should allow us to always enable the SDIO IRQ interrupt
+> source in INTC. The SDIO driver should set the TMIO_MMC_SDIO_IRQ flag
+> to show that SDHI is known to support SDIO IRQ.
+> 
+> Hopefully this TMIO_MMC_SDIO_IRQ flag will make it easier for Ian to
+> review the code and see that it doesn't break any other platforms that
+> may or may not lack SDIO IRQ support.
+> 
+> 2) The regular MMC_CAP_SDIO_IRQ flag.
+> 
+> This is enabled per board. If the SDIO IRQ feature doesn't work in
+> some case then the system integrator can simply just simply go back to
+> polled mode by not setting MMC_CAP_SIDO_IRQ.
+> 
+> I'm not sure if we can keep the SDIO IRQ interrupt source constantly
+> enabled in INTC though. Your current patches require the board
+> specific MMC_CAP_SDIO_IRQ flag to be paired with the cpu-specific INTC
+> enable change. If someone wishes tho disable SDIO_IRQ support for
+> their board then they must know that they also need to revert the INTC
+> enable bits, otherwise they'll get endless interrupts when the
+> tmio-mmc driver starts. I believe the two-flag approach above will
+> solve this problem.
+
+This makes sense, I'll shortly post a revised patchset implementing
+your idea...
+
+Thanks,
+Arnd
