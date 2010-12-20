@@ -1,56 +1,109 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Sun, 19 Dec 2010 22:37:58 -0500 (EST)
-Message-ID: <Pine.LNX.4.44L0.1012192226270.31110-100000@netrider.rowland.org>
-References: <201012191122.09581.rjw@sisk.pl>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH 1/4] mmc: tmio: Implement SDIO IRQ
+Date: Mon, 20 Dec 2010 12:58:26 +0900
+Message-ID: <AANLkTi=HuQKRuTLLKt3Y4r9Boo71dq4qGtHLNy2=RD-V@mail.gmail.com>
+References: <1291656942-18100-1-git-send-email-arnd@arndnet.de>
+	<AANLkTimHqoHzO8-5mdTiB03sp_mB0Ose6enOXsTvT5R+@mail.gmail.com>
+	<4CFE26FE.2070206@arndnet.de>
+	<AANLkTinzGuZjyqLqKJEz6t_CShBUfusobAs-8Md=ix4E@mail.gmail.com>
+	<4CFE4DD3.8050302@arndnet.de>
+	<AANLkTikukY6t-4tLTtYhG1=zEfegD4WpictkxBryhHaK@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from netrider.rowland.org ([192.131.102.5]:52116 "HELO
-	netrider.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1752374Ab0LTDh7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Dec 2010 22:37:59 -0500
-In-Reply-To: <201012191122.09581.rjw@sisk.pl>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <AANLkTikukY6t-4tLTtYhG1=zEfegD4WpictkxBryhHaK@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Arnd Hannemann <arnd@arndnet.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, g.liakhovetski@gmx.de, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, Kevin Hilman <khilman@deeprootsystems.com>
 
-On Sun, 19 Dec 2010, Rafael J. Wysocki wrote:
+Hi again Arnd,
 
-> That said, I think we may do something different that perhaps will make your
-> life somewhat easier.
-> 
-> Namely, if your driver doesn't implement any system suspend callbacks
-> (i.e. ->suspend(), ->resume(), ->freeze(), ->thaw() etc.) and it doesn't
-> want the analogous subsystem callbacks to be executed for the device, it will
-> make sense to flag the device as "runtime only", or something like this,
-> which make the PM core skip the device in dpm_suspend() etc.
-> 
-> In that case, if a device if flagged as "runtime only", we can avoid
-> calling pm_runtime_get_noirq() for it in dpm_prepare() and, analogously,
-> calling pm_runtime_put_sync() for it in dpm_complete().  However, we will have
-> to fail system suspend (or hibernation) if a "runtime only" device has the
-> power.runtime_auto flag unset.
+On Wed, Dec 15, 2010 at 12:44 AM, Magnus Damm <magnus.damm@gmail.com> w=
+rote:
+> On Wed, Dec 8, 2010 at 12:08 AM, Arnd Hannemann <arnd@arndnet.de> wro=
+te:
+>> Am 07.12.2010 09:37, schrieb Magnus Damm:
+>>> On Tue, Dec 7, 2010 at 9:22 PM, Arnd Hannemann <arnd@arndnet.de> wr=
+ote:
+>>>> Am 07.12.2010 00:39, schrieb Magnus Damm:
+>>>>> On Tue, Dec 7, 2010 at 2:35 AM, Arnd Hannemann <arnd@arndnet.de> =
+wrote:
+>>>>>> This patch implements SDIO IRQ support for mfds which
+>>>>>> announce the MMC_CAP_SDIO_IRQ capability for tmio_mmc.
+>>>>>> Tested with a b43-based wireless SDIO card and sh_mobile_sdhi.
+>>>>>>
+>>>>>> This patch applies on top of:
+>>>>>> mmc: tmio_mmc: allow multi-element scatter-gather lists
+>>>>>> mmc: tmio_mmc: fix PIO fallback on DMA descriptor allocation fai=
+lure
+>>>>>> mmc: tmio: merge the private header into the driver
+>>>>>> mmc: tmio: implement a bounce buffer for unaligned DMA
+>>>>>>
+>>>>>> Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+>>>>>> CC: Ian Molton <ian@mnementh.co.uk>
+>>>>>> CC: Samuel Ortiz <sameo@linux.intel.com>
+>>>>>> CC: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>>>>>> ---
+>>>>>> =A0drivers/mmc/host/tmio_mmc.c | =A0 54 ++++++++++++++++++++++++=
+++++++++++++++++++-
+>>>>>> =A01 files changed, 53 insertions(+), 1 deletions(-)
+>>>>>
 
-Or more generally, if pm_runtime_suspended() doesn't return 'true' for 
-the device.  But if the device gets suspended asynchronously, this may 
-very well happen.  For example, an i2c device is originally runtime 
-suspended, but its device_suspend() call occurs at the same time as the 
-call for the RTC device, so the i2c device actually happens to be 
-resumed at that time in order to communicate with the RTC.
+>>> I'll try to find my AR6002 card, maybe that will shed some light...
+>>
+>> Yeah, that would be really cool.
+>
+> I'll try again next time I have a bit of time to spare. =3D)
 
-> So, I think we can add a "runtime only" flag working as described above.
-> I guess it will also help in the case I've been discussing with Kevin for some
-> time (i2c device using runtime PM used by an RTC in a semi-transparent
-> fashion).
-> 
-> Alan, what do you think?
+Alright, now my AR6002-based card is working with your patches. At
+least it seems to be working - my antenna cable is broken so I can
+unfortunately not do any more proper than a simple "iwlist wlan0
+scan". Good thing is that the SDIO IRQ mode and polling mode seem to
+behave about the same.
 
-I'm not sure.  In this situation, should we worry more that we usually
-do about the possibility of a runtime resume occurring after the device
-has gone through device_suspend()?  Or just depend on the driver to do
-everything correctly?
+Please note that I did not test using the upstream driver. I couldn't
+get that one working last week, so today I reverted to using my last
+known working configuration - the out-of-tree "ar69_sdk" driver
+pointed out by the following instructions:
+http://armin762.wordpress.com/2010/05/24/nvidia-tegra2-getting-wifiathe=
+ros-6002-working/
 
-Alan Stern
+Anyway, I'm all for including your SDIO IRQ patches, but I think that
+they should be reworked a bit.
 
+I propose using two flags:
+
+1) A hardware-has-sdio-irq-support flag for include/linux/mfd/tmio.h,
+perhaps TMIO_MMC_SDIO_IRQ
+
+The SDIO IRQ hardware registers are only touched when tmio-mmc is
+provided the TMIO_MMC_SDIO_IRQ flag. The default behavior would be to
+mask the SDIO IRQ interrupt source regardless of the MMC_CAP_SDIO_IRQ
+flag. This should allow us to always enable the SDIO IRQ interrupt
+source in INTC. The SDIO driver should set the TMIO_MMC_SDIO_IRQ flag
+to show that SDHI is known to support SDIO IRQ.
+
+Hopefully this TMIO_MMC_SDIO_IRQ flag will make it easier for Ian to
+review the code and see that it doesn't break any other platforms that
+may or may not lack SDIO IRQ support.
+
+2) The regular MMC_CAP_SDIO_IRQ flag.
+
+This is enabled per board. If the SDIO IRQ feature doesn't work in
+some case then the system integrator can simply just simply go back to
+polled mode by not setting MMC_CAP_SIDO_IRQ.
+
+I'm not sure if we can keep the SDIO IRQ interrupt source constantly
+enabled in INTC though. Your current patches require the board
+specific MMC_CAP_SDIO_IRQ flag to be paired with the cpu-specific INTC
+enable change. If someone wishes tho disable SDIO_IRQ support for
+their board then they must know that they also need to revert the INTC
+enable bits, otherwise they'll get endless interrupts when the
+tmio-mmc driver starts. I believe the two-flag approach above will
+solve this problem.
+
+Thanks,
+
+/ magnus
