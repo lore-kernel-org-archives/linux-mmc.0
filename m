@@ -1,38 +1,64 @@
 From: Arnd Hannemann <arnd@arndnet.de>
-Subject: [PATCH 0/6 v2] mmc: tmio: Add SDIO IRQ support
-Date: Mon, 20 Dec 2010 15:53:45 +0000
-Message-ID: <1292860431-16195-1-git-send-email-arnd@arndnet.de>
+Subject: [PATCH 4/6 v2] ARM: mach-shmobile: sh7372 Enable SDIO IRQs
+Date: Mon, 20 Dec 2010 15:53:49 +0000
+Message-ID: <1292860431-16195-5-git-send-email-arnd@arndnet.de>
 References: <AANLkTi=HuQKRuTLLKt3Y4r9Boo71dq4qGtHLNy2=RD-V@mail.gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from slowhand.arndnet.de ([88.198.19.76]:34183 "EHLO mail.unitix.de"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1758095Ab0LTQFI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 20 Dec 2010 11:05:08 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <AANLkTi=HuQKRuTLLKt3Y4r9Boo71dq4qGtHLNy2=RD-V@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: Magnus Damm <magnus.damm@gmail.com>
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, g.liakhovetski@gmx.de, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Hannemann <arnd@arndnet.de>
+List-Id: linux-mmc@vger.kernel.org
 
-[PATCH 1/6 v2] mmc: tmio: implement SDIO IRQ
-[PATCH 2/6 v2] mfd: sh_mobile_sdhi: activate SDIO IRQ for tmio_mmc
-[PATCH 3/6 v2] mmc: tmio: disable IRQs early in remove
-[PATCH 4/6 v2] ARM: mach-shmobile: sh7372 Enable SDIO IRQs
-[PATCH 5/6 v2] sh: sh7724 Enable SDIO IRQs
-[PATCH 6/6 v2] [RFC] sh: sh7722 Enable SDIO IRQs
-
-These patches add SDIO IRQ support for the tmio mmc cell
-of the sh_mobile_sdhi mfd and activate the usage of
-SDIO IRQs on all SoCs where sh_mobile_sdhi is currently
-used.
-
-Changes since the earlier patchset:
-- Add TMIO_MMC_SDIO_IRQ flag, which expresses that  the hardware is known
-  to support SDIO IRQ as suggested by Magnus Damm
-- Activate this flag for sh_mobile_sdhi
-- Add a patch which disables IRQs early in remove
-  to avoid spurious SDIO IRQs, during module unload
-- Patches 4-6 are unmodified but included for
-  completeness
+This patch enables the interrupt generation for SDIO IRQs
+of the sdhi controllers of the SoC. To make sure interrupts
+are handled announce the MMC_CAP_SDIO_IRQ capability
+on AP4EVB. Tested with a b43-based SDIO wireless card.
 
 Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+---
+ arch/arm/mach-shmobile/board-ap4evb.c |    3 ++-
+ arch/arm/mach-shmobile/intc-sh7372.c  |    4 ++--
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
+index 16eba07..5763b0d 100644
+--- a/arch/arm/mach-shmobile/board-ap4evb.c
++++ b/arch/arm/mach-shmobile/board-ap4evb.c
+@@ -310,6 +310,7 @@ static u64 sdhi0_dma_mask = DMA_BIT_MASK(32);
+ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
++	.tmio_caps	= MMC_CAP_SDIO_IRQ,
+ };
+ 
+ static struct resource sdhi0_resources[] = {
+@@ -344,7 +345,7 @@ static struct sh_mobile_sdhi_info sdhi1_info = {
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
+ 	.tmio_ocr_mask	= MMC_VDD_165_195,
+ 	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
+-	.tmio_caps	= MMC_CAP_NEEDS_POLL,
++	.tmio_caps	= MMC_CAP_NEEDS_POLL | MMC_CAP_SDIO_IRQ,
+ 	.get_cd		= slot_cn7_get_cd,
+ };
+ 
+diff --git a/arch/arm/mach-shmobile/intc-sh7372.c b/arch/arm/mach-shmobile/intc-sh7372.c
+index 30b2f40..f78a1ea 100644
+--- a/arch/arm/mach-shmobile/intc-sh7372.c
++++ b/arch/arm/mach-shmobile/intc-sh7372.c
+@@ -230,10 +230,10 @@ static struct intc_mask_reg intca_mask_registers[] __initdata = {
+ 	  { SCIFB, SCIFA5, SCIFA4, MSIOF1,
+ 	    0, 0, MSIOF2, 0 } },
+ 	{ 0xe694009c, 0xe69400dc, 8, /* IMR7A / IMCR7A */
+-	  { DISABLED, DISABLED, ENABLED, ENABLED,
++	  { DISABLED, ENABLED, ENABLED, ENABLED,
+ 	    FLCTL_FLTREQ1I, FLCTL_FLTREQ0I, FLCTL_FLTENDI, FLCTL_FLSTEI } },
+ 	{ 0xe69400a0, 0xe69400e0, 8, /* IMR8A / IMCR8A */
+-	  { 0, DISABLED, ENABLED, ENABLED,
++	  { 0, ENABLED, ENABLED, ENABLED,
+ 	    TTI20, USBHSDMAC0_USHDMI, 0, 0 } },
+ 	{ 0xe69400a4, 0xe69400e4, 8, /* IMR9A / IMCR9A */
+ 	  { CMT1_CMT13, CMT1_CMT12, CMT1_CMT11, CMT1_CMT10,
+-- 
+1.7.2.3
+
