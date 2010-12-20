@@ -1,195 +1,56 @@
-From: Kyungmin Park <kyungmin.park@samsung.com>
-Subject: Re: [PATCH v4 2/2] sdhci-s3c: Add support no internal clock divider
- in host controller
-Date: Mon, 20 Dec 2010 11:08:00 +0900
-Message-ID: <AANLkTinJE0GOFbVEWNdTxwpv2Dwi6im0ipkPsf8jEhU1@mail.gmail.com>
-References: <1286776076-24970-1-git-send-email-kgene.kim@samsung.com>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
+Date: Sun, 19 Dec 2010 22:37:58 -0500 (EST)
+Message-ID: <Pine.LNX.4.44L0.1012192226270.31110-100000@netrider.rowland.org>
+References: <201012191122.09581.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1286776076-24970-1-git-send-email-kgene.kim@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, akpm@linux-foundation.org, Jeongbae Seo <jeongbae.seo@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from netrider.rowland.org ([192.131.102.5]:52116 "HELO
+	netrider.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1752374Ab0LTDh7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Dec 2010 22:37:59 -0500
+In-Reply-To: <201012191122.09581.rjw@sisk.pl>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, Kevin Hilman <khilman@deeprootsystems.com>
 
-Hi Chris,
+On Sun, 19 Dec 2010, Rafael J. Wysocki wrote:
 
-Unfortunately it's not merged your tree.
-It's required for s5pc210 board. can you merge it for 37-rc6 or later?
+> That said, I think we may do something different that perhaps will make your
+> life somewhat easier.
+> 
+> Namely, if your driver doesn't implement any system suspend callbacks
+> (i.e. ->suspend(), ->resume(), ->freeze(), ->thaw() etc.) and it doesn't
+> want the analogous subsystem callbacks to be executed for the device, it will
+> make sense to flag the device as "runtime only", or something like this,
+> which make the PM core skip the device in dpm_suspend() etc.
+> 
+> In that case, if a device if flagged as "runtime only", we can avoid
+> calling pm_runtime_get_noirq() for it in dpm_prepare() and, analogously,
+> calling pm_runtime_put_sync() for it in dpm_complete().  However, we will have
+> to fail system suspend (or hibernation) if a "runtime only" device has the
+> power.runtime_auto flag unset.
 
-Thank you,
-Kyungmin Park
+Or more generally, if pm_runtime_suspended() doesn't return 'true' for 
+the device.  But if the device gets suspended asynchronously, this may 
+very well happen.  For example, an i2c device is originally runtime 
+suspended, but its device_suspend() call occurs at the same time as the 
+call for the RTC device, so the i2c device actually happens to be 
+resumed at that time in order to communicate with the RTC.
 
-On Mon, Oct 11, 2010 at 2:47 PM, Kukjin Kim <kgene.kim@samsung.com> wro=
-te:
-> From: Jeongbae Seo <jeongbae.seo@samsung.com>
->
-> This patch adds to support no internal clock divider in SDHCI.
-> The external clock divider can be used to make a proper clock
-> because SDHCI doesn't support internal clock divider by itself.
->
-> If external clock divider type is selected, some functions related
-> with clock control will be overridened by other functions.
->
-> The current clock control index is added to let you know which
-> clock bus is used for SDHCI when using overriding functions.
->
-> The checking functions is added into sdhci_s3c_consider_clock,
-> because clock divider step is different from that of host controller.
->
-> Signed-off-by: Jeongbae Seo <jeongbae.seo@samsung.com>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Kyungmin Park <kyungmin.park@samsung.com>
-> Cc: Ben Dooks <ben-linux@fluff.org>
-> Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
-> ---
-> Changes since v3:
-> - Modified comparision condition as per Kyungmin Park's suggestion
->
-> Changes since v2:
-> - Changed clock control method to overriding from using quirk
-> - This patch is referred from that of Jaehoon Chung's support non-sta=
-ndard clock setting
->
-> Changes since v1:
-> - Separated to each topic
->
-> NOTE :
-> - This patch depends on following.
-> =A0[PATCH 4/5] ARM: SAMSUNG : Add clock types into platform data
->
-> =A0drivers/mmc/host/sdhci-s3c.c | =A0 62 ++++++++++++++++++++++++++++=
-++++++++++++++
-> =A01 files changed, 62 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3=
-c.c
-> index a7710f5..e7208f6 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -130,6 +130,15 @@ static unsigned int sdhci_s3c_consider_clock(str=
-uct sdhci_s3c *ourhost,
-> =A0 =A0 =A0 =A0if (!clksrc)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return UINT_MAX;
->
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* Clock divider's step is different as 1 from that o=
-f host controller
-> + =A0 =A0 =A0 =A0* when 'clk_type' is S3C_SDHCI_CLK_DIV_EXTERNAL.
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 if (ourhost->pdata->clk_type =3D=3D S3C_SDHCI_CLK_DIV_E=
-XTERNAL) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 rate =3D clk_round_rate(clksrc, wanted)=
-;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return wanted - rate;
-> + =A0 =A0 =A0 }
-> +
-> =A0 =A0 =A0 =A0rate =3D clk_get_rate(clksrc);
->
-> =A0 =A0 =A0 =A0for (div =3D 1; div < 256; div *=3D 2) {
-> @@ -232,6 +241,42 @@ static unsigned int sdhci_s3c_get_min_clock(stru=
-ct sdhci_host *host)
-> =A0 =A0 =A0 =A0return min;
-> =A0}
->
-> +/* sdhci_cmu_get_max_clk - callback to get maximum clock frequency.*=
-/
-> +static unsigned int sdhci_cmu_get_max_clock(struct sdhci_host *host)
-> +{
-> + =A0 =A0 =A0 struct sdhci_s3c *ourhost =3D to_s3c(host);
-> +
-> + =A0 =A0 =A0 return clk_round_rate(ourhost->clk_bus[ourhost->cur_clk=
-], UINT_MAX);
-> +}
-> +
-> +/* sdhci_cmu_get_min_clock - callback to get minimal supported clock=
- value. */
-> +static unsigned int sdhci_cmu_get_min_clock(struct sdhci_host *host)
-> +{
-> + =A0 =A0 =A0 struct sdhci_s3c *ourhost =3D to_s3c(host);
-> +
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* initial clock can be in the frequency range of
-> + =A0 =A0 =A0 =A0* 100KHz-400KHz, so we set it as max value.
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 return clk_round_rate(ourhost->clk_bus[ourhost->cur_clk=
-], 400000);
-> +}
-> +
-> +/* sdhci_cmu_set_clock - callback on clock change.*/
-> +static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned in=
-t clock)
-> +{
-> + =A0 =A0 =A0 struct sdhci_s3c *ourhost =3D to_s3c(host);
-> +
-> + =A0 =A0 =A0 /* don't bother if the clock is going off */
-> + =A0 =A0 =A0 if (clock =3D=3D 0)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> +
-> + =A0 =A0 =A0 sdhci_s3c_set_clock(host, clock);
-> +
-> + =A0 =A0 =A0 clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock)=
-;
-> +
-> + =A0 =A0 =A0 host->clock =3D clock;
-> +}
-> +
-> =A0static struct sdhci_ops sdhci_s3c_ops =3D {
-> =A0 =A0 =A0 =A0.get_max_clock =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_get_ma=
-x_clk,
-> =A0 =A0 =A0 =A0.set_clock =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D sdhci_s3c_se=
-t_clock,
-> @@ -361,6 +406,13 @@ static int __devinit sdhci_s3c_probe(struct plat=
-form_device *pdev)
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clks++;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sc->clk_bus[ptr] =3D clk;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* save current clock index to know w=
-hich clock bus
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* is used later in overriding functi=
-ons.
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sc->cur_clk =3D ptr;
-> +
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_enable(clk);
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_info(dev, "clock source %d: %s (%l=
-d Hz)\n",
-> @@ -427,6 +479,16 @@ static int __devinit sdhci_s3c_probe(struct plat=
-form_device *pdev)
-> =A0 =A0 =A0 =A0/* HSMMC on Samsung SoCs uses SDCLK as timeout clock *=
-/
-> =A0 =A0 =A0 =A0host->quirks |=3D SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
->
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* If controller does not have internal clock divider=
-,
-> + =A0 =A0 =A0 =A0* we can use overriding functions instead of default=
-=2E
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 if (pdata->clk_type) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_s3c_ops.set_clock =3D sdhci_cmu_s=
-et_clock;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_s3c_ops.get_min_clock =3D sdhci_c=
-mu_get_min_clock;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_s3c_ops.get_max_clock =3D sdhci_c=
-mu_get_max_clock;
-> + =A0 =A0 =A0 }
-> +
-> =A0 =A0 =A0 =A0/* It supports additional host capabilities if needed =
-*/
-> =A0 =A0 =A0 =A0if (pdata->host_caps)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->mmc->caps |=3D pdata->host_caps;
-> --
-> 1.6.2.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
-ng-soc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+> So, I think we can add a "runtime only" flag working as described above.
+> I guess it will also help in the case I've been discussing with Kevin for some
+> time (i2c device using runtime PM used by an RTC in a semi-transparent
+> fashion).
+> 
+> Alan, what do you think?
+
+I'm not sure.  In this situation, should we worry more that we usually
+do about the possibility of a runtime resume occurring after the device
+has gone through device_suspend()?  Or just depend on the driver to do
+everything correctly?
+
+Alan Stern
+
