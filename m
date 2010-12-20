@@ -1,7 +1,7 @@
 From: Arnd Hannemann <arnd@arndnet.de>
-Subject: [PATCH 4/6 v2] ARM: mach-shmobile: sh7372 Enable SDIO IRQs
-Date: Mon, 20 Dec 2010 15:53:49 +0000
-Message-ID: <1292860431-16195-5-git-send-email-arnd@arndnet.de>
+Subject: [PATCH 3/6 v2] mmc: tmio: disable IRQs early in remove
+Date: Mon, 20 Dec 2010 15:53:48 +0000
+Message-ID: <1292860431-16195-4-git-send-email-arnd@arndnet.de>
 References: <AANLkTi=HuQKRuTLLKt3Y4r9Boo71dq4qGtHLNy2=RD-V@mail.gmail.com>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <AANLkTi=HuQKRuTLLKt3Y4r9Boo71dq4qGtHLNy2=RD-V@mail.gmail.com>
@@ -10,55 +10,32 @@ To: Magnus Damm <magnus.damm@gmail.com>
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, g.liakhovetski@gmx.de, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Hannemann <arnd@arndnet.de>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch enables the interrupt generation for SDIO IRQs
-of the sdhi controllers of the SoC. To make sure interrupts
-are handled announce the MMC_CAP_SDIO_IRQ capability
-on AP4EVB. Tested with a b43-based SDIO wireless card.
+With SDIO IRQ, spurious interrupts are generated on
+module unloading.
+
+This patch fixes that by disabling IRQs early.
+Tested with a b43-based wireless SDIO card and sh_mobile_sdhi.
 
 Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
 ---
- arch/arm/mach-shmobile/board-ap4evb.c |    3 ++-
- arch/arm/mach-shmobile/intc-sh7372.c  |    4 ++--
- 2 files changed, 4 insertions(+), 3 deletions(-)
+ drivers/mmc/host/tmio_mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
-index 16eba07..5763b0d 100644
---- a/arch/arm/mach-shmobile/board-ap4evb.c
-+++ b/arch/arm/mach-shmobile/board-ap4evb.c
-@@ -310,6 +310,7 @@ static u64 sdhi0_dma_mask = DMA_BIT_MASK(32);
- static struct sh_mobile_sdhi_info sdhi0_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
-+	.tmio_caps	= MMC_CAP_SDIO_IRQ,
- };
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 18771b4..37721aa 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -1249,9 +1249,9 @@ static int __devexit tmio_mmc_remove(struct platform_device *dev)
  
- static struct resource sdhi0_resources[] = {
-@@ -344,7 +345,7 @@ static struct sh_mobile_sdhi_info sdhi1_info = {
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
- 	.tmio_ocr_mask	= MMC_VDD_165_195,
- 	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
--	.tmio_caps	= MMC_CAP_NEEDS_POLL,
-+	.tmio_caps	= MMC_CAP_NEEDS_POLL | MMC_CAP_SDIO_IRQ,
- 	.get_cd		= slot_cn7_get_cd,
- };
- 
-diff --git a/arch/arm/mach-shmobile/intc-sh7372.c b/arch/arm/mach-shmobile/intc-sh7372.c
-index 30b2f40..f78a1ea 100644
---- a/arch/arm/mach-shmobile/intc-sh7372.c
-+++ b/arch/arm/mach-shmobile/intc-sh7372.c
-@@ -230,10 +230,10 @@ static struct intc_mask_reg intca_mask_registers[] __initdata = {
- 	  { SCIFB, SCIFA5, SCIFA4, MSIOF1,
- 	    0, 0, MSIOF2, 0 } },
- 	{ 0xe694009c, 0xe69400dc, 8, /* IMR7A / IMCR7A */
--	  { DISABLED, DISABLED, ENABLED, ENABLED,
-+	  { DISABLED, ENABLED, ENABLED, ENABLED,
- 	    FLCTL_FLTREQ1I, FLCTL_FLTREQ0I, FLCTL_FLTENDI, FLCTL_FLSTEI } },
- 	{ 0xe69400a0, 0xe69400e0, 8, /* IMR8A / IMCR8A */
--	  { 0, DISABLED, ENABLED, ENABLED,
-+	  { 0, ENABLED, ENABLED, ENABLED,
- 	    TTI20, USBHSDMAC0_USHDMI, 0, 0 } },
- 	{ 0xe69400a4, 0xe69400e4, 8, /* IMR9A / IMCR9A */
- 	  { CMT1_CMT13, CMT1_CMT12, CMT1_CMT11, CMT1_CMT10,
+ 	if (mmc) {
+ 		struct tmio_mmc_host *host = mmc_priv(mmc);
+-		mmc_remove_host(mmc);
+ 		tmio_mmc_release_dma(host);
+ 		free_irq(host->irq, host);
++		mmc_remove_host(mmc);
+ 		if (cell->disable)
+ 			cell->disable(dev);
+ 		iounmap(host->ctl);
 -- 
 1.7.2.3
 
