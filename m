@@ -1,50 +1,64 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/2] mmc: agressive clocking framework v8
-Date: Tue, 21 Dec 2010 20:24:08 +0000
-Message-ID: <20101221202408.GA12006@void.printf.net>
-References: <1288776170-10141-1-git-send-email-linus.walleij@stericsson.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
+Date: Tue, 21 Dec 2010 22:31:57 +0100
+Message-ID: <201012212231.57420.rjw@sisk.pl>
+References: <Pine.LNX.4.44L0.1012201946330.19558-100000@netrider.rowland.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:42195 "EHLO void.printf.net"
+Received: from ogre.sisk.pl ([217.79.144.158]:44137 "EHLO ogre.sisk.pl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751223Ab0LUUYN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Dec 2010 15:24:13 -0500
-Content-Disposition: inline
-In-Reply-To: <1288776170-10141-1-git-send-email-linus.walleij@stericsson.com>
+	id S1751280Ab0LUVc5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 21 Dec 2010 16:32:57 -0500
+In-Reply-To: <Pine.LNX.4.44L0.1012201946330.19558-100000@netrider.rowland.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Ghorai Sukumar <s-ghorai@ti.com>, Nicolas Pitre <nico@fluxnic.net>, Adrian Hunter <adrian.hunter@nokia.com>, David Vrabel <david.vrabel@csr.com>, Kyungmin Park <kmpark@infradead.org>, jh80.chung@samsung.com
+To: Alan Stern <stern@rowland.harvard.edu>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, Kevin Hilman <khilman@deeprootsystems.com>
 
-Hi Linus,
+On Tuesday, December 21, 2010, Alan Stern wrote:
+> On Mon, 20 Dec 2010, Rafael J. Wysocki wrote:
+> 
+> > > > In that case, if a device if flagged as "runtime only", we can avoid
+> > > > calling pm_runtime_get_noirq() for it in dpm_prepare() and, analogously,
+> > > > calling pm_runtime_put_sync() for it in dpm_complete().  However, we will have
+> > > > to fail system suspend (or hibernation) if a "runtime only" device has the
+> > > > power.runtime_auto flag unset.
+> > > 
+> > > Or more generally, if pm_runtime_suspended() doesn't return 'true' for 
+> > > the device.
+> > 
+> > That's not necessary, because the device may be suspended using
+> > pm_runtime_suspend() later than we check pm_runtime_suspended().
+> 
+> What if the device has a child in the RPM_ACTIVE state?  Then 
+> pm_runtime_suspend() won't do anything, even if the child really is 
+> dpm-suspended.
 
-On Wed, Nov 03, 2010 at 10:22:50AM +0100, Linus Walleij wrote:
-> +/*
-> + *	mmc_host_clk_exit - shut down clock gating code
-> + *	@host: host with potential clock to control
-> + */
-> +static inline void mmc_host_clk_exit(struct mmc_host *host)
-> +{
-> +	/*
-> +	 * Wait for any outstanding gate and then make sure we're
-> +	 * ungated before exiting.
-> +	 */
-> +	if (cancel_work_sync(&host->clk_disable_work))
-> +		mmc_host_clk_gate_delayed(host);
-> +	if (host->clk_gated)
-> +		mmc_host_clk_ungate(host);
-> +	BUG_ON(host->clk_requests > 0);
-> +}
+Well, in fact I was thinking of leaf devices.  Following all of the children
+for non-leaf devices would pretty much nullify the whole possible gain.
 
-I just hit the BUG_ON() above, when doing "rmmod sdhci-pci" on my x86
-laptop running today's linux-next.  There was *no* SD card inserted,
-and hadn't been one inserted all boot.
+> > I'd use the "runtime only" (or perhaps better "no_dpm") flag as a declaration
+> > (if set) that the device is going to be suspended with the help of "runtime"
+> > callbacks and the driver takes the responsibility for getting things right.
+> 
+> I'm still not sure about this; the design isn't clear.  Are these
+> runtime callbacks going to come from the PM core or from the driver?  
+> If from the driver, how will the driver know when to issue them?  What
+> about coordinating async suspends (the device must be suspended after
+> its children and before its parent)?
 
-Let me know if you want me to try adding any extra debugging/patches.
+It basically goes like this.  There's device A that is only resumed when it's
+needed to carry out an operation and is suspended immediately after that.
+There's another device B that needs A to do something during its suspend.
+So, when the suspend of B is started, A is woken up, does its work and is
+suspended again (using pm_runtime_suspend()).  Then B is suspended.
 
-Thanks,
+We currently require that ->suspend() and ->resume() callbacks be defined
+for A (presumably pointing to the same code as its runtime callbacks) so that
+things work correctly, but perhaps we can just relax this requirement a bit?
+I'm not 100% sure that's a good idea, just considering it.
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Rafael
