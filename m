@@ -1,60 +1,89 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: Re: MMC DEBUG and Scheduler WARN observation
-Date: Tue, 21 Dec 2010 10:50:24 -0800
-Message-ID: <A02E0DC6-2038-4D02-B6A8-896A73B9250A@marvell.com>
-References: <3944C8CC-0AED-43D5-B5BD-DDE378F8EE81@marvell.com>
+Subject: Re: [PATCH] mmc: Test bus-width for old MMC devices (v2)
+Date: Tue, 21 Dec 2010 11:35:09 -0800
+Message-ID: <6E608F2B-DB48-43CC-BF08-1415041A8316@marvell.com>
+References: <s5hfwtzbj8v.wl%tiwai@suse.de>
+ <20101216234032.GA17239@void.printf.net>
+ <50D31EC8-BD9E-4920-8CEB-2AD10DF9C5C5@marvell.com>
+ <20101217034342.GA19673@void.printf.net>	<s5hy67o95to.wl%tiwai@suse.de>
+ <AANLkTimSt5a998m1oqdppsWjGCVid0-Ub81pKgsPR36f@mail.gmail.com>
+ <E81C83FE-E3AD-49DA-86BE-95631F1B81CD@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:52963 "HELO
-	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1752482Ab0LUSxY convert rfc822-to-8bit
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:35034 "HELO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751863Ab0LUTiK convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Dec 2010 13:53:24 -0500
-In-Reply-To: <3944C8CC-0AED-43D5-B5BD-DDE378F8EE81@marvell.com>
+	Tue, 21 Dec 2010 14:38:10 -0500
+In-Reply-To: <E81C83FE-E3AD-49DA-86BE-95631F1B81CD@marvell.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>
+To: Zhangfei Gao <zhangfei.gao@gmail.com>, Zhangfei Gao <zgao6@marvell.com>
+Cc: Takashi Iwai <tiwai@suse.de>, Chris Ball <cjb@laptop.org>, Aries Lee <arieslee@jmicron.com>, Qiming Wu <wuqm@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
 
-more information:  not just related to debug -- on card insert see this
+Zhangfei,
 
-  311.430644] mmcblk1: mmc1:8fe4 SD16G 14.8 GiB (ro)                                                                                                                                                         
-[  311.453761]  mmcblk1: p1                                                                                                                                                                                   
-[  311.491052] FAT: IO charset iso8859-1 not found                                                                                                                                                            
-[  311.506584] ------------[ cut here ]------------                                                                                                                                                           
-[  311.506602] WARNING: at kernel/sched.c:4000 schedule+0x25c/0x3ac()                                                                                                                                         
-[  311.520321] Modules linked in:                                                                                                                                                                             
-[  311.547754] [<c002abe8>] (unwind_backtrace+0x0/0x124) from [<c003834c>] (warn_slowpath_common+0x4c/0x64)                                                                                                   
-[  311.547754] [<c003834c>] (warn_slowpath_common+0x4c/0x64) from [<c0038380>] (warn_slowpath_null+0x1c/0x24)                                                                                                 
-[  311.575939] [<c0038380>] (warn_slowpath_null+0x1c/0x24) from [<c028911c>] (schedule+0x25c/0x3ac)                                                                                                           
-[  311.630782] [<c028911c>] (schedule+0x25c/0x3ac) from [<c02892ac>] (preempt_schedule+0x40/0x70)                                                                                                             
-[  311.656404] [<c02892ac>] (preempt_schedule+0x40/0x70) from [<c01ec164>] (mmc_blk_issue_rq+0x5f4/0x8f0)                                                                                                     
-[  311.656404] [<c01ec164>] (mmc_blk_issue_rq+0x5f4/0x8f0) from [<c01ecb5c>] (mmc_queue_thread+0xd4/0xf8)                                                                                                     
-[  311.684078] [<c01ecb5c>] (mmc_queue_thread+0xd4/0xf8) from [<c00500d0>] (kthread+0x7c/0x84)                                                                                                                
-[  311.736602] [<c00500d0>] (kthread+0x7c/0x84) from [<c00263e0>] (kernel_thread_exit+0x0/0x8)                                                                                                                
-[  311.736602] ---[ end trace 9d0d1c3c07fa6efd ]---                                                                                                                                                           
-[  311.775214] EXT3-fs (mmcblk1p1): error: can't find ext3 filesystem on dev mmcblk1p1.                                                                                                                       
-[  311.799387] EXT2-fs (mmcblk1p1): error: can't find an ext2 filesystem on dev mmcblk1p1.                                                                                                                    
-[  311.822737] MTD: Attempt to mount non-MTD device "/dev/mmcblk1p1"                                                                                                                                          
-[  311.845630] cramfs: wrong magic                                                                                                                                                                            
+Reproduced the problem on mmp2.  Fix enclosed.  Slight change from Zhangfei
+original suggestion.
+
+Please confirm by adding tested-by.
+
+Philip
 
 
-On Dec 21, 2010, at 8:40 AM, Philip Rakity wrote:
 
-> 
-> Using linux-next and enabled MMC_DEBUG
-> 
-> on card insert get schedule warn message sched.c line 4000
-> warn on once test_tsk_need_resched(next));
-> 
-> This warning comes when sdhci.c printk no vmmc regulator found on card insert in add_host.
-> 
-> Phlip--
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>From 8b35e007d67dd593ff5e8a07b564c438e8303aae Mon Sep 17 00:00:00 2001
+From: Philip Rakity <prakity@marvell.com>
+Date: Tue, 21 Dec 2010 11:29:33 -0800
+Subject: [PATCH] mmc: fix regression testing bus width when CAP not defined
+
+First reported by Zhangfei Gao.
+
+set mmc bus width before checking for CAP for mmc bus width testing.
+set bus width when card is not ddr
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+Tested-by: Philip Rakity
+---
+ drivers/mmc/core/mmc.c |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 1d8409f..3a2905f 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -558,6 +558,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 					 EXT_CSD_BUS_WIDTH,
+ 					 ext_csd_bits[idx][0]);
+ 			if (!err) {
++				mmc_set_bus_width_ddr(card->host,
++						      bus_width, MMC_SDR_MODE);
+ 				/*
+ 				 * If controller can't handle bus width test,
+ 				 * use the highest bus width to maintain
+@@ -565,8 +567,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 				 */
+ 				if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
+ 					break;
+-				mmc_set_bus_width_ddr(card->host,
+-						      bus_width, MMC_SDR_MODE);
+ 				err = mmc_bus_test(card, bus_width);
+ 				if (!err)
+ 					break;
+@@ -586,7 +586,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		} else if (ddr) {
+ 			mmc_card_set_ddr_mode(card);
+ 			mmc_set_bus_width_ddr(card->host, bus_width, ddr);
+-		}
++		} else
++			mmc_set_bus_width (card->host, bus_width);
+ 	}
+ 
+ 	if (!oldcard)
+-- 
+1.6.0.4
 
