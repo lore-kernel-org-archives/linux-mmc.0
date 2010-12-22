@@ -1,61 +1,60 @@
-From: viresh kumar <viresh.kumar@st.com>
-Subject: mmc_test mmc0:0001: Can't create file. Perhaps debugfs is disabled
-Date: Wed, 22 Dec 2010 17:29:47 +0530
-Message-ID: <4D11E833.7000506@st.com>
+From: "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>
+Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
+Date: Wed, 22 Dec 2010 13:29:40 +0100
+Message-ID: <201012221329.40251.rjw@sisk.pl>
+References: <Pine.LNX.4.44L0.1012212032590.11252-100000@netrider.rowland.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:39551 "EHLO
-	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752234Ab0LVL76 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Dec 2010 06:59:58 -0500
-Received: from zeta.dmz-ap.st.com (ns6.st.com [138.198.234.13])
-	by beta.dmz-ap.st.com (STMicroelectronics) with ESMTP id 020BFE5
-	for <linux-mmc@vger.kernel.org>; Wed, 22 Dec 2010 11:59:52 +0000 (GMT)
-Received: from Webmail-ap.st.com (eapex1hubcas3.st.com [10.80.176.67])
-	by zeta.dmz-ap.st.com (STMicroelectronics) with ESMTP id A649B149E
-	for <linux-mmc@vger.kernel.org>; Wed, 22 Dec 2010 11:59:52 +0000 (GMT)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <Pine.LNX.4.44L0.1012212032590.11252-100000-pYrvlCTfrz9XsRXLowluHWD2FQJk+8+b@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Cc: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, Kevin Hilman <khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Shiraz HASHIM <shiraz.hashim@st.com>
 
-Hello,
+On Wednesday, December 22, 2010, Alan Stern wrote:
+> On Tue, 21 Dec 2010, Rafael J. Wysocki wrote:
+> 
+> > It basically goes like this.  There's device A that is only resumed when it's
+> > needed to carry out an operation and is suspended immediately after that.
+> > There's another device B that needs A to do something during its suspend.
+> > So, when the suspend of B is started, A is woken up, does its work and is
+> > suspended again (using pm_runtime_suspend()).  Then B is suspended.
+> > 
+> > We currently require that ->suspend() and ->resume() callbacks be defined
+> > for A (presumably pointing to the same code as its runtime callbacks) so that
+> > things work correctly, but perhaps we can just relax this requirement a bit?
+> > I'm not 100% sure that's a good idea, just considering it.
+> 
+> I still don't know.  It would require a lot of special conditions: no
+> child devices, not runtime-PM-disabled, not runtime-PM-forbidden...  
+> Also, A's parent would have to be coded carefully; otherwise A's
+> runtime resume would prevent the parent from suspending.
+> 
+> This just doesn't fit very well with the runtime PM model, or at least, 
+> not in the form you described.
+> 
+> Consider this instead:  Since A is required to be functional before B
+> can be used, A must be registered before B and hence B gets suspended
+> before A.  Therefore during the prepare phase we can runtime-resume A
+> and leave it powered up; when B needs to suspend, it won't matter that
+> the runtime-PM calls are ineffective.
 
-I am using mmc_test.c driver present in drivers/mmc/test.c
+We don't really need to do that, because the runtime resume _is_ functional
+during system suspend.  The only thing missing is a ->suspend() callback for A
+(and a corresponding ->resume() callback to make sure A will be available to
+B during system resume).
 
-Whenever i insert my card after booting linux i get this error:
-"mmc_test mmc0:0001: Can't create file. Perhaps debugfs is disabled"
+> Then when A's dpm_suspend occurs, it can safely go to a low-power state and
+> stay there.
 
-I debugged a bit and found something strange. In file drivers/mmc/core/bus.c
-following code is present.
+Agreed.
 
-int mmc_add_card(struct mmc_card *card)
-{
-...
-
-	ret = device_add(&card->dev);
-	if (ret)
-		return ret;
-
-#ifdef CONFIG_DEBUG_FS
-	mmc_add_card_debugfs(card);
-#endif
-
-...
-}
-
-After device_add is called mmc_test_register_file_test routine (present in mmc_test.c) is
-called and it tries to add "test" file inside card->debugfs_root directory.
-
-But this directory is not actually present till the time mmc_add_card_debugfs() is called,
-which actually creates it.
-
-reversing the sequence of above routines seems to solve this issue.
-I am not sure if i am doing something wrong or it is actually a bug.
-
--- 
-viresh
-ST Microelectronics
-India.
+Thanks,
+Rafael
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
