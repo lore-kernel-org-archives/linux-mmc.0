@@ -1,117 +1,86 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH 22/23]  Alternative mmc structure to support pxa168, pxa910,
+Subject: [PATCH 23/23]  Alternative mmc structure to support pxa168, pxa910,
  mmp2 family SD
-Date: Tue, 21 Dec 2010 23:11:26 -0800
-Message-ID: <809DAEAF-3923-4E7E-968F-62579BA961A5@marvell.com>
+Date: Tue, 21 Dec 2010 23:11:35 -0800
+Message-ID: <92E97B42-FC3E-4ECA-ABCD-214F0DB7182C@marvell.com>
 Mime-Version: 1.0
 Content-Type: multipart/mixed;
-	boundary="_002_809DAEAF39234E7E968F62579BA961A5marvellcom_"
+	boundary="_002_92E97B42FC3E4ECAABCD214F0DB7182Cmarvellcom_"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:53941 "HELO
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:54080 "HELO
 	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1752418Ab0LVHN6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Dec 2010 02:13:58 -0500
+	by vger.kernel.org with SMTP id S1752551Ab0LVHOI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Dec 2010 02:14:08 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 Cc: Mark Brown <markb@marvell.com>
 
---_002_809DAEAF39234E7E968F62579BA961A5marvellcom_
+--_002_92E97B42FC3E4ECAABCD214F0DB7182Cmarvellcom_
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 
->From 8b35e007d67dd593ff5e8a07b564c438e8303aae Mon Sep 17 00:00:00 2001
+
+
+
+>From e7c195e52dacf3a1d976cdd2da07309f35746af2 Mon Sep 17 00:00:00 2001
 From: Philip Rakity <prakity@marvell.com>
-Date: Tue, 21 Dec 2010 11:29:33 -0800
-Subject: [PATCH] mmc: fix regression testing bus width when CAP not defined
+Date: Tue, 21 Dec 2010 21:14:34 -0800
+Subject: [PATCH] mach-mmp: brownstone -- change SD/MMC clk_delay to max for=
+ eMMC
 
-First reported by Zhangfei Gao.
-
-set mmc bus width before checking for CAP for mmc bus width testing.
-set bus width when card is not ddr
+clk_delay 31 needed to support Dual Data Rate eMMC
 
 Signed-off-by: Philip Rakity <prakity@marvell.com>
-Tested-by: Philip Rakity
 ---
- drivers/mmc/core/mmc.c |    7 ++++---
- 1 files changed, 4 insertions(+), 3 deletions(-)
+ arch/arm/mach-mmp/brownstone.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 1d8409f..3a2905f 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -558,6 +558,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr=
-,
- 					 EXT_CSD_BUS_WIDTH,
- 					 ext_csd_bits[idx][0]);
- 			if (!err) {
-+				mmc_set_bus_width_ddr(card->host,
-+						      bus_width, MMC_SDR_MODE);
- 				/*
- 				 * If controller can't handle bus width test,
- 				 * use the highest bus width to maintain
-@@ -565,8 +567,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr=
-,
- 				 */
- 				if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
- 					break;
--				mmc_set_bus_width_ddr(card->host,
--						      bus_width, MMC_SDR_MODE);
- 				err =3D mmc_bus_test(card, bus_width);
- 				if (!err)
- 					break;
-@@ -586,7 +586,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr=
-,
- 		} else if (ddr) {
- 			mmc_card_set_ddr_mode(card);
- 			mmc_set_bus_width_ddr(card->host, bus_width, ddr);
--		}
-+		} else
-+			mmc_set_bus_width (card->host, bus_width);
- 	}
-=20
- 	if (!oldcard)
+diff --git a/arch/arm/mach-mmp/brownstone.c b/arch/arm/mach-mmp/brownstone.=
+c
+index e4e458c..52fc9c5 100644
+--- a/arch/arm/mach-mmp/brownstone.c
++++ b/arch/arm/mach-mmp/brownstone.c
+@@ -157,7 +157,7 @@ static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc1=
+ =3D {
+ static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 =3D {
+ 	.adjust_clocks	=3D 1,
+ 	.clk_select	=3D 1,
+-	.clk_delay	=3D 15,
++	.clk_delay	=3D 31,
+ 	.flags		=3D PXA_FLAG_CARD_PERMANENT |
+ 				PXA_FLAG_SD_8_BIT_CAPABLE_SLOT,
+ };
 --=20
 1.6.0.4
 
---_002_809DAEAF39234E7E968F62579BA961A5marvellcom_
+--_002_92E97B42FC3E4ECAABCD214F0DB7182Cmarvellcom_
 Content-Type: application/octet-stream;
-	name="0022-mmc-fix-regression-testing-bus-width-when-CAP-not-d.patch"
-Content-Description: 0022-mmc-fix-regression-testing-bus-width-when-CAP-not-d.patch
+	name="0023-mach-mmp-brownstone-change-SD-MMC-clk_delay-to-m.patch"
+Content-Description: 0023-mach-mmp-brownstone-change-SD-MMC-clk_delay-to-m.patch
 Content-Disposition: attachment;
-	filename="0022-mmc-fix-regression-testing-bus-width-when-CAP-not-d.patch";
-	size=1596; creation-date="Tue, 21 Dec 2010 23:11:27 GMT";
-	modification-date="Tue, 21 Dec 2010 23:11:27 GMT"
+	filename="0023-mach-mmp-brownstone-change-SD-MMC-clk_delay-to-m.patch";
+	size=926; creation-date="Tue, 21 Dec 2010 23:11:35 GMT";
+	modification-date="Tue, 21 Dec 2010 23:11:35 GMT"
 Content-Transfer-Encoding: base64
 
-RnJvbSA4YjM1ZTAwN2Q2N2RkNTkzZmY1ZThhMDdiNTY0YzQzOGU4MzAzYWFlIE1vbiBTZXAgMTcg
+RnJvbSBlN2MxOTVlNTJkYWNmM2ExZDk3NmNkZDJkYTA3MzA5ZjM1NzQ2YWYyIE1vbiBTZXAgMTcg
 MDA6MDA6MDAgMjAwMQpGcm9tOiBQaGlsaXAgUmFraXR5IDxwcmFraXR5QG1hcnZlbGwuY29tPgpE
-YXRlOiBUdWUsIDIxIERlYyAyMDEwIDExOjI5OjMzIC0wODAwClN1YmplY3Q6IFtQQVRDSF0gbW1j
-OiBmaXggcmVncmVzc2lvbiB0ZXN0aW5nIGJ1cyB3aWR0aCB3aGVuIENBUCBub3QgZGVmaW5lZAoK
-Rmlyc3QgcmVwb3J0ZWQgYnkgWmhhbmdmZWkgR2FvLgoKc2V0IG1tYyBidXMgd2lkdGggYmVmb3Jl
-IGNoZWNraW5nIGZvciBDQVAgZm9yIG1tYyBidXMgd2lkdGggdGVzdGluZy4Kc2V0IGJ1cyB3aWR0
-aCB3aGVuIGNhcmQgaXMgbm90IGRkcgoKU2lnbmVkLW9mZi1ieTogUGhpbGlwIFJha2l0eSA8cHJh
-a2l0eUBtYXJ2ZWxsLmNvbT4KVGVzdGVkLWJ5OiBQaGlsaXAgUmFraXR5Ci0tLQogZHJpdmVycy9t
-bWMvY29yZS9tbWMuYyB8ICAgIDcgKysrKy0tLQogMSBmaWxlcyBjaGFuZ2VkLCA0IGluc2VydGlv
-bnMoKyksIDMgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMu
-YyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKaW5kZXggMWQ4NDA5Zi4uM2EyOTA1ZiAxMDA2NDQK
-LS0tIGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYworKysgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5j
-CkBAIC01NTgsNiArNTU4LDggQEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJkKHN0cnVjdCBtbWNf
-aG9zdCAqaG9zdCwgdTMyIG9jciwKIAkJCQkJIEVYVF9DU0RfQlVTX1dJRFRILAogCQkJCQkgZXh0
-X2NzZF9iaXRzW2lkeF1bMF0pOwogCQkJaWYgKCFlcnIpIHsKKwkJCQltbWNfc2V0X2J1c193aWR0
-aF9kZHIoY2FyZC0+aG9zdCwKKwkJCQkJCSAgICAgIGJ1c193aWR0aCwgTU1DX1NEUl9NT0RFKTsK
-IAkJCQkvKgogCQkJCSAqIElmIGNvbnRyb2xsZXIgY2FuJ3QgaGFuZGxlIGJ1cyB3aWR0aCB0ZXN0
-LAogCQkJCSAqIHVzZSB0aGUgaGlnaGVzdCBidXMgd2lkdGggdG8gbWFpbnRhaW4KQEAgLTU2NSw4
-ICs1NjcsNiBAQCBzdGF0aWMgaW50IG1tY19pbml0X2NhcmQoc3RydWN0IG1tY19ob3N0ICpob3N0
-LCB1MzIgb2NyLAogCQkJCSAqLwogCQkJCWlmICghKGhvc3QtPmNhcHMgJiBNTUNfQ0FQX0JVU19X
-SURUSF9URVNUKSkKIAkJCQkJYnJlYWs7Ci0JCQkJbW1jX3NldF9idXNfd2lkdGhfZGRyKGNhcmQt
-Pmhvc3QsCi0JCQkJCQkgICAgICBidXNfd2lkdGgsIE1NQ19TRFJfTU9ERSk7CiAJCQkJZXJyID0g
-bW1jX2J1c190ZXN0KGNhcmQsIGJ1c193aWR0aCk7CiAJCQkJaWYgKCFlcnIpCiAJCQkJCWJyZWFr
-OwpAQCAtNTg2LDcgKzU4Niw4IEBAIHN0YXRpYyBpbnQgbW1jX2luaXRfY2FyZChzdHJ1Y3QgbW1j
-X2hvc3QgKmhvc3QsIHUzMiBvY3IsCiAJCX0gZWxzZSBpZiAoZGRyKSB7CiAJCQltbWNfY2FyZF9z
-ZXRfZGRyX21vZGUoY2FyZCk7CiAJCQltbWNfc2V0X2J1c193aWR0aF9kZHIoY2FyZC0+aG9zdCwg
-YnVzX3dpZHRoLCBkZHIpOwotCQl9CisJCX0gZWxzZQorCQkJbW1jX3NldF9idXNfd2lkdGggKGNh
-cmQtPmhvc3QsIGJ1c193aWR0aCk7CiAJfQogCiAJaWYgKCFvbGRjYXJkKQotLSAKMS42LjAuNAoK
+YXRlOiBUdWUsIDIxIERlYyAyMDEwIDIxOjE0OjM0IC0wODAwClN1YmplY3Q6IFtQQVRDSF0gbWFj
+aC1tbXA6IGJyb3duc3RvbmUgLS0gY2hhbmdlIFNEL01NQyBjbGtfZGVsYXkgdG8gbWF4IGZvciBl
+TU1DCgpjbGtfZGVsYXkgMzEgbmVlZGVkIHRvIHN1cHBvcnQgRHVhbCBEYXRhIFJhdGUgZU1NQwoK
+U2lnbmVkLW9mZi1ieTogUGhpbGlwIFJha2l0eSA8cHJha2l0eUBtYXJ2ZWxsLmNvbT4KLS0tCiBh
+cmNoL2FybS9tYWNoLW1tcC9icm93bnN0b25lLmMgfCAgICAyICstCiAxIGZpbGVzIGNoYW5nZWQs
+IDEgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9hcmNoL2FybS9t
+YWNoLW1tcC9icm93bnN0b25lLmMgYi9hcmNoL2FybS9tYWNoLW1tcC9icm93bnN0b25lLmMKaW5k
+ZXggZTRlNDU4Yy4uNTJmYzljNSAxMDA2NDQKLS0tIGEvYXJjaC9hcm0vbWFjaC1tbXAvYnJvd25z
+dG9uZS5jCisrKyBiL2FyY2gvYXJtL21hY2gtbW1wL2Jyb3duc3RvbmUuYwpAQCAtMTU3LDcgKzE1
+Nyw3IEBAIHN0YXRpYyBzdHJ1Y3Qgc2RoY2lfcHhhX3BsYXRkYXRhIG1tcDJfc2RoX3BsYXRkYXRh
+X21tYzEgPSB7CiBzdGF0aWMgc3RydWN0IHNkaGNpX3B4YV9wbGF0ZGF0YSBtbXAyX3NkaF9wbGF0
+ZGF0YV9tbWMyID0gewogCS5hZGp1c3RfY2xvY2tzCT0gMSwKIAkuY2xrX3NlbGVjdAk9IDEsCi0J
+LmNsa19kZWxheQk9IDE1LAorCS5jbGtfZGVsYXkJPSAzMSwKIAkuZmxhZ3MJCT0gUFhBX0ZMQUdf
+Q0FSRF9QRVJNQU5FTlQgfAogCQkJCVBYQV9GTEFHX1NEXzhfQklUX0NBUEFCTEVfU0xPVCwKIH07
+Ci0tIAoxLjYuMC40Cgo=
 
---_002_809DAEAF39234E7E968F62579BA961A5marvellcom_--
+--_002_92E97B42FC3E4ECAABCD214F0DB7182Cmarvellcom_--
