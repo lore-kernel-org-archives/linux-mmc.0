@@ -1,48 +1,43 @@
-From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+From: Alan Stern <stern@rowland.harvard.edu>
 Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Tue, 21 Dec 2010 20:42:59 -0500 (EST)
-Message-ID: <Pine.LNX.4.44L0.1012212032590.11252-100000@netrider.rowland.org>
-References: <201012212231.57420.rjw@sisk.pl>
+Date: Tue, 21 Dec 2010 20:48:15 -0500 (EST)
+Message-ID: <Pine.LNX.4.44L0.1012212045220.11252-100000@netrider.rowland.org>
+References: <87ipymwysi.fsf@deeprootsystems.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <201012212231.57420.rjw-KKrjLPT3xs0@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>
-Cc: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, Kevin Hilman <khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from netrider.rowland.org ([192.131.102.5]:52344 "HELO
+	netrider.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1751364Ab0LVBsP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Dec 2010 20:48:15 -0500
+In-Reply-To: <87ipymwysi.fsf@deeprootsystems.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Hilman <khilman@deeprootsystems.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Ohad Ben-Cohen <ohad@wizery.com>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>
 
-On Tue, 21 Dec 2010, Rafael J. Wysocki wrote:
+On Tue, 21 Dec 2010, Kevin Hilman wrote:
 
-> It basically goes like this.  There's device A that is only resumed when it's
-> needed to carry out an operation and is suspended immediately after that.
-> There's another device B that needs A to do something during its suspend.
-> So, when the suspend of B is started, A is woken up, does its work and is
-> suspended again (using pm_runtime_suspend()).  Then B is suspended.
-> 
-> We currently require that ->suspend() and ->resume() callbacks be defined
-> for A (presumably pointing to the same code as its runtime callbacks) so that
-> things work correctly, but perhaps we can just relax this requirement a bit?
-> I'm not 100% sure that's a good idea, just considering it.
+> That being said, another thing we discussed briefly at LPC was wondering
+> about reason(s) behind the DPM core locking out runtime PM transitions
+> in the first place.
 
-I still don't know.  It would require a lot of special conditions: no
-child devices, not runtime-PM-disabled, not runtime-PM-forbidden...  
-Also, A's parent would have to be coded carefully; otherwise A's
-runtime resume would prevent the parent from suspending.
+The reason is to prevent confusion from unwanted runtime-PM state 
+changes during a system sleep transition.
 
-This just doesn't fit very well with the runtime PM model, or at least, 
-not in the form you described.
+> Currently runtime PM transitions are blocked in dpm_prepare() and only
+> allowed again in dpm_complete().  How about locking out runtime PM
+> transitions only until the DPM suspend operation is complete.  IOW,
+> rather than waiting for dpm_complete() to re-allow runtime PM
+> transitions, what about allowing them after dpm_suspend()?  I haven't
+> actually tested this yet, since I'm busy with getting OMAP PM stuff
+> ready for the merge window, so it's just and idea so far.  Of course
+> similar will be needed to block runtime PM transitions during
+> dpm_resume().  
 
-Consider this instead:  Since A is required to be functional before B
-can be used, A must be registered before B and hence B gets suspended
-before A.  Therefore during the prepare phase we can runtime-resume A
-and leave it powered up; when B needs to suspend, it won't matter that
-the runtime-PM calls are ineffective.  Then when A's dpm_suspend
-occurs, it can safely go to a low-power state and stay there.
+That would defeat the purpose.  We need to prevent unwanted state
+changes during the entire sleep transition, not just during the time 
+that dpm_suspend is running.
 
 Alan Stern
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
