@@ -1,60 +1,113 @@
-From: "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>
-Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Wed, 22 Dec 2010 13:29:40 +0100
-Message-ID: <201012221329.40251.rjw@sisk.pl>
-References: <Pine.LNX.4.44L0.1012212032590.11252-100000@netrider.rowland.org>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <Pine.LNX.4.44L0.1012212032590.11252-100000-pYrvlCTfrz9XsRXLowluHWD2FQJk+8+b@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
-Cc: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, Kevin Hilman <khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org>
+From: Pierre Tardy <tardyp@gmail.com>
+Subject: [RFC] sdhci: use ios->clock to know when sdhci is idle
+Date: Wed, 22 Dec 2010 14:13:41 +0100
+Message-ID: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:42544 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751863Ab0LVNUs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Dec 2010 08:20:48 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Pierre Tardy <tardyp@gmail.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Linus Walleij <linus.walleij@stericsson.com>, Ohad Ben-Cohen <ohad@wizery.com>, Yunpeng Gao <yunpeng.gao@intel.com>
 
-On Wednesday, December 22, 2010, Alan Stern wrote:
-> On Tue, 21 Dec 2010, Rafael J. Wysocki wrote:
-> 
-> > It basically goes like this.  There's device A that is only resumed when it's
-> > needed to carry out an operation and is suspended immediately after that.
-> > There's another device B that needs A to do something during its suspend.
-> > So, when the suspend of B is started, A is woken up, does its work and is
-> > suspended again (using pm_runtime_suspend()).  Then B is suspended.
-> > 
-> > We currently require that ->suspend() and ->resume() callbacks be defined
-> > for A (presumably pointing to the same code as its runtime callbacks) so that
-> > things work correctly, but perhaps we can just relax this requirement a bit?
-> > I'm not 100% sure that's a good idea, just considering it.
-> 
-> I still don't know.  It would require a lot of special conditions: no
-> child devices, not runtime-PM-disabled, not runtime-PM-forbidden...  
-> Also, A's parent would have to be coded carefully; otherwise A's
-> runtime resume would prevent the parent from suspending.
-> 
-> This just doesn't fit very well with the runtime PM model, or at least, 
-> not in the form you described.
-> 
-> Consider this instead:  Since A is required to be functional before B
-> can be used, A must be registered before B and hence B gets suspended
-> before A.  Therefore during the prepare phase we can runtime-resume A
-> and leave it powered up; when B needs to suspend, it won't matter that
-> the runtime-PM calls are ineffective.
+This allows sdhci to detect its own activity and to autosuspend
+when not used
 
-We don't really need to do that, because the runtime resume _is_ functional
-during system suspend.  The only thing missing is a ->suspend() callback for A
-(and a corresponding ->resume() callback to make sure A will be available to
-B during system resume).
+inspired from  mmci: handle clock frequency 0 properly
+>From Linus Walleij <linus.walleij@stericsson.com>
+author of mmc aggressive clock gating fw.
 
-> Then when A's dpm_suspend occurs, it can safely go to a low-power state and
-> stay there.
+The idea of using mmc clock gating fw in order to power gate the
+sdhci is simple (hope no too simplistic):
+Whenever the mmc fw tells we dont need the MMC clock, we dont need 
+the sdhci power as well.
 
-Agreed.
+This does not mean that the child (card) is
+suspended. In case of a Wifi SDIO card, the card will be suspended
+and resumed according to the ifconfig up/down status.
+Even if the Wifi interface is up, user might not use the network.
+Sdhci can be powered off during those period. It is up to the HW
+implementation to implement smart enough power gating to still
+support enough always-on circuitry allowing to detect sdio 
+interrupts.
 
-Thanks,
-Rafael
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This patch goes on top of Yunpeng's patch available on patchwork:
+378052 [v2,2/3] mmc: enable runtime PM support of sdhci host controller
+
+CC: Chris Ball <cjb@laptop.org>
+CC: Andrew Morton <akpm@linux-foundation.org>
+CC: Alan Cox <alan@linux.intel.com>
+CC: Takashi Iwai <tiwai@suse.de>
+CC: Maxim Levitsky <maximlevitsky@gmail.com>
+CC: Linus Walleij <linus.walleij@stericsson.com>
+CC: Ohad Ben-Cohen <ohad@wizery.com>
+CC: Yunpeng Gao <yunpeng.gao@intel.com>
+
+Signed-off-by: Pierre Tardy <tardyp@gmail.com>
+---
+ drivers/mmc/host/sdhci.c  |   20 ++++++++++++++++++++
+ include/linux/mmc/sdhci.h |    1 +
+ 2 files changed, 21 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a298fb0..a648330 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1161,6 +1161,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sdhci_host *host;
+ 	unsigned long flags;
++        unsigned int lastclock;
+ 	u8 ctrl;
+ 
+ 	host = mmc_priv(mmc);
+@@ -1171,6 +1172,24 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		goto out;
+ 
+ 	/*
++	 * get/put runtime_pm usage counter at ios->clock transitions
++         * We need to do it before any other chip access, as sdhci could
++         * be power gated
++	 */
++        lastclock = host->iosclock;
++        host->iosclock = ios->clock;
++	if (lastclock == 0 && ios->clock != 0) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		pm_runtime_get_sync(&host->parent.dev);
++		spin_lock_irqsave(&host->lock, flags);
++	} else if (lastclock != 0 && ios->clock == 0) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		pm_runtime_put_autosuspend(&host->parent.dev);
++		spin_lock_irqsave(&host->lock, flags);
++		/* no need to configure the rest.. */
++		goto out;
++	}
++	/*
+ 	 * Reset the chip on each power off.
+ 	 * Should clear out any weird states.
+ 	 */
+@@ -1779,6 +1798,7 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+ 
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
++	host->iosclock = 0;
+ 
+ 	return host;
+ }
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 0d953f5..78c1528 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -114,6 +114,7 @@ struct sdhci_host {
+ 	unsigned int timeout_clk;	/* Timeout freq (KHz) */
+ 
+ 	unsigned int clock;	/* Current clock (MHz) */
++	unsigned int iosclock;	/* Last clock asked via set_ios  */
+ 	u8 pwr;			/* Current voltage */
+ 
+ 	struct mmc_request *mrq;	/* Current request */
+-- 
+1.7.1
+
