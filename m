@@ -1,34 +1,45 @@
-From: Enrico Scholz <enrico.scholz@sigma-chemnitz.de>
-Subject: Re: [PATCH 2/23]  Alternative mmc structure to support pxa168, pxa910,
-	mmp2 family SD
-Date: Thu, 23 Dec 2010 13:26:03 +0100
-Message-ID: <lyei98vfok.fsf@ensc-virt.intern.sigma-chemnitz.de>
-References: <661A407B-8073-4B51-AE40-E3BA6D0B5C42@marvell.com>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
+Date: Thu, 23 Dec 2010 11:03:24 -0500 (EST)
+Message-ID: <Pine.LNX.4.44L0.1012231055440.5617-100000@netrider.rowland.org>
+References: <AANLkTi=9kjmb3evOON3WMoGjqadDHqqBKVH4viT02Qf9@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from netrider.rowland.org ([192.131.102.5]:43202 "HELO
+	netrider.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1753171Ab0LWQDY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2010 11:03:24 -0500
+In-Reply-To: <AANLkTi=9kjmb3evOON3WMoGjqadDHqqBKVH4viT02Qf9@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, Kevin Hilman <khilman@deeprootsystems.com>
 
-Philip Rakity <prakity@marvell.com> writes:
+On Thu, 23 Dec 2010, Ohad Ben-Cohen wrote:
 
-> --- a/arch/arm/mach-mmp/include/mach/regs-apmu.h
-> +++ b/arch/arm/mach-mmp/include/mach/regs-apmu.h
-> +#define APMU_SDH2	APMU_REG(0x0e8)
-> +#define APMU_SDH3	APMU_REG(0x0ec)
+> On Sun, Dec 19, 2010 at 12:22 PM, Rafael J. Wysocki <rjw@sisk.pl> wrote:
+> > That said, I think we may do something different that perhaps will make your
+> > life somewhat easier.
+> ...
+> > So, I think we can add a "runtime only" flag working as described above.
+> 
+> That will definitely solve the suspend/resume issue we're having.
+> 
+> But due to /sys/devices/.../power/control, we will still have to
+> bypass runtime PM for this particular device.
+> 
+> We need a way to unconditionally power down the device, and as long as
+> runtime PM can be disabled by the user, we can't use it.
 
-is this really correct?  "ARMADA 16x Application Processor Family"
-(October 2010) manual says that these registers are at 0xe0 + 0xe4.
+I'm still not aware of the details of your situation.  Nevertheless, it
+shouldn't be hard to set up a suspend() routine that would do whatever
+was needed to power down the device, whether this means calling the 
+runtime_suspend() routine directly or something else.  That's basically 
+what every other driver does.
 
+By definition, system sleep transitions require bypassing runtime PM.  
+There's nothing odd or unusual about it.
 
-Enrico
+Alan Stern
+
