@@ -1,94 +1,148 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH] [patch v2] ARM: mach-shmobile: mackerel: Add zboot MMCIF support
-Date: Thu, 23 Dec 2010 10:48:11 +0900
-Message-ID: <1293068891-25526-1-git-send-email-horms@verge.net.au>
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>, Simon Horman <horms@verge.net.au>
+From: Mike Rapoport <mike@compulab.co.il>
+Subject: Re: [PATCH 3/3] mmc: add sdhci-tegra driver for Tegra SoCs
+Date: Thu, 23 Dec 2010 08:20:58 +0200
+Message-ID: <4D12EA4A.4000906@compulab.co.il>
+References: <1293004871-1918-1-git-send-email-olof@lixom.net> <1293004871-1918-4-git-send-email-olof@lixom.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from compulab.co.il ([67.18.134.219]:56902 "EHLO compulab.co.il"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752418Ab0LWGVt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Dec 2010 01:21:49 -0500
+In-Reply-To: <1293004871-1918-4-git-send-email-olof@lixom.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>
+Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, Yvonne Yip <y@palm.com>
 
-This patch wires up LED debugging for the MMCIF boot
-on the mackerel, which is all that is required to get MMCIF
-boot functioning.
+On 12/22/10 10:01, Olof Johansson wrote:
+> SDHCI driver for Tegra. Pretty straight forward, a few pieces of
+> functionality left to fill in but nothing that stops it from going
+> upstream. Board enablement submitted separately.
+> 
+> This driver plugs in as a new variant of sdhci-pltfm, using the platform
+> data structure passed in to specify the GPIOs to use for card detect,
+> write protect and card power enablement.
+> 
+> Original driver (of which only the header file is left):
+> Signed-off-by: Yvonne Yip <y@palm.com>
+> 
+> The rest, which has been rewritten by now:
+> Signed-off-by: Olof Johansson <olof@lixom.net>
+> Cc: Wolfram Sang <w.sang@pengutronix.de>
+> Cc: Mike Rapoport <mike@compulab.co.il>
 
-Cc: Magnus Damm <magnus.damm@gmail.com>
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Signed-off-by: Simon Horman <horms@verge.net.au>
----
-This patch depends on:
-* ARM: 6515/1: Add zboot support for SuperH Mobile ARM
-  (merged into the devel branch of Russel King's linux-2.6-arm tree)
-* ARM: 6514/1: mach-shmobile: Add zboot support for SuperH Mobile ARM
-  (merged into the devel branch of Russel King's linux-2.6-arm tree)
-* MACH_MACKEREL (3211) being present in arch/arm/tools/mach-types
-* ARM: mach-shmobile: mackerel: Add zboot support
-* rfc v3: mmc, ARM: Add zboot from MMC support for SuperH Mobile ARM,
-  which depends on
-  * mmc, sh: Remove sh_mmcif_boot_slurp()
-    (merged into the common/mmcif branch of Paul Mundt's sh-2.6 tree)
-  * sh, mmc: Use defines when setting CE_CLK_CTRL
-    (merged into the common/mmcif branch of Paul Mundt's sh-2.6 tree)
-  * mmc, sh: Move MMCIF_PROGRESS_* into sh_mmcif.h
-    (merged into the common/mmcif branch of Paul Mundt's sh-2.6 tree)
+Only one comment below, otherwise feel free to add
+Acked-by: Mike Rapoport <mike@compulab.co.il>
 
-v2
-* Use correct GPIO ports
-  - my previous assumptions turned out to be incorrect
----
- .../mach-shmobile/include/mach/mmcif-mackerel.h    |   29 ++++++++++++++++++++
- arch/arm/mach-shmobile/include/mach/mmcif.h        |    2 +
- 2 files changed, 31 insertions(+), 0 deletions(-)
- create mode 100644 arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
+> ---
+> 
+>  arch/arm/mach-tegra/include/mach/sdhci.h |   28 ++++
+>  drivers/mmc/host/Kconfig                 |   10 ++
+>  drivers/mmc/host/Makefile                |    1 +
+>  drivers/mmc/host/sdhci-pltfm.c           |    3 +
+>  drivers/mmc/host/sdhci-pltfm.h           |    1 +
+>  drivers/mmc/host/sdhci-tegra.c           |  219 ++++++++++++++++++++++++++++++
+>  6 files changed, 262 insertions(+), 0 deletions(-)
+>  create mode 100644 arch/arm/mach-tegra/include/mach/sdhci.h
+>  create mode 100644 drivers/mmc/host/sdhci-tegra.c
+> 
 
-diff --git a/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h b/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
-new file mode 100644
-index 0000000..34253c1
---- /dev/null
-+++ b/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
-@@ -0,0 +1,29 @@
-+#ifndef MMCIF_MACKEREL_H
-+#define MMCIF_MACKEREL_H
-+
-+#define PORT0CR      0xe6051001
-+#define PORT1CR      0xe6051002
-+#define PORT2CR      0xe6051003
-+#define PORT3CR      0xe6051004
-+
-+#define PORTR031_000DR 0xe6055000
-+
-+static inline void mmcif_init_progress(void)
-+{
-+       /* Initialise LEDS0-3
-+        * registers: PORT0CR-PORT1CR (LED0-LED3 Control)
-+        * value:     0x10 - enable output
-+        */
-+       __raw_writeb(0x10, PORT0CR);
-+       __raw_writeb(0x10, PORT1CR);
-+       __raw_writeb(0x10, PORT2CR);
-+       __raw_writeb(0x10, PORT3CR);
-+}
-+
-+static inline void mmcif_update_progress(int n)
-+{
-+	__raw_writel((__raw_readl(PORTR031_000DR) & 0xf) |
-+		     (1 << n), PORTR031_000DR);
-+}
-+
-+#endif /* MMCIF_MACKEREL_H */
-diff --git a/arch/arm/mach-shmobile/include/mach/mmcif.h b/arch/arm/mach-shmobile/include/mach/mmcif.h
-index 0812f1e..f4dc327 100644
---- a/arch/arm/mach-shmobile/include/mach/mmcif.h
-+++ b/arch/arm/mach-shmobile/include/mach/mmcif.h
-@@ -9,6 +9,8 @@
- 
- #ifdef CONFIG_MACH_AP4EVB
- #include "mach/mmcif-ap4eb.h"
-+#elif CONFIG_MACH_MACKEREL
-+#include "mach/mmcif-mackerel.h"
- #else
- #error "unsupported board."
- #endif
+[ snip ]
+
+> +	if (gpio_is_valid(plat->wp_gpio)) {
+> +		rc = gpio_request(plat->wp_gpio, "sdhci_wp");
+> +		if (rc) {
+> +			dev_err(mmc_dev(host->mmc), 
+> +				"failed to allocate wp gpio\n");
+> +			goto out_cd;
+> +		}
+> +		tegra_gpio_enable(plat->wp_gpio);
+
+gpio_direction_input?
+
+> +	}
+> +
+> +	clk = clk_get(mmc_dev(host->mmc), NULL);
+> +	if (IS_ERR(clk)) {
+> +		dev_err(mmc_dev(host->mmc), "clk err\n");
+> +		rc = PTR_ERR(clk);
+> +		goto out_wp;
+> +	}
+> +	clk_enable(clk);
+> +	pltfm_host->clk = clk;
+> +
+> +	return 0;
+> +
+> +out_wp:
+> +	if (gpio_is_valid(plat->wp_gpio)) {
+> +		tegra_gpio_disable(plat->wp_gpio);
+> +		gpio_free(plat->wp_gpio);
+> +	}
+> +
+> +out_cd:
+> +	if (gpio_is_valid(plat->cd_gpio)) {
+> +		tegra_gpio_disable(plat->cd_gpio);
+> +		gpio_free(plat->cd_gpio);
+> +	}
+> +
+> +out_power:
+> +	if (gpio_is_valid(plat->power_gpio)) {
+> +		tegra_gpio_disable(plat->power_gpio);
+> +		gpio_free(plat->power_gpio);
+> +	}
+> +
+> +out:
+> +	return rc;
+> +}
+> +
+> +static void tegra_sdhci_pltfm_exit(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
+> +	struct tegra_sdhci_platform_data *plat;
+> +
+> +	plat = pdev->dev.platform_data;
+> +
+> +	if (gpio_is_valid(plat->wp_gpio)) {
+> +		tegra_gpio_disable(plat->wp_gpio);
+> +		gpio_free(plat->wp_gpio);
+> +	}
+> +
+> +	if (gpio_is_valid(plat->cd_gpio)) {
+> +		tegra_gpio_disable(plat->cd_gpio);
+> +		gpio_free(plat->cd_gpio);
+> +	}
+> +
+> +	if (gpio_is_valid(plat->power_gpio)) {
+> +		tegra_gpio_disable(plat->power_gpio);
+> +		gpio_free(plat->power_gpio);
+> +	}
+> +
+> +	clk_disable(pltfm_host->clk);
+> +	clk_put(pltfm_host->clk);
+> +}
+> +
+> +static struct sdhci_ops tegra_sdhci_ops = {
+> +	.get_ro     = tegra_sdhci_get_ro,
+> +	.read_l     = tegra_sdhci_readl,
+> +	.read_w     = tegra_sdhci_readw,
+> +	.write_l    = tegra_sdhci_writel,
+> +};
+> +
+> +struct sdhci_pltfm_data sdhci_tegra_pdata = {
+> +	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+> +		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+> +		  SDHCI_QUIRK_NO_HISPD_BIT |
+> +		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
+> +	.ops  = &tegra_sdhci_ops,
+> +	.init = tegra_sdhci_pltfm_init,
+> +	.exit = tegra_sdhci_pltfm_exit,
+> +};
+
+
 -- 
-1.7.2.3
-
+Sincerely yours,
+Mike.
