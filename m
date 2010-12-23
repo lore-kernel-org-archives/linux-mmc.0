@@ -1,51 +1,39 @@
 From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH 1/2] sdhci: add quirk for max len ADMA descriptors
-Date: Thu, 23 Dec 2010 10:26:16 -0800
-Message-ID: <AANLkTi=SRwNq0918xfra=4ZHzNsGT1nBNxpUnPAoSj3-@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: add sdhci-tegra driver for Tegra SoCs
+Date: Thu, 23 Dec 2010 10:27:29 -0800
+Message-ID: <AANLkTinpfKrLoZEr4RkiLJvNNHKavKCY4VBaJn+eGCv_@mail.gmail.com>
 References: <1293096475-19634-1-git-send-email-olof@lixom.net>
-	<1293096475-19634-2-git-send-email-olof@lixom.net>
-	<20101223112606.GB5044@pengutronix.de>
+	<1293096828-19985-1-git-send-email-olof@lixom.net>
+	<20101223112346.GA5044@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:54307 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752958Ab0LWS0R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2010 13:26:17 -0500
-In-Reply-To: <20101223112606.GB5044@pengutronix.de>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:64627 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753460Ab0LWS1a convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2010 13:27:30 -0500
+In-Reply-To: <20101223112346.GA5044@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Mike Rapoport <mike@compulab.co.il>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, Yvonne Yip <y@palm.com>
 
-On Thu, Dec 23, 2010 at 3:26 AM, Wolfram Sang <w.sang@pengutronix.de> wrote:
-> On Thu, Dec 23, 2010 at 03:27:54AM -0600, Olof Johansson wrote:
->> Some controllers misparse segment length 0 as being 0, not 65536. Add
->> a quirk to deal with it.
->>
->> Signed-off-by: Olof Johansson <olof@lixom.net>
+On Thu, Dec 23, 2010 at 3:23 AM, Wolfram Sang <w.sang@pengutronix.de> w=
+rote:
 >
-> I tend to NACK it (but I am not the maintainer). I'd prefer to see a
-> draft of your idea of a sdhci_add_host_fixup()-function :)
+>> Changes since v2:
+>> =A0 =A0 =A0 * Whitespace fixes
+>> =A0 =A0 =A0 * Changed order of test in get_ro
+>
+> What benefit has the reordering? (And just to make sure: You still
+> return -1 meaning "read-only". I assume this is intentional)\
 
-See, I tend to get annoyed when I get asked to clean up others' messes
-because something I do is all of the sudden held to a higher standard
-than they have been.
+Uh, thanks for the vague feedback last time. I thought that's what
+your concern with it was.
 
-So, I see one of three options:
+But yeah, defaulting to RW makes more sense. v4 coming once I know if
+you want me to rip out the new quirk or not.
 
-* This go in, and I clean up some of the other drivers separately, _as promised_
-* I do a sdhci_host_fixup() function, and only clean up my driver and
-the rest will be cleaned up... never, probably
-* I just remove this quirk, repost my driver without it, carry the
-quirk out of tree and get on with other things that I actually care
-about
-
-
-So, don't overdo it. I already promised I would help clean up this
-subsystem. Ok?
-
-
-Thanks,
 
 -Olof
