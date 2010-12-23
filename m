@@ -1,36 +1,50 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Thu, 23 Dec 2010 09:51:22 +0200
-Message-ID: <AANLkTi=9kjmb3evOON3WMoGjqadDHqqBKVH4viT02Qf9@mail.gmail.com>
-References: <AANLkTikJr+0kVPE4aSwPjZWRfA3gRSNgGwzQdSwRpo_5@mail.gmail.com>
- <AANLkTin23vbbA7+UDzh=v060HbkLMrJjB38cs+AWScPJ@mail.gmail.com>
- <201012182347.08635.rjw@sisk.pl> <201012191122.09581.rjw@sisk.pl>
+From: Sujit Reddy <sujitreddy243@gmail.com>
+Subject: eMMC sector/byte access mode validation
+Date: Thu, 23 Dec 2010 13:35:03 +0530
+Message-ID: <AANLkTinn8EOuiB7ufMFxu=4vCf1K1==oj7Yqni_pbMjc@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:36485 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752281Ab0LWHvn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2010 02:51:43 -0500
-In-Reply-To: <201012191122.09581.rjw@sisk.pl>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:34333 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751532Ab0LWIFF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2010 03:05:05 -0500
+Received: by pzk35 with SMTP id 35so45236pzk.19
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Dec 2010 00:05:04 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Alan Stern <stern@rowland.harvard.edu>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, Kevin Hilman <khilman@deeprootsystems.com>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, akpm@linux-foundation.org, prakity@marvell.com
 
-On Sun, Dec 19, 2010 at 12:22 PM, Rafael J. Wysocki <rjw@sisk.pl> wrote:
-> That said, I think we may do something different that perhaps will make your
-> life somewhat easier.
-...
-> So, I think we can add a "runtime only" flag working as described above.
+Hi,
 
-That will definitely solve the suspend/resume issue we're having.
+According to eMMC spec v4.3, Section 6.1 says that greater than 2GB
+density cards are sector addressable and less than 2GB are byte addressable.
+But Section 7.3.3 says that OCR bit 30 needs to be used which access mode
+the host must use for all its future transactions.
 
-But due to /sys/devices/.../power/control, we will still have to
-bypass runtime PM for this particular device.
+In mainline kernel the support for less than 2GB cards is by checking
+the density of card.
+If it is greater than 2GB it is assumed to be supporting sector addressing.
 
-We need a way to unconditionally power down the device, and as long as
-runtime PM can be disabled by the user, we can't use it.
+But actually we need to check the OCR value to determine the correct access mode
+See patch (http://www.spinics.net/lists/linux-mmc/msg01466.html) by Philip.
 
-Thanks,
-Ohad.
+Some eMMC cards even though less than 2GB have SEC_COUNT value defined
+in EXT_CSD register but does not support sector access mode.
+
+I have a couple of questions here:
+1) Are there any cards that support only byte access mode even though
+the density is
+greater than 2GB?
+2) If there are cards which have capacity less than 2GB and supports only sector
+access mode then what's the solution? I am not sure If there are any such cards.
+
+Philip's patch handles both these scenarios effectively.
+Can anyone mention the reason not taking Philip's patch into account,
+which I feel is much
+more fool proof than the implementation in mainline kernel
+(http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg02307.html)?
+
+Thanks
+Sujit
