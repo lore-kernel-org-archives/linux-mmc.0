@@ -1,50 +1,51 @@
-From: Sujit Reddy <sujitreddy243@gmail.com>
-Subject: eMMC sector/byte access mode validation
-Date: Thu, 23 Dec 2010 13:35:03 +0530
-Message-ID: <AANLkTinn8EOuiB7ufMFxu=4vCf1K1==oj7Yqni_pbMjc@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 2.6.37
+Date: Thu, 23 Dec 2010 03:56:16 -0500
+Message-ID: <m3pqss50lr.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:34333 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751532Ab0LWIFF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2010 03:05:05 -0500
-Received: by pzk35 with SMTP id 35so45236pzk.19
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Dec 2010 00:05:04 -0800 (PST)
+Received: from void.printf.net ([89.145.121.20]:40086 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752027Ab0LWIty (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Dec 2010 03:49:54 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, akpm@linux-foundation.org, prakity@marvell.com
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi,
+Linus,
 
-According to eMMC spec v4.3, Section 6.1 says that greater than 2GB
-density cards are sector addressable and less than 2GB are byte addressable.
-But Section 7.3.3 says that OCR bit 30 needs to be used which access mode
-the host must use for all its future transactions.
+Please pull from:
 
-In mainline kernel the support for less than 2GB cards is by checking
-the density of card.
-If it is greater than 2GB it is assumed to be supporting sector addressing.
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
-But actually we need to check the OCR value to determine the correct access mode
-See patch (http://www.spinics.net/lists/linux-mmc/msg01466.html) by Philip.
+to fix a regression in resume-from-hibernate, and two minor driver bugs
+on Atmel controllers.  These have been tested in linux-next.  Thanks.
 
-Some eMMC cards even though less than 2GB have SEC_COUNT value defined
-in EXT_CSD register but does not support sector access mode.
+The following changes since commit 0a59228168d3722b71f8e3dbc623316fb4be78f4:
 
-I have a couple of questions here:
-1) Are there any cards that support only byte access mode even though
-the density is
-greater than 2GB?
-2) If there are cards which have capacity less than 2GB and supports only sector
-access mode then what's the solution? I am not sure If there are any such cards.
+  Merge git://git.kernel.org/pub/scm/linux/kernel/git/cmetcalf/linux-tile (2010-12-18 10:28:54 -0800)
 
-Philip's patch handles both these scenarios effectively.
-Can anyone mention the reason not taking Philip's patch into account,
-which I feel is much
-more fool proof than the implementation in mainline kernel
-(http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg02307.html)?
+are available in the git repository at:
 
-Thanks
-Sujit
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+Nicolas Ferre (1):
+      mmc: atmel-mci: fix multiblock SDIO transfers
+
+Takashi Iwai (1):
+      mmc: Fix re-probing with PM_POST_RESTORE notification
+
+Yauhen Kharuzhy (1):
+      mmc: at91_mci: fix multiblock SDIO transfers
+
+ arch/arm/mach-at91/include/mach/at91_mci.h |    2 ++
+ drivers/mmc/core/core.c                    |    1 +
+ drivers/mmc/host/at91_mci.c                |   13 +++++++++----
+ drivers/mmc/host/atmel-mci.c               |   18 ++++++++++++------
+ 4 files changed, 24 insertions(+), 10 deletions(-)
+
+-- 
+Chris Ball   <cjb@laptop.org>
+One Laptop Per Child
