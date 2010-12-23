@@ -1,51 +1,49 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC fixes for 2.6.37
-Date: Thu, 23 Dec 2010 03:56:16 -0500
-Message-ID: <m3pqss50lr.fsf@pullcord.laptop.org>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH 3/3] mmc: add sdhci-tegra driver for Tegra SoCs
+Date: Thu, 23 Dec 2010 00:59:03 -0800
+Message-ID: <AANLkTim3v8XzR36ZUn9dSUXpnTLZv134fRVg5VKOtetd@mail.gmail.com>
+References: <1293004871-1918-1-git-send-email-olof@lixom.net>
+	<1293004871-1918-4-git-send-email-olof@lixom.net>
+	<4D12EA4A.4000906@compulab.co.il>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40086 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752027Ab0LWIty (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 23 Dec 2010 03:49:54 -0500
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:58066 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752453Ab0LWI7E convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2010 03:59:04 -0500
+In-Reply-To: <4D12EA4A.4000906@compulab.co.il>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Mike Rapoport <mike@compulab.co.il>
+Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, Yvonne Yip <y@palm.com>
 
-Linus,
+Hi,
 
-Please pull from:
+On Wed, Dec 22, 2010 at 10:20 PM, Mike Rapoport <mike@compulab.co.il> w=
+rote:
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+> Only one comment below, otherwise feel free to add
+> Acked-by: Mike Rapoport <mike@compulab.co.il>
 
-to fix a regression in resume-from-hibernate, and two minor driver bugs
-on Atmel controllers.  These have been tested in linux-next.  Thanks.
+Thanks!
 
-The following changes since commit 0a59228168d3722b71f8e3dbc623316fb4be78f4:
+>> + =A0 =A0 if (gpio_is_valid(plat->wp_gpio)) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 rc =3D gpio_request(plat->wp_gpio, "sdhci_=
+wp");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (rc) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_err(mmc_dev(host->mmc)=
+,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "failed to=
+ allocate wp gpio\n");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out_cd;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 }
+>> + =A0 =A0 =A0 =A0 =A0 =A0 tegra_gpio_enable(plat->wp_gpio);
+>
+> gpio_direction_input?
 
-  Merge git://git.kernel.org/pub/scm/linux/kernel/git/cmetcalf/linux-tile (2010-12-18 10:28:54 -0800)
+Yep, for cd_gpio too.
 
-are available in the git repository at:
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-Nicolas Ferre (1):
-      mmc: atmel-mci: fix multiblock SDIO transfers
-
-Takashi Iwai (1):
-      mmc: Fix re-probing with PM_POST_RESTORE notification
-
-Yauhen Kharuzhy (1):
-      mmc: at91_mci: fix multiblock SDIO transfers
-
- arch/arm/mach-at91/include/mach/at91_mci.h |    2 ++
- drivers/mmc/core/core.c                    |    1 +
- drivers/mmc/host/at91_mci.c                |   13 +++++++++----
- drivers/mmc/host/atmel-mci.c               |   18 ++++++++++++------
- 4 files changed, 24 insertions(+), 10 deletions(-)
-
--- 
-Chris Ball   <cjb@laptop.org>
-One Laptop Per Child
+-Olof
