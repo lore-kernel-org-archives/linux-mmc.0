@@ -1,96 +1,57 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/23]  Alternative mmc structure to support pxa168, pxa910, mmp2 family SD
-Date: Thu, 23 Dec 2010 00:45:32 +0100
-Message-ID: <201012230045.32641.arnd@arndb.de>
-References: <98992407-793C-4545-AAB3-9C80BE5BCEF5@marvell.com> <201012221525.10232.arnd@arndb.de> <09DA111A-AFD0-4214-B6DC-4236E30256FA@marvell.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/2] mmc: agressive clocking framework v8
+Date: Thu, 23 Dec 2010 00:09:47 +0000
+Message-ID: <20101223000947.GA29312@void.printf.net>
+References: <1288776170-10141-1-git-send-email-linus.walleij@stericsson.com> <20101221202408.GA12006@void.printf.net> <AANLkTikdA5Pbiwx+VdhtgShhMGcLkJLV0B5O_Yi+_aCx@mail.gmail.com> <4D11B5D6.3030805@csr.com> <AANLkTikmLaTXAxdfUtfoEKuASeJ-F=zLQYJC36sj4oT+@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:50137 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752426Ab0LVXpi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Dec 2010 18:45:38 -0500
-In-Reply-To: <09DA111A-AFD0-4214-B6DC-4236E30256FA@marvell.com>
+Received: from void.printf.net ([89.145.121.20]:60024 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752471Ab0LWAJw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Dec 2010 19:09:52 -0500
+Content-Disposition: inline
+In-Reply-To: <AANLkTikmLaTXAxdfUtfoEKuASeJ-F=zLQYJC36sj4oT+@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Philip Rakity <prakity@marvell.com>, Mark Brown <markb@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: David Vrabel <david.vrabel@csr.com>, linux-mmc@vger.kernel.org, Ghorai Sukumar <s-ghorai@ti.com>, Nicolas Pitre <nico@fluxnic.net>, Adrian Hunter <adrian.hunter@nokia.com>, Kyungmin Park <kmpark@infradead.org>, jh80.chung@samsung.com
 
-On Thursday 23 December 2010 00:21:26 Philip Rakity wrote:
-> On Dec 22, 2010, at 6:25 AM, Arnd Bergmann wrote:
-> > * The mails are sent as attachments, not inline
+Hi Linus,
+
+On Wed, Dec 22, 2010 at 09:50:12AM +0100, Linus Walleij wrote:
+> Sure! Chris do you prefer this one instead?
 > 
-> My e-mail system shows I received inline and attachments.
-
-Ah, I didn't realize this. It should be inline-only though.
- 
-> > * There is no threading, better make all of the patches 
-> >  replies to a first [PATCH 0/23] mail describing the
-> >  overall intentions of the patch set.
+> From: Linus Walleij <linus.walleij@stericsson.com>
+> Date: Wed, 22 Dec 2010 09:49:04 +0100
+> Subject: [PATCH] mmc: check for > 1 clk_requests
 > 
-> What is correct format for this? 
-
-The initial mail is free-form, just have a look at what others
-do. Good things to include there are a list of patches,
-a combined diffstat and a list of changes from previous
-submissions.
-
-> > * 23 patches is a lot, some of them are obvious candidates
-> >  for merging, because they make no sense on their own, e.g.
-> >  12 and 13, or 19 and 21.
+> Since we make sure the clock is enabled in the mmc_host_clk_exit()
+> function we should expect a reference counter of 1, not 0.
 > 
-> Long discussion about this.  Went between a few BIG patches but was told that
-> this makes review very difficult.  
-
-Right, small patches are normally much preferred to big patches.
-You were just taking it a bit too far.
-
-> The patches were generated in the order that
-> made sense to apply them.  Was worried that skipping one set would break 
-> things.  The intent was that some of the patches could be picked up individually if the 
-> philosophy for handing SD/MMC is not acceptable to the list.
+> Signed-off-by: Linus Walleij <linus.walleij@stericsson.com>
+> ---
+>  drivers/mmc/core/host.c |    3 ++-
+>  1 files changed, 2 insertions(+), 1 deletions(-)
 > 
-> I can go back and separate  arch/ patches into one set and a few patches
-> for SD/MMC.  What would folks like to see.  
-
-The way you did it was almost perfect, don't make the opposite mistake
-of making the patches too big again. Splitting arch/ from drivers/
-patches only makes sense if you expect different maintainers to pick
-them up. In general, it's more important to keep pieces logically
-together. If you introduce a new function and use it in one place,
-put both the function and the user in one patch, rather than having
-one patch that adds multiple unrelated functions and another that
-uses all of them.
- 
-> How is this best handled from a subject line so it is easy to follow the threads ?
-
-You can make multiple series, each with a patch 0/xx email in front and
-the others as a reply to the first mail. Note that a good maximum number
-of patches per series would be no more than 15. You can have 20 or
-so if the patches are as small as the ones you sent, but if they get
-too large, ten patches may be too much already.
-
-> > * Some other patches have a S-o-b from you, but it's not the last
-> >  one in the list.
-> > * Please Cc the people that you have in the Signed-off-by or
-> >  other headers.
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 92e3370..b3ac6c5 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -235,7 +235,8 @@ static inline void mmc_host_clk_exit(struct mmc_host *host)
+>  		mmc_host_clk_gate_delayed(host);
+>  	if (host->clk_gated)
+>  		mmc_host_clk_ungate(host);
+> -	BUG_ON(host->clk_requests > 0);
+> +	/* There should be only one user now */
+> +	WARN_ON(host->clk_requests > 1);
+>  }
 > 
-> 0001 was submitted by the folks in the patch.  It is NOT in linux-next and without
-> it no mmp2 testing can be done on my development board.
+>  #else
 
-Not sure what you mean. If you forward a patch from someone else,
-you are supposed to add you s-o-b under the last one that you got,
-and notify them that you are submitting the patch somewhere.
+Thanks, both of you, have merged this to mmc-next now.  We'll do some
+rebasing to fold it in later.
 
-> > Using git-send-email will take care of some of these issues.
-> 
-> very painful -- corp e-mail issues.
-
-Many freemail providers allow you to use arbitrary sender addresses
-(gmail does not, fwiw), so you can use them with git-send-email as
-long as you have access to the SMTP ports. Other people from your
-company have managed fine, just ask around what they did.
-
-	Arnd
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
