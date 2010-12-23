@@ -1,49 +1,108 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH 3/3] mmc: add sdhci-tegra driver for Tegra SoCs
-Date: Thu, 23 Dec 2010 00:59:03 -0800
-Message-ID: <AANLkTim3v8XzR36ZUn9dSUXpnTLZv134fRVg5VKOtetd@mail.gmail.com>
-References: <1293004871-1918-1-git-send-email-olof@lixom.net>
-	<1293004871-1918-4-git-send-email-olof@lixom.net>
-	<4D12EA4A.4000906@compulab.co.il>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:58066 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752453Ab0LWI7E convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2010 03:59:04 -0500
-In-Reply-To: <4D12EA4A.4000906@compulab.co.il>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH] [patch v3] ARM: mach-shmobile: mackerel: Add zboot MMCIF support
+Date: Thu, 23 Dec 2010 18:01:17 +0900
+Message-ID: <1293094877-28875-1-git-send-email-horms@verge.net.au>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Mike Rapoport <mike@compulab.co.il>
-Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, Yvonne Yip <y@palm.com>
 
-Hi,
+This patch wires up LED debugging for the MMCIF boot
+on the mackerel, which is all that is required to get MMCIF
+boot functioning.
 
-On Wed, Dec 22, 2010 at 10:20 PM, Mike Rapoport <mike@compulab.co.il> w=
-rote:
+Cc: Magnus Damm <magnus.damm@gmail.com>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Signed-off-by: Simon Horman <horms@verge.net.au>
+---
+This patch depends on:
+* ARM: 6515/1: Add zboot support for SuperH Mobile ARM
+  (merged into the devel branch of Russel King's linux-2.6-arm tree)
+* ARM: 6514/1: mach-shmobile: Add zboot support for SuperH Mobile ARM
+  (merged into the devel branch of Russel King's linux-2.6-arm tree)
+* MACH_MACKEREL (3211) being present in arch/arm/tools/mach-types
+* ARM: mach-shmobile: mackerel: Add zboot support
+* rfc v3: mmc, ARM: Add zboot from MMC support for SuperH Mobile ARM,
+  which depends on
+  * mmc, sh: Remove sh_mmcif_boot_slurp()
+    (merged into the common/mmcif branch of Paul Mundt's sh-2.6 tree)
+  * sh, mmc: Use defines when setting CE_CLK_CTRL
+    (merged into the common/mmcif branch of Paul Mundt's sh-2.6 tree)
+  * mmc, sh: Move MMCIF_PROGRESS_* into sh_mmcif.h
+    (merged into the common/mmcif branch of Paul Mundt's sh-2.6 tree)
 
-> Only one comment below, otherwise feel free to add
-> Acked-by: Mike Rapoport <mike@compulab.co.il>
+v2
+* Use correct GPIO ports
+  - my previous assumptions turned out to be incorrect
 
-Thanks!
+v3
+* Actually make the v2 change
+  - my git-foo was poor this morning
+---
+ .../mach-shmobile/include/mach/mmcif-mackerel.h    |   39 ++++++++++++++++++++
+ arch/arm/mach-shmobile/include/mach/mmcif.h        |    2 +
+ 2 files changed, 41 insertions(+), 0 deletions(-)
+ create mode 100644 arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
 
->> + =A0 =A0 if (gpio_is_valid(plat->wp_gpio)) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 rc =3D gpio_request(plat->wp_gpio, "sdhci_=
-wp");
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (rc) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_err(mmc_dev(host->mmc)=
-,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "failed to=
- allocate wp gpio\n");
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out_cd;
->> + =A0 =A0 =A0 =A0 =A0 =A0 }
->> + =A0 =A0 =A0 =A0 =A0 =A0 tegra_gpio_enable(plat->wp_gpio);
->
-> gpio_direction_input?
+diff --git a/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h b/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
+new file mode 100644
+index 0000000..e07fb3f
+--- /dev/null
++++ b/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
+@@ -0,0 +1,39 @@
++#ifndef MMCIF_MACKEREL_H
++#define MMCIF_MACKEREL_H
++
++#define PORT0CR      0xe6051000
++#define PORT1CR      0xe6051001
++#define PORT2CR      0xe6051002
++#define PORT159CR    0xe605009f
++
++#define PORTR031_000DR 0xe6055000
++#define PORTL159_128DR 0xe6054010
++
++static inline void mmcif_init_progress(void)
++{
++       /* Initialise LEDS0-3
++        * registers: PORT0CR-PORT2CR,PORT159CR (LED0-LED3 Control)
++        * value:     0x10 - enable output
++        */
++       __raw_writeb(0x10, PORT0CR);
++       __raw_writeb(0x10, PORT1CR);
++       __raw_writeb(0x10, PORT2CR);
++       __raw_writeb(0x10, PORT159CR);
++}
++
++static inline void mmcif_update_progress(int n)
++{
++	unsigned a = 0, b = 0;
++
++	if (n < 3)
++		a = 1 << n;
++	else
++		b = 1 << 31;
++
++	__raw_writel((__raw_readl(PORTR031_000DR) & ~0x7) | a,
++		     PORTR031_000DR);
++	__raw_writel((__raw_readl(PORTL159_128DR) & ~(1 << 31)) | b,
++		     PORTL159_128DR);
++}
++
++#endif /* MMCIF_MACKEREL_H */
+diff --git a/arch/arm/mach-shmobile/include/mach/mmcif.h b/arch/arm/mach-shmobile/include/mach/mmcif.h
+index 0812f1e..f4dc327 100644
+--- a/arch/arm/mach-shmobile/include/mach/mmcif.h
++++ b/arch/arm/mach-shmobile/include/mach/mmcif.h
+@@ -9,6 +9,8 @@
+ 
+ #ifdef CONFIG_MACH_AP4EVB
+ #include "mach/mmcif-ap4eb.h"
++#elif CONFIG_MACH_MACKEREL
++#include "mach/mmcif-mackerel.h"
+ #else
+ #error "unsupported board."
+ #endif
+-- 
+1.7.2.3
 
-Yep, for cd_gpio too.
-
-
--Olof
