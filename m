@@ -1,48 +1,48 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [GIT PULL] MMC fixes for 2.6.37
-Date: Thu, 23 Dec 2010 19:13:11 +0000
-Message-ID: <20101223191311.GA9220@void.printf.net>
-References: <m3pqss50lr.fsf@pullcord.laptop.org> <AANLkTine-9YC7062cNaPG+iieBD2bcttx2b3sf3sveKP@mail.gmail.com>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [patch v3] mmc, ARM: Add zboot from MMC support for SuperH Mobile ARM
+Date: Fri, 24 Dec 2010 13:15:54 +0900
+Message-ID: <20101224041553.GA9152@linux-sh.org>
+References: <1292137027-17779-1-git-send-email-horms@verge.net.au> <1291855635-30882-1-git-send-email-horms@verge.net.au> <20101222224901.GA16187@verge.net.au> <20101222230450.GA21134@verge.net.au> <1291855635-30882-1-git-send-email-horms@verge.net.au> <20101208221653.GA25239@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51723 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751081Ab0LWTNO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 23 Dec 2010 14:13:14 -0500
+Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:43300 "EHLO
+	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752864Ab0LXERa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2010 23:17:30 -0500
 Content-Disposition: inline
-In-Reply-To: <AANLkTine-9YC7062cNaPG+iieBD2bcttx2b3sf3sveKP@mail.gmail.com>
+In-Reply-To: <1292137027-17779-1-git-send-email-horms@verge.net.au> <20101222230450.GA21134@verge.net.au> <1291855635-30882-1-git-send-email-horms@verge.net.au> <20101208221653.GA25239@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Yusuke Goda <yusuke.goda.sx@renesas.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus Damm <magnus.damm@gmail.com>
 
-Hi Kyungmin,
+On Thu, Dec 09, 2010 at 07:16:53AM +0900, Simon Horman wrote:
+> This allows a ROM-able zImage to be written to MMC and
+> for SuperH Mobile ARM to boot directly from the MMCIF
+> hardware block.
+> 
+> This is achieved by the MaskROM loading the first portion
+> of the image into MERAM and then jumping to it. This portion
+> contains loader code which copies the entire image to SDRAM
+> and jumps to it. From there the zImage boot code proceeds
+> as normal, uncompressing the image into its final location
+> and then jumping to it.
+> 
+> This patch depends on:
+> * "ARM: 6514/1: mach-shmobile: Add zboot support for SuperH Mobile ARM"
+>   which has been merged into the devel branch of Russell King's
+>   linux-2.6-arm tree.
+> * "mmc, sh: Move MMCIF_PROGRESS_* into sh_mmcif.h"
+>   which has been merged into the common/mmcif branch of
+>   Paul Mundt's sh-2.6 tree
+> * "mmc, sh: Remove sh_mmcif_boot_slurp()"
+>   which has been merged into the common/mmcif branch of
+>   Paul Mundt's sh-2.6 tree
 
-On Thu, Dec 23, 2010 at 06:17:50PM +0900, Kyungmin Park wrote:
-> Can you include the s5pc210 external clock support?
-
-As I said:
-
-If Ben agrees, I'm happy to send it on.
-
-If Ben stays silent, then I have to overrule him -- he's the maintainer
-of this driver.  I'm okay with doing that, but I'd like to do it by
-shipping these patches in the next merge window and giving him (and
-others who test the -rc series) time to disagree.
-
-> without this, s5pc210 boards doesn't use the SDHCI.
-
-But that's not a regression from earlier kernels (correct me if I'm
-wrong).  Adding support for a new board is a merge window task, not
-a final-fixes-before-release task.
-
-I'm sorry these patches have been waiting so long.  I didn't realize
-Ben would stay silent on them -- in future, I'll shorten my timeout
-for an ACK from Ben.
-
-Thanks,
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+This one at least should go through Russell's tree. The dependencies from
+my side will be sorted out early in the merge window, so you should be
+able to submit this to Russell's patch tracker after that for a late -rc1
+merge, or for -rc2. After that's done, there don't seem to be any more
+outstanding dependencies, so at that point I'll be able to take care of
+the remaining patches.
