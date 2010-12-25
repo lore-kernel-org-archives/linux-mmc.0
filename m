@@ -1,29 +1,25 @@
-From: Vitaly Wool <vitalywool@gmail.com>
+From: Vitaly Wool <vitalywool-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Sat, 25 Dec 2010 22:50:52 +0100
-Message-ID: <AANLkTikcTSgjdxR106H2XZdmepN40bTKfEgmP04OQAz3@mail.gmail.com>
+Date: Sat, 25 Dec 2010 22:54:18 +0100
+Message-ID: <AANLkTinBpuPZGrOZww=DbW8Z9A0qAZGNswcanSaQKOKp@mail.gmail.com>
 References: <AANLkTi=aHU57xDq+-DWrN2sJsAwx_9bZ_ofy1rOmp0VH@mail.gmail.com>
 	<Pine.LNX.4.44L0.1012251046060.5079-100000@netrider.rowland.org>
 	<AANLkTimj0E3Rz_8WQrU4wGg3ONyXzkUT9+U3Xqz7Cq0X@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:36669 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751531Ab0LYVuz convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 25 Dec 2010 16:50:55 -0500
-In-Reply-To: <AANLkTimj0E3Rz_8WQrU4wGg3ONyXzkUT9+U3Xqz7Cq0X@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <AANLkTimj0E3Rz_8WQrU4wGg3ONyXzkUT9+U3Xqz7Cq0X-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Cc: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: Alan Stern <stern@rowland.harvard.edu>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>
 
 Hi Ohad,
 
-On Sat, Dec 25, 2010 at 9:58 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote=
+On Sat, Dec 25, 2010 at 9:58 PM, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org> wrote=
 :
-> On Sat, Dec 25, 2010 at 6:21 PM, Alan Stern <stern@rowland.harvard.ed=
+> On Sat, Dec 25, 2010 at 6:21 PM, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLsd9G2dDO2Ms@public.gmane.org=
 u> wrote:
 >> Right. =A0You may or may not realize it, but this requirement means =
 that
@@ -54,3 +50,8 @@ runtime PM and static PM, is that correct?
 
 Thanks,
    Vitaly
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireles=
+s" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
