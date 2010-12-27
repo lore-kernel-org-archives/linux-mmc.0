@@ -1,161 +1,50 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v6 3/3]mmc: implement hwreset_emmc and reinit_emmc callbacks
-Date: Mon, 27 Dec 2010 18:14:43 +0800
-Message-ID: <20101227101443.GD20143@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Pierre Tardy <tardyp@gmail.com>
+Subject: Re: [RFC] sdhci: use ios->clock to know when sdhci is idle
+Date: Mon, 27 Dec 2010 12:51:32 +0100
+Message-ID: <AANLkTinYWODS785AefQ7hV+urPkAn1+En-fZEaFQygLG@mail.gmail.com>
+References: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
+	<41EFD7A46E18724CAB128DAD00733480193D2AE61C@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:1737 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753003Ab0L0KT4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 27 Dec 2010 05:19:56 -0500
-Content-Disposition: inline
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:37943 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752921Ab0L0Lvd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Dec 2010 06:51:33 -0500
+In-Reply-To: <41EFD7A46E18724CAB128DAD00733480193D2AE61C@shsmsx502.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, akpm@linux-foundation.org
+To: "Yuan, Hang" <hang.yuan@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Linus Walleij <linus.walleij@stericsson.com>, Ohad Ben-Cohen <ohad@wizery.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>
 
-hwreset_emmc: used for host to trigger a RST_n signal as eMMC4.4 spec
-recommanded to reset eMMC card. It is useful when eMMC card cannot response
-any command.
+On Thu, Dec 23, 2010 at 8:02 AM, Yuan, Hang <hang.yuan@intel.com> wrote:
+> Just have a question why not let sdio card driver call pm_runtime_get/put instead of host
+> controller driver itself?
+Because sdio card maintain its own power via runtime_pm, and sdhci
+wants to manage its power more independantly, and go suspended more
+often than the sdio card. A wifi sdio card would be active when
+background scanning for network. During that time, the sdio bus is
+completly inactive (for full-mac wifi device), and sdhci can go
+suspended during that time.
+Lowest SoC platform state can be achieved during that time.
 
-reinit_emmc: reinitialize eMMC card after HW reset occurs.
+> This patch may suspend host controller without cooperation of sdio card driver. But suspending
+> host controller will change controller's registers and then impact sdio card. I think it's
+> safer to suspend host controller according to sdio card driver's notification following runtime
+> PM framework.
+The sdhci must suspend itself without impacting the sdio card.
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- drivers/mmc/core/mmc.c   |   83 ++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h |    2 +
- 2 files changed, 85 insertions(+), 0 deletions(-)
+> Another question is why to call pm_runtime_get/put when ios-clock changes? Is it based on
+> Linus Walleij's aggressive clock gating framework patch? Linus' patch doesn't gate SDIO cards.
+runtime_suspend of sdhci should *not* gate the sdio card. It should
+only gate the sdhci.
+An sdio bus inactive does not mean that the sdio card is inactive.
+(think wifi Idle, bluetooth idle, ethernet idle)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index ebb5748..8c82b9d 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -12,6 +12,7 @@
- 
- #include <linux/err.h>
- #include <linux/slab.h>
-+#include <linux/gpio.h>
- 
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-@@ -745,6 +746,84 @@ static int mmc_awake(struct mmc_host *host)
- 	return err;
- }
- 
-+/**
-+ * mmc_reinit_card - reinitialize eMMC card after HW reset
-+ * @host: mmc host structure
-+ *
-+ * this callback is used to reinitialize card after a HW
-+ * reset occurs.
-+ * mmc_claim_host should be called before using this callback and
-+ * mmc_release_host should be called after.
-+ *
-+ * Return value:
-+ * 0 - successfully reinitialize
-+ * other - failed to reinitialize
-+ */
-+static int mmc_reinit_card(struct mmc_host *host)
-+{
-+	int err;
-+	/*
-+	 * Before init card, set the clock to be
-+	 * the init frequency
-+	 */
-+	host->ios.clock = host->f_init;
-+	mmc_set_clock(host, host->ios.clock);
-+
-+	err = mmc_init_card(host, host->ocr, host->card);
-+	if (err)
-+		pr_err("%s: Error %d while reinit card\n",
-+				mmc_hostname(host), err);
-+
-+	return err;
-+}
-+
-+/**
-+ * mmc_reset_card - reset eMMC card
-+ *
-+ * this callback is used to trigger RST_n signal by using GPIO to reset eMMC
-+ * card. The RST_n signal is defined in eMMC4.4 spec
-+ *
-+ * Return value:
-+ * 0 - successfully reset eMMC card
-+ * -ENODEV - no valid GPIO line to be used
-+ * -ENOSYS - GPIO functions is not implemented
-+ * other - failed to reset eMMC card
-+ */
-+static int mmc_hwreset_emmc(struct mmc_host *host)
-+{
-+	int gpio = host->rst_gpio;
-+	int ret;
-+	if (gpio <= 0)
-+		return -ENODEV;
-+
-+	/* request reset pin for eMMC */
-+	ret = gpio_request(gpio, "eMMC_rst_pin");
-+	if (ret < 0) {
-+		pr_err("gpio %d request failed, err %d\n",
-+				gpio, ret);
-+		return ret;
-+	}
-+	/* set to be output and to be low state */
-+	ret = gpio_direction_output(gpio, 0);
-+	if (ret < 0) {
-+		pr_err("gpio %d direction output failed, err %d\n",
-+				gpio, ret);
-+		gpio_free(gpio);
-+		return ret;
-+	}
-+	/* delay 10us for tRSTW */
-+	udelay(10);
-+	/* set to be high and delay 300us */
-+	gpio_set_value(gpio, 1);
-+	udelay(300);
-+	/* set to be output and to be low state */
-+	gpio_direction_output(gpio, 0);
-+	/* free reset gpio pin */
-+	gpio_free(gpio);
-+
-+	return 0;
-+}
-+
- static const struct mmc_bus_ops mmc_ops = {
- 	.awake = mmc_awake,
- 	.sleep = mmc_sleep,
-@@ -753,6 +832,8 @@ static const struct mmc_bus_ops mmc_ops = {
- 	.suspend = NULL,
- 	.resume = NULL,
- 	.power_restore = mmc_power_restore,
-+	.reinit_emmc = mmc_reinit_card,
-+	.hwreset_emmc = mmc_hwreset_emmc,
- };
- 
- static const struct mmc_bus_ops mmc_ops_unsafe = {
-@@ -763,6 +844,8 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
- 	.suspend = mmc_suspend,
- 	.resume = mmc_resume,
- 	.power_restore = mmc_power_restore,
-+	.reinit_emmc = mmc_reinit_card,
-+	.hwreset_emmc = mmc_hwreset_emmc,
- };
- 
- static void mmc_attach_bus_ops(struct mmc_host *host)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index bcb793e..d2b3bf6 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -243,6 +243,8 @@ struct mmc_host {
- 
- 	struct dentry		*debugfs_root;
- 
-+	unsigned int	rst_gpio;	/* gpio pin to reset eMMC card */
-+
- 	unsigned long		private[0] ____cacheline_aligned;
- };
- 
--- 
-1.6.6.1
+We need to suspend the sdhci as soon as the sdio bus is inactive,
+which is what clock gating framework is trying to detect. It does not
+do usage counting via runtime_pm because it is generic enough to allow
+clock gating *and* power gating.
 
+Regards,
+Pierre
