@@ -1,377 +1,161 @@
-From: Andy Ross <andy.ross@windriver.com>
-Subject: [PATCH] Fix sd/sdio/mmc initialization frequency retries
-Date: Tue, 28 Dec 2010 09:15:05 -0800
-Message-ID: <4D1A1B19.8000902@windriver.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
+Date: Tue, 28 Dec 2010 21:04:47 +0200
+Message-ID: <AANLkTim7pGtO=vjKmA_3O74Kwvio124cgoaMeUSB70dW@mail.gmail.com>
+References: <AANLkTinyKfwcZLD5D4rdF6OpQqr79F==GRjAMBjjbupW@mail.gmail.com> <Pine.LNX.4.44L0.1012261050050.18773-100000@netrider.rowland.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from li44-10.members.linode.com ([72.14.181.10]:57493 "EHLO
-	plausible.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754033Ab0L1RXw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Dec 2010 12:23:52 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <Pine.LNX.4.44L0.1012261050050.18773-100000-pYrvlCTfrz9XsRXLowluHWD2FQJk+8+b@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, Kevin Hilman <khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: Hein Tibosch <hein_tibosch@yahoo.es>, Pierre Ossman <pierre@ossman.eu>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, Matt Fleming <matt@console-pimps.org>
 
-I'm working with a eMMC device that broke after this commit:
+On Sun, Dec 26, 2010 at 7:00 PM, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>=
+ wrote:
+> Hmm. =A0It's a little difficult to untangle the web of dev_pm_ops
+> pointers and other stuff.
 
-http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=88ae8b86648
+Yeah, SDIO suspend/resume is very different from other subsystems.
 
-The older hack I'd been given hard-coded the initialisation frequency
-at 200kHz (instead of 400kHz in the original upstream) and works fine.
+There are several layers of abstractions involved, from the host
+controller driver, to the MMC core code, to the SDIO core code, to
+finally get to the actual SDIO function driver.
 
-But the new code tries to dynamically detect the highest frequency
-that will work, but as far as I can tell the logic is wrong.  It will
-continue trying after failed mmc_send_*_cond() calls, but *not* after
-failures later on in mmc_attach_{sd,sdio,mmc}.  My boards (at 400kHz)
-are getting successful returns from mmc_send_op_cond(), but failing in
-mmc_attach_mmc().  If I retry at 300, it works.
+I'll try to explain it below by addressing your questions. If
+something is still unclear, feel free to ask me.
 
-Tested on the same controller using a sdhc card.  No idea how the
-extra retries will affect other hardware (though as the original code
-was fixed at 400, presumably very few devices will care?).
+> There's wl1271_suspend() and wl1271_resume()
+> (which don't do anything)
 
-The attached patch fixes that error, and does some rewriting that
-should hopefully make review easier:
+It just looks like they don't. In fact, by returning 0,
+wl1271_suspend() is telling the SDIO subsystem that it's OK to power
+down the SDIO function (in general an SDIO card can have several SDIO
+functions, each of which may be driven by a separate SDIO driver). If
+all the SDIO functions agreed, then SDIO core (mmc_sdio_suspend())
+tells MMC core (mmc_suspend_host()) it's OK to power down the card (by
+directly calling mmc_power_off()).
 
-+ The freqs array should be static
-+ No need for locking around atomic rescan_disable test
-+ Remove adjacent bus_put/get calls.
-+ Move repeated claim/release host calls out of mmc_rescan loop
-+ Hopefully clearer iteration logic for f_init
-+ Remove duplicate mmc_attach_sd() logic after sdio failures
-+ Move mmc_send_*_cond() calls into mmc_attach_*() functions, as they
-  are only called from one place and are the only consumers of the ocr
-  return value.
-+ Make mmc_attach_*() functions symmetric with respect to
-  mmc_claim/release_host().  The existing code is called with the lock
-  and releases it before returning, which was really confusing to me
-  when debugging this issue.  They now hold the lock throughout,
-  releasing across some interior calls to preserve existing behavior.
+> Under what circumstances does the MMC/SDIO core call
+> wl1271_sdio_set_power(), and where are those function calls?
 
->From 0357d0d07d4985de43c814a9fea02d13753c121c Mon Sep 17 00:00:00 2001
-From: Andy Ross <andy.ross@windriver.com>
-Date: Tue, 28 Dec 2010 09:04:10 -0800
-Subject: [PATCH] Fix sd/sdio/mmc initialization frequency retries
+The relations are actually reversed: the MMC/SDIO core never calls
+this function.
 
-Rewrite and clean up mmc_rescan() to properly retry frequencies lower
-than 400kHz.  Failures can happen both in sd_send_* calls and
-mmc_attach_*.  Symmetrize claim/release logic in mmc_attach_* API, and
-move the sd_send_* calls there to make mmc_rescan easier to read.
+This function is called by the wl1271 driver itself, mostly as a
+response to a request by the mac80211 layer (but also as a response to
+a hardware error), that requires manipulation of the power of the
+card.
 
-Signed-off-by: Andy Ross <andy.ross@windriver.com>
----
- drivers/mmc/core/core.c |   86 ++++++++--------------------------------------
- drivers/mmc/core/core.h |    6 ++--
- drivers/mmc/core/mmc.c  |   12 ++++--
- drivers/mmc/core/sd.c   |   10 ++++--
- drivers/mmc/core/sdio.c |   17 ++++++---
- 5 files changed, 44 insertions(+), 87 deletions(-)
+There are a handful of reasons this may happen:
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 31ae07a..c92de04 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1426,23 +1426,13 @@ EXPORT_SYMBOL(mmc_set_blocklen);
+error recovery:
 
- void mmc_rescan(struct work_struct *work)
- {
-+	static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
- 	struct mmc_host *host =
- 		container_of(work, struct mmc_host, detect.work);
--	u32 ocr;
--	int err;
--	unsigned long flags;
- 	int i;
--	const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+wl1271_recovery_work() ->
+    __wl1271_op_remove_interface() ->
+          wl1271_power_off() ->
+               wl1271_sdio_set_power() ->
+                      wl1271_sdio_power_off() ->
+                             pm_runtime_put_sync()
 
--	spin_lock_irqsave(&host->lock, flags);
--
--	if (host->rescan_disable) {
--		spin_unlock_irqrestore(&host->lock, flags);
-+	if (host->rescan_disable)
- 		return;
--	}
--
--	spin_unlock_irqrestore(&host->lock, flags);
--
+wlan interface goes down:
 
- 	mmc_bus_get(host);
+ieee80211_do_stop() ->
+  wl1271_op_remove_interface() ->
+    __wl1271_op_remove_interface() ->
+          ...
 
-@@ -1450,19 +1440,12 @@ void mmc_rescan(struct work_struct *work)
- 	if ((host->bus_ops != NULL) && host->bus_ops->detect && !host->bus_dead)
- 		host->bus_ops->detect(host);
+system suspend:
 
--	mmc_bus_put(host);
--
--
--	mmc_bus_get(host);
--
- 	/* if there still is a card present, stop here */
- 	if (host->bus_ops != NULL) {
- 		mmc_bus_put(host);
- 		goto out;
- 	}
+__ieee80211_suspend ->
+  wl1271_op_remove_interface() ->
+      ...
 
--	/* detect a newly inserted card */
--
- 	/*
- 	 * Only we can add a new handler, so it's safe to
- 	 * release the lock here.
-@@ -1472,17 +1455,11 @@ void mmc_rescan(struct work_struct *work)
- 	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
- 		goto out;
+> The normal case is that system suspend succeeds. =A0Then there is no
+> race. =A0If system suspend fails then the failure may occur either be=
+fore
+> or after the wl1271 device is powered down; _that_ is the race
+> (assuming you are using asynchronous PM). =A0But normally it doesn't
+> occur.
 
--	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
--		mmc_claim_host(host);
-+	mmc_claim_host(host);
-+	host->f_init = freqs[0];
-+	for (i=0; i<ARRAY_SIZE(freqs) && host->f_init > host->f_min; i++) {
-+		host->f_init = max(freqs[i], host->f_min);
+True. On my setup I have stressed the solution for long nights (using
+/sys/power/pm_test) without any error. But we found other setups with
+different circumstances where this error showed up.
 
--		if (freqs[i] >= host->f_min)
--			host->f_init = freqs[i];
--		else if (!i || freqs[i-1] > host->f_min)
--			host->f_init = host->f_min;
--		else {
--			mmc_release_host(host);
--			goto out;
--		}
- #ifdef CONFIG_MMC_DEBUG
- 		pr_info("%s: %s: trying to init card at %u Hz\n",
- 			mmc_hostname(host), __func__, host->f_init);
-@@ -1493,50 +1470,17 @@ void mmc_rescan(struct work_struct *work)
+But it's not only due to the asynchronous PM race - a device that was
+added to the device tree after the host controller, but before
+mac80211, has a chance to abort a system suspend (by returning an
+error in its suspend handler) at a point in time which will leave our
+driver thinking (erroneously) that the wl1271 was powered off.
 
- 		mmc_send_if_cond(host, host->ocr_avail);
+> You mean, the wl1271 device has no PM methods of its own; its power i=
+s
+> managed entirely by the parent MMC/SDIO controller?
 
--		/*
--		 * First we search for SDIO...
--		 */
--		err = mmc_send_io_op_cond(host, 0, &ocr);
--		if (!err) {
--			if (mmc_attach_sdio(host, ocr)) {
--				mmc_claim_host(host);
--				/*
--				 * Try SDMEM (but not MMC) even if SDIO
--				 * is broken.
--				 */
--				if (mmc_send_app_op_cond(host, 0, &ocr))
--					goto out_fail;
--
--				if (mmc_attach_sd(host, ocr))
--					mmc_power_off(host);
--			}
--			goto out;
--		}
--
--		/*
--		 * ...then normal SD...
--		 */
--		err = mmc_send_app_op_cond(host, 0, &ocr);
--		if (!err) {
--			if (mmc_attach_sd(host, ocr))
--				mmc_power_off(host);
--			goto out;
--		}
--
--		/*
--		 * ...and finally MMC.
--		 */
--		err = mmc_send_op_cond(host, 0, &ocr);
--		if (!err) {
--			if (mmc_attach_mmc(host, ocr))
--				mmc_power_off(host);
--			goto out;
--		}
-+		/* Try SDIO, then SD, then MMC */
-+		if(mmc_attach_sdio(host) == 0)
-+			break;
-+		else if(mmc_attach_sd(host) == 0)
-+			break;
-+		else if(mmc_attach_mmc(host) == 0)
-+			break;
+Yes.
 
--out_fail:
--		mmc_release_host(host);
--		mmc_power_off(host);
-+                mmc_power_off(host);
- 	}
-+	mmc_release_host(host);
- out:
- 	if (host->caps & MMC_CAP_NEEDS_POLL)
- 		mmc_schedule_delayed_work(&host->detect, HZ);
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 77240cd..54de886 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -54,9 +54,9 @@ void mmc_rescan(struct work_struct *work);
- void mmc_start_host(struct mmc_host *host);
- void mmc_stop_host(struct mmc_host *host);
+> If that's right
+> then you should call pm_runtime_no_callbacks() for the wl1271 device.
 
--int mmc_attach_mmc(struct mmc_host *host, u32 ocr);
--int mmc_attach_sd(struct mmc_host *host, u32 ocr);
--int mmc_attach_sdio(struct mmc_host *host, u32 ocr);
-+int mmc_attach_mmc(struct mmc_host *host);
-+int mmc_attach_sd(struct mmc_host *host);
-+int mmc_attach_sdio(struct mmc_host *host);
+Yeah, that's in my queue...
 
- /* Module parameters */
- extern int use_spi_crc;
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 77f93c3..cad2eaf 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -737,13 +737,17 @@ static void mmc_attach_bus_ops(struct mmc_host *host)
- /*
-  * Starting point for MMC card init.
-  */
--int mmc_attach_mmc(struct mmc_host *host, u32 ocr)
-+int mmc_attach_mmc(struct mmc_host *host)
- {
- 	int err;
-+	u32 ocr;
+>
+> Is it possible for there to be more than one device connected to the
+> same MMC/SDIO controller?
 
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
+Generally yes, host controllers may have several slots, but to the
+MMC/SDIO core, it is presented as each slot is a separate host
+controller (personally I have never seen such hardware, but I did find
+an example for that in the host controller's source folder).
 
-+ 	if((err = mmc_send_op_cond(host, 0, &ocr)))
-+		return err;
-+
- 	mmc_attach_bus_ops(host);
+> That's for runtime PM. =A0What about system sleep? =A0It looks like
+> sdio_bus_type has no callbacks for suspend or resume, so the driver's
+> callbacks get used instead -- that would be wl1271_suspend() and
+> wl1271_resume(). =A0But they don't do anything, so there's no power
+> change until the parent MMC/SDIO controller is suspended. =A0That wou=
+ld
+> be in mmc_sdio_suspend() and mmc_sdio_resume()? =A0But I can't tell w=
+hat
+> pmops->suspend and pmops->resume methods they end up calling. =A0Are
+> these the entries in wl1271_sdio_pm_ops? =A0Does that mean
+> wl1271_suspend() and wl1271_resume() get called twice?
 
- 	/*
-@@ -784,20 +788,20 @@ int mmc_attach_mmc(struct mmc_host *host, u32 ocr)
- 		goto err;
+No, wl1271_suspend() and wl1271_resume() are called once, but it's all
+triggered by the host controller's suspend/resume handlers.
 
- 	mmc_release_host(host);
--
- 	err = mmc_add_card(host->card);
-+	mmc_claim_host(host);
- 	if (err)
- 		goto remove_card;
+=46or example:
 
- 	return 0;
+omap_hsmmc_suspend() ->
+    mmc_suspend_host() ->
+        mmc_sdio_suspend() ->
+            wl1271_suspend()
 
- remove_card:
-+	mmc_release_host(host);
- 	mmc_remove_card(host->card);
--	host->card = NULL;
- 	mmc_claim_host(host);
-+	host->card = NULL;
- err:
- 	mmc_detach_bus(host);
--	mmc_release_host(host);
+And then, if there are no errors, mmc_suspend_host() will eventually
+call mmc_power_off(), which powers off the card directly. So only at
+this point will our device get eventually shut down.
 
- 	printk(KERN_ERR "%s: error %d whilst initialising MMC card\n",
- 		mmc_hostname(host), err);
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 49da4df..9fad37a 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -764,13 +764,17 @@ static void mmc_sd_attach_bus_ops(struct mmc_host *host)
- /*
-  * Starting point for SD card init.
-  */
--int mmc_attach_sd(struct mmc_host *host, u32 ocr)
-+int mmc_attach_sd(struct mmc_host *host)
- {
- 	int err;
-+	u32 ocr;
+> I think I already understand how the runtime suspend/resume paths wor=
+k:
+> There are no runtime PM methods for the wl1271 device, so the PM core
+> simply propagates changes up to the parent MMC/SDIO device and ends u=
+p
+> calling mmc_runtime_suspend() or mmc_runtime_resume(). =A0Right?
 
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
+Right.
 
-+	if((err = mmc_send_app_op_cond(host, 0, &ocr)))
-+		return err;
-+
- 	mmc_sd_attach_bus_ops(host);
+> What is the pathway for reset (or other similar activities that
+> require the device to be powered-down while it is in use)?
 
- 	/*
-@@ -820,20 +824,20 @@ int mmc_attach_sd(struct mmc_host *host, u32 ocr)
- 		goto err;
+During runtime, the device will have to be powered off for error
+recovery and every time the wlan interface goes down. Please see the
+pathways above.
 
- 	mmc_release_host(host);
--
- 	err = mmc_add_card(host->card);
-+	mmc_claim_host(host);
- 	if (err)
- 		goto remove_card;
-
- 	return 0;
-
- remove_card:
-+	mmc_release_host(host);
- 	mmc_remove_card(host->card);
- 	host->card = NULL;
- 	mmc_claim_host(host);
- err:
- 	mmc_detach_bus(host);
--	mmc_release_host(host);
-
- 	printk(KERN_ERR "%s: error %d whilst initialising SD card\n",
- 		mmc_hostname(host), err);
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index efef5f9..5d2f33d 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -690,15 +690,18 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
- /*
-  * Starting point for SDIO card init.
-  */
--int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
-+int mmc_attach_sdio(struct mmc_host *host)
- {
--	int err;
--	int i, funcs;
-+	int err, i, funcs;
-+	u32 ocr;
- 	struct mmc_card *card;
-
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
-
-+	if((err =mmc_send_io_op_cond(host, 0, &ocr)))
-+		return err;
-+
- 	mmc_attach_bus(host, &mmc_sdio_ops);
-
- 	/*
-@@ -769,12 +772,12 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
- 			pm_runtime_enable(&card->sdio_func[i]->dev);
- 	}
-
--	mmc_release_host(host);
--
- 	/*
- 	 * First add the card to the driver model...
- 	 */
-+	mmc_release_host(host);
- 	err = mmc_add_card(host->card);
-+	mmc_claim_host(host);
- 	if (err)
- 		goto remove_added;
-
-@@ -792,15 +795,17 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
-
- remove_added:
- 	/* Remove without lock if the device has been added. */
-+	mmc_release_host(host);
- 	mmc_sdio_remove(host);
- 	mmc_claim_host(host);
- remove:
- 	/* And with lock if it hasn't been added. */
-+	mmc_release_host(host);
- 	if (host->card)
- 		mmc_sdio_remove(host);
-+	mmc_claim_host(host);
- err:
- 	mmc_detach_bus(host);
--	mmc_release_host(host);
-
- 	printk(KERN_ERR "%s: error %d whilst initialising SDIO card\n",
- 		mmc_hostname(host), err);
--- 
-1.7.1
-
+Thanks,
+Ohad.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireles=
+s" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
