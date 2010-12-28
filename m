@@ -1,100 +1,83 @@
-From: Arnd Hannemann <arnd@arndnet.de>
-Subject: [PATCH 6/6 v3] sh: sh7723 / ap325rxa enable SDIO IRQs
-Date: Tue, 28 Dec 2010 23:22:36 +0100
-Message-ID: <1293574956-30035-7-git-send-email-arnd@arndnet.de>
-References: <1293574956-30035-1-git-send-email-arnd@arndnet.de>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: outstanding TMIO MMC patches
+Date: Wed, 29 Dec 2010 00:32:13 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1012281211560.21647@axis700.grange>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1293574956-30035-1-git-send-email-arnd@arndnet.de>
 Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, g.liakhovetski@gmx.de, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>, Arnd Hannemann <arnd@arndnet.de>
+Cc: Paul Mundt <lethal@linux-sh.org>, Andrew Morton <akpm@linux-foundation.org>, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Magnus Damm <damm@opensource.se>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch enables the interrupt generation for SDIO IRQs
-of the sdhi controllers of the SoC. To make sure SDIO IRQs
-are used announce the MMC_CAP_SDIO_IRQ capability
-on ap325rxa.
+Hi Ian
 
-Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
-Acked-by: Magnus Damm <damm@opensource.se>
+There are a number of outstanding tmio-mmc patches from Arnd Hannemann and 
+myself, many of them posted weeks ago. We really would like to have them 
+in 2.6.38. Would you have time to process them? Otherwise, could someone 
+else maybe apply them? Listed in the order, in which they should be 
+applied.
+
+my patches:
+
+mmc: tmio_mmc: allow multi-element scatter-gather lists
+	https://patchwork.kernel.org/patch/317142/
+	should go in via linux-mmc
+
+mmc: tmio_mmc: fix PIO fallback on DMA descriptor allocation failure
+	https://patchwork.kernel.org/patch/317162/
+	should go in via linux-mmc
+
+[1/3] mmc: tmio: merge the private header into the driver
+	https://patchwork.kernel.org/patch/349931/
+	should go in via linux-mmc
+
+[2/3] mmc: tmio: implement a bounce buffer for unaligned DMA
+	https://patchwork.kernel.org/patch/426661/
+	should go in via linux-mmc
+
+[3/3] mfd: sdhi: require the tmio-mmc driver to bounce unaligned buffers
+	https://patchwork.kernel.org/patch/349961/
+	acked by Samuel Ortiz, should go in via linux-mmc
+
+patches from Arnd Hannemann:
+
+mmc: tmio_mmc: silence compiler warnings
+	https://patchwork.kernel.org/patch/418931/
+	should go in via linux-mmc
+
+[1/6] mmc: tmio: implement SDIO IRQ
+	https://patchwork.kernel.org/patch/437441/
+	should go in via linux-mmc
+
+[2/6] mfd: sh_mobile_sdhi: activate SDIO IRQ for tmio_mmc
+	https://patchwork.kernel.org/patch/437451/
+	acked by Samual Ortiz, should go in via linux-mmc
+
+[3/6] ARM: mach-shmobile: sh7372 Enable SDIO IRQs
+	https://patchwork.kernel.org/patch/437491/
+	Either via linux-mmc: Ack needed by Paul Mundt
+	or later separately via sh-2.6
+
+[4/6] sh: sh7724 Enable SDIO IRQs
+	https://patchwork.kernel.org/patch/437471/
+	Either via linux-mmc: Ack needed by Paul Mundt
+	or later separately via sh-2.6
+
+[5/6] sh: sh7722 Enable SDIO IRQs
+	https://patchwork.kernel.org/patch/437521/
+	Either via linux-mmc: Ack needed by Paul Mundt
+	or later separately via sh-2.6
+
+[6/6] sh: sh7723 / ap325rxa enable SDIO IRQs
+	https://patchwork.kernel.org/patch/437511/
+	Either via linux-mmc: Ack needed by Paul Mundt
+	or later separately via sh-2.6
+
+Thanks
+Guennadi
 ---
- arch/sh/boards/mach-ap325rxa/setup.c   |   16 ++++++++++++++++
- arch/sh/kernel/cpu/sh4a/setup-sh7723.c |    4 ++--
- 2 files changed, 18 insertions(+), 2 deletions(-)
-
-diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
-index 07ea908..3e5fc3b 100644
---- a/arch/sh/boards/mach-ap325rxa/setup.c
-+++ b/arch/sh/boards/mach-ap325rxa/setup.c
-@@ -14,6 +14,8 @@
- #include <linux/device.h>
- #include <linux/interrupt.h>
- #include <linux/platform_device.h>
-+#include <linux/mfd/sh_mobile_sdhi.h>
-+#include <linux/mmc/host.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mtd/sh_flctl.h>
- #include <linux/delay.h>
-@@ -430,11 +432,18 @@ static struct resource sdhi0_cn3_resources[] = {
- 	},
- };
- 
-+static struct sh_mobile_sdhi_info sdhi0_cn3_data = {
-+	.tmio_caps      = MMC_CAP_SDIO_IRQ,
-+};
-+
- static struct platform_device sdhi0_cn3_device = {
- 	.name		= "sh_mobile_sdhi",
- 	.id             = 0, /* "sdhi0" clock */
- 	.num_resources	= ARRAY_SIZE(sdhi0_cn3_resources),
- 	.resource	= sdhi0_cn3_resources,
-+	.dev = {
-+		.platform_data = &sdhi0_cn3_data,
-+	},
- 	.archdata = {
- 		.hwblk_id = HWBLK_SDHI0,
- 	},
-@@ -453,11 +462,18 @@ static struct resource sdhi1_cn7_resources[] = {
- 	},
- };
- 
-+static struct sh_mobile_sdhi_info sdhi1_cn7_data = {
-+	.tmio_caps      = MMC_CAP_SDIO_IRQ,
-+};
-+
- static struct platform_device sdhi1_cn7_device = {
- 	.name		= "sh_mobile_sdhi",
- 	.id             = 1, /* "sdhi1" clock */
- 	.num_resources	= ARRAY_SIZE(sdhi1_cn7_resources),
- 	.resource	= sdhi1_cn7_resources,
-+	.dev = {
-+		.platform_data = &sdhi1_cn7_data,
-+	},
- 	.archdata = {
- 		.hwblk_id = HWBLK_SDHI1,
- 	},
-diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7723.c b/arch/sh/kernel/cpu/sh4a/setup-sh7723.c
-index 0eadefd..d764122 100644
---- a/arch/sh/kernel/cpu/sh4a/setup-sh7723.c
-+++ b/arch/sh/kernel/cpu/sh4a/setup-sh7723.c
-@@ -719,7 +719,7 @@ static struct intc_group groups[] __initdata = {
- static struct intc_mask_reg mask_registers[] __initdata = {
- 	{ 0xa4080080, 0xa40800c0, 8, /* IMR0 / IMCR0 */
- 	  { 0, TMU1_TUNI2, TMU1_TUNI1, TMU1_TUNI0,
--	    0, DISABLED, ENABLED, ENABLED } },
-+	    0, ENABLED, ENABLED, ENABLED } },
- 	{ 0xa4080084, 0xa40800c4, 8, /* IMR1 / IMCR1 */
- 	  { VIO_VOUI, VIO_VEU2HI,VIO_BEUI,VIO_CEUI,DMAC0A_DEI3,DMAC0A_DEI2,DMAC0A_DEI1,DMAC0A_DEI0 } },
- 	{ 0xa4080088, 0xa40800c8, 8, /* IMR2 / IMCR2 */
-@@ -736,7 +736,7 @@ static struct intc_mask_reg mask_registers[] __initdata = {
- 	  { I2C_DTEI, I2C_WAITI, I2C_TACKI, I2C_ALI,
- 	    FLCTL_FLTREQ1I, FLCTL_FLTREQ0I, FLCTL_FLTENDI, FLCTL_FLSTEI } },
- 	{ 0xa40800a0, 0xa40800e0, 8, /* IMR8 / IMCR8 */
--	  { 0, DISABLED, ENABLED, ENABLED,
-+	  { 0, ENABLED, ENABLED, ENABLED,
- 	    0, 0, SCIFA_SCIFA2, SIU_SIUI } },
- 	{ 0xa40800a4, 0xa40800e4, 8, /* IMR9 / IMCR9 */
- 	  { 0, 0, 0, CMT_CMTI, 0, 0, USB_USI0,0 } },
--- 
-1.7.2.3
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
 
