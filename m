@@ -1,28 +1,54 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH] [RFC] sh: sh7723 / ap325rxa enable SDIO IRQs
-Date: Tue, 28 Dec 2010 19:01:40 +0900
-Message-ID: <AANLkTimxipcDMZ3sqNZB0eV0QyC0iL-3+oj213Hw-b6+@mail.gmail.com>
-References: <AANLkTi=oaLjQmz+G8_kK70JCxVfGfzv0VhRt3s9OsVXw@mail.gmail.com>
-	<1293101120-31162-1-git-send-email-arnd@arndnet.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1293101120-31162-1-git-send-email-arnd@arndnet.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Arnd Hannemann <arnd@arndnet.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, g.liakhovetski@gmx.de, Ian Molton <ian@mnementh.co.uk>, Samuel Ortiz <sameo@linux.intel.com>
+From: Arnd Hannemann <arnd@arndnet.de>
+Subject: [PATCH] [RFC] mmc: perform SDIO reset on power restore of host
+Date: Tue, 28 Dec 2010 12:25:23 +0100
+Message-ID: <1293535523-19191-1-git-send-email-arnd@arndnet.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from slowhand.arndnet.de ([88.198.19.76]:36123 "EHLO mail.unitix.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753083Ab0L1LZ3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 28 Dec 2010 06:25:29 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>, Arnd Hannemann <arnd@arndnet.de>
 
-Hi Arnd,
+On some boards card power is hard wired to the slot
+and active regardless of host controller state.
+When runtime PM suspends such a host, certain cards
+may keep their current configuration (e.g. bus width),
+now when runtime PM resumes the host, communication
+with the card will fail.
+This was observed on AP4EVB with tmio_mmc and a b43 based
+SDIO card:
+http://marc.info/?l=linux-mmc&m=128854536521274&w=2
 
-On Thu, Dec 23, 2010 at 7:45 PM, Arnd Hannemann <arnd@arndnet.de> wrote:
-> This patch enables the interrupt generation for SDIO IRQs
-> of the sdhi controllers of the SoC. To make sure SDIO IRQs
-> are used announce the MMC_CAP_SDIO_IRQ capability
-> on ap325rxa. Untested, therefore RFC.
->
-> Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+This patch, fixes the problem by resetting the SDIO
+card on power restore.
 
-Looking good, thanks a lot!
+Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+---
+ drivers/mmc/core/core.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
 
-Acked-by: Magnus Damm <damm@opensource.se>
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 31ae07a..21cdee6 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1617,8 +1617,13 @@ int mmc_power_restore_host(struct mmc_host *host)
+ 	}
+ 
+ 	mmc_power_up(host);
+-	ret = host->bus_ops->power_restore(host);
+ 
++	mmc_claim_host(host);
++	sdio_reset(host);
++	mmc_go_idle(host);
++	mmc_release_host(host);
++
++	ret = host->bus_ops->power_restore(host);
+ 	mmc_bus_put(host);
+ 
+ 	return ret;
+-- 
+1.7.2.3
+
