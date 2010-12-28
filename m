@@ -1,7 +1,7 @@
 From: Arnd Hannemann <arnd@arndnet.de>
-Subject: [PATCH 3/6 v3] ARM: mach-shmobile: sh7372 Enable SDIO IRQs
-Date: Tue, 28 Dec 2010 23:22:33 +0100
-Message-ID: <1293574956-30035-4-git-send-email-arnd@arndnet.de>
+Subject: [PATCH 6/6 v3] sh: sh7723 / ap325rxa enable SDIO IRQs
+Date: Tue, 28 Dec 2010 23:22:36 +0100
+Message-ID: <1293574956-30035-7-git-send-email-arnd@arndnet.de>
 References: <1293574956-30035-1-git-send-email-arnd@arndnet.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1293574956-30035-1-git-send-email-arnd@arndnet.de>
@@ -11,54 +11,90 @@ Cc: Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, g.liakhovetsk
 List-Id: linux-mmc@vger.kernel.org
 
 This patch enables the interrupt generation for SDIO IRQs
-of the sdhi controllers of the SoC. To make sure interrupts
-are handled announce the MMC_CAP_SDIO_IRQ capability
-on AP4EVB. Tested with a b43-based SDIO wireless card.
+of the sdhi controllers of the SoC. To make sure SDIO IRQs
+are used announce the MMC_CAP_SDIO_IRQ capability
+on ap325rxa.
 
 Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+Acked-by: Magnus Damm <damm@opensource.se>
 ---
- arch/arm/mach-shmobile/board-ap4evb.c |    3 ++-
- arch/arm/mach-shmobile/intc-sh7372.c  |    4 ++--
- 2 files changed, 4 insertions(+), 3 deletions(-)
+ arch/sh/boards/mach-ap325rxa/setup.c   |   16 ++++++++++++++++
+ arch/sh/kernel/cpu/sh4a/setup-sh7723.c |    4 ++--
+ 2 files changed, 18 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
-index 16eba07..5763b0d 100644
---- a/arch/arm/mach-shmobile/board-ap4evb.c
-+++ b/arch/arm/mach-shmobile/board-ap4evb.c
-@@ -310,6 +310,7 @@ static u64 sdhi0_dma_mask = DMA_BIT_MASK(32);
- static struct sh_mobile_sdhi_info sdhi0_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
-+	.tmio_caps	= MMC_CAP_SDIO_IRQ,
+diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
+index 07ea908..3e5fc3b 100644
+--- a/arch/sh/boards/mach-ap325rxa/setup.c
++++ b/arch/sh/boards/mach-ap325rxa/setup.c
+@@ -14,6 +14,8 @@
+ #include <linux/device.h>
+ #include <linux/interrupt.h>
+ #include <linux/platform_device.h>
++#include <linux/mfd/sh_mobile_sdhi.h>
++#include <linux/mmc/host.h>
+ #include <linux/mtd/physmap.h>
+ #include <linux/mtd/sh_flctl.h>
+ #include <linux/delay.h>
+@@ -430,11 +432,18 @@ static struct resource sdhi0_cn3_resources[] = {
+ 	},
  };
  
- static struct resource sdhi0_resources[] = {
-@@ -344,7 +345,7 @@ static struct sh_mobile_sdhi_info sdhi1_info = {
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
- 	.tmio_ocr_mask	= MMC_VDD_165_195,
- 	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
--	.tmio_caps	= MMC_CAP_NEEDS_POLL,
-+	.tmio_caps	= MMC_CAP_NEEDS_POLL | MMC_CAP_SDIO_IRQ,
- 	.get_cd		= slot_cn7_get_cd,
++static struct sh_mobile_sdhi_info sdhi0_cn3_data = {
++	.tmio_caps      = MMC_CAP_SDIO_IRQ,
++};
++
+ static struct platform_device sdhi0_cn3_device = {
+ 	.name		= "sh_mobile_sdhi",
+ 	.id             = 0, /* "sdhi0" clock */
+ 	.num_resources	= ARRAY_SIZE(sdhi0_cn3_resources),
+ 	.resource	= sdhi0_cn3_resources,
++	.dev = {
++		.platform_data = &sdhi0_cn3_data,
++	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI0,
+ 	},
+@@ -453,11 +462,18 @@ static struct resource sdhi1_cn7_resources[] = {
+ 	},
  };
  
-diff --git a/arch/arm/mach-shmobile/intc-sh7372.c b/arch/arm/mach-shmobile/intc-sh7372.c
-index 30b2f40..f78a1ea 100644
---- a/arch/arm/mach-shmobile/intc-sh7372.c
-+++ b/arch/arm/mach-shmobile/intc-sh7372.c
-@@ -230,10 +230,10 @@ static struct intc_mask_reg intca_mask_registers[] __initdata = {
- 	  { SCIFB, SCIFA5, SCIFA4, MSIOF1,
- 	    0, 0, MSIOF2, 0 } },
- 	{ 0xe694009c, 0xe69400dc, 8, /* IMR7A / IMCR7A */
--	  { DISABLED, DISABLED, ENABLED, ENABLED,
-+	  { DISABLED, ENABLED, ENABLED, ENABLED,
++static struct sh_mobile_sdhi_info sdhi1_cn7_data = {
++	.tmio_caps      = MMC_CAP_SDIO_IRQ,
++};
++
+ static struct platform_device sdhi1_cn7_device = {
+ 	.name		= "sh_mobile_sdhi",
+ 	.id             = 1, /* "sdhi1" clock */
+ 	.num_resources	= ARRAY_SIZE(sdhi1_cn7_resources),
+ 	.resource	= sdhi1_cn7_resources,
++	.dev = {
++		.platform_data = &sdhi1_cn7_data,
++	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI1,
+ 	},
+diff --git a/arch/sh/kernel/cpu/sh4a/setup-sh7723.c b/arch/sh/kernel/cpu/sh4a/setup-sh7723.c
+index 0eadefd..d764122 100644
+--- a/arch/sh/kernel/cpu/sh4a/setup-sh7723.c
++++ b/arch/sh/kernel/cpu/sh4a/setup-sh7723.c
+@@ -719,7 +719,7 @@ static struct intc_group groups[] __initdata = {
+ static struct intc_mask_reg mask_registers[] __initdata = {
+ 	{ 0xa4080080, 0xa40800c0, 8, /* IMR0 / IMCR0 */
+ 	  { 0, TMU1_TUNI2, TMU1_TUNI1, TMU1_TUNI0,
+-	    0, DISABLED, ENABLED, ENABLED } },
++	    0, ENABLED, ENABLED, ENABLED } },
+ 	{ 0xa4080084, 0xa40800c4, 8, /* IMR1 / IMCR1 */
+ 	  { VIO_VOUI, VIO_VEU2HI,VIO_BEUI,VIO_CEUI,DMAC0A_DEI3,DMAC0A_DEI2,DMAC0A_DEI1,DMAC0A_DEI0 } },
+ 	{ 0xa4080088, 0xa40800c8, 8, /* IMR2 / IMCR2 */
+@@ -736,7 +736,7 @@ static struct intc_mask_reg mask_registers[] __initdata = {
+ 	  { I2C_DTEI, I2C_WAITI, I2C_TACKI, I2C_ALI,
  	    FLCTL_FLTREQ1I, FLCTL_FLTREQ0I, FLCTL_FLTENDI, FLCTL_FLSTEI } },
- 	{ 0xe69400a0, 0xe69400e0, 8, /* IMR8A / IMCR8A */
+ 	{ 0xa40800a0, 0xa40800e0, 8, /* IMR8 / IMCR8 */
 -	  { 0, DISABLED, ENABLED, ENABLED,
 +	  { 0, ENABLED, ENABLED, ENABLED,
- 	    TTI20, USBHSDMAC0_USHDMI, 0, 0 } },
- 	{ 0xe69400a4, 0xe69400e4, 8, /* IMR9A / IMCR9A */
- 	  { CMT1_CMT13, CMT1_CMT12, CMT1_CMT11, CMT1_CMT10,
+ 	    0, 0, SCIFA_SCIFA2, SIU_SIUI } },
+ 	{ 0xa40800a4, 0xa40800e4, 8, /* IMR9 / IMCR9 */
+ 	  { 0, 0, 0, CMT_CMTI, 0, 0, USB_USI0,0 } },
 -- 
 1.7.2.3
 
