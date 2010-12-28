@@ -1,66 +1,53 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Tue, 28 Dec 2010 21:36:14 +0100
-Message-ID: <201012282136.14258.rjw@sisk.pl>
-References: <AANLkTimj0E3Rz_8WQrU4wGg3ONyXzkUT9+U3Xqz7Cq0X@mail.gmail.com> <201012282021.31695.rjw@sisk.pl> <AANLkTinPrUbaFsNMmoZJtOaF6dutLaXXQ7Uws5826n4=@mail.gmail.com>
+Date: Tue, 28 Dec 2010 22:41:29 +0200
+Message-ID: <AANLkTikxmS0sw6HeXL5QhdzBzBU3U9+hTvsPcyJay5J6@mail.gmail.com>
+References: <AANLkTimj0E3Rz_8WQrU4wGg3ONyXzkUT9+U3Xqz7Cq0X@mail.gmail.com>
+ <201012261937.21256.rjw@sisk.pl> <AANLkTinewad6YxXvn5gnJQ+HJn41Sg96319GQn9KRKWj@mail.gmail.com>
+ <201012282104.06232.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:60764 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752011Ab0L1UhH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Dec 2010 15:37:07 -0500
-In-Reply-To: <AANLkTinPrUbaFsNMmoZJtOaF6dutLaXXQ7Uws5826n4=@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <201012282104.06232.rjw-KKrjLPT3xs0@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>
+Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>, Alan Stern <stern@rowland.harvard.edu>
-Cc: linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, Kevin Hilman <khilman@deeprootsystems.com>
 
-On Tuesday, December 28, 2010, Ohad Ben-Cohen wrote:
-> On Tue, Dec 28, 2010 at 9:21 PM, Rafael J. Wysocki <rjw@sisk.pl> wrote:
-> > It looks like you could simply do a power down-power up cycle before trying to
-> > load new firmware, just in case.  I guess that's suboptimal for some reason?
-> 
-> It would work, but we will not be able to unconditionally disable the
-> radios (e.g. airplane mode comes to mind).
+On Tue, Dec 28, 2010 at 10:04 PM, Rafael J. Wysocki <rjw-KKrjLPT3xs0@public.gmane.org> wrote=
+:
+> On Tuesday, December 28, 2010, Ohad Ben-Cohen wrote:
+>> On Sun, Dec 26, 2010 at 8:37 PM, Rafael J. Wysocki <rjw-KKrjLPT3xs0@public.gmane.org> wro=
+te:
+>> > So, it only happens during asynchronous suspend? =A0In other words=
+, if suspend
+>> > is synchronous, everything should be fine, right?
+>>
+>> Not necessarily.
+>
+> So it's not a race after all, is it?
 
-For _unconditional_ disabling you need to bypass the runtime PM anyway.
+There are several scenarios to the same problem.. In one of them, we
+were racing against an event that caused a suspend handler of an
+entirely unrelated device to fail. I'm trying very hard not to
+overload this thread with irrelevant details.. but anyway this forked
+discussion is a bit moot IMHO
 
-I guess it's best to simply disable it and invoke whatever-function-powers-off
-your device directly in those cases.
+> Second, what you'd really want to do (I guess) is:
+>
+> pm_runtime_put_noidle(device);
+> device->bus->pm->runtime_suspend(device);
 
-> > Please pretend that the runtime PM framework doesn't exist for a while.  How
-> > would you design things in that case?
-> 
-> Duplicate most of runtime-PM's plumbing into the MMC/SDIO subsystem.
-> Off the top of my hat:
-> - We need the device hierarchy and the suspend/resume dependencies (a
-> single SDIO card has several logical sub-devices, a.k.a SDIO
-> functions)
-> - We need to maintain usage_count for each device, and expose the same
-> API to handle it
-> - We need autosuspend for MMC cards (power them off on inactivity)
-> - We need the same, or similar, locking plumbing
-> - We probably need the same sysfs ABI as well: autosuspend_delay_ms,
-> and even  /sys/devices/.../power/control itself is useful (not for our
-> device, but for others, sure)
-> - ...
+Yes, our workaround is somewhere in these lines. We're using it
+regardless of the system state (runtime or suspending), and frankly,
+we're happy with it, just like I said in:
 
-I didn't mean that, never mind.
+http://www.spinics.net/linux/lists/linux-mmc/msg05052.html
 
-To solve the problem with system suspend (I think) you need to:
-(1) Add a ->prepare() callback to your driver, calling pm_runtime_resume()
-    for the device.  From that point on you know that its runtime callbacks
-    won't be called and if all of the pm_runtime_get_* and pm_runtime_put_*
-    things are in balance, everything will work out nicely during resume.
-(2) Add ->suspend() and ->resume() callbacks to your driver that will
-    set the device for system suspend and bring it back to the "power on"
-    state during system resume (that will cover your error code path issue in
-    particular).
-During resume, the pm_runtime_put_sync() in dpm_complete() should put the
-device back into the low power state (if it was in that state before).
-
-Thanks,
-Rafael
+I still call it a workaround though...
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireles=
+s" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
