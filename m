@@ -1,56 +1,59 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [RFC] sdhci: use ios->clock to know when sdhci is idle
-Date: Wed, 29 Dec 2010 10:31:50 +0100
-Message-ID: <AANLkTimB7h0ZxvSOt2dUkO90RxE2c3Bu3CRqpasgzxw=@mail.gmail.com>
-References: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
-	<41EFD7A46E18724CAB128DAD00733480193D2AE61C@shsmsx502.ccr.corp.intel.com>
-	<AANLkTinYWODS785AefQ7hV+urPkAn1+En-fZEaFQygLG@mail.gmail.com>
-	<CE761E84DADF2947A4AF22FB8D97A47331E86F6E@shsmsx501.ccr.corp.intel.com>
+From: Arnd Hannemann <arnd@arndnet.de>
+Subject: Re: [PATCH] [RFC] mmc: perform SDIO reset on power restore of host
+Date: Wed, 29 Dec 2010 11:35:33 +0100
+Message-ID: <4D1B0EF5.4080206@arndnet.de>
+References: <1293535523-19191-1-git-send-email-arnd@arndnet.de> <AANLkTi=aWkV3gkK-O6ncbnkdyv+WTHqVcuSj+2NJztg7@mail.gmail.com> <4D19EE1C.9050801@arndnet.de> <AANLkTikN1iJ8TftWK3NENVQWZCF5YY7sETSvknBr6sk9@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:55351 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750847Ab0L2Jbv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Dec 2010 04:31:51 -0500
-In-Reply-To: <CE761E84DADF2947A4AF22FB8D97A47331E86F6E@shsmsx501.ccr.corp.intel.com>
+Received: from slowhand.arndnet.de ([88.198.19.76]:39414 "EHLO mail.unitix.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750962Ab0L2Kff (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Dec 2010 05:35:35 -0500
+In-Reply-To: <AANLkTikN1iJ8TftWK3NENVQWZCF5YY7sETSvknBr6sk9@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Cc: Pierre Tardy <tardyp@gmail.com>, "Yuan, Hang" <hang.yuan@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Ohad Ben-Cohen <ohad@wizery.com>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-2010/12/29 Gao, Yunpeng <yunpeng.gao@intel.com>:
+Hi Ohad,
 
-> So, why we have to move to the 'aggressive clock gating framework'?
+Am 28.12.2010 15:24, schrieb Ohad Ben-Cohen:
+>>> Do you mean that your card is always powered on regardless of
+>>> mmc_power_off() invocations ?
+>>
+>> Yes, it seems so.
+> 
+> Ok, thanks for letting us know.
+> 
+> It bothered me that we didn't understand the issue you had, but now it
+> seems that MMC_CAP_POWER_OFF_CARD is the right solution for you as
+> well.
+> 
+>> Even if the card is kept powered, when mmc_power_off() is called, the
+>> host controller will stop the SD bus clock. So I believe at least some
+>> power is saved this way and MMC_CAP_POWER_OFF_CARD makes sense?
+> 
+> Well, with some SDIO cards, the host controller can use the recently
+> added aggressive clock gating framework to stop the clock on
+> inactivity, and not wait until the card is powered off.
+> 
+> Currently that clock gating framework is still disabled for SDIO
+> cards, but this is just temporary until we sort out how to use it
+> safely for SDIO as well.
 
-The aggressive clock gating makes more sense since the different
-drivers will know better how to handle the gating. ios with f=0 can
-be interpreted differently. Else every driver has to register
-runtime PM hooks for this, which is less elegant.
+So you suggest to don't set MMC_CAP_POWER_OFF_CARD for the boards which
+keep the card powered, but instead wait for the clock gating framework?
+ 
+> For example, the wl1271 card has asynchronous interrupts (via external
+> irq) so we can safely stop its clock on inactivity.
+> 
+> Do you know if that's possible with your card as well ?
 
-A better question is why the clock gating does not use runtime
-PM abstractions.
+I don't think so, the card is a normal SDIO card which plugs into a normal
+MMC/SD slot, no extra pins or such. However SDIO IRQs are available, but you
+don't mean that, do you?
 
-The hysteresis (timeout after inactivity, in the MMC spec >= 8 MCLK
-cycles) can possibly be handled by refactoring the runtime PM
-framework, someone offered to look at this later actually.
-
-> Also, I noticed that in the current 'aggressive clock gating
-> framework' patch, the clock gating of SDIO card has been
-> disabled (please reference code and comments of function
-> mmc_host_may_gate_card() in that patch).
-
-We discussed different approaches to this, from marking an
-SDIO slot as suspendable by using platform data, or whitelisting
-the SDIO cards that can handle clock gating.
-
-It was decided to keep SDIO cards out of it until we have this
-infrastructure in place. So now you will have the opportunity
-to fix this!
-
-Not all SDIO cards will work properly if you try to gate them
-so we need a mechanism to selectively do this.
-Any suggestions?
-
-Yours,
-Linus Walleij
+Thanks,
+Arnd
