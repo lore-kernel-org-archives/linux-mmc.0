@@ -1,70 +1,38 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Wed, 29 Dec 2010 08:34:25 +0200
-Message-ID: <AANLkTikrd3JpBG4JYUUxQhPPNhSmJaE5j5ozz=_vpU52@mail.gmail.com>
-References: <AANLkTim7pGtO=vjKmA_3O74Kwvio124cgoaMeUSB70dW@mail.gmail.com> <Pine.LNX.4.44L0.1012281541580.22998-100000@netrider.rowland.org>
+From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Subject: RE: [RFC] sdhci: use ios->clock to know when sdhci is idle
+Date: Wed, 29 Dec 2010 14:45:21 +0800
+Message-ID: <CE761E84DADF2947A4AF22FB8D97A47331E86F6E@shsmsx501.ccr.corp.intel.com>
+References: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
+	<41EFD7A46E18724CAB128DAD00733480193D2AE61C@shsmsx502.ccr.corp.intel.com>
+ <AANLkTinYWODS785AefQ7hV+urPkAn1+En-fZEaFQygLG@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f194.google.com ([209.85.210.194]:62806 "EHLO
-	mail-iy0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750786Ab0L2Geq convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Dec 2010 01:34:46 -0500
-In-Reply-To: <Pine.LNX.4.44L0.1012281541580.22998-100000@netrider.rowland.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <AANLkTinYWODS785AefQ7hV+urPkAn1+En-fZEaFQygLG@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Pierre Tardy <tardyp@gmail.com>, "Yuan, Hang" <hang.yuan@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Linus Walleij <linus.walleij@stericsson.com>, Ohad Ben-Cohen <ohad@wizery.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, Kevin Hilman <khilman@deeprootsystems.com>
 
-On Tue, Dec 28, 2010 at 11:46 PM, Alan Stern <stern@rowland.harvard.edu=
-> wrote:
-> What's the relation between mmc_power_off() and mmc_power_save_host()=
-?
+>> Another question is why to call pm_runtime_get/put when ios-clock changes?
+>Is it based on
+>> Linus Walleij's aggressive clock gating framework patch? Linus' patch doesn't
+>gate SDIO cards.
+>runtime_suspend of sdhci should *not* gate the sdio card. It should
+>only gate the sdhci.
+>An sdio bus inactive does not mean that the sdio card is inactive.
+>(think wifi Idle, bluetooth idle, ethernet idle)
+>
+>We need to suspend the sdhci as soon as the sdio bus is inactive,
+>which is what clock gating framework is trying to detect. 
 
-Essentially they are the same - mmc_power_off() is the one that
-actually powers off the card.
+If the wifi sdio card enters into some low power state which will not use the sdio bus, then the wifi driver can notify the sdhci host controller driver to power down the host controller only by calling the pm_runtime_put() and pm_suspend_ignore_children(). That is, it can be handled well in the current runtime pm framework. So, why we have to move to the 'aggressive clock gating framework'?
 
-mmc_power_save_host() just invokes first a bus-specific ->power_save()
-handler (if one exists).
+Also, I noticed that in the current 'aggressive clock gating framework' patch, the clock gating of SDIO card has been disabled (please reference code and comments of function mmc_host_may_gate_card() in that patch). That means, if discard the runtime PM framework and move to the aggressive clock gating framework, then all the SDIO cards (including the wifi sdio card) will fail to notify its host controller to enter into any low power mode.
 
-> Does one merely go into a low-power state whereas the other does the
-> complete-power-off reset?
+Thanks.
 
-No, think of them as the same. Both will lead to a complete power off.
-The mmc_power_off() is just an internal function which belongs to the
-MMC core.
-
-> During wlan-interface-down, it's not necessary to reduce the power
-> level; it's merely desirable. =A0That's exactly the sort of thing run=
-time
-> PM is meant for. =A0Hence the existing call to pm_runtime_put_sync() =
-is
-> sufficient.
-
-Not exactly - think of airplane mode, where we must ensure the radios
-are disabled, without being blocked by /sys/devices/.../power/control
-- we will need to bypass runtime PM in this scenario too.
-
-> Put it another way: =A0Suppose an SDIO card has more than one functio=
-n
-> and you need to reset the wl1271 function. =A0It sounds like there's =
-no
-> way to do this without resetting the other functions as well. =A0What
-> happens if another function's driver is busy and can't allow a reset
-> just then?
-
-That's a chip specific thing. In our case, there is no other active
-SDIO function.
-
-Other vendors which does employ several SDIO functions have a separate
-reset for each function _in addition_ to the power line. So for them
-the runtime PM model is just great - they never care if the actual
-power is down or not - it's really just about power consumption, and
-nothing else. When they need an unconditional reset, they just use the
-appropriate reset line.
-
-In our case we have a single control for both power and reset
-functionality (actually we do have a separate power line to the
-device, but it is not controlled by software - it is fed directly from
-the battery rail).
+Regards,
+Yunpeng
