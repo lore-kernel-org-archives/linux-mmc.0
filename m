@@ -1,38 +1,56 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Wed, 29 Dec 2010 10:01:40 +0200
-Message-ID: <AANLkTi=QT1thWxy94=imJhbbcXQ1CD36=PnkAyaaA6Hj@mail.gmail.com>
-References: <AANLkTim7pGtO=vjKmA_3O74Kwvio124cgoaMeUSB70dW@mail.gmail.com> <Pine.LNX.4.44L0.1012281541580.22998-100000@netrider.rowland.org>
+From: Linus Walleij <linus.ml.walleij@gmail.com>
+Subject: Re: [RFC] sdhci: use ios->clock to know when sdhci is idle
+Date: Wed, 29 Dec 2010 10:31:50 +0100
+Message-ID: <AANLkTimB7h0ZxvSOt2dUkO90RxE2c3Bu3CRqpasgzxw=@mail.gmail.com>
+References: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
+	<41EFD7A46E18724CAB128DAD00733480193D2AE61C@shsmsx502.ccr.corp.intel.com>
+	<AANLkTinYWODS785AefQ7hV+urPkAn1+En-fZEaFQygLG@mail.gmail.com>
+	<CE761E84DADF2947A4AF22FB8D97A47331E86F6E@shsmsx501.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f194.google.com ([209.85.210.194]:43309 "EHLO
-	mail-iy0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751017Ab0L2ICB convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Dec 2010 03:02:01 -0500
-In-Reply-To: <Pine.LNX.4.44L0.1012281541580.22998-100000@netrider.rowland.org>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:55351 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750847Ab0L2Jbv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Dec 2010 04:31:51 -0500
+In-Reply-To: <CE761E84DADF2947A4AF22FB8D97A47331E86F6E@shsmsx501.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, Kevin Hilman <khilman@deeprootsystems.com>
+To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Cc: Pierre Tardy <tardyp@gmail.com>, "Yuan, Hang" <hang.yuan@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-On Tue, Dec 28, 2010 at 11:46 PM, Alan Stern <stern@rowland.harvard.edu=
-> wrote:
-> Similarly, during system suspend mmc_suspend_host() should be
-> responsible for doing all the necessary power-down operations. =A0Run=
-time
-> PM is completely out of the picture at this time. =A0And this should =
-be
-> independent of mac80211 -- in fact, the card should be powered down
-> appropriately even if the kernel doesn't have a mac80211 layer.
+2010/12/29 Gao, Yunpeng <yunpeng.gao@intel.com>:
 
-And it is.
+> So, why we have to move to the 'aggressive clock gating framework'?
 
-But in order to boot the firmware on resume, we need to reset the
-device. And if system suspend has been cancelled before
-mmc_power_off() was invoked, we will not be able to. So, in this case
-too, the driver will have to power the device off.
+The aggressive clock gating makes more sense since the different
+drivers will know better how to handle the gating. ios with f=0 can
+be interpreted differently. Else every driver has to register
+runtime PM hooks for this, which is less elegant.
 
-It all really boils down to the same solution - we will always have to
-bypass runtime PM and directly control the power of the device.
+A better question is why the clock gating does not use runtime
+PM abstractions.
+
+The hysteresis (timeout after inactivity, in the MMC spec >= 8 MCLK
+cycles) can possibly be handled by refactoring the runtime PM
+framework, someone offered to look at this later actually.
+
+> Also, I noticed that in the current 'aggressive clock gating
+> framework' patch, the clock gating of SDIO card has been
+> disabled (please reference code and comments of function
+> mmc_host_may_gate_card() in that patch).
+
+We discussed different approaches to this, from marking an
+SDIO slot as suspendable by using platform data, or whitelisting
+the SDIO cards that can handle clock gating.
+
+It was decided to keep SDIO cards out of it until we have this
+infrastructure in place. So now you will have the opportunity
+to fix this!
+
+Not all SDIO cards will work properly if you try to gate them
+so we need a mechanism to selectively do this.
+Any suggestions?
+
+Yours,
+Linus Walleij
