@@ -1,270 +1,98 @@
 From: Arnd Hannemann <arnd@arndnet.de>
-Subject: [PATCH 1/2 v2] mmc: tmio: handle missing HW interrupts
-Date: Wed, 29 Dec 2010 14:21:13 +0100
-Message-ID: <1293628874-8140-2-git-send-email-arnd@arndnet.de>
-References: <1293628874-8140-1-git-send-email-arnd@arndnet.de>
+Subject: Re: outstanding TMIO MMC patches
+Date: Wed, 29 Dec 2010 14:35:51 +0100
+Message-ID: <4D1B3937.80708@arndnet.de>
+References: <Pine.LNX.4.64.1012281211560.21647@axis700.grange>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1293628874-8140-1-git-send-email-arnd@arndnet.de>
+In-Reply-To: <Pine.LNX.4.64.1012281211560.21647@axis700.grange>
 Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
-Cc: linux-sh@vger.kernel.org, Arnd Hannemann <arnd@arndnet.de>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Andrew Morton <akpm@linux-foundation.org>, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Magnus Damm <damm@opensource.se>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-When doing excessive hotplug, e.g., repeated insert/eject operations,
-the hardware may get confused to a point where no CMDTIMEOUT/CMDRESPEND
-interrupts are generated any more.
-As a result requests get stuck, e.g.:
+Hi Guennadi,
 
-[  360.351562] INFO: task kworker/u:0:5 blocked for more than 120 seconds.
-[  360.351562] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-[  360.359375] kworker/u:0   D c020c2b4     0     5      2 0x00000000
-[  360.367187] Backtrace:
-[  360.367187] [<c020bfb0>] (schedule+0x0/0x340) from [<c020c480>] (schedule_timeout+0x20/0x190)
-[  360.375000]  r8:c702fd70 r7:00000002 r6:c702e000 r5:c702fdc4 r4:7fffffff
-[  360.375000] r3:c701e040
-[  360.382812] [<c020c460>] (schedule_timeout+0x0/0x190) from [<c020be78>] (wait_for_common+0xc4/0x150)
-[  360.390625]  r6:c702e000 r5:c702fdc4 r4:7fffffff
-[  360.390625] [<c020bdb4>] (wait_for_common+0x0/0x150) from [<c020bfac>] (wait_for_completion+0x18/0x1c)
-[  360.398437] [<c020bf94>] (wait_for_completion+0x0/0x1c) from [<c0185590>] (mmc_wait_for_req+0x214/0x234)
-[  360.406250] [<c018537c>] (mmc_wait_for_req+0x0/0x234) from [<c01889d0>] (mmc_sd_switch+0xfc/0x114)
-[  360.414062]  r7:c702fe4c r6:c702fe20 r5:c7179800 r4:00fffff0
-[  360.421875] [<c01888d4>] (mmc_sd_switch+0x0/0x114) from [<c0187f70>] (mmc_sd_setup_card+0x260/0x384)
-[  360.429687] [<c0187d10>] (mmc_sd_setup_card+0x0/0x384) from [<c01885e0>] (mmc_sd_init_card+0x13c/0x1e0)
-[  360.437500] [<c01884a4>] (mmc_sd_init_card+0x0/0x1e0) from [<c01887a8>] (mmc_attach_sd+0x124/0x1a8)
-[  360.445312]  r8:c02db404 r7:ffffff92 r6:c702ff34 r5:c6007da8 r4:c6007c00
-[  360.453125] [<c0188684>] (mmc_attach_sd+0x0/0x1a8) from [<c0185140>] (mmc_rescan+0x248/0x2f0)
-[  360.460937]  r5:c6007da8 r4:c6007c00
-[  360.468750] [<c0184ef8>] (mmc_rescan+0x0/0x2f0) from [<c00467f0>] (process_one_work+0x1ec/0x318)
-[  360.476562]  r7:c6007da8 r6:00000000 r5:c710ec00 r4:c701bde0
-[  360.484375] [<c0046604>] (process_one_work+0x0/0x318) from [<c0047fb0>] (worker_thread+0x1b0/0x2cc)
-[  360.492187] [<c0047e00>] (worker_thread+0x0/0x2cc) from [<c004b338>] (kthread+0x8c/0x94)
-[  360.500000] [<c004b2ac>] (kthread+0x0/0x94) from [<c0037fc4>] (do_exit+0x0/0x590)
-[  360.507812]  r7:00000013 r6:c0037fc4 r5:c004b2ac r4:c7021f00
+Am 29.12.2010 00:32, schrieb Guennadi Liakhovetski:
+> Hi Ian
+> 
+> There are a number of outstanding tmio-mmc patches from Arnd Hannemann and 
+> myself, many of them posted weeks ago. We really would like to have them 
+> in 2.6.38. Would you have time to process them? Otherwise, could someone 
+> else maybe apply them? Listed in the order, in which they should be 
+> applied.
+> 
+> my patches:
+> 
+> mmc: tmio_mmc: allow multi-element scatter-gather lists
+> 	https://patchwork.kernel.org/patch/317142/
+> 	should go in via linux-mmc
+> 
+> mmc: tmio_mmc: fix PIO fallback on DMA descriptor allocation failure
+> 	https://patchwork.kernel.org/patch/317162/
+> 	should go in via linux-mmc
+> 
+> [1/3] mmc: tmio: merge the private header into the driver
+> 	https://patchwork.kernel.org/patch/349931/
+> 	should go in via linux-mmc
+> 
+> [2/3] mmc: tmio: implement a bounce buffer for unaligned DMA
+> 	https://patchwork.kernel.org/patch/426661/
+> 	should go in via linux-mmc
+> 
+> [3/3] mfd: sdhi: require the tmio-mmc driver to bounce unaligned buffers
+> 	https://patchwork.kernel.org/patch/349961/
+> 	acked by Samuel Ortiz, should go in via linux-mmc
+> 
+> patches from Arnd Hannemann:
+> 
+> mmc: tmio_mmc: silence compiler warnings
+> 	https://patchwork.kernel.org/patch/418931/
+> 	should go in via linux-mmc
+> 
+> [1/6] mmc: tmio: implement SDIO IRQ
+> 	https://patchwork.kernel.org/patch/437441/
+> 	should go in via linux-mmc
+> 
+> [2/6] mfd: sh_mobile_sdhi: activate SDIO IRQ for tmio_mmc
+> 	https://patchwork.kernel.org/patch/437451/
+> 	acked by Samual Ortiz, should go in via linux-mmc
+> 
+> [3/6] ARM: mach-shmobile: sh7372 Enable SDIO IRQs
+> 	https://patchwork.kernel.org/patch/437491/
+> 	Either via linux-mmc: Ack needed by Paul Mundt
+> 	or later separately via sh-2.6
+> 
+> [4/6] sh: sh7724 Enable SDIO IRQs
+> 	https://patchwork.kernel.org/patch/437471/
+> 	Either via linux-mmc: Ack needed by Paul Mundt
+> 	or later separately via sh-2.6
+> 
+> [5/6] sh: sh7722 Enable SDIO IRQs
+> 	https://patchwork.kernel.org/patch/437521/
+> 	Either via linux-mmc: Ack needed by Paul Mundt
+> 	or later separately via sh-2.6
+> 
+> [6/6] sh: sh7723 / ap325rxa enable SDIO IRQs
+> 	https://patchwork.kernel.org/patch/437511/
+> 	Either via linux-mmc: Ack needed by Paul Mundt
+> 	or later separately via sh-2.6
+> 
 
-This patch addresses this problem by introducing timeouts for outstanding
-interrupts. If a hardware interrupt is missing, a soft reset will be performed
-to bring the hardware back to a working state.
-Tested with the SDHI hardware block in sh7372 / AP4EVB.
+There are also these two:
 
-Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
----
-Changes in v2:
-    - rebased against -rc7
-    - depends on:
-        mmc: tmio: merge the private header into the driver
-            https://patchwork.kernel.org/patch/349931/
+[1/2] tmio_mmc: handle missing HW interrupts
+	https://patchwork.kernel.org/patch/201962/
+[2/2] tmio_mmc: fix CMD irq handling
+	https://patchwork.kernel.org/patch/201982/
 
- drivers/mmc/host/tmio_mmc.c |   90 +++++++++++++++++++++++++++++++++++++++++--
- 1 files changed, 86 insertions(+), 4 deletions(-)
+I reposted them rebased on top of your header merge, otherwise
+that would have been a mess:
 
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index a0cf04a..f980042 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -39,6 +39,8 @@
- #include <linux/module.h>
- #include <linux/pagemap.h>
- #include <linux/scatterlist.h>
-+#include <linux/workqueue.h>
-+#include <linux/spinlock.h>
- 
- #define CTL_SD_CMD 0x00
- #define CTL_ARG_REG 0x04
-@@ -154,6 +156,11 @@ struct tmio_mmc_host {
- 	u8			bounce_buf[PAGE_CACHE_SIZE] __attribute__((aligned(MAX_ALIGN)));
- 	struct scatterlist	bounce_sg;
- #endif
-+
-+	/* Track lost interrupts */
-+	struct delayed_work delayed_reset_work;
-+	spinlock_t      lock;
-+	unsigned long       last_req_ts;
- };
- 
- static u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
-@@ -342,15 +349,60 @@ static void reset(struct tmio_mmc_host *host)
- 	msleep(10);
- }
- 
-+static void tmio_mmc_reset_work(struct work_struct *work)
-+{
-+	struct tmio_mmc_host *host = container_of(work, struct tmio_mmc_host,
-+						  delayed_reset_work.work);
-+	struct mmc_request *mrq;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	mrq = host->mrq;
-+
-+	/* request already finished */
-+	if (!mrq
-+	    || time_is_after_jiffies(host->last_req_ts +
-+		msecs_to_jiffies(2000))) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		return;
-+	}
-+
-+	dev_warn(&host->pdev->dev,
-+		"timeout waiting for hardware interrupt (CMD%u)\n",
-+		mrq->cmd->opcode);
-+
-+	if (host->data)
-+		host->data->error = -ETIMEDOUT;
-+	else if (host->cmd)
-+		host->cmd->error = -ETIMEDOUT;
-+	else
-+		mrq->cmd->error = -ETIMEDOUT;
-+
-+	host->cmd = NULL;
-+	host->data = NULL;
-+	host->mrq = NULL;
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	reset(host);
-+
-+	mmc_request_done(host->mmc, mrq);
-+}
-+
- static void
- tmio_mmc_finish_request(struct tmio_mmc_host *host)
- {
- 	struct mmc_request *mrq = host->mrq;
- 
-+	if (!mrq)
-+		return;
-+
- 	host->mrq = NULL;
- 	host->cmd = NULL;
- 	host->data = NULL;
- 
-+	cancel_delayed_work(&host->delayed_reset_work);
-+
- 	mmc_request_done(host->mmc, mrq);
- }
- 
-@@ -460,6 +512,7 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
- 	return;
- }
- 
-+/* needs to be called with host->lock held */
- static void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
- {
- 	struct mmc_data *data = host->data;
-@@ -520,10 +573,12 @@ static void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
- 
- static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
- {
--	struct mmc_data *data = host->data;
-+	struct mmc_data *data;
-+	spin_lock(&host->lock);
-+	data = host->data;
- 
- 	if (!data)
--		return;
-+		goto out;
- 
- 	if (host->chan_tx && (data->flags & MMC_DATA_WRITE)) {
- 		/*
-@@ -544,6 +599,8 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
- 	} else {
- 		tmio_mmc_do_data_irq(host);
- 	}
-+out:
-+	spin_unlock(&host->lock);
- }
- 
- static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
-@@ -552,9 +609,11 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
- 	struct mmc_command *cmd = host->cmd;
- 	int i, addr;
- 
-+	spin_lock(&host->lock);
-+
- 	if (!host->cmd) {
- 		pr_debug("Spurious CMD irq\n");
--		return;
-+		goto out;
- 	}
- 
- 	host->cmd = NULL;
-@@ -599,6 +658,9 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
- 		tmio_mmc_finish_request(host);
- 	}
- 
-+out:
-+	spin_unlock(&host->lock);
-+
- 	return;
- }
- 
-@@ -899,6 +961,12 @@ static void tmio_issue_tasklet_fn(unsigned long priv)
- static void tmio_tasklet_fn(unsigned long arg)
- {
- 	struct tmio_mmc_host *host = (struct tmio_mmc_host *)arg;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (!host->data)
-+		goto out;
- 
- 	if (host->data->flags & MMC_DATA_READ)
- 		dma_unmap_sg(&host->pdev->dev, host->sg_ptr, host->dma_sglen,
-@@ -908,6 +976,8 @@ static void tmio_tasklet_fn(unsigned long arg)
- 			     DMA_TO_DEVICE);
- 
- 	tmio_mmc_do_data_irq(host);
-+out:
-+	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
- /* It might be necessary to make filter MFD specific */
-@@ -1026,6 +1096,8 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (host->mrq)
- 		pr_debug("request not null\n");
- 
-+	host->last_req_ts = jiffies;
-+	wmb();
- 	host->mrq = mrq;
- 
- 	if (mrq->data) {
-@@ -1035,10 +1107,14 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	}
- 
- 	ret = tmio_mmc_start_command(host, mrq->cmd);
--	if (!ret)
-+	if (!ret) {
-+		schedule_delayed_work(&host->delayed_reset_work,
-+				      msecs_to_jiffies(2000));
- 		return;
-+	}
- 
- fail:
-+	host->mrq = NULL;
- 	mrq->cmd->error = ret;
- 	mmc_request_done(mmc, mrq);
- }
-@@ -1235,6 +1311,11 @@ static int __devinit tmio_mmc_probe(struct platform_device *dev)
- 	if (ret)
- 		goto cell_disable;
- 
-+	spin_lock_init(&host->lock);
-+
-+	/* Init delayed work for request timeouts */
-+	INIT_DELAYED_WORK(&host->delayed_reset_work, tmio_mmc_reset_work);
-+
- 	/* See if we also get DMA */
- 	tmio_mmc_request_dma(host, pdata);
- 
-@@ -1273,6 +1354,7 @@ static int __devexit tmio_mmc_remove(struct platform_device *dev)
- 	if (mmc) {
- 		struct tmio_mmc_host *host = mmc_priv(mmc);
- 		mmc_remove_host(mmc);
-+		cancel_delayed_work_sync(&host->delayed_reset_work);
- 		tmio_mmc_release_dma(host);
- 		free_irq(host->irq, host);
- 		if (cell->disable)
--- 
-1.7.2.3
+http://marc.info/?l=linux-mmc&m=129362888209455&w=2
+
+Thanks,
+Arnd
 
