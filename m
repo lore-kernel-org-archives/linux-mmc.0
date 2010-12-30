@@ -1,98 +1,69 @@
-From: Arnd Hannemann <arnd@arndnet.de>
-Subject: Re: outstanding TMIO MMC patches
-Date: Wed, 29 Dec 2010 14:35:51 +0100
-Message-ID: <4D1B3937.80708@arndnet.de>
-References: <Pine.LNX.4.64.1012281211560.21647@axis700.grange>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
+Date: Wed, 29 Dec 2010 23:25:36 -0500 (EST)
+Message-ID: <Pine.LNX.4.44L0.1012292314280.13580-100000@netrider.rowland.org>
+References: <AANLkTikrd3JpBG4JYUUxQhPPNhSmJaE5j5ozz=_vpU52@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1012281211560.21647@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Andrew Morton <akpm@linux-foundation.org>, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Magnus Damm <damm@opensource.se>, linux-sh@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from netrider.rowland.org ([192.131.102.5]:53392 "HELO
+	netrider.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1751016Ab0L3EZh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Dec 2010 23:25:37 -0500
+In-Reply-To: <AANLkTikrd3JpBG4JYUUxQhPPNhSmJaE5j5ozz=_vpU52@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Ido Yariv <ido@wizery.com>, Kevin Hilman <khilman@deeprootsystems.com>
 
-Hi Guennadi,
+On Wed, 29 Dec 2010, Ohad Ben-Cohen wrote:
 
-Am 29.12.2010 00:32, schrieb Guennadi Liakhovetski:
-> Hi Ian
-> 
-> There are a number of outstanding tmio-mmc patches from Arnd Hannemann and 
-> myself, many of them posted weeks ago. We really would like to have them 
-> in 2.6.38. Would you have time to process them? Otherwise, could someone 
-> else maybe apply them? Listed in the order, in which they should be 
-> applied.
-> 
-> my patches:
-> 
-> mmc: tmio_mmc: allow multi-element scatter-gather lists
-> 	https://patchwork.kernel.org/patch/317142/
-> 	should go in via linux-mmc
-> 
-> mmc: tmio_mmc: fix PIO fallback on DMA descriptor allocation failure
-> 	https://patchwork.kernel.org/patch/317162/
-> 	should go in via linux-mmc
-> 
-> [1/3] mmc: tmio: merge the private header into the driver
-> 	https://patchwork.kernel.org/patch/349931/
-> 	should go in via linux-mmc
-> 
-> [2/3] mmc: tmio: implement a bounce buffer for unaligned DMA
-> 	https://patchwork.kernel.org/patch/426661/
-> 	should go in via linux-mmc
-> 
-> [3/3] mfd: sdhi: require the tmio-mmc driver to bounce unaligned buffers
-> 	https://patchwork.kernel.org/patch/349961/
-> 	acked by Samuel Ortiz, should go in via linux-mmc
-> 
-> patches from Arnd Hannemann:
-> 
-> mmc: tmio_mmc: silence compiler warnings
-> 	https://patchwork.kernel.org/patch/418931/
-> 	should go in via linux-mmc
-> 
-> [1/6] mmc: tmio: implement SDIO IRQ
-> 	https://patchwork.kernel.org/patch/437441/
-> 	should go in via linux-mmc
-> 
-> [2/6] mfd: sh_mobile_sdhi: activate SDIO IRQ for tmio_mmc
-> 	https://patchwork.kernel.org/patch/437451/
-> 	acked by Samual Ortiz, should go in via linux-mmc
-> 
-> [3/6] ARM: mach-shmobile: sh7372 Enable SDIO IRQs
-> 	https://patchwork.kernel.org/patch/437491/
-> 	Either via linux-mmc: Ack needed by Paul Mundt
-> 	or later separately via sh-2.6
-> 
-> [4/6] sh: sh7724 Enable SDIO IRQs
-> 	https://patchwork.kernel.org/patch/437471/
-> 	Either via linux-mmc: Ack needed by Paul Mundt
-> 	or later separately via sh-2.6
-> 
-> [5/6] sh: sh7722 Enable SDIO IRQs
-> 	https://patchwork.kernel.org/patch/437521/
-> 	Either via linux-mmc: Ack needed by Paul Mundt
-> 	or later separately via sh-2.6
-> 
-> [6/6] sh: sh7723 / ap325rxa enable SDIO IRQs
-> 	https://patchwork.kernel.org/patch/437511/
-> 	Either via linux-mmc: Ack needed by Paul Mundt
-> 	or later separately via sh-2.6
-> 
+> On Tue, Dec 28, 2010 at 11:46 PM, Alan Stern <stern@rowland.harvard.e=
+du> wrote:
+> > What's the relation between mmc_power_off() and mmc_power_save_host=
+()?
+>=20
+> Essentially they are the same - mmc_power_off() is the one that
+> actually powers off the card.
+>=20
+> mmc_power_save_host() just invokes first a bus-specific ->power_save(=
+)
+> handler (if one exists).
+>=20
+> > Does one merely go into a low-power state whereas the other does th=
+e
+> > complete-power-off reset?
+>=20
+> No, think of them as the same. Both will lead to a complete power off=
+=2E
+> The mmc_power_off() is just an internal function which belongs to the
+> MMC core.
 
-There are also these two:
+Then what routine does the power down without the full reset?
 
-[1/2] tmio_mmc: handle missing HW interrupts
-	https://patchwork.kernel.org/patch/201962/
-[2/2] tmio_mmc: fix CMD irq handling
-	https://patchwork.kernel.org/patch/201982/
+That's why you run into trouble, isn't it?  The device has been powered
+down, but if the system sleep transition is aborted then the device
+doesn't get reset (by mmc_power_save_host?), so you can't wake it up
+again.
 
-I reposted them rebased on top of your header merge, otherwise
-that would have been a mess:
+Also, what routine tries to do the failing wakeup, and what is its call
+path?
 
-http://marc.info/?l=linux-mmc&m=129362888209455&w=2
+> > During wlan-interface-down, it's not necessary to reduce the power
+> > level; it's merely desirable. =A0That's exactly the sort of thing r=
+untime
+> > PM is meant for. =A0Hence the existing call to pm_runtime_put_sync(=
+) is
+> > sufficient.
+>=20
+> Not exactly - think of airplane mode, where we must ensure the radios
+> are disabled, without being blocked by /sys/devices/.../power/control
+> - we will need to bypass runtime PM in this scenario too.
 
-Thanks,
-Arnd
+I don't see why.  Turning off the radio is different from powering the=20
+device down -- you should be able to do the first without doing the=20
+second (although probably not vice versa).
+
+Alan Stern
 
