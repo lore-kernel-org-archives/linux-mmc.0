@@ -1,42 +1,199 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: RE: [RFC] sdhci: use ios->clock to know when sdhci is idle
-Date: Thu, 30 Dec 2010 18:37:39 +0800
-Message-ID: <CE761E84DADF2947A4AF22FB8D97A47331E875CD@shsmsx501.ccr.corp.intel.com>
-References: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
-	<41EFD7A46E18724CAB128DAD00733480193D2AE61C@shsmsx502.ccr.corp.intel.com>
-	<AANLkTinYWODS785AefQ7hV+urPkAn1+En-fZEaFQygLG@mail.gmail.com>
-	<CE761E84DADF2947A4AF22FB8D97A47331E86F6E@shsmsx501.ccr.corp.intel.com>
- <AANLkTimB7h0ZxvSOt2dUkO90RxE2c3Bu3CRqpasgzxw=@mail.gmail.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH v3] mmc: davinci: add support for SDIO irq handling
+Date: Thu, 30 Dec 2010 16:22:37 +0530
+Message-ID: <1293706357-21358-1-git-send-email-nsekhar@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:59873 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752977Ab0L3Khn convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Dec 2010 05:37:43 -0500
-In-Reply-To: <AANLkTimB7h0ZxvSOt2dUkO90RxE2c3Bu3CRqpasgzxw=@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: Pierre Tardy <tardyp@gmail.com>, "Yuan, Hang" <hang.yuan@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
->> So, why we have to move to the 'aggressive clock gating framework'?
->
->The aggressive clock gating makes more sense since the different
->drivers will know better how to handle the gating. ios with f=0 can
->be interpreted differently. Else every driver has to register
->runtime PM hooks for this, which is less elegant.
+From: Alagu Sankar <alagusankar-LW5URSxhY0VBDgjK7y7TUQ@public.gmane.org>
 
-Thanks for the response. I just curious that is this the only reason to change the framework? To my understanding, seems it's not a very strong reason :-)
+This patch adds support for handing SDIO interrupt on
+DaVinci MMC/SD controller.
 
-Take the example of sd/mmc card -
-by using the aggressive clock gating framework, it means the host controller will gate (clock gating or power gating) itself if not receiving requests for 8 clocks even if the request queue of mmc block driver is not empty at that time. So the host controller has to be gated / ungated repeatedly until the current request queue of mmc block driver becomes empty. I don't think this is elegant since most of the gating / ungating operations are not necessary.
+The patch has been tested on DM355 and DA850 EVMs with
+Marvell Libertas based SDIO wireless LAN card.
 
-Instead, if we do it in the mmc block driver by just call the pm_runtime_put() once the current request queue is empty and call pm_runtime_get() once any new request comes, then the host controller can be gated/ungated appropriately.
+Signed-off-by: Alagu Sankar <alagusankar-LW5URSxhY0VBDgjK7y7TUQ@public.gmane.org>
+Signed-off-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+---
+Applies to mmc-next branch of the mmc tree
 
-Thanks.
+Since v2, the patch has received some cosmetic clean-up and
+is being posted for the first time on the linux-mmc list.
 
-Regards,
-Yunpeng
+ drivers/mmc/host/davinci_mmc.c |   78 +++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 73 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index b643dde..04c2fa4 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -66,8 +66,8 @@
+ #define DAVINCI_MMCBLNC      0x60
+ #define DAVINCI_SDIOCTL      0x64
+ #define DAVINCI_SDIOST0      0x68
+-#define DAVINCI_SDIOEN       0x6C
+-#define DAVINCI_SDIOST       0x70
++#define DAVINCI_SDIOIEN      0x6C
++#define DAVINCI_SDIOIST      0x70
+ #define DAVINCI_MMCFIFOCTL   0x74 /* FIFO Control Register             */
+ 
+ /* DAVINCI_MMCCTL definitions */
+@@ -131,6 +131,14 @@
+ #define MMCFIFOCTL_ACCWD_2    (2 << 3) /* access width of 2 bytes    */
+ #define MMCFIFOCTL_ACCWD_1    (3 << 3) /* access width of 1 byte     */
+ 
++/* DAVINCI_SDIOST0 definitions */
++#define SDIOST0_DAT1_HI       BIT(0)
++
++/* DAVINCI_SDIOIEN definitions */
++#define SDIOIEN_IOINTEN       BIT(0)
++
++/* DAVINCI_SDIOIST definitions */
++#define SDIOIST_IOINT         BIT(0)
+ 
+ /* MMCSD Init clock in Hz in opendrain mode */
+ #define MMCSD_INIT_CLOCK		200000
+@@ -164,7 +172,7 @@ struct mmc_davinci_host {
+ 	unsigned int mmc_input_clk;
+ 	void __iomem *base;
+ 	struct resource *mem_res;
+-	int irq;
++	int mmc_irq, sdio_irq;
+ 	unsigned char bus_mode;
+ 
+ #define DAVINCI_MMC_DATADIR_NONE	0
+@@ -184,6 +192,7 @@ struct mmc_davinci_host {
+ 	u32 rxdma, txdma;
+ 	bool use_dma;
+ 	bool do_dma;
++	bool sdio_int;
+ 
+ 	/* Scatterlist DMA uses one or more parameter RAM entries:
+ 	 * the main one (associated with rxdma or txdma) plus zero or
+@@ -866,6 +875,19 @@ mmc_davinci_xfer_done(struct mmc_davinci_host *host, struct mmc_data *data)
+ {
+ 	host->data = NULL;
+ 
++	if (host->mmc->caps & MMC_CAP_SDIO_IRQ) {
++		/*
++		 * SDIO Interrupt Detection work-around as suggested by
++		 * Davinci Errata (TMS320DM355 Silicon Revision 1.1 Errata
++		 * 2.1.6): Signal SDIO interrupt only if it is enabled by core
++		 */
++		if (host->sdio_int && !(readl(host->base + DAVINCI_SDIOST0) &
++							SDIOST0_DAT1_HI)) {
++			writel(SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
++			mmc_signal_sdio_irq(host->mmc);
++		}
++	}
++
+ 	if (host->do_dma) {
+ 		davinci_abort_dma(host);
+ 
+@@ -932,6 +954,21 @@ davinci_abort_data(struct mmc_davinci_host *host, struct mmc_data *data)
+ 	mmc_davinci_reset_ctrl(host, 0);
+ }
+ 
++static irqreturn_t mmc_davinci_sdio_irq(int irq, void *dev_id)
++{
++	struct mmc_davinci_host *host = dev_id;
++	unsigned int status;
++
++	status = readl(host->base + DAVINCI_SDIOIST);
++	if (status & SDIOIST_IOINT) {
++		dev_dbg(mmc_dev(host->mmc),
++				"SDIO interrupt status %x\n", status);
++		writel(status | SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
++		mmc_signal_sdio_irq(host->mmc);
++	}
++	return IRQ_HANDLED;
++}
++
+ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
+ {
+ 	struct mmc_davinci_host *host = (struct mmc_davinci_host *)dev_id;
+@@ -1076,11 +1113,32 @@ static int mmc_davinci_get_ro(struct mmc_host *mmc)
+ 	return config->get_ro(pdev->id);
+ }
+ 
++static void mmc_davinci_enable_sdio_irq(struct mmc_host *mmc, int enable)
++{
++	struct mmc_davinci_host *host = mmc_priv(mmc);
++
++	if (enable) {
++		if (!(readl(host->base + DAVINCI_SDIOST0) & SDIOST0_DAT1_HI)) {
++			writel(SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
++			mmc_signal_sdio_irq(host->mmc);
++		} else {
++			host->sdio_int = true;
++			writel(readl(host->base + DAVINCI_SDIOIEN) |
++				SDIOIEN_IOINTEN, host->base + DAVINCI_SDIOIEN);
++		}
++	} else {
++		host->sdio_int = false;
++		writel(readl(host->base + DAVINCI_SDIOIEN) & ~SDIOIEN_IOINTEN,
++				host->base + DAVINCI_SDIOIEN);
++	}
++}
++
+ static struct mmc_host_ops mmc_davinci_ops = {
+ 	.request	= mmc_davinci_request,
+ 	.set_ios	= mmc_davinci_set_ios,
+ 	.get_cd		= mmc_davinci_get_cd,
+ 	.get_ro		= mmc_davinci_get_ro,
++	.enable_sdio_irq = mmc_davinci_enable_sdio_irq,
+ };
+ 
+ /*----------------------------------------------------------------------*/
+@@ -1209,7 +1267,8 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+ 		host->nr_sg = MAX_NR_SG;
+ 
+ 	host->use_dma = use_dma;
+-	host->irq = irq;
++	host->mmc_irq = irq;
++	host->sdio_irq = platform_get_irq(pdev, 1);
+ 
+ 	if (host->use_dma && davinci_acquire_dma_channels(host) != 0)
+ 		host->use_dma = 0;
+@@ -1270,6 +1329,13 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto out;
+ 
++	if (host->sdio_irq != NO_IRQ) {
++		ret = request_irq(host->sdio_irq, mmc_davinci_sdio_irq, 0,
++				mmc_hostname(mmc), host);
++		if (!ret)
++			mmc->caps |= MMC_CAP_SDIO_IRQ;
++	}
++
+ 	rename_region(mem, mmc_hostname(mmc));
+ 
+ 	dev_info(mmc_dev(host->mmc), "Using %s, %d-bit mode\n",
+@@ -1313,7 +1379,9 @@ static int __exit davinci_mmcsd_remove(struct platform_device *pdev)
+ 		mmc_davinci_cpufreq_deregister(host);
+ 
+ 		mmc_remove_host(host->mmc);
+-		free_irq(host->irq, host);
++		free_irq(host->mmc_irq, host);
++		if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
++			free_irq(host->sdio_irq, host);
+ 
+ 		davinci_release_dma_channels(host);
+ 
+-- 
+1.7.3.2
