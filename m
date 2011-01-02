@@ -1,87 +1,203 @@
-From: Hein_Tibosch <hein_tibosch@yahoo.es>
-Subject: Re: [PATCH] Fix sd/sdio/mmc initialization frequency retries
-Date: Mon, 03 Jan 2011 02:08:52 +0800
-Message-ID: <4D20BF34.7070008@yahoo.es>
-References: <4D1A1B19.8000902@windriver.com> <4D1E4084.3080601@yahoo.es>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V2 2/2] sdhci: Support for SD/MMC Dual Data Rate
+Date: Sun, 2 Jan 2011 18:55:57 +0000
+Message-ID: <20110102185557.GB24820@void.printf.net>
+References: <35CD48DB-A420-4319-968D-400D45EE9C0D@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bosmailout06.eigbox.net ([66.96.187.6]:52850 "EHLO
-	bosmailout06.eigbox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755121Ab1ABSzG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Jan 2011 13:55:06 -0500
-Received: from bosmailscan16.eigbox.net ([10.20.15.16])
-	by bosmailout06.eigbox.net with esmtp (Exim)
-	id 1PZSQi-0000HX-7u
-	for linux-mmc@vger.kernel.org; Sun, 02 Jan 2011 13:13:20 -0500
-In-Reply-To: <4D1E4084.3080601@yahoo.es>
+Received: from void.printf.net ([89.145.121.20]:33022 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754893Ab1ABSz7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 2 Jan 2011 13:55:59 -0500
+Content-Disposition: inline
+In-Reply-To: <35CD48DB-A420-4319-968D-400D45EE9C0D@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Ross <andy.ross@windriver.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>, Ben Nizette <bn@niasdigital.com>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@nokia.com>, Matt Fleming <matt@console-pimps.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
 
-On 1-1-2011 04:43, Hein_Tibosch wrote:
-> On 29-12-2010 01:15, Andy Ross wrote:
->> I'm working with a eMMC device that broke after this commit:
->>
->> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=88ae8b86648
->>
->> The older hack I'd been given hard-coded the initialisation frequency
->> at 200kHz (instead of 400kHz in the original upstream) and works fine.
->>
->> But the new code tries to dynamically detect the highest frequency
->> that will work, but as far as I can tell the logic is wrong.  It will
->> continue trying after failed mmc_send_*_cond() calls, but *not* after
->> failures later on in mmc_attach_{sd,sdio,mmc}.  My boards (at 400kHz)
->> are getting successful returns from mmc_send_op_cond(), but failing in
->> mmc_attach_mmc().  If I retry at 300, it works.
->>
->> Tested on the same controller using a sdhc card.  No idea how the
->> extra retries will affect other hardware (though as the original code
->> was fixed at 400, presumably very few devices will care?).
->
-> <snip>
->
-> Don't know why all these additions of claim/release?
-> In some cases it will lead to unnecessary releases, just because
-> later in the branch claim will be called.
->
-> I think in all 3 cases (sd/sdio/mmc) the change can be much simpler.
-> For instance for sd.c I would do this:
->
+Hi Philip,
+
+On Sun, Jan 02, 2011 at 08:45:10AM -0800, Philip Rakity wrote:
+> 
+> mmc->caps MMC_CAP_1_8V_DDR is set by looking at cabability_1
+> register if sd 3.0 controller.
+> 
+> Support for dual data rate (DDR50) with 1_8V signalling added
+> with optional call back to enable external control of signalling
+> voltage.
+> 
+> no support for 1.2V core voltage since SD 3.0 does not support
+> this.
+> 
+> **** QUESTION ****
+> should this be part of regulator framework ?
+> 
+> delay for signaling voltage to settle set to 5ms (per spec).
+> 
+> this code does not change the voltage supplied to the card.
+> It assumes that this is correctly handled in the core/ layer.
+> 
+> There is no requirement that the card voltage be at 1.8v
+> for DDR to work.  This violates DDR specification for
+> SD Host Controller 3.0 since explicitly states card voltage
+> is 3.3v while signalling voltage is set to 1.8v.
+> 
+> tested on mmp2 -- brownstone -- under linux-next.
+> 
+> Note:  this board design runs a fixed voltage to the card and
+> signaling voltage cannot be changed.
+> 
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
 > ---
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 49da4df..18331eb
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
->
-> <snip>
->
-> @@ -825,6 +829,7 @@ int mmc_attach_sd(struct mmc_host *host, u32 ocr)
->  	if (err)
->  		goto remove_card;
->
-> +	mmc_claim_host(host);
->  	return 0;
->
->  remove_card:
-> @@ -833,7 +838,6 @@ remove_card:
->  	mmc_claim_host(host);
->  err:
->  	mmc_detach_bus(host);
-> -	mmc_release_host(host);
->
->  	printk(KERN_ERR "%s: error %d whilst initialising SD card\n",
->  		mmc_hostname(host), err);
-> --
->
-I tested the simplified patch as described above on AVR32 with an sd-card.
+>  drivers/mmc/host/sdhci.c |   53 ++++++++++++++++++++++++++++++++++++++++++---
+>  drivers/mmc/host/sdhci.h |    5 ++++
+>  2 files changed, 54 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index d5febe5..805f850 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -84,6 +84,8 @@ static void sdhci_dumpregs(struct sdhci_host *host)
+>  	printk(KERN_DEBUG DRIVER_NAME ": Cmd:      0x%08x | Max curr: 0x%08x\n",
+>  		sdhci_readw(host, SDHCI_COMMAND),
+>  		sdhci_readl(host, SDHCI_MAX_CURRENT));
+> +	printk(KERN_DEBUG DRIVER_NAME ": HostCtrl2:0x%08x\n",
+> +		sdhci_readw(host, SDHCI_HOST_CONTROL_2));
+>  
+>  	if (host->flags & SDHCI_USE_ADMA)
+>  		printk(KERN_DEBUG DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x\n",
+> @@ -986,6 +988,38 @@ static void sdhci_finish_command(struct sdhci_host *host)
+>  	host->cmd = NULL;
+>  }
+>  
+> +/*
+> + * Handle 1.8V signaling for DDR. No need to check for other
+> + * DDR values since driver supports ONLY 1_8V DDR.  This is
+> + * set by the MMC_CAP_1_8V_DDR.  1_2V DDR is not supported.
+> + */
+> +static void sdhci_set_ddr(struct sdhci_host *host, unsigned int ddr)
+> +{
+> +	u16 con;
+> +
+> +	if (ddr == MMC_SDR_MODE)
+> +		return;
+> +
+> +	con = sdhci_readw(host, SDHCI_HOST_CONTROL_2);
+> +	con |= SDCTRL_2_SDH_V18_EN;
+> +	sdhci_writew(host, con, SDHCI_HOST_CONTROL_2);
+> +
+> +	/* Change sigalling voltage and wait for it to be stable */
 
-It worked well and the timing was the same as before: each frequency tried
-takes about 22 ms. The third time, at 200Khz, the card got initialized.
+signaling
 
-But not much time is lost, in a meanwhile it was starting up the USB host
+> +	if (host->ops->set_signaling_voltage)
+> +		host->ops->set_signaling_voltage(host, 18);
 
-Hein
+What do you think about passing the ddr mode itself (MMC_1_8V_DDR_MODE)
+and having set_signaling_voltage() work out what voltage it needs to use
+to achieve that?  I don't like passing the raw number around so much.
 
+> +	else
+> +		mdelay(5);
+> +
+> +	/*
+> +	 * We can fail here but there is no higher level recovery
+> +	 * since the card is already past the switch to ddr
+> +	 */
+> +	con = sdhci_readw(host, SDHCI_HOST_CONTROL_2);
+> +	con &= ~SDCTRL_2_UHS_MODE_MASK;
+> +	con |= SDCTRL_2_UHS_MODE_SEL_DDR50;
+> +	sdhci_writew(host, con, SDHCI_HOST_CONTROL_2);
+> +}
+> +
+>  static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  {
+>  	int div;
+> @@ -1180,6 +1214,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	}
+>  
+>  	sdhci_set_clock(host, ios->clock);
+> +	sdhci_set_ddr(host, ios->ddr);
+>  
+>  	if (ios->power_mode == MMC_POWER_OFF)
+>  		sdhci_set_power(host, -1);
+> @@ -1744,7 +1779,7 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
+>  int sdhci_add_host(struct sdhci_host *host)
+>  {
+>  	struct mmc_host *mmc;
+> -	unsigned int caps, ocr_avail;
+> +	unsigned int caps, caps_h, ocr_avail;
+
+Maybe choose a more understandable name for caps_h?
+
+>  	int ret;
+>  
+>  	WARN_ON(host == NULL);
+> @@ -1767,8 +1802,19 @@ int sdhci_add_host(struct sdhci_host *host)
+>  			host->version);
+>  	}
+>  
+> -	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
+> -		sdhci_readl(host, SDHCI_CAPABILITIES);
+> +	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS) {
+> +		caps = host->caps;
+> +		caps_h = 0;
+> +	} else {
+> +		caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> +		if (host->version >= SDHCI_SPEC_300) 
+> +			caps_h = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+> +		else
+> +			caps_h = 0;
+> +	}
+> +
+> +	if (caps_h & SDHCI_CAN_DDR50)
+> +		mmc->caps |= MMC_CAP_1_8V_DDR;
+>  
+>  	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+>  		host->flags |= SDHCI_USE_SDMA;
+> @@ -1905,7 +1951,6 @@ int sdhci_add_host(struct sdhci_host *host)
+>  		ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
+>  	if (caps & SDHCI_CAN_VDD_180)
+>  		ocr_avail |= MMC_VDD_165_195;
+> -
+>  	mmc->ocr_avail = ocr_avail;
+>  	mmc->ocr_avail_sdio = ocr_avail;
+>  	if (host->ocr_avail_sdio)
+
+This whitespace change shouldn't be here.
+
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 36f3861..d976e4f 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -182,6 +182,9 @@
+>  #define  SDHCI_CAN_64BIT	0x10000000
+>  
+>  #define SDHCI_CAPABILITIES_1	0x44
+> +#define  SDHCI_CAN_SDR50	0x00000001
+> +#define  SDHCI_CAN_SDR104	0x00000002
+> +#define  SDHCI_CAN_DDR50	0x00000004
+>  
+
+You could use the BIT(0..2) macros here.
+
+>  #define SDHCI_MAX_CURRENT	0x48
+>  
+> @@ -237,6 +240,8 @@ struct sdhci_ops {
+>  	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
+>  					     u8 power_mode);
+>  	unsigned int    (*get_ro)(struct sdhci_host *host);
+> +	unsigned int    (*set_signaling_voltage)(struct sdhci_host *host,
+> +				unsigned short voltage);
+>  };
+>  
+>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+> -- 
+
+Thanks,
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
