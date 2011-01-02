@@ -1,35 +1,64 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v4] dw_mmc: Add Synopsys DesignWare mmc host driver.
-Date: Sun, 2 Jan 2011 06:20:13 +0000
-Message-ID: <20110102062013.GB18668@void.printf.net>
-References: <AANLkTi=0RtvsGX+Q3goL3mdG6oKeNidYtiudTZ8ZTpRP@mail.gmail.com> <20101208115510.GD10998@console-pimps.org> <AANLkTi=KqOa-MRQiptCtZGvoafRCgULfE3QFs=hmGpdi@mail.gmail.com> <AANLkTi=PpTi1_JO9Q=ph7w9Jim8iXMf9LbCfmEkWuo-h@mail.gmail.com> <20101209064751.GA21128@void.printf.net> <AANLkTimMgrawcndvUTYYjq9BGFqs-sbRsZkwVQ0Uvhvb@mail.gmail.com> <20101209160157.GA28586@void.printf.net> <AANLkTim3Rj2tTbqvT8nM4L=p=Wx8bdOnGq=EDv+cs02g@mail.gmail.com> <20101211192320.GA24430@void.printf.net> <AANLkTik7cMwgwXR1zK44HXC+1YtzpU3_zW2GUjcBMi8X@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36191 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750695Ab1ABGUP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 2 Jan 2011 01:20:15 -0500
-Content-Disposition: inline
-In-Reply-To: <AANLkTik7cMwgwXR1zK44HXC+1YtzpU3_zW2GUjcBMi8X@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Paul Gortmaker <paul.gortmaker@windriver.com>
+Subject: [34-longterm 067/260] tmio_mmc: don't clear unhandled pending interrupts
+Date: Sun,  2 Jan 2011 02:16:03 -0500
+Message-ID: <1293952756-15010-68-git-send-email-paul.gortmaker@windriver.com>
+References: <1293952756-15010-1-git-send-email-paul.gortmaker@windriver.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1293952756-15010-1-git-send-email-paul.gortmaker@windriver.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: stable@kernel.org, linux-kernel@vger.kernel.org
+Cc: stable-review@kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Matt Fleming <matt@console-pimps.org>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Linus Torvalds <torvalds@linux-foundation.org>, Paul Gortmaker <paul.gortmaker@windriver.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Linux Kernel list <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, linux-arm-kernel@lists.infradead.org
 
-Hi Will,
+From: Yusuke Goda <yusuke.goda.sx@renesas.com>
 
-On Thu, Dec 16, 2010 at 05:04:36PM +0000, Will Newton wrote:
-> This adds the mmc host driver for the Synopsys DesignWare mmc
-> host controller, found in a number of embedded SoC designs.
-> 
-> Signed-off-by: Will Newton <will.newton@imgtec.com>
+commit b78d6c5f51935ba89df8db33a57bacb547aa7325 upstream.
 
-Thanks, I've pushed this to mmc-next for .38 now after adding:
+Previously, it was possible for ack_mmc_irqs() to clear pending interrupt
+bits in the CTL_STATUS register, even though the interrupt handler had not
+been called.  This was because of a race that existed when doing a
+read-modify-write sequence on CTL_STATUS.  After the read step in this
+sequence, if an interrupt occurred (causing one of the bits in CTL_STATUS
+to be set) the write step would inadvertently clear it.
 
-Reviewed-by: Matt Fleming <matt@console-pimps.org>
-Reviewed-by: Chris Ball <cjb@laptop.org>
+Observed with the TMIO_STAT_RXRDY bit together with CMD53 on AR6002 and
+BCM4318 SDIO cards in polled mode.
 
+This patch eliminates this race by only writing to CTL_STATUS and clearing
+the interrupts that were passed as an argument to ack_mmc_irqs()."
+
+[matt@console-pimps.org: rewrote changelog]
+Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
+Acked-by: Magnus Damm <damm@opensource.se>"
+Tested-by: Arnd Hannemann <arnd@arndnet.de>"
+Acked-by: Ian Molton <ian@mnementh.co.uk>
+Cc: Matt Fleming <matt@console-pimps.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>
+Cc: Paul Mundt <lethal@linux-sh.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+Signed-off-by: Paul Gortmaker <paul.gortmaker@windriver.com>
+---
+ drivers/mmc/host/tmio_mmc.h |    5 +----
+ 1 files changed, 1 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index dafecfb..1836ed9 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -80,10 +80,7 @@
+ 
+ #define ack_mmc_irqs(host, i) \
+ 	do { \
+-		u32 mask;\
+-		mask  = sd_ctrl_read32((host), CTL_STATUS); \
+-		mask &= ~((i) & TMIO_MASK_IRQ); \
+-		sd_ctrl_write32((host), CTL_STATUS, mask); \
++		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
+ 	} while (0)
+ 
+ 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.3.3
