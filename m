@@ -1,64 +1,36 @@
-From: Paul Gortmaker <paul.gortmaker@windriver.com>
-Subject: [34-longterm 067/260] tmio_mmc: don't clear unhandled pending interrupts
-Date: Sun,  2 Jan 2011 02:16:03 -0500
-Message-ID: <1293952756-15010-68-git-send-email-paul.gortmaker@windriver.com>
-References: <1293952756-15010-1-git-send-email-paul.gortmaker@windriver.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1293952756-15010-1-git-send-email-paul.gortmaker@windriver.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: stable@kernel.org, linux-kernel@vger.kernel.org
-Cc: stable-review@kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Matt Fleming <matt@console-pimps.org>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Linus Torvalds <torvalds@linux-foundation.org>, Paul Gortmaker <paul.gortmaker@windriver.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH V2 0/2] sdhci: Dual Data Rate Support
+Date: Sun, 2 Jan 2011 08:42:47 -0800
+Message-ID: <EA32CB41-AABC-43C3-ACC2-295E9029C6B5@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:45453 "HELO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751823Ab1ABQmu convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 2 Jan 2011 11:42:50 -0500
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Mark Brown <markb@marvell.com>
 
-From: Yusuke Goda <yusuke.goda.sx@renesas.com>
 
-commit b78d6c5f51935ba89df8db33a57bacb547aa7325 upstream.
+[PATCH 1/2] sdhci: register definitions for sd 3.0 HOST CONTROL 2
+adds the definitions needed for HOST_CONTROL_2 Register
 
-Previously, it was possible for ack_mmc_irqs() to clear pending interrupt
-bits in the CTL_STATUS register, even though the interrupt handler had not
-been called.  This was because of a race that existed when doing a
-read-modify-write sequence on CTL_STATUS.  After the read step in this
-sequence, if an interrupt occurred (causing one of the bits in CTL_STATUS
-to be set) the write step would inadvertently clear it.
+[PATCH 2/2] sdhci: Support for SD/MMC Dual Data Rate
+Enables support for Dual Data Rate 1.8V signalling SD/eMMC when 
+the capability high register indicates support (bit 2 set) if
+the controller is SD 3.0 compiliant.
 
-Observed with the TMIO_STAT_RXRDY bit together with CMD53 on AR6002 and
-BCM4318 SDIO cards in polled mode.
+Implemements support for DDR by programming the appropriate
+registers in the HOST CONTROL 2 register.
 
-This patch eliminates this race by only writing to CTL_STATUS and clearing
-the interrupts that were passed as an argument to ack_mmc_irqs()."
+Code was tested on linux-next using MMP2 brownstone development
+board.  
 
-[matt@console-pimps.org: rewrote changelog]
-Signed-off-by: Yusuke Goda <yusuke.goda.sx@renesas.com>
-Acked-by: Magnus Damm <damm@opensource.se>"
-Tested-by: Arnd Hannemann <arnd@arndnet.de>"
-Acked-by: Ian Molton <ian@mnementh.co.uk>
-Cc: Matt Fleming <matt@console-pimps.org>
-Cc: Samuel Ortiz <sameo@linux.intel.com>
-Cc: Paul Mundt <lethal@linux-sh.org>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
-Signed-off-by: Paul Gortmaker <paul.gortmaker@windriver.com>
----
- drivers/mmc/host/tmio_mmc.h |    5 +----
- 1 files changed, 1 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index dafecfb..1836ed9 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -80,10 +80,7 @@
- 
- #define ack_mmc_irqs(host, i) \
- 	do { \
--		u32 mask;\
--		mask  = sd_ctrl_read32((host), CTL_STATUS); \
--		mask &= ~((i) & TMIO_MASK_IRQ); \
--		sd_ctrl_write32((host), CTL_STATUS, mask); \
-+		sd_ctrl_write32((host), CTL_STATUS, ~(i)); \
- 	} while (0)
- 
- 
--- 
-1.7.3.3
+Note:  this board design runs a fixed voltage to the card and
+signaling voltage cannot be changed.
