@@ -1,40 +1,79 @@
 From: Pierre Tardy <tardyp@gmail.com>
-Subject: Re: [RFC] sdhci: use ios->clock to know when sdhci is idle
-Date: Sun, 2 Jan 2011 22:08:10 +0100
-Message-ID: <AANLkTin7OYXzCYty8pDxyzE_Bg83=+L8jmcaoEMSf4QM@mail.gmail.com>
-References: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
-	<41EFD7A46E18724CAB128DAD00733480193D2AE61C@shsmsx502.ccr.corp.intel.com>
-	<AANLkTinYWODS785AefQ7hV+urPkAn1+En-fZEaFQygLG@mail.gmail.com>
-	<CE761E84DADF2947A4AF22FB8D97A47331E86F6E@shsmsx501.ccr.corp.intel.com>
-	<AANLkTimB7h0ZxvSOt2dUkO90RxE2c3Bu3CRqpasgzxw=@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Subject: [PATCH] mmc: add MMC_QUIRK_BROKEN_CLK_GATING
+Date: Sun,  2 Jan 2011 22:08:30 +0100
+Message-ID: <1294002510-2324-1-git-send-email-tardyp__39844.5204868496$1294002755$gmane$org@gmail.com>
+References: <AANLkTin7OYXzCYty8pDxyzE_Bg83=+L8jmcaoEMSf4QM@mail.gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:63793 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750695Ab1ABVIM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Jan 2011 16:08:12 -0500
-In-Reply-To: <AANLkTimB7h0ZxvSOt2dUkO90RxE2c3Bu3CRqpasgzxw=@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:33985 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750730Ab1ABVMH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Jan 2011 16:12:07 -0500
+In-Reply-To: <AANLkTin7OYXzCYty8pDxyzE_Bg83=+L8jmcaoEMSf4QM@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.ml.walleij@gmail.com>
-Cc: "Gao, Yunpeng" <yunpeng.gao@intel.com>, "Yuan, Hang" <hang.yuan@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Ohad Ben-Cohen <ohad@wizery.com>
+To: Linus Walleij <linus.ml.walleij@gmail.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>, "Yuan, Hang" <hang.yuan@intel.com>
+Cc: Pierre Tardy <tardyp@gmail.com>
 
-> Not all SDIO cards will work properly if you try to gate them
-> so we need a mechanism to selectively do this.
-You are right..##??!! HW vendors that does not support standards...
+Some sdio card are not following sdio standard, and does not work
+when the sdio bus's clock is gated
 
-AFAIK (was working on a sdio HW IP team before), the sdio clock is not
-supposed to be taken as is for a system clock derivative especially
-because it can stop between request.
-SDIO IRQ are asynchronous when a command or data is not ongoing
+To keep functionnality for all legacy driver, we turn this quirk on
+for every sdio card.
+Drivers needs to disable the quirk manually when someone verified that their
+supported card works with clock gating.
 
-> Any suggestions?
-I would personally suggest white list from drivers. With a call to
-mmc_host_allow_gate_card(struct mmc_card *card, bool allow)
+Signed-off-by: Pierre Tardy <tardyp@gmail.com>
+---
+ drivers/mmc/core/host.c  |    5 +----
+ drivers/mmc/core/sdio.c  |    6 ++++++
+ include/linux/mmc/card.h |    1 +
+ 3 files changed, 8 insertions(+), 4 deletions(-)
 
-see following patch..
-
-Regards,
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 92e3370..54cc461 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -160,10 +160,7 @@ static bool mmc_host_may_gate_card(struct mmc_card *card)
+ 	 * gate the clock, because there is somebody out there that may still
+ 	 * be using it.
+ 	 */
+-	if (mmc_card_sdio(card))
+-		return false;
+-
+-	return true;
++	return !(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING);
+ }
+ 
+ /**
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 82f4b90..6df1ead 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -785,6 +785,12 @@ int mmc_attach_sdio(struct mmc_host *host, u32 ocr)
+ 
+ 	mmc_release_host(host);
+ 
++        /*
++         * see comments in mmc_host_may_gate_card()
++         * this can be overidden by function drivers if they know that
++         * their sdio card works with clock gating
++         */
++        card->quirks |= MMC_QUIRK_BROKEN_CLK_GATING;
+ 	/*
+ 	 * First add the card to the driver model...
+ 	 */
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 8ce0827..5071eb1 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -121,6 +121,7 @@ struct mmc_card {
+ 						/* for byte mode */
+ #define MMC_QUIRK_NONSTD_SDIO	(1<<2)		/* non-standard SDIO card attached */
+ 						/* (missing CIA registers) */
++#define MMC_QUIRK_BROKEN_CLK_GATING (1<<3)	/* clock gating the sdio bus will make card fail */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+  	unsigned int		erase_shift;	/* if erase unit is power 2 */
 -- 
-Pierre
+1.7.1
+
