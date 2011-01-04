@@ -1,75 +1,61 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 2/2] mmc: add sdhci-tegra driver for Tegra SoCs
-Date: Tue, 4 Jan 2011 15:24:33 +0100
-Message-ID: <20110104142432.GB2609@pengutronix.de>
-References: <1293096475-19634-1-git-send-email-olof@lixom.net>
- <1293096828-19985-1-git-send-email-olof@lixom.net>
- <20101223112346.GA5044@pengutronix.de>
- <AANLkTimdB+kXKX7sJK4sVZuvmX=Zj=kW5asJzyZXoURL@mail.gmail.com>
+From: Sujit Reddy <sujitreddy243@gmail.com>
+Subject: Re: eMMC sector/byte access mode validation
+Date: Tue, 4 Jan 2011 22:29:32 +0530
+Message-ID: <AANLkTi=HAY1MSMwhRvkae2c1VotJgcKp2oTa8Vjc_FD+@mail.gmail.com>
+References: <AANLkTinn8EOuiB7ufMFxu=4vCf1K1==oj7Yqni_pbMjc@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="3lcZGd9BuhuYXNfi"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:57501 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751028Ab1ADOYi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 09:24:38 -0500
-Content-Disposition: inline
-In-Reply-To: <AANLkTimdB+kXKX7sJK4sVZuvmX=Zj=kW5asJzyZXoURL@mail.gmail.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:62800 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752520Ab1ADQ7e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 11:59:34 -0500
+Received: by pzk35 with SMTP id 35so1523622pzk.19
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Jan 2011 08:59:33 -0800 (PST)
+In-Reply-To: <AANLkTinn8EOuiB7ufMFxu=4vCf1K1==oj7Yqni_pbMjc@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: Chris Ball <cjb@laptop.org>, Mike Rapoport <mike@compulab.co.il>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, Yvonne Yip <y@palm.com>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, akpm@linux-foundation.org, prakity@marvell.com
 
+Hi,
 
---3lcZGd9BuhuYXNfi
-Content-Type: text/plain; charset=iso-8859-15
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Any comments on below mentioned query?
 
-On Sat, Jan 01, 2011 at 04:28:46PM -0800, Olof Johansson wrote:
-> On Thu, Dec 23, 2010 at 3:23 AM, Wolfram Sang <w.sang@pengutronix.de> wro=
-te:
-> >
-> >> Changes since v2:
-> >> =A0 =A0 =A0 * Whitespace fixes
-> >> =A0 =A0 =A0 * Changed order of test in get_ro
-> >
-> > What benefit has the reordering? (And just to make sure: You still
-> > return -1 meaning "read-only". I assume this is intentional)
->=20
-> Looking at drivers/mmc/core/sd.c:mmc_sd_setup_card(), returning <0
-> means no RO detection, and will print a warning to that effect. If no
-> other RO-related quirks are included (i.e. such as
-> SDHCI_QUIRK_INVERTED_WRITE_PROTECT), the value will be passed up
-> through sdhci_get_ro and thus handled appropriately.
->=20
-> So on second look the code as it is seems correct to me.
+Thanks
+Sujit
 
-ACK. I misread the code before :( No wonder my comment seemed vague to
-you, sorry for that. I agree that the code is correct and the reordering
-helps readability. The only nitpick I'd have now is to return
--ESOMETHING (-EINVAL?) instead of -1 to make the fault more obvious.
-
-Kind regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---3lcZGd9BuhuYXNfi
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk0jLaAACgkQD27XaX1/VRuOdwCcCLaJw/WP1D1a7CY0G1HUwx2u
-5PwAoIb+6MoLq1+JwMXWGD96Ta21B4F4
-=pVtE
------END PGP SIGNATURE-----
-
---3lcZGd9BuhuYXNfi--
+On Thu, Dec 23, 2010 at 1:35 PM, Sujit Reddy <sujitreddy243@gmail.com> wrote:
+> Hi,
+>
+> According to eMMC spec v4.3, Section 6.1 says that greater than 2GB
+> density cards are sector addressable and less than 2GB are byte addressable.
+> But Section 7.3.3 says that OCR bit 30 needs to be used which access mode
+> the host must use for all its future transactions.
+>
+> In mainline kernel the support for less than 2GB cards is by checking
+> the density of card.
+> If it is greater than 2GB it is assumed to be supporting sector addressing.
+>
+> But actually we need to check the OCR value to determine the correct access mode
+> See patch (http://www.spinics.net/lists/linux-mmc/msg01466.html) by Philip.
+>
+> Some eMMC cards even though less than 2GB have SEC_COUNT value defined
+> in EXT_CSD register but does not support sector access mode.
+>
+> I have a couple of questions here:
+> 1) Are there any cards that support only byte access mode even though
+> the density is
+> greater than 2GB?
+> 2) If there are cards which have capacity less than 2GB and supports only sector
+> access mode then what's the solution? I am not sure If there are any such cards.
+>
+> Philip's patch handles both these scenarios effectively.
+> Can anyone mention the reason not taking Philip's patch into account,
+> which I feel is much
+> more fool proof than the implementation in mainline kernel
+> (http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg02307.html)?
+>
+> Thanks
+> Sujit
+>
