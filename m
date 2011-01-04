@@ -1,7 +1,7 @@
 From: Philip Rakity <prakity@marvell.com>
 Subject: Re: [PATCH V2 2/2] sdhci: Support for SD/MMC Dual Data Rate
-Date: Mon, 3 Jan 2011 20:37:25 -0800
-Message-ID: <73250D6B-58E4-4791-9E11-032A7E2C8498@marvell.com>
+Date: Mon, 3 Jan 2011 20:41:32 -0800
+Message-ID: <D23DAD59-D0AF-469D-B91A-8528A3F14597@marvell.com>
 References: <35CD48DB-A420-4319-968D-400D45EE9C0D@marvell.com>
  <AANLkTi=ERwn3W8tvt3NNS3Xiq93mhy7TV7vAT9dwjvaq@mail.gmail.com>
  <DF9AC92A-B56D-4D22-8CE3-5AC15F9EAB8C@marvell.com>
@@ -9,11 +9,11 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:50095 "HELO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1750981Ab1ADEn5 convert rfc822-to-8bit
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:50576 "HELO
+	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751099Ab1ADEtS convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 3 Jan 2011 23:43:57 -0500
+	Mon, 3 Jan 2011 23:49:18 -0500
 In-Reply-To: <DF9AC92A-B56D-4D22-8CE3-5AC15F9EAB8C@marvell.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
