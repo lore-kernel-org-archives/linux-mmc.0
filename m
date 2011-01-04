@@ -1,142 +1,78 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [RFC] sdhci: use ios->clock to know when sdhci is idle
-Date: Tue, 4 Jan 2011 16:19:01 +0800
-Message-ID: <5D8008F58939784290FAB48F549751983510982D32@shsmsx502.ccr.corp.intel.com>
-References: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 1/2] sdhci: add quirk for max len ADMA descriptors
+Date: Tue, 4 Jan 2011 15:14:34 +0100
+Message-ID: <20110104141434.GA2609@pengutronix.de>
+References: <1293096475-19634-1-git-send-email-olof@lixom.net>
+ <1293096475-19634-2-git-send-email-olof@lixom.net>
+ <20101223112606.GB5044@pengutronix.de>
+ <AANLkTi=SRwNq0918xfra=4ZHzNsGT1nBNxpUnPAoSj3-@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="ikeVEW9yuYc//A+q"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:21277 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750944Ab1ADITo convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 03:19:44 -0500
-In-Reply-To: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
-Content-Language: en-US
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:34352 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751378Ab1ADOOk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 09:14:40 -0500
+Content-Disposition: inline
+In-Reply-To: <AANLkTi=SRwNq0918xfra=4ZHzNsGT1nBNxpUnPAoSj3-@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Tardy <tardyp@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Linus Walleij <linus.walleij@stericsson.com>, Ohad Ben-Cohen <ohad@wizery.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>, "Yuan, Hang" <hang.yuan@intel.com>
-
-Hi Pierre,
-I have some concerns about this RFC.
-I agree with you that even if the Wifi interface is up, user might not use the network and host controller should be power gated. That also is the purport of runtime PM framework! But I think Wifi card driver can know whether user is using the network after ifconfig up, right? So that Wifi driver can tell host controller when should be power gated as well. That means you can use runtime PM framework to control Wifi card's parent to do power gating. Then why not use the it?
-
-Another thing is, does the clock gating framework work well when use power gating? Let's consider the scenario there are two slots in one host controller. Clock gating framework can only effect the slot it wants to gate since it only set the register of this slot, not touch the other one. That is reasonable. But power gating is not just effect the slot it wants. It will influence both of the slots since it will set the host controller's power. Host controller never knows how many children are alive since his children never use runtime_put/get to notify their parent. I think this is not reasonable.
+To: Olof Johansson <olof@lixom.net>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
 
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org
-> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Pierre Tardy
-> Sent: Wednesday, December 22, 2010 9:14 PM
-> To: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
-> Cc: Pierre Tardy; Chris Ball; Andrew Morton; Alan Cox; Takashi Iwai; Maxim
-> Levitsky; Linus Walleij; Ohad Ben-Cohen; Gao, Yunpeng
-> Subject: [RFC] sdhci: use ios->clock to know when sdhci is idle
-> 
-> This allows sdhci to detect its own activity and to autosuspend
-> when not used
-> 
-> inspired from  mmci: handle clock frequency 0 properly
-> From Linus Walleij <linus.walleij@stericsson.com>
-> author of mmc aggressive clock gating fw.
-> 
-> The idea of using mmc clock gating fw in order to power gate the
-> sdhci is simple (hope no too simplistic):
-> Whenever the mmc fw tells we dont need the MMC clock, we dont need
-> the sdhci power as well.
-> 
-> This does not mean that the child (card) is
-> suspended. In case of a Wifi SDIO card, the card will be suspended
-> and resumed according to the ifconfig up/down status.
-> Even if the Wifi interface is up, user might not use the network.
-> Sdhci can be powered off during those period. It is up to the HW
-> implementation to implement smart enough power gating to still
-> support enough always-on circuitry allowing to detect sdio
-> interrupts.
-> 
-> This patch goes on top of Yunpeng's patch available on patchwork:
-> 378052 [v2,2/3] mmc: enable runtime PM support of sdhci host controller
-> 
-> CC: Chris Ball <cjb@laptop.org>
-> CC: Andrew Morton <akpm@linux-foundation.org>
-> CC: Alan Cox <alan@linux.intel.com>
-> CC: Takashi Iwai <tiwai@suse.de>
-> CC: Maxim Levitsky <maximlevitsky@gmail.com>
-> CC: Linus Walleij <linus.walleij@stericsson.com>
-> CC: Ohad Ben-Cohen <ohad@wizery.com>
-> CC: Yunpeng Gao <yunpeng.gao@intel.com>
-> 
-> Signed-off-by: Pierre Tardy <tardyp@gmail.com>
-> ---
->  drivers/mmc/host/sdhci.c  |   20 ++++++++++++++++++++
->  include/linux/mmc/sdhci.h |    1 +
->  2 files changed, 21 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index a298fb0..a648330 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1161,6 +1161,7 @@ static void sdhci_set_ios(struct mmc_host *mmc,
-> struct mmc_ios *ios)
->  {
->  	struct sdhci_host *host;
->  	unsigned long flags;
-> +        unsigned int lastclock;
->  	u8 ctrl;
-> 
->  	host = mmc_priv(mmc);
-> @@ -1171,6 +1172,24 @@ static void sdhci_set_ios(struct mmc_host *mmc,
-> struct mmc_ios *ios)
->  		goto out;
-> 
->  	/*
-> +	 * get/put runtime_pm usage counter at ios->clock transitions
-> +         * We need to do it before any other chip access, as sdhci could
-> +         * be power gated
-> +	 */
-> +        lastclock = host->iosclock;
-> +        host->iosclock = ios->clock;
-> +	if (lastclock == 0 && ios->clock != 0) {
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +		pm_runtime_get_sync(&host->parent.dev);
-> +		spin_lock_irqsave(&host->lock, flags);
-> +	} else if (lastclock != 0 && ios->clock == 0) {
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +		pm_runtime_put_autosuspend(&host->parent.dev);
-> +		spin_lock_irqsave(&host->lock, flags);
-> +		/* no need to configure the rest.. */
-> +		goto out;
-> +	}
-> +	/*
->  	 * Reset the chip on each power off.
->  	 * Should clear out any weird states.
->  	 */
-> @@ -1779,6 +1798,7 @@ struct sdhci_host *sdhci_alloc_host(struct device
-> *dev,
-> 
->  	host = mmc_priv(mmc);
->  	host->mmc = mmc;
-> +	host->iosclock = 0;
-> 
->  	return host;
->  }
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index 0d953f5..78c1528 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -114,6 +114,7 @@ struct sdhci_host {
->  	unsigned int timeout_clk;	/* Timeout freq (KHz) */
-> 
->  	unsigned int clock;	/* Current clock (MHz) */
-> +	unsigned int iosclock;	/* Last clock asked via set_ios  */
->  	u8 pwr;			/* Current voltage */
-> 
->  	struct mmc_request *mrq;	/* Current request */
-> --
-> 1.7.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--ikeVEW9yuYc//A+q
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi Olof,
+
+happy new 2011, first of all.
+
+On Thu, Dec 23, 2010 at 10:26:16AM -0800, Olof Johansson wrote:
+> > I tend to NACK it (but I am not the maintainer). I'd prefer to see a
+> > draft of your idea of a sdhci_add_host_fixup()-function :)
+>=20
+> See, I tend to get annoyed when I get asked to clean up others' messes
+> because something I do is all of the sudden held to a higher standard
+> than they have been.
+
+If I wasn't stubborn, the bits would have run out in October already,
+and you'd be in a worse situation now ;) That put aside, I anticipated
+that Chris is going to pick up your patches nonetheless (which causes no
+hard feelings here), that's why I wrote "I am not the maintainer".
+
+BTW I'd say cleaning up mess from the past is not that uncommon in
+kernel-development (think BKL), and raising standards is a good thing as
+well, no?
+
+I see your point, though, that if you introduce a fixup()-function now,
+nobody will convert an existing driver to it. It would be nice to have
+the cleanup in one go, but until someone is driving/funding this bigger
+step, we have to fiddle with incremental improvements which need a bit
+more negotiation, it seems.
+
+Kind regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--ikeVEW9yuYc//A+q
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk0jK0oACgkQD27XaX1/VRuLVwCeLk+5ankREEG+iKk47/Lu8MPe
+5U0Anjhy9YJ3KxyJ5rfoobf0USgZsliu
+=+awp
+-----END PGP SIGNATURE-----
+
+--ikeVEW9yuYc//A+q--
