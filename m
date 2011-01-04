@@ -1,61 +1,61 @@
-From: Sujit Reddy <sujitreddy243@gmail.com>
-Subject: Re: eMMC sector/byte access mode validation
-Date: Tue, 4 Jan 2011 22:29:32 +0530
-Message-ID: <AANLkTi=HAY1MSMwhRvkae2c1VotJgcKp2oTa8Vjc_FD+@mail.gmail.com>
-References: <AANLkTinn8EOuiB7ufMFxu=4vCf1K1==oj7Yqni_pbMjc@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] Fix sd/sdio/mmc initialization frequency retries
+Date: Tue, 4 Jan 2011 17:27:38 +0000
+Message-ID: <20110104172738.GA16940@void.printf.net>
+References: <4D1A1B19.8000902@windriver.com> <20101231044942.GC19122@void.printf.net> <4D221748.5040701@windriver.com> <20110104012901.GA8788@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:62800 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752520Ab1ADQ7e (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 11:59:34 -0500
-Received: by pzk35 with SMTP id 35so1523622pzk.19
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Jan 2011 08:59:33 -0800 (PST)
-In-Reply-To: <AANLkTinn8EOuiB7ufMFxu=4vCf1K1==oj7Yqni_pbMjc@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:44093 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751671Ab1ADR1l (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 4 Jan 2011 12:27:41 -0500
+Content-Disposition: inline
+In-Reply-To: <20110104012901.GA8788@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, akpm@linux-foundation.org, prakity@marvell.com
+To: Andy Ross <andy.ross@windriver.com>, linux-mmc@vger.kernel.org
 
 Hi,
 
-Any comments on below mentioned query?
+On Tue, Jan 04, 2011 at 01:29:02AM +0000, Chris Ball wrote:
+> Thanks!  Pushed to mmc-next for .38, after adding Reviewed-by: tags and
+> removing the mmc_bus_{put,get}() comment, since I'll take care of that
+> separately.
 
-Thanks
-Sujit
+And here's the comment patch:
 
-On Thu, Dec 23, 2010 at 1:35 PM, Sujit Reddy <sujitreddy243@gmail.com> wrote:
-> Hi,
->
-> According to eMMC spec v4.3, Section 6.1 says that greater than 2GB
-> density cards are sector addressable and less than 2GB are byte addressable.
-> But Section 7.3.3 says that OCR bit 30 needs to be used which access mode
-> the host must use for all its future transactions.
->
-> In mainline kernel the support for less than 2GB cards is by checking
-> the density of card.
-> If it is greater than 2GB it is assumed to be supporting sector addressing.
->
-> But actually we need to check the OCR value to determine the correct access mode
-> See patch (http://www.spinics.net/lists/linux-mmc/msg01466.html) by Philip.
->
-> Some eMMC cards even though less than 2GB have SEC_COUNT value defined
-> in EXT_CSD register but does not support sector access mode.
->
-> I have a couple of questions here:
-> 1) Are there any cards that support only byte access mode even though
-> the density is
-> greater than 2GB?
-> 2) If there are cards which have capacity less than 2GB and supports only sector
-> access mode then what's the solution? I am not sure If there are any such cards.
->
-> Philip's patch handles both these scenarios effectively.
-> Can anyone mention the reason not taking Philip's patch into account,
-> which I feel is much
-> more fool proof than the implementation in mainline kernel
-> (http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg02307.html)?
->
-> Thanks
-> Sujit
->
+From: Chris Ball <cjb@laptop.org>
+Date: Tue, 4 Jan 2011 12:20:22 -0500
+Subject: [PATCH] mmc: Explain why we make adjacent mmc_bus_{put,get} calls during rescan.
+
+Signed-off-by: Chris Ball <cjb@laptop.org>
+---
+ drivers/mmc/core/core.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 286e6ce..b8e3b97 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1529,13 +1529,15 @@ void mmc_rescan(struct work_struct *work)
+ 	 */
+ 	if (host->bus_ops && host->bus_ops->detect && !host->bus_dead
+ 	    && mmc_card_is_removable(host))
+ 		host->bus_ops->detect(host);
+ 
++	/*
++	 * Let mmc_bus_put() free the bus/bus_ops if we've found that
++	 * the card is no longer present.
++	 */
+ 	mmc_bus_put(host);
+-
+-
+ 	mmc_bus_get(host);
+ 
+ 	/* if there still is a card present, stop here */
+ 	if (host->bus_ops != NULL) {
+ 		mmc_bus_put(host);
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
