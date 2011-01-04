@@ -1,58 +1,55 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 1/2] sdhci: add quirk for max len ADMA descriptors
-Date: Tue, 4 Jan 2011 15:14:34 +0100
-Message-ID: <20110104141434.GA2609@pengutronix.de>
+Subject: Re: [PATCH 2/2] mmc: add sdhci-tegra driver for Tegra SoCs
+Date: Tue, 4 Jan 2011 15:24:33 +0100
+Message-ID: <20110104142432.GB2609@pengutronix.de>
 References: <1293096475-19634-1-git-send-email-olof@lixom.net>
- <1293096475-19634-2-git-send-email-olof@lixom.net>
- <20101223112606.GB5044@pengutronix.de>
- <AANLkTi=SRwNq0918xfra=4ZHzNsGT1nBNxpUnPAoSj3-@mail.gmail.com>
+ <1293096828-19985-1-git-send-email-olof@lixom.net>
+ <20101223112346.GA5044@pengutronix.de>
+ <AANLkTimdB+kXKX7sJK4sVZuvmX=Zj=kW5asJzyZXoURL@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="ikeVEW9yuYc//A+q"
+	protocol="application/pgp-signature"; boundary="3lcZGd9BuhuYXNfi"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:34352 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:57501 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751378Ab1ADOOk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 09:14:40 -0500
+	with ESMTP id S1751028Ab1ADOYi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 09:24:38 -0500
 Content-Disposition: inline
-In-Reply-To: <AANLkTi=SRwNq0918xfra=4ZHzNsGT1nBNxpUnPAoSj3-@mail.gmail.com>
+In-Reply-To: <AANLkTimdB+kXKX7sJK4sVZuvmX=Zj=kW5asJzyZXoURL@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Olof Johansson <olof@lixom.net>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Mike Rapoport <mike@compulab.co.il>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, Yvonne Yip <y@palm.com>
 
 
---ikeVEW9yuYc//A+q
-Content-Type: text/plain; charset=us-ascii
+--3lcZGd9BuhuYXNfi
+Content-Type: text/plain; charset=iso-8859-15
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Hi Olof,
-
-happy new 2011, first of all.
-
-On Thu, Dec 23, 2010 at 10:26:16AM -0800, Olof Johansson wrote:
-> > I tend to NACK it (but I am not the maintainer). I'd prefer to see a
-> > draft of your idea of a sdhci_add_host_fixup()-function :)
+On Sat, Jan 01, 2011 at 04:28:46PM -0800, Olof Johansson wrote:
+> On Thu, Dec 23, 2010 at 3:23 AM, Wolfram Sang <w.sang@pengutronix.de> wro=
+te:
+> >
+> >> Changes since v2:
+> >> =A0 =A0 =A0 * Whitespace fixes
+> >> =A0 =A0 =A0 * Changed order of test in get_ro
+> >
+> > What benefit has the reordering? (And just to make sure: You still
+> > return -1 meaning "read-only". I assume this is intentional)
 >=20
-> See, I tend to get annoyed when I get asked to clean up others' messes
-> because something I do is all of the sudden held to a higher standard
-> than they have been.
+> Looking at drivers/mmc/core/sd.c:mmc_sd_setup_card(), returning <0
+> means no RO detection, and will print a warning to that effect. If no
+> other RO-related quirks are included (i.e. such as
+> SDHCI_QUIRK_INVERTED_WRITE_PROTECT), the value will be passed up
+> through sdhci_get_ro and thus handled appropriately.
+>=20
+> So on second look the code as it is seems correct to me.
 
-If I wasn't stubborn, the bits would have run out in October already,
-and you'd be in a worse situation now ;) That put aside, I anticipated
-that Chris is going to pick up your patches nonetheless (which causes no
-hard feelings here), that's why I wrote "I am not the maintainer".
-
-BTW I'd say cleaning up mess from the past is not that uncommon in
-kernel-development (think BKL), and raising standards is a good thing as
-well, no?
-
-I see your point, though, that if you introduce a fixup()-function now,
-nobody will convert an existing driver to it. It would be nice to have
-the cleanup in one go, but until someone is driving/funding this bigger
-step, we have to fiddle with incremental improvements which need a bit
-more negotiation, it seems.
+ACK. I misread the code before :( No wonder my comment seemed vague to
+you, sorry for that. I agree that the code is correct and the reordering
+helps readability. The only nitpick I'd have now is to return
+-ESOMETHING (-EINVAL?) instead of -1 to make the fault more obvious.
 
 Kind regards,
 
@@ -62,7 +59,7 @@ Kind regards,
 Pengutronix e.K.                           | Wolfram Sang                |
 Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
---ikeVEW9yuYc//A+q
+--3lcZGd9BuhuYXNfi
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 Content-Disposition: inline
@@ -70,9 +67,9 @@ Content-Disposition: inline
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk0jK0oACgkQD27XaX1/VRuLVwCeLk+5ankREEG+iKk47/Lu8MPe
-5U0Anjhy9YJ3KxyJ5rfoobf0USgZsliu
-=+awp
+iEYEARECAAYFAk0jLaAACgkQD27XaX1/VRuOdwCcCLaJw/WP1D1a7CY0G1HUwx2u
+5PwAoIb+6MoLq1+JwMXWGD96Ta21B4F4
+=pVtE
 -----END PGP SIGNATURE-----
 
---ikeVEW9yuYc//A+q--
+--3lcZGd9BuhuYXNfi--
