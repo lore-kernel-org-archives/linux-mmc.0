@@ -1,226 +1,142 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH 15/23] Alternative mmc structure to support pxa168,
- pxa910, mmp2 family SD
-Date: Tue, 4 Jan 2011 01:10:22 -0500
-Message-ID: <AANLkTim6Uda5+T-Fr6WuGJKhoV6EboSHjMKGCAzb3vTH@mail.gmail.com>
-References: <22DA8CC3-8CB2-4EEE-AAD8-8599BD589CCE@marvell.com>
-	<201012221510.36878.arnd@arndb.de>
-	<037EAE31-B07C-4134-B810-A5A1E83517B8@marvell.com>
-	<AANLkTikmZ=c8LnOwxLqx9w6cXV07eVL7AZ0qQmXKojs9@mail.gmail.com>
-	<7E0D4C72-717F-495B-98FE-35F40C7CDCAE@marvell.com>
-	<AANLkTik0YCSw19-Kyj7PFqgS+mJr6btcAzbrmAtiUL0=@mail.gmail.com>
-	<E5C4BC31-9A6C-4F51-ADCD-6755299DD122@marvell.com>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [RFC] sdhci: use ios->clock to know when sdhci is idle
+Date: Tue, 4 Jan 2011 16:19:01 +0800
+Message-ID: <5D8008F58939784290FAB48F549751983510982D32@shsmsx502.ccr.corp.intel.com>
+References: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:36667 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750926Ab1ADGKZ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 01:10:25 -0500
-Received: by fxm20 with SMTP id 20so13810925fxm.19
-        for <linux-mmc@vger.kernel.org>; Mon, 03 Jan 2011 22:10:23 -0800 (PST)
-In-Reply-To: <E5C4BC31-9A6C-4F51-ADCD-6755299DD122@marvell.com>
+Received: from mga02.intel.com ([134.134.136.20]:21277 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750944Ab1ADITo convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 03:19:44 -0500
+In-Reply-To: <1293023621-3077-1-git-send-email-tardyp@gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <markb@marvell.com>
-Cc: Haojian Zhuang <haojian.zhuang@gmail.com>, Philip Rakity <prakity@marvell.com>, Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Pierre Tardy <tardyp@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Linus Walleij <linus.walleij@stericsson.com>, Ohad Ben-Cohen <ohad@wizery.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>, "Yuan, Hang" <hang.yuan@intel.com>
 
-On Fri, Dec 31, 2010 at 5:08 PM, Mark Brown <markb@marvell.com> wrote:
-> On Dec 31, 2010, at 1:46 AM, Haojian Zhuang wrote:
->
->> On Fri, Dec 31, 2010 at 2:03 PM, Philip Rakity <prakity@marvell.com>=
- wrote:
->>>
->>> On Dec 30, 2010, at 9:46 PM, Haojian Zhuang wrote:
->>>
->>>> On Thu, Dec 23, 2010 at 6:58 AM, Philip Rakity <prakity@marvell.co=
-m> wrote:
->>>>>
->>>>> On Dec 22, 2010, at 6:10 AM, Arnd Bergmann wrote:
->>>>>
->>>>>> On Wednesday 22 December 2010 08:09:58 Philip Rakity wrote:
->>>>>>> The PXA168, PXA910, and MMP2 are not the same SOC. =A0The famil=
-y
->>>>>>> of embedded processors have slightly different internal blocks
->>>>>>> for SD, I2C, etc. =A0Sometimes it is important to know which SO=
-C
->>>>>>> is being used due to differences in the silicon. =A0Sometimes i=
-t
->>>>>>> is important to know evaluation boards should be selected based
->>>>>>> on the SOC on the board.
->>>>>>
->>>>>> This looks like you're moving in the wrong direction.
->>>>>>
->>>>>> If the chips are just slightly different, you'd certainly
->>>>>> want to make sure that you can detect the difference at runtime,
->>>>>> and be able to use the same kernel on all of the variants.
->>>>>
->>>>> MMP2 used PJ4 core --- PXA168/PXA910 use PJ1 so rather different =
-architecture.
->>>>>
->>>>> PXA168/PXA910 have slightly different internal peripherals with d=
-ifferent quirks.
->>>>> Certainly possible to tell this apart at runtime but not all peri=
-pherals are the same
->>>>> and startup files ARE different.
->>>>>
->>>>>
->>>> MMP2 and PJ4 are different SoC silicons. But they're using similar=
- SD
->
-> I think you meant MMP2 and PJ1 there. MMP2 is a PJ4 core.
->
->>>> IP, so we can share same driver to them. Different quirks can be
->>>> handled by different flags in run time.
->
-> Technically all of these SDHCI controllers are extremely similar. The=
- point of the SDHCI-* family of drivers
-> are there to specify the implementation differences.
->
-> sdhci-pxa codebase is currently minimal it performs two operations:
-> 1. Register sdhci instance using platform data.
-> 2. Define common quirks.
-> 3. Provides clock control callback
->
-> The PXA168/PXA910 (PJ1) versions would have specific needs:
-> 1. There is a difference in clock control and power up sequencing
-> 2. There is a specific I/O accessor needed to access registers
-> 3. There are workarounds for SDIO that are needed.
-> 4. There specific quirks needed for the PXA168/PXA910.
+Hi Pierre,
+I have some concerns about this RFC.
+I agree with you that even if the Wifi interface is up, user might not use the network and host controller should be power gated. That also is the purport of runtime PM framework! But I think Wifi card driver can know whether user is using the network after ifconfig up, right? So that Wifi driver can tell host controller when should be power gated as well. That means you can use runtime PM framework to control Wifi card's parent to do power gating. Then why not use the it?
 
-=46or mmp2 and pxa910, they are same ip in fact, same silicon bug, and
-same workaround, and fixed together in updated version.
-That's the reason they worked well in currently code base with same
-quirk, same driver.
-pxa168 may be different since no future stepping.
+Another thing is, does the clock gating framework work well when use power gating? Let's consider the scenario there are two slots in one host controller. Clock gating framework can only effect the slot it wants to gate since it only set the register of this slot, not touch the other one. That is reasonable. But power gating is not just effect the slot it wants. It will influence both of the slots since it will set the host controller's power. Host controller never knows how many children are alive since his children never use runtime_put/get to notify their parent. I think this is not reasonable.
 
-It is true, one is v2, the other is v3, but this is handled in sdhci.c
-and transparent for specific driver.
-The only difference is different private register, that may because
-when define v2 and can not foresee v3 definition.
-Still not find strong reason to add more specific driver only handle
-different private register, if so more driver will be added for mmp2x,
-for example, though same ip are used.
 
-BTW, brownstone with mmc support is already added if work based on
-pxa-linux-2.6.git, devel branch.
-
->
-> Even if we were to write a separate driver for PXA168/910 and MMP2 th=
-ere would be no code duplication except for
-> the code to interpret the platform data.
->
-> In Philip's code he took the duplication into account and further abs=
-tracted it so that the platform data interpretation is done in
-> sdhci-pxa.c and the differences are exposed in the sdhci-pxa168 and s=
-dhci-mmp2 modules.
->
-> There is already precedence for this already in sdhci-of-* implementa=
-tion.
->
-> I am not sure why people think combining all of these differences int=
-o one massive sdhci-pxa driver would make maintenance simpler when the
-> relevant commonality is already abstracted away in sdhci.c.
->
->>>>
->>>
->>> The SD IP is not the same. =A0One uses SD controller 3.0 and the ot=
-her is 2.0.
->>>
->>> They are the same in the sense that they public registers adhere to=
- the appropriate SD spec 2.0/3.0 but
->>> these accesses are handled by sdhci.c. =A0(SD 3.0 extends the SD 2.=
-0 spec by adding new registers and adding some bit definitions
->>> in a compatible manner inside the public space).
->>>
->> Yes, you confirmed that they're same in the sense. It's enough. User
->> needn't care whether it's SD2.0 or SD3.0. It's the business of silic=
-on
->> engineer.
->>
->>> The private registers that need to be programmed are not extensions=
- but are at different locations and bit fields do not have exactly the =
-same meaning.
->>>
->>> The code to handle the differences is rather small and is not NOT p=
-laced in arch/arm/ directory but rather in the
->>> drivers/mmc/host directory and follows the conventions to handle th=
-is.
->>>
->> In your patch, you divide them into silicon depedant files. I think
->> that putting them into arch/arm is better.
->>
->>>
->>>> There's no reason to copy driver for each silicon
->>>
->>>>
->>>>>>
->>>>>> Instead, you promote each of the SOCs to a top-level family
->>>>>> in this patch, which makes it impossible to build a kernel
->>>>>> for more than one of them at a time.
->>>>>
->>>>> That was the intent to handle the case of development board selec=
-tion.
->>>>> it is meaningless to select MMP2 development board with say PXA16=
-8 SoC.
->>>>>
->>>>> Open to other way to handle this problem. =A0Suggestions welcome.
->>>>>
->>>> Again, you did wrong. You couldn't make patch for top-level family=
-=2E It
->>>> will introduce a lot of error to maintainers.
->>>
->>> The patch selects ARCH-MMP (as now) but adds the ability
->>> to also know which specific SoC was chosen. =A0(This is sort of don=
-e by choosing the development board today).
->>>
->> If you want to change mmc code, push it into mmc tree. If you want t=
-o
->> change pxa code, push it into pxa tree. If they're dependant, please
->> make sure the sequence is right.
->>>
->>>>
->>>> Your patches will make them mess.
->>>
->>> suggest a solution.
->>>
->>> The current mechanism of having the development board select the CP=
-U does not seem right.
->>> One can select a development board for MMP2 and PXA168 and yet the =
-arch files to support each CPU
->>> are different and not compatible. =A0(for example cache handling).
->>>
->> Only one SoC can be installed on one board. If silicons are
->> pin-compatible to one board, we can register different boards. For
->> example, we can divide saarb as saarb_pv and saarb_mg.
->>
->> If MMP2 and PXA168 are both installed on one board, it means that yo=
-u
->> must run two kernel images on two APs. Actually, I don't think anyon=
-e
->> will design system like this way. If so, why not adopt the above
->> policy? You can divide the board into two sub-board on naming policy=
-=2E
->>>>
->>>> Thanks
->>>> Haojian
->>>>
->>>>>>
->>>>>> =A0 =A0 =A0 Arnd
->>>>>
->>>>>
->>>>> _______________________________________________
->>>>> linux-arm-kernel mailing list
->>>>> linux-arm-kernel@lists.infradead.org
->>>>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
->>>>>
->>>
->>>
->
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org
+> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Pierre Tardy
+> Sent: Wednesday, December 22, 2010 9:14 PM
+> To: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+> Cc: Pierre Tardy; Chris Ball; Andrew Morton; Alan Cox; Takashi Iwai; Maxim
+> Levitsky; Linus Walleij; Ohad Ben-Cohen; Gao, Yunpeng
+> Subject: [RFC] sdhci: use ios->clock to know when sdhci is idle
+> 
+> This allows sdhci to detect its own activity and to autosuspend
+> when not used
+> 
+> inspired from  mmci: handle clock frequency 0 properly
+> From Linus Walleij <linus.walleij@stericsson.com>
+> author of mmc aggressive clock gating fw.
+> 
+> The idea of using mmc clock gating fw in order to power gate the
+> sdhci is simple (hope no too simplistic):
+> Whenever the mmc fw tells we dont need the MMC clock, we dont need
+> the sdhci power as well.
+> 
+> This does not mean that the child (card) is
+> suspended. In case of a Wifi SDIO card, the card will be suspended
+> and resumed according to the ifconfig up/down status.
+> Even if the Wifi interface is up, user might not use the network.
+> Sdhci can be powered off during those period. It is up to the HW
+> implementation to implement smart enough power gating to still
+> support enough always-on circuitry allowing to detect sdio
+> interrupts.
+> 
+> This patch goes on top of Yunpeng's patch available on patchwork:
+> 378052 [v2,2/3] mmc: enable runtime PM support of sdhci host controller
+> 
+> CC: Chris Ball <cjb@laptop.org>
+> CC: Andrew Morton <akpm@linux-foundation.org>
+> CC: Alan Cox <alan@linux.intel.com>
+> CC: Takashi Iwai <tiwai@suse.de>
+> CC: Maxim Levitsky <maximlevitsky@gmail.com>
+> CC: Linus Walleij <linus.walleij@stericsson.com>
+> CC: Ohad Ben-Cohen <ohad@wizery.com>
+> CC: Yunpeng Gao <yunpeng.gao@intel.com>
+> 
+> Signed-off-by: Pierre Tardy <tardyp@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci.c  |   20 ++++++++++++++++++++
+>  include/linux/mmc/sdhci.h |    1 +
+>  2 files changed, 21 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a298fb0..a648330 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1161,6 +1161,7 @@ static void sdhci_set_ios(struct mmc_host *mmc,
+> struct mmc_ios *ios)
+>  {
+>  	struct sdhci_host *host;
+>  	unsigned long flags;
+> +        unsigned int lastclock;
+>  	u8 ctrl;
+> 
+>  	host = mmc_priv(mmc);
+> @@ -1171,6 +1172,24 @@ static void sdhci_set_ios(struct mmc_host *mmc,
+> struct mmc_ios *ios)
+>  		goto out;
+> 
+>  	/*
+> +	 * get/put runtime_pm usage counter at ios->clock transitions
+> +         * We need to do it before any other chip access, as sdhci could
+> +         * be power gated
+> +	 */
+> +        lastclock = host->iosclock;
+> +        host->iosclock = ios->clock;
+> +	if (lastclock == 0 && ios->clock != 0) {
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +		pm_runtime_get_sync(&host->parent.dev);
+> +		spin_lock_irqsave(&host->lock, flags);
+> +	} else if (lastclock != 0 && ios->clock == 0) {
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +		pm_runtime_put_autosuspend(&host->parent.dev);
+> +		spin_lock_irqsave(&host->lock, flags);
+> +		/* no need to configure the rest.. */
+> +		goto out;
+> +	}
+> +	/*
+>  	 * Reset the chip on each power off.
+>  	 * Should clear out any weird states.
+>  	 */
+> @@ -1779,6 +1798,7 @@ struct sdhci_host *sdhci_alloc_host(struct device
+> *dev,
+> 
+>  	host = mmc_priv(mmc);
+>  	host->mmc = mmc;
+> +	host->iosclock = 0;
+> 
+>  	return host;
+>  }
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 0d953f5..78c1528 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -114,6 +114,7 @@ struct sdhci_host {
+>  	unsigned int timeout_clk;	/* Timeout freq (KHz) */
+> 
+>  	unsigned int clock;	/* Current clock (MHz) */
+> +	unsigned int iosclock;	/* Last clock asked via set_ios  */
+>  	u8 pwr;			/* Current voltage */
+> 
+>  	struct mmc_request *mrq;	/* Current request */
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
+> 1.7.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
