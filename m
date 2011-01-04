@@ -1,39 +1,54 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH 4/4] mmc: add MMC_QUIRK_NONSTD_FUNC_IF
-Date: Wed, 5 Jan 2011 01:34:59 +0200
-Message-ID: <AANLkTik8FNxAhGz8Dzj=h4S1hyDGUYw4HSAhzwHWfWpG@mail.gmail.com>
-References: <1294175416-12358-1-git-send-email-ohad@wizery.com>
- <1294175416-12358-4-git-send-email-ohad@wizery.com> <AANLkTimg7DU=1bYv-k2-WwiSurHmsrjN_+zb_=irZv9n@mail.gmail.com>
- <AANLkTi=HyXUAMALQD4MMZrw=Por8bTkJ6HxSC10UrDt4@mail.gmail.com> <AANLkTikwaSmwy2b6if-=BhU9c5Ea_9xyOdKDC0VhpBox@mail.gmail.com>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: Re: [PATCH] mmc: add MMC_QUIRK_BROKEN_CLK_GATING
+Date: Wed, 5 Jan 2011 00:52:28 +0100
+Message-ID: <AANLkTi=uqcFrWujZTG8zy9zQoZ+=O6N1VBSjzgQbfX3Q@mail.gmail.com>
+References: <AANLkTin7OYXzCYty8pDxyzE_Bg83=+L8jmcaoEMSf4QM@mail.gmail.com>
+	<1294002510-2324-1-git-send-email-tardyp@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f194.google.com ([209.85.210.194]:51920 "EHLO
-	mail-iy0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750801Ab1ADXfT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 18:35:19 -0500
-Received: by iyf40 with SMTP id 40so6851330iyf.1
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Jan 2011 15:35:19 -0800 (PST)
-In-Reply-To: <AANLkTikwaSmwy2b6if-=BhU9c5Ea_9xyOdKDC0VhpBox@mail.gmail.com>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:34822 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751397Ab1ADXw2 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 18:52:28 -0500
+In-Reply-To: <1294002510-2324-1-git-send-email-tardyp@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Pierre Tardy <tardyp@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, "DE CESCO, Jonathan" <jonathanc@ti.com>
+Cc: "Gao, Yunpeng" <yunpeng.gao@intel.com>, "Yuan, Hang" <hang.yuan@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Alan Cox <alan@linux.intel.com>, Takashi Iwai <tiwai@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-On Wed, Jan 5, 2011 at 1:25 AM, Pierre Tardy <tardyp@gmail.com> wrote:
-> There is no such platform data in intel_mid platforms.. Sound like
-> another platform hack will be needed for wl1271 to be integrated. :-(
+2011/1/2 Pierre Tardy <tardyp@gmail.com>:
 
-John (cc'ed) ported this to your platform and can share the solution
-with you; IIRC the idea was the same: identify the card according to
-the slot id (this is reasonable because the card is nonremovable) and
-set it as MMC_QUIRK_NONSTD_FUNC_IF.
+> Some sdio card are not following sdio standard, and does not work
+> when the sdio bus's clock is gated
 
-> Our first idea to resolve this problem was to hardcode wl1273 vendor
-> id/product id in a black list table near read_fbr...
+Seem to me like it's pretty straight-forward and will work...
+Acked-by: Linus Walleij <linus.walleij@stericsson.com>
 
-I'm not sure we want to hardcode such details in the SDIO core itself
-(think of how it would look if more devices will show up..).
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 82f4b90..6df1ead 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -785,6 +785,12 @@ int mmc_attach_sdio(struct mmc_host *host, u32 o=
+cr)
+>
+> =A0 =A0 =A0 =A0mmc_release_host(host);
+>
+> + =A0 =A0 =A0 =A0/*
+> + =A0 =A0 =A0 =A0 * see comments in mmc_host_may_gate_card()
+> + =A0 =A0 =A0 =A0 * this can be overidden by function drivers if they=
+ know that
+> + =A0 =A0 =A0 =A0 * their sdio card works with clock gating
+> + =A0 =A0 =A0 =A0 */
+> + =A0 =A0 =A0 =A0card->quirks |=3D MMC_QUIRK_BROKEN_CLK_GATING;
 
-Thanks,
-Ohad.
+=2E..so the function driver will do something like this:
+
+/* May gate clock */
+card->quirks &=3D ~MMC_QUIRK_BROKEN_CLK_GATING;
+
+Do you have a candidate function driver to do this ...?
+
+Yours,
+Linus Walleij
