@@ -1,330 +1,741 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH V2 2/2] sdhci: Support for SD/MMC Dual Data Rate
-Date: Mon, 3 Jan 2011 20:52:13 -0800
-Message-ID: <3CA5E93B-5706-45F9-A7C6-C3174B742661@marvell.com>
-References: <35CD48DB-A420-4319-968D-400D45EE9C0D@marvell.com>
- <AANLkTi=ERwn3W8tvt3NNS3Xiq93mhy7TV7vAT9dwjvaq@mail.gmail.com>
- <DF9AC92A-B56D-4D22-8CE3-5AC15F9EAB8C@marvell.com>
- <73250D6B-58E4-4791-9E11-032A7E2C8498@marvell.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [patch]: sdhci support emmc ddr50 mode [v3]
+Date: Tue, 4 Jan 2011 00:09:15 -0500
+Message-ID: <AANLkTik0b8xf5DHHQO+RkO4qh9v4pURuNnUAR4p77akd@mail.gmail.com>
+References: <AANLkTinbp0i5WmNp5VnfTChDmy2c0gF5_G9YMAHbeGvo@mail.gmail.com>
+	<0A929BFA-55C4-45DF-A11D-2BC8B2B0BCEF@marvell.com>
+	<AANLkTinYBj4ZtnTDPk1F1tsSgepi_OLUhx9vFdJWi3mL@mail.gmail.com>
+	<9F47519A-91F9-4564-9D4A-A402F64DEE09@marvell.com>
+	<AANLkTi=akCEvCVYB4XitbJ1yMTzkgakwoFezqw9Vyh2g@mail.gmail.com>
+	<DEBF0B02-9D8B-45E9-9BF1-D69951833DCF@marvell.com>
+	<AANLkTikL6_C5ag1SPawGfdwhTNMJr2axdO_=uUnfhZA7@mail.gmail.com>
+	<DD46A12B-58EB-47BA-9608-0692F8D0655C@marvell.com>
+	<AANLkTi=xyj8PNfTyZfvBCkatEs2o6Jyg=YLMQFWkjCbh@mail.gmail.com>
+	<B8240ACE-E9B4-4F6F-BC99-BFB0D9C82BE5@marvell.com>
+	<AANLkTinkXYK-xes7ODXpcZCDp=XC6iCgTGG6VOPfkczD@mail.gmail.com>
+	<421E0A42-0CAD-4AB1-91EE-F8D1982E3EB2@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:54066 "HELO
-	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751099Ab1ADE7H convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 3 Jan 2011 23:59:07 -0500
-In-Reply-To: <73250D6B-58E4-4791-9E11-032A7E2C8498@marvell.com>
-Content-Language: en-US
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:64587 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750779Ab1ADFJR convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 00:09:17 -0500
+Received: by fxm20 with SMTP id 20so13788125fxm.19
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Jan 2011 21:09:16 -0800 (PST)
+In-Reply-To: <421E0A42-0CAD-4AB1-91EE-F8D1982E3EB2@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Zhangfei Gao <zhangfei.gao@gmail.com>, Mark Brown <markb@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Zhangfei Gao <zgao6@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
+On Mon, Jan 3, 2011 at 11:31 PM, Philip Rakity <prakity@marvell.com> wr=
+ote:
+>
+> On Jan 3, 2011, at 8:07 PM, zhangfei gao wrote:
+>
+>> On Wed, Dec 22, 2010 at 10:43 AM, Philip Rakity <prakity@marvell.com=
+> wrote:
+>>>
+>>> On Dec 21, 2010, at 11:17 PM, zhangfei gao wrote:
+>>>
+>>>> On Wed, Dec 22, 2010 at 2:06 AM, Philip Rakity <prakity@marvell.co=
+m> wrote:
+>>>>>
+>>>>> On Dec 21, 2010, at 10:42 PM, zhangfei gao wrote:
+>>>>>
+>>>>>> On Wed, Dec 22, 2010 at 1:20 AM, Philip Rakity <prakity@marvell.=
+com> wrote:
+>>>>>>>
+>>>>>>> On Dec 21, 2010, at 10:14 PM, zhangfei gao wrote:
+>>>>>>>
+>>>>>>>> On Wed, Dec 22, 2010 at 12:52 AM, Philip Rakity <prakity@marve=
+ll.com> wrote:
+>>>>>>>>>
+>>>>>>>>> On Dec 21, 2010, at 9:37 PM, zhangfei gao wrote:
+>>>>>>>>>
+>>>>>>>>>> On Wed, Dec 22, 2010 at 12:09 AM, Philip Rakity <prakity@mar=
+vell.com> wrote:
+>>>>>>>>>>>
+>>>>>>>>>>> Resend as plain test -- with additional comments.
+>>>>>>>>>>> On Dec 21, 2010, at 4:37 AM, zhangfei gao wrote:
+>>>>>>>>>>>
+>>>>>>>>>>>> v3: sync to mmc-next
+>>>>>>>>>>>>
+>>>>>>>>>>>> Emmc speed could double if using ddr50 mode, help check
+>>>>>>>>>>>>
+>>>>>>>>>>>> From 895c3d15a200d5f5803f992dab46ff114ad26f90 Mon Sep 17 0=
+0:00:00 2001
+>>>>>>>>>>>> From: Zhangfei Gao <zhangfei.gao@marvell.com>
+>>>>>>>>>>>> Date: Tue, 21 Dec 2010 19:51:38 -0500
+>>>>>>>>>>>> Subject: [PATCH] mmc: sdhci support emmc ddr50 mode
+>>>>>>>>>>>>
+>>>>>>>>>>>> =A0 1. spec sdhc 3.0 does not claim support 1.2v ddr mode
+>>>>>>>>>>>> =A0 2. Call back function set_power is added, since some c=
+ontroller count
+>>>>>>>>>>>> on external pmic to provide power
+>>>>>>>>>>>> =A0 3. According to spec sdhc 3.0, uhs mode, including emm=
+c ddr50 takes
+>>>>>>>>>>>> effect only when 1.8v Signaling Enable bit, which used for=
+ providing
+>>>>>>>>>>>> 1.8v.
+>>>>>>>>>>>> =A0 =A0 =A0So emmc ddr50 mode works after 1.8v switching p=
+rocess, though emmc
+>>>>>>>>>>>> ddr50 could work at high voltage such as 3.3v if external =
+pmic provide
+>>>>>>>>>>>> voltage.
+>>>>>>>>>>>> =A0 =A0 =A0Limitation: emmc ddr50 mode only workable when =
+both host and emmc
+>>>>>>>>>>>> card support 1.70-1.90v
+>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>> signaling voltage is not the same as card voltage. =A0card =
+voltage can be 3.3v and
+>>>>>>>>>>> signaling voltage 1.8v.
+>>>>>>>>>> My understanding is signal voltage is io voltage, which coul=
+d be low
+>>>>>>>>>> voltage, 1.70~1.90v.
+>>>>>>>>>> Card voltage should be keeps high voltage.
+>>>>>>>>>> In fact, two power domain inside emmc, one is vcc, the other=
+ is vccq,
+>>>>>>>>>> this is control io domain.
+>>>>>>>>>>>
+>>>>>>>>>>>> =A0 4. According to JESD84, power down and power up is req=
+uired to
+>>>>>>>>>>>> provide low voltage 1.70-1.90v to mmc.
+>>>>>>>>>>>>
+>>>>>>>>>>>> =A0 Verified: toshiba emmc on mmp2, with io voltage at 1.8=
+v provided by
+>>>>>>>>>>>> external pmic.
+>>>>>>>>>>>>
+>>>>>>>>>>>> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+>>>>>>>>>>>> ---
+>>>>>>>>>>>> drivers/mmc/core/core.c =A0| =A0 13 +++++++++++++
+>>>>>>>>>>>> drivers/mmc/core/core.h =A0| =A0 =A01 +
+>>>>>>>>>>>> drivers/mmc/core/mmc.c =A0 | =A0 =A06 +++++-
+>>>>>>>>>>>> drivers/mmc/host/sdhci.c | =A0 44 ++++++++++++++++++++++++=
++++++++++++++++++---
+>>>>>>>>>>>> drivers/mmc/host/sdhci.h | =A0 14 +++++++++++++-
+>>>>>>>>>>>> 5 files changed, 73 insertions(+), 5 deletions(-)
+>>>>>>>>>>>>
+>>>>>>>>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/co=
+re.c
+>>>>>>>>>>>> index a8e89f3..fd657f1 100644
+>>>>>>>>>>>> --- a/drivers/mmc/core/core.c
+>>>>>>>>>>>> +++ b/drivers/mmc/core/core.c
+>>>>>>>>>>>> @@ -1012,6 +1012,19 @@ static void mmc_power_off(struct mm=
+c_host *host)
+>>>>>>>>>>>> }
+>>>>>>>>>>>>
+>>>>>>>>>>>> /*
+>>>>>>>>>>>> + * mmc select low voltage 1.70-1.95v
+>>>>>>>>>>>> + */
+>>>>>>>>>>>> +void mmc_select_low_voltage(struct mmc_host *host, u32 oc=
+r)
+>>>>>>>>>>>> +{
+>>>>>>>>>>>> + =A0 =A0 if (!(ocr & MMC_VDD_165_195))
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 return;
+>>>>>>>>>>>> +
+>>>>>>>>>>>> + =A0 =A0 mmc_power_off(host);
+>>>>>>>>>>>> + =A0 =A0 host->ocr =3D ocr & host->ocr_avail;
+>>>>>>>>>>>> + =A0 =A0 mmc_power_up(host);
+>>>>>>>>>>>> +}
+>>>>>>>>>>>> +
+>>>>>>>>>>>> +/*
+>>>>>>>>>>>> * Cleanup when the last reference to the bus operator is d=
+ropped.
+>>>>>>>>>>>> */
+>>>>>>>>>>>> static void __mmc_release_bus(struct mmc_host *host)
+>>>>>>>>>>>> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/co=
+re.h
+>>>>>>>>>>>> index 026c975..b05c20a 100644
+>>>>>>>>>>>> --- a/drivers/mmc/core/core.h
+>>>>>>>>>>>> +++ b/drivers/mmc/core/core.h
+>>>>>>>>>>>> @@ -41,6 +41,7 @@ void mmc_set_bus_width(struct mmc_host *=
+host,
+>>>>>>>>>>>> unsigned int width);
+>>>>>>>>>>>> void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned=
+ int width,
+>>>>>>>>>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0unsigned int dd=
+r);
+>>>>>>>>>>>> u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
+>>>>>>>>>>>> +void mmc_select_low_voltage(struct mmc_host *host, u32 oc=
+r);
+>>>>>>>>>>>> void mmc_set_timing(struct mmc_host *host, unsigned int ti=
+ming);
+>>>>>>>>>>>>
+>>>>>>>>>>>> static inline void mmc_delay(unsigned int ms)
+>>>>>>>>>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc=
+=2Ec
+>>>>>>>>>>>> index 86cac0d..8779339 100644
+>>>>>>>>>>>> --- a/drivers/mmc/core/mmc.c
+>>>>>>>>>>>> +++ b/drivers/mmc/core/mmc.c
+>>>>>>>>>>>> @@ -790,7 +790,11 @@ int mmc_attach_mmc(struct mmc_host *h=
+ost, u32 ocr)
+>>>>>>>>>>>> =A0 =A0 =A0 =A0 =A0 ocr &=3D ~0x7F;
+>>>>>>>>>>>> =A0 }
+>>>>>>>>>>>>
+>>>>>>>>>>>> - =A0 =A0 host->ocr =3D mmc_select_voltage(host, ocr);
+>>>>>>>>>>>> + =A0 =A0 if ((ocr & MMC_VDD_165_195)
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 && (host->ocr_av=
+ail & MMC_VDD_165_195))
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 mmc_select_low_voltage(host, ocr=
+);
+>>>>>>>>>>>> + =A0 =A0 else
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 host->ocr =3D mmc_select_voltage=
+(host, ocr);
+>>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>> The patch for dual voltage cards should be a separate patch=
+=2E =A0It is independent of
+>>>>>>>>>>> support for dual data rate.
+>>>>>>>>>>>
+>>>>>>>>>>>> =A0 /*
+>>>>>>>>>>>> =A0 =A0* Can we support the voltage of the card?
+>>>>>>>>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/s=
+dhci.c
+>>>>>>>>>>>> index d5febe5..aafbb42 100644
+>>>>>>>>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>>>>>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>>>>>>>>> @@ -986,6 +986,22 @@ static void sdhci_finish_command(stru=
+ct sdhci_host *host)
+>>>>>>>>>>>> =A0 host->cmd =3D NULL;
+>>>>>>>>>>>> }
+>>>>>>>>>>>>
+>>>>>>>>>>>> +static void sdhci_set_ddr(struct sdhci_host *host, unsign=
+ed int ddr)
+>>>>>>>>>>>> +{
+>>>>>>>>>>>> + =A0 =A0 u16 con;
+>>>>>>>>>>>> +
+>>>>>>>>>>>> + =A0 =A0 if (ddr =3D=3D MMC_SDR_MODE)
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 return;
+>>>>>>>>>>>> +
+>>>>>>>>>>>> + =A0 =A0 con =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>>>>>>>>>>>> + =A0 =A0 if (con & SDHCI_CTRL2_1_8V) {
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 con &=3D ~SDHCI_CTRL2_UHS_MASK;
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 if (ddr & MMC_1_8V_DDR_MODE)
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 con |=3D SDHCI_C=
+TRL2_DDR50;
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writew(host, con, SDHCI_HO=
+ST_CONTROL2);
+>>>>>>>>>>>> + =A0 =A0 }
+>>>>>>>>>>>> +}
+>>>>>>>>>>>> +
+>>>>>>>>>>>> static void sdhci_set_clock(struct sdhci_host *host, unsig=
+ned int clock)
+>>>>>>>>>>>> {
+>>>>>>>>>>>> =A0 int div;
+>>>>>>>>>>>> @@ -1084,6 +1100,18 @@ static void sdhci_set_power(struct =
+sdhci_host
+>>>>>>>>>>>> *host, unsigned short power)
+>>>>>>>>>>>> =A0 =A0 =A0 =A0 =A0 return;
+>>>>>>>>>>>> =A0 }
+>>>>>>>>>>>>
+>>>>>>>>>>>> + =A0 =A0 if ((pwr =3D=3D SDHCI_POWER_180) &&
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 (host->mmc->caps & MMC_CAP_1_8V_=
+DDR)) {
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 u16 con;
+>>>>>>>>>>>> +
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 con =3D sdhci_readw(host, SDHCI_=
+HOST_CONTROL2);
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 con |=3D SDHCI_CTRL2_1_8V;
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writew(host, con, SDHCI_HO=
+ST_CONTROL2);
+>>>>>>>>>>>> +
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 if (host->ops->set_power)
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops->set_p=
+ower(host, pwr);
+>>>>>>>>>>>> + =A0 =A0 }
+>>>>>>>>>>>> +
+>>>>>>>>>>>
+>>>>>>>>>>> power to the card can be at 3.3v and signaling at 1.8v. =A0=
+This is a legal combination.
+>>>>>>>>>>
+>>>>>>>>>> It is legal combination, then why here should be reworked?
+>>>>>>>>>> The Power control register is control SD bus voltage, which =
+should be
+>>>>>>>>>> io voltage.
+>>>>>>>>>> Even the dual voltage emmc card can not work at both vcc and=
+ vccq are 1.8v.
+>>>>>>>>>>
+>>>>>>>>>>> The
+>>>>>>>>>>>> + =A0 =A0 if ((pwr =3D=3D SDHCI_POWER_180) &&
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 (host->mmc->caps & MMC_CAP_1_8V_=
+DDR)) {
+>>>>>>>>>>> should be reworked.
+>>>>>>>>>>>
+>>>>>>>>>>>> =A0 /*
+>>>>>>>>>>>> =A0 =A0* Spec says that we should clear the power reg befo=
+re setting
+>>>>>>>>>>>> =A0 =A0* a new value. Some controllers don't seem to like =
+this though.
+>>>>>>>>>>>> @@ -1180,6 +1208,7 @@ static void sdhci_set_ios(struct mmc=
+_host *mmc,
+>>>>>>>>>>>> struct mmc_ios *ios)
+>>>>>>>>>>>> =A0 }
+>>>>>>>>>>>>
+>>>>>>>>>>>> =A0 sdhci_set_clock(host, ios->clock);
+>>>>>>>>>>>> + =A0 =A0 sdhci_set_ddr(host, ios->ddr);
+>>>>>>>>>>>>
+>>>>>>>>>>>> =A0 if (ios->power_mode =3D=3D MMC_POWER_OFF)
+>>>>>>>>>>>> =A0 =A0 =A0 =A0 =A0 sdhci_set_power(host, -1);
+>>>>>>>>>>>> @@ -1744,7 +1773,7 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
+>>>>>>>>>>>> int sdhci_add_host(struct sdhci_host *host)
+>>>>>>>>>>>> {
+>>>>>>>>>>>> =A0 struct mmc_host *mmc;
+>>>>>>>>>>>> - =A0 =A0 unsigned int caps, ocr_avail;
+>>>>>>>>>>>> + =A0 =A0 unsigned int caps, caps_h =3D 0, ocr_avail;
+>>>>>>>>>>>> =A0 int ret;
+>>>>>>>>>>>>
+>>>>>>>>>>>> =A0 WARN_ON(host =3D=3D NULL);
+>>>>>>>>>>>> @@ -1767,8 +1796,17 @@ int sdhci_add_host(struct sdhci_hos=
+t *host)
+>>>>>>>>>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->version);
+>>>>>>>>>>>> =A0 }
+>>>>>>>>>>>>
+>>>>>>>>>>>> - =A0 =A0 caps =3D (host->quirks & SDHCI_QUIRK_MISSING_CAP=
+S) ? host->caps :
+>>>>>>>>>>>> - =A0 =A0 =A0 =A0 =A0 =A0 sdhci_readl(host, SDHCI_CAPABILI=
+TIES);
+>>>>>>>>>>>> + =A0 =A0 if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 caps =3D host->caps;
+>>>>>>>>>>>> + =A0 =A0 else {
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 caps =3D sdhci_readl(host, SDHCI=
+_CAPABILITIES);
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 caps_h =3D sdhci_readl(host, SDH=
+CI_CAPABILITIES_1);
+>>>>>>>>>>>> + =A0 =A0 }
+>>>>>>>>>>>> +
+>>>>>>>>>>>> + =A0 =A0 if (caps & SDHCI_CAN_VDD_180) {
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 if (caps_h & SDHCI_CAN_SDR50)
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D (=
+MMC_CAP_1_8V_DDR);
+>>>>>>>>>>>> + =A0 =A0 }
+>>>>>>>>>>>>
+>>>>>>>>>>>> =A0 if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+>>>>>>>>>>>> =A0 =A0 =A0 =A0 =A0 host->flags |=3D SDHCI_USE_SDMA;
+>>>>>>>>>>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/s=
+dhci.h
+>>>>>>>>>>>> index 6e0969e..c4bd5dd 100644
+>>>>>>>>>>>> --- a/drivers/mmc/host/sdhci.h
+>>>>>>>>>>>> +++ b/drivers/mmc/host/sdhci.h
+>>>>>>>>>>>> @@ -145,7 +145,14 @@
+>>>>>>>>>>>>
+>>>>>>>>>>>> #define SDHCI_ACMD12_ERR =A0 =A0 =A00x3C
+>>>>>>>>>>>>
+>>>>>>>>>>>> -/* 3E-3F reserved */
+>>>>>>>>>>>> +#define SDHCI_HOST_CONTROL2 =A00x3E
+>>>>>>>>>>>> +#define =A0SDHCI_CTRL2_UHS_MASK =A0 =A0 =A0 =A00x0007
+>>>>>>>>>>>> +#define =A0 SDHCI_CTRL2_SDR12 =A00x0000
+>>>>>>>>>>>> +#define =A0 SDHCI_CTRL2_SDR25 =A00x0001
+>>>>>>>>>>>> +#define =A0 SDHCI_CTRL2_SDR50 =A00x0002
+>>>>>>>>>>>> +#define =A0 SDHCI_CTRL2_SDR104 0x0003
+>>>>>>>>>>>> +#define =A0 SDHCI_CTRL2_DDR50 =A00x0004
+>>>>>>>>>>>> +#define =A0SDHCI_CTRL2_1_8V =A0 =A00x0008
+>>>>>>>>>>>>
+>>>>>>>>>>>> #define SDHCI_CAPABILITIES =A0 =A00x40
+>>>>>>>>>>>> #define =A0SDHCI_TIMEOUT_CLK_MASK =A0 =A0 =A0 0x0000003F
+>>>>>>>>>>>> @@ -167,6 +174,9 @@
+>>>>>>>>>>>> #define =A0SDHCI_CAN_64BIT =A0 =A0 =A00x10000000
+>>>>>>>>>>>>
+>>>>>>>>>>>> #define SDHCI_CAPABILITIES_1 =A00x44
+>>>>>>>>>>>> +#define =A0SDHCI_CAN_SDR50 =A0 =A0 0x00000001
+>>>>>>>>>>>> +#define =A0SDHCI_CAN_SDR104 =A0 =A00x00000002
+>>>>>>>>>>>> +#define =A0SDHCI_CAN_DDR50 =A0 =A0 0x00000004
+>>>>>>>>>>>>
+>>>>>>>>>>>> #define SDHCI_MAX_CURRENT =A0 =A0 0x48
+>>>>>>>>>>>>
+>>>>>>>>>>>> @@ -222,6 +232,8 @@ struct sdhci_ops {
+>>>>>>>>>>>> =A0 void (*platform_send_init_74_clocks)(struct sdhci_host=
+ *host,
+>>>>>>>>>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0u8 power_mode);
+>>>>>>>>>>>> =A0 unsigned int =A0 =A0(*get_ro)(struct sdhci_host *host)=
+;
+>>>>>>>>>>>> + =A0 =A0 unsigned int =A0 =A0(*set_power)(struct sdhci_ho=
+st *host,
+>>>>>>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+unsigned short power);
+>>>>>>>>>>>> };
+>>>>>>>>>>>>
+>>>>>>>>>>>> #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+>>>>>>>>>>>> --
+>>>>>>>>>>>> 1.7.0.4
+>>>>>>>>>>>> <0001-mmc-sdhci-support-emmc-ddr50-mode.patch>
+>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> commented out support for 1.8v in sdhci.c =A0where the check =
+was made for the controller supporting 1.8v core voltage
+>>>>>>>>> added printk to show ocr and host->ocr. before check to call =
+mmc_select_low_voltage or mmc_select_voltage in mmc.c
+>>>>>>>>>
+>>>>>>>>> the card is recognized as DDR but we do not mount the drive s=
+ince the check for SDHCI_POWER_180 fails and we do not program the regi=
+sters.
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> [ =A0 =A00.000000] Linux version 2.6.37-rc6-next-20101220-000=
+23-ge7c195e-dirty (philip@philip-laptop) (gcc version 4.2.0 20070413 (p=
+rerelease) (CodeSourcery 2007q1-10. Marvell 2009q3-18 20090821)) #80 PR=
+EEMPT 0
+>>>>>>>>> [ =A0 =A00.000000] CPU: Marvell PJ4 processor [560f5815] revi=
+sion 5 (ARMv7), cr=3D00c5387f
+>>>>>>>>> [ =A0 =A00.000000] CPU: VIPT nonaliasing data cache, VIPT ali=
+asing instruction cache
+>>>>>>>>> [ =A0 =A00.000000] Machine: Brownstone Development Platform
+>>>>>>>>> [ =A0 =A00.000000] Ignoring unrecognised tag 0x41000403
+>>>>>>>>> [ =A0 =A00.000000] Memory policy: ECC disabled, Data cache wr=
+iteback
+>>>>>>>>> [ =A0 =A00.000000] On node 0 totalpages: 131072
+>>>>>>>>> [ =A0 =A00.000000] free_area_init_node: node 0, pgdat c03713d=
+8, node_mem_map c0390000
+>>>>>>>>> [ =A0 =A00.000000] =A0 Normal zone: 1024 pages used for memma=
+p
+>>>>>>>>> [ =A0 =A00.000000] =A0 Normal zone: 0 pages reserved
+>>>>>>>>> [ =A0 =A00.000000] =A0 Normal zone: 130048 pages, LIFO batch:=
+31
+>>>>>>>>> [ =A0 =A00.000000] pcpu-alloc: s0 r0 d32768 u32768 alloc=3D1*=
+32768
+>>>>>>>>> [ =A0 =A00.000000] pcpu-alloc: [0] 0
+>>>>>>>>> [ =A0 =A00.000000] Built 1 zonelists in Zone order, mobility =
+grouping on. =A0Total pages: 130048
+>>>>>>>>> [ =A0 =A00.000000] Kernel command line: debug rootdelay=3D15 =
+root=3D/dev/mmcblk0p1 rootfstype=3Dext3 console=3DttyS2,38400 mem=3D512=
+M uart_dma mbr_offset=3D0x4800
+>>>>>>>>> [ =A0 =A00.000000] PID hash table entries: 2048 (order: 1, 81=
+92 bytes)
+>>>>>>>>> [ =A0 =A00.000000] Dentry cache hash table entries: 65536 (or=
+der: 6, 262144 bytes)
+>>>>>>>>> [ =A0 =A00.000000] Inode-cache hash table entries: 32768 (ord=
+er: 5, 131072 bytes)
+>>>>>>>>> [ =A0 =A00.000000] Memory: 512MB =3D 512MB total
+>>>>>>>>> [ =A0 =A00.000000] Memory: 516108k/516108k available, 8180k r=
+eserved, 0K highmem
+>>>>>>>>> [ =A0 =A00.000000] Virtual kernel memory layout:
+>>>>>>>>> [ =A0 =A00.000000] =A0 =A0 vector =A0: 0xffff0000 - 0xffff100=
+0 =A0 ( =A0 4 kB)
+>>>>>>>>> [ =A0 =A00.000000] =A0 =A0 fixmap =A0: 0xfff00000 - 0xfffe000=
+0 =A0 ( 896 kB)
+>>>>>>>>> [ =A0 =A00.000000] =A0 =A0 DMA =A0 =A0 : 0xffc00000 - 0xffe00=
+000 =A0 ( =A0 2 MB)
+>>>>>>>>> [ =A0 =A00.000000] =A0 =A0 vmalloc : 0xe0800000 - 0xfe000000 =
+=A0 ( 472 MB)
+>>>>>>>>> [ =A0 =A00.000000] =A0 =A0 lowmem =A0: 0xc0000000 - 0xe000000=
+0 =A0 ( 512 MB)
+>>>>>>>>> [ =A0 =A00.000000] =A0 =A0 modules : 0xbf000000 - 0xc0000000 =
+=A0 ( =A016 MB)
+>>>>>>>>> [ =A0 =A00.000000] =A0 =A0 =A0 .init : 0xc0008000 - 0xc001f00=
+0 =A0 ( =A092 kB)
+>>>>>>>>> [ =A0 =A00.000000] =A0 =A0 =A0 .text : 0xc001f000 - 0xc035400=
+c =A0 (3285 kB)
+>>>>>>>>> [ =A0 =A00.000000] =A0 =A0 =A0 .data : 0xc0356000 - 0xc037304=
+0 =A0 ( 117 kB)
+>>>>>>>>> [ =A0 =A00.000000] Preemptable hierarchical RCU implementatio=
+n.
+>>>>>>>>> [ =A0 =A00.000000] =A0RCU-based detection of stalled CPUs is =
+disabled.
+>>>>>>>>> [ =A0 =A00.000000] =A0Verbose stalled-CPUs detection is disab=
+led.
+>>>>>>>>> [ =A0 =A00.000000] NR_IRQS:320 nr_irqs:360 360
+>>>>>>>>> [ =A0 =A00.000000] sched_clock: 32 bits at 6MHz, resolution 1=
+53ns, wraps every 660764ms
+>>>>>>>>> [ =A0 =A00.000000] Console: colour dummy device 80x30
+>>>>>>>>> [ =A0 =A00.000166] Calibrating delay loop... 796.26 BogoMIPS =
+(lpj=3D3981312)
+>>>>>>>>> [ =A0 =A00.220135] pid_max: default: 32768 minimum: 301
+>>>>>>>>> [ =A0 =A00.220328] Mount-cache hash table entries: 512
+>>>>>>>>> [ =A0 =A00.220328] CPU: Testing write buffer coherency: ok
+>>>>>>>>> [ =A0 =A00.224398] print_constraints: dummy: regulator:
+>>>>>>>>> [ =A0 =A00.224525] NET: Registered protocol family 16
+>>>>>>>>> [ =A0 =A00.224525] Tauros2: Disabling L2 prefetch.
+>>>>>>>>> [ =A0 =A00.224569] Tauros2: L2 cache support initialised in A=
+RMv6 mode.
+>>>>>>>>> [ =A0 =A00.227737] bio: create slab <bio-0> at 0
+>>>>>>>>> [ =A0 =A00.228950] Switching to clocksource clocksource
+>>>>>>>>> [ =A0 =A00.233848] NET: Registered protocol family 2
+>>>>>>>>> [ =A0 =A00.234150] IP route cache hash table entries: 4096 (o=
+rder: 2, 16384 bytes)
+>>>>>>>>> [ =A0 =A00.234482] TCP established hash table entries: 16384 =
+(order: 5, 131072 bytes)
+>>>>>>>>> [ =A0 =A00.234482] TCP bind hash table entries: 16384 (order:=
+ 4, 65536 bytes)
+>>>>>>>>> [ =A0 =A00.234733] TCP: Hash tables configured (established 1=
+6384 bind 16384)
+>>>>>>>>> [ =A0 =A00.234863] TCP reno registered
+>>>>>>>>> [ =A0 =A00.234878] UDP hash table entries: 256 (order: 0, 409=
+6 bytes)
+>>>>>>>>> [ =A0 =A00.234878] UDP-Lite hash table entries: 256 (order: 0=
+, 4096 bytes)
+>>>>>>>>> [ =A0 =A00.234901] NET: Registered protocol family 1
+>>>>>>>>> [ =A0 =A00.235444] RPC: Registered udp transport module.
+>>>>>>>>> [ =A0 =A00.235444] RPC: Registered tcp transport module.
+>>>>>>>>> [ =A0 =A00.235462] RPC: Registered tcp NFSv4.1 backchannel tr=
+ansport module.
+>>>>>>>>> [ =A0 =A00.237177] JFFS2 version 2.2. (NAND) .. 2001-2006 Red=
+ Hat, Inc.
+>>>>>>>>> [ =A0 =A00.237177] msgmni has been set to 1008
+>>>>>>>>> [ =A0 =A00.238053] io scheduler noop registered
+>>>>>>>>> [ =A0 =A00.238087] io scheduler deadline registered
+>>>>>>>>> [ =A0 =A00.238104] io scheduler cfq registered (default)
+>>>>>>>>> [ =A0 =A00.238679] pxa2xx-uart.0: ttyS0 at MMIO 0xd4030000 (i=
+rq =3D 27) is a FFUART
+>>>>>>>>> [ =A0 =A00.238852] pxa2xx-uart.2: ttyS2 at MMIO 0xd4018000 (i=
+rq =3D 24) is a STUART
+>>>>>>>>> [ =A0 =A01.353048] console [ttyS2] enabled
+>>>>>>>>> [ =A0 =A01.364154] mousedev: PS/2 mouse device common for all=
+ mice
+>>>>>>>>> [ =A0 =A01.380867] sdhci: Secure Digital Host Controller Inte=
+rface driver
+>>>>>>>>> [ =A0 =A01.399304] sdhci: Copyright(c) Pierre Ossman
+>>>>>>>>> [ =A0 =A01.412378] mmc0: no vmmc regulator found
+>>>>>>>>> [ =A0 =A01.424539] mmc0: SDHCI controller on MMC [sdhci-pxa.2=
+] using ADMA
+>>>>>>>>> [ =A0 =A01.443030] mmc1: no vmmc regulator found
+>>>>>>>>> [ =A0 =A01.455203] mmc1: SDHCI controller on MMC [sdhci-pxa.0=
+] using ADMA
+>>>>>>>>> [ =A0 =A01.474554] mmc2: no vmmc regulator found
+>>>>>>>>> [ =A0 =A01.486636] mmc2: SDHCI controller on MMC [sdhci-pxa.1=
+] using ADMA
+>>>>>>>>> [ =A0 =A01.505238] TCP cubic registered
+>>>>>>>>> [ =A0 =A01.514889] NET: Registered protocol family 17
+>>>>>>>>> [ =A0 =A01.529176] Registering the dns_resolver key type
+>>>>>>>>> [ =A0 =A01.545330] VFP support v0.3: implementor 56 architect=
+ure 2 part 20 variant 9 rev 5
+>>>>>>>>> [ =A0 =A01.568612] drivers/rtc/hctosys.c: unable to open rtc =
+device (rtc0)
+>>>>>>>>> [ =A0 =A01.587543] Waiting 15sec before mounting root device.=
+=2E.
+>>>>>>>>> [ =A0 =A01.604984] mmc_attach_mmc:mmc0: ocr & MMC_VDD_165_195=
+ =3D 80, host->ocr_avail & MMC_VDD_165_195 =3D 0
+>>>>>>>>
+>>>>>>>> Here something wrong, =A0host->ocr_avail should have 0x80, oth=
+erwise ocr
+>>>>>>>> can not get ox80 back,
+>>>>>>>> Could you try the patch send you this morning, which is tested=
+ based
+>>>>>>>> on mmc-next.
+>>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>> The host controller is NOT required to support 1.8v. =A0mmp2 su=
+pports this and to show the bug
+>>>>>>> I commented out support for this as I mentioned above. =A0If 1.=
+8v core voltage is not supported
+>>>>>>> by the controller by code break.
+>>>>>>
+>>>>>> I think we should conform to spec first, then consider the speci=
+al requirement.
+>>>>>> Since uhs mode, including SDR50 etc, only takes effective when 1=
+=2E8v
+>>>>>> singaling Enbale is set, which requires controller send out 1.8v=
+ io
+>>>>>> voltage.
+>>>>>> So only set 1.8v singaling Enbale at the condition host support =
+1.8v.
+>>>>>>
+>>>>>
+>>>>> We do not agree that this is what the spec says. SD Host Controll=
+er spec
+>>>>> says 3.3v core voltage and 1.8v signaling. =A0I did not see a req=
+uirement
+>>>>> in eMMC spec requiring that high voltage cards cannot support DDR=
+=2E
+>>>>
+>>>> Spec "SD Host Controller Standard Specification Version 3.00" page
+>>>> 83/157, Host Control 2 Register, bit 02-00, UHS mode select
+>>>
+>>>
+>>> The section refers to signaling voltage not core voltage:
+>>>
+>>> "This field is used to select one of the UHS-1 modes and effective =
+when 1.8V
+>>> Signaling Enable is set to 1.
+>>>
+>>> 1.8v Signaling Enable =A0--- This bit controls the voltage =A0regul=
+ator for i/o cell. =A03.3V is
+>>> supplied to the the card regardless of signaling voltage".
+>>
+>> Since mmp2 use external pmic, so we can not verify via mmp2.
+>> Two voltage is provide for sd/emmc, one is vcc, the other is vccq,
+>> which is control io voltage.
+>>
+>
+> agree
+>
+>>
+>> Note: =A0this board design runs a fixed voltage to the card and
+>> signaling voltage cannot be changed.
+>
+> from my patch submission
+>
+>
+>> My understanding is
+>> The SD standards only define vccq. The vcc is independent and based =
+on
+>> the part and most likely cannot be switched.
+>> The power control register (0x29) selects which vccq to provide. (fo=
+r
+>> e.g 0x7 =3D 3.3v, 0x5=3D1.8v)
+>> The sdhci host control2 (0x3e) selects the type of signalling used b=
+y
+>> the IO pad. By default 3.3 but if you enable then 1.8v ("1.8v
+>> signalling enable" bit).
+>>
+>
+> yes
+In fact, i am still in double-confirming this understanding, since the
+spec is not clear enough.
+if this understanding is correct, then time delay is already
+considered in power sequence to wait voltage to be stable.
+>
+> The patch failed on mmp2/brownstone and it has an external pmic where
+What do you mean the patch is failed, it is verified many times.
 
+> a) the voltage to the card is fixed
+> b) setting 1.8v signaling has no effect
+>
 
-On Jan 3, 2011, at 8:37 PM, Philip Rakity wrote:
-
-> 
-> On Jan 3, 2011, at 8:25 PM, Philip Rakity wrote:
-> 
->> 
->> On Jan 3, 2011, at 7:39 PM, zhangfei gao wrote:
->> 
->>> On Sun, Jan 2, 2011 at 11:45 AM, Philip Rakity <prakity@marvell.com> wrote:
->>>> 
->>>> mmc->caps MMC_CAP_1_8V_DDR is set by looking at cabability_1
->>>> register if sd 3.0 controller.
->>>> 
->>>> Support for dual data rate (DDR50) with 1_8V signalling added
->>>> with optional call back to enable external control of signalling
->>>> voltage.
->>>> 
->>>> no support for 1.2V core voltage since SD 3.0 does not support
->>>> this.
->>>> 
->>>> **** QUESTION ****
->>>> should this be part of regulator framework ?
->>>> 
->>>> delay for signaling voltage to settle set to 5ms (per spec).
->>>> 
->>>> this code does not change the voltage supplied to the card.
->>>> It assumes that this is correctly handled in the core/ layer.
->>>> 
->>>> There is no requirement that the card voltage be at 1.8v
->>>> for DDR to work.  This violates DDR specification for
->>>> SD Host Controller 3.0 since explicitly states card voltage
->>>> is 3.3v while signalling voltage is set to 1.8v.
->>>> 
->>>> tested on mmp2 -- brownstone -- under linux-next.
->>>> 
->>>> Note:  this board design runs a fixed voltage to the card and
->>>> signaling voltage cannot be changed.
->>>> 
->>>> Signed-off-by: Philip Rakity <prakity@marvell.com>
->>>> ---
->>>> drivers/mmc/host/sdhci.c |   53 ++++++++++++++++++++++++++++++++++++++++++---
->>>> drivers/mmc/host/sdhci.h |    5 ++++
->>>> 2 files changed, 54 insertions(+), 4 deletions(-)
->>>> 
->>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>> index d5febe5..805f850 100644
->>>> --- a/drivers/mmc/host/sdhci.c
->>>> +++ b/drivers/mmc/host/sdhci.c
->>>> @@ -84,6 +84,8 @@ static void sdhci_dumpregs(struct sdhci_host *host)
->>>>      printk(KERN_DEBUG DRIVER_NAME ": Cmd:      0x%08x | Max curr: 0x%08x\n",
->>>>              sdhci_readw(host, SDHCI_COMMAND),
->>>>              sdhci_readl(host, SDHCI_MAX_CURRENT));
->>>> +       printk(KERN_DEBUG DRIVER_NAME ": HostCtrl2:0x%08x\n",
->>>> +               sdhci_readw(host, SDHCI_HOST_CONTROL_2));
->>>> 
->>>>      if (host->flags & SDHCI_USE_ADMA)
->>>>              printk(KERN_DEBUG DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x\n",
->>>> @@ -986,6 +988,38 @@ static void sdhci_finish_command(struct sdhci_host *host)
->>>>      host->cmd = NULL;
->>>> }
->>>> 
->>>> +/*
->>>> + * Handle 1.8V signaling for DDR. No need to check for other
->>>> + * DDR values since driver supports ONLY 1_8V DDR.  This is
->>>> + * set by the MMC_CAP_1_8V_DDR.  1_2V DDR is not supported.
->>>> + */
->>>> +static void sdhci_set_ddr(struct sdhci_host *host, unsigned int ddr)
->>>> +{
->>>> +       u16 con;
->>>> +
->>>> +       if (ddr == MMC_SDR_MODE)
->>>> +               return;
->>>> +
->>>> +       con = sdhci_readw(host, SDHCI_HOST_CONTROL_2);
->>>> +       con |= SDCTRL_2_SDH_V18_EN;
->>>> +       sdhci_writew(host, con, SDHCI_HOST_CONTROL_2);
->>>> +
->>>> +       /* Change sigalling voltage and wait for it to be stable */
->>>> +       if (host->ops->set_signaling_voltage)
->>>> +               host->ops->set_signaling_voltage(host, 18);
->>>> +       else
->>>> +               mdelay(5);
->>> 
->>> In fact, have considered this method before, mdelay(5) in
->>> spin_lock_irqsave is terrible, since timer can not update system time,
->>> and android must die.
->> 
->> where is the spin_lock set ?
-> 
-> in the set_ios routine on entry 
-> 
->> maybe we need a check to not do this twice by saving the current ddr state  
-> 
-> 
-> Forgot to mention -- set clock can wait up to 20ms and is called with
-> the spin_lock being held. so why the objection to the 5ms ?
-> 
-> <snip>
-> static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> {
-> 	struct sdhci_host *host;
-> 	unsigned long flags;
-> 	u8 ctrl;
-> 
-> 	host = mmc_priv(mmc);
-> 
-> 	spin_lock_irqsave(&host->lock, flags);
-> 
-> 	if (host->flags & SDHCI_DEVICE_DEAD)
-> 		goto out;
-> 
-> 	/*
-> 	 * Reset the chip on each power off.
-> 	 * Should clear out any weird states.
-> 	 */
-> 	if (ios->power_mode == MMC_POWER_OFF) {
-> 		sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
-> 		sdhci_reinit(host);
-> 	}
-> 
-> 	sdhci_set_clock(host, ios->clock);
-> 	sdhci_set_ddr(host, ios->ddr);
-> 
-> 
-> =====
-> 
-> static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-> {
-> 	int div;
-> 	u16 clk;
-> 	unsigned long timeout;
-> 
-> 	if (clock == host->clock)
-> 		return;
-> 
-> 	if (host->ops->set_clock) {
-> 		host->ops->set_clock(host, clock);
-> 		if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
-> 			return;
-> 	}
-> 
-> 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> 
-> 	if (clock == 0)
-> 		goto out;
-> 
-> 	if (host->version >= SDHCI_SPEC_300) {
-> 		/* Version 3.00 divisors must be a multiple of 2. */
-> 		if (host->max_clk <= clock)
-> 			div = 1;
-> 		else {
-> 			for (div = 2; div < SDHCI_MAX_DIV_SPEC_300; div += 2) {
-> 				if ((host->max_clk / div) <= clock)
-> 					break;
-> 			}
-> 		}
-> 	} else {
-> 		/* Version 2.00 divisors must be a power of 2. */
-> 		for (div = 1; div < SDHCI_MAX_DIV_SPEC_200; div *= 2) {
-> 			if ((host->max_clk / div) <= clock)
-> 				break;
-> 		}
-> 	}
-> 	div >>= 1;
-> 
-> 	clk = (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
-> 	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
-> 		<< SDHCI_DIVIDER_HI_SHIFT;
-> 	clk |= SDHCI_CLOCK_INT_EN;
-> 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> 
-> 	/* Wait max 20 ms */
-> 	timeout = 20;
-> 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-> 		& SDHCI_CLOCK_INT_STABLE)) {
-> 		if (timeout == 0) {
-> 			printk(KERN_ERR "%s: Internal clock never "
-> 				"stabilised.\n", mmc_hostname(host->mmc));
-> 			sdhci_dumpregs(host);
-> 			return;
-> 		}
-> 		timeout--;
-> 		mdelay(1);
-> 	}
-> 
-> 	clk |= SDHCI_CLOCK_CARD_EN;
-> 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> 
-> out:
-> 	host->clock = clock;
-> }
-> 
-> 
-
-
-Does it make sense to redo set_ios to release the lock before say set_clock is called
-and reacquire it after set_ddr ? 
-set_clock() and set_ddr() can get their own spin_lock and release it it a more intelligent manner ?
-
-if so --> can do patch
-
-
-> 
->>> 
->>>> +
->>>> +       /*
->>>> +        * We can fail here but there is no higher level recovery
->>>> +        * since the card is already past the switch to ddr
->>>> +        */
->>>> +       con = sdhci_readw(host, SDHCI_HOST_CONTROL_2);
->>>> +       con &= ~SDCTRL_2_UHS_MODE_MASK;
->>>> +       con |= SDCTRL_2_UHS_MODE_SEL_DDR50;
->>>> +       sdhci_writew(host, con, SDHCI_HOST_CONTROL_2);
->>>> +}
->>>> +
->>>> static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->>>> {
->>>>      int div;
->>>> @@ -1180,6 +1214,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>>      }
->>>> 
->>>>      sdhci_set_clock(host, ios->clock);
->>>> +       sdhci_set_ddr(host, ios->ddr);
->>>> 
->>>>      if (ios->power_mode == MMC_POWER_OFF)
->>>>              sdhci_set_power(host, -1);
->>>> @@ -1744,7 +1779,7 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
->>>> int sdhci_add_host(struct sdhci_host *host)
->>>> {
->>>>      struct mmc_host *mmc;
->>>> -       unsigned int caps, ocr_avail;
->>>> +       unsigned int caps, caps_h, ocr_avail;
->>>>      int ret;
->>>> 
->>>>      WARN_ON(host == NULL);
->>>> @@ -1767,8 +1802,19 @@ int sdhci_add_host(struct sdhci_host *host)
->>>>                      host->version);
->>>>      }
->>>> 
->>>> -       caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
->>>> -               sdhci_readl(host, SDHCI_CAPABILITIES);
->>>> +       if (host->quirks & SDHCI_QUIRK_MISSING_CAPS) {
->>>> +               caps = host->caps;
->>>> +               caps_h = 0;
->>>> +       } else {
->>>> +               caps = sdhci_readl(host, SDHCI_CAPABILITIES);
->>>> +               if (host->version >= SDHCI_SPEC_300)
->>>> +                       caps_h = sdhci_readl(host, SDHCI_CAPABILITIES_1);
->>>> +               else
->>>> +                       caps_h = 0;
->>>> +       }
->>>> +
->>>> +       if (caps_h & SDHCI_CAN_DDR50)
->>>> +               mmc->caps |= MMC_CAP_1_8V_DDR;
->>>> 
->>>>      if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
->>>>              host->flags |= SDHCI_USE_SDMA;
->>>> @@ -1905,7 +1951,6 @@ int sdhci_add_host(struct sdhci_host *host)
->>>>              ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
->>>>      if (caps & SDHCI_CAN_VDD_180)
->>>>              ocr_avail |= MMC_VDD_165_195;
->>>> -
->>>>      mmc->ocr_avail = ocr_avail;
->>>>      mmc->ocr_avail_sdio = ocr_avail;
->>>>      if (host->ocr_avail_sdio)
->>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>>> index 36f3861..d976e4f 100644
->>>> --- a/drivers/mmc/host/sdhci.h
->>>> +++ b/drivers/mmc/host/sdhci.h
->>>> @@ -182,6 +182,9 @@
->>>> #define  SDHCI_CAN_64BIT       0x10000000
->>>> 
->>>> #define SDHCI_CAPABILITIES_1   0x44
->>>> +#define  SDHCI_CAN_SDR50       0x00000001
->>>> +#define  SDHCI_CAN_SDR104      0x00000002
->>>> +#define  SDHCI_CAN_DDR50       0x00000004
->>>> 
->>>> #define SDHCI_MAX_CURRENT      0x48
->>>> 
->>>> @@ -237,6 +240,8 @@ struct sdhci_ops {
->>>>      void (*platform_send_init_74_clocks)(struct sdhci_host *host,
->>>>                                           u8 power_mode);
->>>>      unsigned int    (*get_ro)(struct sdhci_host *host);
->>>> +       unsigned int    (*set_signaling_voltage)(struct sdhci_host *host,
->>>> +                               unsigned short voltage);
->>>> };
->>>> 
->>>> #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
->>>> --
->>>> 1.7.0.4
->>>> 
->>>> 
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>> 
->> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+>>>
+>>>
+>>>>>
+>>>>>>>
+>>>>>>>>> [ =A0 11.688964] mmc0: Timeout waiting for hardware interrupt=
+=2E
+>>>>>>>>> [ =A0 11.688976] sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D REG=
+ISTER DUMP (mmc0)=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>>>>>>>>> [ =A0 11.705024] sdhci: Sys addr: 0x00000000 | Version: =A00x=
+00000002
+>>>>>>>>> [ =A0 11.739657] sdhci: Blk size: 0x00007008 | Blk cnt: =A00x=
+00000000
+>>>>>>>>> [ =A0 11.739657] sdhci: Argument: 0x00000000 | Trn mode: 0x00=
+000003
+>>>>>>>>> [ =A0 11.756973] sdhci: Present: =A00x01fa0000 | Host ctl: 0x=
+00000035
+>>>>>>>>> [ =A0 11.791607] sdhci: Power: =A0 =A00x0000000f | Blk gap: =A0=
+0x00000000
+>>>>>>>>> [ =A0 11.791607] sdhci: Wake-up: =A00x00000000 | Clock: =A0 =A0=
+0x00000207
+>>>>>>>>> [ =A0 11.808923] sdhci: Timeout: =A00x0000000e | Int stat: 0x=
+00000000
+>>>>>>>>> [ =A0 11.826241] sdhci: Int enab: 0x02ff000b | Sig enab: 0x02=
+ff000b
+>>>>>>>>> [ =A0 11.843558] sdhci: AC12 err: 0x00000000 | Slot int: 0x00=
+000000
+>>>>>>>>> [ =A0 11.860874] sdhci: Caps: =A0 =A0 0x25fcc8b2 | Caps_1: =A0=
+ 0x00002f77
+>>>>>>>>> [ =A0 11.878191] sdhci: Cmd: =A0 =A0 =A00x0000133a | Max curr=
+: 0x00000000
+>>>>>>>>> [ =A0 11.895509] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x1f=
+943808
+>>>>>>>>> [ =A0 11.912826] sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D
+>>>>>>>>> [ =A0 11.947936] mmc0: new high speed DDR MMC card at address=
+ 0001
+>>>>>>>>> [ =A0 11.965402] mmcblk0: mmc0:0001 SEM08G 7.39 GiB
+>>>>>>>>> [ =A0 11.983931] mmcblk0: retrying using single block read
+>>>>>>>>> [ =A0 11.999498] mmcblk0: error -84 transferring data, sector=
+ 0, nr 8, card status 0x900
+>>>>>>>>> [ =A0 12.022300] end_request: I/O error, dev mmcblk0, sector =
+0
+>>>>>>>>> [ =A0 12.038868] mmcblk0: error -84 transferring data, sector=
+ 1, nr 7, card status 0x900
+>>>>>>>>> [ =A0 12.061745] end_request: I/O error, dev mmcblk0, sector =
+1
+>>>>>>>>> [ =A0 12.078364] mmcblk0: error -84 transferring data, sector=
+ 2, nr 6, card status 0x900
+>>>>>>>>> [ =A0 12.101155] end_request: I/O error, dev mmcblk0, sector =
+2
+>>>>>>>>> [ =A0 12.117704] mmcblk0: error -84 transferring data, sector=
+ 3, nr 5, card status 0x900
+>>>>>>>>> [ =A0 12.140507] end_request: I/O error, dev mmcblk0, sector =
+3
+>>>>>>>>> [ =A0 12.157063] mmcblk0: error -84 transferring data, sector=
+ 4, nr 4, card status 0x900
+>>>>>>>>> [ =A0 12.179876] end_request: I/O error, dev mmcblk0, sector =
+4
+>>>>>>>>> [ =A0 12.196428] mmcblk0: error -84 transferring data, sector=
+ 5, nr 3, card status 0x900
+>>>>>>>>> [ =A0 12.219233] end_request: I/O error, dev mmcblk0, sector =
+5
+>>>>>>>>> [ =A0 12.235789] mmcblk0: error -84 transferring data, sector=
+ 6, nr 2, card status 0x900
+>>>>>>>>> [ =A0 12.258604] end_request: I/O error, dev mmcblk0, sector =
+6
+>>>>>>>>> [ =A0 12.275154] mmcblk0: error -84 transferring data, sector=
+ 7, nr 1, card status 0x900
+>>>>>>>>> [ =A0 12.297970] end_request: I/O error, dev mmcblk0, sector =
+7
+>>>>>>>>> [ =A0 12.314016] Buffer I/O error on device mmcblk0, logical =
+block 0
+>>>>>>>>> [ =A0 12.332239] mmcblk0: retrying using single block read
+>>>>>>>>> [ =A0 12.347777] mmcblk0: error -84 transferring data, sector=
+ 0, nr 8, card status 0x900
+>>>>>>>>> [ =A0 12.370589] end_request: I/O error, dev mmcblk0, sector =
+0
+>>>>>>>>> [ =A0 12.387149] mmcblk0: error -84 transferring data, sector=
+ 1, nr 7, card status 0x900
+>>>>>>>>> [ =A0 12.409954] end_request: I/O error, dev mmcblk0, sector =
+1
+>>>>>>>>> [ =A0 12.426510] mmcblk0: error -84 transferring data, sector=
+ 2, nr 6, card status 0x900
+>>>>>>>>> [ =A0 12.449325] end_request: I/O error, dev mmcblk0, sector =
+2
+>>>>>>>>> [ =A0 12.465891] mmcblk0: error -84 transferring data, sector=
+ 3, nr 5, card status 0x900
+>>>>>>>>> [ =A0 12.488677] end_request: I/O error, dev mmcblk0, sector =
+3
+>>>>>>>>> [ =A0 12.505239] mmcblk0: error -84 transferring data, sector=
+ 4, nr 4, card status 0x900
+>>>>>>>>> [ =A0 12.528050] end_request: I/O error, dev mmcblk0, sector =
+4
+>>>>>>>>> [ =A0 12.544602] mmcblk0: error -84 transferring data, sector=
+ 5, nr 3, card status 0x900
+>>>>>>>>> [ =A0 12.567407] end_request: I/O error, dev mmcblk0, sector =
+5
+>>>>>>>>> [ =A0 12.583965] mmcblk0: error -84 transferring data, sector=
+ 6, nr 2, card status 0x900
+>>>>>>>>> [ =A0 12.606770] end_request: I/O error, dev mmcblk0, sector =
+6
+>>>>>>>>> [ =A0 12.623330] mmcblk0: error -84 transferring data, sector=
+ 7, nr 1, card status 0x900
+>>>>>>>>> [ =A0 12.646134] end_request: I/O error, dev mmcblk0, sector =
+7
+>>>>>>>>> [ =A0 12.662188] Buffer I/O error on device mmcblk0, logical =
+block 0
+>>>>>>>>> [ =A0 12.679810] =A0mmcblk0: unable to read partition table
+>>>>>>>>> [ =A0 16.609127] VFS: Cannot open root device "mmcblk0p1" or =
+unknown-block(179,1)
+>>>>>>>>> [ =A0 16.630132] Please append a correct "root=3D" boot optio=
+n; here are the available partitions:
+>>>>>>>>> [ =A0 16.654964] b300 =A0 =A0 =A0 =A0 7757824 mmcblk0 =A0driv=
+er: mmcblk
+>>>>>>>>> [ =A0 16.670806] Kernel panic - not syncing: VFS: Unable to m=
+ount root fs on unknown-block(179,1)
+>>>>>>>>> [ =A0 16.695905] [<c002abe8>] (unwind_backtrace+0x0/0x124) fr=
+om [<c0038518>] (panic+0x6c/0x18c)
+>>>>>>>>> [ =A0 16.720516] [<c0038518>] (panic+0x6c/0x18c) from [<c0008=
+d94>] (mount_block_root+0x1c4/0x204)
+>>>>>>>>> [ =A0 16.745636] [<c0008d94>] (mount_block_root+0x1c4/0x204) =
+from [<c0008e74>] (mount_root+0xa0/0xc4)
+>>>>>>>>> [ =A0 16.771787] [<c0008e74>] (mount_root+0xa0/0xc4) from [<c=
+0008fb4>] (prepare_namespace+0x11c/0x174)
+>>>>>>>>> [ =A0 16.798201] [<c0008fb4>] (prepare_namespace+0x11c/0x174)=
+ from [<c0008750>] (kernel_init+0x108/0x14c)
+>>>>>>>>> [ =A0 16.825393] [<c0008750>] (kernel_init+0x108/0x14c) from =
+[<c00263e0>] (kernel_thread_exit+0x0/0x8)
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>
+>>>>>
+>>>
+>>>
+>
+>
