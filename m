@@ -1,33 +1,39 @@
-From: Pierre Tardy <tardyp@gmail.com>
-Subject: Re: [PATCH 4/4] mmc: add MMC_QUIRK_NONSTD_FUNC_IF
-Date: Tue, 4 Jan 2011 23:48:28 +0100
-Message-ID: <AANLkTimg7DU=1bYv-k2-WwiSurHmsrjN_+zb_=irZv9n@mail.gmail.com>
-References: <1294175416-12358-1-git-send-email-ohad@wizery.com>
-	<1294175416-12358-4-git-send-email-ohad@wizery.com>
+From: David Vrabel <david.vrabel@csr.com>
+Subject: Re: [PATCH 3/4] mmc: add MMC_QUIRK_DISABLE_CD
+Date: Tue, 04 Jan 2011 23:04:52 +0000
+Message-ID: <4D23A794.8020106@csr.com>
+References: <1294175416-12358-1-git-send-email-ohad@wizery.com> <1294175416-12358-3-git-send-email-ohad@wizery.com> <4D239AAF.6090202@csr.com> <AANLkTikKDkE8eoRct_DN++dRTZ8uEMqUKN2GZdCngRKQ@mail.gmail.com> <AANLkTinEWsYBqgchwbjT2ZnoVYPcibJDF2Jt3v1AysUt@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:60725 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750868Ab1ADWs2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 17:48:28 -0500
-Received: by qwa26 with SMTP id 26so15065081qwa.19
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Jan 2011 14:48:28 -0800 (PST)
-In-Reply-To: <1294175416-12358-4-git-send-email-ohad@wizery.com>
+Received: from smarthost01.mail.zen.net.uk ([212.23.3.140]:42598 "EHLO
+	smarthost01.mail.zen.net.uk" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750940Ab1ADXFJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2011 18:05:09 -0500
+In-Reply-To: <AANLkTinEWsYBqgchwbjT2ZnoVYPcibJDF2Jt3v1AysUt@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ohad Ben-Cohen <ohad@wizery.com>
 Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-On Tue, Jan 4, 2011 at 10:10 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> Use MMC_QUIRK_NONSTD_FUNC_IF to ignore the "SDIO Standard Function interface
-> code" as indicated by the card's FBR, and instead treat all functions as
-> non-standard interfaces.
-Hi Ohad,
+On 04/01/2011 22:27, Ohad Ben-Cohen wrote:
+> On Wed, Jan 5, 2011 at 12:13 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+>>> Whether this pull up should be
+>>> enabled or disabled is determined by the board (not the card).  The
+>>> pull-up should be disabled if the board has a pull-up external to the
+>>> card, otherwise it must remain enabled.
+>>
+>> Agree.
+> 
+> It might make more sense to use a host CAP though for this (i.e.
+> MMC_CAP_DISABLE_CD).
 
-This sounds good, and may solve this problem we have with wl1271.
-Then, how do you tell the mmc stack the wl1271 has the quirk
-MMC_QUIRK_NONSTD_FUNC_IF?
-Regards,
+Could we unconditionally disable the card's internal pull-up?  A board
+that's using DAT3 for card detection should have a switchable pull-down
+/and/ a switchable pull-up.
 
-Pierre
+This would cause regressions on boards that aren't properly designed and
+have omitted the pull-up.  Are there boards like this?
+
+David
