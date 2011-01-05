@@ -1,93 +1,64 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: outstanding TMIO MMC patches
-Date: Wed, 5 Jan 2011 22:24:08 +0000
-Message-ID: <20110105222408.GM9198@void.printf.net>
-References: <Pine.LNX.4.64.1012281211560.21647@axis700.grange> <4D1B3937.80708@arndnet.de>
+From: Arnd Hannemann <arnd@arndnet.de>
+Subject: Re: [PATCH 1/2 v2] mmc: tmio: handle missing HW interrupts
+Date: Wed, 05 Jan 2011 23:31:00 +0100
+Message-ID: <4D24F124.9000303@arndnet.de>
+References: <1293628874-8140-1-git-send-email-arnd@arndnet.de> <1293628874-8140-2-git-send-email-arnd@arndnet.de> <20110105212223.GJ9198@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4D1B3937.80708@arndnet.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Arnd Hannemann <arnd@arndnet.de>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Andrew Morton <akpm@linux-foundation.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <damm@opensource.se>, linux-sh@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from slowhand.arndnet.de ([88.198.19.76]:43318 "EHLO mail.unitix.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751338Ab1AEWbK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 5 Jan 2011 17:31:10 -0500
+In-Reply-To: <20110105212223.GJ9198@void.printf.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, linux-sh@vger.kernel.org
 
-Hi,
+Hi Chris,
 
-Just to check we're agreed on the current status:
+Am 05.01.2011 22:22, schrieb Chris Ball:
+> Hi Arnd,
+>=20
+> On Wed, Dec 29, 2010 at 02:21:13PM +0100, Arnd Hannemann wrote:
+>> This patch addresses this problem by introducing timeouts for outsta=
+nding
+>> interrupts. If a hardware interrupt is missing, a soft reset will be=
+ performed
+>> to bring the hardware back to a working state.
+>> Tested with the SDHI hardware block in sh7372 / AP4EVB.
+>>
+>> Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
+>=20
+> This breaks compilation without CONFIG_TMIO_MMC_DMA=3Dy, because it
+> attempts to compile tmio_mmc_reset_work() unconditionally even though
+> delayed_reset_work is only a member of tmio_mmc_host if TMIO_MMC_DMA=3D=
+y:
+>=20
+> drivers/mmc/host/tmio_mmc.c: In function =E2=80=98tmio_mmc_reset_work=
+=E2=80=99:
+> drivers/mmc/host/tmio_mmc.c:357:31: error: =E2=80=98struct tmio_mmc_h=
+ost=E2=80=99 has no member named =E2=80=98delayed_reset_work=E2=80=99
 
-On Wed, Dec 29, 2010 at 02:35:51PM +0100, Arnd Hannemann wrote:
-> > my patches:
-> > 
-> > mmc: tmio_mmc: allow multi-element scatter-gather lists
-> > 	https://patchwork.kernel.org/patch/317142/
-> > 	should go in via linux-mmc
-> > 
-> > mmc: tmio_mmc: fix PIO fallback on DMA descriptor allocation failure
-> > 	https://patchwork.kernel.org/patch/317162/
-> > 	should go in via linux-mmc
-> > 
-> > [1/3] mmc: tmio: merge the private header into the driver
-> > 	https://patchwork.kernel.org/patch/349931/
-> > 	should go in via linux-mmc
-> > 
-> > [2/3] mmc: tmio: implement a bounce buffer for unaligned DMA
-> > 	https://patchwork.kernel.org/patch/426661/
-> > 	should go in via linux-mmc
-> > 
-> > [3/3] mfd: sdhi: require the tmio-mmc driver to bounce unaligned buffers
-> > 	https://patchwork.kernel.org/patch/349961/
-> > 	acked by Samuel Ortiz, should go in via linux-mmc
-> > 
-> > patches from Arnd Hannemann:
-> > 
-> > mmc: tmio_mmc: silence compiler warnings
-> > 	https://patchwork.kernel.org/patch/418931/
-> > 	should go in via linux-mmc
-> > 
-> > [1/6] mmc: tmio: implement SDIO IRQ
-> > 	https://patchwork.kernel.org/patch/437441/
-> > 	should go in via linux-mmc
-> > 
-> > [2/6] mfd: sh_mobile_sdhi: activate SDIO IRQ for tmio_mmc
-> > 	https://patchwork.kernel.org/patch/437451/
-> > 	acked by Samual Ortiz, should go in via linux-mmc
+Hmm, I could not reproduce this.
+delayed_reset_work should not be in the #ifdef TMIO_MMC_DMA #endif scop=
+e.
+And it isn't according to the patch.
 
-I've merged all of the above patches.
+I tried with mmc-next last commit "549bad416ef62f09711cb22e77adff029e27=
+ce07".
+The patch would apply with some fuzz, but compilation without CONFIG_TM=
+IO_MMC_DMA=3Dy works.
 
-> > [3/6] ARM: mach-shmobile: sh7372 Enable SDIO IRQs
-> > 	https://patchwork.kernel.org/patch/437491/
-> > 	Either via linux-mmc: Ack needed by Paul Mundt
-> > 	or later separately via sh-2.6
-> > 
-> > [4/6] sh: sh7724 Enable SDIO IRQs
-> > 	https://patchwork.kernel.org/patch/437471/
-> > 	Either via linux-mmc: Ack needed by Paul Mundt
-> > 	or later separately via sh-2.6
-> > 
-> > [5/6] sh: sh7722 Enable SDIO IRQs
-> > 	https://patchwork.kernel.org/patch/437521/
-> > 	Either via linux-mmc: Ack needed by Paul Mundt
-> > 	or later separately via sh-2.6
-> > 
-> > [6/6] sh: sh7723 / ap325rxa enable SDIO IRQs
-> > 	https://patchwork.kernel.org/patch/437511/
-> > 	Either via linux-mmc: Ack needed by Paul Mundt
-> > 	or later separately via sh-2.6
+With what tree and .config did you try?
 
-I haven't merged these because I'd prefer them to go via architecture
-trees.
+Maybe I confused you with my email mentioning the older patches, did yo=
+u try the (rebased) v2:
+https://patchwork.kernel.org/patch/439421/
+https://patchwork.kernel.org/patch/439431/
 
-> There are also these two:
-> 
-> [1/2] tmio_mmc: handle missing HW interrupts
-> 	https://patchwork.kernel.org/patch/201962/
-> [2/2] tmio_mmc: fix CMD irq handling
-> 	https://patchwork.kernel.org/patch/201982/
 
-I haven't merged these because 1/2 breaks the build without TMIO_MMC_DMA=y.
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks
+Arnd
