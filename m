@@ -1,37 +1,35 @@
-From: Chris Ball <cjb@laptop.org>
+From: Paul Mundt <lethal@linux-sh.org>
 Subject: Re: outstanding TMIO MMC patches
-Date: Wed, 5 Jan 2011 22:57:03 +0000
-Message-ID: <20110105225703.GD13209@void.printf.net>
-References: <Pine.LNX.4.64.1012281211560.21647@axis700.grange>
+Date: Thu, 6 Jan 2011 08:08:57 +0900
+Message-ID: <20110105230857.GH23889@linux-sh.org>
+References: <Pine.LNX.4.64.1012281211560.21647@axis700.grange> <AANLkTi=NWFmskvAosK9fO65OGNLrqEY-_PdvKydyn=G2@mail.gmail.com> <20110105045347.GA23889@linux-sh.org> <20110105165757.GA7876@void.printf.net> <20110105173029.GG23889@linux-sh.org> <20110105185717.GA9016@void.printf.net> <4D24DFA8.3030201@arndnet.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39788 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751298Ab1AEW5K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 5 Jan 2011 17:57:10 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1012281211560.21647@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <4D24DFA8.3030201@arndnet.de>
+Sender: linux-sh-owner@vger.kernel.org
+To: Arnd Hannemann <arnd@arndnet.de>
+Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <damm@opensource.se>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Andrew Morton <akpm@linux-foundation.org>, Magnus Damm <damm@opensource.se>, linux-sh@vger.kernel.org
 
-Hi Ian,
-
-On Wed, Dec 29, 2010 at 12:32:13AM +0100, Guennadi Liakhovetski wrote:
-> There are a number of outstanding tmio-mmc patches from Arnd Hannemann and 
-> myself, many of them posted weeks ago. We really would like to have them 
-> in 2.6.38. Would you have time to process them? Otherwise, could someone 
-> else maybe apply them? Listed in the order, in which they should be 
-> applied.
-
-I've applied these to mmc-next, plus two more of Arnd's, since it looks 
-like you don't have time for reviews at the moment.  Feel free to review
-them before .38 releases; we can still make changes if necessary.  It'd
-be great if you can retest on mmc-next with your HW, too.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+On Wed, Jan 05, 2011 at 10:16:24PM +0100, Arnd Hannemann wrote:
+> Am 05.01.2011 19:57, schrieb Chris Ball:
+> > Arnd, can I take just patches 1/2 from your six-part series, and have
+> > you send the rest through the arch/ maintainers later?
+> 
+> Sure, should be no problem.
+> Ah, just saw that you already pushed those two, thanks.
+> 
+> @Paul: 
+> Maybe it would be best that you ACK those arch patches (if you think
+> they are ok) and that they also go in via the mmc-next tree?
+> Otherwise we would need to wait until mmc-next for .38 is merged in your trees,
+> right?
+> 
+If Chris prefers they go through the architecture side then that's not a
+problem either. I'll be doing at least 2 merges during the merge window,
+and this stuff is just adding in platform data, so it doesn't really
+matter when it gets rolled in. Optionally if the MMC tree doesn't rebase
+I can just set up a topic branch that branches off of that, roll these
+patches on top of that, and you can just test that directly.
