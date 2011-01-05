@@ -1,59 +1,107 @@
-From: Pierre Tardy <tardyp@gmail.com>
-Subject: Re: [PATCH 4/4] mmc: add MMC_QUIRK_NONSTD_FUNC_IF
-Date: Wed, 5 Jan 2011 10:10:34 +0100
-Message-ID: <AANLkTinrz+qonuPSo-HOJ2zmjwmyn0YJkMTg+MwKXN2s@mail.gmail.com>
-References: <1294175416-12358-1-git-send-email-ohad@wizery.com>
-	<1294175416-12358-4-git-send-email-ohad@wizery.com>
-	<AANLkTimg7DU=1bYv-k2-WwiSurHmsrjN_+zb_=irZv9n@mail.gmail.com>
-	<AANLkTi=HyXUAMALQD4MMZrw=Por8bTkJ6HxSC10UrDt4@mail.gmail.com>
-	<AANLkTikwaSmwy2b6if-=BhU9c5Ea_9xyOdKDC0VhpBox@mail.gmail.com>
-	<AANLkTik8FNxAhGz8Dzj=h4S1hyDGUYw4HSAhzwHWfWpG@mail.gmail.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: mmc: sdhci stop SDCLK during asynchronous interrupt peroid
+Date: Wed, 5 Jan 2011 04:39:09 -0500
+Message-ID: <AANLkTimXQMkWhJZ=nD8r-odmU+J6nf+7U+6KOHr5E1N1@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f174.google.com ([209.85.212.174]:56629 "EHLO
-	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751163Ab1AEJKe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2011 04:10:34 -0500
-Received: by pxi15 with SMTP id 15so2724639pxi.19
-        for <linux-mmc@vger.kernel.org>; Wed, 05 Jan 2011 01:10:34 -0800 (PST)
-In-Reply-To: <AANLkTik8FNxAhGz8Dzj=h4S1hyDGUYw4HSAhzwHWfWpG@mail.gmail.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:38682 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751514Ab1AEJjL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2011 04:39:11 -0500
+Received: by fxm20 with SMTP id 20so14862040fxm.19
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Jan 2011 01:39:09 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, "DE CESCO, Jonathan" <jonathanc@ti.com>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@stericsson.com>
 
-On Wed, Jan 5, 2011 at 12:34 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> On Wed, Jan 5, 2011 at 1:25 AM, Pierre Tardy <tardyp@gmail.com> wrote:
->> There is no such platform data in intel_mid platforms.. Sound like
->> another platform hack will be needed for wl1271 to be integrated. :-(
->
-> John (cc'ed) ported this to your platform and can share the solution
-> with you; IIRC the idea was the same: identify the card according to
-> the slot id (this is reasonable because the card is nonremovable) and
-> set it as MMC_QUIRK_NONSTD_FUNC_IF.
-Well, we dont do it like this in intel_mid. Every platform quirk has
-to come somehow from the firmware (SFI), and there is no such
-descriptor to my knowledge. Lets see what John is proposing...
+>From 7554ead744bfdc7304a7ae9fb227212bf548161a Mon Sep 17 00:00:00 2001
+From: Zhangfei Gao <zhangfei.gao@marvell.com>
+Date: Wed, 5 Jan 2011 17:21:00 -0500
+Subject: [PATCH] mmc: sdhci stop SDCLK during asynchronous interrupt peroid
 
+	V3 controller could stop SDCLK during asynchronous interrupt peroid
+to save power, via set SDHCI_CTRL2_AINT bit 14 of
+SDHCI_HOST_CONTROL2(0x3e)
+	Two conditions:
+	1. card support asynchronous interrupt
+	2. Asynchronous interrupt support is set to 1 in the capabilities register.
 
->> Our first idea to resolve this problem was to hardcode wl1273 vendor
->> id/product id in a black list table near read_fbr...
->
-> I'm not sure we want to hardcode such details in the SDIO core itself
-> (think of how it would look if more devices will show up..).
+	How to enable: mmc->caps |= MMC_CAP_CLOCK_GATE
 
-Yes, that's why I thought of a table, we might want to make this more
-generic, and, as you are proposing more than one quirk those few days
-for cards, we could add those quirks in struct sdio_device_id, like
-they do for PCI...
+Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |   14 ++++++++++++++
+ drivers/mmc/host/sdhci.h |    2 ++
+ include/linux/mmc/host.h |    2 ++
+ 3 files changed, 18 insertions(+), 0 deletions(-)
 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index aafbb42..946b947 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1261,6 +1261,15 @@ static void sdhci_set_ios(struct mmc_host *mmc,
+struct mmc_ios *ios)
+ 	if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
+ 		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
 
-The thing is that the semantic of your solution is wrong. You want to say:
-Hey! wl1271 is broken
-and you actually say:
-Hey! the card in slot named "external" of omap4 zoom is brocken.
++	if (mmc->caps & MMC_CAP_CLOCK_GATE) {
++		u16 con;
++
++		con = readw(host->ioaddr + SDHCI_HOST_CONTROL2);
++		con |= SDHCI_CTRL2_AINT;
++		writew(con, host->ioaddr + SDHCI_HOST_CONTROL2);
++	}
++
++
+ out:
+ 	mmiowb();
+ 	spin_unlock_irqrestore(&host->lock, flags);
+@@ -1808,6 +1817,11 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			mmc->caps |= (MMC_CAP_1_8V_DDR);
+ 	}
 
++	if (mmc->caps & MMC_CAP_CLOCK_GATE) {
++		if (!(caps & SDHCI_CAN_ASYN_INT))
++			mmc->caps &= ~MMC_CAP_CLOCK_GATE;
++	}
++
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+ 	else if (!(caps & SDHCI_CAN_DO_SDMA))
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c4bd5dd..907de87 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -153,6 +153,7 @@
+ #define   SDHCI_CTRL2_SDR104	0x0003
+ #define   SDHCI_CTRL2_DDR50	0x0004
+ #define  SDHCI_CTRL2_1_8V	0x0008
++#define  SDHCI_CTRL2_AINT	0x4000
 
-Regards,
-Pierre
+ #define SDHCI_CAPABILITIES	0x40
+ #define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
+@@ -172,6 +173,7 @@
+ #define  SDHCI_CAN_VDD_300	0x02000000
+ #define  SDHCI_CAN_VDD_180	0x04000000
+ #define  SDHCI_CAN_64BIT	0x10000000
++#define  SDHCI_CAN_ASYN_INT	0x20000000
+
+ #define SDHCI_CAPABILITIES_1	0x44
+ #define  SDHCI_CAN_SDR50	0x00000001
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index bcb793e..2a53a94 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -173,6 +173,8 @@ struct mmc_host {
+ 						/* DDR mode at 1.2V */
+ #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
+ #define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus width ok */
++#define MMC_CAP_CLOCK_GATE	(1 << 15)	/* V3 controller */
++						/* support clock gating */
+
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+
+-- 
+1.7.0.4
