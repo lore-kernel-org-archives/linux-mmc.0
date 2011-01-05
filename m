@@ -1,128 +1,42 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: mmc: sdhci stop SDCLK during asynchronous interrupt peroid
-Date: Wed, 5 Jan 2011 08:30:43 -0800
-Message-ID: <CFD46C56-3B58-40E8-8B05-7FF768725B86@marvell.com>
-References: <AANLkTimXQMkWhJZ=nD8r-odmU+J6nf+7U+6KOHr5E1N1@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: outstanding TMIO MMC patches
+Date: Wed, 5 Jan 2011 16:57:57 +0000
+Message-ID: <20110105165757.GA7876@void.printf.net>
+References: <Pine.LNX.4.64.1012281211560.21647@axis700.grange> <AANLkTi=NWFmskvAosK9fO65OGNLrqEY-_PdvKydyn=G2@mail.gmail.com> <20110105045347.GA23889@linux-sh.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog104.obsmtp.com ([74.125.149.73]:50293 "HELO
-	na3sys009aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751026Ab1AEQe7 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 5 Jan 2011 11:34:59 -0500
-In-Reply-To: <AANLkTimXQMkWhJZ=nD8r-odmU+J6nf+7U+6KOHr5E1N1@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20110105045347.GA23889@linux-sh.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Paul Mundt <lethal@linux-sh.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <damm@opensource.se>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@stericsson.com>
 
+Hi,
 
-On Jan 5, 2011, at 1:39 AM, zhangfei gao wrote:
+On Wed, Jan 05, 2011 at 01:53:47PM +0900, Paul Mundt wrote:
+> The MMC subsystem has been pretty much a disaster in terms of maintenance
+> for as long as I can remember, so this is certainly not a new situation,
+> but I had hoped that the situation had rather improved recently with at
+> least some people stepping up and being a bit more active. For now, -mm
+> is probably the only way for these to make any sort of forward progress,
+> but it's a bit counter-intuitive to have to sideline an allegedly
+> maintained subsystem in order for anything to happen at all.
 
-> From 7554ead744bfdc7304a7ae9fb227212bf548161a Mon Sep 17 00:00:00 2001
-> From: Zhangfei Gao <zhangfei.gao@marvell.com>
-> Date: Wed, 5 Jan 2011 17:21:00 -0500
-> Subject: [PATCH] mmc: sdhci stop SDCLK during asynchronous interrupt peroid
-> 
-> 	V3 controller could stop SDCLK during asynchronous interrupt peroid
-> to save power, via set SDHCI_CTRL2_AINT bit 14 of
-> SDHCI_HOST_CONTROL2(0x3e)
-> 	Two conditions:
-> 	1. card support asynchronous interrupt
-> 	2. Asynchronous interrupt support is set to 1 in the capabilities register.
-> 
-> 	How to enable: mmc->caps |= MMC_CAP_CLOCK_GATE
-> 
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
-> ---
-> drivers/mmc/host/sdhci.c |   14 ++++++++++++++
-> drivers/mmc/host/sdhci.h |    2 ++
-> include/linux/mmc/host.h |    2 ++
-> 3 files changed, 18 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index aafbb42..946b947 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1261,6 +1261,15 @@ static void sdhci_set_ios(struct mmc_host *mmc,
-> struct mmc_ios *ios)
-> 	if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
-> 		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-> 
-> +	if (mmc->caps & MMC_CAP_CLOCK_GATE) {
-> +		u16 con;
-> +
-> +		con = readw(host->ioaddr + SDHCI_HOST_CONTROL2);
-> +		con |= SDHCI_CTRL2_AINT;
-> +		writew(con, host->ioaddr + SDHCI_HOST_CONTROL2);
-> +	}
-> +
-> +
+Wow, how hostile -- insult first, ask questions later?  I do review and
+merge MMC patches; all it takes is a ping to let me know that the tmio
+maintainer is absent and that you'd like me to start picking these up.
+I'd seen them being taken into other trees, and no-one's asked me about
+merging any of them into the MMC tree before, so I didn't realize there
+was a problem.  We just need more communication.
 
+So, let's come up with a workflow.  With Ian absent, it would be good to
+have someone with TMIO hardware (I don't have any) who's willing to help
+test and review/ACK patches.  I don't generally like to take arch code
+in through the MMC tree, so it would also be good to break up some of
+the patchsets into MMC-only if possible.
 
-This will enable clock gating for SD/eMMC and SDIO cards.  This is not a good idea for SDIO where
-there are known issues.  This is one reason the software clock gating code does not enable
-clock gating on SDIO.  Not all SDIO cards can work.
-
-It does not handle the case clock gating being supported in pre SD 3.0 controllers.
-
-See my patch on h/w clock gating -- if there are issues with the patch would appreciate comments.
-
-> out:
-> 	mmiowb();
-> 	spin_unlock_irqrestore(&host->lock, flags);
-> @@ -1808,6 +1817,11 @@ int sdhci_add_host(struct sdhci_host *host)
-> 			mmc->caps |= (MMC_CAP_1_8V_DDR);
-> 	}
-> 
-> +	if (mmc->caps & MMC_CAP_CLOCK_GATE) {
-> +		if (!(caps & SDHCI_CAN_ASYN_INT))
-> +			mmc->caps &= ~MMC_CAP_CLOCK_GATE;
-> +	}
-> +
-> 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
-> 		host->flags |= SDHCI_USE_SDMA;
-> 	else if (!(caps & SDHCI_CAN_DO_SDMA))
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index c4bd5dd..907de87 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -153,6 +153,7 @@
-> #define   SDHCI_CTRL2_SDR104	0x0003
-> #define   SDHCI_CTRL2_DDR50	0x0004
-> #define  SDHCI_CTRL2_1_8V	0x0008
-> +#define  SDHCI_CTRL2_AINT	0x4000
-> 
-> #define SDHCI_CAPABILITIES	0x40
-> #define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
-> @@ -172,6 +173,7 @@
-> #define  SDHCI_CAN_VDD_300	0x02000000
-> #define  SDHCI_CAN_VDD_180	0x04000000
-> #define  SDHCI_CAN_64BIT	0x10000000
-> +#define  SDHCI_CAN_ASYN_INT	0x20000000
-> 
-> #define SDHCI_CAPABILITIES_1	0x44
-> #define  SDHCI_CAN_SDR50	0x00000001
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index bcb793e..2a53a94 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -173,6 +173,8 @@ struct mmc_host {
-> 						/* DDR mode at 1.2V */
-> #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
-> #define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus width ok */
-> +#define MMC_CAP_CLOCK_GATE	(1 << 15)	/* V3 controller */
-> +						/* support clock gating */
-> 
-> 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
-> 
-> -- 
-> 1.7.0.4
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
