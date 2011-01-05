@@ -1,176 +1,128 @@
-From: Pierre Tardy <tardyp@gmail.com>
-Subject: Re: [PATCH 4/4] mmc: add MMC_QUIRK_NONSTD_FUNC_IF
-Date: Wed, 5 Jan 2011 13:28:02 +0100
-Message-ID: <AANLkTinmhoY+TqmF_scKnzG-Kjjof=YDf2kzfJfr1gjy@mail.gmail.com>
-References: <1294175416-12358-1-git-send-email-ohad@wizery.com>
-	<1294175416-12358-4-git-send-email-ohad@wizery.com>
-	<AANLkTimg7DU=1bYv-k2-WwiSurHmsrjN_+zb_=irZv9n@mail.gmail.com>
-	<AANLkTi=HyXUAMALQD4MMZrw=Por8bTkJ6HxSC10UrDt4@mail.gmail.com>
-	<AANLkTikwaSmwy2b6if-=BhU9c5Ea_9xyOdKDC0VhpBox@mail.gmail.com>
-	<AANLkTik8FNxAhGz8Dzj=h4S1hyDGUYw4HSAhzwHWfWpG@mail.gmail.com>
-	<AANLkTinrz+qonuPSo-HOJ2zmjwmyn0YJkMTg+MwKXN2s@mail.gmail.com>
-	<AANLkTik7yr6bXcGpNt09zoXU_P03RE=vo2HepDa2fhuW@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: mmc: sdhci stop SDCLK during asynchronous interrupt peroid
+Date: Wed, 5 Jan 2011 08:30:43 -0800
+Message-ID: <CFD46C56-3B58-40E8-8B05-7FF768725B86@marvell.com>
+References: <AANLkTimXQMkWhJZ=nD8r-odmU+J6nf+7U+6KOHr5E1N1@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:44141 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751569Ab1AEM2E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2011 07:28:04 -0500
-Received: by qwa26 with SMTP id 26so15590355qwa.19
-        for <linux-mmc@vger.kernel.org>; Wed, 05 Jan 2011 04:28:02 -0800 (PST)
-In-Reply-To: <AANLkTik7yr6bXcGpNt09zoXU_P03RE=vo2HepDa2fhuW@mail.gmail.com>
+Received: from na3sys009aog104.obsmtp.com ([74.125.149.73]:50293 "HELO
+	na3sys009aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751026Ab1AEQe7 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 5 Jan 2011 11:34:59 -0500
+In-Reply-To: <AANLkTimXQMkWhJZ=nD8r-odmU+J6nf+7U+6KOHr5E1N1@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, "DE CESCO, Jonathan" <jonathanc@ti.com>
-
-On Wed, Jan 5, 2011 at 10:40 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> On Wed, Jan 5, 2011 at 11:10 AM, Pierre Tardy <tardyp@gmail.com> wrote:
->> Well, we dont do it like this in intel_mid. Every platform quirk has
->> to come somehow from the firmware (SFI), and there is no such
->> descriptor to my knowledge. Lets see what John is proposing...
->
-> I think that John shared it with you this morning. I haven't looked
-> into your platform too much, but if it's using upstream code, let's
-> take the discussion to the list (by rebasing John's solution and
-> posting it here).
->
->> Yes, that's why I thought of a table, we might want to make this more
->> generic, and, as you are proposing more than one quirk those few days
->> for cards, we could add those quirks in struct sdio_device_id, like
->> they do for PCI...
->
-> Interesting. Care to send a patch for review ?
-Well... TI is selling quirky hw, would make sense that you handle this. :-)
-
-Here is a first attempt anyway...
-
-From: Pierre Tardy <pierre.tardy@intel.com>
-Date: Wed, 5 Jan 2011 13:21:02 +0100
-Subject: [PATCH] mmc: add per device quirk placeholder
-
-Some cards have quirks valid for every platforms
-using current platform quirk hooks leads to a lot
-of code and debug duplication.
-
-So we inspire a bit from what exists in PCI subsystem
-and do out own per vendorid/deviceid quirk
-We still drop the complexity of the pci quirk system
-(with special section tables, and so on)
-That can be added later if needed.
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@stericsson.com>
 
 
-Signed-off-by: Pierre Tardy <pierre.tardy@intel.com>
----
- drivers/mmc/core/Makefile |    3 ++-
- drivers/mmc/core/core.h   |    2 ++
- drivers/mmc/core/quirks.c |   43 +++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/sdio.c   |    1 +
- include/linux/mmc/card.h  |    2 ++
- 5 files changed, 50 insertions(+), 1 deletions(-)
- create mode 100644 drivers/mmc/core/quirks.c
+On Jan 5, 2011, at 1:39 AM, zhangfei gao wrote:
 
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 86b4791..6395019 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -6,6 +6,7 @@ obj-$(CONFIG_MMC)		+= mmc_core.o
- mmc_core-y			:= core.o bus.o host.o \
- 				   mmc.o mmc_ops.o sd.o sd_ops.o \
- 				   sdio.o sdio_ops.o sdio_bus.o \
--				   sdio_cis.o sdio_io.o sdio_irq.o
-+				   sdio_cis.o sdio_io.o sdio_irq.o \
-+				   quirks.o
+> From 7554ead744bfdc7304a7ae9fb227212bf548161a Mon Sep 17 00:00:00 2001
+> From: Zhangfei Gao <zhangfei.gao@marvell.com>
+> Date: Wed, 5 Jan 2011 17:21:00 -0500
+> Subject: [PATCH] mmc: sdhci stop SDCLK during asynchronous interrupt peroid
+> 
+> 	V3 controller could stop SDCLK during asynchronous interrupt peroid
+> to save power, via set SDHCI_CTRL2_AINT bit 14 of
+> SDHCI_HOST_CONTROL2(0x3e)
+> 	Two conditions:
+> 	1. card support asynchronous interrupt
+> 	2. Asynchronous interrupt support is set to 1 in the capabilities register.
+> 
+> 	How to enable: mmc->caps |= MMC_CAP_CLOCK_GATE
+> 
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+> ---
+> drivers/mmc/host/sdhci.c |   14 ++++++++++++++
+> drivers/mmc/host/sdhci.h |    2 ++
+> include/linux/mmc/host.h |    2 ++
+> 3 files changed, 18 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index aafbb42..946b947 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1261,6 +1261,15 @@ static void sdhci_set_ios(struct mmc_host *mmc,
+> struct mmc_ios *ios)
+> 	if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
+> 		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> 
+> +	if (mmc->caps & MMC_CAP_CLOCK_GATE) {
+> +		u16 con;
+> +
+> +		con = readw(host->ioaddr + SDHCI_HOST_CONTROL2);
+> +		con |= SDHCI_CTRL2_AINT;
+> +		writew(con, host->ioaddr + SDHCI_HOST_CONTROL2);
+> +	}
+> +
+> +
 
- mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 026c975..36d9a25 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -61,6 +61,8 @@ int mmc_attach_mmc(struct mmc_host *host, u32 ocr);
- int mmc_attach_sd(struct mmc_host *host, u32 ocr);
- int mmc_attach_sdio(struct mmc_host *host, u32 ocr);
 
-+void mmc_fixup_device(struct mmc_card *card);
-+
- /* Module parameters */
- extern int use_spi_crc;
+This will enable clock gating for SD/eMMC and SDIO cards.  This is not a good idea for SDIO where
+there are known issues.  This is one reason the software clock gating code does not enable
+clock gating on SDIO.  Not all SDIO cards can work.
 
-diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
-new file mode 100644
-index 0000000..d75e68c
---- /dev/null
-+++ b/drivers/mmc/core/quirks.c
-@@ -0,0 +1,43 @@
-+/*
-+ *  This file contains work-arounds for many known sdio hardware
-+ *  bugs.
-+ *
-+ *  Copyright (c) 2011 Pierre Tardy <tardyp@gmail.com>
-+ *  Inspired from pci fixup code:
-+ *  Copyright (c) 1999 Martin Mares <mj@ucw.cz>
-+ *
-+ */
-+
-+#include <linux/types.h>
-+#include <linux/kernel.h>
-+#include <linux/mmc/card.h>
-+#include <linux/mod_devicetable.h>
-+
-+/*
-+ *  The world is not perfect and supplies us with broken mmc/sdio devices.
-+ *  For at least a part of these bugs we need a work-around
-+ */
-+
-+struct mmc_fixup {
-+	u16 vendor, device;	/* You can use SDIO_ANY_ID here of course */
-+	void (*hook)(struct mmc_card *card);
-+};
-+
-+static const struct mmc_fixup mmc_fixup_methods[] = {
-+	{ 0 }
-+};
-+
-+void mmc_fixup_device(struct mmc_card *card)
-+{
-+	const struct mmc_fixup *f;
-+
-+	for (f = mmc_fixup_methods; f->hook; f++) {
-+		if ((f->vendor == card->cis.vendor || f->vendor == (u16) SDIO_ANY_ID) &&
-+		    (f->device == card->cis.device || f->device == (u16) SDIO_ANY_ID)) {
-+			dev_dbg(&card->dev, "calling %pF\n", f->hook);
-+			f->hook(card);
-+		}
-+	}
-+}
-+EXPORT_SYMBOL(mmc_fixup_device);
-+
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index db18ef5..d290a1c 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -386,6 +386,7 @@ static int mmc_sdio_init_card(struct mmc_host
-*host, u32 ocr,
- 	 */
- 	if (host->ops->init_card)
- 		host->ops->init_card(host, card);
-+	mmc_fixup_device(card);
+It does not handle the case clock gating being supported in pre SD 3.0 controllers.
 
- 	/*
- 	 * For native busses:  set card RCA and quit open drain mode.
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 5071eb1..3fe9db0 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -149,6 +149,8 @@ struct mmc_card {
- 	struct dentry		*debugfs_root;
- };
+See my patch on h/w clock gating -- if there are issues with the patch would appreciate comments.
 
-+void mmc_fixup_device(struct mmc_card *dev);
-+
- #define mmc_card_mmc(c)		((c)->type == MMC_TYPE_MMC)
- #define mmc_card_sd(c)		((c)->type == MMC_TYPE_SD)
- #define mmc_card_sdio(c)	((c)->type == MMC_TYPE_SDIO)
--- 
-1.7.0.4
+> out:
+> 	mmiowb();
+> 	spin_unlock_irqrestore(&host->lock, flags);
+> @@ -1808,6 +1817,11 @@ int sdhci_add_host(struct sdhci_host *host)
+> 			mmc->caps |= (MMC_CAP_1_8V_DDR);
+> 	}
+> 
+> +	if (mmc->caps & MMC_CAP_CLOCK_GATE) {
+> +		if (!(caps & SDHCI_CAN_ASYN_INT))
+> +			mmc->caps &= ~MMC_CAP_CLOCK_GATE;
+> +	}
+> +
+> 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+> 		host->flags |= SDHCI_USE_SDMA;
+> 	else if (!(caps & SDHCI_CAN_DO_SDMA))
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index c4bd5dd..907de87 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -153,6 +153,7 @@
+> #define   SDHCI_CTRL2_SDR104	0x0003
+> #define   SDHCI_CTRL2_DDR50	0x0004
+> #define  SDHCI_CTRL2_1_8V	0x0008
+> +#define  SDHCI_CTRL2_AINT	0x4000
+> 
+> #define SDHCI_CAPABILITIES	0x40
+> #define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
+> @@ -172,6 +173,7 @@
+> #define  SDHCI_CAN_VDD_300	0x02000000
+> #define  SDHCI_CAN_VDD_180	0x04000000
+> #define  SDHCI_CAN_64BIT	0x10000000
+> +#define  SDHCI_CAN_ASYN_INT	0x20000000
+> 
+> #define SDHCI_CAPABILITIES_1	0x44
+> #define  SDHCI_CAN_SDR50	0x00000001
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index bcb793e..2a53a94 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -173,6 +173,8 @@ struct mmc_host {
+> 						/* DDR mode at 1.2V */
+> #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
+> #define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus width ok */
+> +#define MMC_CAP_CLOCK_GATE	(1 << 15)	/* V3 controller */
+> +						/* support clock gating */
+> 
+> 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+> 
+> -- 
+> 1.7.0.4
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
