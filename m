@@ -1,106 +1,73 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: outstanding TMIO MMC patches
-Date: Wed, 5 Jan 2011 18:57:17 +0000
-Message-ID: <20110105185717.GA9016@void.printf.net>
-References: <Pine.LNX.4.64.1012281211560.21647@axis700.grange> <AANLkTi=NWFmskvAosK9fO65OGNLrqEY-_PdvKydyn=G2@mail.gmail.com> <20110105045347.GA23889@linux-sh.org> <20110105165757.GA7876@void.printf.net> <20110105173029.GG23889@linux-sh.org>
+Subject: Re: [PATCH/RESEND] mmc: tmio_mmc: allow multi-element
+	scatter-gather lists (fwd)
+Date: Wed, 5 Jan 2011 19:32:18 +0000
+Message-ID: <20110105193218.GA9198@void.printf.net>
+References: <Pine.LNX.4.64.1011111214020.15747@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35445 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752542Ab1AES5Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 5 Jan 2011 13:57:25 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20110105173029.GG23889@linux-sh.org>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <Pine.LNX.4.64.1011111214020.15747@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Mundt <lethal@linux-sh.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <damm@opensource.se>, linux-sh@vger.kernel.org
 
-On Thu, Jan 06, 2011 at 02:30:30AM +0900, Paul Mundt wrote:
-> Again, this isn't the first time this has happened. Any perceived
-> hostility in this matter is not directed at you directly since you did
-> come in to things rather late and were possibly unaware of the situation.
-> It's more absentee maintainers I have a problem with. In any event, you
-> were Cc'ed on mails that pointed out the problem (at least in summary),
-> you've presumably seen the mails with the patches that went by with pings
-> by people looking for answers, and it still took a strongly worded email
-> to elicit any sort of response. Make of that what you will.
+Hi Guennadi,
 
-A politely-worded email would have achieved just as good a response as the
-insultingly-worded one.  You should reach for politeness first when dealing
-with someone who might simply be misunderstanding your expectations of them.
-
-Since I came in late, I've been reluctant to overrule driver maintainers
-without someone asking me to do so explicitly (I'm happy to do it when
-asked to).  I do sympathize with the frustration, though; let's move on.
-
-> In any event, we seem to have shaken out the beginnings of a way forward
-> now, so this is progress!
+On Thu, Nov 11, 2010 at 12:15:06PM +0100, Guennadi Liakhovetski wrote:
+> The driver is capable of handling multi-element sg lists in both PIO and DMA
+> modes. In DMA mode this also allows to use the DMA sg capability more
+> efficiently and almost doubles the throughput.
 > 
-> > So, let's come up with a workflow.  With Ian absent, it would be good to
-> > have someone with TMIO hardware (I don't have any) who's willing to help
-> > test and review/ACK patches.  I don't generally like to take arch code
-> > in through the MMC tree, so it would also be good to break up some of
-> > the patchsets into MMC-only if possible.
-> > 
-> This is basically where the problem lies. Ian has some version of the
-> hardware that we don't, and he likewise doesn't have access to the
-> version that we do (of course there would be no problem in making the
-> hardware available to whoever decides to step up and look after TMIO in a
-> more constructive fashion, though). There are likewise issues with
-> regards to who has access to what specifications, and there are cases
-> where neither Ian nor any of the people from our side have any specs at
-> all. With this sort of a scenario it can be quite difficult to avoid
-> stepping on other peoples toes and making sure that things aren't being
-> inadvertently broken, and this is something I don't see any specific
-> resolution to, other than if you're not around to test and object in a
-> timely fashion, you lose. I don't know if other MMC drivers have the same
-> problem or not, but I can't imagine that this situation is terribly
-> unique when you have both corporations and hobbyists working on the same
-> driver from vastly different angles.
-
-I see.  So, if most patches are coming from your side, it seems that the
-largest problem for the moment is that no-one except Ian can test your
-patches against his hardware.  Do we think there's any chance of someone
-(I guess ideally you but possibly me) getting hold of hardware with Ian's
-MMC block in, for at least occasional testing before releases?
-
-If not, is there any kind of split in the driver that we could use to try
-to isolate changes more?
-
-If not, I guess I agree that we just have to try and be clear about what
-we're merging and the chance that we're breaking something in the process.
-
-> For the moment Guennadi and Arnd have been doing the work, with the
-> occasional patch from Magnus and others. All of this work however is done
-> on the same set of hardware and roughly by the same set of people with an
-> identical set of interests working for the same company, which makes
-> objective code review a bit problematic. Ian has provided useful feedback
-> in the past, which is why I've generally given him the benefit of the
-> doubt and let patches sit around for a month or two before pushing on
-> people. I note that the driver is 'maintained' for example instead of
-> 'supported', so it's understandable that people do somethings get pulled
-> away by other things from time to time. If one persistently can't even do
-> the bare minimum however, then it should simply be orphaned.
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
 > 
-> As it is now however we are quickly building up an unwieldly patch stack
-> with more future work to be done, and I'm hesitant to have anyone begin
-> any future work when the existing dependencies are wildly out of sync
-> with upstream already. If we can get some sort of process in place that
-> makes this less of a problem, then of course I'm pretty open to anything.
-> The main thing I want to avoid is a feedback loop where things go in to
-> -mm purgatory, get bounced off of Ian once a month or so, and then the
-> process repeats itself.
+> Sorry, one of the addresses was wrong last time, resending to all again to 
+> simplify commenting.
+> 
+>  drivers/mmc/host/tmio_mmc.c |    8 ++++++--
+>  1 files changed, 6 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+> index e7765a8..9034414 100644
+> --- a/drivers/mmc/host/tmio_mmc.c
+> +++ b/drivers/mmc/host/tmio_mmc.c
+> @@ -864,10 +864,14 @@ static int __devinit tmio_mmc_probe(struct platform_device *dev)
+>  		goto host_free;
+>  
+>  	mmc->ops = &tmio_mmc_ops;
+> -	mmc->caps = MMC_CAP_4_BIT_DATA;
+> -	mmc->caps |= pdata->capabilities;
+> +	mmc->caps = MMC_CAP_4_BIT_DATA | pdata->capabilities;
+>  	mmc->f_max = pdata->hclk;
+>  	mmc->f_min = mmc->f_max / 512;
+> +	mmc->max_segs = 32;
+> +	mmc->max_blk_size = 512;
+> +	mmc->max_blk_count = PAGE_CACHE_SIZE / mmc->max_blk_size * mmc->max_segs;
+> +	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+> +	mmc->max_seg_size = mmc->max_req_size;
+>  	if (pdata->ocr_mask)
+>  		mmc->ocr_avail = pdata->ocr_mask;
+>  	else
 
-Yes, I expect we can start by merging many of the outstanding patches.
-It looks like all except Arnd's six-part series can be merged via the
-MMC tree, since the MFD changes have an ACK from Samuel already. 
-I'll do that today.
+Thanks, pushed to mmc-next for .38 with a trivial style change:
 
-Arnd, can I take just patches 1/2 from your six-part series, and have
-you send the rest through the arch/ maintainers later?
-
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 9034414..4e75799 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -869,7 +869,8 @@ static int __devinit tmio_mmc_probe(struct platform_device *dev)
+ 	mmc->f_min = mmc->f_max / 512;
+ 	mmc->max_segs = 32;
+ 	mmc->max_blk_size = 512;
+-	mmc->max_blk_count = PAGE_CACHE_SIZE / mmc->max_blk_size * mmc->max_segs;
++	mmc->max_blk_count = (PAGE_CACHE_SIZE / mmc->max_blk_size) *
++		mmc->max_segs;
+ 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+ 	mmc->max_seg_size = mmc->max_req_size;
+ 	if (pdata->ocr_mask)
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
