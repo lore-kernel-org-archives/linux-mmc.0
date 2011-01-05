@@ -1,54 +1,33 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2 v2] mmc: tmio: fix CMD irq handling
-Date: Wed, 5 Jan 2011 22:48:10 +0000
-Message-ID: <20110105224810.GB13209@void.printf.net>
-References: <1293628874-8140-1-git-send-email-arnd@arndnet.de> <1293628874-8140-3-git-send-email-arnd@arndnet.de>
+Subject: Re: outstanding TMIO MMC patches
+Date: Wed, 5 Jan 2011 22:49:10 +0000
+Message-ID: <20110105224910.GC13209@void.printf.net>
+References: <Pine.LNX.4.64.1012281211560.21647@axis700.grange> <4D1B3937.80708@arndnet.de> <20110105222408.GM9198@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:34470 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751373Ab1AEWtP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 5 Jan 2011 17:49:15 -0500
 Content-Disposition: inline
-In-Reply-To: <1293628874-8140-3-git-send-email-arnd@arndnet.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Arnd Hannemann <arnd@arndnet.de>
-Cc: linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, linux-sh@vger.kernel.org
+In-Reply-To: <20110105222408.GM9198@void.printf.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Hannemann <arnd@arndnet.de>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Andrew Morton <akpm@linux-foundation.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <damm@opensource.se>, linux-sh@vger.kernel.org
 
-Hi Arnd,
+On Wed, Jan 05, 2011 at 10:24:08PM +0000, Chris Ball wrote:
+> > There are also these two:
+> > 
+> > [1/2] tmio_mmc: handle missing HW interrupts
+> > 	https://patchwork.kernel.org/patch/201962/
+> > [2/2] tmio_mmc: fix CMD irq handling
+> > 	https://patchwork.kernel.org/patch/201982/
+> 
+> I haven't merged these because 1/2 breaks the build without TMIO_MMC_DMA=y.
 
-On Wed, Dec 29, 2010 at 02:21:14PM +0100, Arnd Hannemann wrote:
-> With current code card insert/eject interrupts will acknowledge outstanding
-> commands. Normally this seems to be no problem, however if the hardware gets
-> stuck and no interrupts for CMD_TIMEOUT or CMD_RESPEND are generated, then
-> inserting and ejecting cards will falsely acknowledge outstanding commands from
-> the core.
-> 
-> This patch changes the behavior so that CMDs are only acked, if
-> CMD_TIMEOUT or CMD_RESPEND is received.
-> 
-> Signed-off-by: Arnd Hannemann <arnd@arndnet.de>
-> ---
->  drivers/mmc/host/tmio_mmc.c |    6 ++++--
->  1 files changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-> index f980042..e4926c7 100644
-> --- a/drivers/mmc/host/tmio_mmc.c
-> +++ b/drivers/mmc/host/tmio_mmc.c
-> @@ -728,8 +728,10 @@ static irqreturn_t tmio_mmc_irq(int irq, void *devid)
->   */
->  
->  		/* Command completion */
-> -		if (ireg & TMIO_MASK_CMD) {
-> -			ack_mmc_irqs(host, TMIO_MASK_CMD);
-> +		if (ireg & (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT)) {
-> +			ack_mmc_irqs(host,
-> +				     TMIO_STAT_CMDRESPEND |
-> +				     TMIO_STAT_CMDTIMEOUT);
->  			tmio_mmc_cmd_irq(host, status);
->  		}
->  
-
-Thanks, pushed to mmc-next for .38.
+These two are merged now, was my fault.
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
