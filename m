@@ -1,169 +1,95 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: mmc: sdhci stop SDCLK during asynchronous interrupt peroid
-Date: Thu, 6 Jan 2011 05:44:00 -0500
-Message-ID: <AANLkTi=LW+3LpRAQ-9Q-EH5YRT2qWVCyVCjpxMn2RYLT@mail.gmail.com>
-References: <AANLkTimXQMkWhJZ=nD8r-odmU+J6nf+7U+6KOHr5E1N1@mail.gmail.com>
-	<CFD46C56-3B58-40E8-8B05-7FF768725B86@marvell.com>
+From: David Vrabel <david.vrabel@csr.com>
+Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
+Date: Thu, 06 Jan 2011 13:17:14 +0000
+Message-ID: <4D25C0DA.4040204@csr.com>
+References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536>	<20101116150022.GA27726@void.printf.net>	<27884BED0E3C489C8849EE12A803F536@AN00536>	<m3oc9pnt6g.fsf@pullcord.laptop.org>	<4CE41BE3.1060806@elandigitalsystems.com> <m3oc9n241c.fsf@pullcord.laptop.org> <4CEA86D4.9050109@elandigitalsystems.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:33453 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752682Ab1AFKoC convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2011 05:44:02 -0500
-Received: by fxm20 with SMTP id 20so15890732fxm.19
-        for <linux-mmc@vger.kernel.org>; Thu, 06 Jan 2011 02:44:01 -0800 (PST)
-In-Reply-To: <CFD46C56-3B58-40E8-8B05-7FF768725B86@marvell.com>
+Received: from cluster-d.mailcontrol.com ([85.115.60.190]:60471 "EHLO
+	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752163Ab1AFN5u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2011 08:57:50 -0500
+Received: from rly12d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
+	by rly12d.srv.mailcontrol.com (MailControl) with ESMTP id p06DHVfq018830
+	for <linux-mmc@vger.kernel.org>; Thu, 6 Jan 2011 13:17:32 GMT
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+	by rly12d.srv.mailcontrol.com (MailControl) id p06DHHtG015613
+	for <linux-mmc@vger.kernel.org>; Thu, 6 Jan 2011 13:17:17 GMT
+In-Reply-To: <4CEA86D4.9050109@elandigitalsystems.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@stericsson.com>
+To: tony.olech@elandigitalsystems.com
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Wed, Jan 5, 2011 at 11:30 AM, Philip Rakity <prakity@marvell.com> wr=
-ote:
->
-> On Jan 5, 2011, at 1:39 AM, zhangfei gao wrote:
->
->> From 7554ead744bfdc7304a7ae9fb227212bf548161a Mon Sep 17 00:00:00 20=
-01
->> From: Zhangfei Gao <zhangfei.gao@marvell.com>
->> Date: Wed, 5 Jan 2011 17:21:00 -0500
->> Subject: [PATCH] mmc: sdhci stop SDCLK during asynchronous interrupt=
- peroid
->>
->> =A0 =A0 =A0 V3 controller could stop SDCLK during asynchronous inter=
-rupt peroid
->> to save power, via set SDHCI_CTRL2_AINT bit 14 of
->> SDHCI_HOST_CONTROL2(0x3e)
->> =A0 =A0 =A0 Two conditions:
->> =A0 =A0 =A0 1. card support asynchronous interrupt
->> =A0 =A0 =A0 2. Asynchronous interrupt support is set to 1 in the cap=
-abilities register.
->>
->> =A0 =A0 =A0 How to enable: mmc->caps |=3D MMC_CAP_CLOCK_GATE
->>
->> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
->> ---
->> drivers/mmc/host/sdhci.c | =A0 14 ++++++++++++++
->> drivers/mmc/host/sdhci.h | =A0 =A02 ++
->> include/linux/mmc/host.h | =A0 =A02 ++
->> 3 files changed, 18 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index aafbb42..946b947 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1261,6 +1261,15 @@ static void sdhci_set_ios(struct mmc_host *mm=
-c,
->> struct mmc_ios *ios)
->> =A0 =A0 =A0 if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_reset(host, SDHCI_RESET_CMD | SDHC=
-I_RESET_DATA);
->>
->> + =A0 =A0 if (mmc->caps & MMC_CAP_CLOCK_GATE) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 u16 con;
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 con =3D readw(host->ioaddr + SDHCI_HOST_CO=
-NTROL2);
->> + =A0 =A0 =A0 =A0 =A0 =A0 con |=3D SDHCI_CTRL2_AINT;
->> + =A0 =A0 =A0 =A0 =A0 =A0 writew(con, host->ioaddr + SDHCI_HOST_CONT=
-ROL2);
->> + =A0 =A0 }
->> +
->> +
->
->
-> This will enable clock gating for SD/eMMC and SDIO cards. =A0This is =
-not a good idea for SDIO where
-> there are known issues. =A0This is one reason the software clock gati=
-ng code does not enable
-> clock gating on SDIO. =A0Not all SDIO cards can work.
+I've not given this driver a detailed review, just skimmed it and
+noticed a few things.
 
-It is enabled only by setting caps MMC_CAP_CLOCK_GATE, for example the
-code to verify emmc/sd in sdhci-pxa.c
+Tony Olech wrote:
+> 
+> +
+> +	  Some SDIO cards will need a firmware file to be loaded and
+> +	  sent to VUB300 chip in order to achieve better data throughput.
+> +	  Download these "Offload Pseudocode" from Elan Digital Systems'
+> +	  web-site http://www.elandigitalsystems.com/support/downloads.php
+> +	  and put them in /lib/firmware. Note that without these additional
+> +	  firmware files the VUB300 chip will still function, but not at
+> +	  the best obtainable data rate.
 
-        if (pdata && pdata->flags & PXA_FLAG_CONTROL_CLK_GATE) {
-                /* v3 controller could support clock gating */
-                host->mmc->caps |=3D MMC_CAP_CLOCK_GATE;
-        }
-SDIO is not enabled since no PXA_FLAG_CONTROL_CLK_GATE in flags.
-In the experiment, we find sdio (wifi) power does not change a lot
-with or without clock gate, it mainly rely on wifi itself, for example
-wifi goto deep sleep mode.
+It would be useful to document (in the driver) what this "offload
+pseudocode" does.  Looking at the driver it looks like it's pre-fetching
+SDIO register values, yes?
 
->
-> It does not handle the case clock gating being supported in pre SD 3.=
-0 controllers.
-It is true, soft clock gating also be verified in SD 2.0 controller,
-such as pxa955.
+> +#pragma pack(1)
 
->
-> See my patch on h/w clock gating -- if there are issues with the patc=
-h would appreciate comments.
->
->> out:
->> =A0 =A0 =A0 mmiowb();
->> =A0 =A0 =A0 spin_unlock_irqrestore(&host->lock, flags);
->> @@ -1808,6 +1817,11 @@ int sdhci_add_host(struct sdhci_host *host)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D (MMC_CAP_=
-1_8V_DDR);
->> =A0 =A0 =A0 }
->>
->> + =A0 =A0 if (mmc->caps & MMC_CAP_CLOCK_GATE) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (!(caps & SDHCI_CAN_ASYN_INT))
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps &=3D ~MMC_CAP_CL=
-OCK_GATE;
->> + =A0 =A0 }
->> +
->> =A0 =A0 =A0 if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->flags |=3D SDHCI_USE_SDMA;
->> =A0 =A0 =A0 else if (!(caps & SDHCI_CAN_DO_SDMA))
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index c4bd5dd..907de87 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -153,6 +153,7 @@
->> #define =A0 SDHCI_CTRL2_SDR104 =A00x0003
->> #define =A0 SDHCI_CTRL2_DDR50 =A0 0x0004
->> #define =A0SDHCI_CTRL2_1_8V =A0 =A0 0x0008
->> +#define =A0SDHCI_CTRL2_AINT =A0 =A00x4000
->>
->> #define SDHCI_CAPABILITIES =A0 =A00x40
->> #define =A0SDHCI_TIMEOUT_CLK_MASK =A0 =A0 =A0 0x0000003F
->> @@ -172,6 +173,7 @@
->> #define =A0SDHCI_CAN_VDD_300 =A0 =A00x02000000
->> #define =A0SDHCI_CAN_VDD_180 =A0 =A00x04000000
->> #define =A0SDHCI_CAN_64BIT =A0 =A0 =A00x10000000
->> +#define =A0SDHCI_CAN_ASYN_INT =A00x20000000
->>
->> #define SDHCI_CAPABILITIES_1 =A00x44
->> #define =A0SDHCI_CAN_SDR50 =A0 =A0 =A00x00000001
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index bcb793e..2a53a94 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -173,6 +173,8 @@ struct mmc_host {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 /* DDR mode at 1.2V */
->> #define MMC_CAP_POWER_OFF_CARD =A0 =A0 =A0 =A0(1 << 13) =A0 =A0 =A0 =
-/* Can power off after boot */
->> #define MMC_CAP_BUS_WIDTH_TEST =A0 =A0 =A0 =A0(1 << 14) =A0 =A0 =A0 =
-/* CMD14/CMD19 bus width ok */
->> +#define MMC_CAP_CLOCK_GATE =A0 (1 << 15) =A0 =A0 =A0 /* V3 controll=
-er */
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 /* support clock gating */
->>
->> =A0 =A0 =A0 mmc_pm_flag_t =A0 =A0 =A0 =A0 =A0 pm_caps; =A0 =A0 =A0 =A0=
-/* supported pm features */
->>
->> --
->> 1.7.0.4
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
->
+You probably want __attribute__((packed)) on each structure here.  (Not
+sure if GCC even supports this #pragma).
+
+> +static DEVICE_ATTR(OperatingMode, S_IRUGO, show_OperatingMode, NULL);
+> +static struct attribute *vub300_attrs[] = {
+> +	&dev_attr_OperatingMode.attr,
+> +	NULL,
+> +};
+
+Suggest removing this unless it's actually useful. If it is useful, it
+should use all lower case for the name and it should be documented in
+Documentation/ABI.
+
+> +static void snoop_block_size_and_bus_width(struct vub300_mmc_host *vub300,
+> +					   u32 cmd_arg)
+
+This doesn't seem necessary.  The block size is available in the data
+request and the bus width is supplied to the set_ios() call.
+
+> +		if (6 == cmd->opcode) {
+> +			ResponseType = SDRT_1;
+> +			vub300->resp_len = 6;
+
+You don't need to check the opcode to determine the response format. See
+cmd->flags.
+
+> +
+> +static void vub300_enable_sdio_irq(struct mmc_host *mmc, int enable)
+> +{				/* NOT irq */
+> +	struct vub300_mmc_host *vub300 = mmc_priv(mmc);
+> +	if (!vub300->interface)
+> +		return;
+> +	kref_get(&vub300->kref);
+> +	if (enable) {
+> +		mutex_lock(&vub300->irq_mutex);
+> +		if (vub300->irqs_queued) {
+> +			vub300->irqs_queued -= 1;
+> +			mmc_signal_sdio_irq(vub300->mmc);
+
+This might signal a spurious interrupt as it's not checking if the
+interrupt is still asserted.  This should be avoided.
+
+David
+-- 
+David Vrabel, Senior Software Engineer, Drivers
+CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
+Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
+
+
+Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
