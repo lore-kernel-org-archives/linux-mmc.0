@@ -1,388 +1,545 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: [patch]: sdhci support emmc ddr50 mode [v4]
-Date: Sun, 9 Jan 2011 06:50:12 -0500
-Message-ID: <AANLkTi=EP1dJEEHa49N26s0Hfsq_fie69aqTtNAqbvzZ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001636c5b6a53e00f70499687438
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH] mmc, ARM: Add zboot from MMC support for SuperH Mobile ARM
+Date: Sun,  9 Jan 2011 21:39:32 +0900
+Message-ID: <1294576772-26935-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:36955 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751386Ab1AILuO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jan 2011 06:50:14 -0500
-Received: by fxm20 with SMTP id 20so18094734fxm.19
-        for <linux-mmc@vger.kernel.org>; Sun, 09 Jan 2011 03:50:12 -0800 (PST)
+Received: from kirsty.vergenet.net ([202.4.237.240]:35631 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751714Ab1AIMkF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jan 2011 07:40:05 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Yusuke Goda <yusuke.goda.sx@renesas.com>, Paul Mundt <lethal@lethal-sh.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>
 
---001636c5b6a53e00f70499687438
-Content-Type: text/plain; charset=ISO-8859-1
+This allows a ROM-able zImage to be written to MMC and
+for SuperH Mobile ARM to boot directly from the MMCIF
+hardware block.
 
->From d65af1e0a51bd4cc6b7a55b48df2bc23ccb84f2d Mon Sep 17 00:00:00 2001
-From: Zhangfei Gao <zhangfei.gao@marvell.com>
-Date: Sun, 9 Jan 2011 18:09:12 -0500
-Subject: [PATCH] mmc: sdhci support emmc ddr50 mode
+This is achieved by the MaskROM loading the first portion
+of the image into MERAM and then jumping to it. This portion
+contains loader code which copies the entire image to SDRAM
+and jumps to it. From there the zImage boot code proceeds
+as normal, uncompressing the image into its final location
+and then jumping to it.
 
-	1. spec sdhc 3.0 does not claim support 1.2v ddr mode
-	2. Call back function set_uhs is added, since some controller count
-on external pmic to provide io voltage
+Cc: Magnus Damm <magnus.damm@gmail.com>
+Signed-off-by: Simon Horman <horms@verge.net.au>
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+This patch depends on:
+* "ARM: 6514/1: mach-shmobile: Add zboot support for SuperH Mobile ARM"
+  which has been merged into the devel branch of Russell King's
+  linux-2.6-arm tree.
+* "mmc, sh: Move MMCIF_PROGRESS_* into sh_mmcif.h"
+  which has been merged into the common/mmcif branch of
+  Paul Mundt's sh-2.6 tree
+* "mmc, sh: Remove sh_mmcif_boot_slurp()"
+  which has been merged into the common/mmcif branch of
+  Paul Mundt's sh-2.6 tree
+
+v2:
+Addressed comments by Magnus Damm
+* Fix copyright in vrl4.c
+* Fix use of #define CONFIG_ZBOOT_ROM_MMCIF in mmcif-sh7372.c
+* Initialise LED GPIO lines in head-ap4evb.txt instead of mmcif-sh7372.c
+  as this is considered board-specific.
+
+v3:
+Addressed comments made in person by Magnus Damm
+* Move mmcif_loader to be earlier in the image and
+  reduce the number of blocks of boot program loaded by the MaskRom
+  from 40 to 8 accordingly.
+* Move LED GPIO initialisation into mmcif_progress_init
+  - This leaves the partner jet script unbloated
+Other
+* inline mmcif_update_progress so it is a static inline in a header file
+
+v4
+* Use htole16() and htole32() in v4rl.c to ensure
+  that the output is little endian
 ---
- drivers/mmc/core/core.c  |   17 ++++++++++++
- drivers/mmc/core/core.h  |    1 +
- drivers/mmc/core/mmc.c   |    5 +++
- drivers/mmc/host/sdhci.c |   62 +++++++++++++++++++++++++++++++++++++++++++--
- drivers/mmc/host/sdhci.h |   14 +++++++++-
- include/linux/mmc/host.h |    2 +
- 6 files changed, 97 insertions(+), 4 deletions(-)
+ Documentation/arm/SH-Mobile/Makefile              |    8 +
+ Documentation/arm/SH-Mobile/vrl4.c                |  169 +++++++++++++++++++++
+ Documentation/arm/SH-Mobile/zboot-rom-mmcif.txt   |   29 ++++
+ arch/arm/Kconfig                                  |   12 ++
+ arch/arm/boot/compressed/Makefile                 |   13 ++-
+ arch/arm/boot/compressed/head-shmobile.S          |   31 ++++
+ arch/arm/boot/compressed/mmcif-sh7372.c           |   87 +++++++++++
+ arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h |   29 ++++
+ arch/arm/mach-shmobile/include/mach/mmcif.h       |   16 ++
+ 9 files changed, 393 insertions(+), 1 deletions(-)
+ create mode 100644 Documentation/arm/SH-Mobile/Makefile
+ create mode 100644 Documentation/arm/SH-Mobile/vrl4.c
+ create mode 100644 Documentation/arm/SH-Mobile/zboot-rom-mmcif.txt
+ create mode 100644 arch/arm/boot/compressed/mmcif-sh7372.c
+ create mode 100644 arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h
+ create mode 100644 arch/arm/mach-shmobile/include/mach/mmcif.h
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index a8e89f3..964b44f 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -623,6 +623,23 @@ static inline void mmc_set_ios(struct mmc_host *host)
- 	host->ops->set_ios(host, ios);
- }
-
-+int mmc_set_uhs(struct mmc_host *host, unsigned int uhs_mode)
+diff --git a/Documentation/arm/SH-Mobile/Makefile b/Documentation/arm/SH-Mobile/Makefile
+new file mode 100644
+index 0000000..8771d83
+--- /dev/null
++++ b/Documentation/arm/SH-Mobile/Makefile
+@@ -0,0 +1,8 @@
++BIN := vrl4
++
++.PHONY: all
++all: $(BIN)
++
++.PHONY: clean
++clean:
++	rm -f *.o $(BIN)
+diff --git a/Documentation/arm/SH-Mobile/vrl4.c b/Documentation/arm/SH-Mobile/vrl4.c
+new file mode 100644
+index 0000000..e8a1913
+--- /dev/null
++++ b/Documentation/arm/SH-Mobile/vrl4.c
+@@ -0,0 +1,169 @@
++/*
++ * vrl4 format generator
++ *
++ * Copyright (C) 2010 Simon Horman
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ */
++
++/*
++ * usage: vrl4 < zImage > out
++ *	  dd if=out of=/dev/sdx bs=512 seek=1 # Write the image to sector 1
++ *
++ * Reads a zImage from stdin and writes a vrl4 image to stdout.
++ * In practice this means writing a padded vrl4 header to stdout followed
++ * by the zImage.
++ *
++ * The padding places the zImage at ALIGN bytes into the output.
++ * The vrl4 uses ALIGN + START_BASE as the start_address.
++ * This is where the mask ROM will jump to after verifying the header.
++ *
++ * The header sets copy_size to min(sizeof(zImage), MAX_BOOT_PROG_LEN) + ALIGN.
++ * That is, the mask ROM will load the padded header (ALIGN bytes)
++ * And then MAX_BOOT_PROG_LEN bytes of the image, or the entire image,
++ * whichever is smaller.
++ *
++ * The zImage is not modified in any way.
++ */
++
++#define _BSD_SOURCE
++#include <endian.h>
++#include <unistd.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <errno.h>
++
++struct hdr {
++	uint32_t magic1;
++	uint32_t reserved1;
++	uint32_t magic2;
++	uint32_t reserved2;
++	uint16_t copy_size;
++	uint16_t boot_options;
++	uint32_t reserved3;
++	uint32_t start_address;
++	uint32_t reserved4;
++	uint32_t reserved5;
++	char     reserved6[308];
++};
++
++#define DECLARE_HDR(h)					\
++	struct hdr (h) = {				\
++		.magic1 =	htole32(0xea000000),	\
++		.reserved1 =	htole32(0x56),		\
++		.magic2 =	htole32(0xe59ff008),	\
++		.reserved3 =	htole16(0x1) }
++
++/* Align to 512 bytes, the MMCIF sector size */
++#define ALIGN_BITS	9
++#define ALIGN		(1 << ALIGN_BITS)
++
++#define START_BASE	0xe55b0000
++
++/*
++ * With an alignment of 512 the header uses the first sector.
++ * There is a 128 sector (64kbyte) limit on the data loaded by the mask ROM.
++ * So there are 127 sectors left for the boot programme. But in practice
++ * Only a small portion of a zImage is needed, 16 sectors should be more
++ * than enough.
++ *
++ * Note that this sets how much of the zImage is copied by the mask ROM.
++ * The entire zImage is present after the header and is loaded
++ * by the code in the boot program (which is the first portion of the zImage).
++ */
++#define	MAX_BOOT_PROG_LEN (16 * 512)
++
++#define ROUND_UP(x)	((x + ALIGN - 1) & ~(ALIGN - 1))
++
++ssize_t do_read(int fd, void *buf, size_t count)
 +{
-+	int ret = -EINVAL;
++	size_t offset = 0;
++	ssize_t l;
 +
-+	if (host->ops->set_uhs) {
-+		ret = host->ops->set_uhs(host, uhs_mode);
-+
-+		/*
-+		 * According to sdhc standard spec v3.0
-+		 * 1.8v regulator should be stable withing 5ms
-+		 */
-+		mmc_delay(5);
++	while (offset < count) {
++		l = read(fd, buf + offset, count - offset);
++		if (!l)
++			break;
++		if (l < 0) {
++			if (errno == EAGAIN || errno == EWOULDBLOCK)
++				continue;
++			perror("read");
++			return -1;
++		}
++		offset += l;
 +	}
 +
-+	return ret;
++	return offset;
 +}
 +
- /*
-  * Control chip select pin on a host.
-  */
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 026c975..4b1ea7e 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -41,6 +41,7 @@ void mmc_set_bus_width(struct mmc_host *host,
-unsigned int width);
- void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
- 			   unsigned int ddr);
- u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
-+int mmc_set_uhs(struct mmc_host *host, unsigned int uhs_mode);
- void mmc_set_timing(struct mmc_host *host, unsigned int timing);
-
- static inline void mmc_delay(unsigned int ms)
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 86cac0d..4dac82f 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -529,6 +529,11 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 				ddr = MMC_1_2V_DDR_MODE;
- 	}
-
-+	if (ddr) {
-+		if (mmc_set_uhs(host, ddr))
-+			ddr = MMC_SDR_MODE;
-+	}
-+
- 	/*
- 	 * Activate wide bus and DDR (if supported).
- 	 */
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d5febe5..906f85b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -986,6 +986,22 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 	host->cmd = NULL;
- }
-
-+static void sdhci_set_ddr(struct sdhci_host *host, unsigned int ddr)
++ssize_t do_write(int fd, const void *buf, size_t count)
 +{
-+	u16 con;
++	size_t offset = 0;
++	ssize_t l;
 +
-+	if (ddr == MMC_SDR_MODE)
-+		return;
-+
-+	con = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	if (con & SDHCI_CTRL2_1_8V) {
-+		con &= ~SDHCI_CTRL2_UHS_MASK;
-+		if (ddr & MMC_1_8V_DDR_MODE)
-+			con |= SDHCI_CTRL2_DDR50;
-+		sdhci_writew(host, con, SDHCI_HOST_CONTROL2);
++	while (offset < count) {
++		l = write(fd, buf + offset, count - offset);
++		if (l < 0) {
++			if (errno == EAGAIN || errno == EWOULDBLOCK)
++				continue;
++			perror("write");
++			return -1;
++		}
++		offset += l;
 +	}
++
++	return offset;
 +}
 +
- static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	int div;
-@@ -1180,6 +1196,7 @@ static void sdhci_set_ios(struct mmc_host *mmc,
-struct mmc_ios *ios)
- 	}
-
- 	sdhci_set_clock(host, ios->clock);
-+	sdhci_set_ddr(host, ios->ddr);
-
- 	if (ios->power_mode == MMC_POWER_OFF)
- 		sdhci_set_power(host, -1);
-@@ -1237,6 +1254,35 @@ out:
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
-
-+static int sdhci_set_uhs(struct mmc_host *mmc, unsigned int uhs_mode)
++ssize_t write_zero(int fd, size_t len)
 +{
-+	struct sdhci_host *host;
-+	unsigned long flags;
-+	int ret = 0;
++	size_t i = len;
 +
-+	host = mmc_priv(mmc);
++	while (i--) {
++		const char x = 0;
++		if (do_write(fd, &x, 1) < 0)
++			return -1;
++	}
 +
-+	spin_lock_irqsave(&host->lock, flags);
-+	if (host->mmc->caps & MMC_CAP_1_8V_DDR) {
-+		u16 con;
-+
-+		con = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		con |= SDHCI_CTRL2_1_8V;
-+		sdhci_writew(host, con, SDHCI_HOST_CONTROL2);
-+	} else
-+		goto err;
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	if (host->ops->set_uhs)
-+		ret = host->ops->set_uhs(host, uhs_mode);
-+
-+	return ret;
-+err:
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	return  -EINVAL;
++	return len;
 +}
 +
- static int sdhci_get_ro(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host;
-@@ -1287,6 +1333,7 @@ out:
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.set_ios	= sdhci_set_ios,
-+	.set_uhs	= sdhci_set_uhs,
- 	.get_ro		= sdhci_get_ro,
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
- };
-@@ -1744,7 +1791,7 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
- int sdhci_add_host(struct sdhci_host *host)
- {
- 	struct mmc_host *mmc;
--	unsigned int caps, ocr_avail;
-+	unsigned int caps, caps_h = 0, ocr_avail;
- 	int ret;
-
- 	WARN_ON(host == NULL);
-@@ -1767,8 +1814,17 @@ int sdhci_add_host(struct sdhci_host *host)
- 			host->version);
- 	}
-
--	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
--		sdhci_readl(host, SDHCI_CAPABILITIES);
-+	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
-+		caps = host->caps;
-+	else {
-+		caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+		caps_h = sdhci_readl(host, SDHCI_CAPABILITIES_1);
++int main(void)
++{
++	DECLARE_HDR(hdr);
++	char boot_program[MAX_BOOT_PROG_LEN];
++	size_t aligned_hdr_len, alligned_prog_len;
++	ssize_t prog_len;
++
++	prog_len = do_read(0, boot_program, sizeof(boot_program));
++	if (prog_len <= 0)
++		return -1;
++
++	aligned_hdr_len = ROUND_UP(sizeof(hdr));
++	hdr.start_address = htole32(START_BASE + aligned_hdr_len);
++	alligned_prog_len = ROUND_UP(prog_len);
++	hdr.copy_size = htole16(aligned_hdr_len + alligned_prog_len);
++
++	if (do_write(1, &hdr, sizeof(hdr)) < 0)
++		return -1;
++	if (write_zero(1, aligned_hdr_len - sizeof(hdr)) < 0)
++		return -1;
++
++	if (do_write(1, boot_program, prog_len) < 0)
++		return 1;
++
++	/* Write out the rest of the kernel */
++	while (1) {
++		prog_len = do_read(0, boot_program, sizeof(boot_program));
++		if (prog_len < 0)
++			return 1;
++		if (prog_len == 0)
++			break;
++		if (do_write(1, boot_program, prog_len) < 0)
++			return 1;
 +	}
 +
-+	if (caps & SDHCI_CAN_VDD_180) {
-+		if (caps_h & SDHCI_CAN_SDR50)
-+			mmc->caps |= (MMC_CAP_1_8V_DDR);
-+	}
-
- 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
- 		host->flags |= SDHCI_USE_SDMA;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 6e0969e..f8e94b9 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -145,7 +145,14 @@
-
- #define SDHCI_ACMD12_ERR	0x3C
-
--/* 3E-3F reserved */
-+#define SDHCI_HOST_CONTROL2	0x3E
-+#define  SDHCI_CTRL2_UHS_MASK	0x0007
-+#define   SDHCI_CTRL2_SDR12	0x0000
-+#define   SDHCI_CTRL2_SDR25	0x0001
-+#define   SDHCI_CTRL2_SDR50	0x0002
-+#define   SDHCI_CTRL2_SDR104	0x0003
-+#define   SDHCI_CTRL2_DDR50	0x0004
-+#define  SDHCI_CTRL2_1_8V	0x0008
-
- #define SDHCI_CAPABILITIES	0x40
- #define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
-@@ -167,6 +174,9 @@
- #define  SDHCI_CAN_64BIT	0x10000000
-
- #define SDHCI_CAPABILITIES_1	0x44
-+#define  SDHCI_CAN_SDR50	0x00000001
-+#define  SDHCI_CAN_SDR104	0x00000002
-+#define  SDHCI_CAN_DDR50	0x00000004
-
- #define SDHCI_MAX_CURRENT	0x48
-
-@@ -222,6 +232,8 @@ struct sdhci_ops {
- 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
- 					     u8 power_mode);
- 	unsigned int    (*get_ro)(struct sdhci_host *host);
-+	unsigned int    (*set_uhs)(struct sdhci_host *host,
-+				unsigned int uhs_mode);
- };
-
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index bcb793e..07131b0 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -117,6 +117,8 @@ struct mmc_host_ops {
-
- 	/* optional callback for HC quirks */
- 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
++	return 0;
++}
+diff --git a/Documentation/arm/SH-Mobile/zboot-rom-mmcif.txt b/Documentation/arm/SH-Mobile/zboot-rom-mmcif.txt
+new file mode 100644
+index 0000000..efff8ae
+--- /dev/null
++++ b/Documentation/arm/SH-Mobile/zboot-rom-mmcif.txt
+@@ -0,0 +1,29 @@
++ROM-able zImage boot from MMC
++-----------------------------
 +
-+	int	(*set_uhs)(struct mmc_host *host, unsigned int uhs_mode);
- };
-
- struct mmc_card;
++An ROM-able zImage compiled with ZBOOT_ROM_MMCIF may be written to MMC and
++SuperH Mobile ARM will to boot directly from the MMCIF hardware block.
++
++This is achieved by the mask ROM loading the first portion of the image into
++MERAM and then jumping to it. This portion contains loader code which
++copies the entire image to SDRAM and jumps to it. From there the zImage
++boot code proceeds as normal, uncompressing the image into its final
++location and then jumping to it.
++
++This code has been tested on an AP4EB board using the developer 1A eMMC
++boot mode which is configured using the following jumper settings.
++The board used for testing required a patched mask ROM in order for
++this mode to function.
++
++   8 7 6 5 4 3 2 1
++   x|x|x|x|x| |x|
++S4 -+-+-+-+-+-+-+-
++    | | | | |x| |x on
++
++The zImage must be written to the MMC card at sector 1 (512 bytes) in
++vrl4 format. A utility vrl4 is supplied to accomplish this.
++
++e.g.
++	vrl4 < zImage | dd of=/dev/sdX bs=512 seek=1
++
++A dual-voltage MMC 4.0 card was used for testing.
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 81c71da..899c77c 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -1582,6 +1582,18 @@ config ZBOOT_ROM
+ 	  Say Y here if you intend to execute your compressed kernel image
+ 	  (zImage) directly from ROM or flash.  If unsure, say N.
+ 
++config ZBOOT_ROM_MMCIF
++	bool "Include MMCIF loader in zImage (EXPERIMENTAL)"
++	depends on ZBOOT_ROM && ARCH_SH7372 && EXPERIMENTAL
++	help
++	  Say Y here to include experimental MMCIF loading code in the
++	  ROM-able zImage. With this enabled it is possible to write the
++	  the ROM-able zImage kernel image to an MMC card and boot the
++	  kernel straight from the reset vector. At reset the processor
++	  Mask ROM will load the first part of the the ROM-able zImage
++	  which in turn loads the rest the kernel image to RAM using the
++	  MMCIF hardware block.
++
+ config CMDLINE
+ 	string "Default kernel command string"
+ 	default ""
+diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
+index 0a8f748..198007d 100644
+--- a/arch/arm/boot/compressed/Makefile
++++ b/arch/arm/boot/compressed/Makefile
+@@ -4,9 +4,20 @@
+ # create a compressed vmlinuz image from the original vmlinux
+ #
+ 
++OBJS		=
++
++# Ensure that mmcif loader code appears early in the image
++# to minimise that number of bocks that have to be read in
++# order to load it.
++ifeq ($(CONFIG_ZBOOT_ROM_MMCIF),y)
++ifeq ($(CONFIG_ARCH_SH7372),y)
++OBJS		+= mmcif-sh7372.o
++endif
++endif
++
+ AFLAGS_head.o += -DTEXT_OFFSET=$(TEXT_OFFSET)
+ HEAD	= head.o
+-OBJS	= misc.o decompress.o
++OBJS	+= misc.o decompress.o
+ FONTC	= $(srctree)/drivers/video/console/font_acorn_8x8.c
+ 
+ #
+diff --git a/arch/arm/boot/compressed/head-shmobile.S b/arch/arm/boot/compressed/head-shmobile.S
+index 30973b7..de83c5a 100644
+--- a/arch/arm/boot/compressed/head-shmobile.S
++++ b/arch/arm/boot/compressed/head-shmobile.S
+@@ -25,6 +25,37 @@
+ 	/* load board-specific initialization code */
+ #include <mach/zboot.h>
+ 
++#ifdef CONFIG_ZBOOT_ROM_MMCIF
++	/* Load image from MMC */
++	adr	sp, __tmp_stack
++	add	sp, sp, #128
++	ldr	r0, __image_start
++	ldr	r1, __image_end
++	subs	r1, r1, r0
++	ldr	r0, __load_base
++	mov	lr, pc
++	b	mmcif_loader
++
++	/* Jump to loaded code */
++	ldr	r0, __loaded
++	ldr	r1, __image_start
++	sub	r0, r0, r1
++	ldr	r1, __load_base
++	add	pc, r0, r1
++
++__image_start:
++	.long	_start
++__image_end:
++	.long	_got_end
++__load_base:
++	.long	CONFIG_MEMORY_START + 0x02000000 @ Load at 32Mb into SDRAM
++__loaded:
++	.long	__loaded
++	.align
++__tmp_stack:
++	.space	128
++#endif /* CONFIG_ZBOOT_ROM_MMCIF */
++
+ 	b	1f
+ __atags:@ tag #1
+ 	.long	12			@ tag->hdr.size = tag_size(tag_core);
+diff --git a/arch/arm/boot/compressed/mmcif-sh7372.c b/arch/arm/boot/compressed/mmcif-sh7372.c
+new file mode 100644
+index 0000000..c54df5c
+--- /dev/null
++++ b/arch/arm/boot/compressed/mmcif-sh7372.c
+@@ -0,0 +1,87 @@
++/*
++ * sh7372 MMCIF loader
++ *
++ * Copyright (C) 2010 Magnus Damm
++ * Copyright (C) 2010 Simon Horman
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ */
++
++#include <linux/mmc/sh_mmcif.h>
++#include <mach/mmcif.h>
++
++#define MMCIF_BASE      (void __iomem *)0xe6bd0000
++
++#define PORT84CR	0xe6050054
++#define PORT85CR	0xe6050055
++#define PORT86CR	0xe6050056
++#define PORT87CR	0xe6050057
++#define PORT88CR	0xe6050058
++#define PORT89CR	0xe6050059
++#define PORT90CR	0xe605005a
++#define PORT91CR	0xe605005b
++#define PORT92CR	0xe605005c
++#define PORT99CR	0xe6050063
++
++#define SMSTPCR3	0xe615013c
++
++/* SH7372 specific MMCIF loader
++ *
++ * loads the zImage from an MMC card starting from block 1.
++ *
++ * The image must be start with a vrl4 header and
++ * the zImage must start at offset 512 of the image. That is,
++ * at block 2 (=byte 1024) on the media
++ *
++ * Use the following line to write the vrl4 formated zImage
++ * to an MMC card
++ * # dd if=vrl4.out of=/dev/sdx bs=512 seek=1
++ */
++asmlinkage void mmcif_loader(unsigned char *buf, unsigned long len)
++{
++	mmcif_init_progress();
++	mmcif_update_progress(MMCIF_PROGRESS_ENTER);
++
++	/* Initialise MMC
++	 * registers: PORT84CR-PORT92CR
++	 *            (MMCD0_0-MMCD0_7,MMCCMD0 Control)
++	 * value: 0x04 - select function 4
++	 */
++	 __raw_writeb(0x04, PORT84CR);
++	 __raw_writeb(0x04, PORT85CR);
++	 __raw_writeb(0x04, PORT86CR);
++	 __raw_writeb(0x04, PORT87CR);
++	 __raw_writeb(0x04, PORT88CR);
++	 __raw_writeb(0x04, PORT89CR);
++	 __raw_writeb(0x04, PORT90CR);
++	 __raw_writeb(0x04, PORT91CR);
++	 __raw_writeb(0x04, PORT92CR);
++
++	/* Initialise MMC
++	 * registers: PORT99CR (MMCCLK0 Control)
++	 * value: 0x10 | 0x04 - enable output | select function 4
++	 */
++	__raw_writeb(0x14, PORT99CR);
++
++	/* Enable clock to MMC hardware block */
++	__raw_writel(__raw_readl(SMSTPCR3) & ~(1 << 12), SMSTPCR3);
++
++	mmcif_update_progress(MMCIF_PROGRESS_INIT);
++
++	/* setup MMCIF hardware */
++	sh_mmcif_boot_init(MMCIF_BASE);
++
++	mmcif_update_progress(MMCIF_PROGRESS_LOAD);
++
++	/* load kernel via MMCIF interface */
++	sh_mmcif_boot_do_read(MMCIF_BASE, 2, /* Kernel is at block 2 */
++			      (len + SH_MMCIF_BBS - 1) / SH_MMCIF_BBS, buf);
++
++
++	/* Disable clock to MMC hardware block */
++	__raw_writel(__raw_readl(SMSTPCR3) & (1 << 12), SMSTPCR3);
++
++	mmcif_update_progress(MMCIF_PROGRESS_DONE);
++}
+diff --git a/arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h b/arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h
+new file mode 100644
+index 0000000..c6b10ee
+--- /dev/null
++++ b/arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h
+@@ -0,0 +1,29 @@
++#ifndef MMCIF_AP4EB_H
++#define MMCIF_AP4EB_H
++
++#define PORT185CR      0xe60520b9
++#define PORT186CR      0xe60520ba
++#define PORT187CR      0xe60520bb
++#define PORT188CR      0xe60520bc
++
++#define PORTR191_160DR 0xe6056014
++
++static inline void mmcif_init_progress(void)
++{
++       /* Initialise LEDS1-4
++        * registers: PORT185CR-PORT188CR (LED1-LED4 Control)
++        * value:     0x10 - enable output
++        */
++       __raw_writeb(0x10, PORT185CR);
++       __raw_writeb(0x10, PORT186CR);
++       __raw_writeb(0x10, PORT187CR);
++       __raw_writeb(0x10, PORT188CR);
++}
++
++static inline void mmcif_update_progress(int n)
++{
++	__raw_writel((__raw_readl(PORTR191_160DR) & ~(0xf << 25)) |
++		     (1 << (25 + n)), PORTR191_160DR);
++}
++
++#endif /* MMCIF_AP4EB_H */
+diff --git a/arch/arm/mach-shmobile/include/mach/mmcif.h b/arch/arm/mach-shmobile/include/mach/mmcif.h
+new file mode 100644
+index 0000000..0812f1e
+--- /dev/null
++++ b/arch/arm/mach-shmobile/include/mach/mmcif.h
+@@ -0,0 +1,16 @@
++#ifndef MMCIF_H
++#define MMCIF_H
++
++/**************************************************
++ *
++ *		board specific settings
++ *
++ **************************************************/
++
++#ifdef CONFIG_MACH_AP4EVB
++#include "mach/mmcif-ap4eb.h"
++#else
++#error "unsupported board."
++#endif
++
++#endif /* MMCIF_H */
 -- 
-1.7.0.4
+1.7.2.3
 
---001636c5b6a53e00f70499687438
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0001-mmc-sdhci-support-emmc-ddr50-mode.patch"
-Content-Disposition: attachment;
-	filename="0001-mmc-sdhci-support-emmc-ddr50-mode.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_giqnld7s0
-
-RnJvbSBkNjVhZjFlMGE1MWJkNGNjNmI3YTU1YjQ4ZGYyYmMyM2NjYjg0ZjJkIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBaaGFuZ2ZlaSBHYW8gPHpoYW5nZmVpLmdhb0BtYXJ2ZWxsLmNv
-bT4KRGF0ZTogU3VuLCA5IEphbiAyMDExIDE4OjA5OjEyIC0wNTAwClN1YmplY3Q6IFtQQVRDSF0g
-bW1jOiBzZGhjaSBzdXBwb3J0IGVtbWMgZGRyNTAgbW9kZQoKCTEuIHNwZWMgc2RoYyAzLjAgZG9l
-cyBub3QgY2xhaW0gc3VwcG9ydCAxLjJ2IGRkciBtb2RlCgkyLiBDYWxsIGJhY2sgZnVuY3Rpb24g
-c2V0X3VocyBpcyBhZGRlZCwgc2luY2Ugc29tZSBjb250cm9sbGVyIGNvdW50IG9uIGV4dGVybmFs
-IHBtaWMgdG8gcHJvdmlkZSBpbyB2b2x0YWdlCgpTaWduZWQtb2ZmLWJ5OiBaaGFuZ2ZlaSBHYW8g
-PHpoYW5nZmVpLmdhb0BtYXJ2ZWxsLmNvbT4KLS0tCiBkcml2ZXJzL21tYy9jb3JlL2NvcmUuYyAg
-fCAgIDE3ICsrKysrKysrKysrKwogZHJpdmVycy9tbWMvY29yZS9jb3JlLmggIHwgICAgMSArCiBk
-cml2ZXJzL21tYy9jb3JlL21tYy5jICAgfCAgICA1ICsrKwogZHJpdmVycy9tbWMvaG9zdC9zZGhj
-aS5jIHwgICA2MiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrLS0K
-IGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaCB8ICAgMTQgKysrKysrKysrLQogaW5jbHVkZS9saW51
-eC9tbWMvaG9zdC5oIHwgICAgMiArCiA2IGZpbGVzIGNoYW5nZWQsIDk3IGluc2VydGlvbnMoKyks
-IDQgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMgYi9k
-cml2ZXJzL21tYy9jb3JlL2NvcmUuYwppbmRleCBhOGU4OWYzLi45NjRiNDRmIDEwMDY0NAotLS0g
-YS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYworKysgYi9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYwpA
-QCAtNjIzLDYgKzYyMywyMyBAQCBzdGF0aWMgaW5saW5lIHZvaWQgbW1jX3NldF9pb3Moc3RydWN0
-IG1tY19ob3N0ICpob3N0KQogCWhvc3QtPm9wcy0+c2V0X2lvcyhob3N0LCBpb3MpOwogfQogCitp
-bnQgbW1jX3NldF91aHMoc3RydWN0IG1tY19ob3N0ICpob3N0LCB1bnNpZ25lZCBpbnQgdWhzX21v
-ZGUpCit7CisJaW50IHJldCA9IC1FSU5WQUw7CisKKwlpZiAoaG9zdC0+b3BzLT5zZXRfdWhzKSB7
-CisJCXJldCA9IGhvc3QtPm9wcy0+c2V0X3Vocyhob3N0LCB1aHNfbW9kZSk7CisKKwkJLyoKKwkJ
-ICogQWNjb3JkaW5nIHRvIHNkaGMgc3RhbmRhcmQgc3BlYyB2My4wCisJCSAqIDEuOHYgcmVndWxh
-dG9yIHNob3VsZCBiZSBzdGFibGUgd2l0aGluZyA1bXMKKwkJICovCisJCW1tY19kZWxheSg1KTsK
-Kwl9CisKKwlyZXR1cm4gcmV0OworfQorCiAvKgogICogQ29udHJvbCBjaGlwIHNlbGVjdCBwaW4g
-b24gYSBob3N0LgogICovCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuaCBiL2Ry
-aXZlcnMvbW1jL2NvcmUvY29yZS5oCmluZGV4IDAyNmM5NzUuLjRiMWVhN2UgMTAwNjQ0Ci0tLSBh
-L2RyaXZlcnMvbW1jL2NvcmUvY29yZS5oCisrKyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5oCkBA
-IC00MSw2ICs0MSw3IEBAIHZvaWQgbW1jX3NldF9idXNfd2lkdGgoc3RydWN0IG1tY19ob3N0ICpo
-b3N0LCB1bnNpZ25lZCBpbnQgd2lkdGgpOwogdm9pZCBtbWNfc2V0X2J1c193aWR0aF9kZHIoc3Ry
-dWN0IG1tY19ob3N0ICpob3N0LCB1bnNpZ25lZCBpbnQgd2lkdGgsCiAJCQkgICB1bnNpZ25lZCBp
-bnQgZGRyKTsKIHUzMiBtbWNfc2VsZWN0X3ZvbHRhZ2Uoc3RydWN0IG1tY19ob3N0ICpob3N0LCB1
-MzIgb2NyKTsKK2ludCBtbWNfc2V0X3VocyhzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIHVuc2lnbmVk
-IGludCB1aHNfbW9kZSk7CiB2b2lkIG1tY19zZXRfdGltaW5nKHN0cnVjdCBtbWNfaG9zdCAqaG9z
-dCwgdW5zaWduZWQgaW50IHRpbWluZyk7CiAKIHN0YXRpYyBpbmxpbmUgdm9pZCBtbWNfZGVsYXko
-dW5zaWduZWQgaW50IG1zKQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYyBiL2Ry
-aXZlcnMvbW1jL2NvcmUvbW1jLmMKaW5kZXggODZjYWMwZC4uNGRhYzgyZiAxMDA2NDQKLS0tIGEv
-ZHJpdmVycy9tbWMvY29yZS9tbWMuYworKysgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jCkBAIC01
-MjksNiArNTI5LDExIEBAIHN0YXRpYyBpbnQgbW1jX2luaXRfY2FyZChzdHJ1Y3QgbW1jX2hvc3Qg
-Kmhvc3QsIHUzMiBvY3IsCiAJCQkJZGRyID0gTU1DXzFfMlZfRERSX01PREU7CiAJfQogCisJaWYg
-KGRkcikgeworCQlpZiAobW1jX3NldF91aHMoaG9zdCwgZGRyKSkKKwkJCWRkciA9IE1NQ19TRFJf
-TU9ERTsKKwl9CisKIAkvKgogCSAqIEFjdGl2YXRlIHdpZGUgYnVzIGFuZCBERFIgKGlmIHN1cHBv
-cnRlZCkuCiAJICovCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmMgYi9kcml2
-ZXJzL21tYy9ob3N0L3NkaGNpLmMKaW5kZXggZDVmZWJlNS4uOTA2Zjg1YiAxMDA2NDQKLS0tIGEv
-ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCisrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYwpA
-QCAtOTg2LDYgKzk4NiwyMiBAQCBzdGF0aWMgdm9pZCBzZGhjaV9maW5pc2hfY29tbWFuZChzdHJ1
-Y3Qgc2RoY2lfaG9zdCAqaG9zdCkKIAlob3N0LT5jbWQgPSBOVUxMOwogfQogCitzdGF0aWMgdm9p
-ZCBzZGhjaV9zZXRfZGRyKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1bnNpZ25lZCBpbnQgZGRy
-KQoreworCXUxNiBjb247CisKKwlpZiAoZGRyID09IE1NQ19TRFJfTU9ERSkKKwkJcmV0dXJuOwor
-CisJY29uID0gc2RoY2lfcmVhZHcoaG9zdCwgU0RIQ0lfSE9TVF9DT05UUk9MMik7CisJaWYgKGNv
-biAmIFNESENJX0NUUkwyXzFfOFYpIHsKKwkJY29uICY9IH5TREhDSV9DVFJMMl9VSFNfTUFTSzsK
-KwkJaWYgKGRkciAmIE1NQ18xXzhWX0REUl9NT0RFKQorCQkJY29uIHw9IFNESENJX0NUUkwyX0RE
-UjUwOworCQlzZGhjaV93cml0ZXcoaG9zdCwgY29uLCBTREhDSV9IT1NUX0NPTlRST0wyKTsKKwl9
-Cit9CisKIHN0YXRpYyB2b2lkIHNkaGNpX3NldF9jbG9jayhzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9z
-dCwgdW5zaWduZWQgaW50IGNsb2NrKQogewogCWludCBkaXY7CkBAIC0xMTgwLDYgKzExOTYsNyBA
-QCBzdGF0aWMgdm9pZCBzZGhjaV9zZXRfaW9zKHN0cnVjdCBtbWNfaG9zdCAqbW1jLCBzdHJ1Y3Qg
-bW1jX2lvcyAqaW9zKQogCX0KIAogCXNkaGNpX3NldF9jbG9jayhob3N0LCBpb3MtPmNsb2NrKTsK
-KwlzZGhjaV9zZXRfZGRyKGhvc3QsIGlvcy0+ZGRyKTsKIAogCWlmIChpb3MtPnBvd2VyX21vZGUg
-PT0gTU1DX1BPV0VSX09GRikKIAkJc2RoY2lfc2V0X3Bvd2VyKGhvc3QsIC0xKTsKQEAgLTEyMzcs
-NiArMTI1NCwzNSBAQCBvdXQ6CiAJc3Bpbl91bmxvY2tfaXJxcmVzdG9yZSgmaG9zdC0+bG9jaywg
-ZmxhZ3MpOwogfQogCitzdGF0aWMgaW50IHNkaGNpX3NldF91aHMoc3RydWN0IG1tY19ob3N0ICpt
-bWMsIHVuc2lnbmVkIGludCB1aHNfbW9kZSkKK3sKKwlzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdDsK
-Kwl1bnNpZ25lZCBsb25nIGZsYWdzOworCWludCByZXQgPSAwOworCisJaG9zdCA9IG1tY19wcml2
-KG1tYyk7CisKKwlzcGluX2xvY2tfaXJxc2F2ZSgmaG9zdC0+bG9jaywgZmxhZ3MpOworCWlmICho
-b3N0LT5tbWMtPmNhcHMgJiBNTUNfQ0FQXzFfOFZfRERSKSB7CisJCXUxNiBjb247CisKKwkJY29u
-ID0gc2RoY2lfcmVhZHcoaG9zdCwgU0RIQ0lfSE9TVF9DT05UUk9MMik7CisJCWNvbiB8PSBTREhD
-SV9DVFJMMl8xXzhWOworCQlzZGhjaV93cml0ZXcoaG9zdCwgY29uLCBTREhDSV9IT1NUX0NPTlRS
-T0wyKTsKKwl9IGVsc2UKKwkJZ290byBlcnI7CisKKwlzcGluX3VubG9ja19pcnFyZXN0b3JlKCZo
-b3N0LT5sb2NrLCBmbGFncyk7CisKKwlpZiAoaG9zdC0+b3BzLT5zZXRfdWhzKQorCQlyZXQgPSBo
-b3N0LT5vcHMtPnNldF91aHMoaG9zdCwgdWhzX21vZGUpOworCisJcmV0dXJuIHJldDsKK2VycjoK
-KwlzcGluX3VubG9ja19pcnFyZXN0b3JlKCZob3N0LT5sb2NrLCBmbGFncyk7CisJcmV0dXJuICAt
-RUlOVkFMOworfQorCiBzdGF0aWMgaW50IHNkaGNpX2dldF9ybyhzdHJ1Y3QgbW1jX2hvc3QgKm1t
-YykKIHsKIAlzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdDsKQEAgLTEyODcsNiArMTMzMyw3IEBAIG91
-dDoKIHN0YXRpYyBjb25zdCBzdHJ1Y3QgbW1jX2hvc3Rfb3BzIHNkaGNpX29wcyA9IHsKIAkucmVx
-dWVzdAk9IHNkaGNpX3JlcXVlc3QsCiAJLnNldF9pb3MJPSBzZGhjaV9zZXRfaW9zLAorCS5zZXRf
-dWhzCT0gc2RoY2lfc2V0X3VocywKIAkuZ2V0X3JvCQk9IHNkaGNpX2dldF9ybywKIAkuZW5hYmxl
-X3NkaW9faXJxID0gc2RoY2lfZW5hYmxlX3NkaW9faXJxLAogfTsKQEAgLTE3NDQsNyArMTc5MSw3
-IEBAIEVYUE9SVF9TWU1CT0xfR1BMKHNkaGNpX2FsbG9jX2hvc3QpOwogaW50IHNkaGNpX2FkZF9o
-b3N0KHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0KQogewogCXN0cnVjdCBtbWNfaG9zdCAqbW1jOwot
-CXVuc2lnbmVkIGludCBjYXBzLCBvY3JfYXZhaWw7CisJdW5zaWduZWQgaW50IGNhcHMsIGNhcHNf
-aCA9IDAsIG9jcl9hdmFpbDsKIAlpbnQgcmV0OwogCiAJV0FSTl9PTihob3N0ID09IE5VTEwpOwpA
-QCAtMTc2Nyw4ICsxODE0LDE3IEBAIGludCBzZGhjaV9hZGRfaG9zdChzdHJ1Y3Qgc2RoY2lfaG9z
-dCAqaG9zdCkKIAkJCWhvc3QtPnZlcnNpb24pOwogCX0KIAotCWNhcHMgPSAoaG9zdC0+cXVpcmtz
-ICYgU0RIQ0lfUVVJUktfTUlTU0lOR19DQVBTKSA/IGhvc3QtPmNhcHMgOgotCQlzZGhjaV9yZWFk
-bChob3N0LCBTREhDSV9DQVBBQklMSVRJRVMpOworCWlmIChob3N0LT5xdWlya3MgJiBTREhDSV9R
-VUlSS19NSVNTSU5HX0NBUFMpCisJCWNhcHMgPSBob3N0LT5jYXBzOworCWVsc2UgeworCQljYXBz
-ID0gc2RoY2lfcmVhZGwoaG9zdCwgU0RIQ0lfQ0FQQUJJTElUSUVTKTsKKwkJY2Fwc19oID0gc2Ro
-Y2lfcmVhZGwoaG9zdCwgU0RIQ0lfQ0FQQUJJTElUSUVTXzEpOworCX0KKworCWlmIChjYXBzICYg
-U0RIQ0lfQ0FOX1ZERF8xODApIHsKKwkJaWYgKGNhcHNfaCAmIFNESENJX0NBTl9TRFI1MCkKKwkJ
-CW1tYy0+Y2FwcyB8PSAoTU1DX0NBUF8xXzhWX0REUik7CisJfQogCiAJaWYgKGhvc3QtPnF1aXJr
-cyAmIFNESENJX1FVSVJLX0ZPUkNFX0RNQSkKIAkJaG9zdC0+ZmxhZ3MgfD0gU0RIQ0lfVVNFX1NE
-TUE7CmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmggYi9kcml2ZXJzL21tYy9o
-b3N0L3NkaGNpLmgKaW5kZXggNmUwOTY5ZS4uZjhlOTRiOSAxMDA2NDQKLS0tIGEvZHJpdmVycy9t
-bWMvaG9zdC9zZGhjaS5oCisrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaApAQCAtMTQ1LDcg
-KzE0NSwxNCBAQAogCiAjZGVmaW5lIFNESENJX0FDTUQxMl9FUlIJMHgzQwogCi0vKiAzRS0zRiBy
-ZXNlcnZlZCAqLworI2RlZmluZSBTREhDSV9IT1NUX0NPTlRST0wyCTB4M0UKKyNkZWZpbmUgIFNE
-SENJX0NUUkwyX1VIU19NQVNLCTB4MDAwNworI2RlZmluZSAgIFNESENJX0NUUkwyX1NEUjEyCTB4
-MDAwMAorI2RlZmluZSAgIFNESENJX0NUUkwyX1NEUjI1CTB4MDAwMQorI2RlZmluZSAgIFNESENJ
-X0NUUkwyX1NEUjUwCTB4MDAwMgorI2RlZmluZSAgIFNESENJX0NUUkwyX1NEUjEwNAkweDAwMDMK
-KyNkZWZpbmUgICBTREhDSV9DVFJMMl9ERFI1MAkweDAwMDQKKyNkZWZpbmUgIFNESENJX0NUUkwy
-XzFfOFYJMHgwMDA4CiAKICNkZWZpbmUgU0RIQ0lfQ0FQQUJJTElUSUVTCTB4NDAKICNkZWZpbmUg
-IFNESENJX1RJTUVPVVRfQ0xLX01BU0sJMHgwMDAwMDAzRgpAQCAtMTY3LDYgKzE3NCw5IEBACiAj
-ZGVmaW5lICBTREhDSV9DQU5fNjRCSVQJMHgxMDAwMDAwMAogCiAjZGVmaW5lIFNESENJX0NBUEFC
-SUxJVElFU18xCTB4NDQKKyNkZWZpbmUgIFNESENJX0NBTl9TRFI1MAkweDAwMDAwMDAxCisjZGVm
-aW5lICBTREhDSV9DQU5fU0RSMTA0CTB4MDAwMDAwMDIKKyNkZWZpbmUgIFNESENJX0NBTl9ERFI1
-MAkweDAwMDAwMDA0CiAKICNkZWZpbmUgU0RIQ0lfTUFYX0NVUlJFTlQJMHg0OAogCkBAIC0yMjIs
-NiArMjMyLDggQEAgc3RydWN0IHNkaGNpX29wcyB7CiAJdm9pZCAoKnBsYXRmb3JtX3NlbmRfaW5p
-dF83NF9jbG9ja3MpKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LAogCQkJCQkgICAgIHU4IHBvd2Vy
-X21vZGUpOwogCXVuc2lnbmVkIGludCAgICAoKmdldF9ybykoc3RydWN0IHNkaGNpX2hvc3QgKmhv
-c3QpOworCXVuc2lnbmVkIGludCAgICAoKnNldF91aHMpKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0
-LAorCQkJCXVuc2lnbmVkIGludCB1aHNfbW9kZSk7CiB9OwogCiAjaWZkZWYgQ09ORklHX01NQ19T
-REhDSV9JT19BQ0NFU1NPUlMKZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvbW1jL2hvc3QuaCBi
-L2luY2x1ZGUvbGludXgvbW1jL2hvc3QuaAppbmRleCBiY2I3OTNlLi4wNzEzMWIwIDEwMDY0NAot
-LS0gYS9pbmNsdWRlL2xpbnV4L21tYy9ob3N0LmgKKysrIGIvaW5jbHVkZS9saW51eC9tbWMvaG9z
-dC5oCkBAIC0xMTcsNiArMTE3LDggQEAgc3RydWN0IG1tY19ob3N0X29wcyB7CiAKIAkvKiBvcHRp
-b25hbCBjYWxsYmFjayBmb3IgSEMgcXVpcmtzICovCiAJdm9pZAkoKmluaXRfY2FyZCkoc3RydWN0
-IG1tY19ob3N0ICpob3N0LCBzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpOworCisJaW50CSgqc2V0X3Vo
-cykoc3RydWN0IG1tY19ob3N0ICpob3N0LCB1bnNpZ25lZCBpbnQgdWhzX21vZGUpOwogfTsKIAog
-c3RydWN0IG1tY19jYXJkOwotLSAKMS43LjAuNAoK
---001636c5b6a53e00f70499687438--
