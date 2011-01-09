@@ -1,208 +1,88 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Fwd: [PATCH] mach-mmp: Fix Kconfig to allow correct PXA Selections
-Date: Sat, 8 Jan 2011 08:45:15 -0800
-Message-ID: <82004822-1E65-41BA-B6D2-875D634AAE90@marvell.com>
-References: <4B37A311-C664-4C7B-A8F0-0B24A3E3F3B8@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH] ARM: mach-shmobile: mackerel: Add zboot MMCIF support
+Date: Sun,  9 Jan 2011 18:30:15 +0900
+Message-ID: <1294565415-20901-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:34014 "HELO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751371Ab1AHQqt convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 8 Jan 2011 11:46:49 -0500
-Content-Language: en-US
+Received: from kirsty.vergenet.net ([202.4.237.240]:36548 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750908Ab1AIJai (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jan 2011 04:30:38 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Mark Brown <markb@marvell.com>
+To: linux-mmc@vger.kernel.org, vger.kernel.org@vergenet.net, linux-arm-kernel@lists.arm.linux.org.uk
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Yusuke Goda <yusuke.goda.sx@renesas.com>, Kuninori Morimoto <morimoto.kuninori@renesas.com>, Paul Mundt <lethal@lethal-sh.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
+This patch wires up LED debugging for the MMCIF boot
+on the mackerel, which is all that is required to get MMCIF
+boot functioning.
 
-Forwarding to mmc-list for completeness.  Already post to linux-arm-kernel.
+Cc: Magnus Damm <magnus.damm@gmail.com>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Signed-off-by: Simon Horman <horms@verge.net.au>
+---
+ .../mach-shmobile/include/mach/mmcif-mackerel.h    |   39 ++++++++++++++++++++
+ arch/arm/mach-shmobile/include/mach/mmcif.h        |    2 +
+ 2 files changed, 41 insertions(+), 0 deletions(-)
+ create mode 100644 arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
 
-Begin forwarded message:
-
-> From: Philip Rakity <prakity@marvell.com>
-> Date: January 7, 2011 9:28:04 PM PST
-> To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Haojian Zhuang <haojian.zhuang@gmail.com>
-> Cc: Mark Brown <markb@marvell.com>, Arnd Bergmann <arnd@arndb.de>
-> Subject: [PATCH] mach-mmp: Fix Kconfig to allow correct PXA Selections 
-> 
-> 
-> The following items are fixed:
-> 
-> a) inconsistent behavior when board is selected and if
-> menu item is reselected board has disappeard
-> 
-> b) Ability to select options that will not build
-> 	MMP2 and say PXA168
-> 
-> The behavior maps what is done by the mach-omap
-> (thanks to Anrd Bergmann for his help and suggestions)
-> 
-> Mach-MMP is (as now) the sytem type.  Once selected
-> the user can then select the SoC on the board and
-> only the boards that support that SoC are shown.
-> 
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> ---
-> arch/arm/mach-mmp/Kconfig |   96 ++++++++++++++++++++++-----------------------
-> 1 files changed, 47 insertions(+), 49 deletions(-)
-> 
-> diff --git a/arch/arm/mach-mmp/Kconfig b/arch/arm/mach-mmp/Kconfig
-> index 67793a6..4739d27 100644
-> --- a/arch/arm/mach-mmp/Kconfig
-> +++ b/arch/arm/mach-mmp/Kconfig
-> @@ -1,99 +1,97 @@
-> if ARCH_MMP
-> 
-> -menu "Marvell PXA168/910/MMP2 Implmentations"
-> +menu "Marvell PXA168/PXA910/MMP2 Specific Features"
-> +
-> +choice
-> +	prompt "SoC (System on Chip)"
-> +	help
-> +	  Type of System on Chip (SoC) used
-> +
-> +config CPU_PXA168
-> +	bool "PXA168 Based System"
-> +	select CPU_MOHAWK
-> +	help
-> +	  Say 'Y' here if System has a Marvell PXA168 SoC
-> +
-> +config CPU_PXA910
-> +	bool "PXA910 Based System"
-> +	select CPU_MOHAWK
-> +	help
-> +	  Say 'Y' here if System has a Marvell PXA910 SoC
-> +
-> +config CPU_MMP2
-> +	bool "MMP2 Based System"
-> +	select CPU_PJ4
-> +	help
-> +	  Say 'Y' here if System has a Marvell MMP2 SoC
-> +
-> +endchoice
-> +
-> +comment "Development Board"
-> 
-> config MACH_ASPENITE
-> 	bool "Marvell's PXA168 Aspenite Development Board"
-> -	select CPU_PXA168
-> +	depends on CPU_PXA168
-> 	help
-> 	  Say 'Y' here if you want to support the Marvell PXA168-based
-> 	  Aspenite Development Board.
-> 
-> config MACH_ZYLONITE2
-> 	bool "Marvell's PXA168 Zylonite2 Development Board"
-> -	select CPU_PXA168
-> +	depends on CPU_PXA168
-> 	help
-> 	  Say 'Y' here if you want to support the Marvell PXA168-based
-> 	  Zylonite2 Development Board.
-> 
-> config MACH_AVENGERS_LITE
-> 	bool "Marvell's PXA168 Avengers Lite Development Board"
-> -	select CPU_PXA168
-> +	depends on CPU_PXA168
-> 	help
-> 	  Say 'Y' here if you want to support the Marvell PXA168-based
-> 	  Avengers Lite Development Board.
-> 
-> +config MACH_TETON_BGA
-> +	bool "Marvell's PXA168 Teton BGA Development Board"
-> +	depends on CPU_PXA168
-> +	help
-> +	  Say 'Y' here if you want to support the Marvell PXA168-based
-> +	  Teton BGA Development Board.
-> +
-> config MACH_TAVOREVB
-> 	bool "Marvell's PXA910 TavorEVB Development Board"
-> -	select CPU_PXA910
-> +	depends on CPU_PXA910
-> 	help
-> 	  Say 'Y' here if you want to support the Marvell PXA910-based
-> 	  TavorEVB Development Board.
-> 
-> config MACH_TTC_DKB
-> -	bool "Marvell's PXA910 TavorEVB Development Board"
-> -	select CPU_PXA910
-> +	bool "Marvell's PXA910 TTC DKB Development Board"
-> +	depends on CPU_PXA910
-> 	help
-> 	  Say 'Y' here if you want to support the Marvell PXA910-based
-> 	  TTC_DKB Development Board.
-> 
-> config MACH_BROWNSTONE
-> 	bool "Marvell's Brownstone Development Platform"
-> -	depends on !CPU_MOHAWK
-> -	select CPU_MMP2
-> +	depends on CPU_MMP2
-> 	help
-> 	  Say 'Y' here if you want to support the Marvell MMP2-based
-> -	  Brown Development Platform.
-> -	  MMP2-based board can't be co-existed with PXA168-based &
-> -	  PXA910-based development board. Since MMP2 is compatible to
-> -	  ARMv7 architecture.
-> +	  Brownstone Development Board.
-> 
-> config MACH_FLINT
-> 	bool "Marvell's Flint Development Platform"
-> -	depends on !CPU_MOHAWK
-> -	select CPU_MMP2
-> +	depends on CPU_MMP2
-> 	help
-> 	  Say 'Y' here if you want to support the Marvell MMP2-based
-> -	  Flint Development Platform.
-> -	  MMP2-based board can't be co-existed with PXA168-based &
-> -	  PXA910-based development board. Since MMP2 is compatible to
-> -	  ARMv7 architecture.
-> +	  Flint Development Board.
-> 
-> config MACH_MARVELL_JASPER
-> 	bool "Marvell's Jasper Development Platform"
-> -	depends on !CPU_MOHAWK
-> -	select CPU_MMP2
-> +	depends on CPU_MMP2
-> 	help
-> 	  Say 'Y' here if you want to support the Marvell MMP2-base
-> -	  Jasper Development Platform.
-> -	  MMP2-based board can't be co-existed with PXA168-based &
-> -	  PXA910-based development board. Since MMP2 is compatible to
-> -	  ARMv7 architecture.
-> -
-> -config MACH_TETON_BGA
-> -	bool "Marvell's PXA168 Teton BGA Development Board"
-> -	select CPU_PXA168
-> -	help
-> -	  Say 'Y' here if you want to support the Marvell PXA168-based
-> -	  Teton BGA Development Board.
-> +	  Jasper Development Board.
-> 
-> endmenu
-> 
-> -config CPU_PXA168
-> -	bool
-> -	select CPU_MOHAWK
-> -	help
-> -	  Select code specific to PXA168
-> -
-> -config CPU_PXA910
-> -	bool
-> -	select CPU_MOHAWK
-> -	help
-> -	  Select code specific to PXA910
-> -
-> -config CPU_MMP2
-> -	bool
-> -	select CPU_PJ4
-> -	help
-> -	  Select code specific to MMP2. MMP2 is ARMv7 compatible.
-> endif
-> -- 
-> 1.7.0.4
-> 
-> 
+diff --git a/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h b/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
+new file mode 100644
+index 0000000..e07fb3f
+--- /dev/null
++++ b/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
+@@ -0,0 +1,39 @@
++#ifndef MMCIF_MACKEREL_H
++#define MMCIF_MACKEREL_H
++
++#define PORT0CR      0xe6051000
++#define PORT1CR      0xe6051001
++#define PORT2CR      0xe6051002
++#define PORT159CR    0xe605009f
++
++#define PORTR031_000DR 0xe6055000
++#define PORTL159_128DR 0xe6054010
++
++static inline void mmcif_init_progress(void)
++{
++       /* Initialise LEDS0-3
++        * registers: PORT0CR-PORT2CR,PORT159CR (LED0-LED3 Control)
++        * value:     0x10 - enable output
++        */
++       __raw_writeb(0x10, PORT0CR);
++       __raw_writeb(0x10, PORT1CR);
++       __raw_writeb(0x10, PORT2CR);
++       __raw_writeb(0x10, PORT159CR);
++}
++
++static inline void mmcif_update_progress(int n)
++{
++	unsigned a = 0, b = 0;
++
++	if (n < 3)
++		a = 1 << n;
++	else
++		b = 1 << 31;
++
++	__raw_writel((__raw_readl(PORTR031_000DR) & ~0x7) | a,
++		     PORTR031_000DR);
++	__raw_writel((__raw_readl(PORTL159_128DR) & ~(1 << 31)) | b,
++		     PORTL159_128DR);
++}
++
++#endif /* MMCIF_MACKEREL_H */
+diff --git a/arch/arm/mach-shmobile/include/mach/mmcif.h b/arch/arm/mach-shmobile/include/mach/mmcif.h
+index 0812f1e..f4dc327 100644
+--- a/arch/arm/mach-shmobile/include/mach/mmcif.h
++++ b/arch/arm/mach-shmobile/include/mach/mmcif.h
+@@ -9,6 +9,8 @@
+ 
+ #ifdef CONFIG_MACH_AP4EVB
+ #include "mach/mmcif-ap4eb.h"
++#elif CONFIG_MACH_MACKEREL
++#include "mach/mmcif-mackerel.h"
+ #else
+ #error "unsupported board."
+ #endif
+-- 
+1.7.2.3
 
