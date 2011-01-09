@@ -1,32 +1,87 @@
-From: =?UTF-8?Q?Pawe=C5=82?= Moll <mail@pawelmoll.com>
-Subject: Re: [PATCH] mmc, ARM: Add zboot from MMC support for SuperH Mobile ARM
-Date: Sun, 09 Jan 2011 16:12:28 +0000
-Message-ID: <1294589548.8897.1.camel@rojo>
-References: <20110109124928.GC25591@verge.net.au>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20110109124928.GC25591@verge.net.au>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+From: Pierre Tardy <tardyp@gmail.com>
+Subject: [PATCH 2/3] mmc: add MMC_QUIRK_BROKEN_CLK_GATING
+Date: Sun,  9 Jan 2011 17:26:19 +0100
+Message-ID: <4663ceeebbd267abb11515570ac17702a6a482f4.1294588491.git.tardyp@gmail.com>
+References: <cover.1294588491.git.tardyp@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:54866 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750942Ab1AIQa2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jan 2011 11:30:28 -0500
+In-Reply-To: <cover.1294588491.git.tardyp@gmail.com>
+In-Reply-To: <cover.1294588491.git.tardyp@gmail.com>
+References: <cover.1294588491.git.tardyp@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Pierre Tardy <tardyp@gmail.com>
 
-SGksCgo+ICBEb2N1bWVudGF0aW9uL2FybS9TSC1Nb2JpbGUvTWFrZWZpbGUgICAgICAgICAgICAg
-IHwgICAgOCArCj4gIERvY3VtZW50YXRpb24vYXJtL1NILU1vYmlsZS92cmw0LmMgICAgICAgICAg
-ICAgICAgfCAgMTY5ICsrKysrKysrKysrKysrKysrKysrKwoKSG93IGFib3V0IHB1dHRpbmcgdGhv
-c2UgdHdvIGludG8gInRvb2xzIiAoaW4gcGFydGljdWxhciAidG9vbHMvYXJtIikKaW5zdGVhZCBv
-ZiAiRG9jdW1lbnRhdGlvbiI/CgpKdXN0IGEgdGhvdWdodC4uLiA7LSkKCkNoZWVycyEKClBhd2XF
-ggoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4
-LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFk
-Lm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LWFy
-bS1rZXJuZWwK
+Some sdio card are not following sdio standard, and does not work
+when the sdio bus's clock is gated
+
+To keep functionnality for all legacy driver, we turn this quirk on
+for every sdio card.
+Drivers needs to disable the quirk manually when someone verified that their
+supported card works with clock gating.
+
+Signed-off-by: Pierre Tardy <tardyp@gmail.com>
+---
+ drivers/mmc/core/host.c   |    5 +----
+ drivers/mmc/core/quirks.c |   11 +++++++++++
+ include/linux/mmc/card.h  |    1 +
+ 3 files changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index b3ac6c5..461e6a1 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -160,10 +160,7 @@ static bool mmc_host_may_gate_card(struct mmc_card *card)
+ 	 * gate the clock, because there is somebody out there that may still
+ 	 * be using it.
+ 	 */
+-	if (mmc_card_sdio(card))
+-		return false;
+-
+-	return true;
++	return !(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING);
+ }
+ 
+ /**
+diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
+index d8a5fec..fe467c8 100644
+--- a/drivers/mmc/core/quirks.c
++++ b/drivers/mmc/core/quirks.c
+@@ -32,7 +32,18 @@ static void add_quirk(struct mmc_card *card, int data)
+ 	card->quirks |= data;
+ }
+ 
++/*
++ * This hook just adds a quirk for all sdio devices
++ */
++static void add_quirk_for_sdio_devices(struct mmc_card *card, int data)
++{
++	if (mmc_card_sdio(card))
++		card->quirks |= data;
++}
++
+ static const struct mmc_fixup mmc_fixup_methods[] = {
++	{ SDIO_ANY_ID, SDIO_ANY_ID,
++		add_quirk_for_sdio_devices, MMC_QUIRK_BROKEN_CLK_GATING }
+ 	{ 0 }
+ };
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index a498d53..3fe9db0 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -121,6 +121,7 @@ struct mmc_card {
+ 						/* for byte mode */
+ #define MMC_QUIRK_NONSTD_SDIO	(1<<2)		/* non-standard SDIO card attached */
+ 						/* (missing CIA registers) */
++#define MMC_QUIRK_BROKEN_CLK_GATING (1<<3)	/* clock gating the sdio bus will make card fail */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+  	unsigned int		erase_shift;	/* if erase unit is power 2 */
+-- 
+1.7.1
+
