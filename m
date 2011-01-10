@@ -1,46 +1,70 @@
-From: Pierre Tardy <tardyp@gmail.com>
-Subject: Re: [PATCH 1/3] mmc: add per device quirk placeholder
-Date: Mon, 10 Jan 2011 18:02:02 +0100
-Message-ID: <AANLkTinKp6-eR9zK4pddqnBTKoawiaoq4zfEUKk2Qr=u@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH 2/3] mmc: add MMC_QUIRK_BROKEN_CLK_GATING
+Date: Mon, 10 Jan 2011 09:18:51 -0800
+Message-ID: <B4C48E6D-6EEA-4FC4-9FA5-35818F230E0C@marvell.com>
 References: <cover.1294588491.git.tardyp@gmail.com>
-	<6191610532f25d7cda435781ce9b83bfdb677b5a.1294588491.git.tardyp@gmail.com>
-	<77BC89B5-DFC2-4908-8875-59BCD00DC10F@marvell.com>
+ <4663ceeebbd267abb11515570ac17702a6a482f4.1294588491.git.tardyp@gmail.com>
+ <ADE0108D-6DF1-4230-B7FB-39D7AC7F63D1@marvell.com>
+ <AANLkTimSV07Kdk_xq3nhGa26-SF_u3gxCM+CUhmRJrib@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:59430 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753828Ab1AJRCD convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2011 12:02:03 -0500
-In-Reply-To: <77BC89B5-DFC2-4908-8875-59BCD00DC10F@marvell.com>
+Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:39685 "HELO
+	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1754467Ab1AJRS4 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Jan 2011 12:18:56 -0500
+In-Reply-To: <AANLkTimSV07Kdk_xq3nhGa26-SF_u3gxCM+CUhmRJrib@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Pierre Tardy <pierre.tardy@intel.com>
+To: Pierre Tardy <tardyp@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
->> +
->> + =A0 =A0 for (f =3D mmc_fixup_methods; f->hook; f++) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 if ((f->vendor =3D=3D card->cis.vendor
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|| f->vendor =3D=3D (u16) SDIO_=
-ANY_ID) &&
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (f->device =3D=3D card->cis.device
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|| f->device =3D=3D (u16) SDIO_=
-ANY_ID)) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_dbg(&card->dev, "calli=
-ng %pF\n", f->hook);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 f->hook(card, f->data);
->
->
-> hook is not a very nice name --- =A0something more meaningful: =A0ven=
-dor_fixup =A0?
-I just copied the pci/quirks.c way of doing. I think is more coherent
-to keep is this way, this name will forever appear only in 4 lines
-inside the kernel, so I dont care that much.
-I'll change that if you really do care. :-)
 
-Waiting for a few more comments to do all in a row.
+On Jan 10, 2011, at 8:57 AM, Pierre Tardy wrote:
 
-Thanks,
---=20
-Pierre
+>> 
+>> 
+>> Since the code is not called that often could you change the above code to:
+>> 
+>>>       if (mmc_card_sdio(card))
+>>>               return !(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING);
+> Well, The comment in the
+>>        return true;
+>> 
+>> more obvious that quirk only applies to sdio.
+> 
+> Disagree.Actually, before this code, there is a pretty long comment,
+> that explain that this quirk only apply to sdio.
+> 
+> If we figure out later that some sdcard does not like clock gating
+> either, we could add this quirk to those bad sdcard as well.
+
+I am okay with this -- if you resubmit -- just indicate the quirk is more generic than just sdio
+
+> 
+> Here is the whole resulting function. I think this is clear enough:
+> 
+> static bool mmc_host_may_gate_card(struct mmc_card *card)
+> {
+> 
+>        /* If there is no card we may gate it */
+>        if (!card)
+>               return true;
+>        /*
+>        * Don't gate SDIO cards! These need to be clocked at all times
+>        * since they may be independent systems generating interrupts
+>        * and other events. The clock requests counter from the core will
+>        * go down to zero since the core does not need it, but we will not
+>        * gate the clock, because there is somebody out there that may still
+>        * be using it.
+>        */
+>        return !(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING);
+> 
+> 
+> }
+> Pierre
+
+
