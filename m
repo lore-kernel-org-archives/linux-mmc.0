@@ -1,266 +1,43 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [patch]: sdhci support emmc ddr50 mode [v4]
-Date: Mon, 10 Jan 2011 04:19:41 -0500
-Message-ID: <AANLkTim94Pa4CrCHB7-Fr4x0n_vTSRUZR_1OYe93J++Z@mail.gmail.com>
-References: <AANLkTi=EP1dJEEHa49N26s0Hfsq_fie69aqTtNAqbvzZ@mail.gmail.com>
+From: Pawel Moll <mail@pawelmoll.com>
+Subject: Re: [PATCH] mmc, ARM: Add zboot from MMC support for SuperH Mobile
+ ARM
+Date: Mon, 10 Jan 2011 10:10:19 +0000
+Message-ID: <c1e9db480d82d1804930ddcc7bb0db02@rootnode.net>
+References: <20110109124928.GC25591@verge.net.au>
+ <1294589548.8897.1.camel@rojo> <20110109225042.GB29257@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:45577 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752234Ab1AJJTn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2011 04:19:43 -0500
-Received: by fxm20 with SMTP id 20so18625836fxm.19
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Jan 2011 01:19:42 -0800 (PST)
-In-Reply-To: <AANLkTi=EP1dJEEHa49N26s0Hfsq_fie69aqTtNAqbvzZ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20110109225042.GB29257@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>
 
-Update with kernel warn when set_uhs fail.
+ On Mon, 10 Jan 2011 07:50:42 +0900, Simon Horman <horms@verge.net.au>=20
+ wrote:
+>> >  Documentation/arm/SH-Mobile/Makefile              |    8 +
+>> >  Documentation/arm/SH-Mobile/vrl4.c                |  169=20
+>> +++++++++++++++++++++
+>> How about putting those two into "tools" (in particular "tools/arm")
+>> instead of "Documentation"?
+>> Just a thought... ;-)
+>
+> Thats fine by me except that tools/arm doesn't exist yet.
+> It would be good to get some consensus before creating it.
 
->From 33a9fb7359c0d2136d58683517061a1144adc5e4 Mon Sep 17 00:00:00 2001
-From: Zhangfei Gao <zhangfei.gao@marvell.com>
-Date: Sun, 9 Jan 2011 18:09:12 -0500
-Subject: [PATCH] mmc: sdhci support emmc ddr50 mode
+ I think there is consensus regarding "tools" as a place for user-space=
+=20
+ tools - eg. perf tools used to live in "Documentation/..." and then we=
+re=20
+ moved to "tools/perf".
 
-	1. spec sdhc 3.0 does not claim support 1.2v ddr mode
-	2. Call back function set_uhs is added, since some controller count
-on external pmic to provide io voltage
+ Now, whether your stuff should be in "tools/SH-Mobile" or=20
+ "tools/arm/SH-Mobile", I have no opinion ;-)
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
----
- drivers/mmc/core/core.c  |   18 +++++++++++++
- drivers/mmc/core/core.h  |    1 +
- drivers/mmc/core/mmc.c   |    9 ++++++
- drivers/mmc/host/sdhci.c |   62 +++++++++++++++++++++++++++++++++++++++++++--
- drivers/mmc/host/sdhci.h |   14 +++++++++-
- include/linux/mmc/host.h |    2 +
- 6 files changed, 102 insertions(+), 4 deletions(-)
+ Cheers!
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index a8e89f3..1f1f185 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -623,6 +623,24 @@ static inline void mmc_set_ios(struct mmc_host *host)
- 	host->ops->set_ios(host, ios);
- }
+ Pawe=C5=82
 
-+int mmc_set_uhs(struct mmc_host *host, unsigned int uhs_mode)
-+{
-+	int ret = -EINVAL;
-+
-+	if (host->ops->set_uhs) {
-+		ret = host->ops->set_uhs(host, uhs_mode);
-+
-+		/*
-+		 * According to sdhc standard spec v3.0
-+		 * 1.8v regulator should be stable withing 5ms
-+		 */
-+		if (!ret)
-+			mmc_delay(5);
-+	}
-+
-+	return ret;
-+}
-+
- /*
-  * Control chip select pin on a host.
-  */
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 026c975..4b1ea7e 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -41,6 +41,7 @@ void mmc_set_bus_width(struct mmc_host *host,
-unsigned int width);
- void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
- 			   unsigned int ddr);
- u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
-+int mmc_set_uhs(struct mmc_host *host, unsigned int uhs_mode);
- void mmc_set_timing(struct mmc_host *host, unsigned int timing);
-
- static inline void mmc_delay(unsigned int ms)
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 86cac0d..657c5ef 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -529,6 +529,15 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 				ddr = MMC_1_2V_DDR_MODE;
- 	}
-
-+	if (ddr) {
-+		if (mmc_set_uhs(host, ddr)) {
-+			printk(KERN_WARNING "%s: DDR mode not accepted by host "
-+				"and reuse MMC_SDR_MODE.\n",
-+				mmc_hostname(host));
-+			ddr = MMC_SDR_MODE;
-+		}
-+	}
-+
- 	/*
- 	 * Activate wide bus and DDR (if supported).
- 	 */
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d5febe5..906f85b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -986,6 +986,22 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 	host->cmd = NULL;
- }
-
-+static void sdhci_set_ddr(struct sdhci_host *host, unsigned int ddr)
-+{
-+	u16 con;
-+
-+	if (ddr == MMC_SDR_MODE)
-+		return;
-+
-+	con = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	if (con & SDHCI_CTRL2_1_8V) {
-+		con &= ~SDHCI_CTRL2_UHS_MASK;
-+		if (ddr & MMC_1_8V_DDR_MODE)
-+			con |= SDHCI_CTRL2_DDR50;
-+		sdhci_writew(host, con, SDHCI_HOST_CONTROL2);
-+	}
-+}
-+
- static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	int div;
-@@ -1180,6 +1196,7 @@ static void sdhci_set_ios(struct mmc_host *mmc,
-struct mmc_ios *ios)
- 	}
-
- 	sdhci_set_clock(host, ios->clock);
-+	sdhci_set_ddr(host, ios->ddr);
-
- 	if (ios->power_mode == MMC_POWER_OFF)
- 		sdhci_set_power(host, -1);
-@@ -1237,6 +1254,35 @@ out:
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
-
-+static int sdhci_set_uhs(struct mmc_host *mmc, unsigned int uhs_mode)
-+{
-+	struct sdhci_host *host;
-+	unsigned long flags;
-+	int ret = 0;
-+
-+	host = mmc_priv(mmc);
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	if (host->mmc->caps & MMC_CAP_1_8V_DDR) {
-+		u16 con;
-+
-+		con = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		con |= SDHCI_CTRL2_1_8V;
-+		sdhci_writew(host, con, SDHCI_HOST_CONTROL2);
-+	} else
-+		goto err;
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	if (host->ops->set_uhs)
-+		ret = host->ops->set_uhs(host, uhs_mode);
-+
-+	return ret;
-+err:
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	return  -EINVAL;
-+}
-+
- static int sdhci_get_ro(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host;
-@@ -1287,6 +1333,7 @@ out:
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.set_ios	= sdhci_set_ios,
-+	.set_uhs	= sdhci_set_uhs,
- 	.get_ro		= sdhci_get_ro,
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
- };
-@@ -1744,7 +1791,7 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
- int sdhci_add_host(struct sdhci_host *host)
- {
- 	struct mmc_host *mmc;
--	unsigned int caps, ocr_avail;
-+	unsigned int caps, caps_h = 0, ocr_avail;
- 	int ret;
-
- 	WARN_ON(host == NULL);
-@@ -1767,8 +1814,17 @@ int sdhci_add_host(struct sdhci_host *host)
- 			host->version);
- 	}
-
--	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
--		sdhci_readl(host, SDHCI_CAPABILITIES);
-+	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
-+		caps = host->caps;
-+	else {
-+		caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+		caps_h = sdhci_readl(host, SDHCI_CAPABILITIES_1);
-+	}
-+
-+	if (caps & SDHCI_CAN_VDD_180) {
-+		if (caps_h & SDHCI_CAN_SDR50)
-+			mmc->caps |= (MMC_CAP_1_8V_DDR);
-+	}
-
- 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
- 		host->flags |= SDHCI_USE_SDMA;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 6e0969e..d4ef100 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -145,7 +145,14 @@
-
- #define SDHCI_ACMD12_ERR	0x3C
-
--/* 3E-3F reserved */
-+#define SDHCI_HOST_CONTROL2	0x3E
-+#define  SDHCI_CTRL2_UHS_MASK	0x0007
-+#define   SDHCI_CTRL2_SDR12	0x0000
-+#define   SDHCI_CTRL2_SDR25	0x0001
-+#define   SDHCI_CTRL2_SDR50	0x0002
-+#define   SDHCI_CTRL2_SDR104	0x0003
-+#define   SDHCI_CTRL2_DDR50	0x0004
-+#define  SDHCI_CTRL2_1_8V	0x0008
-
- #define SDHCI_CAPABILITIES	0x40
- #define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
-@@ -167,6 +174,9 @@
- #define  SDHCI_CAN_64BIT	0x10000000
-
- #define SDHCI_CAPABILITIES_1	0x44
-+#define  SDHCI_CAN_SDR50	0x00000001
-+#define  SDHCI_CAN_SDR104	0x00000002
-+#define  SDHCI_CAN_DDR50	0x00000004
-
- #define SDHCI_MAX_CURRENT	0x48
-
-@@ -222,6 +232,8 @@ struct sdhci_ops {
- 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
- 					     u8 power_mode);
- 	unsigned int    (*get_ro)(struct sdhci_host *host);
-+	int		(*set_uhs)(struct sdhci_host *host,
-+				unsigned int uhs_mode);
- };
-
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index bcb793e..07131b0 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -117,6 +117,8 @@ struct mmc_host_ops {
-
- 	/* optional callback for HC quirks */
- 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
-+
-+	int	(*set_uhs)(struct mmc_host *host, unsigned int uhs_mode);
- };
-
- struct mmc_card;
--- 
-1.7.0.4
