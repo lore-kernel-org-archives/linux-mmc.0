@@ -1,70 +1,45 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 2/3] mmc: add MMC_QUIRK_BROKEN_CLK_GATING
-Date: Mon, 10 Jan 2011 09:18:51 -0800
-Message-ID: <B4C48E6D-6EEA-4FC4-9FA5-35818F230E0C@marvell.com>
-References: <cover.1294588491.git.tardyp@gmail.com>
- <4663ceeebbd267abb11515570ac17702a6a482f4.1294588491.git.tardyp@gmail.com>
- <ADE0108D-6DF1-4230-B7FB-39D7AC7F63D1@marvell.com>
- <AANLkTimSV07Kdk_xq3nhGa26-SF_u3gxCM+CUhmRJrib@mail.gmail.com>
+From: Jesper Juhl <jj@chaosbits.net>
+Subject: [PATCH] USB SD Host Controller: Including usb.h once is enough
+Date: Mon, 10 Jan 2011 21:56:08 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1101102153280.32164@swampdragon.chaosbits.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:39685 "HELO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1754467Ab1AJRS4 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Jan 2011 12:18:56 -0500
-In-Reply-To: <AANLkTimSV07Kdk_xq3nhGa26-SF_u3gxCM+CUhmRJrib@mail.gmail.com>
-Content-Language: en-US
+Received: from swampdragon.chaosbits.net ([90.184.90.115]:14794 "EHLO
+	swampdragon.chaosbits.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754605Ab1AJU4J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2011 15:56:09 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Tardy <tardyp@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: trivial@kernel.org, linux-kernel@vger.kernel.org, Axel Lin <axel.lin@gmail.com>, Chris Ball <cjb@laptop.org>, David Vrabel <david.vrabel@csr.com>
 
 
-On Jan 10, 2011, at 8:57 AM, Pierre Tardy wrote:
+Including usb.h once is enough in drivers/mmc/host/ushc.c
+This removes the duplicate.
 
->> 
->> 
->> Since the code is not called that often could you change the above code to:
->> 
->>>       if (mmc_card_sdio(card))
->>>               return !(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING);
-> Well, The comment in the
->>        return true;
->> 
->> more obvious that quirk only applies to sdio.
-> 
-> Disagree.Actually, before this code, there is a pretty long comment,
-> that explain that this quirk only apply to sdio.
-> 
-> If we figure out later that some sdcard does not like clock gating
-> either, we could add this quirk to those bad sdcard as well.
 
-I am okay with this -- if you resubmit -- just indicate the quirk is more generic than just sdio
+Signed-off-by: Jesper Juhl <jj@chaosbits.net>
+---
+ ushc.c |    1 -
+ 1 file changed, 1 deletion(-)
 
-> 
-> Here is the whole resulting function. I think this is clear enough:
-> 
-> static bool mmc_host_may_gate_card(struct mmc_card *card)
-> {
-> 
->        /* If there is no card we may gate it */
->        if (!card)
->               return true;
->        /*
->        * Don't gate SDIO cards! These need to be clocked at all times
->        * since they may be independent systems generating interrupts
->        * and other events. The clock requests counter from the core will
->        * go down to zero since the core does not need it, but we will not
->        * gate the clock, because there is somebody out there that may still
->        * be using it.
->        */
->        return !(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING);
-> 
-> 
-> }
-> Pierre
+diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
+index f8f65df..f08f944 100644
+--- a/drivers/mmc/host/ushc.c
++++ b/drivers/mmc/host/ushc.c
+@@ -19,7 +19,6 @@
+ #include <linux/module.h>
+ #include <linux/usb.h>
+ #include <linux/kernel.h>
+-#include <linux/usb.h>
+ #include <linux/slab.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/mmc/host.h>
 
+
+-- 
+Jesper Juhl <jj@chaosbits.net>            http://www.chaosbits.net/
+Don't top-post http://www.catb.org/~esr/jargon/html/T/top-post.html
+Plain text mails only, please.
 
