@@ -1,38 +1,29 @@
-From: Jiri Kosina <jkosina@suse.cz>
-Subject: Re: [PATCH] USB SD Host Controller: Including usb.h once is enough
-Date: Mon, 10 Jan 2011 22:39:27 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1101102239030.26685@pobox.suse.cz>
-References: <alpine.LNX.2.00.1101102153280.32164@swampdragon.chaosbits.net> <20110110210509.GD31011@pengutronix.de> <alpine.LNX.2.00.1101102214500.32164@swampdragon.chaosbits.net> <20110110213735.GA6509@void.printf.net>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: Re: RFC: improved error recovery
+Date: Mon, 10 Jan 2011 22:57:08 +0100
+Message-ID: <AANLkTi=PVjYURdAaiveko8HF_=L7VHkuvOO0bporGQU3@mail.gmail.com>
+References: <20110108001342.GA31708@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor.suse.de ([195.135.220.2]:43304 "EHLO mx1.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754237Ab1AJVjb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Jan 2011 16:39:31 -0500
-In-Reply-To: <20110110213735.GA6509@void.printf.net>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:54630 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754848Ab1AJV5J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2011 16:57:09 -0500
+Received: by pva4 with SMTP id 4so3479358pva.19
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Jan 2011 13:57:08 -0800 (PST)
+In-Reply-To: <20110108001342.GA31708@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jesper Juhl <jj@chaosbits.net>, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Axel Lin <axel.lin@gmail.com>, David Vrabel <david.vrabel@csr.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Mon, 10 Jan 2011, Chris Ball wrote:
+2011/1/8 Russell King - ARM Linux <linux@arm.linux.org.uk>:
 
-> Hi Jesper,
-> 
-> On Mon, Jan 10, 2011 at 10:19:11PM +0100, Jesper Juhl wrote:
-> > > On Mon, Jan 10, 2011 at 09:56:08PM +0100, Jesper Juhl wrote:
-> > > > 
-> > > > Including usb.h once is enough in drivers/mmc/host/ushc.c
-> > > > This removes the duplicate.
-> > > > 
-> > > > 
-> > > > Signed-off-by: Jesper Juhl <jj@chaosbits.net>
-> 
-> Thanks, queued for .38.
+> This is my patch to improve error recovery.
 
-Perfect, dropped from my queue, thanks Chris.
+Looks sane to me.
+Acked-by: Linus Walleij <linus.walleij@stericsson.com>
 
--- 
-Jiri Kosina
-SUSE Labs, Novell Inc.
+Yours,
+Linus Walleij
