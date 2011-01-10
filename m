@@ -1,52 +1,53 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] mmc, ARM: Add zboot from MMC support for SuperH Mobile
- ARM
-Date: Tue, 11 Jan 2011 07:41:34 +0900
-Message-ID: <20110110224134.GA7420@verge.net.au>
-References: <20110109124928.GC25591@verge.net.au>
- <1294589548.8897.1.camel@rojo>
- <20110109225042.GB29257@verge.net.au>
- <c1e9db480d82d1804930ddcc7bb0db02@rootnode.net>
- <20110110154514.GC3760@linux-sh.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v6 0/3]mmc: implement eMMC4.4 standard HW reset feature
+Date: Mon, 10 Jan 2011 23:20:20 +0000
+Message-ID: <20110110232020.GA7920@void.printf.net>
+References: <20101227101305.GA20143@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:57864 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751628Ab1AJXUZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Jan 2011 18:20:25 -0500
 Content-Disposition: inline
-In-Reply-To: <20110110154514.GC3760@linux-sh.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Paul Mundt <lethal@linux-sh.org>
-Cc: Pawel Moll <mail@pawelmoll.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <20101227101305.GA20143@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
 
-On Tue, Jan 11, 2011 at 12:45:14AM +0900, Paul Mundt wrote:
-> On Mon, Jan 10, 2011 at 10:10:19AM +0000, Pawel Moll wrote:
-> > On Mon, 10 Jan 2011 07:50:42 +0900, Simon Horman <horms@verge.net.au> 
-> > wrote:
-> > >>>  Documentation/arm/SH-Mobile/Makefile              |    8 +
-> > >>>  Documentation/arm/SH-Mobile/vrl4.c                |  169 
-> > >>+++++++++++++++++++++
-> > >>How about putting those two into "tools" (in particular "tools/arm")
-> > >>instead of "Documentation"?
-> > >>Just a thought... ;-)
-> > >
-> > >Thats fine by me except that tools/arm doesn't exist yet.
-> > >It would be good to get some consensus before creating it.
-> > 
-> > I think there is consensus regarding "tools" as a place for user-space 
-> > tools - eg. perf tools used to live in "Documentation/..." and then were 
-> > moved to "tools/perf".
-> > 
-> > Now, whether your stuff should be in "tools/SH-Mobile" or 
-> > "tools/arm/SH-Mobile", I have no opinion ;-)
-> > 
-> I agree that this is a worthwhile direction to move to, but we're a long
-> way from a consensus. x86 has traditionally littered scripts/ and others
-> have sunk to arch/<foo>/tools hostprogs abuse and so forth. perf is a bit
-> of a special case in that it's fairly architecture agnostic. 
+Hi Chuanxiao,
 
-I would prefer to leave the code in Documentation/arm/SH-Mobile/ as
-it complements the document that is in the same directory - weather
-its more code or documentation is debatable IMHO.
+On Mon, Dec 27, 2010 at 06:13:05PM +0800, Chuanxiao Dong wrote:
+> Hi all,
+>    This is the version 6 of hardware reset feature implementation. When eMMC
+>    card cannot response any command, signal RST_n can help to reset eMMC
+>    card.
+> 
+>    patch1: enable HW reset capability if card supports.
+>    patch2: do hardware reset if card occurs read/write/erase timeout
+>    patch3: implement hwreset_emmc and reinit_emmc callbacks. In this patch,
+>    hwreset_emmc callback will pull up/down the corresponded GPIO line number
+>    to trigger RST_n signal.
 
-I'm happy to move things later if a consensus is reached.
+Sorry for the very late reply.  I'm simply not sure what to do about
+this patchset -- I'm extremely reluctant to touch the once-only
+programmable bits on the eMMC, and especially to do so silently by
+default.
 
+Also, where exactly do you assign host->rst_gpio?  It isn't assigned
+to in this patch, so where will it be set?  It looks like you could
+end up strobing GPIO0 if a gpio isn't passed in at all.
+
+I haven't seen any other reports of -ETIMEDOUT from eMMC controllers
+not responding to CMD0; I wonder if only your controller has this
+problem, and if that should change how we handle it.
+
+Does anyone else on the list have feedback on how best to proceed?
+
+Thanks,
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
