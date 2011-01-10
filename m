@@ -1,162 +1,43 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [RFC]:  sdhci.c  set_ios -- reduce spin_lock so mdelay is not
- called in spiin_lock
-Date: Mon, 10 Jan 2011 07:03:22 -0800
-Message-ID: <84158E1F-891B-4720-9D31-55F7AF9CE76E@marvell.com>
-References: <28E42EFB-C3E7-4741-BD63-29B603F05B99@marvell.com>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH] mmc, ARM: Add zboot from MMC support for SuperH Mobile ARM
+Date: Tue, 11 Jan 2011 00:45:14 +0900
+Message-ID: <20110110154514.GC3760@linux-sh.org>
+References: <20110109124928.GC25591@verge.net.au> <1294589548.8897.1.camel@rojo> <20110109225042.GB29257@verge.net.au> <c1e9db480d82d1804930ddcc7bb0db02@rootnode.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:57206 "HELO
-	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1752316Ab1AJPD2 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Jan 2011 10:03:28 -0500
-In-Reply-To: <28E42EFB-C3E7-4741-BD63-29B603F05B99@marvell.com>
-Content-Language: en-US
+Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:56846 "EHLO
+	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751266Ab1AJPrU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2011 10:47:20 -0500
+Content-Disposition: inline
+In-Reply-To: <c1e9db480d82d1804930ddcc7bb0db02@rootnode.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Mark Brown <markb@marvell.com>
+To: Pawel Moll <mail@pawelmoll.com>
+Cc: Simon Horman <horms@verge.net.au>, Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-
-If it is felt that the use of the quirk SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS needs to be protected against being interrupted the following code replaces the last few lines of set_ios
-	
-	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL); 
-
-	if (host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS) {
-		/*
-		 * Some (ENE) controllers go apeshit on some ios operation,
-		 * signalling timeout and CRC errors even on CMD0. Resetting
-		 * it on each ios seems to solve the problem.
-		 */
-	
-		spin_lock_irqsave(&host->lock, flags);
-		sdhci_unmask_irqs(host, ier);
-		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-		spin_unlock_irqrestore(&host->lock, flags);
-	}
-	else
-		sdhci_unmask_irqs(host, ier);
-
-out:
-	mmiowb();
-}
-
-On Jan 10, 2011, at 6:51 AM, Philip Rakity wrote:
-
+On Mon, Jan 10, 2011 at 10:10:19AM +0000, Pawel Moll wrote:
+> On Mon, 10 Jan 2011 07:50:42 +0900, Simon Horman <horms@verge.net.au> 
+> wrote:
+> >>>  Documentation/arm/SH-Mobile/Makefile              |    8 +
+> >>>  Documentation/arm/SH-Mobile/vrl4.c                |  169 
+> >>+++++++++++++++++++++
+> >>How about putting those two into "tools" (in particular "tools/arm")
+> >>instead of "Documentation"?
+> >>Just a thought... ;-)
+> >
+> >Thats fine by me except that tools/arm doesn't exist yet.
+> >It would be good to get some consensus before creating it.
 > 
+> I think there is consensus regarding "tools" as a place for user-space 
+> tools - eg. perf tools used to live in "Documentation/..." and then were 
+> moved to "tools/perf".
 > 
-> In the current implementation of set_ios -- spin_lock with interrupts disabled is held when mdelay is called.  This is considered bad form.
+> Now, whether your stuff should be in "tools/SH-Mobile" or 
+> "tools/arm/SH-Mobile", I have no opinion ;-)
 > 
-> This code changes how set_ios works to mask out interrupts on the sdhci device rather than disable interrupts.
-> 
-> This code has been tested on mmp2 - linux-next.  The code is posted as a RFC for review since no amount of testing can
-> verify interrupt handling is really correct.
-> 
-> I can post a patch if that is desired as well.
-> 
-> Philip
-> 
->> 
->> static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->> {
->> 	struct sdhci_host *host;
->> 	unsigned long flags;
->> 	u8 ctrl;
->> 	u32 ier;
->> 
->> 	host = mmc_priv(mmc);
->> 
->> 	if (host->flags & SDHCI_DEVICE_DEAD)
->> 		goto out;
->> 
->> 	/*
->> 	 * Reset the chip on each power off.
->> 	 * Should clear out any weird states.
->> 	 */
->> 	spin_lock_irqsave(&host->lock, flags);
->> 	if (ios->power_mode == MMC_POWER_OFF) {
->> 		sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
->> 		sdhci_reinit(host);
->> 	}
->> 
->> 	ier = sdhci_readl(host, SDHCI_INT_ENABLE);
->> 	sdhci_mask_irqs(host, ier);
->> 	spin_unlock_irqrestore(&host->lock, flags);
->> 
->> 	sdhci_set_clock(host, ios->clock);
->> 	sdhci_set_ddr(host, ios->ddr);
->> 
->> 	if (ios->power_mode == MMC_POWER_OFF)
->> 		sdhci_set_power(host, -1);
->> 	else
->> 		sdhci_set_power(host, ios->vdd);
->> 
->> 	if (host->ops->platform_send_init_74_clocks)
->> 		host->ops->platform_send_init_74_clocks(host, ios->power_mode);
->> 
->> #ifdef CONFIG_MMC_CLKGATE
->> 	if ((mmc->caps & MMC_CAP_HW_CLOCK_GATING)
->> 		&& host->ops->platform_hw_clk_gate)
->> 			host->ops->platform_hw_clk_gate(host);
->> #endif
->> 
->> 	/*
->> 	 * If your platform has 8-bit width support but is not a v3 controller,
->> 	 * or if it requires special setup code, you should implement that in
->> 	 * platform_8bit_width().
->> 	 */
->> 	if (host->ops->platform_8bit_width)
->> 		host->ops->platform_8bit_width(host, ios->bus_width);
->> 	else {
->> 		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->> 		if (ios->bus_width == MMC_BUS_WIDTH_8) {
->> 			ctrl &= ~SDHCI_CTRL_4BITBUS;
->> 			if (host->version >= SDHCI_SPEC_300)
->> 				ctrl |= SDHCI_CTRL_8BITBUS;
->> 		} else {
->> 			if (host->version >= SDHCI_SPEC_300)
->> 				ctrl &= ~SDHCI_CTRL_8BITBUS;
->> 			if (ios->bus_width == MMC_BUS_WIDTH_4)
->> 				ctrl |= SDHCI_CTRL_4BITBUS;
->> 			else
->> 				ctrl &= ~SDHCI_CTRL_4BITBUS;
->> 		}
->> 		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->> 	}
->> 
->> 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->> 
->> 	if ((ios->timing == MMC_TIMING_SD_HS ||
->> 	     ios->timing == MMC_TIMING_MMC_HS)
->> 	    && !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
->> 		ctrl |= SDHCI_CTRL_HISPD;
->> 	else
->> 		ctrl &= ~SDHCI_CTRL_HISPD;
->> 
->> 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->> 	sdhci_unmask_irqs(host, ier);
->> 
->> 	/*
->> 	 * Some (ENE) controllers go apeshit on some ios operation,
->> 	 * signalling timeout and CRC errors even on CMD0. Resetting
->> 	 * it on each ios seems to solve the problem.
->> 	 */
->> 	if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS) {
->> 		spin_lock_irqsave(&host->lock, flags);
->> 		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
->> 		spin_unlock_irqrestore(&host->lock, flags);
->> 	}
->> 		
->> out:
->> 	mmiowb();
->> }
->> <sdhci.c>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+I agree that this is a worthwhile direction to move to, but we're a long
+way from a consensus. x86 has traditionally littered scripts/ and others
+have sunk to arch/<foo>/tools hostprogs abuse and so forth. perf is a bit
+of a special case in that it's fairly architecture agnostic. 
