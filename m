@@ -1,229 +1,92 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/1]mmc: export enhanced area info to user
-Date: Mon, 10 Jan 2011 00:02:41 +0000
-Message-ID: <20110110000241.GA26898@void.printf.net>
-References: <20101208112101.GA14565@intel.com>
+Subject: Re: [PATCH v5] mmc: davinci: add support for SDIO irq handling
+Date: Mon, 10 Jan 2011 00:17:38 +0000
+Message-ID: <20110110001738.GB26898@void.printf.net>
+References: <1294038807-16450-1-git-send-email-nsekhar@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57689 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:59189 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751945Ab1AJACp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 9 Jan 2011 19:02:45 -0500
+	id S1751818Ab1AJARl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 9 Jan 2011 19:17:41 -0500
 Content-Disposition: inline
-In-Reply-To: <20101208112101.GA14565@intel.com>
+In-Reply-To: <1294038807-16450-1-git-send-email-nsekhar@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, leonard.mai@intel.com
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: linux-mmc@vger.kernel.org, davinci-linux-open-source@linux.davincidsp.com, Alagu Sankar <alagusankar@embwise.com>
 
-Hi Chuanxiao, sorry for the late review.
+Hi Sekhar,
 
-On Wed, Dec 08, 2010 at 07:21:01PM +0800, Chuanxiao Dong wrote:
-> enhanced area is a new feature of eMMC4.41 card. Since the offsize and size
-> of enhaneced area is one time programmable register, driver will not set
-> them and just read these values out.
+On Mon, Jan 03, 2011 at 12:43:27PM +0530, Sekhar Nori wrote:
+> From: Alagu Sankar <alagusankar@embwise.com>
 > 
-> So this patch just let host driver read out the enhanced area offsize and
-> size if the eMMC card is enabled this feature. And expose these values to
-> user space through sys fs for use. The feature enabling should be done in
-> manufactory.
+> This patch adds support for handling SDIO interrupt on
+> DaVinci MMC/SD controller.
 > 
-> Before read out these values, host driver also need set the ERASE_GROUP_DEF
-> byte. If this setting this byte failed, driver will set the offsize and size
-> to be 0. But not sure whether need to do this.
+> The patch has been tested on DM355 and DA850 EVMs with
+> Marvell Libertas based SDIO wireless LAN card.
 > 
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-
-Which userspace applications do you imagine will use this feature?
-If we're talking about a published interface, we should document this
-in Documentation/ABI.  If this is just a tool to aid in debugging
-pre-production hardware or host controller drivers, it should live
-in debugfs instead.
-
+> Signed-off-by: Alagu Sankar <alagusankar@embwise.com>
+> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 > ---
->  drivers/mmc/core/mmc.c   |   92 ++++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/card.h |    3 +
->  include/linux/mmc/mmc.h  |    3 +
->  3 files changed, 98 insertions(+), 0 deletions(-)
+> Applies to mmc-next branch of the mmc tree
 > 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 77f93c3..1f49778 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -302,6 +302,64 @@ static int mmc_read_ext_csd(struct mmc_card *card)
->  	}
->  
->  	if (card->ext_csd.rev >= 4) {
-> +		/*
-> +		 * Enhanced area feature support
-> +		 * check whether eMMC card is enabled enhanced area,
-> +		 * if so, export enhanced area offset and size to
-> +		 * user by adding sysfs interface
-> +		 */
-> +		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
-> +				(ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
-> +			u8 hc_erase_grp_sz =
-> +				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> +			u8 hc_wp_grp_sz =
-> +				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-> +			 /*
-> +			  * FIXME
-> +			  * Not sure whether need to enable the
-> +			  * ERASE_GROUP_DEF bit
-> +			  */
-> +			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +					EXT_CSD_ERASE_GROUP_DEF, 1);
-> +
-> +			if (err && err != -EBADMSG)
-> +				goto out;
-> +
-> +			if (err) {
-> +				/*
-> +				 * ignore this err, just disable enhanced area
-> +				 */
-> +				err = 0;
-> +				goto next;
-> +			}
-> +			/* update ext_csd ERASE_GRP_DEF bit */
-> +			ext_csd[EXT_CSD_ERASE_GROUP_DEF] = 1;
-> +			card->ext_csd.erase_group_def =
-> +				ext_csd[EXT_CSD_ERASE_GROUP_DEF];
-> +			/*
-> +			 * set a flag to identify whether the enhanced
-> +			 * user data are enabled
-> +			 */
-> +			card->ext_csd.enh_data_area_en = 1;
-> +			/*
-> +			 * caculate the enhanced data area offset, unit B
-> +			 */
-> +			card->ext_csd.enh_data_area_off =
-> +				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
-> +				(ext_csd[137] << 8) + ext_csd[136];
-> +			if (mmc_card_blockaddr(card))
-> +				card->ext_csd.enh_data_area_off <<= 9;
-> +			/*
-> +			 * caculate the enhanced data area size, unit KB
-> +			 */
-> +			card->ext_csd.enh_data_area_sz =
-> +				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
-> +				ext_csd[140];
-> +			card->ext_csd.enh_data_area_sz *=
-> +				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-> +			card->ext_csd.enh_data_area_sz <<= 9;
-> +		}
-> +next:
->  		card->ext_csd.sec_trim_mult =
->  			ext_csd[EXT_CSD_SEC_TRIM_MULT];
->  		card->ext_csd.sec_erase_mult =
-> @@ -336,6 +394,9 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
->  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
->  MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
-> +MMC_DEV_ATTR(enhen, "%d\n", card->ext_csd.enh_data_area_en);
-> +MMC_DEV_ATTR(enhoff, "0x%llxB\n", card->ext_csd.enh_data_area_off);
-> +MMC_DEV_ATTR(enhsz, "0x%xKB\n", card->ext_csd.enh_data_area_sz);
+> Since v4, fixed a typo in patch description
+> 
+>  drivers/mmc/host/davinci_mmc.c |   78 +++++++++++++++++++++++++++++++++++++---
+>  1 files changed, 73 insertions(+), 5 deletions(-)
 
-If enhen == 0 and the user cats enhoff/enhsz, I think you should return
-something like -EINVAL instead of 0.  (You could also instead consider
-making the appearance of enhoff and enhsz conditional on enhen == 1,
-and then just not export enhen to userspace at all?)
+Thanks, pushed to mmc-next for .38 with some trivial indentation fixes
+as below:
 
-Regardless of where the files live, we should have much better names 
-for them.  It should be possible to work out what each file is for
-without already knowing!  Perhaps enhanced_area_{enable,offset,size},
-if that's not too long.
-
->  
->  static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_cid.attr,
-> @@ -349,6 +410,9 @@ static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_name.attr,
->  	&dev_attr_oemid.attr,
->  	&dev_attr_serial.attr,
-> +	&dev_attr_enhen.attr,
-> +	&dev_attr_enhoff.attr,
-> +	&dev_attr_enhsz.attr,
->  	NULL,
->  };
->  
-> @@ -472,6 +536,34 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  			goto free_card;
->  	}
->  
-> +	/*
-> +	 * If enh_data_are_en is TRUE, means this init card
-> +	 * operation is used to reinit card after a reset
-> +	 * ERASE_GRP_DEF register value will be lost everytime
-> +	 * after a reset or power off.
-> +	 *
-> +	 * FIXME
-> +	 * Not sure whether need to enable ERASE_GRP_DEF bit.
-> +	 */
-
-Can we find out somehow?
-
-> +	if (card->ext_csd.enh_data_area_en) {
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				EXT_CSD_ERASE_GROUP_DEF, 1);
-> +
-> +		if (err && err != -EBADMSG)
-> +			goto free_card;
-> +
-> +		if (err) {
-> +			err = 0;
-> +			/*
-> +			 * Just disable enhanced area off & sz
-> +			 * will try to enable ERASE_GROUP_DEF
-> +			 * during next time reinit
-> +			 */
-> +			card->ext_csd.enh_data_area_off = 0;
-> +			card->ext_csd.enh_data_area_sz = 0;
-> +		}
-> +	}
-> +
->  	if (!oldcard) {
->  		/*
->  		 * Fetch and process extended CSD.
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 8ce0827..e850a39 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -54,6 +54,9 @@ struct mmc_ext_csd {
->  	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
->  	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
->  	unsigned int		trim_timeout;		/* In milliseconds */
-> +	unsigned int		enh_data_area_en; /* enh area enable bit */
-> +	loff_t				enh_data_area_off; /* enh area offset */
-> +	size_t				enh_data_area_sz; /* enh area size */
->  };
->  
->  struct sd_scr {
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 956fbd8..97ca016 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -251,6 +251,8 @@ struct _mmc_csd {
->   * EXT_CSD fields
->   */
->  
-> +#define EXT_CSD_PARTITION_ATTRIBUTE 156	/* R/W */
-> +#define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
->  #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
->  #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
->  #define EXT_CSD_BUS_WIDTH		183	/* R/W */
-> @@ -260,6 +262,7 @@ struct _mmc_csd {
->  #define EXT_CSD_CARD_TYPE		196	/* RO */
->  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
->  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
-> +#define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
->  #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
->  #define EXT_CSD_HC_ERASE_GRP_SIZE	224	/* RO */
->  #define EXT_CSD_SEC_TRIM_MULT		229	/* RO */
-
-Thanks,
-
-- Chris.
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 6b09752..0076c74 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -882,7 +882,7 @@ mmc_davinci_xfer_done(struct mmc_davinci_host *host, struct mmc_data *data)
+ 		 * 2.1.6): Signal SDIO interrupt only if it is enabled by core
+ 		 */
+ 		if (host->sdio_int && !(readl(host->base + DAVINCI_SDIOST0) &
+-							SDIOST0_DAT1_HI)) {
++					SDIOST0_DAT1_HI)) {
+ 			writel(SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
+ 			mmc_signal_sdio_irq(host->mmc);
+ 		}
+@@ -962,7 +962,7 @@ static irqreturn_t mmc_davinci_sdio_irq(int irq, void *dev_id)
+ 	status = readl(host->base + DAVINCI_SDIOIST);
+ 	if (status & SDIOIST_IOINT) {
+ 		dev_dbg(mmc_dev(host->mmc),
+-				"SDIO interrupt status %x\n", status);
++			"SDIO interrupt status %x\n", status);
+ 		writel(status | SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
+ 		mmc_signal_sdio_irq(host->mmc);
+ 	}
+@@ -1124,12 +1124,12 @@ static void mmc_davinci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 		} else {
+ 			host->sdio_int = true;
+ 			writel(readl(host->base + DAVINCI_SDIOIEN) |
+-				SDIOIEN_IOINTEN, host->base + DAVINCI_SDIOIEN);
++			       SDIOIEN_IOINTEN, host->base + DAVINCI_SDIOIEN);
+ 		}
+ 	} else {
+ 		host->sdio_int = false;
+ 		writel(readl(host->base + DAVINCI_SDIOIEN) & ~SDIOIEN_IOINTEN,
+-				host->base + DAVINCI_SDIOIEN);
++		       host->base + DAVINCI_SDIOIEN);
+ 	}
+ }
+ 
+@@ -1331,7 +1331,7 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+ 
+ 	if (host->sdio_irq >= 0) {
+ 		ret = request_irq(host->sdio_irq, mmc_davinci_sdio_irq, 0,
+-				mmc_hostname(mmc), host);
++				  mmc_hostname(mmc), host);
+ 		if (!ret)
+ 			mmc->caps |= MMC_CAP_SDIO_IRQ;
+ 	}
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
