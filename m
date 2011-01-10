@@ -1,43 +1,109 @@
-From: Paul Mundt <lethal@linux-sh.org>
-Subject: Re: [PATCH] mmc, ARM: Add zboot from MMC support for SuperH Mobile ARM
-Date: Tue, 11 Jan 2011 00:45:14 +0900
-Message-ID: <20110110154514.GC3760@linux-sh.org>
-References: <20110109124928.GC25591@verge.net.au> <1294589548.8897.1.camel@rojo> <20110109225042.GB29257@verge.net.au> <c1e9db480d82d1804930ddcc7bb0db02@rootnode.net>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH 2/3] mmc: add MMC_QUIRK_BROKEN_CLK_GATING
+Date: Mon, 10 Jan 2011 07:58:30 -0800
+Message-ID: <ADE0108D-6DF1-4230-B7FB-39D7AC7F63D1@marvell.com>
+References: <cover.1294588491.git.tardyp@gmail.com>
+ <4663ceeebbd267abb11515570ac17702a6a482f4.1294588491.git.tardyp@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 124x34x33x190.ap124.ftth.ucom.ne.jp ([124.34.33.190]:56846 "EHLO
-	master.linux-sh.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751266Ab1AJPrU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2011 10:47:20 -0500
-Content-Disposition: inline
-In-Reply-To: <c1e9db480d82d1804930ddcc7bb0db02@rootnode.net>
+Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:50185 "HELO
+	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751098Ab1AJP6z convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Jan 2011 10:58:55 -0500
+In-Reply-To: <4663ceeebbd267abb11515570ac17702a6a482f4.1294588491.git.tardyp@gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pawel Moll <mail@pawelmoll.com>
-Cc: Simon Horman <horms@verge.net.au>, Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, Yusuke Goda <yusuke.goda.sx@renesas.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: Pierre Tardy <tardyp@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Mon, Jan 10, 2011 at 10:10:19AM +0000, Pawel Moll wrote:
-> On Mon, 10 Jan 2011 07:50:42 +0900, Simon Horman <horms@verge.net.au> 
-> wrote:
-> >>>  Documentation/arm/SH-Mobile/Makefile              |    8 +
-> >>>  Documentation/arm/SH-Mobile/vrl4.c                |  169 
-> >>+++++++++++++++++++++
-> >>How about putting those two into "tools" (in particular "tools/arm")
-> >>instead of "Documentation"?
-> >>Just a thought... ;-)
-> >
-> >Thats fine by me except that tools/arm doesn't exist yet.
-> >It would be good to get some consensus before creating it.
+
+On Jan 9, 2011, at 8:26 AM, Pierre Tardy wrote:
+
+> Some sdio card are not following sdio standard, and does not work
+> when the sdio bus's clock is gated
 > 
-> I think there is consensus regarding "tools" as a place for user-space 
-> tools - eg. perf tools used to live in "Documentation/..." and then were 
-> moved to "tools/perf".
+> To keep functionnality for all legacy driver, we turn this quirk on
+> for every sdio card.
+> Drivers needs to disable the quirk manually when someone verified that their
+> supported card works with clock gating.
 > 
-> Now, whether your stuff should be in "tools/SH-Mobile" or 
-> "tools/arm/SH-Mobile", I have no opinion ;-)
+> Signed-off-by: Pierre Tardy <tardyp@gmail.com>
+> ---
+> drivers/mmc/core/host.c   |    5 +----
+> drivers/mmc/core/quirks.c |   11 +++++++++++
+> include/linux/mmc/card.h  |    1 +
+> 3 files changed, 13 insertions(+), 4 deletions(-)
 > 
-I agree that this is a worthwhile direction to move to, but we're a long
-way from a consensus. x86 has traditionally littered scripts/ and others
-have sunk to arch/<foo>/tools hostprogs abuse and so forth. perf is a bit
-of a special case in that it's fairly architecture agnostic. 
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index b3ac6c5..461e6a1 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -160,10 +160,7 @@ static bool mmc_host_may_gate_card(struct mmc_card *card)
+> 	 * gate the clock, because there is somebody out there that may still
+> 	 * be using it.
+> 	 */
+> -	if (mmc_card_sdio(card))
+> -		return false;
+> -
+> -	return true;
+> +	return !(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING);
+> }
+
+
+Since the code is not called that often could you change the above code to:  
+
+> 	if (mmc_card_sdio(card))
+> 		return !(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING);
+	return true;
+
+more obvious that quirk only applies to sdio.
+
+> 
+> /**
+> diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
+> index d8a5fec..fe467c8 100644
+> --- a/drivers/mmc/core/quirks.c
+> +++ b/drivers/mmc/core/quirks.c
+> @@ -32,7 +32,18 @@ static void add_quirk(struct mmc_card *card, int data)
+> 	card->quirks |= data;
+> }
+> 
+> +/*
+> + * This hook just adds a quirk for all sdio devices
+> + */
+> +static void add_quirk_for_sdio_devices(struct mmc_card *card, int data)
+> +{
+> +	if (mmc_card_sdio(card))
+> +		card->quirks |= data;
+> +}
+> +
+> static const struct mmc_fixup mmc_fixup_methods[] = {
+> +	{ SDIO_ANY_ID, SDIO_ANY_ID,
+> +		add_quirk_for_sdio_devices, MMC_QUIRK_BROKEN_CLK_GATING }
+> 	{ 0 }
+> };
+> 
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index a498d53..3fe9db0 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -121,6 +121,7 @@ struct mmc_card {
+> 						/* for byte mode */
+> #define MMC_QUIRK_NONSTD_SDIO	(1<<2)		/* non-standard SDIO card attached */
+> 						/* (missing CIA registers) */
+> +#define MMC_QUIRK_BROKEN_CLK_GATING (1<<3)	/* clock gating the sdio bus will make card fail */
+> 
+> 	unsigned int		erase_size;	/* erase size in sectors */
+>  	unsigned int		erase_shift;	/* if erase unit is power 2 */
+> -- 
+> 1.7.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
