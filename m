@@ -1,60 +1,46 @@
 From: Pierre Tardy <tardyp@gmail.com>
-Subject: Re: [PATCH 2/3] mmc: add MMC_QUIRK_BROKEN_CLK_GATING
-Date: Mon, 10 Jan 2011 17:57:07 +0100
-Message-ID: <AANLkTimSV07Kdk_xq3nhGa26-SF_u3gxCM+CUhmRJrib@mail.gmail.com>
+Subject: Re: [PATCH 1/3] mmc: add per device quirk placeholder
+Date: Mon, 10 Jan 2011 18:02:02 +0100
+Message-ID: <AANLkTinKp6-eR9zK4pddqnBTKoawiaoq4zfEUKk2Qr=u@mail.gmail.com>
 References: <cover.1294588491.git.tardyp@gmail.com>
-	<4663ceeebbd267abb11515570ac17702a6a482f4.1294588491.git.tardyp@gmail.com>
-	<ADE0108D-6DF1-4230-B7FB-39D7AC7F63D1@marvell.com>
+	<6191610532f25d7cda435781ce9b83bfdb677b5a.1294588491.git.tardyp@gmail.com>
+	<77BC89B5-DFC2-4908-8875-59BCD00DC10F@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <ADE0108D-6DF1-4230-B7FB-39D7AC7F63D1@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:59430 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753828Ab1AJRCD convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2011 12:02:03 -0500
+In-Reply-To: <77BC89B5-DFC2-4908-8875-59BCD00DC10F@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Pierre Tardy <pierre.tardy@intel.com>
 
+>> +
+>> + =A0 =A0 for (f =3D mmc_fixup_methods; f->hook; f++) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if ((f->vendor =3D=3D card->cis.vendor
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|| f->vendor =3D=3D (u16) SDIO_=
+ANY_ID) &&
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (f->device =3D=3D card->cis.device
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|| f->device =3D=3D (u16) SDIO_=
+ANY_ID)) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_dbg(&card->dev, "calli=
+ng %pF\n", f->hook);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 f->hook(card, f->data);
 >
 >
-> Since the code is not called that often could you change the above co=
-de to:
->
->> =A0 =A0 =A0 if (mmc_card_sdio(card))
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 return !(card->quirks & MMC_QUIRK_BROKEN=
-_CLK_GATING);
-Well, The comment in the
-> =A0 =A0 =A0 =A0return true;
->
-> more obvious that quirk only applies to sdio.
+> hook is not a very nice name --- =A0something more meaningful: =A0ven=
+dor_fixup =A0?
+I just copied the pci/quirks.c way of doing. I think is more coherent
+to keep is this way, this name will forever appear only in 4 lines
+inside the kernel, so I dont care that much.
+I'll change that if you really do care. :-)
 
-Disagree.Actually, before this code, there is a pretty long comment,
-that explain that this quirk only apply to sdio.
+Waiting for a few more comments to do all in a row.
 
-If we figure out later that some sdcard does not like clock gating
-either, we could add this quirk to those bad sdcard as well.
-
-Here is the whole resulting function. I think this is clear enough:
-
-static bool mmc_host_may_gate_card(struct mmc_card *card)
-{
-
-        /* If there is no card we may gate it */
-        if (!card)
-               return true;
-        /*
-        * Don't gate SDIO cards! These need to be clocked at all times
-        * since they may be independent systems generating interrupts
-        * and other events. The clock requests counter from the core wi=
-ll
-        * go down to zero since the core does not need it, but we will =
-not
-        * gate the clock, because there is somebody out there that may =
-still
-        * be using it.
-        */
-        return !(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING);
-
-
-}
+Thanks,
+--=20
 Pierre
