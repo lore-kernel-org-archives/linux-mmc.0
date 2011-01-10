@@ -1,58 +1,58 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v6 0/3]mmc: implement eMMC4.4 standard HW reset feature
-Date: Mon, 10 Jan 2011 10:46:11 +0800
-Message-ID: <5D8008F58939784290FAB48F549751983519F48E5D@shsmsx502.ccr.corp.intel.com>
-References: <20101227101305.GA20143@intel.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH V2 2/2] sdhci: Support for SD/MMC Dual Data Rate
+Date: Sun, 9 Jan 2011 22:05:43 -0500
+Message-ID: <AANLkTin53qP-GbXavdvcu0WpjBHQNZoTDRXu7zpq2jNr@mail.gmail.com>
+References: <35CD48DB-A420-4319-968D-400D45EE9C0D@marvell.com>
+	<AANLkTi=ERwn3W8tvt3NNS3Xiq93mhy7TV7vAT9dwjvaq@mail.gmail.com>
+	<20110109232812.GA26728@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:63631 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751407Ab1AJCqs convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jan 2011 21:46:48 -0500
-In-Reply-To: <20101227101305.GA20143@intel.com>
-Content-Language: en-US
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:62495 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752163Ab1AJDFp convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jan 2011 22:05:45 -0500
+Received: by fxm20 with SMTP id 20so18441982fxm.19
+        for <linux-mmc@vger.kernel.org>; Sun, 09 Jan 2011 19:05:43 -0800 (PST)
+In-Reply-To: <20110109232812.GA26728@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
 
-Hi Chris,
-The HW ware reset patches have been pending for several weeks. The first version was sent at Oct.25th, and now I have updated them to be the version 6. So Chris, would you help me on this?. I want to know whether they are acceptable. And I am ready to fix all the comments from the community. Thanks a lot.
+On Sun, Jan 9, 2011 at 6:28 PM, Chris Ball <cjb@laptop.org> wrote:
+> Hi Philip, Zhangfei,
+>
+> We've got two patches from Marvell for SD/DDR now. =A0Any agreement o=
+n
+> which of them to merge?
 
--Chuanxiao
+Could you check the "sdhci support emmc ddr50 mode [v4]"
+Neither mdelay or set_voltage can be used in spin_lock_irqsaved, since
+much time is needed to wait voltage to be stable.
+This method is considered in v1.
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org
-> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
-> Sent: Monday, December 27, 2010 6:13 PM
-> To: linux-mmc@vger.kernel.org
-> Cc: linux-kernel@vger.kernel.org; cjb@laptop.org; akpm@linux-foundation.org
-> Subject: [PATCH v6 0/3]mmc: implement eMMC4.4 standard HW reset feature
-> 
-> Hi all,
->    This is the version 6 of hardware reset feature implementation. When eMMC
->    card cannot response any command, signal RST_n can help to reset eMMC
->    card.
-> 
->    patch1: enable HW reset capability if card supports.
->    patch2: do hardware reset if card occurs read/write/erase timeout
->    patch3: implement hwreset_emmc and reinit_emmc callbacks. In this patch,
->    hwreset_emmc callback will pull up/down the corresponded GPIO line number
->    to trigger RST_n signal.
-> 
->    change log:
->    1. Move hardware_reset callback to mmc_bus_ops so that all kinds of host
->    controller can use hardware_reset callback to trigger RST_n signal.
->    Different host controller only needs to provide a GPIO line number to
->    this callback.
->    2. Add GPIO pull up/down part in hardware_reset callback.
->    3. Remove reset_emmc callback in sdhci_ops.
-> 
-> Thanks
-> Chuanxiao
+>
+> On Mon, Jan 03, 2011 at 10:39:46PM -0500, zhangfei gao wrote:
+>> > + =A0 =A0 =A0 /* Change sigalling voltage and wait for it to be st=
+able */
+>> > + =A0 =A0 =A0 if (host->ops->set_signaling_voltage)
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops->set_signaling_voltage(hos=
+t, 18);
+>> > + =A0 =A0 =A0 else
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mdelay(5);
+>>
+>> In fact, have considered this method before, mdelay(5) in
+>> spin_lock_irqsave is terrible, since timer can not update system tim=
+e,
+>> and android must die.
+>
+> Philip, is there a reason not to use msleep() here instead?
+>
+> Thanks,
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
+>
