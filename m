@@ -1,47 +1,48 @@
-From: Chris Ball <cjb@laptop.org>
+From: Jiri Kosina <jkosina@suse.cz>
 Subject: Re: [PATCH] USB SD Host Controller: Including usb.h once is enough
-Date: Mon, 10 Jan 2011 21:37:36 +0000
-Message-ID: <20110110213735.GA6509@void.printf.net>
-References: <alpine.LNX.2.00.1101102153280.32164@swampdragon.chaosbits.net> <20110110210509.GD31011@pengutronix.de> <alpine.LNX.2.00.1101102214500.32164@swampdragon.chaosbits.net>
+Date: Mon, 10 Jan 2011 22:37:58 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1101102236080.26685@pobox.suse.cz>
+References: <alpine.LNX.2.00.1101102153280.32164@swampdragon.chaosbits.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:44731 "EHLO void.printf.net"
+Received: from cantor2.suse.de ([195.135.220.15]:36931 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754325Ab1AJVhk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Jan 2011 16:37:40 -0500
-Content-Disposition: inline
-In-Reply-To: <alpine.LNX.2.00.1101102214500.32164@swampdragon.chaosbits.net>
+	id S1754701Ab1AJViF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Jan 2011 16:38:05 -0500
+In-Reply-To: <alpine.LNX.2.00.1101102153280.32164@swampdragon.chaosbits.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jesper Juhl <jj@chaosbits.net>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, trivial@kernel.org, linux-kernel@vger.kernel.org, Axel Lin <axel.lin@gmail.com>, David Vrabel <david.vrabel@csr.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Axel Lin <axel.lin@gmail.com>, Chris Ball <cjb@laptop.org>, David Vrabel <david.vrabel@csr.com>
 
-Hi Jesper,
+On Mon, 10 Jan 2011, Jesper Juhl wrote:
 
-On Mon, Jan 10, 2011 at 10:19:11PM +0100, Jesper Juhl wrote:
-> > On Mon, Jan 10, 2011 at 09:56:08PM +0100, Jesper Juhl wrote:
-> > > 
-> > > Including usb.h once is enough in drivers/mmc/host/ushc.c
-> > > This removes the duplicate.
-> > > 
-> > > 
-> > > Signed-off-by: Jesper Juhl <jj@chaosbits.net>
+> 
+> Including usb.h once is enough in drivers/mmc/host/ushc.c
+> This removes the duplicate.
+> 
+> 
+> Signed-off-by: Jesper Juhl <jj@chaosbits.net>
+> ---
+>  ushc.c |    1 -
+>  1 file changed, 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
+> index f8f65df..f08f944 100644
+> --- a/drivers/mmc/host/ushc.c
+> +++ b/drivers/mmc/host/ushc.c
+> @@ -19,7 +19,6 @@
+>  #include <linux/module.h>
+>  #include <linux/usb.h>
+>  #include <linux/kernel.h>
+> -#include <linux/usb.h>
+>  #include <linux/slab.h>
+>  #include <linux/dma-mapping.h>
+>  #include <linux/mmc/host.h>
 
-Thanks, queued for .38.
-
-> No reason.
-> Didn't think of it as "newlines in the commit-msg", just as newlines 
-> providing a nice seperation between patch description and the patch 
-> itself. It never occurred to me that anyone would actually copy those 
-> blank lines into an actual commit message.
-
-I don't copy anything into the commit message -- I like to run git-am
-on the patch mail in my mailbox directly.  In this case, git-am seems
-to have removed the extra newlines itself, which was nice of it, but in
-general please send mail such that from the start of the body of the
-mail up to the "---" separator will become the commit message.  Thanks!
+Applied, thanks.
 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Jiri Kosina
+SUSE Labs, Novell Inc.
