@@ -1,47 +1,53 @@
-From: Jamie Iles <jamie@jamieiles.com>
-Subject: [PATCH 13/16] MMC: jz4740: don't treat NULL clk as an error
-Date: Tue, 11 Jan 2011 12:43:50 +0000
-Message-ID: <1294749833-32019-14-git-send-email-jamie@jamieiles.com>
-References: <1294749833-32019-1-git-send-email-jamie@jamieiles.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1294749833-32019-1-git-send-email-jamie@jamieiles.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Jamie Iles <jamie@jamieiles.com>, linux-mmc@vger.kernel.org
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: [PATCH] MMCI: don't read command response when invalid
+Date: Tue, 11 Jan 2011 16:35:56 +0000
+Message-ID: <20110111163556.GA18746@n2100.arm.linux.org.uk>
+References: <20110111163502.GJ11039@n2100.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:37360 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932428Ab1AKQgD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jan 2011 11:36:03 -0500
+Content-Disposition: inline
+In-Reply-To: <20110111163502.GJ11039@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-clk_get() returns a struct clk cookie to the driver and some platforms
-may return NULL if they only support a single clock.  clk_get() has only
-failed if it returns a ERR_PTR() encoded pointer.
+Don't read the command response from the registers when either the
+command timed out (because there was no response from the card) or
+the checksum on the response was invalid.
 
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Jamie Iles <jamie@jamieiles.com>
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/jz4740_mmc.c |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mmci.c |   10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index b3a0ab0..74218ad 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -14,6 +14,7 @@
-  */
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 5630228..040de4f 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -394,15 +394,15 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
  
- #include <linux/mmc/host.h>
-+#include <linux/err.h>
- #include <linux/io.h>
- #include <linux/irq.h>
- #include <linux/interrupt.h>
-@@ -827,8 +828,8 @@ static int __devinit jz4740_mmc_probe(struct platform_device* pdev)
+ 	host->cmd = NULL;
+ 
+-	cmd->resp[0] = readl(base + MMCIRESPONSE0);
+-	cmd->resp[1] = readl(base + MMCIRESPONSE1);
+-	cmd->resp[2] = readl(base + MMCIRESPONSE2);
+-	cmd->resp[3] = readl(base + MMCIRESPONSE3);
+-
+ 	if (status & MCI_CMDTIMEOUT) {
+ 		cmd->error = -ETIMEDOUT;
+ 	} else if (status & MCI_CMDCRCFAIL && cmd->flags & MMC_RSP_CRC) {
+ 		cmd->error = -EILSEQ;
++	} else {
++		cmd->resp[0] = readl(base + MMCIRESPONSE0);
++		cmd->resp[1] = readl(base + MMCIRESPONSE1);
++		cmd->resp[2] = readl(base + MMCIRESPONSE2);
++		cmd->resp[3] = readl(base + MMCIRESPONSE3);
  	}
  
- 	host->clk = clk_get(&pdev->dev, "mmc");
--	if (!host->clk) {
--		ret = -ENOENT;
-+	if (IS_ERR(host->clk)) {
-+		ret = PTR_ERR(host->clk);
- 		dev_err(&pdev->dev, "Failed to get mmc clock\n");
- 		goto err_free_host;
- 	}
--- 
-1.7.3.4
+ 	if (!cmd->data || cmd->error) {
