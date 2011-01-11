@@ -1,59 +1,58 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] MMCI: don't read command response when invalid
-Date: Tue, 11 Jan 2011 23:20:26 +0000
-Message-ID: <20110111232025.GA25752@void.printf.net>
-References: <20110111163502.GJ11039@n2100.arm.linux.org.uk> <20110111163556.GA18746@n2100.arm.linux.org.uk>
+Subject: Re: [PATCH 13/16] MMC: jz4740: don't treat NULL clk as an error
+Date: Tue, 11 Jan 2011 23:22:26 +0000
+Message-ID: <20110111232226.GB25752@void.printf.net>
+References: <1294749833-32019-1-git-send-email-jamie@jamieiles.com> <1294749833-32019-14-git-send-email-jamie@jamieiles.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:42430 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:42457 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752029Ab1AKXU2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 11 Jan 2011 18:20:28 -0500
+	id S1752029Ab1AKXW1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 11 Jan 2011 18:22:27 -0500
 Content-Disposition: inline
-In-Reply-To: <20110111163556.GA18746@n2100.arm.linux.org.uk>
+In-Reply-To: <1294749833-32019-14-git-send-email-jamie@jamieiles.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Jamie Iles <jamie@jamieiles.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi,
+Hi Jamie,
 
-On Tue, Jan 11, 2011 at 04:35:56PM +0000, Russell King - ARM Linux wrote:
-> Don't read the command response from the registers when either the
-> command timed out (because there was no response from the card) or
-> the checksum on the response was invalid.
+On Tue, Jan 11, 2011 at 12:43:50PM +0000, Jamie Iles wrote:
+> clk_get() returns a struct clk cookie to the driver and some platforms
+> may return NULL if they only support a single clock.  clk_get() has only
+> failed if it returns a ERR_PTR() encoded pointer.
 > 
-> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Jamie Iles <jamie@jamieiles.com>
 > ---
->  drivers/mmc/host/mmci.c |   10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
+>  drivers/mmc/host/jz4740_mmc.c |    5 +++--
+>  1 files changed, 3 insertions(+), 2 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 5630228..040de4f 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -394,15 +394,15 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+> index b3a0ab0..74218ad 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -14,6 +14,7 @@
+>   */
 >  
->  	host->cmd = NULL;
->  
-> -	cmd->resp[0] = readl(base + MMCIRESPONSE0);
-> -	cmd->resp[1] = readl(base + MMCIRESPONSE1);
-> -	cmd->resp[2] = readl(base + MMCIRESPONSE2);
-> -	cmd->resp[3] = readl(base + MMCIRESPONSE3);
-> -
->  	if (status & MCI_CMDTIMEOUT) {
->  		cmd->error = -ETIMEDOUT;
->  	} else if (status & MCI_CMDCRCFAIL && cmd->flags & MMC_RSP_CRC) {
->  		cmd->error = -EILSEQ;
-> +	} else {
-> +		cmd->resp[0] = readl(base + MMCIRESPONSE0);
-> +		cmd->resp[1] = readl(base + MMCIRESPONSE1);
-> +		cmd->resp[2] = readl(base + MMCIRESPONSE2);
-> +		cmd->resp[3] = readl(base + MMCIRESPONSE3);
+>  #include <linux/mmc/host.h>
+> +#include <linux/err.h>
+>  #include <linux/io.h>
+>  #include <linux/irq.h>
+>  #include <linux/interrupt.h>
+> @@ -827,8 +828,8 @@ static int __devinit jz4740_mmc_probe(struct platform_device* pdev)
 >  	}
 >  
->  	if (!cmd->data || cmd->error) {
+>  	host->clk = clk_get(&pdev->dev, "mmc");
+> -	if (!host->clk) {
+> -		ret = -ENOENT;
+> +	if (IS_ERR(host->clk)) {
+> +		ret = PTR_ERR(host->clk);
+>  		dev_err(&pdev->dev, "Failed to get mmc clock\n");
+>  		goto err_free_host;
+>  	}
 
 Thanks, pushed to mmc-next and queued as a .38 fix.
 
