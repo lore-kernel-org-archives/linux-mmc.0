@@ -1,93 +1,85 @@
-From: Richard Zhu <r65037@freescale.com>
-Subject: [REVIEW 2/2] ENGR0000137838 SDHCI Some eMMC cards can't work well in our BSP
-Date: Tue, 11 Jan 2011 10:02:48 +0800
-Message-ID: <1294711368-446-1-git-send-email-r65037@freescale.com>
+From: Zhang Lily-R58066 <R58066@freescale.com>
+Subject: RE: [lnxrevli] [REVIEW 2/2] ENGR0000137838 SDHCI Some eMMC cards
+ can't work well in our BSP
+Date: Tue, 11 Jan 2011 02:02:52 +0000
+Message-ID: <27CBE2803C7F4B4F946DCA25D887162A0876E0@039-SN1MPN1-001.039d.mgd.msft.net>
+References: <1.10.2011-mgd.freescale.com-30-6343028283138894775208-3989@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:31703 "EHLO
-	TX2EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755396Ab1AKCAj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2011 21:00:39 -0500
-Received: from mail94-tx2 (localhost.localdomain [127.0.0.1])	by
- mail94-tx2-R.bigfish.com (Postfix) with ESMTP id C53AC116050B	for
- <linux-mmc@vger.kernel.org>; Tue, 11 Jan 2011 02:00:37 +0000 (UTC)
-Received: from TX2EHSMHS012.bigfish.com (unknown [10.9.14.248])	by
- mail94-tx2.bigfish.com (Postfix) with ESMTP id 82C2710051	for
- <linux-mmc@vger.kernel.org>; Tue, 11 Jan 2011 02:00:37 +0000 (UTC)
+Received: from am1ehsobe002.messaging.microsoft.com ([213.199.154.205]:2445
+	"EHLO AM1EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755680Ab1AKCC7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2011 21:02:59 -0500
+Received: from mail20-am1 (localhost.localdomain [127.0.0.1])	by
+ mail20-am1-R.bigfish.com (Postfix) with ESMTP id 3F75D12401E4	for
+ <linux-mmc@vger.kernel.org>; Tue, 11 Jan 2011 02:02:58 +0000 (UTC)
+Received: from AM1EHSMHS009.bigfish.com (unknown [10.3.201.246])	by
+ mail20-am1.bigfish.com (Postfix) with ESMTP id B5CA81880056	for
+ <linux-mmc@vger.kernel.org>; Tue, 11 Jan 2011 02:02:57 +0000 (UTC)
 Received: from az33smr02.freescale.net (az33smr02.freescale.net
- [10.64.34.200])	by az33egw01.freescale.net (8.14.3/8.14.3) with ESMTP id
- p0B20Qlj025572	for <linux-mmc@vger.kernel.org>; Mon, 10 Jan 2011 19:00:29
+ [10.64.34.200])	by az33egw02.freescale.net (8.14.3/8.14.3) with ESMTP id
+ p0B22tp2009073	for <linux-mmc@vger.kernel.org>; Mon, 10 Jan 2011 19:02:55
  -0700 (MST)
+Received: from mail.freescale.net ([10.84.1.16])	by az33smr02.freescale.net
+ (8.13.1/8.13.0) with ESMTP id p0B22s1U007670	for <linux-mmc@vger.kernel.org>;
+ Mon, 10 Jan 2011 20:02:54 -0600 (CST)
+In-Reply-To: <1.10.2011-mgd.freescale.com-30-6343028283138894775208-3989@freescale.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: r58066@freescale.com, root@udp161639uds.ap.freescale.net
-Cc: lnxrevli@freescale.com, Richard Zhu <r65037@freescale.com>, linux-mmc@vger.kernel.org
+To: Zhu Richard-R65037 <R65037@freescale.com>, "root@udp161639uds.ap.freescale.net" <root@udp161639uds.ap.freescale.net>
+Cc: ReviewList Linux-LNXREVLI <LNXREVLI@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Pick up the patch from the community.
-
-fc8a0985c2846292312556cba10b8a4182f55967
-From: Hanumath Prasad <hanumath.prasad@stericsson.com>
-Date: Tue, 10 Aug 2010 18:01:45 -0700
-Subject: [REVIEW 2/2] mmc: only set blockaddressed for > 2GiB cards
-
-A non-zero value of SEC_COUNT does not indicate that the card is sector
-addressed. According to the MMC specification, cards
-with a densitygreater than 2GiB are sector addressed.
-
-Acked-by: Linus Walleij <linus.walleij@stericsson.com>
-Signed-off-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
-Signed-off-by: Rabin Vincent <rabin.vincent@stericsson.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
-Signed-off-by: Richard Zhu <r65037@freescale.com>
-
- drivers/mmc/core/mmc.c |    4 +++-
- 1 files changed, 3 insertions(+), 1 deletions(-)
-
-ENGR0000137838 SDHCI Some eMMC cards can't work well in our BSP
-sha             : ce733e353d0ac82c9a607b708f7de2b214408445
-local branch is : imx_2.6.35
-remote_branch   : origin/imx_2.6.35
-branch_start    : v2.6.35.3
-
-review-commits last updated 2010-12-31 13:49 /home/r65037/bin/linux-infra/tools/review-commits
-d33ca02dca1624e86b1513e7bb7cce7281cd9590 don't generate pkg for linux-2.6-testbu
-ild for cherry-pick experiment
-git version 1.6.3.3
-
-
-Running checkpatch.pl: 
-total: 0 errors, 0 warnings, 10 lines checked
-
-Your patch has no obvious style problems and is ready for submission.
-
-checking header of ce733e3: ENGR0000137838 SDHCI Some eMMC cards can't work well in our BSP
-
-check header: PASS
-
-Checking kernel paths: PASS
-
-review-commits: PASS
-=============================================
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 4a9e2ed..95e13c2 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -222,7 +222,9 @@ static int mmc_read_ext_csd(struct mmc_card *card)
- 			ext_csd[EXT_CSD_SEC_CNT + 1] << 8 |
- 			ext_csd[EXT_CSD_SEC_CNT + 2] << 16 |
- 			ext_csd[EXT_CSD_SEC_CNT + 3] << 24;
--		if (card->ext_csd.sectors)
-+
-+		/* Cards with density > 2GiB are sector addressed */
-+		if (card->ext_csd.sectors > (2u * 1024 * 1024 * 1024) / 512)
- 			mmc_card_set_blockaddr(card);
- 	}
- 
--- 
-1.6.3.3
-
+T2sgdG8gcHVzaC4NCg0KQmVzdCBSZWdhcmRzDQpMaWx5IFpoYW5nDQpGcmVlc2NhbGUgTUFEIExp
+bnV4IEJTUA0KDQpURUw6ICs4Ni0yMS0yODkzNzU3Mw0KRkFYOiArODYtMjEtMjg5Mzc0NDQNCklN
+OiByNTgwNjZAaW0uZnJlZXNjYWxlLm5ldA0KbWFpbCB0bzogcjU4MDY2QGZyZWVzY2FsZS5jb20N
+Cg0KDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBaaHUgUmljaGFyZC1SNjUw
+MzcgDQpTZW50OiAyMDExxOox1MIxMcjVIDEwOjAzDQpUbzogWmhhbmcgTGlseS1SNTgwNjY7IHJv
+b3RAdWRwMTYxNjM5dWRzLmFwLmZyZWVzY2FsZS5uZXQNCkNjOiBSZXZpZXdMaXN0IExpbnV4LUxO
+WFJFVkxJOyBaaHUgUmljaGFyZC1SNjUwMzc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcNClN1
+YmplY3Q6IFtsbnhyZXZsaV0gW1JFVklFVyAyLzJdIEVOR1IwMDAwMTM3ODM4IFNESENJIFNvbWUg
+ZU1NQyBjYXJkcyBjYW4ndCB3b3JrIHdlbGwgaW4gb3VyIEJTUA0KDQpQaWNrIHVwIHRoZSBwYXRj
+aCBmcm9tIHRoZSBjb21tdW5pdHkuDQoNCmZjOGEwOTg1YzI4NDYyOTIzMTI1NTZjYmExMGI4YTQx
+ODJmNTU5NjcNCkZyb206IEhhbnVtYXRoIFByYXNhZCA8aGFudW1hdGgucHJhc2FkQHN0ZXJpY3Nz
+b24uY29tPg0KRGF0ZTogVHVlLCAxMCBBdWcgMjAxMCAxODowMTo0NSAtMDcwMA0KU3ViamVjdDog
+W1JFVklFVyAyLzJdIG1tYzogb25seSBzZXQgYmxvY2thZGRyZXNzZWQgZm9yID4gMkdpQiBjYXJk
+cw0KDQpBIG5vbi16ZXJvIHZhbHVlIG9mIFNFQ19DT1VOVCBkb2VzIG5vdCBpbmRpY2F0ZSB0aGF0
+IHRoZSBjYXJkIGlzIHNlY3Rvcg0KYWRkcmVzc2VkLiBBY2NvcmRpbmcgdG8gdGhlIE1NQyBzcGVj
+aWZpY2F0aW9uLCBjYXJkcw0Kd2l0aCBhIGRlbnNpdHlncmVhdGVyIHRoYW4gMkdpQiBhcmUgc2Vj
+dG9yIGFkZHJlc3NlZC4NCg0KQWNrZWQtYnk6IExpbnVzIFdhbGxlaWogPGxpbnVzLndhbGxlaWpA
+c3Rlcmljc3Nvbi5jb20+DQpTaWduZWQtb2ZmLWJ5OiBIYW51bWF0aCBQcmFzYWQgPGhhbnVtYXRo
+LnByYXNhZEBzdGVyaWNzc29uLmNvbT4NClNpZ25lZC1vZmYtYnk6IFJhYmluIFZpbmNlbnQgPHJh
+YmluLnZpbmNlbnRAc3Rlcmljc3Nvbi5jb20+DQpDYzogPGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5v
+cmc+DQpTaWduZWQtb2ZmLWJ5OiBBbmRyZXcgTW9ydG9uIDxha3BtQGxpbnV4LWZvdW5kYXRpb24u
+b3JnPg0KU2lnbmVkLW9mZi1ieTogTGludXMgVG9ydmFsZHMgPHRvcnZhbGRzQGxpbnV4LWZvdW5k
+YXRpb24ub3JnPg0KDQpTaWduZWQtb2ZmLWJ5OiBSaWNoYXJkIFpodSA8cjY1MDM3QGZyZWVzY2Fs
+ZS5jb20+DQoNCiBkcml2ZXJzL21tYy9jb3JlL21tYy5jIHwgICAgNCArKystDQogMSBmaWxlcyBj
+aGFuZ2VkLCAzIGluc2VydGlvbnMoKyksIDEgZGVsZXRpb25zKC0pDQoNCkVOR1IwMDAwMTM3ODM4
+IFNESENJIFNvbWUgZU1NQyBjYXJkcyBjYW4ndCB3b3JrIHdlbGwgaW4gb3VyIEJTUA0Kc2hhICAg
+ICAgICAgICAgIDogY2U3MzNlMzUzZDBhYzgyYzlhNjA3YjcwOGY3ZGUyYjIxNDQwODQ0NQ0KbG9j
+YWwgYnJhbmNoIGlzIDogaW14XzIuNi4zNQ0KcmVtb3RlX2JyYW5jaCAgIDogb3JpZ2luL2lteF8y
+LjYuMzUNCmJyYW5jaF9zdGFydCAgICA6IHYyLjYuMzUuMw0KDQpyZXZpZXctY29tbWl0cyBsYXN0
+IHVwZGF0ZWQgMjAxMC0xMi0zMSAxMzo0OSAvaG9tZS9yNjUwMzcvYmluL2xpbnV4LWluZnJhL3Rv
+b2xzL3Jldmlldy1jb21taXRzDQpkMzNjYTAyZGNhMTYyNGU4NmIxNTEzZTdiYjdjY2U3MjgxY2Q5
+NTkwIGRvbid0IGdlbmVyYXRlIHBrZyBmb3IgbGludXgtMi42LXRlc3RidQ0KaWxkIGZvciBjaGVy
+cnktcGljayBleHBlcmltZW50DQpnaXQgdmVyc2lvbiAxLjYuMy4zDQoNCg0KUnVubmluZyBjaGVj
+a3BhdGNoLnBsOiANCnRvdGFsOiAwIGVycm9ycywgMCB3YXJuaW5ncywgMTAgbGluZXMgY2hlY2tl
+ZA0KDQpZb3VyIHBhdGNoIGhhcyBubyBvYnZpb3VzIHN0eWxlIHByb2JsZW1zIGFuZCBpcyByZWFk
+eSBmb3Igc3VibWlzc2lvbi4NCg0KY2hlY2tpbmcgaGVhZGVyIG9mIGNlNzMzZTM6IEVOR1IwMDAw
+MTM3ODM4IFNESENJIFNvbWUgZU1NQyBjYXJkcyBjYW4ndCB3b3JrIHdlbGwgaW4gb3VyIEJTUA0K
+DQpjaGVjayBoZWFkZXI6IFBBU1MNCg0KQ2hlY2tpbmcga2VybmVsIHBhdGhzOiBQQVNTDQoNCnJl
+dmlldy1jb21taXRzOiBQQVNTDQo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT0NCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9t
+bWMvY29yZS9tbWMuYw0KaW5kZXggNGE5ZTJlZC4uOTVlMTNjMiAxMDA2NDQNCi0tLSBhL2RyaXZl
+cnMvbW1jL2NvcmUvbW1jLmMNCisrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCkBAIC0yMjIs
+NyArMjIyLDkgQEAgc3RhdGljIGludCBtbWNfcmVhZF9leHRfY3NkKHN0cnVjdCBtbWNfY2FyZCAq
+Y2FyZCkNCiAJCQlleHRfY3NkW0VYVF9DU0RfU0VDX0NOVCArIDFdIDw8IDggfA0KIAkJCWV4dF9j
+c2RbRVhUX0NTRF9TRUNfQ05UICsgMl0gPDwgMTYgfA0KIAkJCWV4dF9jc2RbRVhUX0NTRF9TRUNf
+Q05UICsgM10gPDwgMjQ7DQotCQlpZiAoY2FyZC0+ZXh0X2NzZC5zZWN0b3JzKQ0KKw0KKwkJLyog
+Q2FyZHMgd2l0aCBkZW5zaXR5ID4gMkdpQiBhcmUgc2VjdG9yIGFkZHJlc3NlZCAqLw0KKwkJaWYg
+KGNhcmQtPmV4dF9jc2Quc2VjdG9ycyA+ICgydSAqIDEwMjQgKiAxMDI0ICogMTAyNCkgLyA1MTIp
+DQogCQkJbW1jX2NhcmRfc2V0X2Jsb2NrYWRkcihjYXJkKTsNCiAJfQ0KIA0KLS0gDQoxLjYuMy4z
+DQoNCg0KDQo=
 
