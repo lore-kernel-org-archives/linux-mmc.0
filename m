@@ -1,298 +1,290 @@
-From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [FYI 3/4] MMCI: Corrections for DMA
-Date: Wed, 12 Jan 2011 19:19:42 +0100
-Message-ID: <1294856383-14187-4-git-send-email-per.forlin@linaro.org>
-References: <1294856383-14187-1-git-send-email-per.forlin@linaro.org>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH 0/5] mmc: add double buffering for mmc block requests
+Date: Wed, 12 Jan 2011 19:24:21 +0100
+Message-ID: <AANLkTi=c13d-hbrS565M8c1UOyv6vGh27yzWK3tt9AVD@mail.gmail.com>
+References: <1294856043-13447-1-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1294856383-14187-1-git-send-email-per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:62192 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751045Ab1ALSYW convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2011 13:24:22 -0500
+In-Reply-To: <1294856043-13447-1-git-send-email-per.forlin@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev <linaro-dev@lists.linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@linaro.org>
 
-From: Ulf Hansson <ulf.hansson-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
+I mistyped the linaro email in this patch series.
 
-NOT to be mainlined, only sets the base for the double
-buffer example implementation. The DMA implemenation for
-MMCI is under development.
+Sorry for the mess
+/Per
 
-Make use of DMA_PREP_INTERRUPT to get a callback when DMA has
-successfully completed the data transfer.
-
-To entirely ending the transfer and request, both the DMA
-callback and MCI_DATAEND must occur.
----
- drivers/mmc/host/mmci.c |  173 +++++++++++++++++++++++++++++++----------------
- 1 files changed, 114 insertions(+), 59 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 38fcbde..ab44f5f 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -203,6 +203,34 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
- 	sg_miter_start(&host->sg_miter, data->sg, data->sg_len, flags);
- }
- 
-+static void
-+mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
-+{
-+	void __iomem *base = host->base;
-+
-+	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
-+	    cmd->opcode, cmd->arg, cmd->flags);
-+
-+	if (readl(base + MMCICOMMAND) & MCI_CPSM_ENABLE) {
-+		writel(0, base + MMCICOMMAND);
-+		udelay(1);
-+	}
-+
-+	c |= cmd->opcode | MCI_CPSM_ENABLE;
-+	if (cmd->flags & MMC_RSP_PRESENT) {
-+		if (cmd->flags & MMC_RSP_136)
-+			c |= MCI_CPSM_LONGRSP;
-+		c |= MCI_CPSM_RESPONSE;
-+	}
-+	if (/*interrupt*/0)
-+		c |= MCI_CPSM_INTERRUPT;
-+
-+	host->cmd = cmd;
-+
-+	writel(cmd->arg, base + MMCIARGUMENT);
-+	writel(c, base + MMCICOMMAND);
-+}
-+
- /*
-  * All the DMA operation mode stuff goes inside this ifdef.
-  * This assumes that you have a generic DMA device interface,
-@@ -290,6 +318,39 @@ static void mmci_dma_terminate(struct mmci_host *host)
- 		     (data->flags & MMC_DATA_WRITE)
- 		     ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
- 	chan->device->device_control(chan, DMA_TERMINATE_ALL, 0);
-+	host->dma_on_current_xfer = false;
-+}
-+
-+static void mmci_dma_callback(void *arg)
-+{
-+	unsigned long flags;
-+	struct mmci_host *host = arg;
-+	struct mmc_data *data;
-+
-+	dev_vdbg(mmc_dev(host->mmc), "DMA transfer done!\n");
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	mmci_dma_data_end(host);
-+
-+	/*
-+	 * Make sure MMCI has received MCI_DATAEND before
-+	 * ending the transfer and request.
-+	 */
-+	if (host->dataend) {
-+		data = host->data;
-+		mmci_stop_data(host);
-+
-+		host->data_xfered += data->blksz * data->blocks;
-+		host->dataend = false;
-+
-+		if (!data->stop)
-+			mmci_request_end(host, data->mrq);
-+		else
-+			mmci_start_command(host, data->stop, 0);
-+	}
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
- static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
-@@ -314,6 +375,8 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 	struct scatterlist *sg;
- 	dma_cookie_t cookie;
- 	int i;
-+	unsigned int irqmask0;
-+	int sg_len;
- 
- 	datactrl |= MCI_DPSM_DMAENABLE;
- 	datactrl |= variant->dmareg_enable;
-@@ -344,15 +407,19 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 			return -EINVAL;
- 	}
- 
--	dma_map_sg(mmc_dev(host->mmc), data->sg,
--		   data->sg_len, direction);
-+	sg_len = dma_map_sg(mmc_dev(host->mmc), data->sg,
-+				data->sg_len, direction);
-+	if (!sg_len)
-+		goto map_err;
- 
- 	desc = chan->device->device_prep_slave_sg(chan,
--					data->sg, data->sg_len, direction,
--					DMA_CTRL_ACK);
-+					data->sg, sg_len, direction,
-+					DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
- 	if (!desc)
- 		goto unmap_exit;
- 
-+	desc->callback = mmci_dma_callback;
-+	desc->callback_param = host;
- 	host->dma_desc = desc;
- 	dev_vdbg(mmc_dev(host->mmc), "Submit MMCI DMA job, sglen %d "
- 		 "blksz %04x blks %04x flags %08x\n",
-@@ -366,20 +433,25 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 	host->dma_on_current_xfer = true;
- 	chan->device->device_issue_pending(chan);
- 
--	/* Trigger the DMA transfer */
--	writel(datactrl, host->base + MMCIDATACTRL);
- 	/*
--	 * Let the MMCI say when the data is ended and it's time
--	 * to fire next DMA request. When that happens, MMCI will
--	 * call mmci_data_end()
-+	 * MMCI monitors both MCI_DATAEND and the DMA callback.
-+	 * Both events must occur before the transfer is considered
-+	 * to be completed. MCI_DATABLOCKEND is not used in DMA mode.
- 	 */
--	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
--	       host->base + MMCIMASK0);
-+	host->last_blockend = true;
-+	irqmask0 = readl(host->base + MMCIMASK0);
-+	irqmask0 |= MCI_DATAENDMASK;
-+	irqmask0 &= ~MCI_DATABLOCKENDMASK;
-+	writel(irqmask0, host->base + MMCIMASK0);
-+
-+	/* Trigger the DMA transfer */
-+	writel(datactrl, host->base + MMCIDATACTRL);
- 	return 0;
- 
- unmap_exit:
--	chan->device->device_control(chan, DMA_TERMINATE_ALL, 0);
- 	dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len, direction);
-+map_err:
-+	chan->device->device_control(chan, DMA_TERMINATE_ALL, 0);
- 	return -ENOMEM;
- }
- #else
-@@ -478,43 +550,20 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 		if (mmc_card_sdio(host->mmc->card))
- 			datactrl |= MCI_ST_DPSM_SDIOEN;
- 
--	writel(datactrl, base + MMCIDATACTRL);
-+	/* Setup IRQ */
- 	irqmask0 = readl(base + MMCIMASK0);
--	if (variant->broken_blockend)
-+	if (variant->broken_blockend) {
-+		host->last_blockend = true;
- 		irqmask0 &= ~MCI_DATABLOCKENDMASK;
--	else
-+	} else {
- 		irqmask0 |= MCI_DATABLOCKENDMASK;
-+	}
- 	irqmask0 &= ~MCI_DATAENDMASK;
- 	writel(irqmask0, base + MMCIMASK0);
- 	mmci_set_mask1(host, irqmask1);
--}
--
--static void
--mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
--{
--	void __iomem *base = host->base;
--
--	dev_dbg(mmc_dev(host->mmc), "op %02x arg %08x flags %08x\n",
--	    cmd->opcode, cmd->arg, cmd->flags);
--
--	if (readl(base + MMCICOMMAND) & MCI_CPSM_ENABLE) {
--		writel(0, base + MMCICOMMAND);
--		udelay(1);
--	}
- 
--	c |= cmd->opcode | MCI_CPSM_ENABLE;
--	if (cmd->flags & MMC_RSP_PRESENT) {
--		if (cmd->flags & MMC_RSP_136)
--			c |= MCI_CPSM_LONGRSP;
--		c |= MCI_CPSM_RESPONSE;
--	}
--	if (/*interrupt*/0)
--		c |= MCI_CPSM_INTERRUPT;
--
--	host->cmd = cmd;
--
--	writel(cmd->arg, base + MMCIARGUMENT);
--	writel(c, base + MMCICOMMAND);
-+	/* Start the data transfer */
-+	writel(datactrl, base + MMCIDATACTRL);
- }
- 
- static void
-@@ -601,26 +650,29 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 	 * on others we must sync with the blockend signal since they can
- 	 * appear out-of-order.
- 	 */
--	if (host->dataend &&
--	    (host->last_blockend || variant->broken_blockend)) {
--		mmci_dma_data_end(host);
--		mmci_stop_data(host);
--
--		/* Reset these flags */
-+	if (host->dataend && host->last_blockend) {
- 		host->last_blockend = false;
--		host->dataend = false;
- 
- 		/*
--		 * Variants with broken blockend flags need to handle the
--		 * end of the entire transfer here.
-+		 * Make sure there is no dma transfer running before
-+		 * ending the transfer and the request.
- 		 */
--		if (variant->broken_blockend && !data->error)
-+		if (!host->dma_on_current_xfer) {
- 			host->data_xfered += data->blksz * data->blocks;
-+			mmci_stop_data(host);
-+			host->dataend = false;
- 
--		if (!data->stop) {
--			mmci_request_end(host, data->mrq);
--		} else {
--			mmci_start_command(host, data->stop, 0);
-+			/*
-+			 * Variants with broken blockend flags need to handle
-+			 * the end of the entire transfer here.
-+			 */
-+			if (variant->broken_blockend && !data->error)
-+				host->data_xfered += data->blksz * data->blocks;
-+
-+			if (!data->stop)
-+				mmci_request_end(host, data->mrq);
-+			else
-+				mmci_start_command(host, data->stop, 0);
- 		}
- 	}
- }
-@@ -1130,10 +1182,13 @@ static int __devinit mmci_probe(struct amba_device *dev, struct amba_id *id)
- 	mmc->max_req_size = (1 << variant->datalength_bits) - 1;
- 
- 	/*
--	 * Set the maximum segment size.  Since we aren't doing DMA
--	 * (yet) we are only limited by the data length register.
-+	 * Set the maximum segment size. Right now DMA sets the
-+	 * limit and not the data length register. Thus until the DMA
-+	 * driver not handles this, the segment size is limited by DMA.
-+	 * DMA limit: src_addr_width x (64 KB -1). src_addr_width
-+	 * can be 1.
- 	 */
--	mmc->max_seg_size = mmc->max_req_size;
-+	mmc->max_seg_size = 65535;
- 
- 	/*
- 	 * Block size can be up to 2048 bytes, but must be a power of two.
--- 
-1.7.1
+On 12 January 2011 19:13, Per Forlin <per.forlin@linaro.org> wrote:
+> Add support to prepare one MMC request while another is active on
+> the host. This is done by making the issue_rw_rq() asynchronous.
+> The increase in throughput is proportional to the time it takes to
+> prepare a request and how fast the memory is. The faster the MMC/SD i=
+s
+> the more significant the prepare request time becomes. Measurements o=
+n U5500
+> and U8500 on eMMC shows significant performance gain for DMA on MMC f=
+or large
+> reads. In the PIO case there is some gain in performance for large re=
+ads too.
+> There seems to be no or small performance gain for write, don't have =
+a good
+> explanation for this yet.
+>
+> There are two optional hooks pre_req() and post_req() that the host d=
+river
+> may implement in order to improve double buffering. In the DMA case p=
+re_req()
+> may do dma_map_sg() and prepare the dma descriptor and post_req runs =
+the
+> dma_unmap_sg.
+>
+> The mmci host driver implementation for double buffering is not inten=
+ded
+> nor ready for mainline yet. It is only an example of how to implement
+> pre_req() and post_req(). The reason for this is that the basic DMA s=
+upport
+> for MMCI is not complete yet. The mmci patches are sent in a separate=
+ patch
+> series "[FYI 0/4] arm: mmci: example implementation of double bufferi=
+ng".
+>
+> Issues/Questions for issue_rw_rq() in block.c:
+> * Is it safe to claim the host for the first MMC request and wait to =
+release
+> =A0it until the MMC queue is empty again? Or must the host be claimed=
+ and
+> =A0released for every request?
+> * Is it possible to predict the result from __blk_end_request().
+> =A0If there are no errors for a completed MMC request and the
+> =A0blk_rq_bytes(req) =3D=3D data.bytes_xfered, will it be guaranteed =
+that
+> =A0__blk_end_request will return 0?
+>
+> Here follows the IOZone results for u8500 v1.1 on eMMC.
+> The numbers for DMA are a bit to good here due to the fact that the
+> CPU speed is decreased compared to u8500 v2. This makes the cache han=
+dling
+> even more significant.
+>
+> Command line used: ./iozone -az -i0 -i1 -i2 -s 50m -I -f /iozone.tmp =
+-e -R -+u
+>
+> Relative diff: VANILLA-MMC-PIO -> 2BUF-MMC-PIO
+> cpu load is abs diff
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0random =A0random
+> =A0 =A0 =A0 =A0KB =A0 =A0 =A0reclen =A0write =A0 rewrite read =A0 =A0=
+reread =A0read =A0 =A0write
+> =A0 =A0 =A0 =A051200 =A0 4 =A0 =A0 =A0 +0% =A0 =A0 +0% =A0 =A0 +0% =A0=
+ =A0 +0% =A0 =A0 +0% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.1 =A0 =A0-0.1 =A0 =A0-0=
+=2E5 =A0 =A0-0.3 =A0 =A0-0.1 =A0 =A0-0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 8 =A0 =A0 =A0 +0% =A0 =A0 +0% =A0 =A0 +6% =A0=
+ =A0 +6% =A0 =A0 +8% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.1 =A0 =A0-0.1 =A0 =A0-0=
+=2E3 =A0 =A0-0.4 =A0 =A0-0.8 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 16 =A0 =A0 =A0+0% =A0 =A0 -2% =A0 =A0 +0% =A0=
+ =A0 +0% =A0 =A0 -3% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0-0.2 =A0 =A0+0=
+=2E0 =A0 =A0+0.0 =A0 =A0-0.2 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 32 =A0 =A0 =A0+0% =A0 =A0 +1% =A0 =A0 +0% =A0=
+ =A0 +0% =A0 =A0 +0% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.1 =A0 =A0+0.0 =A0 =A0-0=
+=2E3 =A0 =A0+0.0 =A0 =A0+0.0 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 64 =A0 =A0 =A0+0% =A0 =A0 +0% =A0 =A0 +0% =A0=
+ =A0 +0% =A0 =A0 +0% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.1 =A0 =A0+0.0 =A0 =A0+0=
+=2E0 =A0 =A0+0.0 =A0 =A0+0.0 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 128 =A0 =A0 +0% =A0 =A0 +1% =A0 =A0 +1% =A0 =
+=A0 +1% =A0 =A0 +1% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0+0.2 =A0 =A0+0=
+=2E1 =A0 =A0-0.3 =A0 =A0+0.4 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 256 =A0 =A0 +0% =A0 =A0 +0% =A0 =A0 +1% =A0 =
+=A0 +1% =A0 =A0 +1% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0-0.0 =A0 =A0+0=
+=2E1 =A0 =A0+0.1 =A0 =A0+0.1 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 512 =A0 =A0 +0% =A0 =A0 +1% =A0 =A0 +2% =A0 =
+=A0 +2% =A0 =A0 +2% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.1 =A0 =A0+0.0 =A0 =A0+0=
+=2E2 =A0 =A0+0.2 =A0 =A0+0.2 =A0 =A0+0.1
+>
+> =A0 =A0 =A0 =A051200 =A0 1024 =A0 =A0+0% =A0 =A0 +2% =A0 =A0 +2% =A0 =
+=A0 +2% =A0 =A0 +3% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.1 =A0 =A0+0=
+=2E2 =A0 =A0+0.5 =A0 =A0-0.8 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 2048 =A0 =A0+0% =A0 =A0 +2% =A0 =A0 +3% =A0 =
+=A0 +3% =A0 =A0 +3% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0-0.2 =A0 =A0+0=
+=2E4 =A0 =A0+0.8 =A0 =A0-0.5 =A0 =A0+0.2
+>
+> =A0 =A0 =A0 =A051200 =A0 4096 =A0 =A0+0% =A0 =A0 +1% =A0 =A0 +3% =A0 =
+=A0 +3% =A0 =A0 +3% =A0 =A0 +1%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.1 =A0 =A0+0=
+=2E9 =A0 =A0+0.9 =A0 =A0+0.5 =A0 =A0+0.1
+>
+> =A0 =A0 =A0 =A051200 =A0 8192 =A0 =A0+1% =A0 =A0 +0% =A0 =A0 +3% =A0 =
+=A0 +3% =A0 =A0 +3% =A0 =A0 +1%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.2 =A0 =A0+1=
+=2E3 =A0 =A0+1.3 =A0 =A0+1.0 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 16384 =A0 +0% =A0 =A0 +1% =A0 =A0 +3% =A0 =A0=
+ +3% =A0 =A0 +3% =A0 =A0 +1%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.1 =A0 =A0+1=
+=2E0 =A0 =A0+1.3 =A0 =A0+1.0 =A0 =A0+0.5
+>
+> Relative diff: VANILLA-MMC-DMA -> 2BUF-MMC-MMCI-DMA
+> cpu load is abs diff
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0random =A0random
+> =A0 =A0 =A0 =A0KB =A0 =A0 =A0reclen =A0write =A0 rewrite read =A0 =A0=
+reread =A0read =A0 =A0write
+> =A0 =A0 =A0 =A051200 =A0 4 =A0 =A0 =A0 +0% =A0 =A0 -3% =A0 =A0 +6% =A0=
+ =A0 +5% =A0 =A0 +5% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0-0.2 =A0 =A0-0=
+=2E6 =A0 =A0-0.1 =A0 =A0+0.3 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 8 =A0 =A0 =A0 +0% =A0 =A0 +0% =A0 =A0 +7% =A0=
+ =A0 +7% =A0 =A0 +7% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0+0.1 =A0 =A0+0=
+=2E8 =A0 =A0+0.6 =A0 =A0+0.9 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 16 =A0 =A0 =A0+0% =A0 =A0 +0% =A0 =A0 +7% =A0=
+ =A0 +7% =A0 =A0 +8% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0-0.0 =A0 =A0+0=
+=2E7 =A0 =A0+0.7 =A0 =A0+0.8 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 32 =A0 =A0 =A0+0% =A0 =A0 +0% =A0 =A0 +8% =A0=
+ =A0 +8% =A0 =A0 +9% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0+0.1 =A0 =A0+0=
+=2E7 =A0 =A0+0.7 =A0 =A0+0.3 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 64 =A0 =A0 =A0+0% =A0 =A0 +1% =A0 =A0 +9% =A0=
+ =A0 +9% =A0 =A0 +9% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0+0.0 =A0 =A0+0=
+=2E8 =A0 =A0+0.7 =A0 =A0+0.8 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 128 =A0 =A0 +1% =A0 =A0 +0% =A0 =A0 +13% =A0=
+ =A0+13% =A0 =A0+14% =A0 =A0+0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.0 =A0 =A0+1=
+=2E0 =A0 =A0+1.0 =A0 =A0+1.1 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 256 =A0 =A0 +1% =A0 =A0 +2% =A0 =A0 +8% =A0 =
+=A0 +8% =A0 =A0 +11% =A0 =A0+0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0+0.3 =A0 =A0+0=
+=2E0 =A0 =A0+0.7 =A0 =A0+1.5 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 512 =A0 =A0 +1% =A0 =A0 +2% =A0 =A0 +16% =A0=
+ =A0+16% =A0 =A0+17% =A0 =A0+0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.2 =A0 =A0+2=
+=2E2 =A0 =A0+2.1 =A0 =A0+2.2 =A0 =A0+0.1
+>
+> =A0 =A0 =A0 =A051200 =A0 1024 =A0 =A0+1% =A0 =A0 +2% =A0 =A0 +20% =A0=
+ =A0+20% =A0 =A0+20% =A0 =A0+1%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.1 =A0 =A0+2=
+=2E6 =A0 =A0+1.9 =A0 =A0+2.6 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 2048 =A0 =A0+0% =A0 =A0 +2% =A0 =A0 +22% =A0=
+ =A0+22% =A0 =A0+21% =A0 =A0+0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0+0.3 =A0 =A0+2=
+=2E3 =A0 =A0+2.9 =A0 =A0+2.1 =A0 =A0-0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 4096 =A0 =A0+1% =A0 =A0 +2% =A0 =A0 +23% =A0=
+ =A0+23% =A0 =A0+23% =A0 =A0+1%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.1 =A0 =A0+2=
+=2E0 =A0 =A0+3.2 =A0 =A0+3.1 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 8192 =A0 =A0+1% =A0 =A0 +5% =A0 =A0 +24% =A0=
+ =A0+24% =A0 =A0+24% =A0 =A0+1%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+1.4 =A0 =A0-0.0 =A0 =A0+4=
+=2E2 =A0 =A0+3.0 =A0 =A0+2.8 =A0 =A0+0.1
+>
+> =A0 =A0 =A0 =A051200 =A0 16384 =A0 +1% =A0 =A0 +3% =A0 =A0 +24% =A0 =A0=
++24% =A0 =A0+24% =A0 =A0+2%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.0 =A0 =A0+0.3 =A0 =A0+3=
+=2E4 =A0 =A0+3.8 =A0 =A0+3.7 =A0 =A0+0.1
+>
+> Here follows the IOZone results for u5500 on eMMC.
+> These numbers for DMA are more as expected.
+>
+> Command line used: ./iozone -az -i0 -i1 -i2 -s 50m -I -f /iozone.tmp =
+-e -R -+u
+>
+> Relative diff: VANILLA-MMC-DMA -> 2BUF-MMC-MMCI-DMA
+> cpu load is abs diff
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0random =A0random
+> =A0 =A0 =A0 =A0KB =A0 =A0 =A0reclen =A0write =A0 rewrite read =A0 =A0=
+reread =A0read =A0 =A0write
+> =A0 =A0 =A0 =A051200 =A0 128 =A0 =A0 +1% =A0 =A0 +1% =A0 =A0 +10% =A0=
+ =A0+9% =A0 =A0 +10% =A0 =A0+0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.1 =A0 =A0+0.0 =A0 =A0+1=
+=2E3 =A0 =A0+0.1 =A0 =A0+0.8 =A0 =A0+0.1
+>
+> =A0 =A0 =A0 =A051200 =A0 256 =A0 =A0 +2% =A0 =A0 +2% =A0 =A0 +7% =A0 =
+=A0 +7% =A0 =A0 +9% =A0 =A0 +0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.1 =A0 =A0+0.4 =A0 =A0+0=
+=2E5 =A0 =A0+0.6 =A0 =A0+0.7 =A0 =A0+0.0
+>
+> =A0 =A0 =A0 =A051200 =A0 512 =A0 =A0 +2% =A0 =A0 +2% =A0 =A0 +12% =A0=
+ =A0+12% =A0 =A0+12% =A0 =A0+1%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.4 =A0 =A0+0.6 =A0 =A0+1=
+=2E8 =A0 =A0+2.4 =A0 =A0+2.4 =A0 =A0+0.2
+>
+> =A0 =A0 =A0 =A051200 =A0 1024 =A0 =A0+2% =A0 =A0 +3% =A0 =A0 +14% =A0=
+ =A0+14% =A0 =A0+14% =A0 =A0+0%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.3 =A0 =A0+0.1 =A0 =A0+2=
+=2E1 =A0 =A0+1.4 =A0 =A0+1.4 =A0 =A0+0.2
+>
+> =A0 =A0 =A0 =A051200 =A0 2048 =A0 =A0+3% =A0 =A0 +3% =A0 =A0 +16% =A0=
+ =A0+16% =A0 =A0+16% =A0 =A0+1%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.2 =A0 =A0+2=
+=2E5 =A0 =A0+1.8 =A0 =A0+2.4 =A0 =A0-0.2
+>
+> =A0 =A0 =A0 =A051200 =A0 4096 =A0 =A0+3% =A0 =A0 +3% =A0 =A0 +17% =A0=
+ =A0+17% =A0 =A0+18% =A0 =A0+3%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.1 =A0 =A0-0.1 =A0 =A0+2=
+=2E7 =A0 =A0+2.0 =A0 =A0+2.7 =A0 =A0-0.1
+>
+> =A0 =A0 =A0 =A051200 =A0 8192 =A0 =A0+3% =A0 =A0 +3% =A0 =A0 +18% =A0=
+ =A0+18% =A0 =A0+18% =A0 =A0+3%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0-0.1 =A0 =A0+0.2 =A0 =A0+3=
+=2E0 =A0 =A0+2.3 =A0 =A0+2.2 =A0 =A0+0.2
+>
+> =A0 =A0 =A0 =A051200 =A0 16384 =A0 +3% =A0 =A0 +3% =A0 =A0 +18% =A0 =A0=
++18% =A0 =A0+18% =A0 =A0+4%
+> =A0 =A0 =A0 =A0cpu: =A0 =A0 =A0 =A0 =A0 =A0+0.2 =A0 =A0+0.2 =A0 =A0+2=
+=2E8 =A0 =A0+3.5 =A0 =A0+2.4 =A0 =A0-0.0
+>
+> Per Forlin (5):
+> =A0mmc: add member in mmc queue struct to hold request data
+> =A0mmc: Add a block request prepare function
+> =A0mmc: Add a second mmc queue request member
+> =A0mmc: Store the mmc block request struct in mmc queue
+> =A0mmc: Add double buffering for mmc block requests
+>
+> =A0drivers/mmc/card/block.c | =A0337 ++++++++++++++++++++++++++++++--=
+--------------
+> =A0drivers/mmc/card/queue.c | =A0171 +++++++++++++++---------
+> =A0drivers/mmc/card/queue.h | =A0 31 +++-
+> =A0drivers/mmc/core/core.c =A0| =A0 77 +++++++++--
+> =A0include/linux/mmc/core.h | =A0 =A07 +-
+> =A0include/linux/mmc/host.h | =A0 =A08 +
+> =A06 files changed, 432 insertions(+), 199 deletions(-)
+>
+>
