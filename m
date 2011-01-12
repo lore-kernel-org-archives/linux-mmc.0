@@ -1,99 +1,106 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH] mxcmmc: use dmaengine API
-Date: Wed, 12 Jan 2011 14:13:32 +0100
-Message-ID: <20110112131332.GW12078@pengutronix.de>
-References: <1294826996-13764-1-git-send-email-s.hauer@pengutronix.de>
- <1294826996-13764-2-git-send-email-s.hauer@pengutronix.de>
- <20110112102632.GX11039@n2100.arm.linux.org.uk>
+From: "Nori, Sekhar" <nsekhar@ti.com>
+Subject: RE: [PATCH v5] mmc: davinci: add support for SDIO irq handling
+Date: Wed, 12 Jan 2011 19:33:02 +0530
+Message-ID: <B85A65D85D7EB246BE421B3FB0FBB5930248349F12@dbde02.ent.ti.com>
+References: <1294038807-16450-1-git-send-email-nsekhar@ti.com>
+ <20110110001738.GB26898@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:34037 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932324Ab1ALNNe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2011 08:13:34 -0500
-Content-Disposition: inline
-In-Reply-To: <20110112102632.GX11039@n2100.arm.linux.org.uk>
+Received: from bear.ext.ti.com ([192.94.94.41]:55487 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751648Ab1ALOD1 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2011 09:03:27 -0500
+In-Reply-To: <20110110001738.GB26898@void.printf.net>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, Alagu Sankar <alagusankar@embwise.com>
 
-On Wed, Jan 12, 2011 at 10:26:32AM +0000, Russell King - ARM Linux wrote:
-> On Wed, Jan 12, 2011 at 11:09:56AM +0100, Sascha Hauer wrote:
-> > +	host->dma_nents = dma_map_sg(mmc_dev(host->mmc), data->sg,
-> > +				     data->sg_len,  host->dma_dir);
-> 
-> As recently discussed, you don't need to save dma_nents - the value to
-> be passed to dma_unmap_sg() is data->sg_len, not host->dma_nents.
-> 
-> You should also do the map/unmap against the DMA engine device (which
-> is the device actually doing DMA) rather than the peripheral (which is
-> only the recipient of DMA).  The reason is - while the peripheral can
-> see the DMA controller, the peripheral may be able to see all RAM but
-> the DMA controller may have an IOMMU or limited view of RAM.
+Hi Chris,
 
-ok.
+On Mon, Jan 10, 2011 at 05:47:38, Chris Ball wrote:
+> Hi Sekhar,
+> 
+> On Mon, Jan 03, 2011 at 12:43:27PM +0530, Sekhar Nori wrote:
+> > From: Alagu Sankar <alagusankar@embwise.com>
+> > 
+> > This patch adds support for handling SDIO interrupt on
+> > DaVinci MMC/SD controller.
+> > 
+> > The patch has been tested on DM355 and DA850 EVMs with
+> > Marvell Libertas based SDIO wireless LAN card.
+> > 
+> > Signed-off-by: Alagu Sankar <alagusankar@embwise.com>
+> > Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+> > ---
+> > Applies to mmc-next branch of the mmc tree
+> > 
+> > Since v4, fixed a typo in patch description
+> > 
+> >  drivers/mmc/host/davinci_mmc.c |   78 +++++++++++++++++++++++++++++++++++++---
+> >  1 files changed, 73 insertions(+), 5 deletions(-)
+> 
+> Thanks, pushed to mmc-next for .38 with some trivial indentation fixes
+> as below:
 
-> 
-> > +static int mxcmci_setup_dma(struct mmc_host *mmc)
-> > +{
-> > +	struct mxcmci_host *host = mmc_priv(mmc);
-> > +	struct dma_slave_config *config = &host->dma_slave_config;
-> > +
-> > +	config->direction = DMA_FROM_DEVICE;
-> 
-> I would like to get some concensus on removing config->direction from
-> the slave configuration entirely - and make all the fields below
-> refer purely to the peripheral device parameters.  At the moment,
-> the API allows them to be used ambiguously.
+Thanks for pushing this for .38 and for making the
+fixes. Will take care of this next time.
 
-OK, I can remove this as it's unused by the dma driver anyway (and in
-fact I wondered what purpose this field has while writing the dma
-drivers)
-
-> 
-> > @@ -794,7 +823,7 @@ static int mxcmci_probe(struct platform_device *pdev)
-> >  	mmc->max_blk_size = 2048;
-> >  	mmc->max_blk_count = 65535;
-> >  	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
-> > -	mmc->max_seg_size = mmc->max_req_size;
-> > +	mmc->max_seg_size = 65535;
-> 
-> You can get this from the DMA parameters for the DMA engine device:
-> 
-> 	mmc->max_seg_size = dma_get_max_seg_size(dev);
-> 
-> where 'dev' is the DMA engine struct device - chan->dma_device->dev.
-
-I prepared a patch to set the segment size in the i.MX DMA drivers.
+Thanks,
+Sekhar
 
 > 
-> Also just spotted this left in your patch:
-> > +	if (!mxcmci_use_dma(host))
-> > +		return 0;
-> > +
-> >  	for_each_sg(data->sg, sg, data->sg_len, i) {
-> >  		if (sg->offset & 3 || sg->length & 3) {
-> > 			host->do_dma = 0;
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index 6b09752..0076c74 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -882,7 +882,7 @@ mmc_davinci_xfer_done(struct mmc_davinci_host *host, struct mmc_data *data)
+>  		 * 2.1.6): Signal SDIO interrupt only if it is enabled by core
+>  		 */
+>  		if (host->sdio_int && !(readl(host->base + DAVINCI_SDIOST0) &
+> -							SDIOST0_DAT1_HI)) {
+> +					SDIOST0_DAT1_HI)) {
+>  			writel(SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
+>  			mmc_signal_sdio_irq(host->mmc);
+>  		}
+> @@ -962,7 +962,7 @@ static irqreturn_t mmc_davinci_sdio_irq(int irq, void *dev_id)
+>  	status = readl(host->base + DAVINCI_SDIOIST);
+>  	if (status & SDIOIST_IOINT) {
+>  		dev_dbg(mmc_dev(host->mmc),
+> -				"SDIO interrupt status %x\n", status);
+> +			"SDIO interrupt status %x\n", status);
+>  		writel(status | SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
+>  		mmc_signal_sdio_irq(host->mmc);
+>  	}
+> @@ -1124,12 +1124,12 @@ static void mmc_davinci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>  		} else {
+>  			host->sdio_int = true;
+>  			writel(readl(host->base + DAVINCI_SDIOIEN) |
+> -				SDIOIEN_IOINTEN, host->base + DAVINCI_SDIOIEN);
+> +			       SDIOIEN_IOINTEN, host->base + DAVINCI_SDIOIEN);
+>  		}
+>  	} else {
+>  		host->sdio_int = false;
+>  		writel(readl(host->base + DAVINCI_SDIOIEN) & ~SDIOIEN_IOINTEN,
+> -				host->base + DAVINCI_SDIOIEN);
+> +		       host->base + DAVINCI_SDIOIEN);
+>  	}
+>  }
+>  
+> @@ -1331,7 +1331,7 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+>  
+>  	if (host->sdio_irq >= 0) {
+>  		ret = request_irq(host->sdio_irq, mmc_davinci_sdio_irq, 0,
+> -				mmc_hostname(mmc), host);
+> +				  mmc_hostname(mmc), host);
+>  		if (!ret)
+>  			mmc->caps |= MMC_CAP_SDIO_IRQ;
+>  	}
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 > 
-> Shouldn't this be a decision made by the DMA engine rather than the
-> driver?  Having looked at the MMCI code also doing this, I think this
-> should cause prep_slave_sg() to return NULL if it can't handle the
-> scatterlist.  On MMCI, we fall back to PIO if prep_slave_sg() returns
-> NULL.
 
-I prepared a patch which checks for invalid addresses and lengths in the
-DMA drivers.
-
-I'd like to push this patch like it is until the two points above are
-solved upstream (with the other points fixed of course).
-
-Sascha
-
-
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
