@@ -1,31 +1,36 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] sdhci-s3c: add platform_8bit_width()
-Date: Wed, 12 Jan 2011 03:58:14 +0000
-Message-ID: <20110112035814.GA28479@void.printf.net>
-References: <4D2CF631.4080402@samsung.com> <20110112022030.GA27414@void.printf.net> <4D2D1900.1020200@samsung.com> <20110112032700.GA28143@void.printf.net> <AANLkTi=oh004OUBQSSBQU634SuwKhRHNzriUu4DZv9dD@mail.gmail.com>
+Subject: Re: [PATCH] mmc: bfin_sdh: fix alloc size for private data
+Date: Wed, 12 Jan 2011 04:05:34 +0000
+Message-ID: <20110112040532.GA28429@void.printf.net>
+References: <1294803575-24087-1-git-send-email-vapier@gentoo.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43896 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:35209 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932798Ab1ALD6S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 11 Jan 2011 22:58:18 -0500
+	id S932791Ab1ALEFk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 11 Jan 2011 23:05:40 -0500
 Content-Disposition: inline
-In-Reply-To: <AANLkTi=oh004OUBQSSBQU634SuwKhRHNzriUu4DZv9dD@mail.gmail.com>
+In-Reply-To: <1294803575-24087-1-git-send-email-vapier@gentoo.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ben Dooks <ben-linux@fluff.org>
+To: Mike Frysinger <vapier@gentoo.org>
+Cc: linux-mmc@vger.kernel.org, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>
 
-On Wed, Jan 12, 2011 at 12:54:07PM +0900, Kyungmin Park wrote:
-> Umm I think it's kind of bug fix since we used 8-bit buswidth previous
-> code but recent change don't make it working
-> So re-support the 8-bit buswidth. Can you merge it at 38.rc period?
+Hi Mike, Sonic,
 
-Okay, that should be fine.  As always, though, it would be nice to see
-an ACK from Ben before pushing it through quickly.
+On Tue, Jan 11, 2011 at 10:39:35PM -0500, Mike Frysinger wrote:
+> From: Sonic Zhang <sonic.zhang@analog.com>
+> 
+> The bfin_sdh driver allocates the wrong size for the private data
+> in the mmc_host.  The first parameter of mmc_alloc_host should be
+> the size of the local driver struct rather than the common mmc_host.
+>  
+> -	mmc = mmc_alloc_host(sizeof(*mmc), &pdev->dev);
+> +	mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
 
-Thanks,
+Thanks, I'll add a stable tag and merge as a .38 fix.  Mind if we
+use "mmc_alloc_host(sizeof(struct sdh_host), &pdev-dev);" instead?
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
