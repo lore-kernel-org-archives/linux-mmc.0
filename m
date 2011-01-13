@@ -1,33 +1,47 @@
-From: Cliff Brake <cliff.brake@gmail.com>
-Subject: SDIO port expander
-Date: Wed, 12 Jan 2011 16:01:26 -0500
-Message-ID: <AANLkTimfM02BHPfDX-zSKRH-kwr70_WyBdg+4veWE7cp@mail.gmail.com>
+From: "Mark Thurlow" <mthurlow@ipwireless.com>
+Subject: building mmc_core.ko - invalid module format
+Date: Thu, 13 Jan 2011 10:45:48 -0000
+Message-ID: <DB5D3F56DF583645AEFD1920B15E0B73A179BB@ipwuk-mail05.ipwirelessus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:46055 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756203Ab1ALVCA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2011 16:02:00 -0500
-Received: by wyb28 with SMTP id 28so1014739wyb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Jan 2011 13:01:58 -0800 (PST)
+Received: from mail.ipwsecure.com ([193.130.71.38]:49703 "EHLO
+	mail6.ipwireless.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932421Ab1AMKq3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2011 05:46:29 -0500
+Content-class: urn:content-classes:message
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
+Cc: Pat Clark <pclark@ipwireless.com>
 
-Hello,
+Hi,
 
-Has anyone implement Linux support for a SDIO port expander such as
-the TI TXS02612?  I'm wondering how painful it would be.  Particularly
-the issue with SDIO interrupts--it seems those would need to be routed
-around the mux directly to the CPU.  We are using a OMAP3530 for the
-SD controller.
+I'm trying to build mmc_core.ko with a modified sdio_cis.c  in order to
+add more debug to see what our card is doing.
 
-http://focus.ti.com/docs/prod/folders/print/txs02612.html
+I have the following setup:
+1.	Ubuntu 10.04 - 2.6.32-27-generic.
+2.	I have downloaded the source for this via 
+	a.	sudo apt-get build-dep --no-install-recommends
+linux-image-$(uname -r)
+	b.	apt-get source linux-image-$(uname -r)
+
+In the top level source directory I run "make menuconfig".  Under the
+device driver option I set MMC/SDIO to M - produce modules. So
+MMC_CONFIG=m in the .config file.
+
+I then run "make modules"
+
+All builds OK. I get a mmc_core.ko produced. However, if I then insmod
+this .ko then I see the "invalid module format".
+
+Any ideas of what I'm doing wrong ?
 
 Thanks,
-Cliff
 
--- 
-=================
-http://bec-systems.com
+Mark
+
+
