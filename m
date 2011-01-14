@@ -1,55 +1,47 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v1 3/3]mmc: not clock gate host when host is in runtime
-	suspended state
-Date: Fri, 14 Jan 2011 16:23:24 +0800
-Message-ID: <20110114082324.GD27523@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Michal Marek <mmarek@suse.cz>
+Subject: [PATCH] mmc: sdhci-of does not build on x86
+Date: Fri, 14 Jan 2011 13:29:51 +0100
+Message-ID: <1295008191-1596-1-git-send-email-mmarek@suse.cz>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:30367 "EHLO mga11.intel.com"
+Received: from cantor.suse.de ([195.135.220.2]:35410 "EHLO mx1.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751046Ab1ANI3n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 14 Jan 2011 03:29:43 -0500
-Content-Disposition: inline
+	id S1752070Ab1ANMaF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 14 Jan 2011 07:30:05 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, ohad@wizery.com
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Since mmc clock gating is done in a work queue which is not synchronized with
-host runtime power management, when driver is doing clock gating, host may
-has already been power gated.
+After commit c10d1e2, CONFIG_OLPC selects CONFIG_OF, which enables to
+select CONFIG_MMC_SDHCI_OF, which does not build on x86:
 
-So before driver clock gate host, check whether host is already suspended.
+drivers/mmc/host/sdhci-of-core.c:24:25: fatal error: asm/machdep.h: No
+such file or directory
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Signed-off-by: Michal Marek <mmarek@suse.cz>
 ---
- drivers/mmc/core/core.c |   11 +++++++++++
- 1 files changed, 11 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index e296c5a..d2121fa 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -670,6 +670,17 @@ void mmc_gate_clock(struct mmc_host *host)
- 	host->ios.clock = 0;
- 	host->clk_gated = true;
- 	spin_unlock_irqrestore(&host->clk_lock, flags);
-+#ifdef CONFIG_PM_RUNTIME
-+	/*
-+	 * mmc clock gating is done in a work queue which
-+	 * does not synchronized with host controller runtime
-+	 * power management. So when mmc gate clock, host may
-+	 * have already in runtime suspend state. In that case,
-+	 * driver cannot touch host controller registers
-+	 */
-+	if (host->class_dev.power.runtime_status != RPM_ACTIVE)
-+		return;
-+#endif
- 	mmc_set_ios(host);
- }
+I don't know if the driver could possibly work on some OLPC hardware,
+but it wasn't used on x86 before, so this patch won't make things any worse.
+
+Michal
+---
+ drivers/mmc/host/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index afe8c6f..9901656 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -83,7 +83,7 @@ config MMC_RICOH_MMC
  
+ config MMC_SDHCI_OF
+ 	tristate "SDHCI support on OpenFirmware platforms"
+-	depends on MMC_SDHCI && OF
++	depends on MMC_SDHCI && OF && !X86
+ 	help
+ 	  This selects the OF support for Secure Digital Host Controller
+ 	  Interfaces.
 -- 
-1.6.6.1
+1.7.3.4
 
