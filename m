@@ -1,7 +1,7 @@
 From: Linus Walleij <linus.ml.walleij@gmail.com>
 Subject: Re: mmci: U300 "sync with blockend" broken for multi-block?
-Date: Sun, 16 Jan 2011 22:16:59 +0100
-Message-ID: <AANLkTimywaKn-jKmxzottNogYiRtwvSEcO6y0LxuKLR4@mail.gmail.com>
+Date: Sun, 16 Jan 2011 23:09:44 +0100
+Message-ID: <AANLkTim9cX0MTh04YyooEKkXv9E=cn314tcBSi=tiLwZ@mail.gmail.com>
 References: <AANLkTimYb6TxLj4SamxRwUgykf9JyW5y9gbejOUXqZ7K@mail.gmail.com>
 	<20110101121048.GB25924@n2100.arm.linux.org.uk>
 	<AANLkTi=4SrxX-oCx-XXd+oib64j8RhMLdsQD1oWGxgU1@mail.gmail.com>
@@ -10,41 +10,44 @@ References: <AANLkTimYb6TxLj4SamxRwUgykf9JyW5y9gbejOUXqZ7K@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f174.google.com ([209.85.212.174]:48048 "EHLO
-	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753666Ab1APVQ7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Jan 2011 16:16:59 -0500
-Received: by pxi15 with SMTP id 15so733707pxi.19
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Jan 2011 13:16:59 -0800 (PST)
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:61815 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753995Ab1APWJp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Jan 2011 17:09:45 -0500
+Received: by pva4 with SMTP id 4so749140pva.19
+        for <linux-mmc@vger.kernel.org>; Sun, 16 Jan 2011 14:09:44 -0800 (PST)
 In-Reply-To: <AANLkTim4J8xrj9axhsu4=_7YkEy_ndiJ6cjDNf2WfzEg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Cc: Rabin Vincent <rabin@rab.in>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Ulf Hansson <Ulf.Hansson@stericsson.com>, Sebastian Rasmussen <Sebastian.Rasmussen@stericsson.com>, linux-mmc@vger.kernel.org
 
-2011/1/14 Linus Walleij <linus.ml.walleij@gmail.com>:
+...and to round off a theory of why the U300 and Ux500 is
+missing interrupts:
 
-> What it problematic with the reads *and* writes is that
-> sometimes there us a MCI_DATABLOCKEND missing, so the
-> blocks simply don't add up! This is the real bug that
-> the sync code was trying to solve, and not in a very
-> good way.
+Maybe the IP-block does not really handle the case of a block
+interrupt not being ACK:ed before the next block is ready. So
+it will just fire another "1" flag, which gets ACK:ed at the end
+of the interrupt handler with the IRQ currently being processed.
 
-Here is a follow-up explanation as to why the code as it
-is today actually works: the sync code has a bug. It is
-intended to check whether the *last* blockend interrupt
-*and* the dataend interrupt has occurred. However it
-actually checks whether *any* blockend interrupt and
-the datend interrupt has occured.
+So the interrupt handler will unknowingly consume interrupts
+for other blocks.
 
-Thus it works, with the side effect of ACK:ing multiblock
-transfers on U300 while the host->data_xfered value is lower
-that what was requested - the blocks have been read
-but not all are accounted for, because there are blockend
-IRQs missing.
+The right way would be to either:
 
-I'll follow up with a patch fixing the *real* issue, in an
-atleast a little more elegant way :-/
+- Queue block ACKs so that they are ACK:ed one at the time
+  if the hardware reads ahead. (Which requires a quite deep
+  queue on large writes.)
+
+- Hold back further block reading from the card until the IRQ
+  has been ACK:ed. (Which is not good for speed.)
+
+So to avoid both it is indeed a logical thing to remove the
+block interrupt altogether and just wait for the last one to
+avoid trouble, it's just not documented and
+HW-implemented as such.
+
+Now I'll send that patch.
 
 Yours,
 Linus Walleij
