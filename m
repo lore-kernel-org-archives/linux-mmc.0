@@ -1,38 +1,52 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH v4] dw_mmc: Add Synopsys DesignWare mmc host driver.
-Date: Tue, 18 Jan 2011 10:21:23 +0000
-Message-ID: <AANLkTi=SEXYk9B6N6RGmLKAx_QF6sybgHMVVpEo8mcp8@mail.gmail.com>
-References: <AANLkTi=0RtvsGX+Q3goL3mdG6oKeNidYtiudTZ8ZTpRP@mail.gmail.com>
-	<20101208115510.GD10998@console-pimps.org>
-	<AANLkTi=KqOa-MRQiptCtZGvoafRCgULfE3QFs=hmGpdi@mail.gmail.com>
-	<AANLkTi=PpTi1_JO9Q=ph7w9Jim8iXMf9LbCfmEkWuo-h@mail.gmail.com>
-	<20101209064751.GA21128@void.printf.net>
-	<AANLkTimMgrawcndvUTYYjq9BGFqs-sbRsZkwVQ0Uvhvb@mail.gmail.com>
-	<20101209160157.GA28586@void.printf.net>
-	<AANLkTim3Rj2tTbqvT8nM4L=p=Wx8bdOnGq=EDv+cs02g@mail.gmail.com>
-	<20101211192320.GA24430@void.printf.net>
-	<AANLkTik7cMwgwXR1zK44HXC+1YtzpU3_zW2GUjcBMi8X@mail.gmail.com>
-	<4D354752.3030401@samsung.com>
+From: "Tardy, Pierre" <pierre.tardy@intel.com>
+Subject: RE: [PATCH v1 1/3]mmc: implemented runtime pm for mmc host
+Date: Tue, 18 Jan 2011 16:39:02 +0000
+Message-ID: <8250E4885F9967469CAC3FB5CBA2CE69934E7AAB20@irsmsx501.ger.corp.intel.com>
+References: <20110114082310.GB27523@intel.com>
+ <8250E4885F9967469CAC3FB5CBA2CE69934E7AA2FE@irsmsx501.ger.corp.intel.com>
+ <5D8008F58939784290FAB48F54975198351D4FA654@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:52800 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751080Ab1ARKVX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jan 2011 05:21:23 -0500
-In-Reply-To: <4D354752.3030401@samsung.com>
+Received: from mga02.intel.com ([134.134.136.20]:34610 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752168Ab1ARQjI convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jan 2011 11:39:08 -0500
+In-Reply-To: <5D8008F58939784290FAB48F54975198351D4FA654@shsmsx502.ccr.corp.intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Linux Kernel list <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, linux-arm-kernel@lists.infradead.org
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "ohad@wizery.com" <ohad@wizery.com>
 
-On Tue, Jan 18, 2011 at 7:54 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi Will.
->
-> I have some question...i'm testing dw_mmc in our environment.
-> but i didn't understand pdata->init(?)...what initialize in there?
+> > I'm also worried about this patch not taking in account the 8 clock cycles before
+> > shutting down the clock, contrary to the clock gating fw.
+> > If you power down hc, you will also gate the clock. So the sdio protocol might not be
+> > strictly followed.
+> As mmc spec said, 8 clock cycles is needed. That is right.
+> But I think if we have set the auto suspended delay for host, runtime pm core could make sure host to
+> wait at least the auto suspended delay before shutting down the power of the device. So if the auto
+> suspended delay is longer than 8 clock cycles, the mmc protocol can be followed, right?
+I disagree. You cannot enforce this. It depends on clock speed, that can vary with sdio cards. 
+User can change the autosuspend delay to whatever he wants, it should just change performance, but not functionality.
 
-In most of our platforms init is empty so I guess it would be fine to
-change that code to ignore a null init pointer. An example of one of
-the things we do use the init function for is to switch pins to GPIO
-to handle card detect.
+Why don't you just take my clock gating version?
+Its working well, I'm using this for 2 weeks, and follow the linux-mmc latest improvement.
+
+Regards,
+Pierre
+
+
+---------------------------------------------------------------------
+Intel Corporation SAS (French simplified joint stock company)
+Registered headquarters: "Les Montalets"- 2, rue de Paris, 
+92196 Meudon Cedex, France
+Registration Number:  302 456 199 R.C.S. NANTERRE
+Capital: 4,572,000 Euros
+
+This e-mail and any attachments may contain confidential material for
+the sole use of the intended recipient(s). Any review or distribution
+by others is strictly prohibited. If you are not the intended
+recipient, please contact the sender and delete all copies.
+
