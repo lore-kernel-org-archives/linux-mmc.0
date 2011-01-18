@@ -1,33 +1,38 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH 0/5] mmc: add double buffering for mmc block requests
-Date: Tue, 18 Jan 2011 09:12:24 +0100
-Message-ID: <AANLkTimjfO4Wb0f87X_sDugW=yU1=YEQn35uZnsKKwq2@mail.gmail.com>
-References: <1294856043-13447-1-git-send-email-per.forlin@linaro.org>
-	<4D34FC5D.5080605@samsung.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH v4] dw_mmc: Add Synopsys DesignWare mmc host driver.
+Date: Tue, 18 Jan 2011 10:21:23 +0000
+Message-ID: <AANLkTi=SEXYk9B6N6RGmLKAx_QF6sybgHMVVpEo8mcp8@mail.gmail.com>
+References: <AANLkTi=0RtvsGX+Q3goL3mdG6oKeNidYtiudTZ8ZTpRP@mail.gmail.com>
+	<20101208115510.GD10998@console-pimps.org>
+	<AANLkTi=KqOa-MRQiptCtZGvoafRCgULfE3QFs=hmGpdi@mail.gmail.com>
+	<AANLkTi=PpTi1_JO9Q=ph7w9Jim8iXMf9LbCfmEkWuo-h@mail.gmail.com>
+	<20101209064751.GA21128@void.printf.net>
+	<AANLkTimMgrawcndvUTYYjq9BGFqs-sbRsZkwVQ0Uvhvb@mail.gmail.com>
+	<20101209160157.GA28586@void.printf.net>
+	<AANLkTim3Rj2tTbqvT8nM4L=p=Wx8bdOnGq=EDv+cs02g@mail.gmail.com>
+	<20101211192320.GA24430@void.printf.net>
+	<AANLkTik7cMwgwXR1zK44HXC+1YtzpU3_zW2GUjcBMi8X@mail.gmail.com>
+	<4D354752.3030401@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:56693 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752070Ab1ARIMZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jan 2011 03:12:25 -0500
-In-Reply-To: <4D34FC5D.5080605@samsung.com>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:52800 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751080Ab1ARKVX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jan 2011 05:21:23 -0500
+In-Reply-To: <4D354752.3030401@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Linux Kernel list <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Matt Fleming <matt@console-pimps.org>, linux-arm-kernel@lists.infradead.org
 
-On 18 January 2011 03:35, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi Per..
+On Tue, Jan 18, 2011 at 7:54 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi Will.
 >
-> it is interesting approach..so
-> we want to test your double buffering in our environment(Samsung SoC).
->
-> Did you test with SDHCI?
-So far I have only tested on mmci for board u5500 and u8500. I happily
-test on a different board if I can get hold of one.
+> I have some question...i'm testing dw_mmc in our environment.
+> but i didn't understand pdata->init(?)...what initialize in there?
 
-> If you tested with SDHCI, i want to know how much increase the performance.
->
-> Thanks,
-> Jaehoon Chung
+In most of our platforms init is empty so I guess it would be fine to
+change that code to ignore a null init pointer. An example of one of
+the things we do use the init function for is to switch pins to GPIO
+to handle card detect.
