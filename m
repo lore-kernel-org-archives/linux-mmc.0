@@ -1,46 +1,48 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: SDHC Read Performance
-Date: Thu, 20 Jan 2011 16:07:40 +0900
-Message-ID: <20110120070738.GA32495@verge.net.au>
-References: <20110119000909.GA9412@verge.net.au>
- <AANLkTinNtL0v2cnhz7Ci+a8TqQTcQXBMVW5EkX8qujy+@mail.gmail.com>
- <20110119080542.GE1960@verge.net.au>
- <20110120033020.GA32120@verge.net.au>
- <AANLkTi=fw1C0cj9U9=c0PxvOPHZtM66pDc+zpR9p=68c@mail.gmail.com>
+From: Pierre Tardy <tardyp@gmail.com>
+Subject: Re: [PATCH 3/3] mmc: remove anti clock gating quirk for wl1271
+Date: Thu, 20 Jan 2011 08:17:51 +0100
+Message-ID: <AANLkTingXmestJGOpi0A0eywz63iKA0q=S1FFb8-q4OO@mail.gmail.com>
+References: <cover.1294588491.git.tardyp@gmail.com>
+	<cb471b35d320b96a9d143103fd9e9b76f8998470.1294588491.git.tardyp@gmail.com>
+	<20110120041412.GA5274@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <AANLkTi=fw1C0cj9U9=c0PxvOPHZtM66pDc+zpR9p=68c@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Arnd Hannemann <arnd@arndnet.de>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:49075 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751412Ab1ATHRw convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jan 2011 02:17:52 -0500
+In-Reply-To: <20110120041412.GA5274@void.printf.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Pierre Tardy <pierre.tardy@intel.com>
 
-On Thu, Jan 20, 2011 at 01:01:04PM +0900, Magnus Damm wrote:
-> 1) Can you try a different SDHC Class 10 card? I'd just simply buy a
-> top-of-the-line SanDisk card myself and try that, but anything
-> different from what you're having is probably useful as a contrast.
+>
+> This adds a defined-but-not-used warning. =A0The MMC tree doesn't
+> currently generate any warnings, so it would be good to avoid adding =
+new
+> ones, though I understand why it might make sense in this case.
+Yes, this is supposed to be used by future user patches.
 
-Sure, will do.
+Do you suggest to add __attribute__ ((unused)), or we just completly
+remove those and will add them whenever we have user?
 
-> 2) How about the MMC4.0 down-clocking. Is there anything we can do
-> about that software-wise?
+>> =A0static const struct mmc_fixup mmc_fixup_methods[] =3D {
+>> =A0 =A0 =A0 { SDIO_ANY_ID, SDIO_ANY_ID,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 add_quirk_for_sdio_devices, MMC_QUIRK_BR=
+OKEN_CLK_GATING }
+>> + =A0 =A0 { SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 remove_quirk_hook, MMC_QUIRK_BROKEN_CLK_GA=
+TING },
+>> =A0 =A0 =A0 { 0 }
+>> =A0};
+>>
+>
+> This doesn't compile, missing a comma. =A0Was it tested?
+Hum, I must have screwed up with patch version.
+I'm using this every day,,,
 
-As I understand it, the problem is that the SDHI allows a simple
-divisor to applied to a clock source. Effectively this means
-that the driver may use use 12Mhz, 24Mhz and 50Mhz.
-
-In the case of MMC the desired speed is 20Mhz, but the highest
-value from the list above that the driver can use is 12Mhz.
-
-As we discussed (offline) yesterday, it ought to be possible
-to change the frequency of the clock source. And in the case of
-the mackerel this can probably be done without disturbing anything
-else as there are per SHDI clock sources.
-
-I imagine it would be possible to manipulate the frequency
-such that MMC can be run closer to 20Mhz than 12Mhz.
-
-However, I am unsure if this would improve performance in any way.
-
+Regards,
+Pierre
