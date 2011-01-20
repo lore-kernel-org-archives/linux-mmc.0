@@ -1,66 +1,244 @@
-From: "Tomoya MORINAGA" <tomoya-linux@dsn.okisemi.com>
-Subject: RE: A MMC card transfer issue
-Date: Thu, 20 Jan 2011 08:49:37 +0900
-Message-ID: <5EE73235CCE94FA8BB09F61BC8C4CBBC@hacdom.okisemi.com>
-References: <4CD8DE9C.4040505@dsn.okisemi.com> <AANLkTimfnj8GcSwmALjaZUBsiq6ssaVuzVZZsZHRYmiX@mail.gmail.com> <001701cb814c$71926bf0$66f8800a@maildom.okisemi.com> <001201cb90f4$4be8f790$66f8800a@maildom.okisemi.com> <2D50F985-2383-4406-8514-DFE462A5F546@marvell.com> <4D2E0464ABB54FFF9C10583336E27879@hacdom.okisemi.com> <4C4E7DE5-7CF1-4D97-9CAD-F600FCBE477A@marvell.com> <20110119174233.GA30494@void.printf.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2 1/1]mmc: implemented eMMC4.4 enhanced area feature
+Date: Thu, 20 Jan 2011 03:25:19 +0000
+Message-ID: <20110120032519.GA4827@void.printf.net>
+References: <20110113125727.GA20452@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20110119174233.GA30494@void.printf.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>, 'Philip Rakity' <prakity@marvell.com>
-Cc: 'Kyungmin Park' <kmpark@infradead.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, andrew.chih.howe.khor@intel.com, kok.howg.ewe@intel.com, Toshiharu Okada <toshiharu-linux@dsn.okisemi.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:55064 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754944Ab1ATDZY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Jan 2011 22:25:24 -0500
+Content-Disposition: inline
+In-Reply-To: <20110113125727.GA20452@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
 
-Hi Chris,
+Hi Chuanxiao,
 
-Thank you for your information.
-We will test using 2.6.38-rc1 and report to you.
- 
+On Thu, Jan 13, 2011 at 08:57:27PM +0800, Chuanxiao Dong wrote:
+> Enhanced area feature is a new feature defined in eMMC4.4 standard. This
+> kind of area can help to improve the performance.
+> 
+> MMC driver will read out the enhanced area offset and size and add them
+> to be device attributes. The feature enabling should be done in manufactory.
+> To use this feature, bit ERASE_GRP_DEF should also be set.
+> 
+> Documentation/ABI/testing/sysfs-devices-mmc described the two new attributes
+> 
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+
+Thanks for the explanation of your use case, this patch looks good.
+Just a few more comments:
+
+> ---
+>  Documentation/ABI/testing/sysfs-devices-mmc |   19 +++++++
+>  drivers/mmc/core/mmc.c                      |   73 +++++++++++++++++++++++++++
+>  include/linux/mmc/card.h                    |    3 +
+>  include/linux/mmc/mmc.h                     |    3 +
+>  4 files changed, 98 insertions(+), 0 deletions(-)
+>  create mode 100644 Documentation/ABI/testing/sysfs-devices-mmc
+> 
+> diff --git a/Documentation/ABI/testing/sysfs-devices-mmc b/Documentation/ABI/testing/sysfs-devices-mmc
+> new file mode 100644
+> index 0000000..f0fb053
+> --- /dev/null
+> +++ b/Documentation/ABI/testing/sysfs-devices-mmc
+> @@ -0,0 +1,19 @@
+> +What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_offset
+> +Date:		January 2011
+> +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
+> +Description:
+> +		Enhanced area is a new feature defined in eMMC4.4 standard.
+> +		eMMC4.4 or later card can support such feature. This kind of area
+> +		can help to improve the card performance. If the feature is enabled,
+> +		this attribute will indicate the start address of enhanced data
+> +		area. If not, this attribute will be 0. Unit Byte.
+> +
+> +What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_size
+> +Date:		January 2011
+> +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
+> +Description:
+> +		Enhanced area is a new feature defined in eMMC4.4 standard.
+> +		eMMC4.4 or later card can support such feature. This kind of area
+> +		can help to improve the card performance. If the feature is enabled,
+> +		this attribute will indicate the size of enhanced data area. If not,
+> +		this attribute will be 0. Unit KBytes.
+
+Please wrap the above at 80 chars.
+
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 16006ef..c8b5b3b 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -302,6 +302,41 @@ static int mmc_read_ext_csd(struct mmc_card *card)
+>  	}
+>  
+>  	if (card->ext_csd.rev >= 4) {
+> +		/*
+> +		 * Enhanced area feature support
+> +		 * check whether eMMC card is enabled enhanced area,
+
+check whether eMMC card has the Enhanced Area enabled
+
+> +		 * if so, export enhanced area offset and size to
+> +		 * user by adding sysfs interface
+> +		 */
+> +		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
+> +				(ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
+> +			u8 hc_erase_grp_sz =
+> +				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+> +			u8 hc_wp_grp_sz =
+> +				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+> +			/*
+> +			 * set a flag to identify whether the enhanced
+> +			 * user data are enabled
+
+enhanced user data area is enabled
+
+> +			 */
+> +			card->ext_csd.enhanced_area_en = 1;
+> +			/*
+> +			 * caculate the enhanced data area offset, unit B
+
+calculate
+
+> +			 */
+> +			card->ext_csd.enhanced_area_offset =
+> +				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
+> +				(ext_csd[137] << 8) + ext_csd[136];
+> +			if (mmc_card_blockaddr(card))
+> +				card->ext_csd.enhanced_area_offset <<= 9;
+> +			/*
+> +			 * caculate the enhanced data area size, unit KB
+> +			 */
+> +			card->ext_csd.enhanced_area_size =
+> +				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
+> +				ext_csd[140];
+> +			card->ext_csd.enhanced_area_size *=
+> +				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
+> +			card->ext_csd.enhanced_area_size <<= 9;
+> +		}
+>  		card->ext_csd.sec_trim_mult =
+>  			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+>  		card->ext_csd.sec_erase_mult =
+> @@ -336,6 +371,9 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+>  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+>  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+>  MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
+> +MMC_DEV_ATTR(enhanced_area_offset, "0x%llxB\n",
+> +		card->ext_csd.enhanced_area_offset);
+> +MMC_DEV_ATTR(enhanced_area_size, "0x%xKB\n", card->ext_csd.enhanced_area_size);
+
+I think these should probably be printed in decimal instead of hex.
+
+Hm, this way the sysfs files will show up regardless of whether we have
+an eMMC device or an SD card, which is very confusing.  Can you not check
+whether enhanced_area_en == 1 before create these files?
+
+>  
+>  static struct attribute *mmc_std_attrs[] = {
+>  	&dev_attr_cid.attr,
+> @@ -349,6 +387,8 @@ static struct attribute *mmc_std_attrs[] = {
+>  	&dev_attr_name.attr,
+>  	&dev_attr_oemid.attr,
+>  	&dev_attr_serial.attr,
+> +	&dev_attr_enhanced_area_offset.attr,
+> +	&dev_attr_enhanced_area_size.attr,
+>  	NULL,
+>  };
+>  
+> @@ -484,6 +524,39 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  	}
+>  
+>  	/*
+> +	 * If enhanced_area_en is TRUE, host need to enable
+> +	 * ERASE_GRP_DEF bit.
+> +	 * ERASE_GRP_DEF bit will be lost everytime
+> +	 * after a reset or power off.
+> +	 */
+> +	if (card->ext_csd.enhanced_area_en) {
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				EXT_CSD_ERASE_GROUP_DEF, 1);
+> +
+> +		if (err && err != -EBADMSG)
+> +			goto free_card;
+> +
+> +		if (err) {
+> +			err = 0;
+> +			/*
+> +			 * Just disable enhanced area off & sz
+> +			 * will try to enable ERASE_GROUP_DEF
+> +			 * during next time reinit
+> +			 */
+> +			card->ext_csd.enhanced_area_offset = 0;
+> +			card->ext_csd.enhanced_area_size = 0;
+
+It makes more sense to me to return -EINVAL instead of 0 if we know
+nothing about the enhanced_area.  What do you think?
+
+> +		} else {
+> +			card->ext_csd.erase_group_def = 1;
+> +			/*
+> +			 * enable ERASE_GRP_DEF successfully.
+> +			 * This will affect the erase size, so
+> +			 * here need to reset erase size
+> +			 */
+> +			mmc_set_erase_size(card);
+> +		}
+> +	}
+> +
+> +	/*
+>  	 * Activate high speed (if supported)
+>  	 */
+>  	if ((card->ext_csd.hs_max_dtr != 0) &&
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 8ce0827..cc9a07e 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -54,6 +54,9 @@ struct mmc_ext_csd {
+>  	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
+>  	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
+>  	unsigned int		trim_timeout;		/* In milliseconds */
+> +	bool		enhanced_area_en; /* enhanced area enable bit */
+> +	loff_t		enhanced_area_offset; /* enhanced area addr */
+> +	size_t		enhanced_area_size; /* enhanced area size */
+
+Think you need another tab to get these to line up.
+
+>  };
+>  
+>  struct sd_scr {
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 612301f..c50ede6 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -253,6 +253,8 @@ struct _mmc_csd {
+>   * EXT_CSD fields
+>   */
+>  
+> +#define EXT_CSD_PARTITION_ATTRIBUTE 156	/* R/W */
+
+This isn't lined up properly either.
+
+> +#define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+>  #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
+>  #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
+>  #define EXT_CSD_BUS_WIDTH		183	/* R/W */
+> @@ -262,6 +264,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_CARD_TYPE		196	/* RO */
+>  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
+>  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
+> +#define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
+>  #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
+>  #define EXT_CSD_HC_ERASE_GRP_SIZE	224	/* RO */
+>  #define EXT_CSD_SEC_TRIM_MULT		229	/* RO */
+
 Thanks,
------------------------------------------
-Tomoya MORINAGA
-OKI SEMICONDUCTOR CO., LTD.
 
-
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org] 
-> Sent: Thursday, January 20, 2011 2:43 AM
-> To: Philip Rakity
-> Cc: Tomoya MORINAGA; Kyungmin Park; 
-> linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; 
-> andrew.chih.howe.khor@intel.com; kok.howg.ewe@intel.com
-> Subject: Re: A MMC card transfer issue
-> 
-> Hi,
-> 
-> On Tue, Jan 18, 2011 at 10:05:04PM -0800, Philip Rakity wrote:
-> > 
-> > For 1 bit transcend cards you need these 2 patches.
-> > 
-> > >From 22113efd00491310da802f3b1a9a66cfcf415fac Mon Sep 17 00:00:00 
-> > >2001
-> > From: Aries Lee <arieslee@jmicron.com>
-> > Date: Wed, 15 Dec 2010 08:14:24 +0100
-> > Subject: [PATCH] mmc: Test bus-width for old MMC devices
-> 
-> Present in 2.6.38-rc1.
-> 
-> > >From 08c82dfad2458f8f9b83126224a85e7ea9e2b046 Mon Sep 17 00:00:00 
-> > >2001
-> > From: Takashi Iwai <tiwai@suse.de>
-> > Date: Wed, 22 Dec 2010 09:59:44 +0100
-> > Subject: [PATCH] mmc: fix mmc_set_bus_width_ddr() call without 
-> > bus-width-test cap
-> 
-> Also present in 2.6.38-rc1.
-> 
-> So, please re-test against 2.6.38-rc1 and let us know whether 
-> you still have problems.  Thanks,
-> 
-> -- 
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> 
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
