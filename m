@@ -1,69 +1,94 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: SDHC Read Performance
-Date: Thu, 20 Jan 2011 13:01:04 +0900
-Message-ID: <AANLkTi=fw1C0cj9U9=c0PxvOPHZtM66pDc+zpR9p=68c@mail.gmail.com>
-References: <20110119000909.GA9412@verge.net.au>
-	<AANLkTinNtL0v2cnhz7Ci+a8TqQTcQXBMVW5EkX8qujy+@mail.gmail.com>
-	<20110119080542.GE1960@verge.net.au>
-	<20110120033020.GA32120@verge.net.au>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 3/3] mmc: remove anti clock gating quirk for wl1271
+Date: Thu, 20 Jan 2011 04:14:12 +0000
+Message-ID: <20110120041412.GA5274@void.printf.net>
+References: <cover.1294588491.git.tardyp@gmail.com> <cb471b35d320b96a9d143103fd9e9b76f8998470.1294588491.git.tardyp@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20110120033020.GA32120@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Arnd Hannemann <arnd@arndnet.de>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:35065 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753585Ab1ATEON (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Jan 2011 23:14:13 -0500
+Content-Disposition: inline
+In-Reply-To: <cb471b35d320b96a9d143103fd9e9b76f8998470.1294588491.git.tardyp@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pierre Tardy <tardyp@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Pierre Tardy <pierre.tardy@intel.com>
 
-On Thu, Jan 20, 2011 at 12:30 PM, Simon Horman <horms@verge.net.au> wro=
-te:
-> I ran my tests again with CONFIG_SH_DMAE (and CONFIG_DMA_ENGINE)
-> enabled and the results are substantially better. Although
-> the results are still below the theoretical speeds of the cards.
->
-> Read Speed - SHDI
-> SD1.1: =A0 =A0 =A0 =A0 =A0 9.9 MB/s
-> SD2.0: =A0 =A0 =A0 =A0 =A017.2 MB/s
-> SDHC Class 2: =A0 17.0 MB/s
-> SDHC Class 10: =A017.2 MB/s
-> MMC4.0: =A0 =A0 =A0 =A0 =A08.6 MB/s =A0 <-- Clocked down to 12Mhz due=
- to driver limitations
->
-> I also tested the Write Speed
-> SD1.1: =A0 =A0 =A0 =A0 =A0 2.4 MB/s =A0 <-- Faster than expected
-> SD2.0: =A0 =A0 =A0 =A0 =A0 2.8 MB/s =A0 <-- Faster than expected
-> SDHC Class 2: =A0 =A02.5 MB/s =A0 <-- Faster than expected
-> SDHC Class 10: =A0 3.8 MB/s =A0 <-- Slower than expected
-> MMC4.0: =A0 =A0 =A0 =A0 =A02.1 MB/s =A0 <-- Clocked down to 12Mhz due=
- to driver limitations
->
-> For reference I obtained the following results on my laptop,
-> which according to dmesg has a SAMSUNG MMCRE28G VBM1 PQ.
->
-> Read
-> SD1.1: =A0 =A0 =A0 =A0 =A010.0 MB/s
-> SD2.0: =A0 =A0 =A0 =A0 =A019.2 MB/s
-> SDHC Class 2: =A0 19.4 MB/s
-> SDHC Class10: =A0 17.9 MB/s =A0<---- What!!!?
-> MMC4.0: =A0 =A0 =A0 =A0 =A08.2 MB/s
->
-> Write
-> SD1.1: =A0 =A0 =A0 =A0 =A0 2.7 MB/s
-> SD2.0: =A0 =A0 =A0 =A0 =A0 3.4 MB/s
-> SDHC Class 2: =A0 =A03.1 MB/s
-> SDHC Class10: =A0 =A03.8 MB/s =A0<---- What!!!?
-> MMC4.0: =A0 =A0 =A0 =A0 =A02.0 MB/s
+Hi Pierre,
 
-Interesting, thanks for running these tests. Two things cross my mind:
+On Sun, Jan 09, 2011 at 05:26:20PM +0100, Pierre Tardy wrote:
+> From: Pierre Tardy <pierre.tardy@intel.com>
+>=20
+> Signed-off-by: Pierre Tardy <pierre.tardy@intel.com>
+> ---
+>  drivers/mmc/core/quirks.c |   18 ++++++++++++++++++
+>  1 files changed, 18 insertions(+), 0 deletions(-)
+>=20
+> diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
+> index fe467c8..506e4fc 100644
+> --- a/drivers/mmc/core/quirks.c
+> +++ b/drivers/mmc/core/quirks.c
+> @@ -33,6 +33,14 @@ static void add_quirk(struct mmc_card *card, int d=
+ata)
+>  }
+> =20
+>  /*
+> + * This hook just removes a quirk unconditionnally
+> + */
+> +static void remove_quirk_hook(struct mmc_card *card, int data)
+> +{
+> +	card->quirks &=3D ~data;
+> +}
 
-1) Can you try a different SDHC Class 10 card? I'd just simply buy a
-top-of-the-line SanDisk card myself and try that, but anything
-different from what you're having is probably useful as a contrast.
+This adds a defined-but-not-used warning.  The MMC tree doesn't
+currently generate any warnings, so it would be good to avoid adding ne=
+w
+ones, though I understand why it might make sense in this case.
 
-2) How about the MMC4.0 down-clocking. Is there anything we can do
-about that software-wise?
+drivers/mmc/core/quirks.c:30:13: warning: =E2=80=98add_quirk=E2=80=99 d=
+efined but not used
+drivers/mmc/core/quirks.c:38:13: warning: =E2=80=98remove_quirk_hook=E2=
+=80=99 defined but not used
 
-Cheers,
+> +
+> +/*
+>   * This hook just adds a quirk for all sdio devices
+>   */
+>  static void add_quirk_for_sdio_devices(struct mmc_card *card, int da=
+ta)
+> @@ -41,9 +49,19 @@ static void add_quirk_for_sdio_devices(struct mmc_=
+card *card, int data)
+>  		card->quirks |=3D data;
+>  }
+> =20
+> +#ifndef SDIO_VENDOR_ID_TI
+> +#define SDIO_VENDOR_ID_TI		0x0097
+> +#endif
+> +
+> +#ifndef SDIO_DEVICE_ID_TI_WL1271
+> +#define SDIO_DEVICE_ID_TI_WL1271	0x4076
+> +#endif
+> +
+>  static const struct mmc_fixup mmc_fixup_methods[] =3D {
+>  	{ SDIO_ANY_ID, SDIO_ANY_ID,
+>  		add_quirk_for_sdio_devices, MMC_QUIRK_BROKEN_CLK_GATING }
+> +	{ SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
+> +		remove_quirk_hook, MMC_QUIRK_BROKEN_CLK_GATING },
+>  	{ 0 }
+>  };
+> =20
 
-/ magnus
+This doesn't compile, missing a comma.  Was it tested?
+
+drivers/mmc/core/quirks.c:63:2: error: expected =E2=80=98}=E2=80=99 bef=
+ore =E2=80=98{=E2=80=99 token
+
+(Otherwise, looks good.)
+
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
