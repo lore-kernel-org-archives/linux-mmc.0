@@ -1,7 +1,7 @@
 From: Tony Olech <tony.olech@elandigitalsystems.com>
 Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
-Date: Thu, 20 Jan 2011 16:09:44 +0000
-Message-ID: <1295539784.9794.46.camel@apple-mac>
+Date: Thu, 20 Jan 2011 16:11:25 +0000
+Message-ID: <1295539885.9794.50.camel@apple-mac>
 References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536>
 	 <20101116150022.GA27726@void.printf.net>
 	 <27884BED0E3C489C8849EE12A803F536@AN00536>
@@ -13,10 +13,10 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:62704 "EHLO
+Received: from moutng.kundenserver.de ([212.227.17.10]:59155 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753160Ab1ATQJ5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jan 2011 11:09:57 -0500
+	with ESMTP id S1755963Ab1ATQLc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jan 2011 11:11:32 -0500
 In-Reply-To: <4D25C0DA.4040204@csr.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -32,7 +32,7 @@ and it will be included in a second e-mail by itself.
 Tony Olech
 Elan Digital Systems Limited
 
-On Thu, 2011-01-06 at 13:17 +0000, David Vrabel wrote:
+On Thu, 2011-01-06 at 13:17 +0000, David Vrabel wrote: 
 > I've not given this driver a detailed review, just skimmed it and
 > noticed a few things.
 > Tony Olech wrote:
@@ -121,5 +121,6 @@ offload processing. The key thing to note is that the
 variable vub300->irqs_queued prevents spurious interrupts.
 
 > David
+
 
 
