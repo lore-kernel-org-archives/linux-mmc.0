@@ -1,42 +1,36 @@
-From: Fabio Estevam <fabio.estevam@freescale.com>
-Subject: [PATCH] mmc: mmc_mxc: Allow selection only for the correct platforms
-Date: Thu, 20 Jan 2011 15:02:59 -0200
-Message-ID: <1295542979-10329-1-git-send-email-fabio.estevam@freescale.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 0/4] omap4: hsmmc: Adding ADMA support
+Date: Thu, 20 Jan 2011 09:42:27 -0800
+Message-ID: <20110120174226.GX4957@atomide.com>
+References: <1295371591-13610-1-git-send-email-kishore.kadiyala@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe001.messaging.microsoft.com ([213.199.154.204]:18732
-	"EHLO AM1EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752039Ab1ATQ4G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jan 2011 11:56:06 -0500
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:28938 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753029Ab1ATRml (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jan 2011 12:42:41 -0500
+Content-Disposition: inline
+In-Reply-To: <1295371591-13610-1-git-send-email-kishore.kadiyala@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, kernel@pengutronix.de, u.kleine-koenig@pengutronix.de, linux-arm-kernel@lists.infradead.org, Fabio Estevam <fabio.estevam@freescale.com>
+To: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, madhu.cr@ti.com
 
-Currently MMC_MXC driver can be selected by all i.MX devices.
+* Kishore Kadiyala <kishore.kadiyala@ti.com> [110118 09:19]:
+> This patch series adds support for ADMA on MMC1 & MMC2 controllers on OMAP4.
+> There is no performance improvement observed using ADMA over SDMA.
+> Advantage using ADMA could be reducing contention over SDMA.
+> Also the series includes some cleanup.
 
-Restrict its use only for the appropriate processors.
+To me it seems that the only sane way to deal with multiple different
+DMA enginges is to implement them all with drivers/dma/dmaengine.c.
+Otherwise we'll end up with multiple custom ADMA implementations in
+each driver. We need to also make SDMA use the dmaengine code.
 
-Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
----
- drivers/mmc/host/Kconfig |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+If the current dmaengine code does not support this, we need to
+improve it to deal with cases like these.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index d618e86..a3a9ec1 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -288,7 +288,7 @@ config MMC_MSM
- 
- config MMC_MXC
- 	tristate "Freescale i.MX2/3 Multimedia Card Interface support"
--	depends on ARCH_MXC
-+	depends on MACH_MX21 || MACH_MX27 || ARCH_MX31
- 	help
- 	  This selects the Freescale i.MX2/3 Multimedia card Interface.
- 	  If you have a i.MX platform with a Multimedia Card slot,
--- 
-1.6.0.4
+Regards,
 
-
+Tony
