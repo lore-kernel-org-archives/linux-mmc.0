@@ -1,37 +1,30 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [2.6.37/38] SDHCI spurious interrupt...
-Date: Thu, 20 Jan 2011 04:26:13 +0000
-Message-ID: <20110120042613.GA5480@void.printf.net>
-References: <AANLkTi=koHRNJaVQGwdPiEkSOwveOKHK97oO99n6PiwF@mail.gmail.com>
+Subject: Re: [PATCH v1 1/3]mmc: implemented runtime pm for mmc host
+Date: Thu, 20 Jan 2011 05:08:03 +0000
+Message-ID: <20110120050803.GA5732@void.printf.net>
+References: <20110114082310.GB27523@intel.com> <8250E4885F9967469CAC3FB5CBA2CE69934E7AA2FE@irsmsx501.ger.corp.intel.com> <5D8008F58939784290FAB48F54975198351D4FA654@shsmsx502.ccr.corp.intel.com> <8250E4885F9967469CAC3FB5CBA2CE69934E7AAB20@irsmsx501.ger.corp.intel.com> <5D8008F58939784290FAB48F5497519835247E72AD@shsmsx502.ccr.corp.intel.com> <8250E4885F9967469CAC3FB5CBA2CE69934E7AACCC@irsmsx501.ger.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57178 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:56230 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754885Ab1ATE0O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 Jan 2011 23:26:14 -0500
+	id S1751234Ab1ATFIG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 20 Jan 2011 00:08:06 -0500
 Content-Disposition: inline
-In-Reply-To: <AANLkTi=koHRNJaVQGwdPiEkSOwveOKHK97oO99n6PiwF@mail.gmail.com>
+In-Reply-To: <8250E4885F9967469CAC3FB5CBA2CE69934E7AACCC@irsmsx501.ger.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel J Blueman <daniel.blueman@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>
+To: "Tardy, Pierre" <pierre.tardy@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.ml.walleij@gmail.com>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Hi Daniel,
-
-On Thu, Jan 20, 2011 at 11:21:14AM +0700, Daniel J Blueman wrote:
-> With 2.6.37 (and by extension 2.6.38-rc1, as the code hasn't changed),
-> I occasionally see an 'IRQ 16: nobody cared' message a second before
-> shutting down (previously reported [1]); the culprit is the SDHCI
-> driver for my Ricoh controller.
+On Wed, Jan 19, 2011 at 09:45:57AM +0000, Tardy, Pierre wrote:
+> Chris,
+> (Sorry for top posting)
+> Seems we have a intel intern disagreement.
 > 
-> I modified the interrupt handler to be unregistered later with a
-> delay, and to dump out the interrupt mask read, but didn't catch it
-> yet.
+> Could we have maintainer opinion on this ?
 
-Are you able to bisect?
-
-Thanks,
+Linus W and Ohad, any input here?  Thanks,
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
