@@ -1,244 +1,128 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/1]mmc: implemented eMMC4.4 enhanced area feature
-Date: Thu, 20 Jan 2011 03:25:19 +0000
-Message-ID: <20110120032519.GA4827@void.printf.net>
-References: <20110113125727.GA20452@intel.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: SDHC Read Performance
+Date: Thu, 20 Jan 2011 12:30:21 +0900
+Message-ID: <20110120033020.GA32120@verge.net.au>
+References: <20110119000909.GA9412@verge.net.au>
+ <AANLkTinNtL0v2cnhz7Ci+a8TqQTcQXBMVW5EkX8qujy+@mail.gmail.com>
+ <20110119080542.GE1960@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:55064 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754944Ab1ATDZY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 Jan 2011 22:25:24 -0500
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20110113125727.GA20452@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20110119080542.GE1960@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Arnd Hannemann <arnd@arndnet.de>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
 
-Hi Chuanxiao,
+On Wed, Jan 19, 2011 at 05:05:49PM +0900, Simon Horman wrote:
+> On Wed, Jan 19, 2011 at 12:14:40PM +0900, Magnus Damm wrote:
+> > Hi Simon,
+> >=20
+> > On Wed, Jan 19, 2011 at 9:09 AM, Simon Horman <horms@verge.net.au> =
+wrote:
+> > > Hi,
+> > >
+> > > I am currently interested in the read performance of the SDHI dri=
+ver. =C2=A0I
+> > > ran the following tests on a Mackerel board using Linus's latest =
+tree
+> > > (6845a44a), which I believe has all of the outstanding patches fr=
+om Arnd
+> > > and Guennadi merged.
+> >=20
+> > Nice, thanks for testing this.
+> >=20
+> > > I have made the following crude performance measurements using
+> > > several different cards.
+> > >
+> > > dd if=3D/dev/mmcblk1 of=3D/dev/null bs=3D512 count=3D100000
+> > >
+> > > SD1.1: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A07.0 MB/s
+> > > SD2.0: =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A07.0 MB/s
+> > > SDHC Class 2: =C2=A0 7.1 MB/s
+> > > SDHC Class 10: =C2=A07.2 MB/s
+> > >
+> > > Whereas I would expect something like:
+> > >
+> > > SD1.1 card: =C2=A0 =C2=A0 12 MB/s
+> > > SD2.0 card: =C2=A0 =C2=A0 24 MB/s
+> > > SDHC Class 2: =C2=A0 24 MB/s
+> > > SDHC Class 10: =C2=A0Faster?
+> >=20
+> > Please have a look at the clock frequency set by the SDHI MFD drive=
+r
+> > (hclk), together with the tmio-mmc settings in tmio_mmc_set_clock()=
+=2E
+> > For the clock to be bumped up properly some capability/feature flag=
+s
+> > may be needed:
+> >=20
+> > MMC_CAP_MMC_HIGHSPEED
+> > MMC_CAP_SD_HIGHSPEED
+> >=20
+> > Not sure if they are set properly. Probably not.
+>=20
+> Actually this is one thing that I did check, sorry for not mentioning=
+ it.
+> The clock does seem to be set correctly, to 50Mhz for the high-speed =
+case,
+> which iirc is everything except SD1.1.
+>=20
+> > > Possibly relevant portions of my .config are:
+> > >
+> > > CONFIG_MFD_SH_MOBILE_SDHI=3Dy
+> > > CONFIG_TMIO_MMC_DMA=3Dy
+> > > CONFIG_MMC_TMIO=3Dy
+> >=20
+> > These two are also relevant:
+> >=20
+> > CONFIG_SH_DMAE=3Dy
+> > CONFIG_DMA_ENGINE=3Dy
+> >=20
+> > DMA controller platform data is also needed, not sure the state of
+> > your board. You can check out the counters in /proc/interrupts to s=
+ee
+> > if the DMA controller is active or not.
+> {
+> Thanks!
+>=20
+> I have CONFIG_DMA_ENGINE but not CONFIG_SH_DMAE.
 
-On Thu, Jan 13, 2011 at 08:57:27PM +0800, Chuanxiao Dong wrote:
-> Enhanced area feature is a new feature defined in eMMC4.4 standard. This
-> kind of area can help to improve the performance.
-> 
-> MMC driver will read out the enhanced area offset and size and add them
-> to be device attributes. The feature enabling should be done in manufactory.
-> To use this feature, bit ERASE_GRP_DEF should also be set.
-> 
-> Documentation/ABI/testing/sysfs-devices-mmc described the two new attributes
-> 
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+I ran my tests again with CONFIG_SH_DMAE (and CONFIG_DMA_ENGINE)
+enabled and the results are substantially better. Although
+the results are still below the theoretical speeds of the cards.
 
-Thanks for the explanation of your use case, this patch looks good.
-Just a few more comments:
+Read Speed - SHDI
+SD1.1:		 9.9 MB/s
+SD2.0:		17.2 MB/s
+SDHC Class 2:	17.0 MB/s
+SDHC Class 10:	17.2 MB/s
+MMC4.0:		 8.6 MB/s   <-- Clocked down to 12Mhz due to driver limitation=
+s
 
-> ---
->  Documentation/ABI/testing/sysfs-devices-mmc |   19 +++++++
->  drivers/mmc/core/mmc.c                      |   73 +++++++++++++++++++++++++++
->  include/linux/mmc/card.h                    |    3 +
->  include/linux/mmc/mmc.h                     |    3 +
->  4 files changed, 98 insertions(+), 0 deletions(-)
->  create mode 100644 Documentation/ABI/testing/sysfs-devices-mmc
-> 
-> diff --git a/Documentation/ABI/testing/sysfs-devices-mmc b/Documentation/ABI/testing/sysfs-devices-mmc
-> new file mode 100644
-> index 0000000..f0fb053
-> --- /dev/null
-> +++ b/Documentation/ABI/testing/sysfs-devices-mmc
-> @@ -0,0 +1,19 @@
-> +What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_offset
-> +Date:		January 2011
-> +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
-> +Description:
-> +		Enhanced area is a new feature defined in eMMC4.4 standard.
-> +		eMMC4.4 or later card can support such feature. This kind of area
-> +		can help to improve the card performance. If the feature is enabled,
-> +		this attribute will indicate the start address of enhanced data
-> +		area. If not, this attribute will be 0. Unit Byte.
-> +
-> +What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_size
-> +Date:		January 2011
-> +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
-> +Description:
-> +		Enhanced area is a new feature defined in eMMC4.4 standard.
-> +		eMMC4.4 or later card can support such feature. This kind of area
-> +		can help to improve the card performance. If the feature is enabled,
-> +		this attribute will indicate the size of enhanced data area. If not,
-> +		this attribute will be 0. Unit KBytes.
+I also tested the Write Speed
+SD1.1:		 2.4 MB/s   <-- Faster than expected
+SD2.0:		 2.8 MB/s   <-- Faster than expected
+SDHC Class 2:	 2.5 MB/s   <-- Faster than expected
+SDHC Class 10:	 3.8 MB/s   <-- Slower than expected
+MMC4.0:		 2.1 MB/s   <-- Clocked down to 12Mhz due to driver limitation=
+s
 
-Please wrap the above at 80 chars.
+=46or reference I obtained the following results on my laptop,
+which according to dmesg has a SAMSUNG MMCRE28G VBM1 PQ.
 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 16006ef..c8b5b3b 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -302,6 +302,41 @@ static int mmc_read_ext_csd(struct mmc_card *card)
->  	}
->  
->  	if (card->ext_csd.rev >= 4) {
-> +		/*
-> +		 * Enhanced area feature support
-> +		 * check whether eMMC card is enabled enhanced area,
+Read
+SD1.1:		10.0 MB/s
+SD2.0:		19.2 MB/s
+SDHC Class 2:	19.4 MB/s
+SDHC Class10:	17.9 MB/s  <---- What!!!?
+MMC4.0:		 8.2 MB/s
 
-check whether eMMC card has the Enhanced Area enabled
-
-> +		 * if so, export enhanced area offset and size to
-> +		 * user by adding sysfs interface
-> +		 */
-> +		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
-> +				(ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
-> +			u8 hc_erase_grp_sz =
-> +				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> +			u8 hc_wp_grp_sz =
-> +				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-> +			/*
-> +			 * set a flag to identify whether the enhanced
-> +			 * user data are enabled
-
-enhanced user data area is enabled
-
-> +			 */
-> +			card->ext_csd.enhanced_area_en = 1;
-> +			/*
-> +			 * caculate the enhanced data area offset, unit B
-
-calculate
-
-> +			 */
-> +			card->ext_csd.enhanced_area_offset =
-> +				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
-> +				(ext_csd[137] << 8) + ext_csd[136];
-> +			if (mmc_card_blockaddr(card))
-> +				card->ext_csd.enhanced_area_offset <<= 9;
-> +			/*
-> +			 * caculate the enhanced data area size, unit KB
-> +			 */
-> +			card->ext_csd.enhanced_area_size =
-> +				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
-> +				ext_csd[140];
-> +			card->ext_csd.enhanced_area_size *=
-> +				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-> +			card->ext_csd.enhanced_area_size <<= 9;
-> +		}
->  		card->ext_csd.sec_trim_mult =
->  			ext_csd[EXT_CSD_SEC_TRIM_MULT];
->  		card->ext_csd.sec_erase_mult =
-> @@ -336,6 +371,9 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
->  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
->  MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
-> +MMC_DEV_ATTR(enhanced_area_offset, "0x%llxB\n",
-> +		card->ext_csd.enhanced_area_offset);
-> +MMC_DEV_ATTR(enhanced_area_size, "0x%xKB\n", card->ext_csd.enhanced_area_size);
-
-I think these should probably be printed in decimal instead of hex.
-
-Hm, this way the sysfs files will show up regardless of whether we have
-an eMMC device or an SD card, which is very confusing.  Can you not check
-whether enhanced_area_en == 1 before create these files?
-
->  
->  static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_cid.attr,
-> @@ -349,6 +387,8 @@ static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_name.attr,
->  	&dev_attr_oemid.attr,
->  	&dev_attr_serial.attr,
-> +	&dev_attr_enhanced_area_offset.attr,
-> +	&dev_attr_enhanced_area_size.attr,
->  	NULL,
->  };
->  
-> @@ -484,6 +524,39 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  	}
->  
->  	/*
-> +	 * If enhanced_area_en is TRUE, host need to enable
-> +	 * ERASE_GRP_DEF bit.
-> +	 * ERASE_GRP_DEF bit will be lost everytime
-> +	 * after a reset or power off.
-> +	 */
-> +	if (card->ext_csd.enhanced_area_en) {
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				EXT_CSD_ERASE_GROUP_DEF, 1);
-> +
-> +		if (err && err != -EBADMSG)
-> +			goto free_card;
-> +
-> +		if (err) {
-> +			err = 0;
-> +			/*
-> +			 * Just disable enhanced area off & sz
-> +			 * will try to enable ERASE_GROUP_DEF
-> +			 * during next time reinit
-> +			 */
-> +			card->ext_csd.enhanced_area_offset = 0;
-> +			card->ext_csd.enhanced_area_size = 0;
-
-It makes more sense to me to return -EINVAL instead of 0 if we know
-nothing about the enhanced_area.  What do you think?
-
-> +		} else {
-> +			card->ext_csd.erase_group_def = 1;
-> +			/*
-> +			 * enable ERASE_GRP_DEF successfully.
-> +			 * This will affect the erase size, so
-> +			 * here need to reset erase size
-> +			 */
-> +			mmc_set_erase_size(card);
-> +		}
-> +	}
-> +
-> +	/*
->  	 * Activate high speed (if supported)
->  	 */
->  	if ((card->ext_csd.hs_max_dtr != 0) &&
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 8ce0827..cc9a07e 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -54,6 +54,9 @@ struct mmc_ext_csd {
->  	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
->  	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
->  	unsigned int		trim_timeout;		/* In milliseconds */
-> +	bool		enhanced_area_en; /* enhanced area enable bit */
-> +	loff_t		enhanced_area_offset; /* enhanced area addr */
-> +	size_t		enhanced_area_size; /* enhanced area size */
-
-Think you need another tab to get these to line up.
-
->  };
->  
->  struct sd_scr {
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 612301f..c50ede6 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -253,6 +253,8 @@ struct _mmc_csd {
->   * EXT_CSD fields
->   */
->  
-> +#define EXT_CSD_PARTITION_ATTRIBUTE 156	/* R/W */
-
-This isn't lined up properly either.
-
-> +#define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
->  #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
->  #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
->  #define EXT_CSD_BUS_WIDTH		183	/* R/W */
-> @@ -262,6 +264,7 @@ struct _mmc_csd {
->  #define EXT_CSD_CARD_TYPE		196	/* RO */
->  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
->  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
-> +#define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
->  #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
->  #define EXT_CSD_HC_ERASE_GRP_SIZE	224	/* RO */
->  #define EXT_CSD_SEC_TRIM_MULT		229	/* RO */
-
-Thanks,
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Write
+SD1.1:		 2.7 MB/s
+SD2.0:		 3.4 MB/s
+SDHC Class 2:	 3.1 MB/s
+SDHC Class10:	 3.8 MB/s  <---- What!!!?
+MMC4.0:		 2.0 MB/s
