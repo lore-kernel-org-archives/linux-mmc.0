@@ -1,94 +1,33 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 3/3] mmc: remove anti clock gating quirk for wl1271
-Date: Thu, 20 Jan 2011 04:14:12 +0000
-Message-ID: <20110120041412.GA5274@void.printf.net>
-References: <cover.1294588491.git.tardyp@gmail.com> <cb471b35d320b96a9d143103fd9e9b76f8998470.1294588491.git.tardyp@gmail.com>
+From: Daniel J Blueman <daniel.blueman@gmail.com>
+Subject: [2.6.37/38] SDHCI spurious interrupt...
+Date: Thu, 20 Jan 2011 11:21:14 +0700
+Message-ID: <AANLkTi=koHRNJaVQGwdPiEkSOwveOKHK97oO99n6PiwF@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35065 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753585Ab1ATEON (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 Jan 2011 23:14:13 -0500
-Content-Disposition: inline
-In-Reply-To: <cb471b35d320b96a9d143103fd9e9b76f8998470.1294588491.git.tardyp@gmail.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:34709 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754215Ab1ATEWR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jan 2011 23:22:17 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Tardy <tardyp@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Pierre Tardy <pierre.tardy@intel.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>
 
-Hi Pierre,
+With 2.6.37 (and by extension 2.6.38-rc1, as the code hasn't changed),
+I occasionally see an 'IRQ 16: nobody cared' message a second before
+shutting down (previously reported [1]); the culprit is the SDHCI
+driver for my Ricoh controller.
 
-On Sun, Jan 09, 2011 at 05:26:20PM +0100, Pierre Tardy wrote:
-> From: Pierre Tardy <pierre.tardy@intel.com>
->=20
-> Signed-off-by: Pierre Tardy <pierre.tardy@intel.com>
-> ---
->  drivers/mmc/core/quirks.c |   18 ++++++++++++++++++
->  1 files changed, 18 insertions(+), 0 deletions(-)
->=20
-> diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
-> index fe467c8..506e4fc 100644
-> --- a/drivers/mmc/core/quirks.c
-> +++ b/drivers/mmc/core/quirks.c
-> @@ -33,6 +33,14 @@ static void add_quirk(struct mmc_card *card, int d=
-ata)
->  }
-> =20
->  /*
-> + * This hook just removes a quirk unconditionnally
-> + */
-> +static void remove_quirk_hook(struct mmc_card *card, int data)
-> +{
-> +	card->quirks &=3D ~data;
-> +}
+I modified the interrupt handler to be unregistered later with a
+delay, and to dump out the interrupt mask read, but didn't catch it
+yet.
 
-This adds a defined-but-not-used warning.  The MMC tree doesn't
-currently generate any warnings, so it would be good to avoid adding ne=
-w
-ones, though I understand why it might make sense in this case.
+Any ideas?
 
-drivers/mmc/core/quirks.c:30:13: warning: =E2=80=98add_quirk=E2=80=99 d=
-efined but not used
-drivers/mmc/core/quirks.c:38:13: warning: =E2=80=98remove_quirk_hook=E2=
-=80=99 defined but not used
+Thanks,
+  Daniel
 
-> +
-> +/*
->   * This hook just adds a quirk for all sdio devices
->   */
->  static void add_quirk_for_sdio_devices(struct mmc_card *card, int da=
-ta)
-> @@ -41,9 +49,19 @@ static void add_quirk_for_sdio_devices(struct mmc_=
-card *card, int data)
->  		card->quirks |=3D data;
->  }
-> =20
-> +#ifndef SDIO_VENDOR_ID_TI
-> +#define SDIO_VENDOR_ID_TI		0x0097
-> +#endif
-> +
-> +#ifndef SDIO_DEVICE_ID_TI_WL1271
-> +#define SDIO_DEVICE_ID_TI_WL1271	0x4076
-> +#endif
-> +
->  static const struct mmc_fixup mmc_fixup_methods[] =3D {
->  	{ SDIO_ANY_ID, SDIO_ANY_ID,
->  		add_quirk_for_sdio_devices, MMC_QUIRK_BROKEN_CLK_GATING }
-> +	{ SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
-> +		remove_quirk_hook, MMC_QUIRK_BROKEN_CLK_GATING },
->  	{ 0 }
->  };
-> =20
-
-This doesn't compile, missing a comma.  Was it tested?
-
-drivers/mmc/core/quirks.c:63:2: error: expected =E2=80=98}=E2=80=99 bef=
-ore =E2=80=98{=E2=80=99 token
-
-(Otherwise, looks good.)
-
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+[1] https://patchwork.kernel.org/patch/416211/
+-- 
+Daniel J Blueman
