@@ -1,126 +1,252 @@
-From: Tony Olech <tony.olech@elandigitalsystems.com>
-Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
-Date: Thu, 20 Jan 2011 16:11:25 +0000
-Message-ID: <1295539885.9794.50.camel@apple-mac>
-References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536>
-	 <20101116150022.GA27726@void.printf.net>
-	 <27884BED0E3C489C8849EE12A803F536@AN00536>
-	 <m3oc9pnt6g.fsf@pullcord.laptop.org>
-	 <4CE41BE3.1060806@elandigitalsystems.com>
-	 <m3oc9n241c.fsf@pullcord.laptop.org>
-	 <4CEA86D4.9050109@elandigitalsystems.com>  <4D25C0DA.4040204@csr.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v3 1/1]mmc: implemented eMMC4.4 enhanced area feature
+Date: Thu, 20 Jan 2011 16:12:48 +0000
+Message-ID: <20110120161248.GA11774@void.printf.net>
+References: <20110120075556.GA23566@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:59155 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755963Ab1ATQLc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jan 2011 11:11:32 -0500
-In-Reply-To: <4D25C0DA.4040204@csr.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20110120075556.GA23566@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Vrabel <david.vrabel@csr.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Hi,
-the answers to your questions and comments are embedded below.
-Because a few changes in the patch are required and also because
-the current kernel version is now 2.6.27 I am re-doing the patch
-and it will be included in a second e-mail by itself.
+Hi Chuanxiao,
 
-Tony Olech
-Elan Digital Systems Limited
+On Thu, Jan 20, 2011 at 03:55:56PM +0800, Chuanxiao Dong wrote:
+> Enhanced area feature is a new feature defined in eMMC4.4 standard. T=
+his
+> kind of area can help to improve the performance.
+>=20
+> MMC driver will read out the enhanced area offset and size and add th=
+em
+> to be device attributes. The feature enabling should be done in manuf=
+actory.
+> To use this feature, bit ERASE_GRP_DEF should also be set.
+>=20
+> Documentation/ABI/testing/sysfs-devices-mmc described the two new att=
+ributes
+>=20
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> ---
+>  Documentation/ABI/testing/sysfs-devices-mmc |   19 ++++++
+>  drivers/mmc/core/mmc.c                      |   80 +++++++++++++++++=
+++++++++++
+>  include/linux/mmc/card.h                    |    3 +
+>  include/linux/mmc/mmc.h                     |    3 +
+>  4 files changed, 105 insertions(+), 0 deletions(-)
+>  create mode 100644 Documentation/ABI/testing/sysfs-devices-mmc
+>=20
+> diff --git a/Documentation/ABI/testing/sysfs-devices-mmc b/Documentat=
+ion/ABI/testing/sysfs-devices-mmc
+> new file mode 100644
+> index 0000000..6e759ae
+> --- /dev/null
+> +++ b/Documentation/ABI/testing/sysfs-devices-mmc
+> @@ -0,0 +1,19 @@
+> +What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_offset
+> +Date:		January 2011
+> +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
+> +Description:
+> +		Enhanced area is a new feature defined in eMMC4.4 standard.eMMC4.4=
+ or
+> +		later card can support such feature. This kind of area can help to
+> +		improve the card performance. If the feature is enabled, this attr=
+ibute
+> +		will indicate the start address of enhanced data area. If not, thi=
+s
+> +		attribute will be -EINVAL. Unit Byte. Format decimal.
+> +
+> +What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_size
+> +Date:		January 2011
+> +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
+> +Description:
+> +		Enhanced area is a new feature defined in eMMC4.4 standard. eMMC4.=
+4 or
+> +		later card can support such feature. This kind of area can help to
+> +		improve the card performance. If the feature is enabled, this attr=
+ibute
+> +		will indicate the size of enhanced data area. If not, this attribu=
+te
+> +		will be -EINVAL. Unit KByte. Format decimal.
 
-On Thu, 2011-01-06 at 13:17 +0000, David Vrabel wrote: 
-> I've not given this driver a detailed review, just skimmed it and
-> noticed a few things.
-> Tony Olech wrote:
-> > +	  Some SDIO cards will need a firmware file to be loaded and
-> > +	  sent to VUB300 chip in order to achieve better data throughput.
-> > +	  Download these "Offload Pseudocode" from Elan Digital Systems'
-> > +	  web-site http://www.elandigitalsystems.com/support/downloads.php
-> > +	  and put them in /lib/firmware. Note that without these additional
-> > +	  firmware files the VUB300 chip will still function, but not at
-> > +	  the best obtainable data rate.
-> It would be useful to document (in the driver) what this "offload
-> pseudocode" does.  Looking at the driver it looks like it's pre-fetching
-> SDIO register values, yes?
+This is still wrapped at > 80 columns.
 
-Yes it does does pre-fetch and pre-set some register values.
-At this point in time the only available documentation is
-the interface document referred to in a previous e-mail which
-can be downloaded from:
-www.elandigitalsystems.com/eng/drivers/vub300/Linux-v2-10.zip
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 16006ef..5ab44bb 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -302,6 +302,48 @@ static int mmc_read_ext_csd(struct mmc_card *car=
+d)
+>  	}
+> =20
+>  	if (card->ext_csd.rev >=3D 4) {
+> +		/*
+> +		 * Enhanced area feature support
+> +		 * check whether eMMC card has the Enhanced area enabled.
+> +		 * if so, export enhanced area offset and size to
+> +		 * user by adding sysfs interface
+> +		 */
+> +		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
+> +				(ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
+> +			u8 hc_erase_grp_sz =3D
+> +				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+> +			u8 hc_wp_grp_sz =3D
+> +				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+> +			/*
+> +			 * set a flag to identify whether the enhanced
+> +			 * user data is enabled
+> +			 */
+> +			card->ext_csd.enhanced_area_en =3D 1;
+> +			/*
+> +			 * calculate the enhanced data area offset, unit B
+> +			 */
+> +			card->ext_csd.enhanced_area_offset =3D
+> +				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
+> +				(ext_csd[137] << 8) + ext_csd[136];
+> +			if (mmc_card_blockaddr(card))
+> +				card->ext_csd.enhanced_area_offset <<=3D 9;
+> +			/*
+> +			 * calculate the enhanced data area size, unit KB
+> +			 */
+> +			card->ext_csd.enhanced_area_size =3D
+> +				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
+> +				ext_csd[140];
+> +			card->ext_csd.enhanced_area_size *=3D
+> +				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
+> +			card->ext_csd.enhanced_area_size <<=3D 9;
+> +		} else {
+> +			/*
+> +			 * If not enabled enhanced area, disable these
+> +			 * device attributes
+> +			 */
+> +			card->ext_csd.enhanced_area_offset =3D -EINVAL;
+> +			card->ext_csd.enhanced_area_size =3D -EINVAL;
+> +		}
+>  		card->ext_csd.sec_trim_mult =3D
+>  			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+>  		card->ext_csd.sec_erase_mult =3D
+> @@ -336,6 +378,9 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid=
+);
+>  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+>  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+>  MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
+> +MMC_DEV_ATTR(enhanced_area_offset, "%lld\n",
+> +		card->ext_csd.enhanced_area_offset);
+> +MMC_DEV_ATTR(enhanced_area_size, "%d\n", card->ext_csd.enhanced_area=
+_size);
+> =20
+>  static struct attribute *mmc_std_attrs[] =3D {
+>  	&dev_attr_cid.attr,
+> @@ -349,6 +394,8 @@ static struct attribute *mmc_std_attrs[] =3D {
+>  	&dev_attr_name.attr,
+>  	&dev_attr_oemid.attr,
+>  	&dev_attr_serial.attr,
+> +	&dev_attr_enhanced_area_offset.attr,
+> +	&dev_attr_enhanced_area_size.attr,
+>  	NULL,
+>  };
+> =20
+> @@ -484,6 +531,39 @@ static int mmc_init_card(struct mmc_host *host, =
+u32 ocr,
+>  	}
+> =20
+>  	/*
+> +	 * If enhanced_area_en is TRUE, host need to enable
+> +	 * ERASE_GRP_DEF bit.
+> +	 * ERASE_GRP_DEF bit will be lost every time
+> +	 * after a reset or power off.
+> +	 */
+> +	if (card->ext_csd.enhanced_area_en) {
+> +		err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				EXT_CSD_ERASE_GROUP_DEF, 1);
+> +
+> +		if (err && err !=3D -EBADMSG)
+> +			goto free_card;
+> +
+> +		if (err) {
+> +			err =3D 0;
+> +			/*
+> +			 * Just disable enhanced area off & sz
+> +			 * will try to enable ERASE_GROUP_DEF
+> +			 * during next time reinit
+> +			 */
+> +			card->ext_csd.enhanced_area_offset =3D -EINVAL;
+> +			card->ext_csd.enhanced_area_size =3D -EINVAL;
+> +		} else {
+> +			card->ext_csd.erase_group_def =3D 1;
+> +			/*
+> +			 * enable ERASE_GRP_DEF successfully.
+> +			 * This will affect the erase size, so
+> +			 * here need to reset erase size
+> +			 */
+> +			mmc_set_erase_size(card);
+> +		}
+> +	}
+> +
+> +	/*
+>  	 * Activate high speed (if supported)
+>  	 */
+>  	if ((card->ext_csd.hs_max_dtr !=3D 0) &&
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 8ce0827..736697f 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -54,6 +54,9 @@ struct mmc_ext_csd {
+>  	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
+>  	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
+>  	unsigned int		trim_timeout;		/* In milliseconds */
+> +	bool			enhanced_area_en;	/* enhanced area en */
+> +	loff_t		enhanced_area_offset;	/* enhanced area addr */
+> +	size_t		enhanced_area_size;		/* enhanced area size */
 
-> > +#pragma pack(1)
-> You probably want __attribute__((packed)) on each structure here.  (Not
-> sure if GCC even supports this #pragma).
+Now enhanced_area_en is aligned correctly, but the other two aren't.
 
-Thank you for this comment. I have changed the patch accordingly.
+This adds a warning:
 
-> > +static DEVICE_ATTR(OperatingMode, S_IRUGO, show_OperatingMode, NULL);
-> > +static struct attribute *vub300_attrs[] = {
-> > +	&dev_attr_OperatingMode.attr,
-> > +	NULL,
-> > +};
-> Suggest removing this unless it's actually useful. If it is useful, it
-> should use all lower case for the name and it should be documented in
-> Documentation/ABI.
+drivers/mmc/core/mmc.c: In function =E2=80=98mmc_enhanced_area_size_sho=
+w=E2=80=99:
+drivers/mmc/core/mmc.c:383:261: warning: format =E2=80=98%d=E2=80=99 ex=
+pects type =E2=80=98int=E2=80=99,
+but argument 3 has type =E2=80=98size_t=E2=80=99
 
-This sysfs interface is a very useful read-only diagnostic and
-will enable us to support customers. In particular it identifies
-the SDIO bus speed actually being used as well as the identity
-of the offload pseudocode firmware file, if any, that has
-been downloaded into the VUB300 adapter. I have modified the
-patch to use lower case for the sysfs file name (even though
-other sysfs users use camel case) and have added documentation
-as requested.vub300->irqs_queued
+If you really want size_t, you should use %zu for it -- see
+Documentation/printk-formats.txt.  (Declaring it as unsigned int would
+work fine too.)
 
-> > +static void snoop_block_size_and_bus_width(struct vub300_mmc_host *vub300,
-> > +					   u32 cmd_arg)
-> This doesn't seem necessary.  The block size is available in the datavub300->irqs_queued
-> request and the bus width is supplied to the set_ios() call.
+Oh, and let's mention the units of _offset and _size in the comment in
+card.h.
 
-Unfortunately you are incorrect in your assertion.
-The "block size" given in the data request is NOT
-ALWAYS equal to the function block size. Therefore
-the snooping of the function block size must remain.
+>  };
+> =20
+>  struct sd_scr {
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 612301f..264ba54 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -253,6 +253,8 @@ struct _mmc_csd {
+>   * EXT_CSD fields
+>   */
+> =20
+> +#define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+> +#define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+>  #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
+>  #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
+>  #define EXT_CSD_BUS_WIDTH		183	/* R/W */
+> @@ -262,6 +264,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_CARD_TYPE		196	/* RO */
+>  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
+>  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
+> +#define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
+>  #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
+>  #define EXT_CSD_HC_ERASE_GRP_SIZE	224	/* RO */
+>  #define EXT_CSD_SEC_TRIM_MULT		229	/* RO */
 
-> > +		if (6 == cmd->opcode) {
-> > +			ResponseType = SDRT_1;
-> > +			vub300->resp_len = 6;
-> You don't need to check the opcode to determine the response format. Seevub300->irqs_queued
-> cmd->flags.
+Thanks,
 
-Unfortunately you are incorrect in your assertion.
-It is impossible, for example, from a flag setting
-of 0x15 to determine whether a response type of
-R5, R6 or R7 is to be expected. Therefore the
-snooping of the opcode must remain.
-
-> > +static void vub300_enable_sdio_irq(struct mmc_host *mmc, int enable)
-> > +{				/* NOT irq */
-> > +	struct vub300_mmc_host *vub300 = mmc_priv(mmc);vub300->irqs_queued
-> > +	if (!vub300->interface)
-> > +		return;
-> > +	kref_get(&vub300->kref);
-> > +	if (enable) {vub300->irqs_queued
-> > +		mutex_lock(&vub300->irq_mutex);
-> > +		if (vub300->irqs_queued) {
-> > +			vub300->irqs_queued -= 1;
-> > +			mmc_signal_sdio_irq(vub300->mmc);
-> This might signal a spurious interrupt as it's not checking if the
-> interrupt is still asserted.  This should be avoided.
-
-You are correct in your implied assertion that spurious
-interrupts cause havoc and ultimately failure in the
-operation of the device. However this code segment is
-absolutely required for the correct operation of our
-offload processing. The key thing to note is that the
-variable vub300->irqs_queued prevents spurious interrupts.
-
-> David
-
-
-
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
