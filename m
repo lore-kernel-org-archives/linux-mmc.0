@@ -1,1281 +1,213 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH] sdhci: Add support PXA168, PXA910, and MMP2 controllers
-Date: Fri, 21 Jan 2011 11:37:04 -0800
-Message-ID: <5B217D58-3F37-42F8-BA2C-2C721FC5D2D1@marvell.com>
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Subject: [PATCH v4 1/1]mmc: implemented eMMC4.4 enhanced area feature
+Date: Sat, 22 Jan 2011 04:09:41 +0800
+Message-ID: <20110121200941.GA16236@intel.com>
+Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:55181 "HELO
-	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1754822Ab1AUThH convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 21 Jan 2011 14:37:07 -0500
-Content-Language: en-US
+Received: from mga02.intel.com ([134.134.136.20]:4470 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750810Ab1AUUPU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 21 Jan 2011 15:15:20 -0500
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Mark Brown <markb@marvell.com>
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-kernel@vger.kernel.org, akpm@linux-foundation.org
 
+Enhanced area feature is a new feature defined in eMMC4.4 standard. This
+kind of area can help to improve the performance.
 
-Select pxa controller based on CPU model: MMP2, PXA168, PXA910
+MMC driver will read out the enhanced area offset and size and add them
+to be device attributes. The feature enabling should be done in manufactory.
+To use this feature, bit ERASE_GRP_DEF should also be set.
 
-Three new SoC specific files added:
-sdhci-pxa168.c
-sdhci-pxa910.c
-sdhci-mmp2.c
+Documentation/ABI/testing/sysfs-devices-mmc described the two new attributes
 
-These files control the platform specific behavior of the SD controller.
-MMP2 and the PXAxxx controllers use different hardware registers
-to control platform specific behavior. Platform flags come from
-arch/mach-mmp/ files for board design (brownstone, jasper, aspenite etc)
-settings (8 bit capable slot / card permanent).
-
-quirks for SD/SoC specific behaviro defined in specific platform files
-(sdhci-pxa168.c, sdhci-pxa910.c, sdhci-mmp2.c)
-
-The correct SD controller is now shown Kconfig.
-
-sdhci-pxa.c changed to act as a shim for the platform specific code.
-Only generic operations are handled in sdhci-pxa.c. All
-platform operations are passed to the platform code.
-
-reset_enter() and reset_exit() used for silicon control.
-
-Signed-off-by: Philip Rakity <prakity@marvell.com>
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
- drivers/mmc/host/Kconfig        |   42 +++++-
- drivers/mmc/host/Makefile       |    5 +-
- drivers/mmc/host/sdhci-mmp2.c   |  265 ++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-pxa.c    |  151 +++---------------
- drivers/mmc/host/sdhci-pxa168.c |  343 +++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-pxa910.c |  272 +++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c        |   15 ++-
- 7 files changed, 953 insertions(+), 140 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-mmp2.c
- create mode 100644 drivers/mmc/host/sdhci-pxa168.c
- create mode 100644 drivers/mmc/host/sdhci-pxa910.c
+ Documentation/ABI/testing/sysfs-devices-mmc |   21 +++++++
+ drivers/mmc/core/mmc.c                      |   80 +++++++++++++++++++++++++++
+ include/linux/mmc/card.h                    |    3 +
+ include/linux/mmc/mmc.h                     |    3 +
+ 4 files changed, 107 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-devices-mmc
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index d42fe49..d9eddbd 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -166,18 +166,52 @@ config MMC_SDHCI_S3C
-
-          If unsure, say N.
-
-+
-+config MMC_SDHCI_PXA_CORE
-+       tristate
-+       help
-+         This is silent Kconfig symbol that is selected by the drivers that
-+         need PXA driver base support
-+
-+
- config MMC_SDHCI_PXA
--       tristate "Marvell PXA168/PXA910/MMP2 SD Host Controller support"
--       depends on ARCH_PXA || ARCH_MMP
-+       tristate "Marvell MMP2 SD Host Controller support"
-+       depends on CPU_MMP2
-+       select MMC_SDHCI
-+       select MMC_SDHCI_PXA_CORE
-+       help
-+         This selects the Marvell(R) MMP2 SD Host Controller.
-+         If you have a MMP2 platform with SD Host Controller
-+         and a card slot, say Y or M here.
-+
-+         If unsure, say N.
-+
-+config MMC_SDHCI_PXA9xx
-+       tristate "Marvell PXA9xx SD Host Controller support"
-+       depends on CPU_PXA910
-        select MMC_SDHCI
-+       select MMC_SDHCI_PXA_CORE
-+       help
-+         This selects the Marvell(R) PXA910 SD Host Controller.
-+         If you have a PXA910 platform with SD Host Controller
-+         and a card slot, say Y or M here.
-+
-+         If unsure, say N.
-+
-+config MMC_SDHCI_PXA168
-+       tristate "Marvell PXA168 SD Host Controller support"
-+       depends on CPU_PXA168
-+       select MMC_SDHCI
-+       select MMC_SDHCI_PXA_CORE
-        select MMC_SDHCI_IO_ACCESSORS
-        help
--         This selects the Marvell(R) PXA168/PXA910/MMP2 SD Host Controller.
--         If you have a PXA168/PXA910/MMP2 platform with SD Host Controller
-+         This selects the Marvell(R) PXA168 SD Host Controller.
-+         If you have a PXA168 platform with SD Host Controller
-          and a card slot, say Y or M here.
-
-          If unsure, say N.
-
-+
- config MMC_SDHCI_SPEAR
-        tristate "SDHCI support on ST SPEAr platform"
-        depends on MMC_SDHCI && PLAT_SPEAR
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index d91364d..1de1c77 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -8,7 +8,10 @@ obj-$(CONFIG_MMC_IMX)          += imxmmc.o
- obj-$(CONFIG_MMC_MXC)          += mxcmmc.o
- obj-$(CONFIG_MMC_SDHCI)                += sdhci.o
- obj-$(CONFIG_MMC_SDHCI_PCI)    += sdhci-pci.o
--obj-$(CONFIG_MMC_SDHCI_PXA)    += sdhci-pxa.o
-+obj-$(CONFIG_MMC_SDHCI_PXA_CORE)       += sdhci-pxa.o
-+obj-$(CONFIG_MMC_SDHCI_PXA)    += sdhci-mmp2.o
-+obj-$(CONFIG_MMC_SDHCI_PXA168) += sdhci-pxa168.o
-+obj-$(CONFIG_MMC_SDHCI_PXA9xx) += sdhci-pxa910.o
- obj-$(CONFIG_MMC_SDHCI_S3C)    += sdhci-s3c.o
- obj-$(CONFIG_MMC_SDHCI_SPEAR)  += sdhci-spear.o
- obj-$(CONFIG_MMC_WBSD)         += wbsd.o
-diff --git a/drivers/mmc/host/sdhci-mmp2.c b/drivers/mmc/host/sdhci-mmp2.c
+diff --git a/Documentation/ABI/testing/sysfs-devices-mmc b/Documentation/ABI/testing/sysfs-devices-mmc
 new file mode 100644
-index 0000000..45e29f5
+index 0000000..8b18326
 --- /dev/null
-+++ b/drivers/mmc/host/sdhci-mmp2.c
-@@ -0,0 +1,265 @@
-+/**************************************************************************
-+ *
-+ * Copyright (c) 2009, 2010 Marvell International Ltd.
-+ *                             Philip Rakity <prakity@marvell.com>
-+ *                             Mark F. Brown <markb@marvell.com>
-+ *
-+ * This file is part of GNU program.
-+ *
-+ * GNU program is free software: you can redistribute it and/or modify it
-+ * under the terms of the GNU General Public License as published by the
-+ * Free Software Foundation, either version 2 of the License, or (at your
-+ * option) any later version.
-+ *
-+ * GNU program is distributed in the hope that it will be useful, but
-+ * WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-+ * Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License along
-+ * with this program.
-+ *
-+ * If not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-+ *
-+ *************************************************************************/
++++ b/Documentation/ABI/testing/sysfs-devices-mmc
+@@ -0,0 +1,21 @@
++What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_offset
++Date:		January 2011
++Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
++Description:
++		Enhanced area is a new feature defined in eMMC4.4 standard.
++		eMMC4.4 or later card can support such feature. This kind of
++		area can help to improve the card performance. If the feature is
++		enabled, this attribute will indicate the start address of
++		enhanced data area. If not, this attribute will be -EINVAL. Unit
++		Byte. Format decimal.
 +
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+#include <linux/mmc/host.h>
-+#include <linux/clk.h>
-+#include <linux/io.h>
-+#include <linux/err.h>
-+#include <linux/delay.h>
-+#include <linux/slab.h>
-+#include <plat/sdhci.h>
-+#include "sdhci-pxa.h"
-+#include "sdhci.h"
++What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_size
++Date:		January 2011
++Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
++Description:
++		Enhanced area is a new feature defined in eMMC4.4 standard.
++		eMMC4.4 or later card can support such feature. This kind of
++		area can help to improve the card performance. If the feature is
++		enabled, this attribute will indicate the size of enhanced data
++		area. If not, this attribute will be -EINVAL. Unit KByte. Format
++		decimal.
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 16006ef..996e95e 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -302,6 +302,48 @@ static int mmc_read_ext_csd(struct mmc_card *card)
+ 	}
+ 
+ 	if (card->ext_csd.rev >= 4) {
++		/*
++		 * Enhanced area feature support
++		 * check whether eMMC card has the Enhanced area enabled.
++		 * if so, export enhanced area offset and size to
++		 * user by adding sysfs interface
++		 */
++		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
++				(ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
++			u8 hc_erase_grp_sz =
++				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
++			u8 hc_wp_grp_sz =
++				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
++			/*
++			 * set a flag to identify whether the enhanced
++			 * user data is enabled
++			 */
++			card->ext_csd.enhanced_area_en = 1;
++			/*
++			 * calculate the enhanced data area offset, unit B
++			 */
++			card->ext_csd.enhanced_area_offset =
++				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
++				(ext_csd[137] << 8) + ext_csd[136];
++			if (mmc_card_blockaddr(card))
++				card->ext_csd.enhanced_area_offset <<= 9;
++			/*
++			 * calculate the enhanced data area size, unit KB
++			 */
++			card->ext_csd.enhanced_area_size =
++				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
++				ext_csd[140];
++			card->ext_csd.enhanced_area_size *=
++				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
++			card->ext_csd.enhanced_area_size <<= 9;
++		} else {
++			/*
++			 * If not enabled enhanced area, disable these
++			 * device attributes
++			 */
++			card->ext_csd.enhanced_area_offset = -EINVAL;
++			card->ext_csd.enhanced_area_size = -EINVAL;
++		}
+ 		card->ext_csd.sec_trim_mult =
+ 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+ 		card->ext_csd.sec_erase_mult =
+@@ -336,6 +378,9 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+ MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+ MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
+ MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
++MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
++		card->ext_csd.enhanced_area_offset);
++MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
+ 
+ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_cid.attr,
+@@ -349,6 +394,8 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_name.attr,
+ 	&dev_attr_oemid.attr,
+ 	&dev_attr_serial.attr,
++	&dev_attr_enhanced_area_offset.attr,
++	&dev_attr_enhanced_area_size.attr,
+ 	NULL,
+ };
+ 
+@@ -484,6 +531,39 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	}
+ 
+ 	/*
++	 * If enhanced_area_en is TRUE, host need to enable
++	 * ERASE_GRP_DEF bit.
++	 * ERASE_GRP_DEF bit will be lost everytime
++	 * after a reset or power off.
++	 */
++	if (card->ext_csd.enhanced_area_en) {
++		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++				EXT_CSD_ERASE_GROUP_DEF, 1);
 +
-+#define DEBUG
++		if (err && err != -EBADMSG)
++			goto free_card;
 +
-+#define DRIVER_NAME "sdhci-mmp2"
++		if (err) {
++			err = 0;
++			/*
++			 * Just disable enhanced area off & sz
++			 * will try to enable ERASE_GROUP_DEF
++			 * during next time reinit
++			 */
++			card->ext_csd.enhanced_area_offset = -EINVAL;
++			card->ext_csd.enhanced_area_size = -EINVAL;
++		} else {
++			card->ext_csd.erase_group_def = 1;
++			/*
++			 * enable ERASE_GRP_DEF successfully.
++			 * This will affect the erase size, so
++			 * here need to reset erase size
++			 */
++			mmc_set_erase_size(card);
++		}
++	}
 +
-+#define SD_CFG_FIFO_PARAM       0x100
-+#define SDCFG_GEN_PAD_CLK_ON   (1<<6)
-+
-+#define SD_CLOCK_AND_BURST_SIZE_SETUP   0x10A
-+#define SDCLK_DELAY_MASK     0x1F
-+#define SDCLK_SEL_MASK       0x1
-+#define SDCLK_DELAY_SHIFT    9
-+#define SDCLK_SEL_SHIFT      8
-+
-+#define SD_CE_ATA_2          0x10E
-+#define SDCE_MISC_INT          (1<<2)
-+#define SDCE_MISC_INT_EN       (1<<1)
-+
-+#define DISABLE_CLOCK_GATING 0
-+
-+
-+static int platform_mmp2_probe(struct sdhci_host *host);
-+
-+/*
-+ * MMC spec calls for the host to send 74 clocks to the card
-+ * during initialization, right after voltage stabilization.
-+ * the pxa168 controller has no easy way to generate those clocks.
-+ * create the clocks manually right here.
-+ */
-+static void generate_initial_74_clocks(struct sdhci_host *host, u8 power_mode)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+       u16 tmp;
-+       int count;
-+
-+       if (pxa->power_mode == MMC_POWER_UP
-+       && power_mode == MMC_POWER_ON) {
-+
-+               pr_debug("%s:%s ENTER: slot->power_mode = %d,"
-+                       "ios->power_mode = %d\n",
-+                       __func__,
-+                       mmc_hostname(host->mmc),
-+                       pxa->power_mode,
-+                       power_mode);
-+
-+               /* set we want notice of when 74 clocks are sent */
-+               tmp = readw(host->ioaddr + SD_CE_ATA_2);
-+               tmp |= SDCE_MISC_INT_EN;
-+               writew(tmp, host->ioaddr + SD_CE_ATA_2);
-+
-+               /* start sending the 74 clocks */
-+               tmp = readw(host->ioaddr + SD_CFG_FIFO_PARAM);
-+               tmp |= SDCFG_GEN_PAD_CLK_ON;
-+               writew(tmp, host->ioaddr + SD_CFG_FIFO_PARAM);
-+
-+               /* slowest speed is about 100KHz or 10usec per clock */
-+               udelay(740);
-+               count = 0;
-+#define MAX_WAIT_COUNT 5
-+               while (count++ < MAX_WAIT_COUNT) {
-+                       if ((readw(host->ioaddr + SD_CE_ATA_2)
-+                                       & SDCE_MISC_INT) == 0)
-+                               break;
-+                       udelay(10);
-+               }
-+
-+               if (count == MAX_WAIT_COUNT)
-+                       printk(KERN_WARNING"%s: %s: 74 clock interrupt "
-+                               "not cleared\n",
-+                               __func__, mmc_hostname(host->mmc));
-+               /* clear the interrupt bit if posted */
-+               tmp = readw(host->ioaddr + SD_CE_ATA_2);
-+               tmp |= SDCE_MISC_INT;
-+               writew(tmp, host->ioaddr + SD_CE_ATA_2);
-+       }
-+       pxa->power_mode = power_mode;
-+}
-+
-+static void set_clock_and_burst_size(struct sdhci_host *host)
-+{
-+       u16 tmp;
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       pr_debug("%s:%s: adjust = %d\n",
-+               __func__, mmc_hostname(host->mmc), pxa->pdata->adjust_clocks);
-+
-+       if (pxa->pdata->adjust_clocks) {
-+               tmp = readw(host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
-+               pr_debug("%s:%s: (B) SD_CLOCK_AND_BURST = %04X, "
-+                       "delay = %d, sel = %d\n",
-+                       __func__, mmc_hostname(host->mmc), tmp,
-+                       pxa->pdata->clk_delay, pxa->pdata->clk_select);
-+               tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
-+               tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
-+               tmp |= (pxa->pdata->clk_delay & SDCLK_DELAY_MASK) <<
-+                       SDCLK_DELAY_SHIFT;
-+               tmp |= (pxa->pdata->clk_select & SDCLK_SEL_MASK) <<
-+                       SDCLK_SEL_SHIFT;
-+               writew(tmp, host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
-+               pr_debug("%s:%s: (A) SD_CLOCK_AND_BURST_SIZE_SETUP = %04X\n",
-+                       __func__, mmc_hostname(host->mmc), tmp);
-+       }
-+}
-+
-+static void programFIFO(struct sdhci_host *host, int enable)
-+{
-+       unsigned short tmp;
-+
-+       tmp = readw(host->ioaddr + SDHCI_HOST_CONTROL_2);
-+
-+       if (enable)
-+               tmp |= SDCTRL_2_ASYNC_INT_EN;
-+       else
-+               tmp &= ~SDCTRL_2_ASYNC_INT_EN;
-+
-+       writew(tmp, host->ioaddr + SDHCI_HOST_CONTROL_2);
-+}
-+
-+static void platform_reset_exit(struct sdhci_host *host, u8 mask)
-+{
-+       if (mask == SDHCI_RESET_ALL) {
-+               /* reset private registers */
-+               programFIFO(host, DISABLE_CLOCK_GATING);
-+               set_clock_and_burst_size(host);
-+       }
-+}
-+
-+
-+#ifdef CONFIG_MMC_CLKGATE
-+static void platform_hw_clk_gate(struct sdhci_host *host)
-+{
-+       int enable;
-+
-+       enable = host->mmc->clk_gated;
-+       programFIFO(host, enable);
-+       pr_debug("%s:%s: enable = %d\n",
-+               __func__, mmc_hostname(host->mmc), enable);
-+}
-+#endif
-+
-+static unsigned int get_f_max_clock(struct sdhci_host *host)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       pr_debug("%s:%s f_max = %d\n",
-+                       __func__, mmc_hostname(host->mmc),
-+                        pxa->pdata->max_speed);
-+
-+       return pxa->pdata->max_speed;
-+}
-+
-+static unsigned int set_signaling_voltage(struct sdhci_host *host,
-+       unsigned int ddr)
-+{
-+       u16 con;
-+
-+       pr_debug("%s:%s\n", __func__, mmc_hostname(host->mmc));
-+       /*
-+        * Set V18_EN -- DDR does not work without this.
-+        * does not change signaling voltage
-+        */
-+       con = readw(host->ioaddr + SDHCI_HOST_CONTROL_2);
-+       con |= SDCTRL_2_SDH_V18_EN;
-+       writew(con, host->ioaddr + SDHCI_HOST_CONTROL_2);
-+       return 0;
-+}
-+
-+struct sdhci_pxa_data sdhci_platform_data = {
-+       .ops = {
-+               .platform_reset_exit = platform_reset_exit,
-+               .platform_send_init_74_clocks = generate_initial_74_clocks,
-+               .set_signaling_voltage = set_signaling_voltage,
-+               .get_f_max_clock = NULL,
-+#ifdef CONFIG_MMC_CLKGATE
-+               .platform_hw_clk_gate = platform_hw_clk_gate,
-+#endif
-+       },
-+#ifdef CONFIG_MMC_CLKGATE
-+       .mmc_caps = MMC_CAP_HW_CLOCK_GATING | MMC_CAP_BUS_WIDTH_TEST,
-+#else
-+       .mmc_caps = MMC_CAP_BUS_WIDTH_TEST,
-+#endif
-+       .platform_probe = platform_mmp2_probe,
-+       .quirks = 0,
-+};
-+EXPORT_SYMBOL_GPL(sdhci_platform_data);
-+
-+static int platform_mmp2_probe(struct sdhci_host *host)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+       struct sdhci_pxa_platdata *pdata = pxa->pdata;
-+       struct sdhci_ops *p_ops;
-+
-+       p_ops = kmalloc(sizeof(struct sdhci_ops), GFP_KERNEL);
-+       if (!p_ops) {
-+               printk(KERN_ERR "no memory");
-+               return -ENOMEM;
-+       }
-+
-+       /*
-+        * we cannot directly copy our operations into host->ops
-+        * since it is read only.  So we do this indirectly.
-+        */
-+       memcpy((void *)p_ops, (void *)&sdhci_platform_data.ops,
-+               sizeof(struct sdhci_ops));
-+
-+       if (pxa->pdata->max_speed)
-+               p_ops->get_f_max_clock = get_f_max_clock;
-+
-+       host->quirks |= sdhci_platform_data.quirks;
-+       host->mmc->caps |= sdhci_platform_data.mmc_caps;
-+
-+       /* If slot design supports 8 bit data, indicate this to MMC. */
-+       if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
-+               host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-+
-+       if (pdata->flags & PXA_FLAG_CARD_PERMANENT) {
-+               host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-+               host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+       }
-+
-+       pr_debug("%s:%s: host->quirks = %08X, mmc->caps = %08lX\n",
-+                __func__, mmc_hostname(host->mmc),
-+               host->quirks, host->mmc->caps);
-+
-+       memcpy((void *)host->ops, (void *)p_ops, sizeof(struct sdhci_ops));
-+       kfree(p_ops);
-+       return 0;
-+}
-diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
-index b31d3d5..3b965ce 100644
---- a/drivers/mmc/host/sdhci-pxa.c
-+++ b/drivers/mmc/host/sdhci-pxa.c
-@@ -18,40 +18,21 @@
-  * Refer to sdhci-s3c.c.
++	/*
+ 	 * Activate high speed (if supported)
+ 	 */
+ 	if ((card->ext_csd.hs_max_dtr != 0) &&
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 8ce0827..4652cf9 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -54,6 +54,9 @@ struct mmc_ext_csd {
+ 	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
+ 	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
+ 	unsigned int		trim_timeout;		/* In milliseconds */
++	bool			enhanced_area_en;	/* enable bit */
++	unsigned long long	enhanced_area_offset;	/* Units: Byte */
++	unsigned int		enhanced_area_size;	/* Units: KB */
+ };
+ 
+ struct sd_scr {
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 612301f..264ba54 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -253,6 +253,8 @@ struct _mmc_csd {
+  * EXT_CSD fields
   */
-
-+#include <linux/module.h>
- #include <linux/delay.h>
- #include <linux/platform_device.h>
- #include <linux/mmc/host.h>
- #include <linux/clk.h>
- #include <linux/io.h>
- #include <linux/err.h>
-+#include <linux/slab.h>
- #include <plat/sdhci.h>
-+#include "sdhci-pxa.h"
-+#include <mach/cputype.h>
- #include "sdhci.h"
-
- #define DRIVER_NAME    "sdhci-pxa"
-
--#define SD_CFG_FIFO_PARAM       0x100
--#define SDCFG_GEN_PAD_CLK_ON   (1<<6)
--
--#define SD_CLOCK_AND_BURST_SIZE_SETUP   0x10A
--#define SDCLK_DELAY_MASK     0x1F
--#define SDCLK_SEL_MASK       0x1
--#define SDCLK_DELAY_SHIFT    9
--#define SDCLK_SEL_SHIFT      8
--
--#define SD_CE_ATA_2          0x10E
--#define SDCE_MISC_INT          (1<<2)
--#define SDCE_MISC_INT_EN       (1<<1)
--
--#define DISABLE_CLOCK_GATING 0
--
--struct sdhci_pxa {
--       struct sdhci_host               *host;
--       struct sdhci_pxa_platdata       *pdata;
--       struct clk                      *clk;
--       struct resource                 *res;
--
--       u8                              clk_enable;
--};
-
- /*****************************************************************************\
-  *                                                                           *
-@@ -68,94 +49,6 @@ static void enable_clock(struct sdhci_host *host)
-        }
- }
-
--static unsigned int get_f_max_clock(struct sdhci_host *host)
--{
--       struct sdhci_pxa *pxa = sdhci_priv(host);
--
--       return pxa->pdata->max_speed;
--}
--
--static unsigned int set_signaling_voltage(struct sdhci_host *host,
--       unsigned int ddr)
--{
--       u16 con;
--       /*
--        * Set V18_EN -- DDR does not work without this.
--        * does not change signaling voltage
--        */
--       con = readw(host->ioaddr + SDHCI_HOST_CONTROL_2);
--       con |= SDCTRL_2_SDH_V18_EN;
--       writew(con, host->ioaddr + SDHCI_HOST_CONTROL_2);
--       return 0;
--}
--
--
--static void set_clock_and_burst_size(struct sdhci_host *host)
--{
--       u16 tmp;
--       struct sdhci_pxa *pxa = sdhci_priv(host);
--
--       pr_debug("%s:%s: adjust = %d\n",
--               __func__, mmc_hostname(host->mmc), pxa->pdata->adjust_clocks);
--
--       if (pxa->pdata->adjust_clocks) {
--               tmp = readw(host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
--               pr_debug("%s:%s: (B) SD_CLOCK_AND_BURST = %04X, "
--                       "delay = %d, sel = %d\n",
--                       __func__, mmc_hostname(host->mmc), tmp,
--                       pxa->pdata->clk_delay, pxa->pdata->clk_select);
--               tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
--               tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
--               tmp |= (pxa->pdata->clk_delay & SDCLK_DELAY_MASK) <<
--                       SDCLK_DELAY_SHIFT;
--               tmp |= (pxa->pdata->clk_select & SDCLK_SEL_MASK) <<
--                       SDCLK_SEL_SHIFT;
--               writew(tmp, host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
--               pr_debug("%s:%s: (A) SD_CLOCK_AND_BURST_SIZE_SETUP = %04X\n",
--                       __func__, mmc_hostname(host->mmc), tmp);
--       }
--}
--
--static void programFIFO(struct sdhci_host *host, int enable)
--{
--       unsigned short tmp;
--
--       tmp = readw(host->ioaddr + SDHCI_HOST_CONTROL_2);
--
--       if (enable)
--               tmp |= SDCTRL_2_ASYNC_INT_EN;
--       else
--               tmp &= ~SDCTRL_2_ASYNC_INT_EN;
--
--       writew(tmp, host->ioaddr + SDHCI_HOST_CONTROL_2);
--}
--
--static void platform_reset_exit(struct sdhci_host *host, u8 mask)
--{
--       if (mask == SDHCI_RESET_ALL) {
--               programFIFO(host, DISABLE_CLOCK_GATING);
--               set_clock_and_burst_size(host);
--       }
--}
--
--#ifdef CONFIG_MMC_CLKGATE
--static void platform_hw_clk_gate(struct sdhci_host *host)
--{
--       int enable;
--
--       enable = host->mmc->clk_gated;
--       programFIFO(host, enable);
--}
--#endif
--
--static struct sdhci_ops sdhci_pxa_ops = {
--       .get_f_max_clock = NULL,
--       .set_signaling_voltage = set_signaling_voltage,
--       .platform_reset_exit = platform_reset_exit,
--#ifdef CONFIG_MMC_CLKGATE
--       .platform_hw_clk_gate = platform_hw_clk_gate,
--#endif
--};
-
- /*****************************************************************************\
-  *                                                                           *
-@@ -218,32 +111,23 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
-        }
-
-        host->hw_name = "MMC";
--       host->ops = &sdhci_pxa_ops;
--       host->irq = irq;
--       host->quirks = SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
--
--#ifdef CONFIG_MMC_CLKGATE
--       host->mmc->caps |= MMC_CAP_HW_CLOCK_GATING | MMC_CAP_BUS_WIDTH_TEST;
--#else
--       host->mmc->caps |= MMC_CAP_BUS_WIDTH_TEST;
--#endif
--
--       /* If slot design supports 8 bit data, indicate this to MMC. */
--       if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
--               host->mmc->caps |= MMC_CAP_8_BIT_DATA;
--
--       if (pdata->flags & PXA_FLAG_CARD_PERMANENT) {
--               host->mmc->caps |= MMC_CAP_NONREMOVABLE;
--               host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+       host->ops = kmalloc(sizeof(struct sdhci_ops), GFP_KERNEL);
-+       if (!host->ops) {
-+               dev_err(&pdev->dev, "no memory for host->ops\n");
-+               ret = -ENOMEM;
-+               goto out;
-        }
-+       host->irq = irq;
-+       host->quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-
-        /* do not rely on u-boot to enable the clocks */
-        enable_clock(host);
-
--       if (pxa->pdata->max_speed)
--               sdhci_pxa_ops.get_f_max_clock = get_f_max_clock;
--       else
--               sdhci_pxa_ops.get_f_max_clock = NULL;
-+       if (sdhci_platform_data.platform_probe) {
-+               ret = sdhci_platform_data.platform_probe(host);
-+               if (ret)
-+                       goto out;
-+       }
-
-        ret = sdhci_add_host(host);
-        if (ret) {
-@@ -257,6 +141,7 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
- out:
-        if (host) {
-                clk_put(pxa->clk);
-+               kfree(host->ops);
-                if (host->ioaddr)
-                        iounmap(host->ioaddr);
-                if (pxa->res)
-@@ -289,6 +174,7 @@ static int __devexit sdhci_pxa_remove(struct platform_device *pdev)
-                                           resource_size(pxa->res));
-                clk_put(pxa->clk);
-
-+               kfree(host->ops);
-                sdhci_free_host(host);
-                platform_set_drvdata(pdev, NULL);
-        }
-@@ -348,4 +234,5 @@ module_exit(sdhci_pxa_exit);
-
- MODULE_DESCRIPTION("SDH controller driver for PXA168/PXA910/MMP2");
- MODULE_AUTHOR("Zhangfei Gao <zhangfei.gao@marvell.com>");
-+MODULE_AUTHOR("Philp Rakity <prakity@marvell.com>");
- MODULE_LICENSE("GPL v2");
-diff --git a/drivers/mmc/host/sdhci-pxa168.c b/drivers/mmc/host/sdhci-pxa168.c
-new file mode 100644
-index 0000000..696862f
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-pxa168.c
-@@ -0,0 +1,343 @@
-+/**************************************************************************
-+ *
-+ * Copyright (c) 2009, 2010 Marvell International Ltd.
-+ *                             Philip Rakity <prakity@marvell.com>
-+ *                             Mark F. Brown <markb@marvell.com>
-+ *
-+ * This file is part of GNU program.
-+ *
-+ * GNU program is free software: you can redistribute it and/or modify it
-+ * under the terms of the GNU General Public License as published by the
-+ * Free Software Foundation, either version 2 of the License, or (at your
-+ * option) any later version.
-+ *
-+ * GNU program is distributed in the hope that it will be useful, but
-+ * WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-+ * Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License along
-+ * with this program.
-+ *
-+ * If not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-+ *
-+ *************************************************************************/
-+
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+#include <linux/mmc/host.h>
-+#include <linux/clk.h>
-+#include <linux/io.h>
-+#include <linux/err.h>
-+#include <linux/delay.h>
-+#include <linux/slab.h>
-+#include <plat/sdhci.h>
-+#include "sdhci-pxa.h"
-+#include "sdhci.h"
-+
-+#define DRIVER_NAME "sdhci-pxa168"
-+
-+#define SD_FIFO_PARAM          0xE0
-+#define DIS_PAD_SD_CLK_GATE    (1<<10) /* Turn on/off Dynamic Clock Gating */
-+
-+#define SD_CLOCK_AND_BURST_SIZE_SETUP  0xE6
-+#define SDCLK_DELAY_MASK       0xF
-+#define SDCLK_SEL_MASK         0x3
-+#define SDCLK_DELAY_SHIFT      10
-+#define SDCLK_SEL_SHIFT                8
-+
-+#define SD_CE_ATA_2                    0xEA
-+#define SDCE_MMC_WIDTH         (1<<8)
-+#define SDCE_MMC_CARD          (1<<12)
-+
-+#define DISABLE_CLOCK_GATING 0
-+
-+static int platform_pxa168_probe(struct sdhci_host *host);
-+
-+/*
-+ * MMC spec calls for the host to send 74 clocks to the card
-+ * during initialization, right after voltage stabilization.
-+ * the pxa168 controller has no easy way to generate those clocks.
-+ * create the clocks manually right here.
-+ */
-+#if 0
-+static void generate_init_clocks(struct sdhci_host *host, u8 power_mode)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+       struct pfn_cfg *cfg = pxa->pdata->pfn_table;
-+       mfp_cfg_t clk_pin;
-+       int i;
-+
-+
-+       if (cfg == NULL) {
-+               DBG("Cannot generate init clocks!\n");
-+               return;
-+       }
-+
-+       if (pxa->power_mode == MMC_POWER_UP
-+       && power_mode == MMC_POWER_ON) {
-+
-+               DBG("%s: ENTER %s: power_mode = %d, ios_.power_mode = %d\n",
-+                       __func__,
-+                       mmc_hostname(host->mmc),
-+                       pxa->power_mode,
-+                       power_mode);
-+               /* CMD/CLK pin to gpio mode.  */
-+               mfp_config(pfn_lookup(cfg, PFN_GPIO, PIN_MMC_CMD), 1);
-+               mfp_config(pfn_lookup(cfg, PFN_GPIO, PIN_MMC_CLK), 1);
-+
-+               /* ensure at least 1/2 period stable to prevent runt pulse.*/
-+               udelay(3);
-+
-+               clk_pin = *(pfn_lookup(cfg, PFN_GPIO, PIN_MMC_CLK));
-+               if (gpio_request(MFP_PIN(clk_pin), "MMC_CLK")) {
-+                       printk(KERN_ERR "Cannot obtain MMC_CLK GPIO %ld\n",
-+                               MFP_PIN(clk_pin));
-+                       goto err;
-+               }
-+
-+               DBG("Generating init clocks on pins CLK %ld\n",
-+                       MFP_PIN(clk_pin));
-+
-+               for (i = 0; i < INIT_CLOCKS; i++) {
-+                       gpio_direction_output(MFP_PIN(clk_pin), 0); /* low */
-+                       udelay(3);
-+                       gpio_direction_output(MFP_PIN(clk_pin), 1); /* high */
-+                       udelay(3);
-+               }
-+
-+               gpio_free(MFP_PIN(clk_pin));
-+       }
-+
-+err:
-+       pxa->power_mode = power_mode;
-+
-+       /* CMD/CLK pin back MMC mode.   */
-+       mfp_config(pfn_lookup(cfg, PFN_FN, PIN_MMC_CMD), 1);
-+       mfp_config(pfn_lookup(cfg, PFN_FN, PIN_MMC_CLK), 1);
-+}
-+#endif
-+
-+/*
-+ * we cannot talk to controller for 8 bus cycles according to sdio spec
-+ * at lowest speed this is 100,000 HZ per cycle or 800,000 cycles
-+ * which is quite a LONG TIME on a fast cpu -- so delay if needed
-+ */
-+static void platform_specific_delay(struct sdhci_host *host)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       mdelay(pxa->delay_in_ms);
-+       udelay(pxa->delay_in_us);
-+       ndelay(pxa->delay_in_ns);
-+}
-+
-+static void set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       if (clock != 0) {
-+               pxa->delay_in_ns = (1000000000/clock);
-+
-+               /* need to delay 12 clocks for 8787/8786 */
-+               /* need to delay 8 clocks for controller -- so just use 12 */
-+
-+               pxa->delay_in_ns = pxa->delay_in_ns * 12;
-+
-+               pxa->delay_in_ms = pxa->delay_in_ns / 1000000;
-+               pxa->delay_in_ns = pxa->delay_in_ns % 1000000;
-+               pxa->delay_in_us = pxa->delay_in_ns / 1000;
-+               pxa->delay_in_ns = pxa->delay_in_ns % 1000;
-+       } else {
-+               pxa->delay_in_ns = 0;
-+               pxa->delay_in_us = 0;
-+               pxa->delay_in_ms = 0;
-+       }
-+}
-+
-+static void set_clock_and_burst_size(struct sdhci_host *host)
-+{
-+       u16 tmp;
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       if (pxa->pdata->adjust_clocks) {
-+               tmp = readw(host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
-+               pr_debug("%s:%s: (B) SD_CLOCK_AND_BURST = %04X"
-+                       ", delay = %d, sel = %d\n",
-+                       __func__, mmc_hostname(host->mmc), tmp,
-+                       pxa->pdata->clk_delay, pxa->pdata->clk_select);
-+               tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
-+               tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
-+               tmp |= (pxa->pdata->clk_delay & SDCLK_DELAY_MASK) <<
-+                       SDCLK_DELAY_SHIFT;
-+               tmp |= (pxa->pdata->clk_select & SDCLK_SEL_MASK) <<
-+                       SDCLK_SEL_SHIFT;
-+               writew(tmp, host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
-+               pr_debug("%s:%s: (A) SD_CLOCK_AND_BURST = %04X\n",
-+                       __func__, mmc_hostname(host->mmc), tmp);
-+       }
-+}
-+
-+static void programFIFO(struct sdhci_host *host, int enable)
-+{
-+       unsigned short tmp;
-+
-+       tmp = readw(host->ioaddr + SD_FIFO_PARAM);
-+       if (enable)
-+               tmp &= ~DIS_PAD_SD_CLK_GATE;
-+       else
-+               tmp |= DIS_PAD_SD_CLK_GATE;
-+       writew(tmp, host->ioaddr + SD_FIFO_PARAM);
-+}
-+
-+static void platform_reset_enter(struct sdhci_host *host, u8 mask)
-+{
-+       /* Before RESET_DATA we need to wait at least 10 sd cycles */
-+       if (mask == SDHCI_RESET_DATA)
-+               platform_specific_delay(host);
-+}
-+
-+
-+static void platform_reset_exit(struct sdhci_host *host, u8 mask)
-+{
-+       if (mask == SDHCI_RESET_ALL) {
-+               /* reset private registers */
-+               programFIFO(host, DISABLE_CLOCK_GATING);
-+               set_clock_and_burst_size(host);
-+       }
-+}
-+
-+
-+#ifdef CONFIG_MMC_CLKGATE
-+static void platform_hw_clk_gate(struct sdhci_host *host)
-+{
-+       int enable;
-+
-+       enable = host->mmc->clk_gated;
-+       programFIFO(host, enable);
-+       pr_debug("%s:%s: enable = %d\n",
-+               __func__, mmc_hostname(host->mmc), enable);
-+}
-+#endif
-+
-+static unsigned int get_max_clock(struct sdhci_host *host)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       pr_debug("%s:%s clk_get_rate = %lu\n",
-+                       __func__, mmc_hostname(host->mmc),
-+                        clk_get_rate(pxa->clk));
-+
-+       return clk_get_rate(pxa->clk);
-+}
-+
-+static unsigned int get_f_max_clock(struct sdhci_host *host)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       pr_debug("%s:%s f_max = %d\n",
-+                       __func__, mmc_hostname(host->mmc),
-+                        pxa->pdata->max_speed);
-+
-+       return pxa->pdata->max_speed;
-+}
-+
-+static int platform_supports_8_bit(struct sdhci_host *host, int width)
-+{
-+       u16 tmp;
-+
-+       tmp = readw(host->ioaddr + SD_CE_ATA_2);
-+       tmp |= SDCE_MMC_CARD | SDCE_MMC_WIDTH;
-+       writew(tmp, host->ioaddr + SD_CE_ATA_2);
-+
-+       tmp = readw(host->ioaddr + SD_CE_ATA_2);
-+       if (width != 8)
-+               tmp &= ~(SDCE_MMC_CARD | SDCE_MMC_WIDTH);
-+       else
-+               tmp |= SDCE_MMC_CARD | SDCE_MMC_WIDTH;
-+       writew(tmp, host->ioaddr + SD_CE_ATA_2);
-+       return 0;
-+}
-+
-+static u16 pxa168_readw(struct sdhci_host *host, int reg)
-+{
-+       u32 temp;
-+
-+       if (reg == SDHCI_HOST_VERSION) {
-+               temp = readl(host->ioaddr + SDHCI_HOST_VERSION - 2) >> 16;
-+               return temp & 0xffff;
-+       }
-+
-+       return readw(host->ioaddr + reg);
-+}
-+
-+struct sdhci_pxa_data sdhci_platform_data = {
-+       .ops = {
-+               .platform_reset_enter = platform_reset_enter,
-+               .platform_reset_exit = platform_reset_exit,
-+               .get_max_clock = get_max_clock,
-+               .set_clock = set_clock,
-+               .platform_specific_delay = platform_specific_delay,
-+               .platform_send_init_74_clocks = NULL,
-+               .get_f_max_clock = NULL,
-+               .platform_8bit_width = NULL,
-+#ifdef CONFIG_MMC_CLKGATE
-+               .platform_hw_clk_gate = platform_hw_clk_gate,
-+#endif
-+               .read_w = pxa168_readw,
-+       },
-+#ifdef CONFIG_MMC_CLKGATE
-+       .mmc_caps = MMC_CAP_HW_CLOCK_GATING | MMC_CAP_BUS_WIDTH_TEST,
-+#else
-+       .mmc_caps = MMC_CAP_BUS_WIDTH_TEST,
-+#endif
-+       .platform_probe = platform_pxa168_probe,
-+       .quirks = SDHCI_QUIRK_32BIT_DMA_ADDR | SDHCI_QUIRK_32BIT_DMA_SIZE
-+               | SDHCI_QUIRK_NO_BUSY_IRQ | SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
-+               | SDHCI_QUIRK_NO_HISPD_BIT,
-+
-+};
-+EXPORT_SYMBOL_GPL(sdhci_platform_data);
-+
-+static int platform_pxa168_probe(struct sdhci_host *host)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+       struct sdhci_pxa_platdata *pdata = pxa->pdata;
-+       struct sdhci_ops *p_ops;
-+
-+       p_ops = kmalloc(sizeof(struct sdhci_ops), GFP_KERNEL);
-+       if (!p_ops)
-+               return -ENOMEM;
-+
-+       /*
-+        * we cannot directly copy our operations into host->ops
-+        * since it is read only.  So we do this indirectly.
-+        */
-+       memcpy((void *)p_ops, (void *)&sdhci_platform_data.ops,
-+               sizeof(struct sdhci_ops));
-+
-+       if (pxa->pdata->max_speed)
-+               p_ops->get_f_max_clock = get_f_max_clock;
-+
-+       host->quirks |= sdhci_platform_data.quirks;
-+       host->mmc->caps |= sdhci_platform_data.mmc_caps;
-+
-+       /* If slot design supports 8 bit data, indicate this to MMC. */
-+       if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT) {
-+               host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-+               p_ops->platform_8bit_width = platform_supports_8_bit;
-+       }
-+
-+       if (pdata->flags & PXA_FLAG_CARD_PERMANENT) {
-+               host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-+               host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+       }
-+
-+       pr_debug("%s:%s: host->quirks = %08X, mmc->caps = %08lX\n",
-+                __func__, mmc_hostname(host->mmc),
-+               host->quirks, host->mmc->caps);
-+
-+       memcpy((void *)host->ops, (void *)p_ops, sizeof(struct sdhci_ops));
-+       kfree(p_ops);
-+       return 0;
-+}
-diff --git a/drivers/mmc/host/sdhci-pxa910.c b/drivers/mmc/host/sdhci-pxa910.c
-new file mode 100644
-index 0000000..18cdf7a
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-pxa910.c
-@@ -0,0 +1,272 @@
-+/**************************************************************************
-+ *
-+ * Copyright (c) 2009, 2010 Marvell International Ltd.
-+ *                             Philip Rakity <prakity@marvell.com>
-+ *                             Mark F. Brown <markb@marvell.com>
-+ *
-+ * This file is part of GNU program.
-+ *
-+ * GNU program is free software: you can redistribute it and/or modify it
-+ * under the terms of the GNU General Public License as published by the
-+ * Free Software Foundation, either version 2 of the License, or (at your
-+ * option) any later version.
-+ *
-+ * GNU program is distributed in the hope that it will be useful, but
-+ * WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-+ * Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License along
-+ * with this program.
-+ *
-+ * If not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-+ *
-+ *************************************************************************/
-+
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+#include <linux/mmc/host.h>
-+#include <linux/clk.h>
-+#include <linux/io.h>
-+#include <linux/err.h>
-+#include <linux/delay.h>
-+#include <linux/slab.h>
-+#include <plat/sdhci.h>
-+#include "sdhci-pxa.h"
-+#include "sdhci.h"
-+
-+#define DRIVER_NAME "sdhci-pxa910"
-+
-+#define SD_FIFO_PARAM          0xE0
-+#define DIS_PAD_SD_CLK_GATE    (1<<10) /* Turn on/off Dynamic Clock Gating */
-+
-+#define SD_CLOCK_AND_BURST_SIZE_SETUP  0xE6
-+#define SDCLK_DELAY_MASK       0xF
-+#define SDCLK_SEL_MASK         0x3
-+#define SDCLK_DELAY_SHIFT      10
-+#define SDCLK_SEL_SHIFT                8
-+
-+#define SD_CE_ATA_2            0xEA
-+#define SDCE_MMC_WIDTH         (1<<8)
-+#define SDCE_MMC_CARD          (1<<12)
-+
-+#define DISABLE_CLOCK_GATING 0
-+
-+static int platform_pxa910_probe(struct sdhci_host *host);
-+
-+/*
-+ * MMC spec calls for the host to send 74 clocks to the card
-+ * during initialization, right after voltage stabilization.
-+ * the pxa168 controller has no easy way to generate those clocks.
-+ * create the clocks manually right here.
-+ */
-+#if 0
-+static void generate_init_clocks(struct sdhci_host *host, u8 power_mode)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+       struct pfn_cfg *cfg = pxa->pdata->pfn_table;
-+       mfp_cfg_t clk_pin;
-+       int i;
-+
-+
-+       if (cfg == NULL) {
-+               DBG("Cannot generate init clocks!\n");
-+               return;
-+       }
-+
-+       if (pxa->power_mode == MMC_POWER_UP
-+       && power_mode == MMC_POWER_ON) {
-+
-+               DBG("%s: ENTER %s: power_mode = %d, ios_.power_mode = %d\n",
-+                       __func__,
-+                       mmc_hostname(host->mmc),
-+                       pxa->power_mode,
-+                       power_mode);
-+               /* CMD/CLK pin to gpio mode.  */
-+               mfp_config(pfn_lookup(cfg, PFN_GPIO, PIN_MMC_CMD), 1);
-+               mfp_config(pfn_lookup(cfg, PFN_GPIO, PIN_MMC_CLK), 1);
-+
-+               /* ensure at least 1/2 period stable to prevent runt pulse.*/
-+               udelay(3);
-+
-+               clk_pin = *(pfn_lookup(cfg, PFN_GPIO, PIN_MMC_CLK));
-+               if (gpio_request(MFP_PIN(clk_pin), "MMC_CLK")) {
-+                       printk(KERN_ERR "Cannot obtain MMC_CLK GPIO %ld\n",
-+                               MFP_PIN(clk_pin));
-+                       goto err;
-+               }
-+
-+               DBG("Generate 74 clocks on pins CLK %ld\n", MFP_PIN(clk_pin));
-+
-+               for (i = 0; i < INIT_CLOCKS; i++) {
-+                       gpio_direction_output(MFP_PIN(clk_pin), 0); /* low */
-+                       udelay(3);
-+                       gpio_direction_output(MFP_PIN(clk_pin), 1); /* high */
-+                       udelay(3);
-+               }
-+
-+               gpio_free(MFP_PIN(clk_pin));
-+       }
-+
-+err:
-+       pxa->power_mode = power_mode;
-+
-+       /* CMD/CLK pin back MMC mode.   */
-+       mfp_config(pfn_lookup(cfg, PFN_FN, PIN_MMC_CMD), 1);
-+       mfp_config(pfn_lookup(cfg, PFN_FN, PIN_MMC_CLK), 1);
-+}
-+#endif
-+
-+static void set_clock_and_burst_size(struct sdhci_host *host)
-+{
-+       u16 tmp;
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       if (pxa->pdata->adjust_clocks) {
-+               tmp = readw(host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
-+               pr_debug("%s:%s: (B) SD_CLOCK_AND_BURST = %04X, "
-+                       "delay = %d, sel = %d\n",
-+                       __func__, mmc_hostname(host->mmc), tmp,
-+                       pxa->pdata->clk_delay, pxa->pdata->clk_select);
-+               tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
-+               tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
-+               tmp |= (pxa->pdata->clk_delay & SDCLK_DELAY_MASK) <<
-+                       SDCLK_DELAY_SHIFT;
-+               tmp |= (pxa->pdata->clk_select & SDCLK_SEL_MASK) <<
-+                       SDCLK_SEL_SHIFT;
-+               writew(tmp, host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
-+               pr_debug("%s:%s: (A) SD_CLOCK_AND_BURST = %04X\n",
-+                       __func__, mmc_hostname(host->mmc), tmp);
-+       }
-+}
-+
-+static void programFIFO(struct sdhci_host *host, int enable)
-+{
-+       unsigned short tmp;
-+
-+       tmp = readw(host->ioaddr + SD_FIFO_PARAM);
-+       if (enable)
-+               tmp &= ~DIS_PAD_SD_CLK_GATE;
-+       else
-+               tmp |= DIS_PAD_SD_CLK_GATE;
-+       writew(tmp, host->ioaddr + SD_FIFO_PARAM);
-+}
-+
-+static void platform_reset_exit(struct sdhci_host *host, u8 mask)
-+{
-+       if (mask == SDHCI_RESET_ALL) {
-+               programFIFO(host, DISABLE_CLOCK_GATING);
-+               set_clock_and_burst_size(host);
-+       }
-+}
-+
-+#ifdef CONFIG_MMC_CLKGATE
-+static void platform_hw_clk_gate(struct sdhci_host *host)
-+{
-+       int enable;
-+
-+       enable = host->mmc->clk_gated;
-+       programFIFO(host, enable);
-+}
-+#endif
-+
-+static unsigned int get_max_clock(struct sdhci_host *host)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       pr_debug("%s:%s clk_get_rate = %lu\n",
-+                       __func__, mmc_hostname(host->mmc),
-+                        clk_get_rate(pxa->clk));
-+
-+       return clk_get_rate(pxa->clk);
-+}
-+
-+static unsigned int get_f_max_clock(struct sdhci_host *host)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+       pr_debug("%s:%s f_max = %d\n",
-+                       __func__, mmc_hostname(host->mmc),
-+                        pxa->pdata->max_speed);
-+
-+       return pxa->pdata->max_speed;
-+}
-+
-+static int platform_supports_8_bit(struct sdhci_host *host, int width)
-+{
-+       u16 tmp;
-+
-+       tmp = readw(host->ioaddr + SD_CE_ATA_2);
-+       tmp |= SDCE_MMC_CARD | SDCE_MMC_WIDTH;
-+       writew(tmp, host->ioaddr + SD_CE_ATA_2);
-+
-+       tmp = readw(host->ioaddr + SD_CE_ATA_2);
-+       if (width != 8)
-+               tmp &= ~(SDCE_MMC_CARD | SDCE_MMC_WIDTH);
-+       else
-+               tmp |= SDCE_MMC_CARD | SDCE_MMC_WIDTH;
-+       writew(tmp, host->ioaddr + SD_CE_ATA_2);
-+       return 0;
-+}
-+
-+struct sdhci_pxa_data sdhci_platform_data = {
-+       .ops = {
-+               .platform_reset_exit = platform_reset_exit,
-+               .get_max_clock = get_max_clock,
-+               .platform_send_init_74_clocks = NULL,
-+               .get_f_max_clock = NULL,
-+               .platform_8bit_width = NULL,
-+#ifdef CONFIG_MMC_CLKGATE
-+               .platform_hw_clk_gate = platform_hw_clk_gate,
-+#endif
-+       },
-+#ifdef CONFIG_MMC_CLKGATE
-+       .mmc_caps = MMC_CAP_HW_CLOCK_GATING | MMC_CAP_BUS_WIDTH_TEST,
-+#else
-+       .mmc_caps = MMC_CAP_BUS_WIDTH_TEST,
-+#endif
-+       .platform_probe = platform_pxa910_probe,
-+       .quirks = SDHCI_QUIRK_32BIT_DMA_ADDR | SDHCI_QUIRK_32BIT_DMA_SIZE
-+               | SDHCI_QUIRK_NO_BUSY_IRQ | SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
-+               | SDHCI_QUIRK_NO_HISPD_BIT,
-+};
-+EXPORT_SYMBOL_GPL(sdhci_platform_data);
-+
-+static int platform_pxa910_probe(struct sdhci_host *host)
-+{
-+       struct sdhci_pxa *pxa = sdhci_priv(host);
-+       struct sdhci_pxa_platdata *pdata = pxa->pdata;
-+       struct sdhci_ops *p_ops;
-+
-+       /*
-+        * we cannot directly copy our operations into host->ops
-+        * since it is read only.  So we do this indirectly.
-+        */
-+       p_ops = kmalloc(sizeof(struct sdhci_ops), GFP_KERNEL);
-+       if (!p_ops)
-+               return -ENOMEM;
-+
-+       memcpy((void *)p_ops, (void *)&sdhci_platform_data.ops,
-+               sizeof(struct sdhci_ops));
-+
-+       host->quirks |= sdhci_platform_data.quirks;
-+       host->mmc->caps |= sdhci_platform_data.mmc_caps;
-+
-+       /* If slot design supports 8 bit data, indicate this to MMC. */
-+       if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT) {
-+               host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-+               p_ops->platform_8bit_width = platform_supports_8_bit;
-+       }
-+
-+       if (pdata->flags & PXA_FLAG_CARD_PERMANENT) {
-+               host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-+               host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+       }
-+
-+       if (pxa->pdata->max_speed)
-+               p_ops->get_f_max_clock = get_f_max_clock;
-+
-+       memcpy((void *)host->ops, (void *)p_ops, sizeof(struct sdhci_ops));
-+       kfree(p_ops);
-+       return 0;
-+}
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 611322c..627c8cf 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1236,9 +1236,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-                host->ops->platform_send_init_74_clocks(host, ios->power_mode);
-
- #ifdef CONFIG_MMC_CLKGATE
--       if ((mmc->caps & MMC_CAP_HW_CLOCK_GATING)
--               && host->ops->platform_hw_clk_gate)
--                       host->ops->platform_hw_clk_gate(host);
-+       if ((mmc->caps & MMC_CAP_HW_CLOCK_GATING) &&
-+               host->ops->platform_hw_clk_gate)
-+               host->ops->platform_hw_clk_gate(host);
- #endif
-
-        /*
-@@ -1948,6 +1948,15 @@ int sdhci_add_host(struct sdhci_host *host)
-        } else
-                mmc->f_max = host->max_clk;
-
-+#ifdef CONFIG_MMC_CLKGATE
-+       /*
-+        * Configure MMC_CAP_HW_CLOCK_GATING in platform code.
-+        * This is done to allow fine grain tuning of this parameter
-+        * as some host controllers may indicate h/w clock gating
-+        * works, but in fact does not.  Avoids need for a quirk.
-+        */
-+#endif
-+
-        mmc->caps |= MMC_CAP_SDIO_IRQ;
-
-        /*
---
-1.7.0.4
-
+ 
++#define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
++#define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+ #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
+ #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
+ #define EXT_CSD_BUS_WIDTH		183	/* R/W */
+@@ -262,6 +264,7 @@ struct _mmc_csd {
+ #define EXT_CSD_CARD_TYPE		196	/* RO */
+ #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
+ #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
++#define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
+ #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
+ #define EXT_CSD_HC_ERASE_GRP_SIZE	224	/* RO */
+ #define EXT_CSD_SEC_TRIM_MULT		229	/* RO */
+-- 
+1.6.6.1
 
