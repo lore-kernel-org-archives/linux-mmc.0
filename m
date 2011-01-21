@@ -1,64 +1,98 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v3 1/1]mmc: implemented eMMC4.4 enhanced area feature
-Date: Sat, 22 Jan 2011 01:43:21 +0800
-Message-ID: <5D8008F58939784290FAB48F549751983539F505FF@shsmsx502.ccr.corp.intel.com>
-References: <20110120075556.GA23566@intel.com>
- <20110120161248.GA11774@void.printf.net>
- <5D8008F58939784290FAB48F5497519835341813A7@shsmsx502.ccr.corp.intel.com>
- <20110121080422.GA21763@void.printf.net>
- <5D8008F58939784290FAB48F549751983539F50558@shsmsx502.ccr.corp.intel.com>
- <20110121152750.GA32551@void.printf.net>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH] sdhci: ensure clocks are enabled on all SD controllers
+Date: Fri, 21 Jan 2011 11:23:19 -0800
+Message-ID: <9D8709D5-8857-4D09-BE2B-D703C119B75D@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:27094 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754249Ab1AURn0 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2011 12:43:26 -0500
-In-Reply-To: <20110121152750.GA32551@void.printf.net>
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:38811 "HELO
+	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753971Ab1AUTYt convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 21 Jan 2011 14:24:49 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Mark Brown <markb@marvell.com>
 
-Hi Chris,
 
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Friday, January 21, 2011 11:28 PM
-> To: Dong, Chuanxiao
-> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
-> akpm@linux-foundation.org
-> Subject: Re: [PATCH v3 1/1]mmc: implemented eMMC4.4 enhanced area feature
-> 
-> Hi Chuanxiao,
-> 
-> On Fri, Jan 21, 2011 at 05:12:00PM +0800, Dong, Chuanxiao wrote:
-> > I have used the checkpatch.pl to check this patch, and no error or warning
-> found....
-> 
-> Oh, you're right!  I wonder if that's because it's in a .txt file rather
-> than a source file.  Not sure how to get it to warn about this, then.
-> 
-> > > Ah, I wasn't clear -- I meant the bytes/kilobytes units, not the data type
-> > > sizes.  e.g.:
-> > >
-> > > +   size_t          enhanced_area_size;             /* Units: KB */
-> > I think the units of _offset and _size should be easy for user to understand, so just
-> choose the Byte for _offset and Kbyte for _size...
-> > And as spec said, the _size is (ENH_SIZE_MULT_2 << 16 + ENH_SIZE_MULT_1 <<
-> 8 + ENH_SIZE_MULT_0) x HC_WP_GRP_SIZE x HC_ERASE_GPR_SIZE x 512kBytes. It
-> must be Kbytes aligned. That is another reason to choose it.
-> 
-> I agree that we we should use these units, I'm just arguing that we
-> might as well mention them in the comment area.  The other card.h
-> definitions mention their unit sizes too.  At the moment your comments
-> for card.h simply repeat the variable name, which isn't useful -- why
-> not make them repeat some useful and not-necessarily-obvious information
-> instead?
-Sure, Chris. I will take care of such things in my future submissions. Of cause including the next v4 enhanced area feature patch. :) I also remember to fix the compile warnings. Thanks a lot, Chris.
+Do not rely on u-boot to do the right thing.  It does not.
+Do not disable the system clock to the device as this may hang
+the system if the register is touched
 
-Thanks
-Chuanxiao
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+Signed-off-by: Mark F. Brown <markb@marvell.com>
+---
+ drivers/mmc/host/sdhci-pxa.c |   25 ++++++++-----------------
+ 1 files changed, 8 insertions(+), 17 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
+index 4713238..8c60d5c 100644
+--- a/drivers/mmc/host/sdhci-pxa.c
++++ b/drivers/mmc/host/sdhci-pxa.c
+@@ -35,7 +35,7 @@ struct sdhci_pxa {
+ 	struct clk			*clk;
+ 	struct resource			*res;
+ 
+-	u8 clk_enable;
++	u8				clk_enable;
+ };
+ 
+ /*****************************************************************************\
+@@ -43,25 +43,17 @@ struct sdhci_pxa {
+  * SDHCI core callbacks                                                      *
+  *                                                                           *
+ \*****************************************************************************/
+-static void set_clock(struct sdhci_host *host, unsigned int clock)
++static void enable_clock(struct sdhci_host *host)
+ {
+ 	struct sdhci_pxa *pxa = sdhci_priv(host);
+ 
+-	if (clock == 0) {
+-		if (pxa->clk_enable) {
+-			clk_disable(pxa->clk);
+-			pxa->clk_enable = 0;
+-		}
+-	} else {
+-		if (0 == pxa->clk_enable) {
+-			clk_enable(pxa->clk);
+-			pxa->clk_enable = 1;
+-		}
++	if (pxa->clk_enable == 0) {
++		clk_enable(pxa->clk);
++		pxa->clk_enable = 1;
+ 	}
+ }
+ 
+ static struct sdhci_ops sdhci_pxa_ops = {
+-	.set_clock = set_clock,
+ };
+ 
+ /*****************************************************************************\
+@@ -136,6 +128,9 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
+ 	if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
+ 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+ 
++	/* do not rely on u-boot to enable the clocks */
++	enable_clock(host);
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "failed to add host\n");
+@@ -181,10 +176,6 @@ static int __devexit sdhci_pxa_remove(struct platform_device *pdev)
+ 		if (pxa->res)
+ 			release_mem_region(pxa->res->start,
+ 					   resource_size(pxa->res));
+-		if (pxa->clk_enable) {
+-			clk_disable(pxa->clk);
+-			pxa->clk_enable = 0;
+-		}
+ 		clk_put(pxa->clk);
+ 
+ 		sdhci_free_host(host);
+-- 
+1.7.0.4
+
+
