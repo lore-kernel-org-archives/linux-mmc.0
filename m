@@ -1,17 +1,16 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH] sdhci: Add pre and post reset processing for chip specific
- reset
-Date: Fri, 21 Jan 2011 11:26:40 -0800
-Message-ID: <49807409-2DDA-4C6D-AD98-ECDEF8B3B633@marvell.com>
+Subject: [PATCH] sdhci: add host->ops to configure f_max
+Date: Fri, 21 Jan 2011 11:27:35 -0800
+Message-ID: <3B8D8528-C323-44DD-9AB5-813464801E30@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:54055 "HELO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753971Ab1AUT0y convert rfc822-to-8bit
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:52061 "HELO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753971Ab1AUT1h convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 21 Jan 2011 14:26:54 -0500
+	Fri, 21 Jan 2011 14:27:37 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -19,64 +18,70 @@ To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Cc: Mark Brown <markb@marvell.com>
 
 
-Marvell pxa controllers have private registers that may need to be
-modified before and after a reset is done.
+sdhci-pxa.c sets f_max after sdhci_add_host was called.
 
-For example, the SD reset
-operation, RESET_ALL,  will reset the private registers to their
-default state.  This will cause the clock adjustment registers that
-may have been programmed to have incorrect values.
+Rather then do this after the call, define a callback to allow
+f_max to be obtained from platform specific code if the callback is
+defined.
 
-RESET_DATA sometimes needs to be delayed before the reset is done
-(depending on SoC) to enable any transactions being handled by the
-SDIO card to be completed.  Needed in pre SD 3.0 silicon to handle
-clock gating.
+We cannot use the quirk SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
+since the clock is not broken and on mmp2 is fixed at 200MHz.
+On some pxa platforms and changing this value
+a) does not work
+b) causes bad clock dividers
+c) mmc errors
 
-Implement hooks to allow this to happen.
+On other platforms defining
+SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN is the right thing to do
+(pxa168 and pxa910) since the clock is configured via system
+registers and not known via the CAPABILITY Register.
 
 Signed-off-by: Philip Rakity <prakity@marvell.com>
 ---
- drivers/mmc/host/sdhci.c |    6 ++++++
- drivers/mmc/host/sdhci.h |    2 ++
- 2 files changed, 8 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-pxa.c |   16 +++++++++++++---
+ 1 files changed, 13 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d5febe5..f439881 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -157,6 +157,9 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
- 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
- 		ier = sdhci_readl(host, SDHCI_INT_ENABLE);
- 
-+	if (host->ops->platform_reset_enter)
-+		host->ops->platform_reset_enter(host, mask);
-+
- 	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
- 
- 	if (mask & SDHCI_RESET_ALL)
-@@ -177,6 +180,9 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
- 		mdelay(1);
+diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
+index 0afc763..4c2a252 100644
+--- a/drivers/mmc/host/sdhci-pxa.c
++++ b/drivers/mmc/host/sdhci-pxa.c
+@@ -53,7 +53,15 @@ static void enable_clock(struct sdhci_host *host)
  	}
- 
-+	if (host->ops->platform_reset_exit)
-+		host->ops->platform_reset_exit(host, mask);
-+
- 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
- 		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
  }
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 6e0969e..9dd7bc1 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -222,6 +222,8 @@ struct sdhci_ops {
- 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
- 					     u8 power_mode);
- 	unsigned int    (*get_ro)(struct sdhci_host *host);
-+	void	(*platform_reset_enter)(struct sdhci_host *host, u8 mask);
-+	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
+ 
++static unsigned int get_f_max_clock(struct sdhci_host *host)
++{
++	struct sdhci_pxa *pxa = sdhci_priv(host);
++
++	return pxa->pdata->max_speed;
++}
++
+ static struct sdhci_ops sdhci_pxa_ops = {
++	.get_f_max_clock = NULL,
  };
  
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+ /*****************************************************************************\
+@@ -131,15 +139,17 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
+ 	/* do not rely on u-boot to enable the clocks */
+ 	enable_clock(host);
+ 
++	if (pxa->pdata->max_speed)
++		sdhci_pxa_ops.get_f_max_clock = get_f_max_clock;
++	else
++		sdhci_pxa_ops.get_f_max_clock = NULL;
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "failed to add host\n");
+ 		goto out;
+ 	}
+ 
+-	if (pxa->pdata->max_speed)
+-		host->mmc->f_max = pxa->pdata->max_speed;
+-
+ 	platform_set_drvdata(pdev, host);
+ 
+ 	return 0;
 -- 
 1.7.0.4
 
