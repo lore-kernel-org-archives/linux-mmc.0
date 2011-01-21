@@ -1,63 +1,69 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH 3/3] sdhci: add support for DDR to platform code
-Date: Thu, 20 Jan 2011 20:29:36 -0800
-Message-ID: <673349E8-F326-4620-AF2C-CCBF11645B71@marvell.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v3 1/1]mmc: implemented eMMC4.4 enhanced area feature
+Date: Fri, 21 Jan 2011 08:04:22 +0000
+Message-ID: <20110121080422.GA21763@void.printf.net>
+References: <20110120075556.GA23566@intel.com> <20110120161248.GA11774@void.printf.net> <5D8008F58939784290FAB48F5497519835341813A7@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:54426 "HELO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753681Ab1AUEdI convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 20 Jan 2011 23:33:08 -0500
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:35693 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751289Ab1AUIE0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 21 Jan 2011 03:04:26 -0500
+Content-Disposition: inline
+In-Reply-To: <5D8008F58939784290FAB48F5497519835341813A7@shsmsx502.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Zhangfei Gao <zhangfei.gao@gmail.com>, Mark Brown <markb@marvell.com>
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
+Hi Chuanxiao,
 
-set the callback for signaling voltage for Dual Data Rate.
+On Fri, Jan 21, 2011 at 11:06:08AM +0800, Dong, Chuanxiao wrote:
+> Hi Chris,
+> > > --- /dev/null
+> > > +++ b/Documentation/ABI/testing/sysfs-devices-mmc
+> > > @@ -0,0 +1,19 @@
+> > > +What:
+> > 	/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_offset
+> > > +Date:		January 2011
+> > > +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
+> > > +Description:
+> > > +		Enhanced area is a new feature defined in eMMC4.4 standard.eMMC4.4
+> > or
+> > > +		later card can support such feature. This kind of area can help to
+> > > +		improve the card performance. If the feature is enabled, this attribute
+> > > +		will indicate the start address of enhanced data area. If not, this
+> > > +		attribute will be -EINVAL. Unit Byte. Format decimal.
+> > > +
+> > > +What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_size
+> > > +Date:		January 2011
+> > > +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
+> > > +Description:
+> > > +		Enhanced area is a new feature defined in eMMC4.4 standard. eMMC4.4
+> > or
+> > > +		later card can support such feature. This kind of area can help to
+> > > +		improve the card performance. If the feature is enabled, this attribute
+> > > +		will indicate the size of enhanced data area. If not, this attribute
+> > > +		will be -EINVAL. Unit KByte. Format decimal.
+> > 
+> > This is still wrapped at > 80 columns.
+> Sorry for that. I have set the textwidth=80 for vim, not understand why this is still wrapped at >80 columns... I know checkpatch.pl can help us to find the style problem, and is there some other script which can help find the style problem of Document or how can I avoid such errors?
 
-The controller requires V18_EN be set for DDR to work.  The
-bit enables DDR but does not affect any signaling voltages.
-no mdelay is needed.
+checkpatch.pl will warn about >80 chars, so that should be fine on its own.
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- drivers/mmc/host/sdhci-pxa.c |   15 +++++++++++++++
- 1 files changed, 15 insertions(+), 0 deletions(-)
+> > Oh, and let's mention the units of _offset and _size in the comment in
+> > card.h.
+>
+> Chris, you mean the type of _offset and _size? I think the 64bits number for _offset is enough, also the 32bits number for _size since the units of _size is Kbytes. Any suggestions on that?
 
-diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
-index 5a61208..8f9a04e 100644
---- a/drivers/mmc/host/sdhci-pxa.c
-+++ b/drivers/mmc/host/sdhci-pxa.c
-@@ -69,8 +69,23 @@ static void set_clock(struct sdhci_host *host, unsigned int clock)
- 	}
- }
- 
-+static unsigned int set_signaling_voltage(struct sdhci_host *host,
-+	unsigned int ddr)
-+{
-+	u16 con;
-+	/*
-+	 * Set V18_EN -- DDR does not work without this.
-+	 * does not change signaling voltage
-+	 */
-+	con = readw(host->ioaddr + SDHCI_HOST_CONTROL_2);
-+	con |= SDCTRL_2_SDH_V18_EN;
-+	writew(con, host->ioaddr + SDHCI_HOST_CONTROL_2);
-+	return 0;
-+}
-+
- static struct sdhci_ops sdhci_pxa_ops = {
- 	.set_clock = set_clock,
-+	.set_signaling_voltage = set_signaling_voltage,
- };
- 
- /*****************************************************************************\
+Ah, I wasn't clear -- I meant the bytes/kilobytes units, not the data type
+sizes.  e.g.:
+
++   size_t          enhanced_area_size;             /* Units: KB */ 
+
+Thanks,
+
 -- 
-1.7.0.4
-
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
