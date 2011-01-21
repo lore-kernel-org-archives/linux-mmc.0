@@ -1,69 +1,64 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3 1/1]mmc: implemented eMMC4.4 enhanced area feature
-Date: Fri, 21 Jan 2011 08:04:22 +0000
-Message-ID: <20110121080422.GA21763@void.printf.net>
-References: <20110120075556.GA23566@intel.com> <20110120161248.GA11774@void.printf.net> <5D8008F58939784290FAB48F5497519835341813A7@shsmsx502.ccr.corp.intel.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v2] sdio: skip initialization on powered resume
+Date: Fri, 21 Jan 2011 04:07:23 -0500
+Message-ID: <AANLkTinjpe8iGcOyru=09WrBq4f5PfBo2QcUs40OycXg@mail.gmail.com>
+References: <1283391692-14150-1-git-send-email-bzhao@marvell.com>
+	<alpine.LFD.2.00.1009021344430.19366@xanadu.home>
+	<477F20668A386D41ADCC57781B1F704307D2F41B27@SC-VEXCH1.marvell.com>
+	<alpine.LFD.2.00.1009021923171.19366@xanadu.home>
+	<477F20668A386D41ADCC57781B1F704307D2FE4A0F@SC-VEXCH1.marvell.com>
+	<alpine.LFD.2.00.1009072119210.19366@xanadu.home>
+	<477F20668A386D41ADCC57781B1F704307D2FE4A52@SC-VEXCH1.marvell.com>
+	<1284459351.2359.17.camel@stummala-linux.in.qualcomm.com>
+	<477F20668A386D41ADCC57781B1F704307D30738F5@SC-VEXCH1.marvell.com>
+	<alpine.LFD.2.00.1009152222400.19366@xanadu.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35693 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751289Ab1AUIE0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 21 Jan 2011 03:04:26 -0500
-Content-Disposition: inline
-In-Reply-To: <5D8008F58939784290FAB48F5497519835341813A7@shsmsx502.ccr.corp.intel.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:32876 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753431Ab1AUJHZ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2011 04:07:25 -0500
+Received: by fxm20 with SMTP id 20so1527257fxm.19
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Jan 2011 01:07:24 -0800 (PST)
+In-Reply-To: <alpine.LFD.2.00.1009152222400.19366@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: Nicolas Pitre <nico@fluxnic.net>, Bing Zhao <bzhao@marvell.com>
+Cc: Sahitya Tummala <stummala@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michal Miroslaw <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>
 
-Hi Chuanxiao,
-
-On Fri, Jan 21, 2011 at 11:06:08AM +0800, Dong, Chuanxiao wrote:
-> Hi Chris,
-> > > --- /dev/null
-> > > +++ b/Documentation/ABI/testing/sysfs-devices-mmc
-> > > @@ -0,0 +1,19 @@
-> > > +What:
-> > 	/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_offset
-> > > +Date:		January 2011
-> > > +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
-> > > +Description:
-> > > +		Enhanced area is a new feature defined in eMMC4.4 standard.eMMC4.4
-> > or
-> > > +		later card can support such feature. This kind of area can help to
-> > > +		improve the card performance. If the feature is enabled, this attribute
-> > > +		will indicate the start address of enhanced data area. If not, this
-> > > +		attribute will be -EINVAL. Unit Byte. Format decimal.
-> > > +
-> > > +What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_size
-> > > +Date:		January 2011
-> > > +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
-> > > +Description:
-> > > +		Enhanced area is a new feature defined in eMMC4.4 standard. eMMC4.4
-> > or
-> > > +		later card can support such feature. This kind of area can help to
-> > > +		improve the card performance. If the feature is enabled, this attribute
-> > > +		will indicate the size of enhanced data area. If not, this attribute
-> > > +		will be -EINVAL. Unit KByte. Format decimal.
-> > 
-> > This is still wrapped at > 80 columns.
-> Sorry for that. I have set the textwidth=80 for vim, not understand why this is still wrapped at >80 columns... I know checkpatch.pl can help us to find the style problem, and is there some other script which can help find the style problem of Document or how can I avoid such errors?
-
-checkpatch.pl will warn about >80 chars, so that should be fine on its own.
-
-> > Oh, and let's mention the units of _offset and _size in the comment in
-> > card.h.
+On Wed, Sep 15, 2010 at 10:26 PM, Nicolas Pitre <nico@fluxnic.net> wrot=
+e:
+> On Wed, 15 Sep 2010, Bing Zhao wrote:
 >
-> Chris, you mean the type of _offset and _size? I think the 64bits number for _offset is enough, also the 32bits number for _size since the units of _size is Kbytes. Any suggestions on that?
+>> If CMD7 is sent _before_ client driver's resume handler is called,
+>> while 8686 card is in sleep mode, it will fail. If CMD7 is sent
+>> _after_ client driver's resume handler is called, it should succeed.
+>
+> Maybe that's what we should do in the powered suspend case then.
+>
+>> By the way, a patch "mmc: fix all hangs related to mmc/sd card
+>> insert/removal during suspend/resume"
+>> (4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e by Maxim Levitsky) has
+>> removed the call to mmc_detect_change() in mmc_resume_host().
+>
+> If a card is removed while the host is suspended, then this should be
+> detected.
+>
+>
+> Nicolas
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
 
-Ah, I wasn't clear -- I meant the bytes/kilobytes units, not the data type
-sizes.  e.g.:
+Hi, Bing
 
-+   size_t          enhanced_area_size;             /* Units: KB */ 
+Do you have any updated patch to skip mmc_sdio_init_card in resume back=
+=2E
+We need such patch in enable host sleep feature for mrvl8787.
 
-Thanks,
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks a lot.
