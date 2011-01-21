@@ -1,92 +1,328 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v3 1/1]mmc: implemented eMMC4.4 enhanced area feature
-Date: Fri, 21 Jan 2011 11:06:08 +0800
-Message-ID: <5D8008F58939784290FAB48F5497519835341813A7@shsmsx502.ccr.corp.intel.com>
-References: <20110120075556.GA23566@intel.com>
- <20110120161248.GA11774@void.printf.net>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [patch]: sdhci support emmc ddr50 mode [v5]
+Date: Thu, 20 Jan 2011 22:51:42 -0500
+Message-ID: <AANLkTikc5kPOx7z3D5RZxcK4eWdZUjw6p55RthrM7JiA@mail.gmail.com>
+References: <AANLkTikJcVpgX7TPr4LTz44HzePKFk-Y1_9QsyUrFk-O@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:25235 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752333Ab1AUDGu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 20 Jan 2011 22:06:50 -0500
-In-Reply-To: <20110120161248.GA11774@void.printf.net>
-Content-Language: en-US
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:63220 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751740Ab1AUDvo convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jan 2011 22:51:44 -0500
+Received: by fxm20 with SMTP id 20so1362287fxm.19
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Jan 2011 19:51:43 -0800 (PST)
+In-Reply-To: <AANLkTikJcVpgX7TPr4LTz44HzePKFk-Y1_9QsyUrFk-O@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@marvell.com>
 
-SGkgQ2hyaXMsDQo+ID4gLS0tIC9kZXYvbnVsbA0KPiA+ICsrKyBiL0RvY3VtZW50YXRpb24vQUJJ
-L3Rlc3Rpbmcvc3lzZnMtZGV2aWNlcy1tbWMNCj4gPiBAQCAtMCwwICsxLDE5IEBADQo+ID4gK1do
-YXQ6DQo+IAkvc3lzL2RldmljZXMvLi4uL21tY19ob3N0L21tY1gvbW1jWDpYWFhYL2VuaGFuY2Vk
-X2FyZWFfb2Zmc2V0DQo+ID4gK0RhdGU6CQlKYW51YXJ5IDIwMTENCj4gPiArQ29udGFjdDoJQ2h1
-YW54aWFvIERvbmcgPGNodWFueGlhby5kb25nQGludGVsLmNvbT4NCj4gPiArRGVzY3JpcHRpb246
-DQo+ID4gKwkJRW5oYW5jZWQgYXJlYSBpcyBhIG5ldyBmZWF0dXJlIGRlZmluZWQgaW4gZU1NQzQu
-NCBzdGFuZGFyZC5lTU1DNC40DQo+IG9yDQo+ID4gKwkJbGF0ZXIgY2FyZCBjYW4gc3VwcG9ydCBz
-dWNoIGZlYXR1cmUuIFRoaXMga2luZCBvZiBhcmVhIGNhbiBoZWxwIHRvDQo+ID4gKwkJaW1wcm92
-ZSB0aGUgY2FyZCBwZXJmb3JtYW5jZS4gSWYgdGhlIGZlYXR1cmUgaXMgZW5hYmxlZCwgdGhpcyBh
-dHRyaWJ1dGUNCj4gPiArCQl3aWxsIGluZGljYXRlIHRoZSBzdGFydCBhZGRyZXNzIG9mIGVuaGFu
-Y2VkIGRhdGEgYXJlYS4gSWYgbm90LCB0aGlzDQo+ID4gKwkJYXR0cmlidXRlIHdpbGwgYmUgLUVJ
-TlZBTC4gVW5pdCBCeXRlLiBGb3JtYXQgZGVjaW1hbC4NCj4gPiArDQo+ID4gK1doYXQ6CQkvc3lz
-L2RldmljZXMvLi4uL21tY19ob3N0L21tY1gvbW1jWDpYWFhYL2VuaGFuY2VkX2FyZWFfc2l6ZQ0K
-PiA+ICtEYXRlOgkJSmFudWFyeSAyMDExDQo+ID4gK0NvbnRhY3Q6CUNodWFueGlhbyBEb25nIDxj
-aHVhbnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+ID4gK0Rlc2NyaXB0aW9uOg0KPiA+ICsJCUVuaGFu
-Y2VkIGFyZWEgaXMgYSBuZXcgZmVhdHVyZSBkZWZpbmVkIGluIGVNTUM0LjQgc3RhbmRhcmQuIGVN
-TUM0LjQNCj4gb3INCj4gPiArCQlsYXRlciBjYXJkIGNhbiBzdXBwb3J0IHN1Y2ggZmVhdHVyZS4g
-VGhpcyBraW5kIG9mIGFyZWEgY2FuIGhlbHAgdG8NCj4gPiArCQlpbXByb3ZlIHRoZSBjYXJkIHBl
-cmZvcm1hbmNlLiBJZiB0aGUgZmVhdHVyZSBpcyBlbmFibGVkLCB0aGlzIGF0dHJpYnV0ZQ0KPiA+
-ICsJCXdpbGwgaW5kaWNhdGUgdGhlIHNpemUgb2YgZW5oYW5jZWQgZGF0YSBhcmVhLiBJZiBub3Qs
-IHRoaXMgYXR0cmlidXRlDQo+ID4gKwkJd2lsbCBiZSAtRUlOVkFMLiBVbml0IEtCeXRlLiBGb3Jt
-YXQgZGVjaW1hbC4NCj4gDQo+IFRoaXMgaXMgc3RpbGwgd3JhcHBlZCBhdCA+IDgwIGNvbHVtbnMu
-DQpTb3JyeSBmb3IgdGhhdC4gSSBoYXZlIHNldCB0aGUgdGV4dHdpZHRoPTgwIGZvciB2aW0sIG5v
-dCB1bmRlcnN0YW5kIHdoeSB0aGlzIGlzIHN0aWxsIHdyYXBwZWQgYXQgPjgwIGNvbHVtbnMuLi4g
-SSBrbm93IGNoZWNrcGF0Y2gucGwgY2FuIGhlbHAgdXMgdG8gZmluZCB0aGUgc3R5bGUgcHJvYmxl
-bSwgYW5kIGlzIHRoZXJlIHNvbWUgb3RoZXIgc2NyaXB0IHdoaWNoIGNhbiBoZWxwIGZpbmQgdGhl
-IHN0eWxlIHByb2JsZW0gb2YgRG9jdW1lbnQgb3IgaG93IGNhbiBJIGF2b2lkIHN1Y2ggZXJyb3Jz
-Pw0KQ2hyaXMsIHRoYW5rIHlvdSBmb3IgeW91ciBraW5kIHBhdGllbmNlIHRvIGhlbHAgbWUgZmlu
-ZCB0aGVzZSBzdHVwaWQgZXJyb3JzIGFnYWluLi4uDQoNCj4gPiBkaWZmIC0tZ2l0IGEvaW5jbHVk
-ZS9saW51eC9tbWMvY2FyZC5oIGIvaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oDQo+ID4gaW5kZXgg
-OGNlMDgyNy4uNzM2Njk3ZiAxMDA2NDQNCj4gPiAtLS0gYS9pbmNsdWRlL2xpbnV4L21tYy9jYXJk
-LmgNCj4gPiArKysgYi9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmgNCj4gPiBAQCAtNTQsNiArNTQs
-OSBAQCBzdHJ1Y3QgbW1jX2V4dF9jc2Qgew0KPiA+ICAJdW5zaWduZWQgaW50CQlzZWNfdHJpbV9t
-dWx0OwkvKiBTZWN1cmUgdHJpbSBtdWx0aXBsaWVyICAqLw0KPiA+ICAJdW5zaWduZWQgaW50CQlz
-ZWNfZXJhc2VfbXVsdDsJLyogU2VjdXJlIGVyYXNlIG11bHRpcGxpZXIgKi8NCj4gPiAgCXVuc2ln
-bmVkIGludAkJdHJpbV90aW1lb3V0OwkJLyogSW4gbWlsbGlzZWNvbmRzICovDQo+ID4gKwlib29s
-CQkJZW5oYW5jZWRfYXJlYV9lbjsJLyogZW5oYW5jZWQgYXJlYSBlbiAqLw0KPiA+ICsJbG9mZl90
-CQllbmhhbmNlZF9hcmVhX29mZnNldDsJLyogZW5oYW5jZWQgYXJlYSBhZGRyICovDQo+ID4gKwlz
-aXplX3QJCWVuaGFuY2VkX2FyZWFfc2l6ZTsJCS8qIGVuaGFuY2VkIGFyZWEgc2l6ZSAqLw0KPiAN
-Cj4gTm93IGVuaGFuY2VkX2FyZWFfZW4gaXMgYWxpZ25lZCBjb3JyZWN0bHksIGJ1dCB0aGUgb3Ro
-ZXIgdHdvIGFyZW4ndC4NCj4gDQo+IFRoaXMgYWRkcyBhIHdhcm5pbmc6DQo+IA0KPiBkcml2ZXJz
-L21tYy9jb3JlL21tYy5jOiBJbiBmdW5jdGlvbiDigJhtbWNfZW5oYW5jZWRfYXJlYV9zaXplX3No
-b3figJk6DQo+IGRyaXZlcnMvbW1jL2NvcmUvbW1jLmM6MzgzOjI2MTogd2FybmluZzogZm9ybWF0
-IOKAmCVk4oCZIGV4cGVjdHMgdHlwZSDigJhpbnTigJksDQo+IGJ1dCBhcmd1bWVudCAzIGhhcyB0
-eXBlIOKAmHNpemVfdOKAmQ0KPiANCj4gSWYgeW91IHJlYWxseSB3YW50IHNpemVfdCwgeW91IHNo
-b3VsZCB1c2UgJXp1IGZvciBpdCAtLSBzZWUNCj4gRG9jdW1lbnRhdGlvbi9wcmludGstZm9ybWF0
-cy50eHQuICAoRGVjbGFyaW5nIGl0IGFzIHVuc2lnbmVkIGludCB3b3VsZA0KPiB3b3JrIGZpbmUg
-dG9vLikNCj4gDQo+IE9oLCBhbmQgbGV0J3MgbWVudGlvbiB0aGUgdW5pdHMgb2YgX29mZnNldCBh
-bmQgX3NpemUgaW4gdGhlIGNvbW1lbnQgaW4NCj4gY2FyZC5oLg0KQ2hyaXMsIHlvdSBtZWFuIHRo
-ZSB0eXBlIG9mIF9vZmZzZXQgYW5kIF9zaXplPyBJIHRoaW5rIHRoZSA2NGJpdHMgbnVtYmVyIGZv
-ciBfb2Zmc2V0IGlzIGVub3VnaCwgYWxzbyB0aGUgMzJiaXRzIG51bWJlciBmb3IgX3NpemUgc2lu
-Y2UgdGhlIHVuaXRzIG9mIF9zaXplIGlzIEtieXRlcy4gQW55IHN1Z2dlc3Rpb25zIG9uIHRoYXQ/
-DQoNCj4gDQo+ID4gIH07DQo+ID4NCj4gPiAgc3RydWN0IHNkX3NjciB7DQo+ID4gZGlmZiAtLWdp
-dCBhL2luY2x1ZGUvbGludXgvbW1jL21tYy5oIGIvaW5jbHVkZS9saW51eC9tbWMvbW1jLmgNCj4g
-PiBpbmRleCA2MTIzMDFmLi4yNjRiYTU0IDEwMDY0NA0KPiA+IC0tLSBhL2luY2x1ZGUvbGludXgv
-bW1jL21tYy5oDQo+ID4gKysrIGIvaW5jbHVkZS9saW51eC9tbWMvbW1jLmgNCj4gPiBAQCAtMjUz
-LDYgKzI1Myw4IEBAIHN0cnVjdCBfbW1jX2NzZCB7DQo+ID4gICAqIEVYVF9DU0QgZmllbGRzDQo+
-ID4gICAqLw0KPiA+DQo+ID4gKyNkZWZpbmUgRVhUX0NTRF9QQVJUSVRJT05fQVRUUklCVVRFCTE1
-NgkvKiBSL1cgKi8NCj4gPiArI2RlZmluZSBFWFRfQ1NEX1BBUlRJVElPTl9TVVBQT1JUCTE2MAkv
-KiBSTyAqLw0KPiA+ICAjZGVmaW5lIEVYVF9DU0RfRVJBU0VfR1JPVVBfREVGCQkxNzUJLyogUi9X
-ICovDQo+ID4gICNkZWZpbmUgRVhUX0NTRF9FUkFTRURfTUVNX0NPTlQJCTE4MQkvKiBSTyAqLw0K
-PiA+ICAjZGVmaW5lIEVYVF9DU0RfQlVTX1dJRFRICQkxODMJLyogUi9XICovDQo+ID4gQEAgLTI2
-Miw2ICsyNjQsNyBAQCBzdHJ1Y3QgX21tY19jc2Qgew0KPiA+ICAjZGVmaW5lIEVYVF9DU0RfQ0FS
-RF9UWVBFCQkxOTYJLyogUk8gKi8NCj4gPiAgI2RlZmluZSBFWFRfQ1NEX1NFQ19DTlQJCQkyMTIJ
-LyogUk8sIDQgYnl0ZXMgKi8NCj4gPiAgI2RlZmluZSBFWFRfQ1NEX1NfQV9USU1FT1VUCQkyMTcJ
-LyogUk8gKi8NCj4gPiArI2RlZmluZSBFWFRfQ1NEX0hDX1dQX0dSUF9TSVpFCQkyMjEJLyogUk8g
-Ki8NCj4gPiAgI2RlZmluZSBFWFRfQ1NEX0VSQVNFX1RJTUVPVVRfTVVMVAkyMjMJLyogUk8gKi8N
-Cj4gPiAgI2RlZmluZSBFWFRfQ1NEX0hDX0VSQVNFX0dSUF9TSVpFCTIyNAkvKiBSTyAqLw0KPiA+
-ICAjZGVmaW5lIEVYVF9DU0RfU0VDX1RSSU1fTVVMVAkJMjI5CS8qIFJPICovDQo+IA0KPiBUaGFu
-a3MsDQo+IA0KPiAtLQ0KPiBDaHJpcyBCYWxsICAgPGNqYkBsYXB0b3Aub3JnPiAgIDxodHRwOi8v
-cHJpbnRmLm5ldC8+DQo+IE9uZSBMYXB0b3AgUGVyIENoaWxkDQo=
+On Mon, Jan 10, 2011 at 9:56 PM, zhangfei gao <zhangfei.gao@gmail.com> =
+wrote:
+> Update typo
+>
+> From 93873d40ea72b1ccd97c3629ffe555080ac4d0e4 Mon Sep 17 00:00:00 200=
+1
+> From: Zhangfei Gao <zhangfei.gao@marvell.com>
+> Date: Sun, 9 Jan 2011 18:09:12 -0500
+> Subject: [PATCH] mmc: sdhci support emmc ddr50 mode
+>
+> =A0 =A0 =A0 =A01. Spec sdhc 3.0 does not claim support 1.2v ddr mode,=
+ so sdhci.c
+> return error and SDR mode is been reused.
+> =A0 =A0 =A0 =A02. Call back function set_uhs is added, since some con=
+troller count
+> on external pmic to provide io voltage
+> =A0 =A0 =A0 =A03. mmc_set_uhs is added to make host switch io voltage=
+ according to uhs_mode
+> =A0 =A0 =A0 =A04. Verified on mmp2 and toshiba emmc
+>
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+> ---
+> =A0drivers/mmc/core/core.c =A0| =A0 18 +++++++++++++
+> =A0drivers/mmc/core/core.h =A0| =A0 =A01 +
+> =A0drivers/mmc/core/mmc.c =A0 | =A0 =A09 ++++++
+> =A0drivers/mmc/host/sdhci.c | =A0 64 ++++++++++++++++++++++++++++++++=
++++++++++++---
+> =A0drivers/mmc/host/sdhci.h | =A0 16 ++++++++++-
+> =A0include/linux/mmc/host.h | =A0 =A02 +
+> =A06 files changed, 104 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index a8e89f3..1f1f185 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -623,6 +623,24 @@ static inline void mmc_set_ios(struct mmc_host *=
+host)
+> =A0 =A0 =A0 =A0host->ops->set_ios(host, ios);
+> =A0}
+>
+> +int mmc_set_uhs(struct mmc_host *host, unsigned int uhs_mode)
+> +{
+> + =A0 =A0 =A0 int ret =3D -EINVAL;
+> +
+> + =A0 =A0 =A0 if (host->ops->set_uhs) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D host->ops->set_uhs(host, uhs_mo=
+de);
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* According to sdhc standard spec v3=
+=2E0
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* 1.8v regulator should be stable wi=
+thing 5ms
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!ret)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_delay(5);
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 return ret;
+> +}
+> +
+> =A0/*
+> =A0* Control chip select pin on a host.
+> =A0*/
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> index 026c975..4b1ea7e 100644
+> --- a/drivers/mmc/core/core.h
+> +++ b/drivers/mmc/core/core.h
+> @@ -41,6 +41,7 @@ void mmc_set_bus_width(struct mmc_host *host,
+> unsigned int width);
+> =A0void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int wid=
+th,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int ddr)=
+;
+> =A0u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
+> +int mmc_set_uhs(struct mmc_host *host, unsigned int uhs_mode);
+> =A0void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+>
+> =A0static inline void mmc_delay(unsigned int ms)
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 86cac0d..657c5ef 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -529,6 +529,15 @@ static int mmc_init_card(struct mmc_host *host, =
+u32 ocr,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ddr =3D=
+ MMC_1_2V_DDR_MODE;
+> =A0 =A0 =A0 =A0}
+>
+> + =A0 =A0 =A0 if (ddr) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_set_uhs(host, ddr)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_WARNING "%s=
+: DDR mode not accepted by host "
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "and re=
+use MMC_SDR_MODE.\n",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hos=
+tname(host));
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ddr =3D MMC_SDR_MODE;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 }
+> +
+> =A0 =A0 =A0 =A0/*
+> =A0 =A0 =A0 =A0 * Activate wide bus and DDR (if supported).
+> =A0 =A0 =A0 =A0 */
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index d5febe5..decc50f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -80,7 +80,7 @@ static void sdhci_dumpregs(struct sdhci_host *host)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_readw(host, SDHCI_SLOT_INT_STATU=
+S));
+> =A0 =A0 =A0 =A0printk(KERN_DEBUG DRIVER_NAME ": Caps: =A0 =A0 0x%08x =
+| Caps_1: =A0 0x%08x\n",
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_readl(host, SDHCI_CAPABILITIES),
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_readl(host, SDHCI_CAPABILITIES_1)=
+);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_readl(host, SDHCI_CAPABILITIES_H)=
+);
+> =A0 =A0 =A0 =A0printk(KERN_DEBUG DRIVER_NAME ": Cmd: =A0 =A0 =A00x%08=
+x | Max curr: 0x%08x\n",
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_readw(host, SDHCI_COMMAND),
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_readl(host, SDHCI_MAX_CURRENT));
+> @@ -986,6 +986,22 @@ static void sdhci_finish_command(struct sdhci_ho=
+st *host)
+> =A0 =A0 =A0 =A0host->cmd =3D NULL;
+> =A0}
+>
+> +static void sdhci_set_ddr(struct sdhci_host *host, unsigned int ddr)
+> +{
+> + =A0 =A0 =A0 u16 con;
+> +
+> + =A0 =A0 =A0 if (ddr =3D=3D MMC_SDR_MODE)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+> +
+> + =A0 =A0 =A0 con =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> + =A0 =A0 =A0 if (con & SDHCI_CTRL2_1_8V) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 con &=3D ~SDHCI_CTRL2_UHS_MASK;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ddr & MMC_1_8V_DDR_MODE)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 con |=3D SDHCI_CTRL2_DD=
+R50;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writew(host, con, SDHCI_HOST_CONT=
+ROL2);
+> + =A0 =A0 =A0 }
+> +}
+> +
+> =A0static void sdhci_set_clock(struct sdhci_host *host, unsigned int =
+clock)
+> =A0{
+> =A0 =A0 =A0 =A0int div;
+> @@ -1180,6 +1196,7 @@ static void sdhci_set_ios(struct mmc_host *mmc,
+> struct mmc_ios *ios)
+> =A0 =A0 =A0 =A0}
+>
+> =A0 =A0 =A0 =A0sdhci_set_clock(host, ios->clock);
+> + =A0 =A0 =A0 sdhci_set_ddr(host, ios->ddr);
+>
+> =A0 =A0 =A0 =A0if (ios->power_mode =3D=3D MMC_POWER_OFF)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_set_power(host, -1);
+> @@ -1237,6 +1254,35 @@ out:
+> =A0 =A0 =A0 =A0spin_unlock_irqrestore(&host->lock, flags);
+> =A0}
+>
+> +static int sdhci_set_uhs(struct mmc_host *mmc, unsigned int uhs_mode=
+)
+> +{
+> + =A0 =A0 =A0 struct sdhci_host *host;
+> + =A0 =A0 =A0 unsigned long flags;
+> + =A0 =A0 =A0 int ret =3D 0;
+> +
+> + =A0 =A0 =A0 host =3D mmc_priv(mmc);
+> +
+> + =A0 =A0 =A0 spin_lock_irqsave(&host->lock, flags);
+> + =A0 =A0 =A0 if (uhs_mode & MMC_1_8V_DDR_MODE) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 u16 con;
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 con =3D sdhci_readw(host, SDHCI_HOST_CO=
+NTROL2);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 con |=3D SDHCI_CTRL2_1_8V;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writew(host, con, SDHCI_HOST_CONT=
+ROL2);
+> + =A0 =A0 =A0 } else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
+> +
+> + =A0 =A0 =A0 spin_unlock_irqrestore(&host->lock, flags);
+> +
+> + =A0 =A0 =A0 if (host->ops->set_uhs)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D host->ops->set_uhs(host, uhs_mo=
+de);
+> +
+> + =A0 =A0 =A0 return ret;
+> +err:
+> + =A0 =A0 =A0 spin_unlock_irqrestore(&host->lock, flags);
+> + =A0 =A0 =A0 return =A0-EINVAL;
+> +}
+> +
+> =A0static int sdhci_get_ro(struct mmc_host *mmc)
+> =A0{
+> =A0 =A0 =A0 =A0struct sdhci_host *host;
+> @@ -1287,6 +1333,7 @@ out:
+> =A0static const struct mmc_host_ops sdhci_ops =3D {
+> =A0 =A0 =A0 =A0.request =A0 =A0 =A0 =A0=3D sdhci_request,
+> =A0 =A0 =A0 =A0.set_ios =A0 =A0 =A0 =A0=3D sdhci_set_ios,
+> + =A0 =A0 =A0 .set_uhs =A0 =A0 =A0 =A0=3D sdhci_set_uhs,
+> =A0 =A0 =A0 =A0.get_ro =A0 =A0 =A0 =A0 =3D sdhci_get_ro,
+> =A0 =A0 =A0 =A0.enable_sdio_irq =3D sdhci_enable_sdio_irq,
+> =A0};
+> @@ -1744,7 +1791,7 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
+> =A0int sdhci_add_host(struct sdhci_host *host)
+> =A0{
+> =A0 =A0 =A0 =A0struct mmc_host *mmc;
+> - =A0 =A0 =A0 unsigned int caps, ocr_avail;
+> + =A0 =A0 =A0 unsigned int caps, caps_h =3D 0, ocr_avail;
+> =A0 =A0 =A0 =A0int ret;
+>
+> =A0 =A0 =A0 =A0WARN_ON(host =3D=3D NULL);
+> @@ -1767,8 +1814,17 @@ int sdhci_add_host(struct sdhci_host *host)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->version);
+> =A0 =A0 =A0 =A0}
+>
+> - =A0 =A0 =A0 caps =3D (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? ho=
+st->caps :
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_readl(host, SDHCI_CAPABILITIES);
+> + =A0 =A0 =A0 if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 caps =3D host->caps;
+> + =A0 =A0 =A0 else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 caps =3D sdhci_readl(host, SDHCI_CAPABI=
+LITIES);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 caps_h =3D sdhci_readl(host, SDHCI_CAPA=
+BILITIES_H);
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 if (caps & SDHCI_CAN_VDD_180) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (caps_h & SDHCI_CAN_DDR50)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D (MMC_CAP=
+_1_8V_DDR);
+> + =A0 =A0 =A0 }
+>
+> =A0 =A0 =A0 =A0if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->flags |=3D SDHCI_USE_SDMA;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 6e0969e..6be28a9 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -145,7 +145,14 @@
+>
+> =A0#define SDHCI_ACMD12_ERR =A0 =A0 =A0 0x3C
+>
+> -/* 3E-3F reserved */
+> +#define SDHCI_HOST_CONTROL2 =A0 =A00x3E
+> +#define =A0SDHCI_CTRL2_UHS_MASK =A00x0007
+> +#define =A0 SDHCI_CTRL2_SDR12 =A0 =A00x0000
+> +#define =A0 SDHCI_CTRL2_SDR25 =A0 =A00x0001
+> +#define =A0 SDHCI_CTRL2_SDR50 =A0 =A00x0002
+> +#define =A0 SDHCI_CTRL2_SDR104 =A0 0x0003
+> +#define =A0 SDHCI_CTRL2_DDR50 =A0 =A00x0004
+> +#define =A0SDHCI_CTRL2_1_8V =A0 =A0 =A00x0008
+>
+> =A0#define SDHCI_CAPABILITIES =A0 =A0 0x40
+> =A0#define =A0SDHCI_TIMEOUT_CLK_MASK =A0 =A0 =A0 =A00x0000003F
+> @@ -166,7 +173,10 @@
+> =A0#define =A0SDHCI_CAN_VDD_180 =A0 =A0 0x04000000
+> =A0#define =A0SDHCI_CAN_64BIT =A0 =A0 =A0 0x10000000
+>
+> -#define SDHCI_CAPABILITIES_1 =A0 0x44
+> +#define SDHCI_CAPABILITIES_H =A0 0x44
+> +#define =A0SDHCI_CAN_SDR50 =A0 =A0 =A0 0x00000001
+> +#define =A0SDHCI_CAN_SDR104 =A0 =A0 =A00x00000002
+> +#define =A0SDHCI_CAN_DDR50 =A0 =A0 =A0 0x00000004
+>
+> =A0#define SDHCI_MAX_CURRENT =A0 =A0 =A00x48
+>
+> @@ -222,6 +232,8 @@ struct sdhci_ops {
+> =A0 =A0 =A0 =A0void (*platform_send_init_74_clocks)(struct sdhci_host=
+ *host,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 u8 power_mode);
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0(*get_ro)(struct sdhci_host *host)=
+;
+> + =A0 =A0 =A0 int =A0 =A0 =A0 =A0 =A0 =A0 (*set_uhs)(struct sdhci_hos=
+t *host,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigne=
+d int uhs_mode);
+> =A0};
+>
+> =A0#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index bcb793e..07131b0 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -117,6 +117,8 @@ struct mmc_host_ops {
+>
+> =A0 =A0 =A0 =A0/* optional callback for HC quirks */
+> =A0 =A0 =A0 =A0void =A0 =A0(*init_card)(struct mmc_host *host, struct=
+ mmc_card *card);
+> +
+> + =A0 =A0 =A0 int =A0 =A0 (*set_uhs)(struct mmc_host *host, unsigned =
+int uhs_mode);
+> =A0};
+>
+> =A0struct mmc_card;
+> --
+> 1.7.0.4
+>
+
+Hi, Chris
+
+What's your suggestion about this patch, thanks in advance.
