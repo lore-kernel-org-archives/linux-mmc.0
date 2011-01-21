@@ -1,213 +1,56 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v4 1/1]mmc: implemented eMMC4.4 enhanced area feature
-Date: Sat, 22 Jan 2011 04:09:41 +0800
-Message-ID: <20110121200941.GA16236@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
+ Resubmission
+Date: Fri, 21 Jan 2011 16:14:46 -0500 (EST)
+Message-ID: <alpine.LFD.2.00.1101211608330.8580@xanadu.home>
+References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536>
+ <20101116150022.GA27726@void.printf.net>
+ <27884BED0E3C489C8849EE12A803F536@AN00536>
+ <m3oc9pnt6g.fsf@pullcord.laptop.org> <4CE41BE3.1060806@elandigitalsystems.com>
+ <m3oc9n241c.fsf@pullcord.laptop.org> <4CEA86D4.9050109@elandigitalsystems.com>
+ <1295607004.1816.6.camel@apple-mac>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:4470 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750810Ab1AUUPU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 21 Jan 2011 15:15:20 -0500
-Content-Disposition: inline
+Received: from relais.videotron.ca ([24.201.245.36]:28986 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751701Ab1AUVOr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2011 16:14:47 -0500
+Received: from xanadu.home ([66.130.28.92]) by vl-mo-mrz23.ip.videotron.ca
+ (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
+ with ESMTP id <0LFE00G0P5O1ORC0@vl-mo-mrz23.ip.videotron.ca> for
+ linux-mmc@vger.kernel.org; Fri, 21 Jan 2011 16:14:25 -0500 (EST)
+In-reply-to: <1295607004.1816.6.camel@apple-mac>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-kernel@vger.kernel.org, akpm@linux-foundation.org
+To: Tony Olech <tony.olech@elandigitalsystems.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, David Vrabel <david.vrabel@csr.com>
 
-Enhanced area feature is a new feature defined in eMMC4.4 standard. This
-kind of area can help to improve the performance.
+On Fri, 21 Jan 2011, Tony Olech wrote:
 
-MMC driver will read out the enhanced area offset and size and add them
-to be device attributes. The feature enabling should be done in manufactory.
-To use this feature, bit ERASE_GRP_DEF should also be set.
+> Add a driver for Elan Digital System's VUB300 chip
+> which is a USB connected SDIO/SDmem/MMC host controller.
+> A VUB300 chip enables a USB 2.0 or USB 1.1 connected host
+> computer to use SDIO/SD/MMC cards without the need for
+> a directly connected, for example via PCI, SDIO host
+> controller.
+> 
+> Signed-off-by: Anthony F Olech <tony.olech@elandigitalsystems.com>
+> ---
+> This is the second submission attempt.
+> There are 5 "do not initialise statics" errors reported by scripts/checkpatch.pl
 
-Documentation/ABI/testing/sysfs-devices-mmc described the two new attributes
+you probably should fix those.  They are due to lines such as:
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- Documentation/ABI/testing/sysfs-devices-mmc |   21 +++++++
- drivers/mmc/core/mmc.c                      |   80 +++++++++++++++++++++++++++
- include/linux/mmc/card.h                    |    3 +
- include/linux/mmc/mmc.h                     |    3 +
- 4 files changed, 107 insertions(+), 0 deletions(-)
- create mode 100644 Documentation/ABI/testing/sysfs-devices-mmc
+static int pad_input_to_usb_pkt = 0;
+static int disable_offload_processing = 0;
+static int force_1_bit_data_xfers = 0;
+static int force_polling_for_irqs = 0;
 
-diff --git a/Documentation/ABI/testing/sysfs-devices-mmc b/Documentation/ABI/testing/sysfs-devices-mmc
-new file mode 100644
-index 0000000..8b18326
---- /dev/null
-+++ b/Documentation/ABI/testing/sysfs-devices-mmc
-@@ -0,0 +1,21 @@
-+What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_offset
-+Date:		January 2011
-+Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
-+Description:
-+		Enhanced area is a new feature defined in eMMC4.4 standard.
-+		eMMC4.4 or later card can support such feature. This kind of
-+		area can help to improve the card performance. If the feature is
-+		enabled, this attribute will indicate the start address of
-+		enhanced data area. If not, this attribute will be -EINVAL. Unit
-+		Byte. Format decimal.
-+
-+What:		/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_size
-+Date:		January 2011
-+Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
-+Description:
-+		Enhanced area is a new feature defined in eMMC4.4 standard.
-+		eMMC4.4 or later card can support such feature. This kind of
-+		area can help to improve the card performance. If the feature is
-+		enabled, this attribute will indicate the size of enhanced data
-+		area. If not, this attribute will be -EINVAL. Unit KByte. Format
-+		decimal.
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 16006ef..996e95e 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -302,6 +302,48 @@ static int mmc_read_ext_csd(struct mmc_card *card)
- 	}
- 
- 	if (card->ext_csd.rev >= 4) {
-+		/*
-+		 * Enhanced area feature support
-+		 * check whether eMMC card has the Enhanced area enabled.
-+		 * if so, export enhanced area offset and size to
-+		 * user by adding sysfs interface
-+		 */
-+		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
-+				(ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
-+			u8 hc_erase_grp_sz =
-+				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-+			u8 hc_wp_grp_sz =
-+				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-+			/*
-+			 * set a flag to identify whether the enhanced
-+			 * user data is enabled
-+			 */
-+			card->ext_csd.enhanced_area_en = 1;
-+			/*
-+			 * calculate the enhanced data area offset, unit B
-+			 */
-+			card->ext_csd.enhanced_area_offset =
-+				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
-+				(ext_csd[137] << 8) + ext_csd[136];
-+			if (mmc_card_blockaddr(card))
-+				card->ext_csd.enhanced_area_offset <<= 9;
-+			/*
-+			 * calculate the enhanced data area size, unit KB
-+			 */
-+			card->ext_csd.enhanced_area_size =
-+				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
-+				ext_csd[140];
-+			card->ext_csd.enhanced_area_size *=
-+				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-+			card->ext_csd.enhanced_area_size <<= 9;
-+		} else {
-+			/*
-+			 * If not enabled enhanced area, disable these
-+			 * device attributes
-+			 */
-+			card->ext_csd.enhanced_area_offset = -EINVAL;
-+			card->ext_csd.enhanced_area_size = -EINVAL;
-+		}
- 		card->ext_csd.sec_trim_mult =
- 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
- 		card->ext_csd.sec_erase_mult =
-@@ -336,6 +378,9 @@ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
- MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
- MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
- MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
-+MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
-+		card->ext_csd.enhanced_area_offset);
-+MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
- 
- static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_cid.attr,
-@@ -349,6 +394,8 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_name.attr,
- 	&dev_attr_oemid.attr,
- 	&dev_attr_serial.attr,
-+	&dev_attr_enhanced_area_offset.attr,
-+	&dev_attr_enhanced_area_size.attr,
- 	NULL,
- };
- 
-@@ -484,6 +531,39 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
- 
- 	/*
-+	 * If enhanced_area_en is TRUE, host need to enable
-+	 * ERASE_GRP_DEF bit.
-+	 * ERASE_GRP_DEF bit will be lost everytime
-+	 * after a reset or power off.
-+	 */
-+	if (card->ext_csd.enhanced_area_en) {
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				EXT_CSD_ERASE_GROUP_DEF, 1);
-+
-+		if (err && err != -EBADMSG)
-+			goto free_card;
-+
-+		if (err) {
-+			err = 0;
-+			/*
-+			 * Just disable enhanced area off & sz
-+			 * will try to enable ERASE_GROUP_DEF
-+			 * during next time reinit
-+			 */
-+			card->ext_csd.enhanced_area_offset = -EINVAL;
-+			card->ext_csd.enhanced_area_size = -EINVAL;
-+		} else {
-+			card->ext_csd.erase_group_def = 1;
-+			/*
-+			 * enable ERASE_GRP_DEF successfully.
-+			 * This will affect the erase size, so
-+			 * here need to reset erase size
-+			 */
-+			mmc_set_erase_size(card);
-+		}
-+	}
-+
-+	/*
- 	 * Activate high speed (if supported)
- 	 */
- 	if ((card->ext_csd.hs_max_dtr != 0) &&
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 8ce0827..4652cf9 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -54,6 +54,9 @@ struct mmc_ext_csd {
- 	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
- 	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
- 	unsigned int		trim_timeout;		/* In milliseconds */
-+	bool			enhanced_area_en;	/* enable bit */
-+	unsigned long long	enhanced_area_offset;	/* Units: Byte */
-+	unsigned int		enhanced_area_size;	/* Units: KB */
- };
- 
- struct sd_scr {
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 612301f..264ba54 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -253,6 +253,8 @@ struct _mmc_csd {
-  * EXT_CSD fields
-  */
- 
-+#define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
-+#define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
- #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
- #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
- #define EXT_CSD_BUS_WIDTH		183	/* R/W */
-@@ -262,6 +264,7 @@ struct _mmc_csd {
- #define EXT_CSD_CARD_TYPE		196	/* RO */
- #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
- #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
-+#define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
- #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
- #define EXT_CSD_HC_ERASE_GRP_SIZE	224	/* RO */
- #define EXT_CSD_SEC_TRIM_MULT		229	/* RO */
--- 
-1.6.6.1
+Since those are global variables, you may omit to initialize them to 0 
+which would then allocate them to the .bss section which is not included 
+in the compiled binary, and automatically cleared to zero at run time.
 
+
+Nicolas
