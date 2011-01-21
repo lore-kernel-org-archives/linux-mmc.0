@@ -1,64 +1,54 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v3 1/1]mmc: implemented eMMC4.4 enhanced area feature
-Date: Fri, 21 Jan 2011 17:12:00 +0800
-Message-ID: <5D8008F58939784290FAB48F549751983539F50558@shsmsx502.ccr.corp.intel.com>
-References: <20110120075556.GA23566@intel.com>
- <20110120161248.GA11774@void.printf.net>
- <5D8008F58939784290FAB48F5497519835341813A7@shsmsx502.ccr.corp.intel.com>
- <20110121080422.GA21763@void.printf.net>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: [PATCH] mmc: clear all interrupt in suspend before free_irq
+Date: Fri, 21 Jan 2011 05:27:16 -0500
+Message-ID: <AANLkTi=M5M=uaGJ-+8K0fLDssDR7bnD=K0Saxz-Gww6y@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:52936 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750810Ab1AUJMH convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2011 04:12:07 -0500
-In-Reply-To: <20110121080422.GA21763@void.printf.net>
-Content-Language: en-US
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:62075 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751876Ab1AUK1R (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2011 05:27:17 -0500
+Received: by qyj19 with SMTP id 19so369685qyj.19
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Jan 2011 02:27:16 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: linux-mmc@vger.kernel.org
+Cc: Nicolas Pitre <nico@fluxnic.net>, Ohad Ben-Cohen <ohad@wizery.com>, Bing Zhao <bzhao@marvell.com>, Chris Ball <cjb@laptop.org>
 
-Hi Chris,
-> 	/sys/devices/.../mmc_host/mmcX/mmcX:XXXX/enhanced_area_size
-> > > > +Date:		January 2011
-> > > > +Contact:	Chuanxiao Dong <chuanxiao.dong@intel.com>
-> > > > +Description:
-> > > > +		Enhanced area is a new feature defined in eMMC4.4 standard.
-> eMMC4.4
-> > > or
-> > > > +		later card can support such feature. This kind of area can help to
-> > > > +		improve the card performance. If the feature is enabled, this
-> attribute
-> > > > +		will indicate the size of enhanced data area. If not, this attribute
-> > > > +		will be -EINVAL. Unit KByte. Format decimal.
-> > >
-> > > This is still wrapped at > 80 columns.
-> > Sorry for that. I have set the textwidth=80 for vim, not understand why this is still
-> wrapped at >80 columns... I know checkpatch.pl can help us to find the style
-> problem, and is there some other script which can help find the style problem of
-> Document or how can I avoid such errors?
-> 
-> checkpatch.pl will warn about >80 chars, so that should be fine on its own.
-I have used the checkpatch.pl to check this patch, and no error or warning found....
+>From b7be39e0bbac3950057078ac66900ebc0871f77e Mon Sep 17 00:00:00 2001
+From: Zhangfei Gao <zhangfei.gao@marvell.com>
+Date: Fri, 21 Jan 2011 18:02:47 -0500
+Subject: [PATCH] mmc: clear all interrupt in suspend before free_irq
 
-> 
-> > > Oh, and let's mention the units of _offset and _size in the comment in
-> > > card.h.
-> >
-> > Chris, you mean the type of _offset and _size? I think the 64bits number for
-> _offset is enough, also the 32bits number for _size since the units of _size is Kbytes.
-> Any suggestions on that?
-> 
-> Ah, I wasn't clear -- I meant the bytes/kilobytes units, not the data type
-> sizes.  e.g.:
-> 
-> +   size_t          enhanced_area_size;             /* Units: KB */
-I think the units of _offset and _size should be easy for user to understand, so just choose the Byte for _offset and Kbyte for _size...
-And as spec said, the _size is (ENH_SIZE_MULT_2 << 16 + ENH_SIZE_MULT_1 << 8 + ENH_SIZE_MULT_0) x HC_WP_GRP_SIZE x HC_ERASE_GPR_SIZE x 512kBytes. It must be Kbytes aligned. That is another reason to choose it.
-What do you think?
+	When debugging wifi host sleep, race condition about
+SDHCI_INT_CARD_INT happens.
+	Host free_irq in suspend and request_irq when resume back.
+	However SDHCI_INT_CARD_INT is not cleared, so interrupt will
+immediately happen after request_irq.
+	mmc_signal_sdio_irq will be called and wakeup sdio_irq_thread.
+	As a result irq_handler in sdio driver is called even before host resume back.
 
-Thanks
-Chuanxiao
+	The correct case is mmc_sdio_resume calls mmc_signal_sdio_irq to
+wakeup sdio_irq_thread
+
+Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index aacd78c..97074ae 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1707,6 +1707,7 @@ int sdhci_suspend_host(struct sdhci_host *host,
+pm_message_t state)
+ 	ret = mmc_suspend_host(host->mmc);
+ 	if (ret)
+ 		return ret;
++	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, 0);
+
+ 	free_irq(host->irq, host);
+
+-- 
+1.7.0.4
