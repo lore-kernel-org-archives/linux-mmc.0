@@ -1,54 +1,57 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: [PATCH] mmc: clear all interrupt in suspend before free_irq
-Date: Fri, 21 Jan 2011 05:27:16 -0500
-Message-ID: <AANLkTi=M5M=uaGJ-+8K0fLDssDR7bnD=K0Saxz-Gww6y@mail.gmail.com>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH] mmc: mmc_mxc: Allow selection only for the correct
+ platforms
+Date: Fri, 21 Jan 2011 11:35:17 +0100
+Message-ID: <20110121103517.GD9041@pengutronix.de>
+References: <1295542979-10329-1-git-send-email-fabio.estevam@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:62075 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751876Ab1AUK1R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2011 05:27:17 -0500
-Received: by qyj19 with SMTP id 19so369685qyj.19
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Jan 2011 02:27:16 -0800 (PST)
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:57086 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750714Ab1AUKfW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2011 05:35:22 -0500
+Content-Disposition: inline
+In-Reply-To: <1295542979-10329-1-git-send-email-fabio.estevam@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Nicolas Pitre <nico@fluxnic.net>, Ohad Ben-Cohen <ohad@wizery.com>, Bing Zhao <bzhao@marvell.com>, Chris Ball <cjb@laptop.org>
+To: Fabio Estevam <fabio.estevam@freescale.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, kernel@pengutronix.de, u.kleine-koenig@pengutronix.de, linux-arm-kernel@lists.infradead.org
 
->From b7be39e0bbac3950057078ac66900ebc0871f77e Mon Sep 17 00:00:00 2001
-From: Zhangfei Gao <zhangfei.gao@marvell.com>
-Date: Fri, 21 Jan 2011 18:02:47 -0500
-Subject: [PATCH] mmc: clear all interrupt in suspend before free_irq
+On Thu, Jan 20, 2011 at 03:02:59PM -0200, Fabio Estevam wrote:
+> Currently MMC_MXC driver can be selected by all i.MX devices.
+> 
+> Restrict its use only for the appropriate processors.
+> 
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 
-	When debugging wifi host sleep, race condition about
-SDHCI_INT_CARD_INT happens.
-	Host free_irq in suspend and request_irq when resume back.
-	However SDHCI_INT_CARD_INT is not cleared, so interrupt will
-immediately happen after request_irq.
-	mmc_signal_sdio_irq will be called and wakeup sdio_irq_thread.
-	As a result irq_handler in sdio driver is called even before host resume back.
+Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
 
-	The correct case is mmc_sdio_resume calls mmc_signal_sdio_irq to
-wakeup sdio_irq_thread
-
-Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
----
- drivers/mmc/host/sdhci.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index aacd78c..97074ae 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1707,6 +1707,7 @@ int sdhci_suspend_host(struct sdhci_host *host,
-pm_message_t state)
- 	ret = mmc_suspend_host(host->mmc);
- 	if (ret)
- 		return ret;
-+	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, 0);
-
- 	free_irq(host->irq, host);
+> ---
+>  drivers/mmc/host/Kconfig |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index d618e86..a3a9ec1 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -288,7 +288,7 @@ config MMC_MSM
+>  
+>  config MMC_MXC
+>  	tristate "Freescale i.MX2/3 Multimedia Card Interface support"
+> -	depends on ARCH_MXC
+> +	depends on MACH_MX21 || MACH_MX27 || ARCH_MX31
+>  	help
+>  	  This selects the Freescale i.MX2/3 Multimedia card Interface.
+>  	  If you have a i.MX platform with a Multimedia Card slot,
+> -- 
+> 1.6.0.4
+> 
+> 
+> 
 
 -- 
-1.7.0.4
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
