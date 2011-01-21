@@ -1,67 +1,64 @@
-From: Fabio Estevam <fabio.estevam@freescale.com>
-Subject: Re: [PATCH] mmc: mmc_mxc: Allow selection only for the correct platforms
-Date: Fri, 21 Jan 2011 14:11:46 -0200
-Message-ID: <4D39B042.5050004@freescale.com>
-References: <1295542979-10329-1-git-send-email-fabio.estevam@freescale.com> <20110121153351.GR14956@pengutronix.de>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH v3 1/1]mmc: implemented eMMC4.4 enhanced area feature
+Date: Sat, 22 Jan 2011 01:43:21 +0800
+Message-ID: <5D8008F58939784290FAB48F549751983539F505FF@shsmsx502.ccr.corp.intel.com>
+References: <20110120075556.GA23566@intel.com>
+ <20110120161248.GA11774@void.printf.net>
+ <5D8008F58939784290FAB48F5497519835341813A7@shsmsx502.ccr.corp.intel.com>
+ <20110121080422.GA21763@void.printf.net>
+ <5D8008F58939784290FAB48F549751983539F50558@shsmsx502.ccr.corp.intel.com>
+ <20110121152750.GA32551@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe004.messaging.microsoft.com ([213.199.154.207]:27388
-	"EHLO AM1EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751088Ab1AUQMD convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 21 Jan 2011 11:12:03 -0500
-In-Reply-To: <20110121153351.GR14956@pengutronix.de>
+Received: from mga09.intel.com ([134.134.136.24]:27094 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754249Ab1AURn0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2011 12:43:26 -0500
+In-Reply-To: <20110121152750.GA32551@void.printf.net>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Uwe_Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
 
-Hi Uwe,
+Hi Chris,
 
-On 1/21/2011 1:33 PM, Uwe Kleine-K=F6nig wrote:
-> Hallo,
->=20
-> On Thu, Jan 20, 2011 at 03:02:59PM -0200, Fabio Estevam wrote:
->> Currently MMC_MXC driver can be selected by all i.MX devices.
->>
->> Restrict its use only for the appropriate processors.
->>
->> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
->> ---
->>  drivers/mmc/host/Kconfig |    2 +-
->>  1 files changed, 1 insertions(+), 1 deletions(-)
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index d618e86..a3a9ec1 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -288,7 +288,7 @@ config MMC_MSM
->> =20
->>  config MMC_MXC
->>  	tristate "Freescale i.MX2/3 Multimedia Card Interface support"
->> -	depends on ARCH_MXC
->> +	depends on MACH_MX21 || MACH_MX27 || ARCH_MX31
-> What about
->=20
-> 	depends IMX_HAVE_PLATFORM_MXC_MMC
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Friday, January 21, 2011 11:28 PM
+> To: Dong, Chuanxiao
+> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
+> akpm@linux-foundation.org
+> Subject: Re: [PATCH v3 1/1]mmc: implemented eMMC4.4 enhanced area feature
+> 
+> Hi Chuanxiao,
+> 
+> On Fri, Jan 21, 2011 at 05:12:00PM +0800, Dong, Chuanxiao wrote:
+> > I have used the checkpatch.pl to check this patch, and no error or warning
+> found....
+> 
+> Oh, you're right!  I wonder if that's because it's in a .txt file rather
+> than a source file.  Not sure how to get it to warn about this, then.
+> 
+> > > Ah, I wasn't clear -- I meant the bytes/kilobytes units, not the data type
+> > > sizes.  e.g.:
+> > >
+> > > +   size_t          enhanced_area_size;             /* Units: KB */
+> > I think the units of _offset and _size should be easy for user to understand, so just
+> choose the Byte for _offset and Kbyte for _size...
+> > And as spec said, the _size is (ENH_SIZE_MULT_2 << 16 + ENH_SIZE_MULT_1 <<
+> 8 + ENH_SIZE_MULT_0) x HC_WP_GRP_SIZE x HC_ERASE_GPR_SIZE x 512kBytes. It
+> must be Kbytes aligned. That is another reason to choose it.
+> 
+> I agree that we we should use these units, I'm just arguing that we
+> might as well mention them in the comment area.  The other card.h
+> definitions mention their unit sizes too.  At the moment your comments
+> for card.h simply repeat the variable name, which isn't useful -- why
+> not make them repeat some useful and not-necessarily-obvious information
+> instead?
+Sure, Chris. I will take care of such things in my future submissions. Of cause including the next v4 enhanced area feature patch. :) I also remember to fix the compile warnings. Thanks a lot, Chris.
 
-I would prefer to let the architectures explicitly in Kconfig.
-
-If someone selects IMX_HAVE_PLATFORM_MXC_MMC by mistake on a MX51 board=
-, it will be possible to select the MXC_MMC driver in the kernel for MX=
-51, which is incorrect.
-
-Using the approach of explicitly marking the architectures that support=
- MXC_MMC would avoid such problems as well.
->=20
-> ?  Then if i.MX29 has the same IP you don't need to touch this again.
-
-Not likely to happen.=20
-
-Thanks,
-
-=46abio Estevam
-
-
+Thanks
+Chuanxiao
