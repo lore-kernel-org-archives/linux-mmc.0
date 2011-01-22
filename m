@@ -1,39 +1,43 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v2] sdio: skip initialization on powered resume
-Date: Sun, 23 Jan 2011 00:01:19 +0200
-Message-ID: <AANLkTikguM7rYuCXpom3dN4T4+9RG2=0OvV8cnL0Tz04@mail.gmail.com>
-References: <1283391692-14150-1-git-send-email-bzhao@marvell.com>
- <alpine.LFD.2.00.1009021344430.19366@xanadu.home> <477F20668A386D41ADCC57781B1F704307D2F41B27@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009021923171.19366@xanadu.home> <477F20668A386D41ADCC57781B1F704307D2FE4A0F@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009072119210.19366@xanadu.home> <477F20668A386D41ADCC57781B1F704307D2FE4A52@SC-VEXCH1.marvell.com>
- <1284459351.2359.17.camel@stummala-linux.in.qualcomm.com> <477F20668A386D41ADCC57781B1F704307D30738F5@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009152222400.19366@xanadu.home> <AANLkTinjpe8iGcOyru=09WrBq4f5PfBo2QcUs40OycXg@mail.gmail.com>
+Subject: Re: [PATCH 1/3] mmc: add per device quirk placeholder
+Date: Sun, 23 Jan 2011 00:55:22 +0200
+Message-ID: <AANLkTik=R=VtaHrUCg_1oAXzjKy7XCBpCsEWTrq3=sNt@mail.gmail.com>
+References: <cover.1294588491.git.tardyp@gmail.com> <6191610532f25d7cda435781ce9b83bfdb677b5a.1294588491.git.tardyp@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:55657 "EHLO
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:37686 "EHLO
 	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750903Ab1AVWBk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Jan 2011 17:01:40 -0500
-Received: by iwn9 with SMTP id 9so2829168iwn.19
-        for <linux-mmc@vger.kernel.org>; Sat, 22 Jan 2011 14:01:39 -0800 (PST)
-In-Reply-To: <AANLkTinjpe8iGcOyru=09WrBq4f5PfBo2QcUs40OycXg@mail.gmail.com>
+	with ESMTP id S1752254Ab1AVWzn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Jan 2011 17:55:43 -0500
+In-Reply-To: <6191610532f25d7cda435781ce9b83bfdb677b5a.1294588491.git.tardyp@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>, Bing Zhao <bzhao@marvell.com>, Sahitya Tummala <stummala@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michal Miroslaw <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>
+To: Pierre Tardy <tardyp@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Pierre Tardy <pierre.tardy@intel.com>
 
-On Fri, Jan 21, 2011 at 11:07 AM, zhangfei gao <zhangfei.gao@gmail.com> wrote:
-> Do you have any updated patch to skip mmc_sdio_init_card in resume back.
-> We need such patch in enable host sleep feature for mrvl8787.
+On Sun, Jan 9, 2011 at 6:26 PM, Pierre Tardy <tardyp@gmail.com> wrote:
+> From: Pierre Tardy <pierre.tardy@intel.com>
+>
+> Some cards have quirks valid for every platforms
+> using current platform quirk hooks leads to a lot
+> of code and debug duplication.
+>
+> So we inspire a bit from what exists in PCI subsystem
+> and do our own per vendorid/deviceid quirk
+> We still drop the complexity of the pci quirk system
+> (with special section tables, and so on)
+> That can be added later if needed.
 
-Is mrvl8787 a removable card ?
+I like this.
 
-I'm asking because we already skip mmc_sdio_init_card() for
-powered-resumed nonremovable cards (check out commit 3cfc33a "mmc:
-sdio: don't reinitialize nonremovable powered-resumed cards").
+It's exactly what we need for the wl12xx, so thanks for pushing this.
 
-I'm not familiar with marvell's cards, but I do remember a thread
-mentioning they have dedicated reset GPIOs, and that may suggest they
-are nonremovables. If that's the case, simply setting
-MMC_CAP_NONREMOVABLE on the relevant slot should do the trick for you.
+I'm not sure about the necessity of the function hooks though - it
+just looks like complexity that we don't really need, and I would
+rather have this framework directly set the required quirks like USB
+is doing. I do see the benefit it provides you with the gating
+framework and the SDIO set/unset issue, and I don't have a cleaner
+alternative approach, so I guess we can live with it.
+
+Acked-by: Ohad Ben-Cohen <ohad@wizery.com>
