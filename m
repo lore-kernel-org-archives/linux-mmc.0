@@ -1,59 +1,39 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v1 1/3]mmc: implemented runtime pm for mmc host
-Date: Sat, 22 Jan 2011 23:24:11 +0200
-Message-ID: <AANLkTi=oOzU0fb+yGkKDkjviGWO8fq=k68+Syp+dWn5B@mail.gmail.com>
-References: <20110114082310.GB27523@intel.com> <8250E4885F9967469CAC3FB5CBA2CE69934E7AA2FE@irsmsx501.ger.corp.intel.com>
- <5D8008F58939784290FAB48F54975198351D4FA654@shsmsx502.ccr.corp.intel.com>
- <8250E4885F9967469CAC3FB5CBA2CE69934E7AAB20@irsmsx501.ger.corp.intel.com>
- <5D8008F58939784290FAB48F5497519835247E72AD@shsmsx502.ccr.corp.intel.com>
- <8250E4885F9967469CAC3FB5CBA2CE69934E7AACCC@irsmsx501.ger.corp.intel.com> <20110120050803.GA5732@void.printf.net>
+Subject: Re: [PATCH v2] sdio: skip initialization on powered resume
+Date: Sun, 23 Jan 2011 00:01:19 +0200
+Message-ID: <AANLkTikguM7rYuCXpom3dN4T4+9RG2=0OvV8cnL0Tz04@mail.gmail.com>
+References: <1283391692-14150-1-git-send-email-bzhao@marvell.com>
+ <alpine.LFD.2.00.1009021344430.19366@xanadu.home> <477F20668A386D41ADCC57781B1F704307D2F41B27@SC-VEXCH1.marvell.com>
+ <alpine.LFD.2.00.1009021923171.19366@xanadu.home> <477F20668A386D41ADCC57781B1F704307D2FE4A0F@SC-VEXCH1.marvell.com>
+ <alpine.LFD.2.00.1009072119210.19366@xanadu.home> <477F20668A386D41ADCC57781B1F704307D2FE4A52@SC-VEXCH1.marvell.com>
+ <1284459351.2359.17.camel@stummala-linux.in.qualcomm.com> <477F20668A386D41ADCC57781B1F704307D30738F5@SC-VEXCH1.marvell.com>
+ <alpine.LFD.2.00.1009152222400.19366@xanadu.home> <AANLkTinjpe8iGcOyru=09WrBq4f5PfBo2QcUs40OycXg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:52201 "EHLO
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:55657 "EHLO
 	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750738Ab1AVVYc convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Jan 2011 16:24:32 -0500
-Received: by iwn9 with SMTP id 9so2814623iwn.19
-        for <linux-mmc@vger.kernel.org>; Sat, 22 Jan 2011 13:24:32 -0800 (PST)
-In-Reply-To: <20110120050803.GA5732@void.printf.net>
+	with ESMTP id S1750903Ab1AVWBk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Jan 2011 17:01:40 -0500
+Received: by iwn9 with SMTP id 9so2829168iwn.19
+        for <linux-mmc@vger.kernel.org>; Sat, 22 Jan 2011 14:01:39 -0800 (PST)
+In-Reply-To: <AANLkTinjpe8iGcOyru=09WrBq4f5PfBo2QcUs40OycXg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "Tardy, Pierre" <pierre.tardy@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.ml.walleij@gmail.com>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Nicolas Pitre <nico@fluxnic.net>, Bing Zhao <bzhao@marvell.com>, Sahitya Tummala <stummala@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michal Miroslaw <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>
 
-On Thu, Jan 20, 2011 at 7:08 AM, Chris Ball <cjb@laptop.org> wrote:
-> On Wed, Jan 19, 2011 at 09:45:57AM +0000, Tardy, Pierre wrote:
->> Chris,
->> (Sorry for top posting)
->> Seems we have a intel intern disagreement.
->>
->> Could we have maintainer opinion on this ?
->
-> Linus W and Ohad, any input here? =A0Thanks,
+On Fri, Jan 21, 2011 at 11:07 AM, zhangfei gao <zhangfei.gao@gmail.com> wrote:
+> Do you have any updated patch to skip mmc_sdio_init_card in resume back.
+> We need such patch in enable host sleep feature for mrvl8787.
 
-Personally I prefer the runtime PM approach.
+Is mrvl8787 a removable card ?
 
-The MMC aggressive clock gating framework is great, but it ended up
-duplicating plumbing that already existed in the runtime PM framework
-(workqueue, locking, usage refcount, "get/put" API).
+I'm asking because we already skip mmc_sdio_init_card() for
+powered-resumed nonremovable cards (check out commit 3cfc33a "mmc:
+sdio: don't reinitialize nonremovable powered-resumed cards").
 
-Moving to runtime PM should reduce a fair amount of code from the MMC
-core, make the code more readable and easier to maintain, and let us
-take advantage of standard tools and knobs that are based on runtime
-PM's sysfs entries.
-
-But surely we don't want two frameworks doing the same; that would be
-too messy. And we want to be sure that any runtime PM approach would
-satisfy everyone's requirement.
-
-Chuanxiao, do you think you can come up with a runtime PM-based patch
-that provides the aggressive clock gating framework's functionality ?
-
-If functionality and requirements are preserved, I don't think anyone
-would complain about moving to an established and well-maintained
-kernel subsystem.
-
-Thanks,
-Ohad.
+I'm not familiar with marvell's cards, but I do remember a thread
+mentioning they have dedicated reset GPIOs, and that may suggest they
+are nonremovables. If that's the case, simply setting
+MMC_CAP_NONREMOVABLE on the relevant slot should do the trick for you.
