@@ -1,56 +1,34 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
- Resubmission
-Date: Fri, 21 Jan 2011 16:14:46 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.1101211608330.8580@xanadu.home>
-References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536>
- <20101116150022.GA27726@void.printf.net>
- <27884BED0E3C489C8849EE12A803F536@AN00536>
- <m3oc9pnt6g.fsf@pullcord.laptop.org> <4CE41BE3.1060806@elandigitalsystems.com>
- <m3oc9n241c.fsf@pullcord.laptop.org> <4CEA86D4.9050109@elandigitalsystems.com>
- <1295607004.1816.6.camel@apple-mac>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v4 1/1]mmc: implemented eMMC4.4 enhanced area feature
+Date: Sat, 22 Jan 2011 01:51:32 +0000
+Message-ID: <20110122015132.GA6748@void.printf.net>
+References: <20110121200941.GA16236@intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:28986 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751701Ab1AUVOr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2011 16:14:47 -0500
-Received: from xanadu.home ([66.130.28.92]) by vl-mo-mrz23.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0LFE00G0P5O1ORC0@vl-mo-mrz23.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Fri, 21 Jan 2011 16:14:25 -0500 (EST)
-In-reply-to: <1295607004.1816.6.camel@apple-mac>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20110121200941.GA16236@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Olech <tony.olech@elandigitalsystems.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, David Vrabel <david.vrabel@csr.com>
 
-On Fri, 21 Jan 2011, Tony Olech wrote:
+Hi Chuanxiao,
 
-> Add a driver for Elan Digital System's VUB300 chip
-> which is a USB connected SDIO/SDmem/MMC host controller.
-> A VUB300 chip enables a USB 2.0 or USB 1.1 connected host
-> computer to use SDIO/SD/MMC cards without the need for
-> a directly connected, for example via PCI, SDIO host
-> controller.
+On Sat, Jan 22, 2011 at 04:09:41AM +0800, Chuanxiao Dong wrote:
+> Enhanced area feature is a new feature defined in eMMC4.4 standard. This
+> kind of area can help to improve the performance.
 > 
-> Signed-off-by: Anthony F Olech <tony.olech@elandigitalsystems.com>
-> ---
-> This is the second submission attempt.
-> There are 5 "do not initialise statics" errors reported by scripts/checkpatch.pl
+> MMC driver will read out the enhanced area offset and size and add them
+> to be device attributes. The feature enabling should be done in manufactory.
+> To use this feature, bit ERASE_GRP_DEF should also be set.
+> 
+> Documentation/ABI/testing/sysfs-devices-mmc described the two new attributes
+> 
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-you probably should fix those.  They are due to lines such as:
+Looks good, pushed to mmc-next.  Thanks for all the edits to this!
 
-static int pad_input_to_usb_pkt = 0;
-static int disable_offload_processing = 0;
-static int force_1_bit_data_xfers = 0;
-static int force_polling_for_irqs = 0;
-
-Since those are global variables, you may omit to initialize them to 0 
-which would then allocate them to the .bss section which is not included 
-in the compiled binary, and automatically cleared to zero at run time.
-
-
-Nicolas
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
