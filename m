@@ -1,69 +1,103 @@
-From: Tony Olech <tony.olech@elandigitalsystems.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
 Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
  Resubmission
-Date: Mon, 24 Jan 2011 15:10:46 +0000
-Message-ID: <1295881846.1677.9.camel@apple-mac>
-References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536>
-	 <20101116150022.GA27726@void.printf.net>
-	 <27884BED0E3C489C8849EE12A803F536@AN00536>
-	 <m3oc9pnt6g.fsf@pullcord.laptop.org>
-	 <4CE41BE3.1060806@elandigitalsystems.com>
-	 <m3oc9n241c.fsf@pullcord.laptop.org>
-	 <4CEA86D4.9050109@elandigitalsystems.com>
-	 <1295607004.1816.6.camel@apple-mac>
-	 <alpine.LFD.2.00.1101211608330.8580@xanadu.home>
-	 <1295858946.1677.3.camel@apple-mac>
-	 <alpine.LFD.2.00.1101240936260.8580@xanadu.home>
+Date: Mon, 24 Jan 2011 16:35:37 +0100
+Message-ID: <20110124153537.GA20736@pengutronix.de>
+References: <m3oc9pnt6g.fsf@pullcord.laptop.org>
+ <4CE41BE3.1060806@elandigitalsystems.com>
+ <m3oc9n241c.fsf@pullcord.laptop.org>
+ <4CEA86D4.9050109@elandigitalsystems.com>
+ <1295607004.1816.6.camel@apple-mac>
+ <alpine.LFD.2.00.1101211608330.8580@xanadu.home>
+ <20110122142112.GC15620@pengutronix.de>
+ <alpine.LFD.2.00.1101221405110.8580@xanadu.home>
+ <20110123100917.GB32578@pengutronix.de>
+ <alpine.LFD.2.00.1101230854430.8580@xanadu.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="wRRV7LY7NUeQGEoC"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:63001 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751877Ab1AXPLI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jan 2011 10:11:08 -0500
-In-Reply-To: <alpine.LFD.2.00.1101240936260.8580@xanadu.home>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:56653 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751346Ab1AXPfn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jan 2011 10:35:43 -0500
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.2.00.1101230854430.8580@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Nicolas Pitre <nico@fluxnic.net>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, David Vrabel <david.vrabel@csr.com>
+Cc: Tony Olech <tony.olech@elandigitalsystems.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, David Vrabel <david.vrabel@csr.com>
 
-On Mon, 2011-01-24 at 09:43 -0500, Nicolas Pitre wrote:
-> On Mon, 24 Jan 2011, Tony Olech wrote:
-> > On Fri, 2011-01-21 at 16:14 -0500, Nicolas Pitre wrote:
-> > > On Fri, 21 Jan 2011, Tony Olech wrote:
-> > > > There are 5 "do not initialise statics" errors reported by scripts/checkpatch.pl
-> > > 
-> > > you probably should fix those.  They are due to lines such as:
-> > > 
-> > > static int pad_input_to_usb_pkt = 0;
-> > > static int disable_offload_processing = 0;
-> > > static int force_1_bit_data_xfers = 0;
-> > > static int force_polling_for_irqs = 0;
-> > > 
-> > > Since those are global variables, you may omit to initialize them to 0 
-> > > which would then allocate them to the .bss section which is not included 
-> > > in the compiled binary, and automatically cleared to zero at run time
-> > > Nicolas
-> > Yes they are due to exactly that, BUT I  have a great aversion to using
-> > uninitialized variables. How can initializing all one's variables be
-> > considered a bug????
-> 
-> Let me repeat myself.
-> 
-> Uninitialized global scope variables are by definition assigned to the 
-> .bss section.  The .bss section is dynamically allocated at run time 
-> rather than being stored in the compiled binary, and also cleared to 
-> zero at run time.  So the preference is for zero-initialized global 
-> variables not to be initialized at all because 1) they are implicitly 
-> initialized to zero anyway, and 2) that makes the resulting binaries 
-> smaller.
-> So this is not about fixing a bug, but rather to conform to the adopted 
-> policy for kernel code.
-> Nicolas
-Thanks for the reply. I had not realized that saving 20 bytes on the
-binary size was so important. How then can one do static code analysis
-to determine which uninitialized variables are uninitialized as
-a result of a bug?
-Tony Olech
 
+--wRRV7LY7NUeQGEoC
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+
+> > > > Should those be static anyhow? Being USB, you could probably hook u=
+p two of
+> > > > those and want to operate one of them in this and the other one in =
+another
+> > > > mode?
+> > >=20
+> > > You could.  Whether or not you would is another question.  Until then=
+ I=20
+> > > don't think it is worth bothering with such corner cases for the init=
+ial=20
+> > > merging of this driver.
+> >=20
+> > A static variable which should be per-device is a corner-case? Frankly,=
+ I'd
+> > think it is a flaw. Unless, of course, these module_params are only rar=
+ely
+> > used. Which would lead to the question if they are really needed. There=
+ are
+> > quite a lot.
+>=20
+> Given their name, I'd say they are there only for debugging purposes. =20
+> So yes, they probably are rarely used, which doesn't mean they're=20
+> useless.  Same thing goes for maxfreq and nodma in mvsdio.c for example.
+
+OK, I still wonder if all eight of these debugging-aids really need exposur=
+e to all
+users. There is no documentation how and when to use them. But well...
+
+About the "static" thing: Yes, there are already drivers having one or more
+quirk parameters. That probably justifies it (personal taste aside).
+
+>=20
+> > Also, I am not convinced of the need of a custom sysfs-file. Seeing its=
+ use
+> > cases might help to identify a need which is probably better solved
+> > generically.
+>=20
+> I'm sure the author of this driver would be eager to hear from you with=
+=20
+> a concrete suggestion.
+
+? This is exactly why I asked for a use case? To see if something should be
+exposed from the core and not the driver?
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--wRRV7LY7NUeQGEoC
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAk09nEkACgkQD27XaX1/VRtdHgCeJ+p7w/o5LEIdyR9ojpOI05G/
+DuQAnizW/zS222+IrPM5ugBhLyKKbFVa
+=IWLb
+-----END PGP SIGNATURE-----
+
+--wRRV7LY7NUeQGEoC--
