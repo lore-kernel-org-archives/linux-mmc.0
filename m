@@ -1,37 +1,70 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH v2] sdio: skip initialization on powered resume
-Date: Tue, 25 Jan 2011 09:24:56 +0200
-Message-ID: <AANLkTi=Kd59Y0kFd=41cB7gUNRYjfcYe-n5ysfkQdvsk@mail.gmail.com>
-References: <1283391692-14150-1-git-send-email-bzhao@marvell.com>
- <alpine.LFD.2.00.1009021344430.19366@xanadu.home> <477F20668A386D41ADCC57781B1F704307D2F41B27@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009021923171.19366@xanadu.home> <477F20668A386D41ADCC57781B1F704307D2FE4A0F@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009072119210.19366@xanadu.home> <477F20668A386D41ADCC57781B1F704307D2FE4A52@SC-VEXCH1.marvell.com>
- <1284459351.2359.17.camel@stummala-linux.in.qualcomm.com> <477F20668A386D41ADCC57781B1F704307D30738F5@SC-VEXCH1.marvell.com>
- <alpine.LFD.2.00.1009152222400.19366@xanadu.home> <AANLkTinjpe8iGcOyru=09WrBq4f5PfBo2QcUs40OycXg@mail.gmail.com>
- <AANLkTikguM7rYuCXpom3dN4T4+9RG2=0OvV8cnL0Tz04@mail.gmail.com>
- <477F20668A386D41ADCC57781B1F704307F4EA2BA9@SC-VEXCH1.marvell.com>
- <AANLkTimZJbO1FNGKUG2JhJZOVeM-95cc5NuvAN+oC+Vx@mail.gmail.com> <AANLkTimp4a3BSGePPBwJP3zF2vbgF0hOmRHk2uZoeUF5@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
+ Resubmission
+Date: Tue, 25 Jan 2011 10:13:17 +0100
+Message-ID: <20110125091317.GB2703@pengutronix.de>
+References: <m3oc9pnt6g.fsf@pullcord.laptop.org>
+ <4CE41BE3.1060806@elandigitalsystems.com>
+ <m3oc9n241c.fsf@pullcord.laptop.org>
+ <4CEA86D4.9050109@elandigitalsystems.com>
+ <1295607004.1816.6.camel@apple-mac>
+ <alpine.LFD.2.00.1101211608330.8580@xanadu.home>
+ <20110122142112.GC15620@pengutronix.de>
+ <alpine.LFD.2.00.1101221405110.8580@xanadu.home>
+ <20110123100917.GB32578@pengutronix.de>
+ <1295886085.1677.32.camel@apple-mac>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="zx4FCpZtqtKETZ7O"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:47990 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751335Ab1AYHZR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jan 2011 02:25:17 -0500
-Received: by ywe10 with SMTP id 10so1207322ywe.19
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Jan 2011 23:25:17 -0800 (PST)
-In-Reply-To: <AANLkTimp4a3BSGePPBwJP3zF2vbgF0hOmRHk2uZoeUF5@mail.gmail.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:57924 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751695Ab1AYJNY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jan 2011 04:13:24 -0500
+Content-Disposition: inline
+In-Reply-To: <1295886085.1677.32.camel@apple-mac>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Bing Zhao <bzhao@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Sahitya Tummala <stummala@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michal Miroslaw <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Jun Nie <njun@marvell.com>
+To: Tony Olech <tony.olech@elandigitalsystems.com>
+Cc: Nicolas Pitre <nico@fluxnic.net>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, David Vrabel <david.vrabel@csr.com>
 
-On Tue, Jan 25, 2011 at 9:11 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> One thing we can do is letting drivers register a wake-up function
-> within the SDIO core, just before suspending. Then, upon resume, if
-> such a wake-up function was registered, SDIO core would invoke it just
-> before it tries to read the CIS.
 
-I guess that would be non-trivial, since at that point the driver is
-not resumed yet, and you might need its facilities to receive some
-wake-up ACK from the chip before continuing.
+--zx4FCpZtqtKETZ7O
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+
+> The intended use of the read-only sysfs file is to enable first-line
+> support staff to determine quickly what actual firmware file is being
+> used.
+
+You have that in the driver (and similar ones):
+
++	dev_info(&vub300->udev->dev, "requesting offload firmware %s\n",
++		 vub300->vub_name);
+
+Won't checking the logs do?
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--zx4FCpZtqtKETZ7O
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk0+lC0ACgkQD27XaX1/VRtmvwCgqU7z71m8vMkVcRuBk2Jo8ROp
+fFsAn3pXDMDJYaBnd/la57hDTm96J5XD
+=vq7M
+-----END PGP SIGNATURE-----
+
+--zx4FCpZtqtKETZ7O--
