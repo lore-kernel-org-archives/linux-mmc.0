@@ -1,145 +1,71 @@
-From: "Tardy, Pierre" <pierre.tardy@intel.com>
-Subject: RE: [PATCH v1 1/3]mmc: implemented runtime pm for mmc host
-Date: Tue, 25 Jan 2011 21:34:28 +0000
-Message-ID: <8250E4885F9967469CAC3FB5CBA2CE69934EFA98B2@irsmsx501.ger.corp.intel.com>
-References: <20110114082310.GB27523@intel.com>
-	<8250E4885F9967469CAC3FB5CBA2CE69934E7AA2FE@irsmsx501.ger.corp.intel.com>
-	<5D8008F58939784290FAB48F54975198351D4FA654@shsmsx502.ccr.corp.intel.com>
-	<8250E4885F9967469CAC3FB5CBA2CE69934E7AAB20@irsmsx501.ger.corp.intel.com>
-	<5D8008F58939784290FAB48F5497519835247E72AD@shsmsx502.ccr.corp.intel.com>
-	<8250E4885F9967469CAC3FB5CBA2CE69934E7AACCC@irsmsx501.ger.corp.intel.com>
-	<20110120050803.GA5732@void.printf.net>
- <AANLkTimZyv9f5b5VxmmYyO3qPrb9Y25-=yUV_GYma3e_@mail.gmail.com>
+From: "Tomoya MORINAGA" <tomoya-linux@dsn.okisemi.com>
+Subject: RE: A MMC card transfer issue
+Date: Wed, 26 Jan 2011 17:28:53 +0900
+Message-ID: <F6E8C422FB8A4D78A5BDF7B6ECDA1E00@hacdom.okisemi.com>
+References: <4CD8DE9C.4040505@dsn.okisemi.com> <AANLkTimfnj8GcSwmALjaZUBsiq6ssaVuzVZZsZHRYmiX@mail.gmail.com> <001701cb814c$71926bf0$66f8800a@maildom.okisemi.com> <001201cb90f4$4be8f790$66f8800a@maildom.okisemi.com> <2D50F985-2383-4406-8514-DFE462A5F546@marvell.com> <4D2E0464ABB54FFF9C10583336E27879@hacdom.okisemi.com> <4C4E7DE5-7CF1-4D97-9CAD-F600FCBE477A@marvell.com> <20110119174233.GA30494@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:61017 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754112Ab1AYVed convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jan 2011 16:34:33 -0500
-In-Reply-To: <AANLkTimZyv9f5b5VxmmYyO3qPrb9Y25-=yUV_GYma3e_@mail.gmail.com>
-Content-Language: en-US
+Received: from sm-d311v.smileserver.ne.jp ([203.211.202.206]:33104 "EHLO
+	sm-d311v.smileserver.ne.jp" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751383Ab1AZI24 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jan 2011 03:28:56 -0500
+In-Reply-To: <20110119174233.GA30494@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.ml.walleij@gmail.com>, Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ohad Ben-Cohen <ohad@wizery.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>
+To: 'Chris Ball' <cjb@laptop.org>, 'Philip Rakity' <prakity@marvell.com>
+Cc: 'Kyungmin Park' <kmpark@infradead.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, andrew.chih.howe.khor@intel.com, kok.howg.ewe@intel.com
+
+On Thursday, January 20, 2011 2:43 AM, Chris Ball wrote
+> So, please re-test against 2.6.38-rc1 and let us know whether 
+> you still have problems.  Thanks,
+I have tested the latest "2.6.38-rc2".
+However, the issue remains to be seen.
+
+Thanks in advance,
+-----------------------------------------
+Tomoya MORINAGA
+OKI SEMICONDUCTOR CO., LTD.
 
 > -----Original Message-----
-> From: Linus Walleij [mailto:linus.ml.walleij@gmail.com]
-> Sent: Monday, January 24, 2011 11:11 PM
-> To: Chris Ball
-> Cc: Tardy, Pierre; linux-mmc@vger.kernel.org; Ohad Ben-Cohen; linux-o=
-map Mailing List
-> Subject: Re: [PATCH v1 1/3]mmc: implemented runtime pm for mmc host
->=20
-> 2011/1/20 Chris Ball <cjb@laptop.org>:
-> > On Wed, Jan 19, 2011 at 09:45:57AM +0000, Tardy, Pierre wrote:
-> >> Chris,
-> >> (Sorry for top posting)
-> >> Seems we have a intel intern disagreement.
-> >>
-> >> Could we have maintainer opinion on this ?
-> >
-> > Linus W and Ohad, any input here? =A0Thanks,
->=20
-> What I see is orthogonal purposes altogether. Usually there is
-> something like two clocks and two regulators or switches
-> available in every sufficiently advanced system:
->=20
-> - One regulator to power the card
-> - One clock to clock the card (MCLK)
-> - One regulator or switch to power the MMC IP block
-> - One clock to clock the MMC IP block
->=20
-> The MMC core regulator handling and the clock gating I
-> implemented is about the two first things.
->=20
-> I think this patch is about the two *other* things, if I read it
-> right.
-
-Actually in sdhci, you power off the MMC IP block, you power OFF the MC=
-LK (at least on our platform)
-
-I don't know other platform where mmc clock is not controlled more or l=
-ess directlty by the sdhc IP.
-
-> Further this patch cannot be applied as-is.
-> It needs a clause where it will wait for the clock gating to
-> be sync:ed *before* calling the suspend hook.
-That's the purpose of those hunks:
-
-iff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 8c3769b..27931f6 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -20,6 +20,7 @@
- #include <linux/slab.h>
- #include <linux/scatterlist.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/pm_runtime.h>
-=20
- #include <linux/leds.h>
-=20
-@@ -1221,6 +1222,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, s=
-truct mmc_ios *ios)
- {
-        struct sdhci_host *host;
-        unsigned long flags;
-+       unsigned int lastclock;
-        u8 ctrl;
-=20
-        host =3D mmc_priv(mmc);
-@@ -1231,6 +1233,27 @@ static void sdhci_set_ios(struct mmc_host *mmc, =
-struct mmc_ios *ios)
-                goto out;
-=20
-        /*
-+        * get/put runtime_pm usage counter at ios->clock transitions
-+        * We need to do it before any other chip access, as sdhci coul=
-d
-+        * be power gated
-+        */
-+       lastclock =3D host->iosclock;
-+       host->iosclock =3D ios->clock;
-+       if (lastclock =3D=3D 0 && ios->clock !=3D 0) {
-+               spin_unlock_irqrestore(&host->lock, flags);
-+               pm_runtime_get_sync(host->mmc->parent);
-+               spin_lock_irqsave(&host->lock, flags);
-+       } else if (lastclock !=3D 0 && ios->clock =3D=3D 0) {
-+               spin_unlock_irqrestore(&host->lock, flags);
-+               pm_runtime_mark_last_busy(host->mmc->parent);
-+               pm_runtime_put_autosuspend(host->mmc->parent);
-+               spin_lock_irqsave(&host->lock, flags);
-+       }
-+       /* no need to configure the rest.. */
-+       if (host->iosclock =3D=3D 0)
-+               goto out;
-+
-+       /*
-         * Reset the chip on each power off.
-         * Should clear out any weird states.
-         */
-@@ -1303,6 +1326,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
-
-I'm wondering if this code could be generic to all drivers, and if cloc=
-k gating could not be taking/releasing reference counter on the mmc_bus=
- whenever there is a clock gating transition?
-We could condition that on some MMC_CAP_POWERGATE_WILL_CLKGATE capabili=
-ty flag.
-
-
-Regards,
-Pierre
----------------------------------------------------------------------
-Intel Corporation SAS (French simplified joint stock company)
-Registered headquarters: "Les Montalets"- 2, rue de Paris,=20
-92196 Meudon Cedex, France
-Registration Number:  302 456 199 R.C.S. NANTERRE
-Capital: 4,572,000 Euros
-
-This e-mail and any attachments may contain confidential material for
-the sole use of the intended recipient(s). Any review or distribution
-by others is strictly prohibited. If you are not the intended
-recipient, please contact the sender and delete all copies.
+> From: Chris Ball [mailto:cjb@laptop.org] 
+> Sent: Thursday, January 20, 2011 2:43 AM
+> To: Philip Rakity
+> Cc: Tomoya MORINAGA; Kyungmin Park; 
+> linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; 
+> andrew.chih.howe.khor@intel.com; kok.howg.ewe@intel.com
+> Subject: Re: A MMC card transfer issue
+> 
+> Hi,
+> 
+> On Tue, Jan 18, 2011 at 10:05:04PM -0800, Philip Rakity wrote:
+> > 
+> > For 1 bit transcend cards you need these 2 patches.
+> > 
+> > >From 22113efd00491310da802f3b1a9a66cfcf415fac Mon Sep 17 00:00:00 
+> > >2001
+> > From: Aries Lee <arieslee@jmicron.com>
+> > Date: Wed, 15 Dec 2010 08:14:24 +0100
+> > Subject: [PATCH] mmc: Test bus-width for old MMC devices
+> 
+> Present in 2.6.38-rc1.
+> 
+> > >From 08c82dfad2458f8f9b83126224a85e7ea9e2b046 Mon Sep 17 00:00:00 
+> > >2001
+> > From: Takashi Iwai <tiwai@suse.de>
+> > Date: Wed, 22 Dec 2010 09:59:44 +0100
+> > Subject: [PATCH] mmc: fix mmc_set_bus_width_ddr() call without 
+> > bus-width-test cap
+> 
+> Also present in 2.6.38-rc1.
+> 
+> So, please re-test against 2.6.38-rc1 and let us know whether 
+> you still have problems.  Thanks,
+> 
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> 
 
