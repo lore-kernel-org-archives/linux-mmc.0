@@ -1,84 +1,146 @@
-From: Linus Walleij <linus.ml.walleij@gmail.com>
-Subject: Re: [PATCH v1 1/3]mmc: implemented runtime pm for mmc host
-Date: Wed, 26 Jan 2011 20:19:08 +0100
-Message-ID: <AANLkTikXsaU+6rDByji4jsSP4==cvUCBvSxuXug6UmBD@mail.gmail.com>
-References: <20110114082310.GB27523@intel.com>
-	<8250E4885F9967469CAC3FB5CBA2CE69934E7AA2FE@irsmsx501.ger.corp.intel.com>
-	<5D8008F58939784290FAB48F54975198351D4FA654@shsmsx502.ccr.corp.intel.com>
-	<8250E4885F9967469CAC3FB5CBA2CE69934E7AAB20@irsmsx501.ger.corp.intel.com>
-	<5D8008F58939784290FAB48F5497519835247E72AD@shsmsx502.ccr.corp.intel.com>
-	<8250E4885F9967469CAC3FB5CBA2CE69934E7AACCC@irsmsx501.ger.corp.intel.com>
-	<20110120050803.GA5732@void.printf.net>
-	<AANLkTimZyv9f5b5VxmmYyO3qPrb9Y25-=yUV_GYma3e_@mail.gmail.com>
-	<8250E4885F9967469CAC3FB5CBA2CE69934EFA98B2@irsmsx501.ger.corp.intel.com>
-	<AANLkTi=KKfxTRzW1iyLKjM0Ho6x7kYpwGwx7F-gD4EaM@mail.gmail.com>
+From: Kevin Hilman <khilman@ti.com>
+Subject: Re: subtle pm_runtime_put_sync race and sdio functions
+Date: Wed, 26 Jan 2011 15:28:20 -0800
+Message-ID: <87k4hrtfcb.fsf@ti.com>
+References: <Pine.LNX.4.44L0.1012212032590.11252-100000@netrider.rowland.org>
+	<201012221329.40251.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=KKfxTRzW1iyLKjM0Ho6x7kYpwGwx7F-gD4EaM@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "Tardy, Pierre" <pierre.tardy@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ohad Ben-Cohen <ohad@wizery.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-pm-bounces@lists.linux-foundation.org>
+In-Reply-To: <201012221329.40251.rjw@sisk.pl> (Rafael J. Wysocki's message of
+	"Wed, 22 Dec 2010 13:29:40 +0100")
+List-Unsubscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
+	<mailto:linux-pm-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linux-foundation.org/pipermail/linux-pm>
+List-Post: <mailto:linux-pm@lists.linux-foundation.org>
+List-Help: <mailto:linux-pm-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
+	<mailto:linux-pm-request@lists.linux-foundation.org?subject=subscribe>
+Sender: linux-pm-bounces@lists.linux-foundation.org
+Errors-To: linux-pm-bounces@lists.linux-foundation.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, Ido Yariv <ido@wizery.com>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>
 List-Id: linux-mmc@vger.kernel.org
 
-2011/1/26 Linus Walleij <linus.walleij@linaro.org>:
-> 2011/1/25 Tardy, Pierre <pierre.tardy@intel.com>:
+"Rafael J. Wysocki" <rjw@sisk.pl> writes:
 
->> @@ -1231,6 +1233,27 @@ static void sdhci_set_ios(struct mmc_host *mm=
-c, struct mmc_ios *ios)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto out;
->>
->> =A0 =A0 =A0 =A0/*
->> + =A0 =A0 =A0 =A0* get/put runtime_pm usage counter at ios->clock tr=
-ansitions
->> + =A0 =A0 =A0 =A0* We need to do it before any other chip access, as=
- sdhci could
->> + =A0 =A0 =A0 =A0* be power gated
->> + =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 lastclock =3D host->iosclock;
->> + =A0 =A0 =A0 host->iosclock =3D ios->clock;
->> + =A0 =A0 =A0 if (lastclock =3D=3D 0 && ios->clock !=3D 0) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_unlock_irqrestore(&host->lock, fl=
-ags);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_get_sync(host->mmc->parent)=
-;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irqsave(&host->lock, flags);
->> + =A0 =A0 =A0 } else if (lastclock !=3D 0 && ios->clock =3D=3D 0) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_unlock_irqrestore(&host->lock, fl=
-ags);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_mark_last_busy(host->mmc->p=
-arent);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_put_autosuspend(host->mmc->=
-parent);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irqsave(&host->lock, flags);
->> + =A0 =A0 =A0 }
->> + =A0 =A0 =A0 /* no need to configure the rest.. */
->> + =A0 =A0 =A0 if (host->iosclock =3D=3D 0)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
->> +
->> + =A0 =A0 =A0 /*
->> =A0 =A0 =A0 =A0 * Reset the chip on each power off.
->> =A0 =A0 =A0 =A0 * Should clear out any weird states.
->> =A0 =A0 =A0 =A0 */
+> On Wednesday, December 22, 2010, Alan Stern wrote:
+>> On Tue, 21 Dec 2010, Rafael J. Wysocki wrote:
+>> 
+>> > It basically goes like this.  There's device A that is only resumed when it's
+>> > needed to carry out an operation and is suspended immediately after that.
+>> > There's another device B that needs A to do something during its suspend.
+>> > So, when the suspend of B is started, A is woken up, does its work and is
+>> > suspended again (using pm_runtime_suspend()).  Then B is suspended.
+>> > 
+>> > We currently require that ->suspend() and ->resume() callbacks be defined
+>> > for A (presumably pointing to the same code as its runtime callbacks) so that
+>> > things work correctly, but perhaps we can just relax this requirement a bit?
+>> > I'm not 100% sure that's a good idea, just considering it.
+>> 
+>> I still don't know.  It would require a lot of special conditions: no
+>> child devices, not runtime-PM-disabled, not runtime-PM-forbidden...  
+>> Also, A's parent would have to be coded carefully; otherwise A's
+>> runtime resume would prevent the parent from suspending.
+>> 
+>> This just doesn't fit very well with the runtime PM model, or at least, 
+>> not in the form you described.
+>> 
+>> Consider this instead:  Since A is required to be functional before B
+>> can be used, A must be registered before B and hence B gets suspended
+>> before A.  Therefore during the prepare phase we can runtime-resume A
+>> and leave it powered up; when B needs to suspend, it won't matter that
+>> the runtime-PM calls are ineffective.
 >
-> Aha I get it. So it uses the freq shift from the existing clock gate
-> code to hint rpm, that's actually how I envisioned that this would
-> work for this case.
+> We don't really need to do that, because the runtime resume _is_ functional
+> during system suspend.  The only thing missing is a ->suspend() callback for A
+> (and a corresponding ->resume() callback to make sure A will be available to
+> B during system resume).
 >
-> Now I really started liking this patch.
-> Acked-by: Linus Walleij <linus.walleij@stericsson.com>
 
-Which shall be interpreted as for the patch with the above code, not
-the one which is subject for this post I believe.
+OK, I'm finally back to debugging this problem and looking for a final
+solution.
 
-Pierre, I can't locate your patches for some reason, care to repost
-them?
+I agree that what is needed is ->suspend() and ->resume() callbacks for
+A, but the question remains how to implement them.
 
-Yours,
-Linus Walleij
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+In my case, A doesn't need runtime callbacks, but *does* require that
+the subsystem callbacks are called because the subsystem actually does
+all the real PM work.  On OMAP, the device PM code (clock mgmt, device
+low-power states, etc.) is common for all on-chip devices, so is handled
+in common code at the subsystem level (in this case, platform_bus.)
+
+Therefore, what is ideally needed is the ability for A's suspend to
+simply call pm_runtime_suspend() so the subsystem can do the work.
+However, since runtime transitions are locked out by this time, that
+doesn't work.  IOW, what is needed is a way for a system suspend to say
+"please finish the runtime suspend that was already requested."
+
+What I've done to work around this in driver A is to manually check
+pm_runtime_suspended() and directly call the subsystem's runtime
+suspend/resume (patch below[1].  NOTE, I've used the _noirq methods to
+ensure device A is available when device B needs it.)
+
+While this works, I'm not crazy about it since it requires the driver
+know about the subsystem (in this case the bus) where the real PM work
+is done.  IMO, it would be much more intuitive (and readable) if the
+driver's suspend hooks could simply trigger a runtime suspend (either a
+new one, or one already requested.)
+
+FWIW, another hack that I've experimented with is just to just re-enable
+runtime transitions by doing a pm_runtime_put_sync() in the
+suspend_noirq method and a pm_runtime_get_noresume() in the resume_noirq
+method.  This allows driver A to suspend since it has already requested
+runtime, but I don't expect this second approach to be popluar. :) This
+second approach also doen't address system suspend/resume when the user
+has disabled runtime PM via /sys/devices/.../power/control.
+
+Kevin
+
+[1]
+diff --git a/drivers/i2c/busses/i2c-omap.c b/drivers/i2c/busses/i2c-omap.c
+index b605ff3..a4bc15a 100644
+--- a/drivers/i2c/busses/i2c-omap.c
++++ b/drivers/i2c/busses/i2c-omap.c
+@@ -1137,12 +1137,40 @@ omap_i2c_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_SUSPEND
++static int omap_i2c_suspend(struct device *dev)
++{
++	if (!pm_runtime_suspended(dev))
++		if (dev->bus && dev->bus->pm && dev->bus->pm->runtime_suspend)
++			dev->bus->pm->runtime_suspend(dev);
++
++	return 0;
++}
++
++static int omap_i2c_resume(struct device *dev)
++{
++	if (!pm_runtime_suspended(dev))
++		if (dev->bus && dev->bus->pm && dev->bus->pm->runtime_resume)
++			dev->bus->pm->runtime_resume(dev);
++
++	return 0;
++}
++
++static struct dev_pm_ops omap_i2c_pm_ops = {
++	.suspend_noirq = omap_i2c_suspend,
++	.resume_noirq = omap_i2c_resume,
++};
++#else
++#define omap_i2c_pm_ops NULL
++#endif
++
+ static struct platform_driver omap_i2c_driver = {
+ 	.probe		= omap_i2c_probe,
+ 	.remove		= omap_i2c_remove,
+ 	.driver		= {
+ 		.name	= "omap_i2c",
+ 		.owner	= THIS_MODULE,
++		.pm     = &omap_i2c_pm_ops,
+ 	},
+ };
+ 
