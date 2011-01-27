@@ -1,42 +1,49 @@
-From: Vitaly Wool <vitalywool-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Kevin Hilman <khilman@ti.com>
 Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Thu, 27 Jan 2011 19:20:10 +0100
-Message-ID: <AANLkTikH0aHQNzShAYQfPLPg4C_0HS_pWEqbJJ4aHZgm@mail.gmail.com>
+Date: Thu, 27 Jan 2011 10:54:19 -0800
+Message-ID: <87bp32npno.fsf@ti.com>
 References: <Pine.LNX.4.44L0.1012212032590.11252-100000@netrider.rowland.org>
-	<201012221329.40251.rjw@sisk.pl>
-	<87k4hrtfcb.fsf@ti.com>
+	<201012221329.40251.rjw@sisk.pl> <87k4hrtfcb.fsf@ti.com>
+	<AANLkTikH0aHQNzShAYQfPLPg4C_0HS_pWEqbJJ4aHZgm@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87k4hrtfcb.fsf-l0cyMroinI0@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kevin Hilman <khilman-l0cyMroinI0@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:33037 "EHLO
+	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751953Ab1A0SyY convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jan 2011 13:54:24 -0500
+In-Reply-To: <AANLkTikH0aHQNzShAYQfPLPg4C_0HS_pWEqbJJ4aHZgm@mail.gmail.com>
+	(Vitaly Wool's message of "Thu, 27 Jan 2011 19:20:10 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Vitaly Wool <vitalywool@gmail.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, Ido Yariv <ido@wizery.com>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>
 
-Hi Kevin,
+Vitaly Wool <vitalywool@gmail.com> writes:
 
-> Therefore, what is ideally needed is the ability for A's suspend to
-> simply call pm_runtime_suspend() so the subsystem can do the work.
-> However, since runtime transitions are locked out by this time, that
-> doesn't work. =A0IOW, what is needed is a way for a system suspend to=
- say
-> "please finish the runtime suspend that was already requested."
+> Hi Kevin,
 >
-> What I've done to work around this in driver A is to manually check
-> pm_runtime_suspended() and directly call the subsystem's runtime
-> suspend/resume (patch below[1]. =A0NOTE, I've used the _noirq methods=
- to
-> ensure device A is available when device B needs it.)
+>> Therefore, what is ideally needed is the ability for A's suspend to
+>> simply call pm_runtime_suspend() so the subsystem can do the work.
+>> However, since runtime transitions are locked out by this time, that
+>> doesn't work. =C2=A0IOW, what is needed is a way for a system suspen=
+d to say
+>> "please finish the runtime suspend that was already requested."
+>>
+>> What I've done to work around this in driver A is to manually check
+>> pm_runtime_suspended() and directly call the subsystem's runtime
+>> suspend/resume (patch below[1]. =C2=A0NOTE, I've used the _noirq met=
+hods to
+>> ensure device A is available when device B needs it.)
+>
+> suppose this driver runs on a platform that has runtime PM disabled.
+> How is it going to work then?
+>
 
-suppose this driver runs on a platform that has runtime PM disabled.
-How is it going to work then?
+Then pm_runtime_suspended() will be false, and the bus methods will
+suspend the device.
 
-Thanks,
-   Vitaly
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireles=
-s" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kevin
+
