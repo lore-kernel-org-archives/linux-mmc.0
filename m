@@ -1,146 +1,58 @@
-From: Kevin Hilman <khilman@ti.com>
-Subject: Re: subtle pm_runtime_put_sync race and sdio functions
-Date: Wed, 26 Jan 2011 15:28:20 -0800
-Message-ID: <87k4hrtfcb.fsf@ti.com>
-References: <Pine.LNX.4.44L0.1012212032590.11252-100000@netrider.rowland.org>
-	<201012221329.40251.rjw@sisk.pl>
+From: Chris Ball <cjb@laptop.org>
+Subject: MMC fixes for 2.6.38-rc3
+Date: Wed, 26 Jan 2011 20:00:11 -0500
+Message-ID: <m3lj27i2jo.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-pm-bounces@lists.linux-foundation.org>
-In-Reply-To: <201012221329.40251.rjw@sisk.pl> (Rafael J. Wysocki's message of
-	"Wed, 22 Dec 2010 13:29:40 +0100")
-List-Unsubscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
-	<mailto:linux-pm-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linux-foundation.org/pipermail/linux-pm>
-List-Post: <mailto:linux-pm@lists.linux-foundation.org>
-List-Help: <mailto:linux-pm-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linux-foundation.org/mailman/listinfo/linux-pm>,
-	<mailto:linux-pm-request@lists.linux-foundation.org?subject=subscribe>
-Sender: linux-pm-bounces@lists.linux-foundation.org
-Errors-To: linux-pm-bounces@lists.linux-foundation.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, Ido Yariv <ido@wizery.com>, linux-pm@lists.linux-foundation.org, Johannes Berg <johannes@sipsolutions.net>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:46444 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752504Ab1A0A4d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 26 Jan 2011 19:56:33 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-"Rafael J. Wysocki" <rjw@sisk.pl> writes:
+Hi Linus,
 
-> On Wednesday, December 22, 2010, Alan Stern wrote:
->> On Tue, 21 Dec 2010, Rafael J. Wysocki wrote:
->> 
->> > It basically goes like this.  There's device A that is only resumed when it's
->> > needed to carry out an operation and is suspended immediately after that.
->> > There's another device B that needs A to do something during its suspend.
->> > So, when the suspend of B is started, A is woken up, does its work and is
->> > suspended again (using pm_runtime_suspend()).  Then B is suspended.
->> > 
->> > We currently require that ->suspend() and ->resume() callbacks be defined
->> > for A (presumably pointing to the same code as its runtime callbacks) so that
->> > things work correctly, but perhaps we can just relax this requirement a bit?
->> > I'm not 100% sure that's a good idea, just considering it.
->> 
->> I still don't know.  It would require a lot of special conditions: no
->> child devices, not runtime-PM-disabled, not runtime-PM-forbidden...  
->> Also, A's parent would have to be coded carefully; otherwise A's
->> runtime resume would prevent the parent from suspending.
->> 
->> This just doesn't fit very well with the runtime PM model, or at least, 
->> not in the form you described.
->> 
->> Consider this instead:  Since A is required to be functional before B
->> can be used, A must be registered before B and hence B gets suspended
->> before A.  Therefore during the prepare phase we can runtime-resume A
->> and leave it powered up; when B needs to suspend, it won't matter that
->> the runtime-PM calls are ineffective.
->
-> We don't really need to do that, because the runtime resume _is_ functional
-> during system suspend.  The only thing missing is a ->suspend() callback for A
-> (and a corresponding ->resume() callback to make sure A will be available to
-> B during system resume).
->
+Please pull from:
 
-OK, I'm finally back to debugging this problem and looking for a final
-solution.
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
-I agree that what is needed is ->suspend() and ->resume() callbacks for
-A, but the question remains how to implement them.
+for five small fixes to MMC host controller drivers.  These have been
+tested in linux-next.  Thanks.
 
-In my case, A doesn't need runtime callbacks, but *does* require that
-the subsystem callbacks are called because the subsystem actually does
-all the real PM work.  On OMAP, the device PM code (clock mgmt, device
-low-power states, etc.) is common for all on-chip devices, so is handled
-in common code at the subsystem level (in this case, platform_bus.)
+The following changes since commit 6663050edd9c2e8b1e1f55c09459144d84c045f0:
 
-Therefore, what is ideally needed is the ability for A's suspend to
-simply call pm_runtime_suspend() so the subsystem can do the work.
-However, since runtime transitions are locked out by this time, that
-doesn't work.  IOW, what is needed is a way for a system suspend to say
-"please finish the runtime suspend that was already requested."
+  Merge branch 'fixes' of master.kernel.org:/home/rmk/linux-2.6-arm (2011-01-26 09:04:18 +1000)
 
-What I've done to work around this in driver A is to manually check
-pm_runtime_suspended() and directly call the subsystem's runtime
-suspend/resume (patch below[1].  NOTE, I've used the _noirq methods to
-ensure device A is available when device B needs it.)
+are available in the git repository at:
 
-While this works, I'm not crazy about it since it requires the driver
-know about the subsystem (in this case the bus) where the real PM work
-is done.  IMO, it would be much more intuitive (and readable) if the
-driver's suspend hooks could simply trigger a runtime suspend (either a
-new one, or one already requested.)
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
-FWIW, another hack that I've experimented with is just to just re-enable
-runtime transitions by doing a pm_runtime_put_sync() in the
-suspend_noirq method and a pm_runtime_get_noresume() in the resume_noirq
-method.  This allows driver A to suspend since it has already requested
-runtime, but I don't expect this second approach to be popluar. :) This
-second approach also doen't address system suspend/resume when the user
-has disabled runtime PM via /sys/devices/.../power/control.
+Jaehoon Chung (1):
+      mmc: sdhci-s3c: add platform_8bit_width() hook
 
-Kevin
+Jamie Iles (1):
+      mmc: jz4740: don't treat NULL clk as an error
 
-[1]
-diff --git a/drivers/i2c/busses/i2c-omap.c b/drivers/i2c/busses/i2c-omap.c
-index b605ff3..a4bc15a 100644
---- a/drivers/i2c/busses/i2c-omap.c
-+++ b/drivers/i2c/busses/i2c-omap.c
-@@ -1137,12 +1137,40 @@ omap_i2c_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_SUSPEND
-+static int omap_i2c_suspend(struct device *dev)
-+{
-+	if (!pm_runtime_suspended(dev))
-+		if (dev->bus && dev->bus->pm && dev->bus->pm->runtime_suspend)
-+			dev->bus->pm->runtime_suspend(dev);
-+
-+	return 0;
-+}
-+
-+static int omap_i2c_resume(struct device *dev)
-+{
-+	if (!pm_runtime_suspended(dev))
-+		if (dev->bus && dev->bus->pm && dev->bus->pm->runtime_resume)
-+			dev->bus->pm->runtime_resume(dev);
-+
-+	return 0;
-+}
-+
-+static struct dev_pm_ops omap_i2c_pm_ops = {
-+	.suspend_noirq = omap_i2c_suspend,
-+	.resume_noirq = omap_i2c_resume,
-+};
-+#else
-+#define omap_i2c_pm_ops NULL
-+#endif
-+
- static struct platform_driver omap_i2c_driver = {
- 	.probe		= omap_i2c_probe,
- 	.remove		= omap_i2c_remove,
- 	.driver		= {
- 		.name	= "omap_i2c",
- 		.owner	= THIS_MODULE,
-+		.pm     = &omap_i2c_pm_ops,
- 	},
- };
- 
+Jesper Juhl (1):
+      mmc: ushc: Remove duplicate include of usb.h
+
+Russell King - ARM Linux (1):
+      mmc: mmci: don't read command response when invalid
+
+Sonic Zhang (1):
+      mmc: bfin_sdh: fix alloc size for private data
+
+ drivers/mmc/host/bfin_sdh.c   |    2 +-
+ drivers/mmc/host/jz4740_mmc.c |    5 +++--
+ drivers/mmc/host/mmci.c       |   10 +++++-----
+ drivers/mmc/host/sdhci-s3c.c  |   36 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/ushc.c       |    1 -
+ 5 files changed, 45 insertions(+), 9 deletions(-)
+
+-- 
+Chris Ball   <cjb@laptop.org>
+One Laptop Per Child
