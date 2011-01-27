@@ -1,70 +1,67 @@
-From: Kevin Hilman <khilman-l0cyMroinI0@public.gmane.org>
-Subject: Re: [linux-pm] subtle pm_runtime_put_sync race and sdio functions
-Date: Thu, 27 Jan 2011 12:15:12 -0800
-Message-ID: <87tyguje7j.fsf@ti.com>
-References: <Pine.LNX.4.44L0.1101271439020.2090-100000@iolanthe.rowland.org>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH] sdhci: Do not hold spin_lock while waiting in set_ios
+Date: Thu, 27 Jan 2011 12:56:41 -0800
+Message-ID: <DACE2F62-BB3F-410D-82E5-295FB0890217@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <Pine.LNX.4.44L0.1101271439020.2090-100000-IYeN2dnnYyZXsRXLowluHWD2FQJk+8+b@public.gmane.org>
-	(Alan Stern's message of "Thu, 27 Jan 2011 14:49:01 -0500 (EST)")
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, linux-pm-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:58331 "EHLO
+	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752564Ab1A0U61 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jan 2011 15:58:27 -0500
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Mark Brown <markb@marvell.com>
 
-Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org> writes:
 
-> On Thu, 27 Jan 2011, Kevin Hilman wrote:
->
->> > Calling the runtime_suspend method directly is the way to do it.
->> >
->> 
->> Do you mean the driver's runtime_suspend method, or the subsystem's
->> runtime_suspend method?
->
-> The subsystem's.  If the driver has a runtime_suspend method then the 
-> subsystem's method will call it.
+holding the spin_lock with all interrupts disabled
+is not good form when doing mdelay.
+set_ios calls routines need to delay for power to
+stabalize or for chip issues when quirks are defined.
 
-Yes.  Thanks for the clarification.
+disable only our interupt and spin_lock on the chip
+instead of spin_lock with all interrupts disabled.
 
->> >> While this works, I'm not crazy about it since it requires the driver
->> >> know about the subsystem (in this case the bus) where the real PM work
->> >> is done.  IMO, it would be much more intuitive (and readable) if the
->> >> driver's suspend hooks could simply trigger a runtime suspend (either a
->> >> new one, or one already requested.)
->> >
->> > This isn't clear to me.  Isn't the driver registered on the bus in 
->> > question?  Can't the driver therefore call the bus's runtime_suspend 
->> > routine directly, instead of dereferencing the bus->pm->runtime_suspend 
->> > pointer?
->> 
->> Not sure what you mean by directly.  The platform_bus doesn't expose
->> its runtime PM methods since they can be customized at runtime, so they
->> have to be called via bus->pm.
->> 
->> Or do you mean using dev->driver instead of dev->bus?
->
-> You're doing all of this for OMAP, right?  What is the subsystem's
-> runtime_suspend routine?  Is it omap_pm_runtime_suspend()?
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+Signed-off-by: Mark F. Brown <markb@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
 
-Yes.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 627c8cf..49394a2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1205,12 +1205,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sdhci_host *host;
+-	unsigned long flags;
+ 	u8 ctrl;
+ 
+ 	host = mmc_priv(mmc);
+ 
+-	spin_lock_irqsave(&host->lock, flags);
++	disable_irq(host->irq);
++	spin_lock(&host->lock);
+ 
+ 	if (host->flags & SDHCI_DEVICE_DEAD)
+ 		goto out;
+@@ -1286,7 +1286,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ out:
+ 	mmiowb();
+-	spin_unlock_irqrestore(&host->lock, flags);
++	spin_unlock(&host->lock);
++	enable_irq(host->irq);
+ }
+ 
+ static int sdhci_get_ro(struct mmc_host *mmc)
+-- 
+1.7.0.4
 
-> If it is, then you can call omap_pm_runtime_suspend() directly instead
-> of calling dev->bus->pm->runtime_suspend().
 
-Personally, I prefer going through dev->bus as we try to avoid SoC
-specific calls in the driver.
-
-This same HW block might be re-used on non-OMAP SoCs (e.g. TI DaVinci)
-that would have different PM at the susbystem level.
-
-So, to summarize, as long as folks are OK with drivers directly calling
-the subsystem runtime PM callbacks, I'll go this route.
-
-Kevin
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
