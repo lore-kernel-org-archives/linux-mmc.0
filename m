@@ -1,58 +1,34 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: MMC fixes for 2.6.38-rc3
-Date: Wed, 26 Jan 2011 20:00:11 -0500
-Message-ID: <m3lj27i2jo.fsf@pullcord.laptop.org>
+From: "Tomoya MORINAGA" <tomoya-linux@dsn.okisemi.com>
+Subject: RE: A MMC card transfer issue
+Date: Thu, 27 Jan 2011 10:00:09 +0900
+Message-ID: <629816F753974155B62FF8FA718A26CA@hacdom.okisemi.com>
+References: <4CD8DE9C.4040505@dsn.okisemi.com> <AANLkTimfnj8GcSwmALjaZUBsiq6ssaVuzVZZsZHRYmiX@mail.gmail.com> <001701cb814c$71926bf0$66f8800a@maildom.okisemi.com> <001201cb90f4$4be8f790$66f8800a@maildom.okisemi.com> <2D50F985-2383-4406-8514-DFE462A5F546@marvell.com> <4D2E0464ABB54FFF9C10583336E27879@hacdom.okisemi.com> <4C4E7DE5-7CF1-4D97-9CAD-F600FCBE477A@marvell.com> <20110119174233.GA30494@void.printf.net> <F6E8C422FB8A4D78A5BDF7B6ECDA1E00@hacdom.okisemi.com> <D8E7AFC5-6B9E-414E-81A8-292FCD2F6E3C@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46444 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752504Ab1A0A4d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 26 Jan 2011 19:56:33 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <D8E7AFC5-6B9E-414E-81A8-292FCD2F6E3C@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: 'Philip Rakity' <prakity@marvell.com>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kmpark@infradead.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, andrew.chih.howe.khor@intel.com, kok.howg.ewe@intel.com
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Linus,
+Hi Philip,
 
-Please pull from:
+On Thursday, January 27, 2011 12:42 AM, Philip Rakity wrote:
+> Did you define the CAP for BUS WIDTH ? 
+> 
+> MMC_CAP_BUS_WIDTH_TEST 
+> 
+> in the driver or the platform driver ?
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+Let me make the above meaning clear.
 
-for five small fixes to MMC host controller drivers.  These have been
-tested in linux-next.  Thanks.
+I don't modify kernel source code "drivers/mmc" at all
+Is the above mean I must modify something kernel source code ?
 
-The following changes since commit 6663050edd9c2e8b1e1f55c09459144d84c045f0:
-
-  Merge branch 'fixes' of master.kernel.org:/home/rmk/linux-2.6-arm (2011-01-26 09:04:18 +1000)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-Jaehoon Chung (1):
-      mmc: sdhci-s3c: add platform_8bit_width() hook
-
-Jamie Iles (1):
-      mmc: jz4740: don't treat NULL clk as an error
-
-Jesper Juhl (1):
-      mmc: ushc: Remove duplicate include of usb.h
-
-Russell King - ARM Linux (1):
-      mmc: mmci: don't read command response when invalid
-
-Sonic Zhang (1):
-      mmc: bfin_sdh: fix alloc size for private data
-
- drivers/mmc/host/bfin_sdh.c   |    2 +-
- drivers/mmc/host/jz4740_mmc.c |    5 +++--
- drivers/mmc/host/mmci.c       |   10 +++++-----
- drivers/mmc/host/sdhci-s3c.c  |   36 ++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/ushc.c       |    1 -
- 5 files changed, 45 insertions(+), 9 deletions(-)
-
--- 
-Chris Ball   <cjb@laptop.org>
-One Laptop Per Child
+Thanks,
+-----------------------------------------
+Tomoya MORINAGA
+OKI SEMICONDUCTOR CO., LTD.
