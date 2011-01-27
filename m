@@ -1,66 +1,58 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] MMCI: don't read command response when invalid
-Date: Thu, 27 Jan 2011 12:19:01 +0000
-Message-ID: <20110127121901.GB25968@n2100.arm.linux.org.uk>
-References: <20110111163502.GJ11039@n2100.arm.linux.org.uk> <20110111163556.GA18746@n2100.arm.linux.org.uk> <20110111232025.GA25752@void.printf.net>
+From: "Tardy, Pierre" <pierre.tardy@intel.com>
+Subject: RE: [PATCH v1 1/3]mmc: implemented runtime pm for mmc host
+Date: Thu, 27 Jan 2011 14:06:25 +0000
+Message-ID: <8250E4885F9967469CAC3FB5CBA2CE69934EFAA028@irsmsx501.ger.corp.intel.com>
+References: <20110114082310.GB27523@intel.com>
+	<8250E4885F9967469CAC3FB5CBA2CE69934E7AA2FE@irsmsx501.ger.corp.intel.com>
+	<5D8008F58939784290FAB48F54975198351D4FA654@shsmsx502.ccr.corp.intel.com>
+	<8250E4885F9967469CAC3FB5CBA2CE69934E7AAB20@irsmsx501.ger.corp.intel.com>
+	<5D8008F58939784290FAB48F5497519835247E72AD@shsmsx502.ccr.corp.intel.com>
+	<8250E4885F9967469CAC3FB5CBA2CE69934E7AACCC@irsmsx501.ger.corp.intel.com>
+	<20110120050803.GA5732@void.printf.net>
+	<AANLkTimZyv9f5b5VxmmYyO3qPrb9Y25-=yUV_GYma3e_@mail.gmail.com>
+	<8250E4885F9967469CAC3FB5CBA2CE69934EFA98B2@irsmsx501.ger.corp.intel.com>
+	<AANLkTi=KKfxTRzW1iyLKjM0Ho6x7kYpwGwx7F-gD4EaM@mail.gmail.com>
+ <AANLkTikXsaU+6rDByji4jsSP4==cvUCBvSxuXug6UmBD@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:46080 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752213Ab1A0MWO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jan 2011 07:22:14 -0500
-Content-Disposition: inline
-In-Reply-To: <20110111232025.GA25752@void.printf.net>
+Received: from mga14.intel.com ([143.182.124.37]:43011 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752677Ab1A0OHR convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jan 2011 09:07:17 -0500
+In-Reply-To: <AANLkTikXsaU+6rDByji4jsSP4==cvUCBvSxuXug6UmBD@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ohad Ben-Cohen <ohad@wizery.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>
 
-On Tue, Jan 11, 2011 at 11:20:26PM +0000, Chris Ball wrote:
-> Hi,
+[snip]
+> >
+> > Now I really started liking this patch.
+> > Acked-by: Linus Walleij <linus.walleij@stericsson.com>
 > 
-> On Tue, Jan 11, 2011 at 04:35:56PM +0000, Russell King - ARM Linux wrote:
-> > Don't read the command response from the registers when either the
-> > command timed out (because there was no response from the card) or
-> > the checksum on the response was invalid.
-> > 
-> > Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
-> > ---
-> >  drivers/mmc/host/mmci.c |   10 +++++-----
-> >  1 file changed, 5 insertions(+), 5 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> > index 5630228..040de4f 100644
-> > --- a/drivers/mmc/host/mmci.c
-> > +++ b/drivers/mmc/host/mmci.c
-> > @@ -394,15 +394,15 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
-> >  
-> >  	host->cmd = NULL;
-> >  
-> > -	cmd->resp[0] = readl(base + MMCIRESPONSE0);
-> > -	cmd->resp[1] = readl(base + MMCIRESPONSE1);
-> > -	cmd->resp[2] = readl(base + MMCIRESPONSE2);
-> > -	cmd->resp[3] = readl(base + MMCIRESPONSE3);
-> > -
-> >  	if (status & MCI_CMDTIMEOUT) {
-> >  		cmd->error = -ETIMEDOUT;
-> >  	} else if (status & MCI_CMDCRCFAIL && cmd->flags & MMC_RSP_CRC) {
-> >  		cmd->error = -EILSEQ;
-> > +	} else {
-> > +		cmd->resp[0] = readl(base + MMCIRESPONSE0);
-> > +		cmd->resp[1] = readl(base + MMCIRESPONSE1);
-> > +		cmd->resp[2] = readl(base + MMCIRESPONSE2);
-> > +		cmd->resp[3] = readl(base + MMCIRESPONSE3);
-> >  	}
-> >  
-> >  	if (!cmd->data || cmd->error) {
+> Which shall be interpreted as for the patch with the above code, not
+> the one which is subject for this post I believe.
 > 
-> Thanks, pushed to mmc-next and queued as a .38 fix.
+> Pierre, I can't locate your patches for some reason, care to repost
+> them?
+https://patchwork.kernel.org/patch/427151/
 
-FYI, I've now merged this into the ARM devel tree for the time being so
-it doesn't get forgotten - which means it'll appear in linux-next at some
-point if it isn't already there.  (Mainly so I don't have to keep on
-adding the patch.)
+I have newer version of them, which actually works (this one was just RFC)
+I'll post it later in the week.
 
-Once you push it into mainline, I'll drop my copy.
+Pierre
+---------------------------------------------------------------------
+Intel Corporation SAS (French simplified joint stock company)
+Registered headquarters: "Les Montalets"- 2, rue de Paris, 
+92196 Meudon Cedex, France
+Registration Number:  302 456 199 R.C.S. NANTERRE
+Capital: 4,572,000 Euros
+
+This e-mail and any attachments may contain confidential material for
+the sole use of the intended recipient(s). Any review or distribution
+by others is strictly prohibited. If you are not the intended
+recipient, please contact the sender and delete all copies.
+
