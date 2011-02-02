@@ -1,51 +1,53 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: Setting MMC_CAP_POWER_OFF_CARD on mmc2 leads to filesystem
- problems on mmc1
-Date: Wed, 2 Feb 2011 10:01:34 +0200
-Message-ID: <AANLkTik_pkpe=d4QyLdVmtbvGKTk+k1beRrzKXyeMAND@mail.gmail.com>
-References: <E6C3A477-63F7-4BA0-8E6B-A35A53B3AEA1@dominion.thruhere.net>
- <1295621342.1925.139.camel@pimenta> <AANLkTi=H2rJkbZnuuS7jfrXE6WunzhTYKGk+ZFPjOivp@mail.gmail.com>
- <EC9B76BF-F0F4-4F8C-9C6D-5CE311B2785C@dominion.thruhere.net>
- <AANLkTi=xPhi1Bho-8qhRup=fG02ybNzipq7Z-iQrqT1B@mail.gmail.com> <20110202001155.GO3358@atomide.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20110202001155.GO3358@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Koen Kooi <koen@dominion.thruhere.net>, l-o List <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "cjb@laptop.org" <cjb@laptop.org>, Luciano Coelho <coelho@ti.com>
+From: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Subject: [PATCH 0/5] OMAP: HSMMC: hwmod adaptation
+Date: Wed,  2 Feb 2011 20:57:37 +0530
+Message-ID: <1296660462-28489-1-git-send-email-kishore.kadiyala@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from devils.ext.ti.com ([198.47.26.153]:40255 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752892Ab1BBPVp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2011 10:21:45 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, paul@pwsan.com, Kishore Kadiyala <kishore.kadiyala@ti.com>
 
-On Wed, Feb 2, 2011 at 2:11 AM, Tony Lindgren <tony@atomide.com> wrote:
-> * Ohad Ben-Cohen <ohad@wizery.com> [110122 07:47]:
->> On Sat, Jan 22, 2011 at 5:30 PM, Koen Kooi <koen@dominion.thruhere.n=
-et> wrote:
->> > That was indeed the problem, not I get:
->> >
->> > [ =A0 35.417053] wl1271: firmware booted (Rev 6.1.0.0.343)
->> >
->> > and
->> >
->> > root@beagleboard-xm-next:~# ifconfig wlan0 hw eth 00:11:22:33:44:5=
-5
->> > root@beagleboard-xm-next:~# iwlist wlan0 scanning | grep ESSID | w=
-c -l
->> > 13
->> >
->> > That get's me a lot further!
->>
->> Cool !
->
-> Hmm, do we need to still patch something for the -rc cycle for this?
+Adding hwmod data for hsmmc device on OMAP2420/OMAP2430/OMAP3/OMAP4.
+Adapting the omap_hsmmc driver to hwmod framework.
 
-I don't think so; the problem wasn't in the existing mainline code,
-but in the new functionality developed (adding support for the
-beagletoy expansion board), so this is not -rc material.
+The patch series is based on v2.6.38-rc3 and tested on OMAP4430SDP & 
+OMAP3430SDP.
 
-Thanks
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Testing pending on OMAP2420SDP & OMAP2430SDP since mmc/sd cards are not getting
+detected. Currently omap2_hsmmc_init call is missing in the board files, but 
+updating it is not helping though.
+Investigation is under progress and any pointers on working version of MMC/SD on
+OMAP2420/2430 SDP would be helpful.
+
+
+Kishore Kadiyala (2):
+  OMAP2420: hwmod data: Add HSMMC
+  OMAP: devices: Modify HSMMC device to adapt to hwmod framework
+
+Paul Walmsley (2):
+  OMAP2430: hwmod data: Add HSMMC
+  OMAP3: hwmod data: Add HSMMC
+  
+Benoit Cousson (1):  
+  OMAP4: hwmod data: Add HSMMC
+
+ arch/arm/mach-omap1/devices.c              |   41 ++++
+ arch/arm/mach-omap2/board-n8x0.c           |    6 +-
+ arch/arm/mach-omap2/devices.c              |  207 ++++-------------
+ arch/arm/mach-omap2/hsmmc.c                |    6 +-
+ arch/arm/mach-omap2/omap_hwmod_2420_data.c |   88 +++++++
+ arch/arm/mach-omap2/omap_hwmod_2430_data.c |  155 +++++++++++++
+ arch/arm/mach-omap2/omap_hwmod_3xxx_data.c |  221 ++++++++++++++++++
+ arch/arm/mach-omap2/omap_hwmod_44xx_data.c |  339 ++++++++++++++++++++++++++++
+ arch/arm/mach-omap2/prcm-common.h          |    2 +
+ arch/arm/mach-omap2/prm-regbits-34xx.h     |    4 +
+ arch/arm/plat-omap/devices.c               |   50 ----
+ arch/arm/plat-omap/include/plat/mmc.h      |   43 ++---
+ drivers/mmc/host/omap_hsmmc.c              |    4 +-
+ 13 files changed, 916 insertions(+), 250 deletions(-)
+
