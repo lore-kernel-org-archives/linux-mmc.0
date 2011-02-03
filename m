@@ -1,59 +1,47 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: Setting MMC_CAP_POWER_OFF_CARD on mmc2 leads to filesystem
- problems on mmc1
-Date: Wed, 2 Feb 2011 17:08:49 -0800
-Message-ID: <20110203010849.GK3322@atomide.com>
-References: <E6C3A477-63F7-4BA0-8E6B-A35A53B3AEA1@dominion.thruhere.net>
- <1295621342.1925.139.camel@pimenta>
- <AANLkTi=H2rJkbZnuuS7jfrXE6WunzhTYKGk+ZFPjOivp@mail.gmail.com>
- <EC9B76BF-F0F4-4F8C-9C6D-5CE311B2785C@dominion.thruhere.net>
- <AANLkTi=xPhi1Bho-8qhRup=fG02ybNzipq7Z-iQrqT1B@mail.gmail.com>
- <20110202001155.GO3358@atomide.com>
- <AANLkTik_pkpe=d4QyLdVmtbvGKTk+k1beRrzKXyeMAND@mail.gmail.com>
+From: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
+Subject: Re: [PATCH 0/4] omap4: hsmmc: Adding ADMA support
+Date: Thu, 3 Feb 2011 11:44:28 +0530
+Message-ID: <AANLkTi=8LGDj91uU6_VM+5aWaWW4i6G=XPet294Nt-MF@mail.gmail.com>
+References: <1295371591-13610-1-git-send-email-kishore.kadiyala@ti.com> <20110120174226.GX4957@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:19643 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750930Ab1BCBI7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2011 20:08:59 -0500
-Content-Disposition: inline
-In-Reply-To: <AANLkTik_pkpe=d4QyLdVmtbvGKTk+k1beRrzKXyeMAND@mail.gmail.com>
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:42811 "EHLO
+	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751982Ab1BCGOt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Feb 2011 01:14:49 -0500
+In-Reply-To: <20110120174226.GX4957@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: Koen Kooi <koen@dominion.thruhere.net>, l-o List <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "cjb@laptop.org" <cjb@laptop.org>, Luciano Coelho <coelho@ti.com>
+To: Tony Lindgren <tony@atomide.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, madhu.cr@ti.com
 
-* Ohad Ben-Cohen <ohad@wizery.com> [110202 00:00]:
-> On Wed, Feb 2, 2011 at 2:11 AM, Tony Lindgren <tony@atomide.com> wrot=
-e:
-> > * Ohad Ben-Cohen <ohad@wizery.com> [110122 07:47]:
-> >> On Sat, Jan 22, 2011 at 5:30 PM, Koen Kooi <koen@dominion.thruhere=
-=2Enet> wrote:
-> >> > That was indeed the problem, not I get:
-> >> >
-> >> > [ =C2=A0 35.417053] wl1271: firmware booted (Rev 6.1.0.0.343)
-> >> >
-> >> > and
-> >> >
-> >> > root@beagleboard-xm-next:~# ifconfig wlan0 hw eth 00:11:22:33:44=
-:55
-> >> > root@beagleboard-xm-next:~# iwlist wlan0 scanning | grep ESSID |=
- wc -l
-> >> > 13
-> >> >
-> >> > That get's me a lot further!
-> >>
-> >> Cool !
-> >
-> > Hmm, do we need to still patch something for the -rc cycle for this=
-?
->=20
-> I don't think so; the problem wasn't in the existing mainline code,
-> but in the new functionality developed (adding support for the
-> beagletoy expansion board), so this is not -rc material.
+Tony,
 
-OK thanks.
+On Thu, Jan 20, 2011 at 11:12 PM, Tony Lindgren <tony@atomide.com> wrote:
+> * Kishore Kadiyala <kishore.kadiyala@ti.com> [110118 09:19]:
+>> This patch series adds support for ADMA on MMC1 & MMC2 controllers on OMAP4.
+>> There is no performance improvement observed using ADMA over SDMA.
+>> Advantage using ADMA could be reducing contention over SDMA.
+>> Also the series includes some cleanup.
+>
+> To me it seems that the only sane way to deal with multiple different
+> DMA enginges is to implement them all with drivers/dma/dmaengine.c.
+> Otherwise we'll end up with multiple custom ADMA implementations in
+> each driver. We need to also make SDMA use the dmaengine code.
+>
+> If the current dmaengine code does not support this, we need to
+> improve it to deal with cases like these.
 
-Tony
+Ok, I will check the feasibility of implementing ADMA through dmaengine .
+
+
+-- 
+Regards,
+Kishore
+
+>
+> Regards,
+>
+> Tony
+>
