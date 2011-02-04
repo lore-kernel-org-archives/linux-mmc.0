@@ -1,31 +1,44 @@
-From: Pierre Tardy <tardyp@gmail.com>
-Subject: Re: [PATCH] sdhci: support setting f_max clock via call back
-Date: Thu, 3 Feb 2011 10:38:29 +0100
-Message-ID: <AANLkTinqCuNbgY2Bdv=+PZ1Z5ZQKyAD_kZ6LDnqBYB8s@mail.gmail.com>
-References: <Acu5oWH1/duaLDmRR3W+IiEqXu/fAA==>
-	<EFB42CB6-2B1D-4A01-851D-1EE27E35D021@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH] tmio_mmc: Improve readability of the output of pr_debug_status()
+Date: Fri,  4 Feb 2011 17:33:07 +0900
+Message-ID: <1296808387-21935-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:38699 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755856Ab1BCJia (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Feb 2011 04:38:30 -0500
-Received: by qwa26 with SMTP id 26so783248qwa.19
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Feb 2011 01:38:29 -0800 (PST)
-In-Reply-To: <EFB42CB6-2B1D-4A01-851D-1EE27E35D021@marvell.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:44275 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752429Ab1BDIdX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Feb 2011 03:33:23 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Simon Horman <horms@verge.net.au>
 
-Hi Philip,
-Obviously, your patches about sdhci clock gating are interressing me.
+Signed-off-by: Simon Horman <horms@verge.net.au>
+---
+ drivers/mmc/host/tmio_mmc.h |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
 
-However, I'm a bit lost them not being numbered.
-Would you care a resend with patch numbering (i.e. [PATCH 1/9]) , and
-a cover letter [PATCH 0/9]?
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 6f724de..811427d 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -237,12 +237,16 @@ static inline void tmio_mmc_kunmap_atomic(void *virt,
+ 
+ #define STATUS_TO_TEXT(a) \
+ 	do { \
+-		if (status & TMIO_STAT_##a) \
++		if (status & TMIO_STAT_##a) { \
++			if (i++) \
++				printk("|"); \
+ 			printk(#a); \
++		} \
+ 	} while (0)
+ 
+ void pr_debug_status(u32 status)
+ {
++	int i = 0;
+ 	printk(KERN_DEBUG "status: %08x = ", status);
+ 	STATUS_TO_TEXT(CARD_REMOVE);
+ 	STATUS_TO_TEXT(CARD_INSERT);
+-- 
+1.7.2.3
 
-
-Thanks,
-Pierre
