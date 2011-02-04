@@ -1,12 +1,12 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH] [patch v2] tmio_mmc: Improve readability of the output of pr_debug_status()
-Date: Sat,  5 Feb 2011 06:44:48 +0900
-Message-ID: <1296855888-1535-1-git-send-email-horms@verge.net.au>
+Subject: [PATCH] [patch v3] tmio_mmc: Improve readability of the output of pr_debug_status()
+Date: Sat,  5 Feb 2011 06:47:56 +0900
+Message-ID: <1296856076-2387-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:37156 "EHLO
+Received: from kirsty.vergenet.net ([202.4.237.240]:37175 "EHLO
 	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752474Ab1BDVpE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Feb 2011 16:45:04 -0500
+	with ESMTP id S1751222Ab1BDVsC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Feb 2011 16:48:02 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
@@ -20,22 +20,28 @@ Signed-off-by: Simon Horman <horms@verge.net.au>
 v2: As suggested by Guennadi Liakhovetski
 * Pass status and i as parameters to STATUS_TO_TEXT
 * Pad "|" with spaces to further improve readability
+
+v3: Actually include the v2 changes
+* My git-foo bites again
 ---
- drivers/mmc/host/tmio_mmc.h |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
+ drivers/mmc/host/tmio_mmc.h |   50 +++++++++++++++++++++++-------------------
+ 1 files changed, 27 insertions(+), 23 deletions(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 6f724de..811427d 100644
+index 6f724de..ddf79b0 100644
 --- a/drivers/mmc/host/tmio_mmc.h
 +++ b/drivers/mmc/host/tmio_mmc.h
-@@ -237,12 +237,16 @@ static inline void tmio_mmc_kunmap_atomic(void *virt,
+@@ -235,36 +235,40 @@ static inline void tmio_mmc_kunmap_atomic(void *virt,
  
- #define STATUS_TO_TEXT(a) \
+ #ifdef CONFIG_MMC_DEBUG
+ 
+-#define STATUS_TO_TEXT(a) \
++#define STATUS_TO_TEXT(a, status, i) \
  	do { \
 -		if (status & TMIO_STAT_##a) \
 +		if (status & TMIO_STAT_##a) { \
 +			if (i++) \
-+				printk("|"); \
++				printk(" | "); \
  			printk(#a); \
 +		} \
  	} while (0)
@@ -44,8 +50,51 @@ index 6f724de..811427d 100644
  {
 +	int i = 0;
  	printk(KERN_DEBUG "status: %08x = ", status);
- 	STATUS_TO_TEXT(CARD_REMOVE);
- 	STATUS_TO_TEXT(CARD_INSERT);
+-	STATUS_TO_TEXT(CARD_REMOVE);
+-	STATUS_TO_TEXT(CARD_INSERT);
+-	STATUS_TO_TEXT(SIGSTATE);
+-	STATUS_TO_TEXT(WRPROTECT);
+-	STATUS_TO_TEXT(CARD_REMOVE_A);
+-	STATUS_TO_TEXT(CARD_INSERT_A);
+-	STATUS_TO_TEXT(SIGSTATE_A);
+-	STATUS_TO_TEXT(CMD_IDX_ERR);
+-	STATUS_TO_TEXT(STOPBIT_ERR);
+-	STATUS_TO_TEXT(ILL_FUNC);
+-	STATUS_TO_TEXT(CMD_BUSY);
+-	STATUS_TO_TEXT(CMDRESPEND);
+-	STATUS_TO_TEXT(DATAEND);
+-	STATUS_TO_TEXT(CRCFAIL);
+-	STATUS_TO_TEXT(DATATIMEOUT);
+-	STATUS_TO_TEXT(CMDTIMEOUT);
+-	STATUS_TO_TEXT(RXOVERFLOW);
+-	STATUS_TO_TEXT(TXUNDERRUN);
+-	STATUS_TO_TEXT(RXRDY);
+-	STATUS_TO_TEXT(TXRQ);
+-	STATUS_TO_TEXT(ILL_ACCESS);
++	STATUS_TO_TEXT(CARD_REMOVE, status, i);
++	STATUS_TO_TEXT(CARD_INSERT, status, i);
++	STATUS_TO_TEXT(SIGSTATE, status, i);
++	STATUS_TO_TEXT(WRPROTECT, status, i);
++	STATUS_TO_TEXT(CARD_REMOVE_A, status, i);
++	STATUS_TO_TEXT(CARD_INSERT_A, status, i);
++	STATUS_TO_TEXT(SIGSTATE_A, status, i);
++	STATUS_TO_TEXT(CMD_IDX_ERR, status, i);
++	STATUS_TO_TEXT(STOPBIT_ERR, status, i);
++	STATUS_TO_TEXT(ILL_FUNC, status, i);
++	STATUS_TO_TEXT(CMD_BUSY, status, i);
++	STATUS_TO_TEXT(CMDRESPEND, status, i);
++	STATUS_TO_TEXT(DATAEND, status, i);
++	STATUS_TO_TEXT(CRCFAIL, status, i);
++	STATUS_TO_TEXT(DATATIMEOUT, status, i);
++	STATUS_TO_TEXT(CMDTIMEOUT, status, i);
++	STATUS_TO_TEXT(RXOVERFLOW, status, i);
++	STATUS_TO_TEXT(TXUNDERRUN, status, i);
++	STATUS_TO_TEXT(RXRDY, status, i);
++	STATUS_TO_TEXT(TXRQ, status, i);
++	STATUS_TO_TEXT(ILL_ACCESS, status, i);
+ 	printk("\n");
+ }
+ 
 -- 
 1.7.2.3
 
