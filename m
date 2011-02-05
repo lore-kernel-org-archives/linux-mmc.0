@@ -1,72 +1,53 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: [PATCH 2/2] dw_mmc: Enable low-power mode for the card clock.
-Date: Fri, 4 Feb 2011 11:17:59 +0000
-Message-ID: <AANLkTim4XwhXsBA78WD_0Gsu0=Y4QE6fjGWJdO9D3R5X@mail.gmail.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: [PATCH 0/7] Add mmc driver for i.MX23/28
+Date: Sat, 5 Feb 2011 10:18:40 +0800
+Message-ID: <1296872327-21166-1-git-send-email-shawn.guo@freescale.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001636c5bf46e8d915049b7308c0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:60945 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751450Ab1BDLSA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Feb 2011 06:18:00 -0500
-Received: by mail-bw0-f46.google.com with SMTP id 15so2595721bwz.19
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Feb 2011 03:18:00 -0800 (PST)
+Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:1773 "EHLO
+	TX2EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750799Ab1BDSR7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Feb 2011 13:17:59 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, s.hauer@pengutronix.de, u.kleine-koenig@pengutronix.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
---001636c5bf46e8d915049b7308c0
-Content-Type: text/plain; charset=ISO-8859-1
+This patch set is to add mmc host driver for i.MX23/28.  It was
+tested on both mx23evk and mx28evk boards against Sascha's
+imx-for-2.6.39 tree plus the mxs-dma patch set.
 
-Setting this bit in the clock enable register will stop the clock
-when the card is in the IDLE state.
+Thanks for review.
 
-Signed-off-by: Will Newton <will.newton@imgtec.com>
----
- drivers/mmc/host/dw_mmc.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+Regards,
+Shawn
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 0b0bedd..4cf560d 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -562,7 +562,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
- 			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+Shawn Guo (7)
+ [PATCH 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+ [PATCH 2/7] ARM: mxs/clock: fix base address missing in name##_set_parent
+ [PATCH 3/7] ARM: mxs: make ssp error irq definition consistent
+ [PATCH 4/7] ARM: mxs: dynamically allocate mmc device
+ [PATCH 5/7] ARM: mxs: fix typo "GPO" in iomux-mx23.h
+ [PATCH 6/7] ARM: mxs/mx23evk: add mmc device
+ [PATCH 7/7] ARM: mxs/mx28evk: add mmc device
 
- 		/* enable clock */
--		mci_writel(host, CLKENA, SDMMC_CLKEN_ENABLE);
-+		mci_writel(host, CLKENA, SDMMC_CLKEN_ENABLE |
-+			   SDMMC_CLKEN_LOW_PWR);
+ arch/arm/mach-mxs/Kconfig                       |    2 +
+ arch/arm/mach-mxs/clock-mx23.c                  |   18 +-
+ arch/arm/mach-mxs/clock-mx28.c                  |   20 +-
+ arch/arm/mach-mxs/devices-mx23.h                |    4 +
+ arch/arm/mach-mxs/devices-mx28.h                |    4 +
+ arch/arm/mach-mxs/devices/Kconfig               |    3 +
+ arch/arm/mach-mxs/devices/Makefile              |    1 +
+ arch/arm/mach-mxs/devices/platform-mmc.c        |   80 ++
+ arch/arm/mach-mxs/include/mach/devices-common.h |   13 +
+ arch/arm/mach-mxs/include/mach/iomux-mx23.h     |  190 +++---
+ arch/arm/mach-mxs/include/mach/mmc.h            |   15 +
+ arch/arm/mach-mxs/include/mach/mx23.h           |    2 +-
+ arch/arm/mach-mxs/include/mach/mx28.h           |    8 +-
+ arch/arm/mach-mxs/mach-mx23evk.c                |   58 ++
+ arch/arm/mach-mxs/mach-mx28evk.c                |  102 +++-
+ drivers/mmc/host/Kconfig                        |    9 +
+ drivers/mmc/host/Makefile                       |    1 +
+ drivers/mmc/host/mxs-mmc.c                      |  884 +++++++++++++++++++++++
+ 18 files changed, 1310 insertions(+), 104 deletions(-)
 
- 		/* inform CIU */
- 		mci_send_cmd(slot,
--- 
-1.7.3.4
-
---001636c5bf46e8d915049b7308c0
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0002-dw_mmc-Enable-low-power-mode-for-the-card-clock.patch"
-Content-Disposition: attachment;
-	filename="0002-dw_mmc-Enable-low-power-mode-for-the-card-clock.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gjr022e40
-
-RnJvbSBhZjU0ZTM5OTkyYTIzYTViNmI2Yzg1M2ZlZGU2NTJiMWRmM2JlMzdmIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBXaWxsIE5ld3RvbiA8d2lsbC5uZXd0b25AaW1ndGVjLmNvbT4K
-RGF0ZTogVGh1LCAzIEZlYiAyMDExIDEyOjE4OjQ0ICswMDAwClN1YmplY3Q6IFtQQVRDSCAyLzJd
-IGR3X21tYzogRW5hYmxlIGxvdy1wb3dlciBtb2RlIGZvciB0aGUgY2FyZCBjbG9jay4KClNldHRp
-bmcgdGhpcyBiaXQgaW4gdGhlIGNsb2NrIGVuYWJsZSByZWdpc3RlciB3aWxsIHN0b3AgdGhlIGNs
-b2NrCndoZW4gdGhlIGNhcmQgaXMgaW4gdGhlIElETEUgc3RhdGUuCgpTaWduZWQtb2ZmLWJ5OiBX
-aWxsIE5ld3RvbiA8d2lsbC5uZXd0b25AaW1ndGVjLmNvbT4KLS0tCiBkcml2ZXJzL21tYy9ob3N0
-L2R3X21tYy5jIHwgICAgMyArKy0KIDEgZmlsZXMgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAx
-IGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMgYi9k
-cml2ZXJzL21tYy9ob3N0L2R3X21tYy5jCmluZGV4IDBiMGJlZGQuLjRjZjU2MGQgMTAwNjQ0Ci0t
-LSBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMKKysrIGIvZHJpdmVycy9tbWMvaG9zdC9kd19t
-bWMuYwpAQCAtNTYyLDcgKzU2Miw4IEBAIHN0YXRpYyB2b2lkIGR3X21jaV9zZXR1cF9idXMoc3Ry
-dWN0IGR3X21jaV9zbG90ICpzbG90KQogCQkJICAgICBTRE1NQ19DTURfVVBEX0NMSyB8IFNETU1D
-X0NNRF9QUlZfREFUX1dBSVQsIDApOwogCiAJCS8qIGVuYWJsZSBjbG9jayAqLwotCQltY2lfd3Jp
-dGVsKGhvc3QsIENMS0VOQSwgU0RNTUNfQ0xLRU5fRU5BQkxFKTsKKwkJbWNpX3dyaXRlbChob3N0
-LCBDTEtFTkEsIFNETU1DX0NMS0VOX0VOQUJMRSB8CisJCQkgICBTRE1NQ19DTEtFTl9MT1dfUFdS
-KTsKIAogCQkvKiBpbmZvcm0gQ0lVICovCiAJCW1jaV9zZW5kX2NtZChzbG90LAotLSAKMS43LjMu
-NAoK
---001636c5bf46e8d915049b7308c0--
