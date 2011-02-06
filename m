@@ -1,112 +1,64 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH 2/2] mmc: sdhci: Replace SDHCI_QUIRK_NO_MULTIBLOCK with a platform hook.
-Date: Sun, 06 Feb 2011 01:13:26 -0500
-Message-ID: <m3zkq9n115.fsf@pullcord.laptop.org>
+From: Albert Herranz <albert_herranz@yahoo.es>
+Subject: Re: [BUG] CMD52 sent as first command not CMD0
+Date: Sun, 06 Feb 2011 12:13:50 +0100
+Message-ID: <4D4E826E.40905@yahoo.es>
+References: <C85F98EE-B8C5-4037-A0FF-203265A7575C@marvell.com> <20110206003845.GA15019@void.printf.net> <BC6C6C10-631A-4482-BA1B-C6F0057BC54A@marvell.com> <20110206011514.GA15322@void.printf.net> <173274DF-475D-44FB-8C34-25728D12ADBB@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37035 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751549Ab1BFGKa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 6 Feb 2011 01:10:30 -0500
+Received: from nm8-vm0.bullet.mail.ukl.yahoo.com ([217.146.183.238]:24396 "HELO
+	nm8-vm0.bullet.mail.ukl.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1752057Ab1BFLTq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Feb 2011 06:19:46 -0500
+In-Reply-To: <173274DF-475D-44FB-8C34-25728D12ADBB@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>, Wolfram Sang <w.sang@pengutronix.de>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Part of a quirk cleanup run.  This quirk was only used by sdhci-esdhc.
-This patch is untested.
+Hi,
 
-Signed-off-by: Chris Ball <cjb@laptop.org>
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>
----
- drivers/mmc/host/sdhci-esdhc-imx.c |   12 ++++++++----
- drivers/mmc/host/sdhci.c           |    5 ++++-
- drivers/mmc/host/sdhci.h           |    1 +
- include/linux/mmc/sdhci.h          |    4 ++--
- 4 files changed, 15 insertions(+), 7 deletions(-)
+On 02/06/2011 02:35 AM, Philip Rakity wrote:
+> 
+> proposed solution:  I cannot verify this fix until Monday.
+> =====
+> 
+> CMD52 is a reset for SDIO cards.  CMD0 is not sufficient when
+> the card is being re-initialized.  Only send CMD52 if
+> a) doing a reinitialize
+> b) card is SDIO or SDIO_COMBO
+> 
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> ---
+>  drivers/mmc/core/core.c |    7 ++++++-
+>  1 files changed, 6 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 30d4da4..f0ce6f6 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1521,7 +1521,12 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>  		mmc_hostname(host), __func__, host->f_init);
+>  #endif
+>  	mmc_power_up(host);
+> -	sdio_reset(host);
+> +
+> +	/* reset sdio before CMD0 when card is being reinitialized */
+> +	if (host->card &&
+> +		(host->card->type == MMC_TYPE_SDIO ||
+> +		host->card->type == MMC_TYPE_SD_COMBO))
+> +			sdio_reset(host);
+>  	mmc_go_idle(host);
+>  	mmc_hwungate_clock(host);
+>  
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 6249b75..f19b818 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -107,6 +107,13 @@ static unsigned int esdhc_pltfm_get_max_blk_size(struct sdhci_host *host)
- 	return 2;
- }
- 
-+static unsigned int esdhc_pltfm_get_max_blk_count(struct sdhci_host *host)
-+{
-+	/* Fix errata ENGcm07207 which is present on i.MX25 and i.MX35 */
-+
-+	return (cpu_is_mx25() || cpu_is_mx35()) ? 1 : 65535;
-+}
-+
- static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pdata)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -123,10 +130,6 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 	if (cpu_is_mx35() || cpu_is_mx51())
- 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
- 
--	/* Fix errata ENGcm07207 which is present on i.MX25 and i.MX35 */
--	if (cpu_is_mx25() || cpu_is_mx35())
--		host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK;
--
- 	return 0;
- }
- 
-@@ -146,6 +149,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.get_max_clock = esdhc_pltfm_get_max_clock,
- 	.get_min_clock = esdhc_pltfm_get_min_clock,
- 	.get_max_blk_size = esdhc_pltfm_get_max_blk_size,
-+	.get_max_blk_count = esdhc_pltfm_get_max_blk_count,
- };
- 
- struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index fcd6188..8a794fb 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1979,7 +1979,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	/*
- 	 * Maximum block count.
- 	 */
--	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
-+	if (host->ops->get_max_blk_count)
-+		mmc->max_blk_count = host->ops->get_max_blk_count(host);
-+	else
-+		mmc->max_blk_count = 65535;
- 
- 	/*
- 	 * Init tasklets.
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 08c1071..a9de7b1 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -218,6 +218,7 @@ struct sdhci_ops {
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_max_blk_size)(struct sdhci_host *host);
-+	unsigned int	(*get_max_blk_count)(struct sdhci_host *host);
- 	int		(*platform_8bit_width)(struct sdhci_host *host,
- 					       int width);
- 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 2fde25c..52de824 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -65,8 +65,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET		(1<<19)
- /* Reclaimed */
- #define SDHCI_QUIRK_UNUSED_20				(1<<20)
--/* Controller cannot do multi-block transfers */
--#define SDHCI_QUIRK_NO_MULTIBLOCK			(1<<21)
-+/* Reclaimed */
-+#define SDHCI_QUIRK_UNUSED_21				(1<<21)
- /* Controller can only handle 1-bit data transfers */
- #define SDHCI_QUIRK_FORCE_1_BIT_DATA			(1<<22)
- /* Controller needs 10ms delay between applying power and clock */
--- 
-Chris Ball   <cjb@laptop.org>
-One Laptop Per Child
+At least on the Nintendo Wii, a platform reset _does not_ reset the SDIO hardware, and there is no known way to power-off/power-on it.
+So, in some cases like after a system reboot, we need to issue a CMD52 before a CMD0 (even if on that particular case host->card is NULL) to properly reset the Nintendo Wii SDIO-based Wireless LAN card from its previous state, otherwise the card is not detected.
+
+The proposed fix breaks this and makes the card unavailable after a system reboot.
+
+If you are concerned about unconditionally issuing a CMD52 then we can use a quirk to make sure that we always perform a SDIO reset at least for the Nintendo Wii.
+
+Cheers,
+Albert
