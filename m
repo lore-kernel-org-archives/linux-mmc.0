@@ -1,40 +1,49 @@
-From: David Vrabel <david.vrabel@csr.com>
-Subject: Re: [BUG] CMD52 sent as first command not CMD0
-Date: Sun, 06 Feb 2011 16:02:02 +0000
-Message-ID: <4D4EC5FA.8000404@csr.com>
-References: <C85F98EE-B8C5-4037-A0FF-203265A7575C@marvell.com> <20110206003845.GA15019@void.printf.net> <BC6C6C10-631A-4482-BA1B-C6F0057BC54A@marvell.com> <20110206011514.GA15322@void.printf.net> <173274DF-475D-44FB-8C34-25728D12ADBB@marvell.com> <20110206015003.GA15576@void.printf.net>
+From: "Tardy, Pierre" <pierre.tardy@intel.com>
+Subject: RE: [BUG] CMD52 sent as first command not CMD0
+Date: Sun, 6 Feb 2011 16:09:56 +0000
+Message-ID: <8250E4885F9967469CAC3FB5CBA2CE69934F1C6A16@irsmsx501.ger.corp.intel.com>
+References: <C85F98EE-B8C5-4037-A0FF-203265A7575C@marvell.com>
+ <20110206003845.GA15019@void.printf.net>
+ <BC6C6C10-631A-4482-BA1B-C6F0057BC54A@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smarthost01.mail.zen.net.uk ([212.23.3.140]:60087 "EHLO
-	smarthost01.mail.zen.net.uk" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752936Ab1BFQCX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Feb 2011 11:02:23 -0500
-In-Reply-To: <20110206015003.GA15576@void.printf.net>
+Received: from mga09.intel.com ([134.134.136.24]:11341 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752761Ab1BFQKH convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Feb 2011 11:10:07 -0500
+In-Reply-To: <BC6C6C10-631A-4482-BA1B-C6F0057BC54A@marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Philip Rakity <prakity@marvell.com>, Albert Herranz <albert_herranz@yahoo.es>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Philip Rakity <prakity@marvell.com>, Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Albert Herranz <albert_herranz@yahoo.es>
 
-On 06/02/2011 01:50, Chris Ball wrote:
+ 
 > 
-> 
-> Thanks.  We have macros for this, but need to add one for combo cards.
-> include/linux/mmc/card.h should get:
-> 
-> #define mmc_card_sd_combo(c)    ((c)->type == MMC_TYPE_SD_COMBO)
+> nothing negative but reset is meant to reinit the card.  This is the power up sequence for the 1st
+> time a card is detected.
+> There is no reason to do this if no card has yet enumerated.  If a sdio card was there I completely
+> agree with the mod since we need to reset
+> the card.
 
-How about something like:
+What about using linux as a bootloader, or just using kexec?
+The first linux could have initialized the card, and we want to put everything back to known state.
 
-#define mmc_card_has_sdio(c) \
-    ({ \
-        struct mmc_card *__card = (c); \
-        mmc_card_sdio(__card) && mmc_card_sd_combo(__card); \
-    })
+This is a valid reason why you want to make sure to reset the card at the first place.
 
-And similarly
+Regards,
+Pierre
+---------------------------------------------------------------------
+Intel Corporation SAS (French simplified joint stock company)
+Registered headquarters: "Les Montalets"- 2, rue de Paris, 
+92196 Meudon Cedex, France
+Registration Number:  302 456 199 R.C.S. NANTERRE
+Capital: 4,572,000 Euros
 
-#define mmc_card_has_sd(c) ...
+This e-mail and any attachments may contain confidential material for
+the sole use of the intended recipient(s). Any review or distribution
+by others is strictly prohibited. If you are not the intended
+recipient, please contact the sender and delete all copies.
 
-David
