@@ -1,40 +1,43 @@
-From: "Tardy, Pierre" <pierre.tardy@intel.com>
-Subject: RE: [BUG] CMD52 sent as first command not CMD0
-Date: Sun, 6 Feb 2011 16:09:56 +0000
-Message-ID: <8250E4885F9967469CAC3FB5CBA2CE69934F1C6A16@irsmsx501.ger.corp.intel.com>
-References: <C85F98EE-B8C5-4037-A0FF-203265A7575C@marvell.com>
- <20110206003845.GA15019@void.printf.net>
- <BC6C6C10-631A-4482-BA1B-C6F0057BC54A@marvell.com>
-Mime-Version: 1.0
+From: Pierre Tardy <pierre.tardy@intel.com>
+Subject: [PATCH v2 0/3] sdhci runtime_pm implementation using mmc clock gating fw
+Date: Sun,  6 Feb 2011 19:02:47 +0100
+Message-ID: <cover.1297014479.git.pierre.tardy@intel.com>
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:11341 "EHLO mga09.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:15601 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752761Ab1BFQKH convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Feb 2011 11:10:07 -0500
-In-Reply-To: <BC6C6C10-631A-4482-BA1B-C6F0057BC54A@marvell.com>
-Content-Language: en-US
+	id S1753344Ab1BFSDI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 6 Feb 2011 13:03:08 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>, Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Albert Herranz <albert_herranz@yahoo.es>
+To: linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Pierre Tardy <pierre.tardy@intel.com>
 
- 
-> 
-> nothing negative but reset is meant to reinit the card.  This is the power up sequence for the 1st
-> time a card is detected.
-> There is no reason to do this if no card has yet enumerated.  If a sdio card was there I completely
-> agree with the mod since we need to reset
-> the card.
+Please find a simple sdhci runtime_pm implementation
+that uses clock gating fw as a tip to know when 
+our chip is idle.
 
-What about using linux as a bootloader, or just using kexec?
-The first linux could have initialized the card, and we want to put everything back to known state.
+Previous version was RFC and untested,
+This version has been tested on intel medfield platform.
 
-This is a valid reason why you want to make sure to reset the card at the first place.
+Pierre Tardy (2):
+  mmc: put the led blinking code after clock ungating
+  sdhci:v2:use ios->clock to know when sdhci is idle
 
-Regards,
-Pierre
+Yunpeng Gao (1):
+  sdhci-pci : Enable runtime PM support
+
+ drivers/mmc/core/core.c      |    3 +-
+ drivers/mmc/host/sdhci-pci.c |  124 ++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c     |   60 ++++++++++++++++++++
+ drivers/mmc/host/sdhci.h     |    5 ++
+ include/linux/mmc/sdhci.h    |    1 +
+ 5 files changed, 191 insertions(+), 2 deletions(-)
+
+-- 
+1.7.2.3
+
 ---------------------------------------------------------------------
 Intel Corporation SAS (French simplified joint stock company)
 Registered headquarters: "Les Montalets"- 2, rue de Paris, 
