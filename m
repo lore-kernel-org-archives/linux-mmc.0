@@ -1,167 +1,159 @@
 From: Pierre Tardy <pierre.tardy@intel.com>
-Subject: [PATCH v2 3/3] sdhci:v2:use ios->clock to know when sdhci is idle
-Date: Sun,  6 Feb 2011 19:02:50 +0100
-Message-ID: <430729a58c5efc725455e1985b1facca8f784c92.1297014479.git.pierre.tardy@intel.com>
-References: <cover.1297014479.git.pierre.tardy@intel.com>
+Subject: [PATCH v2 1/3] mmc: add per device quirk placeholder
+Date: Sun,  6 Feb 2011 19:03:46 +0100
+Message-ID: <89ba04ca08bd8f0f858d0921add9522f36f5bd94.1297014807.git.pierre.tardy@intel.com>
+References: <cover.1297014807.git.pierre.tardy@intel.com>
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1297014479.git.pierre.tardy@intel.com>
-In-Reply-To: <cover.1297014479.git.pierre.tardy@intel.com>
-References: <cover.1297014479.git.pierre.tardy@intel.com>
+In-Reply-To: <cover.1297014807.git.pierre.tardy@intel.com>
+In-Reply-To: <cover.1297014807.git.pierre.tardy@intel.com>
+References: <cover.1297014807.git.pierre.tardy@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Pierre Tardy <tardyp@gmail.com>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Pierre Tardy <pierre.tardy@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Pierre Tardy <tardyp@gmail.com>
+Some cards have quirks valid for every platforms
+using current platform quirk hooks leads to a lot
+of code and debug duplication.
 
-This allows sdhci to detect its own activity and to autosuspend
-when not used
+So we inspire a bit from what exists in PCI subsystem
+and do out own per vendorid/deviceid quirk
+We still drop the complexity of the pci quirk system
+(with special section tables, and so on)
+That can be added later if needed.
 
-inspired from  mmci: handle clock frequency 0 properly
->From Linus Walleij <linus.walleij@stericsson.com>
-author of mmc aggressive clock gating fw.
-
-The idea of using mmc clock gating fw in order to power gate the
-sdhci is simple (it still need some other get/set because set_ios() is
-not cause first before any other acticity):
-Whenever the mmc fw tells we dont need the MMC clock, we dont need
-the sdhci power as well.
-
-This does not mean that the child (card) is
-suspended. In case of a Wifi SDIO card, the card will be suspended
-and resumed according to the ifconfig up/down status.
-Even if the Wifi interface is up, user might not use the network.
-Sdhci can be powered off during those period. It is up to the HW
-implementation to implement smart enough power gating to still
-support enough always-on circuitry allowing to detect sdio
-interrupts.
-
+Signed-off-by: Pierre Tardy <pierre.tardy@intel.com>
 Acked-by: Linus Walleij <linus.walleij@stericsson.com>
-
-Signed-off-by: Pierre Tardy <tardyp@gmail.com>
+Acked-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/mmc/host/sdhci-pci.c |    3 +++
- drivers/mmc/host/sdhci.c     |   29 +++++++++++++++++++++++++++++
- include/linux/mmc/sdhci.h    |    1 +
- 3 files changed, 33 insertions(+), 0 deletions(-)
+ drivers/mmc/core/Makefile |    3 +-
+ drivers/mmc/core/core.h   |    2 +
+ drivers/mmc/core/quirks.c |   62 +++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sdio.c   |    1 +
+ include/linux/mmc/card.h  |    2 +
+ 5 files changed, 69 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 22581a1..9d23f4c 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1086,6 +1086,9 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
- 	}
- 	pm_runtime_enable(&pdev->dev);
- 	pm_runtime_allow(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+	pm_suspend_ignore_children(&pdev->dev, 1);
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index 86b4791..6395019 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -6,6 +6,7 @@ obj-$(CONFIG_MMC)		+= mmc_core.o
+ mmc_core-y			:= core.o bus.o host.o \
+ 				   mmc.o mmc_ops.o sd.o sd_ops.o \
+ 				   sdio.o sdio_ops.o sdio_bus.o \
+-				   sdio_cis.o sdio_io.o sdio_irq.o
++				   sdio_cis.o sdio_io.o sdio_irq.o \
++				   quirks.o
  
- 	return 0;
+ mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index ca1fdde..20b1c08 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -61,6 +61,8 @@ int mmc_attach_mmc(struct mmc_host *host);
+ int mmc_attach_sd(struct mmc_host *host);
+ int mmc_attach_sdio(struct mmc_host *host);
  
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3e65d94..655617c 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -20,6 +20,7 @@
- #include <linux/slab.h>
- #include <linux/scatterlist.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/pm_runtime.h>
- 
- #include <linux/leds.h>
- 
-@@ -1161,6 +1162,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host;
- 	unsigned long flags;
-+	unsigned int lastclock;
- 	u8 ctrl;
- 
- 	host = mmc_priv(mmc);
-@@ -1171,6 +1173,27 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		goto out;
- 
- 	/*
-+	 * get/put runtime_pm usage counter at ios->clock transitions
-+	 * We need to do it before any other chip access, as sdhci could
-+	 * be power gated
-+	 */
-+	lastclock = host->iosclock;
-+	host->iosclock = ios->clock;
-+	if (lastclock == 0 && ios->clock != 0) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		pm_runtime_get_sync(host->mmc->parent);
-+		spin_lock_irqsave(&host->lock, flags);
-+	} else if (lastclock != 0 && ios->clock == 0) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		pm_runtime_mark_last_busy(host->mmc->parent);
-+		pm_runtime_put_autosuspend(host->mmc->parent);
-+		spin_lock_irqsave(&host->lock, flags);
-+	}
-+	/* no need to configure the rest.. */
-+	if (host->iosclock == 0)
-+		goto out;
++void mmc_fixup_device(struct mmc_card *card);
 +
-+	/*
- 	 * Reset the chip on each power off.
- 	 * Should clear out any weird states.
- 	 */
-@@ -1244,6 +1267,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
- 	int is_readonly;
+ /* Module parameters */
+ extern int use_spi_crc;
  
- 	host = mmc_priv(mmc);
-+	/* this function is called before set_ios... */
-+	pm_runtime_get_sync(mmc->parent);
+diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
+new file mode 100644
+index 0000000..aa811fc
+--- /dev/null
++++ b/drivers/mmc/core/quirks.c
+@@ -0,0 +1,62 @@
++/*
++ *  This file contains work-arounds for many known sdio hardware
++ *  bugs.
++ *
++ *  Copyright (c) 2011 Pierre Tardy <tardyp@gmail.com>
++ *  Inspired from pci fixup code:
++ *  Copyright (c) 1999 Martin Mares <mj@ucw.cz>
++ *
++ */
++
++#include <linux/types.h>
++#include <linux/kernel.h>
++#include <linux/mmc/card.h>
++#include <linux/mod_devicetable.h>
++
++/*
++ *  The world is not perfect and supplies us with broken mmc/sdio devices.
++ *  For at least a part of these bugs we need a work-around
++ */
++
++struct mmc_fixup {
++	u16 vendor, device;	/* You can use SDIO_ANY_ID here of course */
++	void (*vendor_fixup)(struct mmc_card *card, int data);
++	int data;
++};
++
++/*
++ * This hook just adds a quirk unconditionnally
++ */
++static void __maybe_unused add_quirk(struct mmc_card *card, int data)
++{
++	card->quirks |= data;
++}
++
++/*
++ * This hook just removes a quirk unconditionnally
++ */
++static void __maybe_unused remove_quirk(struct mmc_card *card, int data)
++{
++	card->quirks &= ~data;
++}
++
++static const struct mmc_fixup mmc_fixup_methods[] = {
++	{ 0 }
++};
++
++void mmc_fixup_device(struct mmc_card *card)
++{
++	const struct mmc_fixup *f;
++
++	for (f = mmc_fixup_methods; f->vendor_fixup; f++) {
++		if ((f->vendor == card->cis.vendor
++		     || f->vendor == (u16) SDIO_ANY_ID) &&
++		    (f->device == card->cis.device
++		     || f->device == (u16) SDIO_ANY_ID)) {
++			dev_dbg(&card->dev, "calling %pF\n", f->vendor_fixup);
++			f->vendor_fixup(card, f->data);
++		}
++	}
++}
++EXPORT_SYMBOL(mmc_fixup_device);
++
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 5c4a54d..617e9ad 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -458,6 +458,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
  
- 	spin_lock_irqsave(&host->lock, flags);
+ 		card = oldcard;
+ 	}
++	mmc_fixup_device(card);
  
-@@ -1257,6 +1282,7 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+ 	if (card->type == MMC_TYPE_SD_COMBO) {
+ 		err = mmc_sd_setup_card(host, card, oldcard != NULL);
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 4652cf9..ad74138 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -151,6 +151,8 @@ struct mmc_card {
+ 	struct dentry		*debugfs_root;
+ };
  
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
-+	pm_runtime_put_autosuspend(mmc->parent);
- 	/* This quirk needs to be replaced by a callback-function later */
- 	return host->quirks & SDHCI_QUIRK_INVERTED_WRITE_PROTECT ?
- 		!is_readonly : is_readonly;
-@@ -1268,6 +1294,7 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	unsigned long flags;
- 
- 	host = mmc_priv(mmc);
-+	pm_runtime_get_sync(mmc->parent);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -1282,6 +1309,7 @@ out:
- 	mmiowb();
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
-+	pm_runtime_put_autosuspend(mmc->parent);
- }
- 
- static const struct mmc_host_ops sdhci_ops = {
-@@ -1766,6 +1794,7 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
-+	host->iosclock = 0;
- 
- 	return host;
- }
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 83bd9f7..a38d040 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -116,6 +116,7 @@ struct sdhci_host {
- 	unsigned int timeout_clk;	/* Timeout freq (KHz) */
- 
- 	unsigned int clock;	/* Current clock (MHz) */
-+	unsigned int iosclock;	/* Last clock asked via set_ios  */
- 	u8 pwr;			/* Current voltage */
- 
- 	struct mmc_request *mrq;	/* Current request */
++void mmc_fixup_device(struct mmc_card *dev);
++
+ #define mmc_card_mmc(c)		((c)->type == MMC_TYPE_MMC)
+ #define mmc_card_sd(c)		((c)->type == MMC_TYPE_SD)
+ #define mmc_card_sdio(c)	((c)->type == MMC_TYPE_SDIO)
 -- 
 1.7.2.3
 
