@@ -1,71 +1,47 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [BUG] CMD52 sent as first command not CMD0
-Date: Sun, 6 Feb 2011 01:50:03 +0000
-Message-ID: <20110206015003.GA15576@void.printf.net>
-References: <C85F98EE-B8C5-4037-A0FF-203265A7575C@marvell.com> <20110206003845.GA15019@void.printf.net> <BC6C6C10-631A-4482-BA1B-C6F0057BC54A@marvell.com> <20110206011514.GA15322@void.printf.net> <173274DF-475D-44FB-8C34-25728D12ADBB@marvell.com>
+Subject: Re: [PATCH] mmc: sdhci-s3c: Auto CMD12 support
+Date: Sun, 6 Feb 2011 04:07:15 +0000
+Message-ID: <20110206040714.GA16352@void.printf.net>
+References: <20101030035856.GA13041@july>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:44935 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:52653 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752022Ab1BFBuH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 5 Feb 2011 20:50:07 -0500
+	id S1752376Ab1BFEHT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 5 Feb 2011 23:07:19 -0500
 Content-Disposition: inline
-In-Reply-To: <173274DF-475D-44FB-8C34-25728D12ADBB@marvell.com>
+In-Reply-To: <20101030035856.GA13041@july>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Albert Herranz <albert_herranz@yahoo.es>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Kyungmin Park <kmpark@infradead.org>
+Cc: linux-mmc@vger.kernel.org, jh80.chung@samsung.com, Ben Dooks <ben-linux@fluff.org>
 
-Hi,
+Hi Kyungmin,
 
-On Sat, Feb 05, 2011 at 05:35:46PM -0800, Philip Rakity wrote:
+On Sat, Oct 30, 2010 at 12:58:56PM +0900, Kyungmin Park wrote:
+> From: Kyungmin Park <kyungmin.park@samsung.com>
 > 
-> proposed solution:  I cannot verify this fix until Monday.
-> =====
+> Samsung SDHCI host controller supports the Auto CMD12.
 > 
-> CMD52 is a reset for SDIO cards.  CMD0 is not sufficient when
-> the card is being re-initialized.  Only send CMD52 if
-> a) doing a reinitialize
-> b) card is SDIO or SDIO_COMBO
-> 
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > ---
->  drivers/mmc/core/core.c |    7 ++++++-
->  1 files changed, 6 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 30d4da4..f0ce6f6 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1521,7 +1521,12 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
->  		mmc_hostname(host), __func__, host->f_init);
->  #endif
->  	mmc_power_up(host);
-> -	sdio_reset(host);
-> +
-> +	/* reset sdio before CMD0 when card is being reinitialized */
-> +	if (host->card &&
-> +		(host->card->type == MMC_TYPE_SDIO ||
-> +		host->card->type == MMC_TYPE_SD_COMBO))
-> +			sdio_reset(host);
->  	mmc_go_idle(host);
->  	mmc_hwungate_clock(host);
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index aacb862..e2d79e7 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -414,6 +414,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+>  	 * SDHCI block, or a missing configuration that needs to be set. */
+>  	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
 >  
+> +	/* This host supports the Auto CMD12 */
+> +	host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+> +
+>  	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
+>  	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+>  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
 
-Thanks.  We have macros for this, but need to add one for combo cards.
-include/linux/mmc/card.h should get:
-
-#define mmc_card_sd_combo(c)    ((c)->type == MMC_TYPE_SD_COMBO)
-
-and then:
-
-	/* reset sdio before CMD0 when card is being reinitialized */
-	if (host->card && (mmc_card_sdio(host->card) || 
-			   mmc_card_sd_combo(host->card)))
-		sdio_reset(host);
-
-(FYI your hwgate patches are applied above but aren't in mainline yet.)
+I've merged this to mmc-next now -- I'm sorry that it took so long. 
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
