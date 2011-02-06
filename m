@@ -1,69 +1,33 @@
-From: Pierre Tardy <pierre.tardy@intel.com>
-Subject: [PATCH v2 3/3] mmc: remove BROCKEN_CLK_GATING quirk for wl1271
-Date: Sun,  6 Feb 2011 19:04:17 +0100
-Message-ID: <0b3533accd30f25b0ee92ac7181240a5bd9eb36e.1297014807.git.pierre.tardy@intel.com>
-References: <cover.1297014807.git.pierre.tardy@intel.com>
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2 0/3] sdhci runtime_pm implementation using mmc clock
+ gating fw
+Date: Sun, 6 Feb 2011 19:54:11 +0100
+Message-ID: <AANLkTinzhhZMC=dRhC5PbeK98UH8ZkOKMriEq0cU6g=q@mail.gmail.com>
+References: <cover.1297014479.git.pierre.tardy@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:35213 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753423Ab1BFSEc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 6 Feb 2011 13:04:32 -0500
-In-Reply-To: <cover.1297014807.git.pierre.tardy@intel.com>
+Received: from mail-px0-f174.google.com ([209.85.212.174]:59299 "EHLO
+	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753452Ab1BFSyL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Feb 2011 13:54:11 -0500
+In-Reply-To: <cover.1297014479.git.pierre.tardy@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Pierre Tardy <pierre.tardy@intel.com>, Pierre Tardy <tardyp@gmail.com>
+To: Pierre Tardy <pierre.tardy@intel.com>
+Cc: linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This sdio card is supporting having its sdio clock shutdown
-It is also not using the SDIO IRQ, but rather uses
-a side gpio irq.
+2011/2/6 Pierre Tardy <pierre.tardy@intel.com>:
 
-Signed-off-by: Pierre Tardy <tardyp@gmail.com>
----
- drivers/mmc/core/quirks.c |   12 +++++++++++-
- 1 files changed, 11 insertions(+), 1 deletions(-)
+> Please find a simple sdhci runtime_pm implementation
+> that uses clock gating fw as a tip to know when
+> our chip is idle.
 
-diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
-index d004106..4fb16ac 100644
---- a/drivers/mmc/core/quirks.c
-+++ b/drivers/mmc/core/quirks.c
-@@ -49,11 +49,21 @@ static void add_quirk_for_sdio_devices(struct mmc_card *card, int data)
- 		card->quirks |= data;
- }
- 
-+#ifndef SDIO_VENDOR_ID_TI
-+#define SDIO_VENDOR_ID_TI		0x0097
-+#endif
-+
-+#ifndef SDIO_DEVICE_ID_TI_WL1271
-+#define SDIO_DEVICE_ID_TI_WL1271	0x4076
-+#endif
-+
- static const struct mmc_fixup mmc_fixup_methods[] = {
- 	/* by default sdio devices are considered CLK_GATING broken */
- 	/* good cards will be whitelisted as they are tested */
- 	{ SDIO_ANY_ID, SDIO_ANY_ID,
--		add_quirk_for_sdio_devices, MMC_QUIRK_BROKEN_CLK_GATING }
-+		add_quirk_for_sdio_devices, MMC_QUIRK_BROKEN_CLK_GATING },
-+	{ SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
-+		remove_quirk, MMC_QUIRK_BROKEN_CLK_GATING },
- 	{ 0 }
- };
- 
--- 
-1.7.2.3
+I like this approach, the gated clock hints to rpm that it's time
+to idle the device. Great work.
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
----------------------------------------------------------------------
-Intel Corporation SAS (French simplified joint stock company)
-Registered headquarters: "Les Montalets"- 2, rue de Paris, 
-92196 Meudon Cedex, France
-Registration Number:  302 456 199 R.C.S. NANTERRE
-Capital: 4,572,000 Euros
+For all patches.
 
-This e-mail and any attachments may contain confidential material for
-the sole use of the intended recipient(s). Any review or distribution
-by others is strictly prohibited. If you are not the intended
-recipient, please contact the sender and delete all copies.
-
+Thanks,
+Linus Walleij
