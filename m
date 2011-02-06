@@ -1,43 +1,37 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc_test: Don't warn about not waiting for busy if
-	controller can't do this
-Date: Sun, 6 Feb 2011 20:31:04 +0000
-Message-ID: <20110206203104.GA23366@void.printf.net>
-References: <1295283631-7965-1-git-send-email-pawel.moll@arm.com> <20110206195359.3dfeef7a@mfleming-mobl1.ger.corp.intel.com>
+Subject: Re: [PATCH v2 0/3] sdhci runtime_pm implementation using mmc clock
+	gating fw
+Date: Sun, 6 Feb 2011 20:35:20 +0000
+Message-ID: <20110206203520.GB23366@void.printf.net>
+References: <cover.1297014479.git.pierre.tardy@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56475 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752984Ab1BFUbI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 6 Feb 2011 15:31:08 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20110206195359.3dfeef7a@mfleming-mobl1.ger.corp.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <cover.1297014479.git.pierre.tardy@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Pierre Tardy <pierre.tardy@intel.com>
+Cc: linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Pawel Moll <pawel.moll@arm.com>, linux-mmc@vger.kernel.org
 
-Hi,
+Hi Pierre,
 
-On Sun, Feb 06, 2011 at 07:53:59PM +0000, Matt Fleming wrote:
-> On Mon, 17 Jan 2011 17:00:31 +0000
-> Pawel Moll <pawel.moll@arm.com> wrote:
+On Sun, Feb 06, 2011 at 07:02:47PM +0100, Pierre Tardy wrote:
+> Please find a simple sdhci runtime_pm implementation
+> that uses clock gating fw as a tip to know when 
+> our chip is idle.
 > 
-> > If the MMC host controller does not support waiting for card signaling
-> > busy state (MMC_CAP_WAIT_WHILE_BUSY cap), there is no point in prining
-> > the relevant warning message.
-> > 
-> > Signed-off-by: Pawel Moll <pawel.moll@arm.com>
-> > ---
-> >  drivers/mmc/card/mmc_test.c |    7 ++++---
-> >  1 files changed, 4 insertions(+), 3 deletions(-)
+> Previous version was RFC and untested,
+> This version has been tested on intel medfield platform.
 > 
-> Seems straight forward.
+> Pierre Tardy (2):
+>   mmc: put the led blinking code after clock ungating
+>   sdhci:v2:use ios->clock to know when sdhci is idle
 > 
-> Reviewed-by: Matt Fleming <matt@console-pimps.org>
+> Yunpeng Gao (1):
+>   sdhci-pci : Enable runtime PM support
 
-Thanks very much, pushed to mmc-next with Matt's Reviewed-by.
+Thanks very much, pushed to mmc-next with Linus W's ACK.
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
