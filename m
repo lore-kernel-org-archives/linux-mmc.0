@@ -1,73 +1,69 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Short excursion into mmci.c vs msm_sdcc.c
-Date: Mon, 7 Feb 2011 18:13:00 +0100
-Message-ID: <AANLkTik24N+BerdrQ8RQK7_5oWSrZJmk5tNwuetDLjN+@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 1/2] mmc: sdhci: Replace SDHCI_QUIRK_FORCE_BLK_SZ_2048
+ with a pklatform hook.
+Date: Mon, 7 Feb 2011 18:40:39 +0100
+Message-ID: <20110207174039.GE3123@pengutronix.de>
+References: <m31v3lofm1.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="xJK8B5Wah2CMJs8h"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f174.google.com ([209.85.212.174]:45023 "EHLO
-	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754312Ab1BGRNA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Feb 2011 12:13:00 -0500
-Received: by pxi15 with SMTP id 15so937974pxi.19
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Feb 2011 09:13:00 -0800 (PST)
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:55443 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753791Ab1BGRko (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Feb 2011 12:40:44 -0500
+Content-Disposition: inline
+In-Reply-To: <m31v3lofm1.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, Sahitya Tummala <stummala@codeaurora.org>, San Mehat <san@google.com>
-Cc: linux-mmc@vger.kernel.org, Russell King - ARM Linux <linux@arm.linux.org.uk>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>
 
-As some of the readers of ARM PL180 MMCI MMC driver might have
-already noticed the driver in drivers/mmc/host/msm_sdcc.c is a fork
-of mmci.c.
 
-There are some bugs in msm_sdcc.c that we fixed over the
-last few weeks in mmci.c too I think. Check the latest error handling
-and how we determine how much data has been transferred on error
-for example, you just error out in this driver.
+--xJK8B5Wah2CMJs8h
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Look here:
+On Sun, Feb 06, 2011 at 01:13:10AM -0500, Chris Ball wrote:
+> Part of a quirk cleanup run.  This quirk was only used by sdhci-esdhc.
+> This patch is untested.
+>=20
+> Signed-off-by: Chris Ball <cjb@laptop.org>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 9e15f41..fcd6188 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1962,8 +1962,8 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	 * Maximum block size. This varies from controller to controller and
+>  	 * is specified in the capabilities register.
+>  	 */
+> -	if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
+> -		mmc->max_blk_size =3D 2;
+> +	if (host->ops->get_max_blk_size) {
+> +		mmc->max_blk_size =3D host->ops->get_max_blk_size(host);
+>  	} else {
+>  		mmc->max_blk_size =3D (caps & SDHCI_MAX_BLOCK_MASK) >>
+>  				SDHCI_MAX_BLOCK_SHIFT;
 
-        n = dma_map_sg(mmc_dev(host->mmc), host->dma.sg,
-                        host->dma.num_ents, host->dma.dir);
-       /* dsb inside dma_map_sg will write nc out to mem as well */
+I tend to think this could be fixed using io-accessors when reading the
+caps register?
 
-        if (n != host->dma.num_ents) {
-                printk(KERN_ERR "%s: Unable to map in all sg elements\n",
-                        mmc_hostname(host->mmc));
-                host->dma.sg = NULL;
-                host->dma.num_ents = 0;
-                return -ENOMEM;
-        }
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
-This is wrong. The DMA API does not work like that, as I
-learned some weeks ago writing code for MMCI. It is prefectly
-legal for the mapping function to return fewer number of
-entries than were passed in.
+--xJK8B5Wah2CMJs8h
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
 
-When you do this in msmsdcc_dma_complete_tlet():
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
 
-        dma_unmap_sg(mmc_dev(host->mmc), host->dma.sg, host->dma.num_ents,
-                     host->dma.dir);
+iEYEARECAAYFAk1QLpcACgkQD27XaX1/VRsvAgCfWA/aUBRrbCOBeU7cGTQIohle
+e4EAoKV2NrCQd+0x2WZJzi2LibzKM2Ri
+=o2zm
+-----END PGP SIGNATURE-----
 
-        if (host->curr.user_pages) {
-                struct scatterlist *sg = host->dma.sg;
-                int i;
-
-                for (i = 0; i < host->dma.num_ents; i++)
-                        flush_dcache_page(sg_page(sg++));
-        }
-
-Why are you explicitly flushing the sglist after dma_unmap_sg()?
-At this point it should be synced for the CPU already if I'm not
-mistaken.
-
-I could write up patches for this and probably some more,
-but that's not the point.
-
-The real question: how different is this hardware really? It looks
-very, very similar. I guess there are changes in it as with all hardware
-vendors, but I suspect they may be similar to what we have. Have
-you contemplated just using mmci.c?
-
-Yours,
-Linus Walleij
+--xJK8B5Wah2CMJs8h--
