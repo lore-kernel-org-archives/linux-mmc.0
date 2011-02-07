@@ -1,89 +1,46 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [BUG] CMD52 sent as first command not CMD0
-Date: Sun, 06 Feb 2011 19:55:53 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.1102061953030.12104@xanadu.home>
-References: <C85F98EE-B8C5-4037-A0FF-203265A7575C@marvell.com>
- <20110206003845.GA15019@void.printf.net>
- <BC6C6C10-631A-4482-BA1B-C6F0057BC54A@marvell.com>
- <20110206011514.GA15322@void.printf.net>
- <173274DF-475D-44FB-8C34-25728D12ADBB@marvell.com> <4D4E826E.40905@yahoo.es>
- <00AF35E9-3CE0-44C7-AF18-E765AD5184D0@marvell.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH 1/2] dw_mmc: Run card detect tasklet during slot initialisation.
+Date: Mon, 7 Feb 2011 10:13:34 +0000
+Message-ID: <AANLkTinkCN0UxDTV1RLziF9qwGb5ucZxXcZ47VWMkGf9@mail.gmail.com>
+References: <AANLkTikwVAKaiAy+0Vpcu97qxX3ZKgZ8k_LyNfOU9Ws=@mail.gmail.com>
+	<20110204235027.3b93091b@mfleming-mobl1.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:50784 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754348Ab1BGAz4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Feb 2011 19:55:56 -0500
-Received: from xanadu.home ([66.130.28.92]) by vl-mh-mrz21.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0LG800CR52KHDMA0@vl-mh-mrz21.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Sun, 06 Feb 2011 19:55:30 -0500 (EST)
-In-reply-to: <00AF35E9-3CE0-44C7-AF18-E765AD5184D0@marvell.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:42719 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752277Ab1BGKNf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Feb 2011 05:13:35 -0500
+Received: by bwz15 with SMTP id 15so4710808bwz.19
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Feb 2011 02:13:34 -0800 (PST)
+In-Reply-To: <20110204235027.3b93091b@mfleming-mobl1.ger.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Albert Herranz <albert_herranz@yahoo.es>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Matt Fleming <matt@console-pimps.org>
+Cc: linux-mmc@vger.kernel.org
 
-On Sun, 6 Feb 2011, Philip Rakity wrote:
+On Fri, Feb 4, 2011 at 11:50 PM, Matt Fleming <matt@console-pimps.org> wrote:
+> On Fri, 4 Feb 2011 11:17:54 +0000
+> Will Newton <will.newton@gmail.com> wrote:
+>
+>> We need to run the card detect tasklet at the end of slot
+>> initialisation as it is possible that a card has been inserted prior
+>> to boot, so we miss the insertion interrupt and now the card is
+>> sitting there inserted but with no power to it.
+>
+> So when powering up the board with a card already inserted, an interrupt
+> isn't generated? If that's the case then we haven't "missed" an
+> interrupt as one was never generated, right?
 
-> 
-> On Feb 6, 2011, at 3:13 AM, Albert Herranz wrote:
-> 
-> > Hi,
-> > 
-> > On 02/06/2011 02:35 AM, Philip Rakity wrote:
-> >> 
-> >> proposed solution:  I cannot verify this fix until Monday.
-> >> =====
-> >> 
-> >> CMD52 is a reset for SDIO cards.  CMD0 is not sufficient when
-> >> the card is being re-initialized.  Only send CMD52 if
-> >> a) doing a reinitialize
-> >> b) card is SDIO or SDIO_COMBO
-> >> 
-> >> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> >> ---
-> >> drivers/mmc/core/core.c |    7 ++++++-
-> >> 1 files changed, 6 insertions(+), 1 deletions(-)
-> >> 
-> >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> >> index 30d4da4..f0ce6f6 100644
-> >> --- a/drivers/mmc/core/core.c
-> >> +++ b/drivers/mmc/core/core.c
-> >> @@ -1521,7 +1521,12 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
-> >> 		mmc_hostname(host), __func__, host->f_init);
-> >> #endif
-> >> 	mmc_power_up(host);
-> >> -	sdio_reset(host);
-> >> +
-> >> +	/* reset sdio before CMD0 when card is being reinitialized */
-> >> +	if (host->card &&
-> >> +		(host->card->type == MMC_TYPE_SDIO ||
-> >> +		host->card->type == MMC_TYPE_SD_COMBO))
-> >> +			sdio_reset(host);
-> >> 	mmc_go_idle(host);
-> >> 	mmc_hwungate_clock(host);
-> >> 
-> > 
-> > At least on the Nintendo Wii, a platform reset _does not_ reset the SDIO hardware, and there is no known way to power-off/power-on it.
-> > So, in some cases like after a system reboot, we need to issue a CMD52 before a CMD0 (even if on that particular case host->card is NULL) to properly reset the Nintendo Wii SDIO-based Wireless LAN card from its previous state, otherwise the card is not detected.
-> > 
-> > The proposed fix breaks this and makes the card unavailable after a system reboot.
-> > 
-> > If you are concerned about unconditionally issuing a CMD52 then we can use a quirk to make sure that we always perform a SDIO reset at least for the Nintendo Wii.
-> 
-> Would be happy with either a quirk or comment in the code.   Comment seems easiest.
-> 
-> /* sdhci_reset will generate CMD52 to reset card.  SD/eMMC cards are ignore this */
-> 
-> or something like that.
+I believe it starts up with interrupts masked so we don't actually see
+any interrupts until
+we unmask - and it isn't clear from the documentation whether or not
+an interrupt is generated.
 
-Indeed.  If always issuing cmd52 doesn't bother other types of cards, 
-then I'd simply always send it without trying to be too smart.  On some 
-other boards such as the SheevaPlug it is impossible to power off or 
-reset the card too.
+> If the answer to the above questions is "yes", then you can add my
+> Reviewed-by (though it might be worth changing the bit about missing
+> an interrupt in the commit message). Otherwise, I would have expected
+> the usual interrupt machinery to take care of detecting the inserted
+> card?
 
-
-Nicolas
+Ok I'll update that, thanks for the review!
