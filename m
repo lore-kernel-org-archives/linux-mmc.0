@@ -1,148 +1,90 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH 3/3] mmc_test: add tests to measure large sequential I/O performance
-Date: Tue,  8 Feb 2011 13:41:03 +0200
-Message-ID: <1297165263-656-4-git-send-email-adrian.hunter@nokia.com>
-References: <1297165263-656-1-git-send-email-adrian.hunter@nokia.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([147.243.1.47]:51222 "EHLO mgw-sa01.nokia.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753516Ab1BHLlj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 8 Feb 2011 06:41:39 -0500
-In-Reply-To: <1297165263-656-1-git-send-email-adrian.hunter@nokia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: =?utf-8?Q?Lothar_Wa=C3=9Fmann?= <LW@KARO-electronics.de>
+Subject: Re: [PATCH 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+Date: Tue, 8 Feb 2011 12:41:20 +0100
+Message-ID: <19793.11232.308502.128439@ipc1.ka-ro>
+References: <1296872327-21166-1-git-send-email-shawn.guo@freescale.com>
+	<1296872327-21166-2-git-send-email-shawn.guo@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1296872327-21166-2-git-send-email-shawn.guo@freescale.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: s.hauer@pengutronix.de, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, u.kleine-koenig@pengutronix.de
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Adrian Hunter <adrian.hunter@nokia.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>
 
-Add two large sequential I/O performance tests:
-        35. Large sequential read into scattered pages
-        36. Large sequential write from scattered pages
-
-The tests measure transfer times for 10MiB, 100MiB, 1000MiB.
-
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
----
- drivers/mmc/card/mmc_test.c |  100 +++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 100 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index d1aa57a..5ec8edd 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -1871,6 +1871,92 @@ static int mmc_test_random_write_perf(struct mmc_test_card *test)
- 	return mmc_test_random_perf(test, 1);
- }
- 
-+static int mmc_test_seq_perf(struct mmc_test_card *test, int write,
-+			     unsigned int tot_sz, int max_scatter)
-+{
-+	unsigned int dev_addr, i, cnt, sz, ssz;
-+	struct timespec ts1, ts2, ts;
-+	int ret;
-+
-+	sz = test->area.max_tfr;
-+	/*
-+	 * In the case of a maximally scattered transfer, the maximum transfer
-+	 * size is further limited by using PAGE_SIZE segments.
-+	 */
-+	if (max_scatter) {
-+		struct mmc_test_area *t = &test->area;
-+		unsigned long max_tfr;
-+
-+		if (t->max_seg_sz >= PAGE_SIZE)
-+			max_tfr = t->max_segs * PAGE_SIZE;
-+		else
-+			max_tfr = t->max_segs * t->max_seg_sz;
-+		if (sz > max_tfr)
-+			sz = max_tfr;
-+	}
-+
-+	ssz = sz >> 9;
-+	dev_addr = mmc_test_capacity(test->card) / 4;
-+	if (tot_sz > dev_addr << 9)
-+		tot_sz = dev_addr << 9;
-+	cnt = tot_sz / sz;
-+	dev_addr &= 0xffff0000; /* Round to 64MiB boundary */
-+
-+	getnstimeofday(&ts1);
-+	for (i = 0; i < cnt; i++) {
-+		ret = mmc_test_area_io(test, sz, dev_addr, write,
-+				       max_scatter, 0);
-+		if (ret)
-+			return ret;
-+		dev_addr += ssz;
-+	}
-+	getnstimeofday(&ts2);
-+
-+	ts = timespec_sub(ts2, ts1);
-+	mmc_test_print_avg_rate(test, sz, cnt, &ts1, &ts2);
-+
-+	return 0;
-+}
-+
-+static int mmc_test_large_seq_perf(struct mmc_test_card *test, int write)
-+{
-+	int ret, i;
-+
-+	for (i = 0; i < 10; i++) {
-+		ret = mmc_test_seq_perf(test, write, 10 * 1024 * 1024, 1);
-+		if (ret)
-+			return ret;
-+	}
-+	for (i = 0; i < 5; i++) {
-+		ret = mmc_test_seq_perf(test, write, 100 * 1024 * 1024, 1);
-+		if (ret)
-+			return ret;
-+	}
-+	for (i = 0; i < 3; i++) {
-+		ret = mmc_test_seq_perf(test, write, 1000 * 1024 * 1024, 1);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	return ret;
-+}
-+
-+/*
-+ * Large sequential read performance.
-+ */
-+static int mmc_test_large_seq_read_perf(struct mmc_test_card *test)
-+{
-+	return mmc_test_large_seq_perf(test, 0);
-+}
-+
-+/*
-+ * Large sequential write performance.
-+ */
-+static int mmc_test_large_seq_write_perf(struct mmc_test_card *test)
-+{
-+	return mmc_test_large_seq_perf(test, 1);
-+}
-+
- static const struct mmc_test_case mmc_test_cases[] = {
- 	{
- 		.name = "Basic write (no data verification)",
-@@ -2124,6 +2210,20 @@ static const struct mmc_test_case mmc_test_cases[] = {
- 		.cleanup = mmc_test_area_cleanup,
- 	},
- 
-+	{
-+		.name = "Large sequential read into scattered pages",
-+		.prepare = mmc_test_area_prepare,
-+		.run = mmc_test_large_seq_read_perf,
-+		.cleanup = mmc_test_area_cleanup,
-+	},
-+
-+	{
-+		.name = "Large sequential write from scattered pages",
-+		.prepare = mmc_test_area_prepare,
-+		.run = mmc_test_large_seq_write_perf,
-+		.cleanup = mmc_test_area_cleanup,
-+	},
-+
- };
- 
- static DEFINE_MUTEX(mmc_test_lock);
--- 
-1.7.0.4
-
+SGksCgpTaGF3biBHdW8gd3JpdGVzOgpbLi4uXQo+ICtzdGF0aWMgaW50IG14c19tbWNfcmVtb3Zl
+KHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpCj4gK3sKPiArCXN0cnVjdCBtbWNfaG9zdCAq
+bW1jID0gcGxhdGZvcm1fZ2V0X2RydmRhdGEocGRldik7Cj4gKwlzdHJ1Y3QgbXhzX21tY19ob3N0
+ICpob3N0ID0gbW1jX3ByaXYobW1jKTsKPiArCj4gKwlwbGF0Zm9ybV9zZXRfZHJ2ZGF0YShwZGV2
+LCBOVUxMKTsKPiArCj4gKwltbWNfcmVtb3ZlX2hvc3QobW1jKTsKPiArCj4gKwlkZWxfdGltZXIo
+Jmhvc3QtPnRpbWVyKTsKPiArCj4gKwlmcmVlX2lycShob3N0LT5pcnEsIGhvc3QpOwo+ICsKPiAr
+CWlmIChob3N0LT5kbWFjaCkKPiArCQlkbWFfcmVsZWFzZV9jaGFubmVsKGhvc3QtPmRtYWNoKTsK
+PiArCj4gKwljbGtfZGlzYWJsZShob3N0LT5jbGspOwo+ICsJY2xrX3B1dChob3N0LT5jbGspOwo+
+ICsKPiArCWlvdW5tYXAoaG9zdC0+YmFzZSk7Cj4gKwo+ICsJbW1jX2ZyZWVfaG9zdChtbWMpOwo+
+ICsKPiArCXJlbGVhc2VfbWVtX3JlZ2lvbihob3N0LT5yZXMtPnN0YXJ0LCByZXNvdXJjZV9zaXpl
+KGhvc3QtPnJlcykpOwo+CldoZW4gY29tcGlsZWQgd2l0aCBDT05GSUdfUEFHRV9QT0lTT04gdGhp
+cyBsZWFkcyB0bzoKfG1tYzA6IGNhcmQgY2RlZiByZW1vdmVkCnxVbmFibGUgdG8gaGFuZGxlIGtl
+cm5lbCBwYWdpbmcgcmVxdWVzdCBhdCB2aXJ0dWFsIGFkZHJlc3MgNmI2YjZiNmIKfHBnZCA9IGM2
+ZWE0MDAwCnxbNmI2YjZiNmJdICpwZ2Q9MDAwMDAwMDAKfEludGVybmFsIGVycm9yOiBPb3BzOiAx
+IFsjMV0gUFJFRU1QVAp8bGFzdCBzeXNmcyBmaWxlOiAvc3lzL21vZHVsZS9teHNfbW1jL3JlZmNu
+dAp8TW9kdWxlcyBsaW5rZWQgaW46IG14c19tbWMoLSkgZXZkZXYgbmFuZCBuYW5kX2lkcyBuYW5k
+X2VjYyB0c2MyMDA3IHBjYTk1M3gKfENQVTogMCAgICBOb3QgdGFpbnRlZCAgKDIuNi4zNy1rYXJv
+KyAjMTAwKQp8UEMgaXMgYXQgbXhzX21tY19yZW1vdmUrMHg3OC8weDk0IFtteHNfbW1jXQp8TFIg
+aXMgYXQgbWFya19oZWxkX2xvY2tzKzB4NWMvMHg4NAp8cGMgOiBbPGJmMDMzMTBjPl0gICAgbHIg
+OiBbPGMwMDcxZGEwPl0gICAgcHNyOiAyMDAwMDAxMwp8c3AgOiBjNmUzM2VmOCAgaXAgOiA2YjZi
+NmI2YiAgZnAgOiBiZTgyNWEzOAp8cjEwOiAwMDAwMDAwMCAgcjkgOiBjNmUzMjAwMCAgcjggOiBj
+MDAzNzg4OAp8cjcgOiAwMDU5MTcwMCAgcjYgOiBjNzhkMjRiYyAgcjUgOiBjNmM2ZWE4MCAgcjQg
+OiBjNmM2ZWQ2MAp8cjMgOiA2YjZiNmI2YiAgcjIgOiAwMDAwMDA0MCAgcjEgOiBjNmQ4MzNkMCAg
+cjAgOiBjMDQzYWYxOAp8RmxhZ3M6IG56Q3YgIElSUXMgb24gIEZJUXMgb24gIE1vZGUgU1ZDXzMy
+ICBJU0EgQVJNICBTZWdtZW50IHVzZXIKfENvbnRyb2w6IDAwMDUzMTdmICBUYWJsZTogNDZlYTQw
+MDAgIERBQzogMDAwMDAwMTUKfFByb2Nlc3MgbW9kcHJvYmUgKHBpZDogMTIxNywgc3RhY2sgbGlt
+aXQgPSAweGM2ZTMyMjcwKQp8U3RhY2s6ICgweGM2ZTMzZWY4IHRvIDB4YzZlMzQwMDApCnwzZWUw
+OiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBj
+NzhkMjQ4OCBiZjAzNDEwMAp8M2YwMDogYzc4ZDI0YmMgYzAyMzcwMzQgYzc4ZDI0ODggYzAyMzVl
+NjggYzc4ZDI0ODggYmYwMzQxMDAgYzc4ZDI0YmMgYzAyMzVmMzQKfDNmMjA6IGJmMDM0MTAwIDAw
+MDAwMDgwIGMwNDVjM2U4IGMwMjM1MWM0IGJmMDM0MTM4IDAwMDAwMDgwIGM2ZTMzZjQ0IGMwMDdk
+ZTRjCnwzZjQwOiBiZTgyNTk5YyA1ZjczNzg2ZCAwMDYzNmQ2ZCAwMDAwMDAwMCBjMDFlZmRmMCBj
+NmQ4MzBjMCBjNmQ4MzBjMCBjMDMxOTVlYwp8M2Y2MDogMDAwMDAwMDEgYzZkZGRiZDggYzZlMzNm
+N2MgYzAwNDVmYzQgYzZkODMwYzAgYzAwMzc3ZDggMDAwMDAwMDEgMDAwMDAwODEKfDNmODA6IDYw
+MDAwMDEwIGMwMDcyMGQ0IGJlODI1YTJjIDAwMDAwMDAwIDAwMDAwMDAxIGJlODI1YTJjIDAwNTkx
+NmIwIDAwMDAwMDAxCnwzZmEwOiAwMDAwMDA4MSBjMDAzNzZjMCBiZTgyNWEyYyAwMDU5MTZiMCAw
+MDU5MTcwMCAwMDAwMDA4MCBiZTgyNTk5NCAwMDAwMDAwMAp8M2ZjMDogYmU4MjVhMmMgMDA1OTE2
+YjAgMDAwMDAwMDEgMDAwMDAwODEgMDA1OTE3MDAgMDAwMGM2OWMgMDA1OTE2YmMgYmU4MjVhMzgK
+fDNmZTA6IDAwNTkxNTIwIGJlODI1OWEwIDAwMDBhNDJjIDQwMmFlZTNjIDYwMDAwMDEwIDAwNTkx
+NzAwIGFhYWFhYWFhIGFhYWFhYWFhCnxbPGJmMDMzMTBjPl0gKG14c19tbWNfcmVtb3ZlKzB4Nzgv
+MHg5NCBbbXhzX21tY10pIGZyb20gWzxjMDIzNzAzND5dIChwbGF0Zm9ybV9kcnZfcmVtb3ZlKzB4
+MTgvMHgxYykKfFs8YzAyMzcwMzQ+XSAocGxhdGZvcm1fZHJ2X3JlbW92ZSsweDE4LzB4MWMpIGZy
+b20gWzxjMDIzNWU2OD5dIChfX2RldmljZV9yZWxlYXNlX2RyaXZlcisweDY0LzB4YTQpCnxbPGMw
+MjM1ZTY4Pl0gKF9fZGV2aWNlX3JlbGVhc2VfZHJpdmVyKzB4NjQvMHhhNCkgZnJvbSBbPGMwMjM1
+ZjM0Pl0gKGRyaXZlcl9kZXRhY2grMHg4Yy8weGI0KQp8WzxjMDIzNWYzND5dIChkcml2ZXJfZGV0
+YWNoKzB4OGMvMHhiNCkgZnJvbSBbPGMwMjM1MWM0Pl0gKGJ1c19yZW1vdmVfZHJpdmVyKzB4OGMv
+MHhiNCkKfFs8YzAyMzUxYzQ+XSAoYnVzX3JlbW92ZV9kcml2ZXIrMHg4Yy8weGI0KSBmcm9tIFs8
+YzAwN2RlNGM+XSAoc3lzX2RlbGV0ZV9tb2R1bGUrMHgxZjQvMHgyNjApCnxbPGMwMDdkZTRjPl0g
+KHN5c19kZWxldGVfbW9kdWxlKzB4MWY0LzB4MjYwKSBmcm9tIFs8YzAwMzc2YzA+XSAocmV0X2Zh
+c3Rfc3lzY2FsbCsweDAvMHgzOCkKfENvZGU6IGUxYTAwMDA1IGViNDhjZDQ3IGU1OTQzMDA4IGU1
+OWYwMDE0IChlODkzMDAwNikgCnwtLS1bIGVuZCB0cmFjZSBiYjA2MTc1ODM5NTU0YzNiIF0tLS0K
+aW5kaWNhdGluZyBhIHVzZV9hZnRlcl9mcmVlIEJVRyEKVGhlIHN0cnVjdCBteHNfbW1jX2hvc3Qg
+aGFzIGJlZW4gYWxyZWFkeSBmcmVlZCBoZXJlIGJ5IHRoZQpwcmVjZWRpbmcgbW1jX2ZyZWVfaG9z
+dCgpIGNhbGwuIFRoaXMgc2hvdWxkIGJlOgoJc3RydWN0IHJlc291cmNlICpyZXMgPSBob3N0LT5y
+ZXM7Ci4uLgoJbW1jX2ZyZWVfaG9zdChtbWMpOwoJcmVsZWFzZV9tZW1fcmVnaW9uKHJlcy0+c3Rh
+cnQsIHJlc291cmNlX3NpemUocmVzKSk7CgoKTG90aGFyIFdhw59tYW5uCi0tIApfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwoKS2EtUm8g
+ZWxlY3Ryb25pY3MgR21iSCB8IFBhc2NhbHN0cmHDn2UgMjIgfCBEIC0gNTIwNzYgQWFjaGVuClBo
+b25lOiArNDkgMjQwOCAxNDAyLTAgfCBGYXg6ICs0OSAyNDA4IDE0MDItMTAKR2VzY2jDpGZ0c2bD
+vGhyZXI6IE1hdHRoaWFzIEthdXNzZW4KSGFuZGVsc3JlZ2lzdGVyZWludHJhZzogQW10c2dlcmlj
+aHQgQWFjaGVuLCBIUkIgNDk5NgoKd3d3Lmthcm8tZWxlY3Ryb25pY3MuZGUgfCBpbmZvQGthcm8t
+ZWxlY3Ryb25pY3MuZGUKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxA
+bGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xp
+c3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
