@@ -1,89 +1,102 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: MMC quirks relating to performance/lifetime.
-Date: Tue, 8 Feb 2011 22:38:25 +0100
-Message-ID: <20110208213825.GB29410@pengutronix.de>
-References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="p4qYPpj5QlsIQJ0K"
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH] [patch v4] tmio_mmc: Improve readability of the output of pr_debug_status()
+Date: Wed,  9 Feb 2011 07:25:22 +0900
+Message-ID: <1297203922-25669-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:35338 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751846Ab1BHVia (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Feb 2011 16:38:30 -0500
-Content-Disposition: inline
-In-Reply-To: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:50839 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753878Ab1BHWZb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Feb 2011 17:25:31 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Simon Horman <horms@verge.net.au>
 
+Reviewed-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Signed-off-by: Simon Horman <horms@verge.net.au>
 
---p4qYPpj5QlsIQJ0K
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+---
 
-On Tue, Feb 08, 2011 at 03:22:59PM -0600, Andrei Warkentin wrote:
-> Hi,
->=20
-> I'm not sure if this is the best place to bring this up, but Russel's
-> name is on a fair share of drivers/mmc code, and there does seem to be
-> quite a bit of MMC-related discussions. Excuse me in advance if this
-> isn't the right forum :-).
+v2: As suggested by Guennadi Liakhovetski
+* Pass status and i as parameters to STATUS_TO_TEXT
+* Pad "|" with spaces to further improve readability
 
-Searching for MMC in MAINTAINERS will get you:
+v3: Actually include the v2 changes
+* My git-foo bites again
 
-MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
-M:      Chris Ball <cjb@laptop.org>
-L:      linux-mmc@vger.kernel.org
-=2E..
+v4: Rebase against 2.6.38-rc4
+---
+ drivers/mmc/host/tmio_mmc.c |   50 +++++++++++++++++++++++-------------------
+ 1 files changed, 27 insertions(+), 23 deletions(-)
 
-List CCed...
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index e3c6ef2..a33f718 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -228,36 +228,40 @@ static void tmio_mmc_kunmap_atomic(void *virt, unsigned long *flags)
+ 
+ #ifdef CONFIG_MMC_DEBUG
+ 
+-#define STATUS_TO_TEXT(a) \
++#define STATUS_TO_TEXT(a, status, i) \
+ 	do { \
+-		if (status & TMIO_STAT_##a) \
++		if (status & TMIO_STAT_##a) { \
++			if (i++) \
++				printk(" | "); \
+ 			printk(#a); \
++		} \
+ 	} while (0)
+ 
+ void pr_debug_status(u32 status)
+ {
++	int i = 0;
+ 	printk(KERN_DEBUG "status: %08x = ", status);
+-	STATUS_TO_TEXT(CARD_REMOVE);
+-	STATUS_TO_TEXT(CARD_INSERT);
+-	STATUS_TO_TEXT(SIGSTATE);
+-	STATUS_TO_TEXT(WRPROTECT);
+-	STATUS_TO_TEXT(CARD_REMOVE_A);
+-	STATUS_TO_TEXT(CARD_INSERT_A);
+-	STATUS_TO_TEXT(SIGSTATE_A);
+-	STATUS_TO_TEXT(CMD_IDX_ERR);
+-	STATUS_TO_TEXT(STOPBIT_ERR);
+-	STATUS_TO_TEXT(ILL_FUNC);
+-	STATUS_TO_TEXT(CMD_BUSY);
+-	STATUS_TO_TEXT(CMDRESPEND);
+-	STATUS_TO_TEXT(DATAEND);
+-	STATUS_TO_TEXT(CRCFAIL);
+-	STATUS_TO_TEXT(DATATIMEOUT);
+-	STATUS_TO_TEXT(CMDTIMEOUT);
+-	STATUS_TO_TEXT(RXOVERFLOW);
+-	STATUS_TO_TEXT(TXUNDERRUN);
+-	STATUS_TO_TEXT(RXRDY);
+-	STATUS_TO_TEXT(TXRQ);
+-	STATUS_TO_TEXT(ILL_ACCESS);
++	STATUS_TO_TEXT(CARD_REMOVE, status, i);
++	STATUS_TO_TEXT(CARD_INSERT, status, i);
++	STATUS_TO_TEXT(SIGSTATE, status, i);
++	STATUS_TO_TEXT(WRPROTECT, status, i);
++	STATUS_TO_TEXT(CARD_REMOVE_A, status, i);
++	STATUS_TO_TEXT(CARD_INSERT_A, status, i);
++	STATUS_TO_TEXT(SIGSTATE_A, status, i);
++	STATUS_TO_TEXT(CMD_IDX_ERR, status, i);
++	STATUS_TO_TEXT(STOPBIT_ERR, status, i);
++	STATUS_TO_TEXT(ILL_FUNC, status, i);
++	STATUS_TO_TEXT(CMD_BUSY, status, i);
++	STATUS_TO_TEXT(CMDRESPEND, status, i);
++	STATUS_TO_TEXT(DATAEND, status, i);
++	STATUS_TO_TEXT(CRCFAIL, status, i);
++	STATUS_TO_TEXT(DATATIMEOUT, status, i);
++	STATUS_TO_TEXT(CMDTIMEOUT, status, i);
++	STATUS_TO_TEXT(RXOVERFLOW, status, i);
++	STATUS_TO_TEXT(TXUNDERRUN, status, i);
++	STATUS_TO_TEXT(RXRDY, status, i);
++	STATUS_TO_TEXT(TXRQ, status, i);
++	STATUS_TO_TEXT(ILL_ACCESS, status, i);
+ 	printk("\n");
+ }
+ 
+-- 
+1.7.2.3
 
-> Certain MMC vendors (maybe even quite a bit of them) use a pretty
-> rigid buffering scheme when it comes to handling writes. There is
-> usually a buffer A for random accesses, and a buffer B for sequential
-> accesses. For certain Toshiba parts, it looks like buffer A is 8KB
-> wide, with buffer B being 4MB wide, and all accesses larger than 8KB
-> effectively equating to 4MB accesses. Worse, consecutive small (8k)
-> writes are treated as one large sequential access, once again ending
-> up in buffer B, thus necessitating out-of-order writing to work around
-> this.
->=20
-> What this means is decreased life span for the parts, and it also
-> means a performance impact on small writes, but the first item is much
-> more crucial, especially for smaller parts.
->=20
-> As I've mentioned, probably more vendors are affected. How about a
-> generic MMC_BLOCK quirk that splits the requests (and optionally
-> reorders) them? The thresholds would then be adjustable as
-> module/kernel parameters based on manfid. I'm asking because I have a
-> patch now, but its ugly and hardcoded against a specific manufacturer.
->=20
-> Thanks,
-> A
->=20
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---p4qYPpj5QlsIQJ0K
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAk1Rt9EACgkQD27XaX1/VRsEQACgytf7jjpXNSDqEiw1bNWCWYcd
-pWEAn0Rbrn0y8+IGq6HEGQShs1GhGVC+
-=61BR
------END PGP SIGNATURE-----
-
---p4qYPpj5QlsIQJ0K--
