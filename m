@@ -1,102 +1,58 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH] [patch v4] tmio_mmc: Improve readability of the output of pr_debug_status()
-Date: Wed,  9 Feb 2011 07:25:22 +0900
-Message-ID: <1297203922-25669-1-git-send-email-horms@verge.net.au>
+From: Kevin Hilman <khilman@ti.com>
+Subject: Re: [PATCH 3/5] OMAP3: hwmod data: Add HSMMC
+Date: Tue, 08 Feb 2011 14:30:34 -0800
+Message-ID: <87mxm6jh11.fsf@ti.com>
+References: <1296660462-28489-1-git-send-email-kishore.kadiyala@ti.com>
+	<1296660462-28489-4-git-send-email-kishore.kadiyala@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:50839 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753878Ab1BHWZb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Feb 2011 17:25:31 -0500
+Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:37310 "EHLO
+	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754091Ab1BHWai (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Feb 2011 17:30:38 -0500
+In-Reply-To: <1296660462-28489-4-git-send-email-kishore.kadiyala@ti.com>
+	(Kishore Kadiyala's message of "Wed, 2 Feb 2011 20:57:40 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Simon Horman <horms@verge.net.au>
+To: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, paul@pwsan.com, Rajendra Nayak <rnayak@ti.com>
 
-Reviewed-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Signed-off-by: Simon Horman <horms@verge.net.au>
+Kishore Kadiyala <kishore.kadiyala@ti.com> writes:
 
----
+> From: Paul Walmsley <paul@pwsan.com>
+>
+> Update the omap3 hwmod data with the HSMMC info.
+>
+> Signed-off-by: Paul Walmsley <paul@pwsan.com>
+> Signed-off-by: Kevin Hilman <khilman@deeprootsystems.com>
+> Signed-off-by: Rajendra Nayak <rnayak@ti.com>
+> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
 
-v2: As suggested by Guennadi Liakhovetski
-* Pass status and i as parameters to STATUS_TO_TEXT
-* Pad "|" with spaces to further improve readability
+[...]
 
-v3: Actually include the v2 changes
-* My git-foo bites again
+Just notcied a minor issue below, which was probably inherited from my
+original hacks on this code...
 
-v4: Rebase against 2.6.38-rc4
----
- drivers/mmc/host/tmio_mmc.c |   50 +++++++++++++++++++++++-------------------
- 1 files changed, 27 insertions(+), 23 deletions(-)
+> +static struct omap_hwmod omap3xxx_mmc1_hwmod = {
+> +	.name		= "mmc1_hwmod",
+> +	.mpu_irqs	= mmc1_mpu_irqs,
+> +	.mpu_irqs_cnt	= ARRAY_SIZE(mmc1_mpu_irqs),
+> +	.sdma_reqs	= mmc1_sdma_reqs,
+> +	.sdma_reqs_cnt	= ARRAY_SIZE(mmc1_sdma_reqs),
+> +	.opt_clks	= mmc1_opt_clks,
+> +	.opt_clks_cnt	= ARRAY_SIZE(mmc1_opt_clks),
+> +	.main_clk	= "mmchs1_fck",
+> +	.prcm		= {
+> +		.omap2 = {
+> +			.module_offs = CORE_MOD,
+> +			.prcm_reg_id = 1,
+> +			.module_bit = OMAP3430_GRPSEL_MMC1_SHIFT,
 
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index e3c6ef2..a33f718 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -228,36 +228,40 @@ static void tmio_mmc_kunmap_atomic(void *virt, unsigned long *flags)
- 
- #ifdef CONFIG_MMC_DEBUG
- 
--#define STATUS_TO_TEXT(a) \
-+#define STATUS_TO_TEXT(a, status, i) \
- 	do { \
--		if (status & TMIO_STAT_##a) \
-+		if (status & TMIO_STAT_##a) { \
-+			if (i++) \
-+				printk(" | "); \
- 			printk(#a); \
-+		} \
- 	} while (0)
- 
- void pr_debug_status(u32 status)
- {
-+	int i = 0;
- 	printk(KERN_DEBUG "status: %08x = ", status);
--	STATUS_TO_TEXT(CARD_REMOVE);
--	STATUS_TO_TEXT(CARD_INSERT);
--	STATUS_TO_TEXT(SIGSTATE);
--	STATUS_TO_TEXT(WRPROTECT);
--	STATUS_TO_TEXT(CARD_REMOVE_A);
--	STATUS_TO_TEXT(CARD_INSERT_A);
--	STATUS_TO_TEXT(SIGSTATE_A);
--	STATUS_TO_TEXT(CMD_IDX_ERR);
--	STATUS_TO_TEXT(STOPBIT_ERR);
--	STATUS_TO_TEXT(ILL_FUNC);
--	STATUS_TO_TEXT(CMD_BUSY);
--	STATUS_TO_TEXT(CMDRESPEND);
--	STATUS_TO_TEXT(DATAEND);
--	STATUS_TO_TEXT(CRCFAIL);
--	STATUS_TO_TEXT(DATATIMEOUT);
--	STATUS_TO_TEXT(CMDTIMEOUT);
--	STATUS_TO_TEXT(RXOVERFLOW);
--	STATUS_TO_TEXT(TXUNDERRUN);
--	STATUS_TO_TEXT(RXRDY);
--	STATUS_TO_TEXT(TXRQ);
--	STATUS_TO_TEXT(ILL_ACCESS);
-+	STATUS_TO_TEXT(CARD_REMOVE, status, i);
-+	STATUS_TO_TEXT(CARD_INSERT, status, i);
-+	STATUS_TO_TEXT(SIGSTATE, status, i);
-+	STATUS_TO_TEXT(WRPROTECT, status, i);
-+	STATUS_TO_TEXT(CARD_REMOVE_A, status, i);
-+	STATUS_TO_TEXT(CARD_INSERT_A, status, i);
-+	STATUS_TO_TEXT(SIGSTATE_A, status, i);
-+	STATUS_TO_TEXT(CMD_IDX_ERR, status, i);
-+	STATUS_TO_TEXT(STOPBIT_ERR, status, i);
-+	STATUS_TO_TEXT(ILL_FUNC, status, i);
-+	STATUS_TO_TEXT(CMD_BUSY, status, i);
-+	STATUS_TO_TEXT(CMDRESPEND, status, i);
-+	STATUS_TO_TEXT(DATAEND, status, i);
-+	STATUS_TO_TEXT(CRCFAIL, status, i);
-+	STATUS_TO_TEXT(DATATIMEOUT, status, i);
-+	STATUS_TO_TEXT(CMDTIMEOUT, status, i);
-+	STATUS_TO_TEXT(RXOVERFLOW, status, i);
-+	STATUS_TO_TEXT(TXUNDERRUN, status, i);
-+	STATUS_TO_TEXT(RXRDY, status, i);
-+	STATUS_TO_TEXT(TXRQ, status, i);
-+	STATUS_TO_TEXT(ILL_ACCESS, status, i);
- 	printk("\n");
- }
- 
--- 
-1.7.2.3
+Thee GRPSEL bit isn't the right bit here, and should be the
+EN_MMC1_SHIFT value.  I realize, they're probably the same bitfield, but
+this should be consistent with the other hwmods.
 
+Same issue with other MMC hwmods.
+
+Kevin
