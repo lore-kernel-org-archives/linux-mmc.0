@@ -1,53 +1,46 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: Improve MMC_TEST config text.
-Date: Thu, 10 Feb 2011 19:48:27 +0000
-Message-ID: <20110210194827.GC19076@void.printf.net>
-References: <AANLkTinps7xSofxw8opY4A5X=14jT+EE4P2bo=-F16q_@mail.gmail.com>
+Subject: Re: [PATCH] mmc: Ensure prototypes for SD API are visible in sd.c
+Date: Thu, 10 Feb 2011 19:50:37 +0000
+Message-ID: <20110210195037.GD19076@void.printf.net>
+References: <1297335517-26248-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56303 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:56318 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752507Ab1BJTs2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Feb 2011 14:48:28 -0500
+	id S1756375Ab1BJTui (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Feb 2011 14:50:38 -0500
 Content-Disposition: inline
-In-Reply-To: <AANLkTinps7xSofxw8opY4A5X=14jT+EE4P2bo=-F16q_@mail.gmail.com>
+In-Reply-To: <1297335517-26248-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: linux-mmc@vger.kernel.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: linux-mmc@vger.kernel.org, patches@opensource.wolfsonmicro.com
 
-Hi,
+Hi Mark,
 
-On Thu, Feb 10, 2011 at 10:41:02AM +0000, Will Newton wrote:
-> The test file is created under debugfs, not sysfs. Also remove
-> the unnecessary default n.
+On Thu, Feb 10, 2011 at 10:58:37AM +0000, Mark Brown wrote:
+> So we know the implementation and prototypes agree with each other.
 > 
-> Signed-off-by: Will Newton <will.newton@imgtec.com>
+> Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
 > ---
->  drivers/mmc/card/Kconfig |    3 +--
->  1 files changed, 1 insertions(+), 2 deletions(-)
+>  drivers/mmc/core/sd.c |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
 > 
-> diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
-> index 2a876c4..3b1f783 100644
-> --- a/drivers/mmc/card/Kconfig
-> +++ b/drivers/mmc/card/Kconfig
-> @@ -58,12 +58,11 @@ config SDIO_UART
-> 
->  config MMC_TEST
->  	tristate "MMC host test driver"
-> -	default n
->  	help
->  	  Development driver that performs a series of reads and writes
->  	  to a memory card in order to expose certain well known bugs
->  	  in host controllers. The tests are executed by writing to the
-> -	  "test" file in sysfs under each card. Note that whatever is
-> +	  "test" file in debugfs under each card. Note that whatever is
->  	  on your card will be overwritten by these tests.
-> 
->  	  This driver is only of interest to those developing or
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index d18c32b..6dac89f 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -21,6 +21,7 @@
+>  #include "core.h"
+>  #include "bus.h"
+>  #include "mmc_ops.h"
+> +#include "sd.h"
+>  #include "sd_ops.h"
+>  
+>  static const unsigned int tran_exp[] = {
 
-Pushed to mmc-next for .39, thanks.
+Thanks, pushed to mmc-next for .39.
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
