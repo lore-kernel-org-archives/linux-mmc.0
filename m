@@ -1,47 +1,40 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: Ensure prototypes for SD API are visible in sd.c
-Date: Thu, 10 Feb 2011 19:50:37 +0000
-Message-ID: <20110210195037.GD19076@void.printf.net>
-References: <1297335517-26248-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+From: Paul Walmsley <paul@pwsan.com>
+Subject: Re: [PATCH 1/5] OMAP2420: hwmod data: Add HSMMC
+Date: Thu, 10 Feb 2011 12:52:53 -0700 (MST)
+Message-ID: <alpine.DEB.2.00.1102101251390.21991@utopia.booyaka.com>
+References: <1296660462-28489-1-git-send-email-kishore.kadiyala@ti.com> <1296660462-28489-2-git-send-email-kishore.kadiyala@ti.com> <alpine.DEB.2.00.1102081622180.21991@utopia.booyaka.com> <AANLkTikLLSXGg+VMubeRs-K=EBUuna5gFwGjvn=SsPB7@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56318 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756375Ab1BJTui (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Feb 2011 14:50:38 -0500
-Content-Disposition: inline
-In-Reply-To: <1297335517-26248-1-git-send-email-broonie@opensource.wolfsonmicro.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="155748971-646867055-1297367573=:21991"
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <AANLkTikLLSXGg+VMubeRs-K=EBUuna5gFwGjvn=SsPB7@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: linux-mmc@vger.kernel.org, patches@opensource.wolfsonmicro.com
 
-Hi Mark,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-On Thu, Feb 10, 2011 at 10:58:37AM +0000, Mark Brown wrote:
-> So we know the implementation and prototypes agree with each other.
-> 
-> Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
-> ---
->  drivers/mmc/core/sd.c |    1 +
->  1 files changed, 1 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index d18c32b..6dac89f 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -21,6 +21,7 @@
->  #include "core.h"
->  #include "bus.h"
->  #include "mmc_ops.h"
-> +#include "sd.h"
->  #include "sd_ops.h"
->  
->  static const unsigned int tran_exp[] = {
+--155748971-646867055-1297367573=:21991
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Thanks, pushed to mmc-next for .39.
+On Thu, 10 Feb 2011, Kadiyala, Kishore wrote:
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> On Wed, Feb 9, 2011 at 4:59 AM, Paul Walmsley <paul@pwsan.com> wrote:
+> > On Wed, 2 Feb 2011, Kishore Kadiyala wrote:
+> >
+> >> Update the omap2420 hwmod data with the HSMMC info.
+> >
+> > Umm, this doesn't look right. =A0OMAP2420 doesn't have an HSMMC block a=
+s far
+> > as I know. =A0It also uses a different driver than later OMAPs.
+>=20
+> OK , I will update this in V3.
+
+Tony says that the N800 MMC slots should work with the current kernel. =20
+So please test your patches on N800 before resending...
+
+
+- Paul
+--155748971-646867055-1297367573=:21991--
