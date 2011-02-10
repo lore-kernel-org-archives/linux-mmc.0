@@ -1,44 +1,56 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 05/11] sh_mmcif: unmap with the proper sglen
-Date: Thu, 10 Feb 2011 16:09:40 +0100
-Message-ID: <1297350580-2068-1-git-send-email-linus.walleij@linaro.org>
+Subject: [PATCH 02/11] atmel-mci: conform to DMA-API
+Date: Thu, 10 Feb 2011 16:08:16 +0100
+Message-ID: <1297350496-1263-1-git-send-email-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail.df.lth.se ([194.47.250.12]:53476 "EHLO df.lth.se"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1756530Ab1BJPtO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Feb 2011 10:49:14 -0500
+	id S1756547Ab1BJPtQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Feb 2011 10:49:16 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Dan Williams <dan.j.williams@intel.com>, Paul Mundt <lethal@linux-sh.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Dan Williams <dan.j.williams@intel.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-According to the DMA-API you shall unmap the sglists with the same
-sglist length as passed into the mapping function, not the
-returned value from the mapping function.
+Fixes the following:
+- It is perfectly legal for the dma_map_sg() to return fewer
+  entries than were passed in.
+- Supply the returned numer of (possibly coalesced) entries to
+  the device_pre_slave_sg() function.
+- Use the proper original sg_len when unmapping the sglist
+  in the error path.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/sh_mmcif.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/atmel-mci.c |    7 +++----
+ 1 files changed, 3 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 8e4aba9..61ad19e 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -195,11 +195,11 @@ static void mmcif_dma_complete(void *arg)
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 045bdbb..df5a135 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -687,10 +687,9 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
  
- 	if (host->data->flags & MMC_DATA_READ)
- 		dma_unmap_sg(host->chan_rx->device->dev,
--			     host->data->sg, host->dma_sglen,
-+			     host->data->sg, host->data->sg_len,
- 			     DMA_FROM_DEVICE);
- 	else
- 		dma_unmap_sg(host->chan_tx->device->dev,
--			     host->data->sg, host->dma_sglen,
-+			     host->data->sg, host->data->sg_len,
- 			     DMA_TO_DEVICE);
+ 	sglen = dma_map_sg(chan->device->dev, data->sg,
+ 			   data->sg_len, direction);
+-	if (sglen != data->sg_len)
+-		goto unmap_exit;
++
+ 	desc = chan->device->device_prep_slave_sg(chan,
+-			data->sg, data->sg_len, direction,
++			data->sg, sglen, direction,
+ 			DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+ 	if (!desc)
+ 		goto unmap_exit;
+@@ -701,7 +700,7 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
  
- 	complete(&host->dma_complete);
+ 	return 0;
+ unmap_exit:
+-	dma_unmap_sg(chan->device->dev, data->sg, sglen, direction);
++	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, direction);
+ 	return -ENOMEM;
+ }
+ 
 -- 
 1.7.4
 
