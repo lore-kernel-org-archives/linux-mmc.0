@@ -1,58 +1,63 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 01/11] atmel-mci: map DMA sglist on the DMA engine
-Date: Thu, 10 Feb 2011 16:08:06 +0100
-Message-ID: <1297350486-1004-1-git-send-email-linus.walleij@linaro.org>
+Subject: [PATCH 10/11] tmio_mmc: drop dma_sglen state variable
+Date: Thu, 10 Feb 2011 16:10:56 +0100
+Message-ID: <1297350656-3392-1-git-send-email-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail.df.lth.se ([194.47.250.12]:53476 "EHLO df.lth.se"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1756547Ab1BJPtR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Feb 2011 10:49:17 -0500
+	id S1756531Ab1BJPtT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Feb 2011 10:49:19 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Dan Williams <dan.j.williams@intel.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Dan Williams <dan.j.williams@intel.com>, Ian Molton <ian@mnementh.co.uk>, Linus Walleij <linus.walleij@linaro.org>
 
-As established for the MMCI, it is proper to map the DMA buffers
-on the DMA engine which is the one actually performing the DMA.
+This variable doesn't seem to be used for anything after the
+other patches so just drop it.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/atmel-mci.c |    8 +++++---
- 1 files changed, 5 insertions(+), 3 deletions(-)
+ drivers/mmc/host/tmio_mmc.c |    9 ++-------
+ 1 files changed, 2 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index ad2a7a0..045bdbb 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -578,7 +578,8 @@ static void atmci_dma_cleanup(struct atmel_mci *host)
- 	struct mmc_data			*data = host->data;
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 5da2e17..708b3a1 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -152,7 +152,6 @@ struct tmio_mmc_host {
+ 	struct tasklet_struct	dma_complete;
+ 	struct tasklet_struct	dma_issue;
+ #ifdef CONFIG_TMIO_MMC_DMA
+-	unsigned int            dma_sglen;
+ 	u8			bounce_buf[PAGE_CACHE_SIZE] __attribute__((aligned(MAX_ALIGN)));
+ 	struct scatterlist	bounce_sg;
+ #endif
+@@ -826,11 +825,9 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
+ 	}
  
- 	if (data)
--		dma_unmap_sg(&host->pdev->dev, data->sg, data->sg_len,
-+		dma_unmap_sg(host->dma.chan->device->dev,
-+			     data->sg, data->sg_len,
- 			     ((data->flags & MMC_DATA_WRITE)
- 			      ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
- }
-@@ -684,7 +685,8 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
- 	else
- 		direction = DMA_TO_DEVICE;
+ 	ret = dma_map_sg(chan->device->dev, sg, host->sg_len, DMA_FROM_DEVICE);
+-	if (ret > 0) {
+-		host->dma_sglen = ret;
++	if (ret > 0)
+ 		desc = chan->device->device_prep_slave_sg(chan, sg, ret,
+ 			DMA_FROM_DEVICE, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+-	}
  
--	sglen = dma_map_sg(&host->pdev->dev, data->sg, data->sg_len, direction);
-+	sglen = dma_map_sg(chan->device->dev, data->sg,
-+			   data->sg_len, direction);
- 	if (sglen != data->sg_len)
- 		goto unmap_exit;
- 	desc = chan->device->device_prep_slave_sg(chan,
-@@ -699,7 +701,7 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 	if (desc) {
+ 		desc->callback = tmio_dma_complete;
+@@ -907,11 +904,9 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
+ 	}
  
- 	return 0;
- unmap_exit:
--	dma_unmap_sg(&host->pdev->dev, data->sg, sglen, direction);
-+	dma_unmap_sg(chan->device->dev, data->sg, sglen, direction);
- 	return -ENOMEM;
- }
+ 	ret = dma_map_sg(chan->device->dev, sg, host->sg_len, DMA_TO_DEVICE);
+-	if (ret > 0) {
+-		host->dma_sglen = ret;
++	if (ret > 0)
+ 		desc = chan->device->device_prep_slave_sg(chan, sg, ret,
+ 			DMA_TO_DEVICE, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+-	}
  
+ 	if (desc) {
+ 		desc->callback = tmio_dma_complete;
 -- 
 1.7.4
 
