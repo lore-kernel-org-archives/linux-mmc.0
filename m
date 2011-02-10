@@ -1,74 +1,51 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 2/3] sdhci-pci : Enable runtime PM support
-Date: Thu, 10 Feb 2011 04:37:18 +0000
-Message-ID: <20110210043718.GA7585@void.printf.net>
-References: <cover.1297014479.git.pierre.tardy@intel.com> <6722fa7986194808f4d69a1e5ba6d3f163b77da9.1297014479.git.pierre.tardy@intel.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: [PATCH 1/2] dw_mmc: Run card detect tasklet during slot initialisation.
+Date: Thu, 10 Feb 2011 10:40:42 +0000
+Message-ID: <AANLkTi=NFjSaGFOrJm24nHB_ngEyqA6eQ4g835yQDMdX@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34749 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755228Ab1BJEhW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 9 Feb 2011 23:37:22 -0500
-Content-Disposition: inline
-In-Reply-To: <6722fa7986194808f4d69a1e5ba6d3f163b77da9.1297014479.git.pierre.tardy@intel.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:52996 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755219Ab1BJKko (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2011 05:40:44 -0500
+Received: by bwz15 with SMTP id 15so1947000bwz.19
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Feb 2011 02:40:43 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Tardy <pierre.tardy@intel.com>
-Cc: linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Yunpeng Gao <yunpeng.gao@intel.com>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Matt Fleming <matt@console-pimps.org>
 
-Hi Pierre,
+We need to run the card detect tasklet at the end of slot initialisation
+as it is possible that a card has been inserted prior to boot, so we don't
+see an insertion interrupt and now the card is sitting there inserted but with
+no power to it.
 
-On Sun, Feb 06, 2011 at 07:02:49PM +0100, Pierre Tardy wrote:
-> From: Yunpeng Gao <yunpeng.gao@intel.com>
-> 
-> Follow the kernel runtime PM framework, enable runtime PM support of the
-> sdhci host controller with pci interface.
-> 
-> Note that this patch implements runtime_pm but now actually detects
-> activity.
-> It relies on higher level (childrens) to do actual waking up
-> Activity detection is put in following patch
+Signed-off-by: Neil Jones <neil.jones@imgtec.com>
+Signed-off-by: Will Newton <will.newton@imgtec.com>
+Reviewed-by: Matt Fleming <matt@console-pimps.org>
+---
+ drivers/mmc/host/dw_mmc.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
 
-Testing this patchset in linux-next-20100208 gives:
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 2fcc825..0b0bedd 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1441,6 +1441,13 @@ static int __init dw_mci_init_slot(struct
+dw_mci *host, unsigned int id)
+ 	/* Card initially undetected */
+ 	slot->last_detect_state = 0;
 
-[   10.829223] sdhci: Secure Digital Host Controller Interface driver
-[   10.829548] sdhci: Copyright(c) Pierre Ossman
-[   10.883906] sdhci-pci 0000:0d:00.0: SDHCI controller found [1180:e822] (rev 1)
-[   10.884533] sdhci-pci 0000:0d:00.0: PCI INT A -> GSI 16 (level, low) -> IRQ 16
-[   10.885189] sdhci-pci 0000:0d:00.0: Will use DMA mode even though HW doesn't fully claim to support it.
-[   10.886176] sdhci-pci 0000:0d:00.0: setting latency timer to 64
-[   10.886819] Registered led device: mmc0::
-[   10.887281] mmc0: SDHCI controller on PCI [0000:0d:00.0] using DMA
-[   10.887724] sdhci-pci 0000:0d:00.0: Unbalanced pm_runtime_enable!
-[   10.888498] sdhci-pci 0000:17:00.0: SDHCI controller found [1180:e822] (rev 1)
-[   10.889179] sdhci-pci 0000:17:00.0: PCI INT A -> GSI 19 (level, low) -> IRQ 19
-[   10.889876] sdhci-pci 0000:17:00.0: Will use DMA mode even though HW doesn't fully claim to support it.
-[   10.890924] sdhci-pci 0000:17:00.0: setting latency timer to 64
-[   10.891387] Registered led device: mmc1::
-[   10.891900] mmc1: SDHCI controller on PCI [0000:17:00.0] using DMA
-[   10.892280] sdhci-pci 0000:17:00.0: Unbalanced pm_runtime_enable!
-
-(Note the last line above.)
-
-I then removed the card and reinserted it, but there's no dmesg output
-related to the reinsert, only to the card removal:
-
-[   65.381047] mmc0: card d555 removed
-
-So, card insertion is broken.  I then did rmmod sdhci-pci && modprobe
-sdhci-pci, and it picked up the card again.
-
-There was also a weird UI hang for a few hundred msecs around the time
-the second modprobe happened, but I don't expect you to be able to do
-anything about that without a more helpful report; if it happens again
-I'll try to record what's going on using ftrace.
-
-Full dmesg is at:
-   http://dev.laptop.org/~cjb/logs/runtime-pm-sdhci-20100209.log
-
-Thanks,
++
++	/*
++	 * Card may have been plugged in prior to boot so we
++	 * need to run the detect tasklet
++	 */
++	tasklet_schedule(&host->card_tasklet);
++
+ 	return 0;
+ }
 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.3.4
