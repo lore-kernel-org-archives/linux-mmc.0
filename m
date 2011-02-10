@@ -1,51 +1,41 @@
 From: Will Newton <will.newton@gmail.com>
-Subject: [PATCH 1/2] dw_mmc: Run card detect tasklet during slot initialisation.
-Date: Thu, 10 Feb 2011 10:40:42 +0000
-Message-ID: <AANLkTi=NFjSaGFOrJm24nHB_ngEyqA6eQ4g835yQDMdX@mail.gmail.com>
+Subject: [PATCH 2/2] dw_mmc: Enable low-power mode for the card clock.
+Date: Thu, 10 Feb 2011 10:40:57 +0000
+Message-ID: <AANLkTikkCeo2YSyw_w7Qny0k9iugrM59pFWDTSwQx=i2@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-bw0-f46.google.com ([209.85.214.46]:52996 "EHLO
 	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755219Ab1BJKko (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2011 05:40:44 -0500
-Received: by bwz15 with SMTP id 15so1947000bwz.19
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Feb 2011 02:40:43 -0800 (PST)
+	with ESMTP id S1756124Ab1BJKk6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2011 05:40:58 -0500
+Received: by mail-bw0-f46.google.com with SMTP id 15so1947000bwz.19
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Feb 2011 02:40:57 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Matt Fleming <matt@console-pimps.org>
 
-We need to run the card detect tasklet at the end of slot initialisation
-as it is possible that a card has been inserted prior to boot, so we don't
-see an insertion interrupt and now the card is sitting there inserted but with
-no power to it.
+Setting this bit in the clock enable register will stop the clock
+when the card is in the IDLE state.
 
-Signed-off-by: Neil Jones <neil.jones@imgtec.com>
 Signed-off-by: Will Newton <will.newton@imgtec.com>
-Reviewed-by: Matt Fleming <matt@console-pimps.org>
 ---
- drivers/mmc/host/dw_mmc.c |    7 +++++++
- 1 files changed, 7 insertions(+), 0 deletions(-)
+ drivers/mmc/host/dw_mmc.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2fcc825..0b0bedd 100644
+index 0b0bedd..4cf560d 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1441,6 +1441,13 @@ static int __init dw_mci_init_slot(struct
-dw_mci *host, unsigned int id)
- 	/* Card initially undetected */
- 	slot->last_detect_state = 0;
+@@ -562,7 +562,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+ 			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
 
-+
-+	/*
-+	 * Card may have been plugged in prior to boot so we
-+	 * need to run the detect tasklet
-+	 */
-+	tasklet_schedule(&host->card_tasklet);
-+
- 	return 0;
- }
+ 		/* enable clock */
+-		mci_writel(host, CLKENA, SDMMC_CLKEN_ENABLE);
++		mci_writel(host, CLKENA, SDMMC_CLKEN_ENABLE |
++			   SDMMC_CLKEN_LOW_PWR);
 
+ 		/* inform CIU */
+ 		mci_send_cmd(slot,
 -- 
 1.7.3.4
