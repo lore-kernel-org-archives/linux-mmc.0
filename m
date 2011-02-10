@@ -1,58 +1,75 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: [PATCH 0/5] sdhci-esdhc-imx: use gpio for write protection and card detection
-Date: Thu, 10 Feb 2011 20:14:46 +0100
-Message-ID: <1297365291-1038-1-git-send-email-w.sang@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Subject: [PATCH 4/5] arm: mach-mx3: pcm043: add write-protect and card-detect for SD1
+Date: Thu, 10 Feb 2011 20:14:50 +0100
+Message-ID: <1297365291-1038-5-git-send-email-w.sang@pengutronix.de>
+References: <1297365291-1038-1-git-send-email-w.sang@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:49298 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:49308 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755833Ab1BJTPZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2011 14:15:25 -0500
+	with ESMTP id S1756689Ab1BJTPd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2011 14:15:33 -0500
+In-Reply-To: <1297365291-1038-1-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, =?UTF-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>, Zhu Richard-R65037 <r65037@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>
 
-Hi,
+Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
+---
+ arch/arm/mach-mx3/mach-pcm043.c |   13 ++++++++++++-
+ 1 files changed, 12 insertions(+), 1 deletions(-)
 
-I finally could do a second version of my write protect-patches and the first
-version of a card detect approach (thanks to Olof for the inspiration here).
-Note that these feature are only needed for i.mx25/35 as the i.mx5x-series
-_finally_ seem to be able to route the gpios to the controller directly.
-
-These patches apply to mmc-next and have been tested with a mx35-based pcm043.
-I think the first three patches should go via Chris and the latter two via
-Sascha. The last one is more a cleanup-patch, but it depends on the former, so
-I included it here.
-
-The branch can be found at:
-
-	git://git.pengutronix.de/git/wsa/linux-2.6.git pcm043-mmc
-
-Eric: Would be awesome if you could test these on your boards!
-
-Looking forward to comments,
-
-   Wolfram
-
-Wolfram Sang (5):
-  mmc: sdhci-esdhc-imx: add support for write protect on custom GPIO
-  mmc: sdhci-esdhc: broken card detection is not a default quirk
-  mmc: sdhci-esdhc-imx: add card detect on custom GPIO
-  arm: mach-mx3: pcm043: add write-protect and card-detect for SD1
-  arm: mach-mx3: use IMX_GPIO_NR instead of hard-coded values
-
- arch/arm/mach-mx3/eukrea_mbimxsd-baseboard.c |    4 +-
- arch/arm/mach-mx3/mach-cpuimx35.c            |    2 +-
- arch/arm/mach-mx3/mach-pcm043.c              |   19 +++-
- arch/arm/plat-mxc/include/mach/esdhc.h       |   12 ++-
- drivers/mmc/host/sdhci-esdhc-imx.c           |  129 +++++++++++++++++++++++---
- drivers/mmc/host/sdhci-esdhc.h               |    1 -
- drivers/mmc/host/sdhci-of-esdhc.c            |    3 +-
- 7 files changed, 148 insertions(+), 22 deletions(-)
-
+diff --git a/arch/arm/mach-mx3/mach-pcm043.c b/arch/arm/mach-mx3/mach-pcm043.c
+index bcf83fc..26b686c 100644
+--- a/arch/arm/mach-mx3/mach-pcm043.c
++++ b/arch/arm/mach-mx3/mach-pcm043.c
+@@ -40,6 +40,7 @@
+ #include <mach/mx3fb.h>
+ #include <mach/ulpi.h>
+ #include <mach/audmux.h>
++#include <mach/esdhc.h>
+ 
+ #include "devices-imx35.h"
+ #include "devices.h"
+@@ -219,12 +220,17 @@ static iomux_v3_cfg_t pcm043_pads[] = {
+ 	MX35_PAD_SD1_DATA1__ESDHC1_DAT1,
+ 	MX35_PAD_SD1_DATA2__ESDHC1_DAT2,
+ 	MX35_PAD_SD1_DATA3__ESDHC1_DAT3,
++	MX35_PAD_ATA_DATA10__GPIO2_23, /* WriteProtect */
++	MX35_PAD_ATA_DATA11__GPIO2_24, /* CardDetect */
+ };
+ 
+ #define AC97_GPIO_TXFS	(1 * 32 + 31)
+ #define AC97_GPIO_TXD	(1 * 32 + 28)
+ #define AC97_GPIO_RESET	(1 * 32 + 0)
+ 
++#define SD1_GPIO_WP	(1 * 32 + 23)
++#define SD1_GPIO_CD	(1 * 32 + 24)
++
+ static void pcm043_ac97_warm_reset(struct snd_ac97 *ac97)
+ {
+ 	iomux_v3_cfg_t txfs_gpio = MX35_PAD_STXFS4__GPIO2_31;
+@@ -307,6 +313,11 @@ pcm037_nand_board_info __initconst = {
+ 	.hw_ecc = 1,
+ };
+ 
++static struct esdhc_platform_data sd1_pdata = {
++	.wp_gpio = SD1_GPIO_WP,
++	.cd_gpio = SD1_GPIO_CD,
++};
++
+ #if defined(CONFIG_USB_ULPI)
+ static struct mxc_usbh_platform_data otg_pdata __initdata = {
+ 	.portsc	= MXC_EHCI_MODE_UTMI,
+@@ -393,7 +404,7 @@ static void __init mxc_board_init(void)
+ 		imx35_add_fsl_usb2_udc(&otg_device_pdata);
+ 
+ 	imx35_add_flexcan1(NULL);
+-	imx35_add_sdhci_esdhc_imx(0, NULL);
++	imx35_add_sdhci_esdhc_imx(0, &sd1_pdata);
+ }
+ 
+ static void __init pcm043_timer_init(void)
 -- 
 1.7.2.3
 
