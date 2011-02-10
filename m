@@ -1,53 +1,81 @@
-From: Kevin Hilman <khilman@ti.com>
-Subject: Re: [PATCH 5/5] OMAP: devices: Modify HSMMC device to adapt to hwmod framework
-Date: Thu, 10 Feb 2011 13:10:39 -0800
-Message-ID: <87d3mzioj4.fsf@ti.com>
-References: <1296660462-28489-1-git-send-email-kishore.kadiyala@ti.com>
-	<1296660462-28489-6-git-send-email-kishore.kadiyala@ti.com>
-	<878vxqi0un.fsf@ti.com>
-	<AANLkTimN68yMC6BxHOvsJSu_Ddw8Lxr9oxzpx3vy7gxP@mail.gmail.com>
+From: Marc Reilly <marc@cpdesign.com.au>
+Subject: Re: [PATCH 1/5] mmc: sdhci-esdhc-imx: add support for write protect
+	on custom GPIO
+Date: Fri, 11 Feb 2011 09:24:38 +1100
+Message-ID: <201102110924.38338.marc@cpdesign.com.au>
+References: <1297365291-1038-1-git-send-email-w.sang@pengutronix.de>
+	<1297365291-1038-2-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:34113 "EHLO
-	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755660Ab1BJVKn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2011 16:10:43 -0500
-In-Reply-To: <AANLkTimN68yMC6BxHOvsJSu_Ddw8Lxr9oxzpx3vy7gxP@mail.gmail.com>
-	(Kishore Kadiyala's message of "Thu, 10 Feb 2011 22:38:16 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1297365291-1038-2-git-send-email-w.sang@pengutronix.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Zhu Richard-R65037 <r65037@freescale.com>, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, kernel@pengutronix.de, Eric =?iso-8859-1?q?B=E9nard?= <eric@eukrea.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, paul@pwsan.com
 
-"Kadiyala, Kishore" <kishore.kadiyala@ti.com> writes:
+Hi Wolfram,
 
-[...]
+First three patches work well on my vpr200 board (mx35). 
+One comment inline...
 
->
->>
->> The board code should simply call some mmc init routine optionally
->> passing int the platform_data, just like is done for hsmmc_init.
->>
->> With common hwmod data, shouldn't it be possible to unify the init of
->> MMC and HS-MMC controllers?
->
-> The init of MMC & HS-MMC are different.
+I ran some tests of insert/remove card with the card locked and unlocked, and 
+trying to append a file. It behaved as expected, thus:
 
-> HSMMC supported boards, the board file fills an intermediate structure
-> omap2_hsmmc_info which is used by the hsmmc.c file to update the
-> omap_mmc_platform_data.
->
-> MMC supported boards, the board file fills the omap_mmc_platform_data.
+Tested-by: Marc Reilly <marc@cpdesign.com.au> 
 
-Yes, I understand how they are different _today_.  My question is that
-now that we're using hwmod, is there any real reason they need to remain
-different.
 
->
-> Ok, will try to keep an API common for init of both MMC & HSMMC
->
+> +static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
+> +{
+> +	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
+> +
+> +	if (boarddata && gpio_is_valid(boarddata->wp_gpio))
+> +		return gpio_get_value(boarddata->wp_gpio);
+> +	else
+> +		return -ENOSYS;
+> +}
+> +
 
-Thanks,
+..snip..
 
-Kevin
+> @@ -116,9 +139,20 @@ static int esdhc_pltfm_init(struct sdhci_host *host,
+> struct sdhci_pltfm_data *pd if (cpu_is_mx35() || cpu_is_mx51())
+>  		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> 
+> -	/* Fix errata ENGcm07207 which is present on i.MX25 and i.MX35 */
+> -	if (cpu_is_mx25() || cpu_is_mx35())
+> +	if (cpu_is_mx25() || cpu_is_mx35()) {
+> +		/* Fix errata ENGcm07207 present on i.MX25 and i.MX35 */
+>  		host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK;
+> +		/* write_protect can't be routed to controller, use gpio */
+> +		sdhci_esdhc_ops.get_ro = esdhc_pltfm_get_ro;
+> +	}
+> +
+> +	if (boarddata) {
+
+Perhaps (boarddata && gpio_is_valid(boarddata->wp_gpio) as above?
+
+For example what if someone sets up the boarddata for a card detect, but not 
+write protect.
+
+> +		err = gpio_request_one(boarddata->wp_gpio, GPIOF_IN, "ESDHC_WP");
+> +		if (err) {
+> +			dev_warn(mmc_dev(host->mmc), "can't get wp_pin!\n");
+> +			boarddata->wp_gpio = err;
+> +		}
+> +	}
+> 
+>  	return 0;
+>  }
+
+Cheers,
+Marc
