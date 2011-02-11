@@ -1,95 +1,75 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
-Date: Fri, 11 Feb 2011 16:51:35 +0100
-Message-ID: <201102111651.35530.arnd@arndb.de>
-References: <1296872327-21166-1-git-send-email-shawn.guo@freescale.com> <201102101817.42099.arnd@arndb.de> <20110211231417.GC9289@S2100-06.ap.freescale.net>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: Moving platform_data contents to device tree
+Date: Fri, 11 Feb 2011 09:01:14 -0700
+Message-ID: <AANLkTi=1UH-YBgS18pLbuGRGX02Xwxpek-wTGk5B3rGx@mail.gmail.com>
+References: <AANLkTikGa9dkM5DMJrM=RDs9twMY=uE21u5NmOv-=dPG@mail.gmail.com> <4D555983.7090102@gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:53348 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756811Ab1BKPvl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Feb 2011 10:51:41 -0500
-In-Reply-To: <20110211231417.GC9289@S2100-06.ap.freescale.net>
+Received: from mail-yi0-f46.google.com ([209.85.218.46]:53954 "EHLO
+	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757247Ab1BKQBv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Feb 2011 11:01:51 -0500
+Received: by yib18 with SMTP id 18so1126922yib.19
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Feb 2011 08:01:50 -0800 (PST)
+In-Reply-To: <4D555983.7090102@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: linux-arm-kernel@lists.infradead.org, s.hauer@pengutronix.de, cjb@laptop.org, linux-mmc@vger.kernel.org, u.kleine-koenig@pengutronix.de
+To: Rob Herring <robherring2@gmail.com>
+Cc: Thomas Abraham <thomas.abraham@linaro.org>, devicetree-discuss <devicetree-discuss@lists.ozlabs.org>, linux-mmc@vger.kernel.org
 
-On Saturday 12 February 2011, Shawn Guo wrote:
-> On Thu, Feb 10, 2011 at 06:17:41PM +0100, Arnd Bergmann wrote:
-> > On Friday 11 February 2011, Shawn Guo wrote:
-> > > 
-> > > > > +	struct mxs_dma_data		dma_data;
-> > > > 
-> > > > Why do you need host specific DMA structures? Please stick to
-> > > > the generic dma-engine API if possible.
-> > > > 
-> > > I'm sticking to the generic dmaengine api.  The mxs dma hardware
-> > > has separate irq line for every single dma channel, which needs to
-> > > be told by client driver.
-> > 
-> > I'm not convinced, it still sounds like a layering violation to
-> > have specific information about the DMA controller in the
-> > platform data of a driver using the dma engine API.
-> > 
-> It sounds like something about the dma controller, but it really
-> belongs to dma client device e.g. ssp here.  Every single dma client
-> device has two dma related resources, dma channel and dma irq, which
-> should be defined in client device data.
+On Fri, Feb 11, 2011 at 8:45 AM, Rob Herring <robherring2@gmail.com> wrote:
+> Thomas,
+>
+> On 02/10/2011 09:29 PM, Thomas Abraham wrote:
+>>
+>> Hi,
+>>
+>> I am currently adding device tree support for Samsung's S5PV310
+>> processor. I have a question about handling platform_data when adding
+>> device tree support in drivers, specifically about the sdhci-s3c
+>> driver.
+>>
+>> The platform data that is passed to the sdhci-s3c driver is defined in
+>> file arch/arm/plat-samsung/plat/sdhci.h, struct s3c_sdhci_platdata. In
+>> this structure, there are some function pointers that are passed to
+>> the driver. These function pointers are setup by the platform code in
+>> arch/arm/plat-samsung. But when platform devices are created from the
+>> device tree, how would such function pointers be passed to the driver?
+>>
+>> Any suggestions on the approach to handle the platform_data
+>> information when moving to device tree would be very helpful.
+>>
+> As suggested by Grant, you can use bus notifiers. Here is an example:
+>
+> arch/powerpc/platforms/512x/pdm360ng.c
+>
+> Pure data (flags, quirks, chip select assignments, etc.) should ultimately
+> go into the device tree.
+>
+> For board specific functions, use the bus notifiers. For SoC functions, put
+> them in the driver and use the OF match table data pointer.
 
-That is true for the DMA controller you use, but it doesn't have
-to be that way for all other DMA controllers, right? My point is
-that the MMC driver should not make any assumptions about what
-DMA controller is used, because a future SoC might combine it
-with a different DMA controller, e.g. one that just just a single
-interrupt for all channels.
+Yes, Rob is right.  However, things are simpler if the driver can be
+designed so that it *doesn't* need platform callbacks.  Sometimes it
+is unavoidable, but in a lot of cases platform callback turn into a
+way to let platform code twiddle or read GPIOs.  In those cases it
+would be better to turn those callbacks into real gpiolib drivers and
+design the driver to use the gpio api.
 
-> > Why can't you put the interrupt number into the platform data of
-> > the dma engine device? Your filter function already identifies
-> > the number of the DMA channel.
-> > 
-> We have 16 channels for dma-apbh and dma-apbx respectively.  And each
-> channel has fixed peripheral device and irq.  You think we can define
-> 2 x 16 x (channel number + channel irq) in dma engine driver?  I'm
-> afraid not.  The channel number can be identified in filter function
-> because dmaengine core code and mxs dma hw are indexing the channel
-> in the same way, so that the sw channel id can be used to address hw
-> channel, otherwise we have to pass hw channel id to dma driver just
-> like what we do with irq.
+> See sdhci-of-core.c for an example.
 
-I don't understand. The sw channel id should be something that is
-defined in an arbitrary way for each machine, and it should be the
-only thing that a driver needs, right?
+On a side note (and not related to sdhci-s3c); I'd like to be rid of
+both sdhci-of-core.c and sdhci-pltfm.c.  I'm all for providing common
+infrastructure, but I think those two files go about it in the wrong
+way.  Rather than having a single platform_device (well, 2 in this
+case, but of and non-of can be merged now) that matches against all
+'platform' sdhci controllers, each specific controller should have its
+own platform_driver structure.  The way it is done now creates too
+much indirection (IMHO) and it would be cleaner if the common code was
+available to the drivers a library function calls.
 
-I have not looked much at other dmaengine drivers, but I'd be
-surprised if they require the device driver to be written
-for a specific implementation. If that was the case, you would
-not even need a dmaengine API but could just as well write
-to the DMA controller registers from the device driver directly.
+I've put splitting them up onto my todo list if somebody else doesn't
+beat me to it.
 
-> > What I meant is that you take care to avoid getting into the
-> > interrupt handler while holding the spinlock, but in the handler,
-> > you don't check if the lock is held. It can't be correct to
-> > serialize just half the cases.
-> > 
-> Thanks for the explanation.  Please help review the fix below to see
-> if I understand the comment correctly.
-> 
->         if ((stat & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN)) {
->                 spin_lock_irqsave(&host->lock, flags);
->                 mmc_signal_sdio_irq(host->mmc);
->                 spin_unlock_irqrestore(&host->lock, flags);
->         }
-
-This is still wrong for two reasons:
-
-* You now don't hold the lock while reading the 'stat' variable. The point of the
-  lock is to make sure that sdio doesn't get turned off after reading stat but
-  before signaling the sdio, so you have to hold it across both.
-* In an interrupt controller, you should not disable interrupts again.
-  It's harmless, but slow and confusing to the reader.
-
-	Arnd
+g.
