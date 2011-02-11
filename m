@@ -1,142 +1,95 @@
-From: Shawn Guo <shawn.guo@freescale.com>
+From: Arnd Bergmann <arnd@arndb.de>
 Subject: Re: [PATCH 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
-Date: Sat, 12 Feb 2011 07:48:44 +0800
-Message-ID: <20110211234843.GD9289@S2100-06.ap.freescale.net>
-References: <1296872327-21166-1-git-send-email-shawn.guo@freescale.com>
-	<1296872327-21166-2-git-send-email-shawn.guo@freescale.com>
-	<19794.17994.381937.158944@ipc1.ka-ro>
-	<20110211220821.GA9289@S2100-06.ap.freescale.net>
-	<19797.19780.128209.60173@ipc1.ka-ro>
+Date: Fri, 11 Feb 2011 16:51:35 +0100
+Message-ID: <201102111651.35530.arnd@arndb.de>
+References: <1296872327-21166-1-git-send-email-shawn.guo@freescale.com> <201102101817.42099.arnd@arndb.de> <20110211231417.GC9289@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <19797.19780.128209.60173@ipc1.ka-ro>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>
-Cc: s.hauer@pengutronix.de, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, u.kleine-koenig@pengutronix.de
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.9]:53348 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756811Ab1BKPvl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Feb 2011 10:51:41 -0500
+In-Reply-To: <20110211231417.GC9289@S2100-06.ap.freescale.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: linux-arm-kernel@lists.infradead.org, s.hauer@pengutronix.de, cjb@laptop.org, linux-mmc@vger.kernel.org, u.kleine-koenig@pengutronix.de
 
-On Fri, Feb 11, 2011 at 03:52:52PM +0100, Lothar Wa=DFmann wrote:
-> Hi,
-> =
+On Saturday 12 February 2011, Shawn Guo wrote:
+> On Thu, Feb 10, 2011 at 06:17:41PM +0100, Arnd Bergmann wrote:
+> > On Friday 11 February 2011, Shawn Guo wrote:
+> > > 
+> > > > > +	struct mxs_dma_data		dma_data;
+> > > > 
+> > > > Why do you need host specific DMA structures? Please stick to
+> > > > the generic dma-engine API if possible.
+> > > > 
+> > > I'm sticking to the generic dmaengine api.  The mxs dma hardware
+> > > has separate irq line for every single dma channel, which needs to
+> > > be told by client driver.
+> > 
+> > I'm not convinced, it still sounds like a layering violation to
+> > have specific information about the DMA controller in the
+> > platform data of a driver using the dma engine API.
+> > 
+> It sounds like something about the dma controller, but it really
+> belongs to dma client device e.g. ssp here.  Every single dma client
+> device has two dma related resources, dma channel and dma irq, which
+> should be defined in client device data.
 
-> Shawn Guo writes:
-> > Hi Lothar,
-> > =
+That is true for the DMA controller you use, but it doesn't have
+to be that way for all other DMA controllers, right? My point is
+that the MMC driver should not make any assumptions about what
+DMA controller is used, because a future SoC might combine it
+with a different DMA controller, e.g. one that just just a single
+interrupt for all channels.
 
-> > On Wed, Feb 09, 2011 at 08:46:18AM +0100, Lothar Wa=DFmann wrote:
-> > > Hi Shawn,
-> > > =
+> > Why can't you put the interrupt number into the platform data of
+> > the dma engine device? Your filter function already identifies
+> > the number of the DMA channel.
+> > 
+> We have 16 channels for dma-apbh and dma-apbx respectively.  And each
+> channel has fixed peripheral device and irq.  You think we can define
+> 2 x 16 x (channel number + channel irq) in dma engine driver?  I'm
+> afraid not.  The channel number can be identified in filter function
+> because dmaengine core code and mxs dma hw are indexing the channel
+> in the same way, so that the sw channel id can be used to address hw
+> channel, otherwise we have to pass hw channel id to dma driver just
+> like what we do with irq.
 
-> > > Shawn Guo writes:
-> > > > This adds the mmc host driver for Freescale MXS-based SoC i.MX23/28.
-> > > > The driver calls into mxs-dma via generic dmaengine api for both pio
-> > > > and data transfer.
-> > > > =
+I don't understand. The sw channel id should be something that is
+defined in an arbitrary way for each machine, and it should be the
+only thing that a driver needs, right?
 
-> > > > Signed-off-by: Shawn Guo <shawn.guo@freescale.com>
-> > > > ---
-> > > >  arch/arm/mach-mxs/include/mach/mmc.h |   15 +
-> > > >  drivers/mmc/host/Kconfig             |    9 +
-> > > >  drivers/mmc/host/Makefile            |    1 +
-> > > >  drivers/mmc/host/mxs-mmc.c           |  884 ++++++++++++++++++++++=
-++++++++++++
-> > > >  4 files changed, 909 insertions(+), 0 deletions(-)
-> > > >  create mode 100644 arch/arm/mach-mxs/include/mach/mmc.h
-> > > >  create mode 100644 drivers/mmc/host/mxs-mmc.c
-> > > > =
+I have not looked much at other dmaengine drivers, but I'd be
+surprised if they require the device driver to be written
+for a specific implementation. If that was the case, you would
+not even need a dmaengine API but could just as well write
+to the DMA controller registers from the device driver directly.
 
-> > > I've run the mmc-test kernel module with this driver on our TX28
-> > > module which fails in the following tests:
-> > > |mmc0: Test case 15. Correct xfer_size at write (start failure)...
-> > > |mmc0: Result: ERROR (-110)
-> > > |mmc0: Test case 16. Correct xfer_size at read (start failure)...
-> > > |mmc0: Result: ERROR (-110)
-> > > |mmc0: Test case 17. Correct xfer_size at write (midway failure)...
-> > > |mmc0: Result: ERROR (-110)
-> > > |mmc0: Test case 18. Correct xfer_size at read (midway failure)...
-> > > |mmc0: Result: ERROR (-110)
-> > > =
+> > What I meant is that you take care to avoid getting into the
+> > interrupt handler while holding the spinlock, but in the handler,
+> > you don't check if the lock is held. It can't be correct to
+> > serialize just half the cases.
+> > 
+> Thanks for the explanation.  Please help review the fix below to see
+> if I understand the comment correctly.
+> 
+>         if ((stat & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN)) {
+>                 spin_lock_irqsave(&host->lock, flags);
+>                 mmc_signal_sdio_irq(host->mmc);
+>                 spin_unlock_irqrestore(&host->lock, flags);
+>         }
 
-> > > Could you try the test on your hardware?
-> > > =
+This is still wrong for two reasons:
 
-> > I'm new to this test.  I enabled MMC_TEST but did not see "test"
-> > under /sys for mmc.  Can you please elaborate how to launch this
-> > test?  Thanks.
-> > =
+* You now don't hold the lock while reading the 'stat' variable. The point of the
+  lock is to make sure that sdio doesn't get turned off after reading stat but
+  before signaling the sdio, so you have to hold it across both.
+* In an interrupt controller, you should not disable interrupts again.
+  It's harmless, but slow and confusing to the reader.
 
-> You need debugfs mounted and the mmc-test module loaded.
-> An inserted card will normally be grabbed by the mmc-block driver. You
-> can 'unbind' the driver and 'bind' it to the mmc-test driver using the
-> corresponding entries in sysfs. The mmc-test driver can be controlled
-> via debugfs.
-> =
-
-> The following script steals an inserted card from the mmc-block driver
-> and performs all mmc-test testcases (TRASHING THE CONTENTS OF THE
-> CARD!).
-> <--------
-> #!/bin/bash
-> drv_path=3D/sys/bus/mmc/drivers
-> dbg_path=3D/sys/kernel/debug
-> testdrv=3Dmmc_test
-> =
-
-> shopt -s nullglob
-> card=3D""
-> =
-
-> cleanup() {
->     if [ -n "$card" -a -n "$driver" -a "$driver" !=3D "$testdrv" ];then
-> 	echo "Restoring driver $driver"
-> 	echo "$card" > "$drv_path/$testdrv/unbind"
-> 	echo "$card" > "$drv_path/$driver/bind"
->     fi
-> }
-> =
-
-> trap cleanup 0
-> set -e
-> cd "$drv_path"
-> for d in *;do
->     for l in "$d/"*;do
-> 	[ -h "$l" ] || continue
-> 	card=3D"$(basename "$l")"
-> 	driver=3D"$(dirname "$l")"
-> 	break
->     done
->     [ -n "$card" ] && break
-> done
-> if [ -z "$card" ];then
->     echo "No MMC/SD card found"
->     exit 1
-> fi
-> if [ "$driver" !=3D "$testdrv" ];then
->     echo "Trying to claim card $card from driver $driver"
->     echo "$card" > "$drv_path/$driver/unbind"
->     echo "$card" > "$drv_path/$testdrv/bind"
-> fi
-> echo "WARNING: Card $card will be overwritten!"
-> echo "Hit <ENTER> to continue; <CTRL-C> to abort"
-> read
-> # perform all testcases (> 0 for individual tests)
-> echo 0 > "$dbg_path/${card%:*}/$card/test"
-> >--------
-> =
-
-Thanks a lot for the test script.  Yes, I'm seeing the same problem
-here.  I will try to get it fixed in v2.
-
-Regards,
-Shawn
+	Arnd
