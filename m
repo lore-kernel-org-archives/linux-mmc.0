@@ -1,48 +1,40 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: mmc_rescan failure in case of CONFIG_MMC_UNSAFE_RESUME
-Date: Sat, 12 Feb 2011 17:22:05 +0000
-Message-ID: <20110212172205.GA9608@void.printf.net>
-References: <loom.20110212T012758-658@post.gmane.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: add ricoh e823 pci id
+Date: Sat, 12 Feb 2011 18:29:26 +0100
+Message-ID: <201102121829.26608.arnd@arndb.de>
+References: <1297463131-3557-1-git-send-email-manoj.iyer@canonical.com> <1297463131-3557-2-git-send-email-manoj.iyer@canonical.com> <20110211224234.GA1958@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39608 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751530Ab1BLRWH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 12 Feb 2011 12:22:07 -0500
-Content-Disposition: inline
-In-Reply-To: <loom.20110212T012758-658@post.gmane.org>
+Received: from moutng.kundenserver.de ([212.227.17.9]:49170 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751246Ab1BLR3b (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Feb 2011 12:29:31 -0500
+In-Reply-To: <20110211224234.GA1958@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dmitry Shmidt <dimitrysh@android.com>
-Cc: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Manoj Iyer <manoj.iyer@canonical.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Dmitry,
-
-On Sat, Feb 12, 2011 at 12:33:33AM +0000, Dmitry Shmidt wrote:
-> Recently new check was added to core.c function mmc_rescan():
->     if (host->bus_ops && host->bus_ops->detect && !host->bus_dead
->         && mmc_card_is_removable(host)) <<<< This one
->         host->bus_ops->detect(host);
-> mmc_card_is_removable() is checking
->  !(host->caps & MMC_CAP_NONREMOVABLE) && mmc_assume_removable;
+On Friday 11 February 2011 23:42:34 Chris Ball wrote:
+> >  
+> >       {
+> > +             .vendor         = PCI_VENDOR_ID_RICOH,
+> > +             .device         = 0xe823,
+> > +             .subvendor      = PCI_ANY_ID,
+> > +             .subdevice      = PCI_ANY_ID,
+> > +             .driver_data    = (kernel_ulong_t)&sdhci_ricoh_mmc,
+> > +     },
+> > +
+> > +     {
+> >               .vendor         = PCI_VENDOR_ID_ENE,
+> >               .device         = PCI_DEVICE_ID_ENE_CB712_SD,
+> >               .subvendor      = PCI_ANY_ID,
 > 
-> If we use CONFIG_MMC_UNSAFE_RESUME then
->   mmc_assume_removable will be 0 and any card will be always considered
-> as non-removable. And host->bus_ops->detect() will not be called on card
-> removal.
+> Thanks, pushed to mmc-next for .39.
 
-I agree that we've changed the behavior to avoid running ->detect
-in this case, but that was intentional -- you should not be using
-CONFIG_MMC_UNSAFE_RESUME on a card that is physically removable.
-Why are you trying to?
+Wouldn't this be a candidate for -stable as well?
 
-config MMC_UNSAFE_RESUME
-        bool "Assume MMC/SD cards are non-removable (DANGEROUS)"
-        ...
-
-Thanks,
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+	Arnd
