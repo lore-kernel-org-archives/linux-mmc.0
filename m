@@ -1,87 +1,53 @@
 From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
-Date: Sat, 12 Feb 2011 14:22:14 +0800
-Message-ID: <20110212062214.GB25519@intel.com>
+Subject: [PATCH v4 3/3]mmc: fix division by zero when cal erase timeout
+Date: Sat, 12 Feb 2011 14:22:26 +0800
+Message-ID: <20110212062226.GD25519@intel.com>
 Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:37203 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758657Ab1BLG27 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 12 Feb 2011 01:28:59 -0500
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org
 Cc: linux-kernel@vger.kernel.org, akpm@linux-foundation.org, adrian.hunter@nokia.com
-List-Id: linux-mmc@vger.kernel.org
 
-max_discard_sectors value is UINT_MAX which means kernel block layer can pass
-down unlimited sectors to MMC driver to erase. But erasing so many sectors may
-delay some other important I/O requests. This is not preferred.
+Since if clock gating feature is enabled, the clock frequency may be zero when
+host clock is gated. In such scenario, mmc_set_mmc_erase_timeout() may have a
+division by zero bug.
 
-So use 'pref_erase' to set a suitable max_discard_sectors value for mmc queue to
-avoid erasing too many sectors at one time.
+So this patch used mmc_host_clk_rate() to fix this.
 
 Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
- drivers/mmc/card/queue.c |    3 ++-
- drivers/mmc/core/core.c  |   20 ++++++++++++++++++++
- include/linux/mmc/core.h |    1 +
- 3 files changed, 23 insertions(+), 1 deletions(-)
+ drivers/mmc/core/core.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 4e42d03..6c13859 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -131,7 +131,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock
- 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
- 	if (mmc_can_erase(card)) {
- 		queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, mq->queue);
--		mq->queue->limits.max_discard_sectors = UINT_MAX;
-+		mq->queue->limits.max_discard_sectors =
-+			mmc_set_max_discard_sectors(card);
- 		if (card->erased_byte == 0)
- 			mq->queue->limits.discard_zeroes_data = 1;
- 		if (!mmc_can_trim(card) && is_power_of_2(card->erase_size)) {
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 34a7e8c..0eb27aa 100644
+index 0eb27aa..2f4576d 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1470,6 +1470,26 @@ int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
- }
- EXPORT_SYMBOL(mmc_erase_group_aligned);
- 
-+/*
-+ * Set max_discard_sectors for mmc queue.
-+ * max_discard_sectors will determine how many sectors can be erased at one
-+ * time. Sometimes user may want to erase a large area of SD or MMC card, it may
-+ * take long time which delay some other important I/O requests. So we would
-+ * better set some values for max_discard_sectors which can forbid block layer
-+ * pass too many sectors at one time.
-+ *
-+ * 'pref_erase' is initialized for this purpose. We can use it to set a preferred
-+ * value for it.
-+ */
-+int mmc_set_max_discard_sectors(struct mmc_card *card)
-+{
-+	if (card->pref_erase)
-+		return card->pref_erase;
-+	else
-+		return UINT_MAX;
-+}
-+EXPORT_SYMBOL(mmc_set_max_discard_sectors);
+@@ -1201,8 +1201,14 @@ static void mmc_set_mmc_erase_timeout(struct mmc_card *card,
+ 		 * less but not that much less, so fudge it by multiplying by 2.
+ 		 */
+ 		timeout_clks <<= 1;
+-		timeout_us += (timeout_clks * 1000) /
+-			      (card->host->ios.clock / 1000);
 +
- int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
- {
- 	struct mmc_command cmd;
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 64e013f..a218d57 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -152,6 +152,7 @@ extern int mmc_can_trim(struct mmc_card *card);
- extern int mmc_can_secure_erase_trim(struct mmc_card *card);
- extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
- 				   unsigned int nr);
-+extern int mmc_set_max_discard_sectors(struct mmc_card *card);
++		/*
++		 * at this moment, host controller maybe clock gated, so make
++		 * sure we can get a correct host clock freq.
++		 */
++		if (mmc_host_clk_rate(card->host))
++			timeout_us += (timeout_clks * 1000) /
++				      (mmc_host_clk_rate(card->host) / 1000);
  
- extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
+ 		erase_timeout = timeout_us / 1000;
  
 -- 
 1.6.6.1
+
