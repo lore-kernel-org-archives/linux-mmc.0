@@ -1,61 +1,53 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
-Date: Sun, 13 Feb 2011 02:37:27 +0800
-Message-ID: <20110212183726.GC9821@S2100-06.ap.freescale.net>
-References: <1296872327-21166-1-git-send-email-shawn.guo@freescale.com>
- <201102120959.22707.arnd@arndb.de>
- <20110212172357.GB9821@S2100-06.ap.freescale.net>
- <201102121107.17779.arnd@arndb.de>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
+Date: Sat, 12 Feb 2011 18:42:51 +0800
+Message-ID: <5D8008F58939784290FAB48F54975198358C2EF87A@shsmsx502.ccr.corp.intel.com>
+References: <20110212062214.GB25519@intel.com>
+ <201102120938.16626.arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:24211 "EHLO
-	TX2EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750739Ab1BLKjV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Feb 2011 05:39:21 -0500
-Received: from mail148-tx2 (localhost.localdomain [127.0.0.1])	by
- mail148-tx2-R.bigfish.com (Postfix) with ESMTP id E780D19C867F	for
- <linux-mmc@vger.kernel.org>; Sat, 12 Feb 2011 10:39:19 +0000 (UTC)
-Received: from TX2EHSMHS039.bigfish.com (unknown [10.9.14.250])	by
- mail148-tx2.bigfish.com (Postfix) with ESMTP id 068909C005B	for
- <linux-mmc@vger.kernel.org>; Sat, 12 Feb 2011 10:38:12 +0000 (UTC)
-Received: from de01smr01.freescale.net (de01smr01.freescale.net [10.208.0.31])
-	by az33egw01.freescale.net (8.14.3/8.14.3) with ESMTP id p1CAcAjU019637	for
- <linux-mmc@vger.kernel.org>; Sat, 12 Feb 2011 03:38:10 -0700 (MST)
-Received: from S2100-06.ap.freescale.net (S2100-06.ap.freescale.net
- [10.192.242.50])	by de01smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
- p1CAc9Nq026415	for <linux-mmc@vger.kernel.org>; Sat, 12 Feb 2011 04:38:09
- -0600 (CST)
-Content-Disposition: inline
-In-Reply-To: <201102121107.17779.arnd@arndb.de>
+Received: from mga01.intel.com ([192.55.52.88]:10649 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752447Ab1BLKm4 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Feb 2011 05:42:56 -0500
+In-Reply-To: <201102120938.16626.arnd@arndb.de>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: s.hauer@pengutronix.de, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, u.kleine-koenig@pengutronix.de
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>
 
-On Sat, Feb 12, 2011 at 11:07:17AM +0100, Arnd Bergmann wrote:
-> On Saturday 12 February 2011 18:23:58 Shawn Guo wrote:
-> > Well, we are removing inclusion of mach/dma.h from mmc driver, but
-> > adding it to every mxs based machine code.  This makes mmc driver
-> > clean but machine code becomes not.  For some dma client devices
-> > coming later, the platform data could be saved at all, if they do not
-> > have any.  But with the approach you are suggesting, every single
-> > client device will have to get platform data.
+> -----Original Message-----
+> From: Arnd Bergmann [mailto:arnd@arndb.de]
+> Sent: Saturday, February 12, 2011 4:38 PM
+> To: Dong, Chuanxiao
+> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; linux-kernel@vger.kernel.org;
+> akpm@linux-foundation.org; adrian.hunter@nokia.com
+> Subject: Re: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
 > 
-> Right, unless there is a way to encode it exlusively in the resources,
-> which is what I was suggesting at first: If the dma engine driver
-> knows about all the channels, you only need to pass the channel number.
+> On Saturday 12 February 2011 07:22:14 Chuanxiao Dong wrote:
+> > max_discard_sectors value is UINT_MAX which means kernel block layer can pass
+> > down unlimited sectors to MMC driver to erase. But erasing so many sectors may
+> > delay some other important I/O requests. This is not preferred.
+> >
+> > So use 'pref_erase' to set a suitable max_discard_sectors value for mmc queue to
+> > avoid erasing too many sectors at one time.
+> >
+> > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 > 
-> If you use a flattened device tree, you can avoid the need for
-> platform data by adding the phandle of the dma engine device to
-> a property of the mmc driver, along with the channel number inside
-> of that device. I think that would be the cleanest approach, but
-> some people still need to be convinced that changing drivers to
-> use fdt data is the right direction for ARM.
-> 
-Could we keep the current the approach for now and go to the cleanest
-way directly when Grant's dt patches get merged?
+> I'm not sure about this one. pref_erase on SDHC cards should be the *minimum*
+> unit you can erase in one request, not the maximum. Erasing an arbitrary
+Hi Arnd,
+I found the comment in mmc_init_erase() function which explains the 'pref_erase':
+'pref_erase' is defined as a guide to limit erases to that size and alignment.
+So I think it is not the minimum unit driver can erase, also not the maximum erase unit. It just a guide erase size for driver which can avoid holding host controller too long to response other I/O requests.
 
-Regards,
-Shawn
+> number of allocation units on an SDHC card should complete almost instantly,
+> because it only needs to update a single table with the allocation units.
+>
+> Discarding partial allocation units will take a lot longer, because the
+> card then has to copy over the remaining blocks.
+Is discarding started when card is idle or right after erase command? Can it cause some other I/O requests delayed?
 
