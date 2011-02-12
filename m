@@ -1,53 +1,88 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
-Date: Sat, 12 Feb 2011 18:42:51 +0800
-Message-ID: <5D8008F58939784290FAB48F54975198358C2EF87A@shsmsx502.ccr.corp.intel.com>
-References: <20110212062214.GB25519@intel.com>
- <201102120938.16626.arnd@arndb.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Sat, 12 Feb 2011 11:45:41 +0100
+Message-ID: <201102121145.42053.arnd@arndb.de>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <201102091013.56670.arnd@arndb.de> <AANLkTimZb-hxz-31nGmycdtU-i=t=9wBoDJ-chAXUmD6@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:10649 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752447Ab1BLKm4 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Feb 2011 05:42:56 -0500
-In-Reply-To: <201102120938.16626.arnd@arndb.de>
-Content-Language: en-US
+Received: from moutng.kundenserver.de ([212.227.126.186]:64671 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752447Ab1BLKpo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Feb 2011 05:45:44 -0500
+In-Reply-To: <AANLkTimZb-hxz-31nGmycdtU-i=t=9wBoDJ-chAXUmD6@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>
+To: Linus Walleij <linus.ml.walleij@gmail.com>
+Cc: linux-arm-kernel@lists.infradead.org, Andrei Warkentin <andreiw@motorola.com>, linux-mmc@vger.kernel.org, Sebastian Rasmussen <Sebastian.Rasmussen@stericsson.com>, Ulf Hansson <Ulf.Hansson@stericsson.com>
 
-> -----Original Message-----
-> From: Arnd Bergmann [mailto:arnd@arndb.de]
-> Sent: Saturday, February 12, 2011 4:38 PM
-> To: Dong, Chuanxiao
-> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; linux-kernel@vger.kernel.org;
-> akpm@linux-foundation.org; adrian.hunter@nokia.com
-> Subject: Re: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
+On Saturday 12 February 2011 00:23:37 Linus Walleij wrote:
+> H'm! That's an interesting resource indeed. When you write
+> "From measurements, it appears that the size in which data is
+> managed is typically 64 kb on SD cards" and "the size of the
+> medium is always a multiple of entire allocation groups, and
+> the most common size today is 4 MB" and then list
+> Size, Allocation Unit, Write Size, Page Size, FAT Location,
+> open AUs linear, open AUs random, Algorithm.
 > 
-> On Saturday 12 February 2011 07:22:14 Chuanxiao Dong wrote:
-> > max_discard_sectors value is UINT_MAX which means kernel block layer can pass
-> > down unlimited sectors to MMC driver to erase. But erasing so many sectors may
-> > delay some other important I/O requests. This is not preferred.
-> >
-> > So use 'pref_erase' to set a suitable max_discard_sectors value for mmc queue to
-> > avoid erasing too many sectors at one time.
-> >
-> > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> 
-> I'm not sure about this one. pref_erase on SDHC cards should be the *minimum*
-> unit you can erase in one request, not the maximum. Erasing an arbitrary
-Hi Arnd,
-I found the comment in mmc_init_erase() function which explains the 'pref_erase':
-'pref_erase' is defined as a guide to limit erases to that size and alignment.
-So I think it is not the minimum unit driver can erase, also not the maximum erase unit. It just a guide erase size for driver which can avoid holding host controller too long to response other I/O requests.
+> How exactly do you measure that?
 
-> number of allocation units on an SDHC card should complete almost instantly,
-> because it only needs to update a single table with the allocation units.
->
-> Discarding partial allocation units will take a lot longer, because the
-> card then has to copy over the remaining blocks.
-Is discarding started when card is idle or right after erase command? Can it cause some other I/O requests delayed?
+It's not an exact science, but for most cards I have found
+reasonably good ways to identify these numbers:
 
+* the allocation unit size can almost always be found
+  using read-only tests: reading 2kb across an allocation
+  unit boundary is slightly slower than reading 2kb
+  just before or just after the boundary.
+  For a few cards where this doesn't work, I do write tests.
+  After finding out how many allocation units can be open,
+  it's trivial to find out the size.
+
+* Finding the number of open allocation units means I write
+  to the start of a few AUs alternating. Up to a certain
+  number, the throughput is constant, above that, it drops
+  sharply, sometimes by one or two orders of magnitude.
+
+* The page size can also be found doing read-only tests, with
+  varying block sizes. Smaller reads always give lower throughput
+  than larger reads, but getting smaller than page size
+  drops down significantly more than the difference between
+  multi-page reads. This effect is more prominent in write tests.
+
+* Finding the algorithm basically means I write an allocation
+  unit using varying block sizes two times, using both linear
+  access and random access. Cards that are optimized for
+  linear access can be unbelievably slow in the random access
+  tests. Sometimes the performance is the same above a specific
+  block size, but slower for random access below that size.
+  This is the write block size.
+
+* Finding the write block size in cases where this is not the
+  case can be harder. Most cards have a noticable performance
+  drop in writes of less than a few pages, so that's the
+  size I put in the table.
+
+* The FAT location is clearly visible in a number of tests
+  done inside of an allocation unit. It's normally slower for
+  linear access, but faster for random access. Sometimes
+  reading the FAT is also slower than reading elsewhere.
+
+> I'm sort of smelling a card-probe.git with this tool that you
+> can run on your device and get out data like that listed
+> in your table. We have a rather large stash of cards we can
+> probe for you to get that kind of data out if it is useful, and
+> I believe other Linaro members may have such stuff too,
+> if empirical data is usefult to your work.
+
+The tool I'm using is on http://git.linaro.org/gitweb?p=people/arnd/flashbench.git
+Unfortunately, it's not yet in the state that I'm recommending
+anyone besides me to run it. I'm still rewriting the source
+for every new card I get to nail down the specific properties.
+
+I will make an announcement when I have the tool in a state
+of general usefulness, and at that point I would really
+appreciate people to run it, but just not yet.
+
+	Arnd
