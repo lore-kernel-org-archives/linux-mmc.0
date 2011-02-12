@@ -1,69 +1,44 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
-Date: Sat, 12 Feb 2011 19:04:30 +0100
-Message-ID: <201102121904.30944.arnd@arndb.de>
-References: <20110212062214.GB25519@intel.com> <201102120938.16626.arnd@arndb.de> <5D8008F58939784290FAB48F54975198358C2EF87A@shsmsx502.ccr.corp.intel.com>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Sat, 12 Feb 2011 19:22:22 +0100
+Message-ID: <201102121922.22055.arnd@arndb.de>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <201102121805.47311.arnd@arndb.de> <AANLkTikxMKm-Xy5du2+MzrD2eLuvfO9hXrSzBKmAkdBm@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
   charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:50447 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.171]:57256 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752300Ab1BLSEl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Feb 2011 13:04:41 -0500
-In-Reply-To: <5D8008F58939784290FAB48F54975198358C2EF87A@shsmsx502.ccr.corp.intel.com>
+	with ESMTP id S1752103Ab1BLSW3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Feb 2011 13:22:29 -0500
+In-Reply-To: <AANLkTikxMKm-Xy5du2+MzrD2eLuvfO9hXrSzBKmAkdBm@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
-On Saturday 12 February 2011 11:42:51 Dong, Chuanxiao wrote:
-> > From: Arnd Bergmann [mailto:arnd@arndb.de]
-> > On Saturday 12 February 2011 07:22:14 Chuanxiao Dong wrote:
-> > > max_discard_sectors value is UINT_MAX which means kernel block layer can pass
-> > > down unlimited sectors to MMC driver to erase. But erasing so many sectors may
-> > > delay some other important I/O requests. This is not preferred.
-> > >
-> > > So use 'pref_erase' to set a suitable max_discard_sectors value for mmc queue to
-> > > avoid erasing too many sectors at one time.
-> > >
-> > > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> > 
-> > I'm not sure about this one. pref_erase on SDHC cards should be the *minimum*
-> > unit you can erase in one request, not the maximum. Erasing an arbitrary
->
-> I found the comment in mmc_init_erase() function which explains the 'pref_erase':
-> 'pref_erase' is defined as a guide to limit erases to that size and alignment.
-> So I think it is not the minimum unit driver can erase, also not the maximum 
-> erase unit. It just a guide erase size for driver which can avoid holding host 
-> controller too long to response other I/O requests.
-
-Ok, I see. Adrian introduced the function and the comment last year,
-maybe he can comment on this some more. For all cards I've seen,
-multi-AU erases on SDHC cards are really fast, though the standard
-clearly allows for very slow erases.
-
-My feeling is that the function is suboptimal right now, because it assumes
-that one AU is the best size. If a card reports that it can erase
-many AUs quickly (large N_erase, small T_erase, relatively large T_offset),
-we should report that to the user.
-
-> > number of allocation units on an SDHC card should complete almost instantly,
-> > because it only needs to update a single table with the allocation units.
+On Saturday 12 February 2011 18:33:10 Andrei Warkentin wrote:
+> On Sat, Feb 12, 2011 at 11:05 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> > On Friday 11 February 2011 23:33:42 Andrei Warkentin wrote:
+> >> On Wed, Feb 9, 2011 at 3:13 AM, Arnd Bergmann <arnd@arndb.de> wrote:
 > >
-> > Discarding partial allocation units will take a lot longer, because the
-> > card then has to copy over the remaining blocks.
->
-> Is discarding started when card is idle or right after erase command?
-> Can it cause some other I/O requests delayed?
+> >> Yes, this is a Toshiba card. I've sent the patch as a reply to Linus' email.
+> >>
+> >> cid - 02010053454d3332479070cc51451d00
+> >> csd - d00f 0032 0f59 03ff ffffffff92404000
+> >> erase_size - 524288
+> >> fwrev - 0x0
+> >> hwrev - 0x0
+> >> manfid - 0x000002
+> >> name - SEM32G
+> >> oemid - 0x0100
+> >> preferred_erase_size - 2097152
+> >
+> 
+> This is a Toshiba eMMC part. It is 32GB as far as the OS can see and access.
 
-As far as I can tell, most operations on the card are synchronous when it's
-writing. The erase command on a partial AU should not return until the
-remaining data is copied to a new location, so it will take some time, but
-physically the AU can be done in the background, if reading from it simply
-returns a zero buffer rather than accessing the old data. Write-after-erase
-might have to wait for the erase to complete, but good cards could also
-hide that.
+Ah, right, that explains all the values, which make sense for eMMC4
+but not for SDHC ;-)
 
 	Arnd
