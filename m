@@ -1,104 +1,64 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [RFC}  sdhci.c set_ios -- disable global interrupts and Question on
- Power Management
-Date: Sat, 12 Feb 2011 21:39:20 -0800
-Message-ID: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+Date: Mon, 14 Feb 2011 01:53:02 +0800
+Message-ID: <20110213175300.GA10271@S2100-06.ap.freescale.net>
+References: <1296872327-21166-1-git-send-email-shawn.guo@freescale.com>
+ <1296872327-21166-2-git-send-email-shawn.guo@freescale.com>
+ <201102042126.52701.arnd@arndb.de>
+ <20110211003533.GA9151@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:42791 "EHLO
-	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750816Ab1BMFjY convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 13 Feb 2011 00:39:24 -0500
-Content-Language: en-US
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:40428 "EHLO
+	TX2EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753209Ab1BMJx5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Feb 2011 04:53:57 -0500
+Received: from mail80-tx2 (localhost.localdomain [127.0.0.1])	by
+ mail80-tx2-R.bigfish.com (Postfix) with ESMTP id C178519A81AF	for
+ <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 09:53:56 +0000 (UTC)
+Received: from TX2EHSMHS006.bigfish.com (unknown [10.9.14.248])	by
+ mail80-tx2.bigfish.com (Postfix) with ESMTP id 910D835804E	for
+ <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 09:53:56 +0000 (UTC)
+Received: from az33smr01.freescale.net (az33smr01.freescale.net
+ [10.64.34.199])	by de01egw02.freescale.net (8.14.3/8.14.3) with ESMTP id
+ p1D9rrH1017997	for <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 02:53:55
+ -0700 (MST)
+Received: from S2100-06.ap.freescale.net (S2100-06.ap.freescale.net
+ [10.192.242.50])	by az33smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
+ p1D9rq1i011646	for <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 03:53:53
+ -0600 (CST)
+Content-Disposition: inline
+In-Reply-To: <20110211003533.GA9151@S2100-06.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Tardy <tardyp@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: s.hauer@pengutronix.de, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, u.kleine-koenig@pengutronix.de
 
+Hi Arnd,
 
-Pierre,
+On Fri, Feb 11, 2011 at 08:35:34AM +0800, Shawn Guo wrote:
+> 
+> > > +	unsigned			present:1;
+> > 
+> > Your card detection by polling through this variable is
+> > really bad for power management. Is there really no interrupt
+> > that gets triggered when installing or removing a card?
+> > 
+> Good point.  Will try to use interrupt.
+> 
+I'm trying to use interrupt for card detection.  But unfortunately,
+I got stuck for some reason.
 
-I am preparing a patch to just diable to interrupt line to the SD controller so global interrupts are not locked out.  This
-will allow mdelay to work correctly in the routines the set_ios() calls.
+There is a known issue that mx28 gpio interrupt from bank0 can not
+work, because the pin bank0 irq number 127 was used in
+get_irqnr_and_base (entry-macro.S) to tell there is no pending
+interrupt any more.
 
-The pm_ calls  remove the lock before being called and restore it afterwards.  Is this just to ensure interrupts are globally
-enabled ?  If so, I can simplify my patch deleting the original spin_lock calls that surround the pm_ calls.
+The mmc0 cd pin has no problem to trigger interrupt, as it's GPIO_2_9.
+But mmc1 cd pin can not, because it's GPIO_0_20.
 
-Philip
+So I probably have to stay with polling.
 
-
->From 782c474f1abe992a203ad76594db025414332e67 Mon Sep 17 00:00:00 2001
-From: Philip Rakity <prakity@marvell.com>
-Date: Tue, 25 Jan 2011 16:04:42 -0800
-Subject: [PATCH 1/2] sdhci: sdhci.c: Do not disable global interrupts while waiting in set_ios
-
-holding the spin_lock with all interrupts disabled
-is not good form when doing mdelay.
-set_ios calls routines that need to delay for power to
-stabalize or for chip issues when quirks are defined.
-
-disable only our interupt and spin_lock on the chip
-instead of spin_lock with all interrupts disabled.
-
-Signed-off-by: Philip Rakity <prakity@marvell.com>
-Signed-off-by: Mark F. Brown <markb@marvell.com>
----
- drivers/mmc/host/sdhci.c |   15 ++++++++-------
- 1 files changed, 8 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 655617c..1a88303 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1161,13 +1161,13 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host;
--	unsigned long flags;
- 	unsigned int lastclock;
- 	u8 ctrl;
- 
- 	host = mmc_priv(mmc);
- 
--	spin_lock_irqsave(&host->lock, flags);
-+	disable_irq(host->irq);
-+	spin_lock(&host->lock);
- 
- 	if (host->flags & SDHCI_DEVICE_DEAD)
- 		goto out;
-@@ -1180,14 +1180,14 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	lastclock = host->iosclock;
- 	host->iosclock = ios->clock;
- 	if (lastclock == 0 && ios->clock != 0) {
--		spin_unlock_irqrestore(&host->lock, flags);
-+		spin_unlock(&host->lock);
- 		pm_runtime_get_sync(host->mmc->parent);
--		spin_lock_irqsave(&host->lock, flags);
-+		spin_lock(&host->lock);
- 	} else if (lastclock != 0 && ios->clock == 0) {
--		spin_unlock_irqrestore(&host->lock, flags);
-+		spin_unlock(&host->lock);
- 		pm_runtime_mark_last_busy(host->mmc->parent);
- 		pm_runtime_put_autosuspend(host->mmc->parent);
--		spin_lock_irqsave(&host->lock, flags);
-+		spin_lock(&host->lock);
- 	}
- 	/* no need to configure the rest.. */
- 	if (host->iosclock == 0)
-@@ -1257,7 +1257,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- out:
- 	mmiowb();
--	spin_unlock_irqrestore(&host->lock, flags);
-+	spin_unlock(&host->lock);
-+	enable_irq(host->irq);
- }
- 
- static int sdhci_get_ro(struct mmc_host *mmc)
--- 
-1.7.0.4
-
+Regards,
+Shawn
 
