@@ -1,64 +1,52 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
-Date: Mon, 14 Feb 2011 01:53:02 +0800
-Message-ID: <20110213175300.GA10271@S2100-06.ap.freescale.net>
-References: <1296872327-21166-1-git-send-email-shawn.guo@freescale.com>
- <1296872327-21166-2-git-send-email-shawn.guo@freescale.com>
- <201102042126.52701.arnd@arndb.de>
- <20110211003533.GA9151@S2100-06.ap.freescale.net>
+From: Pierre Tardy <tardyp@gmail.com>
+Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and Question
+ on Power Management
+Date: Sun, 13 Feb 2011 11:25:18 +0100
+Message-ID: <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
+References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:40428 "EHLO
-	TX2EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753209Ab1BMJx5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Feb 2011 04:53:57 -0500
-Received: from mail80-tx2 (localhost.localdomain [127.0.0.1])	by
- mail80-tx2-R.bigfish.com (Postfix) with ESMTP id C178519A81AF	for
- <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 09:53:56 +0000 (UTC)
-Received: from TX2EHSMHS006.bigfish.com (unknown [10.9.14.248])	by
- mail80-tx2.bigfish.com (Postfix) with ESMTP id 910D835804E	for
- <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 09:53:56 +0000 (UTC)
-Received: from az33smr01.freescale.net (az33smr01.freescale.net
- [10.64.34.199])	by de01egw02.freescale.net (8.14.3/8.14.3) with ESMTP id
- p1D9rrH1017997	for <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 02:53:55
- -0700 (MST)
-Received: from S2100-06.ap.freescale.net (S2100-06.ap.freescale.net
- [10.192.242.50])	by az33smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
- p1D9rq1i011646	for <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 03:53:53
- -0600 (CST)
-Content-Disposition: inline
-In-Reply-To: <20110211003533.GA9151@S2100-06.ap.freescale.net>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:47487 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754448Ab1BMKZT convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Feb 2011 05:25:19 -0500
+Received: by qyj19 with SMTP id 19so719371qyj.19
+        for <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 02:25:18 -0800 (PST)
+In-Reply-To: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: s.hauer@pengutronix.de, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, u.kleine-koenig@pengutronix.de
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Arnd,
+On Sun, Feb 13, 2011 at 6:39 AM, Philip Rakity <prakity@marvell.com> wr=
+ote:
+>
+> Pierre,
+>
+> I am preparing a patch to just diable to interrupt line to the SD con=
+troller so global interrupts are not locked out.
+I think I already have seen previous version of that patch earlier. It
+does not sound like a bad idea. However, disabling all interrupt is
+really cheap, and disabling only one is a bit more expensive. AFAIK,
+spin_lock and co are really meant for very short time locks.
 
-On Fri, Feb 11, 2011 at 08:35:34AM +0800, Shawn Guo wrote:
-> 
-> > > +	unsigned			present:1;
-> > 
-> > Your card detection by polling through this variable is
-> > really bad for power management. Is there really no interrupt
-> > that gets triggered when installing or removing a card?
-> > 
-> Good point.  Will try to use interrupt.
-> 
-I'm trying to use interrupt for card detection.  But unfortunately,
-I got stuck for some reason.
+> =A0This
+> will allow mdelay to work correctly in the routines the set_ios() cal=
+ls.
+This sounds a little bit worse. mdelay is never good, as this is
+active wait, that is loosing tons of good cpu cycles.
+Do we really need those? Can we do the same thing asynchronous?
 
-There is a known issue that mx28 gpio interrupt from bank0 can not
-work, because the pin bank0 irq number 127 was used in
-get_irqnr_and_base (entry-macro.S) to tell there is no pending
-interrupt any more.
+>
+> The pm_ calls =A0remove the lock before being called and restore it a=
+fterwards. =A0Is this just to ensure interrupts are globally
+> enabled ?
+At least on my platform, pm_ calls cannot be done in atomic context,
+and sdhci runtime_pm flow will call set_ios() back, so you will
+re-enter the function.
 
-The mmc0 cd pin has no problem to trigger interrupt, as it's GPIO_2_9.
-But mmc1 cd pin can not, because it's GPIO_0_20.
-
-So I probably have to stay with polling.
-
-Regards,
-Shawn
-
+>=A0If so, I can simplify my patch deleting the original spin_lock call=
+s that surround the pm_ calls.
+No, you cannot safely remove the spin_lock calls here.
