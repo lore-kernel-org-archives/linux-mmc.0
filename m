@@ -1,69 +1,39 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 2/2] mmc: sdhci: Replace SDHCI_QUIRK_NO_MULTIBLOCK with
- a platform hook.
-Date: Sun, 13 Feb 2011 22:13:12 +0100
-Message-ID: <20110213211312.GA27028@pengutronix.de>
-References: <m3zkq9n115.fsf@pullcord.laptop.org>
- <20110207174839.GF3123@pengutronix.de>
- <20110212202212.GA11375@void.printf.net>
- <20110212204350.GA23657@pengutronix.de>
- <20110212210541.GA11634@void.printf.net>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+Date: Sun, 13 Feb 2011 23:35:54 +0100
+Message-ID: <201102132335.54868.arnd@arndb.de>
+References: <1297650746-12841-1-git-send-email-shawn.guo@freescale.com> <1297650746-12841-2-git-send-email-shawn.guo@freescale.com> <20110213192609.GA21429@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:36427 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754744Ab1BMVNP convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Feb 2011 16:13:15 -0500
-Content-Disposition: inline
-In-Reply-To: <20110212210541.GA11634@void.printf.net>
+Received: from moutng.kundenserver.de ([212.227.126.171]:65534 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753125Ab1BMWf7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Feb 2011 17:35:59 -0500
+In-Reply-To: <20110213192609.GA21429@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Olof Johansson <olof@lixom.net>, Philip Rakity <prakity@marvell.com>
+Cc: Shawn Guo <shawn.guo@freescale.com>, s.hauer@pengutronix.de, LW@karo-electronics.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Sat, Feb 12, 2011 at 09:05:41PM +0000, Chris Ball wrote:
-
-> > > If there still isn't a better alternative in mind, I'm thinking about
-> > > going ahead and taking this patch, and then reusing the quirk bit for
-> > > Chuanxiao's "mmc: set a suitable max_discard_sectors value for HC"
-> > > patchset.
+On Sunday 13 February 2011, Chris Ball wrote:
+> On Mon, Feb 14, 2011 at 10:32:20AM +0800, Shawn Guo wrote:
+> > This adds the mmc host driver for Freescale MXS-based SoC i.MX23/28.
+> > The driver calls into mxs-dma via generic dmaengine api for both pio
+> > and data transfer.
 > > 
-> > What about using the SZ_2048 quirk instead which could be done via
-> > io-accessors?
+> > Signed-off-by: Shawn Guo <shawn.guo@freescale.com>
 > 
-> That sounds fine too; I thought this one was more straightforward.
-> 
-> > That being said, I have a train travel tomorrow and will try to
-> > see if a fixup() function would make sense for this one. Can you
-> > wait one more day?
-> 
-> Sure, no immediate hurry.  Thanks!
+> Please add a Reviewed-by: from Arnd and a Tested-by: from Lothar.
+> Could you add a MODULE_AUTHOR() field, too?
 
-So, I had a look today: Hmm....
+In general, these tags should not simply be added by the author without
+having the person who did the reviewing or testing specifically provide
+them!
 
-I wanted something like a fixup-function called at the end of sdhci_add_host
-which could handle all quirks doing some "mmc->..." changes. (I know that Olof
-doesn't like this because it breaks abstraction. There might be a middle-way,
-though.)
+In this particular case, I'm happy with the driver in version 2, good job!
+Please do add my
 
-What bugs me with that approach is that it won't help against all quirks, so we
-would need to replace all other quirks with functions, too. I'd think a
-combination of QUIRKS and a fixup-function will be too confusing (we have that
-to some degree already). Changing all at once is a major task though if you
-want to group them properly and not do a 1:1 mapping.
-
-I'd like to hear other people's opinion at this point. For now, my suggestion
-would be to remove those quirks which could be handled via io-accessors. That
-could be done on a step by step basis and should not create confusion if all
-registers flaws are handled via io-accessors. But that's just my brainstorming,
-so looking forward to comments.
-
-Regards,
-
-   Wolfram
-
--- 
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Reviewed-by: Arnd Bergmann <arnd@arndb.de>
