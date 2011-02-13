@@ -1,106 +1,81 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: MMC quirks relating to performance/lifetime.
-Date: Sun, 13 Feb 2011 18:39:08 +0100
-Message-ID: <201102131839.08517.arnd@arndb.de>
-References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <201102121937.24933.arnd@arndb.de> <AANLkTikGvUZ2sWfox9Ws+gbuCw1JiykO=y-rk9QjL8xJ@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and Question
+ on Power Management
+Date: Sun, 13 Feb 2011 09:57:00 -0800
+Message-ID: <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
+References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
+ <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:62840 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751155Ab1BMRjR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Feb 2011 12:39:17 -0500
-In-Reply-To: <AANLkTikGvUZ2sWfox9Ws+gbuCw1JiykO=y-rk9QjL8xJ@mail.gmail.com>
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:55135 "EHLO
+	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754740Ab1BMR5E convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 13 Feb 2011 12:57:04 -0500
+In-Reply-To: <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
+To: Pierre Tardy <tardyp@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Sunday 13 February 2011 01:10:09 Andrei Warkentin wrote:
-> On Sat, Feb 12, 2011 at 12:37 PM, Arnd Bergmann <arnd@arndb.de> wrote:
->
-> > This part might make sense in general, though it's hard to know the
-> > page size in the general case. For many SD cards, writing naturally
-> > aligned 64 KB blocks was the ideal case in my testing, but some need
-> > larger alignment or can deal well with smaller blocks.
-> >
+
+On Feb 13, 2011, at 2:25 AM, Pierre Tardy wrote:
+
+> On Sun, Feb 13, 2011 at 6:39 AM, Philip Rakity <prakity@marvell.com> wrote:
+>> 
+>> Pierre,
+>> 
+>> I am preparing a patch to just diable to interrupt line to the SD controller so global interrupts are not locked out.
+> I think I already have seen previous version of that patch earlier. It
+> does not sound like a bad idea. However, disabling all interrupt is
+> really cheap, and disabling only one is a bit more expensive. AFAIK,
+> spin_lock and co are really meant for very short time locks.
 > 
-> ...which is why I believe this should be a boot per-card parameter,
-> and that it really only makes sense for embedded parts, where you know
-> nothing else is going to be used as, say, mmcblk0.
+>>  This
+>> will allow mdelay to work correctly in the routines the set_ios() calls.
+> This sounds a little bit worse. mdelay is never good, as this is
+> active wait, that is loosing tons of good cpu cycles.
 
-I don't think it needs to be boot-time, it can easily be run-time
-tuneable using sysfs, where you can configure it using an init script
-or some other logic from user space.
+do not need active waiting.  Good point.
 
-> > I could imagine that this will cause problems on your eMMC once you
-> > write small blocks to more than erase block group, because that probably
-> > causes it to start garbage collection -- it makes sense for the cards
-> > to know that something is a directory, but it can only know about
-> > a small number of directories, so it will turn the segment into a regular
-> > one as soon something else becomes a directory.
-> >
+> Do we really need those? Can we do the same thing asynchronous?
+
+This might be possible without a restructure to separate out all the sub-calls that are
+done in set_ios. Otherwise  we would require a restructure of the code in core/ to not use
+set_ios but to call only the function they need via separate call in's.
+(for example setting the width or power) and the associated changes in all the drivers in host.
+
+Rather then do mdelay we could use:  (code from core.h)
+
+static inline void mmc_delay(unsigned int ms)
+{
+	if (ms < 1000 / HZ) {
+		cond_resched();
+		mdelay(ms);
+	} else {
+		msleep(ms);
+	}
+}
+
+Since the whole point of locking out the one interrupt line is to let everything else
+work this look attractive.   -- Opintions Please --
+
 > 
-> It's difficult for me to argue one way or another. The code provided
-> is implementing Toshiba's suggestions for mitigating excessive wear.
-> Basically, as far as certain Android products are concerned, Motorola
-> created some "typical usage" cases, and collected data logs. These
-> logs were analyzed by Toshiba, which reported an approx x16
-> multiplication factor for writes.
+>> 
+>> The pm_ calls  remove the lock before being called and restore it afterwards.  Is this just to ensure interrupts are globally
+>> enabled ?
+> At least on my platform, pm_ calls cannot be done in atomic context,
+> and sdhci runtime_pm flow will call set_ios() back, so you will
+> re-enter the function.
 
-Yes, I've seen similar numbers in my measurements. My experience with
-the Kingston/Toshiba cards is that they combine two unfortunate
-problems:
+ok
 
-* Only one 4 MB AU can be open, writing to a different AU waits for
-garbage collection on the old one. Other cards typically have
-five buffers for open AUs, which makes them much easier to work with.
-
-* Only linear access within one AU is fast. Writing to a block with
-a lower address in the same AU causes garbage collection of the AU.
-
-> Analysis of data written showed that there were many random accesses
-> with 16KB or 32KB, meaning they go into buffer B. 
-
-I have started a remapping layer that should be able to deal with
-this independent of the card, see
-https://wiki.linaro.org/WorkingGroups/KernelConsolidation/Projects/FlashDeviceMapper
-It's still in the early stages, but maybe something like that will
-help you as well.
-
-The real solution would be to have a file system that knows what
-accesses are fast and reorders file data accordingly. Right now,
-the only thing that is normally fast is FAT32 using 32KB clusters,
-and only if the file system is aligned properly.
-
-> According to T, that
-> means extra GC and PE cycle. I'm guessing per write.
-
-Yes.
-
-What is "PE" here?
-
-> So T suggested for random data to better go into buffer A. How? Two suggestions.
-> 1) Split smaller accesses into 8KB and write with reliable write.
-> 2) Split smaller accesses into 8KB and write in reverse.
 > 
-> The patch does both and I am verifying if that is really necessary. I
-> need to go see the mmc spec and what it says about reliable write.
+>>  If so, I can simplify my patch deleting the original spin_lock calls that surround the pm_ calls.
+> No, you cannot safely remove the spin_lock calls here.
 
-I should add this to my test tool once I can reproduce it. If it turns
-out that other media do the same, we can also trigger the same behavior
-for those.
+ok
 
-> Basically, whatever behavior you choose is going to be wrong some set
-> of cards. Which is why tuning it probably only makes sense for eMMC
-> parts, and should be a set of runtime/compile-time quirks. What do you
-> think?
-
-Your explanation makes sense, but I'd definitely favor a run-time solution
-over compile-time or boot-time, because it would be much more flexible.
-We should also be able to find some optimizations that are universally
-good so we can always use them.
-
-	Arnd
