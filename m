@@ -1,46 +1,104 @@
-From: Paul Compaore <paulcompaore12@gmail.com>
-Subject: My Dear Good Friend.
-Date: Sun, 13 Feb 2011 13:31:49 +0900 (KST)
-Message-ID: <460203.44697.qm@web70808.mail.kr3.yahoo.com>
-Reply-To: paulcompaore14@gmail.com
+From: Philip Rakity <prakity@marvell.com>
+Subject: [RFC}  sdhci.c set_ios -- disable global interrupts and Question on
+ Power Management
+Date: Sat, 12 Feb 2011 21:39:20 -0800
+Message-ID: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from nm1-vm1.bullet.mail.kr3.yahoo.com ([111.67.240.243]:47921 "HELO
-	nm1-vm1.bullet.mail.kr3.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753747Ab1BMEb5 convert rfc822-to-8bit
+Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:42791 "EHLO
+	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750816Ab1BMFjY convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 12 Feb 2011 23:31:57 -0500
+	Sun, 13 Feb 2011 00:39:24 -0500
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pierre Tardy <tardyp@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
-My Dear Good Friend.
+Pierre,
 
-Compliment of the season, how are you and your family? Hope All is well. I am Mr.Paul Compaore, the accountant general in the accounts unit of Bib Bank Burkina (BIB-BF) Ouagadougou Burkina Faso. I got your contact from the Burkina Faso chambers of commerce have some fund to claim in my bank Which will be of benefit to both of us.
+I am preparing a patch to just diable to interrupt line to the SD controller so global interrupts are not locked out.  This
+will allow mdelay to work correctly in the routines the set_ios() calls.
 
-I want you to be an inheritor of the fund, the fund is in a Doormat account and with your bank information and my Documentation certifies you as the inheritor/beneficiary Since I am an insider and working in the same bank, the Transfer will be processed legally and successfully and I will Be coming down to your country for disbursement.
+The pm_ calls  remove the lock before being called and restore it afterwards.  Is this just to ensure interrupts are globally
+enabled ?  If so, I can simplify my patch deleting the original spin_lock calls that surround the pm_ calls.
 
-The amount of money involved is ($11.3m) which I want you to Claim for further transfer out of the country to your bank Account, all to our financial benefit. This is very great opportunity as it will take a maximum of 7 banking Working days to be concluded.
-
-I as an insider will do my duties perfectly well concerning this transaction for security reasons. This is confidential for successful conclusion and hitch-free transaction. Contact me immediately for further details and mutual Relationship and we will decide together on how to disburse The funds and percentage as well, my private email Address:( paulcompaore14@gmail.com )
-
-If you are interested and capable to handle this business transaction, come up with the information's shown below:- 
-
-1). Your full name: 
-2). Your contact cell phone number: 
-3). Your age: 
-4). Your sex: 
-5). Your occupations: 
-6). Your country and city:
-
-As soon as possible all these information's is submitted to me immediately i will send you full details of this business transaction on the receipt of your response.Reply to my private email: paulcompaore12@gmail.com
-
-Yours truly.
-Mr.Paul Compaore
-Banque Internationale Du Burkina (BIB)
-Burkina (BIB-BF)
+Philip
 
 
-      
+>From 782c474f1abe992a203ad76594db025414332e67 Mon Sep 17 00:00:00 2001
+From: Philip Rakity <prakity@marvell.com>
+Date: Tue, 25 Jan 2011 16:04:42 -0800
+Subject: [PATCH 1/2] sdhci: sdhci.c: Do not disable global interrupts while waiting in set_ios
+
+holding the spin_lock with all interrupts disabled
+is not good form when doing mdelay.
+set_ios calls routines that need to delay for power to
+stabalize or for chip issues when quirks are defined.
+
+disable only our interupt and spin_lock on the chip
+instead of spin_lock with all interrupts disabled.
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+Signed-off-by: Mark F. Brown <markb@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |   15 ++++++++-------
+ 1 files changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 655617c..1a88303 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1161,13 +1161,13 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sdhci_host *host;
+-	unsigned long flags;
+ 	unsigned int lastclock;
+ 	u8 ctrl;
+ 
+ 	host = mmc_priv(mmc);
+ 
+-	spin_lock_irqsave(&host->lock, flags);
++	disable_irq(host->irq);
++	spin_lock(&host->lock);
+ 
+ 	if (host->flags & SDHCI_DEVICE_DEAD)
+ 		goto out;
+@@ -1180,14 +1180,14 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	lastclock = host->iosclock;
+ 	host->iosclock = ios->clock;
+ 	if (lastclock == 0 && ios->clock != 0) {
+-		spin_unlock_irqrestore(&host->lock, flags);
++		spin_unlock(&host->lock);
+ 		pm_runtime_get_sync(host->mmc->parent);
+-		spin_lock_irqsave(&host->lock, flags);
++		spin_lock(&host->lock);
+ 	} else if (lastclock != 0 && ios->clock == 0) {
+-		spin_unlock_irqrestore(&host->lock, flags);
++		spin_unlock(&host->lock);
+ 		pm_runtime_mark_last_busy(host->mmc->parent);
+ 		pm_runtime_put_autosuspend(host->mmc->parent);
+-		spin_lock_irqsave(&host->lock, flags);
++		spin_lock(&host->lock);
+ 	}
+ 	/* no need to configure the rest.. */
+ 	if (host->iosclock == 0)
+@@ -1257,7 +1257,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ out:
+ 	mmiowb();
+-	spin_unlock_irqrestore(&host->lock, flags);
++	spin_unlock(&host->lock);
++	enable_irq(host->irq);
+ }
+ 
+ static int sdhci_get_ro(struct mmc_host *mmc)
+-- 
+1.7.0.4
+
+
