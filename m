@@ -1,52 +1,98 @@
 From: Pierre Tardy <tardyp@gmail.com>
-Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and Question
- on Power Management
-Date: Sun, 13 Feb 2011 11:25:18 +0100
-Message-ID: <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
-References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
+Subject: Re: [PATCH v2 2/3] sdhci-pci : Enable runtime PM support
+Date: Sun, 13 Feb 2011 11:42:01 +0100
+Message-ID: <AANLkTi=iZ3dzAoRuRdpvQ=uBp4u8O8LtMuu2XdSWeZwr@mail.gmail.com>
+References: <cover.1297014479.git.pierre.tardy@intel.com>
+	<6722fa7986194808f4d69a1e5ba6d3f163b77da9.1297014479.git.pierre.tardy@intel.com>
+	<20110210043718.GA7585@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:47487 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754448Ab1BMKZT convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Feb 2011 05:25:19 -0500
-Received: by qyj19 with SMTP id 19so719371qyj.19
-        for <linux-mmc@vger.kernel.org>; Sun, 13 Feb 2011 02:25:18 -0800 (PST)
-In-Reply-To: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:60986 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752640Ab1BMKmD convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Feb 2011 05:42:03 -0500
+In-Reply-To: <20110210043718.GA7585@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Pierre Tardy <pierre.tardy@intel.com>, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Yunpeng Gao <yunpeng.gao@intel.com>
 
-On Sun, Feb 13, 2011 at 6:39 AM, Philip Rakity <prakity@marvell.com> wr=
-ote:
+> On Sun, Feb 06, 2011 at 07:02:49PM +0100, Pierre Tardy wrote:
+>> From: Yunpeng Gao <yunpeng.gao@intel.com>
+>>
+>> Follow the kernel runtime PM framework, enable runtime PM support of=
+ the
+>> sdhci host controller with pci interface.
+>>
+>> Note that this patch implements runtime_pm but now actually detects
+>> activity.
+>> It relies on higher level (childrens) to do actual waking up
+>> Activity detection is put in following patch
 >
-> Pierre,
+> Testing this patchset in linux-next-20100208 gives:
 >
-> I am preparing a patch to just diable to interrupt line to the SD con=
-troller so global interrupts are not locked out.
-I think I already have seen previous version of that patch earlier. It
-does not sound like a bad idea. However, disabling all interrupt is
-really cheap, and disabling only one is a bit more expensive. AFAIK,
-spin_lock and co are really meant for very short time locks.
+> [ =A0 10.829223] sdhci: Secure Digital Host Controller Interface driv=
+er
+> [ =A0 10.829548] sdhci: Copyright(c) Pierre Ossman
+> [ =A0 10.883906] sdhci-pci 0000:0d:00.0: SDHCI controller found [1180=
+:e822] (rev 1)
+> [ =A0 10.884533] sdhci-pci 0000:0d:00.0: PCI INT A -> GSI 16 (level, =
+low) -> IRQ 16
+> [ =A0 10.885189] sdhci-pci 0000:0d:00.0: Will use DMA mode even thoug=
+h HW doesn't fully claim to support it.
+> [ =A0 10.886176] sdhci-pci 0000:0d:00.0: setting latency timer to 64
+> [ =A0 10.886819] Registered led device: mmc0::
+> [ =A0 10.887281] mmc0: SDHCI controller on PCI [0000:0d:00.0] using D=
+MA
+> [ =A0 10.887724] sdhci-pci 0000:0d:00.0: Unbalanced pm_runtime_enable=
+!
+> [ =A0 10.888498] sdhci-pci 0000:17:00.0: SDHCI controller found [1180=
+:e822] (rev 1)
+> [ =A0 10.889179] sdhci-pci 0000:17:00.0: PCI INT A -> GSI 19 (level, =
+low) -> IRQ 19
+> [ =A0 10.889876] sdhci-pci 0000:17:00.0: Will use DMA mode even thoug=
+h HW doesn't fully claim to support it.
+> [ =A0 10.890924] sdhci-pci 0000:17:00.0: setting latency timer to 64
+> [ =A0 10.891387] Registered led device: mmc1::
+> [ =A0 10.891900] mmc1: SDHCI controller on PCI [0000:17:00.0] using D=
+MA
+> [ =A0 10.892280] sdhci-pci 0000:17:00.0: Unbalanced pm_runtime_enable=
+!
+>
+> (Note the last line above.)
 
-> =A0This
-> will allow mdelay to work correctly in the routines the set_ios() cal=
-ls.
-This sounds a little bit worse. mdelay is never good, as this is
-active wait, that is loosing tons of good cpu cycles.
-Do we really need those? Can we do the same thing asynchronous?
+I never have seen this before. I'm not testing those patches on
+mmc-next, as our platform is not totally upstream yet, and do not boot
+on 2.6.37+ based kernel.
+However, we backported the pm_runtime patches from 2.6.37. Is there
+some differences in very latest patches on default enablement of
+runtime_pm?
 
 >
-> The pm_ calls =A0remove the lock before being called and restore it a=
-fterwards. =A0Is this just to ensure interrupts are globally
-> enabled ?
-At least on my platform, pm_ calls cannot be done in atomic context,
-and sdhci runtime_pm flow will call set_ios() back, so you will
-re-enter the function.
+> I then removed the card and reinserted it, but there's no dmesg outpu=
+t
+> related to the reinsert, only to the card removal:
+>
+> [ =A0 65.381047] mmc0: card d555 removed
+>
+> So, card insertion is broken. =A0I then did rmmod sdhci-pci && modpro=
+be
+> sdhci-pci, and it picked up the card again.
 
->=A0If so, I can simplify my patch deleting the original spin_lock call=
-s that surround the pm_ calls.
-No, you cannot safely remove the spin_lock calls here.
+So what you have here is non working card-detection when device is in P=
+CI_D3.
+This sounds like a HW limitation in you platform.
+
+D3 is originally meant for suspend to ram, so it sounds logic that
+some HW wont support wake on card detect.
+it sounds like we need a SDHCI_RUNTIME_PM_CAP, so that we can properly
+describe which HW can be safely put D3 at runtime.
+Also, maybe on some HW, D1 will support wake on card detect. I dont
+know how can the driver hint pci subsystem that it should go D1 rather
+than D3 in the runtime_pm flow.
+Maybe Rafael can advice on this.
+
+Regards,
+Pierre
