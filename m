@@ -1,59 +1,57 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH 0/1] sdhci: Add support PXA168, PXA910, and MMP2 controllers
-Date: Sun, 13 Feb 2011 23:23:37 -0800
-Message-ID: <4C169F7B-5950-4E3C-8B7D-A7C1E3EB3125@marvell.com>
+From: "panduranga" <x0125717@ti.com>
+Subject: Re: [PATCH 1/5] omap: panda: wlan board muxing
+Date: Mon, 14 Feb 2011 13:31:21 +0530
+Message-ID: <FBC9ED9F50B94DFFB6CAE483EF20F1C7@MINX0125717>
+References: <1297667958-22377-1-git-send-email-panduranga_mallireddy@ti.com> <1297667958-22377-2-git-send-email-panduranga_mallireddy@ti.com> <AANLkTik4+CRp8B8Ajnpy-_k1m+=MZNe62c2WG8cjaz-D@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain;
+	format=flowed;
+	charset="iso-8859-1";
+	reply-type=original
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:59161 "EHLO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751994Ab1BNH1m convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 02:27:42 -0500
-Content-Language: en-US
+Received: from comal.ext.ti.com ([198.47.26.152]:59200 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751411Ab1BNIBr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Feb 2011 03:01:47 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Mark Brown <markb@marvell.com>
+To: Ohad Ben-Cohen <ohad@wizery.com>, "Mallireddy, Panduranga" <panduranga_mallireddy@ti.com>
+Cc: "Coelho, Luciano" <coelho@ti.com>, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, "Gabay, Benzy" <benzyg@ti.com>, "Gurumath, Pradeep" <pradeepgurumath@ti.com>, "Mahaveer, Vishal" <vishalm@ti.com>, "Boudet, Xavier" <x-boudet@ti.com>, "Jain, Naveen" <naveen_jain@ti.com>, "Savoy, Pavan" <pavan_savoy@ti.com>, "Halli, Manjunatha" <manjunatha_halli@ti.com>, tony@atomide.com, cjb@laptop.org
 
-Patch set 12 of 12
+Hi Ohad,
 
-The current sdhci-pxa code is only useful for MMP2.  It does not
-work on other PXA controllers.  Factor out the common code
-and define 3 SoC specific files that control the SD hardware.
+I will modify the patch accordingly.
 
-Take into account that while the PXA910 and PXA168 controllers
-are similar they have different quirks due to hardware differences.
+Regards,
+Pandu.
 
-MMP2 is different since it is based on the SD 3.0 controller spec
-while the other 2 SoC are based on SD 2.0 spec with SoC specific
-extensions.
+----- Original Message ----- 
+From: "Ohad Ben-Cohen" <ohad@wizery.com>
+To: "Mallireddy, Panduranga" <panduranga_mallireddy@ti.com>
+Cc: "Coelho, Luciano" <coelho@ti.com>; <netdev@vger.kernel.org>; 
+<linux-omap@vger.kernel.org>; <linux-mmc@vger.kernel.org>; "Gabay, Benzy" 
+<benzyg@ti.com>; "Gurumath, Pradeep" <pradeepgurumath@ti.com>; "Mahaveer, 
+Vishal" <vishalm@ti.com>; "Boudet, Xavier" <x-boudet@ti.com>; "Jain, Naveen" 
+<naveen_jain@ti.com>; "Savoy, Pavan" <pavan_savoy@ti.com>; "Halli, 
+Manjunatha" <manjunatha_halli@ti.com>; <tony@atomide.com>; <cjb@laptop.org>
+Sent: Monday, February 14, 2011 12:54 PM
+Subject: Re: [PATCH 1/5] omap: panda: wlan board muxing
 
 
-[PATCH] sdhci: Add support PXA168, PXA910, and MMP2 controllers
+Hi Pandu,
 
-Select pxa controller based on CPU model: MMP2, PXA168, PXA910
+On Mon, Feb 14, 2011 at 9:19 AM,  <panduranga_mallireddy@ti.com> wrote:
+> + /* WLAN IRQ - GPIO 53 */
+> + OMAP4_MUX(GPMC_NCS3, OMAP_MUX_MODE3 | OMAP_PIN_INPUT_PULLUP),
 
-Three new SoC specific files added:
-sdhci-pxa168.c
-sdhci-pxa910.c
-sdhci-mmp2.c
+Actually we don't need to pull up the IRQ line -  it is always held by
+the 1271 device, and there's no need for the host to pull it up
+(wasting some power while doing it).
 
-These files control the platform specific behavior of the SD controller.
-MMP2 and the PXAxxx controllers use different hardware registers
-to control platform specific behavior. Platform flags come from
-arch/mach-mmp/ files for board design (brownstone, jasper, aspenite etc)
-settings (8 bit capable slot / card permanent).
+We have that on the ZOOM, but that's not necessary, and will be fixed
+there, too.
 
-quirks for SD/SoC specific behaviro defined in specific platform files
-(sdhci-pxa168.c, sdhci-pxa910.c, sdhci-mmp2.c)
-
-The correct SD controller is now shown Kconfig.
-
-sdhci-pxa.c changed to act as a shim for the platform specific code.
-Only generic operations are handled in sdhci-pxa.c. All
-platform operations are passed to the platform code.
-
-reset_enter() and reset_exit() used for silicon control.
+Thanks,
+Ohad.
 
