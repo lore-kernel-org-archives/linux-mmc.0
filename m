@@ -1,38 +1,47 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and
- Question on Power Management
-Date: Mon, 14 Feb 2011 10:55:28 +0100
-Message-ID: <20110214095528.GA30100@pengutronix.de>
-References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
- <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
- <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
- <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
- <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
+Subject: Re: [PATCH v2 7/7] ARM: mxs/mx28evk: add mmc device
+Date: Mon, 14 Feb 2011 11:26:46 +0100
+Message-ID: <20110214102646.GB30100@pengutronix.de>
+References: <1297650746-12841-1-git-send-email-shawn.guo@freescale.com>
+ <1297650746-12841-8-git-send-email-shawn.guo@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:33286 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:45759 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752710Ab1BNJzb convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 04:55:31 -0500
+	with ESMTP id S1753228Ab1BNK0x convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 05:26:53 -0500
 Content-Disposition: inline
-In-Reply-To: <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
+In-Reply-To: <1297650746-12841-8-git-send-email-shawn.guo@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Tardy <tardyp@gmail.com>
-Cc: Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: cjb@laptop.org, s.hauer@pengutronix.de, arnd@arndb.de, LW@KARO-electronics.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
+Shawn,
 
-> It looks like the mdelay are not in the fastpath, so why bother.
+> +/* mmc */
+> +static void __init mx28evk_mmc_slot_poweron(int gpio)
+> +{
+> +	int ret;
+> +
+> +	ret = gpio_request(gpio, "mmc-slot-power");
+> +	if (ret) {
+> +		pr_err("Failed to request gpio mmc-slot-power: %d\n", ret);
+> +		return;
+> +	}
+> +
+> +	ret = gpio_direction_output(gpio, 0);
+> +	if (ret) {
+> +		pr_err("Failed to drive gpio mmc-slot-power: %d\n", ret);
+> +		return;
+> +	}
+> +}
 
-On embedded systems, we had audio streaming or CAN communication or similar
-running in parallel. Currently, those mdelays (there are a couple, sadly)
-produce significant latencies, e.g. when inserting/removing a card. The latter
-gets especially bad with BROKEN_CARD_DETECTION.
-
-The proper solution is probably to check the locking and see if it can be made
-fine-granular, I'd assume?
+Minor nit: You could use gpio_request_one(), and doing so maybe even get rid of
+this function and simply do it the init-function. The advantage would be, that
+you can name the two GPIOs independently.
 
 Regards,
 
