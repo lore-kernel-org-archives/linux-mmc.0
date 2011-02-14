@@ -1,39 +1,39 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
-Date: Mon, 14 Feb 2011 13:13:51 +0100
-Message-ID: <201102141313.52132.arnd@arndb.de>
-References: <20110212062214.GB25519@intel.com> <201102121904.30944.arnd@arndb.de> <5D8008F58939784290FAB48F5497519835964E1F58@shsmsx502.ccr.corp.intel.com>
+Subject: Re: [[PATCH 1/4] arm: mach-mmp: Fix Kconfig to allow correct PXA Selections
+Date: Mon, 14 Feb 2011 15:03:53 +0100
+Message-ID: <201102141503.53189.arnd@arndb.de>
+References: <CEFFF7FE-F2F8-47EB-948A-C79301FEB82A@marvell.com>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
   charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5D8008F58939784290FAB48F5497519835964E1F58@shsmsx502.ccr.corp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.8]:59186 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755087Ab1BNOD6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 09:03:58 -0500
+In-Reply-To: <CEFFF7FE-F2F8-47EB-948A-C79301FEB82A@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>
 
-On Monday 14 February 2011, Dong, Chuanxiao wrote:
-> When I do trim with a 32GB eMMC card in my platform, sometimes I can get the 10s
-> timeout errors but sometimes not. I am not much clear about the "discarding partial
-> AU will take a lot longer". If this action is hide for driver, then I think from 
-> driver side, the UINT_MAX value for max_discard_sectors will be OK. But if this action
-> sometimes need driver to wait for some hardware interrupt, then I think the UINT_MAX
-> value is not preferred.
->
-> Arnd, have any suggestion of dealing this? What I thought is using other value
-> instead of using UINT_MAX.
+On Monday 14 February 2011, Philip Rakity wrote:
+> The following items are fixed:
+> 
+> a) inconsistent behavior when board is selected and if
+> menu item is reselected board has disappeard
+> 
+> b) Ability to select options that will not build
+>         MMP2 and say PXA168
+> 
+> The behavior maps what is done by the mach-omap
+> (thanks to Anrd Bergmann for his help and suggestions)
+> 
+> Mach-MMP is (as now) the sytem type.  Once selected
+> the user can then select the SoC on the board and
+> only the boards that support that SoC are shown.
+> 
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
 
-I'm not too familiar with the eMMC spec, but it should have a way to calculate
-a maximum trim timeout like SD 3.0 does for AU erases. When I've seen the timeouts
-with SDHCI (missing your patch), it was always a bug in the driver, and the
-erase was already completed before the driver even started waiting for the
-interrupt.
-
-10 seconds still sounds like a reasonable timeout, and we should probably
-not issue any requests that might take longer than that, so I think the
-interesting question is how to determine a good value for pref_erase,
-so we can still take your patch.
-
-	Arnd
+Acked-by: Arnd Bergmann <arnd@arndb.de>
