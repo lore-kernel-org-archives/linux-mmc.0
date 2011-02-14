@@ -1,62 +1,76 @@
-From: "Tardy, Pierre" <pierre.tardy@intel.com>
-Subject: RE: [RFC} sdhci.c set_ios -- disable global interrupts and Question
- on Power Management
-Date: Mon, 14 Feb 2011 18:41:47 +0000
-Message-ID: <8250E4885F9967469CAC3FB5CBA2CE69935205E445@irsmsx501.ger.corp.intel.com>
-References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
- <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
- <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
- <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
- <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
- <E5D06E6B-BE70-4446-9F56-32982C119FC0@marvell.com>
+From: Dmitry Shmidt <dimitrysh@android.com>
+Subject: Re: mmc_rescan failure in case of CONFIG_MMC_UNSAFE_RESUME
+Date: Mon, 14 Feb 2011 11:04:13 -0800
+Message-ID: <AANLkTimkW0JDUT-8ERrGTimLUpqWvgNd5jYLfuXodL==@mail.gmail.com>
+References: <loom.20110212T012758-658@post.gmane.org>
+	<20110212172205.GA9608@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:5459 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751050Ab1BNSlv convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 13:41:51 -0500
-In-Reply-To: <E5D06E6B-BE70-4446-9F56-32982C119FC0@marvell.com>
-Content-Language: en-US
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:45901 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751209Ab1BNTEP convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 14:04:15 -0500
+Received: by iyj8 with SMTP id 8so5123389iyj.19
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2011 11:04:14 -0800 (PST)
+In-Reply-To: <20110212172205.GA9608@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>, Pierre Tardy <tardyp@gmail.com>, Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Philip,
-> > And, more important, you will do cond_resched while holding you
-> > spinlock, which is *bad*.
-> > What if the mmc stack will call you again from another thread? deadlock...
+Hi Chris,
 
-> Assumptions -- Please Confirm
-> -------------------------------------------
-No need to do assumptions, schedule while holding spinlocks is bad, your kernel will oops with something like:
-BUG: scheduling while in atomic.
+On Sat, Feb 12, 2011 at 9:22 AM, Chris Ball <cjb@laptop.org> wrote:
+> Hi Dmitry,
+>
+> On Sat, Feb 12, 2011 at 12:33:33AM +0000, Dmitry Shmidt wrote:
+>> Recently new check was added to core.c function mmc_rescan():
+>> =A0 =A0 if (host->bus_ops && host->bus_ops->detect && !host->bus_dea=
+d
+>> =A0 =A0 =A0 =A0 && mmc_card_is_removable(host)) <<<< This one
+>> =A0 =A0 =A0 =A0 host->bus_ops->detect(host);
+>> mmc_card_is_removable() is checking
+>> =A0!(host->caps & MMC_CAP_NONREMOVABLE) && mmc_assume_removable;
+>>
+>> If we use CONFIG_MMC_UNSAFE_RESUME then
+>> =A0 mmc_assume_removable will be 0 and any card will be always consi=
+dered
+>> as non-removable. And host->bus_ops->detect() will not be called on =
+card
+>> removal.
+>
+> I agree that we've changed the behavior to avoid running ->detect
+> in this case, but that was intentional -- you should not be using
+> CONFIG_MMC_UNSAFE_RESUME on a card that is physically removable.
+> Why are you trying to?
+
+MMC_UNSAFE_RESUME is affecting mmc_sdio_resume() sequence. If it is
+not defined then sdio card will be considered
+"removable" and on resume mmc_sdio_init_card() will be always called.
+
+static int mmc_sdio_resume(struct mmc_host *host)
+{
+     ...
+     if (mmc_card_is_removable(host) || !mmc_card_is_powered_resumed(ho=
+st))
+          err =3D mmc_sdio_init_card(host, host->ocr, host->card,
+                        (host->pm_flags & MMC_PM_KEEP_POWER));
 
 
-> >> @@ -1108,7 +1108,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
-> >>         * can apply clock after applying power
-> >>         */
-> >>        if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
-> >> -               mdelay(10);
-> >> +               mmc_delay(10);
-> > Do you need this quirk in your platform?
-> 
-> No
-Then, you dont have any mdelay in your set_ios, and you are trying to optimize something that never happen.
+>
+> config MMC_UNSAFE_RESUME
+> =A0 =A0 =A0 =A0bool "Assume MMC/SD cards are non-removable (DANGEROUS=
+)"
+> =A0 =A0 =A0 =A0...
+>
+> Thanks,
+>
+> --
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
+>
 
-Pierre
-
----------------------------------------------------------------------
-Intel Corporation SAS (French simplified joint stock company)
-Registered headquarters: "Les Montalets"- 2, rue de Paris, 
-92196 Meudon Cedex, France
-Registration Number:  302 456 199 R.C.S. NANTERRE
-Capital: 4,572,000 Euros
-
-This e-mail and any attachments may contain confidential material for
-the sole use of the intended recipient(s). Any review or distribution
-by others is strictly prohibited. If you are not the intended
-recipient, please contact the sender and delete all copies.
-
+Thanks,
+Dmitry
