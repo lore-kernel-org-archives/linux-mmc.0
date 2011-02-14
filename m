@@ -1,116 +1,50 @@
-From: panduranga_mallireddy@ti.com
-Subject: [PATCH 5/5] OMAP: hsmmc: Enable MMC4 and MMC5 on OMAP4 platforms
-Date: Mon, 14 Feb 2011 02:19:18 -0500
-Message-ID: <1297667958-22377-6-git-send-email-panduranga_mallireddy@ti.com>
-References: <1297667958-22377-1-git-send-email-panduranga_mallireddy@ti.com>
- <1297667958-22377-2-git-send-email-panduranga_mallireddy@ti.com>
- <1297667958-22377-3-git-send-email-panduranga_mallireddy@ti.com>
- <1297667958-22377-4-git-send-email-panduranga_mallireddy@ti.com>
- <1297667958-22377-5-git-send-email-panduranga_mallireddy@ti.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH 2/5] arm: mach-mmp: mmp2.c use revised APMU registers
+ defines for APMU_CLK_OPS
+Date: Sun, 13 Feb 2011 22:50:32 -0800
+Message-ID: <3A0B1D79-FBC5-4952-94FE-AF91A87C8292@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:52709 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751375Ab1BNGxt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 01:53:49 -0500
-In-Reply-To: <1297667958-22377-5-git-send-email-panduranga_mallireddy@ti.com>
+Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:37877 "EHLO
+	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751506Ab1BNGyH convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Feb 2011 01:54:07 -0500
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: coelho@ti.com, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ohad@wizery.com, benzyg@ti.com, pradeepgurumath@ti.com, vishalm@ti.com, x-boudet@ti.com, naveen_jain@ti.com, pavan_savoy@ti.com, manjunatha_halli@ti.com, tony@atomide.com, cjb@laptop.org, Kishore Kadiyala <kishore.kadiyala@ti.com>, Panduranga Mallireddy <panduranga_mallireddy@ti.com>
+To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>
 
-From: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Subject: [PATCH 2/5] arm: mach-mmp: mmp2.c use revised APMU registers defines for APMU_CLK_OPS
 
-OMAP4 supports up to 5 MMC controllers, but only 3 of these were
-initialized. MMC5 is used by wl12xx chip. So initialize MMC4 and MMC5.
-
-Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Signed-off-by: Panduranga Mallireddy <panduranga_mallireddy@ti.com>
+Signed-off-by: Philip Rakity <prakity@marvell.com>
 ---
- arch/arm/mach-omap2/hsmmc.c   |    5 +++++
- drivers/mmc/host/omap_hsmmc.c |   24 ++++++++++++++++++++----
- 2 files changed, 25 insertions(+), 4 deletions(-)
+ arch/arm/mach-mmp/mmp2.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 8f1a484..3c0809f 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -348,6 +348,11 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
- 				mmc->slots[0].after_set_reg = NULL;
- 			}
- 			break;
-+		case 4:
-+		case 5:
-+			mmc->slots[0].before_set_reg = NULL;
-+			mmc->slots[0].after_set_reg = NULL;
-+			break;
- 		default:
- 			pr_err("MMC%d configuration not supported!\n", c->mmc);
- 			kfree(mmc);
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f59f8da..2525071 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -260,7 +260,7 @@ static int omap_hsmmc_1_set_power(struct device *dev, int slot, int power_on,
- 	return ret;
- }
+diff --git a/arch/arm/mach-mmp/mmp2.c b/arch/arm/mach-mmp/mmp2.c
+index 8e6c3ac..564bfbc 100644
+--- a/arch/arm/mach-mmp/mmp2.c
++++ b/arch/arm/mach-mmp/mmp2.c
+@@ -151,10 +151,10 @@ static APBC_CLK(twsi5, MMP2_TWSI5, 0, 26000000);
+ static APBC_CLK(twsi6, MMP2_TWSI6, 0, 26000000);
  
--static int omap_hsmmc_23_set_power(struct device *dev, int slot, int power_on,
-+static int omap_hsmmc_235_set_power(struct device *dev, int slot, int power_on,
- 				   int vdd)
- {
- 	struct omap_hsmmc_host *host =
-@@ -316,6 +316,12 @@ static int omap_hsmmc_23_set_power(struct device *dev, int slot, int power_on,
- 	return ret;
- }
+ static APMU_CLK(nand, NAND, 0xbf, 100000000);
+-static APMU_CLK_OPS(sdh0, SDH0, 0x1b, 200000000, &sdhc_clk_ops);
+-static APMU_CLK_OPS(sdh1, SDH1, 0x1b, 200000000, &sdhc_clk_ops);
+-static APMU_CLK_OPS(sdh2, SDH2, 0x1b, 200000000, &sdhc_clk_ops);
+-static APMU_CLK_OPS(sdh3, SDH3, 0x1b, 200000000, &sdhc_clk_ops);
++static APMU_CLK_OPS(sdh0, MMP2_SDH0, 0x1b, 200000000, &sdhc_clk_ops);
++static APMU_CLK_OPS(sdh1, MMP2_SDH1, 0x1b, 200000000, &sdhc_clk_ops);
++static APMU_CLK_OPS(sdh2, MMP2_SDH2, 0x1b, 200000000, &sdhc_clk_ops);
++static APMU_CLK_OPS(sdh3, MMP2_SDH3, 0x1b, 200000000, &sdhc_clk_ops);
  
-+static int omap_hsmmc_4_set_power(struct device *dev, int slot, int power_on,
-+					int vdd)
-+{
-+	return 0;
-+}
-+
- static int omap_hsmmc_1_set_sleep(struct device *dev, int slot, int sleep,
- 				  int vdd, int cardsleep)
- {
-@@ -326,7 +332,7 @@ static int omap_hsmmc_1_set_sleep(struct device *dev, int slot, int sleep,
- 	return regulator_set_mode(host->vcc, mode);
- }
- 
--static int omap_hsmmc_23_set_sleep(struct device *dev, int slot, int sleep,
-+static int omap_hsmmc_235_set_sleep(struct device *dev, int slot, int sleep,
- 				   int vdd, int cardsleep)
- {
- 	struct omap_hsmmc_host *host =
-@@ -365,6 +371,12 @@ static int omap_hsmmc_23_set_sleep(struct device *dev, int slot, int sleep,
- 		return regulator_enable(host->vcc_aux);
- }
- 
-+static int omap_hsmmc_4_set_sleep(struct device *dev, int slot, int sleep,
-+					int vdd, int cardsleep)
-+{
-+	return 0;
-+}
-+
- static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- {
- 	struct regulator *reg;
-@@ -379,10 +391,14 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 		break;
- 	case OMAP_MMC2_DEVID:
- 	case OMAP_MMC3_DEVID:
-+	case OMAP_MMC5_DEVID:
- 		/* Off-chip level shifting, or none */
--		mmc_slot(host).set_power = omap_hsmmc_23_set_power;
--		mmc_slot(host).set_sleep = omap_hsmmc_23_set_sleep;
-+		mmc_slot(host).set_power = omap_hsmmc_235_set_power;
-+		mmc_slot(host).set_sleep = omap_hsmmc_235_set_sleep;
- 		break;
-+	case OMAP_MMC4_DEVID:
-+		mmc_slot(host).set_power = omap_hsmmc_4_set_power;
-+		mmc_slot(host).set_sleep = omap_hsmmc_4_set_sleep;
- 	default:
- 		pr_err("MMC%d configuration not supported!\n", host->id);
- 		return -EINVAL;
+ static struct clk_lookup mmp2_clkregs[] = {
+ 	INIT_CLKREG(&clk_uart1, "pxa2xx-uart.0", NULL),
 -- 
-1.5.6.3
+1.7.0.4
+
 
