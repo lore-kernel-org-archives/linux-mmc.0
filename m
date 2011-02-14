@@ -1,16 +1,16 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH 3/4] arm: configs: update pxa168 defconfig for SoC Selection
-Date: Sun, 13 Feb 2011 22:45:15 -0800
-Message-ID: <E4CAC973-9323-4273-A436-9F25840B9841@marvell.com>
+Subject: [PATCH 4/4] arm: configs: update pxa910 defconfig for SoC Selection
+Date: Sun, 13 Feb 2011 22:46:08 -0800
+Message-ID: <B06C04F0-9A0F-4EA9-ACBC-2479BFA7664B@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:55732 "EHLO
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:56848 "EHLO
 	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751260Ab1BNGsS convert rfc822-to-8bit
+	by vger.kernel.org with ESMTP id S1751237Ab1BNGss convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 01:48:18 -0500
+	Mon, 14 Feb 2011 01:48:48 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,23 +18,25 @@ To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>
 
 
-took old pxa168_defconfig --
+
+took old pxa910_defconfig --
 did make menuconfig
+changed to CPU_PXA910
 
 Signed-off-by: Philip Rakity <prakity@marvell.com>
 ---
- arch/arm/configs/pxa168_defconfig |  974 ++++++++++++++++++++++++++++++++++++-
- 1 files changed, 971 insertions(+), 3 deletions(-)
+ arch/arm/configs/pxa910_defconfig |  983 ++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 979 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/configs/pxa168_defconfig b/arch/arm/configs/pxa168_defconfig
-index 74d7e01..b39d0ce 100644
---- a/arch/arm/configs/pxa168_defconfig
-+++ b/arch/arm/configs/pxa168_defconfig
-@@ -1,70 +1,1038 @@
+diff --git a/arch/arm/configs/pxa910_defconfig b/arch/arm/configs/pxa910_defconfig
+index 1cd381e..ef3b83a 100644
+--- a/arch/arm/configs/pxa910_defconfig
++++ b/arch/arm/configs/pxa910_defconfig
+@@ -1,70 +1,1045 @@
 +#
 +# Automatically generated make config: don't edit
 +# Linux/arm 2.6.37-rc8 Kernel Configuration
-+# Tue Jan 25 13:43:16 2011
++# Tue Jan 25 13:57:30 2011
 +#
 +CONFIG_ARM=y
 +CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -111,7 +113,12 @@ index 74d7e01..b39d0ce 100644
 +# CONFIG_SCHED_AUTOGROUP is not set
 +# CONFIG_SYSFS_DEPRECATED is not set
 +# CONFIG_RELAY is not set
-+# CONFIG_BLK_DEV_INITRD is not set
+ CONFIG_BLK_DEV_INITRD=y
++CONFIG_INITRAMFS_SOURCE=""
++CONFIG_RD_GZIP=y
++CONFIG_RD_BZIP2=y
++CONFIG_RD_LZMA=y
++CONFIG_RD_LZO=y
 +CONFIG_CC_OPTIMIZE_FOR_SIZE=y
 +CONFIG_SYSCTL=y
 +CONFIG_ANON_INODES=y
@@ -246,6 +253,7 @@ index 74d7e01..b39d0ce 100644
 +# CONFIG_ARCH_MV78XX0 is not set
 +# CONFIG_ARCH_ORION5X is not set
  CONFIG_ARCH_MMP=y
+-CONFIG_MACH_TAVOREVB=y
 +# CONFIG_ARCH_KS8695 is not set
 +# CONFIG_ARCH_NS9XXX is not set
 +# CONFIG_ARCH_W90X900 is not set
@@ -273,21 +281,19 @@ index 74d7e01..b39d0ce 100644
 +# CONFIG_ARCH_DAVINCI is not set
 +# CONFIG_ARCH_OMAP is not set
 +# CONFIG_PLAT_SPEAR is not set
++# CONFIG_MACH_TAVOREVB is not set
 +
 +#
 +# Marvell PXA168/PXA910/MMP2 Specific Features
 +#
-+CONFIG_CPU_PXA168=y
-+# CONFIG_CPU_PXA910 is not set
++# CONFIG_CPU_PXA168 is not set
++CONFIG_CPU_PXA910=y
 +# CONFIG_CPU_MMP2 is not set
 +
 +#
 +# Development Board
 +#
- CONFIG_MACH_ASPENITE=y
- CONFIG_MACH_ZYLONITE2=y
- CONFIG_MACH_AVENGERS_LITE=y
-+# CONFIG_MACH_TETON_BGA is not set
+ CONFIG_MACH_TTC_DKB=y
 +CONFIG_PLAT_PXA=y
 +
 +#
@@ -544,7 +550,6 @@ index 74d7e01..b39d0ce 100644
  CONFIG_NET_ETHERNET=y
 +# CONFIG_AX88796 is not set
  CONFIG_SMC91X=y
-+# CONFIG_PXA168_ETH is not set
 +# CONFIG_DM9000 is not set
 +# CONFIG_ETHOC is not set
 +# CONFIG_SMC911X is not set
@@ -1065,6 +1070,11 @@ index 74d7e01..b39d0ce 100644
 +# CONFIG_CRC7 is not set
 +# CONFIG_LIBCRC32C is not set
 +CONFIG_ZLIB_INFLATE=y
++CONFIG_LZO_DECOMPRESS=y
++CONFIG_DECOMPRESS_GZIP=y
++CONFIG_DECOMPRESS_BZIP2=y
++CONFIG_DECOMPRESS_LZMA=y
++CONFIG_DECOMPRESS_LZO=y
 +CONFIG_HAS_IOMEM=y
 +CONFIG_HAS_IOPORT=y
 +CONFIG_HAS_DMA=y
