@@ -1,67 +1,50 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH 1/5] arm: mach-mmp: SDH register definitions for (pxa168,
- pxa910, mmp2)
-Date: Sun, 13 Feb 2011 22:49:37 -0800
-Message-ID: <E7516703-3A5B-4514-870E-12EFD6A218AA@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: panduranga_mallireddy@ti.com
+Subject: [PATCH 0/5] Panda: Support for WLAN on WL127x
+Date: Mon, 14 Feb 2011 02:19:13 -0500
+Message-ID: <1297667958-22377-1-git-send-email-panduranga_mallireddy@ti.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:52287 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751313Ab1BNGwJ convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 01:52:09 -0500
-Content-Language: en-US
+Received: from bear.ext.ti.com ([192.94.94.41]:48417 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751211Ab1BNGxs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Feb 2011 01:53:48 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>
+To: coelho@ti.com, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ohad@wizery.com, benzyg@ti.com, pradeepgurumath@ti.com, vishalm@ti.com, x-boudet@ti.com, naveen_jain@ti.com, pavan_savoy@ti.com, manjunatha_halli@ti.com, tony@atomide.com, cjb@laptop.org, Panduranga Mallireddy <panduranga_mallireddy@ti.com>
 
+From: Panduranga Mallireddy <panduranga_mallireddy@ti.com>
 
-Register definitions added for APMU registers for all platforms
-Definitions are platform dependent (not same for pxa168, pxz910, mmp2).
+Adding support for WLAN on Panda board using wl12xx and mac80211 drivers
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- arch/arm/mach-mmp/include/mach/regs-apmu.h |   18 ++++++++++++++----
- 1 files changed, 14 insertions(+), 4 deletions(-)
+Patches were tested on Panda board.
 
-diff --git a/arch/arm/mach-mmp/include/mach/regs-apmu.h b/arch/arm/mach-mmp/include/mach/regs-apmu.h
-index f7011ef..9d1146f 100644
---- a/arch/arm/mach-mmp/include/mach/regs-apmu.h
-+++ b/arch/arm/mach-mmp/include/mach/regs-apmu.h
-@@ -20,15 +20,25 @@
- #define APMU_IRE	APMU_REG(0x048)
- #define APMU_LCD	APMU_REG(0x04c)
- #define APMU_CCIC	APMU_REG(0x050)
--#define APMU_SDH0	APMU_REG(0x054)
--#define APMU_SDH1	APMU_REG(0x058)
- #define APMU_USB	APMU_REG(0x05c)
- #define APMU_NAND	APMU_REG(0x060)
- #define APMU_DMA	APMU_REG(0x064)
- #define APMU_GEU	APMU_REG(0x068)
- #define APMU_BUS	APMU_REG(0x06c)
--#define APMU_SDH2	APMU_REG(0x0e8)
--#define APMU_SDH3	APMU_REG(0x0ec)
-+
-+#define APMU_PXA168_SDH0	APMU_REG(0x054)
-+#define APMU_PXA168_SDH1	APMU_REG(0x058)
-+#define APMU_PXA168_SDH2	APMU_REG(0x0e0)
-+#define APMU_PXA168_SDH3	APMU_REG(0x0e4)
-+
-+#define APMU_PXA910_SDH0	APMU_REG(0x054)
-+#define APMU_PXA910_SDH1	APMU_REG(0x058)
-+#define APMU_PXA910_SDH2	APMU_REG(0x0e0)
-+
-+#define APMU_MMP2_SDH0	APMU_REG(0x054)
-+#define APMU_MMP2_SDH1	APMU_REG(0x058)
-+#define APMU_MMP2_SDH2	APMU_REG(0x0e8)
-+#define APMU_MMP2_SDH3	APMU_REG(0x0ec)
- 
- #define APMU_FNCLK_EN	(1 << 4)
- #define APMU_AXICLK_EN	(1 << 3)
--- 
-1.7.0.4
+These patches add software control for emulating card detect events,
+add board configurations to support the wl127x device.
 
+These patches are dependent on the patches that enable clock for WLAN on panda.
+Please refer the following links for these patches:
+https://patchwork.kernel.org/patch/546381/
+https://patchwork.kernel.org/patch/546401/
+
+[PATCH 5/5] OMAP: hsmmc: Enable MMC4 and MMC5 on OMAP4 platforms
+ is dependent on hwmod adpotation for HSMMC patches series.
+For original patches of adpotation for HSMMC refer:
+http://www.mail-archive.com/linux-omap@vger.kernel.org/msg43464.html
+
+Patches are based on mainline 2.6.38-rc3
+
+Kishore Kadiyala (1):
+  OMAP: hsmmc: Enable MMC4 and MMC5 on OMAP4 platforms
+
+Panduranga Mallireddy (4):
+  omap: panda: wlan board muxing
+  omap: select REGULATOR_FIXED_VOLTAGE by default for panda and sdp4430
+  omap: panda: add fixed regulator device for wlan
+  omap: panda: add mmc5/wl1271 device support
+
+ arch/arm/mach-omap2/Kconfig            |    2 +
+ arch/arm/mach-omap2/board-omap4panda.c |   67 ++++++++++++++++++++++++++++++++
+ arch/arm/mach-omap2/hsmmc.c            |    5 ++
+ drivers/mmc/host/omap_hsmmc.c          |   24 +++++++++--
+ 4 files changed, 94 insertions(+), 4 deletions(-)
 
