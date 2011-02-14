@@ -1,57 +1,69 @@
-From: "panduranga" <x0125717@ti.com>
-Subject: Re: [PATCH 1/5] omap: panda: wlan board muxing
-Date: Mon, 14 Feb 2011 13:31:21 +0530
-Message-ID: <FBC9ED9F50B94DFFB6CAE483EF20F1C7@MINX0125717>
-References: <1297667958-22377-1-git-send-email-panduranga_mallireddy@ti.com> <1297667958-22377-2-git-send-email-panduranga_mallireddy@ti.com> <AANLkTik4+CRp8B8Ajnpy-_k1m+=MZNe62c2WG8cjaz-D@mail.gmail.com>
+From: Pierre Tardy <tardyp@gmail.com>
+Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and Question
+ on Power Management
+Date: Mon, 14 Feb 2011 10:29:55 +0100
+Message-ID: <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
+References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
+	<AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
+	<447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
+	<B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	format=flowed;
-	charset="iso-8859-1";
-	reply-type=original
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:59200 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751411Ab1BNIBr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 03:01:47 -0500
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:41533 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752268Ab1BNJ34 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 04:29:56 -0500
+Received: by qwa26 with SMTP id 26so2948290qwa.19
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2011 01:29:55 -0800 (PST)
+In-Reply-To: <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>, "Mallireddy, Panduranga" <panduranga_mallireddy@ti.com>
-Cc: "Coelho, Luciano" <coelho@ti.com>, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, "Gabay, Benzy" <benzyg@ti.com>, "Gurumath, Pradeep" <pradeepgurumath@ti.com>, "Mahaveer, Vishal" <vishalm@ti.com>, "Boudet, Xavier" <x-boudet@ti.com>, "Jain, Naveen" <naveen_jain@ti.com>, "Savoy, Pavan" <pavan_savoy@ti.com>, "Halli, Manjunatha" <manjunatha_halli@ti.com>, tony@atomide.com, cjb@laptop.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Ohad,
+On Mon, Feb 14, 2011 at 6:50 AM, Philip Rakity <prakity@marvell.com> wr=
+ote:
+>
+> Pierre,
+>
+> are you comfortable with this ?
+The mmc_delay() looks hackish at the first sight. Looks like Pierre
+Ossman was the author, he must have his reasons.
 
-I will modify the patch accordingly.
+It looks like the mdelay are not in the fastpath, so why bother.
 
-Regards,
-Pandu.
-
------ Original Message ----- 
-From: "Ohad Ben-Cohen" <ohad@wizery.com>
-To: "Mallireddy, Panduranga" <panduranga_mallireddy@ti.com>
-Cc: "Coelho, Luciano" <coelho@ti.com>; <netdev@vger.kernel.org>; 
-<linux-omap@vger.kernel.org>; <linux-mmc@vger.kernel.org>; "Gabay, Benzy" 
-<benzyg@ti.com>; "Gurumath, Pradeep" <pradeepgurumath@ti.com>; "Mahaveer, 
-Vishal" <vishalm@ti.com>; "Boudet, Xavier" <x-boudet@ti.com>; "Jain, Naveen" 
-<naveen_jain@ti.com>; "Savoy, Pavan" <pavan_savoy@ti.com>; "Halli, 
-Manjunatha" <manjunatha_halli@ti.com>; <tony@atomide.com>; <cjb@laptop.org>
-Sent: Monday, February 14, 2011 12:54 PM
-Subject: Re: [PATCH 1/5] omap: panda: wlan board muxing
+And, more important, you will do cond_resched while holding you
+spinlock, which is *bad*.
+What if the mmc stack will call you again from another thread? deadlock=
+=2E..
 
 
-Hi Pandu,
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> -static inline void mmc_delay(unsigned int ms)
+why do you want to remove it from here ?
+It is still used by the core code.
 
-On Mon, Feb 14, 2011 at 9:19 AM,  <panduranga_mallireddy@ti.com> wrote:
-> + /* WLAN IRQ - GPIO 53 */
-> + OMAP4_MUX(GPMC_NCS3, OMAP_MUX_MODE3 | OMAP_PIN_INPUT_PULLUP),
 
-Actually we don't need to pull up the IRQ line -  it is always held by
-the 1271 device, and there's no need for the host to pull it up
-(wasting some power while doing it).
+> @@ -1043,7 +1043,7 @@ static void sdhci_set_clock(struct sdhci_host *=
+host, unsigned int clock)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0timeout--;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mdelay(1);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_delay(1);
+This looks like timeout code that never happen in normal condition.
 
-We have that on the ZOOM, but that's not necessary, and will be fixed
-there, too.
 
-Thanks,
-Ohad.
+> @@ -1108,7 +1108,7 @@ static void sdhci_set_power(struct sdhci_host *=
+host, unsigned short power)
+> =A0 =A0 =A0 =A0 * can apply clock after applying power
+> =A0 =A0 =A0 =A0 */
+> =A0 =A0 =A0 =A0if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mdelay(10);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_delay(10);
+Do you need this quirk in your platform?
 
+
+Pierre
