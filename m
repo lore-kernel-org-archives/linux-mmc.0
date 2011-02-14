@@ -1,41 +1,47 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 5/5] arm: mach-mmp: brownstone.c support multiple sd slots
-Date: Mon, 14 Feb 2011 15:10:47 +0100
-Message-ID: <201102141510.48137.arnd@arndb.de>
-References: <23C25DE3-86A5-4115-8539-D9837268F63F@marvell.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH v2 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+Date: Mon, 14 Feb 2011 16:39:52 +0100
+Message-ID: <20110214153952.GE10709@pengutronix.de>
+References: <1297650746-12841-1-git-send-email-shawn.guo@freescale.com>
+ <1297650746-12841-2-git-send-email-shawn.guo@freescale.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:56979 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754293Ab1BNOKx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 09:10:53 -0500
-In-Reply-To: <23C25DE3-86A5-4115-8539-D9837268F63F@marvell.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:35955 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755675Ab1BNPj7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 10:39:59 -0500
+Content-Disposition: inline
+In-Reply-To: <1297650746-12841-2-git-send-email-shawn.guo@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: cjb@laptop.org, s.hauer@pengutronix.de, arnd@arndb.de, LW@KARO-electronics.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Monday 14 February 2011, Philip Rakity wrote:
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index afe8c6f..42a9e21 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -319,6 +319,15 @@ config MMC_MXC
+>  
+>  	  If unsure, say N.
+>  
+> +config MMC_MXS
+> +	tristate "Freescale MXS Multimedia Card Interface support"
+> +	depends on ARCH_MXS
+> +	help
+> +	  This selects the Freescale SSP MMC controller found on MXS based
+> +	  platforms like mx23/28.
 > +
-> +       gpio_direction_output(poweron, 1);
-> +       mdelay (20);
-> +       gpio_direction_output(reset, 0);
-> +       mdelay (20);
-> +       gpio_direction_output(reset, 1);
-> +       gpio_free(reset);
-> +       gpio_free(poweron);
+> +	  If unsure, say N.
+> +
 
-mdelay is not nice, especially in boot code, because a lot of people
-are interested in reducing boot times, and 40 miliseconds is definitely
-in the range that people notice.
+It should also depend on MXS_DMA?
 
-At the very least, change it from mdelay() to msleep(), to allow other
-processes to continue.
+Regards,
 
-Ideally, you can run the function in the background using schedule_work(),
-but there may be better ways to do that for the entire platform code.
+   Wolfram
 
-	Arnd
+-- 
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
