@@ -1,50 +1,45 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH 2/5] arm: mach-mmp: mmp2.c use revised APMU registers
- defines for APMU_CLK_OPS
-Date: Sun, 13 Feb 2011 22:50:32 -0800
-Message-ID: <3A0B1D79-FBC5-4952-94FE-AF91A87C8292@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:37877 "EHLO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751506Ab1BNGyH convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 01:54:07 -0500
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+From: panduranga_mallireddy@ti.com
+Subject: [PATCH 2/5] omap: select REGULATOR_FIXED_VOLTAGE by default for panda and sdp4430
+Date: Mon, 14 Feb 2011 02:19:15 -0500
+Message-ID: <1297667958-22377-3-git-send-email-panduranga_mallireddy@ti.com>
+References: <1297667958-22377-1-git-send-email-panduranga_mallireddy@ti.com>
+ <1297667958-22377-2-git-send-email-panduranga_mallireddy@ti.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1297667958-22377-2-git-send-email-panduranga_mallireddy@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: coelho@ti.com, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ohad@wizery.com, benzyg@ti.com, pradeepgurumath@ti.com, vishalm@ti.com, x-boudet@ti.com, naveen_jain@ti.com, pavan_savoy@ti.com, manjunatha_halli@ti.com, tony@atomide.com, cjb@laptop.org, Panduranga Mallireddy <panduranga_mallireddy@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>
 
-Subject: [PATCH 2/5] arm: mach-mmp: mmp2.c use revised APMU registers defines for APMU_CLK_OPS
+From: Panduranga Mallireddy <panduranga_mallireddy@ti.com>
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
+Power to the wl12xx wlan device is controlled by a fixed regulator.
+Boards that have the wl12xx should select REGULATOR_FIXED_VOLTAGE.
+Signed-off-by: Panduranga Mallireddy <panduranga_mallireddy@ti.com>
 ---
- arch/arm/mach-mmp/mmp2.c |    8 ++++----
- 1 files changed, 4 insertions(+), 4 deletions(-)
+ arch/arm/mach-omap2/Kconfig |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm/mach-mmp/mmp2.c b/arch/arm/mach-mmp/mmp2.c
-index 8e6c3ac..564bfbc 100644
---- a/arch/arm/mach-mmp/mmp2.c
-+++ b/arch/arm/mach-mmp/mmp2.c
-@@ -151,10 +151,10 @@ static APBC_CLK(twsi5, MMP2_TWSI5, 0, 26000000);
- static APBC_CLK(twsi6, MMP2_TWSI6, 0, 26000000);
+diff --git a/arch/arm/mach-omap2/Kconfig b/arch/arm/mach-omap2/Kconfig
+index 1a2cf62..eeaeb3b 100644
+--- a/arch/arm/mach-omap2/Kconfig
++++ b/arch/arm/mach-omap2/Kconfig
+@@ -300,6 +300,7 @@ config MACH_OMAP_4430SDP
+ 	depends on ARCH_OMAP4
+ 	select OMAP_PACKAGE_CBL
+ 	select OMAP_PACKAGE_CBS
++	select REGULATOR_FIXED_VOLTAGE
  
- static APMU_CLK(nand, NAND, 0xbf, 100000000);
--static APMU_CLK_OPS(sdh0, SDH0, 0x1b, 200000000, &sdhc_clk_ops);
--static APMU_CLK_OPS(sdh1, SDH1, 0x1b, 200000000, &sdhc_clk_ops);
--static APMU_CLK_OPS(sdh2, SDH2, 0x1b, 200000000, &sdhc_clk_ops);
--static APMU_CLK_OPS(sdh3, SDH3, 0x1b, 200000000, &sdhc_clk_ops);
-+static APMU_CLK_OPS(sdh0, MMP2_SDH0, 0x1b, 200000000, &sdhc_clk_ops);
-+static APMU_CLK_OPS(sdh1, MMP2_SDH1, 0x1b, 200000000, &sdhc_clk_ops);
-+static APMU_CLK_OPS(sdh2, MMP2_SDH2, 0x1b, 200000000, &sdhc_clk_ops);
-+static APMU_CLK_OPS(sdh3, MMP2_SDH3, 0x1b, 200000000, &sdhc_clk_ops);
+ config MACH_OMAP4_PANDA
+ 	bool "OMAP4 Panda Board"
+@@ -307,6 +308,7 @@ config MACH_OMAP4_PANDA
+ 	depends on ARCH_OMAP4
+ 	select OMAP_PACKAGE_CBL
+ 	select OMAP_PACKAGE_CBS
++	select REGULATOR_FIXED_VOLTAGE
  
- static struct clk_lookup mmp2_clkregs[] = {
- 	INIT_CLKREG(&clk_uart1, "pxa2xx-uart.0", NULL),
+ config OMAP3_EMU
+ 	bool "OMAP3 debugging peripherals"
 -- 
-1.7.0.4
-
+1.5.6.3
 
