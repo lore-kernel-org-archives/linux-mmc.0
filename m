@@ -1,91 +1,41 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: Re: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
-Date: Mon, 14 Feb 2011 16:08:34 +0200
-Message-ID: <4D593762.7020006@nokia.com>
-References: <20110212062214.GB25519@intel.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 5/5] arm: mach-mmp: brownstone.c support multiple sd slots
+Date: Mon, 14 Feb 2011 15:10:47 +0100
+Message-ID: <201102141510.48137.arnd@arndb.de>
+References: <23C25DE3-86A5-4115-8539-D9837268F63F@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20110212062214.GB25519@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.8]:56979 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754293Ab1BNOKx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 09:10:53 -0500
+In-Reply-To: <23C25DE3-86A5-4115-8539-D9837268F63F@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>
 
-On 12/02/11 08:22, ext Chuanxiao Dong wrote:
-> max_discard_sectors value is UINT_MAX which means kernel block layer can pass
-> down unlimited sectors to MMC driver to erase. But erasing so many sectors may
-> delay some other important I/O requests. This is not preferred.
->
-> So use 'pref_erase' to set a suitable max_discard_sectors value for mmc queue to
-> avoid erasing too many sectors at one time.
->
-> Signed-off-by: Chuanxiao Dong<chuanxiao.dong@intel.com>
-> ---
->   drivers/mmc/card/queue.c |    3 ++-
->   drivers/mmc/core/core.c  |   20 ++++++++++++++++++++
->   include/linux/mmc/core.h |    1 +
->   3 files changed, 23 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index 4e42d03..6c13859 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -131,7 +131,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock
->   	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
->   	if (mmc_can_erase(card)) {
->   		queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, mq->queue);
-> -		mq->queue->limits.max_discard_sectors = UINT_MAX;
-> +		mq->queue->limits.max_discard_sectors =
-> +			mmc_set_max_discard_sectors(card);
->   		if (card->erased_byte == 0)
->   			mq->queue->limits.discard_zeroes_data = 1;
->   		if (!mmc_can_trim(card)&&  is_power_of_2(card->erase_size)) {
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 34a7e8c..0eb27aa 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1470,6 +1470,26 @@ int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
->   }
->   EXPORT_SYMBOL(mmc_erase_group_aligned);
->
-> +/*
-> + * Set max_discard_sectors for mmc queue.
-> + * max_discard_sectors will determine how many sectors can be erased at one
-> + * time. Sometimes user may want to erase a large area of SD or MMC card, it may
-> + * take long time which delay some other important I/O requests. So we would
-> + * better set some values for max_discard_sectors which can forbid block layer
-> + * pass too many sectors at one time.
-> + *
-> + * 'pref_erase' is initialized for this purpose. We can use it to set a preferred
-> + * value for it.
-> + */
-> +int mmc_set_max_discard_sectors(struct mmc_card *card)
-> +{
-> +	if (card->pref_erase)
-> +		return card->pref_erase;
-
-This will cause orders of magnitude decrease in secure erase
-performance for eMMC.
-
-> +	else
-> +		return UINT_MAX;
-> +}
-> +EXPORT_SYMBOL(mmc_set_max_discard_sectors);
+On Monday 14 February 2011, Philip Rakity wrote:
 > +
->   int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
->   {
->   	struct mmc_command cmd;
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index 64e013f..a218d57 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -152,6 +152,7 @@ extern int mmc_can_trim(struct mmc_card *card);
->   extern int mmc_can_secure_erase_trim(struct mmc_card *card);
->   extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
->   				   unsigned int nr);
-> +extern int mmc_set_max_discard_sectors(struct mmc_card *card);
->
->   extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
->
+> +       gpio_direction_output(poweron, 1);
+> +       mdelay (20);
+> +       gpio_direction_output(reset, 0);
+> +       mdelay (20);
+> +       gpio_direction_output(reset, 1);
+> +       gpio_free(reset);
+> +       gpio_free(poweron);
+
+mdelay is not nice, especially in boot code, because a lot of people
+are interested in reducing boot times, and 40 miliseconds is definitely
+in the range that people notice.
+
+At the very least, change it from mdelay() to msleep(), to allow other
+processes to continue.
+
+Ideally, you can run the function in the background using schedule_work(),
+but there may be better ways to do that for the entire platform code.
+
+	Arnd
