@@ -1,76 +1,83 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and Question
- on Power Management
-Date: Mon, 14 Feb 2011 12:44:49 -0800
-Message-ID: <70D5B8A0-2EC9-4CA1-8350-B44E5A07D779@marvell.com>
-References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
- <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
- <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
- <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
- <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
- <E5D06E6B-BE70-4446-9F56-32982C119FC0@marvell.com>
- <8250E4885F9967469CAC3FB5CBA2CE69935205E445@irsmsx501.ger.corp.intel.com>
+From: Dmitry Shmidt <dimitrysh@android.com>
+Subject: Re: mmc_rescan failure in case of CONFIG_MMC_UNSAFE_RESUME
+Date: Mon, 14 Feb 2011 13:54:27 -0800
+Message-ID: <AANLkTin0e=wUR_WXMaVcX1U1Ln6WGHCx-836nv7Rn1Sd@mail.gmail.com>
+References: <loom.20110212T012758-658@post.gmane.org>
+	<20110212172205.GA9608@void.printf.net>
+	<AANLkTimkW0JDUT-8ERrGTimLUpqWvgNd5jYLfuXodL==@mail.gmail.com>
+	<20110214194013.GA3145@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:47403 "EHLO
-	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751506Ab1BNUrO convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 15:47:14 -0500
-In-Reply-To: <8250E4885F9967469CAC3FB5CBA2CE69935205E445@irsmsx501.ger.corp.intel.com>
-Content-Language: en-US
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:55279 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751079Ab1BNVy2 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 16:54:28 -0500
+Received: by iyj8 with SMTP id 8so5280570iyj.19
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2011 13:54:27 -0800 (PST)
+In-Reply-To: <20110214194013.GA3145@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Tardy, Pierre" <pierre.tardy@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Nicolas Pitre <nico@fluxnic.net>
 
+Hi Chris,
 
-Pierre,
+On Mon, Feb 14, 2011 at 11:40 AM, Chris Ball <cjb@laptop.org> wrote:
+> Hi Dmitry,
+>
+> [Cc +=3D Nico]
+>
+> On Mon, Feb 14, 2011 at 11:04:13AM -0800, Dmitry Shmidt wrote:
+>> MMC_UNSAFE_RESUME is affecting mmc_sdio_resume() sequence. If it is
+>> not defined then sdio card will be considered
+>> "removable" and on resume mmc_sdio_init_card() will be always called=
+=2E
+>>
+>> static int mmc_sdio_resume(struct mmc_host *host)
+>> {
+>> =A0 =A0 =A0...
+>> =A0 =A0 =A0if (mmc_card_is_removable(host) || !mmc_card_is_powered_r=
+esumed(host))
+>> =A0 =A0 =A0 =A0 =A0 err =3D mmc_sdio_init_card(host, host->ocr, host=
+->card,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host->pm_flags & MM=
+C_PM_KEEP_POWER));
+>
+> mmc_sdio_init_card() is supposed to be called if your card is removab=
+le,
+> because the card might have changed. =A0It has a fast path that's ena=
+bled
+> by MMC_PM_KEEP_POWER. =A0(Nicolas explained this back in October.)
+>
+> You absolutely should not enable MMC_UNSAFE_RESUME if your host has a
+> removable card. =A0It's an awful hack, and you just found an example =
+of
+> where it breaks.
 
-The spin_lock may not be needed if the same thread cannot be re-entered.
+My main concern was that here we are mixing two things: removable
+cards and cards that stay powered and need quick resume.
+It is possible to assume that last ones are not removable, but I feel
+it is not 100% correct. For example you may have
+removable wlan sdio adaptor.
 
-That was the reason for the assumptions.  Sorry about not being clear.
+> If you need mmc_sdio_resume() to have an even faster path for you, we=
+ can
+> talk about that and see if it makes sense. =A0Misusing MMC_UNSAFE_RES=
+UME to
+> get a powered SDIO resume is just wrong.
 
-Philip
+So what can we do to suppress resume for removable sdio card ?
 
-On Feb 14, 2011, at 10:41 AM, Tardy, Pierre wrote:
+>
+> Thanks,
+>
+> --
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
+>
 
-> Philip,
->>> And, more important, you will do cond_resched while holding you
->>> spinlock, which is *bad*.
->>> What if the mmc stack will call you again from another thread? deadlock...
-> 
->> Assumptions -- Please Confirm
->> -------------------------------------------
-> No need to do assumptions, schedule while holding spinlocks is bad, your kernel will oops with something like:
-> BUG: scheduling while in atomic.
-> 
-> 
->>>> @@ -1108,7 +1108,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
->>>>        * can apply clock after applying power
->>>>        */
->>>>       if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
->>>> -               mdelay(10);
->>>> +               mmc_delay(10);
->>> Do you need this quirk in your platform?
->> 
->> No
-> Then, you dont have any mdelay in your set_ios, and you are trying to optimize something that never happen.
-> 
-> Pierre
-> 
-> ---------------------------------------------------------------------
-> Intel Corporation SAS (French simplified joint stock company)
-> Registered headquarters: "Les Montalets"- 2, rue de Paris, 
-> 92196 Meudon Cedex, France
-> Registration Number:  302 456 199 R.C.S. NANTERRE
-> Capital: 4,572,000 Euros
-> 
-> This e-mail and any attachments may contain confidential material for
-> the sole use of the intended recipient(s). Any review or distribution
-> by others is strictly prohibited. If you are not the intended
-> recipient, please contact the sender and delete all copies.
-> 
+Thanks,
 
+Dmitry
