@@ -1,52 +1,39 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v2 7/7] ARM: mxs/mx28evk: add mmc device
-Date: Mon, 14 Feb 2011 11:26:46 +0100
-Message-ID: <20110214102646.GB30100@pengutronix.de>
-References: <1297650746-12841-1-git-send-email-shawn.guo@freescale.com>
- <1297650746-12841-8-git-send-email-shawn.guo@freescale.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
+Date: Mon, 14 Feb 2011 13:13:51 +0100
+Message-ID: <201102141313.52132.arnd@arndb.de>
+References: <20110212062214.GB25519@intel.com> <201102121904.30944.arnd@arndb.de> <5D8008F58939784290FAB48F5497519835964E1F58@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:45759 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753228Ab1BNK0x convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 05:26:53 -0500
-Content-Disposition: inline
-In-Reply-To: <1297650746-12841-8-git-send-email-shawn.guo@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <5D8008F58939784290FAB48F5497519835964E1F58@shsmsx502.ccr.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: cjb@laptop.org, s.hauer@pengutronix.de, arnd@arndb.de, LW@KARO-electronics.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Shawn,
+On Monday 14 February 2011, Dong, Chuanxiao wrote:
+> When I do trim with a 32GB eMMC card in my platform, sometimes I can get the 10s
+> timeout errors but sometimes not. I am not much clear about the "discarding partial
+> AU will take a lot longer". If this action is hide for driver, then I think from 
+> driver side, the UINT_MAX value for max_discard_sectors will be OK. But if this action
+> sometimes need driver to wait for some hardware interrupt, then I think the UINT_MAX
+> value is not preferred.
+>
+> Arnd, have any suggestion of dealing this? What I thought is using other value
+> instead of using UINT_MAX.
 
-> +/* mmc */
-> +static void __init mx28evk_mmc_slot_poweron(int gpio)
-> +{
-> +	int ret;
-> +
-> +	ret = gpio_request(gpio, "mmc-slot-power");
-> +	if (ret) {
-> +		pr_err("Failed to request gpio mmc-slot-power: %d\n", ret);
-> +		return;
-> +	}
-> +
-> +	ret = gpio_direction_output(gpio, 0);
-> +	if (ret) {
-> +		pr_err("Failed to drive gpio mmc-slot-power: %d\n", ret);
-> +		return;
-> +	}
-> +}
+I'm not too familiar with the eMMC spec, but it should have a way to calculate
+a maximum trim timeout like SD 3.0 does for AU erases. When I've seen the timeouts
+with SDHCI (missing your patch), it was always a bug in the driver, and the
+erase was already completed before the driver even started waiting for the
+interrupt.
 
-Minor nit: You could use gpio_request_one(), and doing so maybe even get rid of
-this function and simply do it the init-function. The advantage would be, that
-you can name the two GPIOs independently.
+10 seconds still sounds like a reasonable timeout, and we should probably
+not issue any requests that might take longer than that, so I think the
+interesting question is how to determine a good value for pref_erase,
+so we can still take your patch.
 
-Regards,
-
-   Wolfram
-
--- 
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+	Arnd
