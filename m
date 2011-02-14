@@ -1,52 +1,84 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: mmc_rescan failure in case of CONFIG_MMC_UNSAFE_RESUME
-Date: Mon, 14 Feb 2011 19:40:13 +0000
-Message-ID: <20110214194013.GA3145@void.printf.net>
-References: <loom.20110212T012758-658@post.gmane.org> <20110212172205.GA9608@void.printf.net> <AANLkTimkW0JDUT-8ERrGTimLUpqWvgNd5jYLfuXodL==@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and Question
+ on Power Management
+Date: Mon, 14 Feb 2011 12:17:28 -0800
+Message-ID: <ADA48E01-9665-4D2B-889A-097FA4E6AD9F@marvell.com>
+References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
+ <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
+ <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
+ <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
+ <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
+ <E5D06E6B-BE70-4446-9F56-32982C119FC0@marvell.com>
+ <8250E4885F9967469CAC3FB5CBA2CE69935205E445@irsmsx501.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57509 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751170Ab1BNTkO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 14:40:14 -0500
-Content-Disposition: inline
-In-Reply-To: <AANLkTimkW0JDUT-8ERrGTimLUpqWvgNd5jYLfuXodL==@mail.gmail.com>
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:60176 "EHLO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752046Ab1BNUSe convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Feb 2011 15:18:34 -0500
+In-Reply-To: <8250E4885F9967469CAC3FB5CBA2CE69935205E445@irsmsx501.ger.corp.intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dmitry Shmidt <dimitrysh@android.com>
-Cc: linux-mmc@vger.kernel.org, Nicolas Pitre <nico@fluxnic.net>
+To: "Tardy, Pierre" <pierre.tardy@intel.com>
+Cc: Pierre Tardy <tardyp@gmail.com>, Wolfram Sang <w.sang@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Dmitry,
 
-[Cc += Nico]
+According to Zhangfei Gao -- android crashes when we are code to handle dual data rate because of the mdelay of 5ms that 
+is needed for the voltage to become stable.  (see my ddr patch) 
 
-On Mon, Feb 14, 2011 at 11:04:13AM -0800, Dmitry Shmidt wrote:
-> MMC_UNSAFE_RESUME is affecting mmc_sdio_resume() sequence. If it is
-> not defined then sdio card will be considered
-> "removable" and on resume mmc_sdio_init_card() will be always called.
+I have never seen this problem with android.
+
+The dual data rate code is in another patch;  it adds another call into set_ios to handle this.  
+
+His comment was doing mdelay stopped the system from being scheduled since mdelay is done with interrupts disabled.  It also
+stopped the system for keeping correct time.  
+
+If doing mdelay breaks android then the original code (no ddr code) is wrong since mdelay should not be issued with
+interrupts disabled and depending on the quirks defined the delays can be very large.
+
+Wanted to handle his concern.
+
+
+On Feb 14, 2011, at 10:41 AM, Tardy, Pierre wrote:
+
+> Philip,
+>>> And, more important, you will do cond_resched while holding you
+>>> spinlock, which is *bad*.
+>>> What if the mmc stack will call you again from another thread? deadlock...
 > 
-> static int mmc_sdio_resume(struct mmc_host *host)
-> {
->      ...
->      if (mmc_card_is_removable(host) || !mmc_card_is_powered_resumed(host))
->           err = mmc_sdio_init_card(host, host->ocr, host->card,
->                         (host->pm_flags & MMC_PM_KEEP_POWER));
+>> Assumptions -- Please Confirm
+>> -------------------------------------------
+> No need to do assumptions, schedule while holding spinlocks is bad, your kernel will oops with something like:
+> BUG: scheduling while in atomic.
+> 
+> 
+>>>> @@ -1108,7 +1108,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
+>>>>        * can apply clock after applying power
+>>>>        */
+>>>>       if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+>>>> -               mdelay(10);
+>>>> +               mmc_delay(10);
+>>> Do you need this quirk in your platform?
+>> 
+>> No
+> Then, you dont have any mdelay in your set_ios, and you are trying to optimize something that never happen.
+> 
+> Pierre
+> 
+> ---------------------------------------------------------------------
+> Intel Corporation SAS (French simplified joint stock company)
+> Registered headquarters: "Les Montalets"- 2, rue de Paris, 
+> 92196 Meudon Cedex, France
+> Registration Number:  302 456 199 R.C.S. NANTERRE
+> Capital: 4,572,000 Euros
+> 
+> This e-mail and any attachments may contain confidential material for
+> the sole use of the intended recipient(s). Any review or distribution
+> by others is strictly prohibited. If you are not the intended
+> recipient, please contact the sender and delete all copies.
+> 
 
-mmc_sdio_init_card() is supposed to be called if your card is removable,
-because the card might have changed.  It has a fast path that's enabled
-by MMC_PM_KEEP_POWER.  (Nicolas explained this back in October.)
-
-You absolutely should not enable MMC_UNSAFE_RESUME if your host has a
-removable card.  It's an awful hack, and you just found an example of
-where it breaks.
-
-If you need mmc_sdio_resume() to have an even faster path for you, we can
-talk about that and see if it makes sense.  Misusing MMC_UNSAFE_RESUME to
-get a powered SDIO resume is just wrong.
-
-Thanks,
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
