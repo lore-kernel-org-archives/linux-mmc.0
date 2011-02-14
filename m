@@ -1,44 +1,198 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
-Date: Mon, 14 Feb 2011 00:25:24 +0000
-Message-ID: <20110214002524.GA24047@void.printf.net>
-References: <1297650746-12841-1-git-send-email-shawn.guo@freescale.com> <1297650746-12841-2-git-send-email-shawn.guo@freescale.com> <20110213192609.GA21429@void.printf.net> <201102132335.54868.arnd@arndb.de>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and Question
+ on Power Management
+Date: Sun, 13 Feb 2011 21:50:23 -0800
+Message-ID: <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
+References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
+ <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
+ <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41526 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755225Ab1BNAZr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 13 Feb 2011 19:25:47 -0500
-Content-Disposition: inline
-In-Reply-To: <201102132335.54868.arnd@arndb.de>
+Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:41963 "EHLO
+	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750764Ab1BNF6M convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Feb 2011 00:58:12 -0500
+In-Reply-To: <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Shawn Guo <shawn.guo@freescale.com>, s.hauer@pengutronix.de, LW@karo-electronics.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Pierre Tardy <tardyp@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Arnd,
 
-On Sun, Feb 13, 2011 at 11:35:54PM +0100, Arnd Bergmann wrote:
-> > Please add a Reviewed-by: from Arnd and a Tested-by: from Lothar.
-> > Could you add a MODULE_AUTHOR() field, too?
-> 
-> In general, these tags should not simply be added by the author without
-> having the person who did the reviewing or testing specifically provide
-> them!
-> 
-> In this particular case, I'm happy with the driver in version 2, good job!
-> Please do add my
-> 
-> Reviewed-by: Arnd Bergmann <arnd@arndb.de>
+Pierre,
 
-Ah, okay, sorry.  I do behave that way with S-o-b, but in this case I
-wanted to make sure people who put effort into reviewing/testing didn't
-go uncredited -- next time I'll send mail to the reviewer/tester
-reminding them to add a tag if they're happy.
+are you comfortable with this ?
 
-Thanks,
+Philip
 
+>From 85b200161edac97fc2817ad3f213795df99cd7e8 Mon Sep 17 00:00:00 2001
+From: Philip Rakity <prakity@marvell.com>
+Date: Tue, 25 Jan 2011 16:04:42 -0800
+Subject: [PATCH] sdhci: sdhci.c: Do not disable global interrupts while waiting in set_ios
+
+holding the spin_lock with all interrupts disabled
+is not good form when doing mdelay.
+set_ios calls routines that need to delay for power to
+stabalize or for chip issues when quirks are defined.
+
+disable only our interupt and spin_lock on the chip
+instead of spin_lock with all interrupts disabled.
+
+use mmc_delay (if possible) rather then mdelay
+to avoid active waits. sdhci_reset not changed.
+still uses mdelay as we do not know if interrupts
+have been disabled so we play "safe"
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+---
+ drivers/mmc/core/core.h  |   12 ------------
+ drivers/mmc/host/sdhci.c |   26 +++++++++++++++++---------
+ include/linux/mmc/host.h |   11 +++++++++++
+ 3 files changed, 28 insertions(+), 21 deletions(-)
+
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 20b1c08..146b6f6 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -11,8 +11,6 @@
+ #ifndef _MMC_CORE_CORE_H
+ #define _MMC_CORE_CORE_H
+ 
+-#include <linux/delay.h>
+-
+ #define MMC_CMD_RETRIES        3
+ 
+ struct mmc_bus_ops {
+@@ -43,16 +41,6 @@ void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
+ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
+ void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+ 
+-static inline void mmc_delay(unsigned int ms)
+-{
+-	if (ms < 1000 / HZ) {
+-		cond_resched();
+-		mdelay(ms);
+-	} else {
+-		msleep(ms);
+-	}
+-}
+-
+ void mmc_rescan(struct work_struct *work);
+ void mmc_start_host(struct mmc_host *host);
+ void mmc_stop_host(struct mmc_host *host);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 655617c..2d7fbd1 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1043,7 +1043,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			return;
+ 		}
+ 		timeout--;
+-		mdelay(1);
++		mmc_delay(1);
+ 	}
+ 
+ 	clk |= SDHCI_CLOCK_CARD_EN;
+@@ -1108,7 +1108,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 	 * can apply clock after applying power
+ 	 */
+ 	if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+-		mdelay(10);
++		mmc_delay(10);
+ }
+ 
+ /*****************************************************************************\
+@@ -1161,22 +1161,21 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sdhci_host *host;
+-	unsigned long flags;
+ 	unsigned int lastclock;
++	unsigned long flags;
+ 	u8 ctrl;
+ 
+ 	host = mmc_priv(mmc);
+ 
+-	spin_lock_irqsave(&host->lock, flags);
+-
+ 	if (host->flags & SDHCI_DEVICE_DEAD)
+-		goto out;
++		return;
+ 
+ 	/*
+ 	 * get/put runtime_pm usage counter at ios->clock transitions
+ 	 * We need to do it before any other chip access, as sdhci could
+ 	 * be power gated
+ 	 */
++	spin_lock_irqsave(&host->lock, flags);
+ 	lastclock = host->iosclock;
+ 	host->iosclock = ios->clock;
+ 	if (lastclock == 0 && ios->clock != 0) {
+@@ -1189,9 +1188,18 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		pm_runtime_put_autosuspend(host->mmc->parent);
+ 		spin_lock_irqsave(&host->lock, flags);
+ 	}
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 	/* no need to configure the rest.. */
+ 	if (host->iosclock == 0)
+-		goto out;
++		return;
++
++	/* disable local interrupts and lock structures so
++	 * that mmc_delay can be scheduled.  This cannot happen
++	 * if interrupts are globally disabled
++	 */
++	disable_irq(host->irq);
++	spin_lock(&host->lock);
+ 
+ 	/*
+ 	 * Reset the chip on each power off.
+@@ -1255,9 +1263,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
+ 		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+ 
+-out:
+ 	mmiowb();
+-	spin_unlock_irqrestore(&host->lock, flags);
++	spin_unlock(&host->lock);
++	enable_irq(host->irq);
+ }
+ 
+ static int sdhci_get_ro(struct mmc_host *mmc)
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index bcb793e..d9edc06 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -15,6 +15,7 @@
+ 
+ #include <linux/mmc/core.h>
+ #include <linux/mmc/pm.h>
++#include <linux/delay.h>
+ 
+ struct mmc_ios {
+ 	unsigned int	clock;			/* clock rate */
+@@ -326,5 +327,15 @@ static inline int mmc_card_is_powered_resumed(struct mmc_host *host)
+ 	return host->pm_flags & MMC_PM_KEEP_POWER;
+ }
+ 
++static inline void mmc_delay(unsigned int ms)
++{
++	if (ms < 1000 / HZ) {
++		cond_resched();
++		mdelay(ms);
++	} else {
++		msleep(ms);
++	}
++}
++
+ #endif
+ 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.0.4
+
+
