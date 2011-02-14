@@ -1,89 +1,46 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
-Date: Mon, 14 Feb 2011 15:01:35 +0800
-Message-ID: <5D8008F58939784290FAB48F5497519835964E1F58@shsmsx502.ccr.corp.intel.com>
-References: <20110212062214.GB25519@intel.com>
- <201102120938.16626.arnd@arndb.de>
- <5D8008F58939784290FAB48F54975198358C2EF87A@shsmsx502.ccr.corp.intel.com>
- <201102121904.30944.arnd@arndb.de>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH 0/5] sdhci-pxa.  Mutliple bug fixes/enhancements
+Date: Sun, 13 Feb 2011 22:57:48 -0800
+Message-ID: <B73D79C3-69A9-4A4B-BA2F-A09AB6DC1D74@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:47165 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751373Ab1BNHCv convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2011 02:02:51 -0500
-In-Reply-To: <201102121904.30944.arnd@arndb.de>
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:60781 "EHLO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751847Ab1BNHDB convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Feb 2011 02:03:01 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Mark Brown <markb@marvell.com>
 
-> -----Original Message-----
-> From: Arnd Bergmann [mailto:arnd@arndb.de]
-> Sent: Sunday, February 13, 2011 2:05 AM
-> To: Dong, Chuanxiao
-> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; linux-kernel@vger.kernel.org;
-> akpm@linux-foundation.org; adrian.hunter@nokia.com
-> Subject: Re: [PATCH v4 1/3]mmc: set max_discard_sectors value for mmc queue
-> 
-> On Saturday 12 February 2011 11:42:51 Dong, Chuanxiao wrote:
-> > > From: Arnd Bergmann [mailto:arnd@arndb.de]
-> > > On Saturday 12 February 2011 07:22:14 Chuanxiao Dong wrote:
-> > > > max_discard_sectors value is UINT_MAX which means kernel block layer can
-> pass
-> > > > down unlimited sectors to MMC driver to erase. But erasing so many sectors
-> may
-> > > > delay some other important I/O requests. This is not preferred.
-> > > >
-> > > > So use 'pref_erase' to set a suitable max_discard_sectors value for mmc
-> queue to
-> > > > avoid erasing too many sectors at one time.
-> > > >
-> > > > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> > >
-> > > I'm not sure about this one. pref_erase on SDHC cards should be the
-> *minimum*
-> > > unit you can erase in one request, not the maximum. Erasing an arbitrary
-> >
-> > I found the comment in mmc_init_erase() function which explains the
-> 'pref_erase':
-> > 'pref_erase' is defined as a guide to limit erases to that size and alignment.
-> > So I think it is not the minimum unit driver can erase, also not the maximum
-> > erase unit. It just a guide erase size for driver which can avoid holding host
-> > controller too long to response other I/O requests.
-> 
-> Ok, I see. Adrian introduced the function and the comment last year,
-> maybe he can comment on this some more. For all cards I've seen,
-> multi-AU erases on SDHC cards are really fast, though the standard
-> clearly allows for very slow erases.
-> 
-> My feeling is that the function is suboptimal right now, because it assumes
-> that one AU is the best size. If a card reports that it can erase
-> many AUs quickly (large N_erase, small T_erase, relatively large T_offset),
-> we should report that to the user.
-> 
-> > > number of allocation units on an SDHC card should complete almost instantly,
-> > > because it only needs to update a single table with the allocation units.
-> > >
-> > > Discarding partial allocation units will take a lot longer, because the
-> > > card then has to copy over the remaining blocks.
-> >
-> > Is discarding started when card is idle or right after erase command?
-> > Can it cause some other I/O requests delayed?
-> 
-> As far as I can tell, most operations on the card are synchronous when it's
-> writing. The erase command on a partial AU should not return until the
-> remaining data is copied to a new location, so it will take some time, but
-> physically the AU can be done in the background, if reading from it simply
-> returns a zero buffer rather than accessing the old data. Write-after-erase
-> might have to wait for the erase to complete, but good cards could also
-> hide that.
-Thanks, Arnd.
-When I do trim with a 32GB eMMC card in my platform, sometimes I can get the 10s timeout errors but sometimes not. I am not much clear about the "discarding partial AU will take a lot longer". If this action is hide for driver, then I think from driver side, the UINT_MAX value for max_discard_sectors will be OK. But if this action sometimes need driver to wait for some hardware interrupt, then I think the UINT_MAX value is not preferred.
-Arnd, have any suggestion of dealing this? What I thought is using other value instead of using UINT_MAX.
+Patch set 4/12
 
-Thanks
-Chuanxiao
+[PATCH 1/5] sdhci: sdhci-pxa.c: delete clk gating code - not correct
+clock gating is using wrong registers for mmp2 SoC
+sdhc-pxa.c is not generic for pxa family.
+
+[PATCH 2/5] sdhci: sdhci-pxa.c ensure clocks are enabled on all SD controllers
+Do not rely on u-boot to do the right thing.  It does not.
+Do not disable the system clock to the device as this may hang
+the system if the register is touched
+
+[PATCH 3/5] sdhci: sdhci-pxa.c enable CAP support for cards marked permanent
+eMMC and Wifi cards that are fixed to the board are marked
+permanent in the developemnt board files (eg brownstone.c for mmp2)
+The platform specific code nows informs the mmc layer about this.
+
+[PATCH 4/5] sdhci: sdhci-pxa.c: Enable BUS WIDTH testing for MMC/eMMC cards
+The PXA family of controllers (PXA168/PXA910/MMP2) support CMD14/CMD19
+transactions that are used to test the MMC/eMMC bus width for 1, 4, or
+8 bits.
+Indicate to the mmc layer that it is safe to do bus width testing.
+
+[PATCH 5/5] sdhci: sdhci-pxa.c: Add QUIRKS for DMA/ADMA to match h/w
+32 Bit DMA/ADMA Access
+32 Bit Size
+Support ADMA End Descriptor in current chain
+	(no need for dummy entry)
