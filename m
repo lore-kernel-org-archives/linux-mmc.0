@@ -1,74 +1,95 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH 02/12] mmc: sd: add support for signal voltage switch
- procedure
-Date: Tue, 15 Feb 2011 16:18:14 -0500 (EST)
-Message-ID: <alpine.LFD.2.00.1102151604410.14920@xanadu.home>
-References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
- <1297762510-2696-3-git-send-email-arindam.nath@amd.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH 2/4] arm: V2 configs: update mmp2 defconfig for brownstone
+ and SoC Selection
+Date: Tue, 15 Feb 2011 13:50:16 -0800
+Message-ID: <E421876B-006C-4D5F-AB17-391464AEB65B@marvell.com>
+References: <04A50A49-CBBC-4E5D-B19E-391B4DF77DF3@marvell.com>
+ <alpine.LFD.2.00.1102141320410.14920@xanadu.home>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:15554 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751406Ab1BOVSP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 16:18:15 -0500
-Received: from xanadu.home ([66.130.28.92]) by vl-mo-mrz23.ip.videotron.ca
- (Sun Java(tm) System Messaging Server 6.3-8.01 (built Dec 16 2008; 32bit))
- with ESMTP id <0LGO00GVHGHO7WH0@vl-mo-mrz23.ip.videotron.ca> for
- linux-mmc@vger.kernel.org; Tue, 15 Feb 2011 16:17:49 -0500 (EST)
-In-reply-to: <1297762510-2696-3-git-send-email-arindam.nath@amd.com>
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:60018 "EHLO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755325Ab1BOVwH convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 Feb 2011 16:52:07 -0500
+In-Reply-To: <alpine.LFD.2.00.1102141320410.14920@xanadu.home>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arindam Nath <arindam.nath@amd.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com
-
-On Tue, 15 Feb 2011, Arindam Nath wrote:
-
-> @@ -1340,11 +1342,76 @@ out:
->  	spin_unlock_irqrestore(&host->lock, flags);
->  }
->  
-> +static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host;
-> +	u8 pwr;
-> +	u16 clk, ctrl;
-> +	u32 present_state;
-> +	unsigned long flags;
-> +
-> +	host = mmc_priv(mmc);
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +
-> +	/* Stop SDCLK */
-> +	host = mmc_priv(mmc);
-> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	clk &= ~SDHCI_CLOCK_CARD_EN;
-> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +
-> +	/* Check whether DAT[3:0] is 0000 */
-> +	present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> +	if (!((present_state & SDHCI_DATA_LVL_MASK) >> SDHCI_DATA_LVL_SHIFT)) {
-> +		/* Enable 1.8V Signal Enable in the Host Control2 register */
-> +		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +		ctrl |= SDHCI_CTRL_VDD_180;
-> +		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> +
-> +		/* Wait for 5ms */
-> +		mdelay(5);
-
-You're busy-waiting for 5 ms while holding a spinlock and with 
-interrupts masked off.  This is totally unacceptable.
-
-There shouldn't be any other concurrent access to the controller here as 
-the 
-core code should have claimed the host through mmc_claim_host(), if not 
-this is a bug.  So if the only thing you're worried about is some sdhci 
-specific interrupts then simply mask interrupts at the controller level, 
-do your business including this 5 ms delay using msleep() and _not_ 
-mdelay(), and unmask them afterwards.  If this is called in a non 
-sleepable context then please make it so.
+To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>
 
 
-Nicolas
+V2
+==
+Use make savedefconfigconfig to produce reduced size defconfig
+per suggestion of Nico Pitre.
+
+V1
+==
+took old mmp2_defconfig --
+did make menuconfig
+changed to CPU_MMP2
+added brownstone as supported board
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+---
+ arch/arm/configs/mmp2_defconfig |    7 ++-----
+ 1 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/configs/mmp2_defconfig b/arch/arm/configs/mmp2_defconfig
+index 47ad3b1..93c03df 100644
+--- a/arch/arm/configs/mmp2_defconfig
++++ b/arch/arm/configs/mmp2_defconfig
+@@ -1,13 +1,14 @@
+ CONFIG_EXPERIMENTAL=y
+ CONFIG_SYSVIPC=y
+ CONFIG_LOG_BUF_SHIFT=14
+-CONFIG_SYSFS_DEPRECATED_V2=y
+ CONFIG_SLAB=y
+ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
+ CONFIG_ARCH_MMP=y
++CONFIG_CPU_MMP2=y
++CONFIG_MACH_BROWNSTONE=y
+ CONFIG_MACH_FLINT=y
+ CONFIG_MACH_MARVELL_JASPER=y
+ CONFIG_HIGH_RES_TIMERS=y
+@@ -16,7 +17,6 @@ CONFIG_AEABI=y
+ CONFIG_ZBOOT_ROM_TEXT=0x0
+ CONFIG_ZBOOT_ROM_BSS=0x0
+ CONFIG_CMDLINE="root=/dev/nfs rootfstype=nfs nfsroot=192.168.1.100:/nfsroot/ ip=192.168.1.101:192.168.1.100::255.255.255.0::eth0:on console=ttyS2,38400 mem=128M user_debug=255"
+-CONFIG_VFP=y
+ CONFIG_NET=y
+ CONFIG_PACKET=y
+ CONFIG_UNIX=y
+@@ -33,7 +33,6 @@ CONFIG_MTD_NAND=y
+ CONFIG_MTD_ONENAND=y
+ CONFIG_MTD_ONENAND_GENERIC=y
+ # CONFIG_BLK_DEV is not set
+-# CONFIG_MISC_DEVICES is not set
+ CONFIG_NETDEVICES=y
+ CONFIG_NET_ETHERNET=y
+ CONFIG_SMC91X=y
+@@ -58,13 +57,11 @@ CONFIG_BACKLIGHT_LCD_SUPPORT=y
+ CONFIG_LCD_CLASS_DEVICE=y
+ CONFIG_BACKLIGHT_CLASS_DEVICE=y
+ CONFIG_BACKLIGHT_MAX8925=y
+-# CONFIG_VGA_CONSOLE is not set
+ # CONFIG_HID_SUPPORT is not set
+ # CONFIG_USB_SUPPORT is not set
+ CONFIG_RTC_CLASS=y
+ CONFIG_RTC_DRV_MAX8925=y
+ # CONFIG_DNOTIFY is not set
+-CONFIG_INOTIFY=y
+ CONFIG_TMPFS=y
+ CONFIG_TMPFS_POSIX_ACL=y
+ CONFIG_JFFS2_FS=y
+-- 
+1.7.0.4
+
+
