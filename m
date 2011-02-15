@@ -1,95 +1,53 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v2 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
-Date: Tue, 15 Feb 2011 18:13:41 +0100
-Message-ID: <20110215171341.GD10770@pengutronix.de>
-References: <1297650746-12841-1-git-send-email-shawn.guo@freescale.com>
- <1297650746-12841-2-git-send-email-shawn.guo@freescale.com>
- <20110214165958.GH10709@pengutronix.de>
- <20110215223941.GJ10990@S2100-06.ap.freescale.net>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Tue, 15 Feb 2011 18:16:56 +0100
+Message-ID: <201102151816.57104.arnd@arndb.de>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <201102142122.54766.arnd@arndb.de> <AANLkTinPtiwXmtRy9qS2zZXwuhQDOyO-H8-wmF=fSNnJ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:56745 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752579Ab1BORNr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 12:13:47 -0500
-Content-Disposition: inline
-In-Reply-To: <20110215223941.GJ10990@S2100-06.ap.freescale.net>
+Received: from moutng.kundenserver.de ([212.227.126.187]:50328 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754097Ab1BORRC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 12:17:02 -0500
+In-Reply-To: <AANLkTinPtiwXmtRy9qS2zZXwuhQDOyO-H8-wmF=fSNnJ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: cjb@laptop.org, s.hauer@pengutronix.de, arnd@arndb.de, LW@KARO-electronics.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
+On Monday 14 February 2011, Andrei Warkentin wrote:
+> > There are multiple ways how this could be implemented:
+> >
+> > 1. Have one exception cache for all "special" blocks. This would normally
+> >   be for FAT32 subdirectory updates, which always write to the same
+> >   few blocks. This means you can do small writes efficiently anywhere
+> >   on the card, but only up to a (small) fixed number of block addresses.
+> >   If you overflow the table, the card still needs to go through an
+> >   extra PE for each new entry you write, in order to free up an entry.
+> >
+> > 2. Have a small number of AUs that can be in a special mode with efficient
+> >   small writes but inefficient large writes. This means that when you
+> >   alternate between small and large writes in the same AU, it has to go
+> >   through a PE on every switch. Similarly, if you do small writes to
+> >   more than the maximum number of AUs that can be held in this mode, you
+> >   get the same effect. This number can be as small as one, because that
+> >   is what FAT32 requires.
+> >
+> > In both cases, you don't actually have a solution for the problem, you just
+> > make it less likely for specific workloads.
+> 
+> Aha, ok. By the way, I did find out that either suggestion works. So
+> I'll pull out the reversing portion of the patch. No need to
+> overcomplicate :).
 
-> Ah, yes.  I can also see the problem here after turning on
-> DEBUG_SPINLOCK.
+BTW, what file system are you using? I could imagine that each of ext4, btrfs
+and nilfs2 give you very different results here. It could be that if your
+patch is optimizing for one file system, it is actually pessimising for
+another one.
 
-Ah, okay. After turning it off, it works a lot better :)
+What benchmark do you use to find out of your optimizations actually help you?
 
-SD seems to work:
-
-	mmc0: new high speed SD card at address b368
-	mmcblk0: mmc0:b368 NCard 1.86 GiB 
-	 mmcblk0: p1
-	mmc0: card b368 removed
-
-SDHC seems to work:
-
-	mmc0: new high speed SDHC card at address 0007
-	mmcblk0: mmc0:0007 SD04G 3.70 GiB 
-	 mmcblk0: p1
-	mmc0: card 0007 removed
-
-MMC fails for me (note: the card works fine with an mx35-based board)
-
-	mmc0: new high speed MMC card at address 0001
-	mmcblk0: mmc0:0001 AF HMP 247 MiB 
-	mmcblk0: retrying using single block read
-	mmcblk0: error -84 transferring data, sector 0, nr 8, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 0
-	mmcblk0: error -84 transferring data, sector 1, nr 7, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 1
-	mmcblk0: error -84 transferring data, sector 2, nr 6, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 2
-	mmcblk0: error -84 transferring data, sector 3, nr 5, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 3
-	mmcblk0: error -84 transferring data, sector 4, nr 4, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 4
-	mmcblk0: error -84 transferring data, sector 5, nr 3, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 5
-	mmcblk0: error -84 transferring data, sector 6, nr 2, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 6
-	mmcblk0: error -84 transferring data, sector 7, nr 1, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 7
-	Buffer I/O error on device mmcblk0, logical block 0
-	mmcblk0: retrying using single block read
-	mmcblk0: error -84 transferring data, sector 0, nr 8, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 0
-	mmcblk0: error -84 transferring data, sector 1, nr 7, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 1
-	mmcblk0: error -84 transferring data, sector 2, nr 6, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 2
-	mmcblk0: error -84 transferring data, sector 3, nr 5, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 3
-	mmcblk0: error -84 transferring data, sector 4, nr 4, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 4
-	mmcblk0: error -84 transferring data, sector 5, nr 3, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 5
-	mmcblk0: error -84 transferring data, sector 6, nr 2, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 6
-	mmcblk0: error -84 transferring data, sector 7, nr 1, card status 0x900
-	end_request: I/O error, dev mmcblk0, sector 7
-	Buffer I/O error on device mmcblk0, logical block 0
-	 mmcblk0: unable to read partition table
-	mmc0: card 0001 removed
-
-SDIO card locks the machine. Is it supposed to work already?
-
-Regards,
-
-   Wolfram
-
--- 
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+	Arnd
