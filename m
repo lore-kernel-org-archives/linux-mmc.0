@@ -1,32 +1,34 @@
-From: Andy Ross <andy.ross@windriver.com>
-Subject: Re: [PATCH] mmc: core: Allow sdio operations in other thread during
- sdio_add_func()
-Date: Tue, 15 Feb 2011 11:26:20 -0800
-Message-ID: <4D5AD35C.80004@windriver.com>
-References: <loom.20110212T012443-915@post.gmane.org>	<AANLkTimyc-sXEhnPtCjQwHbEsdnwGY-ss6SoRSqDOD+d@mail.gmail.com> <AANLkTinJg2t5tM6+PjUF6jbfCWZfXAG2tObXnbdbn=55@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 00/12] add support for sd host controller v3.00
+Date: Tue, 15 Feb 2011 19:43:37 +0000
+Message-ID: <20110215194337.GA32551@void.printf.net>
+References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from li44-10.members.linode.com ([72.14.181.10]:44030 "EHLO
-	plausible.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755645Ab1BOTgl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 15 Feb 2011 14:36:41 -0500
-In-Reply-To: <AANLkTinJg2t5tM6+PjUF6jbfCWZfXAG2tObXnbdbn=55@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:48276 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755216Ab1BOTnk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 Feb 2011 14:43:40 -0500
+Content-Disposition: inline
+In-Reply-To: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dmitry Shmidt <dimitrysh@android.com>
-Cc: linux-mmc@vger.kernel.org
+To: Arindam Nath <arindam.nath@amd.com>
+Cc: linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com, Philip Rakity <prakity@marvell.com>, zhangfei gao <zhangfei.gao@gmail.com>, David Vrabel <david.vrabel@csr.com>
 
-On 02/15/2011 10:08 AM, Dmitry Shmidt wrote:
-> mmc: core: Allow sdio operations in other thread during sdio_add_func()
->
-> This is important when wlan driver is doing sdio operations from another
-> thread during initialization.
-> This behavior was introduced as a side-effect in patch
-> 807e8e40673d9628fa7dcdd14423424b4ee5f43b
+Hi Arindam,
 
-That patch made similar to mmc_attach_sd() and mmc_attach_mmc().  Do
-they need to be audited for the same lock contention?
+On Tue, Feb 15, 2011 at 03:04:58PM +0530, Arindam Nath wrote:
+> The patches below add support for Host Controller v3.00 as per the
+> spec v3.00. It also adds support for UHS-I cards as per Physical
+> Layer Specification v3.01.
 
-Andy
+Thanks for the patchset!  It might take us some time to review these,
+both because there's a lot of code and because we don't all have access
+to the SD 3.0 specs.  I'm CC'ing some folks who've worked on 3.0 patches
+in the past -- if anyone's willing to help review, that'd be great.
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
