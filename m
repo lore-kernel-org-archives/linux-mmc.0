@@ -1,43 +1,56 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and
- Question on Power Management
-Date: Tue, 15 Feb 2011 10:13:36 +0100
-Message-ID: <20110215091336.GB13934@pengutronix.de>
-References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
- <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
- <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
- <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
- <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
- <20110214095528.GA30100@pengutronix.de>
- <E318EA02-8219-41BD-81B0-90C91E84F2D8@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Arindam Nath <arindam.nath@amd.com>
+Subject: [PATCH 00/12] add support for sd host controller v3.00
+Date: Tue, 15 Feb 2011 15:04:58 +0530
+Message-ID: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:60651 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751592Ab1BOJNi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 04:13:38 -0500
-Content-Disposition: inline
-In-Reply-To: <E318EA02-8219-41BD-81B0-90C91E84F2D8@marvell.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:58882 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754145Ab1BOJgE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 04:36:04 -0500
+Received: by iyj8 with SMTP id 8so5729218iyj.19
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2011 01:36:04 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Pierre Tardy <tardyp@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com, Arindam Nath <arindam.nath@amd.com>
 
-On Mon, Feb 14, 2011 at 09:27:52AM -0800, Philip Rakity wrote:
-> 
-> I wonder if I can remove the locking (spin_lock).  The disable and enable irq should be enough.  
+The patches below add support for Host Controller v3.00 as per the
+spec v3.00. It also adds support for UHS-I cards as per Physical
+Layer Specification v3.01.
 
-I discussed this shortly with Sascha yesterday and we agree the core serializes
-requests to the host (by means of mmc_claim_host and synchronus requests).
-Protecting only the interrupts works for drivers like pxa and mxc. Such locking
-might or might not be not enough for sdhci, but that would have to be carefully
-evaluated. Should be worth trying, though (unless we missed something).
+Thanks for review.
 
 Regards,
+Arindam
 
-   Wolfram
+Arindam Nath (12):
+  [PATCH 01/12] mmc: sdhci: add support for auto CMD23
+  [PATCH 02/12] mmc: sd: add support for signal voltage switch procedure
+  [PATCH 03/12] mmc: sd: query function modes for uhs cards
+  [PATCH 04/12] mmc: sd: add support for driver type selection
+  [PATCH 05/12] mmc: sdhci: reset sdclk before setting high speed enable
+  [PATCH 06/12] mmc: sd: add support for uhs bus speed mode selection
+  [PATCH 07/12] mmc: sd: set current limit for uhs cards
+  [PATCH 08/12] mmc: sd: report correct speed and capacity of uhs cards
+  [PATCH 09/12] mmc: sd: add support for tuning during uhs initialization
+  [PATCH 10/12] mmc: sdhci: enable preset value after uhs initialization
+  [PATCH 11/12] mmc: sdhci: add support for programmable clock mode
+  [PATCH 12/12] mmc: sdhci: add support for retuning mode 1
 
--- 
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+ drivers/mmc/core/bus.c    |   11 +-
+ drivers/mmc/core/core.c   |    9 +
+ drivers/mmc/core/core.h   |    1 +
+ drivers/mmc/core/sd.c     |  420 +++++++++++++++++++++++++---
+ drivers/mmc/core/sd.h     |    3 +-
+ drivers/mmc/core/sd_ops.c |   25 ++
+ drivers/mmc/core/sd_ops.h |    1 +
+ drivers/mmc/core/sdio.c   |    3 +-
+ drivers/mmc/host/sdhci.c  |  692 ++++++++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/host/sdhci.h  |   45 +++-
+ include/linux/mmc/card.h  |   43 +++
+ include/linux/mmc/host.h  |   24 ++
+ include/linux/mmc/mmc.h   |    1 +
+ include/linux/mmc/sd.h    |    3 +-
+ include/linux/mmc/sdhci.h |   11 +
+ 15 files changed, 1200 insertions(+), 92 deletions(-)
+
