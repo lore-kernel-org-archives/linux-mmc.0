@@ -1,194 +1,189 @@
-From: Andres Salomon <dilinger@queued.net>
-Subject: [PATCH 5/9] tmio-mmc: use mfd_data instead of driver_data
-Date: Tue, 15 Feb 2011 14:25:25 -0800
-Message-ID: <1297808729-21110-6-git-send-email-dilinger@queued.net>
-References: <1297808729-21110-1-git-send-email-dilinger@queued.net>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH V2] sdhci: sdhci.c: Do not disable global interrupts while
+ waiting in set_ios
+Date: Tue, 15 Feb 2011 14:54:49 -0800
+Message-ID: <1EBEBD84-0B84-47BE-B8AC-1052EB6325F1@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from LUNGE.MIT.EDU ([18.54.1.69]:48947 "EHLO lunge.queued.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752159Ab1BOWZi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 15 Feb 2011 17:25:38 -0500
-In-Reply-To: <1297808729-21110-1-git-send-email-dilinger@queued.net>
+Received: from na3sys009aog106.obsmtp.com ([74.125.149.77]:59475 "EHLO
+	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755622Ab1BOWzO convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 Feb 2011 17:55:14 -0500
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Samuel Ortiz <sameo@linux.intel.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-kernel@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Pierre Tardy <tardyp@gmail.com>, Wolfram Sang <w.sang@pengutronix.de>, Mark Brown <markb@marvell.com>, Nicolas Pitre <nico@fluxnic.net>
 
-Use mfd_data for passing information from mfd drivers to mfd
-clients.  The mfd_cell's driver_data field is being phased out.
 
-Clients that were using driver_data now access .mfd_data
-via mfd_get_data().  This changes tmio-mmc only; mfd drivers with
-other cells are not modified.
+V2 Changes
+==========
+Delete spin_lock as not needed.  disable/enable irq
+should be enough to interlock bewteen the isr and
+the main thread.
 
-Signed-off-by: Andres Salomon <dilinger@queued.net>
+V1
+===
+holding the spin_lock with all interrupts disabled
+is not good form when doing mdelay.
+set_ios calls routines that need to delay for power to
+stabalize or for chip issues when quirks are defined.
+
+disable only our interupt and spin_lock on the chip
+instead of spin_lock with all interrupts disabled.
+
+use mmc_delay (if possible) rather then mdelay
+to avoid active waits. sdhci_reset not changed.
+still uses mdelay as we do not know if interrupts
+have been disabled so we play "safe"
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
 ---
- drivers/mfd/asic3.c          |    2 +-
- drivers/mfd/sh_mobile_sdhi.c |    2 +-
- drivers/mfd/t7l66xb.c        |    2 +-
- drivers/mfd/tc6387xb.c       |    2 +-
- drivers/mfd/tc6393xb.c       |    2 +-
- drivers/mmc/host/tmio_mmc.c  |   26 +++++++++-----------------
- 6 files changed, 14 insertions(+), 22 deletions(-)
+ drivers/mmc/core/core.h  |   12 ------------
+ drivers/mmc/host/sdhci.c |   24 +++++++++++++++---------
+ include/linux/mmc/host.h |   11 +++++++++++
+ 3 files changed, 26 insertions(+), 21 deletions(-)
 
-diff --git a/drivers/mfd/asic3.c b/drivers/mfd/asic3.c
-index 549d14d..d0d247d 100644
---- a/drivers/mfd/asic3.c
-+++ b/drivers/mfd/asic3.c
-@@ -783,7 +783,7 @@ static struct mfd_cell asic3_cell_mmc = {
- 	.name          = "tmio-mmc",
- 	.enable        = asic3_mmc_enable,
- 	.disable       = asic3_mmc_disable,
--	.driver_data   = &asic3_mmc_data,
-+	.mfd_data      = &asic3_mmc_data,
- 	.num_resources = ARRAY_SIZE(asic3_mmc_resources),
- 	.resources     = asic3_mmc_resources,
- };
-diff --git a/drivers/mfd/sh_mobile_sdhi.c b/drivers/mfd/sh_mobile_sdhi.c
-index b511e74..53a6302 100644
---- a/drivers/mfd/sh_mobile_sdhi.c
-+++ b/drivers/mfd/sh_mobile_sdhi.c
-@@ -146,7 +146,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 20b1c08..146b6f6 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -11,8 +11,6 @@
+ #ifndef _MMC_CORE_CORE_H
+ #define _MMC_CORE_CORE_H
+ 
+-#include <linux/delay.h>
+-
+ #define MMC_CMD_RETRIES        3
+ 
+ struct mmc_bus_ops {
+@@ -43,16 +41,6 @@ void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
+ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
+ void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+ 
+-static inline void mmc_delay(unsigned int ms)
+-{
+-	if (ms < 1000 / HZ) {
+-		cond_resched();
+-		mdelay(ms);
+-	} else {
+-		msleep(ms);
+-	}
+-}
+-
+ void mmc_rescan(struct work_struct *work);
+ void mmc_start_host(struct mmc_host *host);
+ void mmc_stop_host(struct mmc_host *host);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 655617c..3dc4135 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1043,7 +1043,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			return;
+ 		}
+ 		timeout--;
+-		mdelay(1);
++		mmc_delay(1);
  	}
  
- 	memcpy(&priv->cell_mmc, &sh_mobile_sdhi_cell, sizeof(priv->cell_mmc));
--	priv->cell_mmc.driver_data = mmc_data;
-+	priv->cell_mmc.mfd_data = mmc_data;
+ 	clk |= SDHCI_CLOCK_CARD_EN;
+@@ -1108,7 +1108,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 	 * can apply clock after applying power
+ 	 */
+ 	if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+-		mdelay(10);
++		mmc_delay(10);
+ }
  
- 	platform_set_drvdata(pdev, priv);
- 
-diff --git a/drivers/mfd/t7l66xb.c b/drivers/mfd/t7l66xb.c
-index b9c1e4c..3c9e389 100644
---- a/drivers/mfd/t7l66xb.c
-+++ b/drivers/mfd/t7l66xb.c
-@@ -170,7 +170,7 @@ static struct mfd_cell t7l66xb_cells[] = {
- 		.name = "tmio-mmc",
- 		.enable = t7l66xb_mmc_enable,
- 		.disable = t7l66xb_mmc_disable,
--		.driver_data = &t7166xb_mmc_data,
-+		.mfd_data = &t7166xb_mmc_data,
- 		.num_resources = ARRAY_SIZE(t7l66xb_mmc_resources),
- 		.resources = t7l66xb_mmc_resources,
- 	},
-diff --git a/drivers/mfd/tc6387xb.c b/drivers/mfd/tc6387xb.c
-index 6bf1775..b006f7c 100644
---- a/drivers/mfd/tc6387xb.c
-+++ b/drivers/mfd/tc6387xb.c
-@@ -131,7 +131,7 @@ static struct mfd_cell tc6387xb_cells[] = {
- 		.name = "tmio-mmc",
- 		.enable = tc6387xb_mmc_enable,
- 		.disable = tc6387xb_mmc_disable,
--		.driver_data = &tc6387xb_mmc_data,
-+		.mfd_data = &tc6387xb_mmc_data,
- 		.num_resources = ARRAY_SIZE(tc6387xb_mmc_resources),
- 		.resources = tc6387xb_mmc_resources,
- 	},
-diff --git a/drivers/mfd/tc6393xb.c b/drivers/mfd/tc6393xb.c
-index a71ff5c..7f7b9fa 100644
---- a/drivers/mfd/tc6393xb.c
-+++ b/drivers/mfd/tc6393xb.c
-@@ -393,7 +393,7 @@ static struct mfd_cell __devinitdata tc6393xb_cells[] = {
- 		.name = "tmio-mmc",
- 		.enable = tc6393xb_mmc_enable,
- 		.resume = tc6393xb_mmc_resume,
--		.driver_data = &tc6393xb_mmc_data,
-+		.mfd_data = &tc6393xb_mmc_data,
- 		.num_resources = ARRAY_SIZE(tc6393xb_mmc_resources),
- 		.resources = tc6393xb_mmc_resources,
- 	},
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index 816fb74..f7d3fa9 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -300,8 +300,7 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host, int new_clock)
- 
- static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+ /*****************************************************************************\
+@@ -1161,22 +1161,21 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  {
--	struct mfd_cell *cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+ 	struct sdhci_host *host;
+-	unsigned long flags;
+ 	unsigned int lastclock;
++	unsigned long flags;
+ 	u8 ctrl;
+ 
+ 	host = mmc_priv(mmc);
+ 
+-	spin_lock_irqsave(&host->lock, flags);
+-
+ 	if (host->flags & SDHCI_DEVICE_DEAD)
+-		goto out;
++		return;
  
  	/*
- 	 * Testing on sh-mobile showed that SDIO IRQs are unmasked when
-@@ -324,8 +323,7 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+ 	 * get/put runtime_pm usage counter at ios->clock transitions
+ 	 * We need to do it before any other chip access, as sdhci could
+ 	 * be power gated
+ 	 */
++	spin_lock_irqsave(&host->lock, flags);
+ 	lastclock = host->iosclock;
+ 	host->iosclock = ios->clock;
+ 	if (lastclock == 0 && ios->clock != 0) {
+@@ -1189,9 +1188,17 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		pm_runtime_put_autosuspend(host->mmc->parent);
+ 		spin_lock_irqsave(&host->lock, flags);
+ 	}
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 	/* no need to configure the rest.. */
+ 	if (host->iosclock == 0)
+-		goto out;
++		return;
++
++	/* disable local interrupts to lock structures so
++	 * that mmc_delay can be scheduled.  This cannot happen
++	 * if interrupts are globally disabled
++	 */
++	disable_irq(host->irq);
  
- static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
- {
--	struct mfd_cell *cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+ 	/*
+ 	 * Reset the chip on each power off.
+@@ -1255,9 +1262,8 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
+ 		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
  
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x0100 |
- 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-@@ -666,8 +664,7 @@ out:
- static irqreturn_t tmio_mmc_irq(int irq, void *devid)
- {
- 	struct tmio_mmc_host *host = devid;
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
- 	unsigned int ireg, irq_mask, status;
- 	unsigned int sdio_ireg, sdio_irq_mask, sdio_status;
+-out:
+ 	mmiowb();
+-	spin_unlock_irqrestore(&host->lock, flags);
++	enable_irq(host->irq);
+ }
  
-@@ -796,8 +793,7 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- 	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
- 	struct dma_async_tx_descriptor *desc = NULL;
- 	struct dma_chan *chan = host->chan_rx;
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
- 	dma_cookie_t cookie;
- 	int ret, i;
- 	bool aligned = true, multiple = true;
-@@ -873,8 +869,7 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- 	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
- 	struct dma_async_tx_descriptor *desc = NULL;
- 	struct dma_chan *chan = host->chan_tx;
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
- 	dma_cookie_t cookie;
- 	int ret, i;
- 	bool aligned = true, multiple = true;
-@@ -1071,8 +1066,7 @@ static void tmio_mmc_release_dma(struct tmio_mmc_host *host)
- static int tmio_mmc_start_data(struct tmio_mmc_host *host,
- 	struct mmc_data *data)
- {
--	struct mfd_cell *cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+ static int sdhci_get_ro(struct mmc_host *mmc)
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index bcb793e..d9edc06 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -15,6 +15,7 @@
  
- 	pr_debug("setup data transfer: blocksize %08x  nr_blocks %d\n",
- 		 data->blksz, data->blocks);
-@@ -1177,8 +1171,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- static int tmio_mmc_get_ro(struct mmc_host *mmc)
- {
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+ #include <linux/mmc/core.h>
+ #include <linux/mmc/pm.h>
++#include <linux/delay.h>
  
- 	return ((pdata->flags & TMIO_MMC_WRPROTECT_DISABLE) ||
- 		(sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT)) ? 0 : 1;
-@@ -1187,8 +1180,7 @@ static int tmio_mmc_get_ro(struct mmc_host *mmc)
- static int tmio_mmc_get_cd(struct mmc_host *mmc)
- {
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+ struct mmc_ios {
+ 	unsigned int	clock;			/* clock rate */
+@@ -326,5 +327,15 @@ static inline int mmc_card_is_powered_resumed(struct mmc_host *host)
+ 	return host->pm_flags & MMC_PM_KEEP_POWER;
+ }
  
- 	if (!pdata->get_cd)
- 		return -ENOSYS;
-@@ -1260,7 +1252,7 @@ static int __devinit tmio_mmc_probe(struct platform_device *dev)
- 	if (!res_ctl)
- 		goto out;
- 
--	pdata = cell->driver_data;
-+	pdata = mfd_get_data(dev);
- 	if (!pdata || !pdata->hclk)
- 		goto out;
++static inline void mmc_delay(unsigned int ms)
++{
++	if (ms < 1000 / HZ) {
++		cond_resched();
++		mdelay(ms);
++	} else {
++		msleep(ms);
++	}
++}
++
+ #endif
  
 -- 
-1.7.2.3
+1.7.0.4
+
 
