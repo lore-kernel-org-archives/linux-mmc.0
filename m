@@ -1,66 +1,74 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] mmc: rename ddr to uhs in ios structure to indicate
- usage
-Date: Mon, 14 Feb 2011 15:51:33 -0800
-Message-ID: <7D68A5C4-7546-47FE-B2B6-75DEE75DA454@marvell.com>
-References: <52D7AFC3-31CF-4938-90EC-3BB4B701CCD4@marvell.com>
- <20110214220341.GA5235@void.printf.net>
- <42E706F2-7E7B-40DB-9716-7E43E6EF873E@marvell.com>
- <m3oc6ew625.fsf@pullcord.laptop.org>
+Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and Question
+ on Power Management
+Date: Mon, 14 Feb 2011 19:09:44 -0800
+Message-ID: <3890D4C6-B293-4AD9-AF43-50ABE6413D56@marvell.com>
+References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
+ <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
+ <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
+ <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
+ <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:44929 "EHLO
-	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751456Ab1BNXzB convert rfc822-to-8bit
+Received: from na3sys009aog104.obsmtp.com ([74.125.149.73]:51473 "EHLO
+	na3sys009aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751192Ab1BODMq convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 18:55:01 -0500
-In-Reply-To: <m3oc6ew625.fsf@pullcord.laptop.org>
+	Mon, 14 Feb 2011 22:12:46 -0500
+In-Reply-To: <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
+To: Pierre Tardy <tardyp@gmail.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
-On Feb 14, 2011, at 3:27 PM, Chris Ball wrote:
+On Feb 14, 2011, at 1:29 AM, Pierre Tardy wrote:
 
-> Hi,
-> 
->>> Noticed that this patch ([PATCH 3/3] in "mmc: core: misc bug
->>> fixes") and [PATCH 1/4] in "mmc: sdhci: Dual Data Rate Support"
->>> do the same thing differently -- please followup to the one of
->>> them that's redundant mentioning that it should be dropped from
->>> the set.
-> 
->> I checked these two patches from yesterday and they go together.
+> On Mon, Feb 14, 2011 at 6:50 AM, Philip Rakity <prakity@marvell.com> wrote:
 >> 
->> [PATCH 3/4] mmc: sdhci: Support for SD/MMC Dual Data Rate and
->> [PATCH 1/4] mmc: rename ddr to uhs in ios structure to indicate
->> usage
+>> Pierre,
+>> 
+>> are you comfortable with this ?
+> The mmc_delay() looks hackish at the first sight. Looks like Pierre
+> Ossman was the author, he must have his reasons.
 > 
-> Ah, you're looking at 1/4 and 3/4 in the DDR patchset, whereas I'm
-> talking about 1/4 in the DDR patchset vs. 3/3 in the "mmc: core: misc
-> bug fixes" patchset.  i.e.:
+> It looks like the mdelay are not in the fastpath, so why bother.
 > 
->   http://article.gmane.org/gmane.linux.kernel.mmc/5959
-> vs.
->   http://article.gmane.org/gmane.linux.kernel.mmc/5961
-> 
-> Since they both contain some of the same hunks, they clearly can't
-> both be applied together.
-> 
-> It looks like it's actually the one that was part of "mmc: core misc
-> bug fixes" (5959) that's correct, and the one that's part of "sdhci:
-> Dual Data Rate Support" needs to be dropped?
+> And, more important, you will do cond_resched while holding you
+> spinlock, which is *bad*.
+> What if the mmc stack will call you again from another thread? deadlock...
 
-drop 5961 -- not correct
-
+The original code used  a 	spin_lock_irqsave and  a spin_lock_irqrestore so
+if the code was called again the deadlock surely would have happened by now.
 
 > 
-> - Chris.
-> -- 
-> Chris Ball   <cjb@laptop.org>
-> One Laptop Per Child
+> 
+>> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+>> -static inline void mmc_delay(unsigned int ms)
+> why do you want to remove it from here ?
+> It is still used by the core code.
+> 
+> 
+>> @@ -1043,7 +1043,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>>                        return;
+>>                }
+>>                timeout--;
+>> -               mdelay(1);
+>> +               mmc_delay(1);
+> This looks like timeout code that never happen in normal condition.
+> 
+> 
+>> @@ -1108,7 +1108,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
+>>         * can apply clock after applying power
+>>         */
+>>        if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+>> -               mdelay(10);
+>> +               mmc_delay(10);
+> Do you need this quirk in your platform?
+> 
+> 
+> Pierre
 
