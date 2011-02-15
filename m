@@ -1,112 +1,62 @@
-From: Panduranga Mallireddy <panduranga_mallireddy@ti.com>
-Subject: [PATCH v2 5/5] OMAP: hsmmc: Enable MMC4 and MMC5 on OMAP4 platforms
-Date: Tue, 15 Feb 2011 03:40:36 -0500
-Message-ID: <1297759236-25323-6-git-send-email-panduranga_mallireddy@ti.com>
-References: <1297759236-25323-1-git-send-email-panduranga_mallireddy@ti.com>
- <1297759236-25323-2-git-send-email-panduranga_mallireddy@ti.com>
- <1297759236-25323-3-git-send-email-panduranga_mallireddy@ti.com>
- <1297759236-25323-4-git-send-email-panduranga_mallireddy@ti.com>
- <1297759236-25323-5-git-send-email-panduranga_mallireddy@ti.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1297759236-25323-5-git-send-email-panduranga_mallireddy@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: coelho@ti.com, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ohad@wizery.com, benzyg@ti.com, pradeepgurumath@ti.com, vishalm@ti.com, x-boudet@ti.com, naveen_jain@ti.com, pavan_savoy@ti.com, manjunatha_halli@ti.com, tony@atomide.com, cjb@laptop.org, Kishore Kadiyala <kishore.kadiyala@ti.com>, Panduranga Mallireddy <panduranga_mallireddy@ti.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and
+ Question on Power Management
+Date: Tue, 15 Feb 2011 09:39:17 +0100
+Message-ID: <20110215083917.GB3517@pengutronix.de>
+References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
+ <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
+ <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
+ <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
+ <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
+ <E5D06E6B-BE70-4446-9F56-32982C119FC0@marvell.com>
+ <8250E4885F9967469CAC3FB5CBA2CE69935205E445@irsmsx501.ger.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:51590 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754582Ab1BOIjX convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 03:39:23 -0500
+Content-Disposition: inline
+In-Reply-To: <8250E4885F9967469CAC3FB5CBA2CE69935205E445@irsmsx501.ger.corp.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Tardy, Pierre" <pierre.tardy@intel.com>
+Cc: Philip Rakity <prakity@marvell.com>, Pierre Tardy <tardyp@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-From: Kishore Kadiyala <kishore.kadiyala@ti.com>
+On Mon, Feb 14, 2011 at 06:41:47PM +0000, Tardy, Pierre wrote:
+> Philip,
+> > > And, more important, you will do cond_resched while holding you
+> > > spinlock, which is *bad*.
+> > > What if the mmc stack will call you again from another thread? deadlock...
+> 
+> > Assumptions -- Please Confirm
+> > -------------------------------------------
+> No need to do assumptions, schedule while holding spinlocks is bad, your kernel will oops with something like:
+> BUG: scheduling while in atomic.
 
-OMAP4 supports up to 5 MMC controllers, but only 3 of these were
-initialized. MMC5 is used by wl12xx chip. So initialize MMC4 and MMC5.
+I thought the assumptions were made in order to check where the spinlock is
+_really_ needed. Thinking in that direction is a good aproach IMO.
 
-Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Signed-off-by: Panduranga Mallireddy <panduranga_mallireddy@ti.com>
----
- arch/arm/mach-omap2/hsmmc.c   |    5 +++++
- drivers/mmc/host/omap_hsmmc.c |   24 ++++++++++++++++++++----
- 2 files changed, 25 insertions(+), 4 deletions(-)
+> > >> @@ -1108,7 +1108,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
+> > >>         * can apply clock after applying power
+> > >>         */
+> > >>        if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+> > >> -               mdelay(10);
+> > >> +               mmc_delay(10);
+> > > Do you need this quirk in your platform?
+> > 
+> > No
+> Then, you dont have any mdelay in your set_ios, and you are trying to optimize something that never happen.
 
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 8f1a484..3c0809f 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -348,6 +348,11 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
- 				mmc->slots[0].after_set_reg = NULL;
- 			}
- 			break;
-+		case 4:
-+		case 5:
-+			mmc->slots[0].before_set_reg = NULL;
-+			mmc->slots[0].after_set_reg = NULL;
-+			break;
- 		default:
- 			pr_err("MMC%d configuration not supported!\n", c->mmc);
- 			kfree(mmc);
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f59f8da..2525071 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -260,7 +260,7 @@ static int omap_hsmmc_1_set_power(struct device *dev, int slot, int power_on,
- 	return ret;
- }
- 
--static int omap_hsmmc_23_set_power(struct device *dev, int slot, int power_on,
-+static int omap_hsmmc_235_set_power(struct device *dev, int slot, int power_on,
- 				   int vdd)
- {
- 	struct omap_hsmmc_host *host =
-@@ -316,6 +316,12 @@ static int omap_hsmmc_23_set_power(struct device *dev, int slot, int power_on,
- 	return ret;
- }
- 
-+static int omap_hsmmc_4_set_power(struct device *dev, int slot, int power_on,
-+					int vdd)
-+{
-+	return 0;
-+}
-+
- static int omap_hsmmc_1_set_sleep(struct device *dev, int slot, int sleep,
- 				  int vdd, int cardsleep)
- {
-@@ -326,7 +332,7 @@ static int omap_hsmmc_1_set_sleep(struct device *dev, int slot, int sleep,
- 	return regulator_set_mode(host->vcc, mode);
- }
- 
--static int omap_hsmmc_23_set_sleep(struct device *dev, int slot, int sleep,
-+static int omap_hsmmc_235_set_sleep(struct device *dev, int slot, int sleep,
- 				   int vdd, int cardsleep)
- {
- 	struct omap_hsmmc_host *host =
-@@ -365,6 +371,12 @@ static int omap_hsmmc_23_set_sleep(struct device *dev, int slot, int sleep,
- 		return regulator_enable(host->vcc_aux);
- }
- 
-+static int omap_hsmmc_4_set_sleep(struct device *dev, int slot, int sleep,
-+					int vdd, int cardsleep)
-+{
-+	return 0;
-+}
-+
- static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- {
- 	struct regulator *reg;
-@@ -379,10 +391,14 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 		break;
- 	case OMAP_MMC2_DEVID:
- 	case OMAP_MMC3_DEVID:
-+	case OMAP_MMC5_DEVID:
- 		/* Off-chip level shifting, or none */
--		mmc_slot(host).set_power = omap_hsmmc_23_set_power;
--		mmc_slot(host).set_sleep = omap_hsmmc_23_set_sleep;
-+		mmc_slot(host).set_power = omap_hsmmc_235_set_power;
-+		mmc_slot(host).set_sleep = omap_hsmmc_235_set_sleep;
- 		break;
-+	case OMAP_MMC4_DEVID:
-+		mmc_slot(host).set_power = omap_hsmmc_4_set_power;
-+		mmc_slot(host).set_sleep = omap_hsmmc_4_set_sleep;
- 	default:
- 		pr_err("MMC%d configuration not supported!\n", host->id);
- 		return -EINVAL;
+There are some more mdelays in error-conditions which could happen occasionally
+(see sdhci_send_command, spinlocked by sdhci_request for example).
+
+Regards,
+
+   Wolfram
+
 -- 
-1.5.6.3
-
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
