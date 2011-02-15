@@ -1,41 +1,93 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH v2 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
-Date: Tue, 15 Feb 2011 17:32:55 +0000
-Message-ID: <20110215173255.GR4152@n2100.arm.linux.org.uk>
-References: <1297650746-12841-1-git-send-email-shawn.guo@freescale.com> <1297650746-12841-2-git-send-email-shawn.guo@freescale.com> <20110214165958.GH10709@pengutronix.de> <20110215223941.GJ10990@S2100-06.ap.freescale.net> <20110215171341.GD10770@pengutronix.de> <20110215171917.GQ4152@n2100.arm.linux.org.uk> <20110215172948.GE10770@pengutronix.de>
+From: Dmitry Shmidt <dimitrysh@android.com>
+Subject: Re: mmc_rescan failure in case of CONFIG_MMC_UNSAFE_RESUME
+Date: Tue, 15 Feb 2011 10:06:38 -0800
+Message-ID: <AANLkTinNcXAFa_DQOVZHS6_OHUUw=pNohnfZfuoFfH+3@mail.gmail.com>
+References: <loom.20110212T012758-658@post.gmane.org>
+	<20110212172205.GA9608@void.printf.net>
+	<AANLkTimkW0JDUT-8ERrGTimLUpqWvgNd5jYLfuXodL==@mail.gmail.com>
+	<20110214194013.GA3145@void.printf.net>
+	<AANLkTin0e=wUR_WXMaVcX1U1Ln6WGHCx-836nv7Rn1Sd@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:43675 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755267Ab1BORdK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 12:33:10 -0500
-Content-Disposition: inline
-In-Reply-To: <20110215172948.GE10770@pengutronix.de>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:46512 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754885Ab1BOSGk convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 13:06:40 -0500
+Received: by iyj8 with SMTP id 8so320408iyj.19
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2011 10:06:40 -0800 (PST)
+In-Reply-To: <AANLkTin0e=wUR_WXMaVcX1U1Ln6WGHCx-836nv7Rn1Sd@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Shawn Guo <shawn.guo@freescale.com>, arnd@arndb.de, s.hauer@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, LW@KARO-electronics.de
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Nicolas Pitre <nico@fluxnic.net>, Ohad Ben-Cohen <ohad@wizery.com>
 
-On Tue, Feb 15, 2011 at 06:29:48PM +0100, Wolfram Sang wrote:
-> On Tue, Feb 15, 2011 at 05:19:17PM +0000, Russell King - ARM Linux wrote:
-> > On Tue, Feb 15, 2011 at 06:13:41PM +0100, Wolfram Sang wrote:
-> > > MMC fails for me (note: the card works fine with an mx35-based board)
-> > > 
-> > > 	mmc0: new high speed MMC card at address 0001
-> > > 	mmcblk0: mmc0:0001 AF HMP 247 MiB 
-> > > 	mmcblk0: retrying using single block read
-> > > 	mmcblk0: error -84 transferring data, sector 0, nr 8, card status 0x900
-> > > 	end_request: I/O error, dev mmcblk0, sector 0
-> > 
-> > EILSEQ means CRC failure.  Probably unrelated.
-> 
-> Even if it works in another setup? As a result of the above, I can't read the
-> partition table of that MMC. The mx35 can do so.
+Hi,
 
-CRC is generated to protect the link between the card and the host.  It
-means that the CRC computed by the card for the transfer and the CRC
-computed by the host didn't match.
+[Cc +=3D Ohad]
+On Mon, Feb 14, 2011 at 1:54 PM, Dmitry Shmidt <dimitrysh@android.com> =
+wrote:
+> Hi Chris,
+>
+> On Mon, Feb 14, 2011 at 11:40 AM, Chris Ball <cjb@laptop.org> wrote:
+>> Hi Dmitry,
+>>
+>> [Cc +=3D Nico]
+>>
+>> On Mon, Feb 14, 2011 at 11:04:13AM -0800, Dmitry Shmidt wrote:
+>>> MMC_UNSAFE_RESUME is affecting mmc_sdio_resume() sequence. If it is
+>>> not defined then sdio card will be considered
+>>> "removable" and on resume mmc_sdio_init_card() will be always calle=
+d.
+>>>
+>>> static int mmc_sdio_resume(struct mmc_host *host)
+>>> {
+>>> =A0 =A0 =A0...
+>>> =A0 =A0 =A0if (mmc_card_is_removable(host) || !mmc_card_is_powered_=
+resumed(host))
+>>> =A0 =A0 =A0 =A0 =A0 err =3D mmc_sdio_init_card(host, host->ocr, hos=
+t->card,
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host->pm_flags & M=
+MC_PM_KEEP_POWER));
+>>
+>> mmc_sdio_init_card() is supposed to be called if your card is remova=
+ble,
+>> because the card might have changed. =A0It has a fast path that's en=
+abled
+>> by MMC_PM_KEEP_POWER. =A0(Nicolas explained this back in October.)
+>>
+>> You absolutely should not enable MMC_UNSAFE_RESUME if your host has =
+a
+>> removable card. =A0It's an awful hack, and you just found an example=
+ of
+>> where it breaks.
+>
+> My main concern was that here we are mixing two things: removable
+> cards and cards that stay powered and need quick resume.
+> It is possible to assume that last ones are not removable, but I feel
+> it is not 100% correct. For example you may have
+> removable wlan sdio adaptor.
+>
+>> If you need mmc_sdio_resume() to have an even faster path for you, w=
+e can
+>> talk about that and see if it makes sense. =A0Misusing MMC_UNSAFE_RE=
+SUME to
+>> get a powered SDIO resume is just wrong.
+>
+> So what can we do to suppress resume for removable sdio card ?
+>
+>>
+>> Thanks,
+>>
+>> --
+>> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+>> One Laptop Per Child
+>>
+As I wrote, Ohad's patch resolves quick resume situation for
+non-removable cards, but in case of
+removable - it is not working.
 
-In other words, data was corrupted in some way between the card and the
-MMC host.
+Thanks,
+
+Dmitry
