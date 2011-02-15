@@ -1,74 +1,47 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [RFC} sdhci.c set_ios -- disable global interrupts and Question
- on Power Management
-Date: Mon, 14 Feb 2011 19:09:44 -0800
-Message-ID: <3890D4C6-B293-4AD9-AF43-50ABE6413D56@marvell.com>
-References: <7953F5A4-7BFA-4E40-8202-C682C0314F49@marvell.com>
- <AANLkTimh2cZbtnoSLQ7ddq9hFxx7ddfM-NJmaS1f=pXh@mail.gmail.com>
- <447896B1-8836-4DFE-A00D-D41C395C79FC@marvell.com>
- <B040EC60-E156-4863-A735-15876F835FA1@marvell.com>
- <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Panduranga Mallireddy <panduranga_mallireddy@ti.com>
+Subject: [PATCH v2 2/5] omap: select REGULATOR_FIXED_VOLTAGE by default for panda and sdp4430
+Date: Tue, 15 Feb 2011 03:40:33 -0500
+Message-ID: <1297759236-25323-3-git-send-email-panduranga_mallireddy@ti.com>
+References: <1297759236-25323-1-git-send-email-panduranga_mallireddy@ti.com>
+ <1297759236-25323-2-git-send-email-panduranga_mallireddy@ti.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog104.obsmtp.com ([74.125.149.73]:51473 "EHLO
-	na3sys009aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751192Ab1BODMq convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Feb 2011 22:12:46 -0500
-In-Reply-To: <AANLkTikYYo4bJxQEa3+p=gE8iKNHxxbv7JPjB6vnywrs@mail.gmail.com>
-Content-Language: en-US
+Received: from bear.ext.ti.com ([192.94.94.41]:46652 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751393Ab1BOIPG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 Feb 2011 03:15:06 -0500
+In-Reply-To: <1297759236-25323-2-git-send-email-panduranga_mallireddy@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Tardy <tardyp@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: coelho@ti.com, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: ohad@wizery.com, benzyg@ti.com, pradeepgurumath@ti.com, vishalm@ti.com, x-boudet@ti.com, naveen_jain@ti.com, pavan_savoy@ti.com, manjunatha_halli@ti.com, tony@atomide.com, cjb@laptop.org, Panduranga Mallireddy <panduranga_mallireddy@ti.com>
 
+Power to the wl12xx wlan device is controlled by a fixed regulator.
+Boards that have the wl12xx should select REGULATOR_FIXED_VOLTAGE.
+Signed-off-by: Panduranga Mallireddy <panduranga_mallireddy@ti.com>
+---
+ arch/arm/mach-omap2/Kconfig |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-On Feb 14, 2011, at 1:29 AM, Pierre Tardy wrote:
-
-> On Mon, Feb 14, 2011 at 6:50 AM, Philip Rakity <prakity@marvell.com> wrote:
->> 
->> Pierre,
->> 
->> are you comfortable with this ?
-> The mmc_delay() looks hackish at the first sight. Looks like Pierre
-> Ossman was the author, he must have his reasons.
-> 
-> It looks like the mdelay are not in the fastpath, so why bother.
-> 
-> And, more important, you will do cond_resched while holding you
-> spinlock, which is *bad*.
-> What if the mmc stack will call you again from another thread? deadlock...
-
-The original code used  a 	spin_lock_irqsave and  a spin_lock_irqrestore so
-if the code was called again the deadlock surely would have happened by now.
-
-> 
-> 
->> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
->> -static inline void mmc_delay(unsigned int ms)
-> why do you want to remove it from here ?
-> It is still used by the core code.
-> 
-> 
->> @@ -1043,7 +1043,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->>                        return;
->>                }
->>                timeout--;
->> -               mdelay(1);
->> +               mmc_delay(1);
-> This looks like timeout code that never happen in normal condition.
-> 
-> 
->> @@ -1108,7 +1108,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
->>         * can apply clock after applying power
->>         */
->>        if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
->> -               mdelay(10);
->> +               mmc_delay(10);
-> Do you need this quirk in your platform?
-> 
-> 
-> Pierre
+diff --git a/arch/arm/mach-omap2/Kconfig b/arch/arm/mach-omap2/Kconfig
+index 1a2cf62..eeaeb3b 100644
+--- a/arch/arm/mach-omap2/Kconfig
++++ b/arch/arm/mach-omap2/Kconfig
+@@ -300,6 +300,7 @@ config MACH_OMAP_4430SDP
+ 	depends on ARCH_OMAP4
+ 	select OMAP_PACKAGE_CBL
+ 	select OMAP_PACKAGE_CBS
++	select REGULATOR_FIXED_VOLTAGE
+ 
+ config MACH_OMAP4_PANDA
+ 	bool "OMAP4 Panda Board"
+@@ -307,6 +308,7 @@ config MACH_OMAP4_PANDA
+ 	depends on ARCH_OMAP4
+ 	select OMAP_PACKAGE_CBL
+ 	select OMAP_PACKAGE_CBS
++	select REGULATOR_FIXED_VOLTAGE
+ 
+ config OMAP3_EMU
+ 	bool "OMAP3 debugging peripherals"
+-- 
+1.5.6.3
 
