@@ -1,161 +1,79 @@
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH 03/12] mmc: sd: query function modes for uhs cards
-Date: Tue, 15 Feb 2011 15:05:01 +0530
-Message-ID: <1297762510-2696-4-git-send-email-arindam.nath@amd.com>
+Subject: [PATCH 05/12] mmc: sdhci: reset sdclk before setting high speed enable
+Date: Tue, 15 Feb 2011 15:05:03 +0530
+Message-ID: <1297762510-2696-6-git-send-email-arindam.nath@amd.com>
 References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:54223 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754600Ab1BOJgo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 04:36:44 -0500
-Received: by mail-iw0-f174.google.com with SMTP id 9so5731723iwn.19
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2011 01:36:44 -0800 (PST)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:52231 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753787Ab1BOJhJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 04:37:09 -0500
+Received: by iyj8 with SMTP id 8so5729998iyj.19
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2011 01:37:09 -0800 (PST)
 In-Reply-To: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
 Cc: linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com, Arindam Nath <arindam.nath@amd.com>
 
-SD cards which conform to Physical Layer Spec v3.01 can support
-additional Bus Speed Modes, Driver Strength, and Current Limit
-other than the default values. We use CMD6 mode 0 to read these
-additional card functions. The values read here will be used during
-UHS-I initialization steps.
+As per Host Controller spec v3.00, we reset SDCLK before setting
+High Speed Enable, and then set it back to avoid generating clock
+gliches.
 
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/mmc/core/sd.c    |   99 +++++++++++++++++++++++++++++++++++++++-------
- include/linux/mmc/card.h |    3 +
- 2 files changed, 87 insertions(+), 15 deletions(-)
+ drivers/mmc/host/sdhci.c |   25 ++++++++++++++++++++++---
+ 1 files changed, 22 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index e968d5c..2a84396 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -283,25 +283,94 @@ static int mmc_read_switch(struct mmc_card *card)
- 		return -ENOMEM;
- 	}
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index b768839..5db0109 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1280,13 +1280,12 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		ctrl &= ~SDHCI_CTRL_HISPD;
  
--	err = mmc_sd_switch(card, 0, 0, 1, status);
--	if (err) {
--		/* If the host or the card can't do the switch,
--		 * fail more gracefully. */
--		if ((err != -EINVAL)
--		 && (err != -ENOSYS)
--		 && (err != -EFAULT))
-+	if (card->scr.sda_spec3) {
-+		/* First find out the supported Bus Speed Modes. */
-+		err = mmc_sd_switch(card, 0, 0, 1, status);
-+		if (err) {
+-	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
+-
+ 	if (host->version >= SDHCI_SPEC_300) {
+ 		u16 ctrl_2;
+ 
+ 		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 		if (!(ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
++			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
+ 			/*
+ 			 * We only need to set Driver Strength if the
+ 			 * preset value enable is not set.
+@@ -1297,8 +1296,28 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 				ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
+ 
+ 			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
++		} else {
 +			/*
-+			 * If the host or the card can't do the switch,
-+			 * fail more gracefully.
++			 * According to SDHC Spec v3.00, if the Preset Value
++			 * Enable in the Host Control 2 register is set, we
++			 * need to reset SD Clock Enable before changing High
++			 * Speed Enable to avoid generating clock gliches.
 +			 */
-+			if ((err != -EINVAL)
-+			&& (err != -ENOSYS)
-+			&& (err != -EFAULT))
-+				goto out;
++			u16 clk;
 +
-+			printk(KERN_WARNING "%s: problem reading "
-+				"Bus Speed modes.\n",
-+				mmc_hostname(card->host));
-+			err = 0;
++			/* Reset SD Clock Enable */
++			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++			clk &= ~SDHCI_CLOCK_CARD_EN;
++			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
 +
- 			goto out;
-+		}
- 
--		printk(KERN_WARNING "%s: problem reading switch "
--			"capabilities, performance might suffer.\n",
--			mmc_hostname(card->host));
--		err = 0;
-+		card->sw_caps.uhs_bus_mode = status[13];
++			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
 +
-+		/* Find out Driver Strengths supported by the card */
-+		err = mmc_sd_switch(card, 0, 2, 1, status);
-+		if (err) {
-+			/*
-+			 * If the host or the card can't do the switch,
-+			 * fail more gracefully.
-+			 */
-+			if ((err != -EINVAL)
-+			&& (err != -ENOSYS)
-+			&& (err != -EFAULT))
-+				goto out;
-+
-+			printk(KERN_WARNING "%s: problem reading "
-+				"Driver Strength.\n",
-+				mmc_hostname(card->host));
-+			err = 0;
- 
--		goto out;
++			/* Re-enable SD Clock */
++			clk |= SDHCI_CLOCK_CARD_EN;
++			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ 		}
 -	}
-+			goto out;
-+		}
++	} else
++		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
  
--	if (status[13] & 0x02)
--		card->sw_caps.hs_max_dtr = 50000000;
-+		card->sw_caps.uhs_drv_type = status[9];
-+
-+		/* Find out Current Limits supported by the card */
-+		err = mmc_sd_switch(card, 0, 3, 1, status);
-+		if (err) {
-+			/*
-+			 * If the host or the card can't do the switch,
-+			 * fail more gracefully.
-+			 */
-+			if ((err != -EINVAL)
-+			&& (err != -ENOSYS)
-+			&& (err != -EFAULT))
-+				goto out;
-+
-+			printk(KERN_WARNING "%s: problem reading "
-+				"Current Limit.\n",
-+				mmc_hostname(card->host));
-+			err = 0;
-+
-+			goto out;
-+		}
-+
-+		card->sw_caps.uhs_curr_limit = status[7];
-+	} else {
-+		err = mmc_sd_switch(card, 0, 0, 1, status);
-+		if (err) {
-+			/*
-+			 * If the host or the card can't do the switch,
-+			 * fail more gracefully.
-+			 */
-+			if ((err != -EINVAL)
-+			&& (err != -ENOSYS)
-+			&& (err != -EFAULT))
-+				goto out;
-+
-+			printk(KERN_WARNING "%s: problem reading switch "
-+				"capabilities, performance might suffer.\n",
-+				mmc_hostname(card->host));
-+			err = 0;
-+			goto out;
-+		}
-+
-+		if (status[13] & 0x02)
-+			card->sw_caps.hs_max_dtr = 50000000;
-+	}
- 
- out:
- 	kfree(status);
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 22b0335..7080f22 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -75,6 +75,9 @@ struct sd_ssr {
- 
- struct sd_switch_caps {
- 	unsigned int		hs_max_dtr;
-+	unsigned int		uhs_bus_mode;
-+	unsigned int		uhs_drv_type;
-+	unsigned int		uhs_curr_limit;
- };
- 
- struct sdio_cccr {
+ 	/*
+ 	 * Some (ENE) controllers go apeshit on some ios operation,
 -- 
 1.7.1
 
