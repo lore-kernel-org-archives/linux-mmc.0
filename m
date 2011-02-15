@@ -1,248 +1,499 @@
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH 01/12] mmc: sdhci: add support for auto CMD23
-Date: Tue, 15 Feb 2011 15:04:59 +0530
-Message-ID: <1297762510-2696-2-git-send-email-arindam.nath@amd.com>
+Subject: [PATCH 02/12] mmc: sd: add support for signal voltage switch procedure
+Date: Tue, 15 Feb 2011 15:05:00 +0530
+Message-ID: <1297762510-2696-3-git-send-email-arindam.nath@amd.com>
 References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-iw0-f174.google.com ([209.85.214.174]:54223 "EHLO
 	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753787Ab1BOJgT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 04:36:19 -0500
-Received: by iwn9 with SMTP id 9so5731723iwn.19
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2011 01:36:18 -0800 (PST)
+	with ESMTP id S1754593Ab1BOJgd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2011 04:36:33 -0500
+Received: by mail-iw0-f174.google.com with SMTP id 9so5731723iwn.19
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2011 01:36:33 -0800 (PST)
 In-Reply-To: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
 Cc: linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com, Arindam Nath <arindam.nath@amd.com>
 
-Host Controller v3.00 and later support Auto CMD23 in the Transfer
-Mode register. Since Auto CMD23 can be used with or without DMA,
-and if used with DMA, it should _only_ be ADMA, we check against
-SDHCI_USE_SDMA not being set. This flag is reset when SDHCI_USE_ADMA
-is set.
+Host Controller v3.00 adds another Capabilities register. We can
+directly read this register without any version checking since the
+new register bits will be considred as reserved in older controllers,
+and will be read as 0. Apart from other things, this new register
+indicates whether the Host Controller supports SDR50, SDR104, and
+DDR50 UHS-I modes. So depending on the host support, we set
+the corresponding MMC_CAP_* flags. One more new register. Host Control2
+is added in v3.00, which is used during Signal Voltage Switch prcedure
+described below.
 
-A new definition for SDHCI_ARGUMENT2 register has been added
-in v3.00 spec, which is the same as SDHCI_DMA_ADDRESS. We program the
-block count for CMD23 in SDHCI_ARGUMENT2, so we don't need CMD12 to
-stop multiple block transfers. But during error recovery procedure,
-we will need to send Abort command, so we use a global variable
-abort_cmd to save the stop command to be used later.
+Since as per v3.00 spec, UHS-I supported hosts should set S18R to 1,
+we set S18R (bit 24) of OCR before sending ACMD41. We also need to set
+XPC (bit 28) of OCR in case the host can supply >150mA. This support is
+indicated by the Maximum Current Capabilities register of the Host
+Controller.
 
-Two bits are added to SCR register as per the Physical Layer Spec v3.01,
-which specify whether the card supports CMD20 and/or CMD23. We use this
-as one of the conditions to decide whether to enable Auto CMD23 or not.
+If the response of ACMD41 has both CCS and S18A set, we start the
+signal voltage switch procedure, which if successfull, will switch
+the card from 3.3V signalling to 1.8V signalling. Signal voltage
+switch procedure adds support for a new command CMD11 in the Physical
+Layer Spec v3.01. As part of this procedure, we need to set 1.8V Signalling
+Enable (bit 3) of Host Control2 register, which if remains set after 5ms,
+means the switch to 1.8V signalling is successfull. Otherwise, we clear
+bit 24 of OCR and retry the initialization sequence.
 
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/mmc/core/sd.c    |    6 ++++
- drivers/mmc/host/sdhci.c |   66 +++++++++++++++++++++++++++++++++++++++++++--
- drivers/mmc/host/sdhci.h |    2 +
- include/linux/mmc/card.h |    4 +++
- include/linux/mmc/sd.h   |    2 +-
- 5 files changed, 76 insertions(+), 4 deletions(-)
+ drivers/mmc/core/sd.c     |   37 ++++++++++-
+ drivers/mmc/core/sd_ops.c |   25 ++++++++
+ drivers/mmc/core/sd_ops.h |    1 +
+ drivers/mmc/host/sdhci.c  |  147 +++++++++++++++++++++++++++++++++++++++++----
+ drivers/mmc/host/sdhci.h  |   18 +++++-
+ include/linux/mmc/host.h  |    8 +++
+ include/linux/mmc/sd.h    |    1 +
+ 7 files changed, 219 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index d18c32b..b3f8a3c 100644
+index b3f8a3c..e968d5c 100644
 --- a/drivers/mmc/core/sd.c
 +++ b/drivers/mmc/core/sd.c
-@@ -188,6 +188,12 @@ static int mmc_decode_scr(struct mmc_card *card)
+@@ -408,6 +408,7 @@ struct device_type sd_type = {
+ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
+ {
+ 	int err;
++	u32 rocr;
  
- 	scr->sda_vsn = UNSTUFF_BITS(resp, 56, 4);
- 	scr->bus_widths = UNSTUFF_BITS(resp, 48, 4);
-+	if (scr->sda_vsn == SCR_SPEC_VER_2) {
-+		/* Check if Physical Layer Spec v3.0 is supported*/
-+		scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);
-+		if (scr->sda_spec3)
-+			scr->cmd_support = UNSTUFF_BITS(resp, 32, 2);
+ 	/*
+ 	 * Since we're changing the OCR value, we seem to
+@@ -427,10 +428,25 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
+ 	if (!err)
+ 		ocr |= 1 << 30;
+ 
+-	err = mmc_send_app_op_cond(host, ocr, NULL);
++	/* If the host can supply more than 150mA, XPC should be set to 1. */
++	if (host->caps & (MMC_CAP_SET_XPC_330 | MMC_CAP_SET_XPC_300 |
++	    MMC_CAP_SET_XPC_180))
++		ocr |= 1 << 28;
++
++	err = mmc_send_app_op_cond(host, ocr, &rocr);
+ 	if (err)
+ 		return err;
+ 
++	/*
++	 * In case CCS and S18A in the response is set, start Signal Voltage
++	 * Switch procedure. SPI mode doesn't support CMD11.
++	 */
++	if (!mmc_host_is_spi(host) && (rocr & 0x41000000)) {
++		err = mmc_start_voltage_switch(host);
++		if (err)
++			return err;
++	}
++
+ 	if (mmc_host_is_spi(host))
+ 		err = mmc_send_cid(host, cid);
+ 	else
+@@ -827,11 +843,26 @@ int mmc_attach_sd(struct mmc_host *host)
+ 	}
+ 
+ 	/*
++	 * If the host supports one of UHS-I modes, request the card
++	 * to switch to 1.8V signaling level.
++	 */
++	if (host->caps & (MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
++	    MMC_CAP_UHS_DDR50))
++		host->ocr |= (1 << 24);
++
++	/*
+ 	 * Detect and init the card.
+ 	 */
+ 	err = mmc_sd_init_card(host, host->ocr, NULL);
+-	if (err)
+-		goto err;
++	if (err == -EAGAIN) {
++		/*
++		 * Retry initialization with S18R set to 0.
++		 */
++		host->ocr &= ~(1 << 24);
++		err = mmc_sd_init_card(host, host->ocr, NULL);
++		if (err)
++			goto err;
 +	}
  
- 	if (UNSTUFF_BITS(resp, 55, 1))
- 		card->erased_byte = 0xFF;
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9e15f41..0b537cf 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -25,6 +25,7 @@
- 
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/host.h>
-+#include <linux/mmc/card.h>
- 
- #include "sdhci.h"
- 
-@@ -46,6 +47,8 @@ static void sdhci_finish_data(struct sdhci_host *);
- static void sdhci_send_command(struct sdhci_host *, struct mmc_command *);
- static void sdhci_finish_command(struct sdhci_host *);
- 
-+static struct mmc_command *abort_cmd;
-+
- static void sdhci_dumpregs(struct sdhci_host *host)
- {
- 	printk(KERN_DEBUG DRIVER_NAME ": =========== REGISTER DUMP (%s)===========\n",
-@@ -812,6 +815,30 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_data *data)
- 	sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+ 	mmc_release_host(host);
+ 	err = mmc_add_card(host->card);
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index 797cdb5..a0f97c9 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -146,6 +146,31 @@ int mmc_app_set_bus_width(struct mmc_card *card, int width)
+ 	return 0;
  }
  
-+/*
-+ * Does the Host Controller support Auto CMD23?
-+ *
-+ * There are four preconditions for Auto CMD23 to be supported:
-+ *  1. Host Controller v3.00 or later
-+ *  2. Card supports CMD23
-+ *  3. If DMA is used, it should be ADMA
-+ *  4. Only when CMD18 or CMD25 is issued
-+ */
-+static int sdhci_host_auto_cmd23_supported(struct sdhci_host *host,
-+	struct mmc_request *mrq)
++int mmc_start_voltage_switch(struct mmc_host *host)
 +{
-+	struct mmc_card *card = host->mmc->card;
++	struct mmc_command cmd;
++	int err;
 +
-+	if ((host->version >= SDHCI_SPEC_300) &&
-+	   card && (card->scr.cmd_support & SD_SCR_CMD23_SUPPORT) &&
-+	   !(host->flags & SDHCI_USE_SDMA) &&
-+	   ((mrq->cmd->opcode == MMC_READ_MULTIPLE_BLOCK) ||
-+	   (mrq->cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK)))
-+		return 1;
++	BUG_ON(!host);
 +
-+	return 0;
++	memset(&cmd, 0, sizeof(struct mmc_command));
++
++	cmd.opcode = SD_SWITCH_VOLTAGE;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
++
++	err = mmc_wait_for_cmd(host, &cmd, 0);
++	if (err)
++		return err;
++
++	if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
++		return -EIO;
++
++	err = host->ops->start_signal_voltage_switch(host);
++
++	return err;
 +}
 +
- static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	struct mmc_data *data)
+ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
  {
-@@ -824,11 +851,23 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+ 	struct mmc_command cmd;
+diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+index ffc2305..3cfba59 100644
+--- a/drivers/mmc/core/sd_ops.h
++++ b/drivers/mmc/core/sd_ops.h
+@@ -20,6 +20,7 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr);
+ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+ 	u8 value, u8 *resp);
+ int mmc_app_sd_status(struct mmc_card *card, void *ssr);
++int mmc_start_voltage_switch(struct mmc_host *host);
  
- 	mode = SDHCI_TRNS_BLK_CNT_EN;
- 	if (data->blocks > 1) {
-+		if (sdhci_host_auto_cmd23_supported(host, host->mrq)) {
-+			/*
-+			 * Host Controller v3.00 can automatically send CMD23
-+			 * before CMD18 or CMD25. For that, we need to enable
-+			 * Auto CMD23 in the Transfer Mode register and
-+			 * program the block count in Argument 2 register.
-+			 */
-+			mode |= SDHCI_TRNS_AUTO_CMD23;
-+			sdhci_writel(host, data->blocks, SDHCI_ARGUMENT2);
-+		}
-+
- 		if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
- 			mode |= SDHCI_TRNS_MULTI | SDHCI_TRNS_ACMD12;
- 		else
- 			mode |= SDHCI_TRNS_MULTI;
- 	}
-+
- 	if (data->flags & MMC_DATA_READ)
- 		mode |= SDHCI_TRNS_READ;
- 	if (host->flags & SDHCI_REQ_USE_DMA)
-@@ -1131,6 +1170,23 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- #ifndef SDHCI_USE_LEDS_CLASS
- 	sdhci_activate_led(host);
  #endif
-+	/*
-+	 * Since the block count for CMD23 has already been specified in the
-+	 * Argument 2 register, we don't need CMD12 to stop multiple block
-+	 * transfers.
-+	 */
-+	if (sdhci_host_auto_cmd23_supported(host, mrq)) {
-+		if (mrq->stop) {
+ 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0b537cf..6d7a276 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -87,6 +87,8 @@ static void sdhci_dumpregs(struct sdhci_host *host)
+ 	printk(KERN_DEBUG DRIVER_NAME ": Cmd:      0x%08x | Max curr: 0x%08x\n",
+ 		sdhci_readw(host, SDHCI_COMMAND),
+ 		sdhci_readl(host, SDHCI_MAX_CURRENT));
++	printk(KERN_DEBUG DRIVER_NAME ": Host ctl2: 0x%08x\n",
++		sdhci_readw(host, SDHCI_HOST_CONTROL2));
+ 
+ 	if (host->flags & SDHCI_USE_ADMA)
+ 		printk(KERN_DEBUG DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x\n",
+@@ -1340,11 +1342,76 @@ out:
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
++static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc)
++{
++	struct sdhci_host *host;
++	u8 pwr;
++	u16 clk, ctrl;
++	u32 present_state;
++	unsigned long flags;
++
++	host = mmc_priv(mmc);
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	/* Stop SDCLK */
++	host = mmc_priv(mmc);
++	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	clk &= ~SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	/* Check whether DAT[3:0] is 0000 */
++	present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
++	if (!((present_state & SDHCI_DATA_LVL_MASK) >> SDHCI_DATA_LVL_SHIFT)) {
++		/* Enable 1.8V Signal Enable in the Host Control2 register */
++		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++		ctrl |= SDHCI_CTRL_VDD_180;
++		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
++
++		/* Wait for 5ms */
++		mdelay(5);
++
++		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++		if (ctrl & SDHCI_CTRL_VDD_180) {
++			/* Provide SDCLK again and wait for 1ms*/
++			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++			clk |= SDHCI_CLOCK_CARD_EN;
++			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++			mdelay(1);
++
 +			/*
-+			 * Save the stop command here to be used during
-+			 * error recovery
++			 * If DAT[3:0] level is 1111b, then the card was
++			 * successfully switched to 1.8V signaling.
 +			 */
-+			abort_cmd = mrq->data->stop;
-+			mrq->data->stop = NULL;
-+			mrq->stop = NULL;
++			present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
++			if ((present_state & SDHCI_DATA_LVL_MASK) ==
++			     SDHCI_DATA_LVL_MASK) {
++				spin_unlock_irqrestore(&host->lock, flags);
++				return 0;
++			}
 +		}
 +	}
 +
- 	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12) {
- 		if (mrq->stop) {
- 			mrq->data->stop = NULL;
-@@ -1396,6 +1452,7 @@ static void sdhci_timeout_timer(unsigned long data)
++	/*
++	 * If we are here, that means the switch to 1.8V signaling failed. Stop
++	 * power to the card, and retry initialization sequence by setting S18R
++	 * to 0.
++	 */
++	pwr = sdhci_readb(host, SDHCI_POWER_CONTROL);
++	pwr &= ~SDHCI_POWER_ON;
++	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return -EAGAIN;
++}
++
+ static const struct mmc_host_ops sdhci_ops = {
+ 	.request	= sdhci_request,
+ 	.set_ios	= sdhci_set_ios,
+ 	.get_ro		= sdhci_get_ro,
+ 	.enable_sdio_irq = sdhci_enable_sdio_irq,
++	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
+ };
  
- 		if (host->data) {
- 			host->data->error = -ETIMEDOUT;
-+			host->data->stop = abort_cmd;
- 			sdhci_finish_data(host);
- 		} else {
- 			if (host->cmd)
-@@ -1534,9 +1591,10 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		host->data->error = -EIO;
+ /*****************************************************************************\
+@@ -1802,7 +1869,9 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
+ int sdhci_add_host(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc;
+-	unsigned int caps, ocr_avail;
++	u32 caps[2];
++	u32 max_current_caps;
++	unsigned int ocr_avail;
+ 	int ret;
+ 
+ 	WARN_ON(host == NULL);
+@@ -1825,12 +1894,13 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			host->version);
  	}
  
--	if (host->data->error)
-+	if (host->data->error) {
-+		host->data->stop = abort_cmd;
- 		sdhci_finish_data(host);
--	else {
-+	} else {
- 		if (intmask & (SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL))
- 			sdhci_transfer_pio(host);
+-	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
++	caps[0] = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
+ 		sdhci_readl(host, SDHCI_CAPABILITIES);
++	caps[1] = sdhci_readl(host, SDHCI_CAPABILITIES_1);
  
-@@ -1783,8 +1841,10 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+-	else if (!(caps & SDHCI_CAN_DO_SDMA))
++	else if (!(caps[0] & SDHCI_CAN_DO_SDMA))
+ 		DBG("Controller doesn't have SDMA capability\n");
+ 	else
+ 		host->flags |= SDHCI_USE_SDMA;
+@@ -1841,7 +1911,8 @@ int sdhci_add_host(struct sdhci_host *host)
  		host->flags &= ~SDHCI_USE_SDMA;
  	}
  
--	if ((host->version >= SDHCI_SPEC_200) && (caps & SDHCI_CAN_DO_ADMA2))
-+	if ((host->version >= SDHCI_SPEC_200) && (caps & SDHCI_CAN_DO_ADMA2)) {
-+		host->flags &= ~SDHCI_USE_SDMA;
+-	if ((host->version >= SDHCI_SPEC_200) && (caps & SDHCI_CAN_DO_ADMA2)) {
++	if ((host->version >= SDHCI_SPEC_200) &&
++		(caps[0] & SDHCI_CAN_DO_ADMA2)) {
+ 		host->flags &= ~SDHCI_USE_SDMA;
  		host->flags |= SDHCI_USE_ADMA;
-+	}
+ 	}
+@@ -1893,10 +1964,10 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	}
  
- 	if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA) &&
- 		(host->flags & SDHCI_USE_ADMA)) {
+ 	if (host->version >= SDHCI_SPEC_300)
+-		host->max_clk = (caps & SDHCI_CLOCK_V3_BASE_MASK)
++		host->max_clk = (caps[0] & SDHCI_CLOCK_V3_BASE_MASK)
+ 			>> SDHCI_CLOCK_BASE_SHIFT;
+ 	else
+-		host->max_clk = (caps & SDHCI_CLOCK_BASE_MASK)
++		host->max_clk = (caps[0] & SDHCI_CLOCK_BASE_MASK)
+ 			>> SDHCI_CLOCK_BASE_SHIFT;
+ 
+ 	host->max_clk *= 1000000;
+@@ -1912,7 +1983,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	}
+ 
+ 	host->timeout_clk =
+-		(caps & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
++		(caps[0] & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
+ 	if (host->timeout_clk == 0) {
+ 		if (host->ops->get_timeout_clock) {
+ 			host->timeout_clk = host->ops->get_timeout_clock(host);
+@@ -1924,7 +1995,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			return -ENODEV;
+ 		}
+ 	}
+-	if (caps & SDHCI_TIMEOUT_CLK_UNIT)
++	if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
+ 		host->timeout_clk *= 1000;
+ 
+ 	/*
+@@ -1951,21 +2022,71 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 
+-	if (caps & SDHCI_CAN_DO_HISPD)
++	if (caps[0] & SDHCI_CAN_DO_HISPD)
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+ 
+ 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+ 	    mmc_card_is_removable(mmc))
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 
++	/* UHS-I mode(s) supported by the host controller. */
++	if (caps[1] & SDHCI_SUPPORT_SDR50)
++		mmc->caps |= MMC_CAP_UHS_SDR50;
++	if (caps[1] & SDHCI_SUPPORT_SDR104)
++		mmc->caps |= MMC_CAP_UHS_SDR104;
++	if (caps[1] & SDHCI_SUPPORT_DDR50)
++		mmc->caps |= MMC_CAP_UHS_DDR50;
++
+ 	ocr_avail = 0;
+-	if (caps & SDHCI_CAN_VDD_330)
++	/*
++	 * According to SD Host Controller spec v3.00, if the Host System
++	 * can afford more than 150mA, Host Driver should set XPC to 1. Also
++	 * the value is meaningful only if Voltage Support in the Capabilities
++	 * register is set. The actual current value is 4 times the register
++	 * value.
++	 */
++	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
++
++	if (caps[0] & SDHCI_CAN_VDD_330) {
++		int max_current_330;
++
+ 		ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
+-	if (caps & SDHCI_CAN_VDD_300)
++
++		max_current_330 = ((max_current_caps &
++				   SDHCI_MAX_CURRENT_330_MASK) >>
++				   SDHCI_MAX_CURRENT_330_SHIFT) *
++				   SDHCI_MAX_CURRENT_MULTIPLIER;
++
++		if (max_current_330 > 150)
++			mmc->caps |= MMC_CAP_SET_XPC_330;
++	}
++	if (caps[0] & SDHCI_CAN_VDD_300) {
++		int max_current_300;
++
+ 		ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
+-	if (caps & SDHCI_CAN_VDD_180)
++
++		max_current_300 = ((max_current_caps &
++				   SDHCI_MAX_CURRENT_300_MASK) >>
++				   SDHCI_MAX_CURRENT_300_SHIFT) *
++				   SDHCI_MAX_CURRENT_MULTIPLIER;
++
++		if (max_current_300 > 150)
++			mmc->caps |= MMC_CAP_SET_XPC_300;
++	}
++	if (caps[0] & SDHCI_CAN_VDD_180) {
++		int max_current_180;
++
+ 		ocr_avail |= MMC_VDD_165_195;
+ 
++		max_current_180 = ((max_current_caps &
++				   SDHCI_MAX_CURRENT_180_MASK) >>
++				   SDHCI_MAX_CURRENT_180_SHIFT) *
++				   SDHCI_MAX_CURRENT_MULTIPLIER;
++
++		if (max_current_180 > 150)
++			mmc->caps |= MMC_CAP_SET_XPC_180;
++	}
++
+ 	mmc->ocr_avail = ocr_avail;
+ 	mmc->ocr_avail_sdio = ocr_avail;
+ 	if (host->ocr_avail_sdio)
+@@ -2025,7 +2146,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
+ 		mmc->max_blk_size = 2;
+ 	} else {
+-		mmc->max_blk_size = (caps & SDHCI_MAX_BLOCK_MASK) >>
++		mmc->max_blk_size = (caps[0] & SDHCI_MAX_BLOCK_MASK) >>
+ 				SDHCI_MAX_BLOCK_SHIFT;
+ 		if (mmc->max_blk_size >= 3) {
+ 			printk(KERN_WARNING "%s: Invalid maximum block size, "
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 6e0969e..223762c 100644
+index 223762c..95d70e6 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -25,6 +25,7 @@
-  */
+@@ -69,6 +69,8 @@
+ #define  SDHCI_DATA_AVAILABLE	0x00000800
+ #define  SDHCI_CARD_PRESENT	0x00010000
+ #define  SDHCI_WRITE_PROTECT	0x00080000
++#define  SDHCI_DATA_LVL_MASK	0x00F00000
++#define   SDHCI_DATA_LVL_SHIFT	20
  
- #define SDHCI_DMA_ADDRESS	0x00
-+#define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
+ #define SDHCI_HOST_CONTROL 	0x28
+ #define  SDHCI_CTRL_LED		0x01
+@@ -147,7 +149,8 @@
  
- #define SDHCI_BLOCK_SIZE	0x04
- #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
-@@ -37,6 +38,7 @@
- #define  SDHCI_TRNS_DMA		0x01
- #define  SDHCI_TRNS_BLK_CNT_EN	0x02
- #define  SDHCI_TRNS_ACMD12	0x04
-+#define  SDHCI_TRNS_AUTO_CMD23	0x08
- #define  SDHCI_TRNS_READ	0x10
- #define  SDHCI_TRNS_MULTI	0x20
+ #define SDHCI_ACMD12_ERR	0x3C
  
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 8ce0827..22b0335 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -58,9 +58,13 @@ struct mmc_ext_csd {
+-/* 3E-3F reserved */
++#define SDHCI_HOST_CONTROL2		0x3E
++#define  SDHCI_CTRL_VDD_180		0x0008
  
- struct sd_scr {
- 	unsigned char		sda_vsn;
-+	unsigned char		sda_spec3;
- 	unsigned char		bus_widths;
- #define SD_SCR_BUS_WIDTH_1	(1<<0)
- #define SD_SCR_BUS_WIDTH_4	(1<<2)
-+	unsigned char		cmd_support;
-+#define SD_SCR_CMD20_SUPPORT	(1<<0)
-+#define SD_SCR_CMD23_SUPPORT	(1<<1)
+ #define SDHCI_CAPABILITIES	0x40
+ #define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
+@@ -168,9 +171,20 @@
+ #define  SDHCI_CAN_VDD_180	0x04000000
+ #define  SDHCI_CAN_64BIT	0x10000000
+ 
++#define  SDHCI_SUPPORT_SDR50	0x00000001
++#define  SDHCI_SUPPORT_SDR104	0x00000002
++#define  SDHCI_SUPPORT_DDR50	0x00000004
++
+ #define SDHCI_CAPABILITIES_1	0x44
+ 
+-#define SDHCI_MAX_CURRENT	0x48
++#define SDHCI_MAX_CURRENT		0x48
++#define  SDHCI_MAX_CURRENT_330_MASK	0x0000FF
++#define  SDHCI_MAX_CURRENT_330_SHIFT	0
++#define  SDHCI_MAX_CURRENT_300_MASK	0x00FF00
++#define  SDHCI_MAX_CURRENT_300_SHIFT	8
++#define  SDHCI_MAX_CURRENT_180_MASK	0xFF0000
++#define  SDHCI_MAX_CURRENT_180_SHIFT	16
++#define   SDHCI_MAX_CURRENT_MULTIPLIER	4
+ 
+ /* 4C-4F reserved for more max current */
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index bcb793e..ec09b32 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -117,6 +117,8 @@ struct mmc_host_ops {
+ 
+ 	/* optional callback for HC quirks */
+ 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
++
++	int	(*start_signal_voltage_switch)(struct mmc_host *host);
  };
  
- struct sd_ssr {
+ struct mmc_card;
+@@ -173,6 +175,12 @@ struct mmc_host {
+ 						/* DDR mode at 1.2V */
+ #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
+ #define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus width ok */
++#define MMC_CAP_UHS_SDR50	(1 << 15)	/* Host supports UHS SDR50 mode */
++#define MMC_CAP_UHS_SDR104	(1 << 16)	/* Host supports UHS SDR104 mode */
++#define MMC_CAP_UHS_DDR50	(1 << 17)	/* Host supports UHS DDR50 mode */
++#define MMC_CAP_SET_XPC_330	(1 << 18)	/* Host supports >150mA current at 3.3V */
++#define MMC_CAP_SET_XPC_300	(1 << 19)	/* Host supports >150mA current at 3.0V */
++#define MMC_CAP_SET_XPC_180	(1 << 20)	/* Host supports >150mA current at 1.8V */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
 diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-index 3fd85e0..178363b 100644
+index 178363b..3ba5aa6 100644
 --- a/include/linux/mmc/sd.h
 +++ b/include/linux/mmc/sd.h
-@@ -59,7 +59,7 @@
+@@ -17,6 +17,7 @@
+ /* This is basically the same command as for MMC with some quirks. */
+ #define SD_SEND_RELATIVE_ADDR     3   /* bcr                     R6  */
+ #define SD_SEND_IF_COND           8   /* bcr  [11:0] See below   R7  */
++#define SD_SWITCH_VOLTAGE         11  /* ac                      R1  */
  
- #define SCR_SPEC_VER_0		0	/* Implements system specification 1.0 - 1.01 */
- #define SCR_SPEC_VER_1		1	/* Implements system specification 1.10 */
--#define SCR_SPEC_VER_2		2	/* Implements system specification 2.00 */
-+#define SCR_SPEC_VER_2		2	/* Implements system specification 2.00 - 3.0x */
- 
- /*
-  * SD bus widths
+   /* class 10 */
+ #define SD_SWITCH                 6   /* adtc [31:0] See below   R1  */
 -- 
 1.7.1
 
