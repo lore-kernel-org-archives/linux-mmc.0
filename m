@@ -1,60 +1,56 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] dw_mmc: modify quirks bit-shift control
-Date: Wed, 16 Feb 2011 15:19:28 +0900
-Message-ID: <4D5B6C70.2030809@samsung.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH 02/12] mmc: sd: add support for signal voltage switch
+ procedure
+Date: Wed, 16 Feb 2011 01:55:12 -0600
+Message-ID: <6C03668EAF45B747AF947A1603D1B300DCDEF7F0@SAUSEXMBP01.amd.com>
+References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
+ <1297762510-2696-3-git-send-email-arindam.nath@amd.com>
+ <20110215101627.GC13934@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:33799 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751330Ab1BPGUW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2011 01:20:22 -0500
-Received: from epmmp2 (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LGP00FFO5L3VKA0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 16 Feb 2011 15:19:52 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LGP00G265L4UZ@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 16 Feb 2011 15:19:52 +0900 (KST)
+Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:5458 "EHLO
+	VA3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752189Ab1BPHz0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2011 02:55:26 -0500
+In-Reply-To: <20110215101627.GC13934@pengutronix.de>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-If we need some quirks, maybe add quirks in future
-But now, quirks value set to integer..later we should be confused..
-So i think that need bit-shift control.
+Hi Wolfram,
 
-And If we need not any quirks, we didn't set anything..
-(Need not DW_MCI_QUIRK_NONE)
+> -----Original Message-----
+> From: Wolfram Sang [mailto:w.sang@pengutronix.de]
+> Sent: Tuesday, February 15, 2011 3:46 PM
+> To: Nath, Arindam
+> Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
+> anath.amd@gmail.com
+> Subject: Re: [PATCH 02/12] mmc: sd: add support for signal voltage
+> switch procedure
+> 
+> On Tue, Feb 15, 2011 at 03:05:00PM +0530, Arindam Nath wrote:
+> 
+> > Host Controller v3.00 adds another Capabilities register. We can
+> > directly read this register without any version checking since the
+> > new register bits will be considred as reserved in older controllers,
+> > and will be read as 0.
+> 
+> I so much wish you were right, but reality is different :(
+> 
+> The i.MX35-processor, for example, has a custom watermark-register
+> there. I
+> could fix this by intercepting the read using io-accessors, but to
+> minimize
+> potential regressions on older controllers in general, I'd say the
+> check for v3
+> might be justified?
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- include/linux/mmc/dw_mmc.h |    8 +++-----
- 1 files changed, 3 insertions(+), 5 deletions(-)
+Thanks for the suggestion. I will add the changes in V2 of the patchset.
 
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 16b0261..8614832 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -165,14 +165,12 @@ struct dw_mci_dma_ops {
- };
- 
- /* IP Quirks/flags. */
--/* No special quirks or flags to cater for */
--#define DW_MCI_QUIRK_NONE		0
- /* DTO fix for command transmission with IDMAC configured */
--#define DW_MCI_QUIRK_IDMAC_DTO		1
-+#define DW_MCI_QUIRK_IDMAC_DTO		(1 << 0)
- /* delay needed between retries on some 2.11a implementations */
--#define DW_MCI_QUIRK_RETRY_DELAY	2
-+#define DW_MCI_QUIRK_RETRY_DELAY	(1 << 2)
- /* High Speed Capable - Supports HS cards (upto 50MHz) */
--#define DW_MCI_QUIRK_HIGHSPEED		4
-+#define DW_MCI_QUIRK_HIGHSPEED		(1 << 3)
- 
- 
- struct dma_pdata;
+Regards,
+Arindam
+
