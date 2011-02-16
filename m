@@ -1,58 +1,31 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH 01/12] mmc: sdhci: add support for auto CMD23
-Date: Wed, 16 Feb 2011 02:04:19 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B300DCDEF7FC@SAUSEXMBP01.amd.com>
-References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
- <1297762510-2696-2-git-send-email-arindam.nath@amd.com>
- <alpine.LFD.2.00.1102151556450.14920@xanadu.home>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] dw_mmc: modify quirks bit-shift control
+Date: Wed, 16 Feb 2011 09:58:44 +0000
+Message-ID: <AANLkTik=GivKq8MRHdK9CFNhH-BOs9CiU=1Jt2QEuxBF@mail.gmail.com>
+References: <4D5B6C70.2030809@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:55040
-	"EHLO DB3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753628Ab1BPITd convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Feb 2011 03:19:33 -0500
-In-Reply-To: <alpine.LFD.2.00.1102151556450.14920@xanadu.home>
-Content-Language: en-US
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:46725 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755219Ab1BPJ6p (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2011 04:58:45 -0500
+Received: by gwj20 with SMTP id 20so512922gwj.19
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2011 01:58:44 -0800 (PST)
+In-Reply-To: <4D5B6C70.2030809@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nico@fluxnic.net>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Nicolas,
+On Wed, Feb 16, 2011 at 6:19 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> If we need some quirks, maybe add quirks in future
+> But now, quirks value set to integer..later we should be confused..
+> So i think that need bit-shift control.
+>
+> And If we need not any quirks, we didn't set anything..
+> (Need not DW_MCI_QUIRK_NONE)
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-> -----Original Message-----
-> From: Nicolas Pitre [mailto:nico@fluxnic.net]
-> Sent: Wednesday, February 16, 2011 2:29 AM
-> To: Nath, Arindam
-> Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
-> anath.amd@gmail.com
-> Subject: Re: [PATCH 01/12] mmc: sdhci: add support for auto CMD23
-> 
-> On Tue, 15 Feb 2011, Arindam Nath wrote:
-> 
-> > Host Controller v3.00 and later support Auto CMD23 in the Transfer
-> > Mode register. Since Auto CMD23 can be used with or without DMA,
-> > and if used with DMA, it should _only_ be ADMA, we check against
-> > SDHCI_USE_SDMA not being set. This flag is reset when SDHCI_USE_ADMA
-> > is set.
-> >
-> > A new definition for SDHCI_ARGUMENT2 register has been added
-> > in v3.00 spec, which is the same as SDHCI_DMA_ADDRESS. We program the
-> > block count for CMD23 in SDHCI_ARGUMENT2, so we don't need CMD12 to
-> > stop multiple block transfers. But during error recovery procedure,
-> > we will need to send Abort command, so we use a global variable
-> > abort_cmd to save the stop command to be used later.
-> 
-> This is wrong.  Don't use global variables for such things.  Imagine
-> what might happen if you have more than one sdhci controller in a
-> system. This is a per instance issue certainly not a global driver
-> issue.
-
-Thanks for the review. I will make the changes in V2 of the patchset.
-
-Regards,
-Arindam
-
+Acked-by: Will Newton <will.newton@imgtec.com>
