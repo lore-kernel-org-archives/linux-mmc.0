@@ -1,49 +1,57 @@
 From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH 00/12] add support for sd host controller v3.00
-Date: Wed, 16 Feb 2011 02:00:33 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B300DCDEF7F9@SAUSEXMBP01.amd.com>
+Subject: RE: [PATCH 01/12] mmc: sdhci: add support for auto CMD23
+Date: Wed, 16 Feb 2011 02:04:19 -0600
+Message-ID: <6C03668EAF45B747AF947A1603D1B300DCDEF7FC@SAUSEXMBP01.amd.com>
 References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
- <20110215194337.GA32551@void.printf.net>
+ <1297762510-2696-2-git-send-email-arindam.nath@amd.com>
+ <alpine.LFD.2.00.1102151556450.14920@xanadu.home>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.185]:22041
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751510Ab1BPIPu convert rfc822-to-8bit
+Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:55040
+	"EHLO DB3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753628Ab1BPITd convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Feb 2011 03:15:50 -0500
-In-Reply-To: <20110215194337.GA32551@void.printf.net>
+	Wed, 16 Feb 2011 03:19:33 -0500
+In-Reply-To: <alpine.LFD.2.00.1102151556450.14920@xanadu.home>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>, Philip Rakity <prakity@marvell.com>, zhangfei gao <zhangfei.gao@gmail.com>, David Vrabel <david.vrabel@csr.com>
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-Hi Chris,
+Hi Nicolas,
 
 > -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Wednesday, February 16, 2011 1:14 AM
+> From: Nicolas Pitre [mailto:nico@fluxnic.net]
+> Sent: Wednesday, February 16, 2011 2:29 AM
 > To: Nath, Arindam
-> Cc: linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
-> anath.amd@gmail.com; Philip Rakity; zhangfei gao; David Vrabel
-> Subject: Re: [PATCH 00/12] add support for sd host controller v3.00
+> Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
+> anath.amd@gmail.com
+> Subject: Re: [PATCH 01/12] mmc: sdhci: add support for auto CMD23
 > 
-> Hi Arindam,
+> On Tue, 15 Feb 2011, Arindam Nath wrote:
 > 
-> On Tue, Feb 15, 2011 at 03:04:58PM +0530, Arindam Nath wrote:
-> > The patches below add support for Host Controller v3.00 as per the
-> > spec v3.00. It also adds support for UHS-I cards as per Physical
-> > Layer Specification v3.01.
+> > Host Controller v3.00 and later support Auto CMD23 in the Transfer
+> > Mode register. Since Auto CMD23 can be used with or without DMA,
+> > and if used with DMA, it should _only_ be ADMA, we check against
+> > SDHCI_USE_SDMA not being set. This flag is reset when SDHCI_USE_ADMA
+> > is set.
+> >
+> > A new definition for SDHCI_ARGUMENT2 register has been added
+> > in v3.00 spec, which is the same as SDHCI_DMA_ADDRESS. We program the
+> > block count for CMD23 in SDHCI_ARGUMENT2, so we don't need CMD12 to
+> > stop multiple block transfers. But during error recovery procedure,
+> > we will need to send Abort command, so we use a global variable
+> > abort_cmd to save the stop command to be used later.
 > 
-> Thanks for the patchset!  It might take us some time to review these,
-> both because there's a lot of code and because we don't all have access
-> to the SD 3.0 specs.  I'm CC'ing some folks who've worked on 3.0
-> patches
-> in the past -- if anyone's willing to help review, that'd be great.
+> This is wrong.  Don't use global variables for such things.  Imagine
+> what might happen if you have more than one sdhci controller in a
+> system. This is a per instance issue certainly not a global driver
+> issue.
 
-I would appreciate getting comments on the patches.
+Thanks for the review. I will make the changes in V2 of the patchset.
 
 Regards,
 Arindam
