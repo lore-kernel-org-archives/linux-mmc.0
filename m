@@ -1,78 +1,62 @@
-From: Pawel Moll <pawel.moll@arm.com>
+From: David Brown <davidb@codeaurora.org>
 Subject: Re: [RFC] MMC: error handling improvements
-Date: Wed, 16 Feb 2011 19:01:06 +0000
-Message-ID: <1297882866.20252.20.camel@hornet.cambridge.arm.com>
+Date: Wed, 16 Feb 2011 11:28:15 -0800
+Message-ID: <8ya8vxf4w4w.fsf@huya.qualcomm.com>
 References: <20110215230311.GT4152@n2100.arm.linux.org.uk>
+	<8yaoc6c7tan.fsf@huya.qualcomm.com>
+	<AANLkTikpdwfM19oirENbOhnz8Rh40ZnMXByGX_QKdu-V@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from service87.mimecast.com ([94.185.240.25]:36856 "HELO
-	service87.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1750857Ab1BPTBM convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2011 14:01:12 -0500
-In-Reply-To: <20110215230311.GT4152@n2100.arm.linux.org.uk>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:32221 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751556Ab1BPT2P (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2011 14:28:15 -0500
+In-Reply-To: <AANLkTikpdwfM19oirENbOhnz8Rh40ZnMXByGX_QKdu-V@mail.gmail.com>
+	(Linus Walleij's message of "Wed, 16 Feb 2011 19:41:42 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Hi,
+On Wed, Feb 16 2011, Linus Walleij wrote:
 
-> The adaptive clock
-> rate algorithm can probably do with a lot more work to avoid it up-
-> clocking to a rate which has proven to never work.  I'd actually go a=
-s
-> far as to say that the algorithm probably has a lot to be desired - b=
-ut
-> it seems to work for my test scenarios.
+> 2011/2/16 David Brown <davidb@codeaurora.org>:
 
-I've just gave it a try (on top of a clean 2.6.38-rc5):
+>> It's also possible this is finding problems in our SDCC driver.
+>
+> The SDCC is obviously an MMCI derivate, VHDL hacking
+> on top of ARMs source code for PL180/PL181.
+>
+> Why do you insist on maintaining a forked driver?
 
+Well, it's not me insisting on it.  I'll let the maintainers of the
+driver chime in.
 
-/ # dd if=3D/dev/mmcblk0 of=3D/dev/null bs=3D128k count=3D10
-10+0 records in
-10+0 records out
-1310720 bytes (1.3MB) copied, 2.922722 seconds, 437.9KB/s
-/ # cat /dev/sda > /dev/null &
-/ # dd if=3D/dev/mmcblk0 of=3D/dev/null bs=3D128k count=3D10
-mmcblk0: error -5 transferring data, sector 0, nr 120, cmd response 0x9=
-00, card status 0xb00
-mmcblk0: error -5 transferring data, sector 0, nr 120, cmd response 0x9=
-00, card status 0xb00
-mmcblk0: retrying with slower /2 clock rate
-mmcblk0: error -5 transferring data, sector 0, nr 120, cmd response 0x9=
-00, card status 0xb00
-mmcblk0: retrying with slower /4 clock rate
-mmcblk0: error -5 transferring data, sector 0, nr 120, cmd response 0x9=
-00, card status 0xb00
-mmcblk0: retrying with slower /8 clock rate
-mmcblk0: error -5 transferring data, sector 0, nr 120, cmd response 0x9=
-00, card status 0xb00
-mmcblk0: retrying with slower /16 clock rate
-10+0 records in
-10+0 records out
-1310720 bytes (1.3MB) copied, 46.763456 seconds, 27.4KB/s
-/ # kill %1
-/ #=20
-[1]+  Terminated                 cat /dev/sda 1>/dev/null
-/ # dd if=3D/dev/mmcblk0 of=3D/dev/null bs=3D128k count=3D10
-10+0 records in
-10+0 records out
-1310720 bytes (1.3MB) copied, 46.539866 seconds, 27.5KB/s
-/ # sleep 30
-/ # dd if=3D/dev/mmcblk0 of=3D/dev/null bs=3D128k count=3D10
-10+0 records in
-10+0 records out
-1310720 bytes (1.3MB) copied, 46.540215 seconds, 27.5KB/s
+The changes we made to the block are significant, but even beyond that
+we changed how the block is even accessed.  The driver doesn't directly
+access the registers of the controller, but all accesses go through a
+custom DMA engine.
 
+> Please consider switching to using mmci.c like everyone else.
+> The quirks we have in place for U300, Nomadik and Ux500
+> should show you the way for how to do this (yes we did the
+> same thing, hacking the ARM VHDL).
 
-So it does the right thing with decreasing the clock rate in face of
-problems, I just can't see it clocking it back up...
+I suspect the changes to mmci would be fairly drastic.
 
-Cheers!
+> If I remember correctly I could even see that some early
+> Android sources were using Russells mmci.c driver before this
+> fork was created.
 
-Pawe=C5=82
+These old drivers are also not usable.  The SDCC block is shared between
+the modem processor and the processor running Linux.  If the driver
+doesn't go through the DMA engine, which coordinates this, the registers
+will be stomped on by the other CPU whenever it decides to access it's
+parts of the flash device.
 
+David
 
-
+-- 
+Sent by an employee of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
