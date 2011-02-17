@@ -1,50 +1,41 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] dw_mmc: support 8-bit buswidth
-Date: Thu, 17 Feb 2011 16:12:38 +0900
-Message-ID: <4D5CCA66.9080008@samsung.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] dw_mmc: modify quirks bit-shift control
+Date: Thu, 17 Feb 2011 10:05:57 +0000
+Message-ID: <AANLkTimhDb4W73SdcVbObrvS6WBZwnK8vsUzC=k80bM-@mail.gmail.com>
+References: <4D5B6C70.2030809@samsung.com>
+	<20110216194232.GA17634@void.printf.net>
+	<4D5C9F60.9020306@samsung.com>
+	<20110217041309.GA23241@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:45119 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751160Ab1BQHWx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2011 02:22:53 -0500
-Received: from epmmp1 (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LGR00CMU2PSIU10@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 17 Feb 2011 16:13:04 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LGR005ZD2PSJM@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 17 Feb 2011 16:13:04 +0900 (KST)
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:33164 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754041Ab1BQKF6 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2011 05:05:58 -0500
+Received: by gwj20 with SMTP id 20so1036651gwj.19
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2011 02:05:57 -0800 (PST)
+In-Reply-To: <20110217041309.GA23241@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Will Newton <will.newton@gmail.com>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-This patch is supported 8-bit buswidth
+On Thu, Feb 17, 2011 at 4:13 AM, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
+>
+> On Thu, Feb 17, 2011 at 01:09:04PM +0900, Jaehoon Chung wrote:
+>> Hi..
+>>
+>> > Why skip (1 << 1)? =A0(There's also BIT(0) -> BIT(2) if you prefer=
+=2E)
+>>
+>> My mistake..sorry..and thanks for your comment..
+>> I resend the patch applied BIT(0)-BIT(2)
+>
+> No problem. =A0Will, may I re-use your ACK for this patch?
 
-dw_mmc can also 8-bit buswidth and set to CTYPE_8BIT in card-type register.
+Yep, sure.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2fcc825..0f6e4a5 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -672,6 +672,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	case MMC_BUS_WIDTH_4:
- 		slot->ctype = SDMMC_CTYPE_4BIT;
- 		break;
-+	case MMC_BUS_WIDTH_8:
-+		slot->ctype = SDMMC_CTYPE_8BIT;
-+		break;
- 	}
- 
- 	if (ios->clock) {
+Acked-by: Will Newton <will.newton@imgtec.com>
