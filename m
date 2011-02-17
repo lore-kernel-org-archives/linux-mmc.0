@@ -1,29 +1,38 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] dw_mmc: support 8-bit buswidth
-Date: Thu, 17 Feb 2011 10:12:06 +0000
-Message-ID: <AANLkTiksY87gFUWNsX7iF8ipB6dbX8CgmMb06amzZ=C5@mail.gmail.com>
-References: <4D5CCA66.9080008@samsung.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [RFC] MMC: error handling improvements
+Date: Thu, 17 Feb 2011 10:40:48 +0000
+Message-ID: <20110217104048.GD24627@n2100.arm.linux.org.uk>
+References: <20110215230311.GT4152@n2100.arm.linux.org.uk> <1297882866.20252.20.camel@hornet.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:41852 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754041Ab1BQKMG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2011 05:12:06 -0500
-Received: by gwj20 with SMTP id 20so1038717gwj.19
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2011 02:12:06 -0800 (PST)
-In-Reply-To: <4D5CCA66.9080008@samsung.com>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:57200 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751993Ab1BQKlK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2011 05:41:10 -0500
+Content-Disposition: inline
+In-Reply-To: <1297882866.20252.20.camel@hornet.cambridge.arm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Pawel Moll <pawel.moll@arm.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-On Thu, Feb 17, 2011 at 7:12 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> This patch is supported 8-bit buswidth
->
-> dw_mmc can also 8-bit buswidth and set to CTYPE_8BIT in card-type register.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+On Wed, Feb 16, 2011 at 07:01:06PM +0000, Pawel Moll wrote:
+> / # dd if=/dev/mmcblk0 of=/dev/null bs=128k count=10
+> 10+0 records in
+> 10+0 records out
+> 1310720 bytes (1.3MB) copied, 46.539866 seconds, 27.5KB/s
+> / # sleep 30
+> / # dd if=/dev/mmcblk0 of=/dev/null bs=128k count=10
+> 10+0 records in
+> 10+0 records out
+> 1310720 bytes (1.3MB) copied, 46.540215 seconds, 27.5KB/s
+> 
+> 
+> So it does the right thing with decreasing the clock rate in face of
+> problems, I just can't see it clocking it back up...
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+You need at least 100 requests before it'll consider clocking back up.
+Once it has 100 requests, no more than 5% of them at the current clock
+rate must have failed for it to consider clocking up.  I found with
+fewer requests, it was forever clocking down, up, down very frequently.
