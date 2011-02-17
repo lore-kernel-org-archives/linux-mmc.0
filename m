@@ -1,105 +1,70 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: MMC quirks relating to performance/lifetime.
-Date: Wed, 16 Feb 2011 20:08:56 -0600
-Message-ID: <AANLkTimoqCtWMmBJ40v+1UjR0U2Sdh9pp+2fwYpi3fUx@mail.gmail.com>
-References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
-	<201102142122.54766.arnd@arndb.de>
-	<AANLkTinPtiwXmtRy9qS2zZXwuhQDOyO-H8-wmF=fSNnJ@mail.gmail.com>
-	<201102151816.57104.arnd@arndb.de>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v2 1/7] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+Date: Thu, 17 Feb 2011 10:44:09 +0800
+Message-ID: <20110217024408.GA1273@S2100-06.ap.freescale.net>
+References: <1297650746-12841-1-git-send-email-shawn.guo@freescale.com>
+ <20110215172948.GE10770@pengutronix.de>
+ <20110216202818.GA11467@S2100-06.ap.freescale.net>
+ <201102161659.18475.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og116.obsmtp.com ([64.18.0.147]:50530 "EHLO
-	exprod5og116.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755497Ab1BQCI6 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2011 21:08:58 -0500
-Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p1H27sIv015421
-	for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2011 21:07:54 -0500 (EST)
-Received: from mail-qy0-f170.google.com (mail-qy0-f170.google.com [209.85.216.170])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p1H27RFc015265
-	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2011 21:07:54 -0500 (EST)
-Received: by mail-qy0-f170.google.com with SMTP id 10so4567903qyk.15
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2011 18:08:56 -0800 (PST)
-In-Reply-To: <201102151816.57104.arnd@arndb.de>
+Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:31233
+	"EHLO VA3EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1755935Ab1BQCpO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2011 21:45:14 -0500
+Received: from mail50-va3 (localhost.localdomain [127.0.0.1])	by
+ mail50-va3-R.bigfish.com (Postfix) with ESMTP id 31BCA1500D7	for
+ <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2011 02:45:12 +0000 (UTC)
+Received: from VA3EHSMHS032.bigfish.com (unknown [10.7.14.236])	by
+ mail50-va3.bigfish.com (Postfix) with ESMTP id 4CAF38B00AF	for
+ <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2011 02:44:37 +0000 (UTC)
+Received: from az33smr01.freescale.net (az33smr01.freescale.net
+ [10.64.34.199])	by az33egw02.freescale.net (8.14.3/8.14.3) with ESMTP id
+ p1H2iUNH004037	for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2011 19:44:30
+ -0700 (MST)
+Received: from S2100-06.ap.freescale.net (S2100-06.ap.freescale.net
+ [10.192.242.50])	by az33smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
+ p1H2iThc005574	for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2011 20:44:30
+ -0600 (CST)
+Content-Disposition: inline
+In-Reply-To: <201102161659.18475.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <w.sang@pengutronix.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>, s.hauer@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, LW@karo-electronics.de
 
-On Tue, Feb 15, 2011 at 11:16 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Monday 14 February 2011, Andrei Warkentin wrote:
->> > There are multiple ways how this could be implemented:
->> >
->> > 1. Have one exception cache for all "special" blocks. This would n=
-ormally
->> > =A0 be for FAT32 subdirectory updates, which always write to the s=
-ame
->> > =A0 few blocks. This means you can do small writes efficiently any=
-where
->> > =A0 on the card, but only up to a (small) fixed number of block ad=
-dresses.
->> > =A0 If you overflow the table, the card still needs to go through =
-an
->> > =A0 extra PE for each new entry you write, in order to free up an =
-entry.
->> >
->> > 2. Have a small number of AUs that can be in a special mode with e=
-fficient
->> > =A0 small writes but inefficient large writes. This means that whe=
-n you
->> > =A0 alternate between small and large writes in the same AU, it ha=
-s to go
->> > =A0 through a PE on every switch. Similarly, if you do small write=
-s to
->> > =A0 more than the maximum number of AUs that can be held in this m=
-ode, you
->> > =A0 get the same effect. This number can be as small as one, becau=
-se that
->> > =A0 is what FAT32 requires.
->> >
->> > In both cases, you don't actually have a solution for the problem,=
- you just
->> > make it less likely for specific workloads.
->>
->> Aha, ok. By the way, I did find out that either suggestion works. So
->> I'll pull out the reversing portion of the patch. No need to
->> overcomplicate :).
->
-> BTW, what file system are you using? I could imagine that each of ext=
-4, btrfs
-> and nilfs2 give you very different results here. It could be that if =
-your
-> patch is optimizing for one file system, it is actually pessimising f=
-or
-> another one.
->
+Hi Arnd,
 
-Ext4. I've actually been rewriting the patch a lot and it's taking
-time because there are a lot of things that are wrong in it (so I feel
-kinda bad for forwarding it to this list in the first place...). I've
-already mentioned that there is no need to reorder, so that's going
-away and it simplifies everything greatly.
+On Wed, Feb 16, 2011 at 04:59:18PM +0100, Arnd Bergmann wrote:
+> On Wednesday 16 February 2011, Shawn Guo wrote:
+> > It's caused by spinlock recursion introduced by mxs-dma functions
+> > mxs_dma_tx_submit and mxs_dma_tasklet.  We have mmc_request_done
+> > invoked in the dma callback tasklet.  At the meantime,
+> > mmc_request_done will issue retries in some case, which will call in
+> > mxs_dma_tx_submit.
+> > 
+> > I added the lock by referring to other dma driver implementation, but
+> > now I'm considering to remove the lock completely, as I do not see
+> > any global data needs to be protected there.  Comments?
+> 
+> You need to be sure that the data accessed in the tasklet does not
+> need to be locked against mxs_dma_tx_submit.
+> 
+The only thing we actually put in tasklet is just the callback
+registered by client device driver, which should not have anything
+that mxs_dma_tx_submit would concern.
 
-I agree, which is why all of this is controlled now through sysfs, and
-there are no more hard-coded checks for manfid, mmc versus sd or any
-other magic. There is a page_size_secs attribute, through which you
-can notify of the page size for the device. The workaround for small
-writes crossing the page boundary (and winding up in Buffer B, instead
-of A) is turned on by setting split_tlow and split_thigh, which
-provided a threshold range in sectors over which the the writes will
-be split/aligned. The second workaround for splitting larger requests
-and writing them with reliable write (to avoid getting coalesced and
-winding up in Buffer B again) is controlled through split_relw_tlow
-and split_relw_thigh. Do you think there is a better way? Or is this
-good enough?
+> I haven't looked at the dmaengine code for this, but it's quite likely
+> that you actually need it, because you need to serialize adding an
+> element to the DMA device with removing it again.
+> 
+I'm not sure that I understand your comment. If the adding/removing
+an element means what mxs_dma_alloc_chan_resources and 
+mxs_dma_free_chan_resources do, I do not think it's a problem, as
+client driver is calling them in probe/remove for once.
 
-So, as I mentioned before, T had done some tests given data provided
-by M, and then T verified that this fix was good. I need to do my own
-tests on the patch after I rewrite it. Is iozone the best tool I can
-use? So far I have a MMC logging facility through connector that I use
-to collect stats (useful for seeing how fs traffic translates to
-actual mmc commands...once I clean it up I'll push here for RFC). What
-about the tool you're writing? Any way I can use it?
+-- 
+Regards,
+Shawn
+
