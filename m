@@ -1,44 +1,67 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v2] mxcmmc: use dmaengine API
-Date: Fri, 18 Feb 2011 14:37:02 +0100
-Message-ID: <201102181437.02943.arnd@arndb.de>
-References: <20110218092109.GG24426@pengutronix.de>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Fri, 18 Feb 2011 14:44:24 +0100
+Message-ID: <201102181444.24476.arnd@arndb.de>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <AANLkTinaY2RM86tX4ex+zsMwFKUdBNVpdZ8fFrt-e12_@mail.gmail.com> <AANLkTikjUEjr=Sd1Ewyj8-yAKPV3Wa2Ch1aE=0DtrXP6@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
   charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:52144 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.187]:63810 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751038Ab1BRNhT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Feb 2011 08:37:19 -0500
-In-Reply-To: <20110218092109.GG24426@pengutronix.de>
+	with ESMTP id S1752883Ab1BRNo0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Feb 2011 08:44:26 -0500
+In-Reply-To: <AANLkTikjUEjr=Sd1Ewyj8-yAKPV3Wa2Ch1aE=0DtrXP6@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
-Cc: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Andrei Warkentin <andreiw@motorola.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
-On Friday 18 February 2011, Sascha Hauer wrote:
-> This switches the mxcmmc driver to use the dmaengine API. Unlike
-> the old one this one is always present in the tree, even if no DMA
-> is implemented, hence we can remove all the #ifdefs in from the driver.
-> The driver automatically switches to PIO mode if no DMA support or no
-> suitable channel is available.
+On Friday 18 February 2011, Andrei Warkentin wrote:
+> On Fri, Feb 11, 2011 at 4:33 PM, Andrei Warkentin <andreiw@motorola.com> wrote:
+> > Arnd,
+> >
+> > Yes, this is a Toshiba card. I've sent the patch as a reply to Linus' email.
+> >
+> > cid - 02010053454d3332479070cc51451d00
+> > csd - d00f00320f5903ffffffffff92404000
+> > erase_size - 524288
+> > fwrev - 0x0
+> > hwrev - 0x0
+> > manfid - 0x000002
+> > name - SEM32G
+> > oemid - 0x0100
+> > preferred_erase_size - 2097152
+> >
 > 
-> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+> Ok. Big mistake. Sorry about that. This card is Sandisk card. I got
+> confused over all the manfids changing.
+> 
+> Here is the Toshiba card:
+> 
+> cid - 1101004d4d4333324703101a17746d00
+> csd - 900e00320f5903ffffffffe796400000
+> erase_size - 524288
+> fwrev - 0x0
+> hwrev - 0x0
+> manfid - 0x000011
+> name - MMC32G
+> oemid - 0x0100
+> preferred_erase_size - 4194304
+> 
+> I'll get you the flashbench timings for both.
 
-The patch looks good to me, but shouldn't you also add a Kconfig
-dependency or select on CONFIG_DMA_ENGINE? I don't see where that
-gets set.
+I'm curious. Neither the manfid nor the oemid fields of either card
+match what I have seen on SD cards, I would expect them to be
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+Sandisk: manfid 0x000003, oemid 0x5344
+Toshiba: manfid 0x000002, oemid 0x544d
 
-> Arnd recognized that it's not a good idea that the driver has to
-> know about the dmaengine implementation (the struct imx_dma_data field).
-> I have a patch in my queue fixing this, but as this has to be
-> synchronized with the platform code, I'd like to address this in a later
-> patch.
+I have not actually seen any Toshiba SD cards, but I assume that they
+use the same controllers as Kingston.
 
-Sounds good, since this patch is definitely a step forward.
+Does anyone know if the IDs have any correlation between MMC and SD
+controllers?
 
 	Arnd
