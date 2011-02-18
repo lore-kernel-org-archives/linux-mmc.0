@@ -1,70 +1,50 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 01/12] mmc: sdhci: add support for SD Host Controller 3.0
-Date: Fri, 18 Feb 2011 11:08:50 -0800
-Message-ID: <64C8576A-387E-44FB-A2E8-45033B5F9088@marvell.com>
-References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
- <201102181408.35946.arnd@arndb.de>
- <6C03668EAF45B747AF947A1603D1B300DCED195D@SAUSEXMBP01.amd.com>
- <201102181640.16398.arnd@arndb.de>
- <F099B2A7-9E9B-4E33-A1D7-2C975A1A3BAB@marvell.com>
- <6C03668EAF45B747AF947A1603D1B300DCED1BCC@SAUSEXMBP01.amd.com>
- <alpine.LFD.2.00.1102181352090.14920@xanadu.home>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Fri, 18 Feb 2011 13:47:26 -0600
+Message-ID: <AANLkTi=W16NxpzhrBhxJPmk-CSe+yyxAXMh6YYq6oaEt@mail.gmail.com>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
+	<AANLkTinaY2RM86tX4ex+zsMwFKUdBNVpdZ8fFrt-e12_@mail.gmail.com>
+	<AANLkTikjUEjr=Sd1Ewyj8-yAKPV3Wa2Ch1aE=0DtrXP6@mail.gmail.com>
+	<201102181444.24476.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog115.obsmtp.com ([74.125.149.238]:51343 "EHLO
-	na3sys009aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751458Ab1BRTKu convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 18 Feb 2011 14:10:50 -0500
-In-Reply-To: <alpine.LFD.2.00.1102181352090.14920@xanadu.home>
-Content-Language: en-US
+Received: from exprod5og115.obsmtp.com ([64.18.0.246]:58469 "EHLO
+	exprod5og115.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754773Ab1BRTr3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Feb 2011 14:47:29 -0500
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.167])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p1IJldkJ018419
+	for <linux-mmc@vger.kernel.org>; Fri, 18 Feb 2011 14:47:39 -0500 (EST)
+Received: from mail-vx0-f170.google.com (mail-vx0-f170.google.com [209.85.220.170])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p1IJVrlX012510
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Fri, 18 Feb 2011 14:47:39 -0500 (EST)
+Received: by mail-vx0-f170.google.com with SMTP id 38so2755104vxc.15
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Feb 2011 11:47:27 -0800 (PST)
+In-Reply-To: <201102181444.24476.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nico@fluxnic.net>
-Cc: "Nath, Arindam" <Arindam.Nath@amd.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
+On Fri, Feb 18, 2011 at 7:44 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> I'm curious. Neither the manfid nor the oemid fields of either card
+> match what I have seen on SD cards, I would expect them to be
+>
+> Sandisk: manfid 0x000003, oemid 0x5344
+> Toshiba: manfid 0x000002, oemid 0x544d
+>
+> I have not actually seen any Toshiba SD cards, but I assume that they
+> use the same controllers as Kingston.
+>
+> Does anyone know if the IDs have any correlation between MMC and SD
+> controllers?
+>
+> =A0 =A0 =A0 =A0Arnd
+>
 
-Thanks Nico 
-
-Anindam,  Lets follow Nico advise -- please ignore my last post on moving it into the host driver.
-
-Philip
-
-On Feb 18, 2011, at 10:55 AM, Nicolas Pitre wrote:
-
-> On Fri, 18 Feb 2011, Nath, Arindam wrote:
-> 
->> Hi Philip,
->> 
->> 
->>> -----Original Message-----
->>> From: Philip Rakity [mailto:prakity@marvell.com]
->>> Sent: Friday, February 18, 2011 9:19 PM
->>> To: Nath, Arindam
->>> Cc: Zhangfei Gao; Chris Ball; linux-mmc@vger.kernel.org; Su, Henry; Lu,
->>> Aaron; anath.amd@gmail.com; Nicolas Pitre
->>> Subject: [PATCH 01/12] mmc: sdhci: add support for SD Host Controller
->>> 3.0
->>> 
->>> 
->>> Arindam,
->>> 
->>> Could you look at making (Tuning)  CMD19 part of the sdhc.ci driver?
->>> It flow is part of the Host Controller and Physical layer specs.
-> 
-> Still, if this is something that is common to all host controllers then 
-> it should live in the core code.  The host controller driver should be 
-> as dumb as possible and try to be command agnostic.
-> 
->> There are two main reasons for exposing the callback of tuning procedure from sdhci.c:
->> 
->> 1. The tuning procedure is part of UHS-I initialization sequence as described in Physical Layer Spec v3.01. Since the UHS-I init sequence takes places inside sd.c, so I thought it better to place it there instead.
->> 2. In future, if we need to add support for UHS-I sequence for sdio cards too, we can use the same callback from sdhci.c without any modifications.
-> 
-> And this won't have to be duplicated in all the host controller drivers.
-> 
-> 
-> Nicolas
-
+I'm unsure about the older scheme (assigned by MMCA), but ever since
+MMC is now JEDEC-controlled, the IDs have changed. Sandisk's new id
+will be 0x45, and Toshiba I guess will be 0x11.
