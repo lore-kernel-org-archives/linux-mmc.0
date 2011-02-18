@@ -1,74 +1,80 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH 01/12] mmc: sdhci: add support for auto CMD23
-Date: Fri, 18 Feb 2011 06:08:54 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B300DCED1913@SAUSEXMBP01.amd.com>
-References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
- <1297762510-2696-2-git-send-email-arindam.nath@amd.com>
- <AANLkTi=Dmsud5KJqFcP-97FxgyLVKmnxPn9e3z6fqqNc@mail.gmail.com>
- <201102181150.41350.arnd@arndb.de>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [RFC] MMC: error handling improvements
+Date: Fri, 18 Feb 2011 14:03:29 +0100
+Message-ID: <AANLkTin64W=VQP+EomU3PK-Ye=Nz_SP+DOLxgT__4fkQ@mail.gmail.com>
+References: <20110215230311.GT4152@n2100.arm.linux.org.uk>
+	<8yaoc6c7tan.fsf@huya.qualcomm.com>
+	<AANLkTikpdwfM19oirENbOhnz8Rh40ZnMXByGX_QKdu-V@mail.gmail.com>
+	<8ya8vxf4w4w.fsf@huya.qualcomm.com>
+	<AANLkTimQqGVTwUv4ywQnmd4Z1Ur4vWk2sK5+ZLa4mmTs@mail.gmail.com>
+	<AANLkTikDxOeW9Nfaew_mZLnVJ6e7pyzQTNs139g_AehW@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:53625
-	"EHLO VA3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754207Ab1BRMJA convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 18 Feb 2011 07:09:00 -0500
-In-Reply-To: <201102181150.41350.arnd@arndb.de>
-Content-Language: en-US
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:51979 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752292Ab1BRND3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Feb 2011 08:03:29 -0500
+Received: by pwj3 with SMTP id 3so582747pwj.19
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Feb 2011 05:03:29 -0800 (PST)
+In-Reply-To: <AANLkTikDxOeW9Nfaew_mZLnVJ6e7pyzQTNs139g_AehW@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, zhangfei gao <zhangfei.gao@gmail.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Brian Swetland <swetland@google.com>
+Cc: David Brown <davidb@codeaurora.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
 
-Hi Arnd,
+2011/2/17 Brian Swetland <swetland@google.com>:
+> On Wed, Feb 16, 2011 at 1:01 PM, Linus Walleij <linus.walleij@linaro.=
+org> wrote:
+>> 2011/2/16 David Brown <davidb@codeaurora.org>:
 
-> -----Original Message-----
-> From: Arnd Bergmann [mailto:arnd@arndb.de]
-> Sent: Friday, February 18, 2011 4:21 PM
-> To: zhangfei gao
-> Cc: Nath, Arindam; cjb@laptop.org; linux-mmc@vger.kernel.org; Su,
-> Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: Re: [PATCH 01/12] mmc: sdhci: add support for auto CMD23
-> 
-> On Friday 18 February 2011 11:45:27 zhangfei gao wrote:
-> > On Tue, Feb 15, 2011 at 4:34 AM, Arindam Nath <arindam.nath@amd.com>
-> wrote:
-> > > Host Controller v3.00 and later support Auto CMD23 in the Transfer
-> > > Mode register. Since Auto CMD23 can be used with or without DMA,
-> > > and if used with DMA, it should only be ADMA, we check against
-> > > SDHCI_USE_SDMA not being set. This flag is reset when
-> SDHCI_USE_ADMA
-> > > is set.
-> > >
-> > > A new definition for SDHCI_ARGUMENT2 register has been added
-> > > in v3.00 spec, which is the same as SDHCI_DMA_ADDRESS. We program
-> the
-> > > block count for CMD23 in SDHCI_ARGUMENT2, so we don't need CMD12 to
-> > > stop multiple block transfers. But during error recovery procedure,
-> > > we will need to send Abort command, so we use a global variable
-> > > abort_cmd to save the stop command to be used later.
-> > >
-> > > Two bits are added to SCR register as per the Physical Layer Spec
-> v3.01,
-> > > which specify whether the card supports CMD20 and/or CMD23. We use
-> this
-> > > as one of the conditions to decide whether to enable Auto CMD23 or
-> not.
-> > >
-> > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> 
-> Why are you doing this in the SDHC code and not in the block driver
-> code?
-> 
-> AFAICT, whether CMD23 can be used or not is primarily a decision based
-> on
-> the card, and the block driver might want issue it for a longer range
-> if it needs to split a block request into multiple MMC requests.
+>>> The SDCC block is shared between
+>>> the modem processor and the processor running Linux. =A0If the driv=
+er
+>>> doesn't go through the DMA engine, which coordinates this, the regi=
+sters
+>>> will be stomped on by the other CPU whenever it decides to access i=
+t's
+>>> parts of the flash device.
+>> (...)
+>>
+>> At the same time what you're saying sounds very weird:
+>> the ios handler in mmc_sdcc does not request any DMA
+>> channel before messing with the hardware, it simply just write
+>> into registers very much in the style of mmci.c. Wouldn't that
+>> disturb any simultaneous access to the MMC from another
+>> CPU?
+>
+> (...)
+> The way register access for the SDCC is synchronized between these tw=
+o
+> cores is by using a locking primitive built into the MSM DMA
+> controller. =A0If you don't use this indirect access model (via DMA
+> transactions to the registers), you end up tripping over the baseband
+> or the other way 'round. =A0It's not fun.
 
-Thanks for the comments. Yes, whether a card supports CMD23 depends on the card, but Auto CMD23 is a feature added to the Host Controller v3.00 just like Auto CMD12. I am already doing a check inside sdhci_host_auto_cmd23_supported() whether the card supports CMD23, and whether the request is for multiple block transfers. Also I tried to make my implementation consistent with Auto CMD12 implementation already there in the sdhc code.
+Wherever is that synchronized in the DMA controller?
+I don't get it because the code is so very similar.
 
-Regards,
-Arindam
+When the ios does this:
+msmsdcc_writel(host, clk, MMCICLOCK);
 
+This magic macro does the trick?
+
+static inline void
+msmsdcc_writel(struct msmsdcc_host *host, u32 data, unsigned int reg)
+{
+        writel(data, host->base + reg);
+        /* 3 clk delay required! */
+        udelay(1 + ((3 * USEC_PER_SEC) /
+               (host->clk_rate ? host->clk_rate : msmsdcc_fmin)));
+}
+
+What is so hard about renaming this mmci_writel() and putting
+the udelay() weirdness inside #ifdef ARCH_MSM? Wrapping
+all the writes in the mmci driver inside an inline function is hardly
+a big problem.
+
+Yours,
+Linus Walleij
