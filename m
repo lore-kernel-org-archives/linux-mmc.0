@@ -1,189 +1,175 @@
 From: Andres Salomon <dilinger@queued.net>
-Subject: [PATCH 22/29] tmio-mmc: use mfd_data instead of driver_data
-Date: Thu, 17 Feb 2011 19:07:29 -0800
-Message-ID: <1297998456-7615-23-git-send-email-dilinger@queued.net>
+Subject: [PATCH 06/29] asic3: mfd_cell is now implicitly available to drivers
+Date: Thu, 17 Feb 2011 19:07:13 -0800
+Message-ID: <1297998456-7615-7-git-send-email-dilinger@queued.net>
 References: <1297998456-7615-1-git-send-email-dilinger@queued.net>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1297998456-7615-1-git-send-email-dilinger@queued.net>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Samuel Ortiz <sameo@linux.intel.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-kernel@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-kernel@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Evgeniy Polyakov <johnpol@2ka.mipt.ru>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Use mfd_data for passing information from mfd drivers to mfd
-clients.  The mfd_cell's driver_data field is being phased out.
+No need to explicitly set the cell's platform_data/data_size.
 
-Clients that were using driver_data now access .mfd_data
-via mfd_get_data().  This changes tmio-mmc only; mfd drivers with
-other cells are not modified.
+Modify clients to use mfd_get_cell helper function instead of
+accessing platform_data directly.
 
 Signed-off-by: Andres Salomon <dilinger@queued.net>
 ---
- drivers/mfd/asic3.c          |    2 +-
- drivers/mfd/sh_mobile_sdhi.c |    2 +-
- drivers/mfd/t7l66xb.c        |    2 +-
- drivers/mfd/tc6387xb.c       |    2 +-
- drivers/mfd/tc6393xb.c       |    2 +-
- drivers/mmc/host/tmio_mmc.c  |   26 +++++++++-----------------
- 6 files changed, 14 insertions(+), 22 deletions(-)
+ drivers/mfd/asic3.c         |    6 ------
+ drivers/mmc/host/tmio_mmc.c |   24 ++++++++++++------------
+ drivers/w1/masters/ds1wm.c  |    2 +-
+ 3 files changed, 13 insertions(+), 19 deletions(-)
 
 diff --git a/drivers/mfd/asic3.c b/drivers/mfd/asic3.c
-index 549d14d..d0d247d 100644
+index 6a1f940..71d2901 100644
 --- a/drivers/mfd/asic3.c
 +++ b/drivers/mfd/asic3.c
-@@ -783,7 +783,7 @@ static struct mfd_cell asic3_cell_mmc = {
- 	.name          = "tmio-mmc",
- 	.enable        = asic3_mmc_enable,
- 	.disable       = asic3_mmc_disable,
--	.driver_data   = &asic3_mmc_data,
-+	.mfd_data      = &asic3_mmc_data,
- 	.num_resources = ARRAY_SIZE(asic3_mmc_resources),
- 	.resources     = asic3_mmc_resources,
- };
-diff --git a/drivers/mfd/sh_mobile_sdhi.c b/drivers/mfd/sh_mobile_sdhi.c
-index b511e74..53a6302 100644
---- a/drivers/mfd/sh_mobile_sdhi.c
-+++ b/drivers/mfd/sh_mobile_sdhi.c
-@@ -146,7 +146,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	}
+@@ -810,9 +810,6 @@ static int __init asic3_mfd_probe(struct platform_device *pdev,
+ 	ds1wm_resources[0].start >>= asic->bus_shift;
+ 	ds1wm_resources[0].end   >>= asic->bus_shift;
  
- 	memcpy(&priv->cell_mmc, &sh_mobile_sdhi_cell, sizeof(priv->cell_mmc));
--	priv->cell_mmc.driver_data = mmc_data;
-+	priv->cell_mmc.mfd_data = mmc_data;
+-	asic3_cell_ds1wm.platform_data = &asic3_cell_ds1wm;
+-	asic3_cell_ds1wm.data_size = sizeof(asic3_cell_ds1wm);
+-
+ 	/* MMC */
+ 	asic->tmio_cnf = ioremap((ASIC3_SD_CONFIG_BASE >> asic->bus_shift) +
+ 				 mem_sdio->start, 0x400 >> asic->bus_shift);
+@@ -824,9 +821,6 @@ static int __init asic3_mfd_probe(struct platform_device *pdev,
+ 	asic3_mmc_resources[0].start >>= asic->bus_shift;
+ 	asic3_mmc_resources[0].end   >>= asic->bus_shift;
  
- 	platform_set_drvdata(pdev, priv);
- 
-diff --git a/drivers/mfd/t7l66xb.c b/drivers/mfd/t7l66xb.c
-index b9c1e4c..3c9e389 100644
---- a/drivers/mfd/t7l66xb.c
-+++ b/drivers/mfd/t7l66xb.c
-@@ -170,7 +170,7 @@ static struct mfd_cell t7l66xb_cells[] = {
- 		.name = "tmio-mmc",
- 		.enable = t7l66xb_mmc_enable,
- 		.disable = t7l66xb_mmc_disable,
--		.driver_data = &t7166xb_mmc_data,
-+		.mfd_data = &t7166xb_mmc_data,
- 		.num_resources = ARRAY_SIZE(t7l66xb_mmc_resources),
- 		.resources = t7l66xb_mmc_resources,
- 	},
-diff --git a/drivers/mfd/tc6387xb.c b/drivers/mfd/tc6387xb.c
-index 6bf1775..b006f7c 100644
---- a/drivers/mfd/tc6387xb.c
-+++ b/drivers/mfd/tc6387xb.c
-@@ -131,7 +131,7 @@ static struct mfd_cell tc6387xb_cells[] = {
- 		.name = "tmio-mmc",
- 		.enable = tc6387xb_mmc_enable,
- 		.disable = tc6387xb_mmc_disable,
--		.driver_data = &tc6387xb_mmc_data,
-+		.mfd_data = &tc6387xb_mmc_data,
- 		.num_resources = ARRAY_SIZE(tc6387xb_mmc_resources),
- 		.resources = tc6387xb_mmc_resources,
- 	},
-diff --git a/drivers/mfd/tc6393xb.c b/drivers/mfd/tc6393xb.c
-index a71ff5c..7f7b9fa 100644
---- a/drivers/mfd/tc6393xb.c
-+++ b/drivers/mfd/tc6393xb.c
-@@ -393,7 +393,7 @@ static struct mfd_cell __devinitdata tc6393xb_cells[] = {
- 		.name = "tmio-mmc",
- 		.enable = tc6393xb_mmc_enable,
- 		.resume = tc6393xb_mmc_resume,
--		.driver_data = &tc6393xb_mmc_data,
-+		.mfd_data = &tc6393xb_mmc_data,
- 		.num_resources = ARRAY_SIZE(tc6393xb_mmc_resources),
- 		.resources = tc6393xb_mmc_resources,
- 	},
+-	asic3_cell_mmc.platform_data = &asic3_cell_mmc;
+-	asic3_cell_mmc.data_size = sizeof(asic3_cell_mmc);
+-
+ 	ret = mfd_add_devices(&pdev->dev, pdev->id,
+ 			&asic3_cell_ds1wm, 1, mem, asic->irq_base);
+ 	if (ret < 0)
 diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index 816fb74..f7d3fa9 100644
+index e3c6ef2..816fb74 100644
 --- a/drivers/mmc/host/tmio_mmc.c
 +++ b/drivers/mmc/host/tmio_mmc.c
-@@ -300,8 +300,7 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host, int new_clock)
+@@ -300,7 +300,7 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host, int new_clock)
  
  static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
  {
--	struct mfd_cell *cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+-	struct mfd_cell *cell = host->pdev->dev.platform_data;
++	struct mfd_cell *cell = mfd_get_cell(host->pdev);
+ 	struct tmio_mmc_data *pdata = cell->driver_data;
  
  	/*
- 	 * Testing on sh-mobile showed that SDIO IRQs are unmasked when
-@@ -324,8 +323,7 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+@@ -324,7 +324,7 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
  
  static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
  {
--	struct mfd_cell *cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+-	struct mfd_cell *cell = host->pdev->dev.platform_data;
++	struct mfd_cell *cell = mfd_get_cell(host->pdev);
+ 	struct tmio_mmc_data *pdata = cell->driver_data;
  
  	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x0100 |
- 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-@@ -666,8 +664,7 @@ out:
+@@ -666,7 +666,7 @@ out:
  static irqreturn_t tmio_mmc_irq(int irq, void *devid)
  {
  	struct tmio_mmc_host *host = devid;
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+-	struct mfd_cell	*cell = host->pdev->dev.platform_data;
++	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
+ 	struct tmio_mmc_data *pdata = cell->driver_data;
  	unsigned int ireg, irq_mask, status;
  	unsigned int sdio_ireg, sdio_irq_mask, sdio_status;
- 
-@@ -796,8 +793,7 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
+@@ -796,7 +796,7 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
  	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
  	struct dma_async_tx_descriptor *desc = NULL;
  	struct dma_chan *chan = host->chan_rx;
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+-	struct mfd_cell	*cell = host->pdev->dev.platform_data;
++	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
+ 	struct tmio_mmc_data *pdata = cell->driver_data;
  	dma_cookie_t cookie;
  	int ret, i;
- 	bool aligned = true, multiple = true;
-@@ -873,8 +869,7 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
+@@ -873,7 +873,7 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
  	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
  	struct dma_async_tx_descriptor *desc = NULL;
  	struct dma_chan *chan = host->chan_tx;
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+-	struct mfd_cell	*cell = host->pdev->dev.platform_data;
++	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
+ 	struct tmio_mmc_data *pdata = cell->driver_data;
  	dma_cookie_t cookie;
  	int ret, i;
- 	bool aligned = true, multiple = true;
-@@ -1071,8 +1066,7 @@ static void tmio_mmc_release_dma(struct tmio_mmc_host *host)
+@@ -1071,7 +1071,7 @@ static void tmio_mmc_release_dma(struct tmio_mmc_host *host)
  static int tmio_mmc_start_data(struct tmio_mmc_host *host,
  	struct mmc_data *data)
  {
--	struct mfd_cell *cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+-	struct mfd_cell *cell = host->pdev->dev.platform_data;
++	struct mfd_cell *cell = mfd_get_cell(host->pdev);
+ 	struct tmio_mmc_data *pdata = cell->driver_data;
  
  	pr_debug("setup data transfer: blocksize %08x  nr_blocks %d\n",
- 		 data->blksz, data->blocks);
-@@ -1177,8 +1171,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -1177,7 +1177,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  static int tmio_mmc_get_ro(struct mmc_host *mmc)
  {
  	struct tmio_mmc_host *host = mmc_priv(mmc);
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+-	struct mfd_cell	*cell = host->pdev->dev.platform_data;
++	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
+ 	struct tmio_mmc_data *pdata = cell->driver_data;
  
  	return ((pdata->flags & TMIO_MMC_WRPROTECT_DISABLE) ||
- 		(sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT)) ? 0 : 1;
-@@ -1187,8 +1180,7 @@ static int tmio_mmc_get_ro(struct mmc_host *mmc)
+@@ -1187,7 +1187,7 @@ static int tmio_mmc_get_ro(struct mmc_host *mmc)
  static int tmio_mmc_get_cd(struct mmc_host *mmc)
  {
  	struct tmio_mmc_host *host = mmc_priv(mmc);
--	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
--	struct tmio_mmc_data *pdata = cell->driver_data;
-+	struct tmio_mmc_data *pdata = mfd_get_data(host->pdev);
+-	struct mfd_cell	*cell = host->pdev->dev.platform_data;
++	struct mfd_cell	*cell = mfd_get_cell(host->pdev);
+ 	struct tmio_mmc_data *pdata = cell->driver_data;
  
  	if (!pdata->get_cd)
- 		return -ENOSYS;
-@@ -1260,7 +1252,7 @@ static int __devinit tmio_mmc_probe(struct platform_device *dev)
- 	if (!res_ctl)
- 		goto out;
+@@ -1207,7 +1207,7 @@ static const struct mmc_host_ops tmio_mmc_ops = {
+ #ifdef CONFIG_PM
+ static int tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
+ {
+-	struct mfd_cell	*cell = (struct mfd_cell *)dev->dev.platform_data;
++	struct mfd_cell	*cell = mfd_get_cell(dev);
+ 	struct mmc_host *mmc = platform_get_drvdata(dev);
+ 	int ret;
  
--	pdata = cell->driver_data;
-+	pdata = mfd_get_data(dev);
- 	if (!pdata || !pdata->hclk)
- 		goto out;
+@@ -1222,7 +1222,7 @@ static int tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
+ 
+ static int tmio_mmc_resume(struct platform_device *dev)
+ {
+-	struct mfd_cell	*cell = (struct mfd_cell *)dev->dev.platform_data;
++	struct mfd_cell	*cell = mfd_get_cell(dev);
+ 	struct mmc_host *mmc = platform_get_drvdata(dev);
+ 	int ret = 0;
+ 
+@@ -1245,7 +1245,7 @@ out:
+ 
+ static int __devinit tmio_mmc_probe(struct platform_device *dev)
+ {
+-	struct mfd_cell	*cell = (struct mfd_cell *)dev->dev.platform_data;
++	struct mfd_cell	*cell = mfd_get_cell(dev);
+ 	struct tmio_mmc_data *pdata;
+ 	struct resource *res_ctl;
+ 	struct tmio_mmc_host *host;
+@@ -1360,7 +1360,7 @@ out:
+ 
+ static int __devexit tmio_mmc_remove(struct platform_device *dev)
+ {
+-	struct mfd_cell	*cell = (struct mfd_cell *)dev->dev.platform_data;
++	struct mfd_cell	*cell = mfd_get_cell(dev);
+ 	struct mmc_host *mmc = platform_get_drvdata(dev);
+ 
+ 	platform_set_drvdata(dev, NULL);
+diff --git a/drivers/w1/masters/ds1wm.c b/drivers/w1/masters/ds1wm.c
+index 6b85e7f..94f55d8 100644
+--- a/drivers/w1/masters/ds1wm.c
++++ b/drivers/w1/masters/ds1wm.c
+@@ -336,7 +336,7 @@ static int ds1wm_probe(struct platform_device *pdev)
+ 	if (!pdev)
+ 		return -ENODEV;
+ 
+-	cell = pdev->dev.platform_data;
++	cell = mfd_get_cell(pdev);
+ 	if (!cell)
+ 		return -ENODEV;
  
 -- 
 1.7.2.3
