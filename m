@@ -1,81 +1,96 @@
 From: Arnd Bergmann <arnd@arndb.de>
 Subject: Re: MMC quirks relating to performance/lifetime.
-Date: Sat, 19 Feb 2011 10:54:48 +0100
-Message-ID: <201102191054.48706.arnd@arndb.de>
-References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <AANLkTi=W16NxpzhrBhxJPmk-CSe+yyxAXMh6YYq6oaEt@mail.gmail.com> <AANLkTi=rg2Du2RbakqpRNZZ7HHkhrsobz713YL29Wqoi@mail.gmail.com>
+Date: Sat, 19 Feb 2011 12:20:54 +0100
+Message-ID: <201102191220.54815.arnd@arndb.de>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <AANLkTi=rg2Du2RbakqpRNZZ7HHkhrsobz713YL29Wqoi@mail.gmail.com> <AANLkTimWAnPg2sYiLbfZXAAUiu7P5T3LmNoVbPi9RTEG@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: Text/Plain; charset=iso-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:56125 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.186]:57936 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753196Ab1BSJzA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Feb 2011 04:55:00 -0500
-In-Reply-To: <AANLkTi=rg2Du2RbakqpRNZZ7HHkhrsobz713YL29Wqoi@mail.gmail.com>
+	with ESMTP id S1753667Ab1BSLU7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Feb 2011 06:20:59 -0500
+In-Reply-To: <AANLkTimWAnPg2sYiLbfZXAAUiu7P5T3LmNoVbPi9RTEG@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrei Warkentin <andreiw@motorola.com>
 Cc: linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
-On Friday 18 February 2011 23:40:16 Andrei Warkentin wrote:
-> On Fri, Feb 18, 2011 at 1:47 PM, Andrei Warkentin <andreiw@motorola.com> wrote:
->
-> Flashbench timings for both Sandisk and Toshiba cards. Attaching due to size.
+On Saturday 19 February 2011 00:17:51 Andrei Warkentin wrote:
+> # echo 0 > /sys/block/mmcblk0/device/page_size
+> # ./flashbench -A -b 1024 /dev/block/mmcblk0p9
+> write align 8388608     pre 3.59ms      on 6.54ms       post 3.65ms  =
+   diff 2.92ms
+> write align 4194304     pre 4.13ms      on 7.37ms       post 4.27ms  =
+   diff 3.17ms
+> write align 2097152     pre 3.62ms      on 6.81ms       post 3.94ms  =
+   diff 3.03ms
+> write align 1048576     pre 3.62ms      on 6.53ms       post 3.55ms  =
+   diff 2.95ms
+> write align 524288      pre 3.62ms      on 6.51ms       post 3.63ms  =
+   diff 2.88ms
+> write align 262144      pre 3.62ms      on 6.51ms       post 3.63ms  =
+   diff 2.89ms
+> write align 131072      pre 3.62ms      on 6.5ms        post 3.63ms  =
+   diff 2.88ms
+> write align 65536       pre 3.61ms      on 6.49ms       post 3.62ms  =
+   diff 2.88ms
+> write align 32768       pre 3.61ms      on 6.49ms       post 3.61ms  =
+   diff 2.88ms
+> write align 16384       pre 3.68ms      on 107ms        post 3.51ms  =
+   diff 103ms
+> write align 8192        pre 3.74ms      on 121ms        post 3.91ms  =
+   diff 117ms
+> write align 4096        pre 3.88ms      on 3.87ms       post 3.87ms  =
+   diff -2937ns
+> write align 2048        pre 3.89ms      on 3.88ms       post 3.88ms  =
+   diff -8734ns
+> # fjnh84@fjnh84-desktop:~/src/n/src/flash$ adb -s 17006185428011d7 sh=
+ell
+> # echo 8192 > /sys/block/mmcblk0/device/page_size
+> # cd data
+> # ./flashbench -A -b 1024 /dev/block/mmcblk0p9
+> write align 8388608     pre 3.33ms      on 6.8ms        post 3.65ms  =
+   diff 3.31ms
+> write align 4194304     pre 4.34ms      on 8.14ms       post 4.53ms  =
+   diff 3.71ms
+> write align 2097152     pre 3.64ms      on 7.31ms       post 4.09ms  =
+   diff 3.44ms
+> write align 1048576     pre 3.65ms      on 7.52ms       post 3.65ms  =
+   diff 3.87ms
+> write align 524288      pre 3.62ms      on 6.8ms        post 3.63ms  =
+   diff 3.17ms
+> write align 262144      pre 3.62ms      on 6.84ms       post 3.63ms  =
+   diff 3.22ms
+> write align 131072      pre 3.62ms      on 6.85ms       post 3.44ms  =
+   diff 3.32ms
+> write align 65536       pre 3.39ms      on 6.8ms        post 3.66ms  =
+   diff 3.28ms
+> write align 32768       pre 3.64ms      on 6.86ms       post 3.66ms  =
+   diff 3.21ms
+> write align 16384       pre 3.67ms      on 6.86ms       post 3.65ms  =
+   diff 3.2ms
+> write align 8192        pre 3.66ms      on 6.84ms       post 3.64ms  =
+   diff 3.19ms
+> write align 4096        pre 3.71ms      on 3.71ms       post 3.64ms  =
+   diff 38.6=B5s
+> write align 2048        pre 3.71ms      on 3.71ms       post 3.72ms  =
+   diff -656ns
+>=20
+> This was with the split unaligned accesses patch... Which I am
+> attaching for comments.
 
-Very nice, thanks for the measurement!
+I agree, this is very fascinating behavior. 100ms second latency for a
+single 2KB access is definitely something we should try to avoid, and I
+wonder why the drive decides to do that. It must get into a state where
+it requires an extra garbage collection (you mentioned that earlier).
 
-I don't think having the results inline in the mail is a problem,
-it would even make it easier to quote.
- 
-> Some interesting things that I don't understand. For the align test, I
-> extended it to do a write align test (-A). I tried two partitions that
-> I could write over, and both read and writes behaved differently for
-> the two partitions on same device. Odd. They are both 4MB aligned.
+The numbers you see here are taken over multiple runs. Do you see a lot
+of fluctuation when doing this with --count=3D1?
 
-I never did a write align test because the results will be highly
-unreliable as soon as you get into thrashing. Your results seem
-to be meaningful still, so maybe we should have it after all, but
-I'll put a big warning on it.
-
-> On the sandisk it was the write align that made the page size stand
-> out.  The read align had pretty constant results.
-
-I've noticed on other Sandisk media that the read align test is
-sometimes useless. It may help to do a full erase of the partition,
-or to fill it with data before running the test.
-
-> On the toshiba the results varied wildly for the two partitions. For
-> partition 6, there was a clear pattern in the diff values for read
-> align. For 9, it was all over the place. For 9 with the write align,
-> 8K and 16K the crossing writes took ~115ms!! Look in attached files
-> for all the data.
-
-Partition 6 is a lot smaller, so you have the accesses less than a
-segment apart, so it shows other effects.
-
-> The AU tests were interesting too, especially how with several open
-> AUs the throughput is higher for certain smaller sizes on sandisk, but
-> if I interpret it correctly both cards have at least 4 AUs, as I
-> didn't see yet a significant drop for small sizes. The larger ones I
-> am running now on mmcblk0p9 which is sufficiently larger for these
-> tests... (mmcblk0p6 is only 40mb, p9 is 314 mb)
-
-Right, you should try larger values for --open-au-nr here. It's at
-least a good sign that the drive can do random access inside a segment
-and that it can have at least 4 segments open. This is much better
-than I expected from your descriptions at first.
-
-However, the drop from 32 KB to 16 KB in performance is horrifying
-for the Toshiba drive, it's clear that this one does not like
-to be accessed smaller than 32 KB at a time, an obvious optimization
-for FAT32 with 32 KB clusters. How does this change with your
-kernel patches?
-
-For the sandisk drive, it's funny how it is consistently faster
-doing random access than linear access. I don't think I've seem that
-before. It does seem to have some cache for linear access using
-smaller than 16 KB, and can probably combine them when it's only
-writing to a single segment.
+Also, does the same happen with other blocksizes, e.g. 4096 or 8192, pa=
+ssed
+to flashbench?
 
 	Arnd
