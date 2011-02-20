@@ -1,92 +1,106 @@
-From: Andrei Warkentin <andreiw@motorola.com>
+From: Arnd Bergmann <arnd@arndb.de>
 Subject: Re: MMC quirks relating to performance/lifetime.
-Date: Sun, 20 Feb 2011 05:27:39 -0600
-Message-ID: <AANLkTimGrT_p_5xdXJv5UURPMC0cwJCPkZ=xcX5Nk=o=@mail.gmail.com>
-References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
-	<201102151816.57104.arnd@arndb.de>
-	<AANLkTimoqCtWMmBJ40v+1UjR0U2Sdh9pp+2fwYpi3fUx@mail.gmail.com>
-	<201102171647.46190.arnd@arndb.de>
+Date: Sun, 20 Feb 2011 15:39:08 +0100
+Message-ID: <201102201539.08496.arnd@arndb.de>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <201102171647.46190.arnd@arndb.de> <AANLkTimGrT_p_5xdXJv5UURPMC0cwJCPkZ=xcX5Nk=o=@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og116.obsmtp.com ([64.18.0.147]:57566 "EHLO
-	exprod5og116.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753497Ab1BTL1n (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Feb 2011 06:27:43 -0500
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.130.20])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p1KBRqcb006274
-	for <linux-mmc@vger.kernel.org>; Sun, 20 Feb 2011 06:27:52 -0500 (EST)
-Received: from mail-vw0-f42.google.com (mail-vw0-f42.google.com [209.85.212.42])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p1KBRqC8006267
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Sun, 20 Feb 2011 06:27:52 -0500 (EST)
-Received: by vws10 with SMTP id 10so789770vws.15
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Feb 2011 03:27:39 -0800 (PST)
-In-Reply-To: <201102171647.46190.arnd@arndb.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <AANLkTimGrT_p_5xdXJv5UURPMC0cwJCPkZ=xcX5Nk=o=@mail.gmail.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org
+Cc: Andrei Warkentin <andreiw@motorola.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
-On Thu, Feb 17, 2011 at 9:47 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> I think I'd try to reduce the number of sysfs files needed for this.
-> What are the values you would typically set here?
->
-> My feeling is that separating unaligned page writes from full pages
-> or multiples of pages could always be benefitial for all cards, or at
-> least harmless, but that will require more measurements.
-> Whether to do the reliable write or not could be a simple flag
-> if the numbers are the same.
+[adding linux-fsdevel to Cc, see http://lwn.net/Articles/428941/ and
+http://comments.gmane.org/gmane.linux.ports.arm.kernel/105607 for more
+on this discussion.]
 
-I thought about this some more, and I realized it would be ugly if
-everybody added enable_workaround_sec_start/enable_workaround_sec_end
-for every novel idea of working around some issue with
-performance/reliability on mmc/sd cards.
+On Sunday 20 February 2011 12:27:39 Andrei Warkentin wrote:
+> On Thu, Feb 17, 2011 at 9:47 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> > I think I'd try to reduce the number of sysfs files needed for this.
+> > What are the values you would typically set here?
+> >
+> > My feeling is that separating unaligned page writes from full pages
+> > or multiples of pages could always be benefitial for all cards, or at
+> > least harmless, but that will require more measurements.
+> > Whether to do the reliable write or not could be a simple flag
+> > if the numbers are the same.
+> 
+> I thought about this some more, and I realized it would be ugly if
+> everybody added enable_workaround_sec_start/enable_workaround_sec_end
+> for every novel idea of working around some issue with
+> performance/reliability on mmc/sd cards.
+> 
+> What about letting the user/embedder create policies for how certain
+> accesses are done? That way you give runtime-accessible
+> blocks for tuning mmc block layer while having one interface to
+> manipulate (and combine) multiple workarounds, all the while catching
+> conflicts and
+> without forcing specific policy in code.
+> 
+> Essentially under /sys/block/mmcblk0/device you have an attribute
+> called "policies". Example:
+> 
+> # echo mypol0 > /sys/block/mmcblk0/device/policies
+> # ls /sys/block/mmcblk0/device/mypol0
+> debug
+> delete
+> start_block
+> end_block
+> access_size_low
+> access_size_high
+> write_policy
+> erase_policy
+> read_policy
+> # cat /sys/block/mmcblk0/device/mypol0/write_policy
+> Current: none
+> 0x00000001: Split unaligned writes across page_size
+> 0x00000002: Split writes into page_size chunks and write using reliable writes
+> 0x00000004: Use reliable writes for WRITE_META blocks.
+> # cat /sys/block/mmcblk0/device/mypol0/erase_policy
+> Current: none
+> 0x00000001: Use secure erase.
+> # echo 1 > delete
+> # Policy is deleted.
+> 
+> The policies are all stored in a rb-tree. First order of business
+> inside mmc_blk_issue_rw_rq/mmc_blk_issue_* is to fetch an existing
+> policy given the access type and block start/end (which both tells
+> where the access is going and the size of the access). Later, it's
+> that policy information which controls how the request is translated
+> into MMC commands. I'm almost done with a prototype.
 
-What about letting the user/embedder create policies for how certain
-accesses are done? That way you give runtime-accessible
-blocks for tuning mmc block layer while having one interface to
-manipulate (and combine) multiple workarounds, all the while catching
-conflicts and
-without forcing specific policy in code.
+I think it's good to discuss all the options, but my feeling is that
+we should not add so much complexity at the interface level, because
+we will never be able to change all that again. In general, sysfs
+files should contain simple values that are self-descriptive (a simple
+number or one word), and should have no side-effects (unlike the delete
+or the policies attributes you describe).
 
-Essentially under /sys/block/mmcblk0/device you have an attribute
-called "policies". Example:
+The behavior of the Toshiba chip is peculiar enough to justify having
+some workarounds for it, including run-time selected ones, but I'm
+looking for something much simpler. I'd certainly be interested in
+the patch you come up with and any performance results, but I don't
+think it can be merged like that.
 
-# echo mypol0 > /sys/block/mmcblk0/device/policies
-# ls /sys/block/mmcblk0/device/mypol0
-debug
-delete
-start_block
-end_block
-access_size_low
-access_size_high
-write_policy
-erase_policy
-read_policy
-# cat /sys/block/mmcblk0/device/mypol0/write_policy
-Current: none
-0x00000001: Split unaligned writes across page_size
-0x00000002: Split writes into page_size chunks and write using reliable writes
-0x00000004: Use reliable writes for WRITE_META blocks.
-# cat /sys/block/mmcblk0/device/mypol0/erase_policy
-Current: none
-0x00000001: Use secure erase.
-# echo 1 > delete
-# Policy is deleted.
+In the end, Chris will have to make the decision on mmc patches of
+course -- I'm just trying to contribute experience from other subsystems.
 
-The policies are all stored in a rb-tree. First order of business
-inside mmc_blk_issue_rw_rq/mmc_blk_issue_* is to fetch an existing
-policy given the access type and block start/end (which both tells
-where the access is going and the size of the access). Later, it's
-that policy information which controls how the request is translated
-into MMC commands. I'm almost done with a prototype.
+What I see as a more promising approach is to add the tunables
+to attributes of the CFQ I/O scheduler once we know what we want.
+This will allow doing the same optimizations to non-MMC devices such
+as USB sticks or CF/IDE cards without reimplementing it in other
+subsystems, and give more control over the individual requests than
+the MMC layer has.
 
-I noticed that all sysfs attributes are managed by code under
-core/mmc.c and core/sd.c, duplicating where necessary. I think some of
-the new block-related settings like page_size (or policies) are
-generic enough that they should live in the card/block code. How about
-putting all future sysfs block related things into block-sysfs.c?
+E.g. the I/O scheduler can also make sure that we always submit all
+blocks from the start of one erase unit (e.g. 4 MB) to the end, but
+not try to merge requests across erase unit boundaries. It can
+also try to group the requests in aligned power-of-two sized chunks
+rather than merging as many sectors as possible up to the maximum
+request size, ignoring the alignment.
 
-Thanks,
-A
+	Arnd
