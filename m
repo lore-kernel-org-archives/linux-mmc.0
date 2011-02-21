@@ -1,98 +1,65 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] mmc: sdhci-tegra: free irq on error and remove
-Date: Mon, 21 Feb 2011 08:21:20 +0100
-Message-ID: <20110221072120.GA13424@pengutronix.de>
-References: <1297357650-14245-1-git-send-email-w.sang@pengutronix.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] dw_mmc: set the debounce value and remove duplicated offset
+Date: Mon, 21 Feb 2011 17:57:26 +0900
+Message-ID: <4D6228F6.6020500@samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="OXfL5xGRrasGEqWY"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:44283 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752463Ab1BUHVW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Feb 2011 02:21:22 -0500
-Content-Disposition: inline
-In-Reply-To: <1297357650-14245-1-git-send-email-w.sang@pengutronix.de>
+Received: from mailout2.samsung.com ([203.254.224.25]:44627 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753078Ab1BUI72 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Feb 2011 03:59:28 -0500
+Received: from epmmp1 (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LGY00KYQM8UDE90@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 21 Feb 2011 17:58:06 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LGY008ZFM8UR2@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 21 Feb 2011 17:58:06 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Olof Johansson <olof@lixom.net>, Chris Ball <cjb@laptop.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
+This patch is set the debouce value..
+This value do not need to be changed with every command.
+So we set the value in probe function.
 
---OXfL5xGRrasGEqWY
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+And DATA register offset is duplicated..
 
-On Thu, Feb 10, 2011 at 06:07:30PM +0100, Wolfram Sang wrote:
-> Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
-> Cc: Olof Johansson <olof@lixom.net>
-> Cc: Chris Ball <cjb@laptop.org>
-> ---
->=20
-> Found the leak while working on the esdhc-imx driver. Not even compile te=
-sted,
-> please check.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    3 +++
+ drivers/mmc/host/dw_mmc.h |    1 -
+ 2 files changed, 3 insertions(+), 1 deletions(-)
 
-Olof, do you have a minute for this one?
-
->=20
->  drivers/mmc/host/sdhci-tegra.c |    6 +++++-
->  1 files changed, 5 insertions(+), 1 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
-a.c
-> index 4823ee9..f7e1f96 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -169,7 +169,7 @@ static int tegra_sdhci_pltfm_init(struct sdhci_host *=
-host,
->  		if (rc) {
->  			dev_err(mmc_dev(host->mmc),
->  				"failed to allocate wp gpio\n");
-> -			goto out_cd;
-> +			goto out_irq;
->  		}
->  		tegra_gpio_enable(plat->wp_gpio);
->  		gpio_direction_input(plat->wp_gpio);
-> @@ -195,6 +195,9 @@ out_wp:
->  		gpio_free(plat->wp_gpio);
->  	}
-> =20
-> +out_irq:
-> +	if (gpio_is_valid(plat->cd_gpio))
-> +		free_irq(gpio_to_irq(plat->cd_gpio), host);
->  out_cd:
->  	if (gpio_is_valid(plat->cd_gpio)) {
->  		tegra_gpio_disable(plat->cd_gpio);
-> @@ -225,6 +228,7 @@ static void tegra_sdhci_pltfm_exit(struct sdhci_host =
-*host)
->  	}
-> =20
->  	if (gpio_is_valid(plat->cd_gpio)) {
-> +		free_irq(gpio_to_irq(plat->cd_gpio), host);
->  		tegra_gpio_disable(plat->cd_gpio);
->  		gpio_free(plat->cd_gpio);
->  	}
-> --=20
-> 1.7.2.3
->=20
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---OXfL5xGRrasGEqWY
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAk1iEnAACgkQD27XaX1/VRtPYwCbBShgv6P3LZLl+O8fbEjgYdS6
-E08AmgM+fkHXNflkpI6C68yzKCFcxMBn
-=q84P
------END PGP SIGNATURE-----
-
---OXfL5xGRrasGEqWY--
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 62c8440..b3f94ff 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1623,6 +1623,9 @@ static int dw_mci_probe(struct platform_device *pdev)
+ 	/* Put in max timeout */
+ 	mci_writel(host, TMOUT, 0xFFFFFFFF);
+ 
++	/* Set the debounce value */
++	mci_writel(host, DEBNCE, 0xFFFFFF);
++
+ 	/*
+ 	 * FIFO threshold settings  RxMark  = fifo_size / 2 - 1,
+ 	 *                          Tx Mark = fifo_size / 2 DMA Size = 8
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 5dd55a7..f492837 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -51,7 +51,6 @@
+ #define SDMMC_DSCADDR		0x094
+ #define SDMMC_BUFADDR		0x098
+ #define SDMMC_DATA		0x100
+-#define SDMMC_DATA_ADR		0x100
+ 
+ /* shift bit field */
+ #define _SBF(f, v)		((v) << (f))
