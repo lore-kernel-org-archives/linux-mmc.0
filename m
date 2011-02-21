@@ -1,67 +1,98 @@
-From: Anand Gadiyar <gadiyar@ti.com>
-Subject: [PATCH] omap: hsmmc: fix ocr mask usage
-Date: Mon, 21 Feb 2011 11:37:17 +0530
-Message-ID: <1298268437-17989-1-git-send-email-gadiyar@ti.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] mmc: sdhci-tegra: free irq on error and remove
+Date: Mon, 21 Feb 2011 08:21:20 +0100
+Message-ID: <20110221072120.GA13424@pengutronix.de>
+References: <1297357650-14245-1-git-send-email-w.sang@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="OXfL5xGRrasGEqWY"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:45447 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751429Ab1BUGH3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Feb 2011 01:07:29 -0500
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:44283 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752463Ab1BUHVW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Feb 2011 02:21:22 -0500
+Content-Disposition: inline
+In-Reply-To: <1297357650-14245-1-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Anand Gadiyar <gadiyar@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Chris Ball <cjb@laptop.org>
+Cc: Olof Johansson <olof@lixom.net>, Chris Ball <cjb@laptop.org>
 
-The OMAP HSMMC driver uses an ocr_mask to determine the
-list of voltages supported by the card. It populates this
-mask based on the list of voltages supported by the
-regulator that supplies the voltage.
 
-Commit 64be97822b (omap4 hsmmc: Update ocr mask for MMC2 for
-regulator to use) passed a fixed ocr_mask from the OMAP4 SDP
-board file to limit the voltage to 2.9-3.0 Volts, and updated
-the driver to use this mask if provided, instead of using the
-regulator's supported voltages.
+--OXfL5xGRrasGEqWY
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-However the commit is buggy - the ocr_mask is overridden
-by the regulator's capabilities anyway. Fix this.
+On Thu, Feb 10, 2011 at 06:07:30PM +0100, Wolfram Sang wrote:
+> Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
+> Cc: Olof Johansson <olof@lixom.net>
+> Cc: Chris Ball <cjb@laptop.org>
+> ---
+>=20
+> Found the leak while working on the esdhc-imx driver. Not even compile te=
+sted,
+> please check.
 
-(The bug shows up when a system-wide suspend is attempted
-on the OMAP4 SDP/Blaze platforms. The eMMC card comes up
-at 3V, but drops to 1.65V after the system resumes).
+Olof, do you have a minute for this one?
 
-Signed-off-by: Anand Gadiyar <gadiyar@ti.com>
-Cc: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
-Cc: Chris Ball <cjb@laptop.org>
----
-Tony, Chris,
+>=20
+>  drivers/mmc/host/sdhci-tegra.c |    6 +++++-
+>  1 files changed, 5 insertions(+), 1 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
+a.c
+> index 4823ee9..f7e1f96 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -169,7 +169,7 @@ static int tegra_sdhci_pltfm_init(struct sdhci_host *=
+host,
+>  		if (rc) {
+>  			dev_err(mmc_dev(host->mmc),
+>  				"failed to allocate wp gpio\n");
+> -			goto out_cd;
+> +			goto out_irq;
+>  		}
+>  		tegra_gpio_enable(plat->wp_gpio);
+>  		gpio_direction_input(plat->wp_gpio);
+> @@ -195,6 +195,9 @@ out_wp:
+>  		gpio_free(plat->wp_gpio);
+>  	}
+> =20
+> +out_irq:
+> +	if (gpio_is_valid(plat->cd_gpio))
+> +		free_irq(gpio_to_irq(plat->cd_gpio), host);
+>  out_cd:
+>  	if (gpio_is_valid(plat->cd_gpio)) {
+>  		tegra_gpio_disable(plat->cd_gpio);
+> @@ -225,6 +228,7 @@ static void tegra_sdhci_pltfm_exit(struct sdhci_host =
+*host)
+>  	}
+> =20
+>  	if (gpio_is_valid(plat->cd_gpio)) {
+> +		free_irq(gpio_to_irq(plat->cd_gpio), host);
+>  		tegra_gpio_disable(plat->cd_gpio);
+>  		gpio_free(plat->cd_gpio);
+>  	}
+> --=20
+> 1.7.2.3
+>=20
 
-This is only a partial fix. It fixes the obvious bug introduced
-in the commit I noted above, however it is not the final
-fix. I'm not convinced the way the regulators are handled
-in this driver is correct - I'm still studying the code and
-will come up with a proper fix later.
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
-However, this does fix a real bug and I believe the bug is
-obvious. Would be nice to get this into the -rc series if
-we still can.
+--OXfL5xGRrasGEqWY
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
 
-- Anand
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
 
- drivers/mmc/host/omap_hsmmc.c |    1 -
- 1 file changed, 1 deletion(-)
+iEYEARECAAYFAk1iEnAACgkQD27XaX1/VRtPYwCbBShgv6P3LZLl+O8fbEjgYdS6
+E08AmgM+fkHXNflkpI6C68yzKCFcxMBn
+=q84P
+-----END PGP SIGNATURE-----
 
-Index: linux-2.6/drivers/mmc/host/omap_hsmmc.c
-===================================================================
---- linux-2.6.orig/drivers/mmc/host/omap_hsmmc.c
-+++ linux-2.6/drivers/mmc/host/omap_hsmmc.c
-@@ -413,7 +413,6 @@ static int omap_hsmmc_reg_get(struct oma
- 				return -EINVAL;
- 			}
- 		}
--		mmc_slot(host).ocr_mask = mmc_regulator_get_ocrmask(reg);
- 
- 		/* Allow an aux regulator */
- 		reg = regulator_get(host->dev, "vmmc_aux");
+--OXfL5xGRrasGEqWY--
