@@ -1,62 +1,44 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v2 5/5] mmc: sdhci-esdhc: enable esdhc on imx53
-Date: Tue, 22 Feb 2011 16:51:30 +0100
-Message-ID: <20110222155130.GJ2755@pengutronix.de>
-References: <1298369606-29972-1-git-send-email-Hong-Xing.Zhu@freescale.com>
- <1298369606-29972-5-git-send-email-Hong-Xing.Zhu@freescale.com>
- <20110222113222.GE2755@pengutronix.de>
- <AANLkTimbx6=YvRHFuVkmPVYvYtwME31PxXWNHNfFsVRQ@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v3] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+Date: Tue, 22 Feb 2011 17:15:07 +0100
+Message-ID: <201102221715.07480.arnd@arndb.de>
+References: <1298284528-14761-1-git-send-email-shawn.guo@freescale.com> <20110222085256.GA19871@S2100-06.ap.freescale.net> <20110222103349.GA2755@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="pWOmaDnDlrCGjNh4"
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:34516 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753784Ab1BVPvk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Feb 2011 10:51:40 -0500
-Content-Disposition: inline
-In-Reply-To: <AANLkTimbx6=YvRHFuVkmPVYvYtwME31PxXWNHNfFsVRQ@mail.gmail.com>
+Received: from moutng.kundenserver.de ([212.227.126.171]:62717 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754548Ab1BVQPh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Feb 2011 11:15:37 -0500
+In-Reply-To: <20110222103349.GA2755@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: Richard Zhu <Hong-Xing.Zhu@freescale.com>, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, linuxzsc@gmail.com, richard.zhao@freescale.com
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Shawn Guo <shawn.guo@freescale.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux@arm.linux.org.uk, linux-arm-kernel@lists.infradead.org
 
+On Tuesday 22 February 2011, Wolfram Sang wrote:
+> # mount -t vfat /dev/mmcblk0p1 /mnt
+> # dd if=/mnt/test.dat of=/tmp/a bs=1024
+> # umount /mnt
+> # ./dd --version
+> dd (coreutils) 8.5
 
---pWOmaDnDlrCGjNh4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In general, you should try to rule out file system, garbage collection,
+partitioning and cache effects.
 
+With coreutils dd, a good command is
 
-> > Thanks for respinning \o/ This approach looks better to me, but CCing
-> > Olof to comment on abstraction issues if he has them. Will do a deeper
-> > review later this week.
->=20
->=20
-> I like it! Definitely the right approach. Pushing quirks down into the
-> I/O accessors is definitely the only scalable way to handle all the
-> various buggy controllers out there.
->=20
-> Acked-by: Olof Johansson <olof@lixom.net>
+dd if=/dev/zero of=/dev/mmcblk0 bs=64K count=64 seek=256 oflag=direct
 
-Glad to hear that. I do have a few issues though, will report them later
-as mentioned before, it needs a bit of time.
+* Always write multiples of 4 MB to avoid garbage collection
+* smaller block sizes may be faster, so writing 64 times 64K may
+  be better than writing 4 MB once, depending on the card
+* don't write to the FAT area, so start writing at 16 MB into the
+  device.
+* use direct I/O to bypass the page cache.
+* read from /dev/zero instead of a disk file to avoid measuring the
+  wrong thing
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---pWOmaDnDlrCGjNh4
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk1j24IACgkQD27XaX1/VRs3GACffvhmM3gmJo5lCye6mOVjsRbT
-YpUAnioScX7w3+cIGm1otSLOiNKSGNsO
-=IRGm
------END PGP SIGNATURE-----
-
---pWOmaDnDlrCGjNh4--
+	Arnd
