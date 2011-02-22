@@ -1,57 +1,70 @@
-From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Subject: [PATCH v2 4/5] mmc: sdhci-esdhc: remove SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
-Date: Tue, 22 Feb 2011 18:13:25 +0800
-Message-ID: <1298369606-29972-4-git-send-email-Hong-Xing.Zhu@freescale.com>
-References: <1298369606-29972-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH v3] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+Date: Tue, 22 Feb 2011 11:33:49 +0100
+Message-ID: <20110222103349.GA2755@pengutronix.de>
+References: <1298284528-14761-1-git-send-email-shawn.guo@freescale.com>
+ <20110221174016.GN2616@pengutronix.de>
+ <20110222085256.GA19871@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="ibTvN161/egqYuK8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.181]:20064
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752048Ab1BVKVQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Feb 2011 05:21:16 -0500
-In-Reply-To: <1298369606-29972-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:37364 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753080Ab1BVKdv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Feb 2011 05:33:51 -0500
+Content-Disposition: inline
+In-Reply-To: <20110222085256.GA19871@S2100-06.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, richard.zhao@freescale.com, Richard Zhu <Hong-Xing.Zhu@freescale.com>
-
-sdhci-esdhc-imx does not need SDHCI_QUIRK_NO_CARD_NO_RESET. Make it OF-specific.
-
-Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
----
- drivers/mmc/host/sdhci-esdhc.h    |    3 +--
- drivers/mmc/host/sdhci-of-esdhc.c |    2 +-
- 2 files changed, 2 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index afaf1bc..303cde0 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -24,8 +24,7 @@
- 				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
- 				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
- 				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
--				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET | \
--				SDHCI_QUIRK_NO_CARD_NO_RESET)
-+				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
- 
- #define ESDHC_SYSTEM_CONTROL	0x2c
- #define ESDHC_CLOCK_MASK	0x0000fff0
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index fcd0e1f..6337607 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -73,7 +73,7 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
- }
- 
- struct sdhci_of_data sdhci_esdhc = {
--	.quirks = ESDHC_DEFAULT_QUIRKS,
-+	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_NO_CARD_NO_RESET,
- 	.ops = {
- 		.read_l = sdhci_be32bs_readl,
- 		.read_w = esdhc_readw,
--- 
-1.7.1
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux@arm.linux.org.uk, linux-arm-kernel@lists.infradead.org, arnd@arndb.de
 
 
+--ibTvN161/egqYuK8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+
+> > What throughput rates do you get on a mx28-regulated slot serving a card
+> > at 50Mhz? This is poor here (55kb/s) while it is OK at 25Mhz. Could be a
+>=20
+> To make sure we are on the same test, can you share the test case
+> you ran to get the result?  So that I can run it here for the result
+> on my board.
+
+# mount -t vfat /dev/mmcblk0p1 /mnt
+# dd if=3D/mnt/test.dat of=3D/tmp/a bs=3D1024
+# umount /mnt
+# ./dd --version
+dd (coreutils) 8.5
+=2E..
+
+'test.dat' was a 8MB file of random data on a 4GB SDHC card
+(extrememory) on a slot powered by the mx28. Operating the card at
+50Mhz, dd will report ~55 kb/s. If I add 'rate /=3D 2;' to the beginning
+of set_clk_rate, so it will operate at 25Mhz, I have 8mb/s.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--ibTvN161/egqYuK8
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk1jkQ0ACgkQD27XaX1/VRucGACgucR1CNKwBT/Lm/6MOB5u66t3
+fiEAnjtJ1tw+hp6CkN1U+WkiQx0vpbPg
+=gtrR
+-----END PGP SIGNATURE-----
+
+--ibTvN161/egqYuK8--
