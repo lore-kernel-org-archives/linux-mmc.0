@@ -1,117 +1,65 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: MMC quirks relating to performance/lifetime.
-Date: Tue, 22 Feb 2011 01:46:17 -0600
-Message-ID: <AANLkTi=ZOUrNoT1W1n3d+9KTMewKZ3kxo71AQsas9OpD@mail.gmail.com>
-References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
-	<201102171647.46190.arnd@arndb.de>
-	<AANLkTimGrT_p_5xdXJv5UURPMC0cwJCPkZ=xcX5Nk=o=@mail.gmail.com>
-	<201102201539.08496.arnd@arndb.de>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v3] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+Date: Tue, 22 Feb 2011 16:52:57 +0800
+Message-ID: <20110222085256.GA19871@S2100-06.ap.freescale.net>
+References: <1298284528-14761-1-git-send-email-shawn.guo@freescale.com>
+ <20110221174016.GN2616@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og115.obsmtp.com ([64.18.0.246]:59839 "EHLO
-	exprod5og115.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753795Ab1BVHqV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Feb 2011 02:46:21 -0500
-In-Reply-To: <201102201539.08496.arnd@arndb.de>
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:41747 "EHLO
+	TX2EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751666Ab1BVIxf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Feb 2011 03:53:35 -0500
+Received: from mail196-tx2 (localhost.localdomain [127.0.0.1])	by
+ mail196-tx2-R.bigfish.com (Postfix) with ESMTP id 76D9EA28073	for
+ <linux-mmc@vger.kernel.org>; Tue, 22 Feb 2011 08:53:34 +0000 (UTC)
+Received: from TX2EHSMHS023.bigfish.com (unknown [10.9.14.251])	by
+ mail196-tx2.bigfish.com (Postfix) with ESMTP id 2D88412F804F	for
+ <linux-mmc@vger.kernel.org>; Tue, 22 Feb 2011 08:53:34 +0000 (UTC)
+Received: from az33smr01.freescale.net (az33smr01.freescale.net
+ [10.64.34.199])	by az33egw01.freescale.net (8.14.3/8.14.3) with ESMTP id
+ p1M8rJpB005991	for <linux-mmc@vger.kernel.org>; Tue, 22 Feb 2011 01:53:20
+ -0700 (MST)
+Received: from S2100-06.ap.freescale.net (S2100-06.ap.freescale.net
+ [10.192.242.50])	by az33smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
+ p1M8rIhL002686	for <linux-mmc@vger.kernel.org>; Tue, 22 Feb 2011 02:53:19
+ -0600 (CST)
+Content-Disposition: inline
+In-Reply-To: <20110221174016.GN2616@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux@arm.linux.org.uk, cjb@laptop.org, linux-mmc@vger.kernel.org, arnd@arndb.de, linux-arm-kernel@lists.infradead.org
 
-On Sun, Feb 20, 2011 at 8:39 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> [adding linux-fsdevel to Cc, see http://lwn.net/Articles/428941/ and
-> http://comments.gmane.org/gmane.linux.ports.arm.kernel/105607 for more
-> on this discussion.]
->
->
-> I think it's good to discuss all the options, but my feeling is that
-> we should not add so much complexity at the interface level, because
-> we will never be able to change all that again. In general, sysfs
-> files should contain simple values that are self-descriptive (a simple
-> number or one word), and should have no side-effects (unlike the delete
-> or the policies attributes you describe).
->
-> The behavior of the Toshiba chip is peculiar enough to justify having
-> some workarounds for it, including run-time selected ones, but I'm
-> looking for something much simpler. I'd certainly be interested in
-> the patch you come up with and any performance results, but I don't
-> think it can be merged like that.
->
+Hi Wolfram,
 
-Sure. The page_align patch is just going to be a single sysfs
-attribute. All I need to prove to myself now is the effect for large
-unaligned accesses (and show everyone else the data :-)).
+On Mon, Feb 21, 2011 at 06:40:16PM +0100, Wolfram Sang wrote:
+> Shawn,
+> 
+> On Mon, Feb 21, 2011 at 06:35:28PM +0800, Shawn Guo wrote:
+> > This adds the mmc host driver for Freescale MXS-based SoC i.MX23/28.
+> > The driver calls into mxs-dma via generic dmaengine api for both pio
+> > and data transfer.
+> > 
+> > Thanks Chris Ball for the indentation patch.
+> > 
+> > Signed-off-by: Shawn Guo <shawn.guo@freescale.com>
+> > Reviewed-by: Arnd Bergmann <arnd@arndb.de>
+> 
+> What throughput rates do you get on a mx28-regulated slot serving a card
+> at 50Mhz? This is poor here (55kb/s) while it is OK at 25Mhz. Could be a
 
-> In the end, Chris will have to make the decision on mmc patches of
-> course -- I'm just trying to contribute experience from other subsystems.
->
-> What I see as a more promising approach is to add the tunables
-> to attributes of the CFQ I/O scheduler once we know what we want.
-> This will allow doing the same optimizations to non-MMC devices such
-> as USB sticks or CF/IDE cards without reimplementing it in other
-> subsystems, and give more control over the individual requests than
-> the MMC layer has.
->
-> E.g. the I/O scheduler can also make sure that we always submit all
-> blocks from the start of one erase unit (e.g. 4 MB) to the end, but
-> not try to merge requests across erase unit boundaries. It can
-> also try to group the requests in aligned power-of-two sized chunks
-> rather than merging as many sectors as possible up to the maximum
-> request size, ignoring the alignment.
+To make sure we are on the same test, can you share the test case
+you ran to get the result?  So that I can run it here for the result
+on my board.
 
-I agree. These are common things that affect any kind of flash
-storage, and it belongs in the I/O scheduler as simple tuneables. I'll
-see if I can figure my way around that...
+> board issue though (or we can fix it later), rest works fine, thus:
+> 
+> Tested-by: Wolfram Sang <w.sang@pengutronix.de>
+> 
 
-What belongs in mmc card driver are tunable workarounds for MMC/SD
-brokeness. For example - needing to use 8K-spitted reliable writes to
-ensure that a 64KB access doesn't wind up in the 4MB buffer B (as to
-improve lifespan of the card.) But you want a waterline above which
-you don't do this anymore, otherwise the overall performance will go
-to 0 - i.e. there is a need to balance between performance and
-reliability, so the range of access size for which the workaround
-works needs to be runtime controlled, as it's potentially different.
-Another example (this one is apparently affecting Sandisk) - do
-special stuff for block erase, since the card violates spec in that
-regard (touch ext_csd instead of argument, I believe). A different
-example might be turning on reliable writes for WRITE_META (or all)
-blocks for a certain partition (but I just made that up... ).
+-- 
+Regards,
+Shawn
 
-So there are things that just should be on (spec brokeness
-workarounds), and things that apply only to a subset of accesses (and
-thus they are selective at issue_*_rq time), whether it's because of
-accessed offset or access size.
-
-I agree that the sysfs method is particularly nasty, and I guess I
-didn't have to make a prototype to figure that out :-) (but needed
-something similar for selective testing anyway). Nothing else exists
-right now that acts in the same way, and nothing really should, as
-there is no feedback for manipulating the policies (echo POLICY_ENUM >
-policy, if it doesn't stick, then the arguments were wrong, etc).
-
-You could put the entire MMC block policy interface through an API
-usable by system integrators - i.e. you would really only care for
-tuning the MMC parameters if you're creating a device around an emmc.
-
-Idea (1). One idea is to keep the "policies" from my previous mail.
-Policies are registered through platform-specific code. The policies
-could be then matched for enabling against a specific block device by
-manfid/date/etc at the time of mmc_block_alloc... For removable media
-no one would fiddle with the tunable parameters anyway, unless there
-was some global database of cards and workarounds and a daemon or some
-such to take care of that... Probably don't want to add such baggage
-to the kernel.
-
-Idea (2). There is probably no need to overcomplicate. Just add a
-platform callback (something like int
-(*mmc_platform_block_workaround)(struct request *, struct
-mmc_blk_request *)). This will be usable as-is for R/W accesses, and
-the discard code will need to be slightly modified.
-
-Do you think there is any need for runtime tuning of the MMC
-workarounds (disregarding ones that really belong in the I/O
-scheduler)? Should the workarounds be simply platform callbacks, or
-should they be something heftier ("policies")?
-
-A
