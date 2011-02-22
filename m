@@ -1,85 +1,103 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] dw_mmc: set the debounce value and remove duplicated offset
-Date: Tue, 22 Feb 2011 11:18:04 +0900
-Message-ID: <4D631CDC.2060702@samsung.com>
-References: <4D6228F6.6020500@samsung.com>
- <AANLkTi=Vv8=7FwArQPwjXPZ93YoE7uKvyR-0Ze81Lmbn@mail.gmail.com>
+From: Zhu Richard-R65037 <R65037@freescale.com>
+Subject: RE: [PATCH 5/5] mmc: sdhci: add quirk
+ SDHCI_QUIRK_FIX_NO_INT_IN_MULTI_BLK_IO
+Date: Tue, 22 Feb 2011 02:21:46 +0000
+Message-ID: <010C9052C42A00499CE76D637FA5EE900C5972@039-SN1MPN1-001.039d.mgd.msft.net>
+References: <1298282095-2279-1-git-send-email-richard.zhao@freescale.com>
+ <1298282095-2279-5-git-send-email-richard.zhao@freescale.com>
+ <20110221100439.GE2616@pengutronix.de>
+ <010C9052C42A00499CE76D637FA5EE900C579F@039-SN1MPN1-001.039d.mgd.msft.net>
+ <20110221104608.GF2616@pengutronix.de>
+ <20110221110905.GL14495@n2100.arm.linux.org.uk>
+ <20110221111557.GG2616@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:18307 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752185Ab1BVCTp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Feb 2011 21:19:45 -0500
-Received: from epmmp1 (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LGZ0061CYFA3NA0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 22 Feb 2011 11:18:46 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LGZ00FJWYFAOA@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 22 Feb 2011 11:18:46 +0900 (KST)
-In-reply-to: <AANLkTi=Vv8=7FwArQPwjXPZ93YoE7uKvyR-0Ze81Lmbn@mail.gmail.com>
+Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.186]:3247
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751918Ab1BVCWM convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 21 Feb 2011 21:22:12 -0500
+In-Reply-To: <20110221111557.GG2616@pengutronix.de>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Wolfram Sang <w.sang@pengutronix.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Zhao Richard-B20223 <B20223@freescale.com>, "cjb@laptop.org" <cjb@laptop.org>, "eric@eukrea.com" <eric@eukrea.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "avorontsov@ru.mvista.com" <avorontsov@ru.mvista.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linuxzsc@gmail.com" <linuxzsc@gmail.com>
 
-Will Newton wrote:
-> On Mon, Feb 21, 2011 at 8:57 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> This patch is set the debouce value..
->> This value do not need to be changed with every command.
->> So we set the value in probe function.
->>
->> And DATA register offset is duplicated..
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c |    3 +++
->>  drivers/mmc/host/dw_mmc.h |    1 -
->>  2 files changed, 3 insertions(+), 1 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 62c8440..b3f94ff 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1623,6 +1623,9 @@ static int dw_mci_probe(struct platform_device *pdev)
->>        /* Put in max timeout */
->>        mci_writel(host, TMOUT, 0xFFFFFFFF);
->>
->> +       /* Set the debounce value */
->> +       mci_writel(host, DEBNCE, 0xFFFFFF);
->> +
-> 
-> As I understand it this is the reset value of the DEBNCE register? Why
-> do we need to set it at all?
+Hi Wolfsang:
+Maybe I don't describe my thoughts clearly and exactly.
+I feel it's not easy to add the the IO-accessors in every cmd execution procedure, to make
+a double check why a IO-accessor is needed or not.
 
-If need to set other value, we can change the debounce value (5~25ms).
-This value is default reset value.
+Best Regards
+Richard Zhu
 
-> 
->>        /*
->>         * FIFO threshold settings  RxMark  = fifo_size / 2 - 1,
->>         *                          Tx Mark = fifo_size / 2 DMA Size = 8
->> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> index 5dd55a7..f492837 100644
->> --- a/drivers/mmc/host/dw_mmc.h
->> +++ b/drivers/mmc/host/dw_mmc.h
->> @@ -51,7 +51,6 @@
->>  #define SDMMC_DSCADDR          0x094
->>  #define SDMMC_BUFADDR          0x098
->>  #define SDMMC_DATA             0x100
->> -#define SDMMC_DATA_ADR         0x100
-> 
-> This part is fine.
-> 
-> Acked-by: Will Newton <will.newton@imgtec.com>
+
+> -----Original Message-----
+> From: Wolfram Sang [mailto:w.sang@pengutronix.de]
+> Sent: Monday, February 21, 2011 7:16 PM
+> To: Russell King - ARM Linux
+> Cc: Zhu Richard-R65037; Zhao Richard-B20223; cjb@laptop.org;
+> eric@eukrea.com; linux-mmc@vger.kernel.org; kernel@pengutronix.de;
+> avorontsov@ru.mvista.com; linux-arm-kernel@lists.infradead.org;
+> linuxzsc@gmail.com
+> Subject: Re: [PATCH 5/5] mmc: sdhci: add quirk
+> SDHCI_QUIRK_FIX_NO_INT_IN_MULTI_BLK_IO
+>
+> On Mon, Feb 21, 2011 at 11:09:05AM +0000, Russell King - ARM Linux wrote:
+> > On Mon, Feb 21, 2011 at 11:46:08AM +0100, Wolfram Sang wrote:
+> > > > > > -   if (cpu_is_mx35() || cpu_is_mx51())
+> > > > > > +   if (cpu_is_mx53())
+> > > > > > +           host->quirks |=
+> > > > > > + SDHCI_QUIRK_FIX_NO_INT_IN_MULTI_BLK_IO;
+> > > > >
+> > > > > Have you tried it doing it via IO-accessors?
+> > > > Richard Zhu: This quirk is used to fix a mechanism problem in the
+> MMC CMDs execution procedure.
+> > > > It would be very abrupt and ugly, if the IO-accessors are added
+> into these original procedures.
+> > >
+> > > Please don't get it personal, but IMHO it is pretty ugly the way it
+> > > is now. This quirk is very imx-specific and calling something like
+> > > SDHCI_VENDOR_SPEC in sdhci.c looks clearly wrong to me. By the way,
+> > > what does this bit do, the description doesn't say so?
+> >
+> > SDHCI_QUIRK_FIX_NO_INT_IN_MULTI_BLK_IO is rather too verbose.  Isn't
+> > there a shorter version which could be used?
+> > SDHCI_QUIRK_SDIO_MULTIBLK_INT maybe?
+>
+> As I understand, the non-SDIO part is handled here:
+Yes, it is. The following codes are used to solve non-sdio part.
+That bit is introduced by imx53 latest spec.
+I think so too that the SDHCI_VENDOR_SPEC shouldn't be used in sdhci.c file, but
+I don't have better idea to fix the issue in this situation.
+Option:
+Make a double check when issue every MMC CMD, to figure out whether a IO-accessor is needed or not?
+Two checkpoints would be needed, one is in the sdhci_send_command function, the other should be in sdhci_data_finish func.
+How do you think this method?
+
+>
+> +       /*Set the CMD_TYPE of the CMD12, fix no INT in MULTI_BLK IO */
+> +       if (host->quirks & SDHCI_QUIRK_FIX_NO_INT_IN_MULTI_BLK_IO) {
+> +               if (cmd->opcode == 12)
+> +                       flags |= SDHCI_CMD_ABORTCMD;
+> +       }
+>
+> But I'd really like to avoid the quirk bit. Maybe we'll get a better idea
+> once we understand what that magic bit actually does. For a start, we
+> might simply set SDHCI_QUIRK_NO_MULTIBLOCK for mx53 like we do for other
+> imx.
+As I know that, this bit is used to make the machine stat of the eSDHC IC to be a correct stat after SDIO Multi-Read.
+>
+> Regards,
+>
+>    Wolfram
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> Pengutronix e.K.                           | Wolfram Sang
+> |
+> Industrial Linux Solutions                 | http://www.pengutronix.de/
+> |
 
