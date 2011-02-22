@@ -1,61 +1,59 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v3] mmc: mxs-mmc: add mmc host driver for i.MX23/28
-Date: Tue, 22 Feb 2011 12:57:16 +0100
-Message-ID: <20110222115716.GG2755@pengutronix.de>
-References: <1298284528-14761-1-git-send-email-shawn.guo@freescale.com>
- <20110221174016.GN2616@pengutronix.de>
- <20110222085256.GA19871@S2100-06.ap.freescale.net>
- <20110222103349.GA2755@pengutronix.de>
- <20110222115045.GB19871@S2100-06.ap.freescale.net>
+Subject: [PATCH V2 0/5] sdhci-esdhc-imx: use gpio for write protection and card detection
+Date: Tue, 22 Feb 2011 13:58:15 +0100
+Message-ID: <1298379500-27590-1-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="Cp3Cp8fzgozWLBWL"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:39384 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:55295 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754068Ab1BVL5T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Feb 2011 06:57:19 -0500
-Content-Disposition: inline
-In-Reply-To: <20110222115045.GB19871@S2100-06.ap.freescale.net>
+	with ESMTP id S1752035Ab1BVM61 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Feb 2011 07:58:27 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux@arm.linux.org.uk, linux-arm-kernel@lists.infradead.org, arnd@arndb.de
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, =?UTF-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>, Wolfram Sang <w.sang@pengutronix.de>
 
+Hi,
 
---Cp3Cp8fzgozWLBWL
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Second version of my series, no major changes:
 
+* rephrased warnings
+* collected some tags
+* rebased to mmc/mmc-next as of today
 
-> My busybox version of dd does not report the speed.  But I tried to
-> dd 8MB data and saw it's done in 1~2 seconds.
->=20
-> Also here is mmc host driver test performance related result on my
-> board if you are interested.
+Eric wanted to tested these patches soonish. Thanks to Marc for testing the
+first three already.
 
-OK, looks good. Let's merge the driver then and I will check my board.
+I think the first three patches should go via Chris and the latter two via
+Sascha. The last one is more a cleanup-patch, but it depends on the former, so
+I included it here.
 
-Thanks!
+The branch can be found at:
+
+	git://git.pengutronix.de/git/wsa/linux-2.6.git pcm043-mmc
+
+Thanks,
 
    Wolfram
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Wolfram Sang (5):
+  mmc: sdhci-esdhc-imx: add support for write protect on custom GPIO
+  mmc: sdhci-esdhc: broken card detection is not a default quirk
+  mmc: sdhci-esdhc-imx: add card detect on custom GPIO
+  arm: mach-mx3: pcm043: add write-protect and card-detect for SD1
+  arm: mach-mx3: use IMX_GPIO_NR instead of hard-coded values
 
---Cp3Cp8fzgozWLBWL
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
+ arch/arm/mach-mx3/eukrea_mbimxsd-baseboard.c |    4 +-
+ arch/arm/mach-mx3/mach-cpuimx35.c            |    2 +-
+ arch/arm/mach-mx3/mach-pcm043.c              |   19 +++-
+ arch/arm/plat-mxc/include/mach/esdhc.h       |   12 ++-
+ drivers/mmc/host/sdhci-esdhc-imx.c           |  131 +++++++++++++++++++++++---
+ drivers/mmc/host/sdhci-esdhc.h               |    1 -
+ drivers/mmc/host/sdhci-of-esdhc.c            |    3 +-
+ 7 files changed, 148 insertions(+), 22 deletions(-)
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
+-- 
+1.7.2.3
 
-iEYEARECAAYFAk1jpJwACgkQD27XaX1/VRvbSwCfdU83hQxbb/hPuzx0eNPEKHCl
-xicAn1TlixXCfpAvmdBQHFlnwmU5eyIN
-=Kson
------END PGP SIGNATURE-----
-
---Cp3Cp8fzgozWLBWL--
