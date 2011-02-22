@@ -1,66 +1,50 @@
-From: =?utf-8?Q?Lothar_Wa=C3=9Fmann?= <LW@KARO-electronics.de>
-Subject: Re: [PATCH 5/5] arm: mach-mx3: use IMX_GPIO_NR instead of hard-coded
-	values
-Date: Tue, 22 Feb 2011 14:30:02 +0100
-Message-ID: <19811.47706.277301.848103@ipc1.ka-ro>
+From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
+Subject: Re: [PATCH V2 0/5] sdhci-esdhc-imx: use gpio for write protection and
+	card detection
+Date: Tue, 22 Feb 2011 15:52:07 +0100
+Message-ID: <87wrks5dgo.fsf@lebrac.rtp-net.org>
 References: <1298379500-27590-1-git-send-email-w.sang@pengutronix.de>
-	<1298379500-27590-6-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.karo-electronics.de ([81.173.242.67]:55067 "EHLO
-	mail.karo-electronics.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752041Ab1BVNaN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Feb 2011 08:30:13 -0500
-In-Reply-To: <1298379500-27590-6-git-send-email-w.sang@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1298379500-27590-1-git-send-email-w.sang@pengutronix.de>
+	(Wolfram Sang's message of "Tue, 22 Feb 2011 13:58:15 +0100")
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>, Eric =?utf-8?Q?B=C3=A9nard?= <eric@eukrea.com>, linux-arm-kernel@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Eric =?utf-8?Q?B=C3=A9nard?= <eric@eukrea.com>
+List-Id: linux-mmc@vger.kernel.org
+
+Wolfram Sang <w.sang@pengutronix.de> writes:
+
+> Hi,
 
 Hi,
 
-> The latter are error-prone because the bank number is one less than o=
-ne
-> would read in the documentation.
->=20
-> Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
-> Cc: Eric B=C3=A9nard <eric@eukrea.com>
-> Cc: Sascha Hauer <s.hauer@pengutronix.de>
-> ---
->  arch/arm/mach-mx3/eukrea_mbimxsd-baseboard.c |    4 ++--
->  arch/arm/mach-mx3/mach-cpuimx35.c            |    2 +-
->  arch/arm/mach-mx3/mach-pcm043.c              |   10 +++++-----
->  3 files changed, 8 insertions(+), 8 deletions(-)
->=20
-> diff --git a/arch/arm/mach-mx3/eukrea_mbimxsd-baseboard.c b/arch/arm/=
-mach-mx3/eukrea_mbimxsd-baseboard.c
-> index 14a5ffc..8076147 100644
-> --- a/arch/arm/mach-mx3/eukrea_mbimxsd-baseboard.c
-> +++ b/arch/arm/mach-mx3/eukrea_mbimxsd-baseboard.c
-> @@ -165,8 +165,8 @@ static iomux_v3_cfg_t eukrea_mbimxsd_pads[] =3D {
->  	MX35_PAD_SD1_DATA3__ESDHC1_DAT3,
->  };
-> =20
-> -#define GPIO_LED1	(2 * 32 + 29)
-> -#define GPIO_SWITCH1	(2 * 32 + 25)
-> +#define GPIO_LED1	IMX_GPIO_NR(3, 29)
-> +#define GPIO_SWITCH1	IMX_GPIO_NR(3, 25)
->  #define GPIO_LCDPWR	(4)
-> =20
-While you are at it you could also remove the nonsensical () around
-the bare number.
+>
+> Second version of my series, no major changes:
+>
+> * rephrased warnings
+> * collected some tags
+> * rebased to mmc/mmc-next as of today
+>
+> Eric wanted to tested these patches soonish. Thanks to Marc for testing the
+> first three already.
 
+Has this been tested on imx51 ? By default (even after applying your
+patches), the sdhci has quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION set, so
+we're polling.
+I've been wondering if it was a good idea to configure for everyone sdhc
+host card detect pin as gpio 1 1 or gpio 1 8 on imx51, which would mean
+no more polling. What do you think ? Would it be working or it's just a
+stupid idea ?
 
-Lothar Wa=C3=9Fmann
---=20
-___________________________________________________________
-
-Ka-Ro electronics GmbH | Pascalstra=C3=9Fe 22 | D - 52076 Aachen
-Phone: +49 2408 1402-0 | Fax: +49 2408 1402-10
-Gesch=C3=A4ftsf=C3=BChrer: Matthias Kaussen
-Handelsregistereintrag: Amtsgericht Aachen, HRB 4996
-
-www.karo-electronics.de | info@karo-electronics.de
-___________________________________________________________
+Arnaud
