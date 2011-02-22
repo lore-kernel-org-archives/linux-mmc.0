@@ -1,53 +1,54 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH V3 0/5] sdhci-esdhc-imx: use gpio for write protection
- and card detection
-Date: Thu, 24 Feb 2011 14:12:45 +0100
-Message-ID: <20110224131245.GA2420@pengutronix.de>
-References: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
- <87k4gp3bl1.fsf@lebrac.rtp-net.org>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v3] mmc: mxs-mmc: add mmc host driver for i.MX23/28
+Date: Tue, 22 Feb 2011 16:09:06 +0800
+Message-ID: <20110222080905.GB16141@S2101-09.ap.freescale.net>
+References: <1298284528-14761-1-git-send-email-shawn.guo@freescale.com>
+	<20110221174016.GN2616@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="ikeVEW9yuYc//A+q"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:59828 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753047Ab1BXNMq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 08:12:46 -0500
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <87k4gp3bl1.fsf@lebrac.rtp-net.org>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20110221174016.GN2616@pengutronix.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux@arm.linux.org.uk, linux-arm-kernel@lists.infradead.org, arnd@arndb.de
 List-Id: linux-mmc@vger.kernel.org
-To: Arnaud Patard <arnaud.patard@rtp-net.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
+Hi Wolfram,
 
---ikeVEW9yuYc//A+q
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Mon, Feb 21, 2011 at 06:40:16PM +0100, Wolfram Sang wrote:
+> Shawn,
+> 
+> On Mon, Feb 21, 2011 at 06:35:28PM +0800, Shawn Guo wrote:
+> > This adds the mmc host driver for Freescale MXS-based SoC i.MX23/28.
+> > The driver calls into mxs-dma via generic dmaengine api for both pio
+> > and data transfer.
+> > 
+> > Thanks Chris Ball for the indentation patch.
+> > 
+> > Signed-off-by: Shawn Guo <shawn.guo@freescale.com>
+> > Reviewed-by: Arnd Bergmann <arnd@arndb.de>
+> 
+> What throughput rates do you get on a mx28-regulated slot serving a card
+> at 50Mhz? This is poor here (55kb/s) while it is OK at 25Mhz. Could be a
 
-> I'm getting a hard freeze on my efika sb and mx once I remove the
-> unconditional BROKEN_CARD_DETECTION flag. I'm still investigating the
-> issue. I'll keep you informed if I find something.
+To make sure we are on the same page, can you share me the test you
+ran?  And I can give it a try on my board.
 
-Hmm, this is probably an unhandled interrupt. Will see if I can get the
-efika here...
+> board issue though (or we can fix it later), rest works fine, thus:
+> 
+> Tested-by: Wolfram Sang <w.sang@pengutronix.de>
+> 
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---ikeVEW9yuYc//A+q
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk1mWU0ACgkQD27XaX1/VRtEIgCeKmilbtcuL+LhPz2WFertzt2U
-hCgAoLPJxoSBE8EnTE6qggmWcqSGaVBS
-=2hZu
------END PGP SIGNATURE-----
-
---ikeVEW9yuYc//A+q--
+-- 
+Regards,
+Shawn
