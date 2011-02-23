@@ -1,253 +1,71 @@
-From: Richard Zhao <linuxzsc@gmail.com>
-Subject: Re: [PATCH v2 2/5] ARM: imx51/53: add sdhc3/4 clock
-Date: Wed, 23 Feb 2011 22:43:28 +0800
-Message-ID: <20110223144328.GA2820@richard-laptop>
-References: <1298369606-29972-1-git-send-email-Hong-Xing.Zhu@freescale.com>
- <1298369606-29972-2-git-send-email-Hong-Xing.Zhu@freescale.com>
- <20110223075036.GE7381@pengutronix.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Wed, 23 Feb 2011 17:09:04 +0100
+Message-ID: <201102231709.05036.arnd@arndb.de>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <201102221800.17196.arnd@arndb.de> <AANLkTinfWiRaGruP8cM44c62T8svVOKsFhi4Dmg8yzEa@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:54320 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751771Ab1BWOnu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Feb 2011 09:43:50 -0500
-Received: by pvg12 with SMTP id 12so510447pvg.19
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Feb 2011 06:43:49 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20110223075036.GE7381@pengutronix.de>
+Received: from moutng.kundenserver.de ([212.227.126.187]:50807 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754465Ab1BWQJN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Feb 2011 11:09:13 -0500
+In-Reply-To: <AANLkTinfWiRaGruP8cM44c62T8svVOKsFhi4Dmg8yzEa@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Richard Zhu <Hong-Xing.Zhu@freescale.com>, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, richard.zhao@freescale.com
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
-Hi Sascha,
+On Wednesday 23 February 2011, Andrei Warkentin wrote:
+> That sounds good! In fact, for any quirks enabled for a particular
+> card, I'll expose the tuneables through sysfs attributes, something
+> like /sys/block/mmcblk0/device/quirks/quirk-name/attr-names.
+> 
+> Quirks will have block intervals and access size intervals over which
+> they are valid, along with any other quirk-specific parameter.
+> Interval overlap will not be allowed for quirks in the same operation
+> type (r/w/e). The goal here is to make the changes to issue_*_rq as
+> small as possible, and not to pollute block.c at all with the quirks
+> stuff. Quirks are looked up inside issue_*_rq based on req type and
+> [start,end) interval. The resulting found quirks structure will
+> contain a callback used inside issue_*_rq to modify mmc block request
+> structures prior to generating actual MMC commands.
+>
+> Quirks consist of a callback called inside of mmc issue_*_rq,
+> configurable attributes, and the sysfs interface. Quirk groups are
+> defined per-card. At card insertion time, a matching quirk group is
+> found, and is enabled. The quirk group enable function then enables
+> the relevant quirks with the right parameters (adds them to per
+> mmc_blk_data quirk interval tree). Some sane defaults for the tunables
+> are used. If the tunables are modified through sysfs, care is taken
+> that an interval overlap never happens, otherwise the tunable is not
+> modified and a kernel error message is logged.
+> 
+> I hope I explained the tentative idea clearly... Thoughts?
 
-On Wed, Feb 23, 2011 at 08:50:36AM +0100, Sascha Hauer wrote:
-> On Tue, Feb 22, 2011 at 06:13:23PM +0800, Richard Zhu wrote:
-> > Signed-off-by: Richard Zhao <richard.zhao@freescale.com>
-> > ---
-> >  arch/arm/mach-mx5/clock-mx51-mx53.c |  100 ++++++++++++++++++++++++++++++++++-
-> >  arch/arm/mach-mx5/crm_regs.h        |    7 +++
-> >  2 files changed, 106 insertions(+), 1 deletions(-)
-> > 
-> > diff --git a/arch/arm/mach-mx5/clock-mx51-mx53.c b/arch/arm/mach-mx5/clock-mx51-mx53.c
-> > index 8164b1d..2ca97de 100644
-> > --- a/arch/arm/mach-mx5/clock-mx51-mx53.c
-> > +++ b/arch/arm/mach-mx5/clock-mx51-mx53.c
-> > @@ -42,6 +42,9 @@ static struct clk usboh3_clk;
-> >  static struct clk emi_fast_clk;
-> >  static struct clk ipu_clk;
-> >  static struct clk mipi_hsc1_clk;
-> > +static struct clk esdhc1_clk;
-> > +static struct clk esdhc2_clk;
-> > +static struct clk esdhc3_mx53_clk;
-> >  
-> >  #define MAX_DPLL_WAIT_TRIES	1000 /* 1000 * udelay(1) = 1ms */
-> >  
-> > @@ -1138,15 +1141,45 @@ static struct clk ecspi_main_clk = {
-> >  	.set_parent = clk_ecspi_set_parent,
-> >  };
-> >  
-> > +#define SDHC_SET_PARENT_SHORT(name, parent2, bitsname)			\
-> > +static int clk_##name##_set_parent(struct clk *clk, struct clk *parent)	\
-> > +{									\
-> > +	u32 reg;							\
-> > +									\
-> > +	reg = __raw_readl(MXC_CCM_CSCMR1);				\
-> > +	if (parent == &esdhc1_clk)					\
-> > +		reg &= ~MXC_CCM_CSCMR1_##bitsname##_CLK_SEL;		\
-> > +	else if (parent == &parent2)					\
-> > +		reg |= MXC_CCM_CSCMR1_##bitsname##_CLK_SEL;		\
-> > +	else								\
-> > +		return -EINVAL;						\
-> > +	__raw_writel(reg, MXC_CCM_CSCMR1);				\
-> > +									\
-> > +	return 0;							\
-> > +}
-> 
-> Please don't do this. I should have rejected this kind of stuff for the
-> i.MX23/28. This ## stuff looks short in the source code but expands to
-> duplicated binary code.
-The macro way is widely used in this file. Happy that it'll get re-structure.
-> Also it's hard to make changes in such code.
-Yes, and not that readable.
-> 
-> To answer your question about cleaning up the i.MX clock code you asked
-> few days ago: Yes, I definitely want to proceed on this once Jeremys
-> patches are ready. Then this can become a clock multiplexer consuming
-> not much space in both binary and source code.
-Looking for that.
-> 
-> For now I suggest that you just duplicate the code in real functions
-> without macro voodoo.
-ok. I'll re-send the patch.
+I would hope that the quirks can be simpler than this still, without
+the need to call any function pointers while using the device, or
+quirk specific sysfs directories.
 
-Thanks
-Richard
-> 
-> Sascha
-> 
-> > +
-> >  /* eSDHC */
-> >  CLK_GET_RATE(esdhc1, 1, ESDHC1_MSHC1)
-> >  CLK_SET_PARENT(esdhc1, 1, ESDHC1_MSHC1)
-> >  CLK_SET_RATE(esdhc1, 1, ESDHC1_MSHC1)
-> >  
-> > +/* mx51 specific */
-> >  CLK_GET_RATE(esdhc2, 1, ESDHC2_MSHC2)
-> >  CLK_SET_PARENT(esdhc2, 1, ESDHC2_MSHC2)
-> >  CLK_SET_RATE(esdhc2, 1, ESDHC2_MSHC2)
-> >  
-> > +SDHC_SET_PARENT_SHORT(esdhc3, esdhc2_clk, ESDHC3)
-> > +SDHC_SET_PARENT_SHORT(esdhc4, esdhc2_clk, ESDHC4)
-> > +
-> > +/* mx53 specific */
-> > +SDHC_SET_PARENT_SHORT(esdhc2_mx53, esdhc3_mx53_clk, ESDHC2_MSHC2_MX53)
-> > +
-> > +CLK_GET_RATE(esdhc3_mx53, 1, ESDHC3_MX53)
-> > +CLK_SET_PARENT(esdhc3_mx53, 1, ESDHC3_MX53)
-> > +CLK_SET_RATE(esdhc3_mx53, 1, ESDHC3_MX53)
-> > +
-> > +SDHC_SET_PARENT_SHORT(esdhc4_mx53, esdhc3_mx53_clk, ESDHC4)
-> > +
-> >  #define DEFINE_CLOCK_FULL(name, i, er, es, gr, sr, e, d, p, s)		\
-> >  	static struct clk name = {					\
-> >  		.id		= i,					\
-> > @@ -1251,9 +1284,62 @@ DEFINE_CLOCK_MAX(esdhc1_clk, 0, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG1_OFFSET,
-> >  	clk_esdhc1, &pll2_sw_clk, &esdhc1_ipg_clk);
-> >  DEFINE_CLOCK_FULL(esdhc2_ipg_clk, 1, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG2_OFFSET,
-> >  	NULL,  NULL, _clk_max_enable, _clk_max_disable, &ipg_clk, NULL);
-> > +DEFINE_CLOCK_FULL(esdhc3_ipg_clk, 2, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG4_OFFSET,
-> > +	NULL,  NULL, _clk_max_enable, _clk_max_disable, &ipg_clk, NULL);
-> > +DEFINE_CLOCK_FULL(esdhc4_ipg_clk, 3, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG6_OFFSET,
-> > +	NULL,  NULL, _clk_max_enable, _clk_max_disable, &ipg_clk, NULL);
-> > +
-> > +/* mx51 specific */
-> >  DEFINE_CLOCK_MAX(esdhc2_clk, 1, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG3_OFFSET,
-> >  	clk_esdhc2, &pll2_sw_clk, &esdhc2_ipg_clk);
-> >  
-> > +static struct clk esdhc3_clk = {
-> > +	.id = 2,
-> > +	.parent = &esdhc1_clk,
-> > +	.set_parent = clk_esdhc3_set_parent,
-> > +	.enable_reg = MXC_CCM_CCGR3,
-> > +	.enable_shift = MXC_CCM_CCGRx_CG5_OFFSET,
-> > +	.enable  = _clk_max_enable,
-> > +	.disable = _clk_max_disable,
-> > +	.secondary = &esdhc3_ipg_clk,
-> > +};
-> > +static struct clk esdhc4_clk = {
-> > +	.id = 3,
-> > +	.parent = &esdhc1_clk,
-> > +	.set_parent = clk_esdhc4_set_parent,
-> > +	.enable_reg = MXC_CCM_CCGR3,
-> > +	.enable_shift = MXC_CCM_CCGRx_CG7_OFFSET,
-> > +	.enable  = _clk_max_enable,
-> > +	.disable = _clk_max_disable,
-> > +	.secondary = &esdhc4_ipg_clk,
-> > +};
-> > +
-> > +/* mx53 specific */
-> > +static struct clk esdhc2_mx53_clk = {
-> > +	.id = 2,
-> > +	.parent = &esdhc1_clk,
-> > +	.set_parent = clk_esdhc2_mx53_set_parent,
-> > +	.enable_reg = MXC_CCM_CCGR3,
-> > +	.enable_shift = MXC_CCM_CCGRx_CG3_OFFSET,
-> > +	.enable  = _clk_max_enable,
-> > +	.disable = _clk_max_disable,
-> > +	.secondary = &esdhc3_ipg_clk,
-> > +};
-> > +
-> > +DEFINE_CLOCK_MAX(esdhc3_mx53_clk, 2, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG5_OFFSET,
-> > +	clk_esdhc3_mx53, &pll2_sw_clk, &esdhc2_ipg_clk);
-> > +
-> > +static struct clk esdhc4_mx53_clk = {
-> > +	.id = 3,
-> > +	.parent = &esdhc1_clk,
-> > +	.set_parent = clk_esdhc4_mx53_set_parent,
-> > +	.enable_reg = MXC_CCM_CCGR3,
-> > +	.enable_shift = MXC_CCM_CCGRx_CG7_OFFSET,
-> > +	.enable  = _clk_max_enable,
-> > +	.disable = _clk_max_disable,
-> > +	.secondary = &esdhc4_ipg_clk,
-> > +};
-> > +
-> >  DEFINE_CLOCK(mipi_esc_clk, 0, MXC_CCM_CCGR4, MXC_CCM_CCGRx_CG5_OFFSET, NULL, NULL, NULL, &pll2_sw_clk);
-> >  DEFINE_CLOCK(mipi_hsc2_clk, 0, MXC_CCM_CCGR4, MXC_CCM_CCGRx_CG4_OFFSET, NULL, NULL, &mipi_esc_clk, &pll2_sw_clk);
-> >  DEFINE_CLOCK(mipi_hsc1_clk, 0, MXC_CCM_CCGR4, MXC_CCM_CCGRx_CG3_OFFSET, NULL, NULL, &mipi_hsc2_clk, &pll2_sw_clk);
-> > @@ -1312,6 +1398,8 @@ static struct clk_lookup mx51_lookups[] = {
-> >  	_REGISTER_CLOCK("imx51-cspi.0", NULL, cspi_clk)
-> >  	_REGISTER_CLOCK("sdhci-esdhc-imx.0", NULL, esdhc1_clk)
-> >  	_REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_clk)
-> > +	_REGISTER_CLOCK("sdhci-esdhc-imx.2", NULL, esdhc3_clk)
-> > +	_REGISTER_CLOCK("sdhci-esdhc-imx.3", NULL, esdhc4_clk)
-> >  	_REGISTER_CLOCK(NULL, "cpu_clk", cpu_clk)
-> >  	_REGISTER_CLOCK(NULL, "iim_clk", iim_clk)
-> >  	_REGISTER_CLOCK("imx2-wdt.0", NULL, dummy_clk)
-> > @@ -1332,7 +1420,9 @@ static struct clk_lookup mx53_lookups[] = {
-> >  	_REGISTER_CLOCK("imx-i2c.0", NULL, i2c1_clk)
-> >  	_REGISTER_CLOCK("imx-i2c.1", NULL, i2c2_clk)
-> >  	_REGISTER_CLOCK("sdhci-esdhc-imx.0", NULL, esdhc1_clk)
-> > -	_REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_clk)
-> > +	_REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_mx53_clk)
-> > +	_REGISTER_CLOCK("sdhci-esdhc-imx.2", NULL, esdhc3_mx53_clk)
-> > +	_REGISTER_CLOCK("sdhci-esdhc-imx.3", NULL, esdhc4_mx53_clk)
-> >  	_REGISTER_CLOCK("imx53-ecspi.0", NULL, ecspi1_clk)
-> >  	_REGISTER_CLOCK("imx53-ecspi.1", NULL, ecspi2_clk)
-> >  	_REGISTER_CLOCK("imx53-cspi.0", NULL, cspi_clk)
-> > @@ -1425,6 +1515,14 @@ int __init mx53_clocks_init(unsigned long ckil, unsigned long osc,
-> >  	mx53_revision();
-> >  	clk_disable(&iim_clk);
-> >  
-> > +	/* Set SDHC parents to be PLL2 */
-> > +	clk_set_parent(&esdhc1_clk, &pll2_sw_clk);
-> > +	clk_set_parent(&esdhc3_mx53_clk, &pll2_sw_clk);
-> > +
-> > +	/* set SDHC root clock as 200MHZ*/
-> > +	clk_set_rate(&esdhc1_clk, 200000000);
-> > +	clk_set_rate(&esdhc3_mx53_clk, 200000000);
-> > +
-> >  	/* System timer */
-> >  	mxc_timer_init(&gpt_clk, MX53_IO_ADDRESS(MX53_GPT1_BASE_ADDR),
-> >  		MX53_INT_GPT);
-> > diff --git a/arch/arm/mach-mx5/crm_regs.h b/arch/arm/mach-mx5/crm_regs.h
-> > index b462c22..87c0c58 100644
-> > --- a/arch/arm/mach-mx5/crm_regs.h
-> > +++ b/arch/arm/mach-mx5/crm_regs.h
-> > @@ -217,9 +217,12 @@
-> >  #define MXC_CCM_CSCMR1_ESDHC1_MSHC1_CLK_SEL_OFFSET	(20)
-> >  #define MXC_CCM_CSCMR1_ESDHC1_MSHC1_CLK_SEL_MASK	(0x3 << 20)
-> >  #define MXC_CCM_CSCMR1_ESDHC3_CLK_SEL			(0x1 << 19)
-> > +#define MXC_CCM_CSCMR1_ESDHC2_MSHC2_MX53_CLK_SEL	(0x1 << 19)
-> >  #define MXC_CCM_CSCMR1_ESDHC4_CLK_SEL			(0x1 << 18)
-> >  #define MXC_CCM_CSCMR1_ESDHC2_MSHC2_CLK_SEL_OFFSET	(16)
-> >  #define MXC_CCM_CSCMR1_ESDHC2_MSHC2_CLK_SEL_MASK	(0x3 << 16)
-> > +#define MXC_CCM_CSCMR1_ESDHC3_MX53_CLK_SEL_OFFSET	(16)
-> > +#define MXC_CCM_CSCMR1_ESDHC3_MX53_CLK_SEL_MASK		(0x3 << 16)
-> >  #define MXC_CCM_CSCMR1_SSI1_CLK_SEL_OFFSET		(14)
-> >  #define MXC_CCM_CSCMR1_SSI1_CLK_SEL_MASK		(0x3 << 14)
-> >  #define MXC_CCM_CSCMR1_SSI2_CLK_SEL_OFFSET		(12)
-> > @@ -271,6 +274,10 @@
-> >  #define MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PRED_MASK	(0x7 << 22)
-> >  #define MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PODF_OFFSET	(19)
-> >  #define MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PODF_MASK	(0x7 << 19)
-> > +#define MXC_CCM_CSCDR1_ESDHC3_MX53_CLK_PRED_OFFSET	(22)
-> > +#define MXC_CCM_CSCDR1_ESDHC3_MX53_CLK_PRED_MASK	(0x7 << 22)
-> > +#define MXC_CCM_CSCDR1_ESDHC3_MX53_CLK_PODF_OFFSET	(19)
-> > +#define MXC_CCM_CSCDR1_ESDHC3_MX53_CLK_PODF_MASK	(0x7 << 19)
-> >  #define MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PRED_OFFSET	(16)
-> >  #define MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PRED_MASK	(0x7 << 16)
-> >  #define MXC_CCM_CSCDR1_PGC_CLK_PODF_OFFSET		(14)
-> > -- 
-> > 1.7.1
-> > 
-> > 
-> > 
-> 
-> -- 
-> Pengutronix e.K.                           |                             |
-> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-> Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-> Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+What I meant is to have a single function pointer that can get
+called when detecting a specific known card. All this function
+does is to set values and flags that we can export either through
+common attributes of block devices (e.g. preferred erase size),
+or attributes specific to mmc devices (e.g. the toshiba hack, as
+a bool attribute).
+
+An obvious attribute would be the minimum size of an atomic
+page update. By default this could be 32KB, because any device
+should support that (FAT32 cannot have larger clusters). A
+card specific quirk can set it to another value, like 8KB, 16KB
+or 64KB, and file systems or other tools like mkfs can optimize
+for this value.
+
+I would like the flags like "don't submit requests spanning
+this boundary" and "make all writes below this size" to be defined
+in terms of the regular sizes we already know about, like the
+page size or the erase size.
+
+	Arnd
