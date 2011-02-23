@@ -1,70 +1,150 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: MMC quirks relating to performance/lifetime.
-Date: Wed, 23 Feb 2011 04:19:50 -0600
-Message-ID: <AANLkTinfWiRaGruP8cM44c62T8svVOKsFhi4Dmg8yzEa@mail.gmail.com>
-References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
-	<201102201539.08496.arnd@arndb.de>
-	<AANLkTi=ZOUrNoT1W1n3d+9KTMewKZ3kxo71AQsas9OpD@mail.gmail.com>
-	<201102221800.17196.arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: [PATCH 1/5] mmc: sdhci-esdhc-imx: add support for write protect on custom GPIO
+Date: Wed, 23 Feb 2011 14:51:54 +0100
+Message-ID: <1298469118-25282-2-git-send-email-w.sang@pengutronix.de>
+References: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og114.obsmtp.com ([64.18.0.28]:59365 "EHLO
-	exprod5og114.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752029Ab1BWKTy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Feb 2011 05:19:54 -0500
-In-Reply-To: <201102221800.17196.arnd@arndb.de>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:35663 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754101Ab1BWNwA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Feb 2011 08:52:00 -0500
+In-Reply-To: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>
 
-On Tue, Feb 22, 2011 at 11:00 AM, Arnd Bergmann <arnd@arndb.de> wrote:
->>
->> Do you think there is any need for runtime tuning of the MMC
->> workarounds (disregarding ones that really belong in the I/O
->> scheduler)? Should the workarounds be simply platform callbacks, or
->> should they be something heftier ("policies")?
->
-> The platform hook seems the wrong place, because you might use
-> the same chip in multiple platforms, and a single platform might
-> have a large number of different boards, all of which require
-> separate workarounds.
->
+Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
+Tested-by: Marc Reilly <marc@cpdesign.com.au>
+Tested-by: Eric Benard <eric@eukrea.com>
+---
 
-That's a good point. At best it would result in massive copy-paste/
+change since last version:
 
-> A per-card quirk table does not seem so bad, we have that in
-> other subsystems as well. I wouldn't necessarily make it
-> a list of possible quirks, but rather a __devinit function that
-> is called for a new card on insertion, in order to tweak various
-> parameters.
->
+* improve kerneldoc
 
-That sounds good! In fact, for any quirks enabled for a particular
-card, I'll expose the tuneables through sysfs attributes, something
-like /sys/block/mmcblk0/device/quirks/quirk-name/attr-names.
+ arch/arm/plat-mxc/include/mach/esdhc.h |   10 +++++-
+ drivers/mmc/host/sdhci-esdhc-imx.c     |   52 +++++++++++++++++++++++++-------
+ 2 files changed, 50 insertions(+), 12 deletions(-)
 
-Quirks will have block intervals and access size intervals over which
-they are valid, along with any other quirk-specific parameter.
-Interval overlap will not be allowed for quirks in the same operation
-type (r/w/e). The goal here is to make the changes to issue_*_rq as
-small as possible, and not to pollute block.c at all with the quirks
-stuff. Quirks are looked up inside issue_*_rq based on req type and
-[start,end) interval. The resulting found quirks structure will
-contain a callback used inside issue_*_rq to modify mmc block request
-structures prior to generating actual MMC commands.
+diff --git a/arch/arm/plat-mxc/include/mach/esdhc.h b/arch/arm/plat-mxc/include/mach/esdhc.h
+index a48a9aa..47da109 100644
+--- a/arch/arm/plat-mxc/include/mach/esdhc.h
++++ b/arch/arm/plat-mxc/include/mach/esdhc.h
+@@ -10,7 +10,15 @@
+ #ifndef __ASM_ARCH_IMX_ESDHC_H
+ #define __ASM_ARCH_IMX_ESDHC_H
+ 
++/**
++ * struct esdhc_platform_data - optional platform data for esdhc on i.MX
++ *
++ * strongly recommended for i.MX25/35, not needed for other variants
++ *
++ * @wp_gpio:	gpio for write_protect (-EINVAL if unused)
++ */
++
+ struct esdhc_platform_data {
+-	unsigned int wp_gpio;	/* write protect pin */
++	unsigned int wp_gpio;
+ };
+ #endif /* __ASM_ARCH_IMX_ESDHC_H */
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 9b82910..65df00b 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -15,9 +15,11 @@
+ #include <linux/delay.h>
+ #include <linux/err.h>
+ #include <linux/clk.h>
++#include <linux/gpio.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdhci-pltfm.h>
+ #include <mach/hardware.h>
++#include <mach/esdhc.h>
+ #include "sdhci.h"
+ #include "sdhci-pltfm.h"
+ #include "sdhci-esdhc.h"
+@@ -100,10 +102,31 @@ static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
+ 	return clk_get_rate(pltfm_host->clk) / 256 / 16;
+ }
+ 
++static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
++{
++	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
++
++	if (boarddata && gpio_is_valid(boarddata->wp_gpio))
++		return gpio_get_value(boarddata->wp_gpio);
++	else
++		return -ENOSYS;
++}
++
++static struct sdhci_ops sdhci_esdhc_ops = {
++	.read_w = esdhc_readw_le,
++	.write_w = esdhc_writew_le,
++	.write_b = esdhc_writeb_le,
++	.set_clock = esdhc_set_clock,
++	.get_max_clock = esdhc_pltfm_get_max_clock,
++	.get_min_clock = esdhc_pltfm_get_min_clock,
++};
++
+ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pdata)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
+ 	struct clk *clk;
++	int err;
+ 
+ 	clk = clk_get(mmc_dev(host->mmc), NULL);
+ 	if (IS_ERR(clk)) {
+@@ -116,9 +139,21 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
+ 	if (cpu_is_mx35() || cpu_is_mx51())
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+ 
+-	/* Fix errata ENGcm07207 which is present on i.MX25 and i.MX35 */
+-	if (cpu_is_mx25() || cpu_is_mx35())
++	if (cpu_is_mx25() || cpu_is_mx35()) {
++		/* Fix errata ENGcm07207 present on i.MX25 and i.MX35 */
+ 		host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK;
++		/* write_protect can't be routed to controller, use gpio */
++		sdhci_esdhc_ops.get_ro = esdhc_pltfm_get_ro;
++	}
++
++	if (boarddata) {
++		err = gpio_request_one(boarddata->wp_gpio, GPIOF_IN, "ESDHC_WP");
++		if (err) {
++			dev_warn(mmc_dev(host->mmc),
++				"no write-protect pin available!\n");
++			boarddata->wp_gpio = err;
++		}
++	}
+ 
+ 	return 0;
+ }
+@@ -126,20 +161,15 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
+ static void esdhc_pltfm_exit(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
++
++	if (boarddata && gpio_is_valid(boarddata->wp_gpio))
++		gpio_free(boarddata->wp_gpio);
+ 
+ 	clk_disable(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
+ }
+ 
+-static struct sdhci_ops sdhci_esdhc_ops = {
+-	.read_w = esdhc_readw_le,
+-	.write_w = esdhc_writew_le,
+-	.write_b = esdhc_writeb_le,
+-	.set_clock = esdhc_set_clock,
+-	.get_max_clock = esdhc_pltfm_get_max_clock,
+-	.get_min_clock = esdhc_pltfm_get_min_clock,
+-};
+-
+ struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+ 	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_ADMA,
+ 	/* ADMA has issues. Might be fixable */
+-- 
+1.7.2.3
 
-Quirks consist of a callback called inside of mmc issue_*_rq,
-configurable attributes, and the sysfs interface. Quirk groups are
-defined per-card. At card insertion time, a matching quirk group is
-found, and is enabled. The quirk group enable function then enables
-the relevant quirks with the right parameters (adds them to per
-mmc_blk_data quirk interval tree). Some sane defaults for the tunables
-are used. If the tunables are modified through sysfs, care is taken
-that an interval overlap never happens, otherwise the tunable is not
-modified and a kernel error message is logged.
-
-I hope I explained the tentative idea clearly... Thoughts?
-
-A
