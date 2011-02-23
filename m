@@ -1,290 +1,98 @@
-From: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Subject: [PATCH v3 2/5] OMAP3: hwmod data: Add HSMMC
-Date: Wed, 23 Feb 2011 23:17:08 +0530
-Message-ID: <1298483231-29622-3-git-send-email-kishore.kadiyala@ti.com>
-References: <1298483231-29622-1-git-send-email-kishore.kadiyala@ti.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1298483231-29622-1-git-send-email-kishore.kadiyala@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, Rajendra Nayak <rnayak@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Benoit Cousson <b-cousson@ti.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Wed, 23 Feb 2011 16:26:12 -0600
+Message-ID: <AANLkTimZDDo0xa2CzgHhH1LSWJ-KT0QgOmEAKs2nJK8x@mail.gmail.com>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
+	<201102221800.17196.arnd@arndb.de>
+	<AANLkTinfWiRaGruP8cM44c62T8svVOKsFhi4Dmg8yzEa@mail.gmail.com>
+	<201102231709.05036.arnd@arndb.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from exprod5og109.obsmtp.com ([64.18.0.188]:38206 "EHLO
+	exprod5og109.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932682Ab1BWW31 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Feb 2011 17:29:27 -0500
+In-Reply-To: <201102231709.05036.arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
-From: Paul Walmsley <paul@pwsan.com>
+On Wed, Feb 23, 2011 at 10:09 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Wednesday 23 February 2011, Andrei Warkentin wrote:
+>> That sounds good! In fact, for any quirks enabled for a particular
+>> card, I'll expose the tuneables through sysfs attributes, something
+>> like /sys/block/mmcblk0/device/quirks/quirk-name/attr-names.
+>>
+>> Quirks will have block intervals and access size intervals over which
+>> they are valid, along with any other quirk-specific parameter.
+>> Interval overlap will not be allowed for quirks in the same operation
+>> type (r/w/e). The goal here is to make the changes to issue_*_rq as
+>> small as possible, and not to pollute block.c at all with the quirks
+>> stuff. Quirks are looked up inside issue_*_rq based on req type and
+>> [start,end) interval. The resulting found quirks structure will
+>> contain a callback used inside issue_*_rq to modify mmc block request
+>> structures prior to generating actual MMC commands.
+>>
+>> Quirks consist of a callback called inside of mmc issue_*_rq,
+>> configurable attributes, and the sysfs interface. Quirk groups are
+>> defined per-card. At card insertion time, a matching quirk group is
+>> found, and is enabled. The quirk group enable function then enables
+>> the relevant quirks with the right parameters (adds them to per
+>> mmc_blk_data quirk interval tree). Some sane defaults for the tunables
+>> are used. If the tunables are modified through sysfs, care is taken
+>> that an interval overlap never happens, otherwise the tunable is not
+>> modified and a kernel error message is logged.
+>>
+>> I hope I explained the tentative idea clearly... Thoughts?
+>
 
-Update the omap3 hwmod data with the HSMMC info.
+> I would hope that the quirks can be simpler than this still, without
+> the need to call any function pointers while using the device, or
+> quirk specific sysfs directories.
+>
 
-Signed-off-by: Paul Walmsley <paul@pwsan.com>
-Signed-off-by: Kevin Hilman <khilman@deeprootsystems.com>
-Signed-off-by: Rajendra Nayak <rnayak@ti.com>
-Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Cc: Benoit Cousson <b-cousson@ti.com>
----
- arch/arm/mach-omap2/omap_hwmod_3xxx_data.c |  209 ++++++++++++++++++++++++++++
- arch/arm/mach-omap2/prcm-common.h          |    4 +
- 2 files changed, 213 insertions(+), 0 deletions(-)
+I'll skip the sysfs part from the first RFC patch. I think this
+complicates what I'm trying to achieve and makes this whole thing look
+bigger than it is.
 
-diff --git a/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c b/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c
-index 879f55f..c8f2725 100644
---- a/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c
-+++ b/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c
-@@ -61,6 +61,9 @@ static struct omap_hwmod omap34xx_mcspi1;
- static struct omap_hwmod omap34xx_mcspi2;
- static struct omap_hwmod omap34xx_mcspi3;
- static struct omap_hwmod omap34xx_mcspi4;
-+static struct omap_hwmod omap3xxx_mmc1_hwmod;
-+static struct omap_hwmod omap3xxx_mmc2_hwmod;
-+static struct omap_hwmod omap3xxx_mmc3_hwmod;
- static struct omap_hwmod am35xx_usbhsotg_hwmod;
- 
- static struct omap_hwmod omap3xxx_dma_system_hwmod;
-@@ -138,6 +141,63 @@ static struct omap_hwmod_ocp_if omap3xxx_l4_core__l4_wkup = {
- 	.user	= OCP_USER_MPU | OCP_USER_SDMA,
- };
- 
-+/* L4 CORE -> MMC1 interface */
-+static struct omap_hwmod_addr_space omap3xxx_mmc1_addr_space[] = {
-+	{
-+		.pa_start	= 0x4809c000,
-+		.pa_end		= 0x4809c1ff,
-+		.flags		= ADDR_TYPE_RT,
-+	},
-+};
-+
-+static struct omap_hwmod_ocp_if omap3xxx_l4_core__mmc1 = {
-+	.master		= &omap3xxx_l4_core_hwmod,
-+	.slave		= &omap3xxx_mmc1_hwmod,
-+	.clk		= "mmchs1_ick",
-+	.addr		= omap3xxx_mmc1_addr_space,
-+	.addr_cnt	= ARRAY_SIZE(omap3xxx_mmc1_addr_space),
-+	.user		= OCP_USER_MPU | OCP_USER_SDMA,
-+	.flags		= OMAP_FIREWALL_L4
-+};
-+
-+/* L4 CORE -> MMC2 interface */
-+static struct omap_hwmod_addr_space omap3xxx_mmc2_addr_space[] = {
-+	{
-+		.pa_start	= 0x480b4000,
-+		.pa_end		= 0x480b41ff,
-+		.flags		= ADDR_TYPE_RT,
-+	},
-+};
-+
-+static struct omap_hwmod_ocp_if omap3xxx_l4_core__mmc2 = {
-+	.master		= &omap3xxx_l4_core_hwmod,
-+	.slave		= &omap3xxx_mmc2_hwmod,
-+	.clk		= "mmchs2_ick",
-+	.addr		= omap3xxx_mmc2_addr_space,
-+	.addr_cnt	= ARRAY_SIZE(omap3xxx_mmc2_addr_space),
-+	.user		= OCP_USER_MPU | OCP_USER_SDMA,
-+	.flags		= OMAP_FIREWALL_L4
-+};
-+
-+/* L4 CORE -> MMC3 interface */
-+static struct omap_hwmod_addr_space omap3xxx_mmc3_addr_space[] = {
-+	{
-+		.pa_start	= 0x480ad000,
-+		.pa_end		= 0x480ad1ff,
-+		.flags		= ADDR_TYPE_RT,
-+	},
-+};
-+
-+static struct omap_hwmod_ocp_if omap3xxx_l4_core__mmc3 = {
-+	.master		= &omap3xxx_l4_core_hwmod,
-+	.slave		= &omap3xxx_mmc3_hwmod,
-+	.clk		= "mmchs3_ick",
-+	.addr		= omap3xxx_mmc3_addr_space,
-+	.addr_cnt	= ARRAY_SIZE(omap3xxx_mmc3_addr_space),
-+	.user		= OCP_USER_MPU | OCP_USER_SDMA,
-+	.flags		= OMAP_FIREWALL_L4
-+};
-+
- /* L4 CORE -> UART1 interface */
- static struct omap_hwmod_addr_space omap3xxx_uart1_addr_space[] = {
- 	{
-@@ -1788,11 +1848,160 @@ static struct omap_hwmod am35xx_usbhsotg_hwmod = {
- 	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_OMAP3430ES3_1)
- };
- 
-+/* MMC/SD/SDIO common */
-+
-+static struct omap_hwmod_class_sysconfig mmc_sysc = {
-+	.rev_offs	= 0x1fc,
-+	.sysc_offs	= 0x10,
-+	.syss_offs	= 0x14,
-+	.sysc_flags	= (SYSC_HAS_CLOCKACTIVITY | SYSC_HAS_SIDLEMODE |
-+			   SYSC_HAS_ENAWAKEUP | SYSC_HAS_SOFTRESET |
-+			   SYSC_HAS_AUTOIDLE | SYSS_HAS_RESET_STATUS),
-+	.idlemodes	= (SIDLE_FORCE | SIDLE_NO | SIDLE_SMART),
-+	.sysc_fields    = &omap_hwmod_sysc_type1,
-+};
-+
-+static struct omap_hwmod_class mmc_class = {
-+	.name = "mmc",
-+	.sysc = &mmc_sysc,
-+};
-+
-+/* MMC/SD/SDIO1 */
-+
-+static struct omap_hwmod_irq_info mmc1_mpu_irqs[] = {
-+	{ .irq = 83, },
-+};
-+
-+static struct omap_hwmod_dma_info mmc1_sdma_reqs[] = {
-+	{ .name = "tx",	.dma_req = 61, },
-+	{ .name = "rx",	.dma_req = 62, },
-+};
-+
-+static struct omap_hwmod_opt_clk mmc1_opt_clks[] = {
-+	{ .role = "dbck", .clk = "omap_32k_fck", },
-+};
-+
-+static struct omap_hwmod_ocp_if *omap3xxx_mmc1_slaves[] = {
-+	&omap3xxx_l4_core__mmc1,
-+};
-+
-+static struct omap_hwmod omap3xxx_mmc1_hwmod = {
-+	.name		= "mmc1",
-+	.mpu_irqs	= mmc1_mpu_irqs,
-+	.mpu_irqs_cnt	= ARRAY_SIZE(mmc1_mpu_irqs),
-+	.sdma_reqs	= mmc1_sdma_reqs,
-+	.sdma_reqs_cnt	= ARRAY_SIZE(mmc1_sdma_reqs),
-+	.opt_clks	= mmc1_opt_clks,
-+	.opt_clks_cnt	= ARRAY_SIZE(mmc1_opt_clks),
-+	.main_clk	= "mmchs1_fck",
-+	.prcm		= {
-+		.omap2 = {
-+			.module_offs = CORE_MOD,
-+			.prcm_reg_id = 1,
-+			.module_bit = OMAP3430_EN_MMC1_SHIFT,
-+			.idlest_reg_id = 1,
-+			.idlest_idle_bit = OMAP3430_ST_MMC1_SHIFT,
-+		},
-+	},
-+	.slaves		= omap3xxx_mmc1_slaves,
-+	.slaves_cnt	= ARRAY_SIZE(omap3xxx_mmc1_slaves),
-+	.class		= &mmc_class,
-+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_OMAP3430),
-+};
-+
-+/* MMC/SD/SDIO2 */
-+
-+static struct omap_hwmod_irq_info mmc2_mpu_irqs[] = {
-+	{ .irq = INT_24XX_MMC2_IRQ, },
-+};
-+
-+static struct omap_hwmod_dma_info mmc2_sdma_reqs[] = {
-+	{ .name = "tx",	.dma_req = 47, },
-+	{ .name = "rx",	.dma_req = 48, },
-+};
-+
-+static struct omap_hwmod_opt_clk mmc2_opt_clks[] = {
-+	{ .role = "dbck", .clk = "omap_32k_fck", },
-+};
-+
-+static struct omap_hwmod_ocp_if *omap3xxx_mmc2_slaves[] = {
-+	&omap3xxx_l4_core__mmc2,
-+};
-+
-+static struct omap_hwmod omap3xxx_mmc2_hwmod = {
-+	.name		= "mmc2",
-+	.mpu_irqs	= mmc2_mpu_irqs,
-+	.mpu_irqs_cnt	= ARRAY_SIZE(mmc2_mpu_irqs),
-+	.sdma_reqs	= mmc2_sdma_reqs,
-+	.sdma_reqs_cnt	= ARRAY_SIZE(mmc2_sdma_reqs),
-+	.opt_clks	= mmc2_opt_clks,
-+	.opt_clks_cnt	= ARRAY_SIZE(mmc2_opt_clks),
-+	.main_clk	= "mmchs2_fck",
-+	.prcm		= {
-+		.omap2 = {
-+			.module_offs = CORE_MOD,
-+			.prcm_reg_id = 1,
-+			.module_bit = OMAP3430_EN_MMC2_SHIFT,
-+			.idlest_reg_id = 1,
-+			.idlest_idle_bit = OMAP3430_ST_MMC2_SHIFT,
-+		},
-+	},
-+	.slaves		= omap3xxx_mmc2_slaves,
-+	.slaves_cnt	= ARRAY_SIZE(omap3xxx_mmc2_slaves),
-+	.class		= &mmc_class,
-+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_OMAP3430),
-+};
-+
-+/* MMC/SD/SDIO3 */
-+
-+static struct omap_hwmod_irq_info mmc3_mpu_irqs[] = {
-+	{ .irq = 94, },
-+};
-+
-+static struct omap_hwmod_dma_info mmc3_sdma_reqs[] = {
-+	{ .name = "tx",	.dma_req = 77, },
-+	{ .name = "rx",	.dma_req = 78, },
-+};
-+
-+static struct omap_hwmod_opt_clk mmc3_opt_clks[] = {
-+	{ .role = "dbck", .clk = "omap_32k_fck", },
-+};
-+
-+static struct omap_hwmod_ocp_if *omap3xxx_mmc3_slaves[] = {
-+	&omap3xxx_l4_core__mmc3,
-+};
-+
-+static struct omap_hwmod omap3xxx_mmc3_hwmod = {
-+	.name		= "mmc3",
-+	.mpu_irqs	= mmc3_mpu_irqs,
-+	.mpu_irqs_cnt	= ARRAY_SIZE(mmc3_mpu_irqs),
-+	.sdma_reqs	= mmc3_sdma_reqs,
-+	.sdma_reqs_cnt	= ARRAY_SIZE(mmc3_sdma_reqs),
-+	.opt_clks	= mmc3_opt_clks,
-+	.opt_clks_cnt	= ARRAY_SIZE(mmc3_opt_clks),
-+	.main_clk	= "mmchs3_fck",
-+	.prcm		= {
-+		.omap2 = {
-+			.prcm_reg_id = 1,
-+			.module_bit = OMAP3430_EN_MMC3_SHIFT,
-+			.idlest_reg_id = 1,
-+			.idlest_idle_bit = OMAP3430_ST_MMC3_SHIFT,
-+		},
-+	},
-+	.slaves		= omap3xxx_mmc3_slaves,
-+	.slaves_cnt	= ARRAY_SIZE(omap3xxx_mmc3_slaves),
-+	.class		= &mmc_class,
-+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_OMAP3430),
-+};
-+
- static __initdata struct omap_hwmod *omap3xxx_hwmods[] = {
- 	&omap3xxx_l3_main_hwmod,
- 	&omap3xxx_l4_core_hwmod,
- 	&omap3xxx_l4_per_hwmod,
- 	&omap3xxx_l4_wkup_hwmod,
-+	&omap3xxx_mmc1_hwmod,
-+	&omap3xxx_mmc2_hwmod,
-+	&omap3xxx_mmc3_hwmod,
- 	&omap3xxx_mpu_hwmod,
- 	&omap3xxx_iva_hwmod,
- 	&omap3xxx_wd_timer2_hwmod,
-diff --git a/arch/arm/mach-omap2/prcm-common.h b/arch/arm/mach-omap2/prcm-common.h
-index 87486f5..098e659 100644
---- a/arch/arm/mach-omap2/prcm-common.h
-+++ b/arch/arm/mach-omap2/prcm-common.h
-@@ -191,6 +191,8 @@
- #define OMAP3430_AUTOIDLE_MASK				(1 << 0)
- 
- /* CM_FCLKEN1_CORE, CM_ICLKEN1_CORE, PM_WKEN1_CORE shared bits */
-+#define OMAP3430_EN_MMC3_MASK				(1 << 30)
-+#define OMAP3430_EN_MMC3_SHIFT				30
- #define OMAP3430_EN_MMC2_MASK				(1 << 25)
- #define OMAP3430_EN_MMC2_SHIFT				25
- #define OMAP3430_EN_MMC1_MASK				(1 << 24)
-@@ -231,6 +233,8 @@
- #define OMAP3430_EN_HSOTGUSB_SHIFT			4
- 
- /* PM_WKST1_CORE, CM_IDLEST1_CORE shared bits */
-+#define OMAP3430_ST_MMC3_SHIFT				30
-+#define OMAP3430_ST_MMC3_MASK				(1 << 30)
- #define OMAP3430_ST_MMC2_SHIFT				25
- #define OMAP3430_ST_MMC2_MASK				(1 << 25)
- #define OMAP3430_ST_MMC1_SHIFT				24
--- 
-1.7.1
+> What I meant is to have a single function pointer that can get
+> called when detecting a specific known card. All this function
+> does is to set values and flags that we can export either through
+> common attributes of block devices (e.g. preferred erase size),
+> or attributes specific to mmc devices (e.g. the toshiba hack, as
+> a bool attribute).
+>
+> An obvious attribute would be the minimum size of an atomic
+> page update. By default this could be 32KB, because any device
+> should support that (FAT32 cannot have larger clusters). A
+> card specific quirk can set it to another value, like 8KB, 16KB
+> or 64KB, and file systems or other tools like mkfs can optimize
+> for this value.
+>
+> I would like the flags like "don't submit requests spanning
+> this boundary" and "make all writes below this size" to be defined
+> in terms of the regular sizes we already know about, like the
+> page size or the erase size.
+>
 
+I agree with you on the size/align issues. These are very generic
+attributes and don't need a complicated framework like I described to
+be dealt with. Ultimately they are just hints to the I/O scheduler, so
+they should be part of the block device.
+
+I am more concerned with workarounds that depend on access size (like
+the toshiba one) and that modify the MMC commands sent (using reliable
+writes, like the Toshiba one, or putting parameters differently like
+the Sandisk erase workaround). It's these kinds of workarounds that
+the quirks framework is meant to address. I don't think it's a good
+idea to pollute mmc_blk_issue_rw_rq and mmc_blk_issue_discard_rq with
+if()-elsed workarounds, because it's going to quickly complicate the
+logic, and get out of hand and unmanageable the more cards are added.
+I'm trying to avoid having to make any changes to card/block.c as part
+of making quirk workarounds. The only cost when compared to an if-else
+will be one O(log n) quirk lookup, where n is either one or something
+close that (since the search is only done for quirks per
+mmc_blk_data), and one callback invoked after "brq.data.sg_len =
+mmc_queue_map_sg(mq);" so it can patch up mrq as necessary.
