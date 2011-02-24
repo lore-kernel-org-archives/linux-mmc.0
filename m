@@ -1,122 +1,63 @@
-From: "Varadarajan, Charulatha" <charu@ti.com>
-Subject: Re: [PATCH v3 4/5] OMAP: hwmod data: Add dev_attr and use in the host driver
-Date: Thu, 24 Feb 2011 11:30:04 +0530
-Message-ID: <AANLkTimOpry8DrY19cYEoRo=WcFfzLyHHoAT_59Z5nFv@mail.gmail.com>
-References: <1298483231-29622-1-git-send-email-kishore.kadiyala@ti.com> <1298483231-29622-5-git-send-email-kishore.kadiyala@ti.com>
+From: Richard Zhao <richard.zhao@freescale.com>
+Subject: Re: [PATCH v2 5/5] mmc: sdhci-esdhc: enable esdhc on imx53
+Date: Thu, 24 Feb 2011 14:16:55 +0800
+Message-ID: <20110224061653.GA3657@b20223-02.ap.freescale.net>
+References: <1298369606-29972-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+ <1298369606-29972-5-git-send-email-Hong-Xing.Zhu@freescale.com>
+ <20110222113222.GE2755@pengutronix.de>
+ <AANLkTimbx6=YvRHFuVkmPVYvYtwME31PxXWNHNfFsVRQ@mail.gmail.com>
+ <20110222155130.GJ2755@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1298483231-29622-5-git-send-email-kishore.kadiyala@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, Benoit Cousson <b-cousson@ti.com>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:36994 "EHLO
+	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752677Ab1BXGSL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 01:18:11 -0500
+Received: from mail191-tx2 (localhost.localdomain [127.0.0.1])	by
+ mail191-tx2-R.bigfish.com (Postfix) with ESMTP id 7263519F029D	for
+ <linux-mmc@vger.kernel.org>; Thu, 24 Feb 2011 06:18:09 +0000 (UTC)
+Received: from TX2EHSMHS047.bigfish.com (unknown [10.9.14.253])	by
+ mail191-tx2.bigfish.com (Postfix) with ESMTP id 6290031008A	for
+ <linux-mmc@vger.kernel.org>; Thu, 24 Feb 2011 06:17:04 +0000 (UTC)
+Received: from de01smr01.freescale.net (de01smr01.freescale.net [10.208.0.31])
+	by de01egw01.freescale.net (8.14.3/8.14.3) with ESMTP id p1O6GvIF028313	for
+ <linux-mmc@vger.kernel.org>; Wed, 23 Feb 2011 23:16:57 -0700 (MST)
+Received: from b20223-02 (B20223-02.ap.freescale.net [10.192.242.48])	by
+ de01smr01.freescale.net (8.13.1/8.13.0) with ESMTP id p1O6Guau015605	for
+ <linux-mmc@vger.kernel.org>; Thu, 24 Feb 2011 00:16:57 -0600 (CST)
+Content-Disposition: inline
+In-Reply-To: <20110222155130.GJ2755@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Olof Johansson <olof@lixom.net>, Richard Zhu <Hong-Xing.Zhu@freescale.com>, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, linuxzsc@gmail.com
 
-Kishore,
+Hi Wolfram,
 
-On Wed, Feb 23, 2011 at 23:17, Kishore Kadiyala <kishore.kadiyala@ti.co=
-m> wrote:
-> Add a device attribute to hwmod data of omap2430, omap3, omap4.
-> Currently the device attribute holds information regarding dual volt =
-MMC card
-> support by the controller which will be later passed to the host driv=
-er via
-> platform data.
->
-> Signed-off-by: Kevin Hilman <khilman@deeprootsystems.com>
-> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-> Cc: Benoit Cousson <b-cousson@ti.com>
-> Cc: Paul Walmsley <paul@pwsan.com>
-> ---
-> =A0arch/arm/mach-omap2/omap_hwmod_2430_data.c | =A0 =A09 +++++++++
-> =A0arch/arm/mach-omap2/omap_hwmod_3xxx_data.c | =A0 12 ++++++++++++
-> =A0arch/arm/mach-omap2/omap_hwmod_44xx_data.c | =A0 16 ++++++++++++++=
-++
-> =A0arch/arm/plat-omap/include/plat/mmc.h =A0 =A0 =A0| =A0 10 ++++++++=
-++
-> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A0=
-4 ++--
-> =A05 files changed, 49 insertions(+), 2 deletions(-)
->
+On Tue, Feb 22, 2011 at 04:51:30PM +0100, Wolfram Sang wrote:
+> 
+> > > Thanks for respinning \o/ This approach looks better to me, but CCing
+> > > Olof to comment on abstraction issues if he has them. Will do a deeper
+> > > review later this week.
+> > 
+> > 
+> > I like it! Definitely the right approach. Pushing quirks down into the
+> > I/O accessors is definitely the only scalable way to handle all the
+> > various buggy controllers out there.
+> > 
+> > Acked-by: Olof Johansson <olof@lixom.net>
+> 
+> Glad to hear that. I do have a few issues though, will report them later
+> as mentioned before, it needs a bit of time.
+What issues on what SoC/board did you find? Maybe we can help debug?
 
-<<snip>>
+Thanks
+Richard
+> 
+> -- 
+> Pengutronix e.K.                           | Wolfram Sang                |
+> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
->
-> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-om=
-ap/include/plat/mmc.h
-> index e5de5d4..7853130 100644
-> --- a/arch/arm/plat-omap/include/plat/mmc.h
-> +++ b/arch/arm/plat-omap/include/plat/mmc.h
-> @@ -43,6 +43,13 @@
->
-> =A0#define OMAP_MMC_MAX_SLOTS =A0 =A0 2
->
-> +/* omap_hwmod integration data */
 
-What is omap_hwmod integration data ? Pls clarify.
 
-> +#define OMAP_HSMMC_SUPPORTS_DUAL_VOLT =A0BIT(1)
-> +
-> +struct mmc_dev_attr {
-> + =A0 =A0 =A0 u8 flags;
-> +};
-> +
-> =A0struct omap_mmc_platform_data {
-> =A0 =A0 =A0 =A0/* back-link to device */
-> =A0 =A0 =A0 =A0struct device *dev;
-> @@ -71,6 +78,9 @@ struct omap_mmc_platform_data {
->
-> =A0 =A0 =A0 =A0u64 dma_mask;
->
-> + =A0 =A0 =A0 /* Integrating attributes from the omap_hwmod layer */
-> + =A0 =A0 =A0 u8 controller_dev_attr;
-> +
-> =A0 =A0 =A0 =A0/* Register offset deviation */
-> =A0 =A0 =A0 =A0u16 reg_offset;
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
-mmc.c
-> index 078fdf1..160cc95 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1555,7 +1555,7 @@ static void omap_hsmmc_set_ios(struct mmc_host =
-*mmc, struct mmc_ios *ios)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
-> =A0 =A0 =A0 =A0}
->
-> - =A0 =A0 =A0 if (host->id =3D=3D OMAP_MMC1_DEVID) {
-> + =A0 =A0 =A0 if (host->pdata->controller_dev_attr & OMAP_HSMMC_SUPPO=
-RTS_DUAL_VOLT) {
-
-Where is pdata->controller_dev_attr getting populated? I don't see the
-dev_attr from the
-hwmod database used anywhere in this patch.
-
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Only MMC1 can interface at 3V witho=
-ut some flavor
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * of external transceiver; but they a=
-ll handle 1.8V.
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
-> @@ -1647,7 +1647,7 @@ static void omap_hsmmc_conf_bus_power(struct om=
-ap_hsmmc_host *host)
-> =A0 =A0 =A0 =A0u32 hctl, capa, value;
->
-> =A0 =A0 =A0 =A0/* Only MMC1 supports 3.0V */
-> - =A0 =A0 =A0 if (host->id =3D=3D OMAP_MMC1_DEVID) {
-> + =A0 =A0 =A0 if (host->pdata->controller_dev_attr & OMAP_HSMMC_SUPPO=
-RTS_DUAL_VOLT) {
-
-Ditto.
-
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hctl =3D SDVS30;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0capa =3D VS30 | VS18;
-> =A0 =A0 =A0 =A0} else {
-> --
-> 1.7.1
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
