@@ -1,41 +1,35 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/1]mmc: set timeout for SDHCI host before sending busy
-	cmd
-Date: Thu, 24 Feb 2011 21:24:30 +0000
-Message-ID: <20110224212429.GB12913@void.printf.net>
-References: <20110224111935.GB7169@intel.com> <AANLkTinJEXc_x36Rht=XfYEtjShAYKWRDcsjGFtd=5Tj@mail.gmail.com> <5D8008F58939784290FAB48F5497519835CE59FE81@shsmsx502.ccr.corp.intel.com> <79DD18D4-C79A-4B08-B9E6-050D7EF2FC3D@marvell.com> <20110224201504.GA12913@void.printf.net> <20110224204352.GB9841@pengutronix.de>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v4 5/6] OMAP: adapt hsmmc to hwmod framework
+Date: Thu, 24 Feb 2011 15:32:15 -0800
+Message-ID: <20110224233215.GX20560@atomide.com>
+References: <1298575614-9388-1-git-send-email-kishore.kadiyala@ti.com>
+ <1298575614-9388-6-git-send-email-kishore.kadiyala@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43208 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932085Ab1BXVYi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 24 Feb 2011 16:24:38 -0500
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20110224204352.GB9841@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1298575614-9388-6-git-send-email-kishore.kadiyala@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, b-cousson@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Philip Rakity <prakity@marvell.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Jae hoon Chung <jh80.chung@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi,
+* Kishore Kadiyala <kishore.kadiyala@ti.com> [110224 11:17]:
+> Changes involves:
+> 1) Remove controller reset in devices.c which is taken care of
+>    by hwmod framework.
+> 2) Omap2420 platform consists of mmc block as in omap1 and not the
+>    hsmmc block as present in omap2430, omap3, omap4 platforms.
+>    Removing all base address macro defines except keeping one for OMAP2420.
+> 3) Using omap-device layer to register device and utilizing data from
+>    hwmod data file for base address, dma channel number, Irq_number,
+>    device attribute.
+> 4) Update the driver to use dev_attr to find whether controller
+>    supports dual volt cards
 
-On Thu, Feb 24, 2011 at 09:43:52PM +0100, Wolfram Sang wrote:
-> +1. A full cycle in linux-next might an idea to be on the safe side? That
-> would be 2.6.40-material then. Or too slow?
-
-I think it could be okay to merge for .39, but that's mainly because I
-don't think we start getting testing with a lot of cards until patches
-appear in an -rc1 -- so for something that requires broad testing, I'd
-rather merge it for -rc1 with a plan to revert it if we find anything
-unexpected.
-
-But I don't have a strong opinion, so if anyone thinks there's a reason
-to wait (for example, an existence-proof of a card that misbehaves when
-configured with a max timeout value) then I'm happy to do so.
+This patch is too hard to read. Can you please split it into 
+more readable patches?
 
 Thanks,
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Tony
