@@ -1,89 +1,38 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH V3 0/5] sdhci-esdhc-imx: use gpio for write protection
- and card detection
-Date: Thu, 24 Feb 2011 20:45:57 +0100
-Message-ID: <20110224194557.GA20877@pengutronix.de>
-References: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
- <20110224081803.GA29530@S2100-06.ap.freescale.net>
- <20110224155126.GA1466@S2100-06.ap.freescale.net>
- <20110224160300.GA1483@S2100-06.ap.freescale.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/1]mmc: set timeout for SDHCI host before sending busy
+	cmd
+Date: Thu, 24 Feb 2011 20:15:04 +0000
+Message-ID: <20110224201504.GA12913@void.printf.net>
+References: <20110224111935.GB7169@intel.com> <AANLkTinJEXc_x36Rht=XfYEtjShAYKWRDcsjGFtd=5Tj@mail.gmail.com> <5D8008F58939784290FAB48F5497519835CE59FE81@shsmsx502.ccr.corp.intel.com> <79DD18D4-C79A-4B08-B9E6-050D7EF2FC3D@marvell.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="zYM0uCDKw75PZbzx"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:47429 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756182Ab1BXTqB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 14:46:01 -0500
+Received: from void.printf.net ([89.145.121.20]:45580 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754598Ab1BXUPM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 24 Feb 2011 15:15:12 -0500
 Content-Disposition: inline
-In-Reply-To: <20110224160300.GA1483@S2100-06.ap.freescale.net>
+In-Reply-To: <79DD18D4-C79A-4B08-B9E6-050D7EF2FC3D@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Jae hoon Chung <jh80.chung@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, Kyungmin Park <kyungmin.park@samsung.com>
 
+On Thu, Feb 24, 2011 at 10:32:30AM -0800, Philip Rakity wrote:
+> proposed this a while ago and strongly support just removing the quirk for broken timeout and setting the timeout value to maximum of 0xE.
+> 
+> This also handles the case of the sd device having a timeout value too low.  In my testing I have come across SD cards that do not provide the correct value.
+> We force our pxa168, pxa910, and mmp2 controllers to have 0xE.  
 
---zYM0uCDKw75PZbzx
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Yeah, OLPC's CaFe controller -- which might be the same hardware as yours,
+actually -- has the same problem.
 
-On Fri, Feb 25, 2011 at 12:03:01AM +0800, Shawn Guo wrote:
-> On Thu, Feb 24, 2011 at 11:51:28PM +0800, Shawn Guo wrote:
-> > On Thu, Feb 24, 2011 at 04:18:05PM +0800, Shawn Guo wrote:
-> > > Hi Wolfram,
-> > >=20
-> > > On Wed, Feb 23, 2011 at 02:51:53PM +0100, Wolfram Sang wrote:
-> > > > Take #3, changes:
-> > > >=20
-> > > > * also intercept calls to SDHCI_SIGNAL_ENABLE (needed on mx25)
-> > > > * remove unconditional BROKEN_CARD_DETECTION (leftover)
-> > > > * improved kernel-doc about unused GPIO
-> > > > * added tags from Eric
-> > > >=20
-> > > > Tested now by me and Marc on mx35, Eric on mx25/35/51. Arnaud, did =
-you have a
-> > > > chance to retest on mx51? What about the FSL guys? :)
-> > > >=20
-> > > I'm testing it on mx25 3ds and mx51 babbage. Both card-detect and
-> > > write-protect are working on mx25 3ds, but write-protect has some
-> > > problem on babbage, and I need some time to figure it out.
-> > >=20
-> > I just figured out why wp_gpio does not work on mx51.
-> >=20
-> > +       if (cpu_is_mx25() || cpu_is_mx35()) {
-> > +               /* Fix errata ENGcm07207 present on i.MX25 and i.MX35 */
-> >                 host->quirks |=3D SDHCI_QUIRK_NO_MULTIBLOCK;
-> > +               /* write_protect can't be routed to controller, use gpi=
-o */
-> > +               sdhci_esdhc_ops.get_ro =3D esdhc_pltfm_get_ro;
-> > +       }
-> >=20
-> > Would it make sense to do the same for mx51?  On babbage board,
-> > SD1_WP is routed to controller, but SD2_WP is not, so we have to use
-> > gpio for SD2 write_protect.
-> >=20
-> We should probably have esdhc_pltfm_get_ro whenever platform provides
-> a wp_gpio, and fall on controller SD_WP only when platform does not
-> provide the wp_gpio.
+Does anyone know of a reason (beyond strict spec-compliance, I suppose)
+for honoring the timeout value rather than using 0xE everywhere?  If not,
+I'm willing to try out Philip's suggestion.
 
-OK, will think about it. Thanks for testing!
+Thanks,
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---zYM0uCDKw75PZbzx
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAk1mtXUACgkQD27XaX1/VRvTJACfYOkR/wgbQ0uaorHqYpuw3Fn8
-vegAoIMpwbgih48O6WwtsWwO7VG5uXin
-=T+/v
------END PGP SIGNATURE-----
-
---zYM0uCDKw75PZbzx--
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
