@@ -1,34 +1,53 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 1/1]mmc: fix division by zero when calculate mmc erase time
-Date: Thu, 24 Feb 2011 13:35:46 +0100
-Message-ID: <AANLkTik8B0c0Bfv2O2-vcNUGGitywRjUXrGE44kP1cq4@mail.gmail.com>
-References: <20110224111801.GA7169@intel.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH V3 0/5] sdhci-esdhc-imx: use gpio for write protection
+ and card detection
+Date: Thu, 24 Feb 2011 14:12:45 +0100
+Message-ID: <20110224131245.GA2420@pengutronix.de>
+References: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
+ <87k4gp3bl1.fsf@lebrac.rtp-net.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="ikeVEW9yuYc//A+q"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:58512 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753138Ab1BXMfq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 07:35:46 -0500
-In-Reply-To: <20110224111801.GA7169@intel.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:59828 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753047Ab1BXNMq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 08:12:46 -0500
+Content-Disposition: inline
+In-Reply-To: <87k4gp3bl1.fsf@lebrac.rtp-net.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, adrian.hunter@nokia.com, linux-kernel@vger.kernel.org
+To: Arnaud Patard <arnaud.patard@rtp-net.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-2011/2/24 Chuanxiao Dong <chuanxiao.dong@intel.com>:
-> Since if clock gating feature is enabled, the clock frequency may be zero when
-> host clock is gated. In such scenario, mmc_set_mmc_erase_timeout() may have a
-> division by zero bug.
->
-> So this patch used mmc_host_clk_rate() to fix this.
->
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+--ikeVEW9yuYc//A+q
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Actually I think these divide-by zero bugs were there before since clock
-0 is perfectly legal, we just didn't trigger them before.
+> I'm getting a hard freeze on my efika sb and mx once I remove the
+> unconditional BROKEN_CARD_DETECTION flag. I'm still investigating the
+> issue. I'll keep you informed if I find something.
 
-Yours,
-Linus Walleij
+Hmm, this is probably an unhandled interrupt. Will see if I can get the
+efika here...
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--ikeVEW9yuYc//A+q
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk1mWU0ACgkQD27XaX1/VRtEIgCeKmilbtcuL+LhPz2WFertzt2U
+hCgAoLPJxoSBE8EnTE6qggmWcqSGaVBS
+=2hZu
+-----END PGP SIGNATURE-----
+
+--ikeVEW9yuYc//A+q--
