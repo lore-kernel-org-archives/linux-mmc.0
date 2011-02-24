@@ -1,85 +1,122 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] dw_mmc: support DDR mode
-Date: Thu, 24 Feb 2011 13:46:11 +0900
-Message-ID: <4D65E293.2040008@samsung.com>
+From: "Varadarajan, Charulatha" <charu@ti.com>
+Subject: Re: [PATCH v3 4/5] OMAP: hwmod data: Add dev_attr and use in the host driver
+Date: Thu, 24 Feb 2011 11:30:04 +0530
+Message-ID: <AANLkTimOpry8DrY19cYEoRo=WcFfzLyHHoAT_59Z5nFv@mail.gmail.com>
+References: <1298483231-29622-1-git-send-email-kishore.kadiyala@ti.com> <1298483231-29622-5-git-send-email-kishore.kadiyala@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:14974 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750751Ab1BXFAb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 00:00:31 -0500
-Received: from epmmp1 (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LH300GNCUL07400@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 24 Feb 2011 13:46:13 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LH300AZNUL08O@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 24 Feb 2011 13:46:12 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1298483231-29622-5-git-send-email-kishore.kadiyala@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, Benoit Cousson <b-cousson@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-This patch is applied DDR mode in dw_mmc.
+Kishore,
 
-DW_MMC is supported DDR mode. 
-If set any bit in UHS_REG bit[16:31], the card of that slot is supported DDR mode.
-For example, if UHS_REG[16] is set, card number 0 is DDR mode.
+On Wed, Feb 23, 2011 at 23:17, Kishore Kadiyala <kishore.kadiyala@ti.co=
+m> wrote:
+> Add a device attribute to hwmod data of omap2430, omap3, omap4.
+> Currently the device attribute holds information regarding dual volt =
+MMC card
+> support by the controller which will be later passed to the host driv=
+er via
+> platform data.
+>
+> Signed-off-by: Kevin Hilman <khilman@deeprootsystems.com>
+> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+> Cc: Benoit Cousson <b-cousson@ti.com>
+> Cc: Paul Walmsley <paul@pwsan.com>
+> ---
+> =A0arch/arm/mach-omap2/omap_hwmod_2430_data.c | =A0 =A09 +++++++++
+> =A0arch/arm/mach-omap2/omap_hwmod_3xxx_data.c | =A0 12 ++++++++++++
+> =A0arch/arm/mach-omap2/omap_hwmod_44xx_data.c | =A0 16 ++++++++++++++=
+++
+> =A0arch/arm/plat-omap/include/plat/mmc.h =A0 =A0 =A0| =A0 10 ++++++++=
+++
+> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A0=
+4 ++--
+> =A05 files changed, 49 insertions(+), 2 deletions(-)
+>
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    8 ++++++++
- drivers/mmc/host/dw_mmc.h |    2 +-
- 2 files changed, 9 insertions(+), 1 deletions(-)
+<<snip>>
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 62c8440..58476c1 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -662,6 +662,7 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
-+	u32 regs;
- 
- 	/* set default 1 bit mode */
- 	slot->ctype = SDMMC_CTYPE_1BIT;
-@@ -678,6 +679,13 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		break;
- 	}
- 
-+	/* DDR mode set */
-+	if (ios->ddr) {
-+		regs = mci_readl(slot->host, UHS_REG);
-+		regs |= (0x1 << slot->id) << 16;
-+		mci_writel(slot->host, UHS_REG, regs);
-+	}
-+
- 	if (ios->clock) {
- 		/*
- 		 * Use mirror of ios->clock to prevent race with mmc
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 5dd55a7..23c662a 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -43,6 +43,7 @@
- #define SDMMC_USRID		0x068
- #define SDMMC_VERID		0x06c
- #define SDMMC_HCON		0x070
-+#define SDMMC_UHS_REG		0x074
- #define SDMMC_BMOD		0x080
- #define SDMMC_PLDMND		0x084
- #define SDMMC_DBADDR		0x088
-@@ -51,7 +52,6 @@
- #define SDMMC_DSCADDR		0x094
- #define SDMMC_BUFADDR		0x098
- #define SDMMC_DATA		0x100
--#define SDMMC_DATA_ADR		0x100
- 
- /* shift bit field */
- #define _SBF(f, v)		((v) << (f))
+>
+> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-om=
+ap/include/plat/mmc.h
+> index e5de5d4..7853130 100644
+> --- a/arch/arm/plat-omap/include/plat/mmc.h
+> +++ b/arch/arm/plat-omap/include/plat/mmc.h
+> @@ -43,6 +43,13 @@
+>
+> =A0#define OMAP_MMC_MAX_SLOTS =A0 =A0 2
+>
+> +/* omap_hwmod integration data */
+
+What is omap_hwmod integration data ? Pls clarify.
+
+> +#define OMAP_HSMMC_SUPPORTS_DUAL_VOLT =A0BIT(1)
+> +
+> +struct mmc_dev_attr {
+> + =A0 =A0 =A0 u8 flags;
+> +};
+> +
+> =A0struct omap_mmc_platform_data {
+> =A0 =A0 =A0 =A0/* back-link to device */
+> =A0 =A0 =A0 =A0struct device *dev;
+> @@ -71,6 +78,9 @@ struct omap_mmc_platform_data {
+>
+> =A0 =A0 =A0 =A0u64 dma_mask;
+>
+> + =A0 =A0 =A0 /* Integrating attributes from the omap_hwmod layer */
+> + =A0 =A0 =A0 u8 controller_dev_attr;
+> +
+> =A0 =A0 =A0 =A0/* Register offset deviation */
+> =A0 =A0 =A0 =A0u16 reg_offset;
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
+mmc.c
+> index 078fdf1..160cc95 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1555,7 +1555,7 @@ static void omap_hsmmc_set_ios(struct mmc_host =
+*mmc, struct mmc_ios *ios)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
+> =A0 =A0 =A0 =A0}
+>
+> - =A0 =A0 =A0 if (host->id =3D=3D OMAP_MMC1_DEVID) {
+> + =A0 =A0 =A0 if (host->pdata->controller_dev_attr & OMAP_HSMMC_SUPPO=
+RTS_DUAL_VOLT) {
+
+Where is pdata->controller_dev_attr getting populated? I don't see the
+dev_attr from the
+hwmod database used anywhere in this patch.
+
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Only MMC1 can interface at 3V witho=
+ut some flavor
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * of external transceiver; but they a=
+ll handle 1.8V.
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
+> @@ -1647,7 +1647,7 @@ static void omap_hsmmc_conf_bus_power(struct om=
+ap_hsmmc_host *host)
+> =A0 =A0 =A0 =A0u32 hctl, capa, value;
+>
+> =A0 =A0 =A0 =A0/* Only MMC1 supports 3.0V */
+> - =A0 =A0 =A0 if (host->id =3D=3D OMAP_MMC1_DEVID) {
+> + =A0 =A0 =A0 if (host->pdata->controller_dev_attr & OMAP_HSMMC_SUPPO=
+RTS_DUAL_VOLT) {
+
+Ditto.
+
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hctl =3D SDVS30;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0capa =3D VS30 | VS18;
+> =A0 =A0 =A0 =A0} else {
+> --
+> 1.7.1
+>
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
