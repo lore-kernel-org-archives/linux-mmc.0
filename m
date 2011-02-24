@@ -1,371 +1,59 @@
-From: "Varadarajan, Charulatha" <charu@ti.com>
-Subject: Re: [PATCH v3 5/5] OMAP: adapt hsmmc to hwmod framework
-Date: Thu, 24 Feb 2011 11:58:29 +0530
-Message-ID: <AANLkTik1BjyofdjQAfkiCpWUUDevC-1CsdxGWug3ntAu@mail.gmail.com>
-References: <1298483231-29622-1-git-send-email-kishore.kadiyala@ti.com> <1298483231-29622-6-git-send-email-kishore.kadiyala@ti.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH V3 0/5] sdhci-esdhc-imx: use gpio for write protection
+ and card detection
+Date: Thu, 24 Feb 2011 16:18:05 +0800
+Message-ID: <20110224081803.GA29530@S2100-06.ap.freescale.net>
+References: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:50598 "EHLO
-	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753438Ab1BXG3L convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 24 Feb 2011 01:29:11 -0500
-In-Reply-To: <1298483231-29622-6-git-send-email-kishore.kadiyala@ti.com>
+Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:16378
+	"EHLO DB3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755422Ab1BXISh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 03:18:37 -0500
+Received: from mail56-db3 (localhost.localdomain [127.0.0.1])	by
+ mail56-db3-R.bigfish.com (Postfix) with ESMTP id 1E414169020D	for
+ <linux-mmc@vger.kernel.org>; Thu, 24 Feb 2011 08:18:36 +0000 (UTC)
+Received: from DB3EHSMHS001.bigfish.com (unknown [10.3.81.245])	by
+ mail56-db3.bigfish.com (Postfix) with ESMTP id 7564CB1804D	for
+ <linux-mmc@vger.kernel.org>; Thu, 24 Feb 2011 08:18:35 +0000 (UTC)
+Received: from az33smr01.freescale.net (az33smr01.freescale.net
+ [10.64.34.199])	by de01egw01.freescale.net (8.14.3/8.14.3) with ESMTP id
+ p1O8ISNN002357	for <linux-mmc@vger.kernel.org>; Thu, 24 Feb 2011 01:18:28
+ -0700 (MST)
+Received: from S2100-06.ap.freescale.net (S2100-06.ap.freescale.net
+ [10.192.242.50])	by az33smr01.freescale.net (8.13.1/8.13.0) with ESMTP id
+ p1O8IQeX009395	for <linux-mmc@vger.kernel.org>; Thu, 24 Feb 2011 02:18:27
+ -0600 (CST)
+Content-Disposition: inline
+In-Reply-To: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, Benoit Cousson <b-cousson@ti.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-Kishore,
+Hi Wolfram,
 
-On Wed, Feb 23, 2011 at 23:17, Kishore Kadiyala <kishore.kadiyala@ti.co=
-m> wrote:
-> Changes involves:
-> 1) Remove controller reset in devices.c which is taken care of
-> =A0 by hwmod framework.
-> 2) Removing all base address macro defines except keeping one for OMA=
-P2420.
+On Wed, Feb 23, 2011 at 02:51:53PM +0100, Wolfram Sang wrote:
+> Take #3, changes:
+> 
+> * also intercept calls to SDHCI_SIGNAL_ENABLE (needed on mx25)
+> * remove unconditional BROKEN_CARD_DETECTION (leftover)
+> * improved kernel-doc about unused GPIO
+> * added tags from Eric
+> 
+> Tested now by me and Marc on mx35, Eric on mx25/35/51. Arnaud, did you have a
+> chance to retest on mx51? What about the FSL guys? :)
+> 
+I'm testing it on mx25 3ds and mx51 babbage. Both card-detect and
+write-protect are working on mx25 3ds, but write-protect has some
+problem on babbage, and I need some time to figure it out.
 
-why?
+Also it's not testable on mx35 3ds board, as these two "gpio" pins
+are routed to a MCU which needs the I2C access.  Do we have this
+support on mainline?
 
-> 3) Using omap-device layer to register device and utilizing data from
-> =A0 hwmod data file for base address, dma channel number, Irq_number,
-> =A0 device attribute.
->
-> Signed-off-by: Paul Walmsley <paul@pwsan.com>
-> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-> Cc: Benoit Cousson <b-cousson@ti.com>
-> CC: Kevin Hilman <khilman@deeprootsystems.com>
-> ---
-> =A0arch/arm/mach-omap2/devices.c =A0 =A0 =A0 =A0 | =A0251 -----------=
-----------------------
-> =A0arch/arm/mach-omap2/hsmmc.c =A0 =A0 =A0 =A0 =A0 | =A0153 +++++++++=
-+++++++++--
-> =A0arch/arm/plat-omap/include/plat/mmc.h | =A0 14 --
-> =A03 files changed, 141 insertions(+), 277 deletions(-)
->
+-- 
+Regards,
+Shawn
 
-<<snip>>
-
-> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.=
-c
-> index 34272e4..b6e1eae 100644
-> --- a/arch/arm/mach-omap2/hsmmc.c
-> +++ b/arch/arm/mach-omap2/hsmmc.c
-> @@ -16,7 +16,11 @@
-> =A0#include <mach/hardware.h>
-> =A0#include <plat/mmc.h>
-> =A0#include <plat/omap-pm.h>
-> +#include <plat/mux.h>
-> +#include <plat/omap_hwmod.h>
-> +#include <plat/omap_device.h>
->
-> +#include "mux.h"
-> =A0#include "hsmmc.h"
-> =A0#include "control.h"
->
-> @@ -30,7 +34,7 @@ static u16 control_mmc1;
->
-> =A0static struct hsmmc_controller {
-> =A0 =A0 =A0 =A0char =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0name[HSMMC_NAME_LEN + 1];
-> -} hsmmc[OMAP34XX_NR_MMC];
-> +} hsmmc[OMAP44XX_NR_MMC];
-
-Why do you have a dependency on OMAP44XX_NR_MMC? You should get
-this kind of information using number of iterations in *_hwmod_each_by_=
-class.
-
->
-> =A0#if defined(CONFIG_ARCH_OMAP3) && defined(CONFIG_PM)
->
-> @@ -204,7 +208,141 @@ static int nop_mmc_set_power(struct device *dev=
-, int slot, int power_on,
-> =A0 =A0 =A0 =A0return 0;
-> =A0}
->
-> -static struct omap_mmc_platform_data *hsmmc_data[OMAP34XX_NR_MMC] __=
-initdata;
-> +static inline void omap2_mmc_mux(struct omap_mmc_platform_data *mmc_=
-controller,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int controller_nr)
-> +{
-> + =A0 =A0 =A0 if ((mmc_controller->slots[0].switch_pin > 0) && \
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (mmc_controller->slots[0].switch_pin < =
-OMAP_MAX_GPIO_LINES))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mux_init_gpio(mmc_controller->slot=
-s[0].switch_pin,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 if ((mmc_controller->slots[0].gpio_wp > 0) && \
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (mmc_controller->slots[0].gpio_wp < OMA=
-P_MAX_GPIO_LINES))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mux_init_gpio(mmc_controller->slot=
-s[0].gpio_wp,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 if (cpu_is_omap34xx()) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (controller_nr =3D=3D 0) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mux_init_signal("s=
-dmmc1_clk",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_PI=
-N_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mux_init_signal("s=
-dmmc1_cmd",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_PI=
-N_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mux_init_signal("s=
-dmmc1_dat0",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_PI=
-N_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_controller->slo=
-ts[0].caps &
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (MMC_CA=
-P_4_BIT_DATA | MMC_CAP_8_BIT_DATA)) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc1_dat1",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc1_dat2",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc1_dat3",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_controller->slo=
-ts[0].caps &
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 MMC_CAP_8_BIT_DATA) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc1_dat4",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc1_dat5",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc1_dat6",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc1_dat7",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (controller_nr =3D=3D 1) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* MMC2 */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mux_init_signal("s=
-dmmc2_clk",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_PI=
-N_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mux_init_signal("s=
-dmmc2_cmd",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_PI=
-N_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mux_init_signal("s=
-dmmc2_dat0",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_PI=
-N_INPUT_PULLUP);
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* For 8 wire configu=
-rations, Lines DAT4, 5, 6 and 7
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* need to be muxed i=
-n the board-*.c files
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_controller->slo=
-ts[0].caps &
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (MMC_CA=
-P_4_BIT_DATA | MMC_CAP_8_BIT_DATA)) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc2_dat1",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc2_dat2",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc2_dat3",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_controller->slo=
-ts[0].caps &
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 MMC_CAP_8_BIT_DATA) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc2_dat4.sdmmc2_dat4",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc2_dat5.sdmmc2_dat5",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc2_dat6.sdmmc2_dat6",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_mu=
-x_init_signal("sdmmc2_dat7.sdmmc2_dat7",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 OMAP_PIN_INPUT_PULLUP);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* For MMC3 the pins need to be muxed=
- in the board-*.c files
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 }
-> +}
-> +
-> +static struct omap_mmc_platform_data *hsmmc_data[OMAP44XX_NR_MMC] __=
-initdata;
-
-Ditto
-
-> +
-> +static struct omap_device_pm_latency omap_hsmmc_latency[] =3D {
-> + =A0 =A0 =A0 [0] =3D {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .deactivate_func =3D omap_device_idle_h=
-wmods,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .activate_func =A0 =3D omap_device_enab=
-le_hwmods,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .flags =A0 =A0 =A0 =A0 =A0 =3D OMAP_DEV=
-ICE_LATENCY_AUTO_ADJUST,
-> + =A0 =A0 =A0 },
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* XXX There should also be an entry here to power of=
-f/on the
-> + =A0 =A0 =A0 =A0* MMC regulators/PBIAS cells, etc.
-> + =A0 =A0 =A0 =A0*/
-> +};
-> +
-> +static int omap2_mmc_init(struct omap_hwmod *oh, void *hsmmcinfo)
-> +{
-> + =A0 =A0 =A0 struct omap_device *od;
-> + =A0 =A0 =A0 struct omap_device_pm_latency *ohl;
-> + =A0 =A0 =A0 char *name;
-> + =A0 =A0 =A0 int ohl_cnt =3D 0;
-> + =A0 =A0 =A0 struct mmc_dev_attr *mmc_dattr =3D oh->dev_attr;
-> + =A0 =A0 =A0 struct omap2_hsmmc_info *c =3D (struct omap2_hsmmc_info=
- *) hsmmcinfo;
-> + =A0 =A0 =A0 int idx;
-> + =A0 =A0 =A0 static int mmc_num;
-> +
-> + =A0 =A0 =A0 /* Initialization of controllers which are not updated
-> + =A0 =A0 =A0 =A0* in board file will be skipped here.
-> + =A0 =A0 =A0 =A0*/
-
-Check multi-line comment style
-
-> + =A0 =A0 =A0 c +=3D mmc_num;
-> + =A0 =A0 =A0 if (!c->mmc) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("omap_hsmmc_info is not updated =
-in board file\n");
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 0;
-> + =A0 =A0 =A0 }
-> + =A0 =A0 =A0 idx =3D c->mmc - 1 ;
-> + =A0 =A0 =A0 name =3D "mmci-omap-hs";
-> + =A0 =A0 =A0 ohl =3D omap_hsmmc_latency;
-> + =A0 =A0 =A0 ohl_cnt =3D ARRAY_SIZE(omap_hsmmc_latency);
-> + =A0 =A0 =A0 omap2_mmc_mux(hsmmc_data[idx], idx);
-> + =A0 =A0 =A0 hsmmc_data[idx]->controller_dev_attr =3D mmc_dattr->fla=
-gs;
-
-It would be good rename controller_dev_attr to controller_flag
-
-> + =A0 =A0 =A0 od =3D omap_device_build(name, idx, oh, hsmmc_data[idx]=
-,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sizeof(struct omap_mmc_platform_data), =
-ohl, ohl_cnt, false);
-> + =A0 =A0 =A0 if (IS_ERR(od)) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 WARN(1, "Cant build omap_device for %s:=
-%s.\n",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 name, oh->name);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return PTR_ERR(od);
-> + =A0 =A0 =A0 }
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* return device handle to board setup code
-> + =A0 =A0 =A0 =A0* required to populate for regulator framework struc=
-ture
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 c->dev =3D &od->pdev.dev;
-> + =A0 =A0 =A0 mmc_num++;
-> + =A0 =A0 =A0 return 0;
-> +}
->
-> =A0void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
-> =A0{
-> @@ -358,16 +496,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_=
-info *controllers)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hsmmc_data[c->mmc - 1] =3D mmc;
-> =A0 =A0 =A0 =A0}
->
-> - =A0 =A0 =A0 omap2_init_mmc(hsmmc_data, OMAP34XX_NR_MMC);
-> -
-> - =A0 =A0 =A0 /* pass the device nodes back to board setup code */
-> - =A0 =A0 =A0 for (c =3D controllers; c->mmc; c++) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct omap_mmc_platform_data *mmc =3D =
-hsmmc_data[c->mmc - 1];
-> -
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!c->mmc || c->mmc > nr_hsmmc)
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 continue;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 c->dev =3D mmc->dev;
-> - =A0 =A0 =A0 }
-> + =A0 =A0 =A0 omap_hwmod_for_each_by_class("mmc", omap2_mmc_init, con=
-trollers);
->
-> =A0done:
-> =A0 =A0 =A0 =A0for (i =3D 0; i < nr_hsmmc; i++)
-> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-om=
-ap/include/plat/mmc.h
-> index 7853130..6205984 100644
-> --- a/arch/arm/plat-omap/include/plat/mmc.h
-> +++ b/arch/arm/plat-omap/include/plat/mmc.h
-> @@ -24,20 +24,12 @@
-> =A0#define OMAP1_MMC2_BASE =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00xfffb7c00 =
-=A0 =A0 =A0/* omap16xx only */
->
-> =A0#define OMAP24XX_NR_MMC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A02
-> -#define OMAP34XX_NR_MMC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A03
-> =A0#define OMAP44XX_NR_MMC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A05
-
-As mentioned above, OMAP44XX_NR_MMC & OMAP24XX_NR_MMC shall be
-removed and instead get these info from hwmod.
-
-I had provided the same comment in the previous patch version too. You =
-may
-reject the comment but mention the reasons for the same.
-
-> =A0#define OMAP2420_MMC_SIZE =A0 =A0 =A0OMAP1_MMC_SIZE
-> -#define OMAP3_HSMMC_SIZE =A0 =A0 =A0 0x200
-> =A0#define OMAP4_HSMMC_SIZE =A0 =A0 =A0 0x1000
-
-Can't this be removed?
-
-> =A0#define OMAP2_MMC1_BASE =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x4809c000
-> =A0#define OMAP2_MMC2_BASE =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x480b4000
-> -#define OMAP3_MMC3_BASE =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x480ad000
-> -#define OMAP4_MMC4_BASE =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x480d1000
-> -#define OMAP4_MMC5_BASE =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x480d5000
-> =A0#define OMAP4_MMC_REG_OFFSET =A0 0x100
-
-Remove OMAP4_MMC_REG_OFFSET too.
-
-> -#define HSMMC5 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << 4)
-> -#define HSMMC4 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << 3)
-> -#define HSMMC3 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << 2)
-> =A0#define HSMMC2 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << 1)
-> =A0#define HSMMC1 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << 0)
-
-<<snip>>
