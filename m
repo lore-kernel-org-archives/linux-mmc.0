@@ -1,131 +1,142 @@
-From: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
-Subject: Re: [PATCH v3 4/5] OMAP: hwmod data: Add dev_attr and use in the host driver
-Date: Thu, 24 Feb 2011 19:35:28 +0530
-Message-ID: <AANLkTi=Gz2kPE45Y3JaXeBH67ivD4DQEqmZkm1t4ajkR@mail.gmail.com>
-References: <1298483231-29622-1-git-send-email-kishore.kadiyala@ti.com>
- <1298483231-29622-5-git-send-email-kishore.kadiyala@ti.com> <AANLkTimOpry8DrY19cYEoRo=WcFfzLyHHoAT_59Z5nFv@mail.gmail.com>
+From: Jae hoon Chung <jh80.chung@gmail.com>
+Subject: Re: [PATCH 1/1]mmc: set timeout for SDHCI host before sending busy cmd
+Date: Thu, 24 Feb 2011 23:18:19 +0900
+Message-ID: <AANLkTinJEXc_x36Rht=XfYEtjShAYKWRDcsjGFtd=5Tj@mail.gmail.com>
+References: <20110224111935.GB7169@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <AANLkTimOpry8DrY19cYEoRo=WcFfzLyHHoAT_59Z5nFv@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "Varadarajan, Charulatha" <charu@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, Benoit Cousson <b-cousson@ti.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20110224111935.GB7169@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org, arnd@arndb.de, Kyungmin Park <kyungmin.park@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Feb 24, 2011 at 11:30 AM, Varadarajan, Charulatha <charu@ti.com=
-> wrote:
-> Kishore,
->
-> On Wed, Feb 23, 2011 at 23:17, Kishore Kadiyala <kishore.kadiyala@ti.=
-com> wrote:
->> Add a device attribute to hwmod data of omap2430, omap3, omap4.
->> Currently the device attribute holds information regarding dual volt=
- MMC card
->> support by the controller which will be later passed to the host dri=
-ver via
->> platform data.
->>
->> Signed-off-by: Kevin Hilman <khilman@deeprootsystems.com>
->> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
->> Cc: Benoit Cousson <b-cousson@ti.com>
->> Cc: Paul Walmsley <paul@pwsan.com>
->> ---
->> =A0arch/arm/mach-omap2/omap_hwmod_2430_data.c | =A0 =A09 +++++++++
->> =A0arch/arm/mach-omap2/omap_hwmod_3xxx_data.c | =A0 12 ++++++++++++
->> =A0arch/arm/mach-omap2/omap_hwmod_44xx_data.c | =A0 16 +++++++++++++=
-+++
->> =A0arch/arm/plat-omap/include/plat/mmc.h =A0 =A0 =A0| =A0 10 +++++++=
-+++
->> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A0=
-4 ++--
->> =A05 files changed, 49 insertions(+), 2 deletions(-)
->>
->
-> <<snip>>
->
->>
->> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-o=
-map/include/plat/mmc.h
->> index e5de5d4..7853130 100644
->> --- a/arch/arm/plat-omap/include/plat/mmc.h
->> +++ b/arch/arm/plat-omap/include/plat/mmc.h
->> @@ -43,6 +43,13 @@
->>
->> =A0#define OMAP_MMC_MAX_SLOTS =A0 =A0 2
->>
->> +/* omap_hwmod integration data */
->
-> What is omap_hwmod integration data ? Pls clarify.
->
->> +#define OMAP_HSMMC_SUPPORTS_DUAL_VOLT =A0BIT(1)
->> +
->> +struct mmc_dev_attr {
->> + =A0 =A0 =A0 u8 flags;
->> +};
->> +
->> =A0struct omap_mmc_platform_data {
->> =A0 =A0 =A0 =A0/* back-link to device */
->> =A0 =A0 =A0 =A0struct device *dev;
->> @@ -71,6 +78,9 @@ struct omap_mmc_platform_data {
->>
->> =A0 =A0 =A0 =A0u64 dma_mask;
->>
->> + =A0 =A0 =A0 /* Integrating attributes from the omap_hwmod layer */
->> + =A0 =A0 =A0 u8 controller_dev_attr;
->> +
->> =A0 =A0 =A0 =A0/* Register offset deviation */
->> =A0 =A0 =A0 =A0u16 reg_offset;
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_h=
-smmc.c
->> index 078fdf1..160cc95 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -1555,7 +1555,7 @@ static void omap_hsmmc_set_ios(struct mmc_host=
- *mmc, struct mmc_ios *ios)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
->> =A0 =A0 =A0 =A0}
->>
->> - =A0 =A0 =A0 if (host->id =3D=3D OMAP_MMC1_DEVID) {
->> + =A0 =A0 =A0 if (host->pdata->controller_dev_attr & OMAP_HSMMC_SUPP=
-ORTS_DUAL_VOLT) {
->
-> Where is pdata->controller_dev_attr getting populated? I don't see th=
-e
-> dev_attr from the
-> hwmod database used anywhere in this patch.
+Hi
 
-good catch ,
-the changes in the driver should be part of last patch.
+This patch looks like this. I sent to the RFC patch..
 
->
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Only MMC1 can interface at 3V with=
-out some flavor
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * of external transceiver; but they =
-all handle 1.8V.
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
->> @@ -1647,7 +1647,7 @@ static void omap_hsmmc_conf_bus_power(struct o=
-map_hsmmc_host *host)
->> =A0 =A0 =A0 =A0u32 hctl, capa, value;
->>
->> =A0 =A0 =A0 =A0/* Only MMC1 supports 3.0V */
->> - =A0 =A0 =A0 if (host->id =3D=3D OMAP_MMC1_DEVID) {
->> + =A0 =A0 =A0 if (host->pdata->controller_dev_attr & OMAP_HSMMC_SUPP=
-ORTS_DUAL_VOLT) {
->
-> Ditto.
->
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hctl =3D SDVS30;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0capa =3D VS30 | VS18;
->> =A0 =A0 =A0 =A0} else {
->> --
->> 1.7.1
->>
->
+http://marc.info/?l=3Dlinux-mmc&m=3D129109794815028&w=3D3
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+ Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+
+---
+ drivers/mmc/host/sdhci.c  |    6 +++++-
+ include/linux/mmc/sdhci.h |    3 ++-
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 782c0ee..3b93d97 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -655,8 +655,12 @@ static void sdhci_prepare_data(struct sdhci_host
+*host, struct mmc_data *data)
+
+       WARN_ON(host->data);
+
+-       if (data =3D=3D NULL)
++       if (data =3D=3D NULL) {
++               if ((host->quirks & SDHCI_QUIRK_SET_DATA_TIMEOUT_VAL) &=
+&
++                               (host->cmd->flags & MMC_RSP_BUSY))
++                       sdhci_writel(host, 0xE, SDHCI_TIMEOUT_CONTROL);
+               return;
++       }
+
+       /* Sanity checks */
+       BUG_ON(data->blksz * data->blocks > 524288);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 1fdc673..315ff49 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -83,7 +83,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12             (1<<28)
+ /* Controller doesn't have HISPD bit field in HI-SPEED SD card */
+ #define SDHCI_QUIRK_NO_HISPD_BIT                       (1<<29)
+-
++/* Controller need set data timeout value when card is busy */
++#define SDHCI_QUIRK_SET_DATA_TIMEOUT_VAL               (1<<30)
+       int irq;                /* Device IRQ */
+       void __iomem *ioaddr;   /* Mapped address */
+
 --
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+1.6.0.4
+
+2011/2/24 Chuanxiao Dong <chuanxiao.dong@intel.com>:
+> Set the timeout control register for SDHCI host when it needs to send=
+ some
+> commands which need busy signal. Use the maximum timeout value will b=
+e safe.
+>
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> ---
+> =A0drivers/mmc/host/sdhci.c | =A0 14 ++++++++++----
+> =A01 files changed, 10 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 9e15f41..32b7475 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -40,7 +40,6 @@
+>
+> =A0static unsigned int debug_quirks =3D 0;
+>
+> -static void sdhci_prepare_data(struct sdhci_host *, struct mmc_data =
+*);
+> =A0static void sdhci_finish_data(struct sdhci_host *);
+>
+> =A0static void sdhci_send_command(struct sdhci_host *, struct mmc_com=
+mand *);
+> @@ -651,16 +650,23 @@ static void sdhci_set_transfer_irqs(struct sdhc=
+i_host *host)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_clear_set_irqs(host, dma_irqs, p=
+io_irqs);
+> =A0}
+>
+> -static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_d=
+ata *data)
+> +static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_c=
+ommand *cmd)
+> =A0{
+> =A0 =A0 =A0 =A0u8 count;
+> =A0 =A0 =A0 =A0u8 ctrl;
+> + =A0 =A0 =A0 struct mmc_data *data =3D cmd->data;
+> =A0 =A0 =A0 =A0int ret;
+>
+> =A0 =A0 =A0 =A0WARN_ON(host->data);
+>
+> - =A0 =A0 =A0 if (data =3D=3D NULL)
+> + =A0 =A0 =A0 if (data =3D=3D NULL) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* set timeout to be maximum value fo=
+r command with busy signal.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (cmd->flags & MMC_RSP_BUSY)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writeb(host, 0xE,=
+ SDHCI_TIMEOUT_CONTROL);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return;
+> + =A0 =A0 =A0 }
+>
+> =A0 =A0 =A0 =A0/* Sanity checks */
+> =A0 =A0 =A0 =A0BUG_ON(data->blksz * data->blocks > 524288);
+> @@ -920,7 +926,7 @@ static void sdhci_send_command(struct sdhci_host =
+*host, struct mmc_command *cmd)
+>
+> =A0 =A0 =A0 =A0host->cmd =3D cmd;
+>
+> - =A0 =A0 =A0 sdhci_prepare_data(host, cmd->data);
+> + =A0 =A0 =A0 sdhci_prepare_data(host, cmd);
+>
+> =A0 =A0 =A0 =A0sdhci_writel(host, cmd->arg, SDHCI_ARGUMENT);
+>
+> --
+> 1.6.6.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
