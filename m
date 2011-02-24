@@ -1,71 +1,38 @@
-From: Marc Koschewski <marc@osknowledge.org>
-Subject: Re: [PATCH 1/1]mmc: fix division by zero when calculate mmc erase
- time
-Date: Thu, 24 Feb 2011 12:37:56 +0100
-Message-ID: <20110224113756.GB7260@marc.osknowledge.org>
-References: <20110224111801.GA7169@intel.com>
+From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
+Subject: Re: [PATCH V3 0/5] sdhci-esdhc-imx: use gpio for write protection and card detection
+Date: Thu, 24 Feb 2011 12:40:10 +0100
+Message-ID: <87k4gp3bl1.fsf@lebrac.rtp-net.org>
+References: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20110224111801.GA7169@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, adrian.hunter@nokia.com, linus.walleij@linaro.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lebrac.rtp-net.org ([88.191.135.105]:44560 "EHLO
+	lebrac.rtp-net.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756195Ab1BXLk2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 06:40:28 -0500
+In-Reply-To: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
+	(Wolfram Sang's message of "Wed, 23 Feb 2011 14:51:53 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+
+Wolfram Sang <w.sang@pengutronix.de> writes:
 
 Hi,
 
-* Chuanxiao Dong <chuanxiao.dong@intel.com> [2011-02-24 19:18:01 +0800]:
+> Take #3, changes:
+>
+> * also intercept calls to SDHCI_SIGNAL_ENABLE (needed on mx25)
+> * remove unconditional BROKEN_CARD_DETECTION (leftover)
+> * improved kernel-doc about unused GPIO
+> * added tags from Eric
+>
+> Tested now by me and Marc on mx35, Eric on mx25/35/51. Arnaud, did you have a
+> chance to retest on mx51? What about the FSL guys? :)
 
-> Since if clock gating feature is enabled, the clock frequency may be zero when
-> host clock is gated. In such scenario, mmc_set_mmc_erase_timeout() may have a
-> division by zero bug.
-> 
-> So this patch used mmc_host_clk_rate() to fix this.
-> 
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> ---
->  drivers/mmc/core/core.c |   10 ++++++++--
->  1 files changed, 8 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 34a7e8c..12d0eb8 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1201,8 +1201,14 @@ static void mmc_set_mmc_erase_timeout(struct mmc_card *card,
->  		 * less but not that much less, so fudge it by multiplying by 2.
->  		 */
->  		timeout_clks <<= 1;
-> -		timeout_us += (timeout_clks * 1000) /
-> -			      (card->host->ios.clock / 1000);
-> +
-> +		/*
-> +		 * at this moment, host controller maybe clock gated, so make
-> +		 * sure we can get a correct host clock freq.
-> +		 */
-> +		if (mmc_host_clk_rate(card->host))
-> +			timeout_us += (timeout_clks * 1000) /
-> +				      (mmc_host_clk_rate(card->host) / 1000);
+I'm getting a hard freeze on my efika sb and mx once I remove the
+unconditional BROKEN_CARD_DETECTION flag. I'm still investigating the
+issue. I'll keep you informed if I find something.
 
-Why don't you just reuse mmc_host_clk_rate()'s result instead of calling it twice?
-
-Cheers,
-Marc
-
->  
->  		erase_timeout = timeout_us / 1000;
->  
-> -- 
-> 1.6.6.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-> 
-> 
-
--- 
-Marc Koschewski
+Arnaud
