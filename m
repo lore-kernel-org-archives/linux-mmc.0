@@ -1,119 +1,34 @@
-From: Marc Koschewski <marc@osknowledge.org>
-Subject: Re: [PATCH 1/1]mmc: fix division by zero when calculate mmc erase
- time
-Date: Thu, 24 Feb 2011 13:34:14 +0100
-Message-ID: <20110224123352.GA26516@marc.osknowledge.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/1]mmc: fix division by zero when calculate mmc erase time
+Date: Thu, 24 Feb 2011 13:35:46 +0100
+Message-ID: <AANLkTik8B0c0Bfv2O2-vcNUGGitywRjUXrGE44kP1cq4@mail.gmail.com>
 References: <20110224111801.GA7169@intel.com>
- <20110224113756.GB7260@marc.osknowledge.org>
- <5D8008F58939784290FAB48F5497519835CE59FE52@shsmsx502.ccr.corp.intel.com>
- <20110224122235.GC7260@marc.osknowledge.org>
- <5D8008F58939784290FAB48F5497519835CE59FE57@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from webbox4.loswebos.de ([213.187.93.205]:37077 "EHLO
-	webbox4.loswebos.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752452Ab1BXMeU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 07:34:20 -0500
-Content-Disposition: inline
-In-Reply-To: <5D8008F58939784290FAB48F5497519835CE59FE57@shsmsx502.ccr.corp.intel.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:58512 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753138Ab1BXMfq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 07:35:46 -0500
+In-Reply-To: <20110224111801.GA7169@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "adrian.hunter@nokia.com" <adrian.hunter@nokia.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, adrian.hunter@nokia.com, linux-kernel@vger.kernel.org
 
-* Dong, Chuanxiao <chuanxiao.dong@intel.com> [2011-02-24 20:25:21 +0800]:
+2011/2/24 Chuanxiao Dong <chuanxiao.dong@intel.com>:
+> Since if clock gating feature is enabled, the clock frequency may be zero when
+> host clock is gated. In such scenario, mmc_set_mmc_erase_timeout() may have a
+> division by zero bug.
+>
+> So this patch used mmc_host_clk_rate() to fix this.
+>
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-> > -----Original Message-----
-> > From: Marc Koschewski [mailto:marc@osknowledge.org]
-> > Sent: Thursday, February 24, 2011 8:23 PM
-> > To: Dong, Chuanxiao
-> > Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; adrian.hunter@nokia.com;
-> > linus.walleij@linaro.org; linux-kernel@vger.kernel.org
-> > Subject: Re: [PATCH 1/1]mmc: fix division by zero when calculate mmc erase time
-> > 
-> > * Dong, Chuanxiao <chuanxiao.dong@intel.com> [2011-02-24 20:09:59 +0800]:
-> > 
-> > >
-> > >
-> > > > -----Original Message-----
-> > > > From: Marc Koschewski [mailto:marc@osknowledge.org]
-> > > > Sent: Thursday, February 24, 2011 7:38 PM
-> > > > To: Dong, Chuanxiao
-> > > > Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; adrian.hunter@nokia.com;
-> > > > linus.walleij@linaro.org; linux-kernel@vger.kernel.org
-> > > > Subject: Re: [PATCH 1/1]mmc: fix division by zero when calculate mmc erase
-> > time
-> > > >
-> > > > Hi,
-> > > >
-> > > > * Chuanxiao Dong <chuanxiao.dong@intel.com> [2011-02-24 19:18:01 +0800]:
-> > > >
-> > > > > Since if clock gating feature is enabled, the clock frequency may be zero when
-> > > > > host clock is gated. In such scenario, mmc_set_mmc_erase_timeout() may
-> > have a
-> > > > > division by zero bug.
-> > > > >
-> > > > > So this patch used mmc_host_clk_rate() to fix this.
-> > > > >
-> > > > > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> > > > > ---
-> > > > >  drivers/mmc/core/core.c |   10 ++++++++--
-> > > > >  1 files changed, 8 insertions(+), 2 deletions(-)
-> > > > >
-> > > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > > > > index 34a7e8c..12d0eb8 100644
-> > > > > --- a/drivers/mmc/core/core.c
-> > > > > +++ b/drivers/mmc/core/core.c
-> > > > > @@ -1201,8 +1201,14 @@ static void mmc_set_mmc_erase_timeout(struct
-> > > > mmc_card *card,
-> > > > >  		 * less but not that much less, so fudge it by multiplying by 2.
-> > > > >  		 */
-> > > > >  		timeout_clks <<= 1;
-> > > > > -		timeout_us += (timeout_clks * 1000) /
-> > > > > -			      (card->host->ios.clock / 1000);
-> > > > > +
-> > > > > +		/*
-> > > > > +		 * at this moment, host controller maybe clock gated, so make
-> > > > > +		 * sure we can get a correct host clock freq.
-> > > > > +		 */
-> > > > > +		if (mmc_host_clk_rate(card->host))
-> > > > > +			timeout_us += (timeout_clks * 1000) /
-> > > > > +				      (mmc_host_clk_rate(card->host) / 1000);
-> > > >
-> > > > Why don't you just reuse mmc_host_clk_rate()'s result instead of calling it
-> > twice?
-> > > This is a incline function and just return host->ios.clock. Reuse
-> > mmc_host_clk_rate()'s result need to add a new variable to save the value.
-> > 
-> > It's not inline on trunk and it spinlocks.
-> > 
-> > drivers/mmc/core/host.c:195
-> > 
-> >     194  */
-> >     195 unsigned int mmc_host_clk_rate(struct mmc_host *host)
-> >     196 {
-> OK. With the clock gating framework enabled... I agree. So, what do you think? Add a new variable is better?
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-I personally would prefer the variable over the spinlock and function call, yes.
+Actually I think these divide-by zero bugs were there before since clock
+0 is perfectly legal, we just didn't trigger them before.
 
-And calling the same method with the same parameters on a line and another
-time on the next line is generally a bad idea I think. But maybe that's kind
-of a 'taste', moreover. It just hit my eye when I saw it...
-
-Cheers,
-Marc
-
-> 
-> Thanks
-> Chuanxiao
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-> 
-> 
-
--- 
-Marc Koschewski
+Yours,
+Linus Walleij
