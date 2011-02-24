@@ -1,173 +1,58 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 1/1]mmc: set timeout for SDHCI host before sending busy
- cmd
-Date: Thu, 24 Feb 2011 10:32:30 -0800
-Message-ID: <79DD18D4-C79A-4B08-B9E6-050D7EF2FC3D@marvell.com>
-References: <20110224111935.GB7169@intel.com>
- <AANLkTinJEXc_x36Rht=XfYEtjShAYKWRDcsjGFtd=5Tj@mail.gmail.com>
- <5D8008F58939784290FAB48F5497519835CE59FE81@shsmsx502.ccr.corp.intel.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: core: add comment why sdio_reset is done at init
+	time
+Date: Thu, 24 Feb 2011 18:41:21 +0000
+Message-ID: <20110224184121.GA11663@void.printf.net>
+References: <1091D46E-68D9-49FC-BBA6-6908BC1835AD@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:54270 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755619Ab1BXSep convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 24 Feb 2011 13:34:45 -0500
-In-Reply-To: <5D8008F58939784290FAB48F5497519835CE59FE81@shsmsx502.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:47656 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752859Ab1BXSlW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 24 Feb 2011 13:41:22 -0500
+Content-Disposition: inline
+In-Reply-To: <1091D46E-68D9-49FC-BBA6-6908BC1835AD@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: Jae hoon Chung <jh80.chung@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <markb@marvell.com>
 
+Hi Philip,
 
-
-On Feb 24, 2011, at 6:54 AM, Dong, Chuanxiao wrote:
-
-> Great. Maybe we wouldn't need to add this quirk since give a maximum timeout value is safe for all host controller I think. We would better save the quirk for other really critical silicon bugs.
-
-
-proposed this a while ago and strongly support just removing the quirk for broken timeout and setting the timeout value to maximum of 0xE.
-
-This also handles the case of the sd device having a timeout value too low.  In my testing I have come across SD cards that do not provide the correct value.
-We force our pxa168, pxa910, and mmp2 controllers to have 0xE.  
-
-Philip
-
+On Sun, Feb 13, 2011 at 11:12:28PM -0800, Philip Rakity wrote:
 > 
->> -----Original Message-----
->> From: Jae hoon Chung [mailto:jh80.chung@gmail.com]
->> Sent: Thursday, February 24, 2011 10:18 PM
->> To: Dong, Chuanxiao
->> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; linux-kernel@vger.kernel.org;
->> arnd@arndb.de; Kyungmin Park
->> Subject: Re: [PATCH 1/1]mmc: set timeout for SDHCI host before sending busy cmd
->> 
->> Hi
->> 
->> This patch looks like this. I sent to the RFC patch..
->> 
->> http://marc.info/?l=linux-mmc&m=129109794815028&w=3
->> 
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> 
->> ---
->> drivers/mmc/host/sdhci.c  |    6 +++++-
->> include/linux/mmc/sdhci.h |    3 ++-
->> 2 files changed, 7 insertions(+), 2 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 782c0ee..3b93d97 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -655,8 +655,12 @@ static void sdhci_prepare_data(struct sdhci_host
->> *host, struct mmc_data *data)
->> 
->>       WARN_ON(host->data);
->> 
->> -       if (data == NULL)
->> +       if (data == NULL) {
->> +               if ((host->quirks & SDHCI_QUIRK_SET_DATA_TIMEOUT_VAL)
->> &&
->> +                               (host->cmd->flags & MMC_RSP_BUSY))
->> +                       sdhci_writel(host, 0xE, SDHCI_TIMEOUT_CONTROL);
->>               return;
->> +       }
->> 
->>       /* Sanity checks */
->>       BUG_ON(data->blksz * data->blocks > 524288);
->> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
->> index 1fdc673..315ff49 100644
->> --- a/include/linux/mmc/sdhci.h
->> +++ b/include/linux/mmc/sdhci.h
->> @@ -83,7 +83,8 @@ struct sdhci_host {
->> #define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12             (1<<28)
->> /* Controller doesn't have HISPD bit field in HI-SPEED SD card */
->> #define SDHCI_QUIRK_NO_HISPD_BIT                       (1<<29)
->> -
->> +/* Controller need set data timeout value when card is busy */
->> +#define SDHCI_QUIRK_SET_DATA_TIMEOUT_VAL               (1<<30)
->>       int irq;                /* Device IRQ */
->>       void __iomem *ioaddr;   /* Mapped address */
->> 
->> --
->> 1.6.0.4
->> 
->> 2011/2/24 Chuanxiao Dong <chuanxiao.dong@intel.com>:
->>> Set the timeout control register for SDHCI host when it needs to send some
->>> commands which need busy signal. Use the maximum timeout value will be safe.
->>> 
->>> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c |   14 ++++++++++----
->>>  1 files changed, 10 insertions(+), 4 deletions(-)
->>> 
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 9e15f41..32b7475 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -40,7 +40,6 @@
->>> 
->>>  static unsigned int debug_quirks = 0;
->>> 
->>> -static void sdhci_prepare_data(struct sdhci_host *, struct mmc_data *);
->>>  static void sdhci_finish_data(struct sdhci_host *);
->>> 
->>>  static void sdhci_send_command(struct sdhci_host *, struct mmc_command
->> *);
->>> @@ -651,16 +650,23 @@ static void sdhci_set_transfer_irqs(struct sdhci_host
->> *host)
->>>                sdhci_clear_set_irqs(host, dma_irqs, pio_irqs);
->>>  }
->>> 
->>> -static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_data *data)
->>> +static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command
->> *cmd)
->>>  {
->>>        u8 count;
->>>        u8 ctrl;
->>> +       struct mmc_data *data = cmd->data;
->>>        int ret;
->>> 
->>>        WARN_ON(host->data);
->>> 
->>> -       if (data == NULL)
->>> +       if (data == NULL) {
->>> +               /*
->>> +                * set timeout to be maximum value for command with busy
->> signal.
->>> +                */
->>> +               if (cmd->flags & MMC_RSP_BUSY)
->>> +                       sdhci_writeb(host, 0xE,
->> SDHCI_TIMEOUT_CONTROL);
->>>                return;
->>> +       }
->>> 
->>>        /* Sanity checks */
->>>        BUG_ON(data->blksz * data->blocks > 524288);
->>> @@ -920,7 +926,7 @@ static void sdhci_send_command(struct sdhci_host *host,
->> struct mmc_command *cmd)
->>> 
->>>        host->cmd = cmd;
->>> 
->>> -       sdhci_prepare_data(host, cmd->data);
->>> +       sdhci_prepare_data(host, cmd);
->>> 
->>>        sdhci_writel(host, cmd->arg, SDHCI_ARGUMENT);
->>> 
->>> --
->>> 1.6.6.1
->>> 
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> sdio_reset sends a CMD52 to reset the sdio card.  This is
+> highly recommended for sdio cards being reinitialized.  Since
+> we do not know if the card is being reinitialized we just send
+> the command.  SD/eMMC cards are supposed to ignore the CMD
+> before the CMD0.  Document why we are doing this.
+> 
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> ---
+>  drivers/mmc/core/core.c |    6 ++++++
+>  1 files changed, 6 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 34a7e8c..d9fb0d3 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1494,6 +1494,12 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>  		mmc_hostname(host), __func__, host->f_init);
+>  #endif
+>  	mmc_power_up(host);
+> +
+> +	/*
+> +	 * sdio_reset sends CMD52 to reset card.  Since we do not know
+> +	 * if the card is being re-initialzed just send it.  CMD52
+> +	 * should be ignored by SD/eMMC cards
+> +	 */
+>  	sdio_reset(host);
+>  	mmc_go_idle(host);
+>  
 
+Thanks, pushed to mmc-next for .39.
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
