@@ -1,68 +1,78 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [RFC] dw_mmc: didn't support multiple blocks of weird length?
-Date: Fri, 25 Feb 2011 16:35:00 +0900
-Message-ID: <4D675BA4.4040006@samsung.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Fri, 25 Feb 2011 05:02:18 -0600
+Message-ID: <AANLkTikWKk0kE=Hh4gfA6Mwt+-65TVFnBcOYy_eRuQfw@mail.gmail.com>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
+	<201102231709.05036.arnd@arndb.de>
+	<AANLkTimZDDo0xa2CzgHhH1LSWJ-KT0QgOmEAKs2nJK8x@mail.gmail.com>
+	<201102241024.01437.arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:20150 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755290Ab1BYHfD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2011 02:35:03 -0500
-Received: from epmmp1 (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LH500MR4X2D7500@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Feb 2011 16:35:01 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LH50024VX2DHK@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Feb 2011 16:35:01 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <201102241024.01437.arnd@arndb.de>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>, Chris Ball <cjb@laptop.org>
 
-Hi..
+On Thu, Feb 24, 2011 at 3:24 AM, Arnd Bergmann <arnd@arndb.de> wrote:
 
-I didn't understand this point..
-Plz let me explain this code..
-why need this function (dw_mci_queue_request(host, slot, mrq)?
+> Unlike the sysfs interface, the code does not need to be future-proof=
+,
+> it can always be changed if we feel the code becomes more maintainabl=
+e
+> by doing it another way.
+>
+> The approach that I'd like to see here is:
+>
+> * Start out with an ad-hoc patch for a quirk (like the one you alread=
+y
+> =A0have).
+> * Add a boolean variable to enable it per card.
+> * Get performance data for this quirk to show that it's useful in
+> =A0real-world workloads for some cards but counterproductive for othe=
+rs
+> * Get the patch into the mmc tree.
+> * Repeat for the next quirk
+> * When the code becomes overly complicated after adding all the quirk=
+s,
+> =A0decide on a good strategy to move the code around, and do a new pa=
+tch.
+>
+
+Yup. I understand :-).  That's the strategy I'm going to follow. For
+page_size-alignment/splitting I'm looking at the block layer now. Is
+that the right approach or should I still submit a (cleaned up) patch
+to mmc/card/block.c for that performance improvement? The other
+(Toshiba quirk) is obviously a quirk belonging to mmc/card/block.c.
+
+> I understand that you are convinced that you will need the indirect f=
+unction
+> calls in the end. That is fine, just don't add them before they are
+> actually needed -- that would only make it harder for you to get the =
+first
+> patch included.
+>
+> Note that the situation is very different for user interfaces such as=
+ sysfs:
+> You need to plan ahead because once the interface is merged upstream,=
+ it
+> can never be changed. When you submit a patch that introduces a new s=
+ysfs
+> interface, it has to be documented, and you have to convince the revi=
+ewers
+> that it is sufficient to cover all the cases it is designed for, whil=
+e
+> at the same time it is the most simple way to achieve this.
 
 
-static void dw_mci_queue_request(struct dw_mci *host, struct dw_mci_slot *slot,
-				 struct mmc_request *mrq)
-{
-	dev_vdbg(&slot->mmc->class_dev, "queue request: state=%d\n",
-		 host->state);
+Ok, thanks a lot for the explanation, I hadn't thought of it that way
+(and should have).
 
-	spin_lock_bh(&host->lock);
-	slot->mrq = mrq;
-
-	if (host->state == STATE_IDLE) {
-		host->state = STATE_SENDING_CMD;
-		dw_mci_start_request(host, slot);
-	} else {
-		list_add_tail(&slot->queue_node, &host->queue);
-	}
-
-	spin_unlock_bh(&host->lock);
-}
-
-static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-{
-	struct dw_mci_slot *slot = mmc_priv(mmc);
-	struct dw_mci *host = slot->host;
-
-	WARN_ON(slot->mrq);
-
-	if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
-		mrq->cmd->error = -ENOMEDIUM;
-		mmc_request_done(mmc, mrq);
-		return;
-	}
-
-	/* We don't support multiple blocks of weird lengths. */
-	dw_mci_queue_request(host, slot, mrq);
-}
+A
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
