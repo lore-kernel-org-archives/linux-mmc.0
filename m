@@ -1,69 +1,37 @@
-From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-Subject: Re: [PATCH v2 2/3] mmc: cb710: Return err value in
-	cb710_wait_while_busy()
-Date: Fri, 25 Feb 2011 19:22:23 +0100
-Message-ID: <20110225182223.GB26137@rere.qmqm.pl>
-References: <1298500153-28081-1-git-send-email-cjb@laptop.org> <1298500153-28081-2-git-send-email-cjb@laptop.org> <20110223230309.GB15104@pengutronix.de> <20110223231743.GA30908@void.printf.net>
+From: "R. J. Wysocki" <Rafal.Wysocki@fuw.edu.pl>
+Subject: Re: [PATCH v2 2/3] sdhci-pci : Enable runtime PM support
+Date: Fri, 25 Feb 2011 19:28:22 +0100
+Message-ID: <201102251928.22328.rwys@fuw.edu.pl>
+References: <cover.1297014479.git.pierre.tardy@intel.com> <8250E4885F9967469CAC3FB5CBA2CE69935212DEA0@irsmsx501.ger.corp.intel.com> <20110225145440.GA31620@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rere.qmqm.pl ([89.167.52.164]:37057 "EHLO rere.qmqm.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932601Ab1BYSWZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 25 Feb 2011 13:22:25 -0500
-Content-Disposition: inline
-In-Reply-To: <20110223231743.GA30908@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20110225145440.GA31620@srcf.ucam.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: "Tardy, Pierre" <pierre.tardy@intel.com>, Chris Ball <cjb@laptop.org>, Pierre Tardy <tardyp@gmail.com>, "linux-pm@lists.linux-foundation.org" <linux-pm@lists.linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Gao, Yunpeng" <yunpeng.gao@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org
 
-On Wed, Feb 23, 2011 at 11:17:43PM +0000, Chris Ball wrote:
-> Fixes:
->=20
-> drivers/mmc/host/cb710-mmc.c: In function =E2=80=98cb710_wait_while_b=
-usy=E2=80=99:
-> drivers/mmc/host/cb710-mmc.c:182:6: warning: variable =E2=80=98err=E2=
-=80=99 set but not
-> used [-Wunused-but-set-variable]
->=20
-> Signed-off-by: Chris Ball <cjb@laptop.org>
-> Cc: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
-> Cc: Wolfram Sang <w.sang@pengutronix.de>
-> ---
-> Hi Wolfram,
->=20
-> > What about changing return 0 into return err? It gets checked in
-> > cb710_mmc_powerup().
->=20
-> Thanks, good idea.
->=20
-> - Chris.
->=20
->  drivers/mmc/host/cb710-mmc.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mm=
-c.c
-> index 66b4ce5..ce2a47b 100644
-> --- a/drivers/mmc/host/cb710-mmc.c
-> +++ b/drivers/mmc/host/cb710-mmc.c
-> @@ -205,7 +205,7 @@ static int cb710_wait_while_busy(struct cb710_slo=
-t *slot, uint8_t mask)
->  			"WAIT12: waited %d loops, mask %02X, entry val %08X, exit val %08=
-X\n",
->  			limit, mask, e, x);
->  #endif
-> -	return 0;
-> +	return err;
->  }
-> =20
->  static void cb710_mmc_set_transfer_size(struct cb710_slot *slot,
+On Friday, February 25, 2011, Matthew Garrett wrote:
+> On Fri, Feb 25, 2011 at 07:33:12AM +0000, Tardy, Pierre wrote:
+> 
+> > My understanding is the pci driver is not supposed to do any set_power_state/pci_save_state/wake_enable.
+> > Everything is supposed to be generically handle by pci frameworks's runtime_pm impl.
+> > Need confirmation from Rafael.
+> 
+> The core can only enable PME generation, it can't configure what 
+> generates PMEs. There's a register in sdhci that needs to be programmed 
+> to enable wakeups on card insert/removal/interrupt. If you don't then 
+> you won't get a PME no matter what the core does.
 
-This patch is good. This part is not completely demystified though, and=
- some
-parts of the code don't care about this function's return value.
+That's correct.  The driver shoulnd't touch the generic-PCI part of wakeup
+preparation, but it _should_ configure the device-specific part of it.
 
-Acked-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
+It's quite similar to network adapters where you have to configure the adapter
+to react to magic packets, for example, in addition to the PCI PME setup done
+by the core.
 
+Thanks,
+Rafael
