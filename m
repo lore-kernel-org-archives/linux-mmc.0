@@ -1,76 +1,78 @@
-From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
-Subject: Re: [PATCH V3 0/5] sdhci-esdhc-imx: use gpio for write protection and	card detection
-Date: Fri, 25 Feb 2011 20:31:17 +0100
-Message-ID: <874o7r29oa.fsf@lebrac.rtp-net.org>
-References: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>
-	<87k4gp3bl1.fsf@lebrac.rtp-net.org> <4D66AAE4.4000308@eukrea.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH V2] sdhci: always use max timeout for xfers
+Date: Fri, 25 Feb 2011 21:07:22 +0100
+Message-ID: <20110225200722.GA2192@pengutronix.de>
+References: <D8739074-546D-4531-A8E9-23E9F7A33EB5@marvell.com>
+ <20110225180248.GA15491@pengutronix.de>
+ <9C437661-BFCC-4F73-989E-06589E0D37CA@marvell.com>
+ <20110225182206.GC15491@pengutronix.de>
+ <62F39533-530F-4DF4-BBC6-AF8E9AB9E751@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="vkogqOf2sHV7VnPd"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lebrac.rtp-net.org ([88.191.135.105]:55250 "EHLO
-	lebrac.rtp-net.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756369Ab1BYTbh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2011 14:31:37 -0500
-In-Reply-To: <4D66AAE4.4000308@eukrea.com> (Eric Benard's message of "Thu, 24
-	Feb 2011 20:00:52 +0100")
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:41741 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932644Ab1BYUH0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2011 15:07:26 -0500
+Content-Disposition: inline
+In-Reply-To: <62F39533-530F-4DF4-BBC6-AF8E9AB9E751@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Eric Benard <eric@eukrea.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Jae hoon Chung <jh80.chung@gmail.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Eric Benard <eric@eukrea.com> writes:
 
-> Hi Arnaud,
+--vkogqOf2sHV7VnPd
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Salut !
->
-> On 24/02/2011 12:40, Arnaud Patard (Rtp) wrote:
->> Wolfram Sang<w.sang@pengutronix.de>  writes:
->>
->> Hi,
->>
->>> Take #3, changes:
->>>
->>> * also intercept calls to SDHCI_SIGNAL_ENABLE (needed on mx25)
->>> * remove unconditional BROKEN_CARD_DETECTION (leftover)
->>> * improved kernel-doc about unused GPIO
->>> * added tags from Eric
->>>
->>> Tested now by me and Marc on mx35, Eric on mx25/35/51. Arnaud, did you have a
->>> chance to retest on mx51? What about the FSL guys? :)
->>
->> I'm getting a hard freeze on my efika sb and mx once I remove the
->> unconditional BROKEN_CARD_DETECTION flag. I'm still investigating the
->> issue. I'll keep you informed if I find something.
->>
-> may you please test the attached patch. It may give someone with a
-> better knowledge of sdhci than me an idea of what is wrong.
+On Fri, Feb 25, 2011 at 10:49:25AM -0800, Philip Rakity wrote:
+> v2
+>=20
+> use define for max timeout.  remove subroutine call and just
+> set the register directly
 
-I've tested this patch on my efikamx and this patch does solve the
-issue. I didn't test on the efika smartbook but I guess it'll be fine
-here too. Thanks.
+The generic description goes above the "---" line, the incremental
+history of the patch usually below.
 
->
-> Here are the workaround this patch add :
-> - we can't let enable or disable irq enabled when the card is
-> present/not present, else the irq triger again which explains why you
-> get the freeze -> so we must rely on the card presence bit to enable
-> the right interrupt,
+>=20
+> v1
+>=20
+> The card/host controller may sometimes return a value that is
+> too low and cause the h/w to timeout a transfer that would have
+> worked.  Using the maximum value avoids this.
+>=20
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
 
-so, we're getting an interrupt storm, right ? can't it be fixed by
-setting a different irq type ?
+What is there seems ok, but it is not enough yet. The quirks can also go
+=66rom the users.
 
-> - we can't turn the clock off if we want the card detect to work when
-> the card is removed -> as a quick workaround this patch prevents
-> sdhci_set_clock from turning off the clocks when the
-> SDHCI_INT_CARD_INSERT interrupt is enabled.
->
-> Also, I had to change the MX51_PAD_GPIO1_0__SD1_CD pad setting as
-> follows to enable the internal pull up :
-> 	_MX51_PAD_GPIO1_0__SD1_CD | MUX_PAD_CTRL(PAD_CTL_PUS_22K_UP |
-> 			PAD_CTL_PKE | PAD_CTL_SRE_FAST |
-> 			PAD_CTL_DSE_HIGH | PAD_CTL_PUE | PAD_CTL_HYS),
+After that, it gets even more complicated; after this patch
+'host->timeout_clk' becomes obsolete which should probably cleaned up in
+a later patch together with host->ops->get_timeout_clk. Hmmmm, that
+needs careful auditing.
 
-It worked without changing this.
+Regards,
 
-Arnaud
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--vkogqOf2sHV7VnPd
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk1oC/oACgkQD27XaX1/VRvRtQCfaLEwCQ5I9tn3GkBGqwhzX/R5
+w24AnihN2wYpvuXmuEFYTH+D0loPe2GV
+=A6Ps
+-----END PGP SIGNATURE-----
+
+--vkogqOf2sHV7VnPd--
