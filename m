@@ -1,76 +1,99 @@
-From: "Krishnamoorthy, Balaji T" <balajitk@ti.com>
-Subject: Re: [PATCH v4 5/6] OMAP: adapt hsmmc to hwmod framework
-Date: Fri, 25 Feb 2011 18:20:35 +0530
-Message-ID: <AANLkTikfa5BPUvbRtc12j3=TvW0HG47kT9JET13Kuiud@mail.gmail.com>
+From: "Cousson, Benoit" <b-cousson@ti.com>
+Subject: Re: [PATCH v4 0/6] OMAP: HSMMC: hwmod adaptation
+Date: Fri, 25 Feb 2011 13:54:15 +0100
+Message-ID: <4D67A677.4000407@ti.com>
 References: <1298575614-9388-1-git-send-email-kishore.kadiyala@ti.com>
-	<1298575614-9388-6-git-send-email-kishore.kadiyala@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:48569 "EHLO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755192Ab1BYMug convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 25 Feb 2011 07:50:36 -0500
-In-Reply-To: <1298575614-9388-6-git-send-email-kishore.kadiyala@ti.com>
+Received: from bear.ext.ti.com ([192.94.94.41]:45537 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753056Ab1BYMyV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 25 Feb 2011 07:54:21 -0500
+In-Reply-To: <1298575614-9388-1-git-send-email-kishore.kadiyala@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, b-cousson@ti.com
+To: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "tony@atomide.com" <tony@atomide.com>, "cjb@laptop.org" <cjb@laptop.org>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "khilman@deeprootsystems.com" <khilman@deeprootsystems.com>, "paul@pwsan.com" <paul@pwsan.com>
 
-<snip>
+Hi Kishore,
 
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (cpu_is_omap44xx())
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->reg_offset =3D OMA=
-P4_MMC_REG_OFFSET;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->reg_offset =3D 0;
-> +static struct omap_mmc_platform_data *mmc __initdata;
+On 2/24/2011 8:26 PM, Kadiyala, Kishore wrote:
+> Adding hwmod data for hsmmc device on OMAP2430/OMAP3/OMAP4.
+> Adapting the omap_hsmmc driver to hwmod framework.
+>
+> The patch series is based on omap-for-linus and tested on
+> OMAP2430, OMAP3430SDP&  OMAP4430SDP.
+> Also boot tested on OMAP2420SDP.
+>
+> V4:
+> ---
+> Omap2420 platform consists of mmc block as in omap1 and not the
+> hsmmc block as present in omap2430, omap3, omap4 platforms.
+> The series takes care of hwmod adaptation of hsmmc drivers and
+> thus excluding the omap2420 platforms.
+>
+> Also includes renaming of device&  driver name.
+>
+> The patch series has dependency on :
+>   1)https://patchwork.kernel.org/patch/585281/
+>   2)https://patchwork.kernel.org/patch/538301/
 
-can you pass this *mmc as another argument to omap_hsmmc_pdata_init
-so that this static initdata can be removed ?
+This is still not omap-for-linus (at 7cab871)...
+I cannot apply the series on it:-(
+
+Benoit
 
 >
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->get_context_loss_count =3D hsmmc_g=
-et_context_loss;
-> +static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c)
-> +{
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 char *hc_name;
+> V3:
+> --
+> http://www.spinics.net/lists/linux-omap/msg46783.html
 >
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].switch_pin =3D c->gpio_cd=
-;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].gpio_wp =3D c->gpio_wp;
-> + =A0 =A0 =A0 if (!c->mmc) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_debug("MMC%d: no such controller\n",=
- c->mmc);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENXIO;
-> + =A0 =A0 =A0 }
+> V2:
+> ---
+> http://www.spinics.net/lists/linux-omap/msg45443.html
 >
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].remux =3D c->remux;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].init_card =3D c->init_car=
-d;
-> + =A0 =A0 =A0 hc_name =3D kzalloc(sizeof(char) * (HSMMC_NAME_LEN + 1)=
-, GFP_KERNEL);
-> + =A0 =A0 =A0 if (!hc_name) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Cannot allocate memory for cont=
-roller slot name\n");
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 kfree(hc_name);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENOMEM;
-> + =A0 =A0 =A0 }
+> V1:
+> ---
+> http://www.spinics.net/lists/linux-mmc/msg05689.html
 >
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (c->cover_only)
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->slots[0].cover =3D=
- 1;
-> + =A0 =A0 =A0 if (c->name)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 strncpy(hc_name, c->name, HSMMC_NAME_LE=
-N);
-> + =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 snprintf(hc_name, (HSMMC_NAME_LEN + 1),=
- "mmc%islot%i",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 c->mmc, 1);
-> + =A0 =A0 =A0 mmc->slots[0].name =3D hc_name;
-> + =A0 =A0 =A0 mmc->nr_slots =3D 1;
+>
+> Anand Gadiyar (1):
+>    OMAP4: hwmod data: enable HSMMC
+>
+> Kishore Kadiyala (2):
+>    OMAP: hwmod data: Add dev_attr and use in the host driver
+>    OMAP: adapt hsmmc to hwmod framework
+>    OMAP: hsmmc: Rename the device and driver
+>
+> Paul Walmsley (2):
+>    OMAP2430: hwmod data: Add HSMMC
+>    OMAP3: hwmod data: Add HSMMC
+>
+>   arch/arm/mach-omap2/board-2430sdp.c          |    2 +-
+>   arch/arm/mach-omap2/board-3430sdp.c          |    6 +-
+>   arch/arm/mach-omap2/board-4430sdp.c          |    4 +-
+>   arch/arm/mach-omap2/board-devkit8000.c       |    2 +-
+>   arch/arm/mach-omap2/board-igep0020.c         |    6 +-
+>   arch/arm/mach-omap2/board-igep0030.c         |    6 +-
+>   arch/arm/mach-omap2/board-omap3evm.c         |    2 +-
+>   arch/arm/mach-omap2/board-omap3pandora.c     |    6 +-
+>   arch/arm/mach-omap2/board-omap4panda.c       |    4 +-
+>   arch/arm/mach-omap2/board-rm680.c            |    2 +-
+>   arch/arm/mach-omap2/board-rx51-peripherals.c |    8 +-
+>   arch/arm/mach-omap2/board-zoom-peripherals.c |    2 +-
+>   arch/arm/mach-omap2/clock2430_data.c         |   12 +-
+>   arch/arm/mach-omap2/clock3xxx_data.c         |   12 +-
+>   arch/arm/mach-omap2/clock44xx_data.c         |   20 +-
+>   arch/arm/mach-omap2/devices.c                |  251 ----------------
+>   arch/arm/mach-omap2/hsmmc.c                  |  417 +++++++++++++++++---------
+>   arch/arm/mach-omap2/omap_hwmod_2430_data.c   |  152 ++++++++++
+>   arch/arm/mach-omap2/omap_hwmod_3xxx_data.c   |  215 +++++++++++++
+>   arch/arm/mach-omap2/omap_hwmod_44xx_data.c   |   16 +-
+>   arch/arm/mach-omap2/prcm-common.h            |    4 +
+>   arch/arm/plat-omap/include/plat/mmc.h        |   29 +--
+>   drivers/mmc/host/omap_hsmmc.c                |    6 +-
+>   23 files changed, 713 insertions(+), 471 deletions(-)
+>
 
-<snip>
