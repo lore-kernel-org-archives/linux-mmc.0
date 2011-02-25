@@ -1,71 +1,257 @@
-From: Eric Benard <eric@eukrea.com>
-Subject: Re: [PATCH V3 0/5] sdhci-esdhc-imx: use gpio for write protection
- and	card detection
-Date: Fri, 25 Feb 2011 22:29:16 +0100
-Message-ID: <4D681F2C.20307@eukrea.com>
-References: <1298469118-25282-1-git-send-email-w.sang@pengutronix.de>	<87k4gp3bl1.fsf@lebrac.rtp-net.org> <4D66AAE4.4000308@eukrea.com> <874o7r29oa.fsf@lebrac.rtp-net.org>
+From: Paul Walmsley <paul@pwsan.com>
+Subject: Re: [PATCH v5 2/8] OMAP2430: hwmod data: Add HSMMC
+Date: Fri, 25 Feb 2011 14:37:22 -0700 (MST)
+Message-ID: <alpine.DEB.2.00.1102251429320.6198@utopia.booyaka.com>
+References: <1298653783-26410-1-git-send-email-kishore.kadiyala@ti.com> <1298653783-26410-3-git-send-email-kishore.kadiyala@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp3-g21.free.fr ([212.27.42.3]:54470 "EHLO smtp3-g21.free.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753076Ab1BYV30 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 25 Feb 2011 16:29:26 -0500
-In-Reply-To: <874o7r29oa.fsf@lebrac.rtp-net.org>
+Received: from utopia.booyaka.com ([72.9.107.138]:37196 "EHLO
+	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755783Ab1BYVhX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2011 16:37:23 -0500
+In-Reply-To: <1298653783-26410-3-git-send-email-kishore.kadiyala@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Arnaud Patard (Rtp)" <arnaud.patard@rtp-net.org>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, b-cousson@ti.com
 
-Hi,
+Hello Kishore,
 
-On 25/02/2011 20:31, Arnaud Patard (Rtp) wrote:
-> Eric Benard<eric@eukrea.com>  writes:
->> may you please test the attached patch. It may give someone with a
->> better knowledge of sdhci than me an idea of what is wrong.
->
-> I've tested this patch on my efikamx and this patch does solve the
-> issue. I didn't test on the efika smartbook but I guess it'll be fine
-> here too. Thanks.
->
-good. Now we have to find can how this code be integrated properly in the 
-sdhci driver.
->>
->> Here are the workaround this patch add :
->> - we can't let enable or disable irq enabled when the card is
->> present/not present, else the irq triger again which explains why you
->> get the freeze ->  so we must rely on the card presence bit to enable
->> the right interrupt,
->
-> so, we're getting an interrupt storm, right ? can't it be fixed by
-> setting a different irq type ?
->
-no this seems to be the way the SDHCI works, at least the i.MX51 ref manual says :
-- When the CRM bit is cleared, if no card is inserted it is immediately set 
-again: this can be prevented by clearing the card removal status enable bit in 
-interrupt status enable register.
-- When the CIN bit is cleared, if a card is inserted it is immediately set 
-again: this can be prevented by clearing the card inserted status enable bit 
-in interrupt status enable register.
+There are several problems with this data that generate warning messages 
+on boot on 2430SDP.
 
-As, unless I'm mistaken, sdhci host actually consider card detect as broken by 
-default, I think this code in not actually used so it may not be really tested.
+Did you actually test this on 2430SDP?  The warning messages would have 
+been obvious in the boot log.
 
->> - we can't turn the clock off if we want the card detect to work when
->> the card is removed ->  as a quick workaround this patch prevents
->> sdhci_set_clock from turning off the clocks when the
->> SDHCI_INT_CARD_INSERT interrupt is enabled.
->>
->> Also, I had to change the MX51_PAD_GPIO1_0__SD1_CD pad setting as
->> follows to enable the internal pull up :
->> 	_MX51_PAD_GPIO1_0__SD1_CD | MUX_PAD_CTRL(PAD_CTL_PUS_22K_UP |
->> 			PAD_CTL_PKE | PAD_CTL_SRE_FAST |
->> 			PAD_CTL_DSE_HIGH | PAD_CTL_PUE | PAD_CTL_HYS),
->
-> It worked without changing this.
->
-this could mean you have an external pull up resistor on the board which was 
-not the case on the prototype I was working on which is partially mounted ;-)
+Comments below:
 
-Eric
+On Fri, 25 Feb 2011, Kishore Kadiyala wrote:
+
+> From: Paul Walmsley <paul@pwsan.com>
+> 
+> Update the omap2430 hwmod data with the HSMMC info.
+> 
+> Signed-off-by: Paul Walmsley <paul@pwsan.com>
+> Signed-off-by: Kevin Hilman <khilman@deeprootsystems.com>
+> Signed-off-by: Rajendra Nayak <rnayak@ti.com
+> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+> Cc: Benoit Cousson <b-cousson@ti.com>
+> ---
+>  arch/arm/mach-omap2/omap_hwmod_2430_data.c |  146 ++++++++++++++++++++++++++++
+>  1 files changed, 146 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm/mach-omap2/omap_hwmod_2430_data.c b/arch/arm/mach-omap2/omap_hwmod_2430_data.c
+> index de0015d..a1c3c5e 100644
+> --- a/arch/arm/mach-omap2/omap_hwmod_2430_data.c
+> +++ b/arch/arm/mach-omap2/omap_hwmod_2430_data.c
+> @@ -54,6 +54,8 @@ static struct omap_hwmod omap2430_dma_system_hwmod;
+>  static struct omap_hwmod omap2430_mcspi1_hwmod;
+>  static struct omap_hwmod omap2430_mcspi2_hwmod;
+>  static struct omap_hwmod omap2430_mcspi3_hwmod;
+> +static struct omap_hwmod omap2430_mmc1_hwmod;
+> +static struct omap_hwmod omap2430_mmc2_hwmod;
+>  
+>  /* L3 -> L4_CORE interface */
+>  static struct omap_hwmod_ocp_if omap2430_l3_main__l4_core = {
+> @@ -250,6 +252,42 @@ static struct omap_hwmod_ocp_if *omap2430_usbhsotg_slaves[] = {
+>  	&omap2430_l4_core__usbhsotg,
+>  };
+>  
+> +/* L4 CORE -> MMC1 interface */
+> +static struct omap_hwmod_addr_space omap2430_mmc1_addr_space[] = {
+> +	{
+> +		.pa_start	= 0x4809c000,
+> +		.pa_end		= 0x4809c1ff,
+> +		.flags		= ADDR_TYPE_RT,
+> +	},
+> +};
+> +
+> +static struct omap_hwmod_ocp_if omap2430_l4_core__mmc1 = {
+> +	.master		= &omap2430_l4_core_hwmod,
+> +	.slave		= &omap2430_mmc1_hwmod,
+> +	.clk		= "mmchs1_ick",
+> +	.addr		= omap2430_mmc1_addr_space,
+> +	.addr_cnt	= ARRAY_SIZE(omap2430_mmc1_addr_space),
+> +	.user		= OCP_USER_MPU | OCP_USER_SDMA,
+> +};
+> +
+> +/* L4 CORE -> MMC2 interface */
+> +static struct omap_hwmod_addr_space omap2430_mmc2_addr_space[] = {
+> +	{
+> +		.pa_start	= 0x480b4000,
+> +		.pa_end		= 0x480b41ff,
+> +		.flags		= ADDR_TYPE_RT,
+> +	},
+> +};
+> +
+> +static struct omap_hwmod_ocp_if omap2430_l4_core__mmc2 = {
+> +	.master		= &omap2430_l4_core_hwmod,
+> +	.slave		= &omap2430_mmc2_hwmod,
+> +	.addr		= omap2430_mmc2_addr_space,
+> +	.clk		= "mmchs2_ick",
+> +	.addr_cnt	= ARRAY_SIZE(omap2430_mmc2_addr_space),
+> +	.user		= OCP_USER_MPU | OCP_USER_SDMA,
+> +};
+> +
+>  /* Slave interfaces on the L4_CORE interconnect */
+>  static struct omap_hwmod_ocp_if *omap2430_l4_core_slaves[] = {
+>  	&omap2430_l3_main__l4_core,
+> @@ -258,6 +296,8 @@ static struct omap_hwmod_ocp_if *omap2430_l4_core_slaves[] = {
+>  /* Master interfaces on the L4_CORE interconnect */
+>  static struct omap_hwmod_ocp_if *omap2430_l4_core_masters[] = {
+>  	&omap2430_l4_core__l4_wkup,
+> +	&omap2430_l4_core__mmc1,
+> +	&omap2430_l4_core__mmc2,
+>  };
+>  
+>  /* L4 CORE */
+> @@ -1508,6 +1548,110 @@ static struct omap_hwmod omap2430_usbhsotg_hwmod = {
+>  
+>  
+>  
+> +/* MMC/SD/SDIO common */
+> +
+> +static struct omap_hwmod_class_sysconfig omap2430_mmc_sysc = {
+> +	.rev_offs	= 0x1fc,
+> +	.sysc_offs	= 0x10,
+> +	.syss_offs	= 0x14,
+> +	.sysc_flags	= (SYSC_HAS_CLOCKACTIVITY | SYSC_HAS_SIDLEMODE |
+> +			   SYSC_HAS_ENAWAKEUP | SYSC_HAS_SOFTRESET |
+> +			   SYSC_HAS_AUTOIDLE | SYSS_HAS_RESET_STATUS),
+> +	.idlemodes	= (SIDLE_FORCE | SIDLE_NO | SIDLE_SMART),
+> +	.sysc_fields    = &omap_hwmod_sysc_type1,
+> +};
+> +
+> +static struct omap_hwmod_class omap2430_mmc_class = {
+> +	.name = "mmc",
+> +	.sysc = &omap2430_mmc_sysc,
+> +};
+> +
+> +/* MMC/SD/SDIO1 */
+> +
+> +static struct omap_hwmod_irq_info omap2430_mmc1_mpu_irqs[] = {
+> +	{ .irq = 83 },
+> +};
+> +
+> +static struct omap_hwmod_dma_info omap2430_mmc1_sdma_reqs[] = {
+> +	{ .name = "tx",	.dma_req = 61 }, /* DMA_MMC1_TX */
+> +	{ .name = "rx",	.dma_req = 62 }, /* DMA_MMC1_RX */
+> +};
+> +
+> +static struct omap_hwmod_opt_clk omap2430_mmc1_opt_clks[] = {
+> +	{ .role = "dbck", .clk = "mmchsdb_fck" },
+
+This is not the correct name of the clock.  This generates warnings on 
+boot and prevents the HSMMC block from being soft-reset.
+
+> +};
+> +
+> +static struct omap_hwmod_ocp_if *omap2430_mmc1_slaves[] = {
+> +	&omap2430_l4_core__mmc1,
+> +};
+> +
+> +static struct omap_hwmod omap2430_mmc1_hwmod = {
+> +	.name		= "mmc1",
+> +	.mpu_irqs	= omap2430_mmc1_mpu_irqs,
+> +	.mpu_irqs_cnt	= ARRAY_SIZE(omap2430_mmc1_mpu_irqs),
+> +	.sdma_reqs	= omap2430_mmc1_sdma_reqs,
+> +	.sdma_reqs_cnt	= ARRAY_SIZE(omap2430_mmc1_sdma_reqs),
+> +	.opt_clks	= omap2430_mmc1_opt_clks,
+> +	.opt_clks_cnt	= ARRAY_SIZE(omap2430_mmc1_opt_clks),
+> +	.main_clk	= "mmchs1_fck",
+> +	.prcm		= {
+> +		.omap2 = {
+> +			.module_offs = CORE_MOD,
+> +			.prcm_reg_id = 2,
+> +			.module_bit  = OMAP2430_EN_MMCHS1_SHIFT,
+> +			.idlest_reg_id = 2,
+> +			.idlest_idle_bit = OMAP2430_ST_MMCHS1_SHIFT,
+> +		},
+> +	},
+> +	.slaves		= omap2430_mmc1_slaves,
+> +	.slaves_cnt	= ARRAY_SIZE(omap2430_mmc1_slaves),
+> +	.class		= &omap2430_mmc_class,
+> +	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_OMAP2430),
+
+This needs to have HWMOD_CONTROL_OPT_CLKS_IN_RESET set in the flags, 
+otherwise the softreset will not be possible.  See the OMAP2430 TRM Rev Z 
+[SWPU090Z] Table 23-10 "MMCHS_SYSSTATUS", the RESETDONE bit.
+
+> +};
+> +
+> +/* MMC/SD/SDIO2 */
+> +
+> +static struct omap_hwmod_irq_info omap2430_mmc2_mpu_irqs[] = {
+> +	{ .irq = 86 },
+> +};
+> +
+> +static struct omap_hwmod_dma_info omap2430_mmc2_sdma_reqs[] = {
+> +	{ .name = "tx",	.dma_req = 47 }, /* DMA_MMC2_TX */
+> +	{ .name = "rx",	.dma_req = 48 }, /* DMA_MMC2_RX */
+> +};
+> +
+> +static struct omap_hwmod_opt_clk omap2430_mmc2_opt_clks[] = {
+> +	{ .role = "dbck", .clk = "mmchsdb_fck" },
+
+This is not the correct name of the clock.  This generates warnings on 
+boot and prevents the HSMMC block from being soft-reset.
+
+> +};
+> +
+> +static struct omap_hwmod_ocp_if *omap2430_mmc2_slaves[] = {
+> +	&omap2430_l4_core__mmc2,
+> +};
+> +
+> +static struct omap_hwmod omap2430_mmc2_hwmod = {
+> +	.name		= "mmc2",
+> +	.mpu_irqs	= omap2430_mmc2_mpu_irqs,
+> +	.mpu_irqs_cnt	= ARRAY_SIZE(omap2430_mmc2_mpu_irqs),
+> +	.sdma_reqs	= omap2430_mmc2_sdma_reqs,
+> +	.sdma_reqs_cnt	= ARRAY_SIZE(omap2430_mmc2_sdma_reqs),
+> +	.opt_clks	= omap2430_mmc2_opt_clks,
+> +	.opt_clks_cnt	= ARRAY_SIZE(omap2430_mmc2_opt_clks),
+> +	.main_clk	= "mmchs2_fck",
+> +	.prcm		= {
+> +		.omap2 = {
+> +			.module_offs = CORE_MOD,
+> +			.prcm_reg_id = 2,
+> +			.module_bit  = OMAP2430_EN_MMCHS2_SHIFT,
+> +			.idlest_reg_id = 2,
+> +			.idlest_idle_bit = OMAP2430_ST_MMCHS2_SHIFT,
+> +		},
+> +	},
+> +	.slaves		= omap2430_mmc2_slaves,
+> +	.slaves_cnt	= ARRAY_SIZE(omap2430_mmc2_slaves),
+> +	.class		= &omap2430_mmc_class,
+> +	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_OMAP2430),
+
+This needs to have HWMOD_CONTROL_OPT_CLKS_IN_RESET set in the flags, 
+otherwise the softreset will not be possible.  See the OMAP2430 TRM Rev Z 
+[SWPU090Z] Table 23-10 "MMCHS_SYSSTATUS", the RESETDONE bit.
+
+> +};
+> +
+>  static __initdata struct omap_hwmod *omap2430_hwmods[] = {
+>  	&omap2430_l3_main_hwmod,
+>  	&omap2430_l4_core_hwmod,
+> @@ -1526,6 +1670,8 @@ static __initdata struct omap_hwmod *omap2430_hwmods[] = {
+>  	/* i2c class */
+>  	&omap2430_i2c1_hwmod,
+>  	&omap2430_i2c2_hwmod,
+> +	&omap2430_mmc1_hwmod,
+> +	&omap2430_mmc2_hwmod,
+>  
+>  	/* gpio class */
+>  	&omap2430_gpio1_hwmod,
+> -- 
+> 1.7.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+
+- Paul
