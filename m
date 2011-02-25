@@ -1,67 +1,68 @@
-From: "Tardy, Pierre" <pierre.tardy@intel.com>
-Subject: RE: [PATCH v2 2/3] sdhci-pci : Enable runtime PM support
-Date: Fri, 25 Feb 2011 07:33:12 +0000
-Message-ID: <8250E4885F9967469CAC3FB5CBA2CE69935212DEA0@irsmsx501.ger.corp.intel.com>
-References: <cover.1297014479.git.pierre.tardy@intel.com>
- <6722fa7986194808f4d69a1e5ba6d3f163b77da9.1297014479.git.pierre.tardy@intel.com>
- <20110210043718.GA7585@void.printf.net>
- <AANLkTi=iZ3dzAoRuRdpvQ=uBp4u8O8LtMuu2XdSWeZwr@mail.gmail.com>
- <20110221204523.GA28419@void.printf.net>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [RFC] dw_mmc: didn't support multiple blocks of weird length?
+Date: Fri, 25 Feb 2011 16:35:00 +0900
+Message-ID: <4D675BA4.4040006@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:12664 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754361Ab1BYHdR convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2011 02:33:17 -0500
-In-Reply-To: <20110221204523.GA28419@void.printf.net>
-Content-Language: en-US
+Received: from mailout2.samsung.com ([203.254.224.25]:20150 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755290Ab1BYHfD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2011 02:35:03 -0500
+Received: from epmmp1 (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LH500MR4X2D7500@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 25 Feb 2011 16:35:01 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LH50024VX2DHK@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 25 Feb 2011 16:35:01 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Pierre Tardy <tardyp@gmail.com>
-Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, "linux-pm@lists.linux-foundation.org" <linux-pm@lists.linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Gao, Yunpeng" <yunpeng.gao@intel.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>, Chris Ball <cjb@laptop.org>
 
-Rafael, 
-Any comments here?
+Hi..
 
-> It's getting enabled by drivers/pci/pci-driver.c:local_pci_probe(),
-> before the sdhci-pci probe function runs.  local_pci_probe() does:
-> 
->         /* Unbound PCI devices are always set to disabled and suspended.
->          * During probe, the device is set to enabled and active and the
->          * usage count is incremented.  If the driver supports runtime PM,
->          * it should call pm_runtime_put_noidle() in its probe routine and
->          * pm_runtime_get_noresume() in its remove routine.
->          */
->         pm_runtime_get_noresume(dev);
->         pm_runtime_set_active(dev);
->         pm_runtime_enable(dev);
+I didn't understand this point..
+Plz let me explain this code..
+why need this function (dw_mci_queue_request(host, slot, mrq)?
 
-OK. Sounds like it is a change post 2.6.37.
-So we need to replace the current sdhci runtime_pm initialization by what is in this comments.
 
-> > Maybe Rafael can advice on this.
-> 
-> The controller advertises the ability to generate PME wakeups from D3
-> in its PCI capabilities; perhaps we just aren't programming it properly.
-> I don't see anything in your patch that would set SDHCI wakeup bits or
-> unmask card insertion/removal IRQs -- maybe that could be it?
-My understanding is the pci driver is not supposed to do any set_power_state/pci_save_state/wake_enable.
-Everything is supposed to be generically handle by pci frameworks's runtime_pm impl.
-Need confirmation from Rafael.
+static void dw_mci_queue_request(struct dw_mci *host, struct dw_mci_slot *slot,
+				 struct mmc_request *mrq)
+{
+	dev_vdbg(&slot->mmc->class_dev, "queue request: state=%d\n",
+		 host->state);
 
-Regards,
-Pierre
----------------------------------------------------------------------
-Intel Corporation SAS (French simplified joint stock company)
-Registered headquarters: "Les Montalets"- 2, rue de Paris, 
-92196 Meudon Cedex, France
-Registration Number:  302 456 199 R.C.S. NANTERRE
-Capital: 4,572,000 Euros
+	spin_lock_bh(&host->lock);
+	slot->mrq = mrq;
 
-This e-mail and any attachments may contain confidential material for
-the sole use of the intended recipient(s). Any review or distribution
-by others is strictly prohibited. If you are not the intended
-recipient, please contact the sender and delete all copies.
+	if (host->state == STATE_IDLE) {
+		host->state = STATE_SENDING_CMD;
+		dw_mci_start_request(host, slot);
+	} else {
+		list_add_tail(&slot->queue_node, &host->queue);
+	}
 
+	spin_unlock_bh(&host->lock);
+}
+
+static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+{
+	struct dw_mci_slot *slot = mmc_priv(mmc);
+	struct dw_mci *host = slot->host;
+
+	WARN_ON(slot->mrq);
+
+	if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
+		mrq->cmd->error = -ENOMEDIUM;
+		mmc_request_done(mmc, mrq);
+		return;
+	}
+
+	/* We don't support multiple blocks of weird lengths. */
+	dw_mci_queue_request(host, slot, mrq);
+}
