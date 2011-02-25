@@ -1,119 +1,67 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 2/3] dw_mmc: support mmc power control with regulator
-Date: Fri, 25 Feb 2011 11:08:14 +0900
-Message-ID: <4D670F0E.7000800@samsung.com>
+From: "Tardy, Pierre" <pierre.tardy@intel.com>
+Subject: RE: [PATCH v2 2/3] sdhci-pci : Enable runtime PM support
+Date: Fri, 25 Feb 2011 07:33:12 +0000
+Message-ID: <8250E4885F9967469CAC3FB5CBA2CE69935212DEA0@irsmsx501.ger.corp.intel.com>
+References: <cover.1297014479.git.pierre.tardy@intel.com>
+ <6722fa7986194808f4d69a1e5ba6d3f163b77da9.1297014479.git.pierre.tardy@intel.com>
+ <20110210043718.GA7585@void.printf.net>
+ <AANLkTi=iZ3dzAoRuRdpvQ=uBp4u8O8LtMuu2XdSWeZwr@mail.gmail.com>
+ <20110221204523.GA28419@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:37823 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756347Ab1BYCI7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2011 21:08:59 -0500
-Received: from epmmp2 (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LH500EP2HXQ3RA0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Feb 2011 11:08:14 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LH500IAFHXRO0@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Feb 2011 11:08:15 +0900 (KST)
+Received: from mga14.intel.com ([143.182.124.37]:12664 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754361Ab1BYHdR convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2011 02:33:17 -0500
+In-Reply-To: <20110221204523.GA28419@void.printf.net>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Chris Ball <cjb@laptop.org>, Pierre Tardy <tardyp@gmail.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, "linux-pm@lists.linux-foundation.org" <linux-pm@lists.linux-foundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Gao, Yunpeng" <yunpeng.gao@intel.com>
 
-This patch is applied the power control with regulator.
+Rafael, 
+Any comments here?
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c  |   25 +++++++++++++++++++++++++
- include/linux/mmc/dw_mmc.h |    2 ++
- 2 files changed, 27 insertions(+), 0 deletions(-)
+> It's getting enabled by drivers/pci/pci-driver.c:local_pci_probe(),
+> before the sdhci-pci probe function runs.  local_pci_probe() does:
+> 
+>         /* Unbound PCI devices are always set to disabled and suspended.
+>          * During probe, the device is set to enabled and active and the
+>          * usage count is incremented.  If the driver supports runtime PM,
+>          * it should call pm_runtime_put_noidle() in its probe routine and
+>          * pm_runtime_get_noresume() in its remove routine.
+>          */
+>         pm_runtime_get_noresume(dev);
+>         pm_runtime_set_active(dev);
+>         pm_runtime_enable(dev);
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 46e5a89..338fedc 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -32,6 +32,7 @@
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/dw_mmc.h>
- #include <linux/bitops.h>
-+#include <linux/regulator/consumer.h>
- 
- #include "dw_mmc.h"
- 
-@@ -1438,6 +1439,13 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	}
- #endif /* CONFIG_MMC_DW_IDMAC */
- 
-+	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
-+	if (IS_ERR(host->vmmc)) {
-+		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
-+		host->vmmc = NULL;
-+	} else
-+		regulator_enable(host->vmmc);
-+
- 	if (dw_mci_get_cd(mmc))
- 		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
- 	else
-@@ -1701,6 +1709,12 @@ err_dmaunmap:
- 			  host->sg_cpu, host->sg_dma);
- 	iounmap(host->regs);
- 
-+	if (host->vmmc) {
-+		regulator_disable(host->vmmc);
-+		regulator_put(host->vmmc);
-+	}
-+
-+
- err_freehost:
- 	kfree(host);
- 	return ret;
-@@ -1732,6 +1746,11 @@ static int __exit dw_mci_remove(struct platform_device *pdev)
- 	if (host->use_dma && host->dma_ops->exit)
- 		host->dma_ops->exit(host);
- 
-+	if (host->vmmc) {
-+		regulator_disable(host->vmmc);
-+		regulator_put(host->vmmc);
-+	}
-+
- 	iounmap(host->regs);
- 
- 	kfree(host);
-@@ -1762,6 +1781,9 @@ static int dw_mci_suspend(struct platform_device *pdev, pm_message_t mesg)
- 		}
- 	}
- 
-+	if (host->vmmc)
-+		regulator_disable(host->vmmc);
-+
- 	return 0;
- }
- 
-@@ -1770,6 +1792,9 @@ static int dw_mci_resume(struct platform_device *pdev)
- 	int i, ret;
- 	struct dw_mci *host = platform_get_drvdata(pdev);
- 
-+	if (host->vmmc)
-+		regulator_enable(host->vmmc);
-+
- 	for (i = 0; i < host->num_slots; i++) {
- 		struct dw_mci_slot *slot = host->slot[i];
- 		if (!slot)
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 3f22c20..a39c497 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -151,6 +151,8 @@ struct dw_mci {
- 
- 	/* Workaround flags */
- 	u32			quirks;
-+
-+	struct regulator	*vmmc;	/* Power regulator */
- };
- 
- /* DMA ops for Internal/External DMAC interface */
+OK. Sounds like it is a change post 2.6.37.
+So we need to replace the current sdhci runtime_pm initialization by what is in this comments.
+
+> > Maybe Rafael can advice on this.
+> 
+> The controller advertises the ability to generate PME wakeups from D3
+> in its PCI capabilities; perhaps we just aren't programming it properly.
+> I don't see anything in your patch that would set SDHCI wakeup bits or
+> unmask card insertion/removal IRQs -- maybe that could be it?
+My understanding is the pci driver is not supposed to do any set_power_state/pci_save_state/wake_enable.
+Everything is supposed to be generically handle by pci frameworks's runtime_pm impl.
+Need confirmation from Rafael.
+
+Regards,
+Pierre
+---------------------------------------------------------------------
+Intel Corporation SAS (French simplified joint stock company)
+Registered headquarters: "Les Montalets"- 2, rue de Paris, 
+92196 Meudon Cedex, France
+Registration Number:  302 456 199 R.C.S. NANTERRE
+Capital: 4,572,000 Euros
+
+This e-mail and any attachments may contain confidential material for
+the sole use of the intended recipient(s). Any review or distribution
+by others is strictly prohibited. If you are not the intended
+recipient, please contact the sender and delete all copies.
+
