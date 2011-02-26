@@ -1,150 +1,47 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: [PATCH 1/3] mmc: sdhci-esdhc-imx: add support for write protect on custom GPIO on mx25/35
-Date: Sat, 26 Feb 2011 14:44:39 +0100
-Message-ID: <1298727881-12141-2-git-send-email-w.sang@pengutronix.de>
-References: <1298727881-12141-1-git-send-email-w.sang@pengutronix.de>
+Subject: [PATCH V4 0/3] adding write_protect and card_detect for mx25/35
+Date: Sat, 26 Feb 2011 14:44:38 +0100
+Message-ID: <1298727881-12141-1-git-send-email-w.sang@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:55084 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:55082 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751432Ab1BZNoo (ORCPT
+	with ESMTP id S1751409Ab1BZNoo (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Feb 2011 08:44:44 -0500
-In-Reply-To: <1298727881-12141-1-git-send-email-w.sang@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>
 
-Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
-Tested-by: Marc Reilly <marc@cpdesign.com.au>
-Tested-by: Eric Benard <eric@eukrea.com>
----
+Last tests showed some problems with MX51, especially with card_detect. While
+the approach in general will suffice for i.MX5x, it seems there are a few
+details missing right now. Because I do not have the resources (both time and
+hardware) to deal with these issues, I propose a step by step approach. Let's
+add the functionality for mx25/35 first and make sure there is no difference in
+behaviour for mx5x. (Note that the i.MX5x can route the pins directly to the
+controller, so a properly designed board should not need these gpio-additions.)
+That is what this patch series does: The main change is that mx5x won't notice
+any difference. For mx25/35, it is the same as it has been tested by Eric and
+Marc.
 
-change since last version:
+Thanks to all involved in providing feedback, I hope it can go in now. If you
+want to add support for it to your board, please CC me.
 
-* none
+Have a nice weekend,
 
- arch/arm/plat-mxc/include/mach/esdhc.h |   10 +++++-
- drivers/mmc/host/sdhci-esdhc-imx.c     |   52 +++++++++++++++++++++++++-------
- 2 files changed, 50 insertions(+), 12 deletions(-)
+   Wolfram
 
-diff --git a/arch/arm/plat-mxc/include/mach/esdhc.h b/arch/arm/plat-mxc/include/mach/esdhc.h
-index a48a9aa..47da109 100644
---- a/arch/arm/plat-mxc/include/mach/esdhc.h
-+++ b/arch/arm/plat-mxc/include/mach/esdhc.h
-@@ -10,7 +10,15 @@
- #ifndef __ASM_ARCH_IMX_ESDHC_H
- #define __ASM_ARCH_IMX_ESDHC_H
- 
-+/**
-+ * struct esdhc_platform_data - optional platform data for esdhc on i.MX
-+ *
-+ * strongly recommended for i.MX25/35, not needed for other variants
-+ *
-+ * @wp_gpio:	gpio for write_protect (-EINVAL if unused)
-+ */
-+
- struct esdhc_platform_data {
--	unsigned int wp_gpio;	/* write protect pin */
-+	unsigned int wp_gpio;
- };
- #endif /* __ASM_ARCH_IMX_ESDHC_H */
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 9b82910..65df00b 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -15,9 +15,11 @@
- #include <linux/delay.h>
- #include <linux/err.h>
- #include <linux/clk.h>
-+#include <linux/gpio.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdhci-pltfm.h>
- #include <mach/hardware.h>
-+#include <mach/esdhc.h>
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-@@ -100,10 +102,31 @@ static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
- 	return clk_get_rate(pltfm_host->clk) / 256 / 16;
- }
- 
-+static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
-+{
-+	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
-+
-+	if (boarddata && gpio_is_valid(boarddata->wp_gpio))
-+		return gpio_get_value(boarddata->wp_gpio);
-+	else
-+		return -ENOSYS;
-+}
-+
-+static struct sdhci_ops sdhci_esdhc_ops = {
-+	.read_w = esdhc_readw_le,
-+	.write_w = esdhc_writew_le,
-+	.write_b = esdhc_writeb_le,
-+	.set_clock = esdhc_set_clock,
-+	.get_max_clock = esdhc_pltfm_get_max_clock,
-+	.get_min_clock = esdhc_pltfm_get_min_clock,
-+};
-+
- static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pdata)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
- 	struct clk *clk;
-+	int err;
- 
- 	clk = clk_get(mmc_dev(host->mmc), NULL);
- 	if (IS_ERR(clk)) {
-@@ -116,9 +139,21 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 	if (cpu_is_mx35() || cpu_is_mx51())
- 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
- 
--	/* Fix errata ENGcm07207 which is present on i.MX25 and i.MX35 */
--	if (cpu_is_mx25() || cpu_is_mx35())
-+	if (cpu_is_mx25() || cpu_is_mx35()) {
-+		/* Fix errata ENGcm07207 present on i.MX25 and i.MX35 */
- 		host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK;
-+		/* write_protect can't be routed to controller, use gpio */
-+		sdhci_esdhc_ops.get_ro = esdhc_pltfm_get_ro;
-+	}
-+
-+	if (boarddata) {
-+		err = gpio_request_one(boarddata->wp_gpio, GPIOF_IN, "ESDHC_WP");
-+		if (err) {
-+			dev_warn(mmc_dev(host->mmc),
-+				"no write-protect pin available!\n");
-+			boarddata->wp_gpio = err;
-+		}
-+	}
- 
- 	return 0;
- }
-@@ -126,20 +161,15 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- static void esdhc_pltfm_exit(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
-+
-+	if (boarddata && gpio_is_valid(boarddata->wp_gpio))
-+		gpio_free(boarddata->wp_gpio);
- 
- 	clk_disable(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
- }
- 
--static struct sdhci_ops sdhci_esdhc_ops = {
--	.read_w = esdhc_readw_le,
--	.write_w = esdhc_writew_le,
--	.write_b = esdhc_writeb_le,
--	.set_clock = esdhc_set_clock,
--	.get_max_clock = esdhc_pltfm_get_max_clock,
--	.get_min_clock = esdhc_pltfm_get_min_clock,
--};
--
- struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
- 	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_ADMA,
- 	/* ADMA has issues. Might be fixable */
+Wolfram Sang (3):
+  mmc: sdhci-esdhc-imx: add support for write protect on custom GPIO on
+    mx25/35
+  mmc: sdhci-esdhc: broken card detection is not a default quirk
+  mmc: sdhci-esdhc-imx: add card detect on custom GPIO for mx25/35
+
+ arch/arm/plat-mxc/include/mach/esdhc.h |   12 +++-
+ drivers/mmc/host/sdhci-esdhc-imx.c     |  134 +++++++++++++++++++++++++++++---
+ drivers/mmc/host/sdhci-esdhc.h         |    1 -
+ drivers/mmc/host/sdhci-of-esdhc.c      |    3 +-
+ 4 files changed, 135 insertions(+), 15 deletions(-)
+
 -- 
 1.7.2.3
 
