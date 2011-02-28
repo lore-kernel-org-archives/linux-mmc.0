@@ -1,7 +1,7 @@
 From: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Subject: [PATCH v6 2/8] OMAP2430: hwmod data: Add HSMMC
-Date: Mon, 28 Feb 2011 20:47:59 +0530
-Message-ID: <1298906285-29895-3-git-send-email-kishore.kadiyala@ti.com>
+Subject: [PATCH v6 6/8] OMAP: hsmmc: Move mux configuration to hsmmc.c
+Date: Mon, 28 Feb 2011 20:48:03 +0530
+Message-ID: <1298906285-29895-7-git-send-email-kishore.kadiyala@ti.com>
 References: <1298906285-29895-1-git-send-email-kishore.kadiyala@ti.com>
 Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1298906285-29895-1-git-send-email-kishore.kadiyala@ti.com>
@@ -10,206 +10,229 @@ To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 Cc: tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, b-cousson@ti.com, Kishore Kadiyala <kishore.kadiyala@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Paul Walmsley <paul@pwsan.com>
+Moving the definition of mux setting API from devices.c to hsmmc.c
+and renaming it from "omap2_mmc_mux" to "omap_hsmmc_mux".
+Also calling "omap_hsmmc_mux" from omap2_hsmmc_init.
 
-Update the omap2430 hwmod data with the HSMMC info.
-
-Signed-off-by: Paul Walmsley <paul@pwsan.com>
-Signed-off-by: Kevin Hilman <khilman@deeprootsystems.com>
-Signed-off-by: Rajendra Nayak <rnayak@ti.com
 Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Cc: Benoit Cousson <b-cousson@ti.com>
+Cc: Chris Ball <cjb@laptop.org
+Cc: Tony Lindgren <tony@atomide.com
 ---
- arch/arm/mach-omap2/omap_hwmod_2430_data.c |  148 ++++++++++++++++++++++++++++
- 1 files changed, 148 insertions(+), 0 deletions(-)
+ arch/arm/mach-omap2/devices.c |   83 ----------------------------------------
+ arch/arm/mach-omap2/hsmmc.c   |   84 +++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 84 insertions(+), 83 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/omap_hwmod_2430_data.c b/arch/arm/mach-omap2/omap_hwmod_2430_data.c
-index de0015d..cba1800 100644
---- a/arch/arm/mach-omap2/omap_hwmod_2430_data.c
-+++ b/arch/arm/mach-omap2/omap_hwmod_2430_data.c
-@@ -54,6 +54,8 @@ static struct omap_hwmod omap2430_dma_system_hwmod;
- static struct omap_hwmod omap2430_mcspi1_hwmod;
- static struct omap_hwmod omap2430_mcspi2_hwmod;
- static struct omap_hwmod omap2430_mcspi3_hwmod;
-+static struct omap_hwmod omap2430_mmc1_hwmod;
-+static struct omap_hwmod omap2430_mmc2_hwmod;
+diff --git a/arch/arm/mach-omap2/devices.c b/arch/arm/mach-omap2/devices.c
+index 100bb42..2f4a598 100644
+--- a/arch/arm/mach-omap2/devices.c
++++ b/arch/arm/mach-omap2/devices.c
+@@ -708,87 +708,6 @@ void __init omap242x_init_mmc(struct omap_mmc_platform_data **mmc_data)
  
- /* L3 -> L4_CORE interface */
- static struct omap_hwmod_ocp_if omap2430_l3_main__l4_core = {
-@@ -250,6 +252,42 @@ static struct omap_hwmod_ocp_if *omap2430_usbhsotg_slaves[] = {
- 	&omap2430_l4_core__usbhsotg,
- };
+ #if defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
  
-+/* L4 CORE -> MMC1 interface */
-+static struct omap_hwmod_addr_space omap2430_mmc1_addr_space[] = {
-+	{
-+		.pa_start	= 0x4809c000,
-+		.pa_end		= 0x4809c1ff,
-+		.flags		= ADDR_TYPE_RT,
-+	},
-+};
-+
-+static struct omap_hwmod_ocp_if omap2430_l4_core__mmc1 = {
-+	.master		= &omap2430_l4_core_hwmod,
-+	.slave		= &omap2430_mmc1_hwmod,
-+	.clk		= "mmchs1_ick",
-+	.addr		= omap2430_mmc1_addr_space,
-+	.addr_cnt	= ARRAY_SIZE(omap2430_mmc1_addr_space),
-+	.user		= OCP_USER_MPU | OCP_USER_SDMA,
-+};
-+
-+/* L4 CORE -> MMC2 interface */
-+static struct omap_hwmod_addr_space omap2430_mmc2_addr_space[] = {
-+	{
-+		.pa_start	= 0x480b4000,
-+		.pa_end		= 0x480b41ff,
-+		.flags		= ADDR_TYPE_RT,
-+	},
-+};
-+
-+static struct omap_hwmod_ocp_if omap2430_l4_core__mmc2 = {
-+	.master		= &omap2430_l4_core_hwmod,
-+	.slave		= &omap2430_mmc2_hwmod,
-+	.addr		= omap2430_mmc2_addr_space,
-+	.clk		= "mmchs2_ick",
-+	.addr_cnt	= ARRAY_SIZE(omap2430_mmc2_addr_space),
-+	.user		= OCP_USER_MPU | OCP_USER_SDMA,
-+};
-+
- /* Slave interfaces on the L4_CORE interconnect */
- static struct omap_hwmod_ocp_if *omap2430_l4_core_slaves[] = {
- 	&omap2430_l3_main__l4_core,
-@@ -258,6 +296,8 @@ static struct omap_hwmod_ocp_if *omap2430_l4_core_slaves[] = {
- /* Master interfaces on the L4_CORE interconnect */
- static struct omap_hwmod_ocp_if *omap2430_l4_core_masters[] = {
- 	&omap2430_l4_core__l4_wkup,
-+	&omap2430_l4_core__mmc1,
-+	&omap2430_l4_core__mmc2,
- };
+-static inline void omap2_mmc_mux(struct omap_mmc_platform_data *mmc_controller,
+-			int controller_nr)
+-{
+-	if ((mmc_controller->slots[0].switch_pin > 0) && \
+-		(mmc_controller->slots[0].switch_pin < OMAP_MAX_GPIO_LINES))
+-		omap_mux_init_gpio(mmc_controller->slots[0].switch_pin,
+-					OMAP_PIN_INPUT_PULLUP);
+-	if ((mmc_controller->slots[0].gpio_wp > 0) && \
+-		(mmc_controller->slots[0].gpio_wp < OMAP_MAX_GPIO_LINES))
+-		omap_mux_init_gpio(mmc_controller->slots[0].gpio_wp,
+-					OMAP_PIN_INPUT_PULLUP);
+-	if (cpu_is_omap34xx()) {
+-		if (controller_nr == 0) {
+-			omap_mux_init_signal("sdmmc1_clk",
+-				OMAP_PIN_INPUT_PULLUP);
+-			omap_mux_init_signal("sdmmc1_cmd",
+-				OMAP_PIN_INPUT_PULLUP);
+-			omap_mux_init_signal("sdmmc1_dat0",
+-				OMAP_PIN_INPUT_PULLUP);
+-			if (mmc_controller->slots[0].caps &
+-				(MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)) {
+-				omap_mux_init_signal("sdmmc1_dat1",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc1_dat2",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc1_dat3",
+-					OMAP_PIN_INPUT_PULLUP);
+-			}
+-			if (mmc_controller->slots[0].caps &
+-						MMC_CAP_8_BIT_DATA) {
+-				omap_mux_init_signal("sdmmc1_dat4",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc1_dat5",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc1_dat6",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc1_dat7",
+-					OMAP_PIN_INPUT_PULLUP);
+-			}
+-		}
+-		if (controller_nr == 1) {
+-			/* MMC2 */
+-			omap_mux_init_signal("sdmmc2_clk",
+-				OMAP_PIN_INPUT_PULLUP);
+-			omap_mux_init_signal("sdmmc2_cmd",
+-				OMAP_PIN_INPUT_PULLUP);
+-			omap_mux_init_signal("sdmmc2_dat0",
+-				OMAP_PIN_INPUT_PULLUP);
+-
+-			/*
+-			 * For 8 wire configurations, Lines DAT4, 5, 6 and 7 need to be muxed
+-			 * in the board-*.c files
+-			 */
+-			if (mmc_controller->slots[0].caps &
+-				(MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)) {
+-				omap_mux_init_signal("sdmmc2_dat1",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc2_dat2",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc2_dat3",
+-					OMAP_PIN_INPUT_PULLUP);
+-			}
+-			if (mmc_controller->slots[0].caps &
+-							MMC_CAP_8_BIT_DATA) {
+-				omap_mux_init_signal("sdmmc2_dat4.sdmmc2_dat4",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc2_dat5.sdmmc2_dat5",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc2_dat6.sdmmc2_dat6",
+-					OMAP_PIN_INPUT_PULLUP);
+-				omap_mux_init_signal("sdmmc2_dat7.sdmmc2_dat7",
+-					OMAP_PIN_INPUT_PULLUP);
+-			}
+-		}
+-
+-		/*
+-		 * For MMC3 the pins need to be muxed in the board-*.c files
+-		 */
+-	}
+-}
+-
+ void __init omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 			int nr_controllers)
+ {
+@@ -802,8 +721,6 @@ void __init omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 		if (!mmc_data[i])
+ 			continue;
  
- /* L4 CORE */
-@@ -1508,6 +1548,112 @@ static struct omap_hwmod omap2430_usbhsotg_hwmod = {
+-		omap2_mmc_mux(mmc_data[i], i);
+-
+ 		switch (i) {
+ 		case 0:
+ 			base = OMAP2_MMC1_BASE;
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 5496bc7..1348ac3 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -16,7 +16,9 @@
+ #include <mach/hardware.h>
+ #include <plat/mmc.h>
+ #include <plat/omap-pm.h>
++#include <plat/mux.h>
  
++#include "mux.h"
+ #include "hsmmc.h"
+ #include "control.h"
  
+@@ -204,6 +206,87 @@ static int nop_mmc_set_power(struct device *dev, int slot, int power_on,
+ 	return 0;
+ }
  
-+/* MMC/SD/SDIO common */
++static inline void omap_hsmmc_mux(struct omap_mmc_platform_data *mmc_controller,
++			int controller_nr)
++{
++	if ((mmc_controller->slots[0].switch_pin > 0) && \
++		(mmc_controller->slots[0].switch_pin < OMAP_MAX_GPIO_LINES))
++		omap_mux_init_gpio(mmc_controller->slots[0].switch_pin,
++					OMAP_PIN_INPUT_PULLUP);
++	if ((mmc_controller->slots[0].gpio_wp > 0) && \
++		(mmc_controller->slots[0].gpio_wp < OMAP_MAX_GPIO_LINES))
++		omap_mux_init_gpio(mmc_controller->slots[0].gpio_wp,
++					OMAP_PIN_INPUT_PULLUP);
++	if (cpu_is_omap34xx()) {
++		if (controller_nr == 0) {
++			omap_mux_init_signal("sdmmc1_clk",
++				OMAP_PIN_INPUT_PULLUP);
++			omap_mux_init_signal("sdmmc1_cmd",
++				OMAP_PIN_INPUT_PULLUP);
++			omap_mux_init_signal("sdmmc1_dat0",
++				OMAP_PIN_INPUT_PULLUP);
++			if (mmc_controller->slots[0].caps &
++				(MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)) {
++				omap_mux_init_signal("sdmmc1_dat1",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc1_dat2",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc1_dat3",
++					OMAP_PIN_INPUT_PULLUP);
++			}
++			if (mmc_controller->slots[0].caps &
++						MMC_CAP_8_BIT_DATA) {
++				omap_mux_init_signal("sdmmc1_dat4",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc1_dat5",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc1_dat6",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc1_dat7",
++					OMAP_PIN_INPUT_PULLUP);
++			}
++		}
++		if (controller_nr == 1) {
++			/* MMC2 */
++			omap_mux_init_signal("sdmmc2_clk",
++				OMAP_PIN_INPUT_PULLUP);
++			omap_mux_init_signal("sdmmc2_cmd",
++				OMAP_PIN_INPUT_PULLUP);
++			omap_mux_init_signal("sdmmc2_dat0",
++				OMAP_PIN_INPUT_PULLUP);
 +
-+static struct omap_hwmod_class_sysconfig omap2430_mmc_sysc = {
-+	.rev_offs	= 0x1fc,
-+	.sysc_offs	= 0x10,
-+	.syss_offs	= 0x14,
-+	.sysc_flags	= (SYSC_HAS_CLOCKACTIVITY | SYSC_HAS_SIDLEMODE |
-+			   SYSC_HAS_ENAWAKEUP | SYSC_HAS_SOFTRESET |
-+			   SYSC_HAS_AUTOIDLE | SYSS_HAS_RESET_STATUS),
-+	.idlemodes	= (SIDLE_FORCE | SIDLE_NO | SIDLE_SMART),
-+	.sysc_fields    = &omap_hwmod_sysc_type1,
-+};
++			/*
++			 * For 8 wire configurations, Lines DAT4, 5, 6 and 7
++			 * need to be muxed in the board-*.c files
++			 */
++			if (mmc_controller->slots[0].caps &
++				(MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)) {
++				omap_mux_init_signal("sdmmc2_dat1",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc2_dat2",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc2_dat3",
++					OMAP_PIN_INPUT_PULLUP);
++			}
++			if (mmc_controller->slots[0].caps &
++							MMC_CAP_8_BIT_DATA) {
++				omap_mux_init_signal("sdmmc2_dat4.sdmmc2_dat4",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc2_dat5.sdmmc2_dat5",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc2_dat6.sdmmc2_dat6",
++					OMAP_PIN_INPUT_PULLUP);
++				omap_mux_init_signal("sdmmc2_dat7.sdmmc2_dat7",
++					OMAP_PIN_INPUT_PULLUP);
++			}
++		}
 +
-+static struct omap_hwmod_class omap2430_mmc_class = {
-+	.name = "mmc",
-+	.sysc = &omap2430_mmc_sysc,
-+};
++		/*
++		 * For MMC3 the pins need to be muxed in the board-*.c files
++		 */
++	}
++}
 +
-+/* MMC/SD/SDIO1 */
-+
-+static struct omap_hwmod_irq_info omap2430_mmc1_mpu_irqs[] = {
-+	{ .irq = 83 },
-+};
-+
-+static struct omap_hwmod_dma_info omap2430_mmc1_sdma_reqs[] = {
-+	{ .name = "tx",	.dma_req = 61 }, /* DMA_MMC1_TX */
-+	{ .name = "rx",	.dma_req = 62 }, /* DMA_MMC1_RX */
-+};
-+
-+static struct omap_hwmod_opt_clk omap2430_mmc1_opt_clks[] = {
-+	{ .role = "dbck", .clk = "mmchsdb1_fck" },
-+};
-+
-+static struct omap_hwmod_ocp_if *omap2430_mmc1_slaves[] = {
-+	&omap2430_l4_core__mmc1,
-+};
-+
-+static struct omap_hwmod omap2430_mmc1_hwmod = {
-+	.name		= "mmc1",
-+	.flags		= HWMOD_CONTROL_OPT_CLKS_IN_RESET,
-+	.mpu_irqs	= omap2430_mmc1_mpu_irqs,
-+	.mpu_irqs_cnt	= ARRAY_SIZE(omap2430_mmc1_mpu_irqs),
-+	.sdma_reqs	= omap2430_mmc1_sdma_reqs,
-+	.sdma_reqs_cnt	= ARRAY_SIZE(omap2430_mmc1_sdma_reqs),
-+	.opt_clks	= omap2430_mmc1_opt_clks,
-+	.opt_clks_cnt	= ARRAY_SIZE(omap2430_mmc1_opt_clks),
-+	.main_clk	= "mmchs1_fck",
-+	.prcm		= {
-+		.omap2 = {
-+			.module_offs = CORE_MOD,
-+			.prcm_reg_id = 2,
-+			.module_bit  = OMAP2430_EN_MMCHS1_SHIFT,
-+			.idlest_reg_id = 2,
-+			.idlest_idle_bit = OMAP2430_ST_MMCHS1_SHIFT,
-+		},
-+	},
-+	.slaves		= omap2430_mmc1_slaves,
-+	.slaves_cnt	= ARRAY_SIZE(omap2430_mmc1_slaves),
-+	.class		= &omap2430_mmc_class,
-+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_OMAP2430),
-+};
-+
-+/* MMC/SD/SDIO2 */
-+
-+static struct omap_hwmod_irq_info omap2430_mmc2_mpu_irqs[] = {
-+	{ .irq = 86 },
-+};
-+
-+static struct omap_hwmod_dma_info omap2430_mmc2_sdma_reqs[] = {
-+	{ .name = "tx",	.dma_req = 47 }, /* DMA_MMC2_TX */
-+	{ .name = "rx",	.dma_req = 48 }, /* DMA_MMC2_RX */
-+};
-+
-+static struct omap_hwmod_opt_clk omap2430_mmc2_opt_clks[] = {
-+	{ .role = "dbck", .clk = "mmchsdb2_fck" },
-+};
-+
-+static struct omap_hwmod_ocp_if *omap2430_mmc2_slaves[] = {
-+	&omap2430_l4_core__mmc2,
-+};
-+
-+static struct omap_hwmod omap2430_mmc2_hwmod = {
-+	.name		= "mmc2",
-+	.flags		= HWMOD_CONTROL_OPT_CLKS_IN_RESET,
-+	.mpu_irqs	= omap2430_mmc2_mpu_irqs,
-+	.mpu_irqs_cnt	= ARRAY_SIZE(omap2430_mmc2_mpu_irqs),
-+	.sdma_reqs	= omap2430_mmc2_sdma_reqs,
-+	.sdma_reqs_cnt	= ARRAY_SIZE(omap2430_mmc2_sdma_reqs),
-+	.opt_clks	= omap2430_mmc2_opt_clks,
-+	.opt_clks_cnt	= ARRAY_SIZE(omap2430_mmc2_opt_clks),
-+	.main_clk	= "mmchs2_fck",
-+	.prcm		= {
-+		.omap2 = {
-+			.module_offs = CORE_MOD,
-+			.prcm_reg_id = 2,
-+			.module_bit  = OMAP2430_EN_MMCHS2_SHIFT,
-+			.idlest_reg_id = 2,
-+			.idlest_idle_bit = OMAP2430_ST_MMCHS2_SHIFT,
-+		},
-+	},
-+	.slaves		= omap2430_mmc2_slaves,
-+	.slaves_cnt	= ARRAY_SIZE(omap2430_mmc2_slaves),
-+	.class		= &omap2430_mmc_class,
-+	.omap_chip	= OMAP_CHIP_INIT(CHIP_IS_OMAP2430),
-+};
-+
- static __initdata struct omap_hwmod *omap2430_hwmods[] = {
- 	&omap2430_l3_main_hwmod,
- 	&omap2430_l4_core_hwmod,
-@@ -1526,6 +1672,8 @@ static __initdata struct omap_hwmod *omap2430_hwmods[] = {
- 	/* i2c class */
- 	&omap2430_i2c1_hwmod,
- 	&omap2430_i2c2_hwmod,
-+	&omap2430_mmc1_hwmod,
-+	&omap2430_mmc2_hwmod,
+ static struct omap_mmc_platform_data *hsmmc_data[OMAP34XX_NR_MMC] __initdata;
  
- 	/* gpio class */
- 	&omap2430_gpio1_hwmod,
+ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+@@ -361,6 +444,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
+ 			continue;
+ 		}
+ 		hsmmc_data[c->mmc - 1] = mmc;
++		omap_hsmmc_mux(hsmmc_data[c->mmc - 1], (c->mmc - 1));
+ 	}
+ 
+ 	omap2_init_mmc(hsmmc_data, OMAP34XX_NR_MMC);
 -- 
 1.7.1
 
