@@ -1,42 +1,65 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V4 0/3] adding write_protect and card_detect for mx25/35
-Date: Mon, 28 Feb 2011 15:55:40 -0500
-Message-ID: <m3r5ar281f.fsf@pullcord.laptop.org>
-References: <1298727881-12141-1-git-send-email-w.sang@pengutronix.de>
+Subject: [PATCH] mmc: dw_mmc: Remove set-but-unused variable.
+Date: Mon, 28 Feb 2011 16:55:37 -0500
+Message-ID: <1298930137-15105-1-git-send-email-cjb@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54536 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754521Ab1B1U5S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 28 Feb 2011 15:57:18 -0500
-In-Reply-To: <1298727881-12141-1-git-send-email-w.sang@pengutronix.de>
-	(Wolfram Sang's message of "Sat, 26 Feb 2011 14:44:38 +0100")
+Received: from pullcord.laptop.org ([18.85.46.20]:55621 "EHLO
+	pullcord.laptop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752562Ab1B1V6D (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2011 16:58:03 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>
 
-Hi Wolfram,
+count is only ever used by assigning to old_len if count =3D=3D 0, and
+then old_len isn't ever used at all.  So, both are redundant.  Fixes:
 
-On Sat, Feb 26 2011, Wolfram Sang wrote:
-> Last tests showed some problems with MX51, especially with card_detect. While
-> the approach in general will suffice for i.MX5x, it seems there are a few
-> details missing right now. Because I do not have the resources (both time and
-> hardware) to deal with these issues, I propose a step by step approach. Let's
-> add the functionality for mx25/35 first and make sure there is no difference in
-> behaviour for mx5x. (Note that the i.MX5x can route the pins directly to the
-> controller, so a properly designed board should not need these gpio-additions.)
-> That is what this patch series does: The main change is that mx5x won't notice
-> any difference. For mx25/35, it is the same as it has been tested by Eric and
-> Marc.
->
-> Thanks to all involved in providing feedback, I hope it can go in now. If you
-> want to add support for it to your board, please CC me.
+drivers/mmc/host/dw_mmc.c: In function =E2=80=98dw_mci_read_data_pio=E2=
+=80=99:
+drivers/mmc/host/dw_mmc.c:1034:32: warning: variable =E2=80=98old_len=E2=
+=80=99 set but
+not used [-Wunused-but-set-variable]
 
-Thanks, pushed to mmc-next for .39 now.
+Signed-off-by: Chris Ball <cjb@laptop.org>
+Cc: Will Newton <will.newton@imgtec.com>
+---
+ drivers/mmc/host/dw_mmc.c |    6 +-----
+ 1 files changed, 1 insertions(+), 5 deletions(-)
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>
-One Laptop Per Child
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 58476c1..299c1d6 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1031,13 +1031,10 @@ static void dw_mci_read_data_pio(struct dw_mci =
+*host)
+ 	struct mmc_data	*data =3D host->data;
+ 	int shift =3D host->data_shift;
+ 	u32 status;
+-	unsigned int nbytes =3D 0, len, old_len, count =3D 0;
++	unsigned int nbytes =3D 0, len;
+=20
+ 	do {
+ 		len =3D SDMMC_GET_FCNT(mci_readl(host, STATUS)) << shift;
+-		if (count =3D=3D 0)
+-			old_len =3D len;
+-
+ 		if (offset + len <=3D sg->length) {
+ 			host->pull_data(host, (void *)(buf + offset), len);
+=20
+@@ -1082,7 +1079,6 @@ static void dw_mci_read_data_pio(struct dw_mci *h=
+ost)
+ 			tasklet_schedule(&host->tasklet);
+ 			return;
+ 		}
+-		count++;
+ 	} while (status & SDMMC_INT_RXDR); /*if the RXDR is ready read again*=
+/
+ 	len =3D SDMMC_GET_FCNT(mci_readl(host, STATUS));
+ 	host->pio_offset =3D offset;
+--=20
+1.7.0.1
+
