@@ -1,433 +1,197 @@
 From: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Subject: [PATCH v6 8/8] OMAP: hsmmc: Rename the device and driver
-Date: Mon, 28 Feb 2011 20:48:05 +0530
-Message-ID: <1298906285-29895-9-git-send-email-kishore.kadiyala@ti.com>
+Subject: [PATCH v6 1/8] omap: mmc: split out init for 2420
+Date: Mon, 28 Feb 2011 20:47:58 +0530
+Message-ID: <1298906285-29895-2-git-send-email-kishore.kadiyala@ti.com>
 References: <1298906285-29895-1-git-send-email-kishore.kadiyala@ti.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:49873 "EHLO comal.ext.ti.com"
+Received: from bear.ext.ti.com ([192.94.94.41]:43692 "EHLO bear.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754545Ab1B1PKr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 28 Feb 2011 10:10:47 -0500
+	id S1754729Ab1B1PKs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Feb 2011 10:10:48 -0500
 In-Reply-To: <1298906285-29895-1-git-send-email-kishore.kadiyala@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, b-cousson@ti.com, Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, khilman@deeprootsystems.com, paul@pwsan.com, b-cousson@ti.com, Anand Gadiyar <gadiyar@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>
 
-Modifying the device & driver name from "mmci-omap-hs" to
-"omap_hsmmc".
+From: Anand Gadiyar <gadiyar@ti.com>
 
+The MMC controller on the OMAP2420 is different from those
+on the OMAP2430, OMAP3 and OMAP4 families - all of the latter
+are identical. The one on the OMAP2420 is closer to that
+on OMAP1 chips.
+
+Currently, the n8x0 is the only OMAP2420 platform supported
+in mainline which registers the MMC controller. Upcoming
+changes to register the controllers using hwmod data are
+potentially invasive. To reduce the risk, separate out the
+2420 controller registration from the common init function
+and update its only user. Also seperating out mux settings
+for OMAP2420.
+
+Signed-off-by: Anand Gadiyar <gadiyar@ti.com>
 Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Acked-by: Benoit Cousson<b-cousson@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
+Cc: Chris Ball <cjb@laptop.org>
 ---
- arch/arm/mach-omap2/board-2430sdp.c          |    2 +-
- arch/arm/mach-omap2/board-3430sdp.c          |    6 +++---
- arch/arm/mach-omap2/board-4430sdp.c          |   14 +++++++-------
- arch/arm/mach-omap2/board-devkit8000.c       |    2 +-
- arch/arm/mach-omap2/board-igep0020.c         |    6 +++---
- arch/arm/mach-omap2/board-igep0030.c         |    6 +++---
- arch/arm/mach-omap2/board-omap3evm.c         |    2 +-
- arch/arm/mach-omap2/board-omap3pandora.c     |    6 +++---
- arch/arm/mach-omap2/board-omap4panda.c       |    4 ++--
- arch/arm/mach-omap2/board-rm680.c            |    2 +-
- arch/arm/mach-omap2/board-rx51-peripherals.c |    8 ++++----
- arch/arm/mach-omap2/board-zoom-peripherals.c |    2 +-
- arch/arm/mach-omap2/clock2430_data.c         |   12 ++++++------
- arch/arm/mach-omap2/clock3xxx_data.c         |   12 ++++++------
- arch/arm/mach-omap2/clock44xx_data.c         |   20 ++++++++++----------
- arch/arm/mach-omap2/hsmmc.c                  |    2 +-
- drivers/mmc/host/omap_hsmmc.c                |    2 +-
- 17 files changed, 54 insertions(+), 54 deletions(-)
+ arch/arm/mach-omap2/board-n8x0.c      |    2 +-
+ arch/arm/mach-omap2/devices.c         |   88 +++++++++++++++++++++------------
+ arch/arm/plat-omap/include/plat/mmc.h |    4 ++
+ 3 files changed, 61 insertions(+), 33 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/board-2430sdp.c b/arch/arm/mach-omap2/board-2430sdp.c
-index cc42d47..ab0880b 100644
---- a/arch/arm/mach-omap2/board-2430sdp.c
-+++ b/arch/arm/mach-omap2/board-2430sdp.c
-@@ -149,7 +149,7 @@ static void __init omap_2430sdp_init_early(void)
- }
- 
- static struct regulator_consumer_supply sdp2430_vmmc1_supplies[] = {
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.0"),
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.0"),
- };
- 
- /* VMMC1 for OMAP VDD_MMC1 (i/o) and MMC1 card */
-diff --git a/arch/arm/mach-omap2/board-3430sdp.c b/arch/arm/mach-omap2/board-3430sdp.c
-index 8950ecc..40b0174 100644
---- a/arch/arm/mach-omap2/board-3430sdp.c
-+++ b/arch/arm/mach-omap2/board-3430sdp.c
-@@ -410,15 +410,15 @@ static struct regulator_consumer_supply sdp3430_vpll2_supplies[] = {
- };
- 
- static struct regulator_consumer_supply sdp3430_vmmc1_supplies[] = {
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.0"),
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.0"),
- };
- 
- static struct regulator_consumer_supply sdp3430_vsim_supplies[] = {
--	REGULATOR_SUPPLY("vmmc_aux", "mmci-omap-hs.0"),
-+	REGULATOR_SUPPLY("vmmc_aux", "omap_hsmmc.0"),
- };
- 
- static struct regulator_consumer_supply sdp3430_vmmc2_supplies[] = {
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.1"),
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.1"),
- };
- 
- /*
-diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
-index 1a943be..f914099 100644
---- a/arch/arm/mach-omap2/board-4430sdp.c
-+++ b/arch/arm/mach-omap2/board-4430sdp.c
-@@ -349,11 +349,6 @@ static struct twl4030_usb_data omap4_usbphy_data = {
- 
- static struct omap2_hsmmc_info mmc[] = {
- 	{
--		.mmc		= 1,
--		.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA,
--		.gpio_wp	= -EINVAL,
--	},
--	{
- 		.mmc		= 2,
- 		.caps		=  MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA,
- 		.gpio_cd	= -EINVAL,
-@@ -361,19 +356,24 @@ static struct omap2_hsmmc_info mmc[] = {
- 		.nonremovable   = true,
- 		.ocr_mask	= MMC_VDD_29_30,
- 	},
-+	{
-+		.mmc		= 1,
-+		.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA,
-+		.gpio_wp	= -EINVAL,
-+	},
- 	{}	/* Terminator */
- };
- 
- static struct regulator_consumer_supply sdp4430_vaux_supply[] = {
- 	{
- 		.supply = "vmmc",
--		.dev_name = "mmci-omap-hs.1",
-+		.dev_name = "omap_hsmmc.1",
- 	},
- };
- static struct regulator_consumer_supply sdp4430_vmmc_supply[] = {
- 	{
- 		.supply = "vmmc",
--		.dev_name = "mmci-omap-hs.0",
-+		.dev_name = "omap_hsmmc.0",
- 	},
- };
- 
-diff --git a/arch/arm/mach-omap2/board-devkit8000.c b/arch/arm/mach-omap2/board-devkit8000.c
-index 54abdd0..c9170f4 100644
---- a/arch/arm/mach-omap2/board-devkit8000.c
-+++ b/arch/arm/mach-omap2/board-devkit8000.c
-@@ -140,7 +140,7 @@ static void devkit8000_panel_disable_dvi(struct omap_dss_device *dssdev)
- }
- 
- static struct regulator_consumer_supply devkit8000_vmmc1_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.0");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.0");
- 
- 
- /* ads7846 on SPI */
-diff --git a/arch/arm/mach-omap2/board-igep0020.c b/arch/arm/mach-omap2/board-igep0020.c
-index 54e6318..1877c28 100644
---- a/arch/arm/mach-omap2/board-igep0020.c
-+++ b/arch/arm/mach-omap2/board-igep0020.c
-@@ -250,7 +250,7 @@ static inline void __init igep2_init_smsc911x(void) { }
- #endif
- 
- static struct regulator_consumer_supply igep2_vmmc1_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.0");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.0");
- 
- /* VMMC1 for OMAP VDD_MMC1 (i/o) and MMC1 card */
- static struct regulator_init_data igep2_vmmc1 = {
-@@ -268,7 +268,7 @@ static struct regulator_init_data igep2_vmmc1 = {
- };
- 
- static struct regulator_consumer_supply igep2_vio_supply =
--	REGULATOR_SUPPLY("vmmc_aux", "mmci-omap-hs.1");
-+	REGULATOR_SUPPLY("vmmc_aux", "omap_hsmmc.1");
- 
- static struct regulator_init_data igep2_vio = {
- 	.constraints = {
-@@ -286,7 +286,7 @@ static struct regulator_init_data igep2_vio = {
- };
- 
- static struct regulator_consumer_supply igep2_vmmc2_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.1");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.1");
- 
- static struct regulator_init_data igep2_vmmc2 = {
- 	.constraints		= {
-diff --git a/arch/arm/mach-omap2/board-igep0030.c b/arch/arm/mach-omap2/board-igep0030.c
-index d75028e..4273d06 100644
---- a/arch/arm/mach-omap2/board-igep0030.c
-+++ b/arch/arm/mach-omap2/board-igep0030.c
-@@ -142,7 +142,7 @@ static void __init igep3_flash_init(void) {}
- #endif
- 
- static struct regulator_consumer_supply igep3_vmmc1_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.0");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.0");
- 
- /* VMMC1 for OMAP VDD_MMC1 (i/o) and MMC1 card */
- static struct regulator_init_data igep3_vmmc1 = {
-@@ -160,7 +160,7 @@ static struct regulator_init_data igep3_vmmc1 = {
- };
- 
- static struct regulator_consumer_supply igep3_vio_supply =
--	REGULATOR_SUPPLY("vmmc_aux", "mmci-omap-hs.1");
-+	REGULATOR_SUPPLY("vmmc_aux", "omap_hsmmc.1");
- 
- static struct regulator_init_data igep3_vio = {
- 	.constraints = {
-@@ -178,7 +178,7 @@ static struct regulator_init_data igep3_vio = {
- };
- 
- static struct regulator_consumer_supply igep3_vmmc2_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.1");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.1");
- 
- static struct regulator_init_data igep3_vmmc2 = {
- 	.constraints	= {
-diff --git a/arch/arm/mach-omap2/board-omap3evm.c b/arch/arm/mach-omap2/board-omap3evm.c
-index 5364147..cccc817 100644
---- a/arch/arm/mach-omap2/board-omap3evm.c
-+++ b/arch/arm/mach-omap2/board-omap3evm.c
-@@ -605,7 +605,7 @@ static struct regulator_init_data omap3evm_vio = {
- 
- static struct regulator_consumer_supply omap3evm_vmmc2_supply = {
- 	.supply			= "vmmc",
--	.dev_name		= "mmci-omap-hs.1",
-+	.dev_name		= "omap_hsmmc.1",
- };
- 
- /* VMMC2 for driving the WL12xx module */
-diff --git a/arch/arm/mach-omap2/board-omap3pandora.c b/arch/arm/mach-omap2/board-omap3pandora.c
-index 17ef547..ed13869 100644
---- a/arch/arm/mach-omap2/board-omap3pandora.c
-+++ b/arch/arm/mach-omap2/board-omap3pandora.c
-@@ -333,13 +333,13 @@ static struct twl4030_gpio_platform_data omap3pandora_gpio_data = {
- };
- 
- static struct regulator_consumer_supply pandora_vmmc1_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.0");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.0");
- 
- static struct regulator_consumer_supply pandora_vmmc2_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.1");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.1");
- 
- static struct regulator_consumer_supply pandora_vmmc3_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.2");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.2");
- 
- static struct regulator_consumer_supply pandora_vdda_dac_supply =
- 	REGULATOR_SUPPLY("vdda_dac", "omapdss");
-diff --git a/arch/arm/mach-omap2/board-omap4panda.c b/arch/arm/mach-omap2/board-omap4panda.c
-index 3dd241b..12bf09a 100644
---- a/arch/arm/mach-omap2/board-omap4panda.c
-+++ b/arch/arm/mach-omap2/board-omap4panda.c
-@@ -180,13 +180,13 @@ static struct omap2_hsmmc_info mmc[] = {
- static struct regulator_consumer_supply omap4_panda_vmmc_supply[] = {
- 	{
- 		.supply = "vmmc",
--		.dev_name = "mmci-omap-hs.0",
-+		.dev_name = "omap_hsmmc.0",
- 	},
- };
- 
- static struct regulator_consumer_supply omap4_panda_vmmc5_supply = {
- 	.supply = "vmmc",
--	.dev_name = "mmci-omap-hs.4",
-+	.dev_name = "omap_hsmmc.4",
- };
- 
- static struct regulator_init_data panda_vmmc5 = {
-diff --git a/arch/arm/mach-omap2/board-rm680.c b/arch/arm/mach-omap2/board-rm680.c
-index bdebcb7..2af8b05 100644
---- a/arch/arm/mach-omap2/board-rm680.c
-+++ b/arch/arm/mach-omap2/board-rm680.c
-@@ -33,7 +33,7 @@
- #include "sdram-nokia.h"
- 
- static struct regulator_consumer_supply rm680_vemmc_consumers[] = {
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.1"),
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.1"),
- };
- 
- /* Fixed regulator for internal eMMC */
-diff --git a/arch/arm/mach-omap2/board-rx51-peripherals.c b/arch/arm/mach-omap2/board-rx51-peripherals.c
-index e75e240..b74357f 100644
---- a/arch/arm/mach-omap2/board-rx51-peripherals.c
-+++ b/arch/arm/mach-omap2/board-rx51-peripherals.c
-@@ -331,13 +331,13 @@ static struct omap2_hsmmc_info mmc[] __initdata = {
- };
- 
- static struct regulator_consumer_supply rx51_vmmc1_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.0");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.0");
- 
- static struct regulator_consumer_supply rx51_vaux3_supply =
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.1");
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.1");
- 
- static struct regulator_consumer_supply rx51_vsim_supply =
--	REGULATOR_SUPPLY("vmmc_aux", "mmci-omap-hs.1");
-+	REGULATOR_SUPPLY("vmmc_aux", "omap_hsmmc.1");
- 
- static struct regulator_consumer_supply rx51_vmmc2_supplies[] = {
- 	/* tlv320aic3x analog supplies */
-@@ -348,7 +348,7 @@ static struct regulator_consumer_supply rx51_vmmc2_supplies[] = {
- 	/* tpa6130a2 */
- 	REGULATOR_SUPPLY("Vdd", "2-0060"),
- 	/* Keep vmmc as last item. It is not iterated for newer boards */
--	REGULATOR_SUPPLY("vmmc", "mmci-omap-hs.1"),
-+	REGULATOR_SUPPLY("vmmc", "omap_hsmmc.1"),
- };
- 
- static struct regulator_consumer_supply rx51_vio_supplies[] = {
-diff --git a/arch/arm/mach-omap2/board-zoom-peripherals.c b/arch/arm/mach-omap2/board-zoom-peripherals.c
-index e0e040f..7a098a4 100644
---- a/arch/arm/mach-omap2/board-zoom-peripherals.c
-+++ b/arch/arm/mach-omap2/board-zoom-peripherals.c
-@@ -118,7 +118,7 @@ static struct regulator_consumer_supply zoom_vmmc2_supply = {
- 
- static struct regulator_consumer_supply zoom_vmmc3_supply = {
- 	.supply		= "vmmc",
--	.dev_name	= "mmci-omap-hs.2",
-+	.dev_name	= "omap_hsmmc.2",
- };
- 
- /* VMMC1 for OMAP VDD_MMC1 (i/o) and MMC1 card */
-diff --git a/arch/arm/mach-omap2/clock2430_data.c b/arch/arm/mach-omap2/clock2430_data.c
-index c047dcd..5c647ce 100644
---- a/arch/arm/mach-omap2/clock2430_data.c
-+++ b/arch/arm/mach-omap2/clock2430_data.c
-@@ -1984,15 +1984,15 @@ static struct omap_clk omap2430_clks[] = {
- 	CLK(NULL,	"pka_ick",	&pka_ick,	CK_243X),
- 	CLK(NULL,	"usb_fck",	&usb_fck,	CK_243X),
- 	CLK("musb-omap2430",	"ick",	&usbhs_ick,	CK_243X),
--	CLK("mmci-omap-hs.0", "ick",	&mmchs1_ick,	CK_243X),
--	CLK("mmci-omap-hs.0", "fck",	&mmchs1_fck,	CK_243X),
--	CLK("mmci-omap-hs.1", "ick",	&mmchs2_ick,	CK_243X),
--	CLK("mmci-omap-hs.1", "fck",	&mmchs2_fck,	CK_243X),
-+	CLK("omap_hsmmc.0", "ick",	&mmchs1_ick,	CK_243X),
-+	CLK("omap_hsmmc.0", "fck",	&mmchs1_fck,	CK_243X),
-+	CLK("omap_hsmmc.1", "ick",	&mmchs2_ick,	CK_243X),
-+	CLK("omap_hsmmc.1", "fck",	&mmchs2_fck,	CK_243X),
- 	CLK(NULL,	"gpio5_ick",	&gpio5_ick,	CK_243X),
- 	CLK(NULL,	"gpio5_fck",	&gpio5_fck,	CK_243X),
- 	CLK(NULL,	"mdm_intc_ick",	&mdm_intc_ick,	CK_243X),
--	CLK("mmci-omap-hs.0", "mmchsdb_fck",	&mmchsdb1_fck,	CK_243X),
--	CLK("mmci-omap-hs.1", "mmchsdb_fck", 	&mmchsdb2_fck,	CK_243X),
-+	CLK("omap_hsmmc.0", "mmchsdb_fck",	&mmchsdb1_fck,	CK_243X),
-+	CLK("omap_hsmmc.1", "mmchsdb_fck",	&mmchsdb2_fck,	CK_243X),
- };
- 
- /*
-diff --git a/arch/arm/mach-omap2/clock3xxx_data.c b/arch/arm/mach-omap2/clock3xxx_data.c
-index f14d986..052ac32 100644
---- a/arch/arm/mach-omap2/clock3xxx_data.c
-+++ b/arch/arm/mach-omap2/clock3xxx_data.c
-@@ -3290,10 +3290,10 @@ static struct omap_clk omap3xxx_clks[] = {
- 	CLK("omap-mcbsp.1",	"prcm_fck",	&core_96m_fck,	CK_3XXX),
- 	CLK("omap-mcbsp.5",	"prcm_fck",	&core_96m_fck,	CK_3XXX),
- 	CLK(NULL,	"core_96m_fck",	&core_96m_fck,	CK_3XXX),
--	CLK("mmci-omap-hs.2",	"fck",	&mmchs3_fck,	CK_3430ES2PLUS | CK_AM35XX | CK_36XX),
--	CLK("mmci-omap-hs.1",	"fck",	&mmchs2_fck,	CK_3XXX),
-+	CLK("omap_hsmmc.2",	"fck",	&mmchs3_fck,	CK_3430ES2PLUS | CK_AM35XX | CK_36XX),
-+	CLK("omap_hsmmc.1",	"fck",	&mmchs2_fck,	CK_3XXX),
- 	CLK(NULL,	"mspro_fck",	&mspro_fck,	CK_34XX | CK_36XX),
--	CLK("mmci-omap-hs.0",	"fck",	&mmchs1_fck,	CK_3XXX),
-+	CLK("omap_hsmmc.0",	"fck",	&mmchs1_fck,	CK_3XXX),
- 	CLK("omap_i2c.3", "fck",	&i2c3_fck,	CK_3XXX),
- 	CLK("omap_i2c.2", "fck",	&i2c2_fck,	CK_3XXX),
- 	CLK("omap_i2c.1", "fck",	&i2c1_fck,	CK_3XXX),
-@@ -3323,13 +3323,13 @@ static struct omap_clk omap3xxx_clks[] = {
- 	CLK(NULL,	"core_l4_ick",	&core_l4_ick,	CK_3XXX),
- 	CLK(NULL,	"usbtll_ick",	&usbtll_ick,	CK_3430ES2PLUS | CK_AM35XX | CK_36XX),
- 	CLK("ehci-omap.0",	"usbtll_ick",	&usbtll_ick,	CK_3430ES2PLUS | CK_AM35XX | CK_36XX),
--	CLK("mmci-omap-hs.2",	"ick",	&mmchs3_ick,	CK_3430ES2PLUS | CK_AM35XX | CK_36XX),
-+	CLK("omap_hsmmc.2",	"ick",	&mmchs3_ick,	CK_3430ES2PLUS | CK_AM35XX | CK_36XX),
- 	CLK(NULL,	"icr_ick",	&icr_ick,	CK_34XX | CK_36XX),
- 	CLK("omap-aes",	"ick",	&aes2_ick,	CK_34XX | CK_36XX),
- 	CLK("omap-sham",	"ick",	&sha12_ick,	CK_34XX | CK_36XX),
- 	CLK(NULL,	"des2_ick",	&des2_ick,	CK_34XX | CK_36XX),
--	CLK("mmci-omap-hs.1",	"ick",	&mmchs2_ick,	CK_3XXX),
--	CLK("mmci-omap-hs.0",	"ick",	&mmchs1_ick,	CK_3XXX),
-+	CLK("omap_hsmmc.1",	"ick",	&mmchs2_ick,	CK_3XXX),
-+	CLK("omap_hsmmc.0",	"ick",	&mmchs1_ick,	CK_3XXX),
- 	CLK(NULL,	"mspro_ick",	&mspro_ick,	CK_34XX | CK_36XX),
- 	CLK("omap_hdq.0", "ick",	&hdq_ick,	CK_3XXX),
- 	CLK("omap2_mcspi.4", "ick",	&mcspi4_ick,	CK_3XXX),
-diff --git a/arch/arm/mach-omap2/clock44xx_data.c b/arch/arm/mach-omap2/clock44xx_data.c
-index de9ec8d..fdbc042 100644
---- a/arch/arm/mach-omap2/clock44xx_data.c
-+++ b/arch/arm/mach-omap2/clock44xx_data.c
-@@ -3158,11 +3158,11 @@ static struct omap_clk omap44xx_clks[] = {
- 	CLK("omap2_mcspi.2",	"fck",				&mcspi2_fck,	CK_443X),
- 	CLK("omap2_mcspi.3",	"fck",				&mcspi3_fck,	CK_443X),
- 	CLK("omap2_mcspi.4",	"fck",				&mcspi4_fck,	CK_443X),
--	CLK("mmci-omap-hs.0",	"fck",				&mmc1_fck,	CK_443X),
--	CLK("mmci-omap-hs.1",	"fck",				&mmc2_fck,	CK_443X),
--	CLK("mmci-omap-hs.2",	"fck",				&mmc3_fck,	CK_443X),
--	CLK("mmci-omap-hs.3",	"fck",				&mmc4_fck,	CK_443X),
--	CLK("mmci-omap-hs.4",	"fck",				&mmc5_fck,	CK_443X),
-+	CLK("omap_hsmmc.0",	"fck",				&mmc1_fck,	CK_443X),
-+	CLK("omap_hsmmc.1",	"fck",				&mmc2_fck,	CK_443X),
-+	CLK("omap_hsmmc.2",	"fck",				&mmc3_fck,	CK_443X),
-+	CLK("omap_hsmmc.3",	"fck",				&mmc4_fck,	CK_443X),
-+	CLK("omap_hsmmc.4",	"fck",				&mmc5_fck,	CK_443X),
- 	CLK(NULL,	"ocp2scp_usb_phy_phy_48m",	&ocp2scp_usb_phy_phy_48m,	CK_443X),
- 	CLK(NULL,	"ocp2scp_usb_phy_ick",		&ocp2scp_usb_phy_ick,	CK_443X),
- 	CLK(NULL,	"ocp_wp_noc_ick",		&ocp_wp_noc_ick,	CK_443X),
-@@ -3245,11 +3245,11 @@ static struct omap_clk omap44xx_clks[] = {
- 	CLK("omap_i2c.2",	"ick",				&dummy_ck,	CK_443X),
- 	CLK("omap_i2c.3",	"ick",				&dummy_ck,	CK_443X),
- 	CLK("omap_i2c.4",	"ick",				&dummy_ck,	CK_443X),
--	CLK("mmci-omap-hs.0",	"ick",				&dummy_ck,	CK_443X),
--	CLK("mmci-omap-hs.1",	"ick",				&dummy_ck,	CK_443X),
--	CLK("mmci-omap-hs.2",	"ick",				&dummy_ck,	CK_443X),
--	CLK("mmci-omap-hs.3",	"ick",				&dummy_ck,	CK_443X),
--	CLK("mmci-omap-hs.4",	"ick",				&dummy_ck,	CK_443X),
-+	CLK("omap_hsmmc.0",	"ick",				&dummy_ck,	CK_443X),
-+	CLK("omap_hsmmc.1",	"ick",				&dummy_ck,	CK_443X),
-+	CLK("omap_hsmmc.2",	"ick",				&dummy_ck,	CK_443X),
-+	CLK("omap_hsmmc.3",	"ick",				&dummy_ck,	CK_443X),
-+	CLK("omap_hsmmc.4",	"ick",				&dummy_ck,	CK_443X),
- 	CLK("omap-mcbsp.1",	"ick",				&dummy_ck,	CK_443X),
- 	CLK("omap-mcbsp.2",	"ick",				&dummy_ck,	CK_443X),
- 	CLK("omap-mcbsp.3",	"ick",				&dummy_ck,	CK_443X),
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 6380d0f..17a8ff7 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -442,7 +442,7 @@ void __init omap_init_hsmmc(struct omap2_hsmmc_info *hsmmcinfo, int ctrl_nr)
+diff --git a/arch/arm/mach-omap2/board-n8x0.c b/arch/arm/mach-omap2/board-n8x0.c
+index b36cbd2..e710cd9 100644
+--- a/arch/arm/mach-omap2/board-n8x0.c
++++ b/arch/arm/mach-omap2/board-n8x0.c
+@@ -536,7 +536,7 @@ static void __init n8x0_mmc_init(void)
  	}
- 	omap_hsmmc_mux(mmc_data, (ctrl_nr - 1));
  
--	name = "mmci-omap-hs";
-+	name = "omap_hsmmc";
- 	ohl = omap_hsmmc_latency;
- 	ohl_cnt = ARRAY_SIZE(omap_hsmmc_latency);
+ 	mmc_data[0] = &mmc1_data;
+-	omap2_init_mmc(mmc_data, OMAP24XX_NR_MMC);
++	omap242x_init_mmc(mmc_data);
+ }
+ #else
  
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index d0bd2b4..191332b 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -118,7 +118,7 @@
+diff --git a/arch/arm/mach-omap2/devices.c b/arch/arm/mach-omap2/devices.c
+index 9ee876f..100bb42 100644
+--- a/arch/arm/mach-omap2/devices.c
++++ b/arch/arm/mach-omap2/devices.c
+@@ -650,11 +650,10 @@ err1:
+ static inline void omap_hsmmc_reset(void) {}
+ #endif
  
- #define MMC_TIMEOUT_MS		20
- #define OMAP_MMC_MASTER_CLOCK	96000000
--#define DRIVER_NAME		"mmci-omap-hs"
-+#define DRIVER_NAME		"omap_hsmmc"
+-#if defined(CONFIG_MMC_OMAP) || defined(CONFIG_MMC_OMAP_MODULE) || \
+-	defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
++#if defined(CONFIG_MMC_OMAP) || defined(CONFIG_MMC_OMAP_MODULE)
  
- /* Timeouts for entering power saving states on inactivity, msec */
- #define OMAP_MMC_DISABLED_TIMEOUT	100
+-static inline void omap2_mmc_mux(struct omap_mmc_platform_data *mmc_controller,
+-			int controller_nr)
++static inline void omap242x_mmc_mux(struct omap_mmc_platform_data
++							*mmc_controller)
+ {
+ 	if ((mmc_controller->slots[0].switch_pin > 0) && \
+ 		(mmc_controller->slots[0].switch_pin < OMAP_MAX_GPIO_LINES))
+@@ -665,33 +664,61 @@ static inline void omap2_mmc_mux(struct omap_mmc_platform_data *mmc_controller,
+ 		omap_mux_init_gpio(mmc_controller->slots[0].gpio_wp,
+ 					OMAP_PIN_INPUT_PULLUP);
+ 
+-	if (cpu_is_omap2420() && controller_nr == 0) {
+-		omap_mux_init_signal("sdmmc_cmd", 0);
+-		omap_mux_init_signal("sdmmc_clki", 0);
+-		omap_mux_init_signal("sdmmc_clko", 0);
+-		omap_mux_init_signal("sdmmc_dat0", 0);
+-		omap_mux_init_signal("sdmmc_dat_dir0", 0);
+-		omap_mux_init_signal("sdmmc_cmd_dir", 0);
+-		if (mmc_controller->slots[0].caps & MMC_CAP_4_BIT_DATA) {
+-			omap_mux_init_signal("sdmmc_dat1", 0);
+-			omap_mux_init_signal("sdmmc_dat2", 0);
+-			omap_mux_init_signal("sdmmc_dat3", 0);
+-			omap_mux_init_signal("sdmmc_dat_dir1", 0);
+-			omap_mux_init_signal("sdmmc_dat_dir2", 0);
+-			omap_mux_init_signal("sdmmc_dat_dir3", 0);
+-		}
++	omap_mux_init_signal("sdmmc_cmd", 0);
++	omap_mux_init_signal("sdmmc_clki", 0);
++	omap_mux_init_signal("sdmmc_clko", 0);
++	omap_mux_init_signal("sdmmc_dat0", 0);
++	omap_mux_init_signal("sdmmc_dat_dir0", 0);
++	omap_mux_init_signal("sdmmc_cmd_dir", 0);
++	if (mmc_controller->slots[0].caps & MMC_CAP_4_BIT_DATA) {
++		omap_mux_init_signal("sdmmc_dat1", 0);
++		omap_mux_init_signal("sdmmc_dat2", 0);
++		omap_mux_init_signal("sdmmc_dat3", 0);
++		omap_mux_init_signal("sdmmc_dat_dir1", 0);
++		omap_mux_init_signal("sdmmc_dat_dir2", 0);
++		omap_mux_init_signal("sdmmc_dat_dir3", 0);
++	}
+ 
+-		/*
+-		 * Use internal loop-back in MMC/SDIO Module Input Clock
+-		 * selection
+-		 */
+-		if (mmc_controller->slots[0].internal_clock) {
+-			u32 v = omap_ctrl_readl(OMAP2_CONTROL_DEVCONF0);
+-			v |= (1 << 24);
+-			omap_ctrl_writel(v, OMAP2_CONTROL_DEVCONF0);
+-		}
++	/*
++	 * Use internal loop-back in MMC/SDIO Module Input Clock
++	 * selection
++	 */
++	if (mmc_controller->slots[0].internal_clock) {
++		u32 v = omap_ctrl_readl(OMAP2_CONTROL_DEVCONF0);
++		v |= (1 << 24);
++		omap_ctrl_writel(v, OMAP2_CONTROL_DEVCONF0);
++	}
++}
++
++void __init omap242x_init_mmc(struct omap_mmc_platform_data **mmc_data)
++{
++	char *name = "mmci-omap";
++
++	if (!mmc_data[0]) {
++		pr_err("%s fails: Incomplete platform data\n", __func__);
++		return;
+ 	}
+ 
++	omap242x_mmc_mux(mmc_data[0]);
++	omap_mmc_add(name, 0, OMAP2_MMC1_BASE, OMAP2420_MMC_SIZE,
++					INT_24XX_MMC_IRQ, mmc_data[0]);
++}
++
++#endif
++
++#if defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
++
++static inline void omap2_mmc_mux(struct omap_mmc_platform_data *mmc_controller,
++			int controller_nr)
++{
++	if ((mmc_controller->slots[0].switch_pin > 0) && \
++		(mmc_controller->slots[0].switch_pin < OMAP_MAX_GPIO_LINES))
++		omap_mux_init_gpio(mmc_controller->slots[0].switch_pin,
++					OMAP_PIN_INPUT_PULLUP);
++	if ((mmc_controller->slots[0].gpio_wp > 0) && \
++		(mmc_controller->slots[0].gpio_wp < OMAP_MAX_GPIO_LINES))
++		omap_mux_init_gpio(mmc_controller->slots[0].gpio_wp,
++					OMAP_PIN_INPUT_PULLUP);
+ 	if (cpu_is_omap34xx()) {
+ 		if (controller_nr == 0) {
+ 			omap_mux_init_signal("sdmmc1_clk",
+@@ -808,10 +835,7 @@ void __init omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 			continue;
+ 		}
+ 
+-		if (cpu_is_omap2420()) {
+-			size = OMAP2420_MMC_SIZE;
+-			name = "mmci-omap";
+-		} else if (cpu_is_omap44xx()) {
++		if (cpu_is_omap44xx()) {
+ 			if (i < 3)
+ 				irq += OMAP44XX_IRQ_GIC_START;
+ 			size = OMAP4_HSMMC_SIZE;
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index f57f36a..e5de5d4 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -159,6 +159,7 @@ extern void omap_mmc_notify_cover_event(struct device *dev, int slot,
+ 	defined(CONFIG_MMC_OMAP_HS) || defined(CONFIG_MMC_OMAP_HS_MODULE)
+ void omap1_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 				int nr_controllers);
++void omap242x_init_mmc(struct omap_mmc_platform_data **mmc_data);
+ void omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 				int nr_controllers);
+ int omap_mmc_add(const char *name, int id, unsigned long base,
+@@ -169,6 +170,9 @@ static inline void omap1_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 				int nr_controllers)
+ {
+ }
++static inline void omap242x_init_mmc(struct omap_mmc_platform_data **mmc_data)
++{
++}
+ static inline void omap2_init_mmc(struct omap_mmc_platform_data **mmc_data,
+ 				int nr_controllers)
+ {
 -- 
 1.7.1
 
