@@ -1,248 +1,198 @@
 From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Subject: [PATCH V3 2/4] ARM: imx51/53: add sdhc3/4 clock
-Date: Mon, 28 Feb 2011 19:25:12 +0800
-Message-ID: <1298892315-23386-2-git-send-email-Hong-Xing.Zhu@freescale.com>
+Subject: [PATCH V3 4/4] mmc: sdhci-esdhc: enable esdhc on imx53
+Date: Mon, 28 Feb 2011 19:25:14 +0800
+Message-ID: <1298892315-23386-4-git-send-email-Hong-Xing.Zhu@freescale.com>
 References: <1298892315-23386-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:37239
+Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:37267
 	"EHLO DB3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753549Ab1B1LZo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2011 06:25:44 -0500
+	by vger.kernel.org with ESMTP id S1753605Ab1B1LZq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2011 06:25:46 -0500
 In-Reply-To: <1298892315-23386-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
 Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, richard.zhao@freescale.com, Richard Zhu <Hong-Xing.Zhu@freescale.com>
 
+Fix the NO INT in the Multi-BLK IO in SD/MMC, and
+Multi-BLK read in SDIO
+
+The CMDTYPE of the CMD register(offset 0xE) should be set to
+"11" when the STOP CMD12 is issued on imx53 to abort one
+open ended multi-blk IO. Otherwise one the TC INT wouldn't
+be generated.
+
+In exact block transfer, the controller doesn't complete the
+operations automatically as required at the end of the
+transfer and remains on hold if the abort command is not sent.
+As a result, the TC flag is not asserted and SW  received timeout
+exeception. set bit1 of Vendor Spec registor to fix it
+
+Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
 Signed-off-by: Richard Zhao <richard.zhao@freescale.com>
 ---
- arch/arm/mach-mx5/clock-mx51-mx53.c |  140 ++++++++++++++++++++++++++++++++++-
- arch/arm/mach-mx5/crm_regs.h        |    7 ++
- 2 files changed, 146 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |   77 ++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci-pltfm.h     |    2 +-
+ 2 files changed, 75 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/mach-mx5/clock-mx51-mx53.c b/arch/arm/mach-mx5/clock-mx51-mx53.c
-index 8164b1d..652ace4 100644
---- a/arch/arm/mach-mx5/clock-mx51-mx53.c
-+++ b/arch/arm/mach-mx5/clock-mx51-mx53.c
-@@ -42,6 +42,9 @@ static struct clk usboh3_clk;
- static struct clk emi_fast_clk;
- static struct clk ipu_clk;
- static struct clk mipi_hsc1_clk;
-+static struct clk esdhc1_clk;
-+static struct clk esdhc2_clk;
-+static struct clk esdhc3_mx53_clk;
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 9b82910..32af7c4 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -15,13 +15,41 @@
+ #include <linux/delay.h>
+ #include <linux/err.h>
+ #include <linux/clk.h>
++#include <linux/slab.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdhci-pltfm.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/sdio.h>
+ #include <mach/hardware.h>
+ #include "sdhci.h"
+ #include "sdhci-pltfm.h"
+ #include "sdhci-esdhc.h"
  
- #define MAX_DPLL_WAIT_TRIES	1000 /* 1000 * udelay(1) = 1ms */
- 
-@@ -1143,10 +1146,80 @@ CLK_GET_RATE(esdhc1, 1, ESDHC1_MSHC1)
- CLK_SET_PARENT(esdhc1, 1, ESDHC1_MSHC1)
- CLK_SET_RATE(esdhc1, 1, ESDHC1_MSHC1)
- 
-+/* mx51 specific */
- CLK_GET_RATE(esdhc2, 1, ESDHC2_MSHC2)
- CLK_SET_PARENT(esdhc2, 1, ESDHC2_MSHC2)
- CLK_SET_RATE(esdhc2, 1, ESDHC2_MSHC2)
- 
-+static int clk_esdhc3_set_parent(struct clk *clk, struct clk *parent)
-+{
-+	u32 reg;
++/* Abort type definition in the command register  */
++#define  SDHCI_CMD_ABORTCMD	0xC0
++/* VENDOR SPEC register */
++#define SDHCI_VENDOR_SPEC	0xC0
 +
-+	reg = __raw_readl(MXC_CCM_CSCMR1);
-+	if (parent == &esdhc1_clk)
-+		reg &= ~MXC_CCM_CSCMR1_ESDHC3_CLK_SEL;
-+	else if (parent == &esdhc2_clk)
-+		reg |= MXC_CCM_CSCMR1_ESDHC3_CLK_SEL;
-+	else
-+		return -EINVAL;
-+	__raw_writel(reg, MXC_CCM_CSCMR1);
++/*
++ * The CMDTYPE of the CMD register(offset 0xE) should be set to
++ * "11" when the STOP CMD12 is issued on imx53 to abort one
++ * open ended multi-blk IO. Otherwise one the TC INT wouldn't
++ * be generated.
++ * In exact block transfer, the controller doesn't complete the
++ * operations automatically as required at the end of the
++ * transfer and remains on hold if the abort command is not sent.
++ * As a result, the TC flag is not asserted and SW  received timeout
++ * exeception. Bit1 of Vendor Spec registor is used to fix it.
++ */
++#define IMX_MULTIBLK_NO_INT		(1 << 0)
 +
-+	return 0;
-+}
-+
-+static int clk_esdhc4_set_parent(struct clk *clk, struct clk *parent)
-+{
-+	u32 reg;
-+
-+	reg = __raw_readl(MXC_CCM_CSCMR1);
-+	if (parent == &esdhc1_clk)
-+		reg &= ~MXC_CCM_CSCMR1_ESDHC4_CLK_SEL;
-+	else if (parent == &esdhc2_clk)
-+		reg |= MXC_CCM_CSCMR1_ESDHC4_CLK_SEL;
-+	else
-+		return -EINVAL;
-+	__raw_writel(reg, MXC_CCM_CSCMR1);
-+
-+	return 0;
-+}
-+
-+/* mx53 specific */
-+static int clk_esdhc2_mx53_set_parent(struct clk *clk, struct clk *parent)
-+{
-+	u32 reg;
-+
-+	reg = __raw_readl(MXC_CCM_CSCMR1);
-+	if (parent == &esdhc1_clk)
-+		reg &= ~MXC_CCM_CSCMR1_ESDHC2_MSHC2_MX53_CLK_SEL;
-+	else if (parent == &esdhc3_mx53_clk)
-+		reg |= MXC_CCM_CSCMR1_ESDHC2_MSHC2_MX53_CLK_SEL;
-+	else
-+		return -EINVAL;
-+	__raw_writel(reg, MXC_CCM_CSCMR1);
-+
-+	return 0;
-+}
-+
-+CLK_GET_RATE(esdhc3_mx53, 1, ESDHC3_MX53)
-+CLK_SET_PARENT(esdhc3_mx53, 1, ESDHC3_MX53)
-+CLK_SET_RATE(esdhc3_mx53, 1, ESDHC3_MX53)
-+
-+static int clk_esdhc4_mx53_set_parent(struct clk *clk, struct clk *parent)
-+{
-+	u32 reg;
-+
-+	reg = __raw_readl(MXC_CCM_CSCMR1);
-+	if (parent == &esdhc1_clk)
-+		reg &= ~MXC_CCM_CSCMR1_ESDHC4_CLK_SEL;
-+	else if (parent == &esdhc3_mx53_clk)
-+		reg |= MXC_CCM_CSCMR1_ESDHC4_CLK_SEL;
-+	else
-+		return -EINVAL;
-+	__raw_writel(reg, MXC_CCM_CSCMR1);
-+
-+	return 0;
-+}
-+
- #define DEFINE_CLOCK_FULL(name, i, er, es, gr, sr, e, d, p, s)		\
- 	static struct clk name = {					\
- 		.id		= i,					\
-@@ -1251,9 +1324,62 @@ DEFINE_CLOCK_MAX(esdhc1_clk, 0, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG1_OFFSET,
- 	clk_esdhc1, &pll2_sw_clk, &esdhc1_ipg_clk);
- DEFINE_CLOCK_FULL(esdhc2_ipg_clk, 1, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG2_OFFSET,
- 	NULL,  NULL, _clk_max_enable, _clk_max_disable, &ipg_clk, NULL);
-+DEFINE_CLOCK_FULL(esdhc3_ipg_clk, 2, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG4_OFFSET,
-+	NULL,  NULL, _clk_max_enable, _clk_max_disable, &ipg_clk, NULL);
-+DEFINE_CLOCK_FULL(esdhc4_ipg_clk, 3, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG6_OFFSET,
-+	NULL,  NULL, _clk_max_enable, _clk_max_disable, &ipg_clk, NULL);
-+
-+/* mx51 specific */
- DEFINE_CLOCK_MAX(esdhc2_clk, 1, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG3_OFFSET,
- 	clk_esdhc2, &pll2_sw_clk, &esdhc2_ipg_clk);
- 
-+static struct clk esdhc3_clk = {
-+	.id = 2,
-+	.parent = &esdhc1_clk,
-+	.set_parent = clk_esdhc3_set_parent,
-+	.enable_reg = MXC_CCM_CCGR3,
-+	.enable_shift = MXC_CCM_CCGRx_CG5_OFFSET,
-+	.enable  = _clk_max_enable,
-+	.disable = _clk_max_disable,
-+	.secondary = &esdhc3_ipg_clk,
-+};
-+static struct clk esdhc4_clk = {
-+	.id = 3,
-+	.parent = &esdhc1_clk,
-+	.set_parent = clk_esdhc4_set_parent,
-+	.enable_reg = MXC_CCM_CCGR3,
-+	.enable_shift = MXC_CCM_CCGRx_CG7_OFFSET,
-+	.enable  = _clk_max_enable,
-+	.disable = _clk_max_disable,
-+	.secondary = &esdhc4_ipg_clk,
++struct pltfm_imx_data {
++	int flags;
++	u32 mod_val;
 +};
 +
-+/* mx53 specific */
-+static struct clk esdhc2_mx53_clk = {
-+	.id = 2,
-+	.parent = &esdhc1_clk,
-+	.set_parent = clk_esdhc2_mx53_set_parent,
-+	.enable_reg = MXC_CCM_CCGR3,
-+	.enable_shift = MXC_CCM_CCGRx_CG3_OFFSET,
-+	.enable  = _clk_max_enable,
-+	.disable = _clk_max_disable,
-+	.secondary = &esdhc3_ipg_clk,
-+};
++static struct sdhci_ops sdhci_esdhc_ops;
 +
-+DEFINE_CLOCK_MAX(esdhc3_mx53_clk, 2, MXC_CCM_CCGR3, MXC_CCM_CCGRx_CG5_OFFSET,
-+	clk_esdhc3_mx53, &pll2_sw_clk, &esdhc2_ipg_clk);
-+
-+static struct clk esdhc4_mx53_clk = {
-+	.id = 3,
-+	.parent = &esdhc1_clk,
-+	.set_parent = clk_esdhc4_mx53_set_parent,
-+	.enable_reg = MXC_CCM_CCGR3,
-+	.enable_shift = MXC_CCM_CCGRx_CG7_OFFSET,
-+	.enable  = _clk_max_enable,
-+	.disable = _clk_max_disable,
-+	.secondary = &esdhc4_ipg_clk,
-+};
-+
- DEFINE_CLOCK(mipi_esc_clk, 0, MXC_CCM_CCGR4, MXC_CCM_CCGRx_CG5_OFFSET, NULL, NULL, NULL, &pll2_sw_clk);
- DEFINE_CLOCK(mipi_hsc2_clk, 0, MXC_CCM_CCGR4, MXC_CCM_CCGRx_CG4_OFFSET, NULL, NULL, &mipi_esc_clk, &pll2_sw_clk);
- DEFINE_CLOCK(mipi_hsc1_clk, 0, MXC_CCM_CCGR4, MXC_CCM_CCGRx_CG3_OFFSET, NULL, NULL, &mipi_hsc2_clk, &pll2_sw_clk);
-@@ -1312,6 +1438,8 @@ static struct clk_lookup mx51_lookups[] = {
- 	_REGISTER_CLOCK("imx51-cspi.0", NULL, cspi_clk)
- 	_REGISTER_CLOCK("sdhci-esdhc-imx.0", NULL, esdhc1_clk)
- 	_REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_clk)
-+	_REGISTER_CLOCK("sdhci-esdhc-imx.2", NULL, esdhc3_clk)
-+	_REGISTER_CLOCK("sdhci-esdhc-imx.3", NULL, esdhc4_clk)
- 	_REGISTER_CLOCK(NULL, "cpu_clk", cpu_clk)
- 	_REGISTER_CLOCK(NULL, "iim_clk", iim_clk)
- 	_REGISTER_CLOCK("imx2-wdt.0", NULL, dummy_clk)
-@@ -1332,7 +1460,9 @@ static struct clk_lookup mx53_lookups[] = {
- 	_REGISTER_CLOCK("imx-i2c.0", NULL, i2c1_clk)
- 	_REGISTER_CLOCK("imx-i2c.1", NULL, i2c2_clk)
- 	_REGISTER_CLOCK("sdhci-esdhc-imx.0", NULL, esdhc1_clk)
--	_REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_clk)
-+	_REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_mx53_clk)
-+	_REGISTER_CLOCK("sdhci-esdhc-imx.2", NULL, esdhc3_mx53_clk)
-+	_REGISTER_CLOCK("sdhci-esdhc-imx.3", NULL, esdhc4_mx53_clk)
- 	_REGISTER_CLOCK("imx53-ecspi.0", NULL, ecspi1_clk)
- 	_REGISTER_CLOCK("imx53-ecspi.1", NULL, ecspi2_clk)
- 	_REGISTER_CLOCK("imx53-cspi.0", NULL, cspi_clk)
-@@ -1425,6 +1555,14 @@ int __init mx53_clocks_init(unsigned long ckil, unsigned long osc,
- 	mx53_revision();
- 	clk_disable(&iim_clk);
+ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, int reg)
+ {
+ 	void __iomem *base = host->ioaddr + (reg & ~0x3);
+@@ -38,20 +66,51 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+ 	return readw(host->ioaddr + reg);
+ }
  
-+	/* Set SDHC parents to be PLL2 */
-+	clk_set_parent(&esdhc1_clk, &pll2_sw_clk);
-+	clk_set_parent(&esdhc3_mx53_clk, &pll2_sw_clk);
++static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
++{
++	switch (reg) {
++	case SDHCI_INT_STATUS:
++		if (val & SDHCI_INT_DATA_END) {
++			u32 v;
++			v = readl(host->ioaddr + SDHCI_VENDOR_SPEC);
++			if (v & 0x2) {
++				v &= ~0x2;
++				writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
++			}
++		}
++		break;
++	}
++	writel(val, host->ioaddr + reg);
++}
 +
-+	/* set SDHC root clock as 200MHZ*/
-+	clk_set_rate(&esdhc1_clk, 200000000);
-+	clk_set_rate(&esdhc3_mx53_clk, 200000000);
+ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data =
++				(struct pltfm_imx_data *)pltfm_host->priv;
+ 
+ 	switch (reg) {
+ 	case SDHCI_TRANSFER_MODE:
++		if ((host->cmd->opcode == SD_IO_RW_EXTENDED)
++				&& (host->cmd->data->blocks > 1)
++				&& (host->cmd->data->flags & MMC_DATA_READ)
++				&& (imx_data->flags & IMX_MULTIBLK_NO_INT)) {
++			u32 v;
++			v = readl(host->ioaddr + SDHCI_VENDOR_SPEC);
++			v |= 0x2;
++			writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
++		}
+ 		/*
+ 		 * Postpone this write, we must do it together with a
+ 		 * command write that is down below.
+ 		 */
+-		pltfm_host->scratchpad = val;
++		imx_data->mod_val = val;
+ 		return;
+ 	case SDHCI_COMMAND:
+-		writel(val << 16 | pltfm_host->scratchpad,
++		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION)
++			&& (imx_data->flags & IMX_MULTIBLK_NO_INT))
++			val |= SDHCI_CMD_ABORTCMD;
++		writel(val << 16 | imx_data->mod_val,
+ 			host->ioaddr + SDHCI_TRANSFER_MODE);
+ 		return;
+ 	case SDHCI_BLOCK_SIZE:
+@@ -104,6 +163,10 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct clk *clk;
++	struct pltfm_imx_data *imx_data;
 +
- 	/* System timer */
- 	mxc_timer_init(&gpt_clk, MX53_IO_ADDRESS(MX53_GPT1_BASE_ADDR),
- 		MX53_INT_GPT);
-diff --git a/arch/arm/mach-mx5/crm_regs.h b/arch/arm/mach-mx5/crm_regs.h
-index b462c22..87c0c58 100644
---- a/arch/arm/mach-mx5/crm_regs.h
-+++ b/arch/arm/mach-mx5/crm_regs.h
-@@ -217,9 +217,12 @@
- #define MXC_CCM_CSCMR1_ESDHC1_MSHC1_CLK_SEL_OFFSET	(20)
- #define MXC_CCM_CSCMR1_ESDHC1_MSHC1_CLK_SEL_MASK	(0x3 << 20)
- #define MXC_CCM_CSCMR1_ESDHC3_CLK_SEL			(0x1 << 19)
-+#define MXC_CCM_CSCMR1_ESDHC2_MSHC2_MX53_CLK_SEL	(0x1 << 19)
- #define MXC_CCM_CSCMR1_ESDHC4_CLK_SEL			(0x1 << 18)
- #define MXC_CCM_CSCMR1_ESDHC2_MSHC2_CLK_SEL_OFFSET	(16)
- #define MXC_CCM_CSCMR1_ESDHC2_MSHC2_CLK_SEL_MASK	(0x3 << 16)
-+#define MXC_CCM_CSCMR1_ESDHC3_MX53_CLK_SEL_OFFSET	(16)
-+#define MXC_CCM_CSCMR1_ESDHC3_MX53_CLK_SEL_MASK		(0x3 << 16)
- #define MXC_CCM_CSCMR1_SSI1_CLK_SEL_OFFSET		(14)
- #define MXC_CCM_CSCMR1_SSI1_CLK_SEL_MASK		(0x3 << 14)
- #define MXC_CCM_CSCMR1_SSI2_CLK_SEL_OFFSET		(12)
-@@ -271,6 +274,10 @@
- #define MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PRED_MASK	(0x7 << 22)
- #define MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PODF_OFFSET	(19)
- #define MXC_CCM_CSCDR1_ESDHC2_MSHC2_CLK_PODF_MASK	(0x7 << 19)
-+#define MXC_CCM_CSCDR1_ESDHC3_MX53_CLK_PRED_OFFSET	(22)
-+#define MXC_CCM_CSCDR1_ESDHC3_MX53_CLK_PRED_MASK	(0x7 << 22)
-+#define MXC_CCM_CSCDR1_ESDHC3_MX53_CLK_PODF_OFFSET	(19)
-+#define MXC_CCM_CSCDR1_ESDHC3_MX53_CLK_PODF_MASK	(0x7 << 19)
- #define MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PRED_OFFSET	(16)
- #define MXC_CCM_CSCDR1_ESDHC1_MSHC1_CLK_PRED_MASK	(0x7 << 16)
- #define MXC_CCM_CSCDR1_PGC_CLK_PODF_OFFSET		(14)
++	imx_data = kzalloc(sizeof(struct pltfm_imx_data), GFP_KERNEL);
++	pltfm_host->priv = (void *)imx_data;
+ 
+ 	clk = clk_get(mmc_dev(host->mmc), NULL);
+ 	if (IS_ERR(clk)) {
+@@ -113,22 +176,30 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
+ 	clk_enable(clk);
+ 	pltfm_host->clk = clk;
+ 
+-	if (cpu_is_mx35() || cpu_is_mx51())
++	if (!cpu_is_mx25())
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+ 
+ 	/* Fix errata ENGcm07207 which is present on i.MX25 and i.MX35 */
+ 	if (cpu_is_mx25() || cpu_is_mx35())
+ 		host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK;
+ 
++	if (!(cpu_is_mx25() || cpu_is_mx35() || cpu_is_mx51())) {
++		imx_data->flags |= IMX_MULTIBLK_NO_INT;
++		sdhci_esdhc_ops.write_l = esdhc_writel_le;
++	}
++
+ 	return 0;
+ }
+ 
+ static void esdhc_pltfm_exit(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data =
++				(struct pltfm_imx_data *)pltfm_host->priv;
+ 
+ 	clk_disable(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
++	kfree(imx_data);
+ }
+ 
+ static struct sdhci_ops sdhci_esdhc_ops = {
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index ea2e44d..2b37016 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -17,7 +17,7 @@
+ 
+ struct sdhci_pltfm_host {
+ 	struct clk *clk;
+-	u32 scratchpad; /* to handle quirks across io-accessor calls */
++	void *priv; /* to handle quirks across io-accessor calls */
+ };
+ 
+ extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
 -- 
 1.7.1
 
