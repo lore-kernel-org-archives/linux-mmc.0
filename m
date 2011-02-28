@@ -1,38 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] msm_sdcc: remove needless cache flush after dma_unmap_sg()
-Date: Mon, 28 Feb 2011 10:54:02 -0500
-Message-ID: <m3vd0417fp.fsf@pullcord.laptop.org>
-References: <1297895333-5551-1-git-send-email-linus.walleij@linaro.org>
-	<AANLkTikju_TmJpPceg0BNvfGx1w1yuNUZcqcSc1ttLhv@mail.gmail.com>
-	<1298896097.15439.7.camel@stummala-linux.in.qualcomm.com>
-	<1298896477.15439.9.camel@stummala-linux.in.qualcomm.com>
+Subject: Re: [PATCH V4 0/3] adding write_protect and card_detect for mx25/35
+Date: Mon, 28 Feb 2011 15:55:40 -0500
+Message-ID: <m3r5ar281f.fsf@pullcord.laptop.org>
+References: <1298727881-12141-1-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1298896477.15439.9.camel@stummala-linux.in.qualcomm.com>
-	(Sahitya Tummala's message of "Mon, 28 Feb 2011 18:04:37 +0530")
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Sahitya Tummala <stummala@codeaurora.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, linux-arm-msm@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:54536 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754521Ab1B1U5S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Feb 2011 15:57:18 -0500
+In-Reply-To: <1298727881-12141-1-git-send-email-w.sang@pengutronix.de>
+	(Wolfram Sang's message of "Sat, 26 Feb 2011 14:44:38 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi,
+Hi Wolfram,
 
-On Mon, Feb 28 2011, Sahitya Tummala wrote:
->> > > dma_unmap_sg() already flushes the cache, I don't get what this
->> > > code is doing here.
->> > >
->> > > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
->> > 
->> > Any feedback on this? I'd prefer the maintainer(s) Acked-by,
->> > but the patch is pretty clear as it stands I believe and I will
->> > request Chris to include it anyway, intuitively it is correct.
->> 
->> Hi Linus Walleij,
->> 
->> You are right. This patch looks good.
+On Sat, Feb 26 2011, Wolfram Sang wrote:
+> Last tests showed some problems with MX51, especially with card_detect. While
+> the approach in general will suffice for i.MX5x, it seems there are a few
+> details missing right now. Because I do not have the resources (both time and
+> hardware) to deal with these issues, I propose a step by step approach. Let's
+> add the functionality for mx25/35 first and make sure there is no difference in
+> behaviour for mx5x. (Note that the i.MX5x can route the pins directly to the
+> controller, so a properly designed board should not need these gpio-additions.)
+> That is what this patch series does: The main change is that mx5x won't notice
+> any difference. For mx25/35, it is the same as it has been tested by Eric and
+> Marc.
+>
+> Thanks to all involved in providing feedback, I hope it can go in now. If you
+> want to add support for it to your board, please CC me.
 
-Thanks, merged to mmc-next for .39.
+Thanks, pushed to mmc-next for .39 now.
 
 - Chris.
 -- 
