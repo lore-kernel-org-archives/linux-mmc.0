@@ -1,64 +1,135 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: MMC quirks relating to performance/lifetime.
-Date: Tue, 1 Mar 2011 20:51:13 +0100
-Message-ID: <201103012051.13768.arnd@arndb.de>
-References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <201103012011.51855.arnd@arndb.de> <4D6D45D2.2020900@kernel.dk>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [linux-pm] [RFC, PATCHv3 3/3] mmc: sdhci: handle wake-up from
+ runtime_pm
+Date: Tue, 1 Mar 2011 14:53:46 -0500 (EST)
+Message-ID: <Pine.LNX.4.44L0.1103011448430.2034-100000@iolanthe.rowland.org>
+References: <b01ca43311e25bf24c6e60e9f6d6d7b91ae3a130.1298820826.git.tardyp@gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:56676 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755440Ab1CATvY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2011 14:51:24 -0500
-In-Reply-To: <4D6D45D2.2020900@kernel.dk>
+Received: from iolanthe.rowland.org ([192.131.102.54]:51518 "HELO
+	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1757176Ab1CATxr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2011 14:53:47 -0500
+In-Reply-To: <b01ca43311e25bf24c6e60e9f6d6d7b91ae3a130.1298820826.git.tardyp@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Andrei Warkentin <andreiw@motorola.com>, linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
+To: Pierre Tardy <tardyp@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org
 
-On Tuesday 01 March 2011 20:15:30 Jens Axboe wrote:
-> Thanks for the recap. One way to handle this would be to have a dm
-> target that ensures that requests are never built up to violate any of
-> the above items. Doing splitting is a little silly, when you can prevent
-> it from happening in the first place.
+On Tue, 1 Mar 2011, Pierre Tardy wrote:
 
-Ok, that sounds good. I didn't know that it's possible to prevent
-bios from getting created that violate this.
+> When sdhci is runtime_suspended, it can still receive a wake-up
+> because of card insertion.
+> The wake-up will then be signaled by an interrupt which cannot be serviced
+> immediatly, as the device is powered off, and register are not accessibles.
+> 
+> We cannot call pm_runtime_get_sync() in irq context as on some architecture (e.g. intel_mid),
+> runtime_resume can lead to too much latency, due to e.g. PLL warm-up and such aggressive
+> power gating.
+> 
+> We temporarly disable the interrupt, and trigger a runtime_resume of the device
+> The interrupt will be re-enabled when resume is finished.
+> 
+> Signed-off-by: Pierre Tardy <tardyp@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-pci.c |    8 +-------
+>  drivers/mmc/host/sdhci.c     |   30 +++++++++++++++++++++++++++++-
+>  include/linux/mmc/sdhci.h    |    2 ++
+>  scripts/checkpatch.pl        |    6 +++---
+>  4 files changed, 35 insertions(+), 11 deletions(-)
 
-I'm actually trying to do a device mapper target that does much more than
-this, see
-https://wiki.linaro.org/WorkingGroups/KernelConsolidation/Projects/FlashDeviceMapper
-for an early draft. The design has moved on since I wrote that, but
-the basic idea is still the same: all blocks get written in a way that
-fills up entire 4MB segments before moving to another segment,
-independent of what the logical block numbers are, and a little space
-is used to store a lookup table for the logical-to-physical block mapping.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 735c3f7..85a1956 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1599,6 +1599,21 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>  	u32 intmask;
+>  	int cardint = 0;
+>  
+> +	/* we might come from a sd insertion or sdio irq wake.. */
+> +	if (pm_runtime_suspended()) {
+> +		host->waking_up = 1;
+> +		/* Note that we disable temporarly the interrupt until we do the
+> +		 * resume. If we don't then we'll get constantly interrupted
+> +		 * until we actually resume.
+> +		 *
+> +		 * as the irq is shared, this might not be very friendly to our
+> +		 * irq sharers but the pm_runtime workqueue should really be
+> +		 * called soon.
 
-> Alternatively, a queue ->merge_bvec_fn() with a settings table could
-> provide the same.
+Instead of disabling the IRQ, would it be possible to tell the device 
+to stop generating an interrupt request?
 
-That's probably better for the common case. The device mapper target
-would be useful for those that want the best case write performance,
-but if I understand you correctly, the merge_bvec_fn() could be used
-per block driver, so we could simply add that to the SCSI (for USB and
-consumer SSD) case and MMC block drivers.
+> +		 */
+> +		disable_irq_nosync(irq);
+> +		pm_runtime_get(host->mmc->parent);
 
-The point that this does not solve is submitting all outstanding writes
-for an erase block together, which is needed to reduce the garbage
-collection overhead. When you do a partial update of an erase block
-(4MB typically) and then start writing to another erase block, the
-drive will have to copy all data you did not write in order to free
-up internal resources.
+Does this pm_runtime_get() have a corresponding pm_runtime_put()?  I 
+didn't notice one anywhere.
 
-> As this is of limited scope, I would prefer having this done via a
-> plugin of some sort (like a dm target).
+> +		return IRQ_NONE;
+> +	}
+>  	spin_lock(&host->lock);
+>  
+>  	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+> @@ -1747,7 +1762,12 @@ EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
+>  
+>  int sdhci_runtime_suspend(struct sdhci_host *host)
+>  {
+> -	/* nothing to do yet */
+> +	u8 val;
+> +	/* make sure we wake up on sdcard insert/remove enabled */
+> +	val = SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE;
+> +	if (host->mmc->pm_flags & MMC_PM_WAKE_SDIO_IRQ)
+> +		val |= SDHCI_WAKE_ON_INT;
+> +	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
+>  	return 0;
+>  }
+>  
+> @@ -1768,6 +1788,14 @@ int sdhci_runtime_resume(struct sdhci_host *host)
+>  	sdhci_set_ios(host->mmc, &host->mmc->ios);
+>  	mmiowb();
+>  
+> +	if (host->waking_up) {
+> +		host->waking_up = 0;
+> +		/* Re-enable the irq now we are perfectly resumed.
+> +		 * Any yet unhandled interrupt (i.e. the wake) will retrigger
+> +		 * irq
+> +		 */
+> +		irq_enable(host->irq);
+> +	}
+>  	return ret;
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_runtime_resume);
 
-I'm not sure what you mean with limited scope. This is certainly not
-as important for the classic server environment (aside from USB boot
-drives), but I assume that it is highly relevant for the a large
-portion of new embedded designs as people move from raw flash to
-eMMC and similar "technologies".
+> diff --git a/scripts/checkpatch.pl b/scripts/checkpatch.pl
+> index e3c7fc0..17aeda3 100755
+> --- a/scripts/checkpatch.pl
+> +++ b/scripts/checkpatch.pl
+> @@ -1325,8 +1325,8 @@ sub process {
+>  		$prefix = "$filename:$realline: " if ($emacs && $file);
+>  		$prefix = "$filename:$linenr: " if ($emacs && !$file);
+>  
+> -		$here = "#$linenr: " if (!$file);
+> -		$here = "#$realline: " if ($file);
+> +		$here = "" if (!$file);
+> +		$here = "" if ($file);
+>  
+>  		# extract the filename as it passes
+>  		if ($line =~ /^diff --git.*?(\S+)$/) {
+> @@ -1349,7 +1349,7 @@ sub process {
+>  			next;
+>  		}
+>  
+> -		$here .= "FILE: $realfile:$realline:" if ($realcnt != 0);
+> +		$here .= "$realfile:$realline:" if ($realcnt != 0);
+>  
+>  		my $hereline = "$here\n$rawline\n";
+>  		my $herecurr = "$here\n$rawline\n";
+> 
 
-	Arnd
+Surely this doesn't belong in the patch.
+
+Alan Stern
+
