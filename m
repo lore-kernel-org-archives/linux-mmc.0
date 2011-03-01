@@ -1,65 +1,58 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH] mmc: dw_mmc: Remove set-but-unused variable.
-Date: Mon, 28 Feb 2011 16:55:37 -0500
-Message-ID: <1298930137-15105-1-git-send-email-cjb@laptop.org>
+From: Zhu Richard-R65037 <R65037@freescale.com>
+Subject: RE: [PATCH V3 3/4] mmc: sdhci-esdhc: remove
+ SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
+Date: Tue, 1 Mar 2011 01:25:05 +0000
+Message-ID: <010C9052C42A00499CE76D637FA5EE900C7B55@039-SN1MPN1-001.039d.mgd.msft.net>
+References: <1298892725-23672-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+ <1298892725-23672-3-git-send-email-Hong-Xing.Zhu@freescale.com>
+ <20110228142037.GE15532@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pullcord.laptop.org ([18.85.46.20]:55621 "EHLO
-	pullcord.laptop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752562Ab1B1V6D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2011 16:58:03 -0500
+Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:53029
+	"EHLO VA3EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754634Ab1CABZL convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Feb 2011 20:25:11 -0500
+In-Reply-To: <20110228142037.GE15532@pengutronix.de>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "avorontsov@ru.mvista.com" <avorontsov@ru.mvista.com>, "eric@eukrea.com" <eric@eukrea.com>, "linuxzsc@gmail.com" <linuxzsc@gmail.com>, Zhao Richard-B20223 <B20223@freescale.com>, "Freescale@lists.linaro.org" <Freescale@lists.linaro.org>, "eric.miao@linaro.org" <eric.miao@linaro.org>
 
-count is only ever used by assigning to old_len if count =3D=3D 0, and
-then old_len isn't ever used at all.  So, both are redundant.  Fixes:
+Hi Wolfram:
+Thanks for you to make tests on your mx35 platform.
 
-drivers/mmc/host/dw_mmc.c: In function =E2=80=98dw_mci_read_data_pio=E2=
-=80=99:
-drivers/mmc/host/dw_mmc.c:1034:32: warning: variable =E2=80=98old_len=E2=
-=80=99 set but
-not used [-Wunused-but-set-variable]
+Best Regards
+Richard Zhu
 
-Signed-off-by: Chris Ball <cjb@laptop.org>
-Cc: Will Newton <will.newton@imgtec.com>
----
- drivers/mmc/host/dw_mmc.c |    6 +-----
- 1 files changed, 1 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 58476c1..299c1d6 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1031,13 +1031,10 @@ static void dw_mci_read_data_pio(struct dw_mci =
-*host)
- 	struct mmc_data	*data =3D host->data;
- 	int shift =3D host->data_shift;
- 	u32 status;
--	unsigned int nbytes =3D 0, len, old_len, count =3D 0;
-+	unsigned int nbytes =3D 0, len;
-=20
- 	do {
- 		len =3D SDMMC_GET_FCNT(mci_readl(host, STATUS)) << shift;
--		if (count =3D=3D 0)
--			old_len =3D len;
--
- 		if (offset + len <=3D sg->length) {
- 			host->pull_data(host, (void *)(buf + offset), len);
-=20
-@@ -1082,7 +1079,6 @@ static void dw_mci_read_data_pio(struct dw_mci *h=
-ost)
- 			tasklet_schedule(&host->tasklet);
- 			return;
- 		}
--		count++;
- 	} while (status & SDMMC_INT_RXDR); /*if the RXDR is ready read again*=
-/
- 	len =3D SDMMC_GET_FCNT(mci_readl(host, STATUS));
- 	host->pio_offset =3D offset;
---=20
-1.7.0.1
+> -----Original Message-----
+> From: Wolfram Sang [mailto:w.sang@pengutronix.de]
+> Sent: Monday, February 28, 2011 10:21 PM
+> To: Zhu Richard-R65037
+> Cc: linux-arm-kernel@lists.infradead.org; kernel@pengutronix.de; linux-
+> mmc@vger.kernel.org; cjb@laptop.org; avorontsov@ru.mvista.com;
+> eric@eukrea.com; linuxzsc@gmail.com; Zhao Richard-B20223;
+> Freescale@lists.linaro.org; eric.miao@linaro.org
+> Subject: Re: [PATCH V3 3/4] mmc: sdhci-esdhc: remove
+> SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
+>
+> On Mon, Feb 28, 2011 at 07:32:04PM +0800, Richard Zhu wrote:
+> > sdhci-esdhc-imx does not need SDHCI_QUIRK_NO_CARD_NO_RESET. Make it OF-
+> specific.
+> >
+> > Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+>
+> Seems to work on mx35 at least:
+>
+> Tested-by: Wolfram Sang <w.sang@pengutronix.de>
+>
+> --
+> Pengutronix e.K.                           | Wolfram Sang
+> |
+> Industrial Linux Solutions                 | http://www.pengutronix.de/
+> |
 
