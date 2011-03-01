@@ -1,162 +1,79 @@
-From: Pierre Tardy <tardyp@gmail.com>
-Subject: [RFC,PATCHv3 2/3] mmc: sdhci: use ios->clock to know when sdhci is idle
-Date: Tue,  1 Mar 2011 19:15:32 +0100
-Message-ID: <5def72b6b40c10672753fe04a7ad49b394e70706.1298820826.git.tardyp@gmail.com>
-References: <cover.1298820825.git.tardyp@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1298820825.git.tardyp@gmail.com>
-In-Reply-To: <cover.1298820825.git.tardyp@gmail.com>
-References: <cover.1298820825.git.tardyp@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org
-Cc: Pierre Tardy <tardyp@gmail.com>
+From: "Murali Krishna Palnati" <palnatim@codeaurora.org>
+Subject: Re: Fwd: [RFC] MMC: error handling improvements
+Date: Tue, 1 Mar 2011 10:39:59 -0800 (PST)
+Message-ID: <a8453bae3ced14c4c325d1782be92e24.squirrel@www.codeaurora.org>
+References: <20110215230311.GT4152@n2100.arm.linux.org.uk>
+    <8yaoc6c7tan.fsf@huya.qualcomm.com>
+    <AANLkTikpdwfM19oirENbOhnz8Rh40ZnMXByGX_QKdu-V@mail.gmail.com>
+    <8ya8vxf4w4w.fsf@huya.qualcomm.com>
+    <AANLkTimQqGVTwUv4ywQnmd4Z1Ur4vWk2sK5+ZLa4mmTs@mail.gmail.com>
+    <AANLkTikDxOeW9Nfaew_mZLnVJ6e7pyzQTNs139g_AehW@mail.gmail.com>
+    <AANLkTin64W=VQP+EomU3PK-Ye=Nz_SP+DOLxgT__4fkQ@mail.gmail.com>
+    <AANLkTin7UaKPgvmPC0+cJf5nBWuUmuUreAjDZxQGNB2j@mail.gmail.com>
+    <AANLkTimE5xK8RgNiP+9D2D_beBcbWhBNSzjnhEU36GTO@mail.gmail.com>
+    <AANLkTimpJUoc64py_jCrvsrXscawsR2c7JBtr1e0U+e8@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <AANLkTimpJUoc64py_jCrvsrXscawsR2c7JBtr1e0U+e8@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Brian Swetland <swetland@google.com>, David Brown <davidb@codeaurora.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This allows sdhci to detect its own activity and to autosuspend
-when not used
+> ---------- Forwarded message ----------
+> From: Linus Walleij <linus.walleij@linaro.org>
+> Date: Tue, Feb 22, 2011 at 2:19 AM
+> Subject: Re: [RFC] MMC: error handling improvements
+> To: Brian Swetland <swetland@google.com>, David Brown
+> <davidb@codeaurora.org
+>>
+> Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <
+> cjb@laptop.org>, linux-mmc@vger.kernel.org,
+> linux-arm-kernel@lists.infradead.org
+>
+>
+> Out of sheer curiosity, Qualcomm/CodeAurora guys:
+>
+> if you dump out the registers at offset 0xfe0-0xfff on the
+> SDCC, does it contain a valid PrimeCell ID? Anyone who
+> can make a hexdump of it?
+>
+> It is possible to hardcode an AMBA ID to use this driver
+> even if this area is just 0x0000... but I'm just curious
+> about how different silicon vendors treat these registers,
+> e.g. if they contain something sensible.
+>
 
-inspired from  mmci: handle clock frequency 0 properly
->From Linus Walleij <linus.walleij@stericsson.com>
-author of mmc aggressive clock gating fw.
+Linus,
 
-The idea of using mmc clock gating fw in order to power gate the
-sdhci is simple (it still need some other get/set because set_ios() is
-not cause first before any other acticity):
-Whenever the mmc fw tells we dont need the MMC clock, we dont need
-the sdhci power as well.
+These Prime cell ID registers are removed in the newer versions of the MSM
+SDCC controller and are replaced with a different register that indicates
+the controller version number. So, using these prime cell ID registers may
+not be an option for us. Nevertheless, as you pointed out we can hard code
+the AMBA ID in the platform device data and use that in the mmci driver to
+handle stuff specific to this controller similar to what is done for ST
+variant in mmci driver.
 
-This does not mean that the child (card) is
-suspended. In case of a Wifi SDIO card, the card will be suspended
-and resumed according to the ifconfig up/down status.
-Even if the Wifi interface is up, user might not use the network.
-Sdhci can be powered off during those period. It is up to the HW
-implementation to implement smart enough power gating to still
-support enough always-on circuitry allowing to detect sdio
-interrupts.
+Though the bulk of the MSM SDCC controller is designed around PL180, there
+are still some modifications to include flow control, SDIO support, Data
+Mover interface (DMA engine on Qualcomm MSMs) etc. Support/ability to talk
+to the Data Mover is one of the main differences when compared to original
+PL180 prime cell.
 
-Acked-by: Linus Walleij <linus.walleij@stericsson.com>
+Our main concern in moving to mmci is support for DMA that needs to be
+added to this driver. I believe PL180 controller does have the ability to
+talk to DMA engines, but i dont see any relevant support for that in mmci
+driver, unless i grossly missed something.
 
-Signed-off-by: Pierre Tardy <tardyp@gmail.com>
----
- drivers/mmc/host/sdhci-pci.c |    3 +++
- drivers/mmc/host/sdhci.c     |   29 +++++++++++++++++++++++++++++
- include/linux/mmc/sdhci.h    |    1 +
- 3 files changed, 33 insertions(+), 0 deletions(-)
+Regards
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index f167a55..1b5e70b 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1089,6 +1089,9 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
- 
- 		chip->slots[i] = slot;
- 	}
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+	pm_suspend_ignore_children(&pdev->dev, 1);
- 	pm_runtime_put_noidle(&pdev->dev);
- 	return 0;
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index cd79a28..735c3f7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -20,6 +20,7 @@
- #include <linux/slab.h>
- #include <linux/scatterlist.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/pm_runtime.h>
- 
- #include <linux/leds.h>
- 
-@@ -1161,6 +1162,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host;
- 	unsigned long flags;
-+	unsigned int lastclock;
- 	u8 ctrl;
- 
- 	host = mmc_priv(mmc);
-@@ -1171,6 +1173,27 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		goto out;
- 
- 	/*
-+	 * get/put runtime_pm usage counter at ios->clock transitions
-+	 * We need to do it before any other chip access, as sdhci could
-+	 * be power gated
-+	 */
-+	lastclock = host->iosclock;
-+	host->iosclock = ios->clock;
-+	if (lastclock == 0 && ios->clock != 0) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		pm_runtime_get_sync(host->mmc->parent);
-+		spin_lock_irqsave(&host->lock, flags);
-+	} else if (lastclock != 0 && ios->clock == 0) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		pm_runtime_mark_last_busy(host->mmc->parent);
-+		pm_runtime_put_autosuspend(host->mmc->parent);
-+		spin_lock_irqsave(&host->lock, flags);
-+	}
-+	/* no need to configure the rest.. */
-+	if (host->iosclock == 0)
-+		goto out;
-+
-+	/*
- 	 * Reset the chip on each power off.
- 	 * Should clear out any weird states.
- 	 */
-@@ -1244,6 +1267,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
- 	int is_readonly;
- 
- 	host = mmc_priv(mmc);
-+	/* this function is called before set_ios... */
-+	pm_runtime_get_sync(mmc->parent);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -1257,6 +1282,7 @@ static int sdhci_get_ro(struct mmc_host *mmc)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
-+	pm_runtime_put_autosuspend(mmc->parent);
- 	/* This quirk needs to be replaced by a callback-function later */
- 	return host->quirks & SDHCI_QUIRK_INVERTED_WRITE_PROTECT ?
- 		!is_readonly : is_readonly;
-@@ -1268,6 +1294,7 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	unsigned long flags;
- 
- 	host = mmc_priv(mmc);
-+	pm_runtime_get_sync(mmc->parent);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -1282,6 +1309,7 @@ out:
- 	mmiowb();
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
-+	pm_runtime_put_autosuspend(mmc->parent);
- }
- 
- static const struct mmc_host_ops sdhci_ops = {
-@@ -1766,6 +1794,7 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
-+	host->iosclock = 0;
- 
- 	return host;
- }
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 83bd9f7..a38d040 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -116,6 +116,7 @@ struct sdhci_host {
- 	unsigned int timeout_clk;	/* Timeout freq (KHz) */
- 
- 	unsigned int clock;	/* Current clock (MHz) */
-+	unsigned int iosclock;	/* Last clock asked via set_ios  */
- 	u8 pwr;			/* Current voltage */
- 
- 	struct mmc_request *mrq;	/* Current request */
--- 
-1.7.1
+P Murali Krishna
+
+
+
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
+Forum.
+
