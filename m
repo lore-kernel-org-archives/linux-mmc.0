@@ -1,46 +1,44 @@
 From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [linux-pm] [RFC, PATCHv3 3/3] mmc: sdhci: handle wake-up from
- runtime_pm
-Date: Tue, 1 Mar 2011 15:27:54 -0500 (EST)
-Message-ID: <Pine.LNX.4.44L0.1103011525040.2034-100000@iolanthe.rowland.org>
-References: <AANLkTikt1r3j99_ub0ce3_3snjoDXvR2+x6RxcjGfMK8@mail.gmail.com>
+Subject: Re: [linux-pm] [RFC,PATCHv3 0/3] sdhci runtime_pm implementation
+Date: Tue, 1 Mar 2011 15:30:29 -0500 (EST)
+Message-ID: <Pine.LNX.4.44L0.1103011528230.2034-100000@iolanthe.rowland.org>
+References: <AANLkTik5HVxoOCH1ZVj50nUsCA5E04Y0J0RaWw7_KyKw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <AANLkTikt1r3j99_ub0ce3_3snjoDXvR2+x6RxcjGfMK8@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from iolanthe.rowland.org ([192.131.102.54]:51147 "HELO
+	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1756459Ab1CAUaa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2011 15:30:30 -0500
+In-Reply-To: <AANLkTik5HVxoOCH1ZVj50nUsCA5E04Y0J0RaWw7_KyKw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Pierre Tardy <tardyp@gmail.com>
 Cc: linux-kernel@vger.kernel.org, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
 
 On Tue, 1 Mar 2011, Pierre Tardy wrote:
 
-> >> + =A0 =A0 if (pm_runtime_suspended()) {
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 host->waking_up =3D 1;
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 /* Note that we disable temporarly the i=
-nterrupt until we do the
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* resume. If we don't then we'll get =
-constantly interrupted
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* until we actually resume.
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0*
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* as the irq is shared, this might no=
-t be very friendly to our
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* irq sharers but the pm_runtime work=
-queue should really be
-> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* called soon.
+> >> > Other drivers do it, but they use PCI PME# instead of interrupts=
+=2E
+> >> Could you please elaborate?
+> >> My understanding is that PCI PME will generate MSI, which translat=
+e in
+> >> interrupt.
 > >
-> > Instead of disabling the IRQ, would it be possible to tell the devi=
-ce
-> > to stop generating an interrupt request?
->=20
-> Well, the device is power gated, so any access to it will cause a bus
-> timeout (depending of the platform)
+> > It depends on the platform. =A0On systems with ACPI, PCI PME genera=
+tes an
+> > ACPI I/O event, which is handled by the ACPI and PM cores. =A0It do=
+es not
+> > invoke the device driver's interrupt handler.
+> So, let's say, in the ACPI case, if the interrupt handler dont get
+> called, how would the driver know that he got a sdcard insert event,
+> and trigger a mmc_rescan() ?
 
-But could you gate the power back on and then turn off the interrupt=20
-request?
-
-It seems like a foolish design to have an interrupt request that can't
-be turned off by an interrupt handler.
+When the ACPI and PCI cores process the PME event, they call
+pm_runtime_resume().  The driver's runtime_resume routine would read
+the device status and see the insert event, which would cause it to
+trigger mmc_rescan().
 
 Alan Stern
+
