@@ -1,64 +1,64 @@
-From: Pierre Tardy <tardyp@gmail.com>
-Subject: Re: [linux-pm] [RFC, PATCHv3 3/3] mmc: sdhci: handle wake-up from runtime_pm
-Date: Tue, 1 Mar 2011 21:48:37 +0100
-Message-ID: <AANLkTi=nWXad7WMRYxu7cvC478qy7ptpotR4K_ATNt_J@mail.gmail.com>
-References: <AANLkTikt1r3j99_ub0ce3_3snjoDXvR2+x6RxcjGfMK8@mail.gmail.com>
-	<Pine.LNX.4.44L0.1103011525040.2034-100000@iolanthe.rowland.org>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [linux-pm] [RFC,PATCHv3 0/3] sdhci runtime_pm implementation
+Date: Tue, 1 Mar 2011 22:07:22 +0100
+Message-ID: <201103012207.22798.rjw@sisk.pl>
+References: <cover.1298820825.git.tardyp@gmail.com> <Pine.LNX.4.44L0.1103011431400.2034-100000@iolanthe.rowland.org> <AANLkTi=ogThxB_2bxANV4hUsLGZs04gzHSCyH90Bm87U@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:52627 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757358Ab1CAUsi convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2011 15:48:38 -0500
-In-Reply-To: <Pine.LNX.4.44L0.1103011525040.2034-100000@iolanthe.rowland.org>
+Received: from ogre.sisk.pl ([217.79.144.158]:40896 "EHLO ogre.sisk.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757226Ab1CAVHf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 1 Mar 2011 16:07:35 -0500
+In-Reply-To: <AANLkTi=ogThxB_2bxANV4hUsLGZs04gzHSCyH90Bm87U@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: linux-kernel@vger.kernel.org, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org
+To: Pierre Tardy <tardyp@gmail.com>
+Cc: Alan Stern <stern@rowland.harvard.edu>, linux-kernel@vger.kernel.org, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org
 
-On Tue, Mar 1, 2011 at 9:27 PM, Alan Stern <stern@rowland.harvard.edu> =
-wrote:
-> On Tue, 1 Mar 2011, Pierre Tardy wrote:
->
->> >> + =A0 =A0 if (pm_runtime_suspended()) {
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 host->waking_up =3D 1;
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 /* Note that we disable temporarly the =
-interrupt until we do the
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* resume. If we don't then we'll get=
- constantly interrupted
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* until we actually resume.
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0*
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* as the irq is shared, this might n=
-ot be very friendly to our
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* irq sharers but the pm_runtime wor=
-kqueue should really be
->> >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* called soon.
->> >
->> > Instead of disabling the IRQ, would it be possible to tell the dev=
-ice
->> > to stop generating an interrupt request?
->>
->> Well, the device is power gated, so any access to it will cause a bu=
-s
->> timeout (depending of the platform)
->
-> But could you gate the power back on and then turn off the interrupt
-> request?
-That's the role of runtime_resume... On some platform, this may need
-up to sending some SPI commands to the PMIC, to get those power rails
-back on.
-Something that you cannot do in interrupt context.
+On Tuesday, March 01, 2011, Pierre Tardy wrote:
+> On Tue, Mar 1, 2011 at 8:33 PM, Alan Stern <stern@rowland.harvard.edu> wrote:
+> > On Tue, 1 Mar 2011, Pierre Tardy wrote:
+> >
+> >> Please find sdhci runtime_pm implementation.
+> >>
+> >> It uses clock gating fw as a tip to know when our chip is idle.
+> >> It implements wake up from card insertion/removal.
+> >>
+> >> This is RFC, please dont merge yet. I really would like to have deep review
+> >> from PCI linux-pm guys.
+> >>
+> >> Opens are:
+> >>
+> >> 1/ Not sure if the pci configs in the driver in rpm_suspend/resume flow
+> >>  are not duplicate from what the core is doing.
+> >
+> > There may be one or two small errors.
+> >
+> >> 2/ Wakeup from D3hot: I cannot find any driver that is implementing it in current upstream,
+> >
+> > Other drivers do it, but they use PCI PME# instead of interrupts.
+> Could you please elaborate?
+> My understanding is that PCI PME will generate MSI, which translate in
+> interrupt.
 
->
-> It seems like a foolish design to have an interrupt request that can'=
-t
-> be turned off by an interrupt handler.
-It's what we have for now ( looks like I need to go back to my system
-architects to see if we can change that...)
+Your driver won't get those interrupts.
 
-Alan,
-thanks for all this feedback. I have now a much more clear view on how
-this is working on ACPI, I'll try to see how we can mimic this
-behaviour on intel_mid.
+How it works is, basically, that when the device signals wakeup, it either
+causes a PME# signal to be raised (parallel PCI), or a PME Message to be
+sent upstream (PCIe).  In the first case it will cause a platform event
+(eg. ACPI GPE) to occur and the handle of that event will resume your
+device (using pm_request_resume()).  In the second case it will cause the PCIe
+root port handling the PME Message to generate an interrupt and the handler of
+that interrupt will resume your device.
+
+And this is a good reason why your driver shouldn't touch the PCI-specific
+part of suspend/resume handling (it may not really know what it's doing).
+
+In fact, there are a few drivers in the tree using this mechanism already
+(r8169, e1000e, i believe PCI HCDs too).
+
+Thanks,
+Rafael
