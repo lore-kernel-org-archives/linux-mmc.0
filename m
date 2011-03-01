@@ -1,64 +1,102 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [linux-pm] [RFC,PATCHv3 0/3] sdhci runtime_pm implementation
-Date: Tue, 1 Mar 2011 22:07:22 +0100
-Message-ID: <201103012207.22798.rjw@sisk.pl>
-References: <cover.1298820825.git.tardyp@gmail.com> <Pine.LNX.4.44L0.1103011431400.2034-100000@iolanthe.rowland.org> <AANLkTi=ogThxB_2bxANV4hUsLGZs04gzHSCyH90Bm87U@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: [RFC 1/3] MMC: Adjust unaligned write accesses.
+Date: Tue,  1 Mar 2011 16:09:02 -0600
+Message-ID: <1299017344-25361-2-git-send-email-andreiw@motorola.com>
+References: <1299017344-25361-1-git-send-email-andreiw@motorola.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:40896 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757226Ab1CAVHf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 1 Mar 2011 16:07:35 -0500
-In-Reply-To: <AANLkTi=ogThxB_2bxANV4hUsLGZs04gzHSCyH90Bm87U@mail.gmail.com>
+Received: from exprod5og104.obsmtp.com ([64.18.0.178]:40525 "EHLO
+	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754479Ab1CAVYf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2011 16:24:35 -0500
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p21LOmQx021420
+	for <linux-mmc@vger.kernel.org>; Tue, 1 Mar 2011 16:24:48 -0500 (EST)
+Received: from mail-yi0-f42.google.com (mail-yi0-f42.google.com [209.85.218.42])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p21LOSuV021301
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Tue, 1 Mar 2011 16:24:47 -0500 (EST)
+Received: by mail-yi0-f42.google.com with SMTP id 21so3532451yic.15
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Mar 2011 13:24:32 -0800 (PST)
+In-Reply-To: <1299017344-25361-1-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Tardy <tardyp@gmail.com>
-Cc: Alan Stern <stern@rowland.harvard.edu>, linux-kernel@vger.kernel.org, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Andrei Warkentin <andreiw@motorola.com>
 
-On Tuesday, March 01, 2011, Pierre Tardy wrote:
-> On Tue, Mar 1, 2011 at 8:33 PM, Alan Stern <stern@rowland.harvard.edu> wrote:
-> > On Tue, 1 Mar 2011, Pierre Tardy wrote:
-> >
-> >> Please find sdhci runtime_pm implementation.
-> >>
-> >> It uses clock gating fw as a tip to know when our chip is idle.
-> >> It implements wake up from card insertion/removal.
-> >>
-> >> This is RFC, please dont merge yet. I really would like to have deep review
-> >> from PCI linux-pm guys.
-> >>
-> >> Opens are:
-> >>
-> >> 1/ Not sure if the pci configs in the driver in rpm_suspend/resume flow
-> >>  are not duplicate from what the core is doing.
-> >
-> > There may be one or two small errors.
-> >
-> >> 2/ Wakeup from D3hot: I cannot find any driver that is implementing it in current upstream,
-> >
-> > Other drivers do it, but they use PCI PME# instead of interrupts.
-> Could you please elaborate?
-> My understanding is that PCI PME will generate MSI, which translate in
-> interrupt.
+Adjust unaligned write accesses spanning preferred align
+size into two accesses - an unaligned and an aligned access.
+This is meant to be used for card quirks, and is off
+by default.
 
-Your driver won't get those interrupts.
+Change-Id: Ic4ce561a4a72a13f34d1a88ad669f98e3c7b9d90
+Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
+---
+ drivers/mmc/card/block.c |   38 ++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 38 insertions(+), 0 deletions(-)
 
-How it works is, basically, that when the device signals wakeup, it either
-causes a PME# signal to be raised (parallel PCI), or a PME Message to be
-sent upstream (PCIe).  In the first case it will cause a platform event
-(eg. ACPI GPE) to occur and the handle of that event will resume your
-device (using pm_request_resume()).  In the second case it will cause the PCIe
-root port handling the PME Message to generate an interrupt and the handler of
-that interrupt will resume your device.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 7054fd5..498c439 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -63,6 +63,7 @@ struct mmc_blk_data {
+ 
+ 	unsigned int	usage;
+ 	unsigned int	read_only;
++	unsigned int	write_align_size;
+ };
+ 
+ static DEFINE_MUTEX(open_lock);
+@@ -312,6 +313,39 @@ out:
+ 	return err ? 0 : 1;
+ }
+ 
++/*
++ * If the request is not aligned, split it into an unaligned
++ * and an aligned portion. Here we can adjust
++ * the size of the MMC request and let the block layer request handle
++ * deal with generating another MMC request.
++ */
++
++static bool mmc_adjust_write(struct mmc_card *card,
++			     struct mmc_request *mrq)
++{
++	unsigned int left_in_page;
++	unsigned int wa_size_blocks;
++	struct mmc_blk_data *md = mmc_get_drvdata(card);
++
++	if (!md->write_align_size)
++		return false;
++
++	wa_size_blocks = md->write_align_size / mrq->data->blksz;
++	left_in_page = wa_size_blocks -
++		(mrq->cmd->arg % wa_size_blocks);
++
++	/* Aligned access. */
++	if (left_in_page == wa_size_blocks)
++		return false;
++
++	/* Not straddling page boundary. */
++	if (mrq->data->blocks <= left_in_page)
++		return false;
++
++	mrq->data->blocks = left_in_page;
++	return true;
++}
++
+ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ {
+ 	struct mmc_blk_data *md = mq->data;
+@@ -339,6 +373,10 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 		brq.stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+ 		brq.data.blocks = blk_rq_sectors(req);
+ 
++		/* Check for unaligned accesses straddling pages. */
++		if (rq_data_dir(req) == WRITE)
++			mmc_adjust_write(card, &brq.mrq);
++
+ 		/*
+ 		 * The block layer doesn't support all sector count
+ 		 * restrictions, so we need to be prepared for too big
+-- 
+1.7.0.4
 
-And this is a good reason why your driver shouldn't touch the PCI-specific
-part of suspend/resume handling (it may not really know what it's doing).
-
-In fact, there are a few drivers in the tree using this mechanism already
-(r8169, e1000e, i believe PCI HCDs too).
-
-Thanks,
-Rafael
