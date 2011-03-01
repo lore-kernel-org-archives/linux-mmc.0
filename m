@@ -1,38 +1,52 @@
-From: Eric Miao <eric.miao@linaro.org>
-Subject: Re: [PATCH V3 4/4] mmc: sdhci-esdhc: enable esdhc on imx53
-Date: Tue, 1 Mar 2011 11:06:07 +0800
-Message-ID: <AANLkTinabUZ8wot=iu7Yp6LnmVWu_k1Ha2srHaipy0qx@mail.gmail.com>
-References: <1298892725-23672-1-git-send-email-Hong-Xing.Zhu@freescale.com>
- <1298892725-23672-4-git-send-email-Hong-Xing.Zhu@freescale.com>
- <20110228144741.GF15532@pengutronix.de> <010C9052C42A00499CE76D637FA5EE900C7B7B@039-SN1MPN1-001.039d.mgd.msft.net>
+From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Subject: [PATCH V4 1/4] ARM: imx53_loco: add esdhc device support
+Date: Tue, 1 Mar 2011 17:58:17 +0800
+Message-ID: <1298973500-2858-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:52945 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755160Ab1CADG2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2011 22:06:28 -0500
-Received: by iwn34 with SMTP id 34so3713045iwn.19
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2011 19:06:27 -0800 (PST)
-In-Reply-To: <010C9052C42A00499CE76D637FA5EE900C7B7B@039-SN1MPN1-001.039d.mgd.msft.net>
+Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:51931
+	"EHLO DB3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754017Ab1CAJ6k (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2011 04:58:40 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhu Richard-R65037 <R65037@freescale.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Zhao Richard-B20223 <B20223@freescale.com>, "cjb@laptop.org" <cjb@laptop.org>, "eric@eukrea.com" <eric@eukrea.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Freescale@lists.linaro.org" <Freescale@lists.linaro.org>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "avorontsov@ru.mvista.com" <avorontsov@ru.mvista.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linuxzsc@gmail.com" <linuxzsc@gmail.com>
+To: linux-arm-kernel@lists.infradead.org
+Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, richard.zhao@freescale.com, eric.miao@linaro.org, Richard Zhu <Hong-Xing.Zhu@freescale.com>
 
->> Hmm, to me, just using cpu_is_mx53() is more readable than introducing
->> another layer of flags/quirks.
-> Hi Wolfram:
-> I discussed it with Richard Zhao before sending out these V3 patches.
-> As we know that there is not only mx53 has this issue, maybe some following SOCs have this issue too.
-> So we make a decision that we introduce another flags/quirks to declare it for all those SOCs that required this
-> mechanism in the end.
+Signed-off-by: Richard Zhao <richard.zhao@freescale.com>
+Acked-by: Wolfram Sang <w.sang@pengutronix.de>
+---
+ arch/arm/mach-mx5/Kconfig           |    1 +
+ arch/arm/mach-mx5/board-mx53_loco.c |    2 ++
+ 2 files changed, 3 insertions(+), 0 deletions(-)
 
-I agree with Richard here that a flag/quirk will be more generic than
-cpu_is_*(). Otherwise we may end up one day growing a big list of
-these cpu_is_*().
+diff --git a/arch/arm/mach-mx5/Kconfig b/arch/arm/mach-mx5/Kconfig
+index f065a0d..a72c833 100644
+--- a/arch/arm/mach-mx5/Kconfig
++++ b/arch/arm/mach-mx5/Kconfig
+@@ -162,6 +162,7 @@ config MACH_MX53_LOCO
+ 	select IMX_HAVE_PLATFORM_IMX2_WDT
+ 	select IMX_HAVE_PLATFORM_IMX_I2C
+ 	select IMX_HAVE_PLATFORM_IMX_UART
++	select IMX_HAVE_PLATFORM_SDHCI_ESDHC_IMX
+ 	help
+ 	  Include support for MX53 LOCO platform. This includes specific
+ 	  configurations for the board and its peripherals.
+diff --git a/arch/arm/mach-mx5/board-mx53_loco.c b/arch/arm/mach-mx5/board-mx53_loco.c
+index 160899e..0a18f8d 100644
+--- a/arch/arm/mach-mx5/board-mx53_loco.c
++++ b/arch/arm/mach-mx5/board-mx53_loco.c
+@@ -213,6 +213,8 @@ static void __init mx53_loco_board_init(void)
+ 	imx53_add_imx2_wdt(0, NULL);
+ 	imx53_add_imx_i2c(0, &mx53_loco_i2c_data);
+ 	imx53_add_imx_i2c(1, &mx53_loco_i2c_data);
++	imx53_add_sdhci_esdhc_imx(0, NULL);
++	imx53_add_sdhci_esdhc_imx(2, NULL);
+ }
+ 
+ static void __init mx53_loco_timer_init(void)
+-- 
+1.7.1
 
-One other point to consider is the SoC stepping, as this might be
-fixed in later steppings, and keeping cpu_is_mx53() or
-cpu_is_mx53_stepping_b2_or_above() doesn't look very good in
-the driver code itself.
+
