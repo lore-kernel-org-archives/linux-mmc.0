@@ -1,43 +1,25 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC 2/3] MMC: Add block quirks support.
-Date: Wed, 2 Mar 2011 22:04:15 +0100
-Message-ID: <201103022204.15235.arnd@arndb.de>
-References: <1299017344-25361-1-git-send-email-andreiw@motorola.com> <201103021819.52837.arnd@arndb.de> <AANLkTimYf01Y6FLYGdyeozvxVO0mxX_QOn2XQ5AHGEFk@mail.gmail.com>
+From: Kevin Hilman <khilman@ti.com>
+Subject: Re: [PATCH v6 0/8]  OMAP: HSMMC: hwmod adaptation
+Date: Wed, 02 Mar 2011 13:16:22 -0800
+Message-ID: <878vwx9qah.fsf@ti.com>
+References: <1298906285-29895-1-git-send-email-kishore.kadiyala@ti.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:62474 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754777Ab1CBVEY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2011 16:04:24 -0500
-In-Reply-To: <AANLkTimYf01Y6FLYGdyeozvxVO0mxX_QOn2XQ5AHGEFk@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1298906285-29895-1-git-send-email-kishore.kadiyala@ti.com>
+	(Kishore Kadiyala's message of "Mon, 28 Feb 2011 20:47:57 +0530")
+Sender: linux-omap-owner@vger.kernel.org
+To: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, tony@atomide.com, cjb@laptop.org, madhu.cr@ti.com, paul@pwsan.com, b-cousson@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org
 
-On Wednesday 02 March 2011 21:48:25 Andrei Warkentin wrote:
+Kishore Kadiyala <kishore.kadiyala@ti.com> writes:
 
-> >
-> > Instead of the dynamic registration, I'd just put all quirks into
-> > one file and have an array of them:
-> 
-> Ideally, you'd have the most important workarounds always built in, to
-> deal with important problems like out-of-spec devices. The eMMC ones
-> you would select, but the external device ones would be "by default".
-> This could potentially explode in the amount of quirks, so maybe
-> linear search isn't the best?
-> 
-> Or you think that there will be sufficiently small number that doesn't
-> justify the complexity?
+> Adding hwmod data for hsmmc device on OMAP2430/OMAP3/OMAP4.
+> Adapting the omap_hsmmc driver to hwmod framework.
 
-I think we will start with a small number, and a linear search once
-at insertion time is good for a significant amount of quirks. We do this
-for all PCI and USB devices, see drivers/usb/storage/usual-tables.c.
+Looks OK to me.
 
-I would certainly not do anything more complex than this unless we
-get into scalability problems with the simple approach.
+Reviewed-by: Kevin Hilman <khilman@ti.com>
 
-	Arnd
+Kevin
