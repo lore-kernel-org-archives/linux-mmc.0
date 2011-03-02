@@ -1,65 +1,75 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: MMC quirks relating to performance/lifetime.
-Date: Wed, 2 Mar 2011 04:34:19 -0600
-Message-ID: <AANLkTimLnd=8oiLeZaaJLNwifG3KJ71kmwy5DDY25j_V@mail.gmail.com>
-References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
-	<201102251321.09232.arnd@arndb.de>
-	<4D6D3F71.4040605@kernel.dk>
-	<201103012011.51855.arnd@arndb.de>
+From: Samuel Ortiz <sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: Re: [PATCH] tmio: silence warnings introduced by mfd changes
+Date: Wed, 2 Mar 2011 11:34:46 +0100
+Message-ID: <20110302103446.GE16181@sortiz-mobl>
+References: <20110301154230.df32be17.sfr@canb.auug.org.au>
+ <20110301105322.48754094@debxo>
+ <20110301123220.705d3368@debxo>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <201103012011.51855.arnd@arndb.de>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Jens Axboe <axboe@kernel.dk>, linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20110301123220.705d3368@debxo>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andres Salomon <dilinger-pFFUokh25LWsTnJN9+BGXg@public.gmane.org>
+Cc: Stephen Rothwell <sfr-3FnU+UHB4dNDw9hX6IcOSA@public.gmane.org>, linux-next-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ian Molton <ian-zdned+2MO1+9FHfhHBbuYA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, David Brownell <dbrownell-Rn4VEauK+AKRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Greg Kroah-Hartman <gregkh-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Mar 1, 2011 at 1:11 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Tuesday 01 March 2011 19:48:17 Jens Axboe wrote:
->>
->> On 2011-02-25 07:21, Arnd Bergmann wrote:
->> > On Friday 25 February 2011, Andrei Warkentin wrote:
->> >> Yup. I understand :-). =A0That's the strategy I'm going to follow=
-=2E For
->> >> page_size-alignment/splitting I'm looking at the block layer now.=
- Is
->> >> that the right approach or should I still submit a (cleaned up) p=
-atch
->> >> to mmc/card/block.c for that performance improvement.
->> >
->> > I guess it should live in block/cfq-iosched in the long run, but I=
- don't
->> > know how easy it is to implement it there for test purposes.
->>
->> I don't think I saw the original patch(es) for this?
->
-> Nobody has posted one yet, only discussions. Andrei made a patch for =
-the
-> MMC block driver to split requests in some cases, but I think the
-> concept has changed enough that it's probably not useful to look at
-> that patch.
->
+Hi Andres,
 
-Before the generic improvements are made to the block layer, I think
-there is some value
-in implementing the (simpler) ones in mmc block code, as well as
-expose an mmc block quirk interface by which its easy to add complex
-workarounds. Some things will never be able to completely stay above
-mmc block code, for example, when splitting up smaller accesses, you
-need to be careful on the Toshiba card, since the 4th consecutive 8KB
-block results in the entire 32KB getting pushed  into the bigger 4MB
-buffer. On our platform, there are a lot of accesses in the 16KB-32KB
-range which benefit from the splitting. Data collected showed
-splitting more than 32KB to have adverse effect on performance (I
-guess that sort of makes sense, after all, why else would the
-controller treat 4 consecutive 8KB accesses as a larger access and
-treat it accordingly?) On the other hand, that data was collected on
-code that used reliable write for every portion of the split access,
-so I'm going to have to get some new data...
+On Tue, Mar 01, 2011 at 12:32:20PM -0800, Andres Salomon wrote:
+> On Tue, 1 Mar 2011 10:53:22 -0800
+> Andres Salomon <dilinger-pFFUokh25LWsTnJN9+BGXg@public.gmane.org> wrote:
+> 
+> > On Tue, 1 Mar 2011 15:42:30 +1100
+> > Stephen Rothwell <sfr-3FnU+UHB4dNDw9hX6IcOSA@public.gmane.org> wrote:
+> > 
+> > > Hi Samuel,
+> > > 
+> > > After merging the mfd tree, today's linux-next build (x86_64
+> > > allmodconfig) produced these warnings:
+> > > 
+> > > drivers/video/tmiofb.c: In function 'tmiofb_hw_init':
+> > > drivers/video/tmiofb.c:270: warning: initialization discards
+> > > qualifiers from pointer target type drivers/video/tmiofb.c: In
+> > > function 'tmiofb_hw_mode': drivers/video/tmiofb.c:314: warning:
+> > > initialization discards qualifiers from pointer target type
+> > > drivers/video/tmiofb.c:314: warning: unused variable 'cell'
+> > > drivers/video/tmiofb.c: In function 'tmiofb_probe':
+> > > drivers/video/tmiofb.c:683: warning: initialization discards
+> > > qualifiers from pointer target type drivers/video/tmiofb.c: In
+> > > function 'tmiofb_remove': drivers/video/tmiofb.c:811: warning:
+> > > initialization discards qualifiers from pointer target type
+> > > drivers/video/tmiofb.c: In function 'tmiofb_suspend':
+> > > drivers/video/tmiofb.c:941: warning: initialization discards
+> > > qualifiers from pointer target type drivers/video/tmiofb.c: In
+> > > function 'tmiofb_resume': drivers/video/tmiofb.c:973: warning:
+> > > initialization discards qualifiers from pointer target type
+> > > 
+> > > Introduced by commits 2a79bb1d72f5ac22dff96de340d90d512f852ecb
+> > > ("mfd: mfd_cell is now implicitly available to tc6393xb drivers")
+> > > and b6361637190e6cb7acb84509499942ada69e7136 ("fb: Use mfd_data
+> > > instead of driver_data for tmio-fb").
+> > > 
+> > 
+> > Oops, this should fix that.
+> > 
+> > 
+> > 
+> 
+> 
+> Actually, I noticed that I screwed this up for the other tmio drivers
+> as well.  Here's a patch that addresses them all (you can
+> ignore the previous patch).
+Patch applied, thanks for fixing that.
+
+Cheers,
+Samuel.
+
+-- 
+Intel Open Source Technology Centre
+http://oss.intel.com/
 --
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
