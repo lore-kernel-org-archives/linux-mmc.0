@@ -1,135 +1,53 @@
 From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Subject: [PATCH V5 5/6] mmc: sdhci-esdhc: enable esdhc on imx53
-Date: Wed, 2 Mar 2011 18:04:42 +0800
-Message-ID: <1299060283-6404-5-git-send-email-Hong-Xing.Zhu@freescale.com>
+Subject: [PATCH V5 6/6] ARM: imx53_loco: add esdhc device support
+Date: Wed, 2 Mar 2011 18:04:43 +0800
+Message-ID: <1299060283-6404-6-git-send-email-Hong-Xing.Zhu@freescale.com>
 References: <1299060283-6404-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe003.messaging.microsoft.com ([213.199.154.206]:20487
-	"EHLO AM1EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756444Ab1CBKId (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2011 05:08:33 -0500
+Received: from am1ehsobe006.messaging.microsoft.com ([213.199.154.209]:24466
+	"EHLO AM1EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756444Ab1CBKIe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2011 05:08:34 -0500
 In-Reply-To: <1299060283-6404-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
 Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, richard.zhao@freescale.com, eric.miao@linaro.org, Richard Zhu <Hong-Xing.Zhu@freescale.com>
 
-Fix the NO INT in the Multi-BLK IO in SD/MMC, and Multi-BLK
-read in SDIO on imx53.
-
-The CMDTYPE of the CMD register (offset 0xE) should be set to
-"11" when the STOP CMD12 is issued on imx53 to abort one
-open ended multi-blk IO. Otherwise one the TC INT wouldn't
-be generated.
-
-In exact block transfer, the controller doesn't complete the
-operations automatically as required at the end of the
-transfer and remains on hold if the abort command is not sent on
-imx53.
-As a result, the TC flag is not asserted and SW  received timeout
-exeception. set bit1 of Vendor Spec registor to fix it.
-
-Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
 Signed-off-by: Richard Zhao <richard.zhao@freescale.com>
+Acked-by: Wolfram Sang <w.sang@pengutronix.de>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   44 +++++++++++++++++++++++++++++++++++-
- 1 files changed, 43 insertions(+), 1 deletions(-)
+ arch/arm/mach-mx5/Kconfig           |    1 +
+ arch/arm/mach-mx5/board-mx53_loco.c |    2 ++
+ 2 files changed, 3 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 42f5687..9ef7bfd 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -19,13 +19,31 @@
- #include <linux/slab.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdhci-pltfm.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/sdio.h>
- #include <mach/hardware.h>
- #include <mach/esdhc.h>
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
- 
-+/* VENDOR SPEC register */
-+#define SDHCI_VENDOR_SPEC		0xC0
-+#define  SDHCI_VENDOR_SPEC_SDIO_QUIRK	0x00000002
-+
- #define IMX_GPIO_CD_WP			(1 << 0)
-+/*
-+ * The CMDTYPE of the CMD register (offset 0xE) should be set to
-+ * "11" when the STOP CMD12 is issued on imx53 to abort one
-+ * open ended multi-blk IO. Otherwise the TC INT wouldn't
-+ * be generated.
-+ * In exact block transfer, the controller doesn't complete the
-+ * operations automatically as required at the end of the
-+ * transfer and remains on hold if the abort command is not sent.
-+ * As a result, the TC flag is not asserted and SW  received timeout
-+ * exeception. Bit1 of Vendor Spec registor is used to fix it.
-+ */
-+#define IMX_MULTIBLK_NO_INT		(1 << 1)
- 
- struct pltfm_imx_data {
- 	int flags;
-@@ -80,6 +98,15 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- 		 */
- 		val &= ~(SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
- 
-+	if (unlikely((imx_data->flags & IMX_MULTIBLK_NO_INT)
-+				&& (reg == SDHCI_INT_STATUS)
-+				&& (val & SDHCI_INT_DATA_END))) {
-+			u32 v;
-+			v = readl(host->ioaddr + SDHCI_VENDOR_SPEC);
-+			v &= ~SDHCI_VENDOR_SPEC_SDIO_QUIRK;
-+			writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
-+	}
-+
- 	writel(val, host->ioaddr + reg);
+diff --git a/arch/arm/mach-mx5/Kconfig b/arch/arm/mach-mx5/Kconfig
+index f065a0d..a72c833 100644
+--- a/arch/arm/mach-mx5/Kconfig
++++ b/arch/arm/mach-mx5/Kconfig
+@@ -162,6 +162,7 @@ config MACH_MX53_LOCO
+ 	select IMX_HAVE_PLATFORM_IMX2_WDT
+ 	select IMX_HAVE_PLATFORM_IMX_I2C
+ 	select IMX_HAVE_PLATFORM_IMX_UART
++	select IMX_HAVE_PLATFORM_SDHCI_ESDHC_IMX
+ 	help
+ 	  Include support for MX53 LOCO platform. This includes specific
+ 	  configurations for the board and its peripherals.
+diff --git a/arch/arm/mach-mx5/board-mx53_loco.c b/arch/arm/mach-mx5/board-mx53_loco.c
+index 160899e..0a18f8d 100644
+--- a/arch/arm/mach-mx5/board-mx53_loco.c
++++ b/arch/arm/mach-mx5/board-mx53_loco.c
+@@ -213,6 +213,8 @@ static void __init mx53_loco_board_init(void)
+ 	imx53_add_imx2_wdt(0, NULL);
+ 	imx53_add_imx_i2c(0, &mx53_loco_i2c_data);
+ 	imx53_add_imx_i2c(1, &mx53_loco_i2c_data);
++	imx53_add_sdhci_esdhc_imx(0, NULL);
++	imx53_add_sdhci_esdhc_imx(2, NULL);
  }
  
-@@ -103,9 +130,21 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 		 * Postpone this write, we must do it together with a
- 		 * command write that is down below.
- 		 */
-+		if ((host->cmd->opcode == SD_IO_RW_EXTENDED)
-+				&& (host->cmd->data->blocks > 1)
-+				&& (host->cmd->data->flags & MMC_DATA_READ)
-+				&& (imx_data->flags & IMX_MULTIBLK_NO_INT)) {
-+			u32 v;
-+			v = readl(host->ioaddr + SDHCI_VENDOR_SPEC);
-+			v |= SDHCI_VENDOR_SPEC_SDIO_QUIRK;
-+			writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
-+		}
- 		imx_data->mod_val = val;
- 		return;
- 	case SDHCI_COMMAND:
-+		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION)
-+			&& (imx_data->flags & IMX_MULTIBLK_NO_INT))
-+			val |= SDHCI_CMD_ABORTCMD;
- 		writel(val << 16 | imx_data->mod_val,
- 			host->ioaddr + SDHCI_TRANSFER_MODE);
- 		return;
-@@ -203,7 +242,7 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 	clk_enable(clk);
- 	pltfm_host->clk = clk;
- 
--	if (cpu_is_mx35() || cpu_is_mx51())
-+	if (!cpu_is_mx25())
- 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
- 
- 	if (cpu_is_mx25() || cpu_is_mx35()) {
-@@ -213,6 +252,9 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 		sdhci_esdhc_ops.get_ro = esdhc_pltfm_get_ro;
- 	}
- 
-+	if (!(cpu_is_mx25() || cpu_is_mx35() || cpu_is_mx51()))
-+		imx_data->flags |= IMX_MULTIBLK_NO_INT;
-+
- 	if (boarddata) {
- 		err = gpio_request_one(boarddata->wp_gpio, GPIOF_IN, "ESDHC_WP");
- 		if (err) {
+ static void __init mx53_loco_timer_init(void)
 -- 
 1.7.1
 
