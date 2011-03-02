@@ -1,52 +1,65 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: Fwd: [RFC] MMC: error handling improvements
-Date: Wed, 2 Mar 2011 11:12:44 +0100
-Message-ID: <AANLkTi=jfB-BiEpKqAy98_jtOTyN4Ozavp=7CnYMGZ_h@mail.gmail.com>
-References: <20110215230311.GT4152@n2100.arm.linux.org.uk>
-	<8yaoc6c7tan.fsf@huya.qualcomm.com>
-	<AANLkTikpdwfM19oirENbOhnz8Rh40ZnMXByGX_QKdu-V@mail.gmail.com>
-	<8ya8vxf4w4w.fsf@huya.qualcomm.com>
-	<AANLkTimQqGVTwUv4ywQnmd4Z1Ur4vWk2sK5+ZLa4mmTs@mail.gmail.com>
-	<AANLkTikDxOeW9Nfaew_mZLnVJ6e7pyzQTNs139g_AehW@mail.gmail.com>
-	<AANLkTin64W=VQP+EomU3PK-Ye=Nz_SP+DOLxgT__4fkQ@mail.gmail.com>
-	<AANLkTin7UaKPgvmPC0+cJf5nBWuUmuUreAjDZxQGNB2j@mail.gmail.com>
-	<AANLkTimE5xK8RgNiP+9D2D_beBcbWhBNSzjnhEU36GTO@mail.gmail.com>
-	<AANLkTimpJUoc64py_jCrvsrXscawsR2c7JBtr1e0U+e8@mail.gmail.com>
-	<a8453bae3ced14c4c325d1782be92e24.squirrel@www.codeaurora.org>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Wed, 2 Mar 2011 04:34:19 -0600
+Message-ID: <AANLkTimLnd=8oiLeZaaJLNwifG3KJ71kmwy5DDY25j_V@mail.gmail.com>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
+	<201102251321.09232.arnd@arndb.de>
+	<4D6D3F71.4040605@kernel.dk>
+	<201103012011.51855.arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <a8453bae3ced14c4c325d1782be92e24.squirrel@www.codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Murali Krishna Palnati <palnatim@codeaurora.org>
-Cc: Brian Swetland <swetland@google.com>, David Brown <davidb@codeaurora.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-arm-msm@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <201103012011.51855.arnd@arndb.de>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Jens Axboe <axboe@kernel.dk>, linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Thanks for writing back Murali!
+On Tue, Mar 1, 2011 at 1:11 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Tuesday 01 March 2011 19:48:17 Jens Axboe wrote:
+>>
+>> On 2011-02-25 07:21, Arnd Bergmann wrote:
+>> > On Friday 25 February 2011, Andrei Warkentin wrote:
+>> >> Yup. I understand :-). =A0That's the strategy I'm going to follow=
+=2E For
+>> >> page_size-alignment/splitting I'm looking at the block layer now.=
+ Is
+>> >> that the right approach or should I still submit a (cleaned up) p=
+atch
+>> >> to mmc/card/block.c for that performance improvement.
+>> >
+>> > I guess it should live in block/cfq-iosched in the long run, but I=
+ don't
+>> > know how easy it is to implement it there for test purposes.
+>>
+>> I don't think I saw the original patch(es) for this?
+>
+> Nobody has posted one yet, only discussions. Andrei made a patch for =
+the
+> MMC block driver to split requests in some cases, but I think the
+> concept has changed enough that it's probably not useful to look at
+> that patch.
+>
 
-2011/3/1 Murali Krishna Palnati <palnatim@codeaurora.org>:
-
-> Though the bulk of the MSM SDCC controller is designed around PL180, there
-> are still some modifications to include flow control, SDIO support,
-
-We have these fixes in the U300/Ux500 version of MMCI as well, I suspect
-it's nothing more than altering which bits are to be poked into which
-registers.
-
-> Data
-> Mover interface (DMA engine on Qualcomm MSMs) etc. Support/ability to talk
-> to the Data Mover is one of the main differences when compared to original
-> PL180 prime cell.
-
-The main work would be to switch the DMA engine in MSM to using
-the DMA engine in drivers/dma. This is one thing we do to avoid the
-proliferation of DMA engine code in arch/arm/*, and we very early
-started to use that framework for U300 and Ux500 and I must say that
-it has payed off well for us, now we have much nicer interfaces and more
-review than any of the custom engines under arch/arm/*.
-
-It's some upfront work but I think it would benefit you if you could
-do this.
-
-Yours,
-Linus Walleij
+Before the generic improvements are made to the block layer, I think
+there is some value
+in implementing the (simpler) ones in mmc block code, as well as
+expose an mmc block quirk interface by which its easy to add complex
+workarounds. Some things will never be able to completely stay above
+mmc block code, for example, when splitting up smaller accesses, you
+need to be careful on the Toshiba card, since the 4th consecutive 8KB
+block results in the entire 32KB getting pushed  into the bigger 4MB
+buffer. On our platform, there are a lot of accesses in the 16KB-32KB
+range which benefit from the splitting. Data collected showed
+splitting more than 32KB to have adverse effect on performance (I
+guess that sort of makes sense, after all, why else would the
+controller treat 4 consecutive 8KB accesses as a larger access and
+treat it accordingly?) On the other hand, that data was collected on
+code that used reliable write for every portion of the split access,
+so I'm going to have to get some new data...
+--
+To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
+" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
