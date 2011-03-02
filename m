@@ -1,58 +1,135 @@
 From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Subject: [PATCH V5 2/6] mmc: sdhci-esdhc: remove SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
-Date: Wed, 2 Mar 2011 18:04:39 +0800
-Message-ID: <1299060283-6404-2-git-send-email-Hong-Xing.Zhu@freescale.com>
+Subject: [PATCH V5 5/6] mmc: sdhci-esdhc: enable esdhc on imx53
+Date: Wed, 2 Mar 2011 18:04:42 +0800
+Message-ID: <1299060283-6404-5-git-send-email-Hong-Xing.Zhu@freescale.com>
 References: <1299060283-6404-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.183]:39125
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756444Ab1CBKI0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2011 05:08:26 -0500
+Received: from am1ehsobe003.messaging.microsoft.com ([213.199.154.206]:20487
+	"EHLO AM1EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756444Ab1CBKId (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2011 05:08:33 -0500
 In-Reply-To: <1299060283-6404-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
 Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, richard.zhao@freescale.com, eric.miao@linaro.org, Richard Zhu <Hong-Xing.Zhu@freescale.com>
 
-sdhci-esdhc-imx does not need SDHCI_QUIRK_NO_CARD_NO_RESET. Make it OF-specific.
+Fix the NO INT in the Multi-BLK IO in SD/MMC, and Multi-BLK
+read in SDIO on imx53.
+
+The CMDTYPE of the CMD register (offset 0xE) should be set to
+"11" when the STOP CMD12 is issued on imx53 to abort one
+open ended multi-blk IO. Otherwise one the TC INT wouldn't
+be generated.
+
+In exact block transfer, the controller doesn't complete the
+operations automatically as required at the end of the
+transfer and remains on hold if the abort command is not sent on
+imx53.
+As a result, the TC flag is not asserted and SW  received timeout
+exeception. set bit1 of Vendor Spec registor to fix it.
 
 Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Tested-by: Wolfram Sang <w.sang@pengutronix.de>
+Signed-off-by: Richard Zhao <richard.zhao@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc.h    |    3 +--
- drivers/mmc/host/sdhci-of-esdhc.c |    3 ++-
- 2 files changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |   44 +++++++++++++++++++++++++++++++++++-
+ 1 files changed, 43 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index c55aae8..c3b08f1 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -23,8 +23,7 @@
- 				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
- 				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
- 				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
--				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET | \
--				SDHCI_QUIRK_NO_CARD_NO_RESET)
-+				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 42f5687..9ef7bfd 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -19,13 +19,31 @@
+ #include <linux/slab.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdhci-pltfm.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/sdio.h>
+ #include <mach/hardware.h>
+ #include <mach/esdhc.h>
+ #include "sdhci.h"
+ #include "sdhci-pltfm.h"
+ #include "sdhci-esdhc.h"
  
- #define ESDHC_SYSTEM_CONTROL	0x2c
- #define ESDHC_CLOCK_MASK	0x0000fff0
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 08161f6..ba40d6d 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -74,7 +74,8 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
++/* VENDOR SPEC register */
++#define SDHCI_VENDOR_SPEC		0xC0
++#define  SDHCI_VENDOR_SPEC_SDIO_QUIRK	0x00000002
++
+ #define IMX_GPIO_CD_WP			(1 << 0)
++/*
++ * The CMDTYPE of the CMD register (offset 0xE) should be set to
++ * "11" when the STOP CMD12 is issued on imx53 to abort one
++ * open ended multi-blk IO. Otherwise the TC INT wouldn't
++ * be generated.
++ * In exact block transfer, the controller doesn't complete the
++ * operations automatically as required at the end of the
++ * transfer and remains on hold if the abort command is not sent.
++ * As a result, the TC flag is not asserted and SW  received timeout
++ * exeception. Bit1 of Vendor Spec registor is used to fix it.
++ */
++#define IMX_MULTIBLK_NO_INT		(1 << 1)
  
- struct sdhci_of_data sdhci_esdhc = {
- 	/* card detection could be handled via GPIO */
--	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-+	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION
-+		| SDHCI_QUIRK_NO_CARD_NO_RESET,
- 	.ops = {
- 		.read_l = sdhci_be32bs_readl,
- 		.read_w = esdhc_readw,
+ struct pltfm_imx_data {
+ 	int flags;
+@@ -80,6 +98,15 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 		 */
+ 		val &= ~(SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
+ 
++	if (unlikely((imx_data->flags & IMX_MULTIBLK_NO_INT)
++				&& (reg == SDHCI_INT_STATUS)
++				&& (val & SDHCI_INT_DATA_END))) {
++			u32 v;
++			v = readl(host->ioaddr + SDHCI_VENDOR_SPEC);
++			v &= ~SDHCI_VENDOR_SPEC_SDIO_QUIRK;
++			writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
++	}
++
+ 	writel(val, host->ioaddr + reg);
+ }
+ 
+@@ -103,9 +130,21 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 		 * Postpone this write, we must do it together with a
+ 		 * command write that is down below.
+ 		 */
++		if ((host->cmd->opcode == SD_IO_RW_EXTENDED)
++				&& (host->cmd->data->blocks > 1)
++				&& (host->cmd->data->flags & MMC_DATA_READ)
++				&& (imx_data->flags & IMX_MULTIBLK_NO_INT)) {
++			u32 v;
++			v = readl(host->ioaddr + SDHCI_VENDOR_SPEC);
++			v |= SDHCI_VENDOR_SPEC_SDIO_QUIRK;
++			writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
++		}
+ 		imx_data->mod_val = val;
+ 		return;
+ 	case SDHCI_COMMAND:
++		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION)
++			&& (imx_data->flags & IMX_MULTIBLK_NO_INT))
++			val |= SDHCI_CMD_ABORTCMD;
+ 		writel(val << 16 | imx_data->mod_val,
+ 			host->ioaddr + SDHCI_TRANSFER_MODE);
+ 		return;
+@@ -203,7 +242,7 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
+ 	clk_enable(clk);
+ 	pltfm_host->clk = clk;
+ 
+-	if (cpu_is_mx35() || cpu_is_mx51())
++	if (!cpu_is_mx25())
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+ 
+ 	if (cpu_is_mx25() || cpu_is_mx35()) {
+@@ -213,6 +252,9 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
+ 		sdhci_esdhc_ops.get_ro = esdhc_pltfm_get_ro;
+ 	}
+ 
++	if (!(cpu_is_mx25() || cpu_is_mx35() || cpu_is_mx51()))
++		imx_data->flags |= IMX_MULTIBLK_NO_INT;
++
+ 	if (boarddata) {
+ 		err = gpio_request_one(boarddata->wp_gpio, GPIOF_IN, "ESDHC_WP");
+ 		if (err) {
 -- 
 1.7.1
 
