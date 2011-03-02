@@ -1,44 +1,34 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [linux-pm] [RFC,PATCHv3 0/3] sdhci runtime_pm implementation
-Date: Wed, 2 Mar 2011 10:12:22 -0500 (EST)
-Message-ID: <Pine.LNX.4.44L0.1103021010050.2015-100000@iolanthe.rowland.org>
-References: <201103020049.36902.rjw@sisk.pl>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc/sdio: remember new card RCA when redetecting card
+Date: Wed, 2 Mar 2011 17:04:54 +0100
+Message-ID: <AANLkTimP2nQVHb51oyXLZf-ve_Gzp-7mBQwW_ZZia=ex@mail.gmail.com>
+References: <1298986864-25597-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from iolanthe.rowland.org ([192.131.102.54]:36674 "HELO
-	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1751957Ab1CBPMY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2011 10:12:24 -0500
-In-Reply-To: <201103020049.36902.rjw@sisk.pl>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:57859 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751384Ab1CBQEz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2011 11:04:55 -0500
+Received: by pvg12 with SMTP id 12so9194pvg.19
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Mar 2011 08:04:54 -0800 (PST)
+In-Reply-To: <1298986864-25597-1-git-send-email-linus.walleij@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Pierre Tardy <tardyp@gmail.com>, linux-kernel@vger.kernel.org, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Lee Jones <lee.jones@linaro.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Wed, 2 Mar 2011, Rafael J. Wysocki wrote:
+2011/3/1 Linus Walleij <linus.walleij@stericsson.com>:
 
-> > > How it works is, basically, that when the device signals wakeup, it either
-> > > causes a PME# signal to be raised (parallel PCI), or a PME Message to be
-> > > sent upstream (PCIe).  In the first case it will cause a platform event
-> > > (eg. ACPI GPE) to occur and the handle of that event will resume your
-> > > device (using pm_request_resume()).  In the second case it will cause the PCIe
-> > > root port handling the PME Message to generate an interrupt and the handler of
-> > > that interrupt will resume your device.
-> > Thanks, that explain a lot how it works.
-> > What I still dont understand is that the wake source I'll have (e.g.
-> > sd card insert) is still an interrupt source.
-> > So it is supposed to generate interrupt until the interrupt source is
-> > acknowledged.
-> > Are we supposed to mask that interrupt source while suspended to make
-> > sure we have either wake or interrupt?
-> 
-> I think the interrupt should be masked while suspended and the driver's resume
-> routine should unmask it.
+> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+>
+> During redetection of a SDIO card, a request for a new card RCA
+> was submitted to the card, but was then overwritten by the old RCA.
+> This caused the card to be deselected instead of selected when using
+> the incorrect RCA.
 
-Right.  That's how the PCI-based USB host controller drivers work.  
-The suspend routine disables interrupt generation and enables PME
-wakeup signals, and the resume routine does the reverse.
+Chris can you look at this, I think it's a bug as in "-rc bug" that
+needs fixing.
 
-Alan Stern
-
+Yours,
+Linus Walleij
