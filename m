@@ -1,116 +1,59 @@
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Subject: Re: [PATCH 1/3] mmc: skip detection of nonremovable cards on
- rescan - card removal detection regression
-Date: Fri, 04 Mar 2011 17:40:17 +0200
-Message-ID: <1299253217.13571.3.camel@maxim-laptop>
-References: <1290921690-6133-1-git-send-email-ohad@wizery.com>
-	 <1290921690-6133-2-git-send-email-ohad@wizery.com>
-	 <20101217005123.GD17239@void.printf.net>
-	 <AANLkTi=ff=kkaRHOrDyoxOgw_Bt7raiPf3T=ed1=EveZ@mail.gmail.com>
-	 <1299205366.4999.3.camel@maxim-laptop> <m3mxlbobz0.fsf@pullcord.laptop.org>
-	 <1299207177.4999.10.camel@maxim-laptop>  <4D7077CA.3090307@samsung.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v2 00/12] add support for host controller v3.00
+Date: Fri, 4 Mar 2011 09:55:40 -0600
+Message-ID: <6C03668EAF45B747AF947A1603D1B300E38E6D5D@SAUSEXMBP01.amd.com>
+References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
+ <m3vczyncf1.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:55056 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759723Ab1CDPkW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2011 10:40:22 -0500
-Received: by ewy6 with SMTP id 6so737414ewy.19
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Mar 2011 07:40:21 -0800 (PST)
-In-Reply-To: <4D7077CA.3090307@samsung.com>
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:7021 "EHLO
+	TX2EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752264Ab1CDPzv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2011 10:55:51 -0500
+In-Reply-To: <m3vczyncf1.fsf@pullcord.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Alan Stern <stern@rowland.harvard.edu>
+To: Chris Ball <cjb@laptop.org>
+Cc: "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "prakity@marvell.com" <prakity@marvell.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-On Fri, 2011-03-04 at 14:25 +0900, Jaehoon Chung wrote:
-> Hi..
-> 
-> I agreed Chris's opinion..If use CONFIG_MMC_UNSAFE_RESUME, you can know to
-> occur some problem..so mentions to "DANGEROUS"
-> If card can be removed during suspend, i think we have too many cases.
-> So this configuration...i think good that use only non-removable card.
-> If you considered every case, you should not use UNSAFE_RESUME..
-Thanks for breaking suspend of MMC cards.
-
-You do know that _by default_, upon Linus request, _all_ USB sticks are
-treated as CONFIG_MMC_UNSAFE_RESUME?
-And in the wild there are much more USB sticks that MMC/SD cards.
-
-
-And now if I remove the MMC card while system is running, system still
-thinks its not.
-
-
-Best regards,
-	Maxim Levitsky
-
-
-
-
-
-> 
-> Regards,
-> Jaehoon Chung
-> 
-> Maxim Levitsky wrote:
-> > On Thu, 2011-03-03 at 21:28 -0500, Chris Ball wrote:
-> >> Hi,
-> >>
-> >> On Thu, Mar 03 2011, Maxim Levitsky wrote:
-> >>> This patch breaks the CONFIG_MMC_UNSAFE_RESUME, because it sets fake
-> >>> non-removeable flag, but the intended use of this option is to assume
-> >>> that card is not removed _during_ suspend,  and it can still be removed
-> >>> during normal use.
-> >>> With this commit, card removal isn't detected.
-> >> I guess we disagree about the semantics of CONFIG_MMC_UNSAFE_RESUME.
-> >> The Kconfig text says:
-> >>
-> >> config MMC_UNSAFE_RESUME
-> >>         bool "Assume MMC/SD cards are non-removable (DANGEROUS)"
-> >>
-> >> which I interpret as meaning that you should set MMC_UNSAFE_RESUME
-> >> *if you're using a card that cannot be removed*.  If your card *can* be
-> >> removed, then it would be extremely foolish to turn on MMC_UNSAFE_RESUME,
-> >> because then if someone removed your removable card during suspend and
-> >> modified it in another machine before resuming, you'd get massive
-> >> filesystem corruption.
-> > That is assuming that someone kindly inserted the card back, while
-> > system still was suspended, which is really unlikely, and besides, I
-> > know who uses my computer (me mostly) and I know what I am doing.
-> > 
-> > 
-> > The description also says:
-> > 
-> > "If you say Y here, the MMC layer will assume that all cards
-> > stayed in their respective slots during the suspend. The
-> > normal behaviour is to remove them at suspend and
-> > redetecting them at resume. Breaking this assumption will
-> > in most cases result in data corruption."
-> > 
-> > 
-> > I own my computer, and I don't need the OS to take the decisions for me.
-> > 
-> > I don't want to have FS corruption if I accidentally suspend the system
-> > with the card in the slot which could happen if that option is disabled.
-> > 
-> > 
-> > Best regards,
-> > 	Maxim Levitsky
-> > 
-> > 
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+SGkgQ2hyaXMsDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBDaHJp
+cyBCYWxsIFttYWlsdG86Y2piQGxhcHRvcC5vcmddDQo+IFNlbnQ6IEZyaWRheSwgTWFyY2ggMDQs
+IDIwMTEgODo0NyBQTQ0KPiBUbzogTmF0aCwgQXJpbmRhbQ0KPiBDYzogemhhbmdmZWkuZ2FvQGdt
+YWlsLmNvbTsgcHJha2l0eUBtYXJ2ZWxsLmNvbTsNCj4gc3ViaGFzaGpAY29kZWF1cm9yYS5vcmc7
+IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IFN1LCBIZW5yeTsgTHUsDQo+IEFhcm9uOyBhbmF0
+aC5hbWRAZ21haWwuY29tDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggdjIgMDAvMTJdIGFkZCBzdXBw
+b3J0IGZvciBob3N0IGNvbnRyb2xsZXIgdjMuMDANCj4gDQo+IEhpIEFyaW5kYW0sDQo+IA0KPiBP
+biBGcmksIE1hciAwNCAyMDExLCBBcmluZGFtIE5hdGggd3JvdGU6DQo+ID4gVjINCj4gDQo+IFRo
+YW5rcyB2ZXJ5IG11Y2ggZm9yIHNlbmRpbmcgdGhpcyEgIFNpbmNlIHlvdSBtZW50aW9uZWQgeW91
+IGFyZW4ndA0KPiBzZWVpbmcgY29tcGlsZXIgd2FybmluZ3MsIGhlcmUncyB0aGUgc2V0IEkgc2Vl
+IGhlcmU6DQo+IA0KPiBkcml2ZXJzL21tYy9jb3JlL3NkLmM6IEluIGZ1bmN0aW9uIOKAmG1tY19z
+ZF9pbml0X2NhcmTigJk6DQo+IGRyaXZlcnMvbW1jL2NvcmUvc2QuYzo1ODQ6MjE6IHdhcm5pbmc6
+IOKAmGN1cnJlbnRfbGltaXTigJkgbWF5IGJlIHVzZWQNCj4gdW5pbml0aWFsaXplZCBpbiB0aGlz
+IGZ1bmN0aW9uIFstV3VuaW5pdGlhbGl6ZWRdDQo+IGRyaXZlcnMvbW1jL2NvcmUvc2QuYzo1NTg6
+MzI6IG5vdGU6IOKAmGN1cnJlbnRfbGltaXTigJkgd2FzIGRlY2xhcmVkIGhlcmUNCj4gDQo+IGRy
+aXZlcnMvbW1jL2NvcmUvc2QuYzo1NDc6MTg6IHdhcm5pbmc6IOKAmHRpbWluZ+KAmSBtYXkgYmUg
+dXNlZA0KPiB1bmluaXRpYWxpemVkIGluIHRoaXMgZnVuY3Rpb24gWy1XdW5pbml0aWFsaXplZF0N
+Cj4gZHJpdmVycy9tbWMvY29yZS9zZC5jOjQ3MToyNjogbm90ZTog4oCYdGltaW5n4oCZIHdhcyBk
+ZWNsYXJlZCBoZXJlDQo+IA0KPiBkcml2ZXJzL21tYy9jb3JlL3NkLmM6NTM4OjIxOiB3YXJuaW5n
+OiDigJhidXNfc3BlZWTigJkgbWF5IGJlIHVzZWQNCj4gdW5pbml0aWFsaXplZCBpbiB0aGlzIGZ1
+bmN0aW9uIFstV3VuaW5pdGlhbGl6ZWRdDQo+IGRyaXZlcnMvbW1jL2NvcmUvc2QuYzo0NzE6MTU6
+IG5vdGU6IOKAmGJ1c19zcGVlZOKAmSB3YXMgZGVjbGFyZWQgaGVyZQ0KPiANCj4gZHJpdmVycy9t
+bWMvY29yZS9zZC5jOjQ1NjoyMTogd2FybmluZzog4oCYY2FyZF9zZXRfZHJ2X3R5cGXigJkgbWF5
+IGJlIHVzZWQNCj4gdW5pbml0aWFsaXplZCBpbiB0aGlzIGZ1bmN0aW9uIFstV3VuaW5pdGlhbGl6
+ZWRdDQo+IGRyaXZlcnMvbW1jL2NvcmUvc2QuYzo0MzM6MjU6IG5vdGU6IOKAmGNhcmRfc2V0X2Ry
+dl90eXBl4oCZIHdhcyBkZWNsYXJlZA0KPiBoZXJlDQo+IA0KPiBkcml2ZXJzL21tYy9jb3JlL3Nk
+LmM6NDY0OjIyOiB3YXJuaW5nOiDigJhob3N0X3NldF9kcnZfdHlwZeKAmSBtYXkgYmUgdXNlZA0K
+PiB1bmluaXRpYWxpemVkIGluIHRoaXMgZnVuY3Rpb24gWy1XdW5pbml0aWFsaXplZF0NCj4gZHJp
+dmVycy9tbWMvY29yZS9zZC5jOjQzMzo2OiBub3RlOiDigJhob3N0X3NldF9kcnZfdHlwZeKAmSB3
+YXMgZGVjbGFyZWQNCj4gaGVyZQ0KPiANCj4gZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jOiBJbiBm
+dW5jdGlvbiDigJhzZGhjaV9hZGRfaG9zdOKAmToNCj4gZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5j
+OjIzNjY6Mjc6IHdhcm5pbmc6IOKAmGNhcHNbMV3igJkgbWF5IGJlIHVzZWQNCj4gdW5pbml0aWFs
+aXplZCBpbiB0aGlzIGZ1bmN0aW9uIFstV3VuaW5pdGlhbGl6ZWRdDQoNClRoYW5rcyBmb3IgcG9p
+bnRpbmcgdGhlc2Ugb3V0LiBJIHdpbGwgbWFrZSBhIG5vdGUgb2YgaXQsIGFuZCBmaXggaXQgaW4g
+dGhlIG5leHQgdmVyc2lvbi4NCg0KUmVnYXJkcywNCkFyaW5kYW0NCg0KPiANCj4gLS0NCj4gQ2hy
+aXMgQmFsbCAgIDxjamJAbGFwdG9wLm9yZz4gICA8aHR0cDovL3ByaW50Zi5uZXQvPg0KPiBPbmUg
+TGFwdG9wIFBlciBDaGlsZA0KDQo=
 
