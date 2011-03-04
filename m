@@ -1,21 +1,21 @@
 From: "Nath, Arindam" <Arindam.Nath@amd.com>
 Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs
  initialization
-Date: Fri, 4 Mar 2011 12:48:10 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B300E38E6F4A@SAUSEXMBP01.amd.com>
+Date: Fri, 4 Mar 2011 12:54:03 -0600
+Message-ID: <6C03668EAF45B747AF947A1603D1B300E38E6F62@SAUSEXMBP01.amd.com>
 References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
  <1299238369-1768-10-git-send-email-arindam.nath@amd.com>
- <88C3F6C8-360C-4678-B471-DACE5415A852@marvell.com>
+ <71492E38-ECEE-4AFE-BC1A-680DA6B4E937@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:55110 "EHLO
-	TX2EHSOBE009.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1759891Ab1CDSsV convert rfc822-to-8bit
+Received: from db3ehsobe005.messaging.microsoft.com ([213.199.154.143]:45789
+	"EHLO DB3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1760060Ab1CDSyR convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 4 Mar 2011 13:48:21 -0500
-In-Reply-To: <88C3F6C8-360C-4678-B471-DACE5415A852@marvell.com>
+	Fri, 4 Mar 2011 13:54:17 -0500
+In-Reply-To: <71492E38-ECEE-4AFE-BC1A-680DA6B4E937@marvell.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -27,7 +27,7 @@ Hi Philip,
 
 > -----Original Message-----
 > From: Philip Rakity [mailto:prakity@marvell.com]
-> Sent: Friday, March 04, 2011 11:58 PM
+> Sent: Saturday, March 05, 2011 12:04 AM
 > To: Nath, Arindam
 > Cc: cjb@laptop.org; zhangfei.gao@gmail.com; subhashj@codeaurora.org;
 > linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
@@ -196,6 +196,15 @@ Hi Philip,
 > > +		spin_lock_irqsave(&host->lock, flags);
 > > +
 > > +		if (!host->tuning_done) {
+> 
+> safer to
+> reread
+> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> and now clear bits ?
+
+Agree on this. Will be fixed in next version.
+
+> 
 > > +			printk(KERN_INFO DRIVER_NAME ": Tuning procedure"
 > > +				" failed, falling back to fixed sampling"
 > > +				" clock\n");
@@ -213,6 +222,24 @@ Hi Philip,
 > > +		timeout--;
 > > +		mdelay(1);
 > > +	} while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+> 
+> msleep is better then mdelay ?
+
+The delay in this case is short enough, and also we have acquired spinlock, so I don't think msleep() is a good idea here.
+
+> 
+> other option is to disable device interrupt
+> and check every ms if SDHCI_INT_DATA_AVAIL is set
+> and then enable device interrupt.  The controller is supposed to
+> disable all other interrupts when doing tuning.
+> no need to mask interrupts.
+
+The unmask_irqs() at the beginning of function is to enable the controller to generate Buffer Read Ready interrupt, and we just disable it again before leaving the function using mask_irqs().
+
+Thanks,
+Arindam
+
+> 
 > > +
 > > +	/*
 > > +	 * The Host Driver has exhausted the maximum number of loops
@@ -263,17 +290,6 @@ Hi Philip,
 > > +		}
 > > +	}
 > > +
-> 
-> Add check that you are doing tuning -- if we are doing BUS_TEST width
-> then CMD19 is legal and used for bus width testing
-
-Thanks for the suggestion. Will add a check in next version.
-
-Thanks,
-Arindam
-
-> 
-> 
 > > 	if (!host->data) {
 > > 		/*
 > > 		 * The "data complete" interrupt is also used to
