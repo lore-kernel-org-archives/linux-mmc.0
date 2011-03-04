@@ -1,19 +1,19 @@
 From: Philip Rakity <prakity@marvell.com>
 Subject: Re: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs
  initialization
-Date: Fri, 4 Mar 2011 10:27:53 -0800
-Message-ID: <88C3F6C8-360C-4678-B471-DACE5415A852@marvell.com>
+Date: Fri, 4 Mar 2011 10:34:24 -0800
+Message-ID: <71492E38-ECEE-4AFE-BC1A-680DA6B4E937@marvell.com>
 References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
  <1299238369-1768-10-git-send-email-arindam.nath@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:40022 "EHLO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752229Ab1CDS2h convert rfc822-to-8bit
+Received: from na3sys009aog115.obsmtp.com ([74.125.149.238]:34239 "EHLO
+	na3sys009aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932271Ab1CDSel convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 4 Mar 2011 13:28:37 -0500
+	Fri, 4 Mar 2011 13:34:41 -0500
 In-Reply-To: <1299238369-1768-10-git-send-email-arindam.nath@amd.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
@@ -172,6 +172,12 @@ On Mar 4, 2011, at 3:32 AM, Arindam Nath wrote:
 > +		spin_lock_irqsave(&host->lock, flags);
 > +
 > +		if (!host->tuning_done) {
+
+safer to
+reread
++	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+and now clear bits ? 
+
 > +			printk(KERN_INFO DRIVER_NAME ": Tuning procedure"
 > +				" failed, falling back to fixed sampling"
 > +				" clock\n");
@@ -189,6 +195,14 @@ On Mar 4, 2011, at 3:32 AM, Arindam Nath wrote:
 > +		timeout--;
 > +		mdelay(1);
 > +	} while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+
+msleep is better then mdelay ?
+
+other option is to disable device interrupt
+and check every ms if SDHCI_INT_DATA_AVAIL is set
+and then enable device interrupt.  The controller is supposed to disable all other interrupts when doing tuning.
+no need to mask interrupts.
+
 > +
 > +	/*
 > +	 * The Host Driver has exhausted the maximum number of loops allowed,
@@ -234,10 +248,6 @@ On Mar 4, 2011, at 3:32 AM, Arindam Nath wrote:
 > +		}
 > +	}
 > +
-
-Add check that you are doing tuning -- if we are doing BUS_TEST width then CMD19 is legal and used for bus width testing
-
-
 > 	if (!host->data) {
 > 		/*
 > 		 * The "data complete" interrupt is also used to
