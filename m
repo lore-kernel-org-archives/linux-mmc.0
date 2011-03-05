@@ -1,116 +1,51 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 05/12] mmc: sdhci: reset sdclk before setting high
- speed enable
-Date: Fri, 4 Mar 2011 23:07:11 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B300E38E72FD@SAUSEXMBP01.amd.com>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
- <1299238369-1768-6-git-send-email-arindam.nath@amd.com>
- <4CC9533A-376B-4E2F-B108-E789C9D3B10A@marvell.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Sat, 5 Mar 2011 03:23:55 -0600
+Message-ID: <AANLkTik1VR+Of_9oi_eyvMBiE2_sbgYCj0XF3zAWou+m@mail.gmail.com>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com>
+	<201102251321.09232.arnd@arndb.de>
+	<4D6D3F71.4040605@kernel.dk>
+	<201103012011.51855.arnd@arndb.de>
+	<AANLkTimLnd=8oiLeZaaJLNwifG3KJ71kmwy5DDY25j_V@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:11033 "EHLO
-	TX2EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750991Ab1CEFHS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Mar 2011 00:07:18 -0500
-In-Reply-To: <4CC9533A-376B-4E2F-B108-E789C9D3B10A@marvell.com>
-Content-Language: en-US
+Received: from exprod5og102.obsmtp.com ([64.18.0.143]:36886 "EHLO
+	exprod5og102.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750766Ab1CEJX6 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Mar 2011 04:23:58 -0500
+In-Reply-To: <AANLkTimLnd=8oiLeZaaJLNwifG3KJ71kmwy5DDY25j_V@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Jens Axboe <axboe@kernel.dk>, linux-arm-kernel@lists.infradead.org, linux-fsdevel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
-Hi Philip,
+On Wed, Mar 2, 2011 at 4:34 AM, Andrei Warkentin <andreiw@motorola.com>=
+ wrote:
+> Before the generic improvements are made to the block layer, I think
+> there is some value
+> in implementing the (simpler) ones in mmc block code, as well as
+> expose an mmc block quirk interface by which its easy to add complex
+> workarounds. Some things will never be able to completely stay above
+> mmc block code, for example, when splitting up smaller accesses, you
+> need to be careful on the Toshiba card, since the 4th consecutive 8KB
+> block results in the entire 32KB getting pushed =A0into the bigger 4M=
+B
+> buffer. On our platform, there are a lot of accesses in the 16KB-32KB
+> range which benefit from the splitting. Data collected showed
+> splitting more than 32KB to have adverse effect on performance (I
+> guess that sort of makes sense, after all, why else would the
+> controller treat 4 consecutive 8KB accesses as a larger access and
+> treat it accordingly?) On the other hand, that data was collected on
+> code that used reliable write for every portion of the split access,
+> so I'm going to have to get some new data...
+>
 
-
-> -----Original Message-----
-> From: Philip Rakity [mailto:prakity@marvell.com]
-> Sent: Saturday, March 05, 2011 10:27 AM
-> To: Nath, Arindam
-> Cc: cjb@laptop.org; zhangfei.gao@gmail.com; subhashj@codeaurora.org;
-> linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: Re: [PATCH v2 05/12] mmc: sdhci: reset sdclk before setting
-> high speed enable
-> 
-> 
-> On Mar 4, 2011, at 3:32 AM, Arindam Nath wrote:
-> 
-> > As per Host Controller spec v3.00, we reset SDCLK before setting
-> > High Speed Enable, and then set it back to avoid generating clock
-> > gliches.
-> >
-> > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > ---
-> > drivers/mmc/host/sdhci.c |   25 ++++++++++++++++++++++---
-> > 1 files changed, 22 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index 1645687..5d3bb11 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -1277,13 +1277,12 @@ static void sdhci_set_ios(struct mmc_host
-> *mmc, struct mmc_ios *ios)
-> > 	else
-> > 		ctrl &= ~SDHCI_CTRL_HISPD;
-> >
-> > -	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
-> > -
-> > 	if (host->version >= SDHCI_SPEC_300) {
-> > 		u16 ctrl_2;
-> >
-> > 		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> > 		if (!(ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
-> > +			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
-> > 			/*
-> > 			 * We only need to set Driver Strength if the
-> > 			 * preset value enable is not set.
-> > @@ -1294,8 +1293,28 @@ static void sdhci_set_ios(struct mmc_host
-> *mmc, struct mmc_ios *ios)
-> > 				ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
-> >
-> > 			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> > +		} else {
-> > +			/*
-> > +			 * According to SDHC Spec v3.00, if the Preset Value
-> > +			 * Enable in the Host Control 2 register is set, we
-> > +			 * need to reset SD Clock Enable before changing High
-> > +			 * Speed Enable to avoid generating clock gliches.
-> > +			 */
-> > +			u16 clk;
-> > +
-> > +			/* Reset SD Clock Enable */
-> > +			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > +			clk &= ~SDHCI_CLOCK_CARD_EN;
-> > +			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> > +
-> > +			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
-> > +
-> > +			/* Re-enable SD Clock */
-> > +			clk |= SDHCI_CLOCK_CARD_EN;
-> > +			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> 
-> Need to ensure clock is stable before using it ---- use sdhci_set_clock
-
-Thanks for the suggestion. I will add the modification in next version.
-
-Regards,
-Arindam
-
-> 
-> > 		}
-> 
-> 
-> 
-> > -	}
-> > +	} else
-> > +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
-> >
-> > 	/*
-> > 	 * Some (ENE) controllers go apeshit on some ios operation,
-> > --
-> > 1.7.1
-> >
-> 
-
-
+Just want to correct myself - any consecutive write that exceeds 8K
+goes into the 4MB buffer.
+Also, according to vendor, there is no performance penalty for using
+reliable write.
+This is why in the patch set, for splitting larger requests (to
+improve lifetime by reducing the number of AU write/erase cycles) I
+perform a reliable write for each split block set.
