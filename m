@@ -1,56 +1,48 @@
-From: Colin Cross <ccross@android.com>
-Subject: Re: [PATCH] mmc: subtract boot sectors from disk size for eMMC 4.3+ devices
-Date: Sun, 6 Mar 2011 08:00:45 -0800
-Message-ID: <AANLkTikOD3oqGAG9vgbhsX3dGnnop3qXoLSZ-QxhD=h_@mail.gmail.com>
-References: <1299327344-12462-1-git-send-email-linus.walleij@stericsson.com>
-	<AANLkTikeQs_eVHYc8vA8+m5tSHRDLnE3Xf9b5yWRj4p=@mail.gmail.com>
-	<AANLkTinkwRM3YPwJ7omOdxRjgcnDa3FuriN3UsRsR-tB@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [[RFC] 2/5] MMC: Add block quirks support.
+Date: Sun, 6 Mar 2011 22:20:07 +0100
+Message-ID: <AANLkTinUGu2aVpCOdGNrYgi3NAw4RiQRd=+gdd_PaDSh@mail.gmail.com>
+References: <1299017344-25361-1-git-send-email-andreiw@motorola.com>
+	<1299295274-32130-1-git-send-email-andreiw@motorola.com>
+	<1299295274-32130-2-git-send-email-andreiw@motorola.com>
+	<1299295274-32130-3-git-send-email-andreiw@motorola.com>
+	<AANLkTinzYpjJxDR64RPsVYS1oFe6QB_7GMmGPXMaMnW-@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-out.google.com ([216.239.44.51]:3929 "EHLO
-	smtp-out.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751091Ab1CFQAs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Mar 2011 11:00:48 -0500
-Received: from hpaq12.eem.corp.google.com (hpaq12.eem.corp.google.com [172.25.149.12])
-	by smtp-out.google.com with ESMTP id p26G0lSN017193
-	for <linux-mmc@vger.kernel.org>; Sun, 6 Mar 2011 08:00:47 -0800
-Received: from yxt33 (yxt33.prod.google.com [10.190.5.225])
-	by hpaq12.eem.corp.google.com with ESMTP id p26G0c3J013092
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Sun, 6 Mar 2011 08:00:46 -0800
-Received: by yxt33 with SMTP id 33so1748281yxt.14
-        for <linux-mmc@vger.kernel.org>; Sun, 06 Mar 2011 08:00:45 -0800 (PST)
-In-Reply-To: <AANLkTinkwRM3YPwJ7omOdxRjgcnDa3FuriN3UsRsR-tB@mail.gmail.com>
+Received: from mail-px0-f174.google.com ([209.85.212.174]:54168 "EHLO
+	mail-px0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752607Ab1CFVUH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Mar 2011 16:20:07 -0500
+Received: by pxi15 with SMTP id 15so625994pxi.19
+        for <linux-mmc@vger.kernel.org>; Sun, 06 Mar 2011 13:20:07 -0800 (PST)
+In-Reply-To: <AANLkTinzYpjJxDR64RPsVYS1oFe6QB_7GMmGPXMaMnW-@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Andrei Warkentin <andreiw@motorola.com>, Chris Ball <cjb@laptop.org>, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org
 
-On Sun, Mar 6, 2011 at 4:22 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
-> 2011/3/6 Andrei Warkentin <andreiw@motorola.com>:
+2011/3/6 Linus Walleij <linus.walleij@linaro.org>:
+> 2011/3/5 Andrei Warkentin <andreiw@motorola.com>:
 >
->> I think Colin mentioned the emmc spec doesn't subtract the boot
->> sectors, just that some out of spec devices do... (sounds like another
->> use for mmc blk quirks)
+>> Quirks are card-specific workarounds. Usually they involve
+>> tuning mmcblk parameters at mmc_blk_probe time.
 >
-> In which case it sounds like it will be the majority of them deviating from
-> the spec right now given that there aren't very many of them around :-(
+> Can't you just drop off all the *block* and *blk* pre- and
+> suffixes off filenames and functions?
 >
-> Details on this Colin?
+> It's inevitably going to be used for all kind of card quirks
+> soon enough, not just those relating to block issues
+> (could be power quirks etc) won't it?
 >
-> Certainly we can come up with some card quirks for this.
->
-> Yours,
-> Linus Walleij
->
+> "Card quirks" is more intuitive to me.
 
-I don't know how this is supposed to work.  I was told by one person
-(Gary King) that the subtraction was necessary, and by another person
-(drambo) that it was not correct according to the manufacturer of
-their eMMC device.  See
-http://www.mail-archive.com/linux-tegra@vger.kernel.org/msg00079.html
-for the previous discussion.
+Or rather - if you check out Chris latest tree or the next
+tree - you will find the new quirks.c file that Pierre Tardy
+created for some SDIO quirks.
 
-Have you verified that the area of the eMMC device between CSD_SECTORS
-- BOOT_SECTORS and CSD_SECTORS is not accessible on your device?
+Can you re-use this infrastructure and refactor/expand
+with the quirks you need for the block stuff?
+
+Yours,
+Linus Walleij
