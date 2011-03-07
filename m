@@ -1,166 +1,164 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 1/2] mmc: tmio: Improve DMA stability on sh-mobile
-Date: Mon, 7 Mar 2011 14:30:31 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103071428110.29543@axis700.grange>
+Subject: [PATCH 2/2] mmc: tmio: use PIO for short transfers
+Date: Mon, 7 Mar 2011 14:30:35 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103071429420.29543@axis700.grange>
 References: <Pine.LNX.4.64.1103071417340.29543@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:61226 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753127Ab1CGNaj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2011 08:30:39 -0500
 In-Reply-To: <Pine.LNX.4.64.1103071417340.29543@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>
-List-Id: linux-mmc@vger.kernel.org
 
-On some SDHI tmio implementations the order of DMA and command completion
-interrupts swaps, which leads to malfunction. This patch postpones
-DMA activation until the MMC command completion IRQ time.
+This patch allows transferring of some requests in PIO and some in DMA
+mode and defaults to using DMA only for transfers longer than 8 bytes.
+This is especially useful with SDIO, which can have lots of 2- and 4-byte
+transfers, creating unnecessary high overhead, when executed in DMA.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc.c |   56 +++++++++++++++++++++++--------------------
- 1 files changed, 30 insertions(+), 26 deletions(-)
+ drivers/mmc/host/tmio_mmc.c |   33 +++++++++++++++++++++++----------
+ 1 files changed, 23 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index e3c6ef2..aa384ba 100644
+index aa384ba..f5ec5e6 100644
 --- a/drivers/mmc/host/tmio_mmc.c
 +++ b/drivers/mmc/host/tmio_mmc.c
-@@ -484,7 +484,10 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
+@@ -100,6 +100,8 @@
+ 		TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT)
+ #define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
+ 
++#define TMIO_MIN_DMA_LEN 8
++
+ #define enable_mmc_irqs(host, i) \
+ 	do { \
+ 		u32 mask;\
+@@ -147,6 +149,7 @@ struct tmio_mmc_host {
+ 	struct platform_device *pdev;
+ 
+ 	/* DMA support */
++	bool			force_pio;
+ 	struct dma_chan		*chan_rx;
+ 	struct dma_chan		*chan_tx;
+ 	struct tasklet_struct	dma_complete;
+@@ -384,6 +387,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+ 	host->cmd = NULL;
+ 	host->data = NULL;
+ 	host->mrq = NULL;
++	host->force_pio = false;
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+@@ -403,6 +407,7 @@ tmio_mmc_finish_request(struct tmio_mmc_host *host)
+ 	host->mrq = NULL;
+ 	host->cmd = NULL;
+ 	host->data = NULL;
++	host->force_pio = false;
+ 
+ 	cancel_delayed_work(&host->delayed_reset_work);
+ 
+@@ -484,7 +489,7 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
  	unsigned int count;
  	unsigned long flags;
  
--	if (!data) {
-+	if (host->chan_tx || host->chan_rx) {
-+		pr_err("PIO IRQ in DMA mode!\n");
-+		return;
-+	} else if (!data) {
- 		pr_debug("Spurious PIO IRQ\n");
+-	if (host->chan_tx || host->chan_rx) {
++	if ((host->chan_tx || host->chan_rx) && !host->force_pio) {
+ 		pr_err("PIO IRQ in DMA mode!\n");
  		return;
- 	}
-@@ -647,6 +650,8 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
- 		if (host->data->flags & MMC_DATA_READ) {
- 			if (!host->chan_rx)
- 				enable_mmc_irqs(host, TMIO_MASK_READOP);
-+			else
-+				tasklet_schedule(&host->dma_issue);
- 		} else {
- 			if (!host->chan_tx)
- 				enable_mmc_irqs(host, TMIO_MASK_WRITEOP);
-@@ -779,18 +784,6 @@ static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
- #endif
- }
+ 	} else if (!data) {
+@@ -550,15 +555,11 @@ static void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
+ 	 */
  
--static void tmio_dma_complete(void *arg)
--{
--	struct tmio_mmc_host *host = arg;
--
--	dev_dbg(&host->pdev->dev, "Command completed\n");
--
--	if (!host->data)
--		dev_warn(&host->pdev->dev, "NULL data in DMA completion!\n");
--	else
--		enable_mmc_irqs(host, TMIO_STAT_DATAEND);
--}
--
- static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- {
- 	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
-@@ -818,6 +811,8 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- 		goto pio;
+ 	if (data->flags & MMC_DATA_READ) {
+-		if (!host->chan_rx)
+-			disable_mmc_irqs(host, TMIO_MASK_READOP);
+-		else
++		if (host->chan_rx && !host->force_pio)
+ 			tmio_check_bounce_buffer(host);
+ 		dev_dbg(&host->pdev->dev, "Complete Rx request %p\n",
+ 			host->mrq);
+ 	} else {
+-		if (!host->chan_tx)
+-			disable_mmc_irqs(host, TMIO_MASK_WRITEOP);
+ 		dev_dbg(&host->pdev->dev, "Complete Tx request %p\n",
+ 			host->mrq);
  	}
+@@ -582,7 +583,7 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
+ 	if (!data)
+ 		goto out;
  
-+	disable_mmc_irqs(host, TMIO_STAT_RXRDY);
-+
- 	/* The only sg element can be unaligned, use our bounce buffer then */
- 	if (!aligned) {
- 		sg_init_one(&host->bounce_sg, host->bounce_buf, sg->length);
-@@ -829,18 +824,14 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- 	if (ret > 0) {
- 		host->dma_sglen = ret;
- 		desc = chan->device->device_prep_slave_sg(chan, sg, ret,
--			DMA_FROM_DEVICE, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
-+			DMA_FROM_DEVICE, DMA_CTRL_ACK);
- 	}
- 
- 	if (desc) {
--		desc->callback = tmio_dma_complete;
--		desc->callback_param = host;
- 		cookie = desc->tx_submit(desc);
- 		if (cookie < 0) {
- 			desc = NULL;
- 			ret = cookie;
--		} else {
--			chan->device->device_issue_pending(chan);
+-	if (host->chan_tx && (data->flags & MMC_DATA_WRITE)) {
++	if (host->chan_tx && (data->flags & MMC_DATA_WRITE) && !host->force_pio) {
+ 		/*
+ 		 * Has all data been written out yet? Testing on SuperH showed,
+ 		 * that in most cases the first interrupt comes already with the
+@@ -595,11 +596,12 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
+ 			disable_mmc_irqs(host, TMIO_STAT_DATAEND);
+ 			tasklet_schedule(&host->dma_complete);
  		}
+-	} else if (host->chan_rx && (data->flags & MMC_DATA_READ)) {
++	} else if (host->chan_rx && (data->flags & MMC_DATA_READ) && !host->force_pio) {
+ 		disable_mmc_irqs(host, TMIO_STAT_DATAEND);
+ 		tasklet_schedule(&host->dma_complete);
+ 	} else {
+ 		tmio_mmc_do_data_irq(host);
++		disable_mmc_irqs(host, TMIO_MASK_READOP | TMIO_MASK_WRITEOP);
  	}
- 	dev_dbg(&host->pdev->dev, "%s(): mapped %d -> %d, cookie %d, rq %p\n",
-@@ -895,6 +886,8 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
+ out:
+ 	spin_unlock(&host->lock);
+@@ -648,12 +650,12 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
+ 	 */
+ 	if (host->data && !cmd->error) {
+ 		if (host->data->flags & MMC_DATA_READ) {
+-			if (!host->chan_rx)
++			if (host->force_pio || !host->chan_rx)
+ 				enable_mmc_irqs(host, TMIO_MASK_READOP);
+ 			else
+ 				tasklet_schedule(&host->dma_issue);
+ 		} else {
+-			if (!host->chan_tx)
++			if (host->force_pio || !host->chan_tx)
+ 				enable_mmc_irqs(host, TMIO_MASK_WRITEOP);
+ 			else
+ 				tasklet_schedule(&host->dma_issue);
+@@ -811,6 +813,11 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
  		goto pio;
  	}
  
-+	disable_mmc_irqs(host, TMIO_STAT_TXRQ);
-+
- 	/* The only sg element can be unaligned, use our bounce buffer then */
- 	if (!aligned) {
- 		unsigned long flags;
-@@ -910,12 +903,10 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- 	if (ret > 0) {
- 		host->dma_sglen = ret;
- 		desc = chan->device->device_prep_slave_sg(chan, sg, ret,
--			DMA_TO_DEVICE, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
-+			DMA_TO_DEVICE, DMA_CTRL_ACK);
- 	}
- 
- 	if (desc) {
--		desc->callback = tmio_dma_complete;
--		desc->callback_param = host;
- 		cookie = desc->tx_submit(desc);
- 		if (cookie < 0) {
- 			desc = NULL;
-@@ -962,17 +953,30 @@ static void tmio_mmc_start_dma(struct tmio_mmc_host *host,
- static void tmio_issue_tasklet_fn(unsigned long priv)
- {
- 	struct tmio_mmc_host *host = (struct tmio_mmc_host *)priv;
--	struct dma_chan *chan = host->chan_tx;
-+	struct dma_chan *chan = NULL;
-+
-+	spin_lock_irq(&host->lock);
-+
-+	if (host && host->data) {
-+		if (host->data->flags & MMC_DATA_READ)
-+			chan = host->chan_rx;
-+		else
-+			chan = host->chan_tx;
++	if (sg->length < TMIO_MIN_DMA_LEN) {
++		host->force_pio = true;
++		return;
 +	}
 +
-+	spin_unlock_irq(&host->lock);
+ 	disable_mmc_irqs(host, TMIO_STAT_RXRDY);
+ 
+ 	/* The only sg element can be unaligned, use our bounce buffer then */
+@@ -886,6 +893,11 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
+ 		goto pio;
+ 	}
+ 
++	if (sg->length < TMIO_MIN_DMA_LEN) {
++		host->force_pio = true;
++		return;
++	}
 +
-+	enable_mmc_irqs(host, TMIO_STAT_DATAEND);
+ 	disable_mmc_irqs(host, TMIO_STAT_TXRQ);
  
--	chan->device->device_issue_pending(chan);
-+	if (chan)
-+		chan->device->device_issue_pending(chan);
+ 	/* The only sg element can be unaligned, use our bounce buffer then */
+@@ -1132,6 +1144,7 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ fail:
+ 	host->mrq = NULL;
++	host->force_pio = false;
+ 	mrq->cmd->error = ret;
+ 	mmc_request_done(mmc, mrq);
  }
- 
- static void tmio_tasklet_fn(unsigned long arg)
- {
- 	struct tmio_mmc_host *host = (struct tmio_mmc_host *)arg;
--	unsigned long flags;
- 
--	spin_lock_irqsave(&host->lock, flags);
-+	spin_lock_irq(&host->lock);
- 
- 	if (!host->data)
- 		goto out;
-@@ -986,7 +990,7 @@ static void tmio_tasklet_fn(unsigned long arg)
- 
- 	tmio_mmc_do_data_irq(host);
- out:
--	spin_unlock_irqrestore(&host->lock, flags);
-+	spin_unlock_irq(&host->lock);
- }
- 
- /* It might be necessary to make filter MFD specific */
 -- 
 1.7.2.3
 
