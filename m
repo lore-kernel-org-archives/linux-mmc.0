@@ -1,145 +1,71 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 4/5] sh: use the new TMIO_MMC_HI_REGS_MISSING flag for SDHI
-Date: Mon, 7 Mar 2011 19:47:59 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103071945320.29543@axis700.grange>
-References: <Pine.LNX.4.64.1103071937010.29543@axis700.grange>
+From: Dmitry Shmidt <dimitrysh@google.com>
+Subject: Re: [PATCH 1/3] mmc: skip detection of nonremovable cards on rescan -
+ card removal detection regression
+Date: Mon, 7 Mar 2011 11:01:51 -0800
+Message-ID: <AANLkTi=tgV0Qqs+GuLVvF6fcVB2tL1e5aWZsMggTQGfX@mail.gmail.com>
+References: <1290921690-6133-1-git-send-email-ohad@wizery.com>
+	<1290921690-6133-2-git-send-email-ohad@wizery.com>
+	<20101217005123.GD17239@void.printf.net>
+	<AANLkTi=ff=kkaRHOrDyoxOgw_Bt7raiPf3T=ed1=EveZ@mail.gmail.com>
+	<1299205366.4999.3.camel@maxim-laptop>
+	<AANLkTi=8Qi=-Ff1SQwBaxC5xxijMKPKAgFR17UGGTAvS@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1103071937010.29543@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp-out.google.com ([74.125.121.67]:9304 "EHLO
+	smtp-out.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752747Ab1CGTB5 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2011 14:01:57 -0500
+Received: from wpaz13.hot.corp.google.com (wpaz13.hot.corp.google.com [172.24.198.77])
+	by smtp-out.google.com with ESMTP id p27J1rLd029079
+	for <linux-mmc@vger.kernel.org>; Mon, 7 Mar 2011 11:01:53 -0800
+Received: from iyf40 (iyf40.prod.google.com [10.241.50.104])
+	by wpaz13.hot.corp.google.com with ESMTP id p27J1hTK020821
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 7 Mar 2011 11:01:52 -0800
+Received: by iyf40 with SMTP id 40so5639006iyf.16
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Mar 2011 11:01:52 -0800 (PST)
+In-Reply-To: <AANLkTi=8Qi=-Ff1SQwBaxC5xxijMKPKAgFR17UGGTAvS@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Prevent access to addresses above 0xff on SDHI instances on sh-mobile SoCs.
+On Sat, Mar 5, 2011 at 7:03 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+> On Fri, Mar 4, 2011 at 4:22 AM, Maxim Levitsky <maximlevitsky@gmail.c=
+om> wrote:
+>> On Mon, 2010-12-20 at 00:11 +0200, Ohad Ben-Cohen wrote:
+>>> Hi Chris,
+>>>
+>>> On Fri, Dec 17, 2010 at 2:51 AM, Chris Ball <cjb@laptop.org> wrote:
+>>> ...
+>>> > Thanks, pushed to mmc-next with trivial cleanup as below:
+>>>
+>>> Looks good, thanks.
+>>>
+>>> I just briefly tested mmc-next and it looks fine.
+>>
+>> This patch breaks the CONFIG_MMC_UNSAFE_RESUME
+>
+> Does the below work for you (untested) ?
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 6625c05..150b5f3 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1529,7 +1529,7 @@ void mmc_rescan(struct work_struct *work)
+> =A0 =A0 =A0 =A0 * still present
+> =A0 =A0 =A0 =A0 */
+> =A0 =A0 =A0 =A0if (host->bus_ops && host->bus_ops->detect && !host->b=
+us_dead
+> - =A0 =A0 =A0 =A0 =A0 && mmc_card_is_removable(host))
+> + =A0 =A0 =A0 =A0 =A0 && !(host->caps & MMC_CAP_NONREMOVABLE))
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->bus_ops->detect(host);
+>
+> =A0 =A0 =A0 =A0/*
+>
+This works for me,
+Thanks,
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- arch/sh/boards/mach-ap325rxa/setup.c |    3 +++
- arch/sh/boards/mach-ecovec24/setup.c |    3 +++
- arch/sh/boards/mach-kfr2r09/setup.c  |    2 +-
- arch/sh/boards/mach-migor/setup.c    |    2 ++
- arch/sh/boards/mach-se/7724/setup.c  |    3 +++
- 5 files changed, 12 insertions(+), 1 deletions(-)
-
-diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
-index 33bfebc..ea1f1a3 100644
---- a/arch/sh/boards/mach-ap325rxa/setup.c
-+++ b/arch/sh/boards/mach-ap325rxa/setup.c
-@@ -15,6 +15,7 @@
- #include <linux/interrupt.h>
- #include <linux/platform_device.h>
- #include <linux/mfd/sh_mobile_sdhi.h>
-+#include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mtd/sh_flctl.h>
-@@ -427,6 +428,7 @@ static struct resource sdhi0_cn3_resources[] = {
- };
- 
- static struct sh_mobile_sdhi_info sdhi0_cn3_data = {
-+	.tmio_flags	= TMIO_MMC_HI_REGS_MISSING,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ,
- };
- 
-@@ -457,6 +459,7 @@ static struct resource sdhi1_cn7_resources[] = {
- };
- 
- static struct sh_mobile_sdhi_info sdhi1_cn7_data = {
-+	.tmio_flags	= TMIO_MMC_HI_REGS_MISSING,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ,
- };
- 
-diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-index aa620fd..0cc86a4 100644
---- a/arch/sh/boards/mach-ecovec24/setup.c
-+++ b/arch/sh/boards/mach-ecovec24/setup.c
-@@ -12,6 +12,7 @@
- #include <linux/device.h>
- #include <linux/platform_device.h>
- #include <linux/mfd/sh_mobile_sdhi.h>
-+#include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sh_mmcif.h>
- #include <linux/mtd/physmap.h>
-@@ -473,6 +474,7 @@ static struct sh_mobile_sdhi_info sdhi0_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
- 	.set_pwr	= sdhi0_set_pwr,
-+	.tmio_flags	= TMIO_MMC_HI_REGS_MISSING,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD,
- };
- 
-@@ -512,6 +514,7 @@ static void sdhi1_set_pwr(struct platform_device *pdev, int state)
- static struct sh_mobile_sdhi_info sdhi1_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI1_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
-+	.tmio_flags	= TMIO_MMC_HI_REGS_MISSING,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD,
- 	.set_pwr	= sdhi1_set_pwr,
- };
-diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-index 7504daa..fa473d4 100644
---- a/arch/sh/boards/mach-kfr2r09/setup.c
-+++ b/arch/sh/boards/mach-kfr2r09/setup.c
-@@ -366,7 +366,7 @@ static struct resource kfr2r09_sh_sdhi0_resources[] = {
- static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
--	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
-+	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE | TMIO_MMC_HI_REGS_MISSING,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ,
- };
- 
-diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
-index 03a7ffe..20e641e 100644
---- a/arch/sh/boards/mach-migor/setup.c
-+++ b/arch/sh/boards/mach-migor/setup.c
-@@ -13,6 +13,7 @@
- #include <linux/input.h>
- #include <linux/input/sh_keysc.h>
- #include <linux/mfd/sh_mobile_sdhi.h>
-+#include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mtd/nand.h>
-@@ -411,6 +412,7 @@ static struct resource sdhi_cn9_resources[] = {
- static struct sh_mobile_sdhi_info sh7724_sdhi_data = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
-+	.tmio_flags	= TMIO_MMC_HI_REGS_MISSING,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ,
- };
- 
-diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
-index 5276793..2ca3253 100644
---- a/arch/sh/boards/mach-se/7724/setup.c
-+++ b/arch/sh/boards/mach-se/7724/setup.c
-@@ -15,6 +15,7 @@
- #include <linux/interrupt.h>
- #include <linux/platform_device.h>
- #include <linux/mfd/sh_mobile_sdhi.h>
-+#include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
- #include <linux/mtd/physmap.h>
- #include <linux/delay.h>
-@@ -472,6 +473,7 @@ static struct resource sdhi0_cn7_resources[] = {
- static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
-+	.tmio_flags	= TMIO_MMC_HI_REGS_MISSING,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ,
- };
- 
-@@ -504,6 +506,7 @@ static struct resource sdhi1_cn8_resources[] = {
- static struct sh_mobile_sdhi_info sh7724_sdhi1_data = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI1_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
-+	.tmio_flags	= TMIO_MMC_HI_REGS_MISSING,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ,
- };
- 
--- 
-1.7.2.3
-
+Dmitry
