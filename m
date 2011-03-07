@@ -1,63 +1,114 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH/RFC 1/5] mmc: tmio: fix power-mode interpretation
-Date: Mon, 7 Mar 2011 19:47:48 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103071943180.29543@axis700.grange>
+Subject: [PATCH 2/5] mmc: tmio: add a flag to prohibit access to registers
+ above 0xff
+Date: Mon, 7 Mar 2011 19:47:51 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103071944200.29543@axis700.grange>
 References: <Pine.LNX.4.64.1103071937010.29543@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:56317 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.186]:50473 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752918Ab1CGSrw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2011 13:47:52 -0500
+	with ESMTP id S1752918Ab1CGSr4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2011 13:47:56 -0500
 In-Reply-To: <Pine.LNX.4.64.1103071937010.29543@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
 
-The power-mode sequence on MMC is MMC_POWER_OFF -> MMC_POWER_UP ->
-MMC_POWER_ON and not MMC_POWER_ON -> MMC_POWER_UP, as the driver currently
-is implying.
+On some implementations there are no registers above 0xff and any
+access to them mirrors to registers at addresses with bit 8 masked
+out, which leads to malfunction. Add a flag to prevent such accesses.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
-
-Should be tested on non-SDHI systems
-
- drivers/mmc/host/tmio_mmc.c |   10 +++++-----
- 1 files changed, 5 insertions(+), 5 deletions(-)
+ drivers/mmc/host/tmio_mmc.c |   38 +++++++++++++++-----------------------
+ include/linux/mfd/tmio.h    |    6 ++++++
+ 2 files changed, 21 insertions(+), 23 deletions(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index f5ec5e6..91a31d2 100644
+index 91a31d2..5e880c06 100644
 --- a/drivers/mmc/host/tmio_mmc.c
 +++ b/drivers/mmc/host/tmio_mmc.c
-@@ -1162,20 +1162,20 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (ios->clock)
- 		tmio_mmc_set_clock(host, ios->clock);
+@@ -306,19 +306,9 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+ 	struct mfd_cell *cell = host->pdev->dev.platform_data;
+ 	struct tmio_mmc_data *pdata = cell->driver_data;
  
--	/* Power sequence - OFF -> ON -> UP */
-+	/* Power sequence - OFF -> UP -> ON */
- 	switch (ios->power_mode) {
- 	case MMC_POWER_OFF: /* power down SD bus */
- 		if (host->set_pwr)
- 			host->set_pwr(host->pdev, 0);
- 		tmio_mmc_clk_stop(host);
- 		break;
--	case MMC_POWER_ON: /* power up SD bus */
-+	case MMC_POWER_ON: /* start bus clock */
-+		tmio_mmc_clk_start(host);
-+		break;
-+	case MMC_POWER_UP: /* power up SD bus */
- 		if (host->set_pwr)
- 			host->set_pwr(host->pdev, 1);
- 		break;
--	case MMC_POWER_UP: /* start bus clock */
--		tmio_mmc_clk_start(host);
--		break;
+-	/*
+-	 * Testing on sh-mobile showed that SDIO IRQs are unmasked when
+-	 * CTL_CLK_AND_WAIT_CTL gets written, so we have to disable the
+-	 * device IRQ here and restore the SDIO IRQ mask before
+-	 * re-enabling the device IRQ.
+-	 */
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+-		disable_irq(host->irq);
+-	sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0000);
+-	msleep(10);
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
+-		tmio_mmc_enable_sdio_irq(host->mmc, host->sdio_irq_enabled);
+-		enable_irq(host->irq);
++	if (!(pdata->flags & TMIO_MMC_HI_REGS_MISSING)) {
++		sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0000);
++		msleep(10);
  	}
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
+ 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+@@ -333,25 +323,27 @@ static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x0100 |
+ 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+ 	msleep(10);
+-	/* see comment in tmio_mmc_clk_stop above */
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+-		disable_irq(host->irq);
+-	sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0100);
+-	msleep(10);
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
+-		tmio_mmc_enable_sdio_irq(host->mmc, host->sdio_irq_enabled);
+-		enable_irq(host->irq);
++	if (!(pdata->flags & TMIO_MMC_HI_REGS_MISSING)) {
++		if (pdata->flags & TMIO_MMC_SDIO_IRQ)
++			disable_irq(host->irq);
++		sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0100);
++		msleep(10);
+ 	}
+ }
  
- 	switch (ios->bus_width) {
+ static void reset(struct tmio_mmc_host *host)
+ {
++	struct mfd_cell *cell = host->pdev->dev.platform_data;
++	struct tmio_mmc_data *pdata = cell->driver_data;
++
+ 	/* FIXME - should we set stop clock reg here */
+ 	sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
+-	sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
++	if (!(pdata->flags & TMIO_MMC_HI_REGS_MISSING))
++		sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
+ 	msleep(10);
+ 	sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
+-	sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
++	if (!(pdata->flags & TMIO_MMC_HI_REGS_MISSING))
++		sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0001);
+ 	msleep(10);
+ }
+ 
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 8e70310..243ad58 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -61,6 +61,12 @@
+  * Some controllers can support SDIO IRQ signalling.
+  */
+ #define TMIO_MMC_SDIO_IRQ		(1 << 2)
++/*
++ * Some controllers are missing all registers in the 0x100-0x1ff address range,
++ * on them accesses to the CTL_CLK_AND_WAIT_CTL (0x138) register end up in 0x38,
++ * which breaks the SDIO functionality.
++ */
++#define TMIO_MMC_HI_REGS_MISSING	(1 << 3)
+ 
+ int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
+ int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
 -- 
 1.7.2.3
 
