@@ -1,68 +1,90 @@
-From: "Tardy, Pierre" <pierre.tardy@intel.com>
-Subject: RE: [[RFC] 2/5] MMC: Add block quirks support.
-Date: Tue, 8 Mar 2011 10:37:39 +0000
-Message-ID: <8250E4885F9967469CAC3FB5CBA2CE699352219A3C@irsmsx501.ger.corp.intel.com>
-References: <1299017344-25361-1-git-send-email-andreiw@motorola.com>
-	<1299295274-32130-1-git-send-email-andreiw@motorola.com>
-	<1299295274-32130-2-git-send-email-andreiw@motorola.com>
-	<1299295274-32130-3-git-send-email-andreiw@motorola.com>
-	<AANLkTinzYpjJxDR64RPsVYS1oFe6QB_7GMmGPXMaMnW-@mail.gmail.com>
-	<AANLkTinUGu2aVpCOdGNrYgi3NAw4RiQRd=+gdd_PaDSh@mail.gmail.com>
-	<AANLkTimZW-aHC1e0hJAsGTibM6uV2cF3+3NwYr3ppOCa@mail.gmail.com>
- <AANLkTi=DhG+yBESfGdFrc7gox2Z_VW-rOfhezsVyeitO@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: MMC quirks relating to performance/lifetime.
+Date: Tue, 8 Mar 2011 15:03:41 +0100
+Message-ID: <201103081503.42297.arnd@arndb.de>
+References: <AANLkTikh4vfS7SLKAa-aUXhbTxcHzYHmBuaXj1qHHYN9@mail.gmail.com> <201102111551.15508.arnd@arndb.de> <20110308065911.GC1357@ucw.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:57667 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751683Ab1CHKiY convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2011 05:38:24 -0500
-In-Reply-To: <AANLkTi=DhG+yBESfGdFrc7gox2Z_VW-rOfhezsVyeitO@mail.gmail.com>
-Content-Language: en-US
+Received: from moutng.kundenserver.de ([212.227.126.187]:64211 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754603Ab1CHODx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2011 09:03:53 -0500
+In-Reply-To: <20110308065911.GC1357@ucw.cz>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>, Linus Walleij <linus.walleij@linaro.org>, Arnd Bergmann <arnd@arndb.de>, "tardyp@gmail.com" <tardyp@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Pavel Machek <pavel@ucw.cz>
+Cc: linux-arm-kernel@lists.infradead.org, Andrei Warkentin <andreiw@motorola.com>, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-
-> I took a look at quirks.c in linux-next. It's a bit sdio-specific... I
-> would extend mmc_fixup to contain card type (to know if cis
-> vendor/device should be checked) as well as name/manfid/oemid and rev
-> id (which is just a combination of hwrev, fwrev and date).
-Feel free to change mmc_fixup. The quirk.c is made to be extended.
-
+On Tuesday 08 March 2011, Pavel Machek wrote:
+> > > 
+> > > How big is performance difference?
+> > 
+> > Several orders of magnitude. It is very easy to get a card that can write
+> > 12 MB/s into a case where it writes no more than 30 KB/s, doing only
+> > things that happen frequently with ext3.
 > 
-> Vendor_fixup would be the top-level card fixup.
-> I would add blk_fixup (so block specific information like desired
-> write align size can be kept inside mmc_blk_data instead of polluting
-> mmc_card).
+> Ungood.
 > 
-> ...and to support part reliability workarounds for Toshiba cards, will
-> add a blk_adjust method to be invoked inside blk req handling.
-> 
-> Arnd, what do you think?
-> 
-> Pierre, what do you think about my above ideas of extending the
-> current quirks.c? Please see the following patches, which were my
-> original submissions...
-I think your work sounds promising.
-Look at pci/quirk.c it's 3k loc, with very various things.
-IMHO, we should just list cards, and set quirk flags, and quirk parameters in quirk.c.
-And put nice generic card independent quirk code in block.c.
+> I guess we should create something like loopback device, which knows
+> about flash specifics, and does the right coalescing so that card
+> stays in the fast mode?
 
-How is it possible to say generically: "avoid writes < 12K that are 8K unaligned and cross an 8K barrier"?
+I have listed a few suggestions for areas to work in my article
+at https://lwn.net/Articles/428584/. My idea was to use a device mapper
+target, as described in https://wiki.linaro.org/WorkingGroups/KernelConsolidation/Projects/FlashDeviceMapper
+but a loopback device might work as well.
 
-Pierre
----------------------------------------------------------------------
-Intel Corporation SAS (French simplified joint stock company)
-Registered headquarters: "Les Montalets"- 2, rue de Paris, 
-92196 Meudon Cedex, France
-Registration Number:  302 456 199 R.C.S. NANTERRE
-Capital: 4,572,000 Euros
+The other area that I think will help a lot is to make the I/O
+scheduler aware of the erase block size and the preferred access
+patterns.
+ 
+> ...or, do we need to create new, simple filesystem with layout similar
+> to fat32, for use on mmc cards?
 
-This e-mail and any attachments may contain confidential material for
-the sole use of the intended recipient(s). Any review or distribution
-by others is strictly prohibited. If you are not the intended
-recipient, please contact the sender and delete all copies.
+It doesn't need to be similar to fat32, but creating a new file system
+could fix this, too. Microsoft seems to have built ExFAT around
+cheap flash devices, though they don't document what that does exactly.
+I think we can do better than that, and I still want to find out
+how close nilfs2 and btrfs can actually get to the optimum.
 
+Note that it's not just MMC cards though, you get the exact same
+effects on some low-end SSDs (which are basically repackaged CF
+cards) and most USB sticks. The best USB sticks I have seen
+can hide some effects with a bit of caching, and they have a higher
+number of open segments than the cheap ones, but the basic
+problems are unchanged.
+
+The requirements for a good low-end flash optimized file system
+would be roughly:
+
+1. Do all writes is chunks of 32 or 64 KB. If there is less
+   data to write, fill the chunk with zeroes and clean up later,
+   but don't write more data to the same chunk.
+2. Start writing on a segment (e.g. 4 MB, configurable) boundary,
+   then write that segment to the end using the chunks mentioned
+   above.
+3. Erase full segments using trim/erase/discard before writing
+   to them, if supported by the drive.
+4. Have a configurable number of segments open for writing, i.e.
+   you have written blocks at the start of the segment but not
+   filled the segment to the end. Typical hardware limitations
+   are between 1 and 10 open segments.
+5. Keep all metadata within a single 4 MB segment. Drives that cannot
+   do random access within normal segments can do it in the area
+   that holds the FAT. If 4 MB is not enough, the FAT area can be
+   used as a journal or cache, for a larger metadata area that gets
+   written less frequently.
+6. Because of the requirement to erase 4 MB chunks at once, there
+   needs to be garbage collection to free up space. The quality
+   of the garbage collection algorithm directly relates to the
+   performance on full file systems and/or the space overhead.
+7. Some static wear levelling is required to increase the expected
+   life of consumer devices that only do dynamic wear levelling,
+   i.e. the segments that contain purely static data need to
+   be written occasionally so they make it back into the
+   wear leveling pool of the hardware.
+
+	Arnd
