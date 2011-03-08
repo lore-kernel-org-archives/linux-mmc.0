@@ -1,189 +1,152 @@
-From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Subject: [PATCH V6 3/4] mmc: sdhci-esdhc: make the writel/readl as the general APIs
-Date: Tue, 8 Mar 2011 10:55:35 +0800
-Message-ID: <1299552936-17202-3-git-send-email-Hong-Xing.Zhu@freescale.com>
-References: <1299552936-17202-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: [PATCH] Exynos4: Add HSMMC channel 4 support
+Date: Tue, 08 Mar 2011 11:53:40 +0900
+Message-ID: <20110308025340.GA25712@july>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:14151
-	"EHLO VA3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753250Ab1CHC4y (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2011 21:56:54 -0500
-In-Reply-To: <1299552936-17202-1-git-send-email-Hong-Xing.Zhu@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-disposition: inline
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: kgene.kim@samsung.com, jh80.chung@samsung.com
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, richard.zhao@freescale.com, eric.miao@linaro.org, Richard Zhu <Hong-Xing.Zhu@freescale.com>
 
-Add one flag to indicate the GPIO CD/WP is enabled or not
-on imx platforms, and reuse the writel/readl as the general
-APIs for imx SOCs.
+From: Kyungmin Park <kyungmin.park@samsung.com>
 
-Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Exynos4 has the DesignWare Host controller at channel 4.
+
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   43 ++++++++++++++++++++++++++++++------
- drivers/mmc/host/sdhci-pltfm.h     |    2 +-
- 2 files changed, 37 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 3b52485..5768e06 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -16,6 +16,7 @@
- #include <linux/err.h>
- #include <linux/clk.h>
- #include <linux/gpio.h>
-+#include <linux/slab.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdhci-pltfm.h>
- #include <mach/hardware.h>
-@@ -24,6 +25,13 @@
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
+diff --git a/arch/arm/mach-exynos4/include/mach/irqs.h b/arch/arm/mach-exynos4/include/mach/irqs.h
+index 2dc5900..aa32679 100644
+--- a/arch/arm/mach-exynos4/include/mach/irqs.h
++++ b/arch/arm/mach-exynos4/include/mach/irqs.h
+@@ -104,6 +104,7 @@
+ #define IRQ_HSMMC1		COMBINER_IRQ(29, 1)
+ #define IRQ_HSMMC2		COMBINER_IRQ(29, 2)
+ #define IRQ_HSMMC3		COMBINER_IRQ(29, 3)
++#define IRQ_HSMMC4		COMBINER_IRQ(29, 4)
  
-+#define IMX_GPIO_CD_WP			(1 << 0)
+ #define IRQ_MIPI_CSIS0		COMBINER_IRQ(30, 0)
+ #define IRQ_MIPI_CSIS1		COMBINER_IRQ(30, 1)
+diff --git a/arch/arm/mach-exynos4/include/mach/map.h b/arch/arm/mach-exynos4/include/mach/map.h
+index 80a41e0..ea79962 100644
+--- a/arch/arm/mach-exynos4/include/mach/map.h
++++ b/arch/arm/mach-exynos4/include/mach/map.h
+@@ -107,6 +107,7 @@
+ #define S3C_PA_HSMMC1			EXYNOS4_PA_HSMMC(1)
+ #define S3C_PA_HSMMC2			EXYNOS4_PA_HSMMC(2)
+ #define S3C_PA_HSMMC3			EXYNOS4_PA_HSMMC(3)
++#define S3C_PA_HSMMC4			EXYNOS4_PA_HSMMC(4)
+ #define S3C_PA_IIC			EXYNOS4_PA_IIC(0)
+ #define S3C_PA_IIC1			EXYNOS4_PA_IIC(1)
+ #define S3C_PA_IIC2			EXYNOS4_PA_IIC(2)
+diff --git a/arch/arm/plat-samsung/Kconfig b/arch/arm/plat-samsung/Kconfig
+index be72100..f816985 100644
+--- a/arch/arm/plat-samsung/Kconfig
++++ b/arch/arm/plat-samsung/Kconfig
+@@ -171,6 +171,11 @@ config S3C_DEV_HSMMC3
+ 	help
+ 	  Compile in platform device definitions for HSMMC channel 3
+ 
++config S3C_DEV_HSMMC4
++	bool
++	help
++	  Compile in platform device definitions for HSMMC channel 4
 +
-+struct pltfm_imx_data {
-+	int flags;
-+	u32 mod_val;
+ config S3C_DEV_HWMON
+ 	bool
+ 	help
+diff --git a/arch/arm/plat-samsung/Makefile b/arch/arm/plat-samsung/Makefile
+index e9de58a..7ddba03 100644
+--- a/arch/arm/plat-samsung/Makefile
++++ b/arch/arm/plat-samsung/Makefile
+@@ -37,6 +37,7 @@ obj-$(CONFIG_S3C_DEV_HSMMC)	+= dev-hsmmc.o
+ obj-$(CONFIG_S3C_DEV_HSMMC1)	+= dev-hsmmc1.o
+ obj-$(CONFIG_S3C_DEV_HSMMC2)	+= dev-hsmmc2.o
+ obj-$(CONFIG_S3C_DEV_HSMMC3)	+= dev-hsmmc3.o
++obj-$(CONFIG_S3C_DEV_HSMMC4)	+= dev-hsmmc4.o
+ obj-$(CONFIG_S3C_DEV_HWMON)	+= dev-hwmon.o
+ obj-y				+= dev-i2c0.o
+ obj-$(CONFIG_S3C_DEV_I2C1)	+= dev-i2c1.o
+diff --git a/arch/arm/plat-samsung/dev-hsmmc4.c b/arch/arm/plat-samsung/dev-hsmmc4.c
+new file mode 100644
+index 0000000..c69a78f
+--- /dev/null
++++ b/arch/arm/plat-samsung/dev-hsmmc4.c
+@@ -0,0 +1,54 @@
++/* linux/arch/arm/plat-samsung/dev-hsmmc4.c
++ *
++ * Copyright (C) 2011 Samsung Electronics Co., Ltd.
++ *
++ * Samsung device definition for hsmmc device 4
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include <linux/kernel.h>
++#include <linux/platform_device.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/dw_mmc.h>
++#include <linux/dma-mapping.h>
++
++#include <mach/map.h>
++#include <plat/sdhci.h>
++#include <plat/devs.h>
++
++#define S3C_SZ_HSMMC		0x1000
++
++static struct resource s3c_hsmmc4_resource[] = {
++	[0] = {
++		.start	= S3C_PA_HSMMC4,
++		.end	= S3C_PA_HSMMC4 + S3C_SZ_HSMMC - 1,
++		.flags	= IORESOURCE_MEM,
++	},
++	[1] = {
++		.start	= IRQ_HSMMC4,
++		.end	= IRQ_HSMMC4,
++		.flags	= IORESOURCE_IRQ,
++	}
 +};
 +
- static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, int reg)
- {
- 	void __iomem *base = host->ioaddr + (reg & ~0x3);
-@@ -34,10 +42,15 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
- 
- static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data =
-+				(struct pltfm_imx_data *)pltfm_host->priv;
++static u64 s3c_device_hsmmc4_dmamask = DMA_BIT_MASK(32);
 +
- 	/* fake CARD_PRESENT flag on mx25/35 */
- 	u32 val = readl(host->ioaddr + reg);
- 
--	if (unlikely(reg == SDHCI_PRESENT_STATE)) {
-+	if (unlikely((reg == SDHCI_PRESENT_STATE)
-+			&& (imx_data->flags & IMX_GPIO_CD_WP))) {
- 		struct esdhc_platform_data *boarddata =
- 				host->mmc->parent->platform_data;
- 
-@@ -55,7 +68,12 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- 
- static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- {
--	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE))
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data =
-+				(struct pltfm_imx_data *)pltfm_host->priv;
++struct platform_device s3c_device_hsmmc4 = {
++	.name			= "dw_mmc",
++	.id			= -1,
++	.num_resources		= ARRAY_SIZE(s3c_hsmmc4_resource),
++	.resource		= s3c_hsmmc4_resource,
++	.dev			= {
++		.dma_mask		= &s3c_device_hsmmc4_dmamask,
++		.coherent_dma_mask	= DMA_BIT_MASK(32),
++	},
++};
 +
-+	if (unlikely((reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)
-+			&& (imx_data->flags & IMX_GPIO_CD_WP)))
- 		/*
- 		 * these interrupts won't work with a custom card_detect gpio
- 		 * (only applied to mx25/35)
-@@ -76,6 +94,8 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
- static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data =
-+				(struct pltfm_imx_data *)pltfm_host->priv;
++void s3c_hsmmc4_set_platdata(struct dw_mci_board *pdata)
++{
++	s3c_set_platdata(pdata, sizeof(struct dw_mci_board),
++			 &s3c_device_hsmmc4);
++}
+diff --git a/arch/arm/plat-samsung/include/plat/devs.h b/arch/arm/plat-samsung/include/plat/devs.h
+index e2b3ab9..4e198ba 100644
+--- a/arch/arm/plat-samsung/include/plat/devs.h
++++ b/arch/arm/plat-samsung/include/plat/devs.h
+@@ -65,6 +65,7 @@ extern struct platform_device s3c_device_hsmmc0;
+ extern struct platform_device s3c_device_hsmmc1;
+ extern struct platform_device s3c_device_hsmmc2;
+ extern struct platform_device s3c_device_hsmmc3;
++extern struct platform_device s3c_device_hsmmc4;
+ extern struct platform_device s3c_device_cfcon;
  
- 	switch (reg) {
- 	case SDHCI_TRANSFER_MODE:
-@@ -83,10 +103,10 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 		 * Postpone this write, we must do it together with a
- 		 * command write that is down below.
- 		 */
--		pltfm_host->scratchpad = val;
-+		imx_data->mod_val = val;
- 		return;
- 	case SDHCI_COMMAND:
--		writel(val << 16 | pltfm_host->scratchpad,
-+		writel(val << 16 | imx_data->mod_val,
- 			host->ioaddr + SDHCI_TRANSFER_MODE);
- 		return;
- 	case SDHCI_BLOCK_SIZE:
-@@ -146,7 +166,9 @@ static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
- }
- 
- static struct sdhci_ops sdhci_esdhc_ops = {
-+	.read_l = esdhc_readl_le,
- 	.read_w = esdhc_readw_le,
-+	.write_l = esdhc_writel_le,
- 	.write_w = esdhc_writew_le,
- 	.write_b = esdhc_writeb_le,
- 	.set_clock = esdhc_set_clock,
-@@ -168,6 +190,7 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
- 	struct clk *clk;
- 	int err;
-+	struct pltfm_imx_data *imx_data;
- 
- 	clk = clk_get(mmc_dev(host->mmc), NULL);
- 	if (IS_ERR(clk)) {
-@@ -177,7 +200,10 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 	clk_enable(clk);
- 	pltfm_host->clk = clk;
- 
--	if (cpu_is_mx35() || cpu_is_mx51())
-+	imx_data = kzalloc(sizeof(struct pltfm_imx_data), GFP_KERNEL);
-+	pltfm_host->priv = (void *)imx_data;
-+
-+	if (!cpu_is_mx25())
- 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
- 
- 	if (cpu_is_mx25() || cpu_is_mx35()) {
-@@ -214,8 +240,7 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 			goto no_card_detect_irq;
- 		}
- 
--		sdhci_esdhc_ops.write_l = esdhc_writel_le;
--		sdhci_esdhc_ops.read_l = esdhc_readl_le;
-+		imx_data->flags |= IMX_GPIO_CD_WP;
- 		/* Now we have a working card_detect again */
- 		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 	}
-@@ -227,6 +252,7 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
-  no_card_detect_pin:
- 	boarddata->cd_gpio = err;
-  not_supported:
-+	kfree(imx_data);
- 	return 0;
- }
- 
-@@ -234,6 +260,8 @@ static void esdhc_pltfm_exit(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
-+	struct pltfm_imx_data *imx_data =
-+				(struct pltfm_imx_data *)pltfm_host->priv;
- 
- 	if (boarddata && gpio_is_valid(boarddata->wp_gpio))
- 		gpio_free(boarddata->wp_gpio);
-@@ -247,6 +275,7 @@ static void esdhc_pltfm_exit(struct sdhci_host *host)
- 
- 	clk_disable(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
-+	kfree(imx_data);
- }
- 
- struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index ea2e44d..2b37016 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -17,7 +17,7 @@
- 
- struct sdhci_pltfm_host {
- 	struct clk *clk;
--	u32 scratchpad; /* to handle quirks across io-accessor calls */
-+	void *priv; /* to handle quirks across io-accessor calls */
- };
- 
- extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
--- 
-1.7.1
-
-
+ extern struct platform_device s3c_device_spi0;
