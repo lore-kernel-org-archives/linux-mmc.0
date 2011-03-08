@@ -1,75 +1,32 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [[RFC] 2/5] MMC: Add block quirks support.
-Date: Tue, 8 Mar 2011 14:57:53 -0600
-Message-ID: <AANLkTimQhTLLpOUk-GNibaLOYJ7yNGyD1Epm2T51oZyE@mail.gmail.com>
-References: <1299017344-25361-1-git-send-email-andreiw@motorola.com>
-	<1299295274-32130-1-git-send-email-andreiw@motorola.com>
-	<1299295274-32130-2-git-send-email-andreiw@motorola.com>
-	<1299295274-32130-3-git-send-email-andreiw@motorola.com>
-	<AANLkTinzYpjJxDR64RPsVYS1oFe6QB_7GMmGPXMaMnW-@mail.gmail.com>
-	<AANLkTinUGu2aVpCOdGNrYgi3NAw4RiQRd=+gdd_PaDSh@mail.gmail.com>
-	<AANLkTimZW-aHC1e0hJAsGTibM6uV2cF3+3NwYr3ppOCa@mail.gmail.com>
-	<AANLkTi=DhG+yBESfGdFrc7gox2Z_VW-rOfhezsVyeitO@mail.gmail.com>
-	<AANLkTi=AEMhOfbBtBfyqeuo9P85Qme=YirrYbF9gAGgf@mail.gmail.com>
-	<AANLkTikc1TW4J9+TmLL9sU2NbH2U66xD0hFXQyeHSkRg@mail.gmail.com>
-	<AANLkTiktQ6zR+SVGa396LBDqgWm+C8BGoQ_94_D9bDRR@mail.gmail.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH 1/3] mmc: skip detection of nonremovable cards on rescan -
+ card removal detection regression
+Date: Tue, 8 Mar 2011 23:10:35 +0200
+Message-ID: <AANLkTim7XGXuiK3r8FxoPVeXtG2G9CmE1x6+E4rpXm3u@mail.gmail.com>
+References: <1290921690-6133-1-git-send-email-ohad@wizery.com>
+ <1290921690-6133-2-git-send-email-ohad@wizery.com> <20101217005123.GD17239@void.printf.net>
+ <AANLkTi=ff=kkaRHOrDyoxOgw_Bt7raiPf3T=ed1=EveZ@mail.gmail.com>
+ <1299205366.4999.3.camel@maxim-laptop> <AANLkTi=8Qi=-Ff1SQwBaxC5xxijMKPKAgFR17UGGTAvS@mail.gmail.com>
+ <AANLkTi=tgV0Qqs+GuLVvF6fcVB2tL1e5aWZsMggTQGfX@mail.gmail.com>
+ <AANLkTin2Ky4sqJCqSePCWBP27Gfo4SdNmr0u16zskPMo@mail.gmail.com> <1299603735.3100.0.camel@maxim-laptop>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og115.obsmtp.com ([64.18.0.246]:40760 "EHLO
-	exprod5og115.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756076Ab1CHU5z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2011 15:57:55 -0500
-Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.167])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p28Kuasf021138
-	for <linux-mmc@vger.kernel.org>; Tue, 8 Mar 2011 15:56:36 -0500 (EST)
-Received: from mail-qy0-f170.google.com (mail-qy0-f170.google.com [209.85.216.170])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p28Kuat7021132
-	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Tue, 8 Mar 2011 15:56:36 -0500 (EST)
-Received: by qyk32 with SMTP id 32so3334194qyk.15
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Mar 2011 12:57:53 -0800 (PST)
-In-Reply-To: <AANLkTiktQ6zR+SVGa396LBDqgWm+C8BGoQ_94_D9bDRR@mail.gmail.com>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:59280 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754258Ab1CHVLS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2011 16:11:18 -0500
+Received: by iwn34 with SMTP id 34so5226199iwn.19
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Mar 2011 13:11:18 -0800 (PST)
+In-Reply-To: <1299603735.3100.0.camel@maxim-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, tardyp@gmail.com, linux-mmc@vger.kernel.org
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: Dmitry Shmidt <dimitrysh@google.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Tue, Mar 8, 2011 at 2:34 PM, Andrei Warkentin <andreiw@motorola.com> wrote:
-> On Tue, Mar 8, 2011 at 2:28 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
->> 2011/3/7 Andrei Warkentin <andreiw@motorola.com>:
->>
->>> The other real issue I see is that it's kind of nasty to put
->>> block-related workarounds into core/quirks.c. The later seems more of
->>> generic card interface workarounds, rather than workarounds for
->>> specific functionality. It would be like putting workarounds for, say,
->>> sdio_uart into core/quirk.c, IMHO block workarounds are still
->>> function-level workarounds, and so should be dealt with at the
->>> function-level under mmc/card. Thoughts?
->>
->> The SDIO cards are function-level too, so what you're saying is
->> that the file quirks.c should be moved from core/ to card/
->> and extended there?
->> If so, yes.
->>
->> Linus Walleij
->>
+On Tue, Mar 8, 2011 at 7:02 PM, Maxim Levitsky <maximlevitsky@gmail.com> wrote:
+>> Maxim, does this work for you too ?
 >
-> Alright :-).
->
-> I'll extend the current mechanism in quirks.c to match on manfid/oemid
-> and revision. In fact, the current code
-> assumes all cards use cis.vendor and cis.device, but that only applies
-> to SDIO cards.
->
-> Thanks,
-> A
->
+> Yep, just tested.
 
-On a second thought it should still belong within core, since it's
-getting built as part of the MMC core support... The tables could be
-per-function-driver, I suppose...
-So mmc_fixup_device takes as an additional parameter a pointer to the
-lookup table...
-
-A
+Thanks
