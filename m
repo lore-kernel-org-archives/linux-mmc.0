@@ -1,64 +1,53 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: fix CONFIG_MMC_UNSAFE_RESUME regression
-Date: Tue, 08 Mar 2011 16:56:50 -0500
-Message-ID: <m3hbbdp97h.fsf@pullcord.laptop.org>
-References: <1299619922-22220-1-git-send-email-ohad@wizery.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH resend] sdhci: work around broken dma boundary behaviour
+Date: Tue, 8 Mar 2011 23:12:13 +0100
+Message-ID: <20110308221213.GB5170@pengutronix.de>
+References: <1299530457-19904-1-git-send-email-mmvinni@yahoo.com>
+ <m31v2hqsm5.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="1UWUbFP1cBYEclgG"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49476 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752151Ab1CHV75 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 8 Mar 2011 16:59:57 -0500
-In-Reply-To: <1299619922-22220-1-git-send-email-ohad@wizery.com> (Ohad
-	Ben-Cohen's message of "Tue, 8 Mar 2011 23:32:02 +0200")
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:46963 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753706Ab1CHWMQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2011 17:12:16 -0500
+Content-Disposition: inline
+In-Reply-To: <m31v2hqsm5.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org, Dmitry Shmidt <dimitrysh@google.com>, Maxim Levitsky <maximlevitsky@gmail.com>, stable@kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Mikko Vinni <mmvinni@yahoo.com>, linux-mmc@vger.kernel.org
 
-Hi Ohad,
 
-On Tue, Mar 08 2011, Ohad Ben-Cohen wrote:
-> 30201e7 allowed skipping detection of nonremovable cards on
-> mmc_rescan(). The intention was to only skip detection of hardwired
-> cards that cannot be removed, so make sure this is indeed the
-> case by directly checking for (lack of) MMC_CAP_NONREMOVABLE, instead
-> of using mmc_card_is_removable(), which is overloaded with
-> CONFIG_MMC_UNSAFE_RESUME semantics.
->
-> Reported-and-tested-by: Dmitry Shmidt <dimitrysh@google.com>
-> Reported-and-tested-by: Maxim Levitsky <maximlevitsky@gmail.com>
-> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
-> Cc: <stable@kernel.org>
-> ---
-> Based on linux-2.6.git master, as this should probably go to Linus.
->
->  drivers/mmc/core/core.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 6625c05..150b5f3 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1529,7 +1529,7 @@ void mmc_rescan(struct work_struct *work)
->  	 * still present
->  	 */
->  	if (host->bus_ops && host->bus_ops->detect && !host->bus_dead
-> -	    && mmc_card_is_removable(host))
-> +	    && !(host->caps & MMC_CAP_NONREMOVABLE))
->  		host->bus_ops->detect(host);
->  
->  	/*
+--1UWUbFP1cBYEclgG
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks, I will send this to Linus for .38 final.
+> Thanks, I agree, pushed to -next for testing.  I'd still appreciate
+> a Reviewed-by: from someone on linux-mmc@, and would like to hear
+> if anyone thinks this needs to be a quirk rather than a generic fix.
 
-I have removed the stable@ tag, because the patch causing this
-regression was introduced in .38-rc1 -- it has not been part of
-any released kernel.  So, as long as we fix it before .38 releases
-in a week, there's no need to involve stable@.
+Not surprisingly, I prefer the generic fix over a quirk ;) It seems to not =
+cost
+much detecting the flaw at runtime. I try to have a closer review tomorrow.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--1UWUbFP1cBYEclgG
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAk12qb0ACgkQD27XaX1/VRsmRQCgmwaubLcTBaY1cv+E+V/2aIvT
+YbUAoKE51NzABq8jpT1jrAYa0i1paMUF
+=64qt
+-----END PGP SIGNATURE-----
+
+--1UWUbFP1cBYEclgG--
