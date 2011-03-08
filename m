@@ -1,82 +1,57 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: MMC fix for 2.6.38
-Date: Mon, 07 Mar 2011 18:03:33 -0500
-Message-ID: <m3bp1m7cu2.fsf@pullcord.laptop.org>
+From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Subject: [PATCH V6 1/4] mmc: sdhci-esdhc: remove SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
+Date: Tue, 8 Mar 2011 10:55:33 +0800
+Message-ID: <1299552936-17202-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:29225 "EHLO
+	TX2EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753604Ab1CHC4J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2011 21:56:09 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, richard.zhao@freescale.com, eric.miao@linaro.org, Richard Zhu <Hong-Xing.Zhu@freescale.com>
 
-Linus,
+sdhci-esdhc-imx does not need SDHCI_QUIRK_NO_CARD_NO_RESET. Make it OF-specific.
 
-Please pull from:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-to fix an SDIO initialization regression introduced in -rc1.  Thanks.
-
-The following changes since commit 214d93b02c4fe93638ad268613c9702a81ed9192:
-  Linus Torvalds (1):
-        Merge branch 'omap-fixes-for-linus' of git://git.kernel.org/.../tmlind/linux-omap-2.6
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-Dmitry Shmidt (1):
-      mmc: sdio: Allow sdio operations in other threads during sdio_add_func()
-
- drivers/mmc/core/sdio.c |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
-
-From: Dmitry Shmidt <dimitrysh@google.com>
-Date: Thu, 3 Mar 2011 17:40:10 -0500
-Subject: [PATCH] mmc: sdio: Allow sdio operations in other threads during sdio_add_func()
-
-This fixes a bug introduced by 807e8e40673d ("mmc: Fix sd/sdio/mmc
-initialization frequency retries") that prevented SDIO drivers from
-performing SDIO commands in their probe routines -- the above patch
-called mmc_claim_host() before sdio_add_func(), which causes a deadlock
-if an external SDIO driver calls sdio_claim_host().
-
-Fix tested on an OLPC XO-1.75 with libertas on SDIO.
-
-Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
-Reviewed-and-Tested-by: Chris Ball <cjb@laptop.org>
-Signed-off-by: Chris Ball <cjb@laptop.org>
+Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Tested-by: Wolfram Sang <w.sang@pengutronix.de>
 ---
- drivers/mmc/core/sdio.c |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-esdhc.h    |    3 +--
+ drivers/mmc/host/sdhci-of-esdhc.c |    3 ++-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 5c4a54d..ebc62ad 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -792,7 +792,6 @@ int mmc_attach_sdio(struct mmc_host *host)
- 	 */
- 	mmc_release_host(host);
- 	err = mmc_add_card(host->card);
--	mmc_claim_host(host);
- 	if (err)
- 		goto remove_added;
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index c55aae8..c3b08f1 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -23,8 +23,7 @@
+ 				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
+ 				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
+ 				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
+-				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET | \
+-				SDHCI_QUIRK_NO_CARD_NO_RESET)
++				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
  
-@@ -805,12 +804,12 @@ int mmc_attach_sdio(struct mmc_host *host)
- 			goto remove_added;
- 	}
+ #define ESDHC_SYSTEM_CONTROL	0x2c
+ #define ESDHC_CLOCK_MASK	0x0000fff0
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 08161f6..ba40d6d 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -74,7 +74,8 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
  
-+	mmc_claim_host(host);
- 	return 0;
- 
- 
- remove_added:
- 	/* Remove without lock if the device has been added. */
--	mmc_release_host(host);
- 	mmc_sdio_remove(host);
- 	mmc_claim_host(host);
- remove:
+ struct sdhci_of_data sdhci_esdhc = {
+ 	/* card detection could be handled via GPIO */
+-	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION,
++	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION
++		| SDHCI_QUIRK_NO_CARD_NO_RESET,
+ 	.ops = {
+ 		.read_l = sdhci_be32bs_readl,
+ 		.read_w = esdhc_readw,
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.1
+
+
