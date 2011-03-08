@@ -1,27 +1,40 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 2/5] mmc: tmio: add a flag to prohibit access to registers
- above 0xff
-Date: Tue, 8 Mar 2011 12:35:19 +0900
-Message-ID: <AANLkTi=ecc4_82vt1fkN6Bx2r0k6Vpb7PrvG7S=smbQp@mail.gmail.com>
-References: <Pine.LNX.4.64.1103071937010.29543@axis700.grange>
-	<Pine.LNX.4.64.1103071944200.29543@axis700.grange>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH] of_mmc_spi: add card detect irq support
+Date: Mon, 7 Mar 2011 20:52:46 -0700
+Message-ID: <20110308035246.GA23260@angua.secretlab.ca>
+References: <20100830161102.GA20413@oksana.dev.rtsoft.ru>
+ <172136.90988.qm@web180315.mail.gq1.yahoo.com>
+ <AANLkTimXJ-hSz3O1xPgLsZLxwkwBeqrW+gAmR8+6jGoW@mail.gmail.com>
+ <20101228160526.GA20087@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1103071944200.29543@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:38605 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753933Ab1CHDwv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2011 22:52:51 -0500
+Received: by ywj3 with SMTP id 3so1846125ywj.19
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Mar 2011 19:52:51 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <20101228160526.GA20087@oksana.dev.rtsoft.ru>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: David Brownell <david-b@pacbell.net>, David Brownell <dbrownell@users.sourceforge.net>, Esben Haabendal <esbenhaabendal@gmail.com>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linuxppc-dev@lists.ozlabs.org
 
-On Tue, Mar 8, 2011 at 3:47 AM, Guennadi Liakhovetski
-<g.liakhovetski@gmx.de> wrote:
-> On some implementations there are no registers above 0xff and any
-> access to them mirrors to registers at addresses with bit 8 masked
-> out, which leads to malfunction. Add a flag to prevent such accesses.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+On Tue, Dec 28, 2010 at 07:05:26PM +0300, Anton Vorontsov wrote:
+> On Mon, Aug 30, 2010 at 11:49:08AM -0600, Grant Likely wrote:
+> > On Mon, Aug 30, 2010 at 10:38 AM, David Brownell <david-b@pacbell.net> wrote:
+> > > Since I don't do OpenFirmware, let's hear from
+> > > Grant on this one.
+> > 
+> > Looks good to me.
+> > 
+> > Acked-by: Grant Likely <grant.likely@secretlab.ca>
+> 
+> I wonder what happened with this patch?
 
-Yes, this is correct for SDHI. Thanks for your help!
+Merged, thanks.  :-)
 
-Acked-by: Magnus Damm <damm@opensource.se>
+g.
+
