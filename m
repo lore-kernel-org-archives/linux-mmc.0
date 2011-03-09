@@ -1,224 +1,78 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 03/12] mmc: sd: query function modes for uhs cards
-Date: Wed, 9 Mar 2011 08:31:12 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B300E3AA1EE8@SAUSEXMBP01.amd.com>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
- <1299238369-1768-4-git-send-email-arindam.nath@amd.com>
- <001801cbde63$89cf8bc0$9d6ea340$@org>
+From: Chris Ball <cjb@laptop.org>
+Subject: MMC fix for 2.6.38
+Date: Wed, 09 Mar 2011 11:30:17 -0500
+Message-ID: <m3wrk8mf3a.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.181]:8208
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757077Ab1CIObU convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 9 Mar 2011 09:31:20 -0500
-In-Reply-To: <001801cbde63$89cf8bc0$9d6ea340$@org>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:60269 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932099Ab1CIQci (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 9 Mar 2011 11:32:38 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "cjb@laptop.org" <cjb@laptop.org>
-Cc: "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "prakity@marvell.com" <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Subhash,
+Linus,
 
+Please pull from:
 
-> -----Original Message-----
-> From: subhashj@codeaurora.org [mailto:subhashj@codeaurora.org]
-> Sent: Wednesday, March 09, 2011 7:39 PM
-> To: Nath, Arindam; cjb@laptop.org
-> Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: RE: [PATCH v2 03/12] mmc: sd: query function modes for uhs
-> cards
-> 
-> 
-> 
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > owner@vger.kernel.org] On Behalf Of Arindam Nath
-> > Sent: Friday, March 04, 2011 5:03 PM
-> > To: cjb@laptop.org
-> > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
-> > subhashj@codeaurora.org; linux-mmc@vger.kernel.org; henry.su@amd.com;
-> > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
-> > Subject: [PATCH v2 03/12] mmc: sd: query function modes for uhs cards
-> >
-> > SD cards which conform to Physical Layer Spec v3.01 can support
-> > additional Bus Speed Modes, Driver Strength, and Current Limit
-> > other than the default values. We use CMD6 mode 0 to read these
-> > additional card functions. The values read here will be used
-> > during UHS-I initialization steps.
-> >
-> > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > ---
-> >  drivers/mmc/core/sd.c    |   99
-> > +++++++++++++++++++++++++++++++++++++++-------
-> >  include/linux/mmc/card.h |    3 +
-> >  2 files changed, 87 insertions(+), 15 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > index 3e82599..a63956b 100644
-> > --- a/drivers/mmc/core/sd.c
-> > +++ b/drivers/mmc/core/sd.c
-> > @@ -283,25 +283,94 @@ static int mmc_read_switch(struct mmc_card
-> *card)
-> >  		return -ENOMEM;
-> >  	}
-> >
-> > -	err = mmc_sd_switch(card, 0, 0, 1, status);
-> > -	if (err) {
-> > -		/* If the host or the card can't do the switch,
-> > -		 * fail more gracefully. */
-> > -		if ((err != -EINVAL)
-> > -		 && (err != -ENOSYS)
-> > -		 && (err != -EFAULT))
-> > +	if (card->scr.sda_spec3) {
-> > +		/* First find out the supported Bus Speed Modes. */
-> > +		err = mmc_sd_switch(card, 0, 0, 1, status);
-> Reading function-group-1 status applies for both SD3.0 and SD2.0 cards
-> as
-> well. With card->scr.sda_spec check, you are duplicating the same code
-> in
-> else part of it as well. You can optimize it to only one call to
-> mmc_sd_switch() to read function-group-1.
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
-Yes, there is a duplication of the code. I will try to minimize it in the next version.
+for a final MMC regression fix against -rc1.  Thanks.
 
-> 
-> > +		if (err) {
-> > +			/*
-> > +			 * If the host or the card can't do the switch,
-> > +			 * fail more gracefully.
-> > +			 */
-> > +			if ((err != -EINVAL)
-> > +			&& (err != -ENOSYS)
-> > +			&& (err != -EFAULT))
-> > +				goto out;
-> > +
-> > +			printk(KERN_WARNING "%s: problem reading "
-> > +				"Bus Speed modes.\n",
-> > +				mmc_hostname(card->host));
-> > +			err = 0;
-> > +
-> >  			goto out;
-> > +		}
-> >
-> > -		printk(KER	N_WARNING "%s: problem reading switch "
-> > -			"capabilities, performance might suffer.\n",
-> > -			mmc_hostname(card->host));
-> > -		err = 0;
-> > +		card->sw_caps.uhs_bus_mode = status[13];
-> Is adding uhs* prefix is appropriate? If card supports SD3.0 spec means
-> card
-> have to support UHS modes? Can we have cards (SDXC?) which sets SD3.0
-> spec
-> bit in SCR but does not support any of the UHS modes. So in this case
-> putting uhs* prefix might not be appropriate.
+The following changes since commit 214d93b02c4fe93638ad268613c9702a81ed9192:
+  Linus Torvalds (1):
+        Merge branch 'omap-fixes-for-linus' of git://git.kernel.org/.../tmlind/linux-omap-2.6
 
-As per Physical Layer Spec v3.01, UHS-I can be applied to SDHC and SDXC cards. Cards which support UHS-I should have sda_spec3 set in the SCR register. Since we need to set the data rate depending on the exact UHS-I speed mode, I have prefixed the variable with uhs_ to make things clear.
+are available in the git repository at:
 
-Thanks,
-Arindam
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
-> 
-> 
-> > +
-> > +		/* Find out Driver Strengths supported by the card */
-> > +		err = mmc_sd_switch(card, 0, 2, 1, status);
-> > +		if (err) {
-> > +			/*
-> > +			 * If the host or the card can't do the switch,
-> > +			 * fail more gracefully.
-> > +			 */
-> > +			if ((err != -EINVAL)
-> > +			&& (err != -ENOSYS)
-> > +			&& (err != -EFAULT))
-> > +				goto out;
-> > +
-> > +			printk(KERN_WARNING "%s: problem reading "
-> > +				"Driver Strength.\n",
-> > +				mmc_hostname(card->host));
-> > +			err = 0;
-> >
-> > -		goto out;
-> > -	}
-> > +			goto out;
-> > +		}
-> >
-> > -	if (status[13] & 0x02)
-> > -		card->sw_caps.hs_max_dtr = 50000000;
-> > +		card->sw_caps.uhs_drv_type = status[9];
-> > +
-> > +		/* Find out Current Limits supported by the card */
-> > +		err = mmc_sd_switch(card, 0, 3, 1, status);
-> > +		if (err) {
-> > +			/*
-> > +			 * If the host or the card can't do the switch,
-> > +			 * fail more gracefully.
-> > +			 */
-> > +			if ((err != -EINVAL)
-> > +			&& (err != -ENOSYS)
-> > +			&& (err != -EFAULT))
-> > +				goto out;
-> > +
-> > +			printk(KERN_WARNING "%s: problem reading "
-> > +				"Current Limit.\n",
-> > +				mmc_hostname(card->host));
-> > +			err = 0;
-> > +
-> > +			goto out;
-> > +		}
-> > +
-> > +		card->sw_caps.uhs_curr_limit = status[7];
-> > +	} else {
-> > +		err = mmc_sd_switch(card, 0, 0, 1, status);
-> > +		if (err) {
-> > +			/*
-> > +			 * If the host or the card can't do the switch,
-> > +			 * fail more gracefully.
-> > +			 */
-> > +			if ((err != -EINVAL)
-> > +			&& (err != -ENOSYS)
-> > +			&& (err != -EFAULT))
-> > +				goto out;
-> > +
-> > +			printk(KERN_WARNING "%s: problem reading switch "
-> > +				"capabilities, performance might suffer.\n",
-> > +				mmc_hostname(card->host));
-> > +			err = 0;
-> > +			goto out;
-> > +		}
-> > +
-> > +		if (status[13] & 0x02)
-> > +			card->sw_caps.hs_max_dtr = 50000000;
-> > +	}
-> >
-> >  out:
-> >  	kfree(status);
-> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> > index 22b0335..7080f22 100644
-> > --- a/include/linux/mmc/card.h
-> > +++ b/include/linux/mmc/card.h
-> > @@ -75,6 +75,9 @@ struct sd_ssr {
-> >
-> >  struct sd_switch_caps {
-> >  	unsigned int		hs_max_dtr;
-> > +	unsigned int		uhs_bus_mode;
-> > +	unsigned int		uhs_drv_type;
-> > +	unsigned int		uhs_curr_limit;
-> >  };
-> >
-> >  struct sdio_cccr {
-> > --
-> > 1.7.1
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Ohad Ben-Cohen (1):
+      mmc: fix CONFIG_MMC_UNSAFE_RESUME regression
 
+ drivers/mmc/core/core.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Date: Tue, 8 Mar 2011 23:32:02 +0200
+Subject: [PATCH] mmc: fix CONFIG_MMC_UNSAFE_RESUME regression
+
+30201e7f3 ("mmc: skip detection of nonremovable cards on rescan")
+allowed skipping detection of nonremovable cards on mmc_rescan().
+The intention was to only skip detection of hardwired cards that
+cannot be removed, so make sure this is indeed the case by directly
+checking for (lack of) MMC_CAP_NONREMOVABLE, instead of using
+mmc_card_is_removable(), which is overloaded with
+CONFIG_MMC_UNSAFE_RESUME semantics.
+
+The user-visible symptom of the bug this patch fixes is that no
+"mmc: card XXXX removed" message appears in dmesg when a card is
+removed and CONFIG_MMC_UNSAFE_RESUME=y.
+
+Reported-and-tested-by: Dmitry Shmidt <dimitrysh@google.com>
+Reported-and-tested-by: Maxim Levitsky <maximlevitsky@gmail.com>
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+Signed-off-by: Chris Ball <cjb@laptop.org>
+---
+ drivers/mmc/core/core.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 6625c05..150b5f3 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1529,7 +1529,7 @@ void mmc_rescan(struct work_struct *work)
+ 	 * still present
+ 	 */
+ 	if (host->bus_ops && host->bus_ops->detect && !host->bus_dead
+-	    && mmc_card_is_removable(host))
++	    && !(host->caps & MMC_CAP_NONREMOVABLE))
+ 		host->bus_ops->detect(host);
+ 
+ 	/*
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
