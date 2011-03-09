@@ -1,275 +1,208 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 06/12] mmc: sd: add support for uhs bus speed mode
- selection
-Date: Wed, 9 Mar 2011 13:43:22 -0800
-Message-ID: <58AD8858-F465-43FD-ADBF-39DDB075EB02@marvell.com>
-References: <1297762510-2696-1-git-send-email-arindam.nath@amd.com>
- <1297762510-2696-7-git-send-email-arindam.nath@amd.com>
+From: Grant Grundler <grundler@google.com>
+Subject: Re: [PATCH] SDHCI: Suspend/Resume needs to save/restore INT_ENABLE on ARM/Tegra2
+Date: Wed, 9 Mar 2011 14:00:00 -0800
+Message-ID: <AANLkTi==6jPPBJQou8KAGZCKtmmN44Q85PR5x2_KOR2J@mail.gmail.com>
+References: <20110308213921.00625208186@grundler.mtv.corp.google.com>
+	<AANLkTik3vKKs+Sxe1g+igFOpqmdYDMec7MH1mKjv0qGw@mail.gmail.com>
+	<AANLkTikwapQ_Qe-U=Noan45kztNrLzZA39Oj8jLBuzV+@mail.gmail.com>
+	<AANLkTikBm00dzzGU_Rap9A0RmebnW6TOvG4LS3cXs1XW@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:57763 "EHLO
-	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750977Ab1CIVqm convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 9 Mar 2011 16:46:42 -0500
-In-Reply-To: <1297762510-2696-7-git-send-email-arindam.nath@amd.com>
-Content-Language: en-US
+Received: from smtp-out.google.com ([74.125.121.67]:3093 "EHLO
+	smtp-out.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752131Ab1CIWAF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2011 17:00:05 -0500
+Received: from kpbe11.cbf.corp.google.com (kpbe11.cbf.corp.google.com [172.25.105.75])
+	by smtp-out.google.com with ESMTP id p29M03sn018182
+	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 14:00:03 -0800
+Received: from gxk19 (gxk19.prod.google.com [10.202.11.19])
+	by kpbe11.cbf.corp.google.com with ESMTP id p29M01kw011950
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 14:00:01 -0800
+Received: by gxk19 with SMTP id 19so476682gxk.39
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Mar 2011 14:00:01 -0800 (PST)
+In-Reply-To: <AANLkTikBm00dzzGU_Rap9A0RmebnW6TOvG4LS3cXs1XW@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arindam Nath <arindam.nath@amd.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "henry.su@amd.com" <henry.su@amd.com>, "aaron.lu@amd.com" <aaron.lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: Dmitry Shmidt <dimitrysh@google.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Venkat Rao <vrao@broadcom.com>, Sandeep Kumar <sandeepm@broadcom.com>
+
+On Wed, Mar 9, 2011 at 1:10 PM, Andrei Warkentin <andreiw@motorola.com>=
+ wrote:
+> On Wed, Mar 9, 2011 at 3:01 PM, Grant Grundler <grundler@google.com> =
+wrote:
+>> On Wed, Mar 9, 2011 at 12:24 PM, Andrei Warkentin <andreiw@motorola.=
+com> wrote:
+>>> On Tue, Mar 8, 2011 at 3:39 PM, Grant Grundler <grundler@google.com=
+> wrote:
+>>>>
+>>>> Save and restore SDHCI interrupt mask during suspend/resume.
+>>>> Enables ARM Tegra2 board to suspend/resume.
+>>>>
+>>>> Signed-off-by: Venkat Rao <vrao@broadcom.com>
+>>>> Reviewed-by: Olof Johansson <olofj@chromium.org>
+>>>> Reviewed-by: Grant Grundler <grundler@chromium.org>
+>>>> ---
+>>>> =C2=A0drivers/mmc/host/sdhci.c =C2=A0| =C2=A0 =C2=A05 +++++
+>>>> =C2=A0include/linux/mmc/sdhci.h | =C2=A0 =C2=A02 ++
+>>>> =C2=A02 files changed, 7 insertions(+), 0 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 3c6358f..68d2e36 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -1654,6 +1654,8 @@ int sdhci_suspend_host(struct sdhci_host *ho=
+st, pm_message_t state)
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (mmc->card && (mmc->card->type !=3D =
+MMC_TYPE_SDIO))
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0ret =3D mmc=
+_suspend_host(host->mmc);
+>>>>
+>>>> + =C2=A0 =C2=A0 =C2=A0 /* Save the original intmask to restore lat=
+er */
+>>>> + =C2=A0 =C2=A0 =C2=A0 host->save_intmask =3D sdhci_readl(host, SD=
+HCI_INT_ENABLE);
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0sdhci_mask_irqs(host, SDHCI_INT_ALL_MAS=
+K);
+>>>>
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (host->vmmc)
+>>>> @@ -1695,6 +1697,9 @@ int sdhci_resume_host(struct sdhci_host *hos=
+t)
+>>>>
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0sdhci_enable_card_detection(host);
+>>>>
+>>>> + =C2=A0 =C2=A0 =C2=A0 /* Restore the original intmask */
+>>>> + =C2=A0 =C2=A0 =C2=A0 sdhci_unmask_irqs(host, host->save_intmask)=
+;
+>>>> +
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0return ret;
+>>>> =C2=A0}
+>>>>
+>>>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>>>> index dfb2106..5b9f6db 100644
+>>>> --- a/include/linux/mmc/sdhci.h
+>>>> +++ b/include/linux/mmc/sdhci.h
+>>>> @@ -141,6 +141,8 @@ struct sdhci_host {
+>>>>
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int caps; =C2=A0 =C2=A0 =C2=A0=
+/* Alternative capabilities */
+>>>>
+>>>> + =C2=A0 =C2=A0 =C2=A0 unsigned int save_intmask; =C2=A0 =C2=A0/* =
+Store original intmask */
+>>>> +
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned long private[0] ____cacheline_=
+aligned;
+>>>> =C2=A0};
+>>>> =C2=A0#endif /* __SDHCI_H */
+>>>> --
+>>>> 1.7.2.3
+>>>>
+>>>> --
+>>>
+>>> Hi Grant,
+>>>
+>>> Why is this necessary?
+>>
+>> Hi Andrei,
+>> Sorry - I didn't CC the original author of the patch...(now CC'd) an=
+d
+>> hopefully he or Sandeep can explain.
+>>
+>>> If I understand correctly, the sdhci resume
+>>> sequence sets some base needed bits inside SDHCI_INT_ENABLE inside
+>>> sdhci_clear_set_irqs. Only if you have some outstanding DMA, but
+>>> surely all DMA must be completed prior to your suspending
+>>> (mmc_queue_suspend ensures nothing is outstanding)?
+>>
+>> That's a good question. Given this is a WIFI device, my initial
+>> assumption is we could receive packets or state/event changes any
+>> time. But the device might in fact be quiesced during the suspend
+>> operation. I have to check what the brcm80211/brcmfmac driver is doi=
+ng
+>> in this case.
+>>
+>>> I'm asking since we're on Tegra 2 and have suspend/resume working f=
+ine
+>>> with eMMC.
+>>
+>> We do too - but only if the brcmfmac driver isn't loaded.
+>>
+>> I'll look up if there are any side effects of writing SDHCI_INT_ENAB=
+LE
+>> as well. It's possible this is unique to having BRCM4329 connected t=
+o
+>> the eMMC controller instead of a flash device.
+>>
+>> thanks,
+>> grant
+>>
+>
+> +Dmitry Shmidt
+>
+> Ah, interesting. So this is an SDIO device. We also have a BRCM4329
+> :-).
+
+Yes. :)
+
+> Different driver, though, although I'm sure it's the same
+> Broadcom DHD stuff...
+
+It might be. I've been pulling brcm80211 from gregkh's
+staging-2.6:drivers/staging tree and that's been evolving.  I expect
+the driver used by Android is functionally equivalent modulo any
+"sleep lock" (or whatever it's called now) changes.
 
 
-On Feb 15, 2011, at 1:35 AM, Arindam Nath wrote:
+> I took a look (yay web archives,
+> http://groups.google.com/a/chromium.org/group/chromium-os-reviews/bro=
+wse_thread/thread/bfe4ece948222f96?pli=3D1),
+> and it seems you have SDHCI_QUIRK_NO_SDIO_IRQ disabled in your
+> sdhci-tegra.
 
-> This patch adds support for setting UHS-I bus speed mode during UHS-I
-> initialization procedure. Since both the host and card can support
-> more than one bus speed, we select the highest speed based on both of
-> their capabilities. First we set the bus speed mode for the card using
-> CMD6 mode 1, and then we program the host controller to support the
-> required speed mode. We also set High Speed Enable in case one of the
-> UHS-I modes is selected. Since MMC_TIMING_UHS_SDR25 is same as
-> MMC_TIMING_SD_HS, we don't need to set the SDHCI_CTRL_HISPD flag for
-> UHS SDR25 again. We also take care to reset SD clock before setting
-> UHS mode in the Host Control2 register, and then re-enable it as per
-> the Host Controller spec v3.00. We set the clock frequency for the
-> UHS-I mode selected.
-> 
-> Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> ---
-> drivers/mmc/core/sd.c    |   82 ++++++++++++++++++++++++++++++++++++++++++++++
-> drivers/mmc/host/sdhci.c |   32 +++++++++++++++++-
-> drivers/mmc/host/sdhci.h |    5 +++
-> include/linux/mmc/card.h |   16 +++++++++
-> include/linux/mmc/host.h |    4 ++
-> 5 files changed, 137 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 9e4574d..e681385 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -464,6 +464,83 @@ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
-> 	return 0;
-> }
-> 
-> +static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
-> +{
-> +	unsigned int bus_speed, timing;
+Indeed - this patch was proposed shortly after Olof submitted the
+change to remove SDHCI_QUIRK_NO_SDIO_IRQ.  My role here is to get
+patches we were handed over a month ago upstream.
 
-warning may not be initialized.  bus_speed
+> I see why above patch is necessary now.
 
-> +	int err;
-> +
-> +	/*
-> +	 * If the host doesn't support any of the UHS-I modes, fallback on
-> +	 * default speed.
-> +	 */
-> +	if (!(card->host->caps & (MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
-> +	    MMC_CAP_UHS_DDR50)))
-> +		return 0;
-> +
-> +	if (card->host->caps & MMC_CAP_UHS_SDR104) {
-> +		if (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR104) {
-> +			bus_speed = UHS_SDR104_BUS_SPEED;
-> +			timing = MMC_TIMING_UHS_SDR104;
-> +			card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
-> +		} else if (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR50) {
-> +			bus_speed = UHS_SDR50_BUS_SPEED;
-> +			timing = MMC_TIMING_UHS_SDR50;
-> +			card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
-> +		} else if (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_DDR50) {
-> +			bus_speed = UHS_DDR50_BUS_SPEED;
-> +			timing = MMC_TIMING_UHS_DDR50;
-> +			card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
-> +		} else if (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR25) {
-> +			bus_speed = UHS_SDR25_BUS_SPEED;
-> +			timing = MMC_TIMING_UHS_SDR25;
-> +			card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
-> +		}
-> +	} else if (card->host->caps & MMC_CAP_UHS_SDR50) {
-> +		if ((card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR104) ||
-> +		    (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR50)) {
-> +			bus_speed = UHS_SDR50_BUS_SPEED;
-> +			timing = MMC_TIMING_UHS_SDR50;
-> +			card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
-> +		} else if (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_DDR50) {
-> +			bus_speed = UHS_DDR50_BUS_SPEED;
-> +			timing = MMC_TIMING_UHS_DDR50;
-> +			card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
-> +		} else if (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR25) {
-> +			bus_speed = UHS_SDR25_BUS_SPEED;
-> +			timing = MMC_TIMING_UHS_SDR25;
-> +			card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
-> +		}
-> +	} else if (card->host->caps & MMC_CAP_UHS_DDR50) {
-> +		if ((card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR104) ||
-> +		    (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR50) ||
-> +		    (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_DDR50)) {
-> +			bus_speed = UHS_DDR50_BUS_SPEED;
-> +			timing = MMC_TIMING_UHS_DDR50;
-> +			card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
-> +		} else if (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR25) {
-> +			bus_speed = UHS_SDR25_BUS_SPEED;
-> +			timing = MMC_TIMING_UHS_SDR25;
-> +			card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
-> +		}
-> +	}
-> +
-> +	err = mmc_sd_switch(card, 1, 0, bus_speed, status);
-> +	if (err)
-> +		return err;
-> +
-> +	if ((status[16] & 0xF) != bus_speed)
-> +		printk(KERN_WARNING "%s: Problem setting bus speed mode!\n",
-> +			mmc_hostname(card->host));
-> +	else {
-> +		if (bus_speed) {
-> +			mmc_set_timing(card->host, timing);
-> +			mmc_set_clock(card->host, card->sw_caps.uhs_max_dtr);
-> +		}
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> /*
->  * UHS-I specific initialization procedure
->  */
-> @@ -499,6 +576,11 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
-> 
-> 	/* Set the driver strength for the card */
-> 	err = sd_select_driver_type(card, status);
-> +	if (err)
-> +		goto out;
-> +
-> +	/* Set bus speed mode of the card */
-> +	err = sd_set_bus_speed_mode(card, status);
-> 
-> out:
-> 	kfree(status);
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 5db0109..ae91c6b 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1281,7 +1281,13 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> 		ctrl &= ~SDHCI_CTRL_HISPD;
-> 
-> 	if (host->version >= SDHCI_SPEC_300) {
-> -		u16 ctrl_2;
-> +		u16 clk, ctrl_2;
-> +
-> +		/* In case of UHS-I modes, set High Speed Enable */
-> +		if ((ios->timing == MMC_TIMING_UHS_SDR50) ||
-> +		    (ios->timing == MMC_TIMING_UHS_SDR104) ||
-> +		    (ios->timing == MMC_TIMING_UHS_DDR50))
-> +			ctrl |= SDHCI_CTRL_HISPD;
-> 
-> 		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> 		if (!(ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
-> @@ -1303,7 +1309,6 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> 			 * need to reset SD Clock Enable before changing High
-> 			 * Speed Enable to avoid generating clock gliches.
-> 			 */
-> -			u16 clk;
-> 
-> 			/* Reset SD Clock Enable */
-> 			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> @@ -1316,6 +1321,29 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> 			clk |= SDHCI_CLOCK_CARD_EN;
-> 			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> 		}
-> +
-> +		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +
-> +		/* Select Bus Speed Mode for host */
-> +		if (ios->timing == MMC_TIMING_UHS_SDR25)
-> +			ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-> +		else if (ios->timing == MMC_TIMING_UHS_SDR50)
-> +			ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-> +		else if (ios->timing == MMC_TIMING_UHS_SDR104)
-> +			ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-> +		else if (ios->timing == MMC_TIMING_UHS_DDR50)
-> +			ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-> +
-> +		/* Reset SD Clock Enable */
-> +		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +		clk &= ~SDHCI_CLOCK_CARD_EN;
-> +		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +
-> +		sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> +
-> +		/* Re-enable SD Clock */
-> +		clk |= SDHCI_CLOCK_CARD_EN;
-> +		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> 	} else
-> 		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
-> 
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index a407b5b..5bf244d 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -150,6 +150,11 @@
-> #define SDHCI_ACMD12_ERR	0x3C
-> 
-> #define SDHCI_HOST_CONTROL2		0x3E
-> +#define  SDHCI_CTRL_UHS_SDR12		0x0000
-> +#define  SDHCI_CTRL_UHS_SDR25		0x0001
-> +#define  SDHCI_CTRL_UHS_SDR50		0x0002
-> +#define  SDHCI_CTRL_UHS_SDR104		0x0003
-> +#define  SDHCI_CTRL_UHS_DDR50		0x0004
-> #define  SDHCI_CTRL_VDD_180		0x0008
-> #define  SDHCI_CTRL_DRV_TYPE_B		0x0000
-> #define  SDHCI_CTRL_DRV_TYPE_A		0x0010
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 2d7f7a3..0b24c41 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -75,7 +75,23 @@ struct sd_ssr {
-> 
-> struct sd_switch_caps {
-> 	unsigned int		hs_max_dtr;
-> +	unsigned int		uhs_max_dtr;
-> +#define UHS_SDR104_MAX_DTR	208000000
-> +#define UHS_SDR50_MAX_DTR	100000000
-> +#define UHS_DDR50_MAX_DTR	50000000
-> +#define UHS_SDR25_MAX_DTR	50000000
-> 	unsigned int		uhs_bus_mode;
-> +#define UHS_SDR12_BUS_SPEED	0
-> +#define UHS_SDR25_BUS_SPEED	1
-> +#define UHS_SDR50_BUS_SPEED	2
-> +#define UHS_SDR104_BUS_SPEED	3
-> +#define UHS_DDR50_BUS_SPEED	4
-> +
-> +#define SD_MODE_UHS_SDR12	(1 << UHS_SDR12_BUS_SPEED)
-> +#define SD_MODE_UHS_SDR25	(1 << UHS_SDR25_BUS_SPEED)
-> +#define SD_MODE_UHS_SDR50	(1 << UHS_SDR50_BUS_SPEED)
-> +#define SD_MODE_UHS_SDR104	(1 << UHS_SDR104_BUS_SPEED)
-> +#define SD_MODE_UHS_DDR50	(1 << UHS_DDR50_BUS_SPEED)
-> 	unsigned int		uhs_drv_type;
-> #define SD_DRIVER_TYPE_B	0x01
-> #define SD_DRIVER_TYPE_A	0x02
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index e6ae4c4..0a21839 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -50,6 +50,10 @@ struct mmc_ios {
-> #define MMC_TIMING_LEGACY	0
-> #define MMC_TIMING_MMC_HS	1
-> #define MMC_TIMING_SD_HS	2
-> +#define MMC_TIMING_UHS_SDR25	MMC_TIMING_SD_HS
-> +#define MMC_TIMING_UHS_SDR50	3
-> +#define MMC_TIMING_UHS_SDR104	4
-> +#define MMC_TIMING_UHS_DDR50	5
-> 
-> 	unsigned char	ddr;			/* dual data rate used */
-> 
-> -- 
-> 1.7.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I don't understand the relationship between the two. Can you
+elaborate? Or point at docs?
+I'd be happy to add comments to the code.
 
+In a followup you wrote
+The dependency bothers me since it suggests that if
+SDHCI_QUIRK_NO_SDIO_IRQ flag is set, we should not be touching this
+register. Is that correct?
+
+
+> This is bit OT, but are the LP2 idle gains significant here?
+
+I don't know if CPU pwer is reduced or if that was intentional or just
+a side effect. Venkat or Sandeep (Broadcom) might be able to answer
+that.
+
+
+In a follow up, you also wrote:
+> As an additional comment, I think the way this patch is made it hides
+> the reason for why this is necessary.
+
+TBH, even after this conversation, it's still not clear to me why.
+
+The dependency bothers me since it suggests that if
+SDHCI_QUIRK_NO_SDIO_IRQ flag is set, we should not be touching this
+register. Is that correct?
+
+> The patch should explicitly record if SDHCI_INT_CARD_INT is
+> enabled on suspend and set it back again on resume.
+
+Would this be better?
+     host->save_intmask =3D sdhci_readl(host, SDHCI_INT_ENABLE) &
+SDHCI_INT_CARD_INT;
+
+Does kernel.org still need something to deal with state of
+SDHCI_QUIRK_NO_SDIO_IRQ quirk bit?
+
+thanks,
+grant
