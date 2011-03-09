@@ -1,298 +1,100 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 03/12] mmc: sd: query function modes for uhs cards
-Date: Wed, 9 Mar 2011 12:16:58 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B300E3AA21CF@SAUSEXMBP01.amd.com>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
- <1299238369-1768-4-git-send-email-arindam.nath@amd.com>
- <001801cbde63$89cf8bc0$9d6ea340$@org>
- <6C03668EAF45B747AF947A1603D1B300E3AA1EE8@SAUSEXMBP01.amd.com>
- <001b01cbde84$7c13c1b0$743b4510$@org>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [PATCH] SDHCI: Suspend/Resume needs to save/restore INT_ENABLE on ARM/Tegra2
+Date: Wed, 9 Mar 2011 14:24:54 -0600
+Message-ID: <AANLkTik3vKKs+Sxe1g+igFOpqmdYDMec7MH1mKjv0qGw@mail.gmail.com>
+References: <20110308213921.00625208186@grundler.mtv.corp.google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:54038
-	"EHLO DB3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751302Ab1CISRV convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 9 Mar 2011 13:17:21 -0500
-In-Reply-To: <001b01cbde84$7c13c1b0$743b4510$@org>
-Content-Language: en-US
+Received: from exprod5og104.obsmtp.com ([64.18.0.178]:49328 "EHLO
+	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752091Ab1CIUY5 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2011 15:24:57 -0500
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.130.20])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p29KPDKR005953
+	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 15:25:13 -0500 (EST)
+Received: from mail-vw0-f42.google.com (mail-vw0-f42.google.com [209.85.212.42])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p29JbW7b006737
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 15:25:12 -0500 (EST)
+Received: by mail-vw0-f42.google.com with SMTP id 10so1043531vws.15
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Mar 2011 12:24:55 -0800 (PST)
+In-Reply-To: <20110308213921.00625208186@grundler.mtv.corp.google.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "cjb@laptop.org" <cjb@laptop.org>
-Cc: "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "prakity@marvell.com" <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Grant Grundler <grundler@google.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Hi Subhash,
+On Tue, Mar 8, 2011 at 3:39 PM, Grant Grundler <grundler@google.com> wr=
+ote:
+>
+> Save and restore SDHCI interrupt mask during suspend/resume.
+> Enables ARM Tegra2 board to suspend/resume.
+>
+> Signed-off-by: Venkat Rao <vrao@broadcom.com>
+> Reviewed-by: Olof Johansson <olofj@chromium.org>
+> Reviewed-by: Grant Grundler <grundler@chromium.org>
+> ---
+> =A0drivers/mmc/host/sdhci.c =A0| =A0 =A05 +++++
+> =A0include/linux/mmc/sdhci.h | =A0 =A02 ++
+> =A02 files changed, 7 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 3c6358f..68d2e36 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1654,6 +1654,8 @@ int sdhci_suspend_host(struct sdhci_host *host,=
+ pm_message_t state)
+> =A0 =A0 =A0 =A0if (mmc->card && (mmc->card->type !=3D MMC_TYPE_SDIO))
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D mmc_suspend_host(host->mmc);
+>
+> + =A0 =A0 =A0 /* Save the original intmask to restore later */
+> + =A0 =A0 =A0 host->save_intmask =3D sdhci_readl(host, SDHCI_INT_ENAB=
+LE);
+> =A0 =A0 =A0 =A0sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+>
+> =A0 =A0 =A0 =A0if (host->vmmc)
+> @@ -1695,6 +1697,9 @@ int sdhci_resume_host(struct sdhci_host *host)
+>
+> =A0 =A0 =A0 =A0sdhci_enable_card_detection(host);
+>
+> + =A0 =A0 =A0 /* Restore the original intmask */
+> + =A0 =A0 =A0 sdhci_unmask_irqs(host, host->save_intmask);
+> +
+> =A0 =A0 =A0 =A0return ret;
+> =A0}
+>
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index dfb2106..5b9f6db 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -141,6 +141,8 @@ struct sdhci_host {
+>
+> =A0 =A0 =A0 =A0unsigned int caps; =A0 =A0 =A0/* Alternative capabilit=
+ies */
+>
+> + =A0 =A0 =A0 unsigned int save_intmask; =A0 =A0/* Store original int=
+mask */
+> +
+> =A0 =A0 =A0 =A0unsigned long private[0] ____cacheline_aligned;
+> =A0};
+> =A0#endif /* __SDHCI_H */
+> --
+> 1.7.2.3
+>
+> --
 
+Hi Grant,
 
-> -----Original Message-----
-> From: subhashj@codeaurora.org [mailto:subhashj@codeaurora.org]
-> Sent: Wednesday, March 09, 2011 11:35 PM
-> To: Nath, Arindam; cjb@laptop.org
-> Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: RE: [PATCH v2 03/12] mmc: sd: query function modes for uhs
-> cards
-> 
-> 
-> 
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> > Sent: Wednesday, March 09, 2011 8:01 PM
-> > To: subhashj@codeaurora.org; cjb@laptop.org
-> > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > Subject: RE: [PATCH v2 03/12] mmc: sd: query function modes for uhs
-> > cards
-> >
-> > Hi Subhash,
-> >
-> >
-> > > -----Original Message-----
-> > > From: subhashj@codeaurora.org [mailto:subhashj@codeaurora.org]
-> > > Sent: Wednesday, March 09, 2011 7:39 PM
-> > > To: Nath, Arindam; cjb@laptop.org
-> > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > > Subject: RE: [PATCH v2 03/12] mmc: sd: query function modes for uhs
-> > > cards
-> > >
-> > >
-> > >
-> > > > -----Original Message-----
-> > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > > owner@vger.kernel.org] On Behalf Of Arindam Nath
-> > > > Sent: Friday, March 04, 2011 5:03 PM
-> > > > To: cjb@laptop.org
-> > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
-> > > > subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
-> > henry.su@amd.com;
-> > > > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
-> > > > Subject: [PATCH v2 03/12] mmc: sd: query function modes for uhs
-> > cards
-> > > >
-> > > > SD cards which conform to Physical Layer Spec v3.01 can support
-> > > > additional Bus Speed Modes, Driver Strength, and Current Limit
-> > > > other than the default values. We use CMD6 mode 0 to read these
-> > > > additional card functions. The values read here will be used
-> > > > during UHS-I initialization steps.
-> > > >
-> > > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > > > ---
-> > > >  drivers/mmc/core/sd.c    |   99
-> > > > +++++++++++++++++++++++++++++++++++++++-------
-> > > >  include/linux/mmc/card.h |    3 +
-> > > >  2 files changed, 87 insertions(+), 15 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > > > index 3e82599..a63956b 100644
-> > > > --- a/drivers/mmc/core/sd.c
-> > > > +++ b/drivers/mmc/core/sd.c
-> > > > @@ -283,25 +283,94 @@ static int mmc_read_switch(struct mmc_card
-> > > *card)
-> > > >  		return -ENOMEM;
-> > > >  	}
-> > > >
-> > > > -	err = mmc_sd_switch(card, 0, 0, 1, status);
-> > > > -	if (err) {
-> > > > -		/* If the host or the card can't do the switch,
-> > > > -		 * fail more gracefully. */
-> > > > -		if ((err != -EINVAL)
-> > > > -		 && (err != -ENOSYS)
-> > > > -		 && (err != -EFAULT))
-> > > > +	if (card->scr.sda_spec3) {
-> > > > +		/* First find out the supported Bus Speed Modes. */
-> > > > +		err = mmc_sd_switch(card, 0, 0, 1, status);
-> > > Reading function-group-1 status applies for both SD3.0 and SD2.0
-> > cards
-> > > as
-> > > well. With card->scr.sda_spec check, you are duplicating the same
-> > code
-> > > in
-> > > else part of it as well. You can optimize it to only one call to
-> > > mmc_sd_switch() to read function-group-1.
-> >
-> > Yes, there is a duplication of the code. I will try to minimize it in
-> > the next version.
-> >
-> > >
-> > > > +		if (err) {
-> > > > +			/*
-> > > > +			 * If the host or the card can't do the switch,
-> > > > +			 * fail more gracefully.
-> > > > +			 */
-> > > > +			if ((err != -EINVAL)
-> > > > +			&& (err != -ENOSYS)
-> > > > +			&& (err != -EFAULT))
-> > > > +				goto out;
-> > > > +
-> > > > +			printk(KERN_WARNING "%s: problem reading "
-> > > > +				"Bus Speed modes.\n",
-> > > > +				mmc_hostname(card->host));
-> > > > +			err = 0;
-> > > > +
-> > > >  			goto out;
-> > > > +		}
-> > > >
-> > > > -		printk(KER	N_WARNING "%s: problem reading switch "
-> > > > -			"capabilities, performance might suffer.\n",
-> > > > -			mmc_hostname(card->host));
-> > > > -		err = 0;
-> > > > +		card->sw_caps.uhs_bus_mode = status[13];
-> > > Is adding uhs* prefix is appropriate? If card supports SD3.0 spec
-> > means
-> > > card
-> > > have to support UHS modes? Can we have cards (SDXC?) which sets
-> SD3.0
-> > > spec
-> > > bit in SCR but does not support any of the UHS modes. So in this
-> case
-> > > putting uhs* prefix might not be appropriate.
-> >
-> > As per Physical Layer Spec v3.01, UHS-I can be applied to SDHC and
-> SDXC
-> > cards. Cards which support UHS-I should have sda_spec3 set in the SCR
-> > register. Since we need to set the data rate depending on the exact
-> > UHS-I speed mode, I have prefixed the variable with uhs_ to make
-> things
-> > clear.
-> 
-> UHS-I speed mode support is not a must condition to set SD_SPEC3 bit to
-> 1 in
-> SCR register:
-> This is what the spec says:
-> . Essential conditions to indicate Version 3.00 Card (SD_SPEC=2 and
-> SD_SPEC3=1)
-> (1) The card shall support CMD6
-> (2) The card shall support CMD8
-> (3) The card shall support CMD42
-> (4) User area capacity shall be up to 2GB (SDSC) or 32GB (SDHC)
-> User area capacity shall be more than or equal to 32GB and up to 2TB
-> (SDXC)
-> (5) Speed Class shall be supported (SDHC or SDXC)
-> 
-> Supporting UHS-I mode is an optional conditional.
+Why is this necessary? If I understand correctly, the sdhci resume
+sequence sets some base needed bits inside SDHCI_INT_ENABLE inside
+sdhci_clear_set_irqs. Only if you have some outstanding DMA, but
+surely all DMA must be completed prior to your suspending
+(mmc_queue_suspend ensures nothing is outstanding)?
 
-Thanks for the clarification. I will change the variable names as sd3_*.
+I'm asking since we're on Tegra 2 and have suspend/resume working fine
+with eMMC.
 
-Arindam
-
-> 
-> >
-> > Thanks,
-> > Arindam
-> >
-> > >
-> > >
-> > > > +
-> > > > +		/* Find out Driver Strengths supported by the card */
-> > > > +		err = mmc_sd_switch(card, 0, 2, 1, status);
-> > > > +		if (err) {
-> > > > +			/*
-> > > > +			 * If the host or the card can't do the switch,
-> > > > +			 * fail more gracefully.
-> > > > +			 */
-> > > > +			if ((err != -EINVAL)
-> > > > +			&& (err != -ENOSYS)
-> > > > +			&& (err != -EFAULT))
-> > > > +				goto out;
-> > > > +
-> > > > +			printk(KERN_WARNING "%s: problem reading "
-> > > > +				"Driver Strength.\n",
-> > > > +				mmc_hostname(card->host));
-> > > > +			err = 0;
-> > > >
-> > > > -		goto out;
-> > > > -	}
-> > > > +			goto out;
-> > > > +		}
-> > > >
-> > > > -	if (status[13] & 0x02)
-> > > > -		card->sw_caps.hs_max_dtr = 50000000;
-> > > > +		card->sw_caps.uhs_drv_type = status[9];
-> > > > +
-> > > > +		/* Find out Current Limits supported by the card */
-> > > > +		err = mmc_sd_switch(card, 0, 3, 1, status);
-> > > > +		if (err) {
-> > > > +			/*
-> > > > +			 * If the host or the card can't do the switch,
-> > > > +			 * fail more gracefully.
-> > > > +			 */
-> > > > +			if ((err != -EINVAL)
-> > > > +			&& (err != -ENOSYS)
-> > > > +			&& (err != -EFAULT))
-> > > > +				goto out;
-> > > > +
-> > > > +			printk(KERN_WARNING "%s: problem reading "
-> > > > +				"Current Limit.\n",
-> > > > +				mmc_hostname(card->host));
-> > > > +			err = 0;
-> > > > +
-> > > > +			goto out;
-> > > > +		}
-> > > > +
-> > > > +		card->sw_caps.uhs_curr_limit = status[7];
-> > > > +	} else {
-> > > > +		err = mmc_sd_switch(card, 0, 0, 1, status);
-> > > > +		if (err) {
-> > > > +			/*
-> > > > +			 * If the host or the card can't do the switch,
-> > > > +			 * fail more gracefully.
-> > > > +			 */
-> > > > +			if ((err != -EINVAL)
-> > > > +			&& (err != -ENOSYS)
-> > > > +			&& (err != -EFAULT))
-> > > > +				goto out;
-> > > > +
-> > > > +			printk(KERN_WARNING "%s: problem reading switch
-> "
-> > > > +				"capabilities, performance might
-> suffer.\n",
-> > > > +				mmc_hostname(card->host));
-> > > > +			err = 0;
-> > > > +			goto out;
-> > > > +		}
-> > > > +
-> > > > +		if (status[13] & 0x02)
-> > > > +			card->sw_caps.hs_max_dtr = 50000000;
-> > > > +	}
-> > > >
-> > > >  out:
-> > > >  	kfree(status);
-> > > > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> > > > index 22b0335..7080f22 100644
-> > > > --- a/include/linux/mmc/card.h
-> > > > +++ b/include/linux/mmc/card.h
-> > > > @@ -75,6 +75,9 @@ struct sd_ssr {
-> > > >
-> > > >  struct sd_switch_caps {
-> > > >  	unsigned int		hs_max_dtr;
-> > > > +	unsigned int		uhs_bus_mode;
-> > > > +	unsigned int		uhs_drv_type;
-> > > > +	unsigned int		uhs_curr_limit;
-> > > >  };
-> > > >
-> > > >  struct sdio_cccr {
-> > > > --
-> > > > 1.7.1
-> > > >
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe linux-
-> > mmc"
-> > > in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-
-> info.html
-> > >
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
+Thanks,
+A
