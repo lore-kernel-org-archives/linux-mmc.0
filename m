@@ -1,76 +1,68 @@
-From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH] mmc: export function mmc_do_release_host
-Date: Wed, 9 Mar 2011 09:11:02 +0100
-Message-ID: <1299658262-1337-1-git-send-email-linus.walleij@stericsson.com>
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Subject: [PATCH]mmc: set timeout for SDHCI host before sending busy cmds
+Date: Wed, 9 Mar 2011 16:06:09 +0800
+Message-ID: <20110309080609.GA23207@intel.com>
+Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:47927 "EHLO
-	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756358Ab1CIIMD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2011 03:12:03 -0500
+Received: from mga02.intel.com ([134.134.136.20]:6492 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752478Ab1CIINn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 9 Mar 2011 03:13:43 -0500
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: kmpark@infradead.org, prakity@marvell.com, jh80.chung@samsung.com, w.sang@pengutronix.de, linux-kernel@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@stericsson.com>
+Hi all,
+   From the previous discussion, I do not think we have got a clear conclusion
+   about using maximum timeout value. At least we know from Jae hoon Chung
+   using 0xE for every case is not a good. So I want to suggest only use 0xE for
+   busy command. I personally preferred below implementation, which is similar
+   with a RFC patch submitted by Jae hoon Chung, but only without adding a new
+   quirk.
 
-When using mmc_try_claim_host the corresponding release
-function is mmc_do_release_host, which then also must
-be exported.
+   I think sdhci_calc_timeout should be left for data transfer since at least we
+   can get a warning if 0xE is not enough for host to use. And if the host
+   controller and the card have no bugs, then the calculated timeout should be
+   safe. Left the old implementation unchanged is also compatible with all
+   existed host controllers and cards.
 
-Reviewed-by: Jonas Aberg <jonas.aberg@stericsson.com>
-Reviewed-by: Sebastian Rasmussen <sebastian.rasmussen@stericsson.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+   But for busy command, we are not clear about how long is safe enough for
+   waiting and there is also no function to do the calculation for them. So
+   preferred just using 0xE. Below the patch and comment:
+
+Set the timeout control register for SDHCI host when send some commands which
+need busy signal. Use the maximum timeout value 0xE will be safe.
+
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
-V2: updated with kerneldoc
----
- drivers/mmc/core/core.c  |   10 +++++++++-
- include/linux/mmc/core.h |    1 +
- 2 files changed, 10 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci.c |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6625c05..0178fca 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -528,7 +528,14 @@ int mmc_try_claim_host(struct mmc_host *host)
- }
- EXPORT_SYMBOL(mmc_try_claim_host);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 99c372e..8306323 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -659,8 +659,15 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_data *data)
  
--static void mmc_do_release_host(struct mmc_host *host)
-+/**
-+ *	mmc_do_release_host - release a claimed host
-+ *	@host: mmc host to release
-+ *
-+ *	If you successfully claimed a host, this function will
-+ *	release it again.
-+ */
-+void mmc_do_release_host(struct mmc_host *host)
- {
- 	unsigned long flags;
+ 	WARN_ON(host->data);
  
-@@ -543,6 +550,7 @@ static void mmc_do_release_host(struct mmc_host *host)
- 		wake_up(&host->wq);
- 	}
- }
-+EXPORT_SYMBOL(mmc_do_release_host);
+-	if (data == NULL)
++	if (data == NULL) {
++		/*
++		 * set the timeout to be maximum value for commands those with
++		 * busy signal
++		 */
++		if (host->cmd->flags & MMC_RSP_BUSY)
++			sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
+ 		return;
++	}
  
- void mmc_host_deeper_disable(struct work_struct *work)
- {
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 64e013f..07f27af 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -160,6 +160,7 @@ extern unsigned int mmc_align_data_size(struct mmc_card *, unsigned int);
- 
- extern int __mmc_claim_host(struct mmc_host *host, atomic_t *abort);
- extern void mmc_release_host(struct mmc_host *host);
-+extern void mmc_do_release_host(struct mmc_host *host);
- extern int mmc_try_claim_host(struct mmc_host *host);
- 
- /**
+ 	/* Sanity checks */
+ 	BUG_ON(data->blksz * data->blocks > 524288);
 -- 
-1.7.3.2
+1.6.6.1
 
