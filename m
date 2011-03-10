@@ -1,234 +1,209 @@
-From: <subhashj@codeaurora.org>
-Subject: RE: [PATCH v2 08/12] mmc: sd: report correct speed and capacity of uhs cards
-Date: Thu, 10 Mar 2011 19:11:43 +0530
-Message-ID: <001e01cbdf28$e73ece90$b5bc6bb0$@org>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com> <1299238369-1768-9-git-send-email-arindam.nath@amd.com> <001801cbdf19$10c9d3f0$325d7bd0$@org> <6C03668EAF45B747AF947A1603D1B300E3AA28F3@SAUSEXMBP01.amd.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v2 08/12] mmc: sd: report correct speed and capacity of
+ uhs cards
+Date: Thu, 10 Mar 2011 07:28:04 -0600
+Message-ID: <6C03668EAF45B747AF947A1603D1B300E3AA28F3@SAUSEXMBP01.amd.com>
+References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
+ <1299238369-1768-9-git-send-email-arindam.nath@amd.com>
+ <001801cbdf19$10c9d3f0$325d7bd0$@org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:1564 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751478Ab1CJNlu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2011 08:41:50 -0500
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B300E3AA28F3@SAUSEXMBP01.amd.com>
-Content-Language: en-us
+Received: from am1ehsobe005.messaging.microsoft.com ([213.199.154.208]:6682
+	"EHLO AM1EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752828Ab1CJNoZ convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Mar 2011 08:44:25 -0500
+In-Reply-To: <001801cbdf19$10c9d3f0$325d7bd0$@org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "'Nath, Arindam'" <Arindam.Nath@amd.com>, cjb@laptop.org
-Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, "'Su, Henry'" <Henry.Su@amd.com>, "'Lu, Aaron'" <Aaron.Lu@amd.com>, anath.amd@gmail.com
+To: "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "cjb@laptop.org" <cjb@laptop.org>
+Cc: "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "prakity@marvell.com" <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
+Hi Subhash,
 
 
 > -----Original Message-----
-> From: Nath, Arindam [mailto:Arindam.Nath@amd.com]
-> Sent: Thursday, March 10, 2011 6:58 PM
-> To: subhashj@codeaurora.org; cjb@laptop.org
+> From: subhashj@codeaurora.org [mailto:subhashj@codeaurora.org]
+> Sent: Thursday, March 10, 2011 5:18 PM
+> To: Nath, Arindam; cjb@laptop.org
 > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
 > Subject: RE: [PATCH v2 08/12] mmc: sd: report correct speed and
 > capacity of uhs cards
 > 
-> Hi Subhash,
 > 
 > 
 > > -----Original Message-----
-> > From: subhashj@codeaurora.org [mailto:subhashj@codeaurora.org]
-> > Sent: Thursday, March 10, 2011 5:18 PM
-> > To: Nath, Arindam; cjb@laptop.org
-> > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > Subject: RE: [PATCH v2 08/12] mmc: sd: report correct speed and
-> > capacity of uhs cards
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Arindam Nath
+> > Sent: Friday, March 04, 2011 5:03 PM
+> > To: cjb@laptop.org
+> > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
+> > subhashj@codeaurora.org; linux-mmc@vger.kernel.org; henry.su@amd.com;
+> > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
+> > Subject: [PATCH v2 08/12] mmc: sd: report correct speed and capacity
+> of
+> > uhs cards
 > >
+> > Since only UHS-I cards respond with S18A set in response to ACMD41,
+> > we set the card as ultra-high-speed after successfull initialization.
+> > We can have SDHC or SDXC UHS-I cards, so we need to decide based on
+> > C_SIZE field of CSDv2.0 register. According to Physical Layer spec
+> > v3.01, the minimum value of C_SIZE for SDXC card is 00FFFFh.
 > >
+> > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> > ---
+> >  drivers/mmc/core/bus.c   |   11 ++++++++---
+> >  drivers/mmc/core/sd.c    |   10 +++++++++-
+> >  include/linux/mmc/card.h |    7 +++++++
+> >  3 files changed, 24 insertions(+), 4 deletions(-)
 > >
-> > > -----Original Message-----
-> > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > owner@vger.kernel.org] On Behalf Of Arindam Nath
-> > > Sent: Friday, March 04, 2011 5:03 PM
-> > > To: cjb@laptop.org
-> > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
-> > > subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
-> henry.su@amd.com;
-> > > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
-> > > Subject: [PATCH v2 08/12] mmc: sd: report correct speed and
-> capacity
-> > of
-> > > uhs cards
-> > >
-> > > Since only UHS-I cards respond with S18A set in response to ACMD41,
-> > > we set the card as ultra-high-speed after successfull
-> initialization.
-> > > We can have SDHC or SDXC UHS-I cards, so we need to decide based on
-> > > C_SIZE field of CSDv2.0 register. According to Physical Layer spec
-> > > v3.01, the minimum value of C_SIZE for SDXC card is 00FFFFh.
-> > >
-> > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > > ---
-> > >  drivers/mmc/core/bus.c   |   11 ++++++++---
-> > >  drivers/mmc/core/sd.c    |   10 +++++++++-
-> > >  include/linux/mmc/card.h |    7 +++++++
-> > >  3 files changed, 24 insertions(+), 4 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> > > index 63667a8..ceeefa4 100644
-> > > --- a/drivers/mmc/core/bus.c
-> > > +++ b/drivers/mmc/core/bus.c
-> > > @@ -274,8 +274,12 @@ int mmc_add_card(struct mmc_card *card)
-> > >  		break;
-> > >  	case MMC_TYPE_SD:
-> > >  		type = "SD";
-> > > -		if (mmc_card_blockaddr(card))
-> > > -			type = "SDHC";
-> > > +		if (mmc_card_blockaddr(card)) {
-> > > +			if (mmc_card_ext_capacity(card))
-> > > +				type = "SDXC";
-> > > +			else
-> > > +				type = "SDHC";
-> > > +		}
-> > >  		break;
-> > >  	case MMC_TYPE_SDIO:
-> > >  		type = "SDIO";
-> > > @@ -298,7 +302,8 @@ int mmc_add_card(struct mmc_card *card)
-> > >  	} else {
-> > >  		printk(KERN_INFO "%s: new %s%s%s card at address %04x\n",
-> > >  			mmc_hostname(card->host),
-> > > -			mmc_card_highspeed(card) ? "high speed " : "",
-> > > +			mmc_card_ultrahighspeed(card) ? "ultra high speed "
-> > :
-> >
-> > we should use "sd" prefix before ultrahighspeed. Also can't we use
-> name
-> > as
-> > ush instead of ultrahighspeed? What about mmc_card_sd_ush().
-> > Also with the USH, SD card's DDR50 mode also falls under UHS mode.
-> And
-> > we
-> > have DDR mode for MMC card as well (mmc_card_ddr_mode()).
+> > diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> > index 63667a8..ceeefa4 100644
+> > --- a/drivers/mmc/core/bus.c
+> > +++ b/drivers/mmc/core/bus.c
+> > @@ -274,8 +274,12 @@ int mmc_add_card(struct mmc_card *card)
+> >  		break;
+> >  	case MMC_TYPE_SD:
+> >  		type = "SD";
+> > -		if (mmc_card_blockaddr(card))
+> > -			type = "SDHC";
+> > +		if (mmc_card_blockaddr(card)) {
+> > +			if (mmc_card_ext_capacity(card))
+> > +				type = "SDXC";
+> > +			else
+> > +				type = "SDHC";
+> > +		}
+> >  		break;
+> >  	case MMC_TYPE_SDIO:
+> >  		type = "SDIO";
+> > @@ -298,7 +302,8 @@ int mmc_add_card(struct mmc_card *card)
+> >  	} else {
+> >  		printk(KERN_INFO "%s: new %s%s%s card at address %04x\n",
+> >  			mmc_hostname(card->host),
+> > -			mmc_card_highspeed(card) ? "high speed " : "",
+> > +			mmc_card_ultrahighspeed(card) ? "ultra high speed "
+> :
 > 
-> I wanted the name to be similar as *_highspeed(), so
-> *_ultrahighspeed(). How about mmc_sd_card_ultrahighspeed() or
-> mmc_sd_card_uhs()?
+> we should use "sd" prefix before ultrahighspeed. Also can't we use name
+> as
+> ush instead of ultrahighspeed? What about mmc_card_sd_ush().
+> Also with the USH, SD card's DDR50 mode also falls under UHS mode. And
+> we
+> have DDR mode for MMC card as well (mmc_card_ddr_mode()).
 
-Yes, mmc_sd_card_uhs() looks fine.
+I wanted the name to be similar as *_highspeed(), so *_ultrahighspeed(). How about mmc_sd_card_ultrahighspeed() or mmc_sd_card_uhs()?
+
+Thanks,
+Arindam
 
 > 
-> Thanks,
-> Arindam
-> 
+> > +			(mmc_card_highspeed(card) ? "high speed " : ""),
+> >  			mmc_card_ddr_mode(card) ? "DDR " : "",
+> >  			type, card->rca);
+> >  	}
+> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > index df98a2c..be01397 100644
+> > --- a/drivers/mmc/core/sd.c
+> > +++ b/drivers/mmc/core/sd.c
+> > @@ -129,7 +129,7 @@ static int mmc_decode_csd(struct mmc_card *card)
+> >  		break;
+> >  	case 1:
+> >  		/*
+> > -		 * This is a block-addressed SDHC card. Most
+> > +		 * This is a block-addressed SDHC or SDXC card. Most
+> >  		 * interesting fields are unused and have fixed
+> >  		 * values. To avoid getting tripped by buggy cards,
+> >  		 * we assume those fixed values ourselves.
+> > @@ -143,6 +143,7 @@ static int mmc_decode_csd(struct mmc_card *card)
+> >  		e = UNSTUFF_BITS(resp, 96, 3);
+> >  		csd->max_dtr	  = tran_exp[e] * tran_mant[m];
+> >  		csd->cmdclass	  = UNSTUFF_BITS(resp, 84, 12);
+> > +		csd->c_size	  = UNSTUFF_BITS(resp, 48, 22);
 > >
-> > > +			(mmc_card_highspeed(card) ? "high speed " : ""),
-> > >  			mmc_card_ddr_mode(card) ? "DDR " : "",
-> > >  			type, card->rca);
-> > >  	}
-> > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > > index df98a2c..be01397 100644
-> > > --- a/drivers/mmc/core/sd.c
-> > > +++ b/drivers/mmc/core/sd.c
-> > > @@ -129,7 +129,7 @@ static int mmc_decode_csd(struct mmc_card
-> *card)
-> > >  		break;
-> > >  	case 1:
-> > >  		/*
-> > > -		 * This is a block-addressed SDHC card. Most
-> > > +		 * This is a block-addressed SDHC or SDXC card. Most
-> > >  		 * interesting fields are unused and have fixed
-> > >  		 * values. To avoid getting tripped by buggy cards,
-> > >  		 * we assume those fixed values ourselves.
-> > > @@ -143,6 +143,7 @@ static int mmc_decode_csd(struct mmc_card
-> *card)
-> > >  		e = UNSTUFF_BITS(resp, 96, 3);
-> > >  		csd->max_dtr	  = tran_exp[e] * tran_mant[m];
-> > >  		csd->cmdclass	  = UNSTUFF_BITS(resp, 84, 12);
-> > > +		csd->c_size	  = UNSTUFF_BITS(resp, 48, 22);
-> > >
-> > >  		m = UNSTUFF_BITS(resp, 48, 22);
-> > >  		csd->capacity     = (1 + m) << 10;
-> > > @@ -922,6 +923,13 @@ static int mmc_sd_init_card(struct mmc_host
-> > *host,
-> > > u32 ocr,
-> > >  		err = mmc_sd_init_uhs_card(card);
-> > >  		if (err)
-> > >  			goto free_card;
-> > > +
-> > > +		/* Card is an ultra-high-speed card */
-> > > +		mmc_card_set_ultrahighspeed(card);
-> > > +
-> > > +		/* SDXC cards have a minimum C_SIZE of 0x00FFFF */
-> > > +		if (card->csd.c_size >= 0xFFFF)
-> > > +			mmc_card_set_ext_capacity(card);
-> > >  	} else {
-> > >  		/*
-> > >  		 * Attempt to change to high-speed (if supported)
-> > > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> > > index a6811ae..61459aa 100644
-> > > --- a/include/linux/mmc/card.h
-> > > +++ b/include/linux/mmc/card.h
-> > > @@ -29,6 +29,7 @@ struct mmc_csd {
-> > >  	unsigned short		cmdclass;
-> > >  	unsigned short		tacc_clks;
-> > >  	unsigned int		tacc_ns;
-> > > +	unsigned int		c_size;
-> > >  	unsigned int		r2w_factor;
-> > >  	unsigned int		max_dtr;
-> > >  	unsigned int		erase_size;		/* In sectors */
-> > > @@ -151,6 +152,8 @@ struct mmc_card {
-> > >  #define MMC_STATE_HIGHSPEED	(1<<2)		/* card is in
-> > high
-> > > speed mode */
-> > >  #define MMC_STATE_BLOCKADDR	(1<<3)		/* card uses
-> > block-
-> > > addressing */
-> > >  #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in
+> >  		m = UNSTUFF_BITS(resp, 48, 22);
+> >  		csd->capacity     = (1 + m) << 10;
+> > @@ -922,6 +923,13 @@ static int mmc_sd_init_card(struct mmc_host
+> *host,
+> > u32 ocr,
+> >  		err = mmc_sd_init_uhs_card(card);
+> >  		if (err)
+> >  			goto free_card;
+> > +
+> > +		/* Card is an ultra-high-speed card */
+> > +		mmc_card_set_ultrahighspeed(card);
+> > +
+> > +		/* SDXC cards have a minimum C_SIZE of 0x00FFFF */
+> > +		if (card->csd.c_size >= 0xFFFF)
+> > +			mmc_card_set_ext_capacity(card);
+> >  	} else {
+> >  		/*
+> >  		 * Attempt to change to high-speed (if supported)
+> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> > index a6811ae..61459aa 100644
+> > --- a/include/linux/mmc/card.h
+> > +++ b/include/linux/mmc/card.h
+> > @@ -29,6 +29,7 @@ struct mmc_csd {
+> >  	unsigned short		cmdclass;
+> >  	unsigned short		tacc_clks;
+> >  	unsigned int		tacc_ns;
+> > +	unsigned int		c_size;
+> >  	unsigned int		r2w_factor;
+> >  	unsigned int		max_dtr;
+> >  	unsigned int		erase_size;		/* In sectors */
+> > @@ -151,6 +152,8 @@ struct mmc_card {
+> >  #define MMC_STATE_HIGHSPEED	(1<<2)		/* card is in
 > high
-> > > speed mode */
-> > > +#define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in
-> > ultra
-> > > high speed mode */
-> > > +#define MMC_CARD_SDXC		(1<<6)		/* card is SDXC
-> > */
-> > >  	unsigned int		quirks; 	/* card quirks */
-> > >  #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0
-> > > writes outside of the VS CCCR range */
-> > >  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func-
-> > > >cur_blksize */
-> > > @@ -193,12 +196,16 @@ struct mmc_card {
-> > >  #define mmc_card_highspeed(c)	((c)->state & MMC_STATE_HIGHSPEED)
-> > >  #define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
-> > >  #define mmc_card_ddr_mode(c)	((c)->state &
-> > MMC_STATE_HIGHSPEED_DDR)
-> > > +#define mmc_card_ultrahighspeed(c) ((c)->state &
-> > > MMC_STATE_ULTRAHIGHSPEED)
-> > > +#define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
-> > >
-> > >  #define mmc_card_set_present(c)	((c)->state |=
-> MMC_STATE_PRESENT)
-> > >  #define mmc_card_set_readonly(c) ((c)->state |=
-> MMC_STATE_READONLY)
-> > >  #define mmc_card_set_highspeed(c) ((c)->state |=
-> > MMC_STATE_HIGHSPEED)
-> > >  #define mmc_card_set_blockaddr(c) ((c)->state |=
-> > MMC_STATE_BLOCKADDR)
-> > >  #define mmc_card_set_ddr_mode(c) ((c)->state |=
-> > > MMC_STATE_HIGHSPEED_DDR)
-> > > +#define mmc_card_set_ultrahighspeed(c) ((c)->state |=
-> > > MMC_STATE_ULTRAHIGHSPEED)
-> > > +#define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
-> > >
-> > >  static inline int mmc_card_lenient_fn0(const struct mmc_card *c)
-> > >  {
-> > > --
-> > > 1.7.1
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-
-> mmc"
-> > in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > speed mode */
+> >  #define MMC_STATE_BLOCKADDR	(1<<3)		/* card uses
+> block-
+> > addressing */
+> >  #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high
+> > speed mode */
+> > +#define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in
+> ultra
+> > high speed mode */
+> > +#define MMC_CARD_SDXC		(1<<6)		/* card is SDXC
+> */
+> >  	unsigned int		quirks; 	/* card quirks */
+> >  #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0
+> > writes outside of the VS CCCR range */
+> >  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func-
+> > >cur_blksize */
+> > @@ -193,12 +196,16 @@ struct mmc_card {
+> >  #define mmc_card_highspeed(c)	((c)->state & MMC_STATE_HIGHSPEED)
+> >  #define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
+> >  #define mmc_card_ddr_mode(c)	((c)->state &
+> MMC_STATE_HIGHSPEED_DDR)
+> > +#define mmc_card_ultrahighspeed(c) ((c)->state &
+> > MMC_STATE_ULTRAHIGHSPEED)
+> > +#define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
 > >
+> >  #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
+> >  #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+> >  #define mmc_card_set_highspeed(c) ((c)->state |=
+> MMC_STATE_HIGHSPEED)
+> >  #define mmc_card_set_blockaddr(c) ((c)->state |=
+> MMC_STATE_BLOCKADDR)
+> >  #define mmc_card_set_ddr_mode(c) ((c)->state |=
+> > MMC_STATE_HIGHSPEED_DDR)
+> > +#define mmc_card_set_ultrahighspeed(c) ((c)->state |=
+> > MMC_STATE_ULTRAHIGHSPEED)
+> > +#define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
+> >
+> >  static inline int mmc_card_lenient_fn0(const struct mmc_card *c)
+> >  {
+> > --
+> > 1.7.1
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 
 
