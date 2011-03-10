@@ -1,208 +1,171 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 07/12] mmc: sd: set current limit for uhs cards
-Date: Wed, 9 Mar 2011 21:12:44 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B300E3AA26C5@SAUSEXMBP01.amd.com>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
- <1299238369-1768-8-git-send-email-arindam.nath@amd.com>
- <010DFB1D-879B-4D48-B2E9-58B52CEF1D05@marvell.com>
+From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Subject: [PATCH V1] mx51 enchance the sd/mmc HW timing compatibility on mx51 boards.
+Date: Thu, 10 Mar 2011 14:15:46 +0800
+Message-ID: <1299737746-19324-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe004.messaging.microsoft.com ([216.32.180.14]:22923
-	"EHLO VA3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751675Ab1CJDM6 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 9 Mar 2011 22:12:58 -0500
-In-Reply-To: <010DFB1D-879B-4D48-B2E9-58B52CEF1D05@marvell.com>
-Content-Language: en-US
+Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.181]:53620
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751592Ab1CJGQS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2011 01:16:18 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: linux-arm-kernel@lists.infradead.org
+Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, eric.miao@linaro.org, Richard Zhu <Hong-Xing.Zhu@freescale.com>
 
-Hi Philip,
+Some cards have the CRC errors in read on mx51 BBG board.
+Configure the eSDHC pad configurations to level up the
+compatibility to fix this issue.
 
+Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Tested-by: Shawn Guo <shawn.gsc@gmail.com>
+---
+ arch/arm/plat-mxc/include/mach/iomux-mx51.h |   40 +++++++++++++-------------
+ 1 files changed, 20 insertions(+), 20 deletions(-)
 
-> -----Original Message-----
-> From: Philip Rakity [mailto:prakity@marvell.com]
-> Sent: Thursday, March 10, 2011 3:11 AM
-> To: Nath, Arindam
-> Cc: cjb@laptop.org; zhangfei.gao@gmail.com; subhashj@codeaurora.org;
-> linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: Re: [PATCH v2 07/12] mmc: sd: set current limit for uhs cards
-> 
-> 
-> On Mar 4, 2011, at 3:32 AM, Arindam Nath wrote:
-> 
-> > We decide on the current limit to be set for the card based on the
-> > Capability of Host Controller to provide current at 1.8V signalling,
-> > and the maximum current limit of the card as indicated by CMD6
-> > mode 0. We then set the current limit for the card using CMD6 mode 1.
-> >
-> > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > ---
-> > drivers/mmc/core/sd.c    |   45
-> +++++++++++++++++++++++++++++++++++++++++++++
-> > drivers/mmc/host/sdhci.c |   24 ++++++++++++++++++++++++
-> > include/linux/mmc/card.h |    9 +++++++++
-> > include/linux/mmc/host.h |    1 +
-> > 4 files changed, 79 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > index ec0d8e6..df98a2c 100644
-> > --- a/drivers/mmc/core/sd.c
-> > +++ b/drivers/mmc/core/sd.c
-> > @@ -550,6 +550,46 @@ static int sd_set_bus_speed_mode(struct mmc_card
-> *card, u8 *status)
-> > 	return 0;
-> > }
-> >
-> > +static int sd_set_current_limit(struct mmc_card *card, u8 *status)
-> > +{
-> > +	struct mmc_host *host = card->host;
-> > +	int mmc_host_max_current_180, current_limit;
-> > +	int err;
-> > +
-> > +	/* sanity check */
-> > +	if (!host->ops->get_max_current_180)
-> > +		return 0;
-> > +
-> > +	/* Maximum current supported by host at 1.8V */
-> > +	mmc_host_max_current_180 = host->ops->get_max_current_180(host);
-> > +
-> > +	if (mmc_host_max_current_180 >= 800) {
-> > +		if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_800)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_800;
-> > +		else if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_600)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_600;
-> > +		else if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_400)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_400;
-> > +	} else if (mmc_host_max_current_180 >= 600) {
-> > +		if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_600)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_600;
-> > +		else if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_400)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_400;
-> > +	} else if (mmc_host_max_current_180 >= 400)
-> > +		if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_400)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_400;
-> > +
-> > +	err = mmc_sd_switch(card, 1, 3, current_limit, status);
-> > +	if (err)
-> > +		return err;
-> > +
-> > +	if (((status[15] >> 4) & 0x0F) != current_limit)
-> > +		printk(KERN_WARNING "%s: Problem setting current limit!\n",
-> > +			mmc_hostname(card->host));
-> > +
-> > +	return 0;
-> > +}
-> > +
-> 
-> warning on current_limit may not be initialized.
-
-Thanks. Already pointed out by Chris. Will be fixed.
-
-Arindam
-
-> 
-> > /*
-> >  * UHS-I specific initialization procedure
-> >  */
-> > @@ -590,6 +630,11 @@ static int mmc_sd_init_uhs_card(struct mmc_card
-> *card)
-> >
-> > 	/* Set bus speed mode of the card */
-> > 	err = sd_set_bus_speed_mode(card, status);
-> > +	if (err)
-> > +		goto out;
-> > +
-> > +	/* Set current limit for the card */
-> > +	err = sd_set_current_limit(card, status);
-> >
-> > out:
-> > 	kfree(status);
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index f127fa2..245cc39 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -1462,12 +1462,36 @@ static int
-> sdhci_start_signal_voltage_switch(struct mmc_host *mmc)
-> > 	return -EAGAIN;
-> > }
-> >
-> > +static int sdhci_get_max_current_180(struct mmc_host *mmc)
-> > +{
-> > +	struct sdhci_host *host;
-> > +	u32 max_current_caps;
-> > +	unsigned long flags;
-> > +	int max_current_180;
-> > +
-> > +	host = mmc_priv(mmc);
-> > +
-> > +	spin_lock_irqsave(&host->lock, flags);
-> > +
-> > +	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
-> > +
-> > +	spin_unlock_irqrestore(&host->lock, flags);
-> > +
-> > +	/* Maximum current is 4 times the register value for 1.8V */
-> > +	max_current_180 = ((max_current_caps &
-> SDHCI_MAX_CURRENT_180_MASK) >>
-> > +			   SDHCI_MAX_CURRENT_180_SHIFT) *
-> > +			   SDHCI_MAX_CURRENT_MULTIPLIER;
-> > +
-> > +	return max_current_180;
-> > +}
-> > +
-> > static const struct mmc_host_ops sdhci_ops = {
-> > 	.request	= sdhci_request,
-> > 	.set_ios	= sdhci_set_ios,
-> > 	.get_ro		= sdhci_get_ro,
-> > 	.enable_sdio_irq = sdhci_enable_sdio_irq,
-> > 	.start_signal_voltage_switch	=
-> sdhci_start_signal_voltage_switch,
-> > +	.get_max_current_180		= sdhci_get_max_current_180,
-> > };
-> >
-> >
-> /**********************************************************************
-> *******\
-> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> > index 0b24c41..a6811ae 100644
-> > --- a/include/linux/mmc/card.h
-> > +++ b/include/linux/mmc/card.h
-> > @@ -98,6 +98,15 @@ struct sd_switch_caps {
-> > #define SD_DRIVER_TYPE_C	0x04
-> > #define SD_DRIVER_TYPE_D	0x08
-> > 	unsigned int		uhs_curr_limit;
-> > +#define SD_SET_CURRENT_LIMIT_200	0
-> > +#define SD_SET_CURRENT_LIMIT_400	1
-> > +#define SD_SET_CURRENT_LIMIT_600	2
-> > +#define SD_SET_CURRENT_LIMIT_800	3
-> > +
-> > +#define SD_MAX_CURRENT_200	(1 << SD_SET_CURRENT_LIMIT_200)
-> > +#define SD_MAX_CURRENT_400	(1 << SD_SET_CURRENT_LIMIT_400)
-> > +#define SD_MAX_CURRENT_600	(1 << SD_SET_CURRENT_LIMIT_600)
-> > +#define SD_MAX_CURRENT_800	(1 << SD_SET_CURRENT_LIMIT_800)
-> > };
-> >
-> > struct sdio_cccr {
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > index 4dfff6d..e84cd05 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -128,6 +128,7 @@ struct mmc_host_ops {
-> > 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
-> >
-> > 	int	(*start_signal_voltage_switch)(struct mmc_host *host);
-> > +	int	(*get_max_current_180)(struct mmc_host *mmc);
-> > };
-> >
-> > struct mmc_card;
-> > --
-> > 1.7.1
-> >
-> 
+diff --git a/arch/arm/plat-mxc/include/mach/iomux-mx51.h b/arch/arm/plat-mxc/include/mach/iomux-mx51.h
+index b6767f9..3e41348 100644
+--- a/arch/arm/plat-mxc/include/mach/iomux-mx51.h
++++ b/arch/arm/plat-mxc/include/mach/iomux-mx51.h
+@@ -985,11 +985,11 @@
+ #define MX51_PAD_NANDF_WE_B__GPIO3_3		(_MX51_PAD_NANDF_WE_B__GPIO3_3 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_WE_B__NANDF_WE_B		(_MX51_PAD_NANDF_WE_B__NANDF_WE_B | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_WE_B__PATA_DIOW		(_MX51_PAD_NANDF_WE_B__PATA_DIOW | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_WE_B__SD3_DATA0		(_MX51_PAD_NANDF_WE_B__SD3_DATA0 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_WE_B__SD3_DATA0		(_MX51_PAD_NANDF_WE_B__SD3_DATA0 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_RE_B__GPIO3_4		(_MX51_PAD_NANDF_RE_B__GPIO3_4 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_RE_B__NANDF_RE_B		(_MX51_PAD_NANDF_RE_B__NANDF_RE_B | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_RE_B__PATA_DIOR		(_MX51_PAD_NANDF_RE_B__PATA_DIOR | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_RE_B__SD3_DATA1		(_MX51_PAD_NANDF_RE_B__SD3_DATA1 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_RE_B__SD3_DATA1		(_MX51_PAD_NANDF_RE_B__SD3_DATA1 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_ALE__GPIO3_5		(_MX51_PAD_NANDF_ALE__GPIO3_5 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_ALE__NANDF_ALE		(_MX51_PAD_NANDF_ALE__NANDF_ALE | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_ALE__PATA_BUFFER_EN	(_MX51_PAD_NANDF_ALE__PATA_BUFFER_EN | MUX_PAD_CTRL(NO_PAD_CTRL))
+@@ -999,18 +999,18 @@
+ #define MX51_PAD_NANDF_WP_B__GPIO3_7		(_MX51_PAD_NANDF_WP_B__GPIO3_7 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_WP_B__NANDF_WP_B		(_MX51_PAD_NANDF_WP_B__NANDF_WP_B | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_WP_B__PATA_DMACK		(_MX51_PAD_NANDF_WP_B__PATA_DMACK | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_WP_B__SD3_DATA2		(_MX51_PAD_NANDF_WP_B__SD3_DATA2 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_WP_B__SD3_DATA2		(_MX51_PAD_NANDF_WP_B__SD3_DATA2 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB0__ECSPI2_SS1		(_MX51_PAD_NANDF_RB0__ECSPI2_SS1 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB0__GPIO3_8		(_MX51_PAD_NANDF_RB0__GPIO3_8 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB0__NANDF_RB0		(_MX51_PAD_NANDF_RB0__NANDF_RB0 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB0__PATA_DMARQ		(_MX51_PAD_NANDF_RB0__PATA_DMARQ | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_RB0__SD3_DATA3		(_MX51_PAD_NANDF_RB0__SD3_DATA3 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_RB0__SD3_DATA3		(_MX51_PAD_NANDF_RB0__SD3_DATA3 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB1__CSPI_MOSI		(_MX51_PAD_NANDF_RB1__CSPI_MOSI | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB1__ECSPI2_RDY		(_MX51_PAD_NANDF_RB1__ECSPI2_RDY | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB1__GPIO3_9		(_MX51_PAD_NANDF_RB1__GPIO3_9 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB1__NANDF_RB1		(_MX51_PAD_NANDF_RB1__NANDF_RB1 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB1__PATA_IORDY		(_MX51_PAD_NANDF_RB1__PATA_IORDY | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_RB1__SD4_CMD		(_MX51_PAD_NANDF_RB1__SD4_CMD | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_RB1__SD4_CMD		(_MX51_PAD_NANDF_RB1__SD4_CMD | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB2__DISP2_WAIT		(_MX51_PAD_NANDF_RB2__DISP2_WAIT | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB2__ECSPI2_SCLK		(_MX51_PAD_NANDF_RB2__ECSPI2_SCLK | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_NANDF_RB2__FEC_COL		(_MX51_PAD_NANDF_RB2__FEC_COL | MUX_PAD_CTRL(MX51_PAD_CTRL_2))
+@@ -1036,41 +1036,41 @@
+ #define MX51_PAD_NANDF_CS2__GPIO3_18		(_MX51_PAD_NANDF_CS2__GPIO3_18 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS2__NANDF_CS2		(_MX51_PAD_NANDF_CS2__NANDF_CS2 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS2__PATA_CS_0		(_MX51_PAD_NANDF_CS2__PATA_CS_0 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_CS2__SD4_CLK		(_MX51_PAD_NANDF_CS2__SD4_CLK | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_CS2__SD4_CLK		(_MX51_PAD_NANDF_CS2__SD4_CLK | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS))
+ #define MX51_PAD_NANDF_CS2__USBH3_H1_DP		(_MX51_PAD_NANDF_CS2__USBH3_H1_DP | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS3__FEC_MDC		(_MX51_PAD_NANDF_CS3__FEC_MDC | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
+ #define MX51_PAD_NANDF_CS3__GPIO3_19		(_MX51_PAD_NANDF_CS3__GPIO3_19 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS3__NANDF_CS3		(_MX51_PAD_NANDF_CS3__NANDF_CS3 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS3__PATA_CS_1		(_MX51_PAD_NANDF_CS3__PATA_CS_1 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_CS3__SD4_DAT0		(_MX51_PAD_NANDF_CS3__SD4_DAT0 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_CS3__SD4_DAT0		(_MX51_PAD_NANDF_CS3__SD4_DAT0 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS3__USBH3_H1_DM		(_MX51_PAD_NANDF_CS3__USBH3_H1_DM | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS4__FEC_TDATA1		(_MX51_PAD_NANDF_CS4__FEC_TDATA1 | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
+ #define MX51_PAD_NANDF_CS4__GPIO3_20		(_MX51_PAD_NANDF_CS4__GPIO3_20 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS4__NANDF_CS4		(_MX51_PAD_NANDF_CS4__NANDF_CS4 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS4__PATA_DA_0		(_MX51_PAD_NANDF_CS4__PATA_DA_0 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_CS4__SD4_DAT1		(_MX51_PAD_NANDF_CS4__SD4_DAT1 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_CS4__SD4_DAT1		(_MX51_PAD_NANDF_CS4__SD4_DAT1 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS4__USBH3_STP		(_MX51_PAD_NANDF_CS4__USBH3_STP | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS5__FEC_TDATA2		(_MX51_PAD_NANDF_CS5__FEC_TDATA2 | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
+ #define MX51_PAD_NANDF_CS5__GPIO3_21		(_MX51_PAD_NANDF_CS5__GPIO3_21 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS5__NANDF_CS5		(_MX51_PAD_NANDF_CS5__NANDF_CS5 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS5__PATA_DA_1		(_MX51_PAD_NANDF_CS5__PATA_DA_1 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_CS5__SD4_DAT2		(_MX51_PAD_NANDF_CS5__SD4_DAT2 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_CS5__SD4_DAT2		(_MX51_PAD_NANDF_CS5__SD4_DAT2 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS5__USBH3_DIR		(_MX51_PAD_NANDF_CS5__USBH3_DIR | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS6__CSPI_SS3		(_MX51_PAD_NANDF_CS6__CSPI_SS3 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS6__FEC_TDATA3		(_MX51_PAD_NANDF_CS6__FEC_TDATA3 | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
+ #define MX51_PAD_NANDF_CS6__GPIO3_22		(_MX51_PAD_NANDF_CS6__GPIO3_22 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS6__NANDF_CS6		(_MX51_PAD_NANDF_CS6__NANDF_CS6 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS6__PATA_DA_2		(_MX51_PAD_NANDF_CS6__PATA_DA_2 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_CS6__SD4_DAT3		(_MX51_PAD_NANDF_CS6__SD4_DAT3 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_CS6__SD4_DAT3		(_MX51_PAD_NANDF_CS6__SD4_DAT3 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS7__FEC_TX_EN		(_MX51_PAD_NANDF_CS7__FEC_TX_EN | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
+ #define MX51_PAD_NANDF_CS7__GPIO3_23		(_MX51_PAD_NANDF_CS7__GPIO3_23 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_CS7__NANDF_CS7		(_MX51_PAD_NANDF_CS7__NANDF_CS7 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_CS7__SD3_CLK		(_MX51_PAD_NANDF_CS7__SD3_CLK | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_CS7__SD3_CLK		(_MX51_PAD_NANDF_CS7__SD3_CLK | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS))
+ #define MX51_PAD_NANDF_RDY_INT__ECSPI2_SS0	(_MX51_PAD_NANDF_RDY_INT__ECSPI2_SS0 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_NANDF_RDY_INT__FEC_TX_CLK	(_MX51_PAD_NANDF_RDY_INT__FEC_TX_CLK | MUX_PAD_CTRL(MX51_PAD_CTRL_4))
+ #define MX51_PAD_NANDF_RDY_INT__GPIO3_24	(_MX51_PAD_NANDF_RDY_INT__GPIO3_24 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_RDY_INT__NANDF_RDY_INT	(_MX51_PAD_NANDF_RDY_INT__NANDF_RDY_INT | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_NANDF_RDY_INT__SD3_CMD		(_MX51_PAD_NANDF_RDY_INT__SD3_CMD | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_NANDF_RDY_INT__SD3_CMD		(_MX51_PAD_NANDF_RDY_INT__SD3_CMD | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_NANDF_D15__ECSPI2_MOSI		(_MX51_PAD_NANDF_D15__ECSPI2_MOSI | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_NANDF_D15__GPIO3_25		(_MX51_PAD_NANDF_D15__GPIO3_25 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
+ #define MX51_PAD_NANDF_D15__NANDF_D15		(_MX51_PAD_NANDF_D15__NANDF_D15 | MUX_PAD_CTRL(NO_PAD_CTRL))
+@@ -1479,26 +1479,26 @@
+ #define MX51_PAD_SD1_CLK__SD1_CLK		(_MX51_PAD_SD1_CLK__SD1_CLK | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS))
+ #define MX51_PAD_SD1_DATA0__AUD5_TXD		(_MX51_PAD_SD1_DATA0__AUD5_TXD | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_SD1_DATA0__CSPI_MISO		(_MX51_PAD_SD1_DATA0__CSPI_MISO | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+-#define MX51_PAD_SD1_DATA0__SD1_DATA0		(_MX51_PAD_SD1_DATA0__SD1_DATA0 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_SD1_DATA0__SD1_DATA0		(_MX51_PAD_SD1_DATA0__SD1_DATA0 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_EIM_DA0__EIM_DA0		(_MX51_PAD_EIM_DA0__EIM_DA0 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_EIM_DA1__EIM_DA1		(_MX51_PAD_EIM_DA1__EIM_DA1 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_EIM_DA2__EIM_DA2		(_MX51_PAD_EIM_DA2__EIM_DA2 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_EIM_DA3__EIM_DA3		(_MX51_PAD_EIM_DA3__EIM_DA3 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_SD1_DATA1__AUD5_RXD		(_MX51_PAD_SD1_DATA1__AUD5_RXD | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_SD1_DATA1__SD1_DATA1		(_MX51_PAD_SD1_DATA1__SD1_DATA1 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_SD1_DATA1__SD1_DATA1		(_MX51_PAD_SD1_DATA1__SD1_DATA1 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_EIM_DA4__EIM_DA4		(_MX51_PAD_EIM_DA4__EIM_DA4 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_EIM_DA5__EIM_DA5		(_MX51_PAD_EIM_DA5__EIM_DA5 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_EIM_DA6__EIM_DA6		(_MX51_PAD_EIM_DA6__EIM_DA6 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_EIM_DA7__EIM_DA7		(_MX51_PAD_EIM_DA7__EIM_DA7 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_SD1_DATA2__AUD5_TXC		(_MX51_PAD_SD1_DATA2__AUD5_TXC | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_SD1_DATA2__SD1_DATA2		(_MX51_PAD_SD1_DATA2__SD1_DATA2 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_SD1_DATA2__SD1_DATA2		(_MX51_PAD_SD1_DATA2__SD1_DATA2 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_EIM_DA10__EIM_DA10		(_MX51_PAD_EIM_DA10__EIM_DA10 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_EIM_DA11__EIM_DA11		(_MX51_PAD_EIM_DA11__EIM_DA11 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_EIM_DA8__EIM_DA8		(_MX51_PAD_EIM_DA8__EIM_DA8 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_EIM_DA9__EIM_DA9		(_MX51_PAD_EIM_DA9__EIM_DA9 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_SD1_DATA3__AUD5_TXFS		(_MX51_PAD_SD1_DATA3__AUD5_TXFS | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_SD1_DATA3__CSPI_SS1		(_MX51_PAD_SD1_DATA3__CSPI_SS1 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+-#define MX51_PAD_SD1_DATA3__SD1_DATA3		(_MX51_PAD_SD1_DATA3__SD1_DATA3 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_SD1_DATA3__SD1_DATA3		(_MX51_PAD_SD1_DATA3__SD1_DATA3 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_GPIO1_0__CSPI_SS2		(_MX51_PAD_GPIO1_0__CSPI_SS2 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_GPIO1_0__GPIO1_0		(_MX51_PAD_GPIO1_0__GPIO1_0 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_GPIO1_0__SD1_CD		(_MX51_PAD_GPIO1_0__SD1_CD | MUX_PAD_CTRL(MX51_ESDHC_PAD_CTRL))
+@@ -1517,16 +1517,16 @@
+ #define MX51_PAD_SD2_CLK__SD2_CLK		(_MX51_PAD_SD2_CLK__SD2_CLK | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS))
+ #define MX51_PAD_SD2_DATA0__CSPI_MISO		(_MX51_PAD_SD2_DATA0__CSPI_MISO | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_SD2_DATA0__SD1_DAT4		(_MX51_PAD_SD2_DATA0__SD1_DAT4 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_SD2_DATA0__SD2_DATA0		(_MX51_PAD_SD2_DATA0__SD2_DATA0 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_SD2_DATA0__SD2_DATA0		(_MX51_PAD_SD2_DATA0__SD2_DATA0 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_SD2_DATA1__SD1_DAT5		(_MX51_PAD_SD2_DATA1__SD1_DAT5 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_SD2_DATA1__SD2_DATA1		(_MX51_PAD_SD2_DATA1__SD2_DATA1 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_SD2_DATA1__SD2_DATA1		(_MX51_PAD_SD2_DATA1__SD2_DATA1 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_SD2_DATA1__USBH3_H2_DP		(_MX51_PAD_SD2_DATA1__USBH3_H2_DP | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_SD2_DATA2__SD1_DAT6		(_MX51_PAD_SD2_DATA2__SD1_DAT6 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_SD2_DATA2__SD2_DATA2		(_MX51_PAD_SD2_DATA2__SD2_DATA2 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_SD2_DATA2__SD2_DATA2		(_MX51_PAD_SD2_DATA2__SD2_DATA2 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_SD2_DATA2__USBH3_H2_DM		(_MX51_PAD_SD2_DATA2__USBH3_H2_DM | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_SD2_DATA3__CSPI_SS2		(_MX51_PAD_SD2_DATA3__CSPI_SS2 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
+ #define MX51_PAD_SD2_DATA3__SD1_DAT7		(_MX51_PAD_SD2_DATA3__SD1_DAT7 | MUX_PAD_CTRL(NO_PAD_CTRL))
+-#define MX51_PAD_SD2_DATA3__SD2_DATA3		(_MX51_PAD_SD2_DATA3__SD2_DATA3 | MUX_PAD_CTRL(NO_PAD_CTRL))
++#define MX51_PAD_SD2_DATA3__SD2_DATA3		(_MX51_PAD_SD2_DATA3__SD2_DATA3 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
+ #define MX51_PAD_GPIO1_2__CCM_OUT_2		(_MX51_PAD_GPIO1_2__CCM_OUT_2 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_GPIO1_2__GPIO1_2		(_MX51_PAD_GPIO1_2__GPIO1_2 | MUX_PAD_CTRL(NO_PAD_CTRL))
+ #define MX51_PAD_GPIO1_2__I2C2_SCL		(_MX51_PAD_GPIO1_2__I2C2_SCL | MUX_PAD_CTRL(MX51_I2C_PAD_CTRL))
+-- 
+1.7.1
 
 
