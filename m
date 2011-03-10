@@ -1,614 +1,836 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 02/12] mmc: sd: add support for signal voltage switch
- procedure
-Date: Thu, 10 Mar 2011 02:11:50 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B300E3AA2816@SAUSEXMBP01.amd.com>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
-	<1299238369-1768-3-git-send-email-arindam.nath@amd.com>
- <AANLkTimZ1carhEsaBVFW5862R9GsztYfp2xJi_3n+av=@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH] [rfc v2] mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM
+Date: Thu, 10 Mar 2011 17:14:00 +0900
+Message-ID: <1299744840-5775-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:34827
-	"EHLO VA3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751810Ab1CJIMC convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Mar 2011 03:12:02 -0500
-In-Reply-To: <AANLkTimZ1carhEsaBVFW5862R9GsztYfp2xJi_3n+av=@mail.gmail.com>
-Content-Language: en-US
+Received: from kirsty.vergenet.net ([202.4.237.240]:38148 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751989Ab1CJIOO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2011 03:14:14 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "prakity@marvell.com" <prakity@marvell.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk, linux-sh@vger.kernel.org
+Cc: Simon Horman <horms@verge.net.au>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
-Hi Zhangfei,
+This allows a ROM-able zImage to be written to eSD and for SuperH Mobile
+ARM to boot directly from the SDHI hardware block.
 
+This is achieved by the MaskROM loading the first portion of the image into
+MERAM and then jumping to it.  This portion contains loader code which
+copies the entire image to SDRAM and jumps to it. From there the zImage
+boot code proceeds as normal, uncompressing the image into its final
+location and then jumping to it.
 
-> -----Original Message-----
-> From: zhangfei gao [mailto:zhangfei.gao@gmail.com]
-> Sent: Wednesday, March 09, 2011 6:15 PM
-> To: Nath, Arindam
-> Cc: cjb@laptop.org; prakity@marvell.com; subhashj@codeaurora.org;
-> linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: Re: [PATCH v2 02/12] mmc: sd: add support for signal voltage
-> switch procedure
->
-> On Fri, Mar 4, 2011 at 6:32 AM, Arindam Nath <arindam.nath@amd.com>
-> wrote:
-> > Host Controller v3.00 adds another Capabilities register. Apart
-> > from other things, this new register indicates whether the Host
-> > Controller supports SDR50, SDR104, and DDR50 UHS-I modes. The spec
-> > doesn't mention about explicit support for SDR12 and SDR25 UHS-I
-> > modes, so the Host Controller v3.00 should support them by default.
-> > Also if the controller support SDR104 mode, it will also support
-> > SDR50 mode as well. So depending on the host support, we set the
-> > corresponding MMC_CAP_* flags. One more new register. Host Control2
-> > is added in v3.00, which is used during Signal Voltage Switch
-> > procedure described below.
-> >
-> > Since as per v3.00 spec, UHS-I supported hosts should set S18R
-> > to 1, we set S18R (bit 24) of OCR before sending ACMD41. We also
-> > need to set XPC (bit 28) of OCR in case the host can supply >150mA.
-> > This support is indicated by the Maximum Current Capabilities
-> > register of the Host Controller.
-> >
-> > If the response of ACMD41 has both CCS and S18A set, we start the
-> > signal voltage switch procedure, which if successfull, will switch
-> > the card from 3.3V signalling to 1.8V signalling. Signal voltage
-> > switch procedure adds support for a new command CMD11 in the
-> > Physical Layer Spec v3.01. As part of this procedure, we need to
-> > set 1.8V Signalling Enable (bit 3) of Host Control2 register, which
-> > if remains set after 5ms, means the switch to 1.8V signalling is
-> > successfull. Otherwise, we clear bit 24 of OCR and retry the
-> > initialization sequence.
-> >
-> > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
->
-> The patch can not work with generic card  :(
->
-> > ---
-> >  drivers/mmc/core/sd.c     |   37 ++++++++++-
-> >  drivers/mmc/core/sd_ops.c |   32 ++++++++++
-> >  drivers/mmc/core/sd_ops.h |    1 +
-> >  drivers/mmc/host/sdhci.c  |  148
-> +++++++++++++++++++++++++++++++++++++++++----
-> >  drivers/mmc/host/sdhci.h  |   18 +++++-
-> >  include/linux/mmc/host.h  |   10 +++
-> >  include/linux/mmc/sd.h    |    1 +
-> >  7 files changed, 229 insertions(+), 18 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > index b3f8a3c..3e82599 100644
-> > --- a/drivers/mmc/core/sd.c
-> > +++ b/drivers/mmc/core/sd.c
-> > @@ -408,6 +408,7 @@ struct device_type sd_type = {
-> >  int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
-> >  {
-> >        int err;
-> > +       u32 rocr;
-> rocr not initialized here, or move to mmc_sd_init_card in following
-> patch, it may be risky, since dependency.
+Cc: Paul Mundt <lethal@linux-sh.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Signed-off-by: Simon Horman <horms@verge.net.au>
 
-I will move rocr to mmc_sd_get_cid().
+---
 
->
-> >
-> >        /*
-> >         * Since we're changing the OCR value, we seem to
-> > @@ -427,10 +428,25 @@ int mmc_sd_get_cid(struct mmc_host *host, u32
-> ocr, u32 *cid)
-> >        if (!err)
-> >                ocr |= 1 << 30;
-> >
-> > -       err = mmc_send_app_op_cond(host, ocr, NULL);
-> > +       /* If the host can supply more than 150mA, XPC should be set
-> to 1. */
-> > +       if (host->caps & (MMC_CAP_SET_XPC_330 | MMC_CAP_SET_XPC_300 |
-> > +           MMC_CAP_SET_XPC_180))
-> > +               ocr |= 1 << 28;
-> > +
-> > +       err = mmc_send_app_op_cond(host, ocr, &rocr);
-> >        if (err)
-> >                return err;
-> >
-> > +       /*
-> > +        * In case CCS and S18A in the response is set, start Signal
-> Voltage
-> > +        * Switch procedure. SPI mode doesn't support CMD11.
-> > +        */
-> > +       if (!mmc_host_is_spi(host) && (rocr & 0x41000000)) {
->
->  if (!mmc_host_is_spi(host) && (rocr & 0x41000000 == 0x41000000))
-> Currently your patch can not work with general card, for example
-> rocr=0xc0ff8000 & 0x41000000 = 0x40000000, while what you want is both
-> two bit are set.
+This patch is based on the for-next branch of
+Russell King's linux-2.6-arm tree
 
-Good catch. I will fix this. Thanks.
+* v2
+  Consistently use __raw_readw().
+  As pointed out by Paul Mundt
+---
+ Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt     |   43 ++
+ arch/arm/Kconfig                                   |   35 +-
+ arch/arm/boot/compressed/Makefile                  |    9 +-
+ arch/arm/boot/compressed/head-shmobile.S           |   12 +-
+ arch/arm/boot/compressed/mmcif-sh7372.c            |    2 +-
+ arch/arm/boot/compressed/sdhi-shmobile.c           |  573 ++++++++++++++++++++
+ .../mach-shmobile/include/mach/mmcif-mackerel.h    |   13 +
+ arch/sh/boot/romimage/mmcif-sh7724.c               |    2 +-
+ 8 files changed, 670 insertions(+), 19 deletions(-)
+ create mode 100644 Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt
+ create mode 100644 arch/arm/boot/compressed/sdhi-shmobile.c
 
->
-> > +               err = mmc_start_voltage_switch(host);
-> > +               if (err)
-> > +                       return err;
-> > +       }
-> > +
-> >        if (mmc_host_is_spi(host))
-> >                err = mmc_send_cid(host, cid);
-> >        else
-> > @@ -827,11 +843,26 @@ int mmc_attach_sd(struct mmc_host *host)
-> >        }
-> >
-> >        /*
-> > +        * If the host supports one of UHS-I modes, request the card
-> > +        * to switch to 1.8V signaling level.
-> > +        */
-> > +       if (host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
-> > +           MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
-> MMC_CAP_UHS_DDR50))
-> > +               host->ocr |= (1 << 24);
-> > +
-> > +       /*
-> >         * Detect and init the card.
-> >         */
-> >        err = mmc_sd_init_card(host, host->ocr, NULL);
-> > -       if (err)
-> > -               goto err;
-> > +       if (err == -EAGAIN) {
-> If other error happen, for example -ETIMEDOUT in current patch for
-> general card, the following card can not be executed.
-> kernel panic will happen in mmc_add_card for null pinter, since card
-> is not allocated.
-> how about if (err) for safety?
-
-Yes, I will make the check more generic, or probably we won't need to once I move rocr to mmc_sd_get_cid().
-
-Thanks,
-Arindam
-
->
-> > +               /*
-> > +                * Retry initialization with S18R set to 0.
-> > +                */
-> > +               host->ocr &= ~(1 << 24);
-> > +               err = mmc_sd_init_card(host, host->ocr, NULL);
-> > +               if (err)
-> > +                       goto err;
-> > +       }
-> >
-> >        mmc_release_host(host);
-> >        err = mmc_add_card(host->card);
-> > diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> > index 797cdb5..8a23e2e 100644
-> > --- a/drivers/mmc/core/sd_ops.c
-> > +++ b/drivers/mmc/core/sd_ops.c
-> > @@ -146,6 +146,38 @@ int mmc_app_set_bus_width(struct mmc_card *card,
-> int width)
-> >        return 0;
-> >  }
-> >
-> > +int mmc_start_voltage_switch(struct mmc_host *host)
-> > +{
-> > +       struct mmc_command cmd;
-> > +       int err;
-> > +
-> > +       BUG_ON(!host);
-> > +
-> > +       /*
-> > +        * If the host does not provide signal voltage switch
-> procedure, we
-> > +        * set S18R to 0, and then retry initialization sequence.
-> > +        */
-> > +       if (!host->ops->start_signal_voltage_switch)
-> > +               return -EAGAIN;
-> > +
-> > +       memset(&cmd, 0, sizeof(struct mmc_command));
-> > +
-> > +       cmd.opcode = SD_SWITCH_VOLTAGE;
-> > +       cmd.arg = 0;
-> > +       cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-> > +
-> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
-> > +       if (err)
-> > +               return err;
-> > +
-> > +       if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
-> > +               return -EIO;
-> > +
-> > +       err = host->ops->start_signal_voltage_switch(host);
-> > +
-> > +       return err;
-> > +}
-> > +
-> >  int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
-> >  {
-> >        struct mmc_command cmd;
-> > diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-> > index ffc2305..3cfba59 100644
-> > --- a/drivers/mmc/core/sd_ops.h
-> > +++ b/drivers/mmc/core/sd_ops.h
-> > @@ -20,6 +20,7 @@ int mmc_app_send_scr(struct mmc_card *card, u32
-> *scr);
-> >  int mmc_sd_switch(struct mmc_card *card, int mode, int group,
-> >        u8 value, u8 *resp);
-> >  int mmc_app_sd_status(struct mmc_card *card, void *ssr);
-> > +int mmc_start_voltage_switch(struct mmc_host *host);
-> >
-> >  #endif
-> >
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index 8914a25..5487a0b 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -85,6 +85,8 @@ static void sdhci_dumpregs(struct sdhci_host *host)
-> >        printk(KERN_DEBUG DRIVER_NAME ": Cmd:      0x%08x | Max curr:
-> 0x%08x\n",
-> >                sdhci_readw(host, SDHCI_COMMAND),
-> >                sdhci_readl(host, SDHCI_MAX_CURRENT));
-> > +       printk(KERN_DEBUG DRIVER_NAME ": Host ctl2: 0x%08x\n",
-> > +               sdhci_readw(host, SDHCI_HOST_CONTROL2));
-> >
-> >        if (host->flags & SDHCI_USE_ADMA)
-> >                printk(KERN_DEBUG DRIVER_NAME ": ADMA Err: 0x%08x |
-> ADMA Ptr: 0x%08x\n",
-> > @@ -1337,11 +1339,70 @@ out:
-> >        spin_unlock_irqrestore(&host->lock, flags);
-> >  }
-> >
-> > +static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc)
-> > +{
-> > +       struct sdhci_host *host;
-> > +       u8 pwr;
-> > +       u16 clk, ctrl;
-> > +       u32 present_state;
-> > +
-> > +       host = mmc_priv(mmc);
-> > +
-> > +       /* Stop SDCLK */
-> > +       host = mmc_priv(mmc);
-> > +       clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > +       clk &= ~SDHCI_CLOCK_CARD_EN;
-> > +       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> > +
-> > +       /* Check whether DAT[3:0] is 0000 */
-> > +       present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> > +       if (!((present_state & SDHCI_DATA_LVL_MASK) >>
-> SDHCI_DATA_LVL_SHIFT)) {
-> > +               /* Enable 1.8V Signal Enable in the Host Control2
-> register */
-> > +               ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> > +               ctrl |= SDHCI_CTRL_VDD_180;
-> > +               sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> > +
-> > +               /* Wait for 5ms */
-> > +               usleep_range(5000, 5500);
-> > +
-> > +               ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> > +               if (ctrl & SDHCI_CTRL_VDD_180) {
-> > +                       /* Provide SDCLK again and wait for 1ms*/
-> > +                       clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > +                       clk |= SDHCI_CLOCK_CARD_EN;
-> > +                       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> > +                       usleep_range(1000, 1500);
-> > +
-> > +                       /*
-> > +                        * If DAT[3:0] level is 1111b, then the card
-> was
-> > +                        * successfully switched to 1.8V signaling.
-> > +                        */
-> > +                       present_state = sdhci_readl(host,
-> SDHCI_PRESENT_STATE);
-> > +                       if ((present_state & SDHCI_DATA_LVL_MASK) ==
-> > +                            SDHCI_DATA_LVL_MASK) {
-> > +                               return 0;
-> > +                       }
-> > +               }
-> > +       }
-> > +
-> > +       /*
-> > +        * If we are here, that means the switch to 1.8V signaling
-> failed. Stop
-> > +        * power to the card, and retry initialization sequence by
-> setting S18R
-> > +        * to 0.
-> > +        */
-> > +       pwr = sdhci_readb(host, SDHCI_POWER_CONTROL);
-> > +       pwr &= ~SDHCI_POWER_ON;
-> > +       sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-> > +
-> > +       return -EAGAIN;
-> > +}
-> > +
-> >  static const struct mmc_host_ops sdhci_ops = {
-> >        .request        = sdhci_request,
-> >        .set_ios        = sdhci_set_ios,
-> >        .get_ro         = sdhci_get_ro,
-> >        .enable_sdio_irq = sdhci_enable_sdio_irq,
-> > +       .start_signal_voltage_switch    =
-> sdhci_start_signal_voltage_switch,
-> >  };
-> >
-> >
->  /*********************************************************************
-> ********\
-> > @@ -1799,7 +1860,9 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
-> >  int sdhci_add_host(struct sdhci_host *host)
-> >  {
-> >        struct mmc_host *mmc;
-> > -       unsigned int caps, ocr_avail;
-> > +       u32 caps[2];
-> > +       u32 max_current_caps;
-> > +       unsigned int ocr_avail;
-> >        int ret;
-> >
-> >        WARN_ON(host == NULL);
-> > @@ -1822,12 +1885,15 @@ int sdhci_add_host(struct sdhci_host *host)
-> >                        host->version);
-> >        }
-> >
-> > -       caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps
-> :
-> > +       caps[0] = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host-
-> >caps :
-> >                sdhci_readl(host, SDHCI_CAPABILITIES);
-> >
-> > +       if (host->version >= SDHCI_SPEC_300)
-> > +               caps[1] = sdhci_readl(host, SDHCI_CAPABILITIES_1);
-> > +
-> >        if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
-> >                host->flags |= SDHCI_USE_SDMA;
-> > -       else if (!(caps & SDHCI_CAN_DO_SDMA))
-> > +       else if (!(caps[0] & SDHCI_CAN_DO_SDMA))
-> >                DBG("Controller doesn't have SDMA capability\n");
-> >        else
-> >                host->flags |= SDHCI_USE_SDMA;
-> > @@ -1838,7 +1904,8 @@ int sdhci_add_host(struct sdhci_host *host)
-> >                host->flags &= ~SDHCI_USE_SDMA;
-> >        }
-> >
-> > -       if ((host->version >= SDHCI_SPEC_200) && (caps &
-> SDHCI_CAN_DO_ADMA2))
-> > +       if ((host->version >= SDHCI_SPEC_200) &&
-> > +               (caps[0] & SDHCI_CAN_DO_ADMA2))
-> >                host->flags |= SDHCI_USE_ADMA;
-> >
-> >        if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA) &&
-> > @@ -1892,10 +1959,10 @@ int sdhci_add_host(struct sdhci_host *host)
-> >        }
-> >
-> >        if (host->version >= SDHCI_SPEC_300)
-> > -               host->max_clk = (caps & SDHCI_CLOCK_V3_BASE_MASK)
-> > +               host->max_clk = (caps[0] & SDHCI_CLOCK_V3_BASE_MASK)
-> >                        >> SDHCI_CLOCK_BASE_SHIFT;
-> >        else
-> > -               host->max_clk = (caps & SDHCI_CLOCK_BASE_MASK)
-> > +               host->max_clk = (caps[0] & SDHCI_CLOCK_BASE_MASK)
-> >                        >> SDHCI_CLOCK_BASE_SHIFT;
-> >
-> >        host->max_clk *= 1000000;
-> > @@ -1911,7 +1978,7 @@ int sdhci_add_host(struct sdhci_host *host)
-> >        }
-> >
-> >        host->timeout_clk =
-> > -               (caps & SDHCI_TIMEOUT_CLK_MASK) >>
-> SDHCI_TIMEOUT_CLK_SHIFT;
-> > +               (caps[0] & SDHCI_TIMEOUT_CLK_MASK) >>
-> SDHCI_TIMEOUT_CLK_SHIFT;
-> >        if (host->timeout_clk == 0) {
-> >                if (host->ops->get_timeout_clock) {
-> >                        host->timeout_clk = host->ops-
-> >get_timeout_clock(host);
-> > @@ -1923,7 +1990,7 @@ int sdhci_add_host(struct sdhci_host *host)
-> >                        return -ENODEV;
-> >                }
-> >        }
-> > -       if (caps & SDHCI_TIMEOUT_CLK_UNIT)
-> > +       if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
-> >                host->timeout_clk *= 1000;
-> >
-> >        /*
-> > @@ -1950,21 +2017,76 @@ int sdhci_add_host(struct sdhci_host *host)
-> >        if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
-> >                mmc->caps |= MMC_CAP_4_BIT_DATA;
-> >
-> > -       if (caps & SDHCI_CAN_DO_HISPD)
-> > +       if (caps[0] & SDHCI_CAN_DO_HISPD)
-> >                mmc->caps |= MMC_CAP_SD_HIGHSPEED |
-> MMC_CAP_MMC_HIGHSPEED;
-> >
-> >        if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
-> >            mmc_card_is_removable(mmc))
-> >                mmc->caps |= MMC_CAP_NEEDS_POLL;
-> >
-> > +       /* UHS-I mode(s) supported by the host controller. */
-> > +       if (host->version >= SDHCI_SPEC_300)
-> > +               mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
-> > +
-> > +       /* SDR104 supports also implies SDR50 support */
-> > +       if (caps[1] & SDHCI_SUPPORT_SDR104)
-> > +               mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
-> > +       else if (caps[1] & SDHCI_SUPPORT_SDR50)
-> > +               mmc->caps |= MMC_CAP_UHS_SDR50;
-> > +
-> > +       if (caps[1] & SDHCI_SUPPORT_DDR50)
-> > +               mmc->caps |= MMC_CAP_UHS_DDR50;
-> > +
-> >        ocr_avail = 0;
-> > -       if (caps & SDHCI_CAN_VDD_330)
-> > +       /*
-> > +        * According to SD Host Controller spec v3.00, if the Host
-> System
-> > +        * can afford more than 150mA, Host Driver should set XPC to
-> 1. Also
-> > +        * the value is meaningful only if Voltage Support in the
-> Capabilities
-> > +        * register is set. The actual current value is 4 times the
-> register
-> > +        * value.
-> > +        */
-> > +       max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
-> > +
-> > +       if (caps[0] & SDHCI_CAN_VDD_330) {
-> > +               int max_current_330;
-> > +
-> >                ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
-> > -       if (caps & SDHCI_CAN_VDD_300)
-> > +
-> > +               max_current_330 = ((max_current_caps &
-> > +                                  SDHCI_MAX_CURRENT_330_MASK) >>
-> > +                                  SDHCI_MAX_CURRENT_330_SHIFT) *
-> > +                                  SDHCI_MAX_CURRENT_MULTIPLIER;
-> > +
-> > +               if (max_current_330 > 150)
-> > +                       mmc->caps |= MMC_CAP_SET_XPC_330;
-> > +       }
-> > +       if (caps[0] & SDHCI_CAN_VDD_300) {
-> > +               int max_current_300;
-> > +
-> >                ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
-> > -       if (caps & SDHCI_CAN_VDD_180)
-> > +
-> > +               max_current_300 = ((max_current_caps &
-> > +                                  SDHCI_MAX_CURRENT_300_MASK) >>
-> > +                                  SDHCI_MAX_CURRENT_300_SHIFT) *
-> > +                                  SDHCI_MAX_CURRENT_MULTIPLIER;
-> > +
-> > +               if (max_current_300 > 150)
-> > +                       mmc->caps |= MMC_CAP_SET_XPC_300;
-> > +       }
-> > +       if (caps[0] & SDHCI_CAN_VDD_180) {
-> > +               int max_current_180;
-> > +
-> >                ocr_avail |= MMC_VDD_165_195;
-> >
-> > +               max_current_180 = ((max_current_caps &
-> > +                                  SDHCI_MAX_CURRENT_180_MASK) >>
-> > +                                  SDHCI_MAX_CURRENT_180_SHIFT) *
-> > +                                  SDHCI_MAX_CURRENT_MULTIPLIER;
-> > +
-> > +               if (max_current_180 > 150)
-> > +                       mmc->caps |= MMC_CAP_SET_XPC_180;
-> > +       }
-> > +
-> >        mmc->ocr_avail = ocr_avail;
-> >        mmc->ocr_avail_sdio = ocr_avail;
-> >        if (host->ocr_avail_sdio)
-> > @@ -2024,7 +2146,7 @@ int sdhci_add_host(struct sdhci_host *host)
-> >        if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
-> >                mmc->max_blk_size = 2;
-> >        } else {
-> > -               mmc->max_blk_size = (caps & SDHCI_MAX_BLOCK_MASK) >>
-> > +               mmc->max_blk_size = (caps[0] & SDHCI_MAX_BLOCK_MASK)
-> >>
-> >                                SDHCI_MAX_BLOCK_SHIFT;
-> >                if (mmc->max_blk_size >= 3) {
-> >                        printk(KERN_WARNING "%s: Invalid maximum block
-> size, "
-> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > index 223762c..95d70e6 100644
-> > --- a/drivers/mmc/host/sdhci.h
-> > +++ b/drivers/mmc/host/sdhci.h
-> > @@ -69,6 +69,8 @@
-> >  #define  SDHCI_DATA_AVAILABLE  0x00000800
-> >  #define  SDHCI_CARD_PRESENT    0x00010000
-> >  #define  SDHCI_WRITE_PROTECT   0x00080000
-> > +#define  SDHCI_DATA_LVL_MASK   0x00F00000
-> > +#define   SDHCI_DATA_LVL_SHIFT 20
-> >
-> >  #define SDHCI_HOST_CONTROL     0x28
-> >  #define  SDHCI_CTRL_LED                0x01
-> > @@ -147,7 +149,8 @@
-> >
-> >  #define SDHCI_ACMD12_ERR       0x3C
-> >
-> > -/* 3E-3F reserved */
-> > +#define SDHCI_HOST_CONTROL2            0x3E
-> > +#define  SDHCI_CTRL_VDD_180            0x0008
-> >
-> >  #define SDHCI_CAPABILITIES     0x40
-> >  #define  SDHCI_TIMEOUT_CLK_MASK        0x0000003F
-> > @@ -168,9 +171,20 @@
-> >  #define  SDHCI_CAN_VDD_180     0x04000000
-> >  #define  SDHCI_CAN_64BIT       0x10000000
-> >
-> > +#define  SDHCI_SUPPORT_SDR50   0x00000001
-> > +#define  SDHCI_SUPPORT_SDR104  0x00000002
-> > +#define  SDHCI_SUPPORT_DDR50   0x00000004
-> > +
-> >  #define SDHCI_CAPABILITIES_1   0x44
-> >
-> > -#define SDHCI_MAX_CURRENT      0x48
-> > +#define SDHCI_MAX_CURRENT              0x48
-> > +#define  SDHCI_MAX_CURRENT_330_MASK    0x0000FF
-> > +#define  SDHCI_MAX_CURRENT_330_SHIFT   0
-> > +#define  SDHCI_MAX_CURRENT_300_MASK    0x00FF00
-> > +#define  SDHCI_MAX_CURRENT_300_SHIFT   8
-> > +#define  SDHCI_MAX_CURRENT_180_MASK    0xFF0000
-> > +#define  SDHCI_MAX_CURRENT_180_SHIFT   16
-> > +#define   SDHCI_MAX_CURRENT_MULTIPLIER 4
-> >
-> >  /* 4C-4F reserved for more max current */
-> >
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > index bcb793e..ad7daa3 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -117,6 +117,8 @@ struct mmc_host_ops {
-> >
-> >        /* optional callback for HC quirks */
-> >        void    (*init_card)(struct mmc_host *host, struct mmc_card
-> *card);
-> > +
-> > +       int     (*start_signal_voltage_switch)(struct mmc_host
-> *host);
-> >  };
-> >
-> >  struct mmc_card;
-> > @@ -173,6 +175,14 @@ struct mmc_host {
-> >                                                /* DDR mode at 1.2V */
-> >  #define MMC_CAP_POWER_OFF_CARD (1 << 13)       /* Can power off
-> after boot */
-> >  #define MMC_CAP_BUS_WIDTH_TEST (1 << 14)       /* CMD14/CMD19 bus
-> width ok */
-> > +#define MMC_CAP_UHS_SDR12      (1 << 15)       /* Host supports UHS
-> SDR12 mode */
-> > +#define MMC_CAP_UHS_SDR25      (1 << 16)       /* Host supports UHS
-> SDR25 mode */
-> > +#define MMC_CAP_UHS_SDR50      (1 << 17)       /* Host supports UHS
-> SDR50 mode */
-> > +#define MMC_CAP_UHS_SDR104     (1 << 18)       /* Host supports UHS
-> SDR104 mode */
-> > +#define MMC_CAP_UHS_DDR50      (1 << 19)       /* Host supports UHS
-> DDR50 mode */
-> > +#define MMC_CAP_SET_XPC_330    (1 << 20)       /* Host supports
-> >150mA current at 3.3V */
-> > +#define MMC_CAP_SET_XPC_300    (1 << 21)       /* Host supports
-> >150mA current at 3.0V */
-> > +#define MMC_CAP_SET_XPC_180    (1 << 22)       /* Host supports
-> >150mA current at 1.8V */
-> >
-> >        mmc_pm_flag_t           pm_caps;        /* supported pm
-> features */
-> >
-> > diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-> > index 178363b..3ba5aa6 100644
-> > --- a/include/linux/mmc/sd.h
-> > +++ b/include/linux/mmc/sd.h
-> > @@ -17,6 +17,7 @@
-> >  /* This is basically the same command as for MMC with some quirks.
-> */
-> >  #define SD_SEND_RELATIVE_ADDR     3   /* bcr                     R6
->  */
-> >  #define SD_SEND_IF_COND           8   /* bcr  [11:0] See below   R7
->  */
-> > +#define SD_SWITCH_VOLTAGE         11  /* ac                      R1
->  */
-> >
-> >   /* class 10 */
-> >  #define SD_SWITCH                 6   /* adtc [31:0] See below   R1
->  */
-> > --
-> > 1.7.1
-> >
-> >
-
+diff --git a/Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt b/Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt
+new file mode 100644
+index 0000000..dbd21ef
+--- /dev/null
++++ b/Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt
+@@ -0,0 +1,43 @@
++ROM-able zImage boot from eSD
++-----------------------------
++
++An ROM-able zImage compiled with ZBOOT_ROM_SDHI may be written to eSD and
++SuperH Mobile ARM will to boot directly from the SDHI hardware block.
++
++This is achieved by the mask ROM loading the first portion of the image into
++MERAM and then jumping to it. This portion contains loader code which
++copies the entire image to SDRAM and jumps to it. From there the zImage
++boot code proceeds as normal, uncompressing the image into its final
++location and then jumping to it.
++
++This code has been tested on an mackerel board using the developer 1A eSD
++boot mode which is configured using the following jumper settings.
++
++   8 7 6 5 4 3 2 1
++   x|x|x|x| |x|x|
++S4 -+-+-+-+-+-+-+-
++    | | | |x| | |x on
++
++The eSD card needs to be present in SDHI slot 1 (CN7).
++As such S1 and S33 also need to be configured as per
++the notes in arch/arm/mach-shmobile/board-mackerel.c.
++
++A partial zImage must be written to physical partition #1 (boot)
++of the eSD at sector 0 in vrl4 format. A utility vrl4 is supplied to
++accomplish this.
++
++e.g.
++	vrl4 < zImage | dd of=/dev/sdX bs=512 count=9
++
++A full copy of _the same_ zImage should be written to physical partition #1
++(boot) of the eSD at sector 0. This should _not_ be in vrl4 format.
++
++	vrl4 < zImage | dd of=/dev/sdX bs=512
++
++Note: The commands above assume that the physical partition has been
++switched. No such facility currently exists in the Linux Kernel.
++
++Physical partitions are described in the eSD specification.  At the time of
++writing they are not the same as partitions that are typically configured
++using fdisk and visible through /proc/partitions
++
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 574ce60..55892eb 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -1685,17 +1685,34 @@ config ZBOOT_ROM
+ 	  Say Y here if you intend to execute your compressed kernel image
+ 	  (zImage) directly from ROM or flash.  If unsure, say N.
+ 
++choice
++	prompt "Include SD/MMC loader in zImage (EXPERIMENTAL)"
++	depends on ZBOOT_ROM && ARCH_SHMOBILE && EXPERIMENTAL
++	default ZBOOT_ROM_NONE
++	help
++	  Include experimental SD/MMC loading code in the ROM-able zImage.
++	  With this enabled it is possible to write the the ROM-able zImage
++	  kernel image to an MMC or SD card and boot the kernel straight
++	  from the reset vector. At reset the processor Mask ROM will load
++	  the first part of the the ROM-able zImage which in turn loads the
++	  rest the kernel image to RAM.
++
++config ZBOOT_ROM_NONE
++	bool "No SD/MMC loader in zImage (EXPERIMENTAL)"
++	help
++	  Do not load image from SD or MMC
++
+ config ZBOOT_ROM_MMCIF
+ 	bool "Include MMCIF loader in zImage (EXPERIMENTAL)"
+-	depends on ZBOOT_ROM && ARCH_SH7372 && EXPERIMENTAL
+-	help
+-	  Say Y here to include experimental MMCIF loading code in the
+-	  ROM-able zImage. With this enabled it is possible to write the
+-	  the ROM-able zImage kernel image to an MMC card and boot the
+-	  kernel straight from the reset vector. At reset the processor
+-	  Mask ROM will load the first part of the the ROM-able zImage
+-	  which in turn loads the rest the kernel image to RAM using the
+-	  MMCIF hardware block.
++	help
++	  Load image from MMCIF hardware block.
++
++config ZBOOT_ROM_SH_MOBILE_SDHI
++	bool "Include SuperH Mobile SDHI loader in zImage (EXPERIMENTAL)"
++	help
++	  Load image from SDHI hardware block
++
++endchoice
+ 
+ config CMDLINE
+ 	string "Default kernel command string"
+diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
+index f9f77c6..60bd76d 100644
+--- a/arch/arm/boot/compressed/Makefile
++++ b/arch/arm/boot/compressed/Makefile
+@@ -6,13 +6,18 @@
+ 
+ OBJS		=
+ 
+-# Ensure that mmcif loader code appears early in the image
++# Ensure that MMCIF loader code appears early in the image
+ # to minimise that number of bocks that have to be read in
+ # order to load it.
+ ifeq ($(CONFIG_ZBOOT_ROM_MMCIF),y)
+-ifeq ($(CONFIG_ARCH_SH7372),y)
+ OBJS		+= mmcif-sh7372.o
+ endif
++
++# Ensure that SDHI loader code appears early in the image
++# to minimise that number of bocks that have to be read in
++# order to load it.
++ifeq ($(CONFIG_ZBOOT_ROM_SH_MOBILE_SDHI),y)
++OBJS		+= sdhi-shmobile.o
+ endif
+ 
+ AFLAGS_head.o += -DTEXT_OFFSET=$(TEXT_OFFSET)
+diff --git a/arch/arm/boot/compressed/head-shmobile.S b/arch/arm/boot/compressed/head-shmobile.S
+index c943d2e..fe3719b 100644
+--- a/arch/arm/boot/compressed/head-shmobile.S
++++ b/arch/arm/boot/compressed/head-shmobile.S
+@@ -25,14 +25,14 @@
+ 	/* load board-specific initialization code */
+ #include <mach/zboot.h>
+ 
+-#ifdef CONFIG_ZBOOT_ROM_MMCIF
+-	/* Load image from MMC */
+-	adr	sp, __tmp_stack + 128
++#if defined(CONFIG_ZBOOT_ROM_MMCIF) || defined(CONFIG_ZBOOT_ROM_SH_MOBILE_SDHI)
++	/* Load image from MMC/SD */
++	adr	sp, __tmp_stack + 256
+ 	ldr	r0, __image_start
+ 	ldr	r1, __image_end
+ 	subs	r1, r1, r0
+ 	ldr	r0, __load_base
+-	bl	mmcif_loader
++	bl	mmc_loader
+ 
+ 	/* Jump to loaded code */
+ 	ldr	r0, __loaded
+@@ -51,9 +51,9 @@ __loaded:
+ 	.long	__continue
+ 	.align
+ __tmp_stack:
+-	.space	128
++	.space	256
+ __continue:
+-#endif /* CONFIG_ZBOOT_ROM_MMCIF */
++#endif /* CONFIG_ZBOOT_ROM_MMC || CONFIG_ZBOOT_ROM_SH_MOBILE_SDHI */
+ 
+ 	b	1f
+ __atags:@ tag #1
+diff --git a/arch/arm/boot/compressed/mmcif-sh7372.c b/arch/arm/boot/compressed/mmcif-sh7372.c
+index e6180af..74d24e4 100644
+--- a/arch/arm/boot/compressed/mmcif-sh7372.c
++++ b/arch/arm/boot/compressed/mmcif-sh7372.c
+@@ -39,7 +39,7 @@
+  * to an MMC card
+  * # dd if=vrl4.out of=/dev/sdx bs=512 seek=1
+  */
+-asmlinkage void mmcif_loader(unsigned char *buf, unsigned long len)
++asmlinkage void mmc_loader(unsigned char *buf, unsigned long len)
+ {
+ 	mmcif_init_progress();
+ 	mmcif_update_progress(MMCIF_PROGRESS_ENTER);
+diff --git a/arch/arm/boot/compressed/sdhi-shmobile.c b/arch/arm/boot/compressed/sdhi-shmobile.c
+new file mode 100644
+index 0000000..d617f6f
+--- /dev/null
++++ b/arch/arm/boot/compressed/sdhi-shmobile.c
+@@ -0,0 +1,573 @@
++/*
++ * SuperH Mobile SDHI
++ *
++ * Copyright (C) 2010 Magnus Damm
++ * Copyright (C) 2010 Kuninori Morimoto
++ * Copyright (C) 2010 Simon Horman
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ *
++ * Parts inspired by u-boot
++ */
++
++#include <linux/mmc/sh_mmcif.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/core.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/sd.h>
++#include <mach/mmcif.h>
++
++#define PORT179CR	0xe60520b3
++#define PORT180CR	0xe60520b4
++#define PORT181CR	0xe60520b5
++#define PORT182CR	0xe60520b6
++#define PORT183CR	0xe60520b7
++#define PORT184CR	0xe60520b8
++
++#define SMSTPCR3	0xe615013c
++#define SDGENCNTA	0xfe40009c
++#define CR_INPUT_ENABLE 0x10
++#define CR_FUNCTION1	0x01
++
++#define SDHI_BBS	512
++
++#define CTL_SD_CMD		0x00
++#define CTL_ARG_REG		0x04
++#define CTL_RESPONSE		0x0c
++#define CTL_STATUS		0x1c
++#define CTL_IRQ_MASK		0x20
++#define CTL_SD_CARD_CLK_CTL	0x24
++#define CTL_SD_XFER_LEN		0x26
++#define CTL_SD_MEM_CARD_OPT	0x28
++#define CTL_RESET_SD		0xe0
++#define CTL_CLK_AND_WAIT_CTL	0x138
++
++/* Definitions for values the CTRL_STATUS register can take. */
++#define TMIO_STAT_CMDRESPEND	0x00000001
++#define TMIO_STAT_DATAEND	0x00000004
++#define TMIO_STAT_CMD_IDX_ERR	0x00010000
++#define TMIO_STAT_CRCFAIL	0x00020000
++#define TMIO_STAT_STOPBIT_ERR	0x00040000
++#define TMIO_STAT_DATATIMEOUT	0x00080000
++#define TMIO_STAT_RXOVERFLOW	0x00100000
++#define TMIO_STAT_TXUNDERRUN	0x00200000
++#define TMIO_STAT_CMDTIMEOUT	0x00400000
++#define TMIO_STAT_RXRDY		0x01000000
++#define TMIO_STAT_ILL_FUNC	0x20000000
++#define TMIO_STAT_CMD_BUSY	0x40000000
++#define TMIO_STAT_ILL_ACCESS	0x80000000
++
++#define OCR_FASTBOOT		(1<<29)
++#define OCR_HCS			(1<<30)
++#define OCR_BUSY		(1<<31)
++
++#define SDHI_EXT_SWAP		0xf0
++
++#define SDHI1_BASE		(void __iomem *)0xe6860000
++#define SDHI_BASE		 SDHI1_BASE
++
++/* The countdown of SDGENCNTA is controlled by
++ * ZB3D2CLK which runs at 149.5MHz.
++ * That is 149.5ticks/us. Approximate this as 150ticks/us.
++ */
++void udelay(int us)
++{
++	__raw_writel(us * 150, SDGENCNTA);
++	while(__raw_readl(SDGENCNTA)) ;
++}
++
++void msleep(int ms)
++{
++	udelay(ms * 1000);
++}
++
++static inline u16 sd_ctrl_read16(void __iomem *base, int addr)
++{
++        return __raw_readw(base + addr);
++}
++
++static inline u32 sd_ctrl_read32(void __iomem *base, int addr)
++{
++	return __raw_readw(base + addr) |
++	       __raw_readw(base + addr + 2) << 16;
++}
++
++static inline void sd_ctrl_write16(void __iomem *base, int addr, u16 val)
++{
++	__raw_writew(val, base + addr);
++}
++
++static inline void sd_ctrl_write32(void __iomem *base, int addr, u32 val)
++{
++	__raw_writew(val, base + addr);
++	__raw_writew(val >> 16, base + addr + 2);
++}
++
++#define ALL_ERROR (TMIO_STAT_CMD_IDX_ERR | TMIO_STAT_CRCFAIL |		\
++		   TMIO_STAT_STOPBIT_ERR | TMIO_STAT_DATATIMEOUT |	\
++		   TMIO_STAT_RXOVERFLOW | TMIO_STAT_TXUNDERRUN |	\
++		   TMIO_STAT_CMDTIMEOUT | TMIO_STAT_ILL_ACCESS |	\
++		   TMIO_STAT_ILL_FUNC)
++
++static int sdhi_intr(void __iomem *base)
++{
++	unsigned long state = sd_ctrl_read32(base, CTL_STATUS);
++
++	if (state & ALL_ERROR) {
++		sd_ctrl_write32(base, CTL_STATUS, ~ALL_ERROR);
++		sd_ctrl_write32(base, CTL_IRQ_MASK,
++				ALL_ERROR |
++				sd_ctrl_read32(base, CTL_IRQ_MASK));
++		return -EINVAL;
++	}
++	if (state & TMIO_STAT_CMDRESPEND) {
++		sd_ctrl_write32(base, CTL_STATUS, ~TMIO_STAT_CMDRESPEND);
++		sd_ctrl_write32(base, CTL_IRQ_MASK,
++				TMIO_STAT_CMDRESPEND |
++				sd_ctrl_read32(base, CTL_IRQ_MASK));
++		return 0;
++	}
++	if (state & TMIO_STAT_RXRDY) {
++		sd_ctrl_write32(base, CTL_STATUS, ~TMIO_STAT_RXRDY);
++		sd_ctrl_write32(base, CTL_IRQ_MASK,
++				TMIO_STAT_RXRDY | TMIO_STAT_TXUNDERRUN |
++				sd_ctrl_read32(base, CTL_IRQ_MASK));
++		return 0;
++	}
++	if (state & TMIO_STAT_DATAEND) {
++		sd_ctrl_write32(base, CTL_STATUS, ~TMIO_STAT_DATAEND);
++		sd_ctrl_write32(base, CTL_IRQ_MASK,
++				TMIO_STAT_DATAEND |
++				sd_ctrl_read32(base, CTL_IRQ_MASK));
++		return 0;
++	}
++
++	//mmcif_update_progress2(4<<1);
++	return -EAGAIN;
++}
++
++static int sdhi_boot_wait_resp_end(void __iomem *base)
++{
++	int err = -EAGAIN, timeout = 10000000;
++
++	while (timeout--) {
++		err = sdhi_intr(base);
++		if (err != -EAGAIN)
++			break;
++		udelay(1);
++	}
++
++	return err;
++}
++
++/* SDHI_CLK_CTRL */
++#define CLK_MMC_ENABLE                 (1 << 8)
++#define CLK_MMC_INIT                   (1 << 6)        /* clk / 256 */
++
++static void shdi_boot_mmc_clk_stop(void __iomem *base)
++{
++	sd_ctrl_write16(base, CTL_CLK_AND_WAIT_CTL, 0x0000);
++	msleep(10);
++	sd_ctrl_write16(base, CTL_SD_CARD_CLK_CTL, ~CLK_MMC_ENABLE &
++		sd_ctrl_read16(base, CTL_SD_CARD_CLK_CTL));
++	msleep(10);
++}
++
++static void shdi_boot_mmc_clk_start(void __iomem *base)
++{
++	sd_ctrl_write16(base, CTL_SD_CARD_CLK_CTL, CLK_MMC_ENABLE |
++		sd_ctrl_read16(base, CTL_SD_CARD_CLK_CTL));
++	msleep(10);
++	sd_ctrl_write16(base, CTL_CLK_AND_WAIT_CTL, CLK_MMC_ENABLE);
++	msleep(10);
++}
++
++static void sdhi_boot_reset(void __iomem *base)
++{
++	sd_ctrl_write16(base, CTL_RESET_SD, 0x0000);
++	msleep(10);
++	sd_ctrl_write16(base, CTL_RESET_SD, 0x0001);
++	msleep(10);
++}
++
++/* Set MMC clock / power.
++ * Note: This controller uses a simple divider scheme therefore it cannot
++ * run a MMC card at full speed (20MHz). The max clock is 24MHz on SD, but as
++ * MMC wont run that fast, it has to be clocked at 12MHz which is the next
++ * slowest setting.
++ */
++static int shdi_boot_mmc_set_ios(void __iomem *base, struct mmc_ios *ios)
++{
++	if (sd_ctrl_read32(base, CTL_STATUS) & TMIO_STAT_CMD_BUSY)
++		return -EBUSY;
++
++	if (ios->clock)
++		sd_ctrl_write16(base, CTL_SD_CARD_CLK_CTL,
++				ios->clock | CLK_MMC_ENABLE);
++
++	/* Power sequence - OFF -> ON -> UP */
++	switch (ios->power_mode) {
++	case MMC_POWER_OFF: /* power down SD bus */
++		shdi_boot_mmc_clk_stop(base);
++		break;
++	case MMC_POWER_ON: /* power up SD bus */
++		break;
++	case MMC_POWER_UP: /* start bus clock */
++		shdi_boot_mmc_clk_start(base);
++		break;
++	}
++
++	switch (ios->bus_width) {
++	case MMC_BUS_WIDTH_1:
++		sd_ctrl_write16(base, CTL_SD_MEM_CARD_OPT, 0x80e0);
++	break;
++	case MMC_BUS_WIDTH_4:
++		sd_ctrl_write16(base, CTL_SD_MEM_CARD_OPT, 0x00e0);
++	break;
++	}
++
++	/* Let things settle. delay taken from winCE driver */
++	udelay(140);
++
++	return 0;
++}
++
++/* These are the bitmasks the tmio chip requires to implement the MMC response
++ * types. Note that R1 and R6 are the same in this scheme. */
++#define RESP_NONE      0x0300
++#define RESP_R1        0x0400
++#define RESP_R1B       0x0500
++#define RESP_R2        0x0600
++#define RESP_R3        0x0700
++#define DATA_PRESENT   0x0800
++#define TRANSFER_READ  0x1000
++
++static int sdhi_boot_request(void __iomem *base, struct mmc_command *cmd)
++{
++	int err, c = cmd->opcode;
++
++	switch (mmc_resp_type(cmd)) {
++	case MMC_RSP_NONE: c |= RESP_NONE; break;
++	case MMC_RSP_R1:   c |= RESP_R1;   break;
++	case MMC_RSP_R1B:  c |= RESP_R1B;  break;
++	case MMC_RSP_R2:   c |= RESP_R2;   break;
++	case MMC_RSP_R3:   c |= RESP_R3;   break;
++	default:
++		return -EINVAL;
++	}
++
++	/* No interrupts so this may not be cleared */
++	sd_ctrl_write32(base, CTL_STATUS, ~TMIO_STAT_CMDRESPEND);
++
++	sd_ctrl_write32(base, CTL_IRQ_MASK, TMIO_STAT_CMDRESPEND |
++			sd_ctrl_read32(base, CTL_IRQ_MASK));
++	sd_ctrl_write32(base, CTL_ARG_REG, cmd->arg);
++	sd_ctrl_write16(base, CTL_SD_CMD, c);
++
++
++	sd_ctrl_write32(base, CTL_IRQ_MASK,
++			~(TMIO_STAT_CMDRESPEND | ALL_ERROR) &
++			sd_ctrl_read32(base, CTL_IRQ_MASK));
++
++	err = sdhi_boot_wait_resp_end(base);
++	if (err)
++		return err;
++
++	cmd->resp[0] = sd_ctrl_read32(base, CTL_RESPONSE);
++
++	return 0;
++}
++
++static int sdhi_boot_do_read_single(void __iomem *base, int high_capacity,
++				    unsigned long block, unsigned short *buf)
++{
++	int err, i;
++
++	/* CMD17 - Read */
++	{
++		struct mmc_command cmd;
++
++		cmd.opcode = MMC_READ_SINGLE_BLOCK | \
++			     TRANSFER_READ | DATA_PRESENT;
++		if (high_capacity)
++			cmd.arg = block;
++		else
++			cmd.arg = block * SDHI_BBS;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	sd_ctrl_write32(base, CTL_IRQ_MASK,
++			~(TMIO_STAT_DATAEND | TMIO_STAT_RXRDY |
++			  TMIO_STAT_TXUNDERRUN) &
++			sd_ctrl_read32(base, CTL_IRQ_MASK));
++	err = sdhi_boot_wait_resp_end(base);
++	if (err)
++		return err;
++
++	sd_ctrl_write16(base, CTL_SD_XFER_LEN, SDHI_BBS);
++	for (i = 0; i < SDHI_BBS / sizeof(*buf); i++)
++		*buf++ = sd_ctrl_read16(base, MMCIF_CE_RESP_CMD12);
++
++	err = sdhi_boot_wait_resp_end(base);
++	if (err)
++		return err;
++
++	return 0;
++}
++
++static int sdhi_boot_do_read(void __iomem *base, int high_capacity,
++			     unsigned long offset, unsigned short count,
++			     unsigned short *buf)
++{
++	unsigned long i;
++	int err = 0;
++
++	for (i = 0; i < count; i++) {
++		if ((i & 0xf) == 0)
++			mmcif_update_progress2((i >> 4) & 0xf);
++		err = sdhi_boot_do_read_single(base, high_capacity, offset + i,
++					       buf + (i * SDHI_BBS /
++						      sizeof(*buf)));
++		if (err)
++			return err;
++	}
++
++	mmcif_update_progress2(0);
++	return 0;
++}
++
++#define VOLTAGES (MMC_VDD_32_33 | MMC_VDD_33_34)
++
++static int sdhi_boot_init(void __iomem *base)
++{
++	bool sd_v2 = false, sd_v1_0 = false;
++	unsigned short cid;
++	int err, high_capacity = 0;
++
++	shdi_boot_mmc_clk_stop(base);
++	sdhi_boot_reset(base);
++
++	/* mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 21 width 0 timing 0 */
++	{
++		struct mmc_ios ios;
++		ios.power_mode = MMC_POWER_ON;
++		ios.bus_width = MMC_BUS_WIDTH_1;
++		ios.clock = CLK_MMC_INIT;
++		err = shdi_boot_mmc_set_ios(base, &ios);
++		if (err)
++			return err;
++	}
++
++	/* CMD0 */
++	{
++		struct mmc_command cmd;
++		msleep(1);
++		cmd.opcode = MMC_GO_IDLE_STATE;
++		cmd.arg = 0;
++		cmd.flags = MMC_RSP_NONE;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++		msleep(2);
++	}
++
++	/* CMD8 - Test for SD version 2 */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = SD_SEND_IF_COND;
++		cmd.arg = (VOLTAGES != 0) << 8 | 0xaa;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd); /* Ignore error */
++		if ((cmd.resp[0] & 0xff) == 0xaa)
++			sd_v2 = true;
++	}
++
++	/* CMD55 - Get OCR (SD) */
++	{
++		int timeout = 1000;
++		struct mmc_command cmd;
++
++		cmd.arg = 0;
++
++		do {
++			cmd.opcode = MMC_APP_CMD;
++			cmd.flags = MMC_RSP_R1;
++			cmd.arg = 0;
++			err = sdhi_boot_request(base, &cmd);
++			if (err)
++				break;
++
++			cmd.opcode = SD_APP_OP_COND;
++			cmd.flags = MMC_RSP_R3;
++			cmd.arg = (VOLTAGES & 0xff8000);
++			if (sd_v2)
++				cmd.arg |= OCR_HCS;
++			cmd.arg |= OCR_FASTBOOT;
++			err = sdhi_boot_request(base, &cmd);
++			if (err)
++				break;
++
++			msleep(1);
++		} while((!(cmd.resp[0] & OCR_BUSY)) && --timeout);
++
++		if (!err && timeout) {
++			if (!sd_v2)
++				sd_v1_0 = true;
++			high_capacity = (cmd.resp[0] & OCR_HCS) == OCR_HCS;
++		}
++	}
++
++	/* CMD1 - Get OCR (MMC) */
++	if (!sd_v2 && !sd_v1_0) {
++		int timeout = 1000;
++		struct mmc_command cmd;
++
++		do {
++			cmd.opcode = MMC_SEND_OP_COND;
++			cmd.arg = VOLTAGES | OCR_HCS;
++			cmd.flags = MMC_RSP_R3;
++			err = sdhi_boot_request(base, &cmd);
++			if (err)
++				return err;
++
++			msleep(1);
++		} while((!(cmd.resp[0] & OCR_BUSY)) && --timeout);
++
++		if (!timeout)
++			return -EAGAIN;
++
++		high_capacity = (cmd.resp[0] & OCR_HCS) == OCR_HCS;
++	}
++
++	/* CMD2 - Get CID */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_ALL_SEND_CID;
++		cmd.arg = 0;
++		cmd.flags = MMC_RSP_R2;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	/* CMD3
++	 * MMC: Set the relative address
++	 * SD:  Get the relative address
++	 * Also puts the card into the standby state
++	 */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_SET_RELATIVE_ADDR;
++		cmd.arg = 0;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++		cid = cmd.resp[0] >> 16;
++	}
++
++	/* CMD9 - Get CSD */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_SEND_CSD;
++		cmd.arg = cid << 16;
++		cmd.flags = MMC_RSP_R2;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	/* CMD7 - Select the card */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_SELECT_CARD;
++		//cmd.arg = rca << 16;
++		cmd.arg = cid << 16;
++		//cmd.flags = MMC_RSP_R1B;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	/* CMD16 - Set the block size */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_SET_BLOCKLEN;
++		cmd.arg = SDHI_BBS;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	return high_capacity;
++}
++
++/*  SuperH Mobile SDHI loader
++ *
++ * loads the zImage from an SD card starting from block 0
++ * on physical partition 1
++ *
++ * The image must be start with a vrl4 header and
++ * the zImage must start at offset 512 of the image. That is,
++ * at block 1 (=byte 512) of physical partition 1
++ *
++ * Use the following line to write the vrl4 formated zImage
++ * to an SD card
++ * # dd if=vrl4.out of=/dev/sdx bs=512
++ */
++asmlinkage void mmc_loader(unsigned short *buf, unsigned long len)
++{
++	int high_capacity;
++
++	mmcif_init_progress();
++	mmcif_update_progress(MMCIF_PROGRESS_ENTER);
++
++	/* Initialise SDHI1 */
++	/* PORT184CR: GPIO_FN_SDHICMD1 Control */
++	__raw_writeb(CR_FUNCTION1, PORT184CR);
++	/* PORT179CR: GPIO_FN_SDHICLK1 Control */
++	__raw_writeb(CR_INPUT_ENABLE|CR_FUNCTION1, PORT179CR);
++	/* PORT181CR: GPIO_FN_SDHID1_3 Control */
++	__raw_writeb(CR_FUNCTION1, PORT183CR);
++	/* PORT182CR: GPIO_FN_SDHID1_2 Control */
++	__raw_writeb(CR_FUNCTION1, PORT182CR);
++	/* PORT183CR: GPIO_FN_SDHID1_1 Control */
++	__raw_writeb(CR_FUNCTION1, PORT181CR);
++	/* PORT180CR: GPIO_FN_SDHID1_0 Control */
++	__raw_writeb(CR_FUNCTION1, PORT180CR);
++
++	/* Enable clock to SDHI1 hardware block */
++	__raw_writel(__raw_readl(SMSTPCR3) & ~(1 << 13), SMSTPCR3);
++
++	/* setup SDHI hardware */
++	mmcif_update_progress(MMCIF_PROGRESS_INIT);
++	high_capacity = sdhi_boot_init(SDHI_BASE);
++	if (high_capacity < 0)
++		goto err;
++
++	mmcif_update_progress(MMCIF_PROGRESS_LOAD);
++	/* load kernel */
++	if (sdhi_boot_do_read(SDHI_BASE, high_capacity,
++			      0, /* Kernel is at block 1 */
++			      (len + SDHI_BBS - 1) / SDHI_BBS, buf))
++		goto err;
++
++	/* Disable clock to SDHI1 hardware block */
++	__raw_writel(__raw_readl(SMSTPCR3) & (1 << 13), SMSTPCR3);
++
++	mmcif_update_progress(MMCIF_PROGRESS_DONE);
++
++	return;
++err:
++	__raw_writel(__raw_readl(PORTR031_000DR) | 1, PORTR031_000DR);
++	for(;;);
++
++}
++
+diff --git a/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h b/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
+index 4b4f694..0d13e7e 100644
+--- a/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
++++ b/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
+@@ -36,4 +36,17 @@ static inline void mmcif_update_progress(int n)
+ 		     PORTL159_128DR);
+ }
+ 
++static inline void mmcif_update_progress2(int n)
++{
++	unsigned a, b;
++
++	a = n & 0x7;
++	b = ((n & 0x8) != 0) << 31;
++
++	__raw_writel((__raw_readl(PORTR031_000DR) & ~0x7) | a,
++		     PORTR031_000DR);
++	__raw_writel((__raw_readl(PORTL159_128DR) & ~(1 << 31)) | b,
++		     PORTL159_128DR);
++}
++
+ #endif /* MMCIF_MACKEREL_H */
+diff --git a/arch/sh/boot/romimage/mmcif-sh7724.c b/arch/sh/boot/romimage/mmcif-sh7724.c
+index c84e783..4ded8ba 100644
+--- a/arch/sh/boot/romimage/mmcif-sh7724.c
++++ b/arch/sh/boot/romimage/mmcif-sh7724.c
+@@ -27,7 +27,7 @@
+  * use the following line to write the romImage to an MMC card
+  * # dd if=arch/sh/boot/romImage of=/dev/sdx bs=512 seek=512
+  */
+-asmlinkage void mmcif_loader(unsigned char *buf, unsigned long no_bytes)
++asmlinkage void mmc_loader(unsigned char *buf, unsigned long no_bytes)
+ {
+ 	mmcif_update_progress(MMCIF_PROGRESS_ENTER);
+ 
+-- 
+1.7.2.3
 
