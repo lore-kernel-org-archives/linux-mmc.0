@@ -1,49 +1,73 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [PATCH] SDHCI: Suspend/Resume needs to save/restore INT_ENABLE on ARM/Tegra2
-Date: Wed, 9 Mar 2011 16:32:23 -0800
-Message-ID: <AANLkTikJe-M2ZZhiDExXK9BCsh9-0M+BuYFBgJwW0vU5@mail.gmail.com>
-References: <20110308213921.00625208186@grundler.mtv.corp.google.com>
-	<AANLkTik3vKKs+Sxe1g+igFOpqmdYDMec7MH1mKjv0qGw@mail.gmail.com>
-	<AANLkTikwapQ_Qe-U=Noan45kztNrLzZA39Oj8jLBuzV+@mail.gmail.com>
-	<AANLkTikBm00dzzGU_Rap9A0RmebnW6TOvG4LS3cXs1XW@mail.gmail.com>
-	<AANLkTi==6jPPBJQou8KAGZCKtmmN44Q85PR5x2_KOR2J@mail.gmail.com>
-	<AANLkTinKiLF2+Yb0q9UmA21h1-uVRCSRmXNXzOWJNtnJ@mail.gmail.com>
-	<AANLkTimOnOvePrb2dT7z15RMepMEBtA4NtKLgAJVk1gW@mail.gmail.com>
-	<AANLkTi=gVXFUajp3K_bhy8P0VcJ2v4=xNYPE7WySQEiL@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH]mmc: set timeout for SDHCI host before sending busy cmds
+Date: Thu, 10 Mar 2011 11:29:57 +0900
+Message-ID: <4D7837A5.3010603@samsung.com>
+References: <20110309080609.GA23207@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-out.google.com ([74.125.121.67]:46771 "EHLO
-	smtp-out.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752727Ab1CJAc1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2011 19:32:27 -0500
-Received: from kpbe13.cbf.corp.google.com (kpbe13.cbf.corp.google.com [172.25.105.77])
-	by smtp-out.google.com with ESMTP id p2A0WPUt006505
-	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 16:32:26 -0800
-Received: from gwaa12 (gwaa12.prod.google.com [10.200.27.12])
-	by kpbe13.cbf.corp.google.com with ESMTP id p2A0ULQc017046
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 16:32:24 -0800
-Received: by gwaa12 with SMTP id a12so249057gwa.28
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Mar 2011 16:32:24 -0800 (PST)
-In-Reply-To: <AANLkTi=gVXFUajp3K_bhy8P0VcJ2v4=xNYPE7WySQEiL@mail.gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:48665 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750759Ab1CJCaQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2011 21:30:16 -0500
+In-reply-to: <20110309080609.GA23207@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: Olof Johansson <olof@lixom.net>, Dmitry Shmidt <dimitrysh@google.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Venkat Rao <vrao@broadcom.com>, Sandeep Kumar <sandeepm@broadcom.com>
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, Kyungmin Park <kyungmin.park@samsung.com>, prakity@marvell.com, jh80.chung@samsung.com, w.sang@pengutronix.de, linux-kernel@vger.kernel.orgPhilip Rakity <prakity@marvell.com>
 
-On Wed, Mar 9, 2011 at 4:07 PM, Andrei Warkentin <andreiw@motorola.com> wrote:
-...
-> I believe Grant's change is necessary for any SDHCI controller with
-> SDIO and suspend/resume.
+Chuanxiao Dong wrote:
+> Hi all,
+>    From the previous discussion, I do not think we have got a clear conclusion
+>    about using maximum timeout value. At least we know from Jae hoon Chung
+>    using 0xE for every case is not a good. So I want to suggest only use 0xE for
+>    busy command. I personally preferred below implementation, which is similar
+>    with a RFC patch submitted by Jae hoon Chung, but only without adding a new
+>    quirk.
 
-BTW, to pick nits, I'm not the author. Note the S-o-b lines in the
-original patch:
+thanks for remind. 
+Yes, i tested without quirks, i think that is not problem.
+(Just sent RFC patch with quirks, because i want to ask how think about adding quirks or not).
 
-Signed-off-by: Venkat Rao <vrao@broadcom.com>
-Reviewed-by: Olof Johansson <olofj@chromium.org>
-Reviewed-by: Grant Grundler <grundler@chromium.org>
+> 
+>    I think sdhci_calc_timeout should be left for data transfer since at least we
+>    can get a warning if 0xE is not enough for host to use. And if the host
+>    controller and the card have no bugs, then the calculated timeout should be
+>    safe. Left the old implementation unchanged is also compatible with all
+>    existed host controllers and cards.
+> 
+>    But for busy command, we are not clear about how long is safe enough for
+>    waiting and there is also no function to do the calculation for them. So
+>    preferred just using 0xE. Below the patch and comment:
+> 
+> Set the timeout control register for SDHCI host when send some commands which
+> need busy signal. Use the maximum timeout value 0xE will be safe.
+> 
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    9 ++++++++-
+>  1 files changed, 8 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 99c372e..8306323 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -659,8 +659,15 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_data *data)
+>  
+>  	WARN_ON(host->data);
+>  
+> -	if (data == NULL)
+> +	if (data == NULL) {
+> +		/*
+> +		 * set the timeout to be maximum value for commands those with
+> +		 * busy signal
+> +		 */
+> +		if (host->cmd->flags & MMC_RSP_BUSY)
+> +			sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
+>  		return;
+> +	}
+>  
+>  	/* Sanity checks */
+>  	BUG_ON(data->blksz * data->blocks > 524288);
 
-
-cheers,
-grant
