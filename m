@@ -1,91 +1,45 @@
 From: Andrei Warkentin <andreiw@motorola.com>
-Subject: [RFC 5/5] MMC: Toshiba eMMC - Split 8K-unaligned accesses.
-Date: Wed,  9 Mar 2011 18:54:09 -0600
-Message-ID: <1299718449-15172-6-git-send-email-andreiw@motorola.com>
+Subject: Re: Block quirks redux + Toshiba performance quirk
+Date: Wed, 9 Mar 2011 18:12:30 -0600
+Message-ID: <AANLkTi=fqxXYe5aea9d5P2eKNrE-4gcv+bdCveDh1Aom@mail.gmail.com>
 References: <1299718449-15172-1-git-send-email-andreiw@motorola.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og113.obsmtp.com ([64.18.0.26]:60764 "EHLO
-	exprod5og113.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751237Ab1CJAKq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2011 19:10:46 -0500
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.130.20])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p2A0B2YB009659
-	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 19:11:02 -0500 (EST)
-Received: from mail-yw0-f42.google.com (mail-yw0-f42.google.com [209.85.213.42])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p2A0AjEa009594
+Received: from exprod5og106.obsmtp.com ([64.18.0.182]:41589 "EHLO
+	exprod5og106.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751231Ab1CJAMc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2011 19:12:32 -0500
+Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.167])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2A0BBP2017533
+	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 19:11:11 -0500 (EST)
+Received: from mail-vw0-f42.google.com (mail-vw0-f42.google.com [209.85.212.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2A0ANku017341
 	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 19:11:02 -0500 (EST)
-Received: by mail-yw0-f42.google.com with SMTP id 1so766091ywh.15
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Mar 2011 16:10:44 -0800 (PST)
+	for <linux-mmc@vger.kernel.org>; Wed, 9 Mar 2011 19:11:11 -0500 (EST)
+Received: by mail-vw0-f42.google.com with SMTP id 10so1344304vws.15
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Mar 2011 16:12:30 -0800 (PST)
 In-Reply-To: <1299718449-15172-1-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Andrei Warkentin <andreiw@motorola.com>
+Cc: tardyp@gmail.com, Linus Walleij <linus.walleij@linaro.org>, Arnd Bergmann <arnd@arndb.de>
 
-These cards show abysmal write performance when
-writes < 12K that are 8K unaligned cross an 8K barrier.
+On Wed, Mar 9, 2011 at 6:54 PM, Andrei Warkentin <andreiw@motorola.com> wrote:
+> I'm sending this as a new mail instead of a reply-to, because it's really a
+> different set of patches. I'm holding off on the reliability improvement, because
+> the generic-code equiv. depends on reliable write support, so I'll wait until everybody
+> is satisfied with these changes until sending those in.
+>
+> This is based on linux-next tree with Pierre's quirks.c.
+>
+> I've tested it on K36 with backported Pierre's changes.
+>
+> Thanks,
+> A
+>
+>
 
-Change-Id: I3b015a93ae21d077b447e7d6fbe81255dbd2b0df
-Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
----
- drivers/mmc/card/Kconfig |    9 +++++++++
- drivers/mmc/card/block.c |   20 ++++++++++++++++++++
- 2 files changed, 29 insertions(+), 0 deletions(-)
+Oops, forgot to add CCs... sorry about that.
 
-diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
-index 86948f9..1a9e4aa 100644
---- a/drivers/mmc/card/Kconfig
-+++ b/drivers/mmc/card/Kconfig
-@@ -14,6 +14,15 @@ config MMC_BLOCK
- 	  mount the filesystem. Almost everyone wishing MMC support
- 	  should say Y or M here.
- 
-+config MMC_BLOCK_QUIRK_TOSHIBA_32NM
-+       tristate "Toshiba MMC 32nm technology flash device quirks"
-+       depends on MMC_BLOCK
-+       default n
-+       help
-+         Say Y if you have a Toshiba 32nm technology flash device,
-+	 such as MMC32G or MMC16G eMMCs. This enables a performance
-+	 improvement for flash page unaligned writes.
-+
- config MMC_BLOCK_BOUNCE
- 	bool "Use bounce buffer for simple hosts"
- 	depends on MMC_BLOCK
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index a8f18c7..5250748 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -729,8 +729,28 @@ mmc_blk_set_blksize(struct mmc_blk_data *md, struct mmc_card *card)
- 	return 0;
- }
- 
-+#ifdef CONFIG_MMC_BLOCK_QUIRK_TOSHIBA_32NM
-+static void toshiba_32nm_fixup(struct mmc_card *card, int data)
-+{
-+	struct mmc_blk_data *md = mmc_get_drvdata(card);
-+	printk(KERN_INFO "Applying Toshiba 32nm workarounds\n");
-+
-+	/* Page size 8K, this card doesn't like unaligned writes
-+	   across 8K boundary. */
-+	md->write_align_size = 8192;
-+
-+	/* Doing the alignment for accesses > 12K seems to
-+	   result in decreased perf. */
-+	md->write_align_limit = 12288;
-+}
-+#endif /* CONFIG_MMC_BLOCK_QUIRK_TOSHIBA_32NM */
-+
- static const struct mmc_fixup blk_fixups[] =
- {
-+#ifdef CONFIG_MMC_BLOCK_QUIRK_TOSHIBA_32NM
-+	MMC_FIXUP("MMC16G", 0x11, 0x0, toshiba_32nm_fixup, 0),
-+	MMC_FIXUP("MMC32G", 0x11, 0x0100, toshiba_32nm_fixup, 0),
-+#endif /* CONFIG_MMC_BLOCK_QUIRK_TOSHIBA_32NM */
- 	END_FIXUP
- };
- 
--- 
-1.7.0.4
-
+A
