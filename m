@@ -1,349 +1,286 @@
 From: <subhashj@codeaurora.org>
-Subject: RE: [PATCH v2 12/12] mmc: sdhci: add support for retuning mode 1
-Date: Thu, 10 Mar 2011 19:27:30 +0530
-Message-ID: <002401cbdf2b$1b7fa8d0$527efa70$@org>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com> <1299238369-1768-13-git-send-email-arindam.nath@amd.com>
+Subject: RE: [PATCH v2 10/12] mmc: sdhci: enable preset value after uhs initialization
+Date: Thu, 10 Mar 2011 19:33:46 +0530
+Message-ID: <002701cbdf2b$fba51940$f2ef4bc0$@org>
+References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com> <1299238369-1768-11-git-send-email-arindam.nath@amd.com> <001b01cbdf26$6b865c70$42931550$@org> <6C03668EAF45B747AF947A1603D1B300E3AA28F7@SAUSEXMBP01.amd.com> <002101cbdf29$6268ce40$273a6ac0$@org> <6C03668EAF45B747AF947A1603D1B300E3AA2914@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
 	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:30332 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751421Ab1CJN5g (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2011 08:57:36 -0500
-In-Reply-To: <1299238369-1768-13-git-send-email-arindam.nath@amd.com>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:37638 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751892Ab1CJODv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2011 09:03:51 -0500
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B300E3AA2914@SAUSEXMBP01.amd.com>
 Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Arindam Nath' <arindam.nath@amd.com>, cjb@laptop.org
-Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com
+To: "'Nath, Arindam'" <Arindam.Nath@amd.com>, cjb@laptop.org
+Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, "'Su, Henry'" <Henry.Su@amd.com>, "'Lu, Aaron'" <Aaron.Lu@amd.com>, anath.amd@gmail.com
 
 
 
 > -----Original Message-----
-> From: Arindam Nath [mailto:anath.amd@gmail.com] On Behalf Of Arindam
-> Nath
-> Sent: Friday, March 04, 2011 5:03 PM
-> To: cjb@laptop.org
-> Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
-> subhashj@codeaurora.org; linux-mmc@vger.kernel.org; henry.su@amd.com;
-> aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
-> Subject: [PATCH v2 12/12] mmc: sdhci: add support for retuning mode 1
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Nath, Arindam
+> Sent: Thursday, March 10, 2011 7:20 PM
+> To: subhashj@codeaurora.org; cjb@laptop.org
+> Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
+> mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
+> Subject: RE: [PATCH v2 10/12] mmc: sdhci: enable preset value after uhs
+> initialization
 > 
-> Host Controller v3.00 can support retuning modes 1,2 or 3 depending on
-> the bits 46-47 of the Capabilities register. Also, the timer count for
-> retuning is indicated by bits 40-43 of the same register. We initialize
-> timer_list for retuning after successfull UHS-I initialization. Since
-> retuning mode 1 sets a limit of 4MB on the maximum data length, we set
-> max_blk_count appropriately. Once the tuning timer expires, we set
-> SDHCI_NEEDS_RETUNING flag, and if the flag is set, we execute tuning
-> procedure before sending the next command. We need to restore
-> mmc_request
-> structure after executing retuning procedure since host->mrq is used
-> inside the procedure to send CMD19. We also disable and re-enable this
-> flag during suspend and resume respectively, as per the spec v3.00.
+> > -----Original Message-----
+> > From: subhashj@codeaurora.org [mailto:subhashj@codeaurora.org]
+> > Sent: Thursday, March 10, 2011 7:15 PM
+> > To: Nath, Arindam; cjb@laptop.org
+> > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
+> > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
+> > Subject: RE: [PATCH v2 10/12] mmc: sdhci: enable preset value after
+> uhs
+> > initialization
+> >
+> >
+> >
+> > > -----Original Message-----
+> > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > > owner@vger.kernel.org] On Behalf Of Nath, Arindam
+> > > Sent: Thursday, March 10, 2011 7:01 PM
+> > > To: subhashj@codeaurora.org; cjb@laptop.org
+> > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
+> > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
+> > > Subject: RE: [PATCH v2 10/12] mmc: sdhci: enable preset value after
+> > uhs
+> > > initialization
+> > >
+> > > Hi Subhash,
+> > >
+> > >
+> > > > -----Original Message-----
+> > > > From: subhashj@codeaurora.org [mailto:subhashj@codeaurora.org]
+> > > > Sent: Thursday, March 10, 2011 6:54 PM
+> > > > To: Nath, Arindam; cjb@laptop.org
+> > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
+> > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
+> > > > Subject: RE: [PATCH v2 10/12] mmc: sdhci: enable preset value
+> after
+> > > uhs
+> > > > initialization
+> > > >
+> > > >
+> > > >
+> > > > > -----Original Message-----
+> > > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > > > > owner@vger.kernel.org] On Behalf Of Arindam Nath
+> > > > > Sent: Friday, March 04, 2011 5:03 PM
+> > > > > To: cjb@laptop.org
+> > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
+> > > > > subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
+> > > henry.su@amd.com;
+> > > > > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
+> > > > > Subject: [PATCH v2 10/12] mmc: sdhci: enable preset value after
+> > uhs
+> > > > > initialization
+> > > > >
+> > > > > According to the Host Controller spec v3.00, setting Preset
+> Value
+> > > > > Enable
+> > > > > in the Host Control2 register lets SDCLK Frequency Select,
+> Clock
+> > > > > Generator
+> > > > > Select and Driver Strength Select to be set automatically by
+> the
+> > > Host
+> > > > > Controller based on the UHS-I mode set. This patch enables this
+> > > > > feature.
+> > > > > We also reset Preset Value Enable when the card is removed from
+> > the
+> > > > > slot.
+> > > >
+> > > > What does this preset_value means? Is this defined in SD3.01
+> spec?
+> > I
+> > > > think
+> > > > it looks like specific to your controller (sdhci). If it's
+> specific
+> > > to
+> > > > your
+> > > > controller then this new mmc_ops should not be added.
+> > >
+> > > Preset Value Enable is very much part of the standard SD Host
+> > > Controller spec v3.00. Please refer to Host Control 2 register.
+> >
+> > I don't think all controllers should be compliant to SD host
+> controller
+> > spec. I don't think controller on our chips has something like this.
 > 
-> Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> ---
->  drivers/mmc/core/sd.c     |    5 ++
->  drivers/mmc/host/sdhci.c  |  109
-> ++++++++++++++++++++++++++++++++++++++++++++-
->  drivers/mmc/host/sdhci.h  |    6 ++-
->  include/linux/mmc/host.h  |    1 +
->  include/linux/mmc/sdhci.h |    6 +++
->  5 files changed, 124 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index ae7a771..1f3cf57 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -641,6 +641,11 @@ static int mmc_sd_init_uhs_card(struct mmc_card
-> *card)
->  	if (!mmc_host_is_spi(card->host) && card->host->ops-
-> >execute_tuning)
->  		card->host->ops->execute_tuning(card->host);
-> 
-> +	/* Initialize and start re-tuning timer */
-> +	if (!mmc_host_is_spi(card->host) &&
-> +	    card->host->ops->start_retuning_timer)
-> +		card->host->ops->start_retuning_timer(card->host);
+> But from the spec it looks as if controllers conforming to v3.00 should
+> provide this feature. There is no other bit anywhere else in the spec
+> which can indicate support for Preset Value Enable except for the
+> controller version number.
 
-Why you need extra mmc_ops for this? You can start the retuning timer when
-first time your driver's "execute_tuning" ops gets executed.
+Actually, I am not aware about this controller spec v3.00. can you please
+point me to the link for this spec (if it's available)?
 
-> +
->  out:
->  	kfree(status);
+
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2ffb0c4..8bf0408 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -48,6 +48,8 @@ static void sdhci_finish_data(struct sdhci_host *);
+> Thanks,
+> Arindam
 > 
->  static void sdhci_send_command(struct sdhci_host *, struct mmc_command
-> *);
->  static void sdhci_finish_command(struct sdhci_host *);
-> +static void sdhci_execute_tuning(struct mmc_host *mmc);
-> +static void sdhci_tuning_timer(unsigned long data);
-> 
->  static void sdhci_dumpregs(struct sdhci_host *host)
->  {
-> @@ -1240,8 +1242,34 @@ static void sdhci_request(struct mmc_host *mmc,
-> struct mmc_request *mrq)
->  	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
->  		host->mrq->cmd->error = -ENOMEDIUM;
->  		tasklet_schedule(&host->finish_tasklet);
-> -	} else
-> +	} else {
-> +		u32 present_state;
-> +
-> +		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> +		/*
-> +		 * Check if the re-tuning timer has already expired and
-> there
-> +		 * is no on-going data transfer. If so, we need to execute
-> +		 * tuning procedure before sending command.
-> +		 */
-> +		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
-> +		    !(present_state & (SDHCI_DOING_WRITE |
-> +		     SDHCI_DOING_READ))) {
-> +			host->flags &= ~SDHCI_NEEDS_RETUNING;
-> +			/* Reload the new initial value for timer */
-> +			if (host->tuning_mode == SDHCI_TUNING_MODE_1)
-> +				mod_timer(&host->tuning_timer, jiffies +
-> +					host->tuning_count * HZ);
-> +
-> +			spin_unlock_irqrestore(&host->lock, flags);
-> +			sdhci_execute_tuning(mmc);
-> +			spin_lock_irqsave(&host->lock, flags);
-> +
-> +			/* Restore original mmc_request structure */
-> +			host->mrq = mrq;
-> +		}
-> +
->  		sdhci_send_command(host, mrq->cmd);
-> +	}
-> 
->  	mmiowb();
->  	spin_unlock_irqrestore(&host->lock, flags);
-> @@ -1667,6 +1695,26 @@ static void sdhci_disable_preset_value(struct
-> sdhci_host *host)
->  	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->  }
-> 
-> +static void sdhci_start_retuning_timer(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host;
-> +	unsigned long flags;
-> +
-> +	host = mmc_priv(mmc);
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +
-> +	if (host->tuning_count &&
-> +	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
-> +		mod_timer(&host->tuning_timer, jiffies + host->tuning_count
-> *
-> +			HZ);
-> +		/* Tuning mode 1 limits the maximum data length to 4MB */
-> +		mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
-> +	}
-> +
-> +	spin_unlock_irqrestore(&host->lock, flags);
-> +}
-> +
->  static const struct mmc_host_ops sdhci_ops = {
->  	.request	= sdhci_request,
->  	.set_ios	= sdhci_set_ios,
-> @@ -1676,6 +1724,7 @@ static const struct mmc_host_ops sdhci_ops = {
->  	.get_max_current_180		= sdhci_get_max_current_180,
->  	.execute_tuning			= sdhci_execute_tuning,
->  	.enable_preset_value		= sdhci_enable_preset_value,
-> +	.start_retuning_timer		= sdhci_start_retuning_timer,
->  };
-> 
-> 
+> >
+> > >
+> > > Thanks,
+> > > Arindam
+> > >
+> > > >
+> > > >
+> > > > >
+> > > > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> > > > > ---
+> > > > >  drivers/mmc/core/sd.c    |    7 +++++++
+> > > > >  drivers/mmc/host/sdhci.c |   36
+> > > ++++++++++++++++++++++++++++++++++++
+> > > > >  include/linux/mmc/host.h |    1 +
+> > > > >  3 files changed, 44 insertions(+), 0 deletions(-)
+> > > > >
+> > > > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > > > > index 1e2d157..ae7a771 100644
+> > > > > --- a/drivers/mmc/core/sd.c
+> > > > > +++ b/drivers/mmc/core/sd.c
+> > > > > @@ -962,6 +962,13 @@ static int mmc_sd_init_card(struct
+> mmc_host
+> > > > *host,
+> > > > > u32 ocr,
+> > > > >  		}
+> > > > >  	}
+> > > > >
+> > > > > +	/*
+> > > > > +	 * Since initialization is now complete, enable preset
+> > > > > +	 * value registers.
+> > > > > +	 */
+> > > > > +	if (host->ops->enable_preset_value)
+> > > > > +		host->ops->enable_preset_value(host);
+> > > > > +
+> > > > >  	host->card = card;
+> > > > >  	return 0;
+> > > > >
+> > > > > diff --git a/drivers/mmc/host/sdhci.c
+> b/drivers/mmc/host/sdhci.c
+> > > > > index 8f4f102..1f6e4ad 100644
+> > > > > --- a/drivers/mmc/host/sdhci.c
+> > > > > +++ b/drivers/mmc/host/sdhci.c
+> > > > > @@ -1602,6 +1602,40 @@ out:
+> > > > >  	spin_unlock_irqrestore(&host->lock, flags);
+> > > > >  }
+> > > > >
+> > > > > +static void sdhci_enable_preset_value(struct mmc_host *mmc)
+> > > > > +{
+> > > > > +	struct sdhci_host *host;
+> > > > > +	u16 ctrl;
+> > > > > +	unsigned long flags;
+> > > > > +
+> > > > > +	host = mmc_priv(mmc);
+> > > > > +
+> > > > > +	/* Host Controller v3.00 defines preset value registers */
+> > > > > +	if (host->version < SDHCI_SPEC_300)
+> > > > > +		return;
+> > > > > +
+> > > > > +	spin_lock_irqsave(&host->lock, flags);
+> > > > > +
+> > > > > +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> > > > > +	ctrl |= SDHCI_CTRL_PRESET_VAL_ENABLE;
+> > > > > +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> > > > > +
+> > > > > +	spin_unlock_irqrestore(&host->lock, flags);
+> > > > > +}
+> > > > > +
+> > > > > +static void sdhci_disable_preset_value(struct sdhci_host
+> *host)
+> > > > > +{
+> > > > > +	u16 ctrl;
+> > > > > +
+> > > > > +	/* Only for Host Controller version >= v3.00 */
+> > > > > +	if (host->version < SDHCI_SPEC_300)
+> > > > > +		return;
+> > > > > +
+> > > > > +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> > > > > +	ctrl &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
+> > > > > +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> > > > > +}
+> > > > > +
+> > > > >  static const struct mmc_host_ops sdhci_ops = {
+> > > > >  	.request	= sdhci_request,
+> > > > >  	.set_ios	= sdhci_set_ios,
+> > > > > @@ -1610,6 +1644,7 @@ static const struct mmc_host_ops
+> sdhci_ops
+> > =
+> > > {
+> > > > >  	.start_signal_voltage_switch	=
+> > > > > sdhci_start_signal_voltage_switch,
+> > > > >  	.get_max_current_180		= sdhci_get_max_current_180,
+> > > > >  	.execute_tuning			= sdhci_execute_tuning,
+> > > > > +	.enable_preset_value		= sdhci_enable_preset_value,
+> > > > >  };
+> > > > >
+> > > > >
+> > > > >
+> > > >
+> > >
+> >
 > /**********************************************************************
-> *******\
-> @@ -1725,6 +1774,10 @@ static void sdhci_tasklet_finish(unsigned long
-> param)
+> > > > > *******\
+> > > > > @@ -1920,6 +1955,7 @@ static irqreturn_t sdhci_irq(int irq,
+> void
+> > > > > *dev_id)
+> > > > >  		sdhci_writel(host, intmask & (SDHCI_INT_CARD_INSERT
+|
+> > > > >  			SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
+> > > > >  		tasklet_schedule(&host->card_tasklet);
+> > > > > +		sdhci_disable_preset_value(host);
+> > > > >  	}
+> > > > >
+> > > > >  	intmask &= ~(SDHCI_INT_CARD_INSERT |
+> > SDHCI_INT_CARD_REMOVE);
+> > > > > diff --git a/include/linux/mmc/host.h
+> b/include/linux/mmc/host.h
+> > > > > index 651e40b..e63e063 100644
+> > > > > --- a/include/linux/mmc/host.h
+> > > > > +++ b/include/linux/mmc/host.h
+> > > > > @@ -130,6 +130,7 @@ struct mmc_host_ops {
+> > > > >  	int	(*start_signal_voltage_switch)(struct mmc_host
+> > *host);
+> > > > >  	int	(*get_max_current_180)(struct mmc_host *mmc);
+> > > > >  	void	(*execute_tuning)(struct mmc_host *host);
+> > > > > +	void	(*enable_preset_value)(struct mmc_host *host);
+> > > > >  };
+> > > > >
+> > > > >  struct mmc_card;
+> > > > > --
+> > > > > 1.7.1
+> > > > >
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe
+> linux-
+> > > mmc"
+> > > > in
+> > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at  http://vger.kernel.org/majordomo-
+> > info.html
+> > > >
+> > >
+> > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe linux-
+> mmc"
+> > in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
 > 
->  	del_timer(&host->timer);
 > 
-> +	if (host->version >= SDHCI_SPEC_300)
-> +		del_timer(&host->tuning_timer);
-> +
-> +
->  	mrq = host->mrq;
-> 
->  	/*
-> @@ -1799,6 +1852,20 @@ static void sdhci_timeout_timer(unsigned long
-> data)
->  	spin_unlock_irqrestore(&host->lock, flags);
->  }
-> 
-> +static void sdhci_tuning_timer(unsigned long data)
-> +{
-> +	struct sdhci_host *host;
-> +	unsigned long flags;
-> +
-> +	host = (struct sdhci_host *)data;
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +
-> +	host->flags |= SDHCI_NEEDS_RETUNING;
-> +
-> +	spin_unlock_irqrestore(&host->lock, flags);
-> +}
-> +
-> 
-> /**********************************************************************
-> *******\
->   *
-> *
->   * Interrupt handling
-> *
-> @@ -2057,6 +2124,15 @@ int sdhci_suspend_host(struct sdhci_host *host,
-> pm_message_t state)
-> 
->  	sdhci_disable_card_detection(host);
-> 
-> +	/* Disable tuning since we are suspending */
-> +	if ((host->version >= SDHCI_SPEC_300) &&
-> +	    host->tuning_count &&
-> +	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
-> +		host->flags &= ~SDHCI_NEEDS_RETUNING;
-> +		mod_timer(&host->tuning_timer, jiffies +
-> +			host->tuning_count * HZ);
-> +	}
-> +
->  	ret = mmc_suspend_host(host->mmc);
->  	if (ret)
->  		return ret;
-> @@ -2098,6 +2174,12 @@ int sdhci_resume_host(struct sdhci_host *host)
->  	ret = mmc_resume_host(host->mmc);
->  	sdhci_enable_card_detection(host);
-> 
-> +	/* Set the re-tuning expiration flag */
-> +	if ((host->version >= SDHCI_SPEC_300) &&
-> +	    host->tuning_count &&
-> +	    (host->tuning_mode == SDHCI_TUNING_MODE_1))
-> +		host->flags |= SDHCI_NEEDS_RETUNING;
-> +
->  	return ret;
->  }
-> 
-> @@ -2353,6 +2435,21 @@ int sdhci_add_host(struct sdhci_host *host)
->  	if (caps[1] & SDHCI_DRIVER_TYPE_D)
->  		mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
-> 
-> +	/* Initial value for re-tuning timer count */
-> +	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK)
-> >>
-> +			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
-> +
-> +	/*
-> +	 * In case Re-tuning Timer is not disabled, the actual value of
-> +	 * re-tuning timer will be 2 ^ (n - 1).
-> +	 */
-> +	if (host->tuning_count)
-> +		host->tuning_count = 1 << (host->tuning_count - 1);
-> +
-> +	/* Re-tuning mode supported by the Host Controller */
-> +	host->tuning_mode = (caps[1] & SDHCI_RETUNING_MODE_MASK) >>
-> +			     SDHCI_RETUNING_MODE_SHIFT;
-> +
->  	ocr_avail = 0;
->  	/*
->  	 * According to SD Host Controller spec v3.00, if the Host System
-> @@ -2488,9 +2585,15 @@ int sdhci_add_host(struct sdhci_host *host)
-> 
->  	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned
-> long)host);
-> 
-> -	if (host->version >= SDHCI_SPEC_300)
-> +	if (host->version >= SDHCI_SPEC_300) {
->  		init_waitqueue_head(&host->buf_ready_int);
-> 
-> +		/* Initialize re-tuning timer */
-> +		init_timer(&host->tuning_timer);
-> +		host->tuning_timer.data = (unsigned long)host;
-> +		host->tuning_timer.function = sdhci_tuning_timer;
-> +	}
-> +
->  	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
->  		mmc_hostname(mmc), host);
->  	if (ret)
-> @@ -2584,6 +2687,8 @@ void sdhci_remove_host(struct sdhci_host *host,
-> int dead)
->  	free_irq(host->irq, host);
-> 
->  	del_timer_sync(&host->timer);
-> +	if (host->version >= SDHCI_SPEC_300)
-> +		del_timer_sync(&host->tuning_timer);
-> 
->  	tasklet_kill(&host->card_tasklet);
->  	tasklet_kill(&host->finish_tasklet);
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 37a8c32..53d5909 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -190,7 +190,11 @@
->  #define  SDHCI_DRIVER_TYPE_A	0x00000010
->  #define  SDHCI_DRIVER_TYPE_C	0x00000020
->  #define  SDHCI_DRIVER_TYPE_D	0x00000040
-> -#define  SDHCI_USE_SDR50_TUNING	0x00002000
-> +#define  SDHCI_RETUNING_TIMER_COUNT_MASK	0x00000F00
-> +#define  SDHCI_RETUNING_TIMER_COUNT_SHIFT	8
-> +#define  SDHCI_USE_SDR50_TUNING			0x00002000
-> +#define  SDHCI_RETUNING_MODE_MASK		0x0000C000
-> +#define  SDHCI_RETUNING_MODE_SHIFT		14
->  #define  SDHCI_CLOCK_MUL_MASK	0x00FF0000
->  #define  SDHCI_CLOCK_MUL_SHIFT	16
-> 
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index e63e063..09f5d03 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -131,6 +131,7 @@ struct mmc_host_ops {
->  	int	(*get_max_current_180)(struct mmc_host *mmc);
->  	void	(*execute_tuning)(struct mmc_host *host);
->  	void	(*enable_preset_value)(struct mmc_host *host);
-> +	void	(*start_retuning_timer)(struct mmc_host *host);
->  };
-> 
->  struct mmc_card;
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index 4be4022..c6539be 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -110,6 +110,7 @@ struct sdhci_host {
->  #define SDHCI_REQ_USE_DMA	(1<<2)	/* Use DMA for this req. */
->  #define SDHCI_DEVICE_DEAD	(1<<3)	/* Device unresponsive */
->  #define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
-> +#define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
-> 
->  	unsigned int version;	/* SDHCI spec. version */
-> 
-> @@ -152,6 +153,11 @@ struct sdhci_host {
->  	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read
-> Ready interrupt */
->  	unsigned int		tuning_done;	/* Condition flag set
-> when CMD19 succeeds */
-> 
-> +	unsigned int		tuning_count;	/* Timer count for re-
-> tuning */
-> +	unsigned int		tuning_mode;	/* Re-tuning mode
-> supported by host */
-> +#define SDHCI_TUNING_MODE_1	0
-> +	struct timer_list	tuning_timer;	/* Timer for tuning */
-> +
->  	unsigned long private[0] ____cacheline_aligned;
->  };
->  #endif /* __SDHCI_H */
 > --
-> 1.7.1
-
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
