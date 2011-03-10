@@ -1,69 +1,68 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: reset card voltage after power off
-Date: Thu, 10 Mar 2011 10:40:54 -0500
-Message-ID: <m362rrkmpl.fsf@pullcord.laptop.org>
-References: <1299332184-13803-1-git-send-email-linus.walleij@stericsson.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC 4/5] MMC: Adjust unaligned write accesses.
+Date: Thu, 10 Mar 2011 17:05:45 +0100
+Message-ID: <201103101705.45230.arnd@arndb.de>
+References: <1299718449-15172-1-git-send-email-andreiw@motorola.com> <1299718449-15172-5-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58721 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752932Ab1CJPnO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Mar 2011 10:43:14 -0500
-In-Reply-To: <1299332184-13803-1-git-send-email-linus.walleij@stericsson.com>
-	(Linus Walleij's message of "Sat, 5 Mar 2011 14:36:24 +0100")
+Received: from moutng.kundenserver.de ([212.227.17.9]:56204 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751314Ab1CJQFy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2011 11:05:54 -0500
+In-Reply-To: <1299718449-15172-5-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi,
+On Thursday 10 March 2011, Andrei Warkentin wrote:
+> Adjust unaligned write accesses spanning preferred align
+> size into two accesses - an unaligned and an aligned access.
+> This is meant to be used for card quirks, and is off
+> by default. A limiting value in transfer size
+> for this adjustment is available, as on some cards there is a
+> perf decrease for larger transfers.
+> 
+> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
 
-On Sat, Mar 05 2011, Linus Walleij wrote:
-> From: Ulf Hansson <ulf.hansson@stericsson.com>
->
-> At power off, reset OCR mask to be the highest possible voltage
-> supported for the current mmc host.
->
-> This solves the re-initialization during the power up sequence.
-> The voltage may have been decreased due to the card accepts a lower
-> voltage than the voltage used during the initialization sequence.
-> We need to reset the voltage to by the host highest possible value
-> since according to specification the initialization must always be
-> done at high voltage.
->
-> Reviewed-by: Jonas Aberg <jonas.aberg@stericsson.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/core/core.c |    7 +++++++
->  1 files changed, 7 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 2521794..b9d39ec 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1002,6 +1002,13 @@ static void mmc_power_off(struct mmc_host *host)
->  {
->  	host->ios.clock = 0;
->  	host->ios.vdd = 0;
-> +
-> +	/*
-> +	 * Reset ocr mask to be the highest possible voltage supported for
-> +	 * this mmc host. This value will be used at next power up.
-> +	 */
-> +	host->ocr = 1 << (fls(host->ocr_avail) - 1);
-> +
->  	if (!mmc_host_is_spi(host)) {
->  		host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
->  		host->ios.chip_select = MMC_CS_DONTCARE;
+Sorry for repeating myself, but I'm not sure if you didn't understand
+me or if I missed your arguments against the more generic approach.
 
-Thanks, pushed to mmc-next for .39.
+Instead of encoding specific parameters for this quirk, I would
+much prefer to have the values be meaningful, and have the
+code deal with the interpretation.
 
-It would be good to hear more about whether you think this is a
-regression, should have a stable@ tag, etc.
+> @@ -63,6 +63,8 @@ struct mmc_blk_data {
+>  
+>  	unsigned int	usage;
+>  	unsigned int	read_only;
+> +	unsigned int	write_align_size;
+> +	unsigned int	write_align_limit;
+>  };
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+These numbers are generally speaking useless, except for the
+one quirk. What I was trying to suggest here is to have
+a page_size field that reflects the underlying page size
+of the NAND flash, and a flag that says "please split all
+requests under 1.5 times the page size along page boundaries".
+
+We can pre-initialize the page size to some common value
+(e.g. 16 KB for 4GB or larger cards, 4 KB for smaller than
+4 GB), and use quirks to override it for cards where we
+know it's different.
+
+There are a lot of optimizations based on the page size
+(partition alignment, fs block size, readahead, ...), so it
+can become a generic blockdev attribute and get used by
+both kernel and user code, rather than assuming we can
+do 512 byte sector accesses efficiently.
+
+The block layer already has physical_block_size and
+io_min fields in various places, so the answer may be
+to simply set one of those instead of introducing another
+page_size for mmc.
+
+	Arnd
