@@ -1,41 +1,41 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC 2/5] MMC: Allow function-specific quirks.
-Date: Thu, 10 Mar 2011 16:09:28 +0100
-Message-ID: <201103101609.28223.arnd@arndb.de>
-References: <1299718449-15172-1-git-send-email-andreiw@motorola.com> <1299718449-15172-3-git-send-email-andreiw@motorola.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: export function mmc_do_release_host
+Date: Thu, 10 Mar 2011 10:27:58 -0500
+Message-ID: <m3aah3knb5.fsf@pullcord.laptop.org>
+References: <1299658262-1337-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:55587 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751788Ab1CJPJb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2011 10:09:31 -0500
-In-Reply-To: <1299718449-15172-3-git-send-email-andreiw@motorola.com>
+Received: from void.printf.net ([89.145.121.20]:54646 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752995Ab1CJPaW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Mar 2011 10:30:22 -0500
+In-Reply-To: <1299658262-1337-1-git-send-email-linus.walleij@stericsson.com>
+	(Linus Walleij's message of "Wed, 9 Mar 2011 09:11:02 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Thursday 10 March 2011, Andrei Warkentin wrote:
-> 
-> This allows us to create quirks for block devices, without
-> creating messy Kconfig dependencies, or polluting core/ with
-> function-specific code.
+Hi,
 
-The change looks good to me, but it's hard to read because
-you are moving around code and changing it in one patch.
+On Wed, Mar 09 2011, Linus Walleij wrote:
+> From: Ulf Hansson <ulf.hansson@stericsson.com>
+>
+> When using mmc_try_claim_host the corresponding release
+> function is mmc_do_release_host, which then also must
+> be exported.
+>
+> Reviewed-by: Jonas Aberg <jonas.aberg@stericsson.com>
+> Reviewed-by: Sebastian Rasmussen <sebastian.rasmussen@stericsson.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+> V2: updated with kerneldoc
 
-A better split of the first three patches would be to first
-move the code to a header file without changing it, and then
-make the changes.
+Thanks, pushed to mmc-next for .39.
 
-Or you could directly add the code to the header file when you
-introduce it in the first patch.
-
-> Change-Id: I0fd466f115718a23edd0636e1e73d91c77b63887
-
-Please remove these lines.
-
-	Arnd
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
