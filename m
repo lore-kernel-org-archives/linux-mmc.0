@@ -1,171 +1,602 @@
-From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Subject: [PATCH V1] mx51 enchance the sd/mmc HW timing compatibility on mx51 boards.
-Date: Thu, 10 Mar 2011 14:15:46 +0800
-Message-ID: <1299737746-19324-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+From: <subhashj@codeaurora.org>
+Subject: RE: [PATCH v2 02/12] mmc: sd: add support for signal voltage switch procedure
+Date: Thu, 10 Mar 2011 12:00:13 +0530
+Message-ID: <000001cbdeec$a02fdad0$e08f9070$@org>
+References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com> <1299238369-1768-3-git-send-email-arindam.nath@amd.com> <000601cbde47$0acbbe00$20633a00$@org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.181]:53620
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751592Ab1CJGQS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2011 01:16:18 -0500
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:21868 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751934Ab1CJGaW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2011 01:30:22 -0500
+In-Reply-To: <000601cbde47$0acbbe00$20633a00$@org>
+Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, eric.miao@linaro.org, Richard Zhu <Hong-Xing.Zhu@freescale.com>
+To: 'Arindam Nath' <arindam.nath@amd.com>, cjb@laptop.org
+Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com
 
-Some cards have the CRC errors in read on mx51 BBG board.
-Configure the eSDHC pad configurations to level up the
-compatibility to fix this issue.
 
-Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Tested-by: Shawn Guo <shawn.gsc@gmail.com>
----
- arch/arm/plat-mxc/include/mach/iomux-mx51.h |   40 +++++++++++++-------------
- 1 files changed, 20 insertions(+), 20 deletions(-)
 
-diff --git a/arch/arm/plat-mxc/include/mach/iomux-mx51.h b/arch/arm/plat-mxc/include/mach/iomux-mx51.h
-index b6767f9..3e41348 100644
---- a/arch/arm/plat-mxc/include/mach/iomux-mx51.h
-+++ b/arch/arm/plat-mxc/include/mach/iomux-mx51.h
-@@ -985,11 +985,11 @@
- #define MX51_PAD_NANDF_WE_B__GPIO3_3		(_MX51_PAD_NANDF_WE_B__GPIO3_3 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_WE_B__NANDF_WE_B		(_MX51_PAD_NANDF_WE_B__NANDF_WE_B | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_WE_B__PATA_DIOW		(_MX51_PAD_NANDF_WE_B__PATA_DIOW | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_WE_B__SD3_DATA0		(_MX51_PAD_NANDF_WE_B__SD3_DATA0 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_WE_B__SD3_DATA0		(_MX51_PAD_NANDF_WE_B__SD3_DATA0 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_RE_B__GPIO3_4		(_MX51_PAD_NANDF_RE_B__GPIO3_4 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_RE_B__NANDF_RE_B		(_MX51_PAD_NANDF_RE_B__NANDF_RE_B | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_RE_B__PATA_DIOR		(_MX51_PAD_NANDF_RE_B__PATA_DIOR | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_RE_B__SD3_DATA1		(_MX51_PAD_NANDF_RE_B__SD3_DATA1 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_RE_B__SD3_DATA1		(_MX51_PAD_NANDF_RE_B__SD3_DATA1 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_ALE__GPIO3_5		(_MX51_PAD_NANDF_ALE__GPIO3_5 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_ALE__NANDF_ALE		(_MX51_PAD_NANDF_ALE__NANDF_ALE | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_ALE__PATA_BUFFER_EN	(_MX51_PAD_NANDF_ALE__PATA_BUFFER_EN | MUX_PAD_CTRL(NO_PAD_CTRL))
-@@ -999,18 +999,18 @@
- #define MX51_PAD_NANDF_WP_B__GPIO3_7		(_MX51_PAD_NANDF_WP_B__GPIO3_7 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_WP_B__NANDF_WP_B		(_MX51_PAD_NANDF_WP_B__NANDF_WP_B | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_WP_B__PATA_DMACK		(_MX51_PAD_NANDF_WP_B__PATA_DMACK | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_WP_B__SD3_DATA2		(_MX51_PAD_NANDF_WP_B__SD3_DATA2 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_WP_B__SD3_DATA2		(_MX51_PAD_NANDF_WP_B__SD3_DATA2 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_RB0__ECSPI2_SS1		(_MX51_PAD_NANDF_RB0__ECSPI2_SS1 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_NANDF_RB0__GPIO3_8		(_MX51_PAD_NANDF_RB0__GPIO3_8 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_RB0__NANDF_RB0		(_MX51_PAD_NANDF_RB0__NANDF_RB0 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_RB0__PATA_DMARQ		(_MX51_PAD_NANDF_RB0__PATA_DMARQ | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_RB0__SD3_DATA3		(_MX51_PAD_NANDF_RB0__SD3_DATA3 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_RB0__SD3_DATA3		(_MX51_PAD_NANDF_RB0__SD3_DATA3 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_RB1__CSPI_MOSI		(_MX51_PAD_NANDF_RB1__CSPI_MOSI | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_NANDF_RB1__ECSPI2_RDY		(_MX51_PAD_NANDF_RB1__ECSPI2_RDY | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_NANDF_RB1__GPIO3_9		(_MX51_PAD_NANDF_RB1__GPIO3_9 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_RB1__NANDF_RB1		(_MX51_PAD_NANDF_RB1__NANDF_RB1 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_RB1__PATA_IORDY		(_MX51_PAD_NANDF_RB1__PATA_IORDY | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_RB1__SD4_CMD		(_MX51_PAD_NANDF_RB1__SD4_CMD | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_RB1__SD4_CMD		(_MX51_PAD_NANDF_RB1__SD4_CMD | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_RB2__DISP2_WAIT		(_MX51_PAD_NANDF_RB2__DISP2_WAIT | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_RB2__ECSPI2_SCLK		(_MX51_PAD_NANDF_RB2__ECSPI2_SCLK | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_NANDF_RB2__FEC_COL		(_MX51_PAD_NANDF_RB2__FEC_COL | MUX_PAD_CTRL(MX51_PAD_CTRL_2))
-@@ -1036,41 +1036,41 @@
- #define MX51_PAD_NANDF_CS2__GPIO3_18		(_MX51_PAD_NANDF_CS2__GPIO3_18 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS2__NANDF_CS2		(_MX51_PAD_NANDF_CS2__NANDF_CS2 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS2__PATA_CS_0		(_MX51_PAD_NANDF_CS2__PATA_CS_0 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_CS2__SD4_CLK		(_MX51_PAD_NANDF_CS2__SD4_CLK | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_CS2__SD4_CLK		(_MX51_PAD_NANDF_CS2__SD4_CLK | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS))
- #define MX51_PAD_NANDF_CS2__USBH3_H1_DP		(_MX51_PAD_NANDF_CS2__USBH3_H1_DP | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS3__FEC_MDC		(_MX51_PAD_NANDF_CS3__FEC_MDC | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
- #define MX51_PAD_NANDF_CS3__GPIO3_19		(_MX51_PAD_NANDF_CS3__GPIO3_19 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS3__NANDF_CS3		(_MX51_PAD_NANDF_CS3__NANDF_CS3 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS3__PATA_CS_1		(_MX51_PAD_NANDF_CS3__PATA_CS_1 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_CS3__SD4_DAT0		(_MX51_PAD_NANDF_CS3__SD4_DAT0 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_CS3__SD4_DAT0		(_MX51_PAD_NANDF_CS3__SD4_DAT0 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_CS3__USBH3_H1_DM		(_MX51_PAD_NANDF_CS3__USBH3_H1_DM | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS4__FEC_TDATA1		(_MX51_PAD_NANDF_CS4__FEC_TDATA1 | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
- #define MX51_PAD_NANDF_CS4__GPIO3_20		(_MX51_PAD_NANDF_CS4__GPIO3_20 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS4__NANDF_CS4		(_MX51_PAD_NANDF_CS4__NANDF_CS4 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS4__PATA_DA_0		(_MX51_PAD_NANDF_CS4__PATA_DA_0 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_CS4__SD4_DAT1		(_MX51_PAD_NANDF_CS4__SD4_DAT1 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_CS4__SD4_DAT1		(_MX51_PAD_NANDF_CS4__SD4_DAT1 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_CS4__USBH3_STP		(_MX51_PAD_NANDF_CS4__USBH3_STP | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS5__FEC_TDATA2		(_MX51_PAD_NANDF_CS5__FEC_TDATA2 | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
- #define MX51_PAD_NANDF_CS5__GPIO3_21		(_MX51_PAD_NANDF_CS5__GPIO3_21 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS5__NANDF_CS5		(_MX51_PAD_NANDF_CS5__NANDF_CS5 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS5__PATA_DA_1		(_MX51_PAD_NANDF_CS5__PATA_DA_1 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_CS5__SD4_DAT2		(_MX51_PAD_NANDF_CS5__SD4_DAT2 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_CS5__SD4_DAT2		(_MX51_PAD_NANDF_CS5__SD4_DAT2 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_CS5__USBH3_DIR		(_MX51_PAD_NANDF_CS5__USBH3_DIR | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS6__CSPI_SS3		(_MX51_PAD_NANDF_CS6__CSPI_SS3 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_NANDF_CS6__FEC_TDATA3		(_MX51_PAD_NANDF_CS6__FEC_TDATA3 | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
- #define MX51_PAD_NANDF_CS6__GPIO3_22		(_MX51_PAD_NANDF_CS6__GPIO3_22 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS6__NANDF_CS6		(_MX51_PAD_NANDF_CS6__NANDF_CS6 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS6__PATA_DA_2		(_MX51_PAD_NANDF_CS6__PATA_DA_2 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_CS6__SD4_DAT3		(_MX51_PAD_NANDF_CS6__SD4_DAT3 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_CS6__SD4_DAT3		(_MX51_PAD_NANDF_CS6__SD4_DAT3 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_CS7__FEC_TX_EN		(_MX51_PAD_NANDF_CS7__FEC_TX_EN | MUX_PAD_CTRL(MX51_PAD_CTRL_5))
- #define MX51_PAD_NANDF_CS7__GPIO3_23		(_MX51_PAD_NANDF_CS7__GPIO3_23 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_CS7__NANDF_CS7		(_MX51_PAD_NANDF_CS7__NANDF_CS7 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_CS7__SD3_CLK		(_MX51_PAD_NANDF_CS7__SD3_CLK | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_CS7__SD3_CLK		(_MX51_PAD_NANDF_CS7__SD3_CLK | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS))
- #define MX51_PAD_NANDF_RDY_INT__ECSPI2_SS0	(_MX51_PAD_NANDF_RDY_INT__ECSPI2_SS0 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_NANDF_RDY_INT__FEC_TX_CLK	(_MX51_PAD_NANDF_RDY_INT__FEC_TX_CLK | MUX_PAD_CTRL(MX51_PAD_CTRL_4))
- #define MX51_PAD_NANDF_RDY_INT__GPIO3_24	(_MX51_PAD_NANDF_RDY_INT__GPIO3_24 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_RDY_INT__NANDF_RDY_INT	(_MX51_PAD_NANDF_RDY_INT__NANDF_RDY_INT | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_NANDF_RDY_INT__SD3_CMD		(_MX51_PAD_NANDF_RDY_INT__SD3_CMD | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_NANDF_RDY_INT__SD3_CMD		(_MX51_PAD_NANDF_RDY_INT__SD3_CMD | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_NANDF_D15__ECSPI2_MOSI		(_MX51_PAD_NANDF_D15__ECSPI2_MOSI | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_NANDF_D15__GPIO3_25		(_MX51_PAD_NANDF_D15__GPIO3_25 | MUX_PAD_CTRL(MX51_GPIO_PAD_CTRL))
- #define MX51_PAD_NANDF_D15__NANDF_D15		(_MX51_PAD_NANDF_D15__NANDF_D15 | MUX_PAD_CTRL(NO_PAD_CTRL))
-@@ -1479,26 +1479,26 @@
- #define MX51_PAD_SD1_CLK__SD1_CLK		(_MX51_PAD_SD1_CLK__SD1_CLK | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS))
- #define MX51_PAD_SD1_DATA0__AUD5_TXD		(_MX51_PAD_SD1_DATA0__AUD5_TXD | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_SD1_DATA0__CSPI_MISO		(_MX51_PAD_SD1_DATA0__CSPI_MISO | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
--#define MX51_PAD_SD1_DATA0__SD1_DATA0		(_MX51_PAD_SD1_DATA0__SD1_DATA0 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_SD1_DATA0__SD1_DATA0		(_MX51_PAD_SD1_DATA0__SD1_DATA0 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_EIM_DA0__EIM_DA0		(_MX51_PAD_EIM_DA0__EIM_DA0 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_EIM_DA1__EIM_DA1		(_MX51_PAD_EIM_DA1__EIM_DA1 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_EIM_DA2__EIM_DA2		(_MX51_PAD_EIM_DA2__EIM_DA2 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_EIM_DA3__EIM_DA3		(_MX51_PAD_EIM_DA3__EIM_DA3 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_SD1_DATA1__AUD5_RXD		(_MX51_PAD_SD1_DATA1__AUD5_RXD | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_SD1_DATA1__SD1_DATA1		(_MX51_PAD_SD1_DATA1__SD1_DATA1 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_SD1_DATA1__SD1_DATA1		(_MX51_PAD_SD1_DATA1__SD1_DATA1 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_EIM_DA4__EIM_DA4		(_MX51_PAD_EIM_DA4__EIM_DA4 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_EIM_DA5__EIM_DA5		(_MX51_PAD_EIM_DA5__EIM_DA5 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_EIM_DA6__EIM_DA6		(_MX51_PAD_EIM_DA6__EIM_DA6 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_EIM_DA7__EIM_DA7		(_MX51_PAD_EIM_DA7__EIM_DA7 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_SD1_DATA2__AUD5_TXC		(_MX51_PAD_SD1_DATA2__AUD5_TXC | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_SD1_DATA2__SD1_DATA2		(_MX51_PAD_SD1_DATA2__SD1_DATA2 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_SD1_DATA2__SD1_DATA2		(_MX51_PAD_SD1_DATA2__SD1_DATA2 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_EIM_DA10__EIM_DA10		(_MX51_PAD_EIM_DA10__EIM_DA10 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_EIM_DA11__EIM_DA11		(_MX51_PAD_EIM_DA11__EIM_DA11 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_EIM_DA8__EIM_DA8		(_MX51_PAD_EIM_DA8__EIM_DA8 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_EIM_DA9__EIM_DA9		(_MX51_PAD_EIM_DA9__EIM_DA9 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_SD1_DATA3__AUD5_TXFS		(_MX51_PAD_SD1_DATA3__AUD5_TXFS | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_SD1_DATA3__CSPI_SS1		(_MX51_PAD_SD1_DATA3__CSPI_SS1 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
--#define MX51_PAD_SD1_DATA3__SD1_DATA3		(_MX51_PAD_SD1_DATA3__SD1_DATA3 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_SD1_DATA3__SD1_DATA3		(_MX51_PAD_SD1_DATA3__SD1_DATA3 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_GPIO1_0__CSPI_SS2		(_MX51_PAD_GPIO1_0__CSPI_SS2 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_GPIO1_0__GPIO1_0		(_MX51_PAD_GPIO1_0__GPIO1_0 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_GPIO1_0__SD1_CD		(_MX51_PAD_GPIO1_0__SD1_CD | MUX_PAD_CTRL(MX51_ESDHC_PAD_CTRL))
-@@ -1517,16 +1517,16 @@
- #define MX51_PAD_SD2_CLK__SD2_CLK		(_MX51_PAD_SD2_CLK__SD2_CLK | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL | PAD_CTL_HYS))
- #define MX51_PAD_SD2_DATA0__CSPI_MISO		(_MX51_PAD_SD2_DATA0__CSPI_MISO | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_SD2_DATA0__SD1_DAT4		(_MX51_PAD_SD2_DATA0__SD1_DAT4 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_SD2_DATA0__SD2_DATA0		(_MX51_PAD_SD2_DATA0__SD2_DATA0 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_SD2_DATA0__SD2_DATA0		(_MX51_PAD_SD2_DATA0__SD2_DATA0 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_SD2_DATA1__SD1_DAT5		(_MX51_PAD_SD2_DATA1__SD1_DAT5 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_SD2_DATA1__SD2_DATA1		(_MX51_PAD_SD2_DATA1__SD2_DATA1 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_SD2_DATA1__SD2_DATA1		(_MX51_PAD_SD2_DATA1__SD2_DATA1 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_SD2_DATA1__USBH3_H2_DP		(_MX51_PAD_SD2_DATA1__USBH3_H2_DP | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_SD2_DATA2__SD1_DAT6		(_MX51_PAD_SD2_DATA2__SD1_DAT6 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_SD2_DATA2__SD2_DATA2		(_MX51_PAD_SD2_DATA2__SD2_DATA2 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_SD2_DATA2__SD2_DATA2		(_MX51_PAD_SD2_DATA2__SD2_DATA2 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_SD2_DATA2__USBH3_H2_DM		(_MX51_PAD_SD2_DATA2__USBH3_H2_DM | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_SD2_DATA3__CSPI_SS2		(_MX51_PAD_SD2_DATA3__CSPI_SS2 | MUX_PAD_CTRL(MX51_ECSPI_PAD_CTRL))
- #define MX51_PAD_SD2_DATA3__SD1_DAT7		(_MX51_PAD_SD2_DATA3__SD1_DAT7 | MUX_PAD_CTRL(NO_PAD_CTRL))
--#define MX51_PAD_SD2_DATA3__SD2_DATA3		(_MX51_PAD_SD2_DATA3__SD2_DATA3 | MUX_PAD_CTRL(NO_PAD_CTRL))
-+#define MX51_PAD_SD2_DATA3__SD2_DATA3		(_MX51_PAD_SD2_DATA3__SD2_DATA3 | MUX_PAD_CTRL(MX51_SDHCI_PAD_CTRL))
- #define MX51_PAD_GPIO1_2__CCM_OUT_2		(_MX51_PAD_GPIO1_2__CCM_OUT_2 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_GPIO1_2__GPIO1_2		(_MX51_PAD_GPIO1_2__GPIO1_2 | MUX_PAD_CTRL(NO_PAD_CTRL))
- #define MX51_PAD_GPIO1_2__I2C2_SCL		(_MX51_PAD_GPIO1_2__I2C2_SCL | MUX_PAD_CTRL(MX51_I2C_PAD_CTRL))
--- 
-1.7.1
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of subhashj@codeaurora.org
+> Sent: Wednesday, March 09, 2011 4:15 PM
+> To: 'Arindam Nath'; cjb@laptop.org
+> Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
+> mmc@vger.kernel.org; henry.su@amd.com; aaron.lu@amd.com;
+> anath.amd@gmail.com
+> Subject: RE: [PATCH v2 02/12] mmc: sd: add support for signal voltage
+> switch procedure
+> 
+> +1. Looks good to me from sd3.0 spec. prospective.
+> 
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Arindam Nath
+> > Sent: Friday, March 04, 2011 5:03 PM
+> > To: cjb@laptop.org
+> > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
+> > subhashj@codeaurora.org; linux-mmc@vger.kernel.org; henry.su@amd.com;
+> > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
+> > Subject: [PATCH v2 02/12] mmc: sd: add support for signal voltage
+> > switch procedure
+> >
+> > Host Controller v3.00 adds another Capabilities register. Apart
+> > from other things, this new register indicates whether the Host
+> > Controller supports SDR50, SDR104, and DDR50 UHS-I modes. The spec
+> > doesn't mention about explicit support for SDR12 and SDR25 UHS-I
+> > modes, so the Host Controller v3.00 should support them by default.
+> > Also if the controller support SDR104 mode, it will also support
+> > SDR50 mode as well. So depending on the host support, we set the
+> > corresponding MMC_CAP_* flags. One more new register. Host Control2
+> > is added in v3.00, which is used during Signal Voltage Switch
+> > procedure described below.
+> >
+> > Since as per v3.00 spec, UHS-I supported hosts should set S18R
+> > to 1, we set S18R (bit 24) of OCR before sending ACMD41. We also
+> > need to set XPC (bit 28) of OCR in case the host can supply >150mA.
+> > This support is indicated by the Maximum Current Capabilities
+> > register of the Host Controller.
+> >
+> > If the response of ACMD41 has both CCS and S18A set, we start the
+> > signal voltage switch procedure, which if successfull, will switch
+> > the card from 3.3V signalling to 1.8V signalling. Signal voltage
+> > switch procedure adds support for a new command CMD11 in the
+> > Physical Layer Spec v3.01. As part of this procedure, we need to
+> > set 1.8V Signalling Enable (bit 3) of Host Control2 register, which
+> > if remains set after 5ms, means the switch to 1.8V signalling is
+> > successfull. Otherwise, we clear bit 24 of OCR and retry the
+> > initialization sequence.
+> >
+> > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> > ---
+> >  drivers/mmc/core/sd.c     |   37 ++++++++++-
+> >  drivers/mmc/core/sd_ops.c |   32 ++++++++++
+> >  drivers/mmc/core/sd_ops.h |    1 +
+> >  drivers/mmc/host/sdhci.c  |  148
+> > +++++++++++++++++++++++++++++++++++++++++----
+> >  drivers/mmc/host/sdhci.h  |   18 +++++-
+> >  include/linux/mmc/host.h  |   10 +++
+> >  include/linux/mmc/sd.h    |    1 +
+> >  7 files changed, 229 insertions(+), 18 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > index b3f8a3c..3e82599 100644
+> > --- a/drivers/mmc/core/sd.c
+> > +++ b/drivers/mmc/core/sd.c
+> > @@ -408,6 +408,7 @@ struct device_type sd_type = {
+> >  int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
+> >  {
+> >  	int err;
+> > +	u32 rocr;
+> >
+> >  	/*
+> >  	 * Since we're changing the OCR value, we seem to
+> > @@ -427,10 +428,25 @@ int mmc_sd_get_cid(struct mmc_host *host, u32
+> > ocr, u32 *cid)
+> >  	if (!err)
+> >  		ocr |= 1 << 30;
+> >
+> > -	err = mmc_send_app_op_cond(host, ocr, NULL);
+> > +	/* If the host can supply more than 150mA, XPC should be set to
+> > 1. */
+> > +	if (host->caps & (MMC_CAP_SET_XPC_330 | MMC_CAP_SET_XPC_300 |
+> > +	    MMC_CAP_SET_XPC_180))
+> > +		ocr |= 1 << 28;
+> > +
+> > +	err = mmc_send_app_op_cond(host, ocr, &rocr);
+> >  	if (err)
+> >  		return err;
+> >
+> > +	/*
+> > +	 * In case CCS and S18A in the response is set, start Signal
+> > Voltage
+> > +	 * Switch procedure. SPI mode doesn't support CMD11.
+> > +	 */
+> > +	if (!mmc_host_is_spi(host) && (rocr & 0x41000000)) {
+> > +		err = mmc_start_voltage_switch(host);
+> > +		if (err)
+> > +			return err;
+> > +	}
+> > +
+> >  	if (mmc_host_is_spi(host))
+> >  		err = mmc_send_cid(host, cid);
+> >  	else
+> > @@ -827,11 +843,26 @@ int mmc_attach_sd(struct mmc_host *host)
+> >  	}
+> >
+> >  	/*
+> > +	 * If the host supports one of UHS-I modes, request the card
+> > +	 * to switch to 1.8V signaling level.
+> > +	 */
+> > +	if (host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
+> > +	    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_DDR50))
+> > +		host->ocr |= (1 << 24);
+> > +
+> > +	/*
+> >  	 * Detect and init the card.
+> >  	 */
+> >  	err = mmc_sd_init_card(host, host->ocr, NULL);
+> > -	if (err)
+> > -		goto err;
+> > +	if (err == -EAGAIN) {
+> > +		/*
+> > +		 * Retry initialization with S18R set to 0.
+> > +		 */
+> > +		host->ocr &= ~(1 << 24);
+> > +		err = mmc_sd_init_card(host, host->ocr, NULL);
+> > +		if (err)
+> > +			goto err;
+> > +	}
 
+Just a thought. Shouldn't we do setting of this b24 bit of OCR in
+mmc_sd_get_cid() function itself and if mmc_send_app_op_cond() returns error
+then reset b24 bit and retry mmc_send_app_op_cond() command.
+
+
+> >
+> >  	mmc_release_host(host);
+> >  	err = mmc_add_card(host->card);
+> > diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+> > index 797cdb5..8a23e2e 100644
+> > --- a/drivers/mmc/core/sd_ops.c
+> > +++ b/drivers/mmc/core/sd_ops.c
+> > @@ -146,6 +146,38 @@ int mmc_app_set_bus_width(struct mmc_card *card,
+> > int width)
+> >  	return 0;
+> >  }
+> >
+> > +int mmc_start_voltage_switch(struct mmc_host *host)
+> > +{
+> > +	struct mmc_command cmd;
+> > +	int err;
+> > +
+> > +	BUG_ON(!host);
+> > +
+> > +	/*
+> > +	 * If the host does not provide signal voltage switch procedure,
+> > we
+> > +	 * set S18R to 0, and then retry initialization sequence.
+> > +	 */
+> > +	if (!host->ops->start_signal_voltage_switch)
+> > +		return -EAGAIN;
+> > +
+> > +	memset(&cmd, 0, sizeof(struct mmc_command));
+> > +
+> > +	cmd.opcode = SD_SWITCH_VOLTAGE;
+> > +	cmd.arg = 0;
+> > +	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
+> > +
+> > +	err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +	if (err)
+> > +		return err;
+> > +
+> > +	if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
+> > +		return -EIO;
+> > +
+> > +	err = host->ops->start_signal_voltage_switch(host);
+> > +
+> > +	return err;
+> > +}
+> > +
+> >  int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+> >  {
+> >  	struct mmc_command cmd;
+> > diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+> > index ffc2305..3cfba59 100644
+> > --- a/drivers/mmc/core/sd_ops.h
+> > +++ b/drivers/mmc/core/sd_ops.h
+> > @@ -20,6 +20,7 @@ int mmc_app_send_scr(struct mmc_card *card, u32
+> > *scr);
+> >  int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+> >  	u8 value, u8 *resp);
+> >  int mmc_app_sd_status(struct mmc_card *card, void *ssr);
+> > +int mmc_start_voltage_switch(struct mmc_host *host);
+> >
+> >  #endif
+> >
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 8914a25..5487a0b 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -85,6 +85,8 @@ static void sdhci_dumpregs(struct sdhci_host *host)
+> >  	printk(KERN_DEBUG DRIVER_NAME ": Cmd:      0x%08x | Max curr:
+> > 0x%08x\n",
+> >  		sdhci_readw(host, SDHCI_COMMAND),
+> >  		sdhci_readl(host, SDHCI_MAX_CURRENT));
+> > +	printk(KERN_DEBUG DRIVER_NAME ": Host ctl2: 0x%08x\n",
+> > +		sdhci_readw(host, SDHCI_HOST_CONTROL2));
+> >
+> >  	if (host->flags & SDHCI_USE_ADMA)
+> >  		printk(KERN_DEBUG DRIVER_NAME ": ADMA Err: 0x%08x | ADMA
+> > Ptr: 0x%08x\n",
+> > @@ -1337,11 +1339,70 @@ out:
+> >  	spin_unlock_irqrestore(&host->lock, flags);
+> >  }
+> >
+> > +static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc)
+> > +{
+> > +	struct sdhci_host *host;
+> > +	u8 pwr;
+> > +	u16 clk, ctrl;
+> > +	u32 present_state;
+> > +
+> > +	host = mmc_priv(mmc);
+> > +
+> > +	/* Stop SDCLK */
+> > +	host = mmc_priv(mmc);
+> > +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > +	clk &= ~SDHCI_CLOCK_CARD_EN;
+> > +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> > +
+> > +	/* Check whether DAT[3:0] is 0000 */
+> > +	present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
+> > +	if (!((present_state & SDHCI_DATA_LVL_MASK) >>
+> > SDHCI_DATA_LVL_SHIFT)) {
+> > +		/* Enable 1.8V Signal Enable in the Host Control2 register
+> > */
+> > +		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> > +		ctrl |= SDHCI_CTRL_VDD_180;
+> > +		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> > +
+> > +		/* Wait for 5ms */
+> > +		usleep_range(5000, 5500);
+> > +
+> > +		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> > +		if (ctrl & SDHCI_CTRL_VDD_180) {
+> > +			/* Provide SDCLK again and wait for 1ms*/
+> > +			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > +			clk |= SDHCI_CLOCK_CARD_EN;
+> > +			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> > +			usleep_range(1000, 1500);
+> > +
+> > +			/*
+> > +			 * If DAT[3:0] level is 1111b, then the card was
+> > +			 * successfully switched to 1.8V signaling.
+> > +			 */
+> > +			present_state = sdhci_readl(host,
+> > SDHCI_PRESENT_STATE);
+> > +			if ((present_state & SDHCI_DATA_LVL_MASK) ==
+> > +			     SDHCI_DATA_LVL_MASK) {
+> > +				return 0;
+> > +			}
+> > +		}
+> > +	}
+> > +
+> > +	/*
+> > +	 * If we are here, that means the switch to 1.8V signaling
+> > failed. Stop
+> > +	 * power to the card, and retry initialization sequence by
+> > setting S18R
+> > +	 * to 0.
+> > +	 */
+> > +	pwr = sdhci_readb(host, SDHCI_POWER_CONTROL);
+> > +	pwr &= ~SDHCI_POWER_ON;
+> > +	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+> > +
+> > +	return -EAGAIN;
+> > +}
+> > +
+> >  static const struct mmc_host_ops sdhci_ops = {
+> >  	.request	= sdhci_request,
+> >  	.set_ios	= sdhci_set_ios,
+> >  	.get_ro		= sdhci_get_ro,
+> >  	.enable_sdio_irq = sdhci_enable_sdio_irq,
+> > +	.start_signal_voltage_switch	=
+> > sdhci_start_signal_voltage_switch,
+> >  };
+> >
+> >
+> >
+> /**********************************************************************
+> > *******\
+> > @@ -1799,7 +1860,9 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
+> >  int sdhci_add_host(struct sdhci_host *host)
+> >  {
+> >  	struct mmc_host *mmc;
+> > -	unsigned int caps, ocr_avail;
+> > +	u32 caps[2];
+> > +	u32 max_current_caps;
+> > +	unsigned int ocr_avail;
+> >  	int ret;
+> >
+> >  	WARN_ON(host == NULL);
+> > @@ -1822,12 +1885,15 @@ int sdhci_add_host(struct sdhci_host *host)
+> >  			host->version);
+> >  	}
+> >
+> > -	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
+> > +	caps[0] = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps
+> > :
+> >  		sdhci_readl(host, SDHCI_CAPABILITIES);
+> >
+> > +	if (host->version >= SDHCI_SPEC_300)
+> > +		caps[1] = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+> > +
+> >  	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+> >  		host->flags |= SDHCI_USE_SDMA;
+> > -	else if (!(caps & SDHCI_CAN_DO_SDMA))
+> > +	else if (!(caps[0] & SDHCI_CAN_DO_SDMA))
+> >  		DBG("Controller doesn't have SDMA capability\n");
+> >  	else
+> >  		host->flags |= SDHCI_USE_SDMA;
+> > @@ -1838,7 +1904,8 @@ int sdhci_add_host(struct sdhci_host *host)
+> >  		host->flags &= ~SDHCI_USE_SDMA;
+> >  	}
+> >
+> > -	if ((host->version >= SDHCI_SPEC_200) && (caps &
+> > SDHCI_CAN_DO_ADMA2))
+> > +	if ((host->version >= SDHCI_SPEC_200) &&
+> > +		(caps[0] & SDHCI_CAN_DO_ADMA2))
+> >  		host->flags |= SDHCI_USE_ADMA;
+> >
+> >  	if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA) &&
+> > @@ -1892,10 +1959,10 @@ int sdhci_add_host(struct sdhci_host *host)
+> >  	}
+> >
+> >  	if (host->version >= SDHCI_SPEC_300)
+> > -		host->max_clk = (caps & SDHCI_CLOCK_V3_BASE_MASK)
+> > +		host->max_clk = (caps[0] & SDHCI_CLOCK_V3_BASE_MASK)
+> >  			>> SDHCI_CLOCK_BASE_SHIFT;
+> >  	else
+> > -		host->max_clk = (caps & SDHCI_CLOCK_BASE_MASK)
+> > +		host->max_clk = (caps[0] & SDHCI_CLOCK_BASE_MASK)
+> >  			>> SDHCI_CLOCK_BASE_SHIFT;
+> >
+> >  	host->max_clk *= 1000000;
+> > @@ -1911,7 +1978,7 @@ int sdhci_add_host(struct sdhci_host *host)
+> >  	}
+> >
+> >  	host->timeout_clk =
+> > -		(caps & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
+> > +		(caps[0] & SDHCI_TIMEOUT_CLK_MASK) >>
+> > SDHCI_TIMEOUT_CLK_SHIFT;
+> >  	if (host->timeout_clk == 0) {
+> >  		if (host->ops->get_timeout_clock) {
+> >  			host->timeout_clk = host->ops-
+> > >get_timeout_clock(host);
+> > @@ -1923,7 +1990,7 @@ int sdhci_add_host(struct sdhci_host *host)
+> >  			return -ENODEV;
+> >  		}
+> >  	}
+> > -	if (caps & SDHCI_TIMEOUT_CLK_UNIT)
+> > +	if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
+> >  		host->timeout_clk *= 1000;
+> >
+> >  	/*
+> > @@ -1950,21 +2017,76 @@ int sdhci_add_host(struct sdhci_host *host)
+> >  	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+> >  		mmc->caps |= MMC_CAP_4_BIT_DATA;
+> >
+> > -	if (caps & SDHCI_CAN_DO_HISPD)
+> > +	if (caps[0] & SDHCI_CAN_DO_HISPD)
+> >  		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+> >
+> >  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> >  	    mmc_card_is_removable(mmc))
+> >  		mmc->caps |= MMC_CAP_NEEDS_POLL;
+> >
+> > +	/* UHS-I mode(s) supported by the host controller. */
+> > +	if (host->version >= SDHCI_SPEC_300)
+> > +		mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
+> > +
+> > +	/* SDR104 supports also implies SDR50 support */
+> > +	if (caps[1] & SDHCI_SUPPORT_SDR104)
+> > +		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
+> > +	else if (caps[1] & SDHCI_SUPPORT_SDR50)
+> > +		mmc->caps |= MMC_CAP_UHS_SDR50;
+> > +
+> > +	if (caps[1] & SDHCI_SUPPORT_DDR50)
+> > +		mmc->caps |= MMC_CAP_UHS_DDR50;
+> > +
+> >  	ocr_avail = 0;
+> > -	if (caps & SDHCI_CAN_VDD_330)
+> > +	/*
+> > +	 * According to SD Host Controller spec v3.00, if the Host System
+> > +	 * can afford more than 150mA, Host Driver should set XPC to 1.
+> > Also
+> > +	 * the value is meaningful only if Voltage Support in the
+> > Capabilities
+> > +	 * register is set. The actual current value is 4 times the
+> > register
+> > +	 * value.
+> > +	 */
+> > +	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
+> > +
+> > +	if (caps[0] & SDHCI_CAN_VDD_330) {
+> > +		int max_current_330;
+> > +
+> >  		ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
+> > -	if (caps & SDHCI_CAN_VDD_300)
+> > +
+> > +		max_current_330 = ((max_current_caps &
+> > +				   SDHCI_MAX_CURRENT_330_MASK) >>
+> > +				   SDHCI_MAX_CURRENT_330_SHIFT) *
+> > +				   SDHCI_MAX_CURRENT_MULTIPLIER;
+> > +
+> > +		if (max_current_330 > 150)
+> > +			mmc->caps |= MMC_CAP_SET_XPC_330;
+> > +	}
+> > +	if (caps[0] & SDHCI_CAN_VDD_300) {
+> > +		int max_current_300;
+> > +
+> >  		ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
+> > -	if (caps & SDHCI_CAN_VDD_180)
+> > +
+> > +		max_current_300 = ((max_current_caps &
+> > +				   SDHCI_MAX_CURRENT_300_MASK) >>
+> > +				   SDHCI_MAX_CURRENT_300_SHIFT) *
+> > +				   SDHCI_MAX_CURRENT_MULTIPLIER;
+> > +
+> > +		if (max_current_300 > 150)
+> > +			mmc->caps |= MMC_CAP_SET_XPC_300;
+> > +	}
+> > +	if (caps[0] & SDHCI_CAN_VDD_180) {
+> > +		int max_current_180;
+> > +
+> >  		ocr_avail |= MMC_VDD_165_195;
+> >
+> > +		max_current_180 = ((max_current_caps &
+> > +				   SDHCI_MAX_CURRENT_180_MASK) >>
+> > +				   SDHCI_MAX_CURRENT_180_SHIFT) *
+> > +				   SDHCI_MAX_CURRENT_MULTIPLIER;
+> > +
+> > +		if (max_current_180 > 150)
+> > +			mmc->caps |= MMC_CAP_SET_XPC_180;
+> > +	}
+> > +
+> >  	mmc->ocr_avail = ocr_avail;
+> >  	mmc->ocr_avail_sdio = ocr_avail;
+> >  	if (host->ocr_avail_sdio)
+> > @@ -2024,7 +2146,7 @@ int sdhci_add_host(struct sdhci_host *host)
+> >  	if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
+> >  		mmc->max_blk_size = 2;
+> >  	} else {
+> > -		mmc->max_blk_size = (caps & SDHCI_MAX_BLOCK_MASK) >>
+> > +		mmc->max_blk_size = (caps[0] & SDHCI_MAX_BLOCK_MASK) >>
+> >  				SDHCI_MAX_BLOCK_SHIFT;
+> >  		if (mmc->max_blk_size >= 3) {
+> >  			printk(KERN_WARNING "%s: Invalid maximum block size,
+> > "
+> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> > index 223762c..95d70e6 100644
+> > --- a/drivers/mmc/host/sdhci.h
+> > +++ b/drivers/mmc/host/sdhci.h
+> > @@ -69,6 +69,8 @@
+> >  #define  SDHCI_DATA_AVAILABLE	0x00000800
+> >  #define  SDHCI_CARD_PRESENT	0x00010000
+> >  #define  SDHCI_WRITE_PROTECT	0x00080000
+> > +#define  SDHCI_DATA_LVL_MASK	0x00F00000
+> > +#define   SDHCI_DATA_LVL_SHIFT	20
+> >
+> >  #define SDHCI_HOST_CONTROL 	0x28
+> >  #define  SDHCI_CTRL_LED		0x01
+> > @@ -147,7 +149,8 @@
+> >
+> >  #define SDHCI_ACMD12_ERR	0x3C
+> >
+> > -/* 3E-3F reserved */
+> > +#define SDHCI_HOST_CONTROL2		0x3E
+> > +#define  SDHCI_CTRL_VDD_180		0x0008
+> >
+> >  #define SDHCI_CAPABILITIES	0x40
+> >  #define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
+> > @@ -168,9 +171,20 @@
+> >  #define  SDHCI_CAN_VDD_180	0x04000000
+> >  #define  SDHCI_CAN_64BIT	0x10000000
+> >
+> > +#define  SDHCI_SUPPORT_SDR50	0x00000001
+> > +#define  SDHCI_SUPPORT_SDR104	0x00000002
+> > +#define  SDHCI_SUPPORT_DDR50	0x00000004
+> > +
+> >  #define SDHCI_CAPABILITIES_1	0x44
+> >
+> > -#define SDHCI_MAX_CURRENT	0x48
+> > +#define SDHCI_MAX_CURRENT		0x48
+> > +#define  SDHCI_MAX_CURRENT_330_MASK	0x0000FF
+> > +#define  SDHCI_MAX_CURRENT_330_SHIFT	0
+> > +#define  SDHCI_MAX_CURRENT_300_MASK	0x00FF00
+> > +#define  SDHCI_MAX_CURRENT_300_SHIFT	8
+> > +#define  SDHCI_MAX_CURRENT_180_MASK	0xFF0000
+> > +#define  SDHCI_MAX_CURRENT_180_SHIFT	16
+> > +#define   SDHCI_MAX_CURRENT_MULTIPLIER	4
+> >
+> >  /* 4C-4F reserved for more max current */
+> >
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index bcb793e..ad7daa3 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -117,6 +117,8 @@ struct mmc_host_ops {
+> >
+> >  	/* optional callback for HC quirks */
+> >  	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
+> > +
+> > +	int	(*start_signal_voltage_switch)(struct mmc_host *host);
+> >  };
+> >
+> >  struct mmc_card;
+> > @@ -173,6 +175,14 @@ struct mmc_host {
+> >  						/* DDR mode at 1.2V */
+> >  #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off
+> after
+> > boot */
+> >  #define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus
+> > width ok */
+> > +#define MMC_CAP_UHS_SDR12	(1 << 15)	/* Host supports UHS SDR12
+> > mode */
+> > +#define MMC_CAP_UHS_SDR25	(1 << 16)	/* Host supports UHS SDR25
+> > mode */
+> > +#define MMC_CAP_UHS_SDR50	(1 << 17)	/* Host supports UHS SDR50
+> > mode */
+> > +#define MMC_CAP_UHS_SDR104	(1 << 18)	/* Host supports UHS SDR104
+> > mode */
+> > +#define MMC_CAP_UHS_DDR50	(1 << 19)	/* Host supports UHS DDR50
+> > mode */
+> > +#define MMC_CAP_SET_XPC_330	(1 << 20)	/* Host supports
+>150mA
+> > current at 3.3V */
+> > +#define MMC_CAP_SET_XPC_300	(1 << 21)	/* Host supports
+>150mA
+> > current at 3.0V */
+> > +#define MMC_CAP_SET_XPC_180	(1 << 22)	/* Host supports
+>150mA
+> > current at 1.8V */
+> >
+> >  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+> >
+> > diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
+> > index 178363b..3ba5aa6 100644
+> > --- a/include/linux/mmc/sd.h
+> > +++ b/include/linux/mmc/sd.h
+> > @@ -17,6 +17,7 @@
+> >  /* This is basically the same command as for MMC with some quirks.
+> */
+> >  #define SD_SEND_RELATIVE_ADDR     3   /* bcr                     R6
+> > */
+> >  #define SD_SEND_IF_COND           8   /* bcr  [11:0] See below   R7
+> > */
+> > +#define SD_SWITCH_VOLTAGE         11  /* ac                      R1
+> > */
+> >
+> >    /* class 10 */
+> >  #define SD_SWITCH                 6   /* adtc [31:0] See below   R1
+> > */
+> > --
+> > 1.7.1
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
