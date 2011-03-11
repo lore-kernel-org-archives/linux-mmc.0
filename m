@@ -1,129 +1,94 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/4 v2] sh: fix SDHI IO address-range
-Date: Fri, 11 Mar 2011 09:09:40 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103110905210.23675@axis700.grange>
+Subject: [PATCH 4/4 v2] mmc: mn57xx: remove work-around for unmasked SDIO
+ interrupts
+Date: Fri, 11 Mar 2011 09:09:44 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103110907460.23675@axis700.grange>
 References: <Pine.LNX.4.64.1103110854050.23675@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:56658 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752131Ab1CKIJn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Mar 2011 03:09:43 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <Pine.LNX.4.64.1103110854050.23675@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-SDHI registers occupy only a 0x100 byte large window, not 0x200 byte.
+SDIO IRQs got unmasked on sh-mobile while writing to the
+CTL_CLK_AND_WAIT_CTL register, because that register at address 0x138
+is not implemented on those SoCs and writes to it overwrite the
+register at address 0x38: CTL_SDIO_IRQ_MASK. Previous patches
+eliminated access to register above 0xff on sh-mobile, so that this
+work-around isn't needed anymore.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
 
 v2:
  
-1. fix the resource size instead of adding a flag
+1. rebase on top of driver split
+2. remove the work-around only after users have been updated
 
- arch/sh/boards/mach-ap325rxa/setup.c |    4 ++--
- arch/sh/boards/mach-ecovec24/setup.c |    4 ++--
- arch/sh/boards/mach-kfr2r09/setup.c  |    2 +-
- arch/sh/boards/mach-migor/setup.c    |    2 +-
- arch/sh/boards/mach-se/7724/setup.c  |    4 ++--
- 5 files changed, 8 insertions(+), 8 deletions(-)
+ drivers/mmc/host/tmio_mmc_pio.c |   23 ++---------------------
+ 1 files changed, 2 insertions(+), 21 deletions(-)
 
-diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
-index 60d109f..65bd042 100644
---- a/arch/sh/boards/mach-ap325rxa/setup.c
-+++ b/arch/sh/boards/mach-ap325rxa/setup.c
-@@ -417,7 +417,7 @@ static struct resource sdhi0_cn3_resources[] = {
- 	[0] = {
- 		.name	= "SDHI0",
- 		.start	= 0x04ce0000,
--		.end	= 0x04ce01ff,
-+		.end	= 0x04ce00ff,
- 		.flags	= IORESOURCE_MEM,
- 	},
- 	[1] = {
-@@ -447,7 +447,7 @@ static struct resource sdhi1_cn7_resources[] = {
- 	[0] = {
- 		.name	= "SDHI1",
- 		.start	= 0x04cf0000,
--		.end	= 0x04cf01ff,
-+		.end	= 0x04cf00ff,
- 		.flags	= IORESOURCE_MEM,
- 	},
- 	[1] = {
-diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-index 710be27c9..fd0cb36 100644
---- a/arch/sh/boards/mach-ecovec24/setup.c
-+++ b/arch/sh/boards/mach-ecovec24/setup.c
-@@ -480,7 +480,7 @@ static struct resource sdhi0_resources[] = {
- 	[0] = {
- 		.name	= "SDHI0",
- 		.start  = 0x04ce0000,
--		.end    = 0x04ce01ff,
-+		.end    = 0x04ce00ff,
- 		.flags  = IORESOURCE_MEM,
- 	},
- 	[1] = {
-@@ -520,7 +520,7 @@ static struct resource sdhi1_resources[] = {
- 	[0] = {
- 		.name	= "SDHI1",
- 		.start  = 0x04cf0000,
--		.end    = 0x04cf01ff,
-+		.end    = 0x04cf00ff,
- 		.flags  = IORESOURCE_MEM,
- 	},
- 	[1] = {
-diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-index 7021b59..8b4abbb 100644
---- a/arch/sh/boards/mach-kfr2r09/setup.c
-+++ b/arch/sh/boards/mach-kfr2r09/setup.c
-@@ -354,7 +354,7 @@ static struct resource kfr2r09_sh_sdhi0_resources[] = {
- 	[0] = {
- 		.name	= "SDHI0",
- 		.start  = 0x04ce0000,
--		.end    = 0x04ce01ff,
-+		.end    = 0x04ce00ff,
- 		.flags  = IORESOURCE_MEM,
- 	},
- 	[1] = {
-diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
-index 37e64a6..184fde1 100644
---- a/arch/sh/boards/mach-migor/setup.c
-+++ b/arch/sh/boards/mach-migor/setup.c
-@@ -399,7 +399,7 @@ static struct resource sdhi_cn9_resources[] = {
- 	[0] = {
- 		.name	= "SDHI",
- 		.start	= 0x04ce0000,
--		.end	= 0x04ce01ff,
-+		.end	= 0x04ce00ff,
- 		.flags	= IORESOURCE_MEM,
- 	},
- 	[1] = {
-diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
-index 58cefd3..1235767 100644
---- a/arch/sh/boards/mach-se/7724/setup.c
-+++ b/arch/sh/boards/mach-se/7724/setup.c
-@@ -456,7 +456,7 @@ static struct resource sdhi0_cn7_resources[] = {
- 	[0] = {
- 		.name	= "SDHI0",
- 		.start  = 0x04ce0000,
--		.end    = 0x04ce01ff,
-+		.end    = 0x04ce00ff,
- 		.flags  = IORESOURCE_MEM,
- 	},
- 	[1] = {
-@@ -488,7 +488,7 @@ static struct resource sdhi1_cn8_resources[] = {
- 	[0] = {
- 		.name	= "SDHI1",
- 		.start  = 0x04cf0000,
--		.end    = 0x04cf01ff,
-+		.end    = 0x04cf00ff,
- 		.flags  = IORESOURCE_MEM,
- 	},
- 	[1] = {
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 28e14c7..e1aed25 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -208,26 +208,14 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host, int new_clock)
+ 
+ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+ {
+-	struct tmio_mmc_data *pdata = host->pdata;
+ 	struct resource *res = platform_get_resource(host->pdev, IORESOURCE_MEM, 0);
+ 
+-	/*
+-	 * Testing on sh-mobile showed that SDIO IRQs are unmasked when
+-	 * CTL_CLK_AND_WAIT_CTL gets written, so we have to disable the
+-	 * device IRQ here and restore the SDIO IRQ mask before
+-	 * re-enabling the device IRQ.
+-	 */
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+-		disable_irq(host->irq);
+ 	/* implicit BUG_ON(!res) */
+ 	if (resource_size(res) > 0x100) {
+ 		sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0000);
+ 		msleep(10);
+ 	}
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
+-		tmio_mmc_enable_sdio_irq(host->mmc, host->sdio_irq_enabled);
+-		enable_irq(host->irq);
+-	}
++
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
+ 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+ 	msleep(10);
+@@ -235,24 +223,17 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+ 
+ static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
+ {
+-	struct tmio_mmc_data *pdata = host->pdata;
+ 	struct resource *res = platform_get_resource(host->pdev, IORESOURCE_MEM, 0);
+ 
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x0100 |
+ 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+ 	msleep(10);
+-	/* see comment in tmio_mmc_clk_stop above */
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+-		disable_irq(host->irq);
++
+ 	/* implicit BUG_ON(!res) */
+ 	if (resource_size(res) > 0x100) {
+ 		sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0100);
+ 		msleep(10);
+ 	}
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
+-		tmio_mmc_enable_sdio_irq(host->mmc, host->sdio_irq_enabled);
+-		enable_irq(host->irq);
+-	}
+ }
+ 
+ static void tmio_mmc_reset(struct tmio_mmc_host *host)
 -- 
 1.7.2.3
 
