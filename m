@@ -1,8 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 4/6] ARM: mach-shmobile: convert boards to use
- linux/mmc/sh_mobile_sdhi.h
-Date: Fri, 11 Mar 2011 08:52:28 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103110846390.23675@axis700.grange>
+Subject: [PATCH 5/6] sh: convert boards to use linux/mmc/sh_mobile_sdhi.h
+Date: Fri, 11 Mar 2011 08:52:35 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103110847120.23675@axis700.grange>
 References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
@@ -17,55 +16,84 @@ Prepare to remove the temporary header.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- arch/arm/mach-shmobile/board-ap4evb.c   |    2 +-
- arch/arm/mach-shmobile/board-g4evm.c    |    2 +-
- arch/arm/mach-shmobile/board-mackerel.c |    2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
+ arch/sh/boards/mach-ap325rxa/setup.c |    2 +-
+ arch/sh/boards/mach-ecovec24/setup.c |    2 +-
+ arch/sh/boards/mach-kfr2r09/setup.c  |    2 +-
+ arch/sh/boards/mach-migor/setup.c    |    2 +-
+ arch/sh/boards/mach-se/7724/setup.c  |    2 +-
+ 5 files changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
-index 1a8118c..7ae9e3b 100644
---- a/arch/arm/mach-shmobile/board-ap4evb.c
-+++ b/arch/arm/mach-shmobile/board-ap4evb.c
-@@ -24,9 +24,9 @@
- #include <linux/irq.h>
+diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
+index 33bfebc..60d109f 100644
+--- a/arch/sh/boards/mach-ap325rxa/setup.c
++++ b/arch/sh/boards/mach-ap325rxa/setup.c
+@@ -14,8 +14,8 @@
+ #include <linux/device.h>
+ #include <linux/interrupt.h>
  #include <linux/platform_device.h>
- #include <linux/delay.h>
 -#include <linux/mfd/sh_mobile_sdhi.h>
- #include <linux/mfd/tmio.h>
  #include <linux/mmc/host.h>
 +#include <linux/mmc/sh_mobile_sdhi.h>
- #include <linux/mtd/mtd.h>
- #include <linux/mtd/partitions.h>
  #include <linux/mtd/physmap.h>
-diff --git a/arch/arm/mach-shmobile/board-g4evm.c b/arch/arm/mach-shmobile/board-g4evm.c
-index dee3e92..cccdf2d 100644
---- a/arch/arm/mach-shmobile/board-g4evm.c
-+++ b/arch/arm/mach-shmobile/board-g4evm.c
-@@ -31,7 +31,7 @@
- #include <linux/input.h>
- #include <linux/input/sh_keysc.h>
- #include <linux/mmc/host.h>
+ #include <linux/mtd/sh_flctl.h>
+ #include <linux/delay.h>
+diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+index 37ad5dc..710be27c9 100644
+--- a/arch/sh/boards/mach-ecovec24/setup.c
++++ b/arch/sh/boards/mach-ecovec24/setup.c
+@@ -11,9 +11,9 @@
+ #include <linux/init.h>
+ #include <linux/device.h>
+ #include <linux/platform_device.h>
 -#include <linux/mfd/sh_mobile_sdhi.h>
-+#include <linux/mmc/sh_mobile_sdhi.h>
- #include <linux/gpio.h>
- #include <mach/sh7377.h>
- #include <mach/common.h>
-diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
-index bbfc167..05fc5ac 100644
---- a/arch/arm/mach-shmobile/board-mackerel.c
-+++ b/arch/arm/mach-shmobile/board-mackerel.c
-@@ -32,10 +32,10 @@
- #include <linux/io.h>
- #include <linux/i2c.h>
- #include <linux/leds.h>
--#include <linux/mfd/sh_mobile_sdhi.h>
- #include <linux/mfd/tmio.h>
  #include <linux/mmc/host.h>
  #include <linux/mmc/sh_mmcif.h>
 +#include <linux/mmc/sh_mobile_sdhi.h>
- #include <linux/mtd/mtd.h>
- #include <linux/mtd/partitions.h>
  #include <linux/mtd/physmap.h>
+ #include <linux/gpio.h>
+ #include <linux/interrupt.h>
+diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
+index 7504daa..7021b59 100644
+--- a/arch/sh/boards/mach-kfr2r09/setup.c
++++ b/arch/sh/boards/mach-kfr2r09/setup.c
+@@ -10,8 +10,8 @@
+ #include <linux/init.h>
+ #include <linux/platform_device.h>
+ #include <linux/interrupt.h>
+-#include <linux/mfd/sh_mobile_sdhi.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/sh_mobile_sdhi.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mtd/physmap.h>
+ #include <linux/mtd/onenand.h>
+diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
+index 03a7ffe..37e64a6 100644
+--- a/arch/sh/boards/mach-migor/setup.c
++++ b/arch/sh/boards/mach-migor/setup.c
+@@ -12,8 +12,8 @@
+ #include <linux/interrupt.h>
+ #include <linux/input.h>
+ #include <linux/input/sh_keysc.h>
+-#include <linux/mfd/sh_mobile_sdhi.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/sh_mobile_sdhi.h>
+ #include <linux/mtd/physmap.h>
+ #include <linux/mtd/nand.h>
+ #include <linux/i2c.h>
+diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
+index c8bcf6a..58cefd3 100644
+--- a/arch/sh/boards/mach-se/7724/setup.c
++++ b/arch/sh/boards/mach-se/7724/setup.c
+@@ -14,8 +14,8 @@
+ #include <linux/device.h>
+ #include <linux/interrupt.h>
+ #include <linux/platform_device.h>
+-#include <linux/mfd/sh_mobile_sdhi.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/sh_mobile_sdhi.h>
+ #include <linux/mtd/physmap.h>
+ #include <linux/delay.h>
+ #include <linux/smc91x.h>
 -- 
 1.7.2.3
 
