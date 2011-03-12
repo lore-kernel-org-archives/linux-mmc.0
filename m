@@ -1,98 +1,83 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: Memory replacement
-Date: Sat, 12 Mar 2011 23:51:07 +0100
-Message-ID: <201103122351.07697.arnd@arndb.de>
-References: <AANLkTikQOVa8qfU-R6uqQXKhAVxqeAmxKONjPmmqLCr8@mail.gmail.com> <201103111135.01394.arnd@arndb.de> <320717C0-7117-462E-9227-7966EE6941D7@laptop.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 1/4 v2] mmc: mn57xx: only access registers above 0xff,
+ if available
+Date: Sat, 12 Mar 2011 23:57:13 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103122349080.28741@axis700.grange>
+References: <Pine.LNX.4.64.1103110854050.23675@axis700.grange>
+ <Pine.LNX.4.64.1103110900080.23675@axis700.grange>
+ <AANLkTi=CwkzwvDy+CTzJBni-OtZUMEtmceNr+-xpuVOK@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:52596 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756148Ab1CLWvP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Mar 2011 17:51:15 -0500
-In-Reply-To: <320717C0-7117-462E-9227-7966EE6941D7@laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <AANLkTi=CwkzwvDy+CTzJBni-OtZUMEtmceNr+-xpuVOK@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: John Watlington <wad@laptop.org>
-Cc: devel@lists.laptop.org, Kevin Gordon <kgordon420@gmail.com>, linux-mmc@vger.kernel.org
 
-On Friday 11 March 2011 18:28:49 John Watlington wrote:
-> 
-> On Mar 11, 2011, at 5:35 AM, Arnd Bergmann wrote:
-> 
-> > I've tested around a dozen media from them, and while you are true
-> > that they use rather different algorithms and NAND chips inside, all
-> > of them can write to at least 5 erase blocks before getting into
-> > garbage collection, which is really needed for ext3 file systems.
-> > 
-> > Contrast this with Kingston cards, which all use the same algorithm
-> > and can only write data linearly to one erase block at a time, resulting
-> > in one or two orders of magnitude higher internal write amplification.
-> > 
-> > Most other vendors are somewhere inbetween, and you sometimes get
-> > fake cards that don't do what you expect, such a a bunch of Samsung
-> > microSDHC cards thaI have I which are labeled Sandisk on the outside.
-> 
-> Those aren't fakes.   That is what I'm trying to get across.
+On Sun, 13 Mar 2011, Magnus Damm wrote:
 
-I've had four cards with a Sandisk label that had unusual characteristics
-and manufacturer/OEM IDs that refer to other companies, three Samsung ("SM")
-and one unknown ("BE", possibly lexar). In all cases, the Sandisk support
-has confirmed from photos that the cards are definitely fake. They also
-explained that all authentic cards (possibly fake ones as well, but I have
-not seen them) will be labeled "Made in China", not "Made in Korea" or
-"Made in Taiwan" as my fake ones, and that the authentic microSD cards have
-the serial number on the front side, not on the back.
+> On Fri, Mar 11, 2011 at 5:09 PM, Guennadi Liakhovetski
+> <g.liakhovetski@gmx.de> wrote:
+> > Not all mn57xx / tmio implementations have registers above oxff.
+> > Accessing them on thise platforms is dangerous. In some cases it le=
+ads
+> > to address wrapping to addresses below 0x100, which corrupts random
+> > unrelated registers.
+> >
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > ---
+> >
+> > v2:
+>=20
+> > --- a/drivers/mmc/host/tmio_mmc_pio.c
+> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
+>=20
+> Nice, it looks like this patch should apply on your earlier broken ou=
+t
+> patch set...
+>=20
+> > + =A0 =A0 =A0 if (resource_size(res) > 0x100) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sd_ctrl_write16(host, CTL_CLK_AND_WAI=
+T_CTL, 0x0000);
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 msleep(10);
+> > + =A0 =A0 =A0 }
+>=20
+> ... but now since you've separated the tmio specific code from the
+> SDHI implementation, why don't you just make all the offsets above
+> 0x100 stay in the tmio code, and let the SDHI only access below 0xff?
 
-> > I've also seen some really cheap noname cards outperform similar-spec'd
-> > sandisk card, both regarding maximum throughput and the garbage collection
-> > algorithms, but you can't rely on that.
-> 
-> 
-> My point is that you can't rely on Sandisk either.
-> 
-> I've been in discussion with both Sandisk and Adata about these issues,
-> as well as constantly testing batches of new SD cards from all major
-> vendors.
->
-> Unless you pay a lot extra and order at least 100K, you have no
-> control over what they give you.   They don't just change NAND chips,
-> they change the controller chip and its firmware.  Frequently.
-> And they don't update either the SKU number, part marking or the
-> identification fields available to software.    The manufacturing batch
-> number printed on the outside is the only thing that changes.
+The current split is:
 
-I agree that you cannot rely on specific behavior to stay the 
-same with any vendor. One thing I noticed for instance is that
-many new Sandisk cards are using TLC (three level cell) NAND,
-which is inherently slower and cheaper than the regular two-level
-MLC used in older cards or those from other vendors.
+tmio_mmc_pio.c: _all_ driver functionality in PIO mode, including MMC A=
+PI
+tmio_mmc_dma.c: DMA
 
-However, they have apparently managed to make them work well
-for random access by using some erase blocks as SLC (writing only
-the pages that carry the most significant bit in each cell) and
-by doing log structured writes in there, something that apparently
-others have not figured out yet. Also, as I mentioned, they
-consistenly use a relatively large number of open erase blocks.
-I've measured both effects on SD cards and USB sticks.
+tmio_mmc.c: _only_ MFD glue - no IO at all
 
-I believe you can get this level of sophistication only from
-companies that make the nand flash, the controller and the card:
-Sandisk, Samsung and Toshiba.
+sh_mobile_sdhi.c: _only_ platform glue for SDHI - no IO at all
 
-Other brands that just get the controllers and the flash chips
-from whoever sells them cheaply (kingston, adata, panasonic,
-transcend, ...) apparently don't get the really good stuff.
- 
-> How we deal with this is constant testing and getting notification from
-> the manufacturer that they are changing the internals (unfortunately,
-> we aren't willing to pay the premium to have a special SKU).
+This split seems logical to me - every file performs one function. But =
+I=20
+do agree, that special-casing addresses > 0xff in the generic core is n=
+ot=20
+very nice... We could otherwise modify the actual read / write accessor=
+s=20
+to check, whether _each_ register address is within the resource, but t=
+hat=20
+would be too much of a performance hit. But pulling those couple of > 0=
+xff=20
+accesses out of the driver proper and into the MFD glue didn't look lik=
+e a=20
+very logical thing to me. I thought this version provided both - no=20
+performance hit and preserved clean function separation - at the cost o=
+f=20
+"slight ugliness." Opinions?
 
-Do you have test results somewhere publically available? We are currently
-discussing adding some tweaks to the linux mmc drivers to detect cards
-with certain features, and to do some optimizations in the block layer
-for common ones.
-
-	Arnd
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+=46reelance Open-Source Software Developer
+http://www.open-technology.de/
