@@ -1,82 +1,74 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 1/4 v2] mmc: mn57xx: only access registers above 0xff,
- if available
-Date: Sat, 12 Mar 2011 23:57:13 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103122349080.28741@axis700.grange>
-References: <Pine.LNX.4.64.1103110854050.23675@axis700.grange>
- <Pine.LNX.4.64.1103110900080.23675@axis700.grange>
- <AANLkTi=CwkzwvDy+CTzJBni-OtZUMEtmceNr+-xpuVOK@mail.gmail.com>
+Subject: Re: [PATCH 2/6] sh: ecovec: use the CONFIG_MMC_TMIO symbols instead
+ of MFD
+Date: Sun, 13 Mar 2011 00:00:41 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103122358380.28741@axis700.grange>
+References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
+ <Pine.LNX.4.64.1103110845220.23675@axis700.grange>
+ <AANLkTikjTNVQT7gzhGQy-wKmfTT=BWikAJ+Wo5+-kZvX@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=CwkzwvDy+CTzJBni-OtZUMEtmceNr+-xpuVOK@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.8]:60374 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752584Ab1CLXAp convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Mar 2011 18:00:45 -0500
+In-Reply-To: <AANLkTikjTNVQT7gzhGQy-wKmfTT=BWikAJ+Wo5+-kZvX@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Magnus Damm <magnus.damm@gmail.com>
 Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
-List-Id: linux-mmc@vger.kernel.org
 
 On Sun, 13 Mar 2011, Magnus Damm wrote:
 
-> On Fri, Mar 11, 2011 at 5:09 PM, Guennadi Liakhovetski
+> On Fri, Mar 11, 2011 at 4:52 PM, Guennadi Liakhovetski
 > <g.liakhovetski@gmx.de> wrote:
-> > Not all mn57xx / tmio implementations have registers above oxff.
-> > Accessing them on thise platforms is dangerous. In some cases it le=
-ads
-> > to address wrapping to addresses below 0x100, which corrupts random
-> > unrelated registers.
+> > The CONFIG_MFD_SH_MOBILE_SDHI Kconfig symbol is going to disappear =
+soon,
+> > switch ecovec to using CONFIG_MMC_TMIO(_MODULE).
 > >
 > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > > ---
+> > =A0arch/sh/boards/mach-ecovec24/setup.c | =A0 =A06 +++---
+> > =A01 files changed, 3 insertions(+), 3 deletions(-)
 > >
-> > v2:
+> > diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/=
+mach-ecovec24/setup.c
+> > index 52751f0..37ad5dc 100644
+> > --- a/arch/sh/boards/mach-ecovec24/setup.c
+> > +++ b/arch/sh/boards/mach-ecovec24/setup.c
+> > @@ -462,7 +462,7 @@ static struct i2c_board_info ts_i2c_clients =3D=
+ {
+> > =A0 =A0 =A0 =A0.irq =A0 =A0 =A0 =A0 =A0 =A0=3D IRQ0,
+> > =A0};
+> >
+> > -#ifdef CONFIG_MFD_SH_MOBILE_SDHI
+> > +#if defined(CONFIG_MMC_TMIO) || defined(CONFIG_MMC_TMIO_MODULE)
+> > =A0/* SDHI0 */
 >=20
-> > --- a/drivers/mmc/host/tmio_mmc_pio.c
-> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> What's wrong with CONFIG_MMC_SDHI? Too early in the patch series?
 >=20
-> Nice, it looks like this patch should apply on your earlier broken ou=
-t
-> patch set...
->=20
-> > + =A0 =A0 =A0 if (resource_size(res) > 0x100) {
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sd_ctrl_write16(host, CTL_CLK_AND_WAI=
-T_CTL, 0x0000);
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 msleep(10);
-> > + =A0 =A0 =A0 }
->=20
-> ... but now since you've separated the tmio specific code from the
-> SDHI implementation, why don't you just make all the offsets above
-> 0x100 stay in the tmio code, and let the SDHI only access below 0xff?
+> I can't really see what the ecovec board has in common with the tmio
+> mmc implementation. Or did you mean the CONFIG_MMC_TMIO_CORE?
 
-The current split is:
+Right, sure, it must be CONFIG_MMC_TMIO_CORE. CONFIG_MFD_SH_MOBILE_SDHI=
+=20
+has to go, because it is removed in a future patch. Will resubmit, than=
+ks!
 
-tmio_mmc_pio.c: _all_ driver functionality in PIO mode, including MMC A=
-PI
-tmio_mmc_dma.c: DMA
-
-tmio_mmc.c: _only_ MFD glue - no IO at all
-
-sh_mobile_sdhi.c: _only_ platform glue for SDHI - no IO at all
-
-This split seems logical to me - every file performs one function. But =
-I=20
-do agree, that special-casing addresses > 0xff in the generic core is n=
-ot=20
-very nice... We could otherwise modify the actual read / write accessor=
-s=20
-to check, whether _each_ register address is within the resource, but t=
-hat=20
-would be too much of a performance hit. But pulling those couple of > 0=
-xff=20
-accesses out of the driver proper and into the MFD glue didn't look lik=
-e a=20
-very logical thing to me. I thought this version provided both - no=20
-performance hit and preserved clean function separation - at the cost o=
-f=20
-"slight ugliness." Opinions?
-
-Thanks
+Regards
 Guennadi
+
+>=20
+> Perhaps this is just a stop-gap solution and it is being fixed in V2 =
+patch 7/7 ?
+>=20
+> Thanks,
+>=20
+> / magnus
+>=20
+
 ---
 Guennadi Liakhovetski, Ph.D.
 =46reelance Open-Source Software Developer
