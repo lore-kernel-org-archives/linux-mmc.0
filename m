@@ -1,52 +1,58 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 2/6] sh: ecovec: use the CONFIG_MMC_TMIO symbols instead
- of MFD
-Date: Sun, 13 Mar 2011 01:18:22 +0900
-Message-ID: <AANLkTikjTNVQT7gzhGQy-wKmfTT=BWikAJ+Wo5+-kZvX@mail.gmail.com>
-References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
-	<Pine.LNX.4.64.1103110845220.23675@axis700.grange>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Simplified Spec V3 available!
+Date: Sat, 12 Mar 2011 19:31:18 +0100
+Message-ID: <20110312183118.GA4212@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1103110845220.23675@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="J2SCkAp4GZ/dPZZf"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:58941 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754480Ab1CLSbU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Mar 2011 13:31:20 -0500
+Received: from octopus.hi.pengutronix.de ([2001:6f8:1178:2:215:17ff:fe12:23b0])
+	by metis.ext.pengutronix.de with esmtp (Exim 4.72)
+	(envelope-from <wsa@pengutronix.de>)
+	id 1PyTax-0005m1-2f
+	for linux-mmc@vger.kernel.org; Sat, 12 Mar 2011 19:31:19 +0100
+Received: from wsa by octopus.hi.pengutronix.de with local (Exim 4.69)
+	(envelope-from <wsa@pengutronix.de>)
+	id 1PyTaw-0001cy-9U
+	for linux-mmc@vger.kernel.org; Sat, 12 Mar 2011 19:31:18 +0100
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-On Fri, Mar 11, 2011 at 4:52 PM, Guennadi Liakhovetski
-<g.liakhovetski@gmx.de> wrote:
-> The CONFIG_MFD_SH_MOBILE_SDHI Kconfig symbol is going to disappear so=
-on,
-> switch ecovec to using CONFIG_MMC_TMIO(_MODULE).
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
-> =A0arch/sh/boards/mach-ecovec24/setup.c | =A0 =A06 +++---
-> =A01 files changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/ma=
-ch-ecovec24/setup.c
-> index 52751f0..37ad5dc 100644
-> --- a/arch/sh/boards/mach-ecovec24/setup.c
-> +++ b/arch/sh/boards/mach-ecovec24/setup.c
-> @@ -462,7 +462,7 @@ static struct i2c_board_info ts_i2c_clients =3D {
-> =A0 =A0 =A0 =A0.irq =A0 =A0 =A0 =A0 =A0 =A0=3D IRQ0,
-> =A0};
->
-> -#ifdef CONFIG_MFD_SH_MOBILE_SDHI
-> +#if defined(CONFIG_MMC_TMIO) || defined(CONFIG_MMC_TMIO_MODULE)
-> =A0/* SDHI0 */
 
-What's wrong with CONFIG_MMC_SDHI? Too early in the patch series?
+--J2SCkAp4GZ/dPZZf
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I can't really see what the ecovec board has in common with the tmio
-mmc implementation. Or did you mean the CONFIG_MMC_TMIO_CORE?
 
-Perhaps this is just a stop-gap solution and it is being fixed in V2 pa=
-tch 7/7 ?
+Good news which haven't been mentioned here AFAICT. I just saw that you can
+freely download the Simplified Specs V3 for SDHC now:
 
-Thanks,
+http://www.sdcard.org/developers/tech/pls/
 
-/ magnus
+Very nice, that will help reviewers.
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--J2SCkAp4GZ/dPZZf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAk17u/YACgkQD27XaX1/VRtnfQCgkWtg524QMBeouKdUEuO3RU/8
+6rUAoKESENiTKE7o8nRk3oVfmu4rrOTZ
+=PA4n
+-----END PGP SIGNATURE-----
+
+--J2SCkAp4GZ/dPZZf--
