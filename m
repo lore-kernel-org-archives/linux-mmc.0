@@ -1,51 +1,51 @@
 From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 1/4 v2] mmc: mn57xx: only access registers above 0xff, if available
-Date: Sun, 13 Mar 2011 01:10:35 +0900
-Message-ID: <AANLkTi=CwkzwvDy+CTzJBni-OtZUMEtmceNr+-xpuVOK@mail.gmail.com>
-References: <Pine.LNX.4.64.1103110854050.23675@axis700.grange>
-	<Pine.LNX.4.64.1103110900080.23675@axis700.grange>
+Subject: Re: [PATCH 2/6] sh: ecovec: use the CONFIG_MMC_TMIO symbols instead
+ of MFD
+Date: Sun, 13 Mar 2011 01:18:22 +0900
+Message-ID: <AANLkTikjTNVQT7gzhGQy-wKmfTT=BWikAJ+Wo5+-kZvX@mail.gmail.com>
+References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
+	<Pine.LNX.4.64.1103110845220.23675@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:39434 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753487Ab1CLQKg convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Mar 2011 11:10:36 -0500
-In-Reply-To: <Pine.LNX.4.64.1103110900080.23675@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1103110845220.23675@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Mar 11, 2011 at 5:09 PM, Guennadi Liakhovetski
+On Fri, Mar 11, 2011 at 4:52 PM, Guennadi Liakhovetski
 <g.liakhovetski@gmx.de> wrote:
-> Not all mn57xx / tmio implementations have registers above oxff.
-> Accessing them on thise platforms is dangerous. In some cases it lead=
-s
-> to address wrapping to addresses below 0x100, which corrupts random
-> unrelated registers.
+> The CONFIG_MFD_SH_MOBILE_SDHI Kconfig symbol is going to disappear so=
+on,
+> switch ecovec to using CONFIG_MMC_TMIO(_MODULE).
 >
 > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > ---
+> =A0arch/sh/boards/mach-ecovec24/setup.c | =A0 =A06 +++---
+> =A01 files changed, 3 insertions(+), 3 deletions(-)
 >
-> v2:
+> diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/ma=
+ch-ecovec24/setup.c
+> index 52751f0..37ad5dc 100644
+> --- a/arch/sh/boards/mach-ecovec24/setup.c
+> +++ b/arch/sh/boards/mach-ecovec24/setup.c
+> @@ -462,7 +462,7 @@ static struct i2c_board_info ts_i2c_clients =3D {
+> =A0 =A0 =A0 =A0.irq =A0 =A0 =A0 =A0 =A0 =A0=3D IRQ0,
+> =A0};
+>
+> -#ifdef CONFIG_MFD_SH_MOBILE_SDHI
+> +#if defined(CONFIG_MMC_TMIO) || defined(CONFIG_MMC_TMIO_MODULE)
+> =A0/* SDHI0 */
 
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+What's wrong with CONFIG_MMC_SDHI? Too early in the patch series?
 
-Nice, it looks like this patch should apply on your earlier broken out
-patch set...
+I can't really see what the ecovec board has in common with the tmio
+mmc implementation. Or did you mean the CONFIG_MMC_TMIO_CORE?
 
-> + =A0 =A0 =A0 if (resource_size(res) > 0x100) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sd_ctrl_write16(host, CTL_CLK_AND_WAIT_=
-CTL, 0x0000);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 msleep(10);
-> + =A0 =A0 =A0 }
-
-=2E.. but now since you've separated the tmio specific code from the
-SDHI implementation, why don't you just make all the offsets above
-0x100 stay in the tmio code, and let the SDHI only access below 0xff?
+Perhaps this is just a stop-gap solution and it is being fixed in V2 pa=
+tch 7/7 ?
 
 Thanks,
 
