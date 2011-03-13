@@ -1,30 +1,40 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/2] MMC: Extends card quicks with MMC/SD quirks matching the CID.
-Date: Sun, 13 Mar 2011 15:55:40 +0100
-Message-ID: <201103131555.40813.arnd@arndb.de>
-References: <1299017344-25361-1-git-send-email-andreiw@motorola.com> <1300024118-23771-2-git-send-email-andreiw@motorola.com>
+From: "C. Scott Ananian" <cscott@laptop.org>
+Subject: Re: Memory replacement
+Date: Sun, 13 Mar 2011 13:00:04 -0400
+Message-ID: <AANLkTike97v8KTayEnMUADyQsF2yvDpAuQC5VCsS1a8b@mail.gmail.com>
+References: <AANLkTikQOVa8qfU-R6uqQXKhAVxqeAmxKONjPmmqLCr8@mail.gmail.com>
+	<201103111135.01394.arnd@arndb.de>
+	<320717C0-7117-462E-9227-7966EE6941D7@laptop.org>
+	<201103122351.07697.arnd@arndb.de>
+	<AANLkTinkAN9Y8wmwt5kzeozYESB7xJD7GvV3Nu6s5wPG@mail.gmail.com>
+	<AANLkTime9LvwzPTyCXVV-ghcB5tm8VMdAiztF_BunOx6@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:53474 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751484Ab1CMOzs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 10:55:48 -0400
-In-Reply-To: <1300024118-23771-2-git-send-email-andreiw@motorola.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:54020 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752189Ab1CMRAF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 13:00:05 -0400
+Received: by iyb26 with SMTP id 26so4226710iyb.19
+        for <linux-mmc@vger.kernel.org>; Sun, 13 Mar 2011 10:00:05 -0700 (PDT)
+In-Reply-To: <AANLkTime9LvwzPTyCXVV-ghcB5tm8VMdAiztF_BunOx6@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org, tardyp@gmail.com, linus.walleij@linaro.org
+Cc: Arnd Bergmann <arnd@arndb.de>, John Watlington <wad@laptop.org>, Kevin Gordon <kgordon420@gmail.com>, devel@lists.laptop.org, linux-mmc@vger.kernel.org
 
-On Sunday 13 March 2011 14:48:37 Andrei Warkentin wrote:
-> The current mechanism is SDIO-only. This allows us to create
-> function-specific quirks, without creating messy Kconfig dependencies,
-> or polluting core/ with function-specific code.
-> 
-> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
+On Sun, Mar 13, 2011 at 8:57 AM, Andrei Warkentin <andreiw@motorola.com=
+> wrote:
+> Sorry to butt in, I think I'm missing most of the context
+> here....nevertheless... I'm curious, ignoring outer packaging and
+> product names, if you look at cards with the "same" CID (i.e. same
+> manfid/oemid/date/firmware and hw rev), do you get same performance
+> characteristics?
 
-Looks good to me.
+No.
+ --scott
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+--=20
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=A0 ( http://cscott.net/=
+ )
