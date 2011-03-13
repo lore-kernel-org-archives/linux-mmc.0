@@ -1,130 +1,96 @@
 From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 1/4 v2] mmc: mn57xx: only access registers above 0xff, if available
-Date: Sun, 13 Mar 2011 12:54:04 +0900
-Message-ID: <AANLkTi=cGjomEu4uPbOFcwQfMYu6q4kjMwmdetRXeefC@mail.gmail.com>
-References: <Pine.LNX.4.64.1103110854050.23675@axis700.grange>
-	<Pine.LNX.4.64.1103110900080.23675@axis700.grange>
-	<AANLkTi=CwkzwvDy+CTzJBni-OtZUMEtmceNr+-xpuVOK@mail.gmail.com>
-	<Pine.LNX.4.64.1103122349080.28741@axis700.grange>
+Subject: Re: [PATCH 1/6] mmc: tmio: split core functionality, DMA and MFD glue
+Date: Sun, 13 Mar 2011 12:57:36 +0900
+Message-ID: <AANLkTi=YAcSOBUyWa-OpD0fL-nr-_i=On8ssN0TXZTqJ@mail.gmail.com>
+References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
+	<Pine.LNX.4.64.1103110844080.23675@axis700.grange>
+	<AANLkTinQB2NB---0o65Uy-axApw9DwPZoMeMBc=qmvSC@mail.gmail.com>
+	<Pine.LNX.4.64.1103122347270.28741@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:40554 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754156Ab1CMDyG convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Mar 2011 22:54:06 -0500
-In-Reply-To: <Pine.LNX.4.64.1103122349080.28741@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1103122347270.28741@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-On Sun, Mar 13, 2011 at 7:57 AM, Guennadi Liakhovetski
+On Sun, Mar 13, 2011 at 7:48 AM, Guennadi Liakhovetski
 <g.liakhovetski@gmx.de> wrote:
 > On Sun, 13 Mar 2011, Magnus Damm wrote:
 >
->> On Fri, Mar 11, 2011 at 5:09 PM, Guennadi Liakhovetski
+>> On Fri, Mar 11, 2011 at 4:51 PM, Guennadi Liakhovetski
 >> <g.liakhovetski@gmx.de> wrote:
->> > Not all mn57xx / tmio implementations have registers above oxff.
->> > Accessing them on thise platforms is dangerous. In some cases it l=
-eads
->> > to address wrapping to addresses below 0x100, which corrupts rando=
-m
->> > unrelated registers.
+>> > TMIO MMC chips contain an SD / SDIO IP core from Panasonic, simila=
+r to
+>> > the one, used in MN5774 and other MN57xx controllers. These IP cor=
+es are
+>> > included in many multifunction devices, in sh-mobile chips from Re=
+nesas,
+>> > in the latter case they can also use DMA. Some sh-mobile implement=
+ations
+>> > also have some other specialities, that MFD-based solutions don't =
+have.
+>> > This makes supporting all these features in a monolithic driver in=
+conveniet
+>> > and error-prone. This patch splits the driver into 3 parts: the co=
+re,
+>> > the MFD glue and the DMA support. In case of a modular build, two =
+modules
+>> > will be built: mmc_tmio_core and mmc_tmio.
 >> >
 >> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 >> > ---
->> >
->> > v2:
 >>
->> > --- a/drivers/mmc/host/tmio_mmc_pio.c
->> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
+>> Thanks for your work on this, I'm happy to see these patches because
+>> they make it easier for me to add multi-interrupt source to the SDHI
+>> portion - something that is needed for sh73a0.
 >>
->> Nice, it looks like this patch should apply on your earlier broken o=
-ut
->> patch set...
+>> > =A0drivers/mmc/host/Kconfig =A0 =A0 =A0 =A0| =A0 =A04 +
+>> > =A0drivers/mmc/host/Makefile =A0 =A0 =A0 | =A0 =A03 +
+>> > =A0drivers/mmc/host/tmio_mmc.c =A0 =A0 | 1303 +-------------------=
+-------------------
+>> > =A0drivers/mmc/host/tmio_mmc.h =A0 =A0 | =A0152 +++++
+>> > =A0drivers/mmc/host/tmio_mmc_dma.c | =A0302 +++++++++
+>> > =A0drivers/mmc/host/tmio_mmc_pio.c | =A0923 ++++++++++++++++++++++=
++++++
+>> > =A06 files changed, 1402 insertions(+), 1285 deletions(-)
+>> > =A0create mode 100644 drivers/mmc/host/tmio_mmc.h
+>> > =A0create mode 100644 drivers/mmc/host/tmio_mmc_dma.c
+>> > =A0create mode 100644 drivers/mmc/host/tmio_mmc_pio.c
 >>
->> > + =A0 =A0 =A0 if (resource_size(res) > 0x100) {
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sd_ctrl_write16(host, CTL_CLK_AND_WA=
-IT_CTL, 0x0000);
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 msleep(10);
->> > + =A0 =A0 =A0 }
->>
->> ... but now since you've separated the tmio specific code from the
->> SDHI implementation, why don't you just make all the offsets above
->> 0x100 stay in the tmio code, and let the SDHI only access below 0xff=
-?
+>> Something is wrong with this patch. The Makefile adds tmio_mmc_core.=
+c
+>> but it's not part of the diffstat above. Perhaps you're posting an
+>> older version of the patch?
 >
-> The current split is:
+> No, the Makefile is adding tmio_mmc_core.o:
 >
-> tmio_mmc_pio.c: _all_ driver functionality in PIO mode, including MMC=
- API
-> tmio_mmc_dma.c: DMA
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 30aa686..79c42dd 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -29,6 +29,9 @@ endif
+> =A0obj-$(CONFIG_MMC_S3C) =A0 =A0 =A0 =A0 =A0+=3D s3cmci.o
+> =A0obj-$(CONFIG_MMC_SDRICOH_CS) =A0 +=3D sdricoh_cs.o
+> =A0obj-$(CONFIG_MMC_TMIO) =A0 =A0 =A0 =A0 +=3D tmio_mmc.o
+> +obj-$(CONFIG_MMC_TMIO_CORE) =A0 =A0+=3D tmio_mmc_core.o
+> +tmio_mmc_core-y =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0:=3D =
+tmio_mmc_pio.o
+> +tmio_mmc_core-$(CONFIG_TMIO_MMC_DMA) =A0 +=3D tmio_mmc_dma.o
+> =A0obj-$(CONFIG_MMC_CB710) =A0 =A0 =A0 =A0+=3D cb710-mmc.o
+> =A0obj-$(CONFIG_MMC_VIA_SDMMC) =A0 =A0+=3D via-sdmmc.o
+> =A0obj-$(CONFIG_SDH_BFIN) =A0 =A0 =A0 =A0 +=3D bfin_sdh.o
 >
-> tmio_mmc.c: _only_ MFD glue - no IO at all
->
-> sh_mobile_sdhi.c: _only_ platform glue for SDHI - no IO at all
->
-> This split seems logical to me - every file performs one function. Bu=
-t I
-> do agree, that special-casing addresses > 0xff in the generic core is=
- not
-> very nice... We could otherwise modify the actual read / write access=
-ors
-> to check, whether _each_ register address is within the resource, but=
- that
-> would be too much of a performance hit. But pulling those couple of >=
- 0xff
-> accesses out of the driver proper and into the MFD glue didn't look l=
-ike a
-> very logical thing to me. I thought this version provided both - no
-> performance hit and preserved clean function separation - at the cost=
- of
-> "slight ugliness." Opinions?
+> which is linked from two source files. Looks correct to me.
 
-I don't really see why you want to have "no IO at all" in the
-tmio/sdhi specific files.
+Ok, sorry, my mistake.
 
-Actually, I think it makes sense to abstract based on the hardware
-register layout difference.
+What's the reason behind creating tmio_mmc_core.o instead of simply
+having tmio_mmc_pio.o + tmio_mmc_dma.o? That must be the most
+straightforward solution, no?
 
- Since some parts of the code only applies to tmio (offset >=3D 0x100)
-and some only to SDHI (TMIO_MMC_SDIO_IRQ), why don't you do the
-following:
-
-In tmio_mmc_pio.c:
-
-tmio_mmc_core_clk_start()
-tmio_mmc_core_clk_stop()
-tmio_mmc_core_reset()
-
-Above functions only implement offset < 0x100 and no TMIO_MMC_ stuff
-in there if possible
-
-In tmio_mmc.c
-
-tmio_mmc_clk_start()
-tmio_mmc_clk_stop()
-tmio_mmc_reset()
-
-Above 3 functions call tmio_mmc_core_xxx() and also implement >=3D 0x10=
-0
-offset access.
-
-In sh_mobile_sdhi.c
-
-sh_mobile_sdhi_clk_start()
-sh_mobile_sdhi_clk_stop()
-sh_mobile_sdhi_reset()
-
-Above 3 functions call tmio_mmc_core_xxx() and perhaps also implement S=
-DIO IRQ.
-
-Ideally we want to share the SDIO IRQ code with the TMIO MFD
-implementation, but we're not really receiving any test feedback from
-anyone, so from my POV to avoid breakage we may as well keep things in
-the SDHI portion and move over to the common place if needed in the
-future.
+Thanks,
 
 / magnus
