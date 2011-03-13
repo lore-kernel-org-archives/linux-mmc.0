@@ -1,111 +1,96 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 1/6] mmc: tmio: split core functionality, DMA and MFD
- glue
-Date: Sun, 13 Mar 2011 23:51:40 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103132349140.23221@axis700.grange>
-References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
- <Pine.LNX.4.64.1103110844080.23675@axis700.grange>
- <AANLkTinQB2NB---0o65Uy-axApw9DwPZoMeMBc=qmvSC@mail.gmail.com>
- <Pine.LNX.4.64.1103122347270.28741@axis700.grange>
- <AANLkTi=YAcSOBUyWa-OpD0fL-nr-_i=On8ssN0TXZTqJ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH]mmc: set timeout for SDHCI host before sending busy cmds
+Date: Mon, 14 Mar 2011 08:52:56 +0900
+Message-ID: <4D7D58D8.6070402@samsung.com>
+References: <20110309080609.GA23207@intel.com> <4D7837A5.3010603@samsung.com>
+ <BD70BE74-9C18-4497-A2EE-DB6DCC13CBEA@marvell.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=YAcSOBUyWa-OpD0fL-nr-_i=On8ssN0TXZTqJ@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:64658 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756620Ab1CMXyD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 19:54:03 -0400
+In-reply-to: <BD70BE74-9C18-4497-A2EE-DB6DCC13CBEA@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, "w.sang@pengutronix.de" <w.sang@pengutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Sun, 13 Mar 2011, Magnus Damm wrote:
+Philip Rakity wrote:
+> On Mar 9, 2011, at 6:29 PM, Jaehoon Chung wrote:
+> 
+>> Chuanxiao Dong wrote:
+>>> Hi all,
+>>>   From the previous discussion, I do not think we have got a clear conclusion
+>>>   about using maximum timeout value. At least we know from Jae hoon Chung
+>>>   using 0xE for every case is not a good. So I want to suggest only use 0xE for
+>>>   busy command. I personally preferred below implementation, which is similar
+>>>   with a RFC patch submitted by Jae hoon Chung, but only without adding a new
+>>>   quirk.
+>> thanks for remind. 
+>> Yes, i tested without quirks, i think that is not problem.
+>> (Just sent RFC patch with quirks, because i want to ask how think about adding quirks or not).
+> 
+> 
+> 
+> Sorry I am confused.
+> 
+> Setting 0x0E all the time does not solve the problem and has side effects ?
+> What are the side effects ?
 
-> On Sun, Mar 13, 2011 at 7:48 AM, Guennadi Liakhovetski
-> <g.liakhovetski@gmx.de> wrote:
-> > On Sun, 13 Mar 2011, Magnus Damm wrote:
-> >
-> >> On Fri, Mar 11, 2011 at 4:51 PM, Guennadi Liakhovetski
-> >> <g.liakhovetski@gmx.de> wrote:
-> >> > TMIO MMC chips contain an SD / SDIO IP core from Panasonic, simi=
-lar to
-> >> > the one, used in MN5774 and other MN57xx controllers. These IP c=
-ores are
-> >> > included in many multifunction devices, in sh-mobile chips from =
-Renesas,
-> >> > in the latter case they can also use DMA. Some sh-mobile impleme=
-ntations
-> >> > also have some other specialities, that MFD-based solutions don'=
-t have.
-> >> > This makes supporting all these features in a monolithic driver =
-inconveniet
-> >> > and error-prone. This patch splits the driver into 3 parts: the =
-core,
-> >> > the MFD glue and the DMA support. In case of a modular build, tw=
-o modules
-> >> > will be built: mmc_tmio_core and mmc_tmio.
-> >> >
-> >> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> >> > ---
-> >>
-> >> Thanks for your work on this, I'm happy to see these patches becau=
-se
-> >> they make it easier for me to add multi-interrupt source to the SD=
-HI
-> >> portion - something that is needed for sh73a0.
-> >>
-> >> > =A0drivers/mmc/host/Kconfig =A0 =A0 =A0 =A0| =A0 =A04 +
-> >> > =A0drivers/mmc/host/Makefile =A0 =A0 =A0 | =A0 =A03 +
-> >> > =A0drivers/mmc/host/tmio_mmc.c =A0 =A0 | 1303 +-----------------=
----------------------
-> >> > =A0drivers/mmc/host/tmio_mmc.h =A0 =A0 | =A0152 +++++
-> >> > =A0drivers/mmc/host/tmio_mmc_dma.c | =A0302 +++++++++
-> >> > =A0drivers/mmc/host/tmio_mmc_pio.c | =A0923 ++++++++++++++++++++=
-+++++++
-> >> > =A06 files changed, 1402 insertions(+), 1285 deletions(-)
-> >> > =A0create mode 100644 drivers/mmc/host/tmio_mmc.h
-> >> > =A0create mode 100644 drivers/mmc/host/tmio_mmc_dma.c
-> >> > =A0create mode 100644 drivers/mmc/host/tmio_mmc_pio.c
-> >>
-> >> Something is wrong with this patch. The Makefile adds tmio_mmc_cor=
-e.c
-> >> but it's not part of the diffstat above. Perhaps you're posting an
-> >> older version of the patch?
-> >
-> > No, the Makefile is adding tmio_mmc_core.o:
-> >
-> > diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> > index 30aa686..79c42dd 100644
-> > --- a/drivers/mmc/host/Makefile
-> > +++ b/drivers/mmc/host/Makefile
-> > @@ -29,6 +29,9 @@ endif
-> > =A0obj-$(CONFIG_MMC_S3C) =A0 =A0 =A0 =A0 =A0+=3D s3cmci.o
-> > =A0obj-$(CONFIG_MMC_SDRICOH_CS) =A0 +=3D sdricoh_cs.o
-> > =A0obj-$(CONFIG_MMC_TMIO) =A0 =A0 =A0 =A0 +=3D tmio_mmc.o
-> > +obj-$(CONFIG_MMC_TMIO_CORE) =A0 =A0+=3D tmio_mmc_core.o
-> > +tmio_mmc_core-y =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0:=3D=
- tmio_mmc_pio.o
-> > +tmio_mmc_core-$(CONFIG_TMIO_MMC_DMA) =A0 +=3D tmio_mmc_dma.o
-> > =A0obj-$(CONFIG_MMC_CB710) =A0 =A0 =A0 =A0+=3D cb710-mmc.o
-> > =A0obj-$(CONFIG_MMC_VIA_SDMMC) =A0 =A0+=3D via-sdmmc.o
-> > =A0obj-$(CONFIG_SDH_BFIN) =A0 =A0 =A0 =A0 +=3D bfin_sdh.o
-> >
-> > which is linked from two source files. Looks correct to me.
->=20
-> Ok, sorry, my mistake.
->=20
-> What's the reason behind creating tmio_mmc_core.o instead of simply
-> having tmio_mmc_pio.o + tmio_mmc_dma.o? That must be the most
-> straightforward solution, no?
+Side effect?? i didn't mention "side effect", just not resolved for every case..
+That case is SDHCI didn't support the specific cards during suspend/resume.
 
-You mean two kernel modules ..._pio.ko and ..._dma.ko? but why?... I do=
-n't=20
-see any advantages in such a split, besides, they are calling into each=
-=20
-other ATM.
+i didn't know Mr.Chuanxiao's case.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-=46reelance Open-Source Software Developer
-http://www.open-technology.de/
+> 
+> Using BUSY patch for 0x0e (below) works ?
+> 
+>>>   I think sdhci_calc_timeout should be left for data transfer since at least we
+>>>   can get a warning if 0xE is not enough for host to use. And if the host
+>>>   controller and the card have no bugs, then the calculated timeout should be
+>>>   safe. Left the old implementation unchanged is also compatible with all
+>>>   existed host controllers and cards.
+>>>
+>>>   But for busy command, we are not clear about how long is safe enough for
+>>>   waiting and there is also no function to do the calculation for them. So
+>>>   preferred just using 0xE. Below the patch and comment:
+>>>
+>>> Set the timeout control register for SDHCI host when send some commands which
+>>> need busy signal. Use the maximum timeout value 0xE will be safe.
+>>>
+>>> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+>>> ---
+>>> drivers/mmc/host/sdhci.c |    9 ++++++++-
+>>> 1 files changed, 8 insertions(+), 1 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 99c372e..8306323 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -659,8 +659,15 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_data *data)
+>>>
+>>> 	WARN_ON(host->data);
+>>>
+>>> -	if (data == NULL)
+>>> +	if (data == NULL) {
+>>> +		/*
+>>> +		 * set the timeout to be maximum value for commands those with
+>>> +		 * busy signal
+>>> +		 */
+>>> +		if (host->cmd->flags & MMC_RSP_BUSY)
+>>> +			sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
+>>> 		return;
+>>> +	}
+>>>
+>>> 	/* Sanity checks */
+>>> 	BUG_ON(data->blksz * data->blocks > 524288);
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
