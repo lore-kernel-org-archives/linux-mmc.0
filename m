@@ -1,87 +1,89 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: Memory replacement
-Date: Sun, 13 Mar 2011 18:21:00 +0100
-Message-ID: <201103131821.00762.arnd@arndb.de>
-References: <AANLkTikQOVa8qfU-R6uqQXKhAVxqeAmxKONjPmmqLCr8@mail.gmail.com> <201103122351.07697.arnd@arndb.de> <AANLkTinkAN9Y8wmwt5kzeozYESB7xJD7GvV3Nu6s5wPG@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH]mmc: set timeout for SDHCI host before sending busy cmds
+Date: Sun, 13 Mar 2011 11:35:19 -0700
+Message-ID: <BD70BE74-9C18-4497-A2EE-DB6DCC13CBEA@marvell.com>
+References: <20110309080609.GA23207@intel.com> <4D7837A5.3010603@samsung.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:61614 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755173Ab1CMRVF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 13:21:05 -0400
-In-Reply-To: <AANLkTinkAN9Y8wmwt5kzeozYESB7xJD7GvV3Nu6s5wPG@mail.gmail.com>
+Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:43885 "EHLO
+	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754677Ab1CMSkY convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 13 Mar 2011 14:40:24 -0400
+In-Reply-To: <4D7837A5.3010603@samsung.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "C. Scott Ananian" <cscott@laptop.org>
-Cc: John Watlington <wad@laptop.org>, Kevin Gordon <kgordon420@gmail.com>, devel@lists.laptop.org, linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, "w.sang@pengutronix.de" <w.sang@pengutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Sunday 13 March 2011 02:01:22 C. Scott Ananian wrote:
-> On Sat, Mar 12, 2011 at 5:51 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> > I've had four cards with a Sandisk label that had unusual characteristics
-> > and manufacturer/OEM IDs that refer to other companies, three Samsung ("SM")
-> > and one unknown ("BE", possibly lexar). In all cases, the Sandisk support
-> > has confirmed from photos that the cards are definitely fake. They also
+
+On Mar 9, 2011, at 6:29 PM, Jaehoon Chung wrote:
+
+> Chuanxiao Dong wrote:
+>> Hi all,
+>>   From the previous discussion, I do not think we have got a clear conclusion
+>>   about using maximum timeout value. At least we know from Jae hoon Chung
+>>   using 0xE for every case is not a good. So I want to suggest only use 0xE for
+>>   busy command. I personally preferred below implementation, which is similar
+>>   with a RFC patch submitted by Jae hoon Chung, but only without adding a new
+>>   quirk.
 > 
-> Please see the blog post I cited in the email immediately prior to
-> yours, which discusses this situation precisely.  Often the cards are
-> not actually "fake" -- they may even be produced on the exact same
-> equipment as the usual cards, but "off the books" during hours when
-> the factory is officially closed.  This sort of thing is very very
-> widespread, and fakes can come even via official distribution
-> channels.  (Discussed in bunnie's post.)
+> thanks for remind. 
+> Yes, i tested without quirks, i think that is not problem.
+> (Just sent RFC patch with quirks, because i want to ask how think about adding quirks or not).
 
-I am very familiar with bunnie's research, and have referenced
-it from my own page on the linaro wiki. I have also found Kingston
-cards with the exact same symptoms that triggered his original
-interest (very slow, manfid 0x41, oemid "42", low serial number).
 
-Another interesting case of a fake card I found had a Sandisk
-label and "LEXAR" in its MMC name field. Moreover, it actually
-contained copyrighted software that Lexar ships in their real
-cards. So what I'd assume is happening here is that the factory
-that produces the cards or Lexar had a graveyard shift where they
-were just printing Sandisk labels on the cards.
 
-> You're giving the OEMs too much credit.  As John says, unless you
-> arrange for a special SKU, even the "first source" companies will give
-> you whatever they've got cheap that day.
+Sorry I am confused.
 
-It's pretty clear that they are moving to cheaper NAND chips when
-possible, and I also mentioned that. For the controller chips, I don't
-understand how they would save money by buying them on the spot market.
-On the contrary, using the smart controllers that Sandisk themselves
-make allows them to use even slower NAND chips and still qualify for
-a better nominal speed grade, while companies that don't have acess
-to decent controllers need to either use chips that are fast enough
-to make up for the bad GC algorithm or lie in their speed grades.
+Setting 0x0E all the time does not solve the problem and has side effects ?
+What are the side effects ?
 
-> >> How we deal with this is constant testing and getting notification from
-> >> the manufacturer that they are changing the internals (unfortunately,
-> >> we aren't willing to pay the premium to have a special SKU).
-> >
-> > Do you have test results somewhere publically available? We are currently
-> > discussing adding some tweaks to the linux mmc drivers to detect cards
-> > with certain features, and to do some optimizations in the block layer
-> > for common ones.
+Using BUSY patch for 0x0e (below) works ?
+
 > 
-> http://wiki.laptop.org/go/NAND_Testing
+>> 
+>>   I think sdhci_calc_timeout should be left for data transfer since at least we
+>>   can get a warning if 0xE is not enough for host to use. And if the host
+>>   controller and the card have no bugs, then the calculated timeout should be
+>>   safe. Left the old implementation unchanged is also compatible with all
+>>   existed host controllers and cards.
+>> 
+>>   But for busy command, we are not clear about how long is safe enough for
+>>   waiting and there is also no function to do the calculation for them. So
+>>   preferred just using 0xE. Below the patch and comment:
+>> 
+>> Set the timeout control register for SDHCI host when send some commands which
+>> need busy signal. Use the maximum timeout value 0xE will be safe.
+>> 
+>> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+>> ---
+>> drivers/mmc/host/sdhci.c |    9 ++++++++-
+>> 1 files changed, 8 insertions(+), 1 deletions(-)
+>> 
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 99c372e..8306323 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -659,8 +659,15 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_data *data)
+>> 
+>> 	WARN_ON(host->data);
+>> 
+>> -	if (data == NULL)
+>> +	if (data == NULL) {
+>> +		/*
+>> +		 * set the timeout to be maximum value for commands those with
+>> +		 * busy signal
+>> +		 */
+>> +		if (host->cmd->flags & MMC_RSP_BUSY)
+>> +			sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
+>> 		return;
+>> +	}
+>> 
+>> 	/* Sanity checks */
+>> 	BUG_ON(data->blksz * data->blocks > 524288);
+> 
 
-Ok, so the "testing" essentially means you create an ext2/3/4 file system
-and run tests on the file system until the card wears out, right?
-
-It does seem a bit crude, because many cards are not really suitable
-for this kind of file system when their wear leveling is purely optimized
-to the accesses defined in the sd card file system specification.
-
-If you did this on e.g. a typical Kingston card, it can have a write
-amplification 100 times higher than normal (FAT32, nilfs2, ...), so
-it gets painfully slow and wears out very quickly.
-
-I had hoped that someone already correlated the GC algorithms with
-the requirements of specific file systems to allow a more systematic
-approach.
-
-	Arnd
