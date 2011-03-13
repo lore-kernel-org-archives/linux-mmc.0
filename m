@@ -1,89 +1,78 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH]mmc: set timeout for SDHCI host before sending busy cmds
-Date: Sun, 13 Mar 2011 11:35:19 -0700
-Message-ID: <BD70BE74-9C18-4497-A2EE-DB6DCC13CBEA@marvell.com>
-References: <20110309080609.GA23207@intel.com> <4D7837A5.3010603@samsung.com>
+From: "Richard A. Smith" <richard@laptop.org>
+Subject: Re: Memory replacement
+Date: Sun, 13 Mar 2011 17:31:46 -0400
+Message-ID: <4D7D37C2.2030102@laptop.org>
+References: <AANLkTikQOVa8qfU-R6uqQXKhAVxqeAmxKONjPmmqLCr8@mail.gmail.com>	<201103122351.07697.arnd@arndb.de>	<AANLkTinkAN9Y8wmwt5kzeozYESB7xJD7GvV3Nu6s5wPG@mail.gmail.com> <201103131821.00762.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:43885 "EHLO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754677Ab1CMSkY convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 13 Mar 2011 14:40:24 -0400
-In-Reply-To: <4D7837A5.3010603@samsung.com>
-Content-Language: en-US
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:57245 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754920Ab1CMVbu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 17:31:50 -0400
+Received: by vxi39 with SMTP id 39so3866178vxi.19
+        for <linux-mmc@vger.kernel.org>; Sun, 13 Mar 2011 14:31:50 -0700 (PDT)
+In-Reply-To: <201103131821.00762.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, "w.sang@pengutronix.de" <w.sang@pengutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: "C. Scott Ananian" <cscott@laptop.org>, Kevin Gordon <kgordon420@gmail.com>, devel@lists.laptop.org, linux-mmc@vger.kernel.org
 
+On 03/13/2011 01:21 PM, Arnd Bergmann wrote:
 
-On Mar 9, 2011, at 6:29 PM, Jaehoon Chung wrote:
+>>> Do you have test results somewhere publically available? We are currently
+>>> discussing adding some tweaks to the linux mmc drivers to detect cards
+>>> with certain features, and to do some optimizations in the block layer
+>>> for common ones.
+>>
+>> http://wiki.laptop.org/go/NAND_Testing
+>
+> Ok, so the "testing" essentially means you create an ext2/3/4 file system
+> and run tests on the file system until the card wears out, right?
 
-> Chuanxiao Dong wrote:
->> Hi all,
->>   From the previous discussion, I do not think we have got a clear conclusion
->>   about using maximum timeout value. At least we know from Jae hoon Chung
->>   using 0xE for every case is not a good. So I want to suggest only use 0xE for
->>   busy command. I personally preferred below implementation, which is similar
->>   with a RFC patch submitted by Jae hoon Chung, but only without adding a new
->>   quirk.
-> 
-> thanks for remind. 
-> Yes, i tested without quirks, i think that is not problem.
-> (Just sent RFC patch with quirks, because i want to ask how think about adding quirks or not).
+The qualifying test is that the card must pass 3TB of writes with no 
+errors.  We run that on samples from the various mfg's.
 
+There's a 2nd round of test(s) that runs during the manufacturing and 
+burn-in phases. One is a simple firmware test to see if you can talk the 
+card at all and then one runs at burn in.  It doesn't have a minimum 
+write size criteria but during the run there must not be any bit errors.
 
+> It does seem a bit crude, because many cards are not really suitable
+> for this kind of file system when their wear leveling is purely optimized
+> to the accesses defined in the sd card file system specification.
+>
+> If you did this on e.g. a typical Kingston card, it can have a write
+> amplification 100 times higher than normal (FAT32, nilfs2, ...), so
+> it gets painfully slow and wears out very quickly.
 
-Sorry I am confused.
+Crude as they are they have been useful tests for us.  Our top criteria 
+is reliability.  We want to ship the machines with a SD card thats going 
+to last for the 5 year design life using the filesystem we ship.  We 
+tried to create an access pattern was the worst possible and the highest 
+stress on the wear leveling system.
 
-Setting 0x0E all the time does not solve the problem and has side effects ?
-What are the side effects ?
+If a card pases the 3TB abuse test then we are pretty certain its going 
+to meet that goal.  There were many cards that died very quickly.
 
-Using BUSY patch for 0x0e (below) works ?
+The tests have also helped expose other issues with things like sudden 
+power off.  In one case a SPO during a write would corrupt the card so 
+badly it became useless.  You could only recover them via a super secret 
+tool from the manufacturer.
 
-> 
->> 
->>   I think sdhci_calc_timeout should be left for data transfer since at least we
->>   can get a warning if 0xE is not enough for host to use. And if the host
->>   controller and the card have no bugs, then the calculated timeout should be
->>   safe. Left the old implementation unchanged is also compatible with all
->>   existed host controllers and cards.
->> 
->>   But for busy command, we are not clear about how long is safe enough for
->>   waiting and there is also no function to do the calculation for them. So
->>   preferred just using 0xE. Below the patch and comment:
->> 
->> Set the timeout control register for SDHCI host when send some commands which
->> need busy signal. Use the maximum timeout value 0xE will be safe.
->> 
->> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
->> ---
->> drivers/mmc/host/sdhci.c |    9 ++++++++-
->> 1 files changed, 8 insertions(+), 1 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 99c372e..8306323 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -659,8 +659,15 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_data *data)
->> 
->> 	WARN_ON(host->data);
->> 
->> -	if (data == NULL)
->> +	if (data == NULL) {
->> +		/*
->> +		 * set the timeout to be maximum value for commands those with
->> +		 * busy signal
->> +		 */
->> +		if (host->cmd->flags & MMC_RSP_BUSY)
->> +			sdhci_writeb(host, 0xE, SDHCI_TIMEOUT_CONTROL);
->> 		return;
->> +	}
->> 
->> 	/* Sanity checks */
->> 	BUG_ON(data->blksz * data->blocks > 524288);
-> 
+> I had hoped that someone already correlated the GC algorithms with
+> the requirements of specific file systems to allow a more systematic
+> approach.
 
+At the time we started doing this testing none of the log structure 
+filesystems were deemed to be mature enough for us to ship. So we didn't 
+bother to try and torture test using them.
+
+If more precision tests were created that still allowed us to make a 
+reasonable estimate of data write lifetime we would be happy to start 
+using them.
+
+-- 
+Richard A. Smith  <richard@laptop.org>
+One Laptop per Child
