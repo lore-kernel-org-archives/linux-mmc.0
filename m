@@ -1,60 +1,39 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: [PATCH 2/2] MMC: Support for block quirks.
-Date: Sun, 13 Mar 2011 08:48:38 -0500
-Message-ID: <1300024118-23771-3-git-send-email-andreiw@motorola.com>
-References: <1299017344-25361-1-git-send-email-andreiw@motorola.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC 4/5] MMC: Adjust unaligned write accesses.
+Date: Sun, 13 Mar 2011 15:54:37 +0100
+Message-ID: <201103131554.38028.arnd@arndb.de>
+References: <1299718449-15172-1-git-send-email-andreiw@motorola.com> <201103111123.21063.arnd@arndb.de> <AANLkTinYmXrn=UmJDcr-2aAN5jChfTTX9EebCu9xbibc@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og106.obsmtp.com ([64.18.0.182]:49900 "EHLO
-	exprod5og106.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754605Ab1CMNFi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 09:05:38 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.167])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2DD4EZD016904
-	for <linux-mmc@vger.kernel.org>; Sun, 13 Mar 2011 09:04:14 -0400 (EDT)
-Received: from mail-gy0-f170.google.com (mail-gy0-f170.google.com [209.85.160.170])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2DD4Axc016876
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Sun, 13 Mar 2011 09:04:14 -0400 (EDT)
-Received: by mail-gy0-f170.google.com with SMTP id 11so1008417gyb.15
-        for <linux-mmc@vger.kernel.org>; Sun, 13 Mar 2011 06:05:37 -0700 (PDT)
-In-Reply-To: <1299017344-25361-1-git-send-email-andreiw@motorola.com>
+Received: from moutng.kundenserver.de ([212.227.17.9]:64793 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751484Ab1CMOym (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 10:54:42 -0400
+In-Reply-To: <AANLkTinYmXrn=UmJDcr-2aAN5jChfTTX9EebCu9xbibc@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: tardyp@gmail.com, linus.walleij@linaro.org, arnd@arndb.de, Andrei Warkentin <andreiw@motorola.com>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org
 
-Block quirks implemented using core/quirks.c support.
+On Sunday 13 March 2011 14:00:04 Andrei Warkentin wrote:
+> > If the latter two are not much different on the toshiba card, that
+> > would be a simpler implementation, and more likely to be useful on
+> > other cards.
+> >
+> 
+> Revalidating the data now, along with some more tests, to get a better
+> picture. It seems the more data I get, the less it makes sense :(.
 
-Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
----
- drivers/mmc/card/block.c |    7 +++++++
- 1 files changed, 7 insertions(+), 0 deletions(-)
+I was already fearing that the change would only benefit low-level
+benchmarks. It certainly helps writing small chunks to the buffer
+that is meant for FAT32 directories, but at some point, the card
+will have to write back the entire logical erase block, so you
+might not be able to gain much in real-world workloads.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 7054fd5..913f394 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -686,6 +686,11 @@ mmc_blk_set_blksize(struct mmc_blk_data *md, struct mmc_card *card)
- 	return 0;
- }
- 
-+static const struct mmc_fixup blk_fixups[] =
-+{
-+	END_FIXUP
-+};
-+
- static int mmc_blk_probe(struct mmc_card *card)
- {
- 	struct mmc_blk_data *md;
-@@ -714,6 +719,8 @@ static int mmc_blk_probe(struct mmc_card *card)
- 		cap_str, md->read_only ? "(ro)" : "");
- 
- 	mmc_set_drvdata(card, md);
-+	mmc_fixup_device(card, blk_fixups);
-+
- #ifdef CONFIG_MMC_BLOCK_DEFERRED_RESUME
- 	mmc_set_bus_resume_policy(card->host, 1);
- #endif
--- 
-1.7.0.4
+Of course, I also have only a very limited understanding of the
+algorithm used in the Toshiba chip.
 
+	Arnd
