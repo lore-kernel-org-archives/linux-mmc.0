@@ -1,89 +1,130 @@
-From: "C. Scott Ananian" <cscott@laptop.org>
-Subject: Re: Memory replacement
-Date: Sat, 12 Mar 2011 20:01:22 -0500
-Message-ID: <AANLkTinkAN9Y8wmwt5kzeozYESB7xJD7GvV3Nu6s5wPG@mail.gmail.com>
-References: <AANLkTikQOVa8qfU-R6uqQXKhAVxqeAmxKONjPmmqLCr8@mail.gmail.com>
-	<201103111135.01394.arnd@arndb.de>
-	<320717C0-7117-462E-9227-7966EE6941D7@laptop.org>
-	<201103122351.07697.arnd@arndb.de>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH 1/4 v2] mmc: mn57xx: only access registers above 0xff, if available
+Date: Sun, 13 Mar 2011 12:54:04 +0900
+Message-ID: <AANLkTi=cGjomEu4uPbOFcwQfMYu6q4kjMwmdetRXeefC@mail.gmail.com>
+References: <Pine.LNX.4.64.1103110854050.23675@axis700.grange>
+	<Pine.LNX.4.64.1103110900080.23675@axis700.grange>
+	<AANLkTi=CwkzwvDy+CTzJBni-OtZUMEtmceNr+-xpuVOK@mail.gmail.com>
+	<Pine.LNX.4.64.1103122349080.28741@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:39523 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754137Ab1CMBBY convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Mar 2011 20:01:24 -0500
-Received: by iwn34 with SMTP id 34so3827502iwn.19
-        for <linux-mmc@vger.kernel.org>; Sat, 12 Mar 2011 17:01:23 -0800 (PST)
-In-Reply-To: <201103122351.07697.arnd@arndb.de>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:40554 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754156Ab1CMDyG convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Mar 2011 22:54:06 -0500
+In-Reply-To: <Pine.LNX.4.64.1103122349080.28741@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: John Watlington <wad@laptop.org>, Kevin Gordon <kgordon420@gmail.com>, devel@lists.laptop.org, linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
 
-On Sat, Mar 12, 2011 at 5:51 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> I've had four cards with a Sandisk label that had unusual characteris=
-tics
-> and manufacturer/OEM IDs that refer to other companies, three Samsung=
- ("SM")
-> and one unknown ("BE", possibly lexar). In all cases, the Sandisk sup=
-port
-> has confirmed from photos that the cards are definitely fake. They al=
-so
-
-Please see the blog post I cited in the email immediately prior to
-yours, which discusses this situation precisely.  Often the cards are
-not actually "fake" -- they may even be produced on the exact same
-equipment as the usual cards, but "off the books" during hours when
-the factory is officially closed.  This sort of thing is very very
-widespread, and fakes can come even via official distribution
-channels.  (Discussed in bunnie's post.)
-
-> However, they have apparently managed to make them work well
-> for random access by using some erase blocks as SLC (writing only
-> the pages that carry the most significant bit in each cell) and
-> by doing log structured writes in there, something that apparently
-> others have not figured out yet. Also, as I mentioned, they
-> consistenly use a relatively large number of open erase blocks.
-> I've measured both effects on SD cards and USB sticks.
-
-You've been lucky.
-
-> I believe you can get this level of sophistication only from
-> companies that make the nand flash, the controller and the card:
-> Sandisk, Samsung and Toshiba.
-> Other brands that just get the controllers and the flash chips
-> from whoever sells them cheaply (kingston, adata, panasonic,
-> transcend, ...) apparently don't get the really good stuff.
-
-You're giving the OEMs too much credit.  As John says, unless you
-arrange for a special SKU, even the "first source" companies will give
-you whatever they've got cheap that day.
-
->> How we deal with this is constant testing and getting notification f=
-rom
->> the manufacturer that they are changing the internals (unfortunately=
-,
->> we aren't willing to pay the premium to have a special SKU).
+On Sun, Mar 13, 2011 at 7:57 AM, Guennadi Liakhovetski
+<g.liakhovetski@gmx.de> wrote:
+> On Sun, 13 Mar 2011, Magnus Damm wrote:
 >
-> Do you have test results somewhere publically available? We are curre=
-ntly
-> discussing adding some tweaks to the linux mmc drivers to detect card=
-s
-> with certain features, and to do some optimizations in the block laye=
-r
-> for common ones.
+>> On Fri, Mar 11, 2011 at 5:09 PM, Guennadi Liakhovetski
+>> <g.liakhovetski@gmx.de> wrote:
+>> > Not all mn57xx / tmio implementations have registers above oxff.
+>> > Accessing them on thise platforms is dangerous. In some cases it l=
+eads
+>> > to address wrapping to addresses below 0x100, which corrupts rando=
+m
+>> > unrelated registers.
+>> >
+>> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>> > ---
+>> >
+>> > v2:
+>>
+>> > --- a/drivers/mmc/host/tmio_mmc_pio.c
+>> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
+>>
+>> Nice, it looks like this patch should apply on your earlier broken o=
+ut
+>> patch set...
+>>
+>> > + =A0 =A0 =A0 if (resource_size(res) > 0x100) {
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sd_ctrl_write16(host, CTL_CLK_AND_WA=
+IT_CTL, 0x0000);
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 msleep(10);
+>> > + =A0 =A0 =A0 }
+>>
+>> ... but now since you've separated the tmio specific code from the
+>> SDHI implementation, why don't you just make all the offsets above
+>> 0x100 stay in the tmio code, and let the SDHI only access below 0xff=
+?
+>
+> The current split is:
+>
+> tmio_mmc_pio.c: _all_ driver functionality in PIO mode, including MMC=
+ API
+> tmio_mmc_dma.c: DMA
+>
+> tmio_mmc.c: _only_ MFD glue - no IO at all
+>
+> sh_mobile_sdhi.c: _only_ platform glue for SDHI - no IO at all
+>
+> This split seems logical to me - every file performs one function. Bu=
+t I
+> do agree, that special-casing addresses > 0xff in the generic core is=
+ not
+> very nice... We could otherwise modify the actual read / write access=
+ors
+> to check, whether _each_ register address is within the resource, but=
+ that
+> would be too much of a performance hit. But pulling those couple of >=
+ 0xff
+> accesses out of the driver proper and into the MFD glue didn't look l=
+ike a
+> very logical thing to me. I thought this version provided both - no
+> performance hit and preserved clean function separation - at the cost=
+ of
+> "slight ugliness." Opinions?
 
-http://wiki.laptop.org/go/NAND_Testing
+I don't really see why you want to have "no IO at all" in the
+tmio/sdhi specific files.
 
-But the testing wad is talking about is really *on the factory floor*:
- Regular sampling of chips as they come into the factory to ensure
-that the chips *you are actually about to put into the XOs* are
-consistent.  Relying on manufacturing data reported by the chips is
-not reliable.
-  --scott
+Actually, I think it makes sense to abstract based on the hardware
+register layout difference.
 
---=20
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=A0 ( http://cscott.net/=
- )
+ Since some parts of the code only applies to tmio (offset >=3D 0x100)
+and some only to SDHI (TMIO_MMC_SDIO_IRQ), why don't you do the
+following:
+
+In tmio_mmc_pio.c:
+
+tmio_mmc_core_clk_start()
+tmio_mmc_core_clk_stop()
+tmio_mmc_core_reset()
+
+Above functions only implement offset < 0x100 and no TMIO_MMC_ stuff
+in there if possible
+
+In tmio_mmc.c
+
+tmio_mmc_clk_start()
+tmio_mmc_clk_stop()
+tmio_mmc_reset()
+
+Above 3 functions call tmio_mmc_core_xxx() and also implement >=3D 0x10=
+0
+offset access.
+
+In sh_mobile_sdhi.c
+
+sh_mobile_sdhi_clk_start()
+sh_mobile_sdhi_clk_stop()
+sh_mobile_sdhi_reset()
+
+Above 3 functions call tmio_mmc_core_xxx() and perhaps also implement S=
+DIO IRQ.
+
+Ideally we want to share the SDIO IRQ code with the TMIO MFD
+implementation, but we're not really receiving any test feedback from
+anyone, so from my POV to avoid breakage we may as well keep things in
+the SDHI portion and move over to the common place if needed in the
+future.
+
+/ magnus
