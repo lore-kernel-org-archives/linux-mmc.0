@@ -1,37 +1,111 @@
-From: Mikus Grinbergs <mikus@bga.com>
-Subject: Re: Memory replacement
-Date: Sun, 13 Mar 2011 17:34:24 -0500
-Message-ID: <4D7D4670.1050009@bga.com>
-References: <AANLkTikQOVa8qfU-R6uqQXKhAVxqeAmxKONjPmmqLCr8@mail.gmail.com>	<201103122351.07697.arnd@arndb.de>	<AANLkTinkAN9Y8wmwt5kzeozYESB7xJD7GvV3Nu6s5wPG@mail.gmail.com>	<201103131821.00762.arnd@arndb.de> <4D7D37C2.2030102@laptop.org>
-Reply-To: mikus@bga.com
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 1/6] mmc: tmio: split core functionality, DMA and MFD
+ glue
+Date: Sun, 13 Mar 2011 23:51:40 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103132349140.23221@axis700.grange>
+References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
+ <Pine.LNX.4.64.1103110844080.23675@axis700.grange>
+ <AANLkTinQB2NB---0o65Uy-axApw9DwPZoMeMBc=qmvSC@mail.gmail.com>
+ <Pine.LNX.4.64.1103122347270.28741@axis700.grange>
+ <AANLkTi=YAcSOBUyWa-OpD0fL-nr-_i=On8ssN0TXZTqJ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail4.comsite.net ([205.238.176.238]:60566 "EHLO
-	mail4.comsite.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754617Ab1CMWaW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 18:30:22 -0400
-In-Reply-To: <4D7D37C2.2030102@laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <AANLkTi=YAcSOBUyWa-OpD0fL-nr-_i=On8ssN0TXZTqJ@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: "Richard A. Smith" <richard@laptop.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, devel@lists.laptop.org, linux-mmc@vger.kernel.org
 
-> The tests have also helped expose other issues with things like sudden 
-> power off.  In one case a SPO during a write would corrupt the card so 
-> badly it became useless.  You could only recover them via a super secret 
-> tool from the manufacturer.
+On Sun, 13 Mar 2011, Magnus Damm wrote:
 
-Is there any "sledgehammer" process available to users without a super
-secret tool ?
+> On Sun, Mar 13, 2011 at 7:48 AM, Guennadi Liakhovetski
+> <g.liakhovetski@gmx.de> wrote:
+> > On Sun, 13 Mar 2011, Magnus Damm wrote:
+> >
+> >> On Fri, Mar 11, 2011 at 4:51 PM, Guennadi Liakhovetski
+> >> <g.liakhovetski@gmx.de> wrote:
+> >> > TMIO MMC chips contain an SD / SDIO IP core from Panasonic, simi=
+lar to
+> >> > the one, used in MN5774 and other MN57xx controllers. These IP c=
+ores are
+> >> > included in many multifunction devices, in sh-mobile chips from =
+Renesas,
+> >> > in the latter case they can also use DMA. Some sh-mobile impleme=
+ntations
+> >> > also have some other specialities, that MFD-based solutions don'=
+t have.
+> >> > This makes supporting all these features in a monolithic driver =
+inconveniet
+> >> > and error-prone. This patch splits the driver into 3 parts: the =
+core,
+> >> > the MFD glue and the DMA support. In case of a modular build, tw=
+o modules
+> >> > will be built: mmc_tmio_core and mmc_tmio.
+> >> >
+> >> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> >> > ---
+> >>
+> >> Thanks for your work on this, I'm happy to see these patches becau=
+se
+> >> they make it easier for me to add multi-interrupt source to the SD=
+HI
+> >> portion - something that is needed for sh73a0.
+> >>
+> >> > =A0drivers/mmc/host/Kconfig =A0 =A0 =A0 =A0| =A0 =A04 +
+> >> > =A0drivers/mmc/host/Makefile =A0 =A0 =A0 | =A0 =A03 +
+> >> > =A0drivers/mmc/host/tmio_mmc.c =A0 =A0 | 1303 +-----------------=
+---------------------
+> >> > =A0drivers/mmc/host/tmio_mmc.h =A0 =A0 | =A0152 +++++
+> >> > =A0drivers/mmc/host/tmio_mmc_dma.c | =A0302 +++++++++
+> >> > =A0drivers/mmc/host/tmio_mmc_pio.c | =A0923 ++++++++++++++++++++=
++++++++
+> >> > =A06 files changed, 1402 insertions(+), 1285 deletions(-)
+> >> > =A0create mode 100644 drivers/mmc/host/tmio_mmc.h
+> >> > =A0create mode 100644 drivers/mmc/host/tmio_mmc_dma.c
+> >> > =A0create mode 100644 drivers/mmc/host/tmio_mmc_pio.c
+> >>
+> >> Something is wrong with this patch. The Makefile adds tmio_mmc_cor=
+e.c
+> >> but it's not part of the diffstat above. Perhaps you're posting an
+> >> older version of the patch?
+> >
+> > No, the Makefile is adding tmio_mmc_core.o:
+> >
+> > diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> > index 30aa686..79c42dd 100644
+> > --- a/drivers/mmc/host/Makefile
+> > +++ b/drivers/mmc/host/Makefile
+> > @@ -29,6 +29,9 @@ endif
+> > =A0obj-$(CONFIG_MMC_S3C) =A0 =A0 =A0 =A0 =A0+=3D s3cmci.o
+> > =A0obj-$(CONFIG_MMC_SDRICOH_CS) =A0 +=3D sdricoh_cs.o
+> > =A0obj-$(CONFIG_MMC_TMIO) =A0 =A0 =A0 =A0 +=3D tmio_mmc.o
+> > +obj-$(CONFIG_MMC_TMIO_CORE) =A0 =A0+=3D tmio_mmc_core.o
+> > +tmio_mmc_core-y =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0:=3D=
+ tmio_mmc_pio.o
+> > +tmio_mmc_core-$(CONFIG_TMIO_MMC_DMA) =A0 +=3D tmio_mmc_dma.o
+> > =A0obj-$(CONFIG_MMC_CB710) =A0 =A0 =A0 =A0+=3D cb710-mmc.o
+> > =A0obj-$(CONFIG_MMC_VIA_SDMMC) =A0 =A0+=3D via-sdmmc.o
+> > =A0obj-$(CONFIG_SDH_BFIN) =A0 =A0 =A0 =A0 +=3D bfin_sdh.o
+> >
+> > which is linked from two source files. Looks correct to me.
+>=20
+> Ok, sorry, my mistake.
+>=20
+> What's the reason behind creating tmio_mmc_core.o instead of simply
+> having tmio_mmc_pio.o + tmio_mmc_dma.o? That must be the most
+> straightforward solution, no?
 
-I've encountered SD cards which will be recognized as a device when
-plugged in to a running XO-1 (though 'ls' of a filesystem on that SD
-card is corrupt) -- but 'fdisk' is ineffective when I want to write a
-new partition table (and 'fsck' appears to loop).  Since otherwise I'd
-just have to throw the card away, I'd be willing to apply EXTREME
-measures to get such a card into a reusable ("blank slate") condition.
+You mean two kernel modules ..._pio.ko and ..._dma.ko? but why?... I do=
+n't=20
+see any advantages in such a split, besides, they are calling into each=
+=20
+other ATM.
 
-mikus
-
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+=46reelance Open-Source Software Developer
+http://www.open-technology.de/
