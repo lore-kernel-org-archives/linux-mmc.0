@@ -1,292 +1,161 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 2/4] mmc, ARM: Rename SuperH Mobile ARM zboot helpers
-Date: Mon, 14 Mar 2011 11:57:13 +0900
-Message-ID: <1300071435-26759-3-git-send-email-horms@verge.net.au>
+Subject: [PATCH 1/4] mmc: tmio_mmc: Move some defines into a shared header
+Date: Mon, 14 Mar 2011 11:57:12 +0900
+Message-ID: <1300071435-26759-2-git-send-email-horms@verge.net.au>
 References: <1300071435-26759-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:40254 "EHLO
+Received: from kirsty.vergenet.net ([202.4.237.240]:40249 "EHLO
 	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753841Ab1CNC51 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 22:57:27 -0400
+	with ESMTP id S1753641Ab1CNC50 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2011 22:57:26 -0400
 In-Reply-To: <1300071435-26759-1-git-send-email-horms@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Simon Horman <horms@verge.net.au>
 
-These headers and helpers will also be used for SDHI boot
-so the mmcif name will start to make a lot less sense.
+Also add TMIO_BBS.
 
+This allows these defines to also be used by zboot.
+
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Signed-off-by: Simon Horman <horms@verge.net.au>
----
- arch/arm/boot/compressed/mmcif-sh7372.c            |   12 +++---
- arch/arm/mach-shmobile/include/mach/mmc-ap4eb.h    |   29 +++++++++++++++
- arch/arm/mach-shmobile/include/mach/mmc-mackerel.h |   38 +++++++++++++++++++
- arch/arm/mach-shmobile/include/mach/mmc.h          |   18 +++++++++
- arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h  |   29 ---------------
- .../mach-shmobile/include/mach/mmcif-mackerel.h    |   39 --------------------
- arch/arm/mach-shmobile/include/mach/mmcif.h        |   18 ---------
- 7 files changed, 91 insertions(+), 92 deletions(-)
- create mode 100644 arch/arm/mach-shmobile/include/mach/mmc-ap4eb.h
- create mode 100644 arch/arm/mach-shmobile/include/mach/mmc-mackerel.h
- create mode 100644 arch/arm/mach-shmobile/include/mach/mmc.h
- delete mode 100644 arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h
- delete mode 100644 arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
- delete mode 100644 arch/arm/mach-shmobile/include/mach/mmcif.h
 
-diff --git a/arch/arm/boot/compressed/mmcif-sh7372.c b/arch/arm/boot/compressed/mmcif-sh7372.c
-index e6180af..28bcf3c 100644
---- a/arch/arm/boot/compressed/mmcif-sh7372.c
-+++ b/arch/arm/boot/compressed/mmcif-sh7372.c
-@@ -10,7 +10,7 @@
-  */
+---
+
+This almost certainly conflicts with recent work by Guennadi.
+Though it should be trivial for either of us to rebase our patches.
+---
+ drivers/mmc/host/tmio_mmc.c |   46 +--------------------------------------
+ include/linux/mmc/tmio.h    |   49 +++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 51 insertions(+), 44 deletions(-)
+ create mode 100644 include/linux/mmc/tmio.h
+
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index e3c6ef2..c1a81f8 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -36,55 +36,13 @@
+ #include <linux/mfd/core.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/tmio.h>
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
+ #include <linux/workqueue.h>
+ #include <linux/spinlock.h>
  
- #include <linux/mmc/sh_mmcif.h>
--#include <mach/mmcif.h>
-+#include <mach/mmc.h>
- 
- #define MMCIF_BASE      (void __iomem *)0xe6bd0000
- 
-@@ -41,8 +41,8 @@
-  */
- asmlinkage void mmcif_loader(unsigned char *buf, unsigned long len)
- {
--	mmcif_init_progress();
--	mmcif_update_progress(MMCIF_PROGRESS_ENTER);
-+	mmc_init_progress();
-+	mmc_update_progress(MMCIF_PROGRESS_ENTER);
- 
- 	/* Initialise MMC
- 	 * registers: PORT84CR-PORT92CR
-@@ -68,12 +68,12 @@ asmlinkage void mmcif_loader(unsigned char *buf, unsigned long len)
- 	/* Enable clock to MMC hardware block */
- 	__raw_writel(__raw_readl(SMSTPCR3) & ~(1 << 12), SMSTPCR3);
- 
--	mmcif_update_progress(MMCIF_PROGRESS_INIT);
-+	mmc_update_progress(MMCIF_PROGRESS_INIT);
- 
- 	/* setup MMCIF hardware */
- 	sh_mmcif_boot_init(MMCIF_BASE);
- 
--	mmcif_update_progress(MMCIF_PROGRESS_LOAD);
-+	mmc_update_progress(MMCIF_PROGRESS_LOAD);
- 
- 	/* load kernel via MMCIF interface */
- 	sh_mmcif_boot_do_read(MMCIF_BASE, 2, /* Kernel is at block 2 */
-@@ -83,5 +83,5 @@ asmlinkage void mmcif_loader(unsigned char *buf, unsigned long len)
- 	/* Disable clock to MMC hardware block */
- 	__raw_writel(__raw_readl(SMSTPCR3) & (1 << 12), SMSTPCR3);
- 
--	mmcif_update_progress(MMCIF_PROGRESS_DONE);
-+	mmc_update_progress(MMCIF_PROGRESS_DONE);
- }
-diff --git a/arch/arm/mach-shmobile/include/mach/mmc-ap4eb.h b/arch/arm/mach-shmobile/include/mach/mmc-ap4eb.h
+-#define CTL_SD_CMD 0x00
+-#define CTL_ARG_REG 0x04
+-#define CTL_STOP_INTERNAL_ACTION 0x08
+-#define CTL_XFER_BLK_COUNT 0xa
+-#define CTL_RESPONSE 0x0c
+-#define CTL_STATUS 0x1c
+-#define CTL_IRQ_MASK 0x20
+-#define CTL_SD_CARD_CLK_CTL 0x24
+-#define CTL_SD_XFER_LEN 0x26
+-#define CTL_SD_MEM_CARD_OPT 0x28
+-#define CTL_SD_ERROR_DETAIL_STATUS 0x2c
+-#define CTL_SD_DATA_PORT 0x30
+-#define CTL_TRANSACTION_CTL 0x34
+-#define CTL_SDIO_STATUS 0x36
+-#define CTL_SDIO_IRQ_MASK 0x38
+-#define CTL_RESET_SD 0xe0
+-#define CTL_SDIO_REGS 0x100
+-#define CTL_CLK_AND_WAIT_CTL 0x138
+-#define CTL_RESET_SDIO 0x1e0
+-
+-/* Definitions for values the CTRL_STATUS register can take. */
+-#define TMIO_STAT_CMDRESPEND    0x00000001
+-#define TMIO_STAT_DATAEND       0x00000004
+-#define TMIO_STAT_CARD_REMOVE   0x00000008
+-#define TMIO_STAT_CARD_INSERT   0x00000010
+-#define TMIO_STAT_SIGSTATE      0x00000020
+-#define TMIO_STAT_WRPROTECT     0x00000080
+-#define TMIO_STAT_CARD_REMOVE_A 0x00000100
+-#define TMIO_STAT_CARD_INSERT_A 0x00000200
+-#define TMIO_STAT_SIGSTATE_A    0x00000400
+-#define TMIO_STAT_CMD_IDX_ERR   0x00010000
+-#define TMIO_STAT_CRCFAIL       0x00020000
+-#define TMIO_STAT_STOPBIT_ERR   0x00040000
+-#define TMIO_STAT_DATATIMEOUT   0x00080000
+-#define TMIO_STAT_RXOVERFLOW    0x00100000
+-#define TMIO_STAT_TXUNDERRUN    0x00200000
+-#define TMIO_STAT_CMDTIMEOUT    0x00400000
+-#define TMIO_STAT_RXRDY         0x01000000
+-#define TMIO_STAT_TXRQ          0x02000000
+-#define TMIO_STAT_ILL_FUNC      0x20000000
+-#define TMIO_STAT_CMD_BUSY      0x40000000
+-#define TMIO_STAT_ILL_ACCESS    0x80000000
+-
+ /* Definitions for values the CTRL_SDIO_STATUS register can take. */
+ #define TMIO_SDIO_STAT_IOIRQ	0x0001
+ #define TMIO_SDIO_STAT_EXPUB52	0x4000
+@@ -1290,7 +1248,7 @@ static int __devinit tmio_mmc_probe(struct platform_device *dev)
+ 	mmc->f_max = pdata->hclk;
+ 	mmc->f_min = mmc->f_max / 512;
+ 	mmc->max_segs = 32;
+-	mmc->max_blk_size = 512;
++	mmc->max_blk_size = TMIO_BBS;
+ 	mmc->max_blk_count = (PAGE_CACHE_SIZE / mmc->max_blk_size) *
+ 		mmc->max_segs;
+ 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+diff --git a/include/linux/mmc/tmio.h b/include/linux/mmc/tmio.h
 new file mode 100644
-index 0000000..db59fdb
+index 0000000..cb3f868
 --- /dev/null
-+++ b/arch/arm/mach-shmobile/include/mach/mmc-ap4eb.h
-@@ -0,0 +1,29 @@
-+#ifndef MMC_AP4EB_H
-+#define MMC_AP4EB_H
++++ b/include/linux/mmc/tmio.h
+@@ -0,0 +1,49 @@
++#ifndef TMIO_MMC_H
++#define TMIO_MMC_H
 +
-+#define PORT185CR      (void __iomem *)0xe60520b9
-+#define PORT186CR      (void __iomem *)0xe60520ba
-+#define PORT187CR      (void __iomem *)0xe60520bb
-+#define PORT188CR      (void __iomem *)0xe60520bc
++#define CTL_SD_CMD			0x00
++#define CTL_ARG_REG			0x04
++#define CTL_STOP_INTERNAL_ACTION	0x08
++#define CTL_XFER_BLK_COUNT		0xa
++#define CTL_RESPONSE			0x0c
++#define CTL_STATUS			0x1c
++#define CTL_IRQ_MASK			0x20
++#define CTL_SD_CARD_CLK_CTL		0x24
++#define CTL_SD_XFER_LEN			0x26
++#define CTL_SD_MEM_CARD_OPT		0x28
++#define CTL_SD_ERROR_DETAIL_STATUS	0x2c
++#define CTL_SD_DATA_PORT		0x30
++#define CTL_TRANSACTION_CTL		0x34
++#define CTL_SDIO_STATUS			0x36
++#define CTL_SDIO_IRQ_MASK		0x38
++#define CTL_RESET_SD			0xe0
++#define CTL_SDIO_REGS			0x100
++#define CTL_CLK_AND_WAIT_CTL		0x138
++#define CTL_RESET_SDIO			0x1e0
 +
-+#define PORTR191_160DR (void __iomem *)0xe6056014
++/* Definitions for values the CTRL_STATUS register can take. */
++#define TMIO_STAT_CMDRESPEND    0x00000001
++#define TMIO_STAT_DATAEND       0x00000004
++#define TMIO_STAT_CARD_REMOVE   0x00000008
++#define TMIO_STAT_CARD_INSERT   0x00000010
++#define TMIO_STAT_SIGSTATE      0x00000020
++#define TMIO_STAT_WRPROTECT     0x00000080
++#define TMIO_STAT_CARD_REMOVE_A 0x00000100
++#define TMIO_STAT_CARD_INSERT_A 0x00000200
++#define TMIO_STAT_SIGSTATE_A    0x00000400
++#define TMIO_STAT_CMD_IDX_ERR   0x00010000
++#define TMIO_STAT_CRCFAIL       0x00020000
++#define TMIO_STAT_STOPBIT_ERR   0x00040000
++#define TMIO_STAT_DATATIMEOUT   0x00080000
++#define TMIO_STAT_RXOVERFLOW    0x00100000
++#define TMIO_STAT_TXUNDERRUN    0x00200000
++#define TMIO_STAT_CMDTIMEOUT    0x00400000
++#define TMIO_STAT_RXRDY         0x01000000
++#define TMIO_STAT_TXRQ          0x02000000
++#define TMIO_STAT_ILL_FUNC      0x20000000
++#define TMIO_STAT_CMD_BUSY      0x40000000
++#define TMIO_STAT_ILL_ACCESS    0x80000000
 +
-+static inline void mmc_init_progress(void)
-+{
-+       /* Initialise LEDS1-4
-+        * registers: PORT185CR-PORT188CR (LED1-LED4 Control)
-+        * value:     0x10 - enable output
-+        */
-+       __raw_writeb(0x10, PORT185CR);
-+       __raw_writeb(0x10, PORT186CR);
-+       __raw_writeb(0x10, PORT187CR);
-+       __raw_writeb(0x10, PORT188CR);
-+}
++#define TMIO_BBS	512
 +
-+static inline void mmc_update_progress(int n)
-+{
-+	__raw_writel((__raw_readl(PORTR191_160DR) & ~(0xf << 25)) |
-+		     (1 << (25 + n)), PORTR191_160DR);
-+}
-+
-+#endif /* MMC_AP4EB_H */
-diff --git a/arch/arm/mach-shmobile/include/mach/mmc-mackerel.h b/arch/arm/mach-shmobile/include/mach/mmc-mackerel.h
-new file mode 100644
-index 0000000..15d3a9e
---- /dev/null
-+++ b/arch/arm/mach-shmobile/include/mach/mmc-mackerel.h
-@@ -0,0 +1,38 @@
-+#ifndef MMC_MACKEREL_H
-+#define MMC_MACKEREL_H
-+
-+#define PORT0CR      (void __iomem *)0xe6051000
-+#define PORT1CR      (void __iomem *)0xe6051001
-+#define PORT2CR      (void __iomem *)0xe6051002
-+#define PORT159CR    (void __iomem *)0xe605009f
-+
-+#define PORTR031_000DR (void __iomem *)0xe6055000
-+#define PORTL159_128DR (void __iomem *)0xe6054010
-+
-+static inline void mmc_init_progress(void)
-+{
-+       /* Initialise LEDS0-3
-+        * registers: PORT0CR-PORT2CR,PORT159CR (LED0-LED3 Control)
-+        * value:     0x10 - enable output
-+        */
-+       __raw_writeb(0x10, PORT0CR);
-+       __raw_writeb(0x10, PORT1CR);
-+       __raw_writeb(0x10, PORT2CR);
-+       __raw_writeb(0x10, PORT159CR);
-+}
-+
-+static inline void mmc_update_progress(int n)
-+{
-+	unsigned a = 0, b = 0;
-+
-+	if (n < 3)
-+		a = 1 << n;
-+	else
-+		b = 1 << 31;
-+
-+	__raw_writel((__raw_readl(PORTR031_000DR) & ~0x7) | a,
-+		     PORTR031_000DR);
-+	__raw_writel((__raw_readl(PORTL159_128DR) & ~(1 << 31)) | b,
-+		     PORTL159_128DR);
-+}
-+#endif /* MMC_MACKEREL_H */
-diff --git a/arch/arm/mach-shmobile/include/mach/mmc.h b/arch/arm/mach-shmobile/include/mach/mmc.h
-new file mode 100644
-index 0000000..e11560a
---- /dev/null
-+++ b/arch/arm/mach-shmobile/include/mach/mmc.h
-@@ -0,0 +1,18 @@
-+#ifndef MMC_H
-+#define MMC_H
-+
-+/**************************************************
-+ *
-+ *		board specific settings
-+ *
-+ **************************************************/
-+
-+#ifdef CONFIG_MACH_AP4EVB
-+#include "mach/mmc-ap4eb.h"
-+#elif CONFIG_MACH_MACKEREL
-+#include "mach/mmc-mackerel.h"
-+#else
-+#error "unsupported board."
 +#endif
-+
-+#endif /* MMC_H */
-diff --git a/arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h b/arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h
-deleted file mode 100644
-index a8d02be..0000000
---- a/arch/arm/mach-shmobile/include/mach/mmcif-ap4eb.h
-+++ /dev/null
-@@ -1,29 +0,0 @@
--#ifndef MMCIF_AP4EB_H
--#define MMCIF_AP4EB_H
--
--#define PORT185CR      (void __iomem *)0xe60520b9
--#define PORT186CR      (void __iomem *)0xe60520ba
--#define PORT187CR      (void __iomem *)0xe60520bb
--#define PORT188CR      (void __iomem *)0xe60520bc
--
--#define PORTR191_160DR (void __iomem *)0xe6056014
--
--static inline void mmcif_init_progress(void)
--{
--       /* Initialise LEDS1-4
--        * registers: PORT185CR-PORT188CR (LED1-LED4 Control)
--        * value:     0x10 - enable output
--        */
--       __raw_writeb(0x10, PORT185CR);
--       __raw_writeb(0x10, PORT186CR);
--       __raw_writeb(0x10, PORT187CR);
--       __raw_writeb(0x10, PORT188CR);
--}
--
--static inline void mmcif_update_progress(int n)
--{
--	__raw_writel((__raw_readl(PORTR191_160DR) & ~(0xf << 25)) |
--		     (1 << (25 + n)), PORTR191_160DR);
--}
--
--#endif /* MMCIF_AP4EB_H */
-diff --git a/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h b/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
-deleted file mode 100644
-index 4b4f694..0000000
---- a/arch/arm/mach-shmobile/include/mach/mmcif-mackerel.h
-+++ /dev/null
-@@ -1,39 +0,0 @@
--#ifndef MMCIF_MACKEREL_H
--#define MMCIF_MACKEREL_H
--
--#define PORT0CR      (void __iomem *)0xe6051000
--#define PORT1CR      (void __iomem *)0xe6051001
--#define PORT2CR      (void __iomem *)0xe6051002
--#define PORT159CR    (void __iomem *)0xe605009f
--
--#define PORTR031_000DR (void __iomem *)0xe6055000
--#define PORTL159_128DR (void __iomem *)0xe6054010
--
--static inline void mmcif_init_progress(void)
--{
--       /* Initialise LEDS0-3
--        * registers: PORT0CR-PORT2CR,PORT159CR (LED0-LED3 Control)
--        * value:     0x10 - enable output
--        */
--       __raw_writeb(0x10, PORT0CR);
--       __raw_writeb(0x10, PORT1CR);
--       __raw_writeb(0x10, PORT2CR);
--       __raw_writeb(0x10, PORT159CR);
--}
--
--static inline void mmcif_update_progress(int n)
--{
--	unsigned a = 0, b = 0;
--
--	if (n < 3)
--		a = 1 << n;
--	else
--		b = 1 << 31;
--
--	__raw_writel((__raw_readl(PORTR031_000DR) & ~0x7) | a,
--		     PORTR031_000DR);
--	__raw_writel((__raw_readl(PORTL159_128DR) & ~(1 << 31)) | b,
--		     PORTL159_128DR);
--}
--
--#endif /* MMCIF_MACKEREL_H */
-diff --git a/arch/arm/mach-shmobile/include/mach/mmcif.h b/arch/arm/mach-shmobile/include/mach/mmcif.h
-deleted file mode 100644
-index f4dc327..0000000
---- a/arch/arm/mach-shmobile/include/mach/mmcif.h
-+++ /dev/null
-@@ -1,18 +0,0 @@
--#ifndef MMCIF_H
--#define MMCIF_H
--
--/**************************************************
-- *
-- *		board specific settings
-- *
-- **************************************************/
--
--#ifdef CONFIG_MACH_AP4EVB
--#include "mach/mmcif-ap4eb.h"
--#elif CONFIG_MACH_MACKEREL
--#include "mach/mmcif-mackerel.h"
--#else
--#error "unsupported board."
--#endif
--
--#endif /* MMCIF_H */
 -- 
 1.7.2.3
 
