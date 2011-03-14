@@ -1,37 +1,78 @@
-From: "Richard A. Smith" <richard@laptop.org>
-Subject: Re: Memory replacement
-Date: Mon, 14 Mar 2011 10:17:34 -0400
-Message-ID: <4D7E237E.1040409@laptop.org>
-References: <AANLkTikQOVa8qfU-R6uqQXKhAVxqeAmxKONjPmmqLCr8@mail.gmail.com>	<201103122351.07697.arnd@arndb.de>	<AANLkTinkAN9Y8wmwt5kzeozYESB7xJD7GvV3Nu6s5wPG@mail.gmail.com>	<201103131821.00762.arnd@arndb.de>	<4D7D37C2.2030102@laptop.org> <4D7D4670.1050009@bga.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: [PATCH] mmc: change CONFIG of MMC_SDHCI based drivers from 'bool' to 'tristate'
+Date: Mon, 14 Mar 2011 22:54:25 +0800
+Message-ID: <1300114465-3769-1-git-send-email-shawn.guo@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:43777 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751290Ab1CNORj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2011 10:17:39 -0400
-Received: by vws1 with SMTP id 1so2392841vws.19
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Mar 2011 07:17:39 -0700 (PDT)
-In-Reply-To: <4D7D4670.1050009@bga.com>
+Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:51404
+	"EHLO VA3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750780Ab1CNOvp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2011 10:51:45 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: mikus@bga.com
-Cc: devel@lists.laptop.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, Shawn Guo <shawn.guo@freescale.com>
 
-On 03/13/2011 06:34 PM, Mikus Grinbergs wrote:
->> The tests have also helped expose other issues with things like sudden
->> power off.  In one case a SPO during a write would corrupt the card so
->> badly it became useless.  You could only recover them via a super secret
->> tool from the manufacturer.
->
-> Is there any "sledgehammer" process available to users without a super
-> secret tool ?
+The MMC_SDHCI based driver is either based on MMC_SDHCI_PLTFM or
+MMC_SDHCI_OF.  As both parent CONFIG are 'tristate', it may make
+sense to get all children drivers CONFIG as 'tristate'.
 
-Wasn't just secret to users.  They would not give us the info on how to 
-do it either.  It was vendor specific so not really worth the effort of 
-trying to reverse engineer.
+Signed-off-by: Shawn Guo <shawn.guo@freescale.com>
+---
+ drivers/mmc/host/Kconfig |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
 
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index afe8c6f..f98adbf 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -91,7 +91,7 @@ config MMC_SDHCI_OF
+ 	  If unsure, say N.
+ 
+ config MMC_SDHCI_OF_ESDHC
+-	bool "SDHCI OF support for the Freescale eSDHC controller"
++	tristate "SDHCI OF support for the Freescale eSDHC controller"
+ 	depends on MMC_SDHCI_OF
+ 	depends on PPC_OF
+ 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+@@ -101,7 +101,7 @@ config MMC_SDHCI_OF_ESDHC
+ 	  If unsure, say N.
+ 
+ config MMC_SDHCI_OF_HLWD
+-	bool "SDHCI OF support for the Nintendo Wii SDHCI controllers"
++	tristate "SDHCI OF support for the Nintendo Wii SDHCI controllers"
+ 	depends on MMC_SDHCI_OF
+ 	depends on PPC_OF
+ 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+@@ -124,7 +124,7 @@ config MMC_SDHCI_PLTFM
+ 	  If unsure, say N.
+ 
+ config MMC_SDHCI_CNS3XXX
+-	bool "SDHCI support on the Cavium Networks CNS3xxx SoC"
++	tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
+ 	depends on ARCH_CNS3XXX
+ 	depends on MMC_SDHCI_PLTFM
+ 	help
+@@ -133,7 +133,7 @@ config MMC_SDHCI_CNS3XXX
+ 	  If unsure, say N.
+ 
+ config MMC_SDHCI_ESDHC_IMX
+-	bool "SDHCI platform support for the Freescale eSDHC i.MX controller"
++	tristate "SDHCI platform support for the Freescale eSDHC i.MX controller"
+ 	depends on MMC_SDHCI_PLTFM && (ARCH_MX25 || ARCH_MX35 || ARCH_MX5)
+ 	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+@@ -143,7 +143,7 @@ config MMC_SDHCI_ESDHC_IMX
+ 	  If unsure, say N.
+ 
+ config MMC_SDHCI_DOVE
+-	bool "SDHCI support on Marvell's Dove SoC"
++	tristate "SDHCI support on Marvell's Dove SoC"
+ 	depends on ARCH_DOVE
+ 	depends on MMC_SDHCI_PLTFM
+ 	select MMC_SDHCI_IO_ACCESSORS
 -- 
-Richard A. Smith  <richard@laptop.org>
-One Laptop per Child
+1.7.1
+
+
