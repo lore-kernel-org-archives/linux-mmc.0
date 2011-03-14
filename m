@@ -1,78 +1,82 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: [PATCH] mmc: change CONFIG of MMC_SDHCI based drivers from 'bool' to 'tristate'
-Date: Mon, 14 Mar 2011 22:54:25 +0800
-Message-ID: <1300114465-3769-1-git-send-email-shawn.guo@freescale.com>
+From: Mikko Vinni <mmvinni@yahoo.com>
+Subject: Re: [PATCH resend] sdhci: work around broken dma boundary behaviour
+Date: Mon, 14 Mar 2011 08:58:02 -0700 (PDT)
+Message-ID: <727376.43956.qm@web161815.mail.bf1.yahoo.com>
+References: <1299530457-19904-1-git-send-email-mmvinni@yahoo.com> <20110312214348.GA312@pengutronix.de> <423716.64271.qm@web161805.mail.bf1.yahoo.com> <20110314101829.GB2206@pengutronix.de> <470477.34668.qm@web161814.mail.bf1.yahoo.com> <20110314152817.GD2206@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:51404
-	"EHLO VA3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750780Ab1CNOvp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2011 10:51:45 -0400
+Received: from web161815.mail.bf1.yahoo.com ([98.139.210.165]:32916 "HELO
+	web161815.mail.bf1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1755616Ab1CNP6D (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2011 11:58:03 -0400
+In-Reply-To: <20110314152817.GD2206@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, Shawn Guo <shawn.guo@freescale.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org
 
-The MMC_SDHCI based driver is either based on MMC_SDHCI_PLTFM or
-MMC_SDHCI_OF.  As both parent CONFIG are 'tristate', it may make
-sense to get all children drivers CONFIG as 'tristate'.
-
-Signed-off-by: Shawn Guo <shawn.guo@freescale.com>
----
- drivers/mmc/host/Kconfig |   10 +++++-----
- 1 files changed, 5 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index afe8c6f..f98adbf 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -91,7 +91,7 @@ config MMC_SDHCI_OF
- 	  If unsure, say N.
- 
- config MMC_SDHCI_OF_ESDHC
--	bool "SDHCI OF support for the Freescale eSDHC controller"
-+	tristate "SDHCI OF support for the Freescale eSDHC controller"
- 	depends on MMC_SDHCI_OF
- 	depends on PPC_OF
- 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
-@@ -101,7 +101,7 @@ config MMC_SDHCI_OF_ESDHC
- 	  If unsure, say N.
- 
- config MMC_SDHCI_OF_HLWD
--	bool "SDHCI OF support for the Nintendo Wii SDHCI controllers"
-+	tristate "SDHCI OF support for the Nintendo Wii SDHCI controllers"
- 	depends on MMC_SDHCI_OF
- 	depends on PPC_OF
- 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
-@@ -124,7 +124,7 @@ config MMC_SDHCI_PLTFM
- 	  If unsure, say N.
- 
- config MMC_SDHCI_CNS3XXX
--	bool "SDHCI support on the Cavium Networks CNS3xxx SoC"
-+	tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
- 	depends on ARCH_CNS3XXX
- 	depends on MMC_SDHCI_PLTFM
- 	help
-@@ -133,7 +133,7 @@ config MMC_SDHCI_CNS3XXX
- 	  If unsure, say N.
- 
- config MMC_SDHCI_ESDHC_IMX
--	bool "SDHCI platform support for the Freescale eSDHC i.MX controller"
-+	tristate "SDHCI platform support for the Freescale eSDHC i.MX controller"
- 	depends on MMC_SDHCI_PLTFM && (ARCH_MX25 || ARCH_MX35 || ARCH_MX5)
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
-@@ -143,7 +143,7 @@ config MMC_SDHCI_ESDHC_IMX
- 	  If unsure, say N.
- 
- config MMC_SDHCI_DOVE
--	bool "SDHCI support on Marvell's Dove SoC"
-+	tristate "SDHCI support on Marvell's Dove SoC"
- 	depends on ARCH_DOVE
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
--- 
-1.7.1
+Hi,
 
 
+> Then we'll have a  "useless" update. Won't hurt AFAICS, but might
+> surprise people examining the  debug output.
+
+Ok.
+
+> > I only compile  tested this so far, so no proper patch yet, but what I would
+> > write based  on the comments is something like this:
+> 
+> (Sidenote: Indentation is broken.  Tabwidth is 8)
+
+Well yes, that is what yahoo likes to break. I will send a proper patch via
+git send-email if/when I have actually tested it and it seems to work.
+
+> 
+> > --- a/drivers/mmc/host/sdhci.h
+> > +++  b/drivers/mmc/host/sdhci.h
+> > @@ -1545,9 +1546,20 @@ static void  sdhci_data_irq(struct sdhci_host *host, 
+>u32 
+>
+> > intmask)
+> >            * boundaries, but as we can't disable the  feature
+> >           * we need to at least restart  the transfer.
+> >           */
+> > -         if (intmask & SDHCI_INT_DMA_END)
+> > -             sdhci_writel(host, sdhci_readl(host,  SDHCI_DMA_ADDRESS),
+> > -                 SDHCI_DMA_ADDRESS);
+> > +        if (intmask  & SDHCI_INT_DMA_END) {
+> > +             u32 dmastart, dmanow;
+> > +             dmastart = sg_dma_address(host->data->sg);
+> 
+> Consecutive transfers  won't work (I know you know ;)).
+
+I assume you mean a single transfer that exceeds whatever is
+defined in SDHCI_DEFAULT_BOUNDARY_SIZE. As long as
+it is kept at 512K things should be fine, but adding the auxiliary
+variable to facilitate smaller values would make the patch
+more invasive. Being an mmc non-hacker, I would rather leave
+that kind of invasive patches for others :)
+
+
+> 
+> > +             dmanow = sdhci_readl(host, SDHCI_DMA_ADDRESS);
+> > +             /*
+> > +              * Force update to the next DMA block boundary.
+> > +              */
+> > +             dmanow = (dmastart &
+> > +                 ~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
+> > +                  SDHCI_DEFAULT_BOUNDARY_SIZE;
+> > +             DBG("%s: next DMA address after 0x%08x is 0x%08x\n",
+> > +                 mmc_hostname(host->mmc), dmastart,  dmanow);
+> > +            sdhci_writel(host,  dmanow, SDHCI_DMA_ADDRESS);
+> > +        }
+> 
+> Other  than that, looks like the right direction to me.
+
+Good to hear.
+
+Mikko
+
+
+      
