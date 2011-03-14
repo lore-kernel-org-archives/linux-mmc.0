@@ -1,165 +1,68 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 1/4 v2] mmc: mn57xx: only access registers above 0xff,
- if available
-Date: Mon, 14 Mar 2011 08:37:26 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103140826480.6125@axis700.grange>
-References: <Pine.LNX.4.64.1103110854050.23675@axis700.grange>
- <Pine.LNX.4.64.1103110900080.23675@axis700.grange>
- <AANLkTi=CwkzwvDy+CTzJBni-OtZUMEtmceNr+-xpuVOK@mail.gmail.com>
- <Pine.LNX.4.64.1103122349080.28741@axis700.grange>
- <AANLkTi=cGjomEu4uPbOFcwQfMYu6q4kjMwmdetRXeefC@mail.gmail.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [RFC 4/5] MMC: Adjust unaligned write accesses.
+Date: Mon, 14 Mar 2011 02:40:00 -0500
+Message-ID: <AANLkTimV-no9Wk4wbS4gQGdSgq-2L=ims6SXDFrdEZAe@mail.gmail.com>
+References: <1299718449-15172-1-git-send-email-andreiw@motorola.com>
+	<201103111123.21063.arnd@arndb.de>
+	<AANLkTinYmXrn=UmJDcr-2aAN5jChfTTX9EebCu9xbibc@mail.gmail.com>
+	<201103131554.38028.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <AANLkTi=cGjomEu4uPbOFcwQfMYu6q4kjMwmdetRXeefC@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from exprod5og105.obsmtp.com ([64.18.0.180]:33985 "EHLO
+	exprod5og105.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754684Ab1CNHkC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2011 03:40:02 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2E7cb6c028820
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Mar 2011 03:38:37 -0400 (EDT)
+Received: from mail-iw0-f170.google.com (mail-iw0-f170.google.com [209.85.214.170])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2E7cHG1028701
+	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Mar 2011 03:38:37 -0400 (EDT)
+Received: by mail-iw0-f170.google.com with SMTP id 3so5988323iwn.15
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Mar 2011 00:40:00 -0700 (PDT)
+In-Reply-To: <201103131554.38028.arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org
 
-On Sun, 13 Mar 2011, Magnus Damm wrote:
+On Sun, Mar 13, 2011 at 9:54 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Sunday 13 March 2011 14:00:04 Andrei Warkentin wrote:
+>> > If the latter two are not much different on the toshiba card, that
+>> > would be a simpler implementation, and more likely to be useful on
+>> > other cards.
+>> >
+>>
+>> Revalidating the data now, along with some more tests, to get a better
+>> picture. It seems the more data I get, the less it makes sense :(.
+>
+> I was already fearing that the change would only benefit low-level
+> benchmarks. It certainly helps writing small chunks to the buffer
+> that is meant for FAT32 directories, but at some point, the card
+> will have to write back the entire logical erase block, so you
+> might not be able to gain much in real-world workloads.
+>
 
-> On Sun, Mar 13, 2011 at 7:57 AM, Guennadi Liakhovetski
-> <g.liakhovetski@gmx.de> wrote:
-> > On Sun, 13 Mar 2011, Magnus Damm wrote:
-> >
-> >> On Fri, Mar 11, 2011 at 5:09 PM, Guennadi Liakhovetski
-> >> <g.liakhovetski@gmx.de> wrote:
-> >> > Not all mn57xx / tmio implementations have registers above oxff.
-> >> > Accessing them on thise platforms is dangerous. In some cases it=
- leads
-> >> > to address wrapping to addresses below 0x100, which corrupts ran=
-dom
-> >> > unrelated registers.
-> >> >
-> >> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> >> > ---
-> >> >
-> >> > v2:
-> >>
-> >> > --- a/drivers/mmc/host/tmio_mmc_pio.c
-> >> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> >>
-> >> Nice, it looks like this patch should apply on your earlier broken=
- out
-> >> patch set...
-> >>
-> >> > + =A0 =A0 =A0 if (resource_size(res) > 0x100) {
-> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sd_ctrl_write16(host, CTL_CLK_AND_=
-WAIT_CTL, 0x0000);
-> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 msleep(10);
-> >> > + =A0 =A0 =A0 }
-> >>
-> >> ... but now since you've separated the tmio specific code from the
-> >> SDHI implementation, why don't you just make all the offsets above
-> >> 0x100 stay in the tmio code, and let the SDHI only access below 0x=
-ff?
-> >
-> > The current split is:
-> >
-> > tmio_mmc_pio.c: _all_ driver functionality in PIO mode, including M=
-MC API
-> > tmio_mmc_dma.c: DMA
-> >
-> > tmio_mmc.c: _only_ MFD glue - no IO at all
-> >
-> > sh_mobile_sdhi.c: _only_ platform glue for SDHI - no IO at all
-> >
-> > This split seems logical to me - every file performs one function. =
-But I
-> > do agree, that special-casing addresses > 0xff in the generic core =
-is not
-> > very nice... We could otherwise modify the actual read / write acce=
-ssors
-> > to check, whether _each_ register address is within the resource, b=
-ut that
-> > would be too much of a performance hit. But pulling those couple of=
- > 0xff
-> > accesses out of the driver proper and into the MFD glue didn't look=
- like a
-> > very logical thing to me. I thought this version provided both - no
-> > performance hit and preserved clean function separation - at the co=
-st of
-> > "slight ugliness." Opinions?
->=20
-> I don't really see why you want to have "no IO at all" in the
-> tmio/sdhi specific files.
->=20
-> Actually, I think it makes sense to abstract based on the hardware
-> register layout difference.
->=20
->  Since some parts of the code only applies to tmio (offset >=3D 0x100=
-)
-> and some only to SDHI (TMIO_MMC_SDIO_IRQ), why don't you do the
-> following:
->=20
-> In tmio_mmc_pio.c:
->=20
-> tmio_mmc_core_clk_start()
-> tmio_mmc_core_clk_stop()
-> tmio_mmc_core_reset()
+Original data was collected by someone else on a 16G eMMC device. The
+data I have collected now for a 32G device of seemingly similar
+technology doesn't quite match the original data in terms of
+performance characteristics, so I am trying to collect the data on the
+16G device and figure out what the difference is. The align change may
+only benefit certain types of accesses, but it for sure must not hurt
+the general case, otherwise there is really no point behind even
+considering it...
 
-=2E..and then you'd have to add pointers to these functions to the tmio=
-=20
-struct to be able to call them from the core (*_pio) and check it for N=
-ULL=20
-and-and-and... And this instead of just one test for resource size >=20
-0x100. Do you really think it's worth it? Basically, when your code has=
- to=20
-act differently in different situations you can either check some=20
-parameters, set by the environment, or, in more complicated cases, call=
-=20
-some environment callback. I think this case is still simple enough - y=
-ou=20
-even don't have to add any new parameters - they are already there - th=
-e=20
-resource size. You just have to check it.
+It takes forever to get a good amount of data to see past the noise,
+too. My last set of tests has already been running for 10 hours...
 
-We might well need some callbacks in the future, when we implement=20
-multiple interrupts or some even more significant differences, but this=
-=20
-looks like a really simple thing to me, and your approach makes it a bi=
-t=20
-overly complicated, don't you think?
+> Of course, I also have only a very limited understanding of the
+> algorithm used in the Toshiba chip.
+>
 
-Thanks
-Guennadi
+Unfortunately, so do I. As far as manufacturer suggestions, we get a
+very controlled and limited view of things :).
 
->=20
-> Above functions only implement offset < 0x100 and no TMIO_MMC_ stuff
-> in there if possible
->=20
-> In tmio_mmc.c
->=20
-> tmio_mmc_clk_start()
-> tmio_mmc_clk_stop()
-> tmio_mmc_reset()
->=20
-> Above 3 functions call tmio_mmc_core_xxx() and also implement >=3D 0x=
-100
-> offset access.
->=20
-> In sh_mobile_sdhi.c
->=20
-> sh_mobile_sdhi_clk_start()
-> sh_mobile_sdhi_clk_stop()
-> sh_mobile_sdhi_reset()
->=20
-> Above 3 functions call tmio_mmc_core_xxx() and perhaps also implement=
- SDIO IRQ.
->=20
-> Ideally we want to share the SDIO IRQ code with the TMIO MFD
-> implementation, but we're not really receiving any test feedback from
-> anyone, so from my POV to avoid breakage we may as well keep things i=
-n
-> the SDHI portion and move over to the common place if needed in the
-> future.
->=20
-> / magnus
->=20
-
----
-Guennadi Liakhovetski, Ph.D.
-=46reelance Open-Source Software Developer
-http://www.open-technology.de/
+Thanks,
+A
