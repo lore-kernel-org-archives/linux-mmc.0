@@ -1,57 +1,55 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: Memory replacement
-Date: Tue, 15 Mar 2011 09:42:04 +0100
-Message-ID: <201103150942.04690.arnd@arndb.de>
-References: <AANLkTikQOVa8qfU-R6uqQXKhAVxqeAmxKONjPmmqLCr8@mail.gmail.com> <201103142018.29705.arnd@arndb.de> <CB07FC9E-B64C-4B59-98F7-CD1F6FFFBA7B@laptop.org>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH 1/6] mmc: tmio: split core functionality, DMA and MFD glue
+Date: Tue, 15 Mar 2011 18:01:36 +0900
+Message-ID: <AANLkTinDSfn-QTNdmU6gGnZ0fY0U-wnpbO3-aTxE3GBz@mail.gmail.com>
+References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
+	<Pine.LNX.4.64.1103110844080.23675@axis700.grange>
+	<AANLkTinQB2NB---0o65Uy-axApw9DwPZoMeMBc=qmvSC@mail.gmail.com>
+	<Pine.LNX.4.64.1103122347270.28741@axis700.grange>
+	<AANLkTi=YAcSOBUyWa-OpD0fL-nr-_i=On8ssN0TXZTqJ@mail.gmail.com>
+	<Pine.LNX.4.64.1103132349140.23221@axis700.grange>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:50508 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754980Ab1COImL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2011 04:42:11 -0400
-In-Reply-To: <CB07FC9E-B64C-4B59-98F7-CD1F6FFFBA7B@laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1103132349140.23221@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: John Watlington <wad@laptop.org>
-Cc: mikus@bga.com, "Richard A. Smith" <richard@laptop.org>, devel@lists.laptop.org, linux-mmc@vger.kernel.org
 
-On Tuesday 15 March 2011 01:29:19 John Watlington wrote:
+On Mon, Mar 14, 2011 at 7:51 AM, Guennadi Liakhovetski
+<g.liakhovetski@gmx.de> wrote:
+> On Sun, 13 Mar 2011, Magnus Damm wrote:
+>> On Sun, Mar 13, 2011 at 7:48 AM, Guennadi Liakhovetski
+>> <g.liakhovetski@gmx.de> wrote:
+>> > On Sun, 13 Mar 2011, Magnus Damm wrote:
+>> >> On Fri, Mar 11, 2011 at 4:51 PM, Guennadi Liakhovetski
+>> >> <g.liakhovetski@gmx.de> wrote:
+>> >> > TMIO MMC chips contain an SD / SDIO IP core from Panasonic, similar to
+>> >> > the one, used in MN5774 and other MN57xx controllers. These IP cores are
+>> >> > included in many multifunction devices, in sh-mobile chips from Renesas,
+>> >> > in the latter case they can also use DMA. Some sh-mobile implementations
+>> >> > also have some other specialities, that MFD-based solutions don't have.
+>> >> > This makes supporting all these features in a monolithic driver inconveniet
+>> >> > and error-prone. This patch splits the driver into 3 parts: the core,
+>> >> > the MFD glue and the DMA support. In case of a modular build, two modules
+>> >> > will be built: mmc_tmio_core and mmc_tmio.
+>> >> >
+>> >> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>> >> > ---
 
-> On Mar 14, 2011, at 3:18 PM, Arnd Bergmann wrote:
+>> What's the reason behind creating tmio_mmc_core.o instead of simply
+>> having tmio_mmc_pio.o + tmio_mmc_dma.o? That must be the most
+>> straightforward solution, no?
 >
-> > Another effect is that the page size has increased by a factor of 8,
-> > from 2 or 4 KB to 16 or 32 KB. Writing data that as smaller than
-> > a page is more likely to get you into the worst case mentioned
-> > above. This is part of why FAT32 with 32 KB clusters still works
-> > reasonably well, but ext3 with 4 KB blocks has regressed so much.
-> 
-> The explanation is simple: manufacturers moved to two-bit/cell (MLC) NAND Flash
-> over a year ago, and six months ago moved to three-bit/cell (TLC) NAND Flash.
-> Reliability went down, then went through the floor (I cannot recommend TLC for
-> anything but write-once devices).   You might have noticed this as an increase in
-> the size of the erase block, as it doubled or more with the change.
+> You mean two kernel modules ..._pio.ko and ..._dma.ko? but why?... I don't
+> see any advantages in such a split, besides, they are calling into each
+> other ATM.
 
-That, and the move to smaller structures (down to 25 nm) has of course
-reduced reliablility further, down to 2000 or so erase cycles per block,
-but that effect is unrelated to the file system being used.
+Yeah, two kernel modules. That would be the cleanest IMO. But it's not
+such a big deal though, if you think this split is the best and
+everyone else is happy then I'm fine as well.
 
-My point was that even if the card was done perfectly for FAT32 (maybe a
-write amplification of 2), the changes I described are pessimising ext3
-(data from my head, easily off by an order of magnitude):
+Thanks,
 
-	 drive	 block	page 	erase	w-amplftn	expected life
-	 size    size	size 	cycles	FAT ext3	FAT	ext3
-2005 SLC 256 MB	 64 KB	1 KB	100000	2   8		13 TB	3.2 TB
-2005 MLC 512 MB	 128 KB	2 KB	10000	2   16		2.5 TB	640 GB
-2011 SLC 4 GB	 2 MB	8 KB	50000	2   512		100 TB	200 GB
-2011 MLC 8 GB	 4 MB	16 KB	5000	2   1024	20 TB	40 GB
-2011 TLC 16 GB	 4 MB	16 KB	2000	2   1024	16 TB	32 GB
-
-The manufacturers have probably mitigated this slightly by using more
-spare blocks, better ECC and better GC over the years, but essentially
-your measurements are matching the theory.
-
-	Arnd
+/ magnus
