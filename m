@@ -1,61 +1,52 @@
-From: Tony Olech <tony.olech@elandigitalsystems.com>
-Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
- Re-Resubmission
-Date: Tue, 15 Mar 2011 16:55:07 +0000
-Message-ID: <1300208107.1875.271.camel@apple-mac>
-References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536>
-	 <1295607004.1816.6.camel@apple-mac> <1299773604.1682.21.camel@apple-mac>
-	 <201103151723.32942.arnd@arndb.de>
+From: Ian Molton <ian@mnementh.co.uk>
+Subject: Re: [PATCH 0/6] mmc: split the tmio driver into several modules
+Date: Tue, 15 Mar 2011 21:25:03 +0000
+Message-ID: <AANLkTi=EBDnRtjqN3eckpt32p-tG8VkcsktLartOEgBp@mail.gmail.com>
+References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:52836 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932357Ab1COQzV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2011 12:55:21 -0400
-In-Reply-To: <201103151723.32942.arnd@arndb.de>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:61470 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758688Ab1COVZY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2011 17:25:24 -0400
+In-Reply-To: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-see embedded answers:-
+Sounds like a good idea... Its possible that I could implement DMA on
+the toshiba stuff too, can your code handle this?
 
-On Tue, 2011-03-15 at 17:23 +0100, Arnd Bergmann wrote:
-> On Thursday 10 March 2011, Tony Olech wrote:
-> >   Add a driver for Elan Digital System's VUB300 chip
-> > which is a USB connected SDIO/SDmem/MMC host controller.
-> > A VUB300 chip enables a USB 2.0 or USB 1.1 connected host
-> > computer to use SDIO/SD/MMC cards without the need for
-> > a directly connected, for example via PCI, SDIO host
-> > controller.
-> First a small question: I've read that USB mmc controllers
-> only work for SDIO but not for storage cards. Is that true
-> for this driver?
+(I havent had time to read this yet)
 
-The chip has been designed to handle memory cards as well
-as SDIO, and we have test all we could get our hands on,
-and tested for and thus 64M to 8G SD cards. It has also
-been tested on a 64M MMC (1 bit) data card.
+-- 
+Ian Molton
+Linux, Automotive, and other hacking:
+http://www.mnementh.co.uk/
 
-> If not, I'd probably get one for card testing, since the
-> spring loading mechanism in my laptop is starting to wear
-> out.
-> What are typical products using this?
 
-At the moment the dev kit, which is really just a bare board
-USB to SD/SDIO/MMC converter, is available for evaluation.
-the chips themselves are available for for purchase - see
-our web site for details.
 
-> My comments are mostly for coding style, I didn't see any
-> major problems with the operation of the driver.
-
-I am going to have to go through your coding style comments
-separately.
-
-Thanks for reading through the code,
-
-Tony Olech
-
+On 11 March 2011 07:51, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
+> Hi all
+>
+> The tmio_mmc SD/SDIO driver is serving very different hardware
+> configurations: on the one hand multi-function style chips from Toshiba,
+> Compaq, on the other hand SDHI units in ARM- and SuperH-based sh-mobile
+> SoCs. Apart from the different native APIs: MFD for the former and
+> platform-device in the latter, sh-mobile implementations also have a
+> number of features, exclusive to them, which, if implemented in the common
+> driver, clutter it needlessly and make its maintenance more difficult.
+> This patch series simplifies the situation by splitting the driver up into
+> 3 modules: the core, consisting of the main part and, on sh-mobile, of the
+> DMA part; the mfd glue; and the platform glue. This way also (imaginary)
+> sh-mobile systems with additional tmio mfd chips on them can be supported.
+>
+> Thanks
+> Guennadi
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
+>
