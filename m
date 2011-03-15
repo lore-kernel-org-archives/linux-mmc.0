@@ -1,79 +1,75 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 3/6] mmc: tmio: convert the SDHI MMC driver from MFD to a
- standard platform driver
-Date: Tue, 15 Mar 2011 18:09:10 +0900
-Message-ID: <AANLkTimgNYbz973XLoQhKEQ9W+8mhAOnG3_OHxnGvGwf@mail.gmail.com>
-References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
-	<Pine.LNX.4.64.1103110846000.23675@axis700.grange>
-	<AANLkTi=ywRE0omJ1t0yxqzMS4k+PpjfFH7aLtWMW7C=3@mail.gmail.com>
-	<Pine.LNX.4.64.1103140857350.6125@axis700.grange>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
+ Re-Resubmission
+Date: Tue, 15 Mar 2011 10:40:41 +0100
+Message-ID: <20110315094041.GA32015@pengutronix.de>
+References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536>
+ <20101116150022.GA27726@void.printf.net>
+ <27884BED0E3C489C8849EE12A803F536@AN00536>
+ <m3oc9pnt6g.fsf@pullcord.laptop.org>
+ <4CE41BE3.1060806@elandigitalsystems.com>
+ <m3oc9n241c.fsf@pullcord.laptop.org>
+ <4CEA86D4.9050109@elandigitalsystems.com>
+ <1295607004.1816.6.camel@apple-mac>
+ <1299773604.1682.21.camel@apple-mac>
+ <m37hc1rsrp.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="8t9RHnE3ZwKMSgU+"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:51899 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751237Ab1COJJL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2011 05:09:11 -0400
-In-Reply-To: <Pine.LNX.4.64.1103140857350.6125@axis700.grange>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:35684 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752047Ab1COJkn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2011 05:40:43 -0400
+Content-Disposition: inline
+In-Reply-To: <m37hc1rsrp.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Olech <tony.olech@elandigitalsystems.com>, linux-mmc@vger.kernel.org
 
-On Mon, Mar 14, 2011 at 5:01 PM, Guennadi Liakhovetski
-<g.liakhovetski@gmx.de> wrote:
-> On Sun, 13 Mar 2011, Magnus Damm wrote:
->> On Fri, Mar 11, 2011 at 4:52 PM, Guennadi Liakhovetski
->> <g.liakhovetski@gmx.de> wrote:
->> > On sh-mobile platforms the SDHI driver was using the tmio_mmc SD/S=
-DIO
->> > MFD cell driver. Now that the tmio_mmc driver has been split into =
-a
->> > core and a separate MFD glue, we can support SDHI natively without=
- the
->> > need to emulate an MFD controller. This also allows to support sys=
-tems
->> > with an on-SoC SDHI controller and a separate MFD with a TMIO core=
-=2E
->> >
->> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->> > ---
->>
->> Nice, I believe this is the right direction..
->>
->> > --- a/drivers/mmc/host/tmio_mmc.h
->> > +++ b/drivers/mmc/host/tmio_mmc.h
->> > @@ -92,7 +92,7 @@ struct tmio_mmc_host {
->> > =A0 =A0 =A0 =A0struct tasklet_struct =A0 dma_complete;
->> > =A0 =A0 =A0 =A0struct tasklet_struct =A0 dma_issue;
->> > =A0 =A0 =A0 =A0struct scatterlist =A0 =A0 =A0bounce_sg;
->> > -#ifdef CONFIG_TMIO_MMC_DMA
->> > +#if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
->> > =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bounc=
-e_buf[PAGE_CACHE_SIZE] __attribute__((aligned(TMIO_MAX_ALIGN)));
->> > =A0#else
->> > =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bounc=
-e_buf[1]; =A0/* A dummy in no-DMA case */
->>
->> ... but it would be nice if all this #ifdeffery could be avoided som=
-ehow.
->>
->> Is it possible to use devres to allocate the bounce buffer dynamical=
-ly
->> in the dma portion of the code?
->
-> Well, this #ifdef has been there before, it's not new. But sure, we c=
-ould
-> get rid of it. Basically, what you're suggesting, is to allocate that
-> bounce buffer dynamically - whether or not using devres. Just calling
-> __get_free_page() in tmio_mmc_request_dma() and __free_pages() in
-> tmio_mmc_release_dma() should work without any memory-leaking too. Wo=
-uld
-> this be ok?
 
-Yes, tmio_mmc_request_dma() and tmio_mmc_free_dma() happen very
-infrequently so that seems like a very good location for dynamic
-allocation / free of the bounce buffer. Thanks!
+--8t9RHnE3ZwKMSgU+
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-/ magnus
+Hi,
+
+> linux-mmc@ folks, any strong opinions on this driver?  My impression is
+> that it looks reasonable, but has some areas of being pretty far from
+> standard CodingStyle.
+
+I totally agree (sadly it is hard to review because of its size) and I am s=
+till
+not convinced of the sysfs-entry. Then again, it is a working driver.
+
+> I'm leaning towards merging it as-is and then
+> working on incremental fixes; please yell if that sounds like a bad idea.
+
+What about staging? From my all overall impression, the driver would fit th=
+ere.
+Also, there are more people lurking around fixing coding-style than here.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--8t9RHnE3ZwKMSgU+
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAk1/NBkACgkQD27XaX1/VRvI1ACaA2HKoxA3HnRArPPM/RWQDBS4
+N6wAoKwZwxTp/l5HuAAo4BhssJTuiV1I
+=9FNR
+-----END PGP SIGNATURE-----
+
+--8t9RHnE3ZwKMSgU+--
