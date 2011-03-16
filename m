@@ -1,422 +1,460 @@
 From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 01/12] mmc: sdhci: add support for auto CMD23
-Date: Wed, 16 Mar 2011 01:07:12 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300E3D22388@SAUSEXMBP01.amd.com>
+Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs
+ initialization
+Date: Wed, 16 Mar 2011 01:20:51 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300E3D22391@SAUSEXMBP01.amd.com>
 References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
- <1299238369-1768-2-git-send-email-arindam.nath@amd.com>
- <002301cbe303$714c1650$53e442f0$@org>
- <6C03668EAF45B747AF947A1603D1B300E3C33690@SAUSEXMBP01.amd.com>
- <002901cbe307$7a1e6680$6e5b3380$@org>
+	<1299238369-1768-10-git-send-email-arindam.nath@amd.com>
+	<AANLkTinzMXwJD0TyMBFbitE6PoNMZLmjn_tXmP=hZuY-@mail.gmail.com>
+	<6C03668EAF45B747AF947A1603D1B300E3C33666@SAUSEXMBP01.amd.com>
+ <AANLkTikoJxmBJhdYotv7ZY8E6dye6BuRWYdR6Bk348nt@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.186]:48219
+Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.183]:12059
 	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751446Ab1CPGH3 convert rfc822-to-8bit
+	by vger.kernel.org with ESMTP id S1750885Ab1CPGVA convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Mar 2011 02:07:29 -0400
-In-Reply-To: <002901cbe307$7a1e6680$6e5b3380$@org>
+	Wed, 16 Mar 2011 02:21:00 -0400
+In-Reply-To: <AANLkTikoJxmBJhdYotv7ZY8E6dye6BuRWYdR6Bk348nt@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>, "cjb@laptop.org" <cjb@laptop.org>
-Cc: "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "prakity@marvell.com" <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "prakity@marvell.com" <prakity@marvell.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-Hi Subhash,
+Hi Zhangfei,
 
 
 > -----Original Message-----
-> From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> Sent: Tuesday, March 15, 2011 5:23 PM
-> To: Nath, Arindam; cjb@laptop.org
-> Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: RE: [PATCH v2 01/12] mmc: sdhci: add support for auto CMD23
-> 
-> 
-> 
-> > -----Original Message-----
-> > From: Nath, Arindam [mailto:Arindam.Nath@amd.com]
-> > Sent: Tuesday, March 15, 2011 5:05 PM
-> > To: Subhash Jadavani; cjb@laptop.org
-> > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > Subject: RE: [PATCH v2 01/12] mmc: sdhci: add support for auto CMD23
-> >
-> > Hi Subhash,
+> From: zhangfei gao [mailto:zhangfei.gao@gmail.com]
+> Sent: Wednesday, March 16, 2011 8:21 AM
+> To: Nath, Arindam
+> Cc: cjb@laptop.org; prakity@marvell.com; subhashj@codeaurora.org;
+> linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
+> Subject: Re: [PATCH v2 09/12] mmc: sd: add support for tuning during
+> uhs initialization
+>
+> On Tue, Mar 15, 2011 at 6:43 AM, Nath, Arindam <Arindam.Nath@amd.com>
+> wrote:
+> > Hi Zhangfei,
 > >
 > >
-> > > -----Original Message-----
-> > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > Sent: Tuesday, March 15, 2011 4:54 PM
-> > > To: Nath, Arindam; cjb@laptop.org
-> > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > > Subject: RE: [PATCH v2 01/12] mmc: sdhci: add support for auto
-> CMD23
-> > >
-> > > Arindam,
-> > >
-> > > Capability to send CMD23 automatically is something specific to
-> your
-> > > controller.
-> >
-> > Auto CMD23 is different from ACMD23. Auto CMD23 is a feature added
-> into
-> > Host Controller Spec v3.00, and the code follows the procedure to
-> check
-> > the 4 preconditions required to enable Host to send CMD23
-> > automatically. I had similar discussion on the community with Arnd
-> few
-> > weeks back, and we agreed that this should be part of controller
-> > specific code.
-> 
-> I am not talking about ACMD23 which is SET_WR_BLK_ERASE_COUNT. I am
-> talking
-> about newly added CMD23 (SET_BLOCK_COUNT) command in SD3.0. Shouldn't
+> >> -----Original Message-----
+> >> From: zhangfei gao [mailto:zhangfei.gao@gmail.com]
+> >> Sent: Tuesday, March 15, 2011 4:02 PM
+> >> To: Nath, Arindam
+> >> Cc: cjb@laptop.org; prakity@marvell.com; subhashj@codeaurora.org;
+> >> linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
+> >> Subject: Re: [PATCH v2 09/12] mmc: sd: add support for tuning during
+> >> uhs initialization
+> >>
+> >> On Fri, Mar 4, 2011 at 6:32 AM, Arindam Nath <arindam.nath@amd.com>
+> >> wrote:
+> >> > Host Controller needs tuning during initialization to operate
+> SDR50
+> >> > and SDR104 UHS-I cards. Whether SDR50 mode actually needs tuning
+> is
+> >> > indicated by bit 45 of the Host Controller Capabilities register.
+> >> > A new command CMD19 has been defined in the Physical Layer spec
+> >> > v3.01 to request the card to send tuning pattern.
+> >> >
+> >> > We enable Buffer Read Ready interrupt at the very begining of
+> tuning
+> >> > procedure, because that is the only interrupt generated by the
+> Host
+> >> > Controller during tuning. The tuning block is sent by the card to
 > the
-> logic to send this command be part of generic mmc layers (block/core)
-> rather
-> than at host controller driver level. It's good that your controller
-> have
-> the hw capability to send the CMD23 automatically but what about for
-> controllers which doesn't have this type of capability available? Then
-> it
-> has to rely on the block/core layer to send the CMD23 before
-> CMD19/CMD25. I
-> think this should be part of block/core layer functionality in order to
+> >> > Host Controller using DAT lines, so we set Data Present Select
+> (bit
+> >> 5)
+> >> > in the Command register. The Host Controller is responsible for
+> doing
+> >> > the verfication of tuning block sent by the card at the hardware
+> >> level.
+> >> > After sending CMD19, we wait for Buffer Read Ready interrupt. In
+> case
+> >> > we don't receive an interrupt after the specified timeout value,
+> we
+> >> > fall back on fixed sampling clock by setting Execute Tuning (bit
+> 6)
+> >> > and Sampling Clock Seletc (bit 7) of Host Control2 register to 0.
+> >> > Before exiting the tuning procedure, we disable Buffer Read Ready
+> >> > interrupt.
+> >> >
+> >> > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> >> > ---
+> >> >  drivers/mmc/core/sd.c     |    4 +
+> >> >  drivers/mmc/host/sdhci.c  |  137
+> >> ++++++++++++++++++++++++++++++++++++++++++++-
+> >> >  drivers/mmc/host/sdhci.h  |    3 +
+> >> >  include/linux/mmc/host.h  |    1 +
+> >> >  include/linux/mmc/mmc.h   |    1 +
+> >> >  include/linux/mmc/sdhci.h |    4 +
+> >> >  6 files changed, 149 insertions(+), 1 deletions(-)
+> >> >
+> >> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> >> > index be01397..1e2d157 100644
+> >> > --- a/drivers/mmc/core/sd.c
+> >> > +++ b/drivers/mmc/core/sd.c
+> >> > @@ -637,6 +637,10 @@ static int mmc_sd_init_uhs_card(struct
+> mmc_card
+> >> *card)
+> >> >        /* Set current limit for the card */
+> >> >        err = sd_set_current_limit(card, status);
+> >> >
+> >> > +       /* SPI mode doesn't define CMD19 */
+> >> > +       if (!mmc_host_is_spi(card->host) && card->host->ops-
+> >> >execute_tuning)
+> >> > +               card->host->ops->execute_tuning(card->host);
+> >> > +
+> >> >  out:
+> >> >        kfree(status);
+> >> >
+> >> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> >> > index 245cc39..8f4f102 100644
+> >> > --- a/drivers/mmc/host/sdhci.c
+> >> > +++ b/drivers/mmc/host/sdhci.c
+> >> > @@ -39,6 +39,8 @@
+> >> >  #define SDHCI_USE_LEDS_CLASS
+> >> >  #endif
+> >> >
+> >> > +#define MAX_TUNING_LOOP 40
+> >> > +
+> >> >  static unsigned int debug_quirks = 0;
+> >> >
+> >> >  static void sdhci_prepare_data(struct sdhci_host *, struct
+> mmc_data
+> >> *);
+> >> > @@ -985,7 +987,9 @@ static void sdhci_send_command(struct
+> sdhci_host
+> >> *host, struct mmc_command *cmd)
+> >> >                flags |= SDHCI_CMD_CRC;
+> >> >        if (cmd->flags & MMC_RSP_OPCODE)
+> >> >                flags |= SDHCI_CMD_INDEX;
+> >> > -       if (cmd->data)
+> >> > +
+> >> > +       /* CMD19 is special in that the Data Present Select should
 > be
-> SD3.01 spec compliant.
+> >> set */
+> >> > +       if (cmd->data || (cmd->opcode == MMC_SEND_TUNING_BLOCK))
+> >> >                flags |= SDHCI_CMD_DATA;
+> >> >
+> >> >        sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags),
+> >> SDHCI_COMMAND);
+> >> > @@ -1485,6 +1489,119 @@ static int
+> sdhci_get_max_current_180(struct
+> >> mmc_host *mmc)
+> >> >        return max_current_180;
+> >> >  }
+> >> >
+> >> > +static void sdhci_execute_tuning(struct mmc_host *mmc)
+> >> > +{
+> >> > +       struct sdhci_host *host;
+> >> > +       u16 ctrl;
+> >> > +       int tuning_loop_counter = MAX_TUNING_LOOP;
+> >> > +       unsigned long flags;
+> >> > +       unsigned long timeout;
+> >> > +
+> >> > +       host = mmc_priv(mmc);
+> >> > +
+> >> > +       spin_lock_irqsave(&host->lock, flags);
+> >> > +
+> >> > +       ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> >> > +
+> >> > +       /*
+> >> > +        * Host Controller needs tuning only in case of SDR104
+> mode
+> >> > +        * and for SDR50 mode when Use Tuning for SDR50 is set in
+> >> > +        * Capabilities register.
+> >> > +        */
+> >> > +       if ((ctrl & SDHCI_CTRL_UHS_SDR104) ||
+> >> > +           ((ctrl & SDHCI_CTRL_UHS_SDR50) &&
+> >> > +           (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
+> >> > +               ctrl |= SDHCI_CTRL_EXEC_TUNING;
+> >> > +       else {
+> >> > +               spin_unlock_irqrestore(&host->lock, flags);
+> >> > +               return;
+> >> > +       }
+> >> > +
+> >> > +       sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> >> > +
+> >> > +       /*
+> >> > +        * As per the Host Controller spec v3.00, tuning command
+> >> > +        * generates Buffer Read Ready interrupt, so enable that.
+> >> > +        */
+> >> > +       sdhci_unmask_irqs(host, SDHCI_INT_DATA_AVAIL);
+> >> > +
+> >> > +       /*
+> >> > +        * Issue CMD19 repeatedly till Execute Tuning is set to 0
+> or
+> >> the number
+> >> > +        * of loops reaches 40 times or a timeout of 150ms occurs.
+> >> > +        */
+> >> > +       timeout = 150;
+> >> > +       do {
+> >> > +               struct mmc_command cmd;
+> >> > +               struct mmc_request mrq;
+> >> > +
+> >> > +               if (!tuning_loop_counter && !timeout)
+> >> > +                       break;
+> >> > +
+> >> > +               memset(&cmd, 0, sizeof(struct mmc_command));
+> >> > +               cmd.opcode = MMC_SEND_TUNING_BLOCK;
+> >> > +               cmd.arg = 0;
+> >> > +               cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> >> > +
+> >> > +               memset(&cmd.resp, 0, sizeof(cmd.resp));
+> >> > +               cmd.retries = 0;
+> >> > +
+> >> > +               cmd.data = NULL;
+> >> > +               cmd.error = 0;
+> >> > +
+> >> > +               memset(&mrq, 0, sizeof(struct mmc_request));
+> >> > +               mrq.cmd = &cmd;
+> >> > +               host->mrq = &mrq;
+> >>
+> >> Tune may fail since SDHCI_TRNS_DMA is set in SDHCI_TRANSFER_MODE,
+> >> SDHCI_TRNS_DMA required to be cleared before send_command, such as
+> >> sdhci_writew(host, 0x12, SDHCI_TRANSFER_MODE);
+> >
+> > Can you please tell me why and under what condition can tuning fail
+> when SDHCI_TRANS_DMA is set? Since cmd->data is set to NULL inside
+> sdhci_execute_tuning(), sdhci_set_transfer_mode() will return at the
+> very beginning of the function before setting SDHCI_TRNS_DMA. Moreover,
+> as per the Host Controller v3.00 spec, during tuning procedure, the
+> host controller does not generate interrupts other than Buffer Read
+> Ready.
+> >
+>
+> Hi, Arindam
+>
+> The Present Status Register describes Buffer Read Enable (bit 11) and
+> Buffer Write Enable (bit 10) only used for non-DMA transfer.
+> If set SDHCI_TRANS_DMA during tuning process, controller may get no
+> irq at all including Buffer Read Enable.
+> Could you help check, thanks
 
-I don't think I will be able to add the support for CMD23 in the mmc block layer right now. I will probably add the support in the next phase once the base support for SD3.0 is already in the kernel.
+In the current implementation of tuning procedure, data is set to NULL before calling sdhci_send_command(), which in turn will make sure that SDHCI_TRNS_DMA is not set. So can you give me some specific scenario when the condition you mentioned above can occur?
 
 Thanks,
 Arindam
 
-> 
-> >
+>
 > > Thanks,
 > > Arindam
 > >
-> > > CMD23 (SET_BLOCK_COUNT) is a new command added in SD3.0 spec and
-> > > mandatory
-> > > for SDR104 mode. Why are you not adding this command in core/block
-> > > layer
-> > > before sending multi byte read command to host controller driver?
-> > >
-> > > Regards,
-> > > Subhash
-> > >
-> > > > -----Original Message-----
-> > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > > owner@vger.kernel.org] On Behalf Of Arindam Nath
-> > > > Sent: Friday, March 04, 2011 5:03 PM
-> > > > To: cjb@laptop.org
-> > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
-> > > > subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
-> > henry.su@amd.com;
-> > > > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
-> > > > Subject: [PATCH v2 01/12] mmc: sdhci: add support for auto CMD23
-> > > >
-> > > > Host Controller v3.00 and later support Auto CMD23 in the
-> Transfer
-> > > > Mode register. Since Auto CMD23 can be used with or without DMA,
-> > > > and if used with DMA, it should _only_ be ADMA, we check against
-> > > > SDHCI_USE_SDMA not being set. This flag is reset when
-> > SDHCI_USE_ADMA
-> > > > is set.
-> > > >
-> > > > A new definition for SDHCI_ARGUMENT2 register has been added in
-> > v3.00
-> > > > spec, which is the same as SDHCI_DMA_ADDRESS. We program the
-> block
-> > > > count for CMD23 in SDHCI_ARGUMENT2, so we don't need CMD12 to
-> stop
-> > > > multiple block transfers. But during error recovery procedure, we
-> > > will
-> > > > need to send Abort command, so we use a variable saved_abort_cmd
-> to
-> > > > save the stop command to be used later.
-> > > >
-> > > > Two bits are added to SCR register as per the Physical Layer Spec
-> > > > v3.01,
-> > > > which specify whether the card supports CMD20 and/or CMD23. We
-> use
-> > > this
-> > > > as one of the conditions to decide whether to enable Auto CMD23
-> or
-> > > not.
-> > > >
-> > > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > > > ---
-> > > >  drivers/mmc/core/sd.c     |    6 ++++
-> > > >  drivers/mmc/host/sdhci.c  |   69
-> > > > +++++++++++++++++++++++++++++++++++++++++---
-> > > >  drivers/mmc/host/sdhci.h  |    2 +
-> > > >  include/linux/mmc/card.h  |    4 ++
-> > > >  include/linux/mmc/sd.h    |    2 +-
-> > > >  include/linux/mmc/sdhci.h |    2 +
-> > > >  6 files changed, 79 insertions(+), 6 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > > > index d18c32b..b3f8a3c 100644
-> > > > --- a/drivers/mmc/core/sd.c
-> > > > +++ b/drivers/mmc/core/sd.c
-> > > > @@ -188,6 +188,12 @@ static int mmc_decode_scr(struct mmc_card
-> > *card)
-> > > >
-> > > >  	scr->sda_vsn = UNSTUFF_BITS(resp, 56, 4);
-> > > >  	scr->bus_widths = UNSTUFF_BITS(resp, 48, 4);
-> > > > +	if (scr->sda_vsn == SCR_SPEC_VER_2) {
-> > > > +		/* Check if Physical Layer Spec v3.0 is supported*/
-> > > > +		scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);
-> > > > +		if (scr->sda_spec3)
-> > > > +			scr->cmd_support = UNSTUFF_BITS(resp, 32, 2);
-> > > > +	}
-> > > >
-> > > >  	if (UNSTUFF_BITS(resp, 55, 1))
-> > > >  		card->erased_byte = 0xFF;
-> > > > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > > > index 9e15f41..8914a25 100644
-> > > > --- a/drivers/mmc/host/sdhci.c
-> > > > +++ b/drivers/mmc/host/sdhci.c
-> > > > @@ -25,6 +25,7 @@
-> > > >
-> > > >  #include <linux/mmc/mmc.h>
-> > > >  #include <linux/mmc/host.h>
-> > > > +#include <linux/mmc/card.h>
-> > > >
-> > > >  #include "sdhci.h"
-> > > >
-> > > > @@ -812,6 +813,30 @@ static void sdhci_prepare_data(struct
-> > sdhci_host
-> > > > *host, struct mmc_data *data)
-> > > >  	sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
-> > > >  }
-> > > >
-> > > > +/*
-> > > > + * Does the Host Controller support Auto CMD23?
-> > > > + *
-> > > > + * There are four preconditions for Auto CMD23 to be supported:
-> > > > + *  1. Host Controller v3.00 or later
-> > > > + *  2. Card supports CMD23
-> > > > + *  3. If DMA is used, it should be ADMA
-> > > > + *  4. Only when CMD18 or CMD25 is issued
-> > > > + */
-> > > > +static int sdhci_host_auto_cmd23_supported(struct sdhci_host
-> > *host,
-> > > > +	struct mmc_request *mrq)
-> > > > +{
-> > > > +	struct mmc_card *card = host->mmc->card;
-> > > > +
-> > > > +	if ((host->version >= SDHCI_SPEC_300) &&
-> > > > +	   card && (card->scr.cmd_support & SD_SCR_CMD23_SUPPORT)
-> &&
-> > > > +	   !(host->flags & SDHCI_USE_SDMA) &&
-> > > > +	   ((mrq->cmd->opcode == MMC_READ_MULTIPLE_BLOCK) ||
-> > > > +	   (mrq->cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK)))
-> > > > +		return 1;
-> > > > +
-> > > > +	return 0;
-> > > > +}
-> > > > +
-> > > >  static void sdhci_set_transfer_mode(struct sdhci_host *host,
-> > > >  	struct mmc_data *data)
-> > > >  {
-> > > > @@ -825,10 +850,21 @@ static void sdhci_set_transfer_mode(struct
-> > > > sdhci_host *host,
-> > > >  	mode = SDHCI_TRNS_BLK_CNT_EN;
-> > > >  	if (data->blocks > 1) {
-> > > >  		if (host->quirks &
-> SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
-> > > > -			mode |= SDHCI_TRNS_MULTI | SDHCI_TRNS_ACMD12;
-> > > > -		else
-> > > > -			mode |= SDHCI_TRNS_MULTI;
-> > > > +			mode |= SDHCI_TRNS_ACMD12;
-> > > > +		else if (sdhci_host_auto_cmd23_supported(host, host-
-> >mrq))
-> > > > {
-> > > > +			/*
-> > > > +			 * Host Controller v3.00 can automatically send
-> > > CMD23
-> > > > +			 * before CMD18 or CMD25. For that, we need to
-> > > enable
-> > > > +			 * Auto CMD23 in the Transfer Mode register and
-> > > > +			 * program the block count in Argument 2
-> register.
-> > > > +			 */
-> > > > +			mode |= SDHCI_TRNS_AUTO_CMD23;
-> > > > +			sdhci_writel(host, data->blocks,
-> SDHCI_ARGUMENT2);
-> > > > +		}
-> > > > +
-> > > > +		mode |= SDHCI_TRNS_MULTI;
-> > > >  	}
-> > > > +
-> > > >  	if (data->flags & MMC_DATA_READ)
-> > > >  		mode |= SDHCI_TRNS_READ;
-> > > >  	if (host->flags & SDHCI_REQ_USE_DMA)
-> > > > @@ -1131,6 +1167,23 @@ static void sdhci_request(struct mmc_host
-> > > *mmc,
-> > > > struct mmc_request *mrq)
-> > > >  #ifndef SDHCI_USE_LEDS_CLASS
-> > > >  	sdhci_activate_led(host);
-> > > >  #endif
-> > > > +	/*
-> > > > +	 * Since the block count for CMD23 has already been
-> specified in
-> > > > the
-> > > > +	 * Argument 2 register, we don't need CMD12 to stop
-> multiple
-> > > > block
-> > > > +	 * transfers.
-> > > > +	 */
-> > > > +	if (sdhci_host_auto_cmd23_supported(host, mrq)) {
-> > > > +		if (mrq->stop) {
-> > > > +			/*
-> > > > +			 * Save the stop command here to be used during
-> > > > +			 * error recovery
-> > > > +			 */
-> > > > +			host->saved_abort_cmd = mrq->data->stop;
-> > > > +			mrq->data->stop = NULL;
-> > > > +			mrq->stop = NULL;
-> > > > +		}
-> > > > +	}
-> > > > +
-> > > >  	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12) {
-> > > >  		if (mrq->stop) {
-> > > >  			mrq->data->stop = NULL;
-> > > > @@ -1396,6 +1449,7 @@ static void sdhci_timeout_timer(unsigned
-> long
-> > > > data)
-> > > >
-> > > >  		if (host->data) {
-> > > >  			host->data->error = -ETIMEDOUT;
-> > > > +			host->data->stop = host->saved_abort_cmd;
-> > > >  			sdhci_finish_data(host);
-> > > >  		} else {
-> > > >  			if (host->cmd)
-> > > > @@ -1534,9 +1588,10 @@ static void sdhci_data_irq(struct
+> >>
+> >> > +               sdhci_send_command(host, &cmd);
+> >> > +
+> >> > +               host->cmd = NULL;
+> >> > +               host->mrq = NULL;
+> >> > +
+> >> > +               spin_unlock_irqrestore(&host->lock, flags);
+> >> > +
+> >> > +               /* Wait for Buffer Read Ready interrupt */
+> >> > +               wait_event_interruptible_timeout(host-
+> >buf_ready_int,
+> >> > +                                       (host->tuning_done == 1),
+> >> > +                                       msecs_to_jiffies(50));
+> >> > +               spin_lock_irqsave(&host->lock, flags);
+> >> > +
+> >> > +               if (!host->tuning_done) {
+> >> > +                       printk(KERN_INFO DRIVER_NAME ": Tuning
+> >> procedure"
+> >> > +                               " failed, falling back to fixed
+> >> sampling"
+> >> > +                               " clock\n");
+> >> > +                       ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> >> > +                       ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+> >> > +                       sdhci_writew(host, ctrl,
+> >> SDHCI_HOST_CONTROL2);
+> >> > +
+> >> > +                       goto out;
+> >> > +               }
+> >> > +
+> >> > +               host->tuning_done = 0;
+> >> > +
+> >> > +               ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> >> > +               tuning_loop_counter--;
+> >> > +               timeout--;
+> >> > +               mdelay(1);
+> >> > +       } while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+> >> > +
+> >> > +       /*
+> >> > +        * The Host Driver has exhausted the maximum number of
+> loops
+> >> allowed,
+> >> > +        * so use fixed sampling frequency.
+> >> > +        */
+> >> > +       if (!tuning_loop_counter || !timeout) {
+> >> > +               ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> >> > +               sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> >> > +       } else {
+> >> > +               if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
+> >> > +                       printk(KERN_INFO DRIVER_NAME ": Tuning
+> >> procedure"
+> >> > +                               " failed, falling back to fixed
+> >> sampling"
+> >> > +                               " clock\n");
+> >> > +       }
+> >> > +
+> >> > +out:
+> >> > +       sdhci_mask_irqs(host, SDHCI_INT_DATA_AVAIL);
+> >> > +       spin_unlock_irqrestore(&host->lock, flags);
+> >> > +}
+> >> > +
+> >> >  static const struct mmc_host_ops sdhci_ops = {
+> >> >        .request        = sdhci_request,
+> >> >        .set_ios        = sdhci_set_ios,
+> >> > @@ -1492,6 +1609,7 @@ static const struct mmc_host_ops sdhci_ops =
+> {
+> >> >        .enable_sdio_irq = sdhci_enable_sdio_irq,
+> >> >        .start_signal_voltage_switch    =
+> >> sdhci_start_signal_voltage_switch,
+> >> >        .get_max_current_180            =
+> sdhci_get_max_current_180,
+> >> > +       .execute_tuning                 = sdhci_execute_tuning,
+> >> >  };
+> >> >
+> >> >
+> >>
+>  /*********************************************************************
+> >> ********\
+> >> > @@ -1703,6 +1821,16 @@ static void sdhci_data_irq(struct
 > sdhci_host
-> > > > *host, u32 intmask)
-> > > >  		host->data->error = -EIO;
-> > > >  	}
-> > > >
-> > > > -	if (host->data->error)
-> > > > +	if (host->data->error) {
-> > > > +		host->data->stop = host->saved_abort_cmd;
-> > > >  		sdhci_finish_data(host);
-> > > > -	else {
-> > > > +	} else {
-> > > >  		if (intmask & (SDHCI_INT_DATA_AVAIL |
-> > > > SDHCI_INT_SPACE_AVAIL))
-> > > >  			sdhci_transfer_pio(host);
-> > > >
-> > > > @@ -1792,6 +1847,10 @@ int sdhci_add_host(struct sdhci_host
-> *host)
-> > > >  		host->flags &= ~SDHCI_USE_ADMA;
-> > > >  	}
-> > > >
-> > > > +	/* If the host can perform ADMA operation, we reset SDMA
-> flag */
-> > > > +	if (host->flags & SDHCI_USE_ADMA)
-> > > > +		host->flags &= ~SDHCI_USE_SDMA;
-> > > > +
-> > > >  	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
-> > > >  		if (host->ops->enable_dma) {
-> > > >  			if (host->ops->enable_dma(host)) {
-> > > > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > > > index 6e0969e..223762c 100644
-> > > > --- a/drivers/mmc/host/sdhci.h
-> > > > +++ b/drivers/mmc/host/sdhci.h
-> > > > @@ -25,6 +25,7 @@
-> > > >   */
-> > > >
-> > > >  #define SDHCI_DMA_ADDRESS	0x00
-> > > > +#define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
-> > > >
-> > > >  #define SDHCI_BLOCK_SIZE	0x04
-> > > >  #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) |
-> > (blksz
-> > > &
-> > > > 0xFFF))
-> > > > @@ -37,6 +38,7 @@
-> > > >  #define  SDHCI_TRNS_DMA		0x01
-> > > >  #define  SDHCI_TRNS_BLK_CNT_EN	0x02
-> > > >  #define  SDHCI_TRNS_ACMD12	0x04
-> > > > +#define  SDHCI_TRNS_AUTO_CMD23	0x08
-> > > >  #define  SDHCI_TRNS_READ	0x10
-> > > >  #define  SDHCI_TRNS_MULTI	0x20
-> > > >
-> > > > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> > > > index 8ce0827..22b0335 100644
-> > > > --- a/include/linux/mmc/card.h
-> > > > +++ b/include/linux/mmc/card.h
-> > > > @@ -58,9 +58,13 @@ struct mmc_ext_csd {
-> > > >
-> > > >  struct sd_scr {
-> > > >  	unsigned char		sda_vsn;
-> > > > +	unsigned char		sda_spec3;
-> > > >  	unsigned char		bus_widths;
-> > > >  #define SD_SCR_BUS_WIDTH_1	(1<<0)
-> > > >  #define SD_SCR_BUS_WIDTH_4	(1<<2)
-> > > > +	unsigned char		cmd_support;
-> > > > +#define SD_SCR_CMD20_SUPPORT	(1<<0)
-> > > > +#define SD_SCR_CMD23_SUPPORT	(1<<1)
-> > > >  };
-> > > >
-> > > >  struct sd_ssr {
-> > > > diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-> > > > index 3fd85e0..178363b 100644
-> > > > --- a/include/linux/mmc/sd.h
-> > > > +++ b/include/linux/mmc/sd.h
-> > > > @@ -59,7 +59,7 @@
-> > > >
-> > > >  #define SCR_SPEC_VER_0		0	/* Implements system
-> > > specification
-> > > > 1.0 - 1.01 */
-> > > >  #define SCR_SPEC_VER_1		1	/* Implements system
-> > > specification
-> > > > 1.10 */
-> > > > -#define SCR_SPEC_VER_2		2	/* Implements system
-> > > specification
-> > > > 2.00 */
-> > > > +#define SCR_SPEC_VER_2		2	/* Implements system
-> > > specification
-> > > > 2.00 - 3.0x */
-> > > >
-> > > >  /*
-> > > >   * SD bus widths
-> > > > diff --git a/include/linux/mmc/sdhci.h
-> b/include/linux/mmc/sdhci.h
-> > > > index 83bd9f7..282d158 100644
-> > > > --- a/include/linux/mmc/sdhci.h
-> > > > +++ b/include/linux/mmc/sdhci.h
-> > > > @@ -145,6 +145,8 @@ struct sdhci_host {
-> > > >  	unsigned int            ocr_avail_sd;
-> > > >  	unsigned int            ocr_avail_mmc;
-> > > >
-> > > > +	struct mmc_command	*saved_abort_cmd; /* Abort command
-> saved
-> > > > for data error recovery */
-> > > > +
-> > > >  	unsigned long private[0] ____cacheline_aligned;
-> > > >  };
-> > > >  #endif /* __SDHCI_H */
-> > > > --
-> > > > 1.7.1
-> > > >
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe linux-
-> > mmc"
-> > > in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-
-> info.html
-> > >
+> >> *host, u32 intmask)
+> >> >  {
+> >> >        BUG_ON(intmask == 0);
+> >> >
+> >> > +       /* CMD19 generates _only_ Buffer Read Ready interrupt */
+> >> > +       if (intmask & SDHCI_INT_DATA_AVAIL) {
+> >> > +               if (SDHCI_GET_CMD(sdhci_readw(host,
+> SDHCI_COMMAND))
+> >> > +                               == MMC_SEND_TUNING_BLOCK) {
+> >> > +                       host->tuning_done = 1;
+> >> > +                       wake_up(&host->buf_ready_int);
+> >> > +                       return;
+> >> > +               }
+> >> > +       }
+> >> > +
+> >> >        if (!host->data) {
+> >> >                /*
+> >> >                 * The "data complete" interrupt is also used to
+> >> > @@ -2126,6 +2254,10 @@ int sdhci_add_host(struct sdhci_host *host)
+> >> >        if (caps[1] & SDHCI_SUPPORT_DDR50)
+> >> >                mmc->caps |= MMC_CAP_UHS_DDR50;
+> >> >
+> >> > +       /* Does the host needs tuning for SDR50? */
+> >> > +       if (caps[1] & SDHCI_USE_SDR50_TUNING)
+> >> > +               host->flags |= SDHCI_SDR50_NEEDS_TUNING;
+> >> > +
+> >> >        /* Driver Type(s) (A, C, D) supported by the host */
+> >> >        if (caps[1] & SDHCI_DRIVER_TYPE_A)
+> >> >                mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
+> >> > @@ -2269,6 +2401,9 @@ int sdhci_add_host(struct sdhci_host *host)
+> >> >
+> >> >        setup_timer(&host->timer, sdhci_timeout_timer, (unsigned
+> >> long)host);
+> >> >
+> >> > +       if (host->version >= SDHCI_SPEC_300)
+> >> > +               init_waitqueue_head(&host->buf_ready_int);
+> >> > +
+> >> >        ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+> >> >                mmc_hostname(mmc), host);
+> >> >        if (ret)
+> >> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> >> > index 5bf244d..4746879 100644
+> >> > --- a/drivers/mmc/host/sdhci.h
+> >> > +++ b/drivers/mmc/host/sdhci.h
+> >> > @@ -160,6 +160,8 @@
+> >> >  #define  SDHCI_CTRL_DRV_TYPE_A         0x0010
+> >> >  #define  SDHCI_CTRL_DRV_TYPE_C         0x0020
+> >> >  #define  SDHCI_CTRL_DRV_TYPE_D         0x0030
+> >> > +#define  SDHCI_CTRL_EXEC_TUNING                0x0040
+> >> > +#define  SDHCI_CTRL_TUNED_CLK          0x0080
+> >> >  #define  SDHCI_CTRL_PRESET_VAL_ENABLE  0x8000
+> >> >
+> >> >  #define SDHCI_CAPABILITIES     0x40
+> >> > @@ -187,6 +189,7 @@
+> >> >  #define  SDHCI_DRIVER_TYPE_A   0x00000010
+> >> >  #define  SDHCI_DRIVER_TYPE_C   0x00000020
+> >> >  #define  SDHCI_DRIVER_TYPE_D   0x00000040
+> >> > +#define  SDHCI_USE_SDR50_TUNING        0x00002000
+> >> >
+> >> >  #define SDHCI_CAPABILITIES_1   0x44
+> >> >
+> >> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> >> > index e84cd05..651e40b 100644
+> >> > --- a/include/linux/mmc/host.h
+> >> > +++ b/include/linux/mmc/host.h
+> >> > @@ -129,6 +129,7 @@ struct mmc_host_ops {
+> >> >
+> >> >        int     (*start_signal_voltage_switch)(struct mmc_host
+> *host);
+> >> >        int     (*get_max_current_180)(struct mmc_host *mmc);
+> >> > +       void    (*execute_tuning)(struct mmc_host *host);
+> >> >  };
+> >> >
+> >> >  struct mmc_card;
+> >> > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> >> > index 612301f..9194f9e 100644
+> >> > --- a/include/linux/mmc/mmc.h
+> >> > +++ b/include/linux/mmc/mmc.h
+> >> > @@ -50,6 +50,7 @@
+> >> >  #define MMC_SET_BLOCKLEN         16   /* ac   [31:0] block len
+> R1
+> >>  */
+> >> >  #define MMC_READ_SINGLE_BLOCK    17   /* adtc [31:0] data addr
+> R1
+> >>  */
+> >> >  #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr
+> R1
+> >>  */
+> >> > +#define MMC_SEND_TUNING_BLOCK    19   /* adtc
+>  R1
+> >>  */
+> >> >
+> >> >   /* class 3 */
+> >> >  #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr
+> R1
+> >>  */
+> >> > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> >> > index 282d158..5203b97 100644
+> >> > --- a/include/linux/mmc/sdhci.h
+> >> > +++ b/include/linux/mmc/sdhci.h
+> >> > @@ -109,6 +109,7 @@ struct sdhci_host {
+> >> >  #define SDHCI_USE_ADMA         (1<<1)  /* Host is ADMA capable */
+> >> >  #define SDHCI_REQ_USE_DMA      (1<<2)  /* Use DMA for this req.
+> */
+> >> >  #define SDHCI_DEVICE_DEAD      (1<<3)  /* Device unresponsive */
+> >> > +#define SDHCI_SDR50_NEEDS_TUNING (1<<4)        /* SDR50 needs
+> tuning
+> >> */
+> >> >
+> >> >        unsigned int version;   /* SDHCI spec. version */
+> >> >
+> >> > @@ -147,6 +148,9 @@ struct sdhci_host {
+> >> >
+> >> >        struct mmc_command      *saved_abort_cmd; /* Abort command
+> >> saved for data error recovery */
+> >> >
+> >> > +       wait_queue_head_t       buf_ready_int;  /* Waitqueue for
+> >> Buffer Read Ready interrupt */
+> >> > +       unsigned int            tuning_done;    /* Condition flag
+> set
+> >> when CMD19 succeeds */
+> >> > +
+> >> >        unsigned long private[0] ____cacheline_aligned;
+> >> >  };
+> >> >  #endif /* __SDHCI_H */
+> >> > --
+> >> > 1.7.1
+> >> >
+> >> >
 > >
-> 
-> 
+> >
+> >
 
 
