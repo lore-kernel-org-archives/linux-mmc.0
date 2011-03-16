@@ -1,175 +1,486 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 4/4 v4] mmc, ARM: Add zboot from eSD support for SuperH
- Mobile ARM
-Date: Wed, 16 Mar 2011 11:20:46 +0900
-Message-ID: <AANLkTimBOc2+Ryq+fwas0SPmYqbnJH6_b28DTPJx_p99@mail.gmail.com>
-References: <1300071435-26759-1-git-send-email-horms@verge.net.au>
-	<1300071435-26759-5-git-send-email-horms@verge.net.au>
-	<20110315222738.GA23288@verge.net.au>
-	<AANLkTimgwpP-WTGF-E=KO3TAXDX7FP4WnW3XQiHi0Ton@mail.gmail.com>
-	<20110316011427.GB6724@verge.net.au>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs initialization
+Date: Tue, 15 Mar 2011 22:51:09 -0400
+Message-ID: <AANLkTikoJxmBJhdYotv7ZY8E6dye6BuRWYdR6Bk348nt@mail.gmail.com>
+References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
+	<1299238369-1768-10-git-send-email-arindam.nath@amd.com>
+	<AANLkTinzMXwJD0TyMBFbitE6PoNMZLmjn_tXmP=hZuY-@mail.gmail.com>
+	<6C03668EAF45B747AF947A1603D1B300E3C33666@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20110316011427.GB6724@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:34978 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751902Ab1CPCvK convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2011 22:51:10 -0400
+Received: by qwk3 with SMTP id 3so977791qwk.19
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2011 19:51:09 -0700 (PDT)
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B300E3C33666@SAUSEXMBP01.amd.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Nath, Arindam" <Arindam.Nath@amd.com>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "prakity@marvell.com" <prakity@marvell.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-On Wed, Mar 16, 2011 at 10:14 AM, Simon Horman <horms@verge.net.au> wro=
-te:
-> On Wed, Mar 16, 2011 at 09:37:50AM +0900, Magnus Damm wrote:
->> On Wed, Mar 16, 2011 at 7:27 AM, Simon Horman <horms@verge.net.au> w=
+On Tue, Mar 15, 2011 at 6:43 AM, Nath, Arindam <Arindam.Nath@amd.com> w=
 rote:
->> > This allows a ROM-able zImage to be written to eSD and for SuperH =
-Mobile
->> > ARM to boot directly from the SDHI hardware block.
->> >
->> > This is achieved by the MaskROM loading the first portion of the i=
-mage into
->> > MERAM and then jumping to it. =A0This portion contains loader code=
- which
->> > copies the entire image to SDRAM and jumps to it. From there the z=
-Image
->> > boot code proceeds as normal, uncompressing the image into its fin=
-al
->> > location and then jumping to it.
->> >
->> > Cc: Paul Mundt <lethal@linux-sh.org>
->> > Cc: Magnus Damm <magnus.damm@gmail.com>
->> > Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
->> > Signed-off-by: Simon Horman <horms@verge.net.au>
->> >
->> > ---
->> >
->> > This patch is based on the for-next branch of
->> > Russell King's linux-2.6-arm tree
->> >
->> > v2
->> > * Consistently use __raw_readw(). As pointed out by Paul Mundt
->> >
->> > v3
->> > * Remove mmcif_update_progress2(), it was for debugging during dev=
-elopment
->> > * Move CPU specific code into mach/sdhi.h
->> > =A0As requested by Magnus Damm
->> > * Use linux/mmc/tmio.h now that it exists
->> > * Remove SDHI_EXT_SWAP, it is unused
->> > * Replace use of MMCIF_PROGRESS_* with MMC_PROGRESS_*
->> > * Don't include linux/mmc/sh_mmcif.h
->> > =A0+ Replace use of MMCIF_CE_RESP_CMD12 with RESP_CMD12
->> > =A0+ Include linux/io.h
->> >
->> > v4
->> > * Move definition of SDHI_BASE into CPU-specific code.
->> > =A0Thanks to Magnus Damm.
->> > ---
->>
->> > +asmlinkage void mmc_loader(unsigned short *buf, unsigned long len=
-)
->> > +{
->> > + =A0 =A0 =A0 int high_capacity;
->> > +
->> > + =A0 =A0 =A0 mmc_init_progress();
->> > +
->> > + =A0 =A0 =A0 mmc_update_progress(MMC_PROGRESS_ENTER);
->> > + =A0 =A0 =A0 sdhi_boot_enter();
->> > +
->> > + =A0 =A0 =A0 /* setup SDHI hardware */
->> > + =A0 =A0 =A0 mmc_update_progress(MMC_PROGRESS_INIT);
->> > + =A0 =A0 =A0 high_capacity =3D sdhi_boot_init(SDHI_BASE);
->> > + =A0 =A0 =A0 if (high_capacity < 0)
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
->> > +
->> > + =A0 =A0 =A0 mmc_update_progress(MMC_PROGRESS_LOAD);
->> > + =A0 =A0 =A0 /* load kernel */
->> > + =A0 =A0 =A0 if (sdhi_boot_do_read(SDHI_BASE, high_capacity,
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 0, /* Ke=
-rnel is at block 1 */
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (len + T=
-MIO_BBS - 1) / TMIO_BBS, buf))
->> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
->> > +
->> > + =A0 =A0 =A0 sdhi_boot_cleanup();
->> > +
->> > + =A0 =A0 =A0 mmc_update_progress(MMC_PROGRESS_DONE);
->> > +
->> > + =A0 =A0 =A0 return;
->> > +err:
->> > + =A0 =A0 =A0 __raw_writel(__raw_readl(PORTR031_000DR) | 1, PORTR0=
-31_000DR);
->> > + =A0 =A0 =A0 for(;;);
->> > +
->> > +}
->>
->> Sorry for not catching this earlier, but this __raw_writel() to
->> PORTR031_000DR is cpu specific as well. So please move that to the C=
-PU
->> specific code.
+> Hi Zhangfei,
 >
-> I will just remove that code, its was useful for development
-> but I didn't mean to include it in my patch submission.
-
-Ok, good!
-
->> Not sure if it makes sense at this point, but perhaps it's a good id=
-ea
->> to move the mmc_loader() function into the CPU specific portion. As
->> you know, the CPU itself has multiple SDHI hardware blocks, and
->> because of that we want the common SDHI loader to be written to
->> support any SDHI hardware block instance.
 >
-> Wouldn't that mean moving all of
-> arch/arm/boot/compressed/sdhi-shmobile.c into CPU specific code?
-> That could easily be achived by just guarding its compilation with
-> CONFIG_ARCH_SH7372 (as mmcif-sh7372.c already is) and perhaps
-> renaming the file to sdhi-sh7372.c. We could probably move
-> arch/arm/mach-shmobile/include/mach/sdhi-sh7372.h back into
-> sdhi-shmobile.c.
-
-No, I didn't mean moving all the SDHI loader code into the CPU
-specific place - just the mmc_loader() function.
-
->> Right now the SDHI_BASE variable is limiting the shared SDHI loader
->> code to a fixed hardware block instance. That's fine because we only
->> boot from a single SDHI hardware block instance on sh7372, but futur=
+>> -----Original Message-----
+>> From: zhangfei gao [mailto:zhangfei.gao@gmail.com]
+>> Sent: Tuesday, March 15, 2011 4:02 PM
+>> To: Nath, Arindam
+>> Cc: cjb@laptop.org; prakity@marvell.com; subhashj@codeaurora.org;
+>> linux-mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
+>> Subject: Re: [PATCH v2 09/12] mmc: sd: add support for tuning during
+>> uhs initialization
+>>
+>> On Fri, Mar 4, 2011 at 6:32 AM, Arindam Nath <arindam.nath@amd.com>
+>> wrote:
+>> > Host Controller needs tuning during initialization to operate SDR5=
+0
+>> > and SDR104 UHS-I cards. Whether SDR50 mode actually needs tuning i=
+s
+>> > indicated by bit 45 of the Host Controller Capabilities register.
+>> > A new command CMD19 has been defined in the Physical Layer spec
+>> > v3.01 to request the card to send tuning pattern.
+>> >
+>> > We enable Buffer Read Ready interrupt at the very begining of tuni=
+ng
+>> > procedure, because that is the only interrupt generated by the Hos=
+t
+>> > Controller during tuning. The tuning block is sent by the card to =
+the
+>> > Host Controller using DAT lines, so we set Data Present Select (bi=
+t
+>> 5)
+>> > in the Command register. The Host Controller is responsible for do=
+ing
+>> > the verfication of tuning block sent by the card at the hardware
+>> level.
+>> > After sending CMD19, we wait for Buffer Read Ready interrupt. In c=
+ase
+>> > we don't receive an interrupt after the specified timeout value, w=
 e
->> processors most likely support selecting boot SDHI hardware block
->> instance.
+>> > fall back on fixed sampling clock by setting Execute Tuning (bit 6=
+)
+>> > and Sampling Clock Seletc (bit 7) of Host Control2 register to 0.
+>> > Before exiting the tuning procedure, we disable Buffer Read Ready
+>> > interrupt.
+>> >
+>> > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+>> > ---
+>> > =A0drivers/mmc/core/sd.c =A0 =A0 | =A0 =A04 +
+>> > =A0drivers/mmc/host/sdhci.c =A0| =A0137
+>> ++++++++++++++++++++++++++++++++++++++++++++-
+>> > =A0drivers/mmc/host/sdhci.h =A0| =A0 =A03 +
+>> > =A0include/linux/mmc/host.h =A0| =A0 =A01 +
+>> > =A0include/linux/mmc/mmc.h =A0 | =A0 =A01 +
+>> > =A0include/linux/mmc/sdhci.h | =A0 =A04 +
+>> > =A06 files changed, 149 insertions(+), 1 deletions(-)
+>> >
+>> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> > index be01397..1e2d157 100644
+>> > --- a/drivers/mmc/core/sd.c
+>> > +++ b/drivers/mmc/core/sd.c
+>> > @@ -637,6 +637,10 @@ static int mmc_sd_init_uhs_card(struct mmc_ca=
+rd
+>> *card)
+>> > =A0 =A0 =A0 =A0/* Set current limit for the card */
+>> > =A0 =A0 =A0 =A0err =3D sd_set_current_limit(card, status);
+>> >
+>> > + =A0 =A0 =A0 /* SPI mode doesn't define CMD19 */
+>> > + =A0 =A0 =A0 if (!mmc_host_is_spi(card->host) && card->host->ops-
+>> >execute_tuning)
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->host->ops->execute_tuning(card=
+->host);
+>> > +
+>> > =A0out:
+>> > =A0 =A0 =A0 =A0kfree(status);
+>> >
+>> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> > index 245cc39..8f4f102 100644
+>> > --- a/drivers/mmc/host/sdhci.c
+>> > +++ b/drivers/mmc/host/sdhci.c
+>> > @@ -39,6 +39,8 @@
+>> > =A0#define SDHCI_USE_LEDS_CLASS
+>> > =A0#endif
+>> >
+>> > +#define MAX_TUNING_LOOP 40
+>> > +
+>> > =A0static unsigned int debug_quirks =3D 0;
+>> >
+>> > =A0static void sdhci_prepare_data(struct sdhci_host *, struct mmc_=
+data
+>> *);
+>> > @@ -985,7 +987,9 @@ static void sdhci_send_command(struct sdhci_ho=
+st
+>> *host, struct mmc_command *cmd)
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0flags |=3D SDHCI_CMD_CRC;
+>> > =A0 =A0 =A0 =A0if (cmd->flags & MMC_RSP_OPCODE)
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0flags |=3D SDHCI_CMD_INDEX;
+>> > - =A0 =A0 =A0 if (cmd->data)
+>> > +
+>> > + =A0 =A0 =A0 /* CMD19 is special in that the Data Present Select =
+should be
+>> set */
+>> > + =A0 =A0 =A0 if (cmd->data || (cmd->opcode =3D=3D MMC_SEND_TUNING=
+_BLOCK))
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0flags |=3D SDHCI_CMD_DATA;
+>> >
+>> > =A0 =A0 =A0 =A0sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flag=
+s),
+>> SDHCI_COMMAND);
+>> > @@ -1485,6 +1489,119 @@ static int sdhci_get_max_current_180(struc=
+t
+>> mmc_host *mmc)
+>> > =A0 =A0 =A0 =A0return max_current_180;
+>> > =A0}
+>> >
+>> > +static void sdhci_execute_tuning(struct mmc_host *mmc)
+>> > +{
+>> > + =A0 =A0 =A0 struct sdhci_host *host;
+>> > + =A0 =A0 =A0 u16 ctrl;
+>> > + =A0 =A0 =A0 int tuning_loop_counter =3D MAX_TUNING_LOOP;
+>> > + =A0 =A0 =A0 unsigned long flags;
+>> > + =A0 =A0 =A0 unsigned long timeout;
+>> > +
+>> > + =A0 =A0 =A0 host =3D mmc_priv(mmc);
+>> > +
+>> > + =A0 =A0 =A0 spin_lock_irqsave(&host->lock, flags);
+>> > +
+>> > + =A0 =A0 =A0 ctrl =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> > +
+>> > + =A0 =A0 =A0 /*
+>> > + =A0 =A0 =A0 =A0* Host Controller needs tuning only in case of SD=
+R104 mode
+>> > + =A0 =A0 =A0 =A0* and for SDR50 mode when Use Tuning for SDR50 is=
+ set in
+>> > + =A0 =A0 =A0 =A0* Capabilities register.
+>> > + =A0 =A0 =A0 =A0*/
+>> > + =A0 =A0 =A0 if ((ctrl & SDHCI_CTRL_UHS_SDR104) ||
+>> > + =A0 =A0 =A0 =A0 =A0 ((ctrl & SDHCI_CTRL_UHS_SDR50) &&
+>> > + =A0 =A0 =A0 =A0 =A0 (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D SDHCI_CTRL_EXEC_TUNING;
+>> > + =A0 =A0 =A0 else {
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_unlock_irqrestore(&host->lock, =
+flags);
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+>> > + =A0 =A0 =A0 }
+>> > +
+>> > + =A0 =A0 =A0 sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>> > +
+>> > + =A0 =A0 =A0 /*
+>> > + =A0 =A0 =A0 =A0* As per the Host Controller spec v3.00, tuning c=
+ommand
+>> > + =A0 =A0 =A0 =A0* generates Buffer Read Ready interrupt, so enabl=
+e that.
+>> > + =A0 =A0 =A0 =A0*/
+>> > + =A0 =A0 =A0 sdhci_unmask_irqs(host, SDHCI_INT_DATA_AVAIL);
+>> > +
+>> > + =A0 =A0 =A0 /*
+>> > + =A0 =A0 =A0 =A0* Issue CMD19 repeatedly till Execute Tuning is s=
+et to 0 or
+>> the number
+>> > + =A0 =A0 =A0 =A0* of loops reaches 40 times or a timeout of 150ms=
+ occurs.
+>> > + =A0 =A0 =A0 =A0*/
+>> > + =A0 =A0 =A0 timeout =3D 150;
+>> > + =A0 =A0 =A0 do {
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct mmc_command cmd;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct mmc_request mrq;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!tuning_loop_counter && !timeout=
+)
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 memset(&cmd, 0, sizeof(struct mmc_co=
+mmand));
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 cmd.opcode =3D MMC_SEND_TUNING_BLOCK=
+;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 cmd.arg =3D 0;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 cmd.flags =3D MMC_RSP_R1 | MMC_CMD_A=
+DTC;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 memset(&cmd.resp, 0, sizeof(cmd.resp=
+));
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 cmd.retries =3D 0;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 cmd.data =3D NULL;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 cmd.error =3D 0;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 memset(&mrq, 0, sizeof(struct mmc_re=
+quest));
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mrq.cmd =3D &cmd;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->mrq =3D &mrq;
+>>
+>> Tune may fail since SDHCI_TRNS_DMA is set in SDHCI_TRANSFER_MODE,
+>> SDHCI_TRNS_DMA required to be cleared before send_command, such as
+>> sdhci_writew(host, 0x12, SDHCI_TRANSFER_MODE);
 >
-> So mmc_loader() would need to take SDHI_BASE as an argument?
-> That sounds like a fairly small amount of refactoring.
+> Can you please tell me why and under what condition can tuning fail w=
+hen SDHCI_TRANS_DMA is set? Since cmd->data is set to NULL inside sdhci=
+_execute_tuning(), sdhci_set_transfer_mode() will return at the very be=
+ginning of the function before setting SDHCI_TRNS_DMA. Moreover, as per=
+ the Host Controller v3.00 spec, during tuning procedure, the host cont=
+roller does not generate interrupts other than Buffer Read Ready.
+>
 
-Yes, that's maybe more realistic, I'm not sure. Please remember that
-you probably want to select different GPIO pins for different SDHI
-instances, so you also need to adjust the
-sdhi_boot_enter()/sdhi_boot_cleanup() to receive SDHI_BASE as an
-argument too if you go down that route.
+Hi, Arindam
 
-> How do you envisage that the hardware block would be selected?
-> At compile time through Kconfig? If so the current #define mechanism
-> might be sufficient.
+The Present Status Register describes Buffer Read Enable (bit 11) and
+Buffer Write Enable (bit 10) only used for non-DMA transfer.
+If set SDHCI_TRANS_DMA during tuning process, controller may get no
+irq at all including Buffer Read Enable.
+Could you help check, thanks
 
-Not through Kconfig. I think you should use Kconfig to enable the SDHI
-loader, but you should be able to select the SDHI base address during
-run-time. Similar to how we enable platform device drivers with
-Kconfig but put the instance information in the platform device
-resource and data outside the driver.
-
-So for instance, on some board we may want to read a GPIO pin at boot
-up time to select if we should boot from SDHI0 or SDHI1. I would like
-the SDHI loader to be designed so we can have support for multiple
-instances complied-in. Because of that I'd like to see the fixed
-SDHI_BASE disappear from the header, and letting the mmc_loader()
-function take the base address as an argument, or simply move the
-mmc_loader() function out of the SDHI loader code to give CPU specific
-and/or board specific code freedom to select which ever SDHI hardware
-block instance(s) they want to load from.
-
-Perhaps this would require some serious refactoring?
-
-Thanks,
-
-/ magnus
+> Thanks,
+> Arindam
+>
+>>
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_send_command(host, &cmd);
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->cmd =3D NULL;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->mrq =3D NULL;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_unlock_irqrestore(&host->lock, =
+flags);
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Wait for Buffer Read Ready interr=
+upt */
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 wait_event_interruptible_timeout(hos=
+t->buf_ready_int,
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 (host->tuning_done =3D=3D 1),
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 msecs_to_jiffies(50));
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irqsave(&host->lock, flags=
+);
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!host->tuning_done) {
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_INFO DRI=
+VER_NAME ": Tuning
+>> procedure"
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " fa=
+iled, falling back to fixed
+>> sampling"
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " cl=
+ock\n");
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl &=3D ~SDHCI_CTR=
+L_TUNED_CLK;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl &=3D ~SDHCI_CTR=
+L_EXEC_TUNING;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writew(host, c=
+trl,
+>> SDHCI_HOST_CONTROL2);
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_done =3D 0;
+>> > +
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl =3D sdhci_readw(host, SDHCI_HOS=
+T_CONTROL2);
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 tuning_loop_counter--;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 timeout--;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mdelay(1);
+>> > + =A0 =A0 =A0 } while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+>> > +
+>> > + =A0 =A0 =A0 /*
+>> > + =A0 =A0 =A0 =A0* The Host Driver has exhausted the maximum numbe=
+r of loops
+>> allowed,
+>> > + =A0 =A0 =A0 =A0* so use fixed sampling frequency.
+>> > + =A0 =A0 =A0 =A0*/
+>> > + =A0 =A0 =A0 if (!tuning_loop_counter || !timeout) {
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl &=3D ~SDHCI_CTRL_TUNED_CLK;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writew(host, ctrl, SDHCI_HOST_=
+CONTROL2);
+>> > + =A0 =A0 =A0 } else {
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_INFO DRI=
+VER_NAME ": Tuning
+>> procedure"
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " fa=
+iled, falling back to fixed
+>> sampling"
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " cl=
+ock\n");
+>> > + =A0 =A0 =A0 }
+>> > +
+>> > +out:
+>> > + =A0 =A0 =A0 sdhci_mask_irqs(host, SDHCI_INT_DATA_AVAIL);
+>> > + =A0 =A0 =A0 spin_unlock_irqrestore(&host->lock, flags);
+>> > +}
+>> > +
+>> > =A0static const struct mmc_host_ops sdhci_ops =3D {
+>> > =A0 =A0 =A0 =A0.request =A0 =A0 =A0 =A0=3D sdhci_request,
+>> > =A0 =A0 =A0 =A0.set_ios =A0 =A0 =A0 =A0=3D sdhci_set_ios,
+>> > @@ -1492,6 +1609,7 @@ static const struct mmc_host_ops sdhci_ops =3D=
+ {
+>> > =A0 =A0 =A0 =A0.enable_sdio_irq =3D sdhci_enable_sdio_irq,
+>> > =A0 =A0 =A0 =A0.start_signal_voltage_switch =A0 =A0=3D
+>> sdhci_start_signal_voltage_switch,
+>> > =A0 =A0 =A0 =A0.get_max_current_180 =A0 =A0 =A0 =A0 =A0 =A0=3D sdh=
+ci_get_max_current_180,
+>> > + =A0 =A0 =A0 .execute_tuning =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =3D =
+sdhci_execute_tuning,
+>> > =A0};
+>> >
+>> >
+>> =A0/****************************************************************=
+*****
+>> ********\
+>> > @@ -1703,6 +1821,16 @@ static void sdhci_data_irq(struct sdhci_hos=
+t
+>> *host, u32 intmask)
+>> > =A0{
+>> > =A0 =A0 =A0 =A0BUG_ON(intmask =3D=3D 0);
+>> >
+>> > + =A0 =A0 =A0 /* CMD19 generates _only_ Buffer Read Ready interrup=
+t */
+>> > + =A0 =A0 =A0 if (intmask & SDHCI_INT_DATA_AVAIL) {
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (SDHCI_GET_CMD(sdhci_readw(host, =
+SDHCI_COMMAND))
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =3D=3D=
+ MMC_SEND_TUNING_BLOCK) {
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_done =3D=
+ 1;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 wake_up(&host->buf_r=
+eady_int);
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>> > + =A0 =A0 =A0 }
+>> > +
+>> > =A0 =A0 =A0 =A0if (!host->data) {
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/*
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * The "data complete" interrupt is=
+ also used to
+>> > @@ -2126,6 +2254,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>> > =A0 =A0 =A0 =A0if (caps[1] & SDHCI_SUPPORT_DDR50)
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_UHS_DDR50;
+>> >
+>> > + =A0 =A0 =A0 /* Does the host needs tuning for SDR50? */
+>> > + =A0 =A0 =A0 if (caps[1] & SDHCI_USE_SDR50_TUNING)
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->flags |=3D SDHCI_SDR50_NEEDS_T=
+UNING;
+>> > +
+>> > =A0 =A0 =A0 =A0/* Driver Type(s) (A, C, D) supported by the host *=
+/
+>> > =A0 =A0 =A0 =A0if (caps[1] & SDHCI_DRIVER_TYPE_A)
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_DRIVER_TYPE_=
+A;
+>> > @@ -2269,6 +2401,9 @@ int sdhci_add_host(struct sdhci_host *host)
+>> >
+>> > =A0 =A0 =A0 =A0setup_timer(&host->timer, sdhci_timeout_timer, (uns=
+igned
+>> long)host);
+>> >
+>> > + =A0 =A0 =A0 if (host->version >=3D SDHCI_SPEC_300)
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 init_waitqueue_head(&host->buf_ready=
+_int);
+>> > +
+>> > =A0 =A0 =A0 =A0ret =3D request_irq(host->irq, sdhci_irq, IRQF_SHAR=
+ED,
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_hostname(mmc), host);
+>> > =A0 =A0 =A0 =A0if (ret)
+>> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> > index 5bf244d..4746879 100644
+>> > --- a/drivers/mmc/host/sdhci.h
+>> > +++ b/drivers/mmc/host/sdhci.h
+>> > @@ -160,6 +160,8 @@
+>> > =A0#define =A0SDHCI_CTRL_DRV_TYPE_A =A0 =A0 =A0 =A0 0x0010
+>> > =A0#define =A0SDHCI_CTRL_DRV_TYPE_C =A0 =A0 =A0 =A0 0x0020
+>> > =A0#define =A0SDHCI_CTRL_DRV_TYPE_D =A0 =A0 =A0 =A0 0x0030
+>> > +#define =A0SDHCI_CTRL_EXEC_TUNING =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+0x0040
+>> > +#define =A0SDHCI_CTRL_TUNED_CLK =A0 =A0 =A0 =A0 =A00x0080
+>> > =A0#define =A0SDHCI_CTRL_PRESET_VAL_ENABLE =A00x8000
+>> >
+>> > =A0#define SDHCI_CAPABILITIES =A0 =A0 0x40
+>> > @@ -187,6 +189,7 @@
+>> > =A0#define =A0SDHCI_DRIVER_TYPE_A =A0 0x00000010
+>> > =A0#define =A0SDHCI_DRIVER_TYPE_C =A0 0x00000020
+>> > =A0#define =A0SDHCI_DRIVER_TYPE_D =A0 0x00000040
+>> > +#define =A0SDHCI_USE_SDR50_TUNING =A0 =A0 =A0 =A00x00002000
+>> >
+>> > =A0#define SDHCI_CAPABILITIES_1 =A0 0x44
+>> >
+>> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>> > index e84cd05..651e40b 100644
+>> > --- a/include/linux/mmc/host.h
+>> > +++ b/include/linux/mmc/host.h
+>> > @@ -129,6 +129,7 @@ struct mmc_host_ops {
+>> >
+>> > =A0 =A0 =A0 =A0int =A0 =A0 (*start_signal_voltage_switch)(struct m=
+mc_host *host);
+>> > =A0 =A0 =A0 =A0int =A0 =A0 (*get_max_current_180)(struct mmc_host =
+*mmc);
+>> > + =A0 =A0 =A0 void =A0 =A0(*execute_tuning)(struct mmc_host *host)=
+;
+>> > =A0};
+>> >
+>> > =A0struct mmc_card;
+>> > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+>> > index 612301f..9194f9e 100644
+>> > --- a/include/linux/mmc/mmc.h
+>> > +++ b/include/linux/mmc/mmc.h
+>> > @@ -50,6 +50,7 @@
+>> > =A0#define MMC_SET_BLOCKLEN =A0 =A0 =A0 =A0 16 =A0 /* ac =A0 [31:0=
+] block len =A0 R1
+>> =A0*/
+>> > =A0#define MMC_READ_SINGLE_BLOCK =A0 =A017 =A0 /* adtc [31:0] data=
+ addr =A0 R1
+>> =A0*/
+>> > =A0#define MMC_READ_MULTIPLE_BLOCK =A018 =A0 /* adtc [31:0] data a=
+ddr =A0 R1
+>> =A0*/
+>> > +#define MMC_SEND_TUNING_BLOCK =A0 =A019 =A0 /* adtc =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0R1
+>> =A0*/
+>> >
+>> > =A0 /* class 3 */
+>> > =A0#define MMC_WRITE_DAT_UNTIL_STOP 20 =A0 /* adtc [31:0] data add=
+r =A0 R1
+>> =A0*/
+>> > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>> > index 282d158..5203b97 100644
+>> > --- a/include/linux/mmc/sdhci.h
+>> > +++ b/include/linux/mmc/sdhci.h
+>> > @@ -109,6 +109,7 @@ struct sdhci_host {
+>> > =A0#define SDHCI_USE_ADMA =A0 =A0 =A0 =A0 (1<<1) =A0/* Host is ADM=
+A capable */
+>> > =A0#define SDHCI_REQ_USE_DMA =A0 =A0 =A0(1<<2) =A0/* Use DMA for t=
+his req. */
+>> > =A0#define SDHCI_DEVICE_DEAD =A0 =A0 =A0(1<<3) =A0/* Device unresp=
+onsive */
+>> > +#define SDHCI_SDR50_NEEDS_TUNING (1<<4) =A0 =A0 =A0 =A0/* SDR50 n=
+eeds tuning
+>> */
+>> >
+>> > =A0 =A0 =A0 =A0unsigned int version; =A0 /* SDHCI spec. version */
+>> >
+>> > @@ -147,6 +148,9 @@ struct sdhci_host {
+>> >
+>> > =A0 =A0 =A0 =A0struct mmc_command =A0 =A0 =A0*saved_abort_cmd; /* =
+Abort command
+>> saved for data error recovery */
+>> >
+>> > + =A0 =A0 =A0 wait_queue_head_t =A0 =A0 =A0 buf_ready_int; =A0/* W=
+aitqueue for
+>> Buffer Read Ready interrupt */
+>> > + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0tuning_done; =A0=
+ =A0/* Condition flag set
+>> when CMD19 succeeds */
+>> > +
+>> > =A0 =A0 =A0 =A0unsigned long private[0] ____cacheline_aligned;
+>> > =A0};
+>> > =A0#endif /* __SDHCI_H */
+>> > --
+>> > 1.7.1
+>> >
+>> >
+>
+>
+>
