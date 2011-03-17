@@ -1,94 +1,64 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] dw_mmc: fix suspend/resume operation
-Date: Thu, 17 Mar 2011 14:22:46 -0400
-Message-ID: <m362rhppxl.fsf@pullcord.laptop.org>
-References: <4D81F151.3090300@samsung.com>
+Subject: Re: [PATCH 1/3] dw_mmc: set fixed burst in BMOD register
+Date: Thu, 17 Mar 2011 14:24:07 -0400
+Message-ID: <m31v25ppvc.fsf@pullcord.laptop.org>
+References: <4D670F0D.8020102@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46200 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:46206 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754968Ab1CQSZk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 17 Mar 2011 14:25:40 -0400
-In-Reply-To: <4D81F151.3090300@samsung.com> (Jaehoon Chung's message of "Thu,
-	17 Mar 2011 20:32:33 +0900")
+	id S1754907Ab1CQS1B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 17 Mar 2011 14:27:01 -0400
+In-Reply-To: <4D670F0D.8020102@samsung.com> (Jaehoon Chung's message of "Fri,
+	25 Feb 2011 11:08:13 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi,
+Hi Will,
 
-On Thu, Mar 17 2011, Jaehoon Chung wrote:
-> This patch is applied about re-init processing when suspend/resume.
+On Thu, Feb 24 2011, Jaehoon Chung wrote:
+> This patch is applied fixed burst.
+> If use internal DMA controller, i think that need to set this bit.
 >
-> When card is resuming, some register is reset.
-> If card is removable, maybe controller should be rescan for card.
-> But if assume card is non-removable, need to restore the old value at registers.
+> I tested when set this bit or not. I found that increase performance with IDMAC
 >
 > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > ---
->  drivers/mmc/host/dw_mmc.c  |   22 ++++++++++++++++++++--
->  include/linux/mmc/dw_mmc.h |    1 +
->  2 files changed, 21 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/dw_mmc.c |    4 ++--
+>  1 files changed, 2 insertions(+), 2 deletions(-)
 >
 > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 299c1d6..892bfe3 100644
+> index 58476c1..46e5a89 100644
 > --- a/drivers/mmc/host/dw_mmc.c
 > +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1633,8 +1633,9 @@ static int dw_mci_probe(struct platform_device *pdev)
->  	 */
->  	fifo_size = mci_readl(host, FIFOTH);
->  	fifo_size = (fifo_size >> 16) & 0x7ff;
-> -	mci_writel(host, FIFOTH, ((0x2 << 28) | ((fifo_size/2 - 1) << 16) |
-> -				  ((fifo_size/2) << 0)));
-> +	host->fifoth_val = ((0x2 << 28) | ((fifo_size/2 - 1) << 16) |
-> +			((fifo_size/2) << 0));
-> +	mci_writel(host, FIFOTH, host->fifoth_val);
+> @@ -315,7 +315,7 @@ static void dw_mci_idmac_stop_dma(struct dw_mci *host)
 >  
->  	/* disable clock to CIU */
->  	mci_writel(host, CLKENA, 0);
-> @@ -1766,6 +1767,23 @@ static int dw_mci_resume(struct platform_device *pdev)
->  	int i, ret;
->  	struct dw_mci *host = platform_get_drvdata(pdev);
+>  	/* Stop the IDMAC running */
+>  	temp = mci_readl(host, BMOD);
+> -	temp &= ~SDMMC_IDMAC_ENABLE;
+> +	temp &= ~(SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB);
+>  	mci_writel(host, BMOD, temp);
+>  }
 >  
-> +	if (host->dma_ops->init)
-> +		host->dma_ops->init(host);
-> +
-> +	if (!mci_wait_reset(&pdev->dev, host)) {
-> +		ret = -ENODEV;
-> +		return ret;
-> +	}
-> +
-> +	/* Restore the old value at FIFOTH register */
-> +	mci_writel(host, FIFOTH, host->fifoth_val);
-> +
-> +	mci_writel(host, RINTSTS, 0xFFFFFFFF);
-> +	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
-> +		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
-> +		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
-> +	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
-> +
->  	for (i = 0; i < host->num_slots; i++) {
->  		struct dw_mci_slot *slot = host->slot[i];
->  		if (!slot)
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 3f22c20..5b2b414 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -140,6 +140,7 @@ struct dw_mci {
->  	u32			bus_hz;
->  	u32			current_speed;
->  	u32			num_slots;
-> +	u32			fifoth_val;
->  	struct platform_device	*pdev;
->  	struct dw_mci_board	*pdata;
->  	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
->
+> @@ -384,7 +384,7 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
+>  
+>  	/* Enable the IDMAC */
+>  	temp = mci_readl(host, BMOD);
+> -	temp |= SDMMC_IDMAC_ENABLE;
+> +	temp |= SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB;
+>  	mci_writel(host, BMOD, temp);
+>  
+>  	/* Start it running */
 
-Thanks, will merge for .39 with Will's ACK.
+Any thoughts on this patch?
 
+Thanks,
+
+- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
