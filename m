@@ -1,66 +1,97 @@
-From: Rob Herring <robherring2@gmail.com>
-Subject: Re: [PATCH 5/7] mmc: support sdhci-esdhc-imx as an OF device
-Date: Thu, 17 Mar 2011 15:42:07 -0500
-Message-ID: <4D82721F.5060907@gmail.com>
-References: <1300112759-3495-1-git-send-email-shawn.guo@linaro.org>	<1300112759-3495-6-git-send-email-shawn.guo@linaro.org>	<20110315195926.GB20845@angua.secretlab.ca>	<20110316143915.GE11658@S2100-06.ap.freescale.net> <20110317202238.GF12824@angua.secretlab.ca>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH V6 3/4] mmc: sdhci-esdhc: make the writel/readl as the
+ general APIs
+Date: Thu, 17 Mar 2011 21:55:19 +0100
+Message-ID: <20110317205519.GA29231@pengutronix.de>
+References: <1300343647-15735-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+ <1300343647-15735-3-git-send-email-Hong-Xing.Zhu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="2oS5YaxWCcQjTEyO"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:44972 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755237Ab1CQUmZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 16:42:25 -0400
-Received: by gyf1 with SMTP id 1so1285667gyf.19
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2011 13:42:24 -0700 (PDT)
-In-Reply-To: <20110317202238.GF12824@angua.secretlab.ca>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:40947 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755196Ab1CQUza (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 16:55:30 -0400
+Content-Disposition: inline
+In-Reply-To: <1300343647-15735-3-git-send-email-Hong-Xing.Zhu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Shawn Guo <shawn.guo@freescale.com>, nicolas.pitre@linaro.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linaro-dev@lists.linaro.org
+To: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Cc: linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, linuxzsc@gmail.com, eric.miao@linaro.org
 
-On 03/17/2011 03:22 PM, Grant Likely wrote:
-> [cc'ing linux-mmc to continue this discussion]
->
-> On Wed, Mar 16, 2011 at 10:39:16PM +0800, Shawn Guo wrote:
->> On Tue, Mar 15, 2011 at 01:59:26PM -0600, Grant Likely wrote:
->>> On Mon, Mar 14, 2011 at 10:25:57PM +0800, Shawn Guo wrote:
->>>> Signed-off-by: Shawn Guo<shawn.guo@linaro.org>
->>>
->>> dt support can be added directly to sdchi-pltfm.c drivers now.  There
->>> is no longer any need to use sdhci-of-core.c any more.  For an
->>> example, see the patch titled "of/tegra: add sdhci device tree
->>> handling" in my devicetree/test branch.
->>>
->> I mentioned this a little bit in the cover letter of the patch set
->> as below.
->>
->> "This patch set is to support sdhci-esdhc-imx as an OF device.  As
->> there is already powerpc based esdhc OF support, it chose to add OF
->> support for imx esdhc driver in a different way from what sdhci-tegra
->> did."
->
-> I should read your descriptions more carefully.  :-)
->
->> The tegra approach you made was one of the two options I had, and I
->> happened to love the another more, as it consolidates the eSDHC OF
->> driver for Freescale MPCxxx and i.MX family.
->
-> Heh, I don't dispute the value of merging code.  However, with this
-> approach it means that DT and non-DT imx platforms will be using
-> different drivers for the same device.  Given the choices, I'd
-> rather see the imx driver used in both DT and non-DT situations
-> instead of sharing code with the powerpc version.  I've learnt the
-> hard way that it is just too painful having two drivers for the same
-> hardware; particularly when the only difference is the method used to
-> probe them.
->
-> Actually, what I'd *really* rather see is the powerpc code migrated
-> over to sdhci_pltfm.c, and then have the imx compatible value added to
-> it.  I'll make sure to get some help from the Freescale powerpc folks
-> to test any patch you produce to that end.
 
-Based on past experience, there will be differences between imx and ppc 
-h/w even though it is the "same" block.
+--2oS5YaxWCcQjTEyO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Rob
+Hi Richard,
+
+On Thu, Mar 17, 2011 at 02:34:06PM +0800, Richard Zhu wrote:
+> Add one flag to indicate the GPIO CD/WP is enabled or not
+> on imx platforms, and reuse the writel/readl as the general
+> APIs for imx SOCs.
+>=20
+> Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c |   43 ++++++++++++++++++++++++++++++=
+------
+>  drivers/mmc/host/sdhci-pltfm.h     |    2 +-
+>  2 files changed, 37 insertions(+), 8 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-=
+esdhc-imx.c
+> index 3b52485..5768e06 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -16,6 +16,7 @@
+>  #include <linux/err.h>
+>  #include <linux/clk.h>
+>  #include <linux/gpio.h>
+> +#include <linux/slab.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/sdhci-pltfm.h>
+>  #include <mach/hardware.h>
+> @@ -24,6 +25,13 @@
+>  #include "sdhci-pltfm.h"
+>  #include "sdhci-esdhc.h"
+> =20
+> +#define IMX_GPIO_CD_WP			(1 << 0)
+
+Hmm, that sounds like a macro for a gpio-number. What about
+ESDHC_FLAG_GPIO_FOR_CD_WP or something like that?
+
+> +
+> +struct pltfm_imx_data {
+> +	int flags;
+> +	u32 mod_val;
+
+Maybe 'scratchpad' was not the best name, but 'mod_val' seems worse to me.
+
+Those are minor things, but there is one thing which needs respinning IMHO:
+While it looks functionally OK, I'll tell you (once again) that you cast too
+much. Please be careful about that in the future!
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--2oS5YaxWCcQjTEyO
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAk2CdTYACgkQD27XaX1/VRtPAQCeJOaLFqrJcA4NF6vPIg0BCAmM
+ucAAoKjBDWgEUHvAqcPT9YXNfAPUK6AX
+=k7EP
+-----END PGP SIGNATURE-----
+
+--2oS5YaxWCcQjTEyO--
