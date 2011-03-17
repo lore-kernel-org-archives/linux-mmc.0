@@ -1,66 +1,69 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH 5/7] mmc: support sdhci-esdhc-imx as an OF device
-Date: Thu, 17 Mar 2011 14:22:38 -0600
-Message-ID: <20110317202238.GF12824@angua.secretlab.ca>
-References: <1300112759-3495-1-git-send-email-shawn.guo@linaro.org>
- <1300112759-3495-6-git-send-email-shawn.guo@linaro.org>
- <20110315195926.GB20845@angua.secretlab.ca>
- <20110316143915.GE11658@S2100-06.ap.freescale.net>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH 1/3] dw_mmc: set fixed burst in BMOD register
+Date: Thu, 17 Mar 2011 20:28:02 +0000
+Message-ID: <AANLkTik--TiJgNrezLb6hcbFAxWXqvSBUfvGOU2JuEpH@mail.gmail.com>
+References: <4D670F0D.8020102@samsung.com>
+	<m31v25ppvc.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:54546 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754905Ab1CQUWm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 16:22:42 -0400
-Received: by mail-iw0-f174.google.com with SMTP id 34so3200753iwn.19
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2011 13:22:42 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20110316143915.GE11658@S2100-06.ap.freescale.net>
+Received: from mail-yi0-f46.google.com ([209.85.218.46]:53145 "EHLO
+	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755403Ab1CQU2E convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 16:28:04 -0400
+Received: by yia27 with SMTP id 27so1287058yia.19
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2011 13:28:03 -0700 (PDT)
+In-Reply-To: <m31v25ppvc.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, nicolas.pitre@linaro.org, devicetree-discuss@lists.ozlabs.org, linaro-dev@lists.linaro.org, linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
 
-[cc'ing linux-mmc to continue this discussion]
+On Thu, Mar 17, 2011 at 6:24 PM, Chris Ball <cjb@laptop.org> wrote:
+> Hi Will,
+>
+> On Thu, Feb 24 2011, Jaehoon Chung wrote:
+>> This patch is applied fixed burst.
+>> If use internal DMA controller, i think that need to set this bit.
+>>
+>> I tested when set this bit or not. I found that increase performance=
+ with IDMAC
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> ---
+>> =A0drivers/mmc/host/dw_mmc.c | =A0 =A04 ++--
+>> =A01 files changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 58476c1..46e5a89 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -315,7 +315,7 @@ static void dw_mci_idmac_stop_dma(struct dw_mci =
+*host)
+>>
+>> =A0 =A0 =A0 /* Stop the IDMAC running */
+>> =A0 =A0 =A0 temp =3D mci_readl(host, BMOD);
+>> - =A0 =A0 temp &=3D ~SDMMC_IDMAC_ENABLE;
+>> + =A0 =A0 temp &=3D ~(SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB);
+>> =A0 =A0 =A0 mci_writel(host, BMOD, temp);
+>> =A0}
+>>
+>> @@ -384,7 +384,7 @@ static void dw_mci_idmac_start_dma(struct dw_mci=
+ *host, unsigned int sg_len)
+>>
+>> =A0 =A0 =A0 /* Enable the IDMAC */
+>> =A0 =A0 =A0 temp =3D mci_readl(host, BMOD);
+>> - =A0 =A0 temp |=3D SDMMC_IDMAC_ENABLE;
+>> + =A0 =A0 temp |=3D SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB;
+>> =A0 =A0 =A0 mci_writel(host, BMOD, temp);
+>>
+>> =A0 =A0 =A0 /* Start it running */
+>
+> Any thoughts on this patch?
 
-On Wed, Mar 16, 2011 at 10:39:16PM +0800, Shawn Guo wrote:
-> On Tue, Mar 15, 2011 at 01:59:26PM -0600, Grant Likely wrote:
-> > On Mon, Mar 14, 2011 at 10:25:57PM +0800, Shawn Guo wrote:
-> > > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> > 
-> > dt support can be added directly to sdchi-pltfm.c drivers now.  There
-> > is no longer any need to use sdhci-of-core.c any more.  For an
-> > example, see the patch titled "of/tegra: add sdhci device tree
-> > handling" in my devicetree/test branch.
-> > 
-> I mentioned this a little bit in the cover letter of the patch set
-> as below.
-> 
-> "This patch set is to support sdhci-esdhc-imx as an OF device.  As
-> there is already powerpc based esdhc OF support, it chose to add OF
-> support for imx esdhc driver in a different way from what sdhci-tegra
-> did."
-
-I should read your descriptions more carefully.  :-)
-
-> The tegra approach you made was one of the two options I had, and I
-> happened to love the another more, as it consolidates the eSDHC OF
-> driver for Freescale MPCxxx and i.MX family.
-
-Heh, I don't dispute the value of merging code.  However, with this
-approach it means that DT and non-DT imx platforms will be using
-different drivers for the same device.  Given the choices, I'd
-rather see the imx driver used in both DT and non-DT situations
-instead of sharing code with the powerpc version.  I've learnt the
-hard way that it is just too painful having two drivers for the same
-hardware; particularly when the only difference is the method used to
-probe them.
-
-Actually, what I'd *really* rather see is the powerpc code migrated
-over to sdhci_pltfm.c, and then have the imx compatible value added to
-it.  I'll make sure to get some help from the Freescale powerpc folks
-to test any patch you produce to that end.
-
-g.
-
+=46rom the documentation I have it's not clear what this bit does. I
+have very limited access to hardware with internal DMA support, so I
+can't really test it either. I'm willing to believe the patch improves
+things but I can't really say one way or the other.
