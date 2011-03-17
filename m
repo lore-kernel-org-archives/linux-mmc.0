@@ -1,78 +1,67 @@
-From: Sergei Shtylyov <sshtylyov@ru.mvista.com>
-Subject: [PATCH] MMC: use pci_dev->revision
-Date: Thu, 17 Mar 2011 21:08:45 +0300
-Message-ID: <201103172108.45989.sshtylyov@ru.mvista.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 2/3] dw_mmc: support mmc power control with regulator
+Date: Thu, 17 Mar 2011 14:13:42 -0400
+Message-ID: <m3ei65pqcp.fsf@pullcord.laptop.org>
+References: <4D670F0E.7000800@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.dev.rtsoft.ru ([213.79.90.226]:56752 "HELO
-	mail.dev.rtsoft.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1754935Ab1CQSKW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 14:10:22 -0400
-Content-Disposition: inline
+Received: from void.printf.net ([89.145.121.20]:58746 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752780Ab1CQSQl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 17 Mar 2011 14:16:41 -0400
+In-Reply-To: <4D670F0E.7000800@samsung.com> (Jaehoon Chung's message of "Fri,
+	25 Feb 2011 11:08:14 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: brucechang@via.com.tw, HaraldWelte@viatech.com
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
 
-The SDHCI driver uses PCI_CLASS_REVISION instead of PCI_REVISION_ID, so it was
-not converted by commit 44c10138fd4bbc4b6d6bff0873c24902f2a9da65 (PCI: Change
-all drivers to use pci_device->revision). The newer VIA driver has the similar
-code too. So convert both drivers to using the 'revision' field of 'struct
-pci_dev' now...
+Hi Jaehoon,
 
-Signed-off-by: Sergei Shtylyov <sshtylyov@ru.mvista.com>
+On Thu, Feb 24 2011, Jaehoon Chung wrote:
+> This patch is applied the power control with regulator.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c  |   25 +++++++++++++++++++++++++
+>  include/linux/mmc/dw_mmc.h |    2 ++
+>  2 files changed, 27 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 46e5a89..338fedc 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -32,6 +32,7 @@
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/mmc/dw_mmc.h>
+>  #include <linux/bitops.h>
+> +#include <linux/regulator/consumer.h>
+>  
+>  #include "dw_mmc.h"
+>  
+> @@ -1438,6 +1439,13 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	}
+>  #endif /* CONFIG_MMC_DW_IDMAC */
+>  
+> +	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+> +	if (IS_ERR(host->vmmc)) {
+> +		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
+> +		host->vmmc = NULL;
+> +	} else
+> +		regulator_enable(host->vmmc);
+> +
+>  	if (dw_mci_get_cd(mmc))
+>  		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+>  	else
 
----
-The patch is against the recent Linus' tree.
+I think you want an "#ifdef CONFIG_REGULATOR" around this hunk.
+Please try building the driver with CONFIG_REGULATOR=n.
 
- drivers/mmc/host/sdhci-pci.c |    6 ++----
- drivers/mmc/host/via-sdmmc.c |    5 ++---
- 2 files changed, 4 insertions(+), 7 deletions(-)
+The other hunks in the patch shouldn't need it, because they test
+"host->vcc" before making any regulator calls.
 
-Index: linux-2.6/drivers/mmc/host/sdhci-pci.c
-===================================================================
---- linux-2.6.orig/drivers/mmc/host/sdhci-pci.c
-+++ linux-2.6/drivers/mmc/host/sdhci-pci.c
-@@ -1012,16 +1012,14 @@ static int __devinit sdhci_pci_probe(str
- 	struct sdhci_pci_chip *chip;
- 	struct sdhci_pci_slot *slot;
- 
--	u8 slots, rev, first_bar;
-+	u8 slots, first_bar;
- 	int ret, i;
- 
- 	BUG_ON(pdev == NULL);
- 	BUG_ON(ent == NULL);
- 
--	pci_read_config_byte(pdev, PCI_CLASS_REVISION, &rev);
--
- 	dev_info(&pdev->dev, "SDHCI controller found [%04x:%04x] (rev %x)\n",
--		 (int)pdev->vendor, (int)pdev->device, (int)rev);
-+		 (int)pdev->vendor, (int)pdev->device, (int)pdev->revision);
- 
- 	ret = pci_read_config_byte(pdev, PCI_SLOT_INFO, &slots);
- 	if (ret)
-Index: linux-2.6/drivers/mmc/host/via-sdmmc.c
-===================================================================
---- linux-2.6.orig/drivers/mmc/host/via-sdmmc.c
-+++ linux-2.6/drivers/mmc/host/via-sdmmc.c
-@@ -1090,14 +1090,13 @@ static int __devinit via_sd_probe(struct
- 	struct mmc_host *mmc;
- 	struct via_crdr_mmc_host *sdhost;
- 	u32 base, len;
--	u8 rev, gatt;
-+	u8  gatt;
- 	int ret;
- 
--	pci_read_config_byte(pcidev, PCI_CLASS_REVISION, &rev);
- 	pr_info(DRV_NAME
- 		": VIA SDMMC controller found at %s [%04x:%04x] (rev %x)\n",
- 		pci_name(pcidev), (int)pcidev->vendor, (int)pcidev->device,
--		(int)rev);
-+		(int)pcidev->revision);
- 
- 	ret = pci_enable_device(pcidev);
- 	if (ret)
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
