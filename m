@@ -1,58 +1,91 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/3] dw_mmc: support mmc power control with regulator
-Date: Thu, 17 Mar 2011 19:23:01 +0900
-Message-ID: <4D81E105.7060501@samsung.com>
-References: <4D670F0E.7000800@samsung.com>
- <AANLkTi=4_BanAR4+Sq4AKy6fwHptsyR41b66FP_-ETjQ@mail.gmail.com>
+Subject: [PATCH] dw_mmc: fix suspend/resume operation
+Date: Thu, 17 Mar 2011 20:32:33 +0900
+Message-ID: <4D81F151.3090300@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:28468 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752881Ab1CQKqb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 06:46:31 -0400
-Received: from epmmp2 (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
+Received: from mailout1.samsung.com ([203.254.224.24]:47711 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753992Ab1CQLdL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 07:33:11 -0400
+Received: from epmmp2 (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LI700B8O67DY210@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 17 Mar 2011 19:23:37 +0900 (KST)
+ 2010)) with ESMTP id <0LI700MKA9F9FV00@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 17 Mar 2011 20:33:09 +0900 (KST)
 Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
  by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LI700EOL67EAU@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 17 Mar 2011 19:23:38 +0900 (KST)
-In-reply-to: <AANLkTi=4_BanAR4+Sq4AKy6fwHptsyR41b66FP_-ETjQ@mail.gmail.com>
+ with ESMTPA id <0LI700JWL9FAJC@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 17 Mar 2011 20:33:10 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Chris..
+This patch is applied about re-init processing when suspend/resume.
 
-I want to know this patch..
+When card is resuming, some register is reset.
+If card is removable, maybe controller should be rescan for card.
+But if assume card is non-removable, need to restore the old value at registers.
 
-Regard,
-Jaehoon Chung
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c  |   22 ++++++++++++++++++++--
+ include/linux/mmc/dw_mmc.h |    1 +
+ 2 files changed, 21 insertions(+), 2 deletions(-)
 
-Will Newton wrote:
-> On Fri, Feb 25, 2011 at 2:08 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> This patch is applied the power control with regulator.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c  |   25 +++++++++++++++++++++++++
->>  include/linux/mmc/dw_mmc.h |    2 ++
->>  2 files changed, 27 insertions(+), 0 deletions(-)
-> 
-> This looks ok from an mmc point of view. I'm not that familiar with
-> the regulator API however, so it would be good to get a review from
-> someone who is.
-> 
-> Acked-by: Will Newton <will.newton@imgtec.com>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 299c1d6..892bfe3 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1633,8 +1633,9 @@ static int dw_mci_probe(struct platform_device *pdev)
+ 	 */
+ 	fifo_size = mci_readl(host, FIFOTH);
+ 	fifo_size = (fifo_size >> 16) & 0x7ff;
+-	mci_writel(host, FIFOTH, ((0x2 << 28) | ((fifo_size/2 - 1) << 16) |
+-				  ((fifo_size/2) << 0)));
++	host->fifoth_val = ((0x2 << 28) | ((fifo_size/2 - 1) << 16) |
++			((fifo_size/2) << 0));
++	mci_writel(host, FIFOTH, host->fifoth_val);
+ 
+ 	/* disable clock to CIU */
+ 	mci_writel(host, CLKENA, 0);
+@@ -1766,6 +1767,23 @@ static int dw_mci_resume(struct platform_device *pdev)
+ 	int i, ret;
+ 	struct dw_mci *host = platform_get_drvdata(pdev);
+ 
++	if (host->dma_ops->init)
++		host->dma_ops->init(host);
++
++	if (!mci_wait_reset(&pdev->dev, host)) {
++		ret = -ENODEV;
++		return ret;
++	}
++
++	/* Restore the old value at FIFOTH register */
++	mci_writel(host, FIFOTH, host->fifoth_val);
++
++	mci_writel(host, RINTSTS, 0xFFFFFFFF);
++	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
++		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
++		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
++	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
++
+ 	for (i = 0; i < host->num_slots; i++) {
+ 		struct dw_mci_slot *slot = host->slot[i];
+ 		if (!slot)
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 3f22c20..5b2b414 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -140,6 +140,7 @@ struct dw_mci {
+ 	u32			bus_hz;
+ 	u32			current_speed;
+ 	u32			num_slots;
++	u32			fifoth_val;
+ 	struct platform_device	*pdev;
+ 	struct dw_mci_board	*pdata;
+ 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
