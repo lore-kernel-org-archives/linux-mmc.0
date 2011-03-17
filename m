@@ -1,47 +1,54 @@
-From: Sascha Silbe <sascha-ml-reply-to-2011-2@silbe.org>
-Subject: [PATCH] mmc: enable ERASE caps for mvsdio host
-Date: Thu, 17 Mar 2011 19:42:26 +0100
-Message-ID: <1300387346-1938-1-git-send-email-sascha-ml-reply-to-2011-2@silbe.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 2/3] dw_mmc: support mmc power control with regulator
+Date: Thu, 17 Mar 2011 15:01:39 -0400
+Message-ID: <m3mxkto9kc.fsf@pullcord.laptop.org>
+References: <4D670F0E.7000800@samsung.com>
+	<m3ei65pqcp.fsf@pullcord.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from setoy.chost.de ([217.160.209.225]:58391 "EHLO smtp.chost.de"
+Received: from void.printf.net ([89.145.121.20]:37292 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754725Ab1CQSt4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 17 Mar 2011 14:49:56 -0400
+	id S1752188Ab1CQTEd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 17 Mar 2011 15:04:33 -0400
+In-Reply-To: <m3ei65pqcp.fsf@pullcord.laptop.org> (Chris Ball's message of
+	"Thu, 17 Mar 2011 14:13:42 -0400")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
 
-From: Sascha Silbe <sascha-pgp@silbe.org>
+Hi,
 
-The Marvell SDIO host controller can transmit Erase commands to the card quite
-fine.
+On Thu, Mar 17 2011, Chris Ball wrote:
+>> @@ -1438,6 +1439,13 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>  	}
+>>  #endif /* CONFIG_MMC_DW_IDMAC */
+>>  
+>> +	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+>> +	if (IS_ERR(host->vmmc)) {
+>> +		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
+>> +		host->vmmc = NULL;
+>> +	} else
+>> +		regulator_enable(host->vmmc);
+>> +
+>>  	if (dw_mci_get_cd(mmc))
+>>  		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+>>  	else
+>
+> I think you want an "#ifdef CONFIG_REGULATOR" around this hunk.
+> Please try building the driver with CONFIG_REGULATOR=n.
+>
+> The other hunks in the patch shouldn't need it, because they test
+> "host->vcc" before making any regulator calls.
 
-Signed-off-by: Sascha Silbe <sascha-pgp@silbe.org>
----
- drivers/mmc/host/mvsdio.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+Actually, <linux/regulator/consumer.h> provides no-op versions of all
+these functions if CONFIG_REGULATOR is unset, so I guess this doesn't
+matter; the driver builds without CONFIG_REGULATOR as-is.
 
-Tested on OpenRD-Base using a SanDisk 4GB class 4 card (retail). The
-BLKDISCARD ioctl returned immediately, no timeout issue encountered.
-I had to remove and reinsert the card to read the new (i.e. erased) data, but
-that's most likely either by design or a bug on a different layer.
+Will merge for .39 with Will's ACK, thanks.
 
-
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index eeb1147..758251d 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -735,7 +735,8 @@ static int __init mvsd_probe(struct platform_device *pdev)
-
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
- 	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
--		    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-+		    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
-+		    MMC_CAP_ERASE;
-
- 	mmc->f_min = DIV_ROUND_UP(host->base_clock, MVSD_BASE_DIV_MAX);
- 	mmc->f_max = maxfreq;
---
-1.7.4.1
-
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
