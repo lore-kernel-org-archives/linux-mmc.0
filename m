@@ -1,97 +1,210 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH V6 3/4] mmc: sdhci-esdhc: make the writel/readl as the
- general APIs
-Date: Thu, 17 Mar 2011 21:55:19 +0100
-Message-ID: <20110317205519.GA29231@pengutronix.de>
-References: <1300343647-15735-1-git-send-email-Hong-Xing.Zhu@freescale.com>
- <1300343647-15735-3-git-send-email-Hong-Xing.Zhu@freescale.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH resend] mmc: Added ioctl to let userspace apps send ACMDs
+Date: Thu, 17 Mar 2011 22:55:51 +0100
+Message-ID: <201103172255.51442.arnd@arndb.de>
+References: <203F41F6E33F954E8E8B02559FDC906F743176BFD2@modex01>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="2oS5YaxWCcQjTEyO"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:40947 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755196Ab1CQUza (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 16:55:30 -0400
-Content-Disposition: inline
-In-Reply-To: <1300343647-15735-3-git-send-email-Hong-Xing.Zhu@freescale.com>
+Received: from moutng.kundenserver.de ([212.227.126.187]:61686 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755971Ab1CQVz4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 17:55:56 -0400
+In-Reply-To: <203F41F6E33F954E8E8B02559FDC906F743176BFD2@modex01>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Cc: linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, linuxzsc@gmail.com, eric.miao@linaro.org
+To: John Calixto <john.calixto@modsystems.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>
 
+On Thursday 17 March 2011 19:28:55 John Calixto wrote:
+> Part 3 of the SD Specification (SD Card Association; www.sdcard.org) describes
+> how to use the security function of an SD card using application specific
+> commands in conjunction with CPRM algorithms and keys licensed from the 4C
+> Entity (www.4centity.com).  This allows userspace applications to access this
+> security feature.
 
---2oS5YaxWCcQjTEyO
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Having the ability to send commands from user space sounds useful,
+a number of other block drivers can do this, too.
 
-Hi Richard,
+However, for the specific example you mention, I think it would be
+nicer to implement it in kernel space, and have a high-level
+interface.
 
-On Thu, Mar 17, 2011 at 02:34:06PM +0800, Richard Zhu wrote:
-> Add one flag to indicate the GPIO CD/WP is enabled or not
-> on imx platforms, and reuse the writel/readl as the general
-> APIs for imx SOCs.
->=20
-> Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |   43 ++++++++++++++++++++++++++++++=
-------
->  drivers/mmc/host/sdhci-pltfm.h     |    2 +-
->  2 files changed, 37 insertions(+), 8 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-=
-esdhc-imx.c
-> index 3b52485..5768e06 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -16,6 +16,7 @@
->  #include <linux/err.h>
->  #include <linux/clk.h>
->  #include <linux/gpio.h>
-> +#include <linux/slab.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/sdhci-pltfm.h>
->  #include <mach/hardware.h>
-> @@ -24,6 +25,13 @@
->  #include "sdhci-pltfm.h"
->  #include "sdhci-esdhc.h"
-> =20
-> +#define IMX_GPIO_CD_WP			(1 << 0)
+A few more comments about the implementation below.
 
-Hmm, that sounds like a macro for a gpio-number. What about
-ESDHC_FLAG_GPIO_FOR_CD_WP or something like that?
+> Tested on TI PCIxx12 (SDHCI), Sigma Designs SMP8652 SoC, TI OMAP3621 SoC, TI
+> OMAP3630 SoC, Samsung S5PC110 SoC, Qualcomm MSM7200A SoC.
+
+Is this safe to do while the device is operating and a file system
+writes data?
+
+Does it allow sending all commands or just the ones you require?
+
+I've been thinking about adding something like this to allow
+a passthrough mode for e.g. qemu, or perhaps for combining
+it with a user space mmc host (to be written) to allow tracing
+the communication between host and card from user space.
+
+> +{
+> +       struct sd_ioc_cmd sdic = {0};
+> +       struct mmc_blk_data *md = NULL;
+> +       struct mmc_host *host = NULL;
+> +       struct mmc_card *card = NULL;
+> +       struct mmc_command cmd = {0};
+> +       struct mmc_data data = {0};
+> +       int err = 0;
+> +       struct mmc_request mrq = {0};
+> +       struct scatterlist sg = {0};
+> +       unsigned char *blocks = NULL;
+> +       size_t data_bytes = 0;
+
+[style] Don't initialize variables to zero if they get assigned
+to something else later, otherwise you prevent the compiler
+from warning you about accesses to uninitialized variables.
+
+> +#ifdef CONFIG_MMC_DEBUG
+> +       char dbgbuf[64] = {0};
+> +#endif
 
 > +
-> +struct pltfm_imx_data {
-> +	int flags;
-> +	u32 mod_val;
+> +       if (copy_from_user(&sdic, (void __user *) ioc_arg, sizeof(struct sd_ioc_cmd))) {
+> +               printk(KERN_ERR "%s: error reading ioctl arg from userspace\n", __func__);
+> +               return -EFAULT;
+> +       }
 
-Maybe 'scratchpad' was not the best name, but 'mod_val' seems worse to me.
+Don't printk information about user input, only about unexpected
+data you get from the card. If you print an error, use dev_err().
 
-Those are minor things, but there is one thing which needs respinning IMHO:
-While it looks functionally OK, I'll tell you (once again) that you cast too
-much. Please be careful about that in the future!
+> +       if (sdic.struct_version != SD_IOC_CMD_STRUCT_VERSION)
+> +               return -EINVAL;
 
-Regards,
+Don't use version information for ioctl data structures. We cannot
+change them anyways, so the version number is redundant.
+If we ever need to extend the structure, it has to be done in
+a compatible way, or by introducing a new ioctl command with
+a different structure, but leaving the old one in place.
 
-   Wolfram
+> +       /* Find the mmc structures based on the bdev. */
+> +       md = mmc_blk_get(bdev->bd_disk);
+> +       if (!md)
+> +               return -EINVAL;
+> +
+> +       card = md->queue.card;
+> +#ifdef CONFIG_MMC_DEBUG
+> +       printk(KERN_DEBUG "%s: card = %p\n", __func__, card);
+> +#endif
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+dev_dbg()
 
---2oS5YaxWCcQjTEyO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
+> +       if (IS_ERR(card))
+> +               return PTR_ERR(card);
+> +
+> +#ifdef CONFIG_MMC_DEBUG
+> +       printk(KERN_DEBUG "%s: host = %p\n", __func__, card->host);
+> +#endif
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
+dev_dbg()
 
-iEYEARECAAYFAk2CdTYACgkQD27XaX1/VRtPAQCeJOaLFqrJcA4NF6vPIg0BCAmM
-ucAAoKjBDWgEUHvAqcPT9YXNfAPUK6AX
-=k7EP
------END PGP SIGNATURE-----
+> +       host = card->host;
+> +       BUG_ON(!host);
 
---2oS5YaxWCcQjTEyO--
+try to be very careful about BUG_ON(), it's always better to return
+an error if you can avoid crashing the current process.
+
+> +       mmc_claim_host(host);
+> +
+> +       err = mmc_app_cmd(host, card);
+> +       if (err) {
+> +               dev_err(mmc_dev(host), "%s: CMD%d error\n", __func__, MMC_APP_CMD);
+> +               goto ioctl_done;
+> +       }
+
+Is this an unexpected error case? If it can be triggered by sending
+specific commands, it would be better to just return the error
+number ot user space without printing anything.
+
+> +       data_bytes = data.blksz * data.blocks;
+> +       blocks = (unsigned char *) kzalloc(data_bytes, GFP_KERNEL);
+
+No need for the typecast, kzalloc returns a void pointer.
+
+> +       if (copy_from_user(blocks, sdic.data, data_bytes)) {
+> +               dev_err(mmc_dev(host), "%s: error reading userspace buffer\n", __func__);
+
+no printing here again
+
+> +#ifdef CONFIG_MMC_DEBUG
+> +       hex_dump_to_buffer(blocks, data_bytes, 16, 1, dbgbuf, sizeof(dbgbuf), 0);
+> +       dev_dbg(mmc_dev(host), "%s: first bytes of pre data\n%s\n", __func__, dbgbuf);
+> +#endif
+
+Is this really still needed? I would assume that if your code works
+fine, you can just remove the hex dump.
+
+>  static const struct block_device_operations mmc_bdops = {
+>         .open                   = mmc_blk_open,
+>         .release                = mmc_blk_release,
+>         .getgeo                 = mmc_blk_getgeo,
+>         .owner                  = THIS_MODULE,
+> +       .ioctl                  = mmc_blk_ioctl,
+>  };
+
+This also needs a compat_ioctl pointer, new drivers should always
+work in both 32 and 64 bit mode.
+ 
+> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+> index 797cdb5..0453dcd 100644
+> --- a/drivers/mmc/core/sd_ops.c
+> +++ b/drivers/mmc/core/sd_ops.c
+> @@ -20,7 +20,7 @@
+>  #include "core.h"
+>  #include "sd_ops.h"
+> 
+> -static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+> +int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+>  {
+>         int err;
+>         struct mmc_command cmd;
+> @@ -48,6 +48,7 @@ static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+> 
+>         return 0;
+>  }
+> +EXPORT_SYMBOL(mmc_app_cmd);
+ 
+Why not EXPORT_SYMBOL_GPL?
+
+> @@ -84,5 +86,21 @@
+>  #define SD_SWITCH_ACCESS_DEF   0
+>  #define SD_SWITCH_ACCESS_HS    1
+> 
+> +struct sd_ioc_cmd {
+> +    unsigned int struct_version;
+> +#define SD_IOC_CMD_STRUCT_VERSION 0
+> +    int write_flag;  /* implies direction of data.  true = write, false = read */
+> +    unsigned int opcode;
+> +    unsigned int arg;
+> +    unsigned int flags;
+> +    unsigned int postsleep_us;  /* apply usecond delay *after* issuing command */
+> +    unsigned int force_timeout_ns;  /* force timeout to be force_timeout_ns ns */
+> +    unsigned int response[4];  /* CMD response */
+> +    unsigned int blksz;
+> +    unsigned int blocks;
+> +    unsigned char *data;  /* DAT buffer */
+> +};
+> +#define SD_IOC_ACMD _IOWR(MMC_BLOCK_MAJOR, 0, struct sd_ioc_cmd *)
+> +
+>  #endif
+> 
+
+As I mentioned, any ioctl command that gets introduced needs to be
+designed very carefully to make sure we don't need to change it in the
+future. The only two things I can see here are:
+
+* The struct_version should be removed
+* The data pointer is not compatible between 32 and 64 bits.
+  One solution for this would be to make it a __u64 argument
+  and require the user to cast the pointer to a 64 bit type.
+
+	Arnd
