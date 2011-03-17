@@ -1,91 +1,33 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] dw_mmc: fix suspend/resume operation
-Date: Thu, 17 Mar 2011 20:32:33 +0900
-Message-ID: <4D81F151.3090300@samsung.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] dw_mmc: fix suspend/resume operation
+Date: Thu, 17 Mar 2011 15:33:47 +0000
+Message-ID: <AANLkTikprgnox-4JfTXOSqz6jYBg=u+X_H6GAH4QkXg=@mail.gmail.com>
+References: <4D81F151.3090300@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:47711 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753992Ab1CQLdL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 07:33:11 -0400
-Received: from epmmp2 (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LI700MKA9F9FV00@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 17 Mar 2011 20:33:09 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LI700JWL9FAJC@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 17 Mar 2011 20:33:10 +0900 (KST)
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:44682 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754501Ab1CQPdr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2011 11:33:47 -0400
+Received: by yxs7 with SMTP id 7so1161382yxs.19
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2011 08:33:47 -0700 (PDT)
+In-Reply-To: <4D81F151.3090300@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-This patch is applied about re-init processing when suspend/resume.
+On Thu, Mar 17, 2011 at 11:32 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> This patch is applied about re-init processing when suspend/resume.
+>
+> When card is resuming, some register is reset.
+> If card is removable, maybe controller should be rescan for card.
+> But if assume card is non-removable, need to restore the old value at registers.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-When card is resuming, some register is reset.
-If card is removable, maybe controller should be rescan for card.
-But if assume card is non-removable, need to restore the old value at registers.
+Looks ok to me.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c  |   22 ++++++++++++++++++++--
- include/linux/mmc/dw_mmc.h |    1 +
- 2 files changed, 21 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 299c1d6..892bfe3 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1633,8 +1633,9 @@ static int dw_mci_probe(struct platform_device *pdev)
- 	 */
- 	fifo_size = mci_readl(host, FIFOTH);
- 	fifo_size = (fifo_size >> 16) & 0x7ff;
--	mci_writel(host, FIFOTH, ((0x2 << 28) | ((fifo_size/2 - 1) << 16) |
--				  ((fifo_size/2) << 0)));
-+	host->fifoth_val = ((0x2 << 28) | ((fifo_size/2 - 1) << 16) |
-+			((fifo_size/2) << 0));
-+	mci_writel(host, FIFOTH, host->fifoth_val);
- 
- 	/* disable clock to CIU */
- 	mci_writel(host, CLKENA, 0);
-@@ -1766,6 +1767,23 @@ static int dw_mci_resume(struct platform_device *pdev)
- 	int i, ret;
- 	struct dw_mci *host = platform_get_drvdata(pdev);
- 
-+	if (host->dma_ops->init)
-+		host->dma_ops->init(host);
-+
-+	if (!mci_wait_reset(&pdev->dev, host)) {
-+		ret = -ENODEV;
-+		return ret;
-+	}
-+
-+	/* Restore the old value at FIFOTH register */
-+	mci_writel(host, FIFOTH, host->fifoth_val);
-+
-+	mci_writel(host, RINTSTS, 0xFFFFFFFF);
-+	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
-+		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
-+		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
-+	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
-+
- 	for (i = 0; i < host->num_slots; i++) {
- 		struct dw_mci_slot *slot = host->slot[i];
- 		if (!slot)
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 3f22c20..5b2b414 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -140,6 +140,7 @@ struct dw_mci {
- 	u32			bus_hz;
- 	u32			current_speed;
- 	u32			num_slots;
-+	u32			fifoth_val;
- 	struct platform_device	*pdev;
- 	struct dw_mci_board	*pdata;
- 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
+Acked-by: Will Newton <will.newton@imgtec.com>
