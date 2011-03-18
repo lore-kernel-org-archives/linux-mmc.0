@@ -1,28 +1,18 @@
 From: "Luis R. Rodriguez" <lrodriguez@atheros.com>
-Subject: [RFC 4/4] sdhci: add quick for controllers with for CIRQ issues
-Date: Fri, 18 Mar 2011 15:12:00 -0700
-Message-ID: <1300486320-23607-5-git-send-email-lrodriguez@atheros.com>
+Subject: [RFC 3/4] sdhci: cache when the MMC bus width is 4 bits wide
+Date: Fri, 18 Mar 2011 15:11:59 -0700
+Message-ID: <1300486320-23607-4-git-send-email-lrodriguez@atheros.com>
 References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.atheros.com ([12.19.149.2]:44376 "EHLO mail.atheros.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932908Ab1CRWMZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 18 Mar 2011 18:12:25 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: cjb@laptop.org
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, vmehta@atheros.com, naveen.singh@atheros.com, kvalo@adurom.com, j@w1.fi, "Luis R. Rodriguez" <lrodriguez@atheros.com>, Naveen Singh <nsingh@atheros.com>, Vipin Mehta <Vipin.Mehta@atheros.com>
+List-Id: linux-mmc@vger.kernel.org
 
-This adds an SDHCI quick for controller which cannot
-cannot detect CIRQ reliably when in 4-bit mode. What
-we do is while bus is idle we leave it in 1-bit mode at
-the controller level.
-
-This allows the PCI SDCHI ENE 712 controller to work
-correctly.
+This can later be used when we send commands.
 
 Cc: Chris Ball <cjb@laptop.org>
 Cc: Kalle Valo <kvalo@adurom.com>
@@ -30,88 +20,41 @@ Cc: Naveen Singh <nsingh@atheros.com>
 Cc: Vipin Mehta <Vipin.Mehta@atheros.com>
 Signed-off-by: Luis R. Rodriguez <lrodriguez@atheros.com>
 ---
- drivers/mmc/host/sdhci-pci.c |    3 ++-
- drivers/mmc/host/sdhci.c     |   25 +++++++++++++++++++++++++
- include/linux/mmc/sdhci.h    |    2 ++
- 3 files changed, 29 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci.c  |    7 +++++--
+ include/linux/mmc/sdhci.h |    1 +
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 2f8d468..8b13f61 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -130,7 +130,8 @@ static const struct sdhci_pci_fixes sdhci_ricoh_mmc = {
- 
- static const struct sdhci_pci_fixes sdhci_ene_712 = {
- 	.quirks		= SDHCI_QUIRK_SINGLE_POWER_WRITE |
--			  SDHCI_QUIRK_BROKEN_DMA,
-+			  SDHCI_QUIRK_BROKEN_DMA |
-+			  SDHCI_QUIRK_1BIT_INTERRUPT,
- };
- 
- static const struct sdhci_pci_fixes sdhci_ene_714 = {
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a4cf0c0..fac075e 100644
+index 7074870..a4cf0c0 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -245,6 +245,27 @@ static void sdhci_led_control(struct led_classdev *led,
- }
- #endif
- 
-+/* handle bus case where controller cannot detect CIRQ reliably when in 4-bit mode */
-+static void sdhci_idle_bus_adjust(struct sdhci_host *host, u8 idle)
-+{
-+	u8 ctrl;
-+
-+	if (!(host->flags & SDHCI_IN_4BIT_MODE))
-+		return;
-+
-+	if (!(host->quirks & SDHCI_QUIRK_1BIT_INTERRUPT))
-+		return;
-+
-+	/* while bus is idle, leave it in 1-bit mode at the controller level */
-+	ctrl = readb(host->ioaddr + SDHCI_HOST_CONTROL);
-+	ctrl &= ~SDHCI_CTRL_4BITBUS;
-+
-+	if (!idle)
-+		ctrl |= SDHCI_CTRL_4BITBUS;
-+
-+	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
-+}
-+
- /*****************************************************************************\
-  *                                                                           *
-  * Core functions                                                            *
-@@ -919,6 +940,8 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 
- 	mod_timer(&host->timer, jiffies + 10 * HZ);
- 
-+	sdhci_idle_bus_adjust(host, 0);
-+
- 	host->cmd = cmd;
- 
- 	sdhci_prepare_data(host, cmd->data);
-@@ -1374,6 +1397,8 @@ static void sdhci_tasklet_finish(unsigned long param)
- 	host->cmd = NULL;
- 	host->data = NULL;
- 
-+	sdhci_idle_bus_adjust(host, 1);
-+
- #ifndef SDHCI_USE_LEDS_CLASS
- 	sdhci_deactivate_led(host);
- #endif
+@@ -1206,10 +1206,13 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		} else {
+ 			if (host->version >= SDHCI_SPEC_300)
+ 				ctrl &= ~SDHCI_CTRL_8BITBUS;
+-			if (ios->bus_width == MMC_BUS_WIDTH_4)
++			if (ios->bus_width == MMC_BUS_WIDTH_4) {
+ 				ctrl |= SDHCI_CTRL_4BITBUS;
+-			else
++				host->flags |= SDHCI_IN_4BIT_MODE;
++			} else {
+ 				ctrl &= ~SDHCI_CTRL_4BITBUS;
++				host->flags &= ~SDHCI_IN_4BIT_MODE;
++			}
+ 		}
+ 		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+ 	}
 diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 266f796..4f1b26263 100644
+index 83bd9f7..266f796 100644
 --- a/include/linux/mmc/sdhci.h
 +++ b/include/linux/mmc/sdhci.h
-@@ -85,6 +85,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_NO_HISPD_BIT			(1<<29)
- /* Controller treats ADMA descriptors with length 0000h incorrectly */
- #define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC		(1<<30)
-+/* Controller cannot detect CIRQ reliably when in 4-bit mode */
-+#define SDHCI_QUIRK_1BIT_INTERRUPT			(1<<31)
+@@ -109,6 +109,7 @@ struct sdhci_host {
+ #define SDHCI_USE_ADMA		(1<<1)	/* Host is ADMA capable */
+ #define SDHCI_REQ_USE_DMA	(1<<2)	/* Use DMA for this req. */
+ #define SDHCI_DEVICE_DEAD	(1<<3)	/* Device unresponsive */
++#define SDHCI_IN_4BIT_MODE	(1<<4)  /* bus is in 4-bit mode */
  
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
+ 	unsigned int version;	/* SDHCI spec. version */
+ 
 -- 
 1.7.4.15.g7811d
-
