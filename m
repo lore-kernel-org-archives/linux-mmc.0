@@ -1,193 +1,117 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: MMC updates for 2.6.39-rc1
-Date: Fri, 18 Mar 2011 19:40:38 -0400
-Message-ID: <m3wrjwt2tl.fsf@pullcord.laptop.org>
+From: "Luis R. Rodriguez" <lrodriguez@atheros.com>
+Subject: Re: [RFC 1/4] sdhci: allow for multiple delays when sending commands
+Date: Fri, 18 Mar 2011 16:52:08 -0700
+Message-ID: <AANLkTik=G-FzcUy+x0yK0DY1YKoRA58qhCN95hxOnizO@mail.gmail.com>
+References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
+ <1300486320-23607-2-git-send-email-lrodriguez@atheros.com> <m3y64ct47j.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35292 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757672Ab1CRXnm convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Mar 2011 19:43:42 -0400
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:55074 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757626Ab1CRXwa convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Mar 2011 19:52:30 -0400
+In-Reply-To: <m3y64ct47j.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, vmehta@atheros.com, naveen.singh@atheros.com, kvalo@adurom.com, j@w1.fi, Naveen Singh <nsingh@atheros.com>, Vipin Mehta <Vipin.Mehta@atheros.com>
 
-Hi Linus,
+On Fri, Mar 18, 2011 at 4:10 PM, Chris Ball <cjb@laptop.org> wrote:
+> Hi Luis,
+>
+> On Fri, Mar 18 2011, Luis R. Rodriguez wrote:
+>> This is at least known to be required for the ENE 714.
+>>
+>> Cc: Chris Ball <cjb@laptop.org>
+>> Cc: Kalle Valo <kvalo@adurom.com>
+>> Cc: Naveen Singh <nsingh@atheros.com>
+>> Cc: Vipin Mehta <Vipin.Mehta@atheros.com>
+>> Signed-off-by: Luis R. Rodriguez <lrodriguez@atheros.com>
+>
+> I think this wins cjb's "I've never been so confused about what a pat=
+ch
+> author thought they were doing before" award.
 
-Please pull from:
+I warned you :)
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus=20
+>> ---
+>> =C2=A0drivers/mmc/host/sdhci.c | =C2=A0 =C2=A07 ++++---
+>> =C2=A01 files changed, 4 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 9e15f41..c95dfc2 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -891,8 +891,8 @@ static void sdhci_send_command(struct sdhci_host=
+ *host, struct mmc_command *cmd)
+>>
+>> =C2=A0 =C2=A0 =C2=A0 WARN_ON(host->cmd);
+>>
+>> - =C2=A0 =C2=A0 /* Wait max 10 ms */
+>> - =C2=A0 =C2=A0 timeout =3D 10;
+>> + =C2=A0 =C2=A0 /* Wait max this amount of ms */
+>> + =C2=A0 =C2=A0 timeout =3D (10*256) + 255;
+>>
+>> =C2=A0 =C2=A0 =C2=A0 mask =3D SDHCI_CMD_INHIBIT;
+>> =C2=A0 =C2=A0 =C2=A0 if ((cmd->data !=3D NULL) || (cmd->flags & MMC_=
+RSP_BUSY))
+>
+> Okay, so our original plan is to go through the while loop ten times,
+> which equals ten mdelay(1)s =3D=3D 10ms, waiting for the inhibit bit =
+to
+> become unset.
+>
+> After this hunk of your patch, we're set to go through the loop 2815
+> times, which would make for 2.8 seconds. =C2=A0That seems excessive.
+>
+>> @@ -913,7 +913,8 @@ static void sdhci_send_command(struct sdhci_host=
+ *host, struct mmc_command *cmd)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 return;
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 timeout--;
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mdelay(1);
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (!(timeout & 0xFF))
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 mdelay(1);
+>> =C2=A0 =C2=A0 =C2=A0 }
+>>
+>> =C2=A0 =C2=A0 =C2=A0 mod_timer(&host->timer, jiffies + 10 * HZ);
+>
+> But wait, here you decide *not* to call mdelay(1) every time through =
+the
+> loop, and instead call it only on iterations where the bottom eight b=
+its
+> are unset. =C2=A0This disqualifies most of the 2815 values that timeo=
+ut will
+> be set to, and leaves the following values triggering the mdelay(1):
+>
+> 0x100 0x200 0x300 0x400 0x500 0x600 0x700 0x800 0x900 0xa00
+> =C2=A0256 =C2=A0 512 =C2=A0 768 =C2=A01024 =C2=A01280 =C2=A01536 =C2=A0=
+1792 =C2=A02048 =C2=A02304 =C2=A02560
+>
+> The astute observer will notice that there are ten such values.
+> So you're calling mdelay(1) ten times. =C2=A0But that's what we were
+> doing before! =C2=A0The only difference is that now we spin through
+> the while loop 2815 times instead of 10, and don't perform any
+> explicit delay on 2805 of them. =C2=A0Or am I missing something?
+>
+> I think you should try:
+>
+> (a) Reverting the patch and checking that it's actually needed
+> (b) Leaving the while loop body alone, but increasing the max
+> =C2=A0 =C2=A0timeout until you bisect to the amount of ms that your c=
+ontroller
+> =C2=A0 =C2=A0actually takes to release the inhibit bit.
+> (c) Yelling loudly in the direction that this code came from. =C2=A0:=
+)
 
-to receive the MMC merge for 2.6.39-rc1.  There are currently no merge
-conflicts, and the patches have been tested in linux-next.  Thanks.
+Heh thanks for the review, once I even get ath6kl to even load
+properly on x86_64 I'll try reverting this POS hunk and see if it
+still works without it. Who knows where the hell this patch came from,
+as I noted I was given the entire blob as a huge patch and if you look
+at it, the original patch even removes some quirk for tegra.
 
-Highlights are:
-Core:
- * A new per-device quirks mechanism, based on PCI quirks
- * Export eMMC4.4 enhanced area details to sysfs
- * New mmc_test tests for large sequential I/O performance
-Drivers:
- * New mxs-mmc driver supporting Freescale i.MX23/28 SoCs.
- * Support for Ricoh e823 SDHCI controllers.
- * DesignWare MMC: add 8-bit width, DDR mode, clock gating support
- * SuperH controllers: add clock gating support
-
-
-The following changes since commit cfd80652467717ca7346857d6d8c94503d74=
-f3a3:
-  Linus Torvalds (1):
-        Merge branch 'fixes' of git://git.kernel.org/.../davej/cpufreq
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-Adrian Hunter (3):
-      mmc: mmc_test: make performance test area size about 4MiB
-      mmc: mmc_test: add tests to measure random I/O operations per sec=
-ond
-      mmc: mmc_test: add tests to measure large sequential I/O performa=
-nce
-
-Chris Ball (4):
-      mmc: sdhci-pci: Remove set-but-unused variable.
-      mmc: cb710: Return err value in cb710_wait_while_busy()
-      mmc: via-sdmmc: Remove set-but-unused variable.
-      mmc: dw_mmc: Remove set-but-unused variable.
-
-Chuanxiao Dong (1):
-      mmc: export eMMC4.4 enhanced area details to sysfs
-
-=46abio Estevam (1):
-      mmc: mmc_mxc: Allow selection only for the correct platforms
-
-Guennadi Liakhovetski (2):
-      mmc: sh_mmcif: support aggressive clock gating
-      mmc: tmio: fix address in kunmap_atomic() calls
-
-Jaehoon Chung (6):
-      mmc: dw_mmc: modify quirks bit-shift control
-      mmc: dw_mmc: support 8-bit buswidth
-      mmc: dw_mmc: support DDR mode
-      mmc: dw_mmc: add quirks for unreliable card detect, and capabilit=
-ies
-      mmc: dw_mmc: fix suspend/resume operation
-      mmc: dw_mmc: support mmc power control with regulator
-
-Kyungmin Park (1):
-      mmc: sdhci-s3c: Auto CMD12 support
-
-Linus Walleij (12):
-      mmc: atmel-mci: map DMA sglist on the DMA engine
-      mmc: atmel-mci: conform to DMA-API
-      mmc: atmel-mci: use dmaengine helper functions
-      mmc: sh_mmcif: map DMA buffers on the DMA engine device
-      mmc: sh_mmcif: unmap with the proper sglen
-      mmc: sh_mmcif: rename and retype activity variable
-      mmc: sh_mmcif: use dmaengine helpers, drop submit check
-      mmc: tmio_mmc: map DMA buffers on the DMA engine device
-      mmc: tmio_mmc: unmap with the proper sglen
-      mmc: tmio_mmc: drop dma_sglen state variable
-      mmc: tmio_mmc: use dmaengine helpers, drop submit check
-      mmc: msm_sdcc: remove needless cache flush after dma_unmap_sg()
-
-Manoj Iyer (1):
-      mmc: sdhci: Add Ricoh e823 PCI ID
-
-Marc-Andr=C3=A9 H=C3=A9bert (1):
-      mmc: Fix the block device read only flag
-
-Mark Brown (1):
-      mmc: Ensure prototypes for SD API are visible in sd.c
-
-Pawel Moll (1):
-      mmc: mmc_test: Only warn about not waiting for busy if it's suppo=
-rted
-
-Philip Rakity (2):
-      mmc: core: comment on why sdio_reset is done at init time
-      mmc: check if mmc cards < 2GB do sector addressing
-
-Pierre Tardy (4):
-      mmc: put the led blinking code after clock ungating
-      mmc: add per device quirk placeholder
-      mmc: add MMC_QUIRK_BROKEN_CLK_GATING
-      mmc: remove BROKEN_CLK_GATING quirk for wl1271
-
-Sascha Hauer (1):
-      mmc: mxcmmc: use dmaengine API
-
-Shawn Guo (1):
-      mmc: mxs-mmc: add mmc host driver for i.MX23/28
-
-Simon Horman (1):
-      mmc: tmio_mmc: Improve readability of the output of pr_debug_stat=
-us()
-
-Stefan Nilsson XK (1):
-      mmc: sdio: remember new card RCA when redetecting card
-
-Ulf Hansson (2):
-      mmc: core: export function mmc_do_release_host()
-      mmc: core: reset card voltage after power off
-
-Will Newton (3):
-      mmc: dw_mmc: Run card detect tasklet during slot initialisation.
-      mmc: dw_mmc: Enable low-power mode for the card clock.
-      mmc: Improve MMC_TEST config text.
-
-Wolfram Sang (4):
-      mmc: sdhci-tegra: free irq on error and remove
-      mmc: sdhci-esdhc-imx: add write protect on custom GPIO on mx25/35
-      mmc: sdhci-esdhc: broken card detection is not a default quirk
-      mmc: sdhci-esdhc-imx: add card detect on custom GPIO for mx25/35
-
- Documentation/ABI/testing/sysfs-devices-mmc |   21 +
- arch/arm/mach-mxs/include/mach/mmc.h        |   18 +
- arch/arm/plat-mxc/include/mach/esdhc.h      |   12 +-
- drivers/mmc/card/Kconfig                    |    3 +-
- drivers/mmc/card/block.c                    |    1 +
- drivers/mmc/card/mmc_test.c                 |  271 ++++++++-
- drivers/mmc/core/Makefile                   |    3 +-
- drivers/mmc/core/core.c                     |   26 +-
- drivers/mmc/core/core.h                     |    2 +
- drivers/mmc/core/host.c                     |    5 +-
- drivers/mmc/core/mmc.c                      |   86 +++-
- drivers/mmc/core/quirks.c                   |   84 +++
- drivers/mmc/core/sd.c                       |    1 +
- drivers/mmc/core/sdio.c                     |    9 +
- drivers/mmc/host/Kconfig                    |   11 +-
- drivers/mmc/host/Makefile                   |    1 +
- drivers/mmc/host/atmel-mci.c                |   19 +-
- drivers/mmc/host/cb710-mmc.c                |    2 +-
- drivers/mmc/host/dw_mmc.c                   |   83 +++-
- drivers/mmc/host/dw_mmc.h                   |    2 +-
- drivers/mmc/host/msm_sdcc.c                 |    8 -
- drivers/mmc/host/mxcmmc.c                   |  183 ++++---
- drivers/mmc/host/mxs-mmc.c                  |  874 +++++++++++++++++++=
-++++++++
- drivers/mmc/host/sdhci-esdhc-imx.c          |  134 ++++-
- drivers/mmc/host/sdhci-esdhc.h              |    1 -
- drivers/mmc/host/sdhci-of-esdhc.c           |    3 +-
- drivers/mmc/host/sdhci-pci.c                |   12 +-
- drivers/mmc/host/sdhci-s3c.c                |    3 +
- drivers/mmc/host/sdhci-tegra.c              |    6 +-
- drivers/mmc/host/sh_mmcif.c                 |   62 +-
- drivers/mmc/host/tmio_mmc.c                 |   96 ++--
- drivers/mmc/host/via-sdmmc.c                |    3 -
- include/linux/mmc/card.h                    |    6 +
- include/linux/mmc/core.h                    |    1 +
- include/linux/mmc/dw_mmc.h                  |   15 +-
- include/linux/mmc/mmc.h                     |    3 +
- 36 files changed, 1811 insertions(+), 259 deletions(-)
- create mode 100644 Documentation/ABI/testing/sysfs-devices-mmc
- create mode 100644 arch/arm/mach-mxs/include/mach/mmc.h
- create mode 100644 drivers/mmc/core/quirks.c
- create mode 100644 drivers/mmc/host/mxs-mmc.c
-
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+ Luis
