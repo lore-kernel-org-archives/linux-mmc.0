@@ -1,35 +1,43 @@
-From: David Miller <davem@davemloft.net>
-Subject: [PATCH] of_mmc_spi: Need to include irq.h and of_irq.h
-Date: Fri, 18 Mar 2011 15:00:23 -0700 (PDT)
-Message-ID: <20110318.150023.27819221.davem@davemloft.net>
+From: "Luis R. Rodriguez" <lrodriguez@atheros.com>
+Subject: [RFC 0/4] sdhci: few patches for ENE 712 support
+Date: Fri, 18 Mar 2011 15:11:56 -0700
+Message-ID: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: grant.likely@secretlab.ca
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.atheros.com ([12.19.149.2]:44344 "EHLO mail.atheros.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932866Ab1CRWMH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 18 Mar 2011 18:12:07 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, vmehta@atheros.com, naveen.singh@atheros.com, kvalo@adurom.com, j@w1.fi, "Luis R. Rodriguez" <lrodriguez@atheros.com>
 
+I was pulled in to help with ath6kl development work. As part
+of this I was given some PCI "ENE" SDHCI card which can I can slap
+on to my desktop. I was then given this dump of patches to apply
+to sdhci code to get it to work:
 
-Since these are the headers that provide irq_of_parse_and_map()
-and NO_IRQ.
+I prefer code upstream though so here is my split and cleanup
+of these patches. I've tested it with my ENE card. Since I am
+new to SDHCI I would prefer someone with more experience review
+these chagnes and the respective commit log messages. I've
+tried to make sense of them as best as I can. Unfortunately
+I was not given any explanation to these changes except the
+patch I got so I tried to make the best of it.
 
-Signed-off-by: David S. Miller <davem@davemloft.net>
+Luis R. Rodriguez (4):
+  sdhci: allow for multiple delays when sending commands
+  sdhci: sanity check for triggering interrupts thread
+  sdhci: cache when the MMC bus width is 4 bits wide
+  sdhci: add quick for controllers with for CIRQ issues
 
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index 5530def..e2aecb7 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -15,9 +15,11 @@
- #include <linux/module.h>
- #include <linux/device.h>
- #include <linux/slab.h>
-+#include <linux/irq.h>
- #include <linux/gpio.h>
- #include <linux/of.h>
- #include <linux/of_gpio.h>
-+#include <linux/of_irq.h>
- #include <linux/spi/spi.h>
- #include <linux/spi/mmc_spi.h>
- #include <linux/mmc/core.h>
+ drivers/mmc/host/sdhci-pci.c |    3 +-
+ drivers/mmc/host/sdhci.c     |   46 +++++++++++++++++++++++++++++++++++------
+ include/linux/mmc/sdhci.h    |    3 ++
+ 3 files changed, 44 insertions(+), 8 deletions(-)
+
+-- 
+1.7.4.15.g7811d
+
