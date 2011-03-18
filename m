@@ -1,35 +1,46 @@
-From: Harald Welte <laforge@gnumonks.org>
-Subject: Re: [PATCH] MMC: use pci_dev->revision
-Date: Fri, 18 Mar 2011 12:24:25 +0100
-Message-ID: <20110318112425.GW18597@sunbeam.hmw-consulting.de>
-References: <201103172108.45989.sshtylyov@ru.mvista.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from berligate.hmw-consulting.de ([83.236.178.202]:51781 "EHLO
-	sunbeam.hmw-consulting.de" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752862Ab1CRLkI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Mar 2011 07:40:08 -0400
-Content-Disposition: inline
-In-Reply-To: <201103172108.45989.sshtylyov@ru.mvista.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: [RFC] mmc: msm_sdcc: Use SPS BAM as DMA engine
+Date: Fri, 18 Mar 2011 18:54:03 +0530
+Message-ID: <1300454644-11361-1-git-send-email-subhashj@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, davidb@codeaurora.org, dwalker@fifo99.com, bryanh@codeaurora.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sergei Shtylyov <sshtylyov@ru.mvista.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, brucechang@via.com.tw, HaraldWelte@viatech.com
 
-Hi Sergei,
+On recent MSMs, ADM (Data Mover) HW is not present
+which means existing SDCC driver can perform data
+transfer in PIO (peripheral IO) mode only.
+But PIO mode requires lot of CPU attention which
+would mean consuming extra CPU MIPS.
 
-On Thu, Mar 17, 2011 at 09:08:45PM +0300, Sergei Shtylyov wrote:
-> The SDHCI driver uses PCI_CLASS_REVISION instead of PCI_REVISION_ID, so it was
-> not converted by commit 44c10138fd4bbc4b6d6bff0873c24902f2a9da65 (PCI: Change
-> all drivers to use pci_device->revision). The newer VIA driver has the similar
-> code too. So convert both drivers to using the 'revision' field of 'struct
-> pci_dev' now...
-> 
-> Signed-off-by: Sergei Shtylyov <sshtylyov@ru.mvista.com>
+As a replacement on these recent MSMs, there is
+a new DMA HW engine named SPS-BAM (as part of
+Smart Peripheral System of MSM) is added for
+data movement between SDCC core and system memory.
 
-Acked-by: Harald Welte <HaraldWelte@viatech.com>
--- 
-- Harald Welte <laforge@gnumonks.org>          	        http://gnumonks.org/
-============================================================================
-We all know Linux is great...it does infinite loops in 5 seconds. -- Linus
+This patch has done changes in existing MSM SDCC
+driver for using SPS-BAM as DMA engine.
+
+This patch is just for early review.
+
+This patch is dependent on following 2 patches:
+https://patchwork.kernel.org/patch/586271/
+http://www.spinics.net/lists/arm-kernel/msg118467.html
+
+Subhash Jadavani (1):
+  mmc: msm_sdcc: Use SPS BAM as DMA engine
+
+ drivers/mmc/host/Kconfig        |   10 +
+ drivers/mmc/host/Makefile       |    1 +
+ drivers/mmc/host/msm_sdcc.c     |  929 +++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/host/msm_sdcc.h     |   47 ++
+ drivers/mmc/host/msm_sdcc_dml.c |  303 +++++++++++++
+ drivers/mmc/host/msm_sdcc_dml.h |  120 +++++
+ 6 files changed, 1374 insertions(+), 36 deletions(-)
+ create mode 100644 drivers/mmc/host/msm_sdcc_dml.c
+ create mode 100644 drivers/mmc/host/msm_sdcc_dml.h
+
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
