@@ -1,43 +1,52 @@
 From: "Luis R. Rodriguez" <lrodriguez@atheros.com>
-Subject: [RFC 0/4] sdhci: few patches for ENE 712 support
-Date: Fri, 18 Mar 2011 15:11:56 -0700
-Message-ID: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
+Subject: [RFC 1/4] sdhci: allow for multiple delays when sending commands
+Date: Fri, 18 Mar 2011 15:11:57 -0700
+Message-ID: <1300486320-23607-2-git-send-email-lrodriguez@atheros.com>
+References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.atheros.com ([12.19.149.2]:44344 "EHLO mail.atheros.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932866Ab1CRWMH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 18 Mar 2011 18:12:07 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, vmehta@atheros.com, naveen.singh@atheros.com, kvalo@adurom.com, j@w1.fi, "Luis R. Rodriguez" <lrodriguez@atheros.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, vmehta@atheros.com, naveen.singh@atheros.com, kvalo@adurom.com, j@w1.fi, "Luis R. Rodriguez" <lrodriguez@atheros.com>, Naveen Singh <nsingh@atheros.com>, Vipin Mehta <Vipin.Mehta@atheros.com>
+List-Id: linux-mmc@vger.kernel.org
 
-I was pulled in to help with ath6kl development work. As part
-of this I was given some PCI "ENE" SDHCI card which can I can slap
-on to my desktop. I was then given this dump of patches to apply
-to sdhci code to get it to work:
+This is at least known to be required for the ENE 714.
 
-I prefer code upstream though so here is my split and cleanup
-of these patches. I've tested it with my ENE card. Since I am
-new to SDHCI I would prefer someone with more experience review
-these chagnes and the respective commit log messages. I've
-tried to make sense of them as best as I can. Unfortunately
-I was not given any explanation to these changes except the
-patch I got so I tried to make the best of it.
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Kalle Valo <kvalo@adurom.com>
+Cc: Naveen Singh <nsingh@atheros.com>
+Cc: Vipin Mehta <Vipin.Mehta@atheros.com>
+Signed-off-by: Luis R. Rodriguez <lrodriguez@atheros.com>
+---
+ drivers/mmc/host/sdhci.c |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
 
-Luis R. Rodriguez (4):
-  sdhci: allow for multiple delays when sending commands
-  sdhci: sanity check for triggering interrupts thread
-  sdhci: cache when the MMC bus width is 4 bits wide
-  sdhci: add quick for controllers with for CIRQ issues
-
- drivers/mmc/host/sdhci-pci.c |    3 +-
- drivers/mmc/host/sdhci.c     |   46 +++++++++++++++++++++++++++++++++++------
- include/linux/mmc/sdhci.h    |    3 ++
- 3 files changed, 44 insertions(+), 8 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9e15f41..c95dfc2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -891,8 +891,8 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 
+ 	WARN_ON(host->cmd);
+ 
+-	/* Wait max 10 ms */
+-	timeout = 10;
++	/* Wait max this amount of ms */
++	timeout = (10*256) + 255;
+ 
+ 	mask = SDHCI_CMD_INHIBIT;
+ 	if ((cmd->data != NULL) || (cmd->flags & MMC_RSP_BUSY))
+@@ -913,7 +913,8 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 			return;
+ 		}
+ 		timeout--;
+-		mdelay(1);
++		if (!(timeout & 0xFF))
++			mdelay(1);
+ 	}
+ 
+ 	mod_timer(&host->timer, jiffies + 10 * HZ);
 -- 
 1.7.4.15.g7811d
-
