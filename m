@@ -1,41 +1,35 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: tmio: fix address in kunmap_atomic() calls
-Date: Fri, 18 Mar 2011 16:35:02 -0400
-Message-ID: <m339mkupzd.fsf@pullcord.laptop.org>
-References: <Pine.LNX.4.64.1103110822160.23675@axis700.grange>
-	<m38vwhuzb8.fsf@pullcord.laptop.org>
-	<Pine.LNX.4.64.1103142349490.6125@axis700.grange>
+From: David Miller <davem@davemloft.net>
+Subject: [PATCH] of_mmc_spi: Need to include irq.h and of_irq.h
+Date: Fri, 18 Mar 2011 15:00:23 -0700 (PDT)
+Message-ID: <20110318.150023.27819221.davem@davemloft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53677 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756818Ab1CRUiH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 18 Mar 2011 16:38:07 -0400
-In-Reply-To: <Pine.LNX.4.64.1103142349490.6125@axis700.grange> (Guennadi
-	Liakhovetski's message of "Mon, 14 Mar 2011 23:54:22 +0100 (CET)")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: grant.likely@secretlab.ca
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
 
-Hi Guennadi,
 
-On Mon, Mar 14 2011, Guennadi Liakhovetski wrote:
-> Hm, I've looked at them briefly and nothing in them struck me in them, but 
-> if you want a formal reviewed-by or such I'll have to look at them in more 
-> detail. I'm away from tomorrow until Saturday at a V4L2 meeting, so, will 
-> have little time... I'll try to do that, but, will not be able to test 
-> them. So, either just a review this week or a review + test not before 
-> next weekend, sorry.
+Since these are the headers that provide irq_of_parse_and_map()
+and NO_IRQ.
 
-Okay.  I'll put them in with the .39 merge; they've been in -next for a
-while, are hopefully low-risk, and we can always revert later before .39
-releases.
+Signed-off-by: David S. Miller <davem@davemloft.net>
 
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+index 5530def..e2aecb7 100644
+--- a/drivers/mmc/host/of_mmc_spi.c
++++ b/drivers/mmc/host/of_mmc_spi.c
+@@ -15,9 +15,11 @@
+ #include <linux/module.h>
+ #include <linux/device.h>
+ #include <linux/slab.h>
++#include <linux/irq.h>
+ #include <linux/gpio.h>
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
++#include <linux/of_irq.h>
+ #include <linux/spi/spi.h>
+ #include <linux/spi/mmc_spi.h>
+ #include <linux/mmc/core.h>
