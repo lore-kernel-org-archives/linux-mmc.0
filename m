@@ -1,57 +1,98 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH V7 3/4] mmc: sdhci-esdhc: make the writel/readl as the
- general APIs
-Date: Fri, 18 Mar 2011 14:52:48 +0100
-Message-ID: <20110318135248.GF2155@pengutronix.de>
-References: <1300442217-1060-1-git-send-email-Hong-Xing.Zhu@freescale.com>
- <1300442217-1060-3-git-send-email-Hong-Xing.Zhu@freescale.com>
+From: John Calixto <john.calixto@modsystems.com>
+Subject: RE: [PATCH resend] mmc: Added ioctl to let userspace apps send
+ ACMDs
+Date: Fri, 18 Mar 2011 10:32:41 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1103180927390.5267@peruna>
+References: <201103172255.51442.arnd@arndb.de> <203F41F6E33F954E8E8B02559FDC906F7431FC48EA@modex01>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="JcvBIhDvR6w3jUPA"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:57829 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756663Ab1CRNxA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Mar 2011 09:53:00 -0400
-Content-Disposition: inline
-In-Reply-To: <1300442217-1060-3-git-send-email-Hong-Xing.Zhu@freescale.com>
+Received: from elasmtp-banded.atl.sa.earthlink.net ([209.86.89.70]:54200 "EHLO
+	elasmtp-banded.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757074Ab1CRRc4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Mar 2011 13:32:56 -0400
+In-Reply-To: <201103172255.51442.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Cc: linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, linuxzsc@gmail.com, eric.miao@linaro.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org
 
+Hello Arnd,
 
---JcvBIhDvR6w3jUPA
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> -----Original Message-----
+> From: Arnd Bergmann [mailto:arnd@arndb.de]
+> Sent: Thursday, March 17, 2011 2:56 PM
+> To: John Calixto
+> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org
+> Subject: Re: [PATCH resend] mmc: Added ioctl to let userspace apps send ACMDs
+>
+> On Thursday 17 March 2011 19:28:55 John Calixto wrote:
+> > Part 3 of the SD Specification (SD Card Association; www.sdcard.org) describes
+> > how to use the security function of an SD card using application specific
+> > commands in conjunction with CPRM algorithms and keys licensed from the 4C
+> > Entity (www.4centity.com).  This allows userspace applications to access this
+> > security feature.
+>
+> Having the ability to send commands from user space sounds useful,
+> a number of other block drivers can do this, too.
+>
+> However, for the specific example you mention, I think it would be
+> nicer to implement it in kernel space, and have a high-level
+> interface.
 
-On Fri, Mar 18, 2011 at 05:56:56PM +0800, Richard Zhu wrote:
-> Add one flag to indicate the GPIO CD/WP is enabled or not
-> on imx platforms, and reuse the writel/readl as the general
-> APIs for imx SOCs.
->=20
-> Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+I started down that route, but part of the problem with putting any more
+than a simple passthrough in kernel space is that the CPRM algorithms
+live in the next highest logic layer, and 4C licensees are not allowed
+to reveal those algorithms.  If you have access to the SD Specification,
+you will see that it documents all of the individual security commands.
+However, the sequence of commands is documented in the 4C CPRM
+Specification.
 
-You addressed 2 out of 3 comments nicely. But you still cast the void*
-back and forth which is unnecessary. After that, I think we are finally
-done.
+Installing this passthrough also has the added benefit of allowing
+other, non-security-related, application specific commands to be sent.
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+>
+> A few more comments about the implementation below.
+>
+> > Tested on TI PCIxx12 (SDHCI), Sigma Designs SMP8652 SoC, TI OMAP3621 SoC, TI
+> > OMAP3630 SoC, Samsung S5PC110 SoC, Qualcomm MSM7200A SoC.
+>
+> Is this safe to do while the device is operating and a file system
+> writes data?
 
---JcvBIhDvR6w3jUPA
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
+If you mean:
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
+    Is it safe for one process to write data to the User Area (i.e. the
+    non-secure part; the normal use case for SD as unencrypted storage),
+    while another process issues secure commands?
 
-iEYEARECAAYFAk2DY7AACgkQD27XaX1/VRsTwgCfcpLeaBo+cY7HLH5J8v24se3b
-dAQAn34HFpC3pnSzFNLmvkgymkzaHwki
-=EcFt
------END PGP SIGNATURE-----
+then, no, it is not.  Should I try and protect against this in the
+kernel driver?
 
---JcvBIhDvR6w3jUPA--
+If you mean:
+
+    Can a program use both the User Area and the Protected Area?
+
+then, yes, it can.  In broad terms, the typical program would:
+
+    - mount /dev/mmcblk0p1 /mnt/sdcard
+    - find encrypted file /mnt/sdcard/encrypted_blob
+    - issue secure commands via ioctl() to /dev/mmcblk0p1 to find
+      decryption keys; no need to umount
+    - decrypt /mnt/sdcard/encrypted_blob using keys retrieved above
+
+>
+> Does it allow sending all commands or just the ones you require?
+>
+
+I did not choose to filter out commands.  I expected that other folks
+might want to send other ACMDs.
+
+<snip>
+
+I'll apply the rest of your feedback and Ben Dooks' tip about the
+unnecessary cast in the next revision of the patch.
+
+Thanks!
+
+John
