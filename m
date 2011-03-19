@@ -1,72 +1,69 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [RFC 0/4] sdhci: few patches for ENE 712 support
-Date: Sat, 19 Mar 2011 10:15:44 +0100
-Message-ID: <20110319091544.GA16635@pengutronix.de>
-References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH resend] mmc: Added ioctl to let userspace apps send ACMDs
+Date: Sat, 19 Mar 2011 10:42:30 +0100
+Message-ID: <201103191042.30718.arnd@arndb.de>
+References: <203F41F6E33F954E8E8B02559FDC906F743176BFD2@modex01> <201103172255.51442.arnd@arndb.de> <alpine.DEB.2.00.1103181706450.6084@peruna>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="pf9I7BMVVzbSWLtt"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:51065 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754769Ab1CSJPt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Mar 2011 05:15:49 -0400
-Content-Disposition: inline
-In-Reply-To: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
+Received: from moutng.kundenserver.de ([212.227.17.10]:50564 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755180Ab1CSJmj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Mar 2011 05:42:39 -0400
+In-Reply-To: <alpine.DEB.2.00.1103181706450.6084@peruna>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Luis R. Rodriguez" <lrodriguez@atheros.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, vmehta@atheros.com, naveen.singh@atheros.com, kvalo@adurom.com, j@w1.fi
+To: John Calixto <john.calixto@modsystems.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org
 
+On Saturday 19 March 2011, John Calixto wrote:
 
---pf9I7BMVVzbSWLtt
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> > > -static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+> > > +int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+> > >  {
+> > >         int err;
+> > >         struct mmc_command cmd;
+> > > @@ -48,6 +48,7 @@ static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+> > >
+> > >         return 0;
+> > >  }
+> > > +EXPORT_SYMBOL(mmc_app_cmd);
+> >
+> > Why not EXPORT_SYMBOL_GPL?
+> >
+> 
+> I was just using the convention already used in sd_ops.c.  I can send a
+> pre-patch that sets all of the symbol exports in that file to be
+> EXPORT_SYMBOL_GPL, but without confirmation from you and others on this
+> list, that seems like overstepping my "jurisdiction".  Is that preferable?
 
+No, you shouldn't change existing symbols, we normally don't do that.
+Some subsystems in the kernel generally allow regular EXPORT_SYMBOL
+for everything, I don't know if that's the case here.
 
-> I prefer code upstream though so here is my split and cleanup
-> of these patches. I've tested it with my ENE card. Since I am
-> new to SDHCI I would prefer someone with more experience review
-> these chagnes and the respective commit log messages. I've
-> tried to make sense of them as best as I can. Unfortunately
-> I was not given any explanation to these changes except the
-> patch I got so I tried to make the best of it.
+Chris, do you prefer to leave the new export as EXPORT_SYMBOL
+along wiht the others or to use EXPORT_SYMBOL_GPL?
 
-You did make the best out of it; still, you probably won't be surprised to =
-hear
-that all the patches are, well, not acceptable ;) I agree with Chris about =
-1/4,
-I think 2-4 are for a broken card detection and there is already a quirk for
-that. So you could also try dropping 2-4 and use
+> > As I mentioned, any ioctl command that gets introduced needs to be
+> > designed very carefully to make sure we don't need to change it in the
+> > future. The only two things I can see here are:
+> >
+> > * The struct_version should be removed
+> > * The data pointer is not compatible between 32 and 64 bits.
+> >   One solution for this would be to make it a __u64 argument
+> >   and require the user to cast the pointer to a 64 bit type.
+> 
+> I don't understand your comment about the data pointer not being
+> compatible between 32 and 64 bits.  Wouldn't the compiler take care of
+> pointer size?
 
-	sdhci.debug_quirks =3D 0x8028
+The problem is when you have a 64 bit kernel that can run both
+32 and 64 bit user applications. The compiler for the 32 bit user
+process will create a smaller data structure than what a 64 bit
+kernel expects. The two options here are to force the compiler
+to use a compatible layout, or to use the compat_ioctl() function
+to convert from one format to the other.
 
-That should enable the standard quirks for this card and BROKEN_CARD. Can y=
-ou
-alsso please post the PCI-ID of this card? And does it make a difference if=
- you
-use the SDIO-WLAN card or a standard SD memory card?
-
-Regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---pf9I7BMVVzbSWLtt
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAk2EdEAACgkQD27XaX1/VRtHfACbBYbyJo3hH4A7IJptE5WI0Aoe
-jbIAnRw0Zx5yA1SJWQLpw4WgM4fYcpsw
-=Ilvb
------END PGP SIGNATURE-----
-
---pf9I7BMVVzbSWLtt--
+	Arnd
