@@ -1,69 +1,35 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH resend] mmc: Added ioctl to let userspace apps send ACMDs
-Date: Sat, 19 Mar 2011 10:42:30 +0100
-Message-ID: <201103191042.30718.arnd@arndb.de>
-References: <203F41F6E33F954E8E8B02559FDC906F743176BFD2@modex01> <201103172255.51442.arnd@arndb.de> <alpine.DEB.2.00.1103181706450.6084@peruna>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: MMC/eMMC partitioning support.
+Date: Sat, 19 Mar 2011 06:18:10 -0500
+Message-ID: <1300533491-2378-1-git-send-email-andreiw@motorola.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:50564 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755180Ab1CSJmj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Mar 2011 05:42:39 -0400
-In-Reply-To: <alpine.DEB.2.00.1103181706450.6084@peruna>
+Received: from exprod5og101.obsmtp.com ([64.18.0.141]:40481 "EHLO
+	exprod5og101.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752685Ab1CSKgC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Mar 2011 06:36:02 -0400
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p2JAaHkh022970
+	for <linux-mmc@vger.kernel.org>; Sat, 19 Mar 2011 06:36:17 -0400 (EDT)
+Received: from mail-gy0-f170.google.com (mail-gy0-f170.google.com [209.85.160.170])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p2JAaGm8022967
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Sat, 19 Mar 2011 06:36:16 -0400 (EDT)
+Received: by gyb11 with SMTP id 11so2790090gyb.15
+        for <linux-mmc@vger.kernel.org>; Sat, 19 Mar 2011 03:35:58 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: John Calixto <john.calixto@modsystems.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org
+To: linux-mmc@vger.kernel.org
 
-On Saturday 19 March 2011, John Calixto wrote:
+MMC devices can have boot partitions, as well as a non-replayable
+memory block and some general purpose partitions present. As of the moment,
+these are not accessible from Linux. I'm sending a patch for comments and review to enable
+the boot partitions.
 
-> > > -static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
-> > > +int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
-> > >  {
-> > >         int err;
-> > >         struct mmc_command cmd;
-> > > @@ -48,6 +48,7 @@ static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
-> > >
-> > >         return 0;
-> > >  }
-> > > +EXPORT_SYMBOL(mmc_app_cmd);
-> >
-> > Why not EXPORT_SYMBOL_GPL?
-> >
-> 
-> I was just using the convention already used in sd_ops.c.  I can send a
-> pre-patch that sets all of the symbol exports in that file to be
-> EXPORT_SYMBOL_GPL, but without confirmation from you and others on this
-> list, that seems like overstepping my "jurisdiction".  Is that preferable?
+The MMC partitions are effectively separate devices from the default-accessible user area
+partition, hence, the extra partitions are exposed as separate block devices.
 
-No, you shouldn't change existing symbols, we normally don't do that.
-Some subsystems in the kernel generally allow regular EXPORT_SYMBOL
-for everything, I don't know if that's the case here.
+TOC:
+[RFC] MMC: MMC boot partitions support.
 
-Chris, do you prefer to leave the new export as EXPORT_SYMBOL
-along wiht the others or to use EXPORT_SYMBOL_GPL?
-
-> > As I mentioned, any ioctl command that gets introduced needs to be
-> > designed very carefully to make sure we don't need to change it in the
-> > future. The only two things I can see here are:
-> >
-> > * The struct_version should be removed
-> > * The data pointer is not compatible between 32 and 64 bits.
-> >   One solution for this would be to make it a __u64 argument
-> >   and require the user to cast the pointer to a 64 bit type.
-> 
-> I don't understand your comment about the data pointer not being
-> compatible between 32 and 64 bits.  Wouldn't the compiler take care of
-> pointer size?
-
-The problem is when you have a 64 bit kernel that can run both
-32 and 64 bit user applications. The compiler for the 32 bit user
-process will create a smaller data structure than what a 64 bit
-kernel expects. The two options here are to force the compiler
-to use a compatible layout, or to use the compat_ioctl() function
-to convert from one format to the other.
-
-	Arnd
+Thanks,
+A
