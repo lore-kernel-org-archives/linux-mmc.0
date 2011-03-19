@@ -1,117 +1,96 @@
-From: "Luis R. Rodriguez" <lrodriguez@atheros.com>
-Subject: Re: [RFC 1/4] sdhci: allow for multiple delays when sending commands
-Date: Fri, 18 Mar 2011 16:52:08 -0700
-Message-ID: <AANLkTik=G-FzcUy+x0yK0DY1YKoRA58qhCN95hxOnizO@mail.gmail.com>
-References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
- <1300486320-23607-2-git-send-email-lrodriguez@atheros.com> <m3y64ct47j.fsf@pullcord.laptop.org>
+From: John Calixto <john.calixto@modsystems.com>
+Subject: RE: [PATCH resend] mmc: Added ioctl to let userspace apps send
+ ACMDs
+Date: Fri, 18 Mar 2011 17:24:15 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1103181706450.6084@peruna>
+References: <203F41F6E33F954E8E8B02559FDC906F743176BFD2@modex01> <201103172255.51442.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:55074 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757626Ab1CRXwa convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Mar 2011 19:52:30 -0400
-In-Reply-To: <m3y64ct47j.fsf@pullcord.laptop.org>
+Received: from elasmtp-dupuy.atl.sa.earthlink.net ([209.86.89.62]:45497 "EHLO
+	elasmtp-dupuy.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932177Ab1CSAYb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Mar 2011 20:24:31 -0400
+In-Reply-To: <201103172255.51442.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, vmehta@atheros.com, naveen.singh@atheros.com, kvalo@adurom.com, j@w1.fi, Naveen Singh <nsingh@atheros.com>, Vipin Mehta <Vipin.Mehta@atheros.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org
 
-On Fri, Mar 18, 2011 at 4:10 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi Luis,
->
-> On Fri, Mar 18 2011, Luis R. Rodriguez wrote:
->> This is at least known to be required for the ENE 714.
->>
->> Cc: Chris Ball <cjb@laptop.org>
->> Cc: Kalle Valo <kvalo@adurom.com>
->> Cc: Naveen Singh <nsingh@atheros.com>
->> Cc: Vipin Mehta <Vipin.Mehta@atheros.com>
->> Signed-off-by: Luis R. Rodriguez <lrodriguez@atheros.com>
->
-> I think this wins cjb's "I've never been so confused about what a pat=
-ch
-> author thought they were doing before" award.
+Hello Arnd,
 
-I warned you :)
+I need some clarification on the last bit of your initial feedback below:
 
->> ---
->> =C2=A0drivers/mmc/host/sdhci.c | =C2=A0 =C2=A07 ++++---
->> =C2=A01 files changed, 4 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 9e15f41..c95dfc2 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -891,8 +891,8 @@ static void sdhci_send_command(struct sdhci_host=
- *host, struct mmc_command *cmd)
->>
->> =C2=A0 =C2=A0 =C2=A0 WARN_ON(host->cmd);
->>
->> - =C2=A0 =C2=A0 /* Wait max 10 ms */
->> - =C2=A0 =C2=A0 timeout =3D 10;
->> + =C2=A0 =C2=A0 /* Wait max this amount of ms */
->> + =C2=A0 =C2=A0 timeout =3D (10*256) + 255;
->>
->> =C2=A0 =C2=A0 =C2=A0 mask =3D SDHCI_CMD_INHIBIT;
->> =C2=A0 =C2=A0 =C2=A0 if ((cmd->data !=3D NULL) || (cmd->flags & MMC_=
-RSP_BUSY))
->
-> Okay, so our original plan is to go through the while loop ten times,
-> which equals ten mdelay(1)s =3D=3D 10ms, waiting for the inhibit bit =
-to
-> become unset.
->
-> After this hunk of your patch, we're set to go through the loop 2815
-> times, which would make for 2.8 seconds. =C2=A0That seems excessive.
->
->> @@ -913,7 +913,8 @@ static void sdhci_send_command(struct sdhci_host=
- *host, struct mmc_command *cmd)
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 return;
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 timeout--;
->> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mdelay(1);
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (!(timeout & 0xFF))
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 mdelay(1);
->> =C2=A0 =C2=A0 =C2=A0 }
->>
->> =C2=A0 =C2=A0 =C2=A0 mod_timer(&host->timer, jiffies + 10 * HZ);
->
-> But wait, here you decide *not* to call mdelay(1) every time through =
-the
-> loop, and instead call it only on iterations where the bottom eight b=
-its
-> are unset. =C2=A0This disqualifies most of the 2815 values that timeo=
-ut will
-> be set to, and leaves the following values triggering the mdelay(1):
->
-> 0x100 0x200 0x300 0x400 0x500 0x600 0x700 0x800 0x900 0xa00
-> =C2=A0256 =C2=A0 512 =C2=A0 768 =C2=A01024 =C2=A01280 =C2=A01536 =C2=A0=
-1792 =C2=A02048 =C2=A02304 =C2=A02560
->
-> The astute observer will notice that there are ten such values.
-> So you're calling mdelay(1) ten times. =C2=A0But that's what we were
-> doing before! =C2=A0The only difference is that now we spin through
-> the while loop 2815 times instead of 10, and don't perform any
-> explicit delay on 2805 of them. =C2=A0Or am I missing something?
->
-> I think you should try:
->
-> (a) Reverting the patch and checking that it's actually needed
-> (b) Leaving the while loop body alone, but increasing the max
-> =C2=A0 =C2=A0timeout until you bisect to the amount of ms that your c=
-ontroller
-> =C2=A0 =C2=A0actually takes to release the inhibit bit.
-> (c) Yelling loudly in the direction that this code came from. =C2=A0:=
-)
+On Thu, 17 Mar 2011, Arnd Bergmann wrote:
+> On Thursday 17 March 2011 19:28:55 John Calixto wrote:
 
-Heh thanks for the review, once I even get ath6kl to even load
-properly on x86_64 I'll try reverting this POS hunk and see if it
-still works without it. Who knows where the hell this patch came from,
-as I noted I was given the entire blob as a huge patch and if you look
-at it, the original patch even removes some quirk for tegra.
+<snip>
 
- Luis
+> > diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+> > index 797cdb5..0453dcd 100644
+> > --- a/drivers/mmc/core/sd_ops.c
+> > +++ b/drivers/mmc/core/sd_ops.c
+> > @@ -20,7 +20,7 @@
+> >  #include "core.h"
+> >  #include "sd_ops.h"
+> >
+> > -static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+> > +int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+> >  {
+> >         int err;
+> >         struct mmc_command cmd;
+> > @@ -48,6 +48,7 @@ static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+> >
+> >         return 0;
+> >  }
+> > +EXPORT_SYMBOL(mmc_app_cmd);
+>
+> Why not EXPORT_SYMBOL_GPL?
+>
+
+I was just using the convention already used in sd_ops.c.  I can send a
+pre-patch that sets all of the symbol exports in that file to be
+EXPORT_SYMBOL_GPL, but without confirmation from you and others on this
+list, that seems like overstepping my "jurisdiction".  Is that preferable?
+
+> > @@ -84,5 +86,21 @@
+> >  #define SD_SWITCH_ACCESS_DEF   0
+> >  #define SD_SWITCH_ACCESS_HS    1
+> >
+> > +struct sd_ioc_cmd {
+> > +    unsigned int struct_version;
+> > +#define SD_IOC_CMD_STRUCT_VERSION 0
+> > +    int write_flag;  /* implies direction of data.  true = write, false = read */
+> > +    unsigned int opcode;
+> > +    unsigned int arg;
+> > +    unsigned int flags;
+> > +    unsigned int postsleep_us;  /* apply usecond delay *after* issuing command */
+> > +    unsigned int force_timeout_ns;  /* force timeout to be force_timeout_ns ns */
+> > +    unsigned int response[4];  /* CMD response */
+> > +    unsigned int blksz;
+> > +    unsigned int blocks;
+> > +    unsigned char *data;  /* DAT buffer */
+> > +};
+> > +#define SD_IOC_ACMD _IOWR(MMC_BLOCK_MAJOR, 0, struct sd_ioc_cmd *)
+> > +
+> >  #endif
+> >
+>
+> As I mentioned, any ioctl command that gets introduced needs to be
+> designed very carefully to make sure we don't need to change it in the
+> future. The only two things I can see here are:
+>
+> * The struct_version should be removed
+> * The data pointer is not compatible between 32 and 64 bits.
+>   One solution for this would be to make it a __u64 argument
+>   and require the user to cast the pointer to a 64 bit type.
+>
+>       Arnd
+
+I don't understand your comment about the data pointer not being
+compatible between 32 and 64 bits.  Wouldn't the compiler take care of
+pointer size?
+
+Thanks,
+
+John
