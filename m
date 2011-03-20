@@ -1,83 +1,51 @@
-From: John Calixto <john.calixto@modsystems.com>
-Subject: Re: [PATCH resend] mmc: Added ioctl to let userspace apps send
- ACMD
-Date: Sat, 19 Mar 2011 19:12:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1103191849040.13315@peruna>
-References: <201103172255.51442.arnd@arndb.de> <201103182025.14036.arnd@arndb.de> <alpine.DEB.2.00.1103181332310.6084@peruna> <201103191252.49490.arnd@arndb.de>
+From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Subject: Re: [PATCH resend] mmc: Added ioctl to let userspace apps send ACMD
+Date: Sun, 20 Mar 2011 06:11:19 +0100
+Message-ID: <AANLkTim9PXg8UXMkDXUQ6W9pYp12U6MQ2AR+3ORk-uEX@mail.gmail.com>
+References: <201103172255.51442.arnd@arndb.de> <201103182025.14036.arnd@arndb.de>
+ <alpine.DEB.2.00.1103181332310.6084@peruna> <201103191252.49490.arnd@arndb.de>
+ <alpine.DEB.2.00.1103191849040.13315@peruna>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-junco.atl.sa.earthlink.net ([209.86.89.63]:34962 "EHLO
-	elasmtp-junco.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751187Ab1CTCNC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Mar 2011 22:13:02 -0400
-In-Reply-To: <201103191252.49490.arnd@arndb.de>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:58191 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750786Ab1CTFLk convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Mar 2011 01:11:40 -0400
+Received: by qwk3 with SMTP id 3so3571422qwk.19
+        for <linux-mmc@vger.kernel.org>; Sat, 19 Mar 2011 22:11:39 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1103191849040.13315@peruna>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: John Calixto <john.calixto@modsystems.com>, linux-mmc@vger.kernel.org, cjb@laptop.org
+To: John Calixto <john.calixto@modsystems.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, cjb@laptop.org
 
-On Sat, 19 Mar 2011, Arnd Bergmann wrote:
-> Many of the SD specifications have redacted versions that allow
-> us to write OS drivers. For instance there is
-> http://www.sdcard.org/developers//tech/sdcard/pls/simplified_specs/Part_A1_ASSD_Extension_Simplified_Specification_Ver2.00_Final_100518.pdf
-> that describes some of the "advanced security SD" card 
+2011/3/20 John Calixto <john.calixto@modsystems.com>:
+> On Sat, 19 Mar 2011, Arnd Bergmann wrote:
+[...]
+>> > I expect for more general purposes, like your qemu passthrough cas=
+e, you
+>> > would want to add a handler for cmd=3DSD_IOC_CMD?
+>> Yes, but I suspect that would mean blocking all other activity on th=
+e
+>> same device, possibly with an ioctl for claiming the host for an
+>> extended period of time.
+> Sure. =C2=A0And if the testing I described above shows that regular b=
+lock
+> operations are indeed negatively affected, then I'll have to implemen=
+t
+> that ioctl for claiming the host myself and you'll have a head start!=
+ :)
 
-Thanks for the reference.  I was not aware of those docs.  Note that
-anything related to CPRM is redacted.  I suspect it's because it's a
-separate organization that actually publishes and licenses the CPRM
-specs - the 4C Entity, LLC.  I agree with you that it would be ideal for
-us if we could include much of the CPRM code directly into the kernel,
-but I don't see how that's possible at this time.
+This idea is scary. ;-) Just think what would happen if userspace made
+this sequence:
+1. fd =3D open(dev)
+2. ioctl(fd, claim host)
+3. read(fd, ...)
 
-> Ok, so is the protocol designed in a way that you don't need to
-> mmc_claim_host() across multiple ACMDs to do CPRM?
-> 
-> > > You may get into a situation where the card is owned by the
-> > > program that needs to complete talking to it before the kernel
-> > > can do more block commands, but the program cannot continue until
-> > > the block driver reads back the program .text section from the
-> > > card.
-> > > 
-> > 
-> > Having used mmc_claim_host() (see my previous comment above), the ioctl
-> > should complete before the kernel gets a chance to page the program out
-> > shouldn't it?
-> 
-> Right. But is that enough? The qeustion is whether the card may be
-> in a state where it's expecting another ACMD after the first ioctl
-> and cannot deal with regular block commands.
-> 
+(if 3. is not convincing, replace it with any access to mounted
+filesystem from the same card.)
 
-I see your point.  The card certainly will not allow access to the
-secure area if you interleave secure commands with regular, non-secure
-commands - Failed secure ops would be the immediately observable
-behaviour that I would expect.  However, I am not sure about the
-potential negative effects on the regular block operations.  I will go
-back and specifically test for these scenarios.  Though I must say that
-in the thousands of hours of manual and automated testing, and at least
-hundreds of hours of use by end-users, this patch has held its own.
-
-Again, I will go back and specifically focus on breaking regular block
-operations with interleaved injections of ACMDs using this ioctl.
-
-> > The patch is only for ACMDs for now.  When calling the ioctl with
-> > cmd=SD_IOC_ACMD, it implies you expect CMD55 to be sent *before* sending
-> > your command.  There are specs that describe the values and behaviours
-> > of ACMDs.  You'll find that the SD card's state machine is pretty
-> > resilient, and that apps that are messing with tossing garbage ACMDs in
-> > should expect garbage back out.
-> > 
-> > I expect for more general purposes, like your qemu passthrough case, you
-> > would want to add a handler for cmd=SD_IOC_CMD?
-> 
-> Yes, but I suspect that would mean blocking all other activity on the
-> same device, possibly with an ioctl for claiming the host for an
-> extended period of time.
-> 
-
-Sure.  And if the testing I described above shows that regular block
-operations are indeed negatively affected, then I'll have to implement
-that ioctl for claiming the host myself and you'll have a head start! :)
-
-John
+Best Regards,
+Micha=C5=82 Miros=C5=82aw
