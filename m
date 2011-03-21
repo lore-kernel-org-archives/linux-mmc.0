@@ -1,245 +1,55 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 07/12] mmc: sd: set current limit for uhs cards
-Date: Mon, 21 Mar 2011 02:54:31 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300EA339A50@SAUSEXMBP01.amd.com>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
- <1299238369-1768-8-git-send-email-arindam.nath@amd.com>
- <001101cbe79b$b6660ec0$23322c40$@org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH 0/5] make sdhci device drivers self registered
+Date: Mon, 21 Mar 2011 16:06:58 +0800
+Message-ID: <1300694823-8300-1-git-send-email-shawn.guo@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:52630
-	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752686Ab1CUHzP convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Mar 2011 03:55:15 -0400
-In-Reply-To: <001101cbe79b$b6660ec0$23322c40$@org>
-Content-Language: en-US
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:42334 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751120Ab1CUIET (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2011 04:04:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>, "cjb@laptop.org" <cjb@laptop.org>
-Cc: "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "prakity@marvell.com" <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, patches@linaro.org, sameo@linux.intel.com, grant.likely@secretlab.ca
 
-Hi Subhash,
+This patch set is to take sdhci device driver specific things out
+from sdhci-pltfm.c and make them self registered. Here are the
+differences it makes.
 
+ * Get the sdhci device driver follow the Linux trend that driver
+   take the registration by its own
+ * sdhci-pltfm.c becomes significantly simpler and only has common
+   support functions there
+ * All sdhci device specific stuff are going back its own driver
+ * The dt and non-dt support share the same pair of .probe and
+   .remove hooks.
 
-> -----Original Message-----
-> From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> Sent: Monday, March 21, 2011 1:14 PM
-> To: Nath, Arindam; cjb@laptop.org
-> Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: RE: [PATCH v2 07/12] mmc: sd: set current limit for uhs cards
-> 
-> 
-> 
-> > -----Original Message-----
-> > From: Arindam Nath [mailto:anath.amd@gmail.com] On Behalf Of Arindam
-> > Nath
-> > Sent: Friday, March 04, 2011 5:03 PM
-> > To: cjb@laptop.org
-> > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
-> > subhashj@codeaurora.org; linux-mmc@vger.kernel.org; henry.su@amd.com;
-> > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
-> > Subject: [PATCH v2 07/12] mmc: sd: set current limit for uhs cards
-> >
-> > We decide on the current limit to be set for the card based on the
-> > Capability of Host Controller to provide current at 1.8V signalling,
-> > and the maximum current limit of the card as indicated by CMD6
-> > mode 0. We then set the current limit for the card using CMD6 mode 1.
-> >
-> > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > ---
-> >  drivers/mmc/core/sd.c    |   45
-> > +++++++++++++++++++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci.c |   24 ++++++++++++++++++++++++
-> >  include/linux/mmc/card.h |    9 +++++++++
-> >  include/linux/mmc/host.h |    1 +
-> >  4 files changed, 79 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > index ec0d8e6..df98a2c 100644
-> > --- a/drivers/mmc/core/sd.c
-> > +++ b/drivers/mmc/core/sd.c
-> > @@ -550,6 +550,46 @@ static int sd_set_bus_speed_mode(struct mmc_card
-> > *card, u8 *status)
-> >  	return 0;
-> >  }
-> >
-> > +static int sd_set_current_limit(struct mmc_card *card, u8 *status)
-> > +{
-> > +	struct mmc_host *host = card->host;
-> > +	int mmc_host_max_current_180, current_limit;
-> > +	int err;
-> > +
-> > +	/* sanity check */
-> > +	if (!host->ops->get_max_current_180)
-> > +		return 0;
-> > +
-> > +	/* Maximum current supported by host at 1.8V */
-> > +	mmc_host_max_current_180 = host->ops->get_max_current_180(host);
-> > +
-> > +	if (mmc_host_max_current_180 >= 800) {
-> > +		if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_800)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_800;
-> > +		else if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_600)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_600;
-> > +		else if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_400)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_400;
-> > +	} else if (mmc_host_max_current_180 >= 600) {
-> > +		if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_600)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_600;
-> > +		else if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_400)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_400;
-> > +	} else if (mmc_host_max_current_180 >= 400)
-> > +		if (card->sw_caps.uhs_curr_limit & SD_MAX_CURRENT_400)
-> > +			current_limit = SD_SET_CURRENT_LIMIT_400;
-> > +
-> > +	err = mmc_sd_switch(card, 1, 3, current_limit, status);
-> > +	if (err)
-> > +		return err;
-> > +
-> > +	if (((status[15] >> 4) & 0x0F) != current_limit)
-> > +		printk(KERN_WARNING "%s: Problem setting current limit!\n",
-> > +			mmc_hostname(card->host));
-> 
-> This is what SD3.01 spec says:
-> "Current limit switch is only for SDR50, SDR104 and DDR50. Current
-> limit
-> does not act on the card in SDR12 and SDR25 modes."
-> 
-> But in this function you are not checking for the currently selected
-> bus
-> speed mode. If let's say you are in SDR12/SDR25 mode and if host
-> supports
-> MAX_CURRENT_800 then this function will try to the current limit to 800
-> but
-> card won't switch to it as SDR12/SDR25 mode doen't allow the current
-> switch.
-> 
-> So basically your following check will always print the warning for
-> SDR12/SDR25 mode.
-> 
-> 	if (((status[15] >> 4) & 0x0F) != current_limit)
-> 		printk(KERN_WARNING "%s: Problem setting current limit!\n",
-> 			mmc_hostname(card->host));
-> 
-> So in this function you should also check the current bus speed mode.
-> If
-> current bus_speed_mode is SDR12/SDR25/legacy then you should select the
-> current limit to 200ma and for SDR104/SDR50/DDR50, you should select it
-> depending on the host's Max. current limit.
+The first one patch adds common support function into sdhci-pltfm.c
+when changing sdhci-esdhc-imx driver, while the last one cleans up
+sdhci-pltfm.c when changing sdhci-tegra driver.
 
-Thanks for the correction. Yes, I verified from the spec what you said. I will modify the code accordingly.
+Only the patch of sdhci-esdhc-imx are tested on hardware, and others
+are just build tested.  And it is based on the tree below.
 
-Thanks,
-Arindam
+  git://git.secretlab.ca/git/linux-2.6.git devicetree/test
 
-> 
-> 
-> > +
-> > +	return 0;
-> > +}
-> > +
-> >  /*
-> >   * UHS-I specific initialization procedure
-> >   */
-> > @@ -590,6 +630,11 @@ static int mmc_sd_init_uhs_card(struct mmc_card
-> > *card)
-> >
-> >  	/* Set bus speed mode of the card */
-> >  	err = sd_set_bus_speed_mode(card, status);
-> > +	if (err)
-> > +		goto out;
-> > +
-> > +	/* Set current limit for the card */
-> > +	err = sd_set_current_limit(card, status);
-> >
-> >  out:
-> >  	kfree(status);
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index f127fa2..245cc39 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -1462,12 +1462,36 @@ static int
-> > sdhci_start_signal_voltage_switch(struct mmc_host *mmc)
-> >  	return -EAGAIN;
-> >  }
-> >
-> > +static int sdhci_get_max_current_180(struct mmc_host *mmc)
-> > +{
-> > +	struct sdhci_host *host;
-> > +	u32 max_current_caps;
-> > +	unsigned long flags;
-> > +	int max_current_180;
-> > +
-> > +	host = mmc_priv(mmc);
-> > +
-> > +	spin_lock_irqsave(&host->lock, flags);
-> > +
-> > +	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
-> > +
-> > +	spin_unlock_irqrestore(&host->lock, flags);
-> > +
-> > +	/* Maximum current is 4 times the register value for 1.8V */
-> > +	max_current_180 = ((max_current_caps &
-> > SDHCI_MAX_CURRENT_180_MASK) >>
-> > +			   SDHCI_MAX_CURRENT_180_SHIFT) *
-> > +			   SDHCI_MAX_CURRENT_MULTIPLIER;
-> > +
-> > +	return max_current_180;
-> > +}
-> > +
-> >  static const struct mmc_host_ops sdhci_ops = {
-> >  	.request	= sdhci_request,
-> >  	.set_ios	= sdhci_set_ios,
-> >  	.get_ro		= sdhci_get_ro,
-> >  	.enable_sdio_irq = sdhci_enable_sdio_irq,
-> >  	.start_signal_voltage_switch	=
-> > sdhci_start_signal_voltage_switch,
-> > +	.get_max_current_180		= sdhci_get_max_current_180,
-> >  };
-> >
-> >
-> >
-> /**********************************************************************
-> > *******\
-> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> > index 0b24c41..a6811ae 100644
-> > --- a/include/linux/mmc/card.h
-> > +++ b/include/linux/mmc/card.h
-> > @@ -98,6 +98,15 @@ struct sd_switch_caps {
-> >  #define SD_DRIVER_TYPE_C	0x04
-> >  #define SD_DRIVER_TYPE_D	0x08
-> >  	unsigned int		uhs_curr_limit;
-> > +#define SD_SET_CURRENT_LIMIT_200	0
-> > +#define SD_SET_CURRENT_LIMIT_400	1
-> > +#define SD_SET_CURRENT_LIMIT_600	2
-> > +#define SD_SET_CURRENT_LIMIT_800	3
-> > +
-> > +#define SD_MAX_CURRENT_200	(1 << SD_SET_CURRENT_LIMIT_200)
-> > +#define SD_MAX_CURRENT_400	(1 << SD_SET_CURRENT_LIMIT_400)
-> > +#define SD_MAX_CURRENT_600	(1 << SD_SET_CURRENT_LIMIT_600)
-> > +#define SD_MAX_CURRENT_800	(1 << SD_SET_CURRENT_LIMIT_800)
-> >  };
-> >
-> >  struct sdio_cccr {
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > index 4dfff6d..e84cd05 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -128,6 +128,7 @@ struct mmc_host_ops {
-> >  	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
-> >
-> >  	int	(*start_signal_voltage_switch)(struct mmc_host *host);
-> > +	int	(*get_max_current_180)(struct mmc_host *mmc);
-> >  };
-> >
-> >  struct mmc_card;
-> > --
-> > 1.7.1
-> 
-> 
+Comments are welcomed and appreciated.
 
+Regards,
+Shawn
 
+Shawn Guo (5):
+      mmc: sdhci: make sdhci-esdhc-imx driver self registered
+      mmc: sdhci: make sdhci-cns3xxx driver self registered
+      mmc: sdhci: make sdhci-dove driver self registered
+      mmc: sdhci: make sdhci-tegra driver self registered
+      mmc: sdhci: update Makefile/Kconfig for sdhci_pltfm change
+
+ drivers/mmc/host/Kconfig           |   24 +++--
+ drivers/mmc/host/Makefile          |   11 +-
+ drivers/mmc/host/sdhci-cns3xxx.c   |   68 +++++++++++++-
+ drivers/mmc/host/sdhci-dove.c      |   70 +++++++++++++-
+ drivers/mmc/host/sdhci-esdhc-imx.c |   98 +++++++++++++++----
+ drivers/mmc/host/sdhci-pltfm.c     |  165 ++-----------------------------
+ drivers/mmc/host/sdhci-pltfm.h     |   14 ++-
+ drivers/mmc/host/sdhci-tegra.c     |  189 +++++++++++++++++++++---------------
