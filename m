@@ -1,17 +1,17 @@
 From: "Subhash Jadavani" <subhashj@codeaurora.org>
 Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs initialization
-Date: Mon, 21 Mar 2011 15:13:54 +0530
-Message-ID: <001401cbe7ac$80791080$816b3180$@org>
+Date: Mon, 21 Mar 2011 16:28:46 +0530
+Message-ID: <001701cbe7b6$f5ffd780$e1ff8680$@org>
 References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com> <1299238369-1768-10-git-send-email-arindam.nath@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
 	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:6834 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751916Ab1CUJn7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2011 05:43:59 -0400
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:5462 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753186Ab1CUK6w (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2011 06:58:52 -0400
 In-Reply-To: <1299238369-1768-10-git-send-email-arindam.nath@amd.com>
 Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
@@ -22,8 +22,8 @@ Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, henr
 
 
 > -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Arindam Nath
+> From: Arindam Nath [mailto:anath.amd@gmail.com] On Behalf Of Arindam
+> Nath
 > Sent: Friday, March 04, 2011 5:03 PM
 > To: cjb@laptop.org
 > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
@@ -75,13 +75,6 @@ Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, henr
 > +	if (!mmc_host_is_spi(card->host) && card->host->ops-
 > >execute_tuning)
 > +		card->host->ops->execute_tuning(card->host);
-
-As you have mentioned, Host Controller needs tuning only in case of SDR104
-mode and for SDR50 mode. This means we should not call execute_tuning ops if
-bus speed mode is other than SD104/SDR50. Host driver should not be
-responsible for putting the check if the current bus speed mode is
-SDR104/SDR50 before start tuning.
-
 > +
 >  out:
 >  	kfree(status);
@@ -318,6 +311,14 @@ SDR104/SDR50 before start tuning.
 >  	int	(*start_signal_voltage_switch)(struct mmc_host *host);
 >  	int	(*get_max_current_180)(struct mmc_host *mmc);
 > +	void	(*execute_tuning)(struct mmc_host *host);
+
+
+Why execute_tuning ops return type is void? Will there not be any error
+scenarios? What if host fails to find any tuning point? Shouldn't it return
+error to the core layer and then core layer should not begin with the any
+read/write operations?
+
+
 >  };
 > 
 >  struct mmc_card;
@@ -365,9 +366,5 @@ SDR104/SDR50 before start tuning.
 >  #endif /* __SDHCI_H */
 > --
 > 1.7.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 
