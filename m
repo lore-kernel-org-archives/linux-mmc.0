@@ -1,44 +1,35 @@
-From: Antonio Ospite <ospite@studenti.unina.it>
-Subject: [PATCH 0/4] mmc_spi: Add support for regulator framework
-Date: Mon, 21 Mar 2011 19:46:38 +0100
-Message-ID: <1300733202-27316-1-git-send-email-ospite@studenti.unina.it>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Antonio Ospite <ospite@studenti.unina.it>, Daniel Ribeiro <drwyrm@gmail.com>, David Brownell <dbrownell@users.sourceforge.net>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Ernst Schwab <eschwab@online.de>, Sonic Zhang <sonic.zhang@analog.com>, Linus Walleij <linus.walleij@stericsson.com>, openezx-devel@lists.openezx.org, linux-kernel@vger.kernel.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC 4/5] MMC: Adjust unaligned write accesses.
+Date: Mon, 21 Mar 2011 20:05:37 +0100
+Message-ID: <201103212005.37108.arnd@arndb.de>
+References: <1299718449-15172-1-git-send-email-andreiw@motorola.com> <AANLkTik0DkQa7NrGbpSVVAkhQ4O9+kenPSr2dP=+Ej94@mail.gmail.com> <C0A67981-AF1A-40FF-91BA-93ECF6F72B58@dilger.ca>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.9]:60475 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753967Ab1CUTFt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2011 15:05:49 -0400
+In-Reply-To: <C0A67981-AF1A-40FF-91BA-93ECF6F72B58@dilger.ca>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andreas Dilger <adilger@dilger.ca>
+Cc: Andrei Warkentin <andreiw@motorola.com>, linux-mmc@vger.kernel.org, linux-ext4@vger.kernel.org
 
-Hi,
+On Monday 21 March 2011 19:03:09 Andreas Dilger wrote:
+> Note that mballoc was specifically designed to handle allocation
+> requests that are aligned on RAID stripe boundaries, so it should
+> be able to handle this for MMC as well.  What is needed is to tell
+> the filesystem what the underlying alignment is.  That can be done
+> at format time with mke2fs or afterward with tune2fs by using the
+> "-E stripe_width" option.
 
-this patchset has the purpose of adding support for the regulator framework to 
-the mmc_spi driver. The first three patches are preparatory cleanups to make 
-the forth one more straightforward.
+Ah, that sounds useful. So would I set the stripe_width to the
+erase block size, and the block group size to a multiple of that?
 
-Maybe the fourth patch can be improved, I am open to any suggestions about it.
+Does this also work in (rare) cases where the erase block size is
+not a power of two?
 
-These changes take strong inspiration from the pxamci driver; they have been 
-tested on a Motorola A910, which uses a regulator to powerup the MMC card 
-connected to the SPI bus, a test from a current user of the mmc_spi driver 
-would not hurt just to be sure no regressions have been introduced.
-
-Thanks,
-   Antonio
-
-Antonio Ospite (4):
-  mmc_spi.c: factor out the check for power capability
-  mmc_spi.c: factor out the SD card shutdown sequence
-  mmc_spi.c: factor out a mmc_spi_setpower() function
-  mmc_spi.c: add support for the regulator framework
-
- drivers/mmc/host/mmc_spi.c |  194 +++++++++++++++++++++++++++++---------------
- 1 files changed, 129 insertions(+), 65 deletions(-)
-
--- 
-Antonio Ospite
-http://ao2.it
-
-PGP public key ID: 0x4553B001
-
-A: Because it messes up the order in which people normally read text.
-   See http://en.wikipedia.org/wiki/Posting_style
-Q: Why is top-posting such a bad thing?
+	Arnd
