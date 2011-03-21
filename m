@@ -1,120 +1,373 @@
-From: Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 5/5] mmc: sdhci: update Makefile/Kconfig for sdhci_pltfm change
-Date: Mon, 21 Mar 2011 16:07:03 +0800
-Message-ID: <1300694823-8300-6-git-send-email-shawn.guo@linaro.org>
-References: <1300694823-8300-1-git-send-email-shawn.guo@linaro.org>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs initialization
+Date: Mon, 21 Mar 2011 15:13:54 +0530
+Message-ID: <001401cbe7ac$80791080$816b3180$@org>
+References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com> <1299238369-1768-10-git-send-email-arindam.nath@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain;
+	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1300694823-8300-1-git-send-email-shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:6834 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751916Ab1CUJn7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2011 05:43:59 -0400
+In-Reply-To: <1299238369-1768-10-git-send-email-arindam.nath@amd.com>
+Content-Language: en-us
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Arindam Nath' <arindam.nath@amd.com>, cjb@laptop.org
+Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com
 
-The sdhci_pltfm.c becomes a file only having common support functions
-than a driver with its registeration before.  The patch is to update
-Makefile and Kconfig to let MMC_SDHCI_PLTFM be selected by specific
-SDHCI device drivers.
 
-Signed-off-by: Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/mmc/host/Kconfig  |   24 +++++++++++++-----------
- drivers/mmc/host/Makefile |   11 +++++------
- 2 files changed, 18 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index afe8c6f..1db9347 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -113,20 +113,17 @@ config MMC_SDHCI_OF_HLWD
- 	  If unsure, say N.
- 
- config MMC_SDHCI_PLTFM
--	tristate "SDHCI support on the platform specific bus"
-+	bool
- 	depends on MMC_SDHCI
- 	help
--	  This selects the platform specific bus support for Secure Digital Host
--	  Controller Interface.
--
--	  If you have a controller with this interface, say Y or M here.
--
--	  If unsure, say N.
-+	  This selects the platform common function support for Secure Digital
-+	  Host Controller Interface.
- 
- config MMC_SDHCI_CNS3XXX
- 	bool "SDHCI support on the Cavium Networks CNS3xxx SoC"
- 	depends on ARCH_CNS3XXX
--	depends on MMC_SDHCI_PLTFM
-+	depends on MMC_SDHCI
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the SDHCI support for CNS3xxx System-on-Chip devices.
- 
-@@ -134,7 +131,9 @@ config MMC_SDHCI_CNS3XXX
- 
- config MMC_SDHCI_ESDHC_IMX
- 	bool "SDHCI platform support for the Freescale eSDHC i.MX controller"
--	depends on MMC_SDHCI_PLTFM && (ARCH_MX25 || ARCH_MX35 || ARCH_MX5)
-+	depends on ARCH_MX25 || ARCH_MX35 || ARCH_MX5
-+	depends on MMC_SDHCI
-+	select MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
- 	  This selects the Freescale eSDHC controller support on the platform
-@@ -145,7 +144,8 @@ config MMC_SDHCI_ESDHC_IMX
- config MMC_SDHCI_DOVE
- 	bool "SDHCI support on Marvell's Dove SoC"
- 	depends on ARCH_DOVE
--	depends on MMC_SDHCI_PLTFM
-+	depends on MMC_SDHCI
-+	select MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
- 	  This selects the Secure Digital Host Controller Interface in
-@@ -155,7 +155,9 @@ config MMC_SDHCI_DOVE
- 
- config MMC_SDHCI_TEGRA
- 	tristate "SDHCI platform support for the Tegra SD/MMC Controller"
--	depends on MMC_SDHCI_PLTFM && ARCH_TEGRA
-+	depends on ARCH_TEGRA
-+	depends on MMC_SDHCI
-+	select MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
- 	  This selects the Tegra SD/MMC controller. If you have a Tegra
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index e834fb2..1d8e43d 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -36,12 +36,11 @@ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
- obj-$(CONFIG_MMC_USHC)		+= ushc.o
- 
--obj-$(CONFIG_MMC_SDHCI_PLTFM)			+= sdhci-platform.o
--sdhci-platform-y				:= sdhci-pltfm.o
--sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX)	+= sdhci-cns3xxx.o
--sdhci-platform-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
--sdhci-platform-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
--sdhci-platform-$(CONFIG_MMC_SDHCI_TEGRA)	+= sdhci-tegra.o
-+obj-$(CONFIG_MMC_SDHCI_PLTFM)		+= sdhci-pltfm.o
-+obj-$(CONFIG_MMC_SDHCI_CNS3XXX)		+= sdhci-cns3xxx.o
-+obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
-+obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
-+obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
- 
- obj-$(CONFIG_MMC_SDHCI_OF)	+= sdhci-of.o
- sdhci-of-y				:= sdhci-of-core.o
--- 
-1.7.1
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Arindam Nath
+> Sent: Friday, March 04, 2011 5:03 PM
+> To: cjb@laptop.org
+> Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
+> subhashj@codeaurora.org; linux-mmc@vger.kernel.org; henry.su@amd.com;
+> aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
+> Subject: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs
+> initialization
+> 
+> Host Controller needs tuning during initialization to operate SDR50
+> and SDR104 UHS-I cards. Whether SDR50 mode actually needs tuning is
+> indicated by bit 45 of the Host Controller Capabilities register.
+> A new command CMD19 has been defined in the Physical Layer spec
+> v3.01 to request the card to send tuning pattern.
+> 
+> We enable Buffer Read Ready interrupt at the very begining of tuning
+> procedure, because that is the only interrupt generated by the Host
+> Controller during tuning. The tuning block is sent by the card to the
+> Host Controller using DAT lines, so we set Data Present Select (bit 5)
+> in the Command register. The Host Controller is responsible for doing
+> the verfication of tuning block sent by the card at the hardware level.
+> After sending CMD19, we wait for Buffer Read Ready interrupt. In case
+> we don't receive an interrupt after the specified timeout value, we
+> fall back on fixed sampling clock by setting Execute Tuning (bit 6)
+> and Sampling Clock Seletc (bit 7) of Host Control2 register to 0.
+> Before exiting the tuning procedure, we disable Buffer Read Ready
+> interrupt.
+> 
+> Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> ---
+>  drivers/mmc/core/sd.c     |    4 +
+>  drivers/mmc/host/sdhci.c  |  137
+> ++++++++++++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci.h  |    3 +
+>  include/linux/mmc/host.h  |    1 +
+>  include/linux/mmc/mmc.h   |    1 +
+>  include/linux/mmc/sdhci.h |    4 +
+>  6 files changed, 149 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index be01397..1e2d157 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -637,6 +637,10 @@ static int mmc_sd_init_uhs_card(struct mmc_card
+> *card)
+>  	/* Set current limit for the card */
+>  	err = sd_set_current_limit(card, status);
+> 
+> +	/* SPI mode doesn't define CMD19 */
+> +	if (!mmc_host_is_spi(card->host) && card->host->ops-
+> >execute_tuning)
+> +		card->host->ops->execute_tuning(card->host);
+
+As you have mentioned, Host Controller needs tuning only in case of SDR104
+mode and for SDR50 mode. This means we should not call execute_tuning ops if
+bus speed mode is other than SD104/SDR50. Host driver should not be
+responsible for putting the check if the current bus speed mode is
+SDR104/SDR50 before start tuning.
+
+> +
+>  out:
+>  	kfree(status);
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 245cc39..8f4f102 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -39,6 +39,8 @@
+>  #define SDHCI_USE_LEDS_CLASS
+>  #endif
+> 
+> +#define MAX_TUNING_LOOP 40
+> +
+>  static unsigned int debug_quirks = 0;
+> 
+>  static void sdhci_prepare_data(struct sdhci_host *, struct mmc_data
+> *);
+> @@ -985,7 +987,9 @@ static void sdhci_send_command(struct sdhci_host
+> *host, struct mmc_command *cmd)
+>  		flags |= SDHCI_CMD_CRC;
+>  	if (cmd->flags & MMC_RSP_OPCODE)
+>  		flags |= SDHCI_CMD_INDEX;
+> -	if (cmd->data)
+> +
+> +	/* CMD19 is special in that the Data Present Select should be set
+> */
+> +	if (cmd->data || (cmd->opcode == MMC_SEND_TUNING_BLOCK))
+>  		flags |= SDHCI_CMD_DATA;
+> 
+>  	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags),
+> SDHCI_COMMAND);
+> @@ -1485,6 +1489,119 @@ static int sdhci_get_max_current_180(struct
+> mmc_host *mmc)
+>  	return max_current_180;
+>  }
+> 
+> +static void sdhci_execute_tuning(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host;
+> +	u16 ctrl;
+> +	int tuning_loop_counter = MAX_TUNING_LOOP;
+> +	unsigned long flags;
+> +	unsigned long timeout;
+> +
+> +	host = mmc_priv(mmc);
+> +
+> +	spin_lock_irqsave(&host->lock, flags);
+> +
+> +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +
+> +	/*
+> +	 * Host Controller needs tuning only in case of SDR104 mode
+> +	 * and for SDR50 mode when Use Tuning for SDR50 is set in
+> +	 * Capabilities register.
+> +	 */
+> +	if ((ctrl & SDHCI_CTRL_UHS_SDR104) ||
+> +	    ((ctrl & SDHCI_CTRL_UHS_SDR50) &&
+> +	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
+> +		ctrl |= SDHCI_CTRL_EXEC_TUNING;
+> +	else {
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +		return;
+> +	}
+> +
+> +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +
+> +	/*
+> +	 * As per the Host Controller spec v3.00, tuning command
+> +	 * generates Buffer Read Ready interrupt, so enable that.
+> +	 */
+> +	sdhci_unmask_irqs(host, SDHCI_INT_DATA_AVAIL);
+> +
+> +	/*
+> +	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the
+> number
+> +	 * of loops reaches 40 times or a timeout of 150ms occurs.
+> +	 */
+> +	timeout = 150;
+> +	do {
+> +		struct mmc_command cmd;
+> +		struct mmc_request mrq;
+> +
+> +		if (!tuning_loop_counter && !timeout)
+> +			break;
+> +
+> +		memset(&cmd, 0, sizeof(struct mmc_command));
+> +		cmd.opcode = MMC_SEND_TUNING_BLOCK;
+> +		cmd.arg = 0;
+> +		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> +
+> +		memset(&cmd.resp, 0, sizeof(cmd.resp));
+> +		cmd.retries = 0;
+> +
+> +		cmd.data = NULL;
+> +		cmd.error = 0;
+> +
+> +		memset(&mrq, 0, sizeof(struct mmc_request));
+> +		mrq.cmd = &cmd;
+> +		host->mrq = &mrq;
+> +		sdhci_send_command(host, &cmd);
+> +
+> +		host->cmd = NULL;
+> +		host->mrq = NULL;
+> +
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +		/* Wait for Buffer Read Ready interrupt */
+> +		wait_event_interruptible_timeout(host->buf_ready_int,
+> +					(host->tuning_done == 1),
+> +					msecs_to_jiffies(50));
+> +		spin_lock_irqsave(&host->lock, flags);
+> +
+> +		if (!host->tuning_done) {
+> +			printk(KERN_INFO DRIVER_NAME ": Tuning procedure"
+> +				" failed, falling back to fixed sampling"
+> +				" clock\n");
+> +			ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> +			ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+> +			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +
+> +			goto out;
+> +		}
+> +
+> +		host->tuning_done = 0;
+> +
+> +		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +		tuning_loop_counter--;
+> +		timeout--;
+> +		mdelay(1);
+> +	} while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+> +
+> +	/*
+> +	 * The Host Driver has exhausted the maximum number of loops
+> allowed,
+> +	 * so use fixed sampling frequency.
+> +	 */
+> +	if (!tuning_loop_counter || !timeout) {
+> +		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> +		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +	} else {
+> +		if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
+> +			printk(KERN_INFO DRIVER_NAME ": Tuning procedure"
+> +				" failed, falling back to fixed sampling"
+> +				" clock\n");
+> +	}
+> +
+> +out:
+> +	sdhci_mask_irqs(host, SDHCI_INT_DATA_AVAIL);
+> +	spin_unlock_irqrestore(&host->lock, flags);
+> +}
+> +
+>  static const struct mmc_host_ops sdhci_ops = {
+>  	.request	= sdhci_request,
+>  	.set_ios	= sdhci_set_ios,
+> @@ -1492,6 +1609,7 @@ static const struct mmc_host_ops sdhci_ops = {
+>  	.enable_sdio_irq = sdhci_enable_sdio_irq,
+>  	.start_signal_voltage_switch	=
+> sdhci_start_signal_voltage_switch,
+>  	.get_max_current_180		= sdhci_get_max_current_180,
+> +	.execute_tuning			= sdhci_execute_tuning,
+>  };
+> 
+> 
+> /**********************************************************************
+> *******\
+> @@ -1703,6 +1821,16 @@ static void sdhci_data_irq(struct sdhci_host
+> *host, u32 intmask)
+>  {
+>  	BUG_ON(intmask == 0);
+> 
+> +	/* CMD19 generates _only_ Buffer Read Ready interrupt */
+> +	if (intmask & SDHCI_INT_DATA_AVAIL) {
+> +		if (SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))
+> +				== MMC_SEND_TUNING_BLOCK) {
+> +			host->tuning_done = 1;
+> +			wake_up(&host->buf_ready_int);
+> +			return;
+> +		}
+> +	}
+> +
+>  	if (!host->data) {
+>  		/*
+>  		 * The "data complete" interrupt is also used to
+> @@ -2126,6 +2254,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	if (caps[1] & SDHCI_SUPPORT_DDR50)
+>  		mmc->caps |= MMC_CAP_UHS_DDR50;
+> 
+> +	/* Does the host needs tuning for SDR50? */
+> +	if (caps[1] & SDHCI_USE_SDR50_TUNING)
+> +		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
+> +
+>  	/* Driver Type(s) (A, C, D) supported by the host */
+>  	if (caps[1] & SDHCI_DRIVER_TYPE_A)
+>  		mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
+> @@ -2269,6 +2401,9 @@ int sdhci_add_host(struct sdhci_host *host)
+> 
+>  	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned
+> long)host);
+> 
+> +	if (host->version >= SDHCI_SPEC_300)
+> +		init_waitqueue_head(&host->buf_ready_int);
+> +
+>  	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+>  		mmc_hostname(mmc), host);
+>  	if (ret)
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 5bf244d..4746879 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -160,6 +160,8 @@
+>  #define  SDHCI_CTRL_DRV_TYPE_A		0x0010
+>  #define  SDHCI_CTRL_DRV_TYPE_C		0x0020
+>  #define  SDHCI_CTRL_DRV_TYPE_D		0x0030
+> +#define  SDHCI_CTRL_EXEC_TUNING		0x0040
+> +#define  SDHCI_CTRL_TUNED_CLK		0x0080
+>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+> 
+>  #define SDHCI_CAPABILITIES	0x40
+> @@ -187,6 +189,7 @@
+>  #define  SDHCI_DRIVER_TYPE_A	0x00000010
+>  #define  SDHCI_DRIVER_TYPE_C	0x00000020
+>  #define  SDHCI_DRIVER_TYPE_D	0x00000040
+> +#define  SDHCI_USE_SDR50_TUNING	0x00002000
+> 
+>  #define SDHCI_CAPABILITIES_1	0x44
+> 
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index e84cd05..651e40b 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -129,6 +129,7 @@ struct mmc_host_ops {
+> 
+>  	int	(*start_signal_voltage_switch)(struct mmc_host *host);
+>  	int	(*get_max_current_180)(struct mmc_host *mmc);
+> +	void	(*execute_tuning)(struct mmc_host *host);
+>  };
+> 
+>  struct mmc_card;
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 612301f..9194f9e 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -50,6 +50,7 @@
+>  #define MMC_SET_BLOCKLEN         16   /* ac   [31:0] block len   R1
+> */
+>  #define MMC_READ_SINGLE_BLOCK    17   /* adtc [31:0] data addr   R1
+> */
+>  #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1
+> */
+> +#define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1
+> */
+> 
+>    /* class 3 */
+>  #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1
+> */
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 282d158..5203b97 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -109,6 +109,7 @@ struct sdhci_host {
+>  #define SDHCI_USE_ADMA		(1<<1)	/* Host is ADMA capable */
+>  #define SDHCI_REQ_USE_DMA	(1<<2)	/* Use DMA for this req. */
+>  #define SDHCI_DEVICE_DEAD	(1<<3)	/* Device unresponsive */
+> +#define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
+> 
+>  	unsigned int version;	/* SDHCI spec. version */
+> 
+> @@ -147,6 +148,9 @@ struct sdhci_host {
+> 
+>  	struct mmc_command	*saved_abort_cmd; /* Abort command saved
+> for data error recovery */
+> 
+> +	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read
+> Ready interrupt */
+> +	unsigned int		tuning_done;	/* Condition flag set
+> when CMD19 succeeds */
+> +
+>  	unsigned long private[0] ____cacheline_aligned;
+>  };
+>  #endif /* __SDHCI_H */
+> --
+> 1.7.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
