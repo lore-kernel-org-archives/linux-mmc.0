@@ -1,77 +1,30 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: [PATCH 1/3] drivers/mmc/host/mvsdio.c: Convert release_resource to
- release_mem_region
-Date: Tue, 22 Mar 2011 15:04:16 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1103221503100.11889@xanadu.home>
-References: <1300814095-25278-1-git-send-email-julia@diku.dk>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: MMC partitions support (4th revision)
+Date: Tue, 22 Mar 2011 16:11:39 -0500
+Message-ID: <1300828300-8677-1-git-send-email-andreiw@motorola.com>
+References: <1300533491-2378-2-git-send-email-andreiw@motorola.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:25013 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753901Ab1CVTEc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2011 15:04:32 -0400
-In-reply-to: <1300814095-25278-1-git-send-email-julia@diku.dk>
+Received: from exprod5og101.obsmtp.com ([64.18.0.141]:49772 "EHLO
+	exprod5og101.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750969Ab1CVU37 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2011 16:29:59 -0400
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.129.42])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p2MKUF6v027192
+	for <linux-mmc@vger.kernel.org>; Tue, 22 Mar 2011 16:30:15 -0400 (EDT)
+Received: from mail-gy0-f170.google.com (mail-gy0-f170.google.com [209.85.160.170])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p2MKRQq7025787
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Tue, 22 Mar 2011 16:30:15 -0400 (EDT)
+Received: by mail-gy0-f170.google.com with SMTP id 11so3639331gyb.15
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Mar 2011 13:29:56 -0700 (PDT)
+In-Reply-To: <1300533491-2378-2-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Julia Lawall <julia@diku.dk>
-Cc: kernel-janitors@vger.kernel.org, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>, Michal Miroslaw <mirq-linux@rere.qmqm.pl>, Anton Vorontsov <cbouatmailru@gmail.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Sascha Sommer <saschasommer@freenet.de>, linux-mmc@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
 
-On Tue, 22 Mar 2011, Julia Lawall wrote:
+This is the 4th iteration of the MMC partitions support, which also adds
+boot partition support and slight cleanup of probe/remove/issue_rq code.
 
-> Request_mem_region should be used with release_mem_region, not
-> release_resource.
-> 
-> A semantic patch that partially fixes this problem is as follows:
-> (http://coccinelle.lip6.fr/)
-> 
-> // <smpl>
-> @b@
-> expression x,E;
-> @@
-> 
-> x = request_mem_region(x->start,...)
-> ... when != release_mem_region(x->start,...)
->     when != x = E
-> (
-> - release_resource(x);
-> - kfree(x);
-> +  release_mem_region(x->start,resource_size(x));
-> |
-> ?- release_resource(x);
-> +  release_mem_region(x->start,resource_size(x));
-> )
-> // </smpl>
-> 
-> Signed-off-by: Julia Lawall <julia@diku.dk>
+I've rebased this on top of linux-next, but I haven't run tested because
+linux-next doesn't have support for my platform yet. Tested on K36. Can anyone try :)?
 
-Acked-by: Nicolas Pitre <nico@fluxnic.net>
-
-> ---
->  drivers/mmc/host/mvsdio.c |    4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-> index a5bf60e..4606087 100644
-> --- a/drivers/mmc/host/mvsdio.c
-> +++ b/drivers/mmc/host/mvsdio.c
-> @@ -825,7 +825,7 @@ out:
->  			iounmap(host->base);
->  	}
->  	if (r)
-> -		release_resource(r);
-> +		release_mem_region(r->start, resource_size(r));
->  	if (mmc)
->  		mmc_free_host(mmc);
->  
-> @@ -850,7 +850,7 @@ static int __exit mvsd_remove(struct platform_device *pdev)
->  		del_timer_sync(&host->timer);
->  		mvsd_power_down(host);
->  		iounmap(host->base);
-> -		release_resource(host->res);
-> +		release_mem_region(host->res->start, resource_size(host->res));
->  		mmc_free_host(mmc);
->  	}
->  	platform_set_drvdata(pdev, NULL);
-> 
