@@ -1,55 +1,53 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH V7 4/4] mmc: sdhci-esdhc: enable esdhc on imx53
-Date: Tue, 22 Mar 2011 10:52:36 +0100
-Message-ID: <20110322095236.GD2134@pengutronix.de>
-References: <1300684936-8218-1-git-send-email-Hong-Xing.Zhu@freescale.com>
- <1300684936-8218-5-git-send-email-Hong-Xing.Zhu@freescale.com>
- <20110321130844.GG9686@pengutronix.de>
- <010C9052C42A00499CE76D637FA5EE900D32B1@039-SN1MPN1-001.039d.mgd.msft.net>
- <20110322085429.GA2134@pengutronix.de>
- <010C9052C42A00499CE76D637FA5EE900D365D@039-SN1MPN1-001.039d.mgd.msft.net>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH 0/6] mmc: split the tmio driver into several modules
+Date: Tue, 22 Mar 2011 21:28:50 +0900
+Message-ID: <20110322122850.GA26099@linux-sh.org>
+References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange> <AANLkTi=EBDnRtjqN3eckpt32p-tG8VkcsktLartOEgBp@mail.gmail.com> <Pine.LNX.4.64.1103211226110.21013@axis700.grange> <20110322053127.GG27346@verge.net.au>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="Qrgsu6vtpU/OV/zm"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:56458 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753727Ab1CVJwh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2011 05:52:37 -0400
-Content-Disposition: inline
-In-Reply-To: <010C9052C42A00499CE76D637FA5EE900D365D@039-SN1MPN1-001.039d.mgd.msft.net>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Zhu Richard-R65037 <R65037@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-
-
---Qrgsu6vtpU/OV/zm
 Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20110322053127.GG27346@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
+On Tue, Mar 22, 2011 at 02:31:31PM +0900, Simon Horman wrote:
+> On Mon, Mar 21, 2011 at 12:38:10PM +0100, Guennadi Liakhovetski wrote:
+> > Hi Chris, Ian
+> > 
+> > AFAICS there are currently still a few tmio patch-series outstanding:
+> > 
+> > From: Guennadi Liakhovetski <g.liakhovetski <at> gmx.de>
+> > Subject: [PATCH 0/2] tmio_mmc: improve DMA reliability
+> > 	http://thread.gmane.org/gmane.linux.kernel.mmc/6485
+> > 
+> > From: Simon Horman <horms <at> verge.net.au>
+> > Subject: [PATCH 0/4] [rfc v3] mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM
+> > 	http://thread.gmane.org/gmane.linux.kernel.mmc/6664
+> 
+> IMHO, Patch 1-3 are ready and can either be merged through the MMC
+> or one of Paul's trees. Although I should note that patches
+> 2 and 3 include changes to arch/arm/boot/compressed/mmcif-sh7372.c and
+> arch/sh/boot/romimage/mmcif-sh7724.c.
+> 
+I'm having a hard time working out what these arbitrary 1-3 numbers map
+to in terms of actual series and patch numbers. As far as things with an
+sh or rmobile impact I see:
 
-> No, I don't prefer to skip this patch, and want to carry this patch,
->  since these patch are used for imx53, and imx53 only support the SDHC V2.
+sh: ecovec: use the CONFIG_MMC_TMIO symbols instead of MFD
 
-Ooops, yes. Sorry for the noise!
+and
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+[rfc v3] mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM
 
---Qrgsu6vtpU/OV/zm
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
+although it's not obvious how the latter is tied to a TMIO dependency
+(some SDHI header thing?).
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
+I'm happy to take the ecovec patch whenever, since it doesn't really hurt
+anything. Anything touching drivers/mmc I obviously prefer to go via Chris.
 
-iEYEARECAAYFAk2IcWQACgkQD27XaX1/VRt/VgCbBFJjOFA+oGAtide6lwY8C55n
-ULYAn19eBFN3T5EOefwL0HKhZmqjX4ZD
-=Oej+
------END PGP SIGNATURE-----
-
---Qrgsu6vtpU/OV/zm--
+I got buried in the fbdev patch queue today, so I'll be catching up on sh and
+rmobile stuff tomorrow. You're free to work out amongst yourselves what gets
+applied where in which order, or I'll simply guess.
