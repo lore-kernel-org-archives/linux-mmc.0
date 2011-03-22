@@ -1,53 +1,86 @@
-From: Paul Mundt <lethal@linux-sh.org>
-Subject: Re: [PATCH 0/6] mmc: split the tmio driver into several modules
-Date: Tue, 22 Mar 2011 21:28:50 +0900
-Message-ID: <20110322122850.GA26099@linux-sh.org>
-References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange> <AANLkTi=EBDnRtjqN3eckpt32p-tG8VkcsktLartOEgBp@mail.gmail.com> <Pine.LNX.4.64.1103211226110.21013@axis700.grange> <20110322053127.GG27346@verge.net.au>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC 4/5] MMC: Adjust unaligned write accesses.
+Date: Tue, 22 Mar 2011 14:56:31 +0100
+Message-ID: <201103221456.32151.arnd@arndb.de>
+References: <1299718449-15172-1-git-send-email-andreiw@motorola.com> <201103212005.37108.arnd@arndb.de> <7BE97618-725C-4BFA-9FE5-59C893BDA097@dilger.ca>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20110322053127.GG27346@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-ext4-owner@vger.kernel.org>
+In-Reply-To: <7BE97618-725C-4BFA-9FE5-59C893BDA097@dilger.ca>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Andreas Dilger <adilger@dilger.ca>
+Cc: Andrei Warkentin <andreiw@motorola.com>, linux-mmc@vger.kernel.org, linux-ext4@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Mar 22, 2011 at 02:31:31PM +0900, Simon Horman wrote:
-> On Mon, Mar 21, 2011 at 12:38:10PM +0100, Guennadi Liakhovetski wrote:
-> > Hi Chris, Ian
+On Tuesday 22 March 2011, Andreas Dilger wrote:
+> On 2011-03-21, at 8:05 PM, Arnd Bergmann wrote:
+> > On Monday 21 March 2011 19:03:09 Andreas Dilger wrote:
+> >> Note that mballoc was specifically designed to handle allocation
+> >> requests that are aligned on RAID stripe boundaries, so it should
+> >> be able to handle this for MMC as well.  What is needed is to tell
+> >> the filesystem what the underlying alignment is.  That can be done
+> >> at format time with mke2fs or afterward with tune2fs by using the
+> >> "-E stripe_width" option.
 > > 
-> > AFAICS there are currently still a few tmio patch-series outstanding:
-> > 
-> > From: Guennadi Liakhovetski <g.liakhovetski <at> gmx.de>
-> > Subject: [PATCH 0/2] tmio_mmc: improve DMA reliability
-> > 	http://thread.gmane.org/gmane.linux.kernel.mmc/6485
-> > 
-> > From: Simon Horman <horms <at> verge.net.au>
-> > Subject: [PATCH 0/4] [rfc v3] mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM
-> > 	http://thread.gmane.org/gmane.linux.kernel.mmc/6664
+> > Ah, that sounds useful. So would I set the stripe_width to the
+> > erase block size, and the block group size to a multiple of that?
 > 
-> IMHO, Patch 1-3 are ready and can either be merged through the MMC
-> or one of Paul's trees. Although I should note that patches
-> 2 and 3 include changes to arch/arm/boot/compressed/mmcif-sh7372.c and
-> arch/sh/boot/romimage/mmcif-sh7724.c.
+> When you write "block group size" do you mean the ext4 block group? 
+
+Yes.
+
+> Then yes it would help.  You could also consider setting the flex_bg
+> size to a multiple of this, so that the bitmap blocks are grouped as
+> a multiple of this size.  However, they may not be aligned correctly,
+> which needs extra effort that isn't obvious.  
 > 
-I'm having a hard time working out what these arbitrary 1-3 numbers map
-to in terms of actual series and patch numbers. As far as things with an
-sh or rmobile impact I see:
+> I think it would be nice to have mke2fs take the stripe_width and/or
+> flex_bg factor into account when sizing/aligning the bitmaps, but it
+> doesn't yet.
 
-sh: ecovec: use the CONFIG_MMC_TMIO symbols instead of MFD
+A few more questions: 
 
-and
+* On cards that can only write to a single erase block at a time,
+should I make the block group size the same as the as the erase
+block? I suppose writing both block bitmaps, inode and data to
+separate erase blocks would create multiple eraseblock
+read-modify-write cycles for every single file otherwise.
 
-[rfc v3] mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM
+* Is it guaranteed that inode bitmap, inode, block bitmap and
+blocks are always written in low-to-high sector order within
+one ext4 block group? A lot of the drives will do a garbage-collect
+step (adding hundreds of miliseconds) every time you move back
+inside of the eraseblock.
 
-although it's not obvious how the latter is tied to a TMIO dependency
-(some SDHI header thing?).
+* Is there any way to make ext4 use effective blocks larger
+than 4 KB? The most common size for a NAND flash page is 16
+KB right (effectively, ignoring what the hardware does), so
+it would be good to never write smaller.
 
-I'm happy to take the ecovec patch whenever, since it doesn't really hurt
-anything. Anything touching drivers/mmc I obviously prefer to go via Chris.
+* Calling TRIM on SD cards is probably counterproductive unless
+you trim entire erase blocks. Is that even possible with ext4,
+assuming that we use block group == erase block?
 
-I got buried in the fbdev patch queue today, so I'll be catching up on sh and
-rmobile stuff tomorrow. You're free to work out amongst yourselves what gets
-applied where in which order, or I'll simply guess.
+* Is there a way to put the journal into specific parts of the
+drive? Almost all SD cards have an area in the second 4 MB
+(more for larger cards) that can be written using random access
+without forcing garbage collection on other parts.
+
+> > Does this also work in (rare) cases where the erase block size is
+> > not a power of two?
+> 
+> It does (or is supposed to), but that isn't code that is exercised
+> very much (most installations use a power-of-two size).
+
+Ok. Recently, cheap TLC (three-level cell, 3-bit MLC) NAND is
+becoming popular. I've seen erase block sizes of 6 MiB, 1376 KiB
+(4096 / 3, rounded up) and 4128 KiB (1376 * 3) because of this, in
+place of the common 4096 KiB. The SD card standard specifies
+values of 12 MB and 24 MB aside from the usual power-of-two values
+up to 64 MB for large cards (>32GB), while smaller cards are allowed
+only up to 4 MB erase blocks and need to be power-of-two. Many
+cards do not use the size they claim in their registers.
+
+	Arnd
