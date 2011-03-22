@@ -1,83 +1,71 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 0/6] mmc: split the tmio driver into several modules
-Date: Wed, 23 Mar 2011 07:06:24 +0900
-Message-ID: <20110322220623.GJ2423@verge.net.au>
-References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
- <AANLkTi=EBDnRtjqN3eckpt32p-tG8VkcsktLartOEgBp@mail.gmail.com>
- <Pine.LNX.4.64.1103211226110.21013@axis700.grange>
- <20110322053127.GG27346@verge.net.au>
- <20110322122850.GA26099@linux-sh.org>
+From: John Calixto <john.calixto@modsystems.com>
+Subject: Re: [PATCH resend] mmc: Added ioctl to let userspace apps send
+ ACMDs
+Date: Tue, 22 Mar 2011 15:31:53 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1103221508420.30367@peruna>
+References: <203F41F6E33F954E8E8B02559FDC906F7431FC48EA@modex01> <alpine.DEB.2.00.1103180927390.5267@peruna> <AANLkTimjssCz_U4xbSf+ecoM7RsjC3eGQBo2vabfyy=T@mail.gmail.com> <201103182026.48939.arnd@arndb.de> <AANLkTinKon=D445PEHP2CzeL7OUpf_4y8j0-GA2nmZPt@mail.gmail.com>
+ <alpine.DEB.2.00.1103211129130.23727@peruna> <AANLkTimwnS74Ybo6XTLOVUs7pRZBv4+hDgS7i2bfj+HV@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20110322122850.GA26099@linux-sh.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Paul Mundt <lethal@linux-sh.org>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: MULTIPART/MIXED; BOUNDARY="-1463811328-1948272867-1300833120=:30367"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from elasmtp-banded.atl.sa.earthlink.net ([209.86.89.70]:41943 "EHLO
+	elasmtp-banded.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752338Ab1CVWcJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2011 18:32:09 -0400
+In-Reply-To: <AANLkTimwnS74Ybo6XTLOVUs7pRZBv4+hDgS7i2bfj+HV@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, cjb@laptop.org
 
-On Tue, Mar 22, 2011 at 09:28:50PM +0900, Paul Mundt wrote:
-> On Tue, Mar 22, 2011 at 02:31:31PM +0900, Simon Horman wrote:
-> > On Mon, Mar 21, 2011 at 12:38:10PM +0100, Guennadi Liakhovetski wrote:
-> > > Hi Chris, Ian
-> > > 
-> > > AFAICS there are currently still a few tmio patch-series outstanding:
-> > > 
-> > > From: Guennadi Liakhovetski <g.liakhovetski <at> gmx.de>
-> > > Subject: [PATCH 0/2] tmio_mmc: improve DMA reliability
-> > > 	http://thread.gmane.org/gmane.linux.kernel.mmc/6485
-> > > 
-> > > From: Simon Horman <horms <at> verge.net.au>
-> > > Subject: [PATCH 0/4] [rfc v3] mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM
-> > > 	http://thread.gmane.org/gmane.linux.kernel.mmc/6664
-> > 
-> > IMHO, Patch 1-3 are ready and can either be merged through the MMC
-> > or one of Paul's trees. Although I should note that patches
-> > 2 and 3 include changes to arch/arm/boot/compressed/mmcif-sh7372.c and
-> > arch/sh/boot/romimage/mmcif-sh7724.c.
-> > 
-> I'm having a hard time working out what these arbitrary 1-3 numbers map
-> to in terms of actual series and patch numbers. As far as things with an
-> sh or rmobile impact I see:
-> 
-> sh: ecovec: use the CONFIG_MMC_TMIO symbols instead of MFD
-> 
-> and
-> 
-> [rfc v3] mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM
-> 
-> although it's not obvious how the latter is tied to a TMIO dependency
-> (some SDHI header thing?).
-> 
-> I'm happy to take the ecovec patch whenever, since it doesn't really hurt
-> anything. Anything touching drivers/mmc I obviously prefer to go via Chris.
-> 
-> I got buried in the fbdev patch queue today, so I'll be catching up on sh and
-> rmobile stuff tomorrow. You're free to work out amongst yourselves what gets
-> applied where in which order, or I'll simply guess.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Hi Paul,
+---1463811328-1948272867-1300833120=:30367
+Content-Type: TEXT/PLAIN; charset=ISO-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-By 1-3 I was referring to the first three patches of
-[PATCH 0/4] [rfc v3] mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM
+On Tue, 22 Mar 2011, Micha=B3 Miros=B3aw wrote:
+> >> In this case, a process having access to one partition can disrupt
+> >> other partitions on the same card even if it has no access to them in
+> >> any other way.
+> > This is true, but I can already wreak havoc on partitions for any block
+> > device by opening up the block device node directly, seeking and
+> > writing. =A0If I have write access to the block device, I can do whatev=
+er
+> > I want.
+>=20
+> You're talking about reverse case to what I described. Using a
+> partition, you shouldn't be able to effect the device in a way that
+> extends part this particular partition.
+>=20
 
-That is:
-[PATCH 1/4] mmc: tmio_mmc: Move some defines into a shared header
-[PATCH 2/4] mmc, ARM: Rename SuperH Mobile ARM zboot helpers
-[PATCH 3/4] mmc: Add MMC_PROGRESS_*
+Ah - I see.  Sorry, I misread your comment.
 
-And by patch 4 I was referring to
-[PATCH 4/4 v5] mmc, ARM: Add zboot from eSD support for SuperH Mobile
+> >> It is not that unusual on "normal systems" to give write access to
+> >> some partition or device to unprivileged users. Database volumes are
+> >> one example.
+> > Are you talking about the device nodes themselves, or about access to
+> > the mounted filesystems that live on those devices/partitions? =A0It se=
+ems
+> > like if you give unprivileged users write access to the raw block
+> > device, you should expect a lot more trouble from
+> > runaway/malicious/accidental writes than you would from
+> > application-specific commands being sent via ioctl.
+>=20
+> I don't exactly see what's your point here. If you say that writes are
+> less dangerous than ioctls, then I agree. Even now, for some block
+> ioctls you need CAP_SYS_ADMIN because of that.
+>=20
 
-I apologise for that being as clear as mud.
+In general, I agree with your caution.  My point is that I'm not sure
+this type of protection belongs in the kernel.  We use permissions and
+"medium-privileged" role users all the time to marshal access to
+sensitive files and devices.  This is a problem that has been solved in
+userspace.  You don't let normal user "john" have the same access to
+device nodes or even files and directories that you would for role user
+"database", or role user "webserver".  (Actually, you probably shouldn't
+let normal user "john" have access to anything - I hear he's trouble!)
 
-Magnus raised a build issue with the series since my previous email.
-I will investigate that and reply to him ASAP. Its probably best
-to hold all the patches until then.
-
-With regards to 
-[PATCH 2/6] sh: ecovec: use the CONFIG_MMC_TMIO symbols instead of MFD
-it looks like Magnus raised a few issues and Guennadi is going to repost
-the patch. But I could be wrong.
-
+John
+---1463811328-1948272867-1300833120=:30367--
