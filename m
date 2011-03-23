@@ -1,82 +1,49 @@
-From: Kishore Kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [patch 148/177] drivers/mmc/host/omap.c: use resource_size()
-Date: Wed, 23 Mar 2011 13:10:27 +0530
-Message-ID: <AANLkTi=ftyiFayk+=reDcoZbsDbxi8z6KwGRL9EuviPw@mail.gmail.com>
-References: <201103222334.p2MNYfMe002438@imap1.linux-foundation.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH resend] mmc: Added ioctl to let userspace apps send ACMDs
+Date: Wed, 23 Mar 2011 08:57:32 +0100
+Message-ID: <201103230857.32442.arnd@arndb.de>
+References: <203F41F6E33F954E8E8B02559FDC906F7431FC48EA@modex01> <AANLkTikHzG3j8oT_aqZ5VAGFxyBBShyPzQTZxvxwkuff@mail.gmail.com> <alpine.DEB.2.00.1103221741140.30367@peruna>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:32805 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753417Ab1CWHks convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2011 03:40:48 -0400
-Received: by wya21 with SMTP id 21so7409581wya.19
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Mar 2011 00:40:47 -0700 (PDT)
-In-Reply-To: <201103222334.p2MNYfMe002438@imap1.linux-foundation.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:50831 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754410Ab1CWH7O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2011 03:59:14 -0400
+In-Reply-To: <alpine.DEB.2.00.1103221741140.30367@peruna>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org
-Cc: torvalds@linux-foundation.org, cjb@laptop.org, jarkko.lavinen@nokia.com, linux-mmc@vger.kernel.org, tony@atomide.com
+To: John Calixto <john.calixto@modsystems.com>
+Cc: =?utf-8?q?Micha=C5=82_Miros=C5=82aw?= <mirqus@gmail.com>, linux-mmc@vger.kernel.org, cjb@laptop.org
 
-On Wed, Mar 23, 2011 at 5:04 AM,  <akpm@linux-foundation.org> wrote:
-> From: Chris Ball <cjb@laptop.org>
->
-> Signed-off-by: Chris Ball <cjb@laptop.org>
-> Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
-> Cc: Tony Lindgren <tony@atomide.com>
-> Cc: <linux-mmc@vger.kernel.org>
-> Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+On Wednesday 23 March 2011, John Calixto wrote:
+>=20
+> On Wed, 23 Mar 2011, Micha=C5=82 Miros=C5=82aw wrote:
+> > When you grant write access to a device to some user, you should
+> > expect that it is all you are granting. There shouldn't be any hidd=
+en
+> > doors that, for example, if underlying device is SD card then you c=
+an
+> > destroy it by this ioctl(). Not counting wearing or WORM-like media=
+,
+> > writes (also erasing, changing encryption keys, etc.) are undoable.
+> > Other forms of access should be granted separately (by capabilities=
+ or
+> > other means).
+> >=20
+>=20
+> Fair enough.  I'm not aware enough of the other ACMDs that might
+> actually destroy the card (nothing I'm using will destroy the card), =
+so
+> I'll be sure to hook it with CAP_SYS_ADMIN (or whatever capability is
+> most appropriate).
 
-Acked-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+The standard defines some commands as vendor-specific. A typical use
+case for these would be a way to update the firmware on the embedded
+microcontroller of the card.
 
-> ---
->
-> =A0drivers/mmc/host/omap.c | =A0 =A06 +++---
-> =A01 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff -puN drivers/mmc/host/omap.c~drivers-mmc-host-omapc-use-resource=
-_size drivers/mmc/host/omap.c
-> --- a/drivers/mmc/host/omap.c~drivers-mmc-host-omapc-use-resource_siz=
-e
-> +++ a/drivers/mmc/host/omap.c
-> @@ -1417,7 +1417,7 @@ static int __init mmc_omap_probe(struct
-> =A0 =A0 =A0 =A0if (res =3D=3D NULL || irq < 0)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return -ENXIO;
->
-> - =A0 =A0 =A0 res =3D request_mem_region(res->start, res->end - res->=
-start + 1,
-> + =A0 =A0 =A0 res =3D request_mem_region(res->start, resource_size(re=
-s),
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdev-=
->name);
-> =A0 =A0 =A0 =A0if (res =3D=3D NULL)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return -EBUSY;
-> @@ -1457,7 +1457,7 @@ static int __init mmc_omap_probe(struct
->
-> =A0 =A0 =A0 =A0host->irq =3D irq;
-> =A0 =A0 =A0 =A0host->phys_base =3D host->mem_res->start;
-> - =A0 =A0 =A0 host->virt_base =3D ioremap(res->start, res->end - res-=
->start + 1);
-> + =A0 =A0 =A0 host->virt_base =3D ioremap(res->start, resource_size(r=
-es));
-> =A0 =A0 =A0 =A0if (!host->virt_base)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto err_ioremap;
->
-> @@ -1514,7 +1514,7 @@ err_free_mmc_host:
-> =A0err_ioremap:
-> =A0 =A0 =A0 =A0kfree(host);
-> =A0err_free_mem_region:
-> - =A0 =A0 =A0 release_mem_region(res->start, res->end - res->start + =
-1);
-> + =A0 =A0 =A0 release_mem_region(res->start, resource_size(res));
-> =A0 =A0 =A0 =A0return ret;
-> =A0}
->
-> _
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+Overwriting that firmware with garbage would be an obvious way to
+brick the card.
+
+	Arnd
