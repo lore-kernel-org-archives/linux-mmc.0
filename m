@@ -1,50 +1,46 @@
-From: Daniel Walker <dwalker@fifo99.com>
-Subject: Re: [RFC] mmc: msm_sdcc: Use SPS BAM as DMA engine
-Date: Wed, 23 Mar 2011 06:05:35 -0700
-Message-ID: <1300885535.6117.15.camel@m0nster>
-References: <1300454644-11361-1-git-send-email-subhashj@codeaurora.org>
-	 <1300454644-11361-2-git-send-email-subhashj@codeaurora.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 0/6 v2] mmc: split the tmio driver into several modules
+Date: Wed, 23 Mar 2011 14:42:29 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103231156220.6836@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1300454644-11361-2-git-send-email-subhashj@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, davidb@codeaurora.org, bryanh@codeaurora.org, linux-kernel@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 2011-03-18 at 18:54 +0530, Subhash Jadavani wrote:
-> On recent MSMs, ADM (Data Mover) HW is not present
-> which means existing SDCC driver can perform data
-> transfer in PIO (peripheral IO) mode only.
-> But PIO mode requires lot of CPU attention which
-> would mean consuming extra CPU MIPS.
-> 
-> As a replacement on these recent MSMs, there is
-> a new DMA HW engine named SPS-BAM (as part of
-> Smart Peripheral System of MSM) is added for
-> data movement between SDCC core and system memory.
-> 
-> This patch has done changes in existing MSM SDCC
-> driver for using SPS-BAM as DMA engine.
+Hi all
 
-1300+ lines of code might warrant more of a description .. In the
-subject you say "DMA engine" but does this use drivers/dma/dmaengine.c ?
+This is version 2 of the patch series, posted on 11th of March. The only 
+change in this version is the dynamic allocation of the DMA bounce buffer, 
+as suggested by Magnus. Desription from the original post:
 
-> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> ---
->  drivers/mmc/host/Kconfig        |   10 +
->  drivers/mmc/host/Makefile       |    1 +
->  drivers/mmc/host/msm_sdcc.c     |  929 +++++++++++++++++++++++++++++++++++++--
->  drivers/mmc/host/msm_sdcc.h     |   47 ++
->  drivers/mmc/host/msm_sdcc_dml.c |  303 +++++++++++++
->  drivers/mmc/host/msm_sdcc_dml.h |  120 +++++
->  6 files changed, 1374 insertions(+), 36 deletions(-)
->  create mode 100644 drivers/mmc/host/msm_sdcc_dml.c
->  create mode 100644 drivers/mmc/host/msm_sdcc_dml.h
+The tmio_mmc SD/SDIO driver is serving very different hardware 
+configurations: on the one hand multi-function style chips from Toshiba, 
+Compaq, on the other hand SDHI units in ARM- and SuperH-based sh-mobile 
+SoCs. Apart from the different native APIs: MFD for the former and 
+platform-device in the latter, sh-mobile implementations also have a 
+number of features, exclusive to them, which, if implemented in the common 
+driver, clutter it needlessly and make its maintenance more difficult. 
+This patch series simplifies the situation by splitting the driver up into 
+3 modules: the core, consisting of the main part and, on sh-mobile, of the 
+DMA part; the mfd glue; and the platform glue. This way also (imaginary) 
+sh-mobile systems with additional tmio mfd chips on them can be supported.
 
-I'd do at least two patches. One that adds msm_sdcc_dml.[ch] and one
-that modifies msm_sdcc.[ch] and the Kconfig and Makefile.
+This patch-series touches code under
 
-Daniel
+arch/arm/mach-shmobile
+arch/sh/boards
+drivers/mfd
+drivers/mmc/host
+
+Perhaps, it would be best to collect necessary acks from Paul and push 
+them all via mmc?
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
