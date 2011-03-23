@@ -1,103 +1,118 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 2/4 v3] ARM: mach-shmobile: fix SDHI IO address-range
-Date: Wed, 23 Mar 2011 14:49:07 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103231447040.6836@axis700.grange>
+Subject: [PATCH 3/4 v3] sh: fix SDHI IO address-range
+Date: Wed, 23 Mar 2011 14:49:11 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103231447350.6836@axis700.grange>
 References: <Pine.LNX.4.64.1103231445070.6836@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:54924 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755994Ab1CWNtI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2011 09:49:08 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <Pine.LNX.4.64.1103231445070.6836@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
 SDHI registers occupy only a 0x100 byte large window, not 0x200 byte.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- arch/arm/mach-shmobile/board-ap4evb.c   |    4 ++--
- arch/arm/mach-shmobile/board-g4evm.c    |    4 ++--
- arch/arm/mach-shmobile/board-mackerel.c |    6 +++---
- 3 files changed, 7 insertions(+), 7 deletions(-)
+ arch/sh/boards/mach-ap325rxa/setup.c |    4 ++--
+ arch/sh/boards/mach-ecovec24/setup.c |    4 ++--
+ arch/sh/boards/mach-kfr2r09/setup.c  |    2 +-
+ arch/sh/boards/mach-migor/setup.c    |    2 +-
+ arch/sh/boards/mach-se/7724/setup.c  |    4 ++--
+ 5 files changed, 8 insertions(+), 8 deletions(-)
 
-diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
-index 7ae9e3b..da8931d 100644
---- a/arch/arm/mach-shmobile/board-ap4evb.c
-+++ b/arch/arm/mach-shmobile/board-ap4evb.c
-@@ -312,7 +312,7 @@ static struct resource sdhi0_resources[] = {
+diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
+index 60d109f..65bd042 100644
+--- a/arch/sh/boards/mach-ap325rxa/setup.c
++++ b/arch/sh/boards/mach-ap325rxa/setup.c
+@@ -417,7 +417,7 @@ static struct resource sdhi0_cn3_resources[] = {
  	[0] = {
  		.name	= "SDHI0",
- 		.start  = 0xe6850000,
--		.end    = 0xe68501ff,
-+		.end    = 0xe68500ff,
- 		.flags  = IORESOURCE_MEM,
- 	},
- 	[1] = {
-@@ -345,7 +345,7 @@ static struct resource sdhi1_resources[] = {
- 	[0] = {
- 		.name	= "SDHI1",
- 		.start  = 0xe6860000,
--		.end    = 0xe68601ff,
-+		.end    = 0xe68600ff,
- 		.flags  = IORESOURCE_MEM,
- 	},
- 	[1] = {
-diff --git a/arch/arm/mach-shmobile/board-g4evm.c b/arch/arm/mach-shmobile/board-g4evm.c
-index cccdf2d..c87a7b7 100644
---- a/arch/arm/mach-shmobile/board-g4evm.c
-+++ b/arch/arm/mach-shmobile/board-g4evm.c
-@@ -205,7 +205,7 @@ static struct resource sdhi0_resources[] = {
- 	[0] = {
- 		.name	= "SDHI0",
- 		.start  = 0xe6d50000,
--		.end    = 0xe6d501ff,
-+		.end    = 0xe6d50nff,
- 		.flags  = IORESOURCE_MEM,
- 	},
- 	[1] = {
-@@ -232,7 +232,7 @@ static struct resource sdhi1_resources[] = {
- 	[0] = {
- 		.name	= "SDHI1",
- 		.start  = 0xe6d60000,
--		.end    = 0xe6d601ff,
-+		.end    = 0xe6d600ff,
- 		.flags  = IORESOURCE_MEM,
- 	},
- 	[1] = {
-diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
-index 05fc5ac..0ae0bc6 100644
---- a/arch/arm/mach-shmobile/board-mackerel.c
-+++ b/arch/arm/mach-shmobile/board-mackerel.c
-@@ -670,7 +670,7 @@ static struct resource sdhi0_resources[] = {
- 	[0] = {
- 		.name	= "SDHI0",
- 		.start	= 0xe6850000,
--		.end	= 0xe68501ff,
-+		.end	= 0xe68500ff,
+ 		.start	= 0x04ce0000,
+-		.end	= 0x04ce01ff,
++		.end	= 0x04ce00ff,
  		.flags	= IORESOURCE_MEM,
  	},
  	[1] = {
-@@ -705,7 +705,7 @@ static struct resource sdhi1_resources[] = {
+@@ -447,7 +447,7 @@ static struct resource sdhi1_cn7_resources[] = {
  	[0] = {
  		.name	= "SDHI1",
- 		.start	= 0xe6860000,
--		.end	= 0xe68601ff,
-+		.end	= 0xe68600ff,
+ 		.start	= 0x04cf0000,
+-		.end	= 0x04cf01ff,
++		.end	= 0x04cf00ff,
  		.flags	= IORESOURCE_MEM,
  	},
  	[1] = {
-@@ -748,7 +748,7 @@ static struct resource sdhi2_resources[] = {
+diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+index 710be27c9..fd0cb36 100644
+--- a/arch/sh/boards/mach-ecovec24/setup.c
++++ b/arch/sh/boards/mach-ecovec24/setup.c
+@@ -480,7 +480,7 @@ static struct resource sdhi0_resources[] = {
  	[0] = {
- 		.name	= "SDHI2",
- 		.start	= 0xe6870000,
--		.end	= 0xe68701ff,
-+		.end	= 0xe68700ff,
+ 		.name	= "SDHI0",
+ 		.start  = 0x04ce0000,
+-		.end    = 0x04ce01ff,
++		.end    = 0x04ce00ff,
+ 		.flags  = IORESOURCE_MEM,
+ 	},
+ 	[1] = {
+@@ -520,7 +520,7 @@ static struct resource sdhi1_resources[] = {
+ 	[0] = {
+ 		.name	= "SDHI1",
+ 		.start  = 0x04cf0000,
+-		.end    = 0x04cf01ff,
++		.end    = 0x04cf00ff,
+ 		.flags  = IORESOURCE_MEM,
+ 	},
+ 	[1] = {
+diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
+index 7021b59..8b4abbb 100644
+--- a/arch/sh/boards/mach-kfr2r09/setup.c
++++ b/arch/sh/boards/mach-kfr2r09/setup.c
+@@ -354,7 +354,7 @@ static struct resource kfr2r09_sh_sdhi0_resources[] = {
+ 	[0] = {
+ 		.name	= "SDHI0",
+ 		.start  = 0x04ce0000,
+-		.end    = 0x04ce01ff,
++		.end    = 0x04ce00ff,
+ 		.flags  = IORESOURCE_MEM,
+ 	},
+ 	[1] = {
+diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
+index 37e64a6..184fde1 100644
+--- a/arch/sh/boards/mach-migor/setup.c
++++ b/arch/sh/boards/mach-migor/setup.c
+@@ -399,7 +399,7 @@ static struct resource sdhi_cn9_resources[] = {
+ 	[0] = {
+ 		.name	= "SDHI",
+ 		.start	= 0x04ce0000,
+-		.end	= 0x04ce01ff,
++		.end	= 0x04ce00ff,
  		.flags	= IORESOURCE_MEM,
+ 	},
+ 	[1] = {
+diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
+index 58cefd3..1235767 100644
+--- a/arch/sh/boards/mach-se/7724/setup.c
++++ b/arch/sh/boards/mach-se/7724/setup.c
+@@ -456,7 +456,7 @@ static struct resource sdhi0_cn7_resources[] = {
+ 	[0] = {
+ 		.name	= "SDHI0",
+ 		.start  = 0x04ce0000,
+-		.end    = 0x04ce01ff,
++		.end    = 0x04ce00ff,
+ 		.flags  = IORESOURCE_MEM,
+ 	},
+ 	[1] = {
+@@ -488,7 +488,7 @@ static struct resource sdhi1_cn8_resources[] = {
+ 	[0] = {
+ 		.name	= "SDHI1",
+ 		.start  = 0x04cf0000,
+-		.end    = 0x04cf01ff,
++		.end    = 0x04cf00ff,
+ 		.flags  = IORESOURCE_MEM,
  	},
  	[1] = {
 -- 
