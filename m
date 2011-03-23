@@ -1,42 +1,53 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs initialization
-Date: Wed, 23 Mar 2011 12:15:28 +0530
-Message-ID: <001b01cbe925$ea7ec770$bf7c5650$@org>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com> <1299238369-1768-10-git-send-email-arindam.nath@amd.com> <001701cbe7b6$f5ffd780$e1ff8680$@org> <6C03668EAF45B747AF947A1603D1B300EA339B2F@SAUSEXMBP01.amd.com> <000901cbe920$adeda8d0$09c8fa70$@org> <6C03668EAF45B747AF947A1603D1B300EA7E167B@SAUSEXMBP01.amd.com> <000f01cbe922$54219d00$fc64d700$@org> <6C03668EAF45B747AF947A1603D1B300EA7E1692@SAUSEXMBP01.amd.com> <001501cbe924$5cc7bf00$16573d00$@org> <6C03668EAF45B747AF947A1603D1B300EA7E16B1@SAUSEXMBP01.amd.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs
+ initialization
+Date: Wed, 23 Mar 2011 01:48:42 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300EA7E16BB@SAUSEXMBP01.amd.com>
+References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
+ <1299238369-1768-10-git-send-email-arindam.nath@amd.com>
+ <001701cbe7b6$f5ffd780$e1ff8680$@org>
+ <6C03668EAF45B747AF947A1603D1B300EA339B2F@SAUSEXMBP01.amd.com>
+ <000901cbe920$adeda8d0$09c8fa70$@org>
+ <6C03668EAF45B747AF947A1603D1B300EA7E167B@SAUSEXMBP01.amd.com>
+ <000f01cbe922$54219d00$fc64d700$@org>
+ <6C03668EAF45B747AF947A1603D1B300EA7E1692@SAUSEXMBP01.amd.com>
+ <001501cbe924$5cc7bf00$16573d00$@org>
+ <6C03668EAF45B747AF947A1603D1B300EA7E16B1@SAUSEXMBP01.amd.com>
+ <001b01cbe925$ea7ec770$bf7c5650$@org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:1427 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751876Ab1CWGpi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2011 02:45:38 -0400
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EA7E16B1@SAUSEXMBP01.amd.com>
-Content-Language: en-us
+Received: from mail-tx2.bigfish.com ([65.55.88.10]:45128 "EHLO
+	TX2EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751444Ab1CWGsx convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 23 Mar 2011 02:48:53 -0400
+In-Reply-To: <001b01cbe925$ea7ec770$bf7c5650$@org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "'Nath, Arindam'" <Arindam.Nath@amd.com>, cjb@laptop.org
-Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, "'Su, Henry'" <Henry.Su@amd.com>, "'Lu, Aaron'" <Aaron.Lu@amd.com>, anath.amd@gmail.com
+To: Subhash Jadavani <subhashj@codeaurora.org>, "cjb@laptop.org" <cjb@laptop.org>
+Cc: "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "prakity@marvell.com" <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
 
 
 > -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> Sent: Wednesday, March 23, 2011 12:12 PM
-> To: Subhash Jadavani; cjb@laptop.org
+> From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> Sent: Wednesday, March 23, 2011 12:15 PM
+> To: Nath, Arindam; cjb@laptop.org
 > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
 > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during
 > uhs initialization
-> 
-> 
-> 
+>
+>
+>
 > > -----Original Message-----
-> > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > Sent: Wednesday, March 23, 2011 12:04 PM
-> > To: Nath, Arindam; cjb@laptop.org
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Nath, Arindam
+> > Sent: Wednesday, March 23, 2011 12:12 PM
+> > To: Subhash Jadavani; cjb@laptop.org
 > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
 > > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during
@@ -45,48 +56,47 @@ Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, "'Su
 > >
 > >
 > > > -----Original Message-----
-> > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> > > Sent: Wednesday, March 23, 2011 11:53 AM
-> > > To: Subhash Jadavani; cjb@laptop.org
+> > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> > > Sent: Wednesday, March 23, 2011 12:04 PM
+> > > To: Nath, Arindam; cjb@laptop.org
 > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
 > > > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning
 > during
 > > > uhs initialization
 > > >
-> > > Hi Subhash,
 > > >
 > > >
 > > > > -----Original Message-----
-> > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > > Sent: Wednesday, March 23, 2011 11:50 AM
-> > > > To: Nath, Arindam; cjb@laptop.org
+> > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > > > owner@vger.kernel.org] On Behalf Of Nath, Arindam
+> > > > Sent: Wednesday, March 23, 2011 11:53 AM
+> > > > To: Subhash Jadavani; cjb@laptop.org
 > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
 > > > > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning
 > > during
 > > > > uhs initialization
 > > > >
+> > > > Hi Subhash,
 > > > >
 > > > >
 > > > > > -----Original Message-----
-> > > > > From: Nath, Arindam [mailto:Arindam.Nath@amd.com]
-> > > > > Sent: Wednesday, March 23, 2011 11:45 AM
-> > > > > To: Subhash Jadavani; cjb@laptop.org
+> > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> > > > > Sent: Wednesday, March 23, 2011 11:50 AM
+> > > > > To: Nath, Arindam; cjb@laptop.org
 > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
 > > > > > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning
 > > > during
 > > > > > uhs initialization
 > > > > >
-> > > > > Hi Subhash,
 > > > > >
 > > > > >
 > > > > > > -----Original Message-----
-> > > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > > > > Sent: Wednesday, March 23, 2011 11:38 AM
-> > > > > > To: Nath, Arindam; cjb@laptop.org
+> > > > > > From: Nath, Arindam [mailto:Arindam.Nath@amd.com]
+> > > > > > Sent: Wednesday, March 23, 2011 11:45 AM
+> > > > > > To: Subhash Jadavani; cjb@laptop.org
 > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
 > anath.amd@gmail.com
@@ -94,13 +104,13 @@ Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, "'Su
 > > > > during
 > > > > > > uhs initialization
 > > > > > >
+> > > > > > Hi Subhash,
 > > > > > >
 > > > > > >
 > > > > > > > -----Original Message-----
-> > > > > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > > > > > owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> > > > > > > Sent: Monday, March 21, 2011 4:37 PM
-> > > > > > > To: Subhash Jadavani; cjb@laptop.org
+> > > > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> > > > > > > Sent: Wednesday, March 23, 2011 11:38 AM
+> > > > > > > To: Nath, Arindam; cjb@laptop.org
 > > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
 > > anath.amd@gmail.com
@@ -109,13 +119,13 @@ Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, "'Su
 > > > > > during
 > > > > > > > uhs initialization
 > > > > > > >
-> > > > > > > Hi Subhash,
 > > > > > > >
 > > > > > > >
 > > > > > > > > -----Original Message-----
-> > > > > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > > > > > > Sent: Monday, March 21, 2011 4:29 PM
-> > > > > > > > To: Nath, Arindam; cjb@laptop.org
+> > > > > > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > > > > > > > owner@vger.kernel.org] On Behalf Of Nath, Arindam
+> > > > > > > > Sent: Monday, March 21, 2011 4:37 PM
+> > > > > > > > To: Subhash Jadavani; cjb@laptop.org
 > > > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > > > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
 > > > anath.amd@gmail.com
@@ -124,337 +134,378 @@ Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, "'Su
 > > > > > > during
 > > > > > > > > uhs initialization
 > > > > > > > >
+> > > > > > > > Hi Subhash,
 > > > > > > > >
 > > > > > > > >
 > > > > > > > > > -----Original Message-----
-> > > > > > > > > From: Arindam Nath [mailto:anath.amd@gmail.com] On
-> Behalf
-> > > Of
-> > > > > > > Arindam
-> > > > > > > > > Nath
-> > > > > > > > > Sent: Friday, March 04, 2011 5:03 PM
-> > > > > > > > > To: cjb@laptop.org
-> > > > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
-> > > > > > > > > subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
-> > > > > > > henry.su@amd.com;
-> > > > > > > > > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
-> > > > > > > > > Subject: [PATCH v2 09/12] mmc: sd: add support for
-> tuning
-> > > > > during
-> > > > > > > uhs
-> > > > > > > > > initialization
+> > > > > > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> > > > > > > > > Sent: Monday, March 21, 2011 4:29 PM
+> > > > > > > > > To: Nath, Arindam; cjb@laptop.org
+> > > > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
+> > > > > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
+> > > > anath.amd@gmail.com
+> > > > > > > > > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for
+> > > tuning
+> > > > > > > during
+> > > > > > > > > uhs initialization
 > > > > > > > > >
-> > > > > > > > > Host Controller needs tuning during initialization to
-> > > operate
-> > > > > > SDR50
-> > > > > > > > > and SDR104 UHS-I cards. Whether SDR50 mode actually
-> needs
-> > > > > tuning
-> > > > > > is
-> > > > > > > > > indicated by bit 45 of the Host Controller Capabilities
-> > > > > register.
-> > > > > > > > > A new command CMD19 has been defined in the Physical
-> > Layer
-> > > > spec
-> > > > > > > > > v3.01 to request the card to send tuning pattern.
 > > > > > > > > >
-> > > > > > > > > We enable Buffer Read Ready interrupt at the very
-> > begining
-> > > of
-> > > > > > > tuning
-> > > > > > > > > procedure, because that is the only interrupt generated
-> > by
-> > > > the
-> > > > > > Host
-> > > > > > > > > Controller during tuning. The tuning block is sent by
+> > > > > > > > >
+> > > > > > > > > > -----Original Message-----
+> > > > > > > > > > From: Arindam Nath [mailto:anath.amd@gmail.com] On
+> > Behalf
+> > > > Of
+> > > > > > > > Arindam
+> > > > > > > > > > Nath
+> > > > > > > > > > Sent: Friday, March 04, 2011 5:03 PM
+> > > > > > > > > > To: cjb@laptop.org
+> > > > > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
+> > > > > > > > > > subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
+> > > > > > > > henry.su@amd.com;
+> > > > > > > > > > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
+> > > > > > > > > > Subject: [PATCH v2 09/12] mmc: sd: add support for
+> > tuning
+> > > > > > during
+> > > > > > > > uhs
+> > > > > > > > > > initialization
+> > > > > > > > > >
+> > > > > > > > > > Host Controller needs tuning during initialization to
+> > > > operate
+> > > > > > > SDR50
+> > > > > > > > > > and SDR104 UHS-I cards. Whether SDR50 mode actually
+> > needs
+> > > > > > tuning
+> > > > > > > is
+> > > > > > > > > > indicated by bit 45 of the Host Controller
+> Capabilities
+> > > > > > register.
+> > > > > > > > > > A new command CMD19 has been defined in the Physical
+> > > Layer
+> > > > > spec
+> > > > > > > > > > v3.01 to request the card to send tuning pattern.
+> > > > > > > > > >
+> > > > > > > > > > We enable Buffer Read Ready interrupt at the very
+> > > begining
+> > > > of
+> > > > > > > > tuning
+> > > > > > > > > > procedure, because that is the only interrupt
+> generated
+> > > by
+> > > > > the
+> > > > > > > Host
+> > > > > > > > > > Controller during tuning. The tuning block is sent by
+> > the
+> > > > > card
+> > > > > > to
+> > > > > > > > the
+> > > > > > > > > > Host Controller using DAT lines, so we set Data
+> Present
+> > > > > Select
+> > > > > > > (bit
+> > > > > > > > > 5)
+> > > > > > > > > > in the Command register. The Host Controller is
+> > > responsible
+> > > > > for
+> > > > > > > > doing
+> > > > > > > > > > the verfication of tuning block sent by the card at
 > the
-> > > > card
-> > > > > to
-> > > > > > > the
-> > > > > > > > > Host Controller using DAT lines, so we set Data Present
-> > > > Select
+> > > > > > hardware
+> > > > > > > > > level.
+> > > > > > > > > > After sending CMD19, we wait for Buffer Read Ready
+> > > > interrupt.
+> > > > > > In
+> > > > > > > > case
+> > > > > > > > > > we don't receive an interrupt after the specified
+> > timeout
+> > > > > > value,
+> > > > > > > we
+> > > > > > > > > > fall back on fixed sampling clock by setting Execute
+> > > Tuning
 > > > > > > (bit
-> > > > > > > > 5)
-> > > > > > > > > in the Command register. The Host Controller is
-> > responsible
-> > > > for
-> > > > > > > doing
-> > > > > > > > > the verfication of tuning block sent by the card at the
-> > > > > hardware
-> > > > > > > > level.
-> > > > > > > > > After sending CMD19, we wait for Buffer Read Ready
-> > > interrupt.
-> > > > > In
-> > > > > > > case
-> > > > > > > > > we don't receive an interrupt after the specified
-> timeout
-> > > > > value,
-> > > > > > we
-> > > > > > > > > fall back on fixed sampling clock by setting Execute
-> > Tuning
-> > > > > (bit
-> > > > > > 6)
-> > > > > > > > > and Sampling Clock Seletc (bit 7) of Host Control2
-> > register
-> > > > to
-> > > > > 0.
-> > > > > > > > > Before exiting the tuning procedure, we disable Buffer
-> > Read
-> > > > > Ready
-> > > > > > > > > interrupt.
-> > > > > > > > >
-> > > > > > > > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > > > > > > > > ---
-> > > > > > > > >  drivers/mmc/core/sd.c     |    4 +
-> > > > > > > > >  drivers/mmc/host/sdhci.c  |  137
-> > > > > > > > > ++++++++++++++++++++++++++++++++++++++++++++-
-> > > > > > > > >  drivers/mmc/host/sdhci.h  |    3 +
-> > > > > > > > >  include/linux/mmc/host.h  |    1 +
-> > > > > > > > >  include/linux/mmc/mmc.h   |    1 +
-> > > > > > > > >  include/linux/mmc/sdhci.h |    4 +
-> > > > > > > > >  6 files changed, 149 insertions(+), 1 deletions(-)
-> > > > > > > > >
-> > > > > > > > > diff --git a/drivers/mmc/core/sd.c
-> > b/drivers/mmc/core/sd.c
-> > > > > > > > > index be01397..1e2d157 100644
-> > > > > > > > > --- a/drivers/mmc/core/sd.c
-> > > > > > > > > +++ b/drivers/mmc/core/sd.c
-> > > > > > > > > @@ -637,6 +637,10 @@ static int
-> > mmc_sd_init_uhs_card(struct
-> > > > > > > mmc_card
-> > > > > > > > > *card)
-> > > > > > > > >         /* Set current limit for the card */
-> > > > > > > > >         err = sd_set_current_limit(card, status);
-> > > > > > > > >
-> > > > > > > > > +       /* SPI mode doesn't define CMD19 */
-> > > > > > > > > +       if (!mmc_host_is_spi(card->host) && card->host-
-> > > >ops-
-> > > > > > > > > >execute_tuning)
-> > > > > > > > > +               card->host->ops->execute_tuning(card-
-> > > >host);
-> > > > > > > > > +
-> > > > > > > > >  out:
-> > > > > > > > >         kfree(status);
-> > > > > > > > >
-> > > > > > > > > diff --git a/drivers/mmc/host/sdhci.c
-> > > > > b/drivers/mmc/host/sdhci.c
-> > > > > > > > > index 245cc39..8f4f102 100644
-> > > > > > > > > --- a/drivers/mmc/host/sdhci.c
-> > > > > > > > > +++ b/drivers/mmc/host/sdhci.c
-> > > > > > > > > @@ -39,6 +39,8 @@
-> > > > > > > > >  #define SDHCI_USE_LEDS_CLASS
-> > > > > > > > >  #endif
-> > > > > > > > >
-> > > > > > > > > +#define MAX_TUNING_LOOP 40
-> > > > > > > > > +
-> > > > > > > > >  static unsigned int debug_quirks = 0;
-> > > > > > > > >
-> > > > > > > > >  static void sdhci_prepare_data(struct sdhci_host *,
-> > struct
-> > > > > > > mmc_data
-> > > > > > > > > *);
-> > > > > > > > > @@ -985,7 +987,9 @@ static void
-> sdhci_send_command(struct
-> > > > > > > sdhci_host
-> > > > > > > > > *host, struct mmc_command *cmd)
-> > > > > > > > >                 flags |= SDHCI_CMD_CRC;
-> > > > > > > > >         if (cmd->flags & MMC_RSP_OPCODE)
-> > > > > > > > >                 flags |= SDHCI_CMD_INDEX;
-> > > > > > > > > -       if (cmd->data)
-> > > > > > > > > +
-> > > > > > > > > +       /* CMD19 is special in that the Data Present
-> > Select
-> > > > > should
-> > > > > > be set
-> > > > > > > > > */
-> > > > > > > > > +       if (cmd->data || (cmd->opcode ==
-> > > > > MMC_SEND_TUNING_BLOCK))
-> > > > > > > > >                 flags |= SDHCI_CMD_DATA;
-> > > > > > > > >
-> > > > > > > > >         sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode,
-> > > > flags),
-> > > > > > > > > SDHCI_COMMAND);
-> > > > > > > > > @@ -1485,6 +1489,119 @@ static int
-> > > > > > sdhci_get_max_current_180(struct
-> > > > > > > > > mmc_host *mmc)
-> > > > > > > > >         return max_current_180;
-> > > > > > > > >  }
-> > > > > > > > >
-> > > > > > > > > +static void sdhci_execute_tuning(struct mmc_host *mmc)
-> > > > > > > > > +{
-> > > > > > > > > +       struct sdhci_host *host;
-> > > > > > > > > +       u16 ctrl;
-> > > > > > > > > +       int tuning_loop_counter = MAX_TUNING_LOOP;
-> > > > > > > > > +       unsigned long flags;
-> > > > > > > > > +       unsigned long timeout;
-> > > > > > > > > +
-> > > > > > > > > +       host = mmc_priv(mmc);
-> > > > > > > > > +
-> > > > > > > > > +       spin_lock_irqsave(&host->lock, flags);
-> > > > > > > > > +
-> > > > > > > > > +       ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> > > > > > > > > +
-> > > > > > > > > +       /*
-> > > > > > > > > +        * Host Controller needs tuning only in case of
-> > > > SDR104
-> > > > > mode
-> > > > > > > > > +        * and for SDR50 mode when Use Tuning for SDR50
+> > > > > > > 6)
+> > > > > > > > > > and Sampling Clock Seletc (bit 7) of Host Control2
+> > > register
+> > > > > to
+> > > > > > 0.
+> > > > > > > > > > Before exiting the tuning procedure, we disable
+> Buffer
+> > > Read
+> > > > > > Ready
+> > > > > > > > > > interrupt.
+> > > > > > > > > >
+> > > > > > > > > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> > > > > > > > > > ---
+> > > > > > > > > >  drivers/mmc/core/sd.c     |    4 +
+> > > > > > > > > >  drivers/mmc/host/sdhci.c  |  137
+> > > > > > > > > > ++++++++++++++++++++++++++++++++++++++++++++-
+> > > > > > > > > >  drivers/mmc/host/sdhci.h  |    3 +
+> > > > > > > > > >  include/linux/mmc/host.h  |    1 +
+> > > > > > > > > >  include/linux/mmc/mmc.h   |    1 +
+> > > > > > > > > >  include/linux/mmc/sdhci.h |    4 +
+> > > > > > > > > >  6 files changed, 149 insertions(+), 1 deletions(-)
+> > > > > > > > > >
+> > > > > > > > > > diff --git a/drivers/mmc/core/sd.c
+> > > b/drivers/mmc/core/sd.c
+> > > > > > > > > > index be01397..1e2d157 100644
+> > > > > > > > > > --- a/drivers/mmc/core/sd.c
+> > > > > > > > > > +++ b/drivers/mmc/core/sd.c
+> > > > > > > > > > @@ -637,6 +637,10 @@ static int
+> > > mmc_sd_init_uhs_card(struct
+> > > > > > > > mmc_card
+> > > > > > > > > > *card)
+> > > > > > > > > >         /* Set current limit for the card */
+> > > > > > > > > >         err = sd_set_current_limit(card, status);
+> > > > > > > > > >
+> > > > > > > > > > +       /* SPI mode doesn't define CMD19 */
+> > > > > > > > > > +       if (!mmc_host_is_spi(card->host) && card-
+> >host-
+> > > > >ops-
+> > > > > > > > > > >execute_tuning)
+> > > > > > > > > > +               card->host->ops->execute_tuning(card-
+> > > > >host);
+> > > > > > > > > > +
+> > > > > > > > > >  out:
+> > > > > > > > > >         kfree(status);
+> > > > > > > > > >
+> > > > > > > > > > diff --git a/drivers/mmc/host/sdhci.c
+> > > > > > b/drivers/mmc/host/sdhci.c
+> > > > > > > > > > index 245cc39..8f4f102 100644
+> > > > > > > > > > --- a/drivers/mmc/host/sdhci.c
+> > > > > > > > > > +++ b/drivers/mmc/host/sdhci.c
+> > > > > > > > > > @@ -39,6 +39,8 @@
+> > > > > > > > > >  #define SDHCI_USE_LEDS_CLASS
+> > > > > > > > > >  #endif
+> > > > > > > > > >
+> > > > > > > > > > +#define MAX_TUNING_LOOP 40
+> > > > > > > > > > +
+> > > > > > > > > >  static unsigned int debug_quirks = 0;
+> > > > > > > > > >
+> > > > > > > > > >  static void sdhci_prepare_data(struct sdhci_host *,
+> > > struct
+> > > > > > > > mmc_data
+> > > > > > > > > > *);
+> > > > > > > > > > @@ -985,7 +987,9 @@ static void
+> > sdhci_send_command(struct
+> > > > > > > > sdhci_host
+> > > > > > > > > > *host, struct mmc_command *cmd)
+> > > > > > > > > >                 flags |= SDHCI_CMD_CRC;
+> > > > > > > > > >         if (cmd->flags & MMC_RSP_OPCODE)
+> > > > > > > > > >                 flags |= SDHCI_CMD_INDEX;
+> > > > > > > > > > -       if (cmd->data)
+> > > > > > > > > > +
+> > > > > > > > > > +       /* CMD19 is special in that the Data Present
+> > > Select
+> > > > > > should
+> > > > > > > be set
+> > > > > > > > > > */
+> > > > > > > > > > +       if (cmd->data || (cmd->opcode ==
+> > > > > > MMC_SEND_TUNING_BLOCK))
+> > > > > > > > > >                 flags |= SDHCI_CMD_DATA;
+> > > > > > > > > >
+> > > > > > > > > >         sdhci_writew(host, SDHCI_MAKE_CMD(cmd-
+> >opcode,
+> > > > > flags),
+> > > > > > > > > > SDHCI_COMMAND);
+> > > > > > > > > > @@ -1485,6 +1489,119 @@ static int
+> > > > > > > sdhci_get_max_current_180(struct
+> > > > > > > > > > mmc_host *mmc)
+> > > > > > > > > >         return max_current_180;
+> > > > > > > > > >  }
+> > > > > > > > > >
+> > > > > > > > > > +static void sdhci_execute_tuning(struct mmc_host
+> *mmc)
+> > > > > > > > > > +{
+> > > > > > > > > > +       struct sdhci_host *host;
+> > > > > > > > > > +       u16 ctrl;
+> > > > > > > > > > +       int tuning_loop_counter = MAX_TUNING_LOOP;
+> > > > > > > > > > +       unsigned long flags;
+> > > > > > > > > > +       unsigned long timeout;
+> > > > > > > > > > +
+> > > > > > > > > > +       host = mmc_priv(mmc);
+> > > > > > > > > > +
+> > > > > > > > > > +       spin_lock_irqsave(&host->lock, flags);
+> > > > > > > > > > +
+> > > > > > > > > > +       ctrl = sdhci_readw(host,
+> SDHCI_HOST_CONTROL2);
+> > > > > > > > > > +
+> > > > > > > > > > +       /*
+> > > > > > > > > > +        * Host Controller needs tuning only in case
+> of
+> > > > > SDR104
+> > > > > > mode
+> > > > > > > > > > +        * and for SDR50 mode when Use Tuning for
+> SDR50
+> > > is
+> > > > > set
+> > > > > > in
+> > > > > > > > > > +        * Capabilities register.
+> > > > > > > > > > +        */
+> > > > > > > > > > +       if ((ctrl & SDHCI_CTRL_UHS_SDR104) ||
+> > > > > > > > > > +           ((ctrl & SDHCI_CTRL_UHS_SDR50) &&
+> > > > > > > > > > +           (host->flags &
+> SDHCI_SDR50_NEEDS_TUNING)))
+> > > > > > > > > > +               ctrl |= SDHCI_CTRL_EXEC_TUNING;
+> > > > > > > > > > +       else {
+> > > > > > > > > > +               spin_unlock_irqrestore(&host->lock,
+> > > flags);
+> > > > > > > > > > +               return;
+> > > > > > > > > > +       }
+> > > > > > > > > > +
+> > > > > > > > > > +       sdhci_writew(host, ctrl,
+> SDHCI_HOST_CONTROL2);
+> > > > > > > > > > +
+> > > > > > > > > > +       /*
+> > > > > > > > > > +        * As per the Host Controller spec v3.00,
+> > tuning
+> > > > > > command
+> > > > > > > > > > +        * generates Buffer Read Ready interrupt, so
+> > > enable
+> > > > > > that.
+> > > > > > > > > > +        */
+> > > > > > > > > > +       sdhci_unmask_irqs(host,
+> SDHCI_INT_DATA_AVAIL);
+> > > > > > > > > > +
+> > > > > > > > > > +       /*
+> > > > > > > > > > +        * Issue CMD19 repeatedly till Execute Tuning
 > > is
 > > > > set
-> > > > > in
-> > > > > > > > > +        * Capabilities register.
-> > > > > > > > > +        */
-> > > > > > > > > +       if ((ctrl & SDHCI_CTRL_UHS_SDR104) ||
-> > > > > > > > > +           ((ctrl & SDHCI_CTRL_UHS_SDR50) &&
-> > > > > > > > > +           (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
-> > > > > > > > > +               ctrl |= SDHCI_CTRL_EXEC_TUNING;
-> > > > > > > > > +       else {
-> > > > > > > > > +               spin_unlock_irqrestore(&host->lock,
-> > flags);
-> > > > > > > > > +               return;
-> > > > > > > > > +       }
-> > > > > > > > > +
-> > > > > > > > > +       sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> > > > > > > > > +
-> > > > > > > > > +       /*
-> > > > > > > > > +        * As per the Host Controller spec v3.00,
-> tuning
-> > > > > command
-> > > > > > > > > +        * generates Buffer Read Ready interrupt, so
-> > enable
-> > > > > that.
-> > > > > > > > > +        */
-> > > > > > > > > +       sdhci_unmask_irqs(host, SDHCI_INT_DATA_AVAIL);
-> > > > > > > > > +
-> > > > > > > > > +       /*
-> > > > > > > > > +        * Issue CMD19 repeatedly till Execute Tuning
-> is
-> > > set
-> > > > to
-> > > > > 0
-> > > > > > or the
-> > > > > > > > > number
-> > > > > > > > > +        * of loops reaches 40 times or a timeout of
-> > 150ms
-> > > > > occurs.
-> > > > > > > > > +        */
-> > > > > > > > > +       timeout = 150;
-> > > > > > > > > +       do {
-> > > > > > > > > +               struct mmc_command cmd;
-> > > > > > > > > +               struct mmc_request mrq;
-> > > > > > > > > +
-> > > > > > > > > +               if (!tuning_loop_counter && !timeout)
-> > > > > > > > > +                       break;
-> > > > > > > > > +
-> > > > > > > > > +               memset(&cmd, 0, sizeof(struct
-> > > mmc_command));
-> > > > > > > > > +               cmd.opcode = MMC_SEND_TUNING_BLOCK;
-> > > > > > > > > +               cmd.arg = 0;
-> > > > > > > > > +               cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-> > > > > > > > > +
-> > > > > > > > > +               memset(&cmd.resp, 0, sizeof(cmd.resp));
-> > > > > > > > > +               cmd.retries = 0;
-> > > > > > > > > +
-> > > > > > > > > +               cmd.data = NULL;
-> > > > > > > > > +               cmd.error = 0;
-> > > > > > > > > +
-> > > > > > > > > +               memset(&mrq, 0, sizeof(struct
-> > > mmc_request));
-> > > > > > > > > +               mrq.cmd = &cmd;
-> > > > > > > > > +               host->mrq = &mrq;
-> > > > > > > > > +               sdhci_send_command(host, &cmd);
-> > > > > > > > > +
-> > > > > > > > > +               host->cmd = NULL;
-> > > > > > > > > +               host->mrq = NULL;
-> > > > > > > > > +
-> > > > > > > > > +               spin_unlock_irqrestore(&host->lock,
-> > flags);
-> > > > > > > > > +
-> > > > > > > > > +               /* Wait for Buffer Read Ready interrupt
-> > */
-> > > > > > > > > +               wait_event_interruptible_timeout(host-
-> > > > > >buf_ready_int,
-> > > > > > > > > +                                       (host-
-> > >tuning_done
-> > > ==
-> > > > > 1),
-> > > > > > > > > +
-> > > > msecs_to_jiffies(50));
-> > > > > > > > > +               spin_lock_irqsave(&host->lock, flags);
-> > > > > > > > > +
-> > > > > > > > > +               if (!host->tuning_done) {
-> > > > > > > > > +                       printk(KERN_INFO DRIVER_NAME ":
-> > > > Tuning
-> > > > > > procedure"
-> > > > > > > > > +                               " failed, falling back
-> to
-> > > > fixed
-> > > > > sampling"
-> > > > > > > > > +                               " clock\n");
-> > > > > > > > > +                       ctrl &= ~SDHCI_CTRL_TUNED_CLK;
-> > > > > > > > > +                       ctrl &=
-> ~SDHCI_CTRL_EXEC_TUNING;
-> > > > > > > > > +                       sdhci_writew(host, ctrl,
+> > > > > to
+> > > > > > 0
+> > > > > > > or the
+> > > > > > > > > > number
+> > > > > > > > > > +        * of loops reaches 40 times or a timeout of
+> > > 150ms
+> > > > > > occurs.
+> > > > > > > > > > +        */
+> > > > > > > > > > +       timeout = 150;
+> > > > > > > > > > +       do {
+> > > > > > > > > > +               struct mmc_command cmd;
+> > > > > > > > > > +               struct mmc_request mrq;
+> > > > > > > > > > +
+> > > > > > > > > > +               if (!tuning_loop_counter && !timeout)
+> > > > > > > > > > +                       break;
+> > > > > > > > > > +
+> > > > > > > > > > +               memset(&cmd, 0, sizeof(struct
+> > > > mmc_command));
+> > > > > > > > > > +               cmd.opcode = MMC_SEND_TUNING_BLOCK;
+> > > > > > > > > > +               cmd.arg = 0;
+> > > > > > > > > > +               cmd.flags = MMC_RSP_R1 |
+> MMC_CMD_ADTC;
+> > > > > > > > > > +
+> > > > > > > > > > +               memset(&cmd.resp, 0,
+> sizeof(cmd.resp));
+> > > > > > > > > > +               cmd.retries = 0;
+> > > > > > > > > > +
+> > > > > > > > > > +               cmd.data = NULL;
+> > > > > > > > > > +               cmd.error = 0;
+> > > > > > > > > > +
+> > > > > > > > > > +               memset(&mrq, 0, sizeof(struct
+> > > > mmc_request));
+> > > > > > > > > > +               mrq.cmd = &cmd;
+> > > > > > > > > > +               host->mrq = &mrq;
+> > > > > > > > > > +               sdhci_send_command(host, &cmd);
+> > > > > > > > > > +
+> > > > > > > > > > +               host->cmd = NULL;
+> > > > > > > > > > +               host->mrq = NULL;
+> > > > > > > > > > +
+> > > > > > > > > > +               spin_unlock_irqrestore(&host->lock,
+> > > flags);
+> > > > > > > > > > +
+> > > > > > > > > > +               /* Wait for Buffer Read Ready
+> interrupt
+> > > */
+> > > > > > > > > > +
+> wait_event_interruptible_timeout(host-
+> > > > > > >buf_ready_int,
+> > > > > > > > > > +                                       (host-
+> > > >tuning_done
+> > > > ==
+> > > > > > 1),
+> > > > > > > > > > +
+> > > > > msecs_to_jiffies(50));
+> > > > > > > > > > +               spin_lock_irqsave(&host->lock,
+> flags);
+> > > > > > > > > > +
+> > > > > > > > > > +               if (!host->tuning_done) {
+> > > > > > > > > > +                       printk(KERN_INFO DRIVER_NAME
+> ":
+> > > > > Tuning
+> > > > > > > procedure"
+> > > > > > > > > > +                               " failed, falling
+> back
+> > to
+> > > > > fixed
+> > > > > > sampling"
+> > > > > > > > > > +                               " clock\n");
+> > > > > > > > > > +                       ctrl &=
+> ~SDHCI_CTRL_TUNED_CLK;
+> > > > > > > > > > +                       ctrl &=
+> > ~SDHCI_CTRL_EXEC_TUNING;
+> > > > > > > > > > +                       sdhci_writew(host, ctrl,
+> > > > > > SDHCI_HOST_CONTROL2);
+> > > > > > > > > > +
+> > > > > > > > > > +                       goto out;
+> > > > > > > > > > +               }
+> > > > > > > > > > +
+> > > > > > > > > > +               host->tuning_done = 0;
+> > > > > > > > > > +
+> > > > > > > > > > +               ctrl = sdhci_readw(host,
 > > > > > SDHCI_HOST_CONTROL2);
-> > > > > > > > > +
-> > > > > > > > > +                       goto out;
-> > > > > > > > > +               }
-> > > > > > > > > +
-> > > > > > > > > +               host->tuning_done = 0;
-> > > > > > > > > +
-> > > > > > > > > +               ctrl = sdhci_readw(host,
-> > > > SDHCI_HOST_CONTROL2);
-> > > > > > > > > +               tuning_loop_counter--;
-> > > > > > > > > +               timeout--;
-> > > > > > > > > +               mdelay(1);
-> > > > > > > > > +       } while (ctrl & SDHCI_CTRL_EXEC_TUNING);
-> > > > > > > > > +
-> > > > > > > > > +       /*
-> > > > > > > > > +        * The Host Driver has exhausted the maximum
-> > number
-> > > > of
-> > > > > > loops
-> > > > > > > > > allowed,
-> > > > > > > > > +        * so use fixed sampling frequency.
-> > > > > > > > > +        */
-> > > > > > > > > +       if (!tuning_loop_counter || !timeout) {
-> > > > > > > > > +               ctrl &= ~SDHCI_CTRL_TUNED_CLK;
-> > > > > > > > > +               sdhci_writew(host, ctrl,
-> > > > SDHCI_HOST_CONTROL2);
-> > > > > > > > > +       } else {
-> > > > > > > > > +               if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
-> > > > > > > > > +                       printk(KERN_INFO DRIVER_NAME ":
-> > > > Tuning
-> > > > > > procedure"
-> > > > > > > > > +                               " failed, falling back
-> to
-> > > > fixed
-> > > > > sampling"
-> > > > > > > > > +                               " clock\n");
-> > > > > > > > > +       }
-> > > > > > > > > +
-> > > > > > > > > +out:
-> > > > > > > > > +       sdhci_mask_irqs(host, SDHCI_INT_DATA_AVAIL);
-> > > > > > > > > +       spin_unlock_irqrestore(&host->lock, flags);
-> > > > > > > > > +}
-> > > > > > > > > +
-> > > > > > > > >  static const struct mmc_host_ops sdhci_ops = {
-> > > > > > > > >         .request        = sdhci_request,
-> > > > > > > > >         .set_ios        = sdhci_set_ios,
-> > > > > > > > > @@ -1492,6 +1609,7 @@ static const struct mmc_host_ops
-> > > > > sdhci_ops
-> > > > > > =
-> > > > > > > {
-> > > > > > > > >         .enable_sdio_irq = sdhci_enable_sdio_irq,
-> > > > > > > > >         .start_signal_voltage_switch    =
-> > > > > > > > > sdhci_start_signal_voltage_switch,
-> > > > > > > > >         .get_max_current_180            =
-> > > > > sdhci_get_max_current_180,
-> > > > > > > > > +       .execute_tuning                 =
-> > > > sdhci_execute_tuning,
-> > > > > > > > >  };
-> > > > > > > > >
-> > > > > > > > >
+> > > > > > > > > > +               tuning_loop_counter--;
+> > > > > > > > > > +               timeout--;
+> > > > > > > > > > +               mdelay(1);
+> > > > > > > > > > +       } while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+> > > > > > > > > > +
+> > > > > > > > > > +       /*
+> > > > > > > > > > +        * The Host Driver has exhausted the maximum
+> > > number
+> > > > > of
+> > > > > > > loops
+> > > > > > > > > > allowed,
+> > > > > > > > > > +        * so use fixed sampling frequency.
+> > > > > > > > > > +        */
+> > > > > > > > > > +       if (!tuning_loop_counter || !timeout) {
+> > > > > > > > > > +               ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> > > > > > > > > > +               sdhci_writew(host, ctrl,
+> > > > > SDHCI_HOST_CONTROL2);
+> > > > > > > > > > +       } else {
+> > > > > > > > > > +               if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
+> > > > > > > > > > +                       printk(KERN_INFO DRIVER_NAME
+> ":
+> > > > > Tuning
+> > > > > > > procedure"
+> > > > > > > > > > +                               " failed, falling
+> back
+> > to
+> > > > > fixed
+> > > > > > sampling"
+> > > > > > > > > > +                               " clock\n");
+> > > > > > > > > > +       }
+> > > > > > > > > > +
+> > > > > > > > > > +out:
+> > > > > > > > > > +       sdhci_mask_irqs(host, SDHCI_INT_DATA_AVAIL);
+> > > > > > > > > > +       spin_unlock_irqrestore(&host->lock, flags);
+> > > > > > > > > > +}
+> > > > > > > > > > +
+> > > > > > > > > >  static const struct mmc_host_ops sdhci_ops = {
+> > > > > > > > > >         .request        = sdhci_request,
+> > > > > > > > > >         .set_ios        = sdhci_set_ios,
+> > > > > > > > > > @@ -1492,6 +1609,7 @@ static const struct
+> mmc_host_ops
+> > > > > > sdhci_ops
+> > > > > > > =
+> > > > > > > > {
+> > > > > > > > > >         .enable_sdio_irq = sdhci_enable_sdio_irq,
+> > > > > > > > > >         .start_signal_voltage_switch    =
+> > > > > > > > > > sdhci_start_signal_voltage_switch,
+> > > > > > > > > >         .get_max_current_180            =
+> > > > > > sdhci_get_max_current_180,
+> > > > > > > > > > +       .execute_tuning                 =
+> > > > > sdhci_execute_tuning,
+> > > > > > > > > >  };
+> > > > > > > > > >
+> > > > > > > > > >
+> > > > > > > > > >
 > > > > > > > > >
 > > > > > > > >
 > > > > > > >
@@ -464,354 +515,383 @@ Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, "'Su
 > > >
 > >
 > /**********************************************************************
-> > > > > > > > > *******\
-> > > > > > > > > @@ -1703,6 +1821,16 @@ static void
-> sdhci_data_irq(struct
-> > > > > > sdhci_host
-> > > > > > > > > *host, u32 intmask)
-> > > > > > > > >  {
-> > > > > > > > >         BUG_ON(intmask == 0);
-> > > > > > > > >
-> > > > > > > > > +       /* CMD19 generates _only_ Buffer Read Ready
-> > > interrupt
-> > > > > */
-> > > > > > > > > +       if (intmask & SDHCI_INT_DATA_AVAIL) {
-> > > > > > > > > +               if (SDHCI_GET_CMD(sdhci_readw(host,
-> > > > > SDHCI_COMMAND))
-> > > > > > > > > +                               ==
-> MMC_SEND_TUNING_BLOCK)
-> > {
-> > > > > > > > > +                       host->tuning_done = 1;
-> > > > > > > > > +                       wake_up(&host->buf_ready_int);
-> > > > > > > > > +                       return;
-> > > > > > > > > +               }
-> > > > > > > > > +       }
-> > > > > > > > > +
-> > > > > > > > >         if (!host->data) {
-> > > > > > > > >                 /*
-> > > > > > > > >                  * The "data complete" interrupt is
-> also
-> > > used
-> > > > > to
-> > > > > > > > > @@ -2126,6 +2254,10 @@ int sdhci_add_host(struct
-> > sdhci_host
+> > > > > > > > > > *******\
+> > > > > > > > > > @@ -1703,6 +1821,16 @@ static void
+> > sdhci_data_irq(struct
+> > > > > > > sdhci_host
+> > > > > > > > > > *host, u32 intmask)
+> > > > > > > > > >  {
+> > > > > > > > > >         BUG_ON(intmask == 0);
+> > > > > > > > > >
+> > > > > > > > > > +       /* CMD19 generates _only_ Buffer Read Ready
+> > > > interrupt
+> > > > > > */
+> > > > > > > > > > +       if (intmask & SDHCI_INT_DATA_AVAIL) {
+> > > > > > > > > > +               if (SDHCI_GET_CMD(sdhci_readw(host,
+> > > > > > SDHCI_COMMAND))
+> > > > > > > > > > +                               ==
+> > MMC_SEND_TUNING_BLOCK)
+> > > {
+> > > > > > > > > > +                       host->tuning_done = 1;
+> > > > > > > > > > +                       wake_up(&host-
+> >buf_ready_int);
+> > > > > > > > > > +                       return;
+> > > > > > > > > > +               }
+> > > > > > > > > > +       }
+> > > > > > > > > > +
+> > > > > > > > > >         if (!host->data) {
+> > > > > > > > > >                 /*
+> > > > > > > > > >                  * The "data complete" interrupt is
+> > also
+> > > > used
+> > > > > > to
+> > > > > > > > > > @@ -2126,6 +2254,10 @@ int sdhci_add_host(struct
+> > > sdhci_host
+> > > > > > > *host)
+> > > > > > > > > >         if (caps[1] & SDHCI_SUPPORT_DDR50)
+> > > > > > > > > >                 mmc->caps |= MMC_CAP_UHS_DDR50;
+> > > > > > > > > >
+> > > > > > > > > > +       /* Does the host needs tuning for SDR50? */
+> > > > > > > > > > +       if (caps[1] & SDHCI_USE_SDR50_TUNING)
+> > > > > > > > > > +               host->flags |=
+> > SDHCI_SDR50_NEEDS_TUNING;
+> > > > > > > > > > +
+> > > > > > > > > >         /* Driver Type(s) (A, C, D) supported by the
+> > host
+> > > > */
+> > > > > > > > > >         if (caps[1] & SDHCI_DRIVER_TYPE_A)
+> > > > > > > > > >                 mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
+> > > > > > > > > > @@ -2269,6 +2401,9 @@ int sdhci_add_host(struct
+> > > sdhci_host
 > > > > > > *host)
-> > > > > > > > >         if (caps[1] & SDHCI_SUPPORT_DDR50)
-> > > > > > > > >                 mmc->caps |= MMC_CAP_UHS_DDR50;
+> > > > > > > > > >
+> > > > > > > > > >         setup_timer(&host->timer,
+> sdhci_timeout_timer,
+> > > > > > (unsigned
+> > > > > > > > > > long)host);
+> > > > > > > > > >
+> > > > > > > > > > +       if (host->version >= SDHCI_SPEC_300)
+> > > > > > > > > > +               init_waitqueue_head(&host-
+> > > >buf_ready_int);
+> > > > > > > > > > +
+> > > > > > > > > >         ret = request_irq(host->irq, sdhci_irq,
+> > > > IRQF_SHARED,
+> > > > > > > > > >                 mmc_hostname(mmc), host);
+> > > > > > > > > >         if (ret)
+> > > > > > > > > > diff --git a/drivers/mmc/host/sdhci.h
+> > > > > > b/drivers/mmc/host/sdhci.h
+> > > > > > > > > > index 5bf244d..4746879 100644
+> > > > > > > > > > --- a/drivers/mmc/host/sdhci.h
+> > > > > > > > > > +++ b/drivers/mmc/host/sdhci.h
+> > > > > > > > > > @@ -160,6 +160,8 @@
+> > > > > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_A         0x0010
+> > > > > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_C         0x0020
+> > > > > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_D         0x0030
+> > > > > > > > > > +#define  SDHCI_CTRL_EXEC_TUNING
+> 0x0040
+> > > > > > > > > > +#define  SDHCI_CTRL_TUNED_CLK          0x0080
+> > > > > > > > > >  #define  SDHCI_CTRL_PRESET_VAL_ENABLE  0x8000
+> > > > > > > > > >
+> > > > > > > > > >  #define SDHCI_CAPABILITIES     0x40
+> > > > > > > > > > @@ -187,6 +189,7 @@
+> > > > > > > > > >  #define  SDHCI_DRIVER_TYPE_A   0x00000010
+> > > > > > > > > >  #define  SDHCI_DRIVER_TYPE_C   0x00000020
+> > > > > > > > > >  #define  SDHCI_DRIVER_TYPE_D   0x00000040
+> > > > > > > > > > +#define  SDHCI_USE_SDR50_TUNING        0x00002000
+> > > > > > > > > >
+> > > > > > > > > >  #define SDHCI_CAPABILITIES_1   0x44
+> > > > > > > > > >
+> > > > > > > > > > diff --git a/include/linux/mmc/host.h
+> > > > > > b/include/linux/mmc/host.h
+> > > > > > > > > > index e84cd05..651e40b 100644
+> > > > > > > > > > --- a/include/linux/mmc/host.h
+> > > > > > > > > > +++ b/include/linux/mmc/host.h
+> > > > > > > > > > @@ -129,6 +129,7 @@ struct mmc_host_ops {
+> > > > > > > > > >
+> > > > > > > > > >         int     (*start_signal_voltage_switch)(struct
+> > > > > mmc_host
+> > > > > > > *host);
+> > > > > > > > > >         int     (*get_max_current_180)(struct
+> mmc_host
+> > > > *mmc);
+> > > > > > > > > > +       void    (*execute_tuning)(struct mmc_host
+> > *host);
 > > > > > > > > >
-> > > > > > > > > +       /* Does the host needs tuning for SDR50? */
-> > > > > > > > > +       if (caps[1] & SDHCI_USE_SDR50_TUNING)
-> > > > > > > > > +               host->flags |=
-> SDHCI_SDR50_NEEDS_TUNING;
-> > > > > > > > > +
-> > > > > > > > >         /* Driver Type(s) (A, C, D) supported by the
-> host
-> > > */
-> > > > > > > > >         if (caps[1] & SDHCI_DRIVER_TYPE_A)
-> > > > > > > > >                 mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
-> > > > > > > > > @@ -2269,6 +2401,9 @@ int sdhci_add_host(struct
-> > sdhci_host
-> > > > > *host)
 > > > > > > > > >
-> > > > > > > > >         setup_timer(&host->timer, sdhci_timeout_timer,
-> > > > > (unsigned
-> > > > > > > > > long)host);
-> > > > > > > > >
-> > > > > > > > > +       if (host->version >= SDHCI_SPEC_300)
-> > > > > > > > > +               init_waitqueue_head(&host-
-> > >buf_ready_int);
-> > > > > > > > > +
-> > > > > > > > >         ret = request_irq(host->irq, sdhci_irq,
-> > > IRQF_SHARED,
-> > > > > > > > >                 mmc_hostname(mmc), host);
-> > > > > > > > >         if (ret)
-> > > > > > > > > diff --git a/drivers/mmc/host/sdhci.h
-> > > > > b/drivers/mmc/host/sdhci.h
-> > > > > > > > > index 5bf244d..4746879 100644
-> > > > > > > > > --- a/drivers/mmc/host/sdhci.h
-> > > > > > > > > +++ b/drivers/mmc/host/sdhci.h
-> > > > > > > > > @@ -160,6 +160,8 @@
-> > > > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_A         0x0010
-> > > > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_C         0x0020
-> > > > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_D         0x0030
-> > > > > > > > > +#define  SDHCI_CTRL_EXEC_TUNING                0x0040
-> > > > > > > > > +#define  SDHCI_CTRL_TUNED_CLK          0x0080
-> > > > > > > > >  #define  SDHCI_CTRL_PRESET_VAL_ENABLE  0x8000
-> > > > > > > > >
-> > > > > > > > >  #define SDHCI_CAPABILITIES     0x40
-> > > > > > > > > @@ -187,6 +189,7 @@
-> > > > > > > > >  #define  SDHCI_DRIVER_TYPE_A   0x00000010
-> > > > > > > > >  #define  SDHCI_DRIVER_TYPE_C   0x00000020
-> > > > > > > > >  #define  SDHCI_DRIVER_TYPE_D   0x00000040
-> > > > > > > > > +#define  SDHCI_USE_SDR50_TUNING        0x00002000
-> > > > > > > > >
-> > > > > > > > >  #define SDHCI_CAPABILITIES_1   0x44
-> > > > > > > > >
-> > > > > > > > > diff --git a/include/linux/mmc/host.h
-> > > > > b/include/linux/mmc/host.h
-> > > > > > > > > index e84cd05..651e40b 100644
-> > > > > > > > > --- a/include/linux/mmc/host.h
-> > > > > > > > > +++ b/include/linux/mmc/host.h
-> > > > > > > > > @@ -129,6 +129,7 @@ struct mmc_host_ops {
-> > > > > > > > >
-> > > > > > > > >         int     (*start_signal_voltage_switch)(struct
-> > > > mmc_host
-> > > > > > *host);
-> > > > > > > > >         int     (*get_max_current_180)(struct mmc_host
-> > > *mmc);
-> > > > > > > > > +       void    (*execute_tuning)(struct mmc_host
-> *host);
-> > > > > > > >
-> > > > > > > >
-> > > > > > > > Why execute_tuning ops return type is void? Will there
-> not
-> > be
-> > > > any
-> > > > > > > error
-> > > > > > > > scenarios? What if host fails to find any tuning point?
-> > > > Shouldn't
-> > > > > > it
-> > > > > > > > return
-> > > > > > > > error to the core layer and then core layer should not
-> > begin
-> > > > with
-> > > > > > the
-> > > > > > > > any
-> > > > > > > > read/write operations?
-> > > > > > >
-> > > > > > > In case the tuning procedure fails, Host Controller falls
-> > back
-> > > on
-> > > > > > using
-> > > > > > > Fixed Sampling clock, so data transfer can still continue.
-> > > > > > >
-> > > > > >
-> > > > > > I think that's not a correct assumption. Let's say tuning
-> fails
-> > > and
-> > > > > > host
-> > > > > > controller falls back to fixed sampling clock and card still
-> > > > operates
-> > > > > > in
-> > > > > > SDR104 with CLK=208MHz. This means that all further
-> read/write
-> > > > > > transactions
-> > > > > > will mainly result in CRC Fail errors and none of the
-> > > transactions
-> > > > > may
-> > > > > > be
-> > > > > > successful. So we can't just leave the host controller in
-> state
-> > > > where
-> > > > > > it
-> > > > > > cannot perform high speed transfers (because it's tuning had
-> > > > failed)
-> > > > > > and
-> > > > > > then start issuing commands with high speed transfer
-> conditions
-> > > > > > (CLK=208MHz). Better way is for host to inform core layer
-> that
-> > > > tuning
-> > > > > > has
-> > > > > > failed and then there should not be any further transactions
-> > with
-> > > > the
-> > > > > > card
-> > > > > > or fallback to low speed modes (SDR12, SDR25 or SDR50) or
-> power
-> > > > cycle
-> > > > > > the
-> > > > > > card.
-> > > > >
-> > > > > The host controller spec v3.00 clearly says that the occurrence
-> > of
-> > > an
-> > > > > error during tuning procedure is indicated by Sampling Select,
-> > > which
-> > > > > will be set to 0 in case tuning fails. But that won't stop the
-> > > > > controller to retry re-tuning procedure based on the re-tuning
-> > > mode.
-> > > > So
-> > > > > I don't see any reason for transaction to be stopped in case
-> > tuning
-> > > > > fails.
-> > > >
-> > > > This capability is not there with host controller on our
-> chipsets.
-> > So
-> > > > then
-> > > > what to do? I think referring Host controller spec v3.00 should
-> not
+> > > > > > > > > Why execute_tuning ops return type is void? Will there
+> > not
 > > > be
-> > > > proper here. As this spec is not a must condition for all host
-> > > > controller
-> > > > implementations.
-> > >
-> > > In that case, I would really appreciate if you could implement the
-> > > procedure which will work for your controller, and then we can
-> merge
-> > > the code with mine.
-> >
-> > Ok that's fine. but that doesn't mean "execute_tuning" ops should not
-> > have
-> > any return type in your implementation. We should be able to return
-> the
-> > error from this ops. From your driver you can always return the
-> success
-> > from
-> > "execute_tuning" ops which should solve your purpose. In case
-> > "execute_tuning" returns error then "mmc_sd_init_uhs_card" would
-> return
-> > error which would result in removing the card.
-> >
-> > So this way it should satisfy all the different implementations of
-> > "execute_tuning" ops by different host controller drivers.
-> >
-> > Please let me know if this is fine with you or not?
-> 
-> If you want me to return error the very first time tuning fails, and
-> the card being removed, I am fine with that. But I am not sure if all
-> the host controller would be happy with the implementation. Since some
-> controller like ours would still want re-tuning to be tried the next
-> time round. Anyways, I will implement your suggestion.
-
-Those who want the retuning be tried again at latter point of time, can
-return success from "execute_tuning".
-
-> 
-> Thanks,
-> Arindam
-> 
-> >
-> >
-> > >
-> > > Thanks,
-> > > Arindam
-> > >
-> > > >
-> > > >
-> > > > >
-> > > > > Thanks,
-> > > > > Arindam
-> > > > >
-> > > > > >
-> > > > > >
-> > > > > > > Thanks,
-> > > > > > > Arindam
+> > > > > any
+> > > > > > > > error
+> > > > > > > > > scenarios? What if host fails to find any tuning point?
+> > > > > Shouldn't
+> > > > > > > it
+> > > > > > > > > return
+> > > > > > > > > error to the core layer and then core layer should not
+> > > begin
+> > > > > with
+> > > > > > > the
+> > > > > > > > > any
+> > > > > > > > > read/write operations?
+> > > > > > > >
+> > > > > > > > In case the tuning procedure fails, Host Controller falls
+> > > back
+> > > > on
+> > > > > > > using
+> > > > > > > > Fixed Sampling clock, so data transfer can still
+> continue.
+> > > > > > > >
 > > > > > > >
-> > > > > > > >
-> > > > > > > >
-> > > > > > > > >  };
-> > > > > > > > >
-> > > > > > > > >  struct mmc_card;
-> > > > > > > > > diff --git a/include/linux/mmc/mmc.h
-> > > > b/include/linux/mmc/mmc.h
-> > > > > > > > > index 612301f..9194f9e 100644
-> > > > > > > > > --- a/include/linux/mmc/mmc.h
-> > > > > > > > > +++ b/include/linux/mmc/mmc.h
-> > > > > > > > > @@ -50,6 +50,7 @@
-> > > > > > > > >  #define MMC_SET_BLOCKLEN         16   /* ac   [31:0]
-> > block
-> > > > len
-> > > > > > > R1
-> > > > > > > > > */
-> > > > > > > > >  #define MMC_READ_SINGLE_BLOCK    17   /* adtc [31:0]
-> > data
-> > > > addr
-> > > > > > > R1
-> > > > > > > > > */
-> > > > > > > > >  #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0]
-> > data
-> > > > addr
-> > > > > > > R1
-> > > > > > > > > */
-> > > > > > > > > +#define MMC_SEND_TUNING_BLOCK    19   /* adtc
-> > > > > > > R1
-> > > > > > > > > */
-> > > > > > > > >
-> > > > > > > > >    /* class 3 */
-> > > > > > > > >  #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0]
-> > data
-> > > > addr
-> > > > > > > R1
-> > > > > > > > > */
-> > > > > > > > > diff --git a/include/linux/mmc/sdhci.h
-> > > > > > b/include/linux/mmc/sdhci.h
-> > > > > > > > > index 282d158..5203b97 100644
-> > > > > > > > > --- a/include/linux/mmc/sdhci.h
-> > > > > > > > > +++ b/include/linux/mmc/sdhci.h
-> > > > > > > > > @@ -109,6 +109,7 @@ struct sdhci_host {
-> > > > > > > > >  #define SDHCI_USE_ADMA         (1<<1)  /* Host is ADMA
-> > > > capable
-> > > > > > > > */
-> > > > > > > > >  #define SDHCI_REQ_USE_DMA      (1<<2)  /* Use DMA for
-> > this
-> > > > > > > req. */
-> > > > > > > > >  #define SDHCI_DEVICE_DEAD      (1<<3)  /* Device
-> > > > unresponsive
-> > > > > > > */
-> > > > > > > > > +#define SDHCI_SDR50_NEEDS_TUNING (1<<4)        /*
-> SDR50
-> > > > needs
+> > > > > > > I think that's not a correct assumption. Let's say tuning
+> > fails
+> > > > and
+> > > > > > > host
+> > > > > > > controller falls back to fixed sampling clock and card
+> still
+> > > > > operates
+> > > > > > > in
+> > > > > > > SDR104 with CLK=208MHz. This means that all further
+> > read/write
+> > > > > > > transactions
+> > > > > > > will mainly result in CRC Fail errors and none of the
+> > > > transactions
+> > > > > > may
+> > > > > > > be
+> > > > > > > successful. So we can't just leave the host controller in
+> > state
+> > > > > where
+> > > > > > > it
+> > > > > > > cannot perform high speed transfers (because it's tuning
+> had
+> > > > > failed)
+> > > > > > > and
+> > > > > > > then start issuing commands with high speed transfer
+> > conditions
+> > > > > > > (CLK=208MHz). Better way is for host to inform core layer
+> > that
 > > > > > tuning
-> > > > > > > > */
-> > > > > > > > >
-> > > > > > > > >         unsigned int version;   /* SDHCI spec. version
-> */
-> > > > > > > > >
-> > > > > > > > > @@ -147,6 +148,9 @@ struct sdhci_host {
-> > > > > > > > >
-> > > > > > > > >         struct mmc_command      *saved_abort_cmd; /*
-> > Abort
-> > > > > command
-> > > > > > saved
-> > > > > > > > > for data error recovery */
-> > > > > > > > >
-> > > > > > > > > +       wait_queue_head_t       buf_ready_int;  /*
-> > > Waitqueue
-> > > > > for Buffer
-> > > > > > Read
-> > > > > > > > > Ready interrupt */
-> > > > > > > > > +       unsigned int            tuning_done;    /*
-> > > Condition
-> > > > > flag
-> > > > > > set
-> > > > > > > > > when CMD19 succeeds */
-> > > > > > > > > +
-> > > > > > > > >         unsigned long private[0] ____cacheline_aligned;
-> > > > > > > > >  };
-> > > > > > > > >  #endif /* __SDHCI_H */
-> > > > > > > > > --
-> > > > > > > > > 1.7.1
-> > > > > > > >
-> > > > > > > >
-> > > > > > >
-> > > > > > >
-> > > > > > > --
-> > > > > > > To unsubscribe from this list: send the line "unsubscribe
-> > > linux-
-> > > > > mmc"
-> > > > > > in
-> > > > > > > the body of a message to majordomo@vger.kernel.org
-> > > > > > > More majordomo info at  http://vger.kernel.org/majordomo-
-> > > > info.html
+> > > > > > > has
+> > > > > > > failed and then there should not be any further
+> transactions
+> > > with
+> > > > > the
+> > > > > > > card
+> > > > > > > or fallback to low speed modes (SDR12, SDR25 or SDR50) or
+> > power
+> > > > > cycle
+> > > > > > > the
+> > > > > > > card.
 > > > > > >
+> > > > > > The host controller spec v3.00 clearly says that the
+> occurrence
+> > > of
+> > > > an
+> > > > > > error during tuning procedure is indicated by Sampling
+> Select,
+> > > > which
+> > > > > > will be set to 0 in case tuning fails. But that won't stop
+> the
+> > > > > > controller to retry re-tuning procedure based on the re-
+> tuning
+> > > > mode.
+> > > > > So
+> > > > > > I don't see any reason for transaction to be stopped in case
+> > > tuning
+> > > > > > fails.
+> > > > >
+> > > > > This capability is not there with host controller on our
+> > chipsets.
+> > > So
+> > > > > then
+> > > > > what to do? I think referring Host controller spec v3.00 should
+> > not
+> > > > be
+> > > > > proper here. As this spec is not a must condition for all host
+> > > > > controller
+> > > > > implementations.
+> > > >
+> > > > In that case, I would really appreciate if you could implement
+> the
+> > > > procedure which will work for your controller, and then we can
+> > merge
+> > > > the code with mine.
+> > >
+> > > Ok that's fine. but that doesn't mean "execute_tuning" ops should
+> not
+> > > have
+> > > any return type in your implementation. We should be able to return
+> > the
+> > > error from this ops. From your driver you can always return the
+> > success
+> > > from
+> > > "execute_tuning" ops which should solve your purpose. In case
+> > > "execute_tuning" returns error then "mmc_sd_init_uhs_card" would
+> > return
+> > > error which would result in removing the card.
+> > >
+> > > So this way it should satisfy all the different implementations of
+> > > "execute_tuning" ops by different host controller drivers.
+> > >
+> > > Please let me know if this is fine with you or not?
+> >
+> > If you want me to return error the very first time tuning fails, and
+> > the card being removed, I am fine with that. But I am not sure if all
+> > the host controller would be happy with the implementation. Since
+> some
+> > controller like ours would still want re-tuning to be tried the next
+> > time round. Anyways, I will implement your suggestion.
+>
+> Those who want the retuning be tried again at latter point of time, can
+> return success from "execute_tuning".
+
+I think this can be done. I will modify the code accordingly.
+
+Thanks,
+Arindam
+
+>
+> >
+> > Thanks,
+> > Arindam
+> >
+> > >
+> > >
+> > > >
+> > > > Thanks,
+> > > > Arindam
+> > > >
+> > > > >
+> > > > >
+> > > > > >
+> > > > > > Thanks,
+> > > > > > Arindam
+> > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > > > > Thanks,
+> > > > > > > > Arindam
+> > > > > > > >
+> > > > > > > > >
+> > > > > > > > >
+> > > > > > > > > >  };
+> > > > > > > > > >
+> > > > > > > > > >  struct mmc_card;
+> > > > > > > > > > diff --git a/include/linux/mmc/mmc.h
+> > > > > b/include/linux/mmc/mmc.h
+> > > > > > > > > > index 612301f..9194f9e 100644
+> > > > > > > > > > --- a/include/linux/mmc/mmc.h
+> > > > > > > > > > +++ b/include/linux/mmc/mmc.h
+> > > > > > > > > > @@ -50,6 +50,7 @@
+> > > > > > > > > >  #define MMC_SET_BLOCKLEN         16   /* ac   [31:0]
+> > > block
+> > > > > len
+> > > > > > > > R1
+> > > > > > > > > > */
+> > > > > > > > > >  #define MMC_READ_SINGLE_BLOCK    17   /* adtc [31:0]
+> > > data
+> > > > > addr
+> > > > > > > > R1
+> > > > > > > > > > */
+> > > > > > > > > >  #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0]
+> > > data
+> > > > > addr
+> > > > > > > > R1
+> > > > > > > > > > */
+> > > > > > > > > > +#define MMC_SEND_TUNING_BLOCK    19   /* adtc
+> > > > > > > > R1
+> > > > > > > > > > */
+> > > > > > > > > >
+> > > > > > > > > >    /* class 3 */
+> > > > > > > > > >  #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0]
+> > > data
+> > > > > addr
+> > > > > > > > R1
+> > > > > > > > > > */
+> > > > > > > > > > diff --git a/include/linux/mmc/sdhci.h
+> > > > > > > b/include/linux/mmc/sdhci.h
+> > > > > > > > > > index 282d158..5203b97 100644
+> > > > > > > > > > --- a/include/linux/mmc/sdhci.h
+> > > > > > > > > > +++ b/include/linux/mmc/sdhci.h
+> > > > > > > > > > @@ -109,6 +109,7 @@ struct sdhci_host {
+> > > > > > > > > >  #define SDHCI_USE_ADMA         (1<<1)  /* Host is
+> ADMA
+> > > > > capable
+> > > > > > > > > */
+> > > > > > > > > >  #define SDHCI_REQ_USE_DMA      (1<<2)  /* Use DMA
+> for
+> > > this
+> > > > > > > > req. */
+> > > > > > > > > >  #define SDHCI_DEVICE_DEAD      (1<<3)  /* Device
+> > > > > unresponsive
+> > > > > > > > */
+> > > > > > > > > > +#define SDHCI_SDR50_NEEDS_TUNING (1<<4)        /*
+> > SDR50
+> > > > > needs
+> > > > > > tuning
+> > > > > > > > > */
+> > > > > > > > > >
+> > > > > > > > > >         unsigned int version;   /* SDHCI spec.
+> version
+> > */
+> > > > > > > > > >
+> > > > > > > > > > @@ -147,6 +148,9 @@ struct sdhci_host {
+> > > > > > > > > >
+> > > > > > > > > >         struct mmc_command      *saved_abort_cmd; /*
+> > > Abort
+> > > > > > command
+> > > > > > > saved
+> > > > > > > > > > for data error recovery */
+> > > > > > > > > >
+> > > > > > > > > > +       wait_queue_head_t       buf_ready_int;  /*
+> > > > Waitqueue
+> > > > > > for Buffer
+> > > > > > > Read
+> > > > > > > > > > Ready interrupt */
+> > > > > > > > > > +       unsigned int            tuning_done;    /*
+> > > > Condition
+> > > > > > flag
+> > > > > > > set
+> > > > > > > > > > when CMD19 succeeds */
+> > > > > > > > > > +
+> > > > > > > > > >         unsigned long private[0]
+> ____cacheline_aligned;
+> > > > > > > > > >  };
+> > > > > > > > > >  #endif /* __SDHCI_H */
+> > > > > > > > > > --
+> > > > > > > > > > 1.7.1
+> > > > > > > > >
+> > > > > > > > >
+> > > > > > > >
+> > > > > > > >
+> > > > > > > > --
+> > > > > > > > To unsubscribe from this list: send the line "unsubscribe
+> > > > linux-
+> > > > > > mmc"
+> > > > > > > in
+> > > > > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > > > > More majordomo info at  http://vger.kernel.org/majordomo-
+> > > > > info.html
+> > > > > > >
+> > > > > >
+> > > > >
 > > > > >
 > > > >
 > > > >
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe linux-
+> > mmc"
+> > > in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-
+> info.html
 > > >
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-
-> mmc"
-> > in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > >
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
 
