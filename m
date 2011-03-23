@@ -1,18 +1,18 @@
 From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus speed mode selection
-Date: Wed, 23 Mar 2011 11:56:27 +0530
-Message-ID: <001201cbe923$4047de10$c0d79a30$@org>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com> <1299238369-1768-7-git-send-email-arindam.nath@amd.com> <000001cbe793$2eef8910$8cce9b30$@org> <6C03668EAF45B747AF947A1603D1B300EA7E1666@SAUSEXMBP01.amd.com> <000c01cbe921$928e6830$b7ab3890$@org> <6C03668EAF45B747AF947A1603D1B300EA7E1684@SAUSEXMBP01.amd.com>
+Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during uhs initialization
+Date: Wed, 23 Mar 2011 12:04:20 +0530
+Message-ID: <001501cbe924$5cc7bf00$16573d00$@org>
+References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com> <1299238369-1768-10-git-send-email-arindam.nath@amd.com> <001701cbe7b6$f5ffd780$e1ff8680$@org> <6C03668EAF45B747AF947A1603D1B300EA339B2F@SAUSEXMBP01.amd.com> <000901cbe920$adeda8d0$09c8fa70$@org> <6C03668EAF45B747AF947A1603D1B300EA7E167B@SAUSEXMBP01.amd.com> <000f01cbe922$54219d00$fc64d700$@org> <6C03668EAF45B747AF947A1603D1B300EA7E1692@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
 	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:48328 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751065Ab1CWG0d (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2011 02:26:33 -0400
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EA7E1684@SAUSEXMBP01.amd.com>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:51973 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750997Ab1CWGeg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2011 02:34:36 -0400
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EA7E1692@SAUSEXMBP01.amd.com>
 Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -24,513 +24,665 @@ Cc: zhangfei.gao@gmail.com, prakity@marvell.com, linux-mmc@vger.kernel.org, "'Su
 > -----Original Message-----
 > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
 > owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> Sent: Wednesday, March 23, 2011 11:48 AM
+> Sent: Wednesday, March 23, 2011 11:53 AM
 > To: Subhash Jadavani; cjb@laptop.org
 > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus speed
-> mode selection
+> Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during
+> uhs initialization
 > 
 > Hi Subhash,
 > 
 > 
 > > -----Original Message-----
 > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > Sent: Wednesday, March 23, 2011 11:44 AM
+> > Sent: Wednesday, March 23, 2011 11:50 AM
 > > To: Nath, Arindam; cjb@laptop.org
 > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus speed
-> > mode selection
+> > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning during
+> > uhs initialization
 > >
 > >
 > >
 > > > -----Original Message-----
-> > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> > > Sent: Wednesday, March 23, 2011 11:35 AM
+> > > From: Nath, Arindam [mailto:Arindam.Nath@amd.com]
+> > > Sent: Wednesday, March 23, 2011 11:45 AM
 > > > To: Subhash Jadavani; cjb@laptop.org
 > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus
-> speed
-> > > mode selection
+> > > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning
+> during
+> > > uhs initialization
 > > >
 > > > Hi Subhash,
 > > >
 > > >
 > > > > -----Original Message-----
 > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > > Sent: Monday, March 21, 2011 12:13 PM
+> > > > Sent: Wednesday, March 23, 2011 11:38 AM
 > > > > To: Nath, Arindam; cjb@laptop.org
 > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
 > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > > > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus
-> > speed
-> > > > mode selection
+> > > > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning
+> > during
+> > > > uhs initialization
 > > > >
 > > > >
 > > > >
 > > > > > -----Original Message-----
-> > > > > From: Arindam Nath [mailto:anath.amd@gmail.com] On Behalf Of
-> > > Arindam
-> > > > > Nath
-> > > > > Sent: Friday, March 04, 2011 5:03 PM
-> > > > > To: cjb@laptop.org
-> > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
-> > > > > subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
-> > > henry.su@amd.com;
-> > > > > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
-> > > > > Subject: [PATCH v2 06/12] mmc: sd: add support for uhs bus
-> speed
-> > > mode
-> > > > > selection
+> > > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > > > > owner@vger.kernel.org] On Behalf Of Nath, Arindam
+> > > > > Sent: Monday, March 21, 2011 4:37 PM
+> > > > > To: Subhash Jadavani; cjb@laptop.org
+> > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
+> > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
+> > > > > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning
+> > > during
+> > > > > uhs initialization
 > > > > >
-> > > > > This patch adds support for setting UHS-I bus speed mode during
-> > > UHS-I
-> > > > > initialization procedure. Since both the host and card can
-> > support
-> > > > > more than one bus speed, we select the highest speed based on
-> > both
-> > > of
-> > > > > their capabilities. First we set the bus speed mode for the
-> card
-> > > > using
-> > > > > CMD6 mode 1, and then we program the host controller to support
-> > the
-> > > > > required speed mode. We also set High Speed Enable in case one
+> > > > > Hi Subhash,
+> > > > >
+> > > > >
+> > > > > > -----Original Message-----
+> > > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> > > > > > Sent: Monday, March 21, 2011 4:29 PM
+> > > > > > To: Nath, Arindam; cjb@laptop.org
+> > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
+> > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
+> anath.amd@gmail.com
+> > > > > > Subject: RE: [PATCH v2 09/12] mmc: sd: add support for tuning
+> > > > during
+> > > > > > uhs initialization
+> > > > > >
+> > > > > >
+> > > > > >
+> > > > > > > -----Original Message-----
+> > > > > > > From: Arindam Nath [mailto:anath.amd@gmail.com] On Behalf
+> Of
+> > > > > Arindam
+> > > > > > > Nath
+> > > > > > > Sent: Friday, March 04, 2011 5:03 PM
+> > > > > > > To: cjb@laptop.org
+> > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
+> > > > > > > subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
+> > > > > henry.su@amd.com;
+> > > > > > > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
+> > > > > > > Subject: [PATCH v2 09/12] mmc: sd: add support for tuning
+> > > during
+> > > > > uhs
+> > > > > > > initialization
+> > > > > > >
+> > > > > > > Host Controller needs tuning during initialization to
+> operate
+> > > > SDR50
+> > > > > > > and SDR104 UHS-I cards. Whether SDR50 mode actually needs
+> > > tuning
+> > > > is
+> > > > > > > indicated by bit 45 of the Host Controller Capabilities
+> > > register.
+> > > > > > > A new command CMD19 has been defined in the Physical Layer
+> > spec
+> > > > > > > v3.01 to request the card to send tuning pattern.
+> > > > > > >
+> > > > > > > We enable Buffer Read Ready interrupt at the very begining
 > of
-> > > the
-> > > > > UHS-I modes is selected. Since MMC_TIMING_UHS_SDR25 is same as
-> > > > > MMC_TIMING_SD_HS, we don't need to set the SDHCI_CTRL_HISPD
-> flag
-> > > for
-> > > > > UHS SDR25 again. We also take care to reset SD clock before
-> > setting
-> > > > > UHS mode in the Host Control2 register, and then re-enable it
-> as
-> > > per
-> > > > > the Host Controller spec v3.00. We set the clock frequency for
+> > > > > tuning
+> > > > > > > procedure, because that is the only interrupt generated by
 > > the
-> > > > > UHS-I mode selected.
-> > > > >
-> > > > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > > > > ---
-> > > > >  drivers/mmc/core/sd.c    |   91
-> > > > > ++++++++++++++++++++++++++++++++++++++++++++++
-> > > > >  drivers/mmc/host/sdhci.c |   32 +++++++++++++++-
-> > > > >  drivers/mmc/host/sdhci.h |    5 +++
-> > > > >  include/linux/mmc/card.h |   16 ++++++++
-> > > > >  include/linux/mmc/host.h |    4 ++
-> > > > >  5 files changed, 146 insertions(+), 2 deletions(-)
-> > > > >
-> > > > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > > > > index f6a4fab..ec0d8e6 100644
-> > > > > --- a/drivers/mmc/core/sd.c
-> > > > > +++ b/drivers/mmc/core/sd.c
-> > > > > @@ -464,6 +464,92 @@ static int sd_select_driver_type(struct
-> > > mmc_card
-> > > > > *card, u8 *status)
-> > > > >         return 0;
-> > > > >  }
-> > > > >
-> > > > > +static int sd_set_bus_speed_mode(struct mmc_card *card, u8
-> > > *status)
-> > > > > +{
-> > > > > +       unsigned int bus_speed, timing;
-> > > > > +       int err;
-> > > > > +
-> > > > > +       /*
-> > > > > +        * If the host doesn't support any of the UHS-I modes,
-> > fallback
-> > > > > on
-> > > > > +        * default speed.
-> > > > > +        */
-> > > > > +       if (!(card->host->caps & (MMC_CAP_UHS_SDR12 |
-> > MMC_CAP_UHS_SDR25 |
-> > > > > +           MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
-> > MMC_CAP_UHS_DDR50)))
-> > > > > +               return 0;
-> > > > > +
-> > > > > +       if (card->host->caps & MMC_CAP_UHS_SDR104) {
-> > > > > +               if (card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_SDR104)
-> > {
-> > > > > +                       bus_speed = UHS_SDR104_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_SDR104;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_SDR104_MAX_DTR;
-> > > > > +               } else if (card->sw_caps.uhs_bus_mode &
-> > SD_MODE_UHS_SDR50)
+> > > > Host
+> > > > > > > Controller during tuning. The tuning block is sent by the
+> > card
+> > > to
+> > > > > the
+> > > > > > > Host Controller using DAT lines, so we set Data Present
+> > Select
+> > > > (bit
+> > > > > > 5)
+> > > > > > > in the Command register. The Host Controller is responsible
+> > for
+> > > > > doing
+> > > > > > > the verfication of tuning block sent by the card at the
+> > > hardware
+> > > > > > level.
+> > > > > > > After sending CMD19, we wait for Buffer Read Ready
+> interrupt.
+> > > In
+> > > > > case
+> > > > > > > we don't receive an interrupt after the specified timeout
+> > > value,
+> > > > we
+> > > > > > > fall back on fixed sampling clock by setting Execute Tuning
+> > > (bit
+> > > > 6)
+> > > > > > > and Sampling Clock Seletc (bit 7) of Host Control2 register
+> > to
+> > > 0.
+> > > > > > > Before exiting the tuning procedure, we disable Buffer Read
+> > > Ready
+> > > > > > > interrupt.
+> > > > > > >
+> > > > > > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> > > > > > > ---
+> > > > > > >  drivers/mmc/core/sd.c     |    4 +
+> > > > > > >  drivers/mmc/host/sdhci.c  |  137
+> > > > > > > ++++++++++++++++++++++++++++++++++++++++++++-
+> > > > > > >  drivers/mmc/host/sdhci.h  |    3 +
+> > > > > > >  include/linux/mmc/host.h  |    1 +
+> > > > > > >  include/linux/mmc/mmc.h   |    1 +
+> > > > > > >  include/linux/mmc/sdhci.h |    4 +
+> > > > > > >  6 files changed, 149 insertions(+), 1 deletions(-)
+> > > > > > >
+> > > > > > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > > > > > > index be01397..1e2d157 100644
+> > > > > > > --- a/drivers/mmc/core/sd.c
+> > > > > > > +++ b/drivers/mmc/core/sd.c
+> > > > > > > @@ -637,6 +637,10 @@ static int mmc_sd_init_uhs_card(struct
+> > > > > mmc_card
+> > > > > > > *card)
+> > > > > > >         /* Set current limit for the card */
+> > > > > > >         err = sd_set_current_limit(card, status);
+> > > > > > >
+> > > > > > > +       /* SPI mode doesn't define CMD19 */
+> > > > > > > +       if (!mmc_host_is_spi(card->host) && card->host-
+> >ops-
+> > > > > > > >execute_tuning)
+> > > > > > > +               card->host->ops->execute_tuning(card-
+> >host);
+> > > > > > > +
+> > > > > > >  out:
+> > > > > > >         kfree(status);
+> > > > > > >
+> > > > > > > diff --git a/drivers/mmc/host/sdhci.c
+> > > b/drivers/mmc/host/sdhci.c
+> > > > > > > index 245cc39..8f4f102 100644
+> > > > > > > --- a/drivers/mmc/host/sdhci.c
+> > > > > > > +++ b/drivers/mmc/host/sdhci.c
+> > > > > > > @@ -39,6 +39,8 @@
+> > > > > > >  #define SDHCI_USE_LEDS_CLASS
+> > > > > > >  #endif
+> > > > > > >
+> > > > > > > +#define MAX_TUNING_LOOP 40
+> > > > > > > +
+> > > > > > >  static unsigned int debug_quirks = 0;
+> > > > > > >
+> > > > > > >  static void sdhci_prepare_data(struct sdhci_host *, struct
+> > > > > mmc_data
+> > > > > > > *);
+> > > > > > > @@ -985,7 +987,9 @@ static void sdhci_send_command(struct
+> > > > > sdhci_host
+> > > > > > > *host, struct mmc_command *cmd)
+> > > > > > >                 flags |= SDHCI_CMD_CRC;
+> > > > > > >         if (cmd->flags & MMC_RSP_OPCODE)
+> > > > > > >                 flags |= SDHCI_CMD_INDEX;
+> > > > > > > -       if (cmd->data)
+> > > > > > > +
+> > > > > > > +       /* CMD19 is special in that the Data Present Select
+> > > should
+> > > > be set
+> > > > > > > */
+> > > > > > > +       if (cmd->data || (cmd->opcode ==
+> > > MMC_SEND_TUNING_BLOCK))
+> > > > > > >                 flags |= SDHCI_CMD_DATA;
+> > > > > > >
+> > > > > > >         sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode,
+> > flags),
+> > > > > > > SDHCI_COMMAND);
+> > > > > > > @@ -1485,6 +1489,119 @@ static int
+> > > > sdhci_get_max_current_180(struct
+> > > > > > > mmc_host *mmc)
+> > > > > > >         return max_current_180;
+> > > > > > >  }
+> > > > > > >
+> > > > > > > +static void sdhci_execute_tuning(struct mmc_host *mmc)
+> > > > > > > +{
+> > > > > > > +       struct sdhci_host *host;
+> > > > > > > +       u16 ctrl;
+> > > > > > > +       int tuning_loop_counter = MAX_TUNING_LOOP;
+> > > > > > > +       unsigned long flags;
+> > > > > > > +       unsigned long timeout;
+> > > > > > > +
+> > > > > > > +       host = mmc_priv(mmc);
+> > > > > > > +
+> > > > > > > +       spin_lock_irqsave(&host->lock, flags);
+> > > > > > > +
+> > > > > > > +       ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> > > > > > > +
+> > > > > > > +       /*
+> > > > > > > +        * Host Controller needs tuning only in case of
+> > SDR104
+> > > mode
+> > > > > > > +        * and for SDR50 mode when Use Tuning for SDR50 is
+> > set
+> > > in
+> > > > > > > +        * Capabilities register.
+> > > > > > > +        */
+> > > > > > > +       if ((ctrl & SDHCI_CTRL_UHS_SDR104) ||
+> > > > > > > +           ((ctrl & SDHCI_CTRL_UHS_SDR50) &&
+> > > > > > > +           (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
+> > > > > > > +               ctrl |= SDHCI_CTRL_EXEC_TUNING;
+> > > > > > > +       else {
+> > > > > > > +               spin_unlock_irqrestore(&host->lock, flags);
+> > > > > > > +               return;
+> > > > > > > +       }
+> > > > > > > +
+> > > > > > > +       sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> > > > > > > +
+> > > > > > > +       /*
+> > > > > > > +        * As per the Host Controller spec v3.00, tuning
+> > > command
+> > > > > > > +        * generates Buffer Read Ready interrupt, so enable
+> > > that.
+> > > > > > > +        */
+> > > > > > > +       sdhci_unmask_irqs(host, SDHCI_INT_DATA_AVAIL);
+> > > > > > > +
+> > > > > > > +       /*
+> > > > > > > +        * Issue CMD19 repeatedly till Execute Tuning is
+> set
+> > to
+> > > 0
+> > > > or the
+> > > > > > > number
+> > > > > > > +        * of loops reaches 40 times or a timeout of 150ms
+> > > occurs.
+> > > > > > > +        */
+> > > > > > > +       timeout = 150;
+> > > > > > > +       do {
+> > > > > > > +               struct mmc_command cmd;
+> > > > > > > +               struct mmc_request mrq;
+> > > > > > > +
+> > > > > > > +               if (!tuning_loop_counter && !timeout)
+> > > > > > > +                       break;
+> > > > > > > +
+> > > > > > > +               memset(&cmd, 0, sizeof(struct
+> mmc_command));
+> > > > > > > +               cmd.opcode = MMC_SEND_TUNING_BLOCK;
+> > > > > > > +               cmd.arg = 0;
+> > > > > > > +               cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> > > > > > > +
+> > > > > > > +               memset(&cmd.resp, 0, sizeof(cmd.resp));
+> > > > > > > +               cmd.retries = 0;
+> > > > > > > +
+> > > > > > > +               cmd.data = NULL;
+> > > > > > > +               cmd.error = 0;
+> > > > > > > +
+> > > > > > > +               memset(&mrq, 0, sizeof(struct
+> mmc_request));
+> > > > > > > +               mrq.cmd = &cmd;
+> > > > > > > +               host->mrq = &mrq;
+> > > > > > > +               sdhci_send_command(host, &cmd);
+> > > > > > > +
+> > > > > > > +               host->cmd = NULL;
+> > > > > > > +               host->mrq = NULL;
+> > > > > > > +
+> > > > > > > +               spin_unlock_irqrestore(&host->lock, flags);
+> > > > > > > +
+> > > > > > > +               /* Wait for Buffer Read Ready interrupt */
+> > > > > > > +               wait_event_interruptible_timeout(host-
+> > > >buf_ready_int,
+> > > > > > > +                                       (host->tuning_done
+> ==
+> > > 1),
+> > > > > > > +
+> > msecs_to_jiffies(50));
+> > > > > > > +               spin_lock_irqsave(&host->lock, flags);
+> > > > > > > +
+> > > > > > > +               if (!host->tuning_done) {
+> > > > > > > +                       printk(KERN_INFO DRIVER_NAME ":
+> > Tuning
+> > > > procedure"
+> > > > > > > +                               " failed, falling back to
+> > fixed
+> > > sampling"
+> > > > > > > +                               " clock\n");
+> > > > > > > +                       ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> > > > > > > +                       ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+> > > > > > > +                       sdhci_writew(host, ctrl,
+> > > SDHCI_HOST_CONTROL2);
+> > > > > > > +
+> > > > > > > +                       goto out;
+> > > > > > > +               }
+> > > > > > > +
+> > > > > > > +               host->tuning_done = 0;
+> > > > > > > +
+> > > > > > > +               ctrl = sdhci_readw(host,
+> > SDHCI_HOST_CONTROL2);
+> > > > > > > +               tuning_loop_counter--;
+> > > > > > > +               timeout--;
+> > > > > > > +               mdelay(1);
+> > > > > > > +       } while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+> > > > > > > +
+> > > > > > > +       /*
+> > > > > > > +        * The Host Driver has exhausted the maximum number
+> > of
+> > > > loops
+> > > > > > > allowed,
+> > > > > > > +        * so use fixed sampling frequency.
+> > > > > > > +        */
+> > > > > > > +       if (!tuning_loop_counter || !timeout) {
+> > > > > > > +               ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> > > > > > > +               sdhci_writew(host, ctrl,
+> > SDHCI_HOST_CONTROL2);
+> > > > > > > +       } else {
+> > > > > > > +               if (!(ctrl & SDHCI_CTRL_TUNED_CLK))
+> > > > > > > +                       printk(KERN_INFO DRIVER_NAME ":
+> > Tuning
+> > > > procedure"
+> > > > > > > +                               " failed, falling back to
+> > fixed
+> > > sampling"
+> > > > > > > +                               " clock\n");
+> > > > > > > +       }
+> > > > > > > +
+> > > > > > > +out:
+> > > > > > > +       sdhci_mask_irqs(host, SDHCI_INT_DATA_AVAIL);
+> > > > > > > +       spin_unlock_irqrestore(&host->lock, flags);
+> > > > > > > +}
+> > > > > > > +
+> > > > > > >  static const struct mmc_host_ops sdhci_ops = {
+> > > > > > >         .request        = sdhci_request,
+> > > > > > >         .set_ios        = sdhci_set_ios,
+> > > > > > > @@ -1492,6 +1609,7 @@ static const struct mmc_host_ops
+> > > sdhci_ops
+> > > > =
 > > > > > {
-> > > > > +                       bus_speed = UHS_SDR50_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_SDR50;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_SDR50_MAX_DTR;
-> > > > > +               } else if (card->sw_caps.uhs_bus_mode &
-> > SD_MODE_UHS_DDR50)
-> > > > > {
-> > > > > +                       bus_speed = UHS_DDR50_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_DDR50;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_DDR50_MAX_DTR;
-> > > > > +               } else if (card->sw_caps.uhs_bus_mode &
-> > SD_MODE_UHS_SDR25)
-> > > > > {
-> > > > > +                       bus_speed = UHS_SDR25_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_SDR25;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_SDR25_MAX_DTR;
-> > > > > +               }
+> > > > > > >         .enable_sdio_irq = sdhci_enable_sdio_irq,
+> > > > > > >         .start_signal_voltage_switch    =
+> > > > > > > sdhci_start_signal_voltage_switch,
+> > > > > > >         .get_max_current_180            =
+> > > sdhci_get_max_current_180,
+> > > > > > > +       .execute_tuning                 =
+> > sdhci_execute_tuning,
+> > > > > > >  };
+> > > > > > >
+> > > > > > >
+> > > > > > >
+> > > > > >
+> > > > >
 > > > >
-> > > > I would not agree that if Host cap is set to MMC_CAP_UHS_SDR104
-> > > implies
-> > > > that
-> > > > DDR50 mode is supported by host. There may be a case where host
-> > > > controller
-> > > > only support SDR timing modes.
-> > > > Basically if host should advertise all the supported modes
-> (SDR104,
-> > > > SDR50,
-> > > > SDR25, SDR12 & DDR) by caps and then we should choose the highest
-> > > > performance mode depending on both the card and host's highest
-> > > > performance
-> > > > mode.
-> > > >
-> > > > So this should be the check:
-> > > >
-> > > >   if ((card->host->caps & MMC_CAP_UHS_SDR104 &&
-> > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR104)) {
-> > > >                   bus_speed = UHS_SDR104_BUS_SPEED;
-> > > >                   timing = MMC_TIMING_UHS_SDR104;
-> > > >                   card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
-> > > >   } else if ((card->host->caps & MMC_CAP_UHS_DDR50 &&
-> > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_DDR50)) {
-> > > >                   bus_speed = UHS_DDR50_BUS_SPEED;
-> > > >                   timing = MMC_TIMING_UHS_DDR50;
-> > > >                   card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
-> > > >   } else if ((card->host->caps & MMC_CAP_UHS_SDR50 &&
-> > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR50)) {
-> > > >                   bus_speed = UHS_SDR50_BUS_SPEED;
-> > > >                   timing = MMC_TIMING_UHS_SDR50;
-> > > >                   card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
-> > > >   } else if ((card->host->caps & MMC_CAP_UHS_SDR25 &&
-> > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR25)) {
-> > > >                   bus_speed = UHS_SDR50_BUS_SPEED;
-> > > >                   timing = MMC_TIMING_UHS_SDR25;
-> > > >                   card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
-> > > >   } else if ((card->host->caps & MMC_CAP_UHS_SDR12 &&
-> > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR12)) {
-> > > >                   bus_speed = UHS_SDR12_BUS_SPEED;
-> > > >                   timing = MMC_TIMING_UHS_SDR12;
-> > > >                   card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
-> > > >   }
 > > >
-> > > A host capable of operating at a higher bus speed mode should be
-> able
-> > > to support cards with a lower bus speed mode. In case of your
-> > > conditions checks above, you are checking for the exact match for
-> the
-> > > bus speed modes, otherwise you will fall back on using default bus
-> > > speed mode, thus performance loss.
 > >
-> > Why should we implicitly assume that host supporting SDR104 mode
-> would
-> > also
-> > support DDR50 mode? Is there any spec. which says so? If not then we
-> > should
-> > rely on host capability to take the decision. DDR50 would require
-> > different
-> > timing implementation on the host side and host may choose not to
-> > implement
-> > DDR50 timing support then?
+> /**********************************************************************
+> > > > > > > *******\
+> > > > > > > @@ -1703,6 +1821,16 @@ static void sdhci_data_irq(struct
+> > > > sdhci_host
+> > > > > > > *host, u32 intmask)
+> > > > > > >  {
+> > > > > > >         BUG_ON(intmask == 0);
+> > > > > > >
+> > > > > > > +       /* CMD19 generates _only_ Buffer Read Ready
+> interrupt
+> > > */
+> > > > > > > +       if (intmask & SDHCI_INT_DATA_AVAIL) {
+> > > > > > > +               if (SDHCI_GET_CMD(sdhci_readw(host,
+> > > SDHCI_COMMAND))
+> > > > > > > +                               == MMC_SEND_TUNING_BLOCK) {
+> > > > > > > +                       host->tuning_done = 1;
+> > > > > > > +                       wake_up(&host->buf_ready_int);
+> > > > > > > +                       return;
+> > > > > > > +               }
+> > > > > > > +       }
+> > > > > > > +
+> > > > > > >         if (!host->data) {
+> > > > > > >                 /*
+> > > > > > >                  * The "data complete" interrupt is also
+> used
+> > > to
+> > > > > > > @@ -2126,6 +2254,10 @@ int sdhci_add_host(struct sdhci_host
+> > > > *host)
+> > > > > > >         if (caps[1] & SDHCI_SUPPORT_DDR50)
+> > > > > > >                 mmc->caps |= MMC_CAP_UHS_DDR50;
+> > > > > > >
+> > > > > > > +       /* Does the host needs tuning for SDR50? */
+> > > > > > > +       if (caps[1] & SDHCI_USE_SDR50_TUNING)
+> > > > > > > +               host->flags |= SDHCI_SDR50_NEEDS_TUNING;
+> > > > > > > +
+> > > > > > >         /* Driver Type(s) (A, C, D) supported by the host
+> */
+> > > > > > >         if (caps[1] & SDHCI_DRIVER_TYPE_A)
+> > > > > > >                 mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
+> > > > > > > @@ -2269,6 +2401,9 @@ int sdhci_add_host(struct sdhci_host
+> > > *host)
+> > > > > > >
+> > > > > > >         setup_timer(&host->timer, sdhci_timeout_timer,
+> > > (unsigned
+> > > > > > > long)host);
+> > > > > > >
+> > > > > > > +       if (host->version >= SDHCI_SPEC_300)
+> > > > > > > +               init_waitqueue_head(&host->buf_ready_int);
+> > > > > > > +
+> > > > > > >         ret = request_irq(host->irq, sdhci_irq,
+> IRQF_SHARED,
+> > > > > > >                 mmc_hostname(mmc), host);
+> > > > > > >         if (ret)
+> > > > > > > diff --git a/drivers/mmc/host/sdhci.h
+> > > b/drivers/mmc/host/sdhci.h
+> > > > > > > index 5bf244d..4746879 100644
+> > > > > > > --- a/drivers/mmc/host/sdhci.h
+> > > > > > > +++ b/drivers/mmc/host/sdhci.h
+> > > > > > > @@ -160,6 +160,8 @@
+> > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_A         0x0010
+> > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_C         0x0020
+> > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_D         0x0030
+> > > > > > > +#define  SDHCI_CTRL_EXEC_TUNING                0x0040
+> > > > > > > +#define  SDHCI_CTRL_TUNED_CLK          0x0080
+> > > > > > >  #define  SDHCI_CTRL_PRESET_VAL_ENABLE  0x8000
+> > > > > > >
+> > > > > > >  #define SDHCI_CAPABILITIES     0x40
+> > > > > > > @@ -187,6 +189,7 @@
+> > > > > > >  #define  SDHCI_DRIVER_TYPE_A   0x00000010
+> > > > > > >  #define  SDHCI_DRIVER_TYPE_C   0x00000020
+> > > > > > >  #define  SDHCI_DRIVER_TYPE_D   0x00000040
+> > > > > > > +#define  SDHCI_USE_SDR50_TUNING        0x00002000
+> > > > > > >
+> > > > > > >  #define SDHCI_CAPABILITIES_1   0x44
+> > > > > > >
+> > > > > > > diff --git a/include/linux/mmc/host.h
+> > > b/include/linux/mmc/host.h
+> > > > > > > index e84cd05..651e40b 100644
+> > > > > > > --- a/include/linux/mmc/host.h
+> > > > > > > +++ b/include/linux/mmc/host.h
+> > > > > > > @@ -129,6 +129,7 @@ struct mmc_host_ops {
+> > > > > > >
+> > > > > > >         int     (*start_signal_voltage_switch)(struct
+> > mmc_host
+> > > > *host);
+> > > > > > >         int     (*get_max_current_180)(struct mmc_host
+> *mmc);
+> > > > > > > +       void    (*execute_tuning)(struct mmc_host *host);
+> > > > > >
+> > > > > >
+> > > > > > Why execute_tuning ops return type is void? Will there not be
+> > any
+> > > > > error
+> > > > > > scenarios? What if host fails to find any tuning point?
+> > Shouldn't
+> > > > it
+> > > > > > return
+> > > > > > error to the core layer and then core layer should not begin
+> > with
+> > > > the
+> > > > > > any
+> > > > > > read/write operations?
+> > > > >
+> > > > > In case the tuning procedure fails, Host Controller falls back
+> on
+> > > > using
+> > > > > Fixed Sampling clock, so data transfer can still continue.
+> > > > >
+> > > >
+> > > > I think that's not a correct assumption. Let's say tuning fails
+> and
+> > > > host
+> > > > controller falls back to fixed sampling clock and card still
+> > operates
+> > > > in
+> > > > SDR104 with CLK=208MHz. This means that all further read/write
+> > > > transactions
+> > > > will mainly result in CRC Fail errors and none of the
+> transactions
+> > > may
+> > > > be
+> > > > successful. So we can't just leave the host controller in state
+> > where
+> > > > it
+> > > > cannot perform high speed transfers (because it's tuning had
+> > failed)
+> > > > and
+> > > > then start issuing commands with high speed transfer conditions
+> > > > (CLK=208MHz). Better way is for host to inform core layer that
+> > tuning
+> > > > has
+> > > > failed and then there should not be any further transactions with
+> > the
+> > > > card
+> > > > or fallback to low speed modes (SDR12, SDR25 or SDR50) or power
+> > cycle
+> > > > the
+> > > > card.
+> > >
+> > > The host controller spec v3.00 clearly says that the occurrence of
+> an
+> > > error during tuning procedure is indicated by Sampling Select,
+> which
+> > > will be set to 0 in case tuning fails. But that won't stop the
+> > > controller to retry re-tuning procedure based on the re-tuning
+> mode.
+> > So
+> > > I don't see any reason for transaction to be stopped in case tuning
+> > > fails.
 > >
-> > I would agree that host supporting SDR104 mode should also be
-> > supporting
-> > SDR50/SDR25/SDR12 modes but it may not be true for DDR50 mode.
+> > This capability is not there with host controller on our chipsets. So
+> > then
+> > what to do? I think referring Host controller spec v3.00 should not
+> be
+> > proper here. As this spec is not a must condition for all host
+> > controller
+> > implementations.
 > 
-> Please refer to footnote of table 3-5 of the Physical Layer spec v3.01.
-> It says:
-> 
-> "The card supports a UHS-I mode shall support all lower UHS-I modes."
-> 
-> So if this is true for card, doesn't the same apply to host?
+> In that case, I would really appreciate if you could implement the
+> procedure which will work for your controller, and then we can merge
+> the code with mine.
 
-Yes, this is the exact point I am stretching. Spec. never says the same
-thing for host so we should not assume it. we already have luxury to use
-host caps then why should we assume something which may not be correct?
+Ok that's fine. but that doesn't mean "execute_tuning" ops should not have
+any return type in your implementation. We should be able to return the
+error from this ops. From your driver you can always return the success from
+"execute_tuning" ops which should solve your purpose. In case
+"execute_tuning" returns error then "mmc_sd_init_uhs_card" would return
+error which would result in removing the card.
+
+So this way it should satisfy all the different implementations of
+"execute_tuning" ops by different host controller drivers.
+
+Please let me know if this is fine with you or not?
+
 
 > 
 > Thanks,
 > Arindam
 > 
 > >
+> >
 > > >
 > > > Thanks,
 > > > Arindam
 > > >
 > > > >
-> > > > Regards,
-> > > > Subhash
 > > > >
-> > > >
-> > > > > +       } else if (card->host->caps & MMC_CAP_UHS_SDR50) {
-> > > > > +               if ((card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_SDR104)
-> > ||
-> > > > > +                   (card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_SDR50))
-> > {
-> > > > > +                       bus_speed = UHS_SDR50_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_SDR50;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_SDR50_MAX_DTR;
-> > > > > +               } else if (card->sw_caps.uhs_bus_mode &
-> > SD_MODE_UHS_DDR50)
-> > > > > {
-> > > > > +                       bus_speed = UHS_DDR50_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_DDR50;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_DDR50_MAX_DTR;
-> > > > > +               } else if (card->sw_caps.uhs_bus_mode &
-> > SD_MODE_UHS_SDR25)
-> > > > > {
-> > > > > +                       bus_speed = UHS_SDR25_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_SDR25;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_SDR25_MAX_DTR;
-> > > > > +               }
-> > > > > +       } else if (card->host->caps & MMC_CAP_UHS_DDR50) {
-> > > > > +               if ((card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_SDR104)
-> > ||
-> > > > > +                   (card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_SDR50)
-> > ||
-> > > > > +                   (card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_DDR50))
-> > {
-> > > > > +                       bus_speed = UHS_DDR50_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_DDR50;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_DDR50_MAX_DTR;
-> > > > > +               } else if (card->sw_caps.uhs_bus_mode &
-> > SD_MODE_UHS_SDR25)
-> > > > > {
-> > > > > +                       bus_speed = UHS_SDR25_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_SDR25;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_SDR25_MAX_DTR;
-> > > > > +               }
-> > > > > +       } else if (card->host->caps & MMC_CAP_UHS_SDR25) {
-> > > > > +               if ((card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_SDR104)
-> > ||
-> > > > > +                   (card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_SDR50)
-> > ||
-> > > > > +                   (card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_DDR50)
-> > ||
-> > > > > +                   (card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_SDR25))
-> > {
-> > > > > +                       bus_speed = UHS_SDR25_BUS_SPEED;
-> > > > > +                       timing = MMC_TIMING_UHS_SDR25;
-> > > > > +                       card->sw_caps.uhs_max_dtr =
-> UHS_SDR25_MAX_DTR;
-> > > > > +               }
-> > > > > +       }
-> > > > > +
-> > > > > +       err = mmc_sd_switch(card, 1, 0, bus_speed, status);
-> > > > > +       if (err)
-> > > > > +               return err;
-> > > > > +
-> > > > > +       if ((status[16] & 0xF) != bus_speed)
-> > > > > +               printk(KERN_WARNING "%s: Problem setting bus
-> speed
-> > > > > mode!\n",
-> > > > > +                       mmc_hostname(card->host));
-> > > > > +       else {
-> > > > > +               if (bus_speed) {
-> > > > > +                       mmc_set_timing(card->host, timing);
-> > > > > +                       mmc_set_clock(card->host,
-> > > > card->sw_caps.uhs_max_dtr);
-> > > > > +               }
-> > > > > +       }
-> > > > > +
-> > > > > +       return 0;
-> > > > > +}
-> > > > > +
-> > > > >  /*
-> > > > >   * UHS-I specific initialization procedure
-> > > > >   */
-> > > > > @@ -499,6 +585,11 @@ static int mmc_sd_init_uhs_card(struct
-> > > mmc_card
-> > > > > *card)
+> > > > > Thanks,
+> > > > > Arindam
 > > > > >
-> > > > >         /* Set the driver strength for the card */
-> > > > >         err = sd_select_driver_type(card, status);
-> > > > > +       if (err)
-> > > > > +               goto out;
-> > > > > +
-> > > > > +       /* Set bus speed mode of the card */
-> > > > > +       err = sd_set_bus_speed_mode(card, status);
+> > > > > >
+> > > > > >
+> > > > > > >  };
+> > > > > > >
+> > > > > > >  struct mmc_card;
+> > > > > > > diff --git a/include/linux/mmc/mmc.h
+> > b/include/linux/mmc/mmc.h
+> > > > > > > index 612301f..9194f9e 100644
+> > > > > > > --- a/include/linux/mmc/mmc.h
+> > > > > > > +++ b/include/linux/mmc/mmc.h
+> > > > > > > @@ -50,6 +50,7 @@
+> > > > > > >  #define MMC_SET_BLOCKLEN         16   /* ac   [31:0] block
+> > len
+> > > > > R1
+> > > > > > > */
+> > > > > > >  #define MMC_READ_SINGLE_BLOCK    17   /* adtc [31:0] data
+> > addr
+> > > > > R1
+> > > > > > > */
+> > > > > > >  #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data
+> > addr
+> > > > > R1
+> > > > > > > */
+> > > > > > > +#define MMC_SEND_TUNING_BLOCK    19   /* adtc
+> > > > > R1
+> > > > > > > */
+> > > > > > >
+> > > > > > >    /* class 3 */
+> > > > > > >  #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data
+> > addr
+> > > > > R1
+> > > > > > > */
+> > > > > > > diff --git a/include/linux/mmc/sdhci.h
+> > > > b/include/linux/mmc/sdhci.h
+> > > > > > > index 282d158..5203b97 100644
+> > > > > > > --- a/include/linux/mmc/sdhci.h
+> > > > > > > +++ b/include/linux/mmc/sdhci.h
+> > > > > > > @@ -109,6 +109,7 @@ struct sdhci_host {
+> > > > > > >  #define SDHCI_USE_ADMA         (1<<1)  /* Host is ADMA
+> > capable
+> > > > > > */
+> > > > > > >  #define SDHCI_REQ_USE_DMA      (1<<2)  /* Use DMA for this
+> > > > > req. */
+> > > > > > >  #define SDHCI_DEVICE_DEAD      (1<<3)  /* Device
+> > unresponsive
+> > > > > */
+> > > > > > > +#define SDHCI_SDR50_NEEDS_TUNING (1<<4)        /* SDR50
+> > needs
+> > > tuning
+> > > > > > */
+> > > > > > >
+> > > > > > >         unsigned int version;   /* SDHCI spec. version */
+> > > > > > >
+> > > > > > > @@ -147,6 +148,9 @@ struct sdhci_host {
+> > > > > > >
+> > > > > > >         struct mmc_command      *saved_abort_cmd; /* Abort
+> > > command
+> > > > saved
+> > > > > > > for data error recovery */
+> > > > > > >
+> > > > > > > +       wait_queue_head_t       buf_ready_int;  /*
+> Waitqueue
+> > > for Buffer
+> > > > Read
+> > > > > > > Ready interrupt */
+> > > > > > > +       unsigned int            tuning_done;    /*
+> Condition
+> > > flag
+> > > > set
+> > > > > > > when CMD19 succeeds */
+> > > > > > > +
+> > > > > > >         unsigned long private[0] ____cacheline_aligned;
+> > > > > > >  };
+> > > > > > >  #endif /* __SDHCI_H */
+> > > > > > > --
+> > > > > > > 1.7.1
+> > > > > >
+> > > > > >
 > > > > >
-> > > > >  out:
-> > > > >         kfree(status);
-> > > > > diff --git a/drivers/mmc/host/sdhci.c
-> b/drivers/mmc/host/sdhci.c
-> > > > > index 5d3bb11..f127fa2 100644
-> > > > > --- a/drivers/mmc/host/sdhci.c
-> > > > > +++ b/drivers/mmc/host/sdhci.c
-> > > > > @@ -1278,7 +1278,13 @@ static void sdhci_set_ios(struct
-> mmc_host
-> > > > *mmc,
-> > > > > struct mmc_ios *ios)
-> > > > >                 ctrl &= ~SDHCI_CTRL_HISPD;
-> > > > >
-> > > > >         if (host->version >= SDHCI_SPEC_300) {
-> > > > > -               u16 ctrl_2;
-> > > > > +               u16 clk, ctrl_2;
-> > > > > +
-> > > > > +               /* In case of UHS-I modes, set High Speed
-> Enable */
-> > > > > +               if ((ios->timing == MMC_TIMING_UHS_SDR50) ||
-> > > > > +                   (ios->timing == MMC_TIMING_UHS_SDR104) ||
-> > > > > +                   (ios->timing == MMC_TIMING_UHS_DDR50))
-> > > > > +                       ctrl |= SDHCI_CTRL_HISPD;
-> > > > >
-> > > > >                 ctrl_2 = sdhci_readw(host,
-> SDHCI_HOST_CONTROL2);
-> > > > >                 if (!(ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
-> > > > > @@ -1300,7 +1306,6 @@ static void sdhci_set_ios(struct mmc_host
-> > > *mmc,
-> > > > > struct mmc_ios *ios)
-> > > > >                          * need to reset SD Clock Enable before
-> > changing
-> > > > High
-> > > > >                          * Speed Enable to avoid generating
-> clock
-> > gliches.
-> > > > >                          */
-> > > > > -                       u16 clk;
-> > > > >
-> > > > >                         /* Reset SD Clock Enable */
-> > > > >                         clk = sdhci_readw(host,
-> SDHCI_CLOCK_CONTROL);
-> > > > > @@ -1313,6 +1318,29 @@ static void sdhci_set_ios(struct
-> mmc_host
-> > > > *mmc,
-> > > > > struct mmc_ios *ios)
-> > > > >                         clk |= SDHCI_CLOCK_CARD_EN;
-> > > > >                         sdhci_writew(host, clk,
-> SDHCI_CLOCK_CONTROL);
-> > > > >                 }
-> > > > > +
-> > > > > +               ctrl_2 = sdhci_readw(host,
-> SDHCI_HOST_CONTROL2);
-> > > > > +
-> > > > > +               /* Select Bus Speed Mode for host */
-> > > > > +               if (ios->timing == MMC_TIMING_UHS_SDR25)
-> > > > > +                       ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-> > > > > +               else if (ios->timing == MMC_TIMING_UHS_SDR50)
-> > > > > +                       ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-> > > > > +               else if (ios->timing == MMC_TIMING_UHS_SDR104)
-> > > > > +                       ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-> > > > > +               else if (ios->timing == MMC_TIMING_UHS_DDR50)
-> > > > > +                       ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-> > > > > +
-> > > > > +               /* Reset SD Clock Enable */
-> > > > > +               clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > > > > +               clk &= ~SDHCI_CLOCK_CARD_EN;
-> > > > > +               sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> > > > > +
-> > > > > +               sdhci_writew(host, ctrl_2,
-> SDHCI_HOST_CONTROL2);
-> > > > > +
-> > > > > +               /* Re-enable SD Clock */
-> > > > > +               clk |= SDHCI_CLOCK_CARD_EN;
-> > > > > +               sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> > > > >         } else
-> > > > >                 sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
-> > > > >
-> > > > > diff --git a/drivers/mmc/host/sdhci.h
-> b/drivers/mmc/host/sdhci.h
-> > > > > index a407b5b..5bf244d 100644
-> > > > > --- a/drivers/mmc/host/sdhci.h
-> > > > > +++ b/drivers/mmc/host/sdhci.h
-> > > > > @@ -150,6 +150,11 @@
-> > > > >  #define SDHCI_ACMD12_ERR       0x3C
-> > > > >
-> > > > >  #define SDHCI_HOST_CONTROL2            0x3E
-> > > > > +#define  SDHCI_CTRL_UHS_SDR12          0x0000
-> > > > > +#define  SDHCI_CTRL_UHS_SDR25          0x0001
-> > > > > +#define  SDHCI_CTRL_UHS_SDR50          0x0002
-> > > > > +#define  SDHCI_CTRL_UHS_SDR104         0x0003
-> > > > > +#define  SDHCI_CTRL_UHS_DDR50          0x0004
-> > > > >  #define  SDHCI_CTRL_VDD_180            0x0008
-> > > > >  #define  SDHCI_CTRL_DRV_TYPE_B         0x0000
-> > > > >  #define  SDHCI_CTRL_DRV_TYPE_A         0x0010
-> > > > > diff --git a/include/linux/mmc/card.h
-> b/include/linux/mmc/card.h
-> > > > > index 2d7f7a3..0b24c41 100644
-> > > > > --- a/include/linux/mmc/card.h
-> > > > > +++ b/include/linux/mmc/card.h
-> > > > > @@ -75,7 +75,23 @@ struct sd_ssr {
-> > > > >
-> > > > >  struct sd_switch_caps {
-> > > > >         unsigned int            hs_max_dtr;
-> > > > > +       unsigned int            uhs_max_dtr;
-> > > > > +#define UHS_SDR104_MAX_DTR     208000000
-> > > > > +#define UHS_SDR50_MAX_DTR      100000000
-> > > > > +#define UHS_DDR50_MAX_DTR      50000000
-> > > > > +#define UHS_SDR25_MAX_DTR      50000000
-> > > > >         unsigned int            uhs_bus_mode;
-> > > > > +#define UHS_SDR12_BUS_SPEED    0
-> > > > > +#define UHS_SDR25_BUS_SPEED    1
-> > > > > +#define UHS_SDR50_BUS_SPEED    2
-> > > > > +#define UHS_SDR104_BUS_SPEED   3
-> > > > > +#define UHS_DDR50_BUS_SPEED    4
-> > > > > +
-> > > > > +#define SD_MODE_UHS_SDR12      (1 << UHS_SDR12_BUS_SPEED)
-> > > > > +#define SD_MODE_UHS_SDR25      (1 << UHS_SDR25_BUS_SPEED)
-> > > > > +#define SD_MODE_UHS_SDR50      (1 << UHS_SDR50_BUS_SPEED)
-> > > > > +#define SD_MODE_UHS_SDR104     (1 << UHS_SDR104_BUS_SPEED)
-> > > > > +#define SD_MODE_UHS_DDR50      (1 << UHS_DDR50_BUS_SPEED)
-> > > > >         unsigned int            uhs_drv_type;
-> > > > >  #define SD_DRIVER_TYPE_B       0x01
-> > > > >  #define SD_DRIVER_TYPE_A       0x02
-> > > > > diff --git a/include/linux/mmc/host.h
-> b/include/linux/mmc/host.h
-> > > > > index bc2121e..4dfff6d 100644
-> > > > > --- a/include/linux/mmc/host.h
-> > > > > +++ b/include/linux/mmc/host.h
-> > > > > @@ -50,6 +50,10 @@ struct mmc_ios {
-> > > > >  #define MMC_TIMING_LEGACY      0
-> > > > >  #define MMC_TIMING_MMC_HS      1
-> > > > >  #define MMC_TIMING_SD_HS       2
-> > > > > +#define MMC_TIMING_UHS_SDR25   MMC_TIMING_SD_HS
-> > > > > +#define MMC_TIMING_UHS_SDR50   3
-> > > > > +#define MMC_TIMING_UHS_SDR104  4
-> > > > > +#define MMC_TIMING_UHS_DDR50   5
-> > > > >
-> > > > >         unsigned char   ddr;                    /* dual data
-> rate used
-> > */
 > > > > >
 > > > > > --
-> > > > > 1.7.1
-> > > >
+> > > > > To unsubscribe from this list: send the line "unsubscribe
+> linux-
+> > > mmc"
+> > > > in
+> > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at  http://vger.kernel.org/majordomo-
+> > info.html
 > > > >
 > > >
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-
-> mmc"
-> > in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
 > >
 > 
 > 
