@@ -1,71 +1,42 @@
-From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Subject: Re: [PATCH resend] mmc: Added ioctl to let userspace apps send ACMDs
-Date: Wed, 23 Mar 2011 01:18:01 +0100
-Message-ID: <AANLkTikHzG3j8oT_aqZ5VAGFxyBBShyPzQTZxvxwkuff@mail.gmail.com>
-References: <203F41F6E33F954E8E8B02559FDC906F7431FC48EA@modex01>
- <alpine.DEB.2.00.1103180927390.5267@peruna> <AANLkTimjssCz_U4xbSf+ecoM7RsjC3eGQBo2vabfyy=T@mail.gmail.com>
- <201103182026.48939.arnd@arndb.de> <AANLkTinKon=D445PEHP2CzeL7OUpf_4y8j0-GA2nmZPt@mail.gmail.com>
- <alpine.DEB.2.00.1103211129130.23727@peruna> <AANLkTimwnS74Ybo6XTLOVUs7pRZBv4+hDgS7i2bfj+HV@mail.gmail.com>
- <alpine.DEB.2.00.1103221508420.30367@peruna>
+From: "Tomoya MORINAGA" <tomoya-linux@dsn.okisemi.com>
+Subject: RE: A MMC card transfer issue
+Date: Wed, 23 Mar 2011 09:31:32 +0900
+Message-ID: <3032905B991B4B59ADF0239D4AB008C4@hacdom.okisemi.com>
+References: <4CD8DE9C.4040505@dsn.okisemi.com> <AANLkTimfnj8GcSwmALjaZUBsiq6ssaVuzVZZsZHRYmiX@mail.gmail.com> <001701cb814c$71926bf0$66f8800a@maildom.okisemi.com> <001201cb90f4$4be8f790$66f8800a@maildom.okisemi.com> <2D50F985-2383-4406-8514-DFE462A5F546@marvell.com> <4D2E0464ABB54FFF9C10583336E27879@hacdom.okisemi.com> <4C4E7DE5-7CF1-4D97-9CAD-F600FCBE477A@marvell.com> <20110119174233.GA30494@void.printf.net> <F6E8C422FB8A4D78A5BDF7B6ECDA1E00@hacdom.okisemi.com> <D8E7AFC5-6B9E-414E-81A8-292FCD2F6E3C@marvell.com> <629816F753974155B62FF8FA718A26CA@hacdom.okisemi.com> <6076934B-27C2-4766-B101-793C7447C71C@marvell.com> <0F933C1424BF45E3BD2E13358BD3C89E@hacdom.okisemi.com> <7BDF62B4-A11A-4CB4-9F80-F2206C2655F9@marvell.com> <A32C38D81702478B9AB8626F523E79BB@hacdom.okisemi.com> <0DBFCBB8-B4A3-46A
+ 6-A68D-14FAED451619@marvell.com> <9992F28C7C0C445E956D351E3774C821@hacdom.okisemi.com> <82CB4E44-6543-4578-ACE4-37850FC4A49A@marvell.com> <EE9384C765994E26857C78E3D3A19304@hacdom.okisemi.com
+    > <AF584C10-A796-
+	4	3 5 B-8AB2-DA6D6C0E3FD7@marvell.com> <DE7D3AAF538943459079D18D0CE6ED44@hacdom.okisemi.com> <DDF13C55-A8A1-45C1-AE9A-A76754ED7008@marvell.com> <4425BB0054B748C68A25DD1DFBBB52A7@hacdom.okisemi.com> <5E1B7BBD-C96E-4CC0-B03B-ADCEB0120085@marvell.com> <0C438F11-132E-4639-820D-0E42EEDCD6E7@marvell.com> <671E3EC021E946A383C65F07A0101B27@hacdom.okisemi.com> <16706427-F00E-46F3-B0B4-9B7F06AD0E71@marvell.com> <5CBEE3CD-E95A-4657-8842-D87B5F1F9AC1@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:62153 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755164Ab1CWASW convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2011 20:18:22 -0400
-Received: by qwk3 with SMTP id 3so5555804qwk.19
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Mar 2011 17:18:21 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1103221508420.30367@peruna>
+Received: from sm-d311v.smileserver.ne.jp ([203.211.202.206]:46148 "EHLO
+	sm-d311v.smileserver.ne.jp" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750835Ab1CWAbf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2011 20:31:35 -0400
+In-Reply-To: <5CBEE3CD-E95A-4657-8842-D87B5F1F9AC1@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: John Calixto <john.calixto@modsystems.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, cjb@laptop.org
+To: 'Philip Rakity' <prakity@marvell.com>, 'Nicolas Pitre' <nico@fluxnic.net>
+Cc: 'Toshiharu Okada' <toshiharu-linux@dsn.okisemi.com>, linux-mmc@vger.kernel.org
 
-W dniu 22 marca 2011 23:31 u=BFytkownik John Calixto
-<john.calixto@modsystems.com> napisa=B3:
-> On Tue, 22 Mar 2011, Micha=B3 Miros=B3aw wrote:
->> >> It is not that unusual on "normal systems" to give write access t=
-o
->> >> some partition or device to unprivileged users. Database volumes =
-are
->> >> one example.
->> > Are you talking about the device nodes themselves, or about access=
- to
->> > the mounted filesystems that live on those devices/partitions? =A0=
-It seems
->> > like if you give unprivileged users write access to the raw block
->> > device, you should expect a lot more trouble from
->> > runaway/malicious/accidental writes than you would from
->> > application-specific commands being sent via ioctl.
->> I don't exactly see what's your point here. If you say that writes a=
-re
->> less dangerous than ioctls, then I agree. Even now, for some block
->> ioctls you need CAP_SYS_ADMIN because of that.
-> In general, I agree with your caution. =A0My point is that I'm not su=
-re
-> this type of protection belongs in the kernel. =A0We use permissions =
-and
-> "medium-privileged" role users all the time to marshal access to
-> sensitive files and devices. =A0This is a problem that has been solve=
-d in
-> userspace. =A0You don't let normal user "john" have the same access t=
-o
-> device nodes or even files and directories that you would for role us=
-er
-> "database", or role user "webserver". =A0(Actually, you probably shou=
-ldn't
-> let normal user "john" have access to anything - I hear he's trouble!=
-)
+Hi Philip
 
-When you grant write access to a device to some user, you should
-expect that it is all you are granting. There shouldn't be any hidden
-doors that, for example, if underlying device is SD card then you can
-destroy it by this ioctl(). Not counting wearing or WORM-like media,
-writes (also erasing, changing encryption keys, etc.) are undoable.
-Other forms of access should be granted separately (by capabilities or
-other means).
+Still we can see the issue in 2.6.38(The latest kernel).
+In 2.6.38, is this issue resolved ?
 
-Best Regards,
-Micha=B3 Miros=B3aw
+With Best Regards,
+-----------------------------------------
+Tomoya MORINAGA
+OKI SEMICONDUCTOR CO., LTD.
+
+> -----Original Message-----
+> From: Philip Rakity [mailto:prakity@marvell.com] 
+> Sent: Tuesday, February 01, 2011 1:41 AM
+> To: Nicolas Pitre
+> Cc: Tomoya MORINAGA; Toshiharu Okada; Manabu Miyata; Takahiro 
+> Shimizu; linux-mmc@vger.kernel.org
+> Subject: Re: A MMC card transfer issue
+> 
+
