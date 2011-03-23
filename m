@@ -1,71 +1,64 @@
-From: akpm@linux-foundation.org
-Subject: [merged] drivers-mmc-host-omapc-use-resource_size.patch removed from -mm tree
-Date: Wed, 23 Mar 2011 13:40:14 -0700
-Message-ID: <201103232043.p2NKhppk028996@imap1.linux-foundation.org>
-Reply-To: linux-kernel@vger.kernel.org
-Return-path: <mm-commits-owner@vger.kernel.org>
-Sender: mm-commits-owner@vger.kernel.org
-To: cjb@laptop.org, jarkko.lavinen@nokia.com, kishore.kadiyala@ti.com, linux-mmc@vger.kernel.org, tony@atomide.com, mm-commits@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 0/6] mmc: split the tmio driver into several modules
+Date: Thu, 24 Mar 2011 07:42:50 +0900
+Message-ID: <20110323224245.GA20341@verge.net.au>
+References: <Pine.LNX.4.64.1103110831510.23675@axis700.grange>
+ <AANLkTi=EBDnRtjqN3eckpt32p-tG8VkcsktLartOEgBp@mail.gmail.com>
+ <Pine.LNX.4.64.1103211226110.21013@axis700.grange>
+ <20110322053127.GG27346@verge.net.au>
+ <20110322122850.GA26099@linux-sh.org>
+ <20110322220623.GJ2423@verge.net.au>
+ <20110323145453.GA12106@linux-sh.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:41696 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755197Ab1CWWm6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2011 18:42:58 -0400
+Content-Disposition: inline
+In-Reply-To: <20110323145453.GA12106@linux-sh.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Paul Mundt <lethal@linux-sh.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 
+On Wed, Mar 23, 2011 at 11:54:53PM +0900, Paul Mundt wrote:
+> On Wed, Mar 23, 2011 at 07:06:24AM +0900, Simon Horman wrote:
+> > By 1-3 I was referring to the first three patches of
+> > [PATCH 0/4] [rfc v3] mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM
+> > 
+> > That is:
+> > [PATCH 1/4] mmc: tmio_mmc: Move some defines into a shared header
+> > [PATCH 2/4] mmc, ARM: Rename SuperH Mobile ARM zboot helpers
+> > [PATCH 3/4] mmc: Add MMC_PROGRESS_*
+> > 
+> > And by patch 4 I was referring to
+> > [PATCH 4/4 v5] mmc, ARM: Add zboot from eSD support for SuperH Mobile
+> > 
+> > I apologise for that being as clear as mud.
+> > 
+> Ok, that makes a bit more sense, thanks for clearing it up.
+> 
+> > Magnus raised a build issue with the series since my previous email.
+> > I will investigate that and reply to him ASAP. Its probably best
+> > to hold all the patches until then.
+> > 
+> It looks like 1/4 is going to have to go through the MMC tree, and will
+> have to layer on top of Guennadi's current patch stack. He's done a good
+> job of summarizing the outstanding bits, so it should be trivial to build
+> on top of that.
+> 
+> Once 1/4 is merged I can easily merge 2 and 3/4 at pretty much any time
+> during the -rc window, although I'd prefer to have it sorted out by -rc2
+> or -rc3 at the latest. This will just leave 4/4 for rmk's patch tracker
+> and its respective scheduling.
+> 
+> For now I'll punt the series from patchwork and await a resend with 1/4
+> rebased in such a way that it can trivially be picked up by the MMC tree.
 
-The patch titled
-     drivers/mmc/host/omap.c: use resource_size()
-has been removed from the -mm tree.  Its filename was
-     drivers-mmc-host-omapc-use-resource_size.patch
+Understood. I'll rebase my work on top of Guennadi's current patch stack
+and repost.
 
-This patch was dropped because it was merged into mainline or a subsystem tree
-
-The current -mm tree may be found at http://userweb.kernel.org/~akpm/mmotm/
-
-------------------------------------------------------
-Subject: drivers/mmc/host/omap.c: use resource_size()
-From: Chris Ball <cjb@laptop.org>
-
-Signed-off-by: Chris Ball <cjb@laptop.org>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
-Cc: Tony Lindgren <tony@atomide.com>
-Acked-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
----
-
- drivers/mmc/host/omap.c |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff -puN drivers/mmc/host/omap.c~drivers-mmc-host-omapc-use-resource_size drivers/mmc/host/omap.c
---- a/drivers/mmc/host/omap.c~drivers-mmc-host-omapc-use-resource_size
-+++ a/drivers/mmc/host/omap.c
-@@ -1417,7 +1417,7 @@ static int __init mmc_omap_probe(struct 
- 	if (res == NULL || irq < 0)
- 		return -ENXIO;
- 
--	res = request_mem_region(res->start, res->end - res->start + 1,
-+	res = request_mem_region(res->start, resource_size(res),
- 				 pdev->name);
- 	if (res == NULL)
- 		return -EBUSY;
-@@ -1457,7 +1457,7 @@ static int __init mmc_omap_probe(struct 
- 
- 	host->irq = irq;
- 	host->phys_base = host->mem_res->start;
--	host->virt_base = ioremap(res->start, res->end - res->start + 1);
-+	host->virt_base = ioremap(res->start, resource_size(res));
- 	if (!host->virt_base)
- 		goto err_ioremap;
- 
-@@ -1514,7 +1514,7 @@ err_free_mmc_host:
- err_ioremap:
- 	kfree(host);
- err_free_mem_region:
--	release_mem_region(res->start, res->end - res->start + 1);
-+	release_mem_region(res->start, resource_size(res));
- 	return ret;
- }
- 
-_
-
-Patches currently in -mm which might be from cjb@laptop.org are
-
-origin.patch
-
+I also have some updates to patches 3 and 4 to resolve build issues
+that Magnus alerted me to. So I'll include them in my re-post as well.
