@@ -1,29 +1,49 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 0/6 v2] mmc: split the tmio driver into several modules
-Date: Thu, 24 Mar 2011 08:16:24 +0900
-Message-ID: <20110323231624.GA30365@verge.net.au>
-References: <Pine.LNX.4.64.1103231156220.6836@axis700.grange>
- <20110323230232.GN20341@verge.net.au>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH] of_mmc_spi: Need to include irq.h and of_irq.h
+Date: Wed, 23 Mar 2011 21:41:51 -0600
+Message-ID: <20110324034151.GA27881@ponder.secretlab.ca>
+References: <20110318.150023.27819221.davem@davemloft.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:34359 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932926Ab1CXDl5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2011 23:41:57 -0400
 Content-Disposition: inline
-In-Reply-To: <20110323230232.GN20341@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>
+In-Reply-To: <20110318.150023.27819221.davem@davemloft.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: David Miller <davem@davemloft.net>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, Mar 24, 2011 at 08:02:32AM +0900, Simon Horman wrote:
-> Hi Guennadi,
+On Fri, Mar 18, 2011 at 03:00:23PM -0700, David Miller wrote:
 > 
-> which tree does this series apply to?
+> Since these are the headers that provide irq_of_parse_and_map()
+> and NO_IRQ.
 > 
-> I have tried both Linus's tree and the mmc-next branch of the mmc tree
-> without success.
+> Signed-off-by: David S. Miller <davem@davemloft.net>
 
-Actually, could you consider taking my patch into your series?
-Any rebase should be trivial.
+Acked-by: Grant Likely <grant.likely@secretlab.ca>
 
-The patch is:
-[PATCH 1/4] mmc: tmio_mmc: Move some defines into a shared header
+Chris, let me know if you need me to take this via my tree.
+
+g.
+
+> 
+> diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+> index 5530def..e2aecb7 100644
+> --- a/drivers/mmc/host/of_mmc_spi.c
+> +++ b/drivers/mmc/host/of_mmc_spi.c
+> @@ -15,9 +15,11 @@
+>  #include <linux/module.h>
+>  #include <linux/device.h>
+>  #include <linux/slab.h>
+> +#include <linux/irq.h>
+>  #include <linux/gpio.h>
+>  #include <linux/of.h>
+>  #include <linux/of_gpio.h>
+> +#include <linux/of_irq.h>
+>  #include <linux/spi/spi.h>
+>  #include <linux/spi/mmc_spi.h>
+>  #include <linux/mmc/core.h>
