@@ -1,866 +1,192 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus speed mode
- selection
-Date: Thu, 24 Mar 2011 03:42:24 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300EA91E284@SAUSEXMBP01.amd.com>
-References: <1299238369-1768-1-git-send-email-arindam.nath@amd.com>
- <1299238369-1768-7-git-send-email-arindam.nath@amd.com>
- <000001cbe793$2eef8910$8cce9b30$@org>
- <6C03668EAF45B747AF947A1603D1B300EA7E1666@SAUSEXMBP01.amd.com>
- <000c01cbe921$928e6830$b7ab3890$@org>
- <6C03668EAF45B747AF947A1603D1B300EA7E1684@SAUSEXMBP01.amd.com>
- <001201cbe923$4047de10$c0d79a30$@org>
- <6C03668EAF45B747AF947A1603D1B300EA7E16A3@SAUSEXMBP01.amd.com>
- <003201cbe92b$4761fa20$d625ee60$@org>
- <6C03668EAF45B747AF947A1603D1B300EA7E18BA@SAUSEXMBP01.amd.com>
- <005301cbe9f4$a917ea80$fb47bf80$@org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 1/4] mmc: tmio_mmc: Move some defines into a shared header
+ (fwd)
+Date: Thu, 24 Mar 2011 09:54:59 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103240952280.15629@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.181]:34104
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933713Ab1CXInK convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 24 Mar 2011 04:43:10 -0400
-In-Reply-To: <005301cbe9f4$a917ea80$fb47bf80$@org>
-Content-Language: en-US
+Received: from moutng.kundenserver.de ([212.227.126.186]:64789 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752277Ab1CXIzS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2011 04:55:18 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>, "cjb@laptop.org" <cjb@laptop.org>
-Cc: "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "prakity@marvell.com" <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Simon Horman <horms@verge.net.au>
 
-Hi Subhash,
+From: Simon Horman <horms@verge.net.au>
 
+Also add TMIO_BBS.
 
-> -----Original Message-----
-> From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> Sent: Thursday, March 24, 2011 12:55 PM
-> To: Nath, Arindam; cjb@laptop.org
-> Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus speed
-> mode selection
->
->
->
-> > -----Original Message-----
-> > From: Nath, Arindam [mailto:Arindam.Nath@amd.com]
-> > Sent: Wednesday, March 23, 2011 7:33 PM
-> > To: Subhash Jadavani; cjb@laptop.org
-> > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus speed
-> > mode selection
-> >
-> > Hi Subhash,
-> >
-> >
-> > > -----Original Message-----
-> > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > Sent: Wednesday, March 23, 2011 12:54 PM
-> > > To: Nath, Arindam; cjb@laptop.org
-> > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus
-> speed
-> > > mode selection
-> > >
-> > >
-> > >
-> > > > -----Original Message-----
-> > > > From: Nath, Arindam [mailto:Arindam.Nath@amd.com]
-> > > > Sent: Wednesday, March 23, 2011 12:06 PM
-> > > > To: Subhash Jadavani; cjb@laptop.org
-> > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > > > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus
-> > speed
-> > > > mode selection
-> > > >
-> > > >
-> > > >
-> > > > > -----Original Message-----
-> > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > > > Sent: Wednesday, March 23, 2011 11:56 AM
-> > > > > To: Nath, Arindam; cjb@laptop.org
-> > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> > > > > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs bus
-> > > speed
-> > > > > mode selection
-> > > > >
-> > > > >
-> > > > >
-> > > > > > -----Original Message-----
-> > > > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > > > > owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> > > > > > Sent: Wednesday, March 23, 2011 11:48 AM
-> > > > > > To: Subhash Jadavani; cjb@laptop.org
-> > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
-> anath.amd@gmail.com
-> > > > > > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs
-> bus
-> > > > speed
-> > > > > > mode selection
-> > > > > >
-> > > > > > Hi Subhash,
-> > > > > >
-> > > > > >
-> > > > > > > -----Original Message-----
-> > > > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > > > > > Sent: Wednesday, March 23, 2011 11:44 AM
-> > > > > > > To: Nath, Arindam; cjb@laptop.org
-> > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
-> > anath.amd@gmail.com
-> > > > > > > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for uhs
-> > bus
-> > > > > speed
-> > > > > > > mode selection
-> > > > > > >
-> > > > > > >
-> > > > > > >
-> > > > > > > > -----Original Message-----
-> > > > > > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > > > > > > owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> > > > > > > > Sent: Wednesday, March 23, 2011 11:35 AM
-> > > > > > > > To: Subhash Jadavani; cjb@laptop.org
-> > > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > > > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
-> > > anath.amd@gmail.com
-> > > > > > > > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for
-> uhs
-> > > bus
-> > > > > > speed
-> > > > > > > > mode selection
-> > > > > > > >
-> > > > > > > > Hi Subhash,
-> > > > > > > >
-> > > > > > > >
-> > > > > > > > > -----Original Message-----
-> > > > > > > > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > > > > > > > Sent: Monday, March 21, 2011 12:13 PM
-> > > > > > > > > To: Nath, Arindam; cjb@laptop.org
-> > > > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com; linux-
-> > > > > > > > > mmc@vger.kernel.org; Su, Henry; Lu, Aaron;
-> > > > anath.amd@gmail.com
-> > > > > > > > > Subject: RE: [PATCH v2 06/12] mmc: sd: add support for
-> > uhs
-> > > > bus
-> > > > > > > speed
-> > > > > > > > > mode selection
-> > > > > > > > >
-> > > > > > > > >
-> > > > > > > > >
-> > > > > > > > > > -----Original Message-----
-> > > > > > > > > > From: Arindam Nath [mailto:anath.amd@gmail.com] On
-> > Behalf
-> > > > Of
-> > > > > > > > Arindam
-> > > > > > > > > > Nath
-> > > > > > > > > > Sent: Friday, March 04, 2011 5:03 PM
-> > > > > > > > > > To: cjb@laptop.org
-> > > > > > > > > > Cc: zhangfei.gao@gmail.com; prakity@marvell.com;
-> > > > > > > > > > subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
-> > > > > > > > henry.su@amd.com;
-> > > > > > > > > > aaron.lu@amd.com; anath.amd@gmail.com; Arindam Nath
-> > > > > > > > > > Subject: [PATCH v2 06/12] mmc: sd: add support for
-> uhs
-> > > bus
-> > > > > > speed
-> > > > > > > > mode
-> > > > > > > > > > selection
-> > > > > > > > > >
-> > > > > > > > > > This patch adds support for setting UHS-I bus speed
-> > mode
-> > > > > during
-> > > > > > > > UHS-I
-> > > > > > > > > > initialization procedure. Since both the host and
-> card
-> > > can
-> > > > > > > support
-> > > > > > > > > > more than one bus speed, we select the highest speed
-> > > based
-> > > > on
-> > > > > > > both
-> > > > > > > > of
-> > > > > > > > > > their capabilities. First we set the bus speed mode
-> for
-> > > the
-> > > > > > card
-> > > > > > > > > using
-> > > > > > > > > > CMD6 mode 1, and then we program the host controller
-> to
-> > > > > support
-> > > > > > > the
-> > > > > > > > > > required speed mode. We also set High Speed Enable in
-> > > case
-> > > > > one
-> > > > > > of
-> > > > > > > > the
-> > > > > > > > > > UHS-I modes is selected. Since MMC_TIMING_UHS_SDR25
-> is
-> > > same
-> > > > > as
-> > > > > > > > > > MMC_TIMING_SD_HS, we don't need to set the
-> > > SDHCI_CTRL_HISPD
-> > > > > > flag
-> > > > > > > > for
-> > > > > > > > > > UHS SDR25 again. We also take care to reset SD clock
-> > > before
-> > > > > > > setting
-> > > > > > > > > > UHS mode in the Host Control2 register, and then re-
-> > > enable
-> > > > it
-> > > > > > as
-> > > > > > > > per
-> > > > > > > > > > the Host Controller spec v3.00. We set the clock
-> > > frequency
-> > > > > for
-> > > > > > > the
-> > > > > > > > > > UHS-I mode selected.
-> > > > > > > > > >
-> > > > > > > > > > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> > > > > > > > > > ---
-> > > > > > > > > >  drivers/mmc/core/sd.c    |   91
-> > > > > > > > > > ++++++++++++++++++++++++++++++++++++++++++++++
-> > > > > > > > > >  drivers/mmc/host/sdhci.c |   32 +++++++++++++++-
-> > > > > > > > > >  drivers/mmc/host/sdhci.h |    5 +++
-> > > > > > > > > >  include/linux/mmc/card.h |   16 ++++++++
-> > > > > > > > > >  include/linux/mmc/host.h |    4 ++
-> > > > > > > > > >  5 files changed, 146 insertions(+), 2 deletions(-)
-> > > > > > > > > >
-> > > > > > > > > > diff --git a/drivers/mmc/core/sd.c
-> > > b/drivers/mmc/core/sd.c
-> > > > > > > > > > index f6a4fab..ec0d8e6 100644
-> > > > > > > > > > --- a/drivers/mmc/core/sd.c
-> > > > > > > > > > +++ b/drivers/mmc/core/sd.c
-> > > > > > > > > > @@ -464,6 +464,92 @@ static int
-> > > > sd_select_driver_type(struct
-> > > > > > > > mmc_card
-> > > > > > > > > > *card, u8 *status)
-> > > > > > > > > >         return 0;
-> > > > > > > > > >  }
-> > > > > > > > > >
-> > > > > > > > > > +static int sd_set_bus_speed_mode(struct mmc_card
-> > *card,
-> > > u8
-> > > > > > > > *status)
-> > > > > > > > > > +{
-> > > > > > > > > > +       unsigned int bus_speed, timing;
-> > > > > > > > > > +       int err;
-> > > > > > > > > > +
-> > > > > > > > > > +       /*
-> > > > > > > > > > +        * If the host doesn't support any of the
-> UHS-I
-> > > > > modes,
-> > > > > > > fallback
-> > > > > > > > > > on
-> > > > > > > > > > +        * default speed.
-> > > > > > > > > > +        */
-> > > > > > > > > > +       if (!(card->host->caps & (MMC_CAP_UHS_SDR12 |
-> > > > > > > MMC_CAP_UHS_SDR25 |
-> > > > > > > > > > +           MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
-> > > > > > > MMC_CAP_UHS_DDR50)))
-> > > > > > > > > > +               return 0;
-> > > > > > > > > > +
-> > > > > > > > > > +       if (card->host->caps & MMC_CAP_UHS_SDR104) {
-> > > > > > > > > > +               if (card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_SDR104)
-> > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_SDR104_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_SDR104;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_SDR104_MAX_DTR;
-> > > > > > > > > > +               } else if (card->sw_caps.uhs_bus_mode
-> &
-> > > > > > > SD_MODE_UHS_SDR50)
-> > > > > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_SDR50_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_SDR50;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_SDR50_MAX_DTR;
-> > > > > > > > > > +               } else if (card->sw_caps.uhs_bus_mode
-> &
-> > > > > > > SD_MODE_UHS_DDR50)
-> > > > > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_DDR50_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_DDR50;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_DDR50_MAX_DTR;
-> > > > > > > > > > +               } else if (card->sw_caps.uhs_bus_mode
-> &
-> > > > > > > SD_MODE_UHS_SDR25)
-> > > > > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_SDR25_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_SDR25;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_SDR25_MAX_DTR;
-> > > > > > > > > > +               }
-> > > > > > > > >
-> > > > > > > > > I would not agree that if Host cap is set to
-> > > > MMC_CAP_UHS_SDR104
-> > > > > > > > implies
-> > > > > > > > > that
-> > > > > > > > > DDR50 mode is supported by host. There may be a case
-> > where
-> > > > host
-> > > > > > > > > controller
-> > > > > > > > > only support SDR timing modes.
-> > > > > > > > > Basically if host should advertise all the supported
-> > modes
-> > > > > > (SDR104,
-> > > > > > > > > SDR50,
-> > > > > > > > > SDR25, SDR12 & DDR) by caps and then we should choose
-> the
-> > > > > highest
-> > > > > > > > > performance mode depending on both the card and host's
-> > > > highest
-> > > > > > > > > performance
-> > > > > > > > > mode.
-> > > > > > > > >
-> > > > > > > > > So this should be the check:
-> > > > > > > > >
-> > > > > > > > >   if ((card->host->caps & MMC_CAP_UHS_SDR104 &&
-> > > > > > > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR104)) {
-> > > > > > > > >                   bus_speed = UHS_SDR104_BUS_SPEED;
-> > > > > > > > >                   timing = MMC_TIMING_UHS_SDR104;
-> > > > > > > > >                   card->sw_caps.uhs_max_dtr =
-> > > > > UHS_SDR104_MAX_DTR;
-> > > > > > > > >   } else if ((card->host->caps & MMC_CAP_UHS_DDR50 &&
-> > > > > > > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_DDR50)) {
-> > > > > > > > >                   bus_speed = UHS_DDR50_BUS_SPEED;
-> > > > > > > > >                   timing = MMC_TIMING_UHS_DDR50;
-> > > > > > > > >                   card->sw_caps.uhs_max_dtr =
-> > > > > UHS_DDR50_MAX_DTR;
-> > > > > > > > >   } else if ((card->host->caps & MMC_CAP_UHS_SDR50 &&
-> > > > > > > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR50)) {
-> > > > > > > > >                   bus_speed = UHS_SDR50_BUS_SPEED;
-> > > > > > > > >                   timing = MMC_TIMING_UHS_SDR50;
-> > > > > > > > >                   card->sw_caps.uhs_max_dtr =
-> > > > > UHS_SDR50_MAX_DTR;
-> > > > > > > > >   } else if ((card->host->caps & MMC_CAP_UHS_SDR25 &&
-> > > > > > > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR25)) {
-> > > > > > > > >                   bus_speed = UHS_SDR50_BUS_SPEED;
-> > > > > > > > >                   timing = MMC_TIMING_UHS_SDR25;
-> > > > > > > > >                   card->sw_caps.uhs_max_dtr =
-> > > > > UHS_SDR25_MAX_DTR;
-> > > > > > > > >   } else if ((card->host->caps & MMC_CAP_UHS_SDR12 &&
-> > > > > > > > > (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR12)) {
-> > > > > > > > >                   bus_speed = UHS_SDR12_BUS_SPEED;
-> > > > > > > > >                   timing = MMC_TIMING_UHS_SDR12;
-> > > > > > > > >                   card->sw_caps.uhs_max_dtr =
-> > > > > UHS_SDR12_MAX_DTR;
-> > > > > > > > >   }
-> > > > > > > >
-> > > > > > > > A host capable of operating at a higher bus speed mode
-> > should
-> > > > be
-> > > > > > able
-> > > > > > > > to support cards with a lower bus speed mode. In case of
-> > your
-> > > > > > > > conditions checks above, you are checking for the exact
-> > match
-> > > > for
-> > > > > > the
-> > > > > > > > bus speed modes, otherwise you will fall back on using
-> > > default
-> > > > > bus
-> > > > > > > > speed mode, thus performance loss.
-> > > > > > >
-> > > > > > > Why should we implicitly assume that host supporting SDR104
-> > > mode
-> > > > > > would
-> > > > > > > also
-> > > > > > > support DDR50 mode? Is there any spec. which says so? If
-> not
-> > > then
-> > > > > we
-> > > > > > > should
-> > > > > > > rely on host capability to take the decision. DDR50 would
-> > > require
-> > > > > > > different
-> > > > > > > timing implementation on the host side and host may choose
-> > not
-> > > to
-> > > > > > > implement
-> > > > > > > DDR50 timing support then?
-> > > > > > >
-> > > > > > > I would agree that host supporting SDR104 mode should also
-> be
-> > > > > > > supporting
-> > > > > > > SDR50/SDR25/SDR12 modes but it may not be true for DDR50
-> > mode.
-> > > > > >
-> > > > > > Please refer to footnote of table 3-5 of the Physical Layer
-> > spec
-> > > > > v3.01.
-> > > > > > It says:
-> > > > > >
-> > > > > > "The card supports a UHS-I mode shall support all lower UHS-I
-> > > > modes."
-> > > > > >
-> > > > > > So if this is true for card, doesn't the same apply to host?
-> > > > >
-> > > > > Yes, this is the exact point I am stretching. Spec. never says
-> > the
-> > > > same
-> > > > > thing for host so we should not assume it. we already have
-> luxury
-> > > to
-> > > > > use
-> > > > > host caps then why should we assume something which may not be
-> > > > correct?
-> > > >
-> > > > I still think we should have a combination which works best based
-> > on
-> > > > the capabilities of the host and card, rather than falling back
-> to
-> > > > default bus speed right away. I can try to separate out the case
-> > for
-> > > > DDR50, if you want that. Otherwise, I will wait for few more
-> > comments
-> > > > on the same.
-> > >
-> > > Thanks. My code snippet was just an example. Yes, just separating
-> out
-> > > DDR50
-> > > should be enough.
-> >
-> > Section 3.9.3 of the Physical Layer spec v3.01 says:
-> >
-> > "Host may use SDR50, DDR50 and SDR104 with either UHS50 card or
-> UHS104
-> > card."
-> >
-> > So doesn't that mean that we should also check for all possible
-> > combinations of host and card when the host supports DDR50 mode? Just
-> a
-> > thought.
->
-> Yes, definitely. We should choose the highest performance mode
-> supported by
-> both card and host. How about following checks?
->
->       if ((card->host->caps & MMC_CAP_UHS_SDR104) &&
-> (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR104)) {
->                       bus_speed = UHS_SDR104_BUS_SPEED;
->                       timing = MMC_TIMING_UHS_SDR104;
->                       card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
->       } else if ((card->host->caps & MMC_CAP_UHS_DDR50) &&
-> (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_DDR50)) {
->                       bus_speed = UHS_DDR50_BUS_SPEED;
->                       timing = MMC_TIMING_UHS_DDR50;
->                       card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
->       } else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
-> MMC_CAP_UHS_SDR50)) && (card->sw_caps.uhs_bus_mode &
-> SD_MODE_UHS_SDR50)) {
->                       bus_speed = UHS_SDR50_BUS_SPEED;
->                       timing = MMC_TIMING_UHS_SDR50;
->                       card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
->       } else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
-> MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25)) && (card->sw_caps.uhs_bus_mode
-> &
-> SD_MODE_UHS_SDR25)) {
->                       bus_speed = UHS_SDR50_BUS_SPEED;
->                       timing = MMC_TIMING_UHS_SDR25;
->                       card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
->       } else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
-> MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25 | MMC_CAP_UHS_SDR12)) &&
-> (card->sw_caps.uhs_bus_mode & SD_MODE_UHS_SDR12)) {
->                       bus_speed = UHS_SDR12_BUS_SPEED;
->                       timing = MMC_TIMING_UHS_SDR12;
->                       card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
->       }
->
->
-> Here let's say if host sets both DDR50 and SDR50 caps and card also
-> supports
-> the DDR50 and SDR50 then we have give preference to DDR50 mode as it
-> would
-> require lower interface clock compared to SDR50. Although spec is not
-> saying
-> anything about which one should be given a preference when both are
-> supported by card and host.
->
-> Does above code snippest looks fine?
+This allows these defines to also be used by zboot.
 
-I am okay with this. I just hope that somebody else doesn't have a different opinion at a later point of time. Anyways, I will make the changes as per your snippet above.
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Signed-off-by: Simon Horman <horms@verge.net.au>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
-Thanks,
-Arindam
+As requested by Simon, this is now rebased on top of all my current tmio 
+patches.
 
->
-> >
-> > Thanks,
-> > Arindam
-> >
-> > >
-> > > >
-> > > > Thanks,
-> > > > Arindam
-> > > >
-> > > > >
-> > > > > >
-> > > > > > Thanks,
-> > > > > > Arindam
-> > > > > >
-> > > > > > >
-> > > > > > > >
-> > > > > > > > Thanks,
-> > > > > > > > Arindam
-> > > > > > > >
-> > > > > > > > >
-> > > > > > > > > Regards,
-> > > > > > > > > Subhash
-> > > > > > > > >
-> > > > > > > > >
-> > > > > > > > > > +       } else if (card->host->caps &
-> > MMC_CAP_UHS_SDR50)
-> > > {
-> > > > > > > > > > +               if ((card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_SDR104)
-> > > > > > > ||
-> > > > > > > > > > +                   (card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_SDR50))
-> > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_SDR50_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_SDR50;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_SDR50_MAX_DTR;
-> > > > > > > > > > +               } else if (card->sw_caps.uhs_bus_mode
-> &
-> > > > > > > SD_MODE_UHS_DDR50)
-> > > > > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_DDR50_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_DDR50;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_DDR50_MAX_DTR;
-> > > > > > > > > > +               } else if (card->sw_caps.uhs_bus_mode
-> &
-> > > > > > > SD_MODE_UHS_SDR25)
-> > > > > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_SDR25_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_SDR25;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_SDR25_MAX_DTR;
-> > > > > > > > > > +               }
-> > > > > > > > > > +       } else if (card->host->caps &
-> > MMC_CAP_UHS_DDR50)
-> > > {
-> > > > > > > > > > +               if ((card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_SDR104)
-> > > > > > > ||
-> > > > > > > > > > +                   (card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_SDR50)
-> > > > > > > ||
-> > > > > > > > > > +                   (card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_DDR50))
-> > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_DDR50_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_DDR50;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_DDR50_MAX_DTR;
-> > > > > > > > > > +               } else if (card->sw_caps.uhs_bus_mode
-> &
-> > > > > > > SD_MODE_UHS_SDR25)
-> > > > > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_SDR25_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_SDR25;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_SDR25_MAX_DTR;
-> > > > > > > > > > +               }
-> > > > > > > > > > +       } else if (card->host->caps &
-> > MMC_CAP_UHS_SDR25)
-> > > {
-> > > > > > > > > > +               if ((card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_SDR104)
-> > > > > > > ||
-> > > > > > > > > > +                   (card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_SDR50)
-> > > > > > > ||
-> > > > > > > > > > +                   (card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_DDR50)
-> > > > > > > ||
-> > > > > > > > > > +                   (card->sw_caps.uhs_bus_mode &
-> > > > > > SD_MODE_UHS_SDR25))
-> > > > > > > {
-> > > > > > > > > > +                       bus_speed =
-> > UHS_SDR25_BUS_SPEED;
-> > > > > > > > > > +                       timing =
-> MMC_TIMING_UHS_SDR25;
-> > > > > > > > > > +                       card->sw_caps.uhs_max_dtr =
-> > > > > > UHS_SDR25_MAX_DTR;
-> > > > > > > > > > +               }
-> > > > > > > > > > +       }
-> > > > > > > > > > +
-> > > > > > > > > > +       err = mmc_sd_switch(card, 1, 0, bus_speed,
-> > > status);
-> > > > > > > > > > +       if (err)
-> > > > > > > > > > +               return err;
-> > > > > > > > > > +
-> > > > > > > > > > +       if ((status[16] & 0xF) != bus_speed)
-> > > > > > > > > > +               printk(KERN_WARNING "%s: Problem
-> > setting
-> > > > bus
-> > > > > > speed
-> > > > > > > > > > mode!\n",
-> > > > > > > > > > +                       mmc_hostname(card->host));
-> > > > > > > > > > +       else {
-> > > > > > > > > > +               if (bus_speed) {
-> > > > > > > > > > +                       mmc_set_timing(card->host,
-> > > timing);
-> > > > > > > > > > +                       mmc_set_clock(card->host,
-> > > > > > > > > card->sw_caps.uhs_max_dtr);
-> > > > > > > > > > +               }
-> > > > > > > > > > +       }
-> > > > > > > > > > +
-> > > > > > > > > > +       return 0;
-> > > > > > > > > > +}
-> > > > > > > > > > +
-> > > > > > > > > >  /*
-> > > > > > > > > >   * UHS-I specific initialization procedure
-> > > > > > > > > >   */
-> > > > > > > > > > @@ -499,6 +585,11 @@ static int
-> > > mmc_sd_init_uhs_card(struct
-> > > > > > > > mmc_card
-> > > > > > > > > > *card)
-> > > > > > > > > >
-> > > > > > > > > >         /* Set the driver strength for the card */
-> > > > > > > > > >         err = sd_select_driver_type(card, status);
-> > > > > > > > > > +       if (err)
-> > > > > > > > > > +               goto out;
-> > > > > > > > > > +
-> > > > > > > > > > +       /* Set bus speed mode of the card */
-> > > > > > > > > > +       err = sd_set_bus_speed_mode(card, status);
-> > > > > > > > > >
-> > > > > > > > > >  out:
-> > > > > > > > > >         kfree(status);
-> > > > > > > > > > diff --git a/drivers/mmc/host/sdhci.c
-> > > > > > b/drivers/mmc/host/sdhci.c
-> > > > > > > > > > index 5d3bb11..f127fa2 100644
-> > > > > > > > > > --- a/drivers/mmc/host/sdhci.c
-> > > > > > > > > > +++ b/drivers/mmc/host/sdhci.c
-> > > > > > > > > > @@ -1278,7 +1278,13 @@ static void
-> sdhci_set_ios(struct
-> > > > > > mmc_host
-> > > > > > > > > *mmc,
-> > > > > > > > > > struct mmc_ios *ios)
-> > > > > > > > > >                 ctrl &= ~SDHCI_CTRL_HISPD;
-> > > > > > > > > >
-> > > > > > > > > >         if (host->version >= SDHCI_SPEC_300) {
-> > > > > > > > > > -               u16 ctrl_2;
-> > > > > > > > > > +               u16 clk, ctrl_2;
-> > > > > > > > > > +
-> > > > > > > > > > +               /* In case of UHS-I modes, set High
-> > Speed
-> > > > > > Enable */
-> > > > > > > > > > +               if ((ios->timing ==
-> > MMC_TIMING_UHS_SDR50)
-> > > > ||
-> > > > > > > > > > +                   (ios->timing ==
-> > > MMC_TIMING_UHS_SDR104)
-> > > > ||
-> > > > > > > > > > +                   (ios->timing ==
-> > > MMC_TIMING_UHS_DDR50))
-> > > > > > > > > > +                       ctrl |= SDHCI_CTRL_HISPD;
-> > > > > > > > > >
-> > > > > > > > > >                 ctrl_2 = sdhci_readw(host,
-> > > > > > SDHCI_HOST_CONTROL2);
-> > > > > > > > > >                 if (!(ctrl_2 &
-> > > > SDHCI_CTRL_PRESET_VAL_ENABLE))
-> > > > > {
-> > > > > > > > > > @@ -1300,7 +1306,6 @@ static void
-> sdhci_set_ios(struct
-> > > > > mmc_host
-> > > > > > > > *mmc,
-> > > > > > > > > > struct mmc_ios *ios)
-> > > > > > > > > >                          * need to reset SD Clock
-> > Enable
-> > > > > before
-> > > > > > > changing
-> > > > > > > > > High
-> > > > > > > > > >                          * Speed Enable to avoid
-> > > generating
-> > > > > > clock
-> > > > > > > gliches.
-> > > > > > > > > >                          */
-> > > > > > > > > > -                       u16 clk;
-> > > > > > > > > >
-> > > > > > > > > >                         /* Reset SD Clock Enable */
-> > > > > > > > > >                         clk = sdhci_readw(host,
-> > > > > > SDHCI_CLOCK_CONTROL);
-> > > > > > > > > > @@ -1313,6 +1318,29 @@ static void
-> sdhci_set_ios(struct
-> > > > > > mmc_host
-> > > > > > > > > *mmc,
-> > > > > > > > > > struct mmc_ios *ios)
-> > > > > > > > > >                         clk |= SDHCI_CLOCK_CARD_EN;
-> > > > > > > > > >                         sdhci_writew(host, clk,
-> > > > > > SDHCI_CLOCK_CONTROL);
-> > > > > > > > > >                 }
-> > > > > > > > > > +
-> > > > > > > > > > +               ctrl_2 = sdhci_readw(host,
-> > > > > > SDHCI_HOST_CONTROL2);
-> > > > > > > > > > +
-> > > > > > > > > > +               /* Select Bus Speed Mode for host */
-> > > > > > > > > > +               if (ios->timing ==
-> > MMC_TIMING_UHS_SDR25)
-> > > > > > > > > > +                       ctrl_2 |=
-> SDHCI_CTRL_UHS_SDR25;
-> > > > > > > > > > +               else if (ios->timing ==
-> > > > MMC_TIMING_UHS_SDR50)
-> > > > > > > > > > +                       ctrl_2 |=
-> SDHCI_CTRL_UHS_SDR50;
-> > > > > > > > > > +               else if (ios->timing ==
-> > > > > MMC_TIMING_UHS_SDR104)
-> > > > > > > > > > +                       ctrl_2 |=
-> > SDHCI_CTRL_UHS_SDR104;
-> > > > > > > > > > +               else if (ios->timing ==
-> > > > MMC_TIMING_UHS_DDR50)
-> > > > > > > > > > +                       ctrl_2 |=
-> SDHCI_CTRL_UHS_DDR50;
-> > > > > > > > > > +
-> > > > > > > > > > +               /* Reset SD Clock Enable */
-> > > > > > > > > > +               clk = sdhci_readw(host,
-> > > > SDHCI_CLOCK_CONTROL);
-> > > > > > > > > > +               clk &= ~SDHCI_CLOCK_CARD_EN;
-> > > > > > > > > > +               sdhci_writew(host, clk,
-> > > > SDHCI_CLOCK_CONTROL);
-> > > > > > > > > > +
-> > > > > > > > > > +               sdhci_writew(host, ctrl_2,
-> > > > > > SDHCI_HOST_CONTROL2);
-> > > > > > > > > > +
-> > > > > > > > > > +               /* Re-enable SD Clock */
-> > > > > > > > > > +               clk |= SDHCI_CLOCK_CARD_EN;
-> > > > > > > > > > +               sdhci_writew(host, clk,
-> > > > SDHCI_CLOCK_CONTROL);
-> > > > > > > > > >         } else
-> > > > > > > > > >                 sdhci_writeb(host, ctrl,
-> > > > > SDHCI_HOST_CONTROL1);
-> > > > > > > > > >
-> > > > > > > > > > diff --git a/drivers/mmc/host/sdhci.h
-> > > > > > b/drivers/mmc/host/sdhci.h
-> > > > > > > > > > index a407b5b..5bf244d 100644
-> > > > > > > > > > --- a/drivers/mmc/host/sdhci.h
-> > > > > > > > > > +++ b/drivers/mmc/host/sdhci.h
-> > > > > > > > > > @@ -150,6 +150,11 @@
-> > > > > > > > > >  #define SDHCI_ACMD12_ERR       0x3C
-> > > > > > > > > >
-> > > > > > > > > >  #define SDHCI_HOST_CONTROL2            0x3E
-> > > > > > > > > > +#define  SDHCI_CTRL_UHS_SDR12          0x0000
-> > > > > > > > > > +#define  SDHCI_CTRL_UHS_SDR25          0x0001
-> > > > > > > > > > +#define  SDHCI_CTRL_UHS_SDR50          0x0002
-> > > > > > > > > > +#define  SDHCI_CTRL_UHS_SDR104         0x0003
-> > > > > > > > > > +#define  SDHCI_CTRL_UHS_DDR50          0x0004
-> > > > > > > > > >  #define  SDHCI_CTRL_VDD_180            0x0008
-> > > > > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_B         0x0000
-> > > > > > > > > >  #define  SDHCI_CTRL_DRV_TYPE_A         0x0010
-> > > > > > > > > > diff --git a/include/linux/mmc/card.h
-> > > > > > b/include/linux/mmc/card.h
-> > > > > > > > > > index 2d7f7a3..0b24c41 100644
-> > > > > > > > > > --- a/include/linux/mmc/card.h
-> > > > > > > > > > +++ b/include/linux/mmc/card.h
-> > > > > > > > > > @@ -75,7 +75,23 @@ struct sd_ssr {
-> > > > > > > > > >
-> > > > > > > > > >  struct sd_switch_caps {
-> > > > > > > > > >         unsigned int            hs_max_dtr;
-> > > > > > > > > > +       unsigned int            uhs_max_dtr;
-> > > > > > > > > > +#define UHS_SDR104_MAX_DTR     208000000
-> > > > > > > > > > +#define UHS_SDR50_MAX_DTR      100000000
-> > > > > > > > > > +#define UHS_DDR50_MAX_DTR      50000000
-> > > > > > > > > > +#define UHS_SDR25_MAX_DTR      50000000
-> > > > > > > > > >         unsigned int            uhs_bus_mode;
-> > > > > > > > > > +#define UHS_SDR12_BUS_SPEED    0
-> > > > > > > > > > +#define UHS_SDR25_BUS_SPEED    1
-> > > > > > > > > > +#define UHS_SDR50_BUS_SPEED    2
-> > > > > > > > > > +#define UHS_SDR104_BUS_SPEED   3
-> > > > > > > > > > +#define UHS_DDR50_BUS_SPEED    4
-> > > > > > > > > > +
-> > > > > > > > > > +#define SD_MODE_UHS_SDR12      (1 <<
-> > > UHS_SDR12_BUS_SPEED)
-> > > > > > > > > > +#define SD_MODE_UHS_SDR25      (1 <<
-> > > UHS_SDR25_BUS_SPEED)
-> > > > > > > > > > +#define SD_MODE_UHS_SDR50      (1 <<
-> > > UHS_SDR50_BUS_SPEED)
-> > > > > > > > > > +#define SD_MODE_UHS_SDR104     (1 <<
-> > > UHS_SDR104_BUS_SPEED)
-> > > > > > > > > > +#define SD_MODE_UHS_DDR50      (1 <<
-> > > UHS_DDR50_BUS_SPEED)
-> > > > > > > > > >         unsigned int            uhs_drv_type;
-> > > > > > > > > >  #define SD_DRIVER_TYPE_B       0x01
-> > > > > > > > > >  #define SD_DRIVER_TYPE_A       0x02
-> > > > > > > > > > diff --git a/include/linux/mmc/host.h
-> > > > > > b/include/linux/mmc/host.h
-> > > > > > > > > > index bc2121e..4dfff6d 100644
-> > > > > > > > > > --- a/include/linux/mmc/host.h
-> > > > > > > > > > +++ b/include/linux/mmc/host.h
-> > > > > > > > > > @@ -50,6 +50,10 @@ struct mmc_ios {
-> > > > > > > > > >  #define MMC_TIMING_LEGACY      0
-> > > > > > > > > >  #define MMC_TIMING_MMC_HS      1
-> > > > > > > > > >  #define MMC_TIMING_SD_HS       2
-> > > > > > > > > > +#define MMC_TIMING_UHS_SDR25   MMC_TIMING_SD_HS
-> > > > > > > > > > +#define MMC_TIMING_UHS_SDR50   3
-> > > > > > > > > > +#define MMC_TIMING_UHS_SDR104  4
-> > > > > > > > > > +#define MMC_TIMING_UHS_DDR50   5
-> > > > > > > > > >
-> > > > > > > > > >         unsigned char   ddr;                    /*
-> dual
-> > > > data
-> > > > > > rate used
-> > > > > > > */
-> > > > > > > > > >
-> > > > > > > > > > --
-> > > > > > > > > > 1.7.1
-> > > > > > > > >
-> > > > > > > > >
-> > > > > > > >
-> > > > > > > >
-> > > > > > > > --
-> > > > > > > > To unsubscribe from this list: send the line "unsubscribe
-> > > > linux-
-> > > > > > mmc"
-> > > > > > > in
-> > > > > > > > the body of a message to majordomo@vger.kernel.org
-> > > > > > > > More majordomo info at  http://vger.kernel.org/majordomo-
-> > > > > info.html
-> > > > > > >
-> > > > > >
-> > > > > >
-> > > > > > --
-> > > > > > To unsubscribe from this list: send the line "unsubscribe
-> > linux-
-> > > > mmc"
-> > > > > in
-> > > > > > the body of a message to majordomo@vger.kernel.org
-> > > > > > More majordomo info at  http://vger.kernel.org/majordomo-
-> > > info.html
-> > > > >
-> > > >
-> > >
-> > >
-> >
->
->
+ drivers/mmc/host/tmio_mmc.h     |   30 +++--------------------
+ drivers/mmc/host/tmio_mmc_dma.c |    1 +
+ drivers/mmc/host/tmio_mmc_pio.c |   21 +----------------
+ include/linux/mmc/tmio.h        |   49 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 55 insertions(+), 46 deletions(-)
+ create mode 100644 include/linux/mmc/tmio.h
 
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 7d79b14..099ed49 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -17,36 +17,14 @@
+ #define TMIO_MMC_H
+ 
+ #include <linux/highmem.h>
++#include <linux/mmc/tmio.h>
+ #include <linux/pagemap.h>
+ 
+-/* Definitions for values the CTRL_STATUS register can take. */
+-#define TMIO_STAT_CMDRESPEND    0x00000001
+-#define TMIO_STAT_DATAEND       0x00000004
+-#define TMIO_STAT_CARD_REMOVE   0x00000008
+-#define TMIO_STAT_CARD_INSERT   0x00000010
+-#define TMIO_STAT_SIGSTATE      0x00000020
+-#define TMIO_STAT_WRPROTECT     0x00000080
+-#define TMIO_STAT_CARD_REMOVE_A 0x00000100
+-#define TMIO_STAT_CARD_INSERT_A 0x00000200
+-#define TMIO_STAT_SIGSTATE_A    0x00000400
+-#define TMIO_STAT_CMD_IDX_ERR   0x00010000
+-#define TMIO_STAT_CRCFAIL       0x00020000
+-#define TMIO_STAT_STOPBIT_ERR   0x00040000
+-#define TMIO_STAT_DATATIMEOUT   0x00080000
+-#define TMIO_STAT_RXOVERFLOW    0x00100000
+-#define TMIO_STAT_TXUNDERRUN    0x00200000
+-#define TMIO_STAT_CMDTIMEOUT    0x00400000
+-#define TMIO_STAT_RXRDY         0x01000000
+-#define TMIO_STAT_TXRQ          0x02000000
+-#define TMIO_STAT_ILL_FUNC      0x20000000
+-#define TMIO_STAT_CMD_BUSY      0x40000000
+-#define TMIO_STAT_ILL_ACCESS    0x80000000
+-
+ /* Definitions for values the CTRL_SDIO_STATUS register can take. */
+-#define TMIO_SDIO_STAT_IOIRQ		0x0001
++#define TMIO_SDIO_STAT_IOIRQ	0x0001
+ #define TMIO_SDIO_STAT_EXPUB52	0x4000
+-#define TMIO_SDIO_STAT_EXWT		0x8000
+-#define TMIO_SDIO_MASK_ALL		0xc007
++#define TMIO_SDIO_STAT_EXWT	0x8000
++#define TMIO_SDIO_MASK_ALL	0xc007
+ 
+ /* Define some IRQ masks */
+ /* This is the mask used at reset by the chip */
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index c505278..d3de74a 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -14,6 +14,7 @@
+ #include <linux/dmaengine.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/tmio.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
+ 
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index e35e179..6ae8d2f 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -35,6 +35,7 @@
+ #include <linux/irq.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/tmio.h>
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
+ #include <linux/platform_device.h>
+@@ -44,26 +45,6 @@
+ 
+ #include "tmio_mmc.h"
+ 
+-#define CTL_SD_CMD 0x00
+-#define CTL_ARG_REG 0x04
+-#define CTL_STOP_INTERNAL_ACTION 0x08
+-#define CTL_XFER_BLK_COUNT 0xa
+-#define CTL_RESPONSE 0x0c
+-#define CTL_STATUS 0x1c
+-#define CTL_IRQ_MASK 0x20
+-#define CTL_SD_CARD_CLK_CTL 0x24
+-#define CTL_SD_XFER_LEN 0x26
+-#define CTL_SD_MEM_CARD_OPT 0x28
+-#define CTL_SD_ERROR_DETAIL_STATUS 0x2c
+-#define CTL_SD_DATA_PORT 0x30
+-#define CTL_TRANSACTION_CTL 0x34
+-#define CTL_SDIO_STATUS 0x36
+-#define CTL_SDIO_IRQ_MASK 0x38
+-#define CTL_RESET_SD 0xe0
+-#define CTL_SDIO_REGS 0x100
+-#define CTL_CLK_AND_WAIT_CTL 0x138
+-#define CTL_RESET_SDIO 0x1e0
+-
+ static u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
+ {
+ 	return readw(host->ctl + (addr << host->bus_shift));
+diff --git a/include/linux/mmc/tmio.h b/include/linux/mmc/tmio.h
+new file mode 100644
+index 0000000..7131f8d
+--- /dev/null
++++ b/include/linux/mmc/tmio.h
+@@ -0,0 +1,49 @@
++#ifndef TMIO_H
++#define TMIO_H
++
++#define CTL_SD_CMD 0x00
++#define CTL_ARG_REG 0x04
++#define CTL_STOP_INTERNAL_ACTION 0x08
++#define CTL_XFER_BLK_COUNT 0xa
++#define CTL_RESPONSE 0x0c
++#define CTL_STATUS 0x1c
++#define CTL_IRQ_MASK 0x20
++#define CTL_SD_CARD_CLK_CTL 0x24
++#define CTL_SD_XFER_LEN 0x26
++#define CTL_SD_MEM_CARD_OPT 0x28
++#define CTL_SD_ERROR_DETAIL_STATUS 0x2c
++#define CTL_SD_DATA_PORT 0x30
++#define CTL_TRANSACTION_CTL 0x34
++#define CTL_SDIO_STATUS 0x36
++#define CTL_SDIO_IRQ_MASK 0x38
++#define CTL_RESET_SD 0xe0
++#define CTL_SDIO_REGS 0x100
++#define CTL_CLK_AND_WAIT_CTL 0x138
++#define CTL_RESET_SDIO 0x1e0
++
++/* Definitions for values the CTRL_STATUS register can take. */
++#define TMIO_STAT_CMDRESPEND    0x00000001
++#define TMIO_STAT_DATAEND       0x00000004
++#define TMIO_STAT_CARD_REMOVE   0x00000008
++#define TMIO_STAT_CARD_INSERT   0x00000010
++#define TMIO_STAT_SIGSTATE      0x00000020
++#define TMIO_STAT_WRPROTECT     0x00000080
++#define TMIO_STAT_CARD_REMOVE_A 0x00000100
++#define TMIO_STAT_CARD_INSERT_A 0x00000200
++#define TMIO_STAT_SIGSTATE_A    0x00000400
++#define TMIO_STAT_CMD_IDX_ERR   0x00010000
++#define TMIO_STAT_CRCFAIL       0x00020000
++#define TMIO_STAT_STOPBIT_ERR   0x00040000
++#define TMIO_STAT_DATATIMEOUT   0x00080000
++#define TMIO_STAT_RXOVERFLOW    0x00100000
++#define TMIO_STAT_TXUNDERRUN    0x00200000
++#define TMIO_STAT_CMDTIMEOUT    0x00400000
++#define TMIO_STAT_RXRDY         0x01000000
++#define TMIO_STAT_TXRQ          0x02000000
++#define TMIO_STAT_ILL_FUNC      0x20000000
++#define TMIO_STAT_CMD_BUSY      0x40000000
++#define TMIO_STAT_ILL_ACCESS    0x80000000
++
++#define TMIO_BBS		512		/* Boot block size */
++
++#endif
+-- 
+1.7.2.5
 
