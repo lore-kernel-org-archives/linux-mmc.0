@@ -1,49 +1,71 @@
-From: David Brown <davidb@codeaurora.org>
-Subject: Re: [RFC] mmc: msm_sdcc: Use SPS BAM as DMA engine
-Date: Thu, 24 Mar 2011 15:45:46 -0700
-Message-ID: <8yak4fo16jp.fsf@huya.qualcomm.com>
-References: <1300454644-11361-1-git-send-email-subhashj@codeaurora.org>
-	<1300454644-11361-2-git-send-email-subhashj@codeaurora.org>
-	<1300885535.6117.15.camel@m0nster>
-	<005601cbe9f5$a5088750$ef1995f0$@org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] arm: mmci: Add ARM variant with extended FIFO
+Date: Thu, 24 Mar 2011 18:47:49 -0400
+Message-ID: <m3zkokm8yy.fsf@pullcord.laptop.org>
+References: <1299863887-15490-1-git-send-email-pawel.moll@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:30462 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933724Ab1CXWpG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2011 18:45:06 -0400
-In-Reply-To: <005601cbe9f5$a5088750$ef1995f0$@org> (Subhash Jadavani's message
-	of "Thu, 24 Mar 2011 13:02:31 +0530")
+Received: from void.printf.net ([89.145.121.20]:40102 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932915Ab1CXWv3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 24 Mar 2011 18:51:29 -0400
+In-Reply-To: <1299863887-15490-1-git-send-email-pawel.moll@arm.com> (Pawel
+	Moll's message of "Fri, 11 Mar 2011 17:18:07 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: 'Daniel Walker' <dwalker@fifo99.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, bryanh@codeaurora.org, linux-kernel@vger.kernel.org
+To: Pawel Moll <pawel.moll@arm.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-On Thu, Mar 24 2011, Subhash Jadavani wrote:
+Hi Pawel,
 
-> Here "DMA engine" means we are using SPS BAM as DMA HW.
+On Fri, Mar 11 2011, Pawel Moll wrote:
+> New IO FPGA implementation for Versatile Express boards contain
+> MMCI (PL180) cell with FIFO extended to 128 words (512 bytes).
+>
+> Signed-off-by: Pawel Moll <pawel.moll@arm.com>
+> ---
+>  drivers/mmc/host/mmci.c |   13 ++++++++++++-
+>  1 files changed, 12 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 2d6de3e..e7197b0 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -66,6 +66,12 @@ static struct variant_data variant_arm = {
+>  	.datalength_bits	= 16,
+>  };
+>  
+> +static struct variant_data variant_arm_extended_fifo = {
+> +	.fifosize		= 128 * 4,
+> +	.fifohalfsize		= 64 * 4,
+> +	.datalength_bits	= 16,
+> +};
+> +
+>  static struct variant_data variant_u300 = {
+>  	.fifosize		= 16 * 4,
+>  	.fifohalfsize		= 8 * 4,
+> @@ -1019,10 +1025,15 @@ static int mmci_resume(struct amba_device *dev)
+>  static struct amba_id mmci_ids[] = {
+>  	{
+>  		.id	= 0x00041180,
+> -		.mask	= 0x000fffff,
+> +		.mask	= 0xff0fffff,
+>  		.data	= &variant_arm,
+>  	},
+>  	{
+> +		.id	= 0x01041180,
+> +		.mask	= 0xff0fffff,
+> +		.data	= &variant_arm_extended_fifo,
+> +	},
+> +	{
+>  		.id	= 0x00041181,
+>  		.mask	= 0x000fffff,
+>  		.data	= &variant_arm,
 
-> No, we are not using the "drivers/dma/dmaengine.c" because MSM SPS
-> driver is not exporting the dma compliant APIs to client. We are using
-> the MSM SPS driver's exported APIs directly from our driver. Not sure
-> what extra description we can put it in commit text. Any suggestion?
+Pushed to mmc-next for .39-rc2, thanks.
 
-I think the commit text should explain why this driver doesn't just use
-the DMA engine API.  People are going to want to know that later on as
-well.  I know you did an analysis for this driver, and it would be good
-to include that information in the commit text.  Email me privately if
-you want some help with that.
-
-Currently none of the MSM DMA hardware uses the DMA engine API, and I
-think we need to figure out if we want to move to that at some point.  I
-realize that the hardware (especially SPS BAM) does a lot more than
-regular DMA, this may involve extending DMA engine, which may or may not
-be appropriate.
-
-Thanks,
-David
-
+- Chris.
 -- 
-Sent by an employee of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
