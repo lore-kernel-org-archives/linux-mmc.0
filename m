@@ -1,81 +1,61 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [RFC] mmc: msm_sdcc: Use SPS BAM as DMA engine
-Date: Thu, 24 Mar 2011 13:07:22 +0530
-Message-ID: <005901cbe9f6$5263f420$f72bdc60$@org>
-References: <1300454644-11361-1-git-send-email-subhashj@codeaurora.org>	 <1300454644-11361-2-git-send-email-subhashj@codeaurora.org> <1300885535.6117.15.camel@m0nster>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: outstanding tmio patches
+Date: Thu, 24 Mar 2011 08:38:56 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103240834240.15629@axis700.grange>
+References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:13310 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933338Ab1CXHhc convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2011 03:37:32 -0400
-In-Reply-To: <1300885535.6117.15.camel@m0nster>
-Content-Language: en-us
+Received: from moutng.kundenserver.de ([212.227.126.187]:61001 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933338Ab1CXHjF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2011 03:39:05 -0400
+In-Reply-To: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Daniel Walker' <dwalker@fifo99.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, davidb@codeaurora.org, bryanh@codeaurora.org, linux-kernel@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>
 
+A small update: two more patches have to be applied first, that are also 
+still not in the mmc tree, submitted on the 7th of March:
 
+[1/2] mmc: tmio: Improve DMA stability on sh-mobile
+[2/2] mmc: tmio: use PIO for short transfers
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Daniel Walker
-> Sent: Wednesday, March 23, 2011 6:36 PM
-> To: Subhash Jadavani
-> Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; linux-arm-
-> msm@vger.kernel.org; davidb@codeaurora.org; bryanh@codeaurora.org;
-> linux-kernel@vger.kernel.org
-> Subject: Re: [RFC] mmc: msm_sdcc: Use SPS BAM as DMA engine
+On Wed, 23 Mar 2011, Guennadi Liakhovetski wrote:
+
+> I thought it might help to list all the recent patches in the order they 
+> should apply to make it a bit easier...
 > 
-> On Fri, 2011-03-18 at 18:54 +0530, Subhash Jadavani wrote:
-> > On recent MSMs, ADM (Data Mover) HW is not present
-> > which means existing SDCC driver can perform data
-> > transfer in PIO (peripheral IO) mode only.
-> > But PIO mode requires lot of CPU attention which
-> > would mean consuming extra CPU MIPS.
-> >
-> > As a replacement on these recent MSMs, there is
-> > a new DMA HW engine named SPS-BAM (as part of
-> > Smart Peripheral System of MSM) is added for
-> > data movement between SDCC core and system memory.
-> >
-> > This patch has done changes in existing MSM SDCC
-> > driver for using SPS-BAM as DMA engine.
+> [1/6,v2] mmc: tmio: split core functionality, DMA and MFD glue
+> [2/6] sh: ecovec: use the CONFIG_MMC_TMIO symbols instead of MFD
+> [3/6,v2] mmc: tmio: convert the SDHI MMC driver from MFD to a standard platform driver
+> [4/6] ARM: mach-shmobile: convert boards to use linux/mmc/sh_mobile_sdhi.h
+> [5/6] sh: convert boards to use linux/mmc/sh_mobile_sdhi.h
+> [6/6] mfd: remove now redundant sh_mobile_sdhi.h header
 > 
-> 1300+ lines of code might warrant more of a description .. In the
-> subject you say "DMA engine" but does this use drivers/dma/dmaengine.c
-> ?
+> [1/4,v3] mmc: tmio: only access registers above 0xff, if available
+> [2/4,v3] ARM: mach-shmobile: fix SDHI IO address-range
+> [3/4,v3] sh: fix SDHI IO address-range
+> [4/4,v3] mmc: tmio: remove work-around for unmasked SDIO interrupts
 > 
-> > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> > ---
-> >  drivers/mmc/host/Kconfig        |   10 +
-> >  drivers/mmc/host/Makefile       |    1 +
-> >  drivers/mmc/host/msm_sdcc.c     |  929
-> +++++++++++++++++++++++++++++++++++++--
-> >  drivers/mmc/host/msm_sdcc.h     |   47 ++
-> >  drivers/mmc/host/msm_sdcc_dml.c |  303 +++++++++++++
-> >  drivers/mmc/host/msm_sdcc_dml.h |  120 +++++
-> >  6 files changed, 1374 insertions(+), 36 deletions(-)
-> >  create mode 100644 drivers/mmc/host/msm_sdcc_dml.c
-> >  create mode 100644 drivers/mmc/host/msm_sdcc_dml.h
+> [PATCH/RFC,1/2,v2] mmc: tmio: fix power-mode interpretation
+> [PATCH/RFC,2/2,v2] mmc: tmio: support aggressive clock gating
 > 
-> I'd do at least two patches. One that adds msm_sdcc_dml.[ch] and one
-> that modifies msm_sdcc.[ch] and the Kconfig and Makefile.
+> All available in the patchwork 
+> https://patchwork.kernel.org/project/linux-mmc/list/. The last two 
+> patches are somewhat risky, but given the timeframe, we could push them 
+> and fix any unlikely regressions later.
+> 
+> Thanks
+> Guennadi
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
+> 
 
-Yes, I can do that. Will make sure to separate it in 2 patches when I upload v2.
-
-Thanks,
-Subhash
-
-> 
-> Daniel
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
