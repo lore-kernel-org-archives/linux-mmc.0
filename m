@@ -1,29 +1,913 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 0/2] mmc: zboot helpers
-Date: Thu, 24 Mar 2011 15:54:06 +0900
-Message-ID: <1300949648-15078-1-git-send-email-horms@verge.net.au>
+Subject: Re: [PATCH 4/4 v6] mmc, ARM: Add zboot from eSD support for SuperH
+ Mobile ARM
+Date: Thu, 24 Mar 2011 15:57:30 +0900
+Message-ID: <20110324065715.GA15780@verge.net.au>
+References: <1300071435-26759-1-git-send-email-horms@verge.net.au>
+ <1300071435-26759-5-git-send-email-horms@verge.net.au>
+ <20110315222738.GA23288@verge.net.au>
+ <AANLkTimgwpP-WTGF-E=KO3TAXDX7FP4WnW3XQiHi0Ton@mail.gmail.com>
+ <20110316011427.GB6724@verge.net.au>
+ <AANLkTimBOc2+Ryq+fwas0SPmYqbnJH6_b28DTPJx_p99@mail.gmail.com>
+ <20110316051604.GF27684@verge.net.au>
+ <AANLkTikwet++Dwz17C+MO2vH0tSuvNh-u0o8GKF814iF@mail.gmail.com>
+ <20110316053542.GG27684@verge.net.au>
+ <20110316070242.GA10606@verge.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:47433 "EHLO
+Received: from kirsty.vergenet.net ([202.4.237.240]:41777 "EHLO
 	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932845Ab1CXGyR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2011 02:54:17 -0400
+	with ESMTP id S932845Ab1CXG5h (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2011 02:57:37 -0400
+Content-Disposition: inline
+In-Reply-To: <20110316070242.GA10606@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: vger.kernel.org@vergenet.net, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>
 
-Hi Paul,
+This allows a ROM-able zImage to be written to eSD and for SuperH Mobile
+ARM to boot directly from the SDHI hardware block.
 
-please consider merging the following two patches.
-They are both pre-requisites for
-"mmc, ARM: Add zboot from eSD support for SuperH Mobile ARM"
-which I plan to submit to Russell King.
+This is achieved by the MaskROM loading the first portion of the image into
+MERAM and then jumping to it.  This portion contains loader code which
+copies the entire image to SDRAM and jumps to it. From there the zImage
+boot code proceeds as normal, uncompressing the image into its final
+location and then jumping to it.
 
-These patches were originally submitted in a for patch series
-however they do not depend on any of the other patches in the series
-so I am posting them independently.
+Cc: Paul Mundt <lethal@linux-sh.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Signed-off-by: Simon Horman <horms@verge.net.au>
 
-These patches apply against Linus's current tree
-and I am not aware of any particular prerequisites for them
-other than that the 2nd patch depends on the 1st one.
+---
+
+This patch is based on Linus's tree, commit
+f741a79 ("Merge branch 'for-linus' of
+git://git.kernel.org/pub/scm/linux/kernel/git/mszeredi/fuse")
+
+It also has the following prerequisite patches:
+* mmc: tmio_mmc: Move some defines into a shared header
+  I have asked Guennadi to add this to his current driver-split patch-set 
+* mmc, ARM: Rename SuperH Mobile ARM zboot helpers
+  I have reposted this separately and asked Paul to merge it
+mmc: Add MMC_PROGRESS_*
+  I have reposted this separately and asked Paul to merge it
+
+v2
+* Consistently use __raw_readw(). As pointed out by Paul Mundt
+
+v3
+* Remove mmcif_update_progress2(), it was for debugging during development
+* Move CPU specific code into mach/sdhi.h
+  As requested by Magnus Damm
+* Use linux/mmc/tmio.h now that it exists
+* Remove SDHI_EXT_SWAP, it is unused
+* Replace use of MMCIF_PROGRESS_* with MMC_PROGRESS_*
+* Don't include linux/mmc/sh_mmcif.h
+  + Replace use of MMCIF_CE_RESP_CMD12 with RESP_CMD12
+  + Include linux/io.h
+
+v4
+* Move definition of SDHI_BASE into CPU-specific code.
+  Thanks to Magnus Damm.
+
+v5
+* Move mmc_loader into board-specific code
+  As suggested by Magnus Damm.
+
+v6
+* Don't change the name of mmcif_loader to mmc_loader
+  in arch/sh/boot/romimage/mmcif-sh7724.c
+  That code is unrelated to this change and changing the
+  name without updating the caller introduces a build failure.
+* Fix shdi -> sdhi typos
+
+---
+ Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt    |   43 ++
+ arch/arm/Kconfig                                  |   33 ++-
+ arch/arm/boot/compressed/Makefile                 |   10 +-
+ arch/arm/boot/compressed/head-shmobile.S          |   24 +-
+ arch/arm/boot/compressed/mmcif-sh7372.c           |    2 +-
+ arch/arm/boot/compressed/sdhi-sh7372.c            |   96 +++++
+ arch/arm/boot/compressed/sdhi-shmobile.c          |  449 +++++++++++++++++++++
+ arch/arm/boot/compressed/sdhi-shmobile.h          |   11 +
+ arch/arm/mach-shmobile/include/mach/sdhi-sh7372.h |   21 +
+ arch/arm/mach-shmobile/include/mach/sdhi.h        |   16 +
+ 10 files changed, 688 insertions(+), 17 deletions(-)
+ create mode 100644 Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt
+ create mode 100644 arch/arm/boot/compressed/sdhi-sh7372.c
+ create mode 100644 arch/arm/boot/compressed/sdhi-shmobile.c
+ create mode 100644 arch/arm/boot/compressed/sdhi-shmobile.h
+ create mode 100644 arch/arm/mach-shmobile/include/mach/sdhi-sh7372.h
+ create mode 100644 arch/arm/mach-shmobile/include/mach/sdhi.h
+
+diff --git a/Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt b/Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt
+new file mode 100644
+index 0000000..dbd21ef
+--- /dev/null
++++ b/Documentation/arm/SH-Mobile/zboot-rom-sdhi.txt
+@@ -0,0 +1,43 @@
++ROM-able zImage boot from eSD
++-----------------------------
++
++An ROM-able zImage compiled with ZBOOT_ROM_SDHI may be written to eSD and
++SuperH Mobile ARM will to boot directly from the SDHI hardware block.
++
++This is achieved by the mask ROM loading the first portion of the image into
++MERAM and then jumping to it. This portion contains loader code which
++copies the entire image to SDRAM and jumps to it. From there the zImage
++boot code proceeds as normal, uncompressing the image into its final
++location and then jumping to it.
++
++This code has been tested on an mackerel board using the developer 1A eSD
++boot mode which is configured using the following jumper settings.
++
++   8 7 6 5 4 3 2 1
++   x|x|x|x| |x|x|
++S4 -+-+-+-+-+-+-+-
++    | | | |x| | |x on
++
++The eSD card needs to be present in SDHI slot 1 (CN7).
++As such S1 and S33 also need to be configured as per
++the notes in arch/arm/mach-shmobile/board-mackerel.c.
++
++A partial zImage must be written to physical partition #1 (boot)
++of the eSD at sector 0 in vrl4 format. A utility vrl4 is supplied to
++accomplish this.
++
++e.g.
++	vrl4 < zImage | dd of=/dev/sdX bs=512 count=9
++
++A full copy of _the same_ zImage should be written to physical partition #1
++(boot) of the eSD at sector 0. This should _not_ be in vrl4 format.
++
++	vrl4 < zImage | dd of=/dev/sdX bs=512
++
++Note: The commands above assume that the physical partition has been
++switched. No such facility currently exists in the Linux Kernel.
++
++Physical partitions are described in the eSD specification.  At the time of
++writing they are not the same as partitions that are typically configured
++using fdisk and visible through /proc/partitions
++
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 599e163..6aea903 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -1715,17 +1715,34 @@ config ZBOOT_ROM
+ 	  Say Y here if you intend to execute your compressed kernel image
+ 	  (zImage) directly from ROM or flash.  If unsure, say N.
+ 
++choice
++	prompt "Include SD/MMC loader in zImage (EXPERIMENTAL)"
++	depends on ZBOOT_ROM && ARCH_SH7372 && EXPERIMENTAL
++	default ZBOOT_ROM_NONE
++	help
++	  Include experimental SD/MMC loading code in the ROM-able zImage.
++	  With this enabled it is possible to write the the ROM-able zImage
++	  kernel image to an MMC or SD card and boot the kernel straight
++	  from the reset vector. At reset the processor Mask ROM will load
++	  the first part of the the ROM-able zImage which in turn loads the
++	  rest the kernel image to RAM.
++
++config ZBOOT_ROM_NONE
++	bool "No SD/MMC loader in zImage (EXPERIMENTAL)"
++	help
++	  Do not load image from SD or MMC
++
+ config ZBOOT_ROM_MMCIF
+ 	bool "Include MMCIF loader in zImage (EXPERIMENTAL)"
+-	depends on ZBOOT_ROM && ARCH_SH7372 && EXPERIMENTAL
+ 	help
+-	  Say Y here to include experimental MMCIF loading code in the
+-	  ROM-able zImage. With this enabled it is possible to write the
+-	  the ROM-able zImage kernel image to an MMC card and boot the
+-	  kernel straight from the reset vector. At reset the processor
+-	  Mask ROM will load the first part of the the ROM-able zImage
+-	  which in turn loads the rest the kernel image to RAM using the
+-	  MMCIF hardware block.
++	  Load image from MMCIF hardware block.
++
++config ZBOOT_ROM_SH_MOBILE_SDHI
++	bool "Include SuperH Mobile SDHI loader in zImage (EXPERIMENTAL)"
++	help
++	  Load image from SDHI hardware block
++
++endchoice
+ 
+ config CMDLINE
+ 	string "Default kernel command string"
+diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
+index 8ebbb51..5249d50 100644
+--- a/arch/arm/boot/compressed/Makefile
++++ b/arch/arm/boot/compressed/Makefile
+@@ -6,13 +6,19 @@
+ 
+ OBJS		=
+ 
+-# Ensure that mmcif loader code appears early in the image
++# Ensure that MMCIF loader code appears early in the image
+ # to minimise that number of bocks that have to be read in
+ # order to load it.
+ ifeq ($(CONFIG_ZBOOT_ROM_MMCIF),y)
+-ifeq ($(CONFIG_ARCH_SH7372),y)
+ OBJS		+= mmcif-sh7372.o
+ endif
++
++# Ensure that SDHI loader code appears early in the image
++# to minimise that number of bocks that have to be read in
++# order to load it.
++ifeq ($(CONFIG_ZBOOT_ROM_SH_MOBILE_SDHI),y)
++OBJS		+= sdhi-shmobile.o
++OBJS		+= sdhi-sh7372.o
+ endif
+ 
+ AFLAGS_head.o += -DTEXT_OFFSET=$(TEXT_OFFSET)
+diff --git a/arch/arm/boot/compressed/head-shmobile.S b/arch/arm/boot/compressed/head-shmobile.S
+index c943d2e..3d07519 100644
+--- a/arch/arm/boot/compressed/head-shmobile.S
++++ b/arch/arm/boot/compressed/head-shmobile.S
+@@ -25,14 +25,26 @@
+ 	/* load board-specific initialization code */
+ #include <mach/zboot.h>
+ 
+-#ifdef CONFIG_ZBOOT_ROM_MMCIF
+-	/* Load image from MMC */
+-	adr	sp, __tmp_stack + 128
++#if defined(CONFIG_ZBOOT_ROM_MMCIF) || defined(CONFIG_ZBOOT_ROM_SH_MOBILE_SDHI)
++	/* Load image from MMC/SD */
++	adr	sp, __tmp_stack + 256
+ 	ldr	r0, __image_start
+ 	ldr	r1, __image_end
+ 	subs	r1, r1, r0
+ 	ldr	r0, __load_base
+-	bl	mmcif_loader
++	bl	mmc_loader
++
++	EB      0xe6051000 0x00000010
++	EB      0xe6051001 0x00000010
++	EB      0xe6051002 0x00000010
++__blink:
++	ED      0xe6055000 0x00000001
++	WAIT    200000 0xfe40009c
++	ED      0xe6055000 0x00000002
++	WAIT    200000 0xfe40009c
++	ED	0xe6055000 0x00000004
++	WAIT	200000 0xfe40009c
++	b __blink
+ 
+ 	/* Jump to loaded code */
+ 	ldr	r0, __loaded
+@@ -51,9 +63,9 @@ __loaded:
+ 	.long	__continue
+ 	.align
+ __tmp_stack:
+-	.space	128
++	.space	256
+ __continue:
+-#endif /* CONFIG_ZBOOT_ROM_MMCIF */
++#endif /* CONFIG_ZBOOT_ROM_MMC || CONFIG_ZBOOT_ROM_SH_MOBILE_SDHI */
+ 
+ 	b	1f
+ __atags:@ tag #1
+diff --git a/arch/arm/boot/compressed/mmcif-sh7372.c b/arch/arm/boot/compressed/mmcif-sh7372.c
+index 7453c83..b6f61d9 100644
+--- a/arch/arm/boot/compressed/mmcif-sh7372.c
++++ b/arch/arm/boot/compressed/mmcif-sh7372.c
+@@ -40,7 +40,7 @@
+  * to an MMC card
+  * # dd if=vrl4.out of=/dev/sdx bs=512 seek=1
+  */
+-asmlinkage void mmcif_loader(unsigned char *buf, unsigned long len)
++asmlinkage void mmc_loader(unsigned char *buf, unsigned long len)
+ {
+ 	mmc_init_progress();
+ 	mmc_update_progress(MMC_PROGRESS_ENTER);
+diff --git a/arch/arm/boot/compressed/sdhi-sh7372.c b/arch/arm/boot/compressed/sdhi-sh7372.c
+new file mode 100644
+index 0000000..ba99892
+--- /dev/null
++++ b/arch/arm/boot/compressed/sdhi-sh7372.c
+@@ -0,0 +1,96 @@
++/*
++ * SuperH Mobile SDHI
++ *
++ * Copyright (C) 2010 Magnus Damm
++ * Copyright (C) 2010 Kuninori Morimoto
++ * Copyright (C) 2010 Simon Horman
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ *
++ * Parts inspired by u-boot
++ */
++
++#include <linux/io.h>
++#include <mach/mmc.h>
++#include <linux/mmc/boot.h>
++#include <linux/mmc/tmio.h>
++
++#include "sdhi-shmobile.h"
++
++#define PORT179CR       0xe60520b3
++#define PORT180CR       0xe60520b4
++#define PORT181CR       0xe60520b5
++#define PORT182CR       0xe60520b6
++#define PORT183CR       0xe60520b7
++#define PORT184CR       0xe60520b8
++
++#define SMSTPCR3        0xe615013c
++
++#define CR_INPUT_ENABLE 0x10
++#define CR_FUNCTION1    0x01
++
++#define SDHI1_BASE	(void __iomem *)0xe6860000
++#define SDHI_BASE	SDHI1_BASE
++
++/*  SuperH Mobile SDHI loader
++ *
++ * loads the zImage from an SD card starting from block 0
++ * on physical partition 1
++ *
++ * The image must be start with a vrl4 header and
++ * the zImage must start at offset 512 of the image. That is,
++ * at block 1 (=byte 512) of physical partition 1
++ *
++ * Use the following line to write the vrl4 formated zImage
++ * to an SD card
++ * # dd if=vrl4.out of=/dev/sdx bs=512
++ */
++asmlinkage void mmc_loader(unsigned short *buf, unsigned long len)
++{
++	int high_capacity;
++
++	return;
++	mmc_init_progress();
++
++	mmc_update_progress(MMC_PROGRESS_ENTER);
++        /* Initialise SDHI1 */
++        /* PORT184CR: GPIO_FN_SDHICMD1 Control */
++        __raw_writeb(CR_FUNCTION1, PORT184CR);
++        /* PORT179CR: GPIO_FN_SDHICLK1 Control */
++        __raw_writeb(CR_INPUT_ENABLE|CR_FUNCTION1, PORT179CR);
++        /* PORT181CR: GPIO_FN_SDHID1_3 Control */
++        __raw_writeb(CR_FUNCTION1, PORT183CR);
++        /* PORT182CR: GPIO_FN_SDHID1_2 Control */
++        __raw_writeb(CR_FUNCTION1, PORT182CR);
++        /* PORT183CR: GPIO_FN_SDHID1_1 Control */
++        __raw_writeb(CR_FUNCTION1, PORT181CR);
++        /* PORT180CR: GPIO_FN_SDHID1_0 Control */
++        __raw_writeb(CR_FUNCTION1, PORT180CR);
++
++        /* Enable clock to SDHI1 hardware block */
++        __raw_writel(__raw_readl(SMSTPCR3) & ~(1 << 13), SMSTPCR3);
++
++	/* setup SDHI hardware */
++	mmc_update_progress(MMC_PROGRESS_INIT);
++	high_capacity = sdhi_boot_init(SDHI_BASE);
++	if (high_capacity < 0)
++		goto err;
++
++	mmc_update_progress(MMC_PROGRESS_LOAD);
++	/* load kernel */
++	if (sdhi_boot_do_read(SDHI_BASE, high_capacity,
++			      0, /* Kernel is at block 1 */
++			      (len + TMIO_BBS - 1) / TMIO_BBS, buf))
++		goto err;
++
++        /* Disable clock to SDHI1 hardware block */
++        __raw_writel(__raw_readl(SMSTPCR3) & (1 << 13), SMSTPCR3);
++
++	mmc_update_progress(MMC_PROGRESS_DONE);
++
++	return;
++err:
++	for(;;);
++}
+diff --git a/arch/arm/boot/compressed/sdhi-shmobile.c b/arch/arm/boot/compressed/sdhi-shmobile.c
+new file mode 100644
+index 0000000..bd3d469
+--- /dev/null
++++ b/arch/arm/boot/compressed/sdhi-shmobile.c
+@@ -0,0 +1,449 @@
++/*
++ * SuperH Mobile SDHI
++ *
++ * Copyright (C) 2010 Magnus Damm
++ * Copyright (C) 2010 Kuninori Morimoto
++ * Copyright (C) 2010 Simon Horman
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ *
++ * Parts inspired by u-boot
++ */
++
++#include <linux/io.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/core.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/sd.h>
++#include <linux/mmc/tmio.h>
++#include <mach/sdhi.h>
++
++#define OCR_FASTBOOT		(1<<29)
++#define OCR_HCS			(1<<30)
++#define OCR_BUSY		(1<<31)
++
++#define RESP_CMD12		0x00000030
++
++static inline u16 sd_ctrl_read16(void __iomem *base, int addr)
++{
++        return __raw_readw(base + addr);
++}
++
++static inline u32 sd_ctrl_read32(void __iomem *base, int addr)
++{
++	return __raw_readw(base + addr) |
++	       __raw_readw(base + addr + 2) << 16;
++}
++
++static inline void sd_ctrl_write16(void __iomem *base, int addr, u16 val)
++{
++	__raw_writew(val, base + addr);
++}
++
++static inline void sd_ctrl_write32(void __iomem *base, int addr, u32 val)
++{
++	__raw_writew(val, base + addr);
++	__raw_writew(val >> 16, base + addr + 2);
++}
++
++#define ALL_ERROR (TMIO_STAT_CMD_IDX_ERR | TMIO_STAT_CRCFAIL |		\
++		   TMIO_STAT_STOPBIT_ERR | TMIO_STAT_DATATIMEOUT |	\
++		   TMIO_STAT_RXOVERFLOW | TMIO_STAT_TXUNDERRUN |	\
++		   TMIO_STAT_CMDTIMEOUT | TMIO_STAT_ILL_ACCESS |	\
++		   TMIO_STAT_ILL_FUNC)
++
++static int sdhi_intr(void __iomem *base)
++{
++	unsigned long state = sd_ctrl_read32(base, CTL_STATUS);
++
++	if (state & ALL_ERROR) {
++		sd_ctrl_write32(base, CTL_STATUS, ~ALL_ERROR);
++		sd_ctrl_write32(base, CTL_IRQ_MASK,
++				ALL_ERROR |
++				sd_ctrl_read32(base, CTL_IRQ_MASK));
++		return -EINVAL;
++	}
++	if (state & TMIO_STAT_CMDRESPEND) {
++		sd_ctrl_write32(base, CTL_STATUS, ~TMIO_STAT_CMDRESPEND);
++		sd_ctrl_write32(base, CTL_IRQ_MASK,
++				TMIO_STAT_CMDRESPEND |
++				sd_ctrl_read32(base, CTL_IRQ_MASK));
++		return 0;
++	}
++	if (state & TMIO_STAT_RXRDY) {
++		sd_ctrl_write32(base, CTL_STATUS, ~TMIO_STAT_RXRDY);
++		sd_ctrl_write32(base, CTL_IRQ_MASK,
++				TMIO_STAT_RXRDY | TMIO_STAT_TXUNDERRUN |
++				sd_ctrl_read32(base, CTL_IRQ_MASK));
++		return 0;
++	}
++	if (state & TMIO_STAT_DATAEND) {
++		sd_ctrl_write32(base, CTL_STATUS, ~TMIO_STAT_DATAEND);
++		sd_ctrl_write32(base, CTL_IRQ_MASK,
++				TMIO_STAT_DATAEND |
++				sd_ctrl_read32(base, CTL_IRQ_MASK));
++		return 0;
++	}
++
++	return -EAGAIN;
++}
++
++static int sdhi_boot_wait_resp_end(void __iomem *base)
++{
++	int err = -EAGAIN, timeout = 10000000;
++
++	while (timeout--) {
++		err = sdhi_intr(base);
++		if (err != -EAGAIN)
++			break;
++		udelay(1);
++	}
++
++	return err;
++}
++
++/* SDHI_CLK_CTRL */
++#define CLK_MMC_ENABLE                 (1 << 8)
++#define CLK_MMC_INIT                   (1 << 6)        /* clk / 256 */
++
++static void sdhi_boot_mmc_clk_stop(void __iomem *base)
++{
++	sd_ctrl_write16(base, CTL_CLK_AND_WAIT_CTL, 0x0000);
++	msleep(10);
++	sd_ctrl_write16(base, CTL_SD_CARD_CLK_CTL, ~CLK_MMC_ENABLE &
++		sd_ctrl_read16(base, CTL_SD_CARD_CLK_CTL));
++	msleep(10);
++}
++
++static void sdhi_boot_mmc_clk_start(void __iomem *base)
++{
++	sd_ctrl_write16(base, CTL_SD_CARD_CLK_CTL, CLK_MMC_ENABLE |
++		sd_ctrl_read16(base, CTL_SD_CARD_CLK_CTL));
++	msleep(10);
++	sd_ctrl_write16(base, CTL_CLK_AND_WAIT_CTL, CLK_MMC_ENABLE);
++	msleep(10);
++}
++
++static void sdhi_boot_reset(void __iomem *base)
++{
++	sd_ctrl_write16(base, CTL_RESET_SD, 0x0000);
++	msleep(10);
++	sd_ctrl_write16(base, CTL_RESET_SD, 0x0001);
++	msleep(10);
++}
++
++/* Set MMC clock / power.
++ * Note: This controller uses a simple divider scheme therefore it cannot
++ * run a MMC card at full speed (20MHz). The max clock is 24MHz on SD, but as
++ * MMC wont run that fast, it has to be clocked at 12MHz which is the next
++ * slowest setting.
++ */
++static int sdhi_boot_mmc_set_ios(void __iomem *base, struct mmc_ios *ios)
++{
++	if (sd_ctrl_read32(base, CTL_STATUS) & TMIO_STAT_CMD_BUSY)
++		return -EBUSY;
++
++	if (ios->clock)
++		sd_ctrl_write16(base, CTL_SD_CARD_CLK_CTL,
++				ios->clock | CLK_MMC_ENABLE);
++
++	/* Power sequence - OFF -> ON -> UP */
++	switch (ios->power_mode) {
++	case MMC_POWER_OFF: /* power down SD bus */
++		sdhi_boot_mmc_clk_stop(base);
++		break;
++	case MMC_POWER_ON: /* power up SD bus */
++		break;
++	case MMC_POWER_UP: /* start bus clock */
++		sdhi_boot_mmc_clk_start(base);
++		break;
++	}
++
++	switch (ios->bus_width) {
++	case MMC_BUS_WIDTH_1:
++		sd_ctrl_write16(base, CTL_SD_MEM_CARD_OPT, 0x80e0);
++	break;
++	case MMC_BUS_WIDTH_4:
++		sd_ctrl_write16(base, CTL_SD_MEM_CARD_OPT, 0x00e0);
++	break;
++	}
++
++	/* Let things settle. delay taken from winCE driver */
++	udelay(140);
++
++	return 0;
++}
++
++/* These are the bitmasks the tmio chip requires to implement the MMC response
++ * types. Note that R1 and R6 are the same in this scheme. */
++#define RESP_NONE      0x0300
++#define RESP_R1        0x0400
++#define RESP_R1B       0x0500
++#define RESP_R2        0x0600
++#define RESP_R3        0x0700
++#define DATA_PRESENT   0x0800
++#define TRANSFER_READ  0x1000
++
++static int sdhi_boot_request(void __iomem *base, struct mmc_command *cmd)
++{
++	int err, c = cmd->opcode;
++
++	switch (mmc_resp_type(cmd)) {
++	case MMC_RSP_NONE: c |= RESP_NONE; break;
++	case MMC_RSP_R1:   c |= RESP_R1;   break;
++	case MMC_RSP_R1B:  c |= RESP_R1B;  break;
++	case MMC_RSP_R2:   c |= RESP_R2;   break;
++	case MMC_RSP_R3:   c |= RESP_R3;   break;
++	default:
++		return -EINVAL;
++	}
++
++	/* No interrupts so this may not be cleared */
++	sd_ctrl_write32(base, CTL_STATUS, ~TMIO_STAT_CMDRESPEND);
++
++	sd_ctrl_write32(base, CTL_IRQ_MASK, TMIO_STAT_CMDRESPEND |
++			sd_ctrl_read32(base, CTL_IRQ_MASK));
++	sd_ctrl_write32(base, CTL_ARG_REG, cmd->arg);
++	sd_ctrl_write16(base, CTL_SD_CMD, c);
++
++
++	sd_ctrl_write32(base, CTL_IRQ_MASK,
++			~(TMIO_STAT_CMDRESPEND | ALL_ERROR) &
++			sd_ctrl_read32(base, CTL_IRQ_MASK));
++
++	err = sdhi_boot_wait_resp_end(base);
++	if (err)
++		return err;
++
++	cmd->resp[0] = sd_ctrl_read32(base, CTL_RESPONSE);
++
++	return 0;
++}
++
++static int sdhi_boot_do_read_single(void __iomem *base, int high_capacity,
++				    unsigned long block, unsigned short *buf)
++{
++	int err, i;
++
++	/* CMD17 - Read */
++	{
++		struct mmc_command cmd;
++
++		cmd.opcode = MMC_READ_SINGLE_BLOCK | \
++			     TRANSFER_READ | DATA_PRESENT;
++		if (high_capacity)
++			cmd.arg = block;
++		else
++			cmd.arg = block * TMIO_BBS;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	sd_ctrl_write32(base, CTL_IRQ_MASK,
++			~(TMIO_STAT_DATAEND | TMIO_STAT_RXRDY |
++			  TMIO_STAT_TXUNDERRUN) &
++			sd_ctrl_read32(base, CTL_IRQ_MASK));
++	err = sdhi_boot_wait_resp_end(base);
++	if (err)
++		return err;
++
++	sd_ctrl_write16(base, CTL_SD_XFER_LEN, TMIO_BBS);
++	for (i = 0; i < TMIO_BBS / sizeof(*buf); i++)
++		*buf++ = sd_ctrl_read16(base, RESP_CMD12);
++
++	err = sdhi_boot_wait_resp_end(base);
++	if (err)
++		return err;
++
++	return 0;
++}
++
++int sdhi_boot_do_read(void __iomem *base, int high_capacity,
++		      unsigned long offset, unsigned short count,
++		      unsigned short *buf)
++{
++	unsigned long i;
++	int err = 0;
++
++	for (i = 0; i < count; i++) {
++		err = sdhi_boot_do_read_single(base, high_capacity, offset + i,
++					       buf + (i * TMIO_BBS /
++						      sizeof(*buf)));
++		if (err)
++			return err;
++	}
++
++	return 0;
++}
++
++#define VOLTAGES (MMC_VDD_32_33 | MMC_VDD_33_34)
++
++int sdhi_boot_init(void __iomem *base)
++{
++	bool sd_v2 = false, sd_v1_0 = false;
++	unsigned short cid;
++	int err, high_capacity = 0;
++
++	sdhi_boot_mmc_clk_stop(base);
++	sdhi_boot_reset(base);
++
++	/* mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 21 width 0 timing 0 */
++	{
++		struct mmc_ios ios;
++		ios.power_mode = MMC_POWER_ON;
++		ios.bus_width = MMC_BUS_WIDTH_1;
++		ios.clock = CLK_MMC_INIT;
++		err = sdhi_boot_mmc_set_ios(base, &ios);
++		if (err)
++			return err;
++	}
++
++	/* CMD0 */
++	{
++		struct mmc_command cmd;
++		msleep(1);
++		cmd.opcode = MMC_GO_IDLE_STATE;
++		cmd.arg = 0;
++		cmd.flags = MMC_RSP_NONE;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++		msleep(2);
++	}
++
++	/* CMD8 - Test for SD version 2 */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = SD_SEND_IF_COND;
++		cmd.arg = (VOLTAGES != 0) << 8 | 0xaa;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd); /* Ignore error */
++		if ((cmd.resp[0] & 0xff) == 0xaa)
++			sd_v2 = true;
++	}
++
++	/* CMD55 - Get OCR (SD) */
++	{
++		int timeout = 1000;
++		struct mmc_command cmd;
++
++		cmd.arg = 0;
++
++		do {
++			cmd.opcode = MMC_APP_CMD;
++			cmd.flags = MMC_RSP_R1;
++			cmd.arg = 0;
++			err = sdhi_boot_request(base, &cmd);
++			if (err)
++				break;
++
++			cmd.opcode = SD_APP_OP_COND;
++			cmd.flags = MMC_RSP_R3;
++			cmd.arg = (VOLTAGES & 0xff8000);
++			if (sd_v2)
++				cmd.arg |= OCR_HCS;
++			cmd.arg |= OCR_FASTBOOT;
++			err = sdhi_boot_request(base, &cmd);
++			if (err)
++				break;
++
++			msleep(1);
++		} while((!(cmd.resp[0] & OCR_BUSY)) && --timeout);
++
++		if (!err && timeout) {
++			if (!sd_v2)
++				sd_v1_0 = true;
++			high_capacity = (cmd.resp[0] & OCR_HCS) == OCR_HCS;
++		}
++	}
++
++	/* CMD1 - Get OCR (MMC) */
++	if (!sd_v2 && !sd_v1_0) {
++		int timeout = 1000;
++		struct mmc_command cmd;
++
++		do {
++			cmd.opcode = MMC_SEND_OP_COND;
++			cmd.arg = VOLTAGES | OCR_HCS;
++			cmd.flags = MMC_RSP_R3;
++			err = sdhi_boot_request(base, &cmd);
++			if (err)
++				return err;
++
++			msleep(1);
++		} while((!(cmd.resp[0] & OCR_BUSY)) && --timeout);
++
++		if (!timeout)
++			return -EAGAIN;
++
++		high_capacity = (cmd.resp[0] & OCR_HCS) == OCR_HCS;
++	}
++
++	/* CMD2 - Get CID */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_ALL_SEND_CID;
++		cmd.arg = 0;
++		cmd.flags = MMC_RSP_R2;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	/* CMD3
++	 * MMC: Set the relative address
++	 * SD:  Get the relative address
++	 * Also puts the card into the standby state
++	 */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_SET_RELATIVE_ADDR;
++		cmd.arg = 0;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++		cid = cmd.resp[0] >> 16;
++	}
++
++	/* CMD9 - Get CSD */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_SEND_CSD;
++		cmd.arg = cid << 16;
++		cmd.flags = MMC_RSP_R2;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	/* CMD7 - Select the card */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_SELECT_CARD;
++		//cmd.arg = rca << 16;
++		cmd.arg = cid << 16;
++		//cmd.flags = MMC_RSP_R1B;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	/* CMD16 - Set the block size */
++	{
++		struct mmc_command cmd;
++		cmd.opcode = MMC_SET_BLOCKLEN;
++		cmd.arg = TMIO_BBS;
++		cmd.flags = MMC_RSP_R1;
++		err = sdhi_boot_request(base, &cmd);
++		if (err)
++			return err;
++	}
++
++	return high_capacity;
++}
+diff --git a/arch/arm/boot/compressed/sdhi-shmobile.h b/arch/arm/boot/compressed/sdhi-shmobile.h
+new file mode 100644
+index 0000000..92eaa09
+--- /dev/null
++++ b/arch/arm/boot/compressed/sdhi-shmobile.h
+@@ -0,0 +1,11 @@
++#ifndef SDHI_MOBILE_H
++#define SDHI_MOBILE_H
++
++#include <linux/compiler.h>
++
++int sdhi_boot_do_read(void __iomem *base, int high_capacity,
++		      unsigned long offset, unsigned short count,
++		      unsigned short *buf);
++int sdhi_boot_init(void __iomem *base);
++
++#endif
+diff --git a/arch/arm/mach-shmobile/include/mach/sdhi-sh7372.h b/arch/arm/mach-shmobile/include/mach/sdhi-sh7372.h
+new file mode 100644
+index 0000000..4a81b01
+--- /dev/null
++++ b/arch/arm/mach-shmobile/include/mach/sdhi-sh7372.h
+@@ -0,0 +1,21 @@
++#ifndef SDHI_SH7372_H
++#define SDHI_SH7372_H
++
++#define SDGENCNTA       0xfe40009c
++
++/* The countdown of SDGENCNTA is controlled by
++ * ZB3D2CLK which runs at 149.5MHz.
++ * That is 149.5ticks/us. Approximate this as 150ticks/us.
++ */
++static void udelay(int us)
++{
++	__raw_writel(us * 150, SDGENCNTA);
++	while(__raw_readl(SDGENCNTA)) ;
++}
++
++static void msleep(int ms)
++{
++	udelay(ms * 1000);
++}
++
++#endif
+diff --git a/arch/arm/mach-shmobile/include/mach/sdhi.h b/arch/arm/mach-shmobile/include/mach/sdhi.h
+new file mode 100644
+index 0000000..0ec9e69
+--- /dev/null
++++ b/arch/arm/mach-shmobile/include/mach/sdhi.h
+@@ -0,0 +1,16 @@
++#ifndef SDHI_H
++#define SDHI_H
++
++/**************************************************
++ *
++ *		CPU specific settings
++ *
++ **************************************************/
++
++#ifdef CONFIG_ARCH_SH7372
++#include "mach/sdhi-sh7372.h"
++#else
++#error "unsupported CPU."
++#endif
++
++#endif /* SDHI_H */
+-- 
+1.7.2.3
 
