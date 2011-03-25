@@ -1,148 +1,39 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V7 3/4] mmc: sdhci-esdhc: make the writel/readl as the general APIs
-Date: Thu, 24 Mar 2011 19:14:03 -0400
-Message-ID: <m3r59wm7r8.fsf@pullcord.laptop.org>
-References: <1300684936-8218-1-git-send-email-Hong-Xing.Zhu@freescale.com>
-	<1300684936-8218-4-git-send-email-Hong-Xing.Zhu@freescale.com>
+From: "Tomoya MORINAGA" <tomoya-linux@dsn.okisemi.com>
+Subject: RE: A MMC card transfer issue
+Date: Fri, 25 Mar 2011 10:22:17 +0900
+Message-ID: <74A77583FFF245F68480BC4467DB4028@hacdom.okisemi.com>
+References: <4CD8DE9C.4040505@dsn.okisemi.com> <AANLkTimfnj8GcSwmALjaZUBsiq6ssaVuzVZZsZHRYmiX@mail.gmail.com> <001701cb814c$71926bf0$66f8800a@maildom.okisemi.com> <001201cb90f4$4be8f790$66f8800a@maildom.okisemi.com> <2D50F985-2383-4406-8514-DFE462A5F546@marvell.com> <4D2E0464ABB54FFF9C10583336E27879@hacdom.okisemi.com> <4C4E7DE5-7CF1-4D97-9CAD-F600FCBE477A@marvell.com> <20110119174233.GA30494@void.printf.net> <F6E8C422FB8A4D78A5BDF7B6ECDA1E00@hacdom.okisemi.com> <D8E7AFC5-6B9E-414E-81A8-292FCD2F6E3C@marvell.com> <629816F753974155B62FF8FA718A26CA@hacdom.okisemi.com> <6076934B-27C2-4766-B101-793C7447C71C@marvell.com> <0F933C1424BF45E3BD2E13358BD3C89E@hacdom.okisemi.com> <7BDF62B4-A11A-4CB4-9F80-F2206C2655F9@marvell.com> <A32C38D81702478B9AB8626F523E79BB@hacdom.okisemi.com> <0DBFCBB8-B4A3-46A
+ 6-A68D-14FAED451619@marvell.com> <9992F28C7C0C445E956D351E3774C821@hacdom.okisemi.com> <82CB4E44-6543-4578-ACE4-37850FC4A49A@marvell.com> <EE9384C765994E26857C78E3D3A19304@hacdom.okisemi.com
+     > <AF584C10-A796
+	-	43 5 B-8AB2-DA6D6C0E3FD7@marvell.com> <DE7D3AAF538943459079D18D0CE6ED44@hacdom.okisemi.com> <DDF13C55-A8A1-45C1-AE9A-A76754ED7008@marvell.com> <4425BB0054B748C68A25DD1DFBBB52A7@hacdom.okisemi.com> <5E1B7BBD-C96E-4CC0-B03B-ADCEB0120085@marvell.com> <0C438F11-132E-4639-820D-0E42EEDCD6E7@marvell.com> <671E3EC021E946A383C65F07A0101B27@hacdom.okisemi.com> <16706427-F00E-46F3-B0B4-9B7F06AD0E71@marvell.com> <5CBEE3CD-E95A-4657-8842-D87B5F1F9AC1@marvell.com>,<3032905B991B4B59ADF0239D4AB008C4@hacdom.okisemi.com> <43E4817426ED174AA81263BCECB4351D134716B99D@sc-vexch3.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53503 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S934372Ab1CXXRj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 24 Mar 2011 19:17:39 -0400
-In-Reply-To: <1300684936-8218-4-git-send-email-Hong-Xing.Zhu@freescale.com>
-	(Richard Zhu's message of "Mon, 21 Mar 2011 13:22:15 +0800")
+Received: from sm-d311v.smileserver.ne.jp ([203.211.202.206]:40874 "EHLO
+	sm-d311v.smileserver.ne.jp" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755410Ab1CYBWU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2011 21:22:20 -0400
+In-Reply-To: <43E4817426ED174AA81263BCECB4351D134716B99D@sc-vexch3.marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Cc: linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, eric.miao@linaro.org
+To: 'Philip Rakity' <prakity@marvell.com>, 'Nicolas Pitre' <nico@fluxnic.net>
+Cc: 'Toshiharu Okada' <toshiharu-linux@dsn.okisemi.com>, linux-mmc@vger.kernel.org, kok.howg.ewe@intel.com, "'Lai, Mee Sim'" <mee.sim.lai@intel.com>
 
-Hi Richard,
+Hi  Philip,
 
-On Mon, Mar 21 2011, Richard Zhu wrote:
-> Add one flag to indicate the GPIO CD/WP is enabled or not
-> on imx platforms, and reuse the writel/readl as the general
-> APIs for imx SOCs.
->
-> Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |   39 +++++++++++++++++++++++++++++------
->  drivers/mmc/host/sdhci-pltfm.h     |    2 +-
->  2 files changed, 33 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 3b52485..372455b 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -16,6 +16,7 @@
->  #include <linux/err.h>
->  #include <linux/clk.h>
->  #include <linux/gpio.h>
-> +#include <linux/slab.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/sdhci-pltfm.h>
->  #include <mach/hardware.h>
-> @@ -24,6 +25,13 @@
->  #include "sdhci-pltfm.h"
->  #include "sdhci-esdhc.h"
->  
-> +#define ESDHC_FLAG_GPIO_FOR_CD_WP	(1 << 0)
-> +
-> +struct pltfm_imx_data {
-> +	int flags;
-> +	u32 scratchpad;
-> +};
-> +
->  static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, int reg)
->  {
->  	void __iomem *base = host->ioaddr + (reg & ~0x3);
-> @@ -34,10 +42,14 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
->  
->  static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
->  {
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-> +
->  	/* fake CARD_PRESENT flag on mx25/35 */
->  	u32 val = readl(host->ioaddr + reg);
->  
-> -	if (unlikely(reg == SDHCI_PRESENT_STATE)) {
-> +	if (unlikely((reg == SDHCI_PRESENT_STATE)
-> +			&& (imx_data->flags & ESDHC_FLAG_GPIO_FOR_CD_WP))) {
->  		struct esdhc_platform_data *boarddata =
->  				host->mmc->parent->platform_data;
->  
-> @@ -55,7 +67,11 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
->  
->  static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
->  {
-> -	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE))
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-> +
-> +	if (unlikely((reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)
-> +			&& (imx_data->flags & ESDHC_FLAG_GPIO_FOR_CD_WP)))
->  		/*
->  		 * these interrupts won't work with a custom card_detect gpio
->  		 * (only applied to mx25/35)
-> @@ -76,6 +92,7 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
->  static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct pltfm_imx_data *imx_data = pltfm_host->priv;
->  
->  	switch (reg) {
->  	case SDHCI_TRANSFER_MODE:
-> @@ -83,10 +100,10 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->  		 * Postpone this write, we must do it together with a
->  		 * command write that is down below.
->  		 */
-> -		pltfm_host->scratchpad = val;
-> +		imx_data->scratchpad = val;
->  		return;
->  	case SDHCI_COMMAND:
-> -		writel(val << 16 | pltfm_host->scratchpad,
-> +		writel(val << 16 | imx_data->scratchpad,
->  			host->ioaddr + SDHCI_TRANSFER_MODE);
->  		return;
->  	case SDHCI_BLOCK_SIZE:
-> @@ -146,7 +163,9 @@ static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
->  }
->  
->  static struct sdhci_ops sdhci_esdhc_ops = {
-> +	.read_l = esdhc_readl_le,
->  	.read_w = esdhc_readw_le,
-> +	.write_l = esdhc_writel_le,
->  	.write_w = esdhc_writew_le,
->  	.write_b = esdhc_writeb_le,
->  	.set_clock = esdhc_set_clock,
-> @@ -168,6 +187,7 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
->  	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
->  	struct clk *clk;
->  	int err;
-> +	struct pltfm_imx_data *imx_data;
->  
->  	clk = clk_get(mmc_dev(host->mmc), NULL);
->  	if (IS_ERR(clk)) {
-> @@ -177,7 +197,10 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
->  	clk_enable(clk);
->  	pltfm_host->clk = clk;
->  
-> -	if (cpu_is_mx35() || cpu_is_mx51())
-> +	imx_data = kzalloc(sizeof(struct pltfm_imx_data), GFP_KERNEL);
-> +	pltfm_host->priv = imx_data;
-> +
-> +	if (!cpu_is_mx25())
->  		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->  
->  	if (cpu_is_mx25() || cpu_is_mx35()) {
-
-kzalloc() can fail.
+On Thursday, March 24, 2011 11:19 PM, Philip Rakity wrote:
+> I think the solution is to try to rad the CSD if bus test 
+> fails.  If CSD read fails then lower bus width until it 
+> passes.  Not had time to work on this yet.  On my list of 
+> things to do.
+OK.
+Do you have fixed schedule for this work ?
+If yes, let me know the schedule.
 
 Thanks,
+-----------------------------------------
+Tomoya MORINAGA
+OKI SEMICONDUCTOR CO., LTD.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
