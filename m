@@ -1,47 +1,37 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
+From: Nicolas Pitre <nico@fluxnic.net>
 Subject: Re: [PATCH v1 2/2] sdio: add power_restore support with
  MMC_PM_KEEP_POWER mode
-Date: Fri, 25 Mar 2011 18:23:43 +0200
-Message-ID: <AANLkTimevrNU+JC=KvMzpGfip7cimPMo2cmBzvPiMb9R@mail.gmail.com>
-References: <AANLkTi=CSK8nRF7CTzsq06Bk8Cr74ZcwJBf53_wWbpnv@mail.gmail.com> <AANLkTimvLzgO1VHAbYz0uh-TVBGdLr-aDcyaGyzS2QMi@mail.gmail.com>
+Date: Fri, 25 Mar 2011 13:17:34 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1103251315080.11889@xanadu.home>
+References: <AANLkTi=CSK8nRF7CTzsq06Bk8Cr74ZcwJBf53_wWbpnv@mail.gmail.com>
+ <AANLkTimvLzgO1VHAbYz0uh-TVBGdLr-aDcyaGyzS2QMi@mail.gmail.com>
+ <AANLkTimevrNU+JC=KvMzpGfip7cimPMo2cmBzvPiMb9R@mail.gmail.com>
+ <AANLkTi=Zh2mY8SDRR6431=ykGOLAZJfmgAoDp09aV+O_@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:52887 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753998Ab1CYQYE convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 12:24:04 -0400
-In-Reply-To: <AANLkTimvLzgO1VHAbYz0uh-TVBGdLr-aDcyaGyzS2QMi@mail.gmail.com>
+Received: from relais.videotron.ca ([24.201.245.36]:24806 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754114Ab1CYRRf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 13:17:35 -0400
+In-reply-to: <AANLkTi=Zh2mY8SDRR6431=ykGOLAZJfmgAoDp09aV+O_@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Wilson Loi <wlsloi@gmail.com>
-Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Gao Yunpeng <yunpeng.gao@intel.com>
 
-On Fri, Mar 25, 2011 at 6:00 AM, Wilson Loi <wlsloi@gmail.com> wrote:
-> Another patch file
-> ----------------------------
->
-> diff -ruN a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+On Sat, 26 Mar 2011, Wilson Loi wrote:
 
-Please follow Documentation/SubmittingPatches when submitting patches,
-or at least just add -p to diff, otherwise it's a bit difficult to
-follow. thanks.
+> Sorry, this is the first time I sent a patch.
+> 
+> There are two case for the WLAN SDIO card to do power saving.
+> 1. Totally cut off the power of WLAN network interface.
+> 2. offload the network state to WLAN SDIO firmware.
 
-> =A0=A0=A0=A0 mmc_bus_put(host);
->
-> -=A0=A0=A0 mmc_power_off(host);
-> +=A0=A0=A0 if (!ret && !(host->pm_flags & MMC_PM_KEEP_POWER))
-> +=A0=A0=A0 =A0=A0=A0 mmc_power_off(host);
-
-=2E..
->
-> -=A0=A0=A0 mmc_power_up(host);
-> +=A0=A0=A0 if (!(host->pm_flags & MMC_PM_KEEP_POWER))
-> +=A0=A0=A0 =A0=A0=A0 mmc_power_up(host);
-> =A0=A0=A0=A0 ret =3D host->bus_ops->power_restore(host);
+Case #2 is already supported with current code.  Patches for the 
+libertas driver are in the OLPC repository (no idea if they were 
+submitted upstream yet).
 
 
-I have the same question here: if you driver doesn't want its card to
-be powered down, why does it invoke (or let runtime PM invoke on its
-behalf) mmc_power_save_host() in the first place ?
+Nicolas
