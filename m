@@ -1,177 +1,65 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH 1/5] mmc: sdhci: make sdhci-esdhc-imx driver self
- registered
-Date: Fri, 25 Mar 2011 17:36:50 +0800
-Message-ID: <20110325093649.GA17228@S2100-06.ap.freescale.net>
-References: <1300694823-8300-1-git-send-email-shawn.guo@linaro.org>
- <1300694823-8300-2-git-send-email-shawn.guo@linaro.org>
- <20110324042858.GD27881@ponder.secretlab.ca>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [RFC PATCH 1/1] dw_mmc: add quirk about using only one slot
+Date: Fri, 25 Mar 2011 10:00:10 +0000
+Message-ID: <AANLkTimEsgDF+4j0d_UccyqjsbgriFW4AqBfmE5rPrRH@mail.gmail.com>
+References: <4D8C2F83.4040403@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe005.messaging.microsoft.com ([213.199.154.143]:20444
-	"EHLO DB3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756640Ab1CYJgA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 05:36:00 -0400
-Content-Disposition: inline
-In-Reply-To: <20110324042858.GD27881@ponder.secretlab.ca>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:38205 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754148Ab1CYKAL convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 06:00:11 -0400
+Received: by iyb14 with SMTP id 14so338272iyb.19
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Mar 2011 03:00:11 -0700 (PDT)
+In-Reply-To: <4D8C2F83.4040403@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-dev@lists.linaro.org, sameo@linux.intel.com, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Wed, Mar 23, 2011 at 10:28:58PM -0600, Grant Likely wrote:
-> On Mon, Mar 21, 2011 at 04:06:59PM +0800, Shawn Guo wrote:
-> > The patch turns the common stuff to in sdhci-pltfm.c into functions,
-> > and add sdhci-esdhc-imx its own .probe and .remove which in turn call
-> > into the common functions, so that sdhci-esdhc-imx driver registers
-> > itself and keep all sdhci-esdhc-imx specific things like
-> > sdhci_esdhc_imx_pdata away from sdhci-pltfm.c which is common.
-> > 
-> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> 
-> Hi Shawn,
-> 
-Hi Grant,
+On Fri, Mar 25, 2011 at 6:00 AM, Jaehoon Chung <jh80.chung@samsung.com>=
+ wrote:
+> If assume only using one slot, i think that dw_mci_queue_request() ne=
+ed not.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com
+> ---
+> =A0drivers/mmc/host/dw_mmc.c =A0| =A0 =A09 +++++++--
+> =A0include/linux/mmc/dw_mmc.h | =A0 =A03 ++-
+> =A02 files changed, 9 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 882d004..e3f26ea 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -673,8 +673,13 @@ static void dw_mci_request(struct mmc_host *mmc,=
+ struct mmc_request *mrq)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return;
+> =A0 =A0 =A0 =A0}
+>
+> - =A0 =A0 =A0 /* We don't support multiple blocks of weird lengths. *=
+/
+> - =A0 =A0 =A0 dw_mci_queue_request(host, slot, mrq);
+> + =A0 =A0 =A0 if (host->quirks & DW_MCI_QUIRK_FORCE_ONE_SLOT) {
 
-> Thanks for all this work, I think it is the right thing to do.  A few
-> relatively minor comments below, but otherwise I like it.
-> 
-> g.
-> 
-> > ---
-> >  drivers/mmc/host/sdhci-esdhc-imx.c |   98 +++++++++++++++++++++++++++++-------
-> >  drivers/mmc/host/sdhci-pltfm.c     |   84 +++++++++++++++++++++++++++++--
-> >  drivers/mmc/host/sdhci-pltfm.h     |   11 ++++-
-> 
-> I think this patch should be split in 2.  One patch to refactor
-> edhci-pltfm* to create the common utility functions, and one patch to
-> convert the imx driver.
-> 
-I squashed this whole series into one patch in a relevant patch set
-I just posted out minutes ago, primarily to reduce the patch quantity
-and ease the bisect, since it's logically integral.
+Do we really need a quirk for this? Why not use host->num_slots?
 
-[...]
-> > +static int __init sdhci_esdhc_imx_init(void)
-> > +{
-> > +	return platform_driver_register(&sdhci_esdhc_imx_driver);
-> > +}
-> > +
-> > +static void __exit sdhci_esdhc_imx_exit(void)
-> > +{
-> > +	platform_driver_unregister(&sdhci_esdhc_imx_driver);
-> > +}
-> > +
-> > +module_init(sdhci_esdhc_imx_init);
-> > +module_exit(sdhci_esdhc_imx_exit);
-> 
-> Typically, I like to see module_init() and module_exit() immediately
-> adjacent to the functions they register.
-> 
-Incorporated in the new patch set just posted ...
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 slot->mrq =3D mrq;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->state =3D STATE_SENDING_CMD;
 
-> > +
-> > +MODULE_DESCRIPTION("SDHCI driver for i.MX eSDHC");
-> > +MODULE_AUTHOR("Wolfram Sang <w.sang@pengutronix.de>");
-> > +MODULE_LICENSE("GPL v2");
-> > diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> > index ccc04ac..38b8cb4 100644
-> > --- a/drivers/mmc/host/sdhci-pltfm.c
-> > +++ b/drivers/mmc/host/sdhci-pltfm.c
-> > @@ -44,6 +44,83 @@
-> >  static struct sdhci_ops sdhci_pltfm_ops = {
-> >  };
-> >  
-> > +struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
-> > +				    struct sdhci_pltfm_data *pdata)
-> 
-> Since there is no chance of *pdata being passed via the
-> pdev->dev.platform_data pointer (there aren't any users in mainline of
-> that feature) then I would take the opportunity to rename this
-> parameter and structure to eliminate any confusion.  'struct
-> sdhci_pltfm' would be sufficient I think.
-> 
-The chance comes along with the new patch set (function
-sdhci_esdhc_probe in sdhci-esdhc.c).  And I would not rename 'struct
-sdhci_pltfmi_data' to 'struct sdhci_pltfm' in terms of that we have
-another name of 'struct sdhci_pltfm_host'.  But yes, pdata does
-confuse.  Any suggestion?  I can fix all of them with a follow-up
-patch against the new series.
+I don't think it is safe to manipulate these structures without taking
+the host->lock. If we are to do this then I think I would like to know
+why (e.g. do we have performance numbers to support this change) and
+some analysis of what is protected by host->lock and which functions
+need the lock to be held. For example I do not think it is safe to
+call dw_mci_start_request without taking the lock.
 
-> > +{
-> > +	struct sdhci_host *host;
-> > +	struct sdhci_pltfm_host *pltfm_host;
-> > +	struct resource *iomem;
-> > +	int ret;
-> > +
-> > +	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> > +	if (!iomem) {
-> > +		ret = -ENOMEM;
-> > +		goto err;
-> > +	}
-> > +
-> > +	if (resource_size(iomem) < 0x100)
-> > +		dev_err(&pdev->dev, "Invalid iomem size!\n");
-> > +
-> > +	/* Some PCI-based MFD need the parent here */
-> > +	if (pdev->dev.parent != &platform_bus)
-> > +		host = sdhci_alloc_host(pdev->dev.parent, sizeof(*pltfm_host));
-> > +	else
-> > +		host = sdhci_alloc_host(&pdev->dev, sizeof(*pltfm_host));
-> > +
-> > +	if (IS_ERR(host)) {
-> > +		ret = PTR_ERR(host);
-> > +		goto err;
-> > +	}
-> > +
-> > +	pltfm_host = sdhci_priv(host);
-> > +
-> > +	host->hw_name = "SDHCI";
-> > +	if (pdata && pdata->ops)
-> > +		host->ops = pdata->ops;
-> > +	else
-> > +		host->ops = &sdhci_pltfm_ops;
-> > +	if (pdata)
-> > +		host->quirks = pdata->quirks;
-> > +	host->irq = platform_get_irq(pdev, 0);
-> > +
-> > +	if (!request_mem_region(iomem->start, resource_size(iomem),
-> > +		mmc_hostname(host->mmc))) {
-> > +		dev_err(&pdev->dev, "cannot request region\n");
-> > +		ret = -EBUSY;
-> > +		goto err_request;
-> > +	}
-> > +
-> > +	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
-> > +	if (!host->ioaddr) {
-> > +		dev_err(&pdev->dev, "failed to remap registers\n");
-> > +		ret = -ENOMEM;
-> > +		goto err_remap;
-> > +	}
-> > +
-> > +	platform_set_drvdata(pdev, host);
-> > +
-> > +	return host;
-> > +
-> > +err_remap:
-> > +	release_mem_region(iomem->start, resource_size(iomem));
-> > +err_request:
-> > +	sdhci_free_host(host);
-> > +err:
-> > +	pr_err("%s failed %d\n", __func__, ret);
-> > +	return NULL;
-> > +}
-> 
-> Since the bulk of this function is a direct clone of the
-> body of sdhci_pltfm_probe(), this patch should also modify
-> sdhci_pltfm_probe() to use the new utility function.  That will also
-> make it clearer to readers that this new block is simply a refactor of
-> the old.
-> 
-Good suggestion.  Will take it next time where applies ...
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dw_mci_start_request(host, slot);
+> + =A0 =A0 =A0 } else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* We don't support multiple blocks of =
+weird lengths. */
 
--- 
-Regards,
-Shawn
-
+This comment is obsolete I think and can be removed.
