@@ -1,54 +1,54 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [comments] MMC: Reliable write support.
-Date: Fri, 25 Mar 2011 16:14:29 +0100
-Message-ID: <201103251614.29893.arnd@arndb.de>
-References: <1301001751-30785-1-git-send-email-andreiw@motorola.com> <1301001751-30785-2-git-send-email-andreiw@motorola.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v1 1/2] sdio: add power_restore support with
+ MMC_PM_KEEP_POWER mode
+Date: Fri, 25 Mar 2011 18:18:48 +0200
+Message-ID: <AANLkTinhbwsm_wOBDW5-WBrP0tfLUZMmuY18eGTkr4e4@mail.gmail.com>
+References: <AANLkTi=CSK8nRF7CTzsq06Bk8Cr74ZcwJBf53_wWbpnv@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:51491 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752390Ab1CYPOj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 11:14:39 -0400
-In-Reply-To: <1301001751-30785-2-git-send-email-andreiw@motorola.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <AANLkTi=CSK8nRF7CTzsq06Bk8Cr74ZcwJBf53_wWbpnv-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Wilson Loi <wlsloi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org
 
-On Thursday 24 March 2011, Andrei Warkentin wrote:
-> This is a request-for-comments patch. Please provide your feedback.
-> 
-> Allows reliable writes to be used for MMC writes. Reliable writes are used
-> to service write REQ_FUA/REQ_META requests. Handles both the legacy and the enhanced
-> reliable write support in MMC cards.
-> 
-> Beyond REQ_FUA/REQ_META, this was meant to be used by a following patch that aimed
-> to reduce write amplification issues in cards employing a small (usually flash page-sized)
-> buffer and a large (usually erase-block sized) buffer, at the expense of performance.
+Hello Wilson,
 
-Looks good to me, but I don't really understand some of the block layer
-specifics here. One question:
+On Fri, Mar 25, 2011 at 5:58 AM, Wilson Loi <wlsloi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> The current power_restore handler only support cut off mode.
+> It is better to support keep power mode too.
 
-> +static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
-> +{
-> +	struct mmc_blk_data *md = mq->data;
-> +
-> +	/*
-> +	   No-op, only service this because we need REQ_FUA
-> +	   for reliable writes.
-> +	*/
-> +	spin_lock_irq(&md->lock);
-> +	__blk_end_request_all(req, 0);
-> +	spin_unlock_irq(&md->lock);
-> +
-> +	return 1;
-> +}
+This doesn't make much sense really;
 
-How does this work when you have a flush that does not directly follow
-a REQ_FUA or REQ_META request? I would assume that we still need to
-flush in some way, which you don't seem to do here.
+mmc_power_save_host() and mmc_power_restore_host() are invoked by
+runtime PM when it is time to power off/on the card.
 
-	Arnd
+If your driver doesn't want the power to go, it should just maintain a
+positive runtime PM usage_count (e.g. in case it's an SDIO driver,
+don't call pm_runtime_put{_sync} after being probed).
+
+> =A0static const struct mmc_bus_ops mmc_sdio_ops =3D {
+> =A0=A0=A0=A0 .remove =3D mmc_sdio_remove,
+> =A0=A0=A0=A0 .detect =3D mmc_sdio_detect,
+> =A0=A0=A0=A0 .suspend =3D mmc_sdio_suspend,
+> =A0=A0=A0=A0 .resume =3D mmc_sdio_resume,
+> -=A0=A0=A0 .power_restore =3D mmc_sdio_power_restore,
+> +=A0=A0=A0 .power_save =3D mmc_sdio_suspend,
+> +=A0=A0=A0 .power_restore =3D mmc_sdio_resume,
+
+This can break SDIO runtime PM.
+
+While -ENOSYS is a valid return value for mmc_sdio_suspend (it tells
+mmc_suspend_host to remove the entire MMC card on system suspend), it
+will be treated as an error by runtime PM.
+
+In addition, this can really yield unexpected results, since drivers
+do not expect their suspend/resume handlers to be called during
+runtime PM transitions.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireles=
+s" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
