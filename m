@@ -1,33 +1,37 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [RFC PATCH 0/1] dw_mmc: checking card busy with Status register
-Date: Fri, 25 Mar 2011 10:58:17 +0000
-Message-ID: <AANLkTi=gsKHmuWLZGFW+YUmp4MvPQnbVeD2XGbf8b7xB@mail.gmail.com>
-References: <4D8C2F82.2040504@samsung.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: outstanding tmio patches
+Date: Fri, 25 Mar 2011 09:09:14 -0400
+Message-ID: <m37hbnmjnp.fsf@pullcord.laptop.org>
+References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
+	<m3k4folztx.fsf@pullcord.laptop.org>
+	<Pine.LNX.4.64.1103250858400.22824@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:61949 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754363Ab1CYK6S (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 06:58:18 -0400
-Received: by iwn34 with SMTP id 34so927276iwn.19
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Mar 2011 03:58:18 -0700 (PDT)
-In-Reply-To: <4D8C2F82.2040504@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1103250858400.22824@axis700.grange> (Guennadi
+	Liakhovetski's message of "Fri, 25 Mar 2011 09:04:02 +0100 (CET)")
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Fri, Mar 25, 2011 at 6:00 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> This RFC patch is applied checking card busy with status register.
->
-> In Status register, bit[9] indicate the card busy or not.
-> So, if we use this bit in status register, we can check the card busy or not.
->
-> Maybe, didn't increased the performance, but i think this approach is decreased
-> the CPU usage.
->
-> Anyone, let me know how think about this patch.
+Hi,
 
-Do you have any numbers to report how this patch altered CPU usage or
-card throughput for you? e.g. oprofile output or dd performance
+On Fri, Mar 25 2011, Guennadi Liakhovetski wrote:
+>> > [1/2] mmc: tmio: Improve DMA stability on sh-mobile
+>> 
+>> Some serious merge conflicts with Linus W's dmaengine cleanup here.
+>
+> Sorry, I must be missing something. I'm basing my patches on the current 
+> (of yesterday) next tree, which already contains Linus' patches:
+
+I agree that linux-next contains these patches, but I don't agree that
+"mmc: tmio: Improve DMA stability on sh-mobile" (which was written back
+on March 7th before they were merged) avoids merge conflicts with them.
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
