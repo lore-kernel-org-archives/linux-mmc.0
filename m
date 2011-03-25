@@ -1,25 +1,36 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V8 1/4] mmc: sdhci-esdhc: remove SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
-Date: Fri, 25 Mar 2011 09:17:33 -0400
-Message-ID: <m339mbmj9u.fsf@pullcord.laptop.org>
-References: <1301024346-2232-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+Subject: Re: [PATCH resend] mmc: fix the mmc_app_send_scr() for dma transfer
+Date: Fri, 25 Mar 2011 09:20:51 -0400
+Message-ID: <m3y643l4jw.fsf@pullcord.laptop.org>
+References: <4D8C30DB.1010007@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41726 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:51053 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752330Ab1CYNVJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 25 Mar 2011 09:21:09 -0400
-In-Reply-To: <1301024346-2232-1-git-send-email-Hong-Xing.Zhu@freescale.com>
-	(Richard Zhu's message of "Fri, 25 Mar 2011 11:39:03 +0800")
+	id S1752446Ab1CYNYZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 25 Mar 2011 09:24:25 -0400
+In-Reply-To: <4D8C30DB.1010007@renesas.com> (Yoshihiro Shimoda's message of
+	"Fri, 25 Mar 2011 15:06:19 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Cc: linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, eric.miao@linaro.org
+To: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Richard,
+Hi Yoshihiro,
 
-Thanks, I've pushed all four patches to mmc-next for .39-rc2.
+On Fri, Mar 25 2011, Yoshihiro Shimoda wrote:
+> This patch is based on the commit "af51715079e7fb6b290e1881d63d815dc4de5011":
+>
+>    * Bugfix to that mmc_send_cxd_data() code:  dma-to-stack is
+>      unsafe/nonportable, so kmalloc a bounce buffer instead.
+>
+> The driver may invalidate the mmc_card->csd when host driver uses dma.
+> So the subroutine also needs kmalloc buffer.
+>
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+
+Thanks for the resend, pushed to mmc-next for .39-rc2.
 
 - Chris.
 -- 
