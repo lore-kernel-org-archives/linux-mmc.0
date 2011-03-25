@@ -1,37 +1,25 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: outstanding tmio patches
-Date: Fri, 25 Mar 2011 14:35:59 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103251435070.22824@axis700.grange>
-References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
- <m3k4folztx.fsf@pullcord.laptop.org> <Pine.LNX.4.64.1103250858400.22824@axis700.grange>
- <m37hbnmjnp.fsf@pullcord.laptop.org>
+Subject: [PATCH 0/2 v2] tmio_mmc: improve DMA reliability (fwd)
+Date: Fri, 25 Mar 2011 14:36:08 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103251430260.22824@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <m37hbnmjnp.fsf@pullcord.laptop.org>
 Sender: linux-sh-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>, Linus Walleij <linus.walleij@linaro.org>
+To: linux-sh@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 25 Mar 2011, Chris Ball wrote:
+v2: rebased on top of DMA API update patches from Linus Walleij
 
-> Hi,
-> 
-> On Fri, Mar 25 2011, Guennadi Liakhovetski wrote:
-> >> > [1/2] mmc: tmio: Improve DMA stability on sh-mobile
-> >> 
-> >> Some serious merge conflicts with Linus W's dmaengine cleanup here.
-> >
-> > Sorry, I must be missing something. I'm basing my patches on the current 
-> > (of yesterday) next tree, which already contains Linus' patches:
-> 
-> I agree that linux-next contains these patches, but I don't agree that
-> "mmc: tmio: Improve DMA stability on sh-mobile" (which was written back
-> on March 7th before they were merged) avoids merge conflicts with them.
+Chris, sorry again, forgot to send these out...
 
-Ok, now I understand: I rebased those patches locally, but forgot to 
-resend, sorry. Coming in a minute.
+On my test hardware I am getting different results with different SD and 
+SDIO cards on different boards in different slots. The first patch in this 
+series fixes DMA for all my available hardware, the second one is a 
+further improvement to make switching between DMA and PIO possible at 
+run-time on a per-transfer basis and uses PIO for short transfers also 
+when DMA is available.
 
 Thanks
 Guennadi
