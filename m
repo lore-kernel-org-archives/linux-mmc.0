@@ -1,127 +1,69 @@
-From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Subject: [PATCH V8 4/4] mmc: sdhci-esdhc: enable esdhc on imx53
-Date: Fri, 25 Mar 2011 11:39:06 +0800
-Message-ID: <1301024346-2232-4-git-send-email-Hong-Xing.Zhu@freescale.com>
-References: <1301024346-2232-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [RFC PATCH 1/1] dw_mmc: add quirk about using only one slot
+Date: Fri, 25 Mar 2011 15:00:35 +0900
+Message-ID: <4D8C2F83.4040403@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.184]:5657
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S934427Ab1CYDj1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2011 23:39:27 -0400
-In-Reply-To: <1301024346-2232-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:35426 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753492Ab1CYGBg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 02:01:36 -0400
+Received: from epmmp1 (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LIL002KWNEK9H90@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 25 Mar 2011 15:01:32 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LIL00440NEK9N@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 25 Mar 2011 15:01:32 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, eric.miao@linaro.org, Richard Zhu <Hong-Xing.Zhu@freescale.com>, Richard Zhao <richard.zhao@freescale.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Fix the NO INT in the Multi-BLK IO in SD/MMC, and Multi-BLK
-read in SDIO on imx53.
+If assume only using one slot, i think that dw_mci_queue_request() need not.
 
-The CMDTYPE of the CMD register (offset 0xE) should be set to
-"11" when the STOP CMD12 is issued on imx53 to abort one
-open ended multi-blk IO. Otherwise one the TC INT wouldn't
-be generated.
-
-In exact block transfer, the controller doesn't complete the
-operations automatically as required at the end of the
-transfer and remains on hold if the abort command is not sent on
-imx53.
-As a result, the TC flag is not asserted and SW  received timeout
-exeception. set bit1 of Vendor Spec registor to fix it.
-
-Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Signed-off-by: Richard Zhao <richard.zhao@freescale.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   42 ++++++++++++++++++++++++++++++++++++
- 1 files changed, 42 insertions(+), 0 deletions(-)
+ drivers/mmc/host/dw_mmc.c  |    9 +++++++--
+ include/linux/mmc/dw_mmc.h |    3 ++-
+ 2 files changed, 9 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 67a2da9..a19967d 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -19,13 +19,31 @@
- #include <linux/slab.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdhci-pltfm.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/sdio.h>
- #include <mach/hardware.h>
- #include <mach/esdhc.h>
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
- 
-+/* VENDOR SPEC register */
-+#define SDHCI_VENDOR_SPEC		0xC0
-+#define  SDHCI_VENDOR_SPEC_SDIO_QUIRK	0x00000002
-+
- #define ESDHC_FLAG_GPIO_FOR_CD_WP	(1 << 0)
-+/*
-+ * The CMDTYPE of the CMD register (offset 0xE) should be set to
-+ * "11" when the STOP CMD12 is issued on imx53 to abort one
-+ * open ended multi-blk IO. Otherwise the TC INT wouldn't
-+ * be generated.
-+ * In exact block transfer, the controller doesn't complete the
-+ * operations automatically as required at the end of the
-+ * transfer and remains on hold if the abort command is not sent.
-+ * As a result, the TC flag is not asserted and SW  received timeout
-+ * exeception. Bit1 of Vendor Spec registor is used to fix it.
-+ */
-+#define ESDHC_FLAG_MULTIBLK_NO_INT	(1 << 1)
- 
- struct pltfm_imx_data {
- 	int flags;
-@@ -78,6 +96,15 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- 		 */
- 		val &= ~(SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
- 
-+	if (unlikely((imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
-+				&& (reg == SDHCI_INT_STATUS)
-+				&& (val & SDHCI_INT_DATA_END))) {
-+			u32 v;
-+			v = readl(host->ioaddr + SDHCI_VENDOR_SPEC);
-+			v &= ~SDHCI_VENDOR_SPEC_SDIO_QUIRK;
-+			writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
-+	}
-+
- 	writel(val, host->ioaddr + reg);
- }
- 
-@@ -100,9 +127,21 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 		 * Postpone this write, we must do it together with a
- 		 * command write that is down below.
- 		 */
-+		if ((imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
-+				&& (host->cmd->opcode == SD_IO_RW_EXTENDED)
-+				&& (host->cmd->data->blocks > 1)
-+				&& (host->cmd->data->flags & MMC_DATA_READ)) {
-+			u32 v;
-+			v = readl(host->ioaddr + SDHCI_VENDOR_SPEC);
-+			v |= SDHCI_VENDOR_SPEC_SDIO_QUIRK;
-+			writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
-+		}
- 		imx_data->scratchpad = val;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 882d004..e3f26ea 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -673,8 +673,13 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
  		return;
- 	case SDHCI_COMMAND:
-+		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION)
-+			&& (imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT))
-+			val |= SDHCI_CMD_ABORTCMD;
- 		writel(val << 16 | imx_data->scratchpad,
- 			host->ioaddr + SDHCI_TRANSFER_MODE);
- 		return;
-@@ -215,6 +254,9 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 		sdhci_esdhc_ops.get_ro = esdhc_pltfm_get_ro;
  	}
  
-+	if (!(cpu_is_mx25() || cpu_is_mx35() || cpu_is_mx51()))
-+		imx_data->flags |= ESDHC_FLAG_MULTIBLK_NO_INT;
-+
- 	if (boarddata) {
- 		err = gpio_request_one(boarddata->wp_gpio, GPIOF_IN, "ESDHC_WP");
- 		if (err) {
--- 
-1.7.1
-
-
+-	/* We don't support multiple blocks of weird lengths. */
+-	dw_mci_queue_request(host, slot, mrq);
++	if (host->quirks & DW_MCI_QUIRK_FORCE_ONE_SLOT) {
++		slot->mrq = mrq;
++		host->state = STATE_SENDING_CMD;
++		dw_mci_start_request(host, slot);
++	} else
++		/* We don't support multiple blocks of weird lengths. */
++		dw_mci_queue_request(host, slot, mrq);
+ }
+ 
+ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index c0207a7..82f59c2 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -176,7 +176,8 @@ struct dw_mci_dma_ops {
+ #define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
+ /* Unreliable card detection */
+ #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
+-
++/* Force using only one slot */
++#define DW_MCI_QUIRK_FORCE_ONE_SLOT		BIT(4)
+ 
+ struct dma_pdata;
+ 
