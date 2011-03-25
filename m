@@ -1,73 +1,91 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [RFC PATCH 0/1] dw_mmc: checking card busy with Status register
-Date: Fri, 25 Mar 2011 15:00:34 +0900
-Message-ID: <4D8C2F82.2040504@samsung.com>
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH resend] mmc: fix the mmc_app_send_scr() for dma transfer
+Date: Fri, 25 Mar 2011 15:06:19 +0900
+Message-ID: <4D8C30DB.1010007@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:59402 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753552Ab1CYGBg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 02:01:36 -0400
-Received: from epmmp1 (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LIL00A2CNEJM870@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Mar 2011 15:01:31 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LIL005M9NEJDT@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Mar 2011 15:01:31 +0900 (KST)
+Received: from relmlor1.renesas.com ([210.160.252.171]:50968 "EHLO
+	relmlor1.renesas.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753492Ab1CYGGW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 02:06:22 -0400
+Received: from relmlir4.idc.renesas.com ([10.200.68.154])
+ by relmlor1.idc.renesas.com ( SJSMS)
+ with ESMTP id <0LIL005LBNMLAG30@relmlor1.idc.renesas.com> for
+ linux-mmc@vger.kernel.org; Fri, 25 Mar 2011 15:06:21 +0900 (JST)
+Received: from relmlac3.idc.renesas.com ([10.200.69.23])
+ by relmlir4.idc.renesas.com ( SJSMS)
+ with ESMTP id <0LIL000LPNMDAU80@relmlir4.idc.renesas.com> for
+ linux-mmc@vger.kernel.org; Fri, 25 Mar 2011 15:06:21 +0900 (JST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org
 
-This RFC patch is applied checking card busy with status register.
+This patch is based on the commit "af51715079e7fb6b290e1881d63d815dc4de5011":
 
-In Status register, bit[9] indicate the card busy or not.
-So, if we use this bit in status register, we can check the card busy or not.
+   * Bugfix to that mmc_send_cxd_data() code:  dma-to-stack is
+     unsafe/nonportable, so kmalloc a bounce buffer instead.
 
-Maybe, didn't increased the performance, but i think this approach is decreased
-the CPU usage.
+The driver may invalidate the mmc_card->csd when host driver uses dma.
+So the subroutine also needs kmalloc buffer.
 
-Anyone, let me know how think about this patch.
-
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 ---
- drivers/mmc/host/dw_mmc.c |   17 +++++++++++++++++
- 1 files changed, 17 insertions(+), 0 deletions(-)
+ drivers/mmc/core/sd_ops.c |   14 +++++++++++++-
+ 1 files changed, 13 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 87e1f57..882d004 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -647,9 +647,26 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct dw_mci *host = slot->host;
-+	unsigned int timeout = 0x100;
- 
- 	WARN_ON(slot->mrq);
- 
-+	while (timeout) {
-+		if ((mrq->data && (mrq->data->flags == MMC_DATA_READ)) ||
-+			!(mci_readl(host, STATUS) & (1 << 9)))
-+			break;
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index 797cdb5..76af349 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -9,6 +9,7 @@
+  * your option) any later version.
+  */
+
++#include <linux/slab.h>
+ #include <linux/types.h>
+ #include <linux/scatterlist.h>
+
+@@ -252,6 +253,7 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
+ 	struct mmc_command cmd;
+ 	struct mmc_data data;
+ 	struct scatterlist sg;
++	void *data_buf;
+
+ 	BUG_ON(!card);
+ 	BUG_ON(!card->host);
+@@ -263,6 +265,13 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
+ 	if (err)
+ 		return err;
+
++	/* dma onto stack is unsafe/nonportable, but callers to this
++	 * routine normally provide temporary on-stack buffers ...
++	 */
++	data_buf = kmalloc(sizeof(card->raw_scr), GFP_KERNEL);
++	if (data_buf == NULL)
++		return -ENOMEM;
 +
-+		if (timeout == 0) {
-+			dev_err(&host->pdev->dev, "Card is busy!!\n");
-+			return;
-+		}
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+ 	memset(&cmd, 0, sizeof(struct mmc_command));
+ 	memset(&data, 0, sizeof(struct mmc_data));
+@@ -280,12 +289,15 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
+ 	data.sg = &sg;
+ 	data.sg_len = 1;
+
+-	sg_init_one(&sg, scr, 8);
++	sg_init_one(&sg, data_buf, 8);
+
+ 	mmc_set_data_timeout(&data, card);
+
+ 	mmc_wait_for_req(card->host, &mrq);
+
++	memcpy(scr, data_buf, sizeof(card->raw_scr));
++	kfree(data_buf);
 +
-+		if (!need_resched())
-+			usleep_range(10, 50);
-+
-+		timeout--;
-+	}
-+
- 	if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
- 		mrq->cmd->error = -ENOMEDIUM;
- 		mmc_request_done(mmc, mrq);
+ 	if (cmd.error)
+ 		return cmd.error;
+ 	if (data.error)
+-- 
+1.7.1
