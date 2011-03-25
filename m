@@ -1,82 +1,92 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: outstanding tmio patches
-Date: Fri, 25 Mar 2011 09:04:02 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1103250858400.22824@axis700.grange>
-References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
- <m3k4folztx.fsf@pullcord.laptop.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <m3k4folztx.fsf@pullcord.laptop.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>, Linus Walleij <linus.walleij@linaro.org>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH 0/5] consolidate sdhci pltfm & OF drivers and get them self registered
+Date: Fri, 25 Mar 2011 16:48:46 +0800
+Message-ID: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:41335 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756130Ab1CYIpY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 04:45:24 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, sameo@linux.intel.com, linaro-dev@lists.linaro.org, patches@linaro.org
 
-Hi Chris
+Here are what the patch set does.
 
-On Thu, 24 Mar 2011, Chris Ball wrote:
+* Remove .probe and .remove hooks from sdhci-pltfm.c and make it be
+  a pure common helper function providers.
+* Add .probe and .remove hooks for sdhci pltfm drivers sdhci-cns3xxx,
+  sdhci-dove, sdhci-tegra, and sdhci-esdhc-imx to make them self
+  registered with calling helper functions created above.
+* Migrate the use of sdhci_of_host and sdhci_of_data to
+  sdhci_pltfm_host and sdhci_pltfm_data, so that OF version host and
+  data structure works can be saved, and pltfm version works for both
+  cases.
+* Add OF common helper stuff into sdhci-pltfm.c, and make OF version
+  sdhci drivers sdhci-of-esdhc and sdhci-of-hlwd become self
+  registered as well, so that sdhci-of-core.c and sdhci-of.h can be
+  removed.
+* Consolidate the OF and pltfm esdhc drivers into one with sharing
+  the same pair of .probe and .remove hooks.  As a result,
+  sdhci-esdhc-imx.c and sdhci-of-esdhc.c go away, while
+  sdhci-esdhc.c comes in and works for both MPCxxx and i.MX.
+* Eliminate include/linux/mmc/sdhci-pltfm.h with moving stuff into
+  drivers/mmc/host/sdhci-pltfm.h.
 
-> Hi Guennadi,
-> 
-> On Wed, Mar 23 2011, Guennadi Liakhovetski wrote:
-> > I thought it might help to list all the recent patches in the order they 
-> > should apply to make it a bit easier...
-> >
-> > [1/2] mmc: tmio: Improve DMA stability on sh-mobile
-> 
-> Some serious merge conflicts with Linus W's dmaengine cleanup here.
+And the benefits we gain from the changes are:
 
-Sorry, I must be missing something. I'm basing my patches on the current 
-(of yesterday) next tree, which already contains Linus' patches:
+* Get the sdhci device driver follow the Linux trend that driver
+  makes the registration by its own.
+* sdhci-pltfm.c becomes simple and clean as it only has common helper
+  stuff there now.
+* All sdhci device specific things are going back its own driver.
+* The dt and non-dt drivers are consolidated to use the same pair of
+  .probe and .remove hooks.
+* SDHCI driver for Freescale eSDHC controller found on both MPCxxx
+  and i.MX platforms is consolidated to use the same one .probe
+  function.
 
-mmc: tmio_mmc: use dmaengine helpers, drop submit check
-mmc: tmio_mmc: drop dma_sglen state variable
-mmc: tmio_mmc: unmap with the proper sglen
-mmc: tmio_mmc: map DMA buffers on the DMA engine device
+The patch set works against the tree below, and was only tested on
+i.mx51 babbage board, all other targets were build tested.
 
-or which his patches do you mean?
+  git://git.secretlab.ca/git/linux-2.6.git devicetree/test
 
-Thanks
-Guennadi
+Comments are welcomed and appreciated.
 
-> > [2/2] mmc: tmio: use PIO for short transfers
-> > [1/6,v2] mmc: tmio: split core functionality, DMA and MFD glue
-> 
-> And again here.  These flag-day patches that move around thousands of
-> lines of code are extremely difficult to pull off without announcing
-> them far ahead of time and getting everyone else to hold off from
-> merging code first; you're essentially saying that development is closed
-> and everyone else has to wait for your patch to be merged and then
-> rebase onto it.
-> 
-> I'm open to suggestions on what to do next -- if you find it easier
-> to prepare a git tree with everything applied for me to pull from
-> I'd be happy to do that, although I think we should be preparing this
-> much churn long before the merge window opens if it's supposed to go
-> into mainline for the current cycle; the merge window should be for
-> merging linux-next into mainline.
-> 
-> I think my own suggestion, without knowing too much about tmio, would be
-> to apply the four patches that provide hardware fixes now, for -rc2:
-> 
-> [1/4,v3] mmc: tmio: only access registers above 0xff, if available
-> [2/4,v3] ARM: mach-shmobile: fix SDHI IO address-range
-> [3/4,v3] sh: fix SDHI IO address-range
-> [4/4,v3] mmc: tmio: remove work-around for unmasked SDIO interrupts
-> 
-> and push the module split and clock gating work out to the start of the
-> next merge window.
-> 
-> Let me know what you think, thanks,
-> 
-> - Chris.
-> -- 
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> 
+Regards,
+Shawn
 
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+PS: The first patch is a squashing of the patch set below, which was
+posted for review a few days back.
+
+  [PATCH 0/5] make sdhci device drivers self registered
+
+Some patches in this series are relatively large, involving more
+changes than expected, I chose to not split considering they are
+logically integral, and doing so can reduce the patch quantity much,
+and make bisect much easier.  But sorry for that it makes reviewers'
+life harder.
+
+Shawn Guo (5):
+      mmc: sdhci: make sdhci-pltfm device drivers self registered
+      mmc: sdhci: eliminate sdhci_of_host and sdhci_of_data
+      mmc: sdhci: make sdhci-of device drivers self registered
+      mmc: sdhci: consolidate sdhci-of-esdhc and sdhci-esdhc-imx
+      mmc: sdhci: merge two sdhci-pltfm.h into one
+
+ drivers/mmc/host/Kconfig           |   71 ++++---
+ drivers/mmc/host/Makefile          |   17 +-
+ drivers/mmc/host/sdhci-cns3xxx.c   |   68 ++++++-
+ drivers/mmc/host/sdhci-dove.c      |   69 ++++++-
+ drivers/mmc/host/sdhci-esdhc-imx.c |  149 -------------
+ drivers/mmc/host/sdhci-esdhc.c     |  412 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-of-core.c   |  247 ---------------------
+ drivers/mmc/host/sdhci-of-esdhc.c  |   89 --------
+ drivers/mmc/host/sdhci-of-hlwd.c   |   89 +++++++-
+ drivers/mmc/host/sdhci-of.h        |   42 ----
+ drivers/mmc/host/sdhci-pltfm.c     |  251 +++++++++-------------
+ drivers/mmc/host/sdhci-pltfm.h     |   36 +++-
+ drivers/mmc/host/sdhci-tegra.c     |  187 ++++++++++-------
+ include/linux/mmc/sdhci-pltfm.h    |   35 ---
+ 14 files changed, 912 insertions(+), 850 deletions(-)
