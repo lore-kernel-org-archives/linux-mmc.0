@@ -1,35 +1,25 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: outstanding tmio patches
-Date: Fri, 25 Mar 2011 09:09:14 -0400
-Message-ID: <m37hbnmjnp.fsf@pullcord.laptop.org>
-References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
-	<m3k4folztx.fsf@pullcord.laptop.org>
-	<Pine.LNX.4.64.1103250858400.22824@axis700.grange>
+Subject: Re: [PATCH V8 1/4] mmc: sdhci-esdhc: remove SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
+Date: Fri, 25 Mar 2011 09:17:33 -0400
+Message-ID: <m339mbmj9u.fsf@pullcord.laptop.org>
+References: <1301024346-2232-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1103250858400.22824@axis700.grange> (Guennadi
-	Liakhovetski's message of "Fri, 25 Mar 2011 09:04:02 +0100 (CET)")
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>, Linus Walleij <linus.walleij@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:41726 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752330Ab1CYNVJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 25 Mar 2011 09:21:09 -0400
+In-Reply-To: <1301024346-2232-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+	(Richard Zhu's message of "Fri, 25 Mar 2011 11:39:03 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Cc: linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, eric.miao@linaro.org
 
-Hi,
+Hi Richard,
 
-On Fri, Mar 25 2011, Guennadi Liakhovetski wrote:
->> > [1/2] mmc: tmio: Improve DMA stability on sh-mobile
->> 
->> Some serious merge conflicts with Linus W's dmaengine cleanup here.
->
-> Sorry, I must be missing something. I'm basing my patches on the current 
-> (of yesterday) next tree, which already contains Linus' patches:
-
-I agree that linux-next contains these patches, but I don't agree that
-"mmc: tmio: Improve DMA stability on sh-mobile" (which was written back
-on March 7th before they were merged) avoids merge conflicts with them.
-
-Thanks,
+Thanks, I've pushed all four patches to mmc-next for .39-rc2.
 
 - Chris.
 -- 
