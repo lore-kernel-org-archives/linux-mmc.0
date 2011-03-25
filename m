@@ -1,54 +1,47 @@
-From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v1 1/2] sdio: add power_restore support with
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH v1 2/2] sdio: add power_restore support with
  MMC_PM_KEEP_POWER mode
-Date: Fri, 25 Mar 2011 18:18:48 +0200
-Message-ID: <AANLkTinhbwsm_wOBDW5-WBrP0tfLUZMmuY18eGTkr4e4@mail.gmail.com>
-References: <AANLkTi=CSK8nRF7CTzsq06Bk8Cr74ZcwJBf53_wWbpnv@mail.gmail.com>
+Date: Fri, 25 Mar 2011 18:23:43 +0200
+Message-ID: <AANLkTimevrNU+JC=KvMzpGfip7cimPMo2cmBzvPiMb9R@mail.gmail.com>
+References: <AANLkTi=CSK8nRF7CTzsq06Bk8Cr74ZcwJBf53_wWbpnv@mail.gmail.com> <AANLkTimvLzgO1VHAbYz0uh-TVBGdLr-aDcyaGyzS2QMi@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <AANLkTi=CSK8nRF7CTzsq06Bk8Cr74ZcwJBf53_wWbpnv-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Wilson Loi <wlsloi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Luciano Coelho <luciano.coelho-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, San Mehat <san-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Roger Quadros <roger.quadros-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>, Gao Yunpeng <yunpeng.gao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:52887 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753998Ab1CYQYE convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 12:24:04 -0400
+In-Reply-To: <AANLkTimvLzgO1VHAbYz0uh-TVBGdLr-aDcyaGyzS2QMi@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wilson Loi <wlsloi@gmail.com>
+Cc: linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, Luciano Coelho <luciano.coelho@nokia.com>, akpm@linux-foundation.org, San Mehat <san@google.com>, Roger Quadros <roger.quadros@nokia.com>, Nicolas Pitre <nico@fluxnic.net>, Gao Yunpeng <yunpeng.gao@intel.com>
 
-Hello Wilson,
+On Fri, Mar 25, 2011 at 6:00 AM, Wilson Loi <wlsloi@gmail.com> wrote:
+> Another patch file
+> ----------------------------
+>
+> diff -ruN a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
 
-On Fri, Mar 25, 2011 at 5:58 AM, Wilson Loi <wlsloi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> The current power_restore handler only support cut off mode.
-> It is better to support keep power mode too.
+Please follow Documentation/SubmittingPatches when submitting patches,
+or at least just add -p to diff, otherwise it's a bit difficult to
+follow. thanks.
 
-This doesn't make much sense really;
+> =A0=A0=A0=A0 mmc_bus_put(host);
+>
+> -=A0=A0=A0 mmc_power_off(host);
+> +=A0=A0=A0 if (!ret && !(host->pm_flags & MMC_PM_KEEP_POWER))
+> +=A0=A0=A0 =A0=A0=A0 mmc_power_off(host);
 
-mmc_power_save_host() and mmc_power_restore_host() are invoked by
-runtime PM when it is time to power off/on the card.
+=2E..
+>
+> -=A0=A0=A0 mmc_power_up(host);
+> +=A0=A0=A0 if (!(host->pm_flags & MMC_PM_KEEP_POWER))
+> +=A0=A0=A0 =A0=A0=A0 mmc_power_up(host);
+> =A0=A0=A0=A0 ret =3D host->bus_ops->power_restore(host);
 
-If your driver doesn't want the power to go, it should just maintain a
-positive runtime PM usage_count (e.g. in case it's an SDIO driver,
-don't call pm_runtime_put{_sync} after being probed).
 
-> =A0static const struct mmc_bus_ops mmc_sdio_ops =3D {
-> =A0=A0=A0=A0 .remove =3D mmc_sdio_remove,
-> =A0=A0=A0=A0 .detect =3D mmc_sdio_detect,
-> =A0=A0=A0=A0 .suspend =3D mmc_sdio_suspend,
-> =A0=A0=A0=A0 .resume =3D mmc_sdio_resume,
-> -=A0=A0=A0 .power_restore =3D mmc_sdio_power_restore,
-> +=A0=A0=A0 .power_save =3D mmc_sdio_suspend,
-> +=A0=A0=A0 .power_restore =3D mmc_sdio_resume,
-
-This can break SDIO runtime PM.
-
-While -ENOSYS is a valid return value for mmc_sdio_suspend (it tells
-mmc_suspend_host to remove the entire MMC card on system suspend), it
-will be treated as an error by runtime PM.
-
-In addition, this can really yield unexpected results, since drivers
-do not expect their suspend/resume handlers to be called during
-runtime PM transitions.
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireles=
-s" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I have the same question here: if you driver doesn't want its card to
+be powered down, why does it invoke (or let runtime PM invoke on its
+behalf) mmc_power_save_host() in the first place ?
