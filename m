@@ -1,59 +1,57 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: outstanding tmio patches
-Date: Thu, 24 Mar 2011 22:05:14 -0400
-Message-ID: <m3k4folztx.fsf@pullcord.laptop.org>
-References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
+From: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Subject: [PATCH V8 1/4] mmc: sdhci-esdhc: remove SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
+Date: Fri, 25 Mar 2011 11:39:03 +0800
+Message-ID: <1301024346-2232-1-git-send-email-Hong-Xing.Zhu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1103231505450.6836@axis700.grange> (Guennadi
-	Liakhovetski's message of "Wed, 23 Mar 2011 15:15:43 +0100 (CET)")
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.185]:35626
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934427Ab1CYDjP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2011 23:39:15 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, w.sang@pengutronix.de, linuxzsc@gmail.com, eric.miao@linaro.org, Richard Zhu <Hong-Xing.Zhu@freescale.com>
 
-Hi Guennadi,
+sdhci-esdhc-imx does not need SDHCI_QUIRK_NO_CARD_NO_RESET. Make it OF-specific.
 
-On Wed, Mar 23 2011, Guennadi Liakhovetski wrote:
-> I thought it might help to list all the recent patches in the order they 
-> should apply to make it a bit easier...
->
-> [1/2] mmc: tmio: Improve DMA stability on sh-mobile
+Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+Tested-by: Wolfram Sang <w.sang@pengutronix.de>
+---
+ drivers/mmc/host/sdhci-esdhc.h    |    3 +--
+ drivers/mmc/host/sdhci-of-esdhc.c |    3 ++-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
-Some serious merge conflicts with Linus W's dmaengine cleanup here.
-
-> [2/2] mmc: tmio: use PIO for short transfers
-> [1/6,v2] mmc: tmio: split core functionality, DMA and MFD glue
-
-And again here.  These flag-day patches that move around thousands of
-lines of code are extremely difficult to pull off without announcing
-them far ahead of time and getting everyone else to hold off from
-merging code first; you're essentially saying that development is closed
-and everyone else has to wait for your patch to be merged and then
-rebase onto it.
-
-I'm open to suggestions on what to do next -- if you find it easier
-to prepare a git tree with everything applied for me to pull from
-I'd be happy to do that, although I think we should be preparing this
-much churn long before the merge window opens if it's supposed to go
-into mainline for the current cycle; the merge window should be for
-merging linux-next into mainline.
-
-I think my own suggestion, without knowing too much about tmio, would be
-to apply the four patches that provide hardware fixes now, for -rc2:
-
-[1/4,v3] mmc: tmio: only access registers above 0xff, if available
-[2/4,v3] ARM: mach-shmobile: fix SDHI IO address-range
-[3/4,v3] sh: fix SDHI IO address-range
-[4/4,v3] mmc: tmio: remove work-around for unmasked SDIO interrupts
-
-and push the module split and clock gating work out to the start of the
-next merge window.
-
-Let me know what you think, thanks,
-
-- Chris.
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index c55aae8..c3b08f1 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -23,8 +23,7 @@
+ 				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
+ 				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
+ 				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
+-				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET | \
+-				SDHCI_QUIRK_NO_CARD_NO_RESET)
++				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
+ 
+ #define ESDHC_SYSTEM_CONTROL	0x2c
+ #define ESDHC_CLOCK_MASK	0x0000fff0
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 08161f6..ba40d6d 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -74,7 +74,8 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+ 
+ struct sdhci_of_data sdhci_esdhc = {
+ 	/* card detection could be handled via GPIO */
+-	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION,
++	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION
++		| SDHCI_QUIRK_NO_CARD_NO_RESET,
+ 	.ops = {
+ 		.read_l = sdhci_be32bs_readl,
+ 		.read_w = esdhc_readw,
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.1
+
+
