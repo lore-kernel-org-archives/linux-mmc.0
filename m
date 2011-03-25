@@ -1,91 +1,82 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: [PATCH resend] mmc: fix the mmc_app_send_scr() for dma transfer
-Date: Fri, 25 Mar 2011 15:06:19 +0900
-Message-ID: <4D8C30DB.1010007@renesas.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: outstanding tmio patches
+Date: Fri, 25 Mar 2011 09:04:02 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1103250858400.22824@axis700.grange>
+References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
+ <m3k4folztx.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor1.renesas.com ([210.160.252.171]:50968 "EHLO
-	relmlor1.renesas.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753492Ab1CYGGW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 02:06:22 -0400
-Received: from relmlir4.idc.renesas.com ([10.200.68.154])
- by relmlor1.idc.renesas.com ( SJSMS)
- with ESMTP id <0LIL005LBNMLAG30@relmlor1.idc.renesas.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Mar 2011 15:06:21 +0900 (JST)
-Received: from relmlac3.idc.renesas.com ([10.200.69.23])
- by relmlir4.idc.renesas.com ( SJSMS)
- with ESMTP id <0LIL000LPNMDAU80@relmlir4.idc.renesas.com> for
- linux-mmc@vger.kernel.org; Fri, 25 Mar 2011 15:06:21 +0900 (JST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <m3k4folztx.fsf@pullcord.laptop.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org
 
-This patch is based on the commit "af51715079e7fb6b290e1881d63d815dc4de5011":
+Hi Chris
 
-   * Bugfix to that mmc_send_cxd_data() code:  dma-to-stack is
-     unsafe/nonportable, so kmalloc a bounce buffer instead.
+On Thu, 24 Mar 2011, Chris Ball wrote:
 
-The driver may invalidate the mmc_card->csd when host driver uses dma.
-So the subroutine also needs kmalloc buffer.
+> Hi Guennadi,
+> 
+> On Wed, Mar 23 2011, Guennadi Liakhovetski wrote:
+> > I thought it might help to list all the recent patches in the order they 
+> > should apply to make it a bit easier...
+> >
+> > [1/2] mmc: tmio: Improve DMA stability on sh-mobile
+> 
+> Some serious merge conflicts with Linus W's dmaengine cleanup here.
 
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Sorry, I must be missing something. I'm basing my patches on the current 
+(of yesterday) next tree, which already contains Linus' patches:
+
+mmc: tmio_mmc: use dmaengine helpers, drop submit check
+mmc: tmio_mmc: drop dma_sglen state variable
+mmc: tmio_mmc: unmap with the proper sglen
+mmc: tmio_mmc: map DMA buffers on the DMA engine device
+
+or which his patches do you mean?
+
+Thanks
+Guennadi
+
+> > [2/2] mmc: tmio: use PIO for short transfers
+> > [1/6,v2] mmc: tmio: split core functionality, DMA and MFD glue
+> 
+> And again here.  These flag-day patches that move around thousands of
+> lines of code are extremely difficult to pull off without announcing
+> them far ahead of time and getting everyone else to hold off from
+> merging code first; you're essentially saying that development is closed
+> and everyone else has to wait for your patch to be merged and then
+> rebase onto it.
+> 
+> I'm open to suggestions on what to do next -- if you find it easier
+> to prepare a git tree with everything applied for me to pull from
+> I'd be happy to do that, although I think we should be preparing this
+> much churn long before the merge window opens if it's supposed to go
+> into mainline for the current cycle; the merge window should be for
+> merging linux-next into mainline.
+> 
+> I think my own suggestion, without knowing too much about tmio, would be
+> to apply the four patches that provide hardware fixes now, for -rc2:
+> 
+> [1/4,v3] mmc: tmio: only access registers above 0xff, if available
+> [2/4,v3] ARM: mach-shmobile: fix SDHI IO address-range
+> [3/4,v3] sh: fix SDHI IO address-range
+> [4/4,v3] mmc: tmio: remove work-around for unmasked SDIO interrupts
+> 
+> and push the module split and clock gating work out to the start of the
+> next merge window.
+> 
+> Let me know what you think, thanks,
+> 
+> - Chris.
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> 
+
 ---
- drivers/mmc/core/sd_ops.c |   14 +++++++++++++-
- 1 files changed, 13 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 797cdb5..76af349 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -9,6 +9,7 @@
-  * your option) any later version.
-  */
-
-+#include <linux/slab.h>
- #include <linux/types.h>
- #include <linux/scatterlist.h>
-
-@@ -252,6 +253,7 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
- 	struct mmc_command cmd;
- 	struct mmc_data data;
- 	struct scatterlist sg;
-+	void *data_buf;
-
- 	BUG_ON(!card);
- 	BUG_ON(!card->host);
-@@ -263,6 +265,13 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
- 	if (err)
- 		return err;
-
-+	/* dma onto stack is unsafe/nonportable, but callers to this
-+	 * routine normally provide temporary on-stack buffers ...
-+	 */
-+	data_buf = kmalloc(sizeof(card->raw_scr), GFP_KERNEL);
-+	if (data_buf == NULL)
-+		return -ENOMEM;
-+
- 	memset(&mrq, 0, sizeof(struct mmc_request));
- 	memset(&cmd, 0, sizeof(struct mmc_command));
- 	memset(&data, 0, sizeof(struct mmc_data));
-@@ -280,12 +289,15 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
- 	data.sg = &sg;
- 	data.sg_len = 1;
-
--	sg_init_one(&sg, scr, 8);
-+	sg_init_one(&sg, data_buf, 8);
-
- 	mmc_set_data_timeout(&data, card);
-
- 	mmc_wait_for_req(card->host, &mrq);
-
-+	memcpy(scr, data_buf, sizeof(card->raw_scr));
-+	kfree(data_buf);
-+
- 	if (cmd.error)
- 		return cmd.error;
- 	if (data.error)
--- 
-1.7.1
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
