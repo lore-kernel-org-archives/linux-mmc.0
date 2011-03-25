@@ -1,66 +1,68 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH V8 4/4] mmc: sdhci-esdhc: enable esdhc on imx53
-Date: Fri, 25 Mar 2011 10:00:18 +0100
-Message-ID: <20110325090018.GB3302@pengutronix.de>
+From: Zhu Richard-R65037 <R65037@freescale.com>
+Subject: RE: [PATCH V8 3/4] mmc: sdhci-esdhc: make the writel/readl as the
+ general APIs
+Date: Fri, 25 Mar 2011 09:05:51 +0000
+Message-ID: <010C9052C42A00499CE76D637FA5EE900D45DB@039-SN1MPN1-001.039d.mgd.msft.net>
 References: <1301024346-2232-1-git-send-email-Hong-Xing.Zhu@freescale.com>
- <1301024346-2232-4-git-send-email-Hong-Xing.Zhu@freescale.com>
+ <1301024346-2232-3-git-send-email-Hong-Xing.Zhu@freescale.com>
+ <20110325085329.GA3302@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="aVD9QWMuhilNxW9f"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:42200 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754124Ab1CYJA0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2011 05:00:26 -0400
-Content-Disposition: inline
-In-Reply-To: <1301024346-2232-4-git-send-email-Hong-Xing.Zhu@freescale.com>
+Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.181]:10742
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752599Ab1CYJF6 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 25 Mar 2011 05:05:58 -0400
+In-Reply-To: <20110325085329.GA3302@pengutronix.de>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-Cc: linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, eric@eukrea.com, linuxzsc@gmail.com, eric.miao@linaro.org, Richard Zhao <richard.zhao@freescale.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "avorontsov@ru.mvista.com" <avorontsov@ru.mvista.com>, "eric@eukrea.com" <eric@eukrea.com>, "linuxzsc@gmail.com" <linuxzsc@gmail.com>, "eric.miao@linaro.org" <eric.miao@linaro.org>
 
+Hi Wolfram:
+Got that.
+Thanks for your reminder.
+Would follow your advice in future.
 
---aVD9QWMuhilNxW9f
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Best Regards
+Richard Zhu
 
-On Fri, Mar 25, 2011 at 11:39:06AM +0800, Richard Zhu wrote:
-> Fix the NO INT in the Multi-BLK IO in SD/MMC, and Multi-BLK
-> read in SDIO on imx53.
->=20
-> The CMDTYPE of the CMD register (offset 0xE) should be set to
-> "11" when the STOP CMD12 is issued on imx53 to abort one
-> open ended multi-blk IO. Otherwise one the TC INT wouldn't
-> be generated.
->=20
-> In exact block transfer, the controller doesn't complete the
-> operations automatically as required at the end of the
-> transfer and remains on hold if the abort command is not sent on
-> imx53.
-> As a result, the TC flag is not asserted and SW  received timeout
-> exeception. set bit1 of Vendor Spec registor to fix it.
->=20
-> Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
-> Signed-off-by: Richard Zhao <richard.zhao@freescale.com>
+> -----Original Message-----
+> From: Wolfram Sang [mailto:w.sang@pengutronix.de]
+> Sent: Friday, March 25, 2011 4:53 PM
+> To: Zhu Richard-R65037
+> Cc: linux-arm-kernel@lists.infradead.org; kernel@pengutronix.de; linux-
+> mmc@vger.kernel.org; cjb@laptop.org; avorontsov@ru.mvista.com;
+> eric@eukrea.com; linuxzsc@gmail.com; eric.miao@linaro.org
+> Subject: Re: [PATCH V8 3/4] mmc: sdhci-esdhc: make the writel/readl as
+> the general APIs
+>
+> On Fri, Mar 25, 2011 at 11:39:05AM +0800, Richard Zhu wrote:
+> > Add one flag to indicate the GPIO CD/WP is enabled or not on imx
+> > platforms, and reuse the writel/readl as the general APIs for imx
+> > SOCs.
+> >
+> > Signed-off-by: Richard Zhu <Hong-Xing.Zhu@freescale.com>
+> > ---
+>
+> Please provide something like "changes since last time" _below_ this
+> dashed line "---" next time. Or use --cover-letter to introduce the
+> changes.
+>
+> Other than that
+>
+> Reviewed-by: Wolfram Sang <w.sang@pengutronix.de>
+>
+> Regards,
+>
+>    Wolfram
+>
+> --
+> Pengutronix e.K.                           | Wolfram Sang
+> |
+> Industrial Linux Solutions                 | http://www.pengutronix.de/
+> |
 
-Reviewed-by: Wolfram Sang <w.sang@pengutronix.de>
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---aVD9QWMuhilNxW9f
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk2MWaIACgkQD27XaX1/VRt0iQCgj2KhBAgIAE82ocXUASpeixBQ
-BbMAniSWZneuby7lb8yhP4GCGOVQgRPV
-=lDTE
------END PGP SIGNATURE-----
-
---aVD9QWMuhilNxW9f--
