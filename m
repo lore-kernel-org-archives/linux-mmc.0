@@ -1,87 +1,58 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [comments] MMC: Reliable write support.
-Date: Sat, 26 Mar 2011 02:22:40 -0500
-Message-ID: <AANLkTiksZE_bE2nUXf+OtLpBA7giF-0KGWahbsEBar6O@mail.gmail.com>
-References: <1301001751-30785-1-git-send-email-andreiw@motorola.com>
-	<1301001751-30785-2-git-send-email-andreiw@motorola.com>
-	<201103251614.29893.arnd@arndb.de>
-	<AANLkTik4tXB1eix+Ej10yQudo8zBUxJdgXdPUaS9HJQb@mail.gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: outstanding tmio patches
+Date: Sun, 27 Mar 2011 09:20:11 +0900
+Message-ID: <20110327002011.GC31554@verge.net.au>
+References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
+ <m3k4folztx.fsf@pullcord.laptop.org>
+ <m3mxkjl2nr.fsf@pullcord.laptop.org>
+ <Pine.LNX.4.64.1103251518290.22824@axis700.grange>
+ <m3ipv7l07b.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og108.obsmtp.com ([64.18.0.186]:33840 "EHLO
-	exprod5og108.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752649Ab1CZHWo convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Mar 2011 03:22:44 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.167])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p2Q7N1vN029258
-	for <linux-mmc@vger.kernel.org>; Sat, 26 Mar 2011 03:23:01 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p2Q7MxlY029238
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Sat, 26 Mar 2011 03:23:00 -0400 (EDT)
-Received: by wwb28 with SMTP id 28so2035110wwb.3
-        for <linux-mmc@vger.kernel.org>; Sat, 26 Mar 2011 00:22:40 -0700 (PDT)
-In-Reply-To: <AANLkTik4tXB1eix+Ej10yQudo8zBUxJdgXdPUaS9HJQb@mail.gmail.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:48467 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752255Ab1C0AUR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Mar 2011 20:20:17 -0400
+Content-Disposition: inline
+In-Reply-To: <m3ipv7l07b.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>
 
-On Sat, Mar 26, 2011 at 2:17 AM, Andrei Warkentin <andreiw@motorola.com=
-> wrote:
-> Hi Arnd,
->
-> On Fri, Mar 25, 2011 at 10:14 AM, Arnd Bergmann <arnd@arndb.de> wrote=
-:
->> On Thursday 24 March 2011, Andrei Warkentin wrote:
->>>
->>> Beyond REQ_FUA/REQ_META, this was meant to be used by a following p=
-atch that aimed
->>> to reduce write amplification issues in cards employing a small (us=
-ually flash page-sized)
->>> buffer and a large (usually erase-block sized) buffer, at the expen=
-se of performance.
->>
->> Looks good to me, but I don't really understand some of the block la=
-yer
->> specifics here. One question:
->> How does this work when you have a flush that does not directly foll=
-ow
->> a REQ_FUA or REQ_META request? I would assume that we still need to
->> flush in some way, which you don't seem to do here.
->
-> In much the same way as before - REQ_FLUSH does nothing as it did
-> nothing before. The only reason I'm handing REQ_FLUSH, is because you
-> can't register for REQ_FUA without registering for REQ_FLUSH, which
-> does make sense - after all, if REQ_FUA is used to ensure data is
-> committed immediately, then by default it isn't, and you need a flush
-> operation if you want to commit the data at a particular checkpoint
-> You are correct in stating that it is a likely issue, but it is an
-> issue even without this patch. =A0Unfortunately, there is nothing (th=
-at
-> I saw) in the latest JEDEC MMC specification that says how a card's
-> internal buffers might be forced to be flushed to non-volatile
-> storage. Clearly, any recent card which tries to play optimization
-> games in order to reduce write amplification and flash wearing is
-> going to have an internal buffer, so the inability to handle REQ_FLUS=
-H
-> is already a potential issue for these cards.
->
-> Looking at the 4.41 JEDEC spec, CMD0, CMD15 and hardware reset are al=
-l
-> non-ways to ensure flush. In fact they will terminate the programming
-> operation resulting in an unknown state.
->
-> I'm working with a flash vendor to see if I missed something or if
-> there is some way to flush internal buffers, and if that way is
-> generic enough to apply to all cards.
->
-> A
->
+On Fri, Mar 25, 2011 at 10:54:48AM -0400, Chris Ball wrote:
+> Hi,
+> 
+> On Fri, Mar 25 2011, Guennadi Liakhovetski wrote:
+> > Hm, strange, now all patches should be correct - if the correct versions 
+> > are taken. Let's do it easier: I've uploaded all 15 patches (14 mine and 1 
+> > from Simon) as a quilt series to
+> >
+> > http://download.open-technology.de/tmio-for-2.6.39/
+> 
+> Thanks, I just needed to pull changes from Linus into mmc-next.
+> 
+> I've pushed everything out to mmc-next now.  If anyone else is able to
+> grab mmc-next and supply a Tested-by: for their hardware, that'd be
+> appreciated.
 
-Sorry, I totally forgot to add. REQ_FLUSH means - flush all write back
-caches internal to the disk hardware.
+Hi,
 
-A
+I have done some tests on a Renesas Mackerel board (Guennadi likely has
+one too) both with and without my "mmc, ARM: Add zboot from eSD support for
+SuperH Mobile ARM" change - which needs to go through RMK's tree
+and is the motivation for the " mmc: tmio_mmc: Move some defines into a
+shared header" patch.
+
+I didn't notice any problems.
+
+FWIW
+
+Tested-by: Simon Horman <horms@verge.net.au>
+
+> Also, if anyone thinks that some of this should wait until .40, now's a
+> good time to speak up.  :)
+
+I have no particular objections though I do agree that it
+is a lot of churn at this stage of the release cycle.
