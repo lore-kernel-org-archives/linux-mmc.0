@@ -1,58 +1,49 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: outstanding tmio patches
-Date: Sun, 27 Mar 2011 09:20:11 +0900
-Message-ID: <20110327002011.GC31554@verge.net.au>
-References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
- <m3k4folztx.fsf@pullcord.laptop.org>
- <m3mxkjl2nr.fsf@pullcord.laptop.org>
- <Pine.LNX.4.64.1103251518290.22824@axis700.grange>
- <m3ipv7l07b.fsf@pullcord.laptop.org>
+From: Zhu Richard-R65037 <R65037@freescale.com>
+Subject: RE: [PATCH V8 1/4] mmc: sdhci-esdhc: remove
+ SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
+Date: Mon, 28 Mar 2011 02:38:26 +0000
+Message-ID: <010C9052C42A00499CE76D637FA5EE900D47EA@039-SN1MPN1-001.039d.mgd.msft.net>
+References: <1301024346-2232-1-git-send-email-Hong-Xing.Zhu@freescale.com>
+ <m339mbmj9u.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:48467 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752255Ab1C0AUR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Mar 2011 20:20:17 -0400
-Content-Disposition: inline
-In-Reply-To: <m3ipv7l07b.fsf@pullcord.laptop.org>
+Received: from mail-tx2.bigfish.com ([65.55.88.10]:50028 "EHLO
+	TX2EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753282Ab1C1Ci1 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 27 Mar 2011 22:38:27 -0400
+In-Reply-To: <m339mbmj9u.fsf@pullcord.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "avorontsov@ru.mvista.com" <avorontsov@ru.mvista.com>, "eric@eukrea.com" <eric@eukrea.com>, "w.sang@pengutronix.de" <w.sang@pengutronix.de>, "linuxzsc@gmail.com" <linuxzsc@gmail.com>, "eric.miao@linaro.org" <eric.miao@linaro.org>
 
-On Fri, Mar 25, 2011 at 10:54:48AM -0400, Chris Ball wrote:
-> Hi,
-> 
-> On Fri, Mar 25 2011, Guennadi Liakhovetski wrote:
-> > Hm, strange, now all patches should be correct - if the correct versions 
-> > are taken. Let's do it easier: I've uploaded all 15 patches (14 mine and 1 
-> > from Simon) as a quilt series to
-> >
-> > http://download.open-technology.de/tmio-for-2.6.39/
-> 
-> Thanks, I just needed to pull changes from Linus into mmc-next.
-> 
-> I've pushed everything out to mmc-next now.  If anyone else is able to
-> grab mmc-next and supply a Tested-by: for their hardware, that'd be
-> appreciated.
+Hi Chris:
+Thanks a lot.
 
-Hi,
+Best Regards
+Richard Zhu
 
-I have done some tests on a Renesas Mackerel board (Guennadi likely has
-one too) both with and without my "mmc, ARM: Add zboot from eSD support for
-SuperH Mobile ARM" change - which needs to go through RMK's tree
-and is the motivation for the " mmc: tmio_mmc: Move some defines into a
-shared header" patch.
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Friday, March 25, 2011 9:18 PM
+> To: Zhu Richard-R65037
+> Cc: linux-arm-kernel@lists.infradead.org; kernel@pengutronix.de; linux-
+> mmc@vger.kernel.org; avorontsov@ru.mvista.com; eric@eukrea.com;
+> w.sang@pengutronix.de; linuxzsc@gmail.com; eric.miao@linaro.org
+> Subject: Re: [PATCH V8 1/4] mmc: sdhci-esdhc: remove
+> SDHCI_QUIRK_NO_CARD_NO_RESET from ESDHC_DEFAULT_QUIRKS
+>
+> Hi Richard,
+>
+> Thanks, I've pushed all four patches to mmc-next for .39-rc2.
+>
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 
-I didn't notice any problems.
 
-FWIW
-
-Tested-by: Simon Horman <horms@verge.net.au>
-
-> Also, if anyone thinks that some of this should wait until .40, now's a
-> good time to speak up.  :)
-
-I have no particular objections though I do agree that it
-is a lot of churn at this stage of the release cycle.
