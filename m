@@ -1,50 +1,54 @@
-From: Peppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: SPB104 SDIO WIFI card
-Date: Mon, 28 Mar 2011 12:16:05 +0200
-Message-ID: <4D905FE5.5000804@st.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: SDHI should depend on SUPERH || ARCH_SHMOBILE
+Date: Mon, 28 Mar 2011 09:39:04 -0400
+Message-ID: <m3lizzicuf.fsf@pullcord.laptop.org>
+References: <20110328131018.96742ebb.sfr@canb.auug.org.au>
+	<Pine.LNX.4.64.1103280913170.6625@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:50848 "EHLO
-	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750802Ab1C1KQQ convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 28 Mar 2011 06:16:16 -0400
-Received: from zeta.dmz-eu.st.com (ns2.st.com [164.129.230.9])
-	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 8CC60111
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2011 10:16:11 +0000 (GMT)
-Received: from Webmail-eu.st.com (safex1hubcas5.st.com [10.75.90.71])
-	by zeta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 45CD92480
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2011 10:16:11 +0000 (GMT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1103280913170.6625@axis700.grange> (Guennadi
+	Liakhovetski's message of "Mon, 28 Mar 2011 09:16:33 +0200 (CEST)")
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Stephen Rothwell <sfr@canb.auug.org.au>, linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Youssef TRIKI <youssef.triki@st.com>
 
-Hello.
-I need to use the SPB104 SDIO WiFi card on ST40 platforms with the SDHCI
-HC driver.
+Hi,
 
-IIUC, there is no support within the Kernel for this WiFi device.
+On Mon, Mar 28 2011, Guennadi Liakhovetski wrote:
+> Fix build breakage on platforms, not providing readsw and writesw
+> functions, e.g., on x86(_64).
+>
+> Reported-by: Stephen Rothwell <sfr@canb.auug.org.au>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+>
+> Subject: Re: linux-next: build failure after merge of the mmc tree
+>
+> On Mon, 28 Mar 2011, Stephen Rothwell wrote:
+>
+>> Hi Chris,
+>> 
+>> After merging the mmc tree, today's linux-next build (x86_64 allmodconfig)
+>> failed like this:
+>> 
+>> drivers/mmc/host/tmio_mmc_pio.c: In function 'sd_ctrl_read16_rep':
+>> drivers/mmc/host/tmio_mmc_pio.c:56: error: implicit declaration of function 'readsw'
+>> drivers/mmc/host/tmio_mmc_pio.c: In function 'sd_ctrl_write16_rep':
+>> drivers/mmc/host/tmio_mmc_pio.c:73: error: implicit declaration of function 'writesw'
+>> 
+>> Presumably caused by commit b6147490e6aa ("mmc: tmio: split core
+>> functionality, DMA and MFD glue").
+>> 
+>> I have used the mmc tree from next-20110325 for tdoay.
+>
+> Stephen, please verify, that this fixes your problem.
 
-I've found the driver at:
-http://www.hd-wireless.se/index.php?option=com_content&view=article&id=46&Itemid=53
-This is for ARM platform, only. Please, correct me if I'm wrong.
+I've verified the fix and pushed it to mmc-next, so this should be fixed
+tomorrow.  Thanks!
 
-I wonder if somebody has used this card on *not* arm platforms.
-If yes, please, could you help me to find the driver?
-
-Looking at the d.d. (I mentioned above) there is, inside the
-owl-linux-arm-1.0.4.tar.gz tarball file, a library prebuilt for ARM.
-Where could I get the sources for this file? Hmm, contact Atmel
-directly? :-)
-
-In the end, I could buy other card for my development.
-In this case, I wonder if somebody could point me to a WiFi card fully
-supported and tested in Linux.
-
-Many thanks in advance.
-
-Best Regards,
-Giuseppe
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
