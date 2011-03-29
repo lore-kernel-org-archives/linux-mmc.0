@@ -1,60 +1,59 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
+From: "vooon341@gmail.com" <vooon341@gmail.com>
 Subject: Re: [PATCH] mmc: Add MPC512x SDHC driver.
-Date: Tue, 29 Mar 2011 12:42:31 +0200
-Message-ID: <20110329104231.GB18155@pengutronix.de>
-References: <AANLkTi=cMzOj-NEc0uksDDBiBvyaKQWta9T9jtO12Gxr@mail.gmail.com>
+Date: Tue, 29 Mar 2011 17:46:25 +0400
+Message-ID: <AANLkTinZ25gT+Y=YJMh=bFeZdRE-fZ45wDt8=tDWVScd@mail.gmail.com>
+References: <AANLkTi=cMzOj-NEc0uksDDBiBvyaKQWta9T9jtO12Gxr@mail.gmail.com> <20110329104231.GB18155@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="XOIedfhf+7KOe/yw"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:56016 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751353Ab1C2Kmj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2011 06:42:39 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTi=cMzOj-NEc0uksDDBiBvyaKQWta9T9jtO12Gxr@mail.gmail.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:48513 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752796Ab1C2Nqq convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2011 09:46:46 -0400
+In-Reply-To: <20110329104231.GB18155@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "vooon341@gmail.com" <vooon341@gmail.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, Andrew Morton <akpm@linux-foundation.org>
 
+Hi Wolfram,
 
---XOIedfhf+7KOe/yw
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+I'll try to add abstraction.
+But I can return to this only after our hardware will done (around one =
+month).
 
-Hi Vladimir,
-
-> MPC512x have similar sdhc module as in MX2/MX3,
-> but use different access to the registers.
-
-There are quite some drivers abstracting the register-access
-(sdhci-esdhc for example which is also used on ppc and arm). If the
-state-machine is the same, this really should be done. Otherwise
-maintenance will be harder. I have mx2/3-hardware here and am willing to
-test the changes. If the state-machine is significantly different, a
-seperate driver makes sense, of course.
-
-Regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---XOIedfhf+7KOe/yw
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk2Rt5cACgkQD27XaX1/VRupZQCfZBKjZDcAXYpWruv/YddLcrl6
-5l4AnigRQQhsiy7kyVpMGYYDvtdlzziJ
-=fihf
------END PGP SIGNATURE-----
-
---XOIedfhf+7KOe/yw--
+2011/3/29 Wolfram Sang <w.sang@pengutronix.de>:
+> Hi Vladimir,
+>
+>> MPC512x have similar sdhc module as in MX2/MX3,
+>> but use different access to the registers.
+>
+> There are quite some drivers abstracting the register-access
+> (sdhci-esdhc for example which is also used on ppc and arm). If the
+> state-machine is the same, this really should be done. Otherwise
+> maintenance will be harder. I have mx2/3-hardware here and am willing=
+ to
+> test the changes. If the state-machine is significantly different, a
+> seperate driver makes sense, of course.
+>
+> Regards,
+>
+> =C2=A0 Wolfram
+>
+> --
+> Pengutronix e.K. =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 | Wolfram Sang =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|
+> Industrial Linux Solutions =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 | http://www.pengutronix.de/ =C2=A0|
+>
+> -----BEGIN PGP SIGNATURE-----
+> Version: GnuPG v1.4.10 (GNU/Linux)
+>
+> iEYEARECAAYFAk2Rt5cACgkQD27XaX1/VRupZQCfZBKjZDcAXYpWruv/YddLcrl6
+> 5l4AnigRQQhsiy7kyVpMGYYDvtdlzziJ
+> =3Dfihf
+> -----END PGP SIGNATURE-----
+>
+>
