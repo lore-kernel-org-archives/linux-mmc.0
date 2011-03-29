@@ -1,31 +1,38 @@
-From: "Koul, Vinod" <vinod.koul@intel.com>
-Subject: Re: [RFC] mmc: msm_sdcc: Use SPS BAM as DMA engine
-Date: Tue, 29 Mar 2011 10:00:05 +0530
-Message-ID: <1301373005.1695.25.camel@vkoul-udesk3>
-References: <1300454644-11361-1-git-send-email-subhashj@codeaurora.org>
-	 <1300454644-11361-2-git-send-email-subhashj@codeaurora.org>
-	 <1300885535.6117.15.camel@m0nster> <005601cbe9f5$a5088750$ef1995f0$@org>
-	 <8yak4fo16jp.fsf@huya.qualcomm.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [comments] MMC: Reliable write support.
+Date: Tue, 29 Mar 2011 09:01:31 +0200
+Message-ID: <201103290901.31680.arnd@arndb.de>
+References: <1301001751-30785-1-git-send-email-andreiw@motorola.com> <201103251614.29893.arnd@arndb.de> <AANLkTi=+LOy6V4hLsjaDd60xjEWm7jtYXaW8-4j=7TCQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <8yak4fo16jp.fsf@huya.qualcomm.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: David Brown <davidb@codeaurora.org>
-Cc: Subhash Jadavani <subhashj@codeaurora.org>, 'Daniel Walker' <dwalker@fifo99.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, bryanh@codeaurora.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.9]:53746 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752418Ab1C2HBi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2011 03:01:38 -0400
+In-Reply-To: <AANLkTi=+LOy6V4hLsjaDd60xjEWm7jtYXaW8-4j=7TCQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org
 
-On Thu, 2011-03-24 at 15:45 -0700, David Brown wrote:
+On Tuesday 29 March 2011, Andrei Warkentin wrote:
+> On Fri, Mar 25, 2011 at 10:14 AM, Arnd Bergmann <arnd@arndb.de> wrote:
 > 
-> Currently none of the MSM DMA hardware uses the DMA engine API, and I
-> think we need to figure out if we want to move to that at some point.  I
-> realize that the hardware (especially SPS BAM) does a lot more than
-> regular DMA, this may involve extending DMA engine, which may or may not
-> be appropriate.
-If its looks sane extension, I am okay with it :)
-Can you point out _exactly_ why the MSM DMA H/W can't use DMA engine at
-this point of time?
+> I confirmed with two MMC vendors that there is no "flush". Once the
+> DAT transfer completes, the data is stored on non-volatile storage as
+> soon as the busy status is cleared.
+> 
+> Reliable writes are still "more reliable" because if the DAT transfer
+> is interrupted (power or reset through CMD0/CMD15 or hw pin for eMMC),
+> you have predictable flash contents. So it makes sense to map REQ_FUA
+> to it (and REQ_META, I would guess).
 
--- 
-~Vinod
+Yes, sounds good.
+
+So I guess on MLC flash, a reliable write will go to a flash page
+that does not have data in any of its paired pages.
+
+	Arnd
