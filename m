@@ -1,39 +1,34 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [PATCHv4] MMC: MMC boot partitions support.
-Date: Tue, 29 Mar 2011 17:45:36 -0500
-Message-ID: <AANLkTinMu57VyaVK3zBpePdJ-Yi=g9zt2833UtbcRpM5@mail.gmail.com>
-References: <1300533491-2378-2-git-send-email-andreiw@motorola.com>
-	<1300828300-8677-2-git-send-email-andreiw@motorola.com>
+From: NamJae Jeon <linkinjeon@gmail.com>
+Subject: About mmc delayed workqueue.
+Date: Wed, 30 Mar 2011 08:33:12 +0900
+Message-ID: <AANLkTikB-g44H80hLsrBUcJ4svOZAXisBvFvno4uqKm+@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og112.obsmtp.com ([64.18.0.24]:36328 "EHLO
-	exprod5og112.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751698Ab1C2Wpj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2011 18:45:39 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2TMi1ov014083
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 18:44:01 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2TMhlRY014027
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 18:44:00 -0400 (EDT)
-Received: by mail-ww0-f46.google.com with SMTP id 28so818271wwb.3
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 15:45:37 -0700 (PDT)
-In-Reply-To: <1300828300-8677-2-git-send-email-andreiw@motorola.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:60951 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751746Ab1C2XdN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2011 19:33:13 -0400
+Received: by wya21 with SMTP id 21so614635wya.19
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 16:33:12 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Andrei Warkentin <andreiw@motorola.com>
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
 
-On Tue, Mar 22, 2011 at 4:11 PM, Andrei Warkentin <andreiw@motorola.com> wrote:
-> Allows device MMC boot partitions to be accessed. MMC partitions
-> are treated effectively as separate block devices on the same
-> MMC card.
->
+Hi. Chris.
 
-Anyone has any opinions on these changes as being good or bad?
-Anything I should do differently? Or does everyone like this?
+I found some problem in mmc driver.  As you know, in nand trend, emmc
+nand is used  booting device in embededd product.
 
-Thanks ahead,
-A
+It means that kernel, rootfs image is stored in emmc nand device. and
+when rescaning mmc, mmc driver is working by delay work queue.
+
+It can be cause "can not mount rootfs".  If  kernel mounting is faster
+than mmc rescan, this problem would occur..
+
+I changed to schedule_work instead of mmc_schedule_delayed_work. I can
+make patch & test.
+
+could you tell me your opinion ?
+
+Thanks.
