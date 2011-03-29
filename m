@@ -1,51 +1,51 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: outstanding tmio patches
-Date: Wed, 30 Mar 2011 00:33:41 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1103300032140.13285@axis700.grange>
-References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
- <m3k4folztx.fsf@pullcord.laptop.org> <m3mxkjl2nr.fsf@pullcord.laptop.org>
- <Pine.LNX.4.64.1103251518290.22824@axis700.grange> <m3aagdd0z4.fsf@pullcord.laptop.org>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [comments] MMC: Reliable write support.
+Date: Tue, 29 Mar 2011 17:44:03 -0500
+Message-ID: <AANLkTinDdEJ0bwH3Kj_QmhD=Z=07eaRvpA=sASn+DmkJ@mail.gmail.com>
+References: <1301001751-30785-1-git-send-email-andreiw@motorola.com>
+	<201103251614.29893.arnd@arndb.de>
+	<AANLkTi=+LOy6V4hLsjaDd60xjEWm7jtYXaW8-4j=7TCQ@mail.gmail.com>
+	<201103290901.31680.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:61104 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751683Ab1C2Wdu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2011 18:33:50 -0400
-In-Reply-To: <m3aagdd0z4.fsf@pullcord.laptop.org>
+Received: from exprod5og109.obsmtp.com ([64.18.0.188]:42985 "EHLO
+	exprod5og109.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751698Ab1C2WoG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2011 18:44:06 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2TMgRjQ013476
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 18:42:27 -0400 (EDT)
+Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2TMf08V012847
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 18:42:27 -0400 (EDT)
+Received: by mail-ww0-f46.google.com with SMTP id 28so816235wwb.3
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 15:44:03 -0700 (PDT)
+In-Reply-To: <201103290901.31680.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Chris
+On Tue, Mar 29, 2011 at 2:01 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Tuesday 29 March 2011, Andrei Warkentin wrote:
+>> On Fri, Mar 25, 2011 at 10:14 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+>>
+>> I confirmed with two MMC vendors that there is no "flush". Once the
+>> DAT transfer completes, the data is stored on non-volatile storage as
+>> soon as the busy status is cleared.
+>>
+>> Reliable writes are still "more reliable" because if the DAT transfer
+>> is interrupted (power or reset through CMD0/CMD15 or hw pin for eMMC),
+>> you have predictable flash contents. So it makes sense to map REQ_FUA
+>> to it (and REQ_META, I would guess).
+>
+> Yes, sounds good.
+>
+> So I guess on MLC flash, a reliable write will go to a flash page
+> that does not have data in any of its paired pages.
 
-On Tue, 29 Mar 2011, Chris Ball wrote:
+Should I resubmit the patch?
 
-> Hi Guennadi,
-> 
-> On Fri, Mar 25 2011, Guennadi Liakhovetski wrote:
-> > Let's do it easier: I've uploaded all 15 patches (14 mine and 1 from
-> > Simon) as a quilt series to
-> >
-> > http://download.open-technology.de/tmio-for-2.6.39/
-> >
-> > Please, just try those.
-> 
-> These made it in as the last merge before the .39 window closed.  :)
-
-Great! Thanks a lot!
-
-> Let's talk a few weeks before the .40 merge window opens about what the
-> .40 tmio merge should look like; it would have been better for these to
-> have spent longer in linux-next before merging.
-
-Sure, we should certainly try to sort things out much earlier in the 
-development cycle, than this time.
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+A
