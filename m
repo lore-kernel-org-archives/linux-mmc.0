@@ -1,122 +1,39 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: MMC cleanups for 2.6.39
-Date: Tue, 29 Mar 2011 15:07:11 -0400
-Message-ID: <m3ei5pd9uo.fsf@pullcord.laptop.org>
+Subject: Re: outstanding tmio patches
+Date: Tue, 29 Mar 2011 18:18:55 -0400
+Message-ID: <m3aagdd0z4.fsf@pullcord.laptop.org>
+References: <Pine.LNX.4.64.1103231505450.6836@axis700.grange>
+	<m3k4folztx.fsf@pullcord.laptop.org>
+	<m3mxkjl2nr.fsf@pullcord.laptop.org>
+	<Pine.LNX.4.64.1103251518290.22824@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41505 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751212Ab1C2TBQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 29 Mar 2011 15:01:16 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1103251518290.22824@axis700.grange> (Guennadi
+	Liakhovetski's message of "Fri, 25 Mar 2011 15:19:50 +0100 (CET)")
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Linus,
+Hi Guennadi,
 
-Please pull from:
+On Fri, Mar 25 2011, Guennadi Liakhovetski wrote:
+> Let's do it easier: I've uploaded all 15 patches (14 mine and 1 from
+> Simon) as a quilt series to
+>
+> http://download.open-technology.de/tmio-for-2.6.39/
+>
+> Please, just try those.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+These made it in as the last merge before the .39 window closed.  :)
+Let's talk a few weeks before the .40 merge window opens about what the
+.40 tmio merge should look like; it would have been better for these to
+have spent longer in linux-next before merging.
 
-to receive a few small driver fixes, and a larger cleanup of the TMIO
-MMC driver.  This splits up the driver and touches arch/arm, arch/sh
-and drivers/mfd -- these patches all come with ACKs from the relevant
-maintainers.  There are no currently no merge conflicts.  Thanks.
+Thanks,
 
-
-The following changes since commit d39dd11c3e6a7af5c20bfac40594db36cf270f42:
-  Linus Torvalds (1):
-        Merge branch 'for-linus' of git://git.kernel.org/.../viro/vfs-2.6
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-Chris Ball (1):
-      mmc: mmc_test: Remove set-but-unused variable.
-
-David Miller (1):
-      mmc: of_mmc_spi: Need to include irq.h and of_irq.h
-
-Guennadi Liakhovetski (15):
-      mmc: tmio-mmc: Improve DMA stability on sh-mobile
-      mmc: tmio: use PIO for short transfers
-      mmc: tmio: split core functionality, DMA and MFD glue
-      sh: ecovec: use the CONFIG_MMC_TMIO symbols instead of MFD
-      mmc: tmio: convert the SDHI MMC driver from MFD to a platform driver
-      ARM: mach-shmobile: convert boards to use linux/mmc/sh_mobile_sdhi.h
-      sh: convert boards to use linux/mmc/sh_mobile_sdhi.h
-      mfd: remove now redundant sh_mobile_sdhi.h header
-      mmc: tmio: only access registers above 0xff, if available
-      ARM: mach-shmobile: fix SDHI IO address-range
-      sh: fix SDHI IO address-range
-      mmc: tmio: remove work-around for unmasked SDIO interrupts
-      mmc: tmio: fix power-mode interpretation
-      mmc: tmio: support aggressive clock gating
-      mmc: SDHI should depend on SUPERH || ARCH_SHMOBILE
-
-Jaehoon Chung (1):
-      mmc: dw_mmc: set fixed burst in BMOD register
-
-Pawel Moll (1):
-      mmc: mmci: Add ARM variant with extended FIFO
-
-Richard Zhu (4):
-      mmc: sdhci-esdhc: remove SDHCI_QUIRK_NO_CARD_NO_RESET from esdhc
-      mmc: sdhci: add the abort CMDTYPE bits definition
-      mmc: sdhci-esdhc: use writel/readl as general APIs
-      mmc: sdhci-esdhc: enable esdhc on imx53
-
-Sergei Shtylyov (1):
-      mmc: use pci_dev->revision
-
-Simon Horman (1):
-      mmc: tmio_mmc: Move some defines into a shared header
-
-Yoshihiro Shimoda (1):
-      mmc: fix mmc_app_send_scr() for dma transfer
-
- arch/arm/mach-shmobile/board-ap4evb.c       |    6 +-
- arch/arm/mach-shmobile/board-g4evm.c        |    6 +-
- arch/arm/mach-shmobile/board-mackerel.c     |    8 +-
- arch/sh/boards/mach-ap325rxa/setup.c        |    6 +-
- arch/sh/boards/mach-ecovec24/setup.c        |   12 +-
- arch/sh/boards/mach-kfr2r09/setup.c         |    4 +-
- arch/sh/boards/mach-migor/setup.c           |    4 +-
- arch/sh/boards/mach-se/7724/setup.c         |    6 +-
- drivers/mfd/Kconfig                         |   14 -
- drivers/mfd/Makefile                        |    1 -
- drivers/mmc/card/mmc_test.c                 |    3 +-
- drivers/mmc/core/sd_ops.c                   |   14 +-
- drivers/mmc/host/Kconfig                    |   14 +-
- drivers/mmc/host/Makefile                   |    8 +-
- drivers/mmc/host/dw_mmc.c                   |    4 +-
- drivers/mmc/host/mmci.c                     |   13 +-
- drivers/mmc/host/of_mmc_spi.c               |    2 +
- drivers/mmc/host/sdhci-esdhc-imx.c          |   86 ++-
- drivers/mmc/host/sdhci-esdhc.h              |    3 +-
- drivers/mmc/host/sdhci-of-esdhc.c           |    3 +-
- drivers/mmc/host/sdhci-pci.c                |    6 +-
- drivers/mmc/host/sdhci-pltfm.h              |    2 +-
- drivers/mmc/host/sdhci.h                    |    1 +
- drivers/{mfd => mmc/host}/sh_mobile_sdhi.c  |   95 +--
- drivers/mmc/host/tmio_mmc.c                 | 1285 +--------------------------
- drivers/mmc/host/tmio_mmc.h                 |  123 +++
- drivers/mmc/host/tmio_mmc_dma.c             |  317 +++++++
- drivers/mmc/host/tmio_mmc_pio.c             |  897 +++++++++++++++++++
- drivers/mmc/host/via-sdmmc.c                |    5 +-
- include/linux/{mfd => mmc}/sh_mobile_sdhi.h |    0
- include/linux/mmc/tmio.h                    |   63 ++
- 31 files changed, 1615 insertions(+), 1396 deletions(-)
- rename drivers/{mfd => mmc/host}/sh_mobile_sdhi.c (63%)
- create mode 100644 drivers/mmc/host/tmio_mmc.h
- create mode 100644 drivers/mmc/host/tmio_mmc_dma.c
- create mode 100644 drivers/mmc/host/tmio_mmc_pio.c
- rename include/linux/{mfd => mmc}/sh_mobile_sdhi.h (100%)
- create mode 100644 include/linux/mmc/tmio.h
-
+- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
