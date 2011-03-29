@@ -1,44 +1,31 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH] mmc: sdhci-pci: Fix error case in sdhci_pci_probe_slot()
-Date: Tue, 29 Mar 2011 00:46:12 -0400
-Message-ID: <1301373972-18090-1-git-send-email-cjb@laptop.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pullcord.laptop.org ([18.85.46.20]:33177 "EHLO
-	pullcord.laptop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750821Ab1C2Ela (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2011 00:41:30 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: "Koul, Vinod" <vinod.koul@intel.com>
+Subject: Re: [RFC] mmc: msm_sdcc: Use SPS BAM as DMA engine
+Date: Tue, 29 Mar 2011 10:00:05 +0530
+Message-ID: <1301373005.1695.25.camel@vkoul-udesk3>
+References: <1300454644-11361-1-git-send-email-subhashj@codeaurora.org>
+	 <1300454644-11361-2-git-send-email-subhashj@codeaurora.org>
+	 <1300885535.6117.15.camel@m0nster> <005601cbe9f5$a5088750$ef1995f0$@org>
+	 <8yak4fo16jp.fsf@huya.qualcomm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <8yak4fo16jp.fsf@huya.qualcomm.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: David Brown <davidb@codeaurora.org>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, 'Daniel Walker' <dwalker@fifo99.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, bryanh@codeaurora.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, stable@kernel.org
 
-If pci_ioremap_bar() fails during probe, we "goto release;" and free the
-host, but then we return 0 -- which tells sdhci_pci_probe() that the probe
-succeeded.  Since we think the probe succeeded, when we unload sdhci we'll
-go to sdhci_pci_remove_slot() and it will try to dereference slot->host,
-which is now NULL because we freed it in the error path earlier.
+On Thu, 2011-03-24 at 15:45 -0700, David Brown wrote:
+> 
+> Currently none of the MSM DMA hardware uses the DMA engine API, and I
+> think we need to figure out if we want to move to that at some point.  I
+> realize that the hardware (especially SPS BAM) does a lot more than
+> regular DMA, this may involve extending DMA engine, which may or may not
+> be appropriate.
+If its looks sane extension, I am okay with it :)
+Can you point out _exactly_ why the MSM DMA H/W can't use DMA engine at
+this point of time?
 
-The patch simply sets ret appropriately, so that sdhci_pci_probe() will
-detect the failure immediately and bail out.
-
-Signed-off-by: Chris Ball <cjb@laptop.org>
-Cc: <stable@kernel.org>
----
- drivers/mmc/host/sdhci-pci.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index a136be7..f8b5f37 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -957,6 +957,7 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
- 	host->ioaddr = pci_ioremap_bar(pdev, bar);
- 	if (!host->ioaddr) {
- 		dev_err(&pdev->dev, "failed to remap registers\n");
-+		ret = -ENOMEM;
- 		goto release;
- 	}
- 
 -- 
-1.7.0.1
-
+~Vinod
