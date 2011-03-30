@@ -1,72 +1,63 @@
-From: "Luis R. Rodriguez" <lrodriguez@atheros.com>
-Subject: Re: [RFC 0/4] sdhci: few patches for ENE 712 support
-Date: Tue, 29 Mar 2011 18:16:29 -0700
-Message-ID: <20110330011629.GA15578@tux>
-References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
- <20110319091544.GA16635@pengutronix.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: About mmc delayed workqueue.
+Date: Tue, 29 Mar 2011 22:17:11 -0400
+Message-ID: <m3k4fh8i8o.fsf@pullcord.laptop.org>
+References: <AANLkTikB-g44H80hLsrBUcJ4svOZAXisBvFvno4uqKm+@mail.gmail.com>
+	<20110329233459.GI27290@trinity.fluff.org>
+	<m3sju58pap.fsf@pullcord.laptop.org>
+	<AANLkTi=5R9w0k_Hg=htyDc=aQDA+t1HOLvWtfAOvMo+z@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.atheros.com ([12.19.149.2]:49058 "EHLO mail.atheros.com"
+Received: from void.printf.net ([89.145.121.20]:43144 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753804Ab1C3BQd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 29 Mar 2011 21:16:33 -0400
-Content-Disposition: inline
-In-Reply-To: <20110319091544.GA16635@pengutronix.de>
+	id S1754148Ab1C3CLM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 29 Mar 2011 22:11:12 -0400
+In-Reply-To: <AANLkTi=5R9w0k_Hg=htyDc=aQDA+t1HOLvWtfAOvMo+z@mail.gmail.com>
+	(NamJae Jeon's message of "Wed, 30 Mar 2011 09:26:53 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Luis Rodriguez <Luis.Rodriguez@Atheros.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Vipin Mehta <Vipin.Mehta@Atheros.com>, Naveen Singh <Naveen.Singh@Atheros.com>, "kvalo@adurom.com" <kvalo@adurom.com>, "j@w1.fi" <j@w1.fi>
+To: NamJae Jeon <linkinjeon@gmail.com>, linux-mmc@vger.kernel.org
 
-On Sat, Mar 19, 2011 at 02:15:44AM -0700, Wolfram Sang wrote:
-> 
-> > I prefer code upstream though so here is my split and cleanup
-> > of these patches. I've tested it with my ENE card. Since I am
-> > new to SDHCI I would prefer someone with more experience review
-> > these chagnes and the respective commit log messages. I've
-> > tried to make sense of them as best as I can. Unfortunately
-> > I was not given any explanation to these changes except the
-> > patch I got so I tried to make the best of it.
-> 
-> You did make the best out of it; still, you probably won't be surprised to hear
-> that all the patches are, well, not acceptable ;) I agree with Chris about 1/4,
-> I think 2-4 are for a broken card detection and there is already a quirk for
-> that. So you could also try dropping 2-4 and use
-> 
-> 	sdhci.debug_quirks = 0x8028
-> 
-> That should enable the standard quirks for this card and BROKEN_CARD.
+Hi,
 
-I just tried this, it does not work, in fact my own my patches don't work too,
-only the original crap does though for some odd magical reason.
+On Tue, Mar 29 2011, NamJae Jeon wrote:
+> Dear. Chris, Ben.
+>
+> Thanks for your reply.
+>
+> As you know, booting time is important factor in embededd device.
+>
+> If rootdelay is set to 5, kernel will be waiting for 5 sec. root_wait
+> is also looping per 100ms.
 
-Then again, what I tried was:
+No.  It will wait for *up to* five seconds, but it will actually
+continue as soon as the device has enumerated.  Same with rootwait,
+of course.
 
-insmod ./sdhci.ko debug_quirks=0x8028
+MMC is by no means the only subsystem that behaves this way.  If you
+were using a USB or SATA/AHCI device, amongst many others, you would
+have exactly the same problem.
 
-Was that what you wanted me to try?
+You can see http://lwn.net/Articles/330378/ for some background reading.
 
-> Can you also please post the PCI-ID of this card?
+> I have a question. Why is  mmc using delayed workqueue ?
 
-nsingh@nsingh-desktop ~/wireless-testing (git::master)$ lspci -k -n | grep -3 sdhci
-        Kernel modules: sky2
-03:0a.0 0501: 1524:0730
-03:0a.1 0805: 1524:0750
-        Kernel driver in use: sdhci-pci
-        Kernel modules: sdhci-pci
-03:0a.2 0501: 1524:0720
-nsingh@nsingh-desktop ~/wireless-testing (git::master)$ lspci -k | grep -3 sdhci
-        Kernel modules: sky2
-03:0a.0 FLASH memory: ENE Technology Inc ENE PCI Memory Stick Card Reader Controller
-03:0a.1 SD Host controller: ENE Technology Inc ENE PCI SmartMedia / xD Card Reader Controller
-        Kernel driver in use: sdhci-pci
-        Kernel modules: sdhci-pci
-03:0a.2 FLASH memory: ENE Technology Inc Memory Stick Card Reader Controller
+So that device enumeration can happen in the background, without
+delaying the kernel boot while we wait for the controller to get all
+the way to creating partitions.
 
-> And does it make a difference if you use the SDIO-WLAN card or a standard SD
-> memory card?
+If we didn't use a workqueue and you were working on an embedded project
+that had an MMC slot that it *didn't* boot from, you'd be yelling at us
+for instead wasting time holding up your non-mmc boot by not letting
+userspace get going until we list MMC partitions.  We can't win.  :-)
 
-Um, I don't have physical access to the box, Naveen or Vipin would have to
-test this.
+In any case, I suspect that your system actually does boot faster than
+it would if we didn't use a workqueue -- this way the delays in waiting
+for the controller to come up are parallelized with other boot code.
+That's good, right?
 
-  Luis
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
