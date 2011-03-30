@@ -1,38 +1,41 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] dw_mmc: support send_auto_stop
-Date: Wed, 30 Mar 2011 13:37:28 +0100
-Message-ID: <AANLkTikzkX7vYu0h7T6-C5PvykOZAzYGnTmPydizkTU6@mail.gmail.com>
-References: <4D92C5D2.2000004@samsung.com>
+From: Lars-Peter Clausen <lars@metafoo.de>
+Subject: Re: [PATCH] mmc: change CONFIG of MMC_SDHCI based drivers from 'bool'
+ to 'tristate'
+Date: Wed, 30 Mar 2011 18:46:17 +0200
+Message-ID: <4D935E59.2020908@metafoo.de>
+References: <1300114465-3769-1-git-send-email-shawn.guo@freescale.com>	<20110328143806.GC18721@S2100-06.ap.freescale.net> <m37hbihenx.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:40407 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751681Ab1C3Mh3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 08:37:29 -0400
-Received: by gxk21 with SMTP id 21so485764gxk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2011 05:37:28 -0700 (PDT)
-In-Reply-To: <4D92C5D2.2000004@samsung.com>
+Received: from mailhost.informatik.uni-hamburg.de ([134.100.9.70]:33789 "EHLO
+	mailhost.informatik.uni-hamburg.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754760Ab1C3Qpc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 12:45:32 -0400
+In-Reply-To: <m37hbihenx.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Shawn Guo <shawn.guo@freescale.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, Mar 30, 2011 at 6:55 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> This patch is set the send_auto_stop bit in CMD register.
-> If use DW_MCI_QUIRK_SEND_AUTO_STOP, helps to send an exact
-> number of data bytes.
->
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+On 03/29/2011 03:57 AM, Chris Ball wrote:
+> Hi Shawn,
+> 
+> On Mon, Mar 28 2011, Shawn Guo wrote:
+>> Hi Chris,
+>>
+>> Any comment on this one?
+> 
+> Yep, I'll push it to mmc-next once -rc1 is released.
+> 
+> Thanks,
+> 
+> - Chris.
 
-This is something I have been meaning to look into, does it improve
-latency or throughput in your experiments?
+That patch doesn't make much sense. The config options are used to decide
+whether support for that platform should be build into the sdhci-platform or
+sdhci-of module. So setting them 'm' doesn't make any sense, since you can't
+build part of an module as a module. The effect for 'm' will probably be the
+same as for 'n'.
 
-Is there a reason you have implemented it as a quirk? I would have
-thought if it was a win (in performance or code size) it would be
-applicable to all instances of this block?
-
-If we implemented it as an unconditional feature then we could
-probably remove some of the explicit stop handling code.
+- Lars
