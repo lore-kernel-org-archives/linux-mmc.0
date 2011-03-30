@@ -1,58 +1,80 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: mmc ioctl for hw reset ,partitiing, enhanced area setting, boot
- partition update.
-Date: Wed, 30 Mar 2011 01:44:51 -0500
-Message-ID: <AANLkTik_rGsh7jOkGBRALtW=DB-x5pQrpu_UjAyq15dR@mail.gmail.com>
-References: <AANLkTinF8nWeV5sBb1FOswvPTVgOSbbCNGkOEsiX2+rV@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [RFC 0/4] sdhci: few patches for ENE 712 support
+Date: Wed, 30 Mar 2011 09:47:13 +0200
+Message-ID: <20110330074713.GA2232@pengutronix.de>
+References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
+ <20110319091544.GA16635@pengutronix.de>
+ <20110330011629.GA15578@tux>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="dDRMvlgZJXvWKvBx"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og108.obsmtp.com ([64.18.0.186]:37751 "EHLO
-	exprod5og108.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751533Ab1C3Goy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 02:44:54 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.167])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2U6hHIe012208
-	for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2011 02:43:17 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2U6aNmk010078
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2011 02:43:16 -0400 (EDT)
-Received: by mail-wy0-f170.google.com with SMTP id 34so1002304wyb.15
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 23:44:51 -0700 (PDT)
-In-Reply-To: <AANLkTinF8nWeV5sBb1FOswvPTVgOSbbCNGkOEsiX2+rV@mail.gmail.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:60753 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754628Ab1C3HrT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 03:47:19 -0400
+Content-Disposition: inline
+In-Reply-To: <20110330011629.GA15578@tux>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: NamJae Jeon <linkinjeon@gmail.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org
+To: "Luis R. Rodriguez" <lrodriguez@atheros.com>
+Cc: Luis Rodriguez <Luis.Rodriguez@Atheros.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Vipin Mehta <Vipin.Mehta@Atheros.com>, Naveen Singh <Naveen.Singh@Atheros.com>, "kvalo@adurom.com" <kvalo@adurom.com>, "j@w1.fi" <j@w1.fi>
 
-On Wed, Mar 30, 2011 at 12:23 AM, NamJae Jeon <linkinjeon@gmail.com> wrote:
-> Dear. Chris.
->
-> you know, there is no method to use emmc 4.41 function in current mmc driver.
->
-> hw reset ,partitiing, enhanced area setting, boot partition update etc..
->
-> If mmc have ioctl for emmc 4.4.1 functions, mmc user feel convenient.
->
-> Is there a plan supported emmc 4.41 fuctions ?
->
-> Thanks.
-> --
 
-I have sent a patch to support accessing partitions other than the
-user area ([RFC] MMC: MMC boot partitions support),  The first part
-just adds the required changes and enables the boot partitions. I
-didn't want to add everything before I got the core changes reviewed,
-commented and hopefully approved.
+--dDRMvlgZJXvWKvBx
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Actually the ioctl to support creating new device partitions will be
-interesting because that will affect the size of the user area, so it
-would need to be rescanned. Obviously performing something like that
-on an MMC with a filesystem could be deleterious...
+Hi Luis,
 
-What about hardware reset? It's more-or-less equivalent to powering
-off the bus from the SD controller... Why would you want to expose
-that through an ioctl?
+> I just tried this, it does not work, in fact my own my patches don't work=
+ too,
+> only the original crap does though for some odd magical reason.
+>=20
+> Then again, what I tried was:
+>=20
+> insmod ./sdhci.ko debug_quirks=3D0x8028
+>=20
+> Was that what you wanted me to try?
 
-A
+Yes. I assume this would have helped also (assuming that the original
+patchset was working), but looks like more investigation is needed.
+
+> 03:0a.1 0805: 1524:0750
+
+Okay, so you have PCI_DEVICE_ID_ENE_CB714_SD and not
+PCI_DEVICE_ID_ENE_CB714_SD_2 (just in case they need to be dealt
+differently).
+
+> > And does it make a difference if you use the SDIO-WLAN card or a standa=
+rd SD
+> > memory card?
+>=20
+> Um, I don't have physical access to the box, Naveen or Vipin would have to
+> test this.
+
+Might be worth.
+
+Thanks,
+
+    Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--dDRMvlgZJXvWKvBx
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk2S4AAACgkQD27XaX1/VRuvbQCfc+1lMWoAVlu5qpLiQFCaW2Zb
+XQIAni/jjHdZVeTrZ4Y0nsiszXY7nVWm
+=Fg1B
+-----END PGP SIGNATURE-----
+
+--dDRMvlgZJXvWKvBx--
