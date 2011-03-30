@@ -1,48 +1,43 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [comments] MMC: Reliable write support.
-Date: Wed, 30 Mar 2011 14:05:20 +0200
-Message-ID: <201103301405.21047.arnd@arndb.de>
-References: <1301001751-30785-1-git-send-email-andreiw@motorola.com> <201103290901.31680.arnd@arndb.de> <AANLkTinDdEJ0bwH3Kj_QmhD=Z=07eaRvpA=sASn+DmkJ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Dimitris Papastamos <dp@opensource.wolfsonmicro.com>
+Subject: [PATCH 2/2] MMC: SDHCI: Check mrq != NULL in sdhci_tasklet_finish
+Date: Wed, 30 Mar 2011 13:35:14 +0100
+Message-ID: <1301488514-20963-2-git-send-email-dp@opensource.wolfsonmicro.com>
+References: <1301488514-20963-1-git-send-email-dp@opensource.wolfsonmicro.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:57910 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754803Ab1C3MF0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 08:05:26 -0400
-In-Reply-To: <AANLkTinDdEJ0bwH3Kj_QmhD=Z=07eaRvpA=sASn+DmkJ@mail.gmail.com>
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:55723 "EHLO
+	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754175Ab1C3MfR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 08:35:17 -0400
+In-Reply-To: <1301488514-20963-1-git-send-email-dp@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-On Wednesday 30 March 2011, Andrei Warkentin wrote:
-> On Tue, Mar 29, 2011 at 2:01 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> > On Tuesday 29 March 2011, Andrei Warkentin wrote:
-> >> On Fri, Mar 25, 2011 at 10:14 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> >>
-> >> I confirmed with two MMC vendors that there is no "flush". Once the
-> >> DAT transfer completes, the data is stored on non-volatile storage as
-> >> soon as the busy status is cleared.
-> >>
-> >> Reliable writes are still "more reliable" because if the DAT transfer
-> >> is interrupted (power or reset through CMD0/CMD15 or hw pin for eMMC),
-> >> you have predictable flash contents. So it makes sense to map REQ_FUA
-> >> to it (and REQ_META, I would guess).
-> >
-> > Yes, sounds good.
-> >
-> > So I guess on MLC flash, a reliable write will go to a flash page
-> > that does not have data in any of its paired pages.
-> 
-> Should I resubmit the patch?
+It seems that under certain circumstances the sdhci_tasklet_finish()
+call can be entered with mrq set to NULL, causing the system to crash
+with a NULL pointer de-reference.
 
-I think the patch was ok, you can add my
+Seen on S3C6410 system.
 
-Reviewed-by: Arnd Bergmann <arnd@arndb.de>
+Signed-off-by: Dimitris Papastamos <dp@opensource.wolfsonmicro.com>
+---
+ drivers/mmc/host/sdhci.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Chris, what is your opinion on the patch?
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index e75d070..19f4ba6 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1341,7 +1341,7 @@ static void sdhci_tasklet_finish(unsigned long param)
+ 	 * upon error conditions.
+ 	 */
+ 	if (!(host->flags & SDHCI_DEVICE_DEAD) &&
+-	    ((mrq->cmd && mrq->cmd->error) ||
++	    mrq && ((mrq->cmd && mrq->cmd->error) ||
+ 		 (mrq->data && (mrq->data->error ||
+ 		  (mrq->data->stop && mrq->data->stop->error))) ||
+ 		   (host->quirks & SDHCI_QUIRK_RESET_AFTER_REQUEST))) {
+-- 
+1.7.4.2
 
-	Arnd
