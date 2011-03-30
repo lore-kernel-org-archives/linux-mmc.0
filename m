@@ -1,47 +1,38 @@
-From: Dimitris Papastamos <dp@opensource.wolfsonmicro.com>
-Subject: [PATCH 1/2] MMC: SDHCI: Check mrq->cmd in sdhci_tasklet_finish
-Date: Wed, 30 Mar 2011 13:35:13 +0100
-Message-ID: <1301488514-20963-1-git-send-email-dp@opensource.wolfsonmicro.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] dw_mmc: support send_auto_stop
+Date: Wed, 30 Mar 2011 13:37:28 +0100
+Message-ID: <AANLkTikzkX7vYu0h7T6-C5PvykOZAzYGnTmPydizkTU6@mail.gmail.com>
+References: <4D92C5D2.2000004@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:55722 "EHLO
-	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751681Ab1C3MfR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 08:35:17 -0400
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:40407 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751681Ab1C3Mh3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 08:37:29 -0400
+Received: by gxk21 with SMTP id 21so485764gxk.19
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2011 05:37:28 -0700 (PDT)
+In-Reply-To: <4D92C5D2.2000004@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-From: Ben Dooks <ben-linux@fluff.org>
+On Wed, Mar 30, 2011 at 6:55 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> This patch is set the send_auto_stop bit in CMD register.
+> If use DW_MCI_QUIRK_SEND_AUTO_STOP, helps to send an exact
+> number of data bytes.
+>
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-It seems that under certain circumstances that the sdhci_tasklet_finish()
-call can be entered with mrq->cmd set to NULL, causing the system to crash
-with a NULL pointer de-reference.
+This is something I have been meaning to look into, does it improve
+latency or throughput in your experiments?
 
-Unable to handle kernel NULL pointer dereference at virtual address 00000000
-PC is at sdhci_tasklet_finish+0x34/0xe8
-LR is at sdhci_tasklet_finish+0x24/0xe8
+Is there a reason you have implemented it as a quirk? I would have
+thought if it was a win (in performance or code size) it would be
+applicable to all instances of this block?
 
-Seen on S3C6410 system.
-
-Signed-off-by: Ben Dooks <ben-linux@fluff.org>
----
- drivers/mmc/host/sdhci.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 79ebc39..e75d070 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1341,7 +1341,7 @@ static void sdhci_tasklet_finish(unsigned long param)
- 	 * upon error conditions.
- 	 */
- 	if (!(host->flags & SDHCI_DEVICE_DEAD) &&
--		(mrq->cmd->error ||
-+	    ((mrq->cmd && mrq->cmd->error) ||
- 		 (mrq->data && (mrq->data->error ||
- 		  (mrq->data->stop && mrq->data->stop->error))) ||
- 		   (host->quirks & SDHCI_QUIRK_RESET_AFTER_REQUEST))) {
--- 
-1.7.4.2
-
+If we implemented it as an unconditional feature then we could
+probably remove some of the explicit stop handling code.
