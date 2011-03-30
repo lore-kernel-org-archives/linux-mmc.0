@@ -1,87 +1,72 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: About mmc delayed workqueue.
-Date: Wed, 30 Mar 2011 09:40:43 +0900
-Message-ID: <AANLkTik8Cymp9GDg9hFwmZuoZ9XySqUL9A7t3k1nM5UM@mail.gmail.com>
-References: <AANLkTikB-g44H80hLsrBUcJ4svOZAXisBvFvno4uqKm+@mail.gmail.com>
-	<20110329233459.GI27290@trinity.fluff.org>
-	<m3sju58pap.fsf@pullcord.laptop.org>
-	<AANLkTi=5R9w0k_Hg=htyDc=aQDA+t1HOLvWtfAOvMo+z@mail.gmail.com>
+From: "Luis R. Rodriguez" <lrodriguez@atheros.com>
+Subject: Re: [RFC 0/4] sdhci: few patches for ENE 712 support
+Date: Tue, 29 Mar 2011 18:16:29 -0700
+Message-ID: <20110330011629.GA15578@tux>
+References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com>
+ <20110319091544.GA16635@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:51753 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753295Ab1C3Ako convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2011 20:40:44 -0400
-Received: by wwa36 with SMTP id 36so852694wwa.1
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 17:40:43 -0700 (PDT)
-In-Reply-To: <AANLkTi=5R9w0k_Hg=htyDc=aQDA+t1HOLvWtfAOvMo+z@mail.gmail.com>
+Received: from mail.atheros.com ([12.19.149.2]:49058 "EHLO mail.atheros.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753804Ab1C3BQd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 29 Mar 2011 21:16:33 -0400
+Content-Disposition: inline
+In-Reply-To: <20110319091544.GA16635@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Luis Rodriguez <Luis.Rodriguez@Atheros.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Vipin Mehta <Vipin.Mehta@Atheros.com>, Naveen Singh <Naveen.Singh@Atheros.com>, "kvalo@adurom.com" <kvalo@adurom.com>, "j@w1.fi" <j@w1.fi>
 
-Dear. Chris, Ben.
+On Sat, Mar 19, 2011 at 02:15:44AM -0700, Wolfram Sang wrote:
+> 
+> > I prefer code upstream though so here is my split and cleanup
+> > of these patches. I've tested it with my ENE card. Since I am
+> > new to SDHCI I would prefer someone with more experience review
+> > these chagnes and the respective commit log messages. I've
+> > tried to make sense of them as best as I can. Unfortunately
+> > I was not given any explanation to these changes except the
+> > patch I got so I tried to make the best of it.
+> 
+> You did make the best out of it; still, you probably won't be surprised to hear
+> that all the patches are, well, not acceptable ;) I agree with Chris about 1/4,
+> I think 2-4 are for a broken card detection and there is already a quirk for
+> that. So you could also try dropping 2-4 and use
+> 
+> 	sdhci.debug_quirks = 0x8028
+> 
+> That should enable the standard quirks for this card and BROKEN_CARD.
 
-Thanks for your reply.
+I just tried this, it does not work, in fact my own my patches don't work too,
+only the original crap does though for some odd magical reason.
 
-As you know, booting time is important factor in embededd device.
+Then again, what I tried was:
 
-If rootdelay is set to 5, kernel will be waiting for 5 sec. root_wait
-is also looping per 100ms.
+insmod ./sdhci.ko debug_quirks=0x8028
 
-I have a question. Why is  mmc using delayed workqueue ?
+Was that what you wanted me to try?
 
-Thanks.
+> Can you also please post the PCI-ID of this card?
 
+nsingh@nsingh-desktop ~/wireless-testing (git::master)$ lspci -k -n | grep -3 sdhci
+        Kernel modules: sky2
+03:0a.0 0501: 1524:0730
+03:0a.1 0805: 1524:0750
+        Kernel driver in use: sdhci-pci
+        Kernel modules: sdhci-pci
+03:0a.2 0501: 1524:0720
+nsingh@nsingh-desktop ~/wireless-testing (git::master)$ lspci -k | grep -3 sdhci
+        Kernel modules: sky2
+03:0a.0 FLASH memory: ENE Technology Inc ENE PCI Memory Stick Card Reader Controller
+03:0a.1 SD Host controller: ENE Technology Inc ENE PCI SmartMedia / xD Card Reader Controller
+        Kernel driver in use: sdhci-pci
+        Kernel modules: sdhci-pci
+03:0a.2 FLASH memory: ENE Technology Inc Memory Stick Card Reader Controller
 
-> 2011/3/30 Chris Ball <cjb@laptop.org>:
->> Hi,
->>
->> On Tue, Mar 29 2011, Ben Dooks wrote:
->>> On Wed, Mar 30, 2011 at 08:33:12AM +0900, NamJae Jeon wrote:
->>>> Hi. Chris.
->>>>
->>>> I found some problem in mmc driver. =A0As you know, in nand trend,=
- emmc
->>>> nand is used =A0booting device in embededd product.
->>>
->>> yeah, a really nasty trend if you ask me.
->>>
->>>> It means that kernel, rootfs image is stored in emmc nand device. =
-and
->>>> when rescaning mmc, mmc driver is working by delay work queue.
->>>>
->>>> It can be cause "can not mount rootfs". =A0If =A0kernel mounting i=
-s faster
->>>> than mmc rescan, this problem would occur..
->>>>
->>>> I changed to schedule_work instead of mmc_schedule_delayed_work. I=
- can
->>>> make patch & test.
->>>>
->>>> could you tell me your opinion ?
->>>
->>> Use root_wait on the commandline and it will wait for the root devi=
-ce
->>> to become reayd.
->>
->> Ben's right that you should use "rootwait" (I don't think it works w=
-ith
->> the underscore in the middle), rootdelay=3D5 if you want the boot to=
- fail
->> if the partition isn't mounted after a little extra time, or an init=
-rd
->> if you want full control over rootfs mounting.
->>
->> These parameters are documented in Documentation/kernel-parameters.t=
-xt.
->>
->> Thanks,
->>
->> - Chris.
->> --
->> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
->> One Laptop Per Child
->>
->
+> And does it make a difference if you use the SDIO-WLAN card or a standard SD
+> memory card?
+
+Um, I don't have physical access to the box, Naveen or Vipin would have to
+test this.
+
+  Luis
