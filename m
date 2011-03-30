@@ -1,86 +1,58 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] dw_mmc: support send_auto_stop
-Date: Wed, 30 Mar 2011 14:55:30 +0900
-Message-ID: <4D92C5D2.2000004@samsung.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: mmc ioctl for hw reset ,partitiing, enhanced area setting, boot
+ partition update.
+Date: Wed, 30 Mar 2011 01:44:51 -0500
+Message-ID: <AANLkTik_rGsh7jOkGBRALtW=DB-x5pQrpu_UjAyq15dR@mail.gmail.com>
+References: <AANLkTinF8nWeV5sBb1FOswvPTVgOSbbCNGkOEsiX2+rV@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:9773 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750967Ab1C3F4o (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 01:56:44 -0400
-Received: from epmmp2 (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LIU00APTWIHP480@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 30 Mar 2011 14:56:41 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LIU00IZGWII73@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 30 Mar 2011 14:56:42 +0900 (KST)
+Received: from exprod5og108.obsmtp.com ([64.18.0.186]:37751 "EHLO
+	exprod5og108.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751533Ab1C3Goy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2011 02:44:54 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.167])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2U6hHIe012208
+	for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2011 02:43:17 -0400 (EDT)
+Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2U6aNmk010078
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2011 02:43:16 -0400 (EDT)
+Received: by mail-wy0-f170.google.com with SMTP id 34so1002304wyb.15
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2011 23:44:51 -0700 (PDT)
+In-Reply-To: <AANLkTinF8nWeV5sBb1FOswvPTVgOSbbCNGkOEsiX2+rV@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: will.newton@imgtec.com, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: NamJae Jeon <linkinjeon@gmail.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org
 
-This patch is set the send_auto_stop bit in CMD register.
-If use DW_MCI_QUIRK_SEND_AUTO_STOP, helps to send an exact
-number of data bytes.
+On Wed, Mar 30, 2011 at 12:23 AM, NamJae Jeon <linkinjeon@gmail.com> wrote:
+> Dear. Chris.
+>
+> you know, there is no method to use emmc 4.41 function in current mmc driver.
+>
+> hw reset ,partitiing, enhanced area setting, boot partition update etc..
+>
+> If mmc have ioctl for emmc 4.4.1 functions, mmc user feel convenient.
+>
+> Is there a plan supported emmc 4.41 fuctions ?
+>
+> Thanks.
+> --
 
+I have sent a patch to support accessing partitions other than the
+user area ([RFC] MMC: MMC boot partitions support),  The first part
+just adds the required changes and enables the boot partitions. I
+didn't want to add everything before I got the core changes reviewed,
+commented and hopefully approved.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c  |   10 ++++++++++
- include/linux/mmc/dw_mmc.h |    2 ++
- 2 files changed, 12 insertions(+), 0 deletions(-)
+Actually the ioctl to support creating new device partitions will be
+interesting because that will affect the size of the user area, so it
+would need to be rescanned. Obviously performing something like that
+on an MMC with a filesystem could be deleterious...
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 87e1f57..6c4cb46 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -229,6 +229,8 @@ static void dw_mci_set_timeout(struct dw_mci *host)
- 
- static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- {
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+	struct dw_mci *host = slot->host;
- 	struct mmc_data	*data;
- 	u32 cmdr;
- 	cmd->error = -EINPROGRESS;
-@@ -257,6 +259,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- 			cmdr |= SDMMC_CMD_STRM_MODE;
- 		if (data->flags & MMC_DATA_WRITE)
- 			cmdr |= SDMMC_CMD_DAT_WR;
-+		if ((host->quirks & DW_MCI_QUIRK_SEND_AUTO_STOP) &&
-+				(data->blocks > 1))
-+			cmdr |= SDMMC_CMD_SEND_STOP;
- 	}
- 
- 	return cmdr;
-@@ -656,6 +661,11 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		return;
- 	}
- 
-+	if ((host->quirks & DW_MCI_QUIRK_SEND_AUTO_STOP) && mrq->stop) {
-+		mrq->data->stop = NULL;
-+		mrq->stop = NULL;
-+	}
-+
- 	/* We don't support multiple blocks of weird lengths. */
- 	dw_mci_queue_request(host, slot, mrq);
- }
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index c0207a7..b98aafa 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -176,6 +176,8 @@ struct dw_mci_dma_ops {
- #define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
- /* Unreliable card detection */
- #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
-+/* Use Auto_Send_Stop Command */
-+#define DW_MCI_QUIRK_SEND_AUTO_STOP		BIT(4)
- 
- 
- struct dma_pdata;
+What about hardware reset? It's more-or-less equivalent to powering
+off the bus from the SD controller... Why would you want to expose
+that through an ioctl?
+
+A
