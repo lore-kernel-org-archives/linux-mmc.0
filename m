@@ -1,82 +1,80 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCHv4] MMC: MMC boot partitions support.
-Date: Thu, 31 Mar 2011 13:17:21 +0200
-Message-ID: <201103311317.22110.arnd@arndb.de>
-References: <1300533491-2378-2-git-send-email-andreiw@motorola.com> <201103301403.20779.arnd@arndb.de> <AANLkTimD=vwG-Jh0a4E2tYYYwA9sG5sVWS8BFrDBeThb@mail.gmail.com>
+From: Josh Boyer <jwboyer@gmail.com>
+Subject: Re: [Bugme-new] [Bug 32242] New: irq 18, nobody cared, nor did irqpoll
+Date: Thu, 31 Mar 2011 09:32:05 -0400
+Message-ID: <AANLkTinq74akK9hPMt2vjmsqUGFx7L-ZG3D=FY88vXue@mail.gmail.com>
+References: <bug-32242-10286@https.bugzilla.kernel.org/>
+	<20110330165140.c5ca5705.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:54304 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751202Ab1CaLRf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2011 07:17:35 -0400
-In-Reply-To: <AANLkTimD=vwG-Jh0a4E2tYYYwA9sG5sVWS8BFrDBeThb@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20110330165140.c5ca5705.akpm@linux-foundation.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: harri@afaics.de, linux-mtd@lists.infradead.org, bugzilla-daemon@bugzilla.kernel.org, linux-mmc@vger.kernel.org, bugme-daemon@bugzilla.kernel.org, linux-acpi@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org
 
-On Wednesday 30 March 2011, Andrei Warkentin wrote:
-> On Wed, Mar 30, 2011 at 7:03 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> Since eMMC 4.41, you can create "general purpose" partitions (up to
-> 4), which will be carved out of the user partition, and can be used in
-> any way possible, thus potentially holding file system partitions.
+On Wed, Mar 30, 2011 at 7:51 PM, Andrew Morton
+<akpm@linux-foundation.org> wrote:
+>> I got this at boot time of my laptop:
+>>
+>> [ =A0 11.837498] irq 18: nobody cared (try booting with the "irqpoll=
+" option)
+>> [ =A0 11.837503] Pid: 1618, comm: echo Not tainted 2.6.38.2 #1
+>> [ =A0 11.837504] Call Trace:
+>> [ =A0 11.837506] =A0<IRQ> =A0[<ffffffff810723af>] ?
+>> __report_bad_irq.clone.2+0x30/0x7c
+>> [ =A0 11.837515] =A0[<ffffffff81072502>] ? note_interrupt+0x107/0x17=
+9
+>> [ =A0 11.837518] =A0[<ffffffff81072f8e>] ? handle_fasteoi_irq+0xa6/0=
+xd4
+>> [ =A0 11.837522] =A0[<ffffffff810036cc>] ? call_softirq+0x1c/0x28
+>> [ =A0 11.837525] =A0[<ffffffff8100514f>] ? handle_irq+0x17/0x1d
+>> [ =A0 11.837527] =A0[<ffffffff81004e80>] ? do_IRQ+0x45/0xad
+>> [ =A0 11.837532] =A0[<ffffffff812a2d13>] ? ret_from_intr+0x0/0xe
+>> [ =A0 11.837533] =A0<EOI> =A0[<ffffffff81175b76>] ? cfb_imageblit+0x=
+19e/0x434
+>> [ =A0 11.837539] =A0[<ffffffff812a2d0e>] ? common_interrupt+0xe/0x13
+>> [ =A0 11.837543] =A0[<ffffffff81170fa7>] ? bit_putcs+0x3c0/0x455
+>> [ =A0 11.837546] =A0[<ffffffff81170bcb>] ? bit_cursor+0x439/0x455
+>> [ =A0 11.837549] =A0[<ffffffff8116b93b>] ? fbcon_putcs+0xef/0xfe
+>> [ =A0 11.837551] =A0[<ffffffff81170be7>] ? bit_putcs+0x0/0x455
+>> [ =A0 11.837554] =A0[<ffffffff8116ef5b>] ? fbcon_redraw.clone.15+0xc=
+b/0x160
+>> [ =A0 11.837557] =A0[<ffffffff8116f60e>] ? fbcon_scroll+0x61e/0xb9d
+>> [ =A0 11.837561] =A0[<ffffffff811b2436>] ? scrup+0x67/0xd4
+>> [ =A0 11.837563] =A0[<ffffffff811b25c7>] ? lf+0x25/0x58
+>> [ =A0 11.837566] =A0[<ffffffff811b58fb>] ? do_con_write+0x8aa/0x1e40
+>> [ =A0 11.837569] =A0[<ffffffff81170792>] ? bit_cursor+0x0/0x455
+>> [ =A0 11.837572] =A0[<ffffffff811b6ed5>] ? con_write+0xd/0x23
+>> [ =A0 11.837575] =A0[<ffffffff811a5593>] ? do_output_char+0x87/0x199
+>> [ =A0 11.837578] =A0[<ffffffff811a56d4>] ? process_output+0x2f/0x43
+>> [ =A0 11.837580] =A0[<ffffffff811a6063>] ? n_tty_write+0x26b/0x34d
+>> [ =A0 11.837584] =A0[<ffffffff8103018a>] ? default_wake_function+0x0=
+/0x11
+>> [ =A0 11.837587] =A0[<ffffffff811a3374>] ? tty_write+0x1ad/0x231
+>> [ =A0 11.837589] =A0[<ffffffff811a5df8>] ? n_tty_write+0x0/0x34d
+>> [ =A0 11.837593] =A0[<ffffffff810b7b60>] ? vfs_write+0xaf/0x129
+>> [ =A0 11.837596] =A0[<ffffffff810b7db3>] ? sys_write+0x45/0x6e
+>> [ =A0 11.837598] =A0[<ffffffff8100287b>] ? system_call_fastpath+0x16=
+/0x1b
+>> [ =A0 11.837600] handlers:
+>> [ =A0 11.837601] [<ffffffffa01f80a7>] (sdhci_irq+0x0/0x4d5 [sdhci])
+>> [ =A0 11.837621] [<ffffffffa05bb871>] (r852_irq+0x0/0x201 [r852])
+>
+> So both sdhci_irq and r852_irq were looking at the IRQ, but neither o=
+f
+> them were interested in it.
+>
+> Could be that the bug lies in neither driver, at that something went
+> wrong with the system setup. =A0ACPI?
 
-My feeling is that these should be separate from the boot partition.
-It could probably be done using a new fs/partitions/mmc.c file
-that directly interacts with the mmc layer instead of looking
-at the MS-DOS master boot record. That way, you could define the
-same partitions (mmcblk0p1, ...) using a different method.
+I don't see anything that would implicate the MTD layer at all.  SDHCI
+is unrelated to MTD.  Just an FYI.
 
-It also requires a user interface that a new mmc-fdisk tool
-can talk to, in order to modify the partition table, not sure
-if it's possible to use the BLKPG ioctl for this.
- 
-> There is also the "Replay Protected Memory Block" device partition,
-> which is not able to host a file system in the normal sense (because
-> layer over the MMC block transfer protocol is a "replay protected
-> transaction" protocol, which could be used by a user-mode application
-> directly reading/writing from /dev/block/mmcblkXXX).
-
-Ok. That sounds like a use case for an ioctl interface then, if
-we even want to expose it.
- 
-> > * What devices specifically have these new partitions? Only eMMC 4.4
-> >  or also other versions?
-> >
-> 
-> Boot partitions are available in 4.3. The other ones (4 general
-> purpose ones, rpmb since 4.41).
- 
-ok.
-
-> Unfortunately, since the SD spec is proprietary, I have no way of
-> confirming whether the SD device partitioning (AFAIK there is a
-> concept of boot partitions for eSD) works the same way or not, so I
-> was maximally safe in supporting MMC device partitioning.
-
-The public parts of the SD standard specifically require MS-DOS
-partitioning to be used, so I assume that there is no internal
-method in addition. They also describe the presence of a "secure
-area" that can only be accessed after authentication. This could
-use a similar method as the boot partition, but it's unclear to
-me whether that is something that anyone is interested in.
-
-> > * How does a user identify which hardware partition corresponds to
-> >  a given block device and vice versa?
-> 
-> Right now, you would just need to know. With postfixes like
-> mmcblk0b0/mmcblk0g0 you would be able to tell the device partitions
-> apart from the main mmcblk0.
-
-Regarding the naming, I would not use a trailing zero, but it's probably
-a subjective thing. The other names I could imagine for the boot partition
-of mmc 0 are mmcboot0, mmcblk0b or mmcblk0boot.
-
-I also mentioned the character device option. Yet another way would be
-to add a sysfs_bin_attribute that corresponds to the boot partition and
-can be accessed using read/write, like we do for PCI resources.
-
-	Arnd
+josh
+--
+To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
