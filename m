@@ -1,75 +1,69 @@
-From: Philip Langdale <philipl@overt.org>
-Subject: Re: SDHCI: Ricoh [1180:e823] unable to mount MMC cards.
-Date: Thu, 31 Mar 2011 11:47:46 -0700
-Message-ID: <d21c920c680eac13afdf6b214627325e@mail.overt.org>
-References: <4D93AD5C.1070308@canonical.com>
- <m34o6k43c4.fsf@pullcord.laptop.org> <4D93BDA9.1020107@canonical.com>
- <m3vcz02mi1.fsf@pullcord.laptop.org> <4D948BC4.6020904@canonical.com>
- <m3sju3z6yc.fsf@pullcord.laptop.org> <4D949298.4000701@canonical.com>
- <m3oc4rz5kp.fsf@pullcord.laptop.org> <4D94A510.4040509@canonical.com>
- <m3fwq3z1yu.fsf@pullcord.laptop.org> <4D94B552.8020108@canonical.com>
- <m3zkoburoz.fsf@pullcord.laptop.org> <4D94C0E5.6070801@canonical.com>
- <m3vcyzuols.fsf@pullcord.laptop.org>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [PATCHv4] MMC: MMC boot partitions support.
+Date: Thu, 31 Mar 2011 14:17:49 -0500
+Message-ID: <AANLkTinQts_R5RaWw=ZkREQaVbAD8A4NxDj0o9+EaBGQ@mail.gmail.com>
+References: <1300533491-2378-2-git-send-email-andreiw@motorola.com>
+	<m3zkoc2ne4.fsf@pullcord.laptop.org>
+	<AANLkTinmVNGpmjLNB31nuBke+LD+jJ8AbwNGp14tH+d2@mail.gmail.com>
+	<201103311301.12053.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from usul.saidi.cx ([204.11.33.34]:56764 "EHLO usul.overt.org"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1759164Ab1CaTPH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 31 Mar 2011 15:15:07 -0400
-In-Reply-To: <m3vcyzuols.fsf@pullcord.laptop.org>
+Received: from exprod5og112.obsmtp.com ([64.18.0.24]:51236 "EHLO
+	exprod5og112.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753620Ab1CaTRy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2011 15:17:54 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.176.130.20])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2VJGDw8001983
+	for <linux-mmc@vger.kernel.org>; Thu, 31 Mar 2011 15:16:14 -0400 (EDT)
+Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2VIlTk3016363
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Thu, 31 Mar 2011 15:16:13 -0400 (EDT)
+Received: by mail-wy0-f170.google.com with SMTP id 34so2970848wyb.15
+        for <linux-mmc@vger.kernel.org>; Thu, 31 Mar 2011 12:17:50 -0700 (PDT)
+In-Reply-To: <201103311301.12053.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Manoj <manoj.iyer@canonical.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Maxim Levitsky <maximlevitsky@gmail.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
- On Thu, 31 Mar 2011 14:33:19 -0400, Chris Ball <cjb@laptop.org> wrote:
-> Hi Manoj,
+On Thu, Mar 31, 2011 at 6:01 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Thursday 31 March 2011, Andrei Warkentin wrote:
+>> Well, there are less esoteric ways of turning something into a
+>> paperweight =). No, the whole point of adding the device partition
+>> support is so you don't have to go through hoops to read and write
+>> them.
 >
-> On Thu, Mar 31 2011, Manoj wrote:
->> Card did not mount. New dmesg is attached.
+> Agreed.
 >
-> Okay.  There's nothing in the log about Ricoh, which probably means 
-> that
-> it bailed out early in the function.  You could add a printk to the 
-> top
-> of ricoh_mmc_fixup_rl5c476() if you want to be really sure that the 
-> code
-> there is getting a chance to run.
+>> The scenario where it matters (embedded Linux devices booting through
+>> boot partitions) are such, that if you went through sufficient hoops
+>> to get root access, and can build and boot a kernel to enable these
+>> options for that device, then you must know what you're doing, and a
+>> warning message in the Kconfig help is sufficient. The generic case of
+>> people sticking cards into a PCI SDHCI controller under Ubuntu is such
+>> that you can do no real damage.
 >
-> I think the likely conclusion is that:
+> One possible way of dealing with this would be to make the boot partition
+> a character device instead of a block device. That would still allow
+> you to overwrite it, but make it very obvious that you cannot mount or
+> partition it.
 >
-> (a) The Ricoh controller has a proprietary MMC function that is 
-> stealing
->     MMC cards away from the SDHCI controller even though the SDHCI 
-> could
->     read them if it had a chance to.
+> On the other hand, it would be a rather esoteric interface, since the
+> hardware is still fundamentally block based, we just use it in a different
+> way.
 >
-> (b) We don't know how to turn the MMC controller off, because our old
->     method for doing so isn't working on this new 0xe823 model.
->
-> I'm adding a few people who've touched this code to CC: in case they
-> have any ideas on working out how to disable the MMC function.  If 
-> you
-> have contact with Ricoh directly or through a vendor, please ask them
-> for the PCI configuration writes needed to disable the MMC function 
-> on
-> this model so that you can read MMC cards with the SD interface 
-> instead.
 
- For what it's worth, I previously investigated a Dell e6400 with an 
- 0x822
- and an 0x823 and even without the MMC function disabled, the SD 
- function
- would get the SD card. The machine I currently have access to just has
- the 0x822 function so I doubt it can be used to prove anything.
+Plus what if you do intend to have a file system there? Other than
+complexity and non-obvious usage, I don't see
+anything gained by this. I wouldn't worry about ways of misusing this.
+As I've said, in the only case it matters (some embedded device
+booting from the boot partition), the user would have to gain root
+access, build a kernel giving access to the boot partitions and be
+able to boot into it. So a warning in Kconfig is sufficient.
 
- I was under the impression they'd changed the priority of the 
- controllers
- (and probably requiring the MMC driver to set a flag to make it steal
- cards)
+If you guys feel concerned, then we can add another Kconfig option
+that will allow write access to the boot partitions.
 
- --phil
+A
