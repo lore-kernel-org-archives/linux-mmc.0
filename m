@@ -1,41 +1,46 @@
-From: Manoj <manoj.iyer@canonical.com>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: SDHCI: Ricoh [1180:e823] unable to mount MMC cards.
-Date: Thu, 31 Mar 2011 09:12:20 -0500
-Message-ID: <4D948BC4.6020904@canonical.com>
-References: <4D93AD5C.1070308@canonical.com>	<m34o6k43c4.fsf@pullcord.laptop.org> <4D93BDA9.1020107@canonical.com> <m3vcz02mi1.fsf@pullcord.laptop.org>
+Date: Thu, 31 Mar 2011 10:43:23 -0400
+Message-ID: <m3sju3z6yc.fsf@pullcord.laptop.org>
+References: <4D93AD5C.1070308@canonical.com>
+	<m34o6k43c4.fsf@pullcord.laptop.org> <4D93BDA9.1020107@canonical.com>
+	<m3vcz02mi1.fsf@pullcord.laptop.org> <4D948BC4.6020904@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from adelie.canonical.com ([91.189.90.139]:60139 "EHLO
-	adelie.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753179Ab1CaOMX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2011 10:12:23 -0400
-In-Reply-To: <m3vcz02mi1.fsf@pullcord.laptop.org>
+Received: from void.printf.net ([89.145.121.20]:58656 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757479Ab1CaOhc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 31 Mar 2011 10:37:32 -0400
+In-Reply-To: <4D948BC4.6020904@canonical.com> (Manoj's message of "Thu, 31 Mar
+	2011 09:12:20 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
+To: Manoj <manoj.iyer@canonical.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
+Hi Manoj,
 
-> Hi,
+On Thu, Mar 31 2011, Manoj wrote:
+>> There's no sign of life at all from the card.  Have you tried another
+>> MMC card to verify that this one isn't broken?  Or the quirks?
 >
-> On Wed, Mar 30 2011, Manoj wrote:
->>>
->>> * turn on CONFIG_MMC_DEBUG and post output
->>> * see if sdhci.debug_quirks=1 helps
->>
->> It could be that this card does not support MMC cards, it shows up as
->> SDHCI controller and does not mention MMC, or may be they all come up
->> as SDHCI, I dont know enough to make that assessment.
->>
->> Here is the output with debug turned on. Sorry for the flood:
->
-> There's no sign of life at all from the card.  Have you tried another
-> MMC card to verify that this one isn't broken?  Or the quirks?
+> Yes, tried it all, I have tried MMC, MMCplus, and quirks. I get the
+> same result. At the same time it sees SDHCI just fine.
 
-Yes, tried it all, I have tried MMC, MMCplus, and quirks. I get the same 
-result. At the same time it sees SDHCI just fine.
+How about setting CONFIG_MMC_RICOH_MMC?
 
->
-> - Chris.
+config MMC_RICOH_MMC
+        bool "Ricoh MMC Controller Disabler  (EXPERIMENTAL)"
+        depends on MMC_SDHCI_PCI
+        help
+          This adds a pci quirk to disable Ricoh MMC Controller. This
+          proprietary controller is unnecessary because the SDHCI driver
+          supports MMC cards on the SD controller, but if it is not
+          disabled, it will steal the MMC cards away - rendering them
+          useless. It is safe to select this even if you don't
+          have a Ricoh based card reader.
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
