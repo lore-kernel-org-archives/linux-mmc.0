@@ -1,73 +1,77 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [PATCHv4] MMC: MMC boot partitions support.
-Date: Thu, 31 Mar 2011 01:57:09 -0500
-Message-ID: <AANLkTinmVNGpmjLNB31nuBke+LD+jJ8AbwNGp14tH+d2@mail.gmail.com>
-References: <1300533491-2378-2-git-send-email-andreiw@motorola.com>
-	<1300828300-8677-2-git-send-email-andreiw@motorola.com>
-	<AANLkTinMu57VyaVK3zBpePdJ-Yi=g9zt2833UtbcRpM5@mail.gmail.com>
-	<201103301403.20779.arnd@arndb.de>
-	<AANLkTimD=vwG-Jh0a4E2tYYYwA9sG5sVWS8BFrDBeThb@mail.gmail.com>
-	<m3ipv044c6.fsf@pullcord.laptop.org>
-	<m3ei5o446f.fsf@pullcord.laptop.org>
-	<AANLkTimDp0yRgf-PLVcmd8Y6wdHJ3GNn-U37CytY3Eov@mail.gmail.com>
-	<m3zkoc2ne4.fsf@pullcord.laptop.org>
+From: Harald Dunkel <harri@afaics.de>
+Subject: Re: [Bugme-new] [Bug 32242] New: irq 18, nobody cared, nor did irqpoll
+Date: Thu, 31 Mar 2011 12:59:12 +0200
+Message-ID: <4D945E80.8080104@afaics.de>
+References: <bug-32242-10286@https.bugzilla.kernel.org/>
+	<20110330165140.c5ca5705.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og116.obsmtp.com ([64.18.0.147]:60161 "EHLO
-	exprod5og116.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756245Ab1CaG5N convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2011 02:57:13 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.167])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2V6tY86001773
-	for <linux-mmc@vger.kernel.org>; Thu, 31 Mar 2011 02:55:34 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p2V6obpx000109
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Thu, 31 Mar 2011 02:55:34 -0400 (EDT)
-Received: by mail-ww0-f46.google.com with SMTP id 28so2326006wwb.3
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2011 23:57:10 -0700 (PDT)
-In-Reply-To: <m3zkoc2ne4.fsf@pullcord.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+In-Reply-To: <20110330165140.c5ca5705.akpm@linux-foundation.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: linux-mtd-bounces@lists.infradead.org
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-mtd@lists.infradead.org, bugzilla-daemon@bugzilla.kernel.org, linux-mmc@vger.kernel.org, bugme-daemon@bugzilla.kernel.org, linux-acpi@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org
 
-On Wed, Mar 30, 2011 at 6:34 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Wed, Mar 30 2011, Andrei Warkentin wrote:
->> The argument against turning it on by default is that someone might
->> figure that mke2fs-ing the boot partitions is a good way to reclaim
->> 4MB on their rooted device,
->> and if they didn't realize the data was necessary for boot-up, they
->> will brick the device.
->
-> Ah. =A0Ugh, that sucks; I can totally see that happening. =A0Now I'm
-> wondering if we should just be hardcoding boot devices as always
-> read-only and just refusing to write to them.
->
-> What do others think? =A0Is there an acceptable tradeoff somewhere?
-> It's not clear to me that Kconfig entries are sufficient to obtain
-> consent to present r/w mounts of the boot partitions; the user
-> writing the "dd" line usually isn't the person who made the Kconfig
-> selection, and the person who made the Kconfig selection is often a
-> distro maintainer who just turns on new Kconfig symbols without
-> reading closely.
->
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-Well, there are less esoteric ways of turning something into a
-paperweight =3D). No, the whole point of adding the device partition
-support is so you don't have to go through hoops to read and write
-them.
+On 03/31/11 01:51, Andrew Morton wrote:
+> 
+> So both sdhci_irq and r852_irq were looking at the IRQ, but neither of
+> them were interested in it.
+> 
+> Could be that the bug lies in neither driver, at that something went
+> wrong with the system setup.  ACPI?
+> 
 
-The scenario where it matters (embedded Linux devices booting through
-boot partitions) are such, that if you went through sufficient hoops
-to get root access, and can build and boot a kernel to enable these
-options for that device, then you must know what you're doing, and a
-warning message in the Kconfig help is sufficient. The generic case of
-people sticking cards into a PCI SDHCI controller under Ubuntu is such
-that you can do no real damage.
+Currently I cannot reproduce it, with or without acpi. /var/log/messages
+shows this morning:
 
-A
+[    1.004550] sdhci: Secure Digital Host Controller Interface driver
+[    1.004552] sdhci: Copyright(c) Pierre Ossman
+[    1.005643] sdhci-pci 0000:03:01.1: SDHCI controller found [1180:0822] (rev 22)
+[    1.005662] sdhci-pci 0000:03:01.1: PCI INT B -> GSI 18 (level, low) -> IRQ 18
+[    1.007252] tg3.c:v3.116 (December 3, 2010)
+[    1.007268] tg3 0000:09:00.0: PCI INT A -> GSI 17 (level, low) -> IRQ 17
+[    1.007513] usbcore: registered new interface driver usbfs
+[    1.007537] usbcore: registered new interface driver hub
+[    1.010765] mmc0: SDHCI controller on PCI [0000:03:01.1] using DMA
+[    1.010775] sdhci-pci 0000:03:01.2: SDHCI controller found [1180:0843] (rev 12)
+[    1.010786] sdhci-pci 0000:03:01.2: PCI INT B -> GSI 18 (level, low) -> IRQ 18
+[    1.013877] mmc1: SDHCI controller on PCI [0000:03:01.2] using DMA
+:
+:
+[    8.216702] r852 0000:03:01.4: PCI INT B -> GSI 18 (level, low) -> IRQ 18
+[    8.243648] r852: driver loaded succesfully
+
+
+:-{
+
+When it comes back I will try to reboot with acpi=off.
+
+
+Regards
+
+Harri
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
+
+iEYEARECAAYFAk2UXoAACgkQUTlbRTxpHjcragCghaLRrZJn7pkhbpkzfK0KjstI
+Sw8AniBuFLr0kIpE6ImtJ0b4hdQlILzW
+=ukS3
+-----END PGP SIGNATURE-----
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
