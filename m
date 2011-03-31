@@ -1,77 +1,46 @@
-From: Harald Dunkel <harri@afaics.de>
-Subject: Re: [Bugme-new] [Bug 32242] New: irq 18, nobody cared, nor did irqpoll
-Date: Thu, 31 Mar 2011 12:59:12 +0200
-Message-ID: <4D945E80.8080104@afaics.de>
-References: <bug-32242-10286@https.bugzilla.kernel.org/>
-	<20110330165140.c5ca5705.akpm@linux-foundation.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCHv4] MMC: MMC boot partitions support.
+Date: Thu, 31 Mar 2011 13:01:11 +0200
+Message-ID: <201103311301.12053.arnd@arndb.de>
+References: <1300533491-2378-2-git-send-email-andreiw@motorola.com> <m3zkoc2ne4.fsf@pullcord.laptop.org> <AANLkTinmVNGpmjLNB31nuBke+LD+jJ8AbwNGp14tH+d2@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-In-Reply-To: <20110330165140.c5ca5705.akpm@linux-foundation.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
-	<mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: linux-mtd-bounces@lists.infradead.org
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-mtd@lists.infradead.org, bugzilla-daemon@bugzilla.kernel.org, linux-mmc@vger.kernel.org, bugme-daemon@bugzilla.kernel.org, linux-acpi@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.187]:64617 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751677Ab1CaLBX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2011 07:01:23 -0400
+In-Reply-To: <AANLkTinmVNGpmjLNB31nuBke+LD+jJ8AbwNGp14tH+d2@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
+On Thursday 31 March 2011, Andrei Warkentin wrote:
+> Well, there are less esoteric ways of turning something into a
+> paperweight =). No, the whole point of adding the device partition
+> support is so you don't have to go through hoops to read and write
+> them.
 
-On 03/31/11 01:51, Andrew Morton wrote:
-> 
-> So both sdhci_irq and r852_irq were looking at the IRQ, but neither of
-> them were interested in it.
-> 
-> Could be that the bug lies in neither driver, at that something went
-> wrong with the system setup.  ACPI?
-> 
+Agreed.
 
-Currently I cannot reproduce it, with or without acpi. /var/log/messages
-shows this morning:
+> The scenario where it matters (embedded Linux devices booting through
+> boot partitions) are such, that if you went through sufficient hoops
+> to get root access, and can build and boot a kernel to enable these
+> options for that device, then you must know what you're doing, and a
+> warning message in the Kconfig help is sufficient. The generic case of
+> people sticking cards into a PCI SDHCI controller under Ubuntu is such
+> that you can do no real damage.
 
-[    1.004550] sdhci: Secure Digital Host Controller Interface driver
-[    1.004552] sdhci: Copyright(c) Pierre Ossman
-[    1.005643] sdhci-pci 0000:03:01.1: SDHCI controller found [1180:0822] (rev 22)
-[    1.005662] sdhci-pci 0000:03:01.1: PCI INT B -> GSI 18 (level, low) -> IRQ 18
-[    1.007252] tg3.c:v3.116 (December 3, 2010)
-[    1.007268] tg3 0000:09:00.0: PCI INT A -> GSI 17 (level, low) -> IRQ 17
-[    1.007513] usbcore: registered new interface driver usbfs
-[    1.007537] usbcore: registered new interface driver hub
-[    1.010765] mmc0: SDHCI controller on PCI [0000:03:01.1] using DMA
-[    1.010775] sdhci-pci 0000:03:01.2: SDHCI controller found [1180:0843] (rev 12)
-[    1.010786] sdhci-pci 0000:03:01.2: PCI INT B -> GSI 18 (level, low) -> IRQ 18
-[    1.013877] mmc1: SDHCI controller on PCI [0000:03:01.2] using DMA
-:
-:
-[    8.216702] r852 0000:03:01.4: PCI INT B -> GSI 18 (level, low) -> IRQ 18
-[    8.243648] r852: driver loaded succesfully
+One possible way of dealing with this would be to make the boot partition
+a character device instead of a block device. That would still allow
+you to overwrite it, but make it very obvious that you cannot mount or
+partition it.
 
+On the other hand, it would be a rather esoteric interface, since the
+hardware is still fundamentally block based, we just use it in a different
+way.
 
-:-{
-
-When it comes back I will try to reboot with acpi=off.
-
-
-Regards
-
-Harri
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iEYEARECAAYFAk2UXoAACgkQUTlbRTxpHjcragCghaLRrZJn7pkhbpkzfK0KjstI
-Sw8AniBuFLr0kIpE6ImtJ0b4hdQlILzW
-=ukS3
------END PGP SIGNATURE-----
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
+	Arnd
