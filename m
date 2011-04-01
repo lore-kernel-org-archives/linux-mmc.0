@@ -1,134 +1,74 @@
-From: Shawn Guo <shawn.guo-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Subject: Re: [PATCH 1/5] mmc: sdhci: make sdhci-pltfm device drivers self
-	registered
-Date: Fri, 1 Apr 2011 14:10:21 +0800
-Message-ID: <20110401061020.GF25866@S2100-06.ap.freescale.net>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH 4/5] mmc: sdhci: consolidate sdhci-of-esdhc and
+ sdhci-esdhc-imx
+Date: Fri, 1 Apr 2011 14:18:36 +0800
+Message-ID: <20110401061835.GG25866@S2100-06.ap.freescale.net>
 References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
-	<1301042931-4869-2-git-send-email-shawn.guo@linaro.org>
-	<20110331153322.GA26612@ponder.secretlab.ca>
+ <1301042931-4869-5-git-send-email-shawn.guo@linaro.org>
+ <20110331155312.GC26709@ponder.secretlab.ca>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:28789
+	"EHLO VA3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752690Ab1DAGRI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2011 02:17:08 -0400
 Content-Disposition: inline
-In-Reply-To: <20110331153322.GA26612-e0URQFbLeQY2iJbIjFUEsiwD8/FfD2ys@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20110331155312.GC26709@ponder.secretlab.ca>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-dev@lists.linaro.org, sameo@linux.intel.com, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, Mar 31, 2011 at 09:33:22AM -0600, Grant Likely wrote:
-> On Fri, Mar 25, 2011 at 04:48:47PM +0800, Shawn Guo wrote:
-> > The patch turns the common stuff in sdhci-pltfm.c into functions, and
-> > add device drivers their own .probe and .remove which in turn call
-> > into the common functions, so that those sdhci-pltfm device drivers
-> > register itself and keep all device specific things away from common
-> > sdhci-pltfm file.
+On Thu, Mar 31, 2011 at 09:53:12AM -0600, Grant Likely wrote:
+> On Fri, Mar 25, 2011 at 04:48:50PM +0800, Shawn Guo wrote:
+> > This patch is to consolidate SDHCI driver for Freescale eSDHC
+> > controller found on both MPCxxx and i.MX platforms.  It turns
+> > sdhci-of-esdhc.c and sdhci-esdhc-imx.c into one sdhci-esdhc.c,
+> > which gets the same pair of .probe and .remove serving two cases.
 > > 
-> > Signed-off-by: Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> > ---
+> >  drivers/mmc/host/Kconfig           |   38 ++--
+> >  drivers/mmc/host/Makefile          |    3 +-
+> >  drivers/mmc/host/sdhci-esdhc-imx.c |  210 ------------------
+> >  drivers/mmc/host/sdhci-esdhc.c     |  413 ++++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/sdhci-of-esdhc.c  |  162 --------------
 > 
-> Looks really good.  Relatively minor comments below, but you can add
-> this to the next version:
-> 
-> Reviewed-by: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-> 
-Thanks for the review.
-
-[...]
-> > +
-> > +static int __devinit sdhci_cns3xxx_probe(struct platform_device *pdev)
-> > +{
-> > +	struct sdhci_host *host;
-> > +	int ret;
-> > +
-> > +	host = sdhci_pltfm_init(pdev, &sdhci_cns3xxx_pdata);
-> > +	if (!host)
-> > +		return -ENOMEM;
-> > +
-> > +	ret = sdhci_add_host(host);
-> > +	if (ret)
-> > +		goto err_add_host;
-> > +
-> > +	return 0;
-> > +
-> > +err_add_host:
-> > +	sdhci_pltfm_free(pdev);
-> > +	return ret;
-> > +}
-> 
-> This pattern in this function is used by 2 drivers in this patch, and
-> 2 more users (with the addition of an sdhci_get_of_property() call) in
-> the 3rd patch.  An sdchi_pltfm_register(pdev, &pdata) that does the
-> whole sequence would probably be valuable.  Same for the _remove hook.
-> 
-OK, one more pair of helper function will be added.
-
-> Drivers that still need 2 stage registration, like the tegra driver,
-> would still be able to call sdhci_pltfm_init() and sdhci_add_host()
-> directly.
-> 
-> > +
-> > +static int __devexit sdhci_cns3xxx_remove(struct platform_device *pdev)
-> > +{
-> > +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> > +	int dead = 0;
-> > +	u32 scratch;
-> > +
-> > +	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-> > +	if (scratch == (u32)-1)
-> > +		dead = 1;
-> > +
-> > +	sdhci_remove_host(host, dead);
-> 
-> The following would be equivalent to the above three lines:
-> 
-> 	sdhci_remove_host(host, scratch == (u32)-1);
+> This patch would be easier to review if it was split into two patches;
+> first rename sdhci-esdhc-imx.c to sdhci-esdhc.c without any changes to
+> the .c code, and then a second patch to merge the ppc bits into the
+> imx version.
 > 
 OK.
 
-[...]
-> > @@ -3,7 +3,7 @@
-> >   *
-> >   * Author: Saeed Bishara <saeed-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-> >   *	   Mike Rapoport <mike-UTxiZqZC01RS1MOuV/RT9w@public.gmane.org>
-> > - * Based on sdhci-cns3xxx.c
-> > + * Based on sdhci-dove.c
-> 
-> This file *is* sdhci-dove.c.  Did you intend this change?  :-)
-> 
-My bad.
-
-[...]
-> > +#ifdef CONFIG_OF
-> > +	plat = kzalloc(sizeof(*plat), GFP_KERNEL);
-> > +	if (!plat) {
-> > +		rc = -ENOMEM;
-> > +		goto err_no_plat;
-> > +	}
-> > +	pdev->dev.platform_data = plat;
-> > +
-> > +	plat->cd_gpio = of_get_gpio(pdev->dev.of_node, 0);
-> > +	plat->wp_gpio = of_get_gpio(pdev->dev.of_node, 1);
-> > +	plat->power_gpio = of_get_gpio(pdev->dev.of_node, 2);
-> > +
-> > +	dev_info(&pdev->dev, "using gpios cd=%i, wp=%i power=%i\n",
-> > +		plat->cd_gpio, plat->wp_gpio, plat->power_gpio);
+> > +#if defined(CONFIG_OF)
+> > +#include <linux/of_device.h>
+> > +static const struct of_device_id sdhci_esdhc_dt_ids[] = {
+> > +#ifdef CONFIG_MMC_SDHCI_ESDHC_IMX
+> > +	{ .compatible = "fsl,imx-esdhc", .data = &sdhci_esdhc_imx_pdata },
 > > +#endif
+> > +#ifdef CONFIG_MMC_SDHCI_ESDHC_MPC
+> > +	{ .compatible = "fsl,mpc8379-esdhc", .data = &sdhci_esdhc_mpc_pdata },
+> > +	{ .compatible = "fsl,mpc8536-esdhc", .data = &sdhci_esdhc_mpc_pdata },
+> > +	{ .compatible = "fsl,esdhc", .data = &sdhci_esdhc_mpc_pdata },
+> > +#endif
+> > +	{ }
+> > +};
+> > +MODULE_DEVICE_TABLE(platform, sdhci_esdhc_dt_ids);
+> > +
+> > +static const struct of_device_id *
+> > +sdhci_esdhc_get_of_device_id(struct platform_device *pdev)
+> > +{
+> > +	return of_match_device(sdhci_esdhc_dt_ids, &pdev->dev);
 > 
-> This will need to be reworked for mainline since the Tegra device tree
-> support only exists in my git tree.  Basing it on devicetree/arm would
-> work.
+> You can add an empty implementation of of_match_device() to
+> linux/of_device.h.  That would eliminate the need for this function.
 > 
-OK. Will against mmc-next and test esdhc dt changes on devicetree/arm.
+Will follow what you suggested later to use .of_match pointer newly
+added into struct device.
 
 -- 
 Regards,
 Shawn
+
