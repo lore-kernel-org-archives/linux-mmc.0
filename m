@@ -1,74 +1,66 @@
-From: Russ Knize <Russ.Knize@motorola.com>
-Subject: Re: [PATCH] mmc: power class support
-Date: Fri, 1 Apr 2011 19:44:24 -0500
-Message-ID: <AANLkTinX4GvBPGXjn36sOv5h_n07jNyJpM3hW46zUD0+@mail.gmail.com>
-References: <AANLkTin_=jScYXaXNStx-RfmBopbY43fuV8ZdhcS4M3K@mail.gmail.com> <AANLkTinNGxQgfyph9PXh9cZdxQ+QFZwTw8=NpW-pPXpE@mail.gmail.com>
+From: Sascha Silbe <sascha-ml-reply-to-2011-2@silbe.org>
+Subject: Re: [PATCH v4 2/3]mmc: enable TRIM/ERASE caps for SDHCI host
+Date: Sun, 03 Apr 2011 11:41:41 +0200
+Message-ID: <1301823199-sup-1704@twin.sascha.silbe.org>
+References: <20110212062220.GC25519@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og107.obsmtp.com ([64.18.0.184]:33351 "EHLO
-	exprod5og107.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754549Ab1DBAoq convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2011 20:44:46 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p320h6YD018878
-	for <linux-mmc@vger.kernel.org>; Fri, 1 Apr 2011 20:43:06 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p320fj6A018715
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Fri, 1 Apr 2011 20:43:06 -0400 (EDT)
-Received: by mail-ww0-f46.google.com with SMTP id 28so4508898wwb.3
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2011 17:44:44 -0700 (PDT)
-In-Reply-To: <AANLkTinNGxQgfyph9PXh9cZdxQ+QFZwTw8=NpW-pPXpE@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; boundary="=-1301823731-978476-32191-9345-4-="; protocol="application/pgp-signature"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <20110212062220.GC25519@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, cjb <cjb@laptop.org>, linux-kernel <linux-kernel@vger.kernel.org>, akpm <akpm@linux-foundation.org>, adrian.hunter@flatty.sascha.silbe.org, adrian.hunter@nokia.com
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org
-
-OK.  Anything else?
-
-Russ W. Knize
-Mobile Devices Android Platform
-Desk: 847-523-9381
-Mobile: 224-622-1391
 
 
+--=-1301823731-978476-32191-9345-4-=
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Apr 1, 2011 at 7:28 PM, Andrei Warkentin <andreiw@motorola.com>=
- wrote:
-> Hi Russ,
->
-> On Fri, Apr 1, 2011 at 10:58 AM, Russ Knize <Russ.Knize@motorola.com>=
- wrote:
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Ignore switch err=
-ors from buggy cards that actually
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* do switch success=
-fully.
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_set_power_=
-class(host, max_dtr, bus_width);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err && err !=3D -E=
-BADMSG)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto f=
-ree_card;
->> +
->
-> 1) host->card is not yet set at this moment, you probably want to pas=
-s
-> card to mmc_set_power_class as well .
-> 2) It seems like you will call mmc_set_power_class even if bus_width
-> =3D=3D MMC_BUS_WIDTH_1. Is that supposed to work? 7.6.3 seems to impl=
-y
-> power classes only apply to 4-bit and 8-bit bus widths. As does the
-> paragraph on top of Page 138 of eMMC 4.41 spec, which says that for
-> 1-bit bus configuration the default applies (class 0).
-> 3) Since the current code supports DDR modes, you probably want to
-> extend support for PWR_CL_DDR_52_(360|195) as well.
->
-> Just curious, for the cards reporting switch errors but nonetheless
-> switching to the power class, do they update the EXT_CSD field?
->
-> A
->
+Excerpts from Chuanxiao Dong's message of Sat Feb 12 07:22:20 +0100 2011:=
+
+> SDHCI host controller has TRIM/ERASE capability, enable these caps for =
+erasing
+> purpose.
+> =
+
+> ERASE command needs R1B response. So for such command with busy signal,=
+ before
+> sending command, SDHCI host driver will simply set a maximum value for =
+timeout
+> control register which is safe to use.
+> =
+
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+
+Tested-By: Sascha Silbe <sascha-pgp@silbe.org>
+
+Tested on an OLPC XO-1 using a SanDisk 4GB class 4 card (retail). The
+BLKDISCARD ioctl (range 0..card size) returned immediately, no timeout
+issue encountered.
+
+Sascha
+
+-- =
+
+http://sascha.silbe.org/
+http://www.infra-silbe.de/
+
+--=-1301823731-978476-32191-9345-4-=
+Content-Disposition: attachment; filename="signature.asc"
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.1.0-git7d24ffa (GNU/Linux)
+
+iQEcBAEBCgAGBQJNmEDWAAoJELpz82VMF3DaTFQIAI2UGYeSRoU0ij4tYcL0RFl3
+mg5XShD730DNdNfA1AUTNy1tcEmToQ3v8ngF2wUCOuahTOBw2OnwNBw4fLVGi6cF
+x62A4Y05Uqx2lVTzQcCD2icCvQdUa4zm4gLA7jRkRl/LXbNiNEvrMoOxu+VYrh/S
+LYL/V1fKC0L6F3+XB+OVA9wu2AQfHaPolAboLFYhGK0Ugsf+qqesVL9i18yCbZvr
+iGnQPpaJlacSJoyeBXpDPs8vIXN7AEi3za20F1dK1if+2ncIqoG02YdgqR4YsOSb
+/YykP5SXwt3yBMs6HFUVq6jRpfMA0IH7V/UcRBOD04yseGOgza9VIk9ZY+uUrG4=
+=5yzw
+-----END PGP SIGNATURE-----
+
+--=-1301823731-978476-32191-9345-4-=--
