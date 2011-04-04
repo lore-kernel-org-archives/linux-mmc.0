@@ -1,66 +1,60 @@
-From: Sascha Silbe <sascha-ml-reply-to-2011-2@silbe.org>
-Subject: Re: [PATCH v4 2/3]mmc: enable TRIM/ERASE caps for SDHCI host
-Date: Sun, 03 Apr 2011 11:41:41 +0200
-Message-ID: <1301823199-sup-1704@twin.sascha.silbe.org>
-References: <20110212062220.GC25519@intel.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: sdhci: add error checking for mmc_add_host
+Date: Mon, 04 Apr 2011 11:48:57 +0900
+Message-ID: <4D993199.1060206@samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-1301823731-978476-32191-9345-4-="; protocol="application/pgp-signature"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <20110212062220.GC25519@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, cjb <cjb@laptop.org>, linux-kernel <linux-kernel@vger.kernel.org>, akpm <akpm@linux-foundation.org>, adrian.hunter@flatty.sascha.silbe.org, adrian.hunter@nokia.com
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:51767 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753679Ab1DDCuY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Apr 2011 22:50:24 -0400
+Received: from epmmp2 (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LJ300JVHX7X4650@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 04 Apr 2011 11:50:21 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LJ3005UFX7YYE@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 04 Apr 2011 11:50:22 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
+Sometimes we can't add the device,but we didn't check any error status.
+Need to check error status for mmc_add_host.
 
---=-1301823731-978476-32191-9345-4-=
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
 
-Excerpts from Chuanxiao Dong's message of Sat Feb 12 07:22:20 +0100 2011:=
-
-> SDHCI host controller has TRIM/ERASE capability, enable these caps for =
-erasing
-> purpose.
-> =
-
-> ERASE command needs R1B response. So for such command with busy signal,=
- before
-> sending command, SDHCI host driver will simply set a maximum value for =
-timeout
-> control register which is safe to use.
-> =
-
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-
-Tested-By: Sascha Silbe <sascha-pgp@silbe.org>
-
-Tested on an OLPC XO-1 using a SanDisk 4GB class 4 card (retail). The
-BLKDISCARD ioctl (range 0..card size) returned immediately, no timeout
-issue encountered.
-
-Sascha
-
--- =
-
-http://sascha.silbe.org/
-http://www.infra-silbe.de/
-
---=-1301823731-978476-32191-9345-4-=
-Content-Disposition: attachment; filename="signature.asc"
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.1.0-git7d24ffa (GNU/Linux)
-
-iQEcBAEBCgAGBQJNmEDWAAoJELpz82VMF3DaTFQIAI2UGYeSRoU0ij4tYcL0RFl3
-mg5XShD730DNdNfA1AUTNy1tcEmToQ3v8ngF2wUCOuahTOBw2OnwNBw4fLVGi6cF
-x62A4Y05Uqx2lVTzQcCD2icCvQdUa4zm4gLA7jRkRl/LXbNiNEvrMoOxu+VYrh/S
-LYL/V1fKC0L6F3+XB+OVA9wu2AQfHaPolAboLFYhGK0Ugsf+qqesVL9i18yCbZvr
-iGnQPpaJlacSJoyeBXpDPs8vIXN7AEi3za20F1dK1if+2ncIqoG02YdgqR4YsOSb
-/YykP5SXwt3yBMs6HFUVq6jRpfMA0IH7V/UcRBOD04yseGOgza9VIk9ZY+uUrG4=
-=5yzw
------END PGP SIGNATURE-----
-
---=-1301823731-978476-32191-9345-4-=--
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9e15f41..9c777bc 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2025,7 +2025,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 	mmiowb();
+ 
+-	mmc_add_host(mmc);
++	ret = mmc_add_host(mmc);
++	if (unlikely(ret))
++		goto err_free_mmc;
+ 
+ 	printk(KERN_INFO "%s: SDHCI controller on %s [%s] using %s\n",
+ 		mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+@@ -2041,6 +2043,9 @@ reset:
+ 	sdhci_reset(host, SDHCI_RESET_ALL);
+ 	free_irq(host->irq, host);
+ #endif
++err_free_mmc:
++	mmc_free_host(host);
++
+ untasklet:
+ 	tasklet_kill(&host->card_tasklet);
+ 	tasklet_kill(&host->finish_tasklet);
