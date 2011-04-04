@@ -1,61 +1,41 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] mmc: sdhci: add error checking for mmc_add_host
-Date: Mon, 4 Apr 2011 05:47:53 +0200
-Message-ID: <20110404034753.GA1428@pengutronix.de>
-References: <4D993199.1060206@samsung.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [PATCH v4 2/3]mmc: enable TRIM/ERASE caps for SDHCI host
+Date: Sun, 3 Apr 2011 23:06:09 -0500
+Message-ID: <BANLkTikGW3sYjW1HjSJfdBV22DK+Y0zi1Q@mail.gmail.com>
+References: <20110212062220.GC25519@intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="Kj7319i9nmIyA2yE"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:33857 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753604Ab1DDDr6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Apr 2011 23:47:58 -0400
-Content-Disposition: inline
-In-Reply-To: <4D993199.1060206@samsung.com>
+Received: from exprod5og111.obsmtp.com ([64.18.0.22]:33579 "EHLO
+	exprod5og111.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750715Ab1DDEGN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2011 00:06:13 -0400
+In-Reply-To: <20110212062220.GC25519@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org, adrian.hunter@nokia.com
 
+On Sat, Feb 12, 2011 at 12:22 AM, Chuanxiao Dong
+<chuanxiao.dong@intel.com> wrote:
+> SDHCI host controller has TRIM/ERASE capability, enable these caps for erasing
+> purpose.
+>
+> ERASE command needs R1B response. So for such command with busy signal, before
+> sending command, SDHCI host driver will simply set a maximum value for timeout
+> control register which is safe to use.
+>
 
---Kj7319i9nmIyA2yE
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Awesome. I took a look at the eMMC spec, and the following commands
+also have R1B responses:
 
-On Mon, Apr 04, 2011 at 11:48:57AM +0900, Jaehoon Chung wrote:
-> Sometimes we can't add the device,but we didn't check any error status.
-> Need to check error status for mmc_add_host.
+1) CMD5 (SLEEP_AWAKE)
+2) CMD6 (SWITCH)
+3) CMD7 (Select/Deselect - for Disconnected->Programming transitions)
+4) CMD12 (STOP_TRANSMISSION - for write case)
+5) CMD28 (SET_WRITE_PROT)
+6) CMD29 (CLR_WRITE_PROT)
 
-Thanks, this is correct, but...
+...so this should help with timeouts for those commands as well. Thanks!
 
-> -	mmc_add_host(mmc);
-> +	ret =3D mmc_add_host(mmc);
-> +	if (unlikely(ret))
-> +		goto err_free_mmc;
-
-=2E.. you are leaking the irq and the lcd_classdev here.
-
-Regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---Kj7319i9nmIyA2yE
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAk2ZP2kACgkQD27XaX1/VRvt7gCeKU+GADq/waOAMS0aHLZayDh+
-ivgAnjvaJlBLJSX9Vyrr4r/IMMEHEgss
-=1wLq
------END PGP SIGNATURE-----
-
---Kj7319i9nmIyA2yE--
+A
