@@ -1,54 +1,87 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [PATCH] MMC: enable TRIM/ERASE caps for SDHCI host.
-Date: Mon, 4 Apr 2011 03:34:12 -0500
-Message-ID: <BANLkTi=eHfeXHfNr9gkyBe2VW6uwWMkA9Q@mail.gmail.com>
-References: <BANLkTik0ijdeccTgqxf8Mu87s8jxevaOhA@mail.gmail.com>
-	<1301907694-4533-1-git-send-email-andreiw@motorola.com>
+From: Antonio Ospite <ospite@studenti.unina.it>
+Subject: Re: [PATCH 0/4] mmc_spi: Add support for regulator framework
+Date: Mon, 4 Apr 2011 11:56:31 +0200
+Message-ID: <20110404115631.67b1f317.ospite@studenti.unina.it>
+References: <1300733202-27316-1-git-send-email-ospite@studenti.unina.it>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; protocol="application/pgp-signature";
+ micalg="PGP-SHA1";
+ boundary="Signature=_Mon__4_Apr_2011_11_56_32_+0200_4LkaBDdw3mLxoal1"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og116.obsmtp.com ([64.18.0.147]:50589 "EHLO
-	exprod5og116.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754009Ab1DDIeQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2011 04:34:16 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p348WXpk017716
-	for <linux-mmc@vger.kernel.org>; Mon, 4 Apr 2011 04:32:34 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p348WWwL017699
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Mon, 4 Apr 2011 04:32:33 -0400 (EDT)
-Received: by wwb28 with SMTP id 28so5868803wwb.3
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Apr 2011 01:34:13 -0700 (PDT)
-In-Reply-To: <1301907694-4533-1-git-send-email-andreiw@motorola.com>
+Received: from smtp209.alice.it ([82.57.200.105]:54816 "EHLO smtp209.alice.it"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753731Ab1DDJ4q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 4 Apr 2011 05:56:46 -0400
+In-Reply-To: <1300733202-27316-1-git-send-email-ospite@studenti.unina.it>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Andrei Warkentin <andreiw@motorola.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>
+Cc: Antonio Ospite <ospite@studenti.unina.it>, Daniel Ribeiro <drwyrm@gmail.com>, David Brownell <dbrownell@users.sourceforge.net>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Ernst Schwab <eschwab@online.de>, Sonic Zhang <sonic.zhang@analog.com>, Linus Walleij <linus.walleij@stericsson.com>, openezx-devel@lists.openezx.org, linux-kernel@vger.kernel.org
 
-On Mon, Apr 4, 2011 at 4:01 AM, Andrei Warkentin <andreiw@motorola.com> wrote:
-> SDHCI host controller has TRIM/ERASE capability, enable these caps for erasing
-> purpose.
+--Signature=_Mon__4_Apr_2011_11_56_32_+0200_4LkaBDdw3mLxoal1
+Content-Type: text/plain; charset=US-ASCII
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, 21 Mar 2011 19:46:38 +0100
+Antonio Ospite <ospite@studenti.unina.it> wrote:
+
+> Hi,
+>=20
+> this patchset has the purpose of adding support for the regulator framewo=
+rk to=20
+> the mmc_spi driver. The first three patches are preparatory cleanups to m=
+ake=20
+> the fourth one more straightforward.
+>=20
+> Maybe the fourth patch can be improved, I am open to any suggestions abou=
+t it.
 >
-> ERASE command needs R1B response, so fix R1B-type command
-> handling for SDHCI controller. For non-DAT commands using a busy
-> reponse, the cmd->cmd_timeout (in ms) field is used for timeout
-> calculations. cmd->cmd_timeout field is appropriately set to the
-> correct erase timeout in core/core.c.
->
-> Based on patch by Chuanxiao Dong <chuanxiao.dong@intel.com>
-> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
 
-+Chuanxiao
+Ping. I forgot to Cc spi-devel-general on this series, should I resend
+it?
 
-Tested on Ricoh SDHCI controller (x64) with Arnd's erase tool (from
-flashbench) for -
-- Toshiba eMMC MMC08G (8Gb device) (with and without a changed version
-my partitioning patch)
-- SDHC SA08G (8Gb uSD in adapter)
+> These changes take strong inspiration from the pxamci driver; they have b=
+een=20
+> tested on a Motorola A910, which uses a regulator to powerup the MMC card=
+=20
+> connected to the SPI bus, a test from a current user of the mmc_spi drive=
+r=20
+> would not hurt just to be sure no regressions have been introduced.
+>=20
+> Thanks,
+>    Antonio
+>=20
+> Antonio Ospite (4):
+>   mmc_spi.c: factor out the check for power capability
+>   mmc_spi.c: factor out the SD card shutdown sequence
+>   mmc_spi.c: factor out a mmc_spi_setpower() function
+>   mmc_spi.c: add support for the regulator framework
+>=20
+>  drivers/mmc/host/mmc_spi.c |  194 +++++++++++++++++++++++++++++---------=
+------
+>  1 files changed, 129 insertions(+), 65 deletions(-)
+>=20
 
-Lack of proper R1B handling seems like a pervasive problem for other
-host controller drivers as well. I can start making patches, but I
-won't be able to test them since all I've got is SDHCI :(.
+--=20
+Antonio Ospite
+http://ao2.it
 
-A
+PGP public key ID: 0x4553B001
+
+A: Because it messes up the order in which people normally read text.
+   See http://en.wikipedia.org/wiki/Posting_style
+Q: Why is top-posting such a bad thing?
+
+--Signature=_Mon__4_Apr_2011_11_56_32_+0200_4LkaBDdw3mLxoal1
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk2ZldAACgkQ5xr2akVTsAHKIQCeL58ZVn17aOb6tKRjo7QdBA0Z
+CioAn1lsItDi+7N74H/2C47j9n+OfEcs
+=TNs2
+-----END PGP SIGNATURE-----
+
+--Signature=_Mon__4_Apr_2011_11_56_32_+0200_4LkaBDdw3mLxoal1--
