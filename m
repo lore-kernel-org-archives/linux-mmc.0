@@ -1,61 +1,71 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [PATCH v4 2/3]mmc: enable TRIM/ERASE caps for SDHCI host
-Date: Sun, 3 Apr 2011 23:33:52 -0500
-Message-ID: <BANLkTik0ijdeccTgqxf8Mu87s8jxevaOhA@mail.gmail.com>
-References: <20110212062220.GC25519@intel.com>
-	<BANLkTikGW3sYjW1HjSJfdBV22DK+Y0zi1Q@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH v2] mmc: sdhci: add error checking for mmc_add_host
+Date: Mon, 04 Apr 2011 15:07:02 +0900
+Message-ID: <4D996006.9030402@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og104.obsmtp.com ([64.18.0.178]:40916 "EHLO
-	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750793Ab1DDEdz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2011 00:33:55 -0400
-In-Reply-To: <BANLkTikGW3sYjW1HjSJfdBV22DK+Y0zi1Q@mail.gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:60677 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751654Ab1DDGIu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2011 02:08:50 -0400
+Received: from epmmp2 (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LJ400F7J6E4QPF0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 04 Apr 2011 15:08:28 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LJ400IES6E4WX@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 04 Apr 2011 15:08:28 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org, adrian.hunter@nokia.com
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Sun, Apr 3, 2011 at 11:06 PM, Andrei Warkentin <andreiw@motorola.com> wrote:
-> On Sat, Feb 12, 2011 at 12:22 AM, Chuanxiao Dong
-> <chuanxiao.dong@intel.com> wrote:
->> SDHCI host controller has TRIM/ERASE capability, enable these caps for erasing
->> purpose.
->>
->> ERASE command needs R1B response. So for such command with busy signal, before
->> sending command, SDHCI host driver will simply set a maximum value for timeout
->> control register which is safe to use.
->>
->
-> Awesome. I took a look at the eMMC spec, and the following commands
-> also have R1B responses:
->
-> 1) CMD5 (SLEEP_AWAKE)
-> 2) CMD6 (SWITCH)
-> 3) CMD7 (Select/Deselect - for Disconnected->Programming transitions)
-> 4) CMD12 (STOP_TRANSMISSION - for write case)
-> 5) CMD28 (SET_WRITE_PROT)
-> 6) CMD29 (CLR_WRITE_PROT)
->
-> ...so this should help with timeouts for those commands as well. Thanks!
->
-> A
->
+Sometimes we can't add the device,but we didn't check any error status.
+Need to check error status for mmc_add_host.
 
-On a second thought (and look), I see the following problems with this
-patch, which are otherwise going to make the MMC code confusing (and
-invalid).
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci.c |   14 ++++++++++++--
+ 1 files changed, 12 insertions(+), 2 deletions(-)
 
-1) Erase timeout value is defined by spec (eMMC or SD) and already
-calculated in mmc_set_erase_timeout within core/core.c. You should
-honor that value instead of picking the max timeout.
-2) The trim/erase commands are not the only commands with variable
-timeouts. For example, certain CMD6 operations take different amounts
-of time (Partition switch takes ext_csd:PARTITION_SWITCH_TIME) Right
-now the command structure contains the field "erase_timeout", which
-curiously enough is used nowhere other than getting set in
-core/core.c. I propose renaming it to cmd_timeout. If cmd.data is
-NULL, then cmd_timeout is used to set timeout for busy-type commands.
-
-A
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9e15f41..7070716 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2025,7 +2025,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 	mmiowb();
+ 
+-	mmc_add_host(mmc);
++	ret = mmc_add_host(mmc);
++	if (unlikely(ret))
++		goto err_free_mmc;
+ 
+ 	printk(KERN_INFO "%s: SDHCI controller on %s [%s] using %s\n",
+ 		mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+@@ -2036,11 +2038,19 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 	return 0;
+ 
++err_free_mmc:
++	mmc_free_host(host);
++
+ #ifdef SDHCI_USE_LEDS_CLASS
+ reset:
++#endif
+ 	sdhci_reset(host, SDHCI_RESET_ALL);
+ 	free_irq(host->irq, host);
+-#endif
++	if (host->vmmc) {
++		regulator_disable(host->vmmc);
++		regulator_put(host->vmmc);
++	}
++
+ untasklet:
+ 	tasklet_kill(&host->card_tasklet);
+ 	tasklet_kill(&host->finish_tasklet);
