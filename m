@@ -1,75 +1,51 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [PATCH] mmc: power class support
-Date: Sun, 3 Apr 2011 23:11:59 -0500
-Message-ID: <BANLkTi=x-6a5vtx3BHxifRBHEjimRApavQ@mail.gmail.com>
-References: <AANLkTin_=jScYXaXNStx-RfmBopbY43fuV8ZdhcS4M3K@mail.gmail.com>
-	<AANLkTinNGxQgfyph9PXh9cZdxQ+QFZwTw8=NpW-pPXpE@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: sdhci: add error checking for mmc_add_host
+Date: Mon, 04 Apr 2011 13:13:45 +0900
+Message-ID: <4D994579.10301@samsung.com>
+References: <4D993199.1060206@samsung.com>
+ <20110404034753.GA1428@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og104.obsmtp.com ([64.18.0.178]:52771 "EHLO
-	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750730Ab1DDEMB convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2011 00:12:01 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.130.20])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p344CMYH016614
-	for <linux-mmc@vger.kernel.org>; Mon, 4 Apr 2011 00:12:22 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p344BtUB016569
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Mon, 4 Apr 2011 00:12:21 -0400 (EDT)
-Received: by mail-wy0-f170.google.com with SMTP id 34so6059746wyb.15
-        for <linux-mmc@vger.kernel.org>; Sun, 03 Apr 2011 21:11:59 -0700 (PDT)
-In-Reply-To: <AANLkTinNGxQgfyph9PXh9cZdxQ+QFZwTw8=NpW-pPXpE@mail.gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:53068 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750730Ab1DDEPL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2011 00:15:11 -0400
+Received: from epmmp1 (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LJ400JWA1596O60@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 04 Apr 2011 13:15:09 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LJ400MWR159K4@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 04 Apr 2011 13:15:09 +0900 (KST)
+In-reply-to: <20110404034753.GA1428@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russ Knize <Russ.Knize@motorola.com>
-Cc: linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Fri, Apr 1, 2011 at 7:28 PM, Andrei Warkentin <andreiw@motorola.com>=
- wrote:
-> Hi Russ,
->
-> On Fri, Apr 1, 2011 at 10:58 AM, Russ Knize <Russ.Knize@motorola.com>=
- wrote:
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Ignore switch err=
-ors from buggy cards that actually
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* do switch success=
-fully.
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_set_power_=
-class(host, max_dtr, bus_width);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err && err !=3D -E=
-BADMSG)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto f=
-ree_card;
->> +
->
-> 1) host->card is not yet set at this moment, you probably want to pas=
-s
-> card to mmc_set_power_class as well .
-> 2) It seems like you will call mmc_set_power_class even if bus_width
-> =3D=3D MMC_BUS_WIDTH_1. Is that supposed to work? 7.6.3 seems to impl=
-y
-> power classes only apply to 4-bit and 8-bit bus widths. As does the
-> paragraph on top of Page 138 of eMMC 4.41 spec, which says that for
-> 1-bit bus configuration the default applies (class 0).
-> 3) Since the current code supports DDR modes, you probably want to
-> extend support for PWR_CL_DDR_52_(360|195) as well.
->
-> Just curious, for the cards reporting switch errors but nonetheless
-> switching to the power class, do they update the EXT_CSD field?
->
+Wolfram Sang wrote:
+> On Mon, Apr 04, 2011 at 11:48:57AM +0900, Jaehoon Chung wrote:
+>> Sometimes we can't add the device,but we didn't check any error status.
+>> Need to check error status for mmc_add_host.
+> 
+> Thanks, this is correct, but...
+> 
+>> -	mmc_add_host(mmc);
+>> +	ret = mmc_add_host(mmc);
+>> +	if (unlikely(ret))
+>> +		goto err_free_mmc;
+> 
+> ... you are leaking the irq and the lcd_classdev here.
 
-There was just a patch posted by Chuanxiao Dong ([PATCH v4 0/3]mmc:
-enable TRIM/ERASE caps for SDHCI host) against SDHCI core to enable
-setting proper timeout for R1B response-type commands, one of which is
-CMD6 (SWITCH). The patch is applicable to the kernel sources you've
-tested your patch on. Were the failures you've seen for cards erroring
-on MMC_SWITCH timeouts? Could you test with that change for the parts
-affected, and see if your problem in programming power level goes
-away?
+Thanks for your comment, i will resend the patch.
 
-A
+> 
+> Regards,
+> 
+>    Wolfram
+> 
+
