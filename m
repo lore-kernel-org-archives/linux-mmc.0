@@ -1,41 +1,75 @@
 From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [PATCH v4 2/3]mmc: enable TRIM/ERASE caps for SDHCI host
-Date: Sun, 3 Apr 2011 23:06:09 -0500
-Message-ID: <BANLkTikGW3sYjW1HjSJfdBV22DK+Y0zi1Q@mail.gmail.com>
-References: <20110212062220.GC25519@intel.com>
+Subject: Re: [PATCH] mmc: power class support
+Date: Sun, 3 Apr 2011 23:11:59 -0500
+Message-ID: <BANLkTi=x-6a5vtx3BHxifRBHEjimRApavQ@mail.gmail.com>
+References: <AANLkTin_=jScYXaXNStx-RfmBopbY43fuV8ZdhcS4M3K@mail.gmail.com>
+	<AANLkTinNGxQgfyph9PXh9cZdxQ+QFZwTw8=NpW-pPXpE@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og111.obsmtp.com ([64.18.0.22]:33579 "EHLO
-	exprod5og111.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750715Ab1DDEGN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2011 00:06:13 -0400
-In-Reply-To: <20110212062220.GC25519@intel.com>
+Received: from exprod5og104.obsmtp.com ([64.18.0.178]:52771 "EHLO
+	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750730Ab1DDEMB convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2011 00:12:01 -0400
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.130.20])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p344CMYH016614
+	for <linux-mmc@vger.kernel.org>; Mon, 4 Apr 2011 00:12:22 -0400 (EDT)
+Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p344BtUB016569
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Mon, 4 Apr 2011 00:12:21 -0400 (EDT)
+Received: by mail-wy0-f170.google.com with SMTP id 34so6059746wyb.15
+        for <linux-mmc@vger.kernel.org>; Sun, 03 Apr 2011 21:11:59 -0700 (PDT)
+In-Reply-To: <AANLkTinNGxQgfyph9PXh9cZdxQ+QFZwTw8=NpW-pPXpE@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org, akpm@linux-foundation.org, adrian.hunter@nokia.com
+To: Russ Knize <Russ.Knize@motorola.com>
+Cc: linux-mmc@vger.kernel.org
 
-On Sat, Feb 12, 2011 at 12:22 AM, Chuanxiao Dong
-<chuanxiao.dong@intel.com> wrote:
-> SDHCI host controller has TRIM/ERASE capability, enable these caps for erasing
-> purpose.
+On Fri, Apr 1, 2011 at 7:28 PM, Andrei Warkentin <andreiw@motorola.com>=
+ wrote:
+> Hi Russ,
 >
-> ERASE command needs R1B response. So for such command with busy signal, before
-> sending command, SDHCI host driver will simply set a maximum value for timeout
-> control register which is safe to use.
+> On Fri, Apr 1, 2011 at 10:58 AM, Russ Knize <Russ.Knize@motorola.com>=
+ wrote:
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Ignore switch err=
+ors from buggy cards that actually
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* do switch success=
+fully.
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_set_power_=
+class(host, max_dtr, bus_width);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err && err !=3D -E=
+BADMSG)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto f=
+ree_card;
+>> +
+>
+> 1) host->card is not yet set at this moment, you probably want to pas=
+s
+> card to mmc_set_power_class as well .
+> 2) It seems like you will call mmc_set_power_class even if bus_width
+> =3D=3D MMC_BUS_WIDTH_1. Is that supposed to work? 7.6.3 seems to impl=
+y
+> power classes only apply to 4-bit and 8-bit bus widths. As does the
+> paragraph on top of Page 138 of eMMC 4.41 spec, which says that for
+> 1-bit bus configuration the default applies (class 0).
+> 3) Since the current code supports DDR modes, you probably want to
+> extend support for PWR_CL_DDR_52_(360|195) as well.
+>
+> Just curious, for the cards reporting switch errors but nonetheless
+> switching to the power class, do they update the EXT_CSD field?
 >
 
-Awesome. I took a look at the eMMC spec, and the following commands
-also have R1B responses:
-
-1) CMD5 (SLEEP_AWAKE)
-2) CMD6 (SWITCH)
-3) CMD7 (Select/Deselect - for Disconnected->Programming transitions)
-4) CMD12 (STOP_TRANSMISSION - for write case)
-5) CMD28 (SET_WRITE_PROT)
-6) CMD29 (CLR_WRITE_PROT)
-
-...so this should help with timeouts for those commands as well. Thanks!
+There was just a patch posted by Chuanxiao Dong ([PATCH v4 0/3]mmc:
+enable TRIM/ERASE caps for SDHCI host) against SDHCI core to enable
+setting proper timeout for R1B response-type commands, one of which is
+CMD6 (SWITCH). The patch is applicable to the kernel sources you've
+tested your patch on. Were the failures you've seen for cards erroring
+on MMC_SWITCH timeouts? Could you test with that change for the parts
+affected, and see if your problem in programming power level goes
+away?
 
 A
