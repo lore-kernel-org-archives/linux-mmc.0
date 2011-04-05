@@ -1,55 +1,105 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH 0/4] mmc_spi: Add support for regulator framework
-Date: Tue, 5 Apr 2011 07:46:35 -0600
-Message-ID: <20110405134635.GA30849@ponder.secretlab.ca>
-References: <1300733202-27316-1-git-send-email-ospite@studenti.unina.it>
- <20110404115631.67b1f317.ospite@studenti.unina.it>
- <20110405030543.GC29522@ponder.secretlab.ca>
- <20110405104347.0f93ab97.ospite@studenti.unina.it>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: [PATCH 1/2] mmc: mmc_card_keep_power cleanups
+Date: Tue,  5 Apr 2011 17:43:20 +0300
+Message-ID: <1302014601-8089-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:34191 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752750Ab1DENqk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2011 09:46:40 -0400
-Content-Disposition: inline
-In-Reply-To: <20110405104347.0f93ab97.ospite@studenti.unina.it>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:48769 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753558Ab1DEOoL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2011 10:44:11 -0400
+Received: by bwz15 with SMTP id 15so361705bwz.19
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Apr 2011 07:44:10 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Antonio Ospite <ospite@studenti.unina.it>
-Cc: linux-mmc@vger.kernel.org, Daniel Ribeiro <drwyrm@gmail.com>, David Brownell <dbrownell@users.sourceforge.net>, Chris Ball <cjb@laptop.org>, Ernst Schwab <eschwab@online.de>, Sonic Zhang <sonic.zhang@analog.com>, Linus Walleij <linus.walleij@stericsson.com>, openezx-devel@lists.openezx.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>
 
-On Tue, Apr 05, 2011 at 10:43:47AM +0200, Antonio Ospite wrote:
-> On Mon, 4 Apr 2011 21:05:43 -0600
-> Grant Likely <grant.likely@secretlab.ca> wrote:
-> 
-> > On Mon, Apr 04, 2011 at 11:56:31AM +0200, Antonio Ospite wrote:
-> > > On Mon, 21 Mar 2011 19:46:38 +0100
-> > > Antonio Ospite <ospite@studenti.unina.it> wrote:
-> > > 
-> > > > Hi,
-> > > > 
-> > > > this patchset has the purpose of adding support for the regulator framework to 
-> > > > the mmc_spi driver. The first three patches are preparatory cleanups to make 
-> > > > the fourth one more straightforward.
-> > > > 
-> > > > Maybe the fourth patch can be improved, I am open to any suggestions about it.
-> > > >
-> > > 
-> > > Ping. I forgot to Cc spi-devel-general on this series, should I resend
-> > > it?
-> > 
-> > Not a bad idea.  It doesn't go via my tree since it is an mmc patch,
-> > not an spi one, but I don't mind taking a look at the spi bits.
-> > 
-> 
-> Grant you were on Cc from the start so you should have the patches
-> somewhere; please tell me if you don't.
-> I'd avoid resending if not strictly necessary.
+mmc_card_is_powered_resumed is a mouthful; instead, simply use
+mmc_card_keep_power, which also better explains the purpose of
+the macro.
 
-Ah, then I probably scanned it briefly and decided I didn't need to
-respond to it.  Don't worry about reposting.
+Employ mmc_card_keep_power() where possible.
 
-g.
+Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+---
+Chris, these were already posted previously, i'm just pinging with a rebased version, thanks!
+
+ drivers/mmc/core/core.c  |    4 ++--
+ drivers/mmc/core/sdio.c  |   10 +++++-----
+ include/linux/mmc/host.h |    2 +-
+ 3 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 1f453ac..c2350e4 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1746,7 +1746,7 @@ int mmc_suspend_host(struct mmc_host *host)
+ 	}
+ 	mmc_bus_put(host);
+ 
+-	if (!err && !(host->pm_flags & MMC_PM_KEEP_POWER))
++	if (!err && !mmc_card_keep_power(host))
+ 		mmc_power_off(host);
+ 
+ 	return err;
+@@ -1764,7 +1764,7 @@ int mmc_resume_host(struct mmc_host *host)
+ 
+ 	mmc_bus_get(host);
+ 	if (host->bus_ops && !host->bus_dead) {
+-		if (!(host->pm_flags & MMC_PM_KEEP_POWER)) {
++		if (!mmc_card_keep_power(host)) {
+ 			mmc_power_up(host);
+ 			mmc_select_voltage(host, host->ocr);
+ 			/*
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index db0f0b4..0f7d436 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -625,7 +625,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+ 		}
+ 	}
+ 
+-	if (!err && host->pm_flags & MMC_PM_KEEP_POWER) {
++	if (!err && mmc_card_keep_power(host)) {
+ 		mmc_claim_host(host);
+ 		sdio_disable_wide(host->card);
+ 		mmc_release_host(host);
+@@ -645,10 +645,10 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	mmc_claim_host(host);
+ 
+ 	/* No need to reinitialize powered-resumed nonremovable cards */
+-	if (mmc_card_is_removable(host) || !mmc_card_is_powered_resumed(host))
++	if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
+ 		err = mmc_sdio_init_card(host, host->ocr, host->card,
+-				 (host->pm_flags & MMC_PM_KEEP_POWER));
+-	else if (mmc_card_is_powered_resumed(host)) {
++					mmc_card_keep_power(host));
++	else if (mmc_card_keep_power(host)) {
+ 		/* We may have switched to 1-bit mode during suspend */
+ 		err = sdio_enable_4bit_bus(host->card);
+ 		if (err > 0) {
+@@ -691,7 +691,7 @@ static int mmc_sdio_power_restore(struct mmc_host *host)
+ 
+ 	mmc_claim_host(host);
+ 	ret = mmc_sdio_init_card(host, host->ocr, host->card,
+-			(host->pm_flags & MMC_PM_KEEP_POWER));
++				mmc_card_keep_power(host));
+ 	if (!ret && host->sdio_irqs)
+ 		mmc_signal_sdio_irq(host);
+ 	mmc_release_host(host);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index bcb793e..cccb5cf 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -321,7 +321,7 @@ static inline int mmc_card_is_removable(struct mmc_host *host)
+ 	return !(host->caps & MMC_CAP_NONREMOVABLE) && mmc_assume_removable;
+ }
+ 
+-static inline int mmc_card_is_powered_resumed(struct mmc_host *host)
++static inline int mmc_card_keep_power(struct mmc_host *host)
+ {
+ 	return host->pm_flags & MMC_PM_KEEP_POWER;
+ }
+-- 
+1.7.1
 
