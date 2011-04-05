@@ -1,76 +1,82 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH 2/2] mmc: do not switch to 1-bit mode if not required
-Date: Tue,  5 Apr 2011 17:43:21 +0300
-Message-ID: <1302014601-8089-2-git-send-email-ohad@wizery.com>
-References: <1302014601-8089-1-git-send-email-ohad@wizery.com>
+Subject: [PATCH 1/2] mmc: add MMC_QUIRK_NONSTD_FUNC_IF
+Date: Tue,  5 Apr 2011 17:50:14 +0300
+Message-ID: <1302015015-8178-1-git-send-email-ohad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:48769 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753558Ab1DEOoN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2011 10:44:13 -0400
-Received: by mail-bw0-f46.google.com with SMTP id 15so361705bwz.19
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Apr 2011 07:44:12 -0700 (PDT)
-In-Reply-To: <1302014601-8089-1-git-send-email-ohad@wizery.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:42444 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753088Ab1DEOu6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2011 10:50:58 -0400
+Received: by fxm17 with SMTP id 17so318856fxm.19
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Apr 2011 07:50:56 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>
 
-6b5eda36 followed SDIO spec part E1 section 8, which states that
-in case SDIO interrupts are being used to wake up a suspended host,
-then it is required to switch to 1-bit mode before stopping the clock.
+Introduce MMC_QUIRK_NONSTD_FUNC_IF to ignore the "SDIO Standard Function
+interface code" as indicated by the card's FBR, and instead treat all
+functions as non-standard interfaces.
 
-Before switching to 1-bit mode (or back to 4-bit mode on resume),
-make sure that SDIO interrupts are really being used to wake the host.
+This is required to prevent standard drivers from facing
+errors when trying to communicate with SDIO cards that erroneously
+indicate standard function interface codes.
 
-This is helpful for devices which have an external irq line (e.g.
-wl1271), and do not use SDIO interrupts to wake up the host.
-
-In this case, switching to 1-bit mode (and back to 4-bit mode on resume)
-is not necessary.
-
-Reported-by: Eliad Peller <eliad@wizery.com>
 Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/mmc/core/sdio.c  |    4 ++--
- include/linux/mmc/host.h |    4 ++++
- 2 files changed, 6 insertions(+), 2 deletions(-)
+Chris, I've posted this one before. Sending it again, this time with a follow-up patch that uses the new mmc quirks facility. thanks!
+
+ drivers/mmc/core/sdio.c  |    6 ++++++
+ include/linux/mmc/card.h |    6 ++++++
+ 2 files changed, 12 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 0f7d436..4221670 100644
+index 4221670..c3c2bd0 100644
 --- a/drivers/mmc/core/sdio.c
 +++ b/drivers/mmc/core/sdio.c
-@@ -625,7 +625,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 		}
- 	}
+@@ -16,6 +16,7 @@
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/sdio.h>
+ #include <linux/mmc/sdio_func.h>
++#include <linux/mmc/sdio_ids.h>
  
--	if (!err && mmc_card_keep_power(host)) {
-+	if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
- 		mmc_claim_host(host);
- 		sdio_disable_wide(host->card);
- 		mmc_release_host(host);
-@@ -648,7 +648,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
- 		err = mmc_sdio_init_card(host, host->ocr, host->card,
- 					mmc_card_keep_power(host));
--	else if (mmc_card_keep_power(host)) {
-+	else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
- 		/* We may have switched to 1-bit mode during suspend */
- 		err = sdio_enable_4bit_bus(host->card);
- 		if (err > 0) {
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index cccb5cf..4f705eb 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -326,5 +326,9 @@ static inline int mmc_card_keep_power(struct mmc_host *host)
- 	return host->pm_flags & MMC_PM_KEEP_POWER;
+ #include "core.h"
+ #include "bus.h"
+@@ -31,6 +32,11 @@ static int sdio_read_fbr(struct sdio_func *func)
+ 	int ret;
+ 	unsigned char data;
+ 
++	if (mmc_card_nonstd_func_interface(func->card)) {
++		func->class = SDIO_CLASS_NONE;
++		return 0;
++	}
++
+ 	ret = mmc_io_rw_direct(func->card, 0, 0,
+ 		SDIO_FBR_BASE(func->num) + SDIO_FBR_STD_IF, 0, &data);
+ 	if (ret)
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index adb4888..c7f1532 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -125,6 +125,7 @@ struct mmc_card {
+ #define MMC_QUIRK_NONSTD_SDIO	(1<<2)		/* non-standard SDIO card attached */
+ 						/* (missing CIA registers) */
+ #define MMC_QUIRK_BROKEN_CLK_GATING (1<<3)	/* clock gating the sdio bus will make card fail */
++#define MMC_QUIRK_NONSTD_FUNC_IF (1<<4)		/* SDIO card has nonstd function interfaces */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+  	unsigned int		erase_shift;	/* if erase unit is power 2 */
+@@ -180,6 +181,11 @@ static inline int mmc_blksz_for_byte_mode(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_BLKSZ_FOR_BYTE_MODE;
  }
  
-+static inline int mmc_card_wake_sdio_irq(struct mmc_host *host)
++static inline int mmc_card_nonstd_func_interface(const struct mmc_card *c)
 +{
-+	return host->pm_flags & MMC_PM_WAKE_SDIO_IRQ;
++	return c->quirks & MMC_QUIRK_NONSTD_FUNC_IF;
 +}
- #endif
++
+ #define mmc_card_name(c)	((c)->cid.prod_name)
+ #define mmc_card_id(c)		(dev_name(&(c)->dev))
  
 -- 
 1.7.1
