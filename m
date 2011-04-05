@@ -1,82 +1,55 @@
-From: Antonio Ospite <ospite@studenti.unina.it>
+From: Grant Likely <grant.likely@secretlab.ca>
 Subject: Re: [PATCH 0/4] mmc_spi: Add support for regulator framework
-Date: Tue, 5 Apr 2011 10:43:47 +0200
-Message-ID: <20110405104347.0f93ab97.ospite@studenti.unina.it>
+Date: Tue, 5 Apr 2011 07:46:35 -0600
+Message-ID: <20110405134635.GA30849@ponder.secretlab.ca>
 References: <1300733202-27316-1-git-send-email-ospite@studenti.unina.it>
-	<20110404115631.67b1f317.ospite@studenti.unina.it>
-	<20110405030543.GC29522@ponder.secretlab.ca>
+ <20110404115631.67b1f317.ospite@studenti.unina.it>
+ <20110405030543.GC29522@ponder.secretlab.ca>
+ <20110405104347.0f93ab97.ospite@studenti.unina.it>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pgp-signature";
- micalg="PGP-SHA1";
- boundary="Signature=_Tue__5_Apr_2011_10_43_47_+0200_z7N73p8uiIR.ADUz"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp204.alice.it ([82.57.200.100]:60128 "EHLO smtp204.alice.it"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751095Ab1DEIoE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 5 Apr 2011 04:44:04 -0400
-In-Reply-To: <20110405030543.GC29522@ponder.secretlab.ca>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:34191 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752750Ab1DENqk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2011 09:46:40 -0400
+Content-Disposition: inline
+In-Reply-To: <20110405104347.0f93ab97.ospite@studenti.unina.it>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
+To: Antonio Ospite <ospite@studenti.unina.it>
 Cc: linux-mmc@vger.kernel.org, Daniel Ribeiro <drwyrm@gmail.com>, David Brownell <dbrownell@users.sourceforge.net>, Chris Ball <cjb@laptop.org>, Ernst Schwab <eschwab@online.de>, Sonic Zhang <sonic.zhang@analog.com>, Linus Walleij <linus.walleij@stericsson.com>, openezx-devel@lists.openezx.org, linux-kernel@vger.kernel.org
 
---Signature=_Tue__5_Apr_2011_10_43_47_+0200_z7N73p8uiIR.ADUz
-Content-Type: text/plain; charset=US-ASCII
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Tue, Apr 05, 2011 at 10:43:47AM +0200, Antonio Ospite wrote:
+> On Mon, 4 Apr 2011 21:05:43 -0600
+> Grant Likely <grant.likely@secretlab.ca> wrote:
+> 
+> > On Mon, Apr 04, 2011 at 11:56:31AM +0200, Antonio Ospite wrote:
+> > > On Mon, 21 Mar 2011 19:46:38 +0100
+> > > Antonio Ospite <ospite@studenti.unina.it> wrote:
+> > > 
+> > > > Hi,
+> > > > 
+> > > > this patchset has the purpose of adding support for the regulator framework to 
+> > > > the mmc_spi driver. The first three patches are preparatory cleanups to make 
+> > > > the fourth one more straightforward.
+> > > > 
+> > > > Maybe the fourth patch can be improved, I am open to any suggestions about it.
+> > > >
+> > > 
+> > > Ping. I forgot to Cc spi-devel-general on this series, should I resend
+> > > it?
+> > 
+> > Not a bad idea.  It doesn't go via my tree since it is an mmc patch,
+> > not an spi one, but I don't mind taking a look at the spi bits.
+> > 
+> 
+> Grant you were on Cc from the start so you should have the patches
+> somewhere; please tell me if you don't.
+> I'd avoid resending if not strictly necessary.
 
-On Mon, 4 Apr 2011 21:05:43 -0600
-Grant Likely <grant.likely@secretlab.ca> wrote:
+Ah, then I probably scanned it briefly and decided I didn't need to
+respond to it.  Don't worry about reposting.
 
-> On Mon, Apr 04, 2011 at 11:56:31AM +0200, Antonio Ospite wrote:
-> > On Mon, 21 Mar 2011 19:46:38 +0100
-> > Antonio Ospite <ospite@studenti.unina.it> wrote:
-> >=20
-> > > Hi,
-> > >=20
-> > > this patchset has the purpose of adding support for the regulator fra=
-mework to=20
-> > > the mmc_spi driver. The first three patches are preparatory cleanups =
-to make=20
-> > > the fourth one more straightforward.
-> > >=20
-> > > Maybe the fourth patch can be improved, I am open to any suggestions =
-about it.
-> > >
-> >=20
-> > Ping. I forgot to Cc spi-devel-general on this series, should I resend
-> > it?
->=20
-> Not a bad idea.  It doesn't go via my tree since it is an mmc patch,
-> not an spi one, but I don't mind taking a look at the spi bits.
->=20
+g.
 
-Grant you were on Cc from the start so you should have the patches
-somewhere; please tell me if you don't.
-I'd avoid resending if not strictly necessary.
-
-Regards,
-   Antonio
-
---=20
-Antonio Ospite
-http://ao2.it
-
-PGP public key ID: 0x4553B001
-
-A: Because it messes up the order in which people normally read text.
-   See http://en.wikipedia.org/wiki/Posting_style
-Q: Why is top-posting such a bad thing?
-
---Signature=_Tue__5_Apr_2011_10_43_47_+0200_z7N73p8uiIR.ADUz
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk2a1kMACgkQ5xr2akVTsAHgCwCeLlslXpMUNWY1y3U2oGqF2IM9
-EoIAoJwgDQ7vYXZulTip4xWMQ31NVVaE
-=3yV6
------END PGP SIGNATURE-----
-
---Signature=_Tue__5_Apr_2011_10_43_47_+0200_z7N73p8uiIR.ADUz--
