@@ -1,60 +1,71 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: Dynamic MMC device naming vs. bootloaders
-Date: Mon, 04 Apr 2011 17:29:31 -0400
-Message-ID: <m3ei5haeo4.fsf@pullcord.laptop.org>
-References: <74CDBE0F657A3D45AFBB94109FB122FF0493EB33AE@HQMAIL01.nvidia.com>
-	<m3r59haog5.fsf@pullcord.laptop.org>
-	<74CDBE0F657A3D45AFBB94109FB122FF0493EB3428@HQMAIL01.nvidia.com>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 0/4] mmc_spi: Add support for regulator framework
+Date: Mon, 4 Apr 2011 21:05:43 -0600
+Message-ID: <20110405030543.GC29522@ponder.secretlab.ca>
+References: <1300733202-27316-1-git-send-email-ospite@studenti.unina.it>
+ <20110404115631.67b1f317.ospite@studenti.unina.it>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:55094 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754194Ab1DDVYD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 4 Apr 2011 17:24:03 -0400
-In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF0493EB3428@HQMAIL01.nvidia.com>
-	(Stephen Warren's message of "Mon, 4 Apr 2011 14:07:06 -0700")
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:40943 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752416Ab1DEDFw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2011 23:05:52 -0400
+Content-Disposition: inline
+In-Reply-To: <20110404115631.67b1f317.ospite@studenti.unina.it>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@nvidia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Antonio Ospite <ospite@studenti.unina.it>
+Cc: linux-mmc@vger.kernel.org, Daniel Ribeiro <drwyrm@gmail.com>, David Brownell <dbrownell@users.sourceforge.net>, Chris Ball <cjb@laptop.org>, Ernst Schwab <eschwab@online.de>, Sonic Zhang <sonic.zhang@analog.com>, Linus Walleij <linus.walleij@stericsson.com>, openezx-devel@lists.openezx.org, linux-kernel@vger.kernel.org
 
-Hi Stephen,
+On Mon, Apr 04, 2011 at 11:56:31AM +0200, Antonio Ospite wrote:
+> On Mon, 21 Mar 2011 19:46:38 +0100
+> Antonio Ospite <ospite@studenti.unina.it> wrote:
+> 
+> > Hi,
+> > 
+> > this patchset has the purpose of adding support for the regulator framework to 
+> > the mmc_spi driver. The first three patches are preparatory cleanups to make 
+> > the fourth one more straightforward.
+> > 
+> > Maybe the fourth patch can be improved, I am open to any suggestions about it.
+> >
+> 
+> Ping. I forgot to Cc spi-devel-general on this series, should I resend
+> it?
 
-On Mon, Apr 04 2011, Stephen Warren wrote:
->> The standard way to solve this is to use an initrd that performs the
->> naming (and mounting) that you'd like based on characteristics of the
->> device or card -- this could include making mmcblk{0,1} always attach
->> to the controllers that you're expecting it to.  It's hard enough to get
->> device naming policy right that we don't usually try to do it in-kernel.
->
-> I have a followup question: How could the initrd identify each device, in
-> order to know which names to assign to them, or which one to mount?
->
-> Is there a way to query the block device to determine which host controller
-> ID it's connected to? Querying device size is pretty easy, but the user
-> could easily happen to choose an SD card of the same size as the internal
-> MMC for example.
+Not a bad idea.  It doesn't go via my tree since it is an mmc patch,
+not an spi one, but I don't mind taking a look at the spi bits.
 
-That's a fine question.  I'm not sure what the *best* answer is, but you
-have a few options:
+g.
 
-* if your initrd contains udev, then the udev event for mmcblk creation
-  looks like:
+> 
+> > These changes take strong inspiration from the pxamci driver; they have been 
+> > tested on a Motorola A910, which uses a regulator to powerup the MMC card 
+> > connected to the SPI bus, a test from a current user of the mmc_spi driver 
+> > would not hurt just to be sure no regressions have been introduced.
+> > 
+> > Thanks,
+> >    Antonio
+> > 
+> > Antonio Ospite (4):
+> >   mmc_spi.c: factor out the check for power capability
+> >   mmc_spi.c: factor out the SD card shutdown sequence
+> >   mmc_spi.c: factor out a mmc_spi_setpower() function
+> >   mmc_spi.c: add support for the regulator framework
+> > 
+> >  drivers/mmc/host/mmc_spi.c |  194 +++++++++++++++++++++++++++++---------------
+> >  1 files changed, 129 insertions(+), 65 deletions(-)
+> > 
+> 
+> -- 
+> Antonio Ospite
+> http://ao2.it
+> 
+> PGP public key ID: 0x4553B001
+> 
+> A: Because it messes up the order in which people normally read text.
+>    See http://en.wikipedia.org/wiki/Posting_style
+> Q: Why is top-posting such a bad thing?
 
-  UDEV  [1292447837.786721] add      /devices/platform/sdhci-pxa.0/mmc_host/mmc0/mmc0:d555/block/mmcblk1 (block)
 
-  .. which contains the information you need.
-
-* alternatively, you could grovel around sysfs:
-
-  [root@localhost ~]# ls -la /sys/block/mmcblk0/device
-  lrwxrwxrwx 1 root root 0 Jan  1  1970 /sys/block/mmcblk0/device -> ../../../mmc2:0001
-
-So, the above tells you that on my system mmc2 (internal SD slot) hosts
-mmcblk0, and mmc0 (external SD slot) hosts mmcblk1.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
