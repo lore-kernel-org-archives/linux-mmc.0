@@ -1,51 +1,39 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: [PATCH 2/2] mmc: quirks: wl1271 is MMC_QUIRK_DISABLE_CD
-Date: Tue,  5 Apr 2011 18:02:26 +0300
-Message-ID: <1302015746-8414-2-git-send-email-ohad@wizery.com>
-References: <1302015746-8414-1-git-send-email-ohad@wizery.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/2] mmc: mmc_card_keep_power cleanups
+Date: Tue, 05 Apr 2011 11:25:07 -0400
+Message-ID: <m3fwpw67qk.fsf@pullcord.laptop.org>
+References: <1302014601-8089-1-git-send-email-ohad@wizery.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:42321 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753657Ab1DEPDT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2011 11:03:19 -0400
-Received: by mail-fx0-f46.google.com with SMTP id 17so328800fxm.19
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Apr 2011 08:03:18 -0700 (PDT)
-In-Reply-To: <1302015746-8414-1-git-send-email-ohad@wizery.com>
+Received: from void.printf.net ([89.145.121.20]:53109 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753296Ab1DEPTm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 5 Apr 2011 11:19:42 -0400
+In-Reply-To: <1302014601-8089-1-git-send-email-ohad@wizery.com> (Ohad
+	Ben-Cohen's message of "Tue, 5 Apr 2011 17:43:20 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org
 
-The wl12xx device supports disconnecting the pull-up resistor on
-CD/DAT[3] (pin 1) of the card.
+Hi Ohad,
 
-Tell SDIO core to disconnect that resistor during card init,
-since we don't need it at that point (and anyway all
-hosts shall provide pull-up resistors on all data lines DAT[3:0]
-as described in section 6 of the SD physical specification).
+On Tue, Apr 05 2011, Ohad Ben-Cohen wrote:
+> mmc_card_is_powered_resumed is a mouthful; instead, simply use
+> mmc_card_keep_power, which also better explains the purpose of
+> the macro.
+>
+> Employ mmc_card_keep_power() where possible.
+>
+> Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+> ---
+> Chris, these were already posted previously, i'm just pinging with a rebased version, thanks!
 
-As a result, this may save some power, but it's also generally healthy
-since it prevents both ends from pulling up that pin, which
-results in undesirable asymmetric physical bus.
+Thanks for the resend!  Have reviewed the threads, all six patches look
+good, I've pushed them to mmc-next for .40.
 
-Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
----
- drivers/mmc/core/quirks.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
-index 1957398..a4c42ed 100644
---- a/drivers/mmc/core/quirks.c
-+++ b/drivers/mmc/core/quirks.c
-@@ -66,6 +66,8 @@ static const struct mmc_fixup mmc_fixup_methods[] = {
- 		remove_quirk, MMC_QUIRK_BROKEN_CLK_GATING },
- 	{ SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
- 		add_quirk, MMC_QUIRK_NONSTD_FUNC_IF },
-+	{ SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
-+		add_quirk, MMC_QUIRK_DISABLE_CD },
- 	{ 0 }
- };
- 
+- Chris.
 -- 
-1.7.1
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
