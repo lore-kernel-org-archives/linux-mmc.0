@@ -1,68 +1,86 @@
-From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Subject: Re: [PATCH v2 1/2] mmc: Add ioctl to let userspace apps send ACMDs
-Date: Wed, 6 Apr 2011 20:11:23 +0200
-Message-ID: <BANLkTinOP6G1=ZcC=7Wxr6eO2sowJ_TH0w@mail.gmail.com>
-References: <alpine.DEB.2.00.1104051450480.25803@peruna> <BANLkTinsYioaa69ZdFpBAr-BK6RDh8V83g@mail.gmail.com>
- <alpine.DEB.2.00.1104061021350.391@peruna>
+From: John Calixto <john.calixto@modsystems.com>
+Subject: Re: [PATCH v2 2/2] mmc: Check CAP_SYS_ADMIN for destructive ioctl
+ ACMDs
+Date: Wed, 6 Apr 2011 11:18:35 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1104061054520.391@peruna>
+References: <alpine.DEB.2.00.1104051458350.25803@peruna> <BANLkTi=xcPEJxophfymqF5+Nd=aF40H=FQ@mail.gmail.com> <alpine.DEB.2.00.1104051613150.25803@peruna> <BANLkTi=wXpqFGhaBPnoRa+sQJ_eysvrTVA@mail.gmail.com> <alpine.DEB.2.00.1104051733180.25803@peruna>
+ <BANLkTinG2Zty-VqnKD4c=-DYuML9ZxBeNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="-1463811328-444021280-1302113922=:391"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:45782 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755535Ab1DFSLn convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 14:11:43 -0400
-Received: by qwk3 with SMTP id 3so1040055qwk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2011 11:11:43 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1104061021350.391@peruna>
+Received: from elasmtp-dupuy.atl.sa.earthlink.net ([209.86.89.62]:40682 "EHLO
+	elasmtp-dupuy.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754812Ab1DFSSp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 14:18:45 -0400
+In-Reply-To: <BANLkTinG2Zty-VqnKD4c=-DYuML9ZxBeNg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: John Calixto <john.calixto@modsystems.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>
+To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Cc: Andrei Warkentin <andreiw@motorola.com>, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>
 
-W dniu 6 kwietnia 2011 19:37 u=BFytkownik John Calixto
-<john.calixto@modsystems.com> napisa=B3:
-> On Wed, 6 Apr 2011, Micha=B3 Miros=B3aw wrote:
->> 2011/4/5 John Calixto <john.calixto@modsystems.com>:
->> > +#ifdef CONFIG_COMPAT
->> > +struct sd_ioc_cmd32 {
->> > + =A0 =A0 =A0 u32 write_flag;
->> > + =A0 =A0 =A0 u32 opcode;
->> > + =A0 =A0 =A0 u32 arg;
->> > + =A0 =A0 =A0 u32 response[4];
->> > + =A0 =A0 =A0 u32 flags;
->> > + =A0 =A0 =A0 u32 blksz;
->> > + =A0 =A0 =A0 u32 blocks;
->> > + =A0 =A0 =A0 u32 postsleep_us;
->> > + =A0 =A0 =A0 u32 force_timeout_ns;
->> > + =A0 =A0 =A0 compat_uptr_t data_ptr;
->> > +};
->> > +#define SD_IOC_ACMD32 _IOWR(MMC_BLOCK_MAJOR, 0, struct sd_ioc_cmd=
-32)
->> [...]
->>
->> Since your implementing a new ioctl you can make the structure the
->> same for 64 and 32-bit archs and avoid all this compat crap.
-> I was also less than pleased with this, but I chose to implement the
-> compat crap because it allow a "natural" userspace API for both the
-> kernel32+user32 and kernel64+user64 environments. =A0The ugliness in =
-the
-> kernel is just when you have defined CONFIG_COMPAT. =A0I think 32-bit=
--only
-> is still an important target for this functionality (think set-top me=
-dia
-> players, mobile devices; basically, anything running on ARM) so alway=
-s
-> having to cast your data pointer to 64-bit is not appealing. =A0I sus=
-pect
-> it will be very unlikely to see people using this in the kernel64+use=
-r32
-> environment.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-The problem is only with data_ptr field. If you make it the same size
-whether it's for 32-bit or 64-bit arch then you don't need all that
-compat code for user32 on kernel64 except for pointer translation when
-there's 32-bit process calling.
+---1463811328-444021280-1302113922=:391
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-Best Regards,
-Micha=B3 Miros=B3aw
+On Wed, 6 Apr 2011, Micha=C5=82 Miros=C5=82aw wrote:
+
+> 2011/4/6 John Calixto <john.calixto@modsystems.com>:
+> > On Tue, 5 Apr 2011, Andrei Warkentin wrote:
+> >> Could you check the SD behavior for undefined ACMDs? If I do ACMD25,
+> >> and ACMD25 is not defined, will it be executed as CMD25? This is the
+> >> MMC behavior as I have mentioned.
+> > The SD spec has a similar paragraph about unspecified ACMD opcodes -
+> > they should be treated as the equivalent CMD opcodes. =C2=A0However, al=
+l of
+> > the opcodes that I listed are indeed specified. =C2=A0So, if the card
+> > identifies itself as an SD card, it must implement those opcodes. =C2=
+=A0If
+> > it identifies itself as an SD card, and it does *not* implement the ACM=
+D
+> > opcodes I listed, then it likely "fell out the back door of the
+> > manufacturing facility and landed on a store shelf" ;) ... its
+> > quality/correct performance/reliability is unlikely.
+>=20
+> Not all specified ACMDs are mandatory. SD spec 2.00 says that only
+> 6,13,41,42,51 are mandatory for all cards. This is less than the list
+> you prepared in the patch.
+>=20
+
+Hmm... In several places of the full SD spec, and even in the redacted
+"SD Specifications, Part 1, Physical Layer, Simplified Specification,
+Version 3.01", it states the security functions are mandatory for all SD
+cards except ROM cards.  For ROM cards, the security ACMDs are expected
+to be treated as illegal commands, and do not fall back to their CMD
+equivalents.
+
+> It's better not to make those exceptions and instead prepare an
+> userspace daemon that opens mmcblkX (non-exclusively) and forwards the
+> requests from unprivileged users to the device (or even implements
+> application specific API).
+>=20
+
+OK, this sounds reasonable to me (although I still do not see why
+non-root, non-privileged users have open() access to /dev/mmcblk0).
+
+I will replace the opcode filter with an unconditional check for
+CAP_SYS_RAWIO.  With this capability check, I think I can skip checking
+for SD vs. MMC.  It would be nice for this ioctl to have more general
+purpose than just enabling secure operations on SD cards (see Arnd
+Bergmann's intended use as a passthrough for virtual machines).
+
+Regarding permissions, the next iteration of this patch will:
+
+- Be a single patch containing the main ioctl functionality *and* this
+  capability verification (checking "CAP_SYS_RAWIO", per Alan Cox in
+  this thread).
+
+- Only have the check for CAP_SYS_RAWIO.  It will *not* have an
+  opcode-specific filter, nor a filter limiting it to just SD cards.
+
+Is that satisfactory?
+
+John
+---1463811328-444021280-1302113922=:391--
