@@ -1,110 +1,101 @@
-From: John Calixto <john.calixto@modsystems.com>
-Subject: Re: [PATCH v2 1/2] mmc: Add ioctl to let userspace apps send ACMDs
-Date: Wed, 6 Apr 2011 10:37:24 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1104061021350.391@peruna>
-References: <alpine.DEB.2.00.1104051450480.25803@peruna> <BANLkTinsYioaa69ZdFpBAr-BK6RDh8V83g@mail.gmail.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: Dynamic MMC device naming vs. bootloaders
+Date: Wed, 6 Apr 2011 12:40:38 -0500
+Message-ID: <BANLkTimZtSsHE3VkxwCAH1SnNuhEz46oSg@mail.gmail.com>
+References: <74CDBE0F657A3D45AFBB94109FB122FF0493EB33AE@HQMAIL01.nvidia.com>
+	<BANLkTik7fbz+QLZY8RH9wCkGQdU3hUNfNA@mail.gmail.com>
+	<74CDBE0F657A3D45AFBB94109FB122FF0493EB3599@HQMAIL01.nvidia.com>
+	<BANLkTimDbPkgHDuERqJ-qRe9Ji2RyzAvXA@mail.gmail.com>
+	<74CDBE0F657A3D45AFBB94109FB122FF0493EB36C7@HQMAIL01.nvidia.com>
+	<BANLkTik8fti=o1+NRCUALFGYMiFzbRy+Jg@mail.gmail.com>
+	<74CDBE0F657A3D45AFBB94109FB122FF0493EB36DB@HQMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-1463811328-62886019-1302111451=:391"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-junco.atl.sa.earthlink.net ([209.86.89.63]:48550 "EHLO
-	elasmtp-junco.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755732Ab1DFRhf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 13:37:35 -0400
-In-Reply-To: <BANLkTinsYioaa69ZdFpBAr-BK6RDh8V83g@mail.gmail.com>
+Received: from exprod5og109.obsmtp.com ([64.18.0.188]:54856 "EHLO
+	exprod5og109.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755947Ab1DFRkm convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 13:40:42 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.176.130.20])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p36Hcv09014710
+	for <linux-mmc@vger.kernel.org>; Wed, 6 Apr 2011 13:38:57 -0400 (EDT)
+Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p36HZn2r013288
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Wed, 6 Apr 2011 13:38:57 -0400 (EDT)
+Received: by mail-wy0-f170.google.com with SMTP id 34so2291960wyb.15
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2011 10:40:40 -0700 (PDT)
+In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF0493EB36DB@HQMAIL01.nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>
+To: Stephen Warren <swarren@nvidia.com>
+Cc: Kishore Kadiyala <kishorek.kadiyala@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wed, Apr 6, 2011 at 12:32 PM, Stephen Warren <swarren@nvidia.com> wr=
+ote:
+> Andrei Warkentin wrote at Wednesday, April 06, 2011 11:19 AM:
+>> On Wed, Apr 6, 2011 at 11:59 AM, Stephen Warren <swarren@nvidia.com>=
+ wrote:
+>> > However, isn't it just a fluke that this will work; registering th=
+e internal
+>> > host controller first will I assume start probing of any attached =
+devices on
+>> > that controller first, but does it actually guarantee that such pr=
+obing will
+>> > also complete first, which I believe is the necessary condition fo=
+r the mmcblk
+>> > device to be assigned ID 0?
+>> >
+>>
+>> The device index is only assigned if the mmc block driver is started
+>> on a detected card. ...
+>>
+>> > Equally, if there were two controllers with fixed/internal MMC and=
+/or two
+>> > controllers which supported pluggable SD cards, the race issue wou=
+ld still
+>> > exist?
+>>
+>> I think if you had two controllers and you plugged two cards in at t=
+he
+>> "same time", then you would have =A0a race condition, as both would
+>> mmc_detect_change (effectively schedule_work to an ordered wq), and =
+it
+>> would depend on which card change IRQ occured first. It seems like
+>> different hosts use different delays for when the work will be done,
+>> so if you have different hosts, you can make this even more obvious.
+>> You'd have to really try, though, I think. I guess if you are never
+>> going to support multiple cards on one host, you might as well tie t=
+he
+>> block index to host index.
+>
+> The case I care about most right now is a cold kernel boot. This is
+> basically the same as plugging two SD cards in at (exactly) the same =
+time;
+> the time being when the SD platform driver is registered. The fact th=
+at
+> that on my board, one is actually eMMC and one really an SD card that=
+'s
+> already plugged in pre-boot isn't really that relevant.
+>
+> So, if I interpret your statements correctly, you're agreeing that si=
+mply
+> registering the host controller for eMMC first doesn't guarantee that
+> the eMMC will be block device ID 0, albeit in practice that does seem=
+ to
+> be true a large enough percentage of the time not to notice any probl=
+em.
+>
 
----1463811328-62886019-1302111451=:391
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+The call path is:
 
-On Wed, 6 Apr 2011, Micha=C5=82 Miros=C5=82aw wrote:
-> 2011/4/5 John Calixto <john.calixto@modsystems.com>:
-> > + =C2=A0 =C2=A0 =C2=A0 /*
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* Only allow ACMDs on the whole block devi=
-ce, not on partitions. =C2=A0This
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* prevents overspray between sibling parti=
-tions.
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
-> > + =C2=A0 =C2=A0 =C2=A0 if (bdev !=3D bdev->bd_contains)
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -EPERM;
->=20
-> This should at least also check CAP_SYS_ADMIN capability.
->=20
+mmc_add_host
+mmc_start_host
+mmc_detect_change schedules mmc_rescan work with no delay
 
-Yep.  I broke out the capability check into a separate patch - I'll
-reply to your permissions-related comments on that thread.
+So two consecutive mmc_add_host-s for two different hosts implies that
+the first mmc_rescan will happen for the first added host. So the
+answer to your question is no - you seem to have that guarantee.
 
-> > +
-> > + =C2=A0 =C2=A0 =C2=A0 md =3D mmc_blk_get(bdev->bd_disk);
-> > + =C2=A0 =C2=A0 =C2=A0 if (!md)
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -EINVAL;
-> > +
-> > + =C2=A0 =C2=A0 =C2=A0 card =3D md->queue.card;
-> > + =C2=A0 =C2=A0 =C2=A0 if (IS_ERR(card))
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return PTR_ERR(card)=
-;
-> > +
-> > + =C2=A0 =C2=A0 =C2=A0 host =3D card->host;
-> > + =C2=A0 =C2=A0 =C2=A0 mmc_claim_host(host);
-> > +
-> > + =C2=A0 =C2=A0 =C2=A0 err =3D mmc_app_cmd(host, card);
-> > + =C2=A0 =C2=A0 =C2=A0 if (err)
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto acmd_done;
-> > +
-> > + =C2=A0 =C2=A0 =C2=A0 mrq.cmd =3D &cmd;
-> > + =C2=A0 =C2=A0 =C2=A0 mrq.data =3D &data;
-> > +
-> > + =C2=A0 =C2=A0 =C2=A0 if (copy_from_user(&sdic, sdic_ptr, sizeof(sdic)=
-)) {
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 err =3D -EFAULT;
-> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto acmd_done;
-> > + =C2=A0 =C2=A0 =C2=A0 }
->=20
-> You should first copy and verify ioctl's data and only then claim host
-> and send commands. Preferably the check-and-copy should be separate
-> function.
->=20
-
-Will do.
-
-> > +
-> > +#ifdef CONFIG_COMPAT
-> > +struct sd_ioc_cmd32 {
-> > + =C2=A0 =C2=A0 =C2=A0 u32 write_flag;
-> > + =C2=A0 =C2=A0 =C2=A0 u32 opcode;
-> > + =C2=A0 =C2=A0 =C2=A0 u32 arg;
-> > + =C2=A0 =C2=A0 =C2=A0 u32 response[4];
-> > + =C2=A0 =C2=A0 =C2=A0 u32 flags;
-> > + =C2=A0 =C2=A0 =C2=A0 u32 blksz;
-> > + =C2=A0 =C2=A0 =C2=A0 u32 blocks;
-> > + =C2=A0 =C2=A0 =C2=A0 u32 postsleep_us;
-> > + =C2=A0 =C2=A0 =C2=A0 u32 force_timeout_ns;
-> > + =C2=A0 =C2=A0 =C2=A0 compat_uptr_t data_ptr;
-> > +};
-> > +#define SD_IOC_ACMD32 _IOWR(MMC_BLOCK_MAJOR, 0, struct sd_ioc_cmd32)
-> [...]
->=20
-> Since your implementing a new ioctl you can make the structure the
-> same for 64 and 32-bit archs and avoid all this compat crap.
->=20
-
-I was also less than pleased with this, but I chose to implement the
-compat crap because it allow a "natural" userspace API for both the
-kernel32+user32 and kernel64+user64 environments.  The ugliness in the
-kernel is just when you have defined CONFIG_COMPAT.  I think 32-bit-only
-is still an important target for this functionality (think set-top media
-players, mobile devices; basically, anything running on ARM) so always
-having to cast your data pointer to 64-bit is not appealing.  I suspect
-it will be very unlikely to see people using this in the kernel64+user32
-environment.
-
-Cheers,
-
-John
----1463811328-62886019-1302111451=:391--
+A
