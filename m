@@ -1,86 +1,88 @@
-From: John Calixto <john.calixto@modsystems.com>
-Subject: Re: [PATCH v2 2/2] mmc: Check CAP_SYS_ADMIN for destructive ioctl
- ACMDs
-Date: Wed, 6 Apr 2011 11:18:35 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1104061054520.391@peruna>
-References: <alpine.DEB.2.00.1104051458350.25803@peruna> <BANLkTi=xcPEJxophfymqF5+Nd=aF40H=FQ@mail.gmail.com> <alpine.DEB.2.00.1104051613150.25803@peruna> <BANLkTi=wXpqFGhaBPnoRa+sQJ_eysvrTVA@mail.gmail.com> <alpine.DEB.2.00.1104051733180.25803@peruna>
- <BANLkTinG2Zty-VqnKD4c=-DYuML9ZxBeNg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-1463811328-444021280-1302113922=:391"
+From: Per Forlin <per.forlin@linaro.org>
+Subject: [PATCH v2 00/12] mmc: use nonblock mmc requests to minimize latency
+Date: Wed,  6 Apr 2011 21:07:01 +0200
+Message-ID: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-dupuy.atl.sa.earthlink.net ([209.86.89.62]:40682 "EHLO
-	elasmtp-dupuy.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754812Ab1DFSSp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 14:18:45 -0400
-In-Reply-To: <BANLkTinG2Zty-VqnKD4c=-DYuML9ZxBeNg@mail.gmail.com>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:51964 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756538Ab1DFTHf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 15:07:35 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Cc: Andrei Warkentin <andreiw@motorola.com>, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org
+Cc: Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@linaro.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+How significant is the cache maintenance over head?
+It depends, the eMMC are much faster now
+compared to a few years ago and cache maintenance cost more due to
+multiple cache levels and speculative cache pre-fetch. In relation the
+cost for handling the caches have increased and is now a bottle neck
+dealing with fast eMMC together with DMA.
 
----1463811328-444021280-1302113922=:391
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+The intention for introducing none blocking mmc requests is to minimize the
+time between a mmc request ends and another mmc request starts. In the
+current implementation the MMC controller is idle when dma_map_sg and
+dma_unmap_sg is processing. Introducing none blocking mmc request makes it
+possible to prepare the caches for next job parallel with an active
+mmc request.
 
-On Wed, 6 Apr 2011, Micha=C5=82 Miros=C5=82aw wrote:
+This is done by making the issue_rw_rq() none blocking.
+The increase in throughput is proportional to the time it takes to
+prepare (major part of preparations is dma_map_sg and dma_unmap_sg)
+a request and how fast the memory is. The faster the MMC/SD is
+the more significant the prepare request time becomes. Measurements on U5500
+and Panda on eMMC and SD shows significant performance gain for for large
+reads when running DMA mode. In the PIO case the performance is unchanged.
 
-> 2011/4/6 John Calixto <john.calixto@modsystems.com>:
-> > On Tue, 5 Apr 2011, Andrei Warkentin wrote:
-> >> Could you check the SD behavior for undefined ACMDs? If I do ACMD25,
-> >> and ACMD25 is not defined, will it be executed as CMD25? This is the
-> >> MMC behavior as I have mentioned.
-> > The SD spec has a similar paragraph about unspecified ACMD opcodes -
-> > they should be treated as the equivalent CMD opcodes. =C2=A0However, al=
-l of
-> > the opcodes that I listed are indeed specified. =C2=A0So, if the card
-> > identifies itself as an SD card, it must implement those opcodes. =C2=
-=A0If
-> > it identifies itself as an SD card, and it does *not* implement the ACM=
-D
-> > opcodes I listed, then it likely "fell out the back door of the
-> > manufacturing facility and landed on a store shelf" ;) ... its
-> > quality/correct performance/reliability is unlikely.
->=20
-> Not all specified ACMDs are mandatory. SD spec 2.00 says that only
-> 6,13,41,42,51 are mandatory for all cards. This is less than the list
-> you prepared in the patch.
->=20
+There are two optional hooks pre_req() and post_req() that the host driver
+may implement in order to move work to before and after the actual mmc_request
+function is called. In the DMA case pre_req() may do dma_map_sg() and prepare
+the dma descriptor and post_req runs the dma_unmap_sg.
 
-Hmm... In several places of the full SD spec, and even in the redacted
-"SD Specifications, Part 1, Physical Layer, Simplified Specification,
-Version 3.01", it states the security functions are mandatory for all SD
-cards except ROM cards.  For ROM cards, the security ACMDs are expected
-to be treated as illegal commands, and do not fall back to their CMD
-equivalents.
+Details on measurements from IOZone and mmc_test:
+https://wiki.linaro.org/WorkingGroups/KernelConsolidation/Specs/StoragePerfMMC-async-req
 
-> It's better not to make those exceptions and instead prepare an
-> userspace daemon that opens mmcblkX (non-exclusively) and forwards the
-> requests from unprivileged users to the device (or even implements
-> application specific API).
->=20
+Changes since v1:
+ * Add support for omap_hsmmc
+ * Add test in mmc_test to compare performance with
+   and without none blocking request.
+ * Add random fault injection in mmc core to exercise error
+   handling in the mmc block code.
+ * Fix serveral issue in the mmc block error handling.
+ * Add a host_cookie member in mmc_data to be used by
+   pre_req to mark the data. The host driver will then
+   check this mark to see if the data is prepared or not.
+ * Previous patch subject was
+   "add double buffering for mmc block requests".
 
-OK, this sounds reasonable to me (although I still do not see why
-non-root, non-privileged users have open() access to /dev/mmcblk0).
+Per Forlin (12):
+  mmc: add none blocking mmc request function
+  mmc: mmc_test: add debugfs file to list all tests
+  mmc: mmc_test: add test for none blocking transfers
+  mmc: add member in mmc queue struct to hold request data
+  mmc: add a block request prepare function
+  mmc: move error code in mmc_block_issue_rw_rq to a separate function.
+  mmc: add a second mmc queue request member
+  mmc: add handling for two parallel block requests in issue_rw_rq
+  mmc: test: add random fault injection in core.c
+  omap_hsmmc: use original sg_len for dma_unmap_sg
+  omap_hsmmc: add support for pre_req and post_req
+  mmci: implement pre_req() and post_req()
 
-I will replace the opcode filter with an unconditional check for
-CAP_SYS_RAWIO.  With this capability check, I think I can skip checking
-for SD vs. MMC.  It would be nice for this ioctl to have more general
-purpose than just enabling secure operations on SD cards (see Arnd
-Bergmann's intended use as a passthrough for virtual machines).
+ drivers/mmc/card/block.c      |  493 +++++++++++++++++++++++++++--------------
+ drivers/mmc/card/mmc_test.c   |  342 ++++++++++++++++++++++++++++-
+ drivers/mmc/card/queue.c      |  171 +++++++++------
+ drivers/mmc/card/queue.h      |   31 ++-
+ drivers/mmc/core/core.c       |  132 ++++++++++-
+ drivers/mmc/core/debugfs.c    |    5 +
+ drivers/mmc/host/mmci.c       |  146 +++++++++++-
+ drivers/mmc/host/mmci.h       |    8 +
+ drivers/mmc/host/omap_hsmmc.c |   90 +++++++-
+ include/linux/mmc/core.h      |    9 +-
+ include/linux/mmc/host.h      |   13 +-
+ lib/Kconfig.debug             |   11 +
+ 12 files changed, 1172 insertions(+), 279 deletions(-)
 
-Regarding permissions, the next iteration of this patch will:
+-- 
+1.7.4.1
 
-- Be a single patch containing the main ioctl functionality *and* this
-  capability verification (checking "CAP_SYS_RAWIO", per Alan Cox in
-  this thread).
-
-- Only have the check for CAP_SYS_RAWIO.  It will *not* have an
-  opcode-specific filter, nor a filter limiting it to just SD cards.
-
-Is that satisfactory?
-
-John
----1463811328-444021280-1302113922=:391--
