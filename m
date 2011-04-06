@@ -1,101 +1,46 @@
-From: Emmanuel Bernardo Vieira <mr.emmaneul@hotmail.com>
-Subject: STRICTLY CONFIDENTIAL
-Date: Thu, 07 Apr 2011 00:31:22 -0200
-Message-ID: <20110406211410.AB4201B0168@nkosi.realnet.co.sz>
-Reply-To: mr.emmaneul@hotmail.com
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: Boot partition support patch set.
+Date: Wed, 6 Apr 2011 18:20:36 -0500
+Message-ID: <BANLkTik7nDHvNbYRMEpyOvh71pXHuVgUTg@mail.gmail.com>
+References: <1302052193-23317-1-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from netfinity.webhost.realnet.co.sz ([196.28.7.2]:57369 "EHLO
-	nkosi.realnet.co.sz" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752996Ab1DFWmb convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 18:42:31 -0400
-Content-Disposition: inline
+Received: from exprod5og104.obsmtp.com ([64.18.0.178]:37479 "EHLO
+	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757037Ab1DFXUk convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 19:20:40 -0400
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.129.42])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p36NKxW0007389
+	for <linux-mmc@vger.kernel.org>; Wed, 6 Apr 2011 19:20:59 -0400 (EDT)
+Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p36NKw3D007374
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Wed, 6 Apr 2011 19:20:59 -0400 (EDT)
+Received: by wwb28 with SMTP id 28so2318013wwb.3
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2011 16:20:36 -0700 (PDT)
+In-Reply-To: <1302052193-23317-1-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: info@web.org
+To: linux-mmc@vger.kernel.org
+Cc: arnd@arndb.de, cjb@laptop.org
 
-STRICTLY CONFIDENTIAL JOINT VENTURE/PARTNERSHIP
+On Tue, Apr 5, 2011 at 8:09 PM, Andrei Warkentin <andreiw@motorola.com>=
+ wrote:
+> This is the latest version of the MMC device partition support.
+> It relies on a few other changes that were discussed recently.
+>
+> Thanks,
+> A
+>
+> TOC:
+> =A0[PATCH 1/4] MMC: Rename erase_timeout to cmd_timeout.
+> =A0[PATCH 2/4] MMC: SDHCI R1B command handling + MMC_CAP_ERASE.
+> =A0[PATCH 3/4] MMC: Allow setting CMD timeout for CMD6 (SWITCH).
+> =A0[PATCH 4/4] MMC: MMC boot partitions support.
+>
 
+Any problems, comments?
 
-
-I am making this venture proposal to you, as a reliable partner. I got your contact 
-
-from your country business guide as a 
-
-
-
-reliable person/company in a related area of my interest for investment.
-
-
-
-The money I want to invest was acquired from my late Father,the Guinea Bissau 
-
-President(Mr Jouo Bernardo Vieira)then, I was 
-
-
-
-my Father key financial adviser. I kept the money with a Security Trust and Finance 
-
-Company(fiduciary agent) in Abroad.
-
-
-
-The amount to invest is the sum of (12 MILLION EUROS)
-
-I was in Morocco before, Presently,i am in Nigeria and i have quited the  
-
-Government House in Guinea Bissau.
-
-If you will like to assist me as a partner,then indicate your interest after 
-
-which,you will meet my representatives to 
-
-
-
-discuss on the modalities.
-
-
-
-All other information related to the presence of the funds will be revealed to you 
-
-as we progress on.
-
-And this is my email address:mr.emmaneul@hotmail.com
-
-Phone Number:+2347087958109
-
-
-
-I will like my proposal to be kept confidential as regards to my status.Kindly 
-
-indicate your direct telephone and fax numbers 
-
-
-
-and Address
-
-in your next reply.
-
-Thanks and God Bless,
-
-Mr:Emmanuel Bernardo Vieira
-
-
-
-
-
-
-
-
-
-
-
-
-
----------------------------
-
-Did you know you can now get unCapped ADSL?
-
-For more info call Real Image Internet on +268 2 409 1000
+A
