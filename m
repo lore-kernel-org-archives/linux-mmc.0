@@ -1,68 +1,68 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: pre-defined multiple block read/write vs. open ended multiple
- block read/write
-Date: Wed, 6 Apr 2011 12:46:28 -0500
-Message-ID: <BANLkTimhUjiuz8tMShONsNKdJNSWT=11FQ@mail.gmail.com>
-References: <CE761E84DADF2947A4AF22FB8D97A473570B05A3@shsmsx501.ccr.corp.intel.com>
-	<BANLkTi=+bJ60JeOed6E6DF4u8YAtngJOKA@mail.gmail.com>
+From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: Add ioctl to let userspace apps send ACMDs
+Date: Wed, 6 Apr 2011 20:11:23 +0200
+Message-ID: <BANLkTinOP6G1=ZcC=7Wxr6eO2sowJ_TH0w@mail.gmail.com>
+References: <alpine.DEB.2.00.1104051450480.25803@peruna> <BANLkTinsYioaa69ZdFpBAr-BK6RDh8V83g@mail.gmail.com>
+ <alpine.DEB.2.00.1104061021350.391@peruna>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og104.obsmtp.com ([64.18.0.178]:35777 "EHLO
-	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752520Ab1DFRqb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 13:46:31 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p36HkpKf012987
-	for <linux-mmc@vger.kernel.org>; Wed, 6 Apr 2011 13:46:51 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p36HZG6Q007948
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Wed, 6 Apr 2011 13:46:51 -0400 (EDT)
-Received: by mail-wy0-f170.google.com with SMTP id 34so2288534wyb.15
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2011 10:46:29 -0700 (PDT)
-In-Reply-To: <BANLkTi=+bJ60JeOed6E6DF4u8YAtngJOKA@mail.gmail.com>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:45782 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755535Ab1DFSLn convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 14:11:43 -0400
+Received: by qwk3 with SMTP id 3so1040055qwk.19
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2011 11:11:43 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1104061021350.391@peruna>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: John Calixto <john.calixto@modsystems.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>
 
-On Wed, Apr 6, 2011 at 10:33 AM, Andrei Warkentin <andreiw@motorola.com> wrote:
-> On Wed, Apr 6, 2011 at 8:54 AM, Gao, Yunpeng <yunpeng.gao@intel.com> wrote:
->> Currently, the mmc driver uses open ended multiple block read/write (CMD18/25+CMD12) commands and not use pre-defined multiple block read/write (CMD23+CMD18/25) commands.
+W dniu 6 kwietnia 2011 19:37 u=BFytkownik John Calixto
+<john.calixto@modsystems.com> napisa=B3:
+> On Wed, 6 Apr 2011, Micha=B3 Miros=B3aw wrote:
+>> 2011/4/5 John Calixto <john.calixto@modsystems.com>:
+>> > +#ifdef CONFIG_COMPAT
+>> > +struct sd_ioc_cmd32 {
+>> > + =A0 =A0 =A0 u32 write_flag;
+>> > + =A0 =A0 =A0 u32 opcode;
+>> > + =A0 =A0 =A0 u32 arg;
+>> > + =A0 =A0 =A0 u32 response[4];
+>> > + =A0 =A0 =A0 u32 flags;
+>> > + =A0 =A0 =A0 u32 blksz;
+>> > + =A0 =A0 =A0 u32 blocks;
+>> > + =A0 =A0 =A0 u32 postsleep_us;
+>> > + =A0 =A0 =A0 u32 force_timeout_ns;
+>> > + =A0 =A0 =A0 compat_uptr_t data_ptr;
+>> > +};
+>> > +#define SD_IOC_ACMD32 _IOWR(MMC_BLOCK_MAJOR, 0, struct sd_ioc_cmd=
+32)
+>> [...]
 >>
->> According to the feedback from some MMC/SD device vendors, they prefer the pre-defined multiple block read/write commands since it gives the device a chance to do some internal optimization.
->>
->> Also I found on the latest eMMC 4.5 Spec, quite a few new features requires using of CMD23. That means, these new features can not be implemented with the open ended multiple block read/write commands.
->>
->> So, the question is, why the current mmc driver does not use the pre-defined multiple block read/write commands? Any comments?
->>
->
-> While I really don't know, I would guess becase the SD spec has a
-> different definition of ACMD23 than MMC, so perhaps avoiding
-> ACMD/CMD23 that was chosen as the simpler more common alternative.
-> Alternatively, the difference might imply that at one time it was an
-> optional feature. I'll try digging up an early MMCA spec to confirm...
+>> Since your implementing a new ioctl you can make the structure the
+>> same for 64 and 32-bit archs and avoid all this compat crap.
+> I was also less than pleased with this, but I chose to implement the
+> compat crap because it allow a "natural" userspace API for both the
+> kernel32+user32 and kernel64+user64 environments. =A0The ugliness in =
+the
+> kernel is just when you have defined CONFIG_COMPAT. =A0I think 32-bit=
+-only
+> is still an important target for this functionality (think set-top me=
+dia
+> players, mobile devices; basically, anything running on ARM) so alway=
+s
+> having to cast your data pointer to 64-bit is not appealing. =A0I sus=
+pect
+> it will be very unlikely to see people using this in the kernel64+use=
+r32
+> environment.
 
-Ok let me correct myself.
+The problem is only with data_ptr field. If you make it the same size
+whether it's for 32-bit or 64-bit arch then you don't need all that
+compat code for user32 on kernel64 except for pointer translation when
+there's 32-bit process calling.
 
-For SD:
-ACMD23 - SET_WR_BLK_ERASE_COUNT might speed to the multiple write
-block, but still need CMD12 after the write.
-CMD23 - optional and mandatory on UHS104 cards. CMD23 support is noted
-in SCR register.
-
->
-> At least one new MMC feature now (reliable writes) requires CMD23, and
-> at the very least using SET_BLOCK_COUNT instead of STOP_TRANSMISSION
-> would make that code path more homogenous. Certainly the overhead is
-> the same for MMC - either send an extra command before or after the
-> transfer. For SD you do get an extra CMD55 before CMD23, since it's
-> ACMD23 we're talking about.
->
-> I am actually working on a patch to do just that...
->
-
-Which I will send shortly.
-
-A
+Best Regards,
+Micha=B3 Miros=B3aw
