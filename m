@@ -1,106 +1,51 @@
-From: Kishore Kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: Dynamic MMC device naming vs. bootloaders
-Date: Wed, 6 Apr 2011 15:41:15 +0530
-Message-ID: <BANLkTimDbPkgHDuERqJ-qRe9Ji2RyzAvXA@mail.gmail.com>
-References: <74CDBE0F657A3D45AFBB94109FB122FF0493EB33AE@HQMAIL01.nvidia.com>
- <BANLkTik7fbz+QLZY8RH9wCkGQdU3hUNfNA@mail.gmail.com> <74CDBE0F657A3D45AFBB94109FB122FF0493EB3599@HQMAIL01.nvidia.com>
+From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Subject: Re: [PATCH v2 2/2] mmc: Check CAP_SYS_ADMIN for destructive ioctl ACMDs
+Date: Wed, 6 Apr 2011 12:14:30 +0200
+Message-ID: <BANLkTinG2Zty-VqnKD4c=-DYuML9ZxBeNg@mail.gmail.com>
+References: <alpine.DEB.2.00.1104051458350.25803@peruna> <BANLkTi=xcPEJxophfymqF5+Nd=aF40H=FQ@mail.gmail.com>
+ <alpine.DEB.2.00.1104051613150.25803@peruna> <BANLkTi=wXpqFGhaBPnoRa+sQJ_eysvrTVA@mail.gmail.com>
+ <alpine.DEB.2.00.1104051733180.25803@peruna>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:43427 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755472Ab1DFKLh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 06:11:37 -0400
-Received: by wwa36 with SMTP id 36so1558999wwa.1
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2011 03:11:36 -0700 (PDT)
-In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF0493EB3599@HQMAIL01.nvidia.com>
+Received: from mail-px0-f179.google.com ([209.85.212.179]:48303 "EHLO
+	mail-px0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755285Ab1DFKOv convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2011 06:14:51 -0400
+Received: by pxi2 with SMTP id 2so730182pxi.10
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2011 03:14:51 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.00.1104051733180.25803@peruna>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@nvidia.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: John Calixto <john.calixto@modsystems.com>
+Cc: Andrei Warkentin <andreiw@motorola.com>, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>
 
-On Wed, Apr 6, 2011 at 2:58 AM, Stephen Warren <swarren@nvidia.com> wrote:
-> Kishore Kadiyala wrote at Tuesday, April 05, 2011 12:38 AM:
->>
->> Hi Stephen,
->>
->> On Mon, Apr 4, 2011 at 11:09 PM, Stephen Warren <swarren@nvidia.com> wrote:
->> > Chris et. al.,
->> >
->> > I'm working on an ARM system that contains at least two MMC/SD devices;
->> > specifically the board has an internal MMC device, and an SD card slot,
->> > although the SoC has four MMC/SD hosts IIRC.
->> >
->> > The kernel's naming of these devices is dynamic. If the SD card is not
->> > plugged in, the internal MMC is always known as mmcblock0. If the SD card
->> > is plugged in too, sometimes the internal MMC is mmcblk0 and sometimes it's
->> > mmcblk1. I assume this is timing related; 2.6.37 usually seemed to name
->> > them "in order", whereas 2.6.38 usually seems to name them "backwards".
->> >
->> > This causes problems with the bootloader scripts I'm using, which assumes
->> > that the internal MMC is always device 0 and the SD slot is always device 1,
->> > and hence provides kernel command-line argument root=/dev/mmcblk0p3 or
->> > root=/dev/mmcblk1p3 based on whether it booted from SD or internal MMC (SD
->> > is searched for a valid image first by the bootloader).
->>
->> Just follow this thread which discusses the same but for OMAP4 controller
->> http://www.mail-archive.com/linux-omap@vger.kernel.org/msg47853.html
->
-> Kishore, thanks for the pointer. However, I don't see anything in that thread
-> that affects MMC block device IDs. The thread ended with the original poster
-> requesting the patch be dropped, since he'd made a mistake in his bootloader
-> settings.
->
-> Just perhaps the registration order change is enough to change the timing of
-> device (memory device, not host controller?) probing, which just happens to
-> affect the ID assignment?
->
->> One solution could be make your internal MMC always registered as mmcblk0
->> and the removable one as next device.
->
-> That's essentially what the patch I gave previously does.
+2011/4/6 John Calixto <john.calixto@modsystems.com>:
+> On Tue, 5 Apr 2011, Andrei Warkentin wrote:
+>> Could you check the SD behavior for undefined ACMDs? If I do ACMD25,
+>> and ACMD25 is not defined, will it be executed as CMD25? This is the
+>> MMC behavior as I have mentioned.
+> The SD spec has a similar paragraph about unspecified ACMD opcodes -
+> they should be treated as the equivalent CMD opcodes. =C2=A0However, =
+all of
+> the opcodes that I listed are indeed specified. =C2=A0So, if the card
+> identifies itself as an SD card, it must implement those opcodes. =C2=
+=A0If
+> it identifies itself as an SD card, and it does *not* implement the A=
+CMD
+> opcodes I listed, then it likely "fell out the back door of the
+> manufacturing facility and landed on a store shelf" ;) ... its
+> quality/correct performance/reliability is unlikely.
 
-Your change was in mmc/card/block.c, but you can handle this by
-changing sequence during
-device registeration.
+Not all specified ACMDs are mandatory. SD spec 2.00 says that only
+6,13,41,42,51 are mandatory for all cards. This is less than the list
+you prepared in the patch.
 
-Following change in the patch does that
-https://patchwork.kernel.org/patch/595861/
+It's better not to make those exceptions and instead prepare an
+userspace daemon that opens mmcblkX (non-exclusively) and forwards the
+requests from unprivileged users to the device (or even implements
+application specific API).
 
-diff --git a/arch/arm/mach-omap2/board-4430sdp.c
-b/arch/arm/mach-omap2/board-4430sdp.c
-index 1a943be..f914099 100644
---- a/arch/arm/mach-omap2/board-4430sdp.c
-+++ b/arch/arm/mach-omap2/board-4430sdp.c
-@@ -349,11 +349,6 @@  static struct twl4030_usb_data omap4_usbphy_data = {
-
- static struct omap2_hsmmc_info mmc[] = {
- 	{
--		.mmc		= 1,
--		.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA,
--		.gpio_wp	= -EINVAL,
--	},
--	{
- 		.mmc		= 2,
- 		.caps		=  MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA,
- 		.gpio_cd	= -EINVAL,
-@@ -361,19 +356,24 @@  static struct omap2_hsmmc_info mmc[] = {
- 		.nonremovable   = true,
- 		.ocr_mask	= MMC_VDD_29_30,
- 	},
-+	{
-+		.mmc		= 1,
-+		.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA,
-+		.gpio_wp	= -EINVAL,
-+	},
- 	{}	/* Terminator */
- };
-
-Regards,
-Kishore
-
->
-> --
-> nvpublic
->
->
+Best Regards,
+Micha=C5=82 Miros=C5=82aw
