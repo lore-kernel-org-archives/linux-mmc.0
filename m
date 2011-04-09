@@ -1,50 +1,51 @@
-From: Jae hoon Chung <jh80.chung@gmail.com>
-Subject: Re: [PATCH v2 00/12] mmc: use nonblock mmc requests to minimize latency
-Date: Sat, 9 Apr 2011 20:55:16 +0900
-Message-ID: <BANLkTikVeXvfSBS-xLDXVdesKJpKdtUVqg@mail.gmail.com>
-References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
-	<BANLkTikZVDejarZ4O5KgNS7S4fxBLSmANA@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: mmc_add_card(): fix missing break in switch statement
+Date: Sat, 09 Apr 2011 10:08:44 -0400
+Message-ID: <m3bp0fldoz.fsf@pullcord.laptop.org>
+References: <20110409061647.D5DAE13909@rere.qmqm.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:35935 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753502Ab1DILzS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Apr 2011 07:55:18 -0400
-In-Reply-To: <BANLkTikZVDejarZ4O5KgNS7S4fxBLSmANA@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:44776 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754098Ab1DIODm convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Apr 2011 10:03:42 -0400
+In-Reply-To: <20110409061647.D5DAE13909@rere.qmqm.pl> (=?utf-8?Q?=22Micha?=
+ =?utf-8?Q?=C5=82_Miros=C5=82aw=22's?=
+	message of "Sat, 9 Apr 2011 08:16:47 +0200 (CEST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Per Forlin <per.forlin@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
+To: =?utf-8?Q?Micha=C5=82_Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
+Cc: linux-mmc@vger.kernel.org, Prashanth Bhat <prashanth.bhat@manipal.net>
 
-Hi Per..
+Hi,
 
-I'm applied your patch..and sent the patch about dw_mmc.c.
-I think good this approach..
-
-Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Regards,
-Jaehoon Chung
-
-2011/4/9 Linus Walleij <linus.walleij@linaro.org>:
-> On Wed, Apr 6, 2011 at 9:07 PM, Per Forlin <per.forlin@linaro.org> wr=
-ote:
+On Sat, Apr 09 2011, Micha=C5=82 Miros=C5=82aw wrote:
+> Fixes a cosmetic bug that affects printk() for SD-combo cards.
 >
->> The intention for introducing none blocking mmc requests is to minim=
-ize the
->> time between a mmc request ends and another mmc request starts.
+> Noticed-by: Prashanth Bhat <prashanth.bhat@manipal.net>
+> Signed-off-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
+> ---
+>  drivers/mmc/core/bus.c |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
 >
-> Acked-by: Linus Walleij <linus.walleij@linaro.org> FWIW, I've looked =
-at the
-> patches so many times I'm already blind for any remaining bugs...
->
-> Yours,
-> Linus Walleij
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index 63667a8..d6d62fd 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -284,6 +284,7 @@ int mmc_add_card(struct mmc_card *card)
+>  		type =3D "SD-combo";
+>  		if (mmc_card_blockaddr(card))
+>  			type =3D "SDHC-combo";
+> +		break;
+>  	default:
+>  		type =3D "?";
+>  		break;
+
+Thanks, pushed to mmc-next for .40.
+
+- Chris.
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
