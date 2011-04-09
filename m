@@ -1,30 +1,52 @@
-From: John Calixto <john.calixto@modsystems.com>
-Subject: Re: [PATCH v3] mmc: Add ioctl to let userspace apps send ACMDs
-Date: Fri, 8 Apr 2011 15:17:45 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1104081516180.15853@peruna>
-References: <alpine.DEB.2.00.1104071816270.10238@peruna> <BANLkTin9hfr+VfprkDr-Lc+iY0qShmcnng@mail.gmail.com> <alpine.DEB.2.00.1104081202550.15086@peruna> <BANLkTi=wPYkrj72ixpN52WewVwsb9Ar-Vg@mail.gmail.com> <alpine.DEB.2.00.1104081404210.15584@peruna>
- <BANLkTinOarwAj3Pz1Z_ayHe2tG6fU989Og@mail.gmail.com>
+From: Prashanth Bhat <prashanth.bhat@manipal.net>
+Subject: Potential Bug in drivers/mmc/
+Date: Sat, 09 Apr 2011 07:04:42 +0530
+Message-ID: <4D9FB7B2.3080702@manipal.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-masked.atl.sa.earthlink.net ([209.86.89.68]:54557 "EHLO
-	elasmtp-masked.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757405Ab1DHWRz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Apr 2011 18:17:55 -0400
-In-Reply-To: <BANLkTinOarwAj3Pz1Z_ayHe2tG6fU989Og@mail.gmail.com>
+Received: from p3plsmtpa01-06.prod.phx3.secureserver.net ([72.167.82.86]:59953
+	"HELO p3plsmtpa01-06.prod.phx3.secureserver.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1757986Ab1DIBle (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Apr 2011 21:41:34 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: mirq-linux@rere.qmqm.pl, adrian.hunter@nokia.com, cjb@laptop.org, linux-mmc@vger.kernel.org, akpm@linux-foundation.org, torvalds@linux-foundation.org
 
-On Fri, 8 Apr 2011, Andrei Warkentin wrote:
-> 
-> I'm not sure what the etiquette for this list is, but you can a
-> Reviewed-by: Andrei Warkentin <andreiw@motorola.com>
-> 
-> ...if that's alright with the maintainers.
-> 
+Hi,
 
-Will do - Thanks for taking the time Andrei!
+I'm new to Linux kernel code, but I think I spot a bug in a commit made 
+to drivers/mmc/core/bus.c in 2.6.36, back in Aug 2010.
 
-John
+Here's the GIT URL showing the changes in this commit:
+
+http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=7310ece86ad7da027f85a37a0638164118a5d12f
+
+At line 239, the following code change was made:
+
++ case MMC_TYPE_SD_COMBO:
++               type = "SD-combo";
++               if (mmc_card_blockaddr(card))
++                       type = "SDHC-combo";
+
+
+The bug : I would have expected to see a "break" at the end of the new 
+case entry. I don't see this, even in a later version of the source 
+(namely 2.6.38).
+
+Please take a look, and also let me know what you decide.
+
+Thanks,
+Prashanth Bhat
+
+=============================================================
+Prashanth B. Bhat,  Ph. D.
+Chief Technology Officer,
+Manipal Dot Net Pvt. Ltd.
+Manipal 576 104 INDIA
+
+http://www.linkedin.com/in/prashanthbhat
+http://www.manipal.net
+prashanth.bhat@manipal.net
+=============================================================
