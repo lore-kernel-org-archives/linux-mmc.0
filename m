@@ -1,123 +1,45 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: [PATCH 2/2] MMC: Fix erase/trim for certain SanDisk cards.
-Date: Mon, 11 Apr 2011 17:20:41 -0500
-Message-ID: <1302560441-10565-3-git-send-email-andreiw@motorola.com>
-References: <1302560441-10565-1-git-send-email-andreiw@motorola.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] MMC: Extends card quicks with MMC/SD quirks matching the CID.
+Date: Mon, 11 Apr 2011 17:50:27 -0400
+Message-ID: <m3sjto8nks.fsf@pullcord.laptop.org>
+References: <m339lobj8j.fsf@pullcord.laptop.org>
+	<1302559335-9998-1-git-send-email-andreiw@motorola.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og104.obsmtp.com ([64.18.0.178]:50821 "EHLO
-	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755928Ab1DKVlo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 17:41:44 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3BLg4gV018864
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2011 17:42:05 -0400 (EDT)
-Received: from mail-yw0-f42.google.com (mail-yw0-f42.google.com [209.85.213.42])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3BLfP9o018621
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2011 17:42:04 -0400 (EDT)
-Received: by mail-yw0-f42.google.com with SMTP id 1so4181113ywh.15
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2011 14:41:42 -0700 (PDT)
-In-Reply-To: <1302560441-10565-1-git-send-email-andreiw@motorola.com>
+Received: from void.printf.net ([89.145.121.20]:36332 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756165Ab1DKVpe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Apr 2011 17:45:34 -0400
+In-Reply-To: <1302559335-9998-1-git-send-email-andreiw@motorola.com> (Andrei
+	Warkentin's message of "Mon, 11 Apr 2011 17:02:15 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, Andrei Warkentin <andreiw@motorola.com>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Ohad Ben-Cohen <ohad@wizery.com>
 
-CMD38 argument is passed through EXT_CSD[113].
+Hi,
 
-Change-Id: I47e9d5e2cf44d9274a65a3b1955026185cb8f2b8
-Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
----
- drivers/mmc/card/block.c |   40 +++++++++++++++++++++++++++++++++++++++-
- include/linux/mmc/card.h |    1 +
- 2 files changed, 40 insertions(+), 1 deletions(-)
+On Mon, Apr 11 2011, Andrei Warkentin wrote:
+> From: Chris Ball <cjb@laptop.org>
+>
+> The current mechanism is SDIO-only. This allows us to create
+> function-specific quirks, without creating messy Kconfig dependencies,
+> or polluting core/ with function-specific code.
+>
+> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 823f295..9fba4a6 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -48,6 +48,13 @@ MODULE_ALIAS("mmc:block");
- #endif
- #define MODULE_PARAM_PREFIX "mmcblk."
- 
-+#define INAND_CMD38_ARG_EXT_CSD  113
-+#define INAND_CMD38_ARG_ERASE    0x00
-+#define INAND_CMD38_ARG_TRIM     0x01
-+#define INAND_CMD38_ARG_SECERASE 0x80
-+#define INAND_CMD38_ARG_SECTRIM1 0x81
-+#define INAND_CMD38_ARG_SECTRIM2 0x88
-+
- #define REL_WRITES_SUPPORTED(card) (mmc_card_mmc((card)) &&	\
-     (((card)->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||	\
-      ((card)->ext_csd.rel_sectors)))
-@@ -288,6 +295,15 @@ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
- 	else
- 		arg = MMC_ERASE_ARG;
- 
-+	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				 INAND_CMD38_ARG_EXT_CSD,
-+				 arg == MMC_TRIM_ARG ?
-+				 INAND_CMD38_ARG_TRIM :
-+				 INAND_CMD38_ARG_ERASE);
-+		if (err)
-+			goto out;
-+	}
- 	err = mmc_erase(card, from, nr, arg);
- out:
- 	spin_lock_irq(&md->lock);
-@@ -322,9 +338,26 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 	else
- 		arg = MMC_SECURE_ERASE_ARG;
- 
-+	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				 INAND_CMD38_ARG_EXT_CSD,
-+				 arg == MMC_SECURE_TRIM1_ARG ?
-+				 INAND_CMD38_ARG_SECTRIM1 :
-+				 INAND_CMD38_ARG_SECERASE);
-+		if (err)
-+			goto out;
-+	}
- 	err = mmc_erase(card, from, nr, arg);
--	if (!err && arg == MMC_SECURE_TRIM1_ARG)
-+	if (!err && arg == MMC_SECURE_TRIM1_ARG) {
-+		if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-+			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					 INAND_CMD38_ARG_EXT_CSD,
-+					 INAND_CMD38_ARG_SECTRIM2);
-+			if (err)
-+				goto out;
-+		}
- 		err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
-+	}
- out:
- 	spin_lock_irq(&md->lock);
- 	__blk_end_request(req, err, blk_rq_bytes(req));
-@@ -757,6 +790,11 @@ mmc_blk_set_blksize(struct mmc_blk_data *md, struct mmc_card *card)
- 
- static const struct mmc_fixup blk_fixups[] =
- {
-+	MMC_FIXUP("SEM02G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-+	MMC_FIXUP("SEM04G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-+	MMC_FIXUP("SEM08G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-+	MMC_FIXUP("SEM16G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-+	MMC_FIXUP("SEM32G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
- 	END_FIXUP
- };
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index c651317..28ce230 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -131,6 +131,7 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_CLK_GATING (1<<3)	/* clock gating the sdio bus will make card fail */
- #define MMC_QUIRK_NONSTD_FUNC_IF (1<<4)		/* SDIO card has nonstd function interfaces */
- #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
-+#define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
-  	unsigned int		erase_shift;	/* if erase unit is power 2 */
+Thanks, pushed to mmc-next for .40 with Arnd's ACK.  (And with you as
+patch author, not me.)
+
+I made a mistake in not noticing that your later RFC patchset includes
+(the same version of) this patch -- are you happy with adding block
+quirks on top of this later, and merging this patch for now?
+
+(Ohad, heads-up that I've rebased your wl1271 SDIO quirks onto this
+patchset; there should be no behavior change, but just in case.)
+
+- Chris.
 -- 
-1.7.0.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
