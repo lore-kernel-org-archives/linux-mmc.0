@@ -1,142 +1,87 @@
-From: anish singh <anish198519851985-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v2 00/12] mmc: use nonblock mmc requests to minimize
-	latency
-Date: Sun, 10 Apr 2011 09:03:49 +0530
-Message-ID: <BANLkTikwCveocjPdoMoLEVpNneKkq66s4g@mail.gmail.com>
-References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
-	<BANLkTikZVDejarZ4O5KgNS7S4fxBLSmANA@mail.gmail.com>
-	<BANLkTikVeXvfSBS-xLDXVdesKJpKdtUVqg@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH v4] mmc: sdhci: add error checking for mmc_add_host
+Date: Mon, 11 Apr 2011 11:11:08 +0900
+Message-ID: <4DA2633C.5000103@samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5268293759741690506=="
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <BANLkTikVeXvfSBS-xLDXVdesKJpKdtUVqg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: Jae hoon Chung <jh80.chung-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:46128 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753671Ab1DKCNS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 10 Apr 2011 22:13:18 -0400
+Received: from epmmp1 (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LJG00LDVU5GPH30@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 11 Apr 2011 11:12:52 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LJG001EMU5GTM@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 11 Apr 2011 11:12:52 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Kyungmin Park <kyungmin.park@samsung.com>
 
---===============5268293759741690506==
-Content-Type: multipart/alternative; boundary=20cf307cfff499f6ef04a08820a4
+Sometimes we can't add the device,but we didn't check any error status.
+Need to check error status for mmc_add_host.
+And Missing regulator disable/put. Fixed them.
 
---20cf307cfff499f6ef04a08820a4
-Content-Type: text/plain; charset=UTF-8
-
-On Sat, Apr 9, 2011 at 5:25 PM, Jae hoon Chung <jh80.chung-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-
-> Hi Per..
->
-> I'm applied your patch..and sent the patch about dw_mmc.c.
-> I think good this approach..
->
-Forlin,i too want to test this patch of yours but unfortunately i have
-samsung board+SDHCI host controller so i guess i just need to write pre_req
-and post_req functions and that would enable this(nonblock mmc request) on
-my board.Hope i am right?
-
->
-> Tested-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
->
-> Regards,
-> Jaehoon Chung
->
-> 2011/4/9 Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>:
-> > On Wed, Apr 6, 2011 at 9:07 PM, Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> wrote:
-> >
-> >> The intention for introducing none blocking mmc requests is to minimize
-> the
-> >> time between a mmc request ends and another mmc request starts.
-> >
-> > Acked-by: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> FWIW, I've looked at
-> the
-> > patches so many times I'm already blind for any remaining bugs...
-> >
-> > Yours,
-> > Linus Walleij
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->  > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
->
-
---20cf307cfff499f6ef04a08820a4
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<br><br>
-<div class=3D"gmail_quote">On Sat, Apr 9, 2011 at 5:25 PM, Jae hoon Chung <=
-span dir=3D"ltr">&lt;<a href=3D"mailto:jh80.chung-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">jh80.chung@gma=
-il.com</a>&gt;</span> wrote:<br>
-<blockquote style=3D"BORDER-LEFT: #ccc 1px solid; MARGIN: 0px 0px 0px 0.8ex=
-; PADDING-LEFT: 1ex" class=3D"gmail_quote">Hi Per..<br><br>I&#39;m applied =
-your patch..and sent the patch about dw_mmc.c.<br>I think good this approac=
-h..<br>
-</blockquote>
-<div>Forlin,i too want to test this patch of yours but unfortunately i have=
- samsung board+SDHCI host controller so i guess i just need to write pre_re=
-q and post_req functions and that would enable this(nonblock mmc request) o=
-n my board.Hope i am right?</div>
-
-<blockquote style=3D"BORDER-LEFT: #ccc 1px solid; MARGIN: 0px 0px 0px 0.8ex=
-; PADDING-LEFT: 1ex" class=3D"gmail_quote"><br>Tested-by: Jaehoon Chung &lt=
-;<a href=3D"mailto:jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org">jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org</a>&gt;<b=
-r>
-<br>Regards,<br>Jaehoon Chung<br><br>2011/4/9 Linus Walleij &lt;<a href=3D"=
-mailto:linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org">linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org</a>&gt;:<br>
-<div class=3D"im">&gt; On Wed, Apr 6, 2011 at 9:07 PM, Per Forlin &lt;<a hr=
-ef=3D"mailto:per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org">per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org</a>&gt; wrote:<br=
->&gt;<br>&gt;&gt; The intention for introducing none blocking mmc requests =
-is to minimize the<br>
-&gt;&gt; time between a mmc request ends and another mmc request starts.<br=
->&gt;<br>&gt; Acked-by: Linus Walleij &lt;<a href=3D"mailto:linus.walleij@l=
-inaro.org">linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org</a>&gt; FWIW, I&#39;ve looked at the<br=
->
-&gt; patches so many times I&#39;m already blind for any remaining bugs...<=
-br>&gt;<br>&gt; Yours,<br>&gt; Linus Walleij<br>&gt; --<br></div>&gt; To un=
-subscribe from this list: send the line &quot;unsubscribe linux-mmc&quot; i=
-n<br>
-
-<div>
-<div></div>
-<div class=3D"h5">&gt; the body of a message to <a href=3D"mailto:majordomo=
-@vger.kernel.org">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>&gt; More majordomo info=
- at =C2=A0<a href=3D"http://vger.kernel.org/majordomo-info.html" target=3D"=
-_blank">http://vger.kernel.org/majordomo-info.html</a><br>
-&gt;<br>--<br>To unsubscribe from this list: send the line &quot;unsubscrib=
-e linux-kernel&quot; in<br>the body of a message to <a href=3D"mailto:major=
-domo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>More majordomo info =
-at =C2=A0<a href=3D"http://vger.kernel.org/majordomo-info.html" target=3D"_=
-blank">http://vger.kernel.org/majordomo-info.html</a><br>
-Please read the FAQ at =C2=A0<a href=3D"http://www.tux.org/lkml/" target=3D=
-"_blank">http://www.tux.org/lkml/</a><br></div></div></blockquote></div><br=
->
-
---20cf307cfff499f6ef04a08820a4--
+[PATCH v4] : merged for v3 [PATCH 1/2] and [PATCH 2/2] reviewed on Wolfram Sang
 
 
---===============5268293759741690506==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci.c |   22 ++++++++++++++++++++--
+ 1 files changed, 20 insertions(+), 2 deletions(-)
 
-_______________________________________________
-linaro-dev mailing list
-linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-http://lists.linaro.org/mailman/listinfo/linaro-dev
-
---===============5268293759741690506==--
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9e15f41..e9cb09c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2025,7 +2025,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 	mmiowb();
+ 
+-	mmc_add_host(mmc);
++	ret = mmc_add_host(mmc);
++	if (unlikely(ret))
++		goto err_free_mmc;
+ 
+ 	printk(KERN_INFO "%s: SDHCI controller on %s [%s] using %s\n",
+ 		mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+@@ -2036,15 +2038,31 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 	return 0;
+ 
++err_free_mmc:
++	mmc_remove_host(host);
++
+ #ifdef SDHCI_USE_LEDS_CLASS
++	led_classdev_ungregister(&host->led);
+ reset:
++#endif
+ 	sdhci_reset(host, SDHCI_RESET_ALL);
+ 	free_irq(host->irq, host);
+-#endif
++	del_timer_sync(&host->timer);
++	if (host->vmmc) {
++		regulator_disable(host->vmmc);
++		regulator_put(host->vmmc);
++	}
++
+ untasklet:
+ 	tasklet_kill(&host->card_tasklet);
+ 	tasklet_kill(&host->finish_tasklet);
+ 
++	kfree(host->adma_desc);
++	kfree(host->align_buffer);
++
++	host->adma_desc = NULL;
++	host->align_buffer = NULL;
++
+ 	return ret;
+ }
+ 
