@@ -1,57 +1,41 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [PATCH] MMC: Extends card quicks with MMC/SD quirks matching the CID.
-Date: Mon, 11 Apr 2011 16:47:54 -0500
-Message-ID: <BANLkTi=UidLARN6G9WLv7v+8i7KObcAztQ@mail.gmail.com>
-References: <m339lobj8j.fsf@pullcord.laptop.org>
-	<1302559335-9998-1-git-send-email-andreiw@motorola.com>
-	<m3sjto8nks.fsf@pullcord.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [patchv3 4/4] MMC: MMC boot partitions support.
+Date: Mon, 11 Apr 2011 18:00:56 -0400
+Message-ID: <m3oc4c8n3b.fsf@pullcord.laptop.org>
+References: <BANLkTikA56sD_A6VVPF15SgA-AnKOZ2ZXw@mail.gmail.com>
+	<1302556424-21951-4-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og111.obsmtp.com ([64.18.0.22]:53600 "EHLO
-	exprod5og111.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754947Ab1DKVsA convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 17:48:00 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.130.20])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3BLmHT4021318
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2011 17:48:17 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3BLgL5o019030
-	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2011 17:48:17 -0400 (EDT)
-Received: by mail-wy0-f170.google.com with SMTP id 34so8519202wyb.15
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2011 14:47:54 -0700 (PDT)
-In-Reply-To: <m3sjto8nks.fsf@pullcord.laptop.org>
+Received: from void.printf.net ([89.145.121.20]:59209 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751986Ab1DKV4B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Apr 2011 17:56:01 -0400
+In-Reply-To: <1302556424-21951-4-git-send-email-andreiw@motorola.com> (Andrei
+	Warkentin's message of "Mon, 11 Apr 2011 16:13:44 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Ohad Ben-Cohen <ohad@wizery.com>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org, arnd@arndb.de
 
-On Mon, Apr 11, 2011 at 4:50 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Mon, Apr 11 2011, Andrei Warkentin wrote:
->> From: Chris Ball <cjb@laptop.org>
->>
->> The current mechanism is SDIO-only. This allows us to create
->> function-specific quirks, without creating messy Kconfig dependencie=
-s,
->> or polluting core/ with function-specific code.
->>
->> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
->
-> Thanks, pushed to mmc-next for .40 with Arnd's ACK. =A0(And with you =
-as
-> patch author, not me.)
->
-> I made a mistake in not noticing that your later RFC patchset include=
-s
-> (the same version of) this patch -- are you happy with adding block
-> quirks on top of this later, and merging this patch for now?
->
+Hi Andrei,
 
-Thanks! Yes, no problem, I've just sent a block quirk which uses this
-(SanDisk), and that includes a re-send of the block quirks support.
+On Mon, Apr 11 2011, Andrei Warkentin wrote:
+> Allows device MMC boot partitions to be accessed. MMC partitions
+> are treated effectively as separate block devices on the same
+> MMC card.
+>
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
 
-A
+Looks fine, but would you mind breaking out the {claim,release}_host
+changes around mmc_blk_issue_rq() into a separate patch?  It doesn't
+look like they're obviously related to the partitioning support, but
+maybe I'm missing something.
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
