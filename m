@@ -1,55 +1,42 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [RACE] between rescan thread and clock-gate work
-Date: Mon, 11 Apr 2011 18:12:44 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1104111722380.20798@axis700.grange>
+From: John Calixto <john.calixto@modsystems.com>
+Subject: Re: [PATCH 1/4] MMC: Rename erase_timeout to cmd_timeout.
+Date: Mon, 11 Apr 2011 12:18:11 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1104111213230.32082@peruna>
+References: <1302052193-23317-1-git-send-email-andreiw@motorola.com> <1302052193-23317-2-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:63593 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752258Ab1DKQMs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 12:12:48 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by axis700.grange (Postfix) with ESMTP id 199F6189B85
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2011 18:12:44 +0200 (CEST)
+Received: from elasmtp-banded.atl.sa.earthlink.net ([209.86.89.70]:35997 "EHLO
+	elasmtp-banded.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753836Ab1DKTSW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 15:18:22 -0400
+In-Reply-To: <1302052193-23317-2-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>
 
-Hi all
+Hi Andrei,
 
-I'm observing re-entry into driver's (tmio) .set_ios() method, caused by a 
-race between the card-detect rescan thread along the lines of
+On Tue, 5 Apr 2011, Andrei Warkentin wrote:
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index 07f27af..a7d7da7 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -92,7 +92,7 @@ struct mmc_command {
+>   *              actively failing requests
+>   */
+>  
+> -	unsigned int		erase_timeout;	/* in milliseconds */
+> +	unsigned int		cmd_timeout;	/* in milliseconds */
+>  
+>  	struct mmc_data		*data;		/* data segment associated with cmd */
+>  	struct mmc_request	*mrq;		/* associated request */
 
-[kworker/u:0 worker-thread]
-mmc_claim_host()
-mmc_rescan()
-mmc_rescan_try_freq() /* yes, there are also other paths to call 
-			.set_ios() from here */
-mmc_go_idle()
-mmc_set_chip_select()
-mmc_set_ios()
-host->ops->set_ios()
+Could you rename this field to "cmd_timeout_ms"?  When I was testing the
+addition of cmd_timeout to my ioctl patch, I noticed that data timeout
+was being specified in ns and I had to scale cmd_timeout appropriately.
 
-and the clock-gate work, scheduled from a command completion:
+Cheers,
 
-mmc_request_done()
-mmc_host_clk_gate()
-schedule_work()
-[kworker/0:1 worker-thread] - after mmc_release_host()
-mmc_host_clk_gate_delayed()
-mutex_lock(&host->clk_gate_mutex)
-mmc_gate_clock()
-mmc_set_ios()
-host->ops->set_ios()
-
-Replacing the clk_gate_mutex mutex with claiming and releasing the host 
-fixes the problem for me, but I'm not sure, whether this is the correct 
-solution.
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+John
