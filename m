@@ -1,68 +1,60 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3] mmc: Add ioctl to let userspace apps send ACMDs
-Date: Mon, 11 Apr 2011 17:23:49 -0400
-Message-ID: <m3ipuka3dm.fsf@pullcord.laptop.org>
-References: <alpine.DEB.2.00.1104071816270.10238@peruna>
+Subject: Re: [PATCH] mmc: host: fix memory leak in mmc_add_host
+Date: Mon, 11 Apr 2011 17:25:48 -0400
+Message-ID: <m3ei58a3ab.fsf@pullcord.laptop.org>
+References: <1302495089-23699-1-git-send-email-w.sang@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:55493 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:55538 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754507Ab1DKVSz convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 17:18:55 -0400
-In-Reply-To: <alpine.DEB.2.00.1104071816270.10238@peruna> (John Calixto's
-	message of "Thu, 7 Apr 2011 18:18:27 -0700 (PDT)")
+	id S1755575Ab1DKVUx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Apr 2011 17:20:53 -0400
+In-Reply-To: <1302495089-23699-1-git-send-email-w.sang@pengutronix.de>
+	(Wolfram Sang's message of "Mon, 11 Apr 2011 06:11:29 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: John Calixto <john.calixto@modsystems.com>
-Cc: linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, linus.walleij@linaro.org
 
-Hi John,
+Hi Wolfram,
 
-On Thu, Apr 07 2011, John Calixto wrote:
-> Sending ACMDs from userspace is useful for such things as:
+On Mon, Apr 11 2011, Wolfram Sang wrote:
+> led_trigger_register_simple() allocates memory which must not be leaked
+> in the error-path of mmc_add_host. Move it past the only error-check in
+> the function.
 >
->     - The security application of an SD card (SD Specification, Part =
-3,
->       Security)
+> Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
+> ---
 >
->     - SD passthrough for virtual machines
+> I don't see any reason why it needs to be called before device_add.
 >
-> Tested on TI PCIxx12 (SDHCI), Sigma Designs SMP8652 SoC, TI OMAP3621
-> SoC, TI OMAP3630 SoC, Samsung S5PC110 SoC, Qualcomm MSM7200A SoC.
+>  drivers/mmc/core/host.c |    4 ++--
+>  1 files changed, 2 insertions(+), 2 deletions(-)
 >
-> Signed-off-by: John Calixto <john.calixto@modsystems.com>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 461e6a1..b29d3e8 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -325,12 +325,12 @@ int mmc_add_host(struct mmc_host *host)
+>  	WARN_ON((host->caps & MMC_CAP_SDIO_IRQ) &&
+>  		!host->ops->enable_sdio_irq);
+>  
+> -	led_trigger_register_simple(dev_name(&host->class_dev), &host->led);
+> -
+>  	err = device_add(&host->class_dev);
+>  	if (err)
+>  		return err;
+>  
+> +	led_trigger_register_simple(dev_name(&host->class_dev), &host->led);
+> +
+>  #ifdef CONFIG_DEBUG_FS
+>  	mmc_add_host_debugfs(host);
+>  #endif
 
-This adds two gcc warnings here (compiling for ARM):
-
-  CC      drivers/mmc/card/block.o
-drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_ioctl_copy_from_=
-user=E2=80=99:
-drivers/mmc/card/block.c:199:33: warning: cast to pointer from integer =
-of different size [-Wint-to-pointer-cast]
-drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_ioctl_acmd=E2=80=
-=99:
-drivers/mmc/card/block.c:308:20: warning: cast to pointer from integer =
-of different size [-Wint-to-pointer-cast]
-
-=2E..
-> +	if (copy_from_user(idata->buf, (u8 *) user->data_ptr, idata->buf_by=
-tes)) {
-> +		err =3D -EFAULT;
-> +		goto copy_err;
-> +	}
-=2E..
-> +		if (copy_to_user((u8 *) ic_ptr->data_ptr, idata->buf, idata->buf_b=
-ytes)) {
-> +			err =3D -EFAULT;
-> +			goto acmd_rel_host;
-> +		}
-=2E..
-
-Thanks,
+Thanks, pushed to mmc-next for .40.
 
 - Chris.
---=20
+-- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
