@@ -1,63 +1,46 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v4] mmc: sdhci: add error checking for mmc_add_host
-Date: Mon, 11 Apr 2011 07:59:59 +0200
-Message-ID: <20110411055959.GE20437@pengutronix.de>
-References: <4DA2633C.5000103@samsung.com>
- <20110411030453.GA20437@pengutronix.de>
- <4DA28098.9020202@samsung.com>
- <20110411044022.GD20437@pengutronix.de>
- <4DA289D2.7010501@samsung.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH v2 00/12] mmc: use nonblock mmc requests to minimize latency
+Date: Mon, 11 Apr 2011 11:03:18 +0200
+Message-ID: <BANLkTikoj6UTx08ntZaMM15taKRXjrU_Mg@mail.gmail.com>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+	<BANLkTikZVDejarZ4O5KgNS7S4fxBLSmANA@mail.gmail.com>
+	<BANLkTikVeXvfSBS-xLDXVdesKJpKdtUVqg@mail.gmail.com>
+	<BANLkTikwCveocjPdoMoLEVpNneKkq66s4g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="d8Lz2Tf5e5STOWUP"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:53921 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751487Ab1DKGAB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 02:00:01 -0400
-Content-Disposition: inline
-In-Reply-To: <4DA289D2.7010501@samsung.com>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:33859 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752144Ab1DKJDU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 05:03:20 -0400
+In-Reply-To: <BANLkTikwCveocjPdoMoLEVpNneKkq66s4g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: anish singh <anish198519851985@gmail.com>
+Cc: Jae hoon Chung <jh80.chung@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
 
+On 10 April 2011 05:33, anish singh <anish198519851985@gmail.com> wrote:
+>
+>
+> On Sat, Apr 9, 2011 at 5:25 PM, Jae hoon Chung <jh80.chung@gmail.com> wrote:
+>>
+>> Hi Per..
+>>
+>> I'm applied your patch..and sent the patch about dw_mmc.c.
+>> I think good this approach..
+>
+> Forlin,i too want to test this patch of yours but unfortunately i have
+> samsung board+SDHCI host controller so i guess i just need to write pre_req
+> and post_req functions and that would enable this(nonblock mmc request) on
+> my board.Hope i am right?
+You are right. The  SDHCI driver should work just fine without
+implementing pre_req and post_req but you wont see any performance
+increasing for DMA usage.
+In order to benefit from the patchset you need to implement pre_req
+and post_req.
 
---d8Lz2Tf5e5STOWUP
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-
-> You means that didn't run start_host() before add_host failed.
-> I think that need not to run stop_host. right?
-
-Right, and other stuff like registering the pm_notifier.
-
-> To use mmc_free_host, better than mmc_remove_host.
-
-That would be true for most drivers. However, sdhci has encapsulated this in
-its own sdhci_free_host. So, you don't need to call this as well.
+If you run into trouble implementing those hooks or if you have any
+questions please let me know.
 
 Regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---d8Lz2Tf5e5STOWUP
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAk2imN8ACgkQD27XaX1/VRun2QCgtJAwb4P4hEqutJ47BerUzDjO
-rAoAn13WtaVjduXSIPtWhJkmhWFDkSbc
-=Thc/
------END PGP SIGNATURE-----
-
---d8Lz2Tf5e5STOWUP--
+Per
