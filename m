@@ -1,45 +1,46 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] MMC: Extends card quicks with MMC/SD quirks matching the CID.
-Date: Mon, 11 Apr 2011 17:50:27 -0400
-Message-ID: <m3sjto8nks.fsf@pullcord.laptop.org>
-References: <m339lobj8j.fsf@pullcord.laptop.org>
-	<1302559335-9998-1-git-send-email-andreiw@motorola.com>
+From: John Calixto <john.calixto@modsystems.com>
+Subject: mmc: Add ioctl to let userspace apps send ACMDs
+Date: Mon, 11 Apr 2011 14:47:07 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1104111424140.32082@peruna>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36332 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756165Ab1DKVpe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Apr 2011 17:45:34 -0400
-In-Reply-To: <1302559335-9998-1-git-send-email-andreiw@motorola.com> (Andrei
-	Warkentin's message of "Mon, 11 Apr 2011 17:02:15 -0500")
+Received: from elasmtp-galgo.atl.sa.earthlink.net ([209.86.89.61]:35058 "EHLO
+	elasmtp-galgo.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756007Ab1DKVrZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 17:47:25 -0400
+Received: from [24.41.60.94] (helo=peruna)
+	by elasmtp-galgo.atl.sa.earthlink.net with esmtpsa (TLSv1:AES256-SHA:256)
+	(Exim 4.67)
+	(envelope-from <john.calixto@modsystems.com>)
+	id 1Q9Ox0-0005gW-3u
+	for linux-mmc@vger.kernel.org; Mon, 11 Apr 2011 17:47:14 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Ohad Ben-Cohen <ohad@wizery.com>
+To: linux-mmc@vger.kernel.org
 
-Hi,
+Since this patch has gone through multiple revisions now, I thought I'd
+list the changes in each revision:
 
-On Mon, Apr 11 2011, Andrei Warkentin wrote:
-> From: Chris Ball <cjb@laptop.org>
->
-> The current mechanism is SDIO-only. This allows us to create
-> function-specific quirks, without creating messy Kconfig dependencies,
-> or polluting core/ with function-specific code.
->
-> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
+- v4
+    - replace postsleep udelay() with usleep_range()
+    - add cmd_timeout_ms field for R1B commands
 
-Thanks, pushed to mmc-next for .40 with Arnd's ACK.  (And with you as
-patch author, not me.)
+- v3
+    - copy data from userspace before claiming host
+    - break out copy from userspace into its own function
+    - verify that caller has CAP_SYS_RAWIO
+    - rename ``struct sd_ioc_cmd`` to ``struct mmc_ioc_cmd`` because it
+      applies generally, not just to SD
+    - make struct mmc_ioc_cmd the same between 32-bit and 64-bit to
+      simplify compat_ioctl()
+    - export include/linux/mmc/ioctl.h when you ``make headers_install``
 
-I made a mistake in not noticing that your later RFC patchset includes
-(the same version of) this patch -- are you happy with adding block
-quirks on top of this later, and merging this patch for now?
+- v2
+    - make initialization of struct declarations match kernel style
+    - only allow ioctl() on whole block device, not partition
+    - remove extraneous printks
+    - implement compat_ioctl()
+    - remove version field from ``struct sd_ioc_cmd``
 
-(Ohad, heads-up that I've rebased your wl1271 SDIO quirks onto this
-patchset; there should be no behavior change, but just in case.)
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+John
