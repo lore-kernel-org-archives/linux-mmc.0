@@ -1,133 +1,129 @@
-From: Sachin Nikam <sachinikam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v2 00/12] mmc: use nonblock mmc requests to minimize
-	latency
-Date: Mon, 11 Apr 2011 14:37:32 +0530
-Message-ID: <BANLkTimJdTG+1LD2+hN8SC9-YsbRZ4jBZA@mail.gmail.com>
-References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
-	<BANLkTikZVDejarZ4O5KgNS7S4fxBLSmANA@mail.gmail.com>
-	<BANLkTikVeXvfSBS-xLDXVdesKJpKdtUVqg@mail.gmail.com>
-	<BANLkTikwCveocjPdoMoLEVpNneKkq66s4g@mail.gmail.com>
-	<BANLkTikoj6UTx08ntZaMM15taKRXjrU_Mg@mail.gmail.com>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: Problem when using SDIO interrupts on Nexus One
+Date: Mon, 11 Apr 2011 17:38:05 +0530
+Message-ID: <001b01cbf841$1f354aa0$5d9fdfe0$@org>
+References: <BANLkTin2cVt7236-Ds+3Wg0SsCuSSSZGsg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6940960429367093541=="
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <BANLkTikoj6UTx08ntZaMM15taKRXjrU_Mg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Jae hoon Chung <jh80.chung-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, anish singh <anish198519851985-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: multipart/mixed;
+	boundary="----=_NextPart_000_001C_01CBF86F.38ED86A0"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:30177 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752732Ab1DKMIL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 08:08:11 -0400
+In-Reply-To: <BANLkTin2cVt7236-Ds+3Wg0SsCuSSSZGsg@mail.gmail.com>
+Content-Language: en-us
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Johan' <kungjohan@gmail.com>, linux-mmc@vger.kernel.org
+Cc: bryanh@codeaurora.org
 
---===============6940960429367093541==
-Content-Type: multipart/alternative; boundary=20cf307f32e0e0470204a0a0e73b
+This is a multi-part message in MIME format.
 
---20cf307f32e0e0470204a0a0e73b
-Content-Type: text/plain; charset=ISO-8859-1
+------=_NextPart_000_001C_01CBF86F.38ED86A0
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 
-Does anybody knows which kernel version will have support for SD4.0 specs
-UHS-2?
+Hi Johan,
 
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Johan
+> Sent: Friday, April 08, 2011 12:53 AM
+> To: linux-mmc@vger.kernel.org
+> Subject: Problem when using SDIO interrupts on Nexus One
+> 
+> I have a Nexus One Android phone and I am trying to use a SDIO device
+> connected to the memory slot available on the phone. This device uses
+> SDIO interrupts on SD_D1 to signal interrupts to the host.
+> 
+> I am using a 2.6-32 kernel from the android-msm-2.6.32 branch
+> available from git://android.git.kernel.org/kernel/msm.git and has
+> built the kernel with the mahimahi_defconfig.
+> 
+> I have modified drivers/mmc/host/msm_sdcc.c so that SDIO interrupts is
+> used -> msmsdcc_sdioirq = 1;
+> 
+> My device is working quite well with SDIO interrupts but sometime I
+> can miss a interrupt and will get this interrupt when I try to send a
+> command to my device. I can see this behaviour if my device tries to
+> signal a interrupt 1 second of the last command sent to the device.
+> The SDIO interrupt line goes low and the host does not signal the
+> interrupt at once. My assumption is that this is due to some kind of
+> power management of the SDIO controller. I will get this interrupt
+> when I activate the SDIO controller by sending a command to my device.
+>  I have verified this with a logic analyzer attached to the bus and
+> can attach a screen shot if anyone wants to see this.
+> 
+> So my question is if anyone know how to get reliable SDIO interrupts
+> on this host, Qualcomm MSM? It seems like Qualcomm does not provide
+> documentation for this host.
 
-On Mon, Apr 11, 2011 at 2:33 PM, Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+I had a look at the msm_sdcc.c and it looks like all the SDCC interrupts are
+masked when driver goes into
+Suspend. So when you say interrupts are getting missed it might be the case
+that system is in suspend state.
 
-> On 10 April 2011 05:33, anish singh <anish198519851985-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >
-> >
-> > On Sat, Apr 9, 2011 at 5:25 PM, Jae hoon Chung <jh80.chung-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> wrote:
-> >>
-> >> Hi Per..
-> >>
-> >> I'm applied your patch..and sent the patch about dw_mmc.c.
-> >> I think good this approach..
-> >
-> > Forlin,i too want to test this patch of yours but unfortunately i have
-> > samsung board+SDHCI host controller so i guess i just need to write
-> pre_req
-> > and post_req functions and that would enable this(nonblock mmc request)
-> on
-> > my board.Hope i am right?
-> You are right. The  SDHCI driver should work just fine without
-> implementing pre_req and post_req but you wont see any performance
-> increasing for DMA usage.
-> In order to benefit from the patchset you need to implement pre_req
-> and post_req.
->
-> If you run into trouble implementing those hooks or if you have any
-> questions please let me know.
->
-> Regards,
-> Per
+To fix this, you can keep the SDIO interrupts enabled while going into
+suspend. I have made a patch (attached with this mail) with this change.
+Please give a try and let me know if it works for you or not.
+
+Regards,
+Subhash
+
+> 
+> Best Regards
+> Johan
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
 
-
-
--- 
-Have a nice time !!!
-
-Cheers,
-Sachin.
-
---20cf307f32e0e0470204a0a0e73b
-Content-Type: text/html; charset=ISO-8859-1
+------=_NextPart_000_001C_01CBF86F.38ED86A0
+Content-Type: application/octet-stream;
+	name="0001-msm-msm_sdcc-handle-SDIO-interrupts-during-suspend.patch"
 Content-Transfer-Encoding: quoted-printable
+Content-Disposition: attachment;
+	filename="0001-msm-msm_sdcc-handle-SDIO-interrupts-during-suspend.patch"
 
-<div>Does anybody knows which kernel version will have support for SD4.0 sp=
-ecs UHS-2?</div>
-<div><br>=A0</div>
-<div class=3D"gmail_quote">On Mon, Apr 11, 2011 at 2:33 PM, Per Forlin <spa=
-n dir=3D"ltr">&lt;<a href=3D"mailto:per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org">per.forlin@linar=
-o.org</a>&gt;</span> wrote:<br>
-<blockquote style=3D"BORDER-LEFT: #ccc 1px solid; MARGIN: 0px 0px 0px 0.8ex=
-; PADDING-LEFT: 1ex" class=3D"gmail_quote">On 10 April 2011 05:33, anish si=
-ngh &lt;<a href=3D"mailto:anish198519851985-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">anish198519851985@gm=
-ail.com</a>&gt; wrote:<br>
-&gt;<br>&gt;<br>&gt; On Sat, Apr 9, 2011 at 5:25 PM, Jae hoon Chung &lt;<a =
-href=3D"mailto:jh80.chung-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">jh80.chung-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br=
->&gt;&gt;<br>&gt;&gt; Hi Per..<br>&gt;&gt;<br>&gt;&gt; I&#39;m applied your=
- patch..and sent the patch about dw_mmc.c.<br>
-&gt;&gt; I think good this approach..<br>&gt;<br>&gt; Forlin,i too want to =
-test this patch of yours but unfortunately i have<br>&gt; samsung board+SDH=
-CI host controller so i guess i just need to write pre_req<br>&gt; and post=
-_req functions and that would enable this(nonblock mmc request) on<br>
-&gt; my board.Hope i am right?<br>You are right. The =A0SDHCI driver should=
- work just fine without<br>implementing pre_req and post_req but you wont s=
-ee any performance<br>increasing for DMA usage.<br>In order to benefit from=
- the patchset you need to implement pre_req<br>
-and post_req.<br><br>If you run into trouble implementing those hooks or if=
- you have any<br>questions please let me know.<br><br>Regards,<br>Per<br><f=
-ont color=3D"#888888">--<br>To unsubscribe from this list: send the line &q=
-uot;unsubscribe linux-mmc&quot; in<br>
-the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">major=
-domo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>More majordomo info at =A0<a href=3D"http://vge=
-r.kernel.org/majordomo-info.html" target=3D"_blank">http://vger.kernel.org/=
-majordomo-info.html</a><br>
-</font></blockquote></div><br><br clear=3D"all"><br>-- <br>Have a nice time=
- !!!<br><br>Cheers,<br>Sachin.<br>
+>From 3a4f474d78e7735ac3115edc307ed083dcfaeb53 Mon Sep 17 00:00:00 2001=0A=
+From: Subhash Jadavani <subhashj@codeaurora.org>=0A=
+Date: Mon, 11 Apr 2011 17:29:19 +0530=0A=
+Subject: [PATCH] msm: msm_sdcc: handle SDIO interrupts during suspend=0A=
+=0A=
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>=0A=
+---=0A=
+ drivers/mmc/host/msm_sdcc.c |   11 ++++++++---=0A=
+ 1 files changed, 8 insertions(+), 3 deletions(-)=0A=
+=0A=
+diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c=0A=
+index fb56272..fa9332f 100644=0A=
+--- a/drivers/mmc/host/msm_sdcc.c=0A=
++++ b/drivers/mmc/host/msm_sdcc.c=0A=
+@@ -1330,10 +1330,15 @@ msmsdcc_suspend(struct platform_device *dev, =
+pm_message_t state)=0A=
+ =0A=
+ 		if (mmc->card && mmc->card->type !=3D MMC_TYPE_SDIO)=0A=
+ 			rc =3D mmc_suspend_host(mmc, state);=0A=
+-		if (!rc)=0A=
++=0A=
++		if (mmc->card && mmc->card->type =3D=3D MMC_TYPE_SDIO) {=0A=
++			msmsdcc_writel(host, (MCI_SDIOINTOPERMASK |=0A=
++					MCI_SDIOINTMASK), MMCIMASK0);=0A=
++		} else if (!rc) {=0A=
+ 			msmsdcc_writel(host, 0, MMCIMASK0);=0A=
+-		if (host->clks_on)=0A=
+-			msmsdcc_disable_clocks(host, 0);=0A=
++			if (host->clks_on)=0A=
++				msmsdcc_disable_clocks(host, 0);=0A=
++		}=0A=
+ 	}=0A=
+ 	return rc;=0A=
+ }=0A=
+-- =0A=
+1.7.1.1=0A=
+=0A=
 
---20cf307f32e0e0470204a0a0e73b--
+------=_NextPart_000_001C_01CBF86F.38ED86A0--
 
-
---===============6940960429367093541==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linaro-dev mailing list
-linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-http://lists.linaro.org/mailman/listinfo/linaro-dev
-
---===============6940960429367093541==--
