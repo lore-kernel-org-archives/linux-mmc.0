@@ -1,74 +1,46 @@
-From: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Subject: Re: [PATCH v4] mmc: Add ioctl to let userspace apps send ACMDs
-Date: Tue, 12 Apr 2011 16:21:38 +0200
-Message-ID: <BANLkTimn3vB1JaBfboOL0ayG2FpXsUMe7w@mail.gmail.com>
-References: <alpine.DEB.2.00.1104111424140.32082@peruna> <alpine.DEB.2.00.1104111450340.32082@peruna>
+From: Randy Dunlap <randy.dunlap@oracle.com>
+Subject: [PATCH -next] mmc quirks: fix truncation warnings
+Date: Tue, 12 Apr 2011 09:17:35 -0700
+Message-ID: <20110412091735.f41a3d44.randy.dunlap@oracle.com>
+References: <20110412151408.b80a3afb.sfr@canb.auug.org.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:44571 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755069Ab1DLOV7 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 10:21:59 -0400
-Received: by qyg14 with SMTP id 14so4675203qyg.19
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2011 07:21:58 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1104111450340.32082@peruna>
+Received: from rcsinet10.oracle.com ([148.87.113.121]:50903 "EHLO
+	rcsinet10.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757970Ab1DLQSF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 12:18:05 -0400
+In-Reply-To: <20110412151408.b80a3afb.sfr@canb.auug.org.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: John Calixto <john.calixto@modsystems.com>
-Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Andrei Warkentin <andreiw@motorola.com>
+To: Stephen Rothwell <sfr@canb.auug.org.au>, Chris Ball <cjb@laptop.org>
+Cc: linux-next@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-2011/4/11 John Calixto <john.calixto@modsystems.com>:
-[...]
-> --- /dev/null
-> +++ b/include/linux/mmc/ioctl.h
-> @@ -0,0 +1,32 @@
-> +#ifndef _MMC_IOCTL_H
-> +#define _MMC_IOCTL_H
-> +struct mmc_ioc_cmd {
-> + =A0 =A0 =A0 /* implies direction of data. =A0true =3D write, false =
-=3D read */
-> + =A0 =A0 =A0 int write_flag;
-> +
-> + =A0 =A0 =A0 __u32 opcode;
-> + =A0 =A0 =A0 __u32 arg;
-> + =A0 =A0 =A0 __u32 response[4]; =A0/* CMD response */
-> + =A0 =A0 =A0 unsigned int flags;
-> + =A0 =A0 =A0 unsigned int blksz;
-> + =A0 =A0 =A0 unsigned int blocks;
-> +
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* Sleep at least postsleep_min_us useconds, and at m=
-ost
-> + =A0 =A0 =A0 =A0* postsleep_max_us useconds *after* issuing command.=
- =A0Needed for some
-> + =A0 =A0 =A0 =A0* read commands for which cards have no other way of=
- indicating
-> + =A0 =A0 =A0 =A0* they're ready for the next command (i.e. there is =
-no equivalent of a
-> + =A0 =A0 =A0 =A0* "busy" indicator for read operations).
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 unsigned int postsleep_min_us;
-> + =A0 =A0 =A0 unsigned int postsleep_max_us;
-> +
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* Override driver-computed timeouts. =A0Note the dif=
-ference in units!
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 unsigned int data_timeout_ns;
-> + =A0 =A0 =A0 unsigned int cmd_timeout_ms;
-> + =A0 =A0 =A0 __u64 data_ptr; =A0/* DAT buffer */
+From: Randy Dunlap <randy.dunlap@oracle.com>
 
-This will be more natural if you have an anonymous union here:
-union {
-  __u64 data_ptr_l;
-  void *data_ptr;
-};
+Fix data truncation warnings: .manfid is not unsigned long:
 
-> +};
-> +#define MMC_IOC_ACMD _IOWR(MMC_BLOCK_MAJOR, 0, struct mmc_ioc_cmd)
-> +#endif =A0/* _MMC_IOCTL_H */
+drivers/mmc/core/quirks.c:36: warning: large integer implicitly truncated to unsigned type
+drivers/mmc/core/quirks.c:40: warning: large integer implicitly truncated to unsigned type
+drivers/mmc/core/quirks.c:43: warning: large integer implicitly truncated to unsigned type
+drivers/mmc/core/quirks.c:46: warning: large integer implicitly truncated to unsigned type
 
-Best Regards,
-Micha=B3 Miros=B3aw
+Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
+Cc:	Chris Ball <cjb@laptop.org>
+Cc:	linux-mmc@vger.kernel.org
+---
+ include/linux/mmc/card.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- linux-next-20110412.orig/include/linux/mmc/card.h
++++ linux-next-20110412/include/linux/mmc/card.h
+@@ -180,7 +180,7 @@ struct mmc_fixup {
+ 	int data;
+ };
+ 
+-#define CID_MANFID_ANY (-1ul)
++#define CID_MANFID_ANY (-1u)
+ #define CID_OEMID_ANY ((unsigned short) -1)
+ #define CID_NAME_ANY (NULL)
+ 
