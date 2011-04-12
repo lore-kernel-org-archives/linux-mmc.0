@@ -1,67 +1,122 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: zaurus: mmcblk0: error -110
-Date: Tue, 12 Apr 2011 15:24:34 -0400
-Message-ID: <m3aafvz30t.fsf@pullcord.laptop.org>
-References: <20110412151547.GC20815@atrey.karlin.mff.cuni.cz>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: [PATCH] MMC: Fix erase/trim for certain SanDisk cards.
+Date: Tue, 12 Apr 2011 15:03:45 -0500
+Message-ID: <1302638625-32106-1-git-send-email-andreiw@motorola.com>
+References: <BANLkTi=N75ATcXHqbjDMpCMJ1bGnJggqog@mail.gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49524 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753885Ab1DLTTz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Apr 2011 15:19:55 -0400
-In-Reply-To: <20110412151547.GC20815@atrey.karlin.mff.cuni.cz> (Cyril Hrubis's
-	message of "Tue, 12 Apr 2011 17:15:48 +0200")
+Received: from exprod5og113.obsmtp.com ([64.18.0.26]:50126 "EHLO
+	exprod5og113.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755245Ab1DLTYu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 15:24:50 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3CJN0l7018509
+	for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2011 15:23:00 -0400 (EDT)
+Received: from mail-gx0-f170.google.com (mail-gx0-f170.google.com [209.85.161.170])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3CJN010018504
+	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2011 15:23:00 -0400 (EDT)
+Received: by gxk27 with SMTP id 27so4747367gxk.15
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2011 12:24:48 -0700 (PDT)
+In-Reply-To: <BANLkTi=N75ATcXHqbjDMpCMJ1bGnJggqog@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Cyril Hrubis <metan@ucw.cz>
-Cc: pavel@ucw.cz, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, eric.y.miao@gmail.com, utx@penguin.cz, zaurus-devel@lists.linuxtogo.org, marek.vasut@gmail.com, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, Andrei Warkentin <andreiw@motorola.com>
 
-Hi,
+CMD38 argument is passed through EXT_CSD[113].
 
-(Adding linux-mmc@.)
+Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
+---
+ drivers/mmc/card/block.c |   40 +++++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/card.h |    1 +
+ 2 files changed, 40 insertions(+), 1 deletions(-)
 
-On Tue, Apr 12 2011, Cyril Hrubis wrote:
-> Hi!
-> When I insert the mmc card to zaurus, it gets properly detected and prints some
-> info into console. Mounting reading/writing files works fine.
->
-> However when the card is removed (doesn't need to be mounted before), the
-> removal is most likely not detected, so when I insert it again, no info is
-> printed into console and moreover when I try to mount it zaurus goes into
-> infinite loop printing:
->
-> Buffer I/O error on device mmcblk0p1, logical block 9
-> mmcblk0: error -110 sending status command
-> mmcblk0: error -110 sending read/write command, response 0xb00, card status 0xb00
-> end_request: I/O error, dev mmcblk0, sector 257
-> Buffer I/O error on device mmcblk0p1, logical block 10
-> ...
->
-> Related part of the .config:
->
-> #
-> # OTG and related infrastructure
-> #
-> # CONFIG_USB_GPIO_VBUS is not set
-> # CONFIG_USB_ULPI is not set
-> # CONFIG_NOP_USB_XCEIV is not set
-> CONFIG_MMC=y
-> # CONFIG_MMC_DEBUG is not set
-> CONFIG_MMC_UNSAFE_RESUME=y
-
-Your symptoms match the bug that was fixed by:
-
-bad3babace2ee4d ("mmc: fix CONFIG_MMC_UNSAFE_RESUME regression")
-
-but this fix made it into 2.6.38, so if you're using 2.6.38 final then
-you shouldn't be seeing this.  Could you confirm that you have this
-patch?
-
-If so, could you try building a kernel with CONFIG_MMC_UNSAFE_RESUME=n
-and see if you still have the same problem?
-
-- Chris.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1bf1c5d..8895bb9 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -48,6 +48,13 @@ MODULE_ALIAS("mmc:block");
+ #endif
+ #define MODULE_PARAM_PREFIX "mmcblk."
+ 
++#define INAND_CMD38_ARG_EXT_CSD  113
++#define INAND_CMD38_ARG_ERASE    0x00
++#define INAND_CMD38_ARG_TRIM     0x01
++#define INAND_CMD38_ARG_SECERASE 0x80
++#define INAND_CMD38_ARG_SECTRIM1 0x81
++#define INAND_CMD38_ARG_SECTRIM2 0x88
++
+ #define REL_WRITES_SUPPORTED(card) (mmc_card_mmc((card)) &&	\
+     (((card)->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||	\
+      ((card)->ext_csd.rel_sectors)))
+@@ -356,6 +363,15 @@ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ 	else
+ 		arg = MMC_ERASE_ARG;
+ 
++	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
++		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++				 INAND_CMD38_ARG_EXT_CSD,
++				 arg == MMC_TRIM_ARG ?
++				 INAND_CMD38_ARG_TRIM :
++				 INAND_CMD38_ARG_ERASE);
++		if (err)
++			goto out;
++	}
+ 	err = mmc_erase(card, from, nr, arg);
+ out:
+ 	spin_lock_irq(&md->lock);
+@@ -386,9 +402,26 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
+ 	else
+ 		arg = MMC_SECURE_ERASE_ARG;
+ 
++	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
++		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++				 INAND_CMD38_ARG_EXT_CSD,
++				 arg == MMC_SECURE_TRIM1_ARG ?
++				 INAND_CMD38_ARG_SECTRIM1 :
++				 INAND_CMD38_ARG_SECERASE);
++		if (err)
++			goto out;
++	}
+ 	err = mmc_erase(card, from, nr, arg);
+-	if (!err && arg == MMC_SECURE_TRIM1_ARG)
++	if (!err && arg == MMC_SECURE_TRIM1_ARG) {
++		if (card->quirks & MMC_QUIRK_INAND_CMD38) {
++			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++					 INAND_CMD38_ARG_EXT_CSD,
++					 INAND_CMD38_ARG_SECTRIM2);
++			if (err)
++				goto out;
++		}
+ 		err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
++	}
+ out:
+ 	spin_lock_irq(&md->lock);
+ 	__blk_end_request(req, err, blk_rq_bytes(req));
+@@ -941,6 +974,11 @@ static int mmc_add_disk(struct mmc_blk_data *md)
+ 
+ static const struct mmc_fixup blk_fixups[] =
+ {
++	MMC_FIXUP("SEM02G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
++	MMC_FIXUP("SEM04G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
++	MMC_FIXUP("SEM08G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
++	MMC_FIXUP("SEM16G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
++	MMC_FIXUP("SEM32G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
+ 	END_FIXUP
+ };
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 8ac96f7..0a2be01 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -133,6 +133,7 @@ struct mmc_card {
+ #define MMC_QUIRK_BROKEN_CLK_GATING (1<<3)	/* clock gating the sdio bus will make card fail */
+ #define MMC_QUIRK_NONSTD_FUNC_IF (1<<4)		/* SDIO card has nonstd function interfaces */
+ #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
++#define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+  	unsigned int		erase_shift;	/* if erase unit is power 2 */
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.0.4
+
