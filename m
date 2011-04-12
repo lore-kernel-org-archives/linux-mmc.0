@@ -1,127 +1,71 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PatchRebased] MMC: Fix erase/trim for certain SanDisk cards.
-Date: Tue, 12 Apr 2011 15:37:14 -0400
-Message-ID: <m3wrizxnv9.fsf@pullcord.laptop.org>
-References: <BANLkTi=N75ATcXHqbjDMpCMJ1bGnJggqog@mail.gmail.com>
-	<1302638813-32155-1-git-send-email-andreiw@motorola.com>
+From: Cyril Hrubis <metan-+ZI9xUNit7I@public.gmane.org>
+Subject: Re: zaurus: mmcblk0: error -110
+Date: Tue, 12 Apr 2011 21:39:44 +0200
+Message-ID: <20110412193944.GC2665@atrey.karlin.mff.cuni.cz>
+References: <20110412151547.GC20815@atrey.karlin.mff.cuni.cz>
+	<m3aafvz30t.fsf@pullcord.laptop.org>
+Reply-To: Zaurus PDA developers list <zaurus-devel-cunTk1MwBs/k6gDgw6ADrEB+6BGkLq7r@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36338 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755937Ab1DLTcX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Apr 2011 15:32:23 -0400
-In-Reply-To: <1302638813-32155-1-git-send-email-andreiw@motorola.com> (Andrei
-	Warkentin's message of "Tue, 12 Apr 2011 15:06:53 -0500")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <zaurus-devel-bounces-cunTk1MwBs/k6gDgw6ADrEB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <m3aafvz30t.fsf-0VGQAjvlmrQzNDMTQreKSUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.linuxtogo.org/cgi-bin/mailman/options/zaurus-devel>,
+	<mailto:zaurus-devel-request-cunTk1MwBs/k6gDgw6ADrEB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxtogo.org/pipermail/zaurus-devel>
+List-Post: <mailto:zaurus-devel-cunTk1MwBs/k6gDgw6ADrEB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:zaurus-devel-request-cunTk1MwBs/k6gDgw6ADrEB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linuxtogo.org/cgi-bin/mailman/listinfo/zaurus-devel>,
+	<mailto:zaurus-devel-request-cunTk1MwBs/k6gDgw6ADrEB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: zaurus-devel-bounces-cunTk1MwBs/k6gDgw6ADrEB+6BGkLq7r@public.gmane.org
+Errors-To: zaurus-devel-bounces-cunTk1MwBs/k6gDgw6ADrEB+6BGkLq7r@public.gmane.org
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: eric.y.miao-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, zaurus-devel-cunTk1MwBs/k6gDgw6ADrEB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org
 
-Hi Andrei,
+Hi!
+> > When I insert the mmc card to zaurus, it gets properly detected and prints some
+> > info into console. Mounting reading/writing files works fine.
+> >
+> > However when the card is removed (doesn't need to be mounted before), the
+> > removal is most likely not detected, so when I insert it again, no info is
+> > printed into console and moreover when I try to mount it zaurus goes into
+> > infinite loop printing:
+> >
+> > Buffer I/O error on device mmcblk0p1, logical block 9
+> > mmcblk0: error -110 sending status command
+> > mmcblk0: error -110 sending read/write command, response 0xb00, card status 0xb00
+> > end_request: I/O error, dev mmcblk0, sector 257
+> > Buffer I/O error on device mmcblk0p1, logical block 10
+> > ...
+> >
+> > Related part of the .config:
+> >
+> > #
+> > # OTG and related infrastructure
+> > #
+> > # CONFIG_USB_GPIO_VBUS is not set
+> > # CONFIG_USB_ULPI is not set
+> > # CONFIG_NOP_USB_XCEIV is not set
+> > CONFIG_MMC=y
+> > # CONFIG_MMC_DEBUG is not set
+> > CONFIG_MMC_UNSAFE_RESUME=y
+> 
+> Your symptoms match the bug that was fixed by:
+> 
+> bad3babace2ee4d ("mmc: fix CONFIG_MMC_UNSAFE_RESUME regression")
+> 
+> but this fix made it into 2.6.38, so if you're using 2.6.38 final then
+> you shouldn't be seeing this.  Could you confirm that you have this
+> patch?
 
-On Tue, Apr 12 2011, Andrei Warkentin wrote:
-> CMD38 argument is passed through EXT_CSD[113].
->
-> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
-> ---
->  drivers/mmc/card/block.c |   43 ++++++++++++++++++++++++++++++++++++++++++-
->  include/linux/mmc/card.h |    1 +
->  2 files changed, 43 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 1bf1c5d..863f810 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -48,6 +48,13 @@ MODULE_ALIAS("mmc:block");
->  #endif
->  #define MODULE_PARAM_PREFIX "mmcblk."
->  
-> +#define INAND_CMD38_ARG_EXT_CSD  113
-> +#define INAND_CMD38_ARG_ERASE    0x00
-> +#define INAND_CMD38_ARG_TRIM     0x01
-> +#define INAND_CMD38_ARG_SECERASE 0x80
-> +#define INAND_CMD38_ARG_SECTRIM1 0x81
-> +#define INAND_CMD38_ARG_SECTRIM2 0x88
-> +
->  #define REL_WRITES_SUPPORTED(card) (mmc_card_mmc((card)) &&	\
->      (((card)->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||	\
->       ((card)->ext_csd.rel_sectors)))
-> @@ -356,6 +363,16 @@ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
->  	else
->  		arg = MMC_ERASE_ARG;
->  
-> +	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				 INAND_CMD38_ARG_EXT_CSD,
-> +				 arg == MMC_TRIM_ARG ?
-> +				 INAND_CMD38_ARG_TRIM :
-> +				 INAND_CMD38_ARG_ERASE,
-> +				 0);
-> +		if (err)
-> +			goto out;
-> +	}
->  	err = mmc_erase(card, from, nr, arg);
->  out:
->  	spin_lock_irq(&md->lock);
-> @@ -386,9 +403,28 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
->  	else
->  		arg = MMC_SECURE_ERASE_ARG;
->  
-> +	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				 INAND_CMD38_ARG_EXT_CSD,
-> +				 arg == MMC_SECURE_TRIM1_ARG ?
-> +				 INAND_CMD38_ARG_SECTRIM1 :
-> +				 INAND_CMD38_ARG_SECERASE,
-> +				 0);
-> +		if (err)
-> +			goto out;
-> +	}
->  	err = mmc_erase(card, from, nr, arg);
-> -	if (!err && arg == MMC_SECURE_TRIM1_ARG)
-> +	if (!err && arg == MMC_SECURE_TRIM1_ARG) {
-> +		if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-> +			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +					 INAND_CMD38_ARG_EXT_CSD,
-> +					 INAND_CMD38_ARG_SECTRIM2,
-> +					 0);
-> +			if (err)
-> +				goto out;
-> +		}
->  		err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
-> +	}
->  out:
->  	spin_lock_irq(&md->lock);
->  	__blk_end_request(req, err, blk_rq_bytes(req));
-> @@ -941,6 +977,11 @@ static int mmc_add_disk(struct mmc_blk_data *md)
->  
->  static const struct mmc_fixup blk_fixups[] =
->  {
-> +	MMC_FIXUP("SEM02G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-> +	MMC_FIXUP("SEM04G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-> +	MMC_FIXUP("SEM08G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-> +	MMC_FIXUP("SEM16G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-> +	MMC_FIXUP("SEM32G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
->  	END_FIXUP
->  };
->  
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 8ac96f7..0a2be01 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -133,6 +133,7 @@ struct mmc_card {
->  #define MMC_QUIRK_BROKEN_CLK_GATING (1<<3)	/* clock gating the sdio bus will make card fail */
->  #define MMC_QUIRK_NONSTD_FUNC_IF (1<<4)		/* SDIO card has nonstd function interfaces */
->  #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
-> +#define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
->  
->  	unsigned int		erase_size;	/* erase size in sectors */
->   	unsigned int		erase_shift;	/* if erase unit is power 2 */
+It seems that the pxa tree I have is still based on 2.6.38-rc8.
 
-Pushed to mmc-next for .40 along with the other patchsets.  Thanks very much!
+And yes, turning CONFIG_MMC_UNSAFE_RESUME off seems to fix that problem.
 
-- Chris.
+I'll try to update the kernel tree and try again with CONFIG_MMC_UNSAFE_RESUME
+enabled.
+
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+metan
