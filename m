@@ -1,57 +1,32 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [RFC] mmc: sdhci: work around broken dma boundary behavior
-Date: Tue, 12 Apr 2011 06:56:34 +0200
-Message-ID: <20110412045634.GA25956@pengutronix.de>
-References: <20110314172129.GA20654@pengutronix.de>
- <1301388814-10931-1-git-send-email-mmvinni@yahoo.com>
- <m3tye4a48n.fsf@pullcord.laptop.org>
+From: Ameya Palande <2ameya@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: Fix checkpatch.pl errors
+Date: Tue, 12 Apr 2011 10:04:28 +0300
+Message-ID: <BANLkTikC5QGJN1J5qconoV1n1a91f9Z57Q@mail.gmail.com>
+References: <1302027193-15696-1-git-send-email-2ameya@gmail.com>
+	<m3pqosa3u3.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="IS0zKkzwUGydFO0o"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:42529 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751078Ab1DLE4h (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 00:56:37 -0400
-Content-Disposition: inline
-In-Reply-To: <m3tye4a48n.fsf@pullcord.laptop.org>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:56313 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756721Ab1DLHE3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 03:04:29 -0400
+Received: by vws1 with SMTP id 1so4833416vws.19
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2011 00:04:28 -0700 (PDT)
+In-Reply-To: <m3pqosa3u3.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Mikko Vinni <mmvinni@yahoo.com>, linux-mmc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
 
+On Tue, Apr 12, 2011 at 12:13 AM, Chris Ball <cjb@laptop.org> wrote:
+> Hi Ameya,
+>
+> On Tue, Apr 05 2011, Ameya Palande wrote:
+>> This patch fixes 21 errors and 6 warnings reported by checkpatch.pl
+>>
+>> Signed-off-by: Ameya Palande <2ameya@gmail.com>
+>
+> Thanks, pushed to mmc-next for .40 with Wolfram's Reviewed-by.
 
---IS0zKkzwUGydFO0o
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-> > In my opinion this is more risky than the original patch because this
-> > will affect the behavior on all controllers that use sdhci, and not
-> > just on those ones that don't update SDHCI_DMA_ADDRESS themselves.
-> > Comments welcome!
->=20
-> Any thoughts on which of the two approaches you prefer?
-
-Thanks for the ping. I prefer the latter approach but it should be given en=
-ough
-time testing in -next.
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---IS0zKkzwUGydFO0o
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-
-iEYEARECAAYFAk2j24IACgkQD27XaX1/VRvj7wCeI4veo7R3U1pOXaL8ZPExYQCa
-DbgAoJfpCXwp2hZdjfyYlNU8hMKfv/jA
-=CDH8
------END PGP SIGNATURE-----
-
---IS0zKkzwUGydFO0o--
+Thanks Chris!
