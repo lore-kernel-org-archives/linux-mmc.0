@@ -1,56 +1,94 @@
-From: John Calixto <john.calixto@modsystems.com>
+From: Arnd Bergmann <arnd@arndb.de>
 Subject: Re: [PATCH v4] mmc: Add ioctl to let userspace apps send ACMDs
-Date: Tue, 12 Apr 2011 16:08:48 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1104121604220.8483@peruna>
-References: <alpine.DEB.2.00.1104111424140.32082@peruna> <alpine.DEB.2.00.1104111450340.32082@peruna> <BANLkTimn3vB1JaBfboOL0ayG2FpXsUMe7w@mail.gmail.com> <201104130100.39810.arnd@arndb.de>
+Date: Wed, 13 Apr 2011 01:10:46 +0200
+Message-ID: <201104130110.46815.arnd@arndb.de>
+References: <alpine.DEB.2.00.1104111424140.32082@peruna> <alpine.DEB.2.00.1104111450340.32082@peruna>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-1463811328-1559453478-1302649735=:8483"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-masked.atl.sa.earthlink.net ([209.86.89.68]:59463 "EHLO
-	elasmtp-masked.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756134Ab1DLXI7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 19:08:59 -0400
-In-Reply-To: <201104130100.39810.arnd@arndb.de>
+Received: from moutng.kundenserver.de ([212.227.126.187]:61819 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756324Ab1DLXKy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 19:10:54 -0400
+In-Reply-To: <alpine.DEB.2.00.1104111450340.32082@peruna>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Andrei Warkentin <andreiw@motorola.com>
+To: John Calixto <john.calixto@modsystems.com>
+Cc: linux-mmc@vger.kernel.org, =?utf-8?q?Micha=C5=82_Miros=C5=82aw?= <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>, Andrei Warkentin <andreiw@motorola.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Monday 11 April 2011, John Calixto wrote:
+> Sending ACMDs from userspace is useful for such things as:
+> 
+>     - The security application of an SD card (SD Specification, Part 3,
+>       Security)
+> 
+>     - SD passthrough for virtual machines
+> 
+> Tested on TI PCIxx12 (SDHCI), Sigma Designs SMP8652 SoC, TI OMAP3621
+> SoC, TI OMAP3630 SoC, Samsung S5PC110 SoC, Qualcomm MSM7200A SoC.
+> 
+> Signed-off-by: John Calixto <john.calixto@modsystems.com>
+> Reviewed-by: Andrei Warkentin <andreiw@motorola.com>
 
----1463811328-1559453478-1302649735=:8483
-Content-Type: TEXT/PLAIN; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Since the code is limited to ACMD and cannot do arbitrary commands, it's actually
+not possible to use this for the passthrough scenario, so you should not mention
+it in the changelog.
 
-On Wed, 13 Apr 2011, Arnd Bergmann wrote:
-> On Tuesday 12 April 2011, Micha=B3 Miros=B3aw wrote:
-> > > +       unsigned int cmd_timeout_ms;
-> > > +       __u64 data_ptr;  /* DAT buffer */
-> >=20
-> > This will be more natural if you have an anonymous union here:
-> > union {
-> >   __u64 data_ptr_
-> >  void *data_ptr;
-> > };
->=20
-> No, that really does not work. It's important for all members of the ioct=
-l data
-> structure to have a fixed size, independent of the size of long or pointe=
-r.
->=20
-> If you do a union, the pointer ends up in the first 32 bits of the 64 bit=
- member,
-> which does not work on big-endian architectures. It also doesn't work on =
-31
-> bit architectures, although that is a minor worry here.
->=20
+I would also still advocate something more high-level here because it's limited
+to a single use case. If you make the ioctl interface do the security commands
+directly, you would not need to rely on CAP_SYS_RAWIO.
 
-Gah!  OK, so much for the v5 I just sent then.  What do you think about
-the compat_ioctl that I sent in v2?  It means having the extra 32-bit
-compat structure, but at least all the compat overhead is conditional
-upon CONFIG_COMPAT.  If you're not using CONFIG_COMPAT, you don't get
-any compat cruft.
+> +static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
+> +	struct mmc_ioc_cmd __user *user)
+> +{
+> +	struct mmc_blk_ioc_data *idata;
+> +	int err;
+> +
+> +	idata = kzalloc(sizeof(*idata), GFP_KERNEL);
+> +	if (!idata) {
+> +		err = -ENOMEM;
+> +		goto copy_err;
+> +	}
+> +
+> +	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
+> +		err = -EFAULT;
+> +		goto copy_err;
+> +	}
+> +
+> +	idata->buf_bytes = idata->ic.blksz * idata->ic.blocks;
+> +
+> +	idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
 
-John
----1463811328-1559453478-1302649735=:8483--
+You should probably check the size and allow a fixed maximum here.
+
+> +static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
+> +	unsigned int cmd, unsigned long arg)
+> +{
+> +	int ret = -EINVAL;
+> +	mutex_lock(&block_mutex);
+> +	if (cmd == MMC_IOC_ACMD)
+> +		ret = mmc_blk_ioctl_acmd(bdev, (struct mmc_ioc_cmd __user *)arg);
+> +	mutex_unlock(&block_mutex);
+> +	return ret;
+> +}
+
+Why do you need the mutex here?
+
+> +#ifdef CONFIG_COMPAT
+> +static int mmc_blk_compat_ioctl(struct block_device *bdev, fmode_t mode,
+> +	unsigned int cmd, unsigned long arg)
+> +{
+> +	struct mmc_ioc_cmd __user *ic = (struct mmc_ioc_cmd __user *) arg;
+> +	ic->data_ptr = ic->data_ptr & 0xffffffff;
+
+This conversion should use
+
+	ptr = (unsigned long)compat_ptr(ptr32);
+
+You must never access __user pointers with a direct pointer dereference, but have
+to use copy_{from,to}_user or {get,put}_user. The code you have here allows a
+fairly simple root exploit.
+
+	Arnd
